@@ -1,8 +1,4 @@
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
-
-if(POLICY CMP0129)
-  cmake_policy(SET CMP0129 NEW)
-endif()
+cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
 
 set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "")
 

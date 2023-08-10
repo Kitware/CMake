@@ -1,0 +1,25 @@
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+set(listvar a b c d)
+list(REMOVE_AT listvar 1 3)
+set (output "$<LIST:REMOVE_AT,a;b;c;d,1,3>")
+if (NOT output STREQUAL listvar)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+set(listvar a b c d)
+list(REMOVE_AT listvar 1 -2)
+set (output "$<LIST:REMOVE_AT,a;b;c;d,1;-2>")
+if (NOT output STREQUAL listvar)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+set (output "$<LIST:REMOVE_AT,a;b;c;d,1,0,3;2>")
+if (NOT output STREQUAL "")
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+
+check_errors("LIST:REMOVE_AT..." ${errors})

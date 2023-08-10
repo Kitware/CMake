@@ -50,6 +50,10 @@
 #include <cm3p/zlib.h>
 #endif
 
+#ifdef __clang_analyzer__
+#include <assert.h>
+#endif
+
 #include "archive.h"
 #include "archive_endian.h"
 #include "archive_entry.h"
@@ -6626,6 +6630,11 @@ isoent_collect_dirs(struct vdd *vdd, struct isoent *rootent, int depth)
 		rootent = vdd->rootent;
 	np = rootent;
 	do {
+		#ifdef __clang_analyzer__
+		/* Tell clang-analyzer that pathtbl[depth] is in bounds.  */
+		assert(depth < vdd->max_depth);
+		#endif
+
 		/* Register current directory to pathtable. */
 		path_table_add_entry(&(vdd->pathtbl[depth]), np);
 

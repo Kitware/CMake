@@ -54,6 +54,8 @@
 #include "cmDynamicLoader.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
+#include "cmJSONState.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
 #include "cmState.h"
@@ -1467,7 +1469,7 @@ void cmCTest::AddSiteProperties(cmXMLWriter& xml)
       ch->GetCMake()->GetState()->GetGlobalProperty("SubProjectLabels");
     if (labels) {
       xml.StartElement("Labels");
-      std::vector<std::string> args = cmExpandedList(*labels);
+      cmList args{ *labels };
       for (std::string const& i : args) {
         xml.Element("Label", i);
       }
@@ -1499,7 +1501,7 @@ std::vector<std::string> cmCTest::GetLabelsForSubprojects()
 {
   std::string labelsForSubprojects =
     this->GetCTestConfiguration("LabelsForSubprojects");
-  std::vector<std::string> subprojects = cmExpandedList(labelsForSubprojects);
+  cmList subprojects{ labelsForSubprojects };
 
   // sort the array
   std::sort(subprojects.begin(), subprojects.end());
@@ -1507,7 +1509,7 @@ std::vector<std::string> cmCTest::GetLabelsForSubprojects()
   auto new_end = std::unique(subprojects.begin(), subprojects.end());
   subprojects.erase(new_end, subprojects.end());
 
-  return subprojects;
+  return std::move(subprojects.data());
 }
 
 void cmCTest::EndXML(cmXMLWriter& xml)
@@ -2336,10 +2338,10 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
 
   cmCMakePresetsGraph settingsFile;
   auto result = settingsFile.ReadProjectPresets(workingDirectory);
-  if (result != cmCMakePresetsGraph::ReadFileResult::READ_OK) {
-    cmSystemTools::Error(
-      cmStrCat("Could not read presets from ", workingDirectory, ": ",
-               cmCMakePresetsGraph::ResultToString(result)));
+  if (result != true) {
+    cmSystemTools::Error(cmStrCat("Could not read presets from ",
+                                  workingDirectory, ":",
+                                  settingsFile.parseState.GetErrorMessage()));
     return false;
   }
 
@@ -3097,8 +3099,7 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const std::string& def,
   }
   cmCTestLog(this, DEBUG, "PopulateCustomVector: " << def << std::endl);
 
-  vec.clear();
-  cmExpandList(*dval, vec);
+  cmList::assign(vec, *dval);
 
   for (std::string const& it : vec) {
     cmCTestLog(this, DEBUG, "  -- " << it << std::endl);

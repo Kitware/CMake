@@ -1,0 +1,22 @@
+^4
+6
+8
+10
+CMake Error at variable_watch\.cmake:[0-9]+ \(update_x\):
+  Maximum recursion depth of 10 exceeded
+Call Stack \(most recent call first\):
+  variable_watch\.cmake:5 \(set\)
+  variable_watch\.cmake:[0-9]+ \(update_x\)
+  variable_watch\.cmake:5 \(set\)
+  variable_watch\.cmake:[0-9]+ \(update_x\)
+  variable_watch\.cmake:5 \(set\)
+  variable_watch\.cmake:[0-9]+ \(update_x\)
+  variable_watch\.cmake:5 \(set\)
+  variable_watch\.cmake:[0-9]+ \(update_x\)
+  variable_watch\.cmake:9 \(set\)
+  CMakeLists\.txt:5 \(include\)
+
+
+CMake Error: Error in cmake code at
+Unknown:0:
+A command failed during the invocation of callback "update_x"\.$

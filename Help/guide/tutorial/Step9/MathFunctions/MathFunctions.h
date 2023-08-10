@@ -1,1 +1,5 @@
-double mysqrt(double x);
+#pragma once
+
+namespace mathfunctions {
+double sqrt(double x);
+}

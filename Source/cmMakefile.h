@@ -241,10 +241,13 @@ public:
 
   std::pair<cmTarget&, bool> CreateNewTarget(
     const std::string& name, cmStateEnums::TargetType type,
-    cmTarget::PerConfig perConfig = cmTarget::PerConfig::Yes);
+    cmTarget::PerConfig perConfig = cmTarget::PerConfig::Yes,
+    cmTarget::Visibility vis = cmTarget::Visibility::Normal);
 
   cmTarget* AddNewTarget(cmStateEnums::TargetType type,
                          const std::string& name);
+  cmTarget* AddSynthesizedTarget(cmStateEnums::TargetType type,
+                                 const std::string& name);
 
   /** Create a target instance for the utility.  */
   cmTarget* AddNewUtilityTarget(const std::string& utilityName,
@@ -299,14 +302,23 @@ public:
    */
   void AddDefinitionBool(const std::string& name, bool);
   //! Add a definition to this makefile and the global cmake cache.
-  void AddCacheDefinition(const std::string& name, const char* value,
-                          const char* doc, cmStateEnums::CacheEntryType type,
+  void AddCacheDefinition(const std::string& name, cmValue value, cmValue doc,
+                          cmStateEnums::CacheEntryType type,
                           bool force = false);
-  void AddCacheDefinition(const std::string& name, const std::string& value,
-                          const char* doc, cmStateEnums::CacheEntryType type,
+  void AddCacheDefinition(const std::string& name, cmValue value,
+                          const std::string& doc,
+                          cmStateEnums::CacheEntryType type,
                           bool force = false)
   {
-    this->AddCacheDefinition(name, value.c_str(), doc, type, force);
+    this->AddCacheDefinition(name, value, cmValue{ doc }, type, force);
+  }
+  void AddCacheDefinition(const std::string& name, const std::string& value,
+                          const std::string& doc,
+                          cmStateEnums::CacheEntryType type,
+                          bool force = false)
+  {
+    this->AddCacheDefinition(name, cmValue{ value }, cmValue{ doc }, type,
+                             force);
   }
 
   /**
@@ -422,7 +434,7 @@ public:
    */
   void SetIncludeRegularExpression(const std::string& regex)
   {
-    this->SetProperty("INCLUDE_REGULAR_EXPRESSION", regex.c_str());
+    this->SetProperty("INCLUDE_REGULAR_EXPRESSION", regex);
   }
   const std::string& GetIncludeRegularExpression() const
   {
@@ -515,8 +527,6 @@ public:
   const std::string& GetRequiredDefinition(const std::string& name) const;
   bool IsDefinitionSet(const std::string&) const;
   bool IsNormalDefinitionSet(const std::string&) const;
-  bool GetDefExpandList(const std::string& name, std::vector<std::string>& out,
-                        bool emptyArgs = false) const;
   /**
    * Get the list of all variables in the current space. If argument
    * cacheonly is specified and is greater than 0, then only cache
@@ -558,6 +568,10 @@ public:
 
   /** Return whether the target platform is Apple iOS.  */
   bool PlatformIsAppleEmbedded() const;
+
+  /** Return whether the target platform supports generation of text base stubs
+     (.tbd file) describing exports (Apple specific). */
+  bool PlatformSupportsAppleTextStubs() const;
 
   /** Retrieve soname flag for the specified language if supported */
   const char* GetSONameFlag(const std::string& language) const;
@@ -796,8 +810,11 @@ public:
                              std::string& debugBuffer) const;
 
   //! Set/Get a property of this directory
-  void SetProperty(const std::string& prop, const char* value);
   void SetProperty(const std::string& prop, cmValue value);
+  void SetProperty(const std::string& prop, std::nullptr_t)
+  {
+    this->SetProperty(prop, cmValue{ nullptr });
+  }
   void SetProperty(const std::string& prop, const std::string& value)
   {
     this->SetProperty(prop, cmValue(value));
@@ -1008,13 +1025,18 @@ public:
 
   bool GetDebugFindPkgMode() const;
 
-  void MaybeWarnCMP0074(std::string const& pkg);
+  void MaybeWarnCMP0074(std::string const& rootVar, cmValue rootDef,
+                        cm::optional<std::string> const& rootEnv);
+  void MaybeWarnCMP0144(std::string const& rootVAR, cmValue rootDEF,
+                        cm::optional<std::string> const& rootENV);
   void MaybeWarnUninitialized(std::string const& variable,
                               const char* sourceFilename) const;
   bool IsProjectFile(const char* filename) const;
 
-  int GetRecursionDepth() const;
-  void SetRecursionDepth(int recursionDepth);
+  size_t GetRecursionDepthLimit() const;
+
+  size_t GetRecursionDepth() const;
+  void SetRecursionDepth(size_t recursionDepth);
 
   std::string NewDeferId() const;
   bool DeferCall(std::string id, std::string fileName, cmListFileFunction lff);
@@ -1080,7 +1102,7 @@ protected:
 private:
   cmStateSnapshot StateSnapshot;
   cmListFileBacktrace Backtrace;
-  int RecursionDepth;
+  size_t RecursionDepth = 0;
 
   struct DeferCommand
   {
@@ -1186,6 +1208,7 @@ private:
   bool CheckSystemVars;
   bool CheckCMP0000;
   std::set<std::string> WarnedCMP0074;
+  std::set<std::string> WarnedCMP0144;
   bool IsSourceFileTryCompile;
   mutable bool SuppressSideEffects;
   ImportedTargetScope CurrentImportedTargetScope = ImportedTargetScope::Local;

@@ -8,9 +8,6 @@ macro(KWSYS_PLATFORM_TEST lang var description invert)
   if(NOT DEFINED ${var}_COMPILED)
     message(STATUS "${description}")
     set(maybe_cxx_standard "")
-    if(CMAKE_VERSION VERSION_LESS 3.8 AND CMAKE_CXX_STANDARD)
-      set(maybe_cxx_standard "-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}")
-    endif()
     try_compile(${var}_COMPILED
       ${CMAKE_CURRENT_BINARY_DIR}
       ${CMAKE_CURRENT_SOURCE_DIR}/${KWSYS_PLATFORM_TEST_FILE_${lang}}
@@ -18,14 +15,16 @@ macro(KWSYS_PLATFORM_TEST lang var description invert)
       CMAKE_FLAGS "-DLINK_LIBRARIES:STRING=${KWSYS_PLATFORM_TEST_LINK_LIBRARIES}"
                   ${maybe_cxx_standard}
       OUTPUT_VARIABLE OUTPUT)
-    if(${var}_COMPILED)
-      file(APPEND
-        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-        "${description} compiled with the following output:\n${OUTPUT}\n\n")
-    else()
-      file(APPEND
-        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "${description} failed to compile with the following output:\n${OUTPUT}\n\n")
+    if(CMAKE_VERSION VERSION_LESS 3.26)
+      if(${var}_COMPILED)
+        file(APPEND
+          ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+          "${description} compiled with the following output:\n${OUTPUT}\n\n")
+      else()
+        file(APPEND
+          ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+          "${description} failed to compile with the following output:\n${OUTPUT}\n\n")
+      endif()
     endif()
     if(${invert} MATCHES INVERT)
       if(${var}_COMPILED)
@@ -67,19 +66,23 @@ macro(KWSYS_PLATFORM_TEST_RUN lang var description invert)
 
     # Note that ${var} will be a 0 return value on success.
     if(${var}_COMPILED)
-      if(${var})
-        file(APPEND
-          ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-          "${description} compiled but failed to run with the following output:\n${OUTPUT}\n\n")
-      else()
-        file(APPEND
-          ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-          "${description} compiled and ran with the following output:\n${OUTPUT}\n\n")
+      if(CMAKE_VERSION VERSION_LESS 3.26)
+        if(${var})
+          file(APPEND
+            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+            "${description} compiled but failed to run with the following output:\n${OUTPUT}\n\n")
+        else()
+          file(APPEND
+            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+            "${description} compiled and ran with the following output:\n${OUTPUT}\n\n")
+        endif()
       endif()
     else()
-      file(APPEND
-        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-        "${description} failed to compile with the following output:\n${OUTPUT}\n\n")
+      if(CMAKE_VERSION VERSION_LESS 3.26)
+        file(APPEND
+          ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+          "${description} failed to compile with the following output:\n${OUTPUT}\n\n")
+      endif()
       set(${var} -1 CACHE INTERNAL "${description} failed to compile.")
     endif()
 
@@ -188,14 +191,16 @@ macro(KWSYS_PLATFORM_INFO_TEST lang var description)
         OUTPUT_VARIABLE OUTPUT
         COPY_FILE ${KWSYS_PLATFORM_INFO_FILE}
         )
-      if(${var}_COMPILED)
-        file(APPEND
-          ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-          "${description} compiled with the following output:\n${OUTPUT}\n\n")
-      else()
-        file(APPEND
-          ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-          "${description} failed to compile with the following output:\n${OUTPUT}\n\n")
+      if(CMAKE_VERSION VERSION_LESS 3.26)
+        if(${var}_COMPILED)
+          file(APPEND
+            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+            "${description} compiled with the following output:\n${OUTPUT}\n\n")
+        else()
+          file(APPEND
+            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+            "${description} failed to compile with the following output:\n${OUTPUT}\n\n")
+        endif()
       endif()
       if(${var}_COMPILED)
         message(STATUS "${description} - compiled")

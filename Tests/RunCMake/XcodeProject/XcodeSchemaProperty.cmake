@@ -1,8 +1,6 @@
-cmake_minimum_required(VERSION 3.7)
+enable_language(CXX)
 
 set(CMAKE_XCODE_GENERATE_SCHEME ON)
-
-project(XcodeSchemaProperty CXX)
 
 function(create_scheme_for_variable variable)
   set(CMAKE_XCODE_SCHEME_${variable} ON)

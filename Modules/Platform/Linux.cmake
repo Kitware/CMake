@@ -1,4 +1,3 @@
-set(LINUX 1)
 set(CMAKE_DL_LIBS "dl")
 set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG "-Wl,-rpath,")
 set(CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG_SEP ":")
@@ -79,9 +78,6 @@ else()
       "Install .so files without execute permission.")
   endif()
 endif()
-
-# Match multiarch library directory names.
-set(CMAKE_LIBRARY_ARCHITECTURE_REGEX "[a-z0-9_]+(-[a-z0-9_]+)?-linux-gnu[a-z0-9_]*")
 
 include(Platform/UnixPaths)
 

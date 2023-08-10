@@ -57,6 +57,25 @@ cmake -S jsoncpp-1.6.0 -B jsoncpp-1.6.0-build \
   -DCMAKE_BUILD_TYPE=Release \
   -DJSONCPP_LIB_BUILD_STATIC=ON \
   -DJSONCPP_LIB_BUILD_SHARED=ON \
+  -DJSONCPP_WITH_CMAKE_PACKAGE=ON \
   -DCMAKE_INSTALL_PREFIX=/opt/extdeps
 cmake --build jsoncpp-1.6.0-build --target install
+echo >> /opt/extdeps/lib/cmake/jsoncpp/jsoncppConfig.cmake '
+# Backport imported target from jsoncpp 1.9.5.
+add_library(JsonCpp::JsonCpp INTERFACE IMPORTED)
+set_target_properties(JsonCpp::JsonCpp PROPERTIES INTERFACE_LINK_LIBRARIES "jsoncpp_lib")'
 rm -rf jsoncpp-1.6.0*
+
+#----------------------------------------------------------------------------
+# cppdap
+
+git clone https://github.com/google/cppdap.git
+cd cppdap
+git checkout 03cc18678ed2ed8b2424ec99dee7e4655d876db5 # 2023-05-25
+cd ..
+cmake -S cppdap -B cppdap-build \
+  -DCPPDAP_USE_EXTERNAL_JSONCPP_PACKAGE=ON \
+  -DCMAKE_INSTALL_PREFIX=/opt/extdeps \
+  -DCMAKE_PREFIX_PATH=/opt/extdeps
+cmake --build cppdap-build --target install
+rm -rf cppdap*

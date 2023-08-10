@@ -1,0 +1,8 @@
+CMake Error at COMPILE_ONLY-not-compiling.cmake:1 \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<COMPILE_ONLY:something>
+
+  \$<COMPILE_ONLY:...> may only be used for linking
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

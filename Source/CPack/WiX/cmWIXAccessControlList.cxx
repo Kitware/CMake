@@ -19,10 +19,9 @@ cmWIXAccessControlList::cmWIXAccessControlList(
 
 bool cmWIXAccessControlList::Apply()
 {
-  std::vector<std::string> entries;
-  this->InstalledFile.GetPropertyAsList("CPACK_WIX_ACL", entries);
+  auto entries = this->InstalledFile.GetPropertyAsList("CPACK_WIX_ACL");
 
-  for (std::string const& entry : entries) {
+  for (auto const& entry : entries) {
     this->CreatePermissionElement(entry);
   }
 

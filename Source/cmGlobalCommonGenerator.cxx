@@ -34,8 +34,8 @@ cmGlobalCommonGenerator::ComputeDirectoryTargets() const
 {
   std::map<std::string, DirectoryTarget> dirTargets;
   for (const auto& lg : this->LocalGenerators) {
-    std::string const& currentBinaryDir(
-      lg->GetStateSnapshot().GetDirectory().GetCurrentBinary());
+    std::string currentBinaryDir =
+      lg->GetStateSnapshot().GetDirectory().GetCurrentBinary();
     DirectoryTarget& dirTarget = dirTargets[currentBinaryDir];
     dirTarget.LG = lg.get();
     const std::vector<std::string>& configs =
@@ -68,7 +68,7 @@ cmGlobalCommonGenerator::ComputeDirectoryTargets() const
           for (cmStateSnapshot dir =
                  lg->GetStateSnapshot().GetBuildsystemDirectoryParent();
                dir.IsValid(); dir = dir.GetBuildsystemDirectoryParent()) {
-            std::string const& d = dir.GetDirectory().GetCurrentBinary();
+            std::string d = dir.GetDirectory().GetCurrentBinary();
             dirTargets[d].Targets.emplace_back(t);
           }
         }

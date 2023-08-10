@@ -303,7 +303,7 @@ bool cmCMakeLanguageCommandSET_DEPENDENCY_PROVIDER(
   state->SetDependencyProvider({ parsedArgs.Command, methods });
   state->SetGlobalProperty(
     fcmasProperty,
-    supportsFetchContentMakeAvailableSerial ? parsedArgs.Command.c_str() : "");
+    supportsFetchContentMakeAvailableSerial ? parsedArgs.Command : "");
 
   return true;
 }

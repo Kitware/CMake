@@ -3,7 +3,10 @@
 
 #include "cmBinUtilsWindowsPELinker.h"
 
+#include <algorithm>
+#include <iterator>
 #include <sstream>
+#include <utility>
 #include <vector>
 
 #include <cm/memory>
@@ -16,6 +19,27 @@
 
 #ifdef _WIN32
 #  include <windows.h>
+
+#  include "cmsys/Encoding.hxx"
+#endif
+
+#ifdef _WIN32
+namespace {
+
+void ReplaceWithActualNameCasing(std::string& path)
+{
+  WIN32_FIND_DATAW findData;
+  HANDLE hFind = ::FindFirstFileW(
+    cmsys::Encoding::ToWindowsExtendedPath(path).c_str(), &findData);
+
+  if (hFind != INVALID_HANDLE_VALUE) {
+    auto onDiskName = cmsys::Encoding::ToNarrow(findData.cFileName);
+    ::FindClose(hFind);
+    path.replace(path.end() - onDiskName.size(), path.end(), onDiskName);
+  }
+}
+
+}
 #endif
 
 cmBinUtilsWindowsPELinker::cmBinUtilsWindowsPELinker(
@@ -60,29 +84,47 @@ bool cmBinUtilsWindowsPELinker::ScanDependencies(
   if (!this->Tool->GetFileInfo(file, needed)) {
     return false;
   }
-  for (auto& n : needed) {
-    n = cmSystemTools::LowerCase(n);
-  }
+
+  struct WinPEDependency
+  {
+    WinPEDependency(std::string o)
+      : Original(std::move(o))
+      , LowerCase(cmSystemTools::LowerCase(Original))
+    {
+    }
+    std::string const Original;
+    std::string const LowerCase;
+  };
+
+  std::vector<WinPEDependency> depends;
+  depends.reserve(needed.size());
+  std::move(needed.begin(), needed.end(), std::back_inserter(depends));
   std::string origin = cmSystemTools::GetFilenamePath(file);
 
-  for (auto const& lib : needed) {
-    if (!this->Archive->IsPreExcluded(lib)) {
+  for (auto const& lib : depends) {
+    if (!this->Archive->IsPreExcluded(lib.LowerCase)) {
       std::string path;
       bool resolved = false;
-      if (!this->ResolveDependency(lib, origin, path, resolved)) {
+      if (!this->ResolveDependency(lib.LowerCase, origin, path, resolved)) {
         return false;
       }
       if (resolved) {
         if (!this->Archive->IsPostExcluded(path)) {
+#ifdef _WIN32
+          ReplaceWithActualNameCasing(path);
+#else
+          path.replace(path.end() - lib.Original.size(), path.end(),
+                       lib.Original);
+#endif
           bool unique;
-          this->Archive->AddResolvedPath(lib, path, unique);
+          this->Archive->AddResolvedPath(lib.Original, path, unique);
           if (unique &&
               !this->ScanDependencies(path, cmStateEnums::SHARED_LIBRARY)) {
             return false;
           }
         }
       } else {
-        this->Archive->AddUnresolvedPath(lib);
+        this->Archive->AddUnresolvedPath(lib.Original);
       }
     }
   }

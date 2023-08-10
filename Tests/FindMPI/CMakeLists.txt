@@ -19,3 +19,6 @@ add_test(NAME FindMPI.Test COMMAND
   -DMPI_TEST_Fortran=${CMake_TEST_FindMPI_FLAG_Fortran}
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
+if(CMake_TEST_FindMPI_ENVMOD)
+  set_property(TEST FindMPI.Test PROPERTY ENVIRONMENT_MODIFICATION ${CMake_TEST_FindMPI_ENVMOD})
+endif()

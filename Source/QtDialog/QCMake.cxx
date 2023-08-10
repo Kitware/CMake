@@ -6,6 +6,7 @@
 
 #include <cm/memory>
 
+#include "QCMakeSizeType.h"
 #include <QCoreApplication>
 #include <QDir>
 #include <QString>
@@ -32,7 +33,6 @@ QCMake::QCMake(QObject* p)
   qRegisterMetaType<QCMakePropertyList>();
   qRegisterMetaType<QProcessEnvironment>();
   qRegisterMetaType<QVector<QCMakePreset>>();
-  qRegisterMetaType<cmCMakePresetsGraph::ReadFileResult>();
 
   cmSystemTools::DisableRunCommandOutput();
   cmSystemTools::SetRunCommandHideConsole(true);
@@ -326,7 +326,7 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
 
     QCMakeProperty prop;
     prop.Key = QString::fromStdString(key);
-    int idx = props.indexOf(prop);
+    cm_qsizetype idx = props.indexOf(prop);
     if (idx == -1) {
       toremove.append(QString::fromStdString(key));
     } else {
@@ -359,19 +359,19 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
     if (s.Type == QCMakeProperty::BOOL) {
       this->CMakeInstance->AddCacheEntry(
         s.Key.toStdString(), s.Value.toBool() ? "ON" : "OFF",
-        s.Help.toStdString().c_str(), cmStateEnums::BOOL);
+        s.Help.toStdString(), cmStateEnums::BOOL);
     } else if (s.Type == QCMakeProperty::STRING) {
       this->CMakeInstance->AddCacheEntry(
         s.Key.toStdString(), s.Value.toString().toStdString(),
-        s.Help.toStdString().c_str(), cmStateEnums::STRING);
+        s.Help.toStdString(), cmStateEnums::STRING);
     } else if (s.Type == QCMakeProperty::PATH) {
       this->CMakeInstance->AddCacheEntry(
         s.Key.toStdString(), s.Value.toString().toStdString(),
-        s.Help.toStdString().c_str(), cmStateEnums::PATH);
+        s.Help.toStdString(), cmStateEnums::PATH);
     } else if (s.Type == QCMakeProperty::FILEPATH) {
       this->CMakeInstance->AddCacheEntry(
         s.Key.toStdString(), s.Value.toString().toStdString(),
-        s.Help.toStdString().c_str(), cmStateEnums::FILEPATH);
+        s.Help.toStdString(), cmStateEnums::FILEPATH);
     }
   }
 
@@ -529,9 +529,11 @@ void QCMake::loadPresets()
 {
   auto result = this->CMakePresetsGraph.ReadProjectPresets(
     this->SourceDirectory.toStdString(), true);
-  if (result != this->LastLoadPresetsResult &&
-      result != cmCMakePresetsGraph::ReadFileResult::READ_OK) {
-    emit this->presetLoadError(this->SourceDirectory, result);
+  if (result != this->LastLoadPresetsResult && !result) {
+    emit this->presetLoadError(
+      this->SourceDirectory,
+      QString::fromStdString(
+        this->CMakePresetsGraph.parseState.GetErrorMessage(false)));
   }
   this->LastLoadPresetsResult = result;
 

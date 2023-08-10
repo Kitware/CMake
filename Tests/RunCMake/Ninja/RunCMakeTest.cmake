@@ -192,6 +192,38 @@ function (run_LooseObjectDepends)
 endfunction ()
 run_LooseObjectDepends()
 
+function (run_CustomCommandExplictDepends)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CustomCommandExplicitDepends-build)
+  run_cmake(CustomCommandExplicitDepends)
+
+  set(DEP_LIB "${RunCMake_TEST_BINARY_DIR}/${CMAKE_SHARED_LIBRARY_PREFIX}dep${CMAKE_SHARED_LIBRARY_SUFFIX}")
+
+  run_ninja("${RunCMake_TEST_BINARY_DIR}" "command-option.h")
+  if (EXISTS "${DEP_LIB}")
+    message(FATAL_ERROR
+      "The `dep` library was created when requesting a custom command to be "
+      "generated; this should no longer be necessary when passing "
+      "DEPENDS_EXPLICIT_ONLY option.")
+  endif ()
+
+  run_ninja("${RunCMake_TEST_BINARY_DIR}" "command-variable-on.h")
+  if (EXISTS "${DEP_LIB}")
+    message(FATAL_ERROR
+      "The `dep` library was created when requesting a custom command to be "
+      "generated; this should no longer be necessary when setting "
+      "CMAKE_ADD_CUSTOM_COMMAND_DEPENDS_EXPLICIT_ONLY variable to ON.")
+  endif ()
+
+  run_ninja("${RunCMake_TEST_BINARY_DIR}" "command-variable-off.h")
+  if (NOT EXISTS "${DEP_LIB}")
+    message(FATAL_ERROR
+      "The `dep` library was not created when requesting a custom command to be "
+      "generated; this should be necessary when setting "
+      "CMAKE_ADD_CUSTOM_COMMAND_DEPENDS_EXPLICIT_ONLY variable to OFF.")
+  endif ()
+endfunction ()
+run_CustomCommandExplictDepends()
+
 function (run_AssumedSources)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/AssumedSources-build)
   run_cmake(AssumedSources)

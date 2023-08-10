@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -398,15 +398,17 @@ static CURLcode smtp_perform_upgrade_tls(struct Curl_easy *data)
   struct connectdata *conn = data->conn;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
   CURLcode result;
+  bool ssldone = FALSE;
 
-  if(!Curl_conn_is_ssl(data, FIRSTSOCKET)) {
+  if(!Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
     result = Curl_ssl_cfilter_add(data, conn, FIRSTSOCKET);
     if(result)
       goto out;
   }
 
-  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &smtpc->ssldone);
+  result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
   if(!result) {
+    smtpc->ssldone = ssldone;
     if(smtpc->state != SMTP_UPGRADETLS)
       state(data, SMTP_UPGRADETLS);
 
@@ -891,7 +893,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
 
   if(smtpcode/100 != 2 && smtpcode != 1) {
     if(data->set.use_ssl <= CURLUSESSL_TRY
-       || Curl_conn_is_ssl(data, FIRSTSOCKET))
+       || Curl_conn_is_ssl(conn, FIRSTSOCKET))
       result = smtp_perform_helo(data, conn);
     else {
       failf(data, "Remote access denied: %d", smtpcode);
@@ -956,7 +958,7 @@ static CURLcode smtp_state_ehlo_resp(struct Curl_easy *data,
     }
 
     if(smtpcode != 1) {
-      if(data->set.use_ssl && !Curl_conn_is_ssl(data, FIRSTSOCKET)) {
+      if(data->set.use_ssl && !Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
         /* We don't have a SSL/TLS connection yet, but SSL is requested */
         if(smtpc->tls_supported)
           /* Switch to TLS connection now */
@@ -1288,7 +1290,9 @@ static CURLcode smtp_multi_statemach(struct Curl_easy *data, bool *done)
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
   if((conn->handler->flags & PROTOPT_SSL) && !smtpc->ssldone) {
-    result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &smtpc->ssldone);
+    bool ssldone = FALSE;
+    result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
+    smtpc->ssldone = ssldone;
     if(result || !smtpc->ssldone)
       return result;
   }
@@ -1415,7 +1419,7 @@ static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
     result = status;         /* use the already set error code */
   }
   else if(!data->set.connect_only && data->set.mail_rcpt &&
-          (data->set.upload || data->set.mimepost.kind)) {
+          (data->state.upload || data->set.mimepost.kind)) {
     /* Calculate the EOB taking into account any terminating CRLF from the
        previous line of the email or the CRLF of the DATA command when there
        is "no mail data". RFC-5321, sect. 4.1.1.4.
@@ -1507,7 +1511,7 @@ static CURLcode smtp_perform(struct Curl_easy *data, bool *connected,
   smtp->eob = 2;
 
   /* Start the first command in the DO phase */
-  if((data->set.upload || data->set.mimepost.kind) && data->set.mail_rcpt)
+  if((data->state.upload || data->set.mimepost.kind) && data->set.mail_rcpt)
     /* MAIL transfer */
     result = smtp_perform_mail(data);
   else

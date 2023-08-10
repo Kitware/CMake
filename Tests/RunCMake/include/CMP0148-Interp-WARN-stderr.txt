@@ -1,0 +1,8 @@
+^CMake Warning \(dev\) at CMP0148-Interp-WARN\.cmake:[0-9]+ \(include\):
+  Policy CMP0148 is not set: The FindPythonInterp and FindPythonLibs modules
+  are removed\.  Run "cmake --help-policy CMP0148" for policy details\.  Use
+  the cmake_policy command to set the policy and suppress this warning\.
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.$

@@ -51,13 +51,11 @@ public:
 
   Keywords const& kw() const { return this->Keywords_; }
 
-  bool generate();
+  bool InitializeCustomTargets();
+  bool SetupCustomTargets();
 
 private:
   friend class cmQtAutoGenInitializer;
-
-  bool InitializeCustomTargets();
-  bool SetupCustomTargets();
 
   void GetOrCreateGlobalTarget(cmLocalGenerator* localGen,
                                std::string const& name,

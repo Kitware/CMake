@@ -89,3 +89,11 @@ html_favicon = '@conf_path@/static/cmake-favicon.ico'
 # qthelp_qch_name = "CMake.qch"
 
 linkcheck_ignore = [r'about:|https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack']
+
+linkcheck_allowed_redirects = {
+    r'https://cdash\.org': r'https://www\.cdash\.org/',
+    r'https://docs\.nvidia\.com/cuda/': r'https://docs\.nvidia\.com/cuda/index\.html',
+    r'https://learn\.microsoft\.com/en-us/cpp/c-language/parsing-c-command-line-arguments': r'https://learn\.microsoft\.com/en-us/cpp/c-language/parsing-c-command-line-arguments\?.*',
+    r'https://openjdk\.java\.net/jeps/313': r'https://openjdk\.org:443/jeps/313',
+    r'https://www\.sphinx-doc\.org': r'https://www\.sphinx-doc\.org/en/master/',
+}

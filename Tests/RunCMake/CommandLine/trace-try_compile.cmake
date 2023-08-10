@@ -1,2 +1,2 @@
-cmake_minimum_required(VERSION 3.24)
-project(test C)
+cmake_policy(VERSION 3.24)
+enable_language(C)

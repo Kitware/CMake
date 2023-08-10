@@ -237,12 +237,15 @@ lzma_index_buffer_encode(const lzma_index *i,
 
 	// Do the actual encoding. This should never fail, but store
 	// the original *out_pos just in case.
+#ifndef __clang_analyzer__ // Hide unreachable code from clang-analyzer.
 	const size_t out_start = *out_pos;
+#endif
 	lzma_ret ret = index_encode(&coder, NULL, NULL, NULL, 0,
 			out, out_pos, out_size, LZMA_RUN);
 
 	if (ret == LZMA_STREAM_END) {
 		ret = LZMA_OK;
+#ifndef __clang_analyzer__ // Hide unreachable code from clang-analyzer.
 	} else {
 		// We should never get here, but just in case, restore the
 		// output position and set the error accordingly if something
@@ -250,6 +253,7 @@ lzma_index_buffer_encode(const lzma_index *i,
 		assert(0);
 		*out_pos = out_start;
 		ret = LZMA_PROG_ERROR;
+#endif
 	}
 
 	return ret;

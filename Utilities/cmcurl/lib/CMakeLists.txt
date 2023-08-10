@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -46,29 +46,6 @@ list(APPEND HHEADERS
 if(WIN32 AND NOT CURL_STATICLIB)
   list(APPEND CSOURCES libcurl.rc)
 endif()
-
-# SET(CSOURCES
-# #  memdebug.c -not used
-# # nwlib.c - Not used
-# # strtok.c - specify later
-# # strtoofft.c - specify later
-# )
-
-# #OPTION(CURL_MALLOC_DEBUG "Debug mallocs in Curl" OFF)
-# MARK_AS_ADVANCED(CURL_MALLOC_DEBUG)
-# IF(CURL_MALLOC_DEBUG)
-# SET(CSOURCES ${CSOURCES}
-# memdebug.c
-# )
-# ENDIF(CURL_MALLOC_DEBUG)
-
-# # only build compat strtoofft if we need to
-# IF(NOT HAVE_STRTOLL AND NOT HAVE__STRTOI64)
-# SET(CSOURCES ${CSOURCES}
-# strtoofft.c
-# )
-# ENDIF(NOT HAVE_STRTOLL AND NOT HAVE__STRTOI64)
-
 
 # The rest of the build
 
@@ -136,11 +113,13 @@ set_target_properties(${LIB_NAME} PROPERTIES
 if(0) # This code not needed for building within CMake.
 if(CMAKE_SYSTEM_NAME STREQUAL "AIX" OR
   CMAKE_SYSTEM_NAME STREQUAL "Linux" OR
+  CMAKE_SYSTEM_NAME STREQUAL "Darwin" OR
+  CMAKE_SYSTEM_NAME STREQUAL "SunOS" OR
   CMAKE_SYSTEM_NAME STREQUAL "GNU/kFreeBSD" OR
 
   # FreeBSD comes with the a.out and elf flavours
   # but a.out was supported up to version 3.x and
-  # elf from 3.x. I cannot imagine someone runnig
+  # elf from 3.x. I cannot imagine someone running
   # CMake on those ancient systems
   CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR
 
@@ -180,6 +159,17 @@ if(WIN32)
       set_target_properties(${LIB_NAME} PROPERTIES IMPORT_SUFFIX "_imp.lib")
     endif()
   endif()
+elseif(NOT CMAKE_CROSSCOMPILING)
+  # on not-Windows and not-crosscompiling, check for writable argv[]
+    include(CheckCSourceRuns)
+    check_c_source_runs("
+int main(int argc, char **argv)
+{
+  (void)argc;
+  argv[0][0] = ' ';
+  return (argv[0][0] == ' ')?0:1;
+}"
+      HAVE_WRITABLE_ARGV)
 endif()
 
 target_include_directories(${LIB_NAME} INTERFACE

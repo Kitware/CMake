@@ -1,0 +1,6 @@
+^CMake Error at [^
+]*/Modules/FindCUDA.cmake:[0-9]+ \(message\):
+  The FindCUDA module has been removed by policy CMP0146\.
+Call Stack \(most recent call first\):
+  CMP0146-NEW-path\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)$

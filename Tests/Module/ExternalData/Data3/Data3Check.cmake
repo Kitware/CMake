@@ -1,8 +1,8 @@
 if(NOT EXISTS "${Data}")
-  message(SEND_ERROR "Input file:\n  ${Data}\ndoes not exist!")
+  message(SEND_ERROR "Input file:\n  ${Data}\n" "does not exist!")
 endif()
 if(NOT EXISTS "${Other}")
-  message(SEND_ERROR "Input file:\n  ${Other}\ndoes not exist!")
+  message(SEND_ERROR "Input file:\n  ${Other}\n" "does not exist!")
 endif()
 # Verify that the 'Data' object was found in the second store location left
 # from Data1 target downloads and that the 'Other' object was downloaded to

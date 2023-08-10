@@ -14,12 +14,14 @@ add_executable(ISPCResponseAndDefine main.cxx simple.ispc)
 set_target_properties(ISPCResponseAndDefine PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(ISPCResponseAndDefine PRIVATE  "${CMAKE_CURRENT_BINARY_DIR}")
 
-target_compile_options(ISPCResponseAndDefine PRIVATE "$<$<COMPILE_LANGUAGE:ISPC>:--target=sse2-i32x4>")
-if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-  target_compile_options(ISPCResponseAndDefine PRIVATE "$<$<COMPILE_LANGUAGE:ISPC>:--arch=x86>")
+if("${CMAKE_SYSTEM_NAME};${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Darwin;arm64")
+  target_compile_options(ISPCResponseAndDefine PRIVATE "$<$<COMPILE_LANGUAGE:ISPC>:--target=neon-i32x4>")
+else()
+  target_compile_options(ISPCResponseAndDefine PRIVATE "$<$<COMPILE_LANGUAGE:ISPC>:--target=sse2-i32x4>")
+  if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    target_compile_options(ISPCResponseAndDefine PRIVATE "$<$<COMPILE_LANGUAGE:ISPC>:--arch=x86>")
+  endif()
 endif()
-
-
 
 target_compile_definitions(ISPCResponseAndDefine PRIVATE
   "$<$<COMPILE_LANGUAGE:ISPC>:STRUCT_DEFINE=struct{uniform int a>;M_PI=3.14159f")

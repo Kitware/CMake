@@ -5,7 +5,7 @@ foreach(f
   if(EXISTS "${f}")
     file(READ "${f}" content)
     if(NOT content MATCHES "^relative-input-OLD[\r\n]*$")
-      string(APPEND RunCMake_TEST_FAILED "File\n  ${f}\ndoes not have expected content.\n")
+      string(APPEND RunCMake_TEST_FAILED "File\n  ${f}\n" "does not have expected content.\n")
     endif()
   else()
     string(APPEND RunCMake_TEST_FAILED "Missing\n  ${f}\n")

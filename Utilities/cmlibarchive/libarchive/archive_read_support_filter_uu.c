@@ -36,6 +36,10 @@ __FBSDID("$FreeBSD$");
 #include <string.h>
 #endif
 
+#ifdef __clang_analyzer__
+#include <assert.h>
+#endif
+
 #include "archive.h"
 #include "archive_private.h"
 #include "archive_read_private.h"
@@ -467,6 +471,9 @@ read_more:
 		if (ensure_in_buff_size(self, uudecode,
 		    avail_in + uudecode->in_cnt) != ARCHIVE_OK)
 			return (ARCHIVE_FATAL);
+		#ifdef __clang_analyzer__
+		assert(d);
+		#endif
 		memcpy(uudecode->in_buff + uudecode->in_cnt,
 		    d, avail_in);
 		d = uudecode->in_buff;

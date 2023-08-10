@@ -62,6 +62,9 @@ libgrpc++-dev libgrpc-dev
 libgsl-dev
 libgtest-dev
 libgtk2.0-dev
+libhdf5-dev
+libhdf5-mpich-dev
+libhdf5-openmpi-dev
 libicu-dev
 libinput-dev
 libjpeg-dev
@@ -79,6 +82,7 @@ libsdl-dev
 libsqlite3-dev
 libtiff-dev
 libuv1-dev
+libwxgtk3.0-dev
 libx11-dev
 libxalan-c-dev
 libxerces-c-dev

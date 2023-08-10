@@ -110,6 +110,9 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     this->PopulateInterfaceProperty("INTERFACE_AUTOUIC_OPTIONS", gt,
                                     cmGeneratorExpression::InstallInterface,
                                     properties);
+    this->PopulateInterfaceProperty("INTERFACE_AUTOMOC_MACRO_NAMES", gt,
+                                    cmGeneratorExpression::InstallInterface,
+                                    properties);
     this->PopulateInterfaceProperty("INTERFACE_COMPILE_FEATURES", gt,
                                     cmGeneratorExpression::InstallInterface,
                                     properties);
@@ -409,7 +412,7 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
 
     // Append the installed file name.
     value += cmInstallTargetGenerator::GetInstallFilename(
-      target, config, cmInstallTargetGenerator::NameImplib);
+      target, config, cmInstallTargetGenerator::NameImplibReal);
 
     // Store the property.
     properties[prop] = value;
@@ -430,6 +433,19 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
     properties[prop] = cmJoin(objects, ";");
     importedLocations.insert(prop);
   } else {
+    if (target->IsFrameworkOnApple() && target->HasImportLibrary(config)) {
+      // store as well IMPLIB value
+      auto importProp = cmStrCat("IMPORTED_IMPLIB", suffix);
+      auto importValue =
+        cmStrCat(value,
+                 cmInstallTargetGenerator::GetInstallFilename(
+                   target, config, cmInstallTargetGenerator::NameImplibReal));
+
+      // Store the property.
+      properties[importProp] = importValue;
+      importedLocations.insert(importProp);
+    }
+
     // Construct the property name.
     std::string prop = cmStrCat("IMPORTED_LOCATION", suffix);
 
@@ -582,8 +598,7 @@ std::string cmExportInstallFileGenerator::GetFileSetDirectories(
     auto const& type = fileSet->GetType();
     // C++ modules do not support interface file sets which are dependent upon
     // the configuration.
-    if (cge->GetHadContextSensitiveCondition() &&
-        (type == "CXX_MODULES"_s || type == "CXX_MODULE_HEADER_UNITS"_s)) {
+    if (cge->GetHadContextSensitiveCondition() && type == "CXX_MODULES"_s) {
       auto* mf = this->IEGen->GetLocalGenerator()->GetMakefile();
       std::ostringstream e;
       e << "The \"" << gte->GetName() << "\" target's interface file set \""
@@ -645,8 +660,7 @@ std::string cmExportInstallFileGenerator::GetFileSetFiles(
     auto const& type = fileSet->GetType();
     // C++ modules do not support interface file sets which are dependent upon
     // the configuration.
-    if (contextSensitive &&
-        (type == "CXX_MODULES"_s || type == "CXX_MODULE_HEADER_UNITS"_s)) {
+    if (contextSensitive && type == "CXX_MODULES"_s) {
       auto* mf = this->IEGen->GetLocalGenerator()->GetMakefile();
       std::ostringstream e;
       e << "The \"" << gte->GetName() << "\" target's interface file set \""
@@ -736,6 +750,12 @@ bool cmExportInstallFileGenerator::
 
   auto& prop_files = this->ConfigCxxModuleTargetFiles[config];
   for (auto const* tgt : this->ExportedTargets) {
+    // Only targets with C++ module sources will have a
+    // collator-generated install script.
+    if (!tgt->HaveCxx20ModuleSources()) {
+      continue;
+    }
+
     auto prop_filename = cmStrCat("target-", tgt->GetExportName(), '-',
                                   filename_config, ".cmake");
     prop_files.emplace_back(cmStrCat(dest, prop_filename));

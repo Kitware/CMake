@@ -1,4 +1,3 @@
-cmake_minimum_required(VERSION 3.4)
 include(RunCMake)
 
 # Function to build and install a project.  The latter step *-check.cmake
@@ -122,6 +121,10 @@ run_install_test(FILES-OPTIONAL)
 run_install_test(DIRECTORY-OPTIONAL)
 run_install_test(TARGETS-Defaults)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  run_install_test(TARGETS-NAMELINK-No-Tweak)
+endif()
+
 set(RunCMake_TEST_OPTIONS
   "-DCMAKE_INSTALL_BINDIR:PATH=mybin"
   "-DCMAKE_INSTALL_LIBDIR:PATH=mylib"
@@ -167,13 +170,16 @@ unset(RunCMake_TEST_OPTIONS)
 
 run_install_test(Deprecated)
 run_install_test(PRE_POST_INSTALL_SCRIPT)
-run_install_test(SCRIPT)
 run_install_test(TARGETS-CONFIGURATIONS)
 run_install_test(DIRECTORY-PATTERN)
 run_install_test(TARGETS-Parts)
 run_install_test(FILES-PERMISSIONS)
 run_install_test(TARGETS-RPATH)
 run_install_test(InstallRequiredSystemLibraries)
+
+set(RunCMake_TEST_OPTIONS "-DCMAKE_POLICY_DEFAULT_CMP0087:STRING=NEW")
+run_install_test(SCRIPT)
+unset(RunCMake_TEST_OPTIONS)
 
 if(UNIX)
   run_install_test(DIRECTORY-symlink-clobber)

@@ -16,6 +16,7 @@ class cmOutputConverter
 {
 public:
   cmOutputConverter(cmStateSnapshot const& snapshot);
+  virtual ~cmOutputConverter() = default;
 
   /**
    * Convert the given remote path to a relative path with respect to
@@ -26,6 +27,15 @@ public:
    */
   std::string MaybeRelativeToTopBinDir(std::string const& path) const;
   std::string MaybeRelativeToCurBinDir(std::string const& path) const;
+
+  /**
+   * The effective working directory can be different for each generator.
+   * By default, equivalent to the current binary directory.
+   */
+  virtual std::string MaybeRelativeToWorkDir(std::string const& path) const
+  {
+    return this->MaybeRelativeToCurBinDir(path);
+  }
 
   std::string const& GetRelativePathTopSource() const;
   std::string const& GetRelativePathTopBinary() const;
@@ -97,6 +107,7 @@ public:
                              bool forEcho = false, bool useWatcomQuote = false,
                              bool unescapeNinjaConfiguration = false,
                              bool forResponse = false) const;
+  static std::string EscapeForShell(cm::string_view str, int flags);
 
   enum class WrapQuotes
   {

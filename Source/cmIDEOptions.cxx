@@ -12,6 +12,7 @@
 #include "cmsys/String.h"
 
 #include "cmIDEFlagTable.h"
+#include "cmList.h"
 #include "cmStringAlgorithms.h"
 
 cmIDEOptions::cmIDEOptions()

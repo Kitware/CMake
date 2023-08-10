@@ -1,8 +1,14 @@
 # Set the ExternalProject GIT_TAG to desired_tag, and make sure the
 # resulting checked out version is resulting_sha and rebuild.
 # This check's the correct behavior of the ExternalProject UPDATE_COMMAND.
-# Also verify that a fetch only occurs when fetch_expected is 1.
-macro(check_a_tag desired_tag resulting_sha fetch_expected update_strategy)
+# Also verify that a fetch only occurs when fetch_expected_tsX is 1.
+macro(check_a_tag
+  desired_tag
+  resulting_sha
+  fetch_expected_ts1  # TutorialStep1-GIT
+  fetch_expected_ts2  # TutorialStep2-GIT
+  update_strategy
+)
   message( STATUS "Checking ExternalProjectUpdate to tag: ${desired_tag}" )
 
   # Remove the FETCH_HEAD file, so we can check if it gets replaced with a 'git
@@ -12,7 +18,11 @@ macro(check_a_tag desired_tag resulting_sha fetch_expected update_strategy)
 
   # Give ourselves a marker in the output. It is difficult to tell where we
   # are up to without this
-  message(STATUS "===> check_a_tag ${desired_tag} ${resulting_sha} ${fetch_expected} ${update_strategy}")
+  message(STATUS "===> check_a_tag: "
+    "${desired_tag} ${resulting_sha} "
+    "${fetch_expected_ts1} ${fetch_expected_ts2} "
+    "${update_strategy}"
+  )
 
   # Configure
   execute_process(COMMAND ${CMAKE_COMMAND}
@@ -58,10 +68,10 @@ was expected."
     )
   endif()
 
-  if( NOT EXISTS ${FETCH_HEAD_file} AND ${fetch_expected})
+  if( NOT EXISTS ${FETCH_HEAD_file} AND ${fetch_expected_ts1})
     message( FATAL_ERROR "Fetch did NOT occur when it was expected.")
   endif()
-  if( EXISTS ${FETCH_HEAD_file} AND NOT ${fetch_expected})
+  if( EXISTS ${FETCH_HEAD_file} AND NOT ${fetch_expected_ts1})
     message( FATAL_ERROR "Fetch DID occur when it was not expected.")
   endif()
 
@@ -154,10 +164,10 @@ was expected."
     )
   endif()
 
-  if( NOT EXISTS ${FETCH_HEAD_file} AND ${fetch_expected})
+  if( NOT EXISTS ${FETCH_HEAD_file} AND ${fetch_expected_ts2})
     message( FATAL_ERROR "Fetch did NOT occur when it was expected.")
   endif()
-  if( EXISTS ${FETCH_HEAD_file} AND NOT ${fetch_expected})
+  if( EXISTS ${FETCH_HEAD_file} AND NOT ${fetch_expected_ts2})
     message( FATAL_ERROR "Fetch DID occur when it was not expected.")
   endif()
 endmacro()
@@ -179,16 +189,16 @@ endif()
 file(REMOVE_RECURSE ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals)
 
 if(do_git_tests)
-  check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 REBASE)
-  check_a_tag(tag1          d1970730310fe8bc07e73f15dc570071f9f9654a 1 REBASE)
+  check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 1 REBASE)
+  check_a_tag(tag1          d1970730310fe8bc07e73f15dc570071f9f9654a 1 0 REBASE)
   # With the Git UPDATE_COMMAND performance patch, this will not require a
   # 'git fetch'
-  check_a_tag(tag1          d1970730310fe8bc07e73f15dc570071f9f9654a 0 REBASE)
-  check_a_tag(tag2          5842b503ba4113976d9bb28d57b5aee1ad2736b7 1 REBASE)
-  check_a_tag(d19707303     d1970730310fe8bc07e73f15dc570071f9f9654a 0 REBASE)
-  check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 REBASE)
+  check_a_tag(tag1          d1970730310fe8bc07e73f15dc570071f9f9654a 0 0 REBASE)
+  check_a_tag(tag2          5842b503ba4113976d9bb28d57b5aee1ad2736b7 1 0 REBASE)
+  check_a_tag(d19707303     d1970730310fe8bc07e73f15dc570071f9f9654a 0 0 REBASE)
+  check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 1 REBASE)
   # This is a remote symbolic ref, so it will always trigger a 'git fetch'
-  check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 REBASE)
+  check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 1 REBASE)
 
   foreach(strategy IN ITEMS CHECKOUT REBASE_CHECKOUT)
     # Move local master back, then apply a change that will cause a conflict
@@ -222,7 +232,7 @@ if(do_git_tests)
       message(FATAL_ERROR "Could not commit conflicting change.")
     endif()
     # This should discard our commit but leave behind an annotated tag
-    check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 ${strategy})
+    check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 1 ${strategy})
   endforeach()
 
   # This file matches a .gitignore rule that the last commit defines. We can't
@@ -232,7 +242,7 @@ if(do_git_tests)
   # doesn't choke on it.
   set(ignoredFile ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals/Source/TutorialStep1-GIT/ignored_item)
   file(TOUCH ${ignoredFile})
-  check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 REBASE)
+  check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 1 REBASE)
   if(NOT EXISTS ${ignoredFile})
     message(FATAL_ERROR "Ignored file is missing")
   endif()

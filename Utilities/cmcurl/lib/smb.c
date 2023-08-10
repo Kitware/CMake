@@ -5,8 +5,8 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2016 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
- * Copyright (C) 2014, Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Bill Nagel <wnagel@tycoint.com>, Exacq Technologies
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -25,8 +25,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) &&  \
-  (SIZEOF_CURL_OFF_T > 4)
+#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE)
 
 #define BUILDING_CURL_SMB_C
 
@@ -531,7 +530,7 @@ static CURLcode smb_send_open(struct Curl_easy *data)
   byte_count = strlen(req->path);
   msg.name_length = smb_swap16((unsigned short)byte_count);
   msg.share_access = smb_swap32(SMB_FILE_SHARE_ALL);
-  if(data->set.upload) {
+  if(data->state.upload) {
     msg.access = smb_swap32(SMB_GENERIC_READ | SMB_GENERIC_WRITE);
     msg.create_disposition = smb_swap32(SMB_FILE_OVERWRITE_IF);
   }
@@ -763,6 +762,11 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
   void *msg = NULL;
   const struct smb_nt_create_response *smb_m;
 
+  if(data->state.upload && (data->state.infilesize < 0)) {
+    failf(data, "SMB upload needs to know the size up front");
+    return CURLE_SEND_ERROR;
+  }
+
   /* Start the request */
   if(req->state == SMB_REQUESTING) {
     result = smb_send_tree_connect(data);
@@ -809,13 +813,12 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
     smb_m = (const struct smb_nt_create_response*) msg;
     req->fid = smb_swap16(smb_m->fid);
     data->req.offset = 0;
-    if(data->set.upload) {
+    if(data->state.upload) {
       data->req.size = data->state.infilesize;
       Curl_pgrsSetUploadSize(data, data->req.size);
       next_state = SMB_UPLOAD;
     }
     else {
-      smb_m = (const struct smb_nt_create_response*) msg;
       data->req.size = smb_swap64(smb_m->end_of_file);
       if(data->req.size < 0) {
         req->result = CURLE_WEIRD_SERVER_REPLY;
@@ -993,6 +996,7 @@ static CURLcode smb_parse_url_path(struct Curl_easy *data,
   /* The share must be present */
   if(!slash) {
     Curl_safefree(smbc->share);
+    failf(data, "missing share in URL path for SMB");
     return CURLE_URL_MALFORMAT;
   }
 

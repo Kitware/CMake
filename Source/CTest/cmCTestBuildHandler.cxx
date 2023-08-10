@@ -17,6 +17,7 @@
 #include "cmDuration.h"
 #include "cmFileTimeCache.h"
 #include "cmGeneratedFileStream.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
 #include "cmStringAlgorithms.h"

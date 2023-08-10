@@ -1,4 +1,4 @@
 $pwdpath = $pwd.Path
-cmake -P .gitlab/ci/download_python3.cmake
+& "$pwsh" -File ".gitlab/ci/python.ps1"
 Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\python3;$env:PATH"
 python --version

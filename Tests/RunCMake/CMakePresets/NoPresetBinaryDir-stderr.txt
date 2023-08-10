@@ -1,2 +1,4 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/NoPresetBinaryDir: Invalid preset$
+]*/Tests/RunCMake/CMakePresets/NoPresetBinaryDir:
+Preset "NoPresetBinaryDir" missing field "binaryDir"
+Invalid preset: "NoPresetBinaryDir"$

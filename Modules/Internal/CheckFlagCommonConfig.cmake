@@ -7,7 +7,8 @@
 # It's content may change in any way between releases.
 
 include_guard(GLOBAL)
-cmake_policy(PUSH)
+
+block(SCOPE_FOR POLICIES)
 cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
 cmake_policy(SET CMP0057 NEW) # if() supports IN_LIST
 
@@ -74,4 +75,4 @@ macro(CMAKE_CHECK_FLAG_COMMON_FINISH)
   endforeach()
 endmacro()
 
-cmake_policy(POP)
+endblock()

@@ -10,5 +10,5 @@ be set to a false value (e.g. ``OFF``, ``FALSE``, or ``0``) or the SDK version
 to use as the maximum (e.g. ``10.0.14393.0``).  If unset, the default depends
 on which version of Visual Studio is targeted by the current generator.
 
-This can be used in conjunction with :variable:`CMAKE_SYSTEM_VERSION`, which
-CMake uses to select :variable:`CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION`.
+This can be used to exclude Windows SDK versions from consideration for
+:variable:`CMAKE_VS_WINDOWS_TARGET_PLATFORM_VERSION`.

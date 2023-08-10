@@ -19,6 +19,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cmext/algorithm>
 
 #include <cm3p/json/value.h>
@@ -633,8 +634,9 @@ void cmCTestMultiProcessHandler::FinishTestProcess(
   int test = runner->GetIndex();
   auto* properties = runner->GetTestProperties();
 
-  bool testResult = runner->EndTest(this->Completed, this->Total, started);
-  if (runner->TimedOutForStopTime()) {
+  cmCTestRunTest::EndTestResult testResult =
+    runner->EndTest(this->Completed, this->Total, started);
+  if (testResult.StopTimePassed) {
     this->SetStopTimePassed();
   }
   if (started) {
@@ -645,7 +647,7 @@ void cmCTestMultiProcessHandler::FinishTestProcess(
     }
   }
 
-  if (testResult) {
+  if (testResult.Passed) {
     this->Passed->push_back(properties->Name);
   } else if (!properties->Disabled) {
     this->Failed->push_back(properties->Name);
@@ -1095,9 +1097,9 @@ static Json::Value DumpCTestProperties(
     properties.append(
       DumpCTestProperty("SKIP_RETURN_CODE", testProperties.SkipReturnCode));
   }
-  if (testProperties.ExplicitTimeout) {
+  if (testProperties.Timeout) {
     properties.append(
-      DumpCTestProperty("TIMEOUT", testProperties.Timeout.count()));
+      DumpCTestProperty("TIMEOUT", testProperties.Timeout->count()));
   }
   if (!testProperties.TimeoutRegularExpressions.empty()) {
     properties.append(DumpCTestProperty(

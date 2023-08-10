@@ -665,10 +665,16 @@ A number of cache variables can influence the behavior where details from a
   This is a less severe download/update control compared to
   :variable:`FETCHCONTENT_FULLY_DISCONNECTED`.  Instead of bypassing all
   download and update logic, ``FETCHCONTENT_UPDATES_DISCONNECTED`` only
-  disables the update stage.  Therefore, if content has not been downloaded
-  previously, it will still be downloaded when this option is enabled.
-  This can speed up the configure stage, but not as much as
-  :variable:`FETCHCONTENT_FULLY_DISCONNECTED`.  It is ``OFF`` by default.
+  prevents the update step from making connections to remote servers
+  when using the git or hg download methods.  Updates still occur if details
+  about the update step change, but the update is attempted with only the
+  information already available locally (so switching to a different tag or
+  commit that is already fetched locally will succeed, but switching to an
+  unknown commit hash will fail).  The download step is not affected, so if
+  content has not been downloaded previously, it will still be downloaded
+  when this option is enabled.  This can speed up the configure step, but
+  not as much as :variable:`FETCHCONTENT_FULLY_DISCONNECTED`.
+  ``FETCHCONTENT_UPDATES_DISCONNECTED`` is ``OFF`` by default.
 
 .. variable:: FETCHCONTENT_TRY_FIND_PACKAGE_MODE
 
@@ -735,10 +741,11 @@ content name:
 
   This is the per-content equivalent of
   :variable:`FETCHCONTENT_UPDATES_DISCONNECTED`.  If the global option or
-  this option is ``ON``, then updates will be disabled for the named content.
-  Disabling updates for individual content can be useful for content whose
-  details rarely change, while still leaving other frequently changing content
-  with updates enabled.
+  this option is ``ON``, then updates for the git and hg methods will not
+  contact any remote for the named content.  They will only use information
+  already available locally.  Disabling updates for individual content can
+  be useful for content whose details rarely change, while still leaving
+  other frequently changing content with updates enabled.
 
 .. _`fetch-content-examples`:
 
@@ -1076,6 +1083,8 @@ current working directory.
 
 #]=======================================================================]
 
+include(${CMAKE_CURRENT_LIST_DIR}/ExternalProject/shared_internal_commands.cmake)
+
 #=======================================================================
 # Recording and retrieving content details for later population
 #=======================================================================
@@ -1223,6 +1232,7 @@ function(FetchContent_Declare contentName)
   # cannot check for multi-value arguments with this method. We will have to
   # handle the URL keyword differently.
   set(oneValueArgs
+    GIT_REPOSITORY
     SVN_REPOSITORY
     DOWNLOAD_NO_EXTRACT
     DOWNLOAD_EXTRACT_TIMESTAMP
@@ -1240,6 +1250,30 @@ function(FetchContent_Declare contentName)
 
   if(NOT ARG_SOURCE_DIR)
     set(ARG_SOURCE_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-src")
+  endif()
+
+  if(ARG_GIT_REPOSITORY)
+    # We resolve the GIT_REPOSITORY here so that we get the right parent in the
+    # remote selection logic. In the sub-build, ExternalProject_Add() would see
+    # the private sub-build directory as the parent project, but the parent
+    # project should be the one that called FetchContent_Declare(). We resolve
+    # a relative repo here so that the sub-build's ExternalProject_Add() only
+    # ever sees a non-relative repo.
+    # Since these checks may be non-trivial on some platforms (notably Windows),
+    # don't perform them if we won't be using these details. This also allows
+    # projects to override calls with relative URLs when they have checked out
+    # the parent project in an unexpected way, such as from a mirror or fork.
+    set(savedDetailsPropertyName "_FetchContent_${contentNameLower}_savedDetails")
+    get_property(alreadyDefined GLOBAL PROPERTY ${savedDetailsPropertyName} DEFINED)
+    if(NOT alreadyDefined)
+      cmake_policy(GET CMP0150 cmp0150
+        PARENT_SCOPE # undocumented, do not use outside of CMake
+      )
+      _ep_resolve_git_remote(_resolved_git_repository
+        "${ARG_GIT_REPOSITORY}" "${cmp0150}" "${FETCHCONTENT_BASE_DIR}"
+      )
+      set(ARG_GIT_REPOSITORY "${_resolved_git_repository}")
+    endif()
   endif()
 
   if(ARG_SVN_REPOSITORY)
@@ -1302,9 +1336,11 @@ function(FetchContent_Declare contentName)
   endif()
 
   # Add back in the keyword args we pulled out and potentially tweaked/added
+  set(sep EXTERNALPROJECT_INTERNAL_ARGUMENT_SEPARATOR)
   foreach(key IN LISTS oneValueArgs)
     if(DEFINED ARG_${key})
-      list(PREPEND ARG_UNPARSED_ARGUMENTS ${key} "${ARG_${key}}")
+      list(PREPEND ARG_UNPARSED_ARGUMENTS ${key} "${ARG_${key}}" ${sep})
+      set(sep "")
     endif()
   endforeach()
 
@@ -1536,7 +1572,9 @@ ExternalProject_Add_Step(${contentName}-populate copyfile
     if(CMAKE_GENERATOR_TOOLSET)
       list(APPEND subCMakeOpts "-T${CMAKE_GENERATOR_TOOLSET}")
     endif()
-
+    if(CMAKE_GENERATOR_INSTANCE)
+      list(APPEND subCMakeOpts "-DCMAKE_GENERATOR_INSTANCE:INTERNAL=${CMAKE_GENERATOR_INSTANCE}")
+    endif()
     if(CMAKE_MAKE_PROGRAM)
       list(APPEND subCMakeOpts "-DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_MAKE_PROGRAM}")
     endif()
@@ -1596,7 +1634,9 @@ set_property(GLOBAL PROPERTY _CMAKE_FindGit_GIT_EXECUTABLE_VERSION
   # has this set to something not findable on the PATH. We also ensured above
   # that the Debug config will be defined for multi-config generators.
   configure_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/FetchContent/CMakeLists.cmake.in"
-                 "${ARG_SUBBUILD_DIR}/CMakeLists.txt")
+                 "${ARG_SUBBUILD_DIR}/CMakeLists.txt"
+                 @ONLY
+  )
   execute_process(
     COMMAND ${CMAKE_COMMAND} ${subCMakeOpts} .
     RESULT_VARIABLE result

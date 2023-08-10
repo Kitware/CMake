@@ -1,2 +1,5 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/MinimumRequiredMinor: "cmakeMinimumRequired" version too new$
+]*/Tests/RunCMake/CMakePresets/MinimumRequiredMinor:
+Error: @5,14: "cmakeMinimumRequired" minor version 1000 must be less than [0-9]*
+    "minor": 1000
+             \^$

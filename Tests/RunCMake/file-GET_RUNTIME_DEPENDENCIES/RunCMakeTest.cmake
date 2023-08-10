@@ -9,6 +9,10 @@ function(run_install_test case)
   run_cmake_command(${case}-build ${CMAKE_COMMAND} --build . --config Debug)
   # Check "all" components.
   set(CMAKE_INSTALL_PREFIX ${RunCMake_TEST_BINARY_DIR}/root-all)
+  set(maybe_stderr "${case}-all-stderr-${CMAKE_C_COMPILER_ID}.txt")
+  if(EXISTS "${RunCMake_SOURCE_DIR}/${maybe_stderr}")
+    set(RunCMake-stderr-file "${maybe_stderr}")
+  endif()
   run_cmake_command(${case}-all ${CMAKE_COMMAND} --install . --prefix ${CMAKE_INSTALL_PREFIX} --config Debug)
 endfunction()
 

@@ -8,6 +8,7 @@ set(testlib_names
   search
   unresolved
   conflict
+  MixedCase
   )
 
 file(REMOVE "${CMAKE_BINARY_DIR}/testlib.c")
@@ -34,7 +35,7 @@ file(WRITE "${CMAKE_BINARY_DIR}/testlib_noconflict.c" "__declspec(dllimport) ext
 add_library(testlib_noconflict SHARED "${CMAKE_BINARY_DIR}/testlib_noconflict.c")
 target_link_libraries(testlib_noconflict PRIVATE libdir)
 
-install(TARGETS testlib libdir_postexcluded libdir conflict testlib_noconflict DESTINATION bin)
+install(TARGETS testlib libdir_postexcluded libdir conflict MixedCase testlib_noconflict DESTINATION bin)
 install(TARGETS libdir search_postexcluded search DESTINATION bin/.search) # Prefixing with "." ensures it is the first item after list(SORT)
 install(TARGETS testlib_conflict conflict DESTINATION bin/.conflict)
 
@@ -61,6 +62,7 @@ install(CODE [[
         "^(lib)?search\\.dll$"
         "^(lib)?unresolved\\.dll$"
         "^(lib)?conflict\\.dll$"
+        "^(lib)?mixedcase\\.dll$"
         "^kernel32\\.dll$"
       PRE_EXCLUDE_REGEXES ".*"
       POST_INCLUDE_REGEXES
@@ -68,6 +70,7 @@ install(CODE [[
         "^.*/(lib)?libdir\\.dll$"
         "^.*/(lib)?search\\.dll$"
         "^.*/(lib)?conflict\\.dll$"
+        "^.*/(lib)?mixedcase\\.dll$"
       POST_EXCLUDE_REGEXES ".*"
       DIRECTORIES
         "${CMAKE_INSTALL_PREFIX}/bin/.search"

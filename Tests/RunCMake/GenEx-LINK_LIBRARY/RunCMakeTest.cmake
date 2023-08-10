@@ -29,7 +29,7 @@ run_cmake(nested-compatible-features)
 run_cmake(nested-incompatible-features)
 run_cmake(only-targets)
 
-# testing target propertes LINK_LIBRARY_OVERRIDE and LINK_LIBRARY_OVERRIDE_<LIBRARY>
+# testing target properties LINK_LIBRARY_OVERRIDE and LINK_LIBRARY_OVERRIDE_<LIBRARY>
 run_cmake(override-features1)
 run_cmake(override-features2)
 run_cmake(override-features3)

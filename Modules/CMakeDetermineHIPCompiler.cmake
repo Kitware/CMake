@@ -3,6 +3,7 @@
 
 include(${CMAKE_ROOT}/Modules/CMakeDetermineCompiler.cmake)
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
+include(${CMAKE_ROOT}/Modules/CMakeParseLibraryArchitecture.cmake)
 
 if( NOT ( ("${CMAKE_GENERATOR}" MATCHES "Make") OR
           ("${CMAKE_GENERATOR}" MATCHES "Ninja") ) )
@@ -102,13 +103,57 @@ endif()
 if(NOT CMAKE_HIP_COMPILER_ROCM_ROOT)
   message(FATAL_ERROR "Failed to find ROCm root directory.")
 endif()
-if(NOT EXISTS "${CMAKE_HIP_COMPILER_ROCM_ROOT}/lib/cmake/hip-lang/hip-lang-config.cmake")
-  message(FATAL_ERROR
-    "The ROCm root directory:\n"
-    " ${CMAKE_HIP_COMPILER_ROCM_ROOT}\n"
-    "does not contain the HIP runtime CMake package, expected at:\n"
-    " ${CMAKE_HIP_COMPILER_ROCM_ROOT}/lib/cmake/hip-lang/hip-lang-config.cmake\n"
+
+# Normally implicit link information is not detected until
+cmake_parse_implicit_link_info("${CMAKE_HIP_COMPILER_PRODUCED_OUTPUT}"
+  _CMAKE_HIP_COMPILER_ID_IMPLICIT_LIBS
+  _CMAKE_HIP_COMPILER_ID_IMPLICIT_DIRS
+  _CMAKE_HIP_COMPILER_ID_IMPLICIT_FWKS
+  _CMAKE_HIP_COMPILER_ID_IMPLICIT_LOG
+  "" LANGUAGE HIP)
+message(CONFIGURE_LOG
+  "Parsed HIP implicit link information from compiler id output:\n${_CMAKE_HIP_COMPILER_ID_IMPLICIT_LOG}\n\n")
+cmake_parse_library_architecture(HIP "${_CMAKE_HIP_COMPILER_ID_IMPLICIT_DIRS}" "" CMAKE_HIP_LIBRARY_ARCHITECTURE)
+if(CMAKE_HIP_LIBRARY_ARCHITECTURE)
+  message(CONFIGURE_LOG
+    "Parsed HIP library architecture from compiler id output: ${CMAKE_HIP_LIBRARY_ARCHITECTURE}\n")
+endif()
+unset(_CMAKE_HIP_COMPILER_ID_IMPLICIT_LIBS)
+unset(_CMAKE_HIP_COMPILER_ID_IMPLICIT_DIRS)
+unset(_CMAKE_HIP_COMPILER_ID_IMPLICIT_FWKS)
+unset(_CMAKE_HIP_COMPILER_ID_IMPLICIT_LOG)
+
+if(NOT CMAKE_HIP_COMPILER_ROCM_LIB)
+  set(_CMAKE_HIP_COMPILER_ROCM_LIB_DIRS
+    "${CMAKE_HIP_COMPILER_ROCM_ROOT}/lib"
+    "${CMAKE_HIP_COMPILER_ROCM_ROOT}/lib64"
     )
+  if(CMAKE_HIP_LIBRARY_ARCHITECTURE)
+    list(APPEND _CMAKE_HIP_COMPILER_ROCM_LIB_DIRS "${CMAKE_HIP_COMPILER_ROCM_ROOT}/lib/${CMAKE_HIP_LIBRARY_ARCHITECTURE}")
+  endif()
+  foreach(dir IN LISTS _CMAKE_HIP_COMPILER_ROCM_LIB_DIRS)
+    if(EXISTS "${dir}/cmake/hip-lang/hip-lang-config.cmake")
+      set(CMAKE_HIP_COMPILER_ROCM_LIB "${dir}")
+      break()
+    endif()
+  endforeach()
+  if(NOT CMAKE_HIP_COMPILER_ROCM_LIB)
+    list(TRANSFORM _CMAKE_HIP_COMPILER_ROCM_LIB_DIRS APPEND "/cmake/hip-lang/hip-lang-config.cmake")
+    string(REPLACE ";" "\n " _CMAKE_HIP_COMPILER_ROCM_LIB_DIRS "${_CMAKE_HIP_COMPILER_ROCM_LIB_DIRS}")
+    message(FATAL_ERROR
+      "The ROCm root directory:\n"
+      " ${CMAKE_HIP_COMPILER_ROCM_ROOT}\n"
+      "does not contain the HIP runtime CMake package, expected at one of:\n"
+      " ${_CMAKE_HIP_COMPILER_ROCM_LIB_DIRS}\n"
+      )
+  endif()
+  unset(_CMAKE_HIP_COMPILER_ROCM_LIB_DIRS)
+endif()
+if(CMAKE_HIP_COMPILER_ROCM_LIB MATCHES "/lib64$" AND NOT DEFINED CMAKE_SIZEOF_VOID_P)
+  # We have not yet determined the target ABI but we need 'find_package' to
+  # search lib64 directories to find hip-lang CMake package dependencies.
+  # This will be replaced by ABI detection later.
+  set(CMAKE_HIP_SIZEOF_DATA_PTR 8)
 endif()
 
 if (NOT _CMAKE_TOOLCHAIN_LOCATION)

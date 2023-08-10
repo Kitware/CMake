@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2004 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -181,13 +181,13 @@ curl_easy_strerror(CURLcode error)
   case CURLE_INTERFACE_FAILED:
     return "Failed binding local connection end";
 
-  case CURLE_TOO_MANY_REDIRECTS :
+  case CURLE_TOO_MANY_REDIRECTS:
     return "Number of redirects hit maximum amount";
 
   case CURLE_UNKNOWN_OPTION:
     return "An unknown option was passed in to libcurl";
 
-  case CURLE_SETOPT_OPTION_SYNTAX :
+  case CURLE_SETOPT_OPTION_SYNTAX:
     return "Malformed option provided in a setopt";
 
   case CURLE_GOT_NOTHING:
@@ -549,6 +549,9 @@ curl_url_strerror(CURLUcode error)
 
   case CURLUE_BAD_USER:
     return "Bad user";
+
+  case CURLUE_LACKS_IDN:
+    return "libcurl lacks IDN support";
 
   case CURLUE_LAST:
     break;

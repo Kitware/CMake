@@ -5,9 +5,9 @@
 #include <utility>
 
 #include "cmGeneratorExpression.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
-#include "cmStringAlgorithms.h"
 #include "cmValue.h"
 
 cmInstalledFile::cmInstalledFile() = default;
@@ -97,12 +97,11 @@ bool cmInstalledFile::GetPropertyAsBool(const std::string& prop) const
   return isSet && cmIsOn(value);
 }
 
-void cmInstalledFile::GetPropertyAsList(const std::string& prop,
-                                        std::vector<std::string>& list) const
+std::vector<std::string> cmInstalledFile::GetPropertyAsList(
+  const std::string& prop) const
 {
   std::string value;
   this->GetProperty(prop, value);
 
-  list.clear();
-  cmExpandList(value, list);
+  return std::move(cmList(value).data());
 }

@@ -305,6 +305,12 @@ z_size_t ZEXPORT gzfwrite(buf, size, nitems, file)
         return 0;
     }
 
+#ifdef __clang_analyzer__
+    /* clang-analyzer does not see size==0 through len==0 below. */
+    if (!size)
+        return 0;
+#endif
+
     /* write len bytes to buf, return the number of full items written */
     return len ? gz_write(state, buf, len) / size : 0;
 }

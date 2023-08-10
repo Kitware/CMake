@@ -59,8 +59,7 @@ protected slots:
   void updateBinaryDirectory(const QString& dir);
   void updatePresets(const QVector<QCMakePreset>& presets);
   void updatePreset(const QString& name);
-  void showPresetLoadError(const QString& dir,
-                           cmCMakePresetsGraph::ReadFileResult result);
+  void showPresetLoadError(const QString& dir, const QString& message);
   void showProgress(const QString& msg, float percent);
   void setEnabledState(bool);
   bool setupFirstConfigure();

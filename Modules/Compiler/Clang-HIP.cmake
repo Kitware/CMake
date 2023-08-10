@@ -1,4 +1,5 @@
 include(Compiler/Clang)
+
 __compiler_clang(HIP)
 __compiler_clang_cxx_standards(HIP)
 

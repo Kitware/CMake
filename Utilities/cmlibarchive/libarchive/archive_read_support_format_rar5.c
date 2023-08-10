@@ -388,7 +388,7 @@ static int cdeque_init(struct cdeque* d, int max_capacity_power_of_2) {
 		return CDE_PARAM;
 
 	cdeque_clear(d);
-	d->arr = malloc(sizeof(void*) * max_capacity_power_of_2);
+	d->arr = malloc(sizeof(*d->arr) * max_capacity_power_of_2);
 
 	return d->arr ? CDE_OK : CDE_ALLOC;
 }
@@ -2821,11 +2821,13 @@ static int parse_block_header(struct archive_read* a, const uint8_t* p,
 	    ^ (uint8_t) (*block_size >> 16);
 
 	if(calculated_cksum != hdr->block_cksum) {
+#ifndef DONT_FAIL_ON_CRC_ERROR
 		archive_set_error(&a->archive, ARCHIVE_ERRNO_FILE_FORMAT,
 		    "Block checksum error: got 0x%x, expected 0x%x",
 		    hdr->block_cksum, calculated_cksum);
 
 		return ARCHIVE_FATAL;
+#endif
 	}
 
 	return ARCHIVE_OK;
@@ -2940,12 +2942,23 @@ static int parse_filter(struct archive_read* ar, const uint8_t* p) {
 	if(filter_type == FILTER_DELTA) {
 		int channels;
 
-		if(ARCHIVE_OK != (ret = read_consume_bits(ar, rar, p, 5, &channels)))
+		if(ARCHIVE_OK != (ret = read_consume_bits(ar, rar, p, 5, &channels))) {
+			#ifdef __clang_analyzer__
+			/* Tell clang-analyzer that 'filt' does not leak.
+			   add_new_filter passes off ownership.  */
+			free(filt);
+			#endif
 			return ret;
+		}
 
 		filt->channels = channels + 1;
 	}
 
+	#ifdef __clang_analyzer__
+	/* Tell clang-analyzer that 'filt' does not leak.
+	   add_new_filter passes off ownership.  */
+	free(filt);
+	#endif
 	return ARCHIVE_OK;
 }
 
@@ -3911,6 +3924,13 @@ static int do_unpack(struct archive_read* a, struct rar5* rar,
 			case GOOD:
 				/* fallthrough */
 			case BEST:
+				/* No data is returned here. But because a sparse-file aware
+				 * caller (like archive_read_data_into_fd) may treat zero-size
+				 * as a sparse file block, we need to update the offset
+				 * accordingly. At this point the decoder doesn't have any
+				 * pending uncompressed data blocks, so the current position in
+				 * the output file should be last_write_ptr. */
+				if (offset) *offset = rar->cstate.last_write_ptr;
 				return uncompress_file(a);
 			default:
 				archive_set_error(&a->archive,

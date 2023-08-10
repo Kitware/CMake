@@ -14,6 +14,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
+#include "cmValue.h"
 #include "cmVersion.h"
 
 #ifdef __QNX__
@@ -78,25 +79,37 @@ static void CCONV cmAddCacheDefinition(void* arg, const char* name,
                                        int type)
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
+  std::string valueString;
+  std::string docString;
+  cmValue v;
+  cmValue d;
+  if (value != nullptr) {
+    valueString = value;
+    v = cmValue{ valueString };
+  }
+  if (doc != nullptr) {
+    docString = doc;
+    d = cmValue{ docString };
+  }
 
   switch (type) {
     case CM_CACHE_BOOL:
-      mf->AddCacheDefinition(name, value, doc, cmStateEnums::BOOL);
+      mf->AddCacheDefinition(name, v, d, cmStateEnums::BOOL);
       break;
     case CM_CACHE_PATH:
-      mf->AddCacheDefinition(name, value, doc, cmStateEnums::PATH);
+      mf->AddCacheDefinition(name, v, d, cmStateEnums::PATH);
       break;
     case CM_CACHE_FILEPATH:
-      mf->AddCacheDefinition(name, value, doc, cmStateEnums::FILEPATH);
+      mf->AddCacheDefinition(name, v, d, cmStateEnums::FILEPATH);
       break;
     case CM_CACHE_STRING:
-      mf->AddCacheDefinition(name, value, doc, cmStateEnums::STRING);
+      mf->AddCacheDefinition(name, v, d, cmStateEnums::STRING);
       break;
     case CM_CACHE_INTERNAL:
-      mf->AddCacheDefinition(name, value, doc, cmStateEnums::INTERNAL);
+      mf->AddCacheDefinition(name, v, d, cmStateEnums::INTERNAL);
       break;
     case CM_CACHE_STATIC:
-      mf->AddCacheDefinition(name, value, doc, cmStateEnums::STATIC);
+      mf->AddCacheDefinition(name, v, d, cmStateEnums::STATIC);
       break;
   }
 }
@@ -615,7 +628,11 @@ static void CCONV cmSourceFileSetProperty(void* arg, const char* prop,
 {
   cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
   if (cmSourceFile* rsf = sf->RealSourceFile) {
-    rsf->SetProperty(prop, value);
+    if (value == nullptr) {
+      rsf->SetProperty(prop, nullptr);
+    } else {
+      rsf->SetProperty(prop, value);
+    }
   } else if (prop) {
     if (!value) {
       value = "NOTFOUND";

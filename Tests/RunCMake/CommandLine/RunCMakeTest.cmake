@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 
 include(RunCMake)
 
@@ -124,6 +124,17 @@ run_cmake_command(cache-bad-entry
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-bad-entry/)
 run_cmake_command(cache-empty-entry
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-empty-entry/)
+
+run_cmake_command(DebuggerCapabilityInspect ${CMAKE_COMMAND} -E capabilities)
+get_property(CMake_ENABLE_DEBUGGER DIRECTORY PROPERTY CMake_ENABLE_DEBUGGER)
+if(CMake_ENABLE_DEBUGGER)
+  run_cmake_with_options(DebuggerArgMissingPipe --debugger-pipe)
+  run_cmake_with_options(DebuggerArgMissingDapLog --debugger-dap-log)
+else()
+  run_cmake_with_options(DebuggerNotSupported --debugger)
+  run_cmake_with_options(DebuggerNotSupportedPipe --debugger-pipe pipe)
+  run_cmake_with_options(DebuggerNotSupportedDapLog --debugger-dap-log dap-log)
+endif()
 
 function(run_ExplicitDirs)
   set(RunCMake_TEST_NO_CLEAN 1)
@@ -1100,6 +1111,13 @@ set(ProfilingTestOutput ${RunCMake_TEST_BINARY_DIR}/output.json)
 set(RunCMake_TEST_OPTIONS --profiling-format=google-trace --profiling-output=${ProfilingTestOutput})
 run_cmake(ProfilingTest)
 unset(RunCMake_TEST_OPTIONS)
+
+if(RunCMake_GENERATOR MATCHES "^Visual Studio 9 2008")
+  run_cmake_with_options(DeprecateVS9-WARN-ON -DCMAKE_WARN_VS9=ON)
+  unset(ENV{CMAKE_WARN_VS9})
+  run_cmake(DeprecateVS9-WARN-ON)
+  run_cmake_with_options(DeprecateVS9-WARN-OFF -DCMAKE_WARN_VS9=OFF)
+endif()
 
 if(RunCMake_GENERATOR MATCHES "^Visual Studio 11 2012")
   run_cmake_with_options(DeprecateVS11-WARN-ON -DCMAKE_WARN_VS11=ON)

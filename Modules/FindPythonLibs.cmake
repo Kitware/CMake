@@ -5,6 +5,9 @@
 FindPythonLibs
 --------------
 
+.. versionchanged:: 3.27
+  This module is available only if policy :policy:`CMP0148` is not set to ``NEW``.
+
 .. deprecated:: 3.12
 
   Use :module:`FindPython3`, :module:`FindPython2` or :module:`FindPython` instead.
@@ -44,6 +47,16 @@ If calling both ``find_package(PythonInterp)`` and
 get the currently active Python version by default with a consistent version
 of PYTHON_LIBRARIES.
 #]=======================================================================]
+
+cmake_policy(GET CMP0148 _FindPythonLibs_CMP0148)
+if(_FindPythonLibs_CMP0148 STREQUAL "NEW")
+  message(FATAL_ERROR "The FindPythonLibs module has been removed by policy CMP0148.")
+endif()
+
+if(_FindPythonLibs_testing)
+  set(_FindPythonLibs_included TRUE)
+  return()
+endif()
 
 # Use the executable's path as a hint
 set(_Python_LIBRARY_PATH_HINT)

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5)
 project(ExportLanguages CXX)
 add_library(ExportLanguagesA OBJECT a.cxx)
 add_library(ExportLanguagesB STATIC a.c $<TARGET_OBJECTS:ExportLanguagesA>)

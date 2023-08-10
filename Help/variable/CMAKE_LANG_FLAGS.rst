@@ -1,9 +1,10 @@
 CMAKE_<LANG>_FLAGS
 ------------------
 
-Flags for all build types.
-
-``<LANG>`` flags used regardless of the value of :variable:`CMAKE_BUILD_TYPE`.
+Language-wide flags for language ``<LANG>`` used when building for
+all configurations.  These flags will be passed to all invocations
+of the compiler.  This includes invocations that drive compiling
+and those that drive linking.
 
 For each language, if this variable is not defined, it is initialized
 and stored in the cache using values from environment variables in
@@ -27,7 +28,10 @@ combination with CMake's builtin defaults for the toolchain:
 This value is a command-line string fragment. Therefore, multiple options
 should be separated by spaces, and options with spaces should be quoted.
 
-The flags in this variable will be passed to the compiler before those
-in the per-configuration :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>` variant,
-and before flags added by the :command:`add_compile_options` or
-:command:`target_compile_options` commands.
+The flags in this variable will be passed before those in the
+per-configuration :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>` variable.
+On invocations driving compiling, flags from both variables will be passed
+before flags added by commands such as :command:`add_compile_options` and
+:command:`target_compile_options`. On invocations driving linking,
+they will be passed before flags added by commands such as
+:command:`add_link_options` and :command:`target_link_options`.

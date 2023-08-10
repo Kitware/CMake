@@ -2,8 +2,3 @@ CMake Warning \(dev\) at CMakeLists.txt:25 \(target_sources\):
   CMake's C\+\+ module support is experimental.  It is meant only for
   experimentation and feedback to CMake developers.
 This warning is for project developers.  Use -Wno-dev to suppress it.
-
-CMake Warning \(dev\):
-  C\+\+20 modules support via CMAKE_EXPERIMENTAL_CXX_MODULE_DYNDEP is
-  experimental.  It is meant only for compiler developers to try.
-This warning is for project developers.  Use -Wno-dev to suppress it.

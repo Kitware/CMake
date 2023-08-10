@@ -7,7 +7,7 @@ file(GET_RUNTIME_DEPENDENCIES
   EXECUTABLES ${EXEC_PATH}
   )
 
-list(FILTER resolved_libs INCLUDE REGEX ".*cudart.*")
+list(FILTER resolved_libs INCLUDE REGEX ".*[Cc][Uu][Dd][Aa][Rr][Tt].*")
 list(LENGTH resolved_libs has_cudart)
 
 if(has_cudart EQUAL 0)

@@ -3,6 +3,7 @@
 #pragma once
 
 /* Whether CMake is using its own utility libraries.  */
+#cmakedefine CMAKE_USE_SYSTEM_CPPDAP
 #cmakedefine CMAKE_USE_SYSTEM_CURL
 #cmakedefine CMAKE_USE_SYSTEM_EXPAT
 #cmakedefine CMAKE_USE_SYSTEM_KWIML

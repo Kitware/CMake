@@ -1,0 +1,4 @@
+^CMake Error at OutOfOrderArgs\.cmake:[0-9]+ \(file\):
+  file Unknown argument to GENERATE subcommand\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

@@ -1,0 +1,9 @@
+{
+    "nameOnDisk": "^shared_framework\\.framework/shared_framework$",
+    "artifacts": [
+        {
+            "path": "^framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?shared_framework\\.framework/shared_framework$",
+            "_dllExtra": false
+        }
+    ]
+}

@@ -1,0 +1,6 @@
+^CMake Error at [^
+]*/Modules/FindPythonLibs.cmake:[0-9]+ \(message\):
+  The FindPythonLibs module has been removed by policy CMP0148\.
+Call Stack \(most recent call first\):
+  CMP0148-Libs-NEW-path\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)$

@@ -18,7 +18,7 @@ endfunction()
 function(run_compiler_launcher_env lang)
   string(REGEX REPLACE "-.*" "" core_lang "${lang}")
   # Use the noop genexp $<PATH:...> genexp to validate genexp support.
-  set(ENV{CMAKE_${core_lang}_COMPILER_LAUNCHER} "$<PATH:CMAKE_PATH,${CMAKE_COMMAND}>;-E;env;USED_LAUNCHER=1")
+  set(ENV{CMAKE_${core_lang}_COMPILER_LAUNCHER} "$<PATH:CMAKE_PATH,${CMAKE_COMMAND}>;-E;env;USED_LAUNCHER=1;TARGET_NAME=$<TARGET_PROPERTY:NAME>;LANGUAGE=$<COMPILE_LANGUAGE>")
   run_compiler_launcher(${lang})
   unset(ENV{CMAKE_${core_lang}_COMPILER_LAUNCHER})
 endfunction()

@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
+#include <vector>
 
 #include "cmExternalMakefileProjectGenerator.h"
 
@@ -29,6 +30,7 @@ private:
   void WriteTargets(const cmLocalGenerator& lg,
                     cmGeneratedFileStream& fout) const;
   void AppendTarget(cmGeneratedFileStream& fout, const std::string& target,
+                    const std::vector<std::string>& configs,
                     const std::string& make, const std::string& makeArgs,
                     const std::string& path,
                     const std::string& homeOutputDir) const;

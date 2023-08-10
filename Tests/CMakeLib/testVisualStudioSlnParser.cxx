@@ -80,7 +80,6 @@ int testVisualStudioSlnParser(int, char*[])
       "cmsysProcessFwd9x",
       "cmsysTestDynload",
       "cmsysTestProcess",
-      "cmsysTestSharedForward",
       "cmsysTestsC",
       "cmsysTestsCxx",
       "cmsys_c",

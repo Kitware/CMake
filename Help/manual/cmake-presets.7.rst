@@ -63,6 +63,9 @@ The root object recognizes the following fields:
   ``6``
     .. versionadded:: 3.25
 
+  ``7``
+    .. versionadded:: 3.27
+
 ``cmakeMinimumRequired``
   An optional object representing the minimum version of CMake needed to
   build this project. This object consists of the following fields:
@@ -129,6 +132,9 @@ included multiple times from the same file or from different files.
 Files directly or indirectly included from ``CMakePresets.json`` should be
 guaranteed to be provided by the project. ``CMakeUserPresets.json`` may
 include files from anywhere.
+
+Starting from version ``7``, the ``include`` field supports
+`macro expansion`_, but only ``$penv{}`` macro expansion.
 
 Configure Preset
 ^^^^^^^^^^^^^^^^
@@ -358,6 +364,52 @@ that may contain the following fields:
   ``find``
     An optional boolean. Setting this to ``true`` is equivalent to passing
     :option:`--debug-find <cmake --debug-find>` on the command line.
+
+``trace``
+  An optional object specifying trace options. This is allowed in preset
+  files specifying version ``7``. The object may contain the following fields:
+
+  ``mode``
+    An optional string that specifies the trace mode. Valid values are:
+
+    ``on``
+      Causes a trace of all calls made and from where to be printed.
+      Equivalent to passing :option:`--trace <cmake --trace>` on the command
+      line.
+
+    ``off``
+      A trace of all calls will not be printed.
+
+    ``expand``
+      Causes a trace with variables expanded of all calls made and from where
+      to be printed. Equivalent to passing :option:`--trace-expand <cmake --trace-expand>`
+      on the command line.
+
+  ``format``
+    An optional string that specifies the format output of the trace.
+    Valid values are:
+
+    ``human``
+      Prints each trace line in a human-readable format.
+      This is the default format.  Equivalent to passing
+      :option:`--trace-format=human <cmake --trace-format>`
+      on the command line.
+
+    ``json-v1``
+      Prints each line as a separate JSON document.  Equivalent to passing
+      :option:`--trace-format=json-v1 <cmake --trace-format>`
+      on the command line.
+
+  ``source``
+    An optional array of strings representing the paths of source files to
+    be traced.  This field can also be a string, which is equivalent to an
+    array containing one string.  Equivalent to passing
+    :option:`--trace-source <cmake --trace-source>` on the command line.
+
+  ``redirect``
+    An optional string specifying a path to a trace output file.  Equivalent
+    to passing :option:`--trace-redirect <cmake --trace-redirect>`
+    on the command line.
 
 Build Preset
 ^^^^^^^^^^^^
@@ -1007,6 +1059,12 @@ fields:
   ``CMakeUserPresets.json`` in the same directory with the same name. However,
   a workflow preset may have the same name as a configure, build, test, or
   package preset.
+
+``vendor``
+  An optional map containing vendor-specific information. CMake does not
+  interpret the contents of this field except to verify that it is a map
+  if it does exist. However, it should follow the same conventions as the
+  root-level ``vendor`` field.
 
 ``displayName``
   An optional string with a human-friendly name of the preset.

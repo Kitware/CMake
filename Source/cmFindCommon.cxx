@@ -9,6 +9,7 @@
 #include <cmext/algorithm>
 
 #include "cmExecutionStatus.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
@@ -238,9 +239,9 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
   }
 
   // Construct the list of path roots with no trailing slashes.
-  std::vector<std::string> roots;
+  cmList roots;
   if (rootPath) {
-    cmExpandList(*rootPath, roots);
+    roots.assign(*rootPath);
   }
   if (sysrootCompile) {
     roots.emplace_back(*sysrootCompile);
@@ -251,14 +252,14 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
   if (sysroot) {
     roots.emplace_back(*sysroot);
   }
-  for (std::string& r : roots) {
+  for (auto& r : roots) {
     cmSystemTools::ConvertToUnixSlashes(r);
   }
 
   cmValue stagePrefix = this->Makefile->GetDefinition("CMAKE_STAGING_PREFIX");
 
   // Copy the original set of unrooted paths.
-  std::vector<std::string> unrootedPaths = paths;
+  auto unrootedPaths = paths;
   paths.clear();
 
   auto isSameDirectoryOrSubDirectory = [](std::string const& l,
@@ -267,8 +268,8 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
       cmSystemTools::IsSubDirectory(l, r);
   };
 
-  for (std::string const& r : roots) {
-    for (std::string const& up : unrootedPaths) {
+  for (auto const& r : roots) {
+    for (auto const& up : unrootedPaths) {
       // Place the unrooted path under the current root if it is not
       // already inside.  Skip the unrooted path if it is relative to
       // a user home directory or is empty.
@@ -308,7 +309,7 @@ void cmFindCommon::GetIgnoredPaths(std::vector<std::string>& ignore)
   // Construct the list of path roots with no trailing slashes.
   for (const char* pathName : paths) {
     // Get the list of paths to ignore from the variable.
-    this->Makefile->GetDefExpandList(pathName, ignore);
+    cmList::append(ignore, this->Makefile->GetDefinition(pathName));
   }
 
   for (std::string& i : ignore) {
@@ -333,7 +334,7 @@ void cmFindCommon::GetIgnoredPrefixPaths(std::vector<std::string>& ignore)
   // Construct the list of path roots with no trailing slashes.
   for (const char* pathName : paths) {
     // Get the list of paths to ignore from the variable.
-    this->Makefile->GetDefExpandList(pathName, ignore);
+    cmList::append(ignore, this->Makefile->GetDefinition(pathName));
   }
 
   for (std::string& i : ignore) {

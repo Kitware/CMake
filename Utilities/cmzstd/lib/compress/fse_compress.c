@@ -646,6 +646,10 @@ size_t FSE_compress_wksp (void* dst, size_t dstSize, const void* src, size_t src
     void* scratchBuffer = (void*)(CTable + CTableSize);
     size_t const scratchBufferSize = wkspSize - (CTableSize * sizeof(FSE_CTable));
 
+#ifdef __clang_analyzer__
+    memset(norm, 0, sizeof(norm));
+#endif
+
     /* init conditions */
     if (wkspSize < FSE_COMPRESS_WKSP_SIZE_U32(tableLog, maxSymbolValue)) return ERROR(tableLog_tooLarge);
     if (srcSize <= 1) return 0;  /* Not compressible */

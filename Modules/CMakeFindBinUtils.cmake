@@ -121,9 +121,9 @@ elseif("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^xIAR$")
   set(_CMAKE_IAR_ITOOLS "ARM" "RX" "RH850" "RL78" "RISCV" "RISC-V" "STM8")
   set(_CMAKE_IAR_XTOOLS "AVR" "MSP430" "V850" "8051")
 
-  if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" IN_LIST _CMAKE_IAR_ITOOLS)
-    string(TOLOWER "${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" _CMAKE_IAR_LOWER_ARCHITECTURE_ID)
+  string(TOLOWER "${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" _CMAKE_IAR_LOWER_ARCHITECTURE_ID)
 
+  if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" IN_LIST _CMAKE_IAR_ITOOLS)
     __append_IAR_tool(AR "iarchive")
     __append_IAR_tool(LINKER "ilink${_CMAKE_IAR_LOWER_ARCHITECTURE_ID}")
 
@@ -132,16 +132,21 @@ elseif("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^xIAR$")
     __append_IAR_tool(IAR_OBJMANIP "iobjmanip")
     __append_IAR_tool(IAR_SYMEXPORT "isymexport")
 
-    unset(_CMAKE_IAR_LOWER_ARCHITECTURE_ID)
-
   elseif("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" IN_LIST _CMAKE_IAR_XTOOLS)
     __append_IAR_tool(AR "xar")
-    __append_IAR_tool(LINKER "xlink")
+    if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" STREQUAL "AVR" AND
+      (CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_VERSION VERSION_GREATER_EQUAL 8))
+      # IAR UBROF Linker V8.10+ for Microchip AVR is `xlinkavr`
+      __append_IAR_tool(LINKER "xlink${_CMAKE_IAR_LOWER_ARCHITECTURE_ID}")
+    else()
+      __append_IAR_tool(LINKER "xlink")
+    endif()
 
   else()
     message(FATAL_ERROR "Failed to find linker and librarian for ${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID} on ${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}.")
   endif()
 
+  unset(_CMAKE_IAR_LOWER_ARCHITECTURE_ID)
   unset(_CMAKE_IAR_ITOOLS)
   unset(_CMAKE_IAR_XTOOLS)
 
@@ -165,6 +170,7 @@ else()
   set(_CMAKE_READELF_NAMES "readelf")
   set(_CMAKE_DLLTOOL_NAMES "dlltool")
   set(_CMAKE_ADDR2LINE_NAMES "addr2line")
+  set(_CMAKE_TAPI_NAMES "tapi")
 
   # Prepend toolchain-specific names.
   if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" STREQUAL Clang)
@@ -173,19 +179,17 @@ else()
     elseif(NOT APPLE)
       list(PREPEND _CMAKE_LINKER_NAMES "ld.lld")
     endif()
-    if(APPLE)
-      # llvm-ar does not generate a symbol table that the Apple ld64 linker accepts.
-      # FIXME(#23333): We still need to consider 'llvm-ar' as a fallback because
-      # the 'APPLE' definition may be based on the host in this context, and a
-      # cross-compiling toolchain may not have 'ar'.
-      list(APPEND _CMAKE_AR_NAMES "llvm-ar")
-    else()
+    # llvm-ar does not generate a symbol table that the Apple ld64 linker accepts.
+    if(NOT APPLE)
       list(PREPEND _CMAKE_AR_NAMES "llvm-ar")
     endif()
     list(PREPEND _CMAKE_RANLIB_NAMES "llvm-ranlib")
+    # llvm-strip versions prior to 11 require additional flags we do not yet add.
     if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_VERSION}" VERSION_GREATER_EQUAL 11)
-      # llvm-strip versions prior to 11 require additional flags we do not yet add.
-      list(PREPEND _CMAKE_STRIP_NAMES "llvm-strip")
+      # llvm-strip does not seem to support chained fixup format on macOS correctly.
+      if(NOT APPLE)
+        list(PREPEND _CMAKE_STRIP_NAMES "llvm-strip")
+      endif()
     endif()
     list(PREPEND _CMAKE_NM_NAMES "llvm-nm")
     if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_VERSION}" VERSION_GREATER_EQUAL 9)
@@ -201,7 +205,7 @@ else()
     list(PREPEND _CMAKE_LINKER_NAMES "armlink")
   endif()
 
-  list(APPEND _CMAKE_TOOL_VARS AR RANLIB STRIP LINKER NM OBJDUMP OBJCOPY READELF DLLTOOL ADDR2LINE)
+  list(APPEND _CMAKE_TOOL_VARS AR RANLIB STRIP LINKER NM OBJDUMP OBJCOPY READELF DLLTOOL ADDR2LINE TAPI)
 endif()
 
 foreach(_CMAKE_TOOL IN LISTS _CMAKE_TOOL_VARS)
@@ -223,6 +227,20 @@ endforeach()
 
 if(NOT CMAKE_RANLIB)
     set(CMAKE_RANLIB : CACHE INTERNAL "noop for ranlib")
+endif()
+
+if(NOT CMAKE_TAPI)
+  # try to pick-up from Apple toolchain
+  execute_process(COMMAND xcrun --find tapi
+    OUTPUT_VARIABLE _xcrun_out
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET
+    RESULT_VARIABLE _xcrun_failed)
+  if(NOT _xcrun_failed AND EXISTS "${_xcrun_out}")
+    set_property(CACHE CMAKE_TAPI PROPERTY VALUE "${_xcrun_out}")
+  endif()
+  unset(_xcrun_out)
+  unset(_xcrun_failed)
 endif()
 
 

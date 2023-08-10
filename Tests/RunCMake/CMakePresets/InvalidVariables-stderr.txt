@@ -1,2 +1,5 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/InvalidVariables: Invalid preset$
+]*/Tests/RunCMake/CMakePresets/InvalidVariables:
+Error: @8,25: Invalid preset
+      "cacheVariables": \[\]
+                        \^$

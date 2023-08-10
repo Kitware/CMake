@@ -262,8 +262,8 @@ installers.  The most commonly-used variables are:
   Lists each of the executables and associated text label to be used to
   create Start Menu shortcuts.  For example, setting this to the list
   ``ccmake;CMake`` will create a shortcut named "CMake" that will execute the
-  installed executable :program:`ccmake`.  Not all CPack generators use it (at least
-  NSIS, and WIX do).
+  installed executable :program:`ccmake`. Not all CPack generators use it (at least
+  NSIS, Inno Setup and WIX do).
 
 .. variable:: CPACK_STRIP_FILES
 
@@ -738,14 +738,16 @@ if(NOT CPACK_GENERATOR)
         )
     endif()
   else()
-    option(CPACK_BINARY_7Z    "Enable to build 7-Zip packages" OFF)
-    option(CPACK_BINARY_NSIS  "Enable to build NSIS packages" ON)
-    option(CPACK_BINARY_NUGET "Enable to build NuGet packages" OFF)
-    option(CPACK_BINARY_WIX   "Enable to build WiX packages" OFF)
-    option(CPACK_BINARY_ZIP   "Enable to build ZIP packages" OFF)
+    option(CPACK_BINARY_7Z        "Enable to build 7-Zip packages" OFF)
+    option(CPACK_BINARY_NSIS      "Enable to build NSIS packages" ON)
+    option(CPACK_BINARY_INNOSETUP "Enable to build Inno Setup packages" OFF)
+    option(CPACK_BINARY_NUGET     "Enable to build NuGet packages" OFF)
+    option(CPACK_BINARY_WIX       "Enable to build WiX packages" OFF)
+    option(CPACK_BINARY_ZIP       "Enable to build ZIP packages" OFF)
     mark_as_advanced(
       CPACK_BINARY_7Z
       CPACK_BINARY_NSIS
+      CPACK_BINARY_INNOSETUP
       CPACK_BINARY_NUGET
       CPACK_BINARY_WIX
       CPACK_BINARY_ZIP
@@ -762,6 +764,7 @@ if(NOT CPACK_GENERATOR)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_FREEBSD      FREEBSD)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_IFW          IFW)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_NSIS         NSIS)
+  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_INNOSETUP    INNOSETUP)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_NUGET        NuGet)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_PRODUCTBUILD productbuild)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_RPM          RPM)
@@ -867,6 +870,13 @@ if(NOT DEFINED CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE
     _cpack_set_default(CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE ON)
   endif()
   unset(_CPack_CMP0133)
+endif()
+
+# Inno Setup specific variables
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+  _cpack_set_default(CPACK_INNOSETUP_ARCHITECTURE "x86")
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  _cpack_set_default(CPACK_INNOSETUP_ARCHITECTURE "x64")
 endif()
 
 # WiX specific variables

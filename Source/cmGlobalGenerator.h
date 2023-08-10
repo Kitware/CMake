@@ -50,6 +50,7 @@ class cmLinkLineComputer;
 class cmLocalGenerator;
 class cmMakefile;
 class cmOutputConverter;
+class cmQtAutoGenGlobalInitializer;
 class cmSourceFile;
 class cmState;
 class cmStateDirectory;
@@ -84,6 +85,7 @@ struct GeneratedMakeCommand
   }
 
   std::string Printable() const { return cmJoin(this->PrimaryCommand, " "); }
+  std::string QuotedPrintable() const;
 
   std::vector<std::string> PrimaryCommand;
   bool RequiresOutputForward = false;
@@ -232,7 +234,7 @@ public:
   int Build(
     int jobs, const std::string& srcdir, const std::string& bindir,
     const std::string& projectName,
-    std::vector<std::string> const& targetNames, std::string& output,
+    std::vector<std::string> const& targetNames, std::ostream& ostr,
     const std::string& makeProgram, const std::string& config,
     const cmBuildOptions& buildOptions, bool verbose, cmDuration timeout,
     cmSystemTools::OutputOption outputflag = cmSystemTools::OUTPUT_NONE,
@@ -383,9 +385,17 @@ public:
       , Name(std::move(name))
     {
     }
-    FrameworkDescriptor(std::string directory, std::string name,
-                        std::string suffix)
+    FrameworkDescriptor(std::string directory, std::string version,
+                        std::string name)
       : Directory(std::move(directory))
+      , Version(std::move(version))
+      , Name(std::move(name))
+    {
+    }
+    FrameworkDescriptor(std::string directory, std::string version,
+                        std::string name, std::string suffix)
+      : Directory(std::move(directory))
+      , Version(std::move(version))
       , Name(std::move(name))
       , Suffix(std::move(suffix))
     {
@@ -399,6 +409,13 @@ public:
     {
       return cmStrCat(this->Name, ".framework/"_s, this->Name, this->Suffix);
     }
+    std::string GetVersionedName() const
+    {
+      return this->Version.empty()
+        ? this->GetFullName()
+        : cmStrCat(this->Name, ".framework/Versions/"_s, this->Version, '/',
+                   this->Name, this->Suffix);
+    }
     std::string GetFrameworkPath() const
     {
       return this->Directory.empty()
@@ -411,8 +428,15 @@ public:
         ? this->GetFullName()
         : cmStrCat(this->Directory, '/', this->GetFullName());
     }
+    std::string GetVersionedPath() const
+    {
+      return this->Directory.empty()
+        ? this->GetVersionedName()
+        : cmStrCat(this->Directory, '/', this->GetVersionedName());
+    }
 
     const std::string Directory;
+    const std::string Version;
     const std::string Name;
     const std::string Suffix;
   };
@@ -545,6 +569,8 @@ public:
     return cm::nullopt;
   }
 
+  virtual bool SupportsLinkerDependencyFile() const { return false; }
+
   std::string GetSharedLibFlagsForLanguage(std::string const& lang) const;
 
   /** Generate an <output>.rule file path for a given command output.  */
@@ -591,7 +617,7 @@ public:
 
   std::string MakeSilentFlag;
 
-  int RecursionDepth;
+  size_t RecursionDepth = 0;
 
   virtual void GetQtAutoGenConfigs(std::vector<std::string>& configs) const
   {
@@ -606,6 +632,13 @@ public:
 
   cmInstallRuntimeDependencySet* GetNamedRuntimeDependencySet(
     const std::string& name);
+
+  enum class StripCommandStyle
+  {
+    Default,
+    Apple,
+  };
+  StripCommandStyle GetStripCommandStyle(std::string const& strip);
 
 protected:
   // for a project collect all its targets by following depend
@@ -627,12 +660,6 @@ protected:
   virtual bool ComputeTargetDepends();
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const;
-
-  void CxxModuleSupportCheck() const;
-
-  /// @brief Qt AUTOMOC/UIC/RCC target generation
-  /// @return true on success
-  bool QtAutoGen();
 
   bool AddHeaderSetVerification();
 
@@ -680,6 +707,11 @@ protected:
   cmake* CMakeInstance;
   std::vector<std::unique_ptr<cmMakefile>> Makefiles;
   LocalGeneratorVector LocalGenerators;
+
+#ifndef CMAKE_BOOTSTRAP
+  std::unique_ptr<cmQtAutoGenGlobalInitializer> QtAutoGen;
+#endif
+
   cmMakefile* CurrentConfigureMakefile;
   // map from project name to vector of local generators in that project
   std::map<std::string, std::vector<cmLocalGenerator*>> ProjectMap;
@@ -737,7 +769,9 @@ private:
   std::map<std::string, int> LanguageToLinkerPreference;
   std::map<std::string, std::string> LanguageToOriginalSharedLibFlags;
 
-  mutable bool DiagnosedCxxModuleSupport = false;
+#ifdef __APPLE__
+  std::map<std::string, StripCommandStyle> StripCommandStyleMap;
+#endif
 
   // Deferral id generation.
   size_t NextDeferId = 0;

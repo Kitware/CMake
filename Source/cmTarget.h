@@ -46,11 +46,12 @@ class BTs;
 class cmTarget
 {
 public:
-  enum Visibility
+  enum class Visibility
   {
-    VisibilityNormal,
-    VisibilityImported,
-    VisibilityImportedGlobally
+    Normal,
+    Generated,
+    Imported,
+    ImportedGlobally,
   };
 
   enum class PerConfig
@@ -173,14 +174,17 @@ public:
    * commands. It is not a full path nor does it have an extension.
    */
   void AddUtility(std::string const& name, bool cross,
-                  cmMakefile* mf = nullptr);
+                  cmMakefile const* mf = nullptr);
   void AddUtility(BT<std::pair<std::string, bool>> util);
   //! Get the utilities used by this target
   std::set<BT<std::pair<std::string, bool>>> const& GetUtilities() const;
 
   //! Set/Get a property of this target file
-  void SetProperty(const std::string& prop, const char* value);
   void SetProperty(const std::string& prop, cmValue value);
+  void SetProperty(const std::string& prop, std::nullptr_t)
+  {
+    this->SetProperty(prop, cmValue{ nullptr });
+  }
   void SetProperty(const std::string& prop, const std::string& value)
   {
     this->SetProperty(prop, cmValue(value));
@@ -204,7 +208,11 @@ public:
 
   //! Return whether or not we are targeting AIX.
   bool IsAIX() const;
+  //! Return whether or not we are targeting Apple.
+  bool IsApple() const;
 
+  bool IsNormal() const;
+  bool IsSynthetic() const;
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
   bool IsPerConfig() const;
@@ -215,6 +223,10 @@ public:
 
   //! Return whether this target is an executable with symbol exports enabled.
   bool IsExecutableWithExports() const;
+
+  //! Return whether this target is a shared library with symbol exports
+  //! enabled.
+  bool IsSharedLibraryWithExports() const;
 
   //! Return whether this target is a shared library Framework on Apple.
   bool IsFrameworkOnApple() const;
@@ -284,11 +296,9 @@ public:
 
   cmBTStringRange GetHeaderSetsEntries() const;
   cmBTStringRange GetCxxModuleSetsEntries() const;
-  cmBTStringRange GetCxxModuleHeaderSetsEntries() const;
 
   cmBTStringRange GetInterfaceHeaderSetsEntries() const;
   cmBTStringRange GetInterfaceCxxModuleSetsEntries() const;
-  cmBTStringRange GetInterfaceCxxModuleHeaderSetsEntries() const;
 
   std::string ImportedGetFullPath(const std::string& config,
                                   cmStateEnums::ArtifactType artifact) const;

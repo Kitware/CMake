@@ -1,2 +1,3 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/CyclicInheritance0: Cyclic preset inheritance$
+]*/Tests/RunCMake/CMakePresets/CyclicInheritance0:
+Cyclic preset inheritance for preset "CyclicInheritance0"$

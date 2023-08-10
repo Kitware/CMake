@@ -201,11 +201,7 @@ endif()
 
 # Enable testing if building standalone.
 if(KWSYS_STANDALONE)
-  include(Dart)
-  mark_as_advanced(BUILD_TESTING DART_ROOT TCL_TCLSH)
-  if(BUILD_TESTING)
-    enable_testing()
-  endif()
+  include(CTest)
 endif()
 
 # Choose default shared/static build if not specified.
@@ -630,8 +626,8 @@ endif()
 # Build a list of classes and headers we need to implement the
 # selected components.  Initialize with required components.
 set(KWSYS_CLASSES)
-set(KWSYS_H_FILES Configure SharedForward)
-set(KWSYS_HXX_FILES Configure String)
+set(KWSYS_H_FILES Configure)
+set(KWSYS_HXX_FILES Configure)
 
 # Add selected C++ classes.
 set(cppclasses
@@ -1038,6 +1034,10 @@ if(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
     set_property(TARGET ${KWSYS_NAMESPACE}TestsCxx PROPERTY CXX_INCLUDE_WHAT_YOU_USE "")
     set_property(TARGET ${KWSYS_NAMESPACE}TestsCxx PROPERTY LABELS ${KWSYS_LABELS_EXE})
     target_link_libraries(${KWSYS_NAMESPACE}TestsCxx ${KWSYS_TARGET_LINK})
+    get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+    if(_isMultiConfig)
+      set_property(TARGET ${KWSYS_NAMESPACE}TestsCxx APPEND PROPERTY COMPILE_DEFINITIONS BUILD_CONFIG="$<CONFIG>")
+    endif()
 
     set(TEST_SYSTEMTOOLS_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
     set(TEST_SYSTEMTOOLS_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}")
@@ -1117,16 +1117,6 @@ if(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
       set(testProcess_COMPILE_FLAGS "${testProcess_COMPILE_FLAGS} -DCRASH_USING_ABORT")
     endif()
     set_property(SOURCE testProcess.c PROPERTY COMPILE_FLAGS "${testProcess_COMPILE_FLAGS}")
-
-    # Test SharedForward
-    configure_file(${PROJECT_SOURCE_DIR}/testSharedForward.c.in
-                   ${PROJECT_BINARY_DIR}/testSharedForward.c @ONLY IMMEDIATE)
-    add_executable(${KWSYS_NAMESPACE}TestSharedForward
-                   ${PROJECT_BINARY_DIR}/testSharedForward.c)
-    set_property(TARGET ${KWSYS_NAMESPACE}TestSharedForward PROPERTY LABELS ${KWSYS_LABELS_EXE})
-    add_dependencies(${KWSYS_NAMESPACE}TestSharedForward ${KWSYS_TARGET_C_LINK})
-    add_test(kwsys.testSharedForward ${EXEC_DIR}/${KWSYS_NAMESPACE}TestSharedForward 1)
-    set_property(TEST kwsys.testSharedForward PROPERTY LABELS ${KWSYS_LABELS_TEST})
 
     # Configure some test properties.
     if(KWSYS_STANDALONE)

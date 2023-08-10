@@ -22,9 +22,18 @@ add_executable(testExe2 testExe2.c)
 set_property(TARGET testExe2 PROPERTY ENABLE_EXPORTS 1)
 set_property(TARGET testExe2 PROPERTY LINK_INTERFACE_LIBRARIES testExe2lib)
 
+add_library(compileOnly INTERFACE)
+target_compile_definitions(compileOnly INTERFACE FROM_compileOnly)
+target_link_options(compileOnly INTERFACE -fthis-flag-does-not-exist)
+
 add_library(testLib1 STATIC testLib1.c)
 add_library(testLib2 STATIC testLib2.c)
 target_link_libraries(testLib2 testLib1)
+target_link_libraries(testLib2
+  PRIVATE
+    testLib1
+    "$<COMPILE_ONLY:compileOnly>")
+
 
 # Test install(FILES) with generator expressions referencing testLib1.
 add_custom_command(TARGET testLib1 POST_BUILD
@@ -556,6 +565,7 @@ install(FILES
 # Install and export from install tree.
 install(
   TARGETS
+  compileOnly
   testExe1 testLib1 testLib2 testExe2 testLib3 testLib4 testExe3 testExe4
   testExe2lib testLib4lib testLib4libdbg testLib4libopt
   testLib6 testLib7 testLib8

@@ -3,13 +3,21 @@
 
 #include "cmRuntimeDependencyArchive.h"
 
+#include <algorithm>
+#include <sstream>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <cm/memory>
+
 #include "cmBinUtilsLinuxELFLinker.h"
 #include "cmBinUtilsMacOSMachOLinker.h"
 #include "cmBinUtilsWindowsPELinker.h"
 #include "cmExecutionStatus.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmStateTypes.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 #if defined(_WIN32)
@@ -21,14 +29,6 @@
 
 #  include "cmVSSetupHelper.h"
 #endif
-
-#include <algorithm>
-#include <sstream>
-#include <string>
-#include <utility>
-#include <vector>
-
-#include <cm/memory>
 
 #if defined(_WIN32)
 static void AddVisualStudioPath(std::vector<std::string>& paths,

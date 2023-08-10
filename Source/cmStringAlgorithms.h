@@ -88,63 +88,6 @@ std::string cmJoin(cmStringRange const& rng, cm::string_view separator,
 /** Extract tokens that are separated by any of the characters in @a sep.  */
 std::vector<std::string> cmTokenize(cm::string_view str, cm::string_view sep);
 
-/**
- * Expand the ; separated string @a arg into multiple arguments.
- * All found arguments are appended to @a argsOut.
- */
-void cmExpandList(cm::string_view arg, std::vector<std::string>& argsOut,
-                  bool emptyArgs = false);
-inline void cmExpandList(cmValue arg, std::vector<std::string>& argsOut,
-                         bool emptyArgs = false)
-{
-  if (arg) {
-    cmExpandList(*arg, argsOut, emptyArgs);
-  }
-}
-
-/**
- * Expand out any arguments in the string range [@a first, @a last) that have
- * ; separated strings into multiple arguments.  All found arguments are
- * appended to @a argsOut.
- */
-template <class InputIt>
-void cmExpandLists(InputIt first, InputIt last,
-                   std::vector<std::string>& argsOut)
-{
-  for (; first != last; ++first) {
-    cmExpandList(*first, argsOut);
-  }
-}
-
-/**
- * Same as cmExpandList but a new vector is created containing
- * the expanded arguments from the string @a arg.
- */
-std::vector<std::string> cmExpandedList(cm::string_view arg,
-                                        bool emptyArgs = false);
-inline std::vector<std::string> cmExpandedList(cmValue arg,
-                                               bool emptyArgs = false)
-{
-  if (!arg) {
-    return {};
-  }
-  return cmExpandedList(*arg, emptyArgs);
-}
-
-/**
- * Same as cmExpandList but a new vector is created containing the expanded
- * versions of all arguments in the string range [@a first, @a last).
- */
-template <class InputIt>
-std::vector<std::string> cmExpandedLists(InputIt first, InputIt last)
-{
-  std::vector<std::string> argsOut;
-  for (; first != last; ++first) {
-    cmExpandList(*first, argsOut);
-  }
-  return argsOut;
-}
-
 /** Concatenate string pieces into a single string.  */
 std::string cmCatViews(
   std::initializer_list<std::pair<cm::string_view, std::string*>> views);

@@ -175,8 +175,8 @@ Updates
 
 Changes made since CMake 3.26.0 include the following.
 
-3.26.1, 3.26.2, 3.26.3, 3.26.4
-------------------------------
+3.26.1, 3.26.2, 3.26.3, 3.26.4, 3.26.5
+--------------------------------------
 
 * These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes

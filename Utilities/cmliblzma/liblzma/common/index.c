@@ -263,6 +263,9 @@ index_tree_append(index_tree *tree, index_tree_node *node)
 		up = ctz32(tree->count) + 2;
 		do {
 			node = node->parent;
+			#ifdef __clang_analyzer__
+			assert(node);
+			#endif
 		} while (--up > 0);
 
 		// Rotate left using node as the rotation root.

@@ -9,8 +9,8 @@ Synopsis
 .. parsed-literal::
 
  `Generate a Project Buildsystem`_
+  cmake [<options>] -B <path-to-build> [-S <path-to-source>]
   cmake [<options>] <path-to-source | path-to-existing-build>
-  cmake [<options>] -S <path-to-source> -B <path-to-build>
 
  `Build a Project`_
   cmake --build <dir> [<options>] [-- <build-tool-options>]
@@ -116,6 +116,20 @@ Generate a Project Buildsystem
 Run CMake with one of the following command signatures to specify the
 source and build trees and generate a buildsystem:
 
+``cmake [<options>] -B <path-to-build> [-S <path-to-source>]``
+
+  .. versionadded:: 3.13
+
+  Uses ``<path-to-build>`` as the build tree and ``<path-to-source>``
+  as the source tree.  The specified paths may be absolute or relative
+  to the current working directory.  The source tree must contain a
+  ``CMakeLists.txt`` file.  The build tree will be created automatically
+  if it does not already exist.  For example:
+
+  .. code-block:: console
+
+    $ cmake -S src -B build
+
 ``cmake [<options>] <path-to-source>``
   Uses the current working directory as the build tree, and
   ``<path-to-source>`` as the source tree.  The specified path may
@@ -141,20 +155,6 @@ source and build trees and generate a buildsystem:
     $ cd build
     $ cmake .
 
-``cmake [<options>] -S <path-to-source> -B <path-to-build>``
-
-  .. versionadded:: 3.13
-
-  Uses ``<path-to-build>`` as the build tree and ``<path-to-source>``
-  as the source tree.  The specified paths may be absolute or relative
-  to the current working directory.  The source tree must contain a
-  ``CMakeLists.txt`` file.  The build tree will be created automatically
-  if it does not already exist.  For example:
-
-  .. code-block:: console
-
-    $ cmake -S src -B build
-
 In all cases the ``<options>`` may be zero or more of the `Options`_ below.
 
 The above styles for specifying the source and build trees may be mixed.
@@ -167,14 +167,14 @@ the current working directory (cwd) is used for the other.  For example:
 ============================== ============ ===========
  Command Line                   Source Dir   Build Dir
 ============================== ============ ===========
+ ``cmake -B build``             `cwd`        ``build``
+ ``cmake -B build src``         ``src``      ``build``
+ ``cmake -B build -S src``      ``src``      ``build``
  ``cmake src``                  ``src``      `cwd`
  ``cmake build`` (existing)     `loaded`     ``build``
  ``cmake -S src``               ``src``      `cwd`
  ``cmake -S src build``         ``src``      ``build``
  ``cmake -S src -B build``      ``src``      ``build``
- ``cmake -B build``             `cwd`        ``build``
- ``cmake -B build src``         ``src``      ``build``
- ``cmake -B build -S src``      ``src``      ``build``
 ============================== ============ ===========
 
 .. versionchanged:: 3.23
@@ -517,6 +517,53 @@ Options
  If ``<type>`` is omitted, ``configure`` is assumed.  The current working
  directory must contain CMake preset files.
 
+.. option:: --debugger
+
+  Enables interactive debugging of the CMake language. CMake exposes a debugging
+  interface on the pipe named by :option:`--debugger-pipe <cmake --debugger-pipe>`
+  that conforms to the `Debug Adapter Protocol`_ specification with the following
+  modifications.
+
+  The ``initialize`` response includes an additional field named ``cmakeVersion``
+  which specifies the version of CMake being debugged.
+
+  .. code-block:: json
+    :caption: Debugger initialize response
+
+    {
+      "cmakeVersion": {
+        "major": 3,
+        "minor": 27,
+        "patch": 0,
+        "full": "3.27.0"
+      }
+    }
+
+  The members are:
+
+  ``major``
+    An integer specifying the major version number.
+
+  ``minor``
+    An integer specifying the minor version number.
+
+  ``patch``
+    An integer specifying the patch version number.
+
+  ``full``
+    A string specifying the full CMake version.
+
+.. _`Debug Adapter Protocol`: https://microsoft.github.io/debug-adapter-protocol/
+
+.. option:: --debugger-pipe <pipe name>, --debugger-pipe=<pipe name>
+
+  Name of the pipe (on Windows) or domain socket (on Unix) to use for
+  debugger communication.
+
+.. option:: --debugger-dap-log <log path>, --debugger-dap-log=<log path>
+
+  Logs all debugger communication to the specified file.
+
 .. _`Build Tool Mode`:
 
 Build a Project
@@ -781,7 +828,7 @@ Available commands are:
       (:option:`-A ... <cmake -A>`).  The value is a list of platforms known to
       be supported.
     ``extraGenerators``
-      A list of strings with all the extra generators compatible with
+      A list of strings with all the :ref:`Extra Generators` compatible with
       the generator.
 
   ``fileApi``
@@ -808,6 +855,12 @@ Available commands are:
     .. versionadded:: 3.25
 
     ``true`` if TLS support is enabled and ``false`` otherwise.
+
+  ``debugger``
+    .. versionadded:: 3.27
+
+    ``true`` if the :option:`--debugger <cmake --debugger>` mode
+    is supported and ``false`` otherwise.
 
 .. option:: cat [--] <files>...
 
@@ -1080,11 +1133,18 @@ Available commands are:
   situations instead. Use ``--`` to stop interpreting options and treat all
   remaining arguments as paths, even if they start with ``-``.
 
-.. option:: sleep <number>...
+.. option:: sleep <number>
 
   .. versionadded:: 3.0
 
-  Sleep for given number of seconds.
+  Sleep for ``<number>`` seconds. ``<number>`` may be a floating point number.
+  A practical minimum is about 0.1 seconds due to overhead in starting/stopping
+  CMake executable. This can be useful in a CMake script to insert a delay:
+
+  .. code-block:: cmake
+
+    # Sleep for about 0.5 seconds
+    execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 0.5)
 
 .. option:: tar [cxt][vf][zjJ] file.tar [<options>] [--] [<pathname>...]
 
@@ -1189,7 +1249,7 @@ Available commands are:
 
 .. option:: time <command> [<args>...]
 
-  Run command and display elapsed time.
+  Run ``<command>`` and display elapsed time (including overhead of CMake frontend).
 
   .. versionadded:: 3.5
     The command now properly passes arguments with spaces or special characters

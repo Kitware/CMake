@@ -1,7 +1,4 @@
-
-cmake_minimum_required(VERSION 2.8.12.20131125 FATAL_ERROR)
-
-project(genex_link)
+enable_language(CXX)
 
 set(_main_cpp ${CMAKE_CURRENT_BINARY_DIR}/main.cpp)
 file(WRITE ${_main_cpp}

@@ -1,7 +1,7 @@
 $erroractionpreference = "stop"
 
-$version = "1.18.0"
-$sha256sum = "9210BB2D9D3711367FACCB37ACF49966696132560B565471C1C6121F4924A17E"
+$version = "1.20.0"
+$sha256sum = "E212EBFB4E8AFB57ADC103A2579C52673A3CA49610FBC2A5EAE643D3D378548D"
 $filename = "ispc-v$version-windows"
 $tarball = "$filename.zip"
 

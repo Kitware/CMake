@@ -119,7 +119,7 @@ our source code can tell what resources are available. If both ``log`` and
   :name: MathFunctions/CMakeLists.txt-target_compile_definitions
   :language: cmake
   :start-after: # add compile definitions
-  :end-before: # install libs
+  :end-before: # state
 
 .. raw:: html
 
@@ -136,7 +136,8 @@ Since we may be using ``log`` and ``exp``, we need to modify
   :caption: TODO 4: MathFunctions/mysqrt.cxx
   :name: MathFunctions/mysqrt.cxx-include-cmath
   :language: c++
-  :end-before: #include <iostream>
+  :start-after: #include "mysqrt.h"
+  :end-before: include <iostream>
 
 .. raw:: html
 
@@ -155,7 +156,7 @@ compute the square root in the ``mysqrt`` function. The ``mysqrt`` function in
   :name: MathFunctions/mysqrt.cxx-ifdef
   :language: c++
   :start-after: // if we have both log and exp then use them
-  :end-before: // do ten iterations
+  :end-before: return result;
 
 .. raw:: html
 

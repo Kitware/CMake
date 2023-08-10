@@ -4,13 +4,13 @@
 
 #include <cstring>
 #include <sstream>
-#include <vector>
 
 #include <cmext/string_view>
 
 #include "cmCTest.h"
 #include "cmCTestConfigureHandler.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -25,10 +25,10 @@ void cmCTestConfigureCommand::BindArguments()
 
 cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
 {
-  std::vector<std::string> options;
+  cmList options;
 
   if (!this->Options.empty()) {
-    cmExpandList(this->Options, options);
+    options.assign(this->Options);
   }
 
   if (this->CTest->GetCTestConfiguration("BuildDirectory").empty()) {

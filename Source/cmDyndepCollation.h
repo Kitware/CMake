@@ -49,4 +49,6 @@ struct cmDyndepCollation
                                   std::vector<cmScanDepInfo> const& objects,
                                   cmCxxModuleExportInfo const& export_info,
                                   cmDyndepMetadataCallbacks const& cb);
+  static bool IsObjectPrivate(std::string const& object,
+                              cmCxxModuleExportInfo const& export_info);
 };

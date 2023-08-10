@@ -126,38 +126,28 @@ This module will set the following variables in your project
 ``Python3_STDLIB``
   Standard platform independent installation directory.
 
-  Information returned by
-  ``distutils.sysconfig.get_python_lib(plat_specific=False,standard_lib=True)``
-  or else ``sysconfig.get_path('stdlib')``.
+  Information returned by ``sysconfig.get_path('stdlib')``.
 ``Python3_STDARCH``
   Standard platform dependent installation directory.
 
-  Information returned by
-  ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=True)``
-  or else ``sysconfig.get_path('platstdlib')``.
+  Information returned by ``sysconfig.get_path('platstdlib')``.
 ``Python3_SITELIB``
   Third-party platform independent installation directory.
 
-  Information returned by
-  ``distutils.sysconfig.get_python_lib(plat_specific=False,standard_lib=False)``
-  or else ``sysconfig.get_path('purelib')``.
+  Information returned by ``sysconfig.get_path('purelib')``.
 ``Python3_SITEARCH``
   Third-party platform dependent installation directory.
 
-  Information returned by
-  ``distutils.sysconfig.get_python_lib(plat_specific=True,standard_lib=False)``
-  or else ``sysconfig.get_path('platlib')``.
+  Information returned by ``sysconfig.get_path('platlib')``.
 
 ``Python3_SOABI``
   .. versionadded:: 3.17
 
   Extension suffix for modules.
 
-  Information computed from ``distutils.sysconfig.get_config_var('EXT_SUFFIX')``
-  or ``distutils.sysconfig.get_config_var('SOABI')`` or
-  ``python3-config --extension-suffix``. If package ``distutils.sysconfig`` is
-  not available, ``sysconfig.get_config_var('EXT_SUFFIX')`` or
-  ``sysconfig.get_config_var('SOABI')`` are used.
+  Information computed from ``sysconfig.get_config_var('EXT_SUFFIX')`` or
+  ``sysconfig.get_config_var('SOABI')`` or
+  ``python3-config --extension-suffix``.
 
 ``Python3_SOSABI``
   .. versionadded:: 3.26
@@ -333,6 +323,8 @@ Hints
     constraints is founded.
     This is the default if policy :policy:`CMP0094` is set to ``NEW``.
 
+  See also ``Python3_FIND_UNVERSIONED_NAMES``.
+
 ``Python3_FIND_REGISTRY``
   .. versionadded:: 3.13
 
@@ -439,6 +431,8 @@ Hints
   * ``LAST``: The generic names are searched after the more specialized ones.
     This is the default.
   * ``NEVER``: The generic name are not searched at all.
+
+  See also ``Python3_FIND_STRATEGY``.
 
 Artifacts Specification
 ^^^^^^^^^^^^^^^^^^^^^^^

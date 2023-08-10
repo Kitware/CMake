@@ -1,0 +1,9 @@
+CMake Error at TARGET_LINKER_LIBRARY_FILE-non-valid-target.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<TARGET_LINKER_LIBRARY_FILE:exe1>
+
+  TARGET_LINKER_LIBRARY_FILE is allowed only for libraries with
+  ENABLE_EXPORTS.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

@@ -56,6 +56,7 @@
                 "^empty\\.c$"
             ],
             "includes": null,
+            "frameworks": null,
             "defines": [
                 {
                     "define": "c_shared_lib_EXPORTS",
@@ -117,7 +118,7 @@
                 "backtrace": [
                     {
                         "file": "^codemodel-v2\\.cmake$",
-                        "line": 45,
+                        "line": 46,
                         "command": "install",
                         "hasParent": true
                     },
@@ -147,7 +148,7 @@
                 "backtrace": [
                     {
                         "file": "^codemodel-v2\\.cmake$",
-                        "line": 45,
+                        "line": 46,
                         "command": "install",
                         "hasParent": true
                     },
@@ -177,7 +178,7 @@
                 "backtrace": [
                     {
                         "file": "^codemodel-v2\\.cmake$",
-                        "line": 50,
+                        "line": 51,
                         "command": "install",
                         "hasParent": true
                     },

@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
-project(LooseObjectDepends C)
+enable_language(C)
 
 add_custom_command(
   OUTPUT  "${CMAKE_CURRENT_BINARY_DIR}/command.h"

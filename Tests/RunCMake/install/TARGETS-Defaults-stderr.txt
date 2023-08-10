@@ -1,11 +1,11 @@
 ^CMake Warning \(dev\) at TARGETS-Defaults.cmake:[0-9]+ \(install\):
   Target lib3 has PRIVATE_HEADER files but no PRIVATE_HEADER DESTINATION.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.
 +
 CMake Warning \(dev\) at TARGETS-Defaults.cmake:[0-9]+ \(install\):
   Target lib4 has PUBLIC_HEADER files but no PUBLIC_HEADER DESTINATION.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 This warning is for project developers.  Use -Wno-dev to suppress it.$

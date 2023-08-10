@@ -6,12 +6,12 @@ if len(sys.argv) != 2:
   sys.exit(-1)
 name = sys.argv[1] + "/CMake.qhp"
 
-f = open(name, "rb")
+f = open(name, "r", encoding="utf-8")
 
 if not f:
   sys.exit(-1)
 
-lines = f.read().decode("utf-8").splitlines()
+lines = f.read().splitlines()
 
 if not lines:
   sys.exit(-1)
@@ -47,5 +47,5 @@ for line in lines:
         line = part1 + prefix + "id=\"" + domain_object_type + "/" + domain_object + "\" " + part2
   newlines.append(line + "\n")
 
-f = open(name, "wb")
-f.writelines(map(lambda line: line.encode("utf-8"), newlines))
+f = open(name, "w", encoding="utf-8")
+f.writelines(newlines)

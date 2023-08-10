@@ -1,0 +1,15 @@
+{
+    "name": "Framework",
+    "parentName": "codemodel-v2",
+    "childNames": null,
+    "directorySources": [
+        "^framework$"
+    ],
+    "targetIds": [
+        "^ALL_BUILD::@217a96c3a62328a73ef4$",
+        "^ZERO_CHECK::@217a96c3a62328a73ef4$",
+        "^shared_framework::@217a96c3a62328a73ef4$",
+        "^static_framework::@217a96c3a62328a73ef4$",
+        "^exe_framework::@217a96c3a62328a73ef4$"
+    ]
+}

@@ -8,16 +8,15 @@
   behavior and not rely on setting a policy to OLD.
 Call Stack \(most recent call first\):
   CMakeLists.txt:[0-9]+ \(include\)
-
-
-CMake Error at SourceProperty-CMP0070-OLD.cmake:[0-9]+ \(add_library\):
++
+CMake Error at SourceProperty-CMP0070-OLD.cmake:[0-9]+ \(target_sources\):
   Cannot find source file:
 
 .*\/relative-output-OLD\.c
 
-  Tried extensions \.c \.C.*
-Call Stack \(most recent call first\):
+  Tried extensions ([^
+]+
+)+Call Stack \(most recent call first\):
   CMakeLists.txt:[0-9]+ \(include\)
-
-
++
 CMake Generate step failed.  Build files cannot be regenerated correctly.$

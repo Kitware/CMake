@@ -25,3 +25,22 @@ if(NOT RunCMake_GENERATOR STREQUAL "Watcom WMake")
   run_multilint(C-launch)
   run_multilint(CXX-launch)
 endif()
+
+function(run_skip_linting test_name)
+    set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/${test_name}-build")
+    set(RunCMake_TEST_NO_CLEAN 1)
+
+    run_cmake(${test_name})
+    set(RunCMake_TEST_OUTPUT_MERGE 1)
+    run_cmake_command(${test_name}-Build ${CMAKE_COMMAND} --build .)
+endfunction()
+
+run_skip_linting(C_skip_linting_ON)
+run_skip_linting(CXX_skip_linting_ON)
+run_skip_linting(C_skip_linting_OFF)
+run_skip_linting(CXX_skip_linting_OFF)
+
+if(NOT RunCMake_GENERATOR STREQUAL "Watcom WMake")
+  run_skip_linting(C-launch_skip_linting_ON)
+  run_skip_linting(CXX-launch_skip_linting_ON)
+endif()

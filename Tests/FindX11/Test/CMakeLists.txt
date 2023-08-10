@@ -32,13 +32,38 @@ test_x11_component(x11_components Xau)
 test_x11_component(x11_components Xaw)
 test_x11_component(x11_components xcb)
 test_x11_component(x11_components X11_xcb)
+test_x11_component(x11_components xcb_composite)
+test_x11_component(x11_components xcb_cursor)
+test_x11_component(x11_components xcb_damage)
+test_x11_component(x11_components xcb_dpms)
+test_x11_component(x11_components xcb_dri2)
+test_x11_component(x11_components xcb_dri3)
+test_x11_component(x11_components xcb_errors)
+test_x11_component(x11_components xcb_ewmh)
+test_x11_component(x11_components xcb_glx)
 test_x11_component(x11_components xcb_icccm)
-test_x11_component(x11_components xcb_randr)
-test_x11_component(x11_components xcb_util)
-test_x11_component(x11_components xcb_xfixes)
-test_x11_component(x11_components xcb_xtest)
+test_x11_component(x11_components xcb_image)
 test_x11_component(x11_components xcb_keysyms)
+test_x11_component(x11_components xcb_present)
+test_x11_component(x11_components xcb_randr)
+test_x11_component(x11_components xcb_record)
+test_x11_component(x11_components xcb_render)
+test_x11_component(x11_components xcb_render_util)
+test_x11_component(x11_components xcb_res)
+test_x11_component(x11_components xcb_screensaver)
+test_x11_component(x11_components xcb_shape)
+test_x11_component(x11_components xcb_shm)
+test_x11_component(x11_components xcb_sync)
+test_x11_component(x11_components xcb_util)
+test_x11_component(x11_components xcb_xf86dri)
+test_x11_component(x11_components xcb_xfixes)
+test_x11_component(x11_components xcb_xinerama)
+test_x11_component(x11_components xcb_xinput)
 test_x11_component(x11_components xcb_xkb)
+test_x11_component(x11_components xcb_xrm)
+test_x11_component(x11_components xcb_xtest)
+test_x11_component(x11_components xcb_xvmc)
+test_x11_component(x11_components xcb_xv)
 test_x11_component(x11_components Xcomposite)
 test_x11_component(x11_components Xdamage)
 test_x11_component(x11_components Xdmcp)
@@ -76,10 +101,38 @@ foreach(lib
     Xaw
     xcb
     X11_xcb
+    xcb_composite
+    xcb_cursor
+    xcb_damage
+    xcb_dpms
+    xcb_dri2
+    xcb_dri3
+    xcb_errors
+    xcb_ewmh
+    xcb_glx
     xcb_icccm
+    xcb_image
+    xcb_keysyms
+    xcb_present
     xcb_randr
+    xcb_record
+    xcb_render
+    xcb_render_util
+    xcb_res
+    xcb_screensaver
+    xcb_shape
+    xcb_shm
+    xcb_sync
     xcb_util
+    xcb_xf86dri
     xcb_xfixes
+    xcb_xinerama
+    xcb_xinput
+    xcb_xkb
+    xcb_xrm
+    xcb_xtest
+    xcb_xvmc
+    xcb_xv
     Xcomposite
     Xdamage
     Xdmcp

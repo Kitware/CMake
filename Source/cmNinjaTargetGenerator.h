@@ -136,8 +136,8 @@ protected:
 
   /// @return the clang-tidy replacements file path for the given @a source.
   std::string GetClangTidyReplacementsFilePath(
-    const std::string& directory, cmSourceFile const* source,
-    const std::string& config) const;
+    std::string const& directory, cmSourceFile const& source,
+    std::string const& config) const override;
 
   /// @return the dyndep file path for this target.
   std::string GetDyndepFilePath(std::string const& lang,
@@ -222,12 +222,23 @@ protected:
 private:
   cmLocalNinjaGenerator* LocalGenerator;
 
+  struct ScanningFiles
+  {
+    bool IsEmpty() const
+    {
+      return this->ScanningOutput.empty() && this->ModuleMapFile.empty();
+    }
+
+    std::string ScanningOutput;
+    std::string ModuleMapFile;
+  };
+
   struct ByConfig
   {
     /// List of object files for this target.
     cmNinjaDeps Objects;
-    // Fortran Support
-    std::map<std::string, cmNinjaDeps> DDIFiles;
+    // Dyndep Support
+    std::map<std::string, std::vector<ScanningFiles>> ScanningInfo;
     // Swift Support
     Json::Value SwiftOutputMap;
     std::vector<cmCustomCommand const*> CustomCommands;

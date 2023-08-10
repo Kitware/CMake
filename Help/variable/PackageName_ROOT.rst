@@ -14,3 +14,11 @@ This variable may hold a single prefix or a
 :ref:`semicolon-separated list <CMake Language Lists>` of multiple prefixes.
 
 See also the :envvar:`<PackageName>_ROOT` environment variable.
+
+.. variable:: <PACKAGENAME>_ROOT
+
+  .. versionadded:: 3.27
+
+  Calls to :command:`find_package(<PackageName>)` will also search in
+  prefixes specified by the upper-case ``<PACKAGENAME>_ROOT`` CMake
+  variable.  See policy :policy:`CMP0144`.

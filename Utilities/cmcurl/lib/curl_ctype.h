@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -27,7 +27,7 @@
 #define ISLOWHEXALHA(x) (((x) >= 'a') && ((x) <= 'f'))
 #define ISUPHEXALHA(x) (((x) >= 'A') && ((x) <= 'F'))
 
-#define ISLOWCNTRL(x) ((x) >= 0 && ((x) <= 0x1f))
+#define ISLOWCNTRL(x) ((unsigned char)(x) <= 0x1f)
 #define IS7F(x) ((x) == 0x7f)
 
 #define ISLOWPRINT(x) (((x) >= 9) && ((x) <= 0x0d))

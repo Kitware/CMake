@@ -89,6 +89,23 @@
         "include": { "$ref": "#/definitions/include"}
       },
       "additionalProperties": false
+    },
+    {
+      "properties": {
+        "version": {
+          "const": 7,
+          "description": "A required integer representing the version of the JSON schema."
+        },
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired"},
+        "vendor": { "$ref": "#/definitions/vendor" },
+        "configurePresets": { "$ref": "#/definitions/configurePresetsV7"},
+        "buildPresets": { "$ref": "#/definitions/buildPresetsV4"},
+        "testPresets": { "$ref": "#/definitions/testPresetsV6"},
+        "packagePresets": { "$ref": "#/definitions/packagePresetsV6"},
+        "workflowPresets": { "$ref": "#/definitions/workflowPresetsV6" },
+        "include": { "$ref": "#/definitions/include"}
+      },
+      "additionalProperties": false
     }
   ],
   "required": [
@@ -118,6 +135,59 @@
       "type": "object",
       "description": "An optional map containing vendor-specific information. CMake does not interpret the contents of this field except to verify that it is a map if it does exist. However, the keys should be a vendor-specific domain name followed by a /-separated path. For example, the Example IDE 1.0 could use example.com/ExampleIDE/1.0. The value of each field can be anything desired by the vendor, though will typically be a map.",
       "properties": {}
+    },
+    "configurePresetsItemsV7": {
+      "type": "array",
+      "description": "A configure preset object.",
+      "items": {
+        "type": "object",
+        "description": "A configure preset object.",
+        "properties": {
+          "trace": {
+            "type": "object",
+            "description": "An optional object specifying trace options.",
+            "properties": {
+              "mode": {
+                "type": "string",
+                "description": "An optional string that specifies the trace mode.",
+                "enum": [
+                  "on", "off", "expand"
+                ]
+              },
+              "format": {
+                "type": "string",
+                "description": "An optional string that specifies the trace output format.",
+                "enum": [
+                  "human", "json-v1"
+                ]
+              },
+              "source": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "description": "An optional string representing the path to one source file to be traced.",
+                    "minLength": 1
+                  },
+                  {
+                    "type": "array",
+                    "description": "An optional array of strings representing the paths to source files to be traced.",
+                    "items": {
+                      "type": "string",
+                      "description": "A string representing the path to one source file to be traced.",
+                      "minLength": 1
+                    }
+                  }
+                ]
+              },
+              "redirect": {
+                "type": "string",
+                "description": "An optional string specifying a path to a trace output file."
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
     },
     "configurePresetsItemsV3": {
       "type": "array",
@@ -391,6 +461,43 @@
             "additionalProperties": false
           }
         }
+      }
+    },
+    "configurePresetsV7": {
+      "type": "array",
+      "description": "An optional array of configure preset objects.",
+      "allOf": [
+        { "$ref": "#/definitions/configurePresetsItemsV1" },
+        { "$ref": "#/definitions/configurePresetsItemsV3" },
+        { "$ref": "#/definitions/configurePresetsItemsV7" }
+      ],
+      "items": {
+        "properties": {
+          "name": {},
+          "hidden": {},
+          "inherits": {},
+          "vendor": {},
+          "displayName": {},
+          "description": {},
+          "generator": {},
+          "architecture": {},
+          "toolset": {},
+          "toolchainFile": {},
+          "binaryDir": {},
+          "installDir": {},
+          "cmakeExecutable": {},
+          "cacheVariables": {},
+          "environment": {},
+          "warnings": {},
+          "errors": {},
+          "debug": {},
+          "condition": {},
+          "trace": {}
+        },
+        "required": [
+          "name"
+        ],
+        "additionalProperties": false
       }
     },
     "configurePresetsV3": {

@@ -1,0 +1,9 @@
+{
+    "nameOnDisk": "^static_framework\\.framework/static_framework$",
+    "artifacts": [
+        {
+            "path": "^framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?static_framework\\.framework/static_framework$",
+            "_dllExtra": false
+        }
+    ]
+}

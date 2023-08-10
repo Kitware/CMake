@@ -18,6 +18,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -349,7 +350,7 @@ struct StandardLevelComputer
     for (size_t i = 0; i < this->Levels.size(); ++i) {
       if (cmValue prop = makefile->GetDefinition(
             cmStrCat(prefix, this->LevelsAsStrings[i], "_COMPILE_FEATURES"))) {
-        std::vector<std::string> props = cmExpandedList(*prop);
+        cmList props{ *prop };
         if (cm::contains(props, feature)) {
           maxLevel = { static_cast<int>(i), this->Levels[i] };
         }
@@ -468,7 +469,7 @@ bool cmStandardLevelResolver::CheckCompileFeaturesAvailable(
     return false;
   }
 
-  std::vector<std::string> availableFeatures = cmExpandedList(features);
+  cmList availableFeatures{ features };
   if (!cm::contains(availableFeatures, feature)) {
     std::ostringstream e;
     e << "The compiler feature \"" << feature << "\" is not known to " << lang

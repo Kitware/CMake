@@ -258,7 +258,7 @@ List of CPack NuGet generator specific variables:
 
 .. _nuget.org: https://www.nuget.org
 .. _version specification: https://learn.microsoft.com/en-us/nuget/concepts/package-versioning#version-ranges
-.. _SPDX license identifier: https://spdx.github.io/spdx-spec/SPDX-license-list
-.. _SPDX specification: https://spdx.github.io/spdx-spec/SPDX-license-expressions
+.. _SPDX license identifier: https://spdx.org/licenses
+.. _SPDX specification: https://spdx.github.io/spdx-spec/v2.3/SPDX-license-expressions
 
 .. NuGet spec docs https://docs.microsoft.com/en-us/nuget/reference/nuspec

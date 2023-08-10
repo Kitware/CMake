@@ -17,14 +17,13 @@ void cmExternalMakefileProjectGenerator::EnableLanguage(
 std::string cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
   const std::string& globalGenerator, const std::string& extraGenerator)
 {
-  std::string fullName;
-  if (!globalGenerator.empty()) {
-    if (!extraGenerator.empty()) {
-      fullName = cmStrCat(extraGenerator, " - ");
-    }
-    fullName += globalGenerator;
+  if (globalGenerator.empty()) {
+    return {};
   }
-  return fullName;
+  if (extraGenerator.empty()) {
+    return globalGenerator;
+  }
+  return cmStrCat(extraGenerator, " - ", globalGenerator);
 }
 
 bool cmExternalMakefileProjectGenerator::Open(

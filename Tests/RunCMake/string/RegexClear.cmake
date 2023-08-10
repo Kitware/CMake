@@ -1,6 +1,3 @@
-cmake_minimum_required (VERSION 3.0)
-project (RegexClear C)
-
 function (output_results msg)
   message("results from: ${msg}")
   message("CMAKE_MATCH_0: -->${CMAKE_MATCH_0}<--")

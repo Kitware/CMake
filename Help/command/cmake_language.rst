@@ -27,163 +27,155 @@ those created via the :command:`macro` or :command:`function` commands.
 Calling Commands
 ^^^^^^^^^^^^^^^^
 
-.. _CALL:
-
-.. code-block:: cmake
-
+.. signature::
   cmake_language(CALL <command> [<arg>...])
 
-Calls the named ``<command>`` with the given arguments (if any).
-For example, the code:
+  Calls the named ``<command>`` with the given arguments (if any).
+  For example, the code:
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  set(message_command "message")
-  cmake_language(CALL ${message_command} STATUS "Hello World!")
+    set(message_command "message")
+    cmake_language(CALL ${message_command} STATUS "Hello World!")
 
-is equivalent to
+  is equivalent to
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  message(STATUS "Hello World!")
+    message(STATUS "Hello World!")
 
-.. note::
-  To ensure consistency of the code, the following commands are not allowed:
+  .. note::
+    To ensure consistency of the code, the following commands are not allowed:
 
-  * ``if`` / ``elseif`` / ``else`` / ``endif``
-  * ``block`` / ``endblock``
-  * ``while`` / ``endwhile``
-  * ``foreach`` / ``endforeach``
-  * ``function`` / ``endfunction``
-  * ``macro`` / ``endmacro``
+    * ``if`` / ``elseif`` / ``else`` / ``endif``
+    * ``block`` / ``endblock``
+    * ``while`` / ``endwhile``
+    * ``foreach`` / ``endforeach``
+    * ``function`` / ``endfunction``
+    * ``macro`` / ``endmacro``
 
 Evaluating Code
 ^^^^^^^^^^^^^^^
 
-.. _EVAL:
-
-.. code-block:: cmake
-
+.. signature::
   cmake_language(EVAL CODE <code>...)
+  :target: EVAL
 
-Evaluates the ``<code>...`` as CMake code.
+  Evaluates the ``<code>...`` as CMake code.
 
-For example, the code:
+  For example, the code:
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  set(A TRUE)
-  set(B TRUE)
-  set(C TRUE)
-  set(condition "(A AND B) OR C")
+    set(A TRUE)
+    set(B TRUE)
+    set(C TRUE)
+    set(condition "(A AND B) OR C")
 
-  cmake_language(EVAL CODE "
-    if (${condition})
-      message(STATUS TRUE)
-    else()
-      message(STATUS FALSE)
-    endif()"
-  )
+    cmake_language(EVAL CODE "
+      if (${condition})
+        message(STATUS TRUE)
+      else()
+        message(STATUS FALSE)
+      endif()"
+    )
 
-is equivalent to
+  is equivalent to
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  set(A TRUE)
-  set(B TRUE)
-  set(C TRUE)
-  set(condition "(A AND B) OR C")
+    set(A TRUE)
+    set(B TRUE)
+    set(C TRUE)
+    set(condition "(A AND B) OR C")
 
-  file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/eval.cmake "
-    if (${condition})
-      message(STATUS TRUE)
-    else()
-      message(STATUS FALSE)
-    endif()"
-  )
+    file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/eval.cmake "
+      if (${condition})
+        message(STATUS TRUE)
+      else()
+        message(STATUS FALSE)
+      endif()"
+    )
 
-  include(${CMAKE_CURRENT_BINARY_DIR}/eval.cmake)
+    include(${CMAKE_CURRENT_BINARY_DIR}/eval.cmake)
 
 Deferring Calls
 ^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.19
 
-.. _DEFER:
-
-.. code-block:: cmake
-
+.. signature::
   cmake_language(DEFER <options>... CALL <command> [<arg>...])
 
-Schedules a call to the named ``<command>`` with the given arguments (if any)
-to occur at a later time.  By default, deferred calls are executed as if
-written at the end of the current directory's ``CMakeLists.txt`` file,
-except that they run even after a :command:`return` call.  Variable
-references in arguments are evaluated at the time the deferred call is
-executed.
+  Schedules a call to the named ``<command>`` with the given arguments (if any)
+  to occur at a later time.  By default, deferred calls are executed as if
+  written at the end of the current directory's ``CMakeLists.txt`` file,
+  except that they run even after a :command:`return` call.  Variable
+  references in arguments are evaluated at the time the deferred call is
+  executed.
 
-The options are:
+  The options are:
 
-``DIRECTORY <dir>``
-  Schedule the call for the end of the given directory instead of the
-  current directory.  The ``<dir>`` may reference either a source
-  directory or its corresponding binary directory.  Relative paths are
-  treated as relative to the current source directory.
+  ``DIRECTORY <dir>``
+    Schedule the call for the end of the given directory instead of the
+    current directory.  The ``<dir>`` may reference either a source
+    directory or its corresponding binary directory.  Relative paths are
+    treated as relative to the current source directory.
 
-  The given directory must be known to CMake, being either the top-level
-  directory or one added by :command:`add_subdirectory`.  Furthermore,
-  the given directory must not yet be finished processing.  This means
-  it can be the current directory or one of its ancestors.
+    The given directory must be known to CMake, being either the top-level
+    directory or one added by :command:`add_subdirectory`.  Furthermore,
+    the given directory must not yet be finished processing.  This means
+    it can be the current directory or one of its ancestors.
 
-``ID <id>``
-  Specify an identification for the deferred call.
-  The ``<id>`` may not be empty and may not begin with a capital letter ``A-Z``.
-  The ``<id>`` may begin with an underscore (``_``) only if it was generated
-  automatically by an earlier call that used ``ID_VAR`` to get the id.
+  ``ID <id>``
+    Specify an identification for the deferred call.
+    The ``<id>`` may not be empty and may not begin with a capital letter ``A-Z``.
+    The ``<id>`` may begin with an underscore (``_``) only if it was generated
+    automatically by an earlier call that used ``ID_VAR`` to get the id.
 
-``ID_VAR <var>``
-  Specify a variable in which to store the identification for the
-  deferred call.  If ``ID <id>`` is not given, a new identification
-  will be generated and the generated id will start with an underscore (``_``).
+  ``ID_VAR <var>``
+    Specify a variable in which to store the identification for the
+    deferred call.  If ``ID <id>`` is not given, a new identification
+    will be generated and the generated id will start with an underscore (``_``).
 
-The currently scheduled list of deferred calls may be retrieved:
+  The currently scheduled list of deferred calls may be retrieved:
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  cmake_language(DEFER [DIRECTORY <dir>] GET_CALL_IDS <var>)
+    cmake_language(DEFER [DIRECTORY <dir>] GET_CALL_IDS <var>)
 
-This will store in ``<var>`` a :ref:`semicolon-separated list <CMake Language
-Lists>` of deferred call ids.  The ids are for the directory scope in which
-the calls have been deferred to (i.e. where they will be executed), which can
-be different to the scope in which they were created.  The ``DIRECTORY``
-option can be used to specify the scope for which to retrieve the call ids.
-If that option is not given, the call ids for the current directory scope will
-be returned.
+  This will store in ``<var>`` a :ref:`semicolon-separated list <CMake Language
+  Lists>` of deferred call ids.  The ids are for the directory scope in which
+  the calls have been deferred to (i.e. where they will be executed), which can
+  be different to the scope in which they were created.  The ``DIRECTORY``
+  option can be used to specify the scope for which to retrieve the call ids.
+  If that option is not given, the call ids for the current directory scope
+  will be returned.
 
-Details of a specific call may be retrieved from its id:
+  Details of a specific call may be retrieved from its id:
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  cmake_language(DEFER [DIRECTORY <dir>] GET_CALL <id> <var>)
+    cmake_language(DEFER [DIRECTORY <dir>] GET_CALL <id> <var>)
 
-This will store in ``<var>`` a :ref:`semicolon-separated list <CMake Language
-Lists>` in which the first element is the name of the command to be
-called, and the remaining elements are its unevaluated arguments (any
-contained ``;`` characters are included literally and cannot be distinguished
-from multiple arguments).  If multiple calls are scheduled with the same id,
-this retrieves the first one.  If no call is scheduled with the given id in
-the specified ``DIRECTORY`` scope (or the current directory scope if no
-``DIRECTORY`` option is given), this stores an empty string in the variable.
+  This will store in ``<var>`` a :ref:`semicolon-separated list <CMake Language
+  Lists>` in which the first element is the name of the command to be
+  called, and the remaining elements are its unevaluated arguments (any
+  contained ``;`` characters are included literally and cannot be distinguished
+  from multiple arguments).  If multiple calls are scheduled with the same id,
+  this retrieves the first one.  If no call is scheduled with the given id in
+  the specified ``DIRECTORY`` scope (or the current directory scope if no
+  ``DIRECTORY`` option is given), this stores an empty string in the variable.
 
-Deferred calls may be canceled by their id:
+  Deferred calls may be canceled by their id:
 
-.. code-block:: cmake
+  .. code-block:: cmake
 
-  cmake_language(DEFER [DIRECTORY <dir>] CANCEL_CALL <id>...)
+    cmake_language(DEFER [DIRECTORY <dir>] CANCEL_CALL <id>...)
 
-This cancels all deferred calls matching any of the given ids in the specified
-``DIRECTORY`` scope (or the current directory scope if no ``DIRECTORY`` option
-is given).  Unknown ids are silently ignored.
+  This cancels all deferred calls matching any of the given ids in the specified
+  ``DIRECTORY`` scope (or the current directory scope if no ``DIRECTORY`` option
+  is given).  Unknown ids are silently ignored.
 
 Deferred Call Examples
 """"""""""""""""""""""
@@ -229,8 +221,6 @@ also prints::
   Deferred Message 1
   Deferred Message 2
 
-
-.. _SET_DEPENDENCY_PROVIDER:
 .. _dependency_providers:
 
 Dependency Providers
@@ -241,51 +231,50 @@ Dependency Providers
 .. note:: A high-level introduction to this feature can be found in the
           :ref:`Using Dependencies Guide <dependency_providers_overview>`.
 
-.. code-block:: cmake
-
+.. signature::
   cmake_language(SET_DEPENDENCY_PROVIDER <command>
                  SUPPORTED_METHODS <methods>...)
 
-When a call is made to :command:`find_package` or
-:command:`FetchContent_MakeAvailable`, the call may be forwarded to a
-dependency provider which then has the opportunity to fulfill the request.
-If the request is for one of the ``<methods>`` specified when the provider
-was set, CMake calls the provider's ``<command>`` with a set of
-method-specific arguments.  If the provider does not fulfill the request,
-or if the provider doesn't support the request's method, or no provider
-is set, the built-in :command:`find_package` or
-:command:`FetchContent_MakeAvailable` implementation is used to fulfill
-the request in the usual way.
+  When a call is made to :command:`find_package` or
+  :command:`FetchContent_MakeAvailable`, the call may be forwarded to a
+  dependency provider which then has the opportunity to fulfill the request.
+  If the request is for one of the ``<methods>`` specified when the provider
+  was set, CMake calls the provider's ``<command>`` with a set of
+  method-specific arguments.  If the provider does not fulfill the request,
+  or if the provider doesn't support the request's method, or no provider
+  is set, the built-in :command:`find_package` or
+  :command:`FetchContent_MakeAvailable` implementation is used to fulfill
+  the request in the usual way.
 
-One or more of the following values can be specified for the ``<methods>``
-when setting the provider:
+  One or more of the following values can be specified for the ``<methods>``
+  when setting the provider:
 
-``FIND_PACKAGE``
-  The provider command accepts :command:`find_package` requests.
+  ``FIND_PACKAGE``
+    The provider command accepts :command:`find_package` requests.
 
-``FETCHCONTENT_MAKEAVAILABLE_SERIAL``
-  The provider command accepts :command:`FetchContent_MakeAvailable`
-  requests.  It expects each dependency to be fed to the provider command
-  one at a time, not the whole list in one go.
+  ``FETCHCONTENT_MAKEAVAILABLE_SERIAL``
+    The provider command accepts :command:`FetchContent_MakeAvailable`
+    requests.  It expects each dependency to be fed to the provider command
+    one at a time, not the whole list in one go.
 
-Only one provider can be set at any point in time.  If a provider is already
-set when ``cmake_language(SET_DEPENDENCY_PROVIDER)`` is called, the new
-provider replaces the previously set one.  The specified ``<command>`` must
-already exist when ``cmake_language(SET_DEPENDENCY_PROVIDER)`` is called.
-As a special case, providing an empty string for the ``<command>`` and no
-``<methods>`` will discard any previously set provider.
+  Only one provider can be set at any point in time.  If a provider is already
+  set when ``cmake_language(SET_DEPENDENCY_PROVIDER)`` is called, the new
+  provider replaces the previously set one.  The specified ``<command>`` must
+  already exist when ``cmake_language(SET_DEPENDENCY_PROVIDER)`` is called.
+  As a special case, providing an empty string for the ``<command>`` and no
+  ``<methods>`` will discard any previously set provider.
 
-The dependency provider can only be set while processing one of the files
-specified by the :variable:`CMAKE_PROJECT_TOP_LEVEL_INCLUDES` variable.
-Thus, dependency providers can only be set as part of the first call to
-:command:`project`.  Calling ``cmake_language(SET_DEPENDENCY_PROVIDER)``
-outside of that context will result in an error.
+  The dependency provider can only be set while processing one of the files
+  specified by the :variable:`CMAKE_PROJECT_TOP_LEVEL_INCLUDES` variable.
+  Thus, dependency providers can only be set as part of the first call to
+  :command:`project`.  Calling ``cmake_language(SET_DEPENDENCY_PROVIDER)``
+  outside of that context will result in an error.
 
-.. note::
-  The choice of dependency provider should always be under the user's control.
-  As a convenience, a project may choose to provide a file that users can
-  list in their :variable:`CMAKE_PROJECT_TOP_LEVEL_INCLUDES` variable, but
-  the use of such a file should always be the user's choice.
+  .. note::
+    The choice of dependency provider should always be under the user's control.
+    As a convenience, a project may choose to provide a file that users can
+    list in their :variable:`CMAKE_PROJECT_TOP_LEVEL_INCLUDES` variable, but
+    the use of such a file should always be the user's choice.
 
 Provider commands
 """""""""""""""""
@@ -499,23 +488,21 @@ Getting current message log level
 
 .. versionadded:: 3.25
 
-.. _GET_MESSAGE_LOG_LEVEL:
 .. _query_message_log_level:
 
-.. code-block:: cmake
-
+.. signature::
   cmake_language(GET_MESSAGE_LOG_LEVEL <output_variable>)
 
-Writes the current :command:`message` logging level
-into the given ``<output_variable>``.
+  Writes the current :command:`message` logging level
+  into the given ``<output_variable>``.
 
-See :command:`message` for the possible logging levels.
+  See :command:`message` for the possible logging levels.
 
-The current message logging level can be set either using the
-:option:`--log-level <cmake --log-level>`
-command line option of the :manual:`cmake(1)` program or using
-the :variable:`CMAKE_MESSAGE_LOG_LEVEL` variable.
+  The current message logging level can be set either using the
+  :option:`--log-level <cmake --log-level>`
+  command line option of the :manual:`cmake(1)` program or using
+  the :variable:`CMAKE_MESSAGE_LOG_LEVEL` variable.
 
-If both the command line option and the variable are set, the command line
-option takes precedence. If neither are set, the default logging level
-is returned.
+  If both the command line option and the variable are set, the command line
+  option takes precedence. If neither are set, the default logging level
+  is returned.

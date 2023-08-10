@@ -5,11 +5,11 @@
 #include <algorithm>
 #include <cassert>
 #include <cstdio>
-#include <iterator>
 #include <memory>
 #include <sstream>
 #include <utility>
 
+#include <cm/unordered_set>
 #include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
@@ -22,10 +22,12 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmNinjaTargetGenerator.h"
+#include "cmNinjaTypes.h"
 #include "cmPolicies.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
@@ -39,19 +41,18 @@
 
 cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
                                              cmMakefile* mf)
-  : cmLocalCommonGenerator(gg, mf, WorkDir::TopBin)
+  : cmLocalCommonGenerator(gg, mf)
 {
 }
 
 // Virtual public methods.
 
-cmRulePlaceholderExpander*
+std::unique_ptr<cmRulePlaceholderExpander>
 cmLocalNinjaGenerator::CreateRulePlaceholderExpander() const
 {
-  cmRulePlaceholderExpander* ret =
-    this->cmLocalGenerator::CreateRulePlaceholderExpander();
+  auto ret = this->cmLocalGenerator::CreateRulePlaceholderExpander();
   ret->SetTargetImpLib("$TARGET_IMPLIB");
-  return ret;
+  return std::unique_ptr<cmRulePlaceholderExpander>(std::move(ret));
 }
 
 cmLocalNinjaGenerator::~cmLocalNinjaGenerator() = default;
@@ -186,6 +187,26 @@ cmGlobalNinjaGenerator* cmLocalNinjaGenerator::GetGlobalNinjaGenerator()
   return static_cast<cmGlobalNinjaGenerator*>(this->GetGlobalGenerator());
 }
 
+std::string const& cmLocalNinjaGenerator::GetWorkingDirectory() const
+{
+  return this->GetState()->GetBinaryDirectory();
+}
+
+std::string cmLocalNinjaGenerator::MaybeRelativeToWorkDir(
+  std::string const& path) const
+{
+  return this->GetGlobalNinjaGenerator()->NinjaOutputPath(
+    this->MaybeRelativeToTopBinDir(path));
+}
+
+std::string cmLocalNinjaGenerator::GetLinkDependencyFile(
+  cmGeneratorTarget* target, std::string const& config) const
+{
+  return cmStrCat(target->GetSupportDirectory(),
+                  this->GetGlobalNinjaGenerator()->ConfigDirectory(config),
+                  "/link.d");
+}
+
 // Virtual protected methods.
 
 std::string cmLocalNinjaGenerator::ConvertToIncludeReference(
@@ -300,7 +321,7 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
   if (jobpools) {
     cmGlobalNinjaGenerator::WriteComment(
       os, "Pools defined by global property JOB_POOLS");
-    std::vector<std::string> pools = cmExpandedList(*jobpools);
+    cmList pools{ *jobpools };
     for (std::string const& pool : pools) {
       const std::string::size_type eq = pool.find('=');
       unsigned int jobs;
@@ -601,34 +622,32 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       continue;
     }
 
-    cmNinjaDeps orderOnlyDeps;
+    std::unordered_set<std::string> orderOnlyDeps;
 
-    // A custom command may appear on multiple targets.  However, some build
-    // systems exist where the target dependencies on some of the targets are
-    // overspecified, leading to a dependency cycle.  If we assume all target
-    // dependencies are a superset of the true target dependencies for this
-    // custom command, we can take the set intersection of all target
-    // dependencies to obtain a correct dependency list.
-    //
-    // FIXME: This won't work in certain obscure scenarios involving indirect
-    // dependencies.
-    auto j = targets.begin();
-    assert(j != targets.end());
-    this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(
-      *j, orderOnlyDeps, ccg.GetOutputConfig(), fileConfig, ccgs.size() > 1);
-    std::sort(orderOnlyDeps.begin(), orderOnlyDeps.end());
-    ++j;
-
-    for (; j != targets.end(); ++j) {
-      std::vector<std::string> jDeps;
-      std::vector<std::string> depsIntersection;
+    if (!cc->GetDependsExplicitOnly()) {
+      // A custom command may appear on multiple targets.  However, some build
+      // systems exist where the target dependencies on some of the targets are
+      // overspecified, leading to a dependency cycle.  If we assume all target
+      // dependencies are a superset of the true target dependencies for this
+      // custom command, we can take the set intersection of all target
+      // dependencies to obtain a correct dependency list.
+      //
+      // FIXME: This won't work in certain obscure scenarios involving indirect
+      // dependencies.
+      auto j = targets.begin();
+      assert(j != targets.end());
       this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(
-        *j, jDeps, ccg.GetOutputConfig(), fileConfig, ccgs.size() > 1);
-      std::sort(jDeps.begin(), jDeps.end());
-      std::set_intersection(orderOnlyDeps.begin(), orderOnlyDeps.end(),
-                            jDeps.begin(), jDeps.end(),
-                            std::back_inserter(depsIntersection));
-      orderOnlyDeps = depsIntersection;
+        *j, orderOnlyDeps, ccg.GetOutputConfig(), fileConfig, ccgs.size() > 1);
+      ++j;
+
+      for (; j != targets.end(); ++j) {
+        std::unordered_set<std::string> jDeps;
+        this->GetGlobalNinjaGenerator()->AppendTargetDependsClosure(
+          *j, jDeps, ccg.GetOutputConfig(), fileConfig, ccgs.size() > 1);
+        cm::erase_if(orderOnlyDeps, [&jDeps](std::string const& dep) {
+          return jDeps.find(dep) == jDeps.end();
+        });
+      }
     }
 
     const std::vector<std::string>& outputs = ccg.GetOutputs();
@@ -656,13 +675,17 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
     std::vector<std::string> cmdLines;
     this->AppendCustomCommandLines(ccg, cmdLines);
 
+    cmNinjaDeps sortedOrderOnlyDeps(orderOnlyDeps.begin(),
+                                    orderOnlyDeps.end());
+    std::sort(sortedOrderOnlyDeps.begin(), sortedOrderOnlyDeps.end());
+
     if (cmdLines.empty()) {
       cmNinjaBuild build("phony");
       build.Comment = cmStrCat("Phony custom command for ", mainOutput);
       build.Outputs = std::move(ccOutputs.ExplicitOuts);
       build.WorkDirOuts = std::move(ccOutputs.WorkDirOuts);
       build.ExplicitDeps = std::move(ninjaDeps);
-      build.OrderOnlyDeps = orderOnlyDeps;
+      build.OrderOnlyDeps = std::move(sortedOrderOnlyDeps);
       gg->WriteBuild(this->GetImplFileStream(fileConfig), build);
     } else {
       std::string customStep = cmSystemTools::GetFilenameName(mainOutput);
@@ -708,7 +731,8 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
         this->ConstructComment(ccg), comment, depfile, cc->GetJobPool(),
         cc->GetUsesTerminal(),
         /*restat*/ !symbolic || !byproducts.empty(), fileConfig,
-        std::move(ccOutputs), std::move(ninjaDeps), std::move(orderOnlyDeps));
+        std::move(ccOutputs), std::move(ninjaDeps),
+        std::move(sortedOrderOnlyDeps));
     }
   }
 }
@@ -888,8 +912,7 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   }
   vars.Output = output.c_str();
 
-  std::unique_ptr<cmRulePlaceholderExpander> rulePlaceholderExpander(
-    this->CreateRulePlaceholderExpander());
+  auto rulePlaceholderExpander = this->CreateRulePlaceholderExpander();
 
   std::string launcher = *property_value;
   rulePlaceholderExpander->ExpandRuleVariables(this, launcher, vars);
@@ -904,14 +927,11 @@ void cmLocalNinjaGenerator::AdditionalCleanFiles(const std::string& config)
 {
   if (cmValue prop_value =
         this->Makefile->GetProperty("ADDITIONAL_CLEAN_FILES")) {
-    std::vector<std::string> cleanFiles;
-    {
-      cmExpandList(cmGeneratorExpression::Evaluate(*prop_value, this, config),
-                   cleanFiles);
-    }
+    cmList cleanFiles{ cmGeneratorExpression::Evaluate(*prop_value, this,
+                                                       config) };
     std::string const& binaryDir = this->GetCurrentBinaryDirectory();
     cmGlobalNinjaGenerator* gg = this->GetGlobalNinjaGenerator();
-    for (std::string const& cleanFile : cleanFiles) {
+    for (auto const& cleanFile : cleanFiles) {
       // Support relative paths
       gg->AddAdditionalCleanFile(
         cmSystemTools::CollapseFullPath(cleanFile, binaryDir), config);

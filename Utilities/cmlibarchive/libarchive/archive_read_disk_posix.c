@@ -34,9 +34,6 @@ __FBSDID("$FreeBSD$");
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
-#ifdef HAVE_SYS_MOUNT_H
-#include <sys/mount.h>
-#endif
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
@@ -54,6 +51,8 @@ __FBSDID("$FreeBSD$");
 #endif
 #ifdef HAVE_LINUX_FS_H
 #include <linux/fs.h>
+#elif HAVE_SYS_MOUNT_H
+#include <sys/mount.h>
 #endif
 /*
  * Some Linux distributions have both linux/ext2_fs.h and ext2fs/ext2_fs.h.
@@ -93,6 +92,10 @@ __FBSDID("$FreeBSD$");
 #include <sys/ioctl.h>
 #endif
 
+#ifdef __clang_analyzer__
+#include <assert.h>
+#endif
+
 #include "archive.h"
 #include "archive_string.h"
 #include "archive_entry.h"
@@ -107,6 +110,11 @@ __FBSDID("$FreeBSD$");
 #endif
 #ifndef O_CLOEXEC
 #define O_CLOEXEC	0
+#endif
+
+#if defined(__hpux) && !defined(HAVE_DIRFD)
+#define dirfd(x) ((x)->__dd_fd)
+#define HAVE_DIRFD
 #endif
 
 /*-
@@ -738,6 +746,10 @@ _archive_read_data_block(struct archive *_a, const void **buff,
 			else if (errno == EPERM)
 				flags &= ~O_NOATIME;
 		}
+#ifdef __clang_analyzer__
+		/* Tolerate deadcode.DeadStores to avoid modifying upstream. */
+		(void)flags;
+#endif
 #endif
 		if (t->entry_fd < 0) {
 			archive_set_error(&a->archive, errno,
@@ -2098,6 +2110,8 @@ tree_push(struct tree *t, const char *path, int filesystem_id,
 	struct tree_entry *te;
 
 	te = calloc(1, sizeof(*te));
+	if (te == NULL)
+		__archive_errx(1, "Out of memory");
 	te->next = t->stack;
 	te->parent = t->current;
 	if (te->parent)
@@ -2341,6 +2355,9 @@ tree_pop(struct tree *t)
 	if (t->stack == t->current && t->current != NULL)
 		t->current = t->current->parent;
 	te = t->stack;
+	#ifdef __clang_analyzer__
+	assert(te);
+	#endif
 	t->stack = te->next;
 	t->dirname_length = te->dirname_length;
 	t->basename = t->path.s + t->dirname_length;
@@ -2428,7 +2445,7 @@ tree_dir_next_posix(struct tree *t)
 #else /* HAVE_FDOPENDIR */
 		if (tree_enter_working_dir(t) == 0) {
 			t->d = opendir(".");
-#if HAVE_DIRFD || defined(dirfd)
+#ifdef HAVE_DIRFD
 			__archive_ensure_cloexec_flag(dirfd(t->d));
 #endif
 		}

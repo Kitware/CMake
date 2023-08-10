@@ -26,20 +26,17 @@ Check if the given struct or class has the specified member variable
 The following variables may be set before calling this macro to modify
 the way the check is run:
 
-``CMAKE_REQUIRED_FLAGS``
-  string of compile command line flags.
-``CMAKE_REQUIRED_DEFINITIONS``
-  list of macros to define (-DFOO=bar).
-``CMAKE_REQUIRED_INCLUDES``
-  list of include directories.
-``CMAKE_REQUIRED_LINK_OPTIONS``
-  .. versionadded:: 3.14
-    list of options to pass to link command.
-``CMAKE_REQUIRED_LIBRARIES``
-  list of libraries to link.
-``CMAKE_REQUIRED_QUIET``
-  .. versionadded:: 3.1
-    execute quietly without messages.
+.. include:: /module/CMAKE_REQUIRED_FLAGS.txt
+
+.. include:: /module/CMAKE_REQUIRED_DEFINITIONS.txt
+
+.. include:: /module/CMAKE_REQUIRED_INCLUDES.txt
+
+.. include:: /module/CMAKE_REQUIRED_LINK_OPTIONS.txt
+
+.. include:: /module/CMAKE_REQUIRED_LIBRARIES.txt
+
+.. include:: /module/CMAKE_REQUIRED_QUIET.txt
 
 
 Example:
@@ -51,8 +48,7 @@ Example:
 #]=======================================================================]
 
 include_guard(GLOBAL)
-include(CheckCSourceCompiles)
-include(CheckCXXSourceCompiles)
+include(CheckSourceCompiles)
 
 macro (CHECK_STRUCT_HAS_MEMBER _STRUCT _MEMBER _HEADER _RESULT)
   set(_INCLUDE_FILES)
@@ -78,10 +74,15 @@ int main()
 ")
 
   if("${_lang}" STREQUAL "C")
-    CHECK_C_SOURCE_COMPILES("${_CHECK_STRUCT_MEMBER_SOURCE_CODE}" ${_RESULT})
+    CHECK_SOURCE_COMPILES(C "${_CHECK_STRUCT_MEMBER_SOURCE_CODE}" ${_RESULT})
   elseif("${_lang}" STREQUAL "CXX")
-    CHECK_CXX_SOURCE_COMPILES("${_CHECK_STRUCT_MEMBER_SOURCE_CODE}" ${_RESULT})
+    CHECK_SOURCE_COMPILES(CXX "${_CHECK_STRUCT_MEMBER_SOURCE_CODE}" ${_RESULT})
   else()
     message(FATAL_ERROR "Unknown language:\n  ${_lang}\nSupported languages: C, CXX.\n")
   endif()
 endmacro ()
+
+# FIXME(#24994): The following modules are included only for compatibility
+# with projects that accidentally relied on them with CMake 3.26 and below.
+include(CheckCSourceCompiles)
+include(CheckCXXSourceCompiles)

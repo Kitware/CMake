@@ -1,0 +1,6 @@
+^CMake Error at MissingSource\.cmake:[0-9]+ \(target_sources\):
+  Cannot find source file:
+
+    missing\.txt
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

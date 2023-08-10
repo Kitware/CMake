@@ -1,7 +1,7 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-cmake_minimum_required(VERSION 3.13...3.24 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.13...3.25 FATAL_ERROR)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideC.cmake)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideCXX.cmake)
 
@@ -131,6 +131,23 @@ if(CMake_BUILD_LTO)
   endif()
 endif()
 
+# Check whether to build support for the debugger mode.
+if(NOT CMake_TEST_EXTERNAL_CMAKE)
+  if(NOT DEFINED CMake_ENABLE_DEBUGGER)
+    # The debugger uses cppdap, which does not compile everywhere.
+    if(CMAKE_SYSTEM_NAME MATCHES "Windows|Darwin|Linux|BSD|DragonFly|CYGWIN|MSYS"
+        AND NOT (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.16)
+        AND NOT (CMAKE_CXX_COMPILER_ID STREQUAL "XLClang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16.1)
+        )
+      set(CMake_ENABLE_DEBUGGER 1)
+    else()
+      set(CMake_ENABLE_DEBUGGER 0)
+    endif()
+  endif()
+else()
+  set(CMake_ENABLE_DEBUGGER 0)
+endif()
+
 #-----------------------------------------------------------------------
 # a macro to deal with system libraries, implemented as a macro
 # simply to improve readability of the main script
@@ -141,7 +158,7 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
 
   # Allow the user to enable/disable all system utility library options by
   # defining CMAKE_USE_SYSTEM_LIBRARIES or CMAKE_USE_SYSTEM_LIBRARY_${util}.
-  set(UTILITIES BZIP2 CURL EXPAT FORM JSONCPP LIBARCHIVE LIBLZMA LIBRHASH LIBUV NGHTTP2 ZLIB ZSTD)
+  set(UTILITIES BZIP2 CPPDAP CURL EXPAT FORM JSONCPP LIBARCHIVE LIBLZMA LIBRHASH LIBUV NGHTTP2 ZLIB ZSTD)
   foreach(util IN LISTS UTILITIES)
     if(NOT DEFINED CMAKE_USE_SYSTEM_LIBRARY_${util}
         AND DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
@@ -169,6 +186,9 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
 
   # Optionally use system utility libraries.
   option(CMAKE_USE_SYSTEM_LIBARCHIVE "Use system-installed libarchive" "${CMAKE_USE_SYSTEM_LIBRARY_LIBARCHIVE}")
+  if(CMake_ENABLE_DEBUGGER)
+    option(CMAKE_USE_SYSTEM_CPPDAP "Use system-installed cppdap" "${CMAKE_USE_SYSTEM_LIBRARY_CPPDAP}")
+  endif()
   option(CMAKE_USE_SYSTEM_CURL "Use system-installed curl" "${CMAKE_USE_SYSTEM_LIBRARY_CURL}")
   option(CMAKE_USE_SYSTEM_EXPAT "Use system-installed expat" "${CMAKE_USE_SYSTEM_LIBRARY_EXPAT}")
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_ZLIB "Use system-installed zlib"
@@ -182,7 +202,8 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_NGHTTP2 "Use system-installed nghttp2"
     "${CMAKE_USE_SYSTEM_LIBRARY_NGHTTP2}" "NOT CMAKE_USE_SYSTEM_CURL" ON)
   option(CMAKE_USE_SYSTEM_FORM "Use system-installed libform" "${CMAKE_USE_SYSTEM_LIBRARY_FORM}")
-  option(CMAKE_USE_SYSTEM_JSONCPP "Use system-installed jsoncpp" "${CMAKE_USE_SYSTEM_LIBRARY_JSONCPP}")
+  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_JSONCPP "Use system-installed jsoncpp"
+    "${CMAKE_USE_SYSTEM_LIBRARY_JSONCPP}" "NOT CMAKE_USE_SYSTEM_CPPDAP" ON)
   option(CMAKE_USE_SYSTEM_LIBRHASH "Use system-installed librhash" "${CMAKE_USE_SYSTEM_LIBRARY_LIBRHASH}")
   option(CMAKE_USE_SYSTEM_LIBUV "Use system-installed libuv" "${CMAKE_USE_SYSTEM_LIBRARY_LIBUV}")
 

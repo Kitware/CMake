@@ -11,7 +11,7 @@ string(REPLACE "${CMAKE_END_TEMP_FILE}" "" CMAKE_C_CREATE_SHARED_LIBRARY "${CMAK
 
 add_library(example SHARED LinkOptionsLib.c)
 # use LAUNCH facility to dump linker command
-set_property(TARGET example PROPERTY RULE_LAUNCH_LINK "\"${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}/dump${CMAKE_EXECUTABLE_SUFFIX}\"")
+set_property(TARGET example PROPERTY RULE_LAUNCH_LINK "\"$<TARGET_FILE:dump>\"")
 
 add_dependencies (example dump)
 

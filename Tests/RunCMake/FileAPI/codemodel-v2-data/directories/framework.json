@@ -1,0 +1,17 @@
+{
+    "source": "^framework$",
+    "build": "^framework$",
+    "parentSource": "^\\.$",
+    "childSources": null,
+    "targetIds": [
+        "^ALL_BUILD::@217a96c3a62328a73ef4$",
+        "^ZERO_CHECK::@217a96c3a62328a73ef4$",
+        "^shared_framework::@217a96c3a62328a73ef4$",
+        "^static_framework::@217a96c3a62328a73ef4$",
+        "^exe_framework::@217a96c3a62328a73ef4$"
+    ],
+    "projectName": "Framework",
+    "minimumCMakeVersion": "3.13",
+    "hasInstallRule": null,
+    "installers": []
+}

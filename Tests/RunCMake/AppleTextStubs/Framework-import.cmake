@@ -1,0 +1,62 @@
+enable_language(C)
+
+find_package(foo REQUIRED CONFIG NO_DEFAULT_PATH)
+
+add_executable(main main.c)
+target_link_libraries(main PRIVATE foo-install::foo)
+
+get_property(is_framework TARGET foo-install::foo PROPERTY FRAMEWORK)
+if (NOT is_framework)
+  message(SEND_ERROR "foo-build::foo: FRAMEWORK not set.")
+endif()
+get_property(enable_exports TARGET foo-install::foo PROPERTY ENABLE_EXPORTS)
+if (CAMKE_TAPI AND NOT enable_exports)
+  message(SEND_ERROR "foo-install::foo: ENABLE_EXPORTS not set.")
+endif()
+
+get_property(implib TARGET foo-install::foo PROPERTY IMPORTED_IMPLIB_RELEASE)
+if (CAMKE_TAPI AND NOT implib)
+  message(SEND_ERROR "foo-install::foo: IMPORTED_IMPLIB_RELEASE not set.")
+endif()
+if (CAMKE_TAPI AND NOT implib MATCHES "foo.framework/Versions/A/foo.tbd$")
+  message(SEND_ERROR "foo-install::foo: ${implib}: wrong value for IMPORTED_IMPLIB_RELEASE.")
+endif()
+
+get_property(location TARGET foo-install::foo PROPERTY IMPORTED_LOCATION_RELEASE)
+if (NOT location)
+  message(SEND_ERROR "foo-install::foo: IMPORTED_LOCATION_RELEASE not set.")
+endif()
+if (NOT location MATCHES "foo.framework/Versions/A/foo$")
+  message(SEND_ERROR "foo-install::foo: ${location}: wrong value for IMPORTED_LOCATION_RELEASE.")
+endif()
+
+
+include(${foo_BUILD}/foo.cmake)
+
+add_executable(main2 main.c)
+target_link_libraries(main2 PRIVATE foo-build::foo)
+
+get_property(is_framework TARGET foo-build::foo PROPERTY FRAMEWORK)
+if (NOT is_framework)
+  message(SEND_ERROR "foo-build::foo: FRAMEWORK not set.")
+endif()
+get_property(enable_exports TARGET foo-build::foo PROPERTY ENABLE_EXPORTS)
+if (CAMKE_TAPI AND NOT enable_exports)
+  message(SEND_ERROR "foo-build::foo: ENABLE_EXPORTS not set.")
+endif()
+
+get_property(implib TARGET foo-build::foo PROPERTY IMPORTED_IMPLIB_RELEASE)
+if (CAMKE_TAPI AND NOT implib)
+  message(SEND_ERROR "foo-build::foo: IMPORTED_IMPLIB_RELEASE not set.")
+endif()
+if (CAMKE_TAPI AND NOT implib STREQUAL "${foo_BUILD}/foo.framework/Versions/A/foo.tbd")
+  message(SEND_ERROR "foo-build::foo: ${implib}: wrong value for IMPORTED_IMPLIB_RELEASE.")
+endif()
+
+get_property(location TARGET foo-build::foo PROPERTY IMPORTED_LOCATION_RELEASE)
+if (NOT location)
+  message(SEND_ERROR "foo-build::foo: IMPORTED_LOCATION_RELEASE not set.")
+endif()
+if (NOT location STREQUAL "${foo_BUILD}/foo.framework/Versions/A/foo")
+  message(SEND_ERROR "foo-build::foo: ${location}: wrong value for IMPORTED_LOCATION_RELEASE.")
+endif()

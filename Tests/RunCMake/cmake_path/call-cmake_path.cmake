@@ -1,6 +1,3 @@
-
-cmake_minimum_required(VERSION 3.18...3.19)
-
 # define input variable
 set (path "")
 

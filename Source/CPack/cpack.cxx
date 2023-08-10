@@ -28,6 +28,8 @@
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
+#include "cmJSONState.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
@@ -265,11 +267,11 @@ int main(int argc, char const* const* argv)
 
     cmCMakePresetsGraph presetsGraph;
     auto result = presetsGraph.ReadProjectPresets(workingDirectory);
-    if (result != cmCMakePresetsGraph::ReadFileResult::READ_OK) {
+    if (result != true) {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                   "Could not read presets from "
-                    << workingDirectory << ": "
-                    << cmCMakePresetsGraph::ResultToString(result) << '\n');
+                    << workingDirectory << ":"
+                    << presetsGraph.parseState.GetErrorMessage() << '\n');
       return 1;
     }
 
@@ -508,8 +510,8 @@ int main(int argc, char const* const* argv)
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                   "CPack generator not specified\n");
     } else {
-      std::vector<std::string> generatorsVector = cmExpandedList(*genList);
-      for (std::string const& gen : generatorsVector) {
+      cmList generatorsList{ *genList };
+      for (std::string const& gen : generatorsList) {
         cmMakefile::ScopePushPop raii(&globalMF);
         cmMakefile* mf = &globalMF;
         cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,

@@ -47,7 +47,7 @@ Generated_source6\.txt: # 2a # GENERATED = `0`
 Generated_source6\.txt: # 2b # GENERATED = `0`
 Generated_source6\.txt: # 3a # GENERATED = `0`
 Generated_source6\.txt: # 3b # GENERATED = `0`
-CMake Error at CMP0118-Common-Test9\.cmake:[0-9]+ \(add_custom_target\):
+CMake Error at CMP0118-Common-Test9\.cmake:[0-9]+ \(target_sources\):
   Cannot find source file:
 
 [ \t]*.*Tests/RunCMake/CMP0118/CMP0118-NEW-Test9-build/Generated_source[4-6]\.txt
@@ -55,7 +55,7 @@ Call Stack \(most recent call first\):
   CMP0118-NEW-Test9\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Error at CMP0118-Common-Test9\.cmake:[0-9]+ \(add_custom_target\):
+CMake Error at CMP0118-Common-Test9\.cmake:[0-9]+ \(target_sources\):
   Cannot find source file:
 
 [ \t]*.*Tests/RunCMake/CMP0118/CMP0118-NEW-Test9-build/Generated_source[4-6]\.txt
@@ -63,7 +63,7 @@ Call Stack \(most recent call first\):
   CMP0118-NEW-Test9\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Error at CMP0118-Common-Test9\.cmake:[0-9]+ \(add_custom_target\):
+CMake Error at CMP0118-Common-Test9\.cmake:[0-9]+ \(target_sources\):
   Cannot find source file:
 
 [ \t]*.*Tests/RunCMake/CMP0118/CMP0118-NEW-Test9-build/Generated_source[4-6]\.txt

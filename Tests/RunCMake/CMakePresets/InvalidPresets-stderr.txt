@@ -1,2 +1,5 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/InvalidPresets: Invalid "configurePresets" field$
+]*/Tests/RunCMake/CMakePresets/InvalidPresets:
+Error: @3,23: Invalid "configurePresets" field
+  "configurePresets": {}
+                      \^$

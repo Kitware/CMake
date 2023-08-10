@@ -14,7 +14,7 @@ validity checks.
 Any file that is
 
 - created by the execution of commands such as
-  :command:`add_custom_command` and :command:`file(GENERATE)`
+  :command:`add_custom_command` which run during the build
 - listed as one of the ``BYPRODUCTS`` of an :command:`add_custom_command`
   or :command:`add_custom_target` command, or
 - created by a CMake ``AUTOGEN`` operation such as :prop_tgt:`AUTOMOC`,

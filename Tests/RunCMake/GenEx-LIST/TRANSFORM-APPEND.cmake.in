@@ -1,0 +1,50 @@
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+set(listvar alpha bravo charlie delta)
+
+list(TRANSFORM listvar APPEND "_A" OUTPUT_VARIABLE reference)
+set (output "$<LIST:TRANSFORM,alpha;bravo;charlie;delta,APPEND,_A>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+list(TRANSFORM listvar APPEND "_A" AT 1 3 OUTPUT_VARIABLE reference)
+set (output "$<LIST:TRANSFORM,alpha;bravo;charlie;delta,APPEND,_A,AT,1,3>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+list(TRANSFORM listvar APPEND "_A" AT 1 -2 OUTPUT_VARIABLE reference)
+set (output "$<LIST:TRANSFORM,alpha;bravo;charlie;delta,APPEND,_A,AT,1,-2>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+list(TRANSFORM listvar APPEND "_A" FOR 1 2 OUTPUT_VARIABLE reference)
+set (output "$<LIST:TRANSFORM,alpha;bravo;charlie;delta,APPEND,_A,FOR,1,2>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+list(TRANSFORM listvar APPEND "_A" FOR 1 -1 OUTPUT_VARIABLE reference)
+set (output "$<LIST:TRANSFORM,alpha;bravo;charlie;delta,APPEND,_A,FOR,1,-1>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+list(TRANSFORM listvar APPEND "_A" FOR 1 -1 2 OUTPUT_VARIABLE reference)
+set (output "$<LIST:TRANSFORM,alpha;bravo;charlie;delta,APPEND,_A,FOR,1,-1,2>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+list(TRANSFORM listvar APPEND "_A" REGEX "(r|t)a" OUTPUT_VARIABLE reference)
+set (output "$<LIST:TRANSFORM,alpha;bravo;charlie;delta,APPEND,_A,REGEX,(r|t)a>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+
+check_errors("LIST:TRANSFORM,APPEND..." ${errors})

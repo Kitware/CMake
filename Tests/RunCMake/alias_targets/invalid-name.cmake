@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_policy(SET CMP0037 OLD)
 enable_language(CXX)
 
 add_library(foo empty.cpp)

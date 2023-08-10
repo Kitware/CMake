@@ -1007,7 +1007,8 @@ read_children(struct archive_read *a, struct file_info *parent)
 		p = b;
 		b += iso9660->logical_block_size;
 		step -= iso9660->logical_block_size;
-		for (; *p != 0 && p < b && p + *p <= b; p += *p) {
+		for (; *p != 0 && p + DR_name_offset < b && p + *p <= b;
+			p += *p) {
 			struct file_info *child;
 
 			/* N.B.: these special directory identifiers
@@ -1756,7 +1757,7 @@ parse_file_info(struct archive_read *a, struct file_info *parent,
 	size_t name_len;
 	const unsigned char *rr_start, *rr_end;
 	const unsigned char *p;
-	size_t dr_len;
+	size_t dr_len = 0;
 	uint64_t fsize, offset;
 	int32_t location;
 	int flags;
@@ -3014,6 +3015,7 @@ heap_add_entry(struct archive_read *a, struct heap_queue *heap,
 	uint64_t file_key, parent_key;
 	int hole, parent;
 
+#ifndef __clang_analyzer__ /* It cannot see heap->files remains populated.  */
 	/* Expand our pending files list as necessary. */
 	if (heap->used >= heap->allocated) {
 		struct file_info **new_pending_files;
@@ -3041,6 +3043,7 @@ heap_add_entry(struct archive_read *a, struct heap_queue *heap,
 		heap->files = new_pending_files;
 		heap->allocated = new_size;
 	}
+#endif
 
 	file_key = file->key = key;
 

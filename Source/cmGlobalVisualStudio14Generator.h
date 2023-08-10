@@ -7,6 +7,8 @@
 #include <memory>
 #include <string>
 
+#include <cm/optional>
+
 #include "cmGlobalVisualStudio12Generator.h"
 
 class cmGlobalGeneratorFactory;
@@ -30,7 +32,6 @@ protected:
   cmGlobalVisualStudio14Generator(cmake* cm, const std::string& name,
                                   std::string const& platformInGeneratorName);
 
-  bool InitializeWindows(cmMakefile* mf) override;
   bool InitializeWindowsStore(cmMakefile* mf) override;
   bool InitializeAndroid(cmMakefile* mf) override;
   bool SelectWindowsStoreToolset(std::string& toolset) const override;
@@ -38,6 +39,14 @@ protected:
   // These aren't virtual because we need to check if the selected version
   // of the toolset is installed
   bool IsWindowsStoreToolsetInstalled() const;
+
+  virtual bool IsWin81SDKInstalled() const;
+
+  bool InitializePlatformWindows(cmMakefile* mf) override;
+  bool VerifyNoGeneratorPlatformVersion(cmMakefile* mf) const override;
+
+  bool ProcessGeneratorPlatformField(std::string const& key,
+                                     std::string const& value) override;
 
   // Used to adjust the max-SDK-version calculation to accommodate user
   // configuration.
@@ -47,7 +56,7 @@ protected:
   // version of the toolset.
   virtual std::string GetWindows10SDKMaxVersionDefault(cmMakefile* mf) const;
 
-  virtual bool SelectWindows10SDK(cmMakefile* mf, bool required);
+  virtual bool SelectWindows10SDK(cmMakefile* mf);
 
   void SetWindowsTargetPlatformVersion(std::string const& version,
                                        cmMakefile* mf);
@@ -61,4 +70,6 @@ protected:
 private:
   class Factory;
   friend class Factory;
+
+  cm::optional<std::string> GeneratorPlatformVersion;
 };

@@ -12,3 +12,12 @@ void hello()
 }
 void Hello::operator delete[](void*){};
 void Hello::operator delete(void*){};
+
+#ifdef HELLO_VFTABLE
+HelloVFTable::HelloVFTable()
+{
+}
+HelloVFTable::~HelloVFTable()
+{
+}
+#endif

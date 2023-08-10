@@ -6,7 +6,6 @@ Call Stack \(most recent call first\):
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Error at FileSetWrongTypeExperimental\.cmake:[0-9]+ \(target_sources\):
-  target_sources File set TYPE may only be "HEADERS", "CXX_MODULES", or
-  "CXX_MODULE_HEADER_UNITS"
+  target_sources File set TYPE may only be "HEADERS" or "CXX_MODULES"
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)$

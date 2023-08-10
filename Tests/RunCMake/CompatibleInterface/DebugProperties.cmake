@@ -1,7 +1,4 @@
-
-cmake_minimum_required(VERSION 3.3)
-
-project(CompatibleInterface)
+enable_language(CXX)
 
 include(GenerateExportHeader)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

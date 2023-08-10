@@ -1,0 +1,9 @@
+CMake Error at SORT-wrong-COMPARE-option.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:SORT,a;b,COMPARE:WRONG_OPTION>
+
+  sub-command SORT, an invalid COMPARE option has been specified:
+  "WRONG_OPTION".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

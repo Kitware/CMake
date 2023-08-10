@@ -33,3 +33,11 @@ foreach(case IN LISTS cases)
   run_case(OLD-${case})
   run_case(NEW-${case})
 endforeach()
+
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/EmptyArgument-build)
+  run_cmake(EmptyArgument)
+  # Run ctest on the generated CTestTestfile.cmake.
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(EmptyArgument-ctest ${CMAKE_CTEST_COMMAND} -C Debug)
+endblock()

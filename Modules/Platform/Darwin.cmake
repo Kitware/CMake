@@ -1,5 +1,3 @@
-set(APPLE 1)
-
 if(CMAKE_SYSTEM_NAME STREQUAL "iOS" OR CMAKE_SYSTEM_NAME STREQUAL "tvOS" OR CMAKE_SYSTEM_NAME STREQUAL "watchOS")
   if(NOT DEFINED CMAKE_MACOSX_BUNDLE)
     set(CMAKE_MACOSX_BUNDLE ON)
@@ -45,6 +43,8 @@ set(CMAKE_SHARED_LIBRARY_SUFFIX ".dylib")
 set(CMAKE_EXTRA_SHARED_LIBRARY_SUFFIXES ".tbd" ".so")
 set(CMAKE_SHARED_MODULE_PREFIX "lib")
 set(CMAKE_SHARED_MODULE_SUFFIX ".so")
+set(CMAKE_APPLE_IMPORT_FILE_PREFIX "lib")
+set(CMAKE_APPLE_IMPORT_FILE_SUFFIX ".tbd")
 set(CMAKE_MODULE_EXISTS 1)
 set(CMAKE_DL_LIBS "")
 if(NOT "${_CURRENT_OSX_VERSION}" VERSION_LESS "10.5")
@@ -107,6 +107,9 @@ foreach(lang C CXX Fortran OBJC OBJCXX)
   # preprocessor that may find headers in frameworks.
   set(CMAKE_${lang}_FRAMEWORK_SEARCH_FLAG -F)
 endforeach()
+
+# To generate text-based stubs
+set(CMAKE_CREATE_TEXT_STUBS "<CMAKE_TAPI> stubify -isysroot <CMAKE_OSX_SYSROOT> -o <TARGET_IMPLIB> <TARGET>")
 
 # Defines LINK_LIBRARY features for frameworks
 set(CMAKE_LINK_LIBRARY_USING_FRAMEWORK "LINKER:-framework,<LIBRARY>")

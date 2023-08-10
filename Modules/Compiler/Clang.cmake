@@ -173,7 +173,12 @@ macro(__compiler_clang_cxx_standards lang)
 
     unset(_clang_version_std17)
 
-    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 12.0)
+    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 17.0)
+      set(CMAKE_${lang}23_STANDARD_COMPILE_OPTION "-std=c++23")
+      set(CMAKE_${lang}23_EXTENSION_COMPILE_OPTION "-std=gnu++23")
+      set(CMAKE_${lang}26_STANDARD_COMPILE_OPTION "-std=c++26")
+      set(CMAKE_${lang}26_EXTENSION_COMPILE_OPTION "-std=gnu++26")
+    elseif(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 12.0)
       set(CMAKE_${lang}23_STANDARD_COMPILE_OPTION "-std=c++2b")
       set(CMAKE_${lang}23_EXTENSION_COMPILE_OPTION "-std=gnu++2b")
     endif()

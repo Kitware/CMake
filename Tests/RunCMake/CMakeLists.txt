@@ -15,6 +15,9 @@ macro(add_RunCMake_test test)
   else()
     set(Test_Dir ${test})
   endif()
+  if(CMAKE_C_COMPILER_ID STREQUAL "LCC")
+    list(APPEND TEST_ARGS -DRunCMake_TEST_LCC=1)
+  endif()
   add_test(NAME RunCMake.${test} COMMAND ${CMAKE_CMAKE_COMMAND}
     -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_SOURCE_DIR}
     -DRunCMake_GENERATOR_IS_MULTI_CONFIG=${_isMultiConfig}
@@ -40,6 +43,11 @@ function(add_RunCMake_test_group test types)
   set(TEST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/${test}/conf")
   file(REMOVE_RECURSE "${TEST_CONFIG_DIR}")
   file(MAKE_DIRECTORY "${TEST_CONFIG_DIR}")
+
+  set(TEST_ARGS "")
+  if(CMAKE_C_COMPILER_ID STREQUAL "LCC")
+    list(APPEND TEST_ARGS -DRunCMake_TEST_LCC=1)
+  endif()
 
   foreach(type IN LISTS types)
     # generate prerequirements config file in cmake as ctest doesn't have as
@@ -68,6 +76,7 @@ function(add_RunCMake_test_group test types)
         -DRunCMake_MAKE_PROGRAM=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
         -DRunCMake_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/${test}
         -DRunCMake_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/${type}/${test}
+        ${TEST_ARGS}
         -Dconfig_file=${TEST_CONFIG_DIR}/${type}_config.cmake
         -P "${CMAKE_CURRENT_SOURCE_DIR}/${test}/RunCMakeTest.cmake"
         )
@@ -151,6 +160,10 @@ endif()
 add_RunCMake_test(CMP0132)
 add_RunCMake_test(CMP0135)
 add_RunCMake_test(CMP0139)
+
+if(GIT_EXECUTABLE)
+  add_RunCMake_test(CMP0150)
+endif()
 
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
@@ -256,6 +269,10 @@ if(CMake_TEST_Qt6 AND Qt6Widgets_FOUND)
     -Dwith_qt_version=6
     "-DQt6_DIR:PATH=${Qt6_DIR}"
     "-DCMAKE_PREFIX_PATH:STRING=${base_dir}"
+    -DPSEUDO_TIDY=$<TARGET_FILE:pseudo_tidy>
+    -DPSEUDO_IWYU=$<TARGET_FILE:pseudo_iwyu>
+    -DPSEUDO_CPPLINT=$<TARGET_FILE:pseudo_cpplint>
+    -DPSEUDO_CPPCHECK=$<TARGET_FILE:pseudo_cppcheck>
   )
   set(want_NoQt_test FALSE)
 endif ()
@@ -270,8 +287,6 @@ if(want_NoQt_test)
   add_RunCMake_test(AutogenNoQt TEST_DIR Autogen)
 endif()
 
-add_RunCMake_test(ArtifactOutputDirs)
-
 if(NOT DEFINED CMake_TEST_BuildDepends_GNU_AS
     AND (CMAKE_C_COMPILER_ID STREQUAL "GNU" OR CMAKE_C_COMPILER_ID STREQUAL "LCC")
     AND CMAKE_GENERATOR MATCHES "^Ninja"
@@ -284,9 +299,14 @@ if(NOT DEFINED CMake_TEST_BuildDepends_GNU_AS
   endif()
 endif()
 
+if(CMAKE_Fortran_COMPILER)
+  list(APPEND BuildDepends_ARGS -DCMake_TEST_Fortran=1)
+endif()
+
 add_RunCMake_test(BuildDepends
   -DMSVC_VERSION=${MSVC_VERSION}
   -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+  -DCMAKE_C_LINK_DEPENDS_USE_COMPILER=${CMAKE_C_LINK_DEPENDS_USE_COMPILER}
   -DCMake_TEST_BuildDepends_GNU_AS=${CMake_TEST_BuildDepends_GNU_AS}
   )
 if(UNIX AND "${CMAKE_GENERATOR}" MATCHES "Unix Makefiles|Ninja")
@@ -323,6 +343,10 @@ endif()
 add_RunCMake_test(ExcludeFromAll)
 add_RunCMake_test(ExportImport)
 add_RunCMake_test(ExternalData)
+if(CMAKE_GENERATOR MATCHES "^(Unix Makefiles|Ninja)$"
+    AND NOT "${CMAKE_CURRENT_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
+  add_RunCMake_test(ExtraGenerators)
+endif()
 add_RunCMake_test(FeatureSummary)
 add_RunCMake_test(FPHSA)
 if(CMAKE_USE_SYSTEM_JSONCPP)
@@ -353,11 +377,13 @@ add_RunCMake_test(GenEx-DEVICE_LINK)
 add_RunCMake_test(GenEx-LINK_LIBRARY)
 add_RunCMake_test(GenEx-LINK_GROUP)
 add_RunCMake_test(GenEx-TARGET_FILE -DLINKER_SUPPORTS_PDB=${LINKER_SUPPORTS_PDB})
+add_RunCMake_test(GenEx-TARGET_IMPORT_FILE)
 add_RunCMake_test(GenEx-GENEX_EVAL)
 add_RunCMake_test(GenEx-TARGET_PROPERTY)
 add_RunCMake_test(GenEx-TARGET_RUNTIME_DLLS)
 add_RunCMake_test(GenEx-PATH)
 add_RunCMake_test(GenEx-PATH_EQUAL)
+add_RunCMake_test(GenEx-LIST)
 add_RunCMake_test(GeneratorExpression)
 add_RunCMake_test(GeneratorInstance)
 add_RunCMake_test(GeneratorPlatform)
@@ -392,6 +418,7 @@ if(UNIX AND CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG AND CMAKE_EXECUTABLE_FORMAT STRE
 endif()
 add_RunCMake_test(ScriptMode)
 add_RunCMake_test(Swift -DCMAKE_Swift_COMPILER=${CMAKE_Swift_COMPILER} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
+add_RunCMake_test(TargetArtifacts -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
 add_RunCMake_test(TargetObjects)
 add_RunCMake_test(TargetProperties)
 add_RunCMake_test(ToolchainFile)
@@ -425,7 +452,7 @@ add_RunCMake_test(add_custom_target)
 add_RunCMake_test(add_dependencies)
 add_RunCMake_test(add_executable)
 add_RunCMake_test(add_library)
-add_RunCMake_test(add_subdirectory)
+add_RunCMake_test(add_subdirectory -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER})
 add_RunCMake_test(add_test)
 add_RunCMake_test(build_command)
 add_executable(exit_code exit_code.c)
@@ -511,6 +538,7 @@ add_RunCMake_test(BundleUtilities)
 if(APPLE)
   add_RunCMake_test(INSTALL_NAME_DIR)
   add_RunCMake_test(MacOSVersions)
+  add_RunCMake_test(AppleTextStubs)
 endif()
 
 function(add_RunCMake_test_try_compile)
@@ -545,7 +573,10 @@ add_RunCMake_test(alias_targets)
 add_RunCMake_test(InterfaceLibrary)
 add_RunCMake_test(no_install_prefix)
 add_RunCMake_test(configure_file)
-add_RunCMake_test(CTestTimeout -DTIMEOUT=${CTestTestTimeout_TIME})
+if(CTestTestTimeout_TIME)
+  set(CTestTimeout_ARGS -DTIMEOUT=${CTestTestTimeout_TIME})
+endif()
+add_RunCMake_test(CTestTimeout)
 add_RunCMake_test(CTestTimeoutAfterMatch)
 if(CMake_TEST_CUDA)
   add_RunCMake_test(CUDA_architectures)
@@ -648,7 +679,9 @@ endif()
 
 if(XCODE_VERSION)
   add_RunCMake_test(XcodeProject -DXCODE_VERSION=${XCODE_VERSION}
+                                 -DCMAKE_HOST_SYSTEM_PROCESSOR=${CMAKE_HOST_SYSTEM_PROCESSOR}
                                  -DCMake_TEST_Swift=${CMake_TEST_Swift})
+  add_RunCMake_test(XcodeProject-Device -DXCODE_VERSION=${XCODE_VERSION})
   add_RunCMake_test(XcodeProject-Embed -DXCODE_VERSION=${XCODE_VERSION})
 
   # This test can take a very long time due to lots of combinations.
@@ -766,6 +799,7 @@ endif()
 add_RunCMake_test(install -DNO_NAMELINK=${NO_NAMELINK} -DCYGWIN=${CYGWIN} -DMSYS=${MSYS}
   -DCMAKE_SHARED_LIBRARY_RPATH_ORIGIN_TOKEN=${CMAKE_SHARED_LIBRARY_RPATH_ORIGIN_TOKEN}
   -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+  -DCMAKE_SYSTEM_PROCESSOR=${CMAKE_SYSTEM_PROCESSOR}
   -DCMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG=${CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG}
   -DCMAKE_EXECUTABLE_FORMAT=${CMAKE_EXECUTABLE_FORMAT}
   -DCMake_TEST_ISPC=${CMake_TEST_ISPC}
@@ -779,6 +813,7 @@ if(DEFINED CMake_COMPILER_FORCES_NEW_DTAGS)
 endif()
 add_RunCMake_test(file-GET_RUNTIME_DEPENDENCIES
   -DCMake_INSTALL_NAME_TOOL_BUG=${CMake_INSTALL_NAME_TOOL_BUG}
+  -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
   )
 
 add_RunCMake_test(CPackCommandLine)
@@ -833,6 +868,12 @@ add_RunCMake_test(CrosscompilingEmulator
  -DPSEUDO_EMULATOR=$<TARGET_FILE:pseudo_emulator>
  -DPSEUDO_EMULATOR_CUSTOM_COMMAND=$<TARGET_FILE:pseudo_emulator_custom_command>
  -DPSEUDO_EMULATOR_CUSTOM_COMMAND_ARG=$<TARGET_FILE:pseudo_emulator_custom_command_arg>)
+
+add_executable(pseudo_tidy pseudo_tidy.c)
+add_executable(pseudo_iwyu pseudo_iwyu.c)
+add_executable(pseudo_cpplint pseudo_cpplint.c)
+add_executable(pseudo_cppcheck pseudo_cppcheck.c)
+
 if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
   if(UNIX AND NOT CYGWIN)
     execute_process(COMMAND ldd --help
@@ -843,10 +884,6 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
       add_RunCMake_test(LinkWhatYouUse)
     endif()
   endif()
-  add_executable(pseudo_tidy pseudo_tidy.c)
-  add_executable(pseudo_iwyu pseudo_iwyu.c)
-  add_executable(pseudo_cpplint pseudo_cpplint.c)
-  add_executable(pseudo_cppcheck pseudo_cppcheck.c)
   add_RunCMake_test(ClangTidy -DPSEUDO_TIDY=$<TARGET_FILE:pseudo_tidy>)
   add_RunCMake_test(IncludeWhatYouUse -DPSEUDO_IWYU=$<TARGET_FILE:pseudo_iwyu>)
   add_RunCMake_test(Cpplint -DPSEUDO_CPPLINT=$<TARGET_FILE:pseudo_cpplint>)

@@ -25,6 +25,8 @@ system target.  This has the following effects:
   would be by default.   Entries of
   :prop_tgt:`INTERFACE_SYSTEM_INCLUDE_DIRECTORIES` are not affected,
   and will always be treated as system include directories.
+* On Apple platforms, when the target is a framework, it will not be treated as
+  system.
 
 This property can also be enabled on a non-imported target.  Doing so does
 not affect the build system, but does tell the :command:`install(EXPORT)` and

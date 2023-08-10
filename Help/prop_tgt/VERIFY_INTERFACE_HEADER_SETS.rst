@@ -26,6 +26,9 @@ Otherwise, if C++ is enabled globally, the header is compiled as C++.
 Otherwise, if C is enabled globally, the header is compiled as C. Otherwise,
 the header file is not compiled.
 
+If the header's :prop_sf:`SKIP_LINTING` property is set to true, the file is
+not compiled.
+
 If any verification targets are created, a top-level target called
 ``all_verify_interface_header_sets`` is created which depends on all
 verification targets.

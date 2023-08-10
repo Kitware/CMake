@@ -105,6 +105,9 @@ The options are:
 
 .. include:: SUPPORTED_LANGUAGES.txt
 
+By default ``C`` and ``CXX`` are enabled if no language options are given.
+Specify language ``NONE``, or use the ``LANGUAGES`` keyword and list no languages,
+to skip enabling any languages.
 
 The variables set through the ``VERSION``, ``DESCRIPTION`` and ``HOMEPAGE_URL``
 options are intended for use as default values in package metadata and documentation.

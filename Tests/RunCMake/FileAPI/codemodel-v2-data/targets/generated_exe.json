@@ -108,6 +108,7 @@
                     ]
                 }
             ],
+            "frameworks": null,
             "defines": [
                 {
                     "define": "EMPTY_C=1",
@@ -223,6 +224,7 @@
                     ]
                 }
             ],
+            "frameworks": null,
             "defines": [
                 {
                     "define": "GENERATED_EXE=1",

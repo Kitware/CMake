@@ -11,8 +11,12 @@ foreach(
 endforeach()
 
 function(run_cmake test)
-  if(DEFINED ENV{RunCMake_TEST_FILTER} AND NOT test MATCHES "$ENV{RunCMake_TEST_FILTER}")
-    return()
+  if(DEFINED ENV{RunCMake_TEST_FILTER})
+    set(test_and_variant "${test}${RunCMake_TEST_VARIANT_DESCRIPTION}")
+    if(NOT test_and_variant MATCHES "$ENV{RunCMake_TEST_FILTER}")
+      return()
+    endif()
+    unset(test_and_variant)
   endif()
 
   set(top_src "${RunCMake_SOURCE_DIR}")
@@ -43,6 +47,8 @@ function(run_cmake test)
     elseif(EXISTS ${top_src}/${test}-${o}.txt)
       file(READ ${top_src}/${test}-${o}.txt expect_${o})
       string(REGEX REPLACE "\n+$" "" expect_${o} "${expect_${o}}")
+    elseif(DEFINED RunCMake_TEST_EXPECT_${o})
+      string(REGEX REPLACE "\n+$" "" expect_${o} "${RunCMake_TEST_EXPECT_${o}}")
     else()
       unset(expect_${o})
     endif()
@@ -94,7 +100,7 @@ function(run_cmake test)
     if(APPLE)
       list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0025=NEW)
     endif()
-    if(NOT RunCMake_TEST_NO_CMP0129 AND CMAKE_C_COMPILER_ID STREQUAL "LCC")
+    if(RunCMake_TEST_LCC AND NOT RunCMake_TEST_NO_CMP0129)
       list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0129=NEW)
     endif()
     if(RunCMake_MAKE_PROGRAM)
@@ -161,7 +167,9 @@ function(run_cmake test)
     "|BullseyeCoverage"
     "|[a-z]+\\([0-9]+\\) malloc:"
     "|clang[^:]*: warning: the object size sanitizer has no effect at -O0, but is explicitly enabled:"
+    "|flang-new: warning: argument unused during compilation: .-flang-experimental-exec."
     "|icp?x: remark: Note that use of .-g. without any optimization-level option will turn off most compiler optimizations"
+    "|ifx: remark #10440: Note that use of a debug option without any optimization-level option will turnoff most compiler optimizations"
     "|lld-link: warning: procedure symbol record for .* refers to PDB item index [0-9A-Fa-fx]+ which is not a valid function ID record"
     "|Error kstat returned"
     "|Hit xcodebuild bug"
@@ -171,7 +179,7 @@ function(run_cmake test)
     "|Your license to use PGI[^\n]*expired"
     "|Please obtain a new version at"
     "|contact PGI Sales at"
-    "|icp?c: remark #10441: The Intel\\(R\\) C\\+\\+ Compiler Classic \\(ICC\\) is deprecated"
+    "|ic(p?c|l): remark #10441: The Intel\\(R\\) C\\+\\+ Compiler Classic \\(ICC\\) is deprecated"
 
     "|[^\n]*install_name_tool: warning: changes being made to the file will invalidate the code signature in:"
     "|[^\n]*xcodebuild[^\n]*DVTCoreDeviceEnabledState: DVTCoreDeviceEnabledState_Disabled set via user default"
@@ -187,6 +195,18 @@ function(run_cmake test)
     "|[^\n]*Bullseye Testing Technology"
     ")[^\n]*\n)+"
     )
+  if(RunCMake_IGNORE_POLICY_VERSION_DEPRECATION)
+    string(REGEX REPLACE [[
+^CMake Deprecation Warning at [^
+]*CMakeLists.txt:1 \(cmake_minimum_required\):
+  Compatibility with CMake < 3\.5 will be removed from a future version of
+  CMake.
+
+  Update the VERSION argument <min> value or use a \.\.\.<max> suffix to tell
+  CMake that the project does not need compatibility with older versions\.
++
+]] "" actual_stderr "${actual_stderr}")
+  endif()
   foreach(o IN ITEMS stdout stderr config)
     string(REGEX REPLACE "\r\n" "\n" actual_${o} "${actual_${o}}")
     string(REGEX REPLACE "${ignore_line_regex}" "\\1" actual_${o} "${actual_${o}}")

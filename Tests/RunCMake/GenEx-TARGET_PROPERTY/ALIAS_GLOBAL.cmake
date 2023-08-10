@@ -1,6 +1,3 @@
-
-cmake_minimum_required(VERSION 3.17)
-
 add_library(lib-global SHARED IMPORTED GLOBAL)
 add_library(alias-lib-global ALIAS lib-global)
 

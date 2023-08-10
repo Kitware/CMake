@@ -76,7 +76,8 @@ Functions
         [ALL]
         [USE_STAMP_FILE]
         [WORKING_DIRECTORY dir]
-        [COMMENT comment])
+        [COMMENT comment]
+        [CONFIG_FILE filename])
 
   The function constructs a ``Doxyfile`` and defines a custom target that runs
   Doxygen on that generated file. The listed files and directories are used as
@@ -96,6 +97,10 @@ Functions
   If provided, the optional ``comment`` will be passed as the ``COMMENT`` for
   the :command:`add_custom_target` command used to create the custom target
   internally.
+
+  .. versionadded:: 3.27
+    If ``CONFIG_FILE`` is set, the given file provided with full-path
+    will be used as doxygen configuration file
 
   .. versionadded:: 3.12
     If ``ALL`` is set, the target will be added to the default build target.
@@ -864,7 +869,7 @@ endfunction()
 
 function(doxygen_add_docs targetName)
     set(_options ALL USE_STAMP_FILE)
-    set(_one_value_args WORKING_DIRECTORY COMMENT)
+    set(_one_value_args WORKING_DIRECTORY COMMENT CONFIG_FILE)
     set(_multi_value_args)
     cmake_parse_arguments(_args
                           "${_options}"
@@ -1166,8 +1171,15 @@ doxygen_add_docs() for target ${targetName}")
 
     # Prepare doxygen configuration file
     set(_doxyfile_template "${CMAKE_BINARY_DIR}/CMakeDoxyfile.in")
-    set(_target_doxyfile "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.${targetName}")
-    configure_file("${_doxyfile_template}" "${_target_doxyfile}")
+    if(_args_CONFIG_FILE)
+        if(NOT EXISTS "${_args_CONFIG_FILE}")
+            message(FATAL_ERROR "Option CONFIG_FILE specifies file:\n ${_args_CONFIG_FILE}\nbut it does not exist.")
+        endif()
+        set(_target_doxyfile "${_args_CONFIG_FILE}")
+    else()
+        set(_target_doxyfile "${CMAKE_CURRENT_BINARY_DIR}/Doxyfile.${targetName}")
+        configure_file("${_doxyfile_template}" "${_target_doxyfile}")
+    endif()
 
     unset(_all)
     if(${_args_ALL})

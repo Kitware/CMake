@@ -1,4 +1,5 @@
 include(RunCMake)
+set(RunCMake_IGNORE_POLICY_VERSION_DEPRECATION ON)
 
 run_cmake(NotClosed)
 run_cmake(NotOpened)

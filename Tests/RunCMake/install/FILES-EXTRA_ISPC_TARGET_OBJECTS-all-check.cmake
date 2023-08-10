@@ -1,6 +1,10 @@
 
 set(objs obj1 obj2)
-set(targets  sse2 sse4 avx avx2)
+if("${CMAKE_SYSTEM_NAME};${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Darwin;arm64")
+  set(targets  "")
+else()
+  set(targets  sse2 sse4 avx avx2)
+endif()
 foreach(o IN LISTS objs)
   set(item "objs/${o}\\.ispc\\.(o|obj)")
   check_installed("${item}")

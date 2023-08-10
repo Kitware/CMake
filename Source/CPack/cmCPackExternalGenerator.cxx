@@ -15,8 +15,8 @@
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
+#include "cmList.h"
 #include "cmMakefile.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
@@ -79,7 +79,7 @@ int cmCPackExternalGenerator::PackageFiles()
 
     cmValue builtPackages = this->GetOption("CPACK_EXTERNAL_BUILT_PACKAGES");
     if (builtPackages) {
-      cmExpandList(builtPackages, this->packageFileNames, false);
+      cmExpandList(builtPackages, this->packageFileNames);
     }
   }
 

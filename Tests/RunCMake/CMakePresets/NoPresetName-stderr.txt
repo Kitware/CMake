@@ -1,2 +1,5 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/NoPresetName: Invalid preset$
+]*/Tests/RunCMake/CMakePresets/NoPresetName:
+Error: @4,5: Missing required field "name" in Preset
+    {
+    \^$

@@ -20,6 +20,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmGlobalVisualStudioGenerator.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalVisualStudio7Generator.h"
@@ -94,7 +95,9 @@ bool cmGlobalVisualStudio8Generator::SetGeneratorPlatform(std::string const& p,
     return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform(p, mf);
   }
 
-  this->GeneratorPlatform = p;
+  if (!this->ParseGeneratorPlatform(p, mf)) {
+    return false;
+  }
 
   // FIXME: Add CMAKE_GENERATOR_PLATFORM field to set the framework.
   // For now, just report the generator's default, if any.
@@ -118,6 +121,85 @@ bool cmGlobalVisualStudio8Generator::SetGeneratorPlatform(std::string const& p,
   // explicit platform specification.  We handled that above, so pass an
   // empty platform name to our base class implementation so it does not error.
   return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform("", mf);
+}
+
+bool cmGlobalVisualStudio8Generator::ParseGeneratorPlatform(
+  std::string const& p, cmMakefile* mf)
+{
+  this->GeneratorPlatform.clear();
+
+  std::vector<std::string> const fields = cmTokenize(p, ",");
+  auto fi = fields.begin();
+  if (fi == fields.end()) {
+    return true;
+  }
+
+  // The first field may be the VS platform.
+  if (fi->find('=') == fi->npos) {
+    this->GeneratorPlatform = *fi;
+    ++fi;
+  }
+
+  std::set<std::string> handled;
+
+  // The rest of the fields must be key=value pairs.
+  for (; fi != fields.end(); ++fi) {
+    std::string::size_type pos = fi->find('=');
+    if (pos == fi->npos) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Generator\n"
+        "  " << this->GetName() << "\n"
+        "given platform specification\n"
+        "  " << p << "\n"
+        "that contains a field after the first ',' with no '='."
+        ;
+      /* clang-format on */
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      return false;
+    }
+    std::string const key = fi->substr(0, pos);
+    std::string const value = fi->substr(pos + 1);
+    if (!handled.insert(key).second) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Generator\n"
+        "  " << this->GetName() << "\n"
+        "given platform specification\n"
+        "  " << p << "\n"
+        "that contains duplicate field key '" << key << "'."
+        ;
+      /* clang-format on */
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      return false;
+    }
+    if (!this->ProcessGeneratorPlatformField(key, value)) {
+      std::ostringstream e;
+      /* clang-format off */
+      e <<
+        "Generator\n"
+        "  " << this->GetName() << "\n"
+        "given platform specification\n"
+        "  " << p << "\n"
+        "that contains invalid field '" << *fi << "'."
+        ;
+      /* clang-format on */
+      mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      return false;
+    }
+  }
+
+  return true;
+}
+
+bool cmGlobalVisualStudio8Generator::ProcessGeneratorPlatformField(
+  std::string const& key, std::string const& value)
+{
+  static_cast<void>(key);
+  static_cast<void>(value);
+  return false;
 }
 
 cm::optional<std::string> const&
@@ -169,9 +251,19 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     cm::static_reference_cast<cmLocalVisualStudio7Generator>(generators[0]);
 
   auto cc = cm::make_unique<cmCustomCommand>();
-  cc->SetCMP0116Status(cmPolicies::NEW);
   cmTarget* tgt = lg.AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
                                        std::move(cc));
+
+  // Collect the input files used to generate all targets in this
+  // project.
+  std::vector<std::string> listFiles;
+  for (const auto& gen : generators) {
+    cm::append(listFiles, gen->GetMakefile()->GetListFiles());
+  }
+  // Sort the list of input files and remove duplicates.
+  std::sort(listFiles.begin(), listFiles.end(), std::less<std::string>());
+  auto new_end = std::unique(listFiles.begin(), listFiles.end());
+  listFiles.erase(new_end, listFiles.end());
 
   auto ptr = cm::make_unique<cmGeneratorTarget>(tgt, &lg);
   auto* gt = ptr.get();
@@ -206,13 +298,6 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     // The custom rule runs cmake so set UTF-8 pipes.
     bool stdPipesUTF8 = true;
 
-    // Collect the input files used to generate all targets in this
-    // project.
-    std::vector<std::string> listFiles;
-    for (const auto& gen : generators) {
-      cm::append(listFiles, gen->GetMakefile()->GetListFiles());
-    }
-
     // Add a custom prebuild target to run the VerifyGlobs script.
     cmake* cm = this->GetCMakeInstance();
     if (cm->DoWriteGlobVerifyTarget()) {
@@ -225,7 +310,6 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
       cc->SetByproducts(byproducts);
       cc->SetCommandLines(verifyCommandLines);
       cc->SetComment("Checking File Globs");
-      cc->SetCMP0116Status(cmPolicies::NEW);
       cc->SetStdPipesUTF8(stdPipesUTF8);
       lg.AddCustomCommandToTarget(CMAKE_CHECK_BUILD_SYSTEM_TARGET,
                                   cmCustomCommandType::PRE_BUILD,
@@ -237,11 +321,6 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
       listFiles.push_back(cm->GetGlobVerifyStamp());
     }
 
-    // Sort the list of input files and remove duplicates.
-    std::sort(listFiles.begin(), listFiles.end(), std::less<std::string>());
-    auto new_end = std::unique(listFiles.begin(), listFiles.end());
-    listFiles.erase(new_end, listFiles.end());
-
     // Create a rule to re-run CMake.
     std::string argS = cmStrCat("-S", lg.GetSourceDirectory());
     std::string argB = cmStrCat("-B", lg.GetBinaryDirectory());
@@ -250,6 +329,9 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
       { cmSystemTools::GetCMakeCommand(), argS, argB, "--check-stamp-list",
         stampList, "--vs-solution-file", sln });
+    if (cm->GetIgnoreWarningAsError()) {
+      commandLines[0].emplace_back("--compile-no-warning-as-error");
+    }
 
     // Add the rule.  Note that we cannot use the CMakeLists.txt
     // file as the main dependency because it would get
@@ -260,7 +342,6 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     cc->SetDepends(listFiles);
     cc->SetCommandLines(commandLines);
     cc->SetComment("Checking Build System");
-    cc->SetCMP0116Status(cmPolicies::NEW);
     cc->SetEscapeOldStyle(false);
     cc->SetStdPipesUTF8(stdPipesUTF8);
     if (cmSourceFile* file =

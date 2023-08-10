@@ -109,6 +109,7 @@ of the following libraries that are part of the CUDAToolkit:
 - :ref:`CUDA Runtime Library<cuda_toolkit_rt_lib>`
 - :ref:`CUDA Driver Library<cuda_toolkit_driver_lib>`
 - :ref:`cuBLAS<cuda_toolkit_cuBLAS>`
+- :ref:`cuDLA<cuda_toolkit_cuDLA>`
 - :ref:`cuFile<cuda_toolkit_cuFile>`
 - :ref:`cuFFT<cuda_toolkit_cuFFT>`
 - :ref:`cuRAND<cuda_toolkit_cuRAND>`
@@ -166,6 +167,19 @@ Targets Created:
 - ``CUDA::cublasLt`` starting in CUDA 10.1
 - ``CUDA::cublasLt_static`` starting in CUDA 10.1
 
+.. _`cuda_toolkit_cuDLA`:
+
+cuDLA
+""""""
+
+.. versionadded:: 3.27
+
+The NVIDIA Tegra Deep Learning Accelerator `cuDLA <https://docs.nvidia.com/cuda/cublas/index.html>`_ library.
+
+Targets Created:
+
+- ``CUDA::cudla`` starting in CUDA 11.6
+
 .. _`cuda_toolkit_cuFile`:
 
 cuFile
@@ -173,7 +187,7 @@ cuFile
 
 .. versionadded:: 3.25
 
-The NVIDIA GPUDirect Storage `cuFile <https://docs.nvidia.com/cuda/cufile-api/index.html>`_ library.
+The NVIDIA GPUDirect Storage `cuFile <https://docs.nvidia.com/gpudirect-storage/api-reference-guide/index.html>`_ library.
 
 Targets Created:
 
@@ -236,12 +250,19 @@ Targets Created:
 cupti
 """""
 
-The `NVIDIA CUDA Profiling Tools Interface <https://developer.nvidia.com/CUPTI>`_.
+The `NVIDIA CUDA Profiling Tools Interface <https://developer.nvidia.com/cupti>`_.
 
 Targets Created:
 
 - ``CUDA::cupti``
 - ``CUDA::cupti_static``
+
+.. versionadded:: 3.27
+
+  - ``CUDA::nvperf_host``         starting in CUDA 10.2
+  - ``CUDA::nvperf_host_static``  starting in CUDA 10.2
+  - ``CUDA::nvperf_target``       starting in CUDA 10.2
+  - ``CUDA::pcsamplingutil``      starting in CUDA 11.3
 
 .. _`cuda_toolkit_NPP`:
 
@@ -330,7 +351,7 @@ Targets Created:
 nvGRAPH
 """""""
 
-The `nvGRAPH <https://docs.nvidia.com/cuda/nvgraph/index.html>`_ library.
+The `nvGRAPH <https://web.archive.org/web/20201111171403/https://docs.nvidia.com/cuda/nvgraph/index.html>`_ library.
 Removed starting in CUDA 11.0
 
 Targets Created:
@@ -374,7 +395,6 @@ nvRTC
 """""
 
 The `nvRTC <https://docs.nvidia.com/cuda/nvrtc/index.html>`_ (Runtime Compilation) library.
-This is a shared library only.
 
 Targets Created:
 
@@ -417,7 +437,7 @@ nvToolsExt
 
 .. deprecated:: 3.25 With CUDA 10.0+, use :ref:`nvtx3 <cuda_toolkit_nvtx3>`.
 
-The `NVIDIA Tools Extension <https://docs.nvidia.com/gameworks/content/gameworkslibrary/nvtx/nvidia_tools_extension_library_nvtx.htm>`_.
+The `NVIDIA Tools Extension <https://docs.nvidia.com/nvtx/>`_.
 This is a shared library only.
 
 Targets Created:
@@ -609,8 +629,8 @@ else()
         endif()
         unset(_CUDA_NVCC_OUT)
 
-        mark_as_advanced(CUDAToolkit_BIN_DIR)
         set(CUDAToolkit_BIN_DIR "${CUDAToolkit_BIN_DIR}" CACHE PATH "" FORCE)
+        mark_as_advanced(CUDAToolkit_BIN_DIR)
       endif()
 
       if(CUDAToolkit_SENTINEL_FILE)
@@ -1092,6 +1112,11 @@ if(CUDAToolkit_FOUND)
     _CUDAToolkit_find_and_add_import_lib(cuFile_rdma_static DEPS cuFile_static culibos)
   endif()
 
+    if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.6)
+    _CUDAToolkit_find_and_add_import_lib(cudla)
+  endif()
+
+
   # cuFFTW depends on cuFFT
   _CUDAToolkit_find_and_add_import_lib(cufftw DEPS cufft)
   _CUDAToolkit_find_and_add_import_lib(cufftw_static DEPS cufft_static)
@@ -1135,20 +1160,35 @@ if(CUDAToolkit_FOUND)
       "${CUDAToolkit_INCLUDE_DIR}/../extras/CUPTI/include"
       "${CUDAToolkit_INCLUDE_DIR}"
       NO_DEFAULT_PATH)
+  mark_as_advanced(CUDAToolkit_CUPTI_INCLUDE_DIR)
 
   if(CUDAToolkit_CUPTI_INCLUDE_DIR)
+    set(_cmake_cupti_extra_paths extras/CUPTI/lib64/
+                                 extras/CUPTI/lib/
+                                 ../extras/CUPTI/lib64/
+                                 ../extras/CUPTI/lib/)
     _CUDAToolkit_find_and_add_import_lib(cupti
-                                        EXTRA_PATH_SUFFIXES extras/CUPTI/lib64/
-                                                            extras/CUPTI/lib/
-                                                            ../extras/CUPTI/lib64/
-                                                            ../extras/CUPTI/lib/
+                                        EXTRA_PATH_SUFFIXES ${_cmake_cupti_extra_paths}
                                         EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
     _CUDAToolkit_find_and_add_import_lib(cupti_static
-                                        EXTRA_PATH_SUFFIXES extras/CUPTI/lib64/
-                                                            extras/CUPTI/lib/
-                                                            ../extras/CUPTI/lib64/
-                                                            ../extras/CUPTI/lib/
+                                        EXTRA_PATH_SUFFIXES ${_cmake_cupti_extra_paths}
                                         EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
+    if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.2.0)
+      _CUDAToolkit_find_and_add_import_lib(nvperf_host
+                                          EXTRA_PATH_SUFFIXES ${_cmake_cupti_extra_paths}
+                                          EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
+      _CUDAToolkit_find_and_add_import_lib(nvperf_host_static
+                                          EXTRA_PATH_SUFFIXES ${_cmake_cupti_extra_paths}
+                                          EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
+      _CUDAToolkit_find_and_add_import_lib(nvperf_target
+                                          EXTRA_PATH_SUFFIXES ${_cmake_cupti_extra_paths}
+                                          EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
+    endif()
+    if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.3.0)
+      _CUDAToolkit_find_and_add_import_lib(pcsamplingutil
+                                          EXTRA_PATH_SUFFIXES ${_cmake_cupti_extra_paths}
+                                          EXTRA_INCLUDE_DIRS "${CUDAToolkit_CUPTI_INCLUDE_DIR}")
+    endif()
   endif()
 
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.1.0)
@@ -1160,7 +1200,7 @@ if(CUDAToolkit_FOUND)
     endif()
   endif()
 
-  _CUDAToolkit_find_and_add_import_lib(nvrtc_builtins DEPS cuda_driver)
+  _CUDAToolkit_find_and_add_import_lib(nvrtc_builtins ALT nvrtc-builtins DEPS cuda_driver)
   _CUDAToolkit_find_and_add_import_lib(nvrtc DEPS nvrtc_builtins nvJitLink)
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.5.0)
     _CUDAToolkit_find_and_add_import_lib(nvrtc_builtins_static ALT nvrtc-builtins_static DEPS cuda_driver)

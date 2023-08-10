@@ -18,11 +18,11 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGhsMultiGpj.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalGhsMultiGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmPolicies.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -101,11 +101,11 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorToolset(std::string const& ts,
 
   /* check if the toolset changed from last generate */
   if (cmNonempty(prevTool) && !cmSystemTools::ComparePath(gbuild, *prevTool)) {
-    std::string const& e =
-      cmStrCat("toolset build tool: ", gbuild,
-               "\nDoes not match the previously used build tool: ", *prevTool,
-               "\nEither remove the CMakeCache.txt file and CMakeFiles "
-               "directory or choose a different binary directory.");
+    std::string const& e = cmStrCat(
+      "toolset build tool: ", gbuild, '\n',
+      "Does not match the previously used build tool: ", *prevTool, '\n',
+      "Either remove the CMakeCache.txt file and CMakeFiles "
+      "directory or choose a different binary directory.");
     mf->IssueMessage(MessageType::FATAL_ERROR, e);
     return false;
   }
@@ -532,7 +532,7 @@ void cmGlobalGhsMultiGenerator::WriteMacros(std::ostream& fout,
   fout << "macro PROJ_NAME=" << root->GetProjectName() << '\n';
   cmValue ghsGpjMacros = root->GetMakefile()->GetDefinition("GHS_GPJ_MACROS");
   if (ghsGpjMacros) {
-    std::vector<std::string> expandedList = cmExpandedList(*ghsGpjMacros);
+    cmList expandedList{ *ghsGpjMacros };
     for (std::string const& arg : expandedList) {
       fout << "macro " << arg << '\n';
     }
@@ -717,7 +717,6 @@ bool cmGlobalGhsMultiGenerator::AddCheckTarget()
     cc->SetDepends(listFiles);
     cc->SetCommandLines(commandLines);
     cc->SetComment("Checking Build System");
-    cc->SetCMP0116Status(cmPolicies::NEW);
     cc->SetEscapeOldStyle(false);
     cc->SetStdPipesUTF8(true);
 
@@ -747,7 +746,6 @@ void cmGlobalGhsMultiGenerator::AddAllTarget()
       // Use no actual command lines so that the target itself is not
       // considered always out of date.
       auto cc = cm::make_unique<cmCustomCommand>();
-      cc->SetCMP0116Status(cmPolicies::NEW);
       cc->SetEscapeOldStyle(false);
       cc->SetComment("Build all projects");
       cmTarget* allBuild = gen[0]->AddUtilityCommand(this->GetAllTargetName(),

@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.15)
-project(objctest LANGUAGES C OBJC)
+enable_language(C)
+enable_language(OBJC)
 
 include(CheckOBJCCompilerFlag)
 check_objc_compiler_flag(-fobjc-arc HAVE_OBJC_ARC)

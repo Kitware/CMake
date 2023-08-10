@@ -304,10 +304,12 @@ endif()
 # Search for different LAPACK distributions if BLAS is found
 if(NOT LAPACK_NOT_FOUND_MESSAGE)
   set(LAPACK_LINKER_FLAGS ${BLAS_LINKER_FLAGS})
-  if(NOT $ENV{BLA_VENDOR} STREQUAL "")
-    set(BLA_VENDOR $ENV{BLA_VENDOR})
-  elseif(NOT BLA_VENDOR)
-    set(BLA_VENDOR "All")
+  if(NOT BLA_VENDOR)
+    if(NOT "$ENV{BLA_VENDOR}" STREQUAL "")
+      set(BLA_VENDOR "$ENV{BLA_VENDOR}")
+    else()
+      set(BLA_VENDOR "All")
+    endif()
   endif()
 
   # LAPACK in the Intel MKL 10+ library?
@@ -557,6 +559,29 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
         "${BLAS_LIBRARIES}"
       )
     endif()
+  endif()
+
+  # AOCL? (https://developer.amd.com/amd-aocl/)
+  if(NOT LAPACK_LIBRARIES
+      AND (BLA_VENDOR MATCHES "AOCL" OR BLA_VENDOR STREQUAL "All"))
+    if(_lapack_sizeof_integer EQUAL 8)
+      set(_lapack_aocl_subdir "ILP64")
+    else()
+      set(_lapack_aocl_subdir "LP64")
+    endif()
+
+    check_lapack_libraries(
+      LAPACK_LIBRARIES
+      LAPACK
+      cheev
+      ""
+      "flame"
+      "-fopenmp"
+      ""
+      "${_lapack_aocl_subdir}"
+      "${BLAS_LIBRARIES}"
+    )
+    unset(_lapack_aocl_subdir)
   endif()
 
   # LAPACK in SCSL library? (SGI/Cray Scientific Library)

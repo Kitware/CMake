@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -205,7 +205,7 @@ extern OM_uint32 Curl_gss_delete_sec_context_a(OM_uint32 * minor_status,
 extern int Curl_os400_connect(int sd, struct sockaddr *destaddr, int addrlen);
 extern int Curl_os400_bind(int sd, struct sockaddr *localaddr, int addrlen);
 extern int Curl_os400_sendto(int sd, char *buffer, int buflen, int flags,
-                             struct sockaddr *dstaddr, int addrlen);
+                             const struct sockaddr *dstaddr, int addrlen);
 extern int Curl_os400_recvfrom(int sd, char *buffer, int buflen, int flags,
                                struct sockaddr *fromaddr, int *addrlen);
 extern int Curl_os400_getpeername(int sd, struct sockaddr *addr, int *addrlen);

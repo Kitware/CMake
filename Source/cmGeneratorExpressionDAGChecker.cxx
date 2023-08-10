@@ -27,6 +27,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   , Content(content)
   , Backtrace(std::move(backtrace))
   , TransitivePropertiesOnly(false)
+  , CMP0131(false)
 {
   this->Initialize();
 }
@@ -41,6 +42,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   , Content(content)
   , Backtrace()
   , TransitivePropertiesOnly(false)
+  , CMP0131(false)
 {
   this->Initialize();
 }
@@ -143,6 +145,12 @@ bool cmGeneratorExpressionDAGChecker::GetTransitivePropertiesOnly() const
   return this->Top()->TransitivePropertiesOnly;
 }
 
+bool cmGeneratorExpressionDAGChecker::GetTransitivePropertiesOnlyCMP0131()
+  const
+{
+  return this->Top()->CMP0131;
+}
+
 bool cmGeneratorExpressionDAGChecker::EvaluatingGenexExpression() const
 {
   return cmHasLiteralPrefix(this->Property, "TARGET_GENEX_EVAL:") ||
@@ -175,6 +183,15 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkOptionsExpression() const
   cm::string_view property(this->Top()->Property);
 
   return property == "LINK_OPTIONS"_s;
+}
+
+bool cmGeneratorExpressionDAGChecker::EvaluatingLinkerLauncher() const
+{
+  cm::string_view property(this->Top()->Property);
+
+  return property.length() > cmStrLen("_LINKER_LAUNCHER") &&
+    property.substr(property.length() - cmStrLen("_LINKER_LAUNCHER")) ==
+    "_LINKER_LAUNCHER"_s;
 }
 
 bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(

@@ -1,6 +1,12 @@
 Kate
 ----
 
+.. deprecated:: 3.27
+
+  Support for :ref:`Extra Generators` is deprecated and will be removed from
+  a future version of CMake.  IDEs may use the :manual:`cmake-file-api(7)`
+  to view CMake-generated project build trees.
+
 Generates Kate project files.
 
 A project file for Kate will be created in the top directory in the top level
@@ -21,6 +27,9 @@ This "extra" generator may be specified as:
 
 ``Kate - Ninja``
  Generate with :generator:`Ninja`.
+
+``Kate - Ninja Multi-Config``
+ Generate with :generator:`Ninja Multi-Config`.
 
 ``Kate - Unix Makefiles``
  Generate with :generator:`Unix Makefiles`.

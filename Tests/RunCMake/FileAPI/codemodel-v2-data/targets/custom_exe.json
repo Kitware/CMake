@@ -44,6 +44,7 @@
                 "^empty\\.c$"
             ],
             "includes": null,
+            "frameworks": null,
             "defines": null,
             "compileCommandFragments": null
         }

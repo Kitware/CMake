@@ -11,7 +11,7 @@ Synopsis
 .. parsed-literal::
 
  `Run Tests`_
-  ctest [<options>]
+  ctest [<options>] [--test-dir <path-to-build>]
 
  `Build and Test Mode`_
   ctest --build-and-test <path-to-source> <path-to-build>
@@ -354,7 +354,8 @@ Run Tests
 
 .. option:: --test-dir <dir>
 
- Specify the directory in which to look for tests.
+ Specify the directory in which to look for tests, typically a CMake project
+ build directory. If not specified, the current directory is used.
 
 .. option:: --test-output-size-passed <size>
 

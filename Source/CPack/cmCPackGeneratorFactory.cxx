@@ -13,6 +13,7 @@
 #include "cmCPackDebGenerator.h"
 #include "cmCPackExternalGenerator.h"
 #include "cmCPackGenerator.h"
+#include "cmCPackInnoSetupGenerator.h"
 #include "cmCPackLog.h"
 #include "cmCPackNSISGenerator.h"
 #include "cmCPackNuGetGenerator.h"
@@ -59,6 +60,10 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
   if (cmCPackSTGZGenerator::CanGenerate()) {
     this->RegisterGenerator("STGZ", "Self extracting Tar GZip compression",
                             cmCPackSTGZGenerator::CreateGenerator);
+  }
+  if (cmCPackInnoSetupGenerator::CanGenerate()) {
+    this->RegisterGenerator("INNOSETUP", "Inno Setup packages",
+                            cmCPackInnoSetupGenerator::CreateGenerator);
   }
   if (cmCPackNSISGenerator::CanGenerate()) {
     this->RegisterGenerator("NSIS", "Null Soft Installer",

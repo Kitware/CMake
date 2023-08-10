@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1999 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -400,7 +400,7 @@ static int dprintf_Pass1(const char *format, struct va_stack *vto,
         /* out of allowed range */
         return 1;
 
-      switch (*fmt) {
+      switch(*fmt) {
       case 'S':
         flags |= FLAGS_ALT;
         /* FALLTHROUGH */
@@ -743,11 +743,11 @@ static int dprintf_formatf(
 
       goto number;
 
-      unsigned_number:
+unsigned_number:
       /* Unsigned number of base BASE.  */
       is_neg = 0;
 
-      number:
+number:
       /* Number of base BASE.  */
 
       /* Supply a default precision if none was given.  */

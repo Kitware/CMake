@@ -20,6 +20,7 @@
 #include "cmConfigureLog.h"
 #include "cmExportTryCompileFileGenerator.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
@@ -72,6 +73,10 @@ SETUP_LANGUAGE(swift_properties, Swift);
 std::string const kCMAKE_CUDA_ARCHITECTURES = "CMAKE_CUDA_ARCHITECTURES";
 std::string const kCMAKE_CUDA_RUNTIME_LIBRARY = "CMAKE_CUDA_RUNTIME_LIBRARY";
 std::string const kCMAKE_ENABLE_EXPORTS = "CMAKE_ENABLE_EXPORTS";
+std::string const kCMAKE_EXECUTABLE_ENABLE_EXPORTS =
+  "CMAKE_EXECUTABLE_ENABLE_EXPORTS";
+std::string const kCMAKE_SHARED_LIBRARY_ENABLE_EXPORTS =
+  "CMAKE_SHARED_LIBRARY_ENABLE_EXPORTS";
 std::string const kCMAKE_HIP_ARCHITECTURES = "CMAKE_HIP_ARCHITECTURES";
 std::string const kCMAKE_HIP_RUNTIME_LIBRARY = "CMAKE_HIP_RUNTIME_LIBRARY";
 std::string const kCMAKE_ISPC_INSTRUCTION_SETS = "CMAKE_ISPC_INSTRUCTION_SETS";
@@ -121,7 +126,7 @@ ArgumentParser::Continue TryCompileLangProp(Arguments& args,
 ArgumentParser::Continue TryCompileCompileDefs(Arguments& args,
                                                cm::string_view val)
 {
-  cmExpandList(val, args.CompileDefs);
+  args.CompileDefs.append(val);
   return ArgumentParser::Continue::Yes;
 }
 
@@ -784,7 +789,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     if (!arguments.CompileDefs.empty()) {
       // Pass using bracket arguments to preserve content.
       fprintf(fout, "add_definitions([==[%s]==])\n",
-              cmJoin(arguments.CompileDefs, "]==] [==[").c_str());
+              arguments.CompileDefs.join("]==] [==[").c_str());
     }
 
     if (!targets.empty()) {
@@ -997,6 +1002,8 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     vars.insert(kCMAKE_CUDA_ARCHITECTURES);
     vars.insert(kCMAKE_CUDA_RUNTIME_LIBRARY);
     vars.insert(kCMAKE_ENABLE_EXPORTS);
+    vars.insert(kCMAKE_EXECUTABLE_ENABLE_EXPORTS);
+    vars.insert(kCMAKE_SHARED_LIBRARY_ENABLE_EXPORTS);
     vars.insert(kCMAKE_HIP_ARCHITECTURES);
     vars.insert(kCMAKE_HIP_RUNTIME_LIBRARY);
     vars.insert(kCMAKE_ISPC_INSTRUCTION_SETS);
@@ -1018,7 +1025,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
 
     if (cmValue varListStr = this->Makefile->GetDefinition(
           kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {
-      std::vector<std::string> varList = cmExpandedList(*varListStr);
+      cmList varList{ *varListStr };
       vars.insert(varList.begin(), varList.end());
     }
 

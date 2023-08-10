@@ -1,0 +1,115 @@
+# Install build requirements.
+ncurses-devel
+openssl-devel
+qt5-qtbase-devel
+qt6-qtbase-devel
+
+# Install development tools.
+clang
+clang-tools-extra
+clang-tools-extra-devel
+compiler-rt
+flang
+flang-devel
+gcc-c++
+git-core
+make
+
+# Install optional external build dependencies.
+bzip2-devel
+expat-devel
+jsoncpp-devel
+libarchive-devel
+libcurl-devel
+libuv-devel
+libuv-devel
+libzstd-devel
+rhash-devel
+xz-devel
+zlib-devel
+
+# Install documentation tools.
+python3-sphinx
+texinfo
+qt5-qttools-devel
+qt6-qttools-devel
+
+# Install lint tools.
+clang-analyzer
+codespell
+
+# Tools needed for the test suite.
+findutils
+file
+jq
+which
+
+# Packages needed to test CTest.
+breezy
+subversion
+mercurial
+
+# Packages needed to test CPack.
+rpm-build
+
+# Packages needed to test find modules.
+alsa-lib-devel
+blas-devel
+boost-devel boost-python3-devel
+bzip2-devel
+cups-devel
+DevIL-devel
+doxygen
+expat-devel
+fontconfig-devel
+freeglut-devel
+freetype-devel
+gdal-devel
+gettext
+giflib-devel
+glew-devel
+gmock
+gnutls-devel
+grpc-devel grpc-plugins
+gsl-devel
+gtest-devel
+gtk2-devel
+hdf5-devel
+hdf5-mpich-devel
+hdf5-openmpi-devel
+ImageMagick-c++-devel
+java-11-openjdk-devel
+jsoncpp-devel
+lapack-devel
+libarchive-devel
+libcurl-devel
+libicu-devel
+libinput-devel systemd-devel
+libjpeg-turbo-devel
+libpng-devel
+opensp-devel
+postgresql-server-devel
+libtiff-devel
+libuv-devel
+libxml2-devel
+libxslt-devel
+mpich-devel
+openal-soft-devel
+openmpi-devel
+patch
+perl
+protobuf-devel protobuf-c-devel protobuf-lite-devel
+pypy2 pypy2-devel
+pypy3 pypy3-devel
+python2 python2-devel
+python3 python3-devel python3-numpy
+python3-jsmin python3-jsonschema
+ruby rubygems ruby-devel
+SDL-devel
+sqlite-devel
+swig
+unixODBC-devel
+wxGTK-devel
+xalan-c-devel
+xerces-c-devel
+xz-devel
