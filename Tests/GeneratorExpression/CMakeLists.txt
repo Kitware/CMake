@@ -215,6 +215,11 @@ set_property(TARGET importedFallback2 PROPERTY MAP_IMPORTED_CONFIG_NOCONFIG SPEC
 set_property(TARGET importedFallback2 PROPERTY MAP_IMPORTED_CONFIG_DEBUG SPECIAL "")
 set_property(TARGET importedFallback2 PROPERTY MAP_IMPORTED_CONFIG_RELEASE SPECIAL "")
 
+# START MICROSOFT CHANGE
+# We build RelWithDebInfo, but Kitware only builds Debug and Release for tests.
+set_property(TARGET importedFallback2 PROPERTY MAP_IMPORTED_CONFIG_RELWITHDEBINFO SPECIAL "")
+# END MICROSOFT CHANGE
+
 add_library(importedFallback_genex STATIC IMPORTED)
 set_property(TARGET importedFallback_genex PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_property(TARGET importedFallback_genex PROPERTY IMPORTED_LOCATION_RELEASE release_loc)
