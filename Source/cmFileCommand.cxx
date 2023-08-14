@@ -1014,7 +1014,8 @@ bool HandleRPathChangeCommand(std::vector<std::string> const& args,
   if (success) {
     if (changed) {
       std::string message =
-        cmStrCat("Set runtime path of \"", file, "\" to \"", *newRPath, '"');
+        cmStrCat("Set non-toolchain portion of runtime path of \"", file,
+                 "\" to \"", *newRPath, '"');
       status.GetMakefile().DisplayStatus(message, -1);
     }
     ft.Store(file);
@@ -1068,7 +1069,8 @@ bool HandleRPathSetCommand(std::vector<std::string> const& args,
   if (success) {
     if (changed) {
       std::string message =
-        cmStrCat("Set runtime path of \"", file, "\" to \"", *newRPath, '"');
+        cmStrCat("Set non-toolchain portion of runtime path of \"", file,
+                 "\" to \"", *newRPath, '"');
       status.GetMakefile().DisplayStatus(message, -1);
     }
     ft.Store(file);
