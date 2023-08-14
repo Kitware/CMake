@@ -33,6 +33,18 @@ bool HandleAndValidateSourceFileDirectoryScopes(
   std::vector<std::string>& source_target_directories,
   std::vector<cmMakefile*>& source_file_directory_makefiles);
 
+bool HandleTestDirectoryScopes(cmExecutionStatus& status,
+                               std::string& test_directory,
+                               cmMakefile*& directory_makefile);
+
+bool HandleTestDirectoryScopeValidation(cmExecutionStatus& status,
+                                        bool test_directory_option_enabled,
+                                        std::string& test_directory);
+
+bool HandleAndValidateTestDirectoryScopes(
+  cmExecutionStatus& status, bool test_directory_option_encountered,
+  std::string& test_directory, cmMakefile*& test_directory_makefile);
+
 std::string MakeSourceFilePathAbsoluteIfNeeded(
   cmExecutionStatus& status, const std::string& source_file_path, bool needed);
 void MakeSourceFilePathsAbsoluteIfNeeded(
