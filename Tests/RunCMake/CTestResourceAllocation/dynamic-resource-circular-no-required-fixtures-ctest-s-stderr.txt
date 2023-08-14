@@ -1,0 +1,2 @@
+^All tests that have RESOURCE_GROUPS must include the resource spec generator fixture in their FIXTURES_REQUIRED
+No tests were found!!!$

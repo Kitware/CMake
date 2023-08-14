@@ -1,0 +1,2 @@
+^GENERATED_RESOURCE_SPEC_FILE test property cannot be used in conjunction with ResourceSpecFile option
+No tests were found!!!$

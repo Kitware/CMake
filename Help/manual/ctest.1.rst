@@ -1817,6 +1817,25 @@ The following variables are passed to the test process:
   uppercase in the ``CTEST_RESOURCE_GROUP_<num>_<resource-type>`` environment
   variable.
 
+.. _`ctest-resource-dynamically-generated-spec-file`:
+
+Dynamically-Generated Resource Specification File
+-------------------------------------------------
+
+.. versionadded:: 3.28
+
+A project may optionally specify a single test which will be used to
+dynamically generate the resource specification file that CTest will use for
+scheduling tests that use resources. The test that generates the file must
+have the :prop_test:`GENERATED_RESOURCE_SPEC_FILE` property set, and must have
+exactly one fixture in its :prop_test:`FIXTURES_SETUP` property. This fixture
+is considered by CTest to have special meaning: it's the fixture that generates
+the resource spec file. The fixture may have any name. If such a fixture
+exists, all tests that have :prop_test:`RESOURCE_GROUPS` set must have the
+fixture in their :prop_test:`FIXTURES_REQUIRED`, and a resource spec file may
+not be specified with the ``--resource-spec-file`` argument or the
+:variable:`CTEST_RESOURCE_SPEC_FILE` variable.
+
 See Also
 ========
 
