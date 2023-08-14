@@ -68,6 +68,30 @@ bool PlistSupportedPlatformHelper(
   return false;
 }
 
+bool PlistSupportedPlatformVariantHelper(
+  cmXcFrameworkPlistSupportedPlatformVariant& variant,
+  const Json::Value* value, cmJSONState* /*state*/)
+{
+  if (!value) {
+    return false;
+  }
+
+  if (!value->isString()) {
+    return false;
+  }
+
+  if (value->asString() == "catalyst"_s) {
+    variant = cmXcFrameworkPlistSupportedPlatformVariant::catalyst;
+    return true;
+  }
+  if (value->asString() == "simulator"_s) {
+    variant = cmXcFrameworkPlistSupportedPlatformVariant::simulator;
+    return true;
+  }
+
+  return false;
+}
+
 auto const PlistLibraryHelper =
   cmJSONHelperBuilder::Object<cmXcFrameworkPlistLibrary>{}
     .Bind("LibraryIdentifier"_s, &cmXcFrameworkPlistLibrary::LibraryIdentifier,
@@ -81,7 +105,13 @@ auto const PlistLibraryHelper =
           cmJSONHelperBuilder::Vector<std::string>(
             JsonErrors::EXPECTED_TYPE("array"), cmJSONHelperBuilder::String()))
     .Bind("SupportedPlatform"_s, &cmXcFrameworkPlistLibrary::SupportedPlatform,
-          PlistSupportedPlatformHelper);
+          PlistSupportedPlatformHelper)
+    .Bind("SupportedPlatformVariant"_s,
+          &cmXcFrameworkPlistLibrary::SupportedPlatformVariant,
+          cmJSONHelperBuilder::Optional<
+            cmXcFrameworkPlistSupportedPlatformVariant>(
+            PlistSupportedPlatformVariantHelper),
+          false);
 
 auto const PlistHelper =
   cmJSONHelperBuilder::Object<cmXcFrameworkPlist>{}.Bind(
@@ -139,6 +169,10 @@ const cmXcFrameworkPlistLibrary* cmXcFrameworkPlist::SelectSuitableLibrary(
   const cmMakefile& mf, const cmListFileBacktrace& bt) const
 {
   auto systemName = mf.GetSafeDefinition("CMAKE_SYSTEM_NAME");
+  cm::optional<cmXcFrameworkPlistSupportedPlatformVariant> systemVariant;
+  if (mf.PlatformIsAppleSimulator()) {
+    systemVariant = cmXcFrameworkPlistSupportedPlatformVariant::simulator;
+  }
 
   for (auto const& lib : this->AvailableLibraries) {
     std::string supportedSystemName;
@@ -160,7 +194,8 @@ const cmXcFrameworkPlistLibrary* cmXcFrameworkPlist::SelectSuitableLibrary(
         break;
     }
 
-    if (systemName == supportedSystemName) {
+    if (systemName == supportedSystemName &&
+        systemVariant == lib.SupportedPlatformVariant) {
       return &lib;
     }
   }
