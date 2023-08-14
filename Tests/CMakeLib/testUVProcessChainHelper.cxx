@@ -7,6 +7,12 @@
 #include <string>
 #include <thread>
 
+#ifdef _WIN32
+#  include <windows.h>
+#endif
+
+#include "cmSystemTools.h"
+
 static std::string getStdin()
 {
   char buffer[1024];
@@ -59,13 +65,17 @@ int main(int argc, char** argv)
     }
 
     // On Windows, the exit code of abort() is different between debug and
-    // release builds, and does not yield a term_signal in libuv in either
-    // case. For the sake of simplicity, we just return another non-zero code.
+    // release builds. Instead, simulate an access violation.
 #ifdef _WIN32
-    return 2;
+    return STATUS_ACCESS_VIOLATION;
 #else
     std::abort();
 #endif
+  }
+  if (command == "pwd") {
+    std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+    std::cout << cwd << std::flush;
+    return 0;
   }
 
   return -1;

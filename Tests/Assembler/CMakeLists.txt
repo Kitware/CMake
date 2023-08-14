@@ -24,7 +24,7 @@ if("${CMAKE_GENERATOR}" MATCHES "Makefile|Xcode|Ninja" AND
     elseif("${CMAKE_SYSTEM_NAME};${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Darwin;arm64")
       list(APPEND C_FLAGS -arch arm64)
     endif()
-    if(CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    if(CMAKE_C_COMPILER_ID MATCHES "Clang")
       # Just in case the user is passing -flto, we need to pass -fno-lto to
       # clang when generating the assembly file, or else clang will generate
       # LLVM IR instead of assembly.

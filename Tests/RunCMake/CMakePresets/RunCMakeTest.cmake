@@ -146,10 +146,12 @@ run_cmake_presets(NoSuchMacro)
 run_cmake_presets(EnvCycle)
 run_cmake_presets(EmptyEnv)
 run_cmake_presets(EmptyPenv)
+run_cmake_presets(EmptyPenvInInclude)
 run_cmake_presets(InvalidRegex)
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 1)
 run_cmake_presets(ConditionFuture)
 run_cmake_presets(SubConditionNull)
+run_cmake_presets(TraceNotSupported)
 
 # Test cmakeMinimumRequired field
 run_cmake_presets(MinimumRequiredInvalid)
@@ -326,6 +328,18 @@ set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/Debug.json.in")
 run_cmake_presets(NoDebug)
 run_cmake_presets(Debug)
 
+# Test trace
+set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/Trace.json.in")
+run_cmake_presets(NoTrace)
+run_cmake_presets(ExplicitNoTrace)
+run_cmake_presets(Trace)
+run_cmake_presets(TraceExpand)
+run_cmake_presets(TraceFormatJSON)
+run_cmake_presets(TraceFormatHuman)
+run_cmake_presets(TraceSource)
+run_cmake_presets(TraceRedirect)
+run_cmake_presets(TraceAll)
+
 # Test ${hostSystemName} macro
 set(CMakePresets_FILE "${RunCMake_SOURCE_DIR}/HostSystemName.json.in")
 run_cmake_presets(HostSystemName)
@@ -380,6 +394,12 @@ set(CMakePresets_EXTRA_FILES
   "${RunCMake_SOURCE_DIR}/subdir/CMakePresets.json.in"
   )
 run_cmake_presets(Include --list-presets)
+set(CMakePresets_EXTRA_FILES
+  "${RunCMake_SOURCE_DIR}/IncludeCommon.json.in"
+  )
+set(ENV{TEST_ENV_INCLUDE_DIR} ${RunCMake_BINARY_DIR}/IncludeExpansion)
+run_cmake_presets(IncludeExpansion --list-presets)
+unset(ENV{TEST_ENV_INCLUDE_DIR})
 unset(CMakePresets_EXTRA_FILES)
 run_cmake_presets(IncludeNotFound)
 run_cmake_presets(IncludeCycle)

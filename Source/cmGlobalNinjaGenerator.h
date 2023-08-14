@@ -236,6 +236,8 @@ public:
     return cmDepfileFormat::GccDepfile;
   }
 
+  bool SupportsLinkerDependencyFile() const override { return true; }
+
   virtual cmGeneratedFileStream* GetImplFileStream(
     const std::string& /*config*/) const
   {
@@ -351,15 +353,10 @@ public:
                            const std::string& fileConfig,
                            cmNinjaTargetDepends depends);
   void AppendTargetDependsClosure(cmGeneratorTarget const* target,
-                                  cmNinjaDeps& outputs,
+                                  std::unordered_set<std::string>& outputs,
                                   const std::string& config,
                                   const std::string& fileConfig,
-                                  bool genexOutput);
-  void AppendTargetDependsClosure(cmGeneratorTarget const* target,
-                                  cmNinjaOuts& outputs,
-                                  const std::string& config,
-                                  const std::string& fileConfig,
-                                  bool genexOutput, bool omit_self);
+                                  bool genexOutput, bool omit_self = true);
 
   void AppendDirectoryForConfig(const std::string& prefix,
                                 const std::string& config,
@@ -602,7 +599,6 @@ private:
   std::string OutputPathPrefix;
   std::string TargetAll;
   std::string CMakeCacheFile;
-  bool DisableCleandead = false;
 
   struct ByConfig
   {
@@ -618,7 +614,8 @@ private:
       bool GenexOutput;
     };
 
-    std::map<TargetDependsClosureKey, cmNinjaOuts> TargetDependsClosures;
+    std::map<TargetDependsClosureKey, std::unordered_set<std::string>>
+      TargetDependsClosures;
 
     TargetAliasMap TargetAliases;
 

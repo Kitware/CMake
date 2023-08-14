@@ -728,7 +728,7 @@ std::string cmFileAPI::NoSupportedVersion(
 // The "codemodel" object kind.
 
 // Update Help/manual/cmake-file-api.7.rst when updating this constant.
-static unsigned int const CodeModelV2Minor = 5;
+static unsigned int const CodeModelV2Minor = 6;
 
 void cmFileAPI::BuildClientRequestCodeModel(
   ClientRequest& r, std::vector<RequestVersion> const& versions)
@@ -977,4 +977,46 @@ Json::Value cmFileAPI::ReportCapabilities()
   }
 
   return capabilities;
+}
+
+bool cmFileAPI::AddProjectQuery(cmFileAPI::ObjectKind kind,
+                                unsigned majorVersion, unsigned minorVersion)
+{
+  switch (kind) {
+    case ObjectKind::CodeModel:
+      if (majorVersion != 2 || minorVersion > CodeModelV2Minor) {
+        return false;
+      }
+      break;
+    case ObjectKind::Cache:
+      if (majorVersion != 2 || minorVersion > CacheV2Minor) {
+        return false;
+      }
+      break;
+    case ObjectKind::CMakeFiles:
+      if (majorVersion != 1 || minorVersion > CMakeFilesV1Minor) {
+        return false;
+      }
+      break;
+    case ObjectKind::Toolchains:
+      if (majorVersion != 1 || minorVersion > ToolchainsV1Minor) {
+        return false;
+      }
+      break;
+    // These cannot be requested by the project
+    case ObjectKind::ConfigureLog:
+    case ObjectKind::InternalTest:
+      return false;
+  }
+
+  Object query;
+  query.Kind = kind;
+  query.Version = majorVersion;
+  if (std::find(this->TopQuery.Known.begin(), this->TopQuery.Known.end(),
+                query) == this->TopQuery.Known.end()) {
+    this->TopQuery.Known.emplace_back(query);
+    this->QueryExists = true;
+  }
+
+  return true;
 }

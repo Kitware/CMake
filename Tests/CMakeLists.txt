@@ -40,10 +40,12 @@ set(ENV{HOME} \"${TEST_HOME}\")
 endif()
 
 # Suppress generator deprecation warnings in test suite.
-if(CMAKE_GENERATOR MATCHES "^Visual Studio 11 2012")
-  set(TEST_WARN_VS11_CODE "set(ENV{CMAKE_WARN_VS11} OFF)")
+if(CMAKE_GENERATOR MATCHES "^Visual Studio 9 2008")
+  set(TEST_WARN_VS_CODE "set(ENV{CMAKE_WARN_VS9} OFF)")
+elseif(CMAKE_GENERATOR MATCHES "^Visual Studio 11 2012")
+  set(TEST_WARN_VS_CODE "set(ENV{CMAKE_WARN_VS11} OFF)")
 else()
-  set(TEST_WARN_VS11_CODE "")
+  set(TEST_WARN_VS_CODE "")
 endif()
 
 # 3.9 or later provides a definitive answer to whether we are multi-config
@@ -139,6 +141,9 @@ if(BUILD_TESTING)
       --build-makeprogram ${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
       )
   endif()
+
+  # Look for git to use for tests.
+  find_program(GIT_EXECUTABLE NAMES git)
 
   # Look for rpmbuild to use for tests.
   # The tool does not work with spaces in the path.
@@ -744,36 +749,6 @@ if(BUILD_TESTING)
   ADD_LINK_FLAGS_TEST(mod_flags_config dll_flags_config)
   ADD_LINK_FLAGS_TEST(exe_flags_config mod_flags_config)
 
-  # If we are running right now with a Unix Makefiles or Ninja based generator,
-  # build the "Simple" test with the ExtraGenerators, if available
-  # This doesn't test whether the generated project files work (unfortunately),
-  # mainly it tests that cmake doesn't crash when generating these project files.
-  if(CMAKE_GENERATOR MATCHES "^(Unix Makefiles|Ninja)$"
-      AND NOT "${CMAKE_CURRENT_BINARY_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
-    foreach(
-      extraGenerator
-      IN ITEMS
-        "CodeBlocks"
-        "CodeLite"
-        "Eclipse CDT4"
-        "Kate"
-        "Sublime Text 2"
-      )
-      string(REPLACE " " "" extraGeneratorTestName "Simple_${extraGenerator}Generator")
-      add_test(${extraGeneratorTestName} ${CMAKE_CTEST_COMMAND}
-        --build-and-test
-        "${CMake_SOURCE_DIR}/Tests/Simple"
-        "${CMake_BINARY_DIR}/Tests/${extraGeneratorTestName}"
-        --build-two-config
-        --build-generator "${extraGenerator} - ${CMAKE_GENERATOR}"
-        --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
-        --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
-        --build-project Simple
-        --test-command Simple)
-      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${extraGeneratorTestName}")
-    endforeach()
-  endif()
-
   # test for correct sub-project generation
   # not implemented in Xcode or Ninja
   if(NOT CMAKE_GENERATOR MATCHES "Xcode|Ninja")
@@ -1012,6 +987,30 @@ if(BUILD_TESTING)
         ATTACHED_FILES_ON_FAIL
         "${CMake_BINARY_DIR}/Tests/CPackWiXGenerator/_CPack_Packages/win32/WIX/wix.log")
     endif()
+  endif()
+
+  # On Windows run the CPackInnoSetupGenerator test
+  if(WIN32 AND CMake_TEST_CPACK_INNOSETUP)
+    add_test(CPackInnoSetupGenerator ${CMAKE_CTEST_COMMAND}
+      -C \${CTEST_CONFIGURATION_TYPE}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CPackInnoSetupGenerator"
+      "${CMake_BINARY_DIR}/Tests/CPackInnoSetupGenerator"
+      ${build_generator_args}
+      --build-project CPackInnoSetupGenerator
+      --build-options
+      --test-command ${CMAKE_CMAKE_COMMAND}
+      "-DCPackInnoSetupGenerator_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackInnoSetupGenerator"
+      "-Dconfig=\${CTEST_CONFIGURATION_TYPE}"
+      -P "${CMake_SOURCE_DIR}/Tests/CPackInnoSetupGenerator/RunCPackVerifyResult.cmake")
+
+    set_property(TEST CPackInnoSetupGenerator PROPERTY
+      ATTACHED_FILES_ON_FAIL
+      "${CMake_BINARY_DIR}/Tests/CPackInnoSetupGenerator/_CPack_Packages/win32/INNOSETUP/ISCCOutput.log")
+
+    set_property(TEST CPackInnoSetupGenerator PROPERTY
+      ATTACHED_FILES
+      "${CMake_BINARY_DIR}/Tests/CPackInnoSetupGenerator/_CPack_Packages/win32/INNOSETUP/ISScript.iss")
   endif()
 
   # On Windows run the CPackNSISGenerator test
@@ -1478,6 +1477,7 @@ if(BUILD_TESTING)
       GnuTLS
       GSL
       GTK2
+      HDF5
       Iconv
       ICU
       ImageMagick
@@ -1512,6 +1512,7 @@ if(BUILD_TESTING)
       SQLite3
       TIFF
       Vulkan
+      wxWidgets
       X11
       XalanC
       XercesC
@@ -2690,10 +2691,6 @@ if(BUILD_TESTING)
   endif()
 
   # Test CTest Update with GIT
-  if(NOT DEFINED CMake_TEST_CTestUpdate_GIT OR CMake_TEST_CTestUpdate_GIT)
-    find_program(GIT_EXECUTABLE NAMES git)
-    mark_as_advanced(GIT_EXECUTABLE)
-  endif()
   if(NOT DEFINED CMake_TEST_CTestUpdate_GIT AND GIT_EXECUTABLE
       AND (UNIX OR NOT "${GIT_EXECUTABLE}" MATCHES "cygwin"))
     set(CMake_TEST_CTestUpdate_GIT 1)
@@ -3194,17 +3191,6 @@ if(BUILD_TESTING)
     WORKING_DIRECTORY ${CMake_BINARY_DIR}/Tests/CTestTestTimeout)
 
   configure_file(
-    "${CMake_SOURCE_DIR}/Tests/CTestTestZeroTimeout/test.cmake.in"
-    "${CMake_BINARY_DIR}/Tests/CTestTestZeroTimeout/test.cmake"
-    @ONLY ESCAPE_QUOTES)
-  add_test(CTestTestZeroTimeout ${CMAKE_CTEST_COMMAND}
-    -S "${CMake_BINARY_DIR}/Tests/CTestTestZeroTimeout/test.cmake" -V
-    --output-log
-    "${CMake_BINARY_DIR}/Tests/CTestTestZeroTimeout/testOutput.log")
-  set_tests_properties(CTestTestZeroTimeout PROPERTIES
-    FAIL_REGULAR_EXPRESSION "\\*\\*\\*Timeout")
-
-  configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestDepends/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestDepends/test.cmake"
     @ONLY ESCAPE_QUOTES)
@@ -3304,7 +3290,7 @@ if(BUILD_TESTING)
       "${CMake_BINARY_DIR}/Tests/CTestTestChecksum/testOutput.log"
       )
     set_tests_properties(CTestTestChecksum PROPERTIES PASS_REGULAR_EXPRESSION
-      "Submission failed: Checksum failed for file")
+      "md5 mismatch")
 
     # these tests take a long time, make sure they have it
     # if timeouts have not already been set
@@ -3323,18 +3309,20 @@ if(BUILD_TESTING)
     endif()
   endif()
 
-  if(CMake_TEST_EXTERNAL_CMAKE)
-    set(CMAKE_SKIP_BOOTSTRAP_TEST 1)
-  endif()
-  if("${CMAKE_GENERATOR}" MATCHES Xcode)
-    set(CMAKE_SKIP_BOOTSTRAP_TEST 1)
-  endif()
-  if(EXISTS "${CMake_BINARY_DIR}/CMakeLists.txt")
-    # If there is CMakeLists.txt in the binary tree, assume in-source build
-    set(CMAKE_SKIP_BOOTSTRAP_TEST 1)
+  if(NOT DEFINED CMake_TEST_BOOTSTRAP)
+    if(CMAKE_RUN_LONG_TESTS
+        AND NOT CMAKE_SKIP_BOOTSTRAP_TEST
+        AND NOT CMake_TEST_EXTERNAL_CMAKE
+        AND NOT CMAKE_GENERATOR MATCHES "Xcode"
+        AND NOT EXISTS "${CMake_BINARY_DIR}/CMakeLists.txt"
+        )
+      set(CMake_TEST_BOOTSTRAP 1)
+    else()
+      set(CMake_TEST_BOOTSTRAP 0)
+    endif()
   endif()
   set(bootstrap "")
-  if(CMAKE_RUN_LONG_TESTS AND NOT CMAKE_SKIP_BOOTSTRAP_TEST)
+  if(CMake_TEST_BOOTSTRAP)
     if(UNIX)
       set(bootstrap ${CMake_SOURCE_DIR}/bootstrap)
     elseif(MSYS)
@@ -3353,13 +3341,12 @@ if(BUILD_TESTING)
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BootstrapTest")
     # This test will use all processors.
-    set_tests_properties(BootstrapTest PROPERTIES RUN_SERIAL 1)
-
-    # provide more time for the bootstrap test
-    get_test_property(BootstrapTest TIMEOUT PREVIOUS_TIMEOUT)
-    if("${PREVIOUS_TIMEOUT}" MATCHES NOTFOUND)
-      set_tests_properties(BootstrapTest PROPERTIES TIMEOUT 5400)
+    set_property(TEST BootstrapTest PROPERTY RUN_SERIAL 1)
+    # This test may take a long time.
+    if(NOT DEFINED CMake_TEST_BOOTSTRAP_TIMEOUT)
+      set(CMake_TEST_BOOTSTRAP_TIMEOUT 5400)
     endif()
+    set_property(TEST BootstrapTest PROPERTY TIMEOUT "${CMake_TEST_BOOTSTRAP_TIMEOUT}")
   endif()
 
   if(CMAKE_Fortran_COMPILER)

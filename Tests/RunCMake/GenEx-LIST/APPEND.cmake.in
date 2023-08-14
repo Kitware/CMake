@@ -1,0 +1,34 @@
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+set(listvar a b c d)
+list(APPEND listvar e)
+set (output "$<LIST:APPEND,a;b;c;d,e>")
+if (NOT output STREQUAL listvar)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+set(listvar a b c d)
+list(APPEND listvar e f)
+set (output "$<LIST:APPEND,a;b;c;d,e,f>")
+if (NOT output STREQUAL listvar)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+set(listvar a b c d)
+list(APPEND listvar e f)
+set (output "$<LIST:APPEND,a;b;c;d,e;f>")
+if (NOT output STREQUAL listvar)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+unset(listvar)
+list(APPEND listvar e f)
+set (output "$<LIST:APPEND,,e,f>")
+if (NOT output STREQUAL listvar)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+
+check_errors("LIST:APPEND..." ${errors})

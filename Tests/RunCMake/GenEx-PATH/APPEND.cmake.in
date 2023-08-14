@@ -65,4 +65,39 @@ if (WIN32)
   endif()
 endif()
 
+
+######################################
+## tests with list of paths
+######################################
+unset(reference)
+foreach(item IN ITEMS "/a/b" "/x/y")
+  cmake_path (APPEND result "${item}" "c")
+  list(APPEND reference "${result}")
+endforeach()
+set(output "$<PATH:APPEND,/a/b;/x/y,c>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "'${output}' instead of '${reference}'")
+endif()
+
+unset(reference)
+foreach(item IN ITEMS "a" "c")
+  cmake_path (APPEND item "")
+  list(APPEND reference "${item}")
+endforeach()
+set(output "$<PATH:APPEND,a;c,>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "'${output}' instead of '${reference}'")
+endif()
+
+unset(reference)
+foreach(item IN ITEMS "a/" "c/")
+  cmake_path (APPEND item "/b")
+  list(APPEND reference "${item}")
+endforeach()
+set(output "$<PATH:APPEND,a/;c/,/b>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "'${output}' instead of '${reference}'")
+endif()
+
+
 check_errors ("PATH:APPEND" ${errors})

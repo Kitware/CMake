@@ -1,0 +1,8 @@
+CMake Error at TRANSFORM-selector-FOR-wrong-index.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:TRANSFORM,a;b;c,TOUPPER,FOR,0,4,2>
+
+  sub-command TRANSFORM, selector FOR, index: 4 out of range \(-3, 2\).
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

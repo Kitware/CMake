@@ -444,6 +444,10 @@ int BZ_API(BZ2_bzCompress) ( bz_stream *strm, int action )
          if (s->avail_in_expect != s->strm->avail_in) 
             return BZ_SEQUENCE_ERROR;
          progress = handle_compress ( strm );
+         #ifdef __clang_analyzer__
+         /* Tolerate deadcode.DeadStores to avoid modifying upstream.  */
+         (void)progress;
+         #endif
          if (s->avail_in_expect > 0 || !isempty_RL(s) ||
              s->state_out_pos < s->numZ) return BZ_FLUSH_OK;
          s->mode = BZ_M_RUNNING;

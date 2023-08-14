@@ -82,3 +82,10 @@ match the regular expression are not run. For example::
 
 This will only run subtests in ``RunCMake.Example`` that start with
 ``example``.
+
+To speed up the process of creating a new ``RunCMake`` test, you can run a
+script that will automatically perform steps 1 through 4 for you::
+
+  cmake -DRunCMake_TEST_SUITE=<test suite name> -P Tests/RunCMake/AddRunCMakeTestSuite.cmake
+
+Be sure to run this from the top-level CMake source directory.

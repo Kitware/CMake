@@ -1,5 +1,3 @@
-cmake_minimum_required (VERSION 3.19...3.20)
-
 find_package (OpenSSL REQUIRED COMPONENTS Crypto)
 # Store version without a possibly trailing letter.
 string (REGEX MATCH "^([0-9.]+)" version "${OPENSSL_VERSION}")

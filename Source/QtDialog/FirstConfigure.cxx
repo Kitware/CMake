@@ -1,6 +1,7 @@
 
 #include "FirstConfigure.h"
 
+#include "QCMakeSizeType.h"
 #include <QComboBox>
 #include <QRadioButton>
 #include <QSettings>
@@ -242,10 +243,12 @@ void StartCompilerSetup::onGeneratorChanged(int index)
 
     // Default to generator platform from environment
     if (!DefaultGeneratorPlatform.isEmpty()) {
-      int platform_index = platforms.indexOf(DefaultGeneratorPlatform);
+      cm_qsizetype platform_index =
+        platforms.indexOf(DefaultGeneratorPlatform);
       if (platform_index != -1) {
         // The index is off-by-one due to the first empty item added above.
-        this->PlatformOptions->setCurrentIndex(platform_index + 1);
+        this->PlatformOptions->setCurrentIndex(
+          static_cast<int>(platform_index + 1));
       }
     }
   } else {

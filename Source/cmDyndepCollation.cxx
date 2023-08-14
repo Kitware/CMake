@@ -358,6 +358,10 @@ cmDyndepCollation::ParseExportInfo(Json::Value const& tdi)
       fsi.Name = tdi_cxx_module_info["name"].asString();
       fsi.RelativeDirectory =
         tdi_cxx_module_info["relative-directory"].asString();
+      if (!fsi.RelativeDirectory.empty() &&
+          fsi.RelativeDirectory.back() != '/') {
+        fsi.RelativeDirectory = cmStrCat(fsi.RelativeDirectory, '/');
+      }
       fsi.SourcePath = tdi_cxx_module_info["source"].asString();
       fsi.Type = tdi_cxx_module_info["type"].asString();
       fsi.Visibility = cmFileSetVisibilityFromName(
@@ -622,4 +626,21 @@ bool cmDyndepCollation::WriteDyndepMetadata(
   }
 
   return result;
+}
+
+bool cmDyndepCollation::IsObjectPrivate(
+  std::string const& object, cmCxxModuleExportInfo const& export_info)
+{
+#ifdef _WIN32
+  std::string output_path = object;
+  cmSystemTools::ConvertToUnixSlashes(output_path);
+#else
+  std::string const& output_path = object;
+#endif
+  auto fileset_info_itr = export_info.ObjectToFileSet.find(output_path);
+  if (fileset_info_itr == export_info.ObjectToFileSet.end()) {
+    return false;
+  }
+  auto const& file_set = fileset_info_itr->second;
+  return !cmFileSetVisibilityIsForInterface(file_set.Visibility);
 }

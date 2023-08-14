@@ -3,6 +3,7 @@
 #include "cmMessageCommand.h"
 
 #include <cassert>
+#include <memory>
 #include <utility>
 
 #include <cm/string_view>
@@ -10,6 +11,7 @@
 
 #include "cmConfigureLog.h"
 #include "cmExecutionStatus.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
@@ -17,6 +19,10 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
+
+#ifdef CMake_ENABLE_DEBUGGER
+#  include "cmDebuggerAdapter.h"
+#endif
 
 namespace {
 
@@ -31,13 +37,13 @@ enum class CheckingType
 std::string IndentText(std::string text, cmMakefile& mf)
 {
   auto indent =
-    cmJoin(cmExpandedList(mf.GetSafeDefinition("CMAKE_MESSAGE_INDENT")), "");
+    cmList{ mf.GetSafeDefinition("CMAKE_MESSAGE_INDENT") }.join("");
 
   const auto showContext = mf.GetCMakeInstance()->GetShowLogContext() ||
     mf.IsOn("CMAKE_MESSAGE_CONTEXT_SHOW");
   if (showContext) {
-    auto context = cmJoin(
-      cmExpandedList(mf.GetSafeDefinition("CMAKE_MESSAGE_CONTEXT")), ".");
+    auto context =
+      cmList{ mf.GetSafeDefinition("CMAKE_MESSAGE_CONTEXT") }.join(".");
     if (!context.empty()) {
       indent.insert(0u, cmStrCat("["_s, context, "] "_s));
     }
@@ -201,6 +207,12 @@ bool cmMessageCommand(std::vector<std::string> const& args,
 
     case Message::LogLevel::LOG_NOTICE:
       cmSystemTools::Message(IndentText(message, mf));
+#ifdef CMake_ENABLE_DEBUGGER
+      if (mf.GetCMakeInstance()->GetDebugAdapter() != nullptr) {
+        mf.GetCMakeInstance()->GetDebugAdapter()->OnMessageOutput(type,
+                                                                  message);
+      }
+#endif
       break;
 
     case Message::LogLevel::LOG_STATUS:

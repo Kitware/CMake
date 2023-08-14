@@ -600,15 +600,13 @@ foreach(LANG IN LISTS OpenMP_FINDLIST)
         add_library(OpenMP::OpenMP_${LANG} INTERFACE IMPORTED)
       endif()
       if(OpenMP_${LANG}_FLAGS)
-        separate_arguments(_OpenMP_${LANG}_OPTIONS NATIVE_COMMAND "${OpenMP_${LANG}_FLAGS}")
         set_property(TARGET OpenMP::OpenMP_${LANG} PROPERTY
-          INTERFACE_COMPILE_OPTIONS "$<$<COMPILE_LANGUAGE:${LANG}>:${_OpenMP_${LANG}_OPTIONS}>")
+          INTERFACE_COMPILE_OPTIONS "$<$<COMPILE_LANGUAGE:${LANG}>:SHELL:${OpenMP_${LANG}_FLAGS}>")
         if(CMAKE_${LANG}_COMPILER_ID STREQUAL "Fujitsu"
           OR ${CMAKE_${LANG}_COMPILER_ID} STREQUAL "IntelLLVM")
           set_property(TARGET OpenMP::OpenMP_${LANG} PROPERTY
-            INTERFACE_LINK_OPTIONS "${OpenMP_${LANG}_FLAGS}")
+            INTERFACE_LINK_OPTIONS "SHELL:${OpenMP_${LANG}_FLAGS}")
         endif()
-        unset(_OpenMP_${LANG}_OPTIONS)
       endif()
       if(OpenMP_${LANG}_INCLUDE_DIRS)
         set_property(TARGET OpenMP::OpenMP_${LANG} PROPERTY

@@ -17,6 +17,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
@@ -309,6 +310,26 @@ void cmGlobalVisualStudio7Generator::Generate()
                                 GetSLNFile(this->LocalGenerators[0].get()));
   }
 
+  if (this->Version == VSVersion::VS9 &&
+      !this->CMakeInstance->GetIsInTryCompile()) {
+    std::string cmakeWarnVS9;
+    if (cmValue cached = this->CMakeInstance->GetState()->GetCacheEntryValue(
+          "CMAKE_WARN_VS9")) {
+      this->CMakeInstance->MarkCliAsUsed("CMAKE_WARN_VS9");
+      cmakeWarnVS9 = *cached;
+    } else {
+      cmSystemTools::GetEnv("CMAKE_WARN_VS9", cmakeWarnVS9);
+    }
+    if (cmakeWarnVS9.empty() || !cmIsOff(cmakeWarnVS9)) {
+      this->CMakeInstance->IssueMessage(
+        MessageType::WARNING,
+        "The \"Visual Studio 9 2008\" generator is deprecated "
+        "and will be removed in a future version of CMake."
+        "\n"
+        "Add CMAKE_WARN_VS9=OFF to the cache to disable this warning.");
+    }
+  }
+
   if (this->Version == VSVersion::VS11 &&
       !this->CMakeInstance->GetIsInTryCompile()) {
     std::string cmakeWarnVS11;
@@ -560,7 +581,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
         }
         fout << "\tGlobalSection(" << name << ") = " << sectionType << "\n";
         cmValue p = root->GetMakefile()->GetProperty(it);
-        std::vector<std::string> keyValuePairs = cmExpandedList(p ? *p : "");
+        cmList keyValuePairs{ *p };
         for (std::string const& itPair : keyValuePairs) {
           const std::string::size_type posEqual = itPair.find('=');
           if (posEqual != std::string::npos) {
@@ -695,7 +716,7 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
   cmGeneratorTarget const* target)
 {
   std::set<std::string> activeConfigs;
-  // if it is a utilitiy target then only make it part of the
+  // if it is a utility target then only make it part of the
   // default build if another target depends on it
   int type = target->GetType();
   if (type == cmStateEnums::GLOBAL_TARGET) {

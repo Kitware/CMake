@@ -14,6 +14,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -43,7 +44,8 @@ cmExtraSublimeTextGenerator::GetFactory()
 {
   static cmExternalMakefileProjectGeneratorSimpleFactory<
     cmExtraSublimeTextGenerator>
-    factory("Sublime Text 2", "Generates Sublime Text 2 project files.");
+    factory("Sublime Text 2",
+            "Generates Sublime Text 2 project files (deprecated).");
 
   if (factory.GetSupportedGlobalGenerators().empty()) {
 #if defined(_WIN32)
@@ -137,7 +139,7 @@ void cmExtraSublimeTextGenerator::CreateNewProjectFile(
   // End of build_systems
   fout << "\n\t]";
   std::string systemName = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
-  std::vector<std::string> tokens = cmExpandedList(this->EnvSettings);
+  cmList tokens{ this->EnvSettings };
 
   if (!this->EnvSettings.empty()) {
     fout << ",";

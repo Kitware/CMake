@@ -91,10 +91,9 @@ void cmWIXShortcuts::CreateFromProperty(std::string const& propertyName,
                                         std::string const& directoryId,
                                         cmInstalledFile const& installedFile)
 {
-  std::vector<std::string> list;
-  installedFile.GetPropertyAsList(propertyName, list);
+  auto list = installedFile.GetPropertyAsList(propertyName);
 
-  for (std::string const& label : list) {
+  for (auto const& label : list) {
     cmWIXShortcut shortcut;
     shortcut.label = label;
     shortcut.workingDirectoryId = directoryId;

@@ -1,0 +1,8 @@
+CMake Error at TRANSFORM-REPLACE-wrong-regex.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:TRANSFORM,a;b,REPLACE,\(a,b>
+
+  sub-command TRANSFORM, action REPLACE: Failed to compile regex "\(a".
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

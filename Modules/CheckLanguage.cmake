@@ -36,7 +36,7 @@ Example:
 
 include_guard(GLOBAL)
 
-cmake_policy(PUSH)
+block(SCOPE_FOR POLICIES)
 cmake_policy(SET CMP0126 NEW)
 
 macro(check_language lang)
@@ -114,4 +114,4 @@ file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
   endif()
 endmacro()
 
-cmake_policy(POP)
+endblock()

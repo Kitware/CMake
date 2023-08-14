@@ -60,3 +60,14 @@ enum ArtifactType
   ImportLibraryArtifact
 };
 }
+
+namespace cmTraceEnums {
+
+/** \brief Define supported trace formats **/
+enum class TraceOutputFormat
+{
+  Undefined,
+  Human,
+  JSONv1
+};
+};

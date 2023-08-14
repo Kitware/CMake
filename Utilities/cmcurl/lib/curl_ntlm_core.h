@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,11 +37,11 @@
 #define NTLM_NEEDS_NSS_INIT
 #endif
 
-#ifdef USE_WOLFSSL
+#if defined(USE_OPENSSL)
+#  include <openssl/ssl.h>
+#elif defined(USE_WOLFSSL)
 #  include <wolfssl/options.h>
 #  include <wolfssl/openssl/ssl.h>
-#elif defined(USE_OPENSSL)
-#  include <openssl/ssl.h>
 #endif
 
 /* Helpers to generate function byte arguments in little endian order */

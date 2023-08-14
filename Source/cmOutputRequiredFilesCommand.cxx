@@ -14,6 +14,7 @@
 
 #include "cmExecutionStatus.h"
 #include "cmGeneratorExpression.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
@@ -126,9 +127,9 @@ public:
       std::string incDirs = cmGeneratorExpression::Preprocess(
         *incDirProp, cmGeneratorExpression::StripAllGeneratorExpressions);
 
-      std::vector<std::string> includes = cmExpandedList(incDirs);
+      cmList includes{ incDirs };
 
-      for (std::string& path : includes) {
+      for (auto& path : includes) {
         this->Makefile->ExpandVariablesInString(path);
         if (uniqueIncludes.insert(path).second) {
           orderedAndUniqueIncludes.push_back(path);

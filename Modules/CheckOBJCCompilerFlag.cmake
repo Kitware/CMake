@@ -13,31 +13,46 @@ Check whether the Objective-C compiler supports a given flag.
 
   .. code-block:: cmake
 
-    check_objc_compiler_flag(<flag> <var>)
+    check_objc_compiler_flag(<flag> <resultVar>)
 
   Check that the ``<flag>`` is accepted by the compiler without
   a diagnostic.  Stores the result in an internal cache entry
-  named ``<var>``.
-
-This command temporarily sets the ``CMAKE_REQUIRED_DEFINITIONS`` variable
-and calls the ``check_objc_source_compiles`` macro from the
-:module:`CheckOBJCSourceCompiles` module.  See documentation of that
-module for a listing of variables that can otherwise modify the build.
+  named ``<resultVar>``.
 
 A positive result from this check indicates only that the compiler did not
 issue a diagnostic message when given the flag.  Whether the flag has any
 effect or even a specific one is beyond the scope of this module.
 
-.. note::
-  Since the :command:`try_compile` command forwards flags from variables
-  like :variable:`CMAKE_OBJC_FLAGS <CMAKE_<LANG>_FLAGS>`, unknown flags
-  in such variables may cause a false negative for this check.
+The check is only performed once, with the result cached in the variable named
+by ``<resultVar>``. Every subsequent CMake run will re-use this cached value
+rather than performing the check again, even if the ``<code>`` changes. In
+order to force the check to be re-evaluated, the variable named by
+``<resultVar>`` must be manually removed from the cache.
+
+The compile and link commands can be influenced by setting any of the
+following variables prior to calling ``check_objc_compiler_flag()``
+
+.. include:: /module/CMAKE_REQUIRED_FLAGS.txt
+
+.. include:: /module/CMAKE_REQUIRED_DEFINITIONS.txt
+
+.. include:: /module/CMAKE_REQUIRED_INCLUDES.txt
+
+.. include:: /module/CMAKE_REQUIRED_LINK_OPTIONS.txt
+
+.. include:: /module/CMAKE_REQUIRED_LIBRARIES.txt
+
+.. include:: /module/CMAKE_REQUIRED_QUIET.txt
+
 #]=======================================================================]
 
 include_guard(GLOBAL)
-include(CheckOBJCSourceCompiles)
 include(Internal/CheckCompilerFlag)
 
 macro (CHECK_OBJC_COMPILER_FLAG _FLAG _RESULT)
   cmake_check_compiler_flag(OBJC "${_FLAG}" ${_RESULT})
 endmacro ()
+
+# FIXME(#24994): The following module is included only for compatibility
+# with projects that accidentally relied on it with CMake 3.26 and below.
+include(CheckOBJCSourceCompiles)

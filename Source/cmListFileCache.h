@@ -13,6 +13,7 @@
 #include <cm/optional>
 
 #include "cmConstStack.h"
+#include "cmList.h"
 #include "cmSystemTools.h"
 
 /** \class cmListFileCache
@@ -232,7 +233,7 @@ public:
 std::vector<BT<std::string>> cmExpandListWithBacktrace(
   std::string const& list,
   cmListFileBacktrace const& bt = cmListFileBacktrace(),
-  bool emptyArgs = false);
+  cmList::EmptyElements emptyArgs = cmList::EmptyElements::No);
 
 struct cmListFile
 {

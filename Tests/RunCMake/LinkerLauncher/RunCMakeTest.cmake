@@ -17,7 +17,8 @@ endfunction()
 
 function(run_linker_launcher_env lang)
   string(REGEX REPLACE "-.*" "" core_lang "${lang}")
-  set(ENV{CMAKE_${core_lang}_LINKER_LAUNCHER} "${CMAKE_COMMAND};-E;env;USED_LAUNCHER=1")
+  # Use the noop genexp $<PATH:...> genexp to validate genexp support.
+  set(ENV{CMAKE_${core_lang}_LINKER_LAUNCHER} "$<PATH:CMAKE_PATH,${CMAKE_COMMAND}>;-E;env;USED_LAUNCHER=1;TARGET_NAME=$<TARGET_PROPERTY:NAME>;LANGUAGE=$<LINK_LANGUAGE>")
   run_linker_launcher(${lang})
   unset(ENV{CMAKE_${core_lang}_LINKER_LAUNCHER})
 endfunction()

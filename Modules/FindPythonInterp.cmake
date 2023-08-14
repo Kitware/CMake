@@ -5,6 +5,9 @@
 FindPythonInterp
 ----------------
 
+.. versionchanged:: 3.27
+  This module is available only if policy :policy:`CMP0148` is not set to ``NEW``.
+
 .. deprecated:: 3.12
 
   Use :module:`FindPython3`, :module:`FindPython2` or :module:`FindPython` instead.
@@ -49,6 +52,16 @@ of PYTHON_LIBRARIES.
   instead.
 
 #]=======================================================================]
+
+cmake_policy(GET CMP0148 _FindPythonInterp_CMP0148)
+if(_FindPythonInterp_CMP0148 STREQUAL "NEW")
+  message(FATAL_ERROR "The FindPythonInterp module has been removed by policy CMP0148.")
+endif()
+
+if(_FindPythonInterp_testing)
+  set(_FindPythonInterp_included TRUE)
+  return()
+endif()
 
 unset(_Python_NAMES)
 

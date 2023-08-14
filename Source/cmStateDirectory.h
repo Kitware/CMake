@@ -5,6 +5,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -57,10 +58,13 @@ public:
   void SetLinkDirectories(BT<std::string> const& vecs);
   void ClearLinkDirectories();
 
-  void SetProperty(const std::string& prop, const char* value,
-                   cmListFileBacktrace const& lfbt);
   void SetProperty(const std::string& prop, cmValue value,
                    cmListFileBacktrace const& lfbt);
+  void SetProperty(const std::string& prop, std::nullptr_t,
+                   cmListFileBacktrace const& lfbt)
+  {
+    this->SetProperty(prop, cmValue{ nullptr }, lfbt);
+  }
   void AppendProperty(const std::string& prop, const std::string& value,
                       bool asString, cmListFileBacktrace const& lfbt);
   cmValue GetProperty(const std::string& prop) const;

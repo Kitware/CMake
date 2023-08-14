@@ -149,6 +149,8 @@ public:
 
   virtual bool IsUtf8EncodingSupported() const { return false; }
 
+  virtual bool IsScanDependenciesSupported() const { return false; }
+
   static std::string GetInstalledNsightTegraVersion();
 
   /** Return the first two components of CMAKE_SYSTEM_VERSION.  */
@@ -182,6 +184,10 @@ protected:
   virtual bool InitializeWindowsStore(cmMakefile* mf);
   virtual bool InitializeTegraAndroid(cmMakefile* mf);
   virtual bool InitializeAndroid(cmMakefile* mf);
+
+  bool InitializePlatform(cmMakefile* mf) override;
+  virtual bool InitializePlatformWindows(cmMakefile* mf);
+  virtual bool VerifyNoGeneratorPlatformVersion(cmMakefile* mf) const;
 
   virtual bool ProcessGeneratorToolsetField(std::string const& key,
                                             std::string const& value);

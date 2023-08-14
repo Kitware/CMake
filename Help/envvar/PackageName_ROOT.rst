@@ -17,3 +17,17 @@ by ``:`` on UNIX or ``;`` on Windows (the same as the ``PATH`` environment
 variable convention on those platforms).
 
 See also the :variable:`<PackageName>_ROOT` CMake variable.
+
+.. envvar:: <PACKAGENAME>_ROOT
+
+  .. versionadded:: 3.27
+
+  Calls to :command:`find_package(<PackageName>)` will also search in
+  prefixes specified by the upper-case ``<PACKAGENAME>_ROOT`` environment
+  variable.  See policy :policy:`CMP0144`.
+
+.. note::
+
+  Note that the ``<PackageName>_ROOT`` and ``<PACKAGENAME>_ROOT``
+  environment variables are distinct only on platforms that have
+  case-sensitive environments.

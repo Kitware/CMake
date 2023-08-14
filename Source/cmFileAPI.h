@@ -41,6 +41,20 @@ public:
   /** Report file-api capabilities for cmake -E capabilities.  */
   static Json::Value ReportCapabilities();
 
+  // Keep in sync with ObjectKindName.
+  enum class ObjectKind
+  {
+    CodeModel,
+    ConfigureLog,
+    Cache,
+    CMakeFiles,
+    Toolchains,
+    InternalTest
+  };
+
+  bool AddProjectQuery(ObjectKind kind, unsigned majorVersion,
+                       unsigned minorVersion);
+
 private:
   cmake* CMakeInstance;
 
@@ -53,17 +67,6 @@ private:
   static std::vector<std::string> LoadDir(std::string const& dir);
   void RemoveOldReplyFiles();
 
-  // Keep in sync with ObjectKindName.
-  enum class ObjectKind
-  {
-    CodeModel,
-    ConfigureLog,
-    Cache,
-    CMakeFiles,
-    Toolchains,
-    InternalTest
-  };
-
   /** Identify one object kind and major version.  */
   struct Object
   {
@@ -75,6 +78,14 @@ private:
         return l.Kind < r.Kind;
       }
       return l.Version < r.Version;
+    }
+    friend bool operator==(Object const& l, Object const& r)
+    {
+      return l.Kind == r.Kind && l.Version == r.Version;
+    }
+    friend bool operator!=(Object const& l, Object const& r)
+    {
+      return !(l == r);
     }
   };
 

@@ -31,4 +31,28 @@ if (NOT output STREQUAL reference)
 endif()
 
 
+######################################
+## tests with list of paths
+######################################
+unset (reference)
+foreach(item IN ITEMS "../../a/d" "/a/d/../e")
+  cmake_path(ABSOLUTE_PATH item BASE_DIRECTORY "/x/y/a/f")
+  list(APPEND reference "${item}")
+endforeach()
+set(output "$<PATH:ABSOLUTE_PATH,../../a/d;/a/d/../e,/x/y/a/f>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "'${output}' instead of '${reference}'")
+endif()
+
+unset (reference)
+foreach(item IN ITEMS "../../a/d" "/a/d/../e")
+  cmake_path(ABSOLUTE_PATH item BASE_DIRECTORY "/x/y/a/f" NORMALIZE)
+  list(APPEND reference "${item}")
+endforeach()
+set(output "$<PATH:ABSOLUTE_PATH,NORMALIZE,../../a/d;/a/d/../e,/x/y/a/f>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "'${output}' instead of '${reference}'")
+endif()
+
+
 check_errors("PATH:ABSOLUTE_PATH" ${errors})

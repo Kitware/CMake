@@ -73,6 +73,7 @@ syn keyword cmakeProperty contained
             \ AUTOGEN_ORIGIN_DEPENDS
             \ AUTOGEN_PARALLEL
             \ AUTOGEN_SOURCE_GROUP
+            \ AUTOGEN_USE_SYSTEM_INCLUDE
             \ AUTOGEN_TARGETS_FOLDER
             \ AUTOGEN_TARGET_DEPENDS
             \ AUTOMOC
@@ -128,7 +129,10 @@ syn keyword cmakeProperty contained
             \ CPACK_WIX_ACL
             \ CROSSCOMPILING_EMULATOR
             \ CUDA_ARCHITECTURES
+            \ CUDA_CUBIN_COMPILATION
             \ CUDA_EXTENSIONS
+            \ CUDA_FATBIN_COMPILATION
+            \ CUDA_OPTIX_COMPILATION
             \ CUDA_PTX_COMPILATION
             \ CUDA_RESOLVE_DEVICE_SYMBOLS
             \ CUDA_RUNTIME_LIBRARY
@@ -193,6 +197,10 @@ syn keyword cmakeProperty contained
             \ HAS_CXX
             \ HEADER_FILE_ONLY
             \ HELPSTRING
+            \ HIP_ARCHITECTURES
+            \ HIP_EXTENSIONS
+            \ HIP_STANDARD
+            \ HIP_STANDARD_REQUIRED
             \ IMPLICIT_DEPENDS_INCLUDE_TRANSFORM
             \ IMPORTED
             \ IMPORTED_COMMON_LANGUAGE_RUNTIME
@@ -217,6 +225,7 @@ syn keyword cmakeProperty contained
             \ INSTALL_RPATH
             \ INSTALL_RPATH_USE_LINK_PATH
             \ INTERFACE_AUTOUIC_OPTIONS
+            \ INTERFACE_AUTOMOC_MACRO_NAMES
             \ INTERFACE_COMPILE_DEFINITIONS
             \ INTERFACE_COMPILE_FEATURES
             \ INTERFACE_COMPILE_OPTIONS
@@ -320,6 +329,7 @@ syn keyword cmakeProperty contained
             \ SKIP_AUTORCC
             \ SKIP_AUTOUIC
             \ SKIP_BUILD_RPATH
+            \ SKIP_LINTING
             \ SKIP_PRECOMPILE_HEADERS
             \ SKIP_REGULAR_EXPRESSION
             \ SKIP_RETURN_CODE
@@ -459,6 +469,7 @@ syn keyword cmakeVariable contained
             \ BUILD_SHARED_LIBS
             \ CACHE
             \ CMAKE_ABSOLUTE_DESTINATION_FILES
+            \ CMAKE_ADD_CUSTOM_COMMAND_DEPENDS_EXPLICIT_ONLY
             \ CMAKE_AIX_EXPORT_ALL_SYMBOLS
             \ CMAKE_ANDROID_ANT_ADDITIONAL_OPTIONS
             \ CMAKE_ANDROID_API
@@ -678,6 +689,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_VISIBILITY_PRESET
             \ CMAKE_AUTOGEN_ORIGIN_DEPENDS
             \ CMAKE_AUTOGEN_PARALLEL
+            \ CMAKE_AUTOGEN_USE_SYSTEM_INCLUDE
             \ CMAKE_AUTOGEN_VERBOSE
             \ CMAKE_AUTOMOC
             \ CMAKE_AUTOMOC_COMPILER_PREDEFINES
@@ -686,11 +698,14 @@ syn keyword cmakeVariable contained
             \ CMAKE_AUTOMOC_MOC_OPTIONS
             \ CMAKE_AUTOMOC_PATH_PREFIX
             \ CMAKE_AUTOMOC_RELAXED_MODE
+            \ CMAKE_AUTOMOC_EXECUTABLE
             \ CMAKE_AUTORCC
             \ CMAKE_AUTORCC_OPTIONS
+            \ CMAKE_AUTORCC_EXECUTABLE
             \ CMAKE_AUTOUIC
             \ CMAKE_AUTOUIC_OPTIONS
             \ CMAKE_AUTOUIC_SEARCH_PATHS
+            \ CMAKE_AUTOUIC_EXECUTABLE
             \ CMAKE_BACKWARDS_COMPATIBILITY
             \ CMAKE_BINARY_DIR
             \ CMAKE_BUILD_RPATH
@@ -1139,6 +1154,74 @@ syn keyword cmakeVariable contained
             \ CMAKE_GLOBAL_AUTORCC_TARGET
             \ CMAKE_GLOBAL_AUTORCC_TARGET_NAME
             \ CMAKE_GNUtoMS
+            \ CMAKE_HIP
+            \ CMAKE_HIP_ANDROID_TOOLCHAIN_MACHINE
+            \ CMAKE_HIP_ANDROID_TOOLCHAIN_PREFIX
+            \ CMAKE_HIP_ANDROID_TOOLCHAIN_SUFFIX
+            \ CMAKE_HIP_ARCHITECTURES
+            \ CMAKE_HIP_ARCHIVE_APPEND
+            \ CMAKE_HIP_ARCHIVE_CREATE
+            \ CMAKE_HIP_ARCHIVE_FINISH
+            \ CMAKE_HIP_CLANG_TIDY
+            \ CMAKE_HIP_COMPILER
+            \ CMAKE_HIP_COMPILER_ABI
+            \ CMAKE_HIP_COMPILER_AR
+            \ CMAKE_HIP_COMPILER_ARCHITECTURE_ID
+            \ CMAKE_HIP_COMPILER_EXTERNAL_TOOLCHAIN
+            \ CMAKE_HIP_COMPILER_ID
+            \ CMAKE_HIP_COMPILER_LAUNCHER
+            \ CMAKE_HIP_COMPILER_LOADED
+            \ CMAKE_HIP_COMPILER_PREDEFINES_COMMAND
+            \ CMAKE_HIP_COMPILER_RANLIB
+            \ CMAKE_HIP_COMPILER_TARGET
+            \ CMAKE_HIP_COMPILER_VERSION
+            \ CMAKE_HIP_COMPILER_VERSION_INTERNAL
+            \ CMAKE_HIP_COMPILE_FEATURES
+            \ CMAKE_HIP_COMPILE_OBJECT
+            \ CMAKE_HIP_CPPCHECK
+            \ CMAKE_HIP_CPPLINT
+            \ CMAKE_HIP_CREATE_SHARED_LIBRARY
+            \ CMAKE_HIP_CREATE_SHARED_MODULE
+            \ CMAKE_HIP_CREATE_STATIC_LIBRARY
+            \ CMAKE_HIP_EXTENSIONS
+            \ CMAKE_HIP_FLAGS
+            \ CMAKE_HIP_FLAGS_DEBUG
+            \ CMAKE_HIP_FLAGS_DEBUG_INIT
+            \ CMAKE_HIP_FLAGS_INIT
+            \ CMAKE_HIP_FLAGS_MINSIZEREL
+            \ CMAKE_HIP_FLAGS_MINSIZEREL_INIT
+            \ CMAKE_HIP_FLAGS_RELEASE
+            \ CMAKE_HIP_FLAGS_RELEASE_INIT
+            \ CMAKE_HIP_FLAGS_RELWITHDEBINFO
+            \ CMAKE_HIP_FLAGS_RELWITHDEBINFO_INIT
+            \ CMAKE_HIP_IGNORE_EXTENSIONS
+            \ CMAKE_HIP_IMPLICIT_INCLUDE_DIRECTORIES
+            \ CMAKE_HIP_IMPLICIT_LINK_DIRECTORIES
+            \ CMAKE_HIP_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
+            \ CMAKE_HIP_IMPLICIT_LINK_LIBRARIES
+            \ CMAKE_HIP_INCLUDE_WHAT_YOU_USE
+            \ CMAKE_HIP_INIT
+            \ CMAKE_HIP_LIBRARY_ARCHITECTURE
+            \ CMAKE_HIP_LINKER_LAUNCHER
+            \ CMAKE_HIP_LINKER_PREFERENCE
+            \ CMAKE_HIP_LINKER_PREFERENCE_PROPAGATES
+            \ CMAKE_HIP_LINKER_WRAPPER_FLAG
+            \ CMAKE_HIP_LINKER_WRAPPER_FLAG_SEP
+            \ CMAKE_HIP_LINK_EXECUTABLE
+            \ CMAKE_HIP_LINK_LIBRARY_FILE_FLAG
+            \ CMAKE_HIP_LINK_LIBRARY_FLAG
+            \ CMAKE_HIP_LINK_LIBRARY_SUFFIX
+            \ CMAKE_HIP_OUTPUT_EXTENSION
+            \ CMAKE_HIP_PLATFORM_ID
+            \ CMAKE_HIP_SIMULATE_ID
+            \ CMAKE_HIP_SIMULATE_VERSION
+            \ CMAKE_HIP_SIZEOF_DATA_PTR
+            \ CMAKE_HIP_SOURCE_FILE_EXTENSIONS
+            \ CMAKE_HIP_STANDARD
+            \ CMAKE_HIP_STANDARD_INCLUDE_DIRECTORIES
+            \ CMAKE_HIP_STANDARD_LIBRARIES
+            \ CMAKE_HIP_STANDARD_REQUIRED
+            \ CMAKE_HIP_VISIBILITY_PRESET
             \ CMAKE_HOME_DIRECTORY
             \ CMAKE_HOST_APPLE
             \ CMAKE_HOST_SOLARIS
@@ -1491,6 +1574,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_USER_MAKE_RULES_OVERRIDE_CUDA
             \ CMAKE_USER_MAKE_RULES_OVERRIDE_CXX
             \ CMAKE_USER_MAKE_RULES_OVERRIDE_Fortran
+            \ CMAKE_USER_MAKE_RULES_OVERRIDE_HIP
             \ CMAKE_USER_MAKE_RULES_OVERRIDE_Java
             \ CMAKE_USER_MAKE_RULES_OVERRIDE_RC
             \ CMAKE_USER_MAKE_RULES_OVERRIDE_Swift
@@ -2095,6 +2179,7 @@ syn keyword cmakeKWadd_custom_command contained
             \ COMMENT
             \ CROSSCOMPILING_EMULATOR
             \ DEPENDS
+            \ DEPENDS_EXPLICIT_ONLY
             \ DEPFILE
             \ GENERATED
             \ IMPLICIT_DEPENDS
@@ -2563,6 +2648,7 @@ syn keyword cmakeKWdoxygen_add_docs contained
 syn keyword cmakeKWenable_language contained
             \ ASM
             \ CUDA
+            \ HIP
             \ ISPC
             \ OBJC
             \ OBJCXX
@@ -2735,6 +2821,7 @@ syn keyword cmakeKWfile contained
             \ READ_SYMLINK
             \ REAL_PATH
             \ REGEX
+            \ RELATIVE
             \ RELATIVE_PATH
             \ RELEASE
             \ REMOVE
@@ -3304,6 +3391,7 @@ syn keyword cmakeKWproject contained
             \ CMAKE_PROJECT_
             \ CUDA
             \ DESCRIPTION
+            \ HIP
             \ HOMEPAGE_URL
             \ ISPC
             \ LANGUAGES
@@ -3617,6 +3705,9 @@ syn keyword cmakeKWtry_compile contained
             \ EXECUTABLE
             \ FALSE
             \ GHS
+            \ HIP_EXTENSIONS
+            \ HIP_STANDARD
+            \ HIP_STANDARD_REQUIRED
             \ INCLUDE_DIRECTORIES
             \ LANG
             \ LINK_DIRECTORIES
@@ -3736,6 +3827,9 @@ syn keyword cmakeGeneratorExpressions contained
             \ GENERATE
             \ GENEX_EVAL
             \ GNU
+            \ HIP_COMPILER_ID
+            \ HIP_COMPILER_VERSION
+            \ HIP_STANDARD
             \ HOST_LINK
             \ IF
             \ IGNORE

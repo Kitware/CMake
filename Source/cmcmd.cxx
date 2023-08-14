@@ -3,6 +3,7 @@
 #include "cmcmd.h"
 
 #include <functional>
+#include <iterator>
 
 #include <cm/optional>
 #include <cmext/algorithm>
@@ -14,6 +15,7 @@
 #include "cmConsoleBuf.h"
 #include "cmDuration.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmQtAutoMocUic.h"
@@ -50,10 +52,10 @@
 #endif
 
 #include <array>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <ctime>
 #include <iostream>
 #include <memory>
 #include <sstream>
@@ -342,10 +344,9 @@ int HandleIWYU(const std::string& runCmd, const std::string& /* sourceFile */,
 {
   // Construct the iwyu command line by taking what was given
   // and adding all the arguments we give to the compiler.
-  std::vector<std::string> iwyu_cmd = cmExpandedList(runCmd, true);
+  cmList iwyu_cmd{ runCmd, cmList::EmptyElements::Yes };
   cm::append(iwyu_cmd, orig_cmd.begin() + 1, orig_cmd.end());
   // Run the iwyu command line.  Capture its stderr and hide its stdout.
-  // Ignore its return code because the tool always returns non-zero.
   std::string stdErr;
   int ret;
   if (!cmSystemTools::RunSingleCommand(iwyu_cmd, nullptr, &stdErr, &ret,
@@ -359,14 +360,21 @@ int HandleIWYU(const std::string& runCmd, const std::string& /* sourceFile */,
     std::cerr << "Warning: include-what-you-use reported diagnostics:\n"
               << stdErr << "\n";
   }
-  // always return 0 we don't want to break the compile
-  return 0;
+  // Older versions of iwyu always returned a non-zero exit code,
+  // so ignore it unless the user has enabled errors.
+  auto has_error_opt = std::find_if(
+    iwyu_cmd.cbegin(), iwyu_cmd.cend(),
+    [](std::string const& opt) { return cmHasLiteralPrefix(opt, "--error"); });
+  bool errors_enabled = has_error_opt != iwyu_cmd.cend() &&
+    has_error_opt != iwyu_cmd.cbegin() &&
+    *std::prev(has_error_opt) == "-Xiwyu";
+  return errors_enabled ? ret : 0;
 }
 
 int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
                const std::vector<std::string>& orig_cmd)
 {
-  std::vector<std::string> tidy_cmd = cmExpandedList(runCmd, true);
+  cmList tidy_cmd{ runCmd, cmList::EmptyElements::Yes };
   tidy_cmd.push_back(sourceFile);
 
   for (auto const& arg : tidy_cmd) {
@@ -416,7 +424,7 @@ int HandleLWYU(const std::string& runCmd, const std::string& sourceFile,
 {
   // Construct the ldd -r -u (link what you use lwyu) command line
   // ldd -u -r lwuy target
-  std::vector<std::string> lwyu_cmd = cmExpandedList(runCmd, true);
+  cmList lwyu_cmd{ runCmd, cmList::EmptyElements::Yes };
   lwyu_cmd.push_back(sourceFile);
 
   // Run the lwyu check command line,  currently ldd is expected.
@@ -444,7 +452,7 @@ int HandleCppLint(const std::string& runCmd, const std::string& sourceFile,
                   const std::vector<std::string>&)
 {
   // Construct the cpplint command line.
-  std::vector<std::string> cpplint_cmd = cmExpandedList(runCmd, true);
+  cmList cpplint_cmd{ runCmd, cmList::EmptyElements::Yes };
   cpplint_cmd.push_back(sourceFile);
 
   // Run the cpplint command line.  Capture its output.
@@ -471,7 +479,7 @@ int HandleCppCheck(const std::string& runCmd, const std::string& sourceFile,
                    const std::vector<std::string>& orig_cmd)
 {
   // Construct the cpplint command line.
-  std::vector<std::string> cppcheck_cmd = cmExpandedList(runCmd, true);
+  cmList cppcheck_cmd{ runCmd, cmList::EmptyElements::Yes };
   // extract all the -D, -U, and -I options from the compile line
   for (auto const& opt : orig_cmd) {
     if (opt.size() > 2) {
@@ -551,8 +559,8 @@ struct CoCompileJob
 int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
 {
   std::vector<CoCompileJob> jobs;
-  std::string sourceFile;             // store --source=
-  std::vector<std::string> launchers; // store --launcher=
+  std::string sourceFile; // store --source=
+  cmList launchers;       // store --launcher=
 
   // Default is to run the original command found after -- if the option
   // does not need to do that, it should be specified here, currently only
@@ -585,7 +593,7 @@ int cmcmd::HandleCoCompileCommands(std::vector<std::string> const& args)
         if (cmHasLiteralPrefix(arg, "--source=")) {
           sourceFile = arg.substr(9);
         } else if (cmHasLiteralPrefix(arg, "--launcher=")) {
-          cmExpandList(arg.substr(11), launchers, true);
+          launchers.append(arg.substr(11), cmList::EmptyElements::Yes);
         } else {
           // if it was not a co-compiler or --source/--launcher then error
           std::cerr << "__run_co_compile given unknown argument: " << arg
@@ -1104,27 +1112,13 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     if (args[1] == "time" && args.size() > 2) {
       std::vector<std::string> command(args.begin() + 2, args.end());
 
-      clock_t clock_start;
-      clock_t clock_finish;
-      time_t time_start;
-      time_t time_finish;
-
-      time(&time_start);
-      clock_start = clock();
       int ret = 0;
+      auto time_start = std::chrono::steady_clock::now();
       cmSystemTools::RunSingleCommand(command, nullptr, nullptr, &ret);
+      auto time_finish = std::chrono::steady_clock::now();
 
-      clock_finish = clock();
-      time(&time_finish);
-
-      double clocks_per_sec = static_cast<double>(CLOCKS_PER_SEC);
-      std::cout << "Elapsed time: "
-                << static_cast<long>(time_finish - time_start) << " s. (time)"
-                << ", "
-                << static_cast<double>(clock_finish - clock_start) /
-          clocks_per_sec
-                << " s. (clock)"
-                << "\n";
+      std::chrono::duration<double> time_elapsed = time_finish - time_start;
+      std::cout << "Elapsed time (seconds): " << time_elapsed.count() << "\n";
       return ret;
     }
 
@@ -2343,6 +2337,9 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
         cmSystemTools::Strucmp(arg->c_str(), "/INCREMENTAL") == 0 ||
         cmSystemTools::Strucmp(arg->c_str(), "-INCREMENTAL") == 0) {
       this->Incremental = true;
+    } else if (cmSystemTools::Strucmp(arg->c_str(), "/INCREMENTAL:NO") == 0 ||
+               cmSystemTools::Strucmp(arg->c_str(), "-INCREMENTAL:NO") == 0) {
+      this->Incremental = false;
     } else if (cmSystemTools::Strucmp(arg->c_str(), "/MANIFEST:NO") == 0 ||
                cmSystemTools::Strucmp(arg->c_str(), "-MANIFEST:NO") == 0) {
       this->LinkGeneratesManifest = false;
@@ -2367,17 +2364,11 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
     // pass it to the link command.
     this->ManifestFileRC = intDir + "/manifest.rc";
     this->ManifestFileRes = intDir + "/manifest.res";
-  } else if (this->UserManifests.empty()) {
-    // Prior to support for user-specified manifests CMake placed the
-    // linker-generated manifest next to the binary (as if it were not to be
-    // embedded) when not linking incrementally.  Preserve this behavior.
-    this->ManifestFile = this->TargetFile + ".manifest";
-    this->LinkerManifestFile = this->ManifestFile;
-  }
 
-  if (this->LinkGeneratesManifest) {
-    this->LinkCommand.emplace_back("/MANIFEST");
-    this->LinkCommand.push_back("/MANIFESTFILE:" + this->LinkerManifestFile);
+    if (this->LinkGeneratesManifest) {
+      this->LinkCommand.emplace_back("/MANIFEST");
+      this->LinkCommand.push_back("/MANIFESTFILE:" + this->LinkerManifestFile);
+    }
   }
 
   return true;
@@ -2511,20 +2502,43 @@ int cmVSLink::LinkIncremental()
 
 int cmVSLink::LinkNonIncremental()
 {
-  // Run the link command (possibly generates intermediate manifest).
+  // The MSVC link tool expects 'rc' to be in the PATH if it needs to embed
+  // manifests, but the user might explicitly set 'CMAKE_RC_COMPILER' instead.
+  // Add its location as a fallback at the end of PATH.
+  if (cmSystemTools::FileIsFullPath(this->RcPath)) {
+    std::string rcDir = cmSystemTools::GetFilenamePath(this->RcPath);
+#ifdef _WIN32
+    std::replace(rcDir.begin(), rcDir.end(), '/', '\\');
+    char const pathSep = ';';
+#else
+    char const pathSep = ':';
+#endif
+    cm::optional<std::string> path = cmSystemTools::GetEnvVar("PATH");
+    if (path) {
+      path = cmStrCat(*path, pathSep, rcDir);
+    } else {
+      path = rcDir;
+    }
+    cmSystemTools::PutEnv(cmStrCat("PATH=", *path));
+  }
+
+  // Sort out any manifests.
+  if (this->LinkGeneratesManifest || !this->UserManifests.empty()) {
+    std::string opt =
+      std::string("/MANIFEST:EMBED,ID=") + (this->Type == 1 ? '1' : '2');
+    this->LinkCommand.emplace_back(opt);
+
+    for (auto const& m : this->UserManifests) {
+      opt = "/MANIFESTINPUT:" + m;
+      this->LinkCommand.emplace_back(opt);
+    }
+  }
+
+  // Run the link command.
   if (!RunCommand("LINK", this->LinkCommand, this->Verbose, FORMAT_DECIMAL)) {
     return -1;
   }
-
-  // If we have no manifest files we are done.
-  if (!this->LinkGeneratesManifest && this->UserManifests.empty()) {
-    return 0;
-  }
-
-  // Run the manifest tool to embed the final manifest in the binary.
-  std::string mtOut =
-    "/outputresource:" + this->TargetFile + (this->Type == 1 ? ";#1" : ";#2");
-  return this->RunMT(mtOut, false);
+  return 0;
 }
 
 int cmVSLink::RunMT(std::string const& out, bool notify)

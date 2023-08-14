@@ -5,8 +5,8 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2011 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
- * Copyright (C) 2010, Howard Chu, <hyc@openldap.org>
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Howard Chu, <hyc@openldap.org>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -295,7 +295,7 @@ static CURLcode oldap_parse_login_options(struct connectdata *conn)
     const char *value;
 
     while(*ptr && *ptr != '=')
-        ptr++;
+      ptr++;
 
     value = ptr + 1;
 

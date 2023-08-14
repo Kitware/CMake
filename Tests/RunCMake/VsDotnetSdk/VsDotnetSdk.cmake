@@ -1,7 +1,5 @@
-cmake_minimum_required(VERSION 3.22)
-
 # a simple CSharp only test case
-project (DotNetSdk CSharp)
+enable_language(CSharp)
 
 set(CMAKE_DOTNET_TARGET_FRAMEWORK net472)
 set(CMAKE_DOTNET_SDK "Microsoft.NET.Sdk")

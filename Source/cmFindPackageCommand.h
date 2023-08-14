@@ -105,6 +105,8 @@ private:
   void AddFindDefinition(const std::string& var, cm::string_view value);
   void RestoreFindDefinitions();
 
+  class SetRestoreFindDefinitions;
+
   enum /*class*/ HandlePackageModeType
   {
     Module,
@@ -124,6 +126,10 @@ private:
   bool ReadListFile(const std::string& f, PolicyScopeRule psr);
   void StoreVersionFound();
   void SetConfigDirCacheVariable(const std::string& value);
+
+  void PushFindPackageRootPathStack();
+  void PopFindPackageRootPathStack();
+  class PushPopRootPathStack;
 
   void ComputePrefixes();
   void FillPrefixesPackageRedirect();
@@ -211,6 +217,8 @@ private:
   std::set<std::string> IgnoredPaths;
   std::set<std::string> IgnoredPrefixPaths;
   std::string DebugBuffer;
+
+  class FlushDebugBufferOnExit;
 
   /*! the selected sortOrder (None by default)*/
   SortOrderType SortOrder = None;

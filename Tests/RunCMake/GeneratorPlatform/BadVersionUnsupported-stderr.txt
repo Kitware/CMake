@@ -1,0 +1,11 @@
+^CMake Error at CMakeLists.txt:[0-9]+ \(project\):
+  Generator
+
+    Visual Studio [^
+]+
+
+  given platform specification containing a
+
+    version=1\.2\.3\.4
+
+  field with unsupported value\.$

@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,6 +33,7 @@ struct curl_ws_frame {
   int flags;            /* See the CURLWS_* defines */
   curl_off_t offset;    /* the offset of this data into the frame */
   curl_off_t bytesleft; /* number of pending bytes left of the payload */
+  size_t len;           /* size of the current data chunk */
 };
 
 /* flag bits */

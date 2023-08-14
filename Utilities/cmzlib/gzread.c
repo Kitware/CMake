@@ -434,6 +434,12 @@ z_size_t ZEXPORT gzfread(buf, size, nitems, file)
         return 0;
     }
 
+#ifdef __clang_analyzer__
+    /* clang-analyzer does not see size==0 through len==0 below. */
+    if (!size)
+        return 0;
+#endif
+
     /* read len or fewer bytes to buf, return the number of full items read */
     return len ? gz_read(state, buf, len) / size : 0;
 }

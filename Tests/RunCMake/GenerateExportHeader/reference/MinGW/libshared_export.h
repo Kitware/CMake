@@ -22,7 +22,7 @@
 #endif
 
 #ifndef LIBSHARED_DEPRECATED
-#  define LIBSHARED_DEPRECATED __attribute__ ((__deprecated__))
+#  define LIBSHARED_DEPRECATED __declspec(deprecated)
 #endif
 
 #ifndef LIBSHARED_DEPRECATED_EXPORT

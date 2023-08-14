@@ -5,8 +5,8 @@
  *                | (__| |_| |  _ <| |___
  *                 \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2012 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
- * Copyright (C) 2012, Howard Chu, <hyc@highlandsun.com>
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Howard Chu, <hyc@highlandsun.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -231,7 +231,7 @@ static CURLcode rtmp_connect(struct Curl_easy *data, bool *done)
   /* We have to know if it's a write before we send the
    * connect request packet
    */
-  if(data->set.upload)
+  if(data->state.upload)
     r->Link.protocol |= RTMP_FEATURE_WRITE;
 
   /* For plain streams, use the buffer toggle trick to keep data flowing */
@@ -263,7 +263,7 @@ static CURLcode rtmp_do(struct Curl_easy *data, bool *done)
   if(!RTMP_ConnectStream(r, 0))
     return CURLE_FAILED_INIT;
 
-  if(data->set.upload) {
+  if(data->state.upload) {
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
     Curl_setup_transfer(data, -1, -1, FALSE, FIRSTSOCKET);
   }

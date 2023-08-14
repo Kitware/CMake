@@ -1,7 +1,4 @@
-
-cmake_minimum_required(VERSION 3.0)
-
-project(OriginDebug)
+enable_language(CXX)
 
 set(CMAKE_DEBUG_TARGET_PROPERTIES SOURCES)
 

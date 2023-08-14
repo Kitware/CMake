@@ -1,0 +1,87 @@
+{
+    "name": "static_framework",
+    "id": "^static_framework::@217a96c3a62328a73ef4$",
+    "directorySource": "^framework$",
+    "projectName": "Framework",
+    "type": "STATIC_LIBRARY",
+    "isGeneratorProvided": null,
+    "fileSets": null,
+    "sources": [
+        {
+            "path": "^empty\\.cxx$",
+            "isGenerated": null,
+            "fileSetName": null,
+            "sourceGroupName": "Source Files",
+            "compileGroupLanguage": "CXX",
+            "backtrace": [
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": 4,
+                    "command": "add_library",
+                    "hasParent": true
+                },
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "Source Files",
+            "sourcePaths": [
+                "^empty\\.cxx$"
+            ]
+        }
+    ],
+    "compileGroups": [
+        {
+            "language": "CXX",
+            "sourcePaths": [
+                "^empty\\.cxx$"
+            ],
+            "includes": null,
+            "frameworks": null,
+            "defines": null,
+            "compileCommandFragments": null
+        }
+    ],
+    "backtrace": [
+        {
+            "file": "^framework/CMakeLists\\.txt$",
+            "line": 4,
+            "command": "add_library",
+            "hasParent": true
+        },
+        {
+            "file": "^framework/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": "^(lib)?static_framework\\.(a|lib)$",
+    "artifacts": [
+        {
+            "path": "^framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?static_framework\\.(a|lib)$",
+            "_dllExtra": false
+        }
+    ],
+    "build": "^framework$",
+    "source": "^framework$",
+    "install": null,
+    "link": null,
+    "archive": {
+        "lto": null
+    },
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@217a96c3a62328a73ef4$",
+            "backtrace": null
+        }
+    ]
+}

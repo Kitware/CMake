@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "cmCPackLog.h"
+#include "cmList.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
@@ -191,7 +192,7 @@ int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
 
     cmValue sign_files = this->GetOption("CPACK_BUNDLE_APPLE_CODESIGN_FILES");
 
-    std::vector<std::string> relFiles = cmExpandedList(sign_files);
+    cmList relFiles{ sign_files };
 
     // sign the files supplied by the user, ie. frameworks.
     for (auto const& file : relFiles) {

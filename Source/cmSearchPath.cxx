@@ -9,6 +9,7 @@
 #include <cm/optional>
 
 #include "cmFindCommon.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -71,7 +72,7 @@ void cmSearchPath::AddCMakePath(const std::string& variable)
 
   // Get a path from a CMake variable.
   if (cmValue value = this->FC->Makefile->GetDefinition(variable)) {
-    std::vector<std::string> expanded = cmExpandedList(*value);
+    cmList expanded{ *value };
 
     for (std::string const& p : expanded) {
       this->AddPathInternal(
@@ -95,7 +96,7 @@ void cmSearchPath::AddCMakePrefixPath(const std::string& variable)
 
   // Get a path from a CMake variable.
   if (cmValue value = this->FC->Makefile->GetDefinition(variable)) {
-    std::vector<std::string> expanded = cmExpandedList(*value);
+    cmList expanded{ *value };
 
     this->AddPrefixPaths(
       expanded, this->FC->Makefile->GetCurrentSourceDirectory().c_str());

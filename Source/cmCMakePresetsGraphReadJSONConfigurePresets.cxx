@@ -12,72 +12,80 @@
 
 #include <cm3p/json/value.h>
 
+#include "cmCMakePresetErrors.h"
 #include "cmCMakePresetsGraph.h"
 #include "cmCMakePresetsGraphInternal.h"
 #include "cmJSONHelpers.h"
+#include "cmJSONState.h"
+#include "cmStateTypes.h"
 
 namespace {
-using ReadFileResult = cmCMakePresetsGraph::ReadFileResult;
 using CacheVariable = cmCMakePresetsGraph::CacheVariable;
 using ConfigurePreset = cmCMakePresetsGraph::ConfigurePreset;
 using ArchToolsetStrategy = cmCMakePresetsGraph::ArchToolsetStrategy;
-using JSONHelperBuilder = cmJSONHelperBuilder<ReadFileResult>;
+using JSONHelperBuilder = cmJSONHelperBuilder;
+using TraceEnableMode = cmCMakePresetsGraph::TraceEnableMode;
+using TraceOutputFormat = cmTraceEnums::TraceOutputFormat;
 
-ReadFileResult ArchToolsetStrategyHelper(
-  cm::optional<ArchToolsetStrategy>& out, const Json::Value* value)
+bool ArchToolsetStrategyHelper(cm::optional<ArchToolsetStrategy>& out,
+                               const Json::Value* value, cmJSONState* state)
 {
   if (!value) {
     out = cm::nullopt;
-    return ReadFileResult::READ_OK;
+    return true;
   }
 
   if (!value->isString()) {
-    return ReadFileResult::INVALID_PRESET;
+    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    return false;
   }
 
   if (value->asString() == "set") {
     out = ArchToolsetStrategy::Set;
-    return ReadFileResult::READ_OK;
+    return true;
   }
 
   if (value->asString() == "external") {
     out = ArchToolsetStrategy::External;
-    return ReadFileResult::READ_OK;
+    return true;
   }
 
-  return ReadFileResult::INVALID_PRESET;
+  cmCMakePresetErrors::INVALID_PRESET(value, state);
+  return false;
 }
 
-std::function<ReadFileResult(ConfigurePreset&, const Json::Value*)>
+std::function<bool(ConfigurePreset&, const Json::Value*, cmJSONState*)>
 ArchToolsetHelper(
   std::string ConfigurePreset::*valueField,
   cm::optional<ArchToolsetStrategy> ConfigurePreset::*strategyField)
 {
   auto const objectHelper =
-    JSONHelperBuilder::Object<ConfigurePreset>(
-      ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
+    JSONHelperBuilder::Object<ConfigurePreset>(JsonErrors::INVALID_OBJECT,
+                                               false)
       .Bind("value", valueField,
             cmCMakePresetsGraphInternal::PresetStringHelper, false)
       .Bind("strategy", strategyField, ArchToolsetStrategyHelper, false);
-  return [valueField, strategyField, objectHelper](
-           ConfigurePreset& out, const Json::Value* value) -> ReadFileResult {
+  return [valueField, strategyField,
+          objectHelper](ConfigurePreset& out, const Json::Value* value,
+                        cmJSONState* state) -> bool {
     if (!value) {
       (out.*valueField).clear();
       out.*strategyField = cm::nullopt;
-      return ReadFileResult::READ_OK;
+      return true;
     }
 
     if (value->isString()) {
       out.*valueField = value->asString();
       out.*strategyField = cm::nullopt;
-      return ReadFileResult::READ_OK;
+      return true;
     }
 
     if (value->isObject()) {
-      return objectHelper(out, value);
+      return objectHelper(out, value, state);
     }
 
-    return ReadFileResult::INVALID_PRESET;
+    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    return false;
   };
 }
 
@@ -86,65 +94,118 @@ auto const ArchitectureHelper = ArchToolsetHelper(
 auto const ToolsetHelper = ArchToolsetHelper(
   &ConfigurePreset::Toolset, &ConfigurePreset::ToolsetStrategy);
 
-auto const VariableStringHelper = JSONHelperBuilder::String(
-  ReadFileResult::READ_OK, ReadFileResult::INVALID_VARIABLE);
+bool TraceEnableModeHelper(cm::optional<TraceEnableMode>& out,
+                           const Json::Value* value, cmJSONState* state)
+{
+  if (!value) {
+    out = cm::nullopt;
+    return true;
+  }
 
-ReadFileResult VariableValueHelper(std::string& out, const Json::Value* value)
+  if (!value->isString()) {
+    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    return false;
+  }
+
+  if (value->asString() == "on") {
+    out = TraceEnableMode::Default;
+  } else if (value->asString() == "off") {
+    out = TraceEnableMode::Disable;
+  } else if (value->asString() == "expand") {
+    out = TraceEnableMode::Expand;
+  } else {
+    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    return false;
+  }
+
+  return true;
+}
+
+bool TraceOutputFormatHelper(cm::optional<TraceOutputFormat>& out,
+                             const Json::Value* value, cmJSONState* state)
+{
+  if (!value) {
+    out = cm::nullopt;
+    return true;
+  }
+
+  if (!value->isString()) {
+    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    return false;
+  }
+
+  if (value->asString() == "human") {
+    out = TraceOutputFormat::Human;
+  } else if (value->asString() == "json-v1") {
+    out = TraceOutputFormat::JSONv1;
+  } else {
+    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    return false;
+  }
+
+  return true;
+}
+
+auto const VariableStringHelper = JSONHelperBuilder::String();
+
+bool VariableValueHelper(std::string& out, const Json::Value* value,
+                         cmJSONState* state)
 {
   if (!value) {
     out.clear();
-    return ReadFileResult::READ_OK;
+    return true;
   }
 
   if (value->isBool()) {
     out = value->asBool() ? "TRUE" : "FALSE";
-    return ReadFileResult::READ_OK;
+    return true;
   }
 
-  return VariableStringHelper(out, value);
+  return VariableStringHelper(out, value, state);
 }
 
 auto const VariableObjectHelper =
   JSONHelperBuilder::Object<CacheVariable>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_VARIABLE, false)
+    cmCMakePresetErrors::INVALID_VARIABLE_OBJECT, false)
     .Bind("type"_s, &CacheVariable::Type, VariableStringHelper, false)
     .Bind("value"_s, &CacheVariable::Value, VariableValueHelper);
 
-ReadFileResult VariableHelper(cm::optional<CacheVariable>& out,
-                              const Json::Value* value)
+bool VariableHelper(cm::optional<CacheVariable>& out, const Json::Value* value,
+                    cmJSONState* state)
 {
   if (value->isBool()) {
     out = CacheVariable{
       /*Type=*/"BOOL",
       /*Value=*/value->asBool() ? "TRUE" : "FALSE",
     };
-    return ReadFileResult::READ_OK;
+    return true;
   }
   if (value->isString()) {
     out = CacheVariable{
       /*Type=*/"",
       /*Value=*/value->asString(),
     };
-    return ReadFileResult::READ_OK;
+    return true;
   }
   if (value->isObject()) {
     out.emplace();
-    return VariableObjectHelper(*out, value);
+    return VariableObjectHelper(*out, value, state);
   }
   if (value->isNull()) {
     out = cm::nullopt;
-    return ReadFileResult::READ_OK;
+    return true;
   }
-  return ReadFileResult::INVALID_VARIABLE;
+  cmCMakePresetErrors::INVALID_VARIABLE(value, state);
+  return false;
 }
 
 auto const VariablesHelper =
   JSONHelperBuilder::Map<cm::optional<CacheVariable>>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, VariableHelper);
+    cmCMakePresetErrors::INVALID_PRESET, VariableHelper);
 
 auto const PresetWarningsHelper =
   JSONHelperBuilder::Object<ConfigurePreset>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
+    JsonErrors::INVALID_NAMED_OBJECT_KEY, false)
     .Bind("dev"_s, &ConfigurePreset::WarnDev,
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
     .Bind("deprecated"_s, &ConfigurePreset::WarnDeprecated,
@@ -158,7 +219,7 @@ auto const PresetWarningsHelper =
 
 auto const PresetErrorsHelper =
   JSONHelperBuilder::Object<ConfigurePreset>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
+    JsonErrors::INVALID_NAMED_OBJECT_KEY, false)
     .Bind("dev"_s, &ConfigurePreset::ErrorDev,
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
     .Bind("deprecated"_s, &ConfigurePreset::ErrorDeprecated,
@@ -166,7 +227,7 @@ auto const PresetErrorsHelper =
 
 auto const PresetDebugHelper =
   JSONHelperBuilder::Object<ConfigurePreset>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
+    JsonErrors::INVALID_NAMED_OBJECT_KEY, false)
     .Bind("output"_s, &ConfigurePreset::DebugOutput,
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
     .Bind("tryCompile"_s, &ConfigurePreset::DebugTryCompile,
@@ -174,11 +235,23 @@ auto const PresetDebugHelper =
     .Bind("find"_s, &ConfigurePreset::DebugFind,
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false);
 
+auto const PresetTraceHelper =
+  JSONHelperBuilder::Object<ConfigurePreset>(
+    cmCMakePresetErrors::INVALID_PRESET_OBJECT, false)
+    .Bind("mode"_s, &ConfigurePreset::TraceMode, TraceEnableModeHelper, false)
+    .Bind("format"_s, &ConfigurePreset::TraceFormat, TraceOutputFormatHelper,
+          false)
+    .Bind("source"_s, &ConfigurePreset::TraceSource,
+          cmCMakePresetsGraphInternal::PresetVectorOneOrMoreStringHelper,
+          false)
+    .Bind("redirect"_s, &ConfigurePreset::TraceRedirect,
+          cmCMakePresetsGraphInternal::PresetStringHelper, false);
+
 auto const ConfigurePresetHelper =
   JSONHelperBuilder::Object<ConfigurePreset>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
+    cmCMakePresetErrors::INVALID_PRESET_OBJECT, false)
     .Bind("name"_s, &ConfigurePreset::Name,
-          cmCMakePresetsGraphInternal::PresetStringHelper)
+          cmCMakePresetsGraphInternal::PresetNameHelper)
     .Bind("inherits"_s, &ConfigurePreset::Inherits,
           cmCMakePresetsGraphInternal::PresetVectorOneOrMoreStringHelper,
           false)
@@ -186,7 +259,7 @@ auto const ConfigurePresetHelper =
           cmCMakePresetsGraphInternal::PresetBoolHelper, false)
     .Bind<std::nullptr_t>("vendor"_s, nullptr,
                           cmCMakePresetsGraphInternal::VendorHelper(
-                            ReadFileResult::INVALID_PRESET),
+                            cmCMakePresetErrors::INVALID_PRESET),
                           false)
     .Bind("displayName"_s, &ConfigurePreset::DisplayName,
           cmCMakePresetsGraphInternal::PresetStringHelper, false)
@@ -211,18 +284,18 @@ auto const ConfigurePresetHelper =
     .Bind("warnings"_s, PresetWarningsHelper, false)
     .Bind("errors"_s, PresetErrorsHelper, false)
     .Bind("debug"_s, PresetDebugHelper, false)
+    .Bind("trace"_s, PresetTraceHelper, false)
     .Bind("condition"_s, &ConfigurePreset::ConditionEvaluator,
           cmCMakePresetsGraphInternal::PresetConditionHelper, false);
 }
 
 namespace cmCMakePresetsGraphInternal {
-ReadFileResult ConfigurePresetsHelper(std::vector<ConfigurePreset>& out,
-                                      const Json::Value* value)
+bool ConfigurePresetsHelper(std::vector<ConfigurePreset>& out,
+                            const Json::Value* value, cmJSONState* state)
 {
   static auto const helper = JSONHelperBuilder::Vector<ConfigurePreset>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESETS,
-    ConfigurePresetHelper);
+    cmCMakePresetErrors::INVALID_PRESETS, ConfigurePresetHelper);
 
-  return helper(out, value);
+  return helper(out, value, state);
 }
 }

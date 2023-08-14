@@ -130,7 +130,7 @@ endfunction()
 
 function(test_cmp0128_warn_unset)
   # For compilers that had CMAKE_<LANG>_EXTENSION_COMPILE_OPTION (only IAR)
-  # there is no behavioural change and thus no warning.
+  # there is no behavioral change and thus no warning.
   if(NOT "${${lang}_EXT_FLAG}" STREQUAL "")
     return()
   endif()

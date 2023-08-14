@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
-project(testFindGTK2 C)
+enable_language(C)
 
 # First call
 find_package(GTK2 REQUIRED)

@@ -33,7 +33,7 @@ cmExtraCodeLiteGenerator::GetFactory()
 {
   static cmExternalMakefileProjectGeneratorSimpleFactory<
     cmExtraCodeLiteGenerator>
-    factory("CodeLite", "Generates CodeLite project files.");
+    factory("CodeLite", "Generates CodeLite project files (deprecated).");
 
   if (factory.GetSupportedGlobalGenerators().empty()) {
 #if defined(_WIN32)

@@ -9,69 +9,72 @@
 
 #include <cm3p/json/value.h>
 
+#include "cmCMakePresetErrors.h"
 #include "cmCMakePresetsGraph.h"
 #include "cmCMakePresetsGraphInternal.h"
 #include "cmJSONHelpers.h"
 
+class cmJSONState;
+
 namespace {
-using ReadFileResult = cmCMakePresetsGraph::ReadFileResult;
 using WorkflowPreset = cmCMakePresetsGraph::WorkflowPreset;
 
-ReadFileResult WorkflowStepTypeHelper(WorkflowPreset::WorkflowStep::Type& out,
-                                      const Json::Value* value)
+bool WorkflowStepTypeHelper(WorkflowPreset::WorkflowStep::Type& out,
+                            const Json::Value* value, cmJSONState* state)
 {
   if (!value) {
-    return ReadFileResult::INVALID_PRESET;
+    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    return false;
   }
 
   if (!value->isString()) {
-    return ReadFileResult::INVALID_PRESET;
+    return false;
   }
 
   if (value->asString() == "configure") {
     out = WorkflowPreset::WorkflowStep::Type::Configure;
-    return ReadFileResult::READ_OK;
+    return true;
   }
 
   if (value->asString() == "build") {
     out = WorkflowPreset::WorkflowStep::Type::Build;
-    return ReadFileResult::READ_OK;
+    return true;
   }
 
   if (value->asString() == "test") {
     out = WorkflowPreset::WorkflowStep::Type::Test;
-    return ReadFileResult::READ_OK;
+    return true;
   }
 
   if (value->asString() == "package") {
     out = WorkflowPreset::WorkflowStep::Type::Package;
-    return ReadFileResult::READ_OK;
+    return true;
   }
 
-  return ReadFileResult::INVALID_PRESET;
+  cmCMakePresetErrors::INVALID_PRESET(value, state);
+  return false;
 }
 
 auto const WorkflowStepHelper =
-  cmJSONHelperBuilder<ReadFileResult>::Object<WorkflowPreset::WorkflowStep>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
+  cmJSONHelperBuilder::Object<WorkflowPreset::WorkflowStep>(
+    JsonErrors::INVALID_OBJECT, false)
     .Bind("type"_s, &WorkflowPreset::WorkflowStep::PresetType,
           WorkflowStepTypeHelper)
     .Bind("name"_s, &WorkflowPreset::WorkflowStep::PresetName,
           cmCMakePresetsGraphInternal::PresetStringHelper);
 
 auto const WorkflowStepsHelper =
-  cmJSONHelperBuilder<ReadFileResult>::Vector<WorkflowPreset::WorkflowStep>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET,
-    WorkflowStepHelper);
+  cmJSONHelperBuilder::Vector<WorkflowPreset::WorkflowStep>(
+    cmCMakePresetErrors::INVALID_PRESET, WorkflowStepHelper);
 
 auto const WorkflowPresetHelper =
-  cmJSONHelperBuilder<ReadFileResult>::Object<WorkflowPreset>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
+  cmJSONHelperBuilder::Object<WorkflowPreset>(
+    cmCMakePresetErrors::INVALID_PRESET_OBJECT, false)
     .Bind("name"_s, &WorkflowPreset::Name,
-          cmCMakePresetsGraphInternal::PresetStringHelper)
+          cmCMakePresetsGraphInternal::PresetNameHelper)
     .Bind<std::nullptr_t>("vendor"_s, nullptr,
                           cmCMakePresetsGraphInternal::VendorHelper(
-                            ReadFileResult::INVALID_PRESET),
+                            cmCMakePresetErrors::INVALID_PRESET),
                           false)
     .Bind("displayName"_s, &WorkflowPreset::DisplayName,
           cmCMakePresetsGraphInternal::PresetStringHelper, false)
@@ -81,15 +84,13 @@ auto const WorkflowPresetHelper =
 }
 
 namespace cmCMakePresetsGraphInternal {
-cmCMakePresetsGraph::ReadFileResult WorkflowPresetsHelper(
+bool WorkflowPresetsHelper(
   std::vector<cmCMakePresetsGraph::WorkflowPreset>& out,
-  const Json::Value* value)
+  const Json::Value* value, cmJSONState* state)
 {
-  static auto const helper =
-    cmJSONHelperBuilder<ReadFileResult>::Vector<WorkflowPreset>(
-      ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESETS,
-      WorkflowPresetHelper);
+  static auto const helper = cmJSONHelperBuilder::Vector<WorkflowPreset>(
+    cmCMakePresetErrors::INVALID_PRESETS, WorkflowPresetHelper);
 
-  return helper(out, value);
+  return helper(out, value, state);
 }
 }

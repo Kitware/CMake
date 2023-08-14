@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <functional>
 #include <map>
 #include <set>
 #include <string>
@@ -53,6 +54,9 @@ protected:
 
   virtual void AddIncludeFlags(std::string& flags, std::string const& lang,
                                const std::string& config) = 0;
+  virtual std::string GetClangTidyReplacementsFilePath(
+    std::string const& directory, cmSourceFile const& source,
+    std::string const& config) const = 0;
 
   void AppendOSXVerFlag(std::string& flags, const std::string& lang,
                         const char* name, bool so);
@@ -63,7 +67,13 @@ protected:
   std::string GetIncludes(std::string const& l, const std::string& config);
   std::string GetManifests(const std::string& config);
   std::string GetAIXExports(std::string const& config);
+  std::string GenerateCodeCheckRules(
+    cmSourceFile const& source, std::string& compilerLauncher,
+    std::string const& cmakeCmd, std::string const& config,
+    std::function<std::string(std::string const&)> const& pathConverter);
 
+  std::string GetCompilerLauncher(std::string const& lang,
+                                  std::string const& config);
   std::vector<std::string> GetLinkedTargetDirectories(
     const std::string& lang, const std::string& config) const;
   std::string ComputeTargetCompilePDB(const std::string& config) const;

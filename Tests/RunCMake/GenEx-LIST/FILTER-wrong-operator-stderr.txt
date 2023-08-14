@@ -1,0 +1,9 @@
+CMake Error at FILTER-wrong-operator.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:FILTER,a;b;c,WRONG_OPERATOR,\^a>
+
+  sub-command FILTER does not recognize operator "WRONG_OPERATOR".  It must
+  be either INCLUDE or EXCLUDE.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

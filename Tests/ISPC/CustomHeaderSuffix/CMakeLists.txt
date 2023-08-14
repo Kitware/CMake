@@ -6,7 +6,11 @@ if(CMAKE_SIZEOF_VOID_P EQUAL 4)
   set(CMAKE_ISPC_FLAGS "--arch=x86")
 endif()
 
-set(CMAKE_ISPC_INSTRUCTION_SETS "sse2-i32x4;sse4-i8x16")
+if("${CMAKE_SYSTEM_NAME};${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Darwin;arm64")
+  set(CMAKE_ISPC_INSTRUCTION_SETS "neon-i32x4")
+else()
+  set(CMAKE_ISPC_INSTRUCTION_SETS "sse2-i32x4;sse4-i8x16")
+endif()
 
 set(CMAKE_ISPC_HEADER_SUFFIX ".ispc.h")
 

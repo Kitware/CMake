@@ -3,7 +3,7 @@
   "cmakeMinimumRequired": {
     "major": @CMAKE_MAJOR_VERSION@,
     "minor": @CMAKE_MINOR_VERSION@,
-    "patch": 2147483647
+    "patch": 50000000
   },
   "configurePresets": [
     {

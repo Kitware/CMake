@@ -194,7 +194,7 @@ public:
   void RemoveUserDefinedCommands();
   std::vector<std::string> GetCommandNames() const;
 
-  void SetGlobalProperty(const std::string& prop, const char* value);
+  void SetGlobalProperty(const std::string& prop, const std::string& value);
   void SetGlobalProperty(const std::string& prop, cmValue value);
   void AppendGlobalProperty(const std::string& prop, const std::string& value,
                             bool asString = false);
@@ -253,20 +253,8 @@ public:
 
 private:
   friend class cmake;
-  void AddCacheEntry(const std::string& key, const char* value,
-                     const char* helpString, cmStateEnums::CacheEntryType type)
-  {
-    this->AddCacheEntry(key,
-                        value ? cmValue(std::string(value)) : cmValue(nullptr),
-                        helpString, type);
-  }
-  void AddCacheEntry(const std::string& key, const std::string& value,
-                     const char* helpString, cmStateEnums::CacheEntryType type)
-  {
-    this->AddCacheEntry(key, cmValue(value), helpString, type);
-  }
   void AddCacheEntry(const std::string& key, cmValue value,
-                     const char* helpString,
+                     const std::string& helpString,
                      cmStateEnums::CacheEntryType type);
 
   bool DoWriteGlobVerifyTarget() const;

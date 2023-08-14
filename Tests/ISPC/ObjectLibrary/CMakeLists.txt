@@ -11,8 +11,12 @@ endif()
 add_library(ispc_objects OBJECT simple.ispc subdir/extra.ispc)
 
 set_target_properties(ispc_objects PROPERTIES POSITION_INDEPENDENT_CODE ON)
-set_target_properties(ispc_objects PROPERTIES ISPC_INSTRUCTION_SETS "sse2-i32x4;sse4-i8x16")
 
+if("${CMAKE_SYSTEM_NAME};${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Darwin;arm64")
+  set_property(TARGET ispc_objects PROPERTY ISPC_INSTRUCTION_SETS "neon-i32x4")
+else()
+  set_property(TARGET ispc_objects PROPERTY ISPC_INSTRUCTION_SETS "sse2-i32x4;sse4-i8x16")
+endif()
 
 add_executable(ISPCObjectLibrary main.cxx extra.cxx)
 target_link_libraries(ISPCObjectLibrary PRIVATE ispc_objects)

@@ -1,5 +1,3 @@
-cmake_minimum_required (VERSION 3.18...3.19)
-
 find_package (SWIG)
 if (NOT SWIG_FOUND)
   message (FATAL_ERROR "Failed to find SWIG")

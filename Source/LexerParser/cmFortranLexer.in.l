@@ -102,6 +102,7 @@ Modify cmFortranLexer.cxx:
 <fixed_fmt>^[cC*dD].*\n { return EOSTMT; } /* empty lines */
 
 ^[ \t]*#([ \t]*line)?[ \t]*[0-9]+[ \t]* { return CPP_LINE_DIRECTIVE; }
+^[ \t]*#[ \t]*line[ \t]* { return CPP_LINE_DIRECTIVE; }
 ^[ \t]*#[ \t]*include[ \t]*<[^>]+> {
   yytext[yyleng-1] = 0;
   yylvalp->string = strdup(strchr(yytext, '<')+1);

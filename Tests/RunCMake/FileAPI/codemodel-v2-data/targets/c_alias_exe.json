@@ -45,6 +45,7 @@
             ],
             "includes": null,
             "defines": null,
+            "frameworks": null,
             "compileCommandFragments": null
         }
     ],

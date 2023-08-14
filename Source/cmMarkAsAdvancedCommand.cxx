@@ -83,7 +83,8 @@ bool cmMarkAsAdvancedCommand(std::vector<std::string> const& args,
     if (oldBehavior) {
       if (!state->GetCacheEntryValue(variable)) {
         status.GetMakefile().GetCMakeInstance()->AddCacheEntry(
-          variable, nullptr, nullptr, cmStateEnums::UNINITIALIZED);
+          variable, cmValue{ nullptr }, cmValue{ nullptr },
+          cmStateEnums::UNINITIALIZED);
         overwrite = true;
       }
     }

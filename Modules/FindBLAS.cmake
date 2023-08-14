@@ -93,6 +93,11 @@ BLAS/LAPACK Vendors
 ``ACML``, ``ACML_MP``, ``ACML_GPU``
   AMD Core Math Library
 
+``AOCL``, ``AOCL_mt``
+  .. versionadded:: 3.27
+
+  AMD Optimizing CPU Libraries
+
 ``Apple``, ``NAS``
   Apple BLAS (Accelerate), and Apple NAS (vecLib)
 
@@ -386,10 +391,10 @@ set(BLAS_LINKER_FLAGS)
 set(BLAS_LIBRARIES)
 set(BLAS95_LIBRARIES)
 set(_blas_fphsa_req_var BLAS_LIBRARIES)
-if(NOT $ENV{BLA_VENDOR} STREQUAL "")
-  set(BLA_VENDOR $ENV{BLA_VENDOR})
-else()
-  if(NOT BLA_VENDOR)
+if(NOT BLA_VENDOR)
+  if(NOT "$ENV{BLA_VENDOR}" STREQUAL "")
+    set(BLA_VENDOR "$ENV{BLA_VENDOR}")
+  else()
     set(BLA_VENDOR "All")
   endif()
 endif()
@@ -846,6 +851,38 @@ if(BLA_VENDOR STREQUAL "FLAME" OR BLA_VENDOR STREQUAL "All")
   endif()
 
   unset(_blas_flame_lib)
+endif()
+
+# AOCL's blis library? (https://developer.amd.com/amd-aocl/)
+if(BLA_VENDOR MATCHES "AOCL" OR BLA_VENDOR STREQUAL "All")
+  set(_blas_aocl_lib "blis")
+
+  if(_blas_sizeof_integer EQUAL 8)
+    set(_blas_aocl_subdir "ILP64")
+  else()
+    set(_blas_aocl_subdir "LP64")
+  endif()
+
+  # Check for multi-threaded support
+  if(BLA_VENDOR MATCHES "_mt")
+    string(APPEND _blas_aocl_lib "-mt")
+  endif()
+
+  if(NOT BLAS_LIBRARIES)
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "${_blas_aocl_lib}"
+      ""
+      ""
+      "${_blas_aocl_subdir}"
+      )
+  endif()
+
+  unset(_blas_aocl_lib)
+  unset(_blas_aocl_subdir)
 endif()
 
 # BLAS in the ATLAS library? (http://math-atlas.sourceforge.net/)

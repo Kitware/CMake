@@ -18,6 +18,7 @@
 
 #include "cmCMakePath.h"
 #include "cmExpandedCommandArgument.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmState.h"
@@ -740,8 +741,8 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
                                 keyVERSION_LESS_EQUAL, keyVERSION_GREATER,
                                 keyVERSION_GREATER_EQUAL, keyVERSION_EQUAL))) {
       const auto op = MATCH2CMPOP[matchNo - 1];
-      const std::string& lhs = this->GetVariableOrString(*args.current);
-      const std::string& rhs = this->GetVariableOrString(*args.nextnext);
+      const cmValue lhs = this->GetVariableOrString(*args.current);
+      const cmValue rhs = this->GetVariableOrString(*args.nextnext);
       const auto result = cmSystemTools::VersionCompare(op, lhs, rhs);
       newArgs.ReduceTwoArgs(result, args);
     }
@@ -764,7 +765,9 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         cmValue rhs = this->Makefile.GetDefinition(args.nextnext->GetValue());
 
         newArgs.ReduceTwoArgs(
-          rhs && cm::contains(cmExpandedList(*rhs, true), *lhs), args);
+          rhs &&
+            cm::contains(cmList{ *rhs, cmList::EmptyElements::Yes }, *lhs),
+          args);
       }
 
       else if (this->Policy57Status == cmPolicies::WARN) {

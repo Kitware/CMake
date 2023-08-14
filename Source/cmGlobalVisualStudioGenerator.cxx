@@ -75,6 +75,9 @@ void cmGlobalVisualStudioGenerator::EnableLanguage(
 bool cmGlobalVisualStudioGenerator::SetGeneratorPlatform(std::string const& p,
                                                          cmMakefile* mf)
 {
+  if (!this->InitializePlatform(mf)) {
+    return false;
+  }
   if (this->GetPlatformName() == "x64") {
     mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
   } else if (this->GetPlatformName() == "Itanium") {
@@ -82,6 +85,11 @@ bool cmGlobalVisualStudioGenerator::SetGeneratorPlatform(std::string const& p,
   }
   mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName());
   return this->cmGlobalGenerator::SetGeneratorPlatform(p, mf);
+}
+
+bool cmGlobalVisualStudioGenerator::InitializePlatform(cmMakefile*)
+{
+  return true;
 }
 
 std::string const& cmGlobalVisualStudioGenerator::GetPlatformName() const
@@ -206,7 +214,6 @@ void cmGlobalVisualStudioGenerator::AddExtraIDETargets()
       // Use no actual command lines so that the target itself is not
       // considered always out of date.
       auto cc = cm::make_unique<cmCustomCommand>();
-      cc->SetCMP0116Status(cmPolicies::NEW);
       cc->SetEscapeOldStyle(false);
       cc->SetComment("Build all projects");
       cmTarget* allBuild =
@@ -550,12 +557,12 @@ bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
   cmSystemTools::ConvertToUnixSlashes(s1);
 
   std::string keyname;
-  HKEY hkey = NULL;
+  HKEY hkey = nullptr;
   LONG result = ERROR_SUCCESS;
   DWORD index = 0;
 
   keyname = regKeyBase + "\\OtherProjects7";
-  hkey = NULL;
+  hkey = nullptr;
   result =
     RegOpenKeyExW(HKEY_CURRENT_USER, cmsys::Encoding::ToWide(keyname).c_str(),
                   0, KEY_READ, &hkey);
@@ -573,7 +580,7 @@ bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
            RegEnumKeyExW(hkey, index, subkeyname, &cch_subkeyname, 0, keyclass,
                          &cch_keyclass, &lastWriteTime)) {
       // Open the subkey and query the values of interest:
-      HKEY hsubkey = NULL;
+      HKEY hsubkey = nullptr;
       result = RegOpenKeyExW(hkey, subkeyname, 0, KEY_READ, &hsubkey);
       if (ERROR_SUCCESS == result) {
         DWORD valueType = REG_SZ;
@@ -647,7 +654,7 @@ bool IsVisualStudioMacrosFileRegistered(const std::string& macrosFile,
   nextAvailableSubKeyName = std::to_string(index);
 
   keyname = regKeyBase + "\\RecordingProject7";
-  hkey = NULL;
+  hkey = nullptr;
   result =
     RegOpenKeyExW(HKEY_CURRENT_USER, cmsys::Encoding::ToWide(keyname).c_str(),
                   0, KEY_READ, &hkey);
@@ -693,13 +700,13 @@ void WriteVSMacrosFileRegistryEntry(const std::string& nextAvailableSubKeyName,
                                     const std::string& regKeyBase)
 {
   std::string keyname = regKeyBase + "\\OtherProjects7";
-  HKEY hkey = NULL;
+  HKEY hkey = nullptr;
   LONG result =
     RegOpenKeyExW(HKEY_CURRENT_USER, cmsys::Encoding::ToWide(keyname).c_str(),
                   0, KEY_READ | KEY_WRITE, &hkey);
   if (ERROR_SUCCESS == result) {
     // Create the subkey and set the values of interest:
-    HKEY hsubkey = NULL;
+    HKEY hsubkey = nullptr;
     wchar_t lpClass[] = L"";
     result = RegCreateKeyExW(
       hkey, cmsys::Encoding::ToWide(nextAvailableSubKeyName).c_str(), 0,
@@ -966,13 +973,13 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
 static bool OpenSolution(std::string const& sln)
 {
   HRESULT comInitialized =
-    CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+    CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
   if (FAILED(comInitialized)) {
     return false;
   }
 
-  HINSTANCE hi =
-    ShellExecuteA(NULL, "open", sln.c_str(), NULL, NULL, SW_SHOWNORMAL);
+  HINSTANCE hi = ShellExecuteA(nullptr, "open", sln.c_str(), nullptr, nullptr,
+                               SW_SHOWNORMAL);
 
   CoUninitialize();
 

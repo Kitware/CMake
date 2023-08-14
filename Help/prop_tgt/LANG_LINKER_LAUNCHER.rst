@@ -14,3 +14,8 @@ arguments to the tool. This is useful for tools such as static analyzers.
 This property is initialized by the value of the
 :variable:`CMAKE_<LANG>_LINKER_LAUNCHER` variable if it is set when a target is
 created.
+
+.. versionadded:: 3.27
+
+  The property value may use
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.

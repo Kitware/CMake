@@ -378,6 +378,10 @@ bool RegularExpression::compile(const char* exp)
     return false;
   }
 
+#ifdef __clang_analyzer__ /* Convince it that the program is initialized.  */
+  memset(this->program, 0, comp.regsize);
+#endif
+
   // Second pass: emit code.
   comp.regparse = exp;
   comp.regnpar = 1;

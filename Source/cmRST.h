@@ -29,26 +29,26 @@ public:
   bool ProcessFile(std::string const& fname, bool isModule = false);
 
 private:
-  enum IncludeType
+  enum class Include
   {
-    IncludeNormal,
-    IncludeModule,
-    IncludeTocTree
+    Normal,
+    Module,
+    TocTree
   };
-  enum MarkupType
+  enum class Markup
   {
-    MarkupNone,
-    MarkupNormal,
-    MarkupEmpty
+    None,
+    Normal,
+    Empty
   };
-  enum DirectiveType
+  enum class Directive
   {
-    DirectiveNone,
-    DirectiveParsedLiteral,
-    DirectiveLiteralBlock,
-    DirectiveCodeBlock,
-    DirectiveReplace,
-    DirectiveTocTree
+    None,
+    ParsedLiteral,
+    LiteralBlock,
+    CodeBlock,
+    Replace,
+    TocTree
   };
 
   void ProcessRST(std::istream& is);
@@ -59,7 +59,7 @@ private:
   void OutputLine(std::string const& line, bool inlineMarkup);
   std::string ReplaceSubstitutions(std::string const& line);
   void OutputMarkupLines(bool inlineMarkup);
-  bool ProcessInclude(std::string file, IncludeType type);
+  bool ProcessInclude(std::string file, Include type);
   void ProcessDirectiveParsedLiteral();
   void ProcessDirectiveLiteralBlock();
   void ProcessDirectiveCodeBlock();
@@ -72,8 +72,8 @@ private:
   int IncludeDepth = 0;
   bool OutputLinePending = false;
   bool LastLineEndedInColonColon = false;
-  MarkupType Markup = MarkupNone;
-  DirectiveType Directive = DirectiveNone;
+  Markup MarkupType = Markup::None;
+  Directive DirectiveType = Directive::None;
   cmsys::RegularExpression CMakeDirective;
   cmsys::RegularExpression CMakeModuleDirective;
   cmsys::RegularExpression ParsedLiteralDirective;

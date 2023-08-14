@@ -12,6 +12,7 @@
 #include "cmsys/Glob.hxx"
 
 #include "cmGeneratedFileStream.h"
+#include "cmList.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
 #include "cmState.h"
@@ -83,7 +84,7 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
         continue;
       }
     }
-    e.SetProperty("HELPSTRING", helpString.c_str());
+    e.SetProperty("HELPSTRING", helpString);
     if (cmState::ParseCacheEntry(realbuffer, entryKey, e.Value, e.Type)) {
       if (excludes.find(entryKey) == excludes.end()) {
         // Load internal values if internal is set.
@@ -101,7 +102,7 @@ bool cmCacheManager::LoadCache(const std::string& path, bool internal,
                                   " loaded from external file.  "
                                   "To change this value edit this file: ",
                                   path, "/CMakeCache.txt");
-            e.SetProperty("HELPSTRING", helpString.c_str());
+            e.SetProperty("HELPSTRING", helpString);
           }
           if (!this->ReadPropertyEntry(entryKey, e)) {
             e.Initialized = true;
@@ -185,11 +186,11 @@ bool cmCacheManager::ReadPropertyEntry(const std::string& entryKey,
       std::string key = entryKey.substr(0, entryKey.size() - plen);
       if (auto* entry = this->GetCacheEntry(key)) {
         // Store this property on its entry.
-        entry->SetProperty(p, e.Value.c_str());
+        entry->SetProperty(p, e.Value);
       } else {
         // Create an entry and store the property.
         CacheEntry& ne = this->Cache[key];
-        ne.SetProperty(p, e.Value.c_str());
+        ne.SetProperty(p, e.Value);
       }
       return true;
     }
@@ -522,7 +523,7 @@ void cmCacheManager::PrintCache(std::ostream& out) const
 }
 
 void cmCacheManager::AddCacheEntry(const std::string& key, cmValue value,
-                                   const char* helpString,
+                                   cmValue helpString,
                                    cmStateEnums::CacheEntryType type)
 {
   CacheEntry& e = this->Cache[key];
@@ -531,23 +532,20 @@ void cmCacheManager::AddCacheEntry(const std::string& key, cmValue value,
   // make sure we only use unix style paths
   if (type == cmStateEnums::FILEPATH || type == cmStateEnums::PATH) {
     if (e.Value.find(';') != std::string::npos) {
-      std::vector<std::string> paths = cmExpandedList(e.Value);
-      const char* sep = "";
-      e.Value = "";
+      cmList paths{ e.Value };
       for (std::string& i : paths) {
         cmSystemTools::ConvertToUnixSlashes(i);
-        e.Value += sep;
-        e.Value += i;
-        sep = ";";
       }
+      e.Value = paths.to_string();
     } else {
       cmSystemTools::ConvertToUnixSlashes(e.Value);
     }
   }
-  e.SetProperty("HELPSTRING",
-                helpString
-                  ? helpString
-                  : "(This variable does not exist and should not be used)");
+  e.SetProperty(
+    "HELPSTRING",
+    helpString ? *helpString
+               : std::string{
+                   "(This variable does not exist and should not be used)" });
 }
 
 void cmCacheManager::CacheEntry::SetValue(cmValue value)
@@ -583,12 +581,12 @@ bool cmCacheManager::CacheEntry::GetPropertyAsBool(
 }
 
 void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
-                                             const char* value)
+                                             const std::string& value)
 {
   if (prop == "TYPE") {
-    this->Type = cmState::StringToCacheEntryType(value ? value : "STRING");
+    this->Type = cmState::StringToCacheEntryType(value);
   } else if (prop == "VALUE") {
-    this->Value = value ? value : "";
+    this->Value = value;
   } else {
     this->Properties.SetProperty(prop, value);
   }
@@ -596,7 +594,19 @@ void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
 
 void cmCacheManager::CacheEntry::SetProperty(const std::string& p, bool v)
 {
-  this->SetProperty(p, v ? "ON" : "OFF");
+  this->SetProperty(p, v ? std::string{ "ON" } : std::string{ "OFF" });
+}
+
+void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
+                                             std::nullptr_t)
+{
+  if (prop == "TYPE") {
+    this->Type = cmState::StringToCacheEntryType("STRING");
+  } else if (prop == "VALUE") {
+    this->Value = "";
+  } else {
+    this->Properties.SetProperty(prop, cmValue{ nullptr });
+  }
 }
 
 void cmCacheManager::CacheEntry::AppendProperty(const std::string& prop,

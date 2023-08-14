@@ -9,16 +9,23 @@ project(DeviceLTO CUDA)
 add_library(CUDA_dlto STATIC file1.cu file2.cu file3.cu)
 add_executable(CudaOnlyDeviceLTO main.cu)
 
+set(archs_to_test "${CMAKE_CUDA_ARCHITECTURES_ALL}")
+if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
+  # Also test with at least one virtual architecture.
+  list(POP_BACK CMAKE_CUDA_ARCHITECTURES_ALL_MAJOR latest_arch)
+  list(APPEND archs_to_test ${latest_arch}-virtual)
+endif()
+
 set_target_properties(CUDA_dlto
                       PROPERTIES
-                      CUDA_ARCHITECTURES "${CMAKE_CUDA_ARCHITECTURES_ALL}"
+                      CUDA_ARCHITECTURES "${archs_to_test}"
                       CUDA_SEPARABLE_COMPILATION ON
                       POSITION_INDEPENDENT_CODE ON)
 
 set_target_properties(CudaOnlyDeviceLTO
                       PROPERTIES
                       CUDA_SEPARABLE_COMPILATION ON
-                      CUDA_ARCHITECTURES "${CMAKE_CUDA_ARCHITECTURES_ALL}"
+                      CUDA_ARCHITECTURES "${archs_to_test}"
                       )
 
 target_link_libraries(CudaOnlyDeviceLTO PRIVATE CUDA_dlto)

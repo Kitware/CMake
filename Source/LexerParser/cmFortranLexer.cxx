@@ -548,8 +548,8 @@ static void yynoreturn yy_fatal_error ( const char* msg , yyscan_t yyscanner );
 	yyg->yy_hold_char = *yy_cp; \
 	*yy_cp = '\0'; \
 	yyg->yy_c_buf_p = yy_cp;
-#define YY_NUM_RULES 54
-#define YY_END_OF_BUFFER 55
+#define YY_NUM_RULES 55
+#define YY_END_OF_BUFFER 56
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -560,29 +560,29 @@ struct yy_trans_info
 static const flex_int16_t yy_accept[216] =
     {   0,
         0,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-       55,   49,   51,   50,   53,    1,   49,   33,    2,   47,
-       48,   35,   37,   50,   39,   49,   46,   46,   46,   46,
-       46,   46,   49,   46,   51,   49,   50,   51,   49,   46,
-        9,    8,    9,    9,    4,    3,   49,    0,   10,    0,
-        0,    0,    0,    0,   33,   33,   34,   36,   39,   49,
-       46,   46,   46,   46,   46,   46,    0,   52,    0,   46,
+       56,   50,   52,   51,   54,    1,   50,   34,    2,   48,
+       49,   36,   38,   51,   40,   50,   47,   47,   47,   47,
+       47,   47,   50,   47,   52,   50,   51,   52,   50,   47,
+        9,    8,    9,    9,    4,    3,   50,    0,   10,    0,
+        0,    0,    0,    0,   34,   34,   35,   37,   40,   50,
+       47,   47,   47,   47,   47,   47,    0,   53,    0,   47,
         0,    0,    0,   12,    0,    0,    0,    0,    0,    0,
-        0,   49,    0,   11,   46,    0,    0,    0,    5,    0,
-        0,    0,    0,    0,   29,    0,   33,   33,   33,   33,
+        0,   50,    0,   11,   47,    0,    0,    0,    5,    0,
+        0,    0,    0,    0,   30,    0,   34,   34,   34,   34,
 
-        0,    0,   40,   46,   46,   46,   46,   45,   12,   12,
-        0,    0,    0,   23,    0,    0,    0,    0,    0,    0,
+        0,    0,   41,   47,   47,   47,   47,   46,   12,   12,
+        0,    0,    0,   24,    0,    0,    0,    0,    0,    0,
         6,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-       46,   46,   46,   46,    0,    0,    0,    0,    0,    0,
-        0,    0,    0,    0,    0,    0,    0,   30,   31,    0,
-        0,    0,    0,    0,   46,   46,   46,   46,    0,   24,
-       25,    0,    0,    0,    0,    0,    0,    0,    0,    0,
-       20,   32,   27,    0,    0,    0,   46,   46,   43,   46,
-        0,   26,   21,    0,    0,    0,   19,    0,    0,   18,
-       28,    0,    0,   41,   46,   46,   17,   22,    0,    7,
+       47,   47,   47,   47,    0,    0,    0,    0,    0,    0,
+        0,    0,    0,    0,    0,    0,    0,   31,   32,    0,
+        0,    0,    0,    0,   47,   47,   47,   47,    0,   25,
+       26,    0,    0,    0,    0,   13,    0,    0,    0,    0,
+       21,   33,   28,    0,    0,    0,   47,   47,   44,   47,
+        0,   27,   22,    0,    0,   13,   20,    0,    0,   19,
+       29,    0,    0,   42,   47,   47,   18,   23,    0,    7,
 
-       38,    7,   15,    0,   46,   46,   14,   16,   42,   44,
-        0,    0,    0,   13,    0
+       39,    7,   16,    0,   47,   47,   15,   17,   43,   45,
+        0,    0,    0,   14,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -1252,7 +1252,11 @@ YY_RULE_SETUP
 { return CPP_LINE_DIRECTIVE; }
 	YY_BREAK
 case 13:
-/* rule 13 can match eol */
+YY_RULE_SETUP
+{ return CPP_LINE_DIRECTIVE; }
+	YY_BREAK
+case 14:
+/* rule 14 can match eol */
 YY_RULE_SETUP
 {
   yytext[yyleng-1] = 0;
@@ -1260,172 +1264,172 @@ YY_RULE_SETUP
   return CPP_INCLUDE_ANGLE;
 }
 	YY_BREAK
-case 14:
+case 15:
 YY_RULE_SETUP
 { return CPP_INCLUDE; }
 	YY_BREAK
-case 15:
+case 16:
 YY_RULE_SETUP
 { return F90PPR_INCLUDE; }
 	YY_BREAK
-case 16:
+case 17:
 YY_RULE_SETUP
 { return COCO_INCLUDE; }
 	YY_BREAK
-case 17:
+case 18:
 YY_RULE_SETUP
 { return CPP_DEFINE; }
 	YY_BREAK
-case 18:
+case 19:
 YY_RULE_SETUP
 { return F90PPR_DEFINE; }
 	YY_BREAK
-case 19:
+case 20:
 YY_RULE_SETUP
 { return CPP_UNDEF; }
 	YY_BREAK
-case 20:
+case 21:
 YY_RULE_SETUP
 { return F90PPR_UNDEF; }
 	YY_BREAK
-case 21:
+case 22:
 YY_RULE_SETUP
 { return CPP_IFDEF; }
 	YY_BREAK
-case 22:
+case 23:
 YY_RULE_SETUP
 { return CPP_IFNDEF; }
 	YY_BREAK
-case 23:
+case 24:
 YY_RULE_SETUP
 { return CPP_IF; }
 	YY_BREAK
-case 24:
+case 25:
 YY_RULE_SETUP
 { return CPP_ELIF; }
 	YY_BREAK
-case 25:
+case 26:
 YY_RULE_SETUP
 { return CPP_ELSE; }
 	YY_BREAK
-case 26:
+case 27:
 YY_RULE_SETUP
 { return CPP_ENDIF; }
 	YY_BREAK
-case 27:
+case 28:
 YY_RULE_SETUP
 { return F90PPR_IFDEF; }
 	YY_BREAK
-case 28:
+case 29:
 YY_RULE_SETUP
 { return F90PPR_IFNDEF; }
 	YY_BREAK
-case 29:
+case 30:
 YY_RULE_SETUP
 { return F90PPR_IF; }
 	YY_BREAK
-case 30:
+case 31:
 YY_RULE_SETUP
 { return F90PPR_ELIF; }
 	YY_BREAK
-case 31:
+case 32:
 YY_RULE_SETUP
 { return F90PPR_ELSE; }
 	YY_BREAK
-case 32:
+case 33:
 YY_RULE_SETUP
 { return F90PPR_ENDIF; }
 	YY_BREAK
 /* Line continuations, possible involving comments.  */
-case 33:
-/* rule 33 can match eol */
-YY_RULE_SETUP
-
-	YY_BREAK
 case 34:
 /* rule 34 can match eol */
 YY_RULE_SETUP
 
 	YY_BREAK
 case 35:
+/* rule 35 can match eol */
 YY_RULE_SETUP
-{ return COMMA; }
+
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-{ return DCOLON; }
+{ return COMMA; }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-{ return COLON; }
+{ return DCOLON; }
 	YY_BREAK
 case 38:
-/* rule 38 can match eol */
+YY_RULE_SETUP
+{ return COLON; }
+	YY_BREAK
+case 39:
+/* rule 39 can match eol */
 YY_RULE_SETUP
 { return GARBAGE; }
 	YY_BREAK
-case 39:
+case 40:
 YY_RULE_SETUP
 { return ASSIGNMENT_OP; }
 	YY_BREAK
-case 40:
+case 41:
 YY_RULE_SETUP
 { return END; }
 	YY_BREAK
-case 41:
+case 42:
 YY_RULE_SETUP
 { return INCLUDE; }
 	YY_BREAK
-case 42:
+case 43:
 YY_RULE_SETUP
 { return INTERFACE; }
 	YY_BREAK
-case 43:
+case 44:
 YY_RULE_SETUP
 { return MODULE; }
 	YY_BREAK
-case 44:
+case 45:
 YY_RULE_SETUP
 { return SUBMODULE; }
 	YY_BREAK
-case 45:
+case 46:
 YY_RULE_SETUP
 { return USE; }
 	YY_BREAK
-case 46:
+case 47:
 YY_RULE_SETUP
 {
   yylvalp->string = strdup(yytext);
   return WORD;
 }
 	YY_BREAK
-case 47:
+case 48:
 YY_RULE_SETUP
 { return LPAREN; }
 	YY_BREAK
-case 48:
+case 49:
 YY_RULE_SETUP
 { return RPAREN; }
 	YY_BREAK
-case 49:
+case 50:
 YY_RULE_SETUP
 { return GARBAGE; }
 	YY_BREAK
-case 50:
-/* rule 50 can match eol */
+case 51:
+/* rule 51 can match eol */
 YY_RULE_SETUP
 { return EOSTMT; }
 	YY_BREAK
-case 51:
+case 52:
 YY_RULE_SETUP
 /* Ignore */
 	YY_BREAK
-case 52:
-/* rule 52 can match eol */
+case 53:
+/* rule 53 can match eol */
 YY_RULE_SETUP
 /* Ignore line-endings preceded by \ */
 	YY_BREAK
-case 53:
+case 54:
 YY_RULE_SETUP
 { return *yytext; }
 	YY_BREAK
@@ -1441,7 +1445,7 @@ case YY_STATE_EOF(str_dq):
     }
 }
 	YY_BREAK
-case 54:
+case 55:
 YY_RULE_SETUP
 ECHO;
 	YY_BREAK

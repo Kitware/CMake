@@ -1,6 +1,5 @@
-cmake_minimum_required(VERSION 3.8)
 cmake_policy(SET CMP0118 NEW)
-project(AssumedSources)
+enable_language(C)
 
 set_source_files_properties(
   "${CMAKE_CURRENT_BINARY_DIR}/target.c"

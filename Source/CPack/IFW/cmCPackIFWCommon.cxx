@@ -5,12 +5,11 @@
 #include <cstddef> // IWYU pragma: keep
 #include <sstream>
 #include <utility>
-#include <vector>
 
 #include "cmCPackGenerator.h"
 #include "cmCPackIFWGenerator.h"
 #include "cmCPackLog.h" // IWYU pragma: keep
-#include "cmStringAlgorithms.h"
+#include "cmList.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 #include "cmVersionConfig.h"
@@ -76,13 +75,13 @@ bool cmCPackIFWCommon::IsVersionEqual(const char* version) const
 void cmCPackIFWCommon::ExpandListArgument(
   const std::string& arg, std::map<std::string, std::string>& argsOut)
 {
-  std::vector<std::string> args = cmExpandedList(arg, false);
+  cmList args{ arg };
   if (args.empty()) {
     return;
   }
 
-  std::size_t i = 0;
-  std::size_t c = args.size();
+  cmList::size_type i = 0;
+  auto c = args.size();
   if (c % 2) {
     argsOut[""] = args[i];
     ++i;
@@ -97,13 +96,13 @@ void cmCPackIFWCommon::ExpandListArgument(
 void cmCPackIFWCommon::ExpandListArgument(
   const std::string& arg, std::multimap<std::string, std::string>& argsOut)
 {
-  std::vector<std::string> args = cmExpandedList(arg, false);
+  cmList args{ arg };
   if (args.empty()) {
     return;
   }
 
-  std::size_t i = 0;
-  std::size_t c = args.size();
+  cmList::size_type i = 0;
+  auto c = args.size();
   if (c % 2) {
     argsOut.insert(std::pair<std::string, std::string>("", args[i]));
     ++i;

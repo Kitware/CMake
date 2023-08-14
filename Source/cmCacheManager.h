@@ -39,8 +39,9 @@ class cmCacheManager
     std::vector<std::string> GetPropertyList() const;
     cmValue GetProperty(const std::string& property) const;
     bool GetPropertyAsBool(const std::string& property) const;
-    void SetProperty(const std::string& property, const char* value);
+    void SetProperty(const std::string& property, const std::string& value);
     void SetProperty(const std::string& property, bool value);
+    void SetProperty(const std::string& property, std::nullptr_t);
     void AppendProperty(const std::string& property, const std::string& value,
                         bool asString = false);
 
@@ -127,7 +128,7 @@ public:
                              std::string const& value)
   {
     if (auto* entry = this->GetCacheEntry(key)) {
-      entry->SetProperty(propName, value.c_str());
+      entry->SetProperty(propName, value);
     }
   }
 
@@ -172,20 +173,19 @@ public:
   unsigned int GetCacheMinorVersion() const { return this->CacheMinorVersion; }
 
   //! Add an entry into the cache
-  void AddCacheEntry(const std::string& key, const char* value,
-                     const char* helpString, cmStateEnums::CacheEntryType type)
-  {
-    this->AddCacheEntry(key,
-                        value ? cmValue(std::string(value)) : cmValue(nullptr),
-                        helpString, type);
-  }
   void AddCacheEntry(const std::string& key, const std::string& value,
-                     const char* helpString, cmStateEnums::CacheEntryType type)
+                     const std::string& helpString,
+                     cmStateEnums::CacheEntryType type)
   {
-    this->AddCacheEntry(key, cmValue(value), helpString, type);
+    this->AddCacheEntry(key, cmValue{ value }, cmValue{ helpString }, type);
   }
   void AddCacheEntry(const std::string& key, cmValue value,
-                     const char* helpString,
+                     const std::string& helpString,
+                     cmStateEnums::CacheEntryType type)
+  {
+    this->AddCacheEntry(key, value, cmValue{ helpString }, type);
+  }
+  void AddCacheEntry(const std::string& key, cmValue value, cmValue helpString,
                      cmStateEnums::CacheEntryType type);
 
   //! Remove an entry from the cache

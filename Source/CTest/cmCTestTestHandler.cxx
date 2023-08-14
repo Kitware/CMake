@@ -17,6 +17,10 @@
 #include <sstream>
 #include <utility>
 
+#ifndef _WIN32
+#  include <csignal>
+#endif
+
 #include <cm/memory>
 #include <cm/string_view>
 #include <cmext/algorithm>
@@ -37,6 +41,8 @@
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
+#include "cmJSONState.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
@@ -1346,12 +1352,11 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   }
   if (!this->ResourceSpecFile.empty()) {
     this->UseResourceSpec = true;
-    auto result = this->ResourceSpec.ReadFromJSONFile(this->ResourceSpecFile);
-    if (result != cmCTestResourceSpec::ReadFileResult::READ_OK) {
+    if (!this->ResourceSpec.ReadFromJSONFile(this->ResourceSpecFile)) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "Could not read/parse resource spec file "
                    << this->ResourceSpecFile << ": "
-                   << cmCTestResourceSpec::ResultToString(result)
+                   << this->ResourceSpec.parseState.GetErrorMessage()
                    << std::endl);
       return false;
     }
@@ -1376,11 +1381,6 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
 
     if (randomSchedule) {
       p.Cost = static_cast<float>(rand());
-    }
-
-    if (p.Timeout == cmDuration::zero() &&
-        this->CTest->GetGlobalTimeout() != cmDuration::zero()) {
-      p.Timeout = this->CTest->GetGlobalTimeout();
     }
 
     if (!p.Depends.empty()) {
@@ -2175,6 +2175,16 @@ void cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length,
   }
 }
 
+void cmCTestTestHandler::cmCTestTestProperties::AppendError(
+  cm::string_view err)
+{
+  if (this->Error) {
+    *this->Error = cmStrCat(*this->Error, '\n', err);
+  } else {
+    this->Error = err;
+  }
+}
+
 bool cmCTestTestHandler::SetTestsProperties(
   const std::vector<std::string>& args)
 {
@@ -2203,9 +2213,8 @@ bool cmCTestTestHandler::SetTestsProperties(
       for (cmCTestTestProperties& rt : this->TestList) {
         if (t == rt.Name) {
           if (key == "_BACKTRACE_TRIPLES"_s) {
-            std::vector<std::string> triples;
             // allow empty args in the triples
-            cmExpandList(val, triples, true);
+            cmList triples{ val, cmList::EmptyElements::Yes };
 
             // Ensure we have complete triples otherwise the data is corrupt.
             if (triples.size() % 3 == 0) {
@@ -2214,7 +2223,7 @@ bool cmCTestTestHandler::SetTestsProperties(
 
               // the first entry represents the top of the trace so we need to
               // reconstruct the backtrace in reverse
-              for (size_t i = triples.size(); i >= 3; i -= 3) {
+              for (auto i = triples.size(); i >= 3; i -= 3) {
                 cmListFileContext fc;
                 fc.FilePath = triples[i - 3];
                 long line = 0;
@@ -2235,24 +2244,70 @@ bool cmCTestTestHandler::SetTestsProperties(
           } else if (key == "ATTACHED_FILES_ON_FAIL"_s) {
             cmExpandList(val, rt.AttachOnFail);
           } else if (key == "RESOURCE_LOCK"_s) {
-            std::vector<std::string> lval = cmExpandedList(val);
+            cmList lval{ val };
 
             rt.LockedResources.insert(lval.begin(), lval.end());
           } else if (key == "FIXTURES_SETUP"_s) {
-            std::vector<std::string> lval = cmExpandedList(val);
+            cmList lval{ val };
 
             rt.FixturesSetup.insert(lval.begin(), lval.end());
           } else if (key == "FIXTURES_CLEANUP"_s) {
-            std::vector<std::string> lval = cmExpandedList(val);
+            cmList lval{ val };
 
             rt.FixturesCleanup.insert(lval.begin(), lval.end());
           } else if (key == "FIXTURES_REQUIRED"_s) {
-            std::vector<std::string> lval = cmExpandedList(val);
+            cmList lval{ val };
 
             rt.FixturesRequired.insert(lval.begin(), lval.end());
           } else if (key == "TIMEOUT"_s) {
             rt.Timeout = cmDuration(atof(val.c_str()));
-            rt.ExplicitTimeout = true;
+          } else if (key == "TIMEOUT_SIGNAL_NAME"_s) {
+#ifdef _WIN32
+            rt.AppendError("TIMEOUT_SIGNAL_NAME is not supported on Windows.");
+#else
+            std::string const& signalName = val;
+            Signal s;
+            if (signalName == "SIGINT"_s) {
+              s.Number = SIGINT;
+            } else if (signalName == "SIGQUIT"_s) {
+              s.Number = SIGQUIT;
+            } else if (signalName == "SIGTERM"_s) {
+              s.Number = SIGTERM;
+            } else if (signalName == "SIGUSR1"_s) {
+              s.Number = SIGUSR1;
+            } else if (signalName == "SIGUSR2"_s) {
+              s.Number = SIGUSR2;
+            }
+            if (s.Number) {
+              s.Name = signalName;
+              rt.TimeoutSignal = std::move(s);
+            } else {
+              rt.AppendError(cmStrCat("TIMEOUT_SIGNAL_NAME \"", signalName,
+                                      "\" not supported on this platform."));
+            }
+#endif
+          } else if (key == "TIMEOUT_SIGNAL_GRACE_PERIOD"_s) {
+#ifdef _WIN32
+            rt.AppendError(
+              "TIMEOUT_SIGNAL_GRACE_PERIOD is not supported on Windows.");
+#else
+            std::string const& gracePeriod = val;
+            static cmDuration minGracePeriod{ 0 };
+            static cmDuration maxGracePeriod{ 60 };
+            cmDuration gp = cmDuration(atof(gracePeriod.c_str()));
+            if (gp <= minGracePeriod) {
+              rt.AppendError(cmStrCat("TIMEOUT_SIGNAL_GRACE_PERIOD \"",
+                                      gracePeriod, "\" is not greater than \"",
+                                      minGracePeriod.count(), "\" seconds."));
+            } else if (gp > maxGracePeriod) {
+              rt.AppendError(cmStrCat("TIMEOUT_SIGNAL_GRACE_PERIOD \"",
+                                      gracePeriod,
+                                      "\" is not less than the maximum of \"",
+                                      maxGracePeriod.count(), "\" seconds."));
+            } else {
+              rt.TimeoutGracePeriod = gp;
+            }
+#endif
           } else if (key == "COST"_s) {
             rt.Cost = static_cast<float>(atof(val.c_str()));
           } else if (key == "REQUIRED_FILES"_s) {
@@ -2260,12 +2315,12 @@ bool cmCTestTestHandler::SetTestsProperties(
           } else if (key == "RUN_SERIAL"_s) {
             rt.RunSerial = cmIsOn(val);
           } else if (key == "FAIL_REGULAR_EXPRESSION"_s) {
-            std::vector<std::string> lval = cmExpandedList(val);
+            cmList lval{ val };
             for (std::string const& cr : lval) {
               rt.ErrorRegularExpressions.emplace_back(cr, cr);
             }
           } else if (key == "SKIP_REGULAR_EXPRESSION"_s) {
-            std::vector<std::string> lval = cmExpandedList(val);
+            cmList lval{ val };
             for (std::string const& cr : lval) {
               rt.SkipRegularExpressions.emplace_back(cr, cr);
             }
@@ -2292,7 +2347,7 @@ bool cmCTestTestHandler::SetTestsProperties(
           } else if (key == "ENVIRONMENT_MODIFICATION"_s) {
             cmExpandList(val, rt.EnvironmentModification);
           } else if (key == "LABELS"_s) {
-            std::vector<std::string> Labels = cmExpandedList(val);
+            cmList Labels{ val };
             rt.Labels.insert(rt.Labels.end(), Labels.begin(), Labels.end());
             // sort the array
             std::sort(rt.Labels.begin(), rt.Labels.end());
@@ -2309,21 +2364,21 @@ bool cmCTestTestHandler::SetTestsProperties(
               rt.Measurements[val] = "1";
             }
           } else if (key == "PASS_REGULAR_EXPRESSION"_s) {
-            std::vector<std::string> lval = cmExpandedList(val);
+            cmList lval{ val };
             for (std::string const& cr : lval) {
               rt.RequiredRegularExpressions.emplace_back(cr, cr);
             }
           } else if (key == "WORKING_DIRECTORY"_s) {
             rt.Directory = val;
           } else if (key == "TIMEOUT_AFTER_MATCH"_s) {
-            std::vector<std::string> propArgs = cmExpandedList(val);
+            cmList propArgs{ val };
             if (propArgs.size() != 2) {
               cmCTestLog(this->CTest, WARNING,
                          "TIMEOUT_AFTER_MATCH expects two arguments, found "
                            << propArgs.size() << std::endl);
             } else {
               rt.AlternateTimeout = cmDuration(atof(propArgs[0].c_str()));
-              std::vector<std::string> lval = cmExpandedList(propArgs[1]);
+              cmList lval{ propArgs[1] };
               for (std::string const& cr : lval) {
                 rt.TimeoutRegularExpressions.emplace_back(cr, cr);
               }
@@ -2365,7 +2420,7 @@ bool cmCTestTestHandler::SetDirectoryProperties(
       std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
       if (cwd == rt.Directory) {
         if (key == "LABELS"_s) {
-          std::vector<std::string> DirectoryLabels = cmExpandedList(val);
+          cmList DirectoryLabels{ val };
           rt.Labels.insert(rt.Labels.end(), DirectoryLabels.begin(),
                            DirectoryLabels.end());
 
@@ -2431,17 +2486,6 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
                      "Set test directory: " << test.Directory << std::endl,
                      this->Quiet);
 
-  test.IsInBasedOnREOptions = true;
-  test.WillFail = false;
-  test.Disabled = false;
-  test.RunSerial = false;
-  test.Timeout = cmDuration::zero();
-  test.ExplicitTimeout = false;
-  test.Cost = 0;
-  test.Processors = 1;
-  test.WantAffinity = false;
-  test.SkipReturnCode = -1;
-  test.PreviousRuns = 0;
   if (this->UseIncludeRegExpFlag &&
       (!this->IncludeTestsRegularExpression.find(testname) ||
        (!this->UseExcludeRegExpFirst &&
@@ -2569,7 +2613,7 @@ bool cmCTestTestHandler::WriteJUnitXML()
       xml.EndElement(); // </skipped>
     } else if (status == "fail") {
       xml.StartElement("failure");
-      xml.Attribute("message", result.Reason);
+      xml.Attribute("message", this->GetTestStatus(result));
       xml.EndElement(); // </failure>
     }
 

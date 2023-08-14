@@ -1,13 +1,13 @@
-^CMake Deprecation Warning at GET-CMP0007-WARN.cmake:1 \(cmake_policy\):
-  Compatibility with CMake < 2.8.12 will be removed from a future version of
-  CMake.
+^CMake Deprecation Warning at GET-CMP0007-WARN\.cmake:1 \(cmake_policy\):
+  Compatibility with CMake < 3\.5 will be removed from a future version of
+  CMake\.
 
-  Update the VERSION argument <min> value or use a ...<max> suffix to tell
-  CMake that the project does not need compatibility with older versions.
+  Update the VERSION argument <min> value or use a \.\.\.<max> suffix to tell
+  CMake that the project does not need compatibility with older versions\.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 +
-CMake Warning \(dev\) at GET-CMP0007-WARN.cmake:4 \(list\):
+CMake Warning \(dev\) at GET-CMP0007-WARN\.cmake:4 \(list\):
   Policy CMP0007 is not set: list command no longer ignores empty elements.
   Run "cmake --help-policy CMP0007" for policy details.  Use the cmake_policy
   command to set the policy and suppress this warning.  List has value =

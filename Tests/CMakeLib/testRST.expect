@@ -26,10 +26,15 @@ Generator expression ``$<SOME_GENEX:...>`` with brackets and parameter.
 Generator expression ``some genex`` with space and target.
 Generator expression ``$<SOME_GENEX>`` with brackets, space, and target.
 Generator expression ``$<SOME_GENEX:...>`` with brackets, parameter, space, and target.
-Inline literal ``~!@#$%^&*( )_+-=\\[]{}'":;,<>.?/``.
+Inline cref ``Link Dest``.
+Inline cref ``Link_Dest_<Placeholder>``.
+Inline cref ``Link Text``.
+Inline cref ``Link_Text_<Placeholder>``.
+Inline link Link Dest.
 Inline link Link Text.
 Inline link Link Text <With \-escaped Brackets>.
 Inline literal ``__`` followed by inline link Link Text.
+Inline literal ``~!@#$%^&*( )_+-=\\[]{}'":;,<>.?/``.
 
 First TOC entry.
 
@@ -46,7 +51,8 @@ Bracket Comment Content
 Bracket Comment Content
 ]
 
-.. cmake:command:: some_cmd
+.. cmake:command::
+   some_cmd
 
    Command some_cmd description.
 
@@ -54,7 +60,8 @@ Bracket Comment Content
 
    Command other_cmd description.
 
-.. cmake:envvar:: some_var
+.. cmake:envvar::
+   some_var
 
    Environment variable some_var description.
 
@@ -62,7 +69,8 @@ Bracket Comment Content
 
    Environment variable other_var description.
 
-.. cmake:genex:: SOME_GENEX
+.. cmake:genex::
+   SOME_GENEX
 
    Generator expression SOME_GENEX description.
 
@@ -70,7 +78,17 @@ Bracket Comment Content
 
    Generator expression $<OTHER_GENEX> description.
 
-.. cmake:variable:: some_var
+.. cmake:signature::
+   some_command(SOME_SIGNATURE)
+
+   Command some_command SOME_SIGNATURE description.
+
+.. signature:: other_command(OTHER_SIGNATURE)
+
+   Command other_command OTHER_SIGNATURE description.
+
+.. cmake:variable::
+   some_var
 
    Variable some_var description.
 

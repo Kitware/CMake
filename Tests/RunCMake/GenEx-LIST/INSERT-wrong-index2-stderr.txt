@@ -1,0 +1,8 @@
+CMake Error at INSERT-wrong-index2.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:INSERT,a;b;c,-4,d>
+
+  index: -4 out of range \(-3, 3\)
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

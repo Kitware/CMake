@@ -201,6 +201,18 @@
         {
             "id": "^c_headers_2::@6b8db101d64c125f29fe$",
             "backtrace": null
+        },
+        {
+            "id": "^static_framework::@217a96c3a62328a73ef4$",
+            "backtrace": null
+        },
+        {
+            "id": "^shared_framework::@217a96c3a62328a73ef4$",
+            "backtrace": null
+        },
+        {
+            "id": "^exe_framework::@217a96c3a62328a73ef4$",
+            "backtrace": null
         }
     ]
 }

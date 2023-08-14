@@ -1,0 +1,9 @@
+CMake Error at TRANSFORM-selector-FOR-negative-step.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:TRANSFORM,a;b;c,TOUPPER,FOR,0,2,-1>
+
+  sub-command TRANSFORM, selector FOR expects positive numeric value for
+  <step>.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

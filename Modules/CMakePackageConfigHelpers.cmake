@@ -188,7 +188,7 @@ resulting version file.  Depending on the ``COMPATIBILITY``, the corresponding
 ``BasicConfigVersion-<COMPATIBILITY>.cmake.in`` file is used.
 Please note that these files are internal to CMake and you should not call
 :command:`configure_file()` on them yourself, but they can be used as starting
-point to create more sophisticted custom ``ConfigVersion.cmake`` files.
+point to create more sophisticated custom ``ConfigVersion.cmake`` files.
 
 Example Generating Package Files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

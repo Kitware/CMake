@@ -1,0 +1,8 @@
+CMake Error at TARGET_SONAME_IMPORT_FILE-non-valid-target.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<TARGET_SONAME_IMPORT_FILE:static1>
+
+  TARGET_SONAME_IMPORT_FILE is allowed only for SHARED libraries.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

@@ -1,0 +1,2 @@
+^CMake Error: No path specified for --debugger-pipe
+CMake Error: Run 'cmake --help' for all supported options\.$

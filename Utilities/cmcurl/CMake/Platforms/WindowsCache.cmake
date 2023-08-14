@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -29,7 +29,6 @@ if(NOT UNIX)
 
     set(HAVE_ARPA_INET_H 0)
     set(HAVE_FCNTL_H 1)
-    set(HAVE_INTTYPES_H 0)
     set(HAVE_IO_H 1)
     set(HAVE_NETDB_H 0)
     set(HAVE_NETINET_IN_H 0)
@@ -37,7 +36,6 @@ if(NOT UNIX)
     set(HAVE_PWD_H 0)
     set(HAVE_SETJMP_H 1)
     set(HAVE_SIGNAL_H 1)
-    set(HAVE_STDINT_H 0)
     set(HAVE_STDLIB_H 1)
     set(HAVE_STRINGS_H 0)
     set(HAVE_STRING_H 1)

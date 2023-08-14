@@ -13,8 +13,13 @@ target_sources(ispc_objects2 PRIVATE simple.cxx)
 
 set_target_properties(ispc_objects1 PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-set_target_properties(ispc_objects1 PROPERTIES ISPC_INSTRUCTION_SETS "sse2-i32x4;avx1-i32x16;avx2-i32x4")
-set_target_properties(ispc_objects2 PROPERTIES ISPC_INSTRUCTION_SETS "sse2-i32x4")
+if("${CMAKE_SYSTEM_NAME};${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Darwin;arm64")
+  set_property(TARGET ispc_objects1 PROPERTY ISPC_INSTRUCTION_SETS "neon-i32x4")
+  set_property(TARGET ispc_objects2 PROPERTY ISPC_INSTRUCTION_SETS "neon-i32x4")
+else()
+  set_property(TARGET ispc_objects1 PROPERTY ISPC_INSTRUCTION_SETS "sse2-i32x4;avx1-i32x16;avx2-i32x4")
+  set_property(TARGET ispc_objects2 PROPERTY ISPC_INSTRUCTION_SETS "sse2-i32x4")
+endif()
 
 target_link_libraries(ispc_objects2 PUBLIC ispc_objects1)
 

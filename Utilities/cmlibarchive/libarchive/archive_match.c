@@ -606,6 +606,10 @@ add_pattern_from_file(struct archive_match *a, struct match_list *mlist,
 		return (ARCHIVE_FATAL);
 	}
 	r = archive_read_support_format_raw(ar);
+#ifdef __clang_analyzer__
+	/* Tolerate deadcode.DeadStores to avoid modifying upstream.  */
+	(void)r;
+#endif
 	r = archive_read_support_format_empty(ar);
 	if (r != ARCHIVE_OK) {
 		archive_copy_error(&(a->archive), ar);

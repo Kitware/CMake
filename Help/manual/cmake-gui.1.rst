@@ -9,9 +9,9 @@ Synopsis
 .. parsed-literal::
 
  cmake-gui [<options>]
+ cmake-gui [<options>] -B <path-to-build> [-S <path-to-source>]
  cmake-gui [<options>] <path-to-source | path-to-existing-build>
- cmake-gui [<options>] -S <path-to-source> -B <path-to-build>
- cmake-gui [<options>] --browse-manual
+ cmake-gui [<options>] --browse-manual [<filename>]
 
 Description
 ===========
@@ -46,9 +46,11 @@ Options
  Name of the preset to use from the project's
  :manual:`presets <cmake-presets(7)>` files, if it has them.
 
-.. option:: --browse-manual
+.. option:: --browse-manual [<filename>]
 
- Open the CMake reference manual in a browser and immediately exit.
+ Open the CMake reference manual in a browser and immediately exit. If
+ ``<filename>`` is specified, open that file within the reference manual
+ instead of ``index.html``.
 
 .. include:: OPTIONS_HELP.txt
 

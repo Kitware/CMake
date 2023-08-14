@@ -35,25 +35,25 @@
     variables:
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64"
-        VCVARSVERSION: "14.35.32215"
+        VCVARSVERSION: "14.36.32532"
 
 .windows_vcvarsall_vs2022_x86:
     variables:
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x86"
-        VCVARSVERSION: "14.35.32215"
+        VCVARSVERSION: "14.36.32532"
 
 .windows_vcvarsall_vs2022_x64_arm64:
     variables:
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "x64_arm64"
-        VCVARSVERSION: "14.35.32215"
+        VCVARSVERSION: "14.36.32532"
 
 .windows_arm64_vcvarsall_vs2022:
     variables:
         VCVARSALL: "${VS170COMNTOOLS}\\..\\..\\VC\\Auxiliary\\Build\\vcvarsall.bat"
         VCVARSPLATFORM: "arm64"
-        VCVARSVERSION: "14.35.32215"
+        VCVARSVERSION: "14.36.32532"
 
 .windows_vs2022_x64_ninja:
     extends:
@@ -112,7 +112,7 @@
         CMAKE_CONFIGURATION: windows_vs2022_x64
         CMAKE_GENERATOR: "Visual Studio 17 2022"
         CMAKE_GENERATOR_PLATFORM: "x64"
-        CMAKE_GENERATOR_TOOLSET: "v143,version=14.35.32215"
+        CMAKE_GENERATOR_TOOLSET: "v143,version=14.36.32532"
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .windows_vs2019_x64:
@@ -222,6 +222,22 @@
     variables:
         CMAKE_CONFIGURATION: windows_msvc_v71_nmake
 
+.windows_intelclassic_ninja:
+    extends:
+        - .windows_ninja
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_intelclassic_ninja
+
+.windows_inteloneapi_ninja:
+    extends:
+        - .windows_ninja
+        - .windows_vcvarsall_vs2022_x64
+
+    variables:
+        CMAKE_CONFIGURATION: windows_inteloneapi_ninja
+
 .windows_openwatcom:
     extends: .windows
 
@@ -245,7 +261,7 @@
         CMAKE_CONFIGURATION: windows_arm64_vs2022
         CMAKE_GENERATOR: "Visual Studio 17 2022"
         CMAKE_GENERATOR_PLATFORM: "ARM64"
-        CMAKE_GENERATOR_TOOLSET: "v143,version=14.35.32215"
+        CMAKE_GENERATOR_TOOLSET: "v143,version=14.36.32532"
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
 .mingw_osdn_io:
@@ -279,7 +295,7 @@
         - windows-x86_64
         - shell
         - vs2022
-        - msvc-19.35
+        - msvc-19.36
         - nonconcurrent
 
 .windows_x86_64_tags_nonconcurrent_vs2022_arm64:
@@ -288,7 +304,7 @@
         - windows-x86_64
         - shell
         - vs2022
-        - msvc-19.35-arm64
+        - msvc-19.36-arm64
         - nonconcurrent
 
 .windows_x86_64_tags_concurrent_vs2022:
@@ -297,7 +313,7 @@
         - windows-x86_64
         - shell
         - vs2022
-        - msvc-19.35
+        - msvc-19.36
         - concurrent
 
 .windows_x86_64_tags_concurrent_vs2019:
@@ -322,7 +338,7 @@
         - windows-arm64
         - shell
         - vs2022
-        - msvc-19.35
+        - msvc-19.36
         - nonconcurrent
 
 .windows_arm64_tags_concurrent_vs2022:
@@ -331,7 +347,7 @@
         - windows-arm64
         - shell
         - vs2022
-        - msvc-19.35
+        - msvc-19.36
         - concurrent
 
 ## Windows-specific scripts
@@ -347,6 +363,10 @@
     - (& "$env:WIX\bin\light.exe" -help) | Select -First 1
     - cmake --version
     - . .gitlab/ci/qt-env.ps1
+    - . .gitlab/ci/python-env.ps1
+
+.before_script_windows_external: &before_script_windows_external
+    - . .gitlab/ci/env.ps1
     - . .gitlab/ci/python-env.ps1
 
 .cmake_build_windows:
@@ -381,69 +401,7 @@
     stage: test-ext
 
     script:
-        - . .gitlab/ci/env.ps1
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
-
-    interruptible: true
-
-.cmake_test_windows_nmake:
-    stage: test-ext
-
-    script:
-        - . .gitlab/ci/env.ps1
-        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
-
-    interruptible: true
-
-.cmake_test_windows_jom:
-    stage: test-ext
-
-    script:
-        - . .gitlab/ci/env.ps1
-        - Invoke-Expression -Command .gitlab/ci/jom.ps1
-        - $pwdpath = $pwd.Path
-        - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\jom;$env:PATH"
-        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
-
-    interruptible: true
-
-.cmake_test_windows_borland:
-    stage: test-ext
-
-    script:
-        - . .gitlab/ci/env.ps1
-        - Invoke-Expression -Command .gitlab/ci/borland.ps1
-        - $pwdpath = $pwd.Path
-        - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\bcc\bin;$env:PATH"
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
-
-    interruptible: true
-
-.cmake_test_windows_msvc:
-    stage: test-ext
-
-    script:
-        - . .gitlab/ci/env.ps1
-        - Invoke-Expression -Command .gitlab/ci/msvc.ps1
-        - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
-        - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
-
-    interruptible: true
-
-.cmake_test_windows_openwatcom:
-    stage: test-ext
-
-    script:
-        - . .gitlab/ci/env.ps1
-        - Invoke-Expression -Command .gitlab/ci/openwatcom.ps1
-        - $pwdpath = $pwd.Path
-        - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\watcom\binnt;$pwdpath\.gitlab\watcom\binw;$env:PATH"
-        - Set-Item -Force -Path "env:INCLUDE" -Value "$pwdpath\.gitlab\watcom\h;$pwdpath\.gitlab\watcom\h\nt"
-        - Set-Item -Force -Path "env:EDPATH" -Value "$pwdpath\.gitlab\watcom\eddat"
-        - Set-Item -Force -Path "env:WATCOM" -Value "$pwdpath\.gitlab\watcom"
-        - Set-Item -Force -Path "env:WLINKTMP" -Value "."
+        - *before_script_windows_external
         - build/install/bin/ctest --output-on-failure -V -S .gitlab/ci/ctest_standalone.cmake
 
     interruptible: true

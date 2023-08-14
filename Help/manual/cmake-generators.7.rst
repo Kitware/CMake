@@ -107,6 +107,12 @@ Other Generators
 Extra Generators
 ================
 
+.. deprecated:: 3.27
+
+  Support for "Extra Generators" is deprecated and will be removed from
+  a future version of CMake.  IDEs may use the :manual:`cmake-file-api(7)`
+  to view CMake-generated project build trees.
+
 Some of the `CMake Generators`_ listed in the :manual:`cmake(1)`
 command-line tool :option:`--help <cmake --help>` output may have
 variants that specify an extra generator for an auxiliary IDE tool.

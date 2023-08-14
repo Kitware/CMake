@@ -39,5 +39,6 @@ target_link_libraries(CudaOnlyStaticRuntimePlusToolkit PRIVATE SharedToolkit
 if(UNIX)
   # Help the shared cuda runtime find libcurand and libnppif when they are not located
   # in a default system searched location
-  set_property(TARGET CudaOnlyStaticRuntimePlusToolkit PROPERTY BUILD_RPATH ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
+  find_package(CUDAToolkit REQUIRED)
+  set_property(TARGET CudaOnlyStaticRuntimePlusToolkit PROPERTY BUILD_RPATH "${CUDAToolkit_LIBRARY_DIR}")
 endif()

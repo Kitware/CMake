@@ -1,2 +1,5 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/InvalidVersion: Invalid "version" field$
+]*/Tests/RunCMake/CMakePresets/InvalidVersion:
+Error: @2,14: Invalid "version" field
+  "version": "1.0",
+             \^$

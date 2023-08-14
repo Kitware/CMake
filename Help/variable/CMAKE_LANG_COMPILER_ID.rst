@@ -9,7 +9,7 @@ include:
 =============================== ===============================================
 Value                           Name
 =============================== ===============================================
-``Absoft``                      `Absoft Fortran`_
+``Absoft``                      Absoft Fortran
 ``ADSP``                        Analog VisualDSP++
 ``AppleClang``                  Apple Clang
 ``ARMCC``                       ARM Compiler
@@ -50,7 +50,6 @@ Value                           Name
 This variable is not guaranteed to be defined for all compilers or
 languages.
 
-.. _Absoft Fortran: https://www.absoft.com
 .. _LLVM Clang: https://clang.llvm.org
 .. _Embarcadero: https://www.embarcadero.com
 .. _Classic Flang Fortran Compiler: https://github.com/flang-compiler/flang

@@ -192,28 +192,25 @@ function (_PYTHON_GET_REGISTRIES _PYTHON_PGR_REGISTRY_PATHS)
     if (implementation STREQUAL "CPython")
       foreach (version IN LISTS _PGR_VERSION)
         string (REPLACE "." "" version_no_dots ${version})
-        list (APPEND registries
-                     [HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${version}-${_${_PYTHON_PREFIX}_ARCH}/InstallPath]
-                     [HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${version}-${_${_PYTHON_PREFIX}_ARCH2}/InstallPath])
+        list (TRANSFORM _${_PYTHON_PREFIX}_ARCH REPLACE "^(.+)$" "[HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${version}-\\1/InstallPath]" OUTPUT_VARIABLE reg_paths)
+        list (APPEND registries ${reg_paths})
         if (version VERSION_GREATER_EQUAL "3.5")
           # cmake_host_system_information is not usable in bootstrap
           get_filename_component (arch "[HKEY_CURRENT_USER\\Software\\Python\\PythonCore\\${version};SysArchitecture]" NAME)
-          if (arch MATCHES "(${_${_PYTHON_PREFIX}_ARCH}|${_${_PYTHON_PREFIX}_ARCH2})bit")
-            list (APPEND registries
-                         [HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${version}/InstallPath])
+          string (REPLACE "bit" "" arch "${arch}")
+          if (arch IN_LIST _${_PYTHON_PREFIX}_ARCH)
+            list (APPEND registries [HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${version}/InstallPath])
           endif()
         else()
-          list (APPEND registries
-                       [HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${version}/InstallPath])
+          list (APPEND registries [HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${version}/InstallPath])
         endif()
-        list (APPEND registries
-                     [HKEY_CURRENT_USER/SOFTWARE/Python/ContinuumAnalytics/Anaconda${version_no_dots}-${_${_PYTHON_PREFIX}_ARCH}/InstallPath]
-                     [HKEY_CURRENT_USER/SOFTWARE/Python/ContinuumAnalytics/Anaconda${version_no_dots}-${_${_PYTHON_PREFIX}_ARCH2}/InstallPath]
-                     [HKEY_LOCAL_MACHINE/SOFTWARE/Python/PythonCore/${version}-${_${_PYTHON_PREFIX}_ARCH}/InstallPath]
-                     [HKEY_LOCAL_MACHINE/SOFTWARE/Python/PythonCore/${version}-${_${_PYTHON_PREFIX}_ARCH2}/InstallPath]
-                     [HKEY_LOCAL_MACHINE/SOFTWARE/Python/PythonCore/${version}/InstallPath]
-                     [HKEY_LOCAL_MACHINE/SOFTWARE/Python/ContinuumAnalytics/Anaconda${version_no_dots}-${_${_PYTHON_PREFIX}_ARCH}/InstallPath]
-                     [HKEY_LOCAL_MACHINE/SOFTWARE/Python/ContinuumAnalytics/Anaconda${version_no_dots}-${_${_PYTHON_PREFIX}_ARCH2}/InstallPath])
+        list (TRANSFORM _${_PYTHON_PREFIX}_ARCH REPLACE "^(.+)$" "[HKEY_CURRENT_USER/SOFTWARE/Python/ContinuumAnalytics/Anaconda${version_no_dots}-\\1/InstallPath]" OUTPUT_VARIABLE reg_paths)
+        list (APPEND registries ${reg_paths})
+        list (TRANSFORM _${_PYTHON_PREFIX}_ARCH REPLACE "^(.+)$" "[HKEY_CURRENT_USER/SOFTWARE/Python/PythonCore/${version}-\\1/InstallPath]" OUTPUT_VARIABLE reg_paths)
+        list (APPEND registries ${reg_paths})
+        list (APPEND registries [HKEY_LOCAL_MACHINE/SOFTWARE/Python/PythonCore/${version}/InstallPath])
+        list (TRANSFORM _${_PYTHON_PREFIX}_ARCH REPLACE "^(.+)$" "[HKEY_LOCAL_MACHINE/SOFTWARE/Python/ContinuumAnalytics/Anaconda${version_no_dots}-\\1/InstallPath]" OUTPUT_VARIABLE reg_paths)
+        list (APPEND registries ${reg_paths})
       endforeach()
     elseif (implementation STREQUAL "IronPython")
       foreach (version  IN LISTS _PGR_VERSION)
@@ -503,7 +500,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
 
   if (_${_PYTHON_PREFIX}_EXECUTABLE AND NOT CMAKE_CROSSCOMPILING)
     if (NAME STREQUAL "PREFIX")
-      execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.PREFIX,sysconfig.EXEC_PREFIX,sysconfig.BASE_EXEC_PREFIX]))\nexcept Exception:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('base') or '', sysconfig.get_config_var('installed_base') or '']))"
+      execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('base') or '', sysconfig.get_config_var('installed_base') or '']))\nexcept Exception:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.PREFIX,sysconfig.EXEC_PREFIX,sysconfig.BASE_EXEC_PREFIX]))"
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _values
                        ERROR_QUIET
@@ -520,7 +517,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
         set (_scheme "posix_prefix")
       endif()
       execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                               "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_python_inc(plat_specific=True),sysconfig.get_python_inc(plat_specific=False)]))\nexcept Exception:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_path('platinclude'),sysconfig.get_path('platinclude','${_scheme}'),sysconfig.get_path('include'),sysconfig.get_path('include','${_scheme}')]))"
+                               "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_path('platinclude'),sysconfig.get_path('platinclude','${_scheme}'),sysconfig.get_path('include'),sysconfig.get_path('include','${_scheme}')]))\nexcept Exception:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_python_inc(plat_specific=True),sysconfig.get_python_inc(plat_specific=False)]))"
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _values
                        ERROR_QUIET
@@ -533,7 +530,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
     elseif (NAME STREQUAL "SOABI")
       # first step: compute SOABI form EXT_SUFFIX config variable
       execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                               "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('EXT_SUFFIX') or '')\nexcept Exception:\n   import sysconfig;sys.stdout.write(sysconfig.get_config_var('EXT_SUFFIX') or '')"
+                               "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('EXT_SUFFIX') or '')\nexcept Exception:\n   from distutils import sysconfig;sys.stdout.write(sysconfig.get_config_var('EXT_SUFFIX') or '')"
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _values
                        ERROR_QUIET
@@ -554,7 +551,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
       # second step: use SOABI or SO config variables as fallback
       if (NOT _values)
         execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-          "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('SO') or '']))\nexcept Exception:\n   import sysconfig;sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('SO') or '']))"
+          "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('SO') or '']))\nexcept Exception:\n   from distutils import sysconfig;sys.stdout.write(';'.join([sysconfig.get_config_var('SOABI') or '',sysconfig.get_config_var('SO') or '']))"
           RESULT_VARIABLE _result
           OUTPUT_VARIABLE _soabi
           ERROR_QUIET
@@ -595,7 +592,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
         set (config_flag "LIBPL")
       endif()
       execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                               "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('${config_flag}'))\nexcept Exception:\n   import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('${config_flag}'))"
+                               "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('${config_flag}'))\nexcept Exception:\n   from distutils import sysconfig\n   sys.stdout.write(sysconfig.get_config_var('${config_flag}'))"
                        RESULT_VARIABLE _result
                        OUTPUT_VARIABLE _values
                        ERROR_QUIET
@@ -926,6 +923,33 @@ function (_PYTHON_VALIDATE_INTERPRETER)
       endif()
       set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
       return()
+    endif()
+
+    if (WIN32)
+      # In this case, check if the interpreter is compatible with the target processor architecture
+      if (NOT CMAKE_GENERATOR_PLATFORM AND CMAKE_SYSTEM_PROCESSOR MATCHES "ARM" OR CMAKE_GENERATOR_PLATFORM MATCHES "ARM")
+        set(target_arm TRUE)
+      else()
+        set(target_arm FALSE)
+      endif()
+      execute_process (COMMAND ${launcher} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
+        "import sys, sysconfig; sys.stdout.write(sysconfig.get_platform())"
+        RESULT_VARIABLE result
+        OUTPUT_VARIABLE platform
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+      string(TOUPPER "${platform}" platform)
+      if (result OR ((target_arm AND NOT platform MATCHES "ARM") OR
+                     (NOT target_arm AND platform MATCHES "ARM")))
+        # interpreter not usable or has wrong architecture
+        if (result)
+          set_property (CACHE _${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE PROPERTY VALUE "Cannot use the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
+        else()
+          set_property (CACHE _${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE PROPERTY VALUE "Wrong architecture for the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
+        endif()
+        set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
+        return()
+      endif()
     endif()
   endif()
 endfunction()
@@ -1419,19 +1443,37 @@ if (CMAKE_SIZEOF_VOID_P)
       OR "Development.SABIModule" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
       OR "Development.Embed" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     # In this case, search only for 64bit or 32bit
-    set (_${_PYTHON_PREFIX}_ARCH2 ${_${_PYTHON_PREFIX}_ARCH})
     set (_${_PYTHON_PREFIX}_REGISTRY_VIEW REGISTRY_VIEW ${_${_PYTHON_PREFIX}_ARCH})
+    if (WIN32 AND (NOT CMAKE_GENERATOR_PLATFORM AND CMAKE_SYSTEM_PROCESSOR MATCHES "ARM"
+                   OR CMAKE_GENERATOR_PLATFORM MATCHES "ARM"))
+      # search exclusively ARM architecture: 64bit or 32bit
+      if (_${_PYTHON_PREFIX}_ARCH EQUAL 64)
+        set (_${_PYTHON_PREFIX}_ARCH ARM64)
+      else()
+        set (_${_PYTHON_PREFIX}_ARCH ARM)
+      endif()
+    endif()
   else()
     if (_${_PYTHON_PREFIX}_ARCH EQUAL "32")
-      set (_${_PYTHON_PREFIX}_ARCH2 64)
+      if (CMAKE_SYSTEM_PROCESSOR MATCHES "ARM")
+        # search first ARM architectures: 32bit and then 64bit
+        list (PREPEND _${_PYTHON_PREFIX}_ARCH ARM ARM64)
+      endif()
+      list (APPEND _${_PYTHON_PREFIX}_ARCH 64)
     else()
-      set (_${_PYTHON_PREFIX}_ARCH2 32)
+      if (CMAKE_SYSTEM_PROCESSOR MATCHES "ARM")
+        # search first ARM architectures: 64bit and then 32bit
+        list (PREPEND _${_PYTHON_PREFIX}_ARCH ARM64 ARM)
+      endif()
+      list (APPEND _${_PYTHON_PREFIX}_ARCH 32)
     endif()
   endif()
 else()
   # architecture unknown, search for both 64bit and 32bit
-  set (_${_PYTHON_PREFIX}_ARCH 64)
-  set (_${_PYTHON_PREFIX}_ARCH2 32)
+  set (_${_PYTHON_PREFIX}_ARCH 64 32)
+  if (CMAKE_SYSTEM_PROCESSOR MATCHES "ARM")
+    list (PREPEND _${_PYTHON_PREFIX}_ARCH ARM64 ARM)
+  endif()
 endif()
 
 # IronPython support
@@ -1439,7 +1481,7 @@ unset (_${_PYTHON_PREFIX}_IRON_PYTHON_INTERPRETER_NAMES)
 unset (_${_PYTHON_PREFIX}_IRON_PYTHON_COMPILER_NAMES)
 unset (_${_PYTHON_PREFIX}_IRON_PYTHON_COMPILER_ARCH_FLAGS)
 if (CMAKE_SIZEOF_VOID_P)
-  if (_${_PYTHON_PREFIX}_ARCH EQUAL "32")
+  if (CMAKE_SIZEOF_VOID_P EQUAL "4")
     set (_${_PYTHON_PREFIX}_IRON_PYTHON_COMPILER_ARCH_FLAGS "/platform:x86")
   else()
     set (_${_PYTHON_PREFIX}_IRON_PYTHON_COMPILER_ARCH_FLAGS "/platform:x64")
@@ -2048,7 +2090,6 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 3 ${_PYTHON_PREFIX}_VERSION_PATCH)
 
       list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 4 _${_PYTHON_PREFIX}_ARCH)
-      set (_${_PYTHON_PREFIX}_ARCH2 ${_${_PYTHON_PREFIX}_ARCH})
 
       list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 5 _${_PYTHON_PREFIX}_ABIFLAGS)
       list (GET _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES 6 ${_PYTHON_PREFIX}_SOABI)
@@ -2098,10 +2139,27 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
           if (NOT _${_PYTHON_PREFIX}_RESULT)
             if (${_PYTHON_PREFIX}_IS64BIT)
               set (_${_PYTHON_PREFIX}_ARCH 64)
-              set (_${_PYTHON_PREFIX}_ARCH2 64)
             else()
               set (_${_PYTHON_PREFIX}_ARCH 32)
-              set (_${_PYTHON_PREFIX}_ARCH2 32)
+            endif()
+          endif()
+
+          if (WIN32)
+            # check if architecture is Intel or ARM
+            execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
+                                     "import sys; import sysconfig; sys.stdout.write(sysconfig.get_platform())"
+                             RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
+                             OUTPUT_VARIABLE _${_PYTHON_PREFIX}_PLATFORM
+                             ERROR_VARIABLE ${_PYTHON_PREFIX}_PLATFORM)
+            if (NOT _${_PYTHON_PREFIX}_RESULT)
+              string(TOUPPER "${_${_PYTHON_PREFIX}_PLATFORM}" _${_PYTHON_PREFIX}_PLATFORM)
+              if (_${_PYTHON_PREFIX}_PLATFORM MATCHES "ARM")
+                if (${_PYTHON_PREFIX}_IS64BIT)
+                  set (_${_PYTHON_PREFIX}_ARCH ARM64)
+                else()
+                  set (_${_PYTHON_PREFIX}_ARCH ARM)
+                endif()
+              endif()
             endif()
           endif()
         endif()
@@ -2139,7 +2197,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
 
         # retrieve various package installation directories
         execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
-                                 "import sys\ntry:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_python_lib(plat_specific=False,standard_lib=True),sysconfig.get_python_lib(plat_specific=True,standard_lib=True),sysconfig.get_python_lib(plat_specific=False,standard_lib=False),sysconfig.get_python_lib(plat_specific=True,standard_lib=False)]))\nexcept Exception:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_path('stdlib'),sysconfig.get_path('platstdlib'),sysconfig.get_path('purelib'),sysconfig.get_path('platlib')]))"
+                                 "import sys\nif sys.version_info >= (3,10):\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_path('stdlib'),sysconfig.get_path('platstdlib'),sysconfig.get_path('purelib'),sysconfig.get_path('platlib')]))\nelse:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_python_lib(plat_specific=False,standard_lib=True),sysconfig.get_python_lib(plat_specific=True,standard_lib=True),sysconfig.get_python_lib(plat_specific=False,standard_lib=False),sysconfig.get_python_lib(plat_specific=True,standard_lib=False)]))"
                          RESULT_VARIABLE _${_PYTHON_PREFIX}_RESULT
                          OUTPUT_VARIABLE _${_PYTHON_PREFIX}_LIBPATHS
                          ERROR_QUIET)

@@ -41,7 +41,7 @@ set(__conf_types "")
 get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(_isMultiConfig)
   # We need to pass the configuration type on the test command line.
-  set(__conf_types -C "${CMAKE_CFG_INTDIR}")
+  set(__conf_types -C "$<CONFIG>")
 endif()
 
 # Add convenience targets.  Do this at most once in case of nested

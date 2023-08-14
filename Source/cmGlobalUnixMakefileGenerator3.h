@@ -99,6 +99,12 @@ public:
    */
   bool SupportsCustomCommandDepfile() const override { return true; }
 
+  /**
+   * Utilized to determine if this generator
+   * supports linker dependency file.
+   */
+  bool SupportsLinkerDependencyFile() const override { return true; }
+
   /** Get the documentation entry for this generator.  */
   static cmDocumentationEntry GetDocumentation();
 

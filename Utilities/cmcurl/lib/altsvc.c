@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2019 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -117,7 +117,7 @@ static struct altsvc *altsvc_createid(const char *srchost,
   as->dst.port = curlx_ultous(dstport);
 
   return as;
-  error:
+error:
   altsvc_free(as);
   return NULL;
 }
@@ -217,7 +217,7 @@ static CURLcode altsvc_load(struct altsvcinfo *asi, const char *file)
   }
   return result;
 
-  fail:
+fail:
   Curl_safefree(asi->filename);
   free(line);
   fclose(fp);

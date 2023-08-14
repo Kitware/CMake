@@ -38,6 +38,8 @@ It must be one of the following:
   Scope may name zero or more existing targets.
   See also the :command:`set_target_properties` command.
 
+  :ref:`Alias Targets` do not support setting target properties.
+
 ``SOURCE``
   Scope may name zero or more source files.  By default, source file properties
   are only visible to targets added in the same directory (``CMakeLists.txt``).
@@ -82,15 +84,15 @@ It must be one of the following:
   to the installation prefix.
 
 ``TEST``
-  Scope may name zero or more existing tests.
-  See also the :command:`set_tests_properties` command.
+  Scope is limited to the directory the command is called in. It may name zero
+  or more existing tests. See also command :command:`set_tests_properties`.
 
   Test property values may be specified using
   :manual:`generator expressions <cmake-generator-expressions(7)>`
   for tests created by the :command:`add_test(NAME)` signature.
 
 ``CACHE``
-  Scope must name zero or more cache existing entries.
+  Scope must name zero or more existing cache entries.
 
 The required ``PROPERTY`` option is immediately followed by the name of
 the property to set.  Remaining arguments are used to compose the

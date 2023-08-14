@@ -68,6 +68,7 @@
                 "^empty\\.c$"
             ],
             "includes": null,
+            "frameworks": null,
             "defines": [
                 {
                     "define": "interface_exe_EXPORTS",

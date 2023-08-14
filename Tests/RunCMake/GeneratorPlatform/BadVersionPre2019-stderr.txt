@@ -1,0 +1,11 @@
+^CMake Error at CMakeLists.txt:[0-9]+ \(project\):
+  Generator
+
+    Visual Studio [^
+]+
+
+  given platform specification containing a
+
+    version=10\.0
+
+  field\.  The value 10\.0 is only supported by VS 2019 and above\.$

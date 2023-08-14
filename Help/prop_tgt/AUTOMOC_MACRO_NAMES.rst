@@ -3,7 +3,7 @@ AUTOMOC_MACRO_NAMES
 
 .. versionadded:: 3.10
 
-A :ref:`semicolon-separated list <CMake Language Lists>` list of macro names used by
+A :ref:`semicolon-separated list <CMake Language Lists>` of macro names used by
 :prop_tgt:`AUTOMOC` to determine if a C++ file needs to be processed by ``moc``.
 
 This property is only used if the :prop_tgt:`AUTOMOC` property is ``ON``
@@ -21,6 +21,8 @@ then the file will be processed by ``moc``.
 By default ``AUTOMOC_MACRO_NAMES`` is initialized from
 :variable:`CMAKE_AUTOMOC_MACRO_NAMES`.
 
+See also the :prop_tgt:`INTERFACE_AUTOMOC_MACRO_NAMES` target property.
+
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.
 
@@ -29,6 +31,8 @@ Example
 
 In this case the ``Q_OBJECT`` macro is hidden inside another macro
 called ``CUSTOM_MACRO``.  To let CMake know that source files that contain
-``CUSTOM_MACRO`` need to be ``moc`` processed, we call::
+``CUSTOM_MACRO`` need to be ``moc`` processed, we call:
+
+.. code-block:: cmake
 
   set_property(TARGET tgt APPEND PROPERTY AUTOMOC_MACRO_NAMES "CUSTOM_MACRO")

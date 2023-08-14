@@ -56,12 +56,12 @@ bool cmInstallScriptGenerator::Compute(cmLocalGenerator* lg)
 std::string cmInstallScriptGenerator::GetScript(
   std::string const& config) const
 {
-  std::string script;
+  std::string script = this->Script;
   if (this->AllowGenex && this->ActionsPerConfig) {
-    script = cmGeneratorExpression::Evaluate(this->Script,
-                                             this->LocalGenerator, config);
-  } else {
-    script = this->Script;
+    cmGeneratorExpression::ReplaceInstallPrefix(script,
+                                                "${CMAKE_INSTALL_PREFIX}");
+    script =
+      cmGeneratorExpression::Evaluate(script, this->LocalGenerator, config);
   }
   return script;
 }

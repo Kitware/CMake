@@ -11,6 +11,11 @@ Adds options to the :prop_dir:`COMPILE_OPTIONS` directory property.
 These options are used when compiling targets from the current
 directory and below.
 
+.. note::
+
+  These options are not used when linking.
+  See the :command:`add_link_options` command for that.
+
 Arguments
 ^^^^^^^^^
 
@@ -48,5 +53,15 @@ See Also
 
 * The command :command:`target_compile_options` adds target-specific options.
 
+* This command adds compile options for all languages.
+  Use the :genex:`COMPILE_LANGUAGE` generator expression to specify
+  per-language compile options.
+
 * The source file property :prop_sf:`COMPILE_OPTIONS` adds options to one
   source file.
+
+* :command:`add_link_options` adds options for linking.
+
+* :variable:`CMAKE_<LANG>_FLAGS` and :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>`
+  add language-wide flags passed to all invocations of the compiler.
+  This includes invocations that drive compiling and those that drive linking.

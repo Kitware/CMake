@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.3)
-
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(NCURSES QUIET ncurses)
 

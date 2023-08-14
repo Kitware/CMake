@@ -2,7 +2,12 @@
 FindCUDA
 --------
 
-.. warning:: *Deprecated since version 3.10.*
+.. versionchanged:: 3.27
+  This module is available only if policy :policy:`CMP0146` is not set to ``NEW``.
+  Port projects to CMake's first-class ``CUDA`` language support.
+
+.. deprecated:: 3.10
+  Do not use this module in new code.
 
 It is no longer necessary to use this module or call ``find_package(CUDA)``
 for compiling CUDA code. Instead, list ``CUDA`` among the languages named
@@ -555,6 +560,23 @@ The script defines the following variables:
 #
 ###############################################################################
 
+cmake_policy(GET CMP0146 _FindCUDA_CMP0146)
+if(_FindCUDA_CMP0146 STREQUAL "NEW")
+  message(FATAL_ERROR "The FindCUDA module has been removed by policy CMP0146.")
+endif()
+
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
+  cmake_policy(GET CMP0147 _FindCUDA_CMP0147)
+  if(_FindCUDA_CMP0147 STREQUAL "NEW")
+    message(FATAL_ERROR "The FindCUDA module does not work in Visual Studio with policy CMP0147.")
+  endif()
+endif()
+
+if(_FindCUDA_testing)
+  set(_FindCUDA_included TRUE)
+  return()
+endif()
+
 # FindCUDA.cmake
 
 # This macro helps us find the location of helper files we will need the full path to
@@ -1052,6 +1074,7 @@ if(CUDA_USE_STATIC_CUDA_RUNTIME)
     if(NOT APPLE AND NOT (CMAKE_SYSTEM_NAME STREQUAL "QNX"))
       #On Linux, you must link against librt when using the static cuda runtime.
       find_library(CUDA_rt_LIBRARY rt)
+      mark_as_advanced(CUDA_rt_LIBRARY)
       if (NOT CUDA_rt_LIBRARY)
         message(WARNING "Expecting to find librt for libcudart_static, but didn't find it.")
       endif()
@@ -1919,7 +1942,7 @@ function(CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS output_file cuda_target options
       list(APPEND flags -Xcompiler ${f})
     endforeach()
 
-    # Add our general CUDA_NVCC_FLAGS with the configuration specifig flags
+    # Add our general CUDA_NVCC_FLAGS with the configuration specific flags
     set(nvcc_flags ${CUDA_NVCC_FLAGS} ${config_specific_flags} ${nvcc_flags})
 
     file(RELATIVE_PATH output_file_relative_path "${CMAKE_BINARY_DIR}" "${output_file}")

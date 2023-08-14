@@ -4,20 +4,19 @@
 #include KWSYS_HEADER(CommandLineArguments.hxx)
 
 #include KWSYS_HEADER(Configure.hxx)
-#include KWSYS_HEADER(String.hxx)
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
 #  include "CommandLineArguments.hxx.in"
 #  include "Configure.hxx.in"
-#  include "String.hxx.in"
 #endif
 
 #include <iostream>
 #include <map>
 #include <set>
 #include <sstream>
+#include <string>
 #include <vector>
 
 #include <cstdio>
@@ -52,14 +51,14 @@ struct CommandLineArgumentsCallbackStructure
   const char* Help;
 };
 
-class CommandLineArgumentsVectorOfStrings : public std::vector<kwsys::String>
+class CommandLineArgumentsVectorOfStrings : public std::vector<std::string>
 {
 };
-class CommandLineArgumentsSetOfStrings : public std::set<kwsys::String>
+class CommandLineArgumentsSetOfStrings : public std::set<std::string>
 {
 };
 class CommandLineArgumentsMapOfStrucs
-  : public std::map<kwsys::String, CommandLineArgumentsCallbackStructure>
+  : public std::map<std::string, CommandLineArgumentsCallbackStructure>
 {
 };
 
@@ -70,7 +69,7 @@ public:
 
   using VectorOfStrings = CommandLineArgumentsVectorOfStrings;
   using CallbacksMap = CommandLineArgumentsMapOfStrucs;
-  using String = kwsys::String;
+  using String = std::string;
   using SetOfStrings = CommandLineArgumentsSetOfStrings;
 
   VectorOfStrings Argv;
@@ -306,7 +305,7 @@ void CommandLineArguments::GetUnusedArguments(int* argc, char*** argv)
 
   // Copy everything after the LastArgument, since that was not parsed.
   for (cc = 0; cc < this->Internals->UnusedArguments.size(); cc++) {
-    kwsys::String& str = this->Internals->UnusedArguments[cc];
+    std::string& str = this->Internals->UnusedArguments[cc];
     args[cnt] = new char[str.size() + 1];
     strcpy(args[cnt], str.c_str());
     cnt++;

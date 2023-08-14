@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5)
 project(FortranOnly Fortran)
 message("CTEST_FULL_OUTPUT ")
 
@@ -152,13 +152,16 @@ if(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_ON AND
   set_property(SOURCE preprocess3.f PROPERTY Fortran_PREPROCESS ON)
 endif()
 
-# Test that neither the compiler nor CMake performs unnecessary preprocessing.
-add_library(no_preprocess_target_lower STATIC no_preprocess_target_lower.f)
-target_compile_options(no_preprocess_target_lower PRIVATE -DINTEGER=nonsense)
-set_property(TARGET no_preprocess_target_lower PROPERTY Fortran_PREPROCESS OFF)
-add_library(no_preprocess_source_lower STATIC no_preprocess_source_lower.f)
-target_compile_options(no_preprocess_source_lower PRIVATE -DINTEGER=nonsense)
-set_property(SOURCE no_preprocess_source_lower.f PROPERTY Fortran_PREPROCESS OFF)
+# LCC < 1.24 has no way to disable Fortran preprocessor
+if(NOT CMAKE_Fortran_COMPILER_ID STREQUAL "LCC" OR CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL "1.24.00")
+  # Test that neither the compiler nor CMake performs unnecessary preprocessing.
+  add_library(no_preprocess_target_lower STATIC no_preprocess_target_lower.f)
+  target_compile_options(no_preprocess_target_lower PRIVATE -DINTEGER=nonsense)
+  set_property(TARGET no_preprocess_target_lower PROPERTY Fortran_PREPROCESS OFF)
+  add_library(no_preprocess_source_lower STATIC no_preprocess_source_lower.f)
+  target_compile_options(no_preprocess_source_lower PRIVATE -DINTEGER=nonsense)
+  set_property(SOURCE no_preprocess_source_lower.f PROPERTY Fortran_PREPROCESS OFF)
+endif()
 
 # Test that we can explicitly not preprocess a target or source.
 # This will not work on certain compilers due to either missing a
@@ -166,8 +169,11 @@ set_property(SOURCE no_preprocess_source_lower.f PROPERTY Fortran_PREPROCESS OFF
 # extensions like '.F' and '.fpp'.
 if(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_OFF AND
     NOT CMAKE_Fortran_COMPILER_ID MATCHES "(Flang|NAG|PGI|NVHPC|SunPro|XL)")
+
+  set(CMAKE_Fortran_PREPROCESS OFF)
   add_library(no_preprocess_target STATIC no_preprocess_target_upper.F)
   target_compile_options(no_preprocess_target PRIVATE -DINTEGER=nonsense)
+  unset(CMAKE_Fortran_PREPROCESS)
 
   add_library(no_preprocess_source STATIC no_preprocess_source_upper.F)
   target_compile_options(no_preprocess_source PRIVATE -DINTEGER=nonsense)
@@ -178,6 +184,11 @@ if(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_OFF AND
     target_sources(no_preprocess_source PRIVATE no_preprocess_source_fpp.fpp)
   endif()
 
-  set_property(TARGET no_preprocess_target PROPERTY Fortran_PREPROCESS OFF)
   set_property(SOURCE no_preprocess_source_upper.F no_preprocess_source_fpp.fpp PROPERTY Fortran_PREPROCESS OFF)
 endif()
+
+# Issue 25112
+set(CMAKE_Fortran_MODULE_DIRECTORY "${PROJECT_BINARY_DIR}/include")
+add_library(objmod OBJECT objmod.f90)
+add_executable(objmain objmain.f90)
+target_link_libraries(objmain PRIVATE objmod)

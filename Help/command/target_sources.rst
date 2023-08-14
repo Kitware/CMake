@@ -91,15 +91,6 @@ files within those directories. The acceptable types include:
   using the ``export`` keyword). This file set type may not have an
   ``INTERFACE`` scope except on ``IMPORTED`` targets.
 
-``CXX_MODULE_HEADER_UNITS``
-
-  .. note ::
-
-    Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
-
-  C++ header sources which may be imported by other C++ source code. This file
-  set type may not have an ``INTERFACE`` scope except on ``IMPORTED`` targets.
-
 The optional default file sets are named after their type. The target may not
 be a custom target or :prop_tgt:`FRAMEWORK` target.
 
@@ -177,31 +168,20 @@ For file sets of type ``CXX_MODULES``:
 * :prop_tgt:`CXX_MODULE_DIRS`
 * :prop_tgt:`CXX_MODULE_DIRS_<NAME>`
 
-For file sets of type ``CXX_MODULE_HEADER_UNITS``:
-
-* :prop_tgt:`CXX_MODULE_HEADER_UNIT_SETS`
-* :prop_tgt:`INTERFACE_CXX_MODULE_HEADER_UNIT_SETS`
-* :prop_tgt:`CXX_MODULE_HEADER_UNIT_SET`
-* :prop_tgt:`CXX_MODULE_HEADER_UNIT_SET_<NAME>`
-* :prop_tgt:`CXX_MODULE_HEADER_UNIT_DIRS`
-* :prop_tgt:`CXX_MODULE_HEADER_UNIT_DIRS_<NAME>`
-
 Target properties related to include directories are also modified by
 ``target_sources(FILE_SET)`` as follows:
 
 :prop_tgt:`INCLUDE_DIRECTORIES`
 
-  If the ``TYPE`` is ``HEADERS`` or ``CXX_MODULE_HEADER_UNITS``, and the scope
-  of the file set is ``PRIVATE`` or ``PUBLIC``, all of the ``BASE_DIRS`` of
-  the file set are wrapped in :genex:`$<BUILD_INTERFACE>` and appended to this
-  property.
+  If the ``TYPE`` is ``HEADERS``, and the scope of the file set is ``PRIVATE``
+  or ``PUBLIC``, all of the ``BASE_DIRS`` of the file set are wrapped in
+  :genex:`$<BUILD_INTERFACE>` and appended to this property.
 
 :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`
 
-  If the ``TYPE`` is ``HEADERS`` or ``CXX_MODULE_HEADER_UNITS``, and the scope
-  of the file set is ``INTERFACE`` or ``PUBLIC``, all of the ``BASE_DIRS`` of
-  the file set are wrapped in :genex:`$<BUILD_INTERFACE>` and appended to this
-  property.
+  If the ``TYPE`` is ``HEADERS``, and the scope of the file set is
+  ``INTERFACE`` or ``PUBLIC``, all of the ``BASE_DIRS`` of the file set are
+  wrapped in :genex:`$<BUILD_INTERFACE>` and appended to this property.
 
 See Also
 ^^^^^^^^

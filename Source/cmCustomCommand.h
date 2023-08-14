@@ -17,6 +17,8 @@ class cmImplicitDependsList
 {
 };
 
+class cmStateSnapshot;
+
 /** \class cmCustomCommand
  * \brief A class to encapsulate a custom command
  *
@@ -100,6 +102,11 @@ public:
   bool GetCommandExpandLists() const;
   void SetCommandExpandLists(bool b);
 
+  /** Set/Get whether to use additional dependencies coming from
+      users of OUTPUT of the custom command. */
+  bool GetDependsExplicitOnly() const;
+  void SetDependsExplicitOnly(bool b);
+
   /** Set/Get the depfile (used by the Ninja generator) */
   const std::string& GetDepfile() const;
   void SetDepfile(const std::string& depfile);
@@ -108,9 +115,13 @@ public:
   const std::string& GetJobPool() const;
   void SetJobPool(const std::string& job_pool);
 
-  /** Set/Get the CMP0116 status (used by the Ninja generator) */
-  cmPolicies::PolicyStatus GetCMP0116Status() const;
-  void SetCMP0116Status(cmPolicies::PolicyStatus cmp0116);
+#define DECLARE_CC_POLICY_ACCESSOR(P)                                         \
+  cmPolicies::PolicyStatus Get##P##Status() const;
+  CM_FOR_EACH_CUSTOM_COMMAND_POLICY(DECLARE_CC_POLICY_ACCESSOR)
+#undef DECLARE_CC_POLICY_ACCESSOR
+
+  /** Record policy values from state snapshot */
+  void RecordPolicyValues(const cmStateSnapshot& snapshot);
 
   /** Set/Get the associated target */
   const std::string& GetTarget() const;
@@ -135,5 +146,12 @@ private:
   bool CommandExpandLists = false;
   bool StdPipesUTF8 = false;
   bool HasMainDependency_ = false;
-  cmPolicies::PolicyStatus CMP0116Status = cmPolicies::WARN;
+  bool DependsExplicitOnly = false;
+
+// Policies are NEW for synthesized custom commands, and set by cmMakefile for
+// user-created custom commands.
+#define DECLARE_CC_POLICY_FIELD(P)                                            \
+  cmPolicies::PolicyStatus P##Status = cmPolicies::NEW;
+  CM_FOR_EACH_CUSTOM_COMMAND_POLICY(DECLARE_CC_POLICY_FIELD)
+#undef DECLARE_CC_POLICY_FIELD
 };

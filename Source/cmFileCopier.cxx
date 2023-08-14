@@ -9,6 +9,7 @@
 #include "cmExecutionStatus.h"
 #include "cmFSPermissions.h"
 #include "cmFileTimes.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -169,8 +170,7 @@ bool cmFileCopier::GetDefaultDirectoryPermissions(mode_t** mode)
   cmValue default_dir_install_permissions = this->Makefile->GetDefinition(
     "CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
   if (cmNonempty(default_dir_install_permissions)) {
-    std::vector<std::string> items =
-      cmExpandedList(*default_dir_install_permissions);
+    cmList items{ *default_dir_install_permissions };
     for (const auto& arg : items) {
       if (!this->CheckPermissions(arg, **mode)) {
         this->Status.SetError(

@@ -11,6 +11,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 
 class cmSourceFile;
 
@@ -77,7 +78,7 @@ void cmOSXBundleGenerator::CreateFramework(
   std::string frameworkVersion = this->GT->GetFrameworkVersion();
 
   std::string name = cmSystemTools::GetFilenameName(targetName);
-  if (!skipParts.infoPlist) {
+  if (!skipParts.InfoPlist) {
     // Configure the Info.plist file
     std::string plist = newoutpath;
     if (!this->Makefile->PlatformIsAppleEmbedded()) {
@@ -119,6 +120,17 @@ void cmOSXBundleGenerator::CreateFramework(
   cmSystemTools::RemoveFile(newName);
   cmSystemTools::CreateSymlink(oldName, newName);
   this->Makefile->AddCMakeOutputFile(newName);
+
+  if (!skipParts.TextStubs) {
+    // foo.tbd -> Versions/Current/foo.tbd
+    cmValue tbdSuffix =
+      this->Makefile->GetDefinition("CMAKE_APPLE_IMPORT_FILE_SUFFIX");
+    oldName = cmStrCat("Versions/Current/", name, tbdSuffix);
+    newName = cmStrCat(contentdir, name, tbdSuffix);
+    cmSystemTools::RemoveFile(newName);
+    cmSystemTools::CreateSymlink(oldName, newName);
+    this->Makefile->AddCMakeOutputFile(newName);
+  }
 
   // Resources -> Versions/Current/Resources
   if (this->MacContentFolders->find("Resources") !=

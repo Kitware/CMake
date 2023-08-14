@@ -1,0 +1,50 @@
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+set(listvar alpha bravo charlie delta)
+
+list(TRANSFORM listvar TOUPPER OUTPUT_VARIABLE reference)
+set (output "$<LIST:TRANSFORM,alpha;bravo;charlie;delta,TOUPPER>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+list(TRANSFORM listvar TOUPPER AT 1 3 OUTPUT_VARIABLE reference)
+set (output "$<LIST:TRANSFORM,alpha;bravo;charlie;delta,TOUPPER,AT,1,3>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+list(TRANSFORM listvar TOUPPER AT 1 -2 OUTPUT_VARIABLE reference)
+set (output "$<LIST:TRANSFORM,alpha;bravo;charlie;delta,TOUPPER,AT,1,-2>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+list(TRANSFORM listvar TOUPPER FOR 1 2 OUTPUT_VARIABLE reference)
+set (output "$<LIST:TRANSFORM,alpha;bravo;charlie;delta,TOUPPER,FOR,1,2>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+list(TRANSFORM listvar TOUPPER FOR 1 -1 OUTPUT_VARIABLE reference)
+set (output "$<LIST:TRANSFORM,alpha;bravo;charlie;delta,TOUPPER,FOR,1,-1>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+list(TRANSFORM listvar TOUPPER FOR 1 -1 2 OUTPUT_VARIABLE reference)
+set (output "$<LIST:TRANSFORM,alpha;bravo;charlie;delta,TOUPPER,FOR,1,-1,2>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+list(TRANSFORM listvar TOUPPER REGEX "(r|t)a" OUTPUT_VARIABLE reference)
+set (output "$<LIST:TRANSFORM,alpha;bravo;charlie;delta,TOUPPER,REGEX,(r|t)a>")
+if (NOT output STREQUAL reference)
+  list (APPEND errors "returns bad value: ${output}")
+endif()
+
+
+check_errors("LIST:TRANSFORM,TOUPPER..." ${errors})

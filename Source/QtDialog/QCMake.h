@@ -60,7 +60,6 @@ using QCMakePropertyList = QList<QCMakeProperty>;
 Q_DECLARE_METATYPE(QCMakeProperty)
 Q_DECLARE_METATYPE(QCMakePropertyList)
 Q_DECLARE_METATYPE(QProcessEnvironment)
-Q_DECLARE_METATYPE(cmCMakePresetsGraph::ReadFileResult)
 
 /// Qt API for CMake library.
 /// Wrapper like class allows for easier integration with
@@ -158,8 +157,7 @@ signals:
   /// signal when the selected preset changes
   void presetChanged(const QString& name);
   /// signal when there's an error reading the presets files
-  void presetLoadError(const QString& dir,
-                       cmCMakePresetsGraph::ReadFileResult error);
+  void presetLoadError(const QString& dir, const QString& error);
   /// signal when uninitialized warning changes
   void warnUninitializedModeChanged(bool value);
   /// signal for progress events
@@ -203,8 +201,7 @@ protected:
   QString Toolset;
   std::vector<cmake::GeneratorInfo> AvailableGenerators;
   cmCMakePresetsGraph CMakePresetsGraph;
-  cmCMakePresetsGraph::ReadFileResult LastLoadPresetsResult =
-    cmCMakePresetsGraph::ReadFileResult::READ_OK;
+  bool LastLoadPresetsResult = true;
   QString PresetName;
   QString CMakeExecutable;
   QAtomicInt InterruptFlag;

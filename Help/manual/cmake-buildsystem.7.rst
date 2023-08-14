@@ -37,6 +37,8 @@ is defined as an executable formed by compiling and linking ``zipapp.cpp``.
 When linking the ``zipapp`` executable, the ``archive`` static library is
 linked in.
 
+.. _`Binary Executables`:
+
 Binary Executables
 ------------------
 
@@ -796,6 +798,10 @@ An *archive* output artifact of a buildsystem target may be:
 * On AIX: the linker import file (e.g. ``.imp``) of an executable target
   created by the :command:`add_executable` command when its
   :prop_tgt:`ENABLE_EXPORTS` target property is set.
+
+* On macOS: the linker import file (e.g. ``.tbd``) of a shared library target
+  created by the :command:`add_library` command with the ``SHARED`` option and
+  when its :prop_tgt:`ENABLE_EXPORTS` target property is set.
 
 The :prop_tgt:`ARCHIVE_OUTPUT_DIRECTORY` and :prop_tgt:`ARCHIVE_OUTPUT_NAME`
 target properties may be used to control archive output artifact locations

@@ -16,6 +16,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -63,7 +64,8 @@ cmExtraEclipseCDT4Generator::GetFactory()
 {
   static cmExternalMakefileProjectGeneratorSimpleFactory<
     cmExtraEclipseCDT4Generator>
-    factory("Eclipse CDT4", "Generates Eclipse CDT 4.0 project files.");
+    factory("Eclipse CDT4",
+            "Generates Eclipse CDT 4.0 project files (deprecated).");
 
   if (factory.GetSupportedGlobalGenerators().empty()) {
 // TODO: Verify if __CYGWIN__ should be checked.
@@ -255,7 +257,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
     // The variable is in the env, but not in the cache. Use it and put it
     // in the cache
     valueToUse = envVarValue;
-    mf->AddCacheDefinition(cacheEntryName, valueToUse, cacheEntryName.c_str(),
+    mf->AddCacheDefinition(cacheEntryName, valueToUse, cacheEntryName,
                            cmStateEnums::STRING, true);
     mf->GetCMakeInstance()->SaveCache(lg.GetBinaryDirectory());
   } else if (!envVarSet && cacheValue) {
@@ -270,9 +272,8 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(std::ostream& out,
     valueToUse = *cacheValue;
     if (valueToUse.find(envVarValue) == std::string::npos) {
       valueToUse = envVarValue;
-      mf->AddCacheDefinition(cacheEntryName, valueToUse,
-                             cacheEntryName.c_str(), cmStateEnums::STRING,
-                             true);
+      mf->AddCacheDefinition(cacheEntryName, valueToUse, cacheEntryName,
+                             cmStateEnums::STRING, true);
       mf->GetCMakeInstance()->SaveCache(lg.GetBinaryDirectory());
     }
   }
@@ -417,7 +418,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
 
   if (cmValue extraNaturesProp =
         mf->GetState()->GetGlobalProperty("ECLIPSE_EXTRA_NATURES")) {
-    std::vector<std::string> extraNatures = cmExpandedList(*extraNaturesProp);
+    cmList extraNatures{ *extraNaturesProp };
     for (std::string const& n : extraNatures) {
       xml.Element("nature", n);
     }
@@ -797,7 +798,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     mf->GetDefinition("CMAKE_EXTRA_GENERATOR_C_SYSTEM_DEFINED_MACROS");
   if (this->CEnabled && cDefs) {
     // Expand the list.
-    std::vector<std::string> defs = cmExpandedList(*cDefs, true);
+    cmList defs{ *cDefs, cmList::EmptyElements::Yes };
 
     // the list must contain only definition-value pairs:
     if ((defs.size() % 2) == 0) {
@@ -829,7 +830,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     mf->GetDefinition("CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_DEFINED_MACROS");
   if (this->CXXEnabled && cxxDefs) {
     // Expand the list.
-    std::vector<std::string> defs = cmExpandedList(*cxxDefs, true);
+    cmList defs{ *cxxDefs, cmList::EmptyElements::Yes };
 
     // the list must contain only definition-value pairs:
     if ((defs.size() % 2) == 0) {
@@ -878,14 +879,14 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   if (this->CEnabled && !compiler.empty()) {
     std::string systemIncludeDirs =
       mf->GetSafeDefinition("CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
-    std::vector<std::string> dirs = cmExpandedList(systemIncludeDirs);
+    cmList dirs{ systemIncludeDirs };
     this->AppendIncludeDirectories(xml, dirs, emitted);
   }
   compiler = mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
   if (this->CXXEnabled && !compiler.empty()) {
     std::string systemIncludeDirs =
       mf->GetSafeDefinition("CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_INCLUDE_DIRS");
-    std::vector<std::string> dirs = cmExpandedList(systemIncludeDirs);
+    cmList dirs{ systemIncludeDirs };
     this->AppendIncludeDirectories(xml, dirs, emitted);
   }
 

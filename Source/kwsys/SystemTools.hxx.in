@@ -395,10 +395,7 @@ public:
    *  installPrefix is a possibly null pointer to the install directory.
    */
   static bool FindProgramPath(const char* argv0, std::string& pathOut,
-                              std::string& errorMsg,
-                              const char* exeName = nullptr,
-                              const char* buildDir = nullptr,
-                              const char* installPrefix = nullptr);
+                              std::string& errorMsg);
 
   /**
    * Given a path to a file or directory, convert it to a full path.

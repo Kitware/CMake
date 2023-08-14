@@ -27,6 +27,9 @@ if(CMake_TEST_CUDA AND NOT CMake_TEST_CUDA STREQUAL "Clang")
 
   # Only NVCC defines __CUDACC_DEBUG__ when compiling in debug mode.
   add_cuda_test_macro(CudaOnly.GPUDebugFlag CudaOnlyGPUDebugFlag)
+  add_cuda_test_macro(CudaOnly.CUBIN CudaOnlyCUBIN)
+  add_cuda_test_macro(CudaOnly.Fatbin CudaOnlyFatbin)
+  add_cuda_test_macro(CudaOnly.OptixIR CudaOnlyOptixIR)
 endif()
 
 add_cuda_test_macro(CudaOnly.DeviceLTO CudaOnlyDeviceLTO)

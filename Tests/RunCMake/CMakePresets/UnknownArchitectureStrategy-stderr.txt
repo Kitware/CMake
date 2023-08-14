@@ -1,2 +1,5 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/UnknownArchitectureStrategy: Invalid preset$
+]*/Tests/RunCMake/CMakePresets/UnknownArchitectureStrategy:
+Error: @9,21: Invalid preset
+        "strategy": "unknown"
+                    \^$

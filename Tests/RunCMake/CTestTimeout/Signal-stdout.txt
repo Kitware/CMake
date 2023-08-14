@@ -1,0 +1,6 @@
+Test project [^
+]*/Tests/RunCMake/CTestTimeout/Signal-build
+    Start 1: TestTimeout
+1/1 Test #1: TestTimeout ......................\*\*\*Timeout \(SIGUSR1\) +[1-9][0-9.]* sec
++
+0% tests passed, 1 tests failed out of 1

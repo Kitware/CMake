@@ -730,7 +730,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
 
   if(gp_tool MATCHES "ldd$")
     set(gp_cmd_args "")
-    set(gp_regex "^[\t ]*[^\t ]+ =>[\t ]+([^\t\(]+)( \(.+\))?${eol_char}$")
+    set(gp_regex "^[\t ]*[^\t ]+ =>[\t ]+(/[^\t\(]+)( \(.+\))?${eol_char}$")
     set(gp_regex_error "not found${eol_char}$")
     set(gp_regex_fallback "^[\t ]*([^\t ]+) => ([^\t ]+).*${eol_char}$")
     set(gp_regex_cmp_count 1)

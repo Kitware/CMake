@@ -1150,7 +1150,7 @@ function(cpack_rpm_generate_package)
   endforeach()
 
   # CPACK_RPM_SPEC_INSTALL_POST
-  # May be used to define a RPM post intallation script
+  # May be used to define a RPM post installation script
   # for example setting it to "/bin/true" may prevent
   # rpmbuild from stripping binaries.
   if(CPACK_RPM_SPEC_INSTALL_POST)

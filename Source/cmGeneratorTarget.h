@@ -50,6 +50,8 @@ public:
   cmGlobalGenerator* GetGlobalGenerator() const;
 
   bool IsInBuildSystem() const;
+  bool IsNormal() const;
+  bool IsSynthetic() const;
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
   bool CanCompileSources() const;
@@ -271,7 +273,9 @@ public:
   std::string NormalGetFullPath(const std::string& config,
                                 cmStateEnums::ArtifactType artifact,
                                 bool realname) const;
-  std::string NormalGetRealName(const std::string& config) const;
+  std::string NormalGetRealName(const std::string& config,
+                                cmStateEnums::ArtifactType artifact =
+                                  cmStateEnums::RuntimeBinaryArtifact) const;
 
   /** Get the names of an object library's object files underneath
       its object file directory.  */
@@ -346,7 +350,9 @@ public:
   const std::string* GetExportMacro() const;
 
   /** Get the soname of the target.  Allowed only for a shared library.  */
-  std::string GetSOName(const std::string& config) const;
+  std::string GetSOName(const std::string& config,
+                        cmStateEnums::ArtifactType artifact =
+                          cmStateEnums::RuntimeBinaryArtifact) const;
 
   struct NameComponents
   {
@@ -386,6 +392,11 @@ public:
   };
   ModuleDefinitionInfo const* GetModuleDefinitionInfo(
     std::string const& config) const;
+
+  /** Return whether or not we are targeting AIX. */
+  bool IsAIX() const;
+  /** Return whether or not we are targeting Apple. */
+  bool IsApple() const;
 
   /** Return whether or not the target is for a DLL platform.  */
   bool IsDLLPlatform() const;
@@ -473,8 +484,8 @@ public:
       holding object files for the given configuration.  */
   std::string GetObjectDirectory(std::string const& config) const;
 
-  void GetAppleArchs(const std::string& config,
-                     std::vector<std::string>& archVec) const;
+  std::vector<std::string> GetAppleArchs(std::string const& config,
+                                         cm::optional<std::string> lang) const;
 
   void AddExplicitLanguageFlags(std::string& flags,
                                 cmSourceFile const& sf) const;
@@ -733,6 +744,8 @@ public:
     std::string Base;
     std::string Output;
     std::string Real;
+    std::string ImportOutput;
+    std::string ImportReal;
     std::string ImportLibrary;
     std::string PDB;
     std::string SharedObject;
@@ -779,6 +792,10 @@ public:
 
   bool IsExecutableWithExports() const;
 
+  /* Return whether this target is a shared library with capability to generate
+   * a file describing symbols exported (for example, .tbd file on Apple). */
+  bool IsSharedLibraryWithExports() const;
+
   /** Return whether or not the target has a DLL import library.  */
   bool HasImportLibrary(std::string const& config) const;
 
@@ -787,6 +804,9 @@ public:
 
   /** Return whether this target may be used to link another target.  */
   bool IsLinkable() const;
+
+  /** Return whether the link step generates a dependency file. */
+  bool HasLinkDependencyFile(std::string const& config) const;
 
   /** Return whether this target is a shared library Framework on
       Apple.  */
@@ -895,6 +915,8 @@ public:
   std::vector<std::string> GetGeneratedISPCObjects(
     std::string const& config) const;
 
+  void AddSystemIncludeDirectory(std::string const& inc,
+                                 std::string const& lang);
   bool AddHeaderSetVerification();
   std::string GenerateHeaderSetVerificationFile(
     cmSourceFile& source, const std::string& dir,
@@ -1273,4 +1295,26 @@ private:
     std::map<std::string, cmFileSet const*> FileSetCache;
   };
   mutable std::map<std::string, InfoByConfig> Configs;
+};
+
+class cmGeneratorTarget::TargetPropertyEntry
+{
+protected:
+  static cmLinkImplItem NoLinkImplItem;
+
+public:
+  TargetPropertyEntry(cmLinkImplItem const& item);
+  virtual ~TargetPropertyEntry() = default;
+
+  virtual const std::string& Evaluate(
+    cmLocalGenerator* lg, const std::string& config,
+    cmGeneratorTarget const* headTarget,
+    cmGeneratorExpressionDAGChecker* dagChecker,
+    std::string const& language) const = 0;
+
+  virtual cmListFileBacktrace GetBacktrace() const = 0;
+  virtual std::string const& GetInput() const = 0;
+  virtual bool GetHadContextSensitiveCondition() const;
+
+  cmLinkImplItem const& LinkImplItem;
 };

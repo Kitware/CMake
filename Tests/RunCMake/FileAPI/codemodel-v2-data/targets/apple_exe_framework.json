@@ -1,0 +1,79 @@
+{
+    "compileGroups":
+    [
+        {
+            "language": "CXX",
+            "sourcePaths": [
+                "^empty\\.cxx$"
+            ],
+            "includes": null,
+            "defines": null,
+            "frameworks":
+            [
+                {
+                    "isSystem": null,
+                    "path": "^.*/framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?static_framework.framework",
+                    "backtrace": null
+                },
+                {
+                    "isSystem": true,
+                    "path": "^.+/framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?shared_framework.framework",
+                    "backtrace": null
+                },
+                {
+                    "isSystem": true,
+                    "path": "/usr/Frameworks/Foo.framework",
+                    "backtrace": null
+                }
+            ],
+            "compileCommandFragments": []
+        }
+    ],
+    "link": {
+        "language": "CXX",
+        "lto": null,
+        "commandFragments": [
+            {
+                "fragment": "-iframework .+/framework(/(Debug|Release|RelWithDebInfo|MinSizeRel))?\"? -iframework /usr/Frameworks$",
+                "role": "frameworkPath",
+                "backtrace": null
+            },
+            {
+                "fragment": ".*static_framework\\.framework/.+/static_framework",
+                "role": "libraries",
+                "backtrace": [
+                    {
+                        "file": "^framework/CMakeLists\\.txt$",
+                        "line": 17,
+                        "command": "target_link_libraries",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^framework/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
+            },
+            {
+                "fragment": ".*shared_framework\\.framework/.+/shared_framework",
+                "role": "libraries",
+                "backtrace": [
+                    {
+                        "file": "^framework/CMakeLists\\.txt$",
+                        "line": 17,
+                        "command": "target_link_libraries",
+                        "hasParent": true
+                    },
+                    {
+                        "file": "^framework/CMakeLists\\.txt$",
+                        "line": null,
+                        "command": null,
+                        "hasParent": false
+                    }
+                ]
+            }
+        ]
+    }
+}

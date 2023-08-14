@@ -11,18 +11,6 @@ endif()
 
 include(CheckIncludeFile)
 
-if(NOT CMake_DEFAULT_RECURSION_LIMIT)
-  if(DEFINED ENV{DASHBOARD_TEST_FROM_CTEST})
-    set(CMake_DEFAULT_RECURSION_LIMIT 100)
-  elseif(MINGW OR MSYS)
-    set(CMake_DEFAULT_RECURSION_LIMIT 400)
-  elseif(WIN32 AND CMAKE_C_COMPILER_ID STREQUAL "IntelLLVM")
-    set(CMake_DEFAULT_RECURSION_LIMIT 600)
-  else()
-    set(CMake_DEFAULT_RECURSION_LIMIT 1000)
-  endif()
-endif()
-
 if(APPLE)
   set(CMake_USE_MACH_PARSER 1)
 endif()
@@ -140,6 +128,7 @@ add_library(
   cmCLocaleEnvironmentScope.cxx
   cmCMakePath.h
   cmCMakePath.cxx
+  cmCMakePresetErrors.h
   cmCMakePresetsGraph.cxx
   cmCMakePresetsGraph.h
   cmCMakePresetsGraphInternal.h
@@ -204,6 +193,8 @@ add_library(
   cmDyndepCollation.h
   cmELF.h
   cmELF.cxx
+  cmEvaluatedTargetProperty.cxx
+  cmEvaluatedTargetProperty.h
   cmExprParserHelper.cxx
   cmExportBuildAndroidMKGenerator.h
   cmExportBuildAndroidMKGenerator.cxx
@@ -241,6 +232,8 @@ add_library(
   cmFileAPIConfigureLog.h
   cmFileAPICMakeFiles.cxx
   cmFileAPICMakeFiles.h
+  cmFileAPICommand.cxx
+  cmFileAPICommand.h
   cmFileAPIToolchains.cxx
   cmFileAPIToolchains.h
   cmFileCopier.cxx
@@ -331,6 +324,8 @@ add_library(
   cmInstallDirectoryGenerator.h
   cmInstallDirectoryGenerator.cxx
   cmJSONHelpers.h
+  cmJSONState.cxx
+  cmJSONState.h
   cmLDConfigLDConfigTool.cxx
   cmLDConfigLDConfigTool.h
   cmLDConfigTool.cxx
@@ -342,6 +337,8 @@ add_library(
   cmLinkLineComputer.h
   cmLinkLineDeviceComputer.cxx
   cmLinkLineDeviceComputer.h
+  cmList.h
+  cmList.cxx
   cmListFileCache.cxx
   cmListFileCache.h
   cmLocalCommonGenerator.cxx
@@ -767,6 +764,38 @@ target_link_libraries(
     ZLIB::ZLIB
   )
 
+if(CMake_ENABLE_DEBUGGER)
+  target_sources(
+    CMakeLib
+    PRIVATE
+      cmDebuggerAdapter.cxx
+      cmDebuggerAdapter.h
+      cmDebuggerBreakpointManager.cxx
+      cmDebuggerBreakpointManager.h
+      cmDebuggerExceptionManager.cxx
+      cmDebuggerExceptionManager.h
+      cmDebuggerPipeConnection.cxx
+      cmDebuggerPipeConnection.h
+      cmDebuggerProtocol.cxx
+      cmDebuggerProtocol.h
+      cmDebuggerSourceBreakpoint.cxx
+      cmDebuggerSourceBreakpoint.h
+      cmDebuggerStackFrame.cxx
+      cmDebuggerStackFrame.h
+      cmDebuggerThread.cxx
+      cmDebuggerThread.h
+      cmDebuggerThreadManager.cxx
+      cmDebuggerThreadManager.h
+      cmDebuggerVariables.cxx
+      cmDebuggerVariables.h
+      cmDebuggerVariablesHelper.cxx
+      cmDebuggerVariablesHelper.h
+      cmDebuggerVariablesManager.cxx
+      cmDebuggerVariablesManager.h
+    )
+  target_link_libraries(CMakeLib PUBLIC cppdap::cppdap)
+endif()
+
 # Check if we can build the Mach-O parser.
 if(CMake_USE_MACH_PARSER)
   target_sources(
@@ -909,13 +938,9 @@ if(WIN32 AND NOT CYGWIN)
   list(APPEND _tools cmcldeps)
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "sparc")
-  # the atomic instructions are implemented using libatomic on some platforms,
-  # so linking to that may be required
-  check_library_exists(atomic __atomic_fetch_add_4 "" LIBATOMIC_NEEDED)
-  if(LIBATOMIC_NEEDED)
-    target_link_libraries(CMakeLib PUBLIC atomic)
-  endif()
+# Some atomic instructions are implemented using libatomic on some platforms.
+if(CMake_HAVE_CXX_ATOMIC_LIB)
+  target_link_libraries(CMakeLib PUBLIC atomic)
 endif()
 
 # On Apple we need CoreFoundation and CoreServices
@@ -1023,6 +1048,7 @@ add_library(
   CPack/cmCPackGeneratorFactory.cxx
   CPack/cmCPackGenerator.cxx
   CPack/cmCPackLog.cxx
+  CPack/cmCPackInnoSetupGenerator.cxx
   CPack/cmCPackNSISGenerator.cxx
   CPack/cmCPackNuGetGenerator.cxx
   CPack/cmCPackSTGZGenerator.cxx

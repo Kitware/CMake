@@ -1,3 +1,4 @@
+set(CMake_TEST_FindOpenAL "ON" CACHE BOOL "")
 set(CMake_TEST_FindOpenMP "ON" CACHE BOOL "")
 set(CMake_TEST_FindOpenMP_C "ON" CACHE BOOL "")
 set(CMake_TEST_FindOpenMP_CXX "ON" CACHE BOOL "")

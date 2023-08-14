@@ -25,7 +25,7 @@ bool cmGetTestPropertyCommand(std::vector<std::string> const& args,
       prop = test->GetProperty(args[1]);
     }
     if (prop) {
-      mf.AddDefinition(var, prop->c_str());
+      mf.AddDefinition(var, prop);
       return true;
     }
   }

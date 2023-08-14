@@ -1,0 +1,102 @@
+{
+    "name": "shared_framework",
+    "id": "^shared_framework::@217a96c3a62328a73ef4$",
+    "directorySource": "^framework$",
+    "projectName": "Framework",
+    "type": "SHARED_LIBRARY",
+    "isGeneratorProvided": null,
+    "fileSets": null,
+    "sources": [
+        {
+            "path": "^empty\\.cxx$",
+            "isGenerated": null,
+            "fileSetName": null,
+            "sourceGroupName": "Source Files",
+            "compileGroupLanguage": "CXX",
+            "backtrace": [
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": 7,
+                    "command": "add_library",
+                    "hasParent": true
+                },
+                {
+                    "file": "^framework/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "Source Files",
+            "sourcePaths": [
+                "^empty\\.cxx$"
+            ]
+        }
+    ],
+    "compileGroups": [
+        {
+            "language": "CXX",
+            "sourcePaths": [
+                "^empty\\.cxx$"
+            ],
+            "includes": null,
+            "frameworks": null,
+            "defines": [
+                {
+                    "define": "shared_framework_EXPORTS",
+                    "backtrace": null
+                }
+            ],
+            "compileCommandFragments": null
+        }
+    ],
+    "backtrace": [
+        {
+            "file": "^framework/CMakeLists\\.txt$",
+            "line": 7,
+            "command": "add_library",
+            "hasParent": true
+        },
+        {
+            "file": "^framework/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": "^(lib|cyg|msys-)?shared_framework\\.(so|dylib|dll)$",
+    "artifacts": [
+        {
+            "path": "^framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib|cyg|msys-)?shared_framework\\.(so|dylib|dll)$",
+            "_dllExtra": false
+        },
+        {
+            "path": "^framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?shared_framework\\.(dll\\.a|lib)$",
+            "_dllExtra": true
+        },
+        {
+            "path": "^framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib|cyg|msys-)?shared_framework\\.pdb$",
+            "_dllExtra": true
+        }
+    ],
+    "build": "^framework$",
+    "source": "^framework$",
+    "install": null,
+    "link": {
+        "language": "CXX",
+        "lto": null,
+        "commandFragments": null
+    },
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@217a96c3a62328a73ef4$",
+            "backtrace": null
+        }
+    ]
+}

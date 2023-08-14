@@ -40,6 +40,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef __clang_analyzer__
+#include <string.h>
+#endif
+
 #include "divsufsort.h"
 
 /*- Constants -*/
@@ -1119,6 +1123,9 @@ tr_copy(int *ISA, const int *SA,
 
   v = b - SA - 1;
   for(c = first, d = a - 1; c <= d; ++c) {
+    #ifdef __clang_analyzer__
+    assert(c);
+    #endif
     if((0 <= (s = *c - depth)) && (ISA[s] == v)) {
       *++d = s;
       ISA[s] = d - SA;
@@ -1183,6 +1190,10 @@ tr_introsort(int *ISA, const int *ISAd,
   int incr = ISAd - ISA;
   int limit, next;
   int ssize, trlink = -1;
+
+  #ifdef __clang_analyzer__
+  memset(stack, 0, sizeof(stack));
+  #endif
 
   for(ssize = 0, limit = tr_ilg(last - first);;) {
 

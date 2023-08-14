@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,7 +24,7 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+#if defined(USE_CURL_NTLM_CORE)
 
 #include <string.h>
 
@@ -68,10 +68,12 @@
 #include <openssl/md4.h>
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040) && \
-       defined(__MAC_OS_X_VERSION_MIN_ALLOWED) && \
-              (__MAC_OS_X_VERSION_MIN_ALLOWED < 101500)) || \
+       defined(__MAC_OS_X_VERSION_MIN_REQUIRED) && \
+              (__MAC_OS_X_VERSION_MIN_REQUIRED < 101500)) || \
       (defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && \
-              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000))
+              (__IPHONE_OS_VERSION_MAX_ALLOWED >= 20000) && \
+       defined(__IPHONE_OS_VERSION_MIN_REQUIRED) && \
+              (__IPHONE_OS_VERSION_MIN_REQUIRED < 130000))
 #define AN_APPLE_OS
 #include <CommonCrypto/CommonDigest.h>
 #elif defined(USE_WIN32_CRYPTO)
@@ -86,11 +88,7 @@
 #include "memdebug.h"
 
 
-#if defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
-
-#elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
-
-#elif defined(USE_GNUTLS)
+#if defined(USE_GNUTLS)
 
 typedef struct md4_ctx MD4_CTX;
 
@@ -108,6 +106,10 @@ static void MD4_Final(unsigned char *result, MD4_CTX *ctx)
 {
   md4_digest(ctx, MD4_DIGEST_SIZE, result);
 }
+
+#elif defined(USE_WOLFSSL) && !defined(WOLFSSL_NO_MD4)
+
+#elif defined(USE_OPENSSL) && !defined(OPENSSL_NO_MD4)
 
 #elif defined(AN_APPLE_OS)
 typedef CC_MD4_CTX MD4_CTX;
@@ -504,4 +506,4 @@ void Curl_md4it(unsigned char *output, const unsigned char *input,
   MD4_Final(output, &ctx);
 }
 
-#endif /* CURL_DISABLE_CRYPTO_AUTH */
+#endif /* USE_CURL_NTLM_CORE */

@@ -1,0 +1,6 @@
+[0-9]+
+CMake Error at .*/variable_watch\.cmake:[0-9]+ \(update_x\):
+  Maximum recursion depth of [0-9]+ exceeded
+Call Stack \(most recent call first\):
+  .*/variable_watch\.cmake:5 \(set\)
+  .*/variable_watch\.cmake:[0-9]+ \(update_x\)

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_policy(SET CMP0037 OLD)
 add_library(if$ace INTERFACE)
 
 add_library(iface::target INTERFACE)

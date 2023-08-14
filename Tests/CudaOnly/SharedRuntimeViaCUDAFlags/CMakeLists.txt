@@ -11,5 +11,6 @@ add_executable(CudaOnlySharedRuntimeViaCUDAFlags main.cu)
 if(UNIX)
   # Help the shared cuda runtime find libcudart as it is not located
   # in a default system searched location
-  set_property(TARGET CudaOnlySharedRuntimeViaCUDAFlags PROPERTY BUILD_RPATH ${CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES})
+  find_package(CUDAToolkit REQUIRED)
+  set_property(TARGET CudaOnlySharedRuntimeViaCUDAFlags PROPERTY BUILD_RPATH "${CUDAToolkit_LIBRARY_DIR}")
 endif()

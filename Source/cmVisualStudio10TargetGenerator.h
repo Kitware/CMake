@@ -97,6 +97,7 @@ private:
   void WriteWinRTPackageCertificateKeyFile(Elem& e0);
   void WriteXamlFilesGroup(Elem& e0);
   void WritePathAndIncrementalLinkOptions(Elem& e0);
+  void WritePublicProjectContentOptions(Elem& e0);
   void WriteItemDefinitionGroups(Elem& e0);
   void VerifyNecessaryFiles();
   void WriteMissingFiles(Elem& e1);
@@ -117,6 +118,7 @@ private:
 
   std::vector<std::string> GetIncludes(std::string const& config,
                                        std::string const& lang) const;
+  std::string GetTargetOutputName() const;
 
   bool ComputeClOptions();
   bool ComputeClOptions(std::string const& configName);

@@ -6,11 +6,11 @@ project(FortranCInterface C Fortran)
 include(${FortranCInterface_BINARY_DIR}/Input.cmake OPTIONAL)
 
 # Check if the C compiler supports '$' in identifiers.
-include(CheckCSourceCompiles)
-check_c_source_compiles("
-extern int dollar$(void);
-int main() { return 0; }
-" C_SUPPORTS_DOLLAR)
+include(CheckSourceCompiles)
+check_source_compiles(C
+"extern int dollar$(void);
+int main() { return 0; }"
+C_SUPPORTS_DOLLAR)
 
 # List manglings of global symbol names to try.
 set(global_symbols

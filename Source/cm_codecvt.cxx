@@ -171,7 +171,7 @@ std::codecvt_base::result codecvt::Decode(mbstate_t& state, int size,
   }
 
   int tlen = WideCharToMultiByte(m_codepage, 0, wbuf, wlen, to_next,
-                                 to_end - to_next, NULL, NULL);
+                                 to_end - to_next, nullptr, nullptr);
   if (tlen <= 0) {
     if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
       return std::codecvt_base::partial;
@@ -206,7 +206,7 @@ std::codecvt_base::result codecvt::DecodePartial(mbstate_t& state,
   }
 
   int tlen = WideCharToMultiByte(m_codepage, 0, wbuf, wlen, to_next,
-                                 to_end - to_next, NULL, NULL);
+                                 to_end - to_next, nullptr, nullptr);
   if (tlen <= 0) {
     if (GetLastError() == ERROR_INSUFFICIENT_BUFFER) {
       return std::codecvt_base::partial;

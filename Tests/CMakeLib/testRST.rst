@@ -33,10 +33,15 @@ Generator expression :genex:`$<SOME_GENEX:...>` with brackets and parameter.
 Generator expression :genex:`some genex <SOME_GENEX>` with space and target.
 Generator expression :genex:`$<SOME_GENEX> <SOME_GENEX>` with brackets, space, and target.
 Generator expression :genex:`$<SOME_GENEX:...> <SOME_GENEX>` with brackets, parameter, space, and target.
-Inline literal ``~!@#$%^&*( )_+-=\\[]{}'":;,<>.?/``.
+Inline cref :cref:`Link Dest`.
+Inline cref :cref:`Link_Dest_<Placeholder>`.
+Inline cref :cref:`Link Text <ExternalDest>`.
+Inline cref :cref:`Link_Text_<Placeholder> <ExternalDest>`.
+Inline link `Link Dest`_.
 Inline link `Link Text <ExternalDest>`_.
 Inline link `Link Text \<With \\-escaped Brackets\> <ExternalDest>`_.
 Inline literal ``__`` followed by inline link `Link Text <InternalDest_>`_.
+Inline literal ``~!@#$%^&*( )_+-=\\[]{}'":;,<>.?/``.
 
 .. |not replaced| replace:: not replaced through toctree
 .. |not replaced in literal| replace:: replaced in parsed literal
@@ -49,7 +54,8 @@ Inline literal ``__`` followed by inline link `Link Text <InternalDest_>`_.
 
 .. cmake-module:: testRSTmod.cmake
 
-.. cmake:command:: some_cmd
+.. cmake:command::
+   some_cmd
 
    Command some_cmd description.
 
@@ -57,7 +63,8 @@ Inline literal ``__`` followed by inline link `Link Text <InternalDest_>`_.
 
    Command other_cmd description.
 
-.. cmake:envvar:: some_var
+.. cmake:envvar::
+   some_var
 
    Environment variable some_var description.
 
@@ -65,7 +72,8 @@ Inline literal ``__`` followed by inline link `Link Text <InternalDest_>`_.
 
    Environment variable other_var description.
 
-.. cmake:genex:: SOME_GENEX
+.. cmake:genex::
+   SOME_GENEX
 
    Generator expression SOME_GENEX description.
 
@@ -73,7 +81,17 @@ Inline literal ``__`` followed by inline link `Link Text <InternalDest_>`_.
 
    Generator expression $<OTHER_GENEX> description.
 
-.. cmake:variable:: some_var
+.. cmake:signature::
+   some_command(SOME_SIGNATURE)
+
+   Command some_command SOME_SIGNATURE description.
+
+.. signature:: other_command(OTHER_SIGNATURE)
+
+   Command other_command OTHER_SIGNATURE description.
+
+.. cmake:variable::
+   some_var
 
    Variable some_var description.
 

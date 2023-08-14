@@ -285,9 +285,9 @@ command.
   :end-before: # include CMakePackageConfigHelpers macro
 
 This command generates the ``MathFunctionsTargets.cmake`` file and arranges
-to install it to ``lib/cmake``. The file contains code suitable for
-use by downstreams to import all targets listed in the install command from
-the installation tree.
+to install it to ``${CMAKE_INSTALL_LIBDIR}/cmake/MathFunctions``. The file
+contains code suitable for use by downstreams to import all targets listed in
+the install command from the installation tree.
 
 The ``NAMESPACE`` option will prepend ``MathFunctions::`` to  the target names
 as they are written to the export file. This convention of double-colons
@@ -317,14 +317,15 @@ were built in its own tree. For example:
 .. code-block:: cmake
   :linenos:
 
-   include(${INSTALL_PREFIX}/lib/cmake/MathFunctionTargets.cmake)
+   include(GNUInstallDirs)
+   include(${INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}/cmake/MathFunctions/MathFunctionTargets.cmake)
    add_executable(myexe src1.c src2.c )
    target_link_libraries(myexe PRIVATE MathFunctions::MathFunctions)
 
-Line 1 loads the target CMake file. Although we only exported a single
+Line 2 loads the target CMake file. Although we only exported a single
 target, this file may import any number of targets. Their locations are
 computed relative to the file location so that the install tree may be
-easily moved. Line 3 references the imported ``MathFunctions`` library. The
+easily moved. Line 4 references the imported ``MathFunctions`` library. The
 resulting build system will link to the library from its installed location.
 
 Executables may also be exported and imported using the same process.

@@ -13,9 +13,9 @@
 
 #include "cmCTest.h"
 #include "cmCTestVC.h"
+#include "cmList.h"
 #include "cmProcessTools.h"
 #include "cmRange.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmCTestP4::cmCTestP4(cmCTest* ct, std::ostream& log)
@@ -460,7 +460,7 @@ bool cmCTestP4::LoadModifications()
 
 bool cmCTestP4::UpdateCustom(const std::string& custom)
 {
-  std::vector<std::string> p4_custom_command = cmExpandedList(custom, true);
+  cmList p4_custom_command{ custom, cmList::EmptyElements::Yes };
 
   std::vector<char const*> p4_custom;
   p4_custom.reserve(p4_custom_command.size() + 1);

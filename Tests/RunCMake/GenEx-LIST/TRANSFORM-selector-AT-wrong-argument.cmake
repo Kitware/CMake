@@ -1,0 +1,2 @@
+
+file(GENERATE OUTPUT result.txt CONTENT "$<LIST:TRANSFORM,a;b,TOUPPER,AT,0,1x,2>")

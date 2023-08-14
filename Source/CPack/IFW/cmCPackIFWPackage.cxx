@@ -15,6 +15,7 @@
 #include "cmCPackIFWInstaller.h"
 #include "cmCPackLog.h" // IWYU pragma: keep
 #include "cmGeneratedFileStream.h"
+#include "cmList.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
@@ -427,16 +428,16 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   }
 
   // QtIFW dependencies
-  std::vector<std::string> deps;
+  cmList deps;
   option = prefix + "DEPENDS";
   if (cmValue value = this->GetOption(option)) {
-    cmExpandList(value, deps);
+    deps.assign(value);
   }
   option = prefix + "DEPENDENCIES";
   if (cmValue value = this->GetOption(option)) {
-    cmExpandList(value, deps);
+    deps.append(value);
   }
-  for (std::string const& d : deps) {
+  for (auto const& d : deps) {
     DependenceStruct dep(d);
     if (this->Generator->Packages.count(dep.Name)) {
       cmCPackIFWPackage& depPkg = this->Generator->Packages[dep.Name];
@@ -455,7 +456,7 @@ int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
   if (this->IsSetToEmpty(option)) {
     this->AlienAutoDependOn.clear();
   } else if (cmValue value = this->GetOption(option)) {
-    std::vector<std::string> depsOn = cmExpandedList(value);
+    cmList depsOn{ value };
     for (std::string const& d : depsOn) {
       DependenceStruct dep(d);
       if (this->Generator->Packages.count(dep.Name)) {

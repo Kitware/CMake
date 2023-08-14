@@ -12,6 +12,7 @@
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -85,7 +86,7 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*prop);
 
   cmTarget dummyHead("try_compile_dummy_exe", cmStateEnums::EXECUTABLE,
-                     cmTarget::VisibilityNormal, tgt->Target->GetMakefile(),
+                     cmTarget::Visibility::Normal, tgt->Target->GetMakefile(),
                      cmTarget::PerConfig::Yes);
 
   cmGeneratorTarget gDummyHead(&dummyHead, tgt->GetLocalGenerator());
@@ -126,7 +127,7 @@ void cmExportTryCompileFileGenerator::PopulateProperties(
       std::string evalResult =
         this->FindTargets(p, target, std::string(), emitted);
 
-      std::vector<std::string> depends = cmExpandedList(evalResult);
+      cmList depends{ evalResult };
       for (std::string const& li : depends) {
         cmGeneratorTarget* tgt =
           target->GetLocalGenerator()->FindGeneratorTargetToUse(li);

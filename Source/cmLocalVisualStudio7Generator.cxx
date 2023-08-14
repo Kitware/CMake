@@ -29,6 +29,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmGlobalVisualStudio7Generator.h"
 #include "cmGlobalVisualStudioGenerator.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
@@ -141,7 +142,6 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       cc->SetOutputs(force);
       cc->SetCommandLines(force_commands);
       cc->SetComment(" ");
-      cc->SetCMP0116Status(cmPolicies::NEW);
       if (cmSourceFile* file =
             this->AddCustomCommandToOutput(std::move(cc), true)) {
         l->AddSource(file->ResolveFullPath());
@@ -262,6 +262,10 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   cmCustomCommandLines commandLines =
     cmMakeSingleCommandLine({ cmSystemTools::GetCMakeCommand(), argS, argB,
                               "--check-stamp-file", stampName });
+
+  if (cm->GetIgnoreWarningAsError()) {
+    commandLines[0].emplace_back("--compile-no-warning-as-error");
+  }
   std::string comment = cmStrCat("Building Custom Rule ", makefileIn);
   auto cc = cm::make_unique<cmCustomCommand>();
   cc->SetOutputs(stampName);
@@ -269,9 +273,9 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   cc->SetDepends(listFiles);
   cc->SetCommandLines(commandLines);
   cc->SetComment(comment.c_str());
-  cc->SetCMP0116Status(cmPolicies::NEW);
   cc->SetEscapeOldStyle(false);
   cc->SetStdPipesUTF8(true);
+  cc->SetUsesTerminal(true);
   this->AddCustomCommandToOutput(std::move(cc), true);
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn)) {
     // Finalize the source file path now since we're adding this after
@@ -1577,12 +1581,12 @@ cmLocalVisualStudio7GeneratorFCInfo::cmLocalVisualStudio7GeneratorFCInfo(
 
     // Check for extra object-file dependencies.
     if (cmValue deps = sf.GetProperty("OBJECT_DEPENDS")) {
-      std::vector<std::string> depends = cmExpandedList(*deps);
-      const char* sep = "";
-      for (const std::string& d : depends) {
-        fc.AdditionalDeps += sep;
-        fc.AdditionalDeps += lg->ConvertToXMLOutputPath(d);
-        sep = ";";
+      cmList depends{ *deps };
+      if (!depends.empty()) {
+        for (std::string& d : depends) {
+          d = lg->ConvertToXMLOutputPath(d);
+        }
+        fc.AdditionalDeps += depends.to_string();
         needfc = true;
       }
     }

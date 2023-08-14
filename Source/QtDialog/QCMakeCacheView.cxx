@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "QCMakeCacheView.h"
 
+#include "QCMakeSizeType.h"
 #include "QCMakeWidgets.h"
 #include <QApplication>
 #include <QEvent>
@@ -188,7 +189,7 @@ QCMakeCacheModel::~QCMakeCacheModel() = default;
 
 static uint qHash(const QCMakeProperty& p)
 {
-  return qHash(p.Key);
+  return static_cast<uint>(qHash(p.Key));
 }
 
 void QCMakeCacheModel::setShowNewProperties(bool f)
@@ -241,7 +242,7 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
   bool b = this->blockSignals(true);
 
   this->clear();
-  this->NewPropertyCount = newProps.size();
+  this->NewPropertyCount = static_cast<int>(newProps.size());
 
   if (View == FlatView) {
     QCMakePropertyList newP = newProps.values();
@@ -297,8 +298,8 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
       parentItems[1]->setData(1, GroupRole);
       root->appendRow(parentItems);
 
-      int num = props2.size();
-      for (int i = 0; i < num; i++) {
+      cm_qsizetype num = props2.size();
+      for (cm_qsizetype i = 0; i < num; i++) {
         QCMakeProperty const& prop = props2[i];
         QList<QStandardItem*> items;
         items.append(new QStandardItem());
@@ -319,8 +320,8 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
       root->appendRow(parentItem);
       parentItem->setData(1, GroupRole);
 
-      int num = props2.size();
-      for (int i = 0; i < num; i++) {
+      cm_qsizetype num = props2.size();
+      for (cm_qsizetype i = 0; i < num; i++) {
         QCMakeProperty const& prop = props2[i];
         QList<QStandardItem*> items;
         items.append(new QStandardItem());
@@ -349,8 +350,8 @@ void QCMakeCacheModel::setViewType(QCMakeCacheModel::ViewType t)
   QCMakePropertyList props = this->properties();
   QCMakePropertyList oldProps;
   int numNew = this->NewPropertyCount;
-  int numTotal = props.count();
-  for (int i = numNew; i < numTotal; i++) {
+  cm_qsizetype numTotal = props.count();
+  for (cm_qsizetype i = numNew; i < numTotal; i++) {
     oldProps.append(props[i]);
   }
 

@@ -20,6 +20,7 @@ Generators
    /cpack_gen/dmg
    /cpack_gen/external
    /cpack_gen/freebsd
+   /cpack_gen/innosetup
    /cpack_gen/ifw
    /cpack_gen/nsis
    /cpack_gen/nuget

@@ -11,10 +11,10 @@
 #  include <cmsys/Encoding.hxx>
 #endif
 
+#include "cmList.h"
 #include "cmListFileLexer.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 struct cmListFileParser
@@ -496,10 +496,11 @@ std::ostream& operator<<(std::ostream& os, BT<std::string> const& s)
 }
 
 std::vector<BT<std::string>> cmExpandListWithBacktrace(
-  std::string const& list, cmListFileBacktrace const& bt, bool emptyArgs)
+  std::string const& list, cmListFileBacktrace const& bt,
+  cmList::EmptyElements emptyArgs)
 {
   std::vector<BT<std::string>> result;
-  std::vector<std::string> tmp = cmExpandedList(list, emptyArgs);
+  cmList tmp{ list, emptyArgs };
   result.reserve(tmp.size());
   for (std::string& i : tmp) {
     result.emplace_back(std::move(i), bt);

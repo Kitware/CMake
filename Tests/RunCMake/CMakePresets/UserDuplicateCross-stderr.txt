@@ -1,2 +1,3 @@
 ^CMake Error: Could not read presets from [^
-]*/Tests/RunCMake/CMakePresets/UserDuplicateCross: Duplicate presets$
+]*/Tests/RunCMake/CMakePresets/UserDuplicateCross:
+Duplicate preset: "UserDuplicateCross"$

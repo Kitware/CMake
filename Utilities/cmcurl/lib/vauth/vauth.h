@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2014 - 2022, Steve Holme, <steve_holme@hotmail.com>.
+ * Copyright (C) Steve Holme, <steve_holme@hotmail.com>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -219,7 +219,7 @@ bool Curl_auth_is_spnego_supported(void);
    message */
 CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
                                          const char *user,
-                                         const char *passwood,
+                                         const char *password,
                                          const char *service,
                                          const char *host,
                                          const char *chlg64,

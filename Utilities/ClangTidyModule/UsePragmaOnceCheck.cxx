@@ -218,8 +218,6 @@ public:
         this
           ->EndIfs[this->Ifndefs[MacroEntry.first.getIdentifierInfo()].first];
 
-      StringRef CurHeaderGuard =
-        MacroEntry.first.getIdentifierInfo()->getName();
       std::vector<FixItHint> FixIts;
 
       HeaderSearch& HeaderInfo = this->PP->getHeaderSearchInfo();

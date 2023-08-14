@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.9)
-
+cmake_policy(SET CMP0068 NEW)
 enable_language(C)
 
 set(CMAKE_BUILD_WITH_INSTALL_RPATH 1)

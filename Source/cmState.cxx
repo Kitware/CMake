@@ -101,11 +101,13 @@ cmStateEnums::CacheEntryType cmState::StringToCacheEntryType(
 bool cmState::StringToCacheEntryType(const std::string& s,
                                      cmStateEnums::CacheEntryType& type)
 {
-  for (size_t i = 0; i < cmCacheEntryTypes.size(); ++i) {
-    if (s == cmCacheEntryTypes[i]) {
-      type = static_cast<cmStateEnums::CacheEntryType>(i);
-      return true;
-    }
+  // NOLINTNEXTLINE(readability-qualified-auto)
+  auto const entry =
+    std::find(cmCacheEntryTypes.begin(), cmCacheEntryTypes.end(), s);
+  if (entry != cmCacheEntryTypes.end()) {
+    type = static_cast<cmStateEnums::CacheEntryType>(
+      entry - cmCacheEntryTypes.begin());
+    return true;
   }
   return false;
 }
@@ -207,7 +209,7 @@ bool cmState::GetCacheEntryPropertyAsBool(std::string const& key,
 }
 
 void cmState::AddCacheEntry(const std::string& key, cmValue value,
-                            const char* helpString,
+                            const std::string& helpString,
                             cmStateEnums::CacheEntryType type)
 {
   this->CacheManager->AddCacheEntry(key, value, helpString, type);
@@ -562,7 +564,8 @@ void cmState::RemoveUserDefinedCommands()
   this->ScriptedCommands.clear();
 }
 
-void cmState::SetGlobalProperty(const std::string& prop, const char* value)
+void cmState::SetGlobalProperty(const std::string& prop,
+                                const std::string& value)
 {
   this->GlobalProperties.SetProperty(prop, value);
 }
@@ -581,10 +584,10 @@ cmValue cmState::GetGlobalProperty(const std::string& prop)
 {
   if (prop == "CACHE_VARIABLES") {
     std::vector<std::string> cacheKeys = this->GetCacheEntryKeys();
-    this->SetGlobalProperty("CACHE_VARIABLES", cmJoin(cacheKeys, ";").c_str());
+    this->SetGlobalProperty("CACHE_VARIABLES", cmJoin(cacheKeys, ";"));
   } else if (prop == "COMMANDS") {
     std::vector<std::string> commands = this->GetCommandNames();
-    this->SetGlobalProperty("COMMANDS", cmJoin(commands, ";").c_str());
+    this->SetGlobalProperty("COMMANDS", cmJoin(commands, ";"));
   } else if (prop == "IN_TRY_COMPILE") {
     this->SetGlobalProperty(
       "IN_TRY_COMPILE",
@@ -595,10 +598,10 @@ cmValue cmState::GetGlobalProperty(const std::string& prop)
   } else if (prop == "ENABLED_LANGUAGES") {
     std::string langs;
     langs = cmJoin(this->EnabledLanguages, ";");
-    this->SetGlobalProperty("ENABLED_LANGUAGES", langs.c_str());
+    this->SetGlobalProperty("ENABLED_LANGUAGES", langs);
   } else if (prop == "CMAKE_ROLE") {
     std::string mode = this->GetModeString();
-    this->SetGlobalProperty("CMAKE_ROLE", mode.c_str());
+    this->SetGlobalProperty("CMAKE_ROLE", mode);
   }
 #define STRING_LIST_ELEMENT(F) ";" #F
   if (prop == "CMAKE_C_KNOWN_FEATURES") {

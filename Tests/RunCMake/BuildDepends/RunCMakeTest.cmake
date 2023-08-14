@@ -68,6 +68,10 @@ if(NOT RunCMake_GENERATOR STREQUAL "Xcode")
   unset(run_BuildDepends_skip_step_2)
 endif()
 
+if(CMake_TEST_Fortran)
+  run_BuildDepends(FortranInclude)
+endif()
+
 run_BuildDepends(Custom-Symbolic-and-Byproduct)
 run_BuildDepends(Custom-Always)
 
@@ -194,3 +198,15 @@ if(RunCMake_GENERATOR MATCHES "^Visual Studio 9 " OR
 endif()
 run_BuildDepends(CustomCommandUnityBuild)
 unset(run_BuildDepends_skip_step_2)
+
+if (RunCMake_GENERATOR MATCHES "Make|Ninja")
+  set(run_BuildDepends_skip_step_2 1)
+  run_BuildDepends(LinkDependsCheck)
+  include("${RunCMake_BINARY_DIR}/LinkDependsCheck-build/LinkDependsUseLinker.cmake")
+  if ((NOT DEFINED CMAKE_LINK_DEPENDS_USE_LINKER OR CMAKE_LINK_DEPENDS_USE_LINKER)
+      AND CMAKE_C_LINK_DEPENDS_USE_LINKER)
+    run_BuildDepends(LinkDependsExternalLibrary)
+    unset(run_BuildDepends_skip_step_2)
+    run_BuildDepends(LinkDepends)
+  endif()
+endif()

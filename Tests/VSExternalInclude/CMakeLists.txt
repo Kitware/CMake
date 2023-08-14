@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.12)
+cmake_minimum_required (VERSION 3.5)
 project(VSExternalInclude)
 
 if(${CMAKE_GENERATOR} MATCHES "Visual Studio 1[0124567]")

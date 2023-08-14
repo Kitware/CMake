@@ -8,6 +8,7 @@
 #include <set>
 #include <vector>
 
+#include "cmCMakePath.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -24,7 +25,7 @@ cmExtraKateGenerator::cmExtraKateGenerator() = default;
 cmExternalMakefileProjectGeneratorFactory* cmExtraKateGenerator::GetFactory()
 {
   static cmExternalMakefileProjectGeneratorSimpleFactory<cmExtraKateGenerator>
-    factory("Kate", "Generates Kate project files.");
+    factory("Kate", "Generates Kate project files (deprecated).");
 
   if (factory.GetSupportedGlobalGenerators().empty()) {
 #if defined(_WIN32)
@@ -34,6 +35,7 @@ cmExternalMakefileProjectGeneratorFactory* cmExtraKateGenerator::GetFactory()
 // factory.AddSupportedGlobalGenerator("MSYS Makefiles");
 #endif
     factory.AddSupportedGlobalGenerator("Ninja");
+    factory.AddSupportedGlobalGenerator("Ninja Multi-Config");
     factory.AddSupportedGlobalGenerator("Unix Makefiles");
   }
 
@@ -47,7 +49,9 @@ void cmExtraKateGenerator::Generate()
   this->ProjectName = this->GenerateProjectName(
     lg->GetProjectName(), mf->GetSafeDefinition("CMAKE_BUILD_TYPE"),
     this->GetPathBasename(lg->GetBinaryDirectory()));
-  this->UseNinja = (this->GlobalGenerator->GetName() == "Ninja");
+  this->UseNinja =
+    ((this->GlobalGenerator->GetName() == "Ninja") ||
+     (this->GlobalGenerator->GetName() == "Ninja Multi-Config"));
 
   this->CreateKateProjectFile(*lg);
   this->CreateDummyKateProjectFile(*lg);
@@ -81,6 +85,7 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator& lg,
   const std::string& makeArgs =
     mf->GetSafeDefinition("CMAKE_KATE_MAKE_ARGUMENTS");
   std::string const& homeOutputDir = lg.GetBinaryDirectory();
+  const auto configs = mf->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 
   /* clang-format off */
   fout <<
@@ -104,16 +109,16 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator& lg,
   // this is for kate >= 4.13:
   fout << "\t\t\"targets\":[\n";
 
-  this->AppendTarget(fout, "all", make, makeArgs, homeOutputDir,
+  this->AppendTarget(fout, "all", configs, make, makeArgs, homeOutputDir,
                      homeOutputDir);
-  this->AppendTarget(fout, "clean", make, makeArgs, homeOutputDir,
+  this->AppendTarget(fout, "clean", configs, make, makeArgs, homeOutputDir,
                      homeOutputDir);
 
   // add all executable and library targets and some of the GLOBAL
   // and UTILITY targets
   for (const auto& localGen : this->GlobalGenerator->GetLocalGenerators()) {
     const auto& targets = localGen->GetGeneratorTargets();
-    std::string currentDir = localGen->GetCurrentBinaryDirectory();
+    const std::string currentDir = localGen->GetCurrentBinaryDirectory();
     bool topLevel = (currentDir == localGen->GetBinaryDirectory());
 
     for (const auto& target : targets) {
@@ -137,8 +142,8 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator& lg,
             }
           }
           if (insertTarget) {
-            this->AppendTarget(fout, targetName, make, makeArgs, currentDir,
-                               homeOutputDir);
+            this->AppendTarget(fout, targetName, configs, make, makeArgs,
+                               currentDir, homeOutputDir);
           }
         } break;
         case cmStateEnums::UTILITY:
@@ -153,19 +158,21 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator& lg,
             break;
           }
 
-          this->AppendTarget(fout, targetName, make, makeArgs, currentDir,
-                             homeOutputDir);
+          this->AppendTarget(fout, targetName, configs, make, makeArgs,
+                             currentDir, homeOutputDir);
           break;
         case cmStateEnums::EXECUTABLE:
         case cmStateEnums::STATIC_LIBRARY:
         case cmStateEnums::SHARED_LIBRARY:
         case cmStateEnums::MODULE_LIBRARY:
         case cmStateEnums::OBJECT_LIBRARY: {
-          this->AppendTarget(fout, targetName, make, makeArgs, currentDir,
-                             homeOutputDir);
-          std::string fastTarget = cmStrCat(targetName, "/fast");
-          this->AppendTarget(fout, fastTarget, make, makeArgs, currentDir,
-                             homeOutputDir);
+          this->AppendTarget(fout, targetName, configs, make, makeArgs,
+                             currentDir, homeOutputDir);
+          if (!this->UseNinja) {
+            std::string fastTarget = cmStrCat(targetName, "/fast");
+            this->AppendTarget(fout, fastTarget, configs, make, makeArgs,
+                               currentDir, homeOutputDir);
+          }
 
         } break;
         default:
@@ -178,29 +185,36 @@ void cmExtraKateGenerator::WriteTargets(const cmLocalGenerator& lg,
     std::vector<std::string> objectFileTargets;
     localGen->GetIndividualFileTargets(objectFileTargets);
     for (std::string const& f : objectFileTargets) {
-      this->AppendTarget(fout, f, make, makeArgs, currentDir, homeOutputDir);
+      this->AppendTarget(fout, f, configs, make, makeArgs, currentDir,
+                         homeOutputDir);
     }
   }
 
   fout << "\t] }\n";
 }
 
-void cmExtraKateGenerator::AppendTarget(cmGeneratedFileStream& fout,
-                                        const std::string& target,
-                                        const std::string& make,
-                                        const std::string& makeArgs,
-                                        const std::string& path,
-                                        const std::string& homeOutputDir) const
+void cmExtraKateGenerator::AppendTarget(
+  cmGeneratedFileStream& fout, const std::string& target,
+  const std::vector<std::string>& configs, const std::string& make,
+  const std::string& makeArgs, const std::string& path,
+  const std::string& homeOutputDir) const
 {
   static char JsonSep = ' ';
 
-  fout << "\t\t\t" << JsonSep << R"({"name":")" << target
-       << "\", "
-          "\"build_cmd\":\""
-       << make << " -C \\\"" << (this->UseNinja ? homeOutputDir : path)
-       << "\\\" " << makeArgs << " " << target << "\"}\n";
+  for (const std::string& conf : configs) {
+    fout << "\t\t\t" << JsonSep << R"({"name":")" << target
+         << ((configs.size() > 1) ? (std::string(":") + conf) : std::string())
+         << "\", "
+            "\"build_cmd\":\""
+         << make << " -C \\\"" << (this->UseNinja ? homeOutputDir : path)
+         << "\\\" "
+         << ((this->UseNinja && configs.size() > 1)
+               ? std::string(" -f build-") + conf + ".ninja"
+               : std::string())
+         << makeArgs << " " << target << "\"}\n";
 
-  JsonSep = ',';
+    JsonSep = ',';
+  }
 }
 
 void cmExtraKateGenerator::CreateDummyKateProjectFile(
@@ -220,17 +234,58 @@ void cmExtraKateGenerator::CreateDummyKateProjectFile(
 std::string cmExtraKateGenerator::GenerateFilesString(
   const cmLocalGenerator& lg) const
 {
-  std::string s = cmStrCat(lg.GetSourceDirectory(), "/.git");
-  if (cmSystemTools::FileExists(s)) {
-    return "\"git\": 1 ";
+  const cmMakefile* mf = lg.GetMakefile();
+  std::string mode =
+    cmSystemTools::UpperCase(mf->GetSafeDefinition("CMAKE_KATE_FILES_MODE"));
+  static const std::string gitString = "\"git\": 1 ";
+  static const std::string svnString = "\"svn\": 1 ";
+  static const std::string hgString = "\"hg\": 1 ";
+  static const std::string fossilString = "\"fossil\": 1 ";
+
+  if (mode == "SVN") {
+    return svnString;
+  }
+  if (mode == "GIT") {
+    return gitString;
+  }
+  if (mode == "HG") {
+    return hgString;
+  }
+  if (mode == "FOSSIL") {
+    return fossilString;
   }
 
-  s = cmStrCat(lg.GetSourceDirectory(), "/.svn");
-  if (cmSystemTools::FileExists(s)) {
-    return "\"svn\": 1 ";
-  }
+  // check for the VCS files except when "forced" to "FILES" mode:
+  if (mode != "LIST") {
+    cmCMakePath startDir(lg.GetSourceDirectory(), cmCMakePath::auto_format);
+    // move the directories up to the root directory to see whether we are in
+    // a subdir of a svn, git, hg or fossil checkout
+    for (;;) {
+      std::string s = startDir.String() + "/.git";
+      if (cmSystemTools::FileExists(s)) {
+        return gitString;
+      }
 
-  s = cmStrCat(lg.GetSourceDirectory(), '/');
+      s = startDir.String() + "/.svn";
+      if (cmSystemTools::FileExists(s)) {
+        return svnString;
+      }
+
+      s = startDir.String() + "/.hg";
+      if (cmSystemTools::FileExists(s)) {
+        return hgString;
+      }
+      s = startDir.String() + "/.fslckout";
+      if (cmSystemTools::FileExists(s)) {
+        return fossilString;
+      }
+
+      if (!startDir.HasRelativePath()) { // have we reached the root dir ?
+        break;
+      }
+      startDir = startDir.GetParentPath();
+    }
+  }
 
   std::set<std::string> files;
   std::string tmp;
@@ -240,9 +295,8 @@ std::string cmExtraKateGenerator::GenerateFilesString(
     cmMakefile* makefile = lgen->GetMakefile();
     const std::vector<std::string>& listFiles = makefile->GetListFiles();
     for (std::string const& listFile : listFiles) {
-      tmp = listFile;
-      {
-        files.insert(tmp);
+      if (listFile.find("/CMakeFiles/") == std::string::npos) {
+        files.insert(listFile);
       }
     }
 

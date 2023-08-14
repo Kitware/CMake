@@ -162,7 +162,7 @@ if (NOT _CMAKE_TOOLCHAIN_PREFIX)
 
   if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|QCC|LCC")
     get_filename_component(COMPILER_BASENAME "${CMAKE_C_COMPILER}" NAME)
-    if (COMPILER_BASENAME MATCHES "^(.+-)?(clang|g?cc)(-cl)?(-[0-9]+(\\.[0-9]+)*)?(-[^.]+)?(\\.exe)?$")
+    if (COMPILER_BASENAME MATCHES "^(.+-)?(clang|g?cc)(-cl)?(-?[0-9]+(\\.[0-9]+)*)?(-[^.]+)?(\\.exe)?$")
       set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})
       set(_CMAKE_TOOLCHAIN_SUFFIX ${CMAKE_MATCH_4})
       set(_CMAKE_COMPILER_SUFFIX ${CMAKE_MATCH_6})

@@ -110,6 +110,9 @@ size_t rhash_base64_url_encoded_helper(char* dst, const unsigned char* src, size
 {
 #define B64_CHUNK_SIZE 120
 	char buffer[164];
+	#ifdef __clang_analyzer__
+	memset(buffer, 0, sizeof(buffer));
+	#endif
 	assert((BASE64_LENGTH(B64_CHUNK_SIZE) + 4) <= sizeof(buffer));
 	assert((B64_CHUNK_SIZE % 6) == 0);
 	if (url_encode) {

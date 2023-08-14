@@ -12,7 +12,7 @@ endif()
 message(STATUS "CMAKE_BUILDNAME='${CMAKE_BUILDNAME}'")
 message(STATUS "THIS_TESTNAME='${THIS_TESTNAME}'")
 
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5)
 project(${THIS_TESTNAME})
 
 include(ExternalProject)

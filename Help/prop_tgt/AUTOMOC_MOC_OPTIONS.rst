@@ -15,3 +15,39 @@ is created, or an empty string otherwise.
 
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.
+
+EXAMPLE
+^^^^^^^
+
+In this example, the ``moc`` tool is invoked with the ``-D_EXTRA_DEFINE``
+option when generating the moc file for ``object.cpp``.
+
+``CMakeLists.txt``
+  .. code-block:: cmake
+
+    add_executable(mocOptions object.cpp main.cpp)
+    set_property(TARGET mocOptions PROPERTY AUTOMOC ON)
+    target_compile_options(mocOptions PRIVATE "-D_EXTRA_DEFINE")
+    set_property(TARGET mocOptions PROPERTY AUTOMOC_MOC_OPTIONS "-D_EXTRA_DEFINE")
+    target_link_libraries(mocOptions Qt6::Core)
+
+``object.hpp``
+  .. code-block:: c++
+
+    #ifndef Object_HPP
+    #define Object_HPP
+
+    #include <QObject>
+
+    #ifdef _EXTRA_DEFINE
+    class Object : public QObject
+    {
+    Q_OBJECT
+    public:
+
+      Object();
+
+    };
+    #endif
+
+    #endif

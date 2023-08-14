@@ -2,7 +2,9 @@
 /5.15.1-0-202009071110*
 /bcc*
 /cmake*
+/intel
 /ispc*
+/innosetup
 /jom
 /llvm*
 /mingw

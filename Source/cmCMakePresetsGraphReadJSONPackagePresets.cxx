@@ -12,34 +12,34 @@
 
 #include <cm3p/json/value.h>
 
+#include "cmCMakePresetErrors.h"
 #include "cmCMakePresetsGraph.h"
 #include "cmCMakePresetsGraphInternal.h"
 #include "cmJSONHelpers.h"
+class cmJSONState;
 
 namespace {
-using ReadFileResult = cmCMakePresetsGraph::ReadFileResult;
 using PackagePreset = cmCMakePresetsGraph::PackagePreset;
 
 auto const OutputHelper =
-  cmJSONHelperBuilder<ReadFileResult>::Object<PackagePreset>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
+  cmJSONHelperBuilder::Object<PackagePreset>(
+    JsonErrors::INVALID_NAMED_OBJECT_KEY, false)
     .Bind("debug"_s, &PackagePreset::DebugOutput,
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false)
     .Bind("verbose"_s, &PackagePreset::VerboseOutput,
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false);
 
-auto const VariableHelper = cmJSONHelperBuilder<ReadFileResult>::String(
-  ReadFileResult::READ_OK, ReadFileResult::INVALID_VARIABLE);
+auto const VariableHelper =
+  cmJSONHelperBuilder::String(cmCMakePresetErrors::INVALID_VARIABLE);
 
-auto const VariablesHelper =
-  cmJSONHelperBuilder<ReadFileResult>::Map<std::string>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, VariableHelper);
+auto const VariablesHelper = cmJSONHelperBuilder::Map<std::string>(
+  cmCMakePresetErrors::INVALID_VARIABLE, VariableHelper);
 
 auto const PackagePresetHelper =
-  cmJSONHelperBuilder<ReadFileResult>::Object<PackagePreset>(
-    ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESET, false)
+  cmJSONHelperBuilder::Object<PackagePreset>(
+    cmCMakePresetErrors::INVALID_PRESET_OBJECT, false)
     .Bind("name"_s, &PackagePreset::Name,
-          cmCMakePresetsGraphInternal::PresetStringHelper)
+          cmCMakePresetsGraphInternal::PresetNameHelper)
     .Bind("inherits"_s, &PackagePreset::Inherits,
           cmCMakePresetsGraphInternal::PresetVectorOneOrMoreStringHelper,
           false)
@@ -47,7 +47,7 @@ auto const PackagePresetHelper =
           cmCMakePresetsGraphInternal::PresetBoolHelper, false)
     .Bind<std::nullptr_t>("vendor"_s, nullptr,
                           cmCMakePresetsGraphInternal::VendorHelper(
-                            ReadFileResult::INVALID_PRESET),
+                            cmCMakePresetErrors::INVALID_PRESET),
                           false)
     .Bind("displayName"_s, &PackagePreset::DisplayName,
           cmCMakePresetsGraphInternal::PresetStringHelper, false)
@@ -81,15 +81,12 @@ auto const PackagePresetHelper =
 }
 
 namespace cmCMakePresetsGraphInternal {
-cmCMakePresetsGraph::ReadFileResult PackagePresetsHelper(
-  std::vector<cmCMakePresetsGraph::PackagePreset>& out,
-  const Json::Value* value)
+bool PackagePresetsHelper(std::vector<cmCMakePresetsGraph::PackagePreset>& out,
+                          const Json::Value* value, cmJSONState* state)
 {
-  static auto const helper =
-    cmJSONHelperBuilder<ReadFileResult>::Vector<PackagePreset>(
-      ReadFileResult::READ_OK, ReadFileResult::INVALID_PRESETS,
-      PackagePresetHelper);
+  static auto const helper = cmJSONHelperBuilder::Vector<PackagePreset>(
+    cmCMakePresetErrors::INVALID_PRESETS, PackagePresetHelper);
 
-  return helper(out, value);
+  return helper(out, value, state);
 }
 }

@@ -1,6 +1,4 @@
-cmake_minimum_required(VERSION 3.23)
-
-project(BundleLinkBundle CXX)
+enable_language(CXX)
 
 add_subdirectory(lib_bundle)
 

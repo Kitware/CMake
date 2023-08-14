@@ -14,6 +14,9 @@
 
 #include <cm/optional>
 
+#include "cmJSONState.h"
+#include "cmStateTypes.h"
+
 #include "CTest/cmCTestTypes.h"
 
 enum class PackageResolveMode;
@@ -21,47 +24,20 @@ enum class PackageResolveMode;
 class cmCMakePresetsGraph
 {
 public:
-  enum class ReadFileResult
-  {
-    READ_OK,
-    FILE_NOT_FOUND,
-    JSON_PARSE_ERROR,
-    INVALID_ROOT,
-    NO_VERSION,
-    INVALID_VERSION,
-    UNRECOGNIZED_VERSION,
-    INVALID_CMAKE_VERSION,
-    UNRECOGNIZED_CMAKE_VERSION,
-    INVALID_PRESETS,
-    INVALID_PRESET,
-    INVALID_VARIABLE,
-    DUPLICATE_PRESETS,
-    CYCLIC_PRESET_INHERITANCE,
-    INHERITED_PRESET_UNREACHABLE_FROM_FILE,
-    CONFIGURE_PRESET_UNREACHABLE_FROM_FILE,
-    INVALID_MACRO_EXPANSION,
-    BUILD_TEST_PRESETS_UNSUPPORTED,
-    PACKAGE_PRESETS_UNSUPPORTED,
-    WORKFLOW_PRESETS_UNSUPPORTED,
-    INCLUDE_UNSUPPORTED,
-    INVALID_INCLUDE,
-    INVALID_CONFIGURE_PRESET,
-    INSTALL_PREFIX_UNSUPPORTED,
-    INVALID_CONDITION,
-    CONDITION_UNSUPPORTED,
-    TOOLCHAIN_FILE_UNSUPPORTED,
-    CYCLIC_INCLUDE,
-    TEST_OUTPUT_TRUNCATION_UNSUPPORTED,
-    INVALID_WORKFLOW_STEPS,
-    WORKFLOW_STEP_UNREACHABLE_FROM_FILE,
-    CTEST_JUNIT_UNSUPPORTED,
-  };
-
   std::string errors;
+  cmJSONState parseState;
+
   enum class ArchToolsetStrategy
   {
     Set,
     External,
+  };
+
+  enum class TraceEnableMode
+  {
+    Disable,
+    Default,
+    Expand,
   };
 
   class CacheVariable
@@ -111,15 +87,13 @@ public:
 
     std::map<std::string, cm::optional<std::string>> Environment;
 
-    virtual ReadFileResult VisitPresetInherit(const Preset& parent) = 0;
-    virtual ReadFileResult VisitPresetBeforeInherit()
-    {
-      return ReadFileResult::READ_OK;
-    }
+    virtual bool VisitPresetInherit(const Preset& parent) = 0;
+    virtual bool VisitPresetBeforeInherit() { return true; }
 
-    virtual ReadFileResult VisitPresetAfterInherit(int /* version */)
+    virtual bool VisitPresetAfterInherit(int /* version */,
+                                         cmJSONState* /*state*/)
     {
-      return ReadFileResult::READ_OK;
+      return true;
     }
   };
 
@@ -163,9 +137,14 @@ public:
     cm::optional<bool> DebugTryCompile;
     cm::optional<bool> DebugFind;
 
-    ReadFileResult VisitPresetInherit(const Preset& parent) override;
-    ReadFileResult VisitPresetBeforeInherit() override;
-    ReadFileResult VisitPresetAfterInherit(int version) override;
+    cm::optional<TraceEnableMode> TraceMode;
+    cm::optional<cmTraceEnums::TraceOutputFormat> TraceFormat;
+    std::vector<std::string> TraceSource;
+    std::string TraceRedirect;
+
+    bool VisitPresetInherit(const Preset& parent) override;
+    bool VisitPresetBeforeInherit() override;
+    bool VisitPresetAfterInherit(int version, cmJSONState* state) override;
   };
 
   class BuildPreset : public Preset
@@ -195,8 +174,9 @@ public:
     std::vector<std::string> NativeToolOptions;
     cm::optional<PackageResolveMode> ResolvePackageReferences;
 
-    ReadFileResult VisitPresetInherit(const Preset& parent) override;
-    ReadFileResult VisitPresetAfterInherit(int /* version */) override;
+    bool VisitPresetInherit(const Preset& parent) override;
+    bool VisitPresetAfterInherit(int /* version */,
+                                 cmJSONState* /*state*/) override;
   };
 
   class TestPreset : public Preset
@@ -328,8 +308,9 @@ public:
     cm::optional<FilterOptions> Filter;
     cm::optional<ExecutionOptions> Execution;
 
-    ReadFileResult VisitPresetInherit(const Preset& parent) override;
-    ReadFileResult VisitPresetAfterInherit(int /* version */) override;
+    bool VisitPresetInherit(const Preset& parent) override;
+    bool VisitPresetAfterInherit(int /* version */,
+                                 cmJSONState* /*state*/) override;
   };
 
   class PackagePreset : public Preset
@@ -364,8 +345,9 @@ public:
     std::string PackageDirectory;
     std::string VendorName;
 
-    ReadFileResult VisitPresetInherit(const Preset& parent) override;
-    ReadFileResult VisitPresetAfterInherit(int /* version */) override;
+    bool VisitPresetInherit(const Preset& parent) override;
+    bool VisitPresetAfterInherit(int /* version */,
+                                 cmJSONState* /*state*/) override;
   };
 
   class WorkflowPreset : public Preset
@@ -401,8 +383,9 @@ public:
 
     std::vector<WorkflowStep> Steps;
 
-    ReadFileResult VisitPresetInherit(const Preset& parent) override;
-    ReadFileResult VisitPresetAfterInherit(int /* version */) override;
+    bool VisitPresetInherit(const Preset& parent) override;
+    bool VisitPresetAfterInherit(int /* version */,
+                                 cmJSONState* /* state */) override;
   };
 
   template <class T>
@@ -435,9 +418,8 @@ public:
 
   static std::string GetFilename(const std::string& sourceDir);
   static std::string GetUserFilename(const std::string& sourceDir);
-  ReadFileResult ReadProjectPresets(const std::string& sourceDir,
-                                    bool allowNoFiles = false);
-  static const char* ResultToString(ReadFileResult result);
+  bool ReadProjectPresets(const std::string& sourceDir,
+                          bool allowNoFiles = false);
 
   std::string GetGeneratorForPreset(const std::string& presetName) const
   {
@@ -502,10 +484,9 @@ private:
     Included,
   };
 
-  ReadFileResult ReadProjectPresetsInternal(bool allowNoFiles);
-  ReadFileResult ReadJSONFile(const std::string& filename, RootType rootType,
-                              ReadReason readReason,
-                              std::vector<File*>& inProgressFiles, File*& file,
-                              std::string& errMsg);
+  bool ReadProjectPresetsInternal(bool allowNoFiles);
+  bool ReadJSONFile(const std::string& filename, RootType rootType,
+                    ReadReason readReason, std::vector<File*>& inProgressFiles,
+                    File*& file, std::string& errMsg);
   void ClearPresets();
 };

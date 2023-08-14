@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2022, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -37,8 +37,8 @@
  *
  * This is STUPID BLOCKING behavior
  */
-int Curl_blockread_all(struct Curl_easy *data,
-                       curl_socket_t sockfd,
+int Curl_blockread_all(struct Curl_cfilter *cf,
+                       struct Curl_easy *data,
                        char *buf,
                        ssize_t buffersize,
                        ssize_t *n);
@@ -47,13 +47,14 @@ int Curl_blockread_all(struct Curl_easy *data,
 /*
  * This function handles the SOCKS5 GSS-API negotiation and initialization
  */
-CURLcode Curl_SOCKS5_gssapi_negotiate(int sockindex,
+CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
                                       struct Curl_easy *data);
 #endif
 
-CURLcode Curl_conn_socks_proxy_add(struct Curl_easy *data,
-                                   struct connectdata *conn,
-                                   int sockindex);
+CURLcode Curl_cf_socks_proxy_insert_after(struct Curl_cfilter *cf_at,
+                                          struct Curl_easy *data);
+
+extern struct Curl_cftype Curl_cft_socks_proxy;
 
 #endif /* CURL_DISABLE_PROXY */
 

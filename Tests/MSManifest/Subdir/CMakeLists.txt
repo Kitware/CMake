@@ -5,6 +5,11 @@ if(MSVC AND NOT MSVC_VERSION LESS 1400)
   add_test(NAME MSManifest.Single COMMAND
     ${CMAKE_COMMAND} -Dexe=$<TARGET_FILE:MSManifest>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check.cmake)
+  add_executable(MSManifestNonIncremental main.c ${CMAKE_CURRENT_BINARY_DIR}/test.manifest)
+  set_property(TARGET MSManifestNonIncremental PROPERTY LINK_FLAGS "/INCREMENTAL:NO")
+  add_test(NAME MSManifest.Single.NonIncremental COMMAND
+    ${CMAKE_COMMAND} -Dexe=$<TARGET_FILE:MSManifestNonIncremental>
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/check.cmake)
   add_executable(MSManifestNone main.c)
   set_property(TARGET MSManifestNone PROPERTY LINK_FLAGS "/MANIFEST:NO")
 elseif(WIN32 AND CMAKE_C_COMPILER_ID MATCHES "Clang")

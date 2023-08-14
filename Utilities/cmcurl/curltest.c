@@ -10,21 +10,24 @@ int test_curl(const char* url)
   CURLcode r;
   char proxy[1024];
   int proxy_type = 0;
+  const char* env_HTTP_PROXY = getenv("HTTP_PROXY");
 
-  if (getenv("HTTP_PROXY")) {
+  if (env_HTTP_PROXY) {
+    const char* env_HTTP_PROXY_PORT = getenv("HTTP_PROXY_PORT");
+    const char* env_HTTP_PROXY_TYPE = getenv("HTTP_PROXY_TYPE");
     proxy_type = 1;
-    if (getenv("HTTP_PROXY_PORT")) {
-      sprintf(proxy, "%s:%s", getenv("HTTP_PROXY"), getenv("HTTP_PROXY_PORT"));
+    if (env_HTTP_PROXY_PORT) {
+      sprintf(proxy, "%s:%s", env_HTTP_PROXY, env_HTTP_PROXY_PORT);
     } else {
-      sprintf(proxy, "%s", getenv("HTTP_PROXY"));
+      sprintf(proxy, "%s", env_HTTP_PROXY);
     }
-    if (getenv("HTTP_PROXY_TYPE")) {
+    if (env_HTTP_PROXY_TYPE) {
       /* HTTP/SOCKS4/SOCKS5 */
-      if (strcmp(getenv("HTTP_PROXY_TYPE"), "HTTP") == 0) {
+      if (strcmp(env_HTTP_PROXY_TYPE, "HTTP") == 0) {
         proxy_type = 1;
-      } else if (strcmp(getenv("HTTP_PROXY_TYPE"), "SOCKS4") == 0) {
+      } else if (strcmp(env_HTTP_PROXY_TYPE, "SOCKS4") == 0) {
         proxy_type = 2;
-      } else if (strcmp(getenv("HTTP_PROXY_TYPE"), "SOCKS5") == 0) {
+      } else if (strcmp(env_HTTP_PROXY_TYPE, "SOCKS5") == 0) {
         proxy_type = 3;
       }
     }

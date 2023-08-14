@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
-project(Test LANGUAGES C)
+enable_language(C)
 
 # fake launcher executable
 set(input_launcher_executable ${CMAKE_CURRENT_BINARY_DIR}/fake_launcher_executable)

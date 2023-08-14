@@ -1,7 +1,7 @@
-CMake Error at UnterminatedBrace0.cmake:2 \(set\):
+CMake Error at UnterminatedBrace0.cmake:1 \(set\):
   Syntax error in cmake code at
 
-    .*/Tests/RunCMake/Syntax/UnterminatedBrace0.cmake:2
+    .*/Tests/RunCMake/Syntax/UnterminatedBrace0.cmake:1
 
   when parsing string
 

@@ -107,13 +107,13 @@ The following variables may be set to control search behavior:
 
 ``ENV{PKG_CONFIG_PATH}``
   On UNIX-like systems, ``pkg-config`` is used to locate the system OpenSSL.
-  Set the ``PKG_CONFIG_PATH`` environment varialbe to look in alternate
+  Set the ``PKG_CONFIG_PATH`` environment variable to look in alternate
   locations.  Useful on multi-lib systems.
 #]=======================================================================]
 
 macro(_OpenSSL_test_and_find_dependencies ssl_library crypto_library)
   unset(_OpenSSL_extra_static_deps)
-  if((CMAKE_SYSTEM_NAME STREQUAL "Linux") AND
+  if(UNIX AND
      (("${ssl_library}" MATCHES "\\${CMAKE_STATIC_LIBRARY_SUFFIX}$") OR
       ("${crypto_library}" MATCHES "\\${CMAKE_STATIC_LIBRARY_SUFFIX}$")))
     set(_OpenSSL_has_dependencies TRUE)
@@ -140,7 +140,7 @@ macro(_OpenSSL_test_and_find_dependencies ssl_library crypto_library)
         endif()
       endforeach()
       unset(_OPENSSL_DEP_LIB)
-    else()
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
       set(_OpenSSL_has_dependency_dl TRUE)
     endif()
     if(_OpenSSL_ldflags_other)
@@ -152,7 +152,7 @@ macro(_OpenSSL_test_and_find_dependencies ssl_library crypto_library)
         endif()
       endforeach()
       unset(_OPENSSL_DEP_LDFLAG)
-    else()
+    elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
       set(_OpenSSL_has_dependency_threads TRUE)
       find_package(Threads)
     endif()
@@ -210,7 +210,7 @@ endif ()
 # Support preference of static libs by adjusting CMAKE_FIND_LIBRARY_SUFFIXES
 if(OPENSSL_USE_STATIC_LIBS)
   set(_openssl_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
-  if(WIN32)
+  if(MSVC)
     set(CMAKE_FIND_LIBRARY_SUFFIXES .lib .a ${CMAKE_FIND_LIBRARY_SUFFIXES})
   else()
     set(CMAKE_FIND_LIBRARY_SUFFIXES .a )
@@ -230,13 +230,15 @@ else()
   set(_OPENSSL_FIND_PATH_SUFFIX "include")
 endif()
 
-if (WIN32)
+if (OPENSSL_ROOT_DIR OR NOT "$ENV{OPENSSL_ROOT_DIR}" STREQUAL "")
+  set(_OPENSSL_ROOT_HINTS HINTS ${OPENSSL_ROOT_DIR} ENV OPENSSL_ROOT_DIR)
+  set(_OPENSSL_ROOT_PATHS NO_DEFAULT_PATH)
+elseif (MSVC)
   # http://www.slproweb.com/products/Win32OpenSSL.html
   set(_OPENSSL_ROOT_HINTS
-    ${OPENSSL_ROOT_DIR}
+    HINTS
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (32-bit)_is1;Inno Setup: App Path]"
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\OpenSSL (64-bit)_is1;Inno Setup: App Path]"
-    ENV OPENSSL_ROOT_DIR
     )
 
   if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
@@ -255,6 +257,7 @@ if (WIN32)
   endif()
 
   set(_OPENSSL_ROOT_PATHS
+    PATHS
     "${_programfiles}/OpenSSL"
     "${_programfiles}/OpenSSL-${_arch}"
     "C:/OpenSSL/"
@@ -262,16 +265,11 @@ if (WIN32)
     )
   unset(_programfiles)
   unset(_arch)
-else ()
-  set(_OPENSSL_ROOT_HINTS
-    ${OPENSSL_ROOT_DIR}
-    ENV OPENSSL_ROOT_DIR
-    )
 endif ()
 
 set(_OPENSSL_ROOT_HINTS_AND_PATHS
-    HINTS ${_OPENSSL_ROOT_HINTS}
-    PATHS ${_OPENSSL_ROOT_PATHS}
+    ${_OPENSSL_ROOT_HINTS}
+    ${_OPENSSL_ROOT_PATHS}
     )
 
 find_path(OPENSSL_INCLUDE_DIR

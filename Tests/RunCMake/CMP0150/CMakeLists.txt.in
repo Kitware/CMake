@@ -1,0 +1,23 @@
+cmake_minimum_required(VERSION 3.25)
+project(@projName@ LANGUAGES NONE)
+
+@policyCommand@
+
+include(ExternalProject)
+ExternalProject_Add(ep-@depName@
+  GIT_REPOSITORY @epRelativeGitRepo@
+  GIT_TAG master
+  GIT_CONFIG init.defaultBranch=master
+  TEST_COMMAND ""
+  INSTALL_COMMAND "${CMAKE_COMMAND}" -E echo "ExternalProject for ep-@depName@"
+)
+
+include(FetchContent)
+FetchContent_Declare(@depName@
+  GIT_REPOSITORY @fcRelativeGitRepo@
+  GIT_TAG master
+  GIT_CONFIG init.defaultBranch=master
+)
+FetchContent_MakeAvailable(@depName@)
+
+message(STATUS "Completed configuring project @projName@")

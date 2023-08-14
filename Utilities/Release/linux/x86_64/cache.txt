@@ -32,7 +32,7 @@ SPHINX_QTHELP:BOOL=ON
 QHELPGENERATOR_EXECUTABLE:PATH=/opt/qt/bin/qhelpgenerator
 
 # We bootstrap as part of the build so skip its test.
-CMAKE_SKIP_BOOTSTRAP_TEST:STRING=TRUE
+CMake_TEST_BOOTSTRAP:BOOL=FALSE
 
 # Skip Qt5 tests because our Qt is static.
 CMake_TEST_Qt5:BOOL=FALSE

@@ -8,6 +8,7 @@ Synopsis
 
 .. parsed-literal::
 
+ ccmake [<options>] -B <path-to-build> [-S <path-to-source>]
  ccmake [<options>] <path-to-source | path-to-existing-build>
 
 Description

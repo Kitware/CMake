@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.5)
 project(ExternalProjectUpdateTest NONE)
 if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12)
   cmake_policy(SET CMP0114 NEW)
@@ -70,7 +70,9 @@ if(NOT TEST_GIT_TAG)
 endif()
 
 if(do_git_tests)
-  set(local_git_repo "../../LocalRepositories/GIT")
+  cmake_path(SET local_git_repo NORMALIZE
+    "${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/GIT"
+  )
 
   # Unzip/untar the git repository in our source folder so that other
   # projects below may use it to test git args of ExternalProject_Add
@@ -79,6 +81,7 @@ if(do_git_tests)
   ExternalProject_Add(${proj}
     SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/GIT
     URL ${CMAKE_CURRENT_SOURCE_DIR}/gitrepo.tgz
+    DOWNLOAD_EXTRACT_TIMESTAMP NO
     BUILD_COMMAND ""
     CONFIGURE_COMMAND "${GIT_EXECUTABLE}" --version
     INSTALL_COMMAND ""

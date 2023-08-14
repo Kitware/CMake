@@ -1,0 +1,8 @@
+CMake Error at SORT-wrong-option.cmake:[0-9]+ \(file\):
+  Error evaluating generator expression:
+
+    \$<LIST:SORT,a;b,WRONG_OPTION>
+
+  sub-command SORT, option "WRONG_OPTION" is invalid.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

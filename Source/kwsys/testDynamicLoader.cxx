@@ -53,9 +53,9 @@ static std::string GetLibName(const char* lname, const char* subdir = nullptr)
     slname += "/";
     slname += subdir;
   }
-#ifdef CMAKE_INTDIR
+#ifdef BUILD_CONFIG
   slname += "/";
-  slname += CMAKE_INTDIR;
+  slname += BUILD_CONFIG;
 #endif
   slname += "/";
   slname += kwsys::DynamicLoader::LibPrefix();

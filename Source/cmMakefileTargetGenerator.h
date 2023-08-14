@@ -77,8 +77,14 @@ protected:
   // write the clean rules for this target
   void WriteTargetCleanRules();
 
+  // write the linker depend rules for this target
+  void WriteTargetLinkDependRules();
   // write the depend rules for this target
   void WriteTargetDependRules();
+
+  std::string GetClangTidyReplacementsFilePath(
+    std::string const& directory, cmSourceFile const& source,
+    std::string const& config) const override;
 
   // write rules for macOS Application Bundle content.
   struct MacOSXContentGeneratorType
@@ -160,7 +166,8 @@ protected:
       response file name.  */
   std::string CreateResponseFile(const std::string& name,
                                  std::string const& options,
-                                 std::vector<std::string>& makefile_depends);
+                                 std::vector<std::string>& makefile_depends,
+                                 std::string const& language);
 
   bool CheckUseResponseFileForObjects(std::string const& l) const;
   bool CheckUseResponseFileForLibraries(std::string const& l) const;
@@ -175,13 +182,14 @@ protected:
   void CreateLinkLibs(cmLinkLineComputer* linkLineComputer,
                       std::string& linkLibs, bool useResponseFile,
                       std::vector<std::string>& makefile_depends,
+                      std::string const& linkLanguage,
                       ResponseFlagFor responseMode = ResponseFlagFor::Link);
 
   /** Create lists of object files for linking and cleaning.  */
   void CreateObjectLists(bool useLinkScript, bool useArchiveRules,
                          bool useResponseFile, std::string& buildObjs,
                          std::vector<std::string>& makefile_depends,
-                         bool useWatcomQuote,
+                         bool useWatcomQuote, std::string const& linkLanguage,
                          ResponseFlagFor responseMode = ResponseFlagFor::Link);
 
   /** Add commands for generate def files */

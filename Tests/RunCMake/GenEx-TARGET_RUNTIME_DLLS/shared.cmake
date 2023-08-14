@@ -4,6 +4,10 @@ add_executable(exe main.c)
 add_library(lib1 SHARED lib1.c)
 add_library(lib2 SHARED lib2.c)
 add_library(lib3 SHARED lib3.c)
+if(WIN32 OR CYGWIN)
+  set_property(TARGET lib3 PROPERTY RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/SomeSubDir/")
+endif()
+
 add_library(static STATIC static.c)
 add_library(imported SHARED IMPORTED)
 set_property(TARGET imported PROPERTY IMPORTED_LOCATION "${CMAKE_SOURCE_DIR}/imported.dll")
@@ -26,9 +30,16 @@ if(WIN32 OR CYGWIN)
     "$<TARGET_FILE:lib3>"
     "$<TARGET_FILE:lib2>"
     )
+  set(expected_dll_dirs
+    "$<PATH:GET_PARENT_PATH,$<TARGET_FILE:lib2>>"
+    "$<PATH:GET_PARENT_PATH,$<TARGET_FILE:imported>>"
+    "$<PATH:GET_PARENT_PATH,$<TARGET_FILE:lib3>>"
+    )
 endif()
 
-set(content "check_genex(\"${expected_dlls}\" \"$<TARGET_RUNTIME_DLLS:exe>\")\n")
+set(content "check_genex(\"${expected_dlls}\" \"$<TARGET_RUNTIME_DLLS:exe>\")
+check_genex(\"${expected_dll_dirs}\" \"$<TARGET_RUNTIME_DLL_DIRS:exe>\")\n")
+
 set(condition)
 get_property(multi_config GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if(multi_config)
