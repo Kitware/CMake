@@ -388,11 +388,15 @@ if(APPLE)
   else()
     # get xcode version
     execute_process(
-          COMMAND xcodebuild -version
-          OUTPUT_VARIABLE _xcode_version
-          )
-    string(REGEX REPLACE "Xcode ([0-9]+(\\.[0-9]+)*)" "\\1" _FindJNI_XCODE_VERSION ${_xcode_version})
-    unset(_xcode_version)
+      COMMAND xcodebuild -version
+      OUTPUT_VARIABLE _FindJNI_XCODEBUILD_VERSION
+      )
+    if(_FindJNI_XCODEBUILD_VERSION MATCHES "Xcode ([0-9]+(\\.[0-9]+)*)")
+      set(_FindJNI_XCODE_VERSION "${CMAKE_MATCH_1}")
+    else()
+      set(_FindJNI_XCODE_VERSION "")
+    endif()
+    unset(_FindJNI_XCODEBUILD_VERSION)
   endif()
 
   if(_FindJNI_XCODE_VERSION VERSION_GREATER 12.1)
