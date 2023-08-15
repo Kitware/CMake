@@ -4,7 +4,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>
@@ -43,7 +42,7 @@ public:
 
   //! Set/Get a property of this source file
   void SetProperty(const std::string& prop, cmValue value);
-  void SetProperty(const std::string& prop, std::nullptr_t)
+  void RemoveProperty(const std::string& prop)
   {
     this->SetProperty(prop, cmValue{ nullptr });
   }
