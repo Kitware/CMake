@@ -229,7 +229,7 @@ if(NOT CMAKE_RANLIB)
     set(CMAKE_RANLIB : CACHE INTERNAL "noop for ranlib")
 endif()
 
-if(NOT CMAKE_TAPI)
+if(APPLE AND "TAPI" IN_LIST _CMAKE_TOOL_VARS AND NOT CMAKE_TAPI)
   # try to pick-up from Apple toolchain
   execute_process(COMMAND xcrun --find tapi
     OUTPUT_VARIABLE _xcrun_out
