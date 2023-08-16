@@ -24,13 +24,6 @@ CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL:STRING=3
 CMAKE_PREFIX_PATH:STRING=/opt/qt
 CMake_QT_STATIC_QXcbIntegrationPlugin_LIBRARIES:STRING=/opt/qt/plugins/platforms/libqxcb.a;/opt/qt/lib/libQt5XcbQpa.a;/opt/qt/lib/libQt5ServiceSupport.a;/opt/qt/lib/libQt5EdidSupport.a;/opt/qt/lib/libQt5EventDispatcherSupport.a;/opt/qt/lib/libQt5FontDatabaseSupport.a;/opt/qt/lib/libQt5ThemeSupport.a;/opt/qt/lib/libxcb-static.a;-lxcb;-lfontconfig;-lfreetype
 
-# Build documentation.
-SPHINX_EXECUTABLE:FILEPATH=/usr/local/bin/sphinx-build
-SPHINX_HTML:BOOL=ON
-SPHINX_MAN:BOOL=ON
-SPHINX_QTHELP:BOOL=ON
-QHELPGENERATOR_EXECUTABLE:PATH=/opt/qt/bin/qhelpgenerator
-
 # We bootstrap as part of the build so skip its test.
 CMake_TEST_BOOTSTRAP:BOOL=FALSE
 
