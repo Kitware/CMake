@@ -2586,6 +2586,17 @@ bool cmMakefile::PlatformIsAppleEmbedded() const
   return this->GetAppleSDKType() != AppleSDK::MacOS;
 }
 
+bool cmMakefile::PlatformIsAppleSimulator() const
+{
+  return std::set<AppleSDK>{
+    AppleSDK::AppleTVSimulator,
+    AppleSDK::IPhoneSimulator,
+    AppleSDK::WatchSimulator,
+    AppleSDK::XRSimulator,
+  }
+    .count(this->GetAppleSDKType());
+}
+
 bool cmMakefile::PlatformSupportsAppleTextStubs() const
 {
   return this->IsOn("APPLE") && this->IsSet("CMAKE_TAPI");

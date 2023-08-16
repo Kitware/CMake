@@ -20,6 +20,12 @@ enum class cmXcFrameworkPlistSupportedPlatform
   visionOS,
 };
 
+enum class cmXcFrameworkPlistSupportedPlatformVariant
+{
+  catalyst,
+  simulator,
+};
+
 struct cmXcFrameworkPlistLibrary
 {
   std::string LibraryIdentifier;
@@ -27,6 +33,8 @@ struct cmXcFrameworkPlistLibrary
   std::string HeadersPath;
   std::vector<std::string> SupportedArchitectures;
   cmXcFrameworkPlistSupportedPlatform SupportedPlatform;
+  cm::optional<cmXcFrameworkPlistSupportedPlatformVariant>
+    SupportedPlatformVariant;
 };
 
 struct cmXcFrameworkPlist
