@@ -416,7 +416,9 @@ void cmGhsMultiTargetGenerator::WriteCustomCommandsHelper(
 #endif
   // Echo the custom command's comment text.
   if (cm::optional<std::string> comment = ccg.GetComment()) {
-    std::string echocmd = cmStrCat("echo ", *comment);
+    std::string escapedComment = this->LocalGenerator->EscapeForShell(
+      *comment, ccg.GetCC().GetEscapeAllowMakeVars());
+    std::string echocmd = cmStrCat("echo ", escapedComment);
     cmdLines.push_back(std::move(echocmd));
   }
 
