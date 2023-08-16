@@ -80,8 +80,8 @@ bool PlistSupportedPlatformVariantHelper(
     return false;
   }
 
-  if (value->asString() == "catalyst"_s) {
-    variant = cmXcFrameworkPlistSupportedPlatformVariant::catalyst;
+  if (value->asString() == "maccatalyst"_s) {
+    variant = cmXcFrameworkPlistSupportedPlatformVariant::maccatalyst;
     return true;
   }
   if (value->asString() == "simulator"_s) {

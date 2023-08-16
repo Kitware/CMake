@@ -22,7 +22,7 @@ enum class cmXcFrameworkPlistSupportedPlatform
 
 enum class cmXcFrameworkPlistSupportedPlatformVariant
 {
-  catalyst,
+  maccatalyst,
   simulator,
 };
 
