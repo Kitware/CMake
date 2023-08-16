@@ -180,13 +180,13 @@ int runTest(int argc, char* argv[])
   auto debuggerResponse = debuggerResponseStream.str();
 
   std::vector<std::string> expectedResponses = {
-    R"("event" : "initialized".*"type" : "event")",
-    R"("command" : "launch".*"success" : true.*"type" : "response")",
-    R"("command" : "configurationDone".*"success" : true.*"type" : "response")",
-    R"("reason" : "started".*"threadId" : 1.*"event" : "thread".*"type" : "event")",
-    R"("reason" : "exited".*"threadId" : 1.*"event" : "thread".*"type" : "event")",
-    R"("exitCode" : 0.*"event" : "exited".*"type" : "event")",
-    R"("command" : "disconnect".*"success" : true.*"type" : "response")"
+    R"("event" *: *"initialized".*"type" *: *"event")",
+    R"("command" *: *"launch".*"success" *: *true.*"type" *: *"response")",
+    R"("command" *: *"configurationDone".*"success" *: *true.*"type" *: *"response")",
+    R"("reason" *: *"started".*"threadId" *: *1.*"event" *: *"thread".*"type" *: *"event")",
+    R"("reason" *: *"exited".*"threadId" *: *1.*"event" *: *"thread".*"type" *: *"event")",
+    R"("exitCode" *: *0.*"event" *: *"exited".*"type" *: *"event")",
+    R"("command" *: *"disconnect".*"success" *: *true.*"type" *: *"response")"
   };
 
   for (auto& regexString : expectedResponses) {
