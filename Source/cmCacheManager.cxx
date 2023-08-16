@@ -597,15 +597,14 @@ void cmCacheManager::CacheEntry::SetProperty(const std::string& p, bool v)
   this->SetProperty(p, v ? std::string{ "ON" } : std::string{ "OFF" });
 }
 
-void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
-                                             std::nullptr_t)
+void cmCacheManager::CacheEntry::RemoveProperty(const std::string& prop)
 {
   if (prop == "TYPE") {
     this->Type = cmState::StringToCacheEntryType("STRING");
   } else if (prop == "VALUE") {
-    this->Value = "";
+    this->Value.clear();
   } else {
-    this->Properties.SetProperty(prop, cmValue{ nullptr });
+    this->Properties.RemoveProperty(prop);
   }
 }
 

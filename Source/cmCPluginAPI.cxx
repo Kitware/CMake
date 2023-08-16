@@ -628,8 +628,8 @@ static void CCONV cmSourceFileSetProperty(void* arg, const char* prop,
 {
   cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
   if (cmSourceFile* rsf = sf->RealSourceFile) {
-    if (value == nullptr) {
-      rsf->SetProperty(prop, nullptr);
+    if (!value) {
+      rsf->RemoveProperty(prop);
     } else {
       rsf->SetProperty(prop, value);
     }

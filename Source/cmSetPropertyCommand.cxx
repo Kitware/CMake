@@ -348,7 +348,7 @@ bool HandleAndValidateSourceFilePropertyGENERATED(
         sf->AppendProperty("GENERATED", propertyValue, true);
         break;
       case PropertyOp::Remove:
-        sf->SetProperty("GENERATED", nullptr);
+        sf->RemoveProperty("GENERATED");
         break;
       case PropertyOp::Set:
         sf->SetProperty("GENERATED", propertyValue);
@@ -703,7 +703,7 @@ bool HandleSource(cmSourceFile* sf, const std::string& propertyName,
     sf->AppendProperty(propertyName, propertyValue, appendAsString);
   } else {
     if (remove) {
-      sf->SetProperty(propertyName, nullptr);
+      sf->RemoveProperty(propertyName);
     } else {
       sf->SetProperty(propertyName, propertyValue);
     }

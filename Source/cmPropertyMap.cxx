@@ -10,10 +10,6 @@ void cmPropertyMap::Clear()
   this->Map_.clear();
 }
 
-void cmPropertyMap::SetProperty(const std::string& name, std::nullptr_t)
-{
-  this->Map_.erase(name);
-}
 void cmPropertyMap::SetProperty(const std::string& name, cmValue value)
 {
   if (!value) {
