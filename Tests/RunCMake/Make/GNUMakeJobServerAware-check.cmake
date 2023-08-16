@@ -1,21 +1,13 @@
 set(BUILD_DIR "${RunCMake_BINARY_DIR}/GNUMakeJobServerAware-build")
 
-function(check target line)
-  # Read the file and split it into a list of lines
-  file(READ ${BUILD_DIR}/${target} contents)
-  STRING(REGEX REPLACE ";" "\\\\;" contents "${contents}")
-  STRING(REGEX REPLACE "\n" ";" contents "${contents}")
+function(check target regex)
+  file(STRINGS ${BUILD_DIR}/${target} lines
+    REGEX ${regex}
+  )
 
-  set(found FALSE)
-  foreach(entry ${contents})
-    if("${entry}" MATCHES "${line}")
-      set(found TRUE)
-      break()
-    endif()
-  endforeach()
-
-  if(NOT found)
-    message(FATAL_ERROR "Could not find '${line}' in ${BUILD_DIR}/${target}\n${contents}")
+  list(LENGTH lines len)
+  if(len EQUAL 0)
+    message(FATAL_ERROR "Could not find matching lines '${regex}' in ${BUILD_DIR}/${target}")
   endif()
 endfunction()
 

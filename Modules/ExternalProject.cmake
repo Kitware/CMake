@@ -684,6 +684,14 @@ pass ``-v`` to the external project's build step, even if it also uses
   build step's own underlying call to :command:`add_custom_command`, which
   has additional documentation.
 
+``BUILD_JOB_SERVER_AWARE <bool>``
+  .. versionadded:: 3.28
+
+  Specifies that the build step is aware of the GNU Make job server.
+  See the :command:`add_custom_command` documentation of its
+  ``JOB_SERVER_AWARE`` option for details.  This option is relevant
+  only when an explicit ``BUILD_COMMAND`` is specified.
+
 Install Step Options
 """"""""""""""""""""
 
@@ -1020,6 +1028,13 @@ control needed to implement such step-level capabilities.
   ``ALWAYS <bool>``
     When enabled, this option specifies that the custom step should always be
     run (i.e. that it is always considered out of date).
+
+  ``JOB_SERVER_AWARE <bool>``
+    .. versionadded:: 3.28
+
+    Specifies that the custom step is aware of the GNU Make job server.
+    See the :command:`add_custom_command` documentation of its
+    ``JOB_SERVER_AWARE`` option for details.
 
   ``EXCLUDE_FROM_MAIN <bool>``
     When enabled, this option specifies that the external project's main target
@@ -2366,6 +2381,7 @@ function(ExternalProject_Add_Step name step)
     INDEPENDENT
     BYPRODUCTS
     ALWAYS
+    JOB_SERVER_AWARE
     EXCLUDE_FROM_MAIN
     WORKING_DIRECTORY
     LOG
@@ -2545,6 +2561,16 @@ function(ExternalProject_Add_Step name step)
     set(maybe_COMMAND_touch "COMMAND \${CMAKE_COMMAND} -E touch \${stamp_file}")
   endif()
 
+  get_property(job_server_aware
+    TARGET ${name}
+    PROPERTY _EP_${step}_JOB_SERVER_AWARE
+  )
+  if(job_server_aware)
+    set(maybe_JOB_SERVER_AWARE "JOB_SERVER_AWARE 1")
+  else()
+    set(maybe_JOB_SERVER_AWARE "")
+  endif()
+
   # Wrap with log script?
   get_property(log TARGET ${name} PROPERTY _EP_${step}_LOG)
   if(command AND log)
@@ -2571,6 +2597,7 @@ function(ExternalProject_Add_Step name step)
       COMMENT \${comment}
       COMMAND ${__cmdQuoted}
       ${maybe_COMMAND_touch}
+      ${maybe_JOB_SERVER_AWARE}
       DEPENDS \${depends}
       WORKING_DIRECTORY \${work_dir}
       VERBATIM
@@ -3945,6 +3972,17 @@ function(_ep_add_build_command name)
     PROPERTY _EP_BUILD_BYPRODUCTS
   )
 
+  get_property(build_job_server_aware
+    TARGET ${name}
+    PROPERTY _EP_BUILD_JOB_SERVER_AWARE
+  )
+  if(build_job_server_aware)
+    set(maybe_JOB_SERVER_AWARE "JOB_SERVER_AWARE 1")
+  else()
+    set(maybe_JOB_SERVER_AWARE "")
+  endif()
+
+
   set(__cmdQuoted)
   foreach(__item IN LISTS cmd)
     string(APPEND __cmdQuoted " [==[${__item}]==]")
@@ -3958,6 +3996,7 @@ function(_ep_add_build_command name)
       DEPENDEES configure
       DEPENDS \${file_deps}
       ALWAYS \${always}
+      ${maybe_JOB_SERVER_AWARE}
       ${log}
       ${uses_terminal}
     )"
@@ -4252,6 +4291,7 @@ function(ExternalProject_Add name)
     BUILD_IN_SOURCE
     BUILD_ALWAYS
     BUILD_BYPRODUCTS
+    BUILD_JOB_SERVER_AWARE
     #
     # Install step options
     #
