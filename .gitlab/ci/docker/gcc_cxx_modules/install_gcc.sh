@@ -2,7 +2,7 @@
 
 set -e
 
-readonly revision="p1689r5-cmake-ci-20220614" # 3075e510e3d29583f8886b95aff044c0474c84a5
+readonly revision="p1689r5-cmake-ci-20230814" # 9fd54ccc390ab4eb3c48186b7bf15e02632cc76c
 readonly tarball="https://github.com/mathstuf/gcc/archive/$revision.tar.gz"
 
 readonly workdir="$HOME/gcc"
