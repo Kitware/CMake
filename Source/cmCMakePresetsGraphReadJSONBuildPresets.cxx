@@ -13,7 +13,7 @@
 #include <cm3p/json/value.h>
 
 #include "cmBuildOptions.h"
-#include "cmCMakePresetErrors.h"
+#include "cmCMakePresetsErrors.h"
 #include "cmCMakePresetsGraph.h"
 #include "cmCMakePresetsGraphInternal.h"
 #include "cmJSONHelpers.h"
@@ -32,7 +32,7 @@ bool PackageResolveModeHelper(cm::optional<PackageResolveMode>& out,
   }
 
   if (!value->isString()) {
-    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    cmCMakePresetsErrors::INVALID_PRESET(value, state);
     return false;
   }
 
@@ -43,7 +43,7 @@ bool PackageResolveModeHelper(cm::optional<PackageResolveMode>& out,
   } else if (value->asString() == "only") {
     out = PackageResolveMode::OnlyResolve;
   } else {
-    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    cmCMakePresetsErrors::INVALID_PRESET(value, state);
     return false;
   }
 
@@ -59,7 +59,7 @@ std::function<bool(BuildPreset&, const Json::Value*, cmJSONState*)> const
 
 auto const BuildPresetHelper =
   JSONHelperBuilder::Object<BuildPreset>(
-    cmCMakePresetErrors::INVALID_PRESET_OBJECT, false)
+    cmCMakePresetsErrors::INVALID_PRESET_OBJECT, false)
     .Bind("name"_s, &BuildPreset::Name,
           cmCMakePresetsGraphInternal::PresetNameHelper)
     .Bind("inherits"_s, &BuildPreset::Inherits,
@@ -69,7 +69,7 @@ auto const BuildPresetHelper =
           cmCMakePresetsGraphInternal::PresetBoolHelper, false)
     .Bind<std::nullptr_t>("vendor"_s, nullptr,
                           cmCMakePresetsGraphInternal::VendorHelper(
-                            cmCMakePresetErrors::INVALID_PRESET),
+                            cmCMakePresetsErrors::INVALID_PRESET),
                           false)
     .Bind("displayName"_s, &BuildPreset::DisplayName,
           cmCMakePresetsGraphInternal::PresetStringHelper, false)
@@ -105,7 +105,7 @@ bool BuildPresetsHelper(std::vector<BuildPreset>& out,
                         const Json::Value* value, cmJSONState* state)
 {
   static auto const helper = JSONHelperBuilder::Vector<BuildPreset>(
-    cmCMakePresetErrors::INVALID_PRESETS, BuildPresetHelper);
+    cmCMakePresetsErrors::INVALID_PRESETS, BuildPresetHelper);
 
   return helper(out, value, state);
 }
