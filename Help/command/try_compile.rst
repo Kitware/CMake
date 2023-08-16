@@ -144,7 +144,12 @@ single output directory, such that you can only debug one such ``try_compile``
 call at a time.  Use of the newer signature is recommended to simplify
 debugging of multiple ``try_compile`` operations.
 
-The options are:
+.. _`try_compile Options`:
+
+Options
+^^^^^^^
+
+The options for the above signatures are:
 
 ``CMAKE_FLAGS <flags>...``
   Specify flags of the form :option:`-DVAR:TYPE=VALUE <cmake -D>` to be passed

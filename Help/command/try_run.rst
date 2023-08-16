@@ -78,6 +78,11 @@ The signature above is recommended for clarity.
           [ARGS <args>...]
           )
 
+.. _`try_run Options`:
+
+Options
+^^^^^^^
+
 The options specific to ``try_run`` are:
 
 ``COMPILE_OUTPUT_VARIABLE <var>``
