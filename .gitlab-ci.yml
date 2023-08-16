@@ -132,7 +132,7 @@ l:clang-analyzer-fedora38:
 
 # Linux builds
 
-b:centos6-x86_64:
+b:centos7-x86_64:
     extends:
         - .linux_release_x86_64
         - .cmake_build_linux_release
@@ -140,7 +140,7 @@ b:centos6-x86_64:
         - .linux_x86_64_tags
         - .run_manually
     variables:
-        CMAKE_CI_ARTIFACTS_NAME: "artifacts-centos6-x86_64"
+        CMAKE_CI_ARTIFACTS_NAME: "artifacts-centos7-x86_64"
 
 b:centos7-aarch64:
     extends:
@@ -160,7 +160,7 @@ t:debian12-ninja:
         - .linux_x86_64_tags
         - .cmake_junit_artifacts
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY_NINJA: "true"
 
@@ -181,7 +181,7 @@ t:debian12-ninja-clang:
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -191,7 +191,7 @@ t:debian12-makefiles-clang:
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -201,7 +201,7 @@ t:debian12-hip-radeon:
         - .cmake_test_linux_release
         - .linux_x86_64_tags_radeon
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_NO_MR: "true"
 
@@ -211,7 +211,7 @@ t:fedora38-hip-radeon:
         - .cmake_test_linux_release
         - .linux_x86_64_tags_radeon
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_NO_MR: "true"
 
@@ -221,7 +221,7 @@ t:fedora38-ninja-clang:
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -231,7 +231,7 @@ t:fedora38-ninja-multi-clang:
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -241,7 +241,7 @@ t:fedora38-makefiles-clang:
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -251,7 +251,7 @@ t:fedora38-makefiles:
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
 
 t:fedora38-makefiles-nospace:
     extends:
@@ -260,7 +260,7 @@ t:fedora38-makefiles-nospace:
         - .linux_x86_64_tags
         - .cmake_junit_artifacts
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
         CMAKE_CI_BUILD_NAME: fedora38_makefiles_nospace
@@ -272,7 +272,7 @@ t:nvhpc22.11-ninja:
         - .cmake_test_linux_release
         - .linux_x86_64_v3_tags_cuda
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -282,7 +282,7 @@ t:cuda9.2-nvidia:
         - .cmake_test_linux_release
         - .linux_x86_64_tags_cuda
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_NO_MR: "true"
 
@@ -293,7 +293,7 @@ t:cuda10.2-nvidia:
         - .linux_x86_64_tags_cuda
         - .cmake_junit_artifacts
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
 
 t:cuda10.2-clang:
     extends:
@@ -301,7 +301,7 @@ t:cuda10.2-clang:
         - .cmake_test_linux_release
         - .linux_x86_64_tags_cuda
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_NO_MR: "true"
 
@@ -312,7 +312,7 @@ t:cuda11.6-nvidia:
         - .linux_x86_64_tags_cuda
         - .cmake_junit_artifacts
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
 
 t:cuda11.6-clang:
     extends:
@@ -320,7 +320,7 @@ t:cuda11.6-clang:
         - .cmake_test_linux_release
         - .linux_x86_64_tags_cuda
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_NO_MR: "true"
 
@@ -330,7 +330,7 @@ t:cuda11.8-minimal-ninja:
         - .cmake_test_linux_release
         - .linux_x86_64_tags_cuda
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_NO_MR: "true"
 
@@ -340,7 +340,7 @@ t:hip5.5-radeon:
         - .cmake_test_linux_release
         - .linux_x86_64_tags_radeon
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_NO_MR: "true"
 
@@ -350,7 +350,7 @@ t:linux-gcc-cxx-modules-ninja:
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -360,7 +360,7 @@ t:linux-gcc-cxx-modules-ninja-multi:
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -371,7 +371,7 @@ t:debian10-legacy:
         - .linux_x86_64_tags
         - .cmake_junit_artifacts
         - .run_dependent
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
