@@ -193,33 +193,39 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
 
   if (!this->GeneratorToolsetVersion.empty() &&
       this->GeneratorToolsetVersion != "Test Toolset Version"_s) {
-    // If a specific minor version of the toolset was requested, verify that it
-    // is compatible to the major version and that is exists on disk.
-    // If not clear the value.
-    std::string versionToolset = this->GeneratorToolsetVersion;
-    cmsys::RegularExpression regex("[0-9][0-9]\\.[0-9][0-9]");
-    if (regex.find(versionToolset)) {
-      versionToolset = cmStrCat('v', versionToolset.erase(2, 1));
-    } else {
-      // Version not recognized. Clear it.
-      versionToolset.clear();
-    }
+    // If a specific minor version of the MSVC toolset is requested, verify
+    // that it is compatible with the PlatformToolset version. The ability to
+    // choose a minor version of MSVC has been available since v141.
+    std::string const& platformToolset = this->GetPlatformToolsetString();
+    cmsys::RegularExpression vcPlatformToolsetRegex("^v[0-9][0-9][0-9]$");
+    if (vcPlatformToolsetRegex.find(platformToolset) ||
+        platformToolset == "Test Toolset"_s) {
+      std::string versionToolset = this->GeneratorToolsetVersion;
+      cmsys::RegularExpression versionToolsetRegex("^[0-9][0-9]\\.[0-9][0-9]");
+      if (versionToolsetRegex.find(versionToolset)) {
+        versionToolset = cmStrCat('v', versionToolset.erase(2, 1));
+      } else {
+        // Version not recognized. Clear it.
+        versionToolset.clear();
+      }
 
-    if (!cmHasPrefix(versionToolset, this->GetPlatformToolsetString())) {
-      mf->IssueMessage(MessageType::FATAL_ERROR,
-                       cmStrCat("Generator\n"
-                                "  ",
-                                this->GetName(),
-                                "\n"
-                                "given toolset and version specification\n"
-                                "  ",
-                                this->GetPlatformToolsetString(),
-                                ",version=", this->GeneratorToolsetVersion,
-                                "\n"
-                                "contains an invalid version specification."));
+      if (!cmHasPrefix(versionToolset, platformToolset)) {
+        mf->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("Generator\n"
+                   "  ",
+                   this->GetName(),
+                   "\n"
+                   "given toolset and version specification\n"
+                   "  ",
+                   this->GetPlatformToolsetString(),
+                   ",version=", this->GeneratorToolsetVersion,
+                   "\n"
+                   "contains an invalid version specification."));
 
-      // Clear the configured tool-set
-      this->GeneratorToolsetVersion.clear();
+        // Clear the configured tool-set
+        this->GeneratorToolsetVersion.clear();
+      }
     }
 
     std::string auxProps;
