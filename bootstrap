@@ -414,6 +414,7 @@ CMAKE_CXX_SOURCES="\
   cmInstallTargetGenerator \
   cmInstallTargetsCommand \
   cmInstalledFile \
+  cmJSONHelpers \
   cmJSONState \
   cmLDConfigLDConfigTool \
   cmLDConfigTool \
