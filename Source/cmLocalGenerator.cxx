@@ -3033,7 +3033,7 @@ void cmLocalGenerator::WriteUnitySourceInclude(
     unity_file << *beforeInclude << "\n";
   }
 
-  unity_file << "// NOLINTNEXTLINE(bugprone-suspicious-include)\n";
+  unity_file << "/* NOLINTNEXTLINE(bugprone-suspicious-include) */\n";
   unity_file << "#include \"" << sf_full_path << "\"\n";
 
   if (afterInclude) {
