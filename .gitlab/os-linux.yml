@@ -11,11 +11,11 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
 
 .linux_release_x86_64:
-    image: "kitware/cmake:build-linux-x86_64-deps-2020-04-02@sha256:77e9ab183f34680990db9da5945473e288f0d6556bce79ecc1589670d656e157"
+    image: "kitware/cmake:build-linux-x86_64-deps-2023-08-16@sha256:aa0ebdbd90a51cc83d31f393c5c48ec4599a28f7ccdc288558522c6265b24fae"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
-        LAUNCHER: "scl enable devtoolset-6 rh-python36 --"
+        LAUNCHER: "scl enable devtoolset-7 --"
         CMAKE_ARCH: x86_64
 
 .linux_release_aarch64:
@@ -30,11 +30,11 @@
     variables:
         BOOTSTRAP_ARGS: '-- "-DCMake_DOC_ARTIFACT_PREFIX=$CI_PROJECT_DIR/build/install-doc"'
 
-.needs_centos6_x86_64:
+.needs_centos7_x86_64:
     dependencies:
-        - b:centos6-x86_64
+        - b:centos7-x86_64
     needs:
-        - b:centos6-x86_64
+        - b:centos7-x86_64
 
 .needs_centos7_aarch64:
     dependencies:
@@ -618,7 +618,7 @@
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_manually
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
@@ -628,7 +628,7 @@
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_manually
-        - .needs_centos6_x86_64
+        - .needs_centos7_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 

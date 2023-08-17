@@ -4,8 +4,8 @@
 # Produce a base image with a test environment for packaged CMake binaries.
 # Build using the directory containing this file as its own build context.
 
-ARG FROM_IMAGE_NAME=debian:9
-ARG FROM_IMAGE_DIGEST=@sha256:397b2157a9ea8d7f16c613aded70284292106e8b813fb1ed5de8a8785310a26a
+ARG FROM_IMAGE_NAME=debian:10
+ARG FROM_IMAGE_DIGEST=@sha256:b86bfc1dd2fb1820fea6c1e0b6e23d155198b518b3a506f6edad71bf6e9a8cef
 ARG FROM_IMAGE=$FROM_IMAGE_NAME$FROM_IMAGE_DIGEST
 FROM $FROM_IMAGE
 
