@@ -8,7 +8,7 @@
 
 #include <cm3p/json/value.h>
 
-#include "cmCMakePresetErrors.h"
+#include "cmCMakePresetsErrors.h"
 #include "cmCMakePresetsGraph.h"
 #include "cmCMakePresetsGraphInternal.h"
 #include "cmJSONHelpers.h"
@@ -22,7 +22,7 @@ bool WorkflowStepTypeHelper(WorkflowPreset::WorkflowStep::Type& out,
                             const Json::Value* value, cmJSONState* state)
 {
   if (!value) {
-    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    cmCMakePresetsErrors::INVALID_PRESET(value, state);
     return false;
   }
 
@@ -50,7 +50,7 @@ bool WorkflowStepTypeHelper(WorkflowPreset::WorkflowStep::Type& out,
     return true;
   }
 
-  cmCMakePresetErrors::INVALID_PRESET(value, state);
+  cmCMakePresetsErrors::INVALID_PRESET(value, state);
   return false;
 }
 
@@ -64,16 +64,16 @@ auto const WorkflowStepHelper =
 
 auto const WorkflowStepsHelper =
   cmJSONHelperBuilder::Vector<WorkflowPreset::WorkflowStep>(
-    cmCMakePresetErrors::INVALID_PRESET, WorkflowStepHelper);
+    cmCMakePresetsErrors::INVALID_PRESET, WorkflowStepHelper);
 
 auto const WorkflowPresetHelper =
   cmJSONHelperBuilder::Object<WorkflowPreset>(
-    cmCMakePresetErrors::INVALID_PRESET_OBJECT, false)
+    cmCMakePresetsErrors::INVALID_PRESET_OBJECT, false)
     .Bind("name"_s, &WorkflowPreset::Name,
           cmCMakePresetsGraphInternal::PresetNameHelper)
     .Bind<std::nullptr_t>("vendor"_s, nullptr,
                           cmCMakePresetsGraphInternal::VendorHelper(
-                            cmCMakePresetErrors::INVALID_PRESET),
+                            cmCMakePresetsErrors::INVALID_PRESET),
                           false)
     .Bind("displayName"_s, &WorkflowPreset::DisplayName,
           cmCMakePresetsGraphInternal::PresetStringHelper, false)
@@ -88,7 +88,7 @@ bool WorkflowPresetsHelper(
   const Json::Value* value, cmJSONState* state)
 {
   static auto const helper = cmJSONHelperBuilder::Vector<WorkflowPreset>(
-    cmCMakePresetErrors::INVALID_PRESETS, WorkflowPresetHelper);
+    cmCMakePresetsErrors::INVALID_PRESETS, WorkflowPresetHelper);
 
   return helper(out, value, state);
 }
