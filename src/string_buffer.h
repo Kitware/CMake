@@ -19,7 +19,8 @@
 
 #include <algorithm>  // std::min
 #include <cstring>    // memcpy
-#include <memory>     // std::unique_ptr
+#include <deque>
+#include <memory>  // std::unique_ptr
 #include <string>
 
 namespace dap {
@@ -39,6 +40,7 @@ class StringBuffer : public virtual Reader, public virtual Writer {
 
  private:
   std::string str;
+  std::deque<size_t> chunk_lengths;
   bool closed = false;
 };
 
@@ -62,12 +64,19 @@ std::string StringBuffer::string() const {
 }
 
 size_t StringBuffer::read(void* buffer, size_t bytes) {
-  if (closed || bytes == 0 || str.size() == 0) {
+  if (closed || bytes == 0 || str.size() == 0 || chunk_lengths.size() == 0) {
     return 0;
   }
-  auto len = std::min(bytes, str.size());
+  size_t& chunk_length = chunk_lengths.front();
+
+  auto len = std::min(bytes, chunk_length);
   memcpy(buffer, str.data(), len);
   str = std::string(str.begin() + len, str.end());
+  if (bytes < chunk_length) {
+    chunk_length -= bytes;
+  } else {
+    chunk_lengths.pop_front();
+  }
   return len;
 }
 
@@ -77,6 +86,7 @@ bool StringBuffer::write(const void* buffer, size_t bytes) {
   }
   auto chars = reinterpret_cast<const char*>(buffer);
   str.append(chars, chars + bytes);
+  chunk_lengths.push_back(bytes);
   return true;
 }
 
