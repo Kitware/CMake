@@ -24,12 +24,15 @@ namespace dap {
 ////////////////////////////////////////////////////////////////////////////////
 // ContentReader
 ////////////////////////////////////////////////////////////////////////////////
-ContentReader::ContentReader(const std::shared_ptr<Reader>& reader)
-    : reader(reader) {}
+ContentReader::ContentReader(
+    const std::shared_ptr<Reader>& reader,
+    OnInvalidData on_invalid_data /* = OnInvalidData::kIgnore */)
+    : reader(reader), on_invalid_data(on_invalid_data) {}
 
 ContentReader& ContentReader::operator=(ContentReader&& rhs) noexcept {
   buf = std::move(rhs.buf);
   reader = std::move(rhs.reader);
+  on_invalid_data = std::move(rhs.on_invalid_data);
   return *this;
 }
 
@@ -44,17 +47,19 @@ void ContentReader::close() {
 }
 
 std::string ContentReader::read() {
-  matched_idx = 0;
-
   // Find Content-Length header prefix
-  if (!scan("Content-Length:")) {
-    return "";
+  if (on_invalid_data == kClose) {
+    if (!match("Content-Length:")) {
+      return badHeader();
+    }
+  } else {
+    if (!scan("Content-Length:")) {
+      return "";
+    }
   }
-
   // Skip whitespace and tabs
   while (matchAny(" \t")) {
   }
-
   // Parse length
   size_t len = 0;
   while (true) {
@@ -68,20 +73,16 @@ std::string ContentReader::read() {
   if (len == 0) {
     return "";
   }
+
   // Expect \r\n\r\n
   if (!match("\r\n\r\n")) {
-    return "";
+    return badHeader();
   }
 
   // Read message
-  if (!buffer(len + matched_idx)) {
+  if (!buffer(len)) {
     return "";
   }
-
-  for (size_t i = 0; i < matched_idx; i++) {
-    buf.pop_front();
-  }
-
   std::string out;
   out.reserve(len);
   for (size_t i = 0; i < len; i++) {
@@ -107,17 +108,18 @@ bool ContentReader::scan(const char* str) {
 }
 
 bool ContentReader::match(const uint8_t* seq, size_t len) {
-  if (!buffer(len + matched_idx)) {
+  if (!buffer(len)) {
     return false;
   }
-  auto it = matched_idx;
+  auto it = buf.begin();
   for (size_t i = 0; i < len; i++, it++) {
-    if (buf[it] != seq[i]) {
+    if (*it != seq[i]) {
       return false;
     }
   }
-
-  matched_idx += len;
+  for (size_t i = 0; i < len; i++) {
+    buf.pop_front();
+  }
   return true;
 }
 
@@ -127,12 +129,12 @@ bool ContentReader::match(const char* str) {
 }
 
 char ContentReader::matchAny(const char* chars) {
-  if (!buffer(1 + matched_idx)) {
+  if (!buffer(1)) {
     return false;
   }
-  int c = buf[matched_idx];
+  int c = buf.front();
   if (auto p = strchr(chars, c)) {
-    matched_idx++;
+    buf.pop_front();
     return *p;
   }
   return 0;
@@ -156,6 +158,13 @@ bool ContentReader::buffer(size_t bytes) {
     bytes -= numGot;
   }
   return true;
+}
+
+std::string ContentReader::badHeader() {
+  if (on_invalid_data == kClose) {
+    close();
+  }
+  return "";
 }
 
 ////////////////////////////////////////////////////////////////////////////////
