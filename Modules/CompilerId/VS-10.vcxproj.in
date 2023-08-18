@@ -18,8 +18,8 @@
     @id_ToolsetVCTargetsDir@
     @id_CustomGlobals@
   </PropertyGroup>
-  @id_toolset_version_props@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  @id_toolset_version_props@
   <PropertyGroup>
     @id_PreferredToolArchitecture@
   </PropertyGroup>
