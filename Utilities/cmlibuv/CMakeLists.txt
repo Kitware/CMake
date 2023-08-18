@@ -294,19 +294,13 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
     )
   list(APPEND uv_defines
     __EXTENSIONS__
+    _XOPEN_SOURCE=600
     )
+  if(NOT CMAKE_C_STANDARD OR CMAKE_C_STANDARD EQUAL 90)
+    set(CMAKE_C_STANDARD 11)
+  endif()
   if(CMAKE_SYSTEM_VERSION STREQUAL "5.10")
-    set(CMAKE_C_STANDARD 90)
-    list(APPEND uv_defines
-      _XOPEN_SOURCE=500
-      )
-  else()
-    if(NOT CMAKE_C_STANDARD OR CMAKE_C_STANDARD EQUAL 90)
-      set(CMAKE_C_STANDARD 11)
-    endif()
-    list(APPEND uv_defines
-      _XOPEN_SOURCE=600
-      )
+    list(APPEND uv_defines SUNOS_NO_IFADDRS)
   endif()
   list(APPEND uv_sources
     src/unix/no-proctitle.c
