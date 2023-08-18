@@ -80,6 +80,8 @@ invokes
 
 which enables compatibility features for CMake 2.4 and lower.
 
+.. include:: DEPRECATED_POLICY_VERSIONS.txt
+
 See Also
 ^^^^^^^^
 
