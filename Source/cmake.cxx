@@ -37,7 +37,11 @@
 #include "cmCommands.h"
 #ifdef CMake_ENABLE_DEBUGGER
 #  include "cmDebuggerAdapter.h"
-#  include "cmDebuggerPipeConnection.h"
+#  ifdef _WIN32
+#    include "cmDebuggerWindowsPipeConnection.h"
+#  else //!_WIN32
+#    include "cmDebuggerPosixPipeConnection.h"
+#  endif //_WIN32
 #endif
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
