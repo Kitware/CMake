@@ -102,13 +102,25 @@ Then call that build system to actually compile/link the project:
 
   cmake --build .
 
-Finally, try to use the newly built ``Tutorial`` with these commands:
+For multi-config generators (e.g. Visual Studio), first navigate to the
+appropriate subdirectory, for example:
+
+.. code-block:: console
+
+  cd Debug
+
+Finally, try to use the newly built ``Tutorial``:
 
 .. code-block:: console
 
   Tutorial 4294967296
   Tutorial 10
   Tutorial
+
+
+**Note:** Depending on the shell, the correct syntax may be ``Tutorial``,
+``./Tutorial`` or ``.\Tutorial``. For simplicity, the exercises will use
+``Tutorial`` throughout.
 
 Solution
 --------
