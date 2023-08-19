@@ -1762,8 +1762,6 @@ else
       libs="${libs} -lkvm"
       ;;
     *SunOS*)
-      # Normally libuv uses '-D_XOPEN_SOURCE=500 -std=c90' on Solaris 5.10,
-      # but we do not need to do that because we bootstrap using POSIX APIs.
       uv_c_flags="${uv_c_flags} -D__EXTENSIONS__ -D_XOPEN_SOURCE=600"
       libs="${libs} -lkstat -lnsl -lsendfile -lsocket -lrt"
       ;;
