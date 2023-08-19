@@ -1360,7 +1360,9 @@ static const struct ListNode : public cmGeneratorExpressionNode
               try {
                 auto list = GetList(args.front());
                 args.advance(2);
-                list.insert_items(index, args.begin(), args.end());
+                list.insert_items(index, args.begin(), args.end(),
+                                  cmList::ExpandElements::No,
+                                  cmList::EmptyElements::Yes);
                 return list.to_string();
               } catch (std::out_of_range& e) {
                 reportError(ctx, cnt->GetOriginalExpression(), e.what());

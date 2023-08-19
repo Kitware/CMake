@@ -375,7 +375,8 @@ bool HandleInsertCommand(std::vector<std::string> const& args,
   }
 
   try {
-    list->insert_items(index, args.begin() + 3, args.end());
+    list->insert_items(index, args.begin() + 3, args.end(),
+                       cmList::ExpandElements::No, cmList::EmptyElements::Yes);
     status.GetMakefile().AddDefinition(listName, list->to_string());
     return true;
   } catch (std::out_of_range& e) {

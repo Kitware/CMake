@@ -743,9 +743,20 @@ public:
   // Throw std::out_of_range if index is invalid
   template <typename InputIterator>
   cmList& insert_items(index_type index, InputIterator first,
-                       InputIterator last)
+                       InputIterator last,
+                       ExpandElements expandElements = ExpandElements::Yes,
+                       EmptyElements emptyElements = EmptyElements::No)
   {
-    this->insert(this->begin() + this->ComputeInsertIndex(index), first, last);
+    this->insert(this->begin() + this->ComputeInsertIndex(index), first, last,
+                 expandElements, emptyElements);
+    return *this;
+  }
+  template <typename InputIterator>
+  cmList& insert_items(index_type index, InputIterator first,
+                       InputIterator last, EmptyElements emptyElements)
+  {
+    this->insert(this->begin() + this->ComputeInsertIndex(index), first, last,
+                 ExpandElements::Yes, emptyElements);
     return *this;
   }
   cmList& insert_items(index_type index,
