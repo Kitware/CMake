@@ -103,6 +103,14 @@ ResponseOrError<T>& ResponseOrError<T>::operator=(ResponseOrError&& other) {
 // Session
 ////////////////////////////////////////////////////////////////////////////////
 
+// An enum flag that controls how the Session handles invalid data.
+enum OnInvalidData {
+  // Ignore invalid data.
+  kIgnore,
+  // Close the underlying reader when invalid data is received.
+  kClose,
+};
+
 // Session implements a DAP client or server endpoint.
 // The general usage is as follows:
 // (1) Create a session with Session::create().
@@ -143,6 +151,9 @@ class Session {
 
   // create() constructs and returns a new Session.
   static std::unique_ptr<Session> create();
+
+  // Sets how the Session handles invalid data.
+  virtual void setOnInvalidData(OnInvalidData) = 0;
 
   // onError() registers a error handler that will be called whenever a protocol
   // error is encountered.
