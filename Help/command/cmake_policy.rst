@@ -52,6 +52,8 @@ version and tells newer CMake versions to warn about their new policies.
 Note that the :command:`cmake_minimum_required(VERSION)`
 command implicitly calls ``cmake_policy(VERSION)`` too.
 
+.. include:: DEPRECATED_POLICY_VERSIONS.txt
+
 Setting Policies Explicitly
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
