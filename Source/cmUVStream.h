@@ -3,7 +3,10 @@
 #pragma once
 
 #include <cassert>
+#include <functional>
 #include <istream>
+
+#include <cm/memory>
 
 #include <cm3p/uv.h>
 
@@ -104,28 +107,38 @@ void cmBasicUVPipeIStream<CharT, Traits>::close()
 
 using cmUVPipeIStream = cmBasicUVPipeIStream<char>;
 
-template <typename ReadCallback, typename FinishCallback>
-void cmUVStreamRead(uv_stream_t* stream, ReadCallback onRead,
-                    FinishCallback onFinish)
+class cmUVStreamReadHandle
 {
-  struct ReadData
-  {
-    std::vector<char> Buffer;
-    ReadCallback OnRead;
-    FinishCallback OnFinish;
-  };
+private:
+  std::vector<char> Buffer;
+  std::function<void(std::vector<char>)> OnRead;
+  std::function<void()> OnFinish;
 
-  stream->data = new ReadData{ {}, std::move(onRead), std::move(onFinish) };
+  template <typename ReadCallback, typename FinishCallback>
+  friend std::unique_ptr<cmUVStreamReadHandle> cmUVStreamRead(
+    uv_stream_t* stream, ReadCallback onRead, FinishCallback onFinish);
+};
+
+template <typename ReadCallback, typename FinishCallback>
+std::unique_ptr<cmUVStreamReadHandle> cmUVStreamRead(uv_stream_t* stream,
+                                                     ReadCallback onRead,
+                                                     FinishCallback onFinish)
+{
+  auto handle = cm::make_unique<cmUVStreamReadHandle>();
+  handle->OnRead = std::move(onRead);
+  handle->OnFinish = std::move(onFinish);
+
+  stream->data = handle.get();
   uv_read_start(
     stream,
     [](uv_handle_t* s, std::size_t suggestedSize, uv_buf_t* buffer) {
-      auto* data = static_cast<ReadData*>(s->data);
+      auto* data = static_cast<cmUVStreamReadHandle*>(s->data);
       data->Buffer.resize(suggestedSize);
       buffer->base = data->Buffer.data();
       buffer->len = suggestedSize;
     },
     [](uv_stream_t* s, ssize_t nread, const uv_buf_t* buffer) {
-      auto* data = static_cast<ReadData*>(s->data);
+      auto* data = static_cast<cmUVStreamReadHandle*>(s->data);
       if (nread > 0) {
         (void)buffer;
         assert(buffer->base == data->Buffer.data());
@@ -134,7 +147,8 @@ void cmUVStreamRead(uv_stream_t* stream, ReadCallback onRead,
       } else if (nread < 0 /*|| nread == UV_EOF*/) {
         data->OnFinish();
         uv_read_stop(s);
-        delete data;
       }
     });
+
+  return handle;
 }

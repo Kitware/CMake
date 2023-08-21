@@ -503,7 +503,7 @@ bool testUVStreamRead()
 
   std::string output;
   bool finished = false;
-  cmUVStreamRead(
+  auto handle = cmUVStreamRead(
     pipeSource,
     [&output](std::vector<char> data) { cm::append(output, data); },
     [&output, &finished]() {
@@ -518,6 +518,55 @@ bool testUVStreamRead()
 
   if (!finished) {
     std::cout << "finished was not set" << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
+bool testUVStreamReadLeak()
+{
+  int pipe[] = { -1, -1 };
+  if (cmGetPipes(pipe) < 0) {
+    std::cout << "cmGetPipes() returned an error" << std::endl;
+    return false;
+  }
+
+  cm::uv_loop_ptr loop;
+  loop.init();
+  cm::uv_pipe_ptr pipeSink;
+  pipeSink.init(*loop, 0);
+  uv_pipe_open(pipeSink, pipe[1]);
+
+  std::string str = "Hello world!";
+  uv_write_t writeReq;
+  uv_buf_t buf;
+  buf.base = &str.front();
+  buf.len = str.length();
+  uv_write(&writeReq, pipeSink, &buf, 1, nullptr);
+  uv_run(loop, UV_RUN_DEFAULT);
+  pipeSink.reset();
+
+  cm::uv_pipe_ptr pipeSource;
+  pipeSource.init(*loop, 0);
+  uv_pipe_open(pipeSource, pipe[0]);
+
+  std::string output;
+  bool finished = false;
+  auto handle = cmUVStreamRead(
+    pipeSource,
+    [&output](std::vector<char> data) { cm::append(output, data); },
+    [&output, &finished]() {
+      if (output != "Hello world!") {
+        std::cout << "Output was \"" << output
+                  << "\", should be \"Hello world!\"" << std::endl;
+        return;
+      }
+      finished = true;
+    });
+
+  if (finished) {
+    std::cout << "finished was set" << std::endl;
     return false;
   }
 
@@ -547,7 +596,12 @@ int testUVStreambuf(int argc, char** const argv)
   }
 
   if (!testUVStreamRead()) {
-    std::cout << "While executing testUVPipeIStream().\n";
+    std::cout << "While executing testUVStreamRead().\n";
+    return -1;
+  }
+
+  if (!testUVStreamReadLeak()) {
+    std::cout << "While executing testUVStreamReadLeak().\n";
     return -1;
   }
 
