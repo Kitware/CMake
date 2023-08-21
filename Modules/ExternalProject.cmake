@@ -2869,7 +2869,8 @@ function(_ep_add_download_command name)
       TARGET ${name}
       PROPERTY _EP_USES_TERMINAL_DOWNLOAD
     )
-    if(uses_terminal)
+    # The --trust-server-cert option requires --non-interactive
+    if(uses_terminal AND NOT svn_trust_cert)
       set(svn_interactive_args "")
     else()
       set(svn_interactive_args "--non-interactive")
@@ -3357,7 +3358,8 @@ function(_ep_add_update_command name)
     get_property(svn_password TARGET ${name} PROPERTY _EP_SVN_PASSWORD)
     get_property(svn_trust_cert TARGET ${name} PROPERTY _EP_SVN_TRUST_CERT)
     get_property(uses_terminal TARGET ${name} PROPERTY _EP_USES_TERMINAL_UPDATE)
-    if(uses_terminal)
+    # The --trust-server-cert option requires --non-interactive
+    if(uses_terminal AND NOT svn_trust_cert)
       set(svn_interactive_args "")
     else()
       set(svn_interactive_args "--non-interactive")
