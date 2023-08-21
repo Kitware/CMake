@@ -333,6 +333,7 @@ CMAKE_CXX_SOURCES="\
   cmCustomCommandGenerator \
   cmCustomCommandLines \
   cmCxxModuleMapper \
+  cmCxxModuleUsageEffects \
   cmDefinePropertyCommand \
   cmDefinitions \
   cmDocumentationFormatter \
@@ -392,6 +393,7 @@ CMAKE_CXX_SOURCES="\
   cmGlobVerificationManager \
   cmHexFileConverter \
   cmIfCommand \
+  cmImportedCxxModuleInfo \
   cmIncludeCommand \
   cmIncludeGuardCommand \
   cmIncludeDirectoryCommand \

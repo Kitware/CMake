@@ -28,6 +28,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobalCommonGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmList.h"
 #include "cmLocalGenerator.h"
@@ -59,8 +60,13 @@ std::unique_ptr<cmNinjaTargetGenerator> cmNinjaTargetGenerator::New(
     case cmStateEnums::OBJECT_LIBRARY:
       return cm::make_unique<cmNinjaNormalTargetGenerator>(target);
 
-    case cmStateEnums::UTILITY:
     case cmStateEnums::INTERFACE_LIBRARY:
+      if (target->HaveCxx20ModuleSources()) {
+        return cm::make_unique<cmNinjaNormalTargetGenerator>(target);
+      }
+      CM_FALLTHROUGH;
+
+    case cmStateEnums::UTILITY:
     case cmStateEnums::GLOBAL_TARGET:
       return cm::make_unique<cmNinjaUtilityTargetGenerator>(target);
 
@@ -167,7 +173,7 @@ std::string cmNinjaTargetGenerator::OrderDependsTargetForTarget(
 // Refactor it.
 std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
   cmSourceFile const* source, const std::string& language,
-  const std::string& config)
+  const std::string& config, const std::string& objectFileName)
 {
   std::unordered_map<std::string, std::string> pchSources;
   std::vector<std::string> architectures =
@@ -246,6 +252,18 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
                  "\" contains the source\n  ", source->GetFullPath(),
                  "\nin a file set of type \"", fs->GetType(),
                  R"(" but the source is not classified as a "CXX" source.)"));
+    }
+
+    if (!this->GeneratorTarget->Target->IsNormal()) {
+      auto flag = this->GetMakefile()->GetSafeDefinition(
+        "CMAKE_EXPERIMENTAL_CXX_MODULE_BMI_ONLY_FLAG");
+      cmRulePlaceholderExpander::RuleVariables compileObjectVars;
+      compileObjectVars.Object = objectFileName.c_str();
+      auto rulePlaceholderExpander =
+        this->GetLocalGenerator()->CreateRulePlaceholderExpander();
+      rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
+                                                   flag, compileObjectVars);
+      this->LocalGenerator->AppendCompileOptions(flags, flag);
     }
   }
 
@@ -391,6 +409,31 @@ std::string cmNinjaTargetGenerator::GetObjectFilePath(
   path += cmStrCat(
     this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
     this->GetGlobalGenerator()->ConfigDirectory(config), '/', objectName);
+  return path;
+}
+
+std::string cmNinjaTargetGenerator::GetBmiFilePath(
+  cmSourceFile const* source, const std::string& config) const
+{
+  std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
+  if (!path.empty()) {
+    path += '/';
+  }
+
+  auto& importedConfigInfo = this->Configs.at(config).ImportedCxxModules;
+  if (!importedConfigInfo.Initialized()) {
+    std::string configUpper = cmSystemTools::UpperCase(config);
+    std::string propName = cmStrCat("IMPORTED_CXX_MODULES_", configUpper);
+    auto value = this->GeneratorTarget->GetSafeProperty(propName);
+    importedConfigInfo.Initialize(value);
+  }
+
+  std::string bmiName =
+    importedConfigInfo.BmiNameForSource(source->GetFullPath());
+
+  path += cmStrCat(
+    this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
+    this->GetGlobalGenerator()->ConfigDirectory(config), '/', bmiName);
   return path;
 }
 
@@ -1027,6 +1070,16 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     }
   }
 
+  {
+    std::vector<cmSourceFile const*> bmiOnlySources;
+    this->GeneratorTarget->GetCxxModuleSources(bmiOnlySources, config);
+
+    for (cmSourceFile const* sf : bmiOnlySources) {
+      this->WriteCxxModuleBmiBuildStatement(sf, config, fileConfig,
+                                            firstForConfig);
+    }
+  }
+
   for (auto const& langScanningFiles : this->Configs[config].ScanningInfo) {
     std::string const& language = langScanningFiles.first;
     std::vector<ScanningFiles> const& scanningFiles = langScanningFiles.second;
@@ -1149,22 +1202,22 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
   scanBuild.Variables["OBJ_FILE"] = objectFileName;
 
   // Tell dependency scanner where to store dyndep intermediate results.
-  std::string const& ddiFile = cmStrCat(objectFileName, ".ddi");
-  scanBuild.Variables["DYNDEP_INTERMEDIATE_FILE"] = ddiFile;
+  std::string ddiFileName = cmStrCat(objectFileName, ".ddi");
+  scanBuild.Variables["DYNDEP_INTERMEDIATE_FILE"] = ddiFileName;
 
   // Outputs of the scan/preprocessor build statement.
   if (compilePP) {
     scanBuild.Outputs.push_back(ppFileName);
-    scanBuild.ImplicitOuts.push_back(ddiFile);
+    scanBuild.ImplicitOuts.push_back(ddiFileName);
   } else {
-    scanBuild.Outputs.push_back(ddiFile);
+    scanBuild.Outputs.push_back(ddiFileName);
     scanBuild.Variables["PREPROCESSED_OUTPUT_FILE"] = ppFileName;
     if (!compilationPreprocesses) {
       // Compilation does not preprocess and we are not compiling an
       // already-preprocessed source.  Make compilation depend on the scan
       // results to honor implicit dependencies discovered during scanning
       // (such as Fortran INCLUDE directives).
-      objBuild.ImplicitDeps.emplace_back(ddiFile);
+      objBuild.ImplicitDeps.emplace_back(ddiFileName);
     }
   }
 
@@ -1214,7 +1267,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   cmNinjaBuild objBuild(this->LanguageCompilerRule(
     language, config, needDyndep ? WithScanning::Yes : WithScanning::No));
   cmNinjaVars& vars = objBuild.Variables;
-  vars["FLAGS"] = this->ComputeFlagsForObject(source, language, config);
+  vars["FLAGS"] =
+    this->ComputeFlagsForObject(source, language, config, objectFileName);
   vars["DEFINES"] = this->ComputeDefines(source, language, config);
   vars["INCLUDES"] = this->ComputeIncludes(source, language, config);
 
@@ -1545,6 +1599,155 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   }
 }
 
+void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
+  cmSourceFile const* source, const std::string& config,
+  const std::string& fileConfig, bool firstForConfig)
+{
+  std::string const language = source->GetLanguage();
+  if (language != "CXX"_s) {
+    this->GetMakefile()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Source file '", source->GetFullPath(), "' of target '",
+               this->GetTargetName(), "' is a '", language,
+               "' source but must be 'CXX' in order to have a BMI build "
+               "statement generated."));
+    return;
+  }
+
+  std::string const sourceFilePath = this->GetCompiledSourceNinjaPath(source);
+  std::string const bmiDir = this->ConvertToNinjaPath(
+    cmStrCat(this->GeneratorTarget->GetSupportDirectory(),
+             this->GetGlobalGenerator()->ConfigDirectory(config)));
+  std::string const bmiFileName =
+    this->ConvertToNinjaPath(this->GetBmiFilePath(source, config));
+  std::string const bmiFileDir = cmSystemTools::GetFilenamePath(bmiFileName);
+
+  int const commandLineLengthLimit = this->ForceResponseFile() ? -1 : 0;
+
+  cmNinjaBuild bmiBuild(
+    this->LanguageCompilerRule(language, config, WithScanning::Yes));
+  cmNinjaVars& vars = bmiBuild.Variables;
+  vars["FLAGS"] =
+    this->ComputeFlagsForObject(source, language, config, bmiFileName);
+  vars["DEFINES"] = this->ComputeDefines(source, language, config);
+  vars["INCLUDES"] = this->ComputeIncludes(source, language, config);
+
+  if (this->GetMakefile()->GetSafeDefinition(
+        cmStrCat("CMAKE_", language, "_DEPFILE_FORMAT")) != "msvc"_s) {
+    bool replaceExt(false);
+    if (!language.empty()) {
+      std::string repVar =
+        cmStrCat("CMAKE_", language, "_DEPFILE_EXTENSION_REPLACE");
+      replaceExt = this->Makefile->IsOn(repVar);
+    }
+    if (!replaceExt) {
+      // use original code
+      vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+        cmStrCat(bmiFileName, ".d"), cmOutputConverter::SHELL);
+    } else {
+      // Replace the original source file extension with the
+      // depend file extension.
+      std::string dependFileName = cmStrCat(
+        cmSystemTools::GetFilenameWithoutLastExtension(bmiFileName), ".d");
+      vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+        cmStrCat(bmiFileDir, '/', dependFileName), cmOutputConverter::SHELL);
+    }
+  }
+
+  std::string d =
+    this->GeneratorTarget->GetClangTidyExportFixesDirectory(language);
+  if (!d.empty()) {
+    this->GlobalCommonGenerator->AddClangTidyExportFixesDir(d);
+    std::string fixesFile =
+      this->GetClangTidyReplacementsFilePath(d, *source, config);
+    this->GlobalCommonGenerator->AddClangTidyExportFixesFile(fixesFile);
+    cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(fixesFile));
+    fixesFile = this->ConvertToNinjaPath(fixesFile);
+    vars["CLANG_TIDY_EXPORT_FIXES"] = fixesFile;
+  }
+
+  if (firstForConfig) {
+    this->ExportObjectCompileCommand(
+      language, sourceFilePath, bmiDir, bmiFileName, bmiFileDir, vars["FLAGS"],
+      vars["DEFINES"], vars["INCLUDES"], config);
+  }
+
+  bmiBuild.Outputs.push_back(bmiFileName);
+  bmiBuild.ExplicitDeps.push_back(sourceFilePath);
+
+  std::vector<std::string> depList;
+
+  std::vector<std::string> architectures =
+    this->GeneratorTarget->GetAppleArchs(config, language);
+  if (architectures.empty()) {
+    architectures.emplace_back();
+  }
+
+  bmiBuild.OrderOnlyDeps.push_back(this->OrderDependsTargetForTarget(config));
+
+  // For some cases we scan to dynamically discover dependencies.
+  std::string modmapFormat;
+  if (true) {
+    std::string const modmapFormatVar =
+      cmStrCat("CMAKE_EXPERIMENTAL_", language, "_MODULE_MAP_FORMAT");
+    modmapFormat = this->Makefile->GetSafeDefinition(modmapFormatVar);
+  }
+
+  {
+    bool const compilePPWithDefines = this->CompileWithDefines(language);
+
+    std::string scanRuleName = this->LanguageScanRule(language, config);
+    std::string ppFileName = cmStrCat(bmiFileName, ".ddi.i");
+
+    cmNinjaBuild ppBuild = GetScanBuildStatement(
+      scanRuleName, ppFileName, false, compilePPWithDefines, true, bmiBuild,
+      vars, bmiFileName, this->LocalGenerator);
+
+    ScanningFiles scanningFiles;
+
+    if (firstForConfig) {
+      scanningFiles.ScanningOutput = cmStrCat(bmiFileName, ".ddi");
+    }
+
+    this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
+                               ppBuild.Variables);
+
+    this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
+                                           ppBuild, commandLineLengthLimit);
+
+    std::string const dyndep = this->GetDyndepFilePath(language, config);
+    bmiBuild.OrderOnlyDeps.push_back(dyndep);
+    vars["dyndep"] = dyndep;
+
+    if (!modmapFormat.empty()) {
+      std::string ddModmapFile = cmStrCat(bmiFileName, ".modmap");
+      vars["DYNDEP_MODULE_MAP_FILE"] = ddModmapFile;
+      scanningFiles.ModuleMapFile = std::move(ddModmapFile);
+    }
+
+    if (!scanningFiles.IsEmpty()) {
+      this->Configs[config].ScanningInfo[language].emplace_back(scanningFiles);
+    }
+  }
+
+  this->EnsureParentDirectoryExists(bmiFileName);
+
+  vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+    bmiDir, cmOutputConverter::SHELL);
+  vars["OBJECT_FILE_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+    bmiFileDir, cmOutputConverter::SHELL);
+
+  this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
+                             vars);
+
+  this->SetMsvcTargetPdbVariable(vars, config);
+
+  bmiBuild.RspFile = cmStrCat(bmiFileName, ".rsp");
+
+  this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
+                                         bmiBuild, commandLineLengthLimit);
+}
+
 void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,
                                                    const std::string& config)
 {
@@ -1604,6 +1807,9 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,
   cmDyndepGeneratorCallbacks cb;
   cb.ObjectFilePath = [this](cmSourceFile const* sf, std::string const& cnf) {
     return this->GetObjectFilePath(sf, cnf);
+  };
+  cb.BmiFilePath = [this](cmSourceFile const* sf, std::string const& cnf) {
+    return this->GetBmiFilePath(sf, cnf);
   };
 
 #if !defined(CMAKE_BOOTSTRAP)

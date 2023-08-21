@@ -21,7 +21,7 @@ namespace {
 cmExperimental::FeatureData LookupTable[] = {
   // CxxModuleCMakeApi
   { "CxxModuleCMakeApi",
-    "a816ed09-43d1-40e5-bc8c-1a2824ee194e",
+    "ac01f462-0f5f-432a-86aa-acef252918a6",
     "CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API",
     "CMake's C++ module support is experimental. It is meant only for "
     "experimentation and feedback to CMake developers.",

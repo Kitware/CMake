@@ -55,6 +55,7 @@
 #include "cmStateDirectory.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
+#include "cmSyntheticTargetCache.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 #include "cmVersion.h"
@@ -1560,6 +1561,17 @@ bool cmGlobalGenerator::Compute()
   }
 #endif
 
+  // Iterate through all targets and set up C++20 module targets.
+  // Create target templates for each imported target with C++20 modules.
+  // INTERFACE library with BMI-generating rules and a collation step?
+  // Maybe INTERFACE libraries with modules files should just do BMI-only?
+  // Make `add_dependencies(imported_target
+  // $<$<TARGET_NAME_IF_EXISTS:uses_imported>:synth1>
+  // $<$<TARGET_NAME_IF_EXISTS:other_uses_imported>:synth2>)`
+  if (!this->DiscoverSyntheticTargets()) {
+    return false;
+  }
+
   // Add generator specific helper commands
   for (const auto& localGen : this->LocalGenerators) {
     localGen->AddHelperCommands();
@@ -1782,6 +1794,34 @@ void cmGlobalGenerator::ComputeTargetOrder(cmGeneratorTarget const* gt,
   }
 
   entry->second = index++;
+}
+
+bool cmGlobalGenerator::DiscoverSyntheticTargets()
+{
+  cmSyntheticTargetCache cache;
+
+  for (auto const& gen : this->LocalGenerators) {
+    // Because DiscoverSyntheticTargets() adds generator targets, we need to
+    // cache the existing list of generator targets before starting.
+    std::vector<cmGeneratorTarget*> genTargets;
+    genTargets.reserve(gen->GetGeneratorTargets().size());
+    for (auto const& tgt : gen->GetGeneratorTargets()) {
+      genTargets.push_back(tgt.get());
+    }
+
+    for (auto* tgt : genTargets) {
+      std::vector<std::string> const& configs =
+        tgt->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+
+      for (auto const& config : configs) {
+        if (!tgt->DiscoverSyntheticTargets(cache, config)) {
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
 }
 
 bool cmGlobalGenerator::AddHeaderSetVerification()

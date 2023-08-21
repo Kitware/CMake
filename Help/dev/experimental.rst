@@ -18,7 +18,7 @@ C++20 Module APIs
 =================
 
 Variable: ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
-Value: ``a816ed09-43d1-40e5-bc8c-1a2824ee194e``
+Value: ``ac01f462-0f5f-432a-86aa-acef252918a6``
 
 In order to support C++20 modules, there are a number of behaviors that have
 CMake APIs to provide the required features to build and export them from a
@@ -99,6 +99,10 @@ dependencies to the file specified by the ``<DYNDEP_FILE>`` placeholder. The
 ``CMAKE_EXPERIMENTAL_CXX_SCANDEP_DEPFILE_FORMAT`` file may be set to ``msvc``
 for scandep rules which use ``msvc``-style dependency reporting.
 
+In order to support ``IMPORTED`` targets with associated C++20 module sources,
+the ``CMAKE_EXPERIMENTAL_CXX_MODULE_BMI_ONLY_FLAG`` variable must be provided
+to have the compiler only output a BMI instead of a BMI and an object file.
+
 The module dependencies should be written in the format described
 by the `P1689r5`_ paper.
 
@@ -113,6 +117,8 @@ For compilers that generate module maps, tell CMake as follows:
   set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FORMAT "gcc")
   set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FLAG
     "${compiler_flags_for_module_map} -fmodule-mapper=<MODULE_MAP_FILE>")
+  set(CMAKE_EXPERIMENTAL_CXX_MODULE_BMI_ONLY_FLAG
+    "-fmodule-only")
 
 Currently, the only supported formats are, ``clang``, ``gcc``, and ``msvc``.
 The ``gcc`` format is described in the GCC documentation, but the relevant

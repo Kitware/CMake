@@ -15,6 +15,7 @@
 
 #include "cmCommonTargetGenerator.h"
 #include "cmGlobalNinjaGenerator.h"
+#include "cmImportedCxxModuleInfo.h"
 #include "cmNinjaTypes.h"
 #include "cmOSXBundleGenerator.h"
 
@@ -91,7 +92,8 @@ protected:
    */
   std::string ComputeFlagsForObject(cmSourceFile const* source,
                                     const std::string& language,
-                                    const std::string& config);
+                                    const std::string& config,
+                                    const std::string& objectFileName);
 
   void AddIncludeFlags(std::string& flags, std::string const& lang,
                        const std::string& config) override;
@@ -129,6 +131,8 @@ protected:
   /// @return the object file path for the given @a source.
   std::string GetObjectFilePath(cmSourceFile const* source,
                                 const std::string& config) const;
+  std::string GetBmiFilePath(cmSourceFile const* source,
+                             const std::string& config) const;
 
   /// @return the preprocessed source file path for the given @a source.
   std::string GetPreprocessedFilePath(cmSourceFile const* source,
@@ -163,6 +167,10 @@ protected:
   void WriteObjectBuildStatements(const std::string& config,
                                   const std::string& fileConfig,
                                   bool firstForConfig);
+  void WriteCxxModuleBmiBuildStatement(cmSourceFile const* source,
+                                       const std::string& config,
+                                       const std::string& fileConfig,
+                                       bool firstForConfig);
   void WriteObjectBuildStatement(cmSourceFile const* source,
                                  const std::string& config,
                                  const std::string& fileConfig,
@@ -239,6 +247,8 @@ private:
     cmNinjaDeps Objects;
     // Dyndep Support
     std::map<std::string, std::vector<ScanningFiles>> ScanningInfo;
+    // Imported C++ module info.
+    mutable ImportedCxxModuleLookup ImportedCxxModules;
     // Swift Support
     Json::Value SwiftOutputMap;
     std::vector<cmCustomCommand const*> CustomCommands;

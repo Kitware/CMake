@@ -1678,6 +1678,7 @@ Json::Value Target::DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
   }
 
   switch (sk.Kind) {
+    case cmGeneratorTarget::SourceKindCxxModuleSource:
     case cmGeneratorTarget::SourceKindObjectSource: {
       source["compileGroupIndex"] =
         this->AddSourceCompileGroup(sk.Source.Value, si);

@@ -31,6 +31,7 @@ class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
 class cmSourceFile;
+struct cmSyntheticTargetCache;
 class cmTarget;
 
 struct cmGeneratorExpressionContext;
@@ -116,6 +117,7 @@ public:
     SourceKindCertificate,
     SourceKindCustomCommand,
     SourceKindExternalObject,
+    SourceKindCxxModuleSource,
     SourceKindExtra,
     SourceKindHeader,
     SourceKindIDL,
@@ -186,6 +188,8 @@ public:
                           const std::string& config) const;
   void GetHeaderSources(std::vector<cmSourceFile const*>&,
                         const std::string& config) const;
+  void GetCxxModuleSources(std::vector<cmSourceFile const*>&,
+                           const std::string& config) const;
   void GetExtraSources(std::vector<cmSourceFile const*>&,
                        const std::string& config) const;
   void GetCustomCommands(std::vector<cmSourceFile const*>&,
@@ -929,6 +933,9 @@ public:
 
   std::string GetImportedXcFrameworkPath(const std::string& config) const;
 
+  bool DiscoverSyntheticTargets(cmSyntheticTargetCache& cache,
+                                std::string const& config);
+
 private:
   void AddSourceCommon(const std::string& src, bool before = false);
 
@@ -1264,8 +1271,11 @@ public:
    *
    * This will inspect the target itself to see if C++20 module
    * support is expected to work based on its sources.
+   *
+   * If `errorMessage` is given a non-`nullptr`, any error message will be
+   * stored in it, otherwise the error will be reported directly.
    */
-  bool HaveCxx20ModuleSources() const;
+  bool HaveCxx20ModuleSources(std::string* errorMessage = nullptr) const;
 
   enum class Cxx20SupportLevel
   {
@@ -1301,6 +1311,8 @@ private:
   {
     bool BuiltFileSetCache = false;
     std::map<std::string, cmFileSet const*> FileSetCache;
+    std::map<cmGeneratorTarget const*, std::vector<cmGeneratorTarget const*>>
+      SyntheticDeps;
   };
   mutable std::map<std::string, InfoByConfig> Configs;
 };

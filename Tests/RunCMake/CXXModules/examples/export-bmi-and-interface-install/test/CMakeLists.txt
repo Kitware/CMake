@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 project(cxx_modules_library NONE)
 
-set(CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API "a816ed09-43d1-40e5-bc8c-1a2824ee194e")
+set(CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API "ac01f462-0f5f-432a-86aa-acef252918a6")
 
 find_package(export_bmi_and_interfaces REQUIRED)
 

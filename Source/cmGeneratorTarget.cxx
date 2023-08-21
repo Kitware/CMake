@@ -27,7 +27,9 @@
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
+#include "cmCryptoHash.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmCxxModuleUsageEffects.h"
 #include "cmEvaluatedTargetProperty.h"
 #include "cmExperimental.h"
 #include "cmFileSet.h"
@@ -52,6 +54,7 @@
 #include "cmStandardLevelResolver.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
+#include "cmSyntheticTargetCache.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
@@ -1071,6 +1074,12 @@ void cmGeneratorTarget::GetHeaderSources(
   IMPLEMENT_VISIT(SourceKindHeader);
 }
 
+void cmGeneratorTarget::GetCxxModuleSources(
+  std::vector<cmSourceFile const*>& data, const std::string& config) const
+{
+  IMPLEMENT_VISIT(SourceKindCxxModuleSource);
+}
+
 void cmGeneratorTarget::GetExtraSources(std::vector<cmSourceFile const*>& data,
                                         const std::string& config) const
 {
@@ -1953,8 +1962,12 @@ void cmGeneratorTarget::ComputeKindedSources(KindedSources& files,
     // Compute the kind (classification) of this source file.
     SourceKind kind;
     std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
+    cmFileSet const* fs = this->GetFileSetForSource(config, sf);
     if (sf->GetCustomCommand()) {
       kind = SourceKindCustomCommand;
+    } else if (!this->Target->IsNormal() && !this->Target->IsImported() &&
+               fs && (fs->GetType() == "CXX_MODULES"_s)) {
+      kind = SourceKindCxxModuleSource;
     } else if (this->Target->GetType() == cmStateEnums::UTILITY ||
                this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY
                // XXX(clang-tidy): https://bugs.llvm.org/show_bug.cgi?id=44165
@@ -8220,6 +8233,96 @@ void ComputeLinkImplTransitive(cmGeneratorTarget const* self,
 }
 }
 
+bool cmGeneratorTarget::DiscoverSyntheticTargets(cmSyntheticTargetCache& cache,
+                                                 std::string const& config)
+{
+  cmOptionalLinkImplementation impl;
+  this->ComputeLinkImplementationLibraries(config, impl, this,
+                                           LinkInterfaceFor::Link);
+
+  cmCxxModuleUsageEffects usage(this);
+
+  auto& SyntheticDeps = this->Configs[config].SyntheticDeps;
+
+  for (auto const& entry : impl.Libraries) {
+    auto const* gt = entry.Target;
+    if (!gt || !gt->IsImported()) {
+      continue;
+    }
+
+    if (gt->HaveCxx20ModuleSources()) {
+      auto hasher = cmCryptoHash::New("SHA3_512");
+      constexpr size_t HASH_TRUNCATION = 12;
+      auto dirhash = hasher->HashString(
+        gt->GetLocalGenerator()->GetCurrentBinaryDirectory());
+      std::string safeName = gt->GetName();
+      cmSystemTools::ReplaceString(safeName, ":", "_");
+      auto targetIdent =
+        hasher->HashString(cmStrCat("@d_", dirhash, "@u_", usage.GetHash()));
+      std::string targetName =
+        cmStrCat(safeName, "@synth_", targetIdent.substr(0, HASH_TRUNCATION));
+
+      // Check the cache to see if this instance of the imported target has
+      // already been created.
+      auto cached = cache.CxxModuleTargets.find(targetName);
+      cmGeneratorTarget const* synthDep = nullptr;
+      if (cached == cache.CxxModuleTargets.end()) {
+        auto const* model = gt->Target;
+        auto* mf = gt->Makefile;
+        auto* lg = gt->GetLocalGenerator();
+        auto* tgt = mf->AddSynthesizedTarget(cmStateEnums::INTERFACE_LIBRARY,
+                                             targetName);
+
+        // Copy relevant information from the existing IMPORTED target.
+
+        // Copy policies to the target.
+        tgt->CopyPolicyStatuses(model);
+
+        // Copy file sets.
+        {
+          auto fsNames = model->GetAllFileSetNames();
+          for (auto const& fsName : fsNames) {
+            auto const* fs = model->GetFileSet(fsName);
+            if (!fs) {
+              mf->IssueMessage(MessageType::INTERNAL_ERROR,
+                               cmStrCat("Failed to find file set named '",
+                                        fsName, "' on target '",
+                                        tgt->GetName(), '\''));
+              continue;
+            }
+            auto* newFs = tgt
+                            ->GetOrCreateFileSet(fs->GetName(), fs->GetType(),
+                                                 fs->GetVisibility())
+                            .first;
+            newFs->CopyEntries(fs);
+          }
+        }
+
+        // Copy imported C++ module properties.
+        tgt->CopyImportedCxxModulesEntries(model);
+
+        // Copy other properties which may affect the C++ module BMI
+        // generation.
+        tgt->CopyImportedCxxModulesProperties(model);
+
+        // Apply usage requirements to the target.
+        usage.ApplyToTarget(tgt);
+
+        // Create the generator target and attach it to the local generator.
+        auto gtp = cm::make_unique<cmGeneratorTarget>(tgt, lg);
+        synthDep = gtp.get();
+        lg->AddGeneratorTarget(std::move(gtp));
+      } else {
+        synthDep = cached->second;
+      }
+
+      SyntheticDeps[gt].push_back(synthDep);
+    }
+  }
+
+  return true;
+}
+
 void cmGeneratorTarget::ComputeLinkImplementationLibraries(
   const std::string& config, cmOptionalLinkImplementation& impl,
   cmGeneratorTarget const* head, LinkInterfaceFor implFor) const
@@ -8227,6 +8330,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
   cmLocalGenerator const* lg = this->LocalGenerator;
   cmMakefile const* mf = lg->GetMakefile();
   cmBTStringRange entryRange = this->Target->GetLinkImplementationEntries();
+  auto const& synthTargetsForConfig = this->Configs[config].SyntheticDeps;
   // Collect libraries directly linked in this configuration.
   for (auto const& entry : entryRange) {
     // Keep this logic in sync with ExpandLinkItems.
@@ -8316,7 +8420,15 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       // The entry is meant for this configuration.
       cmLinkItem item =
         this->ResolveLinkItem(BT<std::string>(name, entry.Backtrace), lg);
-      if (!item.Target) {
+      if (item.Target) {
+        auto depsForTarget = synthTargetsForConfig.find(item.Target);
+        if (depsForTarget != synthTargetsForConfig.end()) {
+          for (auto const* depForTarget : depsForTarget->second) {
+            cmLinkItem synthItem(depForTarget, item.Cross, item.Backtrace);
+            impl.Libraries.emplace_back(std::move(synthItem), false);
+          }
+        }
+      } else {
         // Report explicitly linked object files separately.
         std::string const& maybeObj = item.AsStr();
         if (cmSystemTools::FileIsFullPath(maybeObj)) {
@@ -8930,24 +9042,28 @@ bool cmGeneratorTarget::HaveFortranSources(std::string const& config) const
                      });
 }
 
-bool cmGeneratorTarget::HaveCxx20ModuleSources() const
+bool cmGeneratorTarget::HaveCxx20ModuleSources(std::string* errorMessage) const
 {
   auto const& fs_names = this->Target->GetAllFileSetNames();
-  return std::any_of(fs_names.begin(), fs_names.end(),
-                     [this](std::string const& name) -> bool {
-                       auto const* file_set = this->Target->GetFileSet(name);
-                       if (!file_set) {
-                         this->Makefile->IssueMessage(
-                           MessageType::INTERNAL_ERROR,
-                           cmStrCat("Target \"", this->Target->GetName(),
-                                    "\" is tracked to have file set \"", name,
-                                    "\", but it was not found."));
-                         return false;
-                       }
+  return std::any_of(
+    fs_names.begin(), fs_names.end(),
+    [this, errorMessage](std::string const& name) -> bool {
+      auto const* file_set = this->Target->GetFileSet(name);
+      if (!file_set) {
+        auto message = cmStrCat("Target \"", this->Target->GetName(),
+                                "\" is tracked to have file set \"", name,
+                                "\", but it was not found.");
+        if (errorMessage) {
+          *errorMessage = std::move(message);
+        } else {
+          this->Makefile->IssueMessage(MessageType::INTERNAL_ERROR, message);
+        }
+        return false;
+      }
 
-                       auto const& fs_type = file_set->GetType();
-                       return fs_type == "CXX_MODULES"_s;
-                     });
+      auto const& fs_type = file_set->GetType();
+      return fs_type == "CXX_MODULES"_s;
+    });
 }
 
 cmGeneratorTarget::Cxx20SupportLevel cmGeneratorTarget::HaveCxxModuleSupport(

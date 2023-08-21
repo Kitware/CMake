@@ -2643,7 +2643,9 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   for (cmScanDepInfo const& object : objects) {
     for (auto const& p : object.Provides) {
       std::string mod;
-      if (!p.CompiledModulePath.empty()) {
+      if (cmDyndepCollation::IsBmiOnly(export_info, object.PrimaryOutput)) {
+        mod = object.PrimaryOutput;
+      } else if (!p.CompiledModulePath.empty()) {
         // The scanner provided the path to the module file.
         mod = p.CompiledModulePath;
         if (!cmSystemTools::FileIsFullPath(mod)) {
@@ -2714,8 +2716,12 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
       build.Outputs[0] = this->ConvertToNinjaPath(object.PrimaryOutput);
       build.ImplicitOuts.clear();
       for (auto const& p : object.Provides) {
-        build.ImplicitOuts.push_back(
-          this->ConvertToNinjaPath(mod_files[p.LogicalName].BmiPath));
+        auto const implicitOut =
+          this->ConvertToNinjaPath(mod_files[p.LogicalName].BmiPath);
+        // Ignore the `provides` when the BMI is the output.
+        if (implicitOut != build.Outputs[0]) {
+          build.ImplicitOuts.emplace_back(implicitOut);
+        }
       }
       build.ImplicitDeps.clear();
       for (auto const& r : object.Requires) {

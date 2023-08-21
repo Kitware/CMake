@@ -73,20 +73,36 @@ Json::Value CollationInformationCxxModules(
                                   gt->LocalGenerator, config, gt);
     }
 
-    std::map<std::string, cmSourceFile const*> sf_map;
+    enum class CompileType
     {
-      std::vector<cmSourceFile const*> objectSources;
-      gt->GetObjectSources(objectSources, config);
-      for (auto const* sf : objectSources) {
+      ObjectAndBmi,
+      BmiOnly,
+    };
+    std::map<std::string, std::pair<cmSourceFile const*, CompileType>> sf_map;
+    {
+      auto fill_sf_map = [gt, tgt, &sf_map](cmSourceFile const* sf,
+                                            CompileType type) {
         auto full_path = sf->GetFullPath();
         if (full_path.empty()) {
           gt->Makefile->IssueMessage(
             MessageType::INTERNAL_ERROR,
             cmStrCat("Target \"", tgt->GetName(),
                      "\" has a full path-less source file."));
-          continue;
+          return;
         }
-        sf_map[full_path] = sf;
+        sf_map[full_path] = std::make_pair(sf, type);
+      };
+
+      std::vector<cmSourceFile const*> objectSources;
+      gt->GetObjectSources(objectSources, config);
+      for (auto const* sf : objectSources) {
+        fill_sf_map(sf, CompileType::ObjectAndBmi);
+      }
+
+      std::vector<cmSourceFile const*> cxxModuleSources;
+      gt->GetCxxModuleSources(cxxModuleSources, config);
+      for (auto const* sf : cxxModuleSources) {
+        fill_sf_map(sf, CompileType::BmiOnly);
       }
     }
 
@@ -113,7 +129,8 @@ Json::Value CollationInformationCxxModules(
           continue;
         }
 
-        auto const* sf = lookup->second;
+        auto const* sf = lookup->second.first;
+        CompileType const ct = lookup->second.second;
 
         if (!sf) {
           gt->Makefile->IssueMessage(
@@ -123,11 +140,14 @@ Json::Value CollationInformationCxxModules(
           continue;
         }
 
-        auto obj_path = cb.ObjectFilePath(sf, config);
+        auto obj_path = ct == CompileType::ObjectAndBmi
+          ? cb.ObjectFilePath(sf, config)
+          : cb.BmiFilePath(sf, config);
         Json::Value& tdi_module_info = tdi_cxx_module_info[obj_path] =
           Json::objectValue;
 
         tdi_module_info["source"] = file;
+        tdi_module_info["bmi-only"] = ct == CompileType::BmiOnly;
         tdi_module_info["relative-directory"] = files_per_dir.first;
         tdi_module_info["name"] = file_set->GetName();
         tdi_module_info["type"] = file_set->GetType();
@@ -269,10 +289,11 @@ void cmDyndepCollation::AddCollationInformation(
 struct CxxModuleFileSet
 {
   std::string Name;
+  bool BmiOnly = false;
   std::string RelativeDirectory;
   std::string SourcePath;
   std::string Type;
-  cmFileSetVisibility Visibility;
+  cmFileSetVisibility Visibility = cmFileSetVisibility::Private;
   cm::optional<std::string> Destination;
 };
 
@@ -356,6 +377,7 @@ cmDyndepCollation::ParseExportInfo(Json::Value const& tdi)
       CxxModuleFileSet& fsi = export_info->ObjectToFileSet[i.key().asString()];
       auto const& tdi_cxx_module_info = *i;
       fsi.Name = tdi_cxx_module_info["name"].asString();
+      fsi.BmiOnly = tdi_cxx_module_info["bmi-only"].asBool();
       fsi.RelativeDirectory =
         tdi_cxx_module_info["relative-directory"].asString();
       if (!fsi.RelativeDirectory.empty() &&
@@ -643,4 +665,17 @@ bool cmDyndepCollation::IsObjectPrivate(
   }
   auto const& file_set = fileset_info_itr->second;
   return !cmFileSetVisibilityIsForInterface(file_set.Visibility);
+}
+
+bool cmDyndepCollation::IsBmiOnly(cmCxxModuleExportInfo const& exportInfo,
+                                  std::string const& object)
+{
+#ifdef _WIN32
+  auto object_path = object;
+  cmSystemTools::ConvertToUnixSlashes(object_path);
+#else
+  auto const& object_path = object;
+#endif
+  auto fs = exportInfo.ObjectToFileSet.find(object_path);
+  return (fs != exportInfo.ObjectToFileSet.end()) && fs->second.BmiOnly;
 }

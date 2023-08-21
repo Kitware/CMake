@@ -1,0 +1,7 @@
+CMake Warning \(dev\) at .*/Tests/RunCMake/CXXModules/examples/export-bmi-and-interface-build-build/export_bmi_and_interfaces-targets.cmake:[0-9]* \(target_sources\):
+  CMake's C\+\+ module support is experimental.  It is meant only for
+  experimentation and feedback to CMake developers.
+Call Stack \(most recent call first\):
+  .*/Tests/RunCMake/CXXModules/examples/export-bmi-and-interface-build-build/export_bmi_and_interfaces-config.cmake:1 \(include\)
+  CMakeLists.txt:15 \(find_package\)
+This warning is for project developers.  Use -Wno-dev to suppress it.

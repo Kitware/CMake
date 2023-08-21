@@ -662,6 +662,8 @@ protected:
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const;
 
+  bool DiscoverSyntheticTargets();
+
   bool AddHeaderSetVerification();
 
   bool AddAutomaticSources();

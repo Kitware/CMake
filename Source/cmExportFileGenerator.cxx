@@ -9,6 +9,7 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
 
@@ -1253,6 +1254,77 @@ void cmExportFileGenerator::GenerateImportedFileChecksCode(
   }
 
   os << ")\n\n";
+}
+
+bool cmExportFileGenerator::PopulateCxxModuleExportProperties(
+  cmGeneratorTarget const* gte, ImportPropertyMap& properties,
+  cmGeneratorExpression::PreprocessContext ctx, std::string& errorMessage)
+{
+  if (!gte->HaveCxx20ModuleSources(&errorMessage)) {
+    return true;
+  }
+
+  const cm::static_string_view exportedDirectModuleProperties[] = {
+    "CXX_EXTENSIONS"_s,
+  };
+  for (auto const& propName : exportedDirectModuleProperties) {
+    auto const propNameStr = std::string(propName);
+    cmValue prop = gte->Target->GetComputedProperty(
+      propNameStr, *gte->Target->GetMakefile());
+    if (!prop) {
+      prop = gte->Target->GetProperty(propNameStr);
+    }
+    if (prop) {
+      properties[propNameStr] = cmGeneratorExpression::Preprocess(*prop, ctx);
+    }
+  }
+
+  const cm::static_string_view exportedModuleProperties[] = {
+    "INCLUDE_DIRECTORIES"_s,
+    "COMPILE_DEFINITIONS"_s,
+    "COMPILE_OPTIONS"_s,
+    "COMPILE_FEATURES"_s,
+  };
+  for (auto const& propName : exportedModuleProperties) {
+    auto const propNameStr = std::string(propName);
+    cmValue prop = gte->Target->GetComputedProperty(
+      propNameStr, *gte->Target->GetMakefile());
+    if (!prop) {
+      prop = gte->Target->GetProperty(propNameStr);
+    }
+    if (prop) {
+      auto const exportedPropName =
+        cmStrCat("IMPORTED_CXX_MODULES_", propName);
+      properties[exportedPropName] =
+        cmGeneratorExpression::Preprocess(*prop, ctx);
+    }
+  }
+
+  const cm::static_string_view exportedLinkModuleProperties[] = {
+    "LINK_LIBRARIES"_s,
+  };
+  for (auto const& propName : exportedLinkModuleProperties) {
+    auto const propNameStr = std::string(propName);
+    cmValue prop = gte->Target->GetComputedProperty(
+      propNameStr, *gte->Target->GetMakefile());
+    if (!prop) {
+      prop = gte->Target->GetProperty(propNameStr);
+    }
+    if (prop) {
+      auto const exportedPropName =
+        cmStrCat("IMPORTED_CXX_MODULES_", propName);
+      auto value = cmGeneratorExpression::Preprocess(*prop, ctx);
+      this->ResolveTargetsInGeneratorExpressions(
+        value, gte, cmExportFileGenerator::ReplaceFreeTargets);
+      std::vector<std::string> wrappedValues;
+      for (auto& item : cmList{ value }) {
+        wrappedValues.push_back(cmStrCat("$<COMPILE_ONLY:", item, '>'));
+      }
+      properties[exportedPropName] = cmJoin(wrappedValues, ";");
+    }
+  }
+
+  return true;
 }
 
 bool cmExportFileGenerator::PopulateExportProperties(

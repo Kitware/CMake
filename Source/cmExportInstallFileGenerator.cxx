@@ -126,6 +126,13 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
       gt, cmGeneratorExpression::InstallInterface, properties);
 
     std::string errorMessage;
+    if (!this->PopulateCxxModuleExportProperties(
+          gt, properties, cmGeneratorExpression::InstallInterface,
+          errorMessage)) {
+      cmSystemTools::Error(errorMessage);
+      return false;
+    }
+
     if (!this->PopulateExportProperties(gt, properties, errorMessage)) {
       cmSystemTools::Error(errorMessage);
       return false;
