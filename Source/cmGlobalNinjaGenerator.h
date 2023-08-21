@@ -282,6 +282,10 @@ public:
   };
   MapToNinjaPathImpl MapToNinjaPath() { return { this }; }
 
+#ifdef _WIN32
+  std::string const& GetComspec() const { return this->Comspec; }
+#endif
+
   // -- Additional clean files
   void AddAdditionalCleanFile(std::string fileName, const std::string& config);
   const char* GetAdditionalCleanTargetName() const
@@ -591,6 +595,11 @@ private:
   bool NinjaSupportsCodePage = false;
 
   codecvt_Encoding NinjaExpectedEncoding = codecvt_Encoding::None;
+
+#ifdef _WIN32
+  // Windows Command shell.
+  std::string Comspec;
+#endif
 
   bool DiagnosedCxxModuleNinjaSupport = false;
 
