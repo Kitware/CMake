@@ -33,7 +33,7 @@ Check if a symbol exists as a function, variable, or macro in ``C++``.
   function. Since there is no reliable way to predict whether a given function
   in the system environment may be defined as an overloaded function or may be
   an overloaded function on other systems or will become so in the future, it
-  is generally advised to use the :module:`CheckCXXSourceCompiles` module for
+  is generally advised to use the :module:`CheckSourceCompiles` module for
   checking any function symbol (unless somehow you surely know the checked
   function is not overloaded on other systems or will not be so in the
   future).
