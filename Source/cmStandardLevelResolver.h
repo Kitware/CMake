@@ -22,6 +22,9 @@ public:
   std::string GetCompileOptionDef(cmGeneratorTarget const* target,
                                   std::string const& lang,
                                   std::string const& config) const;
+  std::string GetEffectiveStandard(cmGeneratorTarget const* target,
+                                   std::string const& lang,
+                                   std::string const& config) const;
 
   bool AddRequiredTargetFeature(cmTarget* target, const std::string& feature,
                                 std::string* error = nullptr) const;
