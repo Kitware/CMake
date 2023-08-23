@@ -13,7 +13,9 @@
 #include <vector>
 
 #include <cm/iterator>
+#include <cm/string_view>
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
@@ -185,7 +187,7 @@ struct StandardLevelComputer
     }
 
     std::string standardStr(*standardProp);
-    if (this->Language == "CUDA" && standardStr == "98") {
+    if (this->Language == "CUDA"_s && standardStr == "98"_s) {
       standardStr = "03";
     }
 
