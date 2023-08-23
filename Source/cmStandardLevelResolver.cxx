@@ -155,8 +155,8 @@ struct StandardLevelComputer
           << this->Language << *standardProp << "\" "
           << (ext ? "(with compiler extensions)" : "")
           << ". But the current compiler \""
-          << makefile->GetSafeDefinition("CMAKE_" + this->Language +
-                                         "_COMPILER_ID")
+          << makefile->GetSafeDefinition(
+               cmStrCat("CMAKE_", this->Language, "_COMPILER_ID"))
           << "\" does not support this, or "
              "CMake does not know the flags to enable it.";
 
@@ -474,10 +474,11 @@ bool cmStandardLevelResolver::CheckCompileFeaturesAvailable(
     std::ostringstream e;
     e << "The compiler feature \"" << feature << "\" is not known to " << lang
       << " compiler\n\""
-      << this->Makefile->GetSafeDefinition("CMAKE_" + lang + "_COMPILER_ID")
+      << this->Makefile->GetSafeDefinition(
+           cmStrCat("CMAKE_", lang, "_COMPILER_ID"))
       << "\"\nversion "
-      << this->Makefile->GetSafeDefinition("CMAKE_" + lang +
-                                           "_COMPILER_VERSION")
+      << this->Makefile->GetSafeDefinition(
+           cmStrCat("CMAKE_", lang, "_COMPILER_VERSION"))
       << '.';
     if (error) {
       *error = e.str();
@@ -561,8 +562,8 @@ cmValue cmStandardLevelResolver::CompileFeaturesAvailable(
     return nullptr;
   }
 
-  cmValue featuresKnown =
-    this->Makefile->GetDefinition("CMAKE_" + lang + "_COMPILE_FEATURES");
+  cmValue featuresKnown = this->Makefile->GetDefinition(
+    cmStrCat("CMAKE_", lang, "_COMPILE_FEATURES"));
 
   if (!cmNonempty(featuresKnown)) {
     std::ostringstream e;
@@ -572,10 +573,11 @@ cmValue cmStandardLevelResolver::CompileFeaturesAvailable(
       e << "No";
     }
     e << " known features for " << lang << " compiler\n\""
-      << this->Makefile->GetSafeDefinition("CMAKE_" + lang + "_COMPILER_ID")
+      << this->Makefile->GetSafeDefinition(
+           cmStrCat("CMAKE_", lang, "_COMPILER_ID"))
       << "\"\nversion "
-      << this->Makefile->GetSafeDefinition("CMAKE_" + lang +
-                                           "_COMPILER_VERSION")
+      << this->Makefile->GetSafeDefinition(
+           cmStrCat("CMAKE_", lang, "_COMPILER_VERSION"))
       << '.';
     if (error) {
       *error = e.str();
