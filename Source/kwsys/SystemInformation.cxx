@@ -3443,7 +3443,7 @@ bool SystemInformationImplementation::RetrieveInformationFromCpuInfoFile()
 
   FILE* fd = fopen("/proc/cpuinfo", "r");
   if (!fd) {
-    std::cout << "Problem opening /proc/cpuinfo" << std::endl;
+    std::cerr << "Problem opening /proc/cpuinfo\n";
     return false;
   }
 
@@ -3454,7 +3454,7 @@ bool SystemInformationImplementation::RetrieveInformationFromCpuInfoFile()
   }
   fclose(fd);
   if (fileSize < 2) {
-    std::cout << "No data in /proc/cpuinfo" << std::endl;
+    std::cerr << "No data in /proc/cpuinfo\n";
     return false;
   }
   buffer.resize(fileSize - 2);
@@ -4162,7 +4162,7 @@ bool SystemInformationImplementation::QueryLinuxMemory()
   struct utsname unameInfo;
   int errorFlag = uname(&unameInfo);
   if (errorFlag != 0) {
-    std::cout << "Problem calling uname(): " << strerror(errno) << std::endl;
+    std::cerr << "Problem calling uname(): " << strerror(errno) << "\n";
     return false;
   }
 
@@ -4182,7 +4182,7 @@ bool SystemInformationImplementation::QueryLinuxMemory()
 
   FILE* fd = fopen("/proc/meminfo", "r");
   if (!fd) {
-    std::cout << "Problem opening /proc/meminfo" << std::endl;
+    std::cerr << "Problem opening /proc/meminfo\n";
     return false;
   }
 
@@ -4221,7 +4221,7 @@ bool SystemInformationImplementation::QueryLinuxMemory()
       this->TotalVirtualMemory = value[mSwapTotal] / 1024;
       this->AvailableVirtualMemory = value[mSwapFree] / 1024;
     } else {
-      std::cout << "Problem parsing /proc/meminfo" << std::endl;
+      std::cerr << "Problem parsing /proc/meminfo\n";
       fclose(fd);
       return false;
     }
@@ -4248,7 +4248,7 @@ bool SystemInformationImplementation::QueryLinuxMemory()
       this->AvailablePhysicalMemory =
         (ap + buffersMem + cachedMem) >> 10 >> 10;
     } else {
-      std::cout << "Problem parsing /proc/meminfo" << std::endl;
+      std::cerr << "Problem parsing /proc/meminfo\n";
       fclose(fd);
       return false;
     }
@@ -4472,8 +4472,8 @@ void SystemInformationImplementation::CPUCountWindows()
   typedef BOOL(WINAPI * GetLogicalProcessorInformationType)(
     PSYSTEM_LOGICAL_PROCESSOR_INFORMATION, PDWORD);
   static GetLogicalProcessorInformationType pGetLogicalProcessorInformation =
-    (GetLogicalProcessorInformationType)GetProcAddress(
-      GetModuleHandleW(L"kernel32"), "GetLogicalProcessorInformation");
+    reinterpret_cast<GetLogicalProcessorInformationType>(GetProcAddress(
+      GetModuleHandleW(L"kernel32"), "GetLogicalProcessorInformation"));
 
   if (!pGetLogicalProcessorInformation) {
     // Fallback to approximate implementation on ancient Windows versions.

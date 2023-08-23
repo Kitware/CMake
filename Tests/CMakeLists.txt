@@ -3278,7 +3278,7 @@ if(BUILD_TESTING)
     if(NOT CMake_TEST_EXTERNAL_CMAKE)
       configure_file("${CMake_SOURCE_DIR}/Tests/CTestTest2/test.cmake.in"
         "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" @ONLY ESCAPE_QUOTES)
-      add_test(CTestTest2 ${CMAKE_CTEST_COMMAND}
+      add_test(NAME CTestTest2 COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
         -S "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" -V
         --output-log "${CMake_BINARY_DIR}/Tests/CTestTest2/testOutput.log"
         )
