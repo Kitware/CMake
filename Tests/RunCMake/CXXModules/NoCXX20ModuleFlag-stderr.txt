@@ -6,15 +6,15 @@ Call Stack \(most recent call first\):
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Error in CMakeLists.txt:
-  The "noexperimentalflag" target has C\+\+ module sources but its experimental
-  support has not been requested
+  The target named "noexperimentalflag" has C\+\+ sources that export modules
+  but its experimental support has not been requested
 
 (
 CMake Error in CMakeLists.txt:
-(  The "noexperimentalflag" target has C\+\+ module sources but its experimental
-  support has not been requested
-|  The "noexperimentalflag" target contains C\+\+ module sources which are not
-  supported by the generator
+(  The target named "noexperimentalflag" has C\+\+ sources that export modules
+  but its experimental support has not been requested
+|  The target named "noexperimentalflag" contains C\+\+ sources that export
+  modules which is not supported by the generator
 )
 )*
 CMake Generate step failed.  Build files cannot be regenerated correctly.

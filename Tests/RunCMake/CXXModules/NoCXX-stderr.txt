@@ -6,15 +6,15 @@ Call Stack \(most recent call first\):
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Error in CMakeLists.txt:
-  The "nocxx" target has C\+\+ module sources but the "CXX" language has not
-  been enabled
+  The target named "nocxx" has C\+\+ sources that export modules but the "CXX"
+  language has not been enabled
 
 (
 CMake Error in CMakeLists.txt:
-(  The "nocxx" target has C\+\+ module sources but the "CXX" language has not
-  been enabled
-|  The "nocxx" target contains C\+\+ module sources which are not supported by
-  the generator
+(  The target named "nocxx" has C\+\+ sources that export modules but the "CXX"
+  language has not been enabled
+|  The target named "nocxx" contains C\+\+ sources that export modules which is
+  not supported by the generator
 )
 )*
 CMake Generate step failed.  Build files cannot be regenerated correctly.

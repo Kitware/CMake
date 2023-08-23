@@ -438,8 +438,8 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
     if (target->HaveCxx20ModuleSources() && !this->SupportsCxxModuleDyndep()) {
       root->GetMakefile()->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("The \"", target->GetName(),
-                 "\" target contains C++ module sources which are not "
+        cmStrCat("The target named \"", target->GetName(),
+                 "\" contains C++ sources that export modules which is not "
                  "supported by the generator"));
     }
 
