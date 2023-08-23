@@ -107,7 +107,7 @@ struct StandardLevelComputer
       if (cmp0128 == cmPolicies::NEW) {
         // Add extension flag if compiler's default doesn't match.
         if (ext != defaultExt) {
-          return cmStrCat("CMAKE_", this->Language, *defaultStd, "_", type,
+          return cmStrCat("CMAKE_", this->Language, *defaultStd, '_', type,
                           "_COMPILE_OPTION");
         }
       } else {
@@ -130,7 +130,7 @@ struct StandardLevelComputer
               cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0128),
                        "\nFor compatibility with older versions of CMake, "
                        "compiler extensions won't be ",
-                       state, "."));
+                       state, '.'));
           }
         }
 
@@ -144,7 +144,7 @@ struct StandardLevelComputer
 
     if (target->GetLanguageStandardRequired(this->Language)) {
       std::string option_flag = cmStrCat(
-        "CMAKE_", this->Language, *standardProp, "_", type, "_COMPILE_OPTION");
+        "CMAKE_", this->Language, *standardProp, '_', type, "_COMPILE_OPTION");
 
       cmValue opt = target->Target->GetMakefile()->GetDefinition(option_flag);
       if (!opt) {
@@ -194,7 +194,7 @@ struct StandardLevelComputer
     if (stdIt == cm::cend(stds)) {
       std::string e =
         cmStrCat(this->Language, "_STANDARD is set to invalid value '",
-                 standardStr, "'");
+                 standardStr, '\'');
       makefile->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e,
                                                  target->GetBacktrace());
       return std::string{};
@@ -205,7 +205,7 @@ struct StandardLevelComputer
     if (defaultStdIt == cm::cend(stds)) {
       std::string e = cmStrCat("CMAKE_", this->Language,
                                "_STANDARD_DEFAULT is set to invalid value '",
-                               *defaultStd, "'");
+                               *defaultStd, '\'');
       makefile->IssueMessage(MessageType::INTERNAL_ERROR, e);
       return std::string{};
     }
@@ -216,7 +216,7 @@ struct StandardLevelComputer
         (cmp0128 == cmPolicies::NEW &&
          (stdIt < defaultStdIt || ext != defaultExt))) {
       auto offset = std::distance(cm::cbegin(stds), stdIt);
-      return cmStrCat("CMAKE_", this->Language, stdsStrings[offset], "_", type,
+      return cmStrCat("CMAKE_", this->Language, stdsStrings[offset], '_', type,
                       "_COMPILE_OPTION");
     }
 
@@ -226,7 +226,7 @@ struct StandardLevelComputer
     for (; defaultStdIt < stdIt; --stdIt) {
       auto offset = std::distance(cm::cbegin(stds), stdIt);
       std::string option_flag =
-        cmStrCat("CMAKE_", this->Language, stdsStrings[offset], "_", type,
+        cmStrCat("CMAKE_", this->Language, stdsStrings[offset], '_', type,
                  "_COMPILE_OPTION");
       if (target->Target->GetMakefile()->GetDefinition(option_flag)) {
         return option_flag;
@@ -478,7 +478,7 @@ bool cmStandardLevelResolver::CheckCompileFeaturesAvailable(
       << "\"\nversion "
       << this->Makefile->GetSafeDefinition("CMAKE_" + lang +
                                            "_COMPILER_VERSION")
-      << ".";
+      << '.';
     if (error) {
       *error = e.str();
     } else {
@@ -576,7 +576,7 @@ cmValue cmStandardLevelResolver::CompileFeaturesAvailable(
       << "\"\nversion "
       << this->Makefile->GetSafeDefinition("CMAKE_" + lang +
                                            "_COMPILER_VERSION")
-      << ".";
+      << '.';
     if (error) {
       *error = e.str();
     } else {
