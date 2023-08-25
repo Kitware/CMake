@@ -96,7 +96,7 @@ else()
   set(CMake_HAVE_CXX_FILESYSTEM FALSE)
 endif()
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND CMAKE_SYSTEM_PROCESSOR MATCHES "armv7l|sparc")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux" AND NOT CMAKE_SYSTEM_PROCESSOR MATCHES "^(x86_64|aarch64)$")
   cm_check_cxx_feature(atomic_builtin)
   if(NOT CMake_HAVE_CXX_ATOMIC_BUILTIN)
     set(cm_check_cxx_feature_LINK_LIBRARIES atomic)
