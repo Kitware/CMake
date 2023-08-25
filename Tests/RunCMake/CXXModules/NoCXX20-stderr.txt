@@ -6,15 +6,17 @@ Call Stack \(most recent call first\):
 This warning is for project developers.  Use -Wno-dev to suppress it.
 
 CMake Error in CMakeLists.txt:
-  The "nocxx20" target has C\+\+ module sources but is not using at least
-  "cxx_std_20"
+  The target named "nocxx20" has C\+\+ sources that export modules but does not
+  include "cxx_std_20" \(or newer\) among its `target_compile_features`; found
+  "cxx_std_17"
 
 (
 CMake Error in CMakeLists.txt:
-(  The "nocxx20" target has C\+\+ module sources but is not using at least
-  "cxx_std_20"
-|  The "nocxx20" target contains C\+\+ module sources which are not supported by
-  the generator
+(  The target named "nocxx20" has C\+\+ sources that export modules but does not
+  include "cxx_std_20" \(or newer\) among its `target_compile_features`; found
+  "cxx_std_17"
+|  The target named "nocxx20" contains C\+\+ sources that export modules which
+  is not supported by the generator
 )
 )*
 CMake Generate step failed.  Build files cannot be regenerated correctly.

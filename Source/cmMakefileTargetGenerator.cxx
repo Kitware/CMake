@@ -207,9 +207,9 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   if (this->GeneratorTarget->HaveCxx20ModuleSources()) {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("The \"", this->GeneratorTarget->GetName(),
-               "\" target contains C++ module sources which are not supported "
-               "by the generator"));
+      cmStrCat("The target named \"", this->GeneratorTarget->GetName(),
+               "\" contains C++ sources that export modules which is not "
+               "supported by the generator"));
   }
 
   // -- Write the custom commands for this target

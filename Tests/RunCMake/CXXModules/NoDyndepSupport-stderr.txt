@@ -13,13 +13,13 @@ This warning is for project developers.  Use -Wno-dev to suppress it.
   due to lack of required features.  Ninja 1.11 or higher is required.
 
 |CMake Error in CMakeLists.txt:
-  The "nodyndep" target contains C\+\+ module sources which are not supported
-  by the generator
+  The target named "nodyndep" contains C\+\+ sources that export modules which
+  is not supported by the generator
 
 (
 CMake Error in CMakeLists.txt:
-  The "nodyndep" target contains C\+\+ module sources which are not supported
-  by the generator
+  The target named "nodyndep" contains C\+\+ sources that export modules which
+  is not supported by the generator
 
 )*)
 CMake Generate step failed.  Build files cannot be regenerated correctly.

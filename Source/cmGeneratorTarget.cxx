@@ -9100,25 +9100,34 @@ void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
       case cmGeneratorTarget::Cxx20SupportLevel::MissingCxx:
         this->Makefile->IssueMessage(
           MessageType::FATAL_ERROR,
-          cmStrCat("The \"", this->GetName(),
-                   "\" target has C++ module sources but the \"CXX\" language "
-                   "has not been enabled"));
+          cmStrCat("The target named \"", this->GetName(),
+                   "\" has C++ sources that export modules but the \"CXX\" "
+                   "language has not been enabled"));
         break;
       case cmGeneratorTarget::Cxx20SupportLevel::MissingExperimentalFlag:
         this->Makefile->IssueMessage(
           MessageType::FATAL_ERROR,
-          cmStrCat("The \"", this->GetName(),
-                   "\" target has C++ module sources but its experimental "
-                   "support has not been requested"));
+          cmStrCat("The target named \"", this->GetName(),
+                   "\" has C++ sources that export modules but its "
+                   "experimental support has not been requested"));
         break;
-      case cmGeneratorTarget::Cxx20SupportLevel::NoCxx20:
+      case cmGeneratorTarget::Cxx20SupportLevel::NoCxx20: {
+        cmStandardLevelResolver standardResolver(this->Makefile);
+        auto effStandard =
+          standardResolver.GetEffectiveStandard(this, "CXX", config);
+        if (effStandard.empty()) {
+          effStandard = "; no C++ standard found";
+        } else {
+          effStandard = cmStrCat("; found \"cxx_std_", effStandard, '"');
+        }
         this->Makefile->IssueMessage(
           MessageType::FATAL_ERROR,
           cmStrCat(
-            "The \"", this->GetName(),
-            "\" target has C++ module sources but is not using at least "
-            "\"cxx_std_20\""));
-        break;
+            "The target named \"", this->GetName(),
+            "\" has C++ sources that export modules but does not include "
+            "\"cxx_std_20\" (or newer) among its `target_compile_features`",
+            effStandard));
+      } break;
       case cmGeneratorTarget::Cxx20SupportLevel::Supported:
         // All is well.
         break;

@@ -366,9 +366,9 @@ void cmVisualStudio10TargetGenerator::Generate()
       !this->GlobalGenerator->SupportsCxxModuleDyndep()) {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("The \"", this->GeneratorTarget->GetName(),
-               "\" target contains C++ module sources which are not supported "
-               "by the generator"));
+      cmStrCat("The target named \"", this->GeneratorTarget->GetName(),
+               "\" contains C++ sources that export modules which is not "
+               "supported by the generator"));
   }
 
   this->ProjectType = computeProjectType(this->GeneratorTarget);

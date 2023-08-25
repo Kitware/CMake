@@ -1385,8 +1385,8 @@ bool cmGlobalXCodeGenerator::CreateXCodeTarget(
   if (gtgt->HaveCxx20ModuleSources()) {
     gtgt->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat("The \"", gtgt->GetName(),
-               "\" target contains C++ module sources which are not "
+      cmStrCat("The target named \"", gtgt->GetName(),
+               "\" contains C++ sources that export modules which is not "
                "supported by the generator"));
   }
 
