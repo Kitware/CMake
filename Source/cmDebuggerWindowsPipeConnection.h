@@ -90,6 +90,8 @@ public:
   bool write(void const* buffer, size_t n) override;
 
 private:
+  std::string GetErrorMessage(DWORD errorCode);
+
   std::string const PipeName;
   std::unique_ptr<DuplexPipe_WIN32> pipes;
 };
