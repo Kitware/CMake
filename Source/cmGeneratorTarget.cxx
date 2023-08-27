@@ -797,10 +797,10 @@ void handleSystemIncludesDep(cmLocalGenerator* lg,
       *dirs, lg, config, headTarget, dagChecker, depTgt, language));
   }
 
-  if (depTgt->Target->IsFrameworkOnApple()) {
+  if (depTgt->Target->IsFrameworkOnApple() ||
+      depTgt->IsImportedFrameworkFolderOnApple(config)) {
     if (auto fwDescriptor = depTgt->GetGlobalGenerator()->SplitFrameworkPath(
-          depTgt->GetLocation(config),
-          cmGlobalGenerator::FrameworkFormat::Strict)) {
+          depTgt->GetLocation(config))) {
       result.push_back(fwDescriptor->Directory);
       result.push_back(fwDescriptor->GetFrameworkPath());
     }
