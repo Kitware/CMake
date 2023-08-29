@@ -8,6 +8,16 @@
 #include <cstdio>
 #include <cstdlib>
 
+bool cmStrCaseEq(cm::string_view s1, cm::string_view s2)
+{
+  if (s1.size() != s2.size()) {
+    return false;
+  }
+
+  return std::equal(s1.begin(), s1.end(), s2.begin(),
+                    [](char a, char b) { return tolower(a) == tolower(b); });
+}
+
 std::string cmTrimWhitespace(cm::string_view str)
 {
   // XXX(clang-tidy): This declaration and the next cannot be `const auto*`
