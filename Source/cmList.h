@@ -747,8 +747,10 @@ public:
                        ExpandElements expandElements = ExpandElements::Yes,
                        EmptyElements emptyElements = EmptyElements::No)
   {
-    this->insert(this->begin() + this->ComputeInsertIndex(index), first, last,
-                 expandElements, emptyElements);
+    auto const offset =
+      static_cast<difference_type>(this->ComputeInsertIndex(index));
+    this->insert(this->begin() + offset, first, last, expandElements,
+                 emptyElements);
     return *this;
   }
   template <typename InputIterator>
@@ -1186,13 +1188,13 @@ private:
         auto size = container.size();
         insertPos = cmList::Insert(container, insertPos, *first,
                                    expandElements, emptyElements);
-        insertPos += container.size() - size;
+        insertPos += static_cast<decltype(delta)>(container.size() - size);
       }
     } else {
       for (; first != last; ++first) {
         if (!first->empty() || emptyElements == EmptyElements::Yes) {
           insertPos = container.insert(insertPos, *first);
-          insertPos++;
+          ++insertPos;
         }
       }
     }
