@@ -107,11 +107,10 @@ Calls to the :command:`cmake_minimum_required(VERSION)`,
 influence only the current top of the policy stack.
 
 .. versionadded:: 3.25
-  The :command:`block` and :command:`endblock` commands offer a more flexible
+  The :command:`block(SCOPE_FOR POLICIES)` command offers a more flexible
   and more secure way to manage the policy stack. The pop action is done
-  automatically when the :command:`endblock` command is executed, so it avoid
-  to call the :command:`cmake_policy(POP)` command before each
-  :command:`return` command.
+  automatically when leaving the block scope, so there is no need to
+  precede each :command:`return` with a call to :command:`cmake_policy(POP)`.
 
   .. code-block:: cmake
 

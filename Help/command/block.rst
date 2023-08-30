@@ -21,7 +21,8 @@ scopes created by the ``block()`` command are removed.
 
   ``POLICIES``
     Create a new policy scope. This is equivalent to
-    :command:`cmake_policy(PUSH)`.
+    :command:`cmake_policy(PUSH)` with an automatic
+    :command:`cmake_policy(POP)` when leaving the block scope.
 
   ``VARIABLES``
     Create a new variable scope.
