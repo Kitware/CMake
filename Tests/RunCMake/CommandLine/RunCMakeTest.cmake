@@ -1125,3 +1125,5 @@ if(RunCMake_GENERATOR MATCHES "^Visual Studio 12 2013")
   run_cmake(DeprecateVS12-WARN-ON)
   run_cmake_with_options(DeprecateVS12-WARN-OFF -DCMAKE_WARN_VS12=OFF)
 endif()
+
+run_cmake_with_options(help-arbitrary "--help" "CMAKE_CXX_IGNORE_EXTENSIONS")
