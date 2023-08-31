@@ -12,7 +12,8 @@ mature enough for use by CMake.  The possible values are:
 
 ``1``
   The original Xcode build system.
-  This is the default when using Xcode 11.x or below.
+  This is the default when using Xcode 11.x or below and supported
+  up to Xcode 13.x.
 
 ``12``
   The Xcode "new build system" introduced by Xcode 10.
