@@ -73,6 +73,47 @@
                 {
                     "define": "interface_exe_EXPORTS",
                     "backtrace": null
+                },
+                {
+                    "define": "COMPILED_WITH_INTERFACE_LIB",
+                    "backtrace": [
+                        {
+                            "file": "^include_test\\.cmake$",
+                            "line": 4,
+                            "command": "target_link_libraries",
+                            "hasParent": true
+                        },
+                        {
+                            "file": "^include_test\\.cmake$",
+                            "line": null,
+                            "command": null,
+                            "hasParent": true
+                        },
+                        {
+                            "file": "^codemodel-v2\\.cmake$",
+                            "line": 3,
+                            "command": "include",
+                            "hasParent": true
+                        },
+                        {
+                            "file": "^codemodel-v2\\.cmake$",
+                            "line": null,
+                            "command": null,
+                            "hasParent": true
+                        },
+                        {
+                            "file": "^CMakeLists\\.txt$",
+                            "line": 3,
+                            "command": "include",
+                            "hasParent": true
+                        },
+                        {
+                            "file": "^CMakeLists\\.txt$",
+                            "line": null,
+                            "command": null,
+                            "hasParent": false
+                        }
+                    ]
                 }
             ],
             "compileCommandFragments": null
