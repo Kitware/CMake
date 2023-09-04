@@ -981,7 +981,7 @@ inst:
     ;MessageBox MB_OK 'User "$0" is in the Admin group'
     StrCpy $SV_ALLUSERS "AllUsers"
     Goto done
-  StrCmp $1 "Power" 0 +4
+  StrCmp $1 "Power" 0 +3
     SetShellVarContext all
     ;MessageBox MB_OK 'User "$0" is in the Power Users group'
     StrCpy $SV_ALLUSERS "AllUsers"
