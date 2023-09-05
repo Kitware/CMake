@@ -538,11 +538,14 @@ cmComputeLinkInformation::GetSharedLibrariesLinked() const
 
 bool cmComputeLinkInformation::Compute()
 {
-  // Skip targets that do not link.
+  // Skip targets that do not link or have link-like information consumers may
+  // need (namely modules).
   if (!(this->Target->GetType() == cmStateEnums::EXECUTABLE ||
         this->Target->GetType() == cmStateEnums::SHARED_LIBRARY ||
         this->Target->GetType() == cmStateEnums::MODULE_LIBRARY ||
-        this->Target->GetType() == cmStateEnums::STATIC_LIBRARY)) {
+        this->Target->GetType() == cmStateEnums::STATIC_LIBRARY ||
+        this->Target->HaveCxx20ModuleSources() ||
+        this->Target->HaveFortranSources())) {
     return false;
   }
 

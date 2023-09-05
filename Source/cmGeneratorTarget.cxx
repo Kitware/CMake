@@ -9042,6 +9042,15 @@ bool cmGeneratorTarget::HaveFortranSources(std::string const& config) const
                      });
 }
 
+bool cmGeneratorTarget::HaveFortranSources() const
+{
+  auto sources = cmGeneratorTarget::GetAllConfigSources();
+  return std::any_of(sources.begin(), sources.end(),
+                     [](AllConfigSource const& sf) -> bool {
+                       return sf.Source->GetLanguage() == "Fortran"_s;
+                     });
+}
+
 bool cmGeneratorTarget::HaveCxx20ModuleSources(std::string* errorMessage) const
 {
   auto const& fs_names = this->Target->GetAllFileSetNames();
