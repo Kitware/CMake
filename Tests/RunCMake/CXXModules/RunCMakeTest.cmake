@@ -71,8 +71,9 @@ foreach (fileset_type IN LISTS fileset_types)
   endforeach ()
   run_cmake("FileSet${fileset_type}InterfaceImported")
 
-  # Test the error message when a non-C++ source file is found in the source
+  # Test the error messages when a non-C++ source file is found in the source
   # list.
+  run_cmake("NotCompiledSource${fileset_type}")
   run_cmake("NotCXXSource${fileset_type}")
 endforeach ()
 
