@@ -1247,6 +1247,7 @@ public:
                     cmGeneratorTarget const* t2) const;
   };
 
+  bool HaveFortranSources() const;
   bool HaveFortranSources(std::string const& config) const;
 
   // C++20 module support queries.
