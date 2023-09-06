@@ -366,6 +366,7 @@
     - Set-Item -Force -Path "env:WIX" -Value "$pwdpath\.gitlab\wix"
     - (& "$pwsh" -File ".gitlab/ci/cmake.ps1")
     - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\cmake\bin;$env:PATH"
+    - $cmake = "cmake"
     - . .gitlab/ci/ninja-env.ps1
     - (& "$env:WIX\bin\light.exe" -help) | Select -First 1
     - cmake --version
