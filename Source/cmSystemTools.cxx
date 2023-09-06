@@ -25,12 +25,17 @@
 
 #include <cm3p/uv.h>
 
+#include "cm_fileno.hxx"
+
 #include "cmDuration.h"
 #include "cmELF.h"
 #include "cmMessageMetadata.h"
 #include "cmProcessOutput.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
+#include "cmUVHandlePtr.h"
+#include "cmUVProcessChain.h"
+#include "cmUVStream.h"
 #include "cmValue.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -59,12 +64,14 @@
 #include <cassert>
 #include <cctype>
 #include <cerrno>
+#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
 #include <functional>
 #include <iostream>
+#include <memory>
 #include <sstream>
 #include <utility>
 #include <vector>
@@ -568,85 +575,113 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
                                      const char* dir, OutputOption outputflag,
                                      cmDuration timeout, Encoding encoding)
 {
-  std::vector<const char*> argv;
-  argv.reserve(command.size() + 1);
-  for (std::string const& cmd : command) {
-    argv.push_back(cmd.c_str());
-  }
-  argv.push_back(nullptr);
-
-  cmsysProcess* cp = cmsysProcess_New();
-  cmsysProcess_SetCommand(cp, argv.data());
-  cmsysProcess_SetWorkingDirectory(cp, dir);
-  if (cmSystemTools::GetRunCommandHideConsole()) {
-    cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
+  cmUVProcessChainBuilder builder;
+  builder.AddCommand(command);
+  if (dir) {
+    builder.SetWorkingDirectory(dir);
   }
 
   if (outputflag == OUTPUT_PASSTHROUGH) {
-    cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDOUT, 1);
-    cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDERR, 1);
     captureStdOut = nullptr;
     captureStdErr = nullptr;
+    builder
+      .SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT,
+                         cm_fileno(stdout))
+      .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR,
+                         cm_fileno(stderr));
   } else if (outputflag == OUTPUT_MERGE ||
              (captureStdErr && captureStdErr == captureStdOut)) {
-    cmsysProcess_SetOption(cp, cmsysProcess_Option_MergeOutput, 1);
+    builder.SetMergedBuiltinStreams();
     captureStdErr = nullptr;
+  } else {
+    builder.SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT)
+      .SetBuiltinStream(cmUVProcessChainBuilder::Stream_ERROR);
   }
   assert(!captureStdErr || captureStdErr != captureStdOut);
 
-  cmsysProcess_SetTimeout(cp, timeout.count());
-  cmsysProcess_Execute(cp);
+  auto chain = builder.Start();
+  bool timedOut = false;
+  cm::uv_timer_ptr timer;
+  if (timeout.count()) {
+    timer.init(chain.GetLoop(), &timedOut);
+    timer.start(
+      [](uv_timer_t* t) {
+        auto* timedOutPtr = static_cast<bool*>(t->data);
+        *timedOutPtr = true;
+      },
+      static_cast<uint64_t>(timeout.count() * 1000.0), 0);
+  }
 
   std::vector<char> tempStdOut;
   std::vector<char> tempStdErr;
-  char* data;
-  int length;
-  int pipe;
+  cm::uv_pipe_ptr outStream;
+  bool outFinished = true;
+  cm::uv_pipe_ptr errStream;
+  bool errFinished = true;
   cmProcessOutput processOutput(encoding);
-  std::string strdata;
+  std::unique_ptr<cmUVStreamReadHandle> outputHandle;
+  std::unique_ptr<cmUVStreamReadHandle> errorHandle;
   if (outputflag != OUTPUT_PASSTHROUGH &&
       (captureStdOut || captureStdErr || outputflag != OUTPUT_NONE)) {
-    while ((pipe = cmsysProcess_WaitForData(cp, &data, &length, nullptr)) >
-           0) {
-      // Translate NULL characters in the output into valid text.
-      for (int i = 0; i < length; ++i) {
-        if (data[i] == '\0') {
-          data[i] = ' ';
-        }
+    auto startRead =
+      [&outputflag, &processOutput,
+       &chain](cm::uv_pipe_ptr& pipe, int stream, std::string* captureStd,
+               std::vector<char>& tempStd, int id,
+               void (*outputFunc)(const std::string&),
+               bool& finished) -> std::unique_ptr<cmUVStreamReadHandle> {
+      if (stream < 0) {
+        return nullptr;
       }
 
-      if (pipe == cmsysProcess_Pipe_STDOUT) {
-        if (outputflag != OUTPUT_NONE) {
-          processOutput.DecodeText(data, length, strdata, 1);
-          cmSystemTools::Stdout(strdata);
-        }
-        if (captureStdOut) {
-          cm::append(tempStdOut, data, data + length);
-        }
-      } else if (pipe == cmsysProcess_Pipe_STDERR) {
-        if (outputflag != OUTPUT_NONE) {
-          processOutput.DecodeText(data, length, strdata, 2);
-          cmSystemTools::Stderr(strdata);
-        }
-        if (captureStdErr) {
-          cm::append(tempStdErr, data, data + length);
-        }
-      }
-    }
+      pipe.init(chain.GetLoop(), 0);
+      uv_pipe_open(pipe, stream);
 
-    if (outputflag != OUTPUT_NONE) {
-      processOutput.DecodeText(std::string(), strdata, 1);
-      if (!strdata.empty()) {
-        cmSystemTools::Stdout(strdata);
-      }
-      processOutput.DecodeText(std::string(), strdata, 2);
-      if (!strdata.empty()) {
-        cmSystemTools::Stderr(strdata);
-      }
+      finished = false;
+      return cmUVStreamRead(
+        pipe,
+        [outputflag, &processOutput, captureStd, &tempStd, id,
+         outputFunc](std::vector<char> data) {
+          // Translate NULL characters in the output into valid text.
+          for (auto& c : data) {
+            if (c == '\0') {
+              c = ' ';
+            }
+          }
+
+          if (outputflag != OUTPUT_NONE) {
+            std::string strdata;
+            processOutput.DecodeText(data.data(), data.size(), strdata, id);
+            outputFunc(strdata);
+          }
+          if (captureStd) {
+            cm::append(tempStd, data.data(), data.data() + data.size());
+          }
+        },
+        [&finished, outputflag, &processOutput, id, outputFunc]() {
+          finished = true;
+          if (outputflag != OUTPUT_NONE) {
+            std::string strdata;
+            processOutput.DecodeText(std::string(), strdata, id);
+            if (!strdata.empty()) {
+              outputFunc(strdata);
+            }
+          }
+        });
+    };
+
+    outputHandle =
+      startRead(outStream, chain.OutputStream(), captureStdOut, tempStdOut, 1,
+                cmSystemTools::Stdout, outFinished);
+    if (chain.OutputStream() != chain.ErrorStream()) {
+      errorHandle =
+        startRead(errStream, chain.ErrorStream(), captureStdErr, tempStdErr, 2,
+                  cmSystemTools::Stderr, errFinished);
     }
   }
 
-  cmsysProcess_WaitForExit(cp, nullptr);
+  while (!timedOut && !(chain.Finished() && outFinished && errFinished)) {
+    uv_run(&chain.GetLoop(), UV_RUN_ONCE);
+  }
 
   if (captureStdOut) {
     captureStdOut->assign(tempStdOut.begin(), tempStdOut.end());
@@ -658,37 +693,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
   }
 
   bool result = true;
-  if (cmsysProcess_GetState(cp) == cmsysProcess_State_Exited) {
-    if (retVal) {
-      *retVal = cmsysProcess_GetExitValue(cp);
-    } else {
-      if (cmsysProcess_GetExitValue(cp) != 0) {
-        result = false;
-      }
-    }
-  } else if (cmsysProcess_GetState(cp) == cmsysProcess_State_Exception) {
-    const char* exception_str = cmsysProcess_GetExceptionString(cp);
-    if (outputflag != OUTPUT_NONE) {
-      std::cerr << exception_str << std::endl;
-    }
-    if (captureStdErr) {
-      captureStdErr->append(exception_str, strlen(exception_str));
-    } else if (captureStdOut) {
-      captureStdOut->append(exception_str, strlen(exception_str));
-    }
-    result = false;
-  } else if (cmsysProcess_GetState(cp) == cmsysProcess_State_Error) {
-    const char* error_str = cmsysProcess_GetErrorString(cp);
-    if (outputflag != OUTPUT_NONE) {
-      std::cerr << error_str << std::endl;
-    }
-    if (captureStdErr) {
-      captureStdErr->append(error_str, strlen(error_str));
-    } else if (captureStdOut) {
-      captureStdOut->append(error_str, strlen(error_str));
-    }
-    result = false;
-  } else if (cmsysProcess_GetState(cp) == cmsysProcess_State_Expired) {
+  if (timedOut) {
     const char* error_str = "Process terminated due to timeout\n";
     if (outputflag != OUTPUT_NONE) {
       std::cerr << error_str << std::endl;
@@ -697,9 +702,34 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
       captureStdErr->append(error_str, strlen(error_str));
     }
     result = false;
+  } else {
+    auto const& status = chain.GetStatus(0);
+    auto exception = status.GetException();
+
+    switch (exception.first) {
+      case cmUVProcessChain::ExceptionCode::None:
+        if (retVal) {
+          *retVal = static_cast<int>(status.ExitStatus);
+        } else {
+          if (status.ExitStatus != 0) {
+            result = false;
+          }
+        }
+        break;
+      default: {
+        if (outputflag != OUTPUT_NONE) {
+          std::cerr << exception.second << std::endl;
+        }
+        if (captureStdErr) {
+          captureStdErr->append(exception.second);
+        } else if (captureStdOut) {
+          captureStdOut->append(exception.second);
+        }
+        result = false;
+      } break;
+    }
   }
 
-  cmsysProcess_Delete(cp);
   return result;
 }
 
@@ -2213,9 +2243,10 @@ bool cmSystemTools::ListTar(const std::string& outFileName,
 #endif
 }
 
-int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
-                               cmDuration timeout, std::vector<char>& out,
-                               std::vector<char>& err)
+cmSystemTools::WaitForLineResult cmSystemTools::WaitForLine(
+  uv_loop_t* loop, uv_stream_t* outPipe, uv_stream_t* errPipe,
+  std::string& line, cmDuration timeout, std::vector<char>& out,
+  std::vector<char>& err)
 {
   line.clear();
   auto outiter = out.begin();
@@ -2237,7 +2268,7 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
           line.append(out.data(), length);
         }
         out.erase(out.begin(), outiter + 1);
-        return cmsysProcess_Pipe_STDOUT;
+        return WaitForLineResult::STDOUT;
       }
     }
 
@@ -2255,33 +2286,66 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
           line.append(err.data(), length);
         }
         err.erase(err.begin(), erriter + 1);
-        return cmsysProcess_Pipe_STDERR;
+        return WaitForLineResult::STDERR;
       }
     }
 
     // No newlines found.  Wait for more data from the process.
-    int length;
-    char* data;
-    double timeoutAsDbl = timeout.count();
-    int pipe =
-      cmsysProcess_WaitForData(process, &data, &length, &timeoutAsDbl);
-    if (pipe == cmsysProcess_Pipe_Timeout) {
+    struct ReadData
+    {
+      uv_stream_t* Stream;
+      std::vector<char> Buffer;
+      bool Read = false;
+      bool Finished = false;
+    };
+    auto startRead =
+      [](uv_stream_t* stream,
+         ReadData& data) -> std::unique_ptr<cmUVStreamReadHandle> {
+      data.Stream = stream;
+      return cmUVStreamRead(
+        stream,
+        [&data](std::vector<char> buf) {
+          data.Buffer = std::move(buf);
+          data.Read = true;
+          uv_read_stop(data.Stream);
+        },
+        [&data]() { data.Finished = true; });
+    };
+    ReadData outData;
+    auto outHandle = startRead(outPipe, outData);
+    ReadData errData;
+    auto errHandle = startRead(errPipe, errData);
+
+    cm::uv_timer_ptr timer;
+    bool timedOut = false;
+    timer.init(*loop, &timedOut);
+    timer.start(
+      [](uv_timer_t* handle) {
+        auto* timedOutPtr = static_cast<bool*>(handle->data);
+        *timedOutPtr = true;
+      },
+      static_cast<uint64_t>(timeout.count() * 1000.0), 0);
+
+    uv_run(loop, UV_RUN_ONCE);
+    if (timedOut) {
       // Timeout has been exceeded.
-      return pipe;
+      return WaitForLineResult::Timeout;
     }
-    if (pipe == cmsysProcess_Pipe_STDOUT) {
-      processOutput.DecodeText(data, length, strdata, 1);
+    if (outData.Read) {
+      processOutput.DecodeText(outData.Buffer.data(), outData.Buffer.size(),
+                               strdata, 1);
       // Append to the stdout buffer.
       std::vector<char>::size_type size = out.size();
       cm::append(out, strdata);
       outiter = out.begin() + size;
-    } else if (pipe == cmsysProcess_Pipe_STDERR) {
-      processOutput.DecodeText(data, length, strdata, 2);
+    } else if (errData.Read) {
+      processOutput.DecodeText(errData.Buffer.data(), errData.Buffer.size(),
+                               strdata, 2);
       // Append to the stderr buffer.
       std::vector<char>::size_type size = err.size();
       cm::append(err, strdata);
       erriter = err.begin() + size;
-    } else if (pipe == cmsysProcess_Pipe_None) {
+    } else if (outData.Finished && errData.Finished) {
       // Both stdout and stderr pipes have broken.  Return leftover data.
       processOutput.DecodeText(std::string(), strdata, 1);
       if (!strdata.empty()) {
@@ -2298,14 +2362,20 @@ int cmSystemTools::WaitForLine(cmsysProcess* process, std::string& line,
       if (!out.empty()) {
         line.append(out.data(), outiter - out.begin());
         out.erase(out.begin(), out.end());
-        return cmsysProcess_Pipe_STDOUT;
+        return WaitForLineResult::STDOUT;
       }
       if (!err.empty()) {
         line.append(err.data(), erriter - err.begin());
         err.erase(err.begin(), err.end());
-        return cmsysProcess_Pipe_STDERR;
+        return WaitForLineResult::STDERR;
       }
-      return cmsysProcess_Pipe_None;
+      return WaitForLineResult::None;
+    }
+    if (!outData.Finished) {
+      uv_read_stop(outPipe);
+    }
+    if (!errData.Finished) {
+      uv_read_stop(errPipe);
     }
   }
 }

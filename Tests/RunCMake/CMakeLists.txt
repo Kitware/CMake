@@ -466,6 +466,7 @@ add_RunCMake_test(build_command)
 add_executable(exit_code exit_code.c)
 set(execute_process_ARGS
   -DEXIT_CODE_EXE=$<TARGET_FILE:exit_code>
+  -DPRINT_STDIN_EXE=$<TARGET_FILE:print_stdin>
   -DPython_EXECUTABLE=${Python_EXECUTABLE}
   )
 if(NOT CMake_TEST_EXTERNAL_CMAKE)

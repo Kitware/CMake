@@ -3,15 +3,17 @@
 #include "cmCTestBuildHandler.h"
 
 #include <cstdlib>
+#include <memory>
 #include <ratio>
 #include <set>
 #include <utility>
 
 #include <cmext/algorithm>
 
+#include <cm3p/uv.h>
+
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
-#include "cmsys/Process.h"
 
 #include "cmCTest.h"
 #include "cmCTestLaunchReporter.h"
@@ -24,6 +26,9 @@
 #include "cmStringAlgorithms.h"
 #include "cmStringReplaceHelper.h"
 #include "cmSystemTools.h"
+#include "cmUVHandlePtr.h"
+#include "cmUVProcessChain.h"
+#include "cmUVStream.h"
 #include "cmValue.h"
 #include "cmXMLWriter.h"
 
@@ -420,7 +425,7 @@ int cmCTestBuildHandler::ProcessHandler()
   cmStringReplaceHelper colorRemover("\x1b\\[[0-9;]*m", "", nullptr);
   this->ColorRemover = &colorRemover;
   int retVal = 0;
-  int res = cmsysProcess_State_Exited;
+  bool res = true;
   if (!this->CTest->GetShowOnly()) {
     res = this->RunMakeCommand(makeCommand, &retVal, buildDirectory.c_str(), 0,
                                ofs);
@@ -475,7 +480,7 @@ int cmCTestBuildHandler::ProcessHandler()
   }
   this->GenerateXMLFooter(xml, elapsed_build_time);
 
-  if (res != cmsysProcess_State_Exited || retVal || this->TotalErrors > 0) {
+  if (!res || retVal || this->TotalErrors > 0) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Error(s) when building project" << std::endl);
   }
@@ -764,10 +769,10 @@ void cmCTestBuildHandler::LaunchHelper::WriteScrapeMatchers(
   }
 }
 
-int cmCTestBuildHandler::RunMakeCommand(const std::string& command,
-                                        int* retVal, const char* dir,
-                                        int timeout, std::ostream& ofs,
-                                        Encoding encoding)
+bool cmCTestBuildHandler::RunMakeCommand(const std::string& command,
+                                         int* retVal, const char* dir,
+                                         int timeout, std::ostream& ofs,
+                                         Encoding encoding)
 {
   // First generate the command and arguments
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
@@ -776,19 +781,9 @@ int cmCTestBuildHandler::RunMakeCommand(const std::string& command,
     return false;
   }
 
-  std::vector<const char*> argv;
-  argv.reserve(args.size() + 1);
-  for (std::string const& arg : args) {
-    argv.push_back(arg.c_str());
-  }
-  argv.push_back(nullptr);
-
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Run command:", this->Quiet);
-  for (char const* arg : argv) {
-    if (!arg) {
-      break;
-    }
+  for (auto const& arg : args) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        " \"" << arg << "\"", this->Quiet);
   }
@@ -800,21 +795,20 @@ int cmCTestBuildHandler::RunMakeCommand(const std::string& command,
   static_cast<void>(launchHelper);
 
   // Now create process object
-  cmsysProcess* cp = cmsysProcess_New();
-  cmsysProcess_SetCommand(cp, argv.data());
-  cmsysProcess_SetWorkingDirectory(cp, dir);
-  cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
-  cmsysProcess_SetTimeout(cp, timeout);
-  cmsysProcess_Execute(cp);
+  cmUVProcessChainBuilder builder;
+  builder.AddCommand(args)
+    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT)
+    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_ERROR);
+  if (dir) {
+    builder.SetWorkingDirectory(dir);
+  }
+  auto chain = builder.Start();
 
   // Initialize tick's
   std::string::size_type tick = 0;
-  const std::string::size_type tick_len = 1024;
+  static constexpr std::string::size_type tick_len = 1024;
 
-  char* data;
-  int length;
   cmProcessOutput processOutput(encoding);
-  std::string strdata;
   cmCTestOptionalLog(
     this->CTest, HANDLER_PROGRESS_OUTPUT,
     "   Each symbol represents "
@@ -836,39 +830,65 @@ int cmCTestBuildHandler::RunMakeCommand(const std::string& command,
   this->WarningQuotaReached = false;
   this->ErrorQuotaReached = false;
 
+  cm::uv_timer_ptr timer;
+  bool timedOut = false;
+  timer.init(chain.GetLoop(), &timedOut);
+  if (timeout > 0) {
+    timer.start(
+      [](uv_timer_t* t) {
+        auto* timedOutPtr = static_cast<bool*>(t->data);
+        *timedOutPtr = true;
+      },
+      timeout * 1000, 0);
+  }
+
   // For every chunk of data
-  int res;
-  while ((res = cmsysProcess_WaitForData(cp, &data, &length, nullptr))) {
-    // Replace '\0' with '\n', since '\0' does not really make sense. This is
-    // for Visual Studio output
-    for (int cc = 0; cc < length; ++cc) {
-      if (data[cc] == 0) {
-        data[cc] = '\n';
-      }
-    }
+  cm::uv_pipe_ptr outputStream;
+  bool outFinished = false;
+  cm::uv_pipe_ptr errorStream;
+  bool errFinished = false;
+  auto startRead = [this, &chain, &processOutput, &tick,
+                    &ofs](cm::uv_pipe_ptr& pipe, int stream,
+                          t_BuildProcessingQueueType& queue, bool& finished,
+                          int id) -> std::unique_ptr<cmUVStreamReadHandle> {
+    pipe.init(chain.GetLoop(), 0);
+    uv_pipe_open(pipe, stream);
+    return cmUVStreamRead(
+      pipe,
+      [this, &processOutput, &queue, id, &tick, &ofs](std::vector<char> data) {
+        // Replace '\0' with '\n', since '\0' does not really make sense. This
+        // is for Visual Studio output
+        for (auto& c : data) {
+          if (c == 0) {
+            c = '\n';
+          }
+        }
 
-    // Process the chunk of data
-    if (res == cmsysProcess_Pipe_STDERR) {
-      processOutput.DecodeText(data, length, strdata, 1);
-      this->ProcessBuffer(strdata.c_str(), strdata.size(), tick, tick_len, ofs,
-                          &this->BuildProcessingErrorQueue);
-    } else {
-      processOutput.DecodeText(data, length, strdata, 2);
-      this->ProcessBuffer(strdata.c_str(), strdata.size(), tick, tick_len, ofs,
-                          &this->BuildProcessingQueue);
-    }
-  }
-  processOutput.DecodeText(std::string(), strdata, 1);
-  if (!strdata.empty()) {
-    this->ProcessBuffer(strdata.c_str(), strdata.size(), tick, tick_len, ofs,
-                        &this->BuildProcessingErrorQueue);
-  }
-  processOutput.DecodeText(std::string(), strdata, 2);
-  if (!strdata.empty()) {
-    this->ProcessBuffer(strdata.c_str(), strdata.size(), tick, tick_len, ofs,
-                        &this->BuildProcessingQueue);
-  }
+        // Process the chunk of data
+        std::string strdata;
+        processOutput.DecodeText(data.data(), data.size(), strdata, id);
+        this->ProcessBuffer(strdata.c_str(), strdata.size(), tick, tick_len,
+                            ofs, &queue);
+      },
+      [this, &processOutput, &queue, id, &tick, &ofs, &finished]() {
+        std::string strdata;
+        processOutput.DecodeText(std::string(), strdata, id);
+        if (!strdata.empty()) {
+          this->ProcessBuffer(strdata.c_str(), strdata.size(), tick, tick_len,
+                              ofs, &queue);
+        }
+        finished = true;
+      });
+  };
+  auto outputHandle = startRead(outputStream, chain.OutputStream(),
+                                this->BuildProcessingQueue, outFinished, 1);
+  auto errorHandle =
+    startRead(errorStream, chain.ErrorStream(),
+              this->BuildProcessingErrorQueue, errFinished, 2);
 
+  while (!timedOut && !(outFinished && errFinished && chain.Finished())) {
+    uv_run(&chain.GetLoop(), UV_RUN_ONCE);
+  }
   this->ProcessBuffer(nullptr, 0, tick, tick_len, ofs,
                       &this->BuildProcessingQueue);
   this->ProcessBuffer(nullptr, 0, tick, tick_len, ofs,
@@ -879,90 +899,93 @@ int cmCTestBuildHandler::RunMakeCommand(const std::string& command,
                        << std::endl,
                      this->Quiet);
 
-  // Properly handle output of the build command
-  cmsysProcess_WaitForExit(cp, nullptr);
-  int result = cmsysProcess_GetState(cp);
-
-  if (result == cmsysProcess_State_Exited) {
-    if (retVal) {
-      *retVal = cmsysProcess_GetExitValue(cp);
-      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                         "Command exited with the value: " << *retVal
-                                                           << std::endl,
-                         this->Quiet);
-      // if a non zero return value
-      if (*retVal) {
-        // If there was an error running command, report that on the
-        // dashboard.
-        if (this->UseCTestLaunch) {
-          // For launchers, do not record this top-level error if other
-          // more granular build errors have already been captured.
-          bool launcherXMLFound = false;
-          cmsys::Directory launchDir;
-          launchDir.Load(this->CTestLaunchDir);
-          unsigned long n = launchDir.GetNumberOfFiles();
-          for (unsigned long i = 0; i < n; ++i) {
-            const char* fname = launchDir.GetFile(i);
-            if (cmHasLiteralSuffix(fname, ".xml")) {
-              launcherXMLFound = true;
-              break;
+  if (chain.Finished()) {
+    auto const& status = chain.GetStatus(0);
+    auto exception = status.GetException();
+    switch (exception.first) {
+      case cmUVProcessChain::ExceptionCode::None:
+        if (retVal) {
+          *retVal = static_cast<int>(status.ExitStatus);
+          cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                             "Command exited with the value: " << *retVal
+                                                               << std::endl,
+                             this->Quiet);
+          // if a non zero return value
+          if (*retVal) {
+            // If there was an error running command, report that on the
+            // dashboard.
+            if (this->UseCTestLaunch) {
+              // For launchers, do not record this top-level error if other
+              // more granular build errors have already been captured.
+              bool launcherXMLFound = false;
+              cmsys::Directory launchDir;
+              launchDir.Load(this->CTestLaunchDir);
+              unsigned long n = launchDir.GetNumberOfFiles();
+              for (unsigned long i = 0; i < n; ++i) {
+                const char* fname = launchDir.GetFile(i);
+                if (cmHasLiteralSuffix(fname, ".xml")) {
+                  launcherXMLFound = true;
+                  break;
+                }
+              }
+              if (!launcherXMLFound) {
+                cmCTestLaunchReporter reporter;
+                reporter.RealArgs = args;
+                reporter.ComputeFileNames();
+                reporter.ExitCode = *retVal;
+                reporter.Status = status;
+                // Use temporary BuildLog file to populate this error for
+                // CDash.
+                ofs.flush();
+                reporter.LogOut = this->LogFileNames["Build"];
+                reporter.LogOut += ".tmp";
+                reporter.WriteXML();
+              }
+            } else {
+              cmCTestBuildErrorWarning errorwarning;
+              errorwarning.LineNumber = 0;
+              errorwarning.LogLine = 1;
+              errorwarning.Text = cmStrCat(
+                "*** WARNING non-zero return value in ctest from: ", args[0]);
+              errorwarning.PreContext.clear();
+              errorwarning.PostContext.clear();
+              errorwarning.Error = false;
+              this->ErrorsAndWarnings.push_back(std::move(errorwarning));
+              this->TotalWarnings++;
             }
           }
-          if (!launcherXMLFound) {
-            cmCTestLaunchReporter reporter;
-            reporter.RealArgs = args;
-            reporter.ComputeFileNames();
-            reporter.ExitCode = *retVal;
-            reporter.Process = cp;
-            // Use temporary BuildLog file to populate this error for CDash.
-            ofs.flush();
-            reporter.LogOut = this->LogFileNames["Build"];
-            reporter.LogOut += ".tmp";
-            reporter.WriteXML();
-          }
-        } else {
-          cmCTestBuildErrorWarning errorwarning;
-          errorwarning.LineNumber = 0;
-          errorwarning.LogLine = 1;
-          errorwarning.Text = cmStrCat(
-            "*** WARNING non-zero return value in ctest from: ", argv[0]);
-          errorwarning.PreContext.clear();
-          errorwarning.PostContext.clear();
-          errorwarning.Error = false;
-          this->ErrorsAndWarnings.push_back(std::move(errorwarning));
-          this->TotalWarnings++;
         }
-      }
+        break;
+      case cmUVProcessChain::ExceptionCode::Spawn: {
+        // If there was an error running command, report that on the dashboard.
+        cmCTestBuildErrorWarning errorwarning;
+        errorwarning.LineNumber = 0;
+        errorwarning.LogLine = 1;
+        errorwarning.Text =
+          cmStrCat("*** ERROR executing: ", exception.second);
+        errorwarning.PreContext.clear();
+        errorwarning.PostContext.clear();
+        errorwarning.Error = true;
+        this->ErrorsAndWarnings.push_back(std::move(errorwarning));
+        this->TotalErrors++;
+        cmCTestLog(this->CTest, ERROR_MESSAGE,
+                   "There was an error: " << exception.second << std::endl);
+      } break;
+      default:
+        if (retVal) {
+          *retVal = status.TermSignal;
+          cmCTestOptionalLog(
+            this->CTest, WARNING,
+            "There was an exception: " << *retVal << std::endl, this->Quiet);
+        }
+        break;
     }
-  } else if (result == cmsysProcess_State_Exception) {
-    if (retVal) {
-      *retVal = cmsysProcess_GetExitException(cp);
-      cmCTestOptionalLog(this->CTest, WARNING,
-                         "There was an exception: " << *retVal << std::endl,
-                         this->Quiet);
-    }
-  } else if (result == cmsysProcess_State_Expired) {
+  } else {
     cmCTestOptionalLog(this->CTest, WARNING,
                        "There was a timeout" << std::endl, this->Quiet);
-  } else if (result == cmsysProcess_State_Error) {
-    // If there was an error running command, report that on the dashboard.
-    cmCTestBuildErrorWarning errorwarning;
-    errorwarning.LineNumber = 0;
-    errorwarning.LogLine = 1;
-    errorwarning.Text =
-      cmStrCat("*** ERROR executing: ", cmsysProcess_GetErrorString(cp));
-    errorwarning.PreContext.clear();
-    errorwarning.PostContext.clear();
-    errorwarning.Error = true;
-    this->ErrorsAndWarnings.push_back(std::move(errorwarning));
-    this->TotalErrors++;
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "There was an error: " << cmsysProcess_GetErrorString(cp)
-                                      << std::endl);
   }
 
-  cmsysProcess_Delete(cp);
-  return result;
+  return true;
 }
 
 // ######################################################################

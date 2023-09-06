@@ -508,6 +508,7 @@ CMAKE_CXX_SOURCES="\
   cmake  \
   cmakemain \
   cmcmd  \
+  cm_fileno \
 "
 
 if ${cmake_system_mingw}; then
