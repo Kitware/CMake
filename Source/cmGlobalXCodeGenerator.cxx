@@ -407,8 +407,10 @@ bool cmGlobalXCodeGenerator::ProcessGeneratorToolsetField(
       mf->IssueMessage(MessageType::FATAL_ERROR, e);
       return false;
     }
-    if (this->XcodeBuildSystem == BuildSystem::Twelve &&
-        this->XcodeVersion < 120) {
+    if ((this->XcodeBuildSystem == BuildSystem::Twelve &&
+         this->XcodeVersion < 120) ||
+        (this->XcodeBuildSystem == BuildSystem::One &&
+         this->XcodeVersion >= 140)) {
       /* clang-format off */
       std::string const& e = cmStrCat(
         "Generator\n"
