@@ -32,8 +32,8 @@ if ($env:VCToolsVersion -match '^(?<version>[0-9][0-9]\.[0-9])') {
   Write-Host "VCToolsVersion env var not set.  Run this from a Visual Studio Command Prompt."
 }
 
-$srcname = "qt-everywhere-src-5.12.1"
-$pkgname = "qt-5.12.1-win-$arch-$toolset-1"
+$srcname = "qt-everywhere-src-5.15.10"
+$pkgname = "qt-5.15.10-win-$arch-$toolset-1"
 $topdir = $pwd.Path
 $srcdir = Join-Path $topdir $srcname
 $blddir = Join-Path $topdir "$pkgname-build"
@@ -41,8 +41,9 @@ $prefix = Join-Path $topdir $pkgname
 
 # JOM
 if ( -not (Test-Path -Path "jom")) {
-  Invoke-WebRequest -Uri "http://download.qt-project.org/official_releases/jom/unstable-jom.zip" -OutFile jom.zip
-  if ($(Get-FileHash "jom.zip").Hash -ne '128fdd846fe24f8594eed37d1d8929a0ea78df563537c0c1b1861a635013fff8') {
+  Invoke-WebRequest -Uri "http://download.qt-project.org/official_releases/jom/jom_1_1_4.zip" -OutFile jom.zip
+  if ($(Get-FileHash "jom.zip").Hash -ne 'd533c1ef49214229681e90196ed2094691e8c4a0a0bef0b2c901debcb562682b') {
+      Write-Host "jom hash does not match"
       exit 1
   }
   Expand-Archive -Path jom.zip -DestinationPath jom
@@ -52,8 +53,9 @@ $jom = "$topdir\jom\jom.exe"
 
 # Qt Source
 if ( -not (Test-Path -Path $srcdir)) {
-  Invoke-WebRequest -Uri "https://download.qt.io/official_releases/qt/5.12/5.12.1/single/qt-everywhere-src-5.12.1.tar.xz" -OutFile qt.tar.xz
-  if ($(Get-FileHash "qt.tar.xz").Hash -ne 'caffbd625c7bc10ff8c5c7a27dbc7d84fa4de146975c0e1ffe904b514ccd6da4') {
+  Invoke-WebRequest -Uri "https://download.qt.io/archive/qt/5.15/5.15.10/single/qt-everywhere-opensource-src-5.15.10.tar.xz" -OutFile qt.tar.xz
+  if ($(Get-FileHash "qt.tar.xz").Hash -ne 'b545cb83c60934adc9a6bbd27e2af79e5013de77d46f5b9f5bb2a3c762bf55ca') {
+      Write-Host "qt hash does not match"
       exit 1
   }
   & $cmake -E tar xvf qt.tar.xz
@@ -94,6 +96,7 @@ if ( -not (Test-Path -Path $blddir)) {
     -skip qtlocation `
     -skip qtmultimedia `
     -skip qtsensors `
+    -skip qtserialbus `
     -skip qtserialport `
     -skip qtsvg `
     -skip qtwayland `
@@ -110,7 +113,7 @@ if ( -not (Test-Path -Path $prefix)) {
   & $jom install
   # Patch the installation.
   Set-Location -Path $prefix
-  & $git apply -v (Join-Path $PSScriptRoot qt-5.12.1-win-x86-msvc-install.patch)
+  & $git apply -v (Join-Path $PSScriptRoot qt-5.15.10-win-x86-msvc-install.patch)
 }
 
 # Package Qt
