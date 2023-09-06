@@ -493,8 +493,8 @@ public:
                   char ch)
   {
     std::string out;
-    out.reserve((first - this->view_.begin()) + count2 +
-                (this->view_.end() - last));
+    out.reserve(static_cast<size_type>(first - this->view_.begin()) + count2 +
+                static_cast<size_type>(this->view_.end() - last));
     out.append(this->view_.begin(), first);
     out.append(count2, ch);
     out.append(last, this->view_.end());
