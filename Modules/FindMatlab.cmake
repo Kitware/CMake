@@ -336,9 +336,7 @@ set(MATLAB_VERSIONS_MAPPING
 # temporary folder for all Matlab runs
 set(_matlab_temporary_folder ${CMAKE_BINARY_DIR}/Matlab)
 
-if(NOT EXISTS "${_matlab_temporary_folder}")
-  file(MAKE_DIRECTORY "${_matlab_temporary_folder}")
-endif()
+file(MAKE_DIRECTORY "${_matlab_temporary_folder}")
 
 #[=======================================================================[.rst:
 .. command:: matlab_get_version_from_release_name
@@ -567,7 +565,7 @@ function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MathWorks\\MATLAB\\${_matlab_current_version};MATLABROOT]"
       ABSOLUTE)
 
-    if(EXISTS "${current_MATLAB_ROOT}")
+    if(IS_DIRECTORY "${current_MATLAB_ROOT}")
       list(APPEND _matlab_roots_list "MATLAB" ${_matlab_current_version} ${current_MATLAB_ROOT})
     endif()
 
@@ -583,7 +581,7 @@ function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_
     # remove the dot
     string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
 
-    if(EXISTS "${current_MATLAB_ROOT}")
+    if(IS_DIRECTORY "${current_MATLAB_ROOT}")
       list(APPEND _matlab_roots_list "MCR" ${_matlab_current_version} "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
     endif()
 
@@ -599,7 +597,7 @@ function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_
     # remove the dot
     string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
 
-    if(EXISTS "${current_MATLAB_ROOT}")
+    if(IS_DIRECTORY "${current_MATLAB_ROOT}")
       list(APPEND _matlab_roots_list "MCR" ${_matlab_current_version} "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
     endif()
 
@@ -1325,7 +1323,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
     if(NOT _matlab_current_program)
 
       set(_find_matlab_options)
-      if(matlab_root AND EXISTS ${matlab_root})
+      if(IS_DIRECTORY "${matlab_root}")
         set(_find_matlab_options PATHS ${matlab_root} ${matlab_root}/bin NO_DEFAULT_PATH)
       endif()
 
@@ -1337,7 +1335,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
         )
     endif()
 
-    if(NOT _matlab_current_program OR NOT EXISTS ${_matlab_current_program})
+    if(NOT _matlab_current_program)
       # if not found, clear the dependent variables
       if(MATLAB_FIND_DEBUG)
         message(WARNING "[MATLAB] Cannot find the main matlab program under ${matlab_root}")
@@ -1463,7 +1461,7 @@ function(_Matlab_find_instances_osx matlab_roots)
     set(_matlab_base_path "/Applications/MATLAB_${_matlab_current_release}.app")
 
     # Check Matlab, has precedence over MCR
-    if(EXISTS ${_matlab_base_path})
+    if(IS_DIRECTORY "${_matlab_base_path}")
       if(MATLAB_FIND_DEBUG)
         message(STATUS "[MATLAB] Found version ${_matlab_current_release} (${_matlab_current_version}) in ${_matlab_base_path}")
       endif()
@@ -1472,7 +1470,7 @@ function(_Matlab_find_instances_osx matlab_roots)
 
     # Checks MCR
     set(_mcr_path "/Applications/MATLAB/MATLAB_Runtime/v${_matlab_current_version_without_dot}")
-    if(EXISTS "${_mcr_path}")
+    if(IS_DIRECTORY "${_mcr_path}")
       if(MATLAB_FIND_DEBUG)
         message(STATUS "[MATLAB] Found MCR version ${_matlab_current_release} (${_matlab_current_version}) in ${_mcr_path}")
       endif()
@@ -1565,7 +1563,7 @@ endif()
 if(Matlab_ROOT_DIR)
   # if the user specifies a possible root, we keep this one
 
-  if(NOT EXISTS "${Matlab_ROOT_DIR}")
+  if(NOT IS_DIRECTORY "${Matlab_ROOT_DIR}")
     # if Matlab_ROOT_DIR specified but erroneous
     if(MATLAB_FIND_DEBUG)
       message(WARNING "[MATLAB] the specified path for Matlab_ROOT_DIR does not exist (${Matlab_ROOT_DIR})")
