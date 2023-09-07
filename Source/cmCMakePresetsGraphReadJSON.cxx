@@ -38,7 +38,7 @@ using MacroExpander = cmCMakePresetsGraphInternal::MacroExpander;
 using cmCMakePresetsGraphInternal::ExpandMacros;
 
 constexpr int MIN_VERSION = 1;
-constexpr int MAX_VERSION = 7;
+constexpr int MAX_VERSION = 8;
 
 struct CMakeVersion
 {
@@ -294,7 +294,9 @@ auto const RootPresetsHelper =
     .Bind<std::nullptr_t>("vendor"_s, nullptr,
                           cmCMakePresetsGraphInternal::VendorHelper(
                             cmCMakePresetsErrors::INVALID_ROOT),
-                          false);
+                          false)
+    .Bind<std::nullptr_t>("$schema"_s, nullptr,
+                          cmCMakePresetsGraphInternal::SchemaHelper(), false);
 }
 
 namespace cmCMakePresetsGraphInternal {
@@ -413,6 +415,13 @@ bool EnvironmentMapHelper(
 
   return helper(out, value, state);
 }
+
+cmJSONHelper<std::nullptr_t> SchemaHelper()
+{
+  return [](std::nullptr_t&, const Json::Value*, cmJSONState*) -> bool {
+    return true;
+  };
+}
 }
 
 bool cmCMakePresetsGraph::ReadJSONFile(const std::string& filename,
@@ -485,6 +494,12 @@ bool cmCMakePresetsGraph::ReadJSONFile(const std::string& filename,
   if (v < 4 && root.isMember("include")) {
     cmCMakePresetsErrors::INCLUDE_UNSUPPORTED(&root["include"],
                                               &this->parseState);
+    return false;
+  }
+
+  // Support for $schema added in version 8.
+  if (v < 8 && root.isMember("$schema")) {
+    cmCMakePresetsErrors::SCHEMA_UNSUPPORTED(&this->parseState);
     return false;
   }
 

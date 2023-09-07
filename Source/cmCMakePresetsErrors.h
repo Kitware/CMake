@@ -113,4 +113,6 @@ JsonErrors::ErrorGenerator INVALID_ROOT_OBJECT(
 
 void PRESET_MISSING_FIELD(const std::string& presetName,
                           const std::string& missingField, cmJSONState* state);
+
+void SCHEMA_UNSUPPORTED(cmJSONState* state);
 }

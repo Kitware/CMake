@@ -153,6 +153,13 @@ run_cmake_presets(ConditionFuture)
 run_cmake_presets(SubConditionNull)
 run_cmake_presets(TraceNotSupported)
 
+set(CMakePresets_NO_PRESET 1)
+set(CMakePresets_SCHEMA_EXPECTED_RESULT 0)
+run_cmake_presets(SchemaSupported --list-presets)
+set(CMakePresets_SCHEMA_EXPECTED_RESULT 1)
+run_cmake_presets(SchemaNotSupported --list-presets)
+unset(CMakePresets_NO_PRESET)
+
 # Test cmakeMinimumRequired field
 run_cmake_presets(MinimumRequiredInvalid)
 set(CMakePresets_SCHEMA_EXPECTED_RESULT 0)
