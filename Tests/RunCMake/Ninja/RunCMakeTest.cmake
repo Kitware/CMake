@@ -380,45 +380,6 @@ function (run_ChangeBuildType)
 endfunction()
 run_ChangeBuildType()
 
-function(run_QtAutoMocDeps)
-  set(QtX Qt${CMake_TEST_Qt_version})
-  if(CMake_TEST_${QtX}Core_Version VERSION_GREATER_EQUAL 5.15.0)
-    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/QtAutoMocDeps-build)
-    run_cmake_with_options(QtAutoMocDeps
-      "-Dwith_qt_version=${CMake_TEST_Qt_version}"
-      "-D${QtX}_DIR=${${QtX}_DIR}"
-      "-D${QtX}Core_DIR=${${QtX}Core_DIR}"
-      "-D${QtX}Widgets_DIR=${${QtX}Widgets_DIR}"
-      "-DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}"
-    )
-    # Build the project.
-    run_ninja("${RunCMake_TEST_BINARY_DIR}")
-    # Touch just the library source file, which shouldn't cause a rerun of AUTOMOC
-    # for app_with_qt target.
-    file(TOUCH "${RunCMake_SOURCE_DIR}/simple_lib.cpp")
-    # Build and assert that AUTOMOC was not run for app_with_qt.
-    run_ninja("${RunCMake_TEST_BINARY_DIR}")
-    if(ninja_stdout MATCHES "Automatic MOC for target app_with_qt")
-      message(FATAL_ERROR
-        "AUTOMOC should not have executed for 'app_with_qt' target:\nstdout:\n${ninja_stdout}")
-    endif()
-    # Assert that the subdir executables were not rebuilt.
-    if(ninja_stdout MATCHES "Automatic MOC for target sub_exe_1")
-      message(FATAL_ERROR
-        "AUTOMOC should not have executed for 'sub_exe_1' target:\nstdout:\n${ninja_stdout}")
-    endif()
-    if(ninja_stdout MATCHES "Automatic MOC for target sub_exe_2")
-      message(FATAL_ERROR
-        "AUTOMOC should not have executed for 'sub_exe_2' target:\nstdout:\n${ninja_stdout}")
-    endif()
-    # Touch a header file to make sure an automoc dependency cycle is not introduced.
-    file(TOUCH "${RunCMake_SOURCE_DIR}/MyWindow.h")
-    run_ninja("${RunCMake_TEST_BINARY_DIR}")
-    # Need to run a second time to hit the dependency cycle.
-    run_ninja("${RunCMake_TEST_BINARY_DIR}")
-  endif()
-endfunction()
-
 function(run_QtAutoMocSkipPch)
   set(QtX Qt${CMake_TEST_Qt_version})
   if(CMake_TEST_${QtX}Core_Version VERSION_GREATER_EQUAL 5.15.0)
@@ -433,7 +394,7 @@ function(run_QtAutoMocSkipPch)
     run_ninja("${RunCMake_TEST_BINARY_DIR}")
   endif()
 endfunction()
+
 if(CMake_TEST_Qt_version)
-  run_QtAutoMocDeps()
   run_QtAutoMocSkipPch()
 endif()

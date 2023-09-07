@@ -274,6 +274,7 @@ if(CMake_TEST_Qt6 AND Qt6Widgets_FOUND)
   cmake_path(GET base_dir PARENT_PATH base_dir)  # <base>
   add_RunCMake_test(AutogenQt6 TEST_DIR Autogen
     -Dwith_qt_version=6
+    -DQtCore_VERSION=${Qt6Core_VERSION}
     "-DQt6_DIR:PATH=${Qt6_DIR}"
     "-DCMAKE_PREFIX_PATH:STRING=${base_dir}"
     -DPSEUDO_TIDY=$<TARGET_FILE:pseudo_tidy>
@@ -286,6 +287,7 @@ endif ()
 if(CMake_TEST_Qt5 AND Qt5Widgets_FOUND)
   add_RunCMake_test(AutogenQt5 TEST_DIR Autogen
     -Dwith_qt_version=5
+    -DQtCore_VERSION=${Qt5Core_VERSION}
     "-DQt5_DIR:PATH=${Qt5_DIR}"
   )
   set(want_NoQt_test FALSE)
