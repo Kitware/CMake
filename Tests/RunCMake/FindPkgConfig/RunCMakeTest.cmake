@@ -59,6 +59,6 @@ Libs: -L\${libdir}
   run_cmake(FindPkgConfig_GET_MATCHING_MODULE_NAME)
   run_cmake(FindPkgConfig_empty_target)
   if(NOT PKG_CONFIG_DONT_SUPPORT_SPACES_IN_PATH)
-    run_cmake(FindPkgConfig_LIBRARY_PATH)
+    run_cmake(FindPkgConfig_SYSTEM_PATH)
   endif()
 endif ()
