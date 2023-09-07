@@ -245,10 +245,9 @@ then use :command:`target_compile_features` to add the compiler feature
   </details>
 
 Finally, with our interface library set up, we need to link our
-executable ``Target``, our ``MathFunctions`` library, and our ``SqrtLibrary``
-library to our new
-``tutorial_compiler_flags`` library. Respectively, the code will look like
-this:
+executable ``Tutorial``, our ``SqrtLibrary`` library and our ``MathFunctions``
+library to our new ``tutorial_compiler_flags`` library. Respectively, the code
+will look like this:
 
 .. raw:: html
 
@@ -275,7 +274,7 @@ this:
   :caption: TODO 6: MathFunctions/CMakeLists.txt
   :name: MathFunctions-CMakeLists.txt-target_link_libraries-step4
   :language: cmake
-  :start-after: # link our compiler flags interface library
+  :start-after: # link SqrtLibrary to tutorial_compiler_flags
   :end-before: target_link_libraries(MathFunctions
 
 .. raw:: html
@@ -292,8 +291,7 @@ and this:
   :caption: TODO 7: MathFunctions/CMakeLists.txt
   :name: MathFunctions-SqrtLibrary-target_link_libraries-step4
   :language: cmake
-  :start-after: # link our compiler flags interface library
-  :end-before: target_link_libraries(MathFunctions PUBLIC SqrtLibrary)
+  :start-after: # link MathFunctions to tutorial_compiler_flags
 
 .. raw:: html
 

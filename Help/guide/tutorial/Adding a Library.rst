@@ -184,7 +184,7 @@ Now let's use our library. In ``tutorial.cxx``, include ``MathFunctions.h``:
 
   </details>
 
-Lastly, replace ``sqrt`` with our library function ``mathfunctions::mysqrt``.
+Lastly, replace ``sqrt`` with the wrapper function ``mathfunctions::sqrt``.
 
 .. raw:: html
 
