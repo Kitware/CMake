@@ -16,12 +16,13 @@ if (USE_MYMATH)
               mysqrt.cxx
               )
 
-  # link our compiler flags interface library
+  # link SqrtLibrary to tutorial_compiler_flags
   target_link_libraries(SqrtLibrary PUBLIC tutorial_compiler_flags)
+
   target_link_libraries(MathFunctions PRIVATE SqrtLibrary)
 endif()
 
-# link our compiler flags interface library
+# link MathFunctions to tutorial_compiler_flags
 target_link_libraries(MathFunctions PUBLIC tutorial_compiler_flags)
 
 # TODO 1: Create a variable called installable_libs that is a list of all

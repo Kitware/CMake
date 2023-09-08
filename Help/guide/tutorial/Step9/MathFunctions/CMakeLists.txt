@@ -25,10 +25,13 @@ if (USE_MYMATH)
                              ${CMAKE_CURRENT_BINARY_DIR}
                              )
 
+  # link SqrtLibrary to tutorial_compiler_flags
   target_link_libraries(SqrtLibrary PUBLIC tutorial_compiler_flags)
+
   target_link_libraries(MathFunctions PRIVATE SqrtLibrary)
 endif()
 
+# link MathFunctions to tutorial_compiler_flags
 target_link_libraries(MathFunctions PUBLIC tutorial_compiler_flags)
 
 # install libs
