@@ -1,26 +1,26 @@
 diff --git a/lib/cmake/Qt5Core/Qt5CoreConfig.cmake b/lib/cmake/Qt5Core/Qt5CoreConfig.cmake
-index 04ec302..75d5596 100644
+index 5bad1af..25bf3e3 100644
 --- a/lib/cmake/Qt5Core/Qt5CoreConfig.cmake
 +++ b/lib/cmake/Qt5Core/Qt5CoreConfig.cmake
-@@ -118,7 +118,7 @@ if (NOT TARGET Qt5::Core)
-     list(REMOVE_DUPLICATES Qt5Core_COMPILE_DEFINITIONS)
-     list(REMOVE_DUPLICATES Qt5Core_EXECUTABLE_COMPILE_FLAGS)
+@@ -264,7 +264,7 @@ if (NOT TARGET Qt5::Core)
+         return()
+     endif()
  
 -    set(_Qt5Core_LIB_DEPENDENCIES "")
 +    set(_Qt5Core_LIB_DEPENDENCIES "${_qt5Core_install_prefix}/lib/qtpcre2.lib;netapi32.lib;version.lib")
  
  
-     add_library(Qt5::Core STATIC IMPORTED)
+     if(NOT Qt5_EXCLUDE_STATIC_DEPENDENCIES)
 diff --git a/lib/cmake/Qt5Widgets/Qt5WidgetsConfig.cmake b/lib/cmake/Qt5Widgets/Qt5WidgetsConfig.cmake
-index a07b953..2e07371 100644
+index d9966ad..308e4cb 100644
 --- a/lib/cmake/Qt5Widgets/Qt5WidgetsConfig.cmake
 +++ b/lib/cmake/Qt5Widgets/Qt5WidgetsConfig.cmake
-@@ -118,7 +118,7 @@ if (NOT TARGET Qt5::Widgets)
-     list(REMOVE_DUPLICATES Qt5Widgets_COMPILE_DEFINITIONS)
-     list(REMOVE_DUPLICATES Qt5Widgets_EXECUTABLE_COMPILE_FLAGS)
+@@ -264,7 +264,7 @@ if (NOT TARGET Qt5::Widgets)
+         return()
+     endif()
  
 -    set(_Qt5Widgets_LIB_DEPENDENCIES "Qt5::Gui;Qt5::Core")
 +    set(_Qt5Widgets_LIB_DEPENDENCIES "Qt5::Gui;Qt5::Core;dwmapi.lib;uxtheme.lib")
  
  
-     add_library(Qt5::Widgets STATIC IMPORTED)
+     if(NOT Qt5_EXCLUDE_STATIC_DEPENDENCIES)
