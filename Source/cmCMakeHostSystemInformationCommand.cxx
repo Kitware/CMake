@@ -35,7 +35,6 @@
 #  include "cmGlobalVisualStudio10Generator.h"
 #  include "cmGlobalVisualStudioVersionedGenerator.h"
 #  include "cmVSSetupHelper.h"
-#  define HAVE_VS_SETUP_HELPER
 #endif
 
 namespace {
@@ -378,9 +377,9 @@ std::map<std::string, std::string> GetOSReleaseVariables(
   return data;
 }
 
-cm::optional<std::string> GetValue(cmExecutionStatus& status,
-                                   std::string const& key,
-                                   std::string const& variable)
+cm::optional<std::string> GetDistribValue(cmExecutionStatus& status,
+                                          std::string const& key,
+                                          std::string const& variable)
 {
   const auto prefix = "DISTRIB_"_s;
   if (!cmHasPrefix(key, prefix)) {
@@ -414,9 +413,9 @@ cm::optional<std::string> GetValue(cmExecutionStatus& status,
   return std::string{};
 }
 
-#ifdef HAVE_VS_SETUP_HELPER
-cm::optional<std::string> GetValue(cmExecutionStatus& status,
-                                   std::string const& key)
+#ifdef _WIN32
+cm::optional<std::string> GetWindowsValue(cmExecutionStatus& status,
+                                          std::string const& key)
 {
   auto* const gg = status.GetMakefile().GetGlobalGenerator();
   for (auto vs : { 15, 16, 17 }) {
@@ -598,9 +597,9 @@ bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
     auto value =
       GetValueChained(
           [&]() { return GetValue(info, key); }
-        , [&]() { return GetValue(status, key, variable); }
-#ifdef HAVE_VS_SETUP_HELPER
-        , [&]() { return GetValue(status, key); }
+        , [&]() { return GetDistribValue(status, key, variable); }
+#ifdef _WIN32
+        , [&]() { return GetWindowsValue(status, key); }
 #endif
         );
     // clang-format on
