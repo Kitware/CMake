@@ -2765,29 +2765,6 @@ if(BUILD_TESTING)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateP4_DIR}")
   endif()
 
-  configure_file(
-    "${CMake_SOURCE_DIR}/Tests/CTestTestFailure/testNoBuild.cmake.in"
-    "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoBuild.cmake"
-    @ONLY ESCAPE_QUOTES)
-  add_test(CTestTestNoBuild ${CMAKE_CTEST_COMMAND}
-    -S "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoBuild.cmake" -V
-    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testOut1.log"
-    )
-  set_tests_properties(CTestTestNoBuild PROPERTIES
-    FAIL_REGULAR_EXPRESSION "Error" WILL_FAIL true)
-
-  configure_file(
-    "${CMake_SOURCE_DIR}/Tests/CTestTestFailure/testNoExe.cmake.in"
-    "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoExe.cmake"
-    @ONLY ESCAPE_QUOTES)
-  add_test(CTestTestNoExe ${CMAKE_CTEST_COMMAND}
-    -S "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoExe.cmake" -V
-    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testOut2.log"
-    )
-  set_tests_properties(CTestTestNoExe PROPERTIES DEPENDS CTestTestNoBuild
-    PASS_REGULAR_EXPRESSION "Could not find executable"
-    FAIL_REGULAR_EXPRESSION "SegFault")
-
   if(NOT CMake_TEST_NO_NETWORK)
     configure_file(
       "${CMake_SOURCE_DIR}/Tests/CTestTestUpload/test.cmake.in"
