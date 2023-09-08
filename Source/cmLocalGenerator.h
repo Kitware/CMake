@@ -649,7 +649,9 @@ private:
   bool AllAppleArchSysrootsAreTheSame(const std::vector<std::string>& archs,
                                       cmValue sysroot);
 
-  void CopyPchCompilePdb(const std::string& config, cmGeneratorTarget* target,
+  void CopyPchCompilePdb(const std::string& config,
+                         const std::string& language,
+                         cmGeneratorTarget* target,
                          const std::string& ReuseFrom,
                          cmGeneratorTarget* reuseTarget,
                          std::vector<std::string> const& extensions);
