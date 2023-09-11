@@ -1,0 +1,1 @@
+-- MSYSTEM_PREFIX_INCLUDE_DIR='[^']*/Tests/RunCMake/find_path/MSYSTEM_PREFIX/include'

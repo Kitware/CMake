@@ -72,6 +72,10 @@ run_cmake(REGISTRY_VIEW-no-view)
 run_cmake(REGISTRY_VIEW-wrong-view)
 run_cmake(REGISTRY_VIEW-propagated)
 
+if(CMAKE_HOST_WIN32 AND MINGW)
+  run_cmake(MSYSTEM_PREFIX)
+endif()
+
 if(CMAKE_HOST_WIN32)
   run_cmake(CMP0144-WARN-CaseInsensitive)
   run_cmake(CMP0144-OLD-CaseInsensitive)
