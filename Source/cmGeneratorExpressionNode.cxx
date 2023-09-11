@@ -128,6 +128,16 @@ struct BooleanOpNode : public cmGeneratorExpressionNode
 
   int NumExpectedParameters() const override { return OneOrMoreParameters; }
 
+  bool ShouldEvaluateNextParameter(const std::vector<std::string>& parameters,
+                                   std::string& def_value) const override
+  {
+    if (!parameters.empty() && parameters[0] == failureVal) {
+      def_value = failureVal;
+      return false;
+    }
+    return true;
+  }
+
   std::string Evaluate(const std::vector<std::string>& parameters,
                        cmGeneratorExpressionContext* context,
                        const GeneratorExpressionContent* content,
@@ -194,6 +204,13 @@ static const struct IfNode : public cmGeneratorExpressionNode
   IfNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 3; }
+
+  bool ShouldEvaluateNextParameter(const std::vector<std::string>& parameters,
+                                   std::string&) const override
+  {
+    return (parameters.empty() ||
+            parameters[0] != cmStrCat(parameters.size() - 1, ""));
+  }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
                        cmGeneratorExpressionContext* context,
