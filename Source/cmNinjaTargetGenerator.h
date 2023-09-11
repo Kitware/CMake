@@ -19,7 +19,6 @@
 #include "cmNinjaTypes.h"
 #include "cmOSXBundleGenerator.h"
 
-class cmCustomCommand;
 class cmGeneratedFileStream;
 class cmGeneratorTarget;
 class cmLocalNinjaGenerator;
@@ -251,7 +250,6 @@ private:
     mutable ImportedCxxModuleLookup ImportedCxxModules;
     // Swift Support
     Json::Value SwiftOutputMap;
-    std::vector<cmCustomCommand const*> CustomCommands;
     cmNinjaDeps ExtraFiles;
     std::unique_ptr<MacOSXContentGeneratorType> MacOSXContentGenerator;
   };

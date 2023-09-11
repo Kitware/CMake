@@ -49,6 +49,8 @@
 #include "cmValue.h"
 #include "cmake.h"
 
+class cmCustomCommand;
+
 std::unique_ptr<cmNinjaTargetGenerator> cmNinjaTargetGenerator::New(
   cmGeneratorTarget* target)
 {
@@ -972,16 +974,15 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     << cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType())
     << " target " << this->GetTargetName() << "\n\n";
 
+  std::vector<cmCustomCommand const*> customCommands;
   {
-    std::vector<cmSourceFile const*> customCommands;
-    this->GeneratorTarget->GetCustomCommands(customCommands, config);
-    for (cmSourceFile const* sf : customCommands) {
+    std::vector<cmSourceFile const*> customCommandSources;
+    this->GeneratorTarget->GetCustomCommands(customCommandSources, config);
+    for (cmSourceFile const* sf : customCommandSources) {
       cmCustomCommand const* cc = sf->GetCustomCommand();
       this->GetLocalGenerator()->AddCustomCommandTarget(
         cc, this->GetGeneratorTarget());
-      // Record the custom commands for this target. The container is used
-      // in WriteObjectBuildStatement when called in a loop below.
-      this->Configs[config].CustomCommands.push_back(cc);
+      customCommands.push_back(cc);
     }
   }
   {
@@ -1028,7 +1029,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     cm::append(orderOnlyDeps, this->Configs[config].ExtraFiles);
 
     // Add order-only dependencies on custom command outputs.
-    for (cmCustomCommand const* cc : this->Configs[config].CustomCommands) {
+    for (cmCustomCommand const* cc : customCommands) {
       cmCustomCommandGenerator ccg(*cc, config, this->GetLocalGenerator());
       const std::vector<std::string>& ccoutputs = ccg.GetOutputs();
       const std::vector<std::string>& ccbyproducts = ccg.GetByproducts();
