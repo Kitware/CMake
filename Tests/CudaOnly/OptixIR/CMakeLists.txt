@@ -13,6 +13,7 @@ if(CMAKE_CUDA_COMPILER_VERSION VERSION_GREATER_EQUAL "11.7.0")
   set_property(TARGET CudaOptix PROPERTY CUDA_OPTIX_COMPILATION ON)
 endif()
 
+set_property(TARGET CudaOptix PROPERTY CUDA_SEPARABLE_COMPILATION ON)
 set_property(TARGET CudaOptix PROPERTY CUDA_ARCHITECTURES native)
 
 add_executable(CudaOnlyOptixIR main.cu)
