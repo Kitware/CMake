@@ -221,11 +221,26 @@ void cmDebuggerPipeClient_WIN32::WaitForConnection()
                              NULL, OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
     if (hPipe == INVALID_HANDLE_VALUE) {
       auto err = GetLastError();
-      throw std::runtime_error("CreateFile failed with " + err);
+      throw std::runtime_error(std::string("CreateFile failed for pipe ") +
+                               GetErrorMessage(err));
     }
 
     pipes = std::make_unique<DuplexPipe_WIN32>(hPipe);
   }
+}
+
+std::string cmDebuggerPipeClient_WIN32::GetErrorMessage(DWORD errorCode)
+{
+  LPSTR message = nullptr;
+  DWORD size = FormatMessageA(
+    FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
+      FORMAT_MESSAGE_IGNORE_INSERTS,
+    nullptr, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+    (LPSTR)&message, 0, nullptr);
+  std::string errorMessage =
+    this->PipeName + ": " + std::string(message, size);
+  LocalFree(message);
+  return errorMessage;
 }
 
 bool cmDebuggerPipeClient_WIN32::isOpen()
