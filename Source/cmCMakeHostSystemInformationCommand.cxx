@@ -35,7 +35,6 @@
 #  include "cmGlobalVisualStudio10Generator.h"
 #  include "cmGlobalVisualStudioVersionedGenerator.h"
 #  include "cmVSSetupHelper.h"
-#  define HAVE_VS_SETUP_HELPER
 #endif
 
 namespace {
@@ -378,9 +377,9 @@ std::map<std::string, std::string> GetOSReleaseVariables(
   return data;
 }
 
-cm::optional<std::string> GetValue(cmExecutionStatus& status,
-                                   std::string const& key,
-                                   std::string const& variable)
+cm::optional<std::string> GetDistribValue(cmExecutionStatus& status,
+                                          std::string const& key,
+                                          std::string const& variable)
 {
   const auto prefix = "DISTRIB_"_s;
   if (!cmHasPrefix(key, prefix)) {
@@ -414,9 +413,89 @@ cm::optional<std::string> GetValue(cmExecutionStatus& status,
   return std::string{};
 }
 
-#ifdef HAVE_VS_SETUP_HELPER
-cm::optional<std::string> GetValue(cmExecutionStatus& status,
-                                   std::string const& key)
+#ifdef _WIN32
+std::string FindMSYSTEM_PREFIX(std::vector<std::string> prefixes)
+{
+  for (std::string const& prefix : prefixes) {
+    std::string out;
+    std::string err;
+    int ret;
+    // In a modern MSYSTEM environment we expect cygpath to be in PATH.
+    std::vector<std::string> cygpath_cmd{ "cygpath", "-w", prefix };
+    if (cmSystemTools::RunSingleCommand(cygpath_cmd, &out, &err, &ret, nullptr,
+                                        cmSystemTools::OUTPUT_NONE)) {
+      if (ret == 0) {
+        out = cmTrimWhitespace(out);
+        cmSystemTools::ConvertToUnixSlashes(out);
+        if (cmSystemTools::FileIsDirectory(out)) {
+          return out;
+        }
+      }
+    } else {
+      // In a legacy MSYSTEM environment (MinGW/MSYS 1.0) there is no
+      // cygpath but we expect 'sh' to be in PATH.
+      std::vector<std::string> sh_cmd{
+        "sh", "-c", cmStrCat("cd \"", prefix, "\" && cmd //c cd")
+      };
+      if (cmSystemTools::RunSingleCommand(sh_cmd, &out, &err, &ret, nullptr,
+                                          cmSystemTools::OUTPUT_NONE)) {
+        if (ret == 0) {
+          out = cmTrimWhitespace(out);
+          cmSystemTools::ConvertToUnixSlashes(out);
+          if (cmSystemTools::FileIsDirectory(out)) {
+            return out;
+          }
+        }
+      }
+    }
+  }
+  return {};
+}
+
+std::string FallbackMSYSTEM_PREFIX(cm::string_view msystem)
+{
+  // These layouts are used by distributions such as
+  // * MSYS2: https://www.msys2.org/docs/environments/
+  // * MinGW/MSYS 1.0: http://mingw.osdn.io/
+  if (msystem == "MSYS"_s) {
+    static std::string const msystem_msys = FindMSYSTEM_PREFIX({ "/usr" });
+    return msystem_msys;
+  }
+  if (msystem == "MINGW32"_s) {
+    static std::string const msystem_mingw32 =
+      FindMSYSTEM_PREFIX({ "/mingw32", "/mingw" });
+    return msystem_mingw32;
+  }
+  if (msystem == "MINGW64"_s) {
+    static std::string const msystem_mingw64 =
+      FindMSYSTEM_PREFIX({ "/mingw64" });
+    return msystem_mingw64;
+  }
+  if (msystem == "UCRT64"_s) {
+    static std::string const msystem_ucrt64 =
+      FindMSYSTEM_PREFIX({ "/ucrt64" });
+    return msystem_ucrt64;
+  }
+  if (msystem == "CLANG32"_s) {
+    static std::string const msystem_clang32 =
+      FindMSYSTEM_PREFIX({ "/clang32" });
+    return msystem_clang32;
+  }
+  if (msystem == "CLANG64"_s) {
+    static std::string const msystem_clang64 =
+      FindMSYSTEM_PREFIX({ "/clang64" });
+    return msystem_clang64;
+  }
+  if (msystem == "CLANGARM64"_s) {
+    static std::string const msystem_clangarm64 =
+      FindMSYSTEM_PREFIX({ "/clangarm64" });
+    return msystem_clangarm64;
+  }
+  return {};
+}
+
+cm::optional<std::string> GetWindowsValue(cmExecutionStatus& status,
+                                          std::string const& key)
 {
   auto* const gg = status.GetMakefile().GetGlobalGenerator();
   for (auto vs : { 15, 16, 17 }) {
@@ -447,6 +526,23 @@ cm::optional<std::string> GetValue(cmExecutionStatus& status,
     return vs10gen->FindMSBuildCommandEarly(&status.GetMakefile());
   }
 
+  if (key == "MSYSTEM_PREFIX") {
+    // MSYSTEM_PREFIX is meaningful only under a MSYSTEM environment.
+    cm::optional<std::string> ms = cmSystemTools::GetEnvVar("MSYSTEM");
+    if (!ms || ms->empty()) {
+      return std::string();
+    }
+    // Prefer the MSYSTEM_PREFIX environment variable.
+    if (cm::optional<std::string> msp =
+          cmSystemTools::GetEnvVar("MSYSTEM_PREFIX")) {
+      cmSystemTools::ConvertToUnixSlashes(*msp);
+      if (cmSystemTools::FileIsDirectory(*msp)) {
+        return msp;
+      }
+    }
+    // Fall back to known distribution layouts.
+    return FallbackMSYSTEM_PREFIX(*ms);
+  }
   return {};
 }
 #endif
@@ -598,9 +694,9 @@ bool cmCMakeHostSystemInformationCommand(std::vector<std::string> const& args,
     auto value =
       GetValueChained(
           [&]() { return GetValue(info, key); }
-        , [&]() { return GetValue(status, key, variable); }
-#ifdef HAVE_VS_SETUP_HELPER
-        , [&]() { return GetValue(status, key); }
+        , [&]() { return GetDistribValue(status, key, variable); }
+#ifdef _WIN32
+        , [&]() { return GetWindowsValue(status, key); }
 #endif
         );
     // clang-format on

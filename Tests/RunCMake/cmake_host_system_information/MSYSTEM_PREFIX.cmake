@@ -1,0 +1,7 @@
+cmake_host_system_information(RESULT result QUERY MSYSTEM_PREFIX)
+message(STATUS "MSYSTEM_PREFIX='${result}'")
+if(CMake_TEST_MSYSTEM_PREFIX)
+  if(NOT "${result}" STREQUAL "${CMake_TEST_MSYSTEM_PREFIX}")
+    message(FATAL_ERROR "Actual result:\n ${result}\nis not expected result:\n ${CMake_TEST_MSYSTEM_PREFIX}")
+  endif()
+endif()
