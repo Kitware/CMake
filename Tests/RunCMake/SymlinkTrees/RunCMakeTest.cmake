@@ -29,8 +29,6 @@ function (run_symlink_test case src bin src_from_bin bin_from_src)
 
   # Test running in binary directory.
   set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
-  # Emulate a shell using this directory.
-  set(ENV{PWD} "${RunCMake_TEST_COMMAND_WORKING_DIRECTORY}")
 
   # Pass absolute path to the source tree, plain.
   set(RunCMake_TEST_VARIANT_DESCRIPTION " $abs/${name}/${src}")
@@ -50,8 +48,6 @@ function (run_symlink_test case src bin src_from_bin bin_from_src)
 
   # Test running in source directory.
   set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${RunCMake_TEST_SOURCE_DIR}")
-  # Emulate a shell using this directory.
-  set(ENV{PWD} "${RunCMake_TEST_COMMAND_WORKING_DIRECTORY}")
 
   # Pass absolute path to the binary tree with -B.
   set(RunCMake_TEST_VARIANT_DESCRIPTION " -B $abs/${name}/${bin}")
@@ -63,8 +59,6 @@ function (run_symlink_test case src bin src_from_bin bin_from_src)
 
   # Test running in another directory.
   set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY "${RunCMake_BINARY_DIR}/${name}")
-  # Emulate a shell using this directory.
-  set(ENV{PWD} "${RunCMake_TEST_COMMAND_WORKING_DIRECTORY}")
 
   # Pass absolute paths to the source and binary trees.
   set(RunCMake_TEST_VARIANT_DESCRIPTION " -S $abs/${name}/${src} -B $abs/${name}/${bin}")
