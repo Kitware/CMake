@@ -1062,7 +1062,7 @@ archive_read_format_rar_read_header(struct archive_read *a,
 		      return (ARCHIVE_FATAL);
 	      }
 	      p = h;
-	      crc32_val = crc32(crc32_val, (const unsigned char *)p, to_read);
+	      crc32_val = crc32(crc32_val, (const unsigned char *)p, (unsigned int)to_read);
 	      __archive_read_consume(a, to_read);
 	      skip -= to_read;
       }
@@ -1830,12 +1830,8 @@ read_exttime(const char *p, struct rar *rar, const char *endp)
   struct tm *tm;
   time_t t;
   long nsec;
-#if defined(HAVE_LOCALTIME_R) || defined(HAVE__LOCALTIME64_S)
+#if defined(HAVE_LOCALTIME_R) || defined(HAVE_LOCALTIME_S)
   struct tm tmbuf;
-#endif
-#if defined(HAVE__LOCALTIME64_S)
-  errno_t terr;
-  __time64_t tmptime;
 #endif
 
   if (p + 2 > endp)
@@ -1868,15 +1864,10 @@ read_exttime(const char *p, struct rar *rar, const char *endp)
         rem = (((unsigned)(unsigned char)*p) << 16) | (rem >> 8);
         p++;
       }
-#if defined(HAVE_LOCALTIME_R)
+#if defined(HAVE_LOCALTIME_S)
+      tm = localtime_s(&tmbuf, &t) ? NULL : &tmbuf;
+#elif defined(HAVE_LOCALTIME_R)
       tm = localtime_r(&t, &tmbuf);
-#elif defined(HAVE__LOCALTIME64_S)
-      tmptime = t;
-      terr = _localtime64_s(&tmbuf, &tmptime);
-      if (terr)
-        tm = NULL;
-      else
-        tm = &tmbuf;
 #else
       tm = localtime(&t);
 #endif
@@ -3446,7 +3437,7 @@ compile_program(const uint8_t *bytes, size_t length)
   prog = calloc(1, sizeof(*prog));
   if (!prog)
     return NULL;
-  prog->fingerprint = crc32(0, bytes, length) | ((uint64_t)length << 32);
+  prog->fingerprint = crc32(0, bytes, (unsigned int)length) | ((uint64_t)length << 32);
 
   if (membr_bits(&br, 1))
   {

@@ -2186,11 +2186,11 @@ zip_read_data_zipx_bzip2(struct archive_read *a, const void **buff,
 
 	/* Setup buffer boundaries. */
 	zip->bzstream.next_in = (char*)(uintptr_t) compressed_buff;
-	zip->bzstream.avail_in = in_bytes;
+	zip->bzstream.avail_in = (uint32_t)in_bytes;
 	zip->bzstream.total_in_hi32 = 0;
 	zip->bzstream.total_in_lo32 = 0;
 	zip->bzstream.next_out = (char*) zip->uncompressed_buffer;
-	zip->bzstream.avail_out = zip->uncompressed_buffer_size;
+	zip->bzstream.avail_out = (uint32_t)zip->uncompressed_buffer_size;
 	zip->bzstream.total_out_hi32 = 0;
 	zip->bzstream.total_out_lo32 = 0;
 
@@ -2227,7 +2227,7 @@ zip_read_data_zipx_bzip2(struct archive_read *a, const void **buff,
 	to_consume = zip->bzstream.total_in_lo32;
 	__archive_read_consume(a, to_consume);
 
-	total_out = ((uint64_t) zip->bzstream.total_out_hi32 << 32) +
+	total_out = ((uint64_t) zip->bzstream.total_out_hi32 << 32) |
 	    zip->bzstream.total_out_lo32;
 
 	zip->entry_bytes_remaining -= to_consume;
