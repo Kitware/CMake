@@ -18,17 +18,24 @@ work with your system as an example).  If you want to use a more
 convenient module that includes everything, use the
 :module:`FindOpenSceneGraph` instead of the ``Findosg*.cmake`` modules.
 
-Locate osgShadow This module defines
+Locate osgShadow This module defines:
 
-OSGSHADOW_FOUND - Was osgShadow found? OSGSHADOW_INCLUDE_DIR - Where
-to find the headers OSGSHADOW_LIBRARIES - The libraries to link for
-osgShadow (use this)
+``OSGSHADOW_FOUND``
+  Was osgShadow found?
+``OSGSHADOW_INCLUDE_DIR``
+  Where to find the headers
+``OSGSHADOW_LIBRARIES``
+  The libraries to link for osgShadow (use this)
+``OSGSHADOW_LIBRARY``
+  The osgShadow library
+``OSGSHADOW_LIBRARY_DEBUG``
+  The osgShadow debug library
 
-OSGSHADOW_LIBRARY - The osgShadow library OSGSHADOW_LIBRARY_DEBUG -
-The osgShadow debug library
+``$OSGDIR`` is an environment variable that would correspond to::
 
-$OSGDIR is an environment variable that would correspond to the
-./configure --prefix=$OSGDIR used in building osg.
+  ./configure --prefix=$OSGDIR
+
+used in building osg.
 
 Created by Eric Wing.
 #]=======================================================================]

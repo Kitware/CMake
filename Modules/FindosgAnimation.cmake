@@ -18,18 +18,24 @@ work with your system as an example).  If you want to use a more
 convenient module that includes everything, use the
 :module:`FindOpenSceneGraph` instead of the ``Findosg*.cmake`` modules.
 
-Locate osgAnimation This module defines
+Locate osgAnimation This module defines:
 
-OSGANIMATION_FOUND - Was osgAnimation found? OSGANIMATION_INCLUDE_DIR
-- Where to find the headers OSGANIMATION_LIBRARIES - The libraries to
-link against for the OSG (use this)
+``OSGANIMATION_FOUND``
+  Was osgAnimation found?
+``OSGANIMATION_INCLUDE_DIR``
+  Where to find the headers
+``OSGANIMATION_LIBRARIES``
+  The libraries to link against for the OSG (use this)
+``OSGANIMATION_LIBRARY``
+  The OSG library
+``OSGANIMATION_LIBRARY_DEBUG``
+  The OSG debug library
 
-OSGANIMATION_LIBRARY - The OSG library OSGANIMATION_LIBRARY_DEBUG -
-The OSG debug library
+``$OSGDIR`` is an environment variable that would correspond to::
 
-$OSGDIR is an environment variable that would correspond to the
-./configure --prefix=$OSGDIR used in building osg.
+  ./configure --prefix=$OSGDIR
 
+used in building osg.
 Created by Eric Wing.
 #]=======================================================================]
 

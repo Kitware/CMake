@@ -7,9 +7,10 @@ Findosg
 
 
 
-NOTE: It is highly recommended that you use the new
-FindOpenSceneGraph.cmake introduced in CMake 2.6.3 and not use this
-Find module directly.
+.. note::
+  It is highly recommended that you use the new
+  :module:`FindOpenSceneGraph` introduced in CMake 2.6.3 and not use this
+  Find module directly.
 
 This is part of the ``Findosg*`` suite used to find OpenSceneGraph
 components.  Each component is separate and you must opt in to each
@@ -22,17 +23,24 @@ work with your system as an example).  If you want to use a more
 convenient module that includes everything, use the
 :module:`FindOpenSceneGraph` instead of the ``Findosg*.cmake`` modules.
 
-Locate osg This module defines
+Locate osg This module defines:
 
-OSG_FOUND - Was the Osg found? OSG_INCLUDE_DIR - Where to find the
-headers OSG_LIBRARIES - The libraries to link against for the OSG (use
-this)
+``OSG_FOUND``
+  Was the Osg found?
+``OSG_INCLUDE_DIR``
+  Where to find theheaders
+``OSG_LIBRARIES``
+  The libraries to link against for the OSG (use this)
+``OSG_LIBRARY``
+  The OSG library
+``OSG_LIBRARY_DEBUG``
+  The OSG debug library
 
-OSG_LIBRARY - The OSG library OSG_LIBRARY_DEBUG - The OSG debug
-library
+``$OSGDIR`` is an environment variable that would correspond to::
 
-$OSGDIR is an environment variable that would correspond to the
-./configure --prefix=$OSGDIR used in building osg.
+  ./configure --prefix=$OSGDIR
+
+used in building osg.
 
 Created by Eric Wing.
 #]=======================================================================]

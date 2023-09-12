@@ -18,17 +18,24 @@ work with your system as an example).  If you want to use a more
 convenient module that includes everything, use the
 :module:`FindOpenSceneGraph` instead of the ``Findosg*.cmake`` modules.
 
-Locate osgGA This module defines
+Locate osgGA This module defines:
 
-OSGGA_FOUND - Was osgGA found? OSGGA_INCLUDE_DIR - Where to find the
-headers OSGGA_LIBRARIES - The libraries to link against for the osgGA
-(use this)
+``OSGGA_FOUND``
+  Was osgGA found?
+``OSGGA_INCLUDE_DIR``
+  Where to find the headers
+``OSGGA_LIBRARIES``
+  The libraries to link against for the osgGA (use this)
+``OSGGA_LIBRARY``
+  The osgGA library
+``OSGGA_LIBRARY_DEBUG``
+  The osgGA debug library
 
-OSGGA_LIBRARY - The osgGA library OSGGA_LIBRARY_DEBUG - The osgGA
-debug library
+``$OSGDIR`` is an environment variable that would correspond to::
 
-$OSGDIR is an environment variable that would correspond to the
-./configure --prefix=$OSGDIR used in building osg.
+  ./configure --prefix=$OSGDIR
+
+used in building osg.
 
 Created by Eric Wing.
 #]=======================================================================]

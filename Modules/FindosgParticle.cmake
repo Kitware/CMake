@@ -18,17 +18,24 @@ work with your system as an example).  If you want to use a more
 convenient module that includes everything, use the
 :module:`FindOpenSceneGraph` instead of the ``Findosg*.cmake`` modules.
 
-Locate osgParticle This module defines
+Locate osgParticle This module defines:
 
-OSGPARTICLE_FOUND - Was osgParticle found? OSGPARTICLE_INCLUDE_DIR -
-Where to find the headers OSGPARTICLE_LIBRARIES - The libraries to
-link for osgParticle (use this)
+``OSGPARTICLE_FOUND``
+  Was osgParticle found?
+``OSGPARTICLE_INCLUDE_DIR``
+  Where to find the headers
+``OSGPARTICLE_LIBRARIES``
+  The libraries to link for osgParticle (use this)
+``OSGPARTICLE_LIBRARY``
+  The osgParticle library
+``OSGPARTICLE_LIBRARY_DEBUG``
+  The osgParticle debug library
 
-OSGPARTICLE_LIBRARY - The osgParticle library
-OSGPARTICLE_LIBRARY_DEBUG - The osgParticle debug library
+``$OSGDIR`` is an environment variable that would correspond to::
 
-$OSGDIR is an environment variable that would correspond to the
-./configure --prefix=$OSGDIR used in building osg.
+  ./configure --prefix=$OSGDIR
+
+used in building osg.
 
 Created by Eric Wing.
 #]=======================================================================]
