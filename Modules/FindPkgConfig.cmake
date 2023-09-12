@@ -563,8 +563,8 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
     foreach (_pkg_check_modules_pkg ${_pkg_check_modules_list})
       set(_pkg_check_modules_exist_query)
 
-      # check whether version is given
-      if (_pkg_check_modules_pkg MATCHES "(.*[^><])(=|[><]=?)(.*)")
+      # check whether version is given while ignoring whitespace
+      if (_pkg_check_modules_pkg MATCHES "(.*[^>< \t])[ \t]*(=|[><]=?)[ \t]*(.*)")
         set(_pkg_check_modules_pkg_name "${CMAKE_MATCH_1}")
         set(_pkg_check_modules_pkg_op "${CMAKE_MATCH_2}")
         set(_pkg_check_modules_pkg_ver "${CMAKE_MATCH_3}")
