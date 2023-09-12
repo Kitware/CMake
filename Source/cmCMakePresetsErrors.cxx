@@ -302,4 +302,9 @@ void PRESET_MISSING_FIELD(const std::string& presetName,
   state->AddError(cmStrCat("Preset \"", presetName, "\" missing field \"",
                            missingField, "\""));
 }
+
+void SCHEMA_UNSUPPORTED(cmJSONState* state)
+{
+  state->AddError("File version must be 8 or higher for $schema support");
+}
 }
