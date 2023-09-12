@@ -1,7 +1,11 @@
 include(RunCMake)
 
 function(check_files dir)
-  set(expected ${ARGN})
+  set(expected)
+  foreach(i IN LISTS ARGN)
+    get_filename_component(real_path ${i} REALPATH)
+    list(APPEND expected ${real_path})
+  endforeach()
   list(FILTER expected EXCLUDE REGEX "^$")
   list(REMOVE_DUPLICATES expected)
   list(SORT expected)

@@ -643,8 +643,10 @@ else()
   message(STATUS "Could not find ctresalloc")
 endif()
 
+get_filename_component(real_binary_dir "${CMake_BINARY_DIR}" REALPATH)
 if(NOT WIN32
     AND NOT MSYS # FIXME: This works on CYGWIN but not on MSYS
+    AND real_binary_dir STREQUAL CMake_BINARY_DIR
     )
   add_RunCMake_test(SymlinkTrees)
 endif ()
