@@ -15,6 +15,11 @@ CMake Error in CMakeLists.txt:
   language has not been enabled
 |  The target named "nocxx" contains C\+\+ sources that export modules which is
   not supported by the generator
+|  Target "nocxx" has source file
+
+    .*/Tests/RunCMake/CXXModules/sources/module.cxx
+
+  in a "FILE_SET TYPE CXX_MODULES" but it is not scheduled for compilation.
 )
 )*
 CMake Generate step failed.  Build files cannot be regenerated correctly.
