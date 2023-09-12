@@ -3869,7 +3869,10 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
 void cmVisualStudio10TargetGenerator::WriteCudaLinkOptions(
   Elem& e1, std::string const& configName)
 {
-  if (this->GeneratorTarget->GetType() > cmStateEnums::MODULE_LIBRARY) {
+  // We need to write link options for OBJECT libraries so that
+  // we override the default device link behavior ( enabled ) when
+  // building object libraries with ptx/optix-ir/etc
+  if (this->GeneratorTarget->GetType() > cmStateEnums::OBJECT_LIBRARY) {
     return;
   }
 

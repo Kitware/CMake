@@ -10,6 +10,7 @@ ${CMAKE_CURRENT_SOURCE_DIR}/../CUBIN/kernelB.cu
 ${CMAKE_CURRENT_SOURCE_DIR}/../CUBIN/kernelC.cu)
 
 set_property(TARGET CudaFATBIN PROPERTY CUDA_FATBIN_COMPILATION ON)
+set_property(TARGET CudaFATBIN PROPERTY CUDA_SEPARABLE_COMPILATION ON)
 
 # Will use `cuModuleLoadFatBinary` to load the fatbinaries
 add_executable(CudaOnlyFatbin main.cu)
