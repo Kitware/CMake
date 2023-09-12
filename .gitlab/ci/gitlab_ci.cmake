@@ -5,8 +5,13 @@ endif ()
 
 # Set up the source and build paths.
 set(CTEST_SOURCE_DIRECTORY "$ENV{CI_PROJECT_DIR}")
+if("$ENV{CMAKE_CI_IN_SYMLINK_TREE}")
+  set(CTEST_SOURCE_DIRECTORY "$ENV{CI_PROJECT_DIR}/work/cmake")
+endif()
 if("$ENV{CMAKE_CI_INPLACE}")
   set(CTEST_BINARY_DIRECTORY "${CTEST_SOURCE_DIRECTORY}")
+elseif("$ENV{CMAKE_CI_IN_SYMLINK_TREE}")
+  set(CTEST_BINARY_DIRECTORY "$ENV{CI_PROJECT_DIR}/work/build")
 else()
   set(CTEST_BINARY_DIRECTORY "${CTEST_SOURCE_DIRECTORY}/build")
 endif()
