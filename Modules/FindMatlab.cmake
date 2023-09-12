@@ -1290,7 +1290,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
 
     if(EXISTS "${matlab_root}/appdata/version.xml")
       # we inspect the application version.xml file that contains the product information
-      file(STRINGS "${matlab_root}/appdata/version.xml" productinfo_string NEWLINE_CONSUME)
+      file(READ "${matlab_root}/appdata/version.xml" productinfo_string)
       string(REGEX MATCH "<installedProductData.*displayedString=\"([a-zA-Z ]+)\".*/>"
              product_reg_match
              ${productinfo_string}
@@ -1363,8 +1363,14 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
         ${_matlab_main_real_path_tmp}
         CACHE INTERNAL "internal matlab location for the discovered version" FORCE)
 
-    set(matlab_list_of_all_versions)
-    matlab_get_version_from_matlab_run("${Matlab_PROG_VERSION_STRING_AUTO_DETECT}" matlab_list_of_all_versions)
+    _Matlab_VersionInfoXML()
+    if(Matlab_VERSION_STRING_INTERNAL AND NOT Matlab_VERSION_STRING_INTERNAL STREQUAL "unknown")
+      # at least back to R2016 VersionInfo.xml exists
+      set(matlab_list_of_all_versions ${Matlab_VERSION_STRING_INTERNAL})
+    else()
+      # time consuming, less stable way to find Matlab version by running Matlab
+      matlab_get_version_from_matlab_run("${Matlab_PROG_VERSION_STRING_AUTO_DETECT}" matlab_list_of_all_versions)
+    endif()
 
     list(LENGTH matlab_list_of_all_versions list_of_all_versions_length)
     if(list_of_all_versions_length GREATER 0)
@@ -1381,32 +1387,45 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
       message(WARNING "[MATLAB] Found several versions, taking the first one (versions found ${matlab_list_of_all_versions})")
     endif()
 
-    # return the updated value
-    set(${matlab_final_version} ${Matlab_VERSION_STRING_INTERNAL} PARENT_SCOPE)
-  elseif(EXISTS "${matlab_root}/VersionInfo.xml")
+  else()
     # MCR
     # we cannot run anything in order to extract the version. We assume that the file
     # VersionInfo.xml exists under the MatlabRoot, we look for it and extract the version from there
-    set(_matlab_version_tmp "unknown")
-    file(STRINGS "${matlab_root}/VersionInfo.xml" versioninfo_string NEWLINE_CONSUME)
-
-    if(versioninfo_string)
-      # parses "<version>9.2.0.538062</version>"
-      string(REGEX MATCH "<version>(.*)</version>"
-             version_reg_match
-             ${versioninfo_string}
-            )
-
-      if(CMAKE_MATCH_1 MATCHES "(([0-9]+)\\.([0-9]+))[\\.0-9]*")
-        set(_matlab_version_tmp "${CMAKE_MATCH_1}")
-      endif()
-    endif()
-    set(${matlab_final_version} "${_matlab_version_tmp}" PARENT_SCOPE)
-    set(Matlab_VERSION_STRING_INTERNAL
-        "${_matlab_version_tmp}"
-        CACHE INTERNAL "Matlab (MCR) version (automatically determined)"
-        FORCE)
+    _Matlab_VersionInfoXML()
   endif() # Matlab or MCR
+
+  # return the updated value
+  set(${matlab_final_version} ${Matlab_VERSION_STRING_INTERNAL} PARENT_SCOPE)
+
+endfunction()
+
+
+function(_Matlab_VersionInfoXML)
+
+  set(_matlab_version_tmp "unknown")
+
+  set(_XMLfile ${matlab_root}/VersionInfo.xml)
+  if(NOT EXISTS ${_XMLfile})
+    return()
+  endif()
+
+  file(READ ${_XMLfile} versioninfo_string)
+
+  if(versioninfo_string)
+    # parses "<version>9.2.0.538062</version>"
+    string(REGEX MATCH "<version>(.*)</version>"
+      version_reg_match
+      ${versioninfo_string}
+      )
+
+    if(CMAKE_MATCH_1 MATCHES "(([0-9]+)\\.([0-9]+))[\\.0-9]*")
+      set(_matlab_version_tmp "${CMAKE_MATCH_1}")
+    endif()
+  endif()
+
+  if(_matlab_version_tmp)
+    set(Matlab_VERSION_STRING_INTERNAL "${_matlab_version_tmp}" CACHE INTERNAL "Matlab version" FORCE)
+  endif()
 
 endfunction()
 
