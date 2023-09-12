@@ -538,13 +538,14 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
 
   std::ostringstream cmd;
 #ifdef _WIN32
+  cmGlobalNinjaGenerator const* gg = this->GetGlobalNinjaGenerator();
   bool const needCMD =
     cmdLines.size() > 1 || (customStep.empty() && RuleNeedsCMD(cmdLines[0]));
   for (auto li = cmdLines.begin(); li != cmdLines.end(); ++li) {
     if (li != cmdLines.begin()) {
       cmd << " && ";
     } else if (needCMD) {
-      cmd << "cmd.exe /C \"";
+      cmd << gg->GetComspec() << " /C \"";
     }
     // Put current cmdLine in brackets if it contains "||" because it has
     // higher precedence than "&&" in cmd.exe

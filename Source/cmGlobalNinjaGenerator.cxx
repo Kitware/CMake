@@ -554,6 +554,15 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
 {
 #ifdef _WIN32
   cm->GetState()->SetWindowsShell(true);
+
+  // Attempt to use full path to COMSPEC, default "cmd.exe"
+  std::string comspec;
+  if (cmSystemTools::GetEnv("COMSPEC", comspec) &&
+      cmSystemTools::FileIsFullPath(comspec)) {
+    this->Comspec = comspec;
+  } else {
+    this->Comspec = "cmd.exe";
+  }
 #endif
   this->FindMakeProgramFile = "CMakeNinjaFindMake.cmake";
 }
