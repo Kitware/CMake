@@ -2770,10 +2770,10 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                 }
 
                 if (editAndContinueDebugInfo || msvc2008OrLess) {
-                  this->CopyPchCompilePdb(config, target, *ReuseFrom,
+                  this->CopyPchCompilePdb(config, lang, target, *ReuseFrom,
                                           reuseTarget, { ".pdb", ".idb" });
                 } else if (programDatabaseDebugInfo) {
-                  this->CopyPchCompilePdb(config, target, *ReuseFrom,
+                  this->CopyPchCompilePdb(config, lang, target, *ReuseFrom,
                                           reuseTarget, { ".pdb" });
                 }
               }
@@ -2830,9 +2830,9 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
 }
 
 void cmLocalGenerator::CopyPchCompilePdb(
-  const std::string& config, cmGeneratorTarget* target,
-  const std::string& ReuseFrom, cmGeneratorTarget* reuseTarget,
-  const std::vector<std::string>& extensions)
+  const std::string& config, const std::string& language,
+  cmGeneratorTarget* target, const std::string& ReuseFrom,
+  cmGeneratorTarget* reuseTarget, const std::vector<std::string>& extensions)
 {
   const std::string pdb_prefix =
     this->GetGlobalGenerator()->IsMultiConfig() ? cmStrCat(config, "/") : "";
@@ -2916,6 +2916,7 @@ void cmLocalGenerator::CopyPchCompilePdb(
   cc->SetCommandLines(commandLines);
   cc->SetComment(no_message);
   cc->SetStdPipesUTF8(true);
+  cc->AppendDepends({ reuseTarget->GetPchFile(config, language) });
 
   if (this->GetGlobalGenerator()->IsVisualStudio()) {
     cc->SetByproducts(outputs);
