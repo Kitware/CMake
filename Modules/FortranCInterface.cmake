@@ -374,6 +374,7 @@ function(FortranCInterface_VERIFY)
                  "-DCMAKE_CXX_FLAGS_RELEASE:STRING=${CMAKE_CXX_FLAGS_RELEASE}"
                  "-DCMAKE_Fortran_FLAGS_RELEASE:STRING=${CMAKE_Fortran_FLAGS_RELEASE}"
                  "-DFortranCInterface_BINARY_DIR=${FortranCInterface_BINARY_DIR}"
+                 "-DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_OSX_DEPLOYMENT_TARGET}"
                  ${_FortranCInterface_OSX_ARCH}
                  ${_FortranCInterface_EXE_LINKER_FLAGS}
       OUTPUT_VARIABLE _output)
