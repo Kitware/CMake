@@ -239,7 +239,7 @@ static int ldap_win_bind_auth(LDAP *server, const char *user,
   }
   else
 #endif
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+#if !defined(CURL_DISABLE_DIGEST_AUTH)
   if(authflags & CURLAUTH_DIGEST) {
     method = LDAP_AUTH_DIGEST;
   }
@@ -762,7 +762,7 @@ quit:
 
   /* no data to transfer */
   Curl_setup_transfer(data, -1, -1, FALSE, -1);
-  connclose(conn, "LDAP connection always disable re-use");
+  connclose(conn, "LDAP connection always disable reuse");
 
   return result;
 }

@@ -32,14 +32,32 @@
 /* Location of default ca path */
 #cmakedefine CURL_CA_PATH "${CURL_CA_PATH}"
 
+/* Default SSL backend */
+#cmakedefine CURL_DEFAULT_SSL_BACKEND "${CURL_DEFAULT_SSL_BACKEND}"
+
 /* disables alt-svc */
 #cmakedefine CURL_DISABLE_ALTSVC 1
 
 /* disables cookies support */
 #cmakedefine CURL_DISABLE_COOKIES 1
 
-/* disables cryptographic authentication */
-#cmakedefine CURL_DISABLE_CRYPTO_AUTH 1
+/* disables Basic authentication */
+#cmakedefine CURL_DISABLE_BASIC_AUTH 1
+
+/* disables Bearer authentication */
+#cmakedefine CURL_DISABLE_BEARER_AUTH 1
+
+/* disables Digest authentication */
+#cmakedefine CURL_DISABLE_DIGEST_AUTH 1
+
+/* disables Kerberos authentication */
+#cmakedefine CURL_DISABLE_KERBEROS_AUTH 1
+
+/* disables negotiate authentication */
+#cmakedefine CURL_DISABLE_NEGOTIATE_AUTH 1
+
+/* disables AWS-SIG4 */
+#cmakedefine CURL_DISABLE_AWS 1
 
 /* disables DICT */
 #cmakedefine CURL_DISABLE_DICT 1
@@ -49,6 +67,9 @@
 
 /* disables FILE */
 #cmakedefine CURL_DISABLE_FILE 1
+
+/* disables form api */
+#cmakedefine CURL_DISABLE_FORM_API 1
 
 /* disables FTP */
 #cmakedefine CURL_DISABLE_FTP 1
@@ -131,12 +152,6 @@
 
 /* Use Windows LDAP implementation */
 #cmakedefine USE_WIN32_LDAP 1
-
-/* when not building a shared library */
-#cmakedefine CURL_STATICLIB 1
-
-/* your Entropy Gathering Daemon socket pathname */
-#cmakedefine EGD_SOCKET ${EGD_SOCKET}
 
 /* Define if you want to enable IPv6 support */
 #cmakedefine ENABLE_IPV6 1
@@ -397,8 +412,8 @@
 /* Define to 1 if you have the <pwd.h> header file. */
 #cmakedefine HAVE_PWD_H 1
 
-/* Define to 1 if you have the `RAND_egd' function. */
-#cmakedefine HAVE_RAND_EGD 1
+/* Define to 1 if OpenSSL has the `SSL_set0_wbio` function. */
+#cmakedefine HAVE_SSL_SET0_WBIO 1
 
 /* Define to 1 if you have the recv function. */
 #cmakedefine HAVE_RECV 1
@@ -459,9 +474,6 @@
 
 /* Define to 1 if you have the socketpair function. */
 #cmakedefine HAVE_SOCKETPAIR 1
-
-/* Define to 1 if you have the <ssl.h> header file. */
-#cmakedefine HAVE_SSL_H 1
 
 /* Define to 1 if you have the <stdatomic.h> header file. */
 #cmakedefine HAVE_STDATOMIC_H 1
@@ -637,6 +649,9 @@ ${SIZEOF_INT_CODE}
 /* The size of `long', as computed by sizeof. */
 ${SIZEOF_LONG_CODE}
 
+/* The size of `long long', as computed by sizeof. */
+${SIZEOF_LONG_LONG_CODE}
+
 /* The size of `off_t', as computed by sizeof. */
 ${SIZEOF_OFF_T_CODE}
 
@@ -690,12 +705,6 @@ ${SIZEOF_TIME_T_CODE}
 
 /* If you want to build curl with the built-in manual */
 #cmakedefine USE_MANUAL 1
-
-/* if NSS is enabled */
-#cmakedefine USE_NSS 1
-
-/* if you have the PK11_CreateManagedGenericObject function */
-#cmakedefine HAVE_PK11_CREATEMANAGEDGENERICOBJECT 1
 
 /* if you want to use OpenLDAP code instead of legacy ldap implementation */
 #cmakedefine USE_OPENLDAP 1
