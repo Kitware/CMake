@@ -18,17 +18,24 @@ work with your system as an example).  If you want to use a more
 convenient module that includes everything, use the
 :module:`FindOpenSceneGraph` instead of the ``Findosg*.cmake`` modules.
 
-Locate osgVolume This module defines
+Locate osgVolume This module defines:
 
-OSGVOLUME_FOUND - Was osgVolume found? OSGVOLUME_INCLUDE_DIR - Where
-to find the headers OSGVOLUME_LIBRARIES - The libraries to link for
-osgVolume (use this)
+``OSGVOLUME_FOUND``
+  Was osgVolume found?
+``OSGVOLUME_INCLUDE_DIR``
+  Where to find the headers
+``OSGVOLUME_LIBRARIES``
+  The libraries to link for osgVolume (use this)
+``OSGVOLUME_LIBRARY``
+  The osgVolume library
+``OSGVOLUME_LIBRARY_DEBUG``
+  The osgVolume debug library
 
-OSGVOLUME_LIBRARY - The osgVolume library OSGVOLUME_LIBRARY_DEBUG -
-The osgVolume debug library
+``$OSGDIR`` is an environment variable that would correspond to::
 
-$OSGDIR is an environment variable that would correspond to the
-./configure --prefix=$OSGDIR used in building osg.
+  ./configure --prefix=$OSGDIR
+
+used in building osg.
 
 Created by Eric Wing.
 #]=======================================================================]

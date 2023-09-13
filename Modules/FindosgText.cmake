@@ -18,17 +18,24 @@ work with your system as an example).  If you want to use a more
 convenient module that includes everything, use the
 :module:`FindOpenSceneGraph` instead of the ``Findosg*.cmake`` modules.
 
-Locate osgText This module defines
+Locate osgText This module defines:
 
-OSGTEXT_FOUND - Was osgText found? OSGTEXT_INCLUDE_DIR - Where to find
-the headers OSGTEXT_LIBRARIES - The libraries to link for osgText (use
-this)
+``OSGTEXT_FOUND``
+  Was osgText found?
+``OSGTEXT_INCLUDE_DIR``
+  Where to find the headers
+``OSGTEXT_LIBRARIES``
+  The libraries to link for osgText (use this)
+``OSGTEXT_LIBRARY``
+  The osgText library
+``OSGTEXT_LIBRARY_DEBUG``
+  The osgText debug library
 
-OSGTEXT_LIBRARY - The osgText library OSGTEXT_LIBRARY_DEBUG - The
-osgText debug library
+``$OSGDIR`` is an environment variable that would correspond to::
 
-$OSGDIR is an environment variable that would correspond to the
-./configure --prefix=$OSGDIR used in building osg.
+  ./configure --prefix=$OSGDIR
+
+used in building osg.
 
 Created by Eric Wing.
 #]=======================================================================]

@@ -18,17 +18,24 @@ work with your system as an example).  If you want to use a more
 convenient module that includes everything, use the
 :module:`FindOpenSceneGraph` instead of the ``Findosg*.cmake`` modules.
 
-Locate osgFX This module defines
+Locate osgFX This module defines:
 
-OSGFX_FOUND - Was osgFX found? OSGFX_INCLUDE_DIR - Where to find the
-headers OSGFX_LIBRARIES - The libraries to link against for the osgFX
-(use this)
+``OSGFX_FOUND``
+  Was osgFX found?
+``OSGFX_INCLUDE_DIR``
+  Where to find the headers
+``OSGFX_LIBRARIES``
+  The libraries to link against for the osgFX (use this)
+``OSGFX_LIBRARY``
+  The osgFX library
+``OSGFX_LIBRARY_DEBUG``
+  The osgFX debug library
 
-OSGFX_LIBRARY - The osgFX library OSGFX_LIBRARY_DEBUG - The osgFX
-debug library
+``$OSGDIR`` is an environment variable that would correspond to::
 
-$OSGDIR is an environment variable that would correspond to the
-./configure --prefix=$OSGDIR used in building osg.
+  ./configure --prefix=$OSGDIR
+
+used in building osg.
 
 Created by Eric Wing.
 #]=======================================================================]

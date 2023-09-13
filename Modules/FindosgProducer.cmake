@@ -18,17 +18,24 @@ work with your system as an example).  If you want to use a more
 convenient module that includes everything, use the
 :module:`FindOpenSceneGraph` instead of the ``Findosg*.cmake`` modules.
 
-Locate osgProducer This module defines
+Locate osgProducer This module defines:
 
-OSGPRODUCER_FOUND - Was osgProducer found? OSGPRODUCER_INCLUDE_DIR -
-Where to find the headers OSGPRODUCER_LIBRARIES - The libraries to
-link for osgProducer (use this)
+``OSGPRODUCER_FOUND``
+  Was osgProducer found?
+``OSGPRODUCER_INCLUDE_DIR``
+  Where to find the headers
+``OSGPRODUCER_LIBRARIES``
+  The libraries to link for osgProducer (use this)
+``OSGPRODUCER_LIBRARY``
+  The osgProducer library
+``OSGPRODUCER_LIBRARY_DEBUG``
+  The osgProducer debug library
 
-OSGPRODUCER_LIBRARY - The osgProducer library
-OSGPRODUCER_LIBRARY_DEBUG - The osgProducer debug library
+``$OSGDIR`` is an environment variable that would correspond to::
 
-$OSGDIR is an environment variable that would correspond to the
-./configure --prefix=$OSGDIR used in building osg.
+  ./configure --prefix=$OSGDIR
+
+used in building osg.
 
 Created by Eric Wing.
 #]=======================================================================]

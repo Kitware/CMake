@@ -18,17 +18,24 @@ work with your system as an example).  If you want to use a more
 convenient module that includes everything, use the
 :module:`FindOpenSceneGraph` instead of the ``Findosg*.cmake`` modules.
 
-Locate osgViewer This module defines
+Locate osgViewer This module defines:
 
-OSGVIEWER_FOUND - Was osgViewer found? OSGVIEWER_INCLUDE_DIR - Where
-to find the headers OSGVIEWER_LIBRARIES - The libraries to link for
-osgViewer (use this)
+``OSGVIEWER_FOUND``
+  Was osgViewer found?
+``OSGVIEWER_INCLUDE_DIR``
+  Where to find the headers
+``OSGVIEWER_LIBRARIES``
+  The libraries to link for osgViewer (use this)
+``OSGVIEWER_LIBRARY``
+  The osgViewer library
+``OSGVIEWER_LIBRARY_DEBUG``
+  The osgViewer debug library
 
-OSGVIEWER_LIBRARY - The osgViewer library OSGVIEWER_LIBRARY_DEBUG -
-The osgViewer debug library
+``$OSGDIR`` is an environment variable that would correspond to::
 
-$OSGDIR is an environment variable that would correspond to the
-./configure --prefix=$OSGDIR used in building osg.
+  ./configure --prefix=$OSGDIR
+
+used in building osg.
 
 Created by Eric Wing.
 #]=======================================================================]

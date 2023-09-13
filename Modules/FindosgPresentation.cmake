@@ -18,19 +18,24 @@ work with your system as an example).  If you want to use a more
 convenient module that includes everything, use the
 :module:`FindOpenSceneGraph` instead of the ``Findosg*.cmake`` modules.
 
-Locate osgPresentation This module defines
+Locate osgPresentation This module defines:
 
-OSGPRESENTATION_FOUND - Was osgPresentation found?
-OSGPRESENTATION_INCLUDE_DIR - Where to find the headers
-OSGPRESENTATION_LIBRARIES - The libraries to link for osgPresentation
-(use this)
+``OSGPRESENTATION_FOUND``
+  Was osgPresentation found?
+``OSGPRESENTATION_INCLUDE_DIR``
+  Where to find the headers
+``OSGPRESENTATION_LIBRARIES``
+  The libraries to link for osgPresentation (use this)
+``OSGPRESENTATION_LIBRARY``
+  The osgPresentation library
+``OSGPRESENTATION_LIBRARY_DEBUG``
+  The osgPresentation debug library
 
-OSGPRESENTATION_LIBRARY - The osgPresentation library
-OSGPRESENTATION_LIBRARY_DEBUG - The osgPresentation debug library
+``$OSGDIR`` is an environment variable that would correspond to::
 
-$OSGDIR is an environment variable that would correspond to the
-./configure --prefix=$OSGDIR used in building osg.
+  ./configure --prefix=$OSGDIR
 
+used in building osg.
 Created by Eric Wing.  Modified to work with osgPresentation by Robert
 Osfield, January 2012.
 #]=======================================================================]

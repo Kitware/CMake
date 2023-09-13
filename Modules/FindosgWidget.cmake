@@ -18,17 +18,24 @@ work with your system as an example).  If you want to use a more
 convenient module that includes everything, use the
 :module:`FindOpenSceneGraph` instead of the ``Findosg*.cmake`` modules.
 
-Locate osgWidget This module defines
+Locate osgWidget This module defines:
 
-OSGWIDGET_FOUND - Was osgWidget found? OSGWIDGET_INCLUDE_DIR - Where
-to find the headers OSGWIDGET_LIBRARIES - The libraries to link for
-osgWidget (use this)
+``OSGWIDGET_FOUND``
+  Was osgWidget found?
+``OSGWIDGET_INCLUDE_DIR``
+  Where to find the headers
+``OSGWIDGET_LIBRARIES``
+  The libraries to link for osgWidget (use this)
+``OSGWIDGET_LIBRARY``
+  The osgWidget library
+``OSGWIDGET_LIBRARY_DEBUG``
+  The osgWidget debug library
 
-OSGWIDGET_LIBRARY - The osgWidget library OSGWIDGET_LIBRARY_DEBUG -
-The osgWidget debug library
+``$OSGDIR`` is an environment variable that would correspond to::
 
-$OSGDIR is an environment variable that would correspond to the
-./configure --prefix=$OSGDIR used in building osg.
+  ./configure --prefix=$OSGDIR
+
+used in building osg.
 
 FindosgWidget.cmake tweaked from Findosg* suite as created by Eric
 Wing.
