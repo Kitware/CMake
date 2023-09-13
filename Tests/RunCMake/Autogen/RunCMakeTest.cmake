@@ -122,4 +122,55 @@ if (DEFINED with_qt_version)
       endblock()
     endif()
   endif()
+
+  if(RunCMake_GENERATOR MATCHES "Make|Ninja")
+    block()
+      if(QtCore_VERSION VERSION_GREATER_EQUAL 5.15.0)
+        set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/QtAutoMocDeps-build)
+        run_cmake(QtAutoMocDeps)
+        set(RunCMake_TEST_NO_CLEAN 1)
+        # Build the project.
+        run_cmake_command(QtAutoMocDeps-build ${CMAKE_COMMAND} --build . --verbose)
+        # Touch just the library source file, which shouldn't cause a rerun of AUTOMOC
+        # for app_with_qt target.
+        file(TOUCH "${RunCMake_SOURCE_DIR}/simple_lib.cpp")
+        set(RunCMake_TEST_NOT_EXPECT_stdout "Automatic MOC for target app_with_qt|\
+Automatic MOC for target sub_exe_1|\
+Automatic MOC for target sub_exe_2")
+        set(RunCMake_TEST_VARIANT_DESCRIPTION "-Don't execute AUTOMOC for 'app_with_qt', 'sub_exe_1' and 'sub_exe_2'")
+        # Build and assert that AUTOMOC was not run for app_with_qt, sub_exe_1 and sub_exe_2.
+        run_cmake_command(QtAutoMocDeps-build ${CMAKE_COMMAND} --build . --verbose)
+        unset(RunCMake_TEST_VARIANT_DESCRIPTION)
+        unset(RunCMake_TEST_NOT_EXPECT_stdout)
+
+        macro(check_file_exists file)
+          if (EXISTS "${file}")
+            set(check_result "PASSED")
+            set(message_type "STATUS")
+          else()
+            set(check_result "FAILED")
+            set(message_type "FATAL_ERROR")
+          endif()
+
+          message(${message_type} "QtAutoMocDeps-build-\"${file}\" was generated - ${check_result}")
+        endmacro()
+
+        check_file_exists("${RunCMake_TEST_BINARY_DIR}/app_with_qt_autogen/deps")
+        check_file_exists("${RunCMake_TEST_BINARY_DIR}/QtSubDir1/sub_exe_1_autogen/deps")
+        check_file_exists("${RunCMake_TEST_BINARY_DIR}/QtSubDir2/sub_exe_2_autogen/deps")
+
+        check_file_exists("${RunCMake_TEST_BINARY_DIR}/app_with_qt_autogen/timestamp")
+        check_file_exists("${RunCMake_TEST_BINARY_DIR}/QtSubDir1/sub_exe_1_autogen/timestamp")
+        check_file_exists("${RunCMake_TEST_BINARY_DIR}/QtSubDir2/sub_exe_2_autogen/timestamp")
+
+        # Touch a header file to make sure an automoc dependency cycle is not introduced.
+        file(TOUCH "${RunCMake_SOURCE_DIR}/MyWindow.h")
+        set(RunCMake_TEST_VARIANT_DESCRIPTION "-First build after touch to detect dependency cycle")
+        run_cmake_command(QtAutoMocDeps-build ${CMAKE_COMMAND} --build . --verbose)
+        # Need to run a second time to hit the dependency cycle.
+        set(RunCMake_TEST_VARIANT_DESCRIPTION "-Don't hit dependency cycle")
+        run_cmake_command(QtAutoMocDeps-build ${CMAKE_COMMAND} --build . --verbose)
+      endif()
+    endblock()
+  endif()
 endif ()

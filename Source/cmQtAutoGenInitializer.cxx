@@ -1177,17 +1177,22 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   this->Makefile->AddCMakeOutputFile(this->AutogenTarget.InfoFile);
 
   // Determine whether to use a depfile for the AUTOGEN target.
-  const bool useNinjaDepfile = this->QtVersion >= IntegerVersion(5, 15) &&
-    this->GlobalGen->GetName().find("Ninja") != std::string::npos;
+  bool const useDepfile = [this]() -> bool {
+    auto const& gen = this->GlobalGen->GetName();
+    return this->QtVersion >= IntegerVersion(5, 15) &&
+      (gen.find("Ninja") != std::string::npos ||
+       gen.find("Make") != std::string::npos);
+  }();
 
   // Files provided by the autogen target
   std::vector<std::string> autogenByproducts;
   std::vector<std::string> timestampByproducts;
   if (this->Moc.Enabled) {
     this->AddGeneratedSource(this->Moc.CompilationFile, this->Moc, true);
-    if (useNinjaDepfile) {
+    if (useDepfile) {
       if (this->MultiConfig &&
-          !this->Makefile->GetSafeDefinition("CMAKE_CROSS_CONFIGS").empty()) {
+          !this->Makefile->GetSafeDefinition("CMAKE_CROSS_CONFIGS").empty() &&
+          this->GlobalGen->GetName().find("Ninja") != std::string::npos) {
         // Make all mocs_compilation_<CONFIG>.cpp files byproducts of the
         // ${target}_autogen/timestamp custom command.
         // We cannot just use Moc.CompilationFileGenex here, because that
@@ -1365,7 +1370,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       this->AutogenTarget.DependFiles.begin(),
       this->AutogenTarget.DependFiles.end());
 
-    if (useNinjaDepfile) {
+    if (useDepfile) {
       // Create a custom command that generates a timestamp file and
       // has a depfile assigned. The depfile is created by JobDepFilesMergeT.
       //
@@ -1472,7 +1477,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
         autogenTarget->AddUtility(depName.Value.first, false, this->Makefile);
       }
     }
-    if (!useNinjaDepfile) {
+    if (!useDepfile) {
       // Add additional autogen target dependencies to autogen target
       for (cmTarget const* depTarget : this->AutogenTarget.DependTargets) {
         autogenTarget->AddUtility(depTarget->GetName(), false, this->Makefile);
