@@ -65,6 +65,79 @@ The following cache variables may also be set:
   Debug and Release variants are found separately.
 #]=======================================================================]
 
+set(_TIFF_args)
+if (TIFF_FIND_QUIETLY)
+  list(APPEND _TIFF_args
+    QUIET)
+endif ()
+if (TIFF_FIND_VERSION)
+  list(APPEND _TIFF_args
+    "${TIFF_FIND_VERSION}")
+  if (TIFF_FIND_VERSION_EXACT)
+    list(APPEND _TIFF_args
+      EXACT)
+  endif ()
+endif ()
+set(_TIFF_component_req)
+set(_TIFF_component_opt)
+foreach (_TIFF_component IN LISTS TIFF_FIND_COMPONENTS)
+  if (TIFF_FIND_REQUIRE_${_TIFF_component})
+    list(APPEND _TIFF_component_req
+      "${_TIFF_component}")
+  else ()
+    list(APPEND _TIFF_component_opt
+      "${_TIFF_component}")
+  endif ()
+endforeach ()
+unset(_TIFF_component)
+if (_TIFF_component_req)
+  list(APPEND _TIFF_args
+    COMPONENTS "${_TIFF_component_req}")
+endif ()
+unset(_TIFF_component_req)
+if (_TIFF_component_opt)
+  list(APPEND _TIFF_args
+    OPTIONAL_COMPONENTS "${_TIFF_component_opt}")
+endif ()
+unset(_TIFF_component_opt)
+find_package(tiff CONFIG ${_TIFF_args})
+unset(_TIFF_args)
+if (tiff_FOUND)
+  if (NOT TARGET TIFF::TIFF)
+    add_library(TIFF::TIFF IMPORTED INTERFACE)
+    set_target_properties(TIFF::TIFF PROPERTIES
+      INTERFACE_LINK_LIBRARIES TIFF::tiff)
+  endif ()
+  get_property(TIFF_INCLUDE_DIRS TARGET TIFF::tiff PROPERTY INTERFACE_INCLUDE_DIRECTORIES)
+  get_property(TIFF_LIBRARIES TARGET TIFF::tiff PROPERTY INTERFACE_LINK_LIBRARIES)
+  get_property(_TIFF_location TARGET TIFF::tiff PROPERTY LOCATION)
+  list(APPEND TIFF_LIBRARIES
+    "${_TIFF_location}")
+  unset(_TIFF_location)
+  set(TIFF_FOUND 1)
+  if("CXX" IN_LIST TIFF_FIND_COMPONENTS)
+    if (TARGET TIFF::CXX)
+      get_property(_TIFF_CXX_location TARGET TIFF::CXX PROPERTY LOCATION)
+      list(APPEND TIFF_LIBRARIES ${_TIFF_CXX_location})
+      unset(_TIFF_CXX_location)
+      set(TIFF_CXX_FOUND 1)
+    else ()
+      set(TIFF_CXX_FOUND 0)
+      if (TIFF_FIND_REQUIRED_CXX)
+        set(TIFF_FOUND 0)
+        list(APPEND TIFF_NOT_FOUND_REASON
+          "No C++ bindings target found")
+      endif ()
+    endif ()
+  endif ()
+  set(TIFF_VERSION_STRING "${tiff_VERSION}")
+  foreach (_TIFF_component IN LISTS TIFF_FIND_COMPONENTS)
+    set(TIFF_${_TIFF_component}_FOUND "${tiff_${_TIFF_component}_FOUND}")
+  endforeach ()
+  unset(_TIFF_component)
+  return ()
+endif ()
+
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW)
 
