@@ -38,6 +38,7 @@
 #include "cmNinjaNormalTargetGenerator.h"
 #include "cmNinjaUtilityTargetGenerator.h"
 #include "cmOutputConverter.h"
+#include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmRulePlaceholderExpander.h"
 #include "cmSourceFile.h"
@@ -166,6 +167,13 @@ std::string cmNinjaTargetGenerator::OrderDependsTargetForTarget(
   const std::string& config)
 {
   return this->GetGlobalGenerator()->OrderDependsTargetForTarget(
+    this->GeneratorTarget, config);
+}
+
+std::string cmNinjaTargetGenerator::OrderDependsTargetForTargetPrivate(
+  const std::string& config)
+{
+  return this->GetGlobalGenerator()->OrderDependsTargetForTargetPrivate(
     this->GeneratorTarget, config);
 }
 
@@ -1020,6 +1028,45 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
       cmStrCat("Order-only phony target for ", this->GetTargetName());
     build.Outputs.push_back(this->OrderDependsTargetForTarget(config));
 
+    // Gather order-only dependencies on custom command outputs.
+    std::vector<std::string> ccouts;
+    std::vector<std::string> ccouts_private;
+    bool usePrivateGeneratedSources = false;
+    if (this->GeneratorTarget->Target->HasFileSets()) {
+      switch (this->GetGeneratorTarget()->GetPolicyStatusCMP0154()) {
+        case cmPolicies::WARN:
+        case cmPolicies::OLD:
+          break;
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::NEW:
+          usePrivateGeneratedSources = true;
+          break;
+      }
+    }
+    for (cmCustomCommand const* cc : customCommands) {
+      cmCustomCommandGenerator ccg(*cc, config, this->GetLocalGenerator());
+      const std::vector<std::string>& ccoutputs = ccg.GetOutputs();
+      const std::vector<std::string>& ccbyproducts = ccg.GetByproducts();
+      ccouts.insert(ccouts.end(), ccoutputs.begin(), ccoutputs.end());
+      ccouts.insert(ccouts.end(), ccbyproducts.begin(), ccbyproducts.end());
+      if (usePrivateGeneratedSources) {
+        auto it = ccouts.begin();
+        while (it != ccouts.end()) {
+          cmFileSet const* fileset =
+            this->GeneratorTarget->GetFileSetForSource(
+              config, this->Makefile->GetOrCreateGeneratedSource(*it));
+          if (fileset &&
+              fileset->GetVisibility() != cmFileSetVisibility::Private) {
+            ++it;
+          } else {
+            ccouts_private.push_back(*it);
+            it = ccouts.erase(it);
+          }
+        }
+      }
+    }
+
     cmNinjaDeps& orderOnlyDeps = build.OrderOnlyDeps;
     this->GetLocalGenerator()->AppendTargetDepends(
       this->GeneratorTarget, orderOnlyDeps, config, fileConfig,
@@ -1029,17 +1076,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     cm::append(orderOnlyDeps, this->Configs[config].ExtraFiles);
 
     // Add order-only dependencies on custom command outputs.
-    for (cmCustomCommand const* cc : customCommands) {
-      cmCustomCommandGenerator ccg(*cc, config, this->GetLocalGenerator());
-      const std::vector<std::string>& ccoutputs = ccg.GetOutputs();
-      const std::vector<std::string>& ccbyproducts = ccg.GetByproducts();
-      std::transform(ccoutputs.begin(), ccoutputs.end(),
-                     std::back_inserter(orderOnlyDeps),
-                     this->MapToNinjaPath());
-      std::transform(ccbyproducts.begin(), ccbyproducts.end(),
-                     std::back_inserter(orderOnlyDeps),
-                     this->MapToNinjaPath());
-    }
+    std::transform(ccouts.begin(), ccouts.end(),
+                   std::back_inserter(orderOnlyDeps), this->MapToNinjaPath());
 
     std::sort(orderOnlyDeps.begin(), orderOnlyDeps.end());
     orderOnlyDeps.erase(
@@ -1060,8 +1098,32 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
 
     this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
                                            build);
-  }
 
+    // Add order-only dependencies on custom command outputs that are
+    // private to this target.
+    this->HasPrivateGeneratedSources = !ccouts_private.empty();
+    if (this->HasPrivateGeneratedSources) {
+      cmNinjaBuild buildPrivate("phony");
+      cmNinjaDeps& orderOnlyDepsPrivate = buildPrivate.OrderOnlyDeps;
+      orderOnlyDepsPrivate.push_back(
+        this->OrderDependsTargetForTarget(config));
+
+      buildPrivate.Outputs.push_back(
+        this->OrderDependsTargetForTargetPrivate(config));
+
+      std::transform(ccouts_private.begin(), ccouts_private.end(),
+                     std::back_inserter(orderOnlyDepsPrivate),
+                     this->MapToNinjaPath());
+
+      std::sort(orderOnlyDepsPrivate.begin(), orderOnlyDepsPrivate.end());
+      orderOnlyDepsPrivate.erase(
+        std::unique(orderOnlyDepsPrivate.begin(), orderOnlyDepsPrivate.end()),
+        orderOnlyDepsPrivate.end());
+
+      this->GetGlobalGenerator()->WriteBuild(
+        this->GetImplFileStream(fileConfig), buildPrivate);
+    }
+  }
   {
     std::vector<cmSourceFile const*> objectSources;
     this->GeneratorTarget->GetObjectSources(objectSources, config);
@@ -1388,7 +1450,13 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
                    this->MapToNinjaPath());
   }
 
-  objBuild.OrderOnlyDeps.push_back(this->OrderDependsTargetForTarget(config));
+  if (this->HasPrivateGeneratedSources) {
+    objBuild.OrderOnlyDeps.push_back(
+      this->OrderDependsTargetForTargetPrivate(config));
+  } else {
+    objBuild.OrderOnlyDeps.push_back(
+      this->OrderDependsTargetForTarget(config));
+  }
 
   // If the source file is GENERATED and does not have a custom command
   // (either attached to this source file or another one), assume that one of

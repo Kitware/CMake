@@ -321,6 +321,8 @@ public:
   static std::string GetFileSetsPropertyName(const std::string& type);
   static std::string GetInterfaceFileSetsPropertyName(const std::string& type);
 
+  bool HasFileSets() const;
+
 private:
   template <typename ValueType>
   void StoreProperty(const std::string& prop, ValueType value);

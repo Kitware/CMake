@@ -1278,6 +1278,13 @@ std::string cmGlobalNinjaGenerator::OrderDependsTargetForTarget(
   return cmStrCat("cmake_object_order_depends_target_", target->GetName());
 }
 
+std::string cmGlobalNinjaGenerator::OrderDependsTargetForTargetPrivate(
+  cmGeneratorTarget const* target, const std::string& config) const
+{
+  return cmStrCat(this->OrderDependsTargetForTarget(target, config),
+                  "_private");
+}
+
 void cmGlobalNinjaGenerator::AppendTargetOutputs(
   cmGeneratorTarget const* target, cmNinjaDeps& outputs,
   const std::string& config, cmNinjaTargetDepends depends) const
@@ -3175,4 +3182,11 @@ std::string cmGlobalNinjaMultiGenerator::OrderDependsTargetForTarget(
 {
   return cmStrCat("cmake_object_order_depends_target_", target->GetName(), '_',
                   cmSystemTools::UpperCase(config));
+}
+
+std::string cmGlobalNinjaMultiGenerator::OrderDependsTargetForTargetPrivate(
+  cmGeneratorTarget const* target, const std::string& config) const
+{
+  return cmStrCat(this->OrderDependsTargetForTarget(target, config),
+                  "_private");
 }

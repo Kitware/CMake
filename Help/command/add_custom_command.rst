@@ -87,6 +87,11 @@ The options are:
     :ref:`Target-dependent expressions <Target-Dependent Queries>` are not
     permitted.
 
+  .. versionchanged:: 3.28
+    In targets using :ref:`file sets`, custom command byproducts are now
+    considered private unless they are listed in a non-private file set.
+    See policy :policy:`CMP0154`.
+
 ``COMMAND``
   Specify the command-line(s) to execute at build time.
   If more than one ``COMMAND`` is specified they will be executed in order,
@@ -269,6 +274,11 @@ The options are:
     :manual:`generator expressions <cmake-generator-expressions(7)>`.
     :ref:`Target-dependent expressions <Target-Dependent Queries>` are not
     permitted.
+
+  .. versionchanged:: 3.28
+    In targets using :ref:`file sets`, custom command outputs are now
+    considered private unless they are listed in a non-private file set.
+    See policy :policy:`CMP0154`.
 
 ``USES_TERMINAL``
   .. versionadded:: 3.2
