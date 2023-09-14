@@ -4,13 +4,13 @@
 include(${CMAKE_ROOT}/Modules/CMakeDetermineCompiler.cmake)
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
 
-if( NOT ( ("${CMAKE_GENERATOR}" MATCHES "Make") OR
-          ("${CMAKE_GENERATOR}" MATCHES "Ninja") OR
-          ("${CMAKE_GENERATOR}" MATCHES "Visual Studio (1|[9][0-9])") ) )
+if(NOT ((CMAKE_GENERATOR MATCHES "Make") OR
+        (CMAKE_GENERATOR MATCHES "Ninja") OR
+        (CMAKE_GENERATOR MATCHES "Visual Studio (1|[9][0-9])")))
   message(FATAL_ERROR "CUDA language not currently supported by \"${CMAKE_GENERATOR}\" generator")
 endif()
 
-if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
   if(DEFINED ENV{CUDAHOSTCXX} OR DEFINED CMAKE_CUDA_HOST_COMPILER)
     message(WARNING "Visual Studio does not support specifying CUDAHOSTCXX or CMAKE_CUDA_HOST_COMPILER. Using the C++ compiler provided by Visual Studio.")
   endif()
@@ -62,7 +62,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
 
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
 
-  if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+  if(CMAKE_GENERATOR MATCHES "Visual Studio")
     # We will not know CMAKE_CUDA_COMPILER until the main compiler id step
     # below extracts it, but we do know that the compiler id will be NVIDIA.
     set(CMAKE_CUDA_COMPILER_ID "NVIDIA")
@@ -306,7 +306,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
 
   CMAKE_DETERMINE_COMPILER_ID(CUDA CUDAFLAGS CMakeCUDACompilerId.cu)
 
-  if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+  if(CMAKE_GENERATOR MATCHES "Visual Studio")
     # Now that we have the path to nvcc, we can compute the toolkit root.
     get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${CMAKE_CUDA_COMPILER}" DIRECTORY)
     get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}" DIRECTORY)
@@ -331,7 +331,7 @@ if(MSVC_CUDA_ARCHITECTURE_ID)
     "set(MSVC_CUDA_ARCHITECTURE_ID ${MSVC_CUDA_ARCHITECTURE_ID})")
 endif()
 
-if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
   set(CMAKE_CUDA_HOST_LINK_LAUNCHER "${CMAKE_LINKER}")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES "")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES "")
