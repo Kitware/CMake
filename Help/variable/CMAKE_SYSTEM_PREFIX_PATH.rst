@@ -38,6 +38,12 @@ OpenBSD:
 Unix:
   * ``ENV{CONDA_PREFIX}`` when using a conda compiler
 
+MSYSTEM environment with MinGW toolchain:
+  .. versionadded:: 3.28
+
+  * ``ENV{MSYSTEM_PREFIX}/local``
+  * ``ENV{MSYSTEM_PREFIX}``
+
 Windows:
   * ``ENV{ProgramW6432}``
   * ``ENV{ProgramFiles}``

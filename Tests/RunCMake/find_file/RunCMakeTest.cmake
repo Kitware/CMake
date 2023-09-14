@@ -12,6 +12,10 @@ run_cmake(VALIDATOR-undefined-function)
 run_cmake(VALIDATOR-specify-macro)
 run_cmake(VALIDATOR)
 
+if(CMAKE_HOST_WIN32 AND MINGW)
+  run_cmake(MSYSTEM_PREFIX)
+endif()
+
 run_cmake_with_options(FromPATHEnvDebugVar --debug-find-var=PrefixInPATH_File)
 
 if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
