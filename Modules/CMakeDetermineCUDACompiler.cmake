@@ -211,9 +211,6 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     endif()
     unset(_CUDA_NVCC_OUT)
 
-    set(CMAKE_CUDA_DEVICE_LINKER "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/bin/nvlink${CMAKE_EXECUTABLE_SUFFIX}")
-    set(CMAKE_CUDA_FATBINARY "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/bin/fatbinary${CMAKE_EXECUTABLE_SUFFIX}")
-
     # In a non-scattered installation the following are equivalent to CMAKE_CUDA_COMPILER_TOOLKIT_ROOT.
     # We first check for a non-scattered installation to prefer it over a scattered installation.
 
@@ -252,6 +249,9 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
 
     # Don't leak variables unnecessarily to user code.
     unset(_CUDA_NVCC_EXECUTABLE)
+
+    set(CMAKE_CUDA_DEVICE_LINKER "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/bin/nvlink${CMAKE_EXECUTABLE_SUFFIX}")
+    set(CMAKE_CUDA_FATBINARY "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/bin/fatbinary${CMAKE_EXECUTABLE_SUFFIX}")
   endif()
 
   set(CMAKE_CUDA_COMPILER_ID_FLAGS_ALWAYS "-v")
