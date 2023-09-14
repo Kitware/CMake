@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <cm/string_view>
@@ -16,6 +17,22 @@
 class cmQtAutoGen
 {
 public:
+  /** String value with per configuration variants.  */
+  class ConfigString
+  {
+  public:
+    std::string Default;
+    std::unordered_map<std::string, std::string> Config;
+  };
+
+  /** String values with per configuration variants.  */
+  template <typename C>
+  class ConfigStrings
+  {
+  public:
+    C Default;
+    std::unordered_map<std::string, C> Config;
+  };
   /** Integer version.  */
   struct IntegerVersion
   {

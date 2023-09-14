@@ -18,6 +18,7 @@
 #include "cmFilePathChecksum.h"
 #include "cmQtAutoGen.h"
 
+class cmCustomCommandLines;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmLocalGenerator;
@@ -32,23 +33,6 @@ class cmTarget;
 class cmQtAutoGenInitializer : public cmQtAutoGen
 {
 public:
-  /** String value with per configuration variants.  */
-  class ConfigString
-  {
-  public:
-    std::string Default;
-    std::unordered_map<std::string, std::string> Config;
-  };
-
-  /** String values with per configuration variants.  */
-  template <typename C>
-  class ConfigStrings
-  {
-  public:
-    C Default;
-    std::unordered_map<std::string, C> Config;
-  };
-
   /** rcc job.  */
   class Qrc
   {
@@ -63,7 +47,7 @@ public:
     bool Generated = false;
     bool Unique = false;
     std::vector<std::string> Options;
-    std::vector<std::string> Resources;
+    ConfigStrings<std::vector<std::string>> Resources;
   };
 
   /** moc and/or uic file.  */
@@ -90,8 +74,8 @@ public:
     // Executable
     std::string ExecutableTargetName;
     cmGeneratorTarget* ExecutableTarget = nullptr;
-    std::string Executable;
-    CompilerFeaturesHandle ExecutableFeatures;
+    ConfigString Executable;
+    ConfigStrings<CompilerFeaturesHandle> ExecutableFeatures;
 
     GenVarsT(GenT gen)
       : Gen(gen)
@@ -141,6 +125,9 @@ private:
                           GenVarsT const& genVars, bool prepend = false);
   void AddToSourceGroup(std::string const& fileName,
                         cm::string_view genNameUpper);
+  void AddCMakeProcessToCommandLines(std::string const& infoFile,
+                                     std::string const& processName,
+                                     cmCustomCommandLines& commandLines);
   void AddCleanFile(std::string const& fileName);
 
   void ConfigFileNames(ConfigString& configString, cm::string_view prefix,
@@ -155,6 +142,9 @@ private:
                        bool ignoreMissingTarget) const;
 
   void handleSkipPch(cmSourceFile* sf);
+  void AddAutogenExecutableToDependencies(
+    cmQtAutoGenInitializer::GenVarsT const& genVars,
+    std::vector<std::string>& dependencies) const;
 
   cmQtAutoGenGlobalInitializer* GlobalInitializer = nullptr;
   cmGeneratorTarget* GenTarget = nullptr;
@@ -167,6 +157,7 @@ private:
   IntegerVersion QtVersion;
   unsigned int Verbosity = 0;
   bool MultiConfig = false;
+  bool CrossConfig = false;
   bool CMP0071Accept = false;
   bool CMP0071Warn = false;
   bool CMP0100Accept = false;
@@ -201,8 +192,8 @@ private:
     bool DependOrigin = false;
     std::set<std::string> DependFiles;
     std::set<cmTarget*> DependTargets;
-    std::string DepFile;
-    std::string DepFileRuleName;
+    ConfigString DepFile;
+    ConfigString DepFileRuleName;
     // Sources to process
     std::unordered_map<cmSourceFile*, MUFileHandle> Headers;
     std::unordered_map<cmSourceFile*, MUFileHandle> Sources;
