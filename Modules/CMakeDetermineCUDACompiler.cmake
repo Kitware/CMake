@@ -98,12 +98,14 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
         ENV CUDA_PATH
         PATH_SUFFIXES bin
         NO_DEFAULT_PATH
+        NO_CACHE
       )
 
       # If we didn't find NVCC, then try the default paths.
       find_program(_CUDA_NVCC_EXECUTABLE
         NAMES nvcc nvcc.exe
         PATH_SUFFIXES bin
+        NO_CACHE
       )
 
       # If the user specified CUDAToolkit_ROOT but nvcc could not be found, this is an error.
@@ -168,6 +170,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
           NAMES nvcc nvcc.exe
           PATHS ${search_paths}
           PATH_SUFFIXES bin
+          NO_CACHE
         )
 
         # We are done with these variables now, cleanup.
@@ -200,7 +203,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
       #We require the path to end in `/nvvm/libdevice'
       if(_CUDA_NVVMIR_LIBRARY_DIR MATCHES "nvvm/libdevice$")
         get_filename_component(_CUDA_NVVMIR_LIBRARY_DIR "${_CUDA_NVVMIR_LIBRARY_DIR}/../.." ABSOLUTE)
-        set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT_FROM_NVVMIR_LIBRARY_DIR "${_CUDA_NVVMIR_LIBRARY_DIR}")
+        set(_CUDA_COMPILER_LIBRARY_ROOT_FROM_NVVMIR_LIBRARY_DIR "${_CUDA_NVVMIR_LIBRARY_DIR}")
       endif()
 
       unset(_CUDA_NVVMIR_LIBRARY_DIR)
@@ -215,8 +218,8 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     # We first check for a non-scattered installation to prefer it over a scattered installation.
 
     # CMAKE_CUDA_COMPILER_LIBRARY_ROOT contains the device library.
-    if(DEFINED CMAKE_CUDA_COMPILER_LIBRARY_ROOT_FROM_NVVMIR_LIBRARY_DIR)
-      set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT "${CMAKE_CUDA_COMPILER_LIBRARY_ROOT_FROM_NVVMIR_LIBRARY_DIR}")
+    if(DEFINED _CUDA_COMPILER_LIBRARY_ROOT_FROM_NVVMIR_LIBRARY_DIR)
+      set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT "${_CUDA_COMPILER_LIBRARY_ROOT_FROM_NVVMIR_LIBRARY_DIR}")
     elseif(EXISTS "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/nvvm/libdevice")
       set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}")
     elseif(CMAKE_SYSROOT_LINK AND EXISTS "${CMAKE_SYSROOT_LINK}/usr/lib/cuda/nvvm/libdevice")
@@ -226,7 +229,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     else()
       message(FATAL_ERROR "Couldn't find CUDA library root.")
     endif()
-    unset(CMAKE_CUDA_COMPILER_LIBRARY_ROOT_FROM_NVVMIR_LIBRARY_DIR)
+    unset(_CUDA_COMPILER_LIBRARY_ROOT_FROM_NVVMIR_LIBRARY_DIR)
 
     # CMAKE_CUDA_COMPILER_TOOLKIT_LIBRARY_ROOT contains the linking stubs necessary for device linking and other low-level library files.
     if(CMAKE_SYSROOT_LINK AND EXISTS "${CMAKE_SYSROOT_LINK}/usr/lib/nvidia-cuda-toolkit/bin/crt/link.stub")
@@ -246,6 +249,9 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     if(CMAKE_CUDA_COMPILER_ID_OUTPUT MATCHES [=[V([0-9]+\.[0-9]+\.[0-9]+)]=])
       set(CMAKE_CUDA_COMPILER_TOOLKIT_VERSION "${CMAKE_MATCH_1}")
     endif()
+
+    # Don't leak variables unnecessarily to user code.
+    unset(_CUDA_NVCC_EXECUTABLE)
   endif()
 
   set(CMAKE_CUDA_COMPILER_ID_FLAGS_ALWAYS "-v")
@@ -409,6 +415,12 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES "${_CUDA_LIBRARY_DIR}")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES "")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES "")
+
+  # Don't leak variables unnecessarily to user code.
+  unset(_CUDA_INCLUDE_DIR)
+  unset(_CUDA_LIBRARY_DIR)
+  unset(_CUDA_TARGET_DIR)
+  unset(_CUDA_TARGET_NAME)
 elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
   set(_nvcc_log "")
   string(REPLACE "\r" "" _nvcc_output_orig "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
@@ -608,13 +620,6 @@ configure_file(${CMAKE_ROOT}/Modules/CMakeCUDACompiler.cmake.in
   ${CMAKE_PLATFORM_INFO_DIR}/CMakeCUDACompiler.cmake
   @ONLY
 )
-
-# Don't leak variables unnecessarily to user code.
-unset(_CUDA_INCLUDE_DIR CACHE)
-unset(_CUDA_NVCC_EXECUTABLE CACHE)
-unset(_CUDA_LIBRARY_DIR)
-unset(_CUDA_TARGET_DIR)
-unset(_CUDA_TARGET_NAME)
 
 unset(architectures_detected)
 
