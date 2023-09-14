@@ -46,7 +46,7 @@ The module supports the following components:
 
   The version given to the :command:`find_package` directive is the Matlab
   **version**, which should not be confused with the Matlab *release* name
-  (eg. `R2014`).
+  (e.g. `R2023b`).
   The :command:`matlab_get_version_from_release_name` and
   :command:`matlab_get_release_name_from_version` provide a mapping
   between the release name and the version.
@@ -57,7 +57,7 @@ specific:
 
 * Windows: The installed versions of Matlab/MCR are retrieved from the
   Windows registry
-* OS X: The installed versions of Matlab/MCR are given by the MATLAB
+* macOS: The installed versions of Matlab/MCR are given by the MATLAB
   default installation paths in ``/Application``. If no such application is
   found, it falls back to the one that might be accessible from the ``PATH``.
 * Unix: The desired Matlab should be accessible from the ``PATH``. This does
@@ -1452,8 +1452,8 @@ function(_Matlab_find_instances_win32 matlab_roots)
 
 endfunction()
 
-# Utility function for finding Matlab or MCR on OSX
-function(_Matlab_find_instances_osx matlab_roots)
+# Utility function for finding Matlab or MCR on macOS
+function(_Matlab_find_instances_macos matlab_roots)
 
   set(_matlab_possible_roots)
   # on mac, we look for the /Application paths
@@ -1595,8 +1595,8 @@ else()
     _Matlab_find_instances_win32(_matlab_possible_roots_win32)
     list(APPEND _matlab_possible_roots ${_matlab_possible_roots_win32})
   elseif(APPLE)
-    _Matlab_find_instances_osx(_matlab_possible_roots_osx)
-    list(APPEND _matlab_possible_roots ${_matlab_possible_roots_osx})
+    _Matlab_find_instances_macos(_matlab_possible_roots_macos)
+    list(APPEND _matlab_possible_roots ${_matlab_possible_roots_macos})
   endif()
 endif()
 
