@@ -236,11 +236,9 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     else()
       set(CMAKE_CUDA_COMPILER_TOOLKIT_LIBRARY_ROOT "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}")
     endif()
-  endif()
 
-  # For regular nvcc we the toolkit version is the same as the compiler version and we can parse it from the vendor test output.
-  # For Clang we need to invoke nvcc to get version output.
-  if(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
+    # For regular nvcc we the toolkit version is the same as the compiler version and we can parse it from the vendor test output.
+    # For Clang we need to invoke nvcc to get version output.
     if(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
       execute_process(COMMAND ${_CUDA_NVCC_EXECUTABLE} "--version" OUTPUT_VARIABLE CMAKE_CUDA_COMPILER_ID_OUTPUT)
     endif()
