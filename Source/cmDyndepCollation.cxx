@@ -122,10 +122,11 @@ Json::Value CollationInformationCxxModules(
         auto lookup = sf_map.find(file);
         if (lookup == sf_map.end()) {
           gt->Makefile->IssueMessage(
-            MessageType::INTERNAL_ERROR,
-            cmStrCat("Target \"", tgt->GetName(), "\" has source file \"",
+            MessageType::FATAL_ERROR,
+            cmStrCat("Target \"", tgt->GetName(), "\" has source file\n  ",
                      file,
-                     R"(" which is not in any of its "FILE_SET BASE_DIRS".)"));
+                     "\nin a \"FILE_SET TYPE CXX_MODULES\" but it is not "
+                     "scheduled for compilation."));
           continue;
         }
 

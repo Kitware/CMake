@@ -2551,6 +2551,12 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
         break;
     }
 
+    std::string config;
+    if (!this->Configurations.empty()) {
+      config = this->Configurations[si.Configs[0]];
+    }
+    auto const* fs =
+      this->GeneratorTarget->GetFileSetForSource(config, si.Source);
     if (tool) {
       // Compute set of configurations to exclude, if any.
       std::vector<size_t> const& include_configs = si.Configs;
@@ -2616,6 +2622,13 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
       if (si.Kind == cmGeneratorTarget::SourceKindObjectSource ||
           si.Kind == cmGeneratorTarget::SourceKindUnityBatched) {
         this->OutputSourceSpecificFlags(e2, si.Source);
+      } else if (fs && fs->GetType() == "CXX_MODULES"_s) {
+        this->GeneratorTarget->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("Target \"", this->GeneratorTarget->GetName(),
+                   "\" has source file\n  ", si.Source->GetFullPath(),
+                   "\nin a \"FILE_SET TYPE CXX_MODULES\" but it is not "
+                   "scheduled for compilation."));
       }
       if (si.Source->GetPropertyAsBool("SKIP_PRECOMPILE_HEADERS")) {
         e2.Element("PrecompiledHeader", "NotUsing");
@@ -2625,6 +2638,13 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
       }
 
       this->FinishWritingSource(e2, toolSettings);
+    } else if (fs && fs->GetType() == "CXX_MODULES"_s) {
+      this->GeneratorTarget->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Target \"", this->GeneratorTarget->GetName(),
+                 "\" has source file\n  ", si.Source->GetFullPath(),
+                 "\nin a \"FILE_SET TYPE CXX_MODULES\" but it is not "
+                 "scheduled for compilation."));
     }
   }
 
