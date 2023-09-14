@@ -380,9 +380,17 @@ endmacro()
 #]=======================================================================]
 macro(matlab_get_release_name_from_version version release_name)
 
+  # only the major.minor version is used
+  string(REGEX MATCH "([0-9]+\\.[0-9]+)" _match ${version})
+  if(CMAKE_MATCH_1)
+    set(short_version ${CMAKE_MATCH_1})
+  else()
+    set(short_version ${version})
+  endif()
+
   set(${release_name} "")
   foreach(_var IN LISTS MATLAB_VERSIONS_MAPPING)
-    string(REGEX MATCHALL "(.+)=${version}" _matched ${_var})
+    string(REGEX MATCHALL "(.+)=${short_version}" _matched ${_var})
     if(NOT _matched STREQUAL "")
       set(${release_name} ${CMAKE_MATCH_1})
       break()
@@ -392,7 +400,7 @@ macro(matlab_get_release_name_from_version version release_name)
   unset(_var)
   unset(_matched)
   if(${release_name} STREQUAL "")
-    message(WARNING "[MATLAB] The version ${version} is not registered")
+    message(WARNING "[MATLAB] The version ${short_version} is not registered")
   endif()
 
 endmacro()
@@ -1396,12 +1404,12 @@ function(_Matlab_VersionInfoXML)
 
   if(versioninfo_string)
     # parses "<version>23.2.0.2365128</version>"
-    string(REGEX MATCH "<version>(.*)</version>"
+    string(REGEX MATCH "<version>([0-9]+\\.[0-9]+\\.?[0-9]*\\.?[0-9]*)</version>"
       version_reg_match
       ${versioninfo_string}
       )
 
-    if(CMAKE_MATCH_1 MATCHES "(([0-9]+)\\.([0-9]+))[\\.0-9]*")
+    if(CMAKE_MATCH_1)
       set(_matlab_version_tmp "${CMAKE_MATCH_1}")
     endif()
   endif()
