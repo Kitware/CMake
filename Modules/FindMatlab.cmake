@@ -353,7 +353,7 @@ file(MAKE_DIRECTORY "${_matlab_temporary_folder}")
 #]=======================================================================]
 macro(matlab_get_version_from_release_name release_name version_name)
 
-  string(REGEX MATCHALL "${release_name}=([0-9]+\\.?[0-9]*)" _matched ${MATLAB_VERSIONS_MAPPING})
+  string(REGEX MATCHALL "${release_name}=([0-9]+\\.[0-9]+)" _matched ${MATLAB_VERSIONS_MAPPING})
 
   set(${version_name} "")
   if(NOT _matched STREQUAL "")
@@ -411,7 +411,7 @@ endmacro()
 macro(matlab_get_supported_releases list_releases)
   set(${list_releases})
   foreach(_var IN LISTS MATLAB_VERSIONS_MAPPING)
-    string(REGEX MATCHALL "(.+)=([0-9]+\\.?[0-9]*)" _matched ${_var})
+    string(REGEX MATCHALL "(.+)=([0-9]+\\.[0-9]+)" _matched ${_var})
     if(NOT _matched STREQUAL "")
       list(APPEND ${list_releases} ${CMAKE_MATCH_1})
     endif()
@@ -428,7 +428,7 @@ endmacro()
 macro(matlab_get_supported_versions list_versions)
   set(${list_versions})
   foreach(_var IN LISTS MATLAB_VERSIONS_MAPPING)
-    string(REGEX MATCHALL "(.+)=([0-9]+\\.?[0-9]*)" _matched ${_var})
+    string(REGEX MATCHALL "(.+)=([0-9]+\\.[0-9]+)" _matched ${_var})
     if(NOT _matched STREQUAL "")
       list(APPEND ${list_versions} ${CMAKE_MATCH_2})
     endif()
@@ -831,7 +831,7 @@ function(matlab_get_version_from_matlab_run matlab_binary_program matlab_list_ve
 
     string(SUBSTRING "${_matlab_version_from_cmd}" ${index} -1 substring_ans)
     string(
-      REGEX MATCHALL "ans[\r\n\t ]*=[\r\n\t ]*'?([0-9]+(\\.[0-9]+)?)"
+      REGEX MATCHALL "ans[\r\n\t ]*=[\r\n\t ]*'?([0-9]+(\\.[0-9]+)+)"
       matlab_versions_regex
       ${substring_ans})
     foreach(match IN LISTS matlab_versions_regex)
@@ -1404,7 +1404,7 @@ function(_Matlab_VersionInfoXML)
 
   if(versioninfo_string)
     # parses "<version>23.2.0.2365128</version>"
-    string(REGEX MATCH "<version>([0-9]+\\.[0-9]+\\.?[0-9]*\\.?[0-9]*)</version>"
+    string(REGEX MATCH "<version>([0-9]+(\\.[0-9]+)+)</version>"
       version_reg_match
       ${versioninfo_string}
       )
