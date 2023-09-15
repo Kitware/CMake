@@ -84,6 +84,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     # - CMAKE_CUDA_COMPILER_LIBRARY_ROOT
     # We save them in CMakeCUDACompiler.cmake so FindCUDAToolkit can
     # avoid searching on future runs and the toolkit is the same.
+    # Match arguments with cmake_cuda_architectures_all call.
     include(Internal/CMakeCUDAFindToolkit)
     cmake_cuda_find_toolkit(CUDA CMAKE_CUDA_COMPILER_)
 
@@ -157,7 +158,12 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     set(CMAKE_CUDA_COMPILER_TOOLKIT_VERSION ${CMAKE_CUDA_COMPILER_VERSION})
   endif()
 
-  include(${CMAKE_ROOT}/Modules/CUDA/architectures.cmake)
+  include(Internal/CMakeCUDAArchitecturesAll)
+  # From CMAKE_CUDA_COMPILER_TOOLKIT_VERSION and CMAKE_CUDA_COMPILER_{ID,VERSION}, get:
+  # - CMAKE_CUDA_ARCHITECTURES_ALL
+  # - CMAKE_CUDA_ARCHITECTURES_ALL_MAJOR
+  # Match arguments with cmake_cuda_find_toolkit call.
+  cmake_cuda_architectures_all(CUDA CMAKE_CUDA_COMPILER_)
 
   _cmake_find_compiler_sysroot(CUDA)
 endif()
