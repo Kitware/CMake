@@ -511,8 +511,7 @@ macro(extract_matlab_versions_from_registry_brute_force matlab_versions)
   # we order from more recent to older
   if(matlab_supported_versions)
     list(REMOVE_DUPLICATES matlab_supported_versions)
-    list(SORT matlab_supported_versions COMPARE NATURAL)
-    list(REVERSE matlab_supported_versions)
+    list(SORT matlab_supported_versions COMPARE NATURAL ORDER DESCENDING)
   endif()
 
   set(${matlab_versions} ${matlab_supported_versions})
@@ -1605,10 +1604,6 @@ if(MATLAB_FIND_DEBUG)
   message(STATUS "[MATLAB] Matlab root folders are ${_matlab_possible_roots}")
 endif()
 
-
-
-
-
 # take the first possible Matlab root
 list(LENGTH _matlab_possible_roots _numbers_of_matlab_roots)
 set(Matlab_VERSION_STRING "NOTFOUND")
@@ -1800,7 +1795,7 @@ endif()
 # This small stub around find_library is to prevent any pollution of CMAKE_FIND_LIBRARY_PREFIXES in the global scope.
 # This is the function to be used below instead of the find_library directives.
 function(_Matlab_find_library _matlab_library_prefix)
-  set(CMAKE_FIND_LIBRARY_PREFIXES ${CMAKE_FIND_LIBRARY_PREFIXES} ${_matlab_library_prefix})
+  list(APPEND CMAKE_FIND_LIBRARY_PREFIXES ${_matlab_library_prefix})
   find_library(${ARGN})
 endfunction()
 
