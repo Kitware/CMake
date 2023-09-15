@@ -458,50 +458,34 @@ endmacro()
 function(matlab_extract_all_installed_versions_from_registry win64 matlab_versions)
 
   if(NOT CMAKE_HOST_WIN32)
-    message(FATAL_ERROR "[MATLAB] This macro can only be called by a windows host (call to reg.exe)")
+    message(FATAL_ERROR "[MATLAB] This macro can only be called by a Windows host")
   endif()
 
   if(${win64} AND CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "64")
-    set(APPEND_REG "/reg:64")
+    set(_view "64")
   else()
-    set(APPEND_REG "/reg:32")
+    set(_view "32")
   endif()
 
   set(matlabs_from_registry)
 
   foreach(_installation_type IN ITEMS "MATLAB" "MATLAB Runtime" "MATLAB Compiler Runtime")
 
-    # /reg:64 should be added on 64 bits capable OSs in order to enable the
-    # redirection of 64 bits applications
-    execute_process(
-      COMMAND reg query "HKEY_LOCAL_MACHINE\\SOFTWARE\\Mathworks\\${_installation_type}" /f * /k ${APPEND_REG}
-      RESULT_VARIABLE resultMatlab
-      OUTPUT_VARIABLE varMatlab
-      ERROR_VARIABLE errMatlab
-      INPUT_FILE NUL
-      )
+    cmake_host_system_information(RESULT _reg
+    QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/${_installation_type}"
+    SUBKEYS VIEW ${_view}
+    )
 
+    if(_reg)
 
-    if(resultMatlab EQUAL 0)
+      string(REGEX MATCHALL "([0-9]+\\.[0-9]+)" _versions_regex ${_reg})
 
-      string(
-        REGEX MATCHALL "${_installation_type}\\\\([0-9]+(\\.[0-9]+)?)"
-        matlab_versions_regex ${varMatlab})
+      foreach(match IN LISTS _versions_regex)
 
-      foreach(match IN LISTS matlab_versions_regex)
-        string(
-          REGEX MATCH "${_installation_type}\\\\(([0-9]+)(\\.([0-9]+))?)"
-          current_match ${match})
-
-        set(_matlab_current_version ${CMAKE_MATCH_1})
-        set(current_matlab_version_major ${CMAKE_MATCH_2})
-        set(current_matlab_version_minor ${CMAKE_MATCH_4})
-        if(NOT current_matlab_version_minor)
-          set(current_matlab_version_minor "0")
+        string(REGEX MATCH "([0-9]+\\.[0-9]+)" current_match ${match})
+        if(CMAKE_MATCH_1)
+          list(APPEND matlabs_from_registry ${CMAKE_MATCH_1})
         endif()
-
-        list(APPEND matlabs_from_registry ${_matlab_current_version})
-        unset(_matlab_current_version)
       endforeach()
 
     endif()
@@ -509,8 +493,7 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
 
   if(matlabs_from_registry)
     list(REMOVE_DUPLICATES matlabs_from_registry)
-    list(SORT matlabs_from_registry COMPARE NATURAL)
-    list(REVERSE matlabs_from_registry)
+    list(SORT matlabs_from_registry COMPARE NATURAL ORDER DESCENDING)
   endif()
 
   set(${matlab_versions} ${matlabs_from_registry} PARENT_SCOPE)
