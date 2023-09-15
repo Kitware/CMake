@@ -489,10 +489,20 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
       string(REGEX MATCHALL "([0-9]+\\.[0-9]+)" _versions_regex ${_reg})
 
       foreach(match IN LISTS _versions_regex)
-
         string(REGEX MATCH "([0-9]+\\.[0-9]+)" current_match ${match})
-        if(CMAKE_MATCH_1)
-          list(APPEND matlabs_from_registry ${CMAKE_MATCH_1})
+
+        if(NOT CMAKE_MATCH_1)
+          continue()
+        endif()
+
+        cmake_host_system_information(RESULT _reg
+          QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/${_installation_type}/${CMAKE_MATCH_1}"
+          VALUE "MATLABROOT"
+        )
+
+        _Matlab_VersionInfoXML(${_reg} _matlab_version_tmp)
+        if(NOT "${_matlab_version_tmp}" STREQUAL "unknown")
+          list(APPEND matlabs_from_registry ${_matlab_version_tmp})
         endif()
       endforeach()
 
@@ -1354,10 +1364,10 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
         ${_matlab_main_real_path_tmp}
         CACHE INTERNAL "internal matlab location for the discovered version" FORCE)
 
-    _Matlab_VersionInfoXML()
-    if(Matlab_VERSION_STRING_INTERNAL AND NOT Matlab_VERSION_STRING_INTERNAL STREQUAL "unknown")
+    _Matlab_VersionInfoXML(${matlab_root} _matlab_version_tmp)
+    if(NOT "${_matlab_version_tmp}" STREQUAL "unknown")
       # at least back to R2016 VersionInfo.xml exists
-      set(matlab_list_of_all_versions ${Matlab_VERSION_STRING_INTERNAL})
+      set(matlab_list_of_all_versions ${_matlab_version_tmp})
     else()
       # time consuming, less stable way to find Matlab version by running Matlab
       matlab_get_version_from_matlab_run("${Matlab_PROG_VERSION_STRING_AUTO_DETECT}" matlab_list_of_all_versions)
@@ -1382,7 +1392,10 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
     # MCR
     # we cannot run anything in order to extract the version. We assume that the file
     # VersionInfo.xml exists under the MatlabRoot, we look for it and extract the version from there
-    _Matlab_VersionInfoXML()
+    _Matlab_VersionInfoXML(${matlab_root} _matlab_version_tmp)
+    if(NOT "${_matlab_version_tmp}" STREQUAL "unknown")
+      set(Matlab_VERSION_STRING_INTERNAL ${_matlab_version_tmp} CACHE INTERNAL "Matlab version (automatically determined)" FORCE)
+    endif()
   endif() # Matlab or MCR
 
   # return the updated value
@@ -1391,9 +1404,9 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
 endfunction()
 
 
-function(_Matlab_VersionInfoXML)
+function(_Matlab_VersionInfoXML matlab_root _version)
 
-  set(_matlab_version_tmp "unknown")
+  set(_ver "unknown")
 
   set(_XMLfile ${matlab_root}/VersionInfo.xml)
   if(NOT EXISTS ${_XMLfile})
@@ -1410,13 +1423,11 @@ function(_Matlab_VersionInfoXML)
       )
 
     if(CMAKE_MATCH_1)
-      set(_matlab_version_tmp "${CMAKE_MATCH_1}")
+      set(_ver "${CMAKE_MATCH_1}")
     endif()
   endif()
 
-  if(_matlab_version_tmp)
-    set(Matlab_VERSION_STRING_INTERNAL "${_matlab_version_tmp}" CACHE INTERNAL "Matlab version" FORCE)
-  endif()
+  set(${_version} ${_ver} PARENT_SCOPE)
 
 endfunction()
 
