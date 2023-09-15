@@ -27,9 +27,11 @@ find_library
 
 .. |SYSTEM_ENVIRONMENT_PATH_XXX| replace:: The directories in ``LIB``
    and ``PATH``.
-.. |SYSTEM_ENVIRONMENT_PATH_WINDOWS_XXX| replace:: On Windows hosts:
-      ``<prefix>/lib/<arch>`` if :variable:`CMAKE_LIBRARY_ARCHITECTURE`
-      is set, and |SYSTEM_ENVIRONMENT_PREFIX_PATH_XXX_SUBDIR|.
+.. |SYSTEM_ENVIRONMENT_PATH_WINDOWS_XXX| replace::
+   On Windows hosts, CMake 3.3 through 3.27 searched additional paths:
+   ``<prefix>/lib/<arch>`` if :variable:`CMAKE_LIBRARY_ARCHITECTURE`
+   is set, and |SYSTEM_ENVIRONMENT_PREFIX_PATH_XXX_SUBDIR|.
+   This behavior was removed by CMake 3.28.
 
 .. |CMAKE_SYSTEM_PREFIX_PATH_XXX| replace::
    ``<prefix>/lib/<arch>`` if :variable:`CMAKE_LIBRARY_ARCHITECTURE` is set,

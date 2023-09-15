@@ -211,7 +211,8 @@ If ``NO_DEFAULT_PATH`` is not specified, the search process is as follows:
    setting the :variable:`CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH` to ``FALSE``.
 
    * |SYSTEM_ENVIRONMENT_PATH_XXX|
-   * |SYSTEM_ENVIRONMENT_PATH_WINDOWS_XXX|
+
+   |SYSTEM_ENVIRONMENT_PATH_WINDOWS_XXX|
 
 6. Search cmake variables defined in the Platform files
    for the current system.  The searching of ``CMAKE_INSTALL_PREFIX`` and
