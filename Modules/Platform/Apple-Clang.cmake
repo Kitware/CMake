@@ -14,6 +14,10 @@ macro(__apple_compiler_clang lang)
   if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 3.2)
     set(CMAKE_${lang}_SYSTEM_FRAMEWORK_SEARCH_FLAG "-iframework ")
   endif()
+
+  set(CMAKE_${lang}_LINK_LIBRARY_USING_FRAMEWORK "-framework <LIBRARY>")
+  set(CMAKE_${lang}_LINK_LIBRARY_USING_FRAMEWORK_SUPPORTED TRUE)
+
   if(_CMAKE_OSX_SYSROOT_PATH MATCHES "/iPhoneOS")
     set(CMAKE_${lang}_OSX_DEPLOYMENT_TARGET_FLAG "-miphoneos-version-min=")
   elseif(_CMAKE_OSX_SYSROOT_PATH MATCHES "/iPhoneSimulator")
