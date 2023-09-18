@@ -3,7 +3,8 @@ HIP_ARCHITECTURES
 
 .. versionadded:: 3.21
 
-List of AMD GPU architectures to generate device code for.
+List of GPU architectures to for which to generate device code.
+Architecture names are interpreted based on :variable:`CMAKE_HIP_PLATFORM`.
 
 A non-empty false value (e.g. ``OFF``) disables adding architectures.
 This is intended to support packagers and rare cases where full control

@@ -590,6 +590,7 @@ Variables for Languages
    /variable/CMAKE_Fortran_MODOUT_FLAG
    /variable/CMAKE_HIP_ARCHITECTURES
    /variable/CMAKE_HIP_EXTENSIONS
+   /variable/CMAKE_HIP_PLATFORM
    /variable/CMAKE_HIP_STANDARD
    /variable/CMAKE_HIP_STANDARD_REQUIRED
    /variable/CMAKE_ISPC_HEADER_DIRECTORY

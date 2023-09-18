@@ -10,6 +10,16 @@ if( NOT ( ("${CMAKE_GENERATOR}" MATCHES "Make") OR
   message(FATAL_ERROR "HIP language not currently supported by \"${CMAKE_GENERATOR}\" generator")
 endif()
 
+if(NOT CMAKE_HIP_PLATFORM)
+  set(CMAKE_HIP_PLATFORM "amd" CACHE STRING "HIP platform" FORCE)
+endif()
+if(NOT CMAKE_HIP_PLATFORM MATCHES "^(amd)$")
+  message(FATAL_ERROR
+    "The CMAKE_HIP_PLATFORM has unsupported value:\n"
+    " '${CMAKE_HIP_PLATFORM}'\n"
+    "It must be 'amd'."
+    )
+endif()
 
 if(NOT CMAKE_HIP_COMPILER)
   set(CMAKE_HIP_COMPILER_INIT NOTFOUND)
@@ -34,15 +44,17 @@ if(NOT CMAKE_HIP_COMPILER)
 
   # finally list compilers to try
   if(NOT CMAKE_HIP_COMPILER_INIT)
-    set(CMAKE_HIP_COMPILER_LIST clang++)
+    if(CMAKE_HIP_PLATFORM STREQUAL "amd")
+      set(CMAKE_HIP_COMPILER_LIST clang++)
 
-    # Look for the Clang coming with ROCm to support HIP.
-    execute_process(COMMAND hipconfig --hipclangpath
-      OUTPUT_VARIABLE _CMAKE_HIPCONFIG_CLANGPATH
-      RESULT_VARIABLE _CMAKE_HIPCONFIG_RESULT
-    )
-    if(_CMAKE_HIPCONFIG_RESULT EQUAL 0 AND EXISTS "${_CMAKE_HIPCONFIG_CLANGPATH}")
-      set(CMAKE_HIP_COMPILER_HINTS "${_CMAKE_HIPCONFIG_CLANGPATH}")
+      # Look for the Clang coming with ROCm to support HIP.
+      execute_process(COMMAND hipconfig --hipclangpath
+        OUTPUT_VARIABLE _CMAKE_HIPCONFIG_CLANGPATH
+        RESULT_VARIABLE _CMAKE_HIPCONFIG_RESULT
+      )
+      if(_CMAKE_HIPCONFIG_RESULT EQUAL 0 AND EXISTS "${_CMAKE_HIPCONFIG_CLANGPATH}")
+        set(CMAKE_HIP_COMPILER_HINTS "${_CMAKE_HIPCONFIG_CLANGPATH}")
+      endif()
     endif()
   endif()
 

@@ -3,7 +3,11 @@ project(HIPArchitecture HIP)
 
 # Make sure CMake doesn't pass architectures if HIP_ARCHITECTURES is OFF.
 set(CMAKE_HIP_ARCHITECTURES OFF)
-string(APPEND CMAKE_HIP_FLAGS " --offload-arch=gfx908")
+
+# Pass our own architecture flags instead.
+if(CMAKE_HIP_PLATFORM STREQUAL "amd")
+  string(APPEND CMAKE_HIP_FLAGS " --offload-arch=gfx908")
+endif()
 
 add_executable(HIPOnlyArchitectureOff main.hip)
 get_property(hip_archs TARGET HIPOnlyArchitectureOff PROPERTY HIP_ARCHITECTURES)
