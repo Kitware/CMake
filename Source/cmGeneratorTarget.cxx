@@ -3387,7 +3387,7 @@ void cmGeneratorTarget::AddExplicitLanguageFlags(std::string& flags,
 }
 
 void cmGeneratorTarget::AddCUDAArchitectureFlags(cmBuildStep compileOrLink,
-                                                 const std::string& config,
+                                                 std::string const& config,
                                                  std::string& flags) const
 {
   std::string arch = this->GetSafeProperty("CUDA_ARCHITECTURES");
@@ -3418,39 +3418,52 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(cmBuildStep compileOrLink,
     return;
   }
 
-  std::string const& compiler =
-    this->Makefile->GetSafeDefinition("CMAKE_CUDA_COMPILER_ID");
-  const bool ipoEnabled = this->IsIPOEnabled("CUDA", config);
+  return this->AddCUDAArchitectureFlagsImpl(compileOrLink, config, "CUDA",
+                                            std::move(arch), flags);
+}
+
+void cmGeneratorTarget::AddCUDAArchitectureFlagsImpl(cmBuildStep compileOrLink,
+                                                     std::string const& config,
+                                                     std::string const& lang,
+                                                     std::string arch,
+                                                     std::string& flags) const
+{
+  std::string const& compiler = this->Makefile->GetSafeDefinition(
+    cmStrCat("CMAKE_", lang, "_COMPILER_ID"));
+  const bool ipoEnabled = this->IsIPOEnabled(lang, config);
 
   // Check for special modes: `all`, `all-major`.
   if (arch == "all" || arch == "all-major") {
     if (compiler == "NVIDIA" &&
-        cmSystemTools::VersionCompare(
-          cmSystemTools::OP_GREATER_EQUAL,
-          this->Makefile->GetDefinition("CMAKE_CUDA_COMPILER_VERSION"),
-          "11.5")) {
+        cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER_EQUAL,
+                                      this->Makefile->GetDefinition(cmStrCat(
+                                        "CMAKE_", lang, "_COMPILER_VERSION")),
+                                      "11.5")) {
       flags = cmStrCat(flags, " -arch=", arch);
       return;
     }
     if (arch == "all") {
-      arch = *this->Makefile->GetDefinition("CMAKE_CUDA_ARCHITECTURES_ALL");
+      arch = *this->Makefile->GetDefinition(
+        cmStrCat("CMAKE_", lang, "_ARCHITECTURES_ALL"));
     } else if (arch == "all-major") {
-      arch =
-        *this->Makefile->GetDefinition("CMAKE_CUDA_ARCHITECTURES_ALL_MAJOR");
+      arch = *this->Makefile->GetDefinition(
+        cmStrCat("CMAKE_", lang, "_ARCHITECTURES_ALL_MAJOR"));
     }
   } else if (arch == "native") {
-    cmValue native =
-      this->Makefile->GetDefinition("CMAKE_CUDA_ARCHITECTURES_NATIVE");
+    cmValue native = this->Makefile->GetDefinition(
+      cmStrCat("CMAKE_", lang, "_ARCHITECTURES_NATIVE"));
     if (native.IsEmpty()) {
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        "CUDA_ARCHITECTURES is set to \"native\", but no GPU was detected.");
+        cmStrCat(lang,
+                 "_ARCHITECTURES is set to \"native\", but no NVIDIA GPU was "
+                 "detected."));
     }
     if (compiler == "NVIDIA" &&
-        cmSystemTools::VersionCompare(
-          cmSystemTools::OP_GREATER_EQUAL,
-          this->Makefile->GetDefinition("CMAKE_CUDA_COMPILER_VERSION"),
-          "11.6")) {
+        cmSystemTools::VersionCompare(cmSystemTools::OP_GREATER_EQUAL,
+                                      this->Makefile->GetDefinition(cmStrCat(
+                                        "CMAKE_", lang, "_COMPILER_VERSION")),
+                                      "11.6")) {
       flags = cmStrCat(flags, " -arch=", arch);
       return;
     }
@@ -3499,8 +3512,8 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(cmBuildStep compileOrLink,
 
   if (compiler == "NVIDIA") {
     if (ipoEnabled && compileOrLink == cmBuildStep::Link) {
-      if (cmValue cudaIPOFlags =
-            this->Makefile->GetDefinition("CMAKE_CUDA_LINK_OPTIONS_IPO")) {
+      if (cmValue cudaIPOFlags = this->Makefile->GetDefinition(
+            cmStrCat("CMAKE_", lang, "_LINK_OPTIONS_IPO"))) {
         flags += *cudaIPOFlags;
       }
     }
