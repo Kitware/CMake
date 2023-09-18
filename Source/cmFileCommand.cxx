@@ -3020,8 +3020,7 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
   }
 
   // Check if the new file already exists and remove it.
-  if ((cmSystemTools::FileExists(newFileName) ||
-       cmSystemTools::FileIsSymlink(newFileName)) &&
+  if (cmSystemTools::PathExists(newFileName) &&
       !cmSystemTools::RemoveFile(newFileName)) {
     std::ostringstream e;
     e << "Failed to create link '" << newFileName

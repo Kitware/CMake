@@ -1018,8 +1018,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
           // Complain if the -f option was not given and
           // either file does not exist or
           // file could not be removed and still exists
-          bool file_exists_or_forced_remove = cmSystemTools::FileExists(arg) ||
-            cmSystemTools::FileIsSymlink(arg) || force;
+          bool file_exists_or_forced_remove =
+            cmSystemTools::PathExists(arg) || force;
           if (cmSystemTools::FileIsDirectory(arg)) {
             if (!cmRemoveDirectory(arg, recursive)) {
               return_value = 1;
@@ -1239,8 +1239,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     // supporting them.
     if (args[1] == "create_symlink" && args.size() == 4) {
       std::string const& destinationFileName = args[3];
-      if ((cmSystemTools::FileExists(destinationFileName) ||
-           cmSystemTools::FileIsSymlink(destinationFileName)) &&
+      if (cmSystemTools::PathExists(destinationFileName) &&
           !cmSystemTools::RemoveFile(destinationFileName)) {
         std::string emsg = cmSystemTools::GetLastSystemError();
         std::cerr << "failed to create symbolic link '" << destinationFileName
@@ -1266,8 +1265,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         return 1;
       }
 
-      if ((cmSystemTools::FileExists(destinationFileName) ||
-           cmSystemTools::FileIsSymlink(destinationFileName)) &&
+      if (cmSystemTools::PathExists(destinationFileName) &&
           !cmSystemTools::RemoveFile(destinationFileName)) {
         std::string emsg = cmSystemTools::GetLastSystemError();
         std::cerr << "failed to create hard link '" << destinationFileName
@@ -1750,7 +1748,7 @@ int cmcmd::SymlinkExecutable(std::vector<std::string> const& args)
 cmsys::Status cmcmd::SymlinkInternal(std::string const& file,
                                      std::string const& link)
 {
-  if (cmSystemTools::FileExists(link) || cmSystemTools::FileIsSymlink(link)) {
+  if (cmSystemTools::PathExists(link)) {
     cmSystemTools::RemoveFile(link);
   }
   std::string linktext = cmSystemTools::GetFilenameName(file);
