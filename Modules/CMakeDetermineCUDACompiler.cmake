@@ -355,11 +355,12 @@ if(CMAKE_GENERATOR MATCHES "Visual Studio")
   set(_SET_CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT
     "set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT \"${CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT}\")")
 elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
-  string(REGEX MATCHALL "-target-cpu sm_([0-9]+)" target_cpus "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
+  string(REGEX MATCHALL "-target-cpu sm_([0-9]+)" _clang_target_cpus "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
 
-  foreach(cpu ${target_cpus})
-    string(REGEX MATCH "-target-cpu sm_([0-9]+)" dont_care "${cpu}")
-    list(APPEND architectures_detected "${CMAKE_MATCH_1}")
+  foreach(_clang_target_cpu ${_clang_target_cpus})
+    if(_clang_target_cpu MATCHES "-target-cpu sm_([0-9]+)")
+      list(APPEND CMAKE_CUDA_ARCHITECTURES_DEFAULT "${CMAKE_MATCH_1}")
+    endif()
   endforeach()
 
   # Find target directory when crosscompiling.
@@ -593,35 +594,31 @@ if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
       "Failed to detect CUDA nvcc include information:\n${_nvcc_log}\n\n")
   endif()
 
-  string(REGEX MATCHALL "-arch compute_([0-9]+)" target_cpus "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
-
-  foreach(cpu ${target_cpus})
-    string(REGEX MATCH "-arch compute_([0-9]+)" dont_care "${cpu}")
-    list(APPEND architectures_detected "${CMAKE_MATCH_1}")
+  string(REGEX MATCHALL "-arch compute_([0-9]+)" _nvcc_target_cpus "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
+  foreach(_nvcc_target_cpu ${_nvcc_target_cpus})
+    if(_nvcc_target_cpu MATCHES "-arch compute_([0-9]+)")
+      list(APPEND CMAKE_CUDA_ARCHITECTURES_DEFAULT "${CMAKE_MATCH_1}")
+    endif()
   endforeach()
 endif()
 
-# If the user didn't set the architectures, then set them to a default.
-# If the user did, then make sure those architectures worked.
+# If the user did not set CMAKE_CUDA_ARCHITECTURES, use the compiler's default.
 if("${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "")
   cmake_policy(GET CMP0104 _CUDA_CMP0104)
-
   if(NOT CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" OR _CUDA_CMP0104 STREQUAL "NEW")
-    set(CMAKE_CUDA_ARCHITECTURES "${architectures_detected}" CACHE STRING "CUDA architectures")
-
+    set(CMAKE_CUDA_ARCHITECTURES "${CMAKE_CUDA_ARCHITECTURES_DEFAULT}" CACHE STRING "CUDA architectures")
     if(NOT CMAKE_CUDA_ARCHITECTURES)
       message(FATAL_ERROR "Failed to detect a default CUDA architecture.\n\nCompiler output:\n${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
     endif()
   endif()
 endif()
+unset(CMAKE_CUDA_ARCHITECTURES_DEFAULT)
 
 # configure all variables set in this file
 configure_file(${CMAKE_ROOT}/Modules/CMakeCUDACompiler.cmake.in
   ${CMAKE_PLATFORM_INFO_DIR}/CMakeCUDACompiler.cmake
   @ONLY
 )
-
-unset(architectures_detected)
 
 set(CMAKE_CUDA_COMPILER_ENV_VAR "CUDACXX")
 set(CMAKE_CUDA_HOST_COMPILER_ENV_VAR "CUDAHOSTCXX")
