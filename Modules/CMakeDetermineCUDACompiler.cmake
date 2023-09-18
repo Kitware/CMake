@@ -111,23 +111,9 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     endif()
   endif()
 
-  # Rest of the code treats an empty value as equivalent to "use the defaults".
-  # Error out early to prevent confusing errors as a result of this.
-  # Note that this also catches invalid non-numerical values such as "a".
-  if(DEFINED CMAKE_CUDA_ARCHITECTURES)
-    if(CMAKE_CUDA_ARCHITECTURES STREQUAL "")
-      message(FATAL_ERROR "CMAKE_CUDA_ARCHITECTURES must be non-empty if set.")
-    elseif(CMAKE_CUDA_ARCHITECTURES AND NOT CMAKE_CUDA_ARCHITECTURES MATCHES "^([0-9]+a?(-real|-virtual)?(;[0-9]+a?(-real|-virtual)?|;)*|all|all-major|native)$")
-      message(FATAL_ERROR
-        "CMAKE_CUDA_ARCHITECTURES:\n"
-        "  ${CMAKE_CUDA_ARCHITECTURES}\n"
-        "is not one of the following:\n"
-        "  * a semicolon-separated list of integers, each optionally\n"
-        "    followed by '-real' or '-virtual'\n"
-        "  * a special value: all, all-major, native\n"
-        )
-    endif()
-  endif()
+  # If the user set CMAKE_CUDA_ARCHITECTURES, validate its value.
+  include(Internal/CMakeCUDAArchitecturesValidate)
+  cmake_cuda_architectures_validate(CUDA)
 
   if(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
     # Clang doesn't automatically select an architecture supported by the SDK.
