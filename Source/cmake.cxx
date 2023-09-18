@@ -785,6 +785,9 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
 
       mf.SetArgcArgv(args);
     }
+    if (!cmSystemTools::FileExists(path, true)) {
+      cmSystemTools::Error("Not a file: " + path);
+    }
     if (!mf.ReadListFile(path)) {
       cmSystemTools::Error("Error processing file: " + path);
     }
