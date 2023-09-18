@@ -127,3 +127,4 @@ if(CMake_TEST_Fortran_SUBMODULES)
 endif()
 
 add_subdirectory(Issue25112)
+add_subdirectory(Issue25223)
