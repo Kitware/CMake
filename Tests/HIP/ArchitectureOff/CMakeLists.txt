@@ -2,7 +2,11 @@ cmake_minimum_required(VERSION 3.18)
 project(HIPArchitecture HIP)
 
 # Make sure CMake doesn't pass architectures if HIP_ARCHITECTURES is OFF.
+set(CMAKE_HIP_ARCHITECTURES OFF)
 string(APPEND CMAKE_HIP_FLAGS " --offload-arch=gfx908")
 
 add_executable(HIPOnlyArchitectureOff main.hip)
-set_property(TARGET HIPOnlyArchitectureOff PROPERTY HIP_ARCHITECTURES OFF)
+get_property(hip_archs TARGET HIPOnlyArchitectureOff PROPERTY HIP_ARCHITECTURES)
+if(NOT hip_archs STREQUAL "OFF")
+  message(FATAL_ERROR "CMAKE_HIP_ARCHITECTURES did not initialize HIP_ARCHITECTURES")
+endif()
