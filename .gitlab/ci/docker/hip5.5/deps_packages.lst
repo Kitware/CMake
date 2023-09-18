@@ -2,3 +2,20 @@
 g++
 curl
 git
+
+# NVIDIA CUDA Compiler
+cuda-keyring
+cuda-nvcc-11-8
+cuda-profiler-api-11-8
+
+# NVIDIA CUDA Toolkit
+# These are not needed for HIP, but having them in
+# the environment allows us to run CUDA tests too.
+cuda-nvrtc-dev-11-8
+cuda-nvtx-11-8
+libcublas-dev-11-8
+libcufft-dev-11-8
+libcurand-dev-11-8
+libcusolver-dev-11-8
+libcusparse-dev-11-8
+libnpp-dev-11-8

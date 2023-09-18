@@ -345,7 +345,7 @@
 ### HIP builds
 
 .hip5.5:
-    image: "kitware/cmake:ci-hip5.5-x86_64-2023-06-01"
+    image: "kitware/cmake:ci-hip5.5-x86_64-2023-09-18"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
