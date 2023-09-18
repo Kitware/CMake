@@ -373,6 +373,13 @@
         CMAKE_CONFIGURATION: fedora38_hip_radeon
         CTEST_LABELS: "HIP"
 
+.hip5.5_nvidia:
+    extends: .hip5.5
+
+    variables:
+        CMAKE_CONFIGURATION: hip5.5_nvidia
+        CTEST_LABELS: "HIP"
+
 ### C++ modules
 
 .gcc_cxx_modules_x86_64:
