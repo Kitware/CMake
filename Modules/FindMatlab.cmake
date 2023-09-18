@@ -1481,6 +1481,11 @@ function(_Matlab_find_instances_macos matlab_roots)
     string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
     set(_matlab_base_path "/Applications/MATLAB_${_matlab_current_release}.app")
 
+    _Matlab_VersionInfoXML(${_matlab_base_path} _matlab_version_tmp)
+    if(NOT "${_matlab_version_tmp}" STREQUAL "unknown")
+      set(_matlab_current_version ${_matlab_version_tmp})
+    endif()
+
     # Check Matlab, has precedence over MCR
     if(IS_DIRECTORY "${_matlab_base_path}")
       if(MATLAB_FIND_DEBUG)
