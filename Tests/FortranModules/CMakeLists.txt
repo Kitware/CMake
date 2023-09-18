@@ -128,3 +128,7 @@ endif()
 
 add_subdirectory(Issue25112)
 add_subdirectory(Issue25223)
+if( # Intel Fortran VS Integration breaks on custom targets with Fortran sources
+    NOT CMAKE_GENERATOR MATCHES "Visual Studio")
+  add_subdirectory(Issue25252)
+endif()
