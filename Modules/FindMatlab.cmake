@@ -1280,7 +1280,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
   if(NOT matlab_known_version STREQUAL "NOTFOUND")
     # the version is known, we just return it
     set(${matlab_final_version} ${matlab_known_version} PARENT_SCOPE)
-    set(Matlab_VERSION_STRING_INTERNAL ${matlab_known_version} CACHE INTERNAL "Matlab version (automatically determined)" FORCE)
+    set(Matlab_VERSION_STRING_INTERNAL ${matlab_known_version} CACHE INTERNAL "Matlab version (automatically determined)")
     return()
   endif()
 
@@ -1341,8 +1341,8 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
       if(MATLAB_FIND_DEBUG)
         message(WARNING "[MATLAB] Cannot find the main matlab program under ${matlab_root}")
       endif()
-      set(Matlab_PROG_VERSION_STRING_AUTO_DETECT "" CACHE INTERNAL "internal matlab location for the discovered version" FORCE)
-      set(Matlab_VERSION_STRING_INTERNAL "" CACHE INTERNAL "internal matlab location for the discovered version" FORCE)
+      set(Matlab_PROG_VERSION_STRING_AUTO_DETECT "" CACHE INTERNAL "internal matlab location for the discovered version")
+      set(Matlab_VERSION_STRING_INTERNAL "" CACHE INTERNAL "internal matlab location for the discovered version")
       unset(_matlab_current_program)
       unset(_matlab_current_program CACHE)
       return()
@@ -1362,7 +1362,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
     # update the location of the program
     set(Matlab_PROG_VERSION_STRING_AUTO_DETECT
         ${_matlab_main_real_path_tmp}
-        CACHE INTERNAL "internal matlab location for the discovered version" FORCE)
+        CACHE INTERNAL "internal matlab location for the discovered version")
 
     _Matlab_VersionInfoXML(${matlab_root} _matlab_version_tmp)
     if(NOT "${_matlab_version_tmp}" STREQUAL "unknown")
@@ -1381,7 +1381,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
     endif()
 
     # set the version into the cache
-    set(Matlab_VERSION_STRING_INTERNAL ${_matlab_version_tmp} CACHE INTERNAL "Matlab version (automatically determined)" FORCE)
+    set(Matlab_VERSION_STRING_INTERNAL ${_matlab_version_tmp} CACHE INTERNAL "Matlab version (automatically determined)")
 
     # warning, just in case several versions found (should not happen)
     if((list_of_all_versions_length GREATER 1) AND MATLAB_FIND_DEBUG)
@@ -1394,7 +1394,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
     # VersionInfo.xml exists under the MatlabRoot, we look for it and extract the version from there
     _Matlab_VersionInfoXML(${matlab_root} _matlab_version_tmp)
     if(NOT "${_matlab_version_tmp}" STREQUAL "unknown")
-      set(Matlab_VERSION_STRING_INTERNAL ${_matlab_version_tmp} CACHE INTERNAL "Matlab version (automatically determined)" FORCE)
+      set(Matlab_VERSION_STRING_INTERNAL ${_matlab_version_tmp} CACHE INTERNAL "Matlab version (automatically determined)")
     endif()
   endif() # Matlab or MCR
 
