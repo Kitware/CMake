@@ -140,8 +140,8 @@ Result variables
 ``Matlab_VERSION``
   .. versionadded:: 3.27
 
-  the numerical version (e.g. 9.13) of Matlab found. Not to be confused with
-  Matlab release name (e.g. R2022b) that can be obtained with
+  the numerical version (e.g. 23.2.0) of Matlab found. Not to be confused with
+  Matlab release name (e.g. R2023b) that can be obtained with
   :command:`matlab_get_release_name_from_version`.
 ``Matlab_ROOT_DIR``
   the final root of the Matlab installation determined by the FindMatlab
@@ -302,6 +302,7 @@ if(NOT MATLAB_ADDITIONAL_VERSIONS)
 endif()
 
 set(MATLAB_VERSIONS_MAPPING
+  "R2023b=23.2"
   "R2023a=9.14"
   "R2022b=9.13"
   "R2022a=9.12"
@@ -345,8 +346,8 @@ file(MAKE_DIRECTORY "${_matlab_temporary_folder}")
 
     matlab_get_version_from_release_name(release version)
 
-  * Input: ``release`` is the release name (R2022b)
-  * Output: ``version`` is the version of Matlab (9.13)
+  * Input: ``release`` is the release name (e.g. R2023b)
+  * Output: ``version`` is the version of Matlab (e.g. 23.2.0)
 
   Returns the version of Matlab from a release name
 #]=======================================================================]
@@ -372,8 +373,8 @@ endmacro()
 
     matlab_get_release_name_from_version(version release_name)
 
-  * Input: ``version`` is the version of Matlab (9.13)
-  * Output: ``release_name`` is the release name (R2022b)
+  * Input: ``version`` is the version of Matlab (e.g. 23.2.0)
+  * Output: ``release_name`` is the release name (R2023b)
 
   Returns the release name from the version of Matlab
 #]=======================================================================]
@@ -1412,7 +1413,7 @@ function(_Matlab_VersionInfoXML)
   file(READ ${_XMLfile} versioninfo_string)
 
   if(versioninfo_string)
-    # parses "<version>9.2.0.538062</version>"
+    # parses "<version>23.2.0.2365128</version>"
     string(REGEX MATCH "<version>(.*)</version>"
       version_reg_match
       ${versioninfo_string}
