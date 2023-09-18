@@ -10,7 +10,10 @@ The value must be one of:
 ``amd``
   AMD GPUs
 
-If not specified, the default is ``amd``.
+``nvidia``
+  NVIDIA GPUs
+
+If not specified, a default is computed via ``hipconfig --platform``.
 
 :variable:`CMAKE_HIP_ARCHITECTURES` entries are interpreted with
 as architectures of the GPU platform.

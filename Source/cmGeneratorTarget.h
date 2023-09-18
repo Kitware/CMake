@@ -504,7 +504,9 @@ public:
                                     std::string& flags) const;
   void AddCUDAToolkitFlags(std::string& flags) const;
 
-  void AddHIPArchitectureFlags(std::string& flags) const;
+  void AddHIPArchitectureFlags(cmBuildStep compileOrLink,
+                               std::string const& config,
+                               std::string& flags) const;
 
   void AddISPCTargetFlags(std::string& flags) const;
 

@@ -3579,9 +3579,11 @@ void cmGeneratorTarget::AddISPCTargetFlags(std::string& flags) const
   }
 }
 
-void cmGeneratorTarget::AddHIPArchitectureFlags(std::string& flags) const
+void cmGeneratorTarget::AddHIPArchitectureFlags(cmBuildStep compileOrLink,
+                                                std::string const& config,
+                                                std::string& flags) const
 {
-  const std::string& arch = this->GetSafeProperty("HIP_ARCHITECTURES");
+  std::string arch = this->GetSafeProperty("HIP_ARCHITECTURES");
 
   if (arch.empty()) {
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR,
@@ -3592,6 +3594,11 @@ void cmGeneratorTarget::AddHIPArchitectureFlags(std::string& flags) const
   // If HIP_ARCHITECTURES is false we don't add any architectures.
   if (cmIsOff(arch)) {
     return;
+  }
+
+  if (this->Makefile->GetSafeDefinition("CMAKE_HIP_PLATFORM") == "nvidia") {
+    return this->AddCUDAArchitectureFlagsImpl(compileOrLink, config, "HIP",
+                                              std::move(arch), flags);
   }
 
   cmList options(arch);

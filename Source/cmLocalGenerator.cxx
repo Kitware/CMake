@@ -87,6 +87,8 @@ static auto ruleReplaceVars = { "CMAKE_${LANG}_COMPILER",
                                 "CMAKE_TAPI",
                                 "CMAKE_CUDA_HOST_COMPILER",
                                 "CMAKE_CUDA_HOST_LINK_LAUNCHER",
+                                "CMAKE_HIP_HOST_COMPILER",
+                                "CMAKE_HIP_HOST_LINK_LAUNCHER",
                                 "CMAKE_CL_SHOWINCLUDES_PREFIX" };
 
 cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
@@ -2058,7 +2060,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
         this->Makefile->GetSafeDefinition("CMAKE_CXX_SIMULATE_ID");
     }
   } else if (lang == "HIP") {
-    target->AddHIPArchitectureFlags(flags);
+    target->AddHIPArchitectureFlags(compileOrLink, config, flags);
   }
 
   // Add VFS Overlay for Clang compilers

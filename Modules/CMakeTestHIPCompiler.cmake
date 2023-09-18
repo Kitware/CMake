@@ -10,7 +10,10 @@ if(CMAKE_HIP_COMPILER_FORCED)
 endif()
 
 set(__CMAKE_HIP_FLAGS "${CMAKE_HIP_FLAGS}")
-string(APPEND CMAKE_HIP_FLAGS " --cuda-host-only")
+
+if(CMAKE_HIP_COMPILER_ID STREQUAL "Clang")
+  string(APPEND CMAKE_HIP_FLAGS " --cuda-host-only")
+endif()
 
 include(CMakeTestCompilerCommon)
 
@@ -31,6 +34,13 @@ if(CMAKE_HIP_ABI_COMPILED)
   # The compiler worked so skip dedicated test below.
   set(CMAKE_HIP_COMPILER_WORKS TRUE)
   message(STATUS "Check for working HIP compiler: ${CMAKE_HIP_COMPILER} - skipped")
+
+  if(CMAKE_HIP_COMPILER_ID STREQUAL "NVIDIA")
+    include(Internal/CMakeCUDAArchitecturesNative)
+    # Run the test binary to get:
+    # - CMAKE_HIP_ARCHITECTURES_NATIVE
+    cmake_cuda_architectures_native(HIP)
+  endif()
 endif()
 
 # This file is used by EnableLanguage in cmGlobalGenerator to
@@ -42,7 +52,7 @@ if(NOT CMAKE_HIP_COMPILER_WORKS)
   PrintTestCompilerStatus("HIP")
   __TestCompiler_setTryCompileTargetType()
   string(CONCAT __TestCompiler_testHIPCompilerSource
-    "#ifndef __HIP__\n"
+    "#if !defined(__HIP__) && !defined(__NVCC__)\n"
     "# error \"The CMAKE_HIP_COMPILER is set to a C/CXX compiler\"\n"
     "#endif\n"
     "int main(){return 0;}\n")
@@ -75,6 +85,16 @@ unset(__CMAKE_HIP_FLAGS)
 # Try to identify the compiler features
 include(${CMAKE_ROOT}/Modules/CMakeDetermineCompileFeatures.cmake)
 CMAKE_DETERMINE_COMPILE_FEATURES(HIP)
+
+if(CMAKE_HIP_COMPILER_ID STREQUAL "NVIDIA")
+  include(Internal/CMakeNVCCFilterImplicitInfo)
+  # Match arguments with cmake_nvcc_parse_implicit_info call in CMakeDetermineHIPCompiler.
+  cmake_nvcc_filter_implicit_info(HIP CMAKE_HIP_CUDA_)
+
+  include(Internal/CMakeCUDAFilterImplicitLibs)
+  # Filter out implicit link libraries that should not be passed unconditionally.
+  cmake_cuda_filter_implicit_libs(CMAKE_HIP_IMPLICIT_LINK_LIBRARIES)
+endif()
 
 # Re-configure to save learned information.
 configure_file(

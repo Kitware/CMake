@@ -7,6 +7,8 @@ set(CMAKE_HIP_ARCHITECTURES OFF)
 # Pass our own architecture flags instead.
 if(CMAKE_HIP_PLATFORM STREQUAL "amd")
   string(APPEND CMAKE_HIP_FLAGS " --offload-arch=gfx908")
+elseif(CMAKE_HIP_PLATFORM STREQUAL "nvidia")
+  string(APPEND CMAKE_HIP_FLAGS " -arch=sm_52")
 endif()
 
 add_executable(HIPOnlyArchitectureOff main.hip)
