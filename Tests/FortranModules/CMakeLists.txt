@@ -125,3 +125,5 @@ add_subdirectory(Executable)
 if(CMake_TEST_Fortran_SUBMODULES)
   add_subdirectory(Submodules)
 endif()
+
+add_subdirectory(Issue25112)
