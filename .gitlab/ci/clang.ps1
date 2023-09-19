@@ -1,10 +1,10 @@
 $erroractionpreference = "stop"
 
-if ("$env:CMAKE_CI_BUILD_NAME".Contains("clang16.0")) {
-    # LLVM/Clang 16.0
-    # https://github.com/llvm/llvm-project/releases/tag/llvmorg-16.0.0
-    $filename = "llvm-16.0.0-win-x86_64-1"
-    $sha256sum = "13F48356BA5892A82E8BB25EB283FDDAA8F23A0F209B6BF6525D2C5E1285B950"
+if ("$env:CMAKE_CI_BUILD_NAME".Contains("clang17.0")) {
+    # LLVM/Clang 17.0.1
+    # https://github.com/llvm/llvm-project/releases/tag/llvmorg-17.0.1
+    $filename = "llvm-17.0.1-win-x86_64-1"
+    $sha256sum = "803F5D7291219BE60D2EE69CE8882341F94A8707A214DED190614895B6996F55"
 } else {
     throw ('unknown CMAKE_CI_BUILD_NAME: ' + "$env:CMAKE_CI_BUILD_NAME")
 }
