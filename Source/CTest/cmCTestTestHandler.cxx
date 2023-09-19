@@ -1711,8 +1711,7 @@ std::string cmCTestTestHandler::FindExecutable(
   // now look in the paths we specified above
   for (unsigned int ai = 0; ai < attempted.size() && fullPath.empty(); ++ai) {
     // first check without exe extension
-    if (cmSystemTools::FileExists(attempted[ai]) &&
-        !cmSystemTools::FileIsDirectory(attempted[ai])) {
+    if (cmSystemTools::FileExists(attempted[ai], true)) {
       fullPath = cmSystemTools::CollapseFullPath(attempted[ai]);
       resultingConfig = attemptedConfigs[ai];
     }
@@ -1721,8 +1720,7 @@ std::string cmCTestTestHandler::FindExecutable(
       failed.push_back(attempted[ai]);
       tempPath =
         cmStrCat(attempted[ai], cmSystemTools::GetExecutableExtension());
-      if (cmSystemTools::FileExists(tempPath) &&
-          !cmSystemTools::FileIsDirectory(tempPath)) {
+      if (cmSystemTools::FileExists(tempPath, true)) {
         fullPath = cmSystemTools::CollapseFullPath(tempPath);
         resultingConfig = attemptedConfigs[ai];
       } else {

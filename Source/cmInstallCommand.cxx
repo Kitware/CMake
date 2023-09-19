@@ -1837,8 +1837,7 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
       }
 
       // Make sure the name is a directory.
-      if (cmSystemTools::FileExists(dir) &&
-          !cmSystemTools::FileIsDirectory(dir)) {
+      if (cmSystemTools::FileExists(dir, true)) {
         status.SetError(cmStrCat(args[0], " given non-directory \"", args[i],
                                  "\" to install."));
         return false;
