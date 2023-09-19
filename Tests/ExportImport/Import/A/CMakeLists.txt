@@ -462,7 +462,7 @@ if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREA
 
     unset(EXP_ERROR_VARIABLE CACHE)
     try_compile(EXP_ERROR_VARIABLE
-      "${CMAKE_CURRENT_SOURCE_DIR}/test_system"
+      "${CMAKE_CURRENT_BINARY_DIR}/test_system"
       "${CMAKE_CURRENT_SOURCE_DIR}/test_system.cpp"
       COMPILE_DEFINITIONS "-Wunused-variable -Werror=unused-variable"
       LINK_LIBRARIES exp_systemlib
@@ -476,7 +476,7 @@ if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREA
       unset(EXP_RUN_VAR CACHE)
       unset(EXP_COMPILE_VAR CACHE)
       try_run(EXP_RUN_VAR EXP_COMPILE_VAR
-        "${CMAKE_CURRENT_SOURCE_DIR}/test_system"
+        "${CMAKE_CURRENT_BINARY_DIR}/test_system"
         "${CMAKE_CURRENT_SOURCE_DIR}/test_system.cpp"
         COMPILE_DEFINITIONS "-Wunused-variable -Werror=unused-variable"
         LINK_LIBRARIES exp_systemlib
@@ -493,7 +493,7 @@ if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREA
 
     unset(BLD_ERROR_VARIABLE CACHE)
     try_compile(BLD_ERROR_VARIABLE
-      "${CMAKE_CURRENT_SOURCE_DIR}/test_system"
+      "${CMAKE_CURRENT_BINARY_DIR}/test_system"
       "${CMAKE_CURRENT_SOURCE_DIR}/test_system.cpp"
       COMPILE_DEFINITIONS "-Wunused-variable -Werror=unused-variable"
       LINK_LIBRARIES bld_systemlib
@@ -507,7 +507,7 @@ if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREA
       unset(BLD_RUN_VAR CACHE)
       unset(BLD_COMPILE_VAR CACHE)
       try_run(BLD_RUN_VAR BLD_COMPILE_VAR
-        "${CMAKE_CURRENT_SOURCE_DIR}/test_system"
+        "${CMAKE_CURRENT_BINARY_DIR}/test_system"
         "${CMAKE_CURRENT_SOURCE_DIR}/test_system.cpp"
         COMPILE_DEFINITIONS "-Wunused-variable -Werror=unused-variable"
         LINK_LIBRARIES bld_systemlib
