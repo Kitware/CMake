@@ -142,6 +142,10 @@ if(BUILD_TESTING)
       )
   endif()
 
+  if(_isMultiConfig)
+    set(test_options -C Debug)
+  endif()
+
   # Look for git to use for tests.
   find_program(GIT_EXECUTABLE NAMES git)
 
