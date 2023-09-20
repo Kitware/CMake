@@ -30,7 +30,7 @@
 #include "urldata.h"
 #include "cfilters.h"
 #include "cf-haproxy.h"
-#include "curl_log.h"
+#include "curl_trc.h"
 #include "multiif.h"
 
 /* The last 3 #include files should be in this order */
@@ -86,12 +86,12 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
   if(data->set.str[STRING_HAPROXY_CLIENT_IP])
     client_ip = data->set.str[STRING_HAPROXY_CLIENT_IP];
   else
-    client_ip = data->info.conn_primary_ip;
+    client_ip = data->info.conn_local_ip;
 
   result = Curl_dyn_addf(&ctx->data_out, "PROXY %s %s %s %i %i\r\n",
                          tcp_version,
-                         data->info.conn_local_ip,
                          client_ip,
+                         data->info.conn_primary_ip,
                          data->info.conn_local_port,
                          data->info.conn_primary_port);
 
@@ -157,14 +157,14 @@ static void cf_haproxy_destroy(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
   (void)data;
-  DEBUGF(LOG_CF(data, cf, "destroy"));
+  CURL_TRC_CF(data, cf, "destroy");
   cf_haproxy_ctx_free(cf->ctx);
 }
 
 static void cf_haproxy_close(struct Curl_cfilter *cf,
                              struct Curl_easy *data)
 {
-  DEBUGF(LOG_CF(data, cf, "close"));
+  CURL_TRC_CF(data, cf, "close");
   cf->connected = FALSE;
   cf_haproxy_ctx_reset(cf->ctx);
   if(cf->next)
