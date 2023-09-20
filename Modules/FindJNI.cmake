@@ -235,13 +235,12 @@ endif()
 if (WIN32)
   set (_JNI_HINTS)
   macro (_JNI_GET_INSTALLED_VERSIONS _KIND)
-    execute_process(COMMAND REG QUERY "HKLM\\SOFTWARE\\JavaSoft\\${_KIND}"
-      RESULT_VARIABLE _JAVA_RESULT
-      OUTPUT_VARIABLE _JAVA_VERSIONS
-      ERROR_QUIET)
-    if (NOT  _JAVA_RESULT)
-      string (REGEX MATCHALL "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\JavaSoft\\\\${_KIND}\\\\[0-9._]+" _JNI_VERSIONS "${_JAVA_VERSIONS}")
-      string (REGEX REPLACE "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\JavaSoft\\\\${_KIND}\\\\([0-9._]+)" "\\1" _JNI_VERSIONS "${_JNI_VERSIONS}")
+  cmake_host_system_information(RESULT _JNI_VERSIONS
+    QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/JavaSoft/${_KIND}"
+    SUBKEYS)
+    if (_JNI_VERSIONS)
+      string (REGEX MATCHALL "[0-9._]+" _JNI_VERSIONS "${_JNI_VERSIONS}")
+      string (REGEX REPLACE "([0-9._]+)" "\\1" _JNI_VERSIONS "${_JNI_VERSIONS}")
       if (_JNI_VERSIONS)
         # sort versions. Most recent first
         list (SORT _JNI_VERSIONS COMPARE NATURAL ORDER DESCENDING)
