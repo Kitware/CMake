@@ -90,13 +90,12 @@ if(_JAVA_HOME)
 endif()
 if (WIN32)
   macro (_JAVA_GET_INSTALLED_VERSIONS _KIND)
-    execute_process(COMMAND REG QUERY "HKLM\\SOFTWARE\\JavaSoft\\${_KIND}"
-      RESULT_VARIABLE _JAVA_RESULT
-      OUTPUT_VARIABLE _JAVA_VERSIONS
-      ERROR_QUIET)
-    if (NOT  _JAVA_RESULT)
-      string (REGEX MATCHALL "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\JavaSoft\\\\${_KIND}\\\\[0-9._]+" _JAVA_VERSIONS "${_JAVA_VERSIONS}")
-      string (REGEX REPLACE "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\JavaSoft\\\\${_KIND}\\\\([0-9._]+)" "\\1" _JAVA_VERSIONS "${_JAVA_VERSIONS}")
+    cmake_host_system_information(RESULT _JAVA_VERSIONS
+    QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/JavaSoft/${_KIND}"
+    SUBKEYS)
+    if (_JAVA_VERSIONS)
+      string (REGEX MATCHALL "[0-9._]+" _JAVA_VERSIONS "${_JAVA_VERSIONS}")
+      string (REGEX REPLACE "([0-9._]+)" "\\1" _JAVA_VERSIONS "${_JAVA_VERSIONS}")
       if (_JAVA_VERSIONS)
         # sort versions. Most recent first
         list (SORT _JAVA_VERSIONS COMPARE NATURAL ORDER DESCENDING)
