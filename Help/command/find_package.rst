@@ -346,7 +346,7 @@ that order).
   ``REGISTRY_VIEW`` can be specified to manage ``Windows`` registry queries
   specified as part of ``PATHS`` and ``HINTS``.
 
-.. include:: FIND_XXX_REGISTRY_VIEW.txt
+  .. include:: FIND_XXX_REGISTRY_VIEW.txt
 
 If ``PATH_SUFFIXES`` is specified, the suffixes are appended to each
 (``W``) or (``U``) directory entry one-by-one.
