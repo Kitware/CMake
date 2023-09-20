@@ -1004,8 +1004,7 @@ int cmCTest::ProcessSteps()
       for (kk = 0; kk < d.GetNumberOfFiles(); kk++) {
         const char* file = d.GetFile(kk);
         std::string fullname = notes_dir + "/" + file;
-        if (cmSystemTools::FileExists(fullname) &&
-            !cmSystemTools::FileIsDirectory(fullname)) {
+        if (cmSystemTools::FileExists(fullname, true)) {
           if (!this->Impl->NotesFiles.empty()) {
             this->Impl->NotesFiles += ";";
           }

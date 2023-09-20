@@ -3267,7 +3267,7 @@ int cmake::CheckBuildSystem()
   // If any byproduct of makefile generation is missing we must re-run.
   cmList products{ mf.GetDefinition("CMAKE_MAKEFILE_PRODUCTS") };
   for (auto const& p : products) {
-    if (!(cmSystemTools::FileExists(p) || cmSystemTools::FileIsSymlink(p))) {
+    if (!cmSystemTools::PathExists(p)) {
       if (verbose) {
         cmSystemTools::Stdout(
           cmStrCat("Re-run cmake, missing byproduct: ", p, '\n'));
