@@ -544,8 +544,9 @@ bool cmComputeLinkInformation::Compute()
         this->Target->GetType() == cmStateEnums::SHARED_LIBRARY ||
         this->Target->GetType() == cmStateEnums::MODULE_LIBRARY ||
         this->Target->GetType() == cmStateEnums::STATIC_LIBRARY ||
-        this->Target->HaveCxx20ModuleSources() ||
-        this->Target->HaveFortranSources())) {
+        (this->Target->CanCompileSources() &&
+         (this->Target->HaveCxx20ModuleSources() ||
+          this->Target->HaveFortranSources())))) {
     return false;
   }
 
