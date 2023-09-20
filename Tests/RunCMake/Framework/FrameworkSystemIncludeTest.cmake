@@ -8,7 +8,7 @@ set_target_properties(Example::Example PROPERTIES
 )
 
 add_library(testcase FrameworkSystemIncludeTest.c)
-target_compile_options(testcase PRIVATE "-Werror=#pragma-messages")
+target_compile_options(testcase PRIVATE "$<IF:$<C_COMPILER_ID:GNU>,-Werror,-Werror=#pragma-messages>")
 target_link_libraries(testcase PRIVATE Example::Example)
 
 
@@ -20,7 +20,7 @@ set_target_properties(Example::Example2 PROPERTIES
 )
 
 add_library(testcase2 FrameworkSystemIncludeTest.c)
-target_compile_options(testcase2 PRIVATE "-Werror=#pragma-messages")
+target_compile_options(testcase2 PRIVATE "$<IF:$<C_COMPILER_ID:GNU>,-Werror,-Werror=#pragma-messages>")
 target_link_libraries(testcase2 PRIVATE Example::Example2)
 
 
@@ -32,5 +32,5 @@ set_target_properties(Example::Example3 PROPERTIES
 )
 
 add_library(testcase3 FrameworkSystemIncludeTest.c)
-target_compile_options(testcase3 PRIVATE "-Werror=#pragma-messages")
+target_compile_options(testcase3 PRIVATE "$<IF:$<C_COMPILER_ID:GNU>,-Werror,-Werror=#pragma-messages>")
 target_link_libraries(testcase3 PRIVATE Example::Example3)

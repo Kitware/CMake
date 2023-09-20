@@ -1850,11 +1850,8 @@ void cmLocalGenerator::OutputLinkLibraries(
   // Append the framework search path flags.
   cmValue fwSearchFlag = this->Makefile->GetDefinition(
     cmStrCat("CMAKE_", linkLanguage, "_FRAMEWORK_SEARCH_FLAG"));
-  cmValue sysFwSearchFlag = this->Makefile->GetDefinition(
-    cmStrCat("CMAKE_", linkLanguage, "_SYSTEM_FRAMEWORK_SEARCH_FLAG"));
 
-  frameworkPath =
-    linkLineComputer->ComputeFrameworkPath(cli, fwSearchFlag, sysFwSearchFlag);
+  frameworkPath = linkLineComputer->ComputeFrameworkPath(cli, fwSearchFlag);
   linkLineComputer->ComputeLinkPath(cli, libPathFlag, libPathTerminator,
                                     linkPath);
   linkLineComputer->ComputeLinkLibraries(cli, stdLibString, linkLibraries);

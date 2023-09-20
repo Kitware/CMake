@@ -34,7 +34,7 @@
         "lto": null,
         "commandFragments": [
             {
-                "fragment": "-iframework .+/framework(/(Debug|Release|RelWithDebInfo|MinSizeRel))?\"? -iframework /usr/Frameworks$",
+                "fragment": "-F.+/framework(/(Debug|Release|RelWithDebInfo|MinSizeRel))?\"? -F/usr/Frameworks$",
                 "role": "frameworkPath",
                 "backtrace": null
             },
