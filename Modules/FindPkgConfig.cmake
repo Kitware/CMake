@@ -923,10 +923,19 @@ endmacro()
 
   .. code-block:: cmake
 
-    pkg_get_variable(<resultVar> <moduleName> <varName>)
+    pkg_get_variable(<resultVar> <moduleName> <varName>
+                     [DEFINE_VARIABLES <key>=<value>...])
 
   If ``pkg-config`` returns multiple values for the specified variable,
   ``resultVar`` will contain a :ref:`;-list <CMake Language Lists>`.
+
+  Options:
+
+  ``DEFINE_VARIABLES <key>=<value>...``
+    .. versionadded:: 3.28
+
+    Specify key-value pairs to redefine variables affecting the variable
+    retrieved with ``pkg-config``.
 
   For example:
 
@@ -935,8 +944,20 @@ endmacro()
     pkg_get_variable(GI_GIRDIR gobject-introspection-1.0 girdir)
 #]========================================]
 function (pkg_get_variable result pkg variable)
+  set(_multiValueArgs DEFINE_VARIABLES)
+
+  CMAKE_PARSE_ARGUMENTS(_parsedArguments "" "" "${_multiValueArgs}" ${ARGN})
+  set(defined_variables )
+  foreach(_def_var ${_parsedArguments_DEFINE_VARIABLES})
+    if(NOT _def_var MATCHES "^.+=.*$")
+      message(FATAL_ERROR "DEFINE_VARIABLES should contain arguments in the form of key=value")
+    endif()
+
+    list(APPEND defined_variables "--define-variable=${_def_var}")
+  endforeach()
+
   _pkg_set_path_internal()
-  _pkgconfig_invoke("${pkg}" "prefix" "result" "" "--variable=${variable}")
+  _pkgconfig_invoke("${pkg}" "prefix" "result" "" "--variable=${variable}" ${defined_variables})
   set("${result}"
     "${prefix_result}"
     PARENT_SCOPE)
