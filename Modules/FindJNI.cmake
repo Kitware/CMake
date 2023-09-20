@@ -194,7 +194,7 @@ macro(java_append_library_directories _var)
 
   foreach(_path ${ARGN})
     if(_path MATCHES "{libarch}")
-      foreach(_libarch ${_java_libarch})
+      foreach(_libarch IN LISTS _java_libarch)
         string(REPLACE "{libarch}" "${_libarch}" _newpath "${_path}")
         if(EXISTS ${_newpath})
           list(APPEND ${_var} "${_newpath}")
@@ -339,7 +339,7 @@ JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
   )
 
 set(JAVA_JVM_LIBRARY_DIRECTORIES)
-foreach(dir ${JAVA_AWT_LIBRARY_DIRECTORIES})
+foreach(dir IN LISTS JAVA_AWT_LIBRARY_DIRECTORIES)
   list(APPEND JAVA_JVM_LIBRARY_DIRECTORIES
     "${dir}"
     "${dir}/client"
@@ -364,14 +364,14 @@ JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_INCLUDE_DIRECTORIES
   ${_JNI_JAVA_INCLUDE_TRIES}
   )
 
-foreach(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
+foreach(JAVA_PROG IN ITEMS "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
   get_filename_component(jpath "${JAVA_PROG}" PATH)
-  foreach(JAVA_INC_PATH ../include ../java/include ../share/java/include)
+  foreach(JAVA_INC_PATH IN ITEMS ../include ../java/include ../share/java/include)
     if(EXISTS ${jpath}/${JAVA_INC_PATH})
       list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES "${jpath}/${JAVA_INC_PATH}")
     endif()
   endforeach()
-  foreach(JAVA_LIB_PATH
+  foreach(JAVA_LIB_PATH IN ITEMS
     ../lib ../jre/lib ../jre/lib/i386
     ../java/lib ../java/jre/lib ../java/jre/lib/i386
     ../share/java/lib ../share/java/jre/lib ../share/java/jre/lib/i386)
@@ -428,7 +428,7 @@ set(_JNI_NORMAL_JAWT
   PATHS ${JAVA_AWT_LIBRARY_DIRECTORIES}
   )
 
-foreach(search ${_JNI_SEARCHES})
+foreach(search IN LISTS _JNI_SEARCHES)
   if(JVM IN_LIST JNI_FIND_COMPONENTS)
     find_library(JAVA_JVM_LIBRARY ${_JNI_${search}_JVM}
       DOC "Java Virtual Machine library"
