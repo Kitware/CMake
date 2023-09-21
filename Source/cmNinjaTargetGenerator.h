@@ -81,6 +81,7 @@ protected:
   bool CompileWithDefines(std::string const& lang) const;
 
   std::string OrderDependsTargetForTarget(const std::string& config);
+  std::string OrderDependsTargetForTargetPrivate(const std::string& config);
 
   std::string ComputeOrderDependsForTarget();
 
@@ -228,6 +229,7 @@ protected:
 
 private:
   cmLocalNinjaGenerator* LocalGenerator;
+  bool HasPrivateGeneratedSources = false;
 
   struct ScanningFiles
   {

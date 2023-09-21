@@ -63,6 +63,11 @@ The options are:
     :ref:`Target-dependent expressions <Target-Dependent Queries>` are not
     permitted.
 
+  .. versionchanged:: 3.28
+    In custom targets using :ref:`file sets`, byproducts are now
+    considered private unless they are listed in a non-private file set.
+    See policy :policy:`CMP0154`.
+
 ``COMMAND``
   Specify the command-line(s) to execute at build time.
   If more than one ``COMMAND`` is specified they will be executed in order,

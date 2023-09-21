@@ -60,6 +60,8 @@ expressions to ensure the sources are correctly assigned to the target.
 See the :manual:`cmake-buildsystem(7)` manual for more on defining
 buildsystem properties.
 
+.. _`File Sets`:
+
 File Sets
 ^^^^^^^^^
 

@@ -3201,6 +3201,11 @@ std::vector<std::string> cmTarget::GetAllInterfaceFileSets() const
   return result;
 }
 
+bool cmTarget::HasFileSets() const
+{
+  return !this->impl->FileSets.empty();
+}
+
 bool cmTargetInternals::CheckImportedLibName(std::string const& prop,
                                              std::string const& value) const
 {
