@@ -2,8 +2,8 @@
 
 set -e
 
-readonly revision="p1689r5-cmake-ci-20230814" # 9fd54ccc390ab4eb3c48186b7bf15e02632cc76c
-readonly tarball="https://github.com/mathstuf/gcc/archive/$revision.tar.gz"
+readonly revision="29862e21f6d656eca59284c927d0c4c0698eb99c" # master as of 21 Sep 2023
+readonly tarball="git://gcc.gnu.org/git/gcc.git"
 
 readonly workdir="$HOME/gcc"
 readonly srcdir="$workdir/gcc"
@@ -12,9 +12,8 @@ readonly njobs="$( nproc )"
 
 mkdir -p "$workdir"
 cd "$workdir"
-curl -L "$tarball" > "gcc-$revision.tar.gz"
-tar xf "gcc-$revision.tar.gz"
-mv "gcc-$revision" "$srcdir"
+git clone "$tarball" "$srcdir"
+git -C "$srcdir" checkout "$revision"
 mkdir -p "$builddir"
 cd "$builddir"
 "$srcdir/configure" \
