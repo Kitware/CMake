@@ -54,10 +54,7 @@ The options are:
   to support consumers using CMake versions older than 2.8.12.
 
 ``CXX_MODULES_DIRECTORY <directory>``
-
-  .. note ::
-
-    Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+  .. versionadded:: 3.28
 
   Export C++ module properties to files under the given directory. Each file
   will be named according to the target's export name (without any namespace).

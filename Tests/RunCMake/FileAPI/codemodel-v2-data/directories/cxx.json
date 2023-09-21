@@ -53,6 +53,40 @@
         },
         {
             "component": "Unspecified",
+            "type": "cxxModuleBmi",
+            "destination": "lib",
+            "paths": null,
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": null,
+            "targetIndex": null,
+            "cxxModuleBmiTarget": {
+                "id": "^cxx_exe::@a56b12a3f5c0529fb296",
+                "index": "cxx_exe"
+            },
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^cxx/CMakeLists\\.txt$",
+                    "line": 38,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^cxx/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
             "type": "runtimeDependencySet",
             "destination": "lib",
             "paths": null,

@@ -1,7 +1,7 @@
 CXX_SCAN_FOR_MODULES
 --------------------
 
-.. versionadded:: 3.26
+.. versionadded:: 3.28
 
 ``CXX_SCAN_FOR_MODULES`` is a boolean specifying whether CMake will scan the
 source for C++ module dependencies.  See also the
@@ -16,8 +16,3 @@ consulted.
 Note that scanning is only performed if C++20 or higher is enabled for the
 target and the source uses the ``CXX`` language.  Scanning for modules in
 sources belonging to file sets of type ``CXX_MODULES`` is always performed.
-
-.. note ::
-
-  This setting is meaningful only when experimental support for C++ modules
-  has been enabled by the ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API`` gate.

@@ -1,10 +1,3 @@
-CMake Warning \(dev\) at NoCXX20.cmake:[0-9]+ \(target_sources\):
-  CMake's C\+\+ module support is experimental.  It is meant only for
-  experimentation and feedback to CMake developers.
-Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.
-
 CMake Error in CMakeLists.txt:
   The target named "nocxx20" has C\+\+ sources that export modules but does not
   include "cxx_std_20" \(or newer\) among its `target_compile_features`; found

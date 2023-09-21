@@ -261,13 +261,10 @@ The options for the above signatures are:
     Sources are not added to any ``FILE_SET`` in the generated project.
 
   ``CXX_MODULE``
+    .. versionadded:: 3.28
+
     Sources are added to a ``FILE_SET`` of type ``CXX_MODULES`` in the
     generated project.
-
-  .. note ::
-
-    Experimental. Sources of type ``CXX_MODULE`` are gated by
-    ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
 
   The default type of sources is ``NORMAL``.
 

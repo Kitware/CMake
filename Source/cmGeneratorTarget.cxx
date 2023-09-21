@@ -31,7 +31,6 @@
 #include "cmCustomCommandGenerator.h"
 #include "cmCxxModuleUsageEffects.h"
 #include "cmEvaluatedTargetProperty.h"
-#include "cmExperimental.h"
 #include "cmFileSet.h"
 #include "cmFileTimes.h"
 #include "cmGeneratedFileStream.h"
@@ -9106,9 +9105,10 @@ cmGeneratorTarget::Cxx20SupportLevel cmGeneratorTarget::HaveCxxModuleSupport(
   // Else, an empty CMAKE_CXX_STANDARD_DEFAULT means CMake does not detect and
   // set a default standard level for this compiler, so assume all standards
   // are available.
-  if (!cmExperimental::HasSupportEnabled(
-        *this->Makefile, cmExperimental::Feature::CxxModuleCMakeApi)) {
-    return Cxx20SupportLevel::MissingExperimentalFlag;
+  cmValue scandepRule =
+    this->Target->GetMakefile()->GetDefinition("CMAKE_CXX_SCANDEP_SOURCE");
+  if (!scandepRule) {
+    return Cxx20SupportLevel::MissingRule;
   }
   return Cxx20SupportLevel::Supported;
 }
@@ -9124,13 +9124,6 @@ void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
           cmStrCat("The target named \"", this->GetName(),
                    "\" has C++ sources that export modules but the \"CXX\" "
                    "language has not been enabled"));
-        break;
-      case cmGeneratorTarget::Cxx20SupportLevel::MissingExperimentalFlag:
-        this->Makefile->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmStrCat("The target named \"", this->GetName(),
-                   "\" has C++ sources that export modules but its "
-                   "experimental support has not been requested"));
         break;
       case cmGeneratorTarget::Cxx20SupportLevel::NoCxx20: {
         cmStandardLevelResolver standardResolver(this->Makefile);
@@ -9149,6 +9142,7 @@ void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
             "\"cxx_std_20\" (or newer) among its `target_compile_features`",
             effStandard));
       } break;
+      case cmGeneratorTarget::Cxx20SupportLevel::MissingRule:
       case cmGeneratorTarget::Cxx20SupportLevel::Supported:
         // All is well.
         break;

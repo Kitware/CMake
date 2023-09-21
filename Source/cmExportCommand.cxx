@@ -16,7 +16,6 @@
 #include "cmArgumentParserTypes.h"
 #include "cmCryptoHash.h"
 #include "cmExecutionStatus.h"
-#include "cmExperimental.h"
 #include "cmExportBuildAndroidMKGenerator.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmExportSet.h"
@@ -69,15 +68,11 @@ bool cmExportCommand(std::vector<std::string> const& args,
     bool ExportOld = false;
   };
 
-  auto parser = cmArgumentParser<Arguments>{}
-                  .Bind("NAMESPACE"_s, &Arguments::Namespace)
-                  .Bind("FILE"_s, &Arguments::Filename);
-
-  bool const supportCxx20FileSetTypes = cmExperimental::HasSupportEnabled(
-    status.GetMakefile(), cmExperimental::Feature::CxxModuleCMakeApi);
-  if (supportCxx20FileSetTypes) {
-    parser.Bind("CXX_MODULES_DIRECTORY"_s, &Arguments::CxxModulesDirectory);
-  }
+  auto parser =
+    cmArgumentParser<Arguments>{}
+      .Bind("NAMESPACE"_s, &Arguments::Namespace)
+      .Bind("FILE"_s, &Arguments::Filename)
+      .Bind("CXX_MODULES_DIRECTORY"_s, &Arguments::CxxModulesDirectory);
 
   if (args[0] == "EXPORT") {
     parser.Bind("EXPORT"_s, &Arguments::ExportSetName);
