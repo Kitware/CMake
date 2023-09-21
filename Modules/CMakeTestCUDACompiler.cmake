@@ -114,9 +114,9 @@ if("x${CMAKE_CUDA_SIMULATE_ID}" STREQUAL "xMSVC")
   set(CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES "${CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES}")
 endif()
 
+include(Internal/CMakeCUDAFilterImplicitLibs)
 # Filter out implicit link libraries that should not be passed unconditionally.
-# See CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES_EXCLUDE in CMakeDetermineCUDACompiler.
-list(REMOVE_ITEM CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES ${CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES_EXCLUDE})
+cmake_cuda_filter_implicit_libs(CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES)
 
 if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
   include(Internal/CMakeNVCCFilterImplicitInfo)
