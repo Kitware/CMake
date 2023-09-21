@@ -136,76 +136,76 @@ endif()
 
 # Expand {libarch} occurrences to java_libarch subdirectory(-ies) and set ${_var}
 macro(java_append_library_directories _var)
-    # Determine java arch-specific library subdir
-    # Mostly based on openjdk/jdk/make/common/shared/Platform.gmk as of openjdk
-    # 1.6.0_18 + icedtea patches. However, it would be much better to base the
-    # guess on the first part of the GNU config.guess platform triplet.
-    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
-      if(CMAKE_LIBRARY_ARCHITECTURE STREQUAL "x86_64-linux-gnux32")
-        set(_java_libarch "x32" "amd64" "i386")
-      else()
-        set(_java_libarch "amd64" "i386")
-      endif()
-    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^i.86$")
-        set(_java_libarch "i386")
-    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^aarch64")
-        set(_java_libarch "arm64" "aarch64")
-    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^alpha")
-        set(_java_libarch "alpha")
-    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
-        # Subdir is "arm" for both big-endian (arm) and little-endian (armel).
-        set(_java_libarch "arm" "aarch32")
-    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^mips")
-        # mips* machines are bi-endian mostly so processor does not tell
-        # endianness of the underlying system.
-        set(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}"
-            "mips" "mipsel" "mipseb" "mipsr6" "mipsr6el"
-            "mips64" "mips64el" "mips64r6" "mips64r6el"
-            "mipsn32" "mipsn32el" "mipsn32r6" "mipsn32r6el")
-    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64le")
-        set(_java_libarch "ppc64" "ppc64le")
-    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64")
-        set(_java_libarch "ppc64" "ppc")
-    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)")
-        set(_java_libarch "ppc" "ppc64")
-    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^sparc")
-        # Both flavors can run on the same processor
-        set(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}" "sparc" "sparcv9")
-    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(parisc|hppa)")
-        set(_java_libarch "parisc" "parisc64")
-    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^s390")
-        # s390 binaries can run on s390x machines
-        set(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}" "s390" "s390x")
-    elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^sh")
-        set(_java_libarch "sh")
+  # Determine java arch-specific library subdir
+  # Mostly based on openjdk/jdk/make/common/shared/Platform.gmk as of openjdk
+  # 1.6.0_18 + icedtea patches. However, it would be much better to base the
+  # guess on the first part of the GNU config.guess platform triplet.
+  if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    if(CMAKE_LIBRARY_ARCHITECTURE STREQUAL "x86_64-linux-gnux32")
+      set(_java_libarch "x32" "amd64" "i386")
     else()
-        set(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}")
+      set(_java_libarch "amd64" "i386")
     endif()
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^i.86$")
+    set(_java_libarch "i386")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^aarch64")
+    set(_java_libarch "arm64" "aarch64")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^alpha")
+    set(_java_libarch "alpha")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
+    # Subdir is "arm" for both big-endian (arm) and little-endian (armel).
+    set(_java_libarch "arm" "aarch32")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^mips")
+    # mips* machines are bi-endian mostly so processor does not tell
+    # endianness of the underlying system.
+    set(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}"
+        "mips" "mipsel" "mipseb" "mipsr6" "mipsr6el"
+        "mips64" "mips64el" "mips64r6" "mips64r6el"
+        "mipsn32" "mipsn32el" "mipsn32r6" "mipsn32r6el")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64le")
+    set(_java_libarch "ppc64" "ppc64le")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64")
+    set(_java_libarch "ppc64" "ppc")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)")
+    set(_java_libarch "ppc" "ppc64")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^sparc")
+    # Both flavors can run on the same processor
+    set(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}" "sparc" "sparcv9")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(parisc|hppa)")
+    set(_java_libarch "parisc" "parisc64")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^s390")
+    # s390 binaries can run on s390x machines
+    set(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}" "s390" "s390x")
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^sh")
+    set(_java_libarch "sh")
+  else()
+    set(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}")
+  endif()
 
-    # Append default list architectures if CMAKE_SYSTEM_PROCESSOR was empty or
-    # system is non-Linux (where the code above has not been well tested)
-    if(NOT _java_libarch OR NOT (CMAKE_SYSTEM_NAME MATCHES "Linux"))
-        list(APPEND _java_libarch "i386" "amd64" "ppc")
-    endif()
+  # Append default list architectures if CMAKE_SYSTEM_PROCESSOR was empty or
+  # system is non-Linux (where the code above has not been well tested)
+  if(NOT _java_libarch OR NOT (CMAKE_SYSTEM_NAME MATCHES "Linux"))
+    list(APPEND _java_libarch "i386" "amd64" "ppc")
+  endif()
 
-    # Sometimes ${CMAKE_SYSTEM_PROCESSOR} is added to the list to prefer
-    # current value to a hardcoded list. Remove possible duplicates.
-    list(REMOVE_DUPLICATES _java_libarch)
+  # Sometimes ${CMAKE_SYSTEM_PROCESSOR} is added to the list to prefer
+  # current value to a hardcoded list. Remove possible duplicates.
+  list(REMOVE_DUPLICATES _java_libarch)
 
-    foreach(_path ${ARGN})
-        if(_path MATCHES "{libarch}")
-            foreach(_libarch ${_java_libarch})
-                string(REPLACE "{libarch}" "${_libarch}" _newpath "${_path}")
-                if(EXISTS ${_newpath})
-                    list(APPEND ${_var} "${_newpath}")
-                endif()
-            endforeach()
-        else()
-            if(EXISTS ${_path})
-                list(APPEND ${_var} "${_path}")
-            endif()
+  foreach(_path ${ARGN})
+    if(_path MATCHES "{libarch}")
+      foreach(_libarch IN LISTS _java_libarch)
+        string(REPLACE "{libarch}" "${_libarch}" _newpath "${_path}")
+        if(EXISTS ${_newpath})
+          list(APPEND ${_var} "${_newpath}")
         endif()
-    endforeach()
+      endforeach()
+    else()
+      if(EXISTS ${_path})
+        list(APPEND ${_var} "${_path}")
+      endif()
+    endif()
+  endforeach()
 endmacro()
 
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeFindJavaCommon.cmake)
@@ -235,13 +235,12 @@ endif()
 if (WIN32)
   set (_JNI_HINTS)
   macro (_JNI_GET_INSTALLED_VERSIONS _KIND)
-    execute_process(COMMAND REG QUERY "HKLM\\SOFTWARE\\JavaSoft\\${_KIND}"
-      RESULT_VARIABLE _JAVA_RESULT
-      OUTPUT_VARIABLE _JAVA_VERSIONS
-      ERROR_QUIET)
-    if (NOT  _JAVA_RESULT)
-      string (REGEX MATCHALL "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\JavaSoft\\\\${_KIND}\\\\[0-9._]+" _JNI_VERSIONS "${_JAVA_VERSIONS}")
-      string (REGEX REPLACE "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\JavaSoft\\\\${_KIND}\\\\([0-9._]+)" "\\1" _JNI_VERSIONS "${_JNI_VERSIONS}")
+  cmake_host_system_information(RESULT _JNI_VERSIONS
+    QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/JavaSoft/${_KIND}"
+    SUBKEYS)
+    if (_JNI_VERSIONS)
+      string (REGEX MATCHALL "[0-9._]+" _JNI_VERSIONS "${_JNI_VERSIONS}")
+      string (REGEX REPLACE "([0-9._]+)" "\\1" _JNI_VERSIONS "${_JNI_VERSIONS}")
       if (_JNI_VERSIONS)
         # sort versions. Most recent first
         list (SORT _JNI_VERSIONS COMPARE NATURAL ORDER DESCENDING)
@@ -340,7 +339,7 @@ JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
   )
 
 set(JAVA_JVM_LIBRARY_DIRECTORIES)
-foreach(dir ${JAVA_AWT_LIBRARY_DIRECTORIES})
+foreach(dir IN LISTS JAVA_AWT_LIBRARY_DIRECTORIES)
   list(APPEND JAVA_JVM_LIBRARY_DIRECTORIES
     "${dir}"
     "${dir}/client"
@@ -365,14 +364,14 @@ JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_INCLUDE_DIRECTORIES
   ${_JNI_JAVA_INCLUDE_TRIES}
   )
 
-foreach(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
+foreach(JAVA_PROG IN ITEMS "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
   get_filename_component(jpath "${JAVA_PROG}" PATH)
-  foreach(JAVA_INC_PATH ../include ../java/include ../share/java/include)
+  foreach(JAVA_INC_PATH IN ITEMS ../include ../java/include ../share/java/include)
     if(EXISTS ${jpath}/${JAVA_INC_PATH})
       list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES "${jpath}/${JAVA_INC_PATH}")
     endif()
   endforeach()
-  foreach(JAVA_LIB_PATH
+  foreach(JAVA_LIB_PATH IN ITEMS
     ../lib ../jre/lib ../jre/lib/i386
     ../java/lib ../java/jre/lib ../java/jre/lib/i386
     ../share/java/lib ../share/java/jre/lib ../share/java/jre/lib/i386)
@@ -429,7 +428,7 @@ set(_JNI_NORMAL_JAWT
   PATHS ${JAVA_AWT_LIBRARY_DIRECTORIES}
   )
 
-foreach(search ${_JNI_SEARCHES})
+foreach(search IN LISTS _JNI_SEARCHES)
   if(JVM IN_LIST JNI_FIND_COMPONENTS)
     find_library(JAVA_JVM_LIBRARY ${_JNI_${search}_JVM}
       DOC "Java Virtual Machine library"
