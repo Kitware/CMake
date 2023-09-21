@@ -1,5 +1,5 @@
 enable_language(CXX)
-set(CMAKE_EXPERIMENTAL_CXX_SCANDEP_SOURCE "")
+set(CMAKE_CXX_SCANDEP_SOURCE "")
 
 add_library(export-modules)
 target_sources(export-modules

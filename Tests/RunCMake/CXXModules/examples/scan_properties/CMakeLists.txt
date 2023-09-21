@@ -11,9 +11,9 @@ endif ()
 # To detect that not-to-be scanned sources are not scanned, add a `-D` to the
 # scan flags so that the files can detect whether scanning happened and error
 # if not.
-string(APPEND CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FLAG
+string(APPEND CMAKE_CXX_MODULE_MAP_FLAG
   " -DCMAKE_SCANNED_THIS_SOURCE")
-string(APPEND CMAKE_EXPERIMENTAL_CXX_SCANDEP_SOURCE
+string(APPEND CMAKE_CXX_SCANDEP_SOURCE
   " -DCMAKE_SCANNED_THIS_SOURCE")
 
 set_property(SOURCE always_scan.cxx
