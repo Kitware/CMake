@@ -1154,8 +1154,9 @@ void cmExportFileGenerator::GenerateImportTargetCode(
 }
 
 void cmExportFileGenerator::GenerateImportPropertyCode(
-  std::ostream& os, const std::string& config, cmGeneratorTarget const* target,
-  ImportPropertyMap const& properties)
+  std::ostream& os, const std::string& config, const std::string& suffix,
+  cmGeneratorTarget const* target, ImportPropertyMap const& properties,
+  const std::string& importedXcFrameworkLocation)
 {
   // Construct the imported target name.
   std::string targetName = this->Namespace;
@@ -1174,12 +1175,31 @@ void cmExportFileGenerator::GenerateImportPropertyCode(
   }
   os << ")\n";
   os << "set_target_properties(" << targetName << " PROPERTIES\n";
+  std::string importedLocationProp = cmStrCat("IMPORTED_LOCATION", suffix);
   for (auto const& property : properties) {
-    os << "  " << property.first << " "
-       << cmExportFileGeneratorEscape(property.second) << "\n";
+    if (importedXcFrameworkLocation.empty() ||
+        property.first != importedLocationProp) {
+      os << "  " << property.first << " "
+         << cmExportFileGeneratorEscape(property.second) << "\n";
+    }
   }
-  os << "  )\n"
-     << "\n";
+  os << "  )\n";
+  if (!importedXcFrameworkLocation.empty()) {
+    auto importedLocationIt = properties.find(importedLocationProp);
+    if (importedLocationIt != properties.end()) {
+      os << "if(NOT CMAKE_VERSION VERSION_LESS \"3.28\" AND IS_DIRECTORY "
+         << cmExportFileGeneratorEscape(importedXcFrameworkLocation)
+         << ")\n"
+            "  set_property(TARGET "
+         << targetName << " PROPERTY " << importedLocationProp << " "
+         << cmExportFileGeneratorEscape(importedXcFrameworkLocation)
+         << ")\nelse()\n  set_property(TARGET " << targetName << " PROPERTY "
+         << importedLocationProp << " "
+         << cmExportFileGeneratorEscape(importedLocationIt->second)
+         << ")\nendif()\n";
+    }
+  }
+  os << "\n";
 }
 
 void cmExportFileGenerator::GenerateFindDependencyCalls(std::ostream& os)
@@ -1310,10 +1330,16 @@ void cmExportFileGenerator::GenerateImportedFileCheckLoop(std::ostream& os)
   /* clang-format off */
   os << "# Loop over all imported files and verify that they actually exist\n"
         "foreach(_cmake_target IN LISTS _cmake_import_check_targets)\n"
-        "  foreach(_cmake_file IN LISTS \"_cmake_import_check_files_for_${_cmake_target}\")\n"
-        "    if(NOT EXISTS \"${_cmake_file}\")\n"
-        "      message(FATAL_ERROR \"The imported target \\\"${_cmake_target}\\\""
-        " references the file\n"
+        "  if(CMAKE_VERSION VERSION_LESS \"3.28\"\n"
+        "      OR NOT DEFINED "
+        "_cmake_import_check_xcframework_for_${_cmake_target}\n"
+        "      OR NOT IS_DIRECTORY "
+        "\"${_cmake_import_check_xcframework_for_${_cmake_target}}\")\n"
+        "    foreach(_cmake_file IN LISTS "
+        "\"_cmake_import_check_files_for_${_cmake_target}\")\n"
+        "      if(NOT EXISTS \"${_cmake_file}\")\n"
+        "        message(FATAL_ERROR \"The imported target "
+        "\\\"${_cmake_target}\\\" references the file\n"
         "   \\\"${_cmake_file}\\\"\n"
         "but this file does not exist.  Possible reasons include:\n"
         "* The file was deleted, renamed, or moved to another location.\n"
@@ -1322,8 +1348,9 @@ void cmExportFileGenerator::GenerateImportedFileCheckLoop(std::ostream& os)
         "   \\\"${CMAKE_CURRENT_LIST_FILE}\\\"\n"
         "but not all the files it references.\n"
         "\")\n"
-        "    endif()\n"
-        "  endforeach()\n"
+        "      endif()\n"
+        "    endforeach()\n"
+        "  endif()\n"
         "  unset(_cmake_file)\n"
         "  unset(\"_cmake_import_check_files_for_${_cmake_target}\")\n"
         "endforeach()\n"
@@ -1336,15 +1363,18 @@ void cmExportFileGenerator::GenerateImportedFileCheckLoop(std::ostream& os)
 void cmExportFileGenerator::GenerateImportedFileChecksCode(
   std::ostream& os, cmGeneratorTarget* target,
   ImportPropertyMap const& properties,
-  const std::set<std::string>& importedLocations)
+  const std::set<std::string>& importedLocations,
+  const std::string& importedXcFrameworkLocation)
 {
   // Construct the imported target name.
   std::string targetName = cmStrCat(this->Namespace, target->GetExportName());
 
-  os << "list(APPEND _cmake_import_check_targets " << targetName
-     << " )\n"
-        "list(APPEND _cmake_import_check_files_for_"
-     << targetName << " ";
+  os << "list(APPEND _cmake_import_check_targets " << targetName << " )\n";
+  if (!importedXcFrameworkLocation.empty()) {
+    os << "set(_cmake_import_check_xcframework_for_" << targetName << ' '
+       << cmExportFileGeneratorEscape(importedXcFrameworkLocation) << ")\n";
+  }
+  os << "list(APPEND _cmake_import_check_files_for_" << targetName << " ";
 
   for (std::string const& li : importedLocations) {
     auto pi = properties.find(li);

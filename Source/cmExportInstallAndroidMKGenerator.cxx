@@ -80,8 +80,8 @@ void cmExportInstallAndroidMKGenerator::GenerateExpectedTargetsCode(
 }
 
 void cmExportInstallAndroidMKGenerator::GenerateImportPropertyCode(
-  std::ostream&, const std::string&, cmGeneratorTarget const*,
-  ImportPropertyMap const&)
+  std::ostream&, const std::string&, const std::string&,
+  cmGeneratorTarget const*, ImportPropertyMap const&, const std::string&)
 {
 }
 
@@ -122,7 +122,7 @@ void cmExportInstallAndroidMKGenerator::GenerateImportedFileCheckLoop(
 
 void cmExportInstallAndroidMKGenerator::GenerateImportedFileChecksCode(
   std::ostream&, cmGeneratorTarget*, ImportPropertyMap const&,
-  const std::set<std::string>&)
+  const std::set<std::string>&, const std::string&)
 {
 }
 

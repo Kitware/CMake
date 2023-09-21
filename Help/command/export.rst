@@ -170,6 +170,9 @@ Configuring Exports
           [ENABLED (<bool-true>|<bool-false>|AUTO)]
           [EXTRA_ARGS <args>...]
          ] [...]
+         [TARGET <target>
+          [XCFRAMEWORK_LOCATION <location>]
+         ] [...]
          )
 
 .. versionadded:: 3.29
@@ -202,3 +205,13 @@ Configure the parameters of an export. The arguments are as follows:
   ``EXTRA_ARGS <args>``
     Specify additional arguments to pass to :command:`find_dependency` after
     the ``REQUIRED`` argument.
+
+``TARGET <target>``
+  Specify a target to configure in this export. This argument accepts the
+  following additional arguments:
+
+  ``XCFRAMEWORK_LOCATION``
+    Specify the location of an ``.xcframework`` which contains the library from
+    this target. If specified, the generated code will check to see if the
+    ``.xcframework`` exists, and if it does, it will use the ``.xcframework``
+    as its imported location instead of the installed library.

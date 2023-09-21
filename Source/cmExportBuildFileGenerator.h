@@ -35,12 +35,14 @@ class cmExportBuildFileGenerator : public cmExportFileGenerator
 public:
   struct TargetExport
   {
-    TargetExport(std::string name)
+    TargetExport(std::string name, std::string xcFrameworkLocation)
       : Name(std::move(name))
+      , XcFrameworkLocation(std::move(xcFrameworkLocation))
     {
     }
 
     std::string Name;
+    std::string XcFrameworkLocation;
   };
 
   cmExportBuildFileGenerator();
@@ -111,12 +113,15 @@ protected:
 
   struct TargetExportPrivate
   {
-    TargetExportPrivate(cmGeneratorTarget* target)
+    TargetExportPrivate(cmGeneratorTarget* target,
+                        std::string xcFrameworkLocation)
       : Target(target)
+      , XcFrameworkLocation(std::move(xcFrameworkLocation))
     {
     }
 
     cmGeneratorTarget* Target;
+    std::string XcFrameworkLocation;
   };
 
   std::vector<TargetExport> Targets;

@@ -72,6 +72,16 @@ void cmExportSet::AddInstallation(cmInstallExportGenerator const* installation)
   this->Installations.push_back(installation);
 }
 
+void cmExportSet::SetXcFrameworkLocation(const std::string& name,
+                                         const std::string& location)
+{
+  for (auto& te : this->TargetExports) {
+    if (name == te->TargetName) {
+      te->XcFrameworkLocation = location;
+    }
+  }
+}
+
 cmExportSet& cmExportSetMap::operator[](const std::string& name)
 {
   auto it = this->find(name);

@@ -61,7 +61,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
       expectedTargets += sep + this->Namespace + te->GetExportName();
       sep = " ";
       if (this->ExportedTargets.insert(te).second) {
-        this->Exports.emplace_back(te);
+        this->Exports.emplace_back(te, tei.XcFrameworkLocation);
       } else {
         std::ostringstream e;
         e << "given target \"" << te->GetName() << "\" more than once.";
@@ -202,7 +202,23 @@ void cmExportBuildFileGenerator::GenerateImportTargetsConfig(
       //                              properties);
 
       // Generate code in the export file.
-      this->GenerateImportPropertyCode(os, config, target, properties);
+      std::string importedXcFrameworkLocation = exp.XcFrameworkLocation;
+      if (!importedXcFrameworkLocation.empty()) {
+        importedXcFrameworkLocation = cmGeneratorExpression::Preprocess(
+          importedXcFrameworkLocation,
+          cmGeneratorExpression::PreprocessContext::BuildInterface);
+        importedXcFrameworkLocation = cmGeneratorExpression::Evaluate(
+          importedXcFrameworkLocation, exp.Target->GetLocalGenerator(), config,
+          exp.Target, nullptr, exp.Target);
+        if (!importedXcFrameworkLocation.empty() &&
+            !cmSystemTools::FileIsFullPath(importedXcFrameworkLocation)) {
+          importedXcFrameworkLocation =
+            cmStrCat(this->LG->GetCurrentBinaryDirectory(), '/',
+                     importedXcFrameworkLocation);
+        }
+      }
+      this->GenerateImportPropertyCode(os, config, suffix, target, properties,
+                                       importedXcFrameworkLocation);
     }
   }
 }
@@ -318,7 +334,7 @@ void cmExportBuildFileGenerator::GetTargets(
       if (te->NamelinkOnly) {
         continue;
       }
-      targets.emplace_back(te->TargetName);
+      targets.emplace_back(te->TargetName, te->XcFrameworkLocation);
     }
     return;
   }
