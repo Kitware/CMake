@@ -18,6 +18,10 @@ stages:
     - test-ext
     - upload
 
+variables:
+    # Some jobs that place their artifacts in a different directory will override this.
+    CMAKE_CI_BUILD_DIR: build
+
 ################################################################################
 # Job declarations
 #
