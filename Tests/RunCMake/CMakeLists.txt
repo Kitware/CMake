@@ -722,7 +722,7 @@ if((CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
     set(CMake_TEST_XcFramework ON)
   endif()
   if(CMake_TEST_XcFramework AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 11.0)
-    set(XcFramework_ARGS -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION})
+    set(XcFramework_ARGS -DCMake_TEST_XCODE_VERSION=${CMake_TEST_XCODE_VERSION})
     add_RunCMake_test(XcFramework)
 
     # This test can take a very long time due to lots of combinations.
