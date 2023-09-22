@@ -103,7 +103,7 @@ function(compiler_id_detection outvar lang)
     endif()
 
     if("x${lang}" STREQUAL "xHIP")
-      set(ordered_compilers Clang)
+      set(ordered_compilers NVIDIA Clang)
     endif()
 
     if(CID_ID_DEFINE)

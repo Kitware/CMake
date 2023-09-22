@@ -14,5 +14,9 @@ project(MathFunctions HIP)
 #    that hip needs that inject support for __half support
 #
 add_executable(HIPOnlyMathFunctions main.hip)
-target_compile_options(HIPOnlyMathFunctions PRIVATE -Werror)
+if(CMAKE_HIP_COMPILER_ID STREQUAL "NVIDIA")
+  target_compile_options(HIPOnlyMathFunctions PRIVATE "SHELL:-Werror all-warnings")
+elseif(CMAKE_HIP_COMPILER_ID STREQUAL "Clang")
+  target_compile_options(HIPOnlyMathFunctions PRIVATE "-Werror")
+endif()
 target_compile_features(HIPOnlyMathFunctions PRIVATE hip_std_14)

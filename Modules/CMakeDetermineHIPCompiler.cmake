@@ -10,6 +10,24 @@ if( NOT ( ("${CMAKE_GENERATOR}" MATCHES "Make") OR
   message(FATAL_ERROR "HIP language not currently supported by \"${CMAKE_GENERATOR}\" generator")
 endif()
 
+if(NOT CMAKE_HIP_PLATFORM)
+  execute_process(COMMAND hipconfig --platform
+    OUTPUT_VARIABLE _CMAKE_HIPCONFIG_PLATFORM OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE _CMAKE_HIPCONFIG_RESULT
+    )
+  if(_CMAKE_HIPCONFIG_RESULT EQUAL 0 AND _CMAKE_HIPCONFIG_PLATFORM MATCHES "^(nvidia|nvcc)$")
+    set(CMAKE_HIP_PLATFORM "nvidia" CACHE STRING "HIP platform" FORCE)
+  else()
+    set(CMAKE_HIP_PLATFORM "amd" CACHE STRING "HIP platform" FORCE)
+  endif()
+endif()
+if(NOT CMAKE_HIP_PLATFORM MATCHES "^(amd|nvidia)$")
+  message(FATAL_ERROR
+    "The CMAKE_HIP_PLATFORM has unsupported value:\n"
+    " '${CMAKE_HIP_PLATFORM}'\n"
+    "It must be 'amd' or 'nvidia'."
+    )
+endif()
 
 if(NOT CMAKE_HIP_COMPILER)
   set(CMAKE_HIP_COMPILER_INIT NOTFOUND)
@@ -34,15 +52,19 @@ if(NOT CMAKE_HIP_COMPILER)
 
   # finally list compilers to try
   if(NOT CMAKE_HIP_COMPILER_INIT)
-    set(CMAKE_HIP_COMPILER_LIST clang++)
+    if(CMAKE_HIP_PLATFORM STREQUAL "nvidia")
+      set(CMAKE_HIP_COMPILER_LIST nvcc)
+    elseif(CMAKE_HIP_PLATFORM STREQUAL "amd")
+      set(CMAKE_HIP_COMPILER_LIST clang++)
 
-    # Look for the Clang coming with ROCm to support HIP.
-    execute_process(COMMAND hipconfig --hipclangpath
-      OUTPUT_VARIABLE _CMAKE_HIPCONFIG_CLANGPATH
-      RESULT_VARIABLE _CMAKE_HIPCONFIG_RESULT
-    )
-    if(_CMAKE_HIPCONFIG_RESULT EQUAL 0 AND EXISTS "${_CMAKE_HIPCONFIG_CLANGPATH}")
-      set(CMAKE_HIP_COMPILER_HINTS "${_CMAKE_HIPCONFIG_CLANGPATH}")
+      # Look for the Clang coming with ROCm to support HIP.
+      execute_process(COMMAND hipconfig --hipclangpath
+        OUTPUT_VARIABLE _CMAKE_HIPCONFIG_CLANGPATH
+        RESULT_VARIABLE _CMAKE_HIPCONFIG_RESULT
+      )
+      if(_CMAKE_HIPCONFIG_RESULT EQUAL 0 AND EXISTS "${_CMAKE_HIPCONFIG_CLANGPATH}")
+        set(CMAKE_HIP_COMPILER_HINTS "${_CMAKE_HIPCONFIG_CLANGPATH}")
+      endif()
     endif()
   endif()
 
@@ -63,16 +85,54 @@ mark_as_advanced(CMAKE_HIP_COMPILER)
 if(NOT CMAKE_HIP_COMPILER_ID_RUN)
   set(CMAKE_HIP_COMPILER_ID_RUN 1)
 
-  # Try to identify the compiler.
+  include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
+
+  # We determine the vendor to use the right flags for detection right away.
+  # The main compiler identification is still needed below to extract other information.
+  list(APPEND CMAKE_HIP_COMPILER_ID_VENDORS NVIDIA Clang)
+  set(CMAKE_HIP_COMPILER_ID_VENDOR_REGEX_NVIDIA "nvcc: NVIDIA \\(R\\) Cuda compiler driver")
+  set(CMAKE_HIP_COMPILER_ID_VENDOR_REGEX_Clang "(clang version)")
+  CMAKE_DETERMINE_COMPILER_ID_VENDOR(HIP "--version")
+
+  if(CMAKE_HIP_COMPILER_ID STREQUAL "NVIDIA")
+    # Find the CUDA toolkit to get:
+    # - CMAKE_HIP_COMPILER_CUDA_TOOLKIT_VERSION
+    # - CMAKE_HIP_COMPILER_CUDA_TOOLKIT_ROOT
+    # - CMAKE_HIP_COMPILER_CUDA_LIBRARY_ROOT
+    # We save them in CMakeHIPCompiler.cmake.
+    # Match arguments with cmake_cuda_architectures_all call.
+    include(Internal/CMakeCUDAFindToolkit)
+    cmake_cuda_find_toolkit(HIP CMAKE_HIP_COMPILER_CUDA_)
+
+    # If the user set CMAKE_HIP_ARCHITECTURES, validate its value.
+    include(Internal/CMakeCUDAArchitecturesValidate)
+    cmake_cuda_architectures_validate(HIP)
+  endif()
+
+  if(CMAKE_HIP_COMPILER_ID STREQUAL "Clang")
+    list(APPEND CMAKE_HIP_COMPILER_ID_TEST_FLAGS_FIRST "-v")
+  elseif(CMAKE_HIP_COMPILER_ID STREQUAL "NVIDIA")
+    # Tell nvcc to treat .hip files as CUDA sources.
+    list(APPEND CMAKE_HIP_COMPILER_ID_TEST_FLAGS_FIRST "-x cu -v")
+  endif()
+
+  # We perform compiler identification for a second time to extract implicit linking info.
+  # We need to unset the compiler ID otherwise CMAKE_DETERMINE_COMPILER_ID() doesn't work.
   set(CMAKE_HIP_COMPILER_ID)
   set(CMAKE_HIP_PLATFORM_ID)
   file(READ ${CMAKE_ROOT}/Modules/CMakePlatformId.h.in
     CMAKE_HIP_COMPILER_ID_PLATFORM_CONTENT)
 
-  list(APPEND CMAKE_HIP_COMPILER_ID_TEST_FLAGS_FIRST "-v")
-
-  include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
   CMAKE_DETERMINE_COMPILER_ID(HIP HIPFLAGS CMakeHIPCompilerId.hip)
+
+  if(CMAKE_HIP_COMPILER_ID STREQUAL "NVIDIA")
+    include(Internal/CMakeCUDAArchitecturesAll)
+    # From CMAKE_HIP_COMPILER_CUDA_TOOLKIT_VERSION and CMAKE_HIP_COMPILER_{ID,VERSION}, get:
+    # - CMAKE_HIP_ARCHITECTURES_ALL
+    # - CMAKE_HIP_ARCHITECTURES_ALL_MAJOR
+    # Match arguments with cmake_cuda_find_toolkit call.
+    cmake_cuda_architectures_all(HIP CMAKE_HIP_COMPILER_CUDA_)
+  endif()
 
   _cmake_find_compiler_sysroot(HIP)
 endif()
@@ -104,7 +164,8 @@ if(NOT CMAKE_HIP_COMPILER_ROCM_ROOT)
   message(FATAL_ERROR "Failed to find ROCm root directory.")
 endif()
 
-# Normally implicit link information is not detected until
+# Normally implicit link information is not detected until ABI detection,
+# but we need to populate CMAKE_HIP_LIBRARY_ARCHITECTURE to find hip-lang.
 cmake_parse_implicit_link_info("${CMAKE_HIP_COMPILER_PRODUCED_OUTPUT}"
   _CMAKE_HIP_COMPILER_ID_IMPLICIT_LIBS
   _CMAKE_HIP_COMPILER_ID_IMPLICIT_DIRS
@@ -165,6 +226,26 @@ include(CMakeFindBinUtils)
 include(Compiler/${CMAKE_HIP_COMPILER_ID}-FindBinUtils OPTIONAL)
 unset(_CMAKE_PROCESSING_LANGUAGE)
 
+if(CMAKE_HIP_COMPILER_ID STREQUAL "Clang")
+  set(CMAKE_HIP_RUNTIME_LIBRARY_DEFAULT "SHARED")
+elseif(CMAKE_HIP_COMPILER_ID STREQUAL "NVIDIA")
+  include(Internal/CMakeNVCCParseImplicitInfo)
+  # Parse CMAKE_HIP_COMPILER_PRODUCED_OUTPUT to get:
+  # - CMAKE_HIP_ARCHITECTURES_DEFAULT
+  # - CMAKE_HIP_HOST_IMPLICIT_LINK_DIRECTORIES
+  # - CMAKE_HIP_HOST_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
+  # - CMAKE_HIP_HOST_IMPLICIT_LINK_LIBRARIES
+  # - CMAKE_HIP_HOST_LINK_LAUNCHER
+  # - CMAKE_HIP_RUNTIME_LIBRARY_DEFAULT
+  # - CMAKE_HIP_CUDA_TOOLKIT_INCLUDE_DIRECTORIES
+  # Match arguments with cmake_nvcc_filter_implicit_info call in CMakeTestHIPCompiler.
+  cmake_nvcc_parse_implicit_info(HIP CMAKE_HIP_CUDA_)
+
+  include(Internal/CMakeCUDAFilterImplicitLibs)
+  # Filter out implicit link libraries that should not be passed unconditionally.
+  cmake_cuda_filter_implicit_libs(CMAKE_HIP_HOST_IMPLICIT_LINK_LIBRARIES)
+endif()
+
 if(CMAKE_HIP_COMPILER_SYSROOT)
   string(CONCAT _SET_CMAKE_HIP_COMPILER_SYSROOT
     "set(CMAKE_HIP_COMPILER_SYSROOT \"${CMAKE_HIP_COMPILER_SYSROOT}\")\n"
@@ -185,7 +266,20 @@ if(MSVC_HIP_ARCHITECTURE_ID)
     "set(MSVC_HIP_ARCHITECTURE_ID ${MSVC_HIP_ARCHITECTURE_ID})")
 endif()
 
-if(NOT DEFINED CMAKE_HIP_ARCHITECTURES)
+if(CMAKE_HIP_COMPILER_ID STREQUAL "NVIDIA")
+  if(NOT "$ENV{CUDAARCHS}" STREQUAL "")
+    set(CMAKE_HIP_ARCHITECTURES "$ENV{CUDAARCHS}" CACHE STRING "CUDA architectures")
+  endif()
+
+  # If the user did not set CMAKE_HIP_ARCHITECTURES, use the compiler's default.
+  if("${CMAKE_HIP_ARCHITECTURES}" STREQUAL "")
+    set(CMAKE_HIP_ARCHITECTURES "${CMAKE_HIP_ARCHITECTURES_DEFAULT}" CACHE STRING "HIP architectures" FORCE)
+    if(NOT CMAKE_HIP_ARCHITECTURES)
+      message(FATAL_ERROR "Failed to detect a default HIP architecture.\n\nCompiler output:\n${CMAKE_HIP_COMPILER_PRODUCED_OUTPUT}")
+    endif()
+  endif()
+  unset(CMAKE_HIP_ARCHITECTURES_DEFAULT)
+elseif(NOT DEFINED CMAKE_HIP_ARCHITECTURES)
   # Use 'rocm_agent_enumerator' to get the current GPU architecture.
   set(_CMAKE_HIP_ARCHITECTURES)
   find_program(_CMAKE_HIP_ROCM_AGENT_ENUMERATOR

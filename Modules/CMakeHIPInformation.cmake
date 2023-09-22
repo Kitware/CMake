@@ -8,6 +8,19 @@ else()
 endif()
 set(CMAKE_INCLUDE_FLAG_HIP "-I")
 
+# Set implicit links early so compiler-specific modules can use them.
+set(__IMPLICIT_LINKS)
+foreach(dir ${CMAKE_HIP_HOST_IMPLICIT_LINK_DIRECTORIES})
+  string(APPEND __IMPLICIT_LINKS " -L\"${dir}\"")
+endforeach()
+foreach(lib ${CMAKE_HIP_HOST_IMPLICIT_LINK_LIBRARIES})
+  if(${lib} MATCHES "/")
+    string(APPEND __IMPLICIT_LINKS " \"${lib}\"")
+  else()
+    string(APPEND __IMPLICIT_LINKS " -l${lib}")
+  endif()
+endforeach()
+
 # Load compiler-specific information.
 if(CMAKE_HIP_COMPILER_ID)
   include(Compiler/${CMAKE_HIP_COMPILER_ID}-HIP OPTIONAL)
@@ -129,7 +142,7 @@ endif()
 # compile a HIP file into an object file
 if(NOT CMAKE_HIP_COMPILE_OBJECT)
   set(CMAKE_HIP_COMPILE_OBJECT
-    "<CMAKE_HIP_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> ${_CMAKE_COMPILE_AS_HIP_FLAG} -c <SOURCE>")
+    "<CMAKE_HIP_COMPILER> ${_CMAKE_HIP_EXTRA_FLAGS} <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> ${_CMAKE_COMPILE_AS_HIP_FLAG} -c <SOURCE>")
 endif()
 
 # compile a cu file into an executable
