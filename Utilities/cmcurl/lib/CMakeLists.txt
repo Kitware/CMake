@@ -47,6 +47,17 @@ if(USE_ARES)
   include_directories(${CARES_INCLUDE_DIR})
 endif()
 
+#-----------------------------------------------------------------------------
+# CMake-specific curl code.
+unset(LIBCURL_OUTPUT_NAME CACHE)
+
+add_library(cmcurl ${HHEADERS} ${CSOURCES})
+target_compile_definitions(cmcurl INTERFACE CURL_STATICLIB)
+target_link_libraries(cmcurl PRIVATE ${CURL_LIBS})
+if(WIN32 AND CMake_BUILD_PCH)
+  target_precompile_headers(cmcurl PRIVATE "curl_setup.h" "curl_sspi.h" "${CURL_SOURCE_DIR}/include/curl/curl.h")
+endif()
+
 # For windows we want to install OPENSSL_LIBRARIES dlls
 # and also copy them into the build tree so that testing
 # can find them.
@@ -70,6 +81,9 @@ if(CURL_USE_OPENSSL AND OPENSSL_FOUND AND WIN32)
     install(PROGRAMS ${CMAKE_EAY_DLL} ${CMAKE_SSL_DLL} DESTINATION bin)
   endif()
 endif()
+
+return() # The rest of this file is not needed for building within CMake.
+#-----------------------------------------------------------------------------
 
 add_library(
   curlu # special libcurlu library just for unittests

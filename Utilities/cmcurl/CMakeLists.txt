@@ -2,7 +2,9 @@
 set(BUILD_CURL_EXE OFF CACHE INTERNAL "No curl exe")
 set(BUILD_DASHBOARD_REPORTS OFF CACHE INTERNAL "No curl dashboard reports")
 set(BUILD_RELEASE_DEBUG_DIRS OFF CACHE INTERNAL "No curl release/debug dirs")
-set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "Build shared libraries")
+set(BUILD_SHARED_LIBS OFF)
+set(BUILD_STATIC_LIBS ON)
+set(BUILD_STATIC_CURL OFF)
 set(CURL_USE_BEARSSL OFF)
 set(CURL_USE_GSSAPI OFF)
 set(CURL_USE_LIBPSL OFF)
@@ -17,11 +19,15 @@ set(CURL_USE_SECTRANSP OFF)
 set(CURL_USE_WOLFSSL OFF)
 set(CURL_BROTLI OFF)
 set(CURL_DISABLE_ALTSVC ON)
+set(CURL_DISABLE_AWS OFF)
+set(CURL_DISABLE_BASIC_AUTH OFF)
+set(CURL_DISABLE_BEARER_AUTH OFF)
 set(CURL_DISABLE_COOKIES OFF CACHE INTERNAL "Do not disable curl cookie support")
-set(CURL_DISABLE_CRYPTO_AUTH OFF CACHE INTERNAL "Do not disable curl crypto auth")
 set(CURL_DISABLE_DICT ON CACHE INTERNAL "Disable curl dict protocol?")
+set(CURL_DISABLE_DIGEST_AUTH OFF)
 set(CURL_DISABLE_DOH OFF)
 set(CURL_DISABLE_FILE OFF CACHE INTERNAL "Disable curl file protocol?")
+set(CURL_DISABLE_FORM_API OFF)
 set(CURL_DISABLE_FTP OFF CACHE INTERNAL "Disable curl ftp protocol?")
 set(CURL_DISABLE_GETOPTIONS OFF)
 set(CURL_DISABLE_GOPHER ON CACHE INTERNAL "Disable curl gopher protocol?")
@@ -29,11 +35,13 @@ set(CURL_DISABLE_HSTS OFF)
 set(CURL_DISABLE_HTTP_AUTH OFF)
 set(CURL_DISABLE_HTTP OFF CACHE INTERNAL "Disable curl http protocol?")
 set(CURL_DISABLE_IMAP ON CACHE INTERNAL "Disable curl imap protocol?")
+set(CURL_DISABLE_KERBEROS_AUTH OFF)
 set(CURL_DISABLE_LDAP ON CACHE INTERNAL "Disable curl ldap protocol?")
 set(CURL_DISABLE_LDAPS ON CACHE INTERNAL "Disable curl ldaps protocol?")
 set(CURL_DISABLE_LIBCURL_OPTION OFF)
 set(CURL_DISABLE_MIME OFF)
 set(CURL_DISABLE_MQTT ON)
+set(CURL_DISABLE_NEGOTIATE_AUTH OFF)
 set(CURL_DISABLE_NETRC OFF)
 set(CURL_DISABLE_NTLM OFF)
 set(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG OFF)
@@ -77,6 +85,7 @@ set(HAVE_STRCASECMP 0) # we do not vendor the code that uses this
 set(HAVE_WIN32_WINNT 0) # we do not need this info
 set(HTTP_ONLY OFF CACHE INTERNAL "Curl is not http-only")
 set(PICKY_COMPILER OFF CACHE INTERNAL "Enable picky compiler options")
+set(SHARE_LIB_OBJECT OFF)
 set(USE_LIBIDN2 ON)
 set(USE_NGHTTP2 ON)
 set(USE_NGTCP2 OFF)
@@ -362,9 +371,11 @@ option(CURL_DISABLE_DOH "disables DNS-over-HTTPS" OFF)
 mark_as_advanced(CURL_DISABLE_DOH)
 option(CURL_DISABLE_FILE "disables FILE" OFF)
 mark_as_advanced(CURL_DISABLE_FILE)
+if(0) # This code not needed for building within CMake.
 cmake_dependent_option(CURL_DISABLE_FORM_API "disables form api" OFF
                        "NOT CURL_DISABLE_MIME" ON)
 mark_as_advanced(CURL_DISABLE_FORM_API)
+endif()
 option(CURL_DISABLE_FTP "disables FTP" OFF)
 mark_as_advanced(CURL_DISABLE_FTP)
 option(CURL_DISABLE_GETOPTIONS "disables curl_easy_options API for existing options to curl_easy_setopt" OFF)
@@ -1582,7 +1593,22 @@ function(transform_makefile_inc INPUT_FILE OUTPUT_FILE)
   set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${INPUT_FILE}")
 endfunction()
 
-if(0) # This code not needed for building within CMake.
+#-----------------------------------------------------------------------------
+# CMake-specific curl code.
+add_subdirectory(lib)
+
+add_executable(curltest curltest.c)
+target_link_libraries(curltest cmcurl)
+
+if(BUILD_TESTING AND CMAKE_CURL_TEST_URL)
+  add_test(curl curltest ${CMAKE_CURL_TEST_URL})
+endif()
+
+install(FILES COPYING DESTINATION ${CMAKE_DOC_DIR}/cmcurl)
+
+return() # The rest of this file is not needed for building within CMake.
+#-----------------------------------------------------------------------------
+
 include(GNUInstallDirs)
 
 set(CURL_INSTALL_CMAKE_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
@@ -1590,7 +1616,6 @@ set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
 set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
 set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
 set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
-endif()
 
 if(USE_MANUAL)
   add_subdirectory(docs)
@@ -1602,19 +1627,6 @@ if(BUILD_CURL_EXE)
   add_subdirectory(src)
 endif()
 
-#-----------------------------------------------------------------------------
-# CMake-specific curl code.
-add_executable(curltest curltest.c)
-target_link_libraries(curltest cmcurl)
-
-if(BUILD_TESTING AND CMAKE_CURL_TEST_URL)
-  add_test(curl curltest ${CMAKE_CURL_TEST_URL})
-endif()
-
-install(FILES COPYING DESTINATION ${CMAKE_DOC_DIR}/cmcurl)
-#-----------------------------------------------------------------------------
-
-if(0) # This code not needed for building within CMake.
 cmake_dependent_option(BUILD_TESTING "Build tests"
   ON "PERL_FOUND;NOT CURL_DISABLE_TESTS"
   OFF)
@@ -1878,5 +1890,4 @@ if(NOT TARGET curl_uninstall)
   add_custom_target(curl_uninstall
       COMMAND ${CMAKE_COMMAND} -P
       ${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake)
-endif()
 endif()
