@@ -1,5 +1,7 @@
-^CMake Error at .*/Modules/CMakeDetermineCUDACompiler\.cmake:[0-9]+ \(message\):
+^CMake Error at .*/Internal/CMakeCUDAArchitecturesValidate\.cmake:[0-9]+ \(message\):
   CMAKE_CUDA_ARCHITECTURES must be non-empty if set\.
 Call Stack \(most recent call first\):
+  [^
+]*/Modules/CMakeDetermineCUDACompiler.cmake:[0-9]+ \(cmake_cuda_architectures_validate\)
   architectures-empty\.cmake:2 \(enable_language\)
   CMakeLists\.txt:3 \(include\)

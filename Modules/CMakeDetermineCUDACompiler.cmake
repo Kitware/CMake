@@ -4,13 +4,13 @@
 include(${CMAKE_ROOT}/Modules/CMakeDetermineCompiler.cmake)
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
 
-if( NOT ( ("${CMAKE_GENERATOR}" MATCHES "Make") OR
-          ("${CMAKE_GENERATOR}" MATCHES "Ninja") OR
-          ("${CMAKE_GENERATOR}" MATCHES "Visual Studio (1|[9][0-9])") ) )
+if(NOT ((CMAKE_GENERATOR MATCHES "Make") OR
+        (CMAKE_GENERATOR MATCHES "Ninja") OR
+        (CMAKE_GENERATOR MATCHES "Visual Studio (1|[9][0-9])")))
   message(FATAL_ERROR "CUDA language not currently supported by \"${CMAKE_GENERATOR}\" generator")
 endif()
 
-if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
   if(DEFINED ENV{CUDAHOSTCXX} OR DEFINED CMAKE_CUDA_HOST_COMPILER)
     message(WARNING "Visual Studio does not support specifying CUDAHOSTCXX or CMAKE_CUDA_HOST_COMPILER. Using the C++ compiler provided by Visual Studio.")
   endif()
@@ -62,7 +62,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
 
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
 
-  if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+  if(CMAKE_GENERATOR MATCHES "Visual Studio")
     # We will not know CMAKE_CUDA_COMPILER until the main compiler id step
     # below extracts it, but we do know that the compiler id will be NVIDIA.
     set(CMAKE_CUDA_COMPILER_ID "NVIDIA")
@@ -78,176 +78,18 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
       message(FATAL_ERROR "Clang with CUDA is not yet supported on Windows. See CMake issue #20776.")
     endif()
 
-    # Find the CUDA toolkit. We store the CMAKE_CUDA_COMPILER_TOOLKIT_ROOT, CMAKE_CUDA_COMPILER_TOOLKIT_VERSION and
-    # CMAKE_CUDA_COMPILER_LIBRARY_ROOT in CMakeCUDACompiler.cmake so FindCUDAToolkit can avoid searching on future
-    # runs and the toolkit is the same.
-    # This is very similar to FindCUDAToolkit, but somewhat simplified since we can issue fatal errors
-    # if we fail and we don't need to account for searching the libraries.
-
-    # For NVCC we can easily deduce the SDK binary directory from the compiler path.
-    if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
-      set(_CUDA_NVCC_EXECUTABLE "${CMAKE_CUDA_COMPILER}")
-    else()
-      # Search using CUDAToolkit_ROOT and then CUDA_PATH for equivalence with FindCUDAToolkit.
-      # In FindCUDAToolkit CUDAToolkit_ROOT is searched automatically due to being in a find_package().
-      # First we search candidate non-default paths to give them priority.
-      find_program(_CUDA_NVCC_EXECUTABLE
-        NAMES nvcc nvcc.exe
-        PATHS ${CUDAToolkit_ROOT}
-        ENV CUDAToolkit_ROOT
-        ENV CUDA_PATH
-        PATH_SUFFIXES bin
-        NO_DEFAULT_PATH
-      )
-
-      # If we didn't find NVCC, then try the default paths.
-      find_program(_CUDA_NVCC_EXECUTABLE
-        NAMES nvcc nvcc.exe
-        PATH_SUFFIXES bin
-      )
-
-      # If the user specified CUDAToolkit_ROOT but nvcc could not be found, this is an error.
-      if(NOT _CUDA_NVCC_EXECUTABLE AND (DEFINED CUDAToolkit_ROOT OR DEFINED ENV{CUDAToolkit_ROOT}))
-        set(fail_base "Could not find nvcc executable in path specified by")
-
-        if(DEFINED CUDAToolkit_ROOT)
-          message(FATAL_ERROR "${fail_base} CUDAToolkit_ROOT=${CUDAToolkit_ROOT}")
-        elseif(DEFINED ENV{CUDAToolkit_ROOT})
-          message(FATAL_ERROR "${fail_base} environment variable CUDAToolkit_ROOT=$ENV{CUDAToolkit_ROOT}")
-        endif()
-      endif()
-
-      # CUDAToolkit_ROOT cmake/env variable not specified, try platform defaults.
-      #
-      # - Linux: /usr/local/cuda-X.Y
-      # - macOS: /Developer/NVIDIA/CUDA-X.Y
-      # - Windows: C:\Program Files\NVIDIA GPU Computing Toolkit\CUDA\vX.Y
-      #
-      # We will also search the default symlink location /usr/local/cuda first since
-      # if CUDAToolkit_ROOT is not specified, it is assumed that the symlinked
-      # directory is the desired location.
-      if(NOT _CUDA_NVCC_EXECUTABLE)
-        if(UNIX)
-          if(NOT APPLE)
-            set(platform_base "/usr/local/cuda-")
-          else()
-            set(platform_base "/Developer/NVIDIA/CUDA-")
-          endif()
-        else()
-          set(platform_base "C:\\Program Files\\NVIDIA GPU Computing Toolkit\\CUDA\\v")
-        endif()
-
-        # Build out a descending list of possible cuda installations, e.g.
-        file(GLOB possible_paths "${platform_base}*")
-        # Iterate the glob results and create a descending list.
-        set(versions)
-        foreach(p ${possible_paths})
-          # Extract version number from end of string
-          string(REGEX MATCH "[0-9][0-9]?\\.[0-9]$" p_version ${p})
-          if(IS_DIRECTORY ${p} AND p_version)
-            list(APPEND versions ${p_version})
-          endif()
-        endforeach()
-
-        # Sort numerically in descending order, so we try the newest versions first.
-        list(SORT versions COMPARE NATURAL ORDER DESCENDING)
-
-        # With a descending list of versions, populate possible paths to search.
-        set(search_paths)
-        foreach(v ${versions})
-          list(APPEND search_paths "${platform_base}${v}")
-        endforeach()
-
-        # Force the global default /usr/local/cuda to the front on Unix.
-        if(UNIX)
-          list(INSERT search_paths 0 "/usr/local/cuda")
-        endif()
-
-        # Now search for nvcc again using the platform default search paths.
-        find_program(_CUDA_NVCC_EXECUTABLE
-          NAMES nvcc nvcc.exe
-          PATHS ${search_paths}
-          PATH_SUFFIXES bin
-        )
-
-        # We are done with these variables now, cleanup.
-        unset(platform_base)
-        unset(possible_paths)
-        unset(versions)
-        unset(search_paths)
-
-        if(NOT _CUDA_NVCC_EXECUTABLE)
-          message(FATAL_ERROR "Failed to find nvcc.\nCompiler ${CMAKE_CUDA_COMPILER_ID} requires the CUDA toolkit. Please set the CUDAToolkit_ROOT variable.")
-        endif()
-      endif()
-    endif()
-
-    # Given that NVCC can be provided by multiple different sources (NVIDIA HPC SDK, CUDA Toolkit, distro)
-    # each of which has a different layout, we need to extract the CUDA toolkit root from the compiler
-    # itself, allowing us to support numerous different scattered toolkit layouts
-    execute_process(COMMAND ${_CUDA_NVCC_EXECUTABLE} "-v" "__cmake_determine_cuda"
-      OUTPUT_VARIABLE _CUDA_NVCC_OUT ERROR_VARIABLE _CUDA_NVCC_OUT)
-    if(_CUDA_NVCC_OUT MATCHES "\\#\\$ TOP=([^\r\n]*)")
-      get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${CMAKE_MATCH_1}" ABSOLUTE)
-    else()
-      get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${_CUDA_NVCC_EXECUTABLE}" DIRECTORY)
-      get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}" DIRECTORY)
-    endif()
-
-    if(_CUDA_NVCC_OUT MATCHES "\\#\\$ NVVMIR_LIBRARY_DIR=([^\r\n]*)")
-      get_filename_component(_CUDA_NVVMIR_LIBRARY_DIR "${CMAKE_MATCH_1}" ABSOLUTE)
-
-      #We require the path to end in `/nvvm/libdevice'
-      if(_CUDA_NVVMIR_LIBRARY_DIR MATCHES "nvvm/libdevice$")
-        get_filename_component(_CUDA_NVVMIR_LIBRARY_DIR "${_CUDA_NVVMIR_LIBRARY_DIR}/../.." ABSOLUTE)
-        set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT_FROM_NVVMIR_LIBRARY_DIR "${_CUDA_NVVMIR_LIBRARY_DIR}")
-      endif()
-
-      unset(_CUDA_NVVMIR_LIBRARY_DIR)
-      unset(_cuda_nvvmir_dir_name)
-    endif()
-    unset(_CUDA_NVCC_OUT)
+    # Find the CUDA toolkit to get:
+    # - CMAKE_CUDA_COMPILER_TOOLKIT_VERSION
+    # - CMAKE_CUDA_COMPILER_TOOLKIT_ROOT
+    # - CMAKE_CUDA_COMPILER_LIBRARY_ROOT
+    # We save them in CMakeCUDACompiler.cmake so FindCUDAToolkit can
+    # avoid searching on future runs and the toolkit is the same.
+    # Match arguments with cmake_cuda_architectures_all call.
+    include(Internal/CMakeCUDAFindToolkit)
+    cmake_cuda_find_toolkit(CUDA CMAKE_CUDA_COMPILER_)
 
     set(CMAKE_CUDA_DEVICE_LINKER "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/bin/nvlink${CMAKE_EXECUTABLE_SUFFIX}")
     set(CMAKE_CUDA_FATBINARY "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/bin/fatbinary${CMAKE_EXECUTABLE_SUFFIX}")
-
-    # In a non-scattered installation the following are equivalent to CMAKE_CUDA_COMPILER_TOOLKIT_ROOT.
-    # We first check for a non-scattered installation to prefer it over a scattered installation.
-
-    # CMAKE_CUDA_COMPILER_LIBRARY_ROOT contains the device library.
-    if(DEFINED CMAKE_CUDA_COMPILER_LIBRARY_ROOT_FROM_NVVMIR_LIBRARY_DIR)
-      set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT "${CMAKE_CUDA_COMPILER_LIBRARY_ROOT_FROM_NVVMIR_LIBRARY_DIR}")
-    elseif(EXISTS "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}/nvvm/libdevice")
-      set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}")
-    elseif(CMAKE_SYSROOT_LINK AND EXISTS "${CMAKE_SYSROOT_LINK}/usr/lib/cuda/nvvm/libdevice")
-      set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT "${CMAKE_SYSROOT_LINK}/usr/lib/cuda")
-    elseif(EXISTS "${CMAKE_SYSROOT}/usr/lib/cuda/nvvm/libdevice")
-      set(CMAKE_CUDA_COMPILER_LIBRARY_ROOT "${CMAKE_SYSROOT}/usr/lib/cuda")
-    else()
-      message(FATAL_ERROR "Couldn't find CUDA library root.")
-    endif()
-    unset(CMAKE_CUDA_COMPILER_LIBRARY_ROOT_FROM_NVVMIR_LIBRARY_DIR)
-
-    # CMAKE_CUDA_COMPILER_TOOLKIT_LIBRARY_ROOT contains the linking stubs necessary for device linking and other low-level library files.
-    if(CMAKE_SYSROOT_LINK AND EXISTS "${CMAKE_SYSROOT_LINK}/usr/lib/nvidia-cuda-toolkit/bin/crt/link.stub")
-      set(CMAKE_CUDA_COMPILER_TOOLKIT_LIBRARY_ROOT "${CMAKE_SYSROOT_LINK}/usr/lib/nvidia-cuda-toolkit")
-    elseif(EXISTS "${CMAKE_SYSROOT}/usr/lib/nvidia-cuda-toolkit/bin/crt/link.stub")
-      set(CMAKE_CUDA_COMPILER_TOOLKIT_LIBRARY_ROOT "${CMAKE_SYSROOT}/usr/lib/nvidia-cuda-toolkit")
-    else()
-      set(CMAKE_CUDA_COMPILER_TOOLKIT_LIBRARY_ROOT "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}")
-    endif()
-  endif()
-
-  # For regular nvcc we the toolkit version is the same as the compiler version and we can parse it from the vendor test output.
-  # For Clang we need to invoke nvcc to get version output.
-  if(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
-    if(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
-      execute_process(COMMAND ${_CUDA_NVCC_EXECUTABLE} "--version" OUTPUT_VARIABLE CMAKE_CUDA_COMPILER_ID_OUTPUT)
-    endif()
-
-    if(CMAKE_CUDA_COMPILER_ID_OUTPUT MATCHES [=[V([0-9]+\.[0-9]+\.[0-9]+)]=])
-      set(CMAKE_CUDA_COMPILER_TOOLKIT_VERSION "${CMAKE_MATCH_1}")
-    endif()
   endif()
 
   set(CMAKE_CUDA_COMPILER_ID_FLAGS_ALWAYS "-v")
@@ -269,23 +111,9 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     endif()
   endif()
 
-  # Rest of the code treats an empty value as equivalent to "use the defaults".
-  # Error out early to prevent confusing errors as a result of this.
-  # Note that this also catches invalid non-numerical values such as "a".
-  if(DEFINED CMAKE_CUDA_ARCHITECTURES)
-    if(CMAKE_CUDA_ARCHITECTURES STREQUAL "")
-      message(FATAL_ERROR "CMAKE_CUDA_ARCHITECTURES must be non-empty if set.")
-    elseif(CMAKE_CUDA_ARCHITECTURES AND NOT CMAKE_CUDA_ARCHITECTURES MATCHES "^([0-9]+a?(-real|-virtual)?(;[0-9]+a?(-real|-virtual)?|;)*|all|all-major|native)$")
-      message(FATAL_ERROR
-        "CMAKE_CUDA_ARCHITECTURES:\n"
-        "  ${CMAKE_CUDA_ARCHITECTURES}\n"
-        "is not one of the following:\n"
-        "  * a semicolon-separated list of integers, each optionally\n"
-        "    followed by '-real' or '-virtual'\n"
-        "  * a special value: all, all-major, native\n"
-        )
-    endif()
-  endif()
+  # If the user set CMAKE_CUDA_ARCHITECTURES, validate its value.
+  include(Internal/CMakeCUDAArchitecturesValidate)
+  cmake_cuda_architectures_validate(CUDA)
 
   if(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
     # Clang doesn't automatically select an architecture supported by the SDK.
@@ -306,7 +134,7 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
 
   CMAKE_DETERMINE_COMPILER_ID(CUDA CUDAFLAGS CMakeCUDACompilerId.cu)
 
-  if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+  if(CMAKE_GENERATOR MATCHES "Visual Studio")
     # Now that we have the path to nvcc, we can compute the toolkit root.
     get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${CMAKE_CUDA_COMPILER}" DIRECTORY)
     get_filename_component(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT "${CMAKE_CUDA_COMPILER_TOOLKIT_ROOT}" DIRECTORY)
@@ -316,7 +144,12 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     set(CMAKE_CUDA_COMPILER_TOOLKIT_VERSION ${CMAKE_CUDA_COMPILER_VERSION})
   endif()
 
-  include(${CMAKE_ROOT}/Modules/CUDA/architectures.cmake)
+  include(Internal/CMakeCUDAArchitecturesAll)
+  # From CMAKE_CUDA_COMPILER_TOOLKIT_VERSION and CMAKE_CUDA_COMPILER_{ID,VERSION}, get:
+  # - CMAKE_CUDA_ARCHITECTURES_ALL
+  # - CMAKE_CUDA_ARCHITECTURES_ALL_MAJOR
+  # Match arguments with cmake_cuda_find_toolkit call.
+  cmake_cuda_architectures_all(CUDA CMAKE_CUDA_COMPILER_)
 
   _cmake_find_compiler_sysroot(CUDA)
 endif()
@@ -331,7 +164,7 @@ if(MSVC_CUDA_ARCHITECTURE_ID)
     "set(MSVC_CUDA_ARCHITECTURE_ID ${MSVC_CUDA_ARCHITECTURE_ID})")
 endif()
 
-if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
   set(CMAKE_CUDA_HOST_LINK_LAUNCHER "${CMAKE_LINKER}")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES "")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES "")
@@ -351,11 +184,12 @@ if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
   set(_SET_CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT
     "set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT \"${CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT}\")")
 elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
-  string(REGEX MATCHALL "-target-cpu sm_([0-9]+)" target_cpus "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
+  string(REGEX MATCHALL "-target-cpu sm_([0-9]+)" _clang_target_cpus "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
 
-  foreach(cpu ${target_cpus})
-    string(REGEX MATCH "-target-cpu sm_([0-9]+)" dont_care "${cpu}")
-    list(APPEND architectures_detected "${CMAKE_MATCH_1}")
+  foreach(_clang_target_cpu ${_clang_target_cpus})
+    if(_clang_target_cpu MATCHES "-target-cpu sm_([0-9]+)")
+      list(APPEND CMAKE_CUDA_ARCHITECTURES_DEFAULT "${CMAKE_MATCH_1}")
+    endif()
   endforeach()
 
   # Find target directory when crosscompiling.
@@ -411,141 +245,32 @@ elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES "${_CUDA_LIBRARY_DIR}")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES "")
   set(CMAKE_CUDA_HOST_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES "")
+
+  # Don't leak variables unnecessarily to user code.
+  unset(_CUDA_INCLUDE_DIR)
+  unset(_CUDA_LIBRARY_DIR)
+  unset(_CUDA_TARGET_DIR)
+  unset(_CUDA_TARGET_NAME)
 elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
-  set(_nvcc_log "")
-  string(REPLACE "\r" "" _nvcc_output_orig "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
-  if(_nvcc_output_orig MATCHES "#\\\$ +PATH= *([^\n]*)\n")
-    set(_nvcc_path "${CMAKE_MATCH_1}")
-    string(APPEND _nvcc_log "  found 'PATH=' string: [${_nvcc_path}]\n")
-    string(REPLACE ":" ";" _nvcc_path "${_nvcc_path}")
-  else()
-    set(_nvcc_path "")
-    string(REPLACE "\n" "\n    " _nvcc_output_log "\n${_nvcc_output_orig}")
-    string(APPEND _nvcc_log "  no 'PATH=' string found in nvcc output:${_nvcc_output_log}\n")
-  endif()
-  if(_nvcc_output_orig MATCHES "#\\\$ +LIBRARIES= *([^\n]*)\n")
-    set(_nvcc_libraries "${CMAKE_MATCH_1}")
-    string(APPEND _nvcc_log "  found 'LIBRARIES=' string: [${_nvcc_libraries}]\n")
-  else()
-    set(_nvcc_libraries "")
-    string(REPLACE "\n" "\n    " _nvcc_output_log "\n${_nvcc_output_orig}")
-    string(APPEND _nvcc_log "  no 'LIBRARIES=' string found in nvcc output:${_nvcc_output_log}\n")
-  endif()
+  include(Internal/CMakeNVCCParseImplicitInfo)
+  # Parse CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT to get:
+  # - CMAKE_CUDA_ARCHITECTURES_DEFAULT
+  # - CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES
+  # - CMAKE_CUDA_HOST_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
+  # - CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES
+  # - CMAKE_CUDA_HOST_LINK_LAUNCHER
+  # - CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT
+  # - CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES
+  # Match arguments with cmake_nvcc_filter_implicit_info call in CMakeTestCUDACompiler.
+  cmake_nvcc_parse_implicit_info(CUDA CMAKE_CUDA_)
 
-  set(_nvcc_link_line "")
-  if(_nvcc_libraries)
-    # Remove variable assignments.
-    string(REGEX REPLACE "#\\\$ *[^= ]+=[^\n]*\n" "" _nvcc_output "${_nvcc_output_orig}")
-    # Encode [] characters that break list expansion.
-    string(REPLACE "[" "{==={" _nvcc_output "${_nvcc_output}")
-    string(REPLACE "]" "}===}" _nvcc_output "${_nvcc_output}")
-    # Split lines.
-    string(REGEX REPLACE "\n+(#\\\$ )?" ";" _nvcc_output "${_nvcc_output}")
-    foreach(line IN LISTS _nvcc_output)
-      set(_nvcc_output_line "${line}")
-      string(REPLACE "{==={" "[" _nvcc_output_line "${_nvcc_output_line}")
-      string(REPLACE "}===}" "]" _nvcc_output_line "${_nvcc_output_line}")
-      string(APPEND _nvcc_log "  considering line: [${_nvcc_output_line}]\n")
-      if("${_nvcc_output_line}" MATCHES "^ *nvlink")
-        string(APPEND _nvcc_log "    ignoring nvlink line\n")
-      elseif(_nvcc_libraries)
-        if("${_nvcc_output_line}" MATCHES "(@\"?((tmp/)?a\\.exe\\.res)\"?)")
-          set(_nvcc_link_res_arg "${CMAKE_MATCH_1}")
-          set(_nvcc_link_res_file "${CMAKE_MATCH_2}")
-          set(_nvcc_link_res "${CMAKE_PLATFORM_INFO_DIR}/CompilerIdCUDA/${_nvcc_link_res_file}")
-          if(EXISTS "${_nvcc_link_res}")
-            file(READ "${_nvcc_link_res}" _nvcc_link_res_content)
-            string(REPLACE "${_nvcc_link_res_arg}" "${_nvcc_link_res_content}" _nvcc_output_line "${_nvcc_output_line}")
-          endif()
-        endif()
-        string(FIND "${_nvcc_output_line}" "${_nvcc_libraries}" _nvcc_libraries_pos)
-        if(NOT _nvcc_libraries_pos EQUAL -1)
-          set(_nvcc_link_line "${_nvcc_output_line}")
-          string(APPEND _nvcc_log "    extracted link line: [${_nvcc_link_line}]\n")
-        endif()
-      endif()
-    endforeach()
-  endif()
-
-  if(_nvcc_link_line)
-    if("x${CMAKE_CUDA_SIMULATE_ID}" STREQUAL "xMSVC")
-      set(CMAKE_CUDA_HOST_LINK_LAUNCHER "${CMAKE_LINKER}")
-    else()
-      #extract the compiler that is being used for linking
-      separate_arguments(_nvcc_link_line_args UNIX_COMMAND "${_nvcc_link_line}")
-      list(GET _nvcc_link_line_args 0 _nvcc_host_link_launcher)
-      if(IS_ABSOLUTE "${_nvcc_host_link_launcher}")
-        string(APPEND _nvcc_log "  extracted link launcher absolute path: [${_nvcc_host_link_launcher}]\n")
-        set(CMAKE_CUDA_HOST_LINK_LAUNCHER "${_nvcc_host_link_launcher}")
-      else()
-        string(APPEND _nvcc_log "  extracted link launcher name: [${_nvcc_host_link_launcher}]\n")
-        find_program(_nvcc_find_host_link_launcher
-          NAMES ${_nvcc_host_link_launcher}
-          PATHS ${_nvcc_path} NO_DEFAULT_PATH)
-        find_program(_nvcc_find_host_link_launcher
-          NAMES ${_nvcc_host_link_launcher})
-        if(_nvcc_find_host_link_launcher)
-          string(APPEND _nvcc_log "  found link launcher absolute path: [${_nvcc_find_host_link_launcher}]\n")
-          set(CMAKE_CUDA_HOST_LINK_LAUNCHER "${_nvcc_find_host_link_launcher}")
-        else()
-          string(APPEND _nvcc_log "  could not find link launcher absolute path\n")
-          set(CMAKE_CUDA_HOST_LINK_LAUNCHER "${_nvcc_host_link_launcher}")
-        endif()
-        unset(_nvcc_find_host_link_launcher CACHE)
-      endif()
-    endif()
-
-    #prefix the line with cuda-fake-ld so that implicit link info believes it is
-    #a link line
-    set(_nvcc_link_line "cuda-fake-ld ${_nvcc_link_line}")
-    CMAKE_PARSE_IMPLICIT_LINK_INFO("${_nvcc_link_line}"
-                                   CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES
-                                   CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES
-                                   CMAKE_CUDA_HOST_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
-                                   log
-                                   "${CMAKE_CUDA_IMPLICIT_OBJECT_REGEX}"
-                                   LANGUAGE CUDA)
-
-    # Detect CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT from the compiler by looking at which
-    # cudart library exists in the implicit link libraries passed to the host linker.
-    # This is required when a project sets the cuda runtime library as part of the
-    # initial flags.
-    if(";${CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES};" MATCHES [[;cudart_static(\.lib)?;]])
-      set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT "STATIC")
-    elseif(";${CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES};" MATCHES [[;cudart(\.lib)?;]])
-      set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT "SHARED")
-    else()
-      set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT "NONE")
-    endif()
-    set(_SET_CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT
-      "set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT \"${CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT}\")")
-
-    message(CONFIGURE_LOG
-      "Parsed CUDA nvcc implicit link information:\n${_nvcc_log}\n${log}\n\n")
-  else()
-    message(CONFIGURE_LOG
-      "Failed to parse CUDA nvcc implicit link information:\n${_nvcc_log}\n\n")
-    message(FATAL_ERROR "Failed to extract nvcc implicit link line.")
-  endif()
+  set(_SET_CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT
+    "set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT \"${CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT}\")")
 endif()
 
-# CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES is detected above as the list of
-# libraries that the CUDA compiler implicitly passes to the host linker.
-# CMake invokes the host linker directly and so needs to pass these libraries.
-# We filter out those that should not be passed unconditionally both here
-# and from CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES in CMakeTestCUDACompiler.
-set(CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES_EXCLUDE
-  # The CUDA runtime libraries are controlled by CMAKE_CUDA_RUNTIME_LIBRARY.
-  cudart        cudart.lib
-  cudart_static cudart_static.lib
-  cudadevrt     cudadevrt.lib
-
-  # Dependencies of the CUDA static runtime library on Linux hosts.
-  rt
-  pthread
-  dl
-  )
-list(REMOVE_ITEM CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES ${CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES_EXCLUDE})
+include(Internal/CMakeCUDAFilterImplicitLibs)
+# Filter out implicit link libraries that should not be passed unconditionally.
+cmake_cuda_filter_implicit_libs(CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES)
 
 if(CMAKE_CUDA_COMPILER_SYSROOT)
   string(CONCAT _SET_CMAKE_CUDA_COMPILER_SYSROOT
@@ -555,70 +280,23 @@ else()
   set(_SET_CMAKE_CUDA_COMPILER_SYSROOT "")
 endif()
 
-# Determine CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES
-if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
-  set(CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES)
-  string(REPLACE "\r" "" _nvcc_output_orig "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
-  if(_nvcc_output_orig MATCHES "#\\\$ +INCLUDES= *([^\n]*)\n")
-    set(_nvcc_includes "${CMAKE_MATCH_1}")
-    string(APPEND _nvcc_log "  found 'INCLUDES=' string: [${_nvcc_includes}]\n")
-  else()
-    set(_nvcc_includes "")
-    string(REPLACE "\n" "\n    " _nvcc_output_log "\n${_nvcc_output_orig}")
-    string(APPEND _nvcc_log "  no 'INCLUDES=' string found in nvcc output:${_nvcc_output_log}\n")
-  endif()
-  if(_nvcc_includes)
-    # across all operating system each include directory is prefixed with -I
-    separate_arguments(_nvcc_output NATIVE_COMMAND "${_nvcc_includes}")
-    foreach(line IN LISTS _nvcc_output)
-      string(REGEX REPLACE "^-I" "" line "${line}")
-      get_filename_component(line "${line}" ABSOLUTE)
-      list(APPEND CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES "${line}")
-    endforeach()
-
-    message(CONFIGURE_LOG
-      "Parsed CUDA nvcc include information:\n${_nvcc_log}\n${log}\n\n")
-  else()
-    message(CONFIGURE_LOG
-      "Failed to detect CUDA nvcc include information:\n${_nvcc_log}\n\n")
-  endif()
-
-  string(REGEX MATCHALL "-arch compute_([0-9]+)" target_cpus "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
-
-  foreach(cpu ${target_cpus})
-    string(REGEX MATCH "-arch compute_([0-9]+)" dont_care "${cpu}")
-    list(APPEND architectures_detected "${CMAKE_MATCH_1}")
-  endforeach()
-endif()
-
-# If the user didn't set the architectures, then set them to a default.
-# If the user did, then make sure those architectures worked.
+# If the user did not set CMAKE_CUDA_ARCHITECTURES, use the compiler's default.
 if("${CMAKE_CUDA_ARCHITECTURES}" STREQUAL "")
   cmake_policy(GET CMP0104 _CUDA_CMP0104)
-
   if(NOT CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" OR _CUDA_CMP0104 STREQUAL "NEW")
-    set(CMAKE_CUDA_ARCHITECTURES "${architectures_detected}" CACHE STRING "CUDA architectures")
-
+    set(CMAKE_CUDA_ARCHITECTURES "${CMAKE_CUDA_ARCHITECTURES_DEFAULT}" CACHE STRING "CUDA architectures")
     if(NOT CMAKE_CUDA_ARCHITECTURES)
       message(FATAL_ERROR "Failed to detect a default CUDA architecture.\n\nCompiler output:\n${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
     endif()
   endif()
 endif()
+unset(CMAKE_CUDA_ARCHITECTURES_DEFAULT)
 
 # configure all variables set in this file
 configure_file(${CMAKE_ROOT}/Modules/CMakeCUDACompiler.cmake.in
   ${CMAKE_PLATFORM_INFO_DIR}/CMakeCUDACompiler.cmake
   @ONLY
 )
-
-# Don't leak variables unnecessarily to user code.
-unset(_CUDA_INCLUDE_DIR CACHE)
-unset(_CUDA_NVCC_EXECUTABLE CACHE)
-unset(_CUDA_LIBRARY_DIR)
-unset(_CUDA_TARGET_DIR)
-unset(_CUDA_TARGET_NAME)
-
-unset(architectures_detected)
 
 set(CMAKE_CUDA_COMPILER_ENV_VAR "CUDACXX")
 set(CMAKE_CUDA_HOST_COMPILER_ENV_VAR "CUDAHOSTCXX")
