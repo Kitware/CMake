@@ -3864,22 +3864,41 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions(
   }
   cudaLinkOptions.AppendFlagString("AdditionalOptions", linkFlags);
 
-  // For static libraries that have device linking enabled compute
-  // the  libraries
-  if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY &&
-      doDeviceLinking) {
-    cmComputeLinkInformation& cli = *pcli;
-    cmLinkLineDeviceComputer computer(
-      this->LocalGenerator,
-      this->LocalGenerator->GetStateSnapshot().GetDirectory());
-    std::vector<BT<std::string>> btLibVec;
-    computer.ComputeLinkLibraries(cli, std::string{}, btLibVec);
+  if (doDeviceLinking) {
     std::vector<std::string> libVec;
-    for (auto const& item : btLibVec) {
-      libVec.emplace_back(item.Value);
+    auto const& kinded = this->GeneratorTarget->GetKindedSources(configName);
+    // CMake conversion uses full paths when possible to allow deeper trees.
+    // However, CUDA 8.0 msbuild rules fail on absolute paths so for CUDA
+    // we must use relative paths.
+    const bool forceRelative = true;
+    for (cmGeneratorTarget::SourceAndKind const& si : kinded.Sources) {
+      switch (si.Kind) {
+        case cmGeneratorTarget::SourceKindExternalObject: {
+          std::string path =
+            this->ConvertPath(si.Source.Value->GetFullPath(), forceRelative);
+          ConvertToWindowsSlash(path);
+          libVec.emplace_back(std::move(path));
+        } break;
+        default:
+          break;
+      }
     }
-
-    cudaLinkOptions.AddFlag("AdditionalDependencies", libVec);
+    // For static libraries that have device linking enabled compute
+    // the  libraries
+    if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY) {
+      cmComputeLinkInformation& cli = *pcli;
+      cmLinkLineDeviceComputer computer(
+        this->LocalGenerator,
+        this->LocalGenerator->GetStateSnapshot().GetDirectory());
+      std::vector<BT<std::string>> btLibVec;
+      computer.ComputeLinkLibraries(cli, std::string{}, btLibVec);
+      for (auto const& item : btLibVec) {
+        libVec.emplace_back(item.Value);
+      }
+    }
+    if (!libVec.empty()) {
+      cudaLinkOptions.AddFlag("AdditionalDependencies", libVec);
+    }
   }
 
   this->CudaLinkOptions[configName] = std::move(pOptions);
