@@ -16,6 +16,7 @@
 
 #include <cm3p/json/value.h>
 
+#include "cmBuildDatabase.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmExportSet.h"
 #include "cmFileSet.h"
@@ -344,6 +345,12 @@ struct CxxModuleFileSet
   cm::optional<std::string> Destination;
 };
 
+struct CxxModuleDatabaseInfo
+{
+  std::string TemplatePath;
+  std::string Output;
+};
+
 struct CxxModuleBmiInstall
 {
   std::string Component;
@@ -370,6 +377,7 @@ struct cmCxxModuleExportInfo
 {
   std::map<std::string, SourceInfo> ObjectToSource;
   std::map<std::string, CxxModuleFileSet> ObjectToFileSet;
+  cm::optional<CxxModuleDatabaseInfo> DatabaseInfo;
   cm::optional<CxxModuleBmiInstall> BmiInstallation;
   std::vector<CxxModuleExport> Exports;
   std::string Config;
@@ -494,6 +502,21 @@ bool cmDyndepCollation::WriteDyndepMetadata(
     exports.emplace_back(std::move(properties), &exp);
   }
 
+  std::unique_ptr<cmBuildDatabase> module_database;
+  cmBuildDatabase::LookupTable build_database_lookup;
+  if (export_info.DatabaseInfo) {
+    module_database =
+      cmBuildDatabase::Load(export_info.DatabaseInfo->TemplatePath);
+    if (module_database) {
+      build_database_lookup = module_database->GenerateLookupTable();
+    } else {
+      cmSystemTools::Error(
+        cmStrCat("Failed to read the template build database ",
+                 export_info.DatabaseInfo->TemplatePath));
+      result = false;
+    }
+  }
+
   std::unique_ptr<cmGeneratedFileStream> bmi_install_script;
   if (export_info.BmiInstallation) {
     bmi_install_script = cm::make_unique<cmGeneratedFileStream>(
@@ -523,6 +546,25 @@ bool cmDyndepCollation::WriteDyndepMetadata(
 #ifdef _WIN32
     cmSystemTools::ConvertToUnixSlashes(output_path);
 #endif
+
+    auto source_info_itr = export_info.ObjectToSource.find(output_path);
+
+    // Update the module compilation database `requires` field if needed.
+    if (source_info_itr != export_info.ObjectToSource.end()) {
+      auto const& sourcePath = source_info_itr->second.SourcePath;
+      auto bdb_entry = build_database_lookup.find(sourcePath);
+      if (bdb_entry != build_database_lookup.end()) {
+        bdb_entry->second->Requires.clear();
+        for (auto const& req : object.Requires) {
+          bdb_entry->second->Requires.push_back(req.LogicalName);
+        }
+      } else if (export_info.DatabaseInfo) {
+        cmSystemTools::Error(
+          cmStrCat("Failed to find module database entry for ", sourcePath));
+        result = false;
+      }
+    }
+
     // Find the fileset for this object.
     auto fileset_info_itr = export_info.ObjectToFileSet.find(output_path);
     bool const has_provides = !object.Provides.empty();
@@ -546,6 +588,31 @@ bool cmDyndepCollation::WriteDyndepMetadata(
     }
 
     auto const& file_set = fileset_info_itr->second;
+
+    // Update the module compilation database `provides` field if needed.
+    {
+      auto bdb_entry = build_database_lookup.find(file_set.SourcePath);
+      if (bdb_entry != build_database_lookup.end()) {
+        // Clear the provides mapping; we will re-initialize it here.
+        if (!object.Provides.empty()) {
+          bdb_entry->second->Provides.clear();
+        }
+        for (auto const& prov : object.Provides) {
+          auto bmiName = cb.ModuleFile(prov.LogicalName);
+          if (bmiName) {
+            bdb_entry->second->Provides[prov.LogicalName] = *bmiName;
+          } else {
+            cmSystemTools::Error(
+              cmStrCat("Failed to find BMI location for ", prov.LogicalName));
+            result = false;
+          }
+        }
+      } else if (export_info.DatabaseInfo) {
+        cmSystemTools::Error(cmStrCat(
+          "Failed to find module database entry for ", file_set.SourcePath));
+        result = false;
+      }
+    }
 
     // Verify the fileset type for the object.
     if (file_set.Type == "CXX_MODULES"_s) {
@@ -705,6 +772,16 @@ bool cmDyndepCollation::WriteDyndepMetadata(
           req, "` C++ module which is provided by a private source"));
         result = false;
       }
+    }
+  }
+
+  if (module_database) {
+    if (module_database->HasPlaceholderNames()) {
+      cmSystemTools::Error(
+        "Module compilation database still contains placeholders");
+      result = false;
+    } else {
+      module_database->Write(export_info.DatabaseInfo->Output);
     }
   }
 

@@ -37,6 +37,40 @@ cmBuildDatabase::cmBuildDatabase() = default;
 cmBuildDatabase::cmBuildDatabase(cmBuildDatabase const&) = default;
 cmBuildDatabase::~cmBuildDatabase() = default;
 
+cmBuildDatabase::LookupTable cmBuildDatabase::GenerateLookupTable()
+{
+  LookupTable lut;
+
+  for (auto& Set_ : this->Sets) {
+    for (auto& TranslationUnit_ : Set_.TranslationUnits) {
+      // This table is from source path to TU instance. This is fine because a
+      // single target (where this is used) cannot contain the same source file
+      // multiple times.
+      lut[TranslationUnit_.Source] = &TranslationUnit_;
+    }
+  }
+
+  return lut;
+}
+
+bool cmBuildDatabase::HasPlaceholderNames() const
+{
+  for (auto const& Set_ : this->Sets) {
+    for (auto const& TranslationUnit_ : Set_.TranslationUnits) {
+      for (auto const& provide : TranslationUnit_.Provides) {
+        if (provide.first == PlaceholderName) {
+          return true;
+        }
+        if (provide.second == PlaceholderName) {
+          return true;
+        }
+      }
+    }
+  }
+
+  return false;
+}
+
 void cmBuildDatabase::Write(std::string const& path) const
 {
   Json::Value mcdb = Json::objectValue;

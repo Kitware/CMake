@@ -41,6 +41,14 @@ public:
   cmBuildDatabase(cmBuildDatabase const&);
   ~cmBuildDatabase();
 
+  using LookupTable = std::map<std::string, TranslationUnit*>;
+  // Generate a lookup table for the database.
+  //
+  // Only use when loading a single target's database in order to populate it.
+  LookupTable GenerateLookupTable();
+
+  bool HasPlaceholderNames() const;
+
   void Write(std::string const& path) const;
 
   static std::unique_ptr<cmBuildDatabase> Load(std::string const& path);
