@@ -306,6 +306,7 @@ CMAKE_CXX_SOURCES="\
   cmBlockCommand \
   cmBreakCommand \
   cmBuildCommand \
+  cmBuildDatabase \
   cmCMakeLanguageCommand \
   cmCMakeMinimumRequired \
   cmList \
