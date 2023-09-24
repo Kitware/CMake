@@ -5921,6 +5921,27 @@ cmGeneratorTarget::CxxModuleSupport cmGeneratorTarget::NeedCxxDyndep(
   return policyAnswer;
 }
 
+std::string cmGeneratorTarget::BuildDatabasePath(
+  std::string const& lang, std::string const& config) const
+{
+  // Check to see if the target wants it.
+  if (!this->GetPropertyAsBool("EXPORT_BUILD_DATABASE")) {
+    return {};
+  }
+  // Check to see if the generator supports it.
+  if (!this->GetGlobalGenerator()->SupportsBuildDatabase()) {
+    return {};
+  }
+
+  if (this->GetGlobalGenerator()->IsMultiConfig()) {
+    return cmStrCat(this->GetSupportDirectory(), '/', config, '/', lang,
+                    "_build_database.json");
+  }
+
+  return cmStrCat(this->GetSupportDirectory(), '/', lang,
+                  "_build_database.json");
+}
+
 void cmGeneratorTarget::BuildFileSetInfoCache(std::string const& config) const
 {
   auto& per_config = this->Configs[config];

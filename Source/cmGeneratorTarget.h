@@ -1502,6 +1502,9 @@ public:
   };
   CxxModuleSupport NeedCxxDyndep(std::string const& config) const;
 
+  std::string BuildDatabasePath(std::string const& lang,
+                                std::string const& config) const;
+
 private:
   void BuildFileSetInfoCache(std::string const& config) const;
   struct InfoByConfig

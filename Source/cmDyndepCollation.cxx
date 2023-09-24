@@ -194,6 +194,20 @@ TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
   return info;
 }
 
+Json::Value CollationInformationDatabaseInfo(cmGeneratorTarget const* gt,
+                                             std::string const& config)
+{
+  Json::Value db_info;
+
+  auto db_path = gt->BuildDatabasePath("CXX", config);
+  if (!db_path.empty()) {
+    db_info["template-path"] = cmStrCat(db_path, ".in");
+    db_info["output"] = db_path;
+  }
+
+  return db_info;
+}
+
 Json::Value CollationInformationBmiInstallation(cmGeneratorTarget const* gt,
                                                 std::string const& config)
 {
@@ -323,6 +337,7 @@ void cmDyndepCollation::AddCollationInformation(
   auto sourcesInfo = CollationInformationSources(gt, config, cb);
   tdi["sources"] = sourcesInfo.Sources;
   tdi["cxx-modules"] = sourcesInfo.CxxModules;
+  tdi["database-info"] = CollationInformationDatabaseInfo(gt, config);
   tdi["bmi-installation"] = CollationInformationBmiInstallation(gt, config);
   tdi["exports"] = CollationInformationExports(gt);
   tdi["config"] = config;
@@ -413,6 +428,15 @@ cmDyndepCollation::ParseExportInfo(Json::Value const& tdi)
 
       export_info->Exports.push_back(exp);
     }
+  }
+  auto const& database_info = tdi["database-info"];
+  if (database_info.isObject()) {
+    CxxModuleDatabaseInfo db_info;
+
+    db_info.TemplatePath = database_info["template-path"].asString();
+    db_info.Output = database_info["output"].asString();
+
+    export_info->DatabaseInfo = db_info;
   }
   auto const& bmi_installation = tdi["bmi-installation"];
   if (bmi_installation.isObject()) {

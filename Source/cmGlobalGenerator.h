@@ -171,6 +171,8 @@ public:
     return false;
   }
 
+  virtual bool SupportsBuildDatabase() const { return false; }
+
   virtual bool IsGNUMakeJobServerAware() const { return false; }
 
   bool Compute();

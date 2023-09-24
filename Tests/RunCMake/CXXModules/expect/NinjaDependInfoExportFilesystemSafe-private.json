@@ -33,6 +33,7 @@
       "visibility": "PRIVATE"
     }
   },
+  "database-info": null,
   "dir-cur-bld": "<BINARY_DIR>",
   "dir-cur-src": "<SOURCE_DIR>",
   "dir-top-bld": "<BINARY_DIR>",
