@@ -3142,10 +3142,11 @@ bool cmGlobalGenerator::IsReservedTarget(std::string const& name)
   // by one or more of the cmake generators.
 
   // Adding additional targets to this list will require a policy!
-  const char* reservedTargets[] = { "all",       "ALL_BUILD",  "help",
-                                    "install",   "INSTALL",    "preinstall",
-                                    "clean",     "edit_cache", "rebuild_cache",
-                                    "ZERO_CHECK" };
+  static const cm::static_string_view reservedTargets[] = {
+    "all"_s,           "ALL_BUILD"_s,  "help"_s,  "install"_s,
+    "INSTALL"_s,       "preinstall"_s, "clean"_s, "edit_cache"_s,
+    "rebuild_cache"_s, "ZERO_CHECK"_s
+  };
 
   return cm::contains(reservedTargets, name);
 }
