@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmBuildDatabase.h"
 
+#include <cstdlib>
 #include <utility>
 
 #include <cm/memory>
@@ -371,4 +372,90 @@ cmBuildDatabase cmBuildDatabase::Merge(
   }
 
   return db;
+}
+
+int cmcmd_cmake_module_compile_db(
+  std::vector<std::string>::const_iterator argBeg,
+  std::vector<std::string>::const_iterator argEnd)
+{
+  const std::string* command = nullptr;
+  const std::string* output = nullptr;
+  std::vector<const std::string*> inputs;
+
+  bool next_is_output = false;
+  for (auto i = argBeg; i != argEnd; ++i) {
+    // The first argument is always the command.
+    if (!command) {
+      command = &(*i);
+      continue;
+    }
+
+    if (*i == "-o"_s) {
+      next_is_output = true;
+      continue;
+    }
+    if (next_is_output) {
+      if (output) {
+        cmSystemTools::Error(
+          "-E cmake_module_compile_db only supports one output file");
+        return EXIT_FAILURE;
+      }
+
+      output = &(*i);
+      next_is_output = false;
+      continue;
+    }
+
+    inputs.emplace_back(&(*i));
+  }
+
+  if (!command) {
+    cmSystemTools::Error("-E cmake_module_compile_db requires a subcommand");
+    return EXIT_FAILURE;
+  }
+
+  int ret = EXIT_SUCCESS;
+
+  if (*command == "verify"_s) {
+    if (output) {
+      cmSystemTools::Error(
+        "-E cmake_module_compile_db verify does not support an output");
+      return EXIT_FAILURE;
+    }
+
+    for (auto const* i : inputs) {
+      auto db = cmBuildDatabase::Load(*i);
+      if (!db) {
+        cmSystemTools::Error(cmStrCat("failed to verify ", *i));
+        ret = EXIT_FAILURE;
+      }
+    }
+  } else if (*command == "merge"_s) {
+    if (!output) {
+      cmSystemTools::Error(
+        "-E cmake_module_compile_db verify requires an output");
+      return EXIT_FAILURE;
+    }
+
+    std::vector<cmBuildDatabase> dbs;
+
+    for (auto const* i : inputs) {
+      auto db = cmBuildDatabase::Load(*i);
+      if (!db) {
+        cmSystemTools::Error(cmStrCat("failed to read ", *i));
+        return EXIT_FAILURE;
+      }
+
+      dbs.emplace_back(std::move(*db));
+    }
+
+    auto db = cmBuildDatabase::Merge(dbs);
+    db.Write(*output);
+  } else {
+    cmSystemTools::Error(
+      cmStrCat("-E cmake_module_compile_db unknown subcommand ", *command));
+    return EXIT_FAILURE;
+  }
+
+  return ret;
 }
