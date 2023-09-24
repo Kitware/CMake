@@ -300,6 +300,8 @@ the table below:
                                             commands used without a type
  :variable:`CMAKE_EXPORT_COMPILE_COMMANDS`  Generate a ``compile_commands.json``
                                             file for use with clang-based tools
+ :variable:`CMAKE_EXPORT_BUILD_DATABASE`    Generate a ``build_database.json``
+                                            file for use with clang-based tools
 ========================================== ============================================================
 
 Other project-specific variables may be available

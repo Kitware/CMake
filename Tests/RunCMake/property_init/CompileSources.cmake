@@ -177,6 +177,7 @@ set(properties
 
   # Metadata
   "EXPORT_COMPILE_COMMANDS"                 "OFF"               "<SAME>"
+  "EXPORT_BUILD_DATABASE"                   "OFF"               "<SAME>"
   )
 
 if (CMAKE_HOST_APPLE) # compile-guarded in CMake
