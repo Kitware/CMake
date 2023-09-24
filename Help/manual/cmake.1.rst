@@ -309,6 +309,8 @@ Options
 
 .. option:: --debug-find
 
+ .. versionadded:: 3.17
+
  Put cmake find commands in a debug mode.
 
  Print extra find call information during the cmake run to standard
@@ -317,6 +319,8 @@ Options
  a more local part of the project.
 
 .. option:: --debug-find-pkg=<pkg>[,...]
+
+ .. versionadded:: 3.23
 
  Put cmake find commands in a debug mode when running under calls
  to :command:`find_package(\<pkg\>) <find_package>`, where ``<pkg>``
@@ -327,6 +331,8 @@ Options
  to the specified packages.
 
 .. option:: --debug-find-var=<var>[,...]
+
+ .. versionadded:: 3.23
 
  Put cmake find commands in a debug mode when called with ``<var>``
  as the result variable, where ``<var>`` is an entry in the given
@@ -348,6 +354,8 @@ Options
  Like :option:`--trace <cmake --trace>`, but with variables expanded.
 
 .. option:: --trace-format=<format>
+
+ .. versionadded:: 3.17
 
  Put cmake in trace mode and sets the trace output format.
 
@@ -471,11 +479,15 @@ Options
 
 .. option:: --compile-no-warning-as-error
 
+ .. versionadded:: 3.24
+
  Ignore target property :prop_tgt:`COMPILE_WARNING_AS_ERROR` and variable
  :variable:`CMAKE_COMPILE_WARNING_AS_ERROR`, preventing warnings from being
  treated as errors on compile.
 
 .. option:: --profiling-output=<path>
+
+ .. versionadded:: 3.18
 
  Used in conjunction with
  :option:`--profiling-format <cmake --profiling-format>` to output to a
@@ -1324,6 +1336,8 @@ autoconf-based projects (via ``share/aclocal/cmake.m4``).
 
 Run a Workflow Preset
 =====================
+
+.. versionadded:: 3.25
 
 .. program:: cmake
 
