@@ -10,7 +10,7 @@
   "compiler-simulate-id": "<IGNORE>",
   "config": "<CONFIG>",
   "cxx-modules": {
-    "CMakeFiles/ninja-bmi-install-private.dir/sources/module-internal-part.cxx.o": {
+    "CMakeFiles/ninja-bmi-install-private.dir<CONFIG_DIR>/sources/module-internal-part.cxx<OBJEXT>": {
       "bmi-only": false,
       "destination": null,
       "name": "internal_partitions",
@@ -19,7 +19,7 @@
       "type": "CXX_MODULES",
       "visibility": "PRIVATE"
     },
-    "CMakeFiles/ninja-bmi-install-private.dir/sources/module-part.cxx.o": {
+    "CMakeFiles/ninja-bmi-install-private.dir<CONFIG_DIR>/sources/module-part.cxx<OBJEXT>": {
       "bmi-only": false,
       "destination": null,
       "name": "modules",
@@ -28,7 +28,7 @@
       "type": "CXX_MODULES",
       "visibility": "PRIVATE"
     },
-    "CMakeFiles/ninja-bmi-install-private.dir/sources/module.cxx.o": {
+    "CMakeFiles/ninja-bmi-install-private.dir<CONFIG_DIR>/sources/module.cxx<OBJEXT>": {
       "bmi-only": false,
       "destination": null,
       "name": "modules",
@@ -46,5 +46,5 @@
   "include-dirs": [],
   "language": "CXX",
   "linked-target-dirs": [],
-  "module-dir": "<BINARY_DIR>/CMakeFiles/ninja-bmi-install-private.dir"
+  "module-dir": "<BINARY_DIR>/CMakeFiles/ninja-bmi-install-private.dir<CONFIG_DIR>"
 }
