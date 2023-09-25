@@ -107,6 +107,13 @@ if(NOT CMAKE_HIP_COMPILER_ID_RUN)
     # If the user set CMAKE_HIP_ARCHITECTURES, validate its value.
     include(Internal/CMakeCUDAArchitecturesValidate)
     cmake_cuda_architectures_validate(HIP)
+
+    if(NOT CMAKE_HIP_HOST_COMPILER AND NOT $ENV{HIPHOSTCXX} STREQUAL "")
+      get_filename_component(CMAKE_HIP_HOST_COMPILER $ENV{HIPHOSTCXX} PROGRAM)
+      if(NOT EXISTS "${CMAKE_HIP_HOST_COMPILER}")
+        message(FATAL_ERROR "Could not find compiler set in environment variable HIPHOSTCXX:\n$ENV{HIPHOSTCXX}.\n${CMAKE_HIP_HOST_COMPILER}")
+      endif()
+    endif()
   endif()
 
   if(CMAKE_HIP_COMPILER_ID STREQUAL "Clang")
@@ -114,6 +121,9 @@ if(NOT CMAKE_HIP_COMPILER_ID_RUN)
   elseif(CMAKE_HIP_COMPILER_ID STREQUAL "NVIDIA")
     # Tell nvcc to treat .hip files as CUDA sources.
     list(APPEND CMAKE_HIP_COMPILER_ID_TEST_FLAGS_FIRST "-x cu -v")
+    if(CMAKE_HIP_HOST_COMPILER)
+      string(APPEND CMAKE_HIP_COMPILER_ID_TEST_FLAGS_FIRST " -ccbin=\"${CMAKE_HIP_HOST_COMPILER}\"")
+    endif()
   endif()
 
   # We perform compiler identification for a second time to extract implicit linking info.

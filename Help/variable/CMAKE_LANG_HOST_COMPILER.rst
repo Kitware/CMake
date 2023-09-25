@@ -4,22 +4,25 @@ CMAKE_<LANG>_HOST_COMPILER
 .. versionadded:: 3.10
   ``CMAKE_CUDA_HOST_COMPILER``
 
-This variable is available when ``<LANG>`` is ``CUDA``.
+.. versionadded:: 3.28
+  ``CMAKE_HIP_HOST_COMPILER``
+
+This variable is available when ``<LANG>`` is ``CUDA`` or ``HIP``.
 
 When :variable:`CMAKE_<LANG>_COMPILER_ID` is
 ``NVIDIA``, ``CMAKE_<LANG>_HOST_COMPILER`` selects the compiler executable
-to use when compiling host code for ``CUDA`` language files.
+to use when compiling host code for ``CUDA`` or ``HIP`` language files.
 This maps to the ``nvcc -ccbin`` option.
 
 The ``CMAKE_<LANG>_HOST_COMPILER`` variable may be set explicitly before CUDA
-is first enabled by a :command:`project` or :command:`enable_language`
+or HIP is first enabled by a :command:`project` or :command:`enable_language`
 command.
 This can be done via ``-DCMAKE_<LANG>_HOST_COMPILER=...`` on the command line
 or in a :ref:`toolchain file <Cross Compiling Toolchain>`.  Or, one may set
-the :envvar:`CUDAHOSTCXX` environment variable to
+the :envvar:`CUDAHOSTCXX` or :envvar:`HIPHOSTCXX` environment variable to
 provide a default value.
 
-Once the CUDA language is enabled, the ``CMAKE_<LANG>_HOST_COMPILER``
+Once the CUDA or HIP language is enabled, the ``CMAKE_<LANG>_HOST_COMPILER``
 variable is read-only and changes to it are undefined behavior.
 
 .. note::
