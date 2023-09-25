@@ -261,6 +261,20 @@
     variables:
         CMAKE_CONFIGURATION: windows_openwatcom1.9
 
+.windows_orangec:
+    extends: .windows
+
+    variables:
+        CMAKE_GENERATOR: "Ninja"
+        CMAKE_CI_BUILD_TYPE: Release
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+
+.windows_orangec6.73.1:
+    extends: .windows_orangec
+
+    variables:
+        CMAKE_CONFIGURATION: windows_orangec6.73.1
+
 .windows_arm64_vs2022:
     extends: .windows
 
