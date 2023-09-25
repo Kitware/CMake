@@ -2,10 +2,8 @@ include(Compiler/NVIDIA)
 __compiler_nvidia_cxx_standards(HIP)
 __compiler_nvidia_cuda_flags(HIP)
 
-# The ROCm hip-lang package does not work for nvcc,
-# so provide a minimal one ourselves.
-add_library(hip-lang::device INTERFACE IMPORTED)
-set(_CMAKE_HIP_DEVICE_RUNTIME_TARGET hip-lang::device)
+# The ROCm hip-lang cmake package's device runtime library is not needed for NVIDIA GPUs.
+set(_CMAKE_HIP_DEVICE_RUNTIME_TARGET "")
 
 set(CMAKE_HIP_STANDARD_INCLUDE_DIRECTORIES "${CMAKE_HIP_COMPILER_ROCM_ROOT}/include")
 
