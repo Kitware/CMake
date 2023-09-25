@@ -22,6 +22,7 @@ function (check_json_value path actual_type expect_type actual_value expect_valu
   if (NOT actual_type STREQUAL expect_type)
     list(APPEND RunCMake_TEST_FAILED
       "Type mismatch at ${path}: ${actual_type} vs. ${expect_type}")
+    set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
     return ()
   endif ()
 
@@ -53,6 +54,8 @@ function (check_json_value path actual_type expect_type actual_value expect_valu
   elseif (actual_type STREQUAL OBJECT)
     check_json_object("${path}" "${actual_value}" "${expect_value}")
   endif ()
+
+  set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
 endfunction ()
 
 # Check that two arrays are the same.
@@ -82,6 +85,8 @@ function (check_json_array path actual expect)
     string(JSON expect_value GET "${expect}" "${idx}")
     check_json_value("${new_path}" "${actual_type}" "${expect_type}" "${actual_value}" "${expect_value}")
   endforeach ()
+
+  set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
 endfunction ()
 
 # Check that two inner objects are the same.
@@ -148,13 +153,15 @@ function (check_json_object path actual expect)
     string(JSON expect_value GET "${expect}" "${key}")
     check_json_value("${new_path}" "${actual_type}" "${expect_type}" "${actual_value}" "${expect_value}")
   endforeach ()
+
+  set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
 endfunction ()
 
 # Check that two JSON objects are the same.
 function (check_json actual expect)
   check_json_object("" "${actual}" "${expect}")
-endfunction ()
 
-string(REPLACE ";" "; " RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}")
+  set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
+endfunction ()
 
 cmake_policy(POP)

@@ -32,3 +32,5 @@ else ()
   file(READ "${CMAKE_CURRENT_LIST_DIR}/expect/NinjaDependInfoFileSet-private.json" expect_contents)
   check_json("${actual_contents}" "${expect_contents}")
 endif ()
+
+string(REPLACE ";" "\n  " RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}")
