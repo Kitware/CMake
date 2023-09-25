@@ -18,6 +18,7 @@ Value                           Name
 ``CCur``                        Concurrent Fortran
 ``Clang``                       `LLVM Clang`_
 ``Cray``                        Cray Compiler
+``CrayClang``                   Cray Clang-based Compiler
 ``Embarcadero``, ``Borland``    `Embarcadero`_
 ``Flang``                       `Classic Flang Fortran Compiler`_
 ``LLVMFlang``                   `LLVM Flang Fortran Compiler`_

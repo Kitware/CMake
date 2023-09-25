@@ -65,6 +65,7 @@ function(compiler_id_detection outvar lang)
       VisualAge
       NVHPC
       PGI
+      CrayClang
       Cray
       TI
       FujitsuClang
