@@ -47,9 +47,6 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#ifdef HAVE_UTSNAME_H
-#include <sys/utsname.h>
-#endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
@@ -422,7 +419,7 @@ static CURLcode pop3_perform_user(struct Curl_easy *data,
   return result;
 }
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifndef CURL_DISABLE_DIGEST_AUTH
 /***********************************************************************
  *
  * pop3_perform_apop()
@@ -566,7 +563,7 @@ static CURLcode pop3_perform_authentication(struct Curl_easy *data,
   }
 
   if(!result && progress == SASL_IDLE) {
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifndef CURL_DISABLE_DIGEST_AUTH
     if(pop3c->authtypes & pop3c->preftype & POP3_TYPE_APOP)
       /* Perform APOP authentication */
       result = pop3_perform_apop(data, conn);
@@ -834,7 +831,7 @@ static CURLcode pop3_state_auth_resp(struct Curl_easy *data,
       pop3_state(data, POP3_STOP);  /* Authenticated */
       break;
     case SASL_IDLE:            /* No mechanism left after cancellation */
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifndef CURL_DISABLE_DIGEST_AUTH
       if(pop3c->authtypes & pop3c->preftype & POP3_TYPE_APOP)
         /* Perform APOP authentication */
         result = pop3_perform_apop(data, conn);
@@ -855,7 +852,7 @@ static CURLcode pop3_state_auth_resp(struct Curl_easy *data,
   return result;
 }
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifndef CURL_DISABLE_DIGEST_AUTH
 /* For APOP responses */
 static CURLcode pop3_state_apop_resp(struct Curl_easy *data, int pop3code,
                                      pop3state instate)
@@ -1018,7 +1015,7 @@ static CURLcode pop3_statemachine(struct Curl_easy *data,
       result = pop3_state_auth_resp(data, pop3code, pop3c->state);
       break;
 
-#ifndef CURL_DISABLE_CRYPTO_AUTH
+#ifndef CURL_DISABLE_DIGEST_AUTH
     case POP3_APOP:
       result = pop3_state_apop_resp(data, pop3code, pop3c->state);
       break;

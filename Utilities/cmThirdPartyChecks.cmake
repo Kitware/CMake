@@ -265,7 +265,6 @@ if(WIN32)
   set(HAVE_WINDOWS_H 1)
   set(HAVE_WINIOCTL_H 1)
   set(HAVE_WINSOCK2_H 1)
-  set(HAVE_WINSOCK_H 1)
   set(HAVE_WS2TCPIP_H 1)
   set(USE_WINCRYPT 1) # We do not need to build as a Windows App.
 
