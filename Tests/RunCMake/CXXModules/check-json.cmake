@@ -15,6 +15,7 @@ function (json_placeholders in out)
   endif ()
   string(REPLACE "<SOURCE_DIR>" "${RunCMake_SOURCE_DIR}" in "${in}")
   string(REPLACE "<BINARY_DIR>" "${RunCMake_TEST_BINARY_DIR}" in "${in}")
+  string(REPLACE "<OBJEXT>" "${CMAKE_CXX_OUTPUT_EXTENSION}" in "${in}")
   set("${out}" "${in}" PARENT_SCOPE)
 endfunction ()
 
