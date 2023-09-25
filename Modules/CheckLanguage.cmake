@@ -25,7 +25,7 @@ or :command:`project` commands:
     If this variable is already set, either explicitly or cached by
     a previous call, the check is skipped.
 
-  :variable:`CMAKE_CUDA_HOST_COMPILER`
+  :variable:`CMAKE_<LANG>_HOST_COMPILER`
     This variable is set when ``<lang>`` is ``CUDA``.
 
     If the check detects an explicit host compiler that is required for
@@ -34,12 +34,12 @@ or :command:`project` commands:
     this variable will be cleared.
 
     If this variable is already set, its value is preserved only if
-    :variable:`CMAKE_CUDA_COMPILER <CMAKE_<LANG>_COMPILER>` is also set.
+    :variable:`CMAKE_<LANG>_COMPILER` is also set.
     Otherwise, the check runs and overwrites
-    :variable:`CMAKE_CUDA_HOST_COMPILER` with a new result.
-    Note that :variable:`CMAKE_CUDA_HOST_COMPILER` documents it should
+    :variable:`CMAKE_<LANG>_HOST_COMPILER` with a new result.
+    Note that :variable:`CMAKE_<LANG>_HOST_COMPILER` documents it should
     not be set without also setting
-    :variable:`CMAKE_CUDA_COMPILER <CMAKE_<LANG>_COMPILER>` to a NVCC compiler.
+    :variable:`CMAKE_<LANG>_COMPILER` to a NVCC compiler.
 
 For example:
 
