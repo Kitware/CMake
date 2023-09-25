@@ -383,7 +383,7 @@
 ### C++ modules
 
 .gcc_cxx_modules_x86_64:
-    image: "kitware/cmake:ci-gcc_cxx_modules-x86_64-2023-08-15"
+    image: "kitware/cmake:ci-gcc_cxx_modules-x86_64-2023-09-21"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
