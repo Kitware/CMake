@@ -137,12 +137,12 @@ function (check_json_object path actual expect)
   if (actual_keys_missed)
     string(REPLACE ";" ", " actual_keys_missed_text "${actual_keys_missed}")
     list(APPEND RunCMake_TEST_FAILED
-      "Missing expected members at ${path}: ${actual_keys_missed_text}")
+      "Extra unexpected members at ${path}: ${actual_keys_missed_text}")
   endif ()
   if (expect_keys_missed)
     string(REPLACE ";" ", " expect_keys_missed_text "${expect_keys_missed}")
     list(APPEND RunCMake_TEST_FAILED
-      "Extra unexpected members at ${path}: ${expect_keys_missed_text}")
+      "Missing expected members at ${path}: ${expect_keys_missed_text}")
   endif ()
 
   foreach (key IN LISTS common_keys)
