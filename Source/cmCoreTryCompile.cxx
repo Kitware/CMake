@@ -732,10 +732,16 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       // The link and compile lines for ABI detection step need to not use
       // response files so we can extract implicit includes given to
       // the underlying host compiler
-      if (testLangs.find("CUDA") != testLangs.end()) {
-        fprintf(fout, "set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_INCLUDES OFF)\n");
-        fprintf(fout, "set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_LIBRARIES OFF)\n");
-        fprintf(fout, "set(CMAKE_CUDA_USE_RESPONSE_FILE_FOR_OBJECTS OFF)\n");
+      static std::array<std::string, 2> const noRSP{ { "CUDA", "HIP" } };
+      for (std::string const& lang : noRSP) {
+        if (testLangs.find(lang) != testLangs.end()) {
+          fprintf(fout, "set(CMAKE_%s_USE_RESPONSE_FILE_FOR_INCLUDES OFF)\n",
+                  lang.c_str());
+          fprintf(fout, "set(CMAKE_%s_USE_RESPONSE_FILE_FOR_LIBRARIES OFF)\n",
+                  lang.c_str());
+          fprintf(fout, "set(CMAKE_%s_USE_RESPONSE_FILE_FOR_OBJECTS OFF)\n",
+                  lang.c_str());
+        }
       }
     }
     fprintf(fout, "set(CMAKE_VERBOSE_MAKEFILE 1)\n");
