@@ -5,63 +5,63 @@
         expire_in: 1d
         paths:
             # Test specifications.
-            - build/**/CTestTestfile.cmake
+            - ${CMAKE_CI_BUILD_DIR}/**/CTestTestfile.cmake
 
             # Allow CMake to find CMAKE_ROOT.
-            - build/CMakeFiles/CMakeSourceDir.txt
+            - ${CMAKE_CI_BUILD_DIR}/CMakeFiles/CMakeSourceDir.txt
 
             # Take the install tree.
-            - build/install/
+            - ${CMAKE_CI_BUILD_DIR}/install/
 
             # We need the main binaries.
-            - build/bin/
+            - ${CMAKE_CI_BUILD_DIR}/bin/
             # The cache is needed for the installation test.
-            - build/CMakeCache.txt
+            - ${CMAKE_CI_BUILD_DIR}/CMakeCache.txt
             # Test binaries. Eventually these might be better under
             # `Source/Tests` or the like.
-            - build/Tests/EnforceConfig.cmake
-            - build/Tests/CMakeBuildTest.cmake
-            - build/Tests/CMakeBuildDoubleProjectTest.cmake
-            - build/Tests/CMake*/runcompilecommands
-            - build/Tests/CMake*/runcompilecommands.exe
-            - build/Tests/CMake*/test*
-            - build/Tests/CMake*/PseudoMemcheck/valgrind
-            - build/Tests/CMake*/PseudoMemcheck/purify
-            - build/Tests/CMake*/PseudoMemcheck/memcheck_fail
-            - build/Tests/CMake*/PseudoMemcheck/BC
-            - build/Tests/CMake*/PseudoMemcheck/cuda-memcheck
-            - build/Tests/CMake*/PseudoMemcheck/valgrind.exe
-            - build/Tests/CMake*/PseudoMemcheck/purify.exe
-            - build/Tests/CMake*/PseudoMemcheck/memcheck_fail.exe
-            - build/Tests/CMake*/PseudoMemcheck/BC.exe
-            - build/Tests/CMake*/PseudoMemcheck/cuda-memcheck.exe
-            - build/Tests/CMake*/PseudoMemcheck/NoLog
-            - build/Tests/CMake*Lib/*LibTests
-            - build/Tests/CMake*Lib/*LibTests.exe
-            - build/Source/kwsys/cmsysTest*
-            - build/Source/kwsys/testConsoleBufChild.exe
-            - build/Utilities/cmcurl/curltest
-            - build/Utilities/cmcurl/curltest.exe
-            - build/Utilities/KWIML/test/kwiml_test
-            - build/Utilities/KWIML/test/kwiml_test.exe
-            - build/Source/kwsys/*cmsysTestDynload.*
-            - build/Source/kwsys/dynloaddir/cmsysTestDynloadImpl.dll
-            - build/Source/kwsys/dynloaddir/cmsysTestDynloadUse.dll
+            - ${CMAKE_CI_BUILD_DIR}/Tests/EnforceConfig.cmake
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMakeBuildTest.cmake
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMakeBuildDoubleProjectTest.cmake
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*/runcompilecommands
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*/runcompilecommands.exe
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*/test*
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*/PseudoMemcheck/valgrind
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*/PseudoMemcheck/purify
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*/PseudoMemcheck/memcheck_fail
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*/PseudoMemcheck/BC
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*/PseudoMemcheck/cuda-memcheck
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*/PseudoMemcheck/valgrind.exe
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*/PseudoMemcheck/purify.exe
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*/PseudoMemcheck/memcheck_fail.exe
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*/PseudoMemcheck/BC.exe
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*/PseudoMemcheck/cuda-memcheck.exe
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*/PseudoMemcheck/NoLog
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*Lib/*LibTests
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMake*Lib/*LibTests.exe
+            - ${CMAKE_CI_BUILD_DIR}/Source/kwsys/cmsysTest*
+            - ${CMAKE_CI_BUILD_DIR}/Source/kwsys/testConsoleBufChild.exe
+            - ${CMAKE_CI_BUILD_DIR}/Utilities/cmcurl/curltest
+            - ${CMAKE_CI_BUILD_DIR}/Utilities/cmcurl/curltest.exe
+            - ${CMAKE_CI_BUILD_DIR}/Utilities/KWIML/test/kwiml_test
+            - ${CMAKE_CI_BUILD_DIR}/Utilities/KWIML/test/kwiml_test.exe
+            - ${CMAKE_CI_BUILD_DIR}/Source/kwsys/*cmsysTestDynload.*
+            - ${CMAKE_CI_BUILD_DIR}/Source/kwsys/dynloaddir/cmsysTestDynloadImpl.dll
+            - ${CMAKE_CI_BUILD_DIR}/Source/kwsys/dynloaddir/cmsysTestDynloadUse.dll
 
             # Test directories.
-            - build/Tests/CTest*
-            - build/Tests/Find*
-            - build/Tests/Qt*
-            - build/Tests/RunCMake/
-            - build/Tests/CMakeOnly/
-            - build/Tests/CMakeTests/
-            - build/Tests/CMakeGUI/
-            - build/Tests/FortranC/
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CTest*
+            - ${CMAKE_CI_BUILD_DIR}/Tests/Find*
+            - ${CMAKE_CI_BUILD_DIR}/Tests/Qt*
+            - ${CMAKE_CI_BUILD_DIR}/Tests/RunCMake/
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMakeOnly/
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMakeTests/
+            - ${CMAKE_CI_BUILD_DIR}/Tests/CMakeGUI/
+            - ${CMAKE_CI_BUILD_DIR}/Tests/FortranC/
 
             # CTest/CDash information.
-            - build/Testing/
-            - build/DartConfiguation.tcl
-            - build/CTestCustom.cmake
+            - ${CMAKE_CI_BUILD_DIR}/Testing/
+            - ${CMAKE_CI_BUILD_DIR}/DartConfiguation.tcl
+            - ${CMAKE_CI_BUILD_DIR}/CTestCustom.cmake
 
 .cmake_release_artifacts:
     artifacts:
@@ -71,17 +71,17 @@
         when: always
         paths:
             # Any packages made.
-            - build/cmake-*-linux-x86_64.*
-            - build/cmake-*-linux-aarch64.*
-            - build/cmake-*-macos*-universal.*
-            - build/cmake-*-windows-x86_64.*
-            - build/cmake-*-windows-i386.*
-            - build/cmake-*-windows-arm64.*
+            - ${CMAKE_CI_BUILD_DIR}/cmake-*-linux-x86_64.*
+            - ${CMAKE_CI_BUILD_DIR}/cmake-*-linux-aarch64.*
+            - ${CMAKE_CI_BUILD_DIR}/cmake-*-macos*-universal.*
+            - ${CMAKE_CI_BUILD_DIR}/cmake-*-windows-x86_64.*
+            - ${CMAKE_CI_BUILD_DIR}/cmake-*-windows-i386.*
+            - ${CMAKE_CI_BUILD_DIR}/cmake-*-windows-arm64.*
             # Any source packages made.
-            - build/cmake-*.tar.gz
-            - build/cmake-*.zip
+            - ${CMAKE_CI_BUILD_DIR}/cmake-*.tar.gz
+            - ${CMAKE_CI_BUILD_DIR}/cmake-*.zip
             # Any unsigned packages made.
-            - build/unsigned/cmake-*
+            - ${CMAKE_CI_BUILD_DIR}/unsigned/cmake-*
 
 .cmake_junit_artifacts:
     artifacts:
@@ -89,7 +89,7 @@
         when: always
         reports:
             junit:
-                - build/junit.xml
+                - ${CMAKE_CI_BUILD_DIR}/junit.xml
 
 .cmake_sphinx_artifacts:
     artifacts:
@@ -97,8 +97,8 @@
         when: always
         paths:
             # Take the sphinx logs.
-            - build/build-*.log
-            - build/linkcheck/output.*
+            - ${CMAKE_CI_BUILD_DIR}/build-*.log
+            - ${CMAKE_CI_BUILD_DIR}/linkcheck/output.*
 
 .cmake_test_artifacts:
     artifacts:
@@ -107,22 +107,22 @@
         when: always
         reports:
             junit:
-                - build/junit.xml
+                - ${CMAKE_CI_BUILD_DIR}/junit.xml
         paths:
             # Take the install tree.
-            - build/install/
+            - ${CMAKE_CI_BUILD_DIR}/install/
 
 .cmake_doc_artifacts:
     artifacts:
         expire_in: 1d
         paths:
             # Take the install tree.
-            - build/install-doc/
+            - ${CMAKE_CI_BUILD_DIR}/install-doc/
 
 .cmake_org_help_artifacts:
     artifacts:
         expire_in: 1d
         paths:
-            - build/html
+            - ${CMAKE_CI_BUILD_DIR}/html
         exclude:
-            - build/html/.buildinfo
+            - ${CMAKE_CI_BUILD_DIR}/html/.buildinfo

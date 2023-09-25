@@ -137,6 +137,16 @@
         CMAKE_CI_NO_INSTALL: 1
         CTEST_NO_WARNINGS_ALLOWED: 1
 
+.debian12_ninja_multi_symlinked:
+    extends: .debian12
+
+    variables:
+        CMAKE_CONFIGURATION: debian12_ninja_multi_symlinked
+        CMAKE_GENERATOR: "Ninja Multi-Config"
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_CI_IN_SYMLINK_TREE: 1
+        CMAKE_CI_BUILD_DIR: "real_work/work/build"
+
 .debian12_extdeps:
     extends: .debian12
 
@@ -184,6 +194,16 @@
         CMAKE_CONFIGURATION: fedora38_makefiles
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
+
+.fedora38_makefiles_symlinked:
+    extends: .fedora38
+
+    variables:
+        CMAKE_CONFIGURATION: fedora38_makefiles_symlinked
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_GENERATOR: "Unix Makefiles"
+        CMAKE_CI_IN_SYMLINK_TREE: 1
+        CMAKE_CI_BUILD_DIR: "real_work/work/build"
 
 ### Clang Compiler
 

@@ -59,6 +59,12 @@ function(run_cmake_gui_test name)
 
   set(ENV{CMake_GUI_TEST_NAME} "${name}")
   set(ENV{CMake_GUI_CONFIG_DIR} "${_workdir}/config")
+  if(DEFINED ENV{PWD})
+    set(_old_pwd "$ENV{PWD}")
+  else()
+    set(_old_pwd)
+  endif()
+  set(ENV{PWD} "${_workdir}")
   execute_process(
     COMMAND "${CMakeGUITest_COMMAND}" ${_rcgt_ARGS}
     WORKING_DIRECTORY "${_workdir}"
@@ -66,6 +72,11 @@ function(run_cmake_gui_test name)
     OUTPUT_VARIABLE _output
     ERROR_VARIABLE _error
     )
+  if(DEFINED _old_pwd)
+    set(ENV{PWD} "${_old_pwd}")
+  else()
+    set(ENV{PWD})
+  endif()
   if(_result)
     set(_fail 1)
     string(REPLACE "\n" "\n  " _formatted_output "${_output}")

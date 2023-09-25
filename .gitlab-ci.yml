@@ -18,6 +18,10 @@ stages:
     - test-ext
     - upload
 
+variables:
+    # Some jobs that place their artifacts in a different directory will override this.
+    CMAKE_CI_BUILD_DIR: build
+
 ################################################################################
 # Job declarations
 #
@@ -194,6 +198,18 @@ t:debian12-makefiles-clang:
         - .needs_centos7_x86_64
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:debian12-ninja-multi-symlinked:
+    extends:
+        - .debian12_ninja_multi_symlinked
+        - .cmake_test_linux_release
+        - .linux_x86_64_tags
+        - .cmake_junit_artifacts
+        - .run_dependent
+        - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+        CMAKE_CI_JOB_NIGHTLY_NINJA: "true"
 
 t:debian12-hip-radeon:
     extends:
@@ -395,6 +411,16 @@ b:fedora38-ninja:
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
 
+b:fedora38-makefiles-symlinked:
+    extends:
+        - .fedora38_makefiles_symlinked
+        - .cmake_build_linux
+        - .cmake_build_artifacts
+        - .linux_x86_64_tags
+        - .run_manually
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 b:debian12-makefiles-inplace:
     extends:
         - .debian12_makefiles_inplace
@@ -444,6 +470,20 @@ t:fedora38-ninja:
         - b:fedora38-ninja
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
+
+t:fedora38-makefiles-symlinked:
+    extends:
+        - .fedora38_makefiles_symlinked
+        - .cmake_test_linux
+        - .linux_x86_64_tags_x11
+        - .cmake_test_artifacts
+        - .run_dependent
+    dependencies:
+        - b:fedora38-makefiles-symlinked
+    needs:
+        - b:fedora38-makefiles-symlinked
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:fedora38-ninja-multi:
     extends:
@@ -867,6 +907,16 @@ b:macos-arm64-ninja:
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
 
+b:macos-arm64-ninja-symlinked:
+    extends:
+        - .macos_arm64_ninja_symlinked
+        - .cmake_build_macos
+        - .cmake_build_artifacts
+        - .macos_arm64_tags
+        - .run_manually
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 b:macos-arm64-pch:
     extends:
         - .macos_arm64_pch
@@ -903,6 +953,21 @@ t:macos-arm64-ninja:
         - b:macos-arm64-ninja
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
+        CMAKE_CI_JOB_NIGHTLY_NINJA: "true"
+
+t:macos-arm64-ninja-symlinked:
+    extends:
+        - .macos_arm64_ninja_symlinked
+        - .cmake_test_macos
+        - .cmake_test_artifacts
+        - .macos_arm64_tags
+        - .run_dependent
+    dependencies:
+        - b:macos-arm64-ninja-symlinked
+    needs:
+        - b:macos-arm64-ninja-symlinked
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
         CMAKE_CI_JOB_NIGHTLY_NINJA: "true"
 
 b:macos-x86_64-makefiles:
@@ -963,6 +1028,20 @@ t:macos-arm64-xcode:
         - t:macos-arm64-ninja
     needs:
         - t:macos-arm64-ninja
+
+t:macos-arm64-xcode-symlinked:
+    extends:
+        - .macos_arm64_xcode_symlinked
+        - .cmake_test_macos_external
+        - .macos_arm64_tags_ext
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:macos-arm64-ninja
+    needs:
+        - t:macos-arm64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:macos-x86_64-ninja-ub:
     extends:
