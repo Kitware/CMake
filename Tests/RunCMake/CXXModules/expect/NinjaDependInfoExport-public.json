@@ -1,9 +1,12 @@
 {
   "bmi-installation": null,
   "compiler-id": "<IGNORE>",
+  "compiler-frontend-variant": "<IGNORE>",
+  "compiler-simulate-id": "<IGNORE>",
   "config": "<CONFIG>",
   "cxx-modules": {
     "CMakeFiles/ninja-exports-public.dir/sources/module-internal-part.cxx.o": {
+      "bmi-only": false,
       "destination": "lib/cxx/internals",
       "name": "internal_partitions",
       "relative-directory": "sources",
@@ -12,6 +15,7 @@
       "visibility": "PUBLIC"
     },
     "CMakeFiles/ninja-exports-public.dir/sources/module-part.cxx.o": {
+      "bmi-only": false,
       "destination": "lib/cxx",
       "name": "modules",
       "relative-directory": "",
@@ -20,6 +24,7 @@
       "visibility": "PUBLIC"
     },
     "CMakeFiles/ninja-exports-public.dir/sources/module.cxx.o": {
+      "bmi-only": false,
       "destination": "lib/cxx",
       "name": "modules",
       "relative-directory": "",
