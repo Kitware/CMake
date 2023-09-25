@@ -5,8 +5,8 @@ include(${CMAKE_ROOT}/Modules/CMakeDetermineCompiler.cmake)
 include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
 include(${CMAKE_ROOT}/Modules/CMakeParseLibraryArchitecture.cmake)
 
-if( NOT ( ("${CMAKE_GENERATOR}" MATCHES "Make") OR
-          ("${CMAKE_GENERATOR}" MATCHES "Ninja") ) )
+if(NOT ((CMAKE_GENERATOR MATCHES "Make") OR
+        (CMAKE_GENERATOR MATCHES "Ninja")))
   message(FATAL_ERROR "HIP language not currently supported by \"${CMAKE_GENERATOR}\" generator")
 endif()
 
