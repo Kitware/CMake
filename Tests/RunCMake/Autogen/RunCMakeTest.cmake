@@ -239,6 +239,16 @@ ${make_program_stderr}
     endif()
   endfunction()
 
+  function(expect_n_times string_to_check expected_output expected_count test_name)
+    count_substring("${string_to_check}" "${expected_output}" count)
+    if(NOT count EQUAL ${expected_count})
+      message(STATUS "${test_name}-expect_${expected_count}_times - FAILED")
+      message(FATAL_ERROR "Expected to find ${expected_output} exactly ${expected_count} times in ${string_to_check} but found ${count} occurrences of ${expected_output}")
+    else()
+      message(STATUS "${test_name}-expect_${expected_count}_times - PASSED")
+    endif()
+  endfunction()
+
   function(not_expect make_program_stdout unexpected_output test_name)
     count_substring("${make_program_stdout}" "${unexpected_output}" count)
     if(NOT count EQUAL 0)
