@@ -362,6 +362,12 @@
         CMAKE_CONFIGURATION: cuda11.8_minimal_nvidia
         CTEST_NO_WARNINGS_ALLOWED: 1
 
+.cuda11.8_splayed_nvidia:
+    extends: .cuda11.8_minimal
+    variables:
+        CMAKE_CONFIGURATION: cuda11.8_splayed_nvidia
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
 ### HIP builds
 
 .hip5.5:
