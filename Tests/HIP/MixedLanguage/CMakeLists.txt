@@ -17,3 +17,7 @@ set_target_properties(MixedStaticLib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 add_executable(HIPMixedLanguage main.cxx)
 target_link_libraries(HIPMixedLanguage PRIVATE MixedStaticLib MixedSharedLib)
+
+add_executable(HIPMixedLanguageCXX main.cxx)
+target_link_libraries(HIPMixedLanguageCXX PRIVATE MixedStaticLib MixedSharedLib)
+set_property(TARGET HIPMixedLanguageCXX PROPERTY LINKER_LANGUAGE CXX)

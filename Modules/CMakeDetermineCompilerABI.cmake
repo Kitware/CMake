@@ -26,13 +26,13 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     if(DEFINED CMAKE_${lang}_VERBOSE_COMPILE_FLAG)
       set(COMPILE_DEFINITIONS "${CMAKE_${lang}_VERBOSE_COMPILE_FLAG}")
     endif()
-    if(lang STREQUAL "CUDA")
-      if(CMAKE_CUDA_ARCHITECTURES STREQUAL "native")
+    if(lang MATCHES "^(CUDA|HIP)$")
+      if(CMAKE_${lang}_ARCHITECTURES STREQUAL "native")
         # We are about to detect the native architectures, so we do
         # not yet know them.  Use all architectures during detection.
-        set(CMAKE_CUDA_ARCHITECTURES "all")
+        set(CMAKE_${lang}_ARCHITECTURES "all")
       endif()
-      set(CMAKE_CUDA_RUNTIME_LIBRARY "Static")
+      set(CMAKE_${lang}_RUNTIME_LIBRARY "Static")
     endif()
     if(NOT "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xMSVC")
       # Avoid adding our own platform standard libraries for compilers

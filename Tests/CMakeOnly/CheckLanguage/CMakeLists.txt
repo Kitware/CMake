@@ -13,7 +13,7 @@ endif()
 unset(expect_Fortran)
 set(expect_NoSuchLanguage 0)
 
-set(LANGUAGES C CXX Fortran CUDA NoSuchLanguage)
+set(LANGUAGES C CXX Fortran CUDA HIP NoSuchLanguage)
 if(APPLE)
   list(APPEND LANGUAGES OBJC OBJCXX)
 endif()

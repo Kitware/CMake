@@ -84,6 +84,7 @@ Environment Variables for Languages
    /envvar/FFLAGS
    /envvar/HIPCXX
    /envvar/HIPFLAGS
+   /envvar/HIPHOSTCXX
    /envvar/ISPC
    /envvar/ISPCFLAGS
    /envvar/OBJC
