@@ -1298,7 +1298,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
     config_upper = cmSystemTools::UpperCase(config);
   }
 
-  std::string key = cmStrCat(config_upper, "/", language);
+  std::string key = cmStrCat(config_upper, '/', language);
   auto iter = this->SystemIncludesCache.find(key);
 
   if (iter == this->SystemIncludesCache.end()) {
