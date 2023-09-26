@@ -72,6 +72,7 @@ function(compiler_id_detection outvar lang)
       Fujitsu
       GHS
       Tasking
+      OrangeC
     )
     if ("x${lang}" STREQUAL "xC")
       list(APPEND ordered_compilers

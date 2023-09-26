@@ -45,12 +45,8 @@ add_executable(complex.file complex.file.cxx complex_nobuild.cxx
 
 if (UNIX)
   target_link_libraries(complex ${CMAKE_DL_LIBS})
-else()
-  if (NOT BORLAND)
-    if(NOT MINGW)
-      target_link_libraries(complex rpcrt4.lib)
-    endif()
-  endif()
+elseif(NOT BORLAND AND NOT MINGW AND NOT CMAKE_C_COMPILER_ID STREQUAL "OrangeC")
+  target_link_libraries(complex rpcrt4.lib)
 endif ()
 
 # Test linking to static lib when a shared lib has the same name.

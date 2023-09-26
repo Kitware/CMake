@@ -1392,6 +1392,20 @@ t:windows-openwatcom1.9:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:windows-orangec6.73.1:
+    extends:
+        - .windows_orangec6.73.1
+        - .cmake_test_windows_external
+        - .windows_x86_64_tags_concurrent
+        - .cmake_junit_artifacts
+        - .run_dependent
+    dependencies:
+        - t:windows-vs2022-x64-ninja
+    needs:
+        - t:windows-vs2022-x64-ninja
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 # Windows arm64 jobs
 
 b:windows-arm64-vs2022-ninja:

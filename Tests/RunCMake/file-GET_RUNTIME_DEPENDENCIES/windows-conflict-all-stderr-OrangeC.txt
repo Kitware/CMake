@@ -1,0 +1,7 @@
+^CMake Error at cmake_install\.cmake:[0-9]+ \(file\):
+  file Multiple conflicting paths found for PATH\.DLL:
+
+    [^
+]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/windows-conflict-build/root-all/lib/test1/path\.dll
+    [^
+]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/windows-conflict-build/root-all/lib/test2/path\.dll$

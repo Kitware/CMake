@@ -76,7 +76,7 @@
             "_dllExtra": false
         },
         {
-            "path": "^framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?shared_framework\\.(dll\\.a|lib)$",
+            "path": "^framework/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?shared_framework\\.(dll\\.a|lib|l)$",
             "_dllExtra": true
         },
         {

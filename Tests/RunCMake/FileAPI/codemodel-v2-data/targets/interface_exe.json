@@ -170,7 +170,7 @@
             "_dllExtra": false
         },
         {
-            "path": "^lib/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?my_interface_exe\\.(dll\\.a|lib)$",
+            "path": "^lib/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?my_interface_exe\\.(dll\\.a|lib|l)$",
             "_dllExtra": true
         },
         {

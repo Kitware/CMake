@@ -219,10 +219,10 @@
     }
   ],
   "folder": null,
-  "nameOnDisk": "^(lib)?c_headers_1\\.(a|lib)$",
+  "nameOnDisk": "^(lib)?c_headers_1\\.(a|lib|l)$",
   "artifacts": [
     {
-      "path": "^fileset/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?c_headers_1\\.(a|lib)$",
+      "path": "^fileset/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?c_headers_1\\.(a|lib|l)$",
       "_dllExtra": false
     }
   ],

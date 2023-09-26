@@ -18,7 +18,7 @@ macro(run_test feature lang)
   endif()
 endmacro()
 
-if(NOT CMAKE_C_COMPILER_ID MATCHES "^(Cray|PGI|NVHPC|XL|XLClang|IBMClang|IntelLLVM|Fujitsu|FujitsuClang)$")
+if(NOT CMAKE_C_COMPILER_ID MATCHES "^(Cray|PGI|NVHPC|XL|XLClang|IBMClang|IntelLLVM|Fujitsu|FujitsuClang|OrangeC)$")
   get_property(c_features GLOBAL PROPERTY CMAKE_C_KNOWN_FEATURES)
   list(FILTER c_features EXCLUDE REGEX "^c_std_[0-9][0-9]")
   foreach(feature ${c_features})
@@ -26,7 +26,7 @@ if(NOT CMAKE_C_COMPILER_ID MATCHES "^(Cray|PGI|NVHPC|XL|XLClang|IBMClang|IntelLL
   endforeach()
 endif()
 
-if(NOT CMAKE_CXX_COMPILER_ID MATCHES "^(Cray|PGI|NVHPC|XL|XLClang|IBMClang|IntelLLVM|Fujitsu|FujitsuClang)$")
+if(NOT CMAKE_CXX_COMPILER_ID MATCHES "^(Cray|PGI|NVHPC|XL|XLClang|IBMClang|IntelLLVM|Fujitsu|FujitsuClang|OrangeC)$")
   get_property(cxx_features GLOBAL PROPERTY CMAKE_CXX_KNOWN_FEATURES)
   list(FILTER cxx_features EXCLUDE REGEX "^cxx_std_[0-9][0-9]")
   foreach(feature ${cxx_features})

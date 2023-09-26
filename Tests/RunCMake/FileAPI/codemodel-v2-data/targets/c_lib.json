@@ -88,10 +88,10 @@
         }
     ],
     "folder": null,
-    "nameOnDisk": "^(lib)?c_lib\\.(a|lib)$",
+    "nameOnDisk": "^(lib)?c_lib\\.(a|lib|l)$",
     "artifacts": [
         {
-            "path": "^((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?c_lib\\.(a|lib)$",
+            "path": "^((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?c_lib\\.(a|lib|l)$",
             "_dllExtra": false
         }
     ],

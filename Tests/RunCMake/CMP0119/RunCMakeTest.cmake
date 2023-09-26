@@ -8,10 +8,10 @@ function(run_CMP0119 status)
 endfunction()
 
 if(NOT RunCMake_GENERATOR MATCHES "Visual Studio|Xcode" AND
-    NOT CMAKE_C_COMPILER_ID MATCHES "(Borland|Embarcadero|Watcom)")
+    NOT CMAKE_C_COMPILER_ID MATCHES "(Borland|Embarcadero|Watcom|OrangeC)")
   run_CMP0119(WARN)
   run_CMP0119(OLD)
 endif()
-if((CMAKE_C_COMPILER_ID MATCHES "(GNU|LCC|Clang|MSVC|Borland|Embarcadero|Intel|TI)"))
+if((CMAKE_C_COMPILER_ID MATCHES "(GNU|LCC|Clang|MSVC|Borland|Embarcadero|Intel|TI|OrangeC)"))
   run_CMP0119(NEW)
 endif()
