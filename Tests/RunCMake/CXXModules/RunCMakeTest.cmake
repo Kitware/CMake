@@ -188,6 +188,7 @@ endif ()
 if ("export_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(export-interface-no-properties-build)
   run_cxx_module_test(export-interface-build)
+  run_cxx_module_test(export-include-directories-build)
   run_cxx_module_test(export-usage-build)
   run_cxx_module_test(export-bmi-and-interface-build)
 
@@ -198,6 +199,9 @@ if ("export_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
 
     set(test_suffix export-interface-no-properties-build)
     run_cxx_module_test(import-modules "import-modules-${test_suffix}" "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/${test_suffix}-build" -DNO_PROPERTIES=1)
+
+    set(test_suffix export-include-directories-build)
+    run_cxx_module_test(import-modules "import-modules-${test_suffix}" "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/${test_suffix}-build" -DINCLUDE_PROPERTIES=1)
 
     set(test_suffix export-bmi-and-interface-build)
     run_cxx_module_test(import-modules "import-modules-${test_suffix}" "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/${test_suffix}-build" -DWITH_BMIS=1)
@@ -215,6 +219,7 @@ if ("install_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
   if ("export_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
     run_cxx_module_test(export-interface-no-properties-install)
     run_cxx_module_test(export-interface-install)
+    run_cxx_module_test(export-include-directories-install)
     run_cxx_module_test(export-usage-install)
     run_cxx_module_test(export-bmi-and-interface-install)
 
@@ -226,6 +231,9 @@ if ("install_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
 
       set(test_suffix export-interface-no-properties-install)
       run_cxx_module_test(import-modules "import-modules-${test_suffix}" "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/${test_suffix}-install" -DNO_PROPERTIES=1)
+
+      set(test_suffix export-include-directories-install)
+      run_cxx_module_test(import-modules "import-modules-${test_suffix}" "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/${test_suffix}-install" -DINCLUDE_PROPERTIES=1)
 
       set(test_suffix export-bmi-and-interface-install)
       run_cxx_module_test(import-modules "import-modules-${test_suffix}" "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/${test_suffix}-install" -DWITH_BMIS=1)
