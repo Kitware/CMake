@@ -101,9 +101,7 @@ void cmLinkLineDeviceComputer::ComputeLinkLibraries(
   ItemVector const& items = cli.GetItems();
   std::string config = cli.GetConfig();
   bool skipItemAfterFramework = false;
-  // Note:
-  // Any modification of this algorithm should be reflected also in
-  // cmVisualStudio10TargetGenerator::ComputeCudaLinkOptions
+
   for (auto const& item : items) {
     if (skipItemAfterFramework) {
       skipItemAfterFramework = false;
@@ -132,11 +130,13 @@ void cmLinkLineDeviceComputer::ComputeLinkLibraries(
 
     BT<std::string> linkLib;
     if (item.IsPath == cmComputeLinkInformation::ItemIsPath::Yes) {
-      // nvcc understands absolute paths to libraries ending in '.a' or '.lib'.
-      // These should be passed to nvlink.  Other extensions need to be left
-      // out because nvlink may not understand or need them.  Even though it
-      // can tolerate '.so' or '.dylib' it cannot tolerate '.so.1'.
-      if (cmHasLiteralSuffix(item.Value.Value, ".a") ||
+      // nvcc understands absolute paths to libraries ending in '.o', .a', or
+      // '.lib'. These should be passed to nvlink.  Other extensions need to be
+      // left out because nvlink may not understand or need them.  Even though
+      // it can tolerate '.so' or '.dylib' it cannot tolerate '.so.1'.
+      if (cmHasLiteralSuffix(item.Value.Value, ".o") ||
+          cmHasLiteralSuffix(item.Value.Value, ".obj") ||
+          cmHasLiteralSuffix(item.Value.Value, ".a") ||
           cmHasLiteralSuffix(item.Value.Value, ".lib")) {
         linkLib.Value = item
                           .GetFormattedItem(this->ConvertToOutputFormat(
