@@ -330,10 +330,7 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
     auto evaluatedProp = cmGeneratorExpression::Evaluate(
       *value, this->GeneratorTarget->GetLocalGenerator(), config,
       this->GeneratorTarget, nullptr, this->GeneratorTarget, lang);
-    if (!evaluatedProp.empty()) {
-      return evaluatedProp;
-    }
-    return *value;
+    return evaluatedProp;
   };
   std::string const tidy_prop = cmStrCat(lang, "_CLANG_TIDY");
   tidy = evaluateProp(tidy_prop);
