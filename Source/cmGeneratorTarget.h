@@ -205,6 +205,9 @@ public:
   cmValue GetFeature(const std::string& feature,
                      const std::string& config) const;
 
+  std::string GetLinkerTypeProperty(std::string const& lang,
+                                    std::string const& config) const;
+
   const char* GetLinkPIEProperty(const std::string& config) const;
 
   bool IsIPOEnabled(std::string const& lang, std::string const& config) const;
@@ -788,6 +791,10 @@ public:
 
   //! Return the preferred linker language for this target
   std::string GetLinkerLanguage(const std::string& config) const;
+  //! Return the preferred linker tool for this target
+  std::string GetLinkerTool(const std::string& config) const;
+  std::string GetLinkerTool(const std::string& lang,
+                            const std::string& config) const;
 
   /** Does this target have a GNU implib to convert to MS format?  */
   bool HasImplibGNUtoMS(std::string const& config) const;

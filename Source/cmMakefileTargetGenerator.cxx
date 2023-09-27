@@ -153,6 +153,8 @@ void cmMakefileTargetGenerator::GetTargetLinkFlags(
   this->LocalGenerator->AppendCompileOptions(flags, opts);
   this->LocalGenerator->SetLinkScriptShell(false);
 
+  this->LocalGenerator->AppendLinkerTypeFlags(
+    flags, this->GeneratorTarget, this->GetConfigName(), linkLanguage);
   this->LocalGenerator->AppendPositionIndependentLinkerFlags(
     flags, this->GeneratorTarget, this->GetConfigName(), linkLanguage);
   this->LocalGenerator->AppendDependencyInfoLinkerFlags(

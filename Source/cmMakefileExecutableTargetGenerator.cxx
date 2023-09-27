@@ -344,6 +344,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     return;
   }
 
+  auto linker = this->GeneratorTarget->GetLinkerTool(this->GetConfigName());
+
   // Build list of dependencies.
   std::vector<std::string> depends;
   this->AppendLinkDepends(depends, linkLanguage);
@@ -533,6 +535,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     vars.CMTargetType =
       cmState::GetTargetTypeName(this->GeneratorTarget->GetType()).c_str();
     vars.Language = linkLanguage.c_str();
+    vars.Linker = linker.c_str();
     vars.AIXExports = aixExports.c_str();
     vars.Objects = buildObjs.c_str();
     std::string objectDir = this->GeneratorTarget->GetSupportDirectory();

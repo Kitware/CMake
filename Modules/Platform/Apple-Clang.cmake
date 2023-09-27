@@ -18,6 +18,13 @@ macro(__apple_compiler_clang lang)
   set(CMAKE_${lang}_LINK_LIBRARY_USING_FRAMEWORK "-framework <LIBRARY>")
   set(CMAKE_${lang}_LINK_LIBRARY_USING_FRAMEWORK_SUPPORTED TRUE)
 
+  # linker selection
+  set(CMAKE_${lang}_USING_LINKER_SYSTEM "-fuse-ld=ld")
+  set(CMAKE_${lang}_USING_LINKER_APPLE_CLASSIC "-fuse-ld=ld" "LINKER:-ld_classic")
+  set(CMAKE_${lang}_USING_LINKER_LLD "-fuse-ld=lld")
+  set(CMAKE_${lang}_USING_LINKER_MOLD "-fuse-ld=mold")
+  set(CMAKE_${lang}_USING_LINKER_SOLD "-fuse-ld=sold")
+
   if(_CMAKE_OSX_SYSROOT_PATH MATCHES "/iPhoneOS")
     set(CMAKE_${lang}_OSX_DEPLOYMENT_TARGET_FLAG "-miphoneos-version-min=")
   elseif(_CMAKE_OSX_SYSROOT_PATH MATCHES "/iPhoneSimulator")
