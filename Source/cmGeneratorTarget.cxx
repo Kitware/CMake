@@ -4287,9 +4287,6 @@ std::string cmGeneratorTarget::GetPchHeader(const std::string& config,
         this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
     }
 
-    filename = cmStrCat(
-      generatorTarget->LocalGenerator->GetCurrentBinaryDirectory(), "/");
-
     const std::map<std::string, std::string> languageToExtension = {
       { "C", ".h" },
       { "CXX", ".hxx" },
@@ -4297,8 +4294,7 @@ std::string cmGeneratorTarget::GetPchHeader(const std::string& config,
       { "OBJCXX", ".objcxx.hxx" }
     };
 
-    filename =
-      cmStrCat(filename, "CMakeFiles/", generatorTarget->GetName(), ".dir");
+    filename = generatorTarget->GetSupportDirectory();
 
     if (this->GetGlobalGenerator()->IsMultiConfig()) {
       filename = cmStrCat(filename, "/", config);
@@ -4391,9 +4387,7 @@ std::string cmGeneratorTarget::GetPchSource(const std::string& config,
         this->GetGlobalGenerator()->FindGeneratorTarget(*pchReuseFrom);
     }
 
-    filename =
-      cmStrCat(generatorTarget->LocalGenerator->GetCurrentBinaryDirectory(),
-               "/CMakeFiles/", generatorTarget->GetName(), ".dir/cmake_pch");
+    filename = cmStrCat(generatorTarget->GetSupportDirectory(), "/cmake_pch");
 
     // For GCC the source extension will be transformed into .h[xx].gch
     if (!this->Makefile->IsOn("CMAKE_LINK_PCH")) {

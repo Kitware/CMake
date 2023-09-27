@@ -2690,13 +2690,9 @@ cmGlobalGenerator::SplitFrameworkPath(const std::string& path,
   return cm::nullopt;
 }
 
-bool cmGlobalGenerator::CheckCMP0037(std::string const& targetName,
-                                     std::string const& reason) const
+static bool RaiseCMP0037Message(cmake* cm, cmTarget* tgt,
+                                std::string const& reason)
 {
-  cmTarget* tgt = this->FindTarget(targetName);
-  if (!tgt) {
-    return true;
-  }
   MessageType messageType = MessageType::AUTHOR_WARNING;
   std::ostringstream e;
   bool issueMessage = false;
@@ -2715,18 +2711,27 @@ bool cmGlobalGenerator::CheckCMP0037(std::string const& targetName,
       break;
   }
   if (issueMessage) {
-    e << "The target name \"" << targetName << "\" is reserved " << reason
+    e << "The target name \"" << tgt->GetName() << "\" is reserved " << reason
       << ".";
     if (messageType == MessageType::AUTHOR_WARNING) {
       e << "  It may result in undefined behavior.";
     }
-    this->GetCMakeInstance()->IssueMessage(messageType, e.str(),
-                                           tgt->GetBacktrace());
+    cm->IssueMessage(messageType, e.str(), tgt->GetBacktrace());
     if (messageType == MessageType::FATAL_ERROR) {
       return false;
     }
   }
   return true;
+}
+
+bool cmGlobalGenerator::CheckCMP0037(std::string const& targetName,
+                                     std::string const& reason) const
+{
+  cmTarget* tgt = this->FindTarget(targetName);
+  if (!tgt) {
+    return true;
+  }
+  return RaiseCMP0037Message(this->GetCMakeInstance(), tgt, reason);
 }
 
 void cmGlobalGenerator::CreateDefaultGlobalTargets(
@@ -3142,10 +3147,11 @@ bool cmGlobalGenerator::IsReservedTarget(std::string const& name)
   // by one or more of the cmake generators.
 
   // Adding additional targets to this list will require a policy!
-  const char* reservedTargets[] = { "all",       "ALL_BUILD",  "help",
-                                    "install",   "INSTALL",    "preinstall",
-                                    "clean",     "edit_cache", "rebuild_cache",
-                                    "ZERO_CHECK" };
+  static const cm::static_string_view reservedTargets[] = {
+    "all"_s,           "ALL_BUILD"_s,  "help"_s,  "install"_s,
+    "INSTALL"_s,       "preinstall"_s, "clean"_s, "edit_cache"_s,
+    "rebuild_cache"_s, "ZERO_CHECK"_s
+  };
 
   return cm::contains(reservedTargets, name);
 }
