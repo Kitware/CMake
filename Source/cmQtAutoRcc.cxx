@@ -35,6 +35,11 @@ public:
 private:
   // -- Utility
   bool IsMultiConfig() const { return this->MultiConfig_; }
+  std::string const& GetGenerator() const { return this->Generator_; }
+  bool IsXcode() const
+  {
+    return this->GetGenerator().find("Xcode") != std::string::npos;
+  }
   std::string MultiConfigOutput() const;
 
   // -- Abstract processing interface
@@ -54,6 +59,7 @@ private:
   // -- Config settings
   bool MultiConfig_ = false;
   bool CrossConfig_ = false;
+  std::string Generator_;
   // -- Directories
   std::string AutogenBuildDir_;
   std::string IncludeDir_;
@@ -93,6 +99,7 @@ bool cmQtAutoRccT::InitFromInfo(InfoT const& info)
 {
   // -- Required settings
   if (!info.GetBool("MULTI_CONFIG", this->MultiConfig_, true) ||
+      !info.GetString("GENERATOR", this->Generator_, true) ||
       !info.GetBool("CROSS_CONFIG", this->CrossConfig_, true) ||
       !info.GetString("BUILD_DIR", this->AutogenBuildDir_, true) ||
       !info.GetStringConfig("INCLUDE_DIR", this->IncludeDir_, true) ||
@@ -122,7 +129,7 @@ bool cmQtAutoRccT::InitFromInfo(InfoT const& info)
   // -- Derive information
   this->QrcFileName_ = cmSystemTools::GetFilenameName(this->QrcFile_);
   this->QrcFileDir_ = cmSystemTools::GetFilenamePath(this->QrcFile_);
-  if (this->CrossConfig_) {
+  if (IsMultiConfig() && !this->IsXcode()) {
     this->RccFilePublic_ =
       cmStrCat(this->AutogenBuildDir_, '/', this->RccPathChecksum_, "_",
                this->InfoConfig(), '/', this->RccFileName_);

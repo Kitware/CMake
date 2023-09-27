@@ -1175,7 +1175,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       // Path checksum
       qrc.QrcPathChecksum = this->PathCheckSum.getPart(qrc.QrcFile);
       // Output file name
-      if (this->CrossConfig) {
+      if (this->MultiConfig && !this->GlobalGen->IsXcode()) {
         qrc.OutputFile = cmStrCat(this->Dir.Build, '/', qrc.QrcPathChecksum,
                                   "_$<CONFIG>", "/qrc_", qrc.QrcName, ".cpp");
       } else {
@@ -1467,7 +1467,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       std::string outputFile;
       std::string depFile;
       // Create the custom command that outputs the timestamp file.
-      if (this->MultiConfig && this->CrossConfig) {
+      if (this->MultiConfig) {
         // create timestamp file with $<CONFIG> in the name so that
         // every cmake_autogen target has its own timestamp file
         std::string const configView = "$<CONFIG>";
@@ -1577,6 +1577,12 @@ void cmQtAutoGenInitializer::AddCMakeProcessToCommandLines(
     commandLines.push_back(cmMakeCommandLine(
       { cmSystemTools::GetCMakeCommand(), "-E", processName, infoFile,
         "$<CONFIG>", "$<COMMAND_CONFIG:$<CONFIG>>" }));
+  } else if (this->MultiConfig && this->GlobalGen->IsXcode()) {
+    for (std::string const& config : this->ConfigsList) {
+      commandLines.push_back(
+        cmMakeCommandLine({ cmSystemTools::GetCMakeCommand(), "-E",
+                            processName, infoFile, config }));
+    }
   } else {
     std::string autoInfoFileConfig;
     if (this->MultiConfig) {
@@ -1934,6 +1940,7 @@ bool cmQtAutoGenInitializer::SetupWriteRccInfo()
     info.SetBool("MULTI_CONFIG", this->MultiConfig);
     info.SetBool("CROSS_CONFIG", this->CrossConfig);
     info.SetUInt("VERBOSITY", this->Verbosity);
+    info.Set("GENERATOR", this->GlobalGen->GetName());
 
     // Files
     info.Set("LOCK_FILE", qrc.LockFile);
