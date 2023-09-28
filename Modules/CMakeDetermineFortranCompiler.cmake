@@ -98,6 +98,9 @@ else()
   set(CMAKE_Fortran_COMPILER_ID_TEST_FLAGS_FIRST
     # Get verbose output to help distinguish compilers.
     "-v"
+
+    # Try compiling to an object file only, with verbose output.
+    "-v -c"
     )
   set(CMAKE_Fortran_COMPILER_ID_TEST_FLAGS
     # Try compiling to an object file only.
@@ -106,6 +109,10 @@ else()
     # Intel on windows does not preprocess by default.
     "-fpp"
     )
+endif()
+
+if(CMAKE_Fortran_COMPILER_TARGET)
+  set(CMAKE_Fortran_COMPILER_ID_TEST_FLAGS_FIRST "-v -c --target=${CMAKE_Fortran_COMPILER_TARGET}")
 endif()
 
 # Build a small source file to identify the compiler.
@@ -225,6 +232,49 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
     set(CMAKE_COMPILER_IS_GNUG77 1)
   endif()
+endif()
+
+if("${CMAKE_Fortran_COMPILER_ID};${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "LLVMFlang;MSVC")
+  # With LLVMFlang targeting the MSVC ABI we link using lld-link.
+  # Detect the implicit link information from the compiler driver
+  # so we can explicitly pass it to the linker.
+  include(${CMAKE_ROOT}/Modules/CMakeParseImplicitLinkInfo.cmake)
+  set(_LLVMFlang_COMMAND "${CMAKE_Fortran_COMPILER}" "-###" ${CMAKE_CURRENT_LIST_DIR}/CMakeFortranCompilerABI.F)
+  if(CMAKE_Fortran_COMPILER_TARGET)
+    list(APPEND _LLVMFlang_COMMAND --target=${CMAKE_Fortran_COMPILER_TARGET})
+  endif()
+  execute_process(COMMAND ${_LLVMFlang_COMMAND}
+    OUTPUT_VARIABLE _LLVMFlang_OUTPUT
+    ERROR_VARIABLE _LLVMFlang_OUTPUT
+    RESULT_VARIABLE _LLVMFlang_RESULT)
+  string(JOIN "\" \"" _LLVMFlang_COMMAND ${_LLVMFlang_COMMAND})
+  message(CONFIGURE_LOG
+    "Running the Fortran compiler: \"${_LLVMFlang_COMMAND}\"\n"
+    "${_LLVMFlang_OUTPUT}"
+    )
+  if(_LLVMFlang_RESULT EQUAL 0)
+    cmake_parse_implicit_link_info("${_LLVMFlang_OUTPUT}"
+                                   CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES
+                                   CMAKE_Fortran_IMPLICIT_LINK_DIRECTORIES
+                                   CMAKE_Fortran_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES
+                                   log
+                                   "${CMAKE_Fortran_IMPLICIT_OBJECT_REGEX}"
+                                   LANGUAGE Fortran)
+    message(CONFIGURE_LOG
+      "Parsed Fortran implicit link information:\n"
+      "${log}\n"
+      )
+    set(_CMAKE_Fortran_IMPLICIT_LINK_INFORMATION_DETERMINED_EARLY 1)
+    if("x${CMAKE_Fortran_COMPILER_ARCHITECTURE_ID}" STREQUAL "xARM64")
+      # FIXME(LLVMFlang): It does not add `-defaultlib:` fields to object
+      # files to specify link dependencies on its runtime libraries.
+      # For now, we add them ourselves.
+      list(APPEND CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES "clang_rt.builtins-aarch64.lib")
+    endif()
+  endif()
+  unset(_LLVMFlang_COMMAND)
+  unset(_LLVMFlang_OUTPUT)
+  unset(_LLVMFlang_RESULT)
 endif()
 
 if (NOT _CMAKE_TOOLCHAIN_LOCATION)
