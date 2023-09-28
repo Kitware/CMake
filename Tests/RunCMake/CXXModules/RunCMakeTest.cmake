@@ -119,6 +119,7 @@ if (RunCMake_GENERATOR MATCHES "Ninja")
   run_cmake(NinjaDependInfoExportFilesystemSafe)
   run_cmake(NinjaDependInfoBMIInstall)
   run_cmake(NinjaForceResponseFile) # issue#25367
+  run_cmake(NinjaDependInfoCompileDatabase)
 elseif (RunCMake_GENERATOR MATCHES "Visual Studio")
   run_cmake(VisualStudioNoSyntheticTargets)
 else ()
@@ -286,6 +287,32 @@ if ("compile_commands" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(export-compile-commands)
 endif ()
 
+macro (setup_export_build_database_targets)
+  set(RunCMake_CXXModules_TARGETS
+    cmake_build_database-CXX
+    cmake_build_database)
+
+  if (RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    list(INSERT RunCMake_CXXModules_TARGETS 0
+      cmake_build_database-CXX-Debug
+      cmake_build_database-Debug
+      # Other config targets.
+      cmake_build_database-CXX-Release@Release
+      cmake_build_database-Release@Release)
+  endif ()
+endmacro ()
+
+# Tests which require build database support.
+if ("build_database" IN_LIST CMake_TEST_MODULE_COMPILATION)
+  setup_export_build_database_targets()
+  set(RunCMake_CXXModules_NO_TEST 1)
+
+  run_cxx_module_test(export-build-database)
+
+  unset(RunCMake_CXXModules_NO_TEST)
+  unset(RunCMake_CXXModules_TARGETS)
+endif ()
+
 # Tests which require collation work.
 if ("collation" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(public-req-private)
@@ -316,6 +343,12 @@ endif ()
 
 function (run_cxx_module_import_test type name)
   set(RunCMake_CXXModules_INSTALL 0)
+
+  if ("EXPORT_BUILD_DATABASE" IN_LIST ARGN)
+    list(REMOVE_ITEM ARGN EXPORT_BUILD_DATABASE)
+    list(APPEND ARGN -DCMAKE_EXPORT_BUILD_DATABASE=1)
+  endif ()
+
   run_cxx_module_test(import-modules "import-modules-${name}" "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/${name}-${type}" ${ARGN})
 endfunction ()
 
@@ -343,6 +376,14 @@ if ("export_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
     run_cxx_module_import_test(build export-transitive-targets-build -DTRANSITIVE_TARGETS=1)
     run_cxx_module_import_test(build export-transitive-modules-build -DTRANSITIVE_MODULES=1)
     run_cxx_module_import_test(build export-with-headers-build -DWITH_HEADERS=1)
+
+    if ("build_database" IN_LIST CMake_TEST_MODULE_COMPILATION)
+      setup_export_build_database_targets()
+
+      run_cxx_module_import_test(build export-build-database -DBUILD_DATABASE=1 EXPORT_BUILD_DATABASE)
+
+      unset(RunCMake_CXXModules_TARGETS)
+    endif ()
   endif ()
 endif ()
 

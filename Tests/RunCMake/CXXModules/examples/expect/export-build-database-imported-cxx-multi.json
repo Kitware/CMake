@@ -1,0 +1,278 @@
+{
+  "version": 1,
+  "revision": 0,
+  "sets": [
+    {
+      "family-name": "use_import_interfaces",
+      "name": "use_import_interfaces@<CONFIG>",
+      "translation-units": [
+        {
+          "arguments": [
+            "<IGNORE>",
+            "-Dtarget_interface_define",
+            "-Dtarget_public_define",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_public_include",
+            "-Dfrom_cmake_cxx_flags",
+            "-Dfrom_cmake_cxx_<CONFIG_LOWER>_flags",
+            "<CXX20_OPTION>",
+            "-Dtarget_interface_option",
+            "-Dtarget_public_option",
+            "PATH:-Ddepflag=\"CMakeFiles/use_import_interfaces.dir<CONFIG_DIR>/use.cxx<OBJEXT>.d\"",
+            "PATH:<OUTPUT_FLAG>CMakeFiles/use_import_interfaces.dir<CONFIG_DIR>/use.cxx<OBJEXT>",
+            "-c",
+            "PATH:<SOURCE_DIR>/examples/import-modules/use.cxx"
+          ],
+          "baseline-arguments": [
+            "-Dtarget_interface_define",
+            "-Dtarget_public_define",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_public_include",
+            "-Dfrom_cmake_cxx_flags",
+            "-Dfrom_cmake_cxx_<CONFIG_LOWER>_flags",
+            "<CXX20_OPTION>",
+            "-Dtarget_interface_option",
+            "-Dtarget_public_option"
+          ],
+          "local-arguments": [
+            "-Dtarget_interface_define",
+            "-Dtarget_public_define",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_public_include",
+            "-Dfrom_cmake_cxx_flags",
+            "-Dfrom_cmake_cxx_<CONFIG_LOWER>_flags",
+            "<CXX20_OPTION>",
+            "-Dtarget_interface_option",
+            "-Dtarget_public_option"
+          ],
+          "object": "PATH:CMakeFiles/use_import_interfaces.dir<CONFIG_DIR>/use.cxx<OBJEXT>",
+          "private": true,
+          "provides": {},
+          "requires": ["importable"],
+          "source": "PATH:<SOURCE_DIR>/examples/import-modules/use.cxx",
+          "work-directory": "<BINARY_DIR>"
+        }
+      ],
+      "visible-sets": ["REGEX:CXXModules__export_build_database@synth_<HEX>@<CONFIG>"]
+    },
+    {
+      "family-name": "use_import_interfaces",
+      "name": "use_import_interfaces@<CONFIG_OTHER>",
+      "translation-units": [
+        {
+          "arguments": [
+            "<IGNORE>",
+            "-Dtarget_interface_define",
+            "-Dtarget_public_define",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_public_include",
+            "-Dfrom_cmake_cxx_flags",
+            "-Dfrom_cmake_cxx_<CONFIG_OTHER_LOWER>_flags",
+            "<CXX20_OPTION>",
+            "-Dtarget_interface_option",
+            "-Dtarget_public_option",
+            "PATH:-Ddepflag=\"CMakeFiles/use_import_interfaces.dir<CONFIG_OTHER_DIR>/use.cxx<OBJEXT>.d\"",
+            "PATH:<OUTPUT_FLAG>CMakeFiles/use_import_interfaces.dir<CONFIG_OTHER_DIR>/use.cxx<OBJEXT>",
+            "-c",
+            "PATH:<SOURCE_DIR>/examples/import-modules/use.cxx"
+          ],
+          "baseline-arguments": [
+            "-Dtarget_interface_define",
+            "-Dtarget_public_define",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_public_include",
+            "-Dfrom_cmake_cxx_flags",
+            "-Dfrom_cmake_cxx_<CONFIG_OTHER_LOWER>_flags",
+            "<CXX20_OPTION>",
+            "-Dtarget_interface_option",
+            "-Dtarget_public_option"
+          ],
+          "local-arguments": [
+            "-Dtarget_interface_define",
+            "-Dtarget_public_define",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_public_include",
+            "-Dfrom_cmake_cxx_flags",
+            "-Dfrom_cmake_cxx_<CONFIG_OTHER_LOWER>_flags",
+            "<CXX20_OPTION>",
+            "-Dtarget_interface_option",
+            "-Dtarget_public_option"
+          ],
+          "object": "PATH:CMakeFiles/use_import_interfaces.dir<CONFIG_OTHER_DIR>/use.cxx<OBJEXT>",
+          "private": true,
+          "provides": {},
+          "requires": ["importable"],
+          "source": "PATH:<SOURCE_DIR>/examples/import-modules/use.cxx",
+          "work-directory": "<BINARY_DIR>"
+        }
+      ],
+      "visible-sets": ["REGEX:CXXModules__export_build_database@synth_<HEX>@<CONFIG_OTHER>"]
+    },
+    {
+      "family-name": "REGEX:CXXModules::export_build_database@<HEX>",
+      "name": "REGEX:CXXModules__export_build_database@synth_<HEX>@<CONFIG>",
+      "translation-units": [
+        {
+          "arguments": [
+            "<IGNORE>",
+            "-Ddep_interface_define",
+            "-Dfrom_compile_definitions",
+            "-Dtarget_interface_define",
+            "-Dtarget_private_define",
+            "-Dtarget_public_define",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/from_include_directories",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_private_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_public_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/dep_interface_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
+            "-Dfrom_cmake_cxx_flags",
+            "-Dfrom_cmake_cxx_<CONFIG_LOWER>_flags",
+            "<CXX20_OPTION>",
+            "-Dfrom_compile_options",
+            "-Dtarget_private_option",
+            "-Dtarget_public_option",
+            "-Ddep_interface_option",
+            "-Dtarget_interface_option",
+            "REGEX:PATH:-Ddepflag=\"CMakeFiles/CXXModules__export_build_database@synth_<HEX>.dir<CONFIG_DIR>/.d\"",
+            "REGEX:<BMI_ONLY_FLAG>",
+            "REGEX:PATH:<OUTPUT_FLAG>CMakeFiles/CXXModules__export_build_database@synth_<HEX>.dir<CONFIG_DIR>/",
+            "-c",
+            "PATH:<SOURCE_DIR>/examples/export-build-database/importable.cxx"
+          ],
+          "baseline-arguments": [
+            "-Ddep_interface_define",
+            "-Dfrom_compile_definitions",
+            "-Dtarget_interface_define",
+            "-Dtarget_private_define",
+            "-Dtarget_public_define",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/from_include_directories",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_private_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_public_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/dep_interface_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
+            "-Dfrom_cmake_cxx_flags",
+            "-Dfrom_cmake_cxx_<CONFIG_LOWER>_flags",
+            "<CXX20_OPTION>",
+            "-Dfrom_compile_options",
+            "-Dtarget_private_option",
+            "-Dtarget_public_option",
+            "-Ddep_interface_option",
+            "-Dtarget_interface_option"
+          ],
+          "local-arguments": [
+            "-Ddep_interface_define",
+            "-Dfrom_compile_definitions",
+            "-Dtarget_interface_define",
+            "-Dtarget_private_define",
+            "-Dtarget_public_define",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/from_include_directories",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_private_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_public_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/dep_interface_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
+            "-Dfrom_cmake_cxx_flags",
+            "-Dfrom_cmake_cxx_<CONFIG_LOWER>_flags",
+            "<CXX20_OPTION>",
+            "-Dfrom_compile_options",
+            "-Dtarget_private_option",
+            "-Dtarget_public_option",
+            "-Ddep_interface_option",
+            "-Dtarget_interface_option"
+          ],
+          "object": "PATH:CMakeFiles/use_import_interfaces.dir<CONFIG_DIR>/use.cxx<OBJEXT>",
+          "private": true,
+          "provides": {
+            "importable": "<IGNORE>"
+          },
+          "requires": [],
+          "source": "PATH:<SOURCE_DIR>/examples/export-build-database/importable.cxx",
+          "work-directory": "<BINARY_DIR>"
+        }
+      ],
+      "visible-sets": []
+    },
+    {
+      "family-name": "REGEX:CXXModules::export_build_database@<HEX>",
+      "name": "REGEX:CXXModules__export_build_database@synth_<HEX>@<CONFIG_OTHER>",
+      "translation-units": [
+        {
+          "arguments": [
+            "<IGNORE>",
+            "-Ddep_interface_define",
+            "-Dfrom_compile_definitions",
+            "-Dtarget_interface_define",
+            "-Dtarget_private_define",
+            "-Dtarget_public_define",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/from_include_directories",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_private_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_public_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/dep_interface_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
+            "-Dfrom_cmake_cxx_flags",
+            "-Dfrom_cmake_cxx_<CONFIG_OTHER_LOWER>_flags",
+            "<CXX20_OPTION>",
+            "-Dfrom_compile_options",
+            "-Dtarget_private_option",
+            "-Dtarget_public_option",
+            "-Ddep_interface_option",
+            "-Dtarget_interface_option",
+            "REGEX:PATH:-Ddepflag=\"CMakeFiles/CXXModules__export_build_database@synth_<HEX>.dir<CONFIG_OTHER_DIR>/.d\"",
+            "REGEX:<BMI_ONLY_FLAG>",
+            "REGEX:PATH:<OUTPUT_FLAG>CMakeFiles/CXXModules__export_build_database@synth_<HEX>.dir<CONFIG_OTHER_DIR>/",
+            "-c",
+            "PATH:<SOURCE_DIR>/examples/export-build-database/importable.cxx"
+          ],
+          "baseline-arguments": [
+            "-Ddep_interface_define",
+            "-Dfrom_compile_definitions",
+            "-Dtarget_interface_define",
+            "-Dtarget_private_define",
+            "-Dtarget_public_define",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/from_include_directories",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_private_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_public_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/dep_interface_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
+            "-Dfrom_cmake_cxx_flags",
+            "-Dfrom_cmake_cxx_<CONFIG_OTHER_LOWER>_flags",
+            "<CXX20_OPTION>",
+            "-Dfrom_compile_options",
+            "-Dtarget_private_option",
+            "-Dtarget_public_option",
+            "-Ddep_interface_option",
+            "-Dtarget_interface_option"
+          ],
+          "local-arguments": [
+            "-Ddep_interface_define",
+            "-Dfrom_compile_definitions",
+            "-Dtarget_interface_define",
+            "-Dtarget_private_define",
+            "-Dtarget_public_define",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/from_include_directories",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_private_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_public_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/dep_interface_include",
+            "PATH:-I<SOURCE_DIR>/examples/export-build-database/target_interface_include",
+            "-Dfrom_cmake_cxx_flags",
+            "-Dfrom_cmake_cxx_<CONFIG_OTHER_LOWER>_flags",
+            "<CXX20_OPTION>",
+            "-Dfrom_compile_options",
+            "-Dtarget_private_option",
+            "-Dtarget_public_option",
+            "-Ddep_interface_option",
+            "-Dtarget_interface_option"
+          ],
+          "object": "PATH:CMakeFiles/use_import_interfaces.dir<CONFIG_OTHER_DIR>/use.cxx<OBJEXT>",
+          "private": true,
+          "provides": {
+            "importable": "<IGNORE>"
+          },
+          "requires": [],
+          "source": "PATH:<SOURCE_DIR>/examples/export-build-database/importable.cxx",
+          "work-directory": "<BINARY_DIR>"
+        }
+      ],
+      "visible-sets": []
+    }
+  ]
+}
