@@ -435,14 +435,6 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
       target->CheckCxxModuleStatus(c);
     }
 
-    if (target->HaveCxx20ModuleSources() && !this->SupportsCxxModuleDyndep()) {
-      root->GetMakefile()->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat("The target named \"", target->GetName(),
-                 "\" contains C++ sources that export modules which is not "
-                 "supported by the generator"));
-    }
-
     // handle external vc project files
     cmValue expath = target->GetProperty("EXTERNAL_MSPROJECT");
     if (expath) {

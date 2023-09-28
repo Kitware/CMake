@@ -362,15 +362,6 @@ void cmVisualStudio10TargetGenerator::Generate()
     this->GeneratorTarget->CheckCxxModuleStatus(config);
   }
 
-  if (this->GeneratorTarget->HaveCxx20ModuleSources() &&
-      !this->GlobalGenerator->SupportsCxxModuleDyndep()) {
-    this->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      cmStrCat("The target named \"", this->GeneratorTarget->GetName(),
-               "\" contains C++ sources that export modules which is not "
-               "supported by the generator"));
-  }
-
   this->ProjectType = computeProjectType(this->GeneratorTarget);
   this->Managed = this->ProjectType == VsProjectType::csproj;
   const std::string ProjectFileExtension =

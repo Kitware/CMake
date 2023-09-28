@@ -14,6 +14,9 @@ if ("cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
   if (NOT forced_cxx_standard)
     run_cmake(NoCXX20)
   endif ()
+
+  run_cmake(NoScanningSourceFileProperty)
+  run_cmake(NoScanningTargetProperty)
 endif ()
 
 if (RunCMake_GENERATOR MATCHES "Ninja")
