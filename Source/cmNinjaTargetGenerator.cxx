@@ -1143,6 +1143,30 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     }
   }
 
+  // Detect sources in `CXX_MODULES` which are not compiled.
+  {
+    std::vector<cmSourceFile*> sources;
+    this->GeneratorTarget->GetSourceFiles(sources, config);
+    for (cmSourceFile const* sf : sources) {
+      cmFileSet const* fs =
+        this->GeneratorTarget->GetFileSetForSource(config, sf);
+      if (!fs) {
+        continue;
+      }
+      if (fs->GetType() != "CXX_MODULES"_s) {
+        continue;
+      }
+      if (sf->GetLanguage().empty()) {
+        this->GeneratorTarget->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("Target \"", this->GeneratorTarget->GetName(),
+                   "\" has source file\n  ", sf->GetFullPath(),
+                   "\nin a \"FILE_SET TYPE CXX_MODULES\" but it is not "
+                   "scheduled for compilation."));
+      }
+    }
+  }
+
   for (auto const& langScanningFiles : this->Configs[config].ScanningInfo) {
     std::string const& language = langScanningFiles.first;
     std::vector<ScanningFiles> const& scanningFiles = langScanningFiles.second;
