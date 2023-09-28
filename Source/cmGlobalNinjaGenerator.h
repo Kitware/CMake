@@ -483,6 +483,7 @@ public:
   bool IsSingleConfigUtility(cmGeneratorTarget const* target) const;
 
   bool CheckCxxModuleSupport(CxxModuleSupportQuery query) override;
+  bool SupportsBuildDatabase() const override { return true; }
 
   std::string ConvertToOutputPath(std::string path) const override;
 

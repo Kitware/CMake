@@ -139,6 +139,20 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   } else {
     this->LinkerLanguage = this->Target->GetSafeProperty("LINKER_LANGUAGE");
   }
+
+  auto configs =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
+  std::string build_db_languages[] = { "CXX" };
+  for (auto const& language : build_db_languages) {
+    for (auto const& config : configs) {
+      auto bdb_path = this->BuildDatabasePath(language, config);
+      if (!bdb_path.empty()) {
+        this->Makefile->GetOrCreateGeneratedSource(bdb_path);
+        this->GetGlobalGenerator()->AddBuildDatabaseFile(language, config,
+                                                         bdb_path);
+      }
+    }
+  }
 }
 
 cmGeneratorTarget::~cmGeneratorTarget() = default;
