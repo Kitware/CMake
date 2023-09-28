@@ -9046,7 +9046,7 @@ std::string cmGeneratorTarget::GetImportedXcFrameworkPath(
 
 bool cmGeneratorTarget::HaveFortranSources(std::string const& config) const
 {
-  auto sources = cmGeneratorTarget::GetSourceFiles(config);
+  auto sources = this->GetSourceFiles(config);
   return std::any_of(sources.begin(), sources.end(),
                      [](BT<cmSourceFile*> const& sf) -> bool {
                        return sf.Value->GetLanguage() == "Fortran"_s;
@@ -9124,7 +9124,7 @@ void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
 
   if (!haveScannableSources) {
     // Check to see if there are regular sources that have requested scanning.
-    auto sources = cmGeneratorTarget::GetSourceFiles(config);
+    auto sources = this->GetSourceFiles(config);
     for (auto const& source : sources) {
       auto const* sf = source.Value;
       auto const& lang = sf->GetLanguage();
