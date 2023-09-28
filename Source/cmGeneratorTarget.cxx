@@ -9261,7 +9261,22 @@ bool cmGeneratorTarget::NeedDyndepForSource(std::string const& lang,
   if (tgtProp.IsSet()) {
     return tgtProp.IsOn();
   }
-  return true;
+
+  bool policyAnswer = false;
+  switch (this->GetPolicyStatusCMP0155()) {
+    case cmPolicies::WARN:
+    case cmPolicies::OLD:
+      // The OLD behavior is to not scan the source.
+      policyAnswer = false;
+      break;
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::NEW:
+      // The NEW behavior is to scan the source.
+      policyAnswer = true;
+      break;
+  }
+  return policyAnswer;
 }
 
 void cmGeneratorTarget::BuildFileSetInfoCache(std::string const& config) const

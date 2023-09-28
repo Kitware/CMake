@@ -871,6 +871,13 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
               ? "NEW"
               : "OLD");
 
+    /* Set the appropriate policy information for C++ module support */
+    fprintf(fout, "cmake_policy(SET CMP0155 %s)\n",
+            this->Makefile->GetPolicyStatus(cmPolicies::CMP0155) ==
+                cmPolicies::NEW
+              ? "NEW"
+              : "OLD");
+
     // Workaround for -Wl,-headerpad_max_install_names issue until we can avoid
     // adding that flag in the platform and compiler language files
     fprintf(fout,
