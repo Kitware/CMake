@@ -1,0 +1,20 @@
+CMAKE_LANG=C
+CMAKE_LINKER=
+CMAKE_C_COMPILER_ABI=
+CMAKE_C_COMPILER_AR=
+CMAKE_C_COMPILER_ARCHITECTURE_ID=ARM64
+CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_C_COMPILER_ID=Clang
+CMAKE_C_COMPILER_LAUNCHER=
+CMAKE_C_COMPILER_LOADED=1
+CMAKE_C_COMPILER_RANLIB=
+CMAKE_C_COMPILER_TARGET=
+CMAKE_C_COMPILER_VERSION=17.0.1
+CMAKE_C_COMPILER_VERSION_INTERAL=
+CMAKE_C_SIMULATE_ID=MSVC
+clang version 17.0.1
+Target: aarch64-pc-windows-msvc
+Thread model: posix
+InstalledDir: C:\DoesNotExist\LLVM\bin
+ "C:\\DoesNotExist\\LLVM\\bin\\clang-cl.exe" -cc1 -triple aarch64-pc-windows-msvc19.36.32532 -emit-obj -mrelax-all -mincremental-linker-compatible -dumpdir a- -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCCompilerABI.c -mrelocation-model pic -pic-level 2 -mframe-pointer=none -relaxed-aliasing -fmath-errno -ffp-contract=on -fno-rounding-math -mconstructor-aliases -funwind-tables=2 -target-cpu generic -target-feature +neon -target-feature +v8a -target-abi aapcs -D_MT -flto-visibility-public-std --dependent-lib=libcmt --dependent-lib=oldnames -stack-protector 2 -fdiagnostics-format msvc -v "-fcoverage-compilation-dir=C:\\DoesNotExist\\Temp" -resource-dir "C:\\DoesNotExist\\LLVM\\lib\\clang\\17" -internal-isystem "C:\\DoesNotExist\\LLVM\\lib\\clang\\17\\include" -internal-isystem "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\include" -internal-isystem "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\ATLMFC\\include" -internal-isystem "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\VS\\include" -internal-isystem "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.22621.0\\ucrt" -internal-isystem "C:\\Program Files (x86)\\Windows Kits\\10\\\\include\\10.0.22621.0\\\\um" -internal-isystem "C:\\Program Files (x86)\\Windows Kits\\10\\\\include\\10.0.22621.0\\\\shared" -internal-isystem "C:\\Program Files (x86)\\Windows Kits\\10\\\\include\\10.0.22621.0\\\\winrt" -internal-isystem "C:\\Program Files (x86)\\Windows Kits\\10\\\\include\\10.0.22621.0\\\\cppwinrt" -internal-isystem "C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.8\\include\\um" -internal-isystem "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\include" -internal-isystem "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.36.32532\\ATLMFC\\include" -internal-isystem "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Auxiliary\\VS\\include" -internal-isystem "C:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.22621.0\\ucrt" -internal-isystem "C:\\Program Files (x86)\\Windows Kits\\10\\\\include\\10.0.22621.0\\\\um" -internal-isystem "C:\\Program Files (x86)\\Windows Kits\\10\\\\include\\10.0.22621.0\\\\shared" -internal-isystem "C:\\Program Files (x86)\\Windows Kits\\10\\\\include\\10.0.22621.0\\\\winrt" -internal-isystem "C:\\Program Files (x86)\\Windows Kits\\10\\\\include\\10.0.22621.0\\\\cppwinrt" -internal-isystem "C:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.8\\include\\um" "-fdebug-compilation-dir=C:\\DoesNotExist\\Temp" -ferror-limit 19 -fno-use-cxa-atexit -fms-extensions -fms-compatibility -fms-compatibility-version=19.36.32532 -fdelayed-template-parsing -target-feature -fmv -faddrsig -o "C:\\DoesNotExist\\Temp\\CMakeCCompilerABI-742dcb.obj" -x c CMakeCCompilerABI.c
+ "C:\\DoesNotExist\\LLVM\\bin\\lld-link" -out:CMakeCCompilerABI.exe "-libpath:C:\\DoesNotExist\\LLVM\\lib\\clang\\17\\lib\\windows" -nologo "C:\\DoesNotExist\\Temp\\CMakeCCompilerABI-742dcb.obj"

@@ -26,11 +26,21 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
   set(multiValueArgs )
   cmake_parse_arguments(EXTRA_PARSE "${keywordArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
+  set(is_msvc 0)
+  if(EXTRA_PARSE_LANGUAGE AND
+    ("x${CMAKE_${EXTRA_PARSE_LANGUAGE}_ID}" STREQUAL "xMSVC" OR
+     "x${CMAKE_${EXTRA_PARSE_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC"))
+    set(is_msvc 1)
+  endif()
+
   # Parse implicit linker arguments.
   set(linker "CMAKE_LINKER-NOTFOUND")
   if(CMAKE_LINKER)
     get_filename_component(linker ${CMAKE_LINKER} NAME)
     string(REGEX REPLACE "([][+.*?()^$])" "\\\\\\1" linker "${linker}")
+  endif()
+  if(is_msvc)
+    string(APPEND linker "|link\\.exe|lld-link")
   endif()
   set(startfile "CMAKE_LINK_STARTFILE-NOTFOUND")
   if(CMAKE_LINK_STARTFILE)
@@ -74,12 +84,6 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
           list(GET args 1 cmd)
         endif()
       endif()
-    endif()
-    set(is_msvc 0)
-    if(EXTRA_PARSE_LANGUAGE AND
-      ("x${CMAKE_${EXTRA_PARSE_LANGUAGE}_ID}" STREQUAL "xMSVC" OR
-       "x${CMAKE_${EXTRA_PARSE_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC"))
-      set(is_msvc 1)
     endif()
     set(search_static 0)
     if("${cmd}" MATCHES "${linker_regex}")
