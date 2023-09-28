@@ -393,7 +393,7 @@
   },
   {
     "name": "EnableEnhancedInstructionSet",
-    "switch": "",
+    "switch": "arch:NotSet",
     "comment": "Not Set",
     "value": "NotSet",
     "flags": []
