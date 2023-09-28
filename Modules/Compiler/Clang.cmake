@@ -173,7 +173,12 @@ macro(__compiler_clang_cxx_standards lang)
 
     unset(_clang_version_std17)
 
-    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 17.0)
+    set(_clang_version_std23 17.0)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+      set(_clang_version_std23 18.0)
+    endif()
+
+    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS "${_clang_version_std23}")
       set(CMAKE_${lang}23_STANDARD_COMPILE_OPTION "-std=c++23")
       set(CMAKE_${lang}23_EXTENSION_COMPILE_OPTION "-std=gnu++23")
       set(CMAKE_${lang}26_STANDARD_COMPILE_OPTION "-std=c++26")
@@ -182,6 +187,8 @@ macro(__compiler_clang_cxx_standards lang)
       set(CMAKE_${lang}23_STANDARD_COMPILE_OPTION "-std=c++2b")
       set(CMAKE_${lang}23_EXTENSION_COMPILE_OPTION "-std=gnu++2b")
     endif()
+
+    unset(_clang_version_std23)
 
     if("x${CMAKE_${lang}_SIMULATE_ID}" STREQUAL "xMSVC")
       # The MSVC standard library requires C++14, and MSVC itself has no
