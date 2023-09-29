@@ -350,6 +350,16 @@ t:cuda11.8-minimal-ninja:
     variables:
         CMAKE_CI_NO_MR: "true"
 
+t:cuda11.8-minimal-splayed-ninja:
+    extends:
+        - .cuda11.8_splayed_nvidia
+        - .cmake_test_linux_release
+        - .linux_x86_64_tags_cuda
+        - .run_dependent
+        - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_NO_MR: "true"
+
 t:hip5.5-nvidia:
     extends:
         - .hip5.5_nvidia
