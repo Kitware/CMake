@@ -11,6 +11,8 @@
 
 #include <cm/optional>
 
+class cmGeneratorTarget;
+
 class cmBuildDatabase
 {
 public:
@@ -43,6 +45,8 @@ public:
 
   static std::unique_ptr<cmBuildDatabase> Load(std::string const& path);
   static cmBuildDatabase Merge(std::vector<cmBuildDatabase> const& components);
+  static cmBuildDatabase ForTarget(cmGeneratorTarget* gt,
+                                   std::string const& config);
 
 private:
   std::vector<Set> Sets;

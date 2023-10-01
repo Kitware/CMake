@@ -3,6 +3,7 @@
 #include "cmBuildDatabase.h"
 
 #include <cstdlib>
+#include <set>
 #include <utility>
 
 #include <cm/memory>
@@ -15,9 +16,22 @@
 
 #include "cmsys/FStream.hxx"
 
+#include "cmComputeLinkInformation.h"
+#include "cmFileSet.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
+#include "cmListFileCache.h"
+#include "cmLocalGenerator.h"
+#include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+
+namespace {
+
+std::string PlaceholderName = "<__CMAKE_UNKNOWN>";
+
+}
 
 cmBuildDatabase::cmBuildDatabase() = default;
 cmBuildDatabase::cmBuildDatabase(cmBuildDatabase const&) = default;
@@ -370,6 +384,78 @@ cmBuildDatabase cmBuildDatabase::Merge(
     db.Sets.insert(db.Sets.end(), component.Sets.begin(),
                    component.Sets.end());
   }
+
+  return db;
+}
+
+cmBuildDatabase cmBuildDatabase::ForTarget(cmGeneratorTarget* gt,
+                                           std::string const& config)
+{
+  cmBuildDatabase db;
+
+  Set set;
+  set.Name = cmStrCat(gt->GetName(), '@', config);
+  set.FamilyName = gt->GetFamilyName();
+  if (auto* cli = gt->GetLinkInformation(config)) {
+    std::set<cmGeneratorTarget const*> emitted;
+    std::vector<cmGeneratorTarget const*> targets;
+    for (auto const& item : cli->GetItems()) {
+      auto const* linkee = item.Target;
+      if (linkee && linkee->HaveCxx20ModuleSources() &&
+          !linkee->IsImported() && emitted.insert(linkee).second) {
+        set.VisibleSets.push_back(cmStrCat(linkee->GetName(), '@', config));
+      }
+    }
+  }
+
+  for (auto const& sfbt : gt->GetSourceFiles(config)) {
+    auto const* sf = sfbt.Value;
+
+    bool isCXXModule = false;
+    bool isPrivate = true;
+    if (sf->GetLanguage() != "CXX"_s) {
+      auto const* fs = gt->GetFileSetForSource(config, sf);
+      if (fs && fs->GetType() == "CXX_MODULES"_s) {
+        isCXXModule = true;
+        isPrivate = !cmFileSetVisibilityIsForInterface(fs->GetVisibility());
+      }
+    }
+
+    TranslationUnit tu;
+
+    // FIXME: Makefiles will want this to be the current working directory.
+    tu.WorkDirectory = gt->GetLocalGenerator()->GetBinaryDirectory();
+    tu.Source = sf->GetFullPath();
+    if (!gt->IsSynthetic()) {
+      auto* gg = gt->GetGlobalGenerator();
+      std::string const objectDir = gg->ConvertToOutputPath(
+        cmStrCat(gt->GetSupportDirectory(), gg->GetConfigDirectory(config)));
+      std::string const objectFileName = gt->GetObjectName(sf);
+      tu.Object = cmStrCat(objectDir, '/', objectFileName);
+    }
+    if (isCXXModule) {
+      tu.Provides[PlaceholderName] = PlaceholderName;
+    }
+
+    cmGeneratorTarget::ClassifiedFlags classifiedFlags =
+      gt->GetClassifiedFlagsForSource(sf, config);
+    for (auto const& classifiedFlag : classifiedFlags) {
+      if (classifiedFlag.Classification ==
+          cmGeneratorTarget::FlagClassification::BaselineFlag) {
+        tu.BaselineArguments.push_back(classifiedFlag.Flag);
+        tu.LocalArguments.push_back(classifiedFlag.Flag);
+      } else if (classifiedFlag.Classification ==
+                 cmGeneratorTarget::FlagClassification::PrivateFlag) {
+        tu.LocalArguments.push_back(classifiedFlag.Flag);
+      }
+      tu.Arguments.push_back(classifiedFlag.Flag);
+    }
+    tu.Private = isPrivate;
+
+    set.TranslationUnits.emplace_back(std::move(tu));
+  }
+
+  db.Sets.emplace_back(std::move(set));
 
   return db;
 }
