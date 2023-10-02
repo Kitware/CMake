@@ -1230,7 +1230,8 @@ Configuration settings include:
 
 ``TimeOut``
   The default timeout for each test if not specified by the
-  :prop_test:`TIMEOUT` test property.
+  :prop_test:`TIMEOUT` test property or the
+  :option:`--timeout <ctest --timeout>` flag.
 
   * `CTest Script`_ variable: :variable:`CTEST_TEST_TIMEOUT`
   * :module:`CTest` module variable: ``DART_TESTING_TIMEOUT``

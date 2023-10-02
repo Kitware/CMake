@@ -791,11 +791,12 @@ bool cmCTestRunTest::ForkProcess()
       timeout = this->CTest->GetGlobalTimeout();
     }
 
-    // Check CTEST_TEST_TIMEOUT.
-    cmDuration ctestTestTimeout = this->CTest->GetTimeOut();
-    if (ctestTestTimeout > cmDuration::zero() &&
-        (!timeout || ctestTestTimeout < *timeout)) {
-      timeout = ctestTestTimeout;
+    if (!timeout) {
+      // Check CTEST_TEST_TIMEOUT.
+      cmDuration ctestTestTimeout = this->CTest->GetTimeOut();
+      if (ctestTestTimeout > cmDuration::zero()) {
+        timeout = ctestTestTimeout;
+      }
     }
   }
 
