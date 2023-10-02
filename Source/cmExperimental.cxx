@@ -19,17 +19,6 @@ namespace {
  * up-to-date.
  */
 cmExperimental::FeatureData LookupTable[] = {
-  // CxxModuleCMakeApi
-  { "CxxModuleCMakeApi",
-    "ac01f462-0f5f-432a-86aa-acef252918a6",
-    "CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API",
-    "CMake's C++ module support is experimental. It is meant only for "
-    "experimentation and feedback to CMake developers.",
-    { "CMAKE_EXPERIMENTAL_CXX_SCANDEP_SOURCE",
-      "CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FORMAT",
-      "CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FLAG" },
-    cmExperimental::TryCompileCondition::SkipCompilerChecks,
-    false },
   // WindowsKernelModeDriver
   { "WindowsKernelModeDriver",
     "5c2d848d-4efa-4529-a768-efd57171bf68",

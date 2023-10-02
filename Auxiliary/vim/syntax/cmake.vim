@@ -3137,7 +3137,6 @@ syn keyword cmakeKWexecute_process contained
 syn keyword cmakeKWexport contained
             \ ANDROID_MK
             \ APPEND
-            \ CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API
             \ CONFIG
             \ CXX_MODULES_DIRECTORY
             \ EXPORT
@@ -3707,7 +3706,6 @@ syn keyword cmakeKWinstall contained
             \ BUILD_TYPE
             \ BUNDLE
             \ BUNDLE_EXECUTABLE
-            \ CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API
             \ CMAKE_INSTALL_BINDIR
             \ CMAKE_INSTALL_DATADIR
             \ CMAKE_INSTALL_DATAROOTDIR
@@ -4258,7 +4256,6 @@ syn keyword cmakeKWtarget_sources contained
             \ ALIAS
             \ BASE_DIRS
             \ BUILD_INTERFACE
-            \ CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API
             \ CONFIG
             \ CORRECT
             \ CXX_MODULES

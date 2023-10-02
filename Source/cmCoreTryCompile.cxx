@@ -235,25 +235,16 @@ ArgumentParser::Continue cmCoreTryCompile::Arguments::SetSourceType(
     this->SourceTypeContext = SourceType::Normal;
     matched = true;
   } else if (sourceType == "CXX_MODULE"_s) {
-    bool const supportCxxModuleSources = cmExperimental::HasSupportEnabled(
-      *this->Makefile, cmExperimental::Feature::CxxModuleCMakeApi);
-    if (supportCxxModuleSources) {
-      this->SourceTypeContext = SourceType::CxxModule;
-      matched = true;
-    }
+    this->SourceTypeContext = SourceType::CxxModule;
+    matched = true;
   }
 
   if (!matched && this->SourceTypeError.empty()) {
-    bool const supportCxxModuleSources = cmExperimental::HasSupportEnabled(
-      *this->Makefile, cmExperimental::Feature::CxxModuleCMakeApi);
-    auto const* message = "'SOURCE'";
-    if (supportCxxModuleSources) {
-      message = "one of 'SOURCE' or 'CXX_MODULE'";
-    }
     // Only remember one error at a time; all other errors related to argument
     // parsing are "indicate one error and return" anyways.
     this->SourceTypeError =
-      cmStrCat("Invalid 'SOURCE_TYPE' '", sourceType, "'; must be ", message);
+      cmStrCat("Invalid 'SOURCE_TYPE' '", sourceType,
+               "'; must be one of 'SOURCE' or 'CXX_MODULE'");
   }
   return ArgumentParser::Continue::Yes;
 }
@@ -876,6 +867,13 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     /* Set the appropriate policy information for PIE link flags */
     fprintf(fout, "cmake_policy(SET CMP0083 %s)\n",
             this->Makefile->GetPolicyStatus(cmPolicies::CMP0083) ==
+                cmPolicies::NEW
+              ? "NEW"
+              : "OLD");
+
+    /* Set the appropriate policy information for C++ module support */
+    fprintf(fout, "cmake_policy(SET CMP0155 %s)\n",
+            this->Makefile->GetPolicyStatus(cmPolicies::CMP0155) ==
                 cmPolicies::NEW
               ? "NEW"
               : "OLD");

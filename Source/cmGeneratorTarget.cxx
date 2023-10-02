@@ -31,7 +31,6 @@
 #include "cmCustomCommandGenerator.h"
 #include "cmCxxModuleUsageEffects.h"
 #include "cmEvaluatedTargetProperty.h"
-#include "cmExperimental.h"
 #include "cmFileSet.h"
 #include "cmFileTimes.h"
 #include "cmGeneratedFileStream.h"
@@ -9047,7 +9046,7 @@ std::string cmGeneratorTarget::GetImportedXcFrameworkPath(
 
 bool cmGeneratorTarget::HaveFortranSources(std::string const& config) const
 {
-  auto sources = cmGeneratorTarget::GetSourceFiles(config);
+  auto sources = this->GetSourceFiles(config);
   return std::any_of(sources.begin(), sources.end(),
                      [](BT<cmSourceFile*> const& sf) -> bool {
                        return sf.Value->GetLanguage() == "Fortran"_s;
@@ -9106,53 +9105,92 @@ cmGeneratorTarget::Cxx20SupportLevel cmGeneratorTarget::HaveCxxModuleSupport(
   // Else, an empty CMAKE_CXX_STANDARD_DEFAULT means CMake does not detect and
   // set a default standard level for this compiler, so assume all standards
   // are available.
-  if (!cmExperimental::HasSupportEnabled(
-        *this->Makefile, cmExperimental::Feature::CxxModuleCMakeApi)) {
-    return Cxx20SupportLevel::MissingExperimentalFlag;
+  cmValue scandepRule =
+    this->Target->GetMakefile()->GetDefinition("CMAKE_CXX_SCANDEP_SOURCE");
+  if (!scandepRule) {
+    return Cxx20SupportLevel::MissingRule;
   }
   return Cxx20SupportLevel::Supported;
 }
 
 void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
 {
+  bool haveScannableSources = false;
+
   // Check for `CXX_MODULE*` file sets and a lack of support.
   if (this->HaveCxx20ModuleSources()) {
-    switch (this->HaveCxxModuleSupport(config)) {
-      case cmGeneratorTarget::Cxx20SupportLevel::MissingCxx:
-        this->Makefile->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmStrCat("The target named \"", this->GetName(),
-                   "\" has C++ sources that export modules but the \"CXX\" "
-                   "language has not been enabled"));
-        break;
-      case cmGeneratorTarget::Cxx20SupportLevel::MissingExperimentalFlag:
-        this->Makefile->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmStrCat("The target named \"", this->GetName(),
-                   "\" has C++ sources that export modules but its "
-                   "experimental support has not been requested"));
-        break;
-      case cmGeneratorTarget::Cxx20SupportLevel::NoCxx20: {
-        cmStandardLevelResolver standardResolver(this->Makefile);
-        auto effStandard =
-          standardResolver.GetEffectiveStandard(this, "CXX", config);
-        if (effStandard.empty()) {
-          effStandard = "; no C++ standard found";
-        } else {
-          effStandard = cmStrCat("; found \"cxx_std_", effStandard, '"');
-        }
-        this->Makefile->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmStrCat(
-            "The target named \"", this->GetName(),
-            "\" has C++ sources that export modules but does not include "
-            "\"cxx_std_20\" (or newer) among its `target_compile_features`",
-            effStandard));
-      } break;
-      case cmGeneratorTarget::Cxx20SupportLevel::Supported:
-        // All is well.
-        break;
+    haveScannableSources = true;
+  }
+
+  if (!haveScannableSources) {
+    // Check to see if there are regular sources that have requested scanning.
+    auto sources = this->GetSourceFiles(config);
+    for (auto const& source : sources) {
+      auto const* sf = source.Value;
+      auto const& lang = sf->GetLanguage();
+      if (lang != "CXX"_s) {
+        continue;
+      }
+      // Ignore sources which do not need dyndep.
+      if (this->NeedDyndepForSource(lang, config, sf)) {
+        haveScannableSources = true;
+      }
     }
+  }
+
+  // If there isn't anything scannable, ignore it.
+  if (!haveScannableSources) {
+    return;
+  }
+
+  // If the generator doesn't support modules at all, error that we have
+  // sources that require the support.
+  if (!this->GetGlobalGenerator()->CheckCxxModuleSupport()) {
+    this->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(
+        "The target named \"", this->GetName(),
+        "\" contains C++ "
+        "sources that use modules which is not supported by the generator"));
+    return;
+  }
+
+  switch (this->HaveCxxModuleSupport(config)) {
+    case cmGeneratorTarget::Cxx20SupportLevel::MissingCxx:
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("The target named \"", this->GetName(),
+                 "\" has C++ sources that use modules but the \"CXX\" "
+                 "language has not been enabled"));
+      break;
+    case cmGeneratorTarget::Cxx20SupportLevel::NoCxx20: {
+      cmStandardLevelResolver standardResolver(this->Makefile);
+      auto effStandard =
+        standardResolver.GetEffectiveStandard(this, "CXX", config);
+      if (effStandard.empty()) {
+        effStandard = "; no C++ standard found";
+      } else {
+        effStandard = cmStrCat("; found \"cxx_std_", effStandard, '"');
+      }
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat(
+          "The target named \"", this->GetName(),
+          "\" has C++ sources that use modules but does not include "
+          "\"cxx_std_20\" (or newer) among its `target_compile_features`",
+          effStandard));
+    } break;
+    case cmGeneratorTarget::Cxx20SupportLevel::MissingRule: {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("The target named \"", this->GetName(),
+                 "\" has C++ sources that use modules but the compiler does "
+                 "not provide a way to discover the import graph "
+                 "dependencies"));
+    } break;
+    case cmGeneratorTarget::Cxx20SupportLevel::Supported:
+      // All is well.
+      break;
   }
 }
 
@@ -9191,13 +9229,29 @@ bool cmGeneratorTarget::NeedDyndepForSource(std::string const& lang,
                                             std::string const& config,
                                             cmSourceFile const* sf) const
 {
-  bool const needDyndep = this->NeedDyndep(lang, config);
-  if (!needDyndep) {
+  // Fortran always needs to be scanned.
+  if (lang == "Fortran"_s) {
+    return true;
+  }
+  // Only C++ code needs scanned otherwise.
+  if (lang != "CXX"_s) {
     return false;
   }
+
+  // Any file in `CXX_MODULES` file sets need scanned (it being `CXX` is
+  // enforced elsewhere).
   auto const* fs = this->GetFileSetForSource(config, sf);
   if (fs && fs->GetType() == "CXX_MODULES"_s) {
     return true;
+  }
+
+  switch (this->HaveCxxModuleSupport(config)) {
+    case Cxx20SupportLevel::MissingCxx:
+    case Cxx20SupportLevel::NoCxx20:
+      return false;
+    case Cxx20SupportLevel::MissingRule:
+    case Cxx20SupportLevel::Supported:
+      break;
   }
   auto const sfProp = sf->GetProperty("CXX_SCAN_FOR_MODULES");
   if (sfProp.IsSet()) {
@@ -9207,7 +9261,22 @@ bool cmGeneratorTarget::NeedDyndepForSource(std::string const& lang,
   if (tgtProp.IsSet()) {
     return tgtProp.IsOn();
   }
-  return true;
+
+  bool policyAnswer = false;
+  switch (this->GetPolicyStatusCMP0155()) {
+    case cmPolicies::WARN:
+    case cmPolicies::OLD:
+      // The OLD behavior is to not scan the source.
+      policyAnswer = false;
+      break;
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::NEW:
+      // The NEW behavior is to scan the source.
+      policyAnswer = true;
+      break;
+  }
+  return policyAnswer;
 }
 
 void cmGeneratorTarget::BuildFileSetInfoCache(std::string const& config) const

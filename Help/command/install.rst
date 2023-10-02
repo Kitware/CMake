@@ -232,10 +232,7 @@ Signatures
     would be installed to ``myproj/here.h`` below the destination.
 
   ``CXX_MODULES_BMI``
-
-    .. note ::
-
-      Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+    .. versionadded:: 3.28
 
     Any module files from C++ modules from ``PUBLIC`` sources in a file set of
     type ``CXX_MODULES`` will be installed to the given ``DESTINATION``. All
@@ -843,10 +840,7 @@ Signatures
     and defines required to use the libraries.
 
   ``CXX_MODULES_DIRECTORY``
-
-    .. note ::
-
-      Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+    .. versionadded:: 3.28
 
     Specify a subdirectory to store C++ module information for targets in the
     export set. This directory will be populated with files which add the

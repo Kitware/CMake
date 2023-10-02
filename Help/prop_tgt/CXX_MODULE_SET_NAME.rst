@@ -1,11 +1,7 @@
 CXX_MODULE_SET_<NAME>
 ---------------------
 
-.. versionadded:: 3.25
-
-.. note ::
-
-  Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+.. versionadded:: 3.28
 
 Semicolon-separated list of files in the target's ``<NAME>`` C++ module set,
 which has the set type ``CXX_MODULES``. If any of the paths are relative, they

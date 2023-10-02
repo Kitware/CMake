@@ -15,9 +15,10 @@ if ("cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
     run_cmake(NoCXX20)
   endif ()
 
-  # This test uses C++20, but another prerequisite is missing, so forced
-  # standards don't matter.
-  run_cmake(NoCXX20ModuleFlag)
+  run_cmake(NoScanningSourceFileProperty)
+  run_cmake(NoScanningTargetProperty)
+  run_cmake(CMP0155-OLD)
+  run_cmake(CMP0155-NEW)
 endif ()
 
 if (RunCMake_GENERATOR MATCHES "Ninja")

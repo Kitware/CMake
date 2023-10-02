@@ -10,7 +10,6 @@
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
-#include "cmExperimental.h"
 #include "cmFileSet.h"
 #include "cmGeneratorExpression.h"
 #include "cmList.h"
@@ -260,28 +259,18 @@ bool TargetSourcesImpl::HandleOneFileSet(
       this->SetError("Must specify a TYPE when creating file set");
       return false;
     }
-    bool const supportCxx20FileSetTypes = cmExperimental::HasSupportEnabled(
-      *this->Makefile, cmExperimental::Feature::CxxModuleCMakeApi);
+    if (type != "HEADERS"_s && type != "CXX_MODULES"_s) {
+      this->SetError(
+        R"(File set TYPE may only be "HEADERS" or "CXX_MODULES")");
+      return false;
+    }
 
-    if (supportCxx20FileSetTypes) {
-      if (type != "HEADERS"_s && type != "CXX_MODULES"_s) {
+    if (cmFileSetVisibilityIsForInterface(visibility) &&
+        !cmFileSetVisibilityIsForSelf(visibility) &&
+        !this->Target->IsImported()) {
+      if (type == "CXX_MODULES"_s) {
         this->SetError(
-          R"(File set TYPE may only be "HEADERS" or "CXX_MODULES")");
-        return false;
-      }
-
-      if (cmFileSetVisibilityIsForInterface(visibility) &&
-          !cmFileSetVisibilityIsForSelf(visibility) &&
-          !this->Target->IsImported()) {
-        if (type == "CXX_MODULES"_s) {
-          this->SetError(
-            R"(File set TYPE "CXX_MODULES" may not have "INTERFACE" visibility)");
-          return false;
-        }
-      }
-    } else {
-      if (type != "HEADERS"_s) {
-        this->SetError("File set TYPE may only be \"HEADERS\"");
+          R"(File set TYPE "CXX_MODULES" may not have "INTERFACE" visibility)");
         return false;
       }
     }

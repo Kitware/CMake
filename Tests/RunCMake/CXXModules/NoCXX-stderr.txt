@@ -1,20 +1,8 @@
-CMake Warning \(dev\) at NoCXX.cmake:[0-9]+ \(target_sources\):
-  CMake's C\+\+ module support is experimental.  It is meant only for
-  experimentation and feedback to CMake developers.
-Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.
-
-CMake Error in CMakeLists.txt:
-  The target named "nocxx" has C\+\+ sources that export modules but the "CXX"
+(CMake Error in CMakeLists.txt:
+(  The target named "nocxx" has C\+\+ sources that use modules but the "CXX"
   language has not been enabled
-
-(
-CMake Error in CMakeLists.txt:
-(  The target named "nocxx" has C\+\+ sources that export modules but the "CXX"
-  language has not been enabled
-|  The target named "nocxx" contains C\+\+ sources that export modules which is
-  not supported by the generator
+|  The target named "nocxx" contains C\+\+ sources that use modules which is not
+  supported by the generator
 |  Target "nocxx" has source file
 
     .*/Tests/RunCMake/CXXModules/sources/module.cxx

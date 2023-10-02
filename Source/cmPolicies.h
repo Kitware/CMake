@@ -469,6 +469,10 @@ class cmMakefile;
   SELECT(                                                                     \
     POLICY, CMP0154,                                                          \
     "Generated files are private by default in targets using file sets.", 3,  \
+    28, 0, cmPolicies::WARN)                                                  \
+  SELECT(                                                                     \
+    POLICY, CMP0155,                                                          \
+    "C++ sources in targets with at least C++20 are scanned for imports", 3,  \
     28, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
@@ -508,7 +512,8 @@ class cmMakefile;
   F(CMP0119)                                                                  \
   F(CMP0131)                                                                  \
   F(CMP0142)                                                                  \
-  F(CMP0154)
+  F(CMP0154)                                                                  \
+  F(CMP0155)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \
