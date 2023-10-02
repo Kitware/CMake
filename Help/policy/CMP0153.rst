@@ -1,6 +1,8 @@
 CMP0153
 -------
 
+.. versionadded:: 3.28
+
 The :command:`exec_program` command should not be called.
 
 This command has long been superseded by the :command:`execute_process`
