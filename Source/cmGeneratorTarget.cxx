@@ -9093,20 +9093,27 @@ cmGeneratorTarget::Cxx20SupportLevel cmGeneratorTarget::HaveCxxModuleSupport(
   if (!state->GetLanguageEnabled("CXX")) {
     return Cxx20SupportLevel::MissingCxx;
   }
+
   cmValue standardDefault =
-    this->Target->GetMakefile()->GetDefinition("CMAKE_CXX_STANDARD_DEFAULT");
-  if (standardDefault && !standardDefault->empty()) {
-    cmStandardLevelResolver standardResolver(this->Makefile);
-    if (!standardResolver.HaveStandardAvailable(this, "CXX", config,
-                                                "cxx_std_20")) {
-      return Cxx20SupportLevel::NoCxx20;
-    }
+    this->Makefile->GetDefinition("CMAKE_CXX_STANDARD_DEFAULT");
+  if (!standardDefault || standardDefault->empty()) {
+    // We do not know any meaningful C++ standard levels for this compiler.
+    return Cxx20SupportLevel::NoCxx20;
   }
-  // Else, an empty CMAKE_CXX_STANDARD_DEFAULT means CMake does not detect and
-  // set a default standard level for this compiler, so assume all standards
-  // are available.
+
+  cmStandardLevelResolver standardResolver(this->Makefile);
+  if (!standardResolver.HaveStandardAvailable(this, "CXX", config,
+                                              "cxx_std_20") ||
+      // During the ABI detection step we do not know the compiler's features.
+      // HaveStandardAvailable may return true as a fallback, but in this code
+      // path we do not want to assume C++ 20 is available.
+      this->Makefile->GetDefinition("CMAKE_CXX20_COMPILE_FEATURES")
+        .IsEmpty()) {
+    return Cxx20SupportLevel::NoCxx20;
+  }
+
   cmValue scandepRule =
-    this->Target->GetMakefile()->GetDefinition("CMAKE_CXX_SCANDEP_SOURCE");
+    this->Makefile->GetDefinition("CMAKE_CXX_SCANDEP_SOURCE");
   if (!scandepRule) {
     return Cxx20SupportLevel::MissingRule;
   }
