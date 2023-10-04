@@ -13,6 +13,7 @@
 #include <vector>
 
 #include <cm/iterator>
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -25,6 +26,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmStandardLevel.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 #include "cmValue.h"
@@ -45,12 +47,6 @@ const char* const CUDA_FEATURES[] = { nullptr FOR_EACH_CUDA_FEATURE(
 const char* const HIP_FEATURES[] = { nullptr FOR_EACH_HIP_FEATURE(
   FEATURE_STRING) };
 #undef FEATURE_STRING
-
-struct StandardNeeded
-{
-  int index;
-  int value;
-};
 
 int ParseStd(std::string const& level)
 {
@@ -352,7 +348,8 @@ struct StandardLevelComputer
       newRequiredStandard.clear();
     }
 
-    auto needed = this->HighestStandardNeeded(makefile, feature);
+    cm::optional<cmStandardLevel> needed =
+      this->HighestStandardNeeded(makefile, feature);
 
     cmValue existingStandard = currentLangStandardValue;
     if (!existingStandard) {
@@ -382,12 +379,12 @@ struct StandardLevelComputer
       }
     }
 
-    if (needed.index != -1) {
+    if (needed) {
       // Ensure the C++ language level is high enough to support
       // the needed C++ features.
       if (existingLevelIter == cm::cend(this->Levels) ||
-          existingLevelIter < this->Levels.begin() + needed.index) {
-        newRequiredStandard = this->LevelsAsStrings[needed.index];
+          existingLevelIter < this->Levels.begin() + needed->Index()) {
+        newRequiredStandard = this->LevelsAsStrings[needed->Index()];
       }
     }
 
@@ -439,23 +436,24 @@ struct StandardLevelComputer
       return false;
     }
 
-    auto needed = this->HighestStandardNeeded(makefile, feature);
+    cm::optional<cmStandardLevel> needed =
+      this->HighestStandardNeeded(makefile, feature);
 
-    return (needed.index == -1) ||
-      (this->Levels.begin() + needed.index) <= existingLevelIter;
+    return !needed ||
+      (this->Levels.begin() + needed->Index()) <= existingLevelIter;
   }
 
-  StandardNeeded HighestStandardNeeded(cmMakefile* makefile,
-                                       std::string const& feature) const
+  cm::optional<cmStandardLevel> HighestStandardNeeded(
+    cmMakefile* makefile, std::string const& feature) const
   {
     std::string prefix = cmStrCat("CMAKE_", this->Language);
-    StandardNeeded maxLevel = { -1, -1 };
+    cm::optional<cmStandardLevel> maxLevel;
     for (size_t i = 0; i < this->Levels.size(); ++i) {
       if (cmValue prop = makefile->GetDefinition(
             cmStrCat(prefix, this->LevelsAsStrings[i], "_COMPILE_FEATURES"))) {
         cmList props{ *prop };
         if (cm::contains(props, feature)) {
-          maxLevel = { static_cast<int>(i), this->Levels[i] };
+          maxLevel = cmStandardLevel(i);
         }
       }
     }
