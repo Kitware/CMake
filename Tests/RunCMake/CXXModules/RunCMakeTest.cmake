@@ -3,8 +3,8 @@ include(RunCMake)
 # For `if (IN_LIST)`
 cmake_policy(SET CMP0057 NEW)
 
-run_cmake(compiler_introspection)
-include("${RunCMake_BINARY_DIR}/compiler_introspection-build/info.cmake")
+run_cmake(Inspect)
+include("${RunCMake_BINARY_DIR}/Inspect-build/info.cmake")
 
 # Test negative cases where C++20 modules do not work.
 run_cmake(NoCXX)
