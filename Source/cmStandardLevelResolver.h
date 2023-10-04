@@ -4,10 +4,13 @@
 
 #include <string>
 
+#include <cm/optional>
+
 #include "cmValue.h"
 
 class cmMakefile;
 class cmGeneratorTarget;
+class cmStandardLevel;
 class cmTarget;
 
 class cmStandardLevelResolver
@@ -32,6 +35,9 @@ public:
   bool CompileFeatureKnown(const std::string& targetName,
                            const std::string& feature, std::string& lang,
                            std::string* error) const;
+
+  cm::optional<cmStandardLevel> CompileFeatureStandardLevel(
+    std::string const& lang, std::string const& feature) const;
 
   cmValue CompileFeaturesAvailable(const std::string& lang,
                                    std::string* error) const;

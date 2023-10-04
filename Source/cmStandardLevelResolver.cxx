@@ -349,7 +349,7 @@ struct StandardLevelComputer
     }
 
     cm::optional<cmStandardLevel> needed =
-      this->HighestStandardNeeded(makefile, feature);
+      this->CompileFeatureStandardLevel(makefile, feature);
 
     cmValue existingStandard = currentLangStandardValue;
     if (!existingStandard) {
@@ -437,13 +437,13 @@ struct StandardLevelComputer
     }
 
     cm::optional<cmStandardLevel> needed =
-      this->HighestStandardNeeded(makefile, feature);
+      this->CompileFeatureStandardLevel(makefile, feature);
 
     return !needed ||
       (this->Levels.begin() + needed->Index()) <= existingLevelIter;
   }
 
-  cm::optional<cmStandardLevel> HighestStandardNeeded(
+  cm::optional<cmStandardLevel> CompileFeatureStandardLevel(
     cmMakefile* makefile, std::string const& feature) const
   {
     std::string prefix = cmStrCat("CMAKE_", this->Language);
@@ -650,6 +650,17 @@ bool cmStandardLevelResolver::CompileFeatureKnown(
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
   }
   return false;
+}
+
+cm::optional<cmStandardLevel>
+cmStandardLevelResolver::CompileFeatureStandardLevel(
+  std::string const& lang, std::string const& feature) const
+{
+  auto mapping = StandardComputerMapping.find(lang);
+  if (mapping == cm::cend(StandardComputerMapping)) {
+    return cm::nullopt;
+  }
+  return mapping->second.CompileFeatureStandardLevel(this->Makefile, feature);
 }
 
 cmValue cmStandardLevelResolver::CompileFeaturesAvailable(
