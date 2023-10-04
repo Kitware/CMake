@@ -21,6 +21,13 @@ foreach(t MultiThreaded SingleThreaded)
     endforeach()
   endforeach()
 endforeach()
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "LLVMFlang")
+  # LLVMFlang does not actually define these, so inject them
+  set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         "-D_MT")
+  set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL      "-D_MT;-D_DLL")
+  set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebug    "-D_MT;-D_DEBUG")
+  set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL "-D_MT;-D_DEBUG;-D_DLL")
+endif()
 string(APPEND CMAKE_Fortran_FLAGS " -w")
 
 function(verify_combinations threads lang src)

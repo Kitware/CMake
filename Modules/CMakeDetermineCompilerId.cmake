@@ -174,6 +174,32 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     endif()
   endif()
 
+  # FIXME(LLVMFlang): It does not provide predefines identifying the MSVC ABI or architecture.
+  # It should be taught to define _MSC_VER and its _M_* architecture flags.
+  if("x${lang}" STREQUAL "xFortran" AND "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xLLVMFlang")
+    # Parse the target triple to detect information we should later be able
+    # to get during preprocessing above, once LLVMFlang provides it.
+    if(COMPILER_${lang}_PRODUCED_OUTPUT MATCHES "-triple ([0-9a-z_]*)-.*windows-msvc([0-9]+)\\.([0-9]+)")
+      set(CMAKE_${lang}_SIMULATE_ID "MSVC")
+      set(CMAKE_${lang}_SIMULATE_VERSION "${CMAKE_MATCH_2}.${CMAKE_MATCH_3}")
+      set(arch ${CMAKE_MATCH_1})
+      if(arch STREQUAL "x86_64")
+        set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "x64")
+      elseif(arch STREQUAL "aarch64")
+        set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "ARM64")
+      elseif(arch STREQUAL "arm64ec")
+        set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "ARM64EC")
+      elseif(arch MATCHES "^i[3-9]86$")
+        set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "X86")
+      else()
+        message(FATAL_ERROR "LLVMFlang target architecture unrecognized: ${arch}")
+      endif()
+      set(MSVC_${lang}_ARCHITECTURE_ID "${CMAKE_${lang}_COMPILER_ARCHITECTURE_ID}")
+    elseif(COMPILER_${lang}_PRODUCED_OUTPUT MATCHES "-triple ([0-9a-z_]*)-.*windows-gnu")
+      set(CMAKE_${lang}_SIMULATE_ID "GNU")
+    endif()
+  endif()
+
   if (COMPILER_QNXNTO AND (CMAKE_${lang}_COMPILER_ID STREQUAL "GNU" OR CMAKE_${lang}_COMPILER_ID STREQUAL "LCC"))
     execute_process(
       COMMAND "${CMAKE_${lang}_COMPILER}"

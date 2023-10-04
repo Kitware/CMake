@@ -1,0 +1,20 @@
+CMAKE_LANG=Fortran
+CMAKE_LINKER=
+CMAKE_Fortran_COMPILER_ABI=
+CMAKE_Fortran_COMPILER_AR=
+CMAKE_Fortran_COMPILER_ARCHITECTURE_ID=x64
+CMAKE_Fortran_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_Fortran_COMPILER_ID=LLVMFlang
+CMAKE_Fortran_COMPILER_LAUNCHER=
+CMAKE_Fortran_COMPILER_LOADED=1
+CMAKE_Fortran_COMPILER_RANLIB=
+CMAKE_Fortran_COMPILER_TARGET=
+CMAKE_Fortran_COMPILER_VERSION=17.0.1
+CMAKE_Fortran_COMPILER_VERSION_INTERAL=
+CMAKE_Fortran_SIMULATE_ID=MSVC
+flang-new version 17.0.1
+Target: x86_64-pc-windows-msvc
+Thread model: posix
+InstalledDir: C:\DoesNotExist\LLVM\bin
+ "C:\\DoesNotExist\\LLVM\\bin\\flang-new" "-fc1" "-triple" "x86_64-pc-windows-msvc19.29.30152" "-emit-obj" "-mrelocation-model" "pic" "-pic-level" "2" "-target-cpu" "x86-64" "-o" "C:\\DoesNotExist\\Temp\\CMakeFortranCompilerABI-54be37.o" "-x" "f95-cpp-input" "CMakeFortranCompilerABI.F"
+ "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Professional\\VC\\Tools\\MSVC\\14.29.30133\\bin\\Hostx64\\x64\\link.exe" "-out:a.exe" "-libpath:C:\\DoesNotExist\\LLVM\\lib" "Fortran_main.lib" "FortranRuntime.lib" "FortranDecimal.lib" "/subsystem:console" "-libpath:C:\\DoesNotExist\\LLVM\\lib\\clang\\17\\lib\\windows" "-nologo" "C:\\DoesNotExist\\Temp\\CMakeFortranCompilerABI-54be37.o"

@@ -1,0 +1,2 @@
+libs=Fortran_main\.lib;FortranRuntime\.lib;FortranDecimal\.lib
+dirs=C:/DoesNotExist/LLVM/lib;C:/DoesNotExist/LLVM/lib/clang/17/lib/windows
