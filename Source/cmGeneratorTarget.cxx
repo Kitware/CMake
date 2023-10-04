@@ -5025,10 +5025,44 @@ void cmGeneratorTarget::ComputeTargetManifest(const std::string& config) const
   }
 }
 
+cm::optional<cmStandardLevel> cmGeneratorTarget::GetExplicitStandardLevel(
+  std::string const& lang, std::string const& config) const
+{
+  cm::optional<cmStandardLevel> level;
+  std::string key = cmStrCat(cmSystemTools::UpperCase(config), '-', lang);
+  auto i = this->ExplicitStandardLevel.find(key);
+  if (i != this->ExplicitStandardLevel.end()) {
+    level = i->second;
+  }
+  return level;
+}
+
+void cmGeneratorTarget::UpdateExplicitStandardLevel(std::string const& lang,
+                                                    std::string const& config,
+                                                    cmStandardLevel level)
+{
+  auto e = this->ExplicitStandardLevel.emplace(
+    cmStrCat(cmSystemTools::UpperCase(config), '-', lang), level);
+  if (!e.second && e.first->second < level) {
+    e.first->second = level;
+  }
+}
+
 bool cmGeneratorTarget::ComputeCompileFeatures(std::string const& config)
 {
-  // Compute the language standard based on the compile features.
   cmStandardLevelResolver standardResolver(this->Makefile);
+
+  for (std::string const& lang :
+       this->Makefile->GetState()->GetEnabledLanguages()) {
+    if (cmValue languageStd = this->GetLanguageStandard(lang, config)) {
+      if (cm::optional<cmStandardLevel> langLevel =
+            standardResolver.LanguageStandardLevel(lang, *languageStd)) {
+        this->UpdateExplicitStandardLevel(lang, config, *langLevel);
+      }
+    }
+  }
+
+  // Compute the language standard based on the compile features.
   std::vector<BT<std::string>> features = this->GetCompileFeatures(config);
   for (BT<std::string> const& f : features) {
     std::string lang;
@@ -5046,6 +5080,10 @@ bool cmGeneratorTarget::ComputeCompileFeatures(std::string const& config)
           this->Target->GetName(), f.Value, currentLanguageStandard,
           featureLevel, newRequiredStandard)) {
       return false;
+    }
+
+    if (featureLevel) {
+      this->UpdateExplicitStandardLevel(lang, config, *featureLevel);
     }
 
     if (!newRequiredStandard.empty()) {

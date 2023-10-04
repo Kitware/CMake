@@ -21,6 +21,7 @@
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
+#include "cmStandardLevel.h"
 #include "cmStateTypes.h"
 #include "cmValue.h"
 
@@ -1241,6 +1242,13 @@ private:
                 std::string& rpath) const;
 
   std::map<std::string, BTs<std::string>> LanguageStandardMap;
+
+  cm::optional<cmStandardLevel> GetExplicitStandardLevel(
+    std::string const& lang, std::string const& config) const;
+  void UpdateExplicitStandardLevel(std::string const& lang,
+                                   std::string const& config,
+                                   cmStandardLevel level);
+  std::map<std::string, cmStandardLevel> ExplicitStandardLevel;
 
   cmValue GetPropertyWithPairedLanguageSupport(std::string const& lang,
                                                const char* suffix) const;
