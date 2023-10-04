@@ -457,6 +457,19 @@ struct StandardLevelComputer
     return maxLevel;
   }
 
+  cm::optional<cmStandardLevel> LanguageStandardLevel(
+    std::string const& standardStr) const
+  {
+    cm::optional<cmStandardLevel> langLevel;
+    auto const& stds = this->Levels;
+    auto stdIt =
+      std::find(cm::cbegin(stds), cm::cend(stds), ParseStd(standardStr));
+    if (stdIt != cm::cend(stds)) {
+      langLevel = cmStandardLevel(std::distance(cm::cbegin(stds), stdIt));
+    }
+    return langLevel;
+  }
+
   bool IsLaterStandard(int lhs, int rhs) const
   {
     auto rhsIt =
@@ -659,6 +672,16 @@ cmStandardLevelResolver::CompileFeatureStandardLevel(
     return cm::nullopt;
   }
   return mapping->second.CompileFeatureStandardLevel(this->Makefile, feature);
+}
+
+cm::optional<cmStandardLevel> cmStandardLevelResolver::LanguageStandardLevel(
+  std::string const& lang, std::string const& standardStr) const
+{
+  auto mapping = StandardComputerMapping.find(lang);
+  if (mapping == cm::cend(StandardComputerMapping)) {
+    return cm::nullopt;
+  }
+  return mapping->second.LanguageStandardLevel(standardStr);
 }
 
 cmValue cmStandardLevelResolver::CompileFeaturesAvailable(

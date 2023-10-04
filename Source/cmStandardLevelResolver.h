@@ -39,6 +39,9 @@ public:
   cm::optional<cmStandardLevel> CompileFeatureStandardLevel(
     std::string const& lang, std::string const& feature) const;
 
+  cm::optional<cmStandardLevel> LanguageStandardLevel(
+    std::string const& lang, std::string const& standardStr) const;
+
   cmValue CompileFeaturesAvailable(const std::string& lang,
                                    std::string* error) const;
 
