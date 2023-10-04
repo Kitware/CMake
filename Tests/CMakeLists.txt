@@ -439,6 +439,10 @@ if(BUILD_TESTING)
         set(CMAKE_SKIP_VSGNUFortran TRUE)
       endif()
     endif()
+    if(CMAKE_Fortran_COMPILER_ID STREQUAL LLVMFlang)
+      # No DLLEXPORT for 'Tests/VSGNUFortran/subdir/fortran/world.f'.
+      set(CMAKE_SKIP_VSGNUFortran TRUE)
+    endif()
     if(CMAKE_Fortran_COMPILER_ID STREQUAL IntelLLVM)
       message(STATUS "Skip VSGNUFortran for ifx until DLLEXPORT support is implemented")
       set(CMAKE_SKIP_VSGNUFortran TRUE)
@@ -2150,7 +2154,10 @@ if(BUILD_TESTING)
     endif()
 
     set(MSVCDebugInformationFormat_BUILD_OPTIONS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
-    if(CMAKE_Fortran_COMPILER)
+    if(CMAKE_Fortran_COMPILER
+        # FIXME(LLVMFlang): It does not provide debug information format flags or predefines.
+        AND NOT CMAKE_Fortran_COMPILER_ID STREQUAL "LLVMFlang"
+        )
       list(APPEND MSVCDebugInformationFormat_BUILD_OPTIONS -DCMake_TEST_Fortran=1)
     endif()
     ADD_TEST_MACRO(MSVCDebugInformationFormat)

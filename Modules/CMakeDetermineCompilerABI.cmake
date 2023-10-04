@@ -139,38 +139,46 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       endif()
       set(CMAKE_${lang}_IMPLICIT_INCLUDE_DIRECTORIES "${_CMAKE_${lang}_IMPLICIT_INCLUDE_DIRECTORIES_INIT}" PARENT_SCOPE)
 
-      # Parse implicit linker information for this language, if available.
-      set(implicit_dirs "")
-      set(implicit_objs "")
-      set(implicit_libs "")
-      set(implicit_fwks "")
-      if(CMAKE_${lang}_VERBOSE_FLAG)
-        CMAKE_PARSE_IMPLICIT_LINK_INFO("${OUTPUT}" implicit_libs implicit_dirs implicit_fwks log
-          "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}"
-          COMPUTE_IMPLICIT_OBJECTS implicit_objs
-          LANGUAGE ${lang})
-        message(CONFIGURE_LOG
-          "Parsed ${lang} implicit link information:\n${log}\n\n")
-      endif()
-      # for VS IDE Intel Fortran we have to figure out the
-      # implicit link path for the fortran run time using
-      # a try-compile
-      if("${lang}" MATCHES "Fortran"
-          AND "${CMAKE_GENERATOR}" MATCHES "Visual Studio")
-        message(CHECK_START "Determine Intel Fortran Compiler Implicit Link Path")
-        # Build a sample project which reports symbols.
-        try_compile(IFORT_LIB_PATH_COMPILED
-          PROJECT IntelFortranImplicit
-          SOURCE_DIR ${CMAKE_ROOT}/Modules/IntelVSImplicitPath
-          BINARY_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath
-          CMAKE_FLAGS
-          "-DCMAKE_Fortran_FLAGS:STRING=${CMAKE_Fortran_FLAGS}"
-          OUTPUT_VARIABLE _output)
-        file(WRITE
-          "${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath/output.txt"
-          "${_output}")
-        include(${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath/output.cmake OPTIONAL)
-        message(CHECK_PASS "done")
+      if(_CMAKE_${lang}_IMPLICIT_LINK_INFORMATION_DETERMINED_EARLY)
+        # Use implicit linker information detected during compiler id step.
+        set(implicit_dirs "${CMAKE_${lang}_IMPLICIT_LINK_DIRECTORIES}")
+        set(implicit_objs "")
+        set(implicit_libs "${CMAKE_${lang}_IMPLICIT_LINK_LIBRARIES}")
+        set(implicit_fwks "${CMAKE_${lang}_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES}")
+      else()
+        # Parse implicit linker information for this language, if available.
+        set(implicit_dirs "")
+        set(implicit_objs "")
+        set(implicit_libs "")
+        set(implicit_fwks "")
+        if(CMAKE_${lang}_VERBOSE_FLAG)
+          CMAKE_PARSE_IMPLICIT_LINK_INFO("${OUTPUT}" implicit_libs implicit_dirs implicit_fwks log
+            "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}"
+            COMPUTE_IMPLICIT_OBJECTS implicit_objs
+            LANGUAGE ${lang})
+          message(CONFIGURE_LOG
+            "Parsed ${lang} implicit link information:\n${log}\n\n")
+        endif()
+        # for VS IDE Intel Fortran we have to figure out the
+        # implicit link path for the fortran run time using
+        # a try-compile
+        if("${lang}" MATCHES "Fortran"
+            AND "${CMAKE_GENERATOR}" MATCHES "Visual Studio")
+          message(CHECK_START "Determine Intel Fortran Compiler Implicit Link Path")
+          # Build a sample project which reports symbols.
+          try_compile(IFORT_LIB_PATH_COMPILED
+            PROJECT IntelFortranImplicit
+            SOURCE_DIR ${CMAKE_ROOT}/Modules/IntelVSImplicitPath
+            BINARY_DIR ${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath
+            CMAKE_FLAGS
+            "-DCMAKE_Fortran_FLAGS:STRING=${CMAKE_Fortran_FLAGS}"
+            OUTPUT_VARIABLE _output)
+          file(WRITE
+            "${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath/output.txt"
+            "${_output}")
+          include(${CMAKE_BINARY_DIR}/CMakeFiles/IntelVSImplicitPath/output.cmake OPTIONAL)
+          message(CHECK_PASS "done")
+        endif()
       endif()
 
       # Implicit link libraries cannot be used explicitly for multiple
