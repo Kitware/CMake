@@ -5025,7 +5025,7 @@ void cmGeneratorTarget::ComputeTargetManifest(const std::string& config) const
   }
 }
 
-bool cmGeneratorTarget::ComputeCompileFeatures(std::string const& config) const
+bool cmGeneratorTarget::ComputeCompileFeatures(std::string const& config)
 {
   // Compute the language standard based on the compile features.
   cmStandardLevelResolver standardResolver(this->Makefile);
@@ -5063,7 +5063,7 @@ bool cmGeneratorTarget::ComputeCompileFeatures(std::string const& config) const
 }
 
 bool cmGeneratorTarget::ComputeCompileFeatures(
-  std::string const& config, std::set<LanguagePair> const& languagePairs) const
+  std::string const& config, std::set<LanguagePair> const& languagePairs)
 {
   for (const auto& language : languagePairs) {
     BTs<std::string> const* generatorTargetLanguageStandard =
