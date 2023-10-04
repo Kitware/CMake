@@ -555,7 +555,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
     endif()
 
     set(_pkg_check_modules_packages)
-    set(_pkg_check_modules_failed)
+    set(_pkg_check_modules_failed "")
 
     _pkg_set_path_internal()
 
@@ -609,14 +609,14 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
           message(STATUS "  ${_pkgconfig_error}")
         endif()
 
-        set(_pkg_check_modules_failed 1)
+        string(APPEND _pkg_check_modules_failed " - ${_pkg_check_modules_pkg}\n")
       endif()
     endforeach()
 
     if(_pkg_check_modules_failed)
       # fail when requested
       if (${_is_required})
-        message(FATAL_ERROR "A required package was not found")
+        message(FATAL_ERROR "The following required packages were not found:\n${_pkg_check_modules_failed}")
       endif ()
     else()
       # when we are here, we checked whether requested modules
