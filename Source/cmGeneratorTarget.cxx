@@ -9142,13 +9142,11 @@ cmGeneratorTarget::Cxx20SupportLevel cmGeneratorTarget::HaveCxxModuleSupport(
   }
 
   cmStandardLevelResolver standardResolver(this->Makefile);
-  if (!standardResolver.HaveStandardAvailable(this, "CXX", config,
-                                              "cxx_std_20") ||
-      // During the ABI detection step we do not know the compiler's features.
-      // HaveStandardAvailable may return true as a fallback, but in this code
-      // path we do not want to assume C++ 20 is available.
-      this->Makefile->GetDefinition("CMAKE_CXX20_COMPILE_FEATURES")
-        .IsEmpty()) {
+  cmStandardLevel const cxxStd20 =
+    *standardResolver.LanguageStandardLevel("CXX", "20");
+  cm::optional<cmStandardLevel> explicitLevel =
+    this->GetExplicitStandardLevel("CXX", config);
+  if (!explicitLevel || *explicitLevel < cxxStd20) {
     return Cxx20SupportLevel::NoCxx20;
   }
 

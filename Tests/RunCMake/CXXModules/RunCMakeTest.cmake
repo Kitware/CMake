@@ -13,6 +13,9 @@ if ("cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
   # standard. If the compiler forces a standard to be used, skip it.
   if (NOT forced_cxx_standard)
     run_cmake(NoCXX20)
+    if(CMAKE_CXX_STANDARD_DEFAULT AND CMAKE_CXX20_STANDARD_COMPILE_OPTION)
+      run_cmake_with_options(ImplicitCXX20 -DCMAKE_CXX20_STANDARD_COMPILE_OPTION=${CMAKE_CXX20_STANDARD_COMPILE_OPTION})
+    endif()
   endif ()
 
   run_cmake(NoScanningSourceFileProperty)
