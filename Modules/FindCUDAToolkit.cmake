@@ -1332,7 +1332,6 @@ if(CUDAToolkit_FOUND)
   _CUDAToolkit_find_and_add_import_lib(OpenCL)
 endif()
 
-unset(CUDAToolkit_LIBRARY_SEARCH_DIRS)
 if(_CUDAToolkit_Pop_ROOT_PATH)
   list(REMOVE_AT CMAKE_FIND_ROOT_PATH 0)
   unset(_CUDAToolkit_Pop_ROOT_PATH)
