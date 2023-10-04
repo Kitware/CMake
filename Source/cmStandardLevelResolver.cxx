@@ -553,14 +553,14 @@ bool cmStandardLevelResolver::AddRequiredTargetFeature(
   // code put in these properties explicitly.  That is mostly true now,
   // but for compatibility we need to continue updating the property here.
   std::string newRequiredStandard;
-  bool newRequired = this->GetNewRequiredStandard(
+  bool succeeded = this->GetNewRequiredStandard(
     target->GetName(), feature,
     target->GetProperty(cmStrCat(lang, "_STANDARD")), newRequiredStandard,
     error);
   if (!newRequiredStandard.empty()) {
     target->SetProperty(cmStrCat(lang, "_STANDARD"), newRequiredStandard);
   }
-  return newRequired;
+  return succeeded;
 }
 
 bool cmStandardLevelResolver::CheckCompileFeaturesAvailable(
