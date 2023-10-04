@@ -50,6 +50,7 @@
 #include "cmSourceFileLocation.h"
 #include "cmSourceFileLocationKind.h"
 #include "cmSourceGroup.h"
+#include "cmStandardLevel.h"
 #include "cmStandardLevelResolver.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
@@ -5039,10 +5040,11 @@ bool cmGeneratorTarget::ComputeCompileFeatures(std::string const& config) const
     std::string key = cmStrCat(cmSystemTools::UpperCase(config), '-', lang);
     cmValue currentLanguageStandard = this->GetLanguageStandard(lang, config);
 
+    cm::optional<cmStandardLevel> featureLevel;
     std::string newRequiredStandard;
     if (!standardResolver.GetNewRequiredStandard(
           this->Target->GetName(), f.Value, currentLanguageStandard,
-          newRequiredStandard)) {
+          featureLevel, newRequiredStandard)) {
       return false;
     }
 

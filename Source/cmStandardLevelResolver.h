@@ -45,6 +45,7 @@ public:
   bool GetNewRequiredStandard(const std::string& targetName,
                               const std::string& feature,
                               cmValue currentLangStandardValue,
+                              cm::optional<cmStandardLevel>& featureLevel,
                               std::string& newRequiredStandard,
                               std::string* error = nullptr) const;
 

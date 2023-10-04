@@ -337,7 +337,7 @@ struct StandardLevelComputer
 
   bool GetNewRequiredStandard(cmMakefile* makefile,
                               std::string const& targetName,
-                              const std::string& feature,
+                              cm::optional<cmStandardLevel> featureLevel,
                               cmValue currentLangStandardValue,
                               std::string& newRequiredStandard,
                               std::string* error) const
@@ -347,9 +347,6 @@ struct StandardLevelComputer
     } else {
       newRequiredStandard.clear();
     }
-
-    cm::optional<cmStandardLevel> needed =
-      this->CompileFeatureStandardLevel(makefile, feature);
 
     cmValue existingStandard = currentLangStandardValue;
     if (!existingStandard) {
@@ -379,12 +376,12 @@ struct StandardLevelComputer
       }
     }
 
-    if (needed) {
+    if (featureLevel) {
       // Ensure the C++ language level is high enough to support
       // the needed C++ features.
       if (existingLevelIter == cm::cend(this->Levels) ||
-          existingLevelIter < this->Levels.begin() + needed->Index()) {
-        newRequiredStandard = this->LevelsAsStrings[needed->Index()];
+          existingLevelIter < this->Levels.begin() + featureLevel->Index()) {
+        newRequiredStandard = this->LevelsAsStrings[featureLevel->Index()];
       }
     }
 
@@ -550,11 +547,12 @@ bool cmStandardLevelResolver::AddRequiredTargetFeature(
   // should be done purely at generate time based on whatever the project
   // code put in these properties explicitly.  That is mostly true now,
   // but for compatibility we need to continue updating the property here.
+  cm::optional<cmStandardLevel> featureLevel;
   std::string newRequiredStandard;
   bool succeeded = this->GetNewRequiredStandard(
     target->GetName(), feature,
-    target->GetProperty(cmStrCat(lang, "_STANDARD")), newRequiredStandard,
-    error);
+    target->GetProperty(cmStrCat(lang, "_STANDARD")), featureLevel,
+    newRequiredStandard, error);
   if (!newRequiredStandard.empty()) {
     target->SetProperty(cmStrCat(lang, "_STANDARD"), newRequiredStandard);
   }
@@ -711,18 +709,21 @@ cmValue cmStandardLevelResolver::CompileFeaturesAvailable(
 
 bool cmStandardLevelResolver::GetNewRequiredStandard(
   const std::string& targetName, const std::string& feature,
-  cmValue currentLangStandardValue, std::string& newRequiredStandard,
-  std::string* error) const
+  cmValue currentLangStandardValue,
+  cm::optional<cmStandardLevel>& featureLevel,
+  std::string& newRequiredStandard, std::string* error) const
 {
   std::string lang;
   if (!this->CheckCompileFeaturesAvailable(targetName, feature, lang, error)) {
     return false;
   }
 
+  featureLevel = this->CompileFeatureStandardLevel(lang, feature);
+
   auto mapping = StandardComputerMapping.find(lang);
   if (mapping != cm::cend(StandardComputerMapping)) {
     return mapping->second.GetNewRequiredStandard(
-      this->Makefile, targetName, feature, currentLangStandardValue,
+      this->Makefile, targetName, featureLevel, currentLangStandardValue,
       newRequiredStandard, error);
   }
   return false;
