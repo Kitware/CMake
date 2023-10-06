@@ -417,6 +417,7 @@ add_library(
   cmSourceFileLocationKind.h
   cmSourceGroup.cxx
   cmSourceGroup.h
+  cmStandardLevel.h
   cmStandardLevelResolver.cxx
   cmStandardLevelResolver.h
   cmState.cxx

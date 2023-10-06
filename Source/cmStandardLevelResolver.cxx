@@ -13,6 +13,7 @@
 #include <vector>
 
 #include <cm/iterator>
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -25,6 +26,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmStandardLevel.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 #include "cmValue.h"
@@ -45,12 +47,6 @@ const char* const CUDA_FEATURES[] = { nullptr FOR_EACH_CUDA_FEATURE(
 const char* const HIP_FEATURES[] = { nullptr FOR_EACH_HIP_FEATURE(
   FEATURE_STRING) };
 #undef FEATURE_STRING
-
-struct StandardNeeded
-{
-  int index;
-  int value;
-};
 
 int ParseStd(std::string const& level)
 {
@@ -341,7 +337,7 @@ struct StandardLevelComputer
 
   bool GetNewRequiredStandard(cmMakefile* makefile,
                               std::string const& targetName,
-                              const std::string& feature,
+                              cm::optional<cmStandardLevel> featureLevel,
                               cmValue currentLangStandardValue,
                               std::string& newRequiredStandard,
                               std::string* error) const
@@ -351,8 +347,6 @@ struct StandardLevelComputer
     } else {
       newRequiredStandard.clear();
     }
-
-    auto needed = this->HighestStandardNeeded(makefile, feature);
 
     cmValue existingStandard = currentLangStandardValue;
     if (!existingStandard) {
@@ -382,12 +376,12 @@ struct StandardLevelComputer
       }
     }
 
-    if (needed.index != -1) {
+    if (featureLevel) {
       // Ensure the C++ language level is high enough to support
       // the needed C++ features.
       if (existingLevelIter == cm::cend(this->Levels) ||
-          existingLevelIter < this->Levels.begin() + needed.index) {
-        newRequiredStandard = this->LevelsAsStrings[needed.index];
+          existingLevelIter < this->Levels.begin() + featureLevel->Index()) {
+        newRequiredStandard = this->LevelsAsStrings[featureLevel->Index()];
       }
     }
 
@@ -439,27 +433,41 @@ struct StandardLevelComputer
       return false;
     }
 
-    auto needed = this->HighestStandardNeeded(makefile, feature);
+    cm::optional<cmStandardLevel> needed =
+      this->CompileFeatureStandardLevel(makefile, feature);
 
-    return (needed.index == -1) ||
-      (this->Levels.begin() + needed.index) <= existingLevelIter;
+    return !needed ||
+      (this->Levels.begin() + needed->Index()) <= existingLevelIter;
   }
 
-  StandardNeeded HighestStandardNeeded(cmMakefile* makefile,
-                                       std::string const& feature) const
+  cm::optional<cmStandardLevel> CompileFeatureStandardLevel(
+    cmMakefile* makefile, std::string const& feature) const
   {
     std::string prefix = cmStrCat("CMAKE_", this->Language);
-    StandardNeeded maxLevel = { -1, -1 };
+    cm::optional<cmStandardLevel> maxLevel;
     for (size_t i = 0; i < this->Levels.size(); ++i) {
       if (cmValue prop = makefile->GetDefinition(
             cmStrCat(prefix, this->LevelsAsStrings[i], "_COMPILE_FEATURES"))) {
         cmList props{ *prop };
         if (cm::contains(props, feature)) {
-          maxLevel = { static_cast<int>(i), this->Levels[i] };
+          maxLevel = cmStandardLevel(i);
         }
       }
     }
     return maxLevel;
+  }
+
+  cm::optional<cmStandardLevel> LanguageStandardLevel(
+    std::string const& standardStr) const
+  {
+    cm::optional<cmStandardLevel> langLevel;
+    auto const& stds = this->Levels;
+    auto stdIt =
+      std::find(cm::cbegin(stds), cm::cend(stds), ParseStd(standardStr));
+    if (stdIt != cm::cend(stds)) {
+      langLevel = cmStandardLevel(std::distance(cm::cbegin(stds), stdIt));
+    }
+    return langLevel;
   }
 
   bool IsLaterStandard(int lhs, int rhs) const
@@ -476,37 +484,33 @@ struct StandardLevelComputer
   std::vector<std::string> LevelsAsStrings;
 };
 
-std::unordered_map<std::string, StandardLevelComputer>
-  StandardComputerMapping = {
-    { "C",
-      StandardLevelComputer{
-        "C", std::vector<int>{ 90, 99, 11, 17, 23 },
-        std::vector<std::string>{ "90", "99", "11", "17", "23" } } },
-    { "CXX",
-      StandardLevelComputer{ "CXX",
-                             std::vector<int>{ 98, 11, 14, 17, 20, 23, 26 },
-                             std::vector<std::string>{ "98", "11", "14", "17",
-                                                       "20", "23", "26" } } },
-    { "CUDA",
-      StandardLevelComputer{ "CUDA",
-                             std::vector<int>{ 03, 11, 14, 17, 20, 23, 26 },
-                             std::vector<std::string>{ "03", "11", "14", "17",
-                                                       "20", "23", "26" } } },
-    { "OBJC",
-      StandardLevelComputer{
-        "OBJC", std::vector<int>{ 90, 99, 11, 17, 23 },
-        std::vector<std::string>{ "90", "99", "11", "17", "23" } } },
-    { "OBJCXX",
-      StandardLevelComputer{ "OBJCXX",
-                             std::vector<int>{ 98, 11, 14, 17, 20, 23, 26 },
-                             std::vector<std::string>{ "98", "11", "14", "17",
-                                                       "20", "23", "26" } } },
-    { "HIP",
-      StandardLevelComputer{ "HIP",
-                             std::vector<int>{ 98, 11, 14, 17, 20, 23, 26 },
-                             std::vector<std::string>{ "98", "11", "14", "17",
-                                                       "20", "23", "26" } } }
-  };
+std::unordered_map<std::string,
+                   StandardLevelComputer> const StandardComputerMapping = {
+  { "C",
+    StandardLevelComputer{
+      "C", std::vector<int>{ 90, 99, 11, 17, 23 },
+      std::vector<std::string>{ "90", "99", "11", "17", "23" } } },
+  { "CXX",
+    StandardLevelComputer{
+      "CXX", std::vector<int>{ 98, 11, 14, 17, 20, 23, 26 },
+      std::vector<std::string>{ "98", "11", "14", "17", "20", "23", "26" } } },
+  { "CUDA",
+    StandardLevelComputer{
+      "CUDA", std::vector<int>{ 03, 11, 14, 17, 20, 23, 26 },
+      std::vector<std::string>{ "03", "11", "14", "17", "20", "23", "26" } } },
+  { "OBJC",
+    StandardLevelComputer{
+      "OBJC", std::vector<int>{ 90, 99, 11, 17, 23 },
+      std::vector<std::string>{ "90", "99", "11", "17", "23" } } },
+  { "OBJCXX",
+    StandardLevelComputer{
+      "OBJCXX", std::vector<int>{ 98, 11, 14, 17, 20, 23, 26 },
+      std::vector<std::string>{ "98", "11", "14", "17", "20", "23", "26" } } },
+  { "HIP",
+    StandardLevelComputer{
+      "HIP", std::vector<int>{ 98, 11, 14, 17, 20, 23, 26 },
+      std::vector<std::string>{ "98", "11", "14", "17", "20", "23", "26" } } }
+};
 }
 
 std::string cmStandardLevelResolver::GetCompileOptionDef(
@@ -556,15 +560,16 @@ bool cmStandardLevelResolver::AddRequiredTargetFeature(
   // should be done purely at generate time based on whatever the project
   // code put in these properties explicitly.  That is mostly true now,
   // but for compatibility we need to continue updating the property here.
+  cm::optional<cmStandardLevel> featureLevel;
   std::string newRequiredStandard;
-  bool newRequired = this->GetNewRequiredStandard(
+  bool succeeded = this->GetNewRequiredStandard(
     target->GetName(), feature,
-    target->GetProperty(cmStrCat(lang, "_STANDARD")), newRequiredStandard,
-    error);
+    target->GetProperty(cmStrCat(lang, "_STANDARD")), featureLevel,
+    newRequiredStandard, error);
   if (!newRequiredStandard.empty()) {
     target->SetProperty(cmStrCat(lang, "_STANDARD"), newRequiredStandard);
   }
-  return newRequired;
+  return succeeded;
 }
 
 bool cmStandardLevelResolver::CheckCompileFeaturesAvailable(
@@ -658,6 +663,27 @@ bool cmStandardLevelResolver::CompileFeatureKnown(
   return false;
 }
 
+cm::optional<cmStandardLevel>
+cmStandardLevelResolver::CompileFeatureStandardLevel(
+  std::string const& lang, std::string const& feature) const
+{
+  auto mapping = StandardComputerMapping.find(lang);
+  if (mapping == cm::cend(StandardComputerMapping)) {
+    return cm::nullopt;
+  }
+  return mapping->second.CompileFeatureStandardLevel(this->Makefile, feature);
+}
+
+cm::optional<cmStandardLevel> cmStandardLevelResolver::LanguageStandardLevel(
+  std::string const& lang, std::string const& standardStr) const
+{
+  auto mapping = StandardComputerMapping.find(lang);
+  if (mapping == cm::cend(StandardComputerMapping)) {
+    return cm::nullopt;
+  }
+  return mapping->second.LanguageStandardLevel(standardStr);
+}
+
 cmValue cmStandardLevelResolver::CompileFeaturesAvailable(
   const std::string& lang, std::string* error) const
 {
@@ -706,18 +732,21 @@ cmValue cmStandardLevelResolver::CompileFeaturesAvailable(
 
 bool cmStandardLevelResolver::GetNewRequiredStandard(
   const std::string& targetName, const std::string& feature,
-  cmValue currentLangStandardValue, std::string& newRequiredStandard,
-  std::string* error) const
+  cmValue currentLangStandardValue,
+  cm::optional<cmStandardLevel>& featureLevel,
+  std::string& newRequiredStandard, std::string* error) const
 {
   std::string lang;
   if (!this->CheckCompileFeaturesAvailable(targetName, feature, lang, error)) {
     return false;
   }
 
+  featureLevel = this->CompileFeatureStandardLevel(lang, feature);
+
   auto mapping = StandardComputerMapping.find(lang);
   if (mapping != cm::cend(StandardComputerMapping)) {
     return mapping->second.GetNewRequiredStandard(
-      this->Makefile, targetName, feature, currentLangStandardValue,
+      this->Makefile, targetName, featureLevel, currentLangStandardValue,
       newRequiredStandard, error);
   }
   return false;
