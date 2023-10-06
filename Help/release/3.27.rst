@@ -285,8 +285,8 @@ Changes made since CMake 3.27.0 include the following.
   to select the Windows 8.1 SDK.  In CMake 3.27.[0-1] the ``version=`` field
   was limited to selecting Windows 10 SDKs.
 
-3.27.3, 3.27.4, 3.27.5, 3.27.6
-------------------------------
+3.27.3, 3.27.4, 3.27.5, 3.27.6, 3.27.7
+--------------------------------------
 
 * These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
