@@ -247,8 +247,14 @@ macro(wx_extract_version)
     "\\2" wxWidgets_VERSION_MINOR "${_wx_version_h}" )
   string(REGEX REPLACE "^(.*\n)?#define +wxRELEASE_NUMBER +([0-9]+).*"
     "\\2" wxWidgets_VERSION_PATCH "${_wx_version_h}" )
+  string(REGEX REPLACE "^(.*\n)?#define +wxSUBRELEASE_NUMBER +([0-9]+).*"
+    "\\2" wxWidgets_VERSION_TWEAK "${_wx_version_h}" )
+
   set(wxWidgets_VERSION_STRING
     "${wxWidgets_VERSION_MAJOR}.${wxWidgets_VERSION_MINOR}.${wxWidgets_VERSION_PATCH}" )
+  if(${wxWidgets_VERSION_TWEAK} GREATER 0)
+    string(APPEND wxWidgets_VERSION_STRING ".${wxWidgets_VERSION_TWEAK}")
+  endif()
   dbg_msg("wxWidgets_VERSION_STRING:    ${wxWidgets_VERSION_STRING}")
 endmacro()
 
@@ -460,6 +466,9 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
   foreach(version ${wx_versions})
     foreach(patch RANGE 15 0 -1)
       list(APPEND wx_paths "wxWidgets-${version}.${patch}")
+      foreach(tweak RANGE 3 1 -1)
+        list(APPEND wx_paths "wxWidgets-${version}.${patch}.${tweak}")
+      endforeach()
     endforeach()
   endforeach()
 
