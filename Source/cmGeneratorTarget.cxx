@@ -50,6 +50,7 @@
 #include "cmSourceFileLocation.h"
 #include "cmSourceFileLocationKind.h"
 #include "cmSourceGroup.h"
+#include "cmStandardLevel.h"
 #include "cmStandardLevelResolver.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
@@ -5024,10 +5025,44 @@ void cmGeneratorTarget::ComputeTargetManifest(const std::string& config) const
   }
 }
 
-bool cmGeneratorTarget::ComputeCompileFeatures(std::string const& config) const
+cm::optional<cmStandardLevel> cmGeneratorTarget::GetExplicitStandardLevel(
+  std::string const& lang, std::string const& config) const
 {
-  // Compute the language standard based on the compile features.
+  cm::optional<cmStandardLevel> level;
+  std::string key = cmStrCat(cmSystemTools::UpperCase(config), '-', lang);
+  auto i = this->ExplicitStandardLevel.find(key);
+  if (i != this->ExplicitStandardLevel.end()) {
+    level = i->second;
+  }
+  return level;
+}
+
+void cmGeneratorTarget::UpdateExplicitStandardLevel(std::string const& lang,
+                                                    std::string const& config,
+                                                    cmStandardLevel level)
+{
+  auto e = this->ExplicitStandardLevel.emplace(
+    cmStrCat(cmSystemTools::UpperCase(config), '-', lang), level);
+  if (!e.second && e.first->second < level) {
+    e.first->second = level;
+  }
+}
+
+bool cmGeneratorTarget::ComputeCompileFeatures(std::string const& config)
+{
   cmStandardLevelResolver standardResolver(this->Makefile);
+
+  for (std::string const& lang :
+       this->Makefile->GetState()->GetEnabledLanguages()) {
+    if (cmValue languageStd = this->GetLanguageStandard(lang, config)) {
+      if (cm::optional<cmStandardLevel> langLevel =
+            standardResolver.LanguageStandardLevel(lang, *languageStd)) {
+        this->UpdateExplicitStandardLevel(lang, config, *langLevel);
+      }
+    }
+  }
+
+  // Compute the language standard based on the compile features.
   std::vector<BT<std::string>> features = this->GetCompileFeatures(config);
   for (BT<std::string> const& f : features) {
     std::string lang;
@@ -5039,11 +5074,16 @@ bool cmGeneratorTarget::ComputeCompileFeatures(std::string const& config) const
     std::string key = cmStrCat(cmSystemTools::UpperCase(config), '-', lang);
     cmValue currentLanguageStandard = this->GetLanguageStandard(lang, config);
 
+    cm::optional<cmStandardLevel> featureLevel;
     std::string newRequiredStandard;
     if (!standardResolver.GetNewRequiredStandard(
           this->Target->GetName(), f.Value, currentLanguageStandard,
-          newRequiredStandard)) {
+          featureLevel, newRequiredStandard)) {
       return false;
+    }
+
+    if (featureLevel) {
+      this->UpdateExplicitStandardLevel(lang, config, *featureLevel);
     }
 
     if (!newRequiredStandard.empty()) {
@@ -5061,7 +5101,7 @@ bool cmGeneratorTarget::ComputeCompileFeatures(std::string const& config) const
 }
 
 bool cmGeneratorTarget::ComputeCompileFeatures(
-  std::string const& config, std::set<LanguagePair> const& languagePairs) const
+  std::string const& config, std::set<LanguagePair> const& languagePairs)
 {
   for (const auto& language : languagePairs) {
     BTs<std::string> const* generatorTargetLanguageStandard =
@@ -9102,13 +9142,11 @@ cmGeneratorTarget::Cxx20SupportLevel cmGeneratorTarget::HaveCxxModuleSupport(
   }
 
   cmStandardLevelResolver standardResolver(this->Makefile);
-  if (!standardResolver.HaveStandardAvailable(this, "CXX", config,
-                                              "cxx_std_20") ||
-      // During the ABI detection step we do not know the compiler's features.
-      // HaveStandardAvailable may return true as a fallback, but in this code
-      // path we do not want to assume C++ 20 is available.
-      this->Makefile->GetDefinition("CMAKE_CXX20_COMPILE_FEATURES")
-        .IsEmpty()) {
+  cmStandardLevel const cxxStd20 =
+    *standardResolver.LanguageStandardLevel("CXX", "20");
+  cm::optional<cmStandardLevel> explicitLevel =
+    this->GetExplicitStandardLevel("CXX", config);
+  if (!explicitLevel || *explicitLevel < cxxStd20) {
     return Cxx20SupportLevel::NoCxx20;
   }
 
