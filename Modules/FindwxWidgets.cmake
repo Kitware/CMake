@@ -37,7 +37,7 @@ select a configuration):
   wxWidgets_EXCLUDE_COMMON_LIBRARIES
                           - Set to TRUE to exclude linking of
                             commonly required libs (e.g., png tiff
-                            jpeg zlib regex expat scintilla).
+                            jpeg zlib regex expat scintilla lexilla).
 
 
 
@@ -274,6 +274,9 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
   # Useful common wx libs needed by almost all components.
   set(wxWidgets_COMMON_LIBRARIES png tiff jpeg zlib regex expat)
 
+  # Libraries needed by stc component
+  set(wxWidgets_STC_LIBRARIES scintilla lexilla)
+
   # DEPRECATED: Use find_package(wxWidgets COMPONENTS mono) instead.
   if(NOT wxWidgets_FIND_COMPONENTS)
     if(wxWidgets_USE_MONOLITHIC)
@@ -287,7 +290,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
   # wxWidgets_EXCLUDE_COMMON_LIBRARIES has been set.
   if(NOT wxWidgets_EXCLUDE_COMMON_LIBRARIES)
     if(stc IN_LIST wxWidgets_FIND_COMPONENTS)
-      list(APPEND wxWidgets_FIND_COMPONENTS scintilla)
+      list(APPEND wxWidgets_FIND_COMPONENTS ${wxWidgets_STC_LIBRARIES})
     endif()
     list(APPEND wxWidgets_FIND_COMPONENTS ${wxWidgets_COMMON_LIBRARIES})
   endif()
@@ -326,7 +329,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
     # FIXME: What if both regex libs are available. regex should be
     # found outside the loop and only wx${LIB}${_UCD}${_DBG}.
     # Find wxWidgets common libraries.
-    foreach(LIB ${wxWidgets_COMMON_LIBRARIES} scintilla)
+    foreach(LIB ${wxWidgets_COMMON_LIBRARIES} ${wxWidgets_STC_LIBRARIES})
       find_library(WX_${LIB}${_DBG}
         NAMES
         wx${LIB}${_UCD}${_DBG} # for regex
@@ -385,7 +388,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
   # Clear all debug or release library paths (arguments are "d" or "").
   macro(WX_CLEAR_ALL_LIBS _DBG)
     # Clear wxWidgets common libraries.
-    foreach(LIB ${wxWidgets_COMMON_LIBRARIES} scintilla)
+    foreach(LIB ${wxWidgets_COMMON_LIBRARIES} ${wxWidgets_STC_LIBRARIES})
       WX_CLEAR_LIB(WX_${LIB}${_DBG})
     endforeach()
 
