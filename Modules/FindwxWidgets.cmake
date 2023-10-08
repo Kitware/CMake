@@ -986,6 +986,9 @@ if(wxWidgets_FOUND)
   wx_extract_version()
 endif()
 
+file(TO_CMAKE_PATH "${wxWidgets_INCLUDE_DIRS}" wxWidgets_INCLUDE_DIRS)
+file(TO_CMAKE_PATH "${wxWidgets_LIBRARY_DIRS}" wxWidgets_LIBRARY_DIRS)
+
 # Debug output:
 DBG_MSG("wxWidgets_FOUND           : ${wxWidgets_FOUND}")
 DBG_MSG("wxWidgets_INCLUDE_DIRS    : ${wxWidgets_INCLUDE_DIRS}")
