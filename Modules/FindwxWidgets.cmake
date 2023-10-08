@@ -37,7 +37,7 @@ select a configuration):
   wxWidgets_EXCLUDE_COMMON_LIBRARIES
                           - Set to TRUE to exclude linking of
                             commonly required libs (e.g., png tiff
-                            jpeg zlib regex expat).
+                            jpeg zlib regex expat scintilla).
 
 
 
@@ -286,8 +286,10 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
   # Add the common (usually required libs) unless
   # wxWidgets_EXCLUDE_COMMON_LIBRARIES has been set.
   if(NOT wxWidgets_EXCLUDE_COMMON_LIBRARIES)
-    list(APPEND wxWidgets_FIND_COMPONENTS
-      ${wxWidgets_COMMON_LIBRARIES})
+    if(stc IN_LIST wxWidgets_FIND_COMPONENTS)
+      list(APPEND wxWidgets_FIND_COMPONENTS scintilla)
+    endif()
+    list(APPEND wxWidgets_FIND_COMPONENTS ${wxWidgets_COMMON_LIBRARIES})
   endif()
 
   #-------------------------------------------------------------------
@@ -453,6 +455,10 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
     if(gl IN_LIST ${_LIBS})
       DBG_MSG_V("- is required.")
       list(APPEND wxWidgets_LIBRARIES opengl32 glu32)
+    endif()
+
+    if(stc IN_LIST ${_LIBS})
+      list(APPEND wxWidgets_LIBRARIES imm32)
     endif()
 
     list(APPEND wxWidgets_LIBRARIES winmm comctl32 uuid oleacc uxtheme rpcrt4 shlwapi version wsock32)
