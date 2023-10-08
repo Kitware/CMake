@@ -292,6 +292,9 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
     list(APPEND wxWidgets_FIND_COMPONENTS ${wxWidgets_COMMON_LIBRARIES})
   endif()
 
+  # Remove duplicates, for example when user has specified common libraries.
+  list(REMOVE_DUPLICATES wxWidgets_FIND_COMPONENTS)
+
   #-------------------------------------------------------------------
   # WIN32: Helper MACROS
   #-------------------------------------------------------------------
