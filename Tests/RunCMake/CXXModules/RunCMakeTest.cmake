@@ -20,6 +20,7 @@ if ("cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
 
   run_cmake(NoScanningSourceFileProperty)
   run_cmake(NoScanningTargetProperty)
+  run_cmake(NoScanningVariable)
   run_cmake(CMP0155-OLD)
   run_cmake(CMP0155-NEW)
 endif ()
