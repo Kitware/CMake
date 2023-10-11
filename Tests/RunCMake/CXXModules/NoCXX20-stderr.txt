@@ -1,9 +1,9 @@
 (CMake Error in CMakeLists.txt:
-(  The target named "nocxx20" has C\+\+ sources that use modules but does not
+  The target named "nocxx20" has C\+\+ sources that use modules, but does not
   include "cxx_std_20" \(or newer\) among its `target_compile_features`; found
-  "cxx_std_17"
-|  The target named "nocxx20" contains C\+\+ sources that use modules which is
-  not supported by the generator
+  "cxx_std_17"\.
+|CMake Error in CMakeLists.txt:
+  The target named "nocxx20" has C\+\+ sources that may use modules, but
+  modules are not supported by this generator\.  See the cmake-cxxmodules\(7\)
+  manual and the CMAKE_CXX_SCAN_FOR_MODULES variable\.
 )
-)*
-CMake Generate step failed.  Build files cannot be regenerated correctly.

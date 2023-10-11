@@ -9195,8 +9195,9 @@ void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
       MessageType::FATAL_ERROR,
       cmStrCat(
         "The target named \"", this->GetName(),
-        "\" contains C++ "
-        "sources that use modules which is not supported by the generator"));
+        "\" has C++ sources that may use modules, but modules are not "
+        "supported by this generator.  See the cmake-cxxmodules(7) manual "
+        "and the CMAKE_CXX_SCAN_FOR_MODULES variable."));
     return;
   }
 
@@ -9205,8 +9206,8 @@ void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat("The target named \"", this->GetName(),
-                 "\" has C++ sources that use modules but the \"CXX\" "
-                 "language has not been enabled"));
+                 "\" has C++ sources that use modules, but the \"CXX\" "
+                 "language has not been enabled."));
       break;
     case cmGeneratorTarget::Cxx20SupportLevel::NoCxx20: {
       cmStandardLevelResolver standardResolver(this->Makefile);
@@ -9221,17 +9222,18 @@ void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
         MessageType::FATAL_ERROR,
         cmStrCat(
           "The target named \"", this->GetName(),
-          "\" has C++ sources that use modules but does not include "
+          "\" has C++ sources that use modules, but does not include "
           "\"cxx_std_20\" (or newer) among its `target_compile_features`",
-          effStandard));
+          effStandard, '.'));
     } break;
     case cmGeneratorTarget::Cxx20SupportLevel::MissingRule: {
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat("The target named \"", this->GetName(),
-                 "\" has C++ sources that use modules but the compiler does "
-                 "not provide a way to discover the import graph "
-                 "dependencies"));
+                 "\" has C++ sources that may use modules, but the compiler "
+                 "does not provide a way to discover the import graph "
+                 "dependencies.  See the cmake-cxxmodules(7) manual "
+                 "and the CMAKE_CXX_SCAN_FOR_MODULES variable."));
     } break;
     case cmGeneratorTarget::Cxx20SupportLevel::Supported:
       // All is well.
