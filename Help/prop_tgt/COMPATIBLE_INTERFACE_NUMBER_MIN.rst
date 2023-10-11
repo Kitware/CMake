@@ -1,7 +1,7 @@
 COMPATIBLE_INTERFACE_NUMBER_MIN
 -------------------------------
 
-Properties whose maximum value from the link interface will be used.
+Properties whose minimum value from the link interface will be used.
 
 The ``COMPATIBLE_INTERFACE_NUMBER_MIN`` property may contain a list of
 properties for this target whose minimum value may be read at generate
