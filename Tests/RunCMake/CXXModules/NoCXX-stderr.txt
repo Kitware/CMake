@@ -1,13 +1,15 @@
 (CMake Error in CMakeLists.txt:
-(  The target named "nocxx" has C\+\+ sources that use modules but the "CXX"
-  language has not been enabled
-|  The target named "nocxx" contains C\+\+ sources that use modules which is not
-  supported by the generator
-|  Target "nocxx" has source file
+  The target named "nocxx" has C\+\+ sources that use modules, but the "CXX"
+  language has not been enabled\.
+|CMake Error in CMakeLists.txt:
+  The target named "nocxx" has C\+\+ sources that may use modules, but modules
+  are not supported by this generator\.  See the cmake-cxxmodules\(7\) manual
+  and the CMAKE_CXX_SCAN_FOR_MODULES variable\.
+|CMake Error in CMakeLists.txt:
+  Target "nocxx" has source file
 
-    .*/Tests/RunCMake/CXXModules/sources/module.cxx
+    [^
+]*/Tests/RunCMake/CXXModules/sources/module.cxx
 
   in a "FILE_SET TYPE CXX_MODULES" but it is not scheduled for compilation.
 )
-)*
-CMake Generate step failed.  Build files cannot be regenerated correctly.

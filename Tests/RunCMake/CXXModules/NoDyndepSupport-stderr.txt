@@ -1,18 +1,12 @@
-(CMake Error:
+^(CMake Error:
   The Ninja generator does not support C\+\+20 modules using Ninja version
 
-    .*
+    [^
+]+
 
-  due to lack of required features.  Ninja 1.11 or higher is required.
-
+  due to lack of required features\.  Ninja 1\.11 or higher is required\.
 |CMake Error in CMakeLists.txt:
-  The target named "nodyndep" contains C\+\+ sources that use modules which is
-  not supported by the generator
-
-(
-CMake Error in CMakeLists.txt:
-  The target named "nodyndep" contains C\+\+ sources that use modules which is
-  not supported by the generator
-
-)*)
-CMake Generate step failed.  Build files cannot be regenerated correctly.
+  The target named "nodyndep" has C\+\+ sources that may use modules, but
+  modules are not supported by this generator\.  See the cmake-cxxmodules\(7\)
+  manual and the CMAKE_CXX_SCAN_FOR_MODULES variable\.
+)

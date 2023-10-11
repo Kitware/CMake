@@ -1,9 +1,10 @@
 (CMake Error in CMakeLists.txt:
-(  The target named "noscanning-sf-property" has C\+\+ sources that use modules
-  but the compiler does not provide a way to discover the import graph
-  dependencies
-|  The target named "noscanning-sf-property" contains C\+\+ sources that use modules which
-  is not supported by the generator
+  The target named "noscanning-sf-property" has C\+\+ sources that may use
+  modules, but the compiler does not provide a way to discover the import
+  graph dependencies\.  See the cmake-cxxmodules\(7\) manual and the
+  CMAKE_CXX_SCAN_FOR_MODULES variable\.
+|CMake Error in CMakeLists.txt:
+  The target named "noscanning-sf-property" has C\+\+ sources that may use
+  modules, but modules are not supported by this generator\.  See the
+  cmake-cxxmodules\(7\) manual and the CMAKE_CXX_SCAN_FOR_MODULES variable\.
 )
-)*
-CMake Generate step failed.  Build files cannot be regenerated correctly.
