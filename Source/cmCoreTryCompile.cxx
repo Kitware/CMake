@@ -72,6 +72,7 @@ SETUP_LANGUAGE(swift_properties, Swift);
 
 std::string const kCMAKE_CUDA_ARCHITECTURES = "CMAKE_CUDA_ARCHITECTURES";
 std::string const kCMAKE_CUDA_RUNTIME_LIBRARY = "CMAKE_CUDA_RUNTIME_LIBRARY";
+std::string const kCMAKE_CXX_SCAN_FOR_MODULES = "CMAKE_CXX_SCAN_FOR_MODULES";
 std::string const kCMAKE_ENABLE_EXPORTS = "CMAKE_ENABLE_EXPORTS";
 std::string const kCMAKE_EXECUTABLE_ENABLE_EXPORTS =
   "CMAKE_EXECUTABLE_ENABLE_EXPORTS";
@@ -1082,6 +1083,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
                 &swift_properties[lang_property_start + lang_property_size]);
     vars.insert(kCMAKE_CUDA_ARCHITECTURES);
     vars.insert(kCMAKE_CUDA_RUNTIME_LIBRARY);
+    vars.insert(kCMAKE_CXX_SCAN_FOR_MODULES);
     vars.insert(kCMAKE_ENABLE_EXPORTS);
     vars.insert(kCMAKE_EXECUTABLE_ENABLE_EXPORTS);
     vars.insert(kCMAKE_SHARED_LIBRARY_ENABLE_EXPORTS);
