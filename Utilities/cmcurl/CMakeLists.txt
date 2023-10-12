@@ -54,6 +54,7 @@ set(CURL_DISABLE_SHUFFLE_DNS OFF)
 set(CURL_DISABLE_SMB OFF)
 set(CURL_DISABLE_SMTP ON CACHE INTERNAL "Disable curl smtp protocol?")
 set(CURL_DISABLE_SOCKETPAIR OFF)
+set(CURL_DISABLE_SRP OFF)
 set(CURL_DISABLE_TELNET ON CACHE INTERNAL "Disable curl telnet protocol?")
 set(CURL_DISABLE_TFTP ON CACHE INTERNAL "Disable curl tftp protocol?")
 set(CURL_DISABLE_VERBOSE_STRINGS OFF CACHE INTERNAL "Do not disable curl verbosity")
@@ -1453,6 +1454,7 @@ if(WIN32)
   unset(HAVE_WIN32_WINNT CACHE)
 endif()
 
+if(0) # This code not needed for building within CMake.
 if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
   # on not-Windows and not-crosscompiling, check for writable argv[]
   include(CheckCSourceRuns)
@@ -1463,6 +1465,7 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
       argv[0][0] = ' ';
       return (argv[0][0] == ' ')?0:1;
     }" HAVE_WRITABLE_ARGV)
+endif()
 endif()
 
 set(CMAKE_REQUIRED_FLAGS)
