@@ -2567,6 +2567,12 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
   struct connectdata *conn = data->conn;
   (void)sockindex;
 
+  /* limit the writes to the maximum specified in Section 3 of
+   * https://datatracker.ietf.org/doc/html/draft-ietf-secsh-filexfer-02
+   */
+  if(len > 32768)
+    len = 32768;
+
   nwrite = sftp_write(conn->proto.sshc.sftp_file, mem, len);
 
   myssh_block2waitfor(conn, FALSE);
@@ -2654,7 +2660,7 @@ static void sftp_quote(struct Curl_easy *data)
   /* if a command starts with an asterisk, which a legal SFTP command never
      can, the command will be allowed to fail without it causing any
      aborts or cancels etc. It will cause libcurl to act as if the command
-     is successful, whatever the server reponds. */
+     is successful, whatever the server responds. */
 
   if(cmd[0] == '*') {
     cmd++;
@@ -2828,7 +2834,7 @@ static void sftp_quote_stat(struct Curl_easy *data)
   /* if a command starts with an asterisk, which a legal SFTP command never
      can, the command will be allowed to fail without it causing any
      aborts or cancels etc. It will cause libcurl to act as if the command
-     is successful, whatever the server reponds. */
+     is successful, whatever the server responds. */
 
   if(cmd[0] == '*') {
     cmd++;
