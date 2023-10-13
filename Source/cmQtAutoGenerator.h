@@ -90,10 +90,6 @@ public:
   std::string const& InfoDir() const { return this->InfoDir_; }
   cmFileTime const& InfoFileTime() const { return this->InfoFileTime_; }
   std::string const& InfoConfig() const { return this->InfoConfig_; }
-  std::string const& ExecutableConfig() const
-  {
-    return this->ExecutableConfig_;
-  }
 
   // -- Info file parsing
   /** Info file reader class. */
@@ -155,8 +151,7 @@ public:
   std::string MessagePath(cm::string_view path) const;
 
   // -- Run
-  bool Run(cm::string_view infoFile, cm::string_view config,
-           cm::string_view executableConfig);
+  bool Run(cm::string_view infoFile, cm::string_view config);
 
 protected:
   // -- Abstract processing interface
@@ -175,7 +170,6 @@ private:
   std::string InfoDir_;
   cmFileTime InfoFileTime_;
   std::string InfoConfig_;
-  std::string ExecutableConfig_;
   // -- Directories
   ProjectDirsT ProjectDirs_;
 };
