@@ -26,7 +26,7 @@
 /* Escape and unescape URL encoding in strings. The functions return a new
  * allocated string or NULL if an error occurred.  */
 
-bool Curl_isunreserved(unsigned char in);
+#include "curl_ctype.h"
 
 enum urlreject {
   REJECT_NADA = 2,
@@ -37,5 +37,8 @@ enum urlreject {
 CURLcode Curl_urldecode(const char *string, size_t length,
                         char **ostring, size_t *olen,
                         enum urlreject ctrl);
+
+void Curl_hexencode(const unsigned char *src, size_t len, /* input length */
+                    unsigned char *out, size_t olen); /* output buffer size */
 
 #endif /* HEADER_CURL_ESCAPE_H */
