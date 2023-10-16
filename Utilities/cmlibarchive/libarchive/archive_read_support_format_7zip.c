@@ -42,7 +42,7 @@ __FBSDID("$FreeBSD$");
 #include <cm3p/zlib.h>
 #endif
 #ifdef HAVE_ZSTD_H
-#include <zstd.h>
+#include <cm3p/zstd.h>
 #endif
 
 #ifdef __clang_analyzer__
