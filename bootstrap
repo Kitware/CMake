@@ -251,8 +251,8 @@ cmake_doc_dir_default="`cmake_install_dest_default DOC ${cmake_doc_dir_keyword}`
 cmake_man_dir_default="`cmake_install_dest_default MAN ${cmake_man_dir_keyword}`"
 cmake_xdgdata_dir_default="`cmake_install_dest_default XDGDATA ${cmake_xdgdata_dir_keyword}`"
 
-CMAKE_KNOWN_C_COMPILERS="cc gcc clang xlc icc tcc"
-CMAKE_KNOWN_CXX_COMPILERS="aCC xlC CC g++ clang++ c++ icc como "
+CMAKE_KNOWN_C_COMPILERS="cc gcc clang xlc icx tcc"
+CMAKE_KNOWN_CXX_COMPILERS="aCC xlC CC g++ clang++ c++ icpx"
 CMAKE_KNOWN_MAKE_PROCESSORS="gmake make smake"
 CMAKE_KNOWN_NINJA_PROCESSORS="ninja-build ninja samu"
 
