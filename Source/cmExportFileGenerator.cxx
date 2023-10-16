@@ -374,9 +374,12 @@ void cmExportFileGenerator::PopulateSourcesInterface(
 void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   cmGeneratorTarget const* target,
   cmGeneratorExpression::PreprocessContext preprocessRule,
-  ImportPropertyMap& properties, cmTargetExport const& te)
+  ImportPropertyMap& properties, cmTargetExport const& te,
+  std::string& includesDestinationDirs)
 {
   assert(preprocessRule == cmGeneratorExpression::InstallInterface);
+
+  includesDestinationDirs.clear();
 
   const char* propName = "INTERFACE_INCLUDE_DIRECTORIES";
   cmValue input = target->GetProperty(propName);
@@ -414,6 +417,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   }
 
   prefixItems(exportDirs);
+  includesDestinationDirs = exportDirs;
 
   std::string includes = (input ? *input : "");
   const char* sep = input ? ";" : "";
@@ -1260,7 +1264,22 @@ enum class PropertyType
 {
   Strings,
   Paths,
+  IncludePaths,
 };
+
+namespace {
+bool PropertyTypeIsForPaths(PropertyType pt)
+{
+  switch (pt) {
+    case PropertyType::Strings:
+      return false;
+    case PropertyType::Paths:
+    case PropertyType::IncludePaths:
+      return true;
+  }
+  return false;
+}
+}
 
 struct ModulePropertyTable
 {
@@ -1270,7 +1289,8 @@ struct ModulePropertyTable
 
 bool cmExportFileGenerator::PopulateCxxModuleExportProperties(
   cmGeneratorTarget const* gte, ImportPropertyMap& properties,
-  cmGeneratorExpression::PreprocessContext ctx, std::string& errorMessage)
+  cmGeneratorExpression::PreprocessContext ctx,
+  std::string const& includesDestinationDirs, std::string& errorMessage)
 {
   if (!gte->HaveCxx20ModuleSources(&errorMessage)) {
     return true;
@@ -1292,7 +1312,7 @@ bool cmExportFileGenerator::PopulateCxxModuleExportProperties(
   }
 
   const ModulePropertyTable exportedModuleProperties[] = {
-    { "INCLUDE_DIRECTORIES"_s, PropertyType::Paths },
+    { "INCLUDE_DIRECTORIES"_s, PropertyType::IncludePaths },
     { "COMPILE_DEFINITIONS"_s, PropertyType::Strings },
     { "COMPILE_OPTIONS"_s, PropertyType::Strings },
     { "COMPILE_FEATURES"_s, PropertyType::Strings },
@@ -1310,9 +1330,16 @@ bool cmExportFileGenerator::PopulateCxxModuleExportProperties(
       properties[exportedPropName] =
         cmGeneratorExpression::Preprocess(*prop, ctx);
       if (ctx == cmGeneratorExpression::InstallInterface &&
-          propEntry.Type == PropertyType::Paths) {
+          PropertyTypeIsForPaths(propEntry.Type)) {
         this->ReplaceInstallPrefix(properties[exportedPropName]);
         prefixItems(properties[exportedPropName]);
+        if (propEntry.Type == PropertyType::IncludePaths &&
+            !includesDestinationDirs.empty()) {
+          if (!properties[exportedPropName].empty()) {
+            properties[exportedPropName] += ';';
+          }
+          properties[exportedPropName] += includesDestinationDirs;
+        }
       }
     }
   }
