@@ -737,6 +737,14 @@ if((CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
   endif()
 endif()
 
+if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin|Windows)"
+    AND CMAKE_C_COMPILER_ID MATCHES "^(AppleClang|Clang|GNU|MSVC|NVIDIA)$"
+    AND NOT CMAKE_GENERATOR STREQUAL "Green Hills MULTI")
+  add_RunCMake_test(LinkerSelection -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+                                    -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+                                    -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION})
+endif()
+
 add_RunCMake_test(File_Archive)
 add_RunCMake_test(File_Configure)
 add_RunCMake_test(File_Generate)

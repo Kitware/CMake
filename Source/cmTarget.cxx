@@ -456,6 +456,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "AUTORCC_EXECUTABLE"_s, IC::CanCompileSources },
 
   // Linking properties
+  { "LINKER_TYPE"_s, IC::CanCompileSources },
   { "ENABLE_EXPORTS"_s, IC::TargetWithSymbolExports },
   { "LINK_LIBRARIES_ONLY_TARGETS"_s, IC::NormalNonImportedTarget },
   { "LINK_SEARCH_START_STATIC"_s, IC::CanCompileSources },

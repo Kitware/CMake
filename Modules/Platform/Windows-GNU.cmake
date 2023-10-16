@@ -112,6 +112,11 @@ macro(__windows_compiler_gnu lang)
     set(CMAKE_${type}_LINK_DYNAMIC_${lang}_FLAGS "-Wl,-Bdynamic")
   endforeach()
 
+  # linker selection
+  set(CMAKE_${lang}_USING_LINKER_SYSTEM "")
+  set(CMAKE_${lang}_USING_LINKER_BFD "-fuse-ld=bfd")
+  set(CMAKE_${lang}_USING_LINKER_LLD "-fuse-ld=lld")
+
   # No -fPIC on Windows
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "")
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "")

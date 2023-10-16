@@ -2987,6 +2987,16 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
       e1.WritePlatformConfigTag(
         "IntDir", cond, R"($(Platform)\$(Configuration)\$(ProjectName)\)");
     } else {
+      if (ttype == cmStateEnums::SHARED_LIBRARY ||
+          ttype == cmStateEnums::MODULE_LIBRARY ||
+          ttype == cmStateEnums::EXECUTABLE) {
+        auto linker = this->GeneratorTarget->GetLinkerTool(config);
+        if (!linker.empty()) {
+          ConvertToWindowsSlash(linker);
+          e1.WritePlatformConfigTag("LinkToolExe", cond, linker);
+        }
+      }
+
       std::string intermediateDir = cmStrCat(
         this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget), '/',
         config, '/');

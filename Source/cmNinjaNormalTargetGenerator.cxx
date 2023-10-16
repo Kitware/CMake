@@ -294,6 +294,9 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkRule(
         .c_str();
 
     vars.Language = "CUDA";
+    std::string linker =
+      this->GetGeneratorTarget()->GetLinkerTool("CUDA", config);
+    vars.Linker = linker.c_str();
 
     // build response file name
     std::string responseFlag = this->GetMakefile()->GetSafeDefinition(
@@ -400,6 +403,9 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRules(
   vars.Fatbinary = "$FATBIN";
   vars.RegisterFile = "$REGISTER";
   vars.LinkFlags = "$LINK_FLAGS";
+  std::string linker =
+    this->GetGeneratorTarget()->GetLinkerTool("CUDA", config);
+  vars.Linker = linker.c_str();
 
   std::string flags = this->GetFlags("CUDA", config);
   vars.Flags = flags.c_str();
@@ -441,6 +447,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
     vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
     vars.CMTargetType = cmState::GetTargetTypeName(targetType).c_str();
 
+    std::string linker = this->GetGeneratorTarget()->GetLinkerTool(config);
+    vars.Linker = linker.c_str();
     std::string lang = this->TargetLinkLanguage(config);
     vars.Language = lang.c_str();
     vars.AIXExports = "$AIX_EXPORTS";

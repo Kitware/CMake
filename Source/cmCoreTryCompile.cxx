@@ -14,6 +14,7 @@
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmArgumentParser.h"
 #include "cmConfigureLog.h"
@@ -83,6 +84,7 @@ std::string const kCMAKE_HIP_PLATFORM = "CMAKE_HIP_PLATFORM";
 std::string const kCMAKE_HIP_RUNTIME_LIBRARY = "CMAKE_HIP_RUNTIME_LIBRARY";
 std::string const kCMAKE_ISPC_INSTRUCTION_SETS = "CMAKE_ISPC_INSTRUCTION_SETS";
 std::string const kCMAKE_ISPC_HEADER_SUFFIX = "CMAKE_ISPC_HEADER_SUFFIX";
+std::string const kCMAKE_LINKER_TYPE = "CMAKE_LINKER_TYPE";
 std::string const kCMAKE_LINK_SEARCH_END_STATIC =
   "CMAKE_LINK_SEARCH_END_STATIC";
 std::string const kCMAKE_LINK_SEARCH_START_STATIC =
@@ -1112,6 +1114,20 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
           kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {
       cmList varList{ *varListStr };
       vars.insert(varList.begin(), varList.end());
+    }
+
+    if (this->Makefile->GetDefinition(kCMAKE_LINKER_TYPE)) {
+      // propagate various variables to support linker selection
+      vars.insert(kCMAKE_LINKER_TYPE);
+      auto defs = this->Makefile->GetDefinitions();
+      cmsys::RegularExpression linkerTypeDef{
+        "^CMAKE_[A-Za-z]+_USING_LINKER_"
+      };
+      for (auto const& def : defs) {
+        if (linkerTypeDef.find(def)) {
+          vars.insert(def);
+        }
+      }
     }
 
     if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0083) ==
