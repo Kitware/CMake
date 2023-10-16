@@ -68,5 +68,6 @@ For the :ref:`Visual Studio Generators`:
 - Only Visual Studio 2022 and MSVC toolsets 14.34 (Visual Studio
   17.4) and newer.
 - No support for exporting or installing BMI or module information.
+- No support for compiling BMIs from ``IMPORTED`` targets with C++ modules.
 - No diagnosis of using modules provided by ``PRIVATE`` sources from
   ``PUBLIC`` module sources.
