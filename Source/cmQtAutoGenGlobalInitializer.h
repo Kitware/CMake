@@ -66,16 +66,14 @@ private:
   void AddToGlobalAutoRcc(cmLocalGenerator* localGen,
                           std::string const& targetName);
 
-  cmQtAutoGen::ConfigStrings<cmQtAutoGen::CompilerFeaturesHandle>
-  GetCompilerFeatures(std::string const& generator,
-                      cmQtAutoGen::ConfigString const& executable,
-                      std::string& error, bool isMultiConfig);
+  cmQtAutoGen::CompilerFeaturesHandle GetCompilerFeatures(
+    std::string const& generator, std::string const& executable,
+    std::string& error);
 
   std::vector<std::unique_ptr<cmQtAutoGenInitializer>> Initializers_;
   std::map<cmLocalGenerator*, std::string> GlobalAutoGenTargets_;
   std::map<cmLocalGenerator*, std::string> GlobalAutoRccTargets_;
-  cmQtAutoGen::ConfigStrings<
-    std::unordered_map<std::string, cmQtAutoGen::CompilerFeaturesHandle>>
+  std::unordered_map<std::string, cmQtAutoGen::CompilerFeaturesHandle>
     CompilerFeatures_;
   Keywords const Keywords_;
 };

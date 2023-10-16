@@ -430,12 +430,10 @@ std::string cmQtAutoGenerator::MessagePath(cm::string_view path) const
   return cmQtAutoGen::Quoted(res);
 }
 
-bool cmQtAutoGenerator::Run(cm::string_view infoFile, cm::string_view config,
-                            cm::string_view executableConfig)
+bool cmQtAutoGenerator::Run(cm::string_view infoFile, cm::string_view config)
 {
   // Info config
   this->InfoConfig_ = std::string(config);
-  this->ExecutableConfig_ = std::string(executableConfig);
 
   // Info file
   this->InfoFile_ = std::string(infoFile);
