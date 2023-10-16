@@ -137,9 +137,9 @@ bool cmCTestHG::UpdateImpl()
   // TODO: if(this->CTest->GetTestModel() == cmCTest::NIGHTLY)
 
   std::vector<std::string> hg_update;
-  hg_update.push_back(this->CommandLineTool.c_str());
-  hg_update.push_back("update");
-  hg_update.push_back("-v");
+  hg_update.emplace_back(this->CommandLineTool);
+  hg_update.emplace_back("update");
+  hg_update.emplace_back("-v");
 
   // Add user-specified update options.
   std::string opts = this->CTest->GetCTestConfiguration("UpdateOptions");

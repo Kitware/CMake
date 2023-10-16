@@ -159,7 +159,7 @@ bool cmCTestGIT::UpdateByFetchAndReset()
   // Use "git fetch" to get remote commits.
   std::vector<std::string> git_fetch;
   git_fetch.push_back(git);
-  git_fetch.push_back("fetch");
+  git_fetch.emplace_back("fetch");
 
   // Add user-specified update options.
   std::string opts = this->CTest->GetCTestConfiguration("UpdateOptions");

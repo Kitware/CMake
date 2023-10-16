@@ -34,7 +34,7 @@ cmCTestSVN::~cmCTestSVN() = default;
 void cmCTestSVN::CleanupImpl()
 {
   std::vector<std::string> svn_cleanup;
-  svn_cleanup.push_back("cleanup");
+  svn_cleanup.emplace_back("cleanup");
   OutputLogger out(this->Log, "cleanup-out> ");
   OutputLogger err(this->Log, "cleanup-err> ");
   this->RunSVNCommand(svn_cleanup, &out, &err);
@@ -89,7 +89,7 @@ std::string cmCTestSVN::LoadInfo(SVNInfo& svninfo)
 {
   // Run "svn info" to get the repository info from the work tree.
   std::vector<std::string> svn_info;
-  svn_info.push_back("info");
+  svn_info.emplace_back("info");
   svn_info.push_back(svninfo.LocalPath);
   std::string rev;
   InfoParser out(this, "info-out> ", rev, svninfo);
@@ -252,7 +252,7 @@ bool cmCTestSVN::UpdateImpl()
   }
 
   std::vector<std::string> svn_update;
-  svn_update.push_back("update");
+  svn_update.emplace_back("update");
   cm::append(svn_update, args);
 
   UpdateParser out(this, "up-out> ");
@@ -270,7 +270,7 @@ bool cmCTestSVN::RunSVNCommand(std::vector<std::string> const& parameters,
   std::vector<std::string> args;
   args.push_back(this->CommandLineTool);
   cm::append(args, parameters);
-  args.push_back("--non-interactive");
+  args.emplace_back("--non-interactive");
 
   std::string userOptions = this->CTest->GetCTestConfiguration("SVNOptions");
 
@@ -388,11 +388,11 @@ bool cmCTestSVN::LoadRevisions(SVNInfo& svninfo)
 
   // Run "svn log" to get all global revisions of interest.
   std::vector<std::string> svn_log;
-  svn_log.push_back("log");
-  svn_log.push_back("--xml");
-  svn_log.push_back("-v");
-  svn_log.push_back(revs.c_str());
-  svn_log.push_back(svninfo.LocalPath.c_str());
+  svn_log.emplace_back("log");
+  svn_log.emplace_back("--xml");
+  svn_log.emplace_back("-v");
+  svn_log.emplace_back(revs);
+  svn_log.emplace_back(svninfo.LocalPath);
   LogParser out(this, "log-out> ", svninfo);
   OutputLogger err(this->Log, "log-err> ");
   return this->RunSVNCommand(svn_log, &out, &err);
@@ -467,7 +467,7 @@ bool cmCTestSVN::LoadModifications()
 {
   // Run "svn status" which reports local modifications.
   std::vector<std::string> svn_status;
-  svn_status.push_back("status");
+  svn_status.emplace_back("status");
   StatusParser out(this, "status-out> ");
   OutputLogger err(this->Log, "status-err> ");
   this->RunSVNCommand(svn_status, &out, &err);
@@ -529,7 +529,7 @@ bool cmCTestSVN::LoadRepositories()
 
   // Run "svn status" to get the list of external repositories
   std::vector<std::string> svn_status;
-  svn_status.push_back("status");
+  svn_status.emplace_back("status");
   ExternalParser out(this, "external-out> ");
   OutputLogger err(this->Log, "external-err> ");
   return this->RunSVNCommand(svn_status, &out, &err);

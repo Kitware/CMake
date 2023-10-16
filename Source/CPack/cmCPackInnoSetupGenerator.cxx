@@ -579,8 +579,9 @@ bool cmCPackInnoSetupGenerator::ProcessFiles()
 
 bool cmCPackInnoSetupGenerator::ProcessComponents()
 {
-  codeIncludes.push_back("{ The following lines are required by CPack because "
-                         "this script uses components }");
+  codeIncludes.emplace_back(
+    "{ The following lines are required by CPack because "
+    "this script uses components }");
 
   // Installation types
   std::vector<cmCPackInstallationType*> types(InstallationTypes.size());
@@ -607,7 +608,7 @@ bool cmCPackInnoSetupGenerator::ProcessComponents()
     "\"{code:CPackGetCustomInstallationMessage}\"";
   customTypeParams["Flags"] = "iscustom";
 
-  allTypes.push_back("custom");
+  allTypes.emplace_back("custom");
   typeInstructions.push_back(ISKeyValueLine(customTypeParams));
 
   // Components
