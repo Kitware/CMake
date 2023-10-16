@@ -12,6 +12,10 @@ run_cmake_with_options(CodeInjection1
 run_cmake_with_options(CodeInjection2
         -C "${CMAKE_CURRENT_LIST_DIR}/CodeInjection/initial_cache_2.cmake"
 )
+# This checks that module names are also allowed.
+run_cmake_with_options(CodeInjection3
+        -C "${CMAKE_CURRENT_LIST_DIR}/CodeInjection/initial_cache_3.cmake"
+)
 
 if(CMake_TEST_RESOURCES)
   run_cmake(ExplicitRC)
