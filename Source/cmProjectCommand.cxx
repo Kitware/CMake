@@ -11,6 +11,7 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmExecutionStatus.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
@@ -371,29 +372,41 @@ static bool IncludeByVariable(cmExecutionStatus& status,
   if (!include) {
     return true;
   }
+  cmList includeFiles{ *include };
 
-  std::string includeFile =
-    cmSystemTools::CollapseFullPath(*include, mf.GetCurrentSourceDirectory());
-  if (!cmSystemTools::FileExists(includeFile)) {
-    status.SetError(cmStrCat("could not find requested file:\n  ", *include));
-    return false;
-  }
-  if (cmSystemTools::FileIsDirectory(includeFile)) {
-    status.SetError(cmStrCat("requested file is a directory:\n  ", *include));
-    return false;
-  }
+  bool failed = false;
+  for (auto const& filePath : includeFiles) {
+    std::string includeFile = cmSystemTools::CollapseFullPath(
+      filePath, mf.GetCurrentSourceDirectory());
+    if (!cmSystemTools::FileExists(includeFile)) {
+      status.SetError(
+        cmStrCat("could not find requested file:\n  ", filePath));
+      failed = true;
+      continue;
+    }
+    if (cmSystemTools::FileIsDirectory(includeFile)) {
+      status.SetError(
+        cmStrCat("requested file is a directory:\n  ", filePath));
+      failed = true;
+      continue;
+    }
 
-  const bool readit = mf.ReadDependentFile(*include);
-  if (readit) {
-    return true;
-  }
+    const bool readit = mf.ReadDependentFile(filePath);
+    if (readit) {
+      // If the included file ran successfully, continue to the next file
+      continue;
+    }
 
-  if (cmSystemTools::GetFatalErrorOccurred()) {
-    return true;
-  }
+    if (cmSystemTools::GetFatalErrorOccurred()) {
+      failed = true;
+      continue;
+    }
 
-  status.SetError(cmStrCat("could not load requested file:\n  ", *include));
-  return false;
+    status.SetError(cmStrCat("could not load requested file:\n  ", filePath));
+    failed = true;
+  }
+  // At this point all files were processed
+  return !failed;
 }
 
 static void TopLevelCMakeVarCondSet(cmMakefile& mf, std::string const& name,
