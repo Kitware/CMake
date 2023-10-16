@@ -500,7 +500,7 @@ if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREA
       OUTPUT_VARIABLE OUTPUT
       )
     if(NOT BLD_ERROR_VARIABLE)
-      message(SEND_ERROR "BLD_ERROR_VARIABLE try_compile failed, but it was expected to succeed.")
+      message(SEND_ERROR "BLD_ERROR_VARIABLE try_compile failed, but it was expected to succeed. ${OUTPUT}")
     endif()
 
     if(NOT CMAKE_CROSSCOMPILING)
