@@ -177,6 +177,9 @@ The options for the above signatures are:
   If this option is specified, any ``-DLINK_LIBRARIES=...`` value
   given to the ``CMAKE_FLAGS`` option will be ignored.
 
+  .. versionadded:: 3.29
+    Alias targets to imported libraries are also supported.
+
 ``LINK_OPTIONS <options>...``
   .. versionadded:: 3.14
 
