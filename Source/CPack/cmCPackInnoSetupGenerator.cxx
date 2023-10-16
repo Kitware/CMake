@@ -633,6 +633,7 @@ bool cmCPackInnoSetupGenerator::ProcessComponents()
     } else if (!component->InstallationTypes.empty()) {
       std::vector<std::string> installationTypes;
 
+      installationTypes.reserve(component->InstallationTypes.size());
       for (cmCPackInstallationType* j : component->InstallationTypes) {
         installationTypes.push_back(j->Name);
       }
