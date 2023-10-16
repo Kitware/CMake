@@ -486,35 +486,11 @@ if(CMake_TEST_Qt_version)
     "-D${QtX}Core_DIR=${${QtX}Core_DIR}"
     "-DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}"
   )
-
-  foreach(target_config IN ITEMS Debug Release RelWithDebInfo)
-    foreach(ninja_config IN ITEMS Debug Release RelWithDebInfo)
-      block()
-        run_cmake_configure(QtX)
-        include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)
-        run_cmake_build(QtX ${target_config}-in-${ninja_config}-graph ${ninja_config} exe:${target_config})
-        check_files("${RunCMake_TEST_BINARY_DIR}"
-        INCLUDE
-          "${AUTOGEN_FILES_${target_config}}"
-          "${TARGET_FILE_exe_${target_config}}"
-          "${TARGET_OBJECT_FILES_exe_${target_config}}"
-        )
-        if (DEFINED RunCMake_TEST_FAILED AND NOT RunCMake_TEST_FAILED STREQUAL "")
-          message(FATAL_ERROR "RunCMake_TEST_FAILED:${RunCMake_TEST_FAILED}")
-        endif()
-
-        check_file_contents("${RunCMake_TEST_BINARY_DIR}/exe_autogen/deps_${target_config}" "exe_autogen/timestamp_${target_config}")
-        if (DEFINED RunCMake_TEST_FAILED AND NOT RunCMake_TEST_FAILED STREQUAL "")
-          message(FATAL_ERROR "RunCMake_TEST_FAILED:${RunCMake_TEST_FAILED}")
-        endif()
-      endblock()
-    endforeach()
-  endforeach()
+  run_cmake_configure(QtX)
+  unset(RunCMake_TEST_OPTIONS)
+  include(${RunCMake_TEST_BINARY_DIR}/target_files.cmake)
+  run_cmake_build(QtX debug-in-release-graph Release exe:Debug)
   if(CMake_TEST_${QtX}Core_Version VERSION_GREATER_EQUAL 5.15.0)
-  foreach(target_config IN ITEMS Debug Release RelWithDebInfo)
-    foreach(ninja_config IN ITEMS Debug Release RelWithDebInfo)
-    run_ninja(QtX automoc-check-${target_config} build-${ninja_config}.ninja -t query exe_autogen/timestamp_${target_config})
-    endforeach()
-  endforeach()
+    run_ninja(QtX automoc-check build-Debug.ninja -t query exe_autogen/timestamp)
   endif()
 endif()

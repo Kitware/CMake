@@ -170,7 +170,6 @@ public:
     // -- Attributes
     // - Config
     bool MultiConfig = false;
-    bool CrossConfig = false;
     IntegerVersion QtVersion = { 4, 0 };
     unsigned int ThreadCount = 0;
     // - Directories
@@ -2373,7 +2372,6 @@ bool cmQtAutoMocUicT::InitFromInfo(InfoT const& info)
 {
   // -- Required settings
   if (!info.GetBool("MULTI_CONFIG", this->BaseConst_.MultiConfig, true) ||
-      !info.GetBool("CROSS_CONFIG", this->BaseConst_.CrossConfig, true) ||
       !info.GetUInt("QT_VERSION_MAJOR", this->BaseConst_.QtVersion.Major,
                     true) ||
       !info.GetUInt("QT_VERSION_MINOR", this->BaseConst_.QtVersion.Minor,
@@ -2386,33 +2384,18 @@ bool cmQtAutoMocUicT::InitFromInfo(InfoT const& info)
                       true) ||
       !info.GetStringConfig("PARSE_CACHE_FILE",
                             this->BaseConst_.ParseCacheFile, true) ||
-      !info.GetStringConfig("DEP_FILE", this->BaseConst_.DepFile, false) ||
-      !info.GetStringConfig("DEP_FILE_RULE_NAME",
-                            this->BaseConst_.DepFileRuleName, false) ||
+      !info.GetString("DEP_FILE", this->BaseConst_.DepFile, false) ||
+      !info.GetString("DEP_FILE_RULE_NAME", this->BaseConst_.DepFileRuleName,
+                      false) ||
       !info.GetStringConfig("SETTINGS_FILE", this->SettingsFile_, true) ||
       !info.GetArray("CMAKE_LIST_FILES", this->BaseConst_.ListFiles, true) ||
       !info.GetArray("HEADER_EXTENSIONS", this->BaseConst_.HeaderExtensions,
-                     true)) {
+                     true) ||
+      !info.GetString("QT_MOC_EXECUTABLE", this->MocConst_.Executable,
+                      false) ||
+      !info.GetString("QT_UIC_EXECUTABLE", this->UicConst_.Executable,
+                      false)) {
     return false;
-  }
-  if (this->BaseConst_.CrossConfig) {
-    std::string const mocExecutableWithConfig =
-      "QT_MOC_EXECUTABLE_" + this->ExecutableConfig();
-    std::string const uicExecutableWithConfig =
-      "QT_UIC_EXECUTABLE_" + this->ExecutableConfig();
-    if (!info.GetString(mocExecutableWithConfig, this->MocConst_.Executable,
-                        false) ||
-        !info.GetString(uicExecutableWithConfig, this->UicConst_.Executable,
-                        false)) {
-      return false;
-    }
-  } else {
-    if (!info.GetStringConfig("QT_MOC_EXECUTABLE", this->MocConst_.Executable,
-                              false) ||
-        !info.GetStringConfig("QT_UIC_EXECUTABLE", this->UicConst_.Executable,
-                              false)) {
-      return false;
-    }
   }
 
   // -- Checks
@@ -3080,8 +3063,7 @@ std::string cmQtAutoMocUicT::AbsoluteIncludePath(
 
 } // End of unnamed namespace
 
-bool cmQtAutoMocUic(cm::string_view infoFile, cm::string_view config,
-                    cm::string_view executableConfig)
+bool cmQtAutoMocUic(cm::string_view infoFile, cm::string_view config)
 {
-  return cmQtAutoMocUicT().Run(infoFile, config, executableConfig);
+  return cmQtAutoMocUicT().Run(infoFile, config);
 }
