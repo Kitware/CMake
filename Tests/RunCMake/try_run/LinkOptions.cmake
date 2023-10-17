@@ -1,7 +1,4 @@
-
 enable_language(C)
-
-cmake_policy(SET CMP0054 NEW)
 
 set (lib_name "${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_STATIC_LIBRARY_PREFIX}lib${CMAKE_STATIC_LIBRARY_SUFFIX}")
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")

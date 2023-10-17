@@ -67,6 +67,7 @@ The signature above is recommended for clarity.
           [COMPILE_DEFINITIONS <defs>...]
           [LINK_OPTIONS <options>...]
           [LINK_LIBRARIES <libs>...]
+          [LINKER_LANGUAGE <lang>]
           [COMPILE_OUTPUT_VARIABLE <var>]
           [COPY_FILE <fileName> [COPY_FILE_ERROR <var>]]
           [<LANG>_STANDARD <std>]

@@ -178,6 +178,7 @@ auto const TryCompileBaseSourcesArgParser =
           ArgumentParser::ExpectAtLeast{ 0 })
     .Bind("LINK_LIBRARIES"_s, &Arguments::LinkLibraries)
     .Bind("LINK_OPTIONS"_s, &Arguments::LinkOptions)
+    .Bind("LINKER_LANGUAGE"_s, &Arguments::LinkerLanguage)
     .Bind("COPY_FILE"_s, &Arguments::CopyFileTo)
     .Bind("COPY_FILE_ERROR"_s, &Arguments::CopyFileError)
     .BIND_LANG_PROPS(C)
@@ -1043,6 +1044,19 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
         fprintf(fout, "target_link_options(%s PRIVATE %s)\n",
                 targetName.c_str(), cmJoin(options, " ").c_str());
       }
+    }
+
+    if (arguments.LinkerLanguage) {
+      std::string LinkerLanguage = *arguments.LinkerLanguage;
+      if (testLangs.find(LinkerLanguage) == testLangs.end()) {
+        this->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          "Linker language '" + LinkerLanguage +
+            "' must be enabled in project(LANGUAGES).");
+      }
+
+      fprintf(fout, "set_property(TARGET %s PROPERTY LINKER_LANGUAGE %s)\n",
+              targetName.c_str(), LinkerLanguage.c_str());
     }
 
     if (arguments.LinkLibraries) {
