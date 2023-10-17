@@ -127,7 +127,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 
     std::string errorMessage;
     if (!this->PopulateCxxModuleExportProperties(
-          gte, properties, cmGeneratorExpression::BuildInterface,
+          gte, properties, cmGeneratorExpression::BuildInterface, {},
           errorMessage)) {
       this->LG->GetGlobalGenerator()->GetCMakeInstance()->IssueMessage(
         MessageType::FATAL_ERROR, errorMessage,
