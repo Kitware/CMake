@@ -42,11 +42,6 @@ function(compiler_id_detection outvar lang)
 
     # Order is relevant here. For example, compilers which pretend to be
     # GCC must appear before the actual GCC.
-    if ("x${lang}" STREQUAL "xCXX")
-      list(APPEND ordered_compilers
-        Comeau
-      )
-    endif()
     list(APPEND ordered_compilers
       Intel
       IntelLLVM
