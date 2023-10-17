@@ -4,7 +4,8 @@ project(cxx_modules_export_include_directories CXX)
 include("${CMAKE_SOURCE_DIR}/../cxx-modules-rules.cmake")
 
 add_library(export_include_directories STATIC
-  include/include.h)
+  include/include.h
+  includes/includes.h)
 target_sources(export_include_directories
   PRIVATE
     forward.cxx
@@ -25,7 +26,8 @@ target_sources(export_include_directories
 target_compile_features(export_include_directories PUBLIC cxx_std_20)
 target_include_directories(export_include_directories
   PRIVATE
-    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>")
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/includes>")
 
 add_library(no_modules STATIC no_modules.cxx)
 

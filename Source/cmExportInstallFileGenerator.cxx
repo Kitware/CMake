@@ -92,8 +92,10 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 
     ImportPropertyMap properties;
 
+    std::string includesDestinationDirs;
     this->PopulateIncludeDirectoriesInterface(
-      gt, cmGeneratorExpression::InstallInterface, properties, *te);
+      gt, cmGeneratorExpression::InstallInterface, properties, *te,
+      includesDestinationDirs);
     this->PopulateSourcesInterface(gt, cmGeneratorExpression::InstallInterface,
                                    properties);
     this->PopulateInterfaceProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES", gt,
@@ -128,7 +130,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     std::string errorMessage;
     if (!this->PopulateCxxModuleExportProperties(
           gt, properties, cmGeneratorExpression::InstallInterface,
-          errorMessage)) {
+          includesDestinationDirs, errorMessage)) {
       cmSystemTools::Error(errorMessage);
       return false;
     }
