@@ -857,8 +857,30 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
         fclose(fout);
         return cm::nullopt;
       }
-      fprintf(fout, "\ninclude(\"${CMAKE_CURRENT_LIST_DIR}/%s\")\n\n",
+      fprintf(fout, "\ninclude(\"${CMAKE_CURRENT_LIST_DIR}/%s\")\n",
               fname.c_str());
+      // Create all relevant alias targets
+      if (arguments.LinkLibraries) {
+        const auto& aliasTargets = this->Makefile->GetAliasTargets();
+        for (std::string const& i : *arguments.LinkLibraries) {
+          auto alias = aliasTargets.find(i);
+          if (alias != aliasTargets.end()) {
+            const auto& aliasTarget =
+              this->Makefile->FindTargetToUse(alias->second);
+            // Create equivalent library/executable alias
+            if (aliasTarget->GetType() == cmStateEnums::EXECUTABLE) {
+              fprintf(fout, "add_executable(\"%s\" ALIAS \"%s\")\n", i.c_str(),
+                      alias->second.c_str());
+            } else {
+              // Other cases like UTILITY and GLOBAL_TARGET are excluded when
+              // arguments.LinkLibraries is initially parsed in this function.
+              fprintf(fout, "add_library(\"%s\" ALIAS \"%s\")\n", i.c_str(),
+                      alias->second.c_str());
+            }
+          }
+        }
+      }
+      fprintf(fout, "\n");
     }
 
     /* Set the appropriate policy information for ENABLE_EXPORTS */
