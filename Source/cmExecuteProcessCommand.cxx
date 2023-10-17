@@ -112,9 +112,27 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  if (!status.GetMakefile().CanIWriteThisFile(arguments.OutputFile)) {
-    status.SetError("attempted to output into a file: " +
-                    arguments.OutputFile + " into a source directory.");
+  std::string inputFilename = arguments.InputFile;
+  std::string outputFilename = arguments.OutputFile;
+  std::string errorFilename = arguments.ErrorFile;
+  if (!arguments.WorkingDirectory.empty()) {
+    if (!inputFilename.empty()) {
+      inputFilename = cmSystemTools::CollapseFullPath(
+        inputFilename, arguments.WorkingDirectory);
+    }
+    if (!outputFilename.empty()) {
+      outputFilename = cmSystemTools::CollapseFullPath(
+        outputFilename, arguments.WorkingDirectory);
+    }
+    if (!errorFilename.empty()) {
+      errorFilename = cmSystemTools::CollapseFullPath(
+        errorFilename, arguments.WorkingDirectory);
+    }
+  }
+
+  if (!status.GetMakefile().CanIWriteThisFile(outputFilename)) {
+    status.SetError("attempted to output into a file: " + outputFilename +
+                    " into a source directory.");
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }
@@ -162,20 +180,24 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
 
   // Check the output variables.
   std::unique_ptr<FILE, int (*)(FILE*)> inputFile(nullptr, fclose);
-  if (!arguments.InputFile.empty()) {
-    inputFile.reset(cmsys::SystemTools::Fopen(arguments.InputFile, "rb"));
-    builder.SetExternalStream(cmUVProcessChainBuilder::Stream_INPUT,
-                              cm_fileno(inputFile.get()));
+  if (!inputFilename.empty()) {
+    inputFile.reset(cmsys::SystemTools::Fopen(inputFilename, "rb"));
+    if (inputFile) {
+      builder.SetExternalStream(cmUVProcessChainBuilder::Stream_INPUT,
+                                cm_fileno(inputFile.get()));
+    }
   } else {
     builder.SetExternalStream(cmUVProcessChainBuilder::Stream_INPUT,
                               cm_fileno(stdin));
   }
 
   std::unique_ptr<FILE, int (*)(FILE*)> outputFile(nullptr, fclose);
-  if (!arguments.OutputFile.empty()) {
-    outputFile.reset(cmsys::SystemTools::Fopen(arguments.OutputFile, "wb"));
-    builder.SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT,
-                              cm_fileno(outputFile.get()));
+  if (!outputFilename.empty()) {
+    outputFile.reset(cmsys::SystemTools::Fopen(outputFilename, "wb"));
+    if (outputFile) {
+      builder.SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT,
+                                cm_fileno(outputFile.get()));
+    }
   } else {
     if (arguments.OutputVariable == arguments.ErrorVariable &&
         !arguments.ErrorVariable.empty()) {
@@ -186,14 +208,18 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
   }
 
   std::unique_ptr<FILE, int (*)(FILE*)> errorFile(nullptr, fclose);
-  if (!arguments.ErrorFile.empty()) {
-    if (arguments.ErrorFile == arguments.OutputFile) {
-      builder.SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR,
-                                cm_fileno(outputFile.get()));
+  if (!errorFilename.empty()) {
+    if (errorFilename == outputFilename) {
+      if (outputFile) {
+        builder.SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR,
+                                  cm_fileno(outputFile.get()));
+      }
     } else {
-      errorFile.reset(cmsys::SystemTools::Fopen(arguments.ErrorFile, "wb"));
-      builder.SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR,
-                                cm_fileno(errorFile.get()));
+      errorFile.reset(cmsys::SystemTools::Fopen(errorFilename, "wb"));
+      if (errorFile) {
+        builder.SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR,
+                                  cm_fileno(errorFile.get()));
+      }
     }
   } else if (arguments.ErrorVariable.empty() ||
              (!arguments.ErrorVariable.empty() &&

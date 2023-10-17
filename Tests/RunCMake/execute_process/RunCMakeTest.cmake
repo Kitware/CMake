@@ -35,6 +35,11 @@ run_cmake_command(LastCommandError ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/La
 run_cmake_command(LastCommandTimeout ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/LastCommandTimeout.cmake)
 run_cmake_command(LastCommandGood ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/LastCommandGood.cmake)
 run_cmake_command(Stdin ${CMAKE_COMMAND} -DPRINT_STDIN_EXE=${PRINT_STDIN_EXE} -P ${RunCMake_SOURCE_DIR}/Stdin.cmake)
+run_cmake_command(StdinNoexist ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/StdinNoexist.cmake)
+run_cmake_command(StdoutNoexist ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/StdoutNoexist.cmake)
+run_cmake_command(StderrNoexist ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/StderrNoexist.cmake)
+run_cmake_command(StdoutStderrNoexist ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/StderrNoexist.cmake)
+run_cmake_command(InOutErrDirectory ${CMAKE_COMMAND} -DPRINT_STDIN_EXE=${PRINT_STDIN_EXE} -P ${RunCMake_SOURCE_DIR}/InOutErrDirectory.cmake)
 
 if(UNIX AND Python_EXECUTABLE)
   run_cmake_command(AnyCommandAbnormalExit ${CMAKE_COMMAND} -DPython_EXECUTABLE=${Python_EXECUTABLE} -P ${RunCMake_SOURCE_DIR}/AnyCommandAbnormalExit.cmake)
