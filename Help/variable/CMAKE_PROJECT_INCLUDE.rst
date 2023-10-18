@@ -3,11 +3,15 @@ CMAKE_PROJECT_INCLUDE
 
 .. versionadded:: 3.15
 
-A CMake language file or module to be included as the last step of all
+A CMake language file to be included as the last step of all
 :command:`project` command calls.  This is intended for injecting custom code
 into project builds without modifying their source.  See :ref:`Code Injection`
 for a more detailed discussion of files potentially included during a
 :command:`project` call.
+
+.. versionadded:: 3.29
+  This variable can be a :ref:`semicolon-separated list <CMake Language Lists>`
+  of CMake language files to be included sequentially.
 
 See also the :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE`,
 :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE_BEFORE`,
