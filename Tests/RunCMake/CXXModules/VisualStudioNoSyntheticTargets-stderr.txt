@@ -1,0 +1,6 @@
+^(CMake Error in CMakeLists.txt:
+  Target "imported-cxx-modules@synth_[0-9a-f]+" contains C\+\+ modules
+  intended for BMI-only compilation.  This is not yet supported by the Visual
+  Studio generator.
+*
+)+CMake Generate step failed.  Build files cannot be regenerated correctly.

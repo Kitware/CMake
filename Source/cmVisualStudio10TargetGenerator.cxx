@@ -358,6 +358,15 @@ std::ostream& cmVisualStudio10TargetGenerator::Elem::WriteString(
 
 void cmVisualStudio10TargetGenerator::Generate()
 {
+  if (this->GeneratorTarget->IsSynthetic()) {
+    this->GeneratorTarget->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Target \"", this->GeneratorTarget->GetName(),
+               "\" contains C++ modules intended for BMI-only compilation. "
+               "This is not yet supported by the Visual Studio generator."));
+    return;
+  }
+
   for (std::string const& config : this->Configurations) {
     this->GeneratorTarget->CheckCxxModuleStatus(config);
   }
