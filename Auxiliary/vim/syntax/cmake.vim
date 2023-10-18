@@ -78,6 +78,7 @@ syn keyword cmakeProperty contained
             \ AUTOGEN_TARGETS_FOLDER
             \ AUTOGEN_TARGET_DEPENDS
             \ AUTOGEN_USE_SYSTEM_INCLUDE
+            \ AUTOGEN_BETTER_GRAPH_MULTI_CONFIG
             \ AUTOMOC
             \ AUTOMOC_COMPILER_PREDEFINES
             \ AUTOMOC_DEPEND_FILTERS
@@ -766,6 +767,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_STANDARD_REQUIRED
             \ CMAKE_ASM_SUPPORTED
             \ CMAKE_ASM_VISIBILITY_PRESET
+            \ CMAKE_AUTOGEN_BETTER_GRAPH_MULTI_CONFIG
             \ CMAKE_AUTOGEN_COMMAND_LINE_LENGTH_MAX
             \ CMAKE_AUTOGEN_ORIGIN_DEPENDS
             \ CMAKE_AUTOGEN_PARALLEL
