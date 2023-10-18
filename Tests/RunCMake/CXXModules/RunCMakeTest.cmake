@@ -95,7 +95,7 @@ if (RunCMake_GENERATOR MATCHES "Ninja")
   run_cmake(NinjaDependInfoExport)
   run_cmake(NinjaDependInfoBMIInstall)
 elseif (RunCMake_GENERATOR MATCHES "Visual Studio")
-  # Not supported yet.
+  run_cmake(VisualStudioNoSyntheticTargets)
 else ()
   message(FATAL_ERROR
     "Please add 'DependInfo' tests for the '${RunCMake_GENERATOR}' generator.")
