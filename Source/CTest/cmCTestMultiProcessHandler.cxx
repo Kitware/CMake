@@ -126,6 +126,11 @@ void cmCTestMultiProcessHandler::SetTestLoad(unsigned long load)
   }
 }
 
+bool cmCTestMultiProcessHandler::Complete()
+{
+  return this->Completed == this->Total;
+}
+
 void cmCTestMultiProcessHandler::RunTests()
 {
   this->CheckResume();
@@ -143,7 +148,7 @@ void cmCTestMultiProcessHandler::RunTests()
   uv_loop_close(&this->Loop);
 
   if (!this->StopTimePassed && !this->CheckStopOnFailure()) {
-    assert(this->Completed == this->Total);
+    assert(this->Complete());
     assert(this->Tests.empty());
   }
   assert(this->AllResourcesAvailable());

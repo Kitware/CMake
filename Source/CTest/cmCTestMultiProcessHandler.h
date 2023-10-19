@@ -152,6 +152,7 @@ protected:
     InsufficientResources,
   };
 
+  bool Complete();
   bool AllocateResources(int index);
   bool TryAllocateResources(
     int index,
