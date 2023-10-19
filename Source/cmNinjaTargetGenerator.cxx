@@ -1409,10 +1409,13 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     }
   }
 
+  this->SetMsvcTargetPdbVariable(vars, config);
+
   if (firstForConfig) {
     this->ExportObjectCompileCommand(
       language, sourceFilePath, objectDir, objectFileName, objectFileDir,
-      vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"], config);
+      vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"],
+      vars["TARGET_COMPILE_PDB"], vars["TARGET_PDB"], config);
   }
 
   objBuild.Outputs.push_back(objectFileName);
@@ -1607,8 +1610,6 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     }
   }
 
-  this->SetMsvcTargetPdbVariable(vars, config);
-
   objBuild.RspFile = cmStrCat(objectFileName, ".rsp");
 
   if (language == "ISPC") {
@@ -1759,10 +1760,13 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
     vars["CLANG_TIDY_EXPORT_FIXES"] = fixesFile;
   }
 
+  this->SetMsvcTargetPdbVariable(vars, config);
+
   if (firstForConfig) {
     this->ExportObjectCompileCommand(
       language, sourceFilePath, bmiDir, bmiFileName, bmiFileDir, vars["FLAGS"],
-      vars["DEFINES"], vars["INCLUDES"], config);
+      vars["DEFINES"], vars["INCLUDES"], vars["TARGET_COMPILE_PDB"],
+      vars["TARGET_PDB"], config);
   }
 
   bmiBuild.Outputs.push_back(bmiFileName);
@@ -1832,8 +1836,6 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
 
   this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetGeneratorTarget(),
                              vars);
-
-  this->SetMsvcTargetPdbVariable(vars, config);
 
   bmiBuild.RspFile = cmStrCat(bmiFileName, ".rsp");
 
@@ -1966,6 +1968,7 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   std::string const& objectDir, std::string const& objectFileName,
   std::string const& objectFileDir, std::string const& flags,
   std::string const& defines, std::string const& includes,
+  std::string const& targetCompilePdb, std::string const& targetPdb,
   std::string const& outputConfig)
 {
   if (!this->GeneratorTarget->GetPropertyAsBool("EXPORT_COMPILE_COMMANDS")) {
@@ -2016,6 +2019,8 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   compileObjectVars.Flags = fullFlags.c_str();
   compileObjectVars.Defines = defines.c_str();
   compileObjectVars.Includes = includes.c_str();
+  compileObjectVars.TargetCompilePDB = targetCompilePdb.c_str();
+  compileObjectVars.TargetPDB = targetPdb.c_str();
 
   // Rule for compiling object file.
   std::string cudaCompileMode;
