@@ -75,6 +75,9 @@ The root object recognizes the following fields:
   ``7``
     .. versionadded:: 3.27
 
+  ``8``
+    .. versionadded:: 3.28
+
 ``cmakeMinimumRequired``
   An optional object representing the minimum version of CMake needed to
   build this project. This object consists of the following fields:
