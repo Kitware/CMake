@@ -265,7 +265,7 @@ Example:
 
 .. [#mebibytes] One MiB (mebibyte) is equal to 1024x1024 bytes.
 
-.. _man 5 os-release: https://www.freedesktop.org/software/systemd/man/os-release.html
+.. _man 5 os-release: https://www.freedesktop.org/software/systemd/man/latest/os-release.html
 .. _various distribution-specific files: http://linuxmafia.com/faq/Admin/release-files.html
 
 .. _Query Windows registry:
