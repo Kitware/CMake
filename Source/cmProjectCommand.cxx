@@ -375,7 +375,21 @@ static bool IncludeByVariable(cmExecutionStatus& status,
   cmList includeFiles{ *include };
 
   bool failed = false;
-  for (auto const& filePath : includeFiles) {
+  for (auto filePath : includeFiles) {
+    // Any relative path without a .cmake extension is checked for valid cmake
+    // modules. This logic should be consistent with CMake's include() command.
+    // Otherwise default to checking relative path w.r.t. source directory
+    if (!cmSystemTools::FileIsFullPath(filePath) &&
+        !cmHasLiteralSuffix(filePath, ".cmake")) {
+      std::string mfile = mf.GetModulesFile(cmStrCat(filePath, ".cmake"));
+      if (mfile.empty()) {
+        status.SetError(
+          cmStrCat("could not find requested module:\n  ", filePath));
+        failed = true;
+        continue;
+      }
+      filePath = mfile;
+    }
     std::string includeFile = cmSystemTools::CollapseFullPath(
       filePath, mf.GetCurrentSourceDirectory());
     if (!cmSystemTools::FileExists(includeFile)) {
