@@ -460,14 +460,7 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
     return false;
   }
 
-  // if there are no depends left then run this test
-  if (this->PendingTests[test].Depends.empty()) {
-    return this->StartTestProcess(test);
-  }
-  // This test was not able to start because it is waiting
-  // on depends to run
-  this->DeallocateResources(test);
-  return false;
+  return this->StartTestProcess(test);
 }
 
 void cmCTestMultiProcessHandler::StartNextTests()
@@ -550,6 +543,11 @@ void cmCTestMultiProcessHandler::StartNextTests()
     // We can only start a RUN_SERIAL test if no other tests are also
     // running.
     if (this->Properties[test]->RunSerial && this->RunningCount > 0) {
+      continue;
+    }
+
+    // Exclude tests that depend on unfinished tests.
+    if (!this->PendingTests[test].Depends.empty()) {
       continue;
     }
 
