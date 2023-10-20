@@ -3183,10 +3183,3 @@ std::string cmGlobalNinjaMultiGenerator::OrderDependsTargetForTarget(
   return cmStrCat("cmake_object_order_depends_target_", target->GetName(), '_',
                   cmSystemTools::UpperCase(config));
 }
-
-std::string cmGlobalNinjaMultiGenerator::OrderDependsTargetForTargetPrivate(
-  cmGeneratorTarget const* target, const std::string& config) const
-{
-  return cmStrCat(this->OrderDependsTargetForTarget(target, config),
-                  "_private");
-}
