@@ -449,17 +449,6 @@ std::string cmCTestMultiProcessHandler::GetName(int test)
 
 bool cmCTestMultiProcessHandler::StartTest(int test)
 {
-  // Check for locked project resources.
-  for (std::string const& i : this->Properties[test]->ProjectResources) {
-    if (cm::contains(this->ProjectResourcesLocked, i)) {
-      return false;
-    }
-  }
-
-  if (!this->AllocateResources(test)) {
-    return false;
-  }
-
   return this->StartTestProcess(test);
 }
 
@@ -576,6 +565,19 @@ void cmCTestMultiProcessHandler::StartNextTests()
       continue;
     }
 
+    // Exclude tests that depend on currently-locked project resources.
+    for (std::string const& i : this->Properties[test]->ProjectResources) {
+      if (cm::contains(this->ProjectResourcesLocked, i)) {
+        continue;
+      }
+    }
+
+    // Allocate system resources needed by this test.
+    if (!this->AllocateResources(test)) {
+      continue;
+    }
+
+    // The test is ready to run.
     if (this->StartTest(test)) {
       numToStart -= processors;
     }
