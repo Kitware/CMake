@@ -1059,13 +1059,18 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
           cmFileSet const* fileset =
             this->GeneratorTarget->GetFileSetForSource(
               config, this->Makefile->GetOrCreateGeneratedSource(*it));
-          if (fileset &&
-              cmFileSetVisibilityIsForInterface(fileset->GetVisibility())) {
+          bool isVisible = fileset &&
+            cmFileSetVisibilityIsForInterface(fileset->GetVisibility());
+          bool isIncludeable =
+            !fileset || cmFileSetTypeCanBeIncluded(fileset->GetType());
+          if (fileset && isVisible && isIncludeable) {
             ++it;
-          } else {
-            ccouts_private.push_back(*it);
-            it = ccouts.erase(it);
+            continue;
           }
+          if (!fileset || isIncludeable) {
+            ccouts_private.push_back(*it);
+          }
+          it = ccouts.erase(it);
         }
       }
     }

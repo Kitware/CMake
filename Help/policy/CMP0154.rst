@@ -22,6 +22,12 @@ type ``HEADERS``.  With this information, :ref:`Ninja Generators` may omit
 the above-mentioned conservative dependencies and produce more efficient
 build graphs.
 
+Additionally, if the custom command's output is a member of a file set of type
+``CXX_MODULES``, it will additionally not be required to exist before
+compiling other sources in the same target.  Since these files should not be
+included at compile time directly, they may not be implicitly required to
+exist for other compilation rules.
+
 This policy provides compatibility for projects using file sets in targets
 with generated header files that have not been updated.  Such projects
 should be updated to express generated public headers in a file set.
