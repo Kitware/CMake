@@ -31,6 +31,8 @@ cmFileSetVisibility cmFileSetVisibilityFromName(cm::string_view name,
 bool cmFileSetVisibilityIsForSelf(cmFileSetVisibility vis);
 bool cmFileSetVisibilityIsForInterface(cmFileSetVisibility vis);
 
+bool cmFileSetTypeCanBeIncluded(std::string const& type);
+
 class cmFileSet
 {
 public:

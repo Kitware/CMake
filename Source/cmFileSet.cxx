@@ -80,6 +80,11 @@ bool cmFileSetVisibilityIsForInterface(cmFileSetVisibility vis)
   return false;
 }
 
+bool cmFileSetTypeCanBeIncluded(std::string const& type)
+{
+  return type == "HEADERS"_s;
+}
+
 cmFileSet::cmFileSet(cmake& cmakeInstance, std::string name, std::string type,
                      cmFileSetVisibility visibility)
   : CMakeInstance(cmakeInstance)
