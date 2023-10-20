@@ -542,7 +542,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
 
   // Start tests in the preferred order, each subject to readiness checks.
   auto ti = this->OrderedTests.begin();
-  while (ti != this->OrderedTests.end()) {
+  while (numToStart > 0 && ti != this->OrderedTests.end()) {
     // Increment the test iterator now because the current list
     // entry may be deleted below.
     int test = *ti++;
@@ -584,8 +584,6 @@ void cmCTestMultiProcessHandler::StartNextTests()
 
     if (this->StartTest(test)) {
       numToStart -= processors;
-    } else if (numToStart == 0) {
-      break;
     }
   }
 
@@ -606,13 +604,19 @@ void cmCTestMultiProcessHandler::StartNextTests()
     } else if (onlyRunSerialTestsLeft) {
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "Only RUN_SERIAL tests remain, awaiting available slot.");
-    } else {
+    } else if (!testWithMinProcessors.empty()) {
       /* clang-format off */
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "System Load: " << systemLoad << ", "
                  "Max Allowed Load: " << this->TestLoad << ", "
                  "Smallest test " << testWithMinProcessors <<
                  " requires " << minProcessorsRequired);
+      /* clang-format on */
+    } else {
+      /* clang-format off */
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                 "System Load: " << systemLoad << ", "
+                 "Max Allowed Load: " << this->TestLoad);
       /* clang-format on */
     }
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "*****" << std::endl);

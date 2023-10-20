@@ -243,6 +243,7 @@ set(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING} 7)
 
 # Verify that new tests are not started when the load average exceeds
 # our threshold and that they then run once the load average drops.
+run_TestLoad(test-load-wait0 5)
 run_TestLoad(test-load-wait1 8)
 
 # Verify that warning message is displayed but tests still start when
