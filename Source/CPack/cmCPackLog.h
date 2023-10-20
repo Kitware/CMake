@@ -29,7 +29,7 @@ public:
   cmCPackLog(const cmCPackLog&) = delete;
   cmCPackLog& operator=(const cmCPackLog&) = delete;
 
-  enum __log_tags
+  enum cm_log_tags
   {
     NOTAG = 0,
     LOG_OUTPUT = 0x1,
