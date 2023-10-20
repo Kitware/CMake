@@ -1060,7 +1060,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
             this->GeneratorTarget->GetFileSetForSource(
               config, this->Makefile->GetOrCreateGeneratedSource(*it));
           if (fileset &&
-              fileset->GetVisibility() != cmFileSetVisibility::Private) {
+              cmFileSetVisibilityIsForInterface(fileset->GetVisibility())) {
             ++it;
           } else {
             ccouts_private.push_back(*it);
