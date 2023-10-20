@@ -558,25 +558,26 @@ void cmCTestMultiProcessHandler::StartNextTests()
     }
 
     size_t processors = this->GetProcessorsUsed(test);
-    bool testLoadOk = true;
     if (this->TestLoad > 0) {
+      // Exclude tests that are too big to fit in the spare load.
       if (processors <= spareLoad) {
+        // We found a test that fits in the spare load.
         cmCTestLog(this->CTest, DEBUG,
                    "OK to run " << this->GetName(test) << ", it requires "
                                 << processors << " procs & system load is: "
                                 << systemLoad << std::endl);
         allTestsFailedTestLoadCheck = false;
       } else {
-        testLoadOk = false;
+        // Keep track of the smallest excluded test to report in message below.
+        if (processors <= minProcessorsRequired) {
+          minProcessorsRequired = processors;
+          testWithMinProcessors = this->GetName(test);
+        }
+        continue;
       }
     }
 
-    if (processors <= minProcessorsRequired) {
-      minProcessorsRequired = processors;
-      testWithMinProcessors = this->GetName(test);
-    }
-
-    if (testLoadOk && processors <= numToStart && this->StartTest(test)) {
+    if (processors <= numToStart && this->StartTest(test)) {
       numToStart -= processors;
     } else if (numToStart == 0) {
       break;
