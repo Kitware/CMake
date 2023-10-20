@@ -270,7 +270,7 @@ std::map<std::string, std::string> GetOSReleaseVariables(
 
   std::map<std::string, std::string> data;
   // Based on
-  // https://www.freedesktop.org/software/systemd/man/os-release.html
+  // https://www.freedesktop.org/software/systemd/man/latest/os-release.html
   for (auto name : { "/etc/os-release"_s, "/usr/lib/os-release"_s }) {
     const auto& filename = cmStrCat(sysroot, name);
     if (cmSystemTools::FileExists(filename)) {

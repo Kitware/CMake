@@ -19,7 +19,7 @@ Commands
 * The :command:`string(TIMESTAMP)` command now supports the ``%V``
   specifier for ISO 8601 week numbers.
 
-.. _`OS identification variables`: https://www.freedesktop.org/software/systemd/man/os-release.html
+.. _`OS identification variables`: https://www.freedesktop.org/software/systemd/man/latest/os-release.html
 
 Variables
 ---------
