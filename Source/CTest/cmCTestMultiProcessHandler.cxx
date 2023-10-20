@@ -577,7 +577,12 @@ void cmCTestMultiProcessHandler::StartNextTests()
       }
     }
 
-    if (processors <= numToStart && this->StartTest(test)) {
+    // Exclude tests that are too big to fit in the concurrency limit.
+    if (processors > numToStart) {
+      continue;
+    }
+
+    if (this->StartTest(test)) {
       numToStart -= processors;
     } else if (numToStart == 0) {
       break;
