@@ -178,6 +178,47 @@ File Operations
 
   False if the given path is an empty string.
 
+  .. warning::
+    To check the readability of a file, use preferably ``if(IS_READABLE)``
+    because this test will evolve to check file existence only in a future
+    release.
+
+.. signature:: if(IS_READABLE <path-to-file-or-directory>)
+
+  .. versionadded:: 3.29
+
+  True if the named file or directory is readable.  Behavior
+  is well-defined only for explicit full paths (a leading ``~/`` is not
+  expanded as a home directory and is considered a relative path).
+  Resolves symbolic links, i.e. if the named file or directory is a
+  symbolic link, returns true if the target of the symbolic link is readable.
+
+  False if the given path is an empty string.
+
+.. signature:: if(IS_WRITABLE <path-to-file-or-directory>)
+
+  .. versionadded:: 3.29
+
+  True if the named file or directory is writable.  Behavior
+  is well-defined only for explicit full paths (a leading ``~/`` is not
+  expanded as a home directory and is considered a relative path).
+  Resolves symbolic links, i.e. if the named file or directory is a
+  symbolic link, returns true if the target of the symbolic link is writable.
+
+  False if the given path is an empty string.
+
+.. signature:: if(IS_EXECUTABLE <path-to-file-or-directory>)
+
+  .. versionadded:: 3.29
+
+  True if the named file or directory is executable.  Behavior
+  is well-defined only for explicit full paths (a leading ``~/`` is not
+  expanded as a home directory and is considered a relative path).
+  Resolves symbolic links, i.e. if the named file or directory is a
+  symbolic link, returns true if the target of the symbolic link is executable.
+
+  False if the given path is an empty string.
+
 .. signature:: if(<file1> IS_NEWER_THAN <file2>)
   :target: IS_NEWER_THAN
 
