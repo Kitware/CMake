@@ -1048,21 +1048,29 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
       cmCustomCommandGenerator ccg(*cc, config, this->GetLocalGenerator());
       const std::vector<std::string>& ccoutputs = ccg.GetOutputs();
       const std::vector<std::string>& ccbyproducts = ccg.GetByproducts();
+      auto const nPreviousOutputs = ccouts.size();
       ccouts.insert(ccouts.end(), ccoutputs.begin(), ccoutputs.end());
       ccouts.insert(ccouts.end(), ccbyproducts.begin(), ccbyproducts.end());
       if (usePrivateGeneratedSources) {
         auto it = ccouts.begin();
+        // Skip over outputs that were already detected.
+        std::advance(it, nPreviousOutputs);
         while (it != ccouts.end()) {
           cmFileSet const* fileset =
             this->GeneratorTarget->GetFileSetForSource(
               config, this->Makefile->GetOrCreateGeneratedSource(*it));
-          if (fileset &&
-              fileset->GetVisibility() != cmFileSetVisibility::Private) {
+          bool isVisible = fileset &&
+            cmFileSetVisibilityIsForInterface(fileset->GetVisibility());
+          bool isIncludeable =
+            !fileset || cmFileSetTypeCanBeIncluded(fileset->GetType());
+          if (fileset && isVisible && isIncludeable) {
             ++it;
-          } else {
-            ccouts_private.push_back(*it);
-            it = ccouts.erase(it);
+            continue;
           }
+          if (!fileset || isIncludeable) {
+            ccouts_private.push_back(*it);
+          }
+          it = ccouts.erase(it);
         }
       }
     }
