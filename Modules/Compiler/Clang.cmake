@@ -117,8 +117,14 @@ else()
 
     # '-fcolor-diagnostics' introduced since Clang 2.6
     if(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 2.6)
-      set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS "-fcolor-diagnostics")
-      set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS_OFF "-fno-color-diagnostics")
+      # -fansi-escape-codes mentioned at https://releases.llvm.org/3.7.0/tools/clang/docs/UsersManual.html
+      if (CMAKE_HOST_WIN32 AND CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 3.7)
+        set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS -fansi-escape-codes -fcolor-diagnostics)
+        set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS_OFF -fno-ansi-escape-codes  -fno-color-diagnostics)
+      else()
+        set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS -fcolor-diagnostics)
+        set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS_OFF -fno-color-diagnostics)
+      endif()
     endif()
   endmacro()
 endif()
