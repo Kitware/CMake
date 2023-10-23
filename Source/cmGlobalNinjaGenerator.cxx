@@ -1357,10 +1357,10 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
   } else {
     cmNinjaDeps outs;
 
-    auto computeISPCOuputs = [](cmGlobalNinjaGenerator* gg,
-                                cmGeneratorTarget const* depTarget,
-                                cmNinjaDeps& outputDeps,
-                                const std::string& targetConfig) {
+    auto computeISPCOutputs = [](cmGlobalNinjaGenerator* gg,
+                                 cmGeneratorTarget const* depTarget,
+                                 cmNinjaDeps& outputDeps,
+                                 const std::string& targetConfig) {
       if (depTarget->CanCompileSources()) {
         auto headers = depTarget->GetGeneratedISPCHeaders(targetConfig);
         if (!headers.empty()) {
@@ -1384,10 +1384,10 @@ void cmGlobalNinjaGenerator::AppendTargetDepends(
       }
       if (targetDep.IsCross()) {
         this->AppendTargetOutputs(targetDep, outs, fileConfig, depends);
-        computeISPCOuputs(this, targetDep, outs, fileConfig);
+        computeISPCOutputs(this, targetDep, outs, fileConfig);
       } else {
         this->AppendTargetOutputs(targetDep, outs, config, depends);
-        computeISPCOuputs(this, targetDep, outs, config);
+        computeISPCOutputs(this, targetDep, outs, config);
       }
     }
     std::sort(outs.begin(), outs.end());
@@ -3182,11 +3182,4 @@ std::string cmGlobalNinjaMultiGenerator::OrderDependsTargetForTarget(
 {
   return cmStrCat("cmake_object_order_depends_target_", target->GetName(), '_',
                   cmSystemTools::UpperCase(config));
-}
-
-std::string cmGlobalNinjaMultiGenerator::OrderDependsTargetForTargetPrivate(
-  cmGeneratorTarget const* target, const std::string& config) const
-{
-  return cmStrCat(this->OrderDependsTargetForTarget(target, config),
-                  "_private");
 }

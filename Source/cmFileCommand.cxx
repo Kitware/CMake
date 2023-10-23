@@ -1322,13 +1322,15 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
       if (oldPolicyPath != realPath) {
         status.GetMakefile().IssueMessage(
           MessageType::AUTHOR_WARNING,
-          cmStrCat(
-            cmPolicies::GetPolicyWarning(cmPolicies::CMP0152), '\n',
-            "From input path:\n  ", input,
-            "\nthe policy OLD behavior produces path:\n  ", oldPolicyPath,
-            "\nbut the policy NEW behavior produces path:\n  ", realPath,
-            "\nSince the policy is not set, CMake is using the OLD "
-            "behavior for compatibility."));
+          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0152),
+                   "\n"
+                   "From input path:\n  ",
+                   input, "\nthe policy OLD behavior produces path:\n  ",
+                   oldPolicyPath,
+                   "\nbut the policy NEW behavior produces path:\n  ",
+                   realPath,
+                   "\nSince the policy is not set, CMake is using the OLD "
+                   "behavior for compatibility."));
       }
     }
     realPath = oldPolicyPath;

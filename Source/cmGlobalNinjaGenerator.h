@@ -349,7 +349,7 @@ public:
   virtual std::string OrderDependsTargetForTarget(
     cmGeneratorTarget const* target, const std::string& config) const;
 
-  virtual std::string OrderDependsTargetForTargetPrivate(
+  std::string OrderDependsTargetForTargetPrivate(
     cmGeneratorTarget const* target, const std::string& config) const;
 
   void AppendTargetOutputs(cmGeneratorTarget const* target,
@@ -739,9 +739,6 @@ public:
   bool SupportsDefaultConfigs() const override { return true; }
 
   std::string OrderDependsTargetForTarget(
-    cmGeneratorTarget const* target, const std::string& config) const override;
-
-  std::string OrderDependsTargetForTargetPrivate(
     cmGeneratorTarget const* target, const std::string& config) const override;
 
 protected:
