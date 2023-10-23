@@ -72,7 +72,6 @@ These modules are loaded using the :command:`include` command.
    /module/CTestCoverageCollectGCOV
    /module/CTestScriptMode
    /module/CTestUseLaunchers
-   /module/Dart
    /module/DeployQt4
    /module/ExternalData
    /module/ExternalProject
@@ -82,14 +81,12 @@ These modules are loaded using the :command:`include` command.
    /module/FindPackageMessage
    /module/FortranCInterface
    /module/GenerateExportHeader
-   /module/GetPrerequisites
    /module/GNUInstallDirs
    /module/GoogleTest
    /module/InstallRequiredSystemLibraries
    /module/ProcessorCount
    /module/SelectLibraryConfigurations
    /module/SquishTestScript
-   /module/TestBigEndian
    /module/TestForANSIForScope
    /module/TestForANSIStreamHeaders
    /module/TestForSSTREAM
@@ -127,7 +124,6 @@ They are normally called through the :command:`find_package` command.
    /module/FindCVS
    /module/FindCxxTest
    /module/FindCygwin
-   /module/FindDart
    /module/FindDCMTK
    /module/FindDevIL
    /module/FindDoxygen
@@ -276,8 +272,11 @@ Deprecated Utility Modules
    /module/CMakeExpandImportedTargets
    /module/CMakeForceCompiler
    /module/CMakeParseArguments
+   /module/Dart
    /module/Documentation
+   /module/GetPrerequisites
    /module/MacroAddFileDependencies
+   /module/TestBigEndian
    /module/TestCXXAcceptsFlag
    /module/UseJavaClassFilelist
    /module/UseJavaSymlinks
@@ -293,6 +292,7 @@ Deprecated Find Modules
    :maxdepth: 1
 
    /module/FindCUDA
+   /module/FindDart
    /module/FindITK
    /module/FindPythonInterp
    /module/FindPythonLibs
