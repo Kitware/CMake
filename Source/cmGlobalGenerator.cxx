@@ -874,7 +874,11 @@ void cmGlobalGenerator::EnableLanguage(
         noCompiler <<
           "The " << compilerName << ":\n"
           "  " << *compilerFile << "\n"
-          "is not a full path and was not found in the PATH.\n"
+          "is not a full path and was not found in the PATH."
+#ifdef _WIN32
+          "  Perhaps the extension is missing?"
+#endif
+          "\n"
           ;
         /* clang-format on */
       } else if (!cmSystemTools::FileExists(*compilerFile)) {
