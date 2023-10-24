@@ -45,6 +45,7 @@ macro(__windows_compiler_clang_gnu lang)
     math(EXPR MSVC_VERSION "${CMAKE_MATCH_1}*100 + ${CMAKE_MATCH_2}")
   endif()
 
+  set(CMAKE_${lang}_VERBOSE_LINK_FLAG "-v")
   # No -fPIC on Windows
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "")
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "")

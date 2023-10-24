@@ -1,4 +1,6 @@
 
+set(CMAKE_CUDA_VERBOSE_LINK_FLAG "-Wl,-v")
+
 # linker selection
 set(CMAKE_CUDA_USING_LINKER_SYSTEM "")
 set(CMAKE_CUDA_USING_LINKER_LLD "-fuse-ld=lld")
