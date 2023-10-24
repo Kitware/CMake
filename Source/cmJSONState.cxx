@@ -45,7 +45,7 @@ cmJSONState::cmJSONState(const std::string& filename, Json::Value* root)
 
 void cmJSONState::AddError(std::string const& errMsg)
 {
-  this->errors.push_back(Error(errMsg));
+  this->errors.emplace_back(errMsg);
 }
 
 void cmJSONState::AddErrorAtValue(std::string const& errMsg,
@@ -65,7 +65,7 @@ void cmJSONState::AddErrorAtOffset(std::string const& errMsg,
     this->AddError(errMsg);
   } else {
     Location loc = LocateInDocument(offset);
-    this->errors.push_back(Error(loc, errMsg));
+    this->errors.emplace_back(loc, errMsg);
   }
 }
 
@@ -118,7 +118,7 @@ const Json::Value* cmJSONState::value_after(std::string const& k)
 
 void cmJSONState::push_stack(std::string const& k, const Json::Value* value)
 {
-  this->parseStack.push_back(JsonPair(k, value));
+  this->parseStack.emplace_back(k, value);
 }
 
 void cmJSONState::pop_stack()

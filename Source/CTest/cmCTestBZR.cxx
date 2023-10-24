@@ -374,7 +374,7 @@ bool cmCTestBZR::UpdateImpl()
   // Use "bzr pull" to update the working tree.
   std::vector<std::string> bzr_update;
   bzr_update.push_back(this->CommandLineTool);
-  bzr_update.push_back("pull");
+  bzr_update.emplace_back("pull");
 
   cm::append(bzr_update, args);
 

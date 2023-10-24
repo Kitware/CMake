@@ -92,8 +92,8 @@ bool cmCTestCVS::UpdateImpl()
   // Run "cvs update" to update the work tree.
   std::vector<std::string> cvs_update;
   cvs_update.push_back(this->CommandLineTool);
-  cvs_update.push_back("-z3");
-  cvs_update.push_back("update");
+  cvs_update.emplace_back("-z3");
+  cvs_update.emplace_back("update");
   cm::append(cvs_update, args);
 
   UpdateParser out(this, "up-out> ");

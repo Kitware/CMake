@@ -151,9 +151,9 @@ cmCTestP4::User cmCTestP4::GetUserData(const std::string& username)
   if (it == this->Users.end()) {
     std::vector<std::string> p4_users;
     this->SetP4Options(p4_users);
-    p4_users.push_back("users");
-    p4_users.push_back("-m");
-    p4_users.push_back("1");
+    p4_users.emplace_back("users");
+    p4_users.emplace_back("-m");
+    p4_users.emplace_back("1");
     p4_users.push_back(username);
 
     UserParser out(this, "users-out> ");
@@ -335,10 +335,10 @@ std::string cmCTestP4::GetWorkingRevision()
   std::vector<std::string> p4_identify;
   this->SetP4Options(p4_identify);
 
-  p4_identify.push_back("changes");
-  p4_identify.push_back("-m");
-  p4_identify.push_back("1");
-  p4_identify.push_back("-t");
+  p4_identify.emplace_back("changes");
+  p4_identify.emplace_back("-m");
+  p4_identify.emplace_back("1");
+  p4_identify.emplace_back("-t");
 
   std::string source = this->SourceDirectory + "/...#have";
   p4_identify.push_back(source);
@@ -403,7 +403,7 @@ bool cmCTestP4::LoadRevisions()
     .append(",")
     .append(this->NewRevision);
 
-  p4_changes.push_back("changes");
+  p4_changes.emplace_back("changes");
   p4_changes.push_back(range);
 
   ChangesParser out(this, "p4_changes-out> ");
@@ -420,8 +420,8 @@ bool cmCTestP4::LoadRevisions()
   std::vector<std::string> p4_describe;
   for (std::string const& i : cmReverseRange(this->ChangeLists)) {
     this->SetP4Options(p4_describe);
-    p4_describe.push_back("describe");
-    p4_describe.push_back("-s");
+    p4_describe.emplace_back("describe");
+    p4_describe.emplace_back("-s");
     p4_describe.push_back(i);
 
     DescribeParser outDescribe(this, "p4_describe-out> ");
@@ -436,10 +436,10 @@ bool cmCTestP4::LoadModifications()
   std::vector<std::string> p4_diff;
   this->SetP4Options(p4_diff);
 
-  p4_diff.push_back("diff");
+  p4_diff.emplace_back("diff");
 
   // Ideally we would use -Od but not all clients support it
-  p4_diff.push_back("-dn");
+  p4_diff.emplace_back("-dn");
   std::string source = this->SourceDirectory + "/...";
   p4_diff.push_back(source);
 
@@ -480,7 +480,7 @@ bool cmCTestP4::UpdateImpl()
   std::vector<std::string> p4_sync;
   this->SetP4Options(p4_sync);
 
-  p4_sync.push_back("sync");
+  p4_sync.emplace_back("sync");
 
   // Get user-specified update options.
   std::string opts = this->CTest->GetCTestConfiguration("UpdateOptions");
