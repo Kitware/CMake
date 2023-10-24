@@ -285,7 +285,8 @@ int main()
       return exit_code;
 
     // compile rc file with rc.exe
-    return process(srcfilename, "", objfile, prefix, binpath + " " + rest,
+    std::string rc = cmStrCat('"', binpath, '"');
+    return process(srcfilename, "", objfile, prefix, cmStrCat(rc, ' ', rest),
                    std::string(), true);
   }
 
