@@ -190,7 +190,7 @@ public:
   {
   public:
     // -- Parse Cache
-    std::atomic<bool> ParseCacheChanged = ATOMIC_VAR_INIT(false);
+    std::atomic<bool> ParseCacheChanged{ false };
     cmFileTime ParseCacheTime;
     ParseCacheT ParseCache;
 
@@ -583,7 +583,7 @@ private:
   std::string SettingsStringMoc_;
   std::string SettingsStringUic_;
   // -- Worker thread pool
-  std::atomic<bool> JobError_ = ATOMIC_VAR_INIT(false);
+  std::atomic<bool> JobError_{ false };
   cmWorkerPool WorkerPool_;
   // -- Concurrent processing
   mutable std::mutex CMakeLibMutex_;
