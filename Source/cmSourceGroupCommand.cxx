@@ -280,8 +280,11 @@ static bool processTree(cmMakefile& mf, ParsedArguments& parsedArguments,
     ? ""
     : parsedArguments[kPrefixOptionName].front();
 
-  std::vector<std::string> files = parsedArguments[kFilesOptionName];
-  if (files.empty()) {
+  std::vector<std::string> files;
+  auto filesArgIt = parsedArguments.find(kFilesOptionName);
+  if (filesArgIt != parsedArguments.end()) {
+    files = filesArgIt->second;
+  } else {
     const std::vector<std::unique_ptr<cmSourceFile>>& srcFiles =
       mf.GetSourceFiles();
     for (const auto& srcFile : srcFiles) {
