@@ -75,7 +75,7 @@ macro(__compiler_gnu lang)
     if (NOT DEFINED CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED)
       ## check if this feature is supported by the linker
       if (CMAKE_${lang}_COMPILER_LINKER AND CMAKE_${lang}_COMPILER_LINKER_ID MATCHES "GNU|LLD")
-        execute_process(COMMAND "${CMAKE_${lang}_COMPILER}" --help
+        execute_process(COMMAND "${CMAKE_${lang}_COMPILER_LINKER}" --help
                         OUTPUT_VARIABLE _linker_capabilities
                         ERROR_VARIABLE _linker_capabilities)
         if(_linker_capabilities MATCHES "--dependency-file")
@@ -92,16 +92,17 @@ macro(__compiler_gnu lang)
   if (CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED)
     set(CMAKE_${lang}_LINK_DEPENDS_USE_LINKER TRUE)
   else()
-    unset(CMAKE_${lang}_LINK_DEPENDS_USE_LINKER)
+    set(CMAKE_${lang}_LINK_DEPENDS_USE_LINKER FALSE)
   endif()
 
   # Due to GNU binutils ld bug when LTO is enabled (see GNU bug
   # `30568 <https://sourceware.org/bugzilla/show_bug.cgi?id=30568>`_),
   # deactivate this feature if the version is less than 2.41.
   # For now, all known versions of gold linker have also this bug.
-  if (CMAKE_${lang}_COMPILER_LINKER_ID STREQUAL "GNUgold"
-      OR (CMAKE_${lang}_COMPILER_LINKER_ID STREQUAL "GNU"
-          AND CMAKE_${lang}_COMPILER_LINKER_VERSION VERSION_LESS "2.41"))
+  if (CMAKE_${lang}_COMPILER_LINKER_ID
+      AND (CMAKE_${lang}_COMPILER_LINKER_ID STREQUAL "GNUgold"
+           OR (CMAKE_${lang}_COMPILER_LINKER_ID STREQUAL "GNU"
+               AND CMAKE_${lang}_COMPILER_LINKER_VERSION VERSION_LESS "2.41")))
     set(CMAKE_${lang}_LINK_DEPENDS_USE_LINKER FALSE)
   endif()
 
