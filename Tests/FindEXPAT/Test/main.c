@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int main()
+int main(void)
 {
   XML_Expat_Version expat_version;
   char expat_version_string[16];

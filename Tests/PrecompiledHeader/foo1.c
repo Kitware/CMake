@@ -2,7 +2,7 @@
 #  error "Precompiled header foo_precompiled.h has not been loaded."
 #endif
 
-int main()
+int main(void)
 {
   return foo();
 }

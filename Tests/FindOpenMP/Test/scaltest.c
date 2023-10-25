@@ -6,7 +6,7 @@ extern "C"
 #endif
 int scalprod(int n, double* x, double* y, double* res);
 
-int main()
+int main(void)
 {
   double a[5] = { 1., 2., 3., 4., 5. };
   double b[5] = { 2., 3., 4., 5., 6. };

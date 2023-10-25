@@ -1,3 +1,3 @@
-void NoDepAFunction()
+void NoDepAFunction(void)
 {
 }

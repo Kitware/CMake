@@ -4,7 +4,7 @@
 #ifndef DEF_B
 #  error DEF_B not defined
 #endif
-int main()
+int main(void)
 {
   return 0;
 }

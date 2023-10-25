@@ -3,7 +3,7 @@
 #include FT_FREETYPE_H
 #include <string.h>
 
-int main()
+int main(void)
 {
   FT_Library library;
   FT_Error error;

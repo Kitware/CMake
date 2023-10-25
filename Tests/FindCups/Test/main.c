@@ -1,6 +1,6 @@
 #include <cups/cups.h>
 
-int main()
+int main(void)
 {
   int num_options = 0;
   cups_option_t* options = NULL;

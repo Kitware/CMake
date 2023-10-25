@@ -20,7 +20,7 @@ public:
   int i;
 };
 
-int main()
+int main(void)
 {
   A a;
   if (a.i == 21) {

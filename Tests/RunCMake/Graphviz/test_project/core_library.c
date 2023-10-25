@@ -1,3 +1,3 @@
-void log_something()
+void log_something(void)
 {
 }

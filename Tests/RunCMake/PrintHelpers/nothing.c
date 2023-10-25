@@ -1,6 +1,6 @@
 #include "nothing.h"
 
-void nothing()
+void nothing(void)
 {
   (void*)0;
 }

@@ -1,4 +1,4 @@
-__declspec(dllexport) int mylibC()
+__declspec(dllexport) int mylibC(void)
 {
   return 1;
 }

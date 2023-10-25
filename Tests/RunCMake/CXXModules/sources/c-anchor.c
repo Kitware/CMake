@@ -1,4 +1,4 @@
-int c_anchor()
+int c_anchor(void)
 {
   return 0;
 }

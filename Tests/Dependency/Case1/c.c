@@ -1,6 +1,6 @@
-extern int b();
+extern int b(void);
 
-int c()
+int c(void)
 {
   return b() + 42;
 }

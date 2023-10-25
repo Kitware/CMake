@@ -1,9 +1,9 @@
 #include <two-test.h> /* Requires TwoCustom to be built first.  */
-void NoDepAFunction();
-void OneFunction();
-void TwoFunction();
+void NoDepAFunction(void);
+void OneFunction(void);
+void TwoFunction(void);
 
-void FourFunction()
+void FourFunction(void)
 {
   static int count = 0;
   if (count == 0) {

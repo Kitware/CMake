@@ -1,7 +1,7 @@
 #include <GL/glut.h>
 #include <stdio.h>
 
-int main()
+int main(void)
 {
   /* The following should call exit(1) and print
       freeglut  ERROR:  Function <glutCreateWindow> called

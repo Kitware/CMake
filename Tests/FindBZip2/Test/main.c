@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main()
+int main(void)
 {
   int chunksize = 1024;
   FILE* file = fopen("test.bzip2", "wb");

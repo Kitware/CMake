@@ -1,5 +1,5 @@
 extern int innerlib(void);
-int main()
+int main(void)
 {
   return innerlib();
 }

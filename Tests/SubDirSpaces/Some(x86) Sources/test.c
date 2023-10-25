@@ -1,3 +1,3 @@
-void testOdd()
+void testOdd(void)
 {
 }

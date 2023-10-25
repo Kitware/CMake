@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main()
+int main(void)
 {
   /* 'cl /showIncludes' encodes output in the console output code page.  */
   unsigned int cp = GetConsoleOutputCP();

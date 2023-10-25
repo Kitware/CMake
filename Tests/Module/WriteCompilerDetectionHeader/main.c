@@ -24,7 +24,7 @@
 #  error Expect no CXX features defined
 #endif
 
-int main()
+int main(void)
 {
   return 0;
 }

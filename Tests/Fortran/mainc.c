@@ -1,5 +1,5 @@
 extern int myc(void);
-int main()
+int main(void)
 {
   return myc();
 }

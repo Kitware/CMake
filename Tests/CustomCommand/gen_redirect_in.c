@@ -1,6 +1,6 @@
 #if 1
 
-int gen_redirect()
+int gen_redirect(void)
 {
   return 3;
 }
