@@ -130,6 +130,8 @@ public:
   uv_handle_ptr_base_(std::nullptr_t) {}
   ~uv_handle_ptr_base_() { this->reset(); }
 
+  explicit operator bool() const;
+
   /**
    * Properly close the handle if needed and sets the inner handle to nullptr
    */

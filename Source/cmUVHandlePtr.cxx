@@ -97,6 +97,12 @@ void uv_handle_ptr_base_<T>::allocate(void* data)
 }
 
 template <typename T>
+uv_handle_ptr_base_<T>::operator bool() const
+{
+  return this->handle.get();
+}
+
+template <typename T>
 void uv_handle_ptr_base_<T>::reset()
 {
   this->handle.reset();
