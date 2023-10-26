@@ -61,7 +61,7 @@ public:
    * Allow less verbose calling of uv_loop_* functions
    * @return reinterpreted handle
    */
-  operator uv_loop_t*();
+  operator uv_loop_t*() const;
 
   uv_loop_t* get() const;
   uv_loop_t* operator->() const noexcept;
@@ -139,7 +139,7 @@ public:
    * Allow less verbose calling of uv_handle_* functions
    * @return reinterpreted handle
    */
-  operator uv_handle_t*();
+  operator uv_handle_t*() const;
 
   T* get() const;
   T* operator->() const noexcept;

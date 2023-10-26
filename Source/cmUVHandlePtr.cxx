@@ -44,7 +44,7 @@ void uv_loop_ptr::reset()
   this->loop.reset();
 }
 
-uv_loop_ptr::operator uv_loop_t*()
+uv_loop_ptr::operator uv_loop_t*() const
 {
   return this->loop.get();
 }
@@ -103,7 +103,7 @@ void uv_handle_ptr_base_<T>::reset()
 }
 
 template <typename T>
-uv_handle_ptr_base_<T>::operator uv_handle_t*()
+uv_handle_ptr_base_<T>::operator uv_handle_t*() const
 {
   return reinterpret_cast<uv_handle_t*>(this->handle.get());
 }
