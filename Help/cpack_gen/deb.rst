@@ -82,8 +82,13 @@ List of CPack DEB generator specific variables:
    Duplicate files get overwritten and it is up to the packager to set
    the variables in a manner that will prevent such errors.
 
- ``<file-name>.deb``
-   Use the given file name.  The ``.deb`` suffix is required.
+ ``<file-name>[.deb]``
+   Use the given file name.
+
+   .. versionchanged:: 3.29
+
+     The ``.deb`` suffix will be automatically added if the file name does
+     not end in ``.deb`` or ``.ipk``.  Previously the suffix was required.
 
  ``<file-name>.ipk``
    .. versionadded:: 3.10
