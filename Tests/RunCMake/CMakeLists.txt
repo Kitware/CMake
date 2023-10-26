@@ -1097,3 +1097,8 @@ endif()
 if(WIN32)
   add_RunCMake_test(Win32GenEx)
 endif()
+
+if(CMake_TEST_IAR_TOOLCHAINS)
+  add_RunCMake_test(IAR -DCMake_TEST_IAR_TOOLCHAINS=${CMake_TEST_IAR_TOOLCHAINS})
+  set_property(TEST RunCMake.IAR APPEND PROPERTY LABELS "IAR")
+endif()
