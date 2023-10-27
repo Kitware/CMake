@@ -13,6 +13,7 @@
 #include "cmDebuggerVariables.h"
 #include "cmDebuggerVariablesHelper.h"
 #include "cmDebuggerVariablesManager.h"
+#include "cmListFileCache.h"
 
 namespace cmDebugger {
 
@@ -135,8 +136,7 @@ dap::StackTraceResponse GetStackTraceResponse(
 #endif
     stackFrame.line = thread->Frames[i]->GetLine();
     stackFrame.column = 1;
-    stackFrame.name = thread->Frames[i]->GetFileName() + " Line " +
-      std::to_string(stackFrame.line);
+    stackFrame.name = thread->Frames[i]->GetFunction().OriginalName();
     stackFrame.id = thread->Frames[i]->GetId();
     stackFrame.source = source;
 
