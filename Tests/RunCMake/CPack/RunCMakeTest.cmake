@@ -69,3 +69,4 @@ run_cpack_test_subtests(
 )
 run_cpack_test(PROJECT_META "RPM.PROJECT_META;DEB.PROJECT_META" false "MONOLITHIC;COMPONENT")
 run_cpack_test_package_target(PRE_POST_SCRIPTS "ZIP" false "MONOLITHIC;COMPONENT")
+run_cpack_test_subtests(DUPLICATE_FILE "success;conflict_file;conflict_symlink" "TGZ" false "COMPONENT;GROUP")

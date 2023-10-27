@@ -47,6 +47,8 @@ private:
   std::string GetArchiveComponentFileName(const std::string& component,
                                           bool isGroupName);
 
+  class Deduplicator;
+
 protected:
   int InitializeInternal() override;
   /**
@@ -54,9 +56,11 @@ protected:
    * to the provided (already opened) archive.
    * @param[in,out] archive the archive object
    * @param[in] component the component whose file will be added to archive
+   * @param[in] deduplicator file deduplicator utility.
    */
   int addOneComponentToArchive(cmArchiveWrite& archive,
-                               cmCPackComponent* component);
+                               cmCPackComponent* component,
+                               Deduplicator* deduplicator);
 
   /**
    * The main package file method.
