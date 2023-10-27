@@ -1,7 +1,7 @@
-void OneFunc();
-void NoDepZ_func();
+void OneFunc(void);
+void NoDepZ_func(void);
 
-void TwoFunc()
+void TwoFunc(void)
 {
   OneFunc();
   NoDepZ_func();

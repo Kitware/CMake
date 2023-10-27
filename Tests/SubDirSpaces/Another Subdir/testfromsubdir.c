@@ -4,7 +4,7 @@ void secondone();
 void pair_stuff();
 void vcl_stuff();
 
-int main()
+int main(void)
 {
   printf("Hello from subdirectory\n");
   secondone();

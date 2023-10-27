@@ -6,7 +6,7 @@
 #  error "BUILD_CONFIG_NAME not defined!"
 #endif
 
-int main()
+int main(void)
 {
   char build_config_name[] = BUILD_CONFIG_NAME;
   char* c;

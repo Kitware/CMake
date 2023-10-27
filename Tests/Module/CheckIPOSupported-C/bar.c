@@ -1,4 +1,4 @@
-int bar()
+int bar(void)
 {
   return 0x42;
 }

@@ -6,7 +6,7 @@ int foo(int* restrict a, int* restrict b)
   return 0;
 }
 
-int main()
+int main(void)
 {
   return 0;
 }

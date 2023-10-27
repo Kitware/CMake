@@ -7,7 +7,7 @@ int main(void)
   return 0;
 }
 
-int notcalled()
+int notcalled(void)
 {
   printf(This function doesn't get called.\n");
   return 0;

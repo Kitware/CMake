@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int FooBar()
+int FooBar(void)
 {
   int class;
   int private = 10;

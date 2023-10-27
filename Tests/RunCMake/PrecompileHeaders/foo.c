@@ -2,12 +2,12 @@
 
 #include "foo2.h"
 
-int foo()
+int foo(void)
 {
   return 0;
 }
 
-int foo2()
+int foo2(void)
 {
   return 0;
 }

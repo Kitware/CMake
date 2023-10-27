@@ -1,7 +1,7 @@
 
 #include <Gui/Gui.h>
 
-int main()
+int main(void)
 {
   foo();
 

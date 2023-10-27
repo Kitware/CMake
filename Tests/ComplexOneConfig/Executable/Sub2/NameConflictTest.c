@@ -1,4 +1,4 @@
-int NameConflictTest2()
+int NameConflictTest2(void)
 {
   return 0;
 }

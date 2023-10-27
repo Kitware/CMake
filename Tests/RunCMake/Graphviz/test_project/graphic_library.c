@@ -1,3 +1,3 @@
-void initialize_graphics()
+void initialize_graphics(void)
 {
 }

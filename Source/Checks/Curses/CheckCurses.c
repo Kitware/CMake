@@ -8,7 +8,7 @@
 #  include <curses.h>
 #endif
 
-int main()
+int main(void)
 {
   curses_version();
   return 0;

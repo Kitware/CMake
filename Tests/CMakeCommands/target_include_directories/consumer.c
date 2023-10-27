@@ -15,7 +15,7 @@
 #  endif
 #endif
 
-int consumer_c()
+int consumer_c(void)
 {
   return 0;
 }

@@ -25,6 +25,6 @@
 #  error unknown OS
 #endif
 
-void foo()
+void foo(void)
 {
 }
