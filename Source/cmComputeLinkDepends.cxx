@@ -512,6 +512,7 @@ void cmComputeLinkDepends::AddLinkObject(cmLinkItem const& item)
   LinkEntry& entry = this->EntryList[index];
   entry.Item = BT<std::string>(item.AsStr(), item.Backtrace);
   entry.Kind = LinkEntry::Object;
+  entry.Target = item.Target;
 
   // Record explicitly linked object files separately.
   this->ObjectEntries.emplace_back(index);
