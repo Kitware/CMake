@@ -219,9 +219,11 @@ void GetScriptingCommands(cmState* state)
   state->AddDisallowedCommand(
     "use_mangled_mesa", cmUseMangledMesaCommand, cmPolicies::CMP0030,
     "The use_mangled_mesa command should not be called; see CMP0030.");
-  state->AddDisallowedCommand(
-    "exec_program", cmExecProgramCommand, cmPolicies::CMP0153,
-    "The exec_program command should not be called; see CMP0153.");
+  state->AddDisallowedCommand("exec_program", cmExecProgramCommand,
+                              cmPolicies::CMP0153,
+                              "The exec_program command should not be called; "
+                              "see CMP0153. Use execute_process() instead.",
+                              "Use execute_process() instead.");
 
 #endif
 }
