@@ -68,7 +68,7 @@ add_library(UseCstaticObjs STATIC $<TARGET_OBJECTS:Cstatic> $<TARGET_OBJECTS:A> 
 # Test a shared library with sources from a different shared library
 add_library(UseCsharedObjs SHARED $<TARGET_OBJECTS:Cshared> $<TARGET_OBJECTS:A> $<TARGET_OBJECTS:Bexport>)
 
-# Test a shared executable with sources from a different shared library
+# Test a shared executable with sources from a different executable
 add_executable(UseABstaticObjs $<TARGET_OBJECTS:UseABstatic>)
 target_link_libraries(UseABstaticObjs ABstatic)
 
