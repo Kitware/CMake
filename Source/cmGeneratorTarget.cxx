@@ -9292,14 +9292,19 @@ bool cmGeneratorTarget::NeedDyndepForSource(std::string const& lang,
     return true;
   }
 
+  bool haveRule = false;
   switch (this->HaveCxxModuleSupport(config)) {
     case Cxx20SupportLevel::MissingCxx:
     case Cxx20SupportLevel::NoCxx20:
       return false;
     case Cxx20SupportLevel::MissingRule:
+      break;
     case Cxx20SupportLevel::Supported:
+      haveRule = true;
       break;
   }
+  bool haveGeneratorSupport =
+    this->GetGlobalGenerator()->CheckCxxModuleSupport();
   auto const sfProp = sf->GetProperty("CXX_SCAN_FOR_MODULES");
   if (sfProp.IsSet()) {
     return sfProp.IsOn();
@@ -9319,8 +9324,9 @@ bool cmGeneratorTarget::NeedDyndepForSource(std::string const& lang,
     case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::NEW:
-      // The NEW behavior is to scan the source.
-      policyAnswer = true;
+      // The NEW behavior is to scan the source if the compiler supports
+      // scanning and the generator supports it.
+      policyAnswer = haveRule && haveGeneratorSupport;
       break;
   }
   return policyAnswer;

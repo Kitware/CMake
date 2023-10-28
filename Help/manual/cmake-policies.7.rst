@@ -57,7 +57,7 @@ Policies Introduced by CMake 3.28
 .. toctree::
    :maxdepth: 1
 
-   CMP0155: C++ sources in targets with at least C++20 are scanned for imports. </policy/CMP0155>
+   CMP0155: C++ sources in targets with at least C++20 are scanned for imports when supported. </policy/CMP0155>
    CMP0154: Generated files are private by default in targets using file sets. </policy/CMP0154>
    CMP0153: The exec_program command should not be called. </policy/CMP0153>
    CMP0152: file(REAL_PATH) resolves symlinks before collapsing ../ components.  </policy/CMP0152>

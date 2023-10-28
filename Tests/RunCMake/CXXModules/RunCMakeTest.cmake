@@ -23,6 +23,7 @@ if ("cxx_std_20" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
   run_cmake(NoScanningVariable)
   run_cmake(CMP0155-OLD)
   run_cmake(CMP0155-NEW)
+  run_cmake(CMP0155-NEW-with-rule)
 endif ()
 
 if (RunCMake_GENERATOR MATCHES "Ninja")
