@@ -140,7 +140,7 @@ if (freetype_FOUND)
     unset(_Freetype_location_release)
     unset(_Freetype_location_debug)
   endif ()
-  list(APPEND FREETYPE_LIBRARIES
+  list(INSERT FREETYPE_LIBRARIES 0
     "${_Freetype_location}")
   unset(_Freetype_location)
   set(Freetype_FOUND 1)
