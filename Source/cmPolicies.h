@@ -473,7 +473,11 @@ class cmMakefile;
   SELECT(POLICY, CMP0155,                                                     \
          "C++ sources in targets with at least C++20 are scanned for "        \
          "imports when supported.",                                           \
-         3, 28, 0, cmPolicies::WARN)
+         3, 28, 0, cmPolicies::WARN)                                          \
+  SELECT(                                                                     \
+    POLICY, CMP0156,                                                          \
+    "De-duplicate libraries on link lines based on linker capabilities.", 3,  \
+    29, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -513,7 +517,8 @@ class cmMakefile;
   F(CMP0131)                                                                  \
   F(CMP0142)                                                                  \
   F(CMP0154)                                                                  \
-  F(CMP0155)
+  F(CMP0155)                                                                  \
+  F(CMP0156)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \

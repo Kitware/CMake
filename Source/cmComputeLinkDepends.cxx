@@ -16,6 +16,8 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmComputeComponentGraph.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
@@ -26,6 +28,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
@@ -239,10 +242,79 @@ public:
   using LinkEntry = cmComputeLinkDepends::LinkEntry;
   using EntryVector = cmComputeLinkDepends::EntryVector;
 
-  EntriesProcessing(EntryVector& entries, EntryVector& finalEntries)
+  EntriesProcessing(const cmGeneratorTarget* target,
+                    const std::string& linkLanguage, EntryVector& entries,
+                    EntryVector& finalEntries)
     : Entries(entries)
     , FinalEntries(finalEntries)
   {
+    const auto* makefile = target->Makefile;
+
+    switch (target->GetPolicyStatusCMP0156()) {
+      case cmPolicies::WARN:
+        if (!makefile->GetCMakeInstance()->GetIsInTryCompile() &&
+            makefile->PolicyOptionalWarningEnabled(
+              "CMAKE_POLICY_WARNING_CMP0156")) {
+          makefile->GetCMakeInstance()->IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0156),
+                     "\nSince the policy is not set, legacy libraries "
+                     "de-duplication strategy will be applied."),
+            target->GetBacktrace());
+        }
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
+        // rely on default initialization of the class
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        makefile->GetCMakeInstance()->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0156),
+          target->GetBacktrace());
+        CM_FALLTHROUGH;
+      case cmPolicies::NEW: {
+        if (auto libProcessing = makefile->GetDefinition(cmStrCat(
+              "CMAKE_", linkLanguage, "_LINK_LIBRARIES_PROCESSING"))) {
+          cmsys::RegularExpression processingOption{
+            "^(ORDER|UNICITY)=(FORWARD|REVERSE|ALL|NONE|SHARED)$"
+          };
+          std::string errorMessage;
+          for (auto const& option : cmList{ libProcessing }) {
+            if (processingOption.find(option)) {
+              if (processingOption.match(1) == "ORDER") {
+                if (processingOption.match(2) == "FORWARD") {
+                  this->Order = Forward;
+                } else if (processingOption.match(2) == "REVERSE") {
+                  this->Order = Reverse;
+                } else {
+                  errorMessage += cmStrCat("  ", option, '\n');
+                }
+              } else if (processingOption.match(1) == "UNICITY") {
+                if (processingOption.match(2) == "ALL") {
+                  this->Unicity = All;
+                } else if (processingOption.match(2) == "NONE") {
+                  this->Unicity = None;
+                } else if (processingOption.match(2) == "SHARED") {
+                  this->Unicity = Shared;
+                } else {
+                  errorMessage += cmStrCat("  ", option, '\n');
+                }
+              }
+            } else {
+              errorMessage += cmStrCat("  ", option, '\n');
+            }
+          }
+          if (!errorMessage.empty()) {
+            makefile->GetCMakeInstance()->IssueMessage(
+              MessageType::FATAL_ERROR,
+              cmStrCat("Erroneous option(s) for 'CMAKE_", linkLanguage,
+                       "_LINK_LIBRARIES_PROCESSING':\n", errorMessage),
+              target->GetBacktrace());
+          }
+        }
+      }
+    }
   }
 
   void AddGroups(const std::map<size_t, std::vector<size_t>>& groups)
@@ -509,7 +581,8 @@ cmComputeLinkDepends::Compute()
   this->OrderLinkEntries();
 
   // Compute the final set of link entries.
-  EntriesProcessing entriesProcessing{ this->EntryList,
+  EntriesProcessing entriesProcessing{ this->Target, this->LinkLanguage,
+                                       this->EntryList,
                                        this->FinalLinkEntries };
   // Add groups first, to ensure that libraries of the groups are always kept.
   entriesProcessing.AddGroups(this->GroupItems);

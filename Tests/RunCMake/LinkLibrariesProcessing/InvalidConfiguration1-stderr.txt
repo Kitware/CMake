@@ -1,0 +1,7 @@
+CMake Error at InvalidConfiguration1.cmake:[0-9]+ \(add_executable\):
+  Erroneous option\(s\) for 'CMAKE_C_LINK_LIBRARIES_PROCESSING':
+
+    ORDER=
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
