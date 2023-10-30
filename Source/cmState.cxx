@@ -447,17 +447,23 @@ void cmState::AddFlowControlCommand(std::string const& name,
 void cmState::AddDisallowedCommand(std::string const& name,
                                    BuiltinCommand command,
                                    cmPolicies::PolicyID policy,
-                                   const char* message)
+                                   const char* message,
+                                   const char* additionalWarning)
 {
   this->AddBuiltinCommand(
     name,
-    [command, policy, message](const std::vector<cmListFileArgument>& args,
-                               cmExecutionStatus& status) -> bool {
+    [command, policy, message,
+     additionalWarning](const std::vector<cmListFileArgument>& args,
+                        cmExecutionStatus& status) -> bool {
       cmMakefile& mf = status.GetMakefile();
       switch (mf.GetPolicyStatus(policy)) {
-        case cmPolicies::WARN:
-          mf.IssueMessage(MessageType::AUTHOR_WARNING,
-                          cmPolicies::GetPolicyWarning(policy));
+        case cmPolicies::WARN: {
+          std::string warning = cmPolicies::GetPolicyWarning(policy);
+          if (additionalWarning) {
+            warning = cmStrCat(warning, '\n', additionalWarning);
+          }
+          mf.IssueMessage(MessageType::AUTHOR_WARNING, warning);
+        }
           CM_FALLTHROUGH;
         case cmPolicies::OLD:
           break;
