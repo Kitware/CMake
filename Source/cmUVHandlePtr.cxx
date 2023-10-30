@@ -54,6 +54,11 @@ uv_loop_t* uv_loop_ptr::operator->() const noexcept
   return this->loop.get();
 }
 
+uv_loop_t& uv_loop_ptr::operator*() const
+{
+  return *this->loop;
+}
+
 uv_loop_t* uv_loop_ptr::get() const
 {
   return this->loop.get();

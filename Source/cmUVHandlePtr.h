@@ -65,6 +65,7 @@ public:
 
   uv_loop_t* get() const;
   uv_loop_t* operator->() const noexcept;
+  uv_loop_t& operator*() const;
 };
 
 /***
