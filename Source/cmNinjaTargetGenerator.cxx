@@ -1257,8 +1257,6 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
 {
   cmNinjaBuild scanBuild(ruleName);
 
-  scanBuild.RspFile = "$out.rsp";
-
   if (compilePP) {
     // Move compilation dependencies to the scan/preprocessing build statement.
     std::swap(scanBuild.ExplicitDeps, objBuild.ExplicitDeps);
@@ -1299,6 +1297,7 @@ cmNinjaBuild GetScanBuildStatement(const std::string& ruleName,
   // Tell dependency scanner where to store dyndep intermediate results.
   std::string ddiFileName = cmStrCat(objectFileName, ".ddi");
   scanBuild.Variables["DYNDEP_INTERMEDIATE_FILE"] = ddiFileName;
+  scanBuild.RspFile = cmStrCat(ddiFileName, ".rsp");
 
   // Outputs of the scan/preprocessor build statement.
   if (compilePP) {
