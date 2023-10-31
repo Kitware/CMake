@@ -1252,7 +1252,7 @@ void cmComputeLinkInformation::AddItem(LinkEntry const& entry)
         this->AddFullItem(entry);
         this->AddLibraryRuntimeInfo(item.Value);
       }
-    } else {
+    } else if (entry.Kind != cmComputeLinkDepends::LinkEntry::Object) {
       // This is a library or option specified by the user.
       this->AddUserItem(entry, true);
     }

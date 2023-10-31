@@ -134,3 +134,6 @@ if( # Intel Fortran VS Integration breaks on custom targets with Fortran sources
   add_subdirectory(Issue25252-iface-target)
 endif()
 add_subdirectory(Issue25252-iface-sources)
+
+add_subdirectory(Issue25365-target-objects)
+add_subdirectory(Issue25365-target-objects-iface)
