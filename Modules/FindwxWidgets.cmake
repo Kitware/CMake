@@ -188,6 +188,9 @@ macro(DBG_MSG_V _MSG)
 #    "${CMAKE_CURRENT_LIST_FILE}(${CMAKE_CURRENT_LIST_LINE}): ${_MSG}")
 endmacro()
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
+
 # Clear return values in case the module is loaded more than once.
 set(wxWidgets_FOUND FALSE)
 set(wxWidgets_INCLUDE_DIRS "")
@@ -441,8 +444,7 @@ if(wxWidgets_FIND_STYLE STREQUAL "win32")
     endif()
 
     DBG_MSG_V("OpenGL")
-    list(FIND ${_LIBS} gl WX_USE_GL)
-    if(NOT WX_USE_GL EQUAL -1)
+    if(gl IN_LIST ${_LIBS})
       DBG_MSG_V("- is required.")
       list(APPEND wxWidgets_LIBRARIES opengl32 glu32)
     endif()
@@ -1215,3 +1217,5 @@ function(WXWIDGETS_ADD_RESOURCES _outfiles)
 
   set(${_outfiles} ${${_outfiles}} PARENT_SCOPE)
 endfunction()
+
+cmake_policy(POP)
