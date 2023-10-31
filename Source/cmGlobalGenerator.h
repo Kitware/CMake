@@ -156,7 +156,17 @@ public:
 
   virtual bool InspectConfigTypeVariables() { return true; }
 
-  virtual bool CheckCxxModuleSupport() { return false; }
+  enum class CxxModuleSupportQuery
+  {
+    // Support is expected at the call site.
+    Expected,
+    // The call site is querying for support and handles problems by itself.
+    Inspect,
+  };
+  virtual bool CheckCxxModuleSupport(CxxModuleSupportQuery /*query*/)
+  {
+    return false;
+  }
 
   virtual bool IsGNUMakeJobServerAware() const { return false; }
 

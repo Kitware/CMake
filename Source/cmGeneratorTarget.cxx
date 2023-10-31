@@ -9190,7 +9190,8 @@ void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
 
   // If the generator doesn't support modules at all, error that we have
   // sources that require the support.
-  if (!this->GetGlobalGenerator()->CheckCxxModuleSupport()) {
+  if (!this->GetGlobalGenerator()->CheckCxxModuleSupport(
+        cmGlobalGenerator::CxxModuleSupportQuery::Expected)) {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat(
@@ -9248,7 +9249,8 @@ bool cmGeneratorTarget::NeedCxxModuleSupport(std::string const& lang,
     return false;
   }
   return this->HaveCxxModuleSupport(config) == Cxx20SupportLevel::Supported &&
-    this->GetGlobalGenerator()->CheckCxxModuleSupport();
+    this->GetGlobalGenerator()->CheckCxxModuleSupport(
+      cmGlobalGenerator::CxxModuleSupportQuery::Inspect);
 }
 
 bool cmGeneratorTarget::NeedDyndep(std::string const& lang,
@@ -9304,7 +9306,8 @@ bool cmGeneratorTarget::NeedDyndepForSource(std::string const& lang,
       break;
   }
   bool haveGeneratorSupport =
-    this->GetGlobalGenerator()->CheckCxxModuleSupport();
+    this->GetGlobalGenerator()->CheckCxxModuleSupport(
+      cmGlobalGenerator::CxxModuleSupportQuery::Inspect);
   auto const sfProp = sf->GetProperty("CXX_SCAN_FOR_MODULES");
   if (sfProp.IsSet()) {
     return sfProp.IsOn();
