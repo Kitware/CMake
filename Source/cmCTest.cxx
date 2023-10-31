@@ -2257,11 +2257,6 @@ bool cmCTest::ProgressOutputSupportedByConsole()
 
 bool cmCTest::ColoredOutputSupportedByConsole()
 {
-#if defined(_WIN32)
-  // Not supported on Windows
-  return false;
-#else
-  // On UNIX we need a non-dumb tty.
   std::string clicolor_force;
   if (cmSystemTools::GetEnv("CLICOLOR_FORCE", clicolor_force) &&
       !clicolor_force.empty() && clicolor_force != "0") {
@@ -2271,6 +2266,11 @@ bool cmCTest::ColoredOutputSupportedByConsole()
   if (cmSystemTools::GetEnv("CLICOLOR", clicolor) && clicolor == "0") {
     return false;
   }
+#if defined(_WIN32)
+  // Not supported on Windows
+  return false;
+#else
+  // On UNIX we need a non-dumb tty.
   return ConsoleIsNotDumb();
 #endif
 }
@@ -3736,12 +3736,7 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg,
 std::string cmCTest::GetColorCode(Color color) const
 {
   if (this->Impl->OutputColorCode) {
-#if defined(_WIN32)
-    // Not supported on Windows
-    static_cast<void>(color);
-#else
     return "\033[0;" + std::to_string(static_cast<int>(color)) + "m";
-#endif
   }
 
   return "";
