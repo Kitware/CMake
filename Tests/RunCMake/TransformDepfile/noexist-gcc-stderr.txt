@@ -1,0 +1,4 @@
+^CMake Warning:
+  Expected depfile does not exist.
+
+    .*/Tests/RunCMake/TransformDepfile/noexist.d$
