@@ -882,13 +882,14 @@ bool cmGlobalNinjaGenerator::CheckLanguages(
   return true;
 }
 
-bool cmGlobalNinjaGenerator::CheckCxxModuleSupport()
+bool cmGlobalNinjaGenerator::CheckCxxModuleSupport(CxxModuleSupportQuery query)
 {
   if (this->NinjaSupportsDyndepsCxx) {
     return true;
   }
   bool const diagnose = !this->DiagnosedCxxModuleNinjaSupport &&
-    !this->CMakeInstance->GetIsInTryCompile();
+    !this->CMakeInstance->GetIsInTryCompile() &&
+    query == CxxModuleSupportQuery::Expected;
   if (diagnose) {
     std::ostringstream e;
     /* clang-format off */

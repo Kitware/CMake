@@ -475,7 +475,7 @@ public:
 
   bool IsSingleConfigUtility(cmGeneratorTarget const* target) const;
 
-  bool CheckCxxModuleSupport() override;
+  bool CheckCxxModuleSupport(CxxModuleSupportQuery query) override;
 
 protected:
   void Generate() override;
