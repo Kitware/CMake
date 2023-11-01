@@ -106,6 +106,8 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
           string(APPEND log "    arg [${arg}] ==> dir [${dir}]\n")
         elseif(is_msvc AND "${arg}" STREQUAL "-link")
           string(APPEND log "    arg [${arg}] ==> ignore MSVC cl option\n")
+        elseif(is_msvc AND "${arg}" MATCHES "^[-/][Ii][Mm][Pp][Ll][Ii][Bb]:")
+          string(APPEND log "    arg [${arg}] ==> ignore MSVC link option\n")
         elseif(is_msvc AND "${arg}" MATCHES "^(.*\\.[Ll][Ii][Bb])$")
           set(lib "${CMAKE_MATCH_1}")
           list(APPEND implicit_libs_tmp ${lib})
