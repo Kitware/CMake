@@ -25,6 +25,7 @@
 #include "cmProcess.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmUVHandlePtr.h"
 #include "cmWorkingDirectory.h"
 
 cmCTestRunTest::cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler,
@@ -890,7 +891,7 @@ bool cmCTestRunTest::ForkProcess()
   this->TestResult.Environment.erase(this->TestResult.Environment.length() -
                                      1);
 
-  return this->TestProcess->StartProcess(this->MultiTestHandler.Loop,
+  return this->TestProcess->StartProcess(*this->MultiTestHandler.Loop,
                                          &this->TestProperties->Affinity);
 }
 

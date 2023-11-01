@@ -201,7 +201,7 @@ protected:
   size_t ParallelLevel; // max number of process that can be run at once
   unsigned long TestLoad;
   unsigned long FakeLoadForTesting;
-  uv_loop_t Loop;
+  cm::uv_loop_ptr Loop;
   cm::uv_timer_ptr TestLoadRetryTimer;
   cmCTestTestHandler* TestHandler;
   cmCTest* CTest;

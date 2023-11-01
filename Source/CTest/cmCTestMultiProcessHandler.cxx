@@ -142,10 +142,10 @@ void cmCTestMultiProcessHandler::RunTests()
 #endif
   this->TestHandler->SetMaxIndex(this->FindMaxIndex());
 
-  uv_loop_init(&this->Loop);
+  this->Loop.init();
   this->StartNextTests();
-  uv_run(&this->Loop, UV_RUN_DEFAULT);
-  uv_loop_close(&this->Loop);
+  uv_run(this->Loop, UV_RUN_DEFAULT);
+  this->Loop.reset();
 
   if (!this->StopTimePassed && !this->CheckStopOnFailure()) {
     assert(this->Complete());
@@ -618,7 +618,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
       milliseconds = 10;
     }
     if (this->TestLoadRetryTimer.get() == nullptr) {
-      this->TestLoadRetryTimer.init(this->Loop, this);
+      this->TestLoadRetryTimer.init(*this->Loop, this);
     }
     this->TestLoadRetryTimer.start(
       &cmCTestMultiProcessHandler::OnTestLoadRetryCB, milliseconds, 0);
