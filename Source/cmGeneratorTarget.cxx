@@ -9259,7 +9259,8 @@ void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
 
   // If the generator doesn't support modules at all, error that we have
   // sources that require the support.
-  if (!this->GetGlobalGenerator()->CheckCxxModuleSupport()) {
+  if (!this->GetGlobalGenerator()->CheckCxxModuleSupport(
+        cmGlobalGenerator::CxxModuleSupportQuery::Expected)) {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
       cmStrCat(
@@ -9317,7 +9318,8 @@ bool cmGeneratorTarget::NeedCxxModuleSupport(std::string const& lang,
     return false;
   }
   return this->HaveCxxModuleSupport(config) == Cxx20SupportLevel::Supported &&
-    this->GetGlobalGenerator()->CheckCxxModuleSupport();
+    this->GetGlobalGenerator()->CheckCxxModuleSupport(
+      cmGlobalGenerator::CxxModuleSupportQuery::Inspect);
 }
 
 bool cmGeneratorTarget::NeedDyndep(std::string const& lang,
@@ -9361,14 +9363,20 @@ bool cmGeneratorTarget::NeedDyndepForSource(std::string const& lang,
     return true;
   }
 
+  bool haveRule = false;
   switch (this->HaveCxxModuleSupport(config)) {
     case Cxx20SupportLevel::MissingCxx:
     case Cxx20SupportLevel::NoCxx20:
       return false;
     case Cxx20SupportLevel::MissingRule:
+      break;
     case Cxx20SupportLevel::Supported:
+      haveRule = true;
       break;
   }
+  bool haveGeneratorSupport =
+    this->GetGlobalGenerator()->CheckCxxModuleSupport(
+      cmGlobalGenerator::CxxModuleSupportQuery::Inspect);
   auto const sfProp = sf->GetProperty("CXX_SCAN_FOR_MODULES");
   if (sfProp.IsSet()) {
     return sfProp.IsOn();
@@ -9388,8 +9396,9 @@ bool cmGeneratorTarget::NeedDyndepForSource(std::string const& lang,
     case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::NEW:
-      // The NEW behavior is to scan the source.
-      policyAnswer = true;
+      // The NEW behavior is to scan the source if the compiler supports
+      // scanning and the generator supports it.
+      policyAnswer = haveRule && haveGeneratorSupport;
       break;
   }
   return policyAnswer;

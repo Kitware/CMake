@@ -48,7 +48,7 @@ public:
 
   const char* GetAndroidApplicationTypeRevision() const override;
 
-  bool CheckCxxModuleSupport() override
+  bool CheckCxxModuleSupport(CxxModuleSupportQuery /*query*/) override
   {
     return this->SupportsCxxModuleDyndep();
   }
