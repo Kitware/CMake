@@ -26,6 +26,7 @@ set(CMakeLib_TESTS
   testXMLSafe.cxx
   testFindPackageCommand.cxx
   testUVHandlePtr.cxx
+  testUVJobServerClient.cxx
   testUVProcessChain.cxx
   testUVRAII.cxx
   testUVStreambuf.cxx

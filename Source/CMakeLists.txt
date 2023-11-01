@@ -1091,6 +1091,9 @@ add_library(
   CTest/cmCTestP4.cxx
   CTest/cmCTestP4.h
 
+  CTest/cmUVJobServerClient.cxx
+  CTest/cmUVJobServerClient.h
+
   LexerParser/cmCTestResourceGroupsLexer.cxx
   LexerParser/cmCTestResourceGroupsLexer.h
   LexerParser/cmCTestResourceGroupsLexer.in.l
