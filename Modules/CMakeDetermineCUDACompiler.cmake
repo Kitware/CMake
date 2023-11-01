@@ -164,26 +164,7 @@ if(MSVC_CUDA_ARCHITECTURE_ID)
     "set(MSVC_CUDA_ARCHITECTURE_ID ${MSVC_CUDA_ARCHITECTURE_ID})")
 endif()
 
-if(CMAKE_GENERATOR MATCHES "Visual Studio")
-  set(CMAKE_CUDA_HOST_LINK_LAUNCHER "${CMAKE_LINKER}")
-  set(CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES "")
-  set(CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES "")
-  set(CMAKE_CUDA_HOST_IMPLICIT_LINK_FRAMEWORK_DIRECTORIES "")
-
-  # We do not currently detect CMAKE_CUDA_HOST_IMPLICIT_LINK_LIBRARIES but we
-  # do need to detect CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT from the compiler by
-  # looking at which cudart library exists in the implicit link libraries passed
-  # to the host linker.
-  if(CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT MATCHES "link\\.exe [^\n]*cudart_static\\.lib")
-    set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT "STATIC")
-  elseif(CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT MATCHES "link\\.exe [^\n]*cudart\\.lib")
-    set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT "SHARED")
-  else()
-    set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT "NONE")
-  endif()
-  set(_SET_CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT
-    "set(CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT \"${CMAKE_CUDA_RUNTIME_LIBRARY_DEFAULT}\")")
-elseif(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
+if(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
   string(REGEX MATCHALL "-target-cpu sm_([0-9]+)" _clang_target_cpus "${CMAKE_CUDA_COMPILER_PRODUCED_OUTPUT}")
 
   foreach(_clang_target_cpu ${_clang_target_cpus})
