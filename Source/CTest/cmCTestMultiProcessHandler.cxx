@@ -358,11 +358,11 @@ bool cmCTestMultiProcessHandler::AllResourcesAvailable()
 void cmCTestMultiProcessHandler::CheckResourcesAvailable()
 {
   if (this->UseResourceSpec) {
-    for (auto test : this->OrderedTests) {
+    for (auto const& t : this->PendingTests) {
       std::map<std::string, std::vector<cmCTestBinPackerAllocation>>
         allocations;
-      this->TryAllocateResources(test, allocations,
-                                 &this->ResourceAllocationErrors[test]);
+      this->TryAllocateResources(t.first, allocations,
+                                 &this->ResourceAllocationErrors[t.first]);
     }
   }
 }
@@ -587,8 +587,8 @@ void cmCTestMultiProcessHandler::StartNextTests()
     // Find out whether there are any non RUN_SERIAL tests left, so that the
     // correct warning may be displayed.
     bool onlyRunSerialTestsLeft = true;
-    for (auto const& test : this->OrderedTests) {
-      if (!this->Properties[test]->RunSerial) {
+    for (auto const& t : this->PendingTests) {
+      if (!this->Properties[t.first]->RunSerial) {
         onlyRunSerialTestsLeft = false;
       }
     }
