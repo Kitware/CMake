@@ -542,15 +542,12 @@ void cmCTestMultiProcessHandler::StartNextTests()
 
   // Start tests in the preferred order, each subject to readiness checks.
   auto ti = this->OrderedTests.begin();
-  while (numToStart > 0 && ti != this->OrderedTests.end()) {
+  while (numToStart > 0 && !this->SerialTestRunning &&
+         ti != this->OrderedTests.end()) {
     // Increment the test iterator now because the current list
     // entry may be deleted below.
     int test = *ti++;
 
-    // Take a nap if we're currently performing a RUN_SERIAL test.
-    if (this->SerialTestRunning) {
-      break;
-    }
     // We can only start a RUN_SERIAL test if no other tests are also
     // running.
     if (this->Properties[test]->RunSerial && this->RunningCount > 0) {
