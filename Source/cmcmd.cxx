@@ -203,11 +203,16 @@ bool cmTarFilesFrom(std::string const& file, std::vector<std::string>& files)
 void cmCatFile(const std::string& fileToAppend)
 {
 #ifdef _WIN32
+  _setmode(fileno(stdin), _O_BINARY);
   _setmode(fileno(stdout), _O_BINARY);
 #endif
-  cmsys::ifstream source(fileToAppend.c_str(),
-                         (std::ios::binary | std::ios::in));
-  std::cout << source.rdbuf();
+  std::streambuf* buf = std::cin.rdbuf();
+  cmsys::ifstream source;
+  if (fileToAppend != "-") {
+    source.open(fileToAppend.c_str(), (std::ios::binary | std::ios::in));
+    buf = source.rdbuf();
+  }
+  std::cout << buf;
 }
 
 bool cmRemoveDirectory(const std::string& dir, bool recursive = true)
@@ -1147,7 +1152,12 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       int return_value = 0;
       bool doing_options = true;
       for (auto const& arg : cmMakeRange(args).advance(2)) {
-        if (doing_options && cmHasLiteralPrefix(arg, "-")) {
+        if (arg == "-") {
+          doing_options = false;
+          // Destroy console buffers to drop cout/cerr encoding transform.
+          consoleBuf.reset();
+          cmCatFile(arg);
+        } else if (doing_options && cmHasLiteralPrefix(arg, "-")) {
           if (arg == "--") {
             doing_options = false;
           } else {

@@ -782,6 +782,8 @@ run_cmake_command(E_cat-without-double-dash ${CMAKE_COMMAND} -E cat "-file-start
 unset(RunCMake_TEST_COMMAND_WORKING_DIRECTORY)
 unset(out)
 
+run_cmake_command(E_cat-stdin ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/E_cat-stdin.cmake)
+
 # Unset environment variables that are used for testing cmake -E
 unset(ENV{TEST_ENV})
 unset(ENV{TEST_ENV_EXPECTED})
