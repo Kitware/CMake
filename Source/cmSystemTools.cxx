@@ -576,7 +576,9 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
                                      cmDuration timeout, Encoding encoding)
 {
   cmUVProcessChainBuilder builder;
-  builder.AddCommand(command);
+  builder
+    .SetExternalStream(cmUVProcessChainBuilder::Stream_INPUT, cm_fileno(stdin))
+    .AddCommand(command);
   if (dir) {
     builder.SetWorkingDirectory(dir);
   }
