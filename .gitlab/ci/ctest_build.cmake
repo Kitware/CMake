@@ -45,10 +45,16 @@ if (iwyu_source_name AND "$ENV{CMAKE_CONFIGURATION}" MATCHES "iwyu")
 endif ()
 
 ctest_build(
+  NUMBER_ERRORS num_errors
   NUMBER_WARNINGS num_warnings
   RETURN_VALUE build_result
   ${ctest_build_args})
 ctest_submit(PARTS Build)
+
+include("${CMAKE_CURRENT_LIST_DIR}/ctest_annotation.cmake")
+ctest_annotation_report("${CTEST_BINARY_DIRECTORY}/annotations.json"
+  "Build Errors (${num_errors})"      "https://open.cdash.org/viewBuildError.php?buildid=${build_id}"
+  "Build Warnings (${num_warnings})"  "https://open.cdash.org/viewBuildError.php?type=1&buildid=${build_id}")
 
 if (build_result)
   message(FATAL_ERROR
