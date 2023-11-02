@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <cstddef>
+#include <list>
 #include <map>
 #include <memory>
 #include <set>
@@ -177,7 +178,8 @@ protected:
 
   // Tests pending selection to start.  They may have dependencies.
   TestMap PendingTests;
-  TestList SortedTests;
+  // List of pending test indexes, ordered by cost.
+  std::list<int> OrderedTests;
   // Total number of tests we'll be running
   size_t Total;
   // Number of tests that are complete

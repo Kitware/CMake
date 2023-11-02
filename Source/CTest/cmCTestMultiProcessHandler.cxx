@@ -358,7 +358,7 @@ bool cmCTestMultiProcessHandler::AllResourcesAvailable()
 void cmCTestMultiProcessHandler::CheckResourcesAvailable()
 {
   if (this->UseResourceSpec) {
-    for (auto test : this->SortedTests) {
+    for (auto test : this->OrderedTests) {
       std::map<std::string, std::vector<cmCTestBinPackerAllocation>>
         allocations;
       this->TryAllocateResources(test, allocations,
@@ -420,8 +420,8 @@ void cmCTestMultiProcessHandler::UnlockResources(int index)
 void cmCTestMultiProcessHandler::ErasePendingTest(int test)
 {
   this->PendingTests.erase(test);
-  this->SortedTests.erase(
-    std::find(this->SortedTests.begin(), this->SortedTests.end(), test));
+  this->OrderedTests.erase(
+    std::find(this->OrderedTests.begin(), this->OrderedTests.end(), test));
 }
 
 inline size_t cmCTestMultiProcessHandler::GetProcessorsUsed(int test)
@@ -540,8 +540,13 @@ void cmCTestMultiProcessHandler::StartNextTests()
     }
   }
 
-  TestList copy = this->SortedTests;
-  for (auto const& test : copy) {
+  // Start tests in the preferred order, each subject to readiness checks.
+  auto ti = this->OrderedTests.begin();
+  while (ti != this->OrderedTests.end()) {
+    // Increment the test iterator now because the current list
+    // entry may be deleted below.
+    int test = *ti++;
+
     // Take a nap if we're currently performing a RUN_SERIAL test.
     if (this->SerialTestRunning) {
       break;
@@ -582,7 +587,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
     // Find out whether there are any non RUN_SERIAL tests left, so that the
     // correct warning may be displayed.
     bool onlyRunSerialTestsLeft = true;
-    for (auto const& test : copy) {
+    for (auto const& test : this->OrderedTests) {
       if (!this->Properties[test]->RunSerial) {
         onlyRunSerialTestsLeft = false;
       }
@@ -800,7 +805,7 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
 
 void cmCTestMultiProcessHandler::CreateParallelTestCostList()
 {
-  TestSet alreadySortedTests;
+  TestSet alreadyOrderedTests;
 
   std::list<TestSet> priorityStack;
   priorityStack.emplace_back();
@@ -811,8 +816,8 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
   for (auto const& t : this->PendingTests) {
     if (cm::contains(this->LastTestsFailed, this->Properties[t.first]->Name)) {
       // If the test failed last time, it should be run first.
-      this->SortedTests.push_back(t.first);
-      alreadySortedTests.insert(t.first);
+      this->OrderedTests.push_back(t.first);
+      alreadyOrderedTests.insert(t.first);
     } else {
       topLevel.insert(t.first);
     }
@@ -848,9 +853,9 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
                      TestComparator(this));
 
     for (auto const& j : sortedCopy) {
-      if (!cm::contains(alreadySortedTests, j)) {
-        this->SortedTests.push_back(j);
-        alreadySortedTests.insert(j);
+      if (!cm::contains(alreadyOrderedTests, j)) {
+        this->OrderedTests.push_back(j);
+        alreadyOrderedTests.insert(j);
       }
     }
   }
@@ -877,10 +882,10 @@ void cmCTestMultiProcessHandler::CreateSerialTestCostList()
   std::stable_sort(presortedList.begin(), presortedList.end(),
                    TestComparator(this));
 
-  TestSet alreadySortedTests;
+  TestSet alreadyOrderedTests;
 
   for (int test : presortedList) {
-    if (cm::contains(alreadySortedTests, test)) {
+    if (cm::contains(alreadyOrderedTests, test)) {
       continue;
     }
 
@@ -888,14 +893,14 @@ void cmCTestMultiProcessHandler::CreateSerialTestCostList()
     this->GetAllTestDependencies(test, dependencies);
 
     for (int testDependency : dependencies) {
-      if (!cm::contains(alreadySortedTests, testDependency)) {
-        alreadySortedTests.insert(testDependency);
-        this->SortedTests.push_back(testDependency);
+      if (!cm::contains(alreadyOrderedTests, testDependency)) {
+        alreadyOrderedTests.insert(testDependency);
+        this->OrderedTests.push_back(testDependency);
       }
     }
 
-    alreadySortedTests.insert(test);
-    this->SortedTests.push_back(test);
+    alreadyOrderedTests.insert(test);
+    this->OrderedTests.push_back(test);
   }
 }
 
