@@ -438,13 +438,6 @@ void cmCTestMultiProcessHandler::UnlockResources(int index)
   this->RunningCount -= this->GetProcessorsUsed(index);
 }
 
-void cmCTestMultiProcessHandler::ErasePendingTest(int test)
-{
-  this->PendingTests.erase(test);
-  this->OrderedTests.erase(
-    std::find(this->OrderedTests.begin(), this->OrderedTests.end(), test));
-}
-
 inline size_t cmCTestMultiProcessHandler::GetProcessorsUsed(int test)
 {
   size_t processors = static_cast<int>(this->Properties[test]->Processors);
@@ -537,7 +530,8 @@ void cmCTestMultiProcessHandler::StartNextTests()
          ti != this->OrderedTests.end()) {
     // Increment the test iterator now because the current list
     // entry may be deleted below.
-    int test = *ti++;
+    auto cti = ti++;
+    int test = *cti;
 
     // We can only start a RUN_SERIAL test if no other tests are also
     // running.
@@ -592,7 +586,8 @@ void cmCTestMultiProcessHandler::StartNextTests()
 
     // The test is ready to run.
     numToStart -= processors;
-    this->ErasePendingTest(test);
+    this->OrderedTests.erase(cti);
+    this->PendingTests.erase(test);
     this->StartTest(test);
   }
 
@@ -1411,7 +1406,9 @@ void cmCTestMultiProcessHandler::CheckResume()
 
 void cmCTestMultiProcessHandler::RemoveTest(int index)
 {
-  this->ErasePendingTest(index);
+  this->OrderedTests.erase(
+    std::find(this->OrderedTests.begin(), this->OrderedTests.end(), index));
+  this->PendingTests.erase(index);
   this->Properties.erase(index);
   this->Completed++;
 }
