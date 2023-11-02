@@ -62,6 +62,10 @@
             - ${CMAKE_CI_BUILD_DIR}/Testing/
             - ${CMAKE_CI_BUILD_DIR}/DartConfiguation.tcl
             - ${CMAKE_CI_BUILD_DIR}/CTestCustom.cmake
+            - ${CMAKE_CI_BUILD_DIR}/cdash-build-id
+        reports:
+            annotations:
+                - ${CMAKE_CI_BUILD_DIR}/annotations.json
 
 .cmake_release_artifacts:
     artifacts:
@@ -82,12 +86,26 @@
             - ${CMAKE_CI_BUILD_DIR}/cmake-*.zip
             # Any unsigned packages made.
             - ${CMAKE_CI_BUILD_DIR}/unsigned/cmake-*
+            - ${CMAKE_CI_BUILD_DIR}/cdash-build-id
+        reports:
+            annotations:
+                - ${CMAKE_CI_BUILD_DIR}/annotations.json
+
+.cmake_cdash_artifacts:
+    artifacts:
+        expire_in: 1d
+        when: always
+        reports:
+            annotations:
+                - ${CMAKE_CI_BUILD_DIR}/annotations.json
 
 .cmake_junit_artifacts:
     artifacts:
         expire_in: 1d
         when: always
         reports:
+            annotations:
+                - ${CMAKE_CI_BUILD_DIR}/annotations.json
             junit:
                 - ${CMAKE_CI_BUILD_DIR}/junit.xml
 
@@ -95,6 +113,9 @@
     artifacts:
         expire_in: 1d
         when: always
+        reports:
+            annotations:
+                - ${CMAKE_CI_BUILD_DIR}/annotations.json
         paths:
             # Take the sphinx logs.
             - ${CMAKE_CI_BUILD_DIR}/build-*.log
@@ -108,6 +129,8 @@
         reports:
             junit:
                 - ${CMAKE_CI_BUILD_DIR}/junit.xml
+            annotations:
+                - ${CMAKE_CI_BUILD_DIR}/annotations.json
         paths:
             # Take the install tree.
             - ${CMAKE_CI_BUILD_DIR}/install/
@@ -115,6 +138,9 @@
 .cmake_doc_artifacts:
     artifacts:
         expire_in: 1d
+        reports:
+            annotations:
+                - ${CMAKE_CI_BUILD_DIR}/annotations.json
         paths:
             # Take the install tree.
             - ${CMAKE_CI_BUILD_DIR}/install-doc/
