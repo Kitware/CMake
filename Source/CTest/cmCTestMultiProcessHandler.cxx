@@ -83,11 +83,11 @@ cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
 cmCTestMultiProcessHandler::~cmCTestMultiProcessHandler() = default;
 
 // Set the tests
-void cmCTestMultiProcessHandler::SetTests(TestMap& tests,
-                                          PropertiesMap& properties)
+void cmCTestMultiProcessHandler::SetTests(TestMap tests,
+                                          PropertiesMap properties)
 {
-  this->Tests = tests;
-  this->Properties = properties;
+  this->Tests = std::move(tests);
+  this->Properties = std::move(properties);
   this->Total = this->Tests.size();
   if (!this->CTest->GetShowOnly()) {
     this->ReadCostData();

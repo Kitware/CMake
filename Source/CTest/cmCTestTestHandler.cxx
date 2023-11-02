@@ -1385,7 +1385,7 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
     properties[p.Index] = &p;
   }
   parallel->SetResourceSpecFile(this->ResourceSpecFile);
-  parallel->SetTests(tests, properties);
+  parallel->SetTests(std::move(tests), std::move(properties));
   parallel->SetPassFailVectors(&passed, &failed);
   this->TestResults.clear();
   parallel->SetTestResults(&this->TestResults);
