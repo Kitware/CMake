@@ -164,12 +164,8 @@ void cmCTestMultiProcessHandler::RunTests()
 
 void cmCTestMultiProcessHandler::StartTestProcess(int test)
 {
-  this->LockResources(test);
-
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "test " << test << "\n", this->Quiet);
-  // now remove the test itself
-  this->ErasePendingTest(test);
 
   auto testRun = cm::make_unique<cmCTestRunTest>(*this, test);
 
@@ -591,8 +587,12 @@ void cmCTestMultiProcessHandler::StartNextTests()
       continue;
     }
 
+    // Lock resources needed by this test.
+    this->LockResources(test);
+
     // The test is ready to run.
     numToStart -= processors;
+    this->ErasePendingTest(test);
     this->StartTest(test);
   }
 
