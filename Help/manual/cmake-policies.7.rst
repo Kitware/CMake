@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.29
 .. toctree::
    :maxdepth: 1
 
+   CMP0158: add_test() honors CMAKE_CROSSCOMPILING_EMULATOR only when cross-compiling. </policy/CMP0158>
    CMP0157: Swift compilation mode is selected by an abstraction. </policy/CMP0157>
    CMP0156: De-duplicate libraries on link lines based on linker capabilities. </policy/CMP0156>
 
