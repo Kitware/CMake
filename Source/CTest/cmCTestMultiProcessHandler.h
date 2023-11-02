@@ -38,7 +38,11 @@ public:
   struct TestSet : public std::set<int>
   {
   };
-  struct TestMap : public std::map<int, TestSet>
+  struct TestInfo
+  {
+    TestSet Depends;
+  };
+  struct TestMap : public std::map<int, TestInfo>
   {
   };
   struct TestList : public std::vector<int>
@@ -124,7 +128,7 @@ protected:
 
   // Removes the checkpoint file
   void MarkFinished();
-  void EraseTest(int index);
+  void ErasePendingTest(int index);
   void FinishTestProcess(std::unique_ptr<cmCTestRunTest> runner, bool started);
 
   static void OnTestLoadRetryCB(uv_timer_t* timer);
@@ -171,8 +175,8 @@ protected:
   cm::optional<std::size_t> ResourceSpecSetupTest;
   bool HasInvalidGeneratedResourceSpec;
 
-  // map from test number to set of depend tests
-  TestMap Tests;
+  // Tests pending selection to start.  They may have dependencies.
+  TestMap PendingTests;
   TestList SortedTests;
   // Total number of tests we'll be running
   size_t Total;

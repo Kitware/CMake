@@ -1381,7 +1381,7 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
         }
       }
     }
-    tests[p.Index] = depends;
+    tests[p.Index].Depends = depends;
     properties[p.Index] = &p;
   }
   parallel->SetResourceSpecFile(this->ResourceSpecFile);

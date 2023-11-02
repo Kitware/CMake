@@ -86,9 +86,9 @@ cmCTestMultiProcessHandler::~cmCTestMultiProcessHandler() = default;
 void cmCTestMultiProcessHandler::SetTests(TestMap tests,
                                           PropertiesMap properties)
 {
-  this->Tests = std::move(tests);
+  this->PendingTests = std::move(tests);
   this->Properties = std::move(properties);
-  this->Total = this->Tests.size();
+  this->Total = this->PendingTests.size();
   if (!this->CTest->GetShowOnly()) {
     this->ReadCostData();
     this->HasCycles = !this->CheckCycles();
@@ -144,7 +144,7 @@ void cmCTestMultiProcessHandler::RunTests()
 
   if (!this->StopTimePassed && !this->CheckStopOnFailure()) {
     assert(this->Complete());
-    assert(this->Tests.empty());
+    assert(this->PendingTests.empty());
   }
   assert(this->AllResourcesAvailable());
 
@@ -170,7 +170,7 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "test " << test << "\n", this->Quiet);
   // now remove the test itself
-  this->EraseTest(test);
+  this->ErasePendingTest(test);
   this->RunningCount += this->GetProcessorsUsed(test);
 
   auto testRun = cm::make_unique<cmCTestRunTest>(*this, test);
@@ -417,9 +417,9 @@ void cmCTestMultiProcessHandler::UnlockResources(int index)
   }
 }
 
-void cmCTestMultiProcessHandler::EraseTest(int test)
+void cmCTestMultiProcessHandler::ErasePendingTest(int test)
 {
-  this->Tests.erase(test);
+  this->PendingTests.erase(test);
   this->SortedTests.erase(
     std::find(this->SortedTests.begin(), this->SortedTests.end(), test));
 }
@@ -462,7 +462,7 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
   }
 
   // if there are no depends left then run this test
-  if (this->Tests[test].empty()) {
+  if (this->PendingTests[test].Depends.empty()) {
     return this->StartTestProcess(test);
   }
   // This test was not able to start because it is waiting
@@ -479,7 +479,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
     uv_timer_stop(this->TestLoadRetryTimer);
   }
 
-  if (this->Tests.empty()) {
+  if (this->PendingTests.empty()) {
     this->TestLoadRetryTimer.reset();
     return;
   }
@@ -652,8 +652,8 @@ void cmCTestMultiProcessHandler::FinishTestProcess(
     this->Failed->push_back(properties->Name);
   }
 
-  for (auto& t : this->Tests) {
-    t.second.erase(test);
+  for (auto& t : this->PendingTests) {
+    t.second.Depends.erase(test);
   }
 
   this->WriteCheckpoint(test);
@@ -808,7 +808,7 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
 
   // In parallel test runs add previously failed tests to the front
   // of the cost list and queue other tests for further sorting
-  for (auto const& t : this->Tests) {
+  for (auto const& t : this->PendingTests) {
     if (cm::contains(this->LastTestsFailed, this->Properties[t.first]->Name)) {
       // If the test failed last time, it should be run first.
       this->SortedTests.push_back(t.first);
@@ -827,7 +827,7 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
     TestSet& currentSet = priorityStack.back();
 
     for (auto const& i : previousSet) {
-      TestSet const& dependencies = this->Tests[i];
+      TestSet const& dependencies = this->PendingTests[i].Depends;
       currentSet.insert(dependencies.begin(), dependencies.end());
     }
 
@@ -859,7 +859,7 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
 void cmCTestMultiProcessHandler::GetAllTestDependencies(int test,
                                                         TestList& dependencies)
 {
-  TestSet const& dependencySet = this->Tests[test];
+  TestSet const& dependencySet = this->PendingTests[test].Depends;
   for (int i : dependencySet) {
     this->GetAllTestDependencies(i, dependencies);
     dependencies.push_back(i);
@@ -870,7 +870,7 @@ void cmCTestMultiProcessHandler::CreateSerialTestCostList()
 {
   TestList presortedList;
 
-  for (auto const& i : this->Tests) {
+  for (auto const& i : this->PendingTests) {
     presortedList.push_back(i.first);
   }
 
@@ -1383,7 +1383,7 @@ void cmCTestMultiProcessHandler::CheckResume()
 
 void cmCTestMultiProcessHandler::RemoveTest(int index)
 {
-  this->EraseTest(index);
+  this->ErasePendingTest(index);
   this->Properties.erase(index);
   this->Completed++;
 }
@@ -1391,7 +1391,7 @@ void cmCTestMultiProcessHandler::RemoveTest(int index)
 int cmCTestMultiProcessHandler::FindMaxIndex()
 {
   int max = 0;
-  for (auto const& i : this->Tests) {
+  for (auto const& i : this->PendingTests) {
     if (i.first > max) {
       max = i.first;
     }
@@ -1405,7 +1405,7 @@ bool cmCTestMultiProcessHandler::CheckCycles()
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Checking test dependency graph..." << std::endl,
                      this->Quiet);
-  for (auto const& it : this->Tests) {
+  for (auto const& it : this->PendingTests) {
     // DFS from each element to itself
     int root = it.first;
     std::set<int> visited;
@@ -1415,7 +1415,7 @@ bool cmCTestMultiProcessHandler::CheckCycles()
       int test = s.top();
       s.pop();
       if (visited.insert(test).second) {
-        for (auto const& d : this->Tests[test]) {
+        for (auto const& d : this->PendingTests[test].Depends) {
           if (d == root) {
             // cycle exists
             cmCTestLog(
