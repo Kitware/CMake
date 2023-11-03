@@ -38,8 +38,15 @@ ctest_configure(
 ctest_read_custom_files("${CTEST_BINARY_DIRECTORY}")
 
 # We can now submit because we've configured. This is a cmb-superbuild-ism.
-ctest_submit(PARTS Update)
+ctest_submit(PARTS Update
+  BUILD_ID build_id)
 ctest_submit(PARTS Configure)
+
+include("${CMAKE_CURRENT_LIST_DIR}/ctest_annotation.cmake")
+ctest_annotation_report("${CTEST_BINARY_DIRECTORY}/annotations.json"
+  "Build Summary" "https://open.cdash.org/build/${build_id}"
+  "Update"        "https://open.cdash.org/build/${build_id}/update"
+  "Configure"     "https://open.cdash.org/build/${build_id}/configure")
 
 if (configure_result)
   ctest_submit(PARTS Done)
@@ -54,9 +61,14 @@ elseif (CTEST_CMAKE_GENERATOR MATCHES "Ninja")
 endif ()
 
 ctest_build(
+  NUMBER_ERRORS num_errors
   NUMBER_WARNINGS num_warnings
   RETURN_VALUE build_result)
 ctest_submit(PARTS Build)
+
+ctest_annotation_report("${CTEST_BINARY_DIRECTORY}/annotations.json"
+  "Build Errors (${num_errors})"      "https://open.cdash.org/viewBuildError.php?buildid=${build_id}"
+  "Build Warnings (${num_warnings})"  "https://open.cdash.org/viewBuildError.php?type=1&buildid=${build_id}")
 
 if (build_result)
   ctest_submit(PARTS Done)
@@ -85,6 +97,12 @@ ctest_test(
   ${ctest_label_args}
   EXCLUDE "${test_exclusions}")
 ctest_submit(PARTS Test)
+
+ctest_annotation_report("${CTEST_BINARY_DIRECTORY}/annotations.json"
+  "All Tests"     "https://open.cdash.org/viewTest.php?buildid=${build_id}"
+  "Test Failures" "https://open.cdash.org/viewTest.php?onlyfailed&buildid=${build_id}"
+  "Tests Not Run" "https://open.cdash.org/viewTest.php?onlynotrun&buildid=${build_id}"
+  "Test Passes"   "https://open.cdash.org/viewTest.php?onlypassed&buildid=${build_id}")
 
 if (test_result)
   ctest_submit(PARTS Done)
