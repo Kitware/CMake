@@ -105,6 +105,7 @@ l:iwyu-debian12:
         - .debian12_iwyu
         - .cmake_build_linux
         - .linux_x86_64_tags
+        - .cmake_cdash_artifacts
         - .run_automatically
 
 l:tidy-fedora38:
@@ -112,6 +113,7 @@ l:tidy-fedora38:
         - .fedora38_tidy
         - .cmake_build_linux
         - .linux_x86_64_tags
+        - .cmake_cdash_artifacts
         - .run_automatically
 
 l:sphinx-fedora38:
