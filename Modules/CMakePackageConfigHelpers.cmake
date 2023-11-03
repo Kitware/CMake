@@ -190,6 +190,68 @@ Please note that these files are internal to CMake and you should not call
 :command:`configure_file()` on them yourself, but they can be used as starting
 point to create more sophisticated custom ``ConfigVersion.cmake`` files.
 
+Generating an Apple Platform Selection File
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.29
+
+.. command:: generate_apple_platform_selection_file
+
+ Create an Apple platform selection file:
+
+   generate_apple_platform_selection_file(<filename>
+     INSTALL_DESTINATION <path>
+     [MACOS_CONFIG_FILE <file>]
+     [IOS_CONFIG_FILE <file>]
+     [IOS_SIMULATOR_CONFIG_FILE <file>]
+     [TVOS_CONFIG_FILE <file>]
+     [TVOS_SIMULATOR_CONFIG_FILE <file>]
+     [WATCHOS_CONFIG_FILE <file>]
+     [WATCHOS_SIMULATOR_CONFIG_FILE <file>]
+     [VISIONOS_CONFIG_FILE <file>]
+     [VISIONOS_SIMULATOR_CONFIG_FILE <file>]
+     )
+
+Writes a file for use as ``<PackageName>Config.cmake`` which can include an
+Apple-platform-specific ``<PackageName>Config.cmake`` from a different
+directory. This can be used in conjunction with the ``XCFRAMEWORK_LOCATION``
+argument of :command:`export(SETUP)` to export packages in a way that a project
+built for any Apple platform can use them.
+
+``INSTALL_DESTINATION <path>``
+  Path that the file will be installed to.
+
+``MACOS_CONFIG_FILE <file>``
+  File to include if the platform is macOS.
+
+``IOS_CONFIG_FILE <file>``
+  File to include if the platform is iOS.
+
+``IOS_SIMULATOR_CONFIG_FILE <file>``
+  File to include if the platform is iOS Simulator.
+
+``TVOS_CONFIG_FILE <file>``
+  File to include if the platform is tvOS.
+
+``TVOS_SIMULATOR_CONFIG_FILE <file>``
+  File to include if the platform is tvOS Simulator.
+
+``WATCHOS_CONFIG_FILE <file>``
+  File to include if the platform is watchOS.
+
+``WATCHOS_SIMULATOR_CONFIG_FILE <file>``
+  File to include if the platform is watchOS Simulator.
+
+``VISIONOS_CONFIG_FILE <file>``
+  File to include if the platform is visionOS.
+
+``VISIONOS_SIMULATOR_CONFIG_FILE <file>``
+  File to include if the platform is visionOS Simulator.
+
+If any of the optional config files are not specified, and the consuming
+project is built for their corresponding platform, an error will be thrown
+when including the generated file.
+
 Example Generating Package Files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -343,4 +405,46 @@ endmacro()
 
   configure_file("${_inputFile}" "${_outputFile}" @ONLY)
 
+endfunction()
+
+function(generate_apple_platform_selection_file _output_file)
+  set(_config_file_options
+    MACOS_CONFIG_FILE
+    IOS_CONFIG_FILE
+    IOS_SIMULATOR_CONFIG_FILE
+    TVOS_CONFIG_FILE
+    TVOS_SIMULATOR_CONFIG_FILE
+    WATCHOS_CONFIG_FILE
+    WATCHOS_SIMULATOR_CONFIG_FILE
+    VISIONOS_CONFIG_FILE
+    VISIONOS_SIMULATOR_CONFIG_FILE
+    )
+
+  set(_options)
+  set(_single
+    INSTALL_DESTINATION
+    ${_config_file_options}
+    )
+  set(_multi)
+  cmake_parse_arguments(PARSE_ARGV 0 _gpsf "${_options}" "${_single}" "${_multi}")
+
+  set(_have_relative 0)
+  foreach(_opt IN LISTS _config_file_options)
+    if(_gpsf_${_opt})
+      set(_config_file "${_gpsf_${_opt}}")
+      if(NOT IS_ABSOLUTE "${_config_file}")
+        string(PREPEND _config_file [[${PACKAGE_PREFIX_DIR}/]])
+        set(_have_relative 1)
+      endif()
+      set(_branch_${_opt} "include(\"${_config_file}\")")
+    else()
+      set(_branch_${_opt} "message(FATAL_ERROR \"Platform not supported\")")
+    endif()
+  endforeach()
+
+  configure_package_config_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/PlatformSelectionFile.cmake.in" "${_output_file}"
+    INSTALL_DESTINATION "${_gpsf_INSTALL_DESTINATION}"
+    NO_SET_AND_CHECK_MACRO
+    NO_CHECK_REQUIRED_COMPONENTS_MACRO
+    )
 endfunction()
