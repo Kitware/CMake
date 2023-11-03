@@ -5,10 +5,9 @@
 CMakeFindPackageMode
 --------------------
 
-
-
-This file is executed by cmake when invoked with --find-package.  It
-expects that the following variables are set using -D:
+This file is executed by cmake when invoked with
+:ref:`--find-package <Find-Package Tool Mode>`.
+It expects that the following variables are set using ``-D``:
 
 ``NAME``
   name of the package

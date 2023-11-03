@@ -1311,6 +1311,7 @@ The following ``cmake -E`` commands are available only on Windows:
 
   Write Windows registry value.
 
+.. _`Find-Package Tool Mode`:
 
 Run the Find-Package Tool
 =========================
