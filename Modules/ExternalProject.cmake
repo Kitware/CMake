@@ -3778,6 +3778,9 @@ function(_ep_extract_configure_command var name)
         list(APPEND cmd "-G${CMAKE_EXTRA_GENERATOR} - ${CMAKE_GENERATOR}")
       else()
         list(APPEND cmd "-G${CMAKE_GENERATOR}")
+        # GreenHills needs to know about the compiler and toolset.
+        # Be sure to update the similar section in
+        # FetchContent.cmake:__FetchContent_directPopulate()
         if("${CMAKE_GENERATOR}" MATCHES "Green Hills MULTI")
           set(has_cmake_cache_default_args 1)
           list(APPEND cmake_cache_default_args

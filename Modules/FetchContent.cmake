@@ -1596,6 +1596,20 @@ ExternalProject_Add_Step(${contentName}-populate copyfile
       list(APPEND subCMakeOpts "-DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_MAKE_PROGRAM}")
     endif()
 
+    # GreenHills needs to know about the compiler and toolset to run the
+    # subbuild commands. Be sure to update the similar section in
+    # ExternalProject.cmake:_ep_extract_configure_command()
+    if(CMAKE_GENERATOR MATCHES "Green Hills MULTI")
+      list(APPEND subCMakeOpts
+        "-DGHS_TARGET_PLATFORM:STRING=${GHS_TARGET_PLATFORM}"
+        "-DGHS_PRIMARY_TARGET:STRING=${GHS_PRIMARY_TARGET}"
+        "-DGHS_TOOLSET_ROOT:STRING=${GHS_TOOLSET_ROOT}"
+        "-DGHS_OS_ROOT:STRING=${GHS_OS_ROOT}"
+        "-DGHS_OS_DIR:STRING=${GHS_OS_DIR}"
+        "-DGHS_BSP_NAME:STRING=${GHS_BSP_NAME}"
+      )
+    endif()
+
     # Override the sub-build's configuration types for multi-config generators.
     # This ensures we are not affected by any custom setting from the project
     # and can always request a known configuration further below.
