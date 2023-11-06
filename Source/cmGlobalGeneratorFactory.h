@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include "cmDocumentationEntry.h" // IWYU pragma: export
+#include "cmGlobalGenerator.h"    // IWYU pragma: keep
 
 // TODO The following headers are parts of the `cmGlobalGeneratorFactory`
 // public API, so could be defined as export to IWYU
@@ -13,7 +14,6 @@
 
 #include <cm/memory>
 
-class cmGlobalGenerator;
 class cmake;
 
 /** \class cmGlobalGeneratorFactory
