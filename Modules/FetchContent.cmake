@@ -195,6 +195,12 @@ Commands
       still be called if :variable:`FETCHCONTENT_TRY_FIND_PACKAGE_MODE` is
       set to ``OPT_IN`` or is not set.
 
+      It would not normally be appropriate to specify ``REQUIRED`` as one of
+      the additional arguments after ``FIND_PACKAGE_ARGS``.  Doing so would
+      mean the :command:`find_package` call must succeed, so none of the other
+      details specified in the ``FetchContent_Declare()`` call would get a
+      chance to be used as a fall-back.
+
       Everything after the ``FIND_PACKAGE_ARGS`` keyword is appended to the
       :command:`find_package` call, so all other ``<contentOptions>`` must
       come before the ``FIND_PACKAGE_ARGS`` keyword.  If the
