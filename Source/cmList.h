@@ -1192,7 +1192,7 @@ private:
       }
     } else {
       for (; first != last; ++first) {
-        if (!first->empty() || emptyElements == EmptyElements::Yes) {
+        if (!(*first).empty() || emptyElements == EmptyElements::Yes) {
           insertPos = container.insert(insertPos, *first);
           ++insertPos;
         }
