@@ -16,3 +16,6 @@ endif()
 
 add_executable(myexe myexe/myexe.c)
 target_link_libraries(myexe PRIVATE ${MYLIB_LIBRARY})
+
+add_library(myconsuminglib STATIC myconsuminglib/myconsuminglib.c)
+target_link_libraries(myconsuminglib PRIVATE ${MYLIB_LIBRARY})
