@@ -196,6 +196,13 @@ public:
   void send();
 };
 
+struct uv_idle_ptr : public uv_handle_ptr_<uv_idle_t>
+{
+  CM_INHERIT_CTOR(uv_idle_ptr, uv_handle_ptr_, <uv_idle_t>);
+
+  int init(uv_loop_t& loop, void* data = nullptr);
+};
+
 struct uv_signal_ptr : public uv_handle_ptr_<uv_signal_t>
 {
   CM_INHERIT_CTOR(uv_signal_ptr, uv_handle_ptr_, <uv_signal_t>);
@@ -254,6 +261,8 @@ extern template class uv_handle_ptr_base_<uv_handle_t>;
     extern template class uv_handle_ptr_<uv_##NAME##_t>;
 
 UV_HANDLE_PTR_INSTANTIATE_EXTERN(async)
+
+UV_HANDLE_PTR_INSTANTIATE_EXTERN(idle)
 
 UV_HANDLE_PTR_INSTANTIATE_EXTERN(signal)
 

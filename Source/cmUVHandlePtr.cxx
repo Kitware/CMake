@@ -254,11 +254,19 @@ int uv_tty_ptr::init(uv_loop_t& loop, int fd, int readable, void* data)
 }
 #endif
 
+int uv_idle_ptr::init(uv_loop_t& loop, void* data)
+{
+  this->allocate(data);
+  return uv_idle_init(&loop, *this);
+}
+
 template class uv_handle_ptr_base_<uv_handle_t>;
 
 #define UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(NAME)                              \
   template class uv_handle_ptr_base_<uv_##NAME##_t>;                          \
   template class uv_handle_ptr_<uv_##NAME##_t>;
+
+UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(idle)
 
 UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(signal)
 
