@@ -2479,6 +2479,25 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       buildSettings->AddAttribute("SWIFT_ACTIVE_COMPILATION_CONDITIONS",
                                   swiftDefs.CreateList());
     }
+
+    if (cm::optional<cmSwiftCompileMode> swiftCompileMode =
+          this->CurrentLocalGenerator->GetSwiftCompileMode(gtgt, configName)) {
+      switch (*swiftCompileMode) {
+        case cmSwiftCompileMode::Wholemodule:
+          buildSettings->AddAttribute("SWIFT_COMPILATION_MODE",
+                                      this->CreateString("wholemodule"));
+          break;
+        case cmSwiftCompileMode::Incremental:
+        case cmSwiftCompileMode::Singlefile:
+          break;
+        case cmSwiftCompileMode::Unknown:
+          this->CurrentLocalGenerator->IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmStrCat("Unknown Swift_COMPILATION_MODE on target '",
+                     gtgt->GetName(), "'"));
+          break;
+      }
+    }
   }
 
   std::string extraLinkOptionsVar;
@@ -4610,6 +4629,10 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     buildSettings->AddAttribute("CODE_SIGNING_ALLOWED",
                                 this->CreateString("NO"));
   }
+
+  // This code supports the OLD behavior of CMP0157. We should be able to
+  // remove computing the debug configuration set once the old behavior is
+  // removed.
   auto debugConfigs = this->GetCMakeInstance()->GetDebugConfigs();
   std::set<std::string> debugConfigSet(debugConfigs.begin(),
                                        debugConfigs.end());
@@ -4619,9 +4642,16 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
 
     cmXCodeObject* buildSettingsForCfg = this->CreateFlatClone(buildSettings);
 
-    if (debugConfigSet.count(cmSystemTools::UpperCase(config.first)) == 0) {
-      buildSettingsForCfg->AddAttribute("SWIFT_COMPILATION_MODE",
-                                        this->CreateString("wholemodule"));
+    // Supports the OLD behavior of CMP0157. CMP0157 OLD behavior globally set
+    // wholemodule compilation for all non-debug configurations, for all
+    // targets.
+    if (this->CurrentMakefile
+          ->GetDefinition("CMAKE_Swift_COMPILATION_MODE_DEFAULT")
+          .IsEmpty()) {
+      if (debugConfigSet.count(cmSystemTools::UpperCase(config.first)) == 0) {
+        buildSettingsForCfg->AddAttribute("SWIFT_COMPILATION_MODE",
+                                          this->CreateString("wholemodule"));
+      }
     }
 
     // Put this last so it can override existing settings

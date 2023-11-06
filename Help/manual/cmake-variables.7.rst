@@ -115,6 +115,7 @@ Variables that Provide Information
    /variable/CMAKE_SOURCE_DIR
    /variable/CMAKE_STATIC_LIBRARY_PREFIX
    /variable/CMAKE_STATIC_LIBRARY_SUFFIX
+   /variable/CMAKE_Swift_COMPILATION_MODE
    /variable/CMAKE_Swift_MODULE_DIRECTORY
    /variable/CMAKE_Swift_NUM_THREADS
    /variable/CMAKE_TOOLCHAIN_FILE

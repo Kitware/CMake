@@ -68,30 +68,42 @@ set(CMAKE_Swift_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL -libc MD)
 set(CMAKE_Swift_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebug -libc MTd)
 set(CMAKE_Swift_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL -libc MDd)
 
+set(CMAKE_Swift_FLAGS_DEBUG_INIT "-Onone -g")
+set(CMAKE_Swift_FLAGS_RELEASE_INIT "-O")
+set(CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT "-O -g")
+set(CMAKE_Swift_FLAGS_MINSIZEREL_INIT "-Osize")
+
 if(CMAKE_GENERATOR STREQUAL "Xcode")
+  string(APPEND CMAKE_Swift_FLAGS_DEBUG_INIT " ${CMAKE_Swift_FLAGS_DEBUG_LINKER_FLAGS}")
+  string(APPEND CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT " ${CMAKE_Swift_FLAGS_RELWITHDEBINFO_LINKER_FLAGS}")
+endif()
+
+# Warns if unset and uses old policy.
+# Old policy flag-smashes the wmo and incremental flags onto the compiler flags.
+# New policy respects the Swift_COMPILATION_MODE target property to add
+# incremental and wholemodule optimization flags as appropriate.
+cmake_policy(GET CMP0157 __SWIFT_COMP_MODE_CMP0157)
+if(__SWIFT_COMP_MODE_CMP0157 STREQUAL "NEW")
+  set(CMAKE_Swift_COMPILATION_MODE_DEFAULT "incremental")
+else()
   # Xcode has a separate Xcode project option (SWIFT_COMPILATION_MODE) used to set
   # whether compiling with whole-module optimizations or incrementally. Setting
   # these options here will have no effect when compiling with the built-in driver,
   # and will explode violently, leaving build products in the source directory, when
-  # using the old swift driver.
-  set(CMAKE_Swift_FLAGS_DEBUG_INIT "-Onone -g ${CMAKE_Swift_FLAGS_DEBUG_LINKER_FLAGS}")
-  set(CMAKE_Swift_FLAGS_RELEASE_INIT "-O")
-  set(CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT "-O -g ${CMAKE_Swift_FLAGS_RELWITHDEBINFO_LINKER_FLAGS}")
-  set(CMAKE_Swift_FLAGS_MINSIZEREL_INIT "-Osize")
-else()
-  set(CMAKE_Swift_FLAGS_DEBUG_INIT "-Onone -g -incremental")
-  set(CMAKE_Swift_FLAGS_RELEASE_INIT "-O")
-  set(CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT "-O -g")
-  set(CMAKE_Swift_FLAGS_MINSIZEREL_INIT "-Osize")
-
-  # Enable Whole Module Optimization by default unless the old
-  # C++ driver is being used, which behaves differently under WMO.
-  if(NOT CMAKE_Swift_COMPILER_USE_OLD_DRIVER)
-    string(APPEND CMAKE_Swift_FLAGS_RELEASE_INIT " -wmo")
-    string(APPEND CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT " -wmo")
-    string(APPEND CMAKE_Swift_FLAGS_MINSIZEREL_INIT " -wmo")
+  # using the old swift driver. Don't append `-incremental` or `-wmo` to the
+  # flags in the Xcode generator.
+  if(NOT CMAKE_GENERATOR STREQUAL "Xcode")
+    # Enable Whole Module Optimization by default unless the old
+    # C++ driver is being used, which behaves differently under WMO.
+    if(NOT CMAKE_Swift_COMPILER_USE_OLD_DRIVER)
+      string(APPEND CMAKE_Swift_FLAGS_RELEASE_INIT " -wmo")
+      string(APPEND CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT " -wmo")
+      string(APPEND CMAKE_Swift_FLAGS_MINSIZEREL_INIT " -wmo")
+    endif()
+    string(APPEND CMAKE_Swift_FLAGS_DEBUG_INIT " -incremental")
   endif()
 endif()
+unset(__SWIFT_COMP_MODE_CMP0157)
 
 if(CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
   if(NOT DEFINED CMAKE_Swift_LINK_WHAT_YOU_USE_FLAG)

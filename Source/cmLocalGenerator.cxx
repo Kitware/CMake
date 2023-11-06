@@ -1651,6 +1651,39 @@ std::vector<BT<std::string>> cmLocalGenerator::GetTargetCompileFlags(
   if (lang == "Fortran") {
     this->AppendFlags(compileFlags,
                       this->GetTargetFortranFlags(target, config));
+  } else if (lang == "Swift") {
+    // Only set the compile mode if CMP0157 is set
+    if (cm::optional<cmSwiftCompileMode> swiftCompileMode =
+          this->GetSwiftCompileMode(target, config)) {
+      std::string swiftCompileModeFlag;
+      switch (*swiftCompileMode) {
+        case cmSwiftCompileMode::Incremental: {
+          swiftCompileModeFlag = "-incremental";
+          if (cmValue flag =
+                mf->GetDefinition("CMAKE_Swift_COMPILE_OPTIONS_INCREMENTAL")) {
+            swiftCompileModeFlag = *flag;
+          }
+          break;
+        }
+        case cmSwiftCompileMode::Wholemodule: {
+          swiftCompileModeFlag = "-wmo";
+          if (cmValue flag =
+                mf->GetDefinition("CMAKE_Swift_COMPILE_OPTIONS_WMO")) {
+            swiftCompileModeFlag = *flag;
+          }
+          break;
+        }
+        case cmSwiftCompileMode::Singlefile:
+          break;
+        case cmSwiftCompileMode::Unknown: {
+          this->IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmStrCat("Unknown Swift_COMPILATION_MODE on target '",
+                     target->GetName(), "'"));
+        }
+      }
+      this->AppendFlags(compileFlags, swiftCompileModeFlag);
+    }
   }
 
   this->AddCMP0018Flags(compileFlags, target, lang, config);
@@ -2953,6 +2986,34 @@ cm::optional<std::string> cmLocalGenerator::GetMSVCDebugFormatName(
       *msvcDebugInformationFormatValue, this, config, target);
   }
   return msvcDebugInformationFormat;
+}
+
+cm::optional<cmSwiftCompileMode> cmLocalGenerator::GetSwiftCompileMode(
+  cmGeneratorTarget const* target, std::string const& config)
+{
+  cmMakefile const* mf = this->GetMakefile();
+  cmValue const swiftCompileModeDefault =
+    mf->GetDefinition("CMAKE_Swift_COMPILATION_MODE_DEFAULT");
+  if (!cmNonempty(swiftCompileModeDefault)) {
+    return {};
+  }
+  cmValue swiftCompileMode = target->GetProperty("Swift_COMPILATION_MODE");
+  if (!swiftCompileMode) {
+    swiftCompileMode = swiftCompileModeDefault;
+  }
+
+  std::string const expandedCompileMode =
+    cmGeneratorExpression::Evaluate(*swiftCompileMode, this, config, target);
+  if (expandedCompileMode == "wholemodule") {
+    return cmSwiftCompileMode::Wholemodule;
+  }
+  if (expandedCompileMode == "singlefile") {
+    return cmSwiftCompileMode::Singlefile;
+  }
+  if (expandedCompileMode == "incremental") {
+    return cmSwiftCompileMode::Incremental;
+  }
+  return cmSwiftCompileMode::Unknown;
 }
 
 namespace {

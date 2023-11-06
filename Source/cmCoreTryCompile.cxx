@@ -904,6 +904,14 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
               ? "NEW"
               : "OLD");
 
+    /* Set the appropriate policy information for Swift compilation mode */
+    fprintf(
+      fout, "cmake_policy(SET CMP0157 %s)\n",
+      this->Makefile->GetDefinition("CMAKE_Swift_COMPILATION_MODE_DEFAULT")
+          .IsEmpty()
+        ? "OLD"
+        : "NEW");
+
     // Workaround for -Wl,-headerpad_max_install_names issue until we can avoid
     // adding that flag in the platform and compiler language files
     fprintf(fout,
