@@ -137,14 +137,18 @@ bool cmVisualStudioGeneratorOptions::IsManaged() const
 bool cmVisualStudioGeneratorOptions::UsingUnicode() const
 {
   // Look for a _UNICODE definition.
-  return std::any_of(this->Defines.begin(), this->Defines.end(),
-                     [](std::string const& di) { return di == "_UNICODE"_s; });
+  return std::any_of(
+    this->Defines.begin(), this->Defines.end(), [](std::string const& di) {
+      return di == "_UNICODE"_s || cmHasLiteralPrefix(di, "_UNICODE=");
+    });
 }
 bool cmVisualStudioGeneratorOptions::UsingSBCS() const
 {
   // Look for a _SBCS definition.
-  return std::any_of(this->Defines.begin(), this->Defines.end(),
-                     [](std::string const& di) { return di == "_SBCS"_s; });
+  return std::any_of(
+    this->Defines.begin(), this->Defines.end(), [](std::string const& di) {
+      return di == "_SBCS"_s || cmHasLiteralPrefix(di, "_SBCS=");
+    });
 }
 
 void cmVisualStudioGeneratorOptions::FixCudaCodeGeneration()
