@@ -20,6 +20,7 @@
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmFileSet.h"
+#include "cmFindPackageStack.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -585,6 +586,7 @@ TargetProperty const StaticTargetProperties[] = {
   // Usage requirement properties
   { "LINK_INTERFACE_LIBRARIES"_s, IC::CanCompileSources },
   { "MAP_IMPORTED_CONFIG_"_s, IC::NormalTarget, R::PerConfig },
+  { "EXPORT_FIND_PACKAGE_NAME"_s, IC::NormalTarget },
 
   // Metadata
   { "CROSSCOMPILING_EMULATOR"_s, IC::ExecutableTarget },
@@ -661,6 +663,7 @@ public:
     TLLCommands;
   std::map<std::string, cmFileSet> FileSets;
   cmListFileBacktrace Backtrace;
+  cmFindPackageStack FindPackageStack;
 
   UsageRequirementProperty IncludeDirectories;
   UsageRequirementProperty CompileOptions;
@@ -961,6 +964,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 
   // Save the backtrace of target construction.
   this->impl->Backtrace = this->impl->Makefile->GetBacktrace();
+  if (this->impl->IsImported()) {
+    this->impl->FindPackageStack = this->impl->Makefile->GetFindPackageStack();
+  }
 
   if (this->IsNormal()) {
     // Initialize the INCLUDE_DIRECTORIES property based on the current value
@@ -1246,6 +1252,11 @@ std::set<BT<std::pair<std::string, bool>>> const& cmTarget::GetUtilities()
 cmListFileBacktrace const& cmTarget::GetBacktrace() const
 {
   return this->impl->Backtrace;
+}
+
+cmFindPackageStack const& cmTarget::GetFindPackageStack() const
+{
+  return this->impl->FindPackageStack;
 }
 
 bool cmTarget::IsExecutableWithExports() const

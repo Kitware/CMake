@@ -20,6 +20,17 @@ cmExportSet::cmExportSet(std::string name)
 
 cmExportSet::~cmExportSet() = default;
 
+cmExportSet::PackageDependency& cmExportSet::GetPackageDependencyForSetup(
+  const std::string& name)
+{
+  auto& dep = this->PackageDependencies[name];
+  if (!dep.SpecifiedIndex) {
+    dep.SpecifiedIndex = this->NextPackageDependencyIndex;
+    this->NextPackageDependencyIndex++;
+  }
+  return dep;
+}
+
 bool cmExportSet::Compute(cmLocalGenerator* lg)
 {
   for (std::unique_ptr<cmTargetExport>& tgtExport : this->TargetExports) {

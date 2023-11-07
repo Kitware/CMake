@@ -90,6 +90,7 @@ protected:
                                     cmTargetExport* te) override;
   std::string GetFileSetFiles(cmGeneratorTarget* gte, cmFileSet* fileSet,
                               cmTargetExport* te) override;
+  cmExportSet* GetExportSet() const override { return this->ExportSet; }
 
   std::string GetCxxModulesDirectory() const override;
   void GenerateCxxModuleConfigInformation(std::ostream&) const override;

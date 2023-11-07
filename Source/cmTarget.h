@@ -24,6 +24,7 @@
 
 class cmCustomCommand;
 class cmFileSet;
+class cmFindPackageStack;
 class cmGlobalGenerator;
 class cmInstallTargetGenerator;
 class cmMakefile;
@@ -238,6 +239,9 @@ public:
 
   //! Get a backtrace from the creation of the target.
   cmListFileBacktrace const& GetBacktrace() const;
+
+  //! Get a find_package call stack from the creation of the target.
+  cmFindPackageStack const& GetFindPackageStack() const;
 
   void InsertInclude(BT<std::string> const& entry, bool before = false);
   void InsertCompileOption(BT<std::string> const& entry, bool before = false);

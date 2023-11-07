@@ -176,6 +176,7 @@ run_install_test(TARGETS-Parts)
 run_install_test(FILES-PERMISSIONS)
 run_install_test(TARGETS-RPATH)
 run_install_test(InstallRequiredSystemLibraries)
+run_install_test(EXPORT-FindDependencyExport)
 
 set(RunCMake_TEST_OPTIONS "-DCMAKE_POLICY_DEFAULT_CMP0087:STRING=NEW")
 run_install_test(SCRIPT)

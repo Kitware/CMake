@@ -55,6 +55,7 @@ protected:
     cmGeneratorTarget const* target,
     ImportPropertyMap const& properties) override;
   void GenerateMissingTargetsCheckCode(std::ostream& os) override;
+  void GenerateFindDependencyCalls(std::ostream&) override {}
   void GenerateInterfaceProperties(
     cmGeneratorTarget const* target, std::ostream& os,
     const ImportPropertyMap& properties) override;

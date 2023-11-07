@@ -4,6 +4,8 @@ if(POLICY CMP0129)
 endif()
 project(Export C CXX)
 
+find_package(Foo REQUIRED CONFIG NO_DEFAULT_PATH)
+
 # Pretend that RelWithDebInfo should link to debug libraries to test
 # the DEBUG_CONFIGURATIONS property.
 set_property(GLOBAL PROPERTY DEBUG_CONFIGURATIONS Debug RelWithDebInfo)
@@ -110,6 +112,7 @@ add_library(testLib9ObjIface OBJECT testLib9ObjIface.c)
 target_compile_definitions(testLib9ObjIface INTERFACE testLib9ObjIface_USED)
 add_library(testLib9 STATIC testLib9.c)
 target_link_libraries(testLib9 INTERFACE testLib9ObjIface PUBLIC testLib9ObjPub PRIVATE testLib9ObjPriv)
+target_link_libraries(testLib9 PUBLIC Foo::Foo)
 cmake_policy(POP)
 
 # Test using the target_link_libraries command to set the
@@ -624,7 +627,7 @@ install(
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   )
-install(EXPORT exp NAMESPACE exp_ DESTINATION lib/exp)
+install(EXPORT exp NAMESPACE exp_ DESTINATION lib/exp EXPORT_PACKAGE_DEPENDENCIES)
 
 # Install testLib5.dll outside the export.
 if(WIN32)

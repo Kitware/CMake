@@ -27,7 +27,7 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   std::string const& component, MessageLevel message, bool exclude_from_all,
   std::string filename, std::string name_space,
   std::string cxx_modules_directory, bool exportOld, bool android,
-  cmListFileBacktrace backtrace)
+  bool exportPackageDependencies, cmListFileBacktrace backtrace)
   : cmInstallGenerator(destination, configurations, component, message,
                        exclude_from_all, false, std::move(backtrace))
   , ExportSet(exportSet)
@@ -36,6 +36,7 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   , Namespace(std::move(name_space))
   , CxxModulesDirectory(std::move(cxx_modules_directory))
   , ExportOld(exportOld)
+  , ExportPackageDependencies(exportPackageDependencies)
 {
   if (android) {
 #ifndef CMAKE_BOOTSTRAP
@@ -119,6 +120,7 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
       this->EFGen->AddConfiguration(c);
     }
   }
+  this->EFGen->SetExportPackageDependencies(this->ExportPackageDependencies);
   this->EFGen->GenerateImportFile();
 
   // Perform the main install script generation.

@@ -15,6 +15,7 @@ Synopsis
   export(`TARGETS`_ <target>... [...])
   export(`EXPORT`_ <export-name> [...])
   export(`PACKAGE`_ <PackageName>)
+  export(`SETUP`_ <export-name> [...])
 
 Exporting Targets
 ^^^^^^^^^^^^^^^^^
@@ -108,7 +109,7 @@ Exporting Targets matching install(EXPORT)
 .. code-block:: cmake
 
   export(EXPORT <export-name> [NAMESPACE <namespace>] [FILE <filename>]
-         [CXX_MODULES_DIRECTORY <directory>])
+         [CXX_MODULES_DIRECTORY <directory>] [EXPORT_PACKAGE_DEPENDENCIES])
 
 Creates a file ``<filename>`` that may be included by outside projects to
 import targets from the current project's build tree.  This is the same
@@ -117,6 +118,12 @@ explicitly listed.  Instead, it exports the targets associated with
 the installation export ``<export-name>``.  Target installations may be
 associated with the export ``<export-name>`` using the ``EXPORT`` option
 of the :command:`install(TARGETS)` command.
+
+``EXPORT_PACKAGE_DEPENDENCIES``
+  .. versionadded:: 3.29
+
+  Specify that :command:`find_dependency` calls should be exported. See
+  :command:`install(EXPORT)` for details on how this works.
 
 Exporting Packages
 ^^^^^^^^^^^^^^^^^^
@@ -149,3 +156,49 @@ registry.
   outside the source and build trees.  Set the
   :variable:`CMAKE_EXPORT_PACKAGE_REGISTRY` variable to add build directories
   to the CMake user package registry.
+
+Configuring Exports
+^^^^^^^^^^^^^^^^^^^
+
+.. signature::
+  export(SETUP <export-name> [...])
+
+.. code-block:: cmake
+
+  export(SETUP <export-name>
+         [PACKAGE_DEPENDENCY <dep>
+          [ENABLED (<bool-true>|<bool-false>|AUTO)]
+          [EXTRA_ARGS <args>...]
+         ] [...]
+         )
+
+.. versionadded:: 3.29
+
+Configure the parameters of an export. The arguments are as follows:
+
+``PACKAGE_DEPENDENCY <dep>``
+  Specify a package dependency to configure. This changes how
+  :command:`find_dependency` calls are written during
+  :command:`export(EXPORT)` and :command:`install(EXPORT)`. ``<dep>`` is the
+  name of a package to export. This argument accepts the following additional
+  arguments:
+
+  ``ENABLED``
+    Manually control whether or not the dependency is exported. This accepts
+    the following values:
+
+    ``<bool-true>``
+      Any value that CMake recognizes as "true". Always export the dependency,
+      even if no exported targets depend on it. This can be used to manually
+      add :command:`find_dependency` calls to the export.
+
+    ``<bool-false>``
+      Any value that CMake recognizes as "false". Never export the dependency,
+      even if an exported target depends on it.
+
+    ``AUTO``
+      Only export the dependency if an exported target depends on it.
+
+  ``EXTRA_ARGS <args>``
+    Specify additional arguments to pass to :command:`find_dependency` after
+    the ``REQUIRED`` argument.
