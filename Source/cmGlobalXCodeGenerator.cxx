@@ -3857,15 +3857,81 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
         configName);
     }
 
-    // Skip link information for object libraries.
-    if (gt->GetType() == cmStateEnums::OBJECT_LIBRARY ||
-        gt->GetType() == cmStateEnums::STATIC_LIBRARY) {
-      continue;
-    }
-
     // Compute the link library and directory information.
     cmComputeLinkInformation* cli = gt->GetLinkInformation(configName);
     if (!cli) {
+      continue;
+    }
+
+    // add .xcframework include paths
+    {
+      // Keep track of framework search paths we've already added or that are
+      // part of the set of implicit search paths. We don't want to repeat
+      // them and we also need to avoid hard-coding any SDK-specific paths.
+      // This is essential for getting device-and-simulator builds to work,
+      // otherwise we end up hard-coding a path to the wrong SDK for
+      // SDK-provided frameworks that are added by their full path.
+      std::set<std::string> emitted(cli->GetFrameworkPathsEmitted());
+      BuildObjectListOrString includePaths(this, true);
+      BuildObjectListOrString fwSearchPaths(this, true);
+      for (auto const& libItem : configItemMap[configName]) {
+        auto const& libName = *libItem;
+        if (libName.IsPath == cmComputeLinkInformation::ItemIsPath::Yes) {
+          auto cleanPath = libName.Value.Value;
+          if (cmSystemTools::FileIsFullPath(cleanPath)) {
+            cleanPath = cmSystemTools::CollapseFullPath(cleanPath);
+          }
+          bool isXcFramework =
+            cmHasSuffix(libName.GetFeatureName(), "XCFRAMEWORK"_s);
+          if (isXcFramework) {
+            auto plist = cmParseXcFrameworkPlist(
+              cleanPath, *this->Makefiles.front(), libName.Value.Backtrace);
+            if (!plist) {
+              return;
+            }
+            if (auto const* library = plist->SelectSuitableLibrary(
+                  *this->Makefiles.front(), libName.Value.Backtrace)) {
+              auto libraryPath =
+                cmStrCat(cleanPath, '/', library->LibraryIdentifier, '/',
+                         library->LibraryPath);
+              if (auto const fwDescriptor = this->SplitFrameworkPath(
+                    libraryPath,
+                    cmGlobalGenerator::FrameworkFormat::Relaxed)) {
+                if (!fwDescriptor->Directory.empty() &&
+                    emitted.insert(fwDescriptor->Directory).second) {
+                  // This is a search path we had not added before and it
+                  // isn't an implicit search path, so we need it
+                  fwSearchPaths.Add(
+                    this->XCodeEscapePath(fwDescriptor->Directory));
+                }
+              } else {
+                if (!library->HeadersPath.empty()) {
+                  includePaths.Add(this->XCodeEscapePath(
+                    cmStrCat(cleanPath, '/', library->LibraryIdentifier, '/',
+                             library->HeadersPath)));
+                }
+              }
+            } else {
+              return;
+            }
+          }
+        }
+      }
+      if (!includePaths.IsEmpty()) {
+        this->AppendBuildSettingAttribute(target, "HEADER_SEARCH_PATHS",
+                                          includePaths.CreateList(),
+                                          configName);
+      }
+      if (!fwSearchPaths.IsEmpty()) {
+        this->AppendBuildSettingAttribute(target, "FRAMEWORK_SEARCH_PATHS",
+                                          fwSearchPaths.CreateList(),
+                                          configName);
+      }
+    }
+
+    // Skip link information for object libraries.
+    if (gt->GetType() == cmStateEnums::OBJECT_LIBRARY ||
+        gt->GetType() == cmStateEnums::STATIC_LIBRARY) {
       continue;
     }
 
@@ -3975,13 +4041,6 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
               if (auto const fwDescriptor = this->SplitFrameworkPath(
                     libraryPath,
                     cmGlobalGenerator::FrameworkFormat::Relaxed)) {
-                if (!fwDescriptor->Directory.empty() &&
-                    emitted.insert(fwDescriptor->Directory).second) {
-                  // This is a search path we had not added before and it
-                  // isn't an implicit search path, so we need it
-                  fwSearchPaths.Add(
-                    this->XCodeEscapePath(fwDescriptor->Directory));
-                }
                 libPaths.Add(cmStrCat(
                   "-framework ",
                   this->XCodeEscapePath(fwDescriptor->GetLinkName())));
@@ -3989,14 +4048,6 @@ void cmGlobalXCodeGenerator::AddDependAndLinkInformation(cmXCodeObject* target)
                 libPaths.Add(
                   libName.GetFormattedItem(this->XCodeEscapePath(libraryPath))
                     .Value);
-                if (!library->HeadersPath.empty()) {
-                  this->AppendBuildSettingAttribute(
-                    target, "HEADER_SEARCH_PATHS",
-                    this->CreateString(this->XCodeEscapePath(
-                      cmStrCat(cleanPath, '/', library->LibraryIdentifier, '/',
-                               library->HeadersPath))),
-                    configName);
-                }
               }
             } else {
               return;
