@@ -19,3 +19,6 @@ set_property(TARGET mylib PROPERTY IMPORTED_LOCATION ${MYLIB_LIBRARY})
 
 add_executable(myexe myexe/myexe.c)
 target_link_libraries(myexe PRIVATE mylib)
+
+add_library(myconsuminglib STATIC myconsuminglib/myconsuminglib.c)
+target_link_libraries(myconsuminglib PRIVATE mylib)
