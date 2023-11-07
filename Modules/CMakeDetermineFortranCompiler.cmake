@@ -22,7 +22,7 @@ elseif("${CMAKE_GENERATOR}" MATCHES "Xcode")
   _cmake_find_compiler_path(Fortran)
 else()
   if(NOT CMAKE_Fortran_COMPILER)
-    # prefer the environment variable CC
+    # prefer the environment variable FC
     if(NOT $ENV{FC} STREQUAL "")
       get_filename_component(CMAKE_Fortran_COMPILER_INIT $ENV{FC} PROGRAM PROGRAM_ARGS CMAKE_Fortran_FLAGS_ENV_INIT)
       if(CMAKE_Fortran_FLAGS_ENV_INIT)
