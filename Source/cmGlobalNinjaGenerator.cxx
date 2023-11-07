@@ -378,6 +378,15 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
   }
 
   {
+    std::string ninjaDepfilePath;
+    bool depfileIsOutput = false;
+    if (!depfile.empty()) {
+      ninjaDepfilePath = this->ConvertToNinjaPath(depfile);
+      depfileIsOutput =
+        std::find(outputs.ExplicitOuts.begin(), outputs.ExplicitOuts.end(),
+                  ninjaDepfilePath) != outputs.ExplicitOuts.end();
+    }
+
     cmNinjaBuild build("CUSTOM_COMMAND");
     build.Comment = comment;
     build.Outputs = std::move(outputs.ExplicitOuts);
@@ -405,7 +414,13 @@ void cmGlobalNinjaGenerator::WriteCustomCommandBuild(
       vars["pool"] = job_pool;
     }
     if (!depfile.empty()) {
-      vars["depfile"] = depfile;
+      vars["depfile"] = ninjaDepfilePath;
+      // Add the depfile to the `.ninja_deps` database. Since this (generally)
+      // removes the file, it cannot be declared as an output or byproduct of
+      // the command.
+      if (!depfileIsOutput) {
+        vars["deps"] = "gcc";
+      }
     }
     if (config.empty()) {
       this->WriteBuild(*this->GetCommonFileStream(), build);

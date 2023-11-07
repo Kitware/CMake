@@ -388,6 +388,8 @@ unset(RunCMake_TEST_NO_CLEAN)
 unset(RunCMake_TEST_BINARY_DIR)
 
 run_cmake(CustomCommandDepfile)
+run_cmake(CustomCommandDepfileAsOutput)
+run_cmake(CustomCommandDepfileAsByproduct)
 
 set(RunCMake_TEST_OPTIONS "-DCMAKE_CROSS_CONFIGS=all")
 run_cmake(PerConfigSources)

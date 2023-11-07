@@ -16,6 +16,9 @@
 #include "cmGccDepfileReaderTypes.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
+#include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 namespace {
@@ -121,6 +124,10 @@ bool cmTransformDepfile(cmDepfileFormat format, const cmLocalGenerator& lg,
       return false;
     }
     content = *std::move(result);
+  } else {
+    lg.GetMakefile()->IssueMessage(
+      MessageType::WARNING,
+      cmStrCat("Expected depfile does not exist.\n  ", infile));
   }
 
   cmSystemTools::MakeDirectory(cmSystemTools::GetFilenamePath(outfile));

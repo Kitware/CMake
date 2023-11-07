@@ -373,6 +373,11 @@ The options are:
     :manual:`generator expressions <cmake-generator-expressions(7)>` was also
     added.
 
+  .. versionadded:: 3.29
+    The :ref:`Ninja Generators` will now incorporate the dependencies into its
+    "deps log" database if the file is not listed in ``OUTPUTS`` or
+    ``BYPRODUCTS``.
+
   Using ``DEPFILE`` with generators other than those listed above is an error.
 
   If the ``DEPFILE`` argument is relative, it should be relative to
