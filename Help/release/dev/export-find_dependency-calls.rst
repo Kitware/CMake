@@ -12,3 +12,5 @@ export-find_dependency-calls
   allow targets to specify what package name to pass when exporting
   :command:`find_dependency` calls. This property is initialized with a new
   :variable:`CMAKE_EXPORT_FIND_PACKAGE_NAME` variable.
+* :command:`FetchContent_MakeAvailable` now sets the
+  :variable:`CMAKE_EXPORT_FIND_PACKAGE_NAME` variable for CMake projects.
