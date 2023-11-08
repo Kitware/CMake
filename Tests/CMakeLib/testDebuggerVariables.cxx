@@ -196,8 +196,8 @@ static bool testNoSupportsVariableType()
       CreateVariablesRequest(vars->GetId()));
 
   ASSERT_TRUE(variables.size() == 2);
-  ASSERT_VARIABLE(variables[0], "Children", "", nullptr);
-  ASSERT_VARIABLE(variables[1], "test", "value", nullptr);
+  ASSERT_VARIABLE(variables[0], "Children", "", "");
+  ASSERT_VARIABLE(variables[1], "test", "value", "");
 
   return true;
 }
