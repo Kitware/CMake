@@ -15,3 +15,5 @@ function(run_BuiltinTarget case target)
 endfunction()
 
 run_BuiltinTarget(TestDependsAll-Default test)
+run_BuiltinTarget(TestDependsAll-No test)
+run_BuiltinTarget(TestDependsAll-Yes test)
