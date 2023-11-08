@@ -19,8 +19,8 @@ Synopsis
 Exporting Targets
 ^^^^^^^^^^^^^^^^^
 
-.. _`export(TARGETS)`:
-.. _TARGETS:
+.. signature::
+  export(TARGETS <target>... [...])
 
 .. code-block:: cmake
 
@@ -62,7 +62,7 @@ The options are:
 
 This signature requires all targets to be listed explicitly.  If a library
 target is included in the export, but a target to which it links is not
-included, the behavior is unspecified.  See the `export(EXPORT)`_ signature
+included, the behavior is unspecified.  See the :command:`export(EXPORT)` signature
 to automatically export the same targets from the build tree as
 :command:`install(EXPORT)` would from an install tree.
 
@@ -102,8 +102,8 @@ that policy is set to OLD for one of the targets.
 Exporting Targets matching install(EXPORT)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. _`export(EXPORT)`:
-.. _EXPORT:
+.. signature::
+  export(EXPORT <export-name> [...])
 
 .. code-block:: cmake
 
@@ -112,7 +112,7 @@ Exporting Targets matching install(EXPORT)
 
 Creates a file ``<filename>`` that may be included by outside projects to
 import targets from the current project's build tree.  This is the same
-as the `export(TARGETS)`_ signature, except that the targets are not
+as the :command:`export(TARGETS)` signature, except that the targets are not
 explicitly listed.  Instead, it exports the targets associated with
 the installation export ``<export-name>``.  Target installations may be
 associated with the export ``<export-name>`` using the ``EXPORT`` option
@@ -121,8 +121,8 @@ of the :command:`install(TARGETS)` command.
 Exporting Packages
 ^^^^^^^^^^^^^^^^^^
 
-.. _`export(PACKAGE)`:
-.. _PACKAGE:
+.. signature::
+  export(PACKAGE <PackageName>)
 
 .. code-block:: cmake
 
