@@ -19,7 +19,7 @@
   do {                                                                        \
     ASSERT_TRUE(x.name == expectedName);                                      \
     ASSERT_TRUE(x.value == expectedValue);                                    \
-    if (expectedType == nullptr) {                                            \
+    if (expectedType == std::string()) {                                      \
       ASSERT_TRUE(x.type == dap::optional<dap::string>());                    \
     } else {                                                                  \
       ASSERT_TRUE(x.type == dap::optional<dap::string>(expectedType));        \
