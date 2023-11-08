@@ -1053,6 +1053,10 @@ related to most of the expressions in this sub-section.
   ``1`` if CMake's compiler id of the C compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
 
+  .. versionchanged:: 3.15
+    Multiple ``compiler_ids`` can be specified.
+    CMake 3.14 and earlier only accepted a single compiler ID.
+
 .. genex:: $<CXX_COMPILER_ID>
 
   CMake's compiler id of the CXX compiler used.
@@ -1062,6 +1066,10 @@ related to most of the expressions in this sub-section.
   where ``compiler_ids`` is a comma-separated list.
   ``1`` if CMake's compiler id of the CXX compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
+
+  .. versionchanged:: 3.15
+    Multiple ``compiler_ids`` can be specified.
+    CMake 3.14 and earlier only accepted a single compiler ID.
 
 .. genex:: $<CUDA_COMPILER_ID>
 
@@ -1114,6 +1122,10 @@ related to most of the expressions in this sub-section.
   where ``compiler_ids`` is a comma-separated list.
   ``1`` if CMake's compiler id of the Fortran compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
+
+  .. versionchanged:: 3.15
+    Multiple ``compiler_ids`` can be specified.
+    CMake 3.14 and earlier only accepted a single compiler ID.
 
 .. genex:: $<HIP_COMPILER_ID>
 
