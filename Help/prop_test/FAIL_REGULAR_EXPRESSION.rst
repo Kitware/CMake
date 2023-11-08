@@ -1,15 +1,22 @@
 FAIL_REGULAR_EXPRESSION
 -----------------------
 
-If the output matches this regular expression the test will fail,
-regardless of the process exit code.
+If the test output (stdout or stderr) matches this regular expression the test
+will fail, regardless of the process exit code. Tests that exceed the timeout
+specified by :prop_test:`TIMEOUT` fail regardless of
+``FAIL_REGULAR_EXPRESSION``. Any non-zero return code or system-level test
+failures including segmentation faults, signal abort, or heap errors fail the
+test even if the regular expression does not match.
 
-If set, if the output matches one of specified regular expressions,
-the test will fail.  Example:
+If set, if the output matches one of specified regular expressions, the test
+will fail.  Example:
 
 .. code-block:: cmake
 
-  set_tests_properties(mytest PROPERTIES
+  # test would pass, except for FAIL_REGULAR_EXPRESSION
+  add_test(NAME mytest COMMAND ${CMAKE_COMMAND} -E echo "Failed")
+
+  set_property(TEST mytest PROPERTY
     FAIL_REGULAR_EXPRESSION "[^a-z]Error;ERROR;Failed"
   )
 
