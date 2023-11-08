@@ -247,5 +247,9 @@ will be generated when this variable is ``ON``.
 This target property controls the number of ``moc`` or ``uic`` processes to
 start in parallel during builds.
 
+:prop_tgt:`AUTOGEN_COMMAND_LINE_LENGTH_MAX`:
+This target property controls the limit when to use response files for
+``moc`` or ``uic`` processes on Windows.
+
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.

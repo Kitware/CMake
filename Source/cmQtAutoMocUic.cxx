@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <atomic>
 #include <cstddef>
+#include <limits>
 #include <map>
 #include <mutex>
 #include <set>
@@ -172,6 +173,8 @@ public:
     bool MultiConfig = false;
     IntegerVersion QtVersion = { 4, 0 };
     unsigned int ThreadCount = 0;
+    unsigned int MaxCommandLineLength =
+      std::numeric_limits<unsigned int>::max();
     // - Directories
     std::string AutogenBuildDir;
     std::string AutogenIncludeDir;
@@ -811,7 +814,7 @@ void cmQtAutoMocUicT::JobT::MaybeWriteResponseFile(
   for (std::string const& str : cmd) {
     commandLineLength += str.length();
   }
-  if (commandLineLength >= CommandLineLengthMax) {
+  if (commandLineLength >= this->BaseConst().MaxCommandLineLength) {
     // Command line exceeds maximum size allowed by OS
     // => create response file
     std::string const responseFile = cmStrCat(outputFile, ".rsp");
@@ -2380,6 +2383,10 @@ bool cmQtAutoMocUicT::InitFromInfo(InfoT const& info)
       !info.GetUInt("QT_VERSION_MINOR", this->BaseConst_.QtVersion.Minor,
                     true) ||
       !info.GetUInt("PARALLEL", this->BaseConst_.ThreadCount, false) ||
+#ifdef _WIN32
+      !info.GetUInt("AUTOGEN_COMMAND_LINE_LENGTH_MAX",
+                    this->BaseConst_.MaxCommandLineLength, false) ||
+#endif
       !info.GetString("BUILD_DIR", this->BaseConst_.AutogenBuildDir, true) ||
       !info.GetStringConfig("INCLUDE_DIR", this->BaseConst_.AutogenIncludeDir,
                             true) ||

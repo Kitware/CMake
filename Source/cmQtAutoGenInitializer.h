@@ -5,6 +5,7 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <cstddef>
+#include <limits>
 #include <memory>
 #include <set>
 #include <string>
@@ -194,6 +195,8 @@ private:
     bool GlobalTarget = false;
     // Settings
     unsigned int Parallel = 1;
+    unsigned int MaxCommandLineLength =
+      std::numeric_limits<unsigned int>::max();
     // Configuration files
     std::string InfoFile;
     ConfigString SettingsFile;

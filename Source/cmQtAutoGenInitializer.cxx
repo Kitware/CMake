@@ -485,6 +485,38 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
       }
     }
 
+#ifdef _WIN32
+    {
+      const auto& value =
+        this->GenTarget->GetProperty("AUTOGEN_COMMAND_LINE_LENGTH_MAX");
+      if (value.IsSet()) {
+        using maxCommandLineLengthType =
+          decltype(this->AutogenTarget.MaxCommandLineLength);
+        unsigned long propInt = 0;
+        if (cmStrToULong(value, &propInt) && propInt > 0 &&
+            propInt <= std::numeric_limits<maxCommandLineLengthType>::max()) {
+          this->AutogenTarget.MaxCommandLineLength =
+            static_cast<maxCommandLineLengthType>(propInt);
+        } else {
+          // Warn the project author that AUTOGEN_PARALLEL is not valid.
+          this->Makefile->IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmStrCat("AUTOGEN_COMMAND_LINE_LENGTH_MAX=\"", *value,
+                     "\" for target \"", this->GenTarget->GetName(),
+                     "\" is not valid. Using no limit for "
+                     "AUTOGEN_COMMAND_LINE_LENGTH_MAX"));
+          this->AutogenTarget.MaxCommandLineLength =
+            std::numeric_limits<maxCommandLineLengthType>::max();
+        }
+      } else {
+        // Actually 32767 (see
+        // https://devblogs.microsoft.com/oldnewthing/20031210-00/?p=41553) but
+        // we allow for a small margin
+        this->AutogenTarget.MaxCommandLineLength = 32000;
+      }
+    }
+#endif
+
     // Autogen target info and settings files
     {
       // Info file
@@ -1692,6 +1724,10 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
   // General
   info.SetBool("MULTI_CONFIG", this->MultiConfig);
   info.SetUInt("PARALLEL", this->AutogenTarget.Parallel);
+#ifdef _WIN32
+  info.SetUInt("AUTOGEN_COMMAND_LINE_LENGTH_MAX",
+               this->AutogenTarget.MaxCommandLineLength);
+#endif
   info.SetUInt("VERBOSITY", this->Verbosity);
 
   // Directories

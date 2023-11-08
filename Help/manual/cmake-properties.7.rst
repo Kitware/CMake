@@ -130,6 +130,7 @@ Properties on Targets
    /prop_tgt/ARCHIVE_OUTPUT_NAME
    /prop_tgt/ARCHIVE_OUTPUT_NAME_CONFIG
    /prop_tgt/AUTOGEN_BUILD_DIR
+   /prop_tgt/AUTOGEN_COMMAND_LINE_LENGTH_MAX
    /prop_tgt/AUTOGEN_ORIGIN_DEPENDS
    /prop_tgt/AUTOGEN_PARALLEL
    /prop_tgt/AUTOGEN_TARGET_DEPENDS
