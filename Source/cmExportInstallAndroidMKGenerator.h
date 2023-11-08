@@ -54,8 +54,6 @@ protected:
     const ImportPropertyMap& properties) override;
   void GenerateImportPrefix(std::ostream& os) override;
   void LoadConfigFiles(std::ostream&) override;
-  void GenerateRequiredCMakeVersion(std::ostream& os,
-                                    const char* versionString) override;
   void CleanupTemporaryVariables(std::ostream&) override;
   void GenerateImportedFileCheckLoop(std::ostream& os) override;
   void GenerateImportedFileChecksCode(

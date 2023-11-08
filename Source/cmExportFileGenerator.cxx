@@ -30,6 +30,7 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmValue.h"
+#include "cmVersion.h"
 
 static std::string cmExportFileGeneratorEscape(std::string const& str)
 {
@@ -93,17 +94,22 @@ bool cmExportFileGenerator::GenerateImportFile()
     return false;
   }
   std::ostream& os = *foutPtr;
+  std::stringstream mainFileWithHeadersAndFootersBuffer;
 
   // Start with the import file header.
-  this->GeneratePolicyHeaderCode(os);
-  this->GenerateImportHeaderCode(os);
+  this->GenerateImportHeaderCode(mainFileWithHeadersAndFootersBuffer);
 
   // Create all the imported targets.
-  bool result = this->GenerateMainFile(os);
+  bool result = this->GenerateMainFile(mainFileWithHeadersAndFootersBuffer);
 
   // End with the import file footer.
-  this->GenerateImportFooterCode(os);
-  this->GeneratePolicyFooterCode(os);
+  this->GenerateImportFooterCode(mainFileWithHeadersAndFootersBuffer);
+  this->GeneratePolicyFooterCode(mainFileWithHeadersAndFootersBuffer);
+
+  // This has to be done last, after the minimum CMake version has been
+  // determined.
+  this->GeneratePolicyHeaderCode(os);
+  os << mainFileWithHeadersAndFootersBuffer.rdbuf();
 
   return result;
 }
@@ -154,17 +160,6 @@ void cmExportFileGenerator::PopulateInterfaceProperty(
       properties[outputName] = prepro;
     }
   }
-}
-
-void cmExportFileGenerator::GenerateRequiredCMakeVersion(
-  std::ostream& os, const char* versionString)
-{
-  /* clang-format off */
-  os << "if(CMAKE_VERSION VERSION_LESS " << versionString << ")\n"
-        "  message(FATAL_ERROR \"This file relies on consumers using "
-        "CMake " << versionString << " or greater.\")\n"
-        "endif()\n\n";
-  /* clang-format on */
 }
 
 bool cmExportFileGenerator::PopulateInterfaceLinkLibrariesProperty(
@@ -953,8 +948,14 @@ void cmExportFileGenerator::GeneratePolicyHeaderCode(std::ostream& os)
   os << "if(\"${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}\" LESS 2.8)\n"
      << "   message(FATAL_ERROR \"CMake >= 2.8.0 required\")\n"
      << "endif()\n"
-     << "if(CMAKE_VERSION VERSION_LESS \"2.8.3\")\n"
-     << "   message(FATAL_ERROR \"CMake >= 2.8.3 required\")\n"
+     << "if(CMAKE_VERSION VERSION_LESS \""
+     << this->RequiredCMakeVersionMajor << '.'
+     << this->RequiredCMakeVersionMinor << '.'
+     << this->RequiredCMakeVersionPatch << "\")\n"
+     << "   message(FATAL_ERROR \"CMake >= "
+     << this->RequiredCMakeVersionMajor << '.'
+     << this->RequiredCMakeVersionMinor << '.'
+     << this->RequiredCMakeVersionPatch << " required\")\n"
      << "endif()\n";
   /* clang-format on */
 
@@ -966,7 +967,10 @@ void cmExportFileGenerator::GeneratePolicyHeaderCode(std::ostream& os)
   // versions.
   /* clang-format off */
   os << "cmake_policy(PUSH)\n"
-     << "cmake_policy(VERSION 2.8.3...3.27)\n";
+     << "cmake_policy(VERSION "
+     << this->RequiredCMakeVersionMajor << '.'
+     << this->RequiredCMakeVersionMinor << '.'
+     << this->RequiredCMakeVersionPatch << "...3.27)\n";
   /* clang-format on */
 }
 
@@ -1484,4 +1488,18 @@ void cmExportFileGenerator::GenerateCxxModuleInformation(std::ostream& os)
   ap.SetCopyIfDifferent(true);
 
   this->GenerateCxxModuleConfigInformation(ap);
+}
+
+void cmExportFileGenerator::SetRequiredCMakeVersion(unsigned int major,
+                                                    unsigned int minor,
+                                                    unsigned int patch)
+{
+  if (CMake_VERSION_ENCODE(major, minor, patch) >
+      CMake_VERSION_ENCODE(this->RequiredCMakeVersionMajor,
+                           this->RequiredCMakeVersionMinor,
+                           this->RequiredCMakeVersionPatch)) {
+    this->RequiredCMakeVersionMajor = major;
+    this->RequiredCMakeVersionMinor = minor;
+    this->RequiredCMakeVersionPatch = patch;
+  }
 }

@@ -173,9 +173,6 @@ protected:
     std::string& input, cmGeneratorTarget const* target,
     FreeTargetsReplace replace = NoReplaceFreeTargets);
 
-  virtual void GenerateRequiredCMakeVersion(std::ostream& os,
-                                            const char* versionString);
-
   bool PopulateCxxModuleExportProperties(
     cmGeneratorTarget const* gte, ImportPropertyMap& properties,
     cmGeneratorExpression::PreprocessContext ctx,
@@ -196,6 +193,9 @@ protected:
                                       cmFileSet* fileSet,
                                       cmTargetExport* te) = 0;
 
+  void SetRequiredCMakeVersion(unsigned int major, unsigned int minor,
+                               unsigned int patch);
+
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;
 
@@ -215,6 +215,10 @@ protected:
   std::set<cmGeneratorTarget*> ExportedTargets;
 
   std::vector<std::string> MissingTargets;
+
+  unsigned int RequiredCMakeVersionMajor = 2;
+  unsigned int RequiredCMakeVersionMinor = 8;
+  unsigned int RequiredCMakeVersionPatch = 3;
 
 private:
   void PopulateInterfaceProperty(const std::string&, const std::string&,
