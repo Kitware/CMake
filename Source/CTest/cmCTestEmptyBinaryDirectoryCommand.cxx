@@ -2,25 +2,27 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestEmptyBinaryDirectoryCommand.h"
 
-#include <sstream>
-
 #include "cmCTestScriptHandler.h"
-
-class cmExecutionStatus;
+#include "cmExecutionStatus.h"
+#include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmStringAlgorithms.h"
 
 bool cmCTestEmptyBinaryDirectoryCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus& /*unused*/)
+  std::vector<std::string> const& args, cmExecutionStatus& status)
 {
   if (args.size() != 1) {
     this->SetError("called with incorrect number of arguments");
     return false;
   }
 
-  if (!cmCTestScriptHandler::EmptyBinaryDirectory(args[0])) {
-    std::ostringstream ostr;
-    ostr << "problem removing the binary directory: " << args[0];
-    this->SetError(ostr.str());
-    return false;
+  std::string err;
+  if (!cmCTestScriptHandler::EmptyBinaryDirectory(args[0], err)) {
+    status.GetMakefile().IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("Did not remove the binary directory:\n ", args[0],
+               "\nbecause:\n ", err));
+    return true;
   }
 
   return true;
