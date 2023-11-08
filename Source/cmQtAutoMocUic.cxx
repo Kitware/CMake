@@ -887,6 +887,8 @@ void cmQtAutoMocUicT::JobMocPredefsT::Process()
       cm::append(cmd, this->MocConst().OptionsDefinitions);
       // Add includes
       cm::append(cmd, this->MocConst().OptionsIncludes);
+      // Check if response file is necessary
+      MaybeWriteResponseFile(this->MocConst().PredefsFileAbs, cmd);
       // Execute command
       if (!this->RunProcess(GenT::MOC, result, cmd, reason.get())) {
         this->LogCommandError(GenT::MOC,

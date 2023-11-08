@@ -64,11 +64,6 @@ public:
   /// @brief Maximum number of parallel threads/processes in a generator
   static unsigned int const ParallelMax;
 
-#ifdef _WIN32
-  /// @brief Maximum number of characters on command line
-  static size_t const CommandLineLengthMax;
-#endif
-
   /// @brief Returns the generator name
   static cm::string_view GeneratorName(GenT genType);
   /// @brief Returns the generator name in upper case
