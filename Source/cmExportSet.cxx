@@ -1,6 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmExportSet.h"
+#include "cmExportSet.h" // IWYU pragma: associated
 
 #include <algorithm>
 #include <tuple>
@@ -11,7 +11,7 @@
 #include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
-#include "cmTargetExport.h"
+#include "cmTargetExport.h" // IWYU pragma: associated
 
 cmExportSet::cmExportSet(std::string name)
   : Name(std::move(name))
