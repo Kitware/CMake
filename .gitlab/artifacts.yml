@@ -120,6 +120,8 @@
             # Take the sphinx logs.
             - ${CMAKE_CI_BUILD_DIR}/build-*.log
             - ${CMAKE_CI_BUILD_DIR}/linkcheck/output.*
+            # Take the HTML output.
+            - ${CMAKE_CI_BUILD_DIR}/html/
 
 .cmake_test_artifacts:
     artifacts:
