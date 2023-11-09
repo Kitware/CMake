@@ -1192,11 +1192,11 @@ if(CUDAToolkit_FOUND)
   endif()
 
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.4)
-    _CUDAToolkit_find_and_add_import_lib(cuFile DEPS culibos)
-    _CUDAToolkit_find_and_add_import_lib(cuFile_static DEPS culibos)
+    _CUDAToolkit_find_and_add_import_lib(cuFile ALT cufile DEPS culibos)
+    _CUDAToolkit_find_and_add_import_lib(cuFile_static ALT cufile_static DEPS culibos)
 
-    _CUDAToolkit_find_and_add_import_lib(cuFile_rdma DEPS cuFile culibos)
-    _CUDAToolkit_find_and_add_import_lib(cuFile_rdma_static DEPS cuFile_static culibos)
+    _CUDAToolkit_find_and_add_import_lib(cuFile_rdma ALT cufile_rdma DEPS cuFile culibos)
+    _CUDAToolkit_find_and_add_import_lib(cuFile_rdma_static ALT cufile_rdma_static DEPS cuFile_static culibos)
   endif()
 
     if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.6)
