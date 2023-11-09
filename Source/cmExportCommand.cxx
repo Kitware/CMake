@@ -204,7 +204,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
     fname = dir + "/" + fname;
   }
 
-  std::vector<std::string> targets;
+  std::vector<cmExportBuildFileGenerator::TargetExport> targets;
 
   cmGlobalGenerator* gg = mf.GetGlobalGenerator();
 
@@ -242,7 +242,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
         status.SetError(e.str());
         return false;
       }
-      targets.push_back(currentTarget);
+      targets.emplace_back(currentTarget);
     }
     if (arguments.Append) {
       if (cmExportBuildFileGenerator* ebfg =
