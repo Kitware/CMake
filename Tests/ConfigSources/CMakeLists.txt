@@ -154,7 +154,15 @@ else()
 endif()
 add_library(OneConfigOnly OBJECT "$<$<CONFIG:${one_config}>:${CMAKE_CURRENT_SOURCE_DIR}/iface_src.cpp>")
 set_property(TARGET OneConfigOnly PROPERTY LINKER_LANGUAGE CXX)
+add_executable(ConfigSourcesUseOne main_one_config.cpp)
+target_compile_definitions(ConfigSourcesUseOne PRIVATE "$<$<CONFIG:${one_config}>:CFG_ONE>")
+target_link_libraries(ConfigSourcesUseOne PRIVATE "$<$<CONFIG:${one_config}>:OneConfigOnly>")
 
+add_library(OneConfigOnlyIface INTERFACE)
+target_sources(OneConfigOnlyIface INTERFACE "$<$<CONFIG:${one_config}>:${CMAKE_CURRENT_SOURCE_DIR}/iface_src.cpp>")
+add_executable(ConfigSourcesUseOneIface main_one_config.cpp)
+target_compile_definitions(ConfigSourcesUseOneIface PRIVATE "$<$<CONFIG:${one_config}>:CFG_ONE>")
+target_link_libraries(ConfigSourcesUseOneIface PRIVATE "$<$<CONFIG:${one_config}>:OneConfigOnlyIface>")
 
 # ---------------------------------------------------------------------------
 # Makes sure that each configuration uses the correct generated file.
