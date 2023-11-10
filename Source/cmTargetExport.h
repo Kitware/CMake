@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <map>
 #include <string>
 
 class cmFileSet;
