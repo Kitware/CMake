@@ -672,9 +672,11 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
 
   // clear the binary directory?
   if (this->EmptyBinDir) {
-    if (!cmCTestScriptHandler::EmptyBinaryDirectory(this->BinaryDir)) {
+    std::string err;
+    if (!cmCTestScriptHandler::EmptyBinaryDirectory(this->BinaryDir, err)) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Problem removing the binary directory" << std::endl);
+                 "Problem removing the binary directory ("
+                   << err << "): " << this->BinaryDir << std::endl);
     }
   }
 
@@ -860,10 +862,12 @@ bool cmCTestScriptHandler::RunScript(cmCTest* ctest, cmMakefile* mf,
   return true;
 }
 
-bool cmCTestScriptHandler::EmptyBinaryDirectory(const std::string& sname)
+bool cmCTestScriptHandler::EmptyBinaryDirectory(const std::string& sname,
+                                                std::string& err)
 {
   // try to avoid deleting root
   if (sname.size() < 2) {
+    err = "path too short";
     return false;
   }
 
@@ -876,20 +880,24 @@ bool cmCTestScriptHandler::EmptyBinaryDirectory(const std::string& sname)
   std::string check = cmStrCat(sname, "/CMakeCache.txt");
 
   if (!cmSystemTools::FileExists(check)) {
+    err = "path does not contain an existing CMakeCache.txt file";
     return false;
   }
 
+  cmsys::Status status;
   for (int i = 0; i < 5; ++i) {
-    if (TryToRemoveBinaryDirectoryOnce(sname)) {
+    status = TryToRemoveBinaryDirectoryOnce(sname);
+    if (status) {
       return true;
     }
     cmSystemTools::Delay(100);
   }
 
+  err = status.GetString();
   return false;
 }
 
-bool cmCTestScriptHandler::TryToRemoveBinaryDirectoryOnce(
+cmsys::Status cmCTestScriptHandler::TryToRemoveBinaryDirectoryOnce(
   const std::string& directoryPath)
 {
   cmsys::Directory directory;
@@ -907,18 +915,18 @@ bool cmCTestScriptHandler::TryToRemoveBinaryDirectoryOnce(
     bool isDirectory = cmSystemTools::FileIsDirectory(fullPath) &&
       !cmSystemTools::FileIsSymlink(fullPath);
 
+    cmsys::Status status;
     if (isDirectory) {
-      if (!cmSystemTools::RemoveADirectory(fullPath)) {
-        return false;
-      }
+      status = cmSystemTools::RemoveADirectory(fullPath);
     } else {
-      if (!cmSystemTools::RemoveFile(fullPath)) {
-        return false;
-      }
+      status = cmSystemTools::RemoveFile(fullPath);
+    }
+    if (!status) {
+      return status;
     }
   }
 
-  return static_cast<bool>(cmSystemTools::RemoveADirectory(directoryPath));
+  return cmSystemTools::RemoveADirectory(directoryPath);
 }
 
 cmDuration cmCTestScriptHandler::GetRemainingTimeAllowed()
