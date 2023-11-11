@@ -398,6 +398,7 @@ Properties on Targets
    /prop_tgt/Swift_MODULE_DIRECTORY
    /prop_tgt/Swift_MODULE_NAME
    /prop_tgt/SYSTEM
+   /prop_tgt/TEST_LAUNCHER
    /prop_tgt/TYPE
    /prop_tgt/UNITY_BUILD
    /prop_tgt/UNITY_BUILD_BATCH_SIZE

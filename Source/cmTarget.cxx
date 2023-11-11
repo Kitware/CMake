@@ -594,6 +594,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "CROSSCOMPILING_EMULATOR"_s, IC::ExecutableTarget },
   { "EXPORT_COMPILE_COMMANDS"_s, IC::CanCompileSources },
   { "FOLDER"_s },
+  { "TEST_LAUNCHER"_s, IC::ExecutableTarget },
 
   // Xcode properties
   { "XCODE_GENERATE_SCHEME"_s, IC::NeedsXcode },

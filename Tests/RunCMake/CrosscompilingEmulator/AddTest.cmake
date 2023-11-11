@@ -18,3 +18,9 @@ add_test(NAME UsesEmulatorWithExecTargetFromSubdirAddedWithoutGenex
 
 add_test(NAME DoesNotUseEmulatorWithExecTargetFromSubdirAddedWithGenex
   COMMAND $<TARGET_FILE:generated_exe_in_subdir_added_to_test_with_genex>)
+
+add_executable(generated_exe_test_launcher simple_src_exiterror.cxx)
+set_property(TARGET generated_exe_test_launcher PROPERTY TEST_LAUNCHER "pseudo_test_launcher")
+
+add_test(NAME UsesTestLauncherAndEmulator
+  COMMAND generated_exe_test_launcher)
