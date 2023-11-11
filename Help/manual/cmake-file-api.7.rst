@@ -431,7 +431,7 @@ Version 1 does not exist to avoid confusion with that from
 
   {
     "kind": "codemodel",
-    "version": { "major": 2, "minor": 6 },
+    "version": { "major": 2, "minor": 7 },
     "paths": {
       "source": "/path/to/top-level-source-dir",
       "build": "/path/to/top-level-build-dir"
@@ -997,6 +997,32 @@ with members:
       the :command:`install` command invocation that specified this
       destination is available.  The value is an unsigned integer 0-based
       index into the ``backtraceGraph`` member's ``nodes`` array.
+
+  ``launchers``
+    Optional member that is present on executable targets that have
+    at least one launcher specified by the project.  The value is a
+    JSON array of entries corresponding to the specified launchers.
+    Each entry is a JSON object with members:
+
+    ``command``
+      A string specifying the path to the launcher on disk, represented
+      with forward slashes. If the file is inside the top-level source
+      directory then the path is specified relative to that directory.
+
+    ``arguments``
+      Optional member that is present when the launcher command has
+      arguments preceding the executable to be launched.  The value
+      is a JSON array of strings representing the arguments.
+
+    ``type``
+      A string specifying the type of launcher.  The value is one of
+      the following:
+
+      ``emulator``
+        An emulator for the target platform when cross-compiling.
+        See the :prop_tgt:`CROSSCOMPILING_EMULATOR` target property.
+
+    This field was added in codemodel version 2.7.
 
 ``link``
   Optional member that is present for executables and shared library
