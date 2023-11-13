@@ -1,5 +1,12 @@
 enable_language(C)
 
+if(CMP0156 STREQUAL "NEW")
+  cmake_policy(SET CMP0156 NEW)
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/LIBRARIES_PROCESSING.cmake" "set(CMAKE_C_LINK_LIBRARIES_PROCESSING \"${CMAKE_C_LINK_LIBRARIES_PROCESSING}\")\n")
+else()
+  cmake_policy(SET CMP0156 OLD)
+endif()
+
 # ensure command line is always displayed and do not use any response file
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_C_USE_RESPONSE_FILE_FOR_LIBRARIES FALSE)

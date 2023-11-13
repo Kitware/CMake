@@ -170,6 +170,8 @@ if(NOT WIN32 OR CYGWIN)
 endif()
 
 add_RunCMake_test(CMP0153)
+add_RunCMake_test(CMP0156 -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+                          -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION})
 
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
@@ -748,6 +750,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin|Windows)"
                                     -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION})
 endif()
 
+add_RunCMake_test(LinkLibrariesProcessing)
 add_RunCMake_test(File_Archive)
 add_RunCMake_test(File_Configure)
 add_RunCMake_test(File_Generate)

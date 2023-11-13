@@ -15,6 +15,8 @@ macro(__apple_compiler_clang lang)
     set(CMAKE_${lang}_SYSTEM_FRAMEWORK_SEARCH_FLAG "-iframework ")
   endif()
 
+  set(CMAKE_${lang}_LINK_LIBRARIES_PROCESSING ORDER=REVERSE UNICITY=ALL)
+
   set(CMAKE_${lang}_LINK_LIBRARY_USING_FRAMEWORK "-framework <LIBRARY>")
   set(CMAKE_${lang}_LINK_LIBRARY_USING_FRAMEWORK_SUPPORTED TRUE)
 
