@@ -1656,6 +1656,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_SKIP_INSTALL_RPATH
             \ CMAKE_SKIP_INSTALL_RULES
             \ CMAKE_SKIP_RPATH
+            \ CMAKE_SKIP_TEST_ALL_DEPENDENCY
             \ CMAKE_SOURCE_DIR
             \ CMAKE_STAGING_PREFIX
             \ CMAKE_STATIC_LIBRARY_PREFIX
