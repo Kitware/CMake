@@ -135,3 +135,67 @@ For the :ref:`Visual Studio Generators`:
   ``import std``) is not supported.
 - Use of modules provided by ``PRIVATE`` sources from ``PUBLIC`` module
   sources is not diagnosed.
+
+Possible Future Enhancements
+============================
+
+This section documents possible future enhancements to CMake's support of C++
+modules.  Nothing here is a guarantee of future implementation, and the
+ordering is arbitrary.
+
+Batch Scanning
+--------------
+
+It is possible to scan all sources within a target at once, which should be
+faster when sources share transitive includes.  This does have side effects
+for incremental builds, as the update of any source in the target means that
+all sources in the target are scanned again.  Given how much faster scanning
+can be, it should be negligible to do such "extra" scanning assuming that
+unchanged results do not trigger recompilations.
+
+BMI Modification Optimization
+-----------------------------
+
+Currently, as with object files, compilers always update a BMI file even if
+the contents have not changed.  Because modules increase the potential scope
+of "non-changes" to cause (conceptually) unnecessary recompilation, it might
+be useful to avoid recompilation of module consumers if the BMI file has not
+changed.  This might be achieved by wrapping the compilation to juggle the BMI
+through a ``cmake -E copy_if_different`` pass with ``ninja``'s ``restat = 1``
+feature to avoid recompiling importers if the BMI file doesn't actually
+change.
+
+.. _`easier-source-specification`:
+
+Easier Source Specification
+---------------------------
+
+The initial implementation of CMake's module support had used the "just list
+sources; CMake will figure it out" pattern.  However, this ran into issues
+related to other metadata requirements.  These were discovered while
+implementing CMake support beyond just building the modules-using code.
+
+Conflicts with `Separate BMI Generation <separate-bmi-generation_>`__ on a
+single target, as that requires knowledge of all BMI-generating rules at
+generate time.
+
+.. _`separate-bmi-generation`:
+
+Separate BMI Generation
+-----------------------
+
+CMake currently uses a single rule to generate both the BMI and the object
+file for a compilation.  At least Clang supports compiling an object directly
+from the BMI.  This would be beneficial because BMI generation is typically
+faster than compilation and generating the BMI as a separate step allows
+importers to start compiling without waiting for the object to also be
+generated.
+
+This is not supported in the current implementation as only Clang supports
+generating an object directly from the BMI.  Other compilers either do not
+support such a two-phase generation (GCC) or need to start object compilation
+from the source again.
+
+Conflicts with `Easier Source Specification <easier-source-specification_>`__
+on a single target because CMake must know all BMI-generating sources at
+generate time rather than build time to create the two-phase rules.
