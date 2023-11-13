@@ -184,8 +184,6 @@ protected:
   bool StopTimePassed = false;
   // list of test properties (indices concurrent to the test map)
   PropertiesMap Properties;
-  std::map<int, bool> TestRunningMap;
-  std::map<int, bool> TestFinishMap;
   std::map<int, std::string> TestOutput;
   std::vector<std::string>* Passed;
   std::vector<std::string>* Failed;

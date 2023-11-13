@@ -89,11 +89,6 @@ void cmCTestMultiProcessHandler::SetTests(TestMap& tests,
   this->Tests = tests;
   this->Properties = properties;
   this->Total = this->Tests.size();
-  // set test run map to false for all
-  for (auto const& t : this->Tests) {
-    this->TestRunningMap[t.first] = false;
-    this->TestFinishMap[t.first] = false;
-  }
   if (!this->CTest->GetShowOnly()) {
     this->ReadCostData();
     this->HasCycles = !this->CheckCycles();
@@ -174,7 +169,6 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
 
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "test " << test << "\n", this->Quiet);
-  this->TestRunningMap[test] = true; // mark the test as running
   // now remove the test itself
   this->EraseTest(test);
   this->RunningCount += this->GetProcessorsUsed(test);
@@ -662,8 +656,6 @@ void cmCTestMultiProcessHandler::FinishTestProcess(
     t.second.erase(test);
   }
 
-  this->TestFinishMap[test] = true;
-  this->TestRunningMap[test] = false;
   this->WriteCheckpoint(test);
   this->DeallocateResources(test);
   this->UnlockResources(test);
@@ -1393,8 +1385,6 @@ void cmCTestMultiProcessHandler::RemoveTest(int index)
 {
   this->EraseTest(index);
   this->Properties.erase(index);
-  this->TestRunningMap[index] = false;
-  this->TestFinishMap[index] = true;
   this->Completed++;
 }
 
