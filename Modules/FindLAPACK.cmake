@@ -463,7 +463,7 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
     set(_lapack_flexiblas_lib "flexiblas")
 
     if(_lapack_sizeof_integer EQUAL 8)
-      string(APPEND _lapack_openblas_lib "64")
+      string(APPEND _lapack_flexiblas_lib "64")
     endif()
 
     check_lapack_libraries(
@@ -488,9 +488,9 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
 
     if(_lapack_sizeof_integer EQUAL 8)
       if(MINGW)
-        string(APPEND _lapack_flexiblas_lib "_64")
+        string(APPEND _lapack_openblas_lib "_64")
       else()
-        string(APPEND _lapack_flexiblas_lib "64")
+        string(APPEND _lapack_openblas_lib "64")
       endif()
     endif()
 
