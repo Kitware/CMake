@@ -2397,8 +2397,15 @@ int cmake::ActualConfigure()
   cmSystemTools::RemoveADirectory(redirectsDir);
   if (!cmSystemTools::MakeDirectory(redirectsDir)) {
     cmSystemTools::Error(
-      "Unable to (re)create the private pkgRedirects directory:\n" +
-      redirectsDir);
+      cmStrCat("Unable to (re)create the private pkgRedirects directory:\n  ",
+               redirectsDir,
+               "\n"
+               "This may be caused by not having read/write access to "
+               "the build directory.\n"
+               "Try specifying a location with read/write access like:\n"
+               "  cmake -B build\n"
+               "If using a CMake presets file, ensure that preset parameter\n"
+               "'binaryDir' expands to a writable directory.\n"));
     return -1;
   }
   this->AddCacheEntry("CMAKE_FIND_PACKAGE_REDIRECTS_DIR", redirectsDir,
