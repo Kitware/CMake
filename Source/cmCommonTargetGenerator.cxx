@@ -200,6 +200,9 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories(
     for (cmGeneratorTarget const* target : cli->GetObjectLibrariesLinked()) {
       addLinkedTarget(target);
     }
+    for (cmGeneratorTarget const* target : cli->GetExternalObjectTargets()) {
+      addLinkedTarget(target);
+    }
   }
   return dirs;
 }

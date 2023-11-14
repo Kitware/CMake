@@ -100,7 +100,6 @@ private:
   void AddLinkObject(cmLinkItem const& item);
   void AddVarLinkEntries(size_t depender_index, const char* value);
   void AddDirectLinkEntries();
-  void AddTargetObjectEntries();
   template <typename T>
   void AddLinkEntries(size_t depender_index, std::vector<T> const& libs);
   void AddLinkObjects(std::vector<cmLinkItem> const& objs);
