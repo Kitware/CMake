@@ -435,6 +435,8 @@ endfunction()
 
 macro(_OPENMP_SET_VERSION_BY_SPEC_DATE LANG)
   set(OpenMP_SPEC_DATE_MAP
+    "202111=5.2"
+    "202011=5.1"
     # Preview versions
     "201611=5.0" # OpenMP 5.0 preview 1
     # Combined versions, 2.5 onwards
