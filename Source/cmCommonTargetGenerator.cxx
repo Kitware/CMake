@@ -170,15 +170,8 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories(
   cmGlobalCommonGenerator* const gg = this->GlobalCommonGenerator;
   if (cmComputeLinkInformation* cli =
         this->GeneratorTarget->GetLinkInformation(config)) {
-    std::vector<cmGeneratorTarget const*> targets;
-    for (auto const& item : cli->GetItems()) {
-      targets.push_back(item.Target);
-    }
-    for (auto const* target : cli->GetObjectLibrariesLinked()) {
-      targets.push_back(target);
-    }
-
-    for (auto const* linkee : targets) {
+    auto addLinkedTarget = [this, &lang, &config, &dirs, &emitted,
+                            gg](cmGeneratorTarget const* linkee) {
       if (linkee &&
           !linkee->IsImported()
           // Skip targets that build after this one in a static lib cycle.
@@ -200,6 +193,12 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories(
         }
         dirs.push_back(std::move(di));
       }
+    };
+    for (auto const& item : cli->GetItems()) {
+      addLinkedTarget(item.Target);
+    }
+    for (cmGeneratorTarget const* target : cli->GetObjectLibrariesLinked()) {
+      addLinkedTarget(target);
     }
   }
   return dirs;
