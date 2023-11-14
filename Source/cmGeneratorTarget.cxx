@@ -1833,32 +1833,31 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
   AddInterfaceEntries(this, config, "INTERFACE_SOURCES", std::string(),
                       &dagChecker, linkInterfaceSourcesEntries,
                       IncludeRuntimeInterface::No, LinkInterfaceFor::Usage);
-  std::vector<std::string>::size_type numFilesBefore = files.size();
   bool contextDependentInterfaceSources = processSources(
     this, linkInterfaceSourcesEntries, files, uniqueSrcs, debugSources);
 
   // Collect TARGET_OBJECTS of direct object link-dependencies.
   bool contextDependentObjects = false;
-  std::vector<std::string>::size_type numFilesBefore2 = files.size();
   if (this->GetType() != cmStateEnums::OBJECT_LIBRARY) {
     EvaluatedTargetPropertyEntries linkObjectsEntries;
     AddObjectEntries(this, config, &dagChecker, linkObjectsEntries);
     contextDependentObjects = processSources(this, linkObjectsEntries, files,
                                              uniqueSrcs, debugSources);
+    // Note that for imported targets or multi-config generators supporting
+    // cross-config builds the paths to the object files must be per-config,
+    // so contextDependentObjects will be true here even if object libraries
+    // are specified without per-config generator expressions.
   }
 
   // Collect this target's file sets.
-  std::vector<std::string>::size_type numFilesBefore3 = files.size();
   EvaluatedTargetPropertyEntries fileSetEntries;
   AddFileSetEntries(this, config, &dagChecker, fileSetEntries);
   bool contextDependentFileSets =
     processSources(this, fileSetEntries, files, uniqueSrcs, debugSources);
 
   // Determine if sources are context-dependent or not.
-  if (!contextDependentDirectSources &&
-      !(contextDependentInterfaceSources && numFilesBefore < files.size()) &&
-      !(contextDependentObjects && numFilesBefore2 < files.size()) &&
-      !(contextDependentFileSets && numFilesBefore3 < files.size())) {
+  if (!contextDependentDirectSources && !contextDependentInterfaceSources &&
+      !contextDependentObjects && !contextDependentFileSets) {
     this->SourcesAreContextDependent = Tribool::False;
   } else {
     this->SourcesAreContextDependent = Tribool::True;
