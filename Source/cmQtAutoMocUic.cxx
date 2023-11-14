@@ -333,6 +333,13 @@ public:
                          std::vector<std::string> const& command,
                          std::string const& output) const;
 
+    /*
+     * Check if command line exceeds maximum length supported by OS
+     * (if on Windows) and switch to using a response file instead.
+     */
+    void MaybeWriteResponseFile(std::string const& outputFile,
+                                std::vector<std::string>& cmd) const;
+
     /** @brief Run an external process. Use only during Process() call!  */
     bool RunProcess(GenT genType, cmWorkerPool::ProcessResultT& result,
                     std::vector<std::string> const& command,
@@ -498,10 +505,6 @@ public:
 
   protected:
     ParseCacheT::FileHandleT CacheEntry;
-
-  private:
-    void MaybeWriteMocResponseFile(std::string const& outputFile,
-                                   std::vector<std::string>& cmd) const;
   };
 
   /** uic compiles a file.  */
@@ -793,6 +796,51 @@ void cmQtAutoMocUicT::JobT::LogCommandError(
 {
   this->Gen()->AbortError();
   this->Gen()->Log().ErrorCommand(genType, message, command, output);
+}
+
+/*
+ * Check if command line exceeds maximum length supported by OS
+ * (if on Windows) and switch to using a response file instead.
+ */
+void cmQtAutoMocUicT::JobT::MaybeWriteResponseFile(
+  std::string const& outputFile, std::vector<std::string>& cmd) const
+{
+#ifdef _WIN32
+  // Ensure cmd is less than CommandLineLengthMax characters
+  size_t commandLineLength = cmd.size(); // account for separating spaces
+  for (std::string const& str : cmd) {
+    commandLineLength += str.length();
+  }
+  if (commandLineLength >= CommandLineLengthMax) {
+    // Command line exceeds maximum size allowed by OS
+    // => create response file
+    std::string const responseFile = cmStrCat(outputFile, ".rsp");
+
+    cmsys::ofstream fout(responseFile.c_str());
+    if (!fout) {
+      this->LogError(
+        GenT::MOC,
+        cmStrCat("AUTOMOC was unable to create a response file at\n  ",
+                 this->MessagePath(responseFile)));
+      return;
+    }
+
+    auto it = cmd.begin();
+    while (++it != cmd.end()) {
+      fout << *it << "\n";
+    }
+    fout.close();
+
+    // Keep all but executable
+    cmd.resize(1);
+
+    // Specify response file
+    cmd.emplace_back(cmStrCat('@', responseFile));
+  }
+#else
+  static_cast<void>(outputFile);
+  static_cast<void>(cmd);
+#endif
 }
 
 bool cmQtAutoMocUicT::JobT::RunProcess(GenT genType,
@@ -2034,7 +2082,7 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
     // Add source file
     cmd.push_back(sourceFile);
 
-    MaybeWriteMocResponseFile(outputFile, cmd);
+    MaybeWriteResponseFile(outputFile, cmd);
   }
 
   // Execute moc command
@@ -2078,51 +2126,6 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
     this->CacheEntry->Moc.Depends =
       this->Gen()->dependenciesFromDepFile(depfile.c_str());
   }
-}
-
-/*
- * Check if command line exceeds maximum length supported by OS
- * (if on Windows) and switch to using a response file instead.
- */
-void cmQtAutoMocUicT::JobCompileMocT::MaybeWriteMocResponseFile(
-  std::string const& outputFile, std::vector<std::string>& cmd) const
-{
-#ifdef _WIN32
-  // Ensure cmd is less than CommandLineLengthMax characters
-  size_t commandLineLength = cmd.size(); // account for separating spaces
-  for (std::string const& str : cmd) {
-    commandLineLength += str.length();
-  }
-  if (commandLineLength >= CommandLineLengthMax) {
-    // Command line exceeds maximum size allowed by OS
-    // => create response file
-    std::string const responseFile = cmStrCat(outputFile, ".rsp");
-
-    cmsys::ofstream fout(responseFile.c_str());
-    if (!fout) {
-      this->LogError(
-        GenT::MOC,
-        cmStrCat("AUTOMOC was unable to create a response file at\n  ",
-                 this->MessagePath(responseFile)));
-      return;
-    }
-
-    auto it = cmd.begin();
-    while (++it != cmd.end()) {
-      fout << *it << "\n";
-    }
-    fout.close();
-
-    // Keep all but executable
-    cmd.resize(1);
-
-    // Specify response file
-    cmd.emplace_back(cmStrCat('@', responseFile));
-  }
-#else
-  static_cast<void>(outputFile);
-  static_cast<void>(cmd);
-#endif
 }
 
 void cmQtAutoMocUicT::JobCompileUicT::Process()
