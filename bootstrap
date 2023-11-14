@@ -364,6 +364,7 @@ CMAKE_CXX_SOURCES="\
   cmFindFileCommand \
   cmFindLibraryCommand \
   cmFindPackageCommand \
+  cmFindPackageStack \
   cmFindPathCommand \
   cmFindProgramCommand \
   cmForEachCommand \

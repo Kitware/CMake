@@ -444,6 +444,7 @@ Variables that Control the Build
    /variable/CMAKE_EXE_LINKER_FLAGS_CONFIG
    /variable/CMAKE_EXE_LINKER_FLAGS_CONFIG_INIT
    /variable/CMAKE_EXE_LINKER_FLAGS_INIT
+   /variable/CMAKE_EXPORT_FIND_PACKAGE_NAME
    /variable/CMAKE_FOLDER
    /variable/CMAKE_Fortran_FORMAT
    /variable/CMAKE_Fortran_MODULE_DIRECTORY

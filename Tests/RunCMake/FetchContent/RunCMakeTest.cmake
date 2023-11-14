@@ -19,6 +19,10 @@ run_cmake(MakeAvailableTwice)
 run_cmake(MakeAvailableUndeclared)
 run_cmake(VerifyHeaderSet)
 
+run_cmake_with_options(FindDependencyExport
+  -D "CMAKE_PROJECT_TOP_LEVEL_INCLUDES=${CMAKE_CURRENT_LIST_DIR}/FindDependencyExportDP.cmake"
+)
+
 run_cmake_with_options(ManualSourceDirectory
   -D "FETCHCONTENT_SOURCE_DIR_WITHPROJECT=${CMAKE_CURRENT_LIST_DIR}/WithProject"
 )

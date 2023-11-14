@@ -558,6 +558,8 @@ add_library(
   cmFindLibraryCommand.h
   cmFindPackageCommand.cxx
   cmFindPackageCommand.h
+  cmFindPackageStack.cxx
+  cmFindPackageStack.h
   cmFindPathCommand.cxx
   cmFindPathCommand.h
   cmFindProgramCommand.cxx

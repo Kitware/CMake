@@ -110,11 +110,6 @@ void cmExportInstallAndroidMKGenerator::GenerateImportPrefix(std::ostream&)
 {
 }
 
-void cmExportInstallAndroidMKGenerator::GenerateRequiredCMakeVersion(
-  std::ostream&, const char*)
-{
-}
-
 void cmExportInstallAndroidMKGenerator::CleanupTemporaryVariables(
   std::ostream&)
 {

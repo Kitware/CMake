@@ -76,9 +76,6 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
   // Compute the relative import prefix for the file
   this->GenerateImportPrefix(os);
 
-  bool require2_8_12 = false;
-  bool require3_0_0 = false;
-  bool require3_1_0 = false;
   bool requiresConfigFiles = false;
   // Create all the imported targets.
   for (cmTargetExport* te : allTargets) {
@@ -147,16 +144,16 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
       if (this->PopulateInterfaceLinkLibrariesProperty(
             gt, cmGeneratorExpression::InstallInterface, properties) &&
           !this->ExportOld) {
-        require2_8_12 = true;
+        this->SetRequiredCMakeVersion(2, 8, 12);
       }
     }
     if (targetType == cmStateEnums::INTERFACE_LIBRARY) {
-      require3_0_0 = true;
+      this->SetRequiredCMakeVersion(3, 0, 0);
     }
     if (gt->GetProperty("INTERFACE_SOURCES")) {
       // We can only generate INTERFACE_SOURCES in CMake 3.3, but CMake 3.1
       // can consume them.
-      require3_1_0 = true;
+      this->SetRequiredCMakeVersion(3, 1, 0);
     }
 
     this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE", gt,
@@ -167,14 +164,6 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     this->GenerateInterfaceProperties(gt, os, properties);
 
     this->GenerateTargetFileSets(gt, os, te);
-  }
-
-  if (require3_1_0) {
-    this->GenerateRequiredCMakeVersion(os, "3.1.0");
-  } else if (require3_0_0) {
-    this->GenerateRequiredCMakeVersion(os, "3.0.0");
-  } else if (require2_8_12) {
-    this->GenerateRequiredCMakeVersion(os, "2.8.12");
   }
 
   this->LoadConfigFiles(os);

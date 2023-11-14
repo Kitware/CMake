@@ -49,13 +49,12 @@ protected:
     cmGeneratorTarget const* target,
     ImportPropertyMap const& properties) override;
   void GenerateMissingTargetsCheckCode(std::ostream& os) override;
+  void GenerateFindDependencyCalls(std::ostream&) override {}
   void GenerateInterfaceProperties(
     cmGeneratorTarget const* target, std::ostream& os,
     const ImportPropertyMap& properties) override;
   void GenerateImportPrefix(std::ostream& os) override;
   void LoadConfigFiles(std::ostream&) override;
-  void GenerateRequiredCMakeVersion(std::ostream& os,
-                                    const char* versionString) override;
   void CleanupTemporaryVariables(std::ostream&) override;
   void GenerateImportedFileCheckLoop(std::ostream& os) override;
   void GenerateImportedFileChecksCode(

@@ -1,0 +1,30 @@
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/CMake)
+
+find_package(P1)
+find_package(P2)
+find_package(P9)
+find_package(P4)
+find_package(P3)
+
+add_library(mylib INTERFACE)
+target_link_libraries(mylib INTERFACE l1 l2 l3 l4 l9)
+
+install(TARGETS mylib EXPORT mytargets)
+export(SETUP mytargets
+  PACKAGE_DEPENDENCY P1
+    ENABLED OFF
+  PACKAGE_DEPENDENCY P3
+    ENABLED AUTO
+  PACKAGE_DEPENDENCY P2
+    ENABLED ON
+    EXTRA_ARGS VERSION 1.0
+  PACKAGE_DEPENDENCY P5
+    ENABLED FALSE
+  PACKAGE_DEPENDENCY P8
+    ENABLED TRUE
+  PACKAGE_DEPENDENCY P6
+    ENABLED 1
+  PACKAGE_DEPENDENCY P7
+    ENABLED AUTO
+  )
+export(EXPORT mytargets EXPORT_PACKAGE_DEPENDENCIES FILE mytargets.cmake)

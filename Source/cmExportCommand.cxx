@@ -8,6 +8,7 @@
 
 #include <cm/memory>
 #include <cm/optional>
+#include <cmext/algorithm>
 #include <cmext/string_view>
 
 #include "cmsys/RegularExpression.hxx"
@@ -24,10 +25,12 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmPolicies.h"
+#include "cmRange.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 
 #if defined(__HAIKU__)
 #  include <FindDirectory.h>
@@ -66,6 +69,9 @@ bool cmExportCommand(std::vector<std::string> const& args,
     std::string CxxModulesDirectory;
     bool Append = false;
     bool ExportOld = false;
+
+    std::vector<std::vector<std::string>> PackageDependencyArgs;
+    bool ExportPackageDependencies = false;
   };
 
   auto parser =
@@ -75,7 +81,12 @@ bool cmExportCommand(std::vector<std::string> const& args,
       .Bind("CXX_MODULES_DIRECTORY"_s, &Arguments::CxxModulesDirectory);
 
   if (args[0] == "EXPORT") {
-    parser.Bind("EXPORT"_s, &Arguments::ExportSetName);
+    parser.Bind("EXPORT"_s, &Arguments::ExportSetName)
+      .Bind("EXPORT_PACKAGE_DEPENDENCIES"_s,
+            &Arguments::ExportPackageDependencies);
+  } else if (args[0] == "SETUP") {
+    parser.Bind("SETUP"_s, &Arguments::ExportSetName);
+    parser.Bind("PACKAGE_DEPENDENCY"_s, &Arguments::PackageDependencyArgs);
   } else {
     parser.Bind("TARGETS"_s, &Arguments::Targets);
     parser.Bind("ANDROID_MK"_s, &Arguments::AndroidMKFile);
@@ -89,6 +100,66 @@ bool cmExportCommand(std::vector<std::string> const& args,
   if (!unknownArgs.empty()) {
     status.SetError("Unknown argument: \"" + unknownArgs.front() + "\".");
     return false;
+  }
+
+  if (args[0] == "SETUP") {
+    cmMakefile& mf = status.GetMakefile();
+    cmGlobalGenerator* gg = mf.GetGlobalGenerator();
+
+    cmExportSetMap& setMap = gg->GetExportSets();
+    auto& exportSet = setMap[arguments.ExportSetName];
+
+    struct PackageDependencyArguments
+    {
+      std::string Enabled;
+      ArgumentParser::MaybeEmpty<std::vector<std::string>> ExtraArgs;
+    };
+
+    auto packageDependencyParser =
+      cmArgumentParser<PackageDependencyArguments>{}
+        .Bind("ENABLED"_s, &PackageDependencyArguments::Enabled)
+        .Bind("EXTRA_ARGS"_s, &PackageDependencyArguments::ExtraArgs);
+
+    for (auto const& packageDependencyArgs : arguments.PackageDependencyArgs) {
+      if (packageDependencyArgs.empty()) {
+        continue;
+      }
+
+      PackageDependencyArguments const packageDependencyArguments =
+        packageDependencyParser.Parse(
+          cmMakeRange(packageDependencyArgs).advance(1), &unknownArgs);
+
+      if (!unknownArgs.empty()) {
+        status.SetError("Unknown argument: \"" + unknownArgs.front() + "\".");
+        return false;
+      }
+
+      auto& packageDependency =
+        exportSet.GetPackageDependencyForSetup(packageDependencyArgs.front());
+
+      if (!packageDependencyArguments.Enabled.empty()) {
+        if (packageDependencyArguments.Enabled == "AUTO") {
+          packageDependency.Enabled =
+            cmExportSet::PackageDependencyExportEnabled::Auto;
+        } else if (cmIsOff(packageDependencyArguments.Enabled)) {
+          packageDependency.Enabled =
+            cmExportSet::PackageDependencyExportEnabled::Off;
+        } else if (cmIsOn(packageDependencyArguments.Enabled)) {
+          packageDependency.Enabled =
+            cmExportSet::PackageDependencyExportEnabled::On;
+        } else {
+          status.SetError(
+            cmStrCat("Invalid enable setting for package dependency: \"",
+                     packageDependencyArguments.Enabled, "\""));
+          return false;
+        }
+      }
+
+      cm::append(packageDependency.ExtraArguments,
+                 packageDependencyArguments.ExtraArgs);
+    }
+
+    return true;
   }
 
   std::string fname;
@@ -224,6 +295,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
     ebfg->SetTargets(targets);
   }
   ebfg->SetExportOld(arguments.ExportOld);
+  ebfg->SetExportPackageDependencies(arguments.ExportPackageDependencies);
 
   // Compute the set of configurations exported.
   std::vector<std::string> configurationTypes =

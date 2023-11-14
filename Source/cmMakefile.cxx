@@ -302,6 +302,11 @@ cmListFileBacktrace cmMakefile::GetBacktrace() const
   return this->Backtrace;
 }
 
+cmFindPackageStack cmMakefile::GetFindPackageStack() const
+{
+  return this->FindPackageStack;
+}
+
 void cmMakefile::PrintCommandTrace(cmListFileFunction const& lff,
                                    cmListFileBacktrace const& bt,
                                    CommandMissingFromStack missing) const
@@ -4769,6 +4774,36 @@ cmMakefile::MacroPushPop::MacroPushPop(cmMakefile* mf,
 cmMakefile::MacroPushPop::~MacroPushPop()
 {
   this->Makefile->PopMacroScope(this->ReportError);
+}
+
+cmMakefile::FindPackageStackRAII::FindPackageStackRAII(cmMakefile* mf,
+                                                       std::string const& name)
+  : Makefile(mf)
+{
+  this->Makefile->FindPackageStack =
+    this->Makefile->FindPackageStack.Push(cmFindPackageCall{
+      name,
+      this->Makefile->FindPackageStackNextIndex,
+    });
+  this->Makefile->FindPackageStackNextIndex++;
+}
+
+cmMakefile::FindPackageStackRAII::~FindPackageStackRAII()
+{
+  this->Makefile->FindPackageStackNextIndex =
+    this->Makefile->FindPackageStack.Top().Index + 1;
+  this->Makefile->FindPackageStack = this->Makefile->FindPackageStack.Pop();
+
+  if (!this->Makefile->FindPackageStack.Empty()) {
+    auto top = this->Makefile->FindPackageStack.Top();
+    this->Makefile->FindPackageStack = this->Makefile->FindPackageStack.Pop();
+
+    top.Index = this->Makefile->FindPackageStackNextIndex;
+    this->Makefile->FindPackageStackNextIndex++;
+
+    this->Makefile->FindPackageStack =
+      this->Makefile->FindPackageStack.Push(top);
+  }
 }
 
 cmMakefile::DebugFindPkgRAII::DebugFindPkgRAII(cmMakefile* mf,

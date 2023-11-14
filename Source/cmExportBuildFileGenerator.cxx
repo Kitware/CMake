@@ -76,7 +76,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
     }
 
     if (generatedInterfaceRequired) {
-      this->GenerateRequiredCMakeVersion(os, "3.0.0");
+      this->SetRequiredCMakeVersion(3, 0, 0);
     }
     this->GenerateExpectedTargetsCode(os, expectedTargets);
   }

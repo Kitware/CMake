@@ -15,6 +15,7 @@
 #include "cmVersion.h"
 #include "cmVersionConfig.h"
 
+class cmExportSet;
 class cmFileSet;
 class cmGeneratorTarget;
 class cmLocalGenerator;
@@ -61,6 +62,11 @@ public:
       error.  */
   bool GenerateImportFile();
 
+  void SetExportPackageDependencies(bool exportPackageDependencies)
+  {
+    this->ExportPackageDependencies = exportPackageDependencies;
+  }
+
 protected:
   using ImportPropertyMap = std::map<std::string, std::string>;
 
@@ -88,6 +94,7 @@ protected:
     const std::set<std::string>& importedLocations);
   virtual void GenerateImportedFileCheckLoop(std::ostream& os);
   virtual void GenerateMissingTargetsCheckCode(std::ostream& os);
+  virtual void GenerateFindDependencyCalls(std::ostream& os);
 
   virtual void GenerateExpectedTargetsCode(std::ostream& os,
                                            const std::string& expectedTargets);
@@ -173,9 +180,6 @@ protected:
     std::string& input, cmGeneratorTarget const* target,
     FreeTargetsReplace replace = NoReplaceFreeTargets);
 
-  virtual void GenerateRequiredCMakeVersion(std::ostream& os,
-                                            const char* versionString);
-
   bool PopulateCxxModuleExportProperties(
     cmGeneratorTarget const* gte, ImportPropertyMap& properties,
     cmGeneratorExpression::PreprocessContext ctx,
@@ -196,6 +200,11 @@ protected:
                                       cmFileSet* fileSet,
                                       cmTargetExport* te) = 0;
 
+  virtual cmExportSet* GetExportSet() const { return nullptr; }
+
+  void SetRequiredCMakeVersion(unsigned int major, unsigned int minor,
+                               unsigned int patch);
+
   // The namespace in which the exports are placed in the generated file.
   std::string Namespace;
 
@@ -215,6 +224,14 @@ protected:
   std::set<cmGeneratorTarget*> ExportedTargets;
 
   std::vector<std::string> MissingTargets;
+
+  std::set<cmGeneratorTarget const*> ExternalTargets;
+
+  unsigned int RequiredCMakeVersionMajor = 2;
+  unsigned int RequiredCMakeVersionMinor = 8;
+  unsigned int RequiredCMakeVersionPatch = 3;
+
+  bool ExportPackageDependencies = false;
 
 private:
   void PopulateInterfaceProperty(const std::string&, const std::string&,
