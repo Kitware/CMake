@@ -1162,7 +1162,7 @@ void cmComputeLinkInformation::AddItem(LinkEntry const& entry)
         this->AddItem(BT<std::string>(libName, item.Backtrace));
       }
     } else if (tgt->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-      this->Items.emplace_back(entry.Item, ItemIsPath::No, entry.Target);
+      this->Items.emplace_back(item, ItemIsPath::No, tgt);
     } else if (this->GlobalGenerator->IsXcode() &&
                !tgt->GetImportedXcFrameworkPath(config).empty()) {
       this->Items.emplace_back(
