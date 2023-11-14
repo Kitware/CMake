@@ -171,7 +171,6 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories(
   cmGlobalCommonGenerator* const gg = this->GlobalCommonGenerator;
   if (cmComputeLinkInformation* cli =
         this->GeneratorTarget->GetLinkInformation(config)) {
-    std::vector<cmGeneratorTarget const*> targets;
     for (auto const& item : cli->GetItems()) {
       auto const* linkee = item.Target;
       if (linkee &&
