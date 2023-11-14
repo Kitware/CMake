@@ -131,7 +131,7 @@ struct BooleanOpNode : public cmGeneratorExpressionNode
   bool ShouldEvaluateNextParameter(const std::vector<std::string>& parameters,
                                    std::string& def_value) const override
   {
-    if (!parameters.empty() && parameters[0] == failureVal) {
+    if (!parameters.empty() && parameters.back() == failureVal) {
       def_value = failureVal;
       return false;
     }
