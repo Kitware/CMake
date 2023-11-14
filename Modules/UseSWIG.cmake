@@ -657,7 +657,7 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     if(NOT ("-dllimport" IN_LIST swig_source_file_flags OR "-dllimport" IN_LIST SWIG_MODULE_${name}_EXTRA_FLAGS))
       # This makes sure that the name used in the generated DllImport
       # matches the library name created by CMake
-      list (APPEND SWIG_MODULE_${name}_EXTRA_FLAGS "-dllimport" "$<TARGET_FILE_PREFIX:${target_name}>$<TARGET_FILE_BASE_NAME:${target_name}>")
+      list (APPEND SWIG_MODULE_${name}_EXTRA_FLAGS "-dllimport" "$<TARGET_FILE_BASE_NAME:${target_name}>")
     endif()
   endif()
   if (SWIG_MODULE_${name}_LANGUAGE STREQUAL "PYTHON" AND NOT SWIG_MODULE_${name}_NOPROXY)
