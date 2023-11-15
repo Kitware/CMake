@@ -176,14 +176,12 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
   this->EraseTest(test);
   this->RunningCount += this->GetProcessorsUsed(test);
 
-  auto testRun = cm::make_unique<cmCTestRunTest>(*this);
+  auto testRun = cm::make_unique<cmCTestRunTest>(*this, test);
 
   if (this->RepeatMode != cmCTest::Repeat::Never) {
     testRun->SetRepeatMode(this->RepeatMode);
     testRun->SetNumberOfRuns(this->RepeatCount);
   }
-  testRun->SetIndex(test);
-  testRun->SetTestProperties(this->Properties[test]);
   if (this->UseResourceSpec) {
     testRun->SetUseAllocatedResources(true);
     testRun->SetAllocatedResources(this->AllocatedResources[test]);
@@ -1259,9 +1257,7 @@ void cmCTestMultiProcessHandler::PrintOutputAsJson()
     // Don't worry if this fails, we are only showing the test list, not
     // running the tests
     cmWorkingDirectory workdir(p.Directory);
-    cmCTestRunTest testRun(*this);
-    testRun.SetIndex(p.Index);
-    testRun.SetTestProperties(&p);
+    cmCTestRunTest testRun(*this, p.Index);
     testRun.ComputeArguments();
 
     // Skip tests not available in this configuration.
@@ -1298,9 +1294,7 @@ void cmCTestMultiProcessHandler::PrintTestList()
     // running the tests
     cmWorkingDirectory workdir(p.Directory);
 
-    cmCTestRunTest testRun(*this);
-    testRun.SetIndex(p.Index);
-    testRun.SetTestProperties(&p);
+    cmCTestRunTest testRun(*this, p.Index);
     testRun.ComputeArguments(); // logs the command in verbose mode
 
     if (!p.Labels.empty()) // print the labels
