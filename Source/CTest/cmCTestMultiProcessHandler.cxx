@@ -398,21 +398,21 @@ void cmCTestMultiProcessHandler::SetStopTimePassed()
 
 void cmCTestMultiProcessHandler::LockResources(int index)
 {
-  this->LockedResources.insert(
-    this->Properties[index]->LockedResources.begin(),
-    this->Properties[index]->LockedResources.end());
-
-  if (this->Properties[index]->RunSerial) {
+  auto* properties = this->Properties[index];
+  this->LockedResources.insert(properties->LockedResources.begin(),
+                               properties->LockedResources.end());
+  if (properties->RunSerial) {
     this->SerialTestRunning = true;
   }
 }
 
 void cmCTestMultiProcessHandler::UnlockResources(int index)
 {
-  for (std::string const& i : this->Properties[index]->LockedResources) {
+  auto* properties = this->Properties[index];
+  for (std::string const& i : properties->LockedResources) {
     this->LockedResources.erase(i);
   }
-  if (this->Properties[index]->RunSerial) {
+  if (properties->RunSerial) {
     this->SerialTestRunning = false;
   }
 }
