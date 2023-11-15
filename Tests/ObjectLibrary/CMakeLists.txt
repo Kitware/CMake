@@ -77,3 +77,5 @@ add_subdirectory(ExportLanguages)
 add_subdirectory(LinkObjects)
 
 add_subdirectory(Transitive)
+
+add_subdirectory(TransitiveLinkDeps)
