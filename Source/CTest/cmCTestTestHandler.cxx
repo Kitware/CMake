@@ -2233,7 +2233,7 @@ bool cmCTestTestHandler::SetTestsProperties(
           } else if (key == "RESOURCE_LOCK"_s) {
             cmList lval{ val };
 
-            rt.LockedResources.insert(lval.begin(), lval.end());
+            rt.ProjectResources.insert(lval.begin(), lval.end());
           } else if (key == "FIXTURES_SETUP"_s) {
             cmList lval{ val };
 

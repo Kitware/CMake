@@ -401,8 +401,8 @@ void cmCTestMultiProcessHandler::SetStopTimePassed()
 void cmCTestMultiProcessHandler::LockResources(int index)
 {
   auto* properties = this->Properties[index];
-  this->LockedResources.insert(properties->LockedResources.begin(),
-                               properties->LockedResources.end());
+  this->ProjectResourcesLocked.insert(properties->ProjectResources.begin(),
+                                      properties->ProjectResources.end());
   if (properties->RunSerial) {
     this->SerialTestRunning = true;
   }
@@ -411,8 +411,8 @@ void cmCTestMultiProcessHandler::LockResources(int index)
 void cmCTestMultiProcessHandler::UnlockResources(int index)
 {
   auto* properties = this->Properties[index];
-  for (std::string const& i : properties->LockedResources) {
-    this->LockedResources.erase(i);
+  for (std::string const& i : properties->ProjectResources) {
+    this->ProjectResourcesLocked.erase(i);
   }
   if (properties->RunSerial) {
     this->SerialTestRunning = false;
@@ -449,9 +449,9 @@ std::string cmCTestMultiProcessHandler::GetName(int test)
 
 bool cmCTestMultiProcessHandler::StartTest(int test)
 {
-  // Check for locked resources
-  for (std::string const& i : this->Properties[test]->LockedResources) {
-    if (cm::contains(this->LockedResources, i)) {
+  // Check for locked project resources.
+  for (std::string const& i : this->Properties[test]->ProjectResources) {
+    if (cm::contains(this->ProjectResourcesLocked, i)) {
       return false;
     }
   }
@@ -1093,9 +1093,9 @@ static Json::Value DumpCTestProperties(
     properties.append(DumpCTestProperty(
       "REQUIRED_FILES", DumpToJsonArray(testProperties.RequiredFiles)));
   }
-  if (!testProperties.LockedResources.empty()) {
+  if (!testProperties.ProjectResources.empty()) {
     properties.append(DumpCTestProperty(
-      "RESOURCE_LOCK", DumpToJsonArray(testProperties.LockedResources)));
+      "RESOURCE_LOCK", DumpToJsonArray(testProperties.ProjectResources)));
   }
   if (testProperties.RunSerial) {
     properties.append(

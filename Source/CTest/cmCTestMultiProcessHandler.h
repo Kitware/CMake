@@ -194,7 +194,7 @@ protected:
   std::vector<std::string>* Passed;
   std::vector<std::string>* Failed;
   std::vector<std::string> LastTestsFailed;
-  std::set<std::string> LockedResources;
+  std::set<std::string> ProjectResourcesLocked;
   std::map<int,
            std::vector<std::map<std::string, std::vector<ResourceAllocation>>>>
     AllocatedResources;
