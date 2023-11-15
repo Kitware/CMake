@@ -15,6 +15,7 @@
 #include "cmComputeLinkDepends.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmLinkItem.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
@@ -23,6 +24,7 @@
 #include "cmOrderDirectories.h"
 #include "cmPlaceholderExpander.h"
 #include "cmPolicies.h"
+#include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -536,6 +538,12 @@ cmComputeLinkInformation::GetSharedLibrariesLinked() const
   return this->SharedLibrariesLinked;
 }
 
+const std::vector<const cmGeneratorTarget*>&
+cmComputeLinkInformation::GetExternalObjectTargets() const
+{
+  return this->ExternalObjectTargets;
+}
+
 bool cmComputeLinkInformation::Compute()
 {
   // Skip targets that do not link or have link-like information consumers may
@@ -682,6 +690,9 @@ bool cmComputeLinkInformation::Compute()
     this->CMakeInstance->IssueMessage(MessageType::AUTHOR_WARNING, w.str(),
                                       this->Target->GetBacktrace());
   }
+
+  // Record targets referenced by $<TARGET_OBJECTS:...> sources.
+  this->AddExternalObjectTargets();
 
   return true;
 }
@@ -1057,6 +1068,26 @@ cmComputeLinkInformation::GetGroupFeature(std::string const& feature)
     .first->second;
 }
 
+void cmComputeLinkInformation::AddExternalObjectTargets()
+{
+  std::vector<cmSourceFile const*> externalObjects;
+  this->Target->GetExternalObjects(externalObjects, this->Config);
+  std::set<std::string> emitted;
+  for (auto const* externalObject : externalObjects) {
+    std::string const& objLib = externalObject->GetObjectLibrary();
+    if (objLib.empty()) {
+      continue;
+    }
+    if (emitted.insert(objLib).second) {
+      cmLinkItem const& objItem =
+        this->Target->ResolveLinkItem(BT<std::string>(objLib));
+      if (objItem.Target) {
+        this->ExternalObjectTargets.emplace_back(objItem.Target);
+      }
+    }
+  }
+}
+
 void cmComputeLinkInformation::AddImplicitLinkInfo()
 {
   // The link closure lists all languages whose implicit info is needed.
@@ -1162,7 +1193,7 @@ void cmComputeLinkInformation::AddItem(LinkEntry const& entry)
         this->AddItem(BT<std::string>(libName, item.Backtrace));
       }
     } else if (tgt->GetType() == cmStateEnums::OBJECT_LIBRARY) {
-      this->Items.emplace_back(entry.Item, ItemIsPath::No, entry.Target);
+      this->Items.emplace_back(item, ItemIsPath::No, tgt);
     } else if (this->GlobalGenerator->IsXcode() &&
                !tgt->GetImportedXcFrameworkPath(config).empty()) {
       this->Items.emplace_back(

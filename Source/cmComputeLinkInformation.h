@@ -97,6 +97,8 @@ public:
   std::string GetRPathString(bool for_install) const;
   std::string GetChrpathString() const;
   std::set<cmGeneratorTarget const*> const& GetSharedLibrariesLinked() const;
+  std::vector<cmGeneratorTarget const*> const& GetExternalObjectTargets()
+    const;
   std::vector<cmGeneratorTarget const*> const& GetRuntimeDLLs() const
   {
     return this->RuntimeDLLs;
@@ -134,6 +136,7 @@ private:
   std::vector<std::string> XcFrameworkHeaderPaths;
   std::vector<std::string> RuntimeSearchPath;
   std::set<cmGeneratorTarget const*> SharedLibrariesLinked;
+  std::vector<cmGeneratorTarget const*> ExternalObjectTargets;
   std::vector<cmGeneratorTarget const*> RuntimeDLLs;
 
   // Context information.
@@ -220,6 +223,8 @@ private:
   std::unique_ptr<cmOrderDirectories> OrderLinkerSearchPath;
   bool FinishLinkerSearchDirectories();
   void PrintLinkPolicyDiagnosis(std::ostream&);
+
+  void AddExternalObjectTargets();
 
   // Implicit link libraries and directories for linker language.
   void LoadImplicitLinkInfo();
