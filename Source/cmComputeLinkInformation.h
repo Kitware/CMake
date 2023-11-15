@@ -98,6 +98,8 @@ public:
   std::set<cmGeneratorTarget const*> const& GetSharedLibrariesLinked() const;
   std::vector<cmGeneratorTarget const*> const& GetObjectLibrariesLinked()
     const;
+  std::vector<cmGeneratorTarget const*> const& GetExternalObjectTargets()
+    const;
   std::vector<cmGeneratorTarget const*> const& GetRuntimeDLLs() const
   {
     return this->RuntimeDLLs;
@@ -135,6 +137,7 @@ private:
   std::vector<std::string> RuntimeSearchPath;
   std::set<cmGeneratorTarget const*> SharedLibrariesLinked;
   std::vector<cmGeneratorTarget const*> ObjectLibrariesLinked;
+  std::vector<cmGeneratorTarget const*> ExternalObjectTargets;
   std::vector<cmGeneratorTarget const*> RuntimeDLLs;
 
   // Context information.
@@ -218,6 +221,8 @@ private:
   std::unique_ptr<cmOrderDirectories> OrderLinkerSearchPath;
   bool FinishLinkerSearchDirectories();
   void PrintLinkPolicyDiagnosis(std::ostream&);
+
+  void AddExternalObjectTargets();
 
   // Implicit link libraries and directories for linker language.
   void LoadImplicitLinkInfo();
