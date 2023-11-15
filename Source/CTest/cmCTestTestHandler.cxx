@@ -1389,7 +1389,7 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   parallel->SetPassFailVectors(&passed, &failed);
   this->TestResults.clear();
   parallel->SetTestResults(&this->TestResults);
-  parallel->CheckResourcesAvailable();
+  parallel->CheckResourceAvailability();
 
   if (this->CTest->ShouldPrintLabels()) {
     parallel->PrintLabels();

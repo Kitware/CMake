@@ -165,7 +165,7 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
       reason = "Invalid resource spec file";
       forceFail = true;
     } else {
-      this->MultiTestHandler.CheckResourcesAvailable();
+      this->MultiTestHandler.CheckResourceAvailability();
     }
   }
   std::ostringstream outputStream;

@@ -104,7 +104,7 @@ public:
 
   void SetQuiet(bool b) { this->Quiet = b; }
 
-  void CheckResourcesAvailable();
+  void CheckResourceAvailability();
 
 protected:
   // Start the next test or tests as many as are allowed by
@@ -151,7 +151,7 @@ protected:
   void LockResources(int index);
   void UnlockResources(int index);
 
-  enum class ResourceAllocationError
+  enum class ResourceAvailabilityError
   {
     NoResourceType,
     InsufficientResources,
@@ -163,7 +163,7 @@ protected:
     int index,
     std::map<std::string, std::vector<cmCTestBinPackerAllocation>>&
       allocations,
-    std::map<std::string, ResourceAllocationError>* errors = nullptr);
+    std::map<std::string, ResourceAvailabilityError>* errors = nullptr);
   void DeallocateResources(int index);
   bool AllResourcesAvailable();
   bool InitResourceAllocator(std::string& error);
@@ -198,8 +198,8 @@ protected:
   std::map<int,
            std::vector<std::map<std::string, std::vector<ResourceAllocation>>>>
     AllocatedResources;
-  std::map<int, std::map<std::string, ResourceAllocationError>>
-    ResourceAllocationErrors;
+  std::map<int, std::map<std::string, ResourceAvailabilityError>>
+    ResourceAvailabilityErrors;
   cmCTestResourceAllocator ResourceAllocator;
   std::vector<cmCTestTestHandler::cmCTestTestResult>* TestResults;
   size_t ParallelLevel; // max number of process that can be run at once

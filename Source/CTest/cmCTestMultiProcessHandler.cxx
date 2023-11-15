@@ -196,18 +196,18 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
   // working directory because FinishTestProcess() will try to unlock them
   this->LockResources(test);
 
-  if (!this->ResourceAllocationErrors[test].empty()) {
+  if (!this->ResourceAvailabilityErrors[test].empty()) {
     std::ostringstream e;
     e << "Insufficient resources for test " << this->Properties[test]->Name
       << ":\n\n";
-    for (auto const& it : this->ResourceAllocationErrors[test]) {
+    for (auto const& it : this->ResourceAvailabilityErrors[test]) {
       switch (it.second) {
-        case ResourceAllocationError::NoResourceType:
+        case ResourceAvailabilityError::NoResourceType:
           e << "  Test requested resources of type '" << it.first
             << "' which does not exist\n";
           break;
 
-        case ResourceAllocationError::InsufficientResources:
+        case ResourceAvailabilityError::InsufficientResources:
           e << "  Test requested resources of type '" << it.first
             << "' in the following amounts:\n";
           for (auto const& group : this->Properties[test]->ResourceGroups) {
@@ -280,7 +280,7 @@ bool cmCTestMultiProcessHandler::AllocateResources(int index)
 bool cmCTestMultiProcessHandler::TryAllocateResources(
   int index,
   std::map<std::string, std::vector<cmCTestBinPackerAllocation>>& allocations,
-  std::map<std::string, ResourceAllocationError>* errors)
+  std::map<std::string, ResourceAvailabilityError>* errors)
 {
   allocations.clear();
 
@@ -300,7 +300,7 @@ bool cmCTestMultiProcessHandler::TryAllocateResources(
   for (auto& it : allocations) {
     if (!availableResources.count(it.first)) {
       if (errors) {
-        (*errors)[it.first] = ResourceAllocationError::NoResourceType;
+        (*errors)[it.first] = ResourceAvailabilityError::NoResourceType;
         result = false;
       } else {
         return false;
@@ -308,7 +308,7 @@ bool cmCTestMultiProcessHandler::TryAllocateResources(
     } else if (!cmAllocateCTestResourcesRoundRobin(
                  availableResources.at(it.first), it.second)) {
       if (errors) {
-        (*errors)[it.first] = ResourceAllocationError::InsufficientResources;
+        (*errors)[it.first] = ResourceAvailabilityError::InsufficientResources;
         result = false;
       } else {
         return false;
@@ -355,14 +355,14 @@ bool cmCTestMultiProcessHandler::AllResourcesAvailable()
   return true;
 }
 
-void cmCTestMultiProcessHandler::CheckResourcesAvailable()
+void cmCTestMultiProcessHandler::CheckResourceAvailability()
 {
   if (this->UseResourceSpec) {
     for (auto const& t : this->PendingTests) {
       std::map<std::string, std::vector<cmCTestBinPackerAllocation>>
         allocations;
       this->TryAllocateResources(t.first, allocations,
-                                 &this->ResourceAllocationErrors[t.first]);
+                                 &this->ResourceAvailabilityErrors[t.first]);
     }
   }
 }
@@ -455,7 +455,7 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
   }
 
   // Allocate resources
-  if (this->ResourceAllocationErrors[test].empty() &&
+  if (this->ResourceAvailabilityErrors[test].empty() &&
       !this->AllocateResources(test)) {
     this->DeallocateResources(test);
     return false;
