@@ -164,18 +164,7 @@ void cmCTestMultiProcessHandler::RunTests()
 
 void cmCTestMultiProcessHandler::StartTestProcess(int test)
 {
-  if (this->HaveAffinity && this->Properties[test]->WantAffinity) {
-    size_t needProcessors = this->GetProcessorsUsed(test);
-    assert(needProcessors <= this->ProcessorsAvailable.size());
-    std::vector<size_t> affinity;
-    affinity.reserve(needProcessors);
-    for (size_t i = 0; i < needProcessors; ++i) {
-      auto p = this->ProcessorsAvailable.begin();
-      affinity.push_back(*p);
-      this->ProcessorsAvailable.erase(p);
-    }
-    this->Properties[test]->Affinity = std::move(affinity);
-  }
+  this->LockResources(test);
 
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "test " << test << "\n", this->Quiet);
@@ -201,10 +190,6 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
       testRun->AddFailedDependency(f);
     }
   }
-
-  // Always lock the resources we'll be using, even if we fail to set the
-  // working directory because FinishTestProcess() will try to unlock them
-  this->LockResources(test);
 
   if (!this->ResourceAvailabilityErrors[test].empty()) {
     std::ostringstream e;
@@ -414,19 +399,41 @@ void cmCTestMultiProcessHandler::SetStopTimePassed()
 void cmCTestMultiProcessHandler::LockResources(int index)
 {
   auto* properties = this->Properties[index];
+
   this->ProjectResourcesLocked.insert(properties->ProjectResources.begin(),
                                       properties->ProjectResources.end());
+
   if (properties->RunSerial) {
     this->SerialTestRunning = true;
+  }
+
+  if (this->HaveAffinity && properties->WantAffinity) {
+    size_t needProcessors = this->GetProcessorsUsed(index);
+    assert(needProcessors <= this->ProcessorsAvailable.size());
+    std::vector<size_t> affinity;
+    affinity.reserve(needProcessors);
+    for (size_t i = 0; i < needProcessors; ++i) {
+      auto p = this->ProcessorsAvailable.begin();
+      affinity.push_back(*p);
+      this->ProcessorsAvailable.erase(p);
+    }
+    properties->Affinity = std::move(affinity);
   }
 }
 
 void cmCTestMultiProcessHandler::UnlockResources(int index)
 {
   auto* properties = this->Properties[index];
+
+  for (auto p : properties->Affinity) {
+    this->ProcessorsAvailable.insert(p);
+  }
+  properties->Affinity.clear();
+
   for (std::string const& i : properties->ProjectResources) {
     this->ProjectResourcesLocked.erase(i);
   }
+
   if (properties->RunSerial) {
     this->SerialTestRunning = false;
   }
@@ -685,11 +692,6 @@ void cmCTestMultiProcessHandler::FinishTestProcess(
   this->DeallocateResources(test);
   this->UnlockResources(test);
   this->RunningCount -= this->GetProcessorsUsed(test);
-
-  for (auto p : properties->Affinity) {
-    this->ProcessorsAvailable.insert(p);
-  }
-  properties->Affinity.clear();
 
   runner.reset();
 
