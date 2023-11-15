@@ -256,6 +256,12 @@ bool cmCTestMultiProcessHandler::AllocateResources(int index)
     return true;
   }
 
+  // If the test needs unavailable resources then do not allocate anything
+  // because it will never run.  We will issue the recorded errors instead.
+  if (!this->ResourceAvailabilityErrors[index].empty()) {
+    return true;
+  }
+
   std::map<std::string, std::vector<cmCTestBinPackerAllocation>> allocations;
   if (!this->TryAllocateResources(index, allocations)) {
     return false;
@@ -454,10 +460,7 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
     }
   }
 
-  // Allocate resources
-  if (this->ResourceAvailabilityErrors[test].empty() &&
-      !this->AllocateResources(test)) {
-    this->DeallocateResources(test);
+  if (!this->AllocateResources(test)) {
     return false;
   }
 
