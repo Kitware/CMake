@@ -1,0 +1,2 @@
+mylib location: [^
+]*/Tests/RunCMake/XcFramework/export-macos-build/lib/mylib\.xcframework/macos-(arm64|x86_64|arm64_x86_64)/libmylib\.a

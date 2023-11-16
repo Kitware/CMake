@@ -84,14 +84,15 @@ protected:
   virtual void GenerateImportTargetCode(std::ostream& os,
                                         cmGeneratorTarget const* target,
                                         cmStateEnums::TargetType targetType);
-  virtual void GenerateImportPropertyCode(std::ostream& os,
-                                          const std::string& config,
-                                          cmGeneratorTarget const* target,
-                                          ImportPropertyMap const& properties);
+  virtual void GenerateImportPropertyCode(
+    std::ostream& os, const std::string& config, const std::string& suffix,
+    cmGeneratorTarget const* target, ImportPropertyMap const& properties,
+    const std::string& importedXcFrameworkLocation);
   virtual void GenerateImportedFileChecksCode(
     std::ostream& os, cmGeneratorTarget* target,
     ImportPropertyMap const& properties,
-    const std::set<std::string>& importedLocations);
+    const std::set<std::string>& importedLocations,
+    const std::string& importedXcFrameworkLocation);
   virtual void GenerateImportedFileCheckLoop(std::ostream& os);
   virtual void GenerateMissingTargetsCheckCode(std::ostream& os);
   virtual void GenerateFindDependencyCalls(std::ostream& os);

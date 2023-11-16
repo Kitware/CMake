@@ -10,7 +10,6 @@
 #include <utility>
 
 #include <cm/string_view>
-#include <cmext/algorithm>
 #include <cmext/string_view>
 
 #include "cmExportSet.h"
@@ -54,15 +53,15 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
   {
     std::string expectedTargets;
     std::string sep;
-    std::vector<std::string> targets;
+    std::vector<TargetExport> targets;
     bool generatedInterfaceRequired = false;
     this->GetTargets(targets);
-    for (std::string const& tei : targets) {
-      cmGeneratorTarget* te = this->LG->FindGeneratorTargetToUse(tei);
+    for (auto const& tei : targets) {
+      cmGeneratorTarget* te = this->LG->FindGeneratorTargetToUse(tei.Name);
       expectedTargets += sep + this->Namespace + te->GetExportName();
       sep = " ";
       if (this->ExportedTargets.insert(te).second) {
-        this->Exports.push_back(te);
+        this->Exports.emplace_back(te, tei.XcFrameworkLocation);
       } else {
         std::ostringstream e;
         e << "given target \"" << te->GetName() << "\" more than once.";
@@ -82,7 +81,8 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
   }
 
   // Create all the imported targets.
-  for (cmGeneratorTarget* gte : this->Exports) {
+  for (auto const& exp : this->Exports) {
+    cmGeneratorTarget* gte = exp.Target;
     this->GenerateImportTargetCode(os, gte, this->GetExportTargetType(gte));
 
     gte->Target->AppendBuildInterfaceIncludes();
@@ -176,7 +176,9 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 void cmExportBuildFileGenerator::GenerateImportTargetsConfig(
   std::ostream& os, const std::string& config, std::string const& suffix)
 {
-  for (cmGeneratorTarget* target : this->Exports) {
+  for (auto const& exp : this->Exports) {
+    cmGeneratorTarget* target = exp.Target;
+
     // Collect import properties for this target.
     ImportPropertyMap properties;
 
@@ -200,7 +202,23 @@ void cmExportBuildFileGenerator::GenerateImportTargetsConfig(
       //                              properties);
 
       // Generate code in the export file.
-      this->GenerateImportPropertyCode(os, config, target, properties);
+      std::string importedXcFrameworkLocation = exp.XcFrameworkLocation;
+      if (!importedXcFrameworkLocation.empty()) {
+        importedXcFrameworkLocation = cmGeneratorExpression::Preprocess(
+          importedXcFrameworkLocation,
+          cmGeneratorExpression::PreprocessContext::BuildInterface);
+        importedXcFrameworkLocation = cmGeneratorExpression::Evaluate(
+          importedXcFrameworkLocation, exp.Target->GetLocalGenerator(), config,
+          exp.Target, nullptr, exp.Target);
+        if (!importedXcFrameworkLocation.empty() &&
+            !cmSystemTools::FileIsFullPath(importedXcFrameworkLocation)) {
+          importedXcFrameworkLocation =
+            cmStrCat(this->LG->GetCurrentBinaryDirectory(), '/',
+                     importedXcFrameworkLocation);
+        }
+      }
+      this->GenerateImportPropertyCode(os, config, suffix, target, properties,
+                                       importedXcFrameworkLocation);
     }
   }
 }
@@ -308,7 +326,7 @@ void cmExportBuildFileGenerator::HandleMissingTarget(
 }
 
 void cmExportBuildFileGenerator::GetTargets(
-  std::vector<std::string>& targets) const
+  std::vector<TargetExport>& targets) const
 {
   if (this->ExportSet) {
     for (std::unique_ptr<cmTargetExport> const& te :
@@ -316,7 +334,7 @@ void cmExportBuildFileGenerator::GetTargets(
       if (te->NamelinkOnly) {
         continue;
       }
-      targets.push_back(te->TargetName);
+      targets.emplace_back(te->TargetName, te->XcFrameworkLocation);
     }
     return;
   }
@@ -334,9 +352,11 @@ cmExportBuildFileGenerator::FindBuildExportInfo(cmGlobalGenerator* gg,
 
   for (auto const& exp : exportSets) {
     const auto& exportSet = exp.second;
-    std::vector<std::string> targets;
+    std::vector<TargetExport> targets;
     exportSet->GetTargets(targets);
-    if (cm::contains(targets, name)) {
+    if (std::any_of(
+          targets.begin(), targets.end(),
+          [&name](const TargetExport& te) { return te.Name == name; })) {
       exportFiles.push_back(exp.first);
       ns = exportSet->GetNamespace();
     }

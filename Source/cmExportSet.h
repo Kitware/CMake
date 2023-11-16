@@ -33,6 +33,9 @@ public:
 
   void AddInstallation(cmInstallExportGenerator const* installation);
 
+  void SetXcFrameworkLocation(const std::string& name,
+                              const std::string& location);
+
   std::string const& GetName() const { return this->Name; }
 
   std::vector<std::unique_ptr<cmTargetExport>> const& GetTargetExports() const

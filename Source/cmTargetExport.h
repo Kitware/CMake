@@ -38,4 +38,5 @@ public:
   ///@}
 
   bool NamelinkOnly = false;
+  std::string XcFrameworkLocation;
 };

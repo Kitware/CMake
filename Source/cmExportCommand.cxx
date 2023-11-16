@@ -72,6 +72,8 @@ bool cmExportCommand(std::vector<std::string> const& args,
 
     std::vector<std::vector<std::string>> PackageDependencyArgs;
     bool ExportPackageDependencies = false;
+
+    std::vector<std::vector<std::string>> TargetArgs;
   };
 
   auto parser =
@@ -87,6 +89,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
   } else if (args[0] == "SETUP") {
     parser.Bind("SETUP"_s, &Arguments::ExportSetName);
     parser.Bind("PACKAGE_DEPENDENCY"_s, &Arguments::PackageDependencyArgs);
+    parser.Bind("TARGET"_s, &Arguments::TargetArgs);
   } else {
     parser.Bind("TARGETS"_s, &Arguments::Targets);
     parser.Bind("ANDROID_MK"_s, &Arguments::AndroidMKFile);
@@ -159,6 +162,31 @@ bool cmExportCommand(std::vector<std::string> const& args,
                  packageDependencyArguments.ExtraArgs);
     }
 
+    struct TargetArguments
+    {
+      std::string XcFrameworkLocation;
+    };
+
+    auto targetParser = cmArgumentParser<TargetArguments>{}.Bind(
+      "XCFRAMEWORK_LOCATION"_s, &TargetArguments::XcFrameworkLocation);
+
+    for (auto const& targetArgs : arguments.TargetArgs) {
+      if (targetArgs.empty()) {
+        continue;
+      }
+
+      TargetArguments const targetArguments =
+        targetParser.Parse(cmMakeRange(targetArgs).advance(1), &unknownArgs);
+
+      if (!unknownArgs.empty()) {
+        status.SetError("Unknown argument: \"" + unknownArgs.front() + "\".");
+        return false;
+      }
+
+      exportSet.SetXcFrameworkLocation(targetArgs.front(),
+                                       targetArguments.XcFrameworkLocation);
+    }
+
     return true;
   }
 
@@ -204,7 +232,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
     fname = dir + "/" + fname;
   }
 
-  std::vector<std::string> targets;
+  std::vector<cmExportBuildFileGenerator::TargetExport> targets;
 
   cmGlobalGenerator* gg = mf.GetGlobalGenerator();
 
@@ -242,7 +270,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
         status.SetError(e.str());
         return false;
       }
-      targets.push_back(currentTarget);
+      targets.emplace_back(currentTarget, std::string{});
     }
     if (arguments.Append) {
       if (cmExportBuildFileGenerator* ebfg =

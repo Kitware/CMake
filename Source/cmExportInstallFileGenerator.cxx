@@ -375,9 +375,26 @@ void cmExportInstallFileGenerator::GenerateImportTargetsConfig(
       //                              properties);
 
       // Generate code in the export file.
-      this->GenerateImportPropertyCode(os, config, gtgt, properties);
-      this->GenerateImportedFileChecksCode(os, gtgt, properties,
-                                           importedLocations);
+      std::string importedXcFrameworkLocation = te->XcFrameworkLocation;
+      if (!importedXcFrameworkLocation.empty()) {
+        importedXcFrameworkLocation = cmGeneratorExpression::Preprocess(
+          importedXcFrameworkLocation,
+          cmGeneratorExpression::PreprocessContext::InstallInterface, true);
+        importedXcFrameworkLocation = cmGeneratorExpression::Evaluate(
+          importedXcFrameworkLocation, te->Target->GetLocalGenerator(), config,
+          te->Target, nullptr, te->Target);
+        if (!importedXcFrameworkLocation.empty() &&
+            !cmSystemTools::FileIsFullPath(importedXcFrameworkLocation) &&
+            !cmHasLiteralPrefix(importedXcFrameworkLocation,
+                                "${_IMPORT_PREFIX}/")) {
+          importedXcFrameworkLocation =
+            cmStrCat("${_IMPORT_PREFIX}/", importedXcFrameworkLocation);
+        }
+      }
+      this->GenerateImportPropertyCode(os, config, suffix, gtgt, properties,
+                                       importedXcFrameworkLocation);
+      this->GenerateImportedFileChecksCode(
+        os, gtgt, properties, importedLocations, importedXcFrameworkLocation);
     }
   }
 }
