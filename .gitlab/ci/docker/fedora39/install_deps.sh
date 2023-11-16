@@ -19,12 +19,12 @@ for p in Demo test; do
 done
 
 # Remove tests for numpy
-for v in 2.7 3.11; do
+for v in 2.7 3.12; do
     find /usr/lib64/python${v}/site-packages/numpy -type d -a -name tests -exec rm -rf {} +
 done
 
 # Remove some other packages tests
-find /usr/lib64/python3.11/site-packages/breezy -type d -a -name tests -exec rm -rf {} +
+find /usr/lib64/python3.12/site-packages/breezy -type d -a -name tests -exec rm -rf {} +
 
 # Perforce
 curl -L https://www.perforce.com/downloads/perforce/r21.2/bin.linux26x86_64/helix-core-server.tgz -o - \
