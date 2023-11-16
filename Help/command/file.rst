@@ -32,14 +32,14 @@ Synopsis
 
   `Writing`_
     file({`WRITE`_ | `APPEND`_} <filename> <content>...)
-    file({`TOUCH`_ | `TOUCH_NOCREATE`_} [<file>...])
+    file({`TOUCH`_ | `TOUCH_NOCREATE`_} <file>...)
     file(`GENERATE`_ OUTPUT <output-file> [...])
     file(`CONFIGURE`_ OUTPUT <output-file> CONTENT <content> [...])
 
   `Filesystem`_
-    file({`GLOB`_ | `GLOB_RECURSE`_} <out-var> [...] [<globbing-expr>...])
-    file(`MAKE_DIRECTORY`_ [<dir>...])
-    file({`REMOVE`_ | `REMOVE_RECURSE`_ } [<files>...])
+    file({`GLOB`_ | `GLOB_RECURSE`_} <out-var> [...] <globbing-expr>...)
+    file(`MAKE_DIRECTORY`_ <directories>...)
+    file({`REMOVE`_ | `REMOVE_RECURSE`_ } <files>...)
     file(`RENAME`_ <oldname> <newname> [...])
     file(`COPY_FILE`_ <oldname> <newname> [...])
     file({`COPY`_ | `INSTALL`_} <file>... DESTINATION <dir> [...])
@@ -80,7 +80,7 @@ Reading
   (``a`` through ``f``) are in lowercase.
 
 .. signature::
-  file(STRINGS <filename> <variable> [<options>...])
+  file(STRINGS <filename> <variable> <options>...)
 
   Parse a list of ASCII strings from ``<filename>`` and store it in
   ``<variable>``.  Binary data in the file are ignored.  Carriage return
@@ -165,17 +165,17 @@ Reading
       [RESOLVED_DEPENDENCIES_VAR <deps_var>]
       [UNRESOLVED_DEPENDENCIES_VAR <unresolved_deps_var>]
       [CONFLICTING_DEPENDENCIES_PREFIX <conflicting_deps_prefix>]
-      [EXECUTABLES [<executable_files>...]]
-      [LIBRARIES [<library_files>...]]
-      [MODULES [<module_files>...]]
-      [DIRECTORIES [<directories>...]]
+      [EXECUTABLES <executable_files>...]
+      [LIBRARIES <library_files>...]
+      [MODULES <module_files>...]
+      [DIRECTORIES <directories>...]
       [BUNDLE_EXECUTABLE <bundle_executable_file>]
-      [PRE_INCLUDE_REGEXES [<regexes>...]]
-      [PRE_EXCLUDE_REGEXES [<regexes>...]]
-      [POST_INCLUDE_REGEXES [<regexes>...]]
-      [POST_EXCLUDE_REGEXES [<regexes>...]]
-      [POST_INCLUDE_FILES [<files>...]]
-      [POST_EXCLUDE_FILES [<files>...]]
+      [PRE_INCLUDE_REGEXES <regexes>...]
+      [PRE_EXCLUDE_REGEXES <regexes>...]
+      [POST_INCLUDE_REGEXES <regexes>...]
+      [POST_EXCLUDE_REGEXES <regexes>...]
+      [POST_INCLUDE_FILES <files>...]
+      [POST_EXCLUDE_FILES <files>...]
       )
 
   Please note that this sub-command is not intended to be used in project mode.
@@ -210,7 +210,7 @@ Reading
       of paths that were found for that filename are stored in
       ``<conflicting_deps_prefix>_<filename>``.
 
-    ``EXECUTABLES <executable_files>``
+    ``EXECUTABLES <executable_files>...``
       List of executable files to read for dependencies. These are executables
       that are typically created with :command:`add_executable`, but they do
       not have to be created by CMake. On Apple platforms, the paths to these
@@ -218,14 +218,14 @@ Reading
       resolving the libraries. Specifying any kind of library (``STATIC``,
       ``MODULE``, or ``SHARED``) here will result in undefined behavior.
 
-    ``LIBRARIES <library_files>``
+    ``LIBRARIES <library_files>...``
       List of library files to read for dependencies. These are libraries that
       are typically created with :command:`add_library(SHARED)`, but they do
       not have to be created by CMake. Specifying ``STATIC`` libraries,
       ``MODULE`` libraries, or executables here will result in undefined
       behavior.
 
-    ``MODULES <module_files>``
+    ``MODULES <module_files>...``
       List of loadable module files to read for dependencies. These are modules
       that are typically created with :command:`add_library(MODULE)`, but they
       do not have to be created by CMake. They are typically used by calling
@@ -233,7 +233,7 @@ Reading
       Specifying ``STATIC`` libraries, ``SHARED`` libraries, or executables
       here will result in undefined behavior.
 
-    ``DIRECTORIES <directories>``
+    ``DIRECTORIES <directories>...``
       List of additional directories to search for dependencies. On Linux
       platforms, these directories are searched if the dependency is not found
       in any of the other usual paths. If it is found in such a directory, a
@@ -256,30 +256,30 @@ Reading
   The following arguments specify filters for including or excluding libraries
   to be resolved. See below for a full description of how they work.
 
-    ``PRE_INCLUDE_REGEXES <regexes>``
+    ``PRE_INCLUDE_REGEXES <regexes>...``
       List of pre-include regexes through which to filter the names of
       not-yet-resolved dependencies.
 
-    ``PRE_EXCLUDE_REGEXES <regexes>``
+    ``PRE_EXCLUDE_REGEXES <regexes>...``
       List of pre-exclude regexes through which to filter the names of
       not-yet-resolved dependencies.
 
-    ``POST_INCLUDE_REGEXES <regexes>``
+    ``POST_INCLUDE_REGEXES <regexes>...``
       List of post-include regexes through which to filter the names of
       resolved dependencies.
 
-    ``POST_EXCLUDE_REGEXES <regexes>``
+    ``POST_EXCLUDE_REGEXES <regexes>...``
       List of post-exclude regexes through which to filter the names of
       resolved dependencies.
 
-    ``POST_INCLUDE_FILES <files>``
+    ``POST_INCLUDE_FILES <files>...``
       .. versionadded:: 3.21
 
       List of post-include filenames through which to filter the names of
       resolved dependencies. Symlinks are resolved when attempting to match
       these filenames.
 
-    ``POST_EXCLUDE_FILES <files>``
+    ``POST_EXCLUDE_FILES <files>...``
       .. versionadded:: 3.21
 
       List of post-exclude filenames through which to filter the names of
@@ -486,8 +486,8 @@ Writing
   to update the file only when its content changes.
 
 .. signature::
-  file(TOUCH [<files>...])
-  file(TOUCH_NOCREATE [<files>...])
+  file(TOUCH <files>...)
+  file(TOUCH_NOCREATE <files>...)
 
   .. versionadded:: 3.12
 
@@ -638,10 +638,10 @@ Filesystem
 .. signature::
   file(GLOB <variable>
        [LIST_DIRECTORIES true|false] [RELATIVE <path>] [CONFIGURE_DEPENDS]
-       [<globbing-expressions>...])
+       <globbing-expressions>...)
   file(GLOB_RECURSE <variable> [FOLLOW_SYMLINKS]
        [LIST_DIRECTORIES true|false] [RELATIVE <path>] [CONFIGURE_DEPENDS]
-       [<globbing-expressions>...])
+       <globbing-expressions>...)
 
   Generate a list of files that match the ``<globbing-expressions>`` and
   store it into the ``<variable>``.  Globbing expressions are similar to
@@ -703,13 +703,13 @@ Filesystem
   ============== ======================================================
 
 .. signature::
-  file(MAKE_DIRECTORY [<directories>...])
+  file(MAKE_DIRECTORY <directories>...)
 
   Create the given directories and their parents as needed.
 
 .. signature::
-  file(REMOVE [<files>...])
-  file(REMOVE_RECURSE [<files>...])
+  file(REMOVE <files>...)
+  file(REMOVE_RECURSE <files>...)
 
   Remove the given files.  The ``REMOVE_RECURSE`` mode will remove the given
   files and directories, including non-empty directories. No error is emitted
@@ -1012,8 +1012,8 @@ Transfer
 ^^^^^^^^
 
 .. signature::
-  file(DOWNLOAD <url> [<file>] [<options>...])
-  file(UPLOAD <file> <url> [<options>...])
+  file(DOWNLOAD <url> [<file>] <options>...)
+  file(UPLOAD <file> <url> <options>...)
 
   The ``DOWNLOAD`` subcommand downloads the given ``<url>`` to a local
   ``<file>``.  The ``UPLOAD`` mode uploads a local ``<file>`` to a given
