@@ -34,6 +34,15 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "nvhpc_")
     )
 endif()
 
+if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "fedora39_makefiles")
+  list(APPEND test_exclusions
+    # FIXME(#25421): CPack/RPM needs an update for Fedora 39.
+    "^CPackComponentsForAll-RPM-default$"
+    "^CPackComponentsForAll-RPM-AllInOne$"
+    "^CPackComponentsForAll-RPM-OnePackPerGroup$"
+    )
+endif()
+
 string(REPLACE ";" "|" test_exclusions "${test_exclusions}")
 if (test_exclusions)
   set(test_exclusions "(${test_exclusions})")
