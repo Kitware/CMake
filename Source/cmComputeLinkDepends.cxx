@@ -178,7 +178,7 @@ guaranteed to be acyclic.
 The final list of items produced by this procedure consists of the
 original user link line followed by minimal additional items needed to
 satisfy dependencies.  The final list is then filtered to de-duplicate
-items that we know the linker will re-use automatically (shared libs).
+items that we know the linker will reuse automatically (shared libs).
 
 */
 
@@ -382,7 +382,7 @@ cmComputeLinkDepends::Compute()
   for (size_t i : cmReverseRange(this->FinalLinkOrder)) {
     LinkEntry const& e = this->EntryList[i];
     cmGeneratorTarget const* t = e.Target;
-    // Entries that we know the linker will re-use do not need to be repeated.
+    // Entries that we know the linker will reuse do not need to be repeated.
     bool uniquify = t && t->GetType() == cmStateEnums::SHARED_LIBRARY;
     if (!uniquify || emitted.insert(i).second) {
       this->FinalLinkEntries.push_back(e);
