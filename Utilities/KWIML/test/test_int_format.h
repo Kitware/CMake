@@ -8,7 +8,7 @@
 
 #if defined(_MSC_VER)
 # pragma warning (push)
-# pragma warning (disable:4309) /* static_cast trunction of constant value */
+# pragma warning (disable:4309) /* static_cast truncation of constant value */
 # pragma warning (disable:4310) /* cast truncates constant value */
 #endif
 
