@@ -70,6 +70,7 @@ syn keyword cmakeProperty contained
             \ ATTACHED_FILES
             \ ATTACHED_FILES_ON_FAIL
             \ AUTOGEN_BUILD_DIR
+            \ AUTOGEN_COMMAND_LINE_LENGTH_MAX
             \ AUTOGEN_ORIGIN_DEPENDS
             \ AUTOGEN_PARALLEL
             \ AUTOGEN_SOURCE_GROUP
@@ -764,6 +765,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_STANDARD_REQUIRED
             \ CMAKE_ASM_SUPPORTED
             \ CMAKE_ASM_VISIBILITY_PRESET
+            \ CMAKE_AUTOGEN_COMMAND_LINE_LENGTH_MAX
             \ CMAKE_AUTOGEN_ORIGIN_DEPENDS
             \ CMAKE_AUTOGEN_PARALLEL
             \ CMAKE_AUTOGEN_USE_SYSTEM_INCLUDE

@@ -551,6 +551,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "ANDROID_PROCESS_MAX"_s, IC::CanCompileSources },
   { "ANDROID_SKIP_ANT_STEP"_s, IC::CanCompileSources },
   // -- Autogen
+  { "AUTOGEN_COMMAND_LINE_LENGTH_MAX"_s, IC::CanCompileSources },
   { "AUTOGEN_ORIGIN_DEPENDS"_s, IC::CanCompileSources },
   { "AUTOGEN_PARALLEL"_s, IC::CanCompileSources },
   { "AUTOGEN_USE_SYSTEM_INCLUDE"_s, IC::CanCompileSources },
