@@ -1884,7 +1884,7 @@ bool cmGlobalGenerator::AddAutomaticSources()
       }
       lg->AddUnityBuild(gt.get());
       lg->AddISPCDependencies(gt.get());
-      // Targets that re-use a PCH are handled below.
+      // Targets that reuse a PCH are handled below.
       if (!gt->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM")) {
         lg->AddPchDependencies(gt.get());
       }
@@ -1896,7 +1896,7 @@ bool cmGlobalGenerator::AddAutomaticSources()
       if (!gt->CanCompileSources()) {
         continue;
       }
-      // Handle targets that re-use a PCH from an above-handled target.
+      // Handle targets that reuse a PCH from an above-handled target.
       if (gt->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM")) {
         lg->AddPchDependencies(gt.get());
       }

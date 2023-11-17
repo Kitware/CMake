@@ -4,7 +4,7 @@
 # Originally it was a macro in the root `CMakeLists.txt` with the comment
 # "Simply to improve readability...".
 # However, as part of the modernization refactoring it was moved into a
-# separate file cuz adding library alises wasn't possible inside the
+# separate file cuz adding library aliases wasn't possible inside the
 # macro.
 #-----------------------------------------------------------------------
 
@@ -170,7 +170,7 @@ else()
   CMAKE_SET_TARGET_FOLDER(cmcurl "Utilities/3rdParty")
   CMAKE_SET_TARGET_FOLDER(LIBCURL "Utilities/3rdParty")
   if(NOT CMAKE_USE_SYSTEM_NGHTTP2)
-    # Configure after curl to re-use some check results.
+    # Configure after curl to reuse some check results.
     add_subdirectory(Utilities/cmnghttp2)
     CMAKE_SET_TARGET_FOLDER(cmnghttp2 "Utilities/3rdParty")
   endif()

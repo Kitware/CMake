@@ -19,9 +19,9 @@ be used on FreeBSD, DragonflyBSD, NetBSD, OpenBSD, but also on Linux or OSX,
 depending on the installed package-management tools -- using :module:`CPack`.
 
 The CPack FreeBSD generator is a :module:`CPack` generator and uses the
-:variable:`!CPACK_XXX` variables used by :module:`CPack`. It tries to re-use packaging
+:variable:`!CPACK_XXX` variables used by :module:`CPack`. It tries to reuse packaging
 information that may already be specified for Debian packages for the
-:cpack_gen:`CPack DEB Generator`. It also tries to re-use RPM packaging
+:cpack_gen:`CPack DEB Generator`. It also tries to reuse RPM packaging
 information when Debian does not specify.
 
 The CPack FreeBSD generator should work on any host with libpkg installed. The

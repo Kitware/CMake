@@ -32,7 +32,7 @@ nitpicky = True
 smartquotes = False
 
 cmake_manuals = sorted(glob.glob(r'@conf_docs@/manual/*.rst'))
-cmake_manual_description = re.compile('^\.\. cmake-manual-description:(.*)$')
+cmake_manual_description = re.compile(r'^\.\. cmake-manual-description:(.*)$')
 man_pages = []
 for fpath in cmake_manuals:
     try:

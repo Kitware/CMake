@@ -12,7 +12,7 @@ endif()
 # clear the log file
 file(REMOVE "${LOG_FILE}.2343")
 
-# create an error of each type of thread santizer
+# create an error of each type of thread sanitizer
 # these names come from tsan_report.cc in llvm
 
 file(APPEND "${LOG_FILE}.2343"

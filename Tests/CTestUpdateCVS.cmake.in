@@ -17,7 +17,7 @@ message("Using CVS tools:")
 set(CVS "@CVS_EXECUTABLE@")
 message(" cvs = ${CVS}")
 
-# Pre-pending :local: prevents cvs from trying to interpret Windows drive
+# Prepending :local: prevents cvs from trying to interpret Windows drive
 # letters, like "C:", as host names.
 set(REPO ":local:${TOP}/repo")
 

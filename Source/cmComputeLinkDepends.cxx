@@ -181,7 +181,7 @@ guaranteed to be acyclic.
 The final list of items produced by this procedure consists of the
 original user link line followed by minimal additional items needed to
 satisfy dependencies.  The final list is then filtered to de-duplicate
-items that we know the linker will re-use automatically (shared libs).
+items that we know the linker will reuse automatically (shared libs).
 
 */
 
