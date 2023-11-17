@@ -1204,10 +1204,10 @@ function(__FetchContent_declareDetails contentName)
     set(propertyName "_FetchContent_${contentNameLower}_find_package_args")
     define_property(GLOBAL PROPERTY ${propertyName})
     if(NOT __sawQuietKeyword)
-      list(INSERT __findPackageArgs 0 QUIET)
+      string(PREPEND __findPackageArgs "QUIET ")
     endif()
     if(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL AND NOT __sawGlobalKeyword)
-      list(APPEND __findPackageArgs GLOBAL)
+      string(APPEND __findPackageArgs " GLOBAL")
     endif()
     cmake_language(EVAL CODE
       "set_property(GLOBAL PROPERTY ${propertyName} ${__findPackageArgs})"
