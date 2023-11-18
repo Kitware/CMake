@@ -1158,20 +1158,26 @@ std::string cmGlobalGenerator::GetLanguageOutputExtension(
 {
   const std::string& lang = source.GetLanguage();
   if (!lang.empty()) {
-    auto const it = this->LanguageToOutputExtension.find(lang);
-    if (it != this->LanguageToOutputExtension.end()) {
-      return it->second;
+    return this->GetLanguageOutputExtension(lang);
+  }
+  // if no language is found then check to see if it is already an
+  // output extension for some language.  In that case it should be ignored
+  // and in this map, so it will not be compiled but will just be used.
+  std::string const& ext = source.GetExtension();
+  if (!ext.empty()) {
+    if (this->OutputExtensions.count(ext)) {
+      return ext;
     }
-  } else {
-    // if no language is found then check to see if it is already an
-    // output extension for some language.  In that case it should be ignored
-    // and in this map, so it will not be compiled but will just be used.
-    std::string const& ext = source.GetExtension();
-    if (!ext.empty()) {
-      if (this->OutputExtensions.count(ext)) {
-        return ext;
-      }
-    }
+  }
+  return "";
+}
+
+std::string cmGlobalGenerator::GetLanguageOutputExtension(
+  std::string const& lang) const
+{
+  auto const it = this->LanguageToOutputExtension.find(lang);
+  if (it != this->LanguageToOutputExtension.end()) {
+    return it->second;
   }
   return "";
 }
