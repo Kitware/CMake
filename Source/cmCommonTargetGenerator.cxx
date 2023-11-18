@@ -201,6 +201,14 @@ std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories(
     for (cmGeneratorTarget const* target : cli->GetExternalObjectTargets()) {
       addLinkedTarget(target);
     }
+    if (lang == "Fortran"_s) {
+      // Fortran modules provided by `$<TARGET_OBJECTS>` as sources should be
+      // collated for use in this target.
+      for (cmGeneratorTarget const* target :
+           this->GeneratorTarget->GetSourceObjectLibraries(config)) {
+        addLinkedTarget(target);
+      }
+    }
   }
   return dirs;
 }
