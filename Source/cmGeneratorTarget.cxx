@@ -8044,27 +8044,21 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
     }
   }
 
-  std::vector<cmGeneratorTarget*> objectLibraries;
-  std::vector<cmSourceFile const*> externalObjects;
+  std::set<cmGeneratorTarget*> objectLibraries;
   if (!this->GlobalGenerator->GetConfigureDoneCMP0026()) {
     std::vector<cmGeneratorTarget*> objectTargets;
     this->GetObjectLibrariesCMP0026(objectTargets);
-    objectLibraries.reserve(objectTargets.size());
     for (cmGeneratorTarget* gt : objectTargets) {
-      objectLibraries.push_back(gt);
+      objectLibraries.insert(gt);
     }
   } else {
+    std::vector<cmSourceFile const*> externalObjects;
     this->GetExternalObjects(externalObjects, config);
     for (cmSourceFile const* extObj : externalObjects) {
       std::string objLib = extObj->GetObjectLibrary();
       if (cmGeneratorTarget* tgt =
             this->LocalGenerator->FindGeneratorTargetToUse(objLib)) {
-        auto const objLibIt =
-          std::find_if(objectLibraries.cbegin(), objectLibraries.cend(),
-                       [tgt](cmGeneratorTarget* t) { return t == tgt; });
-        if (objectLibraries.cend() == objLibIt) {
-          objectLibraries.push_back(tgt);
-        }
+        objectLibraries.insert(tgt);
       }
     }
   }
