@@ -9090,19 +9090,47 @@ std::string cmGeneratorTarget::GetImportedXcFrameworkPath(
 bool cmGeneratorTarget::HaveFortranSources(std::string const& config) const
 {
   auto sources = this->GetSourceFiles(config);
-  return std::any_of(sources.begin(), sources.end(),
-                     [](BT<cmSourceFile*> const& sf) -> bool {
-                       return sf.Value->GetLanguage() == "Fortran"_s;
-                     });
+  bool const have_direct = std::any_of(
+    sources.begin(), sources.end(), [](BT<cmSourceFile*> const& sf) -> bool {
+      return sf.Value->GetLanguage() == "Fortran"_s;
+    });
+  bool have_via_target_objects = false;
+  if (!have_direct) {
+    auto const sourceObjectLibraries = this->GetSourceObjectLibraries(config);
+    have_via_target_objects =
+      std::any_of(sourceObjectLibraries.begin(), sourceObjectLibraries.end(),
+                  [&config](cmGeneratorTarget const* tgt) -> bool {
+                    return tgt->HaveFortranSources(config);
+                  });
+  }
+  return have_direct || have_via_target_objects;
 }
 
 bool cmGeneratorTarget::HaveFortranSources() const
 {
-  auto sources = cmGeneratorTarget::GetAllConfigSources();
-  return std::any_of(sources.begin(), sources.end(),
-                     [](AllConfigSource const& sf) -> bool {
-                       return sf.Source->GetLanguage() == "Fortran"_s;
-                     });
+  auto sources = this->GetAllConfigSources();
+  bool const have_direct = std::any_of(
+    sources.begin(), sources.end(), [](AllConfigSource const& sf) -> bool {
+      return sf.Source->GetLanguage() == "Fortran"_s;
+    });
+  bool have_via_target_objects = false;
+  if (!have_direct) {
+    std::vector<std::string> configs =
+      this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+    for (auto const& config : configs) {
+      auto const sourceObjectLibraries =
+        this->GetSourceObjectLibraries(config);
+      have_via_target_objects =
+        std::any_of(sourceObjectLibraries.begin(), sourceObjectLibraries.end(),
+                    [&config](cmGeneratorTarget const* tgt) -> bool {
+                      return tgt->HaveFortranSources(config);
+                    });
+      if (have_via_target_objects) {
+        break;
+      }
+    }
+  }
+  return have_direct || have_via_target_objects;
 }
 
 bool cmGeneratorTarget::HaveCxx20ModuleSources(std::string* errorMessage) const
