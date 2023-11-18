@@ -211,7 +211,18 @@ cmCommonTargetGenerator::GetLinkedTargetDirectories(
         }
       };
     for (auto const& item : cli->GetItems()) {
-      addLinkedTarget(item.Target, Forwarding::No);
+      if (item.Target) {
+        addLinkedTarget(item.Target, Forwarding::No);
+      } else if (item.ObjectSource && lang == "Fortran"_s
+                 /* Object source files do not have a language associated with
+                    them. */
+                 /* && item.ObjectSource->GetLanguage() == "Fortran"_s*/) {
+        // Fortran modules provided by `$<TARGET_OBJECTS>` as linked items
+        // should be collated for use in this target.
+        addLinkedTarget(this->LocalCommonGenerator->FindGeneratorTargetToUse(
+                          item.ObjectSource->GetObjectLibrary()),
+                        Forwarding::Yes);
+      }
     }
     for (cmGeneratorTarget const* target : cli->GetExternalObjectTargets()) {
       addLinkedTarget(target, Forwarding::No);
