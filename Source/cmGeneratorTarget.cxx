@@ -8044,7 +8044,7 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
     }
   }
 
-  std::set<cmGeneratorTarget*> objectLibraries;
+  std::set<cmGeneratorTarget const*> objectLibraries;
   if (!this->GlobalGenerator->GetConfigureDoneCMP0026()) {
     std::vector<cmGeneratorTarget*> objectTargets;
     this->GetObjectLibrariesCMP0026(objectTargets);
@@ -8062,7 +8062,7 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
       }
     }
   }
-  for (cmGeneratorTarget* objLib : objectLibraries) {
+  for (cmGeneratorTarget const* objLib : objectLibraries) {
     objLib->GetLanguages(languages, config);
   }
 }
