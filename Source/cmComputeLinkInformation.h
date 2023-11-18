@@ -22,6 +22,7 @@ class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
 class cmOrderDirectories;
+class cmSourceFile;
 class cmake;
 
 /** \class cmComputeLinkInformation
@@ -51,16 +52,21 @@ public:
   {
     Item(BT<std::string> v, ItemIsPath isPath,
          cmGeneratorTarget const* target = nullptr,
+         cmSourceFile const* objectSource = nullptr,
          FeatureDescriptor const* feature = nullptr)
       : Value(std::move(v))
       , IsPath(isPath)
       , Target(target)
+      , ObjectSource(objectSource)
       , Feature(feature)
     {
     }
     BT<std::string> Value;
     ItemIsPath IsPath = ItemIsPath::No;
     cmGeneratorTarget const* Target = nullptr;
+    // The source file representing the external object (used when linking
+    // `$<TARGET_OBJECTS>`)
+    cmSourceFile const* ObjectSource = nullptr;
 
     bool HasFeature() const { return this->Feature != nullptr; }
     const std::string& GetFeatureName() const
