@@ -1175,6 +1175,15 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     }
   }
 
+  // Check if there are Fortran objects which need to participate in forwarding
+  // module requirements.
+  if (this->GeneratorTarget->HaveFortranSources(config) &&
+      !this->Configs[config].ScanningInfo.count("Fortran")) {
+    ScanningFiles files;
+    this->Configs[config].ScanningInfo["Fortran"].emplace_back(files);
+    this->WriteCompileRule("Fortran", config, WithScanning::Yes);
+  }
+
   for (auto const& langScanningFiles : this->Configs[config].ScanningInfo) {
     std::string const& language = langScanningFiles.first;
     std::vector<ScanningFiles> const& scanningFiles = langScanningFiles.second;
