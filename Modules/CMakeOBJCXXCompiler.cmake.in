@@ -50,7 +50,7 @@ if (CMAKE_OBJC_COMPILER_ID_RUN)
   endforeach()
 endif()
 
-foreach (lang C CXX OBJC)
+foreach (lang IN ITEMS C CXX OBJC)
   foreach(extension IN LISTS CMAKE_OBJCXX_SOURCE_FILE_EXTENSIONS)
     if (CMAKE_${lang}_COMPILER_ID_RUN)
       list(REMOVE_ITEM CMAKE_${lang}_SOURCE_FILE_EXTENSIONS ${extension})
