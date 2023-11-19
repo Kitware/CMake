@@ -1446,6 +1446,17 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
       *this->InfoFileStream << "  \"" << d << "/DependInfo.cmake\"\n";
     }
     *this->InfoFileStream << "  )\n";
+
+    /* clang-format off */
+  *this->InfoFileStream
+    << "\n"
+       "# Targets to which this target links which contain Fortran sources.\n"
+       "set(CMAKE_Fortran_TARGET_FORWARD_LINKED_INFO_FILES\n";
+    /* clang-format on */
+    for (std::string const& d : dirs.Forward) {
+      *this->InfoFileStream << "  \"" << d << "/DependInfo.cmake\"\n";
+    }
+    *this->InfoFileStream << "  )\n";
   }
 
   std::string const& working_dir =
