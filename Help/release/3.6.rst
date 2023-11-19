@@ -104,7 +104,7 @@ Modules
 -------
 
 * The :module:`CMakePushCheckState` module now pushes/pops/resets the variable
-  ``CMAKE_EXTRA_INCLUDE_FILE`` used in :module:`CheckTypeSize`.
+  ``CMAKE_EXTRA_INCLUDE_FILES`` used in :module:`CheckTypeSize`.
 
 * The :module:`ExternalProject` module leared the ``GIT_SHALLOW 1``
   option to perform a shallow clone of a Git repository.
