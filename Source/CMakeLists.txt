@@ -450,7 +450,6 @@ add_library(
   cmUVProcessChain.h
   cmUVStream.h
   cmUVStreambuf.h
-  cmUVSignalHackRAII.h
   cmVariableWatch.cxx
   cmVariableWatch.h
   cmVersion.cxx

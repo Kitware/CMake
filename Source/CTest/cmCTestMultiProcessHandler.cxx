@@ -40,7 +40,6 @@
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmUVSignalHackRAII.h" // IWYU pragma: keep
 #include "cmWorkingDirectory.h"
 
 namespace cmsys {
@@ -132,9 +131,6 @@ void cmCTestMultiProcessHandler::RunTests()
   if (this->HasCycles || this->HasInvalidGeneratedResourceSpec) {
     return;
   }
-#ifdef CMAKE_UV_SIGNAL_HACK
-  cmUVSignalHackRAII hackRAII;
-#endif
   this->TestHandler->SetMaxIndex(this->FindMaxIndex());
 
   uv_loop_init(&this->Loop);
