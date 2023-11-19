@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.3)
 if(POLICY CMP0126)
   cmake_policy(SET CMP0126 NEW)
 endif()
+if(POLICY CMP0157)
+  cmake_policy(SET CMP0157 NEW)
+endif()
 
 # NOTE: Force the Release mode configuration as there are some issues with the
 # debug information handling on macOS on certain Xcode builds.
@@ -54,3 +57,20 @@ target_link_libraries(SwiftOnly PRIVATE SwiftIface)
 if(CMAKE_Swift_COMPILER_VERSION VERSION_GREATER_EQUAL 5.2)
   add_subdirectory("SwiftPlugin")
 endif()
+
+function(test_cmp0157_default mode)
+
+  cmake_policy(GET CMP0157 cmp0157_wmo)
+  if(cmp0157_wmo STREQUAL "NEW")
+    set(CMAKE_Swift_COMPILATION_MODE "${mode}")
+    add_executable(hi_${mode} main.swift)
+    get_target_property(${mode}_swift_comp_mode hi_${mode} "Swift_COMPILATION_MODE")
+    if(NOT ${mode}_swift_comp_mode STREQUAL ${mode})
+      message(SEND_ERROR "expected ${mode} -- found ${${mode}_swift_comp_mode}")
+    endif()
+  endif()
+endfunction()
+
+test_cmp0157_default("wholemodule")
+test_cmp0157_default("incremental")
+test_cmp0157_default("singlefile")

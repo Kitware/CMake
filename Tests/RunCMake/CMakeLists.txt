@@ -87,10 +87,6 @@ endfunction()
 # Some tests use python for extra checks.
 find_package(Python QUIET)
 
-if(XCODE_VERSION AND "${XCODE_VERSION}" VERSION_LESS 6.1)
-  set(Swift_ARGS -DXCODE_BELOW_6_1=1)
-endif()
-
 # Test MSVC for older host CMake versions, and test
 # WIN32/CMAKE_C_COMPILER_ID to fix check on Intel for Windows.
 if(MSVC OR (WIN32 AND CMAKE_C_COMPILER_ID MATCHES "MSVC|Intel")
@@ -435,7 +431,9 @@ if(UNIX AND CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG AND CMAKE_EXECUTABLE_FORMAT STRE
   add_RunCMake_test(RuntimePath)
 endif()
 add_RunCMake_test(ScriptMode)
-add_RunCMake_test(Swift -DCMAKE_Swift_COMPILER=${CMAKE_Swift_COMPILER} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
+add_RunCMake_test(Swift -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+                        -DCMake_TEST_Swift=${CMake_TEST_Swift}
+                        -DXCODE_VERSION=${XCODE_VERSION})
 add_RunCMake_test(TargetArtifacts -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
 add_RunCMake_test(TargetObjects)
 add_RunCMake_test(TargetProperties)
