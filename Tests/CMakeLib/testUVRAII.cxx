@@ -37,7 +37,7 @@ static bool testAsyncShutdown()
       return false;
     }
 
-    if (signal.get()) {
+    if (signal) {
       std::cerr << "Loop exited with signal not being cleaned up" << std::endl;
       return false;
     }
@@ -125,13 +125,13 @@ static bool testCrossAssignment()
     pipe.init(Loop, 0);
 
     cm::uv_stream_ptr stream = std::move(pipe);
-    if (pipe.get()) {
+    if (pipe) {
       std::cerr << "Move should be sure to invalidate the previous ptr"
                 << std::endl;
       return false;
     }
     cm::uv_handle_ptr handle = std::move(stream);
-    if (stream.get()) {
+    if (stream) {
       std::cerr << "Move should be sure to invalidate the previous ptr"
                 << std::endl;
       return false;
@@ -162,6 +162,7 @@ static bool testAllMoves()
     uv_async_ptr _13;
     uv_signal_ptr _14;
     uv_handle_ptr _15;
+    uv_idle_ptr _16;
   };
 
   allTypes a;
@@ -218,6 +219,30 @@ static bool testLoopDestructor()
   return true;
 }
 
+static bool testIdle()
+{
+  bool idled = false;
+
+  cm::uv_loop_ptr loop;
+  loop.init();
+
+  cm::uv_idle_ptr idle;
+  idle.init(*loop, &idled);
+  uv_idle_start(idle, [](uv_idle_t* handle) {
+    auto idledPtr = static_cast<bool*>(handle->data);
+    *idledPtr = true;
+    uv_idle_stop(handle);
+  });
+  uv_run(loop, UV_RUN_DEFAULT);
+
+  if (!idled) {
+    std::cerr << "uv_idle_ptr did not trigger callback" << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
 int testUVRAII(int, char** const)
 {
   if (!testAsyncShutdown()) {
@@ -230,5 +255,6 @@ int testUVRAII(int, char** const)
   passed = testAllMoves() && passed;
   passed = testLoopReset() && passed;
   passed = testLoopDestructor() && passed;
+  passed = testIdle() && passed;
   return passed ? 0 : -1;
 }

@@ -61,7 +61,7 @@ public:
    * Allow less verbose calling of uv_loop_* functions
    * @return reinterpreted handle
    */
-  operator uv_loop_t*();
+  operator uv_loop_t*() const;
 
   uv_loop_t* get() const;
   uv_loop_t* operator->() const noexcept;
@@ -130,6 +130,8 @@ public:
   uv_handle_ptr_base_(std::nullptr_t) {}
   ~uv_handle_ptr_base_() { this->reset(); }
 
+  explicit operator bool() const;
+
   /**
    * Properly close the handle if needed and sets the inner handle to nullptr
    */
@@ -139,7 +141,7 @@ public:
    * Allow less verbose calling of uv_handle_* functions
    * @return reinterpreted handle
    */
-  operator uv_handle_t*();
+  operator uv_handle_t*() const;
 
   T* get() const;
   T* operator->() const noexcept;
@@ -192,6 +194,13 @@ public:
   int init(uv_loop_t& loop, uv_async_cb async_cb, void* data = nullptr);
 
   void send();
+};
+
+struct uv_idle_ptr : public uv_handle_ptr_<uv_idle_t>
+{
+  CM_INHERIT_CTOR(uv_idle_ptr, uv_handle_ptr_, <uv_idle_t>);
+
+  int init(uv_loop_t& loop, void* data = nullptr);
 };
 
 struct uv_signal_ptr : public uv_handle_ptr_<uv_signal_t>
@@ -252,6 +261,8 @@ extern template class uv_handle_ptr_base_<uv_handle_t>;
     extern template class uv_handle_ptr_<uv_##NAME##_t>;
 
 UV_HANDLE_PTR_INSTANTIATE_EXTERN(async)
+
+UV_HANDLE_PTR_INSTANTIATE_EXTERN(idle)
 
 UV_HANDLE_PTR_INSTANTIATE_EXTERN(signal)
 
