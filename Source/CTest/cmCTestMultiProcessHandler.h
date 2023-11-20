@@ -14,8 +14,6 @@
 
 #include <cm/optional>
 
-#include <cm3p/uv.h>
-
 #include "cmCTest.h"
 #include "cmCTestResourceAllocator.h"
 #include "cmCTestResourceSpec.h"
@@ -132,7 +130,7 @@ protected:
   void ErasePendingTest(int index);
   void FinishTestProcess(std::unique_ptr<cmCTestRunTest> runner, bool started);
 
-  static void OnTestLoadRetryCB(uv_timer_t* timer);
+  void StartNextTestsOnTimer();
 
   void RemoveTest(int index);
   // Check if we need to resume an interrupted test set
@@ -209,7 +207,7 @@ protected:
   unsigned long TestLoad;
   unsigned long FakeLoadForTesting;
   cm::uv_loop_ptr Loop;
-  cm::uv_timer_ptr TestLoadRetryTimer;
+  cm::uv_timer_ptr StartNextTestsOnTimer_;
   cmCTestTestHandler* TestHandler;
   cmCTest* CTest;
   bool HasCycles;

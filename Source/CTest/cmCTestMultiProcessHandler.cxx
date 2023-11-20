@@ -128,10 +128,12 @@ bool cmCTestMultiProcessHandler::Complete()
 void cmCTestMultiProcessHandler::InitializeLoop()
 {
   this->Loop.init();
+  this->StartNextTestsOnTimer_.init(*this->Loop, this);
 }
 
 void cmCTestMultiProcessHandler::FinalizeLoop()
 {
+  this->StartNextTestsOnTimer_.reset();
   this->Loop.reset();
 }
 
@@ -464,22 +466,12 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
 
 void cmCTestMultiProcessHandler::StartNextTests()
 {
-  if (this->TestLoadRetryTimer.get() != nullptr) {
-    // This timer may be waiting to call StartNextTests again.
-    // Since we have been called it is no longer needed.
-    uv_timer_stop(this->TestLoadRetryTimer);
-  }
+  // One or more events may be scheduled to call this method again.
+  // Since this method has been called they are no longer needed.
+  this->StartNextTestsOnTimer_.stop();
 
-  if (this->PendingTests.empty()) {
-    this->TestLoadRetryTimer.reset();
-    return;
-  }
-
-  if (this->CheckStopTimePassed()) {
-    return;
-  }
-
-  if (this->CheckStopOnFailure() && !this->Failed->empty()) {
+  if (this->PendingTests.empty() || this->CheckStopTimePassed() ||
+      (this->CheckStopOnFailure() && !this->Failed->empty())) {
     return;
   }
 
@@ -627,23 +619,24 @@ void cmCTestMultiProcessHandler::StartNextTests()
     }
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "*****" << std::endl);
 
-    // Wait between 1 and 5 seconds before trying again.
-    unsigned int milliseconds = (cmSystemTools::RandomSeed() % 5 + 1) * 1000;
-    if (this->FakeLoadForTesting) {
-      milliseconds = 10;
-    }
-    if (this->TestLoadRetryTimer.get() == nullptr) {
-      this->TestLoadRetryTimer.init(*this->Loop, this);
-    }
-    this->TestLoadRetryTimer.start(
-      &cmCTestMultiProcessHandler::OnTestLoadRetryCB, milliseconds, 0);
+    // Try again later when the load might be lower.
+    this->StartNextTestsOnTimer();
   }
 }
 
-void cmCTestMultiProcessHandler::OnTestLoadRetryCB(uv_timer_t* timer)
+void cmCTestMultiProcessHandler::StartNextTestsOnTimer()
 {
-  auto* self = static_cast<cmCTestMultiProcessHandler*>(timer->data);
-  self->StartNextTests();
+  // Wait between 1 and 5 seconds before trying again.
+  unsigned int const milliseconds = this->FakeLoadForTesting
+    ? 10
+    : (cmSystemTools::RandomSeed() % 5 + 1) * 1000;
+  this->StartNextTestsOnTimer_.start(
+    [](uv_timer_t* timer) {
+      uv_timer_stop(timer);
+      auto* self = static_cast<cmCTestMultiProcessHandler*>(timer->data);
+      self->StartNextTests();
+    },
+    milliseconds, 0);
 }
 
 void cmCTestMultiProcessHandler::FinishTestProcess(
