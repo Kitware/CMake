@@ -265,8 +265,8 @@ if("${CMAKE_Fortran_COMPILER_ID};${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "LLVMFla
       "${log}\n"
       )
     set(_CMAKE_Fortran_IMPLICIT_LINK_INFORMATION_DETERMINED_EARLY 1)
-    if("x${CMAKE_Fortran_COMPILER_ARCHITECTURE_ID}" STREQUAL "xARM64")
-      # FIXME(LLVMFlang): It does not add `-defaultlib:` fields to object
+    if("x${CMAKE_Fortran_COMPILER_ARCHITECTURE_ID}" STREQUAL "xARM64" AND CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 18.0)
+      # LLVMFlang < 18.0 does not add `-defaultlib:` fields to object
       # files to specify link dependencies on its runtime libraries.
       # For now, we add them ourselves.
       list(APPEND CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES "clang_rt.builtins-aarch64.lib")
