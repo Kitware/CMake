@@ -522,7 +522,7 @@ overridden if required.
   use the same generator as the main project, but the ``CMAKE_GENERATOR``
   option can be given to override this.  The project is responsible for
   adding any toolchain details, flags or other settings it wants to
-  re-use from the main project or otherwise specify (see ``CMAKE_ARGS``,
+  reuse from the main project or otherwise specify (see ``CMAKE_ARGS``,
   ``CMAKE_CACHE_ARGS`` and ``CMAKE_CACHE_DEFAULT_ARGS`` below).
 
   For non-CMake external projects, the ``CONFIGURE_COMMAND`` option must
@@ -593,7 +593,7 @@ overridden if required.
   as initial defaults only and will not override any variables already set
   from a previous run. Use this option with care, as it can lead to
   different behavior depending on whether the build starts from a fresh
-  build directory or re-uses previous build contents.
+  build directory or reuses previous build contents.
 
   .. versionadded:: 3.15
     If the CMake generator is the ``Green Hills MULTI`` and not overridden,

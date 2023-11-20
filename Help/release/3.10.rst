@@ -263,7 +263,7 @@ Changes made since CMake 3.10.0 include the following.
 3.10.1
 ------
 
-* The :manual:`cmake-server(7)` ``codemodel`` response ``crossReferences``
+* The :manual:`cmake-server(7)` ``codemodel`` response cross-references
   field added by 3.10.0 has been dropped due to excessive memory usage.
   Another approach will be needed to provide backtrace information.
 

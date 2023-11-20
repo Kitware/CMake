@@ -11,4 +11,4 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3" CACHE STRING "")
 # Cover compilation with C++11 only and not higher standards.
 set(CMAKE_CXX_STANDARD "11" CACHE STRING "")
 
-include("${CMAKE_CURRENT_LIST_DIR}/configure_fedora38_common.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/configure_fedora39_common.cmake")

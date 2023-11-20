@@ -1,7 +1,7 @@
 # Steps for uploading artifacts
 
 .rsync_upload_package:
-    image: "fedora:38"
+    image: "fedora:39"
     stage: upload
     tags:
         - cmake
@@ -21,7 +21,7 @@
 
 .rsync_upload_help:
     stage: upload
-    image: "fedora:38"
+    image: "fedora:39"
     tags:
         - cmake
         - docker

@@ -6,6 +6,7 @@ qt6-qtbase-devel
 
 # Install development tools.
 clang
+clang-devel
 clang-tools-extra
 clang-tools-extra-devel
 compiler-rt
@@ -13,6 +14,7 @@ flang
 flang-devel
 gcc-c++
 git-core
+llvm-devel
 make
 
 # Install optional external build dependencies.

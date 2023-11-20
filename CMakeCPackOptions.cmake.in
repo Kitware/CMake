@@ -5,7 +5,7 @@
 if(CPACK_GENERATOR MATCHES "NSIS")
   set(CPACK_NSIS_INSTALL_ROOT "@CPACK_NSIS_INSTALL_ROOT@")
 
-  # set the install/unistall icon used for the installer itself
+  # set the install/uninstall icon used for the installer itself
   # There is a bug in NSI that does not handle full unix paths properly.
   set(CPACK_NSIS_MUI_ICON "@CMake_SOURCE_DIR@/Utilities/Release\\CMakeLogo.ico")
   set(CPACK_NSIS_MUI_UNIICON "@CMake_SOURCE_DIR@/Utilities/Release\\CMakeLogo.ico")

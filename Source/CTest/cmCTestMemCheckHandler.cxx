@@ -962,15 +962,15 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
     "== .*[0-9,]+ bytes in [0-9,]+ blocks are still reachable"
     " in loss record [0-9,]+ of [0-9,]+");
   cmsys::RegularExpression vgUMC(
-    "== .*Conditional jump or move depends on uninitialised value\\(s\\)");
+    "== .*Conditional jump or move depends on uninitiali[sz]ed value\\(s\\)");
   cmsys::RegularExpression vgUMR1(
-    "== .*Use of uninitialised value of size [0-9,]+");
+    "== .*Use of uninitiali[sz]ed value of size [0-9,]+");
   cmsys::RegularExpression vgUMR2("== .*Invalid read of size [0-9,]+");
   cmsys::RegularExpression vgUMR3("== .*Jump to the invalid address ");
   cmsys::RegularExpression vgUMR4(
     "== .*Syscall param .* contains "
-    "uninitialised or unaddressable byte\\(s\\)");
-  cmsys::RegularExpression vgUMR5("== .*Syscall param .* uninitialised");
+    "uninitiali[sz]ed or unaddressable byte\\(s\\)");
+  cmsys::RegularExpression vgUMR5("== .*Syscall param .* uninitiali[sz]ed");
   cmsys::RegularExpression vgIPW("== .*Invalid write of size [0-9,]+");
   cmsys::RegularExpression vgABR("== .*pthread_mutex_unlock: mutex is "
                                  "locked by a different thread");

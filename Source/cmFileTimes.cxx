@@ -70,7 +70,7 @@ bool cmFileTimes::Load(std::string const& fileName)
 {
   std::unique_ptr<Times> ptr;
   if (this->IsValid()) {
-    // Invalidate this and re-use times
+    // Invalidate this and reuse times
     ptr.swap(this->times);
   } else {
     ptr = cm::make_unique<Times>();
