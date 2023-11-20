@@ -130,6 +130,7 @@ protected:
   void ErasePendingTest(int index);
   void FinishTestProcess(std::unique_ptr<cmCTestRunTest> runner, bool started);
 
+  void StartNextTestsOnIdle();
   void StartNextTestsOnTimer();
 
   void RemoveTest(int index);
@@ -207,6 +208,7 @@ protected:
   unsigned long TestLoad;
   unsigned long FakeLoadForTesting;
   cm::uv_loop_ptr Loop;
+  cm::uv_idle_ptr StartNextTestsOnIdle_;
   cm::uv_timer_ptr StartNextTestsOnTimer_;
   cmCTestTestHandler* TestHandler;
   cmCTest* CTest;

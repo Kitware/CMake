@@ -128,12 +128,14 @@ bool cmCTestMultiProcessHandler::Complete()
 void cmCTestMultiProcessHandler::InitializeLoop()
 {
   this->Loop.init();
+  this->StartNextTestsOnIdle_.init(*this->Loop, this);
   this->StartNextTestsOnTimer_.init(*this->Loop, this);
 }
 
 void cmCTestMultiProcessHandler::FinalizeLoop()
 {
   this->StartNextTestsOnTimer_.reset();
+  this->StartNextTestsOnIdle_.reset();
   this->Loop.reset();
 }
 
@@ -146,7 +148,7 @@ void cmCTestMultiProcessHandler::RunTests()
   this->TestHandler->SetMaxIndex(this->FindMaxIndex());
 
   this->InitializeLoop();
-  this->StartNextTests();
+  this->StartNextTestsOnIdle();
   uv_run(this->Loop, UV_RUN_DEFAULT);
   this->FinalizeLoop();
 
@@ -468,6 +470,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
 {
   // One or more events may be scheduled to call this method again.
   // Since this method has been called they are no longer needed.
+  this->StartNextTestsOnIdle_.stop();
   this->StartNextTestsOnTimer_.stop();
 
   if (this->PendingTests.empty() || this->CheckStopTimePassed() ||
@@ -624,6 +627,16 @@ void cmCTestMultiProcessHandler::StartNextTests()
   }
 }
 
+void cmCTestMultiProcessHandler::StartNextTestsOnIdle()
+{
+  // Start more tests on the next loop iteration.
+  this->StartNextTestsOnIdle_.start([](uv_idle_t* idle) {
+    uv_idle_stop(idle);
+    auto* self = static_cast<cmCTestMultiProcessHandler*>(idle->data);
+    self->StartNextTests();
+  });
+}
+
 void cmCTestMultiProcessHandler::StartNextTestsOnTimer()
 {
   // Wait between 1 and 5 seconds before trying again.
@@ -682,7 +695,7 @@ void cmCTestMultiProcessHandler::FinishTestProcess(
 
   runner.reset();
   if (started) {
-    this->StartNextTests();
+    this->StartNextTestsOnIdle();
   }
 }
 
