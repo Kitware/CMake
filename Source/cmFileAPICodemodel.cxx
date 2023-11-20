@@ -1635,7 +1635,7 @@ Json::Value Target::DumpFileSet(cmFileSet const* fs,
 
   Json::Value baseDirs = Json::arrayValue;
   for (auto const& directory : directories) {
-    baseDirs.append(directory);
+    baseDirs.append(RelativeIfUnder(this->TopSource, directory));
   }
   fileSet["baseDirectories"] = baseDirs;
 
