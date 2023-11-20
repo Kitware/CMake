@@ -241,6 +241,12 @@ int uv_timer_ptr::start(uv_timer_cb cb, uint64_t timeout, uint64_t repeat)
   return uv_timer_start(*this, cb, timeout, repeat);
 }
 
+void uv_timer_ptr::stop()
+{
+  assert(this->handle);
+  uv_timer_stop(*this);
+}
+
 #ifndef CMAKE_BOOTSTRAP
 uv_tty_ptr::operator uv_stream_t*() const
 {

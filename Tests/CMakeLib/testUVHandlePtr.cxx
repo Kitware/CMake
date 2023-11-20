@@ -53,6 +53,16 @@ static bool testTimer()
     return false;
   }
 
+  timed = false;
+  timer.start(cb, 10, 0);
+  timer.stop();
+  uv_run(loop, UV_RUN_DEFAULT);
+
+  if (timed) {
+    std::cerr << "uv_timer_ptr::stop did not stop callback" << std::endl;
+    return false;
+  }
+
   return true;
 }
 
