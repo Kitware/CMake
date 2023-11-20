@@ -19,11 +19,22 @@ static bool testIdle()
 
   cm::uv_idle_ptr idle;
   idle.init(*loop, &idled);
-  uv_idle_start(idle, cb);
+  idle.start(cb);
   uv_run(loop, UV_RUN_DEFAULT);
 
   if (!idled) {
     std::cerr << "uv_idle_ptr did not trigger callback" << std::endl;
+    return false;
+  }
+
+  idled = false;
+
+  idle.start(cb);
+  idle.stop();
+  uv_run(loop, UV_RUN_DEFAULT);
+
+  if (idled) {
+    std::cerr << "uv_idle_ptr::stop did not stop callback" << std::endl;
     return false;
   }
 

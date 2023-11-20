@@ -266,6 +266,18 @@ int uv_idle_ptr::init(uv_loop_t& loop, void* data)
   return uv_idle_init(&loop, *this);
 }
 
+int uv_idle_ptr::start(uv_idle_cb cb)
+{
+  assert(this->handle);
+  return uv_idle_start(*this, cb);
+}
+
+void uv_idle_ptr::stop()
+{
+  assert(this->handle);
+  uv_idle_stop(*this);
+}
+
 template class uv_handle_ptr_base_<uv_handle_t>;
 
 #define UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(NAME)                              \
