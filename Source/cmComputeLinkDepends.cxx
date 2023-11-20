@@ -187,15 +187,6 @@ items that we know the linker will reuse automatically (shared libs).
 
 namespace {
 // LINK_LIBRARY helpers
-const auto LL_BEGIN = "<LINK_LIBRARY:"_s;
-const auto LL_END = "</LINK_LIBRARY:"_s;
-
-inline std::string ExtractFeature(std::string const& item)
-{
-  return item.substr(LL_BEGIN.length(),
-                     item.find('>', LL_BEGIN.length()) - LL_BEGIN.length());
-}
-
 bool IsFeatureSupported(cmMakefile* makefile, std::string const& linkLanguage,
                         std::string const& feature)
 {
@@ -434,7 +425,8 @@ private:
 };
 }
 
-const std::string cmComputeLinkDepends::LinkEntry::DEFAULT = "DEFAULT";
+std::string const& cmComputeLinkDepends::LinkEntry::DEFAULT =
+  cmLinkItem::DEFAULT;
 
 cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
                                            const std::string& config,
@@ -632,10 +624,12 @@ std::pair<size_t, bool> cmComputeLinkDepends::AddLinkEntry(
   LinkEntry& entry = this->EntryList[index];
   entry.Item = BT<std::string>(item.AsStr(), item.Backtrace);
   entry.Target = item.Target;
+  entry.Feature = item.Feature;
   if (!entry.Target && entry.Item.Value[0] == '-' &&
       entry.Item.Value[1] != 'l' &&
       entry.Item.Value.substr(0, 10) != "-framework") {
     entry.Kind = LinkEntry::Flag;
+    entry.Feature = LinkEntry::DEFAULT;
   } else if (cmHasPrefix(entry.Item.Value, LG_BEGIN) &&
              cmHasSuffix(entry.Item.Value, '>')) {
     entry.Kind = LinkEntry::Group;
@@ -876,7 +870,6 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
 {
   // Track inferred dependency sets implied by this list.
   std::map<size_t, DependSet> dependSets;
-  std::string feature = LinkEntry::DEFAULT;
 
   bool inGroup = false;
   std::pair<size_t, bool> groupIndex{
@@ -893,34 +886,27 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
       continue;
     }
 
-    if (cmHasPrefix(item.AsStr(), LL_BEGIN) &&
-        cmHasSuffix(item.AsStr(), '>')) {
-      feature = ExtractFeature(item.AsStr());
-      // emit a warning if an undefined feature is used as part of
-      // an imported target
-      if (depender_index != cmComputeComponentGraph::INVALID_COMPONENT) {
-        const auto& depender = this->EntryList[depender_index];
-        if (depender.Target != nullptr && depender.Target->IsImported() &&
-            !IsFeatureSupported(this->Makefile, this->LinkLanguage, feature)) {
-          this->CMakeInstance->IssueMessage(
-            MessageType::AUTHOR_ERROR,
-            cmStrCat("The 'IMPORTED' target '", depender.Target->GetName(),
-                     "' uses the generator-expression '$<LINK_LIBRARY>' with "
-                     "the feature '",
-                     feature,
-                     "', which is undefined or unsupported.\nDid you miss to "
-                     "define it by setting variables \"CMAKE_",
-                     this->LinkLanguage, "_LINK_LIBRARY_USING_", feature,
-                     "\" and \"CMAKE_", this->LinkLanguage,
-                     "_LINK_LIBRARY_USING_", feature, "_SUPPORTED\"?"),
-            this->Target->GetBacktrace());
-        }
+    // emit a warning if an undefined feature is used as part of
+    // an imported target
+    if (item.Feature != LinkEntry::DEFAULT &&
+        depender_index != cmComputeComponentGraph::INVALID_COMPONENT) {
+      const auto& depender = this->EntryList[depender_index];
+      if (depender.Target != nullptr && depender.Target->IsImported() &&
+          !IsFeatureSupported(this->Makefile, this->LinkLanguage,
+                              item.Feature)) {
+        this->CMakeInstance->IssueMessage(
+          MessageType::AUTHOR_ERROR,
+          cmStrCat("The 'IMPORTED' target '", depender.Target->GetName(),
+                   "' uses the generator-expression '$<LINK_LIBRARY>' with "
+                   "the feature '",
+                   item.Feature,
+                   "', which is undefined or unsupported.\nDid you miss to "
+                   "define it by setting variables \"CMAKE_",
+                   this->LinkLanguage, "_LINK_LIBRARY_USING_", item.Feature,
+                   "\" and \"CMAKE_", this->LinkLanguage,
+                   "_LINK_LIBRARY_USING_", item.Feature, "_SUPPORTED\"?"),
+          this->Target->GetBacktrace());
       }
-      continue;
-    }
-    if (cmHasPrefix(item.AsStr(), LL_END) && cmHasSuffix(item.AsStr(), '>')) {
-      feature = LinkEntry::DEFAULT;
-      continue;
     }
 
     if (cmHasPrefix(item.AsStr(), LG_BEGIN) &&
@@ -981,7 +967,7 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
     dependee_index = ale.first;
     LinkEntry& entry = this->EntryList[dependee_index];
     auto const& itemFeature =
-      this->GetCurrentFeature(entry.Item.Value, feature);
+      this->GetCurrentFeature(entry.Item.Value, item.Feature);
     if (inGroup && ale.second && entry.Target != nullptr &&
         (entry.Target->GetType() == cmStateEnums::TargetType::OBJECT_LIBRARY ||
          entry.Target->GetType() ==
@@ -1000,30 +986,27 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
           " library '", entry.Item.Value, "'."),
         this->Target->GetBacktrace());
     }
-    if (itemFeature != LinkEntry::DEFAULT) {
-      if (ale.second) {
-        // current item not yet defined
-        if (entry.Target != nullptr &&
-            (entry.Target->GetType() ==
-               cmStateEnums::TargetType::OBJECT_LIBRARY ||
-             entry.Target->GetType() ==
-               cmStateEnums::TargetType::INTERFACE_LIBRARY)) {
-          this->CMakeInstance->IssueMessage(
-            MessageType::AUTHOR_WARNING,
-            cmStrCat("The feature '", feature,
-                     "', specified as part of a generator-expression "
-                     "'$",
-                     LL_BEGIN, feature, ">', will not be applied to the ",
-                     (entry.Target->GetType() ==
-                          cmStateEnums::TargetType::OBJECT_LIBRARY
-                        ? "OBJECT"
-                        : "INTERFACE"),
-                     " library '", entry.Item.Value, "'."),
-            this->Target->GetBacktrace());
-        } else {
-          entry.Feature = itemFeature;
-        }
+    if (ale.second) {
+      // current item not yet defined
+      if (itemFeature != LinkEntry::DEFAULT && entry.Target != nullptr &&
+          (entry.Target->GetType() ==
+             cmStateEnums::TargetType::OBJECT_LIBRARY ||
+           entry.Target->GetType() ==
+             cmStateEnums::TargetType::INTERFACE_LIBRARY)) {
+        this->CMakeInstance->IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat("The feature '", itemFeature,
+                   "', specified as part of a generator-expression "
+                   "'$<LINK_LIBRARY:",
+                   itemFeature, ">', will not be applied to the ",
+                   (entry.Target->GetType() ==
+                        cmStateEnums::TargetType::OBJECT_LIBRARY
+                      ? "OBJECT"
+                      : "INTERFACE"),
+                   " library '", entry.Item.Value, "'."),
+          this->Target->GetBacktrace());
       }
+      entry.Feature = itemFeature;
     }
 
     bool supportedItem = entry.Target == nullptr ||

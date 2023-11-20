@@ -108,3 +108,10 @@ target_link_libraries(LinkLibrary_override_features4 PRIVATE "$<LINK_LIBRARY:fea
 set_property(TARGET LinkLibrary_override_features4 PROPERTY LINK_LIBRARY_OVERRIDE "feat3,base1,other1")
 set_property(TARGET LinkLibrary_override_features4 PROPERTY LINK_LIBRARY_OVERRIDE_base1 feat2)
 set_property(TARGET LinkLibrary_override_features4 PROPERTY LINK_LIBRARY_OVERRIDE_other1 feat2)
+
+# testing NTERFACE_LINK_LIBRARIES_DIRECT property
+add_library(lib_with_LINK_LIBRARIES_DIRECT SHARED base.c)
+set_property(TARGET lib_with_LINK_LIBRARIES_DIRECT PROPERTY INTERFACE_LINK_LIBRARIES_DIRECT base1)
+
+add_library(LinkLibrary_consuming_LINK_LIBRARIES_DIRECT SHARED lib.c)
+target_link_libraries(LinkLibrary_consuming_LINK_LIBRARIES_DIRECT PRIVATE $<LINK_LIBRARY:feat1,lib_with_LINK_LIBRARIES_DIRECT>)
