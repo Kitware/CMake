@@ -140,11 +140,11 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   set(CMAKE_Fortran_COMPILER_ID_TOOL_MATCH_INDEX 2)
 
   set(_version_info "")
-  foreach(m MAJOR MINOR PATCH TWEAK)
+  foreach(m IN ITEMS MAJOR MINOR PATCH TWEAK)
     set(_COMP "_${m}")
     string(APPEND _version_info "
 #if defined(COMPILER_VERSION${_COMP})")
-    foreach(d 1 2 3 4 5 6 7 8)
+    foreach(d RANGE 1 8)
       string(APPEND _version_info "
 # undef DEC
 # undef HEX

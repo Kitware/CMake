@@ -67,7 +67,7 @@ if (NOT _INCLUDED_FILE)
 endif ()
 
 if(CMAKE_OBJC_SIZEOF_DATA_PTR)
-  foreach(f ${CMAKE_OBJC_ABI_FILES})
+  foreach(f IN LISTS CMAKE_OBJC_ABI_FILES)
     include(${f})
   endforeach()
   unset(CMAKE_OBJC_ABI_FILES)

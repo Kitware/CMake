@@ -62,7 +62,7 @@ if (NOT _INCLUDED_FILE)
 endif ()
 
 if(CMAKE_OBJCXX_SIZEOF_DATA_PTR)
-  foreach(f ${CMAKE_OBJCXX_ABI_FILES})
+  foreach(f IN LISTS CMAKE_OBJCXX_ABI_FILES)
     include(${f})
   endforeach()
   unset(CMAKE_OBJCXX_ABI_FILES)
@@ -178,7 +178,7 @@ if(NOT CMAKE_SHARED_MODULE_OBJCXX_FLAGS)
 endif()
 
 # Initialize OBJCXX link type selection flags from OBJC versions.
-foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
+foreach(type IN ITEMS SHARED_LIBRARY SHARED_MODULE EXE)
   if(NOT CMAKE_${type}_LINK_STATIC_OBJCXX_FLAGS)
     set(CMAKE_${type}_LINK_STATIC_OBJCXX_FLAGS
       ${CMAKE_${type}_LINK_STATIC_OBJC_FLAGS})
