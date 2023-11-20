@@ -36,7 +36,7 @@ set_target_properties (example1 PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Python2")
 target_link_libraries(example1 PRIVATE Python2::Module)
 
-# re-use sample interface file for another plugin
+# reuse sample interface file for another plugin
 swig_add_library(example2
                  LANGUAGE python
                  OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/Python3"

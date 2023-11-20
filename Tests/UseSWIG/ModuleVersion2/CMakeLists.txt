@@ -39,7 +39,7 @@ if(CMake_TEST_FindPython2)
     COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_PROPERTY:example1,SWIG_SUPPORT_FILES_DIRECTORY>${PS}$<TARGET_FILE_DIR:example1>"
     "${Python2_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/../runme.py")
 
-  # re-use sample interface file for another plugin
+  # reuse sample interface file for another plugin
   swig_add_library(example2
                    LANGUAGE python
                    SOURCES ../example.i ../example.cxx)
@@ -73,7 +73,7 @@ if(CMake_TEST_FindPython3)
     "${Python3_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/../runme.py")
 
 
-  # re-use sample interface file for another plugin
+  # reuse sample interface file for another plugin
   swig_add_library(example4
                    LANGUAGE python
                    SOURCES ../example.i ../example.cxx)

@@ -12,7 +12,7 @@ endif()
 # clear the log file
 file(REMOVE "${LOG_FILE}.2343")
 
-# create an example error from address santizer
+# create an example error from address sanitizer
 
 file(APPEND "${LOG_FILE}.2343"
 "=================================================================

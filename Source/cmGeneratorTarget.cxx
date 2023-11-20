@@ -6946,7 +6946,7 @@ cmLinkInterface const* cmGeneratorTarget::GetLinkInterface(
   cmHeadToLinkInterfaceMap& hm = this->GetHeadToLinkInterfaceMap(config);
 
   // If the link interface does not depend on the head target
-  // then re-use the one from the head we computed first.
+  // then reuse the one from the head we computed first.
   if (!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition) {
     head = hm.begin()->first;
   }
@@ -7074,7 +7074,7 @@ const cmLinkInterfaceLibraries* cmGeneratorTarget::GetLinkInterfaceLibraries(
        : this->GetHeadToLinkInterfaceMap(config));
 
   // If the link interface does not depend on the head target
-  // then re-use the one from the head we computed first.
+  // then reuse the one from the head we computed first.
   if (!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition) {
     head = hm.begin()->first;
   }
@@ -7596,7 +7596,7 @@ const cmLinkInterface* cmGeneratorTarget::GetImportLinkInterface(
        : this->GetHeadToLinkInterfaceMap(config));
 
   // If the link interface does not depend on the head target
-  // then re-use the one from the head we computed first.
+  // then reuse the one from the head we computed first.
   if (!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition) {
     headTarget = hm.begin()->first;
   }
@@ -8156,7 +8156,7 @@ cmGeneratorTarget::GetLinkImplementationLibrariesInternal(
        : this->GetHeadToLinkImplementationMap(config));
 
   // If the link implementation does not depend on the head target
-  // then re-use the one from the head we computed first.
+  // then reuse the one from the head we computed first.
   if (!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition) {
     head = hm.begin()->first;
   }

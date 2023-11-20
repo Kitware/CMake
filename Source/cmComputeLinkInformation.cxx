@@ -2591,7 +2591,7 @@ std::string cmComputeLinkInformation::GetRPathString(bool for_install) const
   // If the rpath will be replaced at install time, prepare space.
   if (!for_install && this->RuntimeUseChrpath) {
     if (!rpath.empty()) {
-      // Add one trailing separator so the linker does not re-use the
+      // Add one trailing separator so the linker does not reuse the
       // rpath .dynstr entry for a symbol name that happens to match
       // the end of the rpath string.
       rpath += this->GetRuntimeSep();

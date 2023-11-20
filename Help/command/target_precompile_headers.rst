@@ -94,7 +94,7 @@ Reusing Precompile Headers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The command also supports a second signature which can be used to specify that
-one target re-uses a precompiled header file artifact from another target
+one target reuses a precompiled header file artifact from another target
 instead of generating its own:
 
 .. code-block:: cmake

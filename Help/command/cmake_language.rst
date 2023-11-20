@@ -195,7 +195,7 @@ prints::
   Immediate Message
   Deferred Message
 
-The ``Cancelled Message`` is never printed because its command is
+The ``Canceled Message`` is never printed because its command is
 canceled.  The ``deferred_message`` variable reference is not evaluated
 until the call site, so it can be set after the deferred call is scheduled.
 

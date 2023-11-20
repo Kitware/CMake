@@ -196,7 +196,7 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
 
     # I expect that MPGLIB, VOC, WAV, AIFF, and SHN are compiled in statically.
     # I think Timidity is also compiled in statically.
-    # I've never had to explcitly link against Quicktime, so I'll skip that for now.
+    # I've never had to explicitly link against Quicktime, so I'll skip that for now.
 
     set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARY})
 
