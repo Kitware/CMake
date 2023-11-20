@@ -10,25 +10,25 @@
       "name": "HEADERS",
       "type": "HEADERS",
       "visibility": "PUBLIC",
-      "baseDirectories": [".*/Tests/RunCMake/FileAPI/fileset$"]
+      "baseDirectories": ["^fileset$"]
     },
     {
       "name": "a",
       "type": "HEADERS",
       "visibility": "PRIVATE",
-      "baseDirectories": [".*/Tests/RunCMake/FileAPI/fileset$"]
+      "baseDirectories": ["^fileset$"]
     },
     {
       "name": "b",
       "type": "HEADERS",
       "visibility": "PUBLIC",
-      "baseDirectories": [".*/Tests/RunCMake/FileAPI/fileset/dir$"]
+      "baseDirectories": ["^fileset/dir$"]
     },
     {
       "name": "c",
       "type": "HEADERS",
       "visibility": "INTERFACE",
-      "baseDirectories": [".*/Tests/RunCMake/FileAPI/fileset$"]
+      "baseDirectories": ["^fileset$"]
     }
   ],
   "sources": [

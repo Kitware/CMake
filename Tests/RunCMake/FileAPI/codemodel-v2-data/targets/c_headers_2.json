@@ -10,7 +10,7 @@
       "name": "HEADERS",
       "type": "HEADERS",
       "visibility": "INTERFACE",
-      "baseDirectories": [".*/Tests/RunCMake/FileAPI/fileset$"]
+      "baseDirectories": ["^fileset$"]
     }
   ],
   "sources": [
