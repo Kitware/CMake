@@ -82,17 +82,12 @@ cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
 cmCTestMultiProcessHandler::~cmCTestMultiProcessHandler() = default;
 
 // Set the tests
-void cmCTestMultiProcessHandler::SetTests(TestMap& tests,
-                                          PropertiesMap& properties)
+void cmCTestMultiProcessHandler::SetTests(TestMap tests,
+                                          PropertiesMap properties)
 {
-  this->Tests = tests;
-  this->Properties = properties;
-  this->Total = this->Tests.size();
-  // set test run map to false for all
-  for (auto const& t : this->Tests) {
-    this->TestRunningMap[t.first] = false;
-    this->TestFinishMap[t.first] = false;
-  }
+  this->PendingTests = std::move(tests);
+  this->Properties = std::move(properties);
+  this->Total = this->PendingTests.size();
   if (!this->CTest->GetShowOnly()) {
     this->ReadCostData();
     this->HasCycles = !this->CheckCycles();
@@ -125,6 +120,11 @@ void cmCTestMultiProcessHandler::SetTestLoad(unsigned long load)
   }
 }
 
+bool cmCTestMultiProcessHandler::Complete()
+{
+  return this->Completed == this->Total;
+}
+
 void cmCTestMultiProcessHandler::RunTests()
 {
   this->CheckResume();
@@ -133,14 +133,14 @@ void cmCTestMultiProcessHandler::RunTests()
   }
   this->TestHandler->SetMaxIndex(this->FindMaxIndex());
 
-  uv_loop_init(&this->Loop);
+  this->Loop.init();
   this->StartNextTests();
-  uv_run(&this->Loop, UV_RUN_DEFAULT);
-  uv_loop_close(&this->Loop);
+  uv_run(this->Loop, UV_RUN_DEFAULT);
+  this->Loop.reset();
 
   if (!this->StopTimePassed && !this->CheckStopOnFailure()) {
-    assert(this->Completed == this->Total);
-    assert(this->Tests.empty());
+    assert(this->Complete());
+    assert(this->PendingTests.empty());
   }
   assert(this->AllResourcesAvailable());
 
@@ -152,9 +152,7 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
 {
   if (this->HaveAffinity && this->Properties[test]->WantAffinity) {
     size_t needProcessors = this->GetProcessorsUsed(test);
-    if (needProcessors > this->ProcessorsAvailable.size()) {
-      return false;
-    }
+    assert(needProcessors <= this->ProcessorsAvailable.size());
     std::vector<size_t> affinity;
     affinity.reserve(needProcessors);
     for (size_t i = 0; i < needProcessors; ++i) {
@@ -167,19 +165,16 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
 
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "test " << test << "\n", this->Quiet);
-  this->TestRunningMap[test] = true; // mark the test as running
   // now remove the test itself
-  this->EraseTest(test);
+  this->ErasePendingTest(test);
   this->RunningCount += this->GetProcessorsUsed(test);
 
-  auto testRun = cm::make_unique<cmCTestRunTest>(*this);
+  auto testRun = cm::make_unique<cmCTestRunTest>(*this, test);
 
   if (this->RepeatMode != cmCTest::Repeat::Never) {
     testRun->SetRepeatMode(this->RepeatMode);
     testRun->SetNumberOfRuns(this->RepeatCount);
   }
-  testRun->SetIndex(test);
-  testRun->SetTestProperties(this->Properties[test]);
   if (this->UseResourceSpec) {
     testRun->SetUseAllocatedResources(true);
     testRun->SetAllocatedResources(this->AllocatedResources[test]);
@@ -197,18 +192,18 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
   // working directory because FinishTestProcess() will try to unlock them
   this->LockResources(test);
 
-  if (!this->ResourceAllocationErrors[test].empty()) {
+  if (!this->ResourceAvailabilityErrors[test].empty()) {
     std::ostringstream e;
     e << "Insufficient resources for test " << this->Properties[test]->Name
       << ":\n\n";
-    for (auto const& it : this->ResourceAllocationErrors[test]) {
+    for (auto const& it : this->ResourceAvailabilityErrors[test]) {
       switch (it.second) {
-        case ResourceAllocationError::NoResourceType:
+        case ResourceAvailabilityError::NoResourceType:
           e << "  Test requested resources of type '" << it.first
             << "' which does not exist\n";
           break;
 
-        case ResourceAllocationError::InsufficientResources:
+        case ResourceAvailabilityError::InsufficientResources:
           e << "  Test requested resources of type '" << it.first
             << "' in the following amounts:\n";
           for (auto const& group : this->Properties[test]->ResourceGroups) {
@@ -257,6 +252,12 @@ bool cmCTestMultiProcessHandler::AllocateResources(int index)
     return true;
   }
 
+  // If the test needs unavailable resources then do not allocate anything
+  // because it will never run.  We will issue the recorded errors instead.
+  if (!this->ResourceAvailabilityErrors[index].empty()) {
+    return true;
+  }
+
   std::map<std::string, std::vector<cmCTestBinPackerAllocation>> allocations;
   if (!this->TryAllocateResources(index, allocations)) {
     return false;
@@ -281,7 +282,7 @@ bool cmCTestMultiProcessHandler::AllocateResources(int index)
 bool cmCTestMultiProcessHandler::TryAllocateResources(
   int index,
   std::map<std::string, std::vector<cmCTestBinPackerAllocation>>& allocations,
-  std::map<std::string, ResourceAllocationError>* errors)
+  std::map<std::string, ResourceAvailabilityError>* errors)
 {
   allocations.clear();
 
@@ -301,7 +302,7 @@ bool cmCTestMultiProcessHandler::TryAllocateResources(
   for (auto& it : allocations) {
     if (!availableResources.count(it.first)) {
       if (errors) {
-        (*errors)[it.first] = ResourceAllocationError::NoResourceType;
+        (*errors)[it.first] = ResourceAvailabilityError::NoResourceType;
         result = false;
       } else {
         return false;
@@ -309,7 +310,7 @@ bool cmCTestMultiProcessHandler::TryAllocateResources(
     } else if (!cmAllocateCTestResourcesRoundRobin(
                  availableResources.at(it.first), it.second)) {
       if (errors) {
-        (*errors)[it.first] = ResourceAllocationError::InsufficientResources;
+        (*errors)[it.first] = ResourceAvailabilityError::InsufficientResources;
         result = false;
       } else {
         return false;
@@ -356,14 +357,14 @@ bool cmCTestMultiProcessHandler::AllResourcesAvailable()
   return true;
 }
 
-void cmCTestMultiProcessHandler::CheckResourcesAvailable()
+void cmCTestMultiProcessHandler::CheckResourceAvailability()
 {
   if (this->UseResourceSpec) {
-    for (auto test : this->SortedTests) {
+    for (auto const& t : this->PendingTests) {
       std::map<std::string, std::vector<cmCTestBinPackerAllocation>>
         allocations;
-      this->TryAllocateResources(test, allocations,
-                                 &this->ResourceAllocationErrors[test]);
+      this->TryAllocateResources(t.first, allocations,
+                                 &this->ResourceAvailabilityErrors[t.first]);
     }
   }
 }
@@ -399,30 +400,30 @@ void cmCTestMultiProcessHandler::SetStopTimePassed()
 
 void cmCTestMultiProcessHandler::LockResources(int index)
 {
-  this->LockedResources.insert(
-    this->Properties[index]->LockedResources.begin(),
-    this->Properties[index]->LockedResources.end());
-
-  if (this->Properties[index]->RunSerial) {
+  auto* properties = this->Properties[index];
+  this->LockedResources.insert(properties->LockedResources.begin(),
+                               properties->LockedResources.end());
+  if (properties->RunSerial) {
     this->SerialTestRunning = true;
   }
 }
 
 void cmCTestMultiProcessHandler::UnlockResources(int index)
 {
-  for (std::string const& i : this->Properties[index]->LockedResources) {
+  auto* properties = this->Properties[index];
+  for (std::string const& i : properties->LockedResources) {
     this->LockedResources.erase(i);
   }
-  if (this->Properties[index]->RunSerial) {
+  if (properties->RunSerial) {
     this->SerialTestRunning = false;
   }
 }
 
-void cmCTestMultiProcessHandler::EraseTest(int test)
+void cmCTestMultiProcessHandler::ErasePendingTest(int test)
 {
-  this->Tests.erase(test);
-  this->SortedTests.erase(
-    std::find(this->SortedTests.begin(), this->SortedTests.end(), test));
+  this->PendingTests.erase(test);
+  this->OrderedTests.erase(
+    std::find(this->OrderedTests.begin(), this->OrderedTests.end(), test));
 }
 
 inline size_t cmCTestMultiProcessHandler::GetProcessorsUsed(int test)
@@ -455,15 +456,12 @@ bool cmCTestMultiProcessHandler::StartTest(int test)
     }
   }
 
-  // Allocate resources
-  if (this->ResourceAllocationErrors[test].empty() &&
-      !this->AllocateResources(test)) {
-    this->DeallocateResources(test);
+  if (!this->AllocateResources(test)) {
     return false;
   }
 
   // if there are no depends left then run this test
-  if (this->Tests[test].empty()) {
+  if (this->PendingTests[test].Depends.empty()) {
     return this->StartTestProcess(test);
   }
   // This test was not able to start because it is waiting
@@ -480,7 +478,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
     uv_timer_stop(this->TestLoadRetryTimer);
   }
 
-  if (this->Tests.empty()) {
+  if (this->PendingTests.empty()) {
     this->TestLoadRetryTimer.reset();
     return;
   }
@@ -541,12 +539,14 @@ void cmCTestMultiProcessHandler::StartNextTests()
     }
   }
 
-  TestList copy = this->SortedTests;
-  for (auto const& test : copy) {
-    // Take a nap if we're currently performing a RUN_SERIAL test.
-    if (this->SerialTestRunning) {
-      break;
-    }
+  // Start tests in the preferred order, each subject to readiness checks.
+  auto ti = this->OrderedTests.begin();
+  while (numToStart > 0 && !this->SerialTestRunning &&
+         ti != this->OrderedTests.end()) {
+    // Increment the test iterator now because the current list
+    // entry may be deleted below.
+    int test = *ti++;
+
     // We can only start a RUN_SERIAL test if no other tests are also
     // running.
     if (this->Properties[test]->RunSerial && this->RunningCount > 0) {
@@ -554,28 +554,32 @@ void cmCTestMultiProcessHandler::StartNextTests()
     }
 
     size_t processors = this->GetProcessorsUsed(test);
-    bool testLoadOk = true;
     if (this->TestLoad > 0) {
-      if (processors <= spareLoad) {
-        cmCTestLog(this->CTest, DEBUG,
-                   "OK to run " << this->GetName(test) << ", it requires "
-                                << processors << " procs & system load is: "
-                                << systemLoad << std::endl);
-        allTestsFailedTestLoadCheck = false;
-      } else {
-        testLoadOk = false;
+      // Exclude tests that are too big to fit in the spare load.
+      if (processors > spareLoad) {
+        // Keep track of the smallest excluded test to report in message below.
+        if (processors <= minProcessorsRequired) {
+          minProcessorsRequired = processors;
+          testWithMinProcessors = this->GetName(test);
+        }
+        continue;
       }
+
+      // We found a test that fits in the spare load.
+      allTestsFailedTestLoadCheck = false;
+      cmCTestLog(this->CTest, DEBUG,
+                 "OK to run "
+                   << this->GetName(test) << ", it requires " << processors
+                   << " procs & system load is: " << systemLoad << std::endl);
     }
 
-    if (processors <= minProcessorsRequired) {
-      minProcessorsRequired = processors;
-      testWithMinProcessors = this->GetName(test);
+    // Exclude tests that are too big to fit in the concurrency limit.
+    if (processors > numToStart) {
+      continue;
     }
 
-    if (testLoadOk && processors <= numToStart && this->StartTest(test)) {
+    if (this->StartTest(test)) {
       numToStart -= processors;
-    } else if (numToStart == 0) {
-      break;
     }
   }
 
@@ -583,8 +587,8 @@ void cmCTestMultiProcessHandler::StartNextTests()
     // Find out whether there are any non RUN_SERIAL tests left, so that the
     // correct warning may be displayed.
     bool onlyRunSerialTestsLeft = true;
-    for (auto const& test : copy) {
-      if (!this->Properties[test]->RunSerial) {
+    for (auto const& t : this->PendingTests) {
+      if (!this->Properties[t.first]->RunSerial) {
         onlyRunSerialTestsLeft = false;
       }
     }
@@ -596,13 +600,19 @@ void cmCTestMultiProcessHandler::StartNextTests()
     } else if (onlyRunSerialTestsLeft) {
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "Only RUN_SERIAL tests remain, awaiting available slot.");
-    } else {
+    } else if (!testWithMinProcessors.empty()) {
       /* clang-format off */
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "System Load: " << systemLoad << ", "
                  "Max Allowed Load: " << this->TestLoad << ", "
                  "Smallest test " << testWithMinProcessors <<
                  " requires " << minProcessorsRequired);
+      /* clang-format on */
+    } else {
+      /* clang-format off */
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                 "System Load: " << systemLoad << ", "
+                 "Max Allowed Load: " << this->TestLoad);
       /* clang-format on */
     }
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "*****" << std::endl);
@@ -613,7 +623,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
       milliseconds = 10;
     }
     if (this->TestLoadRetryTimer.get() == nullptr) {
-      this->TestLoadRetryTimer.init(this->Loop, this);
+      this->TestLoadRetryTimer.init(*this->Loop, this);
     }
     this->TestLoadRetryTimer.start(
       &cmCTestMultiProcessHandler::OnTestLoadRetryCB, milliseconds, 0);
@@ -653,12 +663,10 @@ void cmCTestMultiProcessHandler::FinishTestProcess(
     this->Failed->push_back(properties->Name);
   }
 
-  for (auto& t : this->Tests) {
-    t.second.erase(test);
+  for (auto& t : this->PendingTests) {
+    t.second.Depends.erase(test);
   }
 
-  this->TestFinishMap[test] = true;
-  this->TestRunningMap[test] = false;
   this->WriteCheckpoint(test);
   this->DeallocateResources(test);
   this->UnlockResources(test);
@@ -803,7 +811,7 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
 
 void cmCTestMultiProcessHandler::CreateParallelTestCostList()
 {
-  TestSet alreadySortedTests;
+  TestSet alreadyOrderedTests;
 
   std::list<TestSet> priorityStack;
   priorityStack.emplace_back();
@@ -811,11 +819,11 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
 
   // In parallel test runs add previously failed tests to the front
   // of the cost list and queue other tests for further sorting
-  for (auto const& t : this->Tests) {
+  for (auto const& t : this->PendingTests) {
     if (cm::contains(this->LastTestsFailed, this->Properties[t.first]->Name)) {
       // If the test failed last time, it should be run first.
-      this->SortedTests.push_back(t.first);
-      alreadySortedTests.insert(t.first);
+      this->OrderedTests.push_back(t.first);
+      alreadyOrderedTests.insert(t.first);
     } else {
       topLevel.insert(t.first);
     }
@@ -830,7 +838,7 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
     TestSet& currentSet = priorityStack.back();
 
     for (auto const& i : previousSet) {
-      TestSet const& dependencies = this->Tests[i];
+      TestSet const& dependencies = this->PendingTests[i].Depends;
       currentSet.insert(dependencies.begin(), dependencies.end());
     }
 
@@ -851,9 +859,9 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
                      TestComparator(this));
 
     for (auto const& j : sortedCopy) {
-      if (!cm::contains(alreadySortedTests, j)) {
-        this->SortedTests.push_back(j);
-        alreadySortedTests.insert(j);
+      if (!cm::contains(alreadyOrderedTests, j)) {
+        this->OrderedTests.push_back(j);
+        alreadyOrderedTests.insert(j);
       }
     }
   }
@@ -862,7 +870,7 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
 void cmCTestMultiProcessHandler::GetAllTestDependencies(int test,
                                                         TestList& dependencies)
 {
-  TestSet const& dependencySet = this->Tests[test];
+  TestSet const& dependencySet = this->PendingTests[test].Depends;
   for (int i : dependencySet) {
     this->GetAllTestDependencies(i, dependencies);
     dependencies.push_back(i);
@@ -873,17 +881,17 @@ void cmCTestMultiProcessHandler::CreateSerialTestCostList()
 {
   TestList presortedList;
 
-  for (auto const& i : this->Tests) {
+  for (auto const& i : this->PendingTests) {
     presortedList.push_back(i.first);
   }
 
   std::stable_sort(presortedList.begin(), presortedList.end(),
                    TestComparator(this));
 
-  TestSet alreadySortedTests;
+  TestSet alreadyOrderedTests;
 
   for (int test : presortedList) {
-    if (cm::contains(alreadySortedTests, test)) {
+    if (cm::contains(alreadyOrderedTests, test)) {
       continue;
     }
 
@@ -891,14 +899,14 @@ void cmCTestMultiProcessHandler::CreateSerialTestCostList()
     this->GetAllTestDependencies(test, dependencies);
 
     for (int testDependency : dependencies) {
-      if (!cm::contains(alreadySortedTests, testDependency)) {
-        alreadySortedTests.insert(testDependency);
-        this->SortedTests.push_back(testDependency);
+      if (!cm::contains(alreadyOrderedTests, testDependency)) {
+        alreadyOrderedTests.insert(testDependency);
+        this->OrderedTests.push_back(testDependency);
       }
     }
 
-    alreadySortedTests.insert(test);
-    this->SortedTests.push_back(test);
+    alreadyOrderedTests.insert(test);
+    this->OrderedTests.push_back(test);
   }
 }
 
@@ -1255,9 +1263,7 @@ void cmCTestMultiProcessHandler::PrintOutputAsJson()
     // Don't worry if this fails, we are only showing the test list, not
     // running the tests
     cmWorkingDirectory workdir(p.Directory);
-    cmCTestRunTest testRun(*this);
-    testRun.SetIndex(p.Index);
-    testRun.SetTestProperties(&p);
+    cmCTestRunTest testRun(*this, p.Index);
     testRun.ComputeArguments();
 
     // Skip tests not available in this configuration.
@@ -1294,9 +1300,7 @@ void cmCTestMultiProcessHandler::PrintTestList()
     // running the tests
     cmWorkingDirectory workdir(p.Directory);
 
-    cmCTestRunTest testRun(*this);
-    testRun.SetIndex(p.Index);
-    testRun.SetTestProperties(&p);
+    cmCTestRunTest testRun(*this, p.Index);
     testRun.ComputeArguments(); // logs the command in verbose mode
 
     if (!p.Labels.empty()) // print the labels
@@ -1390,17 +1394,15 @@ void cmCTestMultiProcessHandler::CheckResume()
 
 void cmCTestMultiProcessHandler::RemoveTest(int index)
 {
-  this->EraseTest(index);
+  this->ErasePendingTest(index);
   this->Properties.erase(index);
-  this->TestRunningMap[index] = false;
-  this->TestFinishMap[index] = true;
   this->Completed++;
 }
 
 int cmCTestMultiProcessHandler::FindMaxIndex()
 {
   int max = 0;
-  for (auto const& i : this->Tests) {
+  for (auto const& i : this->PendingTests) {
     if (i.first > max) {
       max = i.first;
     }
@@ -1414,7 +1416,7 @@ bool cmCTestMultiProcessHandler::CheckCycles()
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Checking test dependency graph..." << std::endl,
                      this->Quiet);
-  for (auto const& it : this->Tests) {
+  for (auto const& it : this->PendingTests) {
     // DFS from each element to itself
     int root = it.first;
     std::set<int> visited;
@@ -1424,7 +1426,7 @@ bool cmCTestMultiProcessHandler::CheckCycles()
       int test = s.top();
       s.pop();
       if (visited.insert(test).second) {
-        for (auto const& d : this->Tests[test]) {
+        for (auto const& d : this->PendingTests[test].Depends) {
           if (d == root) {
             // cycle exists
             cmCTestLog(

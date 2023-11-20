@@ -1,8 +1,8 @@
 Test project [^
-]*/Tests/RunCMake/ctest_test/CTestTestLoadWait-build(
+]*/Tests/RunCMake/ctest_test/CTestTestLoadWait0-build(
 [^*][^
 ]*)*
-\*\*\*\*\* WAITING, System Load: 5, Max Allowed Load: 4, Smallest test RunCMakeVersion requires 1\*\*\*\*\*
+\*\*\*\*\* WAITING, System Load: 7, Max Allowed Load: 6\*\*\*\*\*
 test 1
     Start 1: RunCMakeVersion
 +(

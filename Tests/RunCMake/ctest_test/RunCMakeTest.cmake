@@ -14,16 +14,20 @@ run_ctest_test(TestQuiet QUIET)
 # Tests for the 'Test Load' feature of ctest
 #
 # Spoof a load average value to make these tests more reliable.
-set(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING} 5)
+set(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING} 7)
 set(RunCTest_VERBOSE_FLAG -VV)
+set(CASE_CMAKELISTS_SUFFIX_CODE [[
+set_property(TEST RunCMakeVersion PROPERTY PROCESSORS 2)
+]])
 
 # Verify that new tests are started when the load average falls below
 # our threshold.
-run_ctest_test(TestLoadPass TEST_LOAD 6)
+run_ctest_test(TestLoadPass TEST_LOAD 8)
 
 # Verify that new tests are not started when the load average exceeds
 # our threshold and that they then run once the load average drops.
-run_ctest_test(TestLoadWait TEST_LOAD 2)
+run_ctest_test(TestLoadWait0 TEST_LOAD 4 PARALLEL_LEVEL 8)
+run_ctest_test(TestLoadWait1 TEST_LOAD 8 PARALLEL_LEVEL 8)
 
 # Verify that when an invalid "TEST_LOAD" value is given, a warning
 # message is displayed and the value is ignored.
@@ -31,13 +35,15 @@ run_ctest_test(TestLoadInvalid TEST_LOAD "ERR1")
 
 # Verify that new tests are started when the load average falls below
 # our threshold.
-set(CASE_CTEST_TEST_LOAD 7)
+set(CASE_CTEST_TEST_LOAD 9)
 run_ctest_test(CTestTestLoadPass)
 
 # Verify that new tests are not started when the load average exceeds
 # our threshold and that they then run once the load average drops.
-set(CASE_CTEST_TEST_LOAD 4)
-run_ctest_test(CTestTestLoadWait)
+set(CASE_CTEST_TEST_LOAD 6)
+run_ctest_test(CTestTestLoadWait0 PARALLEL_LEVEL 8)
+set(CASE_CTEST_TEST_LOAD 8)
+run_ctest_test(CTestTestLoadWait1 PARALLEL_LEVEL 8)
 
 # Verify that when an invalid "CTEST_TEST_LOAD" value is given,
 # a warning message is displayed and the value is ignored.
@@ -51,6 +57,7 @@ run_ctest_test(TestLoadOrder TEST_LOAD "ERR4")
 
 unset(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING})
 unset(CASE_CTEST_TEST_LOAD)
+unset(CASE_CMAKELISTS_SUFFIX_CODE)
 unset(RunCTest_VERBOSE_FLAG)
 
 block()
