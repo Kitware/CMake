@@ -30,9 +30,36 @@ static bool testIdle()
   return true;
 }
 
+static bool testTimer()
+{
+  bool timed = false;
+
+  cm::uv_loop_ptr loop;
+  loop.init();
+
+  auto cb = [](uv_timer_t* handle) {
+    auto timedPtr = static_cast<bool*>(handle->data);
+    *timedPtr = true;
+    uv_timer_stop(handle);
+  };
+
+  cm::uv_timer_ptr timer;
+  timer.init(*loop, &timed);
+  timer.start(cb, 10, 0);
+  uv_run(loop, UV_RUN_DEFAULT);
+
+  if (!timed) {
+    std::cerr << "uv_timer_ptr did not trigger callback" << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
 int testUVHandlePtr(int, char** const)
 {
   bool passed = true;
   passed = testIdle() && passed;
+  passed = testTimer() && passed;
   return passed ? 0 : -1;
 }
