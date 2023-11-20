@@ -1206,10 +1206,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
 
     this->WriteTargetDependInfo(language, config);
 
-    for (std::string const& l :
-         this->GetLinkedTargetDirectories(language, config)) {
-      build.ImplicitDeps.emplace_back(
-        cmStrCat(l, '/', language, "Modules.json"));
+    auto const linked_directories =
+      this->GetLinkedTargetDirectories(language, config);
+    for (std::string const& l : linked_directories.Direct) {
+      build.ImplicitDeps.push_back(cmStrCat(l, '/', language, "Modules.json"));
     }
 
     this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
@@ -1909,7 +1909,9 @@ void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,
 
   Json::Value& tdi_linked_target_dirs = tdi["linked-target-dirs"] =
     Json::arrayValue;
-  for (std::string const& l : this->GetLinkedTargetDirectories(lang, config)) {
+  auto const linked_directories =
+    this->GetLinkedTargetDirectories(lang, config);
+  for (std::string const& l : linked_directories.Direct) {
     tdi_linked_target_dirs.append(l);
   }
 
