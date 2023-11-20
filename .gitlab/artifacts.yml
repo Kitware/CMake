@@ -86,7 +86,6 @@
             - ${CMAKE_CI_BUILD_DIR}/cmake-*.zip
             # Any unsigned packages made.
             - ${CMAKE_CI_BUILD_DIR}/unsigned/cmake-*
-            - ${CMAKE_CI_BUILD_DIR}/cdash-build-id
         reports:
             annotations:
                 - ${CMAKE_CI_BUILD_DIR}/annotations.json
