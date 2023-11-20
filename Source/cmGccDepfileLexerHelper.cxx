@@ -144,8 +144,8 @@ void cmGccDepfileLexerHelper::sanitizeContent()
         ++rit;
       }
     }
-    // Remove the entry if rules are empty or do not have any paths
-    if (it->rules.empty() || it->paths.empty()) {
+    // Remove the entry if rules are empty
+    if (it->rules.empty()) {
       it = this->Content.erase(it);
     } else {
       ++it;
