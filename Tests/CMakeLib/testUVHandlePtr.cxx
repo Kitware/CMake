@@ -11,13 +11,15 @@ static bool testIdle()
   cm::uv_loop_ptr loop;
   loop.init();
 
-  cm::uv_idle_ptr idle;
-  idle.init(*loop, &idled);
-  uv_idle_start(idle, [](uv_idle_t* handle) {
+  auto cb = [](uv_idle_t* handle) {
     auto idledPtr = static_cast<bool*>(handle->data);
     *idledPtr = true;
     uv_idle_stop(handle);
-  });
+  };
+
+  cm::uv_idle_ptr idle;
+  idle.init(*loop, &idled);
+  uv_idle_start(idle, cb);
   uv_run(loop, UV_RUN_DEFAULT);
 
   if (!idled) {
