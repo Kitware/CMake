@@ -241,6 +241,12 @@ int uv_timer_ptr::start(uv_timer_cb cb, uint64_t timeout, uint64_t repeat)
   return uv_timer_start(*this, cb, timeout, repeat);
 }
 
+void uv_timer_ptr::stop()
+{
+  assert(this->handle);
+  uv_timer_stop(*this);
+}
+
 #ifndef CMAKE_BOOTSTRAP
 uv_tty_ptr::operator uv_stream_t*() const
 {
@@ -258,6 +264,18 @@ int uv_idle_ptr::init(uv_loop_t& loop, void* data)
 {
   this->allocate(data);
   return uv_idle_init(&loop, *this);
+}
+
+int uv_idle_ptr::start(uv_idle_cb cb)
+{
+  assert(this->handle);
+  return uv_idle_start(*this, cb);
+}
+
+void uv_idle_ptr::stop()
+{
+  assert(this->handle);
+  uv_idle_stop(*this);
 }
 
 template class uv_handle_ptr_base_<uv_handle_t>;

@@ -201,6 +201,10 @@ struct uv_idle_ptr : public uv_handle_ptr_<uv_idle_t>
   CM_INHERIT_CTOR(uv_idle_ptr, uv_handle_ptr_, <uv_idle_t>);
 
   int init(uv_loop_t& loop, void* data = nullptr);
+
+  int start(uv_idle_cb cb);
+
+  void stop();
 };
 
 struct uv_signal_ptr : public uv_handle_ptr_<uv_signal_t>
@@ -238,6 +242,8 @@ struct uv_timer_ptr : public uv_handle_ptr_<uv_timer_t>
   int init(uv_loop_t& loop, void* data = nullptr);
 
   int start(uv_timer_cb cb, uint64_t timeout, uint64_t repeat);
+
+  void stop();
 };
 
 struct uv_tty_ptr : public uv_handle_ptr_<uv_tty_t>
