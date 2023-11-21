@@ -148,6 +148,9 @@ protected:
   bool CheckStopTimePassed();
   void SetStopTimePassed();
 
+  void InitializeLoop();
+  void FinalizeLoop();
+
   void LockResources(int index);
   void UnlockResources(int index);
 

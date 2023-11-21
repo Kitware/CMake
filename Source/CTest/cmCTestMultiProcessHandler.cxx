@@ -125,6 +125,16 @@ bool cmCTestMultiProcessHandler::Complete()
   return this->Completed == this->Total;
 }
 
+void cmCTestMultiProcessHandler::InitializeLoop()
+{
+  this->Loop.init();
+}
+
+void cmCTestMultiProcessHandler::FinalizeLoop()
+{
+  this->Loop.reset();
+}
+
 void cmCTestMultiProcessHandler::RunTests()
 {
   this->CheckResume();
@@ -133,10 +143,10 @@ void cmCTestMultiProcessHandler::RunTests()
   }
   this->TestHandler->SetMaxIndex(this->FindMaxIndex());
 
-  this->Loop.init();
+  this->InitializeLoop();
   this->StartNextTests();
   uv_run(this->Loop, UV_RUN_DEFAULT);
-  this->Loop.reset();
+  this->FinalizeLoop();
 
   if (!this->StopTimePassed && !this->CheckStopOnFailure()) {
     assert(this->Complete());
