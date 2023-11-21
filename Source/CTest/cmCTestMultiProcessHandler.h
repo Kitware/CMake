@@ -108,8 +108,8 @@ protected:
   // Start the next test or tests as many as are allowed by
   // ParallelLevel
   void StartNextTests();
-  bool StartTestProcess(int test);
-  bool StartTest(int test);
+  void StartTestProcess(int test);
+  void StartTest(int test);
   // Mark the checkpoint for the given test
   void WriteCheckpoint(int index);
 

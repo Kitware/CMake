@@ -56,7 +56,7 @@ public:
   // Read and store output.  Returns true if it must be called again.
   void CheckOutput(std::string const& line);
 
-  static bool StartTest(std::unique_ptr<cmCTestRunTest> runner,
+  static void StartTest(std::unique_ptr<cmCTestRunTest> runner,
                         size_t completed, size_t total);
   static bool StartAgain(std::unique_ptr<cmCTestRunTest> runner,
                          size_t completed);

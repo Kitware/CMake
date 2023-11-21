@@ -162,7 +162,7 @@ void cmCTestMultiProcessHandler::RunTests()
   this->UpdateCostData();
 }
 
-bool cmCTestMultiProcessHandler::StartTestProcess(int test)
+void cmCTestMultiProcessHandler::StartTestProcess(int test)
 {
   if (this->HaveAffinity && this->Properties[test]->WantAffinity) {
     size_t needProcessors = this->GetProcessorsUsed(test);
@@ -241,7 +241,7 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
     e << "Resource spec file:\n\n  " << this->ResourceSpecFile;
     cmCTestRunTest::StartFailure(std::move(testRun), this->Total, e.str(),
                                  "Insufficient resources");
-    return false;
+    return;
   }
 
   cmWorkingDirectory workdir(this->Properties[test]->Directory);
@@ -251,13 +251,12 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
                                    this->Properties[test]->Directory + " : " +
                                    std::strerror(workdir.GetLastResult()),
                                  "Failed to change working directory");
-    return false;
+    return;
   }
 
   // Ownership of 'testRun' has moved to another structure.
   // When the test finishes, FinishTestProcess will be called.
-  return cmCTestRunTest::StartTest(std::move(testRun), this->Completed,
-                                   this->Total);
+  cmCTestRunTest::StartTest(std::move(testRun), this->Completed, this->Total);
 }
 
 bool cmCTestMultiProcessHandler::AllocateResources(int index)
@@ -461,9 +460,9 @@ std::string cmCTestMultiProcessHandler::GetName(int test)
   return this->Properties[test]->Name;
 }
 
-bool cmCTestMultiProcessHandler::StartTest(int test)
+void cmCTestMultiProcessHandler::StartTest(int test)
 {
-  return this->StartTestProcess(test);
+  this->StartTestProcess(test);
 }
 
 void cmCTestMultiProcessHandler::StartNextTests()
@@ -583,9 +582,8 @@ void cmCTestMultiProcessHandler::StartNextTests()
     }
 
     // The test is ready to run.
-    if (this->StartTest(test)) {
-      numToStart -= processors;
-    }
+    numToStart -= processors;
+    this->StartTest(test);
   }
 
   if (allTestsFailedTestLoadCheck) {
@@ -694,9 +692,8 @@ void cmCTestMultiProcessHandler::FinishTestProcess(
   properties->Affinity.clear();
 
   runner.reset();
-  if (started) {
-    this->StartNextTestsOnIdle();
-  }
+
+  this->StartNextTestsOnIdle();
 }
 
 void cmCTestMultiProcessHandler::UpdateCostData()
