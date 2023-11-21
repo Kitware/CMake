@@ -170,7 +170,6 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
                      "test " << test << "\n", this->Quiet);
   // now remove the test itself
   this->ErasePendingTest(test);
-  this->RunningCount += this->GetProcessorsUsed(test);
 
   auto testRun = cm::make_unique<cmCTestRunTest>(*this, test);
 
@@ -398,6 +397,8 @@ void cmCTestMultiProcessHandler::SetStopTimePassed()
 
 void cmCTestMultiProcessHandler::LockResources(int index)
 {
+  this->RunningCount += this->GetProcessorsUsed(index);
+
   auto* properties = this->Properties[index];
 
   this->ProjectResourcesLocked.insert(properties->ProjectResources.begin(),
@@ -437,6 +438,8 @@ void cmCTestMultiProcessHandler::UnlockResources(int index)
   if (properties->RunSerial) {
     this->SerialTestRunning = false;
   }
+
+  this->RunningCount -= this->GetProcessorsUsed(index);
 }
 
 void cmCTestMultiProcessHandler::ErasePendingTest(int test)
@@ -691,7 +694,6 @@ void cmCTestMultiProcessHandler::FinishTestProcess(
   this->WriteCheckpoint(test);
   this->DeallocateResources(test);
   this->UnlockResources(test);
-  this->RunningCount -= this->GetProcessorsUsed(test);
 
   runner.reset();
 
