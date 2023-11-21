@@ -651,6 +651,8 @@ a `CDash`_ server. The command-line signature used to submit to `CDash`_ is::
   ctest -S <script>            [-- <dashboard-options>...]
   ctest -SP <script>           [-- <dashboard-options>...]
 
+.. _`CDash`: https://www.cdash.org
+
 Options for Dashboard Client include:
 
 .. option:: -D <dashboard>, --dashboard <dashboard>
@@ -1820,5 +1822,3 @@ See Also
 ========
 
 .. include:: LINKS.txt
-
-_`CDash`: https://cdash.org
