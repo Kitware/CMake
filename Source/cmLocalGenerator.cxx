@@ -1366,7 +1366,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetStaticLibraryFlags(
 {
   const std::string configUpper = cmSystemTools::UpperCase(config);
   std::vector<BT<std::string>> flags;
-  if (linkLanguage != "Swift") {
+  if (linkLanguage != "Swift" && !this->IsSplitSwiftBuild()) {
     std::string staticLibFlags;
     this->AppendFlags(
       staticLibFlags,
@@ -3014,6 +3014,12 @@ cm::optional<cmSwiftCompileMode> cmLocalGenerator::GetSwiftCompileMode(
     return cmSwiftCompileMode::Incremental;
   }
   return cmSwiftCompileMode::Unknown;
+}
+
+bool cmLocalGenerator::IsSplitSwiftBuild() const
+{
+  return cmNonempty(this->GetMakefile()->GetDefinition(
+    "CMAKE_Swift_COMPILATION_MODE_DEFAULT"));
 }
 
 namespace {
