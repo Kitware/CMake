@@ -165,7 +165,7 @@ public:
     std::vector<std::string> Environment;
     std::vector<std::string> EnvironmentModification;
     std::vector<std::string> Labels;
-    std::set<std::string> LockedResources;
+    std::set<std::string> ProjectResources; // RESOURCE_LOCK
     std::set<std::string> FixturesSetup;
     std::set<std::string> FixturesCleanup;
     std::set<std::string> FixturesRequired;

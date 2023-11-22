@@ -125,6 +125,20 @@ bool cmCTestMultiProcessHandler::Complete()
   return this->Completed == this->Total;
 }
 
+void cmCTestMultiProcessHandler::InitializeLoop()
+{
+  this->Loop.init();
+  this->StartNextTestsOnIdle_.init(*this->Loop, this);
+  this->StartNextTestsOnTimer_.init(*this->Loop, this);
+}
+
+void cmCTestMultiProcessHandler::FinalizeLoop()
+{
+  this->StartNextTestsOnTimer_.reset();
+  this->StartNextTestsOnIdle_.reset();
+  this->Loop.reset();
+}
+
 void cmCTestMultiProcessHandler::RunTests()
 {
   this->CheckResume();
@@ -133,10 +147,10 @@ void cmCTestMultiProcessHandler::RunTests()
   }
   this->TestHandler->SetMaxIndex(this->FindMaxIndex());
 
-  this->Loop.init();
-  this->StartNextTests();
+  this->InitializeLoop();
+  this->StartNextTestsOnIdle();
   uv_run(this->Loop, UV_RUN_DEFAULT);
-  this->Loop.reset();
+  this->FinalizeLoop();
 
   if (!this->StopTimePassed && !this->CheckStopOnFailure()) {
     assert(this->Complete());
@@ -148,7 +162,7 @@ void cmCTestMultiProcessHandler::RunTests()
   this->UpdateCostData();
 }
 
-bool cmCTestMultiProcessHandler::StartTestProcess(int test)
+void cmCTestMultiProcessHandler::StartTestProcess(int test)
 {
   if (this->HaveAffinity && this->Properties[test]->WantAffinity) {
     size_t needProcessors = this->GetProcessorsUsed(test);
@@ -227,7 +241,7 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
     e << "Resource spec file:\n\n  " << this->ResourceSpecFile;
     cmCTestRunTest::StartFailure(std::move(testRun), this->Total, e.str(),
                                  "Insufficient resources");
-    return false;
+    return;
   }
 
   cmWorkingDirectory workdir(this->Properties[test]->Directory);
@@ -237,13 +251,12 @@ bool cmCTestMultiProcessHandler::StartTestProcess(int test)
                                    this->Properties[test]->Directory + " : " +
                                    std::strerror(workdir.GetLastResult()),
                                  "Failed to change working directory");
-    return false;
+    return;
   }
 
   // Ownership of 'testRun' has moved to another structure.
   // When the test finishes, FinishTestProcess will be called.
-  return cmCTestRunTest::StartTest(std::move(testRun), this->Completed,
-                                   this->Total);
+  cmCTestRunTest::StartTest(std::move(testRun), this->Completed, this->Total);
 }
 
 bool cmCTestMultiProcessHandler::AllocateResources(int index)
@@ -401,8 +414,8 @@ void cmCTestMultiProcessHandler::SetStopTimePassed()
 void cmCTestMultiProcessHandler::LockResources(int index)
 {
   auto* properties = this->Properties[index];
-  this->LockedResources.insert(properties->LockedResources.begin(),
-                               properties->LockedResources.end());
+  this->ProjectResourcesLocked.insert(properties->ProjectResources.begin(),
+                                      properties->ProjectResources.end());
   if (properties->RunSerial) {
     this->SerialTestRunning = true;
   }
@@ -411,8 +424,8 @@ void cmCTestMultiProcessHandler::LockResources(int index)
 void cmCTestMultiProcessHandler::UnlockResources(int index)
 {
   auto* properties = this->Properties[index];
-  for (std::string const& i : properties->LockedResources) {
-    this->LockedResources.erase(i);
+  for (std::string const& i : properties->ProjectResources) {
+    this->ProjectResourcesLocked.erase(i);
   }
   if (properties->RunSerial) {
     this->SerialTestRunning = false;
@@ -447,47 +460,20 @@ std::string cmCTestMultiProcessHandler::GetName(int test)
   return this->Properties[test]->Name;
 }
 
-bool cmCTestMultiProcessHandler::StartTest(int test)
+void cmCTestMultiProcessHandler::StartTest(int test)
 {
-  // Check for locked resources
-  for (std::string const& i : this->Properties[test]->LockedResources) {
-    if (cm::contains(this->LockedResources, i)) {
-      return false;
-    }
-  }
-
-  if (!this->AllocateResources(test)) {
-    return false;
-  }
-
-  // if there are no depends left then run this test
-  if (this->PendingTests[test].Depends.empty()) {
-    return this->StartTestProcess(test);
-  }
-  // This test was not able to start because it is waiting
-  // on depends to run
-  this->DeallocateResources(test);
-  return false;
+  this->StartTestProcess(test);
 }
 
 void cmCTestMultiProcessHandler::StartNextTests()
 {
-  if (this->TestLoadRetryTimer.get() != nullptr) {
-    // This timer may be waiting to call StartNextTests again.
-    // Since we have been called it is no longer needed.
-    uv_timer_stop(this->TestLoadRetryTimer);
-  }
+  // One or more events may be scheduled to call this method again.
+  // Since this method has been called they are no longer needed.
+  this->StartNextTestsOnIdle_.stop();
+  this->StartNextTestsOnTimer_.stop();
 
-  if (this->PendingTests.empty()) {
-    this->TestLoadRetryTimer.reset();
-    return;
-  }
-
-  if (this->CheckStopTimePassed()) {
-    return;
-  }
-
-  if (this->CheckStopOnFailure() && !this->Failed->empty()) {
+  if (this->PendingTests.empty() || this->CheckStopTimePassed() ||
+      (this->CheckStopOnFailure() && !this->Failed->empty())) {
     return;
   }
 
@@ -553,6 +539,11 @@ void cmCTestMultiProcessHandler::StartNextTests()
       continue;
     }
 
+    // Exclude tests that depend on unfinished tests.
+    if (!this->PendingTests[test].Depends.empty()) {
+      continue;
+    }
+
     size_t processors = this->GetProcessorsUsed(test);
     if (this->TestLoad > 0) {
       // Exclude tests that are too big to fit in the spare load.
@@ -578,9 +569,21 @@ void cmCTestMultiProcessHandler::StartNextTests()
       continue;
     }
 
-    if (this->StartTest(test)) {
-      numToStart -= processors;
+    // Exclude tests that depend on currently-locked project resources.
+    for (std::string const& i : this->Properties[test]->ProjectResources) {
+      if (cm::contains(this->ProjectResourcesLocked, i)) {
+        continue;
+      }
     }
+
+    // Allocate system resources needed by this test.
+    if (!this->AllocateResources(test)) {
+      continue;
+    }
+
+    // The test is ready to run.
+    numToStart -= processors;
+    this->StartTest(test);
   }
 
   if (allTestsFailedTestLoadCheck) {
@@ -617,23 +620,34 @@ void cmCTestMultiProcessHandler::StartNextTests()
     }
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "*****" << std::endl);
 
-    // Wait between 1 and 5 seconds before trying again.
-    unsigned int milliseconds = (cmSystemTools::RandomSeed() % 5 + 1) * 1000;
-    if (this->FakeLoadForTesting) {
-      milliseconds = 10;
-    }
-    if (this->TestLoadRetryTimer.get() == nullptr) {
-      this->TestLoadRetryTimer.init(*this->Loop, this);
-    }
-    this->TestLoadRetryTimer.start(
-      &cmCTestMultiProcessHandler::OnTestLoadRetryCB, milliseconds, 0);
+    // Try again later when the load might be lower.
+    this->StartNextTestsOnTimer();
   }
 }
 
-void cmCTestMultiProcessHandler::OnTestLoadRetryCB(uv_timer_t* timer)
+void cmCTestMultiProcessHandler::StartNextTestsOnIdle()
 {
-  auto* self = static_cast<cmCTestMultiProcessHandler*>(timer->data);
-  self->StartNextTests();
+  // Start more tests on the next loop iteration.
+  this->StartNextTestsOnIdle_.start([](uv_idle_t* idle) {
+    uv_idle_stop(idle);
+    auto* self = static_cast<cmCTestMultiProcessHandler*>(idle->data);
+    self->StartNextTests();
+  });
+}
+
+void cmCTestMultiProcessHandler::StartNextTestsOnTimer()
+{
+  // Wait between 1 and 5 seconds before trying again.
+  unsigned int const milliseconds = this->FakeLoadForTesting
+    ? 10
+    : (cmSystemTools::RandomSeed() % 5 + 1) * 1000;
+  this->StartNextTestsOnTimer_.start(
+    [](uv_timer_t* timer) {
+      uv_timer_stop(timer);
+      auto* self = static_cast<cmCTestMultiProcessHandler*>(timer->data);
+      self->StartNextTests();
+    },
+    milliseconds, 0);
 }
 
 void cmCTestMultiProcessHandler::FinishTestProcess(
@@ -678,9 +692,8 @@ void cmCTestMultiProcessHandler::FinishTestProcess(
   properties->Affinity.clear();
 
   runner.reset();
-  if (started) {
-    this->StartNextTests();
-  }
+
+  this->StartNextTestsOnIdle();
 }
 
 void cmCTestMultiProcessHandler::UpdateCostData()
@@ -1093,9 +1106,9 @@ static Json::Value DumpCTestProperties(
     properties.append(DumpCTestProperty(
       "REQUIRED_FILES", DumpToJsonArray(testProperties.RequiredFiles)));
   }
-  if (!testProperties.LockedResources.empty()) {
+  if (!testProperties.ProjectResources.empty()) {
     properties.append(DumpCTestProperty(
-      "RESOURCE_LOCK", DumpToJsonArray(testProperties.LockedResources)));
+      "RESOURCE_LOCK", DumpToJsonArray(testProperties.ProjectResources)));
   }
   if (testProperties.RunSerial) {
     properties.append(

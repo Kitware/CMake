@@ -14,8 +14,6 @@
 
 #include <cm/optional>
 
-#include <cm3p/uv.h>
-
 #include "cmCTest.h"
 #include "cmCTestResourceAllocator.h"
 #include "cmCTestResourceSpec.h"
@@ -110,8 +108,8 @@ protected:
   // Start the next test or tests as many as are allowed by
   // ParallelLevel
   void StartNextTests();
-  bool StartTestProcess(int test);
-  bool StartTest(int test);
+  void StartTestProcess(int test);
+  void StartTest(int test);
   // Mark the checkpoint for the given test
   void WriteCheckpoint(int index);
 
@@ -132,7 +130,8 @@ protected:
   void ErasePendingTest(int index);
   void FinishTestProcess(std::unique_ptr<cmCTestRunTest> runner, bool started);
 
-  static void OnTestLoadRetryCB(uv_timer_t* timer);
+  void StartNextTestsOnIdle();
+  void StartNextTestsOnTimer();
 
   void RemoveTest(int index);
   // Check if we need to resume an interrupted test set
@@ -147,6 +146,9 @@ protected:
 
   bool CheckStopTimePassed();
   void SetStopTimePassed();
+
+  void InitializeLoop();
+  void FinalizeLoop();
 
   void LockResources(int index);
   void UnlockResources(int index);
@@ -194,7 +196,7 @@ protected:
   std::vector<std::string>* Passed;
   std::vector<std::string>* Failed;
   std::vector<std::string> LastTestsFailed;
-  std::set<std::string> LockedResources;
+  std::set<std::string> ProjectResourcesLocked;
   std::map<int,
            std::vector<std::map<std::string, std::vector<ResourceAllocation>>>>
     AllocatedResources;
@@ -206,7 +208,8 @@ protected:
   unsigned long TestLoad;
   unsigned long FakeLoadForTesting;
   cm::uv_loop_ptr Loop;
-  cm::uv_timer_ptr TestLoadRetryTimer;
+  cm::uv_idle_ptr StartNextTestsOnIdle_;
+  cm::uv_timer_ptr StartNextTestsOnTimer_;
   cmCTestTestHandler* TestHandler;
   cmCTest* CTest;
   bool HasCycles;

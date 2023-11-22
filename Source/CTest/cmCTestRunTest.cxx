@@ -530,7 +530,7 @@ std::string cmCTestRunTest::GetTestPrefix(size_t completed, size_t total) const
   return outputStream.str();
 }
 
-bool cmCTestRunTest::StartTest(std::unique_ptr<cmCTestRunTest> runner,
+void cmCTestRunTest::StartTest(std::unique_ptr<cmCTestRunTest> runner,
                                size_t completed, size_t total)
 {
   auto* testRun = runner.get();
@@ -539,10 +539,7 @@ bool cmCTestRunTest::StartTest(std::unique_ptr<cmCTestRunTest> runner,
 
   if (!testRun->StartTest(completed, total)) {
     testRun->FinalizeTest(false);
-    return false;
   }
-
-  return true;
 }
 
 // Starts the execution of a test.  Returns once it has started
