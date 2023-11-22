@@ -13,7 +13,7 @@
 			Name="Debug|@id_platform@"
 			OutputDirectory="."
 			IntermediateDirectory="$(ConfigurationName)"
-			>
+			@id_UseCompiler@>
 			<Tool
 				Name="VFFortranCompilerTool"
 				DebugInformationFormat="debugEnabled"

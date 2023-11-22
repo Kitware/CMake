@@ -795,6 +795,9 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
       target->GetType() == cmStateEnums::OBJECT_LIBRARY
       ? ".lib"
       : cmSystemTools::GetFilenameLastExtension(targetNameFull);
+    if (cm::optional<std::string> fortran = gg->GetPlatformToolsetFortran()) {
+      fout << "\t\t\tUseCompiler=\"" << *fortran << "Compiler\"\n";
+    }
     /* clang-format off */
     fout <<
       "\t\t\tTargetName=\"" << this->EscapeForXML(targetName) << "\"\n"

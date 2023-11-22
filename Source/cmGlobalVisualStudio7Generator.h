@@ -10,6 +10,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
+
 #include <cm3p/json/value.h>
 
 #include "cmGlobalVisualStudioGenerator.h"
@@ -102,6 +104,10 @@ public:
   }
 
   const std::string& GetIntelProjectVersion();
+  virtual cm::optional<std::string> GetPlatformToolsetFortran() const
+  {
+    return cm::nullopt;
+  }
 
   bool FindMakeProgram(cmMakefile* mf) override;
 

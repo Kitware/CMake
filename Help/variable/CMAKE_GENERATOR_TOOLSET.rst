@@ -48,6 +48,20 @@ Supported pairs are:
   See the :variable:`CMAKE_VS_PLATFORM_TOOLSET_CUDA` and
   :variable:`CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR` variables.
 
+``fortran=<compiler>``
+  .. versionadded:: 3.29
+
+  Specify the Fortran compiler to use, among those that integrate with VS.
+  The value may be one of:
+
+  ``ifort``
+    Intel classic Fortran compiler.
+
+  ``ifx``
+    Intel oneAPI Fortran compiler.
+
+  See the :variable:`CMAKE_VS_PLATFORM_TOOLSET_FORTRAN` variable.
+
 ``host=<arch>``
   Specify the host tools architecture as ``x64`` or ``x86``.
   Supported by VS 2013 and above.

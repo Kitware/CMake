@@ -1,0 +1,11 @@
+CMake Error at CMakeLists.txt:[0-9]+ \(project\):
+  Generator
+
+    [^
+]*
+
+  given toolset
+
+    fortran=bad
+
+  but the value is not "ifx" or "ifort"\.
