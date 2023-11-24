@@ -20,7 +20,12 @@ endmacro()
 
 macro(__platform_adsp lang)
   __platform_adsp_init()
-  set(CMAKE_${lang}_COMPILER "${CMAKE_ADSP_ROOT}/${CMAKE_ADSP_COMPILER_NAME}")
+  find_program(
+    CMAKE_${lang}_COMPILER
+    "${CMAKE_ADSP_COMPILER_NAME}"
+    PATHS "${CMAKE_ADSP_ROOT}"
+    REQUIRED
+  )
 
   execute_process(
     COMMAND "${CMAKE_${lang}_COMPILER}" "-proc=${CMAKE_ADSP_PROCESSOR}" "-version"
