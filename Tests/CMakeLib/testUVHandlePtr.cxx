@@ -1,7 +1,10 @@
+#include <functional>
 #include <iostream>
+#include <memory>
 
 #include <cm3p/uv.h>
 
+#include "cmGetPipes.h"
 #include "cmUVHandlePtr.h"
 
 static bool testIdle()
@@ -77,10 +80,58 @@ static bool testTimer()
   return true;
 }
 
+static bool testWriteCallback()
+{
+  int pipe[] = { -1, -1 };
+  if (cmGetPipes(pipe) < 0) {
+    std::cout << "cmGetPipes() returned an error" << std::endl;
+    return false;
+  }
+
+  cm::uv_loop_ptr loop;
+  loop.init();
+
+  cm::uv_pipe_ptr pipeRead;
+  pipeRead.init(*loop, 0);
+  uv_pipe_open(pipeRead, pipe[0]);
+
+  cm::uv_pipe_ptr pipeWrite;
+  pipeWrite.init(*loop, 0);
+  uv_pipe_open(pipeWrite, pipe[1]);
+
+  char c = '.';
+  uv_buf_t buf = uv_buf_init(&c, sizeof(c));
+  int status = -1;
+  auto cb = std::make_shared<std::function<void(int)>>(
+    [&status](int s) { status = s; });
+
+  // Test getting a callback after the write is done.
+  cm::uv_write(pipeWrite, &buf, 1, cb);
+  uv_run(loop, UV_RUN_DEFAULT);
+  if (status != 0) {
+    std::cout << "cm::uv_write non-zero status: " << status << std::endl;
+    return false;
+  }
+
+  // Test deleting the callback before it is made.
+  status = -1;
+  cm::uv_write(pipeWrite, &buf, 1, cb);
+  cb.reset();
+  uv_run(loop, UV_RUN_DEFAULT);
+  if (status != -1) {
+    std::cout << "cm::uv_write callback incorrectly called with status: "
+              << status << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
 int testUVHandlePtr(int, char** const)
 {
   bool passed = true;
   passed = testIdle() && passed;
   passed = testTimer() && passed;
+  passed = testWriteCallback() && passed;
   return passed ? 0 : -1;
 }

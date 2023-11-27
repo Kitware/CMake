@@ -6,6 +6,9 @@
 #include <cassert>
 #include <cstdlib>
 #include <mutex>
+#include <utility>
+
+#include <cm/memory>
 
 #include <cm3p/uv.h>
 
@@ -52,6 +55,11 @@ uv_loop_ptr::operator uv_loop_t*() const
 uv_loop_t* uv_loop_ptr::operator->() const noexcept
 {
   return this->loop.get();
+}
+
+uv_loop_t& uv_loop_ptr::operator*() const
+{
+  return *this->loop;
 }
 
 uv_loop_t* uv_loop_ptr::get() const
@@ -301,4 +309,38 @@ UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(async)
 
 UV_HANDLE_PTR_INSTANTIATE_EXPLICIT(tty)
 #endif
+
+namespace {
+struct write_req : public uv_write_t
+{
+  std::weak_ptr<std::function<void(int)>> cb_;
+  write_req(std::weak_ptr<std::function<void(int)>> wcb)
+    : cb_(std::move(wcb))
+  {
+  }
+};
+
+void write_req_cb(uv_write_t* req, int status)
+{
+  // Ownership has been transferred from the event loop.
+  std::unique_ptr<write_req> self(static_cast<write_req*>(req));
+
+  // Notify the original uv_write caller if it is still interested.
+  if (auto cb = self->cb_.lock()) {
+    (*cb)(status);
+  }
+}
+}
+
+int uv_write(uv_stream_t* handle, const uv_buf_t bufs[], unsigned int nbufs,
+             std::weak_ptr<std::function<void(int)>> cb)
+{
+  auto req = cm::make_unique<write_req>(std::move(cb));
+  int status = uv_write(req.get(), handle, bufs, nbufs, write_req_cb);
+  if (status == 0) {
+    // Ownership has been transferred to the event loop.
+    static_cast<void>(req.release());
+  }
+  return status;
+}
 }

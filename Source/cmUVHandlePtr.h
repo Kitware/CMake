@@ -5,6 +5,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <type_traits>
 
@@ -65,6 +66,7 @@ public:
 
   uv_loop_t* get() const;
   uv_loop_t* operator->() const noexcept;
+  uv_loop_t& operator*() const;
 };
 
 /***
@@ -285,4 +287,27 @@ UV_HANDLE_PTR_INSTANTIATE_EXTERN(tty)
 #  undef UV_HANDLE_PTR_INSTANTIATE_EXTERN
 
 #endif
+
+/**
+ * Wraps uv_write to add synchronous cancellation.
+ *
+ * libuv provides no way to synchronously cancel a write request.
+ * Closing a write handle will cancel its pending write request, but its
+ * callback will still be called asynchronously later with UV_ECANCELED.
+ *
+ * This wrapper provides a solution by handing ownership of the uv_write_t
+ * request object to the event loop and taking it back in the callback.
+ * Use this in combination with uv_loop_ptr to ensure the event loop
+ * runs to completion and cleans up all resources.
+ *
+ * The caller may optionally provide a callback it owns with std::shared_ptr.
+ * If the caller's lifetime ends before the write request completes, the
+ * callback can be safely deleted and will not be called.
+ *
+ * The bufs array does not need to live beyond this call, but the memory
+ * referenced by the uv_buf_t values must remain alive until the callback
+ * is made or the stream is closed.
+ */
+int uv_write(uv_stream_t* handle, const uv_buf_t bufs[], unsigned int nbufs,
+             std::weak_ptr<std::function<void(int)>> cb);
 }
