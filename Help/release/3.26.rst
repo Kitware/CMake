@@ -181,3 +181,13 @@ Changes made since CMake 3.26.0 include the following.
 * These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
+
+3.26.6
+------
+
+* The :manual:`cmake-file-api(7)` "codemodel" version 2 "target" object
+  ``fileSets`` field was introduced by CMake 3.26.0 with entries of its
+  ``baseDirectories`` member incorrectly expressed as absolute paths
+  even if they are inside the top-level source directory.  This has
+  been fixed.  Clients must be updated to expect relative paths under
+  the top-level source directory.

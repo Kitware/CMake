@@ -1093,10 +1093,10 @@ with members:
     ``PRIVATE``, or ``INTERFACE``.
 
   ``baseDirectories``
-    A JSON array of strings specifying the base directories containing sources
-    in the file set.  If the file is inside the top-level source directory
-    then the path is specified relative to that directory.  Otherwise the path
-    is absolute.
+    A JSON array of strings, each specifying a base directory containing
+    sources in the file set.  If the directory is inside the top-level source
+    directory then the path is specified relative to that directory.
+    Otherwise the path is absolute.
 
   This field was added in codemodel version 2.5.
 
