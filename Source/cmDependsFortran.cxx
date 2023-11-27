@@ -258,6 +258,12 @@ bool cmDependsFortran::LocateModules()
     }
     this->MatchRemoteModules(fin, targetDir);
   }
+
+  // TODO: Use `CMAKE_Fortran_TARGET_FORWARD_LINKED_INFO_FILES` to handle cases
+  // described in #25425. Note that because Makefiles generators do not
+  // implement relaxed object compilation as described in #15555, the issues
+  // never actually cause build failures; only incremental build incorrectness.
+
   return true;
 }
 

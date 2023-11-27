@@ -74,8 +74,15 @@ protected:
 
   std::string GetCompilerLauncher(std::string const& lang,
                                   std::string const& config);
-  std::vector<std::string> GetLinkedTargetDirectories(
-    const std::string& lang, const std::string& config) const;
+
+  struct LinkedTargetDirs
+  {
+    std::vector<std::string> Direct;
+    std::vector<std::string> Forward;
+  };
+
+  LinkedTargetDirs GetLinkedTargetDirectories(const std::string& lang,
+                                              const std::string& config) const;
   std::string ComputeTargetCompilePDB(const std::string& config) const;
 
   std::string GetLinkerLauncher(const std::string& config);

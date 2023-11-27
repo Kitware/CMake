@@ -466,6 +466,11 @@ public:
   bool IsLanguageUsed(std::string const& language,
                       std::string const& config) const;
 
+  // Get the set of targets directly referenced via `TARGET_OBJECTS` in the
+  // source list for a configuration.
+  std::set<cmGeneratorTarget const*> GetSourceObjectLibraries(
+    std::string const& config) const;
+
   bool IsCSharpOnly() const;
 
   bool IsDotNetSdkTarget() const;

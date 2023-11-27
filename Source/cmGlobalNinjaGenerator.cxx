@@ -2542,6 +2542,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   std::string const& arg_dd, std::vector<std::string> const& arg_ddis,
   std::string const& module_dir,
   std::vector<std::string> const& linked_target_dirs,
+  std::vector<std::string> const& forward_modules_from_target_dirs,
   std::string const& arg_lang, std::string const& arg_modmapfmt,
   cmCxxModuleExportInfo const& export_info)
 {
@@ -2819,6 +2820,51 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   // use by dependents that reference this target in linked-target-dirs.
   std::string const target_mods_file = cmStrCat(
     cmSystemTools::GetFilenamePath(arg_dd), '/', arg_lang, "Modules.json");
+
+  // Populate the module map with those provided by linked targets first.
+  for (std::string const& forward_modules_from_target_dir :
+       forward_modules_from_target_dirs) {
+    std::string const fmftn =
+      cmStrCat(forward_modules_from_target_dir, '/', arg_lang, "Modules.json");
+    Json::Value fmft;
+    cmsys::ifstream fmftf(fmftn.c_str(), std::ios::in | std::ios::binary);
+    if (!fmftf) {
+      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to open ",
+                                    fmftn, " for module information"));
+      return false;
+    }
+    Json::Reader reader;
+    if (!reader.parse(fmftf, fmft, false)) {
+      cmSystemTools::Error(cmStrCat("-E cmake_ninja_dyndep failed to parse ",
+                                    forward_modules_from_target_dir,
+                                    reader.getFormattedErrorMessages()));
+      return false;
+    }
+    if (!fmft.isObject()) {
+      continue;
+    }
+
+    auto forward_info = [](Json::Value& target, Json::Value const& source) {
+      if (!source.isObject()) {
+        return;
+      }
+
+      for (auto i = source.begin(); i != source.end(); ++i) {
+        std::string const key = i.key().asString();
+        if (target.isMember(key)) {
+          continue;
+        }
+        target[key] = *i;
+      }
+    };
+
+    // Forward info from forwarding targets into our collation.
+    Json::Value& tmi_target_modules = target_module_info["modules"];
+    forward_info(tmi_target_modules, fmft["modules"]);
+    forward_info(target_references, fmft["references"]);
+    forward_info(target_usages, fmft["usages"]);
+  }
+
   cmGeneratedFileStream tmf(target_mods_file);
   tmf << target_module_info;
 
@@ -2906,6 +2952,16 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
       linked_target_dirs.push_back(tdi_linked_target_dir.asString());
     }
   }
+  std::vector<std::string> forward_modules_from_target_dirs;
+  Json::Value const& tdi_forward_modules_from_target_dirs =
+    tdi["forward-modules-from-target-dirs"];
+  if (tdi_forward_modules_from_target_dirs.isArray()) {
+    for (auto const& tdi_forward_modules_from_target_dir :
+         tdi_forward_modules_from_target_dirs) {
+      forward_modules_from_target_dirs.push_back(
+        tdi_forward_modules_from_target_dir.asString());
+    }
+  }
   std::string const compilerId = tdi["compiler-id"].asString();
   std::string const simulateId = tdi["compiler-simulate-id"].asString();
   std::string const compilerFrontendVariant =
@@ -2929,7 +2985,8 @@ int cmcmd_cmake_ninja_dyndep(std::vector<std::string>::const_iterator argBeg,
 #  endif
   return gg.WriteDyndepFile(dir_top_src, dir_top_bld, dir_cur_src, dir_cur_bld,
                             arg_dd, arg_ddis, module_dir, linked_target_dirs,
-                            arg_lang, arg_modmapfmt, *export_info)
+                            forward_modules_from_target_dirs, arg_lang,
+                            arg_modmapfmt, *export_info)
     ? 0
     : 1;
 }

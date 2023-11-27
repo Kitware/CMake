@@ -45,6 +45,7 @@
   "exports": [],
   "include-dirs": [],
   "language": "CXX",
+  "forward-modules-from-target-dirs": [],
   "linked-target-dirs": [],
   "module-dir": "<BINARY_DIR>/CMakeFiles/ninja-bmi-install-private.dir<CONFIG_DIR>"
 }

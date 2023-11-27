@@ -17,6 +17,7 @@
 #include "cmTargetLinkLibraryType.h"
 
 class cmGeneratorTarget;
+class cmSourceFile;
 
 // Basic information about each link item.
 class cmLinkItem
@@ -29,6 +30,9 @@ public:
   cmLinkItem(cmGeneratorTarget const* t, bool c, cmListFileBacktrace bt);
   std::string const& AsStr() const;
   cmGeneratorTarget const* Target = nullptr;
+  // The source file representing the external object (used when linking
+  // `$<TARGET_OBJECTS>`)
+  cmSourceFile const* ObjectSource = nullptr;
   bool Cross = false;
   cmListFileBacktrace Backtrace;
   friend bool operator<(cmLinkItem const& l, cmLinkItem const& r);

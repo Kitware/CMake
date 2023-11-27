@@ -3637,6 +3637,9 @@ void cmMakefile::AddTargetObject(std::string const& tgtName,
     this->GetOrCreateSource(objFile, true, cmSourceFileLocationKind::Known);
   sf->SetObjectLibrary(tgtName);
   sf->SetProperty("EXTERNAL_OBJECT", "1");
+  // TODO: Compute a language for this object based on the associated source
+  // file that compiles to it. Needs a policy as it likely affects link
+  // language selection if done unconditionally.
 #if !defined(CMAKE_BOOTSTRAP)
   this->SourceGroups[this->ObjectLibrariesSourceGroupIndex].AddGroupFile(
     sf->ResolveFullPath());
