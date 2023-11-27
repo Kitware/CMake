@@ -127,7 +127,6 @@ protected:
 
   // Removes the checkpoint file
   void MarkFinished();
-  void ErasePendingTest(int index);
   void FinishTestProcess(std::unique_ptr<cmCTestRunTest> runner, bool started);
 
   void StartNextTestsOnIdle();
