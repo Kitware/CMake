@@ -1034,11 +1034,6 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
 
     cmNinjaBuild build(this->LanguageDyndepRule(language, config));
     build.Outputs.push_back(this->GetDyndepFilePath(language, config));
-    build.ImplicitOuts.push_back(
-      cmStrCat(this->Makefile->GetCurrentBinaryDirectory(), '/',
-               this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-               this->GetGlobalGenerator()->ConfigDirectory(config), '/',
-               language, "Modules.json"));
     for (auto const& scanFiles : scanningFiles) {
       if (!scanFiles.ScanningOutput.empty()) {
         build.ExplicitDeps.push_back(scanFiles.ScanningOutput);
@@ -1050,10 +1045,17 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
 
     this->WriteTargetDependInfo(language, config);
 
-    for (std::string const& l :
-         this->GetLinkedTargetDirectories(language, config)) {
-      build.ImplicitDeps.push_back(cmStrCat(l, '/', language, "Modules.json"));
-    }
+    // Make sure dyndep files for all our dependencies have already
+    // been generated so that the '<LANG>Modules.json' files they
+    // produced as side-effects are available for us to read.
+    // Ideally we should depend on the '<LANG>Modules.json' files
+    // from our dependencies directly, but we don't know which of
+    // our dependencies produces them.  Fixing this will require
+    // refactoring the Ninja generator to generate targets in
+    // dependency order so that we can collect the needed information.
+    this->GetLocalGenerator()->AppendTargetDepends(
+      this->GeneratorTarget, build.OrderOnlyDeps, config, fileConfig,
+      DependOnTargetArtifact);
 
     this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
                                            build);
