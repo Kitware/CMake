@@ -1899,6 +1899,11 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
                         : "OFF")
                   << ")\n\n";
 
+  bool requireFortran = false;
+  if (target->HaveFortranSources(this->GetConfigName())) {
+    requireFortran = true;
+  }
+
   auto const& implicitLangs =
     this->GetImplicitDepends(target, cmDependencyScannerKind::CMake);
 
@@ -1908,6 +1913,12 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
   cmakefileStream << "set(CMAKE_DEPENDS_LANGUAGES\n";
   for (auto const& implicitLang : implicitLangs) {
     cmakefileStream << "  \"" << implicitLang.first << "\"\n";
+    if (requireFortran && implicitLang.first == "Fortran"_s) {
+      requireFortran = false;
+    }
+  }
+  if (requireFortran) {
+    cmakefileStream << "  \"Fortran\"\n";
   }
   cmakefileStream << "  )\n";
 

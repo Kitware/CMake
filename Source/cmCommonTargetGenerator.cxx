@@ -163,43 +163,77 @@ std::string cmCommonTargetGenerator::GetIncludes(std::string const& l,
   return i->second;
 }
 
-std::vector<std::string> cmCommonTargetGenerator::GetLinkedTargetDirectories(
+cmCommonTargetGenerator::LinkedTargetDirs
+cmCommonTargetGenerator::GetLinkedTargetDirectories(
   const std::string& lang, const std::string& config) const
 {
-  std::vector<std::string> dirs;
-  std::set<cmGeneratorTarget const*> emitted;
+  LinkedTargetDirs dirs;
+  std::set<cmGeneratorTarget const*> forward_emitted;
+  std::set<cmGeneratorTarget const*> direct_emitted;
   cmGlobalCommonGenerator* const gg = this->GlobalCommonGenerator;
+
+  enum class Forwarding
+  {
+    Yes,
+    No
+  };
+
   if (cmComputeLinkInformation* cli =
         this->GeneratorTarget->GetLinkInformation(config)) {
-    auto addLinkedTarget = [this, &lang, &config, &dirs, &emitted,
-                            gg](cmGeneratorTarget const* linkee) {
-      if (linkee &&
-          !linkee->IsImported()
-          // Skip targets that build after this one in a static lib cycle.
-          && gg->TargetOrderIndexLess(linkee, this->GeneratorTarget)
-          // We can ignore the INTERFACE_LIBRARY items because
-          // Target->GetLinkInformation already processed their
-          // link interface and they don't have any output themselves.
-          && (linkee->GetType() != cmStateEnums::INTERFACE_LIBRARY
-              // Synthesized targets may have relevant rules.
-              || linkee->IsSynthetic()) &&
-          ((lang == "CXX"_s && linkee->HaveCxx20ModuleSources()) ||
-           (lang == "Fortran"_s && linkee->HaveFortranSources(config))) &&
-          emitted.insert(linkee).second) {
-        cmLocalGenerator* lg = linkee->GetLocalGenerator();
-        std::string di = cmStrCat(lg->GetCurrentBinaryDirectory(), '/',
-                                  lg->GetTargetDirectory(linkee));
-        if (lg->GetGlobalGenerator()->IsMultiConfig()) {
-          di = cmStrCat(di, '/', config);
+    auto addLinkedTarget =
+      [this, &lang, &config, &dirs, &direct_emitted, &forward_emitted,
+       gg](cmGeneratorTarget const* linkee, Forwarding forward) {
+        if (linkee &&
+            !linkee->IsImported()
+            // Skip targets that build after this one in a static lib cycle.
+            && gg->TargetOrderIndexLess(linkee, this->GeneratorTarget)
+            // We can ignore the INTERFACE_LIBRARY items because
+            // Target->GetLinkInformation already processed their
+            // link interface and they don't have any output themselves.
+            && (linkee->GetType() != cmStateEnums::INTERFACE_LIBRARY
+                // Synthesized targets may have relevant rules.
+                || linkee->IsSynthetic()) &&
+            ((lang == "CXX"_s && linkee->HaveCxx20ModuleSources()) ||
+             (lang == "Fortran"_s && linkee->HaveFortranSources(config)))) {
+          cmLocalGenerator* lg = linkee->GetLocalGenerator();
+          std::string di = cmStrCat(lg->GetCurrentBinaryDirectory(), '/',
+                                    lg->GetTargetDirectory(linkee));
+          if (lg->GetGlobalGenerator()->IsMultiConfig()) {
+            di = cmStrCat(di, '/', config);
+          }
+          if (forward == Forwarding::Yes &&
+              forward_emitted.insert(linkee).second) {
+            dirs.Forward.push_back(di);
+          }
+          if (direct_emitted.insert(linkee).second) {
+            dirs.Direct.emplace_back(di);
+          }
         }
-        dirs.push_back(std::move(di));
-      }
-    };
+      };
     for (auto const& item : cli->GetItems()) {
-      addLinkedTarget(item.Target);
+      if (item.Target) {
+        addLinkedTarget(item.Target, Forwarding::No);
+      } else if (item.ObjectSource && lang == "Fortran"_s
+                 /* Object source files do not have a language associated with
+                    them. */
+                 /* && item.ObjectSource->GetLanguage() == "Fortran"_s*/) {
+        // Fortran modules provided by `$<TARGET_OBJECTS>` as linked items
+        // should be collated for use in this target.
+        addLinkedTarget(this->LocalCommonGenerator->FindGeneratorTargetToUse(
+                          item.ObjectSource->GetObjectLibrary()),
+                        Forwarding::Yes);
+      }
     }
     for (cmGeneratorTarget const* target : cli->GetExternalObjectTargets()) {
-      addLinkedTarget(target);
+      addLinkedTarget(target, Forwarding::No);
+    }
+    if (lang == "Fortran"_s) {
+      // Fortran modules provided by `$<TARGET_OBJECTS>` as sources should be
+      // collated for use in this target.
+      for (cmGeneratorTarget const* target :
+           this->GeneratorTarget->GetSourceObjectLibraries(config)) {
+        addLinkedTarget(target, Forwarding::Yes);
+      }
     }
   }
   return dirs;

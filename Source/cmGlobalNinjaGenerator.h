@@ -430,6 +430,7 @@ public:
     std::string const& arg_dd, std::vector<std::string> const& arg_ddis,
     std::string const& module_dir,
     std::vector<std::string> const& linked_target_dirs,
+    std::vector<std::string> const& forward_modules_from_target_dirs,
     std::string const& arg_lang, std::string const& arg_modmapfmt,
     cmCxxModuleExportInfo const& export_info);
 

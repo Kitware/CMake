@@ -137,3 +137,9 @@ add_subdirectory(Issue25252-iface-sources)
 
 add_subdirectory(Issue25365-target-objects)
 add_subdirectory(Issue25365-target-objects-iface)
+
+# Issue#25425
+add_subdirectory(ModulesViaTargetObjectsSource)
+add_subdirectory(ModulesViaSubdirTargetObjectsSource)
+add_subdirectory(ModulesViaTargetObjectsLink)
+add_subdirectory(ModulesViaSubdirTargetObjectsLink)
