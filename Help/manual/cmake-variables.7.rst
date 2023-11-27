@@ -55,7 +55,6 @@ Variables that Provide Information
    /variable/CMAKE_EDIT_COMMAND
    /variable/CMAKE_EXECUTABLE_SUFFIX
    /variable/CMAKE_EXECUTABLE_SUFFIX_LANG
-   /variable/CMAKE_EXTRA_GENERATOR
    /variable/CMAKE_EXTRA_SHARED_LIBRARY_SUFFIXES
    /variable/CMAKE_FIND_DEBUG_MODE
    /variable/CMAKE_FIND_PACKAGE_NAME
@@ -174,8 +173,6 @@ Variables that Change Behavior
    /variable/CMAKE_ABSOLUTE_DESTINATION_FILES
    /variable/CMAKE_ADD_CUSTOM_COMMAND_DEPENDS_EXPLICIT_ONLY
    /variable/CMAKE_APPBUNDLE_PATH
-   /variable/CMAKE_AUTOMOC_RELAXED_MODE
-   /variable/CMAKE_BACKWARDS_COMPATIBILITY
    /variable/CMAKE_BUILD_TYPE
    /variable/CMAKE_CLANG_VFS_OVERLAY
    /variable/CMAKE_CODEBLOCKS_COMPILER_ID
@@ -203,8 +200,6 @@ Variables that Change Behavior
    /variable/CMAKE_FIND_LIBRARY_PREFIXES
    /variable/CMAKE_FIND_LIBRARY_SUFFIXES
    /variable/CMAKE_FIND_NO_INSTALL_PREFIX
-   /variable/CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY
-   /variable/CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY
    /variable/CMAKE_FIND_PACKAGE_PREFER_CONFIG
    /variable/CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS
    /variable/CMAKE_FIND_PACKAGE_TARGETS_GLOBAL
@@ -342,15 +337,6 @@ Variables that Describe the System
    /variable/LINUX
    /variable/MINGW
    /variable/MSVC
-   /variable/MSVC10
-   /variable/MSVC11
-   /variable/MSVC12
-   /variable/MSVC14
-   /variable/MSVC60
-   /variable/MSVC70
-   /variable/MSVC71
-   /variable/MSVC80
-   /variable/MSVC90
    /variable/MSVC_IDE
    /variable/MSVC_TOOLSET_VERSION
    /variable/MSVC_VERSION
@@ -467,7 +453,6 @@ Variables that Control the Build
    /variable/CMAKE_INSTALL_RPATH_USE_LINK_PATH
    /variable/CMAKE_INTERPROCEDURAL_OPTIMIZATION
    /variable/CMAKE_INTERPROCEDURAL_OPTIMIZATION_CONFIG
-   /variable/CMAKE_IOS_INSTALL_COMBINED
    /variable/CMAKE_LANG_CLANG_TIDY
    /variable/CMAKE_LANG_CLANG_TIDY_EXPORT_FIXES_DIR
    /variable/CMAKE_LANG_COMPILER_LAUNCHER
@@ -545,7 +530,6 @@ Variables that Control the Build
    /variable/CMAKE_UNITY_BUILD
    /variable/CMAKE_UNITY_BUILD_BATCH_SIZE
    /variable/CMAKE_UNITY_BUILD_UNIQUE_ID
-   /variable/CMAKE_USE_RELATIVE_PATHS
    /variable/CMAKE_VERIFY_INTERFACE_HEADER_SETS
    /variable/CMAKE_VISIBILITY_INLINES_HIDDEN
    /variable/CMAKE_VS_DEBUGGER_COMMAND
@@ -582,9 +566,6 @@ Variables for Languages
    /variable/CMAKE_C_EXTENSIONS
    /variable/CMAKE_C_STANDARD
    /variable/CMAKE_C_STANDARD_REQUIRED
-   /variable/CMAKE_COMPILER_IS_GNUCC
-   /variable/CMAKE_COMPILER_IS_GNUCXX
-   /variable/CMAKE_COMPILER_IS_GNUG77
    /variable/CMAKE_CUDA_ARCHITECTURES
    /variable/CMAKE_CUDA_COMPILE_FEATURES
    /variable/CMAKE_CUDA_EXTENSIONS
@@ -704,7 +685,6 @@ Variables for CTest
    /variable/CTEST_CUSTOM_TESTS_IGNORE
    /variable/CTEST_CUSTOM_WARNING_EXCEPTION
    /variable/CTEST_CUSTOM_WARNING_MATCH
-   /variable/CTEST_CVS_CHECKOUT
    /variable/CTEST_CVS_COMMAND
    /variable/CTEST_CVS_UPDATE_OPTIONS
    /variable/CTEST_DROP_LOCATION
@@ -733,7 +713,6 @@ Variables for CTest
    /variable/CTEST_P4_UPDATE_OPTIONS
    /variable/CTEST_RESOURCE_SPEC_FILE
    /variable/CTEST_RUN_CURRENT_SCRIPT
-   /variable/CTEST_SCP_COMMAND
    /variable/CTEST_SCRIPT_DIRECTORY
    /variable/CTEST_SITE
    /variable/CTEST_SOURCE_DIRECTORY
@@ -744,7 +723,6 @@ Variables for CTest
    /variable/CTEST_SVN_UPDATE_OPTIONS
    /variable/CTEST_TEST_LOAD
    /variable/CTEST_TEST_TIMEOUT
-   /variable/CTEST_TRIGGER_SITE
    /variable/CTEST_UPDATE_COMMAND
    /variable/CTEST_UPDATE_OPTIONS
    /variable/CTEST_UPDATE_VERSION_ONLY
@@ -797,3 +775,67 @@ are subject to change, and not recommended for use in project code.
    /variable/CMAKE_LANG_PLATFORM_ID
    /variable/CMAKE_NOT_USING_CONFIG_FLAGS
    /variable/CMAKE_VS_INTEL_Fortran_PROJECT_VERSION
+
+Deprecated Variables that Provide Information
+=============================================
+
+.. toctree::
+   :maxdepth: 1
+
+   /variable/CMAKE_EXTRA_GENERATOR
+
+Deprecated Variables that Change Behavior
+=========================================
+
+.. toctree::
+   :maxdepth: 1
+
+   /variable/CMAKE_AUTOMOC_RELAXED_MODE
+   /variable/CMAKE_BACKWARDS_COMPATIBILITY
+   /variable/CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY
+   /variable/CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY
+
+Deprecated Variables that Describe the System
+=============================================
+
+.. toctree::
+   :maxdepth: 1
+
+   /variable/MSVC10
+   /variable/MSVC11
+   /variable/MSVC12
+   /variable/MSVC14
+   /variable/MSVC60
+   /variable/MSVC70
+   /variable/MSVC71
+   /variable/MSVC80
+   /variable/MSVC90
+
+Deprecated Variables that Control the Build
+===========================================
+
+.. toctree::
+   :maxdepth: 1
+
+   /variable/CMAKE_IOS_INSTALL_COMBINED
+   /variable/CMAKE_USE_RELATIVE_PATHS
+
+Deprecated Variables for Languages
+==================================
+
+.. toctree::
+   :maxdepth: 1
+
+   /variable/CMAKE_COMPILER_IS_GNUCC
+   /variable/CMAKE_COMPILER_IS_GNUCXX
+   /variable/CMAKE_COMPILER_IS_GNUG77
+
+Deprecated Variables for CTest
+==============================
+
+.. toctree::
+   :maxdepth: 1
+
+   /variable/CTEST_CVS_CHECKOUT
+   /variable/CTEST_SCP_COMMAND
+   /variable/CTEST_TRIGGER_SITE
