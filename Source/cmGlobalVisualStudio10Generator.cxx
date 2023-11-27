@@ -191,6 +191,23 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     }
   }
 
+  if (this->GeneratorToolsetFortran) {
+    if (*this->GeneratorToolsetFortran != "ifx" &&
+        *this->GeneratorToolsetFortran != "ifort") {
+      mf->IssueMessage(MessageType::FATAL_ERROR,
+                       cmStrCat("Generator\n"
+                                "  ",
+                                this->GetName(),
+                                "\n"
+                                "given toolset\n"
+                                "  fortran=",
+                                *this->GeneratorToolsetFortran,
+                                "\n"
+                                "but the value is not \"ifx\" or \"ifort\"."));
+      this->GeneratorToolsetFortran = cm::nullopt;
+    }
+  }
+
   if (!this->GeneratorToolsetVersion.empty() &&
       this->GeneratorToolsetVersion != "Test Toolset Version"_s) {
     // If a specific minor version of the MSVC toolset is requested, verify
@@ -300,6 +317,9 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
   if (const char* cudaDir = this->GetPlatformToolsetCudaCustomDir()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR", cudaDir);
   }
+  if (cm::optional<std::string> fortran = this->GetPlatformToolsetFortran()) {
+    mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_FORTRAN", *fortran);
+  }
   if (const char* vcTargetsDir = this->GetCustomVCTargetsPath()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_VCTARGETS_CUSTOM_DIR",
                       vcTargetsDir);
@@ -408,6 +428,10 @@ bool cmGlobalVisualStudio10Generator::ProcessGeneratorToolsetField(
   if (key == "customFlagTableDir"_s) {
     this->CustomFlagTableDir = value;
     cmSystemTools::ConvertToUnixSlashes(this->CustomFlagTableDir);
+    return true;
+  }
+  if (key == "fortran"_s) {
+    this->GeneratorToolsetFortran = value;
     return true;
   }
   if (key == "version"_s) {
