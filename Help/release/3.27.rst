@@ -291,3 +291,23 @@ Changes made since CMake 3.27.0 include the following.
 * These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
+
+3.27.9
+------
+
+* The :manual:`cmake-file-api(7)` "codemodel" version 2 "target" object
+  ``fileSets`` field was introduced by CMake 3.26.0 with entries of its
+  ``baseDirectories`` member incorrectly expressed as absolute paths
+  even if they are inside the top-level source directory.  This was
+  fixed in CMake 3.26.6 and has now been fixed in 3.27.9.  Clients must
+  be updated to expect relative paths under the top-level source directory.
+
+* Fortran module dependency scanning in :ref:`Ninja Generators` was updated
+  by CMake 3.27.0 to use exact collation dependencies.  This was supposed
+  to fix subtle rebuild failures when moving module sources among targets.
+  Since then, several cases have been found in which exact collation
+  dependencies were incorrectly computed when using :ref:`Object Libraries`.
+  Some of these cases were incrementally fixed through the 3.27.x patch
+  series, but additional more subtle cases have since been found.  In order
+  to avoid further churn in the 3.27 release series, the original change has
+  been reverted and deferred to a future version of CMake.
