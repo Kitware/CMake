@@ -306,8 +306,6 @@ size_t rhash_export_alg(unsigned hash_id, const void* ctx, void* out, size_t siz
 	{
 		case RHASH_TTH:
 			return rhash_tth_export((const tth_ctx*)ctx, out, size);
-		case RHASH_BTIH:
-			return bt_export((const torrent_ctx*)ctx, out, size);
 		case RHASH_AICH:
 			return rhash_aich_export((const aich_ctx*)ctx, out, size);
 	}
@@ -329,8 +327,6 @@ size_t rhash_import_alg(unsigned hash_id, void* ctx, const void* in, size_t size
 	{
 		case RHASH_TTH:
 			return rhash_tth_import((tth_ctx*)ctx, in, size);
-		case RHASH_BTIH:
-			return bt_import((torrent_ctx*)ctx, in, size);
 		case RHASH_AICH:
 			return rhash_aich_import((aich_ctx*)ctx, in, size);
 	}
