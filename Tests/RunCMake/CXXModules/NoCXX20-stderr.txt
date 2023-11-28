@@ -4,6 +4,13 @@
   "cxx_std_17"\.
 |CMake Error in CMakeLists.txt:
   The target named "nocxx20" has C\+\+ sources that may use modules, but
-  modules are not supported by this generator\.  See the cmake-cxxmodules\(7\)
-  manual and the CMAKE_CXX_SCAN_FOR_MODULES variable\.
+  modules are not supported by this generator:
+
+    [^
+]+
+
+  Modules are supported only by Ninja, Ninja Multi-Config, and Visual Studio
+  generators for VS 17\.4 and newer\.  See the cmake-cxxmodules\(7\) manual for
+  details\.  Use the CMAKE_CXX_SCAN_FOR_MODULES variable to enable or disable
+  scanning\.
 )
