@@ -1563,7 +1563,7 @@ ${TMP_DEBUGINFO_ADDITIONAL_SOURCES}
   if(NOT CPACK_RPM_FILE_NAME STREQUAL "RPM-DEFAULT")
     if(CPACK_RPM_FILE_NAME)
       if(NOT CPACK_RPM_FILE_NAME MATCHES ".*\\.rpm")
-        message(FATAL_ERROR "'${CPACK_RPM_FILE_NAME}' is not a valid RPM package file name as it must end with '.rpm'!")
+        set(CPACK_RPM_FILE_NAME "${CPACK_RPM_FILE_NAME}.rpm")
       endif()
     else()
       # old file name format for back compatibility
