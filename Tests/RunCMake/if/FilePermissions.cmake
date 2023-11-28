@@ -13,9 +13,11 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/executable.txt" "foo")
 file(CHMOD "${CMAKE_CURRENT_BINARY_DIR}/executable.txt" PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
 
 if(NOT WIN32)
-  file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/readable-dir"
-              "${CMAKE_CURRENT_BINARY_DIR}/writable-dir"
-              "${CMAKE_CURRENT_BINARY_DIR}/executable-dir")
+  file(REMOVE_RECURSE
+    "${CMAKE_CURRENT_BINARY_DIR}/readable-dir"
+    "${CMAKE_CURRENT_BINARY_DIR}/writable-dir"
+    "${CMAKE_CURRENT_BINARY_DIR}/executable-dir"
+    )
 
   file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/readable-dir")
   file(CHMOD "${CMAKE_CURRENT_BINARY_DIR}/readable-dir" PERMISSIONS OWNER_READ GROUP_READ WORLD_READ)
