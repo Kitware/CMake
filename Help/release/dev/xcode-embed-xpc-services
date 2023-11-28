@@ -1,0 +1,6 @@
+xcode-embed-xpc-services
+------------------------
+
+* The :prop_tgt:`XCODE_EMBED_XPC_SERVICES <XCODE_EMBED_<type>>` target property
+  was added to tell the :generator:`Xcode` generator what targets to put in
+  the ``Embed XPC Resources`` build phase.
