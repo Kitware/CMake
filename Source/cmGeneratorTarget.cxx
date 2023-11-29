@@ -9295,11 +9295,15 @@ void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
         cmGlobalGenerator::CxxModuleSupportQuery::Expected)) {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
-      cmStrCat(
-        "The target named \"", this->GetName(),
-        "\" has C++ sources that may use modules, but modules are not "
-        "supported by this generator.  See the cmake-cxxmodules(7) manual "
-        "and the CMAKE_CXX_SCAN_FOR_MODULES variable."));
+      cmStrCat("The target named \"", this->GetName(),
+               "\" has C++ sources that may use modules, but modules are not "
+               "supported by this generator:\n  ",
+               this->GetGlobalGenerator()->GetName(), '\n',
+               "Modules are supported only by Ninja, Ninja Multi-Config, "
+               "and Visual Studio generators for VS 17.4 and newer.  "
+               "See the cmake-cxxmodules(7) manual for details.  "
+               "Use the CMAKE_CXX_SCAN_FOR_MODULES variable to enable or "
+               "disable scanning."));
     return;
   }
 
@@ -9334,8 +9338,9 @@ void cmGeneratorTarget::CheckCxxModuleStatus(std::string const& config) const
         cmStrCat("The target named \"", this->GetName(),
                  "\" has C++ sources that may use modules, but the compiler "
                  "does not provide a way to discover the import graph "
-                 "dependencies.  See the cmake-cxxmodules(7) manual "
-                 "and the CMAKE_CXX_SCAN_FOR_MODULES variable."));
+                 "dependencies.  See the cmake-cxxmodules(7) manual for "
+                 "details.  Use the CMAKE_CXX_SCAN_FOR_MODULES variable to "
+                 "enable or disable scanning."));
     } break;
     case cmGeneratorTarget::Cxx20SupportLevel::Supported:
       // All is well.
