@@ -2224,6 +2224,13 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
                                                     args[i]);
   }
 
+  else if (this->CheckArgument(arg, "--tests-from-file"_s) &&
+           i < args.size() - 1) {
+    i++;
+    this->GetTestHandler()->SetPersistentOption("TestListFile", args[i]);
+    this->GetMemCheckHandler()->SetPersistentOption("TestListFile", args[i]);
+  }
+
   else if (this->CheckArgument(arg, "--rerun-failed"_s)) {
     this->GetTestHandler()->SetPersistentOption("RerunFailed", "true");
     this->GetMemCheckHandler()->SetPersistentOption("RerunFailed", "true");
