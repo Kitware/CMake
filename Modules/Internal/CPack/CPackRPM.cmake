@@ -55,7 +55,12 @@ macro(set_spec_scripts PACKAGE_NAME)
 endmacro()
 
 function(make_rpm_spec_path var path)
-  set("${var}" "\"${path}\"" PARENT_SCOPE)
+  # RPM supports either whitespace with quoting or globbing without quoting.
+  if(path MATCHES "[ \t]")
+    set("${var}" "\"${path}\"" PARENT_SCOPE)
+  else()
+    set("${var}" "${path}" PARENT_SCOPE)
+  endif()
 endfunction()
 
 function(get_file_permissions FILE RETURN_VAR)
