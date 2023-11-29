@@ -809,6 +809,8 @@ def gen_check_targets(c, g, inSource):
         read_codemodel_json_data("targets/cxx_exe.json"),
         read_codemodel_json_data("targets/cxx_exe_cross_emulator.json"),
         read_codemodel_json_data("targets/cxx_exe_cross_emulator_args.json"),
+        read_codemodel_json_data("targets/cxx_exe_test_launcher_and_cross_emulator.json"),
+        read_codemodel_json_data("targets/cxx_exe_test_launcher.json"),
         read_codemodel_json_data("targets/cxx_standard_compile_feature_exe.json"),
         read_codemodel_json_data("targets/cxx_standard_exe.json"),
         read_codemodel_json_data("targets/cxx_shared_lib.json"),
