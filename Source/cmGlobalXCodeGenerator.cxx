@@ -4295,9 +4295,8 @@ void cmGlobalXCodeGenerator::AddEmbeddedResources(cmXCodeObject* target)
 {
   static const auto dstSubfolderSpec = "7";
 
-  this->AddEmbeddedObjects(target, "Embed Resources",
-                           "XCODE_EMBED_RESOURCES_PATH", dstSubfolderSpec,
-                           NoActionOnCopyByDefault);
+  this->AddEmbeddedObjects(target, "Embed Resources", "XCODE_EMBED_RESOURCES",
+                           dstSubfolderSpec, NoActionOnCopyByDefault);
 }
 
 bool cmGlobalXCodeGenerator::CreateGroups(
