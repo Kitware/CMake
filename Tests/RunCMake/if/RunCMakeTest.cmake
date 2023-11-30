@@ -4,18 +4,9 @@ run_cmake(InvalidArgument1)
 run_cmake(exists)
 if(NOT MSYS)
   # permissions and symbolic links are broken on MSYS
-  unset(uid)
-  unset(status)
-  if(UNIX)
-    set(ID "id")
-    if (CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND EXISTS "/usr/xpg4/bin/id")
-      set (ID "/usr/xpg4/bin/id")
-    endif()
-    # if real user is root, tests are irrelevant
-    execute_process(COMMAND ${ID} -u $ENV{USER} OUTPUT_VARIABLE uid ERROR_QUIET
-                    RESULT_VARIABLE status OUTPUT_STRIP_TRAILING_WHITESPACE)
-  endif()
-  if(NOT status AND NOT uid STREQUAL "0")
+  # if real user is root, tests are irrelevant
+  get_unix_uid(uid)
+  if(NOT uid STREQUAL "0")
     run_cmake(FilePermissions)
   endif()
 endif()

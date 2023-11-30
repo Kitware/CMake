@@ -323,5 +323,21 @@ function(ensure_files_match expected_file actual_file)
   endif()
 endfunction()
 
+# Get the user id on unix if possible.
+function(get_unix_uid var)
+  set("${var}" "" PARENT_SCOPE)
+  if(UNIX)
+    set(ID "id")
+    if(CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND EXISTS "/usr/xpg4/bin/id")
+      set (ID "/usr/xpg4/bin/id")
+    endif()
+    execute_process(COMMAND ${ID} -u $ENV{USER} OUTPUT_VARIABLE uid ERROR_QUIET
+                    RESULT_VARIABLE status OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(status EQUAL 0)
+      set("${var}" "${uid}" PARENT_SCOPE)
+    endif()
+  endif()
+endfunction()
+
 # Protect RunCMake tests from calling environment.
 unset(ENV{MAKEFLAGS})
