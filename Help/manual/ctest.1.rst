@@ -246,6 +246,18 @@ Run Tests
  This option can be combined with the other options like
  ``-R``, ``-E``, ``-L`` or ``-LE``.
 
+.. option:: --exclude-from-file <filename>
+
+ .. versionadded:: 3.29
+
+ Exclude tests listed in the given file.
+
+ This option tells CTest to NOT run the tests which are listed in the given
+ file. The file must contain one exact test name per line.
+ Lines can be commented out using a ``#``.
+ This option can be combined with the other options like
+ ``-R``, ``-E``, ``-L`` or ``-LE``.
+
 .. option:: -FA <regex>, --fixture-exclude-any <regex>
 
  Exclude fixtures matching ``<regex>`` from automatically adding any tests to

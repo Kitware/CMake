@@ -222,6 +222,7 @@ add_test(Test11 \"${CMAKE_COMMAND}\" -E echo \"test11\")
   run_cmake_command(TestsFromFile-${arg} ${CMAKE_CTEST_COMMAND} --${arg} ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList.txt )
 endfunction()
 run_TestsFromFileTest(tests-from-file)
+run_TestsFromFileTest(exclude-from-file)
 
 
 function(run_SerialFailed)

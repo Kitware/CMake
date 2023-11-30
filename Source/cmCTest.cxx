@@ -2231,6 +2231,15 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     this->GetMemCheckHandler()->SetPersistentOption("TestListFile", args[i]);
   }
 
+  else if (this->CheckArgument(arg, "--exclude-from-file"_s) &&
+           i < args.size() - 1) {
+    i++;
+    this->GetTestHandler()->SetPersistentOption("ExcludeTestListFile",
+                                                args[i]);
+    this->GetMemCheckHandler()->SetPersistentOption("ExcludeTestListFile",
+                                                    args[i]);
+  }
+
   else if (this->CheckArgument(arg, "--rerun-failed"_s)) {
     this->GetTestHandler()->SetPersistentOption("RerunFailed", "true");
     this->GetMemCheckHandler()->SetPersistentOption("RerunFailed", "true");

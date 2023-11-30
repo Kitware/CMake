@@ -346,6 +346,7 @@ void cmCTestTestHandler::Initialize()
   this->ExcludeFixtureSetupRegExp.clear();
   this->ExcludeFixtureCleanupRegExp.clear();
   this->TestListFile.clear();
+  this->ExcludeTestListFile.clear();
 
   this->TestsToRunString.clear();
   this->UseUnion = false;
@@ -589,6 +590,10 @@ bool cmCTestTestHandler::ProcessOptions()
   val = this->GetOption("TestListFile");
   if (val) {
     this->TestListFile = val;
+  }
+  val = this->GetOption("ExcludeTestListFile");
+  if (val) {
+    this->ExcludeTestListFile = val;
   }
   this->SetRerunFailed(cmIsOn(this->GetOption("RerunFailed")));
 
@@ -942,6 +947,13 @@ bool cmCTestTestHandler::ComputeTestList()
     if (!this->TestsToRunByName.empty()) {
       if (this->TestsToRunByName.find(tp.Name) ==
           this->TestsToRunByName.end()) {
+        continue;
+      }
+    }
+
+    if (!this->TestsToExcludeByName.empty()) {
+      if (this->TestsToExcludeByName.find(tp.Name) !=
+          this->TestsToExcludeByName.end()) {
         continue;
       }
     }
@@ -1833,7 +1845,11 @@ bool cmCTestTestHandler::GetListOfTests()
   }
 
   if (!this->TestListFile.empty()) {
-    this->ReadTestListFile(this->TestListFile);
+    this->TestsToRunByName = this->ReadTestListFile(this->TestListFile);
+  }
+  if (!this->ExcludeTestListFile.empty()) {
+    this->TestsToExcludeByName =
+      this->ReadTestListFile(this->ExcludeTestListFile);
   }
 
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -2004,8 +2020,11 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
   }
 }
 
-void cmCTestTestHandler::ReadTestListFile(const std::string& testListFileName)
+std::set<std::string> cmCTestTestHandler::ReadTestListFile(
+  const std::string& testListFileName) const
 {
+  std::set<std::string> testNames;
+
   cmsys::ifstream ifs(testListFileName.c_str());
   if (ifs) {
     std::string line;
@@ -2015,7 +2034,7 @@ void cmCTestTestHandler::ReadTestListFile(const std::string& testListFileName)
         continue;
       }
 
-      this->TestsToRunByName.insert(trimmed);
+      testNames.insert(trimmed);
     }
     ifs.close();
   } else if (!this->CTest->GetShowOnly() &&
@@ -2025,6 +2044,8 @@ void cmCTestTestHandler::ReadTestListFile(const std::string& testListFileName)
                  << testListFileName
                  << " while generating list of tests to run." << std::endl);
   }
+
+  return testNames;
 }
 
 void cmCTestTestHandler::RecordCustomTestMeasurements(cmXMLWriter& xml,
