@@ -13,12 +13,12 @@ This module defines the following variables:
   The full path to Perl.
 
 ``PERL_FOUND``
-  True if the executable was found perl.
+  True if the Perl executable was found.
 
 ``PERL_VERSION_STRING``
   .. versionadded:: 2.8.8
 
-  The version of perl found.
+  The version of Perl found.
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindCygwin.cmake)
