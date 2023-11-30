@@ -62,6 +62,9 @@ if ((RunCMake_GENERATOR MATCHES "Makefiles|Ninja|Xcode"
     # testing target property LINK_LIBRARY_OVERRIDE_<LIBRARY>
     run_cmake_target(LINK_LIBRARY-CMP0156-${policy} override-features3 LinkLibrary_override_features3)
     run_cmake_target(LINK_LIBRARY-CMP0156-${policy} override-features4 LinkLibrary_override_features4)
+
+    # testing target property INTERFACE_LINK_LIBRARIES_DIRECT
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} consuming_LINK_LIBRARIES_DIRECT LinkLibrary_consuming_LINK_LIBRARIES_DIRECT)
   endforeach()
 
   run_cmake(imported-target)

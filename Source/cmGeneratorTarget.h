@@ -449,9 +449,12 @@ public:
   TargetOrString ResolveTargetReference(std::string const& name,
                                         cmLocalGenerator const* lg) const;
 
-  cmLinkItem ResolveLinkItem(BT<std::string> const& name) const;
-  cmLinkItem ResolveLinkItem(BT<std::string> const& name,
-                             cmLocalGenerator const* lg) const;
+  cmLinkItem ResolveLinkItem(
+    BT<std::string> const& name,
+    std::string const& linkFeature = cmLinkItem::DEFAULT) const;
+  cmLinkItem ResolveLinkItem(
+    BT<std::string> const& name, cmLocalGenerator const* lg,
+    std::string const& linkFeature = cmLinkItem::DEFAULT) const;
 
   bool HasPackageReferences() const;
   std::vector<std::string> GetPackageReferences() const;
@@ -1182,6 +1185,7 @@ private:
   };
   cm::optional<cmLinkItem> LookupLinkItem(std::string const& n,
                                           cmListFileBacktrace const& bt,
+                                          std::string const& linkFeature,
                                           LookupLinkItemScope* scope,
                                           LookupSelf lookupSelf) const;
 
