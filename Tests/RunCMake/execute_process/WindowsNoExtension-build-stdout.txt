@@ -1,0 +1,6 @@
+[^
+]*This executable does not have an extension
+[^
+]*This executable does not have an extension
+[^
+]*This executable has an extension

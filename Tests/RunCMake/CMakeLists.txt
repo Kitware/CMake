@@ -476,6 +476,7 @@ set(execute_process_ARGS
   -DEXIT_CODE_EXE=$<TARGET_FILE:exit_code>
   -DPRINT_STDIN_EXE=$<TARGET_FILE:print_stdin>
   -DPython_EXECUTABLE=${Python_EXECUTABLE}
+  -DCYGWIN=${CYGWIN}
   )
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   list(APPEND execute_process_ARGS -DTEST_ENCODING_EXE=$<TARGET_FILE:testEncoding>)

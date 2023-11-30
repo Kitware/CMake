@@ -1,0 +1,17 @@
+file(COPY_FILE "${exe_no_extension}" "${CMAKE_CURRENT_BINARY_DIR}/exe" INPUT_MAY_BE_RECENT)
+execute_process(
+  COMMAND "${CMAKE_CURRENT_BINARY_DIR}/exe"
+  COMMAND_ERROR_IS_FATAL ANY
+  )
+
+file(COPY_FILE "${exe_extension}" "${CMAKE_CURRENT_BINARY_DIR}/exe.exe" INPUT_MAY_BE_RECENT)
+execute_process(
+  COMMAND "${CMAKE_CURRENT_BINARY_DIR}/exe"
+  COMMAND_ERROR_IS_FATAL ANY
+  )
+
+file(REMOVE "${CMAKE_CURRENT_BINARY_DIR}/exe")
+execute_process(
+  COMMAND "${CMAKE_CURRENT_BINARY_DIR}/exe"
+  COMMAND_ERROR_IS_FATAL ANY
+  )
