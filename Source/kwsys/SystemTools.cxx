@@ -2794,14 +2794,14 @@ Status SystemTools::RemoveFile(std::string const& source)
 
 Status SystemTools::RemoveADirectory(std::string const& source)
 {
-  // Add write permission to the directory so we can modify its
-  // content to remove files and directories from it.
+  // Add read and write permission to the directory so we can read
+  // and modify its content to remove files and directories from it.
   mode_t mode = 0;
   if (SystemTools::GetPermissions(source, mode)) {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-    mode |= S_IWRITE;
+    mode |= S_IREAD | S_IWRITE;
 #else
-    mode |= S_IWUSR;
+    mode |= S_IRUSR | S_IWUSR;
 #endif
     SystemTools::SetPermissions(source, mode);
   }
