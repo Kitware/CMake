@@ -1999,6 +1999,8 @@ void cmGlobalGenerator::ClearGeneratorMembers()
   this->DirectoryContentMap.clear();
   this->BinaryDirectories.clear();
   this->GeneratedFiles.clear();
+  this->RuntimeDependencySets.clear();
+  this->RuntimeDependencySetsByName.clear();
 }
 
 void cmGlobalGenerator::ComputeTargetObjectDirectory(
