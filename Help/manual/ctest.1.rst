@@ -354,6 +354,8 @@ Run Tests
 
 .. option:: --test-dir <dir>
 
+ .. versionadded:: 3.20
+
  Specify the directory in which to look for tests, typically a CMake project
  build directory. If not specified, the current directory is used.
 
