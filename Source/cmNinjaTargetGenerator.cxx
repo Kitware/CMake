@@ -1916,7 +1916,6 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
   //  indistinguishable from the old behavior.
   //
   //  FIXME(#25490): Add response file support to Swift object build step
-  //  FIXME(#25491): Include all files in module in compile_commands.json
 
   if (sources.empty()) {
     return;
@@ -2027,15 +2026,7 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
     std::string const sourceFilePath = this->GetCompiledSourceNinjaPath(sf);
     objBuild.ExplicitDeps.push_back(sourceFilePath);
 
-    if (isSingleOutput) {
-      if (firstForConfig) {
-        this->ExportObjectCompileCommand(
-          language, sourceFilePath, objectDir, targetObjectFilename,
-          cmSystemTools::GetFilenamePath(targetObjectFilename), vars["FLAGS"],
-          vars["DEFINES"], vars["INCLUDES"],
-          /*compile pdb*/ "", /*target pdb*/ "", config, WithScanning::No);
-      }
-    } else {
+    if (!isSingleOutput) {
       // Object outputs
       std::string const objectFilepath =
         this->ConvertToNinjaPath(this->GetObjectFilePath(sf, config));
@@ -2045,21 +2036,17 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
 
       // Add OFM data
       this->EmitSwiftDependencyInfo(sf, config);
-
-      // Emit compile commands
-      if (firstForConfig) {
-        this->ExportObjectCompileCommand(
-          language, sourceFilePath, objectDir, objectFilepath,
-          cmSystemTools::GetFilenamePath(objectFilepath), vars["FLAGS"],
-          vars["DEFINES"], vars["INCLUDES"],
-          /*compile pdb*/ "",
-          /*target pdb*/ "", config, WithScanning::No);
-      }
     }
   }
 
   if (!isSingleOutput) {
     this->GenerateSwiftOutputFileMap(config, vars["FLAGS"]);
+  }
+
+  if (firstForConfig) {
+    this->ExportSwiftObjectCompileCommand(
+      sources, targetObjectFilename, vars["FLAGS"], vars["DEFINES"],
+      vars["INCLUDES"], config, isSingleOutput);
   }
 
   for (cmTargetDepend const& dep :
@@ -2324,6 +2311,77 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
 
   this->GetGlobalGenerator()->AddCXXCompileCommand(cmdLine, sourceFileName,
                                                    objectFileName);
+}
+
+void cmNinjaTargetGenerator::ExportSwiftObjectCompileCommand(
+  std::vector<cmSourceFile const*> const& moduleSourceFiles,
+  std::string const& moduleObjectFilename, std::string const& flags,
+  std::string const& defines, std::string const& includes,
+  std::string const& outputConfig, bool singleOutput)
+{
+  if (!this->GeneratorTarget->GetPropertyAsBool("EXPORT_COMPILE_COMMANDS")) {
+    return;
+  }
+
+  auto escapeSourceFileName = [this](std::string srcFilename) -> std::string {
+    if (!cmSystemTools::FileIsFullPath(srcFilename)) {
+      srcFilename =
+        cmSystemTools::CollapseFullPath(srcFilename,
+                                        this->GetGlobalGenerator()
+                                          ->GetCMakeInstance()
+                                          ->GetHomeOutputDirectory());
+    }
+
+    return this->LocalGenerator->ConvertToOutputFormat(
+      srcFilename, cmOutputConverter::SHELL);
+  };
+
+  cmRulePlaceholderExpander::RuleVariables compileObjectVars;
+  compileObjectVars.Language = "Swift";
+  compileObjectVars.Flags = flags.c_str();
+  compileObjectVars.Defines = defines.c_str();
+  compileObjectVars.Includes = includes.c_str();
+
+  // Build up the list of source files in the module
+  std::vector<std::string> filenames;
+  filenames.reserve(moduleSourceFiles.size());
+  for (cmSourceFile const* sf : moduleSourceFiles) {
+    filenames.emplace_back(
+      escapeSourceFileName(this->GetCompiledSourceNinjaPath(sf)));
+  }
+  // Note that `escapedSourceFilenames` must remain alive until the
+  // compileObjectVars is consumed or Source will be a dangling pointer.
+  std::string const escapedSourceFilenames = cmJoin(filenames, " ");
+  compileObjectVars.Source = escapedSourceFilenames.c_str();
+
+  std::string const& compileCommand =
+    this->Makefile->GetRequiredDefinition("CMAKE_Swift_COMPILE_OBJECT");
+  cmList compileCmds(compileCommand);
+
+  auto rulePlaceholderExpander =
+    this->GetLocalGenerator()->CreateRulePlaceholderExpander();
+
+  for (cmSourceFile const* sf : moduleSourceFiles) {
+    std::string const sourceFilename = this->GetCompiledSourceNinjaPath(sf);
+    std::string objectFilename = moduleObjectFilename;
+
+    if (!singleOutput) {
+      // If it's not single-output, each source file gets a separate object
+      objectFilename = this->GetObjectFilePath(sf, outputConfig);
+    }
+    compileObjectVars.Objects = objectFilename.c_str();
+
+    for (std::string& cmd : compileCmds) {
+      rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
+                                                   cmd, compileObjectVars);
+    }
+
+    std::string commandLine = this->GetLocalGenerator()->BuildCommandLine(
+      compileCmds, outputConfig, outputConfig);
+
+    this->GetGlobalGenerator()->AddCXXCompileCommand(
+      commandLine, sourceFilename, objectFilename);
+  }
 }
 
 void cmNinjaTargetGenerator::AdditionalCleanFiles(const std::string& config)
