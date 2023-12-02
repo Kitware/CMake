@@ -120,6 +120,10 @@ macro(_cmake_find_compiler_path lang)
     # CMAKE_${lang}_COMPILER and the rest as CMAKE_${lang}_COMPILER_ARG1
     # Otherwise, preserve any existing CMAKE_${lang}_COMPILER_ARG1 that might
     # have been saved by CMakeDetermine${lang}Compiler in a previous run.
+
+    # Necessary for Windows paths to avoid improper escaping of backslashes
+    cmake_path(CONVERT "${CMAKE_${lang}_COMPILER}" TO_CMAKE_PATH_LIST CMAKE_${lang}_COMPILER NORMALIZE)
+
     list(LENGTH CMAKE_${lang}_COMPILER _CMAKE_${lang}_COMPILER_LENGTH)
     if(_CMAKE_${lang}_COMPILER_LENGTH GREATER 1)
       set(CMAKE_${lang}_COMPILER_ARG1 "${CMAKE_${lang}_COMPILER}")
