@@ -119,10 +119,9 @@ std::string const& cmFileCopier::ToName(std::string const& fromName)
 bool cmFileCopier::ReportMissing(const std::string& fromFile)
 {
   // The input file does not exist and installation is not optional.
-  std::ostringstream e;
-  e << this->Name << " cannot find \"" << fromFile
-    << "\": " << cmSystemTools::GetLastSystemError() << ".";
-  this->Status.SetError(e.str());
+  this->Status.SetError(cmStrCat(this->Name, " cannot find \"", fromFile,
+                                 "\": ", cmSystemTools::GetLastSystemError(),
+                                 '.'));
   return false;
 }
 
