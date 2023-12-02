@@ -11,7 +11,7 @@ built-in types. The pre-defined linker types are:
   (for example, ``SYSTEM`` imply Microsoft linker for all ``MSVC`` compatible
   compilers). This type is supported for the following platforms/compilers:
 
-  * Linux, for ``GNU``, ``Clang`` and ``NVIDIA`` compilers.
+  * Linux, for ``GNU``, ``Clang``, ``LLVMFlang`` and ``NVIDIA`` compilers.
   * All Apple variants for ``AppleClang``, ``Clang`` and ``GNU`` compilers.
   * Windows, for ``MSVC``, ``GNU``, ``Clang`` and ``NVIDIA`` compilers.
 
@@ -19,7 +19,7 @@ built-in types. The pre-defined linker types are:
   Use the ``LLVM`` linker. This type is supported for the following
   platforms/compilers:
 
-  * Linux, for ``GNU``, ``Clang`` and ``NVIDIA`` compilers.
+  * Linux, for ``GNU``, ``Clang``, ``LLVMFlang`` and ``NVIDIA`` compilers.
   * All Apple variants for ``Clang`` and ``AppleClang`` compilers.
   * Windows, for ``GNU``, ``Clang`` compilers with ``GNU`` front-end and
     ``CLang``, ``MSVC`` and ``NVIDIA`` compilers with ``MSVC`` front-end.
@@ -28,17 +28,19 @@ built-in types. The pre-defined linker types are:
   Use the ``GNU`` linker.  This type is supported for the following
   platforms/compilers:
 
-  * Linux, for ``GNU``, ``Clang`` and ``NVIDIA`` compilers.
+  * Linux, for ``GNU``, ``Clang``, ``LLVMFlang`` and ``NVIDIA`` compilers.
   * Windows, for ``GNU``, ``Clang`` compilers with ``GNU`` front-end.
 
 ``GOLD``
-  Supported on Linux platform for ``GNU``, ``Clang`` and ``NVIDIA`` compilers.
+  Supported on Linux platform for ``GNU``, ``Clang``, ``LLVMFlang`` and
+  ``NVIDIA`` compilers.
 
 ``MOLD``
   Use the `mold linker <https://github.com/rui314/mold>`_. This type is
   supported on the following platforms:
 
-  * Linux platform for ``GNU``, ``Clang`` and ``NVIDIA`` compilers.
+  * Linux platform for ``GNU``, ``Clang``, ``LLVMFlang`` and ``NVIDIA``
+    compilers.
   * All Apple variants for ``Clang`` and ``AppleClang`` compilers as an
     alias to ``SOLD``.
 
