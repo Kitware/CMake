@@ -7,6 +7,21 @@
 #include "cmGetPipes.h"
 #include "cmUVHandlePtr.h"
 
+static bool testBool()
+{
+  cm::uv_async_ptr async;
+  cm::uv_handle_ptr handle;
+  cm::uv_idle_ptr idle;
+  cm::uv_pipe_ptr pipe;
+  cm::uv_process_ptr process;
+  cm::uv_signal_ptr signal;
+  cm::uv_stream_ptr stream;
+  cm::uv_timer_ptr timer;
+  cm::uv_tty_ptr tty;
+  return !async && !handle && !idle && !pipe && !process && !signal &&
+    !stream && !timer && !tty;
+}
+
 static bool testIdle()
 {
   bool idled = false;
@@ -130,6 +145,7 @@ static bool testWriteCallback()
 int testUVHandlePtr(int, char** const)
 {
   bool passed = true;
+  passed = testBool() && passed;
   passed = testIdle() && passed;
   passed = testTimer() && passed;
   passed = testWriteCallback() && passed;
