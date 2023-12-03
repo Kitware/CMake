@@ -51,6 +51,8 @@ protected:
   std::string Include;
   std::string ExcludeLabel;
   std::string IncludeLabel;
+  std::string IncludeTestsFromFile;
+  std::string ExcludeTestsFromFile;
   std::string ExcludeFixture;
   std::string ExcludeFixtureSetup;
   std::string ExcludeFixtureCleanup;

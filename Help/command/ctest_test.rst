@@ -13,6 +13,8 @@ Perform the :ref:`CTest Test Step` as a :ref:`Dashboard Client`.
              [INCLUDE <include-regex>]
              [EXCLUDE_LABEL <label-exclude-regex>]
              [INCLUDE_LABEL <label-include-regex>]
+             [EXCLUDE_FROM_FILE <filename>]
+             [INCLUDE_FROM_FILE <filename>]
              [EXCLUDE_FIXTURE <regex>]
              [EXCLUDE_FIXTURE_SETUP <regex>]
              [EXCLUDE_FIXTURE_CLEANUP <regex>]
@@ -71,6 +73,16 @@ The options are:
 ``INCLUDE_LABEL <label-include-regex>``
   Specify a regular expression matching test labels to include.
   Tests not matching this expression are excluded.
+
+``EXCLUDE_FROM_FILE <filename>``
+  .. versionadded:: 3.29
+
+  Do NOT run tests listed with their exact name in the given file.
+
+``INCLUDE_FROM_FILE <filename>``
+  .. versionadded:: 3.29
+
+  Only run the tests listed with their exact name in the given file.
 
 ``EXCLUDE_FIXTURE <regex>``
   .. versionadded:: 3.7
