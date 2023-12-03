@@ -132,7 +132,15 @@ public:
   uv_handle_ptr_base_(std::nullptr_t) {}
   ~uv_handle_ptr_base_() { this->reset(); }
 
+#if defined(__SUNPRO_CC)
+  // The Oracle Studio compiler recognizes 'explicit operator bool()' in
+  // 'if(foo)' but not 'if(foo && ...)'.  The purpose of 'explicit' here
+  // is to avoid accidental conversion in non-boolean contexts.  Just
+  // leave it out on this compiler so we can compile valid code.
+  operator bool() const;
+#else
   explicit operator bool() const;
+#endif
 
   /**
    * Properly close the handle if needed and sets the inner handle to nullptr
