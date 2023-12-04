@@ -61,7 +61,7 @@ static const unsigned rhash_k256[64] = {
 	ROUND(a,b,c,d,e,f,g,h, k[n], RECALCULATE_W(W, n))
 
 /**
- * Initialize context before calculaing hash.
+ * Initialize context before calculating hash.
  *
  * @param ctx context to initialize
  */
@@ -74,7 +74,7 @@ void rhash_sha256_init(sha256_ctx* ctx)
 		0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
 		0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
 	};
-
+	memset(ctx->message, 0, sizeof(ctx->message));
 	ctx->length = 0;
 	ctx->digest_length = sha256_hash_size;
 
@@ -83,7 +83,7 @@ void rhash_sha256_init(sha256_ctx* ctx)
 }
 
 /**
- * Initialize context before calculaing hash.
+ * Initialize context before calculating hash.
  *
  * @param ctx context to initialize
  */
@@ -96,7 +96,7 @@ void rhash_sha224_init(struct sha256_ctx* ctx)
 		0xc1059ed8, 0x367cd507, 0x3070dd17, 0xf70e5939,
 		0xffc00b31, 0x68581511, 0x64f98fa7, 0xbefa4fa4
 	};
-
+	memset(ctx->message, 0, sizeof(ctx->message));
 	ctx->length = 0;
 	ctx->digest_length = sha224_hash_size;
 
