@@ -79,9 +79,29 @@ function(detect_jobserver_present)
   run_cmake_command(DetectJobServer-present-parallel-build ${CMAKE_COMMAND} --build . -j4)
 endfunction()
 
+function(run_make_rule case rule job_count)
+  run_cmake_command(${case}-${rule}-j${job_count}
+    ${RunCMake_MAKE_PROGRAM} -f "${RunCMake_SOURCE_DIR}/${case}.make" ${rule} -j${job_count}
+    CMAKE_COMMAND="${CMAKE_COMMAND}" CMAKE_CTEST_COMMAND="${CMAKE_CTEST_COMMAND}"
+    )
+endfunction()
+
+function(run_CTestJobServer)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CTestJobServer-build)
+  run_cmake(CTestJobServer)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_make_rule(CTestJobServer NoPipe 2)
+  run_make_rule(CTestJobServer NoTests 2)
+  run_make_rule(CTestJobServer Tests 2)
+  run_make_rule(CTestJobServer Tests 3)
+endfunction()
+
 # Jobservers are currently only supported by GNU makes, except MSYS2 make
 if(MAKE_IS_GNU AND NOT RunCMake_GENERATOR MATCHES "MSYS Makefiles")
   detect_jobserver_present()
+  if(UNIX)
+    run_CTestJobServer()
+  endif()
 endif()
 
 if(MAKE_IS_GNU)

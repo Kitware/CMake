@@ -19,6 +19,7 @@
 #include "cmCTestResourceSpec.h"
 #include "cmCTestTestHandler.h"
 #include "cmUVHandlePtr.h"
+#include "cmUVJobServerClient.h"
 
 struct cmCTestBinPackerAllocation;
 class cmCTestRunTest;
@@ -204,6 +205,15 @@ protected:
   cmCTestResourceAllocator ResourceAllocator;
   std::vector<cmCTestTestHandler::cmCTestTestResult>* TestResults;
   size_t ParallelLevel; // max number of process that can be run at once
+
+  // 'make' jobserver client.  If connected, we acquire a token
+  // for each test before running its process.
+  cm::optional<cmUVJobServerClient> JobServerClient;
+  // List of tests that are queued to run when a token is available.
+  std::list<int> JobServerQueuedTests;
+  // Callback invoked when a token is received.
+  void JobServerReceivedToken();
+
   unsigned long TestLoad;
   unsigned long FakeLoadForTesting;
   cm::uv_loop_ptr Loop;

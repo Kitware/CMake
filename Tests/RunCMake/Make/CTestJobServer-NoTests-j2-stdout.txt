@@ -1,0 +1,3 @@
+Test project [^
+]*/Tests/RunCMake/Make/CTestJobServer-build
+Connected to MAKE jobserver

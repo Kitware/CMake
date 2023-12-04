@@ -40,6 +40,7 @@
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmUVJobServerClient.h"
 #include "cmWorkingDirectory.h"
 
 namespace cmsys {
@@ -130,10 +131,19 @@ void cmCTestMultiProcessHandler::InitializeLoop()
   this->Loop.init();
   this->StartNextTestsOnIdle_.init(*this->Loop, this);
   this->StartNextTestsOnTimer_.init(*this->Loop, this);
+
+  this->JobServerClient = cmUVJobServerClient::Connect(
+    *this->Loop, /*onToken=*/[this]() { this->JobServerReceivedToken(); },
+    /*onDisconnect=*/nullptr);
+  if (this->JobServerClient) {
+    cmCTestLog(this->CTest, OUTPUT,
+               "Connected to MAKE jobserver" << std::endl);
+  }
 }
 
 void cmCTestMultiProcessHandler::FinalizeLoop()
 {
+  this->JobServerClient.reset();
   this->StartNextTestsOnTimer_.reset();
   this->StartNextTestsOnIdle_.reset();
   this->Loop.reset();
@@ -461,6 +471,26 @@ std::string cmCTestMultiProcessHandler::GetName(int test)
 
 void cmCTestMultiProcessHandler::StartTest(int test)
 {
+  if (this->JobServerClient) {
+    // There is a job server.  Request a token and queue the test to run
+    // when a token is received.  Note that if we do not get a token right
+    // away it's possible that the system load will be higher when the
+    // token is received and we may violate the test-load limit.  However,
+    // this is unlikely because if we do not get a token right away, some
+    // other job that's currently running must finish before we get one.
+    this->JobServerClient->RequestToken();
+    this->JobServerQueuedTests.emplace_back(test);
+  } else {
+    // There is no job server.  Start the test now.
+    this->StartTestProcess(test);
+  }
+}
+
+void cmCTestMultiProcessHandler::JobServerReceivedToken()
+{
+  assert(!this->JobServerQueuedTests.empty());
+  int test = this->JobServerQueuedTests.front();
+  this->JobServerQueuedTests.pop_front();
   this->StartTestProcess(test);
 }
 
@@ -692,6 +722,9 @@ void cmCTestMultiProcessHandler::FinishTestProcess(
 
   runner.reset();
 
+  if (this->JobServerClient) {
+    this->JobServerClient->ReleaseToken();
+  }
   this->StartNextTestsOnIdle();
 }
 
