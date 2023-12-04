@@ -329,6 +329,8 @@ static WCHAR* path_search_walk_ext(const WCHAR *dir,
  * - If there's really only a filename, check the current directory for file,
  *   then search all path directories.
  *
+ * - If a full path is specified, search for the exact filename first.
+ *
  * - If filename specified has *any* extension, search for the file with the
  *   specified extension first.
  *
@@ -392,12 +394,14 @@ static WCHAR* search_path(const WCHAR *file,
   name_has_ext = (dot != NULL && dot[1] != L'\0');
 
   if (file_has_dir) {
-    /* The file has a path inside, don't use path */
+    /* The file has a path inside, don't use path
+     * Try the exact filename first, and then try standard extensions
+     */
     result = path_search_walk_ext(
         file, file_name_start - file,
         file_name_start, file_len - (file_name_start - file),
         cwd, cwd_len,
-        name_has_ext);
+        1);
 
   } else {
     dir_end = path;
