@@ -391,10 +391,12 @@ static WCHAR* search_path(const WCHAR *file,
   } else {
     dir_end = path;
 
-    /* The file is really only a name; look in cwd first, then scan path */
-    result = path_search_walk_ext(L"", 0,
-                                  file, file_len,
-                                  cwd, cwd_len);
+    if (NeedCurrentDirectoryForExePathW(L"")) {
+      /* The file is really only a name; look in cwd first, then scan path */
+      result = path_search_walk_ext(L"", 0,
+                                    file, file_len,
+                                    cwd, cwd_len);
+    }
 
     while (result == NULL) {
       if (dir_end == NULL || *dir_end == L'\0') {
