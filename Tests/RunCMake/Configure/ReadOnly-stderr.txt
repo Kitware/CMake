@@ -1,0 +1,8 @@
+CMake Error: Unable to \(re\)create the private pkgRedirects directory:
+  [^
+]*/Tests/RunCMake/Configure/ReadOnly-build/CMakeFiles/pkgRedirects
+This may be caused by not having read/write access to the build directory.
+Try specifying a location with read/write access like:
+  cmake -B build
+If using a CMake presets file, ensure that preset parameter
+'binaryDir' expands to a writable directory.
