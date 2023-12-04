@@ -45,3 +45,5 @@ if(_rdeps)
     FRAMEWORK DESTINATION fw
     )
 endif()
+
+add_subdirectory(cross)

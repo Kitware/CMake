@@ -2,7 +2,9 @@
     "source": "^cxx$",
     "build": "^cxx$",
     "parentSource": "^\\.$",
-    "childSources": null,
+    "childSources": [
+        "^cxx/cross$"
+    ],
     "targetIds": [
         "^ALL_BUILD::@a56b12a3f5c0529fb296$",
         "^ZERO_CHECK::@a56b12a3f5c0529fb296$",
