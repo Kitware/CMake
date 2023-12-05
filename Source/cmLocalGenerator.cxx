@@ -2739,6 +2739,9 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
 
         auto* pch_sf = this->Makefile->GetOrCreateSource(
           pchSource, false, cmSourceFileLocationKind::Known);
+        // PCH sources should never be scanned as they cannot contain C++
+        // module references.
+        pch_sf->SetProperty("CXX_SCAN_FOR_MODULES", "0");
 
         if (!this->GetGlobalGenerator()->IsXcode()) {
           if (!ReuseFrom) {

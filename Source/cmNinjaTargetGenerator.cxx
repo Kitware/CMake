@@ -1367,7 +1367,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     !(language == "RC" || (language == "CUDA" && !flag));
   int const commandLineLengthLimit =
     ((lang_supports_response && this->ForceResponseFile())) ? -1 : 0;
-  bool const needDyndep =
+  cmValue pchExtension =
+    this->GetMakefile()->GetDefinition("CMAKE_PCH_EXTENSION");
+  bool const isPch = cmHasSuffix(objectFileName, pchExtension);
+  bool const needDyndep = !isPch &&
     this->GeneratorTarget->NeedDyndepForSource(language, config, source);
 
   cmNinjaBuild objBuild(this->LanguageCompilerRule(
@@ -1438,13 +1441,9 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   }
 
   objBuild.Outputs.push_back(objectFileName);
-  if (firstForConfig) {
-    cmValue pchExtension =
-      this->GetMakefile()->GetDefinition("CMAKE_PCH_EXTENSION");
-    if (!cmHasSuffix(objectFileName, pchExtension)) {
-      // Add this object to the list of object files.
-      this->Configs[config].Objects.push_back(objectFileName);
-    }
+  if (firstForConfig && !isPch) {
+    // Add this object to the list of object files.
+    this->Configs[config].Objects.push_back(objectFileName);
   }
 
   objBuild.ExplicitDeps.push_back(sourceFilePath);
