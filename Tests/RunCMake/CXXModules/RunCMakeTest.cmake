@@ -165,6 +165,8 @@ if (RunCMake_GENERATOR MATCHES "Ninja")
   run_cxx_module_test_target(ninja-cmp0154 "${ninja_cmp0154_target}")
 endif ()
 
+run_cxx_module_test(scan-with-pch)
+
 # Tests which use named modules.
 if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(simple)
