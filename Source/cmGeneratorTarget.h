@@ -58,6 +58,7 @@ public:
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
   bool CanCompileSources() const;
+  bool HasKnownRuntimeArtifactLocation(std::string const& config) const;
   const std::string& GetLocation(const std::string& config) const;
 
   /** Get the full path to the target's main artifact, if known.  */
