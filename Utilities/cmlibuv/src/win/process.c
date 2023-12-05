@@ -274,16 +274,19 @@ static WCHAR* path_search_walk_ext(const WCHAR *dir,
                                    const WCHAR *name,
                                    size_t name_len,
                                    WCHAR *cwd,
-                                   size_t cwd_len) {
+                                   size_t cwd_len,
+                                   int name_has_ext) {
   WCHAR* result;
 
-  /* Try the name itself first */
-  result = search_path_join_test(dir, dir_len,
-                                 name, name_len,
-                                 L"", 0,
-                                 cwd, cwd_len);
-  if (result != NULL) {
-    return result;
+  /* If the name itself has a nonempty extension, try this extension first */
+  if (name_has_ext) {
+    result = search_path_join_test(dir, dir_len,
+                                   name, name_len,
+                                   L"", 0,
+                                   cwd, cwd_len);
+    if (result != NULL) {
+      return result;
+    }
   }
 
   /* Try .com extension */
@@ -326,7 +329,10 @@ static WCHAR* path_search_walk_ext(const WCHAR *dir,
  * - If there's really only a filename, check the current directory for file,
  *   then search all path directories.
  *
- * - Search for the file exactly as specified first.
+ * - If a full path is specified, search for the exact filename first.
+ *
+ * - If filename specified has *any* extension, search for the file with the
+ *   specified extension first.
  *
  * - If the literal filename is not found in a directory, try *appending*
  *   (not replacing) .com first and then .exe.
@@ -356,8 +362,10 @@ static WCHAR* search_path(const WCHAR *file,
   int file_has_dir;
   WCHAR* result = NULL;
   WCHAR *file_name_start;
+  WCHAR *dot;
   const WCHAR *dir_start, *dir_end, *dir_path;
   size_t dir_len;
+  int name_has_ext;
 
   size_t file_len = wcslen(file);
   size_t cwd_len = wcslen(cwd);
@@ -381,12 +389,19 @@ static WCHAR* search_path(const WCHAR *file,
 
   file_has_dir = file_name_start != file;
 
+  /* Check if the filename includes an extension */
+  dot = wcschr(file_name_start, L'.');
+  name_has_ext = (dot != NULL && dot[1] != L'\0');
+
   if (file_has_dir) {
-    /* The file has a path inside, don't use path */
+    /* The file has a path inside, don't use path
+     * Try the exact filename first, and then try standard extensions
+     */
     result = path_search_walk_ext(
         file, file_name_start - file,
         file_name_start, file_len - (file_name_start - file),
-        cwd, cwd_len);
+        cwd, cwd_len,
+        1);
 
   } else {
     dir_end = path;
@@ -395,7 +410,8 @@ static WCHAR* search_path(const WCHAR *file,
       /* The file is really only a name; look in cwd first, then scan path */
       result = path_search_walk_ext(L"", 0,
                                     file, file_len,
-                                    cwd, cwd_len);
+                                    cwd, cwd_len,
+                                    name_has_ext);
     }
 
     while (result == NULL) {
@@ -444,7 +460,8 @@ static WCHAR* search_path(const WCHAR *file,
 
       result = path_search_walk_ext(dir_path, dir_len,
                                     file, file_len,
-                                    cwd, cwd_len);
+                                    cwd, cwd_len,
+                                    name_has_ext);
     }
   }
 
