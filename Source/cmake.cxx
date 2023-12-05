@@ -1707,10 +1707,8 @@ void cmake::SetTraceFile(const std::string& file)
   this->TraceFile.close();
   this->TraceFile.open(file.c_str());
   if (!this->TraceFile) {
-    std::stringstream ss;
-    ss << "Error opening trace file " << file << ": "
-       << cmSystemTools::GetLastSystemError();
-    cmSystemTools::Error(ss.str());
+    cmSystemTools::Error(cmStrCat("Error opening trace file ", file, ": ",
+                                  cmSystemTools::GetLastSystemError()));
     return;
   }
   std::cout << "Trace will be written to " << file << '\n';

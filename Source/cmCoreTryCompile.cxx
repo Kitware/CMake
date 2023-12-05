@@ -629,13 +629,11 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     // now create a CMakeLists.txt file in that directory
     FILE* fout = cmsys::SystemTools::Fopen(outFileName, "w");
     if (!fout) {
-      std::ostringstream e;
-      /* clang-format off */
-      e << "Failed to open\n"
-           "  " << outFileName << "\n"
-        << cmSystemTools::GetLastSystemError();
-      /* clang-format on */
-      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Failed to open\n"
+                 "  ",
+                 outFileName, '\n', cmSystemTools::GetLastSystemError()));
       return cm::nullopt;
     }
 

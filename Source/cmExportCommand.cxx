@@ -485,13 +485,11 @@ static void StorePackageRegistry(cmMakefile& mf, std::string const& package,
     if (entry) {
       entry << content << "\n";
     } else {
-      std::ostringstream e;
-      /* clang-format off */
-      e << "Cannot create package registry file:\n"
-        << "  " << fname << "\n"
-        << cmSystemTools::GetLastSystemError() << "\n";
-      /* clang-format on */
-      mf.IssueMessage(MessageType::WARNING, e.str());
+      mf.IssueMessage(MessageType::WARNING,
+                      cmStrCat("Cannot create package registry file:\n"
+                               "  ",
+                               fname, '\n',
+                               cmSystemTools::GetLastSystemError(), '\n'));
     }
   }
 }
