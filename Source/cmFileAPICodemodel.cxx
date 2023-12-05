@@ -2102,7 +2102,7 @@ Json::Value Target::DumpLauncher(const char* name, const char* type)
     for (std::string const& arg : cmMakeRange(commandWithArgs).advance(1)) {
       args.append(arg);
     }
-    launcher["arguments"] = args;
+    launcher["arguments"] = std::move(args);
   }
   return launcher;
 }
@@ -2116,7 +2116,7 @@ Json::Value Target::DumpLaunchers()
   if (allow) {
     launcher = DumpLauncher("CROSSCOMPILING_EMULATOR", "emulator");
     if (!launcher.empty()) {
-      launchers.append(launcher);
+      launchers.append(std::move(launcher));
     }
   }
   return launchers;
