@@ -1,6 +1,7 @@
 module importable:internal_partition;
+import internal;
 
 int from_partition()
 {
-  return 0;
+  return from_internal();
 }

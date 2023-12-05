@@ -19,7 +19,8 @@ target_sources(internal-partitions
         "${CMAKE_CURRENT_SOURCE_DIR}"
       FILES
         importable.cxx
-        partition.cxx)
+        partition.cxx
+        internal.cxx)
 target_compile_features(internal-partitions PUBLIC cxx_std_20)
 
 add_executable(exe)
