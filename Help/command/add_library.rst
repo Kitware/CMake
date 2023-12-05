@@ -144,7 +144,7 @@ itself and is not included as a target in the generated buildsystem.
 
   .. code-block:: cmake
 
-    add_library(<name> INTERFACE [<source>...] [EXCLUDE_FROM_ALL])
+    add_library(<name> INTERFACE [EXCLUDE_FROM_ALL] [<source>...])
 
   Source files may be listed directly in the ``add_library`` call or added
   later by calls to :command:`target_sources` with the ``PRIVATE`` or
