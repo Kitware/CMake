@@ -500,7 +500,7 @@ function(gtest_discover_tests TARGET)
               -D "CTEST_FILE=${ctest_tests_file}"
               -D "TEST_DISCOVERY_TIMEOUT=${_DISCOVERY_TIMEOUT}"
               -D "TEST_XML_OUTPUT_DIR=${_XML_OUTPUT_DIR}"
-              -P "${_GOOGLETEST_DISCOVER_TESTS_SCRIPT}"
+              -P "${CMAKE_ROOT}/Modules/GoogleTestAddTests.cmake"
       VERBATIM
     )
 
@@ -526,7 +526,7 @@ function(gtest_discover_tests TARGET)
       "  if(NOT EXISTS \"${ctest_tests_file}\" OR"                                 "\n"
       "     NOT \"${ctest_tests_file}\" IS_NEWER_THAN \"$<TARGET_FILE:${TARGET}>\" OR\n"
       "     NOT \"${ctest_tests_file}\" IS_NEWER_THAN \"\${CMAKE_CURRENT_LIST_FILE}\")\n"
-      "    include(\"${_GOOGLETEST_DISCOVER_TESTS_SCRIPT}\")"                      "\n"
+      "    include(\"${CMAKE_ROOT}/Modules/GoogleTestAddTests.cmake\")"            "\n"
       "    gtest_discover_tests_impl("                                             "\n"
       "      TEST_EXECUTABLE"        " [==[" "$<TARGET_FILE:${TARGET}>"   "]==]"   "\n"
       "      TEST_EXECUTOR"          " [==[" "${crosscompiling_emulator}" "]==]"   "\n"
@@ -572,10 +572,6 @@ function(gtest_discover_tests TARGET)
 endfunction()
 
 ###############################################################################
-
-set(_GOOGLETEST_DISCOVER_TESTS_SCRIPT
-  ${CMAKE_CURRENT_LIST_DIR}/GoogleTestAddTests.cmake
-)
 
 # Restore project's policies
 cmake_policy(POP)
