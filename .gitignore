@@ -32,3 +32,6 @@
 /.vs/
 # Visual Studio build directory
 /out/
+
+# clang-tidy output
+/clang-tidy-fixes.patch

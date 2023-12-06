@@ -112,6 +112,7 @@ l:tidy-fedora39:
     extends:
         - .fedora39_tidy
         - .cmake_build_linux
+        - .cmake_tidy_artifacts
         - .linux_x86_64_tags
         - .cmake_cdash_artifacts
         - .run_automatically
