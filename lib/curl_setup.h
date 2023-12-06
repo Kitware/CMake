@@ -28,6 +28,11 @@
 #define CURL_NO_OLDIES
 #endif
 
+/* Set default _WIN32_WINNT */
+#ifdef __MINGW32__
+#include <_mingw.h>
+#endif
+
 /*
  * Disable Visual Studio warnings:
  * 4127 "conditional expression is constant"
@@ -36,15 +41,7 @@
 #pragma warning(disable:4127)
 #endif
 
-/*
- * Define WIN32 when build target is Win32 API
- */
-
-#if (defined(_WIN32) || defined(__WIN32__)) && !defined(WIN32)
-#define WIN32
-#endif
-
-#ifdef WIN32
+#ifdef _WIN32
 /*
  * Don't include unneeded stuff in Windows headers to avoid compiler
  * warnings and macro clashes.
@@ -82,7 +79,7 @@
 #ifdef _WIN32_WCE
 #  include "config-win32ce.h"
 #else
-#  ifdef WIN32
+#  ifdef _WIN32
 #    include "config-win32.h"
 #  endif
 #endif
@@ -214,6 +211,23 @@
 #  define CURL_DISABLE_RTSP
 #endif
 
+/*
+ * When HTTP is disabled, disable HTTP-only features
+ */
+
+#if defined(CURL_DISABLE_HTTP)
+#  define CURL_DISABLE_ALTSVC 1
+#  define CURL_DISABLE_COOKIES 1
+#  define CURL_DISABLE_BASIC_AUTH 1
+#  define CURL_DISABLE_BEARER_AUTH 1
+#  define CURL_DISABLE_AWS 1
+#  define CURL_DISABLE_DOH 1
+#  define CURL_DISABLE_FORM_API 1
+#  define CURL_DISABLE_HEADERS_API 1
+#  define CURL_DISABLE_HSTS 1
+#  define CURL_DISABLE_HTTP_AUTH 1
+#endif
+
 /* ================================================================ */
 /* No system header file shall be included in this file before this */
 /* point.                                                           */
@@ -329,23 +343,6 @@
 
 #ifndef STDC_HEADERS /* no standard C headers! */
 #include <curl/stdcheaders.h>
-#endif
-
-#ifdef __POCC__
-#  include <sys/types.h>
-#  include <unistd.h>
-#  define sys_nerr EILSEQ
-#endif
-
-/*
- * Salford-C kludge section (mostly borrowed from wxWidgets).
- */
-#ifdef __SALFORDC__
-  #pragma suppress 353             /* Possible nested comments */
-  #pragma suppress 593             /* Define not used */
-  #pragma suppress 61              /* enum has no name */
-  #pragma suppress 106             /* unnamed, unused parameter */
-  #include <clib.h>
 #endif
 
 /*
@@ -500,11 +497,11 @@
    5. set dir/file naming defines
    */
 
-#ifdef WIN32
+#ifdef _WIN32
 
 #  define DIR_CHAR      "\\"
 
-#else /* WIN32 */
+#else /* _WIN32 */
 
 #  ifdef MSDOS  /* Watt-32 */
 
@@ -529,27 +526,7 @@
 
 #  define DIR_CHAR      "/"
 
-#  ifndef fileno /* sunos 4 have this as a macro! */
-     int fileno(FILE *stream);
-#  endif
-
-#endif /* WIN32 */
-
-/*
- * msvc 6.0 requires PSDK in order to have INET6_ADDRSTRLEN
- * defined in ws2tcpip.h as well as to provide IPv6 support.
- * Does not apply if lwIP is used.
- */
-
-#if defined(_MSC_VER) && !defined(__POCC__) && !defined(USE_LWIPSOCK)
-#  if !defined(HAVE_WS2TCPIP_H) || \
-     ((_MSC_VER < 1300) && !defined(INET6_ADDRSTRLEN))
-#    undef HAVE_GETADDRINFO_THREADSAFE
-#    undef HAVE_FREEADDRINFO
-#    undef HAVE_GETADDRINFO
-#    undef ENABLE_IPV6
-#  endif
-#endif
+#endif /* _WIN32 */
 
 /* ---------------------------------------------------------------- */
 /*             resolver specialty compile-time defines              */
@@ -557,20 +534,11 @@
 /* ---------------------------------------------------------------- */
 
 /*
- * lcc-win32 doesn't have _beginthreadex(), lacks threads support.
- */
-
-#if defined(__LCC__) && defined(WIN32)
-#  undef USE_THREADS_POSIX
-#  undef USE_THREADS_WIN32
-#endif
-
-/*
  * MSVC threads support requires a multi-threaded runtime library.
  * _beginthreadex() is not available in single-threaded ones.
  */
 
-#if defined(_MSC_VER) && !defined(__POCC__) && !defined(_MT)
+#if defined(_MSC_VER) && !defined(_MT)
 #  undef USE_THREADS_POSIX
 #  undef USE_THREADS_WIN32
 #endif
@@ -581,6 +549,9 @@
 
 #if defined(ENABLE_IPV6) && defined(HAVE_GETADDRINFO)
 #  define CURLRES_IPV6
+#elif defined(ENABLE_IPV6) && (defined(_WIN32) || defined(__CYGWIN__))
+/* assume on Windows that IPv6 without getaddrinfo is a broken build */
+#  error "Unexpected build: IPv6 is enabled but getaddrinfo was not found."
 #else
 #  define CURLRES_IPV4
 #endif
@@ -599,35 +570,6 @@
 #endif
 
 /* ---------------------------------------------------------------- */
-
-/*
- * msvc 6.0 does not have struct sockaddr_storage and
- * does not define IPPROTO_ESP in winsock2.h. But both
- * are available if PSDK is properly installed.
- */
-
-#if defined(_MSC_VER) && !defined(__POCC__)
-#  if !defined(HAVE_WINSOCK2_H) || ((_MSC_VER < 1300) && !defined(IPPROTO_ESP))
-#    undef HAVE_STRUCT_SOCKADDR_STORAGE
-#  endif
-#endif
-
-/*
- * Intentionally fail to build when using msvc 6.0 without PSDK installed.
- * The brave of heart can circumvent this, defining ALLOW_MSVC6_WITHOUT_PSDK
- * in lib/config-win32.h although absolutely discouraged and unsupported.
- */
-
-#if defined(_MSC_VER) && !defined(__POCC__)
-#  if !defined(HAVE_WINDOWS_H) || ((_MSC_VER < 1300) && !defined(_FILETIME_))
-#    if !defined(ALLOW_MSVC6_WITHOUT_PSDK)
-#      error MSVC 6.0 requires "February 2003 Platform SDK" a.k.a. \
-             "Windows Server 2003 PSDK"
-#    else
-#      define CURL_DISABLE_LDAP 1
-#    endif
-#  endif
-#endif
 
 #if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H) && !defined(USE_WIN32_IDN)
 /* The lib and header are present */
@@ -694,6 +636,18 @@
 #  define WARN_UNUSED_RESULT
 #endif
 
+/* noreturn attribute */
+
+#if !defined(CURL_NORETURN)
+#if (defined(__GNUC__) && (__GNUC__ >= 3)) || defined(__clang__)
+#  define CURL_NORETURN  __attribute__((__noreturn__))
+#elif defined(_MSC_VER) && (_MSC_VER >= 1200)
+#  define CURL_NORETURN  __declspec(noreturn)
+#else
+#  define CURL_NORETURN
+#endif
+#endif
+
 /*
  * Include macros and defines that should only be processed once.
  */
@@ -752,7 +706,7 @@
 /* In Windows the default file mode is text but an application can override it.
 Therefore we specify it explicitly. https://github.com/curl/curl/pull/258
 */
-#if defined(WIN32) || defined(MSDOS)
+#if defined(_WIN32) || defined(MSDOS)
 #define FOPEN_READTEXT "rt"
 #define FOPEN_WRITETEXT "wt"
 #define FOPEN_APPENDTEXT "at"
@@ -807,7 +761,8 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #define UNITTEST static
 #endif
 
-#if defined(USE_NGHTTP2) || defined(USE_HYPER)
+/* Hyper supports HTTP2 also, but Curl's integration with Hyper does not */
+#if defined(USE_NGHTTP2)
 #define USE_HTTP2
 #endif
 
@@ -820,11 +775,11 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 /* Certain Windows implementations are not aligned with what curl expects,
    so always use the local one on this platform. E.g. the mingw-w64
    implementation can return wrong results for non-ASCII inputs. */
-#if defined(HAVE_BASENAME) && defined(WIN32)
+#if defined(HAVE_BASENAME) && defined(_WIN32)
 #undef HAVE_BASENAME
 #endif
 
-#if defined(USE_UNIX_SOCKETS) && defined(WIN32)
+#if defined(USE_UNIX_SOCKETS) && defined(_WIN32)
 #  if !defined(UNIX_PATH_MAX)
      /* Replicating logic present in afunix.h
         (distributed with newer Windows 10 SDK versions only) */

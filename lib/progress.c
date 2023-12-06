@@ -304,7 +304,7 @@ timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
    * 'actual' is the time in milliseconds it took to actually download the
    * last 'size' bytes.
    */
-  actual = Curl_timediff(now, start);
+  actual = Curl_timediff_ceil(now, start);
   if(actual < minimum) {
     /* if it downloaded the data faster than the limit, make it wait the
        difference */
@@ -319,12 +319,6 @@ timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
  */
 CURLcode Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 {
-  if(data->set.max_filesize && (size > data->set.max_filesize)) {
-    failf(data, "Exceeded the maximum allowed file size "
-          "(%" CURL_FORMAT_CURL_OFF_T ")",
-          data->set.max_filesize);
-    return CURLE_FILESIZE_EXCEEDED;
-  }
   data->progress.downloaded = size;
   return CURLE_OK;
 }

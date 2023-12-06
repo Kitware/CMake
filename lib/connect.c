@@ -84,6 +84,9 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+#endif
 
 /*
  * Curl_timeleft() returns the amount of milliseconds left allowed for the
@@ -348,6 +351,7 @@ void Curl_conncontrol(struct connectdata *conn,
  */
 struct eyeballer {
   const char *name;
+  const struct Curl_addrinfo *first; /* complete address list, not owned */
   const struct Curl_addrinfo *addr;  /* List of addresses to try, not owned */
   int ai_family;                     /* matching address family only */
   cf_ip_connect_create *cf_create;   /* for creating cf */
@@ -359,9 +363,12 @@ struct eyeballer {
   expire_id timeout_id;              /* ID for Curl_expire() */
   CURLcode result;
   int error;
+  BIT(rewinded);                     /* if we rewinded the addr list */
   BIT(has_started);                  /* attempts have started */
   BIT(is_done);                      /* out of addresses/time */
   BIT(connected);                    /* cf has connected */
+  BIT(inconclusive);                 /* connect was not a hard failure, we
+                                      * might talk to a restarting server */
 };
 
 
@@ -408,7 +415,7 @@ static CURLcode eyeballer_new(struct eyeballer **pballer,
 #endif
                   "ip"));
   baller->cf_create = cf_create;
-  baller->addr = addr;
+  baller->first = baller->addr = addr;
   baller->ai_family = ai_family;
   baller->primary = primary;
   baller->delay_ms = delay_ms;
@@ -436,6 +443,13 @@ static void baller_free(struct eyeballer *baller,
     baller_close(baller, data);
     free(baller);
   }
+}
+
+static void baller_rewind(struct eyeballer *baller)
+{
+  baller->rewinded = TRUE;
+  baller->addr = baller->first;
+  baller->inconclusive = FALSE;
 }
 
 static void baller_next_addr(struct eyeballer *baller)
@@ -528,6 +542,10 @@ static CURLcode baller_start_next(struct Curl_cfilter *cf,
 {
   if(cf->sockindex == FIRSTSOCKET) {
     baller_next_addr(baller);
+    /* If we get inconclusive answers from the server(s), we make
+     * a second iteration over the address list */
+    if(!baller->addr && baller->inconclusive && !baller->rewinded)
+      baller_rewind(baller);
     baller_start(cf, data, baller, timeoutms);
   }
   else {
@@ -566,6 +584,8 @@ static CURLcode baller_connect(struct Curl_cfilter *cf,
         baller->result = CURLE_OPERATION_TIMEDOUT;
       }
     }
+    else if(baller->result == CURLE_WEIRD_SERVER_REPLY)
+      baller->inconclusive = TRUE;
   }
   return baller->result;
 }
@@ -595,7 +615,7 @@ evaluate:
   *connected = FALSE; /* a very negative world view is best */
   now = Curl_now();
   ongoing = not_started = 0;
-  for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+  for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
     struct eyeballer *baller = ctx->baller[i];
 
     if(!baller || baller->is_done)
@@ -656,7 +676,7 @@ evaluate:
   if(not_started > 0) {
     int added = 0;
 
-    for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+    for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
       struct eyeballer *baller = ctx->baller[i];
 
       if(!baller || baller->has_started)
@@ -691,13 +711,13 @@ evaluate:
   /* all ballers have failed to connect. */
   CURL_TRC_CF(data, cf, "all eyeballers failed");
   result = CURLE_COULDNT_CONNECT;
-  for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+  for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
     struct eyeballer *baller = ctx->baller[i];
+    if(!baller)
+      continue;
     CURL_TRC_CF(data, cf, "%s assess started=%d, result=%d",
-                baller?baller->name:NULL,
-                baller?baller->has_started:0,
-                baller?baller->result:0);
-    if(baller && baller->has_started && baller->result) {
+                baller->name, baller->has_started, baller->result);
+    if(baller->has_started && baller->result) {
       result = baller->result;
       break;
     }
@@ -838,7 +858,7 @@ static void cf_he_ctx_clear(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   DEBUGASSERT(ctx);
   DEBUGASSERT(data);
-  for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+  for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
     baller_free(ctx->baller[i], data);
     ctx->baller[i] = NULL;
   }
@@ -846,35 +866,22 @@ static void cf_he_ctx_clear(struct Curl_cfilter *cf, struct Curl_easy *data)
   ctx->winner = NULL;
 }
 
-static int cf_he_get_select_socks(struct Curl_cfilter *cf,
+static void cf_he_adjust_pollset(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
-                                  curl_socket_t *socks)
+                                  struct easy_pollset *ps)
 {
   struct cf_he_ctx *ctx = cf->ctx;
-  size_t i, s;
-  int wrc, rc = GETSOCK_BLANK;
-  curl_socket_t wsocks[MAX_SOCKSPEREASYHANDLE];
+  size_t i;
 
-  if(cf->connected)
-    return cf->next->cft->get_select_socks(cf->next, data, socks);
-
-  for(i = s = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
-    struct eyeballer *baller = ctx->baller[i];
-    if(!baller || !baller->cf)
-      continue;
-
-    wrc = Curl_conn_cf_get_select_socks(baller->cf, data, wsocks);
-    if(wrc) {
-      /* TODO: we assume we get at most one socket back */
-      socks[s] = wsocks[0];
-      if(wrc & GETSOCK_WRITESOCK(0))
-        rc |= GETSOCK_WRITESOCK(s);
-      if(wrc & GETSOCK_READSOCK(0))
-        rc |= GETSOCK_READSOCK(s);
-      s++;
+  if(!cf->connected) {
+    for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
+      struct eyeballer *baller = ctx->baller[i];
+      if(!baller || !baller->cf)
+        continue;
+      Curl_conn_cf_adjust_pollset(baller->cf, data, ps);
     }
+    CURL_TRC_CF(data, cf, "adjust_pollset -> %d socks", ps->num);
   }
-  return rc;
 }
 
 static CURLcode cf_he_connect(struct Curl_cfilter *cf,
@@ -956,7 +963,7 @@ static bool cf_he_data_pending(struct Curl_cfilter *cf,
   if(cf->connected)
     return cf->next->cft->has_data_pending(cf->next, data);
 
-  for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+  for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
     struct eyeballer *baller = ctx->baller[i];
     if(!baller || !baller->cf)
       continue;
@@ -975,7 +982,7 @@ static struct curltime get_max_baller_time(struct Curl_cfilter *cf,
   size_t i;
 
   memset(&tmax, 0, sizeof(tmax));
-  for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+  for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
     struct eyeballer *baller = ctx->baller[i];
 
     memset(&t, 0, sizeof(t));
@@ -1000,7 +1007,7 @@ static CURLcode cf_he_query(struct Curl_cfilter *cf,
       int reply_ms = -1;
       size_t i;
 
-      for(i = 0; i < sizeof(ctx->baller)/sizeof(ctx->baller[0]); i++) {
+      for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {
         struct eyeballer *baller = ctx->baller[i];
         int breply_ms;
 
@@ -1055,7 +1062,7 @@ struct Curl_cftype Curl_cft_happy_eyeballs = {
   cf_he_connect,
   cf_he_close,
   Curl_cf_def_get_host,
-  cf_he_get_select_socks,
+  cf_he_adjust_pollset,
   cf_he_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
@@ -1089,7 +1096,7 @@ cf_happy_eyeballs_create(struct Curl_cfilter **pcf,
   (void)data;
   (void)conn;
   *pcf = NULL;
-  ctx = calloc(sizeof(*ctx), 1);
+  ctx = calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -1122,13 +1129,13 @@ struct transport_provider transport_providers[] = {
 #ifdef ENABLE_QUIC
   { TRNSPRT_QUIC, Curl_cf_quic_create },
 #endif
+#ifndef CURL_DISABLE_TFTP
   { TRNSPRT_UDP, Curl_cf_udp_create },
-  { TRNSPRT_UNIX, Curl_cf_unix_create },
-};
-
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 #endif
+#ifdef USE_UNIX_SOCKETS
+  { TRNSPRT_UNIX, Curl_cf_unix_create },
+#endif
+};
 
 static cf_ip_connect_create *get_cf_create(int transport)
 {
@@ -1319,7 +1326,7 @@ struct Curl_cftype Curl_cft_setup = {
   cf_setup_connect,
   cf_setup_close,
   Curl_cf_def_get_host,
-  Curl_cf_def_get_select_socks,
+  Curl_cf_def_adjust_pollset,
   Curl_cf_def_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
@@ -1340,7 +1347,7 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
   CURLcode result = CURLE_OK;
 
   (void)data;
-  ctx = calloc(sizeof(*ctx), 1);
+  ctx = calloc(1, sizeof(*ctx));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

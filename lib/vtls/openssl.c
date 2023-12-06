@@ -79,6 +79,8 @@
 #include <openssl/bio.h>
 #include <openssl/buffer.h>
 #include <openssl/pkcs12.h>
+#include <openssl/tls1.h>
+#include <openssl/evp.h>
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_OCSP)
 #include <openssl/ocsp.h>
@@ -96,6 +98,9 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+#endif
 
 /* Uncomment the ALLOW_RENEG line to a real #define if you want to allow TLS
    renegotiations when built with BoringSSL. Renegotiating is non-compliant
@@ -173,8 +178,6 @@
 
 #if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
 #define HAVE_EVP_PKEY_GET_PARAMS 1
-#else
-#define SSL_get1_peer_certificate SSL_get_peer_certificate
 #endif
 
 #ifdef HAVE_EVP_PKEY_GET_PARAMS
@@ -235,7 +238,11 @@
 #elif defined(OPENSSL_IS_AWSLC)
 #define OSSL_PACKAGE "AWS-LC"
 #else
-#define OSSL_PACKAGE "OpenSSL"
+# if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
+#   define OSSL_PACKAGE "quictls"
+# else
+#   define OSSL_PACKAGE "OpenSSL"
+#endif
 #endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
@@ -538,9 +545,9 @@ CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl)
 #else
           RSA_get0_key(rsa, &n, &e, NULL);
 #endif /* HAVE_EVP_PKEY_GET_PARAMS */
-          BIO_printf(mem, "%d", BN_num_bits(n));
+          BIO_printf(mem, "%d", n ? BN_num_bits(n) : 0);
 #else
-          BIO_printf(mem, "%d", BN_num_bits(rsa->n));
+          BIO_printf(mem, "%d", rsa->n ? BN_num_bits(rsa->n) : 0);
 #endif /* HAVE_OPAQUE_RSA_DSA_DH */
           push_certinfo("RSA Public Key", i);
           print_pubkey_BN(rsa, n, i);
@@ -2098,22 +2105,6 @@ static bool subj_alt_hostcheck(struct Curl_easy *data,
   return FALSE;
 }
 
-static CURLcode
-ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
-                X509 *server_cert, const char *hostname,
-                const char *dispname);
-
-CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
-                              X509 *server_cert)
-{
-  const char *hostname, *dispname;
-  int port;
-
-  (void)conn;
-  Curl_conn_get_host(data, FIRSTSOCKET, &hostname, &dispname, &port);
-  return ossl_verifyhost(data, conn, server_cert, hostname, dispname);
-}
-
 /* Quote from RFC2818 section 3.1 "Server Identity"
 
    If a subjectAltName extension of type dNSName is present, that MUST
@@ -2136,10 +2127,8 @@ CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
 
    This function is now used from ngtcp2 (QUIC) as well.
 */
-static CURLcode
-ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
-                X509 *server_cert, const char *hostname,
-                const char *dispname)
+CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
+                              struct ssl_peer *peer, X509 *server_cert)
 {
   bool matched = FALSE;
   int target = GEN_DNS; /* target type, GEN_DNS or GEN_IPADD */
@@ -2156,25 +2145,21 @@ ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
   size_t hostlen;
 
   (void)conn;
-  hostlen = strlen(hostname);
-
-#ifndef ENABLE_IPV6
-  /* Silence compiler warnings for unused params */
-  (void) conn;
-#endif
-
+  hostlen = strlen(peer->hostname);
+  if(peer->is_ip_address) {
 #ifdef ENABLE_IPV6
-  if(conn->bits.ipv6_ip &&
-     Curl_inet_pton(AF_INET6, hostname, &addr)) {
-    target = GEN_IPADD;
-    addrlen = sizeof(struct in6_addr);
-  }
-  else
-#endif
-    if(Curl_inet_pton(AF_INET, hostname, &addr)) {
+    if(conn->bits.ipv6_ip &&
+       Curl_inet_pton(AF_INET6, peer->hostname, &addr)) {
       target = GEN_IPADD;
-      addrlen = sizeof(struct in_addr);
+      addrlen = sizeof(struct in6_addr);
     }
+    else
+#endif
+      if(Curl_inet_pton(AF_INET, peer->hostname, &addr)) {
+        target = GEN_IPADD;
+        addrlen = sizeof(struct in_addr);
+      }
+  }
 
   /* get a "list" of alternative names */
   altnames = X509_get_ext_d2i(server_cert, NID_subject_alt_name, NULL, NULL);
@@ -2224,9 +2209,9 @@ ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
           if((altlen == strlen(altptr)) &&
              /* if this isn't true, there was an embedded zero in the name
                 string and we cannot match it. */
-             subj_alt_hostcheck(data,
-                                altptr,
-                                altlen, hostname, hostlen, dispname)) {
+             subj_alt_hostcheck(data, altptr, altlen,
+                                peer->hostname, hostlen,
+                                peer->dispname)) {
             dnsmatched = TRUE;
           }
           break;
@@ -2238,7 +2223,7 @@ ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
             ipmatched = TRUE;
             infof(data,
                   " subjectAltName: host \"%s\" matched cert's IP address!",
-                  dispname);
+                  peer->dispname);
           }
           break;
         }
@@ -2254,9 +2239,9 @@ ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
     /* an alternative name matched */
     ;
   else if(dNSName || iPAddress) {
-    infof(data, " subjectAltName does not match %s", dispname);
+    infof(data, " subjectAltName does not match %s", peer->dispname);
     failf(data, "SSL: no alternative certificate subject name matches "
-          "target host name '%s'", dispname);
+          "target host name '%s'", peer->dispname);
     result = CURLE_PEER_FAILED_VERIFICATION;
   }
   else {
@@ -2320,9 +2305,9 @@ ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
     else if(!Curl_cert_hostcheck((const char *)peer_CN,
-                                 peerlen, hostname, hostlen)) {
+                                 peerlen, peer->hostname, hostlen)) {
       failf(data, "SSL: certificate subject name '%s' does not match "
-            "target host name '%s'", peer_CN, dispname);
+            "target host name '%s'", peer_CN, peer->dispname);
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
     else {
@@ -2731,12 +2716,6 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
 #ifdef USE_OPENSSL
 /* ====================================================== */
 
-#ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
-#  define use_sni(x)  sni = (x)
-#else
-#  define use_sni(x)  Curl_nop_stmt
-#endif
-
 /* Check for OpenSSL 1.0.2 which has ALPN support. */
 #undef HAS_ALPN
 #if OPENSSL_VERSION_NUMBER >= 0x10002000L       \
@@ -3032,6 +3011,151 @@ static CURLcode load_cacert_from_memory(X509_STORE *store,
   return (count > 0) ? CURLE_OK : CURLE_SSL_CACERT_BADFILE;
 }
 
+#if defined(USE_WIN32_CRYPTO)
+static CURLcode import_windows_cert_store(struct Curl_easy *data,
+                                          const char *name,
+                                          X509_STORE *store,
+                                          bool *imported)
+{
+  CURLcode result = CURLE_OK;
+  HCERTSTORE hStore;
+
+  *imported = false;
+
+  hStore = CertOpenSystemStoreA(0, name);
+  if(hStore) {
+    PCCERT_CONTEXT pContext = NULL;
+    /* The array of enhanced key usage OIDs will vary per certificate and
+       is declared outside of the loop so that rather than malloc/free each
+       iteration we can grow it with realloc, when necessary. */
+    CERT_ENHKEY_USAGE *enhkey_usage = NULL;
+    DWORD enhkey_usage_size = 0;
+
+    /* This loop makes a best effort to import all valid certificates from
+       the MS root store. If a certificate cannot be imported it is
+       skipped. 'result' is used to store only hard-fail conditions (such
+       as out of memory) that cause an early break. */
+    result = CURLE_OK;
+    for(;;) {
+      X509 *x509;
+      FILETIME now;
+      BYTE key_usage[2];
+      DWORD req_size;
+      const unsigned char *encoded_cert;
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+      char cert_name[256];
+#endif
+
+      pContext = CertEnumCertificatesInStore(hStore, pContext);
+      if(!pContext)
+        break;
+
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+      if(!CertGetNameStringA(pContext, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0,
+                             NULL, cert_name, sizeof(cert_name))) {
+        strcpy(cert_name, "Unknown");
+      }
+      infof(data, "SSL: Checking cert \"%s\"", cert_name);
+#endif
+      encoded_cert = (const unsigned char *)pContext->pbCertEncoded;
+      if(!encoded_cert)
+        continue;
+
+      GetSystemTimeAsFileTime(&now);
+      if(CompareFileTime(&pContext->pCertInfo->NotBefore, &now) > 0 ||
+         CompareFileTime(&now, &pContext->pCertInfo->NotAfter) > 0)
+        continue;
+
+      /* If key usage exists check for signing attribute */
+      if(CertGetIntendedKeyUsage(pContext->dwCertEncodingType,
+                                 pContext->pCertInfo,
+                                 key_usage, sizeof(key_usage))) {
+        if(!(key_usage[0] & CERT_KEY_CERT_SIGN_KEY_USAGE))
+          continue;
+      }
+      else if(GetLastError())
+        continue;
+
+      /* If enhanced key usage exists check for server auth attribute.
+       *
+       * Note "In a Microsoft environment, a certificate might also have
+       * EKU extended properties that specify valid uses for the
+       * certificate."  The call below checks both, and behavior varies
+       * depending on what is found. For more details see
+       * CertGetEnhancedKeyUsage doc.
+       */
+      if(CertGetEnhancedKeyUsage(pContext, 0, NULL, &req_size)) {
+        if(req_size && req_size > enhkey_usage_size) {
+          void *tmp = realloc(enhkey_usage, req_size);
+
+          if(!tmp) {
+            failf(data, "SSL: Out of memory allocating for OID list");
+            result = CURLE_OUT_OF_MEMORY;
+            break;
+          }
+
+          enhkey_usage = (CERT_ENHKEY_USAGE *)tmp;
+          enhkey_usage_size = req_size;
+        }
+
+        if(CertGetEnhancedKeyUsage(pContext, 0, enhkey_usage, &req_size)) {
+          if(!enhkey_usage->cUsageIdentifier) {
+            /* "If GetLastError returns CRYPT_E_NOT_FOUND, the certificate
+               is good for all uses. If it returns zero, the certificate
+               has no valid uses." */
+            if((HRESULT)GetLastError() != CRYPT_E_NOT_FOUND)
+              continue;
+          }
+          else {
+            DWORD i;
+            bool found = false;
+
+            for(i = 0; i < enhkey_usage->cUsageIdentifier; ++i) {
+              if(!strcmp("1.3.6.1.5.5.7.3.1" /* OID server auth */,
+                         enhkey_usage->rgpszUsageIdentifier[i])) {
+                found = true;
+                break;
+              }
+            }
+
+            if(!found)
+              continue;
+          }
+        }
+        else
+          continue;
+      }
+      else
+        continue;
+
+      x509 = d2i_X509(NULL, &encoded_cert, pContext->cbCertEncoded);
+      if(!x509)
+        continue;
+
+      /* Try to import the certificate. This may fail for legitimate
+         reasons such as duplicate certificate, which is allowed by MS but
+         not OpenSSL. */
+      if(X509_STORE_add_cert(store, x509) == 1) {
+#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+        infof(data, "SSL: Imported cert \"%s\"", cert_name);
+#endif
+        *imported = true;
+      }
+      X509_free(x509);
+    }
+
+    free(enhkey_usage);
+    CertFreeCertificateContext(pContext);
+    CertCloseStore(hStore, 0);
+
+    if(result)
+      return result;
+  }
+
+  return result;
+}
+#endif
+
 static CURLcode populate_x509_store(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     X509_STORE *store)
@@ -3061,140 +3185,25 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
        https://github.com/d3x0r/SACK/blob/master/src/netlib/ssl_layer.c#L1037
        https://datatracker.ietf.org/doc/html/rfc5280 */
     if(ssl_config->native_ca_store) {
-      HCERTSTORE hStore = CertOpenSystemStore(0, TEXT("ROOT"));
-
-      if(hStore) {
-        PCCERT_CONTEXT pContext = NULL;
-        /* The array of enhanced key usage OIDs will vary per certificate and
-           is declared outside of the loop so that rather than malloc/free each
-           iteration we can grow it with realloc, when necessary. */
-        CERT_ENHKEY_USAGE *enhkey_usage = NULL;
-        DWORD enhkey_usage_size = 0;
-
-        /* This loop makes a best effort to import all valid certificates from
-           the MS root store. If a certificate cannot be imported it is
-           skipped. 'result' is used to store only hard-fail conditions (such
-           as out of memory) that cause an early break. */
-        result = CURLE_OK;
-        for(;;) {
-          X509 *x509;
-          FILETIME now;
-          BYTE key_usage[2];
-          DWORD req_size;
-          const unsigned char *encoded_cert;
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-          char cert_name[256];
-#endif
-
-          pContext = CertEnumCertificatesInStore(hStore, pContext);
-          if(!pContext)
-            break;
-
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-          if(!CertGetNameStringA(pContext, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0,
-                                 NULL, cert_name, sizeof(cert_name))) {
-            strcpy(cert_name, "Unknown");
-          }
-          infof(data, "SSL: Checking cert \"%s\"", cert_name);
-#endif
-          encoded_cert = (const unsigned char *)pContext->pbCertEncoded;
-          if(!encoded_cert)
-            continue;
-
-          GetSystemTimeAsFileTime(&now);
-          if(CompareFileTime(&pContext->pCertInfo->NotBefore, &now) > 0 ||
-             CompareFileTime(&now, &pContext->pCertInfo->NotAfter) > 0)
-            continue;
-
-          /* If key usage exists check for signing attribute */
-          if(CertGetIntendedKeyUsage(pContext->dwCertEncodingType,
-                                     pContext->pCertInfo,
-                                     key_usage, sizeof(key_usage))) {
-            if(!(key_usage[0] & CERT_KEY_CERT_SIGN_KEY_USAGE))
-              continue;
-          }
-          else if(GetLastError())
-            continue;
-
-          /* If enhanced key usage exists check for server auth attribute.
-           *
-           * Note "In a Microsoft environment, a certificate might also have
-           * EKU extended properties that specify valid uses for the
-           * certificate."  The call below checks both, and behavior varies
-           * depending on what is found. For more details see
-           * CertGetEnhancedKeyUsage doc.
-           */
-          if(CertGetEnhancedKeyUsage(pContext, 0, NULL, &req_size)) {
-            if(req_size && req_size > enhkey_usage_size) {
-              void *tmp = realloc(enhkey_usage, req_size);
-
-              if(!tmp) {
-                failf(data, "SSL: Out of memory allocating for OID list");
-                result = CURLE_OUT_OF_MEMORY;
-                break;
-              }
-
-              enhkey_usage = (CERT_ENHKEY_USAGE *)tmp;
-              enhkey_usage_size = req_size;
-            }
-
-            if(CertGetEnhancedKeyUsage(pContext, 0, enhkey_usage, &req_size)) {
-              if(!enhkey_usage->cUsageIdentifier) {
-                /* "If GetLastError returns CRYPT_E_NOT_FOUND, the certificate
-                   is good for all uses. If it returns zero, the certificate
-                   has no valid uses." */
-                if((HRESULT)GetLastError() != CRYPT_E_NOT_FOUND)
-                  continue;
-              }
-              else {
-                DWORD i;
-                bool found = false;
-
-                for(i = 0; i < enhkey_usage->cUsageIdentifier; ++i) {
-                  if(!strcmp("1.3.6.1.5.5.7.3.1" /* OID server auth */,
-                             enhkey_usage->rgpszUsageIdentifier[i])) {
-                    found = true;
-                    break;
-                  }
-                }
-
-                if(!found)
-                  continue;
-              }
-            }
-            else
-              continue;
-          }
-          else
-            continue;
-
-          x509 = d2i_X509(NULL, &encoded_cert, pContext->cbCertEncoded);
-          if(!x509)
-            continue;
-
-          /* Try to import the certificate. This may fail for legitimate
-             reasons such as duplicate certificate, which is allowed by MS but
-             not OpenSSL. */
-          if(X509_STORE_add_cert(store, x509) == 1) {
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-            infof(data, "SSL: Imported cert \"%s\"", cert_name);
-#endif
-            imported_native_ca = true;
-          }
-          X509_free(x509);
-        }
-
-        free(enhkey_usage);
-        CertFreeCertificateContext(pContext);
-        CertCloseStore(hStore, 0);
-
+      const char *storeNames[] = {
+        "ROOT",   /* Trusted Root Certification Authorities */
+        "CA"      /* Intermediate Certification Authorities */
+      };
+      size_t i;
+      for(i = 0; i < ARRAYSIZE(storeNames); ++i) {
+        bool imported = false;
+        result = import_windows_cert_store(data, storeNames[i], store,
+                                           &imported);
         if(result)
           return result;
+        if(imported) {
+          infof(data, "successfully imported Windows %s store", storeNames[i]);
+          imported_native_ca = true;
+        }
+        else
+          infof(data, "error importing Windows %s store, continuing anyway",
+                storeNames[i]);
       }
-      if(imported_native_ca)
-        infof(data, "successfully imported Windows CA store");
-      else
-        infof(data, "error importing Windows CA store, continuing anyway");
     }
 #endif
     if(ca_info_blob) {
@@ -3210,7 +3219,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
     }
 
     if(ssl_cafile || ssl_capath) {
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3)
+#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
       /* OpenSSL 3.0.0 has deprecated SSL_CTX_load_verify_locations */
       if(ssl_cafile && !X509_STORE_load_file(store, ssl_cafile)) {
         if(!imported_native_ca && !imported_ca_info_blob) {
@@ -3339,6 +3348,7 @@ static X509_STORE *get_cached_x509_store(struct Curl_cfilter *cf,
   struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
   X509_STORE *store = NULL;
 
+  DEBUGASSERT(multi);
   if(multi &&
      multi->ssl_backend_data &&
      multi->ssl_backend_data->store &&
@@ -3358,6 +3368,7 @@ static void set_cached_x509_store(struct Curl_cfilter *cf,
   struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
   struct multi_ssl_backend_data *mbackend;
 
+  DEBUGASSERT(multi);
   if(!multi)
     return;
 
@@ -3449,17 +3460,6 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   BIO *bio;
-
-#ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
-  bool sni;
-  const char *hostname = connssl->hostname;
-
-#ifdef ENABLE_IPV6
-  struct in6_addr addr;
-#else
-  struct in_addr addr;
-#endif
-#endif
   const long int ssl_version = conn_config->version;
   char * const ssl_cert = ssl_config->primary.clientcert;
   const struct curl_blob *ssl_cert_blob = ssl_config->primary.cert_blob;
@@ -3494,7 +3494,6 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 #else
     req_method = SSLv23_client_method();
 #endif
-    use_sni(TRUE);
     break;
   case CURL_SSLVERSION_SSLv2:
     failf(data, "No SSLv2 support");
@@ -3787,13 +3786,8 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 
   backend->server_cert = 0x0;
 #ifdef SSL_CTRL_SET_TLSEXT_HOSTNAME
-  if((0 == Curl_inet_pton(AF_INET, hostname, &addr)) &&
-#ifdef ENABLE_IPV6
-     (0 == Curl_inet_pton(AF_INET6, hostname, &addr)) &&
-#endif
-     sni) {
-    char *snihost = Curl_ssl_snihost(data, hostname, NULL);
-    if(!snihost || !SSL_set_tlsext_host_name(backend->handle, snihost)) {
+  if(connssl->peer.sni) {
+    if(!SSL_set_tlsext_host_name(backend->handle, connssl->peer.sni)) {
       failf(data, "Failed set SNI");
       return CURLE_SSL_CONNECT_ERROR;
     }
@@ -3802,6 +3796,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 
   SSL_set_app_data(backend->handle, cf);
 
+  connssl->reused_session = FALSE;
   if(ssl_config->primary.sessionid) {
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, &ssl_sessionid, NULL)) {
@@ -3815,6 +3810,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
       }
       /* Informational message */
       infof(data, "SSL reusing session ID");
+      connssl->reused_session = TRUE;
     }
     Curl_ssl_sessionid_unlock(data);
   }
@@ -3975,7 +3971,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
           Curl_strerror(sockerr, extramsg, sizeof(extramsg));
         failf(data, OSSL_PACKAGE " SSL_connect: %s in connection to %s:%d ",
               extramsg[0] ? extramsg : SSL_ERROR_to_str(detail),
-              connssl->hostname, connssl->port);
+              connssl->peer.hostname, connssl->port);
         return result;
       }
 
@@ -3986,13 +3982,28 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     }
   }
   else {
+    int psigtype_nid = NID_undef;
+    const char *negotiated_group_name = NULL;
+
     /* we connected fine, we're not waiting for anything else. */
     connssl->connecting_state = ssl_connect_3;
 
+#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
+    SSL_get_peer_signature_type_nid(backend->handle, &psigtype_nid);
+#if (OPENSSL_VERSION_NUMBER >= 0x30200000L)
+    negotiated_group_name = SSL_get0_group_name(backend->handle);
+#else
+    negotiated_group_name =
+      OBJ_nid2sn(SSL_get_negotiated_group(backend->handle) & 0x0000FFFF);
+#endif
+#endif
+
     /* Informational message */
-    infof(data, "SSL connection using %s / %s",
+    infof(data, "SSL connection using %s / %s / %s / %s",
           SSL_get_version(backend->handle),
-          SSL_get_cipher(backend->handle));
+          SSL_get_cipher(backend->handle),
+          negotiated_group_name? negotiated_group_name : "[blank]",
+          OBJ_nid2sn(psigtype_nid));
 
 #ifdef HAS_ALPN
     /* Sets data and len to negotiated protocol, len is 0 if no protocol was
@@ -4068,6 +4079,75 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
 
   return result;
 }
+
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) &&  \
+  !(defined(LIBRESSL_VERSION_NUMBER) && \
+    LIBRESSL_VERSION_NUMBER < 0x3060000fL) && \
+  !defined(OPENSSL_IS_BORINGSSL) && \
+  !defined(OPENSSL_IS_AWSLC) && \
+  !defined(CURL_DISABLE_VERBOSE_STRINGS)
+static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
+{
+  STACK_OF(X509) *certstack;
+  long verify_result;
+  int num_cert_levels;
+  int cert_level;
+
+  verify_result = SSL_get_verify_result(ssl);
+  if(verify_result != X509_V_OK)
+    certstack = SSL_get_peer_cert_chain(ssl);
+  else
+    certstack = SSL_get0_verified_chain(ssl);
+  num_cert_levels = sk_X509_num(certstack);
+
+  for(cert_level = 0; cert_level < num_cert_levels; cert_level++) {
+    char cert_algorithm[80] = "";
+    char group_name_final[80] = "";
+    const X509_ALGOR *palg_cert = NULL;
+    const ASN1_OBJECT *paobj_cert = NULL;
+    X509 *current_cert;
+    EVP_PKEY *current_pkey;
+    int key_bits;
+    int key_sec_bits;
+    int get_group_name;
+    const char *type_name;
+
+    current_cert = sk_X509_value(certstack, cert_level);
+
+    X509_get0_signature(NULL, &palg_cert, current_cert);
+    X509_ALGOR_get0(&paobj_cert, NULL, NULL, palg_cert);
+    OBJ_obj2txt(cert_algorithm, sizeof(cert_algorithm), paobj_cert, 0);
+
+    current_pkey = X509_get0_pubkey(current_cert);
+    key_bits = EVP_PKEY_bits(current_pkey);
+#if (OPENSSL_VERSION_NUMBER < 0x30000000L)
+#define EVP_PKEY_get_security_bits EVP_PKEY_security_bits
+#endif
+    key_sec_bits = EVP_PKEY_get_security_bits(current_pkey);
+#if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
+    {
+      char group_name[80] = "";
+      get_group_name = EVP_PKEY_get_group_name(current_pkey, group_name,
+                                               sizeof(group_name), NULL);
+      msnprintf(group_name_final, sizeof(group_name_final), "/%s", group_name);
+    }
+    type_name = EVP_PKEY_get0_type_name(current_pkey);
+#else
+    get_group_name = 0;
+    type_name = NULL;
+#endif
+
+    infof(data,
+          "  Certificate level %d: "
+          "Public key type %s%s (%d/%d Bits/secBits), signed using %s",
+          cert_level, type_name ? type_name : "?",
+          get_group_name == 0 ? "" : group_name_final,
+          key_bits, key_sec_bits, cert_algorithm);
+  }
+}
+#else
+#define infof_certstack(data, ssl)
+#endif
 
 /*
  * Get the server cert, verify it and show it, etc., only call failf() if the
@@ -4147,8 +4227,8 @@ static CURLcode servercert(struct Curl_cfilter *cf,
   BIO_free(mem);
 
   if(conn_config->verifyhost) {
-    result = ossl_verifyhost(data, conn, backend->server_cert,
-                             connssl->hostname, connssl->dispname);
+    result = Curl_ossl_verifyhost(data, conn, &connssl->peer,
+                                  backend->server_cert);
     if(result) {
       X509_free(backend->server_cert);
       backend->server_cert = NULL;
@@ -4258,9 +4338,12 @@ static CURLcode servercert(struct Curl_cfilter *cf,
       infof(data, " SSL certificate verify ok.");
   }
 
+  infof_certstack(data, backend->handle);
+
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
   !defined(OPENSSL_NO_OCSP)
-  if(conn_config->verifystatus) {
+  if(conn_config->verifystatus && !connssl->reused_session) {
+    /* don't do this after Session ID reuse */
     result = verifystatus(cf, data);
     if(result) {
       X509_free(backend->server_cert);
@@ -4522,22 +4605,9 @@ static ssize_t ossl_send(struct Curl_cfilter *cf,
     case SSL_ERROR_SSL: {
       /*  A failure in the SSL library occurred, usually a protocol error.
           The OpenSSL error queue contains more information on the error. */
-      struct Curl_cfilter *cf_ssl_next = Curl_ssl_cf_get_ssl(cf->next);
-      struct ssl_connect_data *connssl_next = cf_ssl_next?
-        cf_ssl_next->ctx : NULL;
       sslerror = ERR_get_error();
-      if(ERR_GET_LIB(sslerror) == ERR_LIB_SSL &&
-         ERR_GET_REASON(sslerror) == SSL_R_BIO_NOT_SET &&
-         connssl->state == ssl_connection_complete &&
-         (connssl_next && connssl_next->state == ssl_connection_complete)
-        ) {
-        char ver[120];
-        (void)ossl_version(ver, sizeof(ver));
-        failf(data, "Error: %s does not support double SSL tunneling.", ver);
-      }
-      else
-        failf(data, "SSL_write() error: %s",
-              ossl_strerror(sslerror, error_buffer, sizeof(error_buffer)));
+      failf(data, "SSL_write() error: %s",
+            ossl_strerror(sslerror, error_buffer, sizeof(error_buffer)));
       *curlcode = CURLE_SEND_ERROR;
       rc = -1;
       goto out;
@@ -4842,7 +4912,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
   ossl_cert_status_request, /* cert_status_request */
   ossl_connect,             /* connect */
   ossl_connect_nonblocking, /* connect_nonblocking */
-  Curl_ssl_get_select_socks,/* getsock */
+  Curl_ssl_adjust_pollset,  /* adjust_pollset */
   ossl_get_internals,       /* get_internals */
   ossl_close,               /* close_one */
   ossl_close_all,           /* close_all */
