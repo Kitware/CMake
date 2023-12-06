@@ -17,11 +17,13 @@ elseif("x${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "xMSVC")
   set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebug    "")
   set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL "")
 
-  # FIXME(LLVMFlang): It does not provide all debug information format flags or predefines.
-  # It should be given a flag to enable Embedded debug information like MSVC -Z7.
-  #set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_Embedded)        # not supported by LLVMFlang
-  #set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_EditAndContinue) # not supported by LLVMFlang
-  set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_ProgramDatabase "-g")
+  # LLVMFlang, like Clang, does not provide all debug information format flags.
+  # In order to provide easy integration with C and C++ projects that use the
+  # other debug information formats, pretend to support them, and just do not
+  # actually generate any debug information for Fortran.
+  set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_Embedded        -g)
+  set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_ProgramDatabase "") # not supported by LLVMFlang
+  set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_EditAndContinue "") # not supported by LLVMFlang
 
   set(CMAKE_Fortran_COMPILE_OBJECT "<CMAKE_Fortran_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>")
 
