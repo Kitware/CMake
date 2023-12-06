@@ -39,6 +39,9 @@ Compilers
 * The LLVM/Clang GNU-like frontend on Windows (``clang++``) may now be used
   to compile ``CUDA`` language sources.
 
+* TI Clang-based compilers are now supported with
+  :variable:`compiler id <CMAKE_<LANG>_COMPILER_ID>` ``TIClang``.
+
 Commands
 --------
 

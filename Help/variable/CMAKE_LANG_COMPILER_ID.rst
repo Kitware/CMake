@@ -43,6 +43,7 @@ Value                           Name
 ``SunPro``                      Oracle Solaris Studio
 ``Tasking``                     `Tasking Compiler Toolsets`_
 ``TI``                          Texas Instruments
+``TIClang``                     `Texas Instruments Clang-based Compilers`_
 ``TinyCC``                      `Tiny C Compiler`_
 ``XL``, ``VisualAge``, ``zOS``  IBM XL
 ``XLClang``                     IBM Clang-based XL
@@ -68,3 +69,4 @@ languages.
 .. _Small Device C Compiler: https://sdcc.sourceforge.net
 .. _Tiny C Compiler: https://bellard.org/tcc
 .. _Tasking Compiler Toolsets: https://www.tasking.com
+.. _Texas Instruments Clang-based Compilers: https://www.ti.com/tool/download/ARM-CGT-CLANG
