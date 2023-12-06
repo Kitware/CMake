@@ -1283,6 +1283,19 @@ bool cmGeneratorTarget::CanCompileSources() const
   return this->Target->CanCompileSources();
 }
 
+bool cmGeneratorTarget::HasKnownRuntimeArtifactLocation(
+  std::string const& config) const
+{
+  if (!this->IsRuntimeBinary()) {
+    return false;
+  }
+  if (!this->IsImported()) {
+    return true;
+  }
+  ImportInfo const* info = this->GetImportInfo(config);
+  return info && !info->Location.empty();
+}
+
 const std::string& cmGeneratorTarget::GetLocationForBuild() const
 {
   static std::string location;
