@@ -1100,7 +1100,10 @@ if(CUDAToolkit_FOUND)
     if(CUDA_${lib_name}_LIBRARY MATCHES "/stubs/" AND NOT WIN32)
       # Use a SHARED library with IMPORTED_IMPLIB, but not IMPORTED_LOCATION,
       # to indicate that the stub is for linkers but not dynamic loaders.
-      # It will not contribute any RPATH entry.
+      # It will not contribute any RPATH entry.  When encountered as
+      # a private transitive dependency of another shared library,
+      # it will be passed explicitly to linkers so they can find it
+      # even when the runtime library file does not exist on disk.
       set(CUDA_IMPORT_PROPERTY IMPORTED_IMPLIB)
       set(CUDA_IMPORT_TYPE     SHARED)
     endif()
