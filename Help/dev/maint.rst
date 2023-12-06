@@ -8,6 +8,13 @@ See documentation on `CMake Development`_ for more information.
 
 .. contents:: Maintainer Processes:
 
+Governance
+==========
+
+CMake has no formal governance body.  Maintainers expect one another to
+cooperate constructively and make decisions in good faith.  In cases of
+disagreement, the chief maintainer retains final authority.
+
 Review a Merge Request
 ======================
 
