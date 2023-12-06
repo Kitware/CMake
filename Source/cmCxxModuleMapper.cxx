@@ -346,13 +346,16 @@ std::set<std::string> CxxModuleUsageSeed(
         // Add the direct usage.
         this_usages.insert(r.LogicalName);
 
-        // Add the transitive usage.
-        if (transitive_usages != usages.Usage.end()) {
+        if (transitive_usages == usages.Usage.end() ||
+            internal_usages.find(r.LogicalName) != internal_usages.end()) {
+          // Mark that we need to update transitive usages later.
+          if (bmi_loc.IsKnown()) {
+            internal_usages[p.LogicalName].insert(r.LogicalName);
+          }
+        } else {
+          // Add the transitive usage.
           this_usages.insert(transitive_usages->second.begin(),
                              transitive_usages->second.end());
-        } else if (bmi_loc.IsKnown()) {
-          // Mark that we need to update transitive usages later.
-          internal_usages[p.LogicalName].insert(r.LogicalName);
         }
       }
 
