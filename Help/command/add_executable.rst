@@ -63,7 +63,7 @@ Imported Executables
 ^^^^^^^^^^^^^^^^^^^^
 
 .. signature::
-  add_executable(<name> IMPORTED <options>...)
+  add_executable(<name> IMPORTED [GLOBAL])
   :target: IMPORTED
 
   Add an :ref:`IMPORTED executable target <Imported Targets>` to reference
