@@ -54,7 +54,7 @@ set(_cmake_feature_test_cxx_user_literals "${GNU47_CXX11}")
 # NOTE: C++11 was ratified in September 2011. GNU 4.7 is the first minor
 # release following that (March 2012), and the first minor release to
 # support -std=c++11. Prior to that, support for C++11 features is technically
-# experiemental and possibly incomplete (see for example the note below about
+# experimental and possibly incomplete (see for example the note below about
 # cxx_variadic_template_template_parameters)
 # GNU does not define __cplusplus correctly before version 4.7.
 # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=1773

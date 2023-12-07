@@ -22,6 +22,7 @@
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
+class cmSourceFile;
 class cmake;
 
 /** \class cmComputeLinkDepends
@@ -63,6 +64,9 @@ public:
 
     BT<std::string> Item;
     cmGeneratorTarget const* Target = nullptr;
+    // The source file representing the external object (used when linking
+    // `$<TARGET_OBJECTS>`)
+    cmSourceFile const* ObjectSource = nullptr;
     EntryKind Kind = Library;
     // The following member is for the management of items specified
     // through genex $<LINK_LIBRARY:...>

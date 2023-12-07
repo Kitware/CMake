@@ -81,7 +81,7 @@ modules:
 
 .. command:: env_module
 
-  Execute an aribitrary module command:
+  Execute an arbitrary module command:
 
   .. code-block:: cmake
 

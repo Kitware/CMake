@@ -3,6 +3,7 @@
 #include "cmTargetLinkLibrariesCommand.h"
 
 #include <cassert>
+#include <cstddef>
 #include <memory>
 #include <sstream>
 #include <unordered_set>

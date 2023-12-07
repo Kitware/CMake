@@ -65,12 +65,14 @@ function(compiler_id_detection outvar lang)
       VisualAge
       NVHPC
       PGI
+      CrayClang
       Cray
       TI
       FujitsuClang
       Fujitsu
       GHS
       Tasking
+      OrangeC
     )
     if ("x${lang}" STREQUAL "xC")
       list(APPEND ordered_compilers
@@ -99,6 +101,10 @@ function(compiler_id_detection outvar lang)
     endif()
 
     if("x${lang}" STREQUAL "xCUDA")
+      set(ordered_compilers NVIDIA Clang)
+    endif()
+
+    if("x${lang}" STREQUAL "xHIP")
       set(ordered_compilers NVIDIA Clang)
     endif()
 

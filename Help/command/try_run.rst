@@ -13,6 +13,7 @@ Try Compiling and Running Source Files
 .. code-block:: cmake
 
   try_run(<runResultVar> <compileResultVar>
+          [SOURCES_TYPE <type>]
           <SOURCES <srcfile...>                 |
            SOURCE_FROM_CONTENT <name> <content> |
            SOURCE_FROM_VAR <name> <var>         |
@@ -76,6 +77,11 @@ The signature above is recommended for clarity.
           [WORKING_DIRECTORY <var>]
           [ARGS <args>...]
           )
+
+.. _`try_run Options`:
+
+Options
+^^^^^^^
 
 The options specific to ``try_run`` are:
 

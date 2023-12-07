@@ -1,155 +1,155 @@
 cmake-use-cmsys-fstream.cxx:24:20: warning: use cmsys::ifstream [cmake-use-cmsys-fstream]
-  using ifstream = std::ifstream;
-                   ^~~~~~~~~~~~~
-                   cmsys::ifstream
+   24 |   using ifstream = std::ifstream;
+      |                    ^~~~~~~~~~~~~
+      |                    cmsys::ifstream
 cmake-use-cmsys-fstream.cxx:24:20: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:25:20: warning: use cmsys::ofstream [cmake-use-cmsys-fstream]
-  using ofstream = std::ofstream;
-                   ^~~~~~~~~~~~~
-                   cmsys::ofstream
+   25 |   using ofstream = std::ofstream;
+      |                    ^~~~~~~~~~~~~
+      |                    cmsys::ofstream
 cmake-use-cmsys-fstream.cxx:25:20: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:26:19: warning: use cmsys::fstream [cmake-use-cmsys-fstream]
-  using fstream = std::fstream;
-                  ^~~~~~~~~~~~
-                  cmsys::fstream
+   26 |   using fstream = std::fstream;
+      |                   ^~~~~~~~~~~~
+      |                   cmsys::fstream
 cmake-use-cmsys-fstream.cxx:26:19: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:29:13: warning: use cmsys::ifstream [cmake-use-cmsys-fstream]
-using ifs = std::ifstream;
-            ^~~~~~~~~~~~~
-            cmsys::ifstream
+   29 | using ifs = std::ifstream;
+      |             ^~~~~~~~~~~~~
+      |             cmsys::ifstream
 cmake-use-cmsys-fstream.cxx:29:13: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:30:13: warning: use cmsys::ofstream [cmake-use-cmsys-fstream]
-using ofs = std::ofstream;
-            ^~~~~~~~~~~~~
-            cmsys::ofstream
+   30 | using ofs = std::ofstream;
+      |             ^~~~~~~~~~~~~
+      |             cmsys::ofstream
 cmake-use-cmsys-fstream.cxx:30:13: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:31:12: warning: use cmsys::fstream [cmake-use-cmsys-fstream]
-using fs = std::fstream;
-           ^~~~~~~~~~~~
-           cmsys::fstream
+   31 | using fs = std::fstream;
+      |            ^~~~~~~~~~~~
+      |            cmsys::fstream
 cmake-use-cmsys-fstream.cxx:31:12: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:41:3: warning: use cmsys::ifstream [cmake-use-cmsys-fstream]
-  ifstream ifsUnqual;
-  ^~~~~~~~
-  cmsys::ifstream
+   41 |   ifstream ifsUnqual;
+      |   ^~~~~~~~
+      |   cmsys::ifstream
 cmake-use-cmsys-fstream.cxx:41:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:42:3: warning: use cmsys::ifstream [cmake-use-cmsys-fstream]
-  std::ifstream ifsQual;
-  ^~~~~~~~~~~~~
-  cmsys::ifstream
+   42 |   std::ifstream ifsQual;
+      |   ^~~~~~~~~~~~~
+      |   cmsys::ifstream
 cmake-use-cmsys-fstream.cxx:42:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:43:3: warning: use cmsys::ifstream [cmake-use-cmsys-fstream]
-  ns::ifstream ifsNS;
-  ^~~~~~~~~~~~
-  cmsys::ifstream
+   43 |   ns::ifstream ifsNS;
+      |   ^~~~~~~~~~~~
+      |   cmsys::ifstream
 cmake-use-cmsys-fstream.cxx:43:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:44:3: warning: use cmsys::ifstream [cmake-use-cmsys-fstream]
-  ns::ns::ifstream ifsNested;
-  ^~~~~~~~~~~~~~~~
-  cmsys::ifstream
+   44 |   ns::ns::ifstream ifsNested;
+      |   ^~~~~~~~~~~~~~~~
+      |   cmsys::ifstream
 cmake-use-cmsys-fstream.cxx:44:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:45:3: warning: use cmsys::ifstream [cmake-use-cmsys-fstream]
-  ns::cl::ifstream ifsClass;
-  ^~~~~~~~~~~~~~~~
-  cmsys::ifstream
+   45 |   ns::cl::ifstream ifsClass;
+      |   ^~~~~~~~~~~~~~~~
+      |   cmsys::ifstream
 cmake-use-cmsys-fstream.cxx:45:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:46:3: warning: use cmsys::ifstream [cmake-use-cmsys-fstream]
-  ns::ifs ifsRenamed;
-  ^~~~~~~
-  cmsys::ifstream
+   46 |   ns::ifs ifsRenamed;
+      |   ^~~~~~~
+      |   cmsys::ifstream
 cmake-use-cmsys-fstream.cxx:46:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:48:3: warning: use cmsys::ofstream [cmake-use-cmsys-fstream]
-  ofstream ofsUnqual;
-  ^~~~~~~~
-  cmsys::ofstream
+   48 |   ofstream ofsUnqual;
+      |   ^~~~~~~~
+      |   cmsys::ofstream
 cmake-use-cmsys-fstream.cxx:48:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:49:3: warning: use cmsys::ofstream [cmake-use-cmsys-fstream]
-  std::ofstream ofsQual;
-  ^~~~~~~~~~~~~
-  cmsys::ofstream
+   49 |   std::ofstream ofsQual;
+      |   ^~~~~~~~~~~~~
+      |   cmsys::ofstream
 cmake-use-cmsys-fstream.cxx:49:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:50:3: warning: use cmsys::ofstream [cmake-use-cmsys-fstream]
-  ns::ofstream ofsNS;
-  ^~~~~~~~~~~~
-  cmsys::ofstream
+   50 |   ns::ofstream ofsNS;
+      |   ^~~~~~~~~~~~
+      |   cmsys::ofstream
 cmake-use-cmsys-fstream.cxx:50:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:51:3: warning: use cmsys::ofstream [cmake-use-cmsys-fstream]
-  ns::ns::ofstream ofsNested;
-  ^~~~~~~~~~~~~~~~
-  cmsys::ofstream
+   51 |   ns::ns::ofstream ofsNested;
+      |   ^~~~~~~~~~~~~~~~
+      |   cmsys::ofstream
 cmake-use-cmsys-fstream.cxx:51:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:52:3: warning: use cmsys::ofstream [cmake-use-cmsys-fstream]
-  ns::cl::ofstream ofsClass;
-  ^~~~~~~~~~~~~~~~
-  cmsys::ofstream
+   52 |   ns::cl::ofstream ofsClass;
+      |   ^~~~~~~~~~~~~~~~
+      |   cmsys::ofstream
 cmake-use-cmsys-fstream.cxx:52:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:53:3: warning: use cmsys::ofstream [cmake-use-cmsys-fstream]
-  ns::ofs ofsRenamed;
-  ^~~~~~~
-  cmsys::ofstream
+   53 |   ns::ofs ofsRenamed;
+      |   ^~~~~~~
+      |   cmsys::ofstream
 cmake-use-cmsys-fstream.cxx:53:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:55:3: warning: use cmsys::fstream [cmake-use-cmsys-fstream]
-  fstream fsUnqual;
-  ^~~~~~~
-  cmsys::fstream
+   55 |   fstream fsUnqual;
+      |   ^~~~~~~
+      |   cmsys::fstream
 cmake-use-cmsys-fstream.cxx:55:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:56:3: warning: use cmsys::fstream [cmake-use-cmsys-fstream]
-  std::fstream fsQual;
-  ^~~~~~~~~~~~
-  cmsys::fstream
+   56 |   std::fstream fsQual;
+      |   ^~~~~~~~~~~~
+      |   cmsys::fstream
 cmake-use-cmsys-fstream.cxx:56:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:57:3: warning: use cmsys::fstream [cmake-use-cmsys-fstream]
-  ns::fstream fsNS;
-  ^~~~~~~~~~~
-  cmsys::fstream
+   57 |   ns::fstream fsNS;
+      |   ^~~~~~~~~~~
+      |   cmsys::fstream
 cmake-use-cmsys-fstream.cxx:57:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:58:3: warning: use cmsys::fstream [cmake-use-cmsys-fstream]
-  ns::ns::fstream fsNested;
-  ^~~~~~~~~~~~~~~
-  cmsys::fstream
+   58 |   ns::ns::fstream fsNested;
+      |   ^~~~~~~~~~~~~~~
+      |   cmsys::fstream
 cmake-use-cmsys-fstream.cxx:58:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:59:3: warning: use cmsys::fstream [cmake-use-cmsys-fstream]
-  ns::ns::fstream fsClass;
-  ^~~~~~~~~~~~~~~
-  cmsys::fstream
+   59 |   ns::ns::fstream fsClass;
+      |   ^~~~~~~~~~~~~~~
+      |   cmsys::fstream
 cmake-use-cmsys-fstream.cxx:59:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:60:3: warning: use cmsys::fstream [cmake-use-cmsys-fstream]
-  ns::fs fsRenamed;
-  ^~~~~~
-  cmsys::fstream
+   60 |   ns::fs fsRenamed;
+      |   ^~~~~~
+      |   cmsys::fstream
 cmake-use-cmsys-fstream.cxx:60:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:62:3: warning: use cmsys::ifstream [cmake-use-cmsys-fstream]
-  std::ifstream::off_type offsetQual = 0;
-  ^~~~~~~~~~~~~
-  cmsys::ifstream
+   62 |   std::ifstream::off_type offsetQual = 0;
+      |   ^~~~~~~~~~~~~
+      |   cmsys::ifstream
 cmake-use-cmsys-fstream.cxx:62:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:63:3: warning: use cmsys::ifstream [cmake-use-cmsys-fstream]
-  ifstream::off_type offsetUnqual = 0;
-  ^~~~~~~~
-  cmsys::ifstream
+   63 |   ifstream::off_type offsetUnqual = 0;
+      |   ^~~~~~~~
+      |   cmsys::ifstream
 cmake-use-cmsys-fstream.cxx:63:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:64:3: warning: use cmsys::ifstream [cmake-use-cmsys-fstream]
-  ns::ifstream::off_type offsetNS = 0;
-  ^~~~~~~~~~~~
-  cmsys::ifstream
+   64 |   ns::ifstream::off_type offsetNS = 0;
+      |   ^~~~~~~~~~~~
+      |   cmsys::ifstream
 cmake-use-cmsys-fstream.cxx:64:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:65:3: warning: use cmsys::ifstream [cmake-use-cmsys-fstream]
-  ns::ns::ifstream::off_type offsetNested = 0;
-  ^~~~~~~~~~~~~~~~
-  cmsys::ifstream
+   65 |   ns::ns::ifstream::off_type offsetNested = 0;
+      |   ^~~~~~~~~~~~~~~~
+      |   cmsys::ifstream
 cmake-use-cmsys-fstream.cxx:65:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:66:3: warning: use cmsys::ifstream [cmake-use-cmsys-fstream]
-  ns::ns::ifstream::traits_type::off_type offsetTraitsNested = 0;
-  ^~~~~~~~~~~~~~~~
-  cmsys::ifstream
+   66 |   ns::ns::ifstream::traits_type::off_type offsetTraitsNested = 0;
+      |   ^~~~~~~~~~~~~~~~
+      |   cmsys::ifstream
 cmake-use-cmsys-fstream.cxx:66:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:67:3: warning: use cmsys::ifstream [cmake-use-cmsys-fstream]
-  ns::cl::ifstream::traits_type::off_type offsetTraitsClass = 0;
-  ^~~~~~~~~~~~~~~~
-  cmsys::ifstream
+   67 |   ns::cl::ifstream::traits_type::off_type offsetTraitsClass = 0;
+      |   ^~~~~~~~~~~~~~~~
+      |   cmsys::ifstream
 cmake-use-cmsys-fstream.cxx:67:3: note: FIX-IT applied suggested code changes
 cmake-use-cmsys-fstream.cxx:69:15: warning: use cmsys::ifstream [cmake-use-cmsys-fstream]
-  std::vector<ifstream> ifsVectorUnqual;
-              ^~~~~~~~
-              cmsys::ifstream
+   69 |   std::vector<ifstream> ifsVectorUnqual;
+      |               ^~~~~~~~
+      |               cmsys::ifstream
 cmake-use-cmsys-fstream.cxx:69:15: note: FIX-IT applied suggested code changes

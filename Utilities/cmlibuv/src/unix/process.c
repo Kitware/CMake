@@ -75,7 +75,9 @@ extern char **environ;
 #endif
 #endif
 
-#if defined(__APPLE__) || \
+#ifdef CMAKE_BOOTSTRAP
+#define UV_USE_SIGCHLD
+#elif defined(__APPLE__) || \
     defined(__DragonFly__) || \
     defined(__FreeBSD__) || \
     defined(__NetBSD__) || \

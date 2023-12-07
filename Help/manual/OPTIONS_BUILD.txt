@@ -105,10 +105,14 @@
 
 .. option:: --toolchain <path-to-file>
 
+ .. versionadded:: 3.21
+
  Specify the cross compiling toolchain file, equivalent to setting
  :variable:`CMAKE_TOOLCHAIN_FILE` variable.
 
 .. option:: --install-prefix <directory>
+
+ .. versionadded:: 3.21
 
  Specify the installation directory, used by the
  :variable:`CMAKE_INSTALL_PREFIX` variable. Must be an absolute path.

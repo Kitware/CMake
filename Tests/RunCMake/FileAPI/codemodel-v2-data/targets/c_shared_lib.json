@@ -100,7 +100,7 @@
             "_dllExtra": false
         },
         {
-            "path": "^((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?c_shared_lib\\.(dll\\.a|lib)$",
+            "path": "^((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?c_shared_lib\\.(dll\\.a|lib|l)$",
             "_dllExtra": true
         },
         {

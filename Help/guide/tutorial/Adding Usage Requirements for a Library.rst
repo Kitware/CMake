@@ -127,7 +127,7 @@ Remove this line:
 
   </details>
 
-And the lines:
+And remove ``EXTRA_INCLUDES`` from ``target_include_directories``:
 
 .. raw:: html
 
@@ -142,23 +142,6 @@ And the lines:
 .. raw:: html
 
   </details>
-
-The remaining code looks like:
-
-.. raw:: html
-
-  <details><summary>Click to show/hide the resulting code</summary>
-
-.. literalinclude:: Step4/CMakeLists.txt
-  :caption: Remaining code after removing EXTRA_INCLUDES
-  :name: CMakeLists.txt-after-removing-EXTRA_INCLUDES
-  :language: cmake
-  :start-after: add_subdirectory(MathFunctions)
-
-.. raw:: html
-
-  </details>
-
 
 Notice that with this technique, the only thing our executable target does to
 use our library is call :command:`target_link_libraries` with the name
@@ -262,10 +245,9 @@ then use :command:`target_compile_features` to add the compiler feature
   </details>
 
 Finally, with our interface library set up, we need to link our
-executable ``Target``, our ``MathFunctions`` library, and our ``SqrtLibrary``
-library to our new
-``tutorial_compiler_flags`` library. Respectively, the code will look like
-this:
+executable ``Tutorial``, our ``SqrtLibrary`` library and our ``MathFunctions``
+library to our new ``tutorial_compiler_flags`` library. Respectively, the code
+will look like this:
 
 .. raw:: html
 
@@ -292,7 +274,7 @@ this:
   :caption: TODO 6: MathFunctions/CMakeLists.txt
   :name: MathFunctions-CMakeLists.txt-target_link_libraries-step4
   :language: cmake
-  :start-after: # link our compiler flags interface library
+  :start-after: # link SqrtLibrary to tutorial_compiler_flags
   :end-before: target_link_libraries(MathFunctions
 
 .. raw:: html
@@ -309,8 +291,7 @@ and this:
   :caption: TODO 7: MathFunctions/CMakeLists.txt
   :name: MathFunctions-SqrtLibrary-target_link_libraries-step4
   :language: cmake
-  :start-after: target_link_libraries(SqrtLibrary
-  :end-before: endif()
+  :start-after: # link MathFunctions to tutorial_compiler_flags
 
 .. raw:: html
 

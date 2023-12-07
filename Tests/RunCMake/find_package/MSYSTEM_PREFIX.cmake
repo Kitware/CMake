@@ -1,0 +1,5 @@
+set(ENV{MSYSTEM} "FAKEMSYS")
+set(ENV{MSYSTEM_PREFIX} "${CMAKE_CURRENT_LIST_DIR}/MSYSTEM_PREFIX")
+enable_language(C)
+find_package(MsysPfx QUIET)
+message(STATUS "MsysPfx_DIR='${MsysPfx_DIR}'")

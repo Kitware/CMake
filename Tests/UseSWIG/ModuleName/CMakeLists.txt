@@ -8,14 +8,7 @@ find_package(SWIG REQUIRED)
 cmake_policy(SET CMP0086 NEW)
 include(${SWIG_USE_FILE})
 
-find_package(Python2 REQUIRED COMPONENTS Interpreter Development)
-
-# Path separator
-if (WIN32)
-  set (PS "$<SEMICOLON>")
-else()
-  set (PS ":")
-endif()
+find_package(Python REQUIRED COMPONENTS Interpreter Development)
 
 unset(CMAKE_SWIG_FLAGS)
 
@@ -34,9 +27,9 @@ set_target_properties (example1 PROPERTIES
   LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/example1"
   ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/example1"
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/example1")
-target_link_libraries(example1 PRIVATE Python2::Module)
+target_link_libraries(example1 PRIVATE Python::Module)
 
 
 add_test (NAME ModuleName.example1
-  COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}/Python2${PS}$<TARGET_FILE_DIR:example1>"
-  "${Python2_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/runme.py")
+  COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:example1>"
+  "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/runme.py")

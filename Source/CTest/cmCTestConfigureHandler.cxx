@@ -45,7 +45,7 @@ int cmCTestConfigureHandler::ProcessHandler()
   auto elapsed_time_start = std::chrono::steady_clock::now();
   std::string output;
   int retVal = 0;
-  int res = 0;
+  bool res = false;
   if (!this->CTest->GetShowOnly()) {
     cmGeneratedFileStream os;
     if (!this->StartResultingXML(cmCTest::PartConfigure, "Configure", os)) {

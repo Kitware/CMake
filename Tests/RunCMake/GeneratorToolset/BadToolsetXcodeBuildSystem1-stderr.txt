@@ -1,0 +1,10 @@
+CMake Error at CMakeLists.txt:[0-9]+ \(project\):
+  Generator
+
+    Xcode
+
+  toolset specification field
+
+    buildsystem=1
+
+  is not allowed with Xcode [0-9.]+\.$

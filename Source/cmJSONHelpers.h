@@ -5,11 +5,11 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <algorithm>
-#include <cstddef>
 #include <functional>
 #include <iostream>
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cm/optional>
@@ -18,6 +18,7 @@
 #include <cm3p/json/value.h>
 
 #include "cmJSONState.h"
+#include "cmStringAlgorithms.h"
 
 template <typename T>
 using cmJSONHelper =
@@ -36,98 +37,25 @@ enum ObjectError
 using ErrorGenerator = std::function<void(const Json::Value*, cmJSONState*)>;
 using ObjectErrorGenerator =
   std::function<ErrorGenerator(ObjectError, const Json::Value::Members&)>;
-const auto EXPECTED_TYPE = [](const std::string& type) {
-  return [type](const Json::Value* value, cmJSONState* state) -> void {
-#if !defined(CMAKE_BOOTSTRAP)
-    if (state->key().empty()) {
-      state->AddErrorAtValue(cmStrCat("Expected ", type), value);
-      return;
-    }
-    std::string errMsg = cmStrCat("\"", state->key(), "\" expected ", type);
-    if (value && value->isConvertibleTo(Json::ValueType::stringValue)) {
-      errMsg = cmStrCat(errMsg, ", got: ", value->asString());
-    }
-    state->AddErrorAtValue(errMsg, value);
-#endif
-  };
-};
-const auto INVALID_STRING = [](const Json::Value* value,
-                               cmJSONState* state) -> void {
-  JsonErrors::EXPECTED_TYPE("a string")(value, state);
-};
-const auto INVALID_BOOL = [](const Json::Value* value,
-                             cmJSONState* state) -> void {
-  JsonErrors::EXPECTED_TYPE("a bool")(value, state);
-};
-const auto INVALID_INT = [](const Json::Value* value,
-                            cmJSONState* state) -> void {
-  JsonErrors::EXPECTED_TYPE("an integer")(value, state);
-};
-const auto INVALID_UINT = [](const Json::Value* value,
-                             cmJSONState* state) -> void {
-  JsonErrors::EXPECTED_TYPE("an unsigned integer")(value, state);
-};
-const auto INVALID_NAMED_OBJECT =
-  [](const std::function<std::string(const Json::Value*, cmJSONState*)>&
-       nameGenerator) -> ObjectErrorGenerator {
-  return [nameGenerator](
-           ObjectError errorType,
-           const Json::Value::Members& extraFields) -> ErrorGenerator {
-    return [nameGenerator, errorType, extraFields](
-             const Json::Value* value, cmJSONState* state) -> void {
-#if !defined(CMAKE_BOOTSTRAP)
-      std::string name = nameGenerator(value, state);
-      switch (errorType) {
-        case ObjectError::RequiredMissing:
-          state->AddErrorAtValue(cmStrCat("Invalid Required ", name), value);
-          break;
-        case ObjectError::InvalidObject:
-          state->AddErrorAtValue(cmStrCat("Invalid ", name), value);
-          break;
-        case ObjectError::ExtraField: {
-          for (auto const& member : extraFields) {
-            if (value) {
-              state->AddErrorAtValue(
-                cmStrCat("Invalid extra field \"", member, "\" in ", name),
-                &(*value)[member]);
-            } else {
-              state->AddError(
-                cmStrCat("Invalid extra field \"", member, "\" in ", name));
-            }
-          }
-        } break;
-        case ObjectError::MissingRequired:
-          state->AddErrorAtValue(cmStrCat("Missing required field \"",
-                                          state->key(), "\" in ", name),
-                                 value);
-          break;
-      }
-#endif
-    };
-  };
-};
-const auto INVALID_OBJECT =
-  [](ObjectError errorType,
-     const Json::Value::Members& extraFields) -> ErrorGenerator {
-  return INVALID_NAMED_OBJECT(
-    [](const Json::Value*, cmJSONState*) -> std::string { return "Object"; })(
-    errorType, extraFields);
-};
-const auto INVALID_NAMED_OBJECT_KEY =
-  [](ObjectError errorType,
-     const Json::Value::Members& extraFields) -> ErrorGenerator {
-  return INVALID_NAMED_OBJECT(
-    [](const Json::Value*, cmJSONState* state) -> std::string {
-      for (auto it = state->parseStack.rbegin();
-           it != state->parseStack.rend(); ++it) {
-        if (it->first.rfind("$vector_item_", 0) == 0) {
-          continue;
-        }
-        return cmStrCat("\"", it->first, "\"");
-      }
-      return "root";
-    })(errorType, extraFields);
-};
+ErrorGenerator EXPECTED_TYPE(const std::string& type);
+
+void INVALID_STRING(const Json::Value* value, cmJSONState* state);
+
+void INVALID_BOOL(const Json::Value* value, cmJSONState* state);
+
+void INVALID_INT(const Json::Value* value, cmJSONState* state);
+
+void INVALID_UINT(const Json::Value* value, cmJSONState* state);
+
+ObjectErrorGenerator INVALID_NAMED_OBJECT(
+  const std::function<std::string(const Json::Value*, cmJSONState*)>&
+    nameGenerator);
+
+ErrorGenerator INVALID_OBJECT(ObjectError errorType,
+                              const Json::Value::Members& extraFields);
+
+ErrorGenerator INVALID_NAMED_OBJECT_KEY(
+  ObjectError errorType, const Json::Value::Members& extraFields);
 }
 
 struct cmJSONHelperBuilder

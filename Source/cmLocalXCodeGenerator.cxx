@@ -31,7 +31,7 @@ std::string cmLocalXCodeGenerator::GetTargetDirectory(
   cmGeneratorTarget const*) const
 {
   // No per-target directory for this generator (yet).
-  return "";
+  return std::string{};
 }
 
 void cmLocalXCodeGenerator::AppendFlagEscape(std::string& flags,
@@ -82,6 +82,12 @@ void cmLocalXCodeGenerator::AddGeneratorSpecificInstallSetup(std::ostream& os)
         break;
       case cmMakefile::AppleSDK::WatchSimulator:
         platformName = "watchsimulator";
+        break;
+      case cmMakefile::AppleSDK::XROS:
+        platformName = "xros";
+        break;
+      case cmMakefile::AppleSDK::XRSimulator:
+        platformName = "xrsimulator";
         break;
       case cmMakefile::AppleSDK::MacOS:
         break;

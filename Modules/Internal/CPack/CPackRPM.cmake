@@ -54,6 +54,15 @@ macro(set_spec_scripts PACKAGE_NAME)
     "${CPACK_RPM_SPEC_PREUNINSTALL}")
 endmacro()
 
+function(make_rpm_spec_path var path)
+  # RPM supports either whitespace with quoting or globbing without quoting.
+  if(path MATCHES "[ \t]")
+    set("${var}" "\"${path}\"" PARENT_SCOPE)
+  else()
+    set("${var}" "${path}" PARENT_SCOPE)
+  endif()
+endfunction()
+
 function(get_file_permissions FILE RETURN_VAR)
   execute_process(COMMAND ls -l ${FILE}
           OUTPUT_VARIABLE permissions_
@@ -596,7 +605,8 @@ function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXE
       set(DIRECTIVE "%dir ")
     endif()
 
-    string(APPEND INSTALL_FILES "${DIRECTIVE}\"${F}\"\n")
+    make_rpm_spec_path(F_SPEC "${F}")
+    string(APPEND INSTALL_FILES "${DIRECTIVE}${F_SPEC}\n")
   endforeach()
 
   if(REQUIRES_SYMLINK_RELOCATION_SCRIPT)
@@ -1317,7 +1327,8 @@ function(cpack_rpm_generate_package)
         string(APPEND F_PREFIX " ")
       endif()
       # Rebuild the user list file
-      string(APPEND CPACK_RPM_USER_INSTALL_FILES "${F_PREFIX}\"${F_PATH}\"\n")
+      make_rpm_spec_path(F_SPEC "${F_PATH}")
+      string(APPEND CPACK_RPM_USER_INSTALL_FILES "${F_PREFIX}${F_SPEC}\n")
 
       # Remove from CPACK_RPM_INSTALL_FILES and CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL
       list(REMOVE_ITEM CPACK_RPM_INSTALL_FILES_LIST ${F_PATH})
@@ -1330,7 +1341,8 @@ function(cpack_rpm_generate_package)
     # Rebuild CPACK_RPM_INSTALL_FILES
     set(CPACK_RPM_INSTALL_FILES "")
     foreach(F IN LISTS CPACK_RPM_INSTALL_FILES_LIST)
-      string(APPEND CPACK_RPM_INSTALL_FILES "\"${F}\"\n")
+      make_rpm_spec_path(F_SPEC "${F}")
+      string(APPEND CPACK_RPM_INSTALL_FILES "${F_SPEC}\n")
     endforeach()
   else()
     set(CPACK_RPM_USER_INSTALL_FILES "")
@@ -1351,12 +1363,14 @@ function(cpack_rpm_generate_package)
     # Rebuild INSTALL_FILES
     set(CPACK_RPM_INSTALL_FILES "")
     foreach(F IN LISTS CPACK_RPM_INSTALL_FILES_LIST)
-      string(APPEND CPACK_RPM_INSTALL_FILES "\"${F}\"\n")
+      make_rpm_spec_path(F_SPEC "${F}")
+      string(APPEND CPACK_RPM_INSTALL_FILES "${F_SPEC}\n")
     endforeach()
     # Build ABSOLUTE_INSTALL_FILES
     set(CPACK_RPM_ABSOLUTE_INSTALL_FILES "")
     foreach(F IN LISTS CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL)
-      string(APPEND CPACK_RPM_ABSOLUTE_INSTALL_FILES "%config \"${F}\"\n")
+      make_rpm_spec_path(F_SPEC "${F}")
+      string(APPEND CPACK_RPM_ABSOLUTE_INSTALL_FILES "%config ${F_SPEC}\n")
     endforeach()
     if(CPACK_RPM_PACKAGE_DEBUG)
       message("CPackRPM:Debug: CPACK_RPM_ABSOLUTE_INSTALL_FILES=${CPACK_RPM_ABSOLUTE_INSTALL_FILES}")

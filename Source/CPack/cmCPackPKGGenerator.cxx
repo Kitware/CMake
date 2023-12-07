@@ -4,6 +4,8 @@
 
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
@@ -38,13 +40,12 @@ std::string cmCPackPKGGenerator::GetPackageName(
   if (component.ArchiveFile.empty()) {
     std::string packagesDir =
       cmStrCat(this->GetOption("CPACK_TEMPORARY_DIRECTORY"), ".dummy");
-    std::ostringstream out;
-    out << cmSystemTools::GetFilenameWithoutLastExtension(packagesDir) << "-"
-        << component.Name << ".pkg";
-    return out.str();
+    return cmStrCat(
+      cmSystemTools::GetFilenameWithoutLastExtension(packagesDir), '-',
+      component.Name, ".pkg");
   }
 
-  return component.ArchiveFile + ".pkg";
+  return cmStrCat(component.ArchiveFile, ".pkg");
 }
 
 void cmCPackPKGGenerator::CreateBackground(const char* themeName,
@@ -160,14 +161,15 @@ void cmCPackPKGGenerator::WriteDistributionFile(const char* metapackageFile,
   for (auto const& comp : this->Components) {
     if (!comp.second.Group) {
       xChoiceOut.StartElement("line");
-      xChoiceOut.Attribute("choice", comp.first + "Choice");
+      xChoiceOut.Attribute("choice", cmStrCat(comp.first, "Choice"));
       xChoiceOut.Content(""); // Avoid self-closing tag.
       xChoiceOut.EndElement();
     }
   }
   if (!this->PostFlightComponent.Name.empty()) {
     xChoiceOut.StartElement("line");
-    xChoiceOut.Attribute("choice", PostFlightComponent.Name + "Choice");
+    xChoiceOut.Attribute("choice",
+                         cmStrCat(PostFlightComponent.Name, "Choice"));
     xChoiceOut.Content(""); // Avoid self-closing tag.
     xChoiceOut.EndElement();
   }
@@ -207,14 +209,14 @@ void cmCPackPKGGenerator::CreateChoiceOutline(
   const cmCPackComponentGroup& group, cmXMLWriter& xout)
 {
   xout.StartElement("line");
-  xout.Attribute("choice", group.Name + "Choice");
+  xout.Attribute("choice", cmStrCat(group.Name, "Choice"));
   for (cmCPackComponentGroup* subgroup : group.Subgroups) {
     CreateChoiceOutline(*subgroup, xout);
   }
 
   for (cmCPackComponent* comp : group.Components) {
     xout.StartElement("line");
-    xout.Attribute("choice", comp->Name + "Choice");
+    xout.Attribute("choice", cmStrCat(comp->Name, "Choice"));
     xout.Content(""); // Avoid self-closing tag.
     xout.EndElement();
   }
@@ -225,7 +227,7 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponentGroup& group,
                                        cmXMLWriter& xout)
 {
   xout.StartElement("choice");
-  xout.Attribute("id", group.Name + "Choice");
+  xout.Attribute("id", cmStrCat(group.Name, "Choice"));
   xout.Attribute("title", group.DisplayName);
   xout.Attribute("start_selected", "true");
   xout.Attribute("start_enabled", "true");
@@ -249,7 +251,7 @@ void cmCPackPKGGenerator::CreateChoice(const cmCPackComponent& component,
   }
 
   xout.StartElement("choice");
-  xout.Attribute("id", component.Name + "Choice");
+  xout.Attribute("id", cmStrCat(component.Name, "Choice"));
   xout.Attribute("title", component.DisplayName);
   xout.Attribute(
     "start_selected",
@@ -381,15 +383,14 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
                                                  const std::string& dirName)
 {
   std::string uname = cmSystemTools::UpperCase(name);
-  std::string cpackVar = "CPACK_RESOURCE_FILE_" + uname;
+  std::string cpackVar = cmStrCat("CPACK_RESOURCE_FILE_", uname);
   cmValue inFileName = this->GetOption(cpackVar);
   if (!inFileName) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "CPack option: " << cpackVar.c_str()
-                                   << " not specified. It should point to "
-                                   << (!name.empty() ? name : "<empty>")
-                                   << ".rtf, " << name << ".html, or " << name
-                                   << ".txt file" << std::endl);
+                  "CPack option: "
+                    << cpackVar << " not specified. It should point to "
+                    << (!name.empty() ? name : "<empty>") << ".rtf, " << name
+                    << ".html, or " << name << ".txt file" << std::endl);
     return false;
   }
   if (!cmSystemTools::FileExists(inFileName)) {
@@ -400,7 +401,8 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
     return false;
   }
   std::string ext = cmSystemTools::GetFilenameLastExtension(inFileName);
-  if (ext != ".rtfd" && ext != ".rtf" && ext != ".html" && ext != ".txt") {
+  if (ext != ".rtfd"_s && ext != ".rtf"_s && ext != ".html"_s &&
+      ext != ".txt"_s) {
     cmCPackLogger(
       cmCPackLog::LOG_ERROR,
       "Bad file extension specified: "
@@ -414,7 +416,8 @@ bool cmCPackPKGGenerator::CopyCreateResourceFile(const std::string& name,
 
   // Set this so that distribution.dist gets the right name (without
   // the path).
-  this->SetOption("CPACK_RESOURCE_FILE_" + uname + "_NOPATH", (name + ext));
+  this->SetOption(cmStrCat("CPACK_RESOURCE_FILE_", uname, "_NOPATH"),
+                  cmStrCat(name, ext));
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Configure file: " << (inFileName ? *inFileName : "(NULL)")
@@ -454,7 +457,7 @@ int cmCPackPKGGenerator::CopyInstallScript(const std::string& resdir,
 {
   std::string dst = cmStrCat(resdir, '/', name);
   cmSystemTools::CopyFileAlways(script, dst);
-  cmSystemTools::SetPermissions(dst.c_str(), 0777);
+  cmSystemTools::SetPermissions(dst, 0777);
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "copy script : " << script << "\ninto " << dst << std::endl);
 

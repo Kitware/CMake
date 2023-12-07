@@ -332,6 +332,8 @@ cmQtAutoGenInitializer::cmQtAutoGenInitializer(
   this->Uic.Enabled = uicEnabled;
   this->Rcc.Enabled = rccEnabled;
   this->Rcc.GlobalTarget = globalAutoRccTarget;
+  this->CrossConfig =
+    !this->Makefile->GetSafeDefinition("CMAKE_CROSS_CONFIGS").empty();
 }
 
 bool cmQtAutoGenInitializer::InitCustomTargets()
@@ -904,13 +906,13 @@ bool cmQtAutoGenInitializer::InitScanFiles()
       if (muf.MocIt || muf.UicIt) {
         // Search for the default header file and a private header
         std::string const& srcFullPath = muf.SF->ResolveFullPath();
-        std::string basePath = cmStrCat(
+        std::string const basePath = cmStrCat(
           cmQtAutoGen::SubDirPrefix(srcFullPath),
           cmSystemTools::GetFilenameWithoutLastExtension(srcFullPath));
         for (auto const& suffix : suffixes) {
           std::string const suffixedPath = cmStrCat(basePath, suffix);
           for (auto const& ext : exts) {
-            std::string fullPath = cmStrCat(suffixedPath, '.', ext);
+            std::string const fullPath = cmStrCat(suffixedPath, '.', ext);
 
             auto constexpr locationKind = cmSourceFileLocationKind::Known;
             cmSourceFile* sf =
@@ -1026,8 +1028,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
   if (this->MocOrUicEnabled() && !this->AutogenTarget.FilesGenerated.empty()) {
     if (this->CMP0071Accept) {
       // Let the autogen target depend on the GENERATED files
-      if (this->MultiConfig &&
-          this->Makefile->GetSafeDefinition("CMAKE_CROSS_CONFIGS").empty()) {
+      if (this->MultiConfig && !this->CrossConfig) {
         for (MUFile const* muf : this->AutogenTarget.FilesGenerated) {
           if (muf->Configs.empty()) {
             this->AutogenTarget.DependFiles.insert(muf->FullPath);
@@ -1177,17 +1178,21 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   this->Makefile->AddCMakeOutputFile(this->AutogenTarget.InfoFile);
 
   // Determine whether to use a depfile for the AUTOGEN target.
-  const bool useNinjaDepfile = this->QtVersion >= IntegerVersion(5, 15) &&
-    this->GlobalGen->GetName().find("Ninja") != std::string::npos;
+  bool const useDepfile = [this]() -> bool {
+    auto const& gen = this->GlobalGen->GetName();
+    return this->QtVersion >= IntegerVersion(5, 15) &&
+      (gen.find("Ninja") != std::string::npos ||
+       gen.find("Make") != std::string::npos);
+  }();
 
   // Files provided by the autogen target
   std::vector<std::string> autogenByproducts;
   std::vector<std::string> timestampByproducts;
   if (this->Moc.Enabled) {
     this->AddGeneratedSource(this->Moc.CompilationFile, this->Moc, true);
-    if (useNinjaDepfile) {
-      if (this->MultiConfig &&
-          !this->Makefile->GetSafeDefinition("CMAKE_CROSS_CONFIGS").empty()) {
+    if (useDepfile) {
+      if (this->MultiConfig && this->CrossConfig &&
+          this->GlobalGen->GetName().find("Ninja") != std::string::npos) {
         // Make all mocs_compilation_<CONFIG>.cpp files byproducts of the
         // ${target}_autogen/timestamp custom command.
         // We cannot just use Moc.CompilationFileGenex here, because that
@@ -1234,16 +1239,16 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   this->GlobalGen->GetQtAutoGenConfigs(configs);
   bool constexpr stdPipesUTF8 = true;
   cmCustomCommandLines commandLines;
-  if (this->Makefile->GetSafeDefinition("CMAKE_CROSS_CONFIGS").empty()) {
-    std::string autugenInfoFileconfig;
+  if (!this->CrossConfig) {
+    std::string autogenInfoFileConfig;
     if (this->MultiConfig) {
-      autugenInfoFileconfig = "$<CONFIG>";
+      autogenInfoFileConfig = "$<CONFIG>";
     } else {
-      autugenInfoFileconfig = configs[0];
+      autogenInfoFileConfig = configs[0];
     }
     commandLines.push_back(cmMakeCommandLine(
       { cmSystemTools::GetCMakeCommand(), "-E", "cmake_autogen",
-        this->AutogenTarget.InfoFile, autugenInfoFileconfig }));
+        this->AutogenTarget.InfoFile, autogenInfoFileConfig }));
 
   } else {
     for (auto const& config : configs) {
@@ -1365,7 +1370,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       this->AutogenTarget.DependFiles.begin(),
       this->AutogenTarget.DependFiles.end());
 
-    if (useNinjaDepfile) {
+    if (useDepfile) {
       // Create a custom command that generates a timestamp file and
       // has a depfile assigned. The depfile is created by JobDepFilesMergeT.
       //
@@ -1446,7 +1451,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       // Alter variables for the autogen target which now merely wraps the
       // custom command
       dependencies.clear();
-      dependencies.push_back(outputFile);
+      dependencies.emplace_back(outputFile);
       commandLines.clear();
       autogenComment.clear();
     }
@@ -1472,7 +1477,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
         autogenTarget->AddUtility(depName.Value.first, false, this->Makefile);
       }
     }
-    if (!useNinjaDepfile) {
+    if (!useDepfile) {
       // Add additional autogen target dependencies to autogen target
       for (cmTarget const* depTarget : this->AutogenTarget.DependTargets) {
         autogenTarget->AddUtility(depTarget->GetName(), false, this->Makefile);
@@ -1530,7 +1535,8 @@ bool cmQtAutoGenInitializer::InitRccTargets()
         cmMakeCommandLine({ cmSystemTools::GetCMakeCommand(), "-E",
                             "cmake_autorcc", qrc.InfoFile, "$<CONFIG>" }));
     }
-    std::string ccComment =
+
+    std::string const ccComment =
       cmStrCat("Automatic RCC for ",
                FileProjectRelativePath(this->Makefile, qrc.QrcFile));
 
@@ -1578,8 +1584,6 @@ bool cmQtAutoGenInitializer::InitRccTargets()
     } else {
       // Create custom rcc command
       {
-        std::vector<std::string> ccByproducts;
-
         // Add the resource files to the dependencies
         for (std::string const& fileName : qrc.Resources) {
           // Add resource file to the custom command dependencies
@@ -1589,7 +1593,6 @@ bool cmQtAutoGenInitializer::InitRccTargets()
           ccDepends.push_back(this->Rcc.ExecutableTargetName);
         }
         cc->SetOutputs(ccOutput);
-        cc->SetByproducts(ccByproducts);
         cc->SetDepends(ccDepends);
         this->LocalGen->AddCustomCommandToOutput(std::move(cc));
       }
@@ -1836,6 +1839,7 @@ bool cmQtAutoGenInitializer::SetupWriteRccInfo()
     // General
     info.SetBool("MULTI_CONFIG", this->MultiConfig);
     info.SetUInt("VERBOSITY", this->Verbosity);
+    info.Set("GENERATOR", this->GlobalGen->GetName());
 
     // Files
     info.Set("LOCK_FILE", qrc.LockFile);

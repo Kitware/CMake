@@ -6,7 +6,7 @@
   Some library files are in directories implicitly searched by the linker
   when invoked for C:
 
-   .*/Tests/RunCMake/CMP0060/CMP0060-WARN-ON-build/lib/(lib)?CMP0060.(a|lib)
+   .*/Tests/RunCMake/CMP0060/CMP0060-WARN-ON-build/lib/(lib)?CMP0060.(a|lib|l)
 
   For compatibility with older versions of CMake, the generated link line
   will ask the linker to search for these by library name.

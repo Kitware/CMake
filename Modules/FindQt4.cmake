@@ -36,7 +36,7 @@ Qt Build Tools
 ^^^^^^^^^^^^^^
 
 Qt relies on some bundled tools for code generation, such as ``moc`` for
-meta-object code generation,``uic`` for widget layout and population,
+meta-object code generation, ``uic`` for widget layout and population,
 and ``rcc`` for virtual filesystem content generation.  These tools may be
 automatically invoked by :manual:`cmake(1)` if the appropriate conditions
 are met.  See :manual:`cmake-qt(7)` for more.

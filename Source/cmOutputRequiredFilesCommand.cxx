@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <map>
 #include <set>
+#include <unordered_map>
 #include <utility>
 
 #include <cm/memory>
@@ -413,8 +414,7 @@ protected:
         path += "/";
       }
       path += fname;
-      if (cmSystemTools::FileExists(path, true) &&
-          !cmSystemTools::FileIsDirectory(path)) {
+      if (cmSystemTools::FileExists(path, true)) {
         std::string fp = cmSystemTools::CollapseFullPath(path);
         this->DirectoryToFileToPathMap[extraPath][fname] = fp;
         return fp;
@@ -427,8 +427,7 @@ protected:
         path = path + "/";
       }
       path = path + fname;
-      if (cmSystemTools::FileExists(path, true) &&
-          !cmSystemTools::FileIsDirectory(path)) {
+      if (cmSystemTools::FileExists(path, true)) {
         std::string fp = cmSystemTools::CollapseFullPath(path);
         this->DirectoryToFileToPathMap[extraPath][fname] = fp;
         return fp;

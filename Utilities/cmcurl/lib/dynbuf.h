@@ -81,8 +81,6 @@ int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save);
 #define DYN_PAUSE_BUFFER    (64 * 1024 * 1024)
 #define DYN_HAXPROXY        2048
 #define DYN_HTTP_REQUEST    (1024*1024)
-#define DYN_H2_HEADERS      (128*1024)
-#define DYN_H2_TRAILERS     (128*1024)
 #define DYN_APRINTF         8000000
 #define DYN_RTSP_REQ_HEADER (64*1024)
 #define DYN_TRAILERS        (64*1024)
@@ -91,4 +89,5 @@ int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save);
 #define DYN_H1_TRAILER      4096
 #define DYN_PINGPPONG_CMD   (64*1024)
 #define DYN_IMAP_CMD        (64*1024)
+#define DYN_MQTT_RECV       (64*1024)
 #endif

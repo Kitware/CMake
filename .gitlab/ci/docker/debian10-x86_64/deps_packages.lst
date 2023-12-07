@@ -1,0 +1,16 @@
+# Install build requirements.
+libssl-dev
+
+# Install development tools.
+g++
+curl
+git
+
+# Tools needed for the test suite.
+jq
+
+# Packages needed to test find modules.
+python2 python2-dev python-numpy pypy pypy-dev
+
+# CMake_TEST_FindPython2_IronPython
+libmono-system-windows-forms4.0-cil

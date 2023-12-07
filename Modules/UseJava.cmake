@@ -1521,7 +1521,7 @@ function (create_javah)
       "CLASSES;CLASSPATH;DEPENDS"
       ${ARGN})
 
-    # ckeck parameters
+    # check parameters
     if (NOT _create_javah_TARGET AND NOT _create_javah_GENERATED_FILES)
       message (FATAL_ERROR "create_javah: TARGET or GENERATED_FILES must be specified.")
     endif()

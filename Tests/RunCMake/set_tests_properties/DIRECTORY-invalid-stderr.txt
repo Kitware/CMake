@@ -1,0 +1,13 @@
+^CMake Error at DIRECTORY-invalid\.cmake:[0-9]+ \(set_tests_properties\):
+  Error after keyword "DIRECTORY":
+
+    missing required value
+
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+
+
+CMake Error at DIRECTORY-invalid\.cmake:[0-9]+ \(set_tests_properties\):
+  set_tests_properties given non-existent DIRECTORY nonexistent
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

@@ -12,7 +12,7 @@ If the property is unset, Visual Studio uses the first matching
 than one ``Main()`` method is available in the current project, the property
 becomes mandatory for building the project.
 
-This property only works for Visual Studio 11 2012 and above;
+This property only works for Visual Studio 12 2013 and above;
 it is ignored on other generators.
 
 .. code-block:: cmake

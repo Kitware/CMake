@@ -1,11 +1,7 @@
 INTERFACE_CXX_MODULE_SETS
 -------------------------
 
-.. versionadded:: 3.25
-
-.. note ::
-
-  Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+.. versionadded:: 3.28
 
 Read-only list of the target's ``PUBLIC`` C++ module sets (i.e. all file sets
 with the type ``CXX_MODULES``). Files listed in these C++ module sets can be

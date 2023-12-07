@@ -126,8 +126,9 @@ static void ws_dec_info(struct ws_decoder *dec, struct Curl_easy *data,
             dec->head_len, dec->head_total);
     }
     else {
-      infof(data, "WS-DEC: %s [%s%s payload=%zd/%zd]", msg,
-            ws_frame_name_of_op(dec->head[0]),
+      infof(data, "WS-DEC: %s [%s%s payload=%" CURL_FORMAT_CURL_OFF_T
+                  "/%" CURL_FORMAT_CURL_OFF_T "]",
+            msg, ws_frame_name_of_op(dec->head[0]),
             (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL",
             dec->payload_offset, dec->payload_len);
     }
@@ -272,7 +273,8 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
     Curl_bufq_skip(inraw, (size_t)nwritten);
     dec->payload_offset += (curl_off_t)nwritten;
     remain = dec->payload_len - dec->payload_offset;
-    /* infof(data, "WS-DEC: passed  %zd bytes payload, %zd remain",
+    /* infof(data, "WS-DEC: passed  %zd bytes payload, %"
+                CURL_FORMAT_CURL_OFF_T " remain",
           nwritten, remain); */
   }
 
@@ -351,8 +353,9 @@ static void update_meta(struct websocket *ws,
 static void ws_enc_info(struct ws_encoder *enc, struct Curl_easy *data,
                         const char *msg)
 {
-  infof(data, "WS-ENC: %s [%s%s%s payload=%zd/%zd]", msg,
-        ws_frame_name_of_op(enc->firstbyte),
+  infof(data, "WS-ENC: %s [%s%s%s payload=%" CURL_FORMAT_CURL_OFF_T
+              "/%" CURL_FORMAT_CURL_OFF_T "]",
+        msg, ws_frame_name_of_op(enc->firstbyte),
         (enc->firstbyte & WSBIT_OPCODE_MASK) == WSBIT_OPCODE_CONT ?
         " CONT" : "",
         (enc->firstbyte & WSBIT_FIN)? "" : " NON-FIN",
@@ -839,7 +842,7 @@ static ssize_t nw_in_recv(void *reader_ctx,
 
 CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
                                   size_t buflen, size_t *nread,
-                                  struct curl_ws_frame **metap)
+                                  const struct curl_ws_frame **metap)
 {
   struct connectdata *conn = data->conn;
   struct websocket *ws;
@@ -921,7 +924,8 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
               ctx.payload_len, ctx.bufidx);
   *metap = &ws->frame;
   *nread = ws->frame.len;
-  /* infof(data, "curl_ws_recv(len=%zu) -> %zu bytes (frame at %zd, %zd left)",
+  /* infof(data, "curl_ws_recv(len=%zu) -> %zu bytes (frame at %"
+              CURL_FORMAT_CURL_OFF_T ", %" CURL_FORMAT_CURL_OFF_T " left)",
         buflen, *nread, ws->frame.offset, ws->frame.bytesleft); */
   return CURLE_OK;
 }
@@ -966,10 +970,10 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
   return CURLE_OK;
 }
 
-CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
+CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
                                   size_t buflen, size_t *sent,
-                                  curl_off_t totalsize,
-                                  unsigned int sendflags)
+                                  curl_off_t fragsize,
+                                  unsigned int flags)
 {
   struct websocket *ws;
   ssize_t nwritten, n;
@@ -987,14 +991,13 @@ CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
     return CURLE_SEND_ERROR;
   }
   if(!data->conn->proto.ws) {
-    failf(data, "Not a websocket transfer on connection #%ld",
-          data->conn->connection_id);
+    failf(data, "Not a websocket transfer");
     return CURLE_SEND_ERROR;
   }
   ws = data->conn->proto.ws;
 
   if(data->set.ws_raw_mode) {
-    if(totalsize || sendflags)
+    if(fragsize || flags)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     if(!buflen)
       /* nothing to do */
@@ -1027,23 +1030,24 @@ CURL_EXTERN CURLcode curl_ws_send(struct Curl_easy *data, const void *buffer,
   if(space < 14)
     return CURLE_AGAIN;
 
-  if(sendflags & CURLWS_OFFSET) {
-    if(totalsize) {
-      /* a frame series 'totalsize' bytes big, this is the first */
-      n = ws_enc_write_head(data, &ws->enc, sendflags, totalsize,
+  if(flags & CURLWS_OFFSET) {
+    if(fragsize) {
+      /* a frame series 'fragsize' bytes big, this is the first */
+      n = ws_enc_write_head(data, &ws->enc, flags, fragsize,
                             &ws->sendbuf, &result);
       if(n < 0)
         return result;
     }
     else {
       if((curl_off_t)buflen > ws->enc.payload_remain) {
-        infof(data, "WS: unaligned frame size (sending %zu instead of %zd)",
+        infof(data, "WS: unaligned frame size (sending %zu instead of %"
+                    CURL_FORMAT_CURL_OFF_T ")",
               buflen, ws->enc.payload_remain);
       }
     }
   }
   else if(!ws->enc.payload_remain) {
-    n = ws_enc_write_head(data, &ws->enc, sendflags, (curl_off_t)buflen,
+    n = ws_enc_write_head(data, &ws->enc, flags, (curl_off_t)buflen,
                           &ws->sendbuf, &result);
     if(n < 0)
       return result;
@@ -1082,7 +1086,7 @@ CURLcode Curl_ws_disconnect(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-CURL_EXTERN struct curl_ws_frame *curl_ws_meta(struct Curl_easy *data)
+CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(struct Curl_easy *data)
 {
   /* we only return something for websocket, called from within the callback
      when not using raw mode */
@@ -1096,7 +1100,7 @@ CURL_EXTERN struct curl_ws_frame *curl_ws_meta(struct Curl_easy *data)
 
 CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
                                   size_t *nread,
-                                  struct curl_ws_frame **metap)
+                                  const struct curl_ws_frame **metap)
 {
   (void)curl;
   (void)buffer;
@@ -1108,19 +1112,19 @@ CURL_EXTERN CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
 
 CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
                                   size_t buflen, size_t *sent,
-                                  curl_off_t framesize,
-                                  unsigned int sendflags)
+                                  curl_off_t fragsize,
+                                  unsigned int flags)
 {
   (void)curl;
   (void)buffer;
   (void)buflen;
   (void)sent;
-  (void)framesize;
-  (void)sendflags;
+  (void)fragsize;
+  (void)flags;
   return CURLE_NOT_BUILT_IN;
 }
 
-CURL_EXTERN struct curl_ws_frame *curl_ws_meta(struct Curl_easy *data)
+CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(struct Curl_easy *data)
 {
   (void)data;
   return NULL;

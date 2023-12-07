@@ -10,6 +10,7 @@
 #include "cmRuntimeDependencyArchive.h"
 #include "cmSystemTools.h"
 #include "cmUVProcessChain.h"
+#include "cmUVStream.h"
 
 cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool::
   cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool(
@@ -34,7 +35,7 @@ bool cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool::GetFileInfo(
   builder.AddCommand(command);
 
   auto process = builder.Start();
-  if (!process.Valid()) {
+  if (!process.Valid() || process.GetStatus(0).SpawnResult != 0) {
     std::ostringstream e;
     e << "Failed to start objdump process for:\n  " << file;
     this->SetError(e.str());
@@ -44,7 +45,8 @@ bool cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool::GetFileInfo(
   std::string line;
   static const cmsys::RegularExpression regex(
     "^\t*DLL Name: ([^\n]*\\.[Dd][Ll][Ll])$");
-  while (cmSystemTools::GetLineFromStream(*process.OutputStream(), line)) {
+  cmUVPipeIStream output(process.GetLoop(), process.OutputStream());
+  while (cmSystemTools::GetLineFromStream(output, line)) {
     cmsys::RegularExpressionMatch match;
     if (regex.find(line.c_str(), match)) {
       needed.push_back(match.match(1));
@@ -57,8 +59,7 @@ bool cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool::GetFileInfo(
     this->SetError(e.str());
     return false;
   }
-  auto status = process.GetStatus();
-  if (!status[0] || status[0]->ExitStatus != 0) {
+  if (process.GetStatus(0).ExitStatus != 0) {
     std::ostringstream e;
     e << "Failed to run objdump on:\n  " << file;
     this->SetError(e.str());

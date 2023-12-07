@@ -244,6 +244,12 @@ configure_file(
   ${Complex_SOURCE_DIR}/Library/dummy
   ${Complex_BINARY_DIR}/Library/dummylib.lib
   COPYONLY)
+if(CMAKE_C_COMPILER_ID STREQUAL "OrangeC")
+  configure_file(
+    ${Complex_SOURCE_DIR}/Library/dummy
+    ${Complex_BINARY_DIR}/Library/dummylib.l
+    COPYONLY)
+endif()
 foreach (ext ${CMAKE_SHLIB_SUFFIX};.so;.a;.sl
          ${CMAKE_SHARED_LIBRARY_SUFFIX}.2
          ${CMAKE_STATIC_LIBRARY_SUFFIX}.2)
@@ -327,12 +333,12 @@ if (WIN32)
       ${Complex_SOURCE_DIR}/Library/dummy
       "${dir}/${file}"
       COPYONLY)
-    exec_program(${CMAKE_COMMAND} ARGS "-E write_regv \"${hkey}\" \"${dir}\"")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E write_regv "${hkey}" "${dir}")
     find_path(REGISTRY_TEST_PATH
       ${file}
       "[${hkey}]" DOC "Registry_Test_Path")
-    exec_program(${CMAKE_COMMAND} ARGS "-E delete_regv \"${hkey}\"")
-    exec_program(${CMAKE_COMMAND} ARGS "-E rm -f \"${dir}/${file}\"")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E delete_regv "${hkey}")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E rm -f "${dir}/${file}")
   endif ()
 endif ()
 

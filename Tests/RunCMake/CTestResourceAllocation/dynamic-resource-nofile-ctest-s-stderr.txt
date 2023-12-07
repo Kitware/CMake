@@ -1,0 +1,7 @@
+^Could not read/parse resource spec file [^
+]*/Tests/RunCMake/CTestResourceAllocation/dynamic-resource-nofile-ctest-s-build/dynamic-resspec\.json:[ ]
+File not found: [^
+]*/Tests/RunCMake/CTestResourceAllocation/dynamic-resource-nofile-ctest-s-build/dynamic-resspec\.json
+CMake Error at [^
+]*/Tests/RunCMake/CTestResourceAllocation/dynamic-resource-nofile-ctest-s/test\.cmake:[0-9]+ \(message\):
+  Tests did not pass$

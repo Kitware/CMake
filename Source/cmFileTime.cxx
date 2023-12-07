@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmFileTime.h"
 
-#include <ctime>
 #include <string>
 
 // Use a platform-specific API to get file times efficiently.

@@ -153,10 +153,12 @@ std::string GeneratorExpressionContent::EvaluateParameters(
         return std::string();
       }
       std::string parameter;
-      for (const auto& pExprEval : *pit) {
-        parameter += pExprEval->Evaluate(context, dagChecker);
-        if (context->HadError) {
-          return std::string();
+      if (node->ShouldEvaluateNextParameter(parameters, parameter)) {
+        for (const auto& pExprEval : *pit) {
+          parameter += pExprEval->Evaluate(context, dagChecker);
+          if (context->HadError) {
+            return std::string();
+          }
         }
       }
       parameters.push_back(std::move(parameter));

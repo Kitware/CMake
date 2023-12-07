@@ -35,6 +35,10 @@ namespace {
 
 class Impl : public dap::Session {
  public:
+  void setOnInvalidData(dap::OnInvalidData onInvalidData_) override {
+    this->onInvalidData = onInvalidData_;
+  }
+
   void onError(const ErrorHandler& handler) override { handlers.put(handler); }
 
   void registerHandler(const dap::TypeInfo* typeinfo,
@@ -69,7 +73,7 @@ class Impl : public dap::Session {
       return;
     }
 
-    reader = dap::ContentReader(r);
+    reader = dap::ContentReader(r, this->onInvalidData);
     writer = dap::ContentWriter(w);
   }
 
@@ -490,6 +494,7 @@ class Impl : public dap::Session {
   dap::Chan<Payload> inbox;
   std::atomic<uint32_t> nextSeq = {1};
   std::mutex sendMutex;
+  dap::OnInvalidData onInvalidData = dap::kIgnore;
 };
 
 }  // anonymous namespace

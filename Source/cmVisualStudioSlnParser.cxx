@@ -8,6 +8,8 @@
 #include <utility>
 #include <vector>
 
+#include <cmext/string_view>
+
 #include "cmsys/FStream.hxx"
 
 #include "cmStringAlgorithms.h"
@@ -81,7 +83,7 @@ bool cmVisualStudioSlnParser::ParsedLine::IsKeyValuePair() const
 std::string cmVisualStudioSlnParser::ParsedLine::GetArgVerbatim() const
 {
   if (this->Arg.second) {
-    return Quote + this->Arg.first + Quote;
+    return cmStrCat(Quote, this->Arg.first, Quote);
   }
   return this->Arg.first;
 }
@@ -101,7 +103,7 @@ std::string cmVisualStudioSlnParser::ParsedLine::GetValueVerbatim(
   if (idxValue < this->Values.size()) {
     const StringData& data = this->Values[idxValue];
     if (data.second) {
-      return Quote + data.first + Quote;
+      return cmStrCat(Quote, data.first, Quote);
     }
     return data.first;
   }
@@ -169,17 +171,12 @@ LineFormat cmVisualStudioSlnParser::State::NextLineFormat() const
     case FileStateTopLevel:
       return LineMultiValueTag;
     case FileStateProject:
-      return LineSingleValueTag;
-    case FileStateProjectDependencies:
-      return LineKeyValuePair;
     case FileStateGlobal:
       return LineSingleValueTag;
+    case FileStateProjectDependencies:
     case FileStateSolutionConfigurations:
-      return LineKeyValuePair;
     case FileStateProjectConfigurations:
-      return LineKeyValuePair;
     case FileStateSolutionFilters:
-      return LineKeyValuePair;
     case FileStateGlobalSection:
       return LineKeyValuePair;
     case FileStateIgnore:
@@ -206,7 +203,7 @@ bool cmVisualStudioSlnParser::State::Process(
       this->Stack.push(FileStateTopLevel);
       break;
     case FileStateTopLevel:
-      if (line.GetTag() == "Project") {
+      if (line.GetTag() == "Project"_s) {
         if (line.GetValueCount() != 3) {
           result.SetError(ResultErrorInputStructure, this->GetCurrentLine());
           return false;
@@ -221,12 +218,12 @@ bool cmVisualStudioSlnParser::State::Process(
         } else {
           this->IgnoreUntilTag("EndProject");
         }
-      } else if (line.GetTag() == "Global") {
+      } else if (line.GetTag() == "Global"_s) {
 
         this->Stack.push(FileStateGlobal);
-      } else if (line.GetTag() == "VisualStudioVersion") {
+      } else if (line.GetTag() == "VisualStudioVersion"_s) {
         output.SetVisualStudioVersion(line.GetValue(0));
-      } else if (line.GetTag() == "MinimumVisualStudioVersion") {
+      } else if (line.GetTag() == "MinimumVisualStudioVersion"_s) {
         output.SetMinimumVisualStudioVersion(line.GetValue(0));
       } else {
         result.SetError(ResultErrorInputStructure, this->GetCurrentLine());
@@ -234,11 +231,11 @@ bool cmVisualStudioSlnParser::State::Process(
       }
       break;
     case FileStateProject:
-      if (line.GetTag() == "EndProject") {
+      if (line.GetTag() == "EndProject"_s) {
         this->Stack.pop();
-      } else if (line.GetTag() == "ProjectSection") {
-        if (line.GetArg() == "ProjectDependencies" &&
-            line.GetValue(0) == "postProject") {
+      } else if (line.GetTag() == "ProjectSection"_s) {
+        if (line.GetArg() == "ProjectDependencies"_s &&
+            line.GetValue(0) == "postProject"_s) {
           if (this->RequestedData.test(DataGroupProjectDependenciesBit)) {
             this->Stack.push(FileStateProjectDependencies);
           } else {
@@ -253,7 +250,7 @@ bool cmVisualStudioSlnParser::State::Process(
       }
       break;
     case FileStateProjectDependencies:
-      if (line.GetTag() == "EndProjectSection") {
+      if (line.GetTag() == "EndProjectSection"_s) {
         this->Stack.pop();
       } else if (line.IsKeyValuePair()) {
         // implement dependency storing here, once needed
@@ -264,25 +261,25 @@ bool cmVisualStudioSlnParser::State::Process(
       }
       break;
     case FileStateGlobal:
-      if (line.GetTag() == "EndGlobal") {
+      if (line.GetTag() == "EndGlobal"_s) {
         this->Stack.pop();
-      } else if (line.GetTag() == "GlobalSection") {
-        if (line.GetArg() == "SolutionConfigurationPlatforms" &&
-            line.GetValue(0) == "preSolution") {
+      } else if (line.GetTag() == "GlobalSection"_s) {
+        if (line.GetArg() == "SolutionConfigurationPlatforms"_s &&
+            line.GetValue(0) == "preSolution"_s) {
           if (this->RequestedData.test(DataGroupSolutionConfigurationsBit)) {
             this->Stack.push(FileStateSolutionConfigurations);
           } else {
             this->IgnoreUntilTag("EndGlobalSection");
           }
-        } else if (line.GetArg() == "ProjectConfigurationPlatforms" &&
-                   line.GetValue(0) == "postSolution") {
+        } else if (line.GetArg() == "ProjectConfigurationPlatforms"_s &&
+                   line.GetValue(0) == "postSolution"_s) {
           if (this->RequestedData.test(DataGroupProjectConfigurationsBit)) {
             this->Stack.push(FileStateProjectConfigurations);
           } else {
             this->IgnoreUntilTag("EndGlobalSection");
           }
-        } else if (line.GetArg() == "NestedProjects" &&
-                   line.GetValue(0) == "preSolution") {
+        } else if (line.GetArg() == "NestedProjects"_s &&
+                   line.GetValue(0) == "preSolution"_s) {
           if (this->RequestedData.test(DataGroupSolutionFiltersBit)) {
             this->Stack.push(FileStateSolutionFilters);
           } else {
@@ -300,7 +297,7 @@ bool cmVisualStudioSlnParser::State::Process(
       }
       break;
     case FileStateSolutionConfigurations:
-      if (line.GetTag() == "EndGlobalSection") {
+      if (line.GetTag() == "EndGlobalSection"_s) {
         this->Stack.pop();
       } else if (line.IsKeyValuePair()) {
         output.AddConfiguration(line.GetValue(0));
@@ -310,7 +307,7 @@ bool cmVisualStudioSlnParser::State::Process(
       }
       break;
     case FileStateProjectConfigurations:
-      if (line.GetTag() == "EndGlobalSection") {
+      if (line.GetTag() == "EndGlobalSection"_s) {
         this->Stack.pop();
       } else if (line.IsKeyValuePair()) {
         std::vector<std::string> tagElements =
@@ -331,7 +328,7 @@ bool cmVisualStudioSlnParser::State::Process(
           return false;
         }
 
-        if (activeBuild == "ActiveCfg") {
+        if (activeBuild == "ActiveCfg"_s) {
           projectEntry->AddProjectConfiguration(solutionConfiguration,
                                                 line.GetValue(0));
         }
@@ -341,7 +338,7 @@ bool cmVisualStudioSlnParser::State::Process(
       }
       break;
     case FileStateSolutionFilters:
-      if (line.GetTag() == "EndGlobalSection") {
+      if (line.GetTag() == "EndGlobalSection"_s) {
         this->Stack.pop();
       } else if (line.IsKeyValuePair()) {
         // implement filter storing here, once needed
@@ -352,7 +349,7 @@ bool cmVisualStudioSlnParser::State::Process(
       }
       break;
     case FileStateGlobalSection:
-      if (line.GetTag() == "EndGlobalSection") {
+      if (line.GetTag() == "EndGlobalSection"_s) {
         this->Stack.pop();
       } else if (line.IsKeyValuePair()) {
         // implement section storing here, once needed
@@ -544,7 +541,7 @@ bool cmVisualStudioSlnParser::ParseBOM(std::istream& input, std::string& line,
     return false;
   }
   if (!this->LastResult.HadBOM) {
-    line = bom + line; // it wasn't a BOM, prepend it to first line
+    line = cmStrCat(bom, line); // it wasn't a BOM, prepend it to first line
   }
   return true;
 }

@@ -8,7 +8,6 @@
 #include <string>
 
 #include "cmExportBuildFileGenerator.h"
-#include "cmExportFileGenerator.h"
 #include "cmStateTypes.h"
 
 class cmGeneratorTarget;

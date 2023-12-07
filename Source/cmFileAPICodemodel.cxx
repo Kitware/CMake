@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
-#include <functional>
 #include <limits>
 #include <map>
 #include <memory>
@@ -1636,7 +1635,7 @@ Json::Value Target::DumpFileSet(cmFileSet const* fs,
 
   Json::Value baseDirs = Json::arrayValue;
   for (auto const& directory : directories) {
-    baseDirs.append(directory);
+    baseDirs.append(RelativeIfUnder(this->TopSource, directory));
   }
   fileSet["baseDirectories"] = baseDirs;
 
@@ -1679,6 +1678,7 @@ Json::Value Target::DumpSource(cmGeneratorTarget::SourceAndKind const& sk,
   }
 
   switch (sk.Kind) {
+    case cmGeneratorTarget::SourceKindCxxModuleSource:
     case cmGeneratorTarget::SourceKindObjectSource: {
       source["compileGroupIndex"] =
         this->AddSourceCompileGroup(sk.Source.Value, si);

@@ -6,10 +6,6 @@
 
 #include <string>
 
-#if defined(_WIN32)
-#  include <windows.h> // DWORD
-#endif
-
 /**
  * @brief Result of the locking/unlocking file.
  * @note See @c cmFileLock
@@ -17,11 +13,7 @@
 class cmFileLockResult
 {
 public:
-#if defined(_WIN32)
-  using Error = DWORD;
-#else
   using Error = int;
-#endif
 
   /**
    * @brief Successful lock/unlock.

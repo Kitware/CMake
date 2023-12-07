@@ -16,7 +16,7 @@
       "type": "target",
       "destination": "lib",
       "paths": [
-        "^fileset/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib)?c_headers_1\\.(a|lib)?$"
+        "^fileset/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib)?c_headers_1\\.(a|lib|l)?$"
       ],
       "isExcludeFromAll": null,
       "isForAllComponents": null,
@@ -172,7 +172,7 @@
       "type": "target",
       "destination": "lib",
       "paths": [
-        "^fileset/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib)?c_headers_2\\.(a|lib)?$"
+        "^fileset/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib)?c_headers_2\\.(a|lib|l)?$"
       ],
       "isExcludeFromAll": null,
       "isForAllComponents": null,

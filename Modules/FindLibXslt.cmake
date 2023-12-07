@@ -110,7 +110,8 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibXslt
                                   VERSION_VAR LIBXSLT_VERSION_STRING)
 
 mark_as_advanced(LIBXSLT_INCLUDE_DIR
-                 LIBXSLT_LIBRARIES
+                 LIBXSLT_LIBRARY
+                 LIBXSLT_EXSLT_INCLUDE_DIR
                  LIBXSLT_EXSLT_LIBRARY
                  LIBXSLT_XSLTPROC_EXECUTABLE)
 

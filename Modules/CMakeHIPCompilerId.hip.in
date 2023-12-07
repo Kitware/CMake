@@ -1,4 +1,4 @@
-#ifndef __HIP__
+#if !defined(__HIP__) && !defined(__NVCC__)
 # error "A C or C++ compiler has been selected for HIP"
 #endif
 

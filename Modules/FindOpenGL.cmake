@@ -655,17 +655,8 @@ if(OPENGL_FOUND)
     # A legacy GL library is available, so use it for the legacy GL target.
     if(IS_ABSOLUTE "${OPENGL_gl_LIBRARY}")
       add_library(OpenGL::GL UNKNOWN IMPORTED)
-      if(OPENGL_gl_LIBRARY MATCHES "/([^/]+)\\.framework$")
-        set(_gl_fw "${OPENGL_gl_LIBRARY}/${CMAKE_MATCH_1}")
-        if(EXISTS "${_gl_fw}.tbd")
-          string(APPEND _gl_fw ".tbd")
-        endif()
-        set_target_properties(OpenGL::GL PROPERTIES
-          IMPORTED_LOCATION "${_gl_fw}")
-      else()
-        set_target_properties(OpenGL::GL PROPERTIES
-          IMPORTED_LOCATION "${OPENGL_gl_LIBRARY}")
-      endif()
+      set_target_properties(OpenGL::GL PROPERTIES
+        IMPORTED_LOCATION "${OPENGL_gl_LIBRARY}")
     else()
       add_library(OpenGL::GL INTERFACE IMPORTED)
       set_target_properties(OpenGL::GL PROPERTIES
@@ -709,17 +700,8 @@ if(OPENGL_FOUND)
   if(OPENGL_GLU_FOUND AND NOT TARGET OpenGL::GLU)
     if(IS_ABSOLUTE "${OPENGL_glu_LIBRARY}")
       add_library(OpenGL::GLU UNKNOWN IMPORTED)
-      if(OPENGL_glu_LIBRARY MATCHES "/([^/]+)\\.framework$")
-        set(_glu_fw "${OPENGL_glu_LIBRARY}/${CMAKE_MATCH_1}")
-        if(EXISTS "${_glu_fw}.tbd")
-          string(APPEND _glu_fw ".tbd")
-        endif()
-        set_target_properties(OpenGL::GLU PROPERTIES
-          IMPORTED_LOCATION "${_glu_fw}")
-      else()
-        set_target_properties(OpenGL::GLU PROPERTIES
-          IMPORTED_LOCATION "${OPENGL_glu_LIBRARY}")
-      endif()
+      set_target_properties(OpenGL::GLU PROPERTIES
+        IMPORTED_LOCATION "${OPENGL_glu_LIBRARY}")
     else()
       add_library(OpenGL::GLU INTERFACE IMPORTED)
       set_target_properties(OpenGL::GLU PROPERTIES

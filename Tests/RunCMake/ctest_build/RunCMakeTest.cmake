@@ -13,18 +13,18 @@ endfunction()
 run_ctest_build(BuildQuiet QUIET)
 run_ctest_build(ParallelLevel PARALLEL_LEVEL 1)
 
-function(run_BuildFailure)
-  set(CASE_CMAKELISTS_SUFFIX_CODE [[
-add_custom_target(BuildFailure ALL COMMAND command-does-not-exist)
-]])
+block()
+  set(LANG CXX)
+  configure_file("${RunCMake_SOURCE_DIR}/BuildFailure.cxx" "${RunCMake_BINARY_DIR}/BuildFailure/BuildFailure.cxx" COPYONLY)
+  set(CASE_CMAKELISTS_SUFFIX_CODE [=[
+    add_executable(BuildFailure BuildFailure.cxx)
+  ]=])
   set(CASE_CMAKELISTS_PREFIX_CODE [[
 if(NOT CTEST_USE_LAUNCHERS)
   message(FATAL_ERROR "CTEST_USE_LAUNCHERS not set")
 endif()
 ]])
-  set(CASE_TEST_PREFIX_CODE [[
-cmake_policy(SET CMP0061 NEW)
-]])
+  set(CASE_TEST_PREFIX_CODE "")
   set(CASE_TEST_SUFFIX_CODE [[
 if (ctest_build_return_value)
   message("ctest_build returned non-zero")
@@ -35,13 +35,16 @@ endif()
   run_ctest(BuildFailure)
 
   if (RunCMake_GENERATOR MATCHES "Makefiles")
+    set(LANG NONE)
     set(CASE_TEST_PREFIX_CODE [[
 cmake_policy(VERSION 3.2)
 ]])
+    set(CASE_CMAKELISTS_SUFFIX_CODE [[
+add_custom_target(BuildFailure ALL COMMAND command-does-not-exist)
+]])
     run_ctest(BuildFailure-CMP0061-OLD)
   endif()
-endfunction()
-run_BuildFailure()
+endblock()
 
 function(run_BuildChangeId)
   set(CASE_TEST_PREFIX_CODE [[

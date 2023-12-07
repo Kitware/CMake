@@ -34,6 +34,7 @@ public:
     ListVariables,
     ListPolicies,
     ListGenerators,
+    OneArbitrary,
     OneManual,
     OneCommand,
     OneModule,
@@ -118,6 +119,7 @@ private:
   bool PrintUsage(std::ostream& os);
   bool PrintHelp(std::ostream& os);
   bool PrintHelpFull(std::ostream& os);
+  bool PrintHelpOneArbitrary(std::ostream& os);
   bool PrintHelpOneManual(std::ostream& os);
   bool PrintHelpOneCommand(std::ostream& os);
   bool PrintHelpOneModule(std::ostream& os);
@@ -154,4 +156,5 @@ private:
   cmDocumentationFormatter Formatter;
 
   static void WarnFormFromFilename(RequestedHelpItem& request, bool& result);
+  static std::string GeneralizeKeyword(std::string word);
 };

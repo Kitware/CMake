@@ -19,8 +19,9 @@
 #include <cm3p/kwiml/int.h>
 
 #include "cmCustomCommandTypes.h"
+#include "cmGeneratorTarget.h"
 #include "cmListFileCache.h"
-#include "cmMessageType.h"
+#include "cmMessageType.h" // IWYU pragma: keep
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmStateSnapshot.h"
@@ -31,7 +32,6 @@ class cmComputeLinkInformation;
 class cmCustomCommand;
 class cmCustomCommandGenerator;
 class cmCustomCommandLines;
-class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmImplicitDependsList;
 class cmLinkLineComputer;
@@ -520,6 +520,9 @@ public:
   std::string GetFrameworkFlags(std::string const& l,
                                 std::string const& config,
                                 cmGeneratorTarget* target);
+  std::string GetXcFrameworkFlags(std::string const& l,
+                                  std::string const& config,
+                                  cmGeneratorTarget* target);
   virtual std::string GetTargetFortranFlags(cmGeneratorTarget const* target,
                                             std::string const& config);
 
@@ -646,7 +649,9 @@ private:
   bool AllAppleArchSysrootsAreTheSame(const std::vector<std::string>& archs,
                                       cmValue sysroot);
 
-  void CopyPchCompilePdb(const std::string& config, cmGeneratorTarget* target,
+  void CopyPchCompilePdb(const std::string& config,
+                         const std::string& language,
+                         cmGeneratorTarget* target,
                          const std::string& ReuseFrom,
                          cmGeneratorTarget* reuseTarget,
                          std::vector<std::string> const& extensions);
@@ -697,12 +702,6 @@ private:
     cmValue beforeInclude, cmValue afterInclude,
     std::string const& filename_base);
 };
-
-#if !defined(CMAKE_BOOTSTRAP)
-bool cmLocalGeneratorCheckObjectName(std::string& objName,
-                                     std::string::size_type dir_len,
-                                     std::string::size_type max_total_len);
-#endif
 
 namespace detail {
 void AddCustomCommandToTarget(cmLocalGenerator& lg, cmCommandOrigin origin,

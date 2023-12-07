@@ -117,8 +117,14 @@ else()
 
     # '-fcolor-diagnostics' introduced since Clang 2.6
     if(CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 2.6)
-      set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS "-fcolor-diagnostics")
-      set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS_OFF "-fno-color-diagnostics")
+      # -fansi-escape-codes mentioned at https://releases.llvm.org/3.7.0/tools/clang/docs/UsersManual.html
+      if (CMAKE_HOST_WIN32 AND CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 3.7)
+        set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS -fansi-escape-codes -fcolor-diagnostics)
+        set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS_OFF -fno-ansi-escape-codes  -fno-color-diagnostics)
+      else()
+        set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS -fcolor-diagnostics)
+        set(CMAKE_${lang}_COMPILE_OPTIONS_COLOR_DIAGNOSTICS_OFF -fno-color-diagnostics)
+      endif()
     endif()
   endmacro()
 endif()
@@ -173,7 +179,12 @@ macro(__compiler_clang_cxx_standards lang)
 
     unset(_clang_version_std17)
 
-    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 17.0)
+    set(_clang_version_std23 17.0)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Android")
+      set(_clang_version_std23 18.0)
+    endif()
+
+    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS "${_clang_version_std23}")
       set(CMAKE_${lang}23_STANDARD_COMPILE_OPTION "-std=c++23")
       set(CMAKE_${lang}23_EXTENSION_COMPILE_OPTION "-std=gnu++23")
       set(CMAKE_${lang}26_STANDARD_COMPILE_OPTION "-std=c++26")
@@ -182,6 +193,8 @@ macro(__compiler_clang_cxx_standards lang)
       set(CMAKE_${lang}23_STANDARD_COMPILE_OPTION "-std=c++2b")
       set(CMAKE_${lang}23_EXTENSION_COMPILE_OPTION "-std=gnu++2b")
     endif()
+
+    unset(_clang_version_std23)
 
     if("x${CMAKE_${lang}_SIMULATE_ID}" STREQUAL "xMSVC")
       # The MSVC standard library requires C++14, and MSVC itself has no

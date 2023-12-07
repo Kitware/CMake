@@ -9,9 +9,9 @@
           "const": 1,
           "description": "A required integer representing the version of the JSON schema."
         },
-        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired"},
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
         "vendor": { "$ref": "#/definitions/vendor" },
-        "configurePresets": { "$ref": "#/definitions/configurePresetsV1"}
+        "configurePresets": { "$ref": "#/definitions/configurePresetsV1" }
       },
       "additionalProperties": false
     },
@@ -21,11 +21,11 @@
           "const": 2,
           "description": "A required integer representing the version of the JSON schema."
         },
-        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired"},
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
         "vendor": { "$ref": "#/definitions/vendor" },
-        "configurePresets": { "$ref": "#/definitions/configurePresetsV1"},
-        "buildPresets": { "$ref": "#/definitions/buildPresetsV2"},
-        "testPresets": { "$ref": "#/definitions/testPresetsV2"}
+        "configurePresets": { "$ref": "#/definitions/configurePresetsV1" },
+        "buildPresets": { "$ref": "#/definitions/buildPresetsV2" },
+        "testPresets": { "$ref": "#/definitions/testPresetsV2" }
       },
       "additionalProperties": false
     },
@@ -35,11 +35,11 @@
           "const": 3,
           "description": "A required integer representing the version of the JSON schema."
         },
-        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired"},
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
         "vendor": { "$ref": "#/definitions/vendor" },
-        "configurePresets": { "$ref": "#/definitions/configurePresetsV3"},
-        "buildPresets": { "$ref": "#/definitions/buildPresetsV3"},
-        "testPresets": { "$ref": "#/definitions/testPresetsV3"}
+        "configurePresets": { "$ref": "#/definitions/configurePresetsV3" },
+        "buildPresets": { "$ref": "#/definitions/buildPresetsV3" },
+        "testPresets": { "$ref": "#/definitions/testPresetsV3" }
       },
       "additionalProperties": false
     },
@@ -49,12 +49,12 @@
           "const": 4,
           "description": "A required integer representing the version of the JSON schema."
         },
-        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired"},
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
         "vendor": { "$ref": "#/definitions/vendor" },
-        "configurePresets": { "$ref": "#/definitions/configurePresetsV3"},
-        "buildPresets": { "$ref": "#/definitions/buildPresetsV4"},
-        "testPresets": { "$ref": "#/definitions/testPresetsV3"},
-        "include": { "$ref": "#/definitions/include"}
+        "configurePresets": { "$ref": "#/definitions/configurePresetsV3" },
+        "buildPresets": { "$ref": "#/definitions/buildPresetsV4" },
+        "testPresets": { "$ref": "#/definitions/testPresetsV3" },
+        "include": { "$ref": "#/definitions/include" }
       },
       "additionalProperties": false
     },
@@ -64,12 +64,12 @@
           "const": 5,
           "description": "A required integer representing the version of the JSON schema."
         },
-        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired"},
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
         "vendor": { "$ref": "#/definitions/vendor" },
-        "configurePresets": { "$ref": "#/definitions/configurePresetsV3"},
-        "buildPresets": { "$ref": "#/definitions/buildPresetsV4"},
-        "testPresets": { "$ref": "#/definitions/testPresetsV5"},
-        "include": { "$ref": "#/definitions/include"}
+        "configurePresets": { "$ref": "#/definitions/configurePresetsV3" },
+        "buildPresets": { "$ref": "#/definitions/buildPresetsV4" },
+        "testPresets": { "$ref": "#/definitions/testPresetsV5" },
+        "include": { "$ref": "#/definitions/include" }
       },
       "additionalProperties": false
     },
@@ -79,14 +79,14 @@
           "const": 6,
           "description": "A required integer representing the version of the JSON schema."
         },
-        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired"},
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
         "vendor": { "$ref": "#/definitions/vendor" },
-        "configurePresets": { "$ref": "#/definitions/configurePresetsV3"},
-        "buildPresets": { "$ref": "#/definitions/buildPresetsV4"},
-        "testPresets": { "$ref": "#/definitions/testPresetsV6"},
-        "packagePresets": { "$ref": "#/definitions/packagePresetsV6"},
+        "configurePresets": { "$ref": "#/definitions/configurePresetsV3" },
+        "buildPresets": { "$ref": "#/definitions/buildPresetsV4" },
+        "testPresets": { "$ref": "#/definitions/testPresetsV6" },
+        "packagePresets": { "$ref": "#/definitions/packagePresetsV6" },
         "workflowPresets": { "$ref": "#/definitions/workflowPresetsV6" },
-        "include": { "$ref": "#/definitions/include"}
+        "include": { "$ref": "#/definitions/include" }
       },
       "additionalProperties": false
     },
@@ -96,14 +96,32 @@
           "const": 7,
           "description": "A required integer representing the version of the JSON schema."
         },
-        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired"},
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
         "vendor": { "$ref": "#/definitions/vendor" },
-        "configurePresets": { "$ref": "#/definitions/configurePresetsV7"},
-        "buildPresets": { "$ref": "#/definitions/buildPresetsV4"},
-        "testPresets": { "$ref": "#/definitions/testPresetsV6"},
-        "packagePresets": { "$ref": "#/definitions/packagePresetsV6"},
+        "configurePresets": { "$ref": "#/definitions/configurePresetsV7" },
+        "buildPresets": { "$ref": "#/definitions/buildPresetsV4" },
+        "testPresets": { "$ref": "#/definitions/testPresetsV6" },
+        "packagePresets": { "$ref": "#/definitions/packagePresetsV6" },
         "workflowPresets": { "$ref": "#/definitions/workflowPresetsV6" },
-        "include": { "$ref": "#/definitions/include"}
+        "include": { "$ref": "#/definitions/include" }
+      },
+      "additionalProperties": false
+    },
+    {
+      "properties": {
+        "$schema": { "$ref": "#/definitions/$schema" },
+        "version": {
+          "const": 8,
+          "description": "A required integer representing the version of the JSON schema."
+        },
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
+        "vendor": { "$ref": "#/definitions/vendor" },
+        "configurePresets": { "$ref": "#/definitions/configurePresetsV7" },
+        "buildPresets": { "$ref": "#/definitions/buildPresetsV4" },
+        "testPresets": { "$ref": "#/definitions/testPresetsV6" },
+        "packagePresets": { "$ref": "#/definitions/packagePresetsV6" },
+        "workflowPresets": { "$ref": "#/definitions/workflowPresetsV6" },
+        "include": { "$ref": "#/definitions/include" }
       },
       "additionalProperties": false
     }
@@ -112,6 +130,11 @@
     "version"
   ],
   "definitions": {
+    "$schema": {
+      "type": "string",
+      "description": "The schema against which to verify this document.",
+      "format": "uri-reference"
+    },
     "cmakeMinimumRequired": {
       "type": "object",
       "description": "An optional object representing the minimum version of CMake needed to build this project.",

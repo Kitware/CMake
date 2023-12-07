@@ -431,6 +431,7 @@ The section header underline character hierarchy is
 * ``-``: Subsection or `CMake Domain`_ object document title
 * ``^``: Subsubsection or `CMake Domain`_ object document section
 * ``"``: Paragraph or `CMake Domain`_ object document subsection
+* ``~``: `CMake Domain`_ object document subsubsection
 
 Style: Whitespace
 ^^^^^^^^^^^^^^^^^

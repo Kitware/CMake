@@ -323,18 +323,27 @@ containing a configuration file:
 In all cases the ``<name>`` is treated as case-insensitive and corresponds
 to any of the names specified (``<PackageName>`` or names given by ``NAMES``).
 
-Paths with ``lib/<arch>`` are enabled if the
-:variable:`CMAKE_LIBRARY_ARCHITECTURE` variable is set. ``lib*`` includes one
-or more of the values ``lib64``, ``lib32``, ``libx32`` or ``lib`` (searched in
-that order).
+If at least one compiled language has been enabled, the architecture-specific
+``lib/<arch>`` and ``lib*`` directories may be searched based on the compiler's
+target architecture, in the following order:
 
-* Paths with ``lib64`` are searched on 64 bit platforms if the
+``lib/<arch>``
+  Searched if the :variable:`CMAKE_LIBRARY_ARCHITECTURE` variable is set.
+
+``lib64``
+  Searched on 64 bit platforms (:variable:`CMAKE_SIZEOF_VOID_P` is 8) and the
   :prop_gbl:`FIND_LIBRARY_USE_LIB64_PATHS` property is set to ``TRUE``.
-* Paths with ``lib32`` are searched on 32 bit platforms if the
+
+``lib32``
+  Searched on 32 bit platforms (:variable:`CMAKE_SIZEOF_VOID_P` is 4) and the
   :prop_gbl:`FIND_LIBRARY_USE_LIB32_PATHS` property is set to ``TRUE``.
-* Paths with ``libx32`` are searched on platforms using the x32 ABI
+
+``libx32``
+  Searched on platforms using the x32 ABI
   if the :prop_gbl:`FIND_LIBRARY_USE_LIBX32_PATHS` property is set to ``TRUE``.
-* The ``lib`` path is always searched.
+
+``lib``
+  Always searched.
 
 .. versionchanged:: 3.24
   On ``Windows`` platform, it is possible to include registry queries as part
@@ -346,7 +355,7 @@ that order).
   ``REGISTRY_VIEW`` can be specified to manage ``Windows`` registry queries
   specified as part of ``PATHS`` and ``HINTS``.
 
-.. include:: FIND_XXX_REGISTRY_VIEW.txt
+  .. include:: FIND_XXX_REGISTRY_VIEW.txt
 
 If ``PATH_SUFFIXES`` is specified, the suffixes are appended to each
 (``W``) or (``U``) directory entry one-by-one.

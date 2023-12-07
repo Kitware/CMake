@@ -55,7 +55,7 @@ endmacro()
 # detailed features tables, not just meta-features
 
 if (CMAKE_C_COMPILE_FEATURES)
-  if (NOT CMAKE_C_COMPILER_ID MATCHES "^(LCC|Cray|PGI|NVHPC|XL|XLClang|IBMClang|IntelLLVM|Fujitsu|FujitsuClang)$")
+  if (NOT CMAKE_C_COMPILER_ID MATCHES "^(LCC|Cray|CrayClang|PGI|NVHPC|XL|XLClang|IBMClang|IntelLLVM|Fujitsu|FujitsuClang|OrangeC)$")
     set(C_expected_features ${CMAKE_C_COMPILE_FEATURES})
     list(FILTER C_expected_features EXCLUDE REGEX "^c_std_[0-9][0-9]")
   endif()
@@ -98,7 +98,7 @@ if (C_expected_features)
 endif()
 
 if (CMAKE_CXX_COMPILE_FEATURES)
-  if (NOT CMAKE_CXX_COMPILER_ID MATCHES "^(LCC|Cray|PGI|NVHPC|XL|XLClang|IBMClang|IntelLLVM|Fujitsu|FujitsuClang)$")
+  if (NOT CMAKE_CXX_COMPILER_ID MATCHES "^(LCC|Cray|CrayClang|PGI|NVHPC|XL|XLClang|IBMClang|IntelLLVM|Fujitsu|FujitsuClang|OrangeC)$")
     set(CXX_expected_features ${CMAKE_CXX_COMPILE_FEATURES})
     list(FILTER CXX_expected_features EXCLUDE REGEX "^cxx_std_[0-9][0-9]")
   endif()

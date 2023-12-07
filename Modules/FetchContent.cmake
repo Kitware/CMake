@@ -111,6 +111,7 @@ Commands
     FetchContent_Declare(
       <name>
       <contentOptions>...
+      [EXCLUDE_FROM_ALL]
       [SYSTEM]
       [OVERRIDE_FIND_PACKAGE |
        FIND_PACKAGE_ARGS args...]
@@ -240,6 +241,15 @@ Commands
       See the :prop_tgt:`SYSTEM` target property documentation for a more
       detailed discussion of the effects.
 
+  .. versionadded:: 3.28
+
+    ``EXCLUDE_FROM_ALL``
+      If the ``EXCLUDE_FROM_ALL`` argument is provided, then targets in the
+      subdirectory added by :command:`FetchContent_MakeAvailable` will not be
+      included in the ``ALL`` target by default, and may be excluded from IDE
+      project files. See the `:command:`add_subdirectory` `EXCLUDE_FROM_ALL``
+      argument documentation for a more detailed discussion of the effects.
+
 .. command:: FetchContent_MakeAvailable
 
   .. versionadded:: 3.14
@@ -357,6 +367,11 @@ Commands
       If the ``SYSTEM`` keyword was included in the call to
       :command:`FetchContent_Declare`, the ``SYSTEM`` keyword will be
       added to the :command:`add_subdirectory` command as well.
+
+    .. versionadded:: 3.28
+      If the ``EXCLUDE_FROM_ALL`` keyword was included in the call to
+      :command:`FetchContent_Declare`, the ``EXCLUDE_FROM_ALL`` keyword will
+      be added to the :command:`add_subdirectory` command as well.
 
   Projects should aim to declare the details of all dependencies they might
   use before they call ``FetchContent_MakeAvailable()`` for any of them.
@@ -1466,8 +1481,10 @@ function(__FetchContent_directPopulate contentName)
 
   set(options
       QUIET
-      # SYSTEM has no meaning for ExternalProject, it is only used by us in
-      # FetchContent_MakeAvailable(). We need to parse and discard it here.
+      # EXCLUDE_FROM_ALL and SYSTEM have no meaning for ExternalProject, they
+      # are only used by us in FetchContent_MakeAvailable(). We need to parse
+      # and discard them here.
+      EXCLUDE_FROM_ALL
       SYSTEM
   )
   set(oneValueArgs
@@ -2030,22 +2047,28 @@ macro(FetchContent_MakeAvailable)
       if("${__cmake_contentDetails}" STREQUAL "")
         message(FATAL_ERROR "No details have been set for content: ${__cmake_contentName}")
       endif()
-      cmake_parse_arguments(__cmake_arg "SYSTEM" "SOURCE_SUBDIR" "" ${__cmake_contentDetails})
+      cmake_parse_arguments(__cmake_arg "EXCLUDE_FROM_ALL;SYSTEM" "SOURCE_SUBDIR" "" ${__cmake_contentDetails})
       if(NOT "${__cmake_arg_SOURCE_SUBDIR}" STREQUAL "")
         string(APPEND __cmake_srcdir "/${__cmake_arg_SOURCE_SUBDIR}")
       endif()
 
       if(EXISTS ${__cmake_srcdir}/CMakeLists.txt)
-        if (__cmake_arg_SYSTEM)
-          add_subdirectory(${__cmake_srcdir} ${${__cmake_contentNameLower}_BINARY_DIR} SYSTEM)
-        else()
-          add_subdirectory(${__cmake_srcdir} ${${__cmake_contentNameLower}_BINARY_DIR})
+        set(__cmake_add_subdirectory_args ${__cmake_srcdir} ${${__cmake_contentNameLower}_BINARY_DIR})
+        if(__cmake_arg_EXCLUDE_FROM_ALL)
+          list(APPEND __cmake_add_subdirectory_args EXCLUDE_FROM_ALL)
         endif()
+        if(__cmake_arg_SYSTEM)
+          list(APPEND __cmake_add_subdirectory_args SYSTEM)
+        endif()
+        add_subdirectory(${__cmake_add_subdirectory_args})
       endif()
 
       unset(__cmake_srcdir)
       unset(__cmake_contentDetails)
+      unset(__cmake_arg_EXCLUDE_FROM_ALL)
+      unset(__cmake_arg_SYSTEM)
       unset(__cmake_arg_SOURCE_SUBDIR)
+      unset(__cmake_add_subdirectory_args)
     endif()
   endforeach()
 

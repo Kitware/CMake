@@ -78,7 +78,7 @@ cmFileLockResult cmFileLock::LockWithTimeout(unsigned long seconds)
   }
 }
 
-BOOL cmFileLock::LockFile(DWORD flags)
+int cmFileLock::LockFile(int flags)
 {
   const DWORD reserved = 0;
   const unsigned long len = static_cast<unsigned long>(-1);

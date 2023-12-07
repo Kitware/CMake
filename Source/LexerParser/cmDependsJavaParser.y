@@ -13,7 +13,6 @@ Run bison like this:
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <string>

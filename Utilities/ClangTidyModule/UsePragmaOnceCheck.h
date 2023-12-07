@@ -18,6 +18,16 @@
 #include <clang-tidy/ClangTidyCheck.h>
 #include <clang-tidy/utils/FileExtensionsUtils.h>
 
+#if LLVM_VERSION_MAJOR >= 17
+#  include <clang-tidy/FileExtensionsSet.h>
+#else
+namespace clang {
+namespace tidy {
+using utils::FileExtensionsSet;
+} // namespace tidy
+} // namespace clang
+#endif
+
 namespace clang {
 namespace tidy {
 namespace cmake {
@@ -52,7 +62,7 @@ public:
 
 private:
   std::string RawStringHeaderFileExtensions;
-  utils::FileExtensionsSet HeaderFileExtensions;
+  FileExtensionsSet HeaderFileExtensions;
 };
 
 } // namespace cmake

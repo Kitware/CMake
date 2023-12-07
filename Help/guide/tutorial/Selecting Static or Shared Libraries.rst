@@ -44,7 +44,18 @@ SqrtLibrary to be ``True`` when building shared libraries.
   :caption: MathFunctions/CMakeLists.txt
   :name: MathFunctions/CMakeLists.txt-POSITION_INDEPENDENT_CODE
   :language: cmake
-  :lines: 37-42
+  :start-at: # state that SqrtLibrary need PIC when the default is shared libraries
+  :end-at:  )
+
+Define ``EXPORTING_MYMATH`` stating we are using ``declspec(dllexport)`` when
+building on Windows.
+
+.. literalinclude:: Step11/MathFunctions/CMakeLists.txt
+  :caption: MathFunctions/CMakeLists.txt
+  :name: MathFunctions/CMakeLists.txt-dll-export
+  :language: cmake
+  :start-at: # define the symbol stating we are using the declspec(dllexport) when
+  :end-at: target_compile_definitions(MathFunctions PRIVATE "EXPORTING_MYMATH")
 
 **Exercise**: We modified ``MathFunctions.h`` to use dll export defines.
 Using CMake documentation can you find a helper module to simplify this?

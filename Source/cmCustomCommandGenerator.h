@@ -20,7 +20,8 @@ class cmLocalGenerator;
 
 class cmCustomCommandGenerator
 {
-  std::string GetInternalDepfileName(const std::string&, const std::string&);
+  std::string GetInternalDepfileName(const std::string&,
+                                     const std::string&) const;
 
   cmCustomCommand const* CC;
   std::string OutputConfig;

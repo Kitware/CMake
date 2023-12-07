@@ -8,6 +8,7 @@
 
 #include <cm/memory>
 
+#include "cmCryptoHash.h"
 #ifndef CMAKE_BOOTSTRAP
 #  include "cmExportInstallAndroidMKGenerator.h"
 #endif
@@ -16,6 +17,7 @@
 #include "cmInstallType.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
+#include "cmScriptGenerator.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
@@ -63,11 +65,10 @@ std::string cmInstallExportGenerator::TempDirCalculate() const
     return path;
   }
 
-#ifndef CMAKE_BOOTSTRAP
+  cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
   path += '/';
   // Replace the destination path with a hash to keep it short.
-  path += cmSystemTools::ComputeStringMD5(this->Destination);
-#endif
+  path += hasher.HashString(this->Destination);
 
   return path;
 }

@@ -41,7 +41,7 @@ class cmCacheManager
     bool GetPropertyAsBool(const std::string& property) const;
     void SetProperty(const std::string& property, const std::string& value);
     void SetProperty(const std::string& property, bool value);
-    void SetProperty(const std::string& property, std::nullptr_t);
+    void RemoveProperty(const std::string& property);
     void AppendProperty(const std::string& property, const std::string& value,
                         bool asString = false);
 
@@ -144,7 +144,7 @@ public:
                                 std::string const& propName)
   {
     if (auto* entry = this->GetCacheEntry(key)) {
-      entry->SetProperty(propName, nullptr);
+      entry->RemoveProperty(propName);
     }
   }
 

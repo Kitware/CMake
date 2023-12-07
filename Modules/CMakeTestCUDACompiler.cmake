@@ -22,51 +22,10 @@ if(CMAKE_CUDA_ABI_COMPILED)
   set(CMAKE_CUDA_COMPILER_WORKS TRUE)
   message(STATUS "Check for working CUDA compiler: ${CMAKE_CUDA_COMPILER} - skipped")
 
-  # Run the test binary to detect the native architectures.
-  execute_process(COMMAND "${CMAKE_PLATFORM_INFO_DIR}/CMakeDetermineCompilerABI_CUDA.bin"
-    RESULT_VARIABLE _CUDA_ARCHS_RESULT
-    OUTPUT_VARIABLE _CUDA_ARCHS_OUTPUT
-    ERROR_VARIABLE  _CUDA_ARCHS_OUTPUT
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-  if(_CUDA_ARCHS_RESULT EQUAL 0)
-    if("$ENV{CMAKE_CUDA_ARCHITECTURES_NATIVE_CLAMP}")
-      # Undocumented hook used by CMake's CI.
-      # Clamp native architecture to version range supported by this CUDA.
-      list(GET CMAKE_CUDA_ARCHITECTURES_ALL 0  _CUDA_ARCH_MIN)
-      list(GET CMAKE_CUDA_ARCHITECTURES_ALL -1 _CUDA_ARCH_MAX)
-      set(CMAKE_CUDA_ARCHITECTURES_NATIVE "")
-      foreach(_CUDA_ARCH IN LISTS _CUDA_ARCHS_OUTPUT)
-        if(_CUDA_ARCH LESS _CUDA_ARCH_MIN)
-          set(_CUDA_ARCH "${_CUDA_ARCH_MIN}")
-        endif()
-        if(_CUDA_ARCH GREATER _CUDA_ARCH_MAX)
-          set(_CUDA_ARCH "${_CUDA_ARCH_MAX}")
-        endif()
-        list(APPEND CMAKE_CUDA_ARCHITECTURES_NATIVE ${_CUDA_ARCH})
-      endforeach()
-      unset(_CUDA_ARCH)
-      unset(_CUDA_ARCH_MIN)
-      unset(_CUDA_ARCH_MAX)
-    else()
-      set(CMAKE_CUDA_ARCHITECTURES_NATIVE "${_CUDA_ARCHS_OUTPUT}")
-    endif()
-    list(REMOVE_DUPLICATES CMAKE_CUDA_ARCHITECTURES_NATIVE)
-    list(TRANSFORM CMAKE_CUDA_ARCHITECTURES_NATIVE APPEND "-real")
-  else()
-    if(NOT _CUDA_ARCHS_RESULT MATCHES "[0-9]+")
-      set(_CUDA_ARCHS_STATUS " (${_CUDA_ARCHS_RESULT})")
-    else()
-      set(_CUDA_ARCHS_STATUS "")
-    endif()
-    string(REPLACE "\n" "\n  " _CUDA_ARCHS_OUTPUT "  ${_CUDA_ARCHS_OUTPUT}")
-    message(CONFIGURE_LOG
-      "Detecting the CUDA native architecture(s) failed with "
-      "the following output:\n${_CUDA_ARCHS_OUTPUT}\n\n")
-  endif()
-  unset(_CUDA_ARCHS_EXE)
-  unset(_CUDA_ARCHS_RESULT)
-  unset(_CUDA_ARCHS_OUTPUT)
+  include(Internal/CMakeCUDAArchitecturesNative)
+  # Run the test binary to get:
+  # - CMAKE_CUDA_ARCHITECTURES_NATIVE
+  cmake_cuda_architectures_native(CUDA)
 endif()
 
 # This file is used by EnableLanguage in cmGlobalGenerator to
@@ -114,22 +73,14 @@ if("x${CMAKE_CUDA_SIMULATE_ID}" STREQUAL "xMSVC")
   set(CMAKE_CUDA_IMPLICIT_LINK_DIRECTORIES "${CMAKE_CUDA_HOST_IMPLICIT_LINK_DIRECTORIES}")
 endif()
 
+include(Internal/CMakeCUDAFilterImplicitLibs)
 # Filter out implicit link libraries that should not be passed unconditionally.
-# See CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES_EXCLUDE in CMakeDetermineCUDACompiler.
-list(REMOVE_ITEM CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES ${CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES_EXCLUDE})
+cmake_cuda_filter_implicit_libs(CMAKE_CUDA_IMPLICIT_LINK_LIBRARIES)
 
 if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA")
-  # Remove the CUDA Toolkit include directories from the set of
-  # implicit system include directories.
-  # This resolves the issue that NVCC doesn't specify these
-  # includes as SYSTEM includes when compiling device code, and sometimes
-  # they contain headers that generate warnings, so let users mark them
-  # as SYSTEM explicitly
-  if(CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES)
-    list(REMOVE_ITEM CMAKE_CUDA_IMPLICIT_INCLUDE_DIRECTORIES
-      ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}
-      )
-  endif()
+  include(Internal/CMakeNVCCFilterImplicitInfo)
+  # Match arguments with cmake_nvcc_parse_implicit_info call in CMakeDetermineCUDACompiler.
+  cmake_nvcc_filter_implicit_info(CUDA CMAKE_CUDA_)
 endif()
 
 # Re-configure to save learned information.

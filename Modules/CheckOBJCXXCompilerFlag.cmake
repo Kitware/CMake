@@ -24,7 +24,7 @@ issue a diagnostic message when given the flag.  Whether the flag has any
 effect or even a specific one is beyond the scope of this module.
 
 The check is only performed once, with the result cached in the variable named
-by ``<resultVar>``. Every subsequent CMake run will re-use this cached value
+by ``<resultVar>``. Every subsequent CMake run will reuse this cached value
 rather than performing the check again, even if the ``<code>`` changes. In
 order to force the check to be re-evaluated, the variable named by
 ``<resultVar>`` must be manually removed from the cache.

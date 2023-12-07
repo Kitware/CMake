@@ -1,4 +1,4 @@
 .*find_library considered the following locations.*
-.*\(lib\)library_no_exist\(\\.tbd\|\\.dylib\|\\.so\|\\.a\).*
+.*liblibrary_no_exist\(\\.tbd\|\\.dylib\|\\.so\|\\.a\).*
 .*The item was found at.*
 .*lib/libcreated.a.*

@@ -3,7 +3,6 @@
 #include "cmDefinitions.h"
 
 #include <cassert>
-#include <functional>
 #include <unordered_set>
 #include <utility>
 

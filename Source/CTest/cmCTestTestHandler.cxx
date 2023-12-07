@@ -13,6 +13,7 @@
 #include <functional>
 #include <iomanip>
 #include <iterator>
+#include <ratio>
 #include <set>
 #include <sstream>
 #include <utility>
@@ -41,7 +42,6 @@
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
-#include "cmJSONState.h"
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmState.h"
@@ -283,7 +283,6 @@ cmCTestTestHandler::cmCTestTestHandler()
   this->UseIncludeRegExpFlag = false;
   this->UseExcludeRegExpFlag = false;
   this->UseExcludeRegExpFirst = false;
-  this->UseResourceSpec = false;
 
   this->CustomMaximumPassedTestOutputSize = 1 * 1024;
   this->CustomMaximumFailedTestOutputSize = 300 * 1024;
@@ -890,8 +889,7 @@ bool cmCTestTestHandler::ComputeTestList()
   }
 
   if (this->RerunFailed) {
-    this->ComputeTestListForRerunFailed();
-    return true;
+    return this->ComputeTestListForRerunFailed();
   }
 
   cmCTestTestHandler::ListOfTests::size_type tmsize = this->TestList.size();
@@ -950,7 +948,7 @@ bool cmCTestTestHandler::ComputeTestList()
   return true;
 }
 
-void cmCTestTestHandler::ComputeTestListForRerunFailed()
+bool cmCTestTestHandler::ComputeTestListForRerunFailed()
 {
   this->ExpandTestsToRunInformationForRerunFailed();
 
@@ -977,6 +975,8 @@ void cmCTestTestHandler::ComputeTestListForRerunFailed()
   this->TestList = finalList;
 
   this->UpdateMaxTestNameWidth();
+
+  return true;
 }
 
 void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
@@ -1350,18 +1350,6 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   } else {
     parallel->SetTestLoad(this->CTest->GetTestLoad());
   }
-  if (!this->ResourceSpecFile.empty()) {
-    this->UseResourceSpec = true;
-    if (!this->ResourceSpec.ReadFromJSONFile(this->ResourceSpecFile)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Could not read/parse resource spec file "
-                   << this->ResourceSpecFile << ": "
-                   << this->ResourceSpec.parseState.GetErrorMessage()
-                   << std::endl);
-      return false;
-    }
-    parallel->InitResourceAllocator(this->ResourceSpec);
-  }
 
   *this->LogFile
     << "Start testing: " << this->CTest->CurrentTime() << std::endl
@@ -1396,6 +1384,7 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
     tests[p.Index] = depends;
     properties[p.Index] = &p;
   }
+  parallel->SetResourceSpecFile(this->ResourceSpecFile);
   parallel->SetTests(tests, properties);
   parallel->SetPassFailVectors(&passed, &failed);
   this->TestResults.clear();
@@ -1722,8 +1711,7 @@ std::string cmCTestTestHandler::FindExecutable(
   // now look in the paths we specified above
   for (unsigned int ai = 0; ai < attempted.size() && fullPath.empty(); ++ai) {
     // first check without exe extension
-    if (cmSystemTools::FileExists(attempted[ai]) &&
-        !cmSystemTools::FileIsDirectory(attempted[ai])) {
+    if (cmSystemTools::FileExists(attempted[ai], true)) {
       fullPath = cmSystemTools::CollapseFullPath(attempted[ai]);
       resultingConfig = attemptedConfigs[ai];
     }
@@ -1732,8 +1720,7 @@ std::string cmCTestTestHandler::FindExecutable(
       failed.push_back(attempted[ai]);
       tempPath =
         cmStrCat(attempted[ai], cmSystemTools::GetExecutableExtension());
-      if (cmSystemTools::FileExists(tempPath) &&
-          !cmSystemTools::FileIsDirectory(tempPath)) {
+      if (cmSystemTools::FileExists(tempPath, true)) {
         fullPath = cmSystemTools::CollapseFullPath(tempPath);
         resultingConfig = attemptedConfigs[ai];
       } else {
@@ -2335,6 +2322,8 @@ bool cmCTestTestHandler::SetTestsProperties(
             if (!ParseResourceGroupsProperty(val, rt.ResourceGroups)) {
               return false;
             }
+          } else if (key == "GENERATED_RESOURCE_SPEC_FILE"_s) {
+            rt.GeneratedResourceSpecFile = val;
           } else if (key == "SKIP_RETURN_CODE"_s) {
             rt.SkipReturnCode = atoi(val.c_str());
             if (rt.SkipReturnCode < 0 || rt.SkipReturnCode > 255) {
@@ -2616,6 +2605,21 @@ bool cmCTestTestHandler::WriteJUnitXML()
       xml.Attribute("message", this->GetTestStatus(result));
       xml.EndElement(); // </failure>
     }
+
+    xml.StartElement("properties");
+    if ((result.Properties) && (!result.Properties->Labels.empty())) {
+      xml.StartElement("property");
+      xml.Attribute("name", "cmake_labels");
+      // Pass the property as a cmake-formatted list, consumers will know
+      // anyway that this information is coming from cmake, so it should
+      // be ok to put it here as a cmake-list.
+      xml.Attribute("value", cmList::to_string(result.Properties->Labels));
+      // if we export more properties, this should be done the same way,
+      // i.e. prefix the property name with "cmake_", and it it can be
+      // a list, write it cmake-formatted.
+      xml.EndElement(); // </property>
+    }
+    xml.EndElement(); // </properties>
 
     // Note: compressed test output is unconditionally disabled when
     // --output-junit is specified.

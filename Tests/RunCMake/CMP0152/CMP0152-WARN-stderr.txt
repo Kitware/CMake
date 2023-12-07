@@ -1,0 +1,27 @@
+^CMake Warning \(dev\) at CMP0152-Common\.cmake:[0-9]+ \(file\):
+  Policy CMP0152 is not set: file\(REAL_PATH\) resolves symlinks before
+  collapsing \.\./ components\.  Run "cmake --help-policy CMP0152" for policy
+  details\.  Use the cmake_policy command to set the policy and suppress this
+  warning\.
+
+  From input path:
+
+  [^
+]*/Tests/RunCMake/CMP0152/CMP0152-WARN-build/dir/bin/\.\./
+
+  the policy OLD behavior produces path:
+
+  [^
+]*/Tests/RunCMake/CMP0152/CMP0152-WARN-build/dir
+
+  but the policy NEW behavior produces path:
+
+  [^
+]*/Tests/RunCMake/CMP0152/CMP0152-WARN-build/dir/nested
+
+  Since the policy is not set, CMake is using the OLD behavior for
+  compatibility.
+Call Stack \(most recent call first\):
+  CMP0152-WARN\.cmake:[0-9]+ \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.$

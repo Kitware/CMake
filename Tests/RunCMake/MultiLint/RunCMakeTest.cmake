@@ -24,6 +24,7 @@ run_multilint(CXX)
 if(NOT RunCMake_GENERATOR STREQUAL "Watcom WMake")
   run_multilint(C-launch)
   run_multilint(CXX-launch)
+  run_multilint(genex)
 endif()
 
 function(run_skip_linting test_name)

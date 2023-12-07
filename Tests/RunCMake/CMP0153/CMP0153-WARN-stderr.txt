@@ -1,0 +1,8 @@
+^CMake Warning \(dev\) at [^
+]*/Tests/RunCMake/CMP0153/CMP0153-WARN\.cmake:[0-9]+ \(exec_program\):
+  Policy CMP0153 is not set: The exec_program command should not be called\.
+  Run "cmake --help-policy CMP0153" for policy details\.  Use the cmake_policy
+  command to set the policy and suppress this warning\.
+
+  Use execute_process\(\) instead\.
+This warning is for project developers\.  Use -Wno-dev to suppress it\.$

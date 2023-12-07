@@ -74,7 +74,7 @@ if(CMAKE_EFFECTIVE_SYSTEM_NAME STREQUAL "Apple"
   # platform directory which is not added to the CMAKE_FIND_ROOT_PATH
   # (only to CMAKE_SYSTEM_FRAMEWORK_PATH) and therefore not searched.
   #
-  # Until this is properly addressed, temporaily add the platform
+  # Until this is properly addressed, temporarily add the platform
   # directory to CMAKE_FIND_ROOT_PATH.
   list(APPEND CMAKE_FIND_ROOT_PATH "${_CMAKE_OSX_SYSROOT_PATH}/../..")
 endif()

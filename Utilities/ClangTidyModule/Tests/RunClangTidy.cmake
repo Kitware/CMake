@@ -47,6 +47,7 @@ if(NOT result EQUAL 0)
   string(APPEND RunClangTidy_TEST_FAILED "Expected result: 0, actual result: ${result}\n")
 endif()
 
+string(REGEX REPLACE " +\n" "\n" actual_stdout "${actual_stdout}")
 string(REGEX REPLACE "\n+$" "" actual_stdout "${actual_stdout}")
 if(NOT actual_stdout STREQUAL expect_stdout)
   string(REPLACE "\n" "\n  " expect_stdout_formatted "  ${expect_stdout}")

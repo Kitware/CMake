@@ -425,13 +425,19 @@ macro(_pkg_set_path_internal)
     unset(_pkgconfig_path)
   endif()
 
-  # Tell pkg-config not to strip any -L paths so we can search them all.
+  # Tell pkg-config not to strip any -I or -L paths so we can search them all.
   if(DEFINED ENV{PKG_CONFIG_ALLOW_SYSTEM_LIBS})
     set(_pkgconfig_allow_system_libs_old "$ENV{PKG_CONFIG_ALLOW_SYSTEM_LIBS}")
   else()
     unset(_pkgconfig_allow_system_libs_old)
   endif()
   set(ENV{PKG_CONFIG_ALLOW_SYSTEM_LIBS} 1)
+  if(DEFINED ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS})
+    set(_pkgconfig_allow_system_cflags_old "$ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS}")
+  else()
+    unset(_pkgconfig_allow_system_cflags_old)
+  endif()
+  set(ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS} 1)
 endmacro()
 
 macro(_pkg_restore_path_internal)
@@ -444,6 +450,12 @@ macro(_pkg_restore_path_internal)
     unset(_pkgconfig_allow_system_libs_old)
   else()
     unset(ENV{PKG_CONFIG_ALLOW_SYSTEM_LIBS})
+  endif()
+  if(DEFINED _pkgconfig_allow_system_cflags_old)
+    set(ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS} "${_pkgconfig_allow_system_cflags_old}")
+    unset(_pkgconfig_allow_system_cflags_old)
+  else()
+    unset(ENV{PKG_CONFIG_ALLOW_SYSTEM_CFLAGS})
   endif()
 
   unset(_extra_paths)
@@ -543,7 +555,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
     endif()
 
     set(_pkg_check_modules_packages)
-    set(_pkg_check_modules_failed)
+    set(_pkg_check_modules_failed "")
 
     _pkg_set_path_internal()
 
@@ -551,8 +563,8 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
     foreach (_pkg_check_modules_pkg ${_pkg_check_modules_list})
       set(_pkg_check_modules_exist_query)
 
-      # check whether version is given
-      if (_pkg_check_modules_pkg MATCHES "(.*[^><])(=|[><]=?)(.*)")
+      # check whether version is given while ignoring whitespace
+      if (_pkg_check_modules_pkg MATCHES "(.*[^>< \t])[ \t]*(=|[><]=?)[ \t]*(.*)")
         set(_pkg_check_modules_pkg_name "${CMAKE_MATCH_1}")
         set(_pkg_check_modules_pkg_op "${CMAKE_MATCH_2}")
         set(_pkg_check_modules_pkg_ver "${CMAKE_MATCH_3}")
@@ -597,14 +609,14 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
           message(STATUS "  ${_pkgconfig_error}")
         endif()
 
-        set(_pkg_check_modules_failed 1)
+        string(APPEND _pkg_check_modules_failed " - ${_pkg_check_modules_pkg}\n")
       endif()
     endforeach()
 
     if(_pkg_check_modules_failed)
       # fail when requested
       if (${_is_required})
-        message(FATAL_ERROR "A required package was not found")
+        message(FATAL_ERROR "The following required packages were not found:\n${_pkg_check_modules_failed}")
       endif ()
     else()
       # when we are here, we checked whether requested modules
@@ -911,10 +923,19 @@ endmacro()
 
   .. code-block:: cmake
 
-    pkg_get_variable(<resultVar> <moduleName> <varName>)
+    pkg_get_variable(<resultVar> <moduleName> <varName>
+                     [DEFINE_VARIABLES <key>=<value>...])
 
   If ``pkg-config`` returns multiple values for the specified variable,
   ``resultVar`` will contain a :ref:`;-list <CMake Language Lists>`.
+
+  Options:
+
+  ``DEFINE_VARIABLES <key>=<value>...``
+    .. versionadded:: 3.28
+
+    Specify key-value pairs to redefine variables affecting the variable
+    retrieved with ``pkg-config``.
 
   For example:
 
@@ -923,8 +944,20 @@ endmacro()
     pkg_get_variable(GI_GIRDIR gobject-introspection-1.0 girdir)
 #]========================================]
 function (pkg_get_variable result pkg variable)
+  set(_multiValueArgs DEFINE_VARIABLES)
+
+  CMAKE_PARSE_ARGUMENTS(_parsedArguments "" "" "${_multiValueArgs}" ${ARGN})
+  set(defined_variables )
+  foreach(_def_var ${_parsedArguments_DEFINE_VARIABLES})
+    if(NOT _def_var MATCHES "^.+=.*$")
+      message(FATAL_ERROR "DEFINE_VARIABLES should contain arguments in the form of key=value")
+    endif()
+
+    list(APPEND defined_variables "--define-variable=${_def_var}")
+  endforeach()
+
   _pkg_set_path_internal()
-  _pkgconfig_invoke("${pkg}" "prefix" "result" "" "--variable=${variable}")
+  _pkgconfig_invoke("${pkg}" "prefix" "result" "" "--variable=${variable}" ${defined_variables})
   set("${result}"
     "${prefix_result}"
     PARENT_SCOPE)

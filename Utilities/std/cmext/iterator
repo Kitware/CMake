@@ -24,9 +24,18 @@ using is_input_iterator =
 
 // checks if a type is a range type: std::begin() and std::end() are supported
 template <typename Range>
-using is_range = cm::bool_constant<
-  cm::is_iterator<decltype(std::begin(std::declval<const Range>()))>::value &&
-  cm::is_iterator<decltype(std::end(std::declval<const Range>()))>::value>;
+using is_range =
+#if defined(_MSC_VER) && _MSC_VER < 1920
+  // MS C++ is not able to evaluate complex type introspection,
+  // so use a simplified version
+  cm::bool_constant<std::is_class<Range>::value ||
+                    std::is_array<Range>::value>;
+#else
+  cm::bool_constant<
+    cm::is_iterator<decltype(std::begin(
+      std::declval<const Range>()))>::value &&
+    cm::is_iterator<decltype(std::end(std::declval<const Range>()))>::value>;
+#endif
 
 // checks if a type is an input range type: std::begin() and std::end() are
 // returning an input iterator

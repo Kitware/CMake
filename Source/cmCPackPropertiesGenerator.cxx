@@ -1,6 +1,7 @@
 #include "cmCPackPropertiesGenerator.h"
 
 #include <map>
+#include <memory>
 #include <ostream>
 
 #include "cmGeneratorExpression.h"

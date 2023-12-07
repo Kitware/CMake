@@ -64,10 +64,10 @@
         }
     ],
     "folder": null,
-    "nameOnDisk": "^(lib)?cxx_static_lib\\.(a|lib)$",
+    "nameOnDisk": "^(lib)?cxx_static_lib\\.(a|lib|l)$",
     "artifacts": [
         {
-            "path": "^cxx/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?cxx_static_lib\\.(a|lib)$",
+            "path": "^cxx/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?cxx_static_lib\\.(a|lib|l)$",
             "_dllExtra": false
         }
     ],

@@ -12,12 +12,12 @@ case "$(uname -s)-$(uname -m)" in
         ;;
     Darwin-arm64)
         shatool="shasum -a 256"
-        sha256sum="62cee043a3a4dbff8c2f6d3885a7e573901bbc1325dd93d50f92904b7ea67fec"
+        sha256sum="c423a5a88d7a9a6ed667e41d025801c123fa0c5fd384d4ea138fa1fcf2bc24c9"
         platform="macOS.arm64"
         ;;
     Darwin-x86_64)
         shatool="shasum -a 256"
-        sha256sum="da0f11a048a316081a8ad8170d48b170b2ed7efc3b140fc88b8611238809c8e4"
+        sha256sum="e25222d2d6f4f8e3561556ac73f88721ceb5486439d6c2a566d37407ad9a5907"
         platform="macOS.x86_64"
         ;;
     *)

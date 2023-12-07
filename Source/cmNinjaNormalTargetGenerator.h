@@ -49,6 +49,9 @@ private:
                                       const std::string& output);
 
   void WriteObjectLibStatement(const std::string& config);
+  void WriteCxxModuleLibraryStatement(const std::string& config,
+                                      const std::string& fileConfig,
+                                      bool firstForConfig);
 
   std::vector<std::string> ComputeLinkCmd(const std::string& config);
   std::vector<std::string> ComputeDeviceLinkCmd();

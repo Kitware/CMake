@@ -290,8 +290,8 @@ std::string DebGenerator::generateMD5File() const
       continue;
     }
 
-    std::string output =
-      cmSystemTools::ComputeFileHash(file, cmCryptoHash::AlgoMD5);
+    cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
+    std::string output = hasher.HashFile(file);
     if (output.empty()) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Problem computing the md5 of " << file << std::endl);

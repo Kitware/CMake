@@ -549,7 +549,7 @@ static void CCONV* cmGetSource(void* arg, const char* name)
       sf->SourceExtension =
         cmSystemTools::GetFilenameLastExtension(sf->FullPath);
 
-      // Store the proxy in the map so it can be re-used and deleted later.
+      // Store the proxy in the map so it can be reused and deleted later.
       i = cmCPluginAPISourceFiles.emplace(rsf, std::move(sf)).first;
     }
     return i->second.get();
@@ -584,7 +584,7 @@ static void* CCONV cmAddSource(void* arg, void* arg2)
   sf->SourceName = osf->SourceName;
   sf->SourceExtension = osf->SourceExtension;
 
-  // Store the proxy in the map so it can be re-used and deleted later.
+  // Store the proxy in the map so it can be reused and deleted later.
   auto* value = sf.get();
   cmCPluginAPISourceFiles[rsf] = std::move(sf);
   return value;
@@ -628,8 +628,8 @@ static void CCONV cmSourceFileSetProperty(void* arg, const char* prop,
 {
   cmCPluginAPISourceFile* sf = static_cast<cmCPluginAPISourceFile*>(arg);
   if (cmSourceFile* rsf = sf->RealSourceFile) {
-    if (value == nullptr) {
-      rsf->SetProperty(prop, nullptr);
+    if (!value) {
+      rsf->RemoveProperty(prop);
     } else {
       rsf->SetProperty(prop, value);
     }

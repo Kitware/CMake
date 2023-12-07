@@ -1,0 +1,2 @@
+add_library(SharedStubImportedGlobal SHARED IMPORTED GLOBAL)
+set_target_properties(SharedStubImportedGlobal PROPERTIES IMPORTED_IMPLIB z)

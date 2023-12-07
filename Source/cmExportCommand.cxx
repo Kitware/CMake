@@ -14,8 +14,8 @@
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
+#include "cmCryptoHash.h"
 #include "cmExecutionStatus.h"
-#include "cmExperimental.h"
 #include "cmExportBuildAndroidMKGenerator.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmExportSet.h"
@@ -68,15 +68,11 @@ bool cmExportCommand(std::vector<std::string> const& args,
     bool ExportOld = false;
   };
 
-  auto parser = cmArgumentParser<Arguments>{}
-                  .Bind("NAMESPACE"_s, &Arguments::Namespace)
-                  .Bind("FILE"_s, &Arguments::Filename);
-
-  bool const supportCxx20FileSetTypes = cmExperimental::HasSupportEnabled(
-    status.GetMakefile(), cmExperimental::Feature::CxxModuleCMakeApi);
-  if (supportCxx20FileSetTypes) {
-    parser.Bind("CXX_MODULES_DIRECTORY"_s, &Arguments::CxxModulesDirectory);
-  }
+  auto parser =
+    cmArgumentParser<Arguments>{}
+      .Bind("NAMESPACE"_s, &Arguments::Namespace)
+      .Bind("FILE"_s, &Arguments::Filename)
+      .Bind("CXX_MODULES_DIRECTORY"_s, &Arguments::CxxModulesDirectory);
 
   if (args[0] == "EXPORT") {
     parser.Bind("EXPORT"_s, &Arguments::ExportSetName);
@@ -310,7 +306,8 @@ static bool HandlePackage(std::vector<std::string> const& args,
   // named by a hash of its own content.  This is deterministic and is
   // unique with high probability.
   const std::string& outDir = mf.GetCurrentBinaryDirectory();
-  std::string hash = cmSystemTools::ComputeStringMD5(outDir);
+  cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
+  std::string hash = hasher.HashString(outDir);
   StorePackageRegistry(mf, package, outDir.c_str(), hash.c_str());
 
   return true;
@@ -388,13 +385,11 @@ static void StorePackageRegistry(cmMakefile& mf, std::string const& package,
     if (entry) {
       entry << content << "\n";
     } else {
-      std::ostringstream e;
-      /* clang-format off */
-      e << "Cannot create package registry file:\n"
-        << "  " << fname << "\n"
-        << cmSystemTools::GetLastSystemError() << "\n";
-      /* clang-format on */
-      mf.IssueMessage(MessageType::WARNING, e.str());
+      mf.IssueMessage(MessageType::WARNING,
+                      cmStrCat("Cannot create package registry file:\n"
+                               "  ",
+                               fname, '\n',
+                               cmSystemTools::GetLastSystemError(), '\n'));
     }
   }
 }

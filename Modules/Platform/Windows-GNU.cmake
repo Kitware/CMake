@@ -10,6 +10,25 @@ set(__WINDOWS_GNU 1)
 
 set(MINGW 1)
 
+# On Windows hosts, in MSYSTEM environments, search standard prefixes.
+if(CMAKE_HOST_WIN32)
+  # Bootstrap CMake does not have cmake_host_system_information.
+  if(COMMAND cmake_host_system_information)
+    cmake_host_system_information(RESULT _MSYSTEM_PREFIX QUERY MSYSTEM_PREFIX)
+  elseif(IS_DIRECTORY "$ENV{MSYSTEM_PREFIX}")
+    set(_MSYSTEM_PREFIX "$ENV{MSYSTEM_PREFIX}")
+  endif()
+
+  # Search this MSYSTEM environment's equivalent to /usr/local and /usr.
+  if(_MSYSTEM_PREFIX)
+    list(PREPEND CMAKE_SYSTEM_PREFIX_PATH "${_MSYSTEM_PREFIX}")
+    if(IS_DIRECTORY "${_MSYSTEM_PREFIX}/local")
+      list(PREPEND CMAKE_SYSTEM_PREFIX_PATH "${_MSYSTEM_PREFIX}/local")
+    endif()
+  endif()
+  unset(_MSYSTEM_PREFIX)
+endif()
+
 set(CMAKE_IMPORT_LIBRARY_PREFIX "lib")
 set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
 set(CMAKE_SHARED_MODULE_PREFIX  "lib")

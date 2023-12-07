@@ -6,7 +6,7 @@ Deprecated.  Generates Visual Studio 9 2008 project files.
 .. note::
   This generator is deprecated and will be removed in a future version
   of CMake.  It will still be possible to build with VS 9 2008 tools
-  using the :generator:`Visual Studio 12 2013` generator (or above,
+  using the :generator:`Visual Studio 14 2015` generator (or above,
   and with VS 10 2010 also installed) with
   :variable:`CMAKE_GENERATOR_TOOLSET` set to ``v90``,
   or by using the :generator:`NMake Makefiles` generator.

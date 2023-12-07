@@ -1,0 +1,4 @@
+^CMake Error at [^
+]*/Tests/RunCMake/CMP0153/CMP0153-NEW\.cmake:[0-9]+ \(exec_program\):
+  The exec_program command should not be called; see CMP0153\.  Use
+  execute_process\(\) instead\.$

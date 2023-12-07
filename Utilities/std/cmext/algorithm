@@ -16,6 +16,7 @@
 
 #if defined(__SUNPRO_CC) && defined(__sparc)
 #  include <list>
+#  include <string>
 #  include <vector>
 #endif
 
@@ -67,11 +68,15 @@ namespace cm {
     APPEND_TWO(C1, C2)                                                        \
     APPEND_TWO(C2, C1)
 
-// For now, manage only support for std::vector and std::list.
-// Other sequential container support can be added if needed.
+// For now, manage only support for std::vector, std::list, and
+// std::basic_string. Other sequential container support can be added if
+// needed.
 APPEND(std::vector)
 APPEND(std::list)
+APPEND(std::basic_string)
 APPEND_MIX(std::vector, std::list)
+APPEND_MIX(std::vector, std::basic_string)
+APPEND_MIX(std::list, std::basic_string)
 
 #  undef APPEND
 #  undef APPEND_MIX

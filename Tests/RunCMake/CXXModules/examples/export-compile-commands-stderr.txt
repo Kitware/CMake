@@ -1,4 +1,0 @@
-CMake Warning \(dev\) at CMakeLists.txt:9 \(target_sources\):
-  CMake's C\+\+ module support is experimental.  It is meant only for
-  experimentation and feedback to CMake developers.
-This warning is for project developers.  Use -Wno-dev to suppress it.

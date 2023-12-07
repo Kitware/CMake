@@ -30,6 +30,7 @@
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
+#include "cmCMakePath.h"
 #include "cmCryptoHash.h"
 #include "cmELF.h"
 #include "cmExecutionStatus.h"
@@ -42,6 +43,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmHexFileConverter.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -805,7 +807,7 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
 
   std::sort(files.begin(), files.end());
   files.erase(std::unique(files.begin(), files.end()), files.end());
-  status.GetMakefile().AddDefinition(variable, cmJoin(files, ";"));
+  status.GetMakefile().AddDefinition(variable, cmList::to_string(files));
   return true;
 }
 
@@ -1012,7 +1014,8 @@ bool HandleRPathChangeCommand(std::vector<std::string> const& args,
   if (success) {
     if (changed) {
       std::string message =
-        cmStrCat("Set runtime path of \"", file, "\" to \"", *newRPath, '"');
+        cmStrCat("Set non-toolchain portion of runtime path of \"", file,
+                 "\" to \"", *newRPath, '"');
       status.GetMakefile().DisplayStatus(message, -1);
     }
     ft.Store(file);
@@ -1066,7 +1069,8 @@ bool HandleRPathSetCommand(std::vector<std::string> const& args,
   if (success) {
     if (changed) {
       std::string message =
-        cmStrCat("Set runtime path of \"", file, "\" to \"", *newRPath, '"');
+        cmStrCat("Set non-toolchain portion of runtime path of \"", file,
+                 "\" to \"", *newRPath, '"');
       status.GetMakefile().DisplayStatus(message, -1);
     }
     ft.Store(file);
@@ -1277,9 +1281,58 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
     }
   }
 
-  auto realPath =
-    cmSystemTools::CollapseFullPath(input, *arguments.BaseDirectory);
-  realPath = cmSystemTools::GetRealPath(realPath);
+  bool warnAbout152 = false;
+  bool use152New = true;
+  cmPolicies::PolicyStatus policyStatus =
+    status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0152);
+  switch (policyStatus) {
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::NEW:
+      break;
+    case cmPolicies::WARN:
+      use152New = false;
+      warnAbout152 = true;
+      break;
+    case cmPolicies::OLD:
+      use152New = false;
+      warnAbout152 = false;
+      break;
+  }
+
+  auto computeNewPath = [=](std::string const& in, std::string& result) {
+    auto path = cmCMakePath{ in };
+    if (path.IsRelative()) {
+      auto basePath = cmCMakePath{ *arguments.BaseDirectory };
+      path = basePath.Append(path);
+    }
+    result = cmSystemTools::GetActualCaseForPath(
+      cmSystemTools::GetRealPath(path.String()));
+  };
+
+  std::string realPath;
+  if (use152New) {
+    computeNewPath(input, realPath);
+  } else {
+    std::string oldPolicyPath =
+      cmSystemTools::CollapseFullPath(input, *arguments.BaseDirectory);
+    oldPolicyPath = cmSystemTools::GetRealPath(oldPolicyPath);
+    if (warnAbout152) {
+      computeNewPath(input, realPath);
+      if (oldPolicyPath != realPath) {
+        status.GetMakefile().IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat(
+            cmPolicies::GetPolicyWarning(cmPolicies::CMP0152), '\n',
+            "From input path:\n  ", input,
+            "\nthe policy OLD behavior produces path:\n  ", oldPolicyPath,
+            "\nbut the policy NEW behavior produces path:\n  ", realPath,
+            "\nSince the policy is not set, CMake is using the OLD "
+            "behavior for compatibility."));
+      }
+    }
+    realPath = oldPolicyPath;
+  }
 
   status.GetMakefile().AddDefinition(args[2], realPath);
 
@@ -1556,7 +1609,7 @@ bool HandlePathCommand(std::vector<std::string> const& args,
 #endif
   std::vector<std::string> path = cmSystemTools::SplitString(args[1], pathSep);
 
-  std::string value = cmJoin(cmMakeRange(path).transform(convert), ";");
+  std::string value = cmList::to_string(cmMakeRange(path).transform(convert));
   status.GetMakefile().AddDefinition(args[2], value);
   return true;
 }
@@ -2967,19 +3020,17 @@ bool HandleCreateLinkCommand(std::vector<std::string> const& args,
   }
 
   // Check if the new file already exists and remove it.
-  if ((cmSystemTools::FileExists(newFileName) ||
-       cmSystemTools::FileIsSymlink(newFileName)) &&
+  if (cmSystemTools::PathExists(newFileName) &&
       !cmSystemTools::RemoveFile(newFileName)) {
-    std::ostringstream e;
-    e << "Failed to create link '" << newFileName
-      << "' because existing path cannot be removed: "
-      << cmSystemTools::GetLastSystemError() << "\n";
+    auto err = cmStrCat("Failed to create link '", newFileName,
+                        "' because existing path cannot be removed: ",
+                        cmSystemTools::GetLastSystemError(), '\n');
 
     if (!arguments.Result.empty()) {
-      status.GetMakefile().AddDefinition(arguments.Result, e.str());
+      status.GetMakefile().AddDefinition(arguments.Result, err);
       return true;
     }
-    status.SetError(e.str());
+    status.SetError(err);
     return false;
   }
 
@@ -3158,7 +3209,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
       if (!parsedArgs.RPathPrefix.empty()) {
         status.GetMakefile().AddDefinition(
           parsedArgs.RPathPrefix + "_" + firstPath,
-          cmJoin(archive.GetRPaths().at(firstPath), ";"));
+          cmList::to_string(archive.GetRPaths().at(firstPath)));
       }
     } else if (!parsedArgs.ConflictingDependenciesPrefix.empty()) {
       conflictingDeps.push_back(val.first);
@@ -3166,7 +3217,7 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
       paths.insert(paths.begin(), val.second.begin(), val.second.end());
       std::string varName =
         parsedArgs.ConflictingDependenciesPrefix + "_" + val.first;
-      std::string pathsStr = cmJoin(paths, ";");
+      std::string pathsStr = cmList::to_string(paths);
       status.GetMakefile().AddDefinition(varName, pathsStr);
     } else {
       std::ostringstream e;
@@ -3197,17 +3248,17 @@ bool HandleGetRuntimeDependenciesCommand(std::vector<std::string> const& args,
   }
 
   if (!parsedArgs.ResolvedDependenciesVar.empty()) {
-    std::string val = cmJoin(deps, ";");
+    std::string val = cmList::to_string(deps);
     status.GetMakefile().AddDefinition(parsedArgs.ResolvedDependenciesVar,
                                        val);
   }
   if (!parsedArgs.UnresolvedDependenciesVar.empty()) {
-    std::string val = cmJoin(unresolvedDeps, ";");
+    std::string val = cmList::to_string(unresolvedDeps);
     status.GetMakefile().AddDefinition(parsedArgs.UnresolvedDependenciesVar,
                                        val);
   }
   if (!parsedArgs.ConflictingDependenciesPrefix.empty()) {
-    std::string val = cmJoin(conflictingDeps, ";");
+    std::string val = cmList::to_string(conflictingDeps);
     status.GetMakefile().AddDefinition(
       parsedArgs.ConflictingDependenciesPrefix + "_FILENAMES", val);
   }

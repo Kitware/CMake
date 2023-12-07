@@ -10,7 +10,6 @@
 #include <vector>
 
 #include "cmInstallGenerator.h"
-#include "cmScriptGenerator.h"
 
 class cmExportInstallFileGenerator;
 class cmExportSet;

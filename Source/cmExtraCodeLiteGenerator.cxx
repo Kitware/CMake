@@ -59,7 +59,7 @@ void cmExtraCodeLiteGenerator::Generate()
     this->GlobalGenerator->GetProjectMap();
 
   // loop projects and locate the root project.
-  // and extract the information for creating the worspace
+  // and extract the information for creating the workspace
   // root makefile
   for (auto const& it : projectMap) {
     cmLocalGenerator* lg = it.second[0];

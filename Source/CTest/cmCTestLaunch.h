@@ -43,14 +43,11 @@ private:
   bool ParseArguments(int argc, const char* const* argv);
 
   // The real command line appearing after launcher arguments.
-  int RealArgC;
-  const char* const* RealArgV;
+  std::vector<std::string> RealArgV;
 
   // The real command line after response file expansion.
   std::vector<std::string> RealArgs;
   void HandleRealArg(const char* arg);
-
-  struct cmsysProcess_s* Process;
 
   // Whether or not any data have been written to stdout or stderr.
   bool HaveOut;

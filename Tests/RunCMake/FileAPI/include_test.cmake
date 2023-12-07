@@ -1,7 +1,7 @@
 add_library(interface_lib INTERFACE)
 target_compile_definitions(interface_lib INTERFACE COMPILED_WITH_INTERFACE_LIB)
 add_executable(interface_exe empty.c)
-target_link_libraries(interface_exe PRIVATE inteface_lib)
+target_link_libraries(interface_exe PRIVATE interface_lib)
 set_property(TARGET interface_exe PROPERTY ENABLE_EXPORTS ON)
 set_property(TARGET interface_exe PROPERTY RUNTIME_OUTPUT_DIRECTORY bin)
 set_property(TARGET interface_exe PROPERTY ARCHIVE_OUTPUT_DIRECTORY lib)

@@ -24,6 +24,7 @@ The first signature is for adding a custom command to produce an output:
                      [COMMENT comment]
                      [DEPFILE depfile]
                      [JOB_POOL job_pool]
+                     [JOB_SERVER_AWARE <bool>]
                      [VERBATIM] [APPEND] [USES_TERMINAL]
                      [COMMAND_EXPAND_LISTS]
                      [DEPENDS_EXPLICIT_ONLY])
@@ -85,6 +86,11 @@ The options are:
     :manual:`generator expressions <cmake-generator-expressions(7)>`.
     :ref:`Target-dependent expressions <Target-Dependent Queries>` are not
     permitted.
+
+  .. versionchanged:: 3.28
+    In targets using :ref:`file sets`, custom command byproducts are now
+    considered private unless they are listed in a non-private file set.
+    See policy :policy:`CMP0154`.
 
 ``COMMAND``
   Specify the command-line(s) to execute at build time.
@@ -221,6 +227,19 @@ The options are:
   Using a pool that is not defined by :prop_gbl:`JOB_POOLS` causes
   an error by ninja at build time.
 
+``JOB_SERVER_AWARE``
+  .. versionadded:: 3.28
+
+  Specify that the command is GNU Make job server aware.
+
+  For the :generator:`Unix Makefiles`, :generator:`MSYS Makefiles`, and
+  :generator:`MinGW Makefiles` generators this will add the ``+`` prefix to the
+  recipe line. See the `GNU Make Documentation`_ for more information.
+
+  This option is silently ignored by other generators.
+
+.. _`GNU Make Documentation`: https://www.gnu.org/software/make/manual/html_node/MAKE-Variable.html
+
 ``MAIN_DEPENDENCY``
   Specify the primary input source file to the command.  This is
   treated just like any value given to the ``DEPENDS`` option
@@ -255,6 +274,11 @@ The options are:
     :manual:`generator expressions <cmake-generator-expressions(7)>`.
     :ref:`Target-dependent expressions <Target-Dependent Queries>` are not
     permitted.
+
+  .. versionchanged:: 3.28
+    In targets using :ref:`file sets`, custom command outputs are now
+    considered private unless they are listed in a non-private file set.
+    See policy :policy:`CMP0154`.
 
 ``USES_TERMINAL``
   .. versionadded:: 3.2
@@ -516,7 +540,7 @@ one of the keywords to make clear the behavior they expect.
   Because generator expressions can be used in custom commands,
   it is possible to define ``COMMAND`` lines or whole custom commands
   which evaluate to empty strings for certain configurations.
-  For **Visual Studio 11 2012 (and newer)** generators these command
+  For **Visual Studio 12 2013 (and newer)** generators these command
   lines or custom commands will be omitted for the specific
   configuration and no "empty-string-command" will be added.
 

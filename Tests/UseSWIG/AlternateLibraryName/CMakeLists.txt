@@ -7,7 +7,7 @@ include(CTest)
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 
-find_package(Python2 REQUIRED COMPONENTS Interpreter Development)
+find_package(Python REQUIRED COMPONENTS Interpreter Development)
 
 # Path separator
 if (WIN32)
@@ -27,9 +27,9 @@ swig_add_library(example_python
 set_target_properties (example_python PROPERTIES
   INCLUDE_DIRECTORIES "${CMAKE_CURRENT_SOURCE_DIR}/.."
   SWIG_USE_TARGET_INCLUDE_DIRECTORIES TRUE)
-target_link_libraries(example_python PRIVATE Python2::Python)
+target_link_libraries(example_python PRIVATE Python::Python)
 
 
 add_test (NAME AlternateLibraryName.example1
   COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}${PS}$<TARGET_FILE_DIR:example_python>"
-  "${Python2_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/../runme.py")
+  "${Python_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/../runme.py")

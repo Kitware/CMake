@@ -4,7 +4,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cstddef>
 #include <string>
 #include <unordered_map>
 #include <utility>
@@ -26,7 +25,6 @@ public:
   // -- Properties
 
   //! Set the property value
-  void SetProperty(const std::string& name, std::nullptr_t);
   void SetProperty(const std::string& name, cmValue value);
   void SetProperty(const std::string& name, const std::string& value)
   {

@@ -1,1 +1,1 @@
-((Ninja generators)?(build stopped: dependency cycle:)|(Visual Studio generators)?(error : Cannot build the following source files because there is a cyclic dependency between them))
+((Ninja generators)?(CMake Error: Circular dependency detected in the C\+\+ module import graph. See modules named: "a", "b")|(Visual Studio generators)?(error : Cannot build the following source files because there is a cyclic dependency between them))

@@ -8,7 +8,7 @@ FindRuby
 Find Ruby
 
 This module finds if Ruby is installed and determines where the
-include files and libraries are.  Ruby 1.8 through 3.1 are
+include files and libraries are.  Ruby 1.8 through 3.2 are
 supported.
 
 The minimum required version of Ruby can be specified using the
@@ -136,13 +136,13 @@ set(Ruby_FIND_VERSION_SHORT_NODOT "${Ruby_FIND_VERSION_MAJOR}${Ruby_FIND_VERSION
 
 # Set name of possible executables, ignoring the minor
 # Eg:
-# 2.1.1 => from ruby31 to ruby21 included
-# 2.1   => from ruby31 to ruby21 included
-# 2     => from ruby31 to ruby20 included
-# empty => from ruby31 to ruby18 included
+# 2.1.1 => from ruby32 to ruby21 included
+# 2.1   => from ruby32 to ruby21 included
+# 2     => from ruby32 to ruby20 included
+# empty => from ruby32 to ruby18 included
 if(NOT Ruby_FIND_VERSION_EXACT)
 
-  foreach(_ruby_version RANGE 31 18 -1)
+  foreach(_ruby_version RANGE 32 18 -1)
     string(SUBSTRING "${_ruby_version}" 0 1 _ruby_major_version)
     string(SUBSTRING "${_ruby_version}" 1 1 _ruby_minor_version)
 

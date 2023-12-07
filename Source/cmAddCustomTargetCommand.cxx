@@ -17,6 +17,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
+#include "cmValue.h"
 
 bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
                               cmExecutionStatus& status)
@@ -54,6 +55,7 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
   const char* comment = nullptr;
   std::vector<std::string> sources;
   std::string job_pool;
+  std::string job_server_aware;
 
   // Keep track of parser state.
   enum tdoing
@@ -65,6 +67,7 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
     doing_comment,
     doing_source,
     doing_job_pool,
+    doing_job_server_aware,
     doing_nothing
   };
   tdoing doing = doing_command;
@@ -102,6 +105,8 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
       doing = doing_comment;
     } else if (copy == "JOB_POOL") {
       doing = doing_job_pool;
+    } else if (copy == "JOB_SERVER_AWARE") {
+      doing = doing_job_server_aware;
     } else if (copy == "COMMAND") {
       doing = doing_command;
 
@@ -147,6 +152,9 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
           break;
         case doing_job_pool:
           job_pool = copy;
+          break;
+        case doing_job_server_aware:
+          job_server_aware = copy;
           break;
         default:
           status.SetError("Wrong syntax. Unknown type of argument.");
@@ -223,6 +231,7 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
   cc->SetUsesTerminal(uses_terminal);
   cc->SetCommandExpandLists(command_expand_lists);
   cc->SetJobPool(job_pool);
+  cc->SetJobserverAware(cmIsOn(job_server_aware));
   cmTarget* target =
     mf.AddUtilityCommand(targetName, excludeFromAll, std::move(cc));
 

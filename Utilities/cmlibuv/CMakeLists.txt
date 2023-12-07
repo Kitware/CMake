@@ -294,27 +294,13 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
     )
   list(APPEND uv_defines
     __EXTENSIONS__
+    _XOPEN_SOURCE=600
     )
+  if(NOT CMAKE_C_STANDARD OR CMAKE_C_STANDARD EQUAL 90)
+    set(CMAKE_C_STANDARD 11)
+  endif()
   if(CMAKE_SYSTEM_VERSION STREQUAL "5.10")
-    set(CMAKE_C_STANDARD 90)
-    if(CMAKE_VERSION VERSION_LESS 3.8.20170504 AND CMAKE_C_COMPILER_ID STREQUAL "SunPro" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.14)
-      # The running version of CMake does not know how to add this flag.
-      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c90")
-    endif()
-    list(APPEND uv_defines
-      _XOPEN_SOURCE=500
-      )
-  else()
-    if(NOT CMAKE_C_STANDARD OR CMAKE_C_STANDARD EQUAL 90)
-      set(CMAKE_C_STANDARD 11)
-    endif()
-    if(CMAKE_VERSION VERSION_LESS 3.8.20170505 AND CMAKE_C_COMPILER_ID STREQUAL "SunPro" AND CMAKE_C_COMPILER_VERSION VERSION_LESS 5.14)
-      # The running version of CMake does not know how to add this flag.
-      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -xc99")
-    endif()
-    list(APPEND uv_defines
-      _XOPEN_SOURCE=600
-      )
+    list(APPEND uv_defines SUNOS_NO_IFADDRS)
   endif()
   list(APPEND uv_sources
     src/unix/no-proctitle.c
@@ -364,5 +350,9 @@ include_directories(
 add_library(cmlibuv STATIC ${uv_sources})
 target_link_libraries(cmlibuv ${uv_libraries})
 set_property(TARGET cmlibuv PROPERTY COMPILE_DEFINITIONS ${uv_defines})
+
+if(WIN32 AND CMake_BUILD_PCH)
+  target_precompile_headers(cmlibuv PRIVATE "include/uv.h" "src/win/internal.h")
+endif()
 
 install(FILES LICENSE DESTINATION ${CMAKE_DOC_DIR}/cmlibuv)

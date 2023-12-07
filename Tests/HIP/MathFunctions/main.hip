@@ -18,11 +18,15 @@ bool verify(F f, T expected)
 {
   std::unique_ptr<T> cpu_T(new T);
   T* gpu_T = nullptr;
-  hipMalloc((void**)&gpu_T, sizeof(T));
+  if (hipMalloc((void**)&gpu_T, sizeof(T)) != hipSuccess) {
+    return false;
+  }
+  bool result = true;
   hipLaunchKernelGGL(global_entry_point, 1, 1, 0, 0, f, gpu_T);
-  hipMemcpy(cpu_T.get(), gpu_T, sizeof(T), hipMemcpyDeviceToHost);
-  hipFree(gpu_T);
-  return (*cpu_T == expected);
+  result = hipMemcpy(cpu_T.get(), gpu_T, sizeof(T), hipMemcpyDeviceToHost) == hipSuccess && result;
+  result = hipFree(gpu_T) == hipSuccess && result;
+  result = *cpu_T == expected && result;
+  return result;
 }
 }
 

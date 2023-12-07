@@ -21,8 +21,7 @@
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
-#include "cmCTestResourceSpec.h"
-#include "cmCTestTypes.h"
+#include "cmCTestTypes.h" // IWYU pragma: keep
 #include "cmDuration.h"
 #include "cmListFileCache.h"
 #include "cmValue.h"
@@ -172,6 +171,7 @@ public:
     std::set<std::string> FixturesRequired;
     std::set<std::string> RequireSuccessDepends;
     std::vector<std::vector<cmCTestTestResourceRequirement>> ResourceGroups;
+    std::string GeneratedResourceSpecFile;
     // Private test generator properties used to track backtraces
     cmListFileBacktrace Backtrace;
   };
@@ -319,7 +319,7 @@ private:
 
   // compute the lists of tests that will actually run
   // based on LastTestFailed.log
-  void ComputeTestListForRerunFailed();
+  bool ComputeTestListForRerunFailed();
 
   // add required setup/cleanup tests not already in the
   // list of tests to be run and update dependencies between
@@ -360,8 +360,6 @@ private:
   cmsys::RegularExpression IncludeTestsRegularExpression;
   cmsys::RegularExpression ExcludeTestsRegularExpression;
 
-  bool UseResourceSpec;
-  cmCTestResourceSpec ResourceSpec;
   std::string ResourceSpecFile;
 
   void RecordCustomTestMeasurements(cmXMLWriter& xml, std::string content);

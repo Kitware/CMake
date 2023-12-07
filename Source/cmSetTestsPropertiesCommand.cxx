@@ -5,9 +5,15 @@
 #include <algorithm>
 #include <iterator>
 
+#include <cmext/string_view>
+
+#include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"
+#include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmRange.h"
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmTest.h"
 
 bool cmSetTestsPropertiesCommand(std::vector<std::string> const& args,
@@ -31,9 +37,29 @@ bool cmSetTestsPropertiesCommand(std::vector<std::string> const& args,
     return false;
   }
 
+  std::vector<std::string> tests;
+  std::string directory;
+  cmArgumentParser<void> parser;
+  parser.Bind("DIRECTORY"_s, directory);
+  auto result = parser.Parse(cmStringRange{ args.begin(), propsIter }, &tests);
+
+  cmMakefile* mf = &status.GetMakefile();
+  if (result.MaybeReportError(*mf)) {
+    return false;
+  }
+  if (!directory.empty()) {
+    std::string absDirectory = cmSystemTools::CollapseFullPath(
+      directory, mf->GetCurrentSourceDirectory());
+    mf = mf->GetGlobalGenerator()->FindMakefile(absDirectory);
+    if (!mf) {
+      status.SetError(cmStrCat("given non-existent DIRECTORY ", directory));
+      return false;
+    }
+  }
+
   // loop over all the tests
-  for (const std::string& tname : cmStringRange{ args.begin(), propsIter }) {
-    if (cmTest* test = status.GetMakefile().GetTest(tname)) {
+  for (const std::string& tname : tests) {
+    if (cmTest* test = mf->GetTest(tname)) {
       // loop through all the props and set them
       for (auto k = propsIter + 1; k != args.end(); k += 2) {
         if (!k->empty()) {

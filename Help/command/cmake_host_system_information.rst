@@ -146,6 +146,13 @@ queried.  The list of queried values is stored in ``<variable>``.
 
   See :variable:`CMAKE_HOST_SYSTEM_PROCESSOR`
 
+``MSYSTEM_PREFIX``
+  .. versionadded:: 3.28
+
+  Available only on Windows hosts.  In a MSYS or MinGW development
+  environment that sets the ``MSYSTEM`` environment variable, this
+  is its installation prefix.  Otherwise, this is the empty string.
+
 ``DISTRIB_INFO``
   .. versionadded:: 3.22
 

@@ -12,6 +12,10 @@ run_cmake(VALIDATOR-undefined-function)
 run_cmake(VALIDATOR-specify-macro)
 run_cmake(VALIDATOR)
 
+if(CMAKE_HOST_WIN32 AND MINGW)
+  run_cmake(MSYSTEM_PREFIX)
+endif()
+
 if(APPLE)
   run_cmake(FrameworksWithSubdirs)
 endif()

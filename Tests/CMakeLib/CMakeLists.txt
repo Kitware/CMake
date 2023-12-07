@@ -11,6 +11,7 @@ set(CMakeLib_TESTS
   testCTestResourceAllocator.cxx
   testCTestResourceSpec.cxx
   testCTestResourceGroups.cxx
+  testDebug.cxx
   testGccDepfileReader.cxx
   testGeneratedFileStream.cxx
   testJSONHelpers.cxx
@@ -31,6 +32,7 @@ set(CMakeLib_TESTS
   testCMExtAlgorithm.cxx
   testCMExtEnumSet.cxx
   testList.cxx
+  testCMakePath.cxx
   )
 if(CMake_ENABLE_DEBUGGER)
   list(APPEND CMakeLib_TESTS
@@ -63,10 +65,18 @@ if(WIN32)
 endif()
 
 configure_file(testXMLParser.h.in testXMLParser.h @ONLY)
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/testUVProcessChainInput.txt" "HELLO WORLD!")
 
 create_test_sourcelist(CMakeLib_TEST_SRCS CMakeLibTests.cxx ${CMakeLib_TESTS})
 add_executable(CMakeLibTests ${CMakeLib_TEST_SRCS})
-target_link_libraries(CMakeLibTests CMakeLib CTestLib)
+target_link_libraries(CMakeLibTests PRIVATE CTestLib CMakeLib)
+if(CMake_BUILD_PCH)
+  target_precompile_headers(CMakeLibTests PRIVATE "<iostream>" "<cm3p/uv.h>")
+  target_compile_definitions(CMakeLibTests PRIVATE "NOMINMAX")
+endif()
+if(WIN32)
+  target_compile_definitions(CMakeLibTests PRIVATE WIN32_LEAN_AND_MEAN)
+endif()
 
 set_property(TARGET CMakeLibTests PROPERTY C_CLANG_TIDY "")
 set_property(TARGET CMakeLibTests PROPERTY CXX_CLANG_TIDY "")
@@ -102,4 +112,7 @@ if(CMake_ENABLE_DEBUGGER)
     add_test(NAME CMakeLib.testDebuggerNamedPipe-${case} COMMAND testDebuggerNamedPipe ${testDebuggerNamedPipe_${case}_ARGS})
     set_property(TEST CMakeLib.testDebuggerNamedPipe-${case} PROPERTY TIMEOUT 300)
   endforeach()
+  if(WIN32)
+    target_compile_definitions(testDebuggerNamedPipe PRIVATE WIN32_LEAN_AND_MEAN)
+  endif()
 endif()

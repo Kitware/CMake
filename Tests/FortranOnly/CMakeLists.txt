@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.5...3.25) # Enable CMP0091 and CMP0141.
 project(FortranOnly Fortran)
 message("CTEST_FULL_OUTPUT ")
 
@@ -186,9 +186,3 @@ if(CMAKE_Fortran_COMPILE_OPTIONS_PREPROCESS_OFF AND
 
   set_property(SOURCE no_preprocess_source_upper.F no_preprocess_source_fpp.fpp PROPERTY Fortran_PREPROCESS OFF)
 endif()
-
-# Issue 25112
-set(CMAKE_Fortran_MODULE_DIRECTORY "${PROJECT_BINARY_DIR}/include")
-add_library(objmod OBJECT objmod.f90)
-add_executable(objmain objmain.f90)
-target_link_libraries(objmain PRIVATE objmod)

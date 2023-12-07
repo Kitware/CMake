@@ -33,6 +33,12 @@ struct cmGeneratorExpressionNode
 
   virtual int NumExpectedParameters() const { return 1; }
 
+  virtual bool ShouldEvaluateNextParameter(const std::vector<std::string>&,
+                                           std::string&) const
+  {
+    return true;
+  }
+
   virtual std::string Evaluate(
     const std::vector<std::string>& parameters,
     cmGeneratorExpressionContext* context,

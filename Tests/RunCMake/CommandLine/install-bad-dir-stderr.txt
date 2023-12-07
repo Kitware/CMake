@@ -1,1 +1,1 @@
-^CMake Error: Error processing file:
+^CMake Error: Not a file:

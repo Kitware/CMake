@@ -60,6 +60,8 @@ expressions to ensure the sources are correctly assigned to the target.
 See the :manual:`cmake-buildsystem(7)` manual for more on defining
 buildsystem properties.
 
+.. _`File Sets`:
+
 File Sets
 ^^^^^^^^^
 
@@ -82,10 +84,7 @@ files within those directories. The acceptable types include:
   Sources intended to be used via a language's ``#include`` mechanism.
 
 ``CXX_MODULES``
-
-  .. note ::
-
-    Experimental. Gated by ``CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API``
+  .. versionadded:: 3.28
 
   Sources which contain C++ interface module or partition units (i.e., those
   using the ``export`` keyword). This file set type may not have an

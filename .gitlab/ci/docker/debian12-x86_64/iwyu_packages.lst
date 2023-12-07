@@ -1,0 +1,9 @@
+# Install development tools.
+clang-15
+libclang-15-dev
+llvm-15-dev
+libz-dev
+g++
+cmake
+ninja-build
+git

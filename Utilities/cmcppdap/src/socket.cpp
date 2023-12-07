@@ -108,7 +108,6 @@ class dap::Socket::Shared : public dap::ReaderWriter {
       return out;
     }
 
-    freeaddrinfo(info);
     term();
     return nullptr;
   }
@@ -117,7 +116,9 @@ class dap::Socket::Shared : public dap::ReaderWriter {
   Shared(addrinfo* info, SOCKET socket) : info(info), s(socket) {}
 
   ~Shared() {
-    freeaddrinfo(info);
+    if (info) {
+        freeaddrinfo(info);
+    }
     close();
     term();
   }

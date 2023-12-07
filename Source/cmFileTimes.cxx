@@ -6,6 +6,8 @@
 
 #include <cm/memory>
 
+#include "cmsys/Status.hxx"
+
 #include "cm_sys_stat.h"
 
 #if defined(_WIN32)
@@ -13,6 +15,8 @@
 
 #  include "cmSystemTools.h"
 #else
+#  include <cerrno>
+
 #  include <utime.h>
 #endif
 
@@ -66,11 +70,11 @@ cmFileTimes::cmFileTimes(std::string const& fileName)
 }
 cmFileTimes::~cmFileTimes() = default;
 
-bool cmFileTimes::Load(std::string const& fileName)
+cmsys::Status cmFileTimes::Load(std::string const& fileName)
 {
   std::unique_ptr<Times> ptr;
   if (this->IsValid()) {
-    // Invalidate this and re-use times
+    // Invalidate this and reuse times
     ptr.swap(this->times);
   } else {
     ptr = cm::make_unique<Times>();
@@ -82,29 +86,29 @@ bool cmFileTimes::Load(std::string const& fileName)
                 GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING,
                 FILE_FLAG_BACKUP_SEMANTICS, 0);
   if (!handle) {
-    return false;
+    return cmsys::Status::Windows_GetLastError();
   }
   if (!GetFileTime(handle, &ptr->timeCreation, &ptr->timeLastAccess,
                    &ptr->timeLastWrite)) {
-    return false;
+    return cmsys::Status::Windows_GetLastError();
   }
 #else
   struct stat st;
   if (stat(fileName.c_str(), &st) < 0) {
-    return false;
+    return cmsys::Status::POSIX_errno();
   }
   ptr->timeBuf.actime = st.st_atime;
   ptr->timeBuf.modtime = st.st_mtime;
 #endif
   // Accept times
   this->times = std::move(ptr);
-  return true;
+  return cmsys::Status::Success();
 }
 
-bool cmFileTimes::Store(std::string const& fileName) const
+cmsys::Status cmFileTimes::Store(std::string const& fileName) const
 {
   if (!this->IsValid()) {
-    return false;
+    return cmsys::Status::POSIX(EINVAL);
   }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -112,18 +116,28 @@ bool cmFileTimes::Store(std::string const& fileName) const
     cmSystemTools::ConvertToWindowsExtendedPath(fileName).c_str(),
     FILE_WRITE_ATTRIBUTES, 0, 0, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, 0);
   if (!handle) {
-    return false;
+    return cmsys::Status::Windows_GetLastError();
   }
-  return SetFileTime(handle, &this->times->timeCreation,
-                     &this->times->timeLastAccess,
-                     &this->times->timeLastWrite) != 0;
+  if (SetFileTime(handle, &this->times->timeCreation,
+                  &this->times->timeLastAccess,
+                  &this->times->timeLastWrite) == 0) {
+    return cmsys::Status::Windows_GetLastError();
+  }
 #else
-  return utime(fileName.c_str(), &this->times->timeBuf) >= 0;
+  if (utime(fileName.c_str(), &this->times->timeBuf) < 0) {
+    return cmsys::Status::POSIX_errno();
+  }
 #endif
+  return cmsys::Status::Success();
 }
 
-bool cmFileTimes::Copy(std::string const& fromFile, std::string const& toFile)
+cmsys::Status cmFileTimes::Copy(std::string const& fromFile,
+                                std::string const& toFile)
 {
   cmFileTimes fileTimes;
-  return (fileTimes.Load(fromFile) && fileTimes.Store(toFile));
+  cmsys::Status load_status = fileTimes.Load(fromFile);
+  if (!load_status) {
+    return load_status;
+  }
+  return fileTimes.Store(toFile);
 }

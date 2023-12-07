@@ -20,6 +20,10 @@ run_cmake(VALIDATOR-undefined-function)
 run_cmake(VALIDATOR-specify-macro)
 run_cmake(VALIDATOR)
 
+if(CMAKE_HOST_WIN32 AND MINGW)
+  run_cmake(MSYSTEM_PREFIX)
+endif()
+
 run_cmake_script(FromScriptMode "-DTEMP_DIR=${RunCMake_BINARY_DIR}/FromScriptMode-temp")
 
 run_cmake_with_options(FromPATHEnvDebugVar --debug-find-var=CREATED_LIBRARY)

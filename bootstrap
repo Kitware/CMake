@@ -251,8 +251,8 @@ cmake_doc_dir_default="`cmake_install_dest_default DOC ${cmake_doc_dir_keyword}`
 cmake_man_dir_default="`cmake_install_dest_default MAN ${cmake_man_dir_keyword}`"
 cmake_xdgdata_dir_default="`cmake_install_dest_default XDGDATA ${cmake_xdgdata_dir_keyword}`"
 
-CMAKE_KNOWN_C_COMPILERS="cc gcc clang xlc icc tcc"
-CMAKE_KNOWN_CXX_COMPILERS="aCC xlC CC g++ clang++ c++ icc como "
+CMAKE_KNOWN_C_COMPILERS="cc gcc clang xlc icx tcc"
+CMAKE_KNOWN_CXX_COMPILERS="aCC xlC CC g++ clang++ c++ icpx"
 CMAKE_KNOWN_MAKE_PROCESSORS="gmake make smake"
 CMAKE_KNOWN_NINJA_PROCESSORS="ninja-build ninja samu"
 
@@ -333,6 +333,7 @@ CMAKE_CXX_SOURCES="\
   cmCustomCommandGenerator \
   cmCustomCommandLines \
   cmCxxModuleMapper \
+  cmCxxModuleUsageEffects \
   cmDefinePropertyCommand \
   cmDefinitions \
   cmDocumentationFormatter \
@@ -392,6 +393,7 @@ CMAKE_CXX_SOURCES="\
   cmGlobVerificationManager \
   cmHexFileConverter \
   cmIfCommand \
+  cmImportedCxxModuleInfo \
   cmIncludeCommand \
   cmIncludeGuardCommand \
   cmIncludeDirectoryCommand \
@@ -414,6 +416,8 @@ CMAKE_CXX_SOURCES="\
   cmInstallTargetGenerator \
   cmInstallTargetsCommand \
   cmInstalledFile \
+  cmJSONHelpers \
+  cmJSONState \
   cmLDConfigLDConfigTool \
   cmLDConfigTool \
   cmLinkDirectoriesCommand \
@@ -450,6 +454,7 @@ CMAKE_CXX_SOURCES="\
   cmGccDepfileReader \
   cmReturnCommand \
   cmPlaceholderExpander \
+  cmPlistParser \
   cmRulePlaceholderExpander \
   cmRuntimeDependencyArchive \
   cmScriptGenerator \
@@ -500,9 +505,11 @@ CMAKE_CXX_SOURCES="\
   cmWhileCommand \
   cmWindowsRegistry \
   cmWorkingDirectory \
+  cmXcFramework \
   cmake  \
   cmakemain \
   cmcmd  \
+  cm_fileno \
 "
 
 if ${cmake_system_mingw}; then
@@ -587,6 +594,12 @@ LIBRHASH_C_SOURCES="\
   librhash/sha256.c \
   librhash/sha3.c \
   librhash/sha512.c \
+  "
+
+JSONCPP_CXX_SOURCES="\
+  src/lib_json/json_reader.cpp \
+  src/lib_json/json_value.cpp \
+  src/lib_json/json_writer.cpp \
   "
 
 if ${cmake_system_mingw}; then
@@ -1092,12 +1105,6 @@ if test "${cmake_bootstrap_generator}" = "Ninja"; then
     cmFortranLexer \
     cmFortranParser \
     "
-
-  JSONCPP_CXX_SOURCES="\
-    src/lib_json/json_reader.cpp \
-    src/lib_json/json_value.cpp \
-    src/lib_json/json_writer.cpp \
-    "
 else
   CMAKE_CXX_SOURCES="${CMAKE_CXX_SOURCES} \
     cmDepends \
@@ -1111,8 +1118,6 @@ else
     cmMakefileUtilityTargetGenerator \
     cmProcessTools \
     "
-
-  JSONCPP_CXX_SOURCES=
 fi
 
 # Add Cygwin-specific flags
@@ -1726,12 +1731,10 @@ if test "x${bootstrap_system_librhash}" = "x"; then
     objs="${objs} rhash-`cmake_obj ${a}`"
   done
 fi
-if test "${cmake_bootstrap_generator}" = "Ninja"; then
-  if test "x${bootstrap_system_jsoncpp}" = "x"; then
-    for a in ${JSONCPP_CXX_SOURCES}; do
-      objs="${objs} jsoncpp-`cmake_obj ${a}`"
-    done
-  fi
+if test "x${bootstrap_system_jsoncpp}" = "x"; then
+  for a in ${JSONCPP_CXX_SOURCES}; do
+    objs="${objs} jsoncpp-`cmake_obj ${a}`"
+  done
 fi
 
 libs=""
@@ -1763,8 +1766,6 @@ else
       libs="${libs} -lkvm"
       ;;
     *SunOS*)
-      # Normally libuv uses '-D_XOPEN_SOURCE=500 -std=c90' on Solaris 5.10,
-      # but we do not need to do that because we bootstrap using POSIX APIs.
       uv_c_flags="${uv_c_flags} -D__EXTENSIONS__ -D_XOPEN_SOURCE=600"
       libs="${libs} -lkstat -lnsl -lsendfile -lsocket -lrt"
       ;;
@@ -1800,17 +1801,15 @@ if test "x${bootstrap_system_librhash}" != "x"; then
   libs="${libs} -lrhash"
 fi
 
-if test "${cmake_bootstrap_generator}" = "Ninja"; then
-  jsoncpp_cxx_flags=
-  if test "x${bootstrap_system_jsoncpp}" = "x"; then
-    jsoncpp_cxx_flags="${jsoncpp_cxx_flags} `cmake_escape_shell "-I${cmake_source_dir}/Utilities/cmjsoncpp/include"`"
-  else
-    if test `which pkg-config`; then
-      use_jsoncpp_flags="`pkg-config --cflags jsoncpp`"
-      cmake_cxx_flags="${cmake_cxx_flags} ${use_jsoncpp_flags}"
-    fi
-    libs="${libs} -ljsoncpp"
+jsoncpp_cxx_flags=
+if test "x${bootstrap_system_jsoncpp}" = "x"; then
+  jsoncpp_cxx_flags="${jsoncpp_cxx_flags} `cmake_escape_shell "-I${cmake_source_dir}/Utilities/cmjsoncpp/include"`"
+else
+  if test `which pkg-config`; then
+    use_jsoncpp_flags="`pkg-config --cflags jsoncpp`"
+    cmake_cxx_flags="${cmake_cxx_flags} ${use_jsoncpp_flags}"
   fi
+  libs="${libs} -ljsoncpp"
 fi
 
 if test "x${cmake_ansi_cxx_flags}" != "x"; then
@@ -1950,13 +1949,11 @@ if test "x${bootstrap_system_librhash}" = "x"; then
     write_source_rule "c" "rhash-`cmake_obj ${a}`" "${src}" ""
   done
 fi
-if test "${cmake_bootstrap_generator}" = "Ninja"; then
-  if test "x${bootstrap_system_jsoncpp}" = "x"; then
-    for a in ${JSONCPP_CXX_SOURCES}; do
-      src=`cmake_escape_artifact "${cmake_source_dir}/Utilities/cmjsoncpp/${a}"`
-      write_source_rule "cxx" "jsoncpp-`cmake_obj ${a}`" "${src}" "${jsoncpp_cxx_flags}"
-    done
-  fi
+if test "x${bootstrap_system_jsoncpp}" = "x"; then
+  for a in ${JSONCPP_CXX_SOURCES}; do
+    src=`cmake_escape_artifact "${cmake_source_dir}/Utilities/cmjsoncpp/${a}"`
+    write_source_rule "cxx" "jsoncpp-`cmake_obj ${a}`" "${src}" "${jsoncpp_cxx_flags}"
+  done
 fi
 if test "${cmake_bootstrap_generator}" = "Ninja"; then
   echo "

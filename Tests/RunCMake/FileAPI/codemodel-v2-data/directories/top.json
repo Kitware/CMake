@@ -80,7 +80,7 @@
             "type": "target",
             "destination": "lib",
             "paths": [
-                "^((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib)?c_shared_lib\\.(lib|dll\\.a)$"
+                "^((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib)?c_shared_lib\\.(dll\\.a|lib|l)$"
             ],
             "isExcludeFromAll": null,
             "isForAllComponents": null,
@@ -173,7 +173,7 @@
             "type": "target",
             "destination": "lib",
             "paths": [
-                "^cxx/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib)?cxx_shared_lib\\.(lib|dll\\.a)$"
+                "^cxx/((Debug|Release|MinSizeRel|RelWithDebInfo)/)?(lib)?cxx_shared_lib\\.(dll\\.a|lib|l)$"
             ],
             "isExcludeFromAll": null,
             "isForAllComponents": null,

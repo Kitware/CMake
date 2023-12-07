@@ -14,7 +14,7 @@ bool cmWIXPatch::LoadFragments(std::string const& patchFilePath)
   cmWIXPatchParser parser(Fragments, Logger);
   if (!parser.ParseFile(patchFilePath.c_str())) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Failed parsing XML patch file: '" << patchFilePath << "'"
+                  "Failed parsing XML patch file: '" << patchFilePath << '\''
                                                      << std::endl);
     return false;
   }
@@ -25,9 +25,10 @@ bool cmWIXPatch::LoadFragments(std::string const& patchFilePath)
 void cmWIXPatch::ApplyFragment(std::string const& id,
                                cmWIXSourceWriter& writer)
 {
-  cmWIXPatchParser::fragment_map_t::iterator i = Fragments.find(id);
-  if (i == Fragments.end())
+  auto i = Fragments.find(id);
+  if (i == Fragments.end()) {
     return;
+  }
 
   const cmWIXPatchElement& fragment = i->second;
   for (auto const& attr : fragment.attributes) {
@@ -75,9 +76,9 @@ bool cmWIXPatch::CheckForUnappliedFragments()
       fragmentList += ", ";
     }
 
-    fragmentList += "'";
+    fragmentList += '\'';
     fragmentList += fragment.first;
-    fragmentList += "'";
+    fragmentList += '\'';
   }
 
   if (!fragmentList.empty()) {

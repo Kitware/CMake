@@ -1,1 +1,1 @@
-^ninja: error: unknown target 'simplestatic:all'$
+^ninja: error: unknown target 'simplestatic:all'(, did you mean 'simplestatic.l'\?)?$

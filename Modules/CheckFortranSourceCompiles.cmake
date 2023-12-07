@@ -48,7 +48,7 @@ Check if given Fortran source compiles and links into an executable.
   ``.F90`` is a typical choice.
 
   The check is only performed once, with the result cached in the variable named
-  by ``<resultVar>``. Every subsequent CMake run will re-use this cached value
+  by ``<resultVar>``. Every subsequent CMake run will reuse this cached value
   rather than performing the check again, even if the ``<code>`` changes. In
   order to force the check to be re-evaluated, the variable named by
   ``<resultVar>`` must be manually removed from the cache.

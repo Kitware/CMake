@@ -135,7 +135,7 @@ void cmWIXRichTextFormatWriter::WriteDocumentPrefix()
 
 void cmWIXRichTextFormatWriter::ControlWord(std::string const& keyword)
 {
-  File << "\\" << keyword;
+  File << '\\' << keyword;
 }
 
 void cmWIXRichTextFormatWriter::NewControlWord(std::string const& keyword)
@@ -158,7 +158,8 @@ void cmWIXRichTextFormatWriter::EmitUnicodeCodepoint(int c)
   // Do not emit byte order mark (BOM)
   if (c == 0xFEFF) {
     return;
-  } else if (c <= 0xFFFF) {
+  }
+  if (c <= 0xFFFF) {
     EmitUnicodeSurrogate(c);
   } else {
     c -= 0x10000;
@@ -175,12 +176,12 @@ void cmWIXRichTextFormatWriter::EmitUnicodeSurrogate(int c)
   } else {
     File << (c - 65536);
   }
-  File << "?";
+  File << '?';
 }
 
 void cmWIXRichTextFormatWriter::EmitInvalidCodepoint(int c)
 {
   ControlWord("cf1 ");
-  File << "[INVALID-BYTE-" << int(c) << "]";
+  File << "[INVALID-BYTE-" << c << ']';
   ControlWord("cf0 ");
 }
