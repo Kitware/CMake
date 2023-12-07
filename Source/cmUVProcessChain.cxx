@@ -38,7 +38,8 @@ struct cmUVProcessChain::InternalData
 
   bool Valid = false;
 
-  cm::uv_loop_ptr Loop;
+  cm::uv_loop_ptr BuiltinLoop;
+  uv_loop_t* Loop;
 
   StreamData InputStreamData;
   StreamData OutputStreamData;
@@ -71,6 +72,19 @@ cmUVProcessChainBuilder& cmUVProcessChainBuilder::AddCommand(
     this->Processes.emplace_back();
     this->Processes.back().Arguments = arguments;
   }
+  return *this;
+}
+
+cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetBuiltinLoop()
+{
+  this->Loop = nullptr;
+  return *this;
+}
+
+cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetExternalLoop(
+  uv_loop_t& loop)
+{
+  this->Loop = &loop;
   return *this;
 }
 
@@ -135,6 +149,11 @@ cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetWorkingDirectory(
   return *this;
 }
 
+uv_loop_t* cmUVProcessChainBuilder::GetLoop() const
+{
+  return this->Loop;
+}
+
 cmUVProcessChain cmUVProcessChainBuilder::Start() const
 {
   cmUVProcessChain chain;
@@ -157,6 +176,13 @@ bool cmUVProcessChain::InternalData::Prepare(
   const cmUVProcessChainBuilder* builder)
 {
   this->Builder = builder;
+
+  if (this->Builder->Loop) {
+    this->Loop = this->Builder->Loop;
+  } else {
+    this->BuiltinLoop.init();
+    this->Loop = this->BuiltinLoop;
+  }
 
   auto const& input =
     this->Builder->Stdio[cmUVProcessChainBuilder::Stream_INPUT];
@@ -353,7 +379,6 @@ void cmUVProcessChain::InternalData::Finish()
 cmUVProcessChain::cmUVProcessChain()
   : Data(cm::make_unique<InternalData>())
 {
-  this->Data->Loop.init();
 }
 
 cmUVProcessChain::cmUVProcessChain(cmUVProcessChain&& other) noexcept
