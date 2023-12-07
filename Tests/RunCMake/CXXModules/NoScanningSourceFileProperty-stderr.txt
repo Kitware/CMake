@@ -1,0 +1,17 @@
+(CMake Error in CMakeLists.txt:
+  The target named "noscanning-sf-property" has C\+\+ sources that may use
+  modules, but the compiler does not provide a way to discover the import
+  graph dependencies\.  See the cmake-cxxmodules\(7\) manual for details\.  Use
+  the CMAKE_CXX_SCAN_FOR_MODULES variable to enable or disable scanning\.
+|CMake Error in CMakeLists.txt:
+  The target named "noscanning-sf-property" has C\+\+ sources that may use
+  modules, but modules are not supported by this generator:
+
+    [^
+]+
+
+  Modules are supported only by Ninja, Ninja Multi-Config, and Visual Studio
+  generators for VS 17\.4 and newer\.  See the cmake-cxxmodules\(7\) manual for
+  details\.  Use the CMAKE_CXX_SCAN_FOR_MODULES variable to enable or disable
+  scanning\.
+)

@@ -16,7 +16,7 @@
 
 #include <cm/optional>
 
-#include "cm_codecvt.hxx"
+#include "cm_codecvt_Encoding.hxx"
 
 #include "cmBuildOptions.h"
 #include "cmGeneratedFileStream.h"
@@ -77,8 +77,8 @@ public:
   static void WriteDivider(std::ostream& os);
 
   static std::string EncodeRuleName(std::string const& name);
-  std::string EncodeLiteral(const std::string& lit);
-  void EncodeLiteralInplace(std::string& lit);
+  std::string& EncodeLiteral(std::string& lit) override;
+  std::string GetEncodedLiteral(const std::string& lit);
   std::string EncodePath(const std::string& path);
 
   std::unique_ptr<cmLinkLineComputer> CreateLinkLineComputer(
@@ -192,7 +192,7 @@ public:
   bool IsNinja() const override { return true; }
 
   /** Get encoding used by generator for ninja files */
-  codecvt::Encoding GetMakefileEncoding() const override;
+  codecvt_Encoding GetMakefileEncoding() const override;
 
   static cmDocumentationEntry GetDocumentation();
 
@@ -282,6 +282,10 @@ public:
   };
   MapToNinjaPathImpl MapToNinjaPath() { return { this }; }
 
+#ifdef _WIN32
+  std::string const& GetComspec() const { return this->Comspec; }
+#endif
+
   // -- Additional clean files
   void AddAdditionalCleanFile(std::string fileName, const std::string& config);
   const char* GetAdditionalCleanTargetName() const
@@ -343,6 +347,9 @@ public:
   }
 
   virtual std::string OrderDependsTargetForTarget(
+    cmGeneratorTarget const* target, const std::string& config) const;
+
+  virtual std::string OrderDependsTargetForTargetPrivate(
     cmGeneratorTarget const* target, const std::string& config) const;
 
   void AppendTargetOutputs(cmGeneratorTarget const* target,
@@ -423,6 +430,7 @@ public:
     std::string const& arg_dd, std::vector<std::string> const& arg_ddis,
     std::string const& module_dir,
     std::vector<std::string> const& linked_target_dirs,
+    std::vector<std::string> const& forward_modules_from_target_dirs,
     std::string const& arg_lang, std::string const& arg_modmapfmt,
     cmCxxModuleExportInfo const& export_info);
 
@@ -468,7 +476,7 @@ public:
 
   bool IsSingleConfigUtility(cmGeneratorTarget const* target) const;
 
-  bool CheckCxxModuleSupport() override;
+  bool CheckCxxModuleSupport(CxxModuleSupportQuery query) override;
 
 protected:
   void Generate() override;
@@ -590,7 +598,12 @@ private:
   bool NinjaSupportsMetadataOnRegeneration = false;
   bool NinjaSupportsCodePage = false;
 
-  codecvt::Encoding NinjaExpectedEncoding = codecvt::None;
+  codecvt_Encoding NinjaExpectedEncoding = codecvt_Encoding::None;
+
+#ifdef _WIN32
+  // Windows Command shell.
+  std::string Comspec;
+#endif
 
   bool DiagnosedCxxModuleNinjaSupport = false;
 
@@ -727,6 +740,9 @@ public:
   bool SupportsDefaultConfigs() const override { return true; }
 
   std::string OrderDependsTargetForTarget(
+    cmGeneratorTarget const* target, const std::string& config) const override;
+
+  std::string OrderDependsTargetForTargetPrivate(
     cmGeneratorTarget const* target, const std::string& config) const override;
 
 protected:

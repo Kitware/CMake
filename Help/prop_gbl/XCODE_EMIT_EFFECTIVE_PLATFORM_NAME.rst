@@ -16,8 +16,8 @@ generator emits the ``EFFECTIVE_PLATFORM_NAME`` variable:
 - If set to ``ON`` it will always be emitted
 - If set to ``OFF`` it will never be emitted
 - If unset (the default) it will only be emitted when the project was
-  configured for an embedded Xcode SDK like iOS, tvOS, watchOS or any
-  of the simulators.
+  configured for an embedded Xcode SDK like iOS, tvOS, visionOS, watchOS
+  or any of the simulators.
 
 .. note::
 

@@ -44,8 +44,7 @@ public:
                        std::vector<BT<std::string>>& linkPath);
 
   std::string ComputeFrameworkPath(cmComputeLinkInformation& cli,
-                                   cmValue fwSearchFlag,
-                                   cmValue sysFwSearchFlag);
+                                   cmValue fwSearchFlag);
 
   std::string ComputeLinkLibraries(cmComputeLinkInformation& cli,
                                    std::string const& stdLibString);

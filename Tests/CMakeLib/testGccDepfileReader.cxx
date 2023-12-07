@@ -1,6 +1,5 @@
 #include <cstddef> // IWYU pragma: keep
 #include <iostream>
-#include <memory>
 #include <string>
 #include <utility>
 #include <vector>

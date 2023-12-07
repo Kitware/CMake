@@ -1423,7 +1423,7 @@ function(CUDA_COMPUTE_BUILD_PATH path build_path)
   # Only deal with CMake style paths from here on out
   file(TO_CMAKE_PATH "${path}" bpath)
   if (IS_ABSOLUTE "${bpath}")
-    # Absolute paths are generally unnessary, especially if something like
+    # Absolute paths are generally unnecessary, especially if something like
     # file(GLOB_RECURSE) is used to pick up the files.
 
     string(FIND "${bpath}" "${CMAKE_CURRENT_BINARY_DIR}" _binary_dir_pos)

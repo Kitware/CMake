@@ -463,10 +463,6 @@ function(_Doxygen_version_validator version_match doxy_path)
     else()
         _Doxygen_get_version(candidate_version version_result "${doxy_path}")
 
-        if(version_result)
-            message(DEBUG "Unable to determine candidate doxygen version at ${doxy_path}: ${version_result}")
-        endif()
-
         find_package_check_version("${candidate_version}" valid_doxy_version
             HANDLE_VERSION_RANGE
         )
@@ -494,15 +490,18 @@ macro(_Doxygen_find_doxygen)
         _Doxygen_get_version(DOXYGEN_VERSION _Doxygen_version_result "${DOXYGEN_EXECUTABLE}")
 
         if(_Doxygen_version_result)
-            message(WARNING "Unable to determine doxygen version: ${_Doxygen_version_result}")
-        endif()
-
-        # Create an imported target for Doxygen
-        if(NOT TARGET Doxygen::doxygen)
-            add_executable(Doxygen::doxygen IMPORTED GLOBAL)
-            set_target_properties(Doxygen::doxygen PROPERTIES
-                IMPORTED_LOCATION "${DOXYGEN_EXECUTABLE}"
-            )
+            if(NOT Doxygen_FIND_QUIETLY)
+                message(WARNING "Doxygen executable failed unexpected while determining version (exit status: ${_Doxygen_version_result}). Disabling Doxygen.")
+            endif()
+            set(DOXYGEN_EXECUTABLE "${DOXYGEN_EXECUTABLE}-FAILED_EXECUTION-NOTFOUND")
+        else()
+            # Create an imported target for Doxygen
+            if(NOT TARGET Doxygen::doxygen)
+                add_executable(Doxygen::doxygen IMPORTED GLOBAL)
+                set_target_properties(Doxygen::doxygen PROPERTIES
+                    IMPORTED_LOCATION "${DOXYGEN_EXECUTABLE}"
+                )
+            endif()
         endif()
     endif()
 endmacro()

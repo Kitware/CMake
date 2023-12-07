@@ -15,6 +15,8 @@
 #include <cm/string_view>
 
 #if defined(_WIN32)
+#  include <cmext/string_view>
+
 #  include "cmStringAlgorithms.h"
 #endif
 

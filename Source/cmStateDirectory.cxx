@@ -13,6 +13,7 @@
 #include <cmext/string_view>
 
 #include "cmAlgorithms.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmProperty.h"
 #include "cmPropertyMap.h"
@@ -20,7 +21,6 @@
 #include "cmState.h"
 #include "cmStatePrivate.h"
 #include "cmStateTypes.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
@@ -381,15 +381,15 @@ cmValue cmStateDirectory::GetProperty(const std::string& prop,
     for (cmStateSnapshot const& ci : children) {
       child_dirs.push_back(ci.GetDirectory().GetCurrentSource());
     }
-    output = cmJoin(child_dirs, ";");
+    output = cmList::to_string(child_dirs);
     return cmValue(output);
   }
   if (prop == kBUILDSYSTEM_TARGETS) {
-    output = cmJoin(this->DirectoryState->NormalTargetNames, ";");
+    output = cmList::to_string(this->DirectoryState->NormalTargetNames);
     return cmValue(output);
   }
   if (prop == "IMPORTED_TARGETS"_s) {
-    output = cmJoin(this->DirectoryState->ImportedTargetNames, ";");
+    output = cmList::to_string(this->DirectoryState->ImportedTargetNames);
     return cmValue(output);
   }
 
@@ -401,38 +401,38 @@ cmValue cmStateDirectory::GetProperty(const std::string& prop,
       snp = snp.GetCallStackParent();
     }
     std::reverse(listFiles.begin(), listFiles.end());
-    output = cmJoin(listFiles, ";");
+    output = cmList::to_string(listFiles);
     return cmValue(output);
   }
   if (prop == "CACHE_VARIABLES") {
-    output = cmJoin(this->Snapshot_.State->GetCacheEntryKeys(), ";");
+    output = cmList::to_string(this->Snapshot_.State->GetCacheEntryKeys());
     return cmValue(output);
   }
   if (prop == "VARIABLES") {
     std::vector<std::string> res = this->Snapshot_.ClosureKeys();
     cm::append(res, this->Snapshot_.State->GetCacheEntryKeys());
     std::sort(res.begin(), res.end());
-    output = cmJoin(res, ";");
+    output = cmList::to_string(res);
     return cmValue(output);
   }
   if (prop == "INCLUDE_DIRECTORIES") {
-    output = cmJoin(this->GetIncludeDirectoriesEntries(), ";");
+    output = cmList::to_string(this->GetIncludeDirectoriesEntries());
     return cmValue(output);
   }
   if (prop == "COMPILE_OPTIONS") {
-    output = cmJoin(this->GetCompileOptionsEntries(), ";");
+    output = cmList::to_string(this->GetCompileOptionsEntries());
     return cmValue(output);
   }
   if (prop == "COMPILE_DEFINITIONS") {
-    output = cmJoin(this->GetCompileDefinitionsEntries(), ";");
+    output = cmList::to_string(this->GetCompileDefinitionsEntries());
     return cmValue(output);
   }
   if (prop == "LINK_OPTIONS") {
-    output = cmJoin(this->GetLinkOptionsEntries(), ";");
+    output = cmList::to_string(this->GetLinkOptionsEntries());
     return cmValue(output);
   }
   if (prop == "LINK_DIRECTORIES") {
-    output = cmJoin(this->GetLinkDirectoriesEntries(), ";");
+    output = cmList::to_string(this->GetLinkDirectoriesEntries());
     return cmValue(output);
   }
 

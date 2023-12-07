@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGlobalMSYSMakefileGenerator.h"
 
+#include <cmext/string_view>
+
 #include "cmsys/FStream.hxx"
 
 #include "cmMakefile.h"
@@ -31,7 +33,7 @@ std::string cmGlobalMSYSMakefileGenerator::FindMinGW(
   while (fin) {
     fin >> path;
     fin >> mount;
-    if (mount == "/mingw") {
+    if (mount == "/mingw"_s) {
       mingwBin = cmStrCat(path, "/bin");
     }
   }
@@ -45,7 +47,7 @@ void cmGlobalMSYSMakefileGenerator::EnableLanguage(
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 
   if (!mf->IsSet("CMAKE_AR") && !this->CMakeInstance->GetIsInTryCompile() &&
-      !(1 == l.size() && l[0] == "NONE")) {
+      !(1 == l.size() && l[0] == "NONE"_s)) {
     cmSystemTools::Error(
       "CMAKE_AR was not found, please set to archive program. " +
       mf->GetSafeDefinition("CMAKE_AR"));

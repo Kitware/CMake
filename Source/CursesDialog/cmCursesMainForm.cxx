@@ -458,6 +458,14 @@ void cmCursesMainForm::UpdateProgress(const std::string& msg, float prog)
   }
 }
 
+void cmCursesMainForm::Write()
+{
+  this->FillCacheManagerFromUI();
+  this->CMakeInstance->SaveCache(
+    this->CMakeInstance->GetHomeOutputDirectory());
+  this->LoadCache(nullptr);
+}
+
 int cmCursesMainForm::Configure(int noconfigure)
 {
   this->ResetOutputs();
@@ -471,10 +479,7 @@ int cmCursesMainForm::Configure(int noconfigure)
   }
 
   // always save the current gui values to disk
-  this->FillCacheManagerFromUI();
-  this->CMakeInstance->SaveCache(
-    this->CMakeInstance->GetHomeOutputDirectory());
-  this->LoadCache(nullptr);
+  this->Write();
 
   // run the generate process
   this->OkToGenerate = true;
@@ -794,6 +799,21 @@ void cmCursesMainForm::HandleInput()
       else if (key == KEY_PPAGE || key == ctrl('u')) {
         form_driver(this->Form, REQ_PREV_PAGE);
       }
+      // first entry
+      else if (key == KEY_HOME) {
+        form_driver(this->Form, REQ_FIRST_PAGE);
+        form_driver(this->Form, REQ_FIRST_FIELD);
+      }
+      // last entry
+      else if (key == KEY_END) {
+        form_driver(this->Form, REQ_LAST_PAGE);
+        form_driver(this->Form, REQ_LAST_FIELD);
+      }
+      // write and quit
+      else if (key == 'w') {
+        this->Write();
+        break;
+      }
       // configure
       else if (key == 'c') {
         this->Configure();
@@ -853,6 +873,10 @@ void cmCursesMainForm::HandleInput()
       } else if (key == 'n') {
         if (!this->OldSearchString.empty()) {
           this->JumpToCacheEntry(this->OldSearchString.c_str());
+        }
+      } else if (key == 'N') {
+        if (!this->OldSearchString.empty()) {
+          this->JumpToCacheEntry(this->OldSearchString.c_str(), true);
         }
       }
       // switch advanced on/off
@@ -945,6 +969,11 @@ int cmCursesMainForm::LoadCache(const char* /*unused*/)
 
 void cmCursesMainForm::JumpToCacheEntry(const char* astr)
 {
+  this->JumpToCacheEntry(astr, false);
+}
+
+void cmCursesMainForm::JumpToCacheEntry(const char* astr, bool reverse)
+{
   std::string str;
   if (astr) {
     str = cmSystemTools::LowerCase(astr);
@@ -973,12 +1002,21 @@ void cmCursesMainForm::JumpToCacheEntry(const char* astr)
         }
       }
     }
-    if (static_cast<size_t>(findex) >= 3 * this->NumberOfVisibleEntries - 1) {
-      set_current_field(this->Form, this->Fields[2]);
-    } else if (new_page(this->Fields[findex + 1])) {
-      form_driver(this->Form, REQ_NEXT_PAGE);
+    if (!reverse &&
+        static_cast<size_t>(findex) >= 3 * this->NumberOfVisibleEntries - 1) {
+      form_driver(this->Form, REQ_FIRST_PAGE);
+      form_driver(this->Form, REQ_FIRST_FIELD);
+    } else if (reverse && static_cast<size_t>(findex) < 3) {
+      form_driver(this->Form, REQ_LAST_PAGE);
+      form_driver(this->Form, REQ_LAST_FIELD);
+    } else if (this->Fields[findex + (reverse ? -3 : 1)]->page !=
+               this->Fields[findex]->page) {
+      form_driver(this->Form, reverse ? REQ_PREV_PAGE : REQ_NEXT_PAGE);
+      if (reverse) {
+        form_driver(this->Form, REQ_LAST_FIELD);
+      }
     } else {
-      form_driver(this->Form, REQ_NEXT_FIELD);
+      form_driver(this->Form, reverse ? REQ_PREV_FIELD : REQ_NEXT_FIELD);
     }
     cur = current_field(this->Form);
     findex = field_index(cur);
@@ -1040,15 +1078,21 @@ const char* cmCursesMainForm::s_ConstHelpMessage =
   "hit 'g' to have CMake generate all the build files (i.e. makefiles or "
   "project files) and exit. "
   "At any point during the process, you can exit ccmake with 'q'. However, "
-  "this will not generate/change any build files.\n\n"
+  "this will not generate/change any build files. Additionally, you can exit "
+  "ccmake with 'w' to write changes to the cache file without generating or "
+  "changing the build files.\n\n"
   "ccmake KEYS:\n\n"
   "Navigation: "
   "You can use the arrow keys and page up, down to navigate the options. "
-  "Alternatively, you can use the following keys: \n"
+  "Additionally, you can use the following keys: \n"
   " C-n or j : next option\n"
   " C-p or k : previous options\n"
   " C-d : down one page\n"
-  " C-u : up one page\n\n"
+  " C-u : up one page\n"
+  " Home : jump to first option\n"
+  " End : jump to last option\n"
+  " n : next search result\n"
+  " N : previous search result\n\n"
   "Editing options: "
   "To change an option  press enter or return. If the current options is a "
   "boolean, this will toggle its value. "

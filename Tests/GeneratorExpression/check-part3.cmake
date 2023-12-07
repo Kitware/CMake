@@ -20,6 +20,9 @@ endif()
 
 check(test_imported_fallback "1")
 check(test_imported_fallback2 "1")
+check(test_imported_fallback3 "1")
+check(test_imported_fallback4 "1")
+check(test_imported_fallback5 "1")
 check(test_imported_fallback_genex "1")
 
 check(test_alias_file_exe "1")

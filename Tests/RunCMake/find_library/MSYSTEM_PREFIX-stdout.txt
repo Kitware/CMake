@@ -1,0 +1,1 @@
+-- MSYSTEM_PREFIX_LIB='[^']*/Tests/RunCMake/find_library/MSYSTEM_PREFIX/lib/libmsystem_prefix.a'

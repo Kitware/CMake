@@ -58,7 +58,7 @@ int cmCPackProductBuildGenerator::PackageFiles()
     }
   }
 
-  std::string resDir = packageDirFileName + "/Contents";
+  std::string resDir = cmStrCat(packageDirFileName, "/Contents");
 
   if (this->IsSet("CPACK_PRODUCTBUILD_RESOURCES_DIR")) {
     std::string userResDir =
@@ -102,15 +102,24 @@ int cmCPackProductBuildGenerator::PackageFiles()
 
   pkgCmd << productbuild << " --distribution \"" << packageDirFileName
          << "/Contents/distribution.dist\""
-         << " --package-path \"" << packageDirFileName << "/Contents/Packages"
+            " --package-path \""
+         << packageDirFileName
+         << "/Contents/Packages"
+            "\""
+            " --resources \""
+         << resDir
          << "\""
-         << " --resources \"" << resDir << "\""
-         << " --version \"" << version << "\""
-         << (identifier.empty() ? "" : " --identifier \"" + identifier + "\"")
-         << (identityName.empty() ? "" : " --sign \"" + identityName + "\"")
-         << (keychainPath.empty() ? ""
-                                  : " --keychain \"" + keychainPath + "\"")
-         << " \"" << packageFileNames[0] << "\"";
+            " --version \""
+         << version << "\""
+         << (identifier.empty()
+               ? std::string{}
+               : cmStrCat(" --identifier \"", identifier, '"'))
+         << (identityName.empty() ? std::string{}
+                                  : cmStrCat(" --sign \"", identityName, '"'))
+         << (keychainPath.empty()
+               ? std::string{}
+               : cmStrCat(" --keychain \"", keychainPath, '"'))
+         << " \"" << packageFileNames[0] << '"';
 
   // Run ProductBuild
   return RunProductBuild(pkgCmd.str());
@@ -184,10 +193,10 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
 
   std::string resDir = packageFileDir;
   if (component) {
-    resDir += "/";
+    resDir += '/';
     resDir += component->Name;
   }
-  std::string scriptDir = resDir + "/scripts";
+  std::string scriptDir = cmStrCat(resDir, "/scripts");
 
   if (!cmsys::SystemTools::MakeDirectory(scriptDir.c_str())) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -232,15 +241,24 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
     keychainPath = p;
   }
 
-  pkgCmd << pkgbuild << " --root \"" << packageDir << "\""
-         << " --identifier \"" << pkgId << "\""
-         << " --scripts \"" << scriptDir << "\""
-         << " --version \"" << version << "\""
-         << " --install-location \"/\""
-         << (identityName.empty() ? "" : " --sign \"" + identityName + "\"")
-         << (keychainPath.empty() ? ""
-                                  : " --keychain \"" + keychainPath + "\"")
-         << " \"" << packageFile << "\"";
+  pkgCmd << pkgbuild << " --root \"" << packageDir
+         << "\""
+            " --identifier \""
+         << pkgId
+         << "\""
+            " --scripts \""
+         << scriptDir
+         << "\""
+            " --version \""
+         << version
+         << "\""
+            " --install-location \"/\""
+         << (identityName.empty() ? std::string{}
+                                  : cmStrCat(" --sign \"", identityName, "\""))
+         << (keychainPath.empty()
+               ? std::string{}
+               : cmStrCat(" --keychain \"", keychainPath, "\""))
+         << " \"" << packageFile << '"';
 
   if (component && !component->Plist.empty()) {
     pkgCmd << " --component-plist \"" << component->Plist << "\"";
@@ -253,10 +271,10 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
 cmValue cmCPackProductBuildGenerator::GetComponentScript(
   const char* script, const char* component_name)
 {
-  std::string scriptname = std::string("CPACK_") + script + "_";
+  std::string scriptname = cmStrCat("CPACK_", script, '_');
   if (component_name) {
     scriptname += cmSystemTools::UpperCase(component_name);
-    scriptname += "_";
+    scriptname += '_';
   }
   scriptname += "SCRIPT";
 

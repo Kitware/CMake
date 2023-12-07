@@ -11,6 +11,7 @@
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmOutputConverter.h"
+#include "cmScriptGenerator.h"
 #include "cmStringAlgorithms.h"
 
 cmInstallCxxModuleBmiGenerator::cmInstallCxxModuleBmiGenerator(

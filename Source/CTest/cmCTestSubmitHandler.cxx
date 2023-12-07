@@ -285,8 +285,8 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
       if (cmIsOn(this->GetOption("InternalTest"))) {
         upload_as += "ffffffffffffffffffffffffffffffff";
       } else {
-        upload_as +=
-          cmSystemTools::ComputeFileHash(local_file, cmCryptoHash::AlgoMD5);
+        cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
+        upload_as += hasher.HashFile(local_file);
       }
 
       if (!cmSystemTools::FileExists(local_file)) {
@@ -308,6 +308,9 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
 
       // specify target
       ::curl_easy_setopt(curl, CURLOPT_URL, upload_as.c_str());
+
+      // follow redirects
+      ::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1);
 
       // CURLAUTH_BASIC is default, and here we allow additional methods,
       // including more secure ones
@@ -549,8 +552,8 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
     }
   }
 
-  std::string md5sum =
-    cmSystemTools::ComputeFileHash(file, cmCryptoHash::AlgoMD5);
+  cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
+  std::string md5sum = hasher.HashFile(file);
   // 1. request the buildid and check to see if the file
   //    has already been uploaded
   // TODO I added support for subproject. You would need to add

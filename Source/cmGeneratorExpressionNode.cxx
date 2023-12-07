@@ -128,6 +128,16 @@ struct BooleanOpNode : public cmGeneratorExpressionNode
 
   int NumExpectedParameters() const override { return OneOrMoreParameters; }
 
+  bool ShouldEvaluateNextParameter(const std::vector<std::string>& parameters,
+                                   std::string& def_value) const override
+  {
+    if (!parameters.empty() && parameters.back() == failureVal) {
+      def_value = failureVal;
+      return false;
+    }
+    return true;
+  }
+
   std::string Evaluate(const std::vector<std::string>& parameters,
                        cmGeneratorExpressionContext* context,
                        const GeneratorExpressionContent* content,
@@ -194,6 +204,13 @@ static const struct IfNode : public cmGeneratorExpressionNode
   IfNode() {} // NOLINT(modernize-use-equals-default)
 
   int NumExpectedParameters() const override { return 3; }
+
+  bool ShouldEvaluateNextParameter(const std::vector<std::string>& parameters,
+                                   std::string&) const override
+  {
+    return (parameters.empty() ||
+            parameters[0] != cmStrCat(parameters.size() - 1, ""));
+  }
 
   std::string Evaluate(const std::vector<std::string>& parameters,
                        cmGeneratorExpressionContext* context,
@@ -1360,7 +1377,9 @@ static const struct ListNode : public cmGeneratorExpressionNode
               try {
                 auto list = GetList(args.front());
                 args.advance(2);
-                list.insert_items(index, args.begin(), args.end());
+                list.insert_items(index, args.begin(), args.end(),
+                                  cmList::ExpandElements::No,
+                                  cmList::EmptyElements::Yes);
                 return list.to_string();
               } catch (std::out_of_range& e) {
                 reportError(ctx, cnt->GetOriginalExpression(), e.what());
@@ -2540,7 +2559,7 @@ static const struct LinkLibraryNode : public cmGeneratorExpressionNode
     list.front() = LL_BEGIN;
     list.push_back(LL_END);
 
-    return cmJoin(list, ";"_s);
+    return list.to_string();
   }
 } linkLibraryNode;
 
@@ -2609,7 +2628,7 @@ static const struct LinkGroupNode : public cmGeneratorExpressionNode
     list.front() = LG_BEGIN;
     list.push_back(LG_END);
 
-    return cmJoin(list, ";"_s);
+    return list.to_string();
   }
 } linkGroupNode;
 
@@ -2634,7 +2653,7 @@ static const struct HostLinkNode : public cmGeneratorExpressionNode
     }
 
     return context->HeadTarget->IsDeviceLink() ? std::string()
-                                               : cmJoin(parameters, ";");
+                                               : cmList::to_string(parameters);
   }
 } hostLinkNode;
 
@@ -2669,7 +2688,7 @@ static const struct DeviceLinkNode : public cmGeneratorExpressionNode
       list.insert(list.begin(), static_cast<std::string>(DL_BEGIN));
       list.push_back(static_cast<std::string>(DL_END));
 
-      return cmJoin(list, ";");
+      return list.to_string();
     }
 
     return std::string();
@@ -3106,7 +3125,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       mf->AddTargetObject(tgtName, o);
     }
 
-    return cmJoin(objects, ";");
+    return objects.to_string();
   }
 } targetObjectsNode;
 
@@ -3166,7 +3185,7 @@ static const struct TargetRuntimeDllsNode : public TargetRuntimeDllsBaseNode
     cmGeneratorExpressionDAGChecker* /*dagChecker*/) const override
   {
     std::vector<std::string> dlls = CollectDlls(parameters, context, content);
-    return cmJoin(dlls, ";");
+    return cmList::to_string(dlls);
   }
 } targetRuntimeDllsNode;
 
@@ -3189,7 +3208,7 @@ static const struct TargetRuntimeDllDirsNode : public TargetRuntimeDllsBaseNode
         dllDirs.push_back(directory);
       }
     }
-    return cmJoin(dllDirs, ";");
+    return cmList::to_string(dllDirs);
   }
 } targetRuntimeDllDirsNode;
 

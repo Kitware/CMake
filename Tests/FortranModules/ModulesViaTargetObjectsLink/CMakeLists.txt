@@ -1,0 +1,5 @@
+add_library(mvtol_obj STATIC obj.f90)
+add_library(mvtol_lib dummy.f90)
+target_link_libraries(mvtol_lib PRIVATE "$<TARGET_OBJECTS:mvtol_obj>")
+add_library(mvtol_use use.f90)
+target_link_libraries(mvtol_use PRIVATE mvtol_lib)

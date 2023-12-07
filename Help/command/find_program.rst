@@ -23,7 +23,7 @@ find_program
 .. |ENV_CMAKE_XXX_MAC_PATH| replace:: :envvar:`CMAKE_APPBUNDLE_PATH`
 
 .. |SYSTEM_ENVIRONMENT_PATH_XXX| replace:: The directories in ``PATH`` itself.
-.. |SYSTEM_ENVIRONMENT_PATH_WINDOWS_XXX| replace:: On Windows hosts no extra search paths are included
+.. |SYSTEM_ENVIRONMENT_PATH_WINDOWS_XXX| replace:: \
 
 .. |CMAKE_SYSTEM_PREFIX_PATH_XXX| replace::
    |CMAKE_SYSTEM_PREFIX_PATH_XXX_SUBDIR|

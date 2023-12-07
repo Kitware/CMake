@@ -20,7 +20,7 @@ macro(TEST_PASS value msg)
 endmacro()
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-  exec_program(${CMAKE_C_COMPILER} ARGS --version OUTPUT_VARIABLE     _gcc_version_info)
+  execute_process(COMMAND ${CMAKE_C_COMPILER} --version OUTPUT_VARIABLE     _gcc_version_info)
   string (REGEX MATCH "[345]\\.[0-9]\\.[0-9]" _gcc_version "${_gcc_version_info}")
   # gcc on mac just reports: "gcc (GCC) 3.3 20030304 ..." without the
   # patch level, handle this here:
@@ -30,12 +30,12 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES Clang)
-  exec_program(${CMAKE_CXX_COMPILER} ARGS --version OUTPUT_VARIABLE     _clang_version_info)
+  execute_process(COMMAND ${CMAKE_CXX_COMPILER} --version OUTPUT_VARIABLE     _clang_version_info)
   string (REGEX REPLACE ".*version ([0-9]\\.[0-9]).*" "\\1" _clang_version "${_clang_version_info}")
 endif()
 
 if(CMAKE_CXX_COMPILER_ID MATCHES Intel)
-  exec_program(${CMAKE_CXX_COMPILER} ARGS -V OUTPUT_VARIABLE     _intel_version_info)
+  execute_process(COMMAND ${CMAKE_CXX_COMPILER} -V OUTPUT_VARIABLE     _intel_version_info)
   string (REGEX REPLACE ".*Version ([0-9]+(\\.[0-9]+)+).*" "\\1" _intel_version "${_intel_version_info}")
 endif()
 

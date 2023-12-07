@@ -19,6 +19,7 @@
 #include "cmInstallExportGenerator.h"
 #include "cmInstallFileSetGenerator.h"
 #include "cmInstallTargetGenerator.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -91,8 +92,10 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 
     ImportPropertyMap properties;
 
+    std::string includesDestinationDirs;
     this->PopulateIncludeDirectoriesInterface(
-      gt, cmGeneratorExpression::InstallInterface, properties, *te);
+      gt, cmGeneratorExpression::InstallInterface, properties, *te,
+      includesDestinationDirs);
     this->PopulateSourcesInterface(gt, cmGeneratorExpression::InstallInterface,
                                    properties);
     this->PopulateInterfaceProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES", gt,
@@ -125,6 +128,13 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
       gt, cmGeneratorExpression::InstallInterface, properties);
 
     std::string errorMessage;
+    if (!this->PopulateCxxModuleExportProperties(
+          gt, properties, cmGeneratorExpression::InstallInterface,
+          includesDestinationDirs, errorMessage)) {
+      cmSystemTools::Error(errorMessage);
+      return false;
+    }
+
     if (!this->PopulateExportProperties(gt, properties, errorMessage)) {
       cmSystemTools::Error(errorMessage);
       return false;
@@ -430,7 +440,7 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
     }
 
     // Store the property.
-    properties[prop] = cmJoin(objects, ";");
+    properties[prop] = cmList::to_string(objects);
     importedLocations.insert(prop);
   } else {
     if (target->IsFrameworkOnApple() && target->HasImportLibrary(config)) {
@@ -590,10 +600,12 @@ std::string cmExportInstallFileGenerator::GetFileSetDirectories(
   auto cge = ge.Parse(te->FileSetGenerators.at(fileSet)->GetDestination());
 
   for (auto const& config : configs) {
-    auto dest = cmStrCat("${_IMPORT_PREFIX}/",
-                         cmOutputConverter::EscapeForCMake(
-                           cge->Evaluate(gte->LocalGenerator, config, gte),
-                           cmOutputConverter::WrapQuotes::NoWrap));
+    auto unescapedDest = cge->Evaluate(gte->LocalGenerator, config, gte);
+    auto dest = cmOutputConverter::EscapeForCMake(
+      unescapedDest, cmOutputConverter::WrapQuotes::NoWrap);
+    if (!cmSystemTools::FileIsFullPath(unescapedDest)) {
+      dest = cmStrCat("${_IMPORT_PREFIX}/", dest);
+    }
 
     auto const& type = fileSet->GetType();
     // C++ modules do not support interface file sets which are dependent upon
@@ -613,7 +625,7 @@ std::string cmExportInstallFileGenerator::GetFileSetDirectories(
       resultVector.push_back(
         cmStrCat("\"$<$<CONFIG:", config, ">:", dest, ">\""));
     } else {
-      resultVector.push_back(cmStrCat('"', dest, '"'));
+      resultVector.emplace_back(cmStrCat('"', dest, '"'));
       break;
     }
   }
@@ -645,11 +657,14 @@ std::string cmExportInstallFileGenerator::GetFileSetFiles(
       fileSet->EvaluateFileEntry(directories, files, entry,
                                  gte->LocalGenerator, config, gte);
     }
-    auto dest = cmStrCat("${_IMPORT_PREFIX}/",
-                         cmOutputConverter::EscapeForCMake(
-                           destCge->Evaluate(gte->LocalGenerator, config, gte),
-                           cmOutputConverter::WrapQuotes::NoWrap),
-                         '/');
+    auto unescapedDest = destCge->Evaluate(gte->LocalGenerator, config, gte);
+    auto dest =
+      cmStrCat(cmOutputConverter::EscapeForCMake(
+                 unescapedDest, cmOutputConverter::WrapQuotes::NoWrap),
+               '/');
+    if (!cmSystemTools::FileIsFullPath(unescapedDest)) {
+      dest = cmStrCat("${_IMPORT_PREFIX}/", dest);
+    }
 
     bool const contextSensitive = destCge->GetHadContextSensitiveCondition() ||
       std::any_of(directoryEntries.begin(), directoryEntries.end(),
@@ -684,7 +699,7 @@ std::string cmExportInstallFileGenerator::GetFileSetFiles(
           resultVector.push_back(
             cmStrCat("\"$<$<CONFIG:", config, ">:", escapedFile, ">\""));
         } else {
-          resultVector.push_back(cmStrCat('"', escapedFile, '"'));
+          resultVector.emplace_back(cmStrCat('"', escapedFile, '"'));
         }
       }
     }

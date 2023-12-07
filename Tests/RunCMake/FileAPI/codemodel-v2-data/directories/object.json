@@ -49,6 +49,40 @@
         },
         {
             "component": "Unspecified",
+            "type": "cxxModuleBmi",
+            "destination": "bin",
+            "paths": null,
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": null,
+            "targetIndex": null,
+            "cxxModuleBmiTarget": {
+                "id": "^c_object_exe::@5ed5358f70faf8d8af7a$",
+                "index": "c_object_exe"
+            },
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": 13,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
             "type": "target",
             "destination": "bin",
             "paths": [
@@ -59,6 +93,40 @@
             "isOptional": null,
             "targetId": "^cxx_object_exe::@5ed5358f70faf8d8af7a$",
             "targetIndex": "cxx_object_exe",
+            "targetIsImportLibrary": null,
+            "targetInstallNamelink": null,
+            "exportName": null,
+            "exportTargets": null,
+            "scriptFile": null,
+            "backtrace": [
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": 13,
+                    "command": "install",
+                    "hasParent": true
+                },
+                {
+                    "file": "^object/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        },
+        {
+            "component": "Unspecified",
+            "type": "cxxModuleBmi",
+            "destination": "bin",
+            "paths": null,
+            "isExcludeFromAll": null,
+            "isForAllComponents": null,
+            "isOptional": null,
+            "targetId": null,
+            "targetIndex": null,
+            "cxxModuleBmiTarget": {
+                "id": "^cxx_object_exe::@5ed5358f70faf8d8af7a$",
+                "index": "cxx_object_exe"
+            },
             "targetIsImportLibrary": null,
             "targetInstallNamelink": null,
             "exportName": null,

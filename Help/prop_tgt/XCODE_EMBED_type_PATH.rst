@@ -22,3 +22,6 @@ The supported values for ``<type>`` are:
 
 ``PLUGINS``
   .. versionadded:: 3.23
+
+``RESOURCES``
+  .. versionadded:: 3.28

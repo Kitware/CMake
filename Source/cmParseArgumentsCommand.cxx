@@ -20,7 +20,9 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
-static std::string EscapeArg(const std::string& arg)
+namespace {
+
+std::string EscapeArg(const std::string& arg)
 {
   // replace ";" with "\;" so output argument lists will split correctly
   std::string escapedArg;
@@ -33,13 +35,11 @@ static std::string EscapeArg(const std::string& arg)
   return escapedArg;
 }
 
-static std::string JoinList(std::vector<std::string> const& arg, bool escape)
+std::string JoinList(std::vector<std::string> const& arg, bool escape)
 {
-  return escape ? cmJoin(cmMakeRange(arg).transform(EscapeArg), ";")
-                : cmJoin(cmMakeRange(arg), ";");
+  return escape ? cmList::to_string(cmMakeRange(arg).transform(EscapeArg))
+                : cmList::to_string(cmMakeRange(arg));
 }
-
-namespace {
 
 using options_map = std::map<std::string, bool>;
 using single_map = std::map<std::string, std::string>;
@@ -108,8 +108,9 @@ static void PassParsedArguments(
   }
 
   if (!keywordsMissingValues.empty()) {
-    makefile.AddDefinition(prefix + "KEYWORDS_MISSING_VALUES",
-                           cmJoin(cmMakeRange(keywordsMissingValues), ";"));
+    makefile.AddDefinition(
+      prefix + "KEYWORDS_MISSING_VALUES",
+      cmList::to_string(cmMakeRange(keywordsMissingValues)));
   } else {
     makefile.RemoveDefinition(prefix + "KEYWORDS_MISSING_VALUES");
   }

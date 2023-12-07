@@ -79,10 +79,10 @@ if(("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC" AND
   set(_CMAKE_MT_NAMES "mt")
 
   # Prepend toolchain-specific names.
-  if("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" STREQUAL "xClang")
+  if("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^x(Clang|LLVMFlang)$")
     set(_CMAKE_NM_NAMES "llvm-nm" "nm")
     list(PREPEND _CMAKE_AR_NAMES "llvm-lib")
-    # llvm-mt does not support all flags we need in vs_link_exe
+    # llvm-mt is not ready to be used as a replacement for mt.exe
     # list(PREPEND _CMAKE_MT_NAMES "llvm-mt")
     list(PREPEND _CMAKE_LINKER_NAMES "lld-link")
     list(APPEND _CMAKE_TOOL_VARS NM)
@@ -229,7 +229,7 @@ if(NOT CMAKE_RANLIB)
     set(CMAKE_RANLIB : CACHE INTERNAL "noop for ranlib")
 endif()
 
-if(NOT CMAKE_TAPI)
+if(APPLE AND "TAPI" IN_LIST _CMAKE_TOOL_VARS AND NOT CMAKE_TAPI)
   # try to pick-up from Apple toolchain
   execute_process(COMMAND xcrun --find tapi
     OUTPUT_VARIABLE _xcrun_out

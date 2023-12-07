@@ -573,12 +573,12 @@ See also target properties:
 * :prop_tgt:`ANDROID_SKIP_ANT_STEP`
 * :prop_tgt:`ANDROID_STL_TYPE`
 
-.. _`Cross Compiling for iOS, tvOS, or watchOS`:
+.. _`Cross Compiling for iOS, tvOS, visionOS, or watchOS`:
 
-Cross Compiling for iOS, tvOS, or watchOS
------------------------------------------
+Cross Compiling for iOS, tvOS, visionOS, or watchOS
+---------------------------------------------------
 
-For cross-compiling to iOS, tvOS, or watchOS, the :generator:`Xcode`
+For cross-compiling to iOS, tvOS, visionOS, or watchOS, the :generator:`Xcode`
 generator is recommended.  The :generator:`Unix Makefiles` or
 :generator:`Ninja` generators can also be used, but they require the
 project to handle more areas like target CPU selection and code signing.
@@ -591,13 +591,14 @@ a different SDK (e.g. a simulator) can be selected by setting the
 necessary (see :ref:`Switching Between Device and Simulator` below).
 A list of available SDKs can be obtained by running ``xcodebuild -showsdks``.
 
-=======  ================= ==================== ================
-OS       CMAKE_SYSTEM_NAME Device SDK (default) Simulator SDK
-=======  ================= ==================== ================
-iOS      iOS               iphoneos             iphonesimulator
-tvOS     tvOS              appletvos            appletvsimulator
-watchOS  watchOS           watchos              watchsimulator
-=======  ================= ==================== ================
+========  ================= ==================== ================
+OS        CMAKE_SYSTEM_NAME Device SDK (default) Simulator SDK
+========  ================= ==================== ================
+iOS       iOS               iphoneos             iphonesimulator
+tvOS      tvOS              appletvos            appletvsimulator
+visionOS  visionOS          xros                 xrsimulator
+watchOS   watchOS           watchos              watchsimulator
+========  ================= ==================== ================
 
 For example, to create a CMake configuration for iOS, the following
 command is sufficient:
@@ -608,7 +609,7 @@ command is sufficient:
 
 Variable :variable:`CMAKE_OSX_ARCHITECTURES` can be used to set architectures
 for both device and simulator. Variable :variable:`CMAKE_OSX_DEPLOYMENT_TARGET`
-can be used to set an iOS/tvOS/watchOS deployment target.
+can be used to set an iOS/tvOS/visionOS/watchOS deployment target.
 
 Next configuration will install fat 5 architectures iOS library
 and add the ``-miphoneos-version-min=9.3``/``-mios-simulator-version-min=9.3``

@@ -1,0 +1,9 @@
+(CMake Error in CMakeLists.txt:
+  Target "not-cxx-source" has source file
+
+    .*/Tests/RunCMake/CXXModules/sources/not-compiled.txt
+
+  in a "FILE_SET TYPE CXX_MODULES" but it is not scheduled for compilation.
+
+)+
+CMake Generate step failed.  Build files cannot be regenerated correctly.

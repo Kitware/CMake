@@ -42,8 +42,8 @@ endif()
 # Suppress generator deprecation warnings in test suite.
 if(CMAKE_GENERATOR MATCHES "^Visual Studio 9 2008")
   set(TEST_WARN_VS_CODE "set(ENV{CMAKE_WARN_VS9} OFF)")
-elseif(CMAKE_GENERATOR MATCHES "^Visual Studio 11 2012")
-  set(TEST_WARN_VS_CODE "set(ENV{CMAKE_WARN_VS11} OFF)")
+elseif(CMAKE_GENERATOR MATCHES "^Visual Studio 12 2013")
+  set(TEST_WARN_VS_CODE "set(ENV{CMAKE_WARN_VS12} OFF)")
 else()
   set(TEST_WARN_VS_CODE "")
 endif()
@@ -117,8 +117,8 @@ if(BUILD_TESTING)
   if(WIN32 OR CYGWIN)
     set(CMake_TEST_RESOURCES TRUE)
   endif()
-  # for borland and watcom there is no resource support
-  if(WATCOM OR BORLAND)
+  # For some Windows toolchains there is no resource support.
+  if(WATCOM OR BORLAND OR CMAKE_C_COMPILER_ID STREQUAL "OrangeC")
     set(CMake_TEST_RESOURCES FALSE)
   endif()
 
@@ -140,6 +140,10 @@ if(BUILD_TESTING)
     list(APPEND build_generator_args
       --build-makeprogram ${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
       )
+  endif()
+
+  if(_isMultiConfig)
+    set(test_options -C Debug)
   endif()
 
   # Look for git to use for tests.
@@ -434,6 +438,10 @@ if(BUILD_TESTING)
         message(STATUS "Skip VSGNUFortran for ifort dual cpu mac build")
         set(CMAKE_SKIP_VSGNUFortran TRUE)
       endif()
+    endif()
+    if(CMAKE_Fortran_COMPILER_ID STREQUAL LLVMFlang)
+      # No DLLEXPORT for 'Tests/VSGNUFortran/subdir/fortran/world.f'.
+      set(CMAKE_SKIP_VSGNUFortran TRUE)
     endif()
     if(CMAKE_Fortran_COMPILER_ID STREQUAL IntelLLVM)
       message(STATUS "Skip VSGNUFortran for ifx until DLLEXPORT support is implemented")
@@ -1540,10 +1548,40 @@ if(BUILD_TESTING)
     add_subdirectory(GoogleTest)
   endif()
 
-  if(CMake_TEST_FindPython OR CMake_TEST_FindPython_SABIModule OR CMake_TEST_FindPython_NumPy
-      OR CMake_TEST_FindPython_Conda OR CMake_TEST_FindPython_IronPython OR CMake_TEST_FindPython_PyPy)
-    if (CMake_TEST_FindPython AND CMAKE_SYSTEM_NAME MATCHES "Linux|Darwin")
-      set(CMake_TEST_FindPython_SABIModule TRUE)
+  if(CMake_TEST_FindPython)
+    set(CMake_TEST_FindPython2 TRUE)
+    set(CMake_TEST_FindPython3 TRUE)
+  endif()
+  if(CMake_TEST_FindPython_SABIMOdule)
+    set(CMake_TEST_FindPython2_SABIModule TRUE)
+    set(CMake_TEST_FindPython3_SABIModule TRUE)
+  endif()
+  if(CMake_TEST_FindPython_NumPy)
+    set(CMake_TEST_FindPython2_NumPyy TRUE)
+    set(CMake_TEST_FindPython3_NumPy TRUE)
+  endif()
+  if(CMake_TEST_FindPython_Conda)
+    set(CMake_TEST_FindPython3_Conda TRUE)
+  endif()
+  if(CMake_TEST_FindPython_IronPython)
+    set(CMake_TEST_FindPython2_IronPython TRUE)
+    set(CMake_TEST_FindPython3_IronPython TRUE)
+  endif()
+  if(CMake_TEST_FindPython_PyPy)
+    set(CMake_TEST_FindPython2_PyPy TRUE)
+    set(CMake_TEST_FindPython3_PyPy TRUE)
+  endif()
+  if(CMake_TEST_FindPython2 OR CMake_TEST_FindPython3
+      OR CMake_TEST_FindPython2_SABIModule OR CMake_TEST_FindPython3_SABIModule
+      OR CMake_TEST_FindPython2_NumPy OR CMake_TEST_FindPython3_NumPy
+      OR CMake_TEST_FindPython3_Conda
+      OR CMake_TEST_FindPython2_IronPython OR CMake_TEST_FindPython3_IronPython
+      OR CMake_TEST_FindPython2_PyPy OR CMake_TEST_FindPython3_PyPy)
+    if (CMake_TEST_FindPython2 AND CMAKE_SYSTEM_NAME MATCHES "Linux|Darwin")
+      set(CMake_TEST_FindPython2_SABIModule TRUE)
+    endif()
+    if (CMake_TEST_FindPython3 AND CMAKE_SYSTEM_NAME MATCHES "Linux|Darwin")
+      set(CMake_TEST_FindPython3_SABIModule TRUE)
     endif()
     add_subdirectory(FindPython)
   endif()
@@ -2060,7 +2098,10 @@ if(BUILD_TESTING)
       )
   endif()
 
-  if(MAKE_SUPPORTS_SPACES AND NOT CMAKE_GENERATOR STREQUAL "Xcode" AND NOT CMAKE_GENERATOR STREQUAL "Watcom WMake")
+  if(MAKE_SUPPORTS_SPACES
+      AND NOT CMAKE_GENERATOR STREQUAL "Xcode"
+      AND NOT CMAKE_GENERATOR STREQUAL "Watcom WMake"
+      )
     add_test(SubDirSpaces ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/SubDirSpaces"
@@ -2279,11 +2320,6 @@ if(BUILD_TESTING)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSWinStorePhone/${name}")
     endmacro()
 
-    if(vs11 AND ws80)
-      add_test_VSWinStorePhone(vs11-store80-X86 "Visual Studio 11 2012" WindowsStore 8.0 Win32)
-      add_test_VSWinStorePhone(vs11-store80-ARM "Visual Studio 11 2012" WindowsStore 8.0 ARM)
-      add_test_VSWinStorePhone(vs11-store80-X64 "Visual Studio 11 2012" WindowsStore 8.0 x64)
-    endif()
     if(vs12 AND ws81)
       add_test_VSWinStorePhone(vs12-store81-X86 "Visual Studio 12 2013" WindowsStore 8.1 Win32)
       add_test_VSWinStorePhone(vs12-store81-ARM "Visual Studio 12 2013" WindowsStore 8.1 ARM)
@@ -2311,10 +2347,6 @@ if(BUILD_TESTING)
       add_test_VSWinStorePhone(vs14-store10_0-ARM "Visual Studio 14 2015" WindowsStore 10.0 ARM)
       add_test_VSWinStorePhone(vs14-store10_0-X64 "Visual Studio 14 2015" WindowsStore 10.0 x64)
     endif()
-    if(vs11 AND wp80)
-      add_test_VSWinStorePhone(vs11-phone80-X86 "Visual Studio 11 2012" WindowsPhone 8.0 Win32)
-      add_test_VSWinStorePhone(vs11-phone80-ARM "Visual Studio 11 2012" WindowsPhone 8.0 ARM)
-    endif()
     if(vs12 AND wp81)
       add_test_VSWinStorePhone(vs12-phone81-X86 "Visual Studio 12 2013" WindowsPhone 8.1 Win32)
       add_test_VSWinStorePhone(vs12-phone81-ARM "Visual Studio 12 2013" WindowsPhone 8.1 ARM)
@@ -2340,10 +2372,6 @@ if(BUILD_TESTING)
         list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Tutorial/Step${STP}_${name}")
       endforeach()
     endmacro()
-
-    if(vs11)
-      add_test_VSWinCE(vs11-ce80-ARM "Visual Studio 11 2012" WindowsCE 8.0 ${wince_sdk})
-    endif()
 
     if(vs12)
       add_test_VSWinCE(vs12-ce80-ARM "Visual Studio 12 2013" WindowsCE 8.0 ${wince_sdk})
@@ -2471,9 +2499,6 @@ if(BUILD_TESTING)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSAndroid/${name}")
   endmacro()
   if(tegra AND NOT "${CMake_SOURCE_DIR};${CMake_BINARY_DIR}" MATCHES " ")
-    if(vs11)
-      add_test_VSAndroid(vs11 "Visual Studio 11 2012" "Tegra-Android")
-    endif()
     if(vs12)
       add_test_VSAndroid(vs12 "Visual Studio 12 2013" "Tegra-Android")
     endif()
@@ -2751,29 +2776,6 @@ if(BUILD_TESTING)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${CTestUpdateP4_DIR}")
   endif()
 
-  configure_file(
-    "${CMake_SOURCE_DIR}/Tests/CTestTestFailure/testNoBuild.cmake.in"
-    "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoBuild.cmake"
-    @ONLY ESCAPE_QUOTES)
-  add_test(CTestTestNoBuild ${CMAKE_CTEST_COMMAND}
-    -S "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoBuild.cmake" -V
-    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testOut1.log"
-    )
-  set_tests_properties(CTestTestNoBuild PROPERTIES
-    FAIL_REGULAR_EXPRESSION "Error" WILL_FAIL true)
-
-  configure_file(
-    "${CMake_SOURCE_DIR}/Tests/CTestTestFailure/testNoExe.cmake.in"
-    "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoExe.cmake"
-    @ONLY ESCAPE_QUOTES)
-  add_test(CTestTestNoExe ${CMAKE_CTEST_COMMAND}
-    -S "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testNoExe.cmake" -V
-    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFailure/testOut2.log"
-    )
-  set_tests_properties(CTestTestNoExe PROPERTIES DEPENDS CTestTestNoBuild
-    PASS_REGULAR_EXPRESSION "Could not find executable"
-    FAIL_REGULAR_EXPRESSION "SegFault")
-
   if(NOT CMake_TEST_NO_NETWORK)
     configure_file(
       "${CMake_SOURCE_DIR}/Tests/CTestTestUpload/test.cmake.in"
@@ -3005,8 +3007,8 @@ if(BUILD_TESTING)
     -S "${CMake_BINARY_DIR}/Tests/CTestTestCrash/test.cmake" -V
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestCrash/testOutput.log"
     )
-  # with watcom the SEGFAULT is not found, it just fails
-  if(CMAKE_GENERATOR MATCHES "Watcom WMake")
+  # With Watcom and OrangeC the SEGFAULT is not found, it just fails
+  if(CMAKE_GENERATOR MATCHES "Watcom WMake" OR CMAKE_C_COMPILER_ID STREQUAL "OrangeC")
     set_tests_properties(CTestTestCrash PROPERTIES
       PASS_REGULAR_EXPRESSION "Failed")
   else()
@@ -3264,7 +3266,7 @@ if(BUILD_TESTING)
     if(NOT CMake_TEST_EXTERNAL_CMAKE)
       configure_file("${CMake_SOURCE_DIR}/Tests/CTestTest2/test.cmake.in"
         "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" @ONLY ESCAPE_QUOTES)
-      add_test(CTestTest2 ${CMAKE_CTEST_COMMAND}
+      add_test(NAME CTestTest2 COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIG>
         -S "${CMake_BINARY_DIR}/Tests/CTestTest2/test.cmake" -V
         --output-log "${CMake_BINARY_DIR}/Tests/CTestTest2/testOutput.log"
         )

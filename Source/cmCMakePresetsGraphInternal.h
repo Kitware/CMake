@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>
@@ -179,4 +180,6 @@ bool PresetVectorOneOrMoreStringHelper(std::vector<std::string>& out,
 bool EnvironmentMapHelper(
   std::map<std::string, cm::optional<std::string>>& out,
   const Json::Value* value, cmJSONState* state);
+
+cmJSONHelper<std::nullptr_t> SchemaHelper();
 }

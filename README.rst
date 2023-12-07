@@ -68,8 +68,8 @@ you can build directly in the source tree::
 Or, if you plan to develop CMake or otherwise run the test suite, create
 a separate build tree::
 
-  $ mkdir cmake-build && cd cmake-build
-  $ ../cmake-source/bootstrap && make
+  $ mkdir build && cd build
+  $ ../bootstrap && make
 
 Windows
 ^^^^^^^

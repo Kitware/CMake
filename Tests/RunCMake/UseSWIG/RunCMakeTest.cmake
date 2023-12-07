@@ -6,7 +6,7 @@ run_cmake(CMP0078-NEW)
 
 run_cmake(CMP0086-WARN)
 
-if (CMake_TEST_FindPython)
+if (CMake_TEST_FindPython2 OR CMake_TEST_FindPython3)
 
   macro(run_cmake_target test subtest target)
     set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)

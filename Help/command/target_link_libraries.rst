@@ -66,6 +66,12 @@ Each ``<item>`` may be:
   :ref:`usage requirement <Target Usage Requirements>`.  This has the same
   effect as passing the framework directory as an include directory.
 
+  .. versionadded:: 3.28
+
+    The library file may point to a ``.xcframework`` folder on macOS. If it
+    does, the target will get the selected library's ``Headers`` directory as
+    a usage requirement.
+
   .. versionadded:: 3.8
     On :ref:`Visual Studio Generators` for VS 2010 and above, library files
     ending in ``.targets`` will be treated as MSBuild targets files and

@@ -53,6 +53,8 @@ public:
   bool AllowNotParallel() const override { return false; }
   bool AllowDeleteOnError() const override { return false; }
 
+  bool IsGNUMakeJobServerAware() const override { return false; }
+
 protected:
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(
     const std::string& makeProgram, const std::string& projectName,

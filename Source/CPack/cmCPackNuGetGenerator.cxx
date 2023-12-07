@@ -12,7 +12,7 @@
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
-#include "cmStringAlgorithms.h"
+#include "cmList.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
@@ -82,10 +82,10 @@ void cmCPackNuGetGenerator::SetupGroupComponentVariables(bool ignoreGroup)
                      std::back_inserter(components),
                      [](cmCPackComponent const* comp) { return comp->Name; });
       this->SetOption("CPACK_NUGET_" + compGUp + "_GROUP_COMPONENTS",
-                      cmJoin(components, ";"));
+                      cmList::to_string(components));
     }
     if (!groups.empty()) {
-      this->SetOption("CPACK_NUGET_GROUPS", cmJoin(groups, ";"));
+      this->SetOption("CPACK_NUGET_GROUPS", cmList::to_string(groups));
     }
 
     // Handle Orphan components (components not belonging to any groups)
@@ -103,7 +103,7 @@ void cmCPackNuGetGenerator::SetupGroupComponentVariables(bool ignoreGroup)
       }
     }
     if (!components.empty()) {
-      this->SetOption("CPACK_NUGET_COMPONENTS", cmJoin(components, ";"));
+      this->SetOption("CPACK_NUGET_COMPONENTS", cmList::to_string(components));
     }
 
   } else {
@@ -114,7 +114,7 @@ void cmCPackNuGetGenerator::SetupGroupComponentVariables(bool ignoreGroup)
                    [](std::pair<std::string, cmCPackComponent> const& comp) {
                      return comp.first;
                    });
-    this->SetOption("CPACK_NUGET_COMPONENTS", cmJoin(components, ";"));
+    this->SetOption("CPACK_NUGET_COMPONENTS", cmList::to_string(components));
   }
 }
 

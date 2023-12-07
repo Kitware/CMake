@@ -8,7 +8,7 @@ set(expected_compile_commands
 ]*",
   "file": "[^
 ]*(/Tests/RunCMake/NinjaMultiConfig/main\.c|\\\\Tests\\\\RunCMake\\\\NinjaMultiConfig\\\\main\.c)",
-  "output": "(CMakeFiles/exe\.dir/Debug/main\.c\.o|CMakeFiles\\\\exe\.dir\\\\Debug\\\\main\.c\.obj)"
+  "output": "(CMakeFiles/exe\.dir/Debug/main\.c\.o|CMakeFiles\\\\exe\.dir\\\\Debug\\\\main\.c\.(obj|o))"
 },
 {
   "directory": "[^
@@ -18,7 +18,7 @@ set(expected_compile_commands
 ]*",
   "file": "[^
 ]*(/Tests/RunCMake/NinjaMultiConfig/main\.c|\\\\Tests\\\\RunCMake\\\\NinjaMultiConfig\\\\main\.c)",
-  "output": "(CMakeFiles/exe\.dir/Release/main\.c\.o|CMakeFiles\\\\exe\.dir\\\\Release\\\\main\.c\.obj)"
+  "output": "(CMakeFiles/exe\.dir/Release/main\.c\.o|CMakeFiles\\\\exe\.dir\\\\Release\\\\main\.c\.(obj|o))"
 }
 ]$]==])
 

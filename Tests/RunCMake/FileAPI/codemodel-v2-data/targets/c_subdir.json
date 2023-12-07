@@ -113,10 +113,10 @@
         }
     ],
     "folder": null,
-    "nameOnDisk": "^(lib)?c_subdir\\.(a|lib)$",
+    "nameOnDisk": "^(lib)?c_subdir\\.(a|lib|l)$",
     "artifacts": [
         {
-            "path": "^((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?c_subdir\\.(a|lib)$",
+            "path": "^((Debug|Release|RelWithDebInfo|MinSizeRel)/)?(lib)?c_subdir\\.(a|lib|l)$",
             "_dllExtra": false
         }
     ],

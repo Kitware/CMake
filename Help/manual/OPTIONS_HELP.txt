@@ -11,6 +11,21 @@
 
  Usage describes the basic command line interface and its options.
 
+.. option:: --help <keyword> [<file>]
+
+ Print help for one CMake keyword.
+
+ ``<keyword>`` can be a property, variable, command, policy, generator
+ or module.
+
+ The relevant manual entry for ``<keyword>`` is
+ printed in a human-readable text format.
+ |file|
+
+ .. versionchanged:: 3.28
+
+   Prior to CMake 3.28, this option supported command names only.
+
 .. option:: --help-full [<file>]
 
  Print all help manuals and exit.

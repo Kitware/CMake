@@ -45,12 +45,14 @@ div.sphinxsidebarwrapper {
   white-space: nowrap;
 }
 
-/* Add hanging indent to version-{added,changed} content. */
-div .versionadded > *,
-div .versionchanged > * {
+/* Add hanging indent to deprecated and version-{added,changed} content. */
+div.deprecated > *,
+div.versionadded > *,
+div.versionchanged > * {
   padding-left: 2em;
 }
 
+div.deprecated > :first-child,
 div.versionadded > :first-child,
 div.versionchanged > :first-child {
   text-indent: -2em;

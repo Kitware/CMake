@@ -18,36 +18,37 @@ namespace {
  * Search for other instances to keep the documentation and test suite
  * up-to-date.
  */
-
-struct FeatureData
-{
-  std::string const Uuid;
-  std::string const Variable;
-  std::string const Description;
-  bool Warned;
-} LookupTable[] = {
-  // CxxModuleCMakeApi
-  { "aa1f7df0-828a-4fcd-9afc-2dc80491aca7",
-    "CMAKE_EXPERIMENTAL_CXX_MODULE_CMAKE_API",
-    "CMake's C++ module support is experimental. It is meant only for "
-    "experimentation and feedback to CMake developers.",
+cmExperimental::FeatureData LookupTable[] = {
+  // WindowsKernelModeDriver
+  { "WindowsKernelModeDriver",
+    "5c2d848d-4efa-4529-a768-efd57171bf68",
+    "CMAKE_EXPERIMENTAL_WINDOWS_KERNEL_MODE_DRIVER",
+    "CMake's Windows kernel-mode driver support is experimental. It is meant "
+    "only for experimentation and feedback to CMake developers.",
+    {},
+    cmExperimental::TryCompileCondition::Always,
     false },
 };
 static_assert(sizeof(LookupTable) / sizeof(LookupTable[0]) ==
                 static_cast<size_t>(cmExperimental::Feature::Sentinel),
               "Experimental feature lookup table mismatch");
 
-FeatureData& DataForFeature(cmExperimental::Feature f)
+cmExperimental::FeatureData& DataForFeature(cmExperimental::Feature f)
 {
   assert(f != cmExperimental::Feature::Sentinel);
   return LookupTable[static_cast<size_t>(f)];
 }
 }
 
+const cmExperimental::FeatureData& cmExperimental::DataForFeature(Feature f)
+{
+  return ::DataForFeature(f);
+}
+
 bool cmExperimental::HasSupportEnabled(cmMakefile const& mf, Feature f)
 {
   bool enabled = false;
-  auto& data = DataForFeature(f);
+  auto& data = ::DataForFeature(f);
 
   auto value = mf.GetDefinition(data.Variable);
   if (value == data.Uuid) {

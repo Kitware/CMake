@@ -41,6 +41,15 @@ The files are a JSON document with an object as the root:
 
 The root object recognizes the following fields:
 
+``$schema``
+  An optional string that provides a URI to the JSON schema that describes the
+  structure of this JSON document. This field is used for validation and
+  autocompletion in editors that support JSON schema. It doesn't affect the
+  behavior of the document itself. If this field is not specified, the JSON
+  document will still be valid, but tools that use JSON schema for validation
+  and autocompletion may not function correctly.
+  This is allowed in preset files specifying version ``8`` or above.
+
 ``version``
   A required integer representing the version of the JSON schema.
   The supported versions are:
@@ -65,6 +74,9 @@ The root object recognizes the following fields:
 
   ``7``
     .. versionadded:: 3.27
+
+  ``8``
+    .. versionadded:: 3.28
 
 ``cmakeMinimumRequired``
   An optional object representing the minimum version of CMake needed to

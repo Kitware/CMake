@@ -98,7 +98,7 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
     cmCPackLogger(cmCPackLog::LOG_WARNING,
                   "CPACK_CYGWIN_PATCH_NUMBER"
                     << " not specified, defaulting to 1\n");
-    outerTarFile += "1";
+    outerTarFile += '1';
   } else {
     outerTarFile += patch;
   }
@@ -150,7 +150,7 @@ const char* cmCPackCygwinSourceGenerator::GetOutputExtension()
     cmCPackLogger(cmCPackLog::LOG_WARNING,
                   "CPACK_CYGWIN_PATCH_NUMBER"
                     << " not specified, defaulting to 1\n");
-    this->OutputExtension += "1";
+    this->OutputExtension += '1';
   } else {
     this->OutputExtension += patch;
   }

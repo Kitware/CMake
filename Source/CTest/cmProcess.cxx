@@ -4,6 +4,7 @@
 
 #include <csignal>
 #include <iostream>
+#include <ratio>
 #include <string>
 #include <utility>
 

@@ -43,7 +43,7 @@ if(NOT CMAKE_CROSSCOMPILING AND
   unset(_sysctl_stdout)
 endif()
 
-# macOS, iOS, tvOS, and watchOS should lookup compilers from
+# macOS, iOS, tvOS, visionOS, and watchOS should lookup compilers from
 # Platform/Apple-${CMAKE_CXX_COMPILER_ID}-<LANG>
 set(CMAKE_EFFECTIVE_SYSTEM_NAME "Apple")
 
@@ -76,6 +76,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL iOS)
   set(_CMAKE_OSX_SYSROOT_DEFAULT "iphoneos")
 elseif(CMAKE_SYSTEM_NAME STREQUAL tvOS)
   set(_CMAKE_OSX_SYSROOT_DEFAULT "appletvos")
+elseif(CMAKE_SYSTEM_NAME STREQUAL visionOS)
+  set(_CMAKE_OSX_SYSROOT_DEFAULT "xros")
 elseif(CMAKE_SYSTEM_NAME STREQUAL watchOS)
   set(_CMAKE_OSX_SYSROOT_DEFAULT "watchos")
 elseif("${CMAKE_GENERATOR}" MATCHES Xcode

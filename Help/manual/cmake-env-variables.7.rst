@@ -43,6 +43,7 @@ Environment Variables that Control the Build
    /envvar/CMAKE_COLOR_DIAGNOSTICS
    /envvar/CMAKE_CONFIGURATION_TYPES
    /envvar/CMAKE_CONFIG_TYPE
+   /envvar/CMAKE_CROSSCOMPILING_EMULATOR
    /envvar/CMAKE_EXPORT_COMPILE_COMMANDS
    /envvar/CMAKE_GENERATOR
    /envvar/CMAKE_GENERATOR_INSTANCE
@@ -83,6 +84,7 @@ Environment Variables for Languages
    /envvar/FFLAGS
    /envvar/HIPCXX
    /envvar/HIPFLAGS
+   /envvar/HIPHOSTCXX
    /envvar/ISPC
    /envvar/ISPCFLAGS
    /envvar/OBJC

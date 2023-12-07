@@ -27,6 +27,7 @@
 #include "cmCryptoHash.h"
 #include "cmFileTime.h"
 #include "cmGccDepfileReader.h"
+#include "cmGccDepfileReaderTypes.h"
 #include "cmGeneratedFileStream.h"
 #include "cmQtAutoGen.h"
 #include "cmQtAutoGenerator.h"
@@ -2116,7 +2117,7 @@ void cmQtAutoMocUicT::JobCompileMocT::MaybeWriteMocResponseFile(
     cmd.resize(1);
 
     // Specify response file
-    cmd.push_back(cmStrCat('@', responseFile));
+    cmd.emplace_back(cmStrCat('@', responseFile));
   }
 #else
   static_cast<void>(outputFile);

@@ -42,6 +42,8 @@ set(targets
     netbsd_nostdinc-C-GNU-4.8.5 netbsd_nostdinc-CXX-GNU-4.8.5
   openbsd-C-Clang-5.0.1 openbsd-CXX-Clang-5.0.1
   sunos-C-SunPro-5.13.0 sunos-CXX-SunPro-5.13.0 sunos-Fortran-SunPro-8.8.0
+  windows_x86_64-C-Clang-17.0.1-MSVC windows_x86_64-CXX-Clang-17.0.1-MSVC windows_x86_64-Fortran-LLVMFlang-17.0.1-MSVC
+  windows_arm64-C-Clang-17.0.1-MSVC windows_arm64-CXX-Clang-17.0.1-MSVC windows_arm64-Fortran-LLVMFlang-17.0.1-MSVC
   )
 
 if(CMAKE_HOST_WIN32)

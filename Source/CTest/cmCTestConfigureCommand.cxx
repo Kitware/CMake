@@ -4,6 +4,7 @@
 
 #include <cstring>
 #include <sstream>
+#include <vector>
 
 #include <cmext/string_view>
 

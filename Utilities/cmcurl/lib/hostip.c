@@ -41,12 +41,8 @@
 #include <inet.h>
 #endif
 
-#ifdef HAVE_SETJMP_H
 #include <setjmp.h>
-#endif
-#ifdef HAVE_SIGNAL_H
 #include <signal.h>
-#endif
 
 #include "urldata.h"
 #include "sendf.h"
@@ -66,10 +62,6 @@
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
-
-#if defined(ENABLE_IPV6) && defined(CURL_OSX_CALL_COPYPROXIES)
-#include <SystemConfiguration/SCDynamicStoreCopySpecific.h>
-#endif
 
 #if defined(CURLRES_SYNCH) &&                   \
   defined(HAVE_ALARM) &&                        \
@@ -124,19 +116,6 @@
  */
 
 static void freednsentry(void *freethis);
-
-/*
- * Return # of addresses in a Curl_addrinfo struct
- */
-static int num_addresses(const struct Curl_addrinfo *addr)
-{
-  int i = 0;
-  while(addr) {
-    addr = addr->ai_next;
-    i++;
-  }
-  return i;
-}
 
 /*
  * Curl_printable_address() stores a printable version of the 1st address
@@ -392,6 +371,19 @@ Curl_fetch_addr(struct Curl_easy *data,
 }
 
 #ifndef CURL_DISABLE_SHUFFLE_DNS
+/*
+ * Return # of addresses in a Curl_addrinfo struct
+ */
+static int num_addresses(const struct Curl_addrinfo *addr)
+{
+  int i = 0;
+  while(addr) {
+    addr = addr->ai_next;
+    i++;
+  }
+  return i;
+}
+
 UNITTEST CURLcode Curl_shuffle_addr(struct Curl_easy *data,
                                     struct Curl_addrinfo **addr);
 /*
@@ -561,6 +553,7 @@ static struct Curl_addrinfo *get_localhost6(int port, const char *name)
 static struct Curl_addrinfo *get_localhost(int port, const char *name)
 {
   struct Curl_addrinfo *ca;
+  struct Curl_addrinfo *ca6;
   const size_t ss_size = sizeof(struct sockaddr_in);
   const size_t hostlen = strlen(name);
   struct sockaddr_in sa;
@@ -587,8 +580,12 @@ static struct Curl_addrinfo *get_localhost(int port, const char *name)
   memcpy(ca->ai_addr, &sa, ss_size);
   ca->ai_canonname = (char *)ca->ai_addr + ss_size;
   strcpy(ca->ai_canonname, name);
-  ca->ai_next = get_localhost6(port, name);
-  return ca;
+
+  ca6 = get_localhost6(port, name);
+  if(!ca6)
+    return ca;
+  ca6->ai_next = ca;
+  return ca6;
 }
 
 #ifdef ENABLE_IPV6
@@ -600,7 +597,7 @@ bool Curl_ipv6works(struct Curl_easy *data)
   if(data) {
     /* the nature of most system is that IPv6 status doesn't come and go
        during a program's lifetime so we only probe the first time and then we
-       have the info kept for fast re-use */
+       have the info kept for fast reuse */
     DEBUGASSERT(data);
     DEBUGASSERT(data->multi);
     if(data->multi->ipv6_up == IPV6_UNKNOWN) {
@@ -742,23 +739,6 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
       if(st)
         return CURLRESOLV_ERROR;
     }
-
-#if defined(ENABLE_IPV6) && defined(CURL_OSX_CALL_COPYPROXIES)
-    {
-      /*
-       * The automagic conversion from IPv4 literals to IPv6 literals only
-       * works if the SCDynamicStoreCopyProxies system function gets called
-       * first. As Curl currently doesn't support system-wide HTTP proxies, we
-       * therefore don't use any value this function might return.
-       *
-       * This function is only available on a macOS and is not needed for
-       * IPv4-only builds, hence the conditions above.
-       */
-      CFDictionaryRef dict = SCDynamicStoreCopyProxies(NULL);
-      if(dict)
-        CFRelease(dict);
-    }
-#endif
 
 #ifndef USE_RESOLVE_ON_IPS
     /* First check if this is an IPv4 address string */
@@ -1256,7 +1236,7 @@ err:
       dns = Curl_hash_pick(data->dns.hostcache, entry_id, entry_len + 1);
 
       if(dns) {
-        infof(data, "RESOLVE %.*s:%d is - old addresses discarded",
+        infof(data, "RESOLVE %.*s:%d - old addresses discarded",
               (int)hlen, host_begin, port);
         /* delete old entry, there are two reasons for this
          1. old entry may have different addresses.

@@ -19,6 +19,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmGeneratorExpression.h"
+#include "cmListFileCache.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmStringReplaceHelper.h"
@@ -1003,4 +1004,9 @@ cmList::container_type::iterator cmList::Insert(
     return container.insert(insertPos, std::move(value));
   }
   return container.begin() + delta;
+}
+
+std::string const& cmList::ToString(BT<std::string> const& s)
+{
+  return s.Value;
 }

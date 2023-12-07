@@ -15,9 +15,9 @@
 #include <cm/optional>
 
 #include "cmJSONState.h"
-#include "cmStateTypes.h"
+#include "cmStateTypes.h" // IWYU pragma: keep
 
-#include "CTest/cmCTestTypes.h"
+#include "CTest/cmCTestTypes.h" // IWYU pragma: keep
 
 enum class PackageResolveMode;
 

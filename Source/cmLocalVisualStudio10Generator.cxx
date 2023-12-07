@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalVisualStudio10Generator.h"
 
+#include <cmext/string_view>
+
 #include <cm3p/expat.h>
 
 #include "cmGlobalGenerator.h"
@@ -37,7 +39,7 @@ public:
     if (!this->GUID.empty()) {
       return;
     }
-    if ("ProjectGUID" == name || "ProjectGuid" == name) {
+    if (name == "ProjectGUID"_s || name == "ProjectGuid"_s) {
       this->DoGUID = true;
     }
   }
@@ -93,7 +95,7 @@ void cmLocalVisualStudio10Generator::ReadAndStoreExternalGUID(
   std::string guidStoreName = cmStrCat(name, "_GUID_CMAKE");
   // save the GUID in the cache
   this->GlobalGenerator->GetCMakeInstance()->AddCacheEntry(
-    guidStoreName, parser.GUID.c_str(), "Stored GUID", cmStateEnums::INTERNAL);
+    guidStoreName, parser.GUID, "Stored GUID", cmStateEnums::INTERNAL);
 }
 
 const char* cmLocalVisualStudio10Generator::ReportErrorLabel() const

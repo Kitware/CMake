@@ -9,7 +9,6 @@
 #include <utility>
 #include <vector>
 
-#include "cmJSONState.h"
 #include "cmStringAlgorithms.h"
 
 namespace Json {

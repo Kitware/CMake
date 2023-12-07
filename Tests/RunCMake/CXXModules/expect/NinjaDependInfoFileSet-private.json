@@ -1,9 +1,12 @@
 {
   "bmi-installation": null,
   "compiler-id": "<IGNORE>",
+  "compiler-frontend-variant": "<IGNORE>",
+  "compiler-simulate-id": "<IGNORE>",
   "config": "<CONFIG>",
   "cxx-modules": {
-    "CMakeFiles/ninja-file-sets-private.dir/sources/module-internal-part.cxx.o": {
+    "CMakeFiles/ninja-file-sets-private.dir<CONFIG_DIR>/sources/module-internal-part.cxx<OBJEXT>": {
+      "bmi-only": false,
       "destination": null,
       "name": "internal_partitions",
       "relative-directory": "sources",
@@ -11,7 +14,8 @@
       "type": "CXX_MODULES",
       "visibility": "PRIVATE"
     },
-    "CMakeFiles/ninja-file-sets-private.dir/sources/module-part.cxx.o": {
+    "CMakeFiles/ninja-file-sets-private.dir<CONFIG_DIR>/sources/module-part.cxx<OBJEXT>": {
+      "bmi-only": false,
       "destination": null,
       "name": "modules",
       "relative-directory": "",
@@ -19,7 +23,8 @@
       "type": "CXX_MODULES",
       "visibility": "PRIVATE"
     },
-    "CMakeFiles/ninja-file-sets-private.dir/sources/module.cxx.o": {
+    "CMakeFiles/ninja-file-sets-private.dir<CONFIG_DIR>/sources/module.cxx<OBJEXT>": {
+      "bmi-only": false,
       "destination": null,
       "name": "modules",
       "relative-directory": "",
@@ -35,6 +40,7 @@
   "exports": [],
   "include-dirs": [],
   "language": "CXX",
+  "forward-modules-from-target-dirs": [],
   "linked-target-dirs": [],
-  "module-dir": "<BINARY_DIR>/CMakeFiles/ninja-file-sets-private.dir"
+  "module-dir": "<BINARY_DIR>/CMakeFiles/ninja-file-sets-private.dir<CONFIG_DIR>"
 }

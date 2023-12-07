@@ -26,3 +26,11 @@ set(RunCMake_TEST_OPTIONS
 "-DCMAKE_CROSSCOMPILING_EMULATOR=${PSEUDO_EMULATOR_CUSTOM_COMMAND_ARG}\;custom_argument")
 CustomCommandGenerator_run_and_build(AddCustomCommandWithArg)
 CustomCommandGenerator_run_and_build(AddCustomTargetWithArg)
+unset(RunCMake_TEST_OPTIONS)
+
+function(run_EnvCrossCompilingEmulator)
+  set(ENV{CMAKE_CROSSCOMPILING_EMULATOR} "${PSEUDO_EMULATOR}")
+  run_cmake(EnvCrossCompilingEmulator)
+  unset(ENV{CMAKE_CROSSCOMPILING_EMULATOR})
+endfunction()
+run_EnvCrossCompilingEmulator()

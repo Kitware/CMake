@@ -31,6 +31,8 @@ cmFileSetVisibility cmFileSetVisibilityFromName(cm::string_view name,
 bool cmFileSetVisibilityIsForSelf(cmFileSetVisibility vis);
 bool cmFileSetVisibilityIsForInterface(cmFileSetVisibility vis);
 
+bool cmFileSetTypeCanBeIncluded(std::string const& type);
+
 class cmFileSet
 {
 public:
@@ -40,6 +42,8 @@ public:
   const std::string& GetName() const { return this->Name; }
   const std::string& GetType() const { return this->Type; }
   cmFileSetVisibility GetVisibility() const { return this->Visibility; }
+
+  void CopyEntries(cmFileSet const* fs);
 
   void ClearDirectoryEntries();
   void AddDirectoryEntry(BT<std::string> directories);

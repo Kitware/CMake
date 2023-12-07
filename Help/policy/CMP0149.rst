@@ -35,6 +35,13 @@ This policy provides compatibility for projects, toolchain files, and
 build scripts that have not been ported away from using
 :variable:`CMAKE_SYSTEM_VERSION` to specify an exact SDK version.
 
+.. note::
+
+  This policy must be set before the first :command:`project` or
+  :command:`enable_language` command invocation at the top of the
+  project.  That is when :ref:`Visual Studio Generators` select a
+  Windows SDK.
+
 The ``OLD`` behavior for this policy is to use the exact value of
 :variable:`CMAKE_SYSTEM_VERSION` if possible.  The ``NEW`` behavior
 for this policy is to ignore it.

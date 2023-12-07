@@ -5,7 +5,7 @@
 
 #if defined(_WIN32) &&                                                        \
   (defined(_MSC_VER) || defined(__WATCOMC__) || defined(__BORLANDC__) ||      \
-   defined(__MINGW32__))
+   defined(__MINGW32__) || defined(__ORANGEC__))
 
 #  include <direct.h>
 #  include <io.h>

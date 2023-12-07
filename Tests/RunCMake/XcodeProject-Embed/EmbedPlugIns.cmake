@@ -1,4 +1,4 @@
-add_executable(plug_in MACOS_BUNDLE Empty.txt)
+add_executable(plug_in MACOSX_BUNDLE Empty.txt)
 set_target_properties(plug_in PROPERTIES
   LINKER_LANGUAGE CXX
   XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED "NO"

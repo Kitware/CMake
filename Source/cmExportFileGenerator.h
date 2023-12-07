@@ -143,7 +143,8 @@ protected:
   void PopulateIncludeDirectoriesInterface(
     cmGeneratorTarget const* target,
     cmGeneratorExpression::PreprocessContext preprocessRule,
-    ImportPropertyMap& properties, cmTargetExport const& te);
+    ImportPropertyMap& properties, cmTargetExport const& te,
+    std::string& includesDestinationDirs);
   void PopulateSourcesInterface(
     cmGeneratorTarget const* target,
     cmGeneratorExpression::PreprocessContext preprocessRule,
@@ -175,6 +176,10 @@ protected:
   virtual void GenerateRequiredCMakeVersion(std::ostream& os,
                                             const char* versionString);
 
+  bool PopulateCxxModuleExportProperties(
+    cmGeneratorTarget const* gte, ImportPropertyMap& properties,
+    cmGeneratorExpression::PreprocessContext ctx,
+    std::string const& includesDestinationDirs, std::string& errorMessage);
   bool PopulateExportProperties(cmGeneratorTarget const* gte,
                                 ImportPropertyMap& properties,
                                 std::string& errorMessage);

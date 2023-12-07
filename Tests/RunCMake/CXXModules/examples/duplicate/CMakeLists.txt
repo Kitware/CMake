@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.24...3.28)
 project(cxx_modules_duplicate CXX)
 
 include("${CMAKE_SOURCE_DIR}/../cxx-modules-rules.cmake")

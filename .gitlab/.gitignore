@@ -12,6 +12,7 @@
 /ninja*
 /openmp
 /open-watcom*
+/orangec
 /python*
 /qt*
 /sccache*

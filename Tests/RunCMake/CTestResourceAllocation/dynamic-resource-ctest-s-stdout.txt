@@ -1,0 +1,24 @@
+test 2
+    Start 2: GenerateSpecFile
+
+2: Test command: "?[^
+]*[\\/]bin([\\/][^\\/
+]+)?[\\/]cmake(\.exe)?"? "-E" "copy" "[^
+]*/Tests/RunCMake/CTestResourceAllocation/dynamic-resspec\.json" "[^
+]*/Tests/RunCMake/CTestResourceAllocation/dynamic-resource-ctest-s-build"
+2: Working Directory: [^
+]*/Tests/RunCMake/CTestResourceAllocation/dynamic-resource-ctest-s-build
+2: Test timeout computed to be: 600
+1/2 Test #2: GenerateSpecFile .................   Passed +[0-9]+\.[0-9]+ sec
+Using generated resource spec file [^
+]*/Tests/RunCMake/CTestResourceAllocation/dynamic-resource-ctest-s-build/dynamic-resspec\.json
+test 1
+    Start 1: RealTest
+
+1: Test command: "?[^
+]*[\\/]bin([\\/][^\\/
+]+)?[\\/]cmake(\.exe)?"? "-E" "true"
+1: Working Directory: [^
+]*/Tests/RunCMake/CTestResourceAllocation/dynamic-resource-ctest-s-build
+1: Test timeout computed to be: 600
+2/2 Test #1: RealTest .........................   Passed +[0-9]+\.[0-9]+ sec

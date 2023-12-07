@@ -15,7 +15,8 @@ form.  The format of the JSON file looks like:
     {
       "directory": "/home/user/development/project",
       "command": "/usr/bin/c++ ... -c ../foo/foo.cc",
-      "file": "../foo/foo.cc"
+      "file": "../foo/foo.cc",
+      "output": "../foo.dir/foo.cc.o"
     },
 
     ...
@@ -23,7 +24,8 @@ form.  The format of the JSON file looks like:
     {
       "directory": "/home/user/development/project",
       "command": "/usr/bin/c++ ... -c ../foo/bar.cc",
-      "file": "../foo/bar.cc"
+      "file": "../foo/bar.cc",
+      "output": "../foo.dir/bar.cc.o"
     }
   ]
 

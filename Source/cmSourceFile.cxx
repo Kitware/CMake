@@ -8,6 +8,7 @@
 #include <cmext/string_view>
 
 #include "cmGlobalGenerator.h"
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -390,7 +391,7 @@ cmValue cmSourceFile::GetProperty(const std::string& prop) const
     }
 
     static std::string output;
-    output = cmJoin(this->IncludeDirectories, ";");
+    output = cmList::to_string(this->IncludeDirectories);
     return cmValue(output);
   }
 
@@ -400,7 +401,7 @@ cmValue cmSourceFile::GetProperty(const std::string& prop) const
     }
 
     static std::string output;
-    output = cmJoin(this->CompileOptions, ";");
+    output = cmList::to_string(this->CompileOptions);
     return cmValue(output);
   }
 
@@ -410,7 +411,7 @@ cmValue cmSourceFile::GetProperty(const std::string& prop) const
     }
 
     static std::string output;
-    output = cmJoin(this->CompileDefinitions, ";");
+    output = cmList::to_string(this->CompileDefinitions);
     return cmValue(output);
   }
 

@@ -1,1 +1,1 @@
-^CMake Error: Error processing file: .*/Tests/RunCMake/CommandLine$
+^CMake Error: Not a file: .*/Tests/RunCMake/CommandLine$

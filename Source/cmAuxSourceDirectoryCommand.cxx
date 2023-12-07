@@ -11,6 +11,7 @@
 #include "cmsys/Directory.hxx"
 
 #include "cmExecutionStatus.h"
+#include "cmList.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmStringAlgorithms.h"
@@ -67,7 +68,7 @@ bool cmAuxSourceDirectoryCommand(std::vector<std::string> const& args,
   if (!sourceListValue.empty()) {
     sourceListValue += ";";
   }
-  sourceListValue += cmJoin(files, ";");
+  sourceListValue += cmList::to_string(files);
   mf.AddDefinition(args[1], sourceListValue);
   return true;
 }

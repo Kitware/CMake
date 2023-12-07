@@ -8,7 +8,7 @@ readonly name="cppdap"
 readonly ownership="cppdap Upstream <kwrobot@kitware.com>"
 readonly subtree="Utilities/cmcppdap"
 readonly repo="https://github.com/google/cppdap.git"
-readonly tag="03cc18678ed2ed8b2424ec99dee7e4655d876db5" # 2023-05-25
+readonly tag="cc2f2058846bb29e18fdadf455d5f5af71b2554f" # 2023-08-17
 readonly shortlog=false
 readonly paths="
   LICENSE
@@ -23,6 +23,7 @@ extract_source () {
     echo "* -whitespace" > .gitattributes
     fromdos LICENSE include/dap/* src/*
     echo "" >> LICENSE
+    echo "" >> src/content_stream.cpp
     echo "" >> src/nlohmann_json_serializer.h
     popd
 }

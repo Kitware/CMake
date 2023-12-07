@@ -12,7 +12,8 @@ Get a property.
                 SOURCE    <source>
                           [DIRECTORY <dir> | TARGET_DIRECTORY <target>] |
                 INSTALL   <file>   |
-                TEST      <test>   |
+                TEST      <test>
+                          [DIRECTORY <dir>] |
                 CACHE     <entry>  |
                 VARIABLE           >
                PROPERTY <name>
@@ -72,6 +73,16 @@ It must be one of the following:
 ``TEST``
   Scope must name one existing test.
   See also the :command:`get_test_property` command.
+
+  .. versionadded:: 3.28
+    Directory scope can be overridden with the following sub-option:
+
+    ``DIRECTORY <dir>``
+      The test property will be read from the ``<dir>`` directory's
+      scope.  CMake must already know about the directory, either by having added
+      it through a call to :command:`add_subdirectory` or ``<dir>`` being the top
+      level directory. Relative paths are treated as relative to the current
+      source directory. ``<dir>`` may reference a binary directory.
 
 ``CACHE``
   Scope must name one cache entry.

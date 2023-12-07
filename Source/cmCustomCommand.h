@@ -115,6 +115,11 @@ public:
   const std::string& GetJobPool() const;
   void SetJobPool(const std::string& job_pool);
 
+  /** Set/Get whether this custom command should be given access to the
+      jobserver (if possible).  */
+  bool GetJobserverAware() const;
+  void SetJobserverAware(bool b);
+
 #define DECLARE_CC_POLICY_ACCESSOR(P)                                         \
   cmPolicies::PolicyStatus Get##P##Status() const;
   CM_FOR_EACH_CUSTOM_COMMAND_POLICY(DECLARE_CC_POLICY_ACCESSOR)
@@ -139,6 +144,7 @@ private:
   std::string WorkingDirectory;
   std::string Depfile;
   std::string JobPool;
+  bool JobserverAware = false;
   bool HaveComment = false;
   bool EscapeAllowMakeVars = false;
   bool EscapeOldStyle = true;

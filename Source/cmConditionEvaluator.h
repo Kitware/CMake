@@ -10,7 +10,7 @@
 #include <cmext/string_view>
 
 #include "cmListFileCache.h"
-#include "cmMessageType.h"
+#include "cmMessageType.h" // IWYU pragma: keep
 #include "cmPolicies.h"
 #include "cmValue.h"
 

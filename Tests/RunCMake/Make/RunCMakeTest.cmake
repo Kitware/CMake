@@ -70,3 +70,22 @@ if(NOT RunCMake_GENERATOR STREQUAL "Watcom WMake")
   run_CMP0113(OLD)
   run_CMP0113(NEW)
 endif()
+
+function(detect_jobserver_present)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/DetectJobServer-present-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_OPTIONS "-DDETECT_JOBSERVER=${DETECT_JOBSERVER}")
+  run_cmake(DetectJobServer-present)
+  run_cmake_command(DetectJobServer-present-parallel-build ${CMAKE_COMMAND} --build . -j4)
+endfunction()
+
+# Jobservers are currently only supported by GNU makes, except MSYS2 make
+if(MAKE_IS_GNU AND NOT RunCMake_GENERATOR MATCHES "MSYS Makefiles")
+  detect_jobserver_present()
+endif()
+
+if(MAKE_IS_GNU)
+  # In GNU makes, `JOB_SERVER_AWARE` support is implemented by prefixing
+  # commands with the '+' operator.
+  run_cmake(GNUMakeJobServerAware)
+endif()

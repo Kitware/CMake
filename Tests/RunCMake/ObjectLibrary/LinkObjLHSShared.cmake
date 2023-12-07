@@ -14,8 +14,14 @@ target_link_libraries(LinkObjLHSShared AnObjLib)
 # Verify that our dependency on OtherLib generated its versioning symlinks.
 if(CMAKE_GENERATOR STREQUAL "Xcode" AND
    "${CMAKE_SYSTEM_NAME};${CMAKE_SYSTEM_PROCESSOR}" STREQUAL "Darwin;arm64")
-  # Xcode runs POST_BUILD before signing, so let the linker use ad-hoc signing.
-  # See CMake Issue 21845.
-  target_link_options(LinkObjLHSShared PRIVATE LINKER:-adhoc_codesign)
+  if(XCODE_VERSION VERSION_GREATER_EQUAL 15)
+    # Xcode 15+ enforces '-Xlinker -no_adhoc_codesign' after user flags,
+    # so we cannot convince the linker to add an adhoc signature.
+    add_custom_command(TARGET LinkObjLHSShared POST_BUILD COMMAND codesign --sign - --force "$<TARGET_FILE:LinkObjLHSShared>")
+  else()
+    # Xcode runs POST_BUILD before signing, so let the linker use ad-hoc signing.
+    # See CMake Issue 21845.
+    target_link_options(LinkObjLHSShared PRIVATE LINKER:-adhoc_codesign)
+  endif()
 endif()
 add_custom_command(TARGET LinkObjLHSShared POST_BUILD COMMAND LinkObjLHSShared)

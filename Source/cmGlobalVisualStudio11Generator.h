@@ -13,7 +13,6 @@
 #include "cmGlobalVisualStudio10Generator.h"
 #include "cmTransformDepfile.h"
 
-class cmGlobalGeneratorFactory;
 class cmMakefile;
 class cmake;
 
@@ -21,10 +20,6 @@ class cmake;
 class cmGlobalVisualStudio11Generator : public cmGlobalVisualStudio10Generator
 {
 public:
-  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory();
-
-  bool MatchesGeneratorName(const std::string& name) const override;
-
   void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
                       bool optional) override;
 
@@ -58,8 +53,4 @@ protected:
 
   /** Return true if target system supports debugging deployment. */
   bool TargetSystemSupportsDeployment() const override;
-
-private:
-  class Factory;
-  friend class Factory;
 };

@@ -18,6 +18,7 @@ Value                           Name
 ``CCur``                        Concurrent Fortran
 ``Clang``                       `LLVM Clang`_
 ``Cray``                        Cray Compiler
+``CrayClang``                   Cray Clang-based Compiler
 ``Embarcadero``, ``Borland``    `Embarcadero`_
 ``Flang``                       `Classic Flang Fortran Compiler`_
 ``LLVMFlang``                   `LLVM Flang Fortran Compiler`_
@@ -34,6 +35,7 @@ Value                           Name
 ``MSVC``                        `Microsoft Visual Studio`_
 ``NVHPC``                       `NVIDIA HPC Compiler`_
 ``NVIDIA``                      `NVIDIA CUDA Compiler`_
+``OrangeC``                     `OrangeC Compiler`_
 ``OpenWatcom``                  `Open Watcom`_
 ``PGI``                         The Portland Group
 ``PathScale``                   PathScale
@@ -62,6 +64,7 @@ languages.
 .. _NVIDIA HPC Compiler: https://developer.nvidia.com/hpc-compilers
 .. _NVIDIA CUDA Compiler: https://developer.nvidia.com/cuda-llvm-compiler
 .. _Open Watcom: https://open-watcom.github.io
+.. _OrangeC Compiler: https://github.com/LADSoft/OrangeC
 .. _Small Device C Compiler: https://sdcc.sourceforge.net
 .. _Tiny C Compiler: https://bellard.org/tcc
 .. _Tasking Compiler Toolsets: https://www.tasking.com

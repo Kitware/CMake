@@ -1,20 +1,22 @@
-CMake Warning \(dev\) at NoCXX.cmake:4 \(target_sources\):
-  CMake's C\+\+ module support is experimental.  It is meant only for
-  experimentation and feedback to CMake developers.
-Call Stack \(most recent call first\):
-  CMakeLists.txt:6 \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.
+(CMake Error in CMakeLists.txt:
+  The target named "nocxx" has C\+\+ sources that use modules, but the "CXX"
+  language has not been enabled\.
+|CMake Error in CMakeLists.txt:
+  The target named "nocxx" has C\+\+ sources that may use modules, but modules
+  are not supported by this generator:
 
-CMake Error in CMakeLists.txt:
-  The "nocxx" target has C\+\+ module sources but the "CXX" language has not
-  been enabled
+    [^
+]+
 
-(
-CMake Error in CMakeLists.txt:
-(  The "nocxx" target has C\+\+ module sources but the "CXX" language has not
-  been enabled
-|  The "nocxx" target contains C\+\+ module sources which are not supported by
-  the generator
+  Modules are supported only by Ninja, Ninja Multi-Config, and Visual Studio
+  generators for VS 17\.4 and newer\.  See the cmake-cxxmodules\(7\) manual for
+  details\.  Use the CMAKE_CXX_SCAN_FOR_MODULES variable to enable or disable
+  scanning\.
+|CMake Error in CMakeLists.txt:
+  Target "nocxx" has source file
+
+    [^
+]*/Tests/RunCMake/CXXModules/sources/module.cxx
+
+  in a "FILE_SET TYPE CXX_MODULES" but it is not scheduled for compilation.
 )
-)*
-CMake Generate step failed.  Build files cannot be regenerated correctly.

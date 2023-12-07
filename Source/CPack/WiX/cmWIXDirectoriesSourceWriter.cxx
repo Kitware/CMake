@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmWIXDirectoriesSourceWriter.h"
 
+#include <cmext/string_view>
+
 cmWIXDirectoriesSourceWriter::cmWIXDirectoriesSourceWriter(
   cmCPackLog* logger, std::string const& filename, GuidType componentGuidType)
   : cmWIXSourceWriter(logger, filename, componentGuidType)
@@ -14,7 +16,7 @@ void cmWIXDirectoriesSourceWriter::EmitStartMenuFolder(
   BeginElement("Directory");
   AddAttribute("Id", "ProgramMenuFolder");
 
-  if (startMenuFolder != ".") {
+  if (startMenuFolder != "."_s) {
     BeginElement("Directory");
     AddAttribute("Id", "PROGRAM_MENU_FOLDER");
     AddAttribute("Name", startMenuFolder);
@@ -53,7 +55,7 @@ size_t cmWIXDirectoriesSourceWriter::BeginInstallationPrefixDirectory(
 
   std::vector<std::string> installRoot;
 
-  cmSystemTools::SplitPath(installRootString.c_str(), installRoot);
+  cmSystemTools::SplitPath(installRootString, installRoot);
 
   if (!installRoot.empty() && installRoot.back().empty()) {
     installRoot.pop_back();

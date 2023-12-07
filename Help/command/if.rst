@@ -228,36 +228,36 @@ Comparisons
 .. signature:: if(<variable|string> LESS <variable|string>)
   :target: LESS
 
-  True if the given string or variable's value is a valid number and less
-  than that on the right.
+  True if the given string or variable's value parses as a real number
+  (like a C ``double``) and less than that on the right.
 
 .. signature:: if(<variable|string> GREATER <variable|string>)
   :target: GREATER
 
-  True if the given string or variable's value is a valid number and greater
-  than that on the right.
+  True if the given string or variable's value parses as a real number
+  (like a C ``double``) and greater than that on the right.
 
 .. signature:: if(<variable|string> EQUAL <variable|string>)
   :target: EQUAL
 
-  True if the given string or variable's value is a valid number and equal
-  to that on the right.
+  True if the given string or variable's value parses as a real number
+  (like a C ``double``) and equal to that on the right.
 
 .. signature:: if(<variable|string> LESS_EQUAL <variable|string>)
   :target: LESS_EQUAL
 
   .. versionadded:: 3.7
 
-  True if the given string or variable's value is a valid number and less
-  than or equal to that on the right.
+  True if the given string or variable's value parses as a real number
+  (like a C ``double``) and less than or equal to that on the right.
 
 .. signature:: if(<variable|string> GREATER_EQUAL <variable|string>)
   :target: GREATER_EQUAL
 
   .. versionadded:: 3.7
 
-  True if the given string or variable's value is a valid number and greater
-  than or equal to that on the right.
+  True if the given string or variable's value parses as a real number
+  (like a C ``double``) and greater than or equal to that on the right.
 
 .. signature:: if(<variable|string> STRLESS <variable|string>)
   :target: STRLESS

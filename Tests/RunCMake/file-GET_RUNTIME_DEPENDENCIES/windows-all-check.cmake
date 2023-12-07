@@ -1,4 +1,4 @@
-if(CMAKE_C_COMPILER_ID STREQUAL "Borland")
+if(CMAKE_C_COMPILER_ID MATCHES "^(Borland|OrangeC)$")
   # Borland upper-cases dll names referenced in import libraries.
   set(conflict_dll [[CONFLICT\.DLL]])
   set(unresolved_dll [[UNRESOLVED\.DLL]])

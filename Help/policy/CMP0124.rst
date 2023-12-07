@@ -3,12 +3,44 @@ CMP0124
 
 .. versionadded:: 3.21
 
-When this policy is set to ``NEW``, the scope of loop variables defined by the
-:command:`foreach` command is restricted to the loop only.  They will be unset
-at the end of the loop.
+:command:`foreach` loop variables are only available in the loop scope.
 
-The ``OLD`` behavior for this policy still clears the loop variables at the end
-of the loop, but does not unset them.  This leaves them as defined, but empty.
+CMake 3.20 and below always leave the loop variable set at the end of the
+loop, either to the value it had before the loop, if any, or to the empty
+string.  CMake 3.21 and above prefer to leave the loop variable in the
+state it had before the loop started, either set or unset.  This policy
+provides compatibility for projects that expect the loop variable to always
+be left set.
+
+The ``OLD`` behavior for this policy is to set the loop variable at the
+end of the loop, either to its original value, or to an empty value.
+The ``NEW`` behavior for this policy is to restore the loop variable to
+the state it had before the loop started, either set or unset.
+
+For example:
+
+.. code-block:: cmake
+
+  set(items a b c)
+
+  set(var1 "value")
+  unset(var2)
+
+  foreach(var1 IN LISTS items)
+  endforeach()
+
+  foreach(var2 IN LISTS items)
+  endforeach()
+
+  if(DEFINED var1)
+    message("var1: ${var1}")
+  endif()
+  if(DEFINED var2)
+    message("var2: ${var2}")
+  endif()
+
+Under the ``OLD`` behavior, this code prints ``var1: value`` and ``var2:``.
+Under the ``NEW`` behavior, this code prints only ``var1: value``.
 
 This policy was introduced in CMake version 3.21. Use the
 :command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.

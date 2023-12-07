@@ -53,6 +53,13 @@ unset(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING})
 unset(CASE_CTEST_TEST_LOAD)
 unset(RunCTest_VERBOSE_FLAG)
 
+block()
+  set(CASE_CMAKELISTS_SUFFIX_CODE [[
+    add_test(NAME testNotRun COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/does_not_exist)
+  ]])
+  run_ctest_test(NotRun)
+endblock()
+
 function(run_TestChangeId)
   set(CASE_TEST_PREFIX_CODE [[
     set(CTEST_CHANGE_ID "<>1")
@@ -131,8 +138,7 @@ run_TestRepeat(AfterTimeout RETURN_VALUE:0 REPEAT AFTER_TIMEOUT:3)
 
 # test repeat and not run tests interact correctly
 set(CASE_CMAKELISTS_SUFFIX_CODE [[
-add_test(NAME testNotRun
-  COMMAND ${CMAKE_COMMAND}/doesnt_exist)
+  add_test(NAME testNotRun COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/does_not_exist)
   set_property(TEST testNotRun PROPERTY TIMEOUT 5)
   ]])
 run_TestRepeat(NotRun RETURN_VALUE:1 REPEAT UNTIL_PASS:3)

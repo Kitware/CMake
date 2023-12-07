@@ -104,20 +104,20 @@ std::string cmUuid::BinaryToString(const unsigned char* input) const
 
     size_t bytes = kUuidGroups[i];
     for (size_t j = 0; j < bytes; ++j) {
-      unsigned char byte = input[inputIndex++];
-      output += this->ByteToHex(byte);
+      unsigned char inputByte = input[inputIndex++];
+      output += this->ByteToHex(inputByte);
     }
   }
 
   return output;
 }
 
-std::string cmUuid::ByteToHex(unsigned char byte) const
+std::string cmUuid::ByteToHex(unsigned char inputByte) const
 {
   std::string result("  ");
   for (int i = 0; i < 2; ++i) {
-    unsigned char rest = byte % 16;
-    byte /= 16;
+    unsigned char rest = inputByte % 16;
+    inputByte /= 16;
     char c = (rest < 0xA) ? static_cast<char>('0' + rest)
                           : static_cast<char>('a' + (rest - 0xA));
     result.at(1 - i) = c;

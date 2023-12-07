@@ -1,0 +1,4 @@
+-- ZOT_LIBRARIES='zot'
+-- ZOT_LINK_LIBRARIES='[^']*/Tests/RunCMake/FindPkgConfig/FindPkgConfig_SYSTEM_PATH-build/root/lib/prefix-zot-suffix'
+-- ZOT_LDFLAGS='-L[^']*/Tests/RunCMake/FindPkgConfig/FindPkgConfig_SYSTEM_PATH-build/root/lib;-lzot'
+-- ZOT_CFLAGS='-I[^']*/Tests/RunCMake/FindPkgConfig/FindPkgConfig_SYSTEM_PATH-build/root/include'

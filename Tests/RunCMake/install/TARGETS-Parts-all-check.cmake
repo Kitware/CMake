@@ -1,1 +1,1 @@
-check_installed([[^include;include/obj1\.h;lib;lib/(mylib\.lib|(lib|cyg)mylib\.a)$]])
+check_installed([[^include;include/obj1\.h;lib;lib/(mylib\.(lib|l)|(lib|cyg)mylib\.a)$]])

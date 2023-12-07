@@ -1,14 +1,12 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
-#include <cstddef> // IWYU pragma: keep
 #include <cstring>
 #include <iostream>
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
 #include <string>
-#include <type_traits>
 #include <utility>
 
 #include <cm/string_view>

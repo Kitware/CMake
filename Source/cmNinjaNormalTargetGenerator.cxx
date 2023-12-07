@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cassert>
 #include <iterator>
-#include <map>
 #include <set>
 #include <sstream>
 #include <unordered_set>
@@ -63,12 +62,15 @@ cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator() = default;
 
 void cmNinjaNormalTargetGenerator::Generate(const std::string& config)
 {
-  std::string lang = this->GeneratorTarget->GetLinkerLanguage(config);
-  if (this->TargetLinkLanguage(config).empty()) {
-    cmSystemTools::Error(
-      cmStrCat("CMake can not determine linker language for target: ",
-               this->GetGeneratorTarget()->GetName()));
-    return;
+  if (this->GetGeneratorTarget()->GetType() !=
+      cmStateEnums::INTERFACE_LIBRARY) {
+    std::string lang = this->GeneratorTarget->GetLinkerLanguage(config);
+    if (this->TargetLinkLanguage(config).empty()) {
+      cmSystemTools::Error(
+        cmStrCat("CMake can not determine linker language for target: ",
+                 this->GetGeneratorTarget()->GetName()));
+      return;
+    }
   }
 
   // Write the rules for each language.
@@ -88,6 +90,34 @@ void cmNinjaNormalTargetGenerator::Generate(const std::string& config)
 
   if (this->GetGeneratorTarget()->GetType() == cmStateEnums::OBJECT_LIBRARY) {
     this->WriteObjectLibStatement(config);
+  } else if (this->GetGeneratorTarget()->GetType() ==
+             cmStateEnums::INTERFACE_LIBRARY) {
+    bool haveCxxModuleSources = false;
+    if (this->GetGeneratorTarget()->HaveCxx20ModuleSources()) {
+      haveCxxModuleSources = true;
+    }
+
+    if (!haveCxxModuleSources) {
+      cmSystemTools::Error(cmStrCat(
+        "Ninja does not support INTERFACE libraries without C++ module "
+        "sources as a normal target: ",
+        this->GetGeneratorTarget()->GetName()));
+      return;
+    }
+
+    firstForConfig = true;
+    for (auto const& fileConfig : this->GetConfigNames()) {
+      if (!this->GetGlobalGenerator()
+             ->GetCrossConfigs(fileConfig)
+             .count(config)) {
+        continue;
+      }
+      if (haveCxxModuleSources) {
+        this->WriteCxxModuleLibraryStatement(config, fileConfig,
+                                             firstForConfig);
+      }
+      firstForConfig = false;
+    }
   } else {
     firstForConfig = true;
     for (auto const& fileConfig : this->GetConfigNames()) {
@@ -124,12 +154,26 @@ void cmNinjaNormalTargetGenerator::WriteLanguagesRules(
 #endif
 
   // Write rules for languages compiled in this target.
-  std::set<std::string> languages;
-  std::vector<cmSourceFile const*> sourceFiles;
-  this->GetGeneratorTarget()->GetObjectSources(sourceFiles, config);
-  if (this->HaveRequiredLanguages(sourceFiles, languages)) {
-    for (std::string const& language : languages) {
-      this->WriteLanguageRules(language, config);
+  {
+    std::set<std::string> languages;
+    std::vector<cmSourceFile const*> sourceFiles;
+    this->GetGeneratorTarget()->GetObjectSources(sourceFiles, config);
+    if (this->HaveRequiredLanguages(sourceFiles, languages)) {
+      for (std::string const& language : languages) {
+        this->WriteLanguageRules(language, config);
+      }
+    }
+  }
+
+  // Write rules for languages in BMI-only rules.
+  {
+    std::set<std::string> languages;
+    std::vector<cmSourceFile const*> sourceFiles;
+    this->GetGeneratorTarget()->GetCxxModuleSources(sourceFiles, config);
+    if (this->HaveRequiredLanguages(sourceFiles, languages)) {
+      for (std::string const& language : languages) {
+        this->WriteLanguageRules(language, config);
+      }
     }
   }
 }
@@ -952,8 +996,6 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
 
   this->addPoolNinjaVariable("JOB_POOL_LINK", genTarget, vars);
 
-  vars["LINK_FLAGS"] = globalGen->EncodeLiteral(vars["LINK_FLAGS"]);
-
   vars["MANIFESTS"] = this->GetManifests(config);
 
   vars["LINK_PATH"] = frameworkPath + linkPath;
@@ -1271,8 +1313,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     vars["LINK_FLAGS"], this->GetGeneratorTarget(),
     this->TargetLinkLanguage(config));
 
-  vars["LINK_FLAGS"] = globalGen->EncodeLiteral(vars["LINK_FLAGS"]);
-
   vars["MANIFESTS"] = this->GetManifests(config);
   vars["AIX_EXPORTS"] = this->GetAIXExports(config);
 
@@ -1474,9 +1514,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     gt, linkBuild.OrderOnlyDeps, config, fileConfig, DependOnTargetArtifact);
 
   // Add order-only dependencies on versioning symlinks of shared libs we link.
-  if (!this->GeneratorTarget->IsDLLPlatform()) {
-    if (cmComputeLinkInformation* cli =
-          this->GeneratorTarget->GetLinkInformation(config)) {
+  // If our target is not producing a runtime binary, it doesn't need the
+  // symlinks (anything that links to the target might, but that consumer will
+  // get its own order-only dependency).
+  if (!gt->IsDLLPlatform() && gt->IsRuntimeBinary()) {
+    if (cmComputeLinkInformation* cli = gt->GetLinkInformation(config)) {
       for (auto const& item : cli->GetItems()) {
         if (item.Target &&
             item.Target->GetType() == cmStateEnums::SHARED_LIBRARY &&
@@ -1632,6 +1674,34 @@ void cmNinjaNormalTargetGenerator::WriteObjectLibStatement(
       this->GetGeneratorTarget(),
       this->GetGlobalGenerator()->GetByproductsForCleanTarget(config), config);
     build.ExplicitDeps = this->GetObjects(config);
+    this->GetGlobalGenerator()->WriteBuild(this->GetCommonFileStream(), build);
+  }
+
+  // Add aliases for the target name.
+  this->GetGlobalGenerator()->AddTargetAlias(
+    this->GetTargetName(), this->GetGeneratorTarget(), config);
+}
+
+void cmNinjaNormalTargetGenerator::WriteCxxModuleLibraryStatement(
+  const std::string& config, const std::string& /*fileConfig*/,
+  bool firstForConfig)
+{
+  // TODO: How to use `fileConfig` properly?
+
+  // Write a phony output that depends on the scanning output.
+  {
+    cmNinjaBuild build("phony");
+    build.Comment =
+      cmStrCat("Imported C++ module library ", this->GetTargetName());
+    this->GetLocalGenerator()->AppendTargetOutputs(this->GetGeneratorTarget(),
+                                                   build.Outputs, config);
+    if (firstForConfig) {
+      this->GetLocalGenerator()->AppendTargetOutputs(
+        this->GetGeneratorTarget(),
+        this->GetGlobalGenerator()->GetByproductsForCleanTarget(config),
+        config);
+    }
+    build.ExplicitDeps.emplace_back(this->GetDyndepFilePath("CXX", config));
     this->GetGlobalGenerator()->WriteBuild(this->GetCommonFileStream(), build);
   }
 

@@ -1,0 +1,2 @@
+^Test that defines GENERATED_RESOURCE_SPEC_FILE must have exactly one FIXTURES_SETUP
+No tests were found!!!$

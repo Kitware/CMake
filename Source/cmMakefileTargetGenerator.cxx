@@ -17,7 +17,7 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
-#include "cm_codecvt.hxx"
+#include "cm_codecvt_Encoding.hxx"
 
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommand.h"
@@ -126,8 +126,11 @@ void cmMakefileTargetGenerator::GetDeviceLinkFlags(
   std::vector<std::string> linkOpts;
   this->GeneratorTarget->GetLinkOptions(linkOpts, this->GetConfigName(),
                                         linkLanguage);
+  this->LocalGenerator->SetLinkScriptShell(
+    this->GlobalGenerator->GetUseLinkScript());
   // LINK_OPTIONS are escaped.
   this->LocalGenerator->AppendCompileOptions(linkFlags, linkOpts);
+  this->LocalGenerator->SetLinkScriptShell(false);
 }
 
 void cmMakefileTargetGenerator::GetTargetLinkFlags(
@@ -144,8 +147,11 @@ void cmMakefileTargetGenerator::GetTargetLinkFlags(
   std::vector<std::string> opts;
   this->GeneratorTarget->GetLinkOptions(opts, this->GetConfigName(),
                                         linkLanguage);
+  this->LocalGenerator->SetLinkScriptShell(
+    this->GlobalGenerator->GetUseLinkScript());
   // LINK_OPTIONS are escaped.
   this->LocalGenerator->AppendCompileOptions(flags, opts);
+  this->LocalGenerator->SetLinkScriptShell(false);
 
   this->LocalGenerator->AppendPositionIndependentLinkerFlags(
     flags, this->GeneratorTarget, this->GetConfigName(), linkLanguage);
@@ -197,14 +203,6 @@ void cmMakefileTargetGenerator::CreateRuleFile()
 void cmMakefileTargetGenerator::WriteTargetBuildRules()
 {
   this->GeneratorTarget->CheckCxxModuleStatus(this->GetConfigName());
-
-  if (this->GeneratorTarget->HaveCxx20ModuleSources()) {
-    this->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      cmStrCat("The \"", this->GeneratorTarget->GetName(),
-               "\" target contains C++ module sources which are not supported "
-               "by the generator"));
-  }
 
   // -- Write the custom commands for this target
 
@@ -1442,9 +1440,20 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
        "# Targets to which this target links which contain Fortran sources.\n"
        "set(CMAKE_Fortran_TARGET_LINKED_INFO_FILES\n";
     /* clang-format on */
-    std::vector<std::string> const dirs =
+    auto const dirs =
       this->GetLinkedTargetDirectories("Fortran", this->GetConfigName());
-    for (std::string const& d : dirs) {
+    for (std::string const& d : dirs.Direct) {
+      *this->InfoFileStream << "  \"" << d << "/DependInfo.cmake\"\n";
+    }
+    *this->InfoFileStream << "  )\n";
+
+    /* clang-format off */
+  *this->InfoFileStream
+    << "\n"
+       "# Targets to which this target links which contain Fortran sources.\n"
+       "set(CMAKE_Fortran_TARGET_FORWARD_LINKED_INFO_FILES\n";
+    /* clang-format on */
+    for (std::string const& d : dirs.Forward) {
       *this->InfoFileStream << "  \"" << d << "/DependInfo.cmake\"\n";
     }
     *this->InfoFileStream << "  )\n";
@@ -2129,12 +2138,12 @@ std::string cmMakefileTargetGenerator::CreateResponseFile(
   // FIXME: Find a better way to determine the response file encoding,
   // perhaps using tool-specific platform information variables.
   // For now, use the makefile encoding as a heuristic.
-  codecvt::Encoding responseEncoding =
+  codecvt_Encoding responseEncoding =
     this->GlobalGenerator->GetMakefileEncoding();
   // Non-MSVC tooling doesn't understand BOM encoded files.
-  if (responseEncoding == codecvt::UTF8_WITH_BOM &&
+  if (responseEncoding == codecvt_Encoding::UTF8_WITH_BOM &&
       (language == "CUDA" || !this->Makefile->IsOn("MSVC"))) {
-    responseEncoding = codecvt::UTF8;
+    responseEncoding = codecvt_Encoding::UTF8;
   }
 
   // Create the response file.

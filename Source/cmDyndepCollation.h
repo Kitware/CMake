@@ -23,6 +23,8 @@ struct cmDyndepGeneratorCallbacks
 {
   std::function<std::string(cmSourceFile const* sf, std::string const& config)>
     ObjectFilePath;
+  std::function<std::string(cmSourceFile const* sf, std::string const& config)>
+    BmiFilePath;
 };
 
 struct cmDyndepMetadataCallbacks
@@ -51,4 +53,7 @@ struct cmDyndepCollation
                                   cmDyndepMetadataCallbacks const& cb);
   static bool IsObjectPrivate(std::string const& object,
                               cmCxxModuleExportInfo const& export_info);
+
+  static bool IsBmiOnly(cmCxxModuleExportInfo const& exportInfo,
+                        std::string const& object);
 };

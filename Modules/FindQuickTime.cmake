@@ -5,16 +5,18 @@
 FindQuickTime
 -------------
 
+Locate QuickTime This module defines:
 
+``QUICKTIME_LIBRARY``
 
-Locate QuickTime This module defines QUICKTIME_LIBRARY
-QUICKTIME_FOUND, if false, do not try to link to gdal
-QUICKTIME_INCLUDE_DIR, where to find the headers
+``QUICKTIME_FOUND``
+  if false, do not try to link to gdal
+``QUICKTIME_INCLUDE_DIR``
+  where to find the headers
 
-$QUICKTIME_DIR is an environment variable that would correspond to the
-./configure --prefix=$QUICKTIME_DIR
+``$QUICKTIME_DIR`` is an environment variable that would correspond to::
 
-Created by Eric Wing.
+  ./configure --prefix=$QUICKTIME_DIR
 #]=======================================================================]
 
 find_path(QUICKTIME_INCLUDE_DIR QuickTime/QuickTime.h QuickTime.h

@@ -22,7 +22,6 @@ Run bison like this:
 # include <malloc.h>
 #endif
 
-#include <stdint.h>
 /* Make sure the parser uses standard memory allocation.  The default
    generated parser malloc/free declarations do not work on all
    platforms.  */

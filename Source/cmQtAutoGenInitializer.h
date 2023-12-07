@@ -167,6 +167,7 @@ private:
   IntegerVersion QtVersion;
   unsigned int Verbosity = 0;
   bool MultiConfig = false;
+  bool CrossConfig = false;
   bool CMP0071Accept = false;
   bool CMP0071Warn = false;
   bool CMP0100Accept = false;

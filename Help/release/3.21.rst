@@ -318,7 +318,7 @@ Changes made since CMake 3.21.0 include the following.
 * The :generator:`Visual Studio 17 2022` generator is now based on
   "Visual Studio 2022 Preview 4".  Previously it was based on "Preview 3.1".
 
-* The AMD ROCm Platform ``hipcc`` compiler was identifed by CMake 3.21.0
+* The AMD ROCm Platform ``hipcc`` compiler was identified by CMake 3.21.0
   through 3.21.2 as a distinct compiler with id ``ROCMClang``.  This has
   been removed because it caused regressions.  Instead:
 

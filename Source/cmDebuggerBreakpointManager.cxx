@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
-#include <memory>
 #include <utility>
 
 #include <cm3p/cppdap/optional.h>

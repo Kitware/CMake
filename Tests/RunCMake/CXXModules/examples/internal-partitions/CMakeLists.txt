@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.24...3.28)
 project(cxx_modules_internal_partitions CXX)
 
 include("${CMAKE_SOURCE_DIR}/../cxx-modules-rules.cmake")
@@ -19,7 +19,8 @@ target_sources(internal-partitions
         "${CMAKE_CURRENT_SOURCE_DIR}"
       FILES
         importable.cxx
-        partition.cxx)
+        partition.cxx
+        internal.cxx)
 target_compile_features(internal-partitions PUBLIC cxx_std_20)
 
 add_executable(exe)

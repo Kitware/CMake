@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include <cstddef>
-#include <functional>
 #include <map>
 #include <memory>
 #include <string>
@@ -12,7 +11,7 @@
 
 #include <cm3p/json/value.h>
 
-#include "cmCMakePresetErrors.h"
+#include "cmCMakePresetsErrors.h"
 #include "cmCMakePresetsGraph.h"
 #include "cmCMakePresetsGraphInternal.h"
 #include "cmJSONHelpers.h"
@@ -30,14 +29,14 @@ auto const OutputHelper =
           cmCMakePresetsGraphInternal::PresetOptionalBoolHelper, false);
 
 auto const VariableHelper =
-  cmJSONHelperBuilder::String(cmCMakePresetErrors::INVALID_VARIABLE);
+  cmJSONHelperBuilder::String(cmCMakePresetsErrors::INVALID_VARIABLE);
 
 auto const VariablesHelper = cmJSONHelperBuilder::Map<std::string>(
-  cmCMakePresetErrors::INVALID_VARIABLE, VariableHelper);
+  cmCMakePresetsErrors::INVALID_VARIABLE, VariableHelper);
 
 auto const PackagePresetHelper =
   cmJSONHelperBuilder::Object<PackagePreset>(
-    cmCMakePresetErrors::INVALID_PRESET_OBJECT, false)
+    cmCMakePresetsErrors::INVALID_PRESET_OBJECT, false)
     .Bind("name"_s, &PackagePreset::Name,
           cmCMakePresetsGraphInternal::PresetNameHelper)
     .Bind("inherits"_s, &PackagePreset::Inherits,
@@ -47,7 +46,7 @@ auto const PackagePresetHelper =
           cmCMakePresetsGraphInternal::PresetBoolHelper, false)
     .Bind<std::nullptr_t>("vendor"_s, nullptr,
                           cmCMakePresetsGraphInternal::VendorHelper(
-                            cmCMakePresetErrors::INVALID_PRESET),
+                            cmCMakePresetsErrors::INVALID_PRESET),
                           false)
     .Bind("displayName"_s, &PackagePreset::DisplayName,
           cmCMakePresetsGraphInternal::PresetStringHelper, false)
@@ -85,7 +84,7 @@ bool PackagePresetsHelper(std::vector<cmCMakePresetsGraph::PackagePreset>& out,
                           const Json::Value* value, cmJSONState* state)
 {
   static auto const helper = cmJSONHelperBuilder::Vector<PackagePreset>(
-    cmCMakePresetErrors::INVALID_PRESETS, PackagePresetHelper);
+    cmCMakePresetsErrors::INVALID_PRESETS, PackagePresetHelper);
 
   return helper(out, value, state);
 }

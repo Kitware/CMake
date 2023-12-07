@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
-#include <memory>
 #include <string>
 #include <utility>
 
@@ -17,10 +16,11 @@
 #include "cmArgumentParserTypes.h"
 #include "cmDependencyProvider.h"
 #include "cmExecutionStatus.h"
+#include "cmExperimental.h"
 #include "cmGlobalGenerator.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
+#include "cmMessageType.h" // IWYU pragma: keep
 #include "cmRange.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
@@ -328,6 +328,46 @@ bool cmCMakeLanguageCommandGET_MESSAGE_LOG_LEVEL(
   makefile.AddDefinition(outputVariable, outputValue);
   return true;
 }
+
+bool cmCMakeLanguageCommandGET_EXPERIMENTAL_FEATURE_ENABLED(
+  std::vector<cmListFileArgument> const& args, cmExecutionStatus& status)
+{
+  cmMakefile& makefile = status.GetMakefile();
+  std::vector<std::string> expandedArgs;
+  makefile.ExpandArguments(args, expandedArgs);
+
+  if (expandedArgs.size() != 3) {
+    return FatalError(status,
+                      "sub-command GET_EXPERIMENTAL_FEATURE_ENABLED expects "
+                      "exactly two arguments");
+  }
+
+  auto const& featureName = expandedArgs[1];
+  auto const& variableName = expandedArgs[2];
+
+  auto feature = cmExperimental::Feature::Sentinel;
+  for (std::size_t i = 0;
+       i < static_cast<std::size_t>(cmExperimental::Feature::Sentinel); i++) {
+    if (cmExperimental::DataForFeature(static_cast<cmExperimental::Feature>(i))
+          .Name == featureName) {
+      feature = static_cast<cmExperimental::Feature>(i);
+      break;
+    }
+  }
+  if (feature == cmExperimental::Feature::Sentinel) {
+    return FatalError(status,
+                      cmStrCat("Experimental feature name \"", featureName,
+                               "\" does not exist."));
+  }
+
+  if (cmExperimental::HasSupportEnabled(makefile, feature)) {
+    makefile.AddDefinition(variableName, "TRUE");
+  } else {
+    makefile.AddDefinition(variableName, "FALSE");
+  }
+
+  return true;
+}
 }
 
 bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
@@ -478,6 +518,11 @@ bool cmCMakeLanguageCommand(std::vector<cmListFileArgument> const& args,
 
   if (expArgs[expArg] == "GET_MESSAGE_LOG_LEVEL") {
     return cmCMakeLanguageCommandGET_MESSAGE_LOG_LEVEL(args, status);
+  }
+
+  if (expArgs[expArg] == "GET_EXPERIMENTAL_FEATURE_ENABLED") {
+    return cmCMakeLanguageCommandGET_EXPERIMENTAL_FEATURE_ENABLED(args,
+                                                                  status);
   }
 
   return FatalError(status, "called with unknown meta-operation");

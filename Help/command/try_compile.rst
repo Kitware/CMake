@@ -65,6 +65,7 @@ Try Compiling Source Files
 .. code-block:: cmake
 
   try_compile(<compileResultVar>
+              [SOURCES_TYPE <type>]
               <SOURCES <srcfile...>                 |
                SOURCE_FROM_CONTENT <name> <content> |
                SOURCE_FROM_VAR <name> <var>         |
@@ -143,7 +144,12 @@ single output directory, such that you can only debug one such ``try_compile``
 call at a time.  Use of the newer signature is recommended to simplify
 debugging of multiple ``try_compile`` operations.
 
-The options are:
+.. _`try_compile Options`:
+
+Options
+^^^^^^^
+
+The options for the above signatures are:
 
 ``CMAKE_FLAGS <flags>...``
   Specify flags of the form :option:`-DVAR:TYPE=VALUE <cmake -D>` to be passed
@@ -243,6 +249,24 @@ The options are:
   components.
 
   ``SOURCE_FROM_VAR`` may be specified multiple times.
+
+``SOURCES_TYPE <type>``
+  .. versionadded:: 3.28
+
+  Sources may be classified using the ``SOURCES_TYPE`` argument. Once
+  specified, all subsequent sources specified will be treated as that type
+  until another ``SOURCES_TYPE`` is given. Available types are:
+
+  ``NORMAL``
+    Sources are not added to any ``FILE_SET`` in the generated project.
+
+  ``CXX_MODULE``
+    .. versionadded:: 3.28
+
+    Sources are added to a ``FILE_SET`` of type ``CXX_MODULES`` in the
+    generated project.
+
+  The default type of sources is ``NORMAL``.
 
 ``<LANG>_STANDARD <std>``
   .. versionadded:: 3.8

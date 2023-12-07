@@ -38,7 +38,7 @@ set_target_properties (example1 PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/Python")
 target_link_libraries(example1 PRIVATE Python::Module)
 
-# re-use sample interface file for another plugin
+# reuse sample interface file for another plugin
 set_property(SOURCE "../example.i" APPEND PROPERTY
   GENERATED_INCLUDE_DIRECTORIES ${PERL_INCLUDE_PATH})
 separate_arguments(c_flags UNIX_COMMAND "${PERL_EXTRA_C_FLAGS}")

@@ -1,4 +1,4 @@
-# prevent older policies from interfearing with this script
+# prevent older policies from interfering with this script
 cmake_policy(PUSH)
 cmake_policy(VERSION ${CMAKE_VERSION})
 

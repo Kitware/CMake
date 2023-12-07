@@ -1,7 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include <cstddef>
-#include <functional>
 #include <map>
 #include <memory>
 #include <string>
@@ -12,7 +11,7 @@
 
 #include <cm3p/json/value.h>
 
-#include "cmCMakePresetErrors.h"
+#include "cmCMakePresetsErrors.h"
 #include "cmCMakePresetsGraph.h"
 #include "cmCMakePresetsGraphInternal.h"
 #include "cmJSONHelpers.h"
@@ -35,7 +34,7 @@ bool TestPresetOutputVerbosityHelper(
   }
 
   if (!value->isString()) {
-    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    cmCMakePresetsErrors::INVALID_PRESET(value, state);
     return false;
   }
 
@@ -54,7 +53,7 @@ bool TestPresetOutputVerbosityHelper(
     return true;
   }
 
-  cmCMakePresetErrors::INVALID_PRESET(value, state);
+  cmCMakePresetsErrors::INVALID_PRESET(value, state);
   return false;
 }
 
@@ -72,7 +71,7 @@ bool TestPresetOutputTruncationHelper(
   }
 
   if (!value->isString()) {
-    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    cmCMakePresetsErrors::INVALID_PRESET(value, state);
     return false;
   }
 
@@ -91,7 +90,7 @@ bool TestPresetOutputTruncationHelper(
     return true;
   }
 
-  cmCMakePresetErrors::INVALID_PRESET(value, state);
+  cmCMakePresetsErrors::INVALID_PRESET(value, state);
   return false;
 }
 
@@ -202,7 +201,7 @@ bool TestPresetExecutionShowOnlyHelper(
   cmJSONState* state)
 {
   if (!value || !value->isString()) {
-    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    cmCMakePresetsErrors::INVALID_PRESET(value, state);
     return false;
   }
 
@@ -216,7 +215,7 @@ bool TestPresetExecutionShowOnlyHelper(
     return true;
   }
 
-  cmCMakePresetErrors::INVALID_PRESET(value, state);
+  cmCMakePresetsErrors::INVALID_PRESET(value, state);
   return false;
 }
 
@@ -233,7 +232,7 @@ bool TestPresetExecutionModeHelper(
   }
 
   if (!value->isString()) {
-    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    cmCMakePresetsErrors::INVALID_PRESET(value, state);
     return false;
   }
 
@@ -252,7 +251,7 @@ bool TestPresetExecutionModeHelper(
     return true;
   }
 
-  cmCMakePresetErrors::INVALID_PRESET(value, state);
+  cmCMakePresetsErrors::INVALID_PRESET(value, state);
   return false;
 }
 
@@ -274,7 +273,7 @@ bool TestPresetExecutionNoTestsActionHelper(
   }
 
   if (!value->isString()) {
-    cmCMakePresetErrors::INVALID_PRESET(value, state);
+    cmCMakePresetsErrors::INVALID_PRESET(value, state);
     return false;
   }
 
@@ -293,7 +292,7 @@ bool TestPresetExecutionNoTestsActionHelper(
     return true;
   }
 
-  cmCMakePresetErrors::INVALID_PRESET(value, state);
+  cmCMakePresetsErrors::INVALID_PRESET(value, state);
   return false;
 }
 
@@ -339,7 +338,7 @@ auto const TestPresetFilterHelper =
 
 auto const TestPresetHelper =
   JSONHelperBuilder::Object<TestPreset>(
-    cmCMakePresetErrors::INVALID_PRESET_OBJECT, false)
+    cmCMakePresetsErrors::INVALID_PRESET_OBJECT, false)
     .Bind("name"_s, &TestPreset::Name,
           cmCMakePresetsGraphInternal::PresetNameHelper)
     .Bind("inherits"_s, &TestPreset::Inherits,
@@ -349,7 +348,7 @@ auto const TestPresetHelper =
           cmCMakePresetsGraphInternal::PresetBoolHelper, false)
     .Bind<std::nullptr_t>("vendor"_s, nullptr,
                           cmCMakePresetsGraphInternal::VendorHelper(
-                            cmCMakePresetErrors::INVALID_PRESET),
+                            cmCMakePresetsErrors::INVALID_PRESET),
                           false)
     .Bind("displayName"_s, &TestPreset::DisplayName,
           cmCMakePresetsGraphInternal::PresetStringHelper, false)
@@ -381,7 +380,7 @@ bool TestPresetsHelper(std::vector<cmCMakePresetsGraph::TestPreset>& out,
                        const Json::Value* value, cmJSONState* state)
 {
   static auto const helper = JSONHelperBuilder::Vector<TestPreset>(
-    cmCMakePresetErrors::INVALID_PRESETS, TestPresetHelper);
+    cmCMakePresetsErrors::INVALID_PRESETS, TestPresetHelper);
 
   return helper(out, value, state);
 }

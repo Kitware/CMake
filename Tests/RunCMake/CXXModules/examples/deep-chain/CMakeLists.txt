@@ -1,7 +1,15 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.24...3.28)
 project(cxx_modules_deep_chain CXX)
 
 include("${CMAKE_SOURCE_DIR}/../cxx-modules-rules.cmake")
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  include(CheckCompilerFlag)
+  check_compiler_flag(CXX "-Wread-modules-implicitly" have_implicit_module_warning)
+  if (have_implicit_module_warning)
+    add_compile_options(-Werror=read-modules-implicitly)
+  endif ()
+endif ()
 
 add_library(a STATIC)
 target_sources(a

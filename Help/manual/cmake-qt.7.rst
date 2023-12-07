@@ -14,7 +14,7 @@ CMake can find and use Qt 4 and Qt 5 libraries.  The Qt 4 libraries are found
 by the :module:`FindQt4` find-module shipped with CMake, whereas the
 Qt 5 libraries are found using "Config-file Packages" shipped with Qt 5. See
 :manual:`cmake-packages(7)` for more information about CMake packages, and
-see `the Qt cmake manual <https://contribute.qt-project.org/doc/qt-5/cmake-manual.html>`_
+see `the Qt cmake manual <https://doc.qt.io/qt-5/cmake-manual.html>`_
 for your Qt version.
 
 Qt 4 and Qt 5 may be used together in the same

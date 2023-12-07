@@ -41,6 +41,8 @@ void Curl_set_in_callback(struct Curl_easy *data, bool value);
 bool Curl_is_in_callback(struct Curl_easy *easy);
 CURLcode Curl_preconnect(struct Curl_easy *data);
 
+void Curl_multi_connchanged(struct Curl_multi *multi);
+
 /* Internal version of curl_multi_init() accepts size parameters for the
    socket, connection and dns hashes */
 struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize,
@@ -57,14 +59,8 @@ struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize,
 /* set the bit for the given sock number to make the bitmap for readable */
 #define GETSOCK_READSOCK(x) (1 << (x))
 
-#ifdef DEBUGBUILD
- /*
-  * Curl_multi_dump is not a stable public function, this is only meant to
-  * allow easier tracking of the internal handle's state and what sockets
-  * they use. Only for research and development DEBUGBUILD enabled builds.
-  */
-void Curl_multi_dump(struct Curl_multi *multi);
-#endif
+/* mask for checking if read and/or write is set for index x */
+#define GETSOCK_MASK_RW(x) (GETSOCK_READSOCK(x)|GETSOCK_WRITESOCK(x))
 
 /* Return the value of the CURLMOPT_MAX_HOST_CONNECTIONS option */
 size_t Curl_multi_max_host_connections(struct Curl_multi *multi);

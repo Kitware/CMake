@@ -174,12 +174,6 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(
   , EmulatorsWithArguments(cc.GetCommandLines().size())
   , ComputeInternalDepfile(std::move(computeInternalDepfile))
 {
-  if (!this->ComputeInternalDepfile) {
-    this->ComputeInternalDepfile =
-      [this](const std::string& cfg, const std::string& file) -> std::string {
-      return this->GetInternalDepfileName(cfg, file);
-    };
-  }
 
   cmGeneratorExpression ge(*lg->GetCMakeInstance(), cc.GetBacktrace());
   cmGeneratorTarget const* target{ lg->FindGeneratorTargetToUse(
@@ -445,7 +439,7 @@ std::string cmCustomCommandGenerator::GetFullDepfile() const
 }
 
 std::string cmCustomCommandGenerator::GetInternalDepfileName(
-  const std::string& /*config*/, const std::string& depfile)
+  const std::string& /*config*/, const std::string& depfile) const
 {
   cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
   std::string extension;
@@ -469,7 +463,10 @@ std::string cmCustomCommandGenerator::GetInternalDepfile() const
     return "";
   }
 
-  return this->ComputeInternalDepfile(this->OutputConfig, depfile);
+  if (this->ComputeInternalDepfile) {
+    return this->ComputeInternalDepfile(this->OutputConfig, depfile);
+  }
+  return this->GetInternalDepfileName(this->OutputConfig, depfile);
 }
 
 cm::optional<std::string> cmCustomCommandGenerator::GetComment() const

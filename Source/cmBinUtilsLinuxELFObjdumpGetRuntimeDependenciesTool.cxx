@@ -10,6 +10,7 @@
 #include "cmRuntimeDependencyArchive.h"
 #include "cmSystemTools.h"
 #include "cmUVProcessChain.h"
+#include "cmUVStream.h"
 
 cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool::
   cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool(
@@ -35,7 +36,7 @@ bool cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool::GetFileInfo(
   builder.AddCommand(command);
 
   auto process = builder.Start();
-  if (!process.Valid()) {
+  if (!process.Valid() || process.GetStatus(0).SpawnResult != 0) {
     std::ostringstream e;
     e << "Failed to start objdump process for:\n  " << file;
     this->SetError(e.str());
@@ -46,7 +47,8 @@ bool cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool::GetFileInfo(
   static const cmsys::RegularExpression neededRegex("^ *NEEDED *([^\n]*)$");
   static const cmsys::RegularExpression rpathRegex("^ *RPATH *([^\n]*)$");
   static const cmsys::RegularExpression runpathRegex("^ *RUNPATH *([^\n]*)$");
-  while (std::getline(*process.OutputStream(), line)) {
+  cmUVPipeIStream output(process.GetLoop(), process.OutputStream());
+  while (std::getline(output, line)) {
     cmsys::RegularExpressionMatch match;
     if (neededRegex.find(line.c_str(), match)) {
       needed.push_back(match.match(1));
@@ -73,8 +75,7 @@ bool cmBinUtilsLinuxELFObjdumpGetRuntimeDependenciesTool::GetFileInfo(
     this->SetError(e.str());
     return false;
   }
-  auto status = process.GetStatus();
-  if (!status[0] || status[0]->ExitStatus != 0) {
+  if (process.GetStatus(0).ExitStatus != 0) {
     std::ostringstream e;
     e << "Failed to run objdump on:\n  " << file;
     this->SetError(e.str());

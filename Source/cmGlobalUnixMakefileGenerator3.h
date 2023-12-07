@@ -120,6 +120,8 @@ public:
 
   void Configure() override;
 
+  bool IsGNUMakeJobServerAware() const override { return true; }
+
   /**
    * Generate the all required files for building this project/tree. This
    * basically creates a series of LocalGenerators for each directory and

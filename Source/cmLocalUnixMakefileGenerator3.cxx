@@ -1080,6 +1080,15 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
   // Setup the proper working directory for the commands.
   this->CreateCDCommand(commands1, dir, relative);
 
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+
+  // Prefix the commands with the jobserver prefix "+"
+  if (ccg.GetCC().GetJobserverAware() && gg->IsGNUMakeJobServerAware()) {
+    std::transform(commands1.begin(), commands1.end(), commands1.begin(),
+                   [](std::string const& cmd) { return cmStrCat("+", cmd); });
+  }
+
   // push back the custom commands
   cm::append(commands, commands1);
 }
@@ -1890,6 +1899,11 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
                         : "OFF")
                   << ")\n\n";
 
+  bool requireFortran = false;
+  if (target->HaveFortranSources(this->GetConfigName())) {
+    requireFortran = true;
+  }
+
   auto const& implicitLangs =
     this->GetImplicitDepends(target, cmDependencyScannerKind::CMake);
 
@@ -1899,6 +1913,12 @@ void cmLocalUnixMakefileGenerator3::WriteDependLanguageInfo(
   cmakefileStream << "set(CMAKE_DEPENDS_LANGUAGES\n";
   for (auto const& implicitLang : implicitLangs) {
     cmakefileStream << "  \"" << implicitLang.first << "\"\n";
+    if (requireFortran && implicitLang.first == "Fortran"_s) {
+      requireFortran = false;
+    }
+  }
+  if (requireFortran) {
+    cmakefileStream << "  \"Fortran\"\n";
   }
   cmakefileStream << "  )\n";
 

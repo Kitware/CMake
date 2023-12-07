@@ -68,7 +68,7 @@ public:
                          size_t completed);
 
   static void StartFailure(std::unique_ptr<cmCTestRunTest> runner,
-                           std::string const& output,
+                           size_t total, std::string const& output,
                            std::string const& detail);
 
   struct EndTestResult
@@ -86,7 +86,8 @@ public:
 
   void ComputeWeightedCost();
 
-  void StartFailure(std::string const& output, std::string const& detail);
+  void StartFailure(size_t total, std::string const& output,
+                    std::string const& detail);
 
   cmCTest* GetCTest() const { return this->CTest; }
 

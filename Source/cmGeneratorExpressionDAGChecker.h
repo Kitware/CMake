@@ -23,6 +23,7 @@ class cmGeneratorTarget;
   SELECT(F, EvaluatingSystemIncludeDirectories, SYSTEM_INCLUDE_DIRECTORIES)   \
   SELECT(F, EvaluatingCompileDefinitions, COMPILE_DEFINITIONS)                \
   SELECT(F, EvaluatingCompileOptions, COMPILE_OPTIONS)                        \
+  SELECT(F, EvaluatingAutoMocMacroNames, AUTOMOC_MACRO_NAMES)                 \
   SELECT(F, EvaluatingAutoUicOptions, AUTOUIC_OPTIONS)                        \
   SELECT(F, EvaluatingSources, SOURCES)                                       \
   SELECT(F, EvaluatingCompileFeatures, COMPILE_FEATURES)                      \

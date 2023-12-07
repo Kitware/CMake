@@ -7,6 +7,7 @@
 #include <cassert>
 #include <cstddef>
 #include <functional>
+#include <iterator>
 #include <map>
 #include <string>
 #include <utility>
@@ -176,6 +177,17 @@ public:
   void Bind(MaybeEmpty<std::vector<std::string>>& val);
   void Bind(NonEmpty<std::vector<std::string>>& val);
   void Bind(std::vector<std::vector<std::string>>& val);
+  template <typename U>
+  void Bind(NonEmpty<std::vector<std::pair<std::string, U>>>& val,
+            U const& context)
+  {
+    this->Bind(
+      [&val, &context](cm::string_view arg) -> Continue {
+        val.emplace_back(std::string(arg), context);
+        return Continue::Yes;
+      },
+      ExpectAtLeast{ 1 });
+  }
 
   // cm::optional<> records the presence the keyword to which it binds.
   template <typename T>
@@ -185,6 +197,15 @@ public:
       optVal.emplace();
     }
     this->Bind(*optVal);
+  }
+
+  template <typename T, typename U>
+  void Bind(cm::optional<T>& optVal, U const& context)
+  {
+    if (!optVal) {
+      optVal.emplace();
+    }
+    this->Bind(*optVal, context);
   }
 
   template <typename Range>
@@ -228,6 +249,17 @@ public:
   {
     this->Base::Bind(name, [member](Instance& instance) {
       instance.Bind(static_cast<Result*>(instance.Result)->*member);
+    });
+    return *this;
+  }
+
+  template <typename T, typename U>
+  cmArgumentParser& BindWithContext(cm::static_string_view name,
+                                    T Result::*member, U Result::*context)
+  {
+    this->Base::Bind(name, [member, context](Instance& instance) {
+      auto* result = static_cast<Result*>(instance.Result);
+      instance.Bind(result->*member, result->*context);
     });
     return *this;
   }

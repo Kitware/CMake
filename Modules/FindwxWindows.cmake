@@ -635,14 +635,14 @@ else()
       # remember: always link shared to use systems GL etc. libs (no static
       # linking, just link *against* static .a libs)
       if(WXWINDOWS_USE_SHARED_LIBS)
-        set(WX_CONFIG_ARGS_LIBS "--libs")
+        set(WX_CONFIG_ARGS_LIBS --libs)
       else()
-        set(WX_CONFIG_ARGS_LIBS "--static --libs")
+        set(WX_CONFIG_ARGS_LIBS --static --libs)
       endif()
 
       # do we need additionial wx GL stuff like GLCanvas ?
       if(WXWINDOWS_USE_GL)
-        string(APPEND WX_CONFIG_ARGS_LIBS " --gl-libs" )
+        list(APPEND WX_CONFIG_ARGS_LIBS --gl-libs)
       endif()
       ##message("DBG: WX_CONFIG_ARGS_LIBS=${WX_CONFIG_ARGS_LIBS}===")
 
@@ -662,14 +662,15 @@ else()
       ##CMAKE_WXWINDOWS_CXX_FLAGS=${CMAKE_WXWINDOWS_CXX_FLAGS}===")
 
       # keep the back-quoted string for clarity
-      set(WXWINDOWS_LIBRARIES "`${CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE} ${WX_CONFIG_ARGS_LIBS}`")
+      string(REPLACE ";" " " _wx_config_args_libs "${WX_CONFIG_ARGS_LIBS}")
+      set(WXWINDOWS_LIBRARIES "`${CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE} ${_wx_config_args_libs}`")
       ##message("DBG2: for linking:
       ##WXWINDOWS_LIBRARIES=${WXWINDOWS_LIBRARIES}===")
 
       # evaluate wx-config output to separate linker flags and linkdirs for
       # rpath:
-      exec_program(${CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE}
-        ARGS ${WX_CONFIG_ARGS_LIBS}
+      execute_process(COMMAND ${CMAKE_WXWINDOWS_WXCONFIG_EXECUTABLE}
+        ${WX_CONFIG_ARGS_LIBS}
         OUTPUT_VARIABLE WX_CONFIG_LIBS )
 
       ## extract linkdirs (-L) for rpath

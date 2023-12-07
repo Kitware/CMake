@@ -9,17 +9,20 @@
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmDocumentationEntry.h"
 #include "cmDocumentationSection.h"
 #include "cmRST.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
 namespace {
-const cmDocumentationEntry cmDocumentationStandardOptions[20] = {
+const cmDocumentationEntry cmDocumentationStandardOptions[21] = {
   { "-h,-H,--help,-help,-usage,/?", "Print usage information and exit." },
   { "--version,-version,/V [<file>]", "Print version number and exit." },
+  { "--help <keyword> [<file>]", "Print help for one keyword and exit." },
   { "--help-full [<file>]", "Print all help manuals and exit." },
   { "--help-manual <man> [<file>]", "Print one help manual and exit." },
   { "--help-manual-list [<file>]", "List help manuals available and exit." },
@@ -92,6 +95,8 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
       return this->PrintHelp(os);
     case cmDocumentation::Full:
       return this->PrintHelpFull(os);
+    case cmDocumentation::OneArbitrary:
+      return this->PrintHelpOneArbitrary(os);
     case cmDocumentation::OneManual:
       return this->PrintHelpOneManual(os);
     case cmDocumentation::OneCommand:
@@ -176,6 +181,30 @@ void cmDocumentation::WarnFormFromFilename(
   }
 }
 
+std::string cmDocumentation::GeneralizeKeyword(std::string cname)
+{
+  std::map<std::string, const std::vector<std::string>> conversions;
+  std::vector<std::string> languages = {
+    "C",      "CXX",      "CSharp",      "CUDA",     "OBJC",
+    "OBJCXX", "Fortran",  "HIP",         "ISPC",     "Swift",
+    "ASM",    "ASM_NASM", "ASM_MARMASM", "ASM_MASM", "ASM-ATT"
+  };
+  std::vector<std::string> configs = { "DEBUG", "RELEASE", "RELWITHDEBINFO",
+                                       "MINSIZEREL" };
+  conversions.emplace("LANG", std::move(languages));
+  conversions.emplace("CONFIG", std::move(configs));
+  for (auto const& it : conversions) {
+    for (auto const& to_replace : it.second) {
+      cmsys::RegularExpression reg(
+        cmStrCat("(^|_)(", to_replace, ")(\\.|$|_)"));
+      if (reg.find(cname)) {
+        cname.replace(reg.start(2), to_replace.length(), it.first);
+      }
+    }
+  }
+  return cname;
+}
+
 void cmDocumentation::addCommonStandardDocSections()
 {
   cmDocumentationSection sec{ "Options" };
@@ -237,10 +266,10 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
         (strcmp(argv[i], "-h") == 0) || (strcmp(argv[i], "-H") == 0)) {
       help.HelpType = cmDocumentation::Help;
       i += int(get_opt_argument(i + 1, help.Argument));
-      help.Argument = cmSystemTools::LowerCase(help.Argument);
-      // special case for single command
+      // special case for arbitrary keyword help
       if (!help.Argument.empty()) {
-        help.HelpType = cmDocumentation::OneCommand;
+        help.HelpType = cmDocumentation::OneArbitrary;
+        i += int(get_opt_argument(i + 1, help.Filename));
       }
     } else if (strcmp(argv[i], "--help-properties") == 0) {
       help.HelpType = cmDocumentation::OneManual;
@@ -400,7 +429,7 @@ void cmDocumentation::GlobHelp(std::vector<std::string>& files,
 {
   cmsys::Glob gl;
   std::string findExpr =
-    cmSystemTools::GetCMakeRoot() + "/Help/" + pattern + ".rst";
+    cmStrCat(cmSystemTools::GetCMakeRoot(), "/Help/", pattern, ".rst");
   if (gl.FindFiles(findExpr)) {
     files = gl.GetFiles();
   }
@@ -452,8 +481,8 @@ bool cmDocumentation::PrintHelpOneManual(std::ostream& os)
   if (mlen > 3 && mname[mlen - 3] == '(' && mname[mlen - 1] == ')') {
     mname = mname.substr(0, mlen - 3) + "." + mname[mlen - 2];
   }
-  if (this->PrintFiles(os, "manual/" + mname) ||
-      this->PrintFiles(os, "manual/" + mname + ".[0-9]")) {
+  if (this->PrintFiles(os, cmStrCat("manual/", mname)) ||
+      this->PrintFiles(os, cmStrCat("manual/", mname, ".[0-9]"))) {
     return true;
   }
   // Argument was not a manual.  Complain.
@@ -469,10 +498,43 @@ bool cmDocumentation::PrintHelpListManuals(std::ostream& os)
   return true;
 }
 
+bool cmDocumentation::PrintHelpOneArbitrary(std::ostream& os)
+{
+  std::string word = cmSystemTools::HelpFileName(this->CurrentArgument);
+  std::string word_m = GeneralizeKeyword(word);
+
+  // Support legacy style uppercase commands, with LANG and CONFIG
+  // substitutions
+  bool found = this->PrintFiles(os, cmStrCat("*/", word));
+  if (found) {
+    os << "\n";
+  }
+  found = this->PrintFiles(
+            os, cmStrCat("command/", cmSystemTools::LowerCase(word))) ||
+    found;
+  if (found) {
+    return true;
+  }
+  found = this->PrintFiles(os, cmStrCat("*/", word_m));
+  if (found) {
+    os << "\n";
+  }
+  found = this->PrintFiles(
+            os, cmStrCat("command/", cmSystemTools::LowerCase(word_m))) ||
+    found;
+  if (found) {
+    return true;
+  }
+  os << "Argument \"" << this->CurrentArgument
+     << "\" to --help did not match any keywords.  "
+        "Use --help without any arguments to print CMake help information.\n";
+  return false;
+}
+
 bool cmDocumentation::PrintHelpOneCommand(std::ostream& os)
 {
   std::string cname = cmSystemTools::LowerCase(this->CurrentArgument);
-  if (this->PrintFiles(os, "command/" + cname)) {
+  if (this->PrintFiles(os, cmStrCat("command/", cname))) {
     return true;
   }
   // Argument was not a command.  Complain.
@@ -491,7 +553,7 @@ bool cmDocumentation::PrintHelpListCommands(std::ostream& os)
 bool cmDocumentation::PrintHelpOneModule(std::ostream& os)
 {
   std::string mname = this->CurrentArgument;
-  if (this->PrintFiles(os, "module/" + mname)) {
+  if (this->PrintFiles(os, cmStrCat("module/", mname))) {
     return true;
   }
   // Argument was not a module.  Complain.
@@ -519,7 +581,7 @@ bool cmDocumentation::PrintHelpListModules(std::ostream& os)
 bool cmDocumentation::PrintHelpOneProperty(std::ostream& os)
 {
   std::string pname = cmSystemTools::HelpFileName(this->CurrentArgument);
-  if (this->PrintFiles(os, "prop_*/" + pname)) {
+  if (this->PrintFiles(os, cmStrCat("prop_*/", pname))) {
     return true;
   }
   // Argument was not a property.  Complain.
@@ -539,7 +601,7 @@ bool cmDocumentation::PrintHelpOnePolicy(std::ostream& os)
 {
   std::string pname = this->CurrentArgument;
   std::vector<std::string> files;
-  if (this->PrintFiles(os, "policy/" + pname)) {
+  if (this->PrintFiles(os, cmStrCat("policy/", pname))) {
     return true;
   }
 
@@ -567,7 +629,7 @@ bool cmDocumentation::PrintHelpListGenerators(std::ostream& os)
 bool cmDocumentation::PrintHelpOneVariable(std::ostream& os)
 {
   std::string vname = cmSystemTools::HelpFileName(this->CurrentArgument);
-  if (this->PrintFiles(os, "variable/" + vname)) {
+  if (this->PrintFiles(os, cmStrCat("variable/", vname))) {
     return true;
   }
   // Argument was not a variable.  Complain.

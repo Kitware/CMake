@@ -288,7 +288,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     for (const auto& gi : generators) {
       stampFile = cmStrCat(gi->GetMakefile()->GetCurrentBinaryDirectory(),
                            "/CMakeFiles/generate.stamp");
-      fout << stampFile << "\n";
+      fout << stampFile << '\n';
       stamps.push_back(stampFile);
     }
   }
@@ -325,7 +325,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     std::string argS = cmStrCat("-S", lg.GetSourceDirectory());
     std::string argB = cmStrCat("-B", lg.GetBinaryDirectory());
     std::string const sln =
-      lg.GetBinaryDirectory() + "/" + lg.GetProjectName() + ".sln";
+      cmStrCat(lg.GetBinaryDirectory(), '/', lg.GetProjectName(), ".sln");
     cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
       { cmSystemTools::GetCMakeCommand(), argS, argB, "--check-stamp-list",
         stampList, "--vs-solution-file", sln });
@@ -348,7 +348,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
           lg.AddCustomCommandToOutput(std::move(cc), true)) {
       gt->AddSource(file->ResolveFullPath());
     } else {
-      cmSystemTools::Error("Error adding rule for " + stamps[0]);
+      cmSystemTools::Error(cmStrCat("Error adding rule for ", stamps[0]));
     }
   }
 

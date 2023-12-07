@@ -1,4 +1,15 @@
-^Generated_source0\.txt: # 1a # GENERATED = `1`
+^CMake Deprecation Warning at CMP0118-OLD-Test10\.cmake:[0-9]+ \(cmake_policy\):
+  The OLD behavior for policy CMP0118 will be removed from a future version
+  of CMake\.
+
+  The cmake-policies\(7\) manual explains that the OLD behaviors of all
+  policies are deprecated and that a policy should be set to OLD only under
+  specific short-term circumstances\.  Projects should be ported to the NEW
+  behavior and not rely on setting a policy to OLD\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+Generated_source0\.txt: # 1a # GENERATED = `1`
 Generated_source0\.txt: # 1b # GENERATED = `1`
 Generated_source0\.txt: # 2a # GENERATED = `1`
 Generated_source0\.txt: # 2b # GENERATED = `1`

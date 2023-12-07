@@ -8,10 +8,10 @@ if(WIN32)
     [[include/obj2\.h]]
     [[include/obj3\.h]]
     [[lib]]
-    [[lib/(lib)?lib1\.(dll\.a|lib)]]
-    [[lib/(lib)?lib2\.(a|lib)]]
+    [[lib/(lib)?lib1\.(dll\.a|lib|l)]]
+    [[lib/(lib)?lib2\.(a|lib|l)]]
     [[lib3]]
-    [[lib3/(lib)?lib3\.(dll\.a|lib)]]
+    [[lib3/(lib)?lib3\.(dll\.a|lib|l)]]
     [[lib4]]
     [[lib4/(lib)?lib4\.dll]]
     )

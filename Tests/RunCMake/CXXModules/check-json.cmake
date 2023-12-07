@@ -2,19 +2,20 @@ cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW)
 
 function (json_placeholders in out)
-  string(REPLACE "<CONFIG>" "${CMAKE_BUILD_TYPE}" in "${in}")
+  string(REPLACE "<CONFIG>" "${CXXModules_config}" in "${in}")
   if (RunCMake_GENERATOR_IS_MULTI_CONFIG)
-    string(REPLACE "<CONFIG_DIR>" "${CMAKE_BUILD_TYPE}/" in "${in}")
+    string(REPLACE "<CONFIG_DIR>" "/${CXXModules_config}" in "${in}")
   else ()
     string(REPLACE "<CONFIG_DIR>" "" in "${in}")
   endif ()
   if (CMAKE_BUILD_TYPE)
-    string(REPLACE "<CONFIG_FORCE>" "${CMAKE_BUILD_TYPE}" in "${in}")
+    string(REPLACE "<CONFIG_FORCE>" "${CXXModules_config}" in "${in}")
   else ()
     string(REPLACE "<CONFIG_FORCE>" "noconfig" in "${in}")
   endif ()
   string(REPLACE "<SOURCE_DIR>" "${RunCMake_SOURCE_DIR}" in "${in}")
   string(REPLACE "<BINARY_DIR>" "${RunCMake_TEST_BINARY_DIR}" in "${in}")
+  string(REPLACE "<OBJEXT>" "${CMAKE_CXX_OUTPUT_EXTENSION}" in "${in}")
   set("${out}" "${in}" PARENT_SCOPE)
 endfunction ()
 
@@ -22,6 +23,7 @@ function (check_json_value path actual_type expect_type actual_value expect_valu
   if (NOT actual_type STREQUAL expect_type)
     list(APPEND RunCMake_TEST_FAILED
       "Type mismatch at ${path}: ${actual_type} vs. ${expect_type}")
+    set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
     return ()
   endif ()
 
@@ -53,6 +55,8 @@ function (check_json_value path actual_type expect_type actual_value expect_valu
   elseif (actual_type STREQUAL OBJECT)
     check_json_object("${path}" "${actual_value}" "${expect_value}")
   endif ()
+
+  set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
 endfunction ()
 
 # Check that two arrays are the same.
@@ -82,6 +86,8 @@ function (check_json_array path actual expect)
     string(JSON expect_value GET "${expect}" "${idx}")
     check_json_value("${new_path}" "${actual_type}" "${expect_type}" "${actual_value}" "${expect_value}")
   endforeach ()
+
+  set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
 endfunction ()
 
 # Check that two inner objects are the same.
@@ -131,12 +137,12 @@ function (check_json_object path actual expect)
   if (actual_keys_missed)
     string(REPLACE ";" ", " actual_keys_missed_text "${actual_keys_missed}")
     list(APPEND RunCMake_TEST_FAILED
-      "Missing expected members at ${path}: ${actual_keys_missed_text}")
+      "Extra unexpected members at ${path}: ${actual_keys_missed_text}")
   endif ()
   if (expect_keys_missed)
     string(REPLACE ";" ", " expect_keys_missed_text "${expect_keys_missed}")
     list(APPEND RunCMake_TEST_FAILED
-      "Extra unexpected members at ${path}: ${expect_keys_missed_text}")
+      "Missing expected members at ${path}: ${expect_keys_missed_text}")
   endif ()
 
   foreach (key IN LISTS common_keys)
@@ -148,13 +154,15 @@ function (check_json_object path actual expect)
     string(JSON expect_value GET "${expect}" "${key}")
     check_json_value("${new_path}" "${actual_type}" "${expect_type}" "${actual_value}" "${expect_value}")
   endforeach ()
+
+  set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
 endfunction ()
 
 # Check that two JSON objects are the same.
 function (check_json actual expect)
   check_json_object("" "${actual}" "${expect}")
-endfunction ()
 
-string(REPLACE ";" "; " RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}")
+  set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
+endfunction ()
 
 cmake_policy(POP)

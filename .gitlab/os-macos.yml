@@ -7,7 +7,7 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci ext/$CI_CONCURRENT_ID"
         # TODO: Factor this out so that each job selects the Xcode version to
         # use so that different versions can be tested in a single pipeline.
-        DEVELOPER_DIR: "/Applications/Xcode-14.3.app/Contents/Developer"
+        DEVELOPER_DIR: "/Applications/Xcode-15.0.app/Contents/Developer"
         # Avoid conflicting with other projects running on the same machine.
         SCCACHE_SERVER_PORT: 4227
 
@@ -37,6 +37,21 @@
     variables:
         CMAKE_CONFIGURATION: macos_arm64_ninja
         CTEST_NO_WARNINGS_ALLOWED: 1
+
+.macos_arm64_ninja_symlinked:
+    extends: .macos_build
+
+    variables:
+        CMAKE_CONFIGURATION: macos_arm64_ninja_symlinked
+        CTEST_NO_WARNINGS_ALLOWED: 1
+        CMAKE_CI_IN_SYMLINK_TREE: 1
+        CMAKE_CI_BUILD_DIR: "real_work/work/build"
+
+.macos_arm64_pch:
+    extends: .macos_arm64_ninja
+
+    variables:
+        CMAKE_CONFIGURATION: macos_arm64_pch
 
 .macos_x86_64_makefiles:
     extends: .macos_build
@@ -80,6 +95,16 @@
         CMAKE_GENERATOR: Xcode
         CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
 
+.macos_arm64_xcode_symlinked:
+    extends: .macos
+
+    variables:
+        CMAKE_CONFIGURATION: macos_arm64_xcode_symlinked
+        CMAKE_GENERATOR: Xcode
+        CMAKE_CI_NIGHTLY_IGNORE_DEPS: "true"
+        CMAKE_CI_IN_SYMLINK_TREE: 1
+        CMAKE_CI_BUILD_DIR: "real_work/work/build"
+
 .macos_arm64_xcode_ub:
     extends: .macos
 
@@ -110,7 +135,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-x86_64
         - shell
-        - xcode-14.3
+        - xcode-15.0
         - nonconcurrent
 
 .macos_x86_64_tags_ext:
@@ -118,7 +143,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-x86_64
         - shell
-        - xcode-14.3
+        - xcode-15.0
         - concurrent
 
 .macos_arm64_tags:
@@ -126,7 +151,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-14.3
+        - xcode-15.0
         - nonconcurrent
 
 .macos_arm64_tags_ext:
@@ -134,7 +159,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-14.3
+        - xcode-15.0
         - concurrent
 
 .macos_arm64_tags_package:
@@ -142,7 +167,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-14.3
+        - xcode-15.0
         - nonconcurrent
         - finder
 

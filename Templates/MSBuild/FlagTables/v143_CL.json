@@ -407,7 +407,7 @@
   },
   {
     "name": "EnableEnhancedInstructionSet",
-    "switch": "",
+    "switch": "arch:NotSet",
     "comment": "Not Set",
     "value": "NotSet",
     "flags": []
@@ -1407,7 +1407,16 @@
     "comment": "Module Output File Name",
     "value": "",
     "flags": [
-      "UserValue"
+      "UserFollowing"
+    ]
+  },
+  {
+    "name": "ModuleDependenciesFile",
+    "switch": "scanDependencies",
+    "comment": "Module Dependencies File Name",
+    "value": "",
+    "flags": [
+      "UserFollowing"
     ]
   },
   {

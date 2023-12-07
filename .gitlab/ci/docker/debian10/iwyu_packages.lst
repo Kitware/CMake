@@ -1,9 +1,0 @@
-# Install development tools.
-clang-6.0
-libclang-6.0-dev
-llvm-6.0-dev
-libz-dev
-g++
-cmake
-ninja-build
-git

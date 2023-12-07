@@ -846,7 +846,7 @@ def gen_check_targets(c, g, inSource):
                 e["compileGroups"] = apple_exe_framework["compileGroups"]
                 e["link"] = apple_exe_framework["link"]
 
-    if cxx_compiler_id in ['Clang', 'AppleClang', 'LCC', 'GNU', 'Intel', 'IntelLLVM', 'MSVC', 'Embarcadero', 'IBMClang'] and g["name"] != "Xcode":
+    if cxx_compiler_id in ['Clang', 'AppleClang', 'LCC', 'GNU', 'Intel', 'IntelLLVM', 'MSVC', 'Embarcadero', 'CrayClang', 'IBMClang'] and g["name"] != "Xcode":
         for e in expected:
             if e["name"] == "cxx_exe":
                 if matches(g["name"], "^(Visual Studio |Ninja Multi-Config)"):

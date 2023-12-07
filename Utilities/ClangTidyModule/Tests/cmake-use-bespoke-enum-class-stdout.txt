@@ -1,18 +1,18 @@
 cmake-use-bespoke-enum-class.cxx:3:16: warning: use a bespoke enum class instead of booleans as parameters [cmake-use-bespoke-enum-class]
-bool function1(bool i)
-               ^
+    3 | bool function1(bool i)
+      |                ^
 cmake-use-bespoke-enum-class.cxx:8:15: warning: use a bespoke enum class instead of booleans as parameters [cmake-use-bespoke-enum-class]
-int function2(bool i)
-              ^
+    8 | int function2(bool i)
+      |               ^
 cmake-use-bespoke-enum-class.cxx:13:16: warning: use a bespoke enum class instead of booleans as parameters [cmake-use-bespoke-enum-class]
-char function3(bool i)
-               ^
+   13 | char function3(bool i)
+      |                ^
 cmake-use-bespoke-enum-class.cxx:18:16: warning: use a bespoke enum class instead of booleans as parameters [cmake-use-bespoke-enum-class]
-void function4(bool i)
-               ^
+   18 | void function4(bool i)
+      |                ^
 cmake-use-bespoke-enum-class.cxx:22:17: warning: use a bespoke enum class instead of booleans as parameters [cmake-use-bespoke-enum-class]
-float function5(bool i)
-                ^
+   22 | float function5(bool i)
+      |                 ^
 cmake-use-bespoke-enum-class.cxx:27:18: warning: use a bespoke enum class instead of booleans as parameters [cmake-use-bespoke-enum-class]
-double function6(bool i)
-                 ^
+   27 | double function6(bool i)
+      |                  ^

@@ -6,8 +6,8 @@
 # The resulting image will have an '/out' directory containing the package.
 
 # Keep this in sync with the `.gitlab/os-linux.yml` `.linux_release_x86_64` image.
-ARG FROM_IMAGE_NAME=kitware/cmake:build-linux-x86_64-deps-2020-04-02
-ARG FROM_IMAGE_DIGEST=@sha256:77e9ab183f34680990db9da5945473e288f0d6556bce79ecc1589670d656e157
+ARG FROM_IMAGE_NAME=kitware/cmake:build-linux-x86_64-deps-2023-08-16
+ARG FROM_IMAGE_DIGEST=@sha256:aa0ebdbd90a51cc83d31f393c5c48ec4599a28f7ccdc288558522c6265b24fae
 ARG FROM_IMAGE=$FROM_IMAGE_NAME$FROM_IMAGE_DIGEST
 FROM $FROM_IMAGE
 
@@ -19,8 +19,7 @@ RUN : \
  && mkdir -p /opt/cmake/src/cmake-build \
  && cd /opt/cmake/src/cmake-build \
  && cp ../cmake/Utilities/Release/linux/x86_64/cache.txt CMakeCache.txt \
- && source /opt/rh/devtoolset-6/enable \
- && source /opt/rh/rh-python36/enable \
+ && source /opt/rh/devtoolset-7/enable \
  && set -x \
  && ../cmake/bootstrap --parallel=$(nproc) --docdir=doc/cmake \
  && nice make -j $(nproc) \

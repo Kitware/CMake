@@ -1,0 +1,1 @@
+-- MsysPfx_DIR='[^']*/Tests/RunCMake/find_package/MSYSTEM_PREFIX'

@@ -50,6 +50,14 @@
 #endif
 
 #ifdef USE_WIN32_LDAP           /* Use Windows LDAP implementation. */
+# ifdef _MSC_VER
+#  pragma warning(push)
+#  pragma warning(disable: 4201)
+# endif
+# include <subauth.h>  /* for [P]UNICODE_STRING */
+# ifdef _MSC_VER
+#  pragma warning(pop)
+# endif
 # include <winldap.h>
 # ifndef LDAP_VENDOR_NAME
 #  error Your Platform SDK is NOT sufficient for LDAP support! \
@@ -231,7 +239,7 @@ static int ldap_win_bind_auth(LDAP *server, const char *user,
   }
   else
 #endif
-#if !defined(CURL_DISABLE_CRYPTO_AUTH)
+#if !defined(CURL_DISABLE_DIGEST_AUTH)
   if(authflags & CURLAUTH_DIGEST) {
     method = LDAP_AUTH_DIGEST;
   }
@@ -727,7 +735,9 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
       if(result)
         goto quit;
       dlsize++;
-      Curl_pgrsSetDownloadCounter(data, dlsize);
+      result = Curl_pgrsSetDownloadCounter(data, dlsize);
+      if(result)
+        goto quit;
     }
 
     if(ber)
@@ -754,7 +764,7 @@ quit:
 
   /* no data to transfer */
   Curl_setup_transfer(data, -1, -1, FALSE, -1);
-  connclose(conn, "LDAP connection always disable re-use");
+  connclose(conn, "LDAP connection always disable reuse");
 
   return result;
 }

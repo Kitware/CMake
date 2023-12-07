@@ -11,6 +11,12 @@ This property may be set:
 * On macOS, to an import file (e.g. ``.tbd``) created for shared libraries (see
   the :prop_tgt:`ENABLE_EXPORTS` target property). For frameworks this is the
   location of the ``.tbd`` file symlink just inside the framework folder.
+* .. versionadded:: 3.28
+    On non-DLL platforms, to the location of a shared library.
+    When set without also specifying an :prop_tgt:`IMPORTED_LOCATION`,
+    the library is considered to be a stub, and its location will not
+    be added as a runtime search path to dependents that link it.
+
 
 The ``IMPORTED_IMPLIB`` target property may be overridden for a
 given configuration ``<CONFIG>`` by the configuration-specific

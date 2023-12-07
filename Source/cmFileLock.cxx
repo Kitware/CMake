@@ -12,11 +12,7 @@
 cmFileLock::cmFileLock(cmFileLock&& other) noexcept
 {
   this->File = other.File;
-#if defined(_WIN32)
-  other.File = INVALID_HANDLE_VALUE;
-#else
-  other.File = -1;
-#endif
+  other.File = (decltype(other.File))-1;
   this->Filename = std::move(other.Filename);
 }
 
@@ -32,11 +28,7 @@ cmFileLock::~cmFileLock()
 cmFileLock& cmFileLock::operator=(cmFileLock&& other) noexcept
 {
   this->File = other.File;
-#if defined(_WIN32)
-  other.File = INVALID_HANDLE_VALUE;
-#else
-  other.File = -1;
-#endif
+  other.File = (decltype(other.File))-1;
   this->Filename = std::move(other.Filename);
 
   return *this;

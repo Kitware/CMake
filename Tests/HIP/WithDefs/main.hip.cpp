@@ -51,6 +51,10 @@ static __global__ void DetermineIfValidHIPDevice()
 #  undef PACKED_DEFINE
 #  define PACKED_DEFINE
 #endif
+#ifdef __NVCC__
+#  undef PACKED_DEFINE
+#  define PACKED_DEFINE
+#endif
 struct PACKED_DEFINE result_type
 {
   bool valid;

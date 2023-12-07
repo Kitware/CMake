@@ -1,0 +1,20 @@
+CMAKE_LANG=CXX
+CMAKE_LINKER=
+CMAKE_CXX_COMPILER_ABI=
+CMAKE_CXX_COMPILER_AR=
+CMAKE_CXX_COMPILER_ARCHITECTURE_ID=x64
+CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_CXX_COMPILER_ID=Clang
+CMAKE_CXX_COMPILER_LAUNCHER=
+CMAKE_CXX_COMPILER_LOADED=1
+CMAKE_CXX_COMPILER_RANLIB=
+CMAKE_CXX_COMPILER_TARGET=
+CMAKE_CXX_COMPILER_VERSION=17.0.1
+CMAKE_CXX_COMPILER_VERSION_INTERAL=
+CMAKE_CXX_SIMULATE_ID=MSVC
+clang version 17.0.1
+Target: x86_64-pc-windows-msvc
+Thread model: posix
+InstalledDir: C:\DoesNotExist\LLVM\bin
+ "C:\\DoesNotExist\\LLVM\\bin\\clang-cl.exe" "-cc1" "-triple" "x86_64-pc-windows-msvc19.29.30152" "-emit-obj" "-mrelax-all" "-mincremental-linker-compatible" "-dumpdir" "a-" "-disable-free" "-clear-ast-before-backend" "-main-file-name" "CMakeCXXCompilerABI.cpp" "-mrelocation-model" "pic" "-pic-level" "2" "-mframe-pointer=none" "-relaxed-aliasing" "-fmath-errno" "-ffp-contract=on" "-fno-rounding-math" "-mconstructor-aliases" "-funwind-tables=2" "-target-cpu" "x86-64" "-mllvm" "-x86-asm-syntax=intel" "-tune-cpu" "generic" "-D_MT" "-flto-visibility-public-std" "--dependent-lib=libcmt" "--dependent-lib=oldnames" "-stack-protector" "2" "-fms-volatile" "-fdiagnostics-format" "msvc" "-fcoverage-compilation-dir=C:\\DoesNotExist\\Temp" "-resource-dir" "C:\\DoesNotExist\\LLVM\\lib\\clang\\17" "-internal-isystem" "C:\\DoesNotExist\\LLVM\\lib\\clang\\17\\include" "-internal-isystem" "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Professional\\VC\\Tools\\MSVC\\14.29.30133\\include" "-internal-isystem" "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Professional\\VC\\Tools\\MSVC\\14.29.30133\\atlmfc\\include" "-internal-isystem" "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\ucrt" "-internal-isystem" "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\shared" "-internal-isystem" "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\um" "-internal-isystem" "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\winrt" "-internal-isystem" "C:\\Program Files (x86)\\Windows Kits\\10\\Include\\10.0.19041.0\\cppwinrt" "-fdeprecated-macro" "-fdebug-compilation-dir=C:\\DoesNotExist\\Temp" "-ferror-limit" "19" "-fno-use-cxa-atexit" "-fms-extensions" "-fms-compatibility" "-fms-compatibility-version=19.29.30152" "-std=c++14" "-fdelayed-template-parsing" "-faddrsig" "-o" "C:\\DoesNotExist\\Temp\\CMakeCXXCompilerABI-9170e6.obj" "-x" "c++" "CMakeCXXCompilerABI.cpp"
+ "C:\\Program Files (x86)\\Microsoft Visual Studio\\2019\\Professional\\VC\\Tools\\MSVC\\14.29.30133\\bin\\Hostx64\\x64\\link.exe" "-out:CMakeCXXCompilerABI.exe" "-libpath:C:\\DoesNotExist\\LLVM\\lib\\clang\\17\\lib\\windows" "-nologo" "C:\\DoesNotExist\\Temp\\CMakeCXXCompilerABI-9170e6.obj"

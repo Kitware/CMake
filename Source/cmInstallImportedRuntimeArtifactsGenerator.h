@@ -8,7 +8,6 @@
 
 #include "cmInstallGenerator.h"
 #include "cmListFileCache.h"
-#include "cmScriptGenerator.h"
 
 class cmGeneratorTarget;
 class cmLocalGenerator;
