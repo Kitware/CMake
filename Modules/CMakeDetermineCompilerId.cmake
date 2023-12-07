@@ -174,27 +174,30 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     endif()
   endif()
 
-  # FIXME(LLVMFlang): It does not provide predefines identifying the MSVC ABI or architecture.
-  # It should be taught to define _MSC_VER and its _M_* architecture flags.
   if("x${lang}" STREQUAL "xFortran" AND "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xLLVMFlang")
-    # Parse the target triple to detect information we should later be able
-    # to get during preprocessing above, once LLVMFlang provides it.
+    # Parse the target triple to detect information not always available from the preprocessor.
     if(COMPILER_${lang}_PRODUCED_OUTPUT MATCHES "-triple ([0-9a-z_]*)-.*windows-msvc([0-9]+)\\.([0-9]+)")
-      set(CMAKE_${lang}_SIMULATE_ID "MSVC")
+      # CMakeFortranCompilerId.F.in does not extract the _MSC_VER minor version.
+      # We can do better using the version parsed here.
       set(CMAKE_${lang}_SIMULATE_VERSION "${CMAKE_MATCH_2}.${CMAKE_MATCH_3}")
-      set(arch ${CMAKE_MATCH_1})
-      if(arch STREQUAL "x86_64")
-        set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "x64")
-      elseif(arch STREQUAL "aarch64")
-        set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "ARM64")
-      elseif(arch STREQUAL "arm64ec")
-        set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "ARM64EC")
-      elseif(arch MATCHES "^i[3-9]86$")
-        set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "X86")
-      else()
-        message(FATAL_ERROR "LLVMFlang target architecture unrecognized: ${arch}")
+
+      if (CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 18.0)
+        # LLVMFlang < 18.0 does not provide predefines identifying the MSVC ABI or architecture.
+        set(CMAKE_${lang}_SIMULATE_ID "MSVC")
+        set(arch ${CMAKE_MATCH_1})
+        if(arch STREQUAL "x86_64")
+          set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "x64")
+        elseif(arch STREQUAL "aarch64")
+          set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "ARM64")
+        elseif(arch STREQUAL "arm64ec")
+          set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "ARM64EC")
+        elseif(arch MATCHES "^i[3-9]86$")
+          set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "X86")
+        else()
+          message(FATAL_ERROR "LLVMFlang target architecture unrecognized: ${arch}")
+        endif()
+        set(MSVC_${lang}_ARCHITECTURE_ID "${CMAKE_${lang}_COMPILER_ARCHITECTURE_ID}")
       endif()
-      set(MSVC_${lang}_ARCHITECTURE_ID "${CMAKE_${lang}_COMPILER_ARCHITECTURE_ID}")
     elseif(COMPILER_${lang}_PRODUCED_OUTPUT MATCHES "-triple ([0-9a-z_]*)-.*windows-gnu")
       set(CMAKE_${lang}_SIMULATE_ID "GNU")
     endif()

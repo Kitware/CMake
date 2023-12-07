@@ -240,7 +240,7 @@
 #else
         PRINT *, 'INFO:platform[]'
 #endif
-#if defined(_WIN32) && (defined(__INTEL_COMPILER) || defined(__ICC))
+#if defined(_MSC_VER)
 # if defined(_M_IA64)
         PRINT *, 'INFO:arch[IA64]'
 # elif defined(_M_X64) || defined(_M_AMD64)

@@ -5,17 +5,22 @@ elseif("x${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "xMSVC")
   include(Platform/Windows-MSVC)
   __windows_compiler_msvc(Fortran)
 
-  # FIXME(LLVMFlang): It does not provides MSVC runtime library selection flags.
-  # It should be given a flag like classic Flang's `-Xclang --dependent-lib=`, or a
-  # dedicated flag to select among multiple `Fortran*.lib` runtime library variants
-  # that each depend on a different MSVC runtime library.  For now, LLVMFlang's
-  # `Fortran*.lib` runtime libraries hard-code use of msvcrt (MultiThreadedDLL),
-  # so we link to it ourselves.
-  set(_LLVMFlang_LINK_RUNTIME "-defaultlib:msvcrt")
-  set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         "")
-  set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL      "")
-  set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebug    "")
-  set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL "")
+  if(CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL 18.0)
+    set(_LLVMFlang_LINK_RUNTIME "")
+    set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         "-fms-runtime-lib=static")
+    set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL      "-fms-runtime-lib=dll")
+    set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebug    "-fms-runtime-lib=static_dbg")
+    set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL "-fms-runtime-lib=dll_dbg")
+  else()
+    # LLVMFlang < 18.0 does not have MSVC runtime library selection flags.
+    # The official distrubtion's `Fortran*.lib` runtime libraries hard-code
+    # use of msvcrt (MultiThreadedDLL), so we link to it ourselves.
+    set(_LLVMFlang_LINK_RUNTIME "-defaultlib:msvcrt")
+    set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreaded         "")
+    set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL      "")
+    set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebug    "")
+    set(CMAKE_Fortran_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL "")
+  endif()
 
   # LLVMFlang, like Clang, does not provide all debug information format flags.
   # In order to provide easy integration with C and C++ projects that use the
