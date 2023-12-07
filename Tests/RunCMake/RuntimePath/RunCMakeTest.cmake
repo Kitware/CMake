@@ -21,12 +21,14 @@ if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
   set(cfg_dir /Debug)
 endif()
 
-run_RuntimePath(SymlinkImplicit)
-run_cmake_command(SymlinkImplicitCheck
-  ${CMAKE_COMMAND} -Ddir=${RunCMake_BINARY_DIR}/SymlinkImplicit-build -Dcfg_dir=${cfg_dir} -P ${RunCMake_SOURCE_DIR}/SymlinkImplicitCheck.cmake)
+if(CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
+  run_RuntimePath(SymlinkImplicit)
+  run_cmake_command(SymlinkImplicitCheck
+    ${CMAKE_COMMAND} -Ddir=${RunCMake_BINARY_DIR}/SymlinkImplicit-build -Dcfg_dir=${cfg_dir} -P ${RunCMake_SOURCE_DIR}/SymlinkImplicitCheck.cmake)
 
-run_RuntimePath(Relative)
+  run_RuntimePath(Relative)
 
-run_RuntimePath(Genex)
-run_cmake_command(GenexCheck
-  ${CMAKE_COMMAND} -Ddir=${RunCMake_BINARY_DIR}/Genex-build -P ${RunCMake_SOURCE_DIR}/GenexCheck.cmake)
+  run_RuntimePath(Genex)
+  run_cmake_command(GenexCheck
+    ${CMAKE_COMMAND} -Ddir=${RunCMake_BINARY_DIR}/Genex-build -P ${RunCMake_SOURCE_DIR}/GenexCheck.cmake)
+endif()
