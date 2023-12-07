@@ -1096,11 +1096,13 @@ if(CUDAToolkit_FOUND)
               ENV CUDA_PATH
         PATH_SUFFIXES lib64/stubs lib/x64/stubs lib/stubs stubs
       )
-      if(CUDA_${lib_name}_LIBRARY AND NOT WIN32)
-        # Use `IMPORTED_IMPLIB` so that we don't add a `-rpath` entry for stub directories
-        set(CUDA_IMPORT_PROPERTY IMPORTED_IMPLIB)
-        set(CUDA_IMPORT_TYPE     SHARED)
-      endif()
+    endif()
+    if(CUDA_${lib_name}_LIBRARY MATCHES "/stubs/" AND NOT WIN32)
+      # Use a SHARED library with IMPORTED_IMPLIB, but not IMPORTED_LOCATION,
+      # to indicate that the stub is for linkers but not dynamic loaders.
+      # It will not contribute any RPATH entry.
+      set(CUDA_IMPORT_PROPERTY IMPORTED_IMPLIB)
+      set(CUDA_IMPORT_TYPE     SHARED)
     endif()
 
     mark_as_advanced(CUDA_${lib_name}_LIBRARY)
