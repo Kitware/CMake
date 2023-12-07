@@ -23,9 +23,5 @@ endif()
 if (CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin|Windows)$" AND
     CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$" AND
     CMAKE_Fortran_COMPILER_ID MATCHES "^(GNU)$")
-  set (RunCMake_TEST_OPTIONS
-    -DRunCMake_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}
-    -DRunCMake_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID})
   run_cmake(LinkerLanguage)
-  unset (RunCMake_TEST_OPTIONS)
 endif()
