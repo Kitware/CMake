@@ -253,7 +253,7 @@ Commands
       If the ``EXCLUDE_FROM_ALL`` argument is provided, then targets in the
       subdirectory added by :command:`FetchContent_MakeAvailable` will not be
       included in the ``ALL`` target by default, and may be excluded from IDE
-      project files. See the `:command:`add_subdirectory` `EXCLUDE_FROM_ALL``
+      project files. See the :command:`add_subdirectory` ``EXCLUDE_FROM_ALL``
       argument documentation for a more detailed discussion of the effects.
 
 .. command:: FetchContent_MakeAvailable
