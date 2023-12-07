@@ -33,6 +33,6 @@ endif()
 
 if (CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin|Windows)$" AND
     CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$" AND
-    CMAKE_Fortran_COMPILER_ID MATCHES "^(GNU)$")
+    (CMAKE_Fortran_COMPILER_ID STREQUAL "GNU" AND CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL 4.3))
   run_cmake(LinkerLanguage)
 endif()
