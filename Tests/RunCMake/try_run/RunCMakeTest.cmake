@@ -1,5 +1,16 @@
 include(RunCMake)
 
+# Detect information from the toolchain:
+# - CMAKE_SYSTEM_NAME
+# - CMAKE_C_COMPILER_ID
+# - CMAKE_C_COMPILER_VERSION
+# - CMAKE_CXX_COMPILER_ID
+# - CMAKE_CXX_COMPILER_VERSION
+run_cmake_with_options(Inspect
+  -DCMake_TEST_Fortran=${CMake_TEST_Fortran}
+  )
+include("${RunCMake_BINARY_DIR}/Inspect-build/info.cmake")
+
 run_cmake(BinDirEmpty)
 run_cmake(BinDirRelative)
 run_cmake(NoOutputVariable)
