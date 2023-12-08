@@ -442,7 +442,7 @@ function(generate_apple_platform_selection_file _output_file)
     endif()
   endforeach()
 
-  configure_package_config_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/PlatformSelectionFile.cmake.in" "${_output_file}"
+  configure_package_config_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/Internal/PlatformSelectionFile.cmake.in" "${_output_file}"
     INSTALL_DESTINATION "${_gpsf_INSTALL_DESTINATION}"
     NO_SET_AND_CHECK_MACRO
     NO_CHECK_REQUIRED_COMPONENTS_MACRO
