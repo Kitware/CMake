@@ -45,7 +45,7 @@ int main(void)
 #if defined(_WIN32)
   Sleep((TIMEOUT + 4) * 1000);
 #elif defined(SIGNAL_IGNORE)
-#  if defined(__CYGWIN__) || defined(__sun__)
+#  if defined(__CYGWIN__) || defined(__sun__) || defined(__GNU__)
 #    define ERRNO_IS_EINTR (errno == EINTR || errno == 0)
 #  else
 #    define ERRNO_IS_EINTR (errno == EINTR)
