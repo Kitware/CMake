@@ -585,10 +585,10 @@ function(add_RunCMake_test_try_compile)
 endfunction()
 add_RunCMake_test_try_compile()
 
-add_RunCMake_test(try_run -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
-                          -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
-                          -DCMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID}
-                          -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID})
+if(CMAKE_Fortran_COMPILER)
+  list(APPEND try_run_ARGS -DCMake_TEST_Fortran=1)
+endif()
+add_RunCMake_test(try_run)
 add_RunCMake_test(set)
 add_RunCMake_test(variable_watch)
 add_RunCMake_test(while)
