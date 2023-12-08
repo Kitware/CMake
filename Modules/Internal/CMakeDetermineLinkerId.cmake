@@ -26,6 +26,7 @@ function(cmake_determine_linker_id lang linker)
   # Compute the linker ID and version.
   foreach(flags IN ITEMS
       "-v"        # AppleClang, GNU, GNUgold, MOLD
+      "-V"        # AIX, Solaris
       "--version" # LLD
       )
     execute_process(COMMAND "${linker}" ${flags}
@@ -70,6 +71,14 @@ function(cmake_determine_linker_id lang linker)
     elseif(linker_desc MATCHES "Microsoft \\(R\\) Incremental Linker Version ([0-9.]+)")
       set(linker_id "MSVC")
       set(linker_frontend "MSVC")
+      set(linker_version "${CMAKE_MATCH_1}")
+      break()
+    elseif (CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND linker_desc MATCHES "Solaris Link Editors: ([0-9.-]+)")
+      set(linker_id "Solaris")
+      set(linker_version "${CMAKE_MATCH_1}")
+      break()
+    elseif (CMAKE_SYSTEM_NAME STREQUAL "AIX" AND linker_desc MATCHES " LD ([0-9.]+)")
+      set(linker_id "AIX")
       set(linker_version "${CMAKE_MATCH_1}")
       break()
     endif()
