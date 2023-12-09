@@ -19,6 +19,8 @@ Value                           Name
 ``MSVC``                        `Microsoft Visual Studio`_
 ``MOLD``                        `mold: A Modern Linker`_ or, on Apple, `sold`_
                                 linker
+``AIX``                         AIX system linker
+``Solaris``                     SunOS system linker
 =============================== ===============================================
 
 This variable is not guaranteed to be defined for all linkers or languages.
