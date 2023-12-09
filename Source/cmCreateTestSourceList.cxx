@@ -135,7 +135,7 @@ bool cmCreateTestSourceList(std::vector<std::string> const& args,
   {
     cmSourceFile* sf = mf.GetOrCreateSource(driver);
     sf->SetProperty("ABSTRACT", "0");
-    sourceListValue = args[1];
+    sourceListValue = driver;
   }
   for (i = testsBegin; i != tests.end(); ++i) {
     cmSourceFile* sf = mf.GetOrCreateSource(*i);
