@@ -10,10 +10,10 @@ This property may be set:
     On AIX, to an import file (e.g. ``.imp``) created for executables that
     export symbols (see the :prop_tgt:`ENABLE_EXPORTS` target property).
 * .. versionadded:: 3.27
-    On macOS platforms, to an import file (e.g. ``.tbd``) created for shared
-    libraries (see the :prop_tgt:`ENABLE_EXPORTS` target property).
-    For frameworks this is the location of the ``.tbd`` file symlink just
-    inside the framework folder.
+    On Apple platforms, to an import file (e.g. ``.tbd``) created for shared
+    libraries or frameworks (see the :prop_tgt:`ENABLE_EXPORTS` target
+    property).  For frameworks, this is the location of the ``.tbd`` file
+    symlink just inside the framework folder.
 * .. versionadded:: 3.28
     On non-DLL platforms, to the location of a shared library.
     When set without also specifying an :prop_tgt:`IMPORTED_LOCATION`,

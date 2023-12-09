@@ -35,8 +35,8 @@ the property instead for backward compatibility reasons.
 See below for alternative initialization behavior for shared library targets.
 
 .. versionadded:: 3.27
-  On Apple platforms, to link with a shared library (either a bare library or a
-  framework), a linker import file can be used instead of the actual shared
+  To link with a shared library on macOS, or to a shared framework on any Apple
+  platform, a linker import file can be used instead of the actual shared
   library. These linker import files are also known as text-based stubs, and
   they have a ``.tbd`` file extension.
 
