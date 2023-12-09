@@ -1,0 +1,2 @@
+-- STATIC_LIBRARY='[^']*/Tests/RunCMake/find_library/Windows-MSVC/static.lib'
+-- RUSTC_IMPORT_LIBRARY='[^']*/Tests/RunCMake/find_library/Windows-MSVC/rustc_import.dll.lib'
