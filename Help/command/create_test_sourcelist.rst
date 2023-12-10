@@ -5,10 +5,10 @@ Create a test driver and source list for building test programs.
 
 .. code-block:: cmake
 
-  create_test_sourcelist(sourceListName driverName
-                         test1 test2 test3
-                         EXTRA_INCLUDE include.h
-                         FUNCTION function)
+  create_test_sourcelist(<sourceListName> <driverName>
+                         <tests> ...
+                         [EXTRA_INCLUDE <include>]
+                         [FUNCTION <function>])
 
 A test driver is a program that links together many small tests into a single
 executable.  This is useful when building static executables with large
