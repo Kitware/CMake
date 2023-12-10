@@ -207,11 +207,14 @@ if (WIN32)
     OPENGL_glu_LIBRARY
     )
 elseif (APPLE)
-  # The OpenGL.framework provides both gl and glu
-  find_library(OPENGL_gl_LIBRARY OpenGL DOC "OpenGL library for OS X")
-  find_library(OPENGL_glu_LIBRARY OpenGL DOC
-    "GLU library for OS X (usually same as OpenGL library)")
-  find_path(OPENGL_INCLUDE_DIR OpenGL/gl.h DOC "Include for OpenGL on OS X")
+  # The OpenGL.framework provides both gl and glu in OpenGL
+  # XQuartz provides libgl and libglu
+  find_library(OPENGL_gl_LIBRARY NAMES OpenGL GL DOC
+    "OpenGL GL library")
+  find_library(OPENGL_glu_LIBRARY NAMES OpenGL GLU DOC
+    "OpenGL GLU library")
+  find_path(OPENGL_INCLUDE_DIR NAMES OpenGL/gl.h GL/gl.h DOC
+    "Include for OpenGL")
   list(APPEND _OpenGL_REQUIRED_VARS OPENGL_INCLUDE_DIR)
 
   list(APPEND _OpenGL_CACHE_VARS
