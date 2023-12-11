@@ -2928,6 +2928,7 @@ void cmLocalGenerator::CopyPchCompilePdb(
   } else {
     cc->SetOutputs(outputs);
     cmSourceFile* copy_rule = this->AddCustomCommandToOutput(std::move(cc));
+    copy_rule->SetProperty("CXX_SCAN_FOR_MODULES", "0");
 
     if (copy_rule) {
       target->AddSource(copy_rule->ResolveFullPath());
