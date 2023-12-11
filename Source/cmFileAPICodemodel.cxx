@@ -2102,7 +2102,9 @@ Json::Value Target::DumpLauncher(const char* name, const char* type)
     for (std::string const& arg : cmMakeRange(commandWithArgs).advance(1)) {
       args.append(arg);
     }
-    launcher["arguments"] = std::move(args);
+    if (!args.empty()) {
+      launcher["arguments"] = std::move(args);
+    }
   }
   return launcher;
 }

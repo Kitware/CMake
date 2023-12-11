@@ -80,7 +80,6 @@
     "install": null,
     "launchers" : [
         {
-            "arguments" : null,
             "command": "^no-such-emulator(\\.exe)?$",
             "type" : "emulator"
         }
