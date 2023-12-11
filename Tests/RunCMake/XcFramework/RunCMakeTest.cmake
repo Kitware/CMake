@@ -121,6 +121,7 @@ run_cmake(find-library)
 run_cmake_command(find-library-script ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/find-library.cmake)
 
 file(REMOVE_RECURSE ${RunCMake_BINARY_DIR}/export-install)
+
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/export-macos-build)
 run_cmake_with_options(export-macos -DCMAKE_SYSTEM_NAME=Darwin -DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/export-install)
 set(RunCMake_TEST_NO_CLEAN 1)
@@ -130,6 +131,30 @@ if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
 endif()
 run_cmake_command(export-macos-build ${CMAKE_COMMAND} --build . ${_config_arg})
 run_cmake_command(export-macos-install ${CMAKE_COMMAND} --install . ${_config_arg})
+unset(RunCMake_TEST_NO_CLEAN)
+unset(RunCMake_TEST_BINARY_DIR)
+
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/export-ios-build)
+run_cmake_with_options(export-ios -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphoneos "-DCMAKE_OSX_ARCHITECTURES=arm64" -DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/export-install)
+set(RunCMake_TEST_NO_CLEAN 1)
+set(_config_arg)
+if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+  set(_config_arg --config Release)
+endif()
+run_cmake_command(export-ios-build ${CMAKE_COMMAND} --build . ${_config_arg})
+run_cmake_command(export-ios-install ${CMAKE_COMMAND} --install . ${_config_arg})
+unset(RunCMake_TEST_NO_CLEAN)
+unset(RunCMake_TEST_BINARY_DIR)
+
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/export-ios-simulator-build)
+run_cmake_with_options(export-ios-simulator -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphonesimulator "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_1}" -DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/export-install)
+set(RunCMake_TEST_NO_CLEAN 1)
+set(_config_arg)
+if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+  set(_config_arg --config Release)
+endif()
+run_cmake_command(export-ios-simulator-build ${CMAKE_COMMAND} --build . ${_config_arg})
+run_cmake_command(export-ios-simulator-install ${CMAKE_COMMAND} --install . ${_config_arg})
 unset(RunCMake_TEST_NO_CLEAN)
 unset(RunCMake_TEST_BINARY_DIR)
 
@@ -146,7 +171,6 @@ run_cmake_command(import-macos-install-specific-no-xcframework-build ${CMAKE_COM
 unset(RunCMake_TEST_NO_CLEAN)
 unset(RunCMake_TEST_BINARY_DIR)
 
-set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/export-macos-build)
 set(RunCMake_TEST_NO_CLEAN 1)
 if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 15)
   # 'xcodebuild -create-xcframework' fails on symlinked paths.
@@ -156,22 +180,32 @@ else()
   set(src_dir "${RunCMake_SOURCE_DIR}")
   set(bld_dir "${RunCMake_BINARY_DIR}")
 endif()
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/export-install)
 run_cmake_command(export-install-xcframework xcodebuild -create-xcframework
   -output ${bld_dir}/export-install/lib/mylib.xcframework
   -library ${bld_dir}/export-install/lib/macos/libmylib.a
   -headers ${src_dir}/mylib/include
-  )
-run_cmake_command(export-build-xcframework xcodebuild -create-xcframework
-  -output ${bld_dir}/export-macos-build/lib/mylib.xcframework
-  -library ${bld_dir}/export-macos-build/lib/macos${_config_dir}/libmylib.a
+  -library ${bld_dir}/export-install/lib/ios/libmylib.a
+  -headers ${src_dir}/mylib/include
+  -library ${bld_dir}/export-install/lib/ios-simulator/libmylib.a
   -headers ${src_dir}/mylib/include
   )
 run_cmake_command(export-install-xcframework-genex xcodebuild -create-xcframework
   -output ${bld_dir}/export-install/lib2/mylib-genex.xcframework
   -library ${bld_dir}/export-install/lib/macos/libmylib-genex.a
   -headers ${src_dir}/mylib/include
+  -library ${bld_dir}/export-install/lib/ios/libmylib-genex.a
+  -headers ${src_dir}/mylib/include
+  -library ${bld_dir}/export-install/lib/ios-simulator/libmylib-genex.a
+  -headers ${src_dir}/mylib/include
   )
-run_cmake_command(export-build-xcframework-genex xcodebuild -create-xcframework
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/export-macos-build)
+run_cmake_command(export-build-macos-xcframework xcodebuild -create-xcframework
+  -output ${bld_dir}/export-macos-build/lib/mylib.xcframework
+  -library ${bld_dir}/export-macos-build/lib/macos${_config_dir}/libmylib.a
+  -headers ${src_dir}/mylib/include
+  )
+run_cmake_command(export-build-macos-xcframework-genex xcodebuild -create-xcframework
   -output ${bld_dir}/export-macos-build/lib/mylib-genex.xcframework
   -library ${bld_dir}/export-macos-build/lib/macos${_config_dir}/libmylib-genex.a
   -headers ${src_dir}/mylib/include
@@ -242,5 +276,16 @@ if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
   set(_config_arg --config Release)
 endif()
 run_cmake_command(import-macos-build-general-build ${CMAKE_COMMAND} --build . ${_config_arg})
+unset(RunCMake_TEST_NO_CLEAN)
+unset(RunCMake_TEST_BINARY_DIR)
+
+set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/import-ios-install-general-build)
+run_cmake_with_options(import-ios-install-general -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphoneos -DCMAKE_OSX_ARCHITECTURES=arm64 -Dmylib_DIR=${RunCMake_BINARY_DIR}/export-install/lib/cmake/mylib)
+set(RunCMake_TEST_NO_CLEAN 1)
+set(_config_arg)
+if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+  set(_config_arg --config Release)
+endif()
+run_cmake_command(import-ios-install-general-build ${CMAKE_COMMAND} --build . ${_config_arg})
 unset(RunCMake_TEST_NO_CLEAN)
 unset(RunCMake_TEST_BINARY_DIR)
