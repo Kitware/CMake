@@ -3196,6 +3196,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
       target->AddSource(file.Path, true);
       unity->SetProperty("SKIP_UNITY_BUILD_INCLUSION", "ON");
       unity->SetProperty("UNITY_SOURCE_FILE", file.Path);
+      unity->SetProperty("CXX_SCAN_FOR_MODULES", "0");
       if (file.PerConfig) {
         unity->SetProperty("COMPILE_DEFINITIONS",
                            "CMAKE_UNITY_CONFIG_$<UPPER_CASE:$<CONFIG>>");
