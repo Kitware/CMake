@@ -1340,7 +1340,8 @@ void cmComputeLinkInformation::AddSharedDepItem(LinkEntry const& entry)
       // If the linker also uses '--as-needed' behavior, this will not
       // add an unnecessary direct dependency.
       (tgt && tgt->IsImported() &&
-       !tgt->HasKnownRuntimeArtifactLocation(this->Config))) {
+       !tgt->HasKnownRuntimeArtifactLocation(this->Config) &&
+       this->Target->LinkerEnforcesNoAllowShLibUndefined(this->Config))) {
     this->AddItem(entry);
     return;
   }
