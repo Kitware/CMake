@@ -480,6 +480,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       return CURLE_SSL_CONNECT_ERROR;
     }
 #endif
+  default:
     break;
   }
 
@@ -513,7 +514,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
   }
 
-#ifndef NO_FILESYSTEM
+#if !defined(NO_FILESYSTEM) && defined(WOLFSSL_SYS_CA_CERTS)
   /* load native CA certificates */
   if(ssl_config->native_ca_store) {
     if(wolfSSL_CTX_load_system_CA_certs(backend->ctx) != WOLFSSL_SUCCESS) {
@@ -608,24 +609,12 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                          SSL_VERIFY_NONE, NULL);
 
 #ifdef HAVE_SNI
-  if(sni) {
-    struct in_addr addr4;
-#ifdef ENABLE_IPV6
-    struct in6_addr addr6;
-#endif
-    size_t hostname_len = strlen(connssl->hostname);
-
-    if((hostname_len < USHRT_MAX) &&
-       !Curl_inet_pton(AF_INET, connssl->hostname, &addr4)
-#ifdef ENABLE_IPV6
-       && !Curl_inet_pton(AF_INET6, connssl->hostname, &addr6)
-#endif
-      ) {
-      size_t snilen;
-      char *snihost = Curl_ssl_snihost(data, connssl->hostname, &snilen);
-      if(!snihost ||
-         wolfSSL_CTX_UseSNI(backend->ctx, WOLFSSL_SNI_HOST_NAME, snihost,
-                            (unsigned short)snilen) != 1) {
+  if(sni && connssl->peer.sni) {
+    size_t sni_len = strlen(connssl->peer.sni);
+    if((sni_len < USHRT_MAX)) {
+      if(wolfSSL_CTX_UseSNI(backend->ctx, WOLFSSL_SNI_HOST_NAME,
+                            connssl->peer.sni,
+                            (unsigned short)sni_len) != 1) {
         failf(data, "Failed to set SNI");
         return CURLE_SSL_CONNECT_ERROR;
       }
@@ -763,9 +752,9 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* Enable RFC2818 checks */
   if(conn_config->verifyhost) {
-    char *snihost = Curl_ssl_snihost(data, connssl->hostname, NULL);
-    if(!snihost ||
-       (wolfSSL_check_domain_name(backend->handle, snihost) == SSL_FAILURE))
+    char *snihost = connssl->peer.sni?
+                    connssl->peer.sni : connssl->peer.hostname;
+    if(wolfSSL_check_domain_name(backend->handle, snihost) == SSL_FAILURE)
       return CURLE_SSL_CONNECT_ERROR;
   }
 
@@ -813,7 +802,7 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     else if(DOMAIN_NAME_MISMATCH == detail) {
 #if 1
       failf(data, " subject alt name(s) or common name do not match \"%s\"",
-            connssl->dispname);
+            connssl->peer.dispname);
       return CURLE_PEER_FAILED_VERIFICATION;
 #else
       /* When the wolfssl_check_domain_name() is used and you desire to
@@ -1398,7 +1387,7 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   Curl_none_cert_status_request,   /* cert_status_request */
   wolfssl_connect,                 /* connect */
   wolfssl_connect_nonblocking,     /* connect_nonblocking */
-  Curl_ssl_get_select_socks,                /* getsock */
+  Curl_ssl_adjust_pollset,         /* adjust_pollset */
   wolfssl_get_internals,           /* get_internals */
   wolfssl_close,                   /* close_one */
   Curl_none_close_all,             /* close_all */

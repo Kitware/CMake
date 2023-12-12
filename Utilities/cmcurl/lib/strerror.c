@@ -48,7 +48,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#if defined(WIN32) || defined(_WIN32_WCE)
+#if defined(_WIN32) || defined(_WIN32_WCE)
 #define PRESERVE_WINDOWS_ERROR_CODE
 #endif
 
@@ -762,7 +762,7 @@ get_winsock_error (int err, char *buf, size_t len)
 }
 #endif   /* USE_WINSOCK */
 
-#if defined(WIN32) || defined(_WIN32_WCE)
+#if defined(_WIN32) || defined(_WIN32_WCE)
 /* This is a helper function for Curl_strerror that converts Windows API error
  * codes (GetLastError) to error messages.
  * Returns NULL if no error message was found for error code.
@@ -804,7 +804,7 @@ get_winapi_error(int err, char *buf, size_t buflen)
 
   return (*buf ? buf : NULL);
 }
-#endif /* WIN32 || _WIN32_WCE */
+#endif /* _WIN32 || _WIN32_WCE */
 
 /*
  * Our thread-safe and smart strerror() replacement.
@@ -837,15 +837,15 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
   if(!buflen)
     return NULL;
 
-#ifndef WIN32
+#ifndef _WIN32
   DEBUGASSERT(err >= 0);
 #endif
 
   max = buflen - 1;
   *buf = '\0';
 
-#if defined(WIN32) || defined(_WIN32_WCE)
-#if defined(WIN32)
+#if defined(_WIN32) || defined(_WIN32_WCE)
+#if defined(_WIN32)
   /* 'sys_nerr' is the maximum errno number, it is not widely portable */
   if(err >= 0 && err < sys_nerr)
     strncpy(buf, sys_errlist[err], max);
@@ -923,7 +923,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
  * Curl_winapi_strerror:
  * Variant of Curl_strerror if the error code is definitely Windows API.
  */
-#if defined(WIN32) || defined(_WIN32_WCE)
+#if defined(_WIN32) || defined(_WIN32_WCE)
 const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen)
 {
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
@@ -958,7 +958,7 @@ const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen)
 
   return buf;
 }
-#endif /* WIN32 || _WIN32_WCE */
+#endif /* _WIN32 || _WIN32_WCE */
 
 #ifdef USE_WINDOWS_SSPI
 /*
@@ -986,6 +986,10 @@ const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
       break;
 #define SEC2TXT(sec) case sec: txt = #sec; break
     SEC2TXT(CRYPT_E_REVOKED);
+    SEC2TXT(CRYPT_E_NO_REVOCATION_DLL);
+    SEC2TXT(CRYPT_E_NO_REVOCATION_CHECK);
+    SEC2TXT(CRYPT_E_REVOCATION_OFFLINE);
+    SEC2TXT(CRYPT_E_NOT_IN_REVOCATION_DATABASE);
     SEC2TXT(SEC_E_ALGORITHM_MISMATCH);
     SEC2TXT(SEC_E_BAD_BINDINGS);
     SEC2TXT(SEC_E_BAD_PKGID);
