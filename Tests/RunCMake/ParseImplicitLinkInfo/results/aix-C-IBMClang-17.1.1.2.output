@@ -1,0 +1,2 @@
+libs=/opt/IBM/openxlC/17.1.1/lib/clang/15.0.0/lib/aix/libxlopt.a;unwind;pthreads;c
+dirs=/opt/IBM/xlmass/10.1.1/lib
