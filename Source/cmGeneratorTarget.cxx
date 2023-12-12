@@ -9046,6 +9046,7 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
             verifyTarget->SetProperty("AUTOUIC", "OFF");
             verifyTarget->SetProperty("DISABLE_PRECOMPILE_HEADERS", "ON");
             verifyTarget->SetProperty("UNITY_BUILD", "OFF");
+            verifyTarget->SetProperty("CXX_SCAN_FOR_MODULES", "OFF");
             cm::optional<std::map<std::string, cmValue>>
               perConfigCompileDefinitions;
             verifyTarget->FinalizeTargetConfiguration(
