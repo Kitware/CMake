@@ -35,7 +35,7 @@ function(cmake_determine_linker_id lang linker)
                     OUTPUT_STRIP_TRAILING_WHITESPACE
                     ERROR_STRIP_TRAILING_WHITESPACE)
 
-    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND linker_desc MATCHES "@\\(#\\)PROGRAM:ld.+PROJECT:[a-z0-9]+-([0-9.]+).+")
+    if(CMAKE_EFFECTIVE_SYSTEM_NAME STREQUAL "Apple" AND linker_desc MATCHES "@\\(#\\)PROGRAM:ld.+PROJECT:[a-z0-9]+-([0-9.]+).+")
       set(linker_id "AppleClang")
       set(linker_frontend "GNU")
       set(linker_version "${CMAKE_MATCH_1}")

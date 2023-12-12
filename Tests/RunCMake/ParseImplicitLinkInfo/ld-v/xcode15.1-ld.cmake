@@ -1,1 +1,1 @@
-set(CMAKE_SYSTEM_NAME "Darwin")
+set(CMAKE_EFFECTIVE_SYSTEM_NAME "Apple")
