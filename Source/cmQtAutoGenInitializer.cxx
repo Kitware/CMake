@@ -1878,6 +1878,7 @@ cmSourceFile* cmQtAutoGenInitializer::RegisterGeneratedSource(
   gFile->MarkAsGenerated();
   gFile->SetProperty("SKIP_AUTOGEN", "1");
   gFile->SetProperty("SKIP_LINTING", "ON");
+  gFile->SetProperty("CXX_SCAN_FOR_MODULES", "0");
   return gFile;
 }
 
