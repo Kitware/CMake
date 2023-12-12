@@ -19,10 +19,10 @@ endif
 let s:keepcpo= &cpo
 set cpo&vim
 
-syn region cmakeBracketArgument start="\[\z(=\?\|=[0-9]*\)\[" end="\]\z1\]" contains=cmakeTodo,@Spell
+syn region cmakeBracketArgument start="\[\z(=*\)\[" end="\]\z1\]" contains=cmakeTodo,@Spell
 
-syn region cmakeComment start="#" end="$" contains=cmakeTodo,@Spell
-syn region cmakeBracketComment start="\[\z(=*\)\[" end="\]\z1\]" contains=cmakeTodo,@Spell
+syn region cmakeComment start="#\(\[=*\[\)\@!" end="$" contains=cmakeTodo,@Spell
+syn region cmakeBracketComment start="#\[\z(=*\)\[" end="\]\z1\]" contains=cmakeTodo,@Spell
 
 syn match cmakeEscaped /\(\\\\\|\\"\|\\n\|\\t\)/ contained
 syn region cmakeRegistry start="\[" end="]" contained oneline contains=cmakeTodo,cmakeEscaped
