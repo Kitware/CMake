@@ -6,6 +6,7 @@ set(tools
   debian12-ld.gold
   debian12-ld.lld
   debian12-ld.mold
+  fedora39-ld.bfd
   fedora39-ld.gold
   fedora39-ld.lld
   fedora39-ld.mold
