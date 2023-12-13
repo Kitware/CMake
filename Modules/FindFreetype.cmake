@@ -66,10 +66,6 @@ directory of a Freetype installation.
 # everything still works.
 
 set(_Freetype_args)
-if (Freetype_FIND_QUIETLY)
-  list(APPEND _Freetype_args
-    QUIET)
-endif ()
 if (Freetype_FIND_VERSION)
   list(APPEND _Freetype_args
     "${Freetype_FIND_VERSION}")
@@ -100,7 +96,8 @@ if (_Freetype_component_opt)
     OPTIONAL_COMPONENTS "${_Freetype_component_opt}")
 endif ()
 unset(_Freetype_component_opt)
-find_package(freetype CONFIG ${_Freetype_args})
+# Always find with QUIET to avoid noise when it is not found.
+find_package(freetype CONFIG QUIET ${_Freetype_args})
 unset(_Freetype_args)
 if (freetype_FOUND)
   if (NOT TARGET Freetype::Freetype)
@@ -150,6 +147,14 @@ if (freetype_FOUND)
     set(Freetype_${_Freetype_component}_FOUND "${freetype_${_Freetype_component}_FOUND}")
   endforeach ()
   unset(_Freetype_component)
+
+  include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+  find_package_handle_standard_args(
+    Freetype
+    VERSION_VAR
+      FREETYPE_VERSION_STRING
+  )
+
   return ()
 endif ()
 
