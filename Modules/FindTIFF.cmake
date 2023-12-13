@@ -66,10 +66,6 @@ The following cache variables may also be set:
 #]=======================================================================]
 
 set(_TIFF_args)
-if (TIFF_FIND_QUIETLY)
-  list(APPEND _TIFF_args
-    QUIET)
-endif ()
 if (TIFF_FIND_VERSION)
   list(APPEND _TIFF_args
     "${TIFF_FIND_VERSION}")
@@ -100,7 +96,8 @@ if (_TIFF_component_opt)
     OPTIONAL_COMPONENTS "${_TIFF_component_opt}")
 endif ()
 unset(_TIFF_component_opt)
-find_package(tiff CONFIG ${_TIFF_args})
+# Always find with QUIET to avoid noise when it is not found.
+find_package(tiff CONFIG QUIET ${_TIFF_args})
 unset(_TIFF_args)
 if (tiff_FOUND)
   if (NOT TARGET TIFF::TIFF)
@@ -135,6 +132,12 @@ if (tiff_FOUND)
     set(TIFF_${_TIFF_component}_FOUND "${tiff_${_TIFF_component}_FOUND}")
   endforeach ()
   unset(_TIFF_component)
+
+  include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+  find_package_handle_standard_args(TIFF
+                                    HANDLE_COMPONENTS
+                                    VERSION_VAR TIFF_VERSION_STRING)
+
   return ()
 endif ()
 
