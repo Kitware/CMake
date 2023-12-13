@@ -83,10 +83,6 @@ function(cmake_determine_linker_id lang linker)
       break()
     endif()
   endforeach()
-  if(NOT linker_id)
-    # unknown linker
-    set(linker_id "UNKNOWN")
-  endif()
 
   set(CMAKE_${lang}_COMPILER_LINKER_ID "${linker_id}" PARENT_SCOPE)
   if (linker_frontend)
