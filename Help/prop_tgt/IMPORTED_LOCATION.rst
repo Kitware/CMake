@@ -17,14 +17,10 @@ non-imported targets.
 
 .. versionadded:: 3.28
 
-  For frameworks on macOS, this may be the location of the framework folder
-  itself.
-
-.. versionadded:: 3.28
-
-  This may be the location of a ``.xcframework`` folder on macOS. If it is,
-  any target that links against it will get the selected library's ``Headers``
-  directory as a usage requirement.
+  For ordinary frameworks on Apple platforms, this may be the location of the
+  ``.framework`` folder itself.  For XCFrameworks, it may be the location of
+  the ``.xcframework`` folder, in which case any target that links against it
+  will get the selected library's ``Headers`` directory as a usage requirement.
 
 The ``IMPORTED_LOCATION`` target property may be overridden for a
 given configuration ``<CONFIG>`` by the configuration-specific
@@ -38,5 +34,5 @@ selected and its :prop_tgt:`IMPORTED_LOCATION_<CONFIG>` value used.
 To get the location of an imported target read one of the :prop_tgt:`LOCATION`
 or :prop_tgt:`LOCATION_<CONFIG>` properties.
 
-For platforms with import libraries (e.g. Windows, AIX or macOS) see also
+For platforms with import libraries (e.g. Windows, AIX or Apple) see also
 :prop_tgt:`IMPORTED_IMPLIB`.
