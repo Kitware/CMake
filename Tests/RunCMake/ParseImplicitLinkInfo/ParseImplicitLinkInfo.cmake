@@ -137,6 +137,7 @@ foreach(t ${targets})
     set(idirs_output "")
     set(implicit_objs "")
     set(library_arch_output "")
+    set(linker_tool_output "")
     file(STRINGS ${outfile} outputs)
     foreach(line IN LISTS outputs)
       if(line MATCHES "libs=")
@@ -148,18 +149,30 @@ foreach(t ${targets})
       if(line MATCHES "library_arch=")
         string(REPLACE "library_arch=" "" library_arch_output "${line}")
       endif()
+      if(line MATCHES "linker_tool=")
+        string(REPLACE "linker_tool=" "" linker_tool_output "${line}")
+      endif()
     endforeach()
 
-    cmake_parse_implicit_link_info("${input}" implicit_libs idirs implicit_fwks log
+    cmake_parse_implicit_link_info2("${input}" log
         "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}"
         LANGUAGE ${lang}
+        COMPUTE_LINKER linker_tool
+        COMPUTE_IMPLICIT_LIBS implicit_libs
+        COMPUTE_IMPLICIT_DIRS idirs
+        COMPUTE_IMPLICIT_FWKS implicit_fwks
         COMPUTE_IMPLICIT_OBJECTS implicit_objs)
 
     set(library_arch)
     cmake_parse_library_architecture(${lang} "${idirs}" "${implicit_objs}" library_arch)
 
     # File format
-    # file(WRITE ${outfile} "libs=${implicit_libs}\ndirs=${idirs}\nlibrary_arch=${library_arch}")
+    # file(WRITE ${outfile} "libs=${implicit_libs}\ndirs=${idirs}\nlibrary_arch=${library_arch}\nlinker_tool=${linker_tool}\n")
+
+    if(NOT CMAKE_HOST_WIN32)
+      string(REPLACE "\\" "/" linker_tool "${linker_tool}")
+      cmake_path(SET linker_tool "${linker_tool}")
+    endif()
 
     if(t MATCHES "-empty$")          # empty isn't supposed to parse
       if("${state}" STREQUAL "done")
@@ -171,6 +184,8 @@ foreach(t ${targets})
       message("${t} parse failed: state=${state}, '${implicit_libs}' does not match '^${implicit_lib_output}$'")
     elseif((library_arch OR library_arch_output) AND NOT "${library_arch}" MATCHES "^${library_arch_output}$")
       message("${t} parse failed: state=${state}, '${library_arch}' does not match '^${library_arch_output}$'")
+    elseif((linker_tool OR linker_tool_output) AND NOT "${linker_tool}" MATCHES "^${linker_tool_output}$")
+      message("${t} parse failed: state=${state}, '${linker_tool}' does not match '^${linker_tool_output}$'")
     endif()
   endblock()
 endforeach(t)

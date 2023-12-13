@@ -1,3 +1,4 @@
 libs=pgf90rtl;pgf90;pgf90_rpm1;pgf902;pgf90rtl;pgftnrtl;pgmp;numa;pthread;pgmath;nspgc;pgc;rt;pthread;m;gcc;c;gcc;gcc_s
 dirs=/mnt/pgi/linux86-64/18.10/lib;/usr/lib64;/usr/lib/gcc/x86_64-linux-gnu/7
 library_arch=
+linker_tool=/usr/bin/ld

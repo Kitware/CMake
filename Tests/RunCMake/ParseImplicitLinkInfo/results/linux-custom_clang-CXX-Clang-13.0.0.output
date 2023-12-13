@@ -1,3 +1,4 @@
 libs=c\+\+;m;-l:libunwind.so;c;-l:libunwind.so
 dirs=/opt/llvm-13/lib/x86_64-pc-linux-gnu;/usr/lib/gcc/x86_64-linux-gnu/9;/usr/lib64;/lib/x86_64-linux-gnu;/lib64;/usr/lib/x86_64-linux-gnu;/opt/llvm-13/lib;/lib;/usr/lib
 library_arch=x86_64-linux-gnu
+linker_tool=/opt/llvm-13/bin/ld.lld
