@@ -88,6 +88,8 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
         NOT linker_tool AND NOT "${line}" MATCHES "${linker_tool_exclude_regex}")
       if("${line}" MATCHES "exec: ([^()]*/(${linker}))") # IBM XL as nvcc host compiler
         set(linker_tool "${CMAKE_MATCH_1}")
+      elseif("${line}" MATCHES "^export XL_LINKER=(.*/${linker})[ \t]*$") # IBM XL
+        set(linker_tool "${CMAKE_MATCH_1}")
       elseif("${line}" MATCHES "${linker_tool_regex}")
         set(linker_tool "${CMAKE_MATCH_2}")
       endif()
