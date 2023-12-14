@@ -173,9 +173,9 @@ foreach(t ${targets})
     # File format
     # file(WRITE ${outfile} "libs=${implicit_libs}\ndirs=${idirs}\nlibrary_arch=${library_arch}\nlinker_tool=${linker_tool}\n")
 
-    if(NOT CMAKE_HOST_WIN32)
+    if(t MATCHES "windows" AND NOT CMAKE_HOST_WIN32)
       string(REPLACE "\\" "/" linker_tool "${linker_tool}")
-      cmake_path(SET linker_tool "${linker_tool}")
+      cmake_path(NORMAL_PATH linker_tool)
     endif()
 
     if(t MATCHES "-empty$")          # empty isn't supposed to parse
