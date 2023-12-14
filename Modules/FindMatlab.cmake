@@ -500,7 +500,7 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
           VALUE "MATLABROOT"
         )
 
-        _Matlab_VersionInfoXML(${_reg} _matlab_version_tmp)
+        _Matlab_VersionInfoXML("${_reg}" _matlab_version_tmp)
         if(NOT "${_matlab_version_tmp}" STREQUAL "unknown")
           list(APPEND matlabs_from_registry ${_matlab_version_tmp})
         endif()
@@ -1364,7 +1364,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
         ${_matlab_main_real_path_tmp}
         CACHE INTERNAL "internal matlab location for the discovered version")
 
-    _Matlab_VersionInfoXML(${matlab_root} _matlab_version_tmp)
+    _Matlab_VersionInfoXML("${matlab_root}" _matlab_version_tmp)
     if(NOT "${_matlab_version_tmp}" STREQUAL "unknown")
       # at least back to R2016 VersionInfo.xml exists
       set(matlab_list_of_all_versions ${_matlab_version_tmp})
@@ -1392,7 +1392,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
     # MCR
     # we cannot run anything in order to extract the version. We assume that the file
     # VersionInfo.xml exists under the MatlabRoot, we look for it and extract the version from there
-    _Matlab_VersionInfoXML(${matlab_root} _matlab_version_tmp)
+    _Matlab_VersionInfoXML("${matlab_root}" _matlab_version_tmp)
     if(NOT "${_matlab_version_tmp}" STREQUAL "unknown")
       set(Matlab_VERSION_STRING_INTERNAL ${_matlab_version_tmp} CACHE INTERNAL "Matlab version (automatically determined)")
     endif()
@@ -1481,7 +1481,7 @@ function(_Matlab_find_instances_macos matlab_roots)
     string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
     set(_matlab_base_path "/Applications/MATLAB_${_matlab_current_release}.app")
 
-    _Matlab_VersionInfoXML(${_matlab_base_path} _matlab_version_tmp)
+    _Matlab_VersionInfoXML("${_matlab_base_path}" _matlab_version_tmp)
     if(NOT "${_matlab_version_tmp}" STREQUAL "unknown")
       set(_matlab_current_version ${_matlab_version_tmp})
     endif()
