@@ -201,3 +201,15 @@ Other Changes
 
 * The precompiled Linux ``x86_64`` binaries provided on
   `cmake.org <https://cmake.org/download/>`_ now require GLIBC 2.17 or higher.
+
+Updates
+=======
+
+Changes made since CMake 3.28.0 include the following.
+
+3.28.1
+------
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
