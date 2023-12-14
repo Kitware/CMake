@@ -486,10 +486,10 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
 
     if(_reg)
 
-      string(REGEX MATCHALL "([0-9]+\\.[0-9]+)" _versions_regex ${_reg})
+      string(REGEX MATCHALL "([0-9]+\\.[0-9]+)" _versions_regex "${_reg}")
 
       foreach(match IN LISTS _versions_regex)
-        string(REGEX MATCH "([0-9]+\\.[0-9]+)" current_match ${match})
+        string(REGEX MATCH "([0-9]+\\.[0-9]+)" current_match "${match}")
 
         if(NOT CMAKE_MATCH_1)
           continue()
