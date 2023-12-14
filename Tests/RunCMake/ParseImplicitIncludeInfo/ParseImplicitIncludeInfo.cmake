@@ -88,15 +88,6 @@ function(load_compiler_info infile lang_var outcmvars_var outstr_var)
 endfunction()
 
 #
-# unload_compiler_info: clear out any CMAKE_* vars load previously set
-#
-function(unload_compiler_info cmvars)
-  foreach(var IN LISTS cmvars)
-    unset("${var}" PARENT_SCOPE)
-  endforeach()
-endfunction()
-
-#
 # main test loop
 #
 foreach(t ${targets})
@@ -113,17 +104,18 @@ foreach(t ${targets})
     continue()
   endif()
 
-  load_compiler_info(${infile} lang cmvars input)
-  file(READ ${outfile} output)
-  string(STRIP "${output}" output)
-  cmake_parse_implicit_include_info("${input}" "${lang}" idirs log state)
+  block()
+    load_compiler_info(${infile} lang cmvars input)
+    file(READ ${outfile} output)
+    string(STRIP "${output}" output)
+    cmake_parse_implicit_include_info("${input}" "${lang}" idirs log state)
 
-  if(t MATCHES "-empty$")          # empty isn't supposed to parse
-    if("${state}" STREQUAL "done")
-      message("empty parse failed: ${idirs}, log=${log}")
+    if(t MATCHES "-empty$")          # empty isn't supposed to parse
+      if("${state}" STREQUAL "done")
+        message("empty parse failed: ${idirs}, log=${log}")
+      endif()
+    elseif(NOT "${state}" STREQUAL "done" OR NOT "${idirs}" MATCHES "^${output}$")
+      message("${t} parse failed: state=${state}, '${idirs}' does not match '^${output}$', log=${log}")
     endif()
-  elseif(NOT "${state}" STREQUAL "done" OR NOT "${idirs}" MATCHES "^${output}$")
-    message("${t} parse failed: state=${state}, '${idirs}' does not match '^${output}$', log=${log}")
-  endif()
-  unload_compiler_info("${cmvars}")
+  endblock()
 endforeach(t)

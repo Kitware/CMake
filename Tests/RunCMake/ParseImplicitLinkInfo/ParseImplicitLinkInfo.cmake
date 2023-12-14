@@ -94,16 +94,6 @@ function(load_compiler_info infile lang_var outcmvars_var outstr_var)
 endfunction()
 
 #
-# unload_compiler_info: clear out any CMAKE_* vars load previously set
-#
-function(unload_compiler_info cmvars)
-  foreach(var IN LISTS cmvars)
-    unset("${var}" PARENT_SCOPE)
-  endforeach()
-endfunction()
-
-
-#
 # load_platform_info: establish CMAKE_LIBRARY_ARCHITECTURE_REGEX
 # based on the target platform.
 #
@@ -132,49 +122,49 @@ foreach(t ${targets})
     continue()
   endif()
 
-  load_compiler_info(${infile} lang cmvars input)
-  load_platform_info(${t})
+  block()
+    load_compiler_info(${infile} lang cmvars input)
+    load_platform_info(${t})
 
-  # Need to handle files with empty entries for both libs or dirs
-  set(implicit_lib_output "")
-  set(idirs_output "")
-  set(implicit_objs "")
-  set(library_arch_output "")
-  file(STRINGS ${outfile} outputs)
-  foreach(line IN LISTS outputs)
-    if(line MATCHES "libs=")
-      string(REPLACE "libs=" "" implicit_lib_output "${line}")
+    # Need to handle files with empty entries for both libs or dirs
+    set(implicit_lib_output "")
+    set(idirs_output "")
+    set(implicit_objs "")
+    set(library_arch_output "")
+    file(STRINGS ${outfile} outputs)
+    foreach(line IN LISTS outputs)
+      if(line MATCHES "libs=")
+        string(REPLACE "libs=" "" implicit_lib_output "${line}")
+      endif()
+      if(line MATCHES "dirs=")
+        string(REPLACE "dirs=" "" idirs_output "${line}")
+      endif()
+      if(line MATCHES "library_arch=")
+        string(REPLACE "library_arch=" "" library_arch_output "${line}")
+      endif()
+    endforeach()
+
+    cmake_parse_implicit_link_info("${input}" implicit_libs idirs implicit_fwks log
+        "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}"
+        LANGUAGE ${lang}
+        COMPUTE_IMPLICIT_OBJECTS implicit_objs)
+
+    set(library_arch)
+    cmake_parse_library_architecture(${lang} "${idirs}" "${implicit_objs}" library_arch)
+
+    # File format
+    # file(WRITE ${outfile} "libs=${implicit_libs}\ndirs=${idirs}\nlibrary_arch=${library_arch}")
+
+    if(t MATCHES "-empty$")          # empty isn't supposed to parse
+      if("${state}" STREQUAL "done")
+        message("empty parse failed: ${idirs}, log=${log}")
+      endif()
+    elseif(NOT "${idirs}" MATCHES "^${idirs_output}$")
+      message("${t} parse failed: state=${state}, '${idirs}' does not match '^${idirs_output}$'")
+    elseif(NOT "${implicit_libs}" MATCHES "^${implicit_lib_output}$")
+      message("${t} parse failed: state=${state}, '${implicit_libs}' does not match '^${implicit_lib_output}$'")
+    elseif((library_arch OR library_arch_output) AND NOT "${library_arch}" MATCHES "^${library_arch_output}$")
+      message("${t} parse failed: state=${state}, '${library_arch}' does not match '^${library_arch_output}$'")
     endif()
-    if(line MATCHES "dirs=")
-      string(REPLACE "dirs=" "" idirs_output "${line}")
-    endif()
-    if(line MATCHES "library_arch=")
-      string(REPLACE "library_arch=" "" library_arch_output "${line}")
-    endif()
-  endforeach()
-
-  cmake_parse_implicit_link_info("${input}" implicit_libs idirs implicit_fwks log
-      "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}"
-      LANGUAGE ${lang}
-      COMPUTE_IMPLICIT_OBJECTS implicit_objs)
-
-  set(library_arch)
-  cmake_parse_library_architecture(${lang} "${idirs}" "${implicit_objs}" library_arch)
-
-  # File format
-  # file(WRITE ${outfile} "libs=${implicit_libs}\ndirs=${idirs}\nlibrary_arch=${library_arch}")
-
-  if(t MATCHES "-empty$")          # empty isn't supposed to parse
-    if("${state}" STREQUAL "done")
-      message("empty parse failed: ${idirs}, log=${log}")
-    endif()
-  elseif(NOT "${idirs}" MATCHES "^${idirs_output}$")
-    message("${t} parse failed: state=${state}, '${idirs}' does not match '^${idirs_output}$'")
-  elseif(NOT "${implicit_libs}" MATCHES "^${implicit_lib_output}$")
-    message("${t} parse failed: state=${state}, '${implicit_libs}' does not match '^${implicit_lib_output}$'")
-  elseif((library_arch OR library_arch_output) AND NOT "${library_arch}" MATCHES "^${library_arch_output}$")
-    message("${t} parse failed: state=${state}, '${library_arch}' does not match '^${library_arch_output}$'")
-  endif()
-
-  unload_compiler_info("${cmvars}")
+  endblock()
 endforeach(t)
