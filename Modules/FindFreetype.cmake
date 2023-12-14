@@ -155,10 +155,9 @@ if (freetype_FOUND)
   unset(_Freetype_component)
 
   include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-  find_package_handle_standard_args(
-    Freetype
-    VERSION_VAR
-      FREETYPE_VERSION_STRING
+  find_package_handle_standard_args(Freetype
+    HANDLE_COMPONENTS
+    VERSION_VAR FREETYPE_VERSION_STRING
   )
 
   return ()
