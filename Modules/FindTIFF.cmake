@@ -65,6 +65,9 @@ The following cache variables may also be set:
   Debug and Release variants are found separately.
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0057 NEW) # if IN_LIST
+
 set(_TIFF_args)
 if (TIFF_FIND_VERSION)
   list(APPEND _TIFF_args
@@ -209,11 +212,9 @@ if (tiff_FOUND)
                                     HANDLE_COMPONENTS
                                     VERSION_VAR TIFF_VERSION_STRING)
 
+  cmake_policy(POP)
   return ()
 endif ()
-
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW)
 
 find_path(TIFF_INCLUDE_DIR tiff.h)
 
