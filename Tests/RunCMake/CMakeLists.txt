@@ -325,6 +325,13 @@ if(UNIX AND "${CMAKE_GENERATOR}" MATCHES "Unix Makefiles|Ninja")
   add_RunCMake_test(Byproducts)
 endif()
 add_RunCMake_test(CMakeDependentOption)
+if(APPLE # Remove these conditions when the test has non-Apple cases
+    AND CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
+  add_RunCMake_test(CMakePackage
+    -DCMake_TEST_XCODE_VERSION=${CMake_TEST_XCODE_VERSION}
+    -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+    )
+endif()
 add_RunCMake_test(CMakeRoleGlobalProperty)
 add_RunCMake_test(CMakeRelease -DCMake_TEST_JQ=${CMake_TEST_JQ})
 if(CMAKE_GENERATOR MATCHES "Make|Ninja")
