@@ -5,9 +5,9 @@ if(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)iphonesimulator")
   @_branch_IOS_SIMULATOR_CONFIG_FILE@
 elseif(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)iphoneos")
   @_branch_IOS_CONFIG_FILE@
-elseif(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)tvsimulator")
+elseif(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)appletvsimulator")
   @_branch_TVOS_SIMULATOR_CONFIG_FILE@
-elseif(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)tvos")
+elseif(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)appletvos")
   @_branch_TVOS_CONFIG_FILE@
 elseif(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)watchsimulator")
   @_branch_WATCHOS_SIMULATOR_CONFIG_FILE@
