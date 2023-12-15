@@ -46,4 +46,7 @@ if(_rdeps)
     )
 endif()
 
+add_executable(cxx_exe_test_launcher ../empty.cxx)
+set_property(TARGET cxx_exe_test_launcher PROPERTY TEST_LAUNCHER no-such-launcher)
+
 add_subdirectory(cross)

@@ -17,6 +17,7 @@ set(properties
 
   # Metadata
   "CROSSCOMPILING_EMULATOR"       "emu"     "<SAME>"
+  "TEST_LAUNCHER"                 "test"    "<SAME>"
   )
 
 prepare_target_types(executable

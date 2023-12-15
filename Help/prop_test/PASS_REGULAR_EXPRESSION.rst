@@ -23,7 +23,8 @@ Example:
 To run a test that may have a system-level failure, but still pass if
 ``PASS_REGULAR_EXPRESSION`` matches, use a CMake command to wrap the
 executable run. Note that this will prevent automatic handling of the
-:prop_tgt:`CROSSCOMPILING_EMULATOR` target property.
+:prop_tgt:`CROSSCOMPILING_EMULATOR` and :prop_tgt:`TEST_LAUNCHER`
+target property.
 
 .. code-block:: cmake
 

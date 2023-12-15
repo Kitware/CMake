@@ -410,15 +410,18 @@ def check_target(c):
                 expected_keys.append("launchers")
                 def check_launcher(actual, expected):
                     assert is_dict(actual)
-                    launcher_keys = ["arguments", "command", "type"]
+                    launcher_keys = ["command", "type"]
+                    if "arguments" in expected:
+                        launcher_keys.append("arguments")
                     assert sorted(actual.keys()) == sorted(launcher_keys)
                     assert matches(actual["command"], expected["command"])
                     assert matches(actual["type"], expected["type"])
-                    if expected["arguments"] is not None:
-                        check_list_match(lambda a, e: matches(a, e),
-                                        actual["arguments"], expected["arguments"],
-                                        missing_exception=lambda e: "argument: %s" % e,
-                                        extra_exception=lambda a: "argument: %s" % actual["arguments"])
+                    if "arguments" in expected:
+                        if expected["arguments"] is not None:
+                            check_list_match(lambda a, e: matches(a, e),
+                                             actual["arguments"], expected["arguments"],
+                                             missing_exception=lambda e: "argument: %s" % e,
+                                             extra_exception=lambda a: "argument: %s" % actual["arguments"])
                 check_list_match(lambda a, e: matches(a["type"], e["type"]),
                                 obj["launchers"], expected["launchers"],
                                 check=check_launcher,
@@ -806,6 +809,8 @@ def gen_check_targets(c, g, inSource):
         read_codemodel_json_data("targets/cxx_exe.json"),
         read_codemodel_json_data("targets/cxx_exe_cross_emulator.json"),
         read_codemodel_json_data("targets/cxx_exe_cross_emulator_args.json"),
+        read_codemodel_json_data("targets/cxx_exe_test_launcher_and_cross_emulator.json"),
+        read_codemodel_json_data("targets/cxx_exe_test_launcher.json"),
         read_codemodel_json_data("targets/cxx_standard_compile_feature_exe.json"),
         read_codemodel_json_data("targets/cxx_standard_exe.json"),
         read_codemodel_json_data("targets/cxx_shared_lib.json"),

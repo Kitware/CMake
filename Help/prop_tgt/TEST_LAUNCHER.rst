@@ -1,0 +1,20 @@
+TEST_LAUNCHER
+-------------
+
+.. versionadded:: 3.29
+
+Use the given launcher to run executables.
+This command will be added as a prefix to :command:`add_test` commands
+for build target system executables and is meant to be run on the host
+machine.
+
+It effectively acts as a run script for tests in a similar way
+to how :variable:`CMAKE_<LANG>_COMPILER_LAUNCHER` works for compilation.
+
+If this property contains a :ref:`semicolon-separated list <CMake Language
+Lists>`, then the first value is the command and remaining values are its
+arguments.
+
+This property is initialized by the value of the
+:variable:`CMAKE_TEST_LAUNCHER` variable if it is set when a target
+is created.

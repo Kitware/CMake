@@ -1022,6 +1022,10 @@ with members:
         An emulator for the target platform when cross-compiling.
         See the :prop_tgt:`CROSSCOMPILING_EMULATOR` target property.
 
+      ``test``
+        A start program for the execution of tests.
+        See the :prop_tgt:`TEST_LAUNCHER` target property.
+
     This field was added in codemodel version 2.7.
 
 ``link``

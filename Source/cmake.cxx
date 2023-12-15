@@ -2515,6 +2515,16 @@ int cmake::ActualConfigure()
                         "Name of generator toolset.", cmStateEnums::INTERNAL);
   }
 
+  if (!this->State->GetInitializedCacheValue("CMAKE_TEST_LAUNCHER")) {
+    cm::optional<std::string> testLauncher =
+      cmSystemTools::GetEnvVar("CMAKE_TEST_LAUNCHER");
+    if (testLauncher && !testLauncher->empty()) {
+      std::string message = "Test launcher to run tests executable.";
+      this->AddCacheEntry("CMAKE_TEST_LAUNCHER", *testLauncher, message,
+                          cmStateEnums::STRING);
+    }
+  }
+
   if (!this->State->GetInitializedCacheValue(
         "CMAKE_CROSSCOMPILING_EMULATOR")) {
     cm::optional<std::string> emulator =

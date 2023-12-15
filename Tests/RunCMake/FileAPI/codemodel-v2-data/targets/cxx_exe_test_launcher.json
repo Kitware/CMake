@@ -1,7 +1,7 @@
 {
-    "name": "cxx_exe_cross_emulator",
-    "id": "^cxx_exe_cross_emulator::@ee4a268216d1f53c4e2e$",
-    "directorySource": "^cxx/cross$",
+    "name": "cxx_exe_test_launcher",
+    "id": "^cxx_exe_test_launcher::@a56b12a3f5c0529fb296$",
+    "directorySource": "^cxx$",
     "projectName": "Cxx",
     "type": "EXECUTABLE",
     "isGeneratorProvided": null,
@@ -15,13 +15,13 @@
             "compileGroupLanguage": "CXX",
             "backtrace": [
                 {
-                    "file": "^cxx/cross/CMakeLists\\.txt$",
-                    "line": 3,
+                    "file": "^cxx/CMakeLists\\.txt$",
+                    "line": 49,
                     "command": "add_executable",
                     "hasParent": true
                 },
                 {
-                    "file": "^cxx/cross/CMakeLists\\.txt$",
+                    "file": "^cxx/CMakeLists\\.txt$",
                     "line": null,
                     "command": null,
                     "hasParent": false
@@ -51,37 +51,37 @@
     ],
     "backtrace": [
         {
-            "file": "^cxx/cross/CMakeLists\\.txt$",
-            "line": 3,
+            "file": "^cxx/CMakeLists\\.txt$",
+            "line": 49,
             "command": "add_executable",
             "hasParent": true
         },
         {
-            "file": "^cxx/cross/CMakeLists\\.txt$",
+            "file": "^cxx/CMakeLists\\.txt$",
             "line": null,
             "command": null,
             "hasParent": false
         }
     ],
     "folder": null,
-    "nameOnDisk": "^cxx_exe_cross_emulator(\\.exe)?$",
+    "nameOnDisk": "^cxx_exe_test_launcher(\\.exe)?$",
     "artifacts": [
         {
-            "path": "^cxx/cross/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?cxx_exe_cross_emulator(\\.exe)?$",
+            "path": "^cxx/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?cxx_exe_test_launcher(\\.exe)?$",
             "_dllExtra": false
         },
         {
-            "path": "^cxx/cross/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?cxx_exe_cross_emulator\\.pdb$",
+            "path": "^cxx/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?cxx_exe_test_launcher\\.pdb$",
             "_dllExtra": true
         }
     ],
-    "build": "^cxx/cross$",
-    "source": "^cxx/cross$",
+    "build": "^cxx$",
+    "source": "^cxx$",
     "install": null,
     "launchers" : [
         {
-            "command": "^no-such-emulator(\\.exe)?$",
-            "type" : "emulator"
+            "command": "^no-such-launcher(\\.exe)?$",
+            "type" : "test"
         }
     ],
     "link": {
@@ -98,7 +98,7 @@
     "archive": null,
     "dependencies": [
         {
-            "id": "^ZERO_CHECK::@6890427a1f51a3e7e1df$",
+            "id": "^ZERO_CHECK::@a56b12a3f5c0529fb296$",
             "backtrace": null
         }
     ]

@@ -41,3 +41,9 @@ block()
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command(EmptyArgument-ctest ${CMAKE_CTEST_COMMAND} -C Debug)
 endblock()
+
+set(RunCMake_TEST_OPTIONS
+    "-DCMAKE_TEST_LAUNCHER=/path/to/pseudo_test_launcher")
+
+run_cmake(TestLauncherProperty)
+run_cmake(TestLauncher)

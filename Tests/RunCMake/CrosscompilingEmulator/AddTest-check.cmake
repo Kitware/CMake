@@ -26,3 +26,7 @@ endif()
 if(testfile_contents MATCHES "add_test[(]DoesNotUseEmulatorWithExecTargetFromSubdirAddedWithGenex [^\n]+pseudo_emulator[^\n]+\n")
   message(SEND_ERROR "Used emulator when it should not be used. ${error_details}")
 endif()
+
+if(NOT testfile_contents MATCHES "add_test[(]UsesTestLauncherAndEmulator[^\n]+pseudo_test_launcher.*pseudo_emulator[^\n]+\n")
+  message(SEND_ERROR "Did not use test launcher and emulator when they should be used. ${error_details}")
+endif()

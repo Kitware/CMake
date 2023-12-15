@@ -168,6 +168,18 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
     // Use the target file on disk.
     exe = target->GetFullPath(config);
 
+    // Prepend with the test launcher if specified.
+    cmValue launcher = target->GetProperty("TEST_LAUNCHER");
+    if (cmNonempty(launcher)) {
+      cmList launcherWithArgs{ *launcher };
+      std::string launcherExe(launcherWithArgs[0]);
+      cmSystemTools::ConvertToUnixSlashes(launcherExe);
+      os << cmOutputConverter::EscapeForCMake(launcherExe) << " ";
+      for (std::string const& arg : cmMakeRange(launcherWithArgs).advance(1)) {
+        os << cmOutputConverter::EscapeForCMake(arg) << " ";
+      }
+    }
+
     // Prepend with the emulator when cross compiling if required.
     cmValue emulator = target->GetProperty("CROSSCOMPILING_EMULATOR");
     if (cmNonempty(emulator)) {

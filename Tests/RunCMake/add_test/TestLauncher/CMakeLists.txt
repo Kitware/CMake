@@ -1,0 +1,9 @@
+add_executable(generated_exe_in_subdir_added_to_test_without_genex
+  ${CMAKE_CURRENT_SOURCE_DIR}/../simple_src_exiterror.cxx)
+set_target_properties(generated_exe_in_subdir_added_to_test_without_genex
+  PROPERTIES LINKER_LANGUAGE C)
+
+add_executable(generated_exe_in_subdir_added_to_test_with_genex
+  ${CMAKE_CURRENT_SOURCE_DIR}/../simple_src_exiterror.cxx)
+set_target_properties(generated_exe_in_subdir_added_to_test_with_genex
+  PROPERTIES LINKER_LANGUAGE C)
