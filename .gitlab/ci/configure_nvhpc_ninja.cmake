@@ -1,4 +1,5 @@
 set(CMake_TEST_CUDA "NVIDIA" CACHE STRING "")
+set(CMake_TEST_CUDA_CUPTI "ON" CACHE STRING "")
 
 set(configure_no_sccache 1)
 

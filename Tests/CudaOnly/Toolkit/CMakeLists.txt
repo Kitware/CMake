@@ -41,7 +41,6 @@ if(CUDAToolkit_VERSION_MAJOR VERSION_LESS 11)
   list(APPEND cuda_libs nvgraph)
 endif()
 
-
 # Verify that all the CUDA:: targets and variables exist
 foreach (cuda_lib IN LISTS cuda_libs)
   if(NOT CUDA_${cuda_lib}_LIBRARY)
@@ -80,6 +79,25 @@ foreach (cuda_lib nvrtc nvToolsExt OpenCL)
     message(FATAL_ERROR "expected CUDAToolkit target CUDA::${cuda_lib} not found")
   endif()
 endforeach()
+
+if(HAS_CUPTI)
+  set(cupti_libs )
+  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.2)
+    list(APPEND cupti_libs cupti nvperf_target)
+  endif()
+  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.3)
+    list(APPEND cupti_libs pcsamplingutil)
+  endif()
+
+  foreach (cuda_lib IN LISTS cupti_libs)
+    if(NOT CUDA_${cuda_lib}_LIBRARY)
+      message(FATAL_ERROR "expected CUDAToolkit variable CUDA_${cuda_lib}_LIBRARY not found")
+    endif()
+    if(NOT TARGET CUDA::${cuda_lib})
+      message(FATAL_ERROR "expected CUDAToolkit target CUDA::${cuda_lib} not found")
+    endif()
+  endforeach()
+endif()
 
 add_executable(CudaOnlyToolkit main.cu)
 target_link_libraries(CudaOnlyToolkit PRIVATE CUDA::toolkit)

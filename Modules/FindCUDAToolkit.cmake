@@ -960,7 +960,7 @@ endif()
 # the version of the CUDA toolchain
 # Create a separate variable so this directory can be selectively added to math targets.
 find_path(CUDAToolkit_CUBLAS_INCLUDE_DIR cublas_v2.h PATHS
-  "${CUDAToolkit_INCLUDE_DIRECTORIES}"
+  ${CUDAToolkit_INCLUDE_DIRECTORIES}
   NO_DEFAULT_PATH)
 
 if(NOT CUDAToolkit_CUBLAS_INCLUDE_DIR)
@@ -973,7 +973,7 @@ if(NOT CUDAToolkit_CUBLAS_INCLUDE_DIR)
   cmake_path(NORMAL_PATH CUDAToolkit_MATH_INCLUDE_DIR)
 
   find_path(CUDAToolkit_CUBLAS_INCLUDE_DIR cublas_v2.h PATHS
-    "${CUDAToolkit_INCLUDE_DIRECTORIES}"
+    ${CUDAToolkit_INCLUDE_DIRECTORIES}
     )
   if(CUDAToolkit_CUBLAS_INCLUDE_DIR)
     list(APPEND CUDAToolkit_INCLUDE_DIRECTORIES "${CUDAToolkit_CUBLAS_INCLUDE_DIR}")
@@ -1246,7 +1246,7 @@ if(CUDAToolkit_FOUND)
 
   find_path(CUDAToolkit_CUPTI_INCLUDE_DIR cupti.h PATHS
       "${CUDAToolkit_ROOT_DIR}/extras/CUPTI/include"
-      "${CUDAToolkit_INCLUDE_DIRS}"
+      ${CUDAToolkit_INCLUDE_DIRS}
       PATH_SUFFIXES "../extras/CUPTI/include"
                     "../../../extras/CUPTI/include"
       NO_DEFAULT_PATH)
