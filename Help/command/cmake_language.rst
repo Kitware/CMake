@@ -317,7 +317,7 @@ be one of the ``<methods>`` that was specified when setting the provider.
   implementation as part of its processing, it can do so by including the
   ``BYPASS_PROVIDER`` keyword as one of the arguments.
 
-``FETCHCONTENT_MAKEAVAILABE_SERIAL``
+``FETCHCONTENT_MAKEAVAILABLE_SERIAL``
   The ``<method-specific-args>`` will be everything passed to the
   :command:`FetchContent_Declare` call that corresponds to the requested
   dependency, with the following exceptions:
