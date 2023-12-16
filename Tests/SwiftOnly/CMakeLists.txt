@@ -43,6 +43,13 @@ add_library(N N.swift)
 target_link_libraries(N PUBLIC
   M)
 
+if(NOT XCODE_VERSION OR XCODE_VERSION VERSION_GREATER_EQUAL 9.0)
+  # TODO: Add a wholemodule object-library test once that is working
+  add_library(O OBJECT O.swift L.swift)
+  target_link_libraries(N PUBLIC O)
+  set_target_properties(O PROPERTIES Swift_COMPILATION_MODE "incremental")
+endif()
+
 # Dummy to make sure generation works with such targets.
 add_library(SwiftIface INTERFACE)
 target_link_libraries(SwiftOnly PRIVATE SwiftIface)
@@ -59,14 +66,15 @@ if(CMAKE_Swift_COMPILER_VERSION VERSION_GREATER_EQUAL 5.2)
 endif()
 
 function(test_cmp0157_default mode)
-
-  cmake_policy(GET CMP0157 cmp0157_wmo)
-  if(cmp0157_wmo STREQUAL "NEW")
-    set(CMAKE_Swift_COMPILATION_MODE "${mode}")
-    add_executable(hi_${mode} main.swift)
-    get_target_property(${mode}_swift_comp_mode hi_${mode} "Swift_COMPILATION_MODE")
-    if(NOT ${mode}_swift_comp_mode STREQUAL ${mode})
-      message(SEND_ERROR "expected ${mode} -- found ${${mode}_swift_comp_mode}")
+  if(POLICY CMP0157)
+    cmake_policy(GET CMP0157 cmp0157_wmo)
+    if(cmp0157_wmo STREQUAL "NEW")
+      set(CMAKE_Swift_COMPILATION_MODE "${mode}")
+      add_executable(hi_${mode} main.swift)
+      get_target_property(${mode}_swift_comp_mode hi_${mode} "Swift_COMPILATION_MODE")
+      if(NOT ${mode}_swift_comp_mode STREQUAL ${mode})
+        message(SEND_ERROR "expected ${mode} -- found ${${mode}_swift_comp_mode}")
+      endif()
     endif()
   endif()
 endfunction()

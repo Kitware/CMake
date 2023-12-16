@@ -1209,7 +1209,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     globalGen->GetByproductsForCleanTarget(config).push_back(targetOutputReal);
   }
 
-  if (this->TargetLinkLanguage(config) == "Swift") {
+  // If we can't split the Swift build model (CMP0157 is OLD or unset), fall
+  // back on the old one-step "build/link" logic.
+  if (!this->GetLocalGenerator()->IsSplitSwiftBuild() &&
+      this->TargetLinkLanguage(config) == "Swift") {
     vars["SWIFT_LIBRARY_NAME"] = [this, config]() -> std::string {
       cmGeneratorTarget::Names targetNames =
         this->GetGeneratorTarget()->GetLibraryNames(config);
@@ -1222,12 +1225,12 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
       cmOutputConverter::SHELL);
 
     vars["SWIFT_SOURCES"] = [this, config]() -> std::string {
-      std::vector<cmSourceFile const*> sources;
+      std::vector<cmSourceFile const*> sourceFiles;
       std::stringstream oss;
 
-      this->GetGeneratorTarget()->GetObjectSources(sources, config);
+      this->GetGeneratorTarget()->GetObjectSources(sourceFiles, config);
       cmLocalGenerator const* LocalGen = this->GetLocalGenerator();
-      for (const auto& source : sources) {
+      for (const auto& source : sourceFiles) {
         const std::string sourcePath = source->GetLanguage() == "Swift"
           ? this->GetCompiledSourceNinjaPath(source)
           : this->GetObjectFilePath(source, config);
@@ -1245,10 +1248,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
     vars["FLAGS"] = this->GetFlags("Swift", config);
     vars["INCLUDES"] = this->GetIncludes("Swift", config);
     this->GenerateSwiftOutputFileMap(config, vars["FLAGS"]);
-  }
 
-  // Compute specific libraries to link with.
-  if (this->TargetLinkLanguage(config) == "Swift") {
+    // Compute specific libraries to link with.
     std::vector<cmSourceFile const*> sources;
     gt->GetObjectSources(sources, config);
     for (const auto& source : sources) {

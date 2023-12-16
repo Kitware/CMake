@@ -171,6 +171,9 @@ protected:
                                        const std::string& config,
                                        const std::string& fileConfig,
                                        bool firstForConfig);
+  void WriteSwiftObjectBuildStatement(
+    std::vector<cmSourceFile const*> const& sources, const std::string& config,
+    const std::string& fileConfig, bool firstForConfig);
   void WriteObjectBuildStatement(cmSourceFile const* source,
                                  const std::string& config,
                                  const std::string& fileConfig,
