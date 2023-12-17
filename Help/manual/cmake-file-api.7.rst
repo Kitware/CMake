@@ -998,35 +998,35 @@ with members:
       destination is available.  The value is an unsigned integer 0-based
       index into the ``backtraceGraph`` member's ``nodes`` array.
 
-  ``launchers``
-    Optional member that is present on executable targets that have
-    at least one launcher specified by the project.  The value is a
-    JSON array of entries corresponding to the specified launchers.
-    Each entry is a JSON object with members:
+``launchers``
+  Optional member that is present on executable targets that have
+  at least one launcher specified by the project.  The value is a
+  JSON array of entries corresponding to the specified launchers.
+  Each entry is a JSON object with members:
 
-    ``command``
-      A string specifying the path to the launcher on disk, represented
-      with forward slashes. If the file is inside the top-level source
-      directory then the path is specified relative to that directory.
+  ``command``
+    A string specifying the path to the launcher on disk, represented
+    with forward slashes. If the file is inside the top-level source
+    directory then the path is specified relative to that directory.
 
-    ``arguments``
-      Optional member that is present when the launcher command has
-      arguments preceding the executable to be launched.  The value
-      is a JSON array of strings representing the arguments.
+  ``arguments``
+    Optional member that is present when the launcher command has
+    arguments preceding the executable to be launched.  The value
+    is a JSON array of strings representing the arguments.
 
-    ``type``
-      A string specifying the type of launcher.  The value is one of
-      the following:
+  ``type``
+    A string specifying the type of launcher.  The value is one of
+    the following:
 
-      ``emulator``
-        An emulator for the target platform when cross-compiling.
-        See the :prop_tgt:`CROSSCOMPILING_EMULATOR` target property.
+    ``emulator``
+      An emulator for the target platform when cross-compiling.
+      See the :prop_tgt:`CROSSCOMPILING_EMULATOR` target property.
 
-      ``test``
-        A start program for the execution of tests.
-        See the :prop_tgt:`TEST_LAUNCHER` target property.
+    ``test``
+      A start program for the execution of tests.
+      See the :prop_tgt:`TEST_LAUNCHER` target property.
 
-    This field was added in codemodel version 2.7.
+  This field was added in codemodel version 2.7.
 
 ``link``
   Optional member that is present for executables and shared library
