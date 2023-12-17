@@ -685,6 +685,17 @@ A number of cache variables can influence the behavior where details from a
   any content details, turning this option ``ON`` can significantly speed up
   the configure stage.  It is ``OFF`` by default.
 
+  .. note::
+
+    The ``FETCHCONTENT_FULLY_DISCONNECTED`` variable is not an appropriate way
+    to prevent any network access on the first run in a build directory.
+    Doing so can break projects, lead to misleading error messages, and hide
+    subtle population failures.  This variable is specifically intended to
+    only be turned on *after* the first time CMake has been run.
+    If you want to prevent network access even on the first run, use a
+    :ref:`dependency provider <dependency_providers>` and populate the
+    dependency from local content instead.
+
 .. variable:: FETCHCONTENT_UPDATES_DISCONNECTED
 
   This is a less severe download/update control compared to
