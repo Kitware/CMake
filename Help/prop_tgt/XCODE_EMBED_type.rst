@@ -49,6 +49,22 @@ The supported values for ``<type>`` are:
   The specified items will be added to the ``Embed XPC Services`` build phase.
   They must be CMake target names.
 
+When listing a target as any of the things to embed, Xcode must see that target
+as part of the same Xcode project, or a sub-project of the one defining the
+bundle.  In order to satisfy this constraint, the CMake project must ensure
+at least one of the following:
+
+* The :variable:`CMAKE_XCODE_GENERATE_TOP_LEVEL_PROJECT_ONLY` variable is set
+  to true in the top level ``CMakeLists.txt`` file.  This is the simplest and
+  most robust approach.
+* Define the target-to-embed in a subdirectory of the one that defines the
+  target being embedded into.
+* If the target-to-embed and the target being embedded into are in separate,
+  unrelated directories (i.e. they are siblings, not one a parent of the
+  other), ensure they have a common :command:`project` call in a parent
+  directory and no other :command:`project` calls between themselves and that
+  common :command:`project` call.
+
 See also :prop_tgt:`XCODE_EMBED_<type>_PATH`,
 :prop_tgt:`XCODE_EMBED_<type>_REMOVE_HEADERS_ON_COPY` and
 :prop_tgt:`XCODE_EMBED_<type>_CODE_SIGN_ON_COPY`.
