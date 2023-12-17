@@ -1986,12 +1986,12 @@ macro(FetchContent_MakeAvailable)
         # This property might be defined but empty. As long as it is defined,
         # find_package() can be called.
         get_property(__cmake_addfpargs GLOBAL PROPERTY
-          _FetchContent_${contentNameLower}_find_package_args
+          _FetchContent_${__cmake_contentNameLower}_find_package_args
           DEFINED
         )
         if(__cmake_addfpargs)
           get_property(__cmake_fpargs GLOBAL PROPERTY
-            _FetchContent_${contentNameLower}_find_package_args
+            _FetchContent_${__cmake_contentNameLower}_find_package_args
           )
           string(APPEND __cmake_providerArgs " FIND_PACKAGE_ARGS")
           foreach(__cmake_item IN LISTS __cmake_fpargs)
