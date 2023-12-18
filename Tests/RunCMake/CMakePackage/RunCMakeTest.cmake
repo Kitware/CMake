@@ -17,6 +17,9 @@ function(apple_export platform system_name archs sysroot)
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command(apple-export-${platform}-build ${CMAKE_COMMAND} --build . --config Release)
   run_cmake_command(apple-export-${platform}-install ${CMAKE_COMMAND} --install . --config Release)
+  file(APPEND "${apple_install}/lib/${platform}/cmake/mylib/mylib-targets.cmake" "\n"
+    "message(STATUS \"loaded: '\${CMAKE_CURRENT_LIST_FILE}'\")\n"
+    )
 endfunction()
 
 function(apple_import platform system_name archs sysroot)
