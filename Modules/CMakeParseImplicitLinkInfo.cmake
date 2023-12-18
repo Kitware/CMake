@@ -74,7 +74,7 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
   # whole line and just the command (argv[0]).
   set(linker_regex "^( *|.*[/\\])(${linker}|${startfile}|([^/\\]+-)?ld|collect2)[^/\\]*( |$)")
   set(linker_exclude_regex "collect2 version |^[A-Za-z0-9_]+=|/ldfe ")
-  set(linker_tool_regex "^[ \t]*(->|\")?[ \t]*([^\"]*[/\\](${linker}))(\"|,| |$)")
+  set(linker_tool_regex "^[ \t]*(->|\")?[ \t]*(([^\"]*[/\\])?(${linker}))(\"|,| |$)")
   set(linker_tool_exclude_regex "cuda-fake-ld|-fuse-ld=")
   set(linker_tool "NOTFOUND")
   set(linker_tool_fallback "")
