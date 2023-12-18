@@ -428,6 +428,10 @@ function(generate_apple_platform_selection_file _output_file)
   set(_multi)
   cmake_parse_arguments(PARSE_ARGV 0 _gpsf "${_options}" "${_single}" "${_multi}")
 
+  if(NOT _gpsf_INSTALL_DESTINATION)
+    message(FATAL_ERROR "No INSTALL_DESTINATION given to generate_apple_platform_selection_file()")
+  endif()
+
   set(_have_relative 0)
   foreach(_opt IN LISTS _config_file_options)
     if(_gpsf_${_opt})
