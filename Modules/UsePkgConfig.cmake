@@ -41,20 +41,19 @@ macro(PKGCONFIG _package _include_DIR _link_DIR _link_FLAGS _cflags)
     if(NOT _return_VALUE)
 
       execute_process(COMMAND ${PKGCONFIG_EXECUTABLE} ${_package} --variable=includedir
-        OUTPUT_VARIABLE ${_include_DIR} )
+        OUTPUT_VARIABLE ${_include_DIR} OUTPUT_STRIP_TRAILING_WHITESPACE )
       string(REGEX REPLACE "[\r\n]" " " ${_include_DIR} "${${_include_DIR}}")
 
-
       execute_process(COMMAND ${PKGCONFIG_EXECUTABLE} ${_package} --variable=libdir
-        OUTPUT_VARIABLE ${_link_DIR} )
+        OUTPUT_VARIABLE ${_link_DIR} OUTPUT_STRIP_TRAILING_WHITESPACE )
       string(REGEX REPLACE "[\r\n]" " " ${_link_DIR} "${${_link_DIR}}")
 
       execute_process(COMMAND ${PKGCONFIG_EXECUTABLE} ${_package} --libs
-        OUTPUT_VARIABLE ${_link_FLAGS} )
+        OUTPUT_VARIABLE ${_link_FLAGS} OUTPUT_STRIP_TRAILING_WHITESPACE )
       string(REGEX REPLACE "[\r\n]" " " ${_link_FLAGS} "${${_link_FLAGS}}")
 
       execute_process(COMMAND ${PKGCONFIG_EXECUTABLE} ${_package} --cflags
-        OUTPUT_VARIABLE ${_cflags} )
+        OUTPUT_VARIABLE ${_cflags} OUTPUT_STRIP_TRAILING_WHITESPACE )
       string(REGEX REPLACE "[\r\n]" " " ${_cflags} "${${_cflags}}")
 
     else()
