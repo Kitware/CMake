@@ -8860,11 +8860,23 @@ bool cmGeneratorTarget::IsFrameworkOnApple() const
 bool cmGeneratorTarget::IsImportedFrameworkFolderOnApple(
   const std::string& config) const
 {
-  return this->IsApple() && this->IsImported() &&
-    (this->GetType() == cmStateEnums::STATIC_LIBRARY ||
-     this->GetType() == cmStateEnums::SHARED_LIBRARY ||
-     this->GetType() == cmStateEnums::UNKNOWN_LIBRARY) &&
-    cmSystemTools::IsPathToFramework(this->GetLocation(config));
+  if (this->IsApple() && this->IsImported() &&
+      (this->GetType() == cmStateEnums::STATIC_LIBRARY ||
+       this->GetType() == cmStateEnums::SHARED_LIBRARY ||
+       this->GetType() == cmStateEnums::UNKNOWN_LIBRARY)) {
+    std::string cfg = config;
+    if (cfg.empty() && this->GetGlobalGenerator()->IsXcode()) {
+      // FIXME(#25515): Remove the need for this workaround.
+      // The Xcode generator queries include directories without any
+      // specific configuration.  Pick one in case this target does
+      // not set either IMPORTED_LOCATION or IMPORTED_CONFIGURATIONS.
+      cfg =
+        this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig)[0];
+    }
+    return cmSystemTools::IsPathToFramework(this->GetLocation(cfg));
+  }
+
+  return false;
 }
 
 bool cmGeneratorTarget::IsAppBundleOnApple() const
