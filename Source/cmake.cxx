@@ -1576,14 +1576,15 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     if (!expandedPreset->ArchitectureStrategy ||
         expandedPreset->ArchitectureStrategy ==
           cmCMakePresetsGraph::ArchToolsetStrategy::Set) {
-      if (!this->GeneratorPlatformSet) {
+      if (!this->GeneratorPlatformSet &&
+          !expandedPreset->Architecture.empty()) {
         this->SetGeneratorPlatform(expandedPreset->Architecture);
       }
     }
     if (!expandedPreset->ToolsetStrategy ||
         expandedPreset->ToolsetStrategy ==
           cmCMakePresetsGraph::ArchToolsetStrategy::Set) {
-      if (!this->GeneratorToolsetSet) {
+      if (!this->GeneratorToolsetSet && !expandedPreset->Toolset.empty()) {
         this->SetGeneratorToolset(expandedPreset->Toolset);
       }
     }
