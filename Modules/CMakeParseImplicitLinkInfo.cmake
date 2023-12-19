@@ -75,8 +75,9 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
   set(linker_regex "^( *|.*[/\\])(${linker}|${startfile}|([^/\\]+-)?ld|collect2)[^/\\]*( |$)")
   set(linker_exclude_regex "collect2 version |^[A-Za-z0-9_]+=|/ldfe ")
   set(linker_tool_regex "^[ \t]*(->|\")?[ \t]*(.*[/\\](${linker}))(\"|,| |$)")
-  set(linker_tool_exclude_regex "cuda-fake-ld|-fuse-ld=|--with-ld=")
+  set(linker_tool_exclude_regex "cuda-fake-ld|-fuse-ld=")
   set(linker_tool "NOTFOUND")
+  set(linker_tool_fallback "")
   set(link_line_parsed 0)
   string(APPEND log "  link line regex: [${linker_regex}]\n")
   if(EXTRA_PARSE_COMPUTE_LINKER)
@@ -90,6 +91,12 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
         set(linker_tool "${CMAKE_MATCH_1}")
       elseif("${line}" MATCHES "^export XL_LINKER=(.*/${linker})[ \t]*$") # IBM XL
         set(linker_tool "${CMAKE_MATCH_1}")
+      elseif("${line}" MATCHES "--with-ld=") # GNU
+        # The GNU compiler reports how it was configured.
+        # This does not account for -fuse-ld= so use it only as a fallback.
+        if("${line}" MATCHES " --with-ld=([^ ]+/${linker})( |$)")
+          set(linker_tool_fallback "${CMAKE_MATCH_1}")
+        endif()
       elseif("${line}" MATCHES "${linker_tool_regex}")
         set(linker_tool "${CMAKE_MATCH_2}")
       endif()
@@ -258,6 +265,9 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
     endif()
   endforeach()
 
+  if(NOT linker_tool AND linker_tool_fallback)
+    set(linker_tool "${linker_tool_fallback}")
+  endif()
   if(linker_tool)
     if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
       # pick-up last path
