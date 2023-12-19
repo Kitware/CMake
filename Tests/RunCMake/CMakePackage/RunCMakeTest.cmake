@@ -33,6 +33,10 @@ function(apple_import platform system_name archs sysroot)
   run_cmake_command(apple-import-${platform}-build ${CMAKE_COMMAND} --build . --config Release)
 endfunction()
 
+if(APPLE)
+  run_cmake(ApplePlatformMissingDest)
+endif()
+
 if(APPLE AND CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
   set(apple_install ${RunCMake_BINARY_DIR}/apple-install)
   file(REMOVE_RECURSE "${apple_install}")

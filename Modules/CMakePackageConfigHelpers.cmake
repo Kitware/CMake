@@ -430,6 +430,10 @@ function(generate_apple_platform_selection_file _output_file)
   set(_multi)
   cmake_parse_arguments(PARSE_ARGV 0 _gpsf "${_options}" "${_single}" "${_multi}")
 
+  if(NOT _gpsf_INSTALL_DESTINATION)
+    message(FATAL_ERROR "No INSTALL_DESTINATION given to generate_apple_platform_selection_file()")
+  endif()
+
   set(_have_relative 0)
   foreach(_opt IN LISTS _config_file_options)
     if(_gpsf_${_opt})
@@ -444,7 +448,7 @@ function(generate_apple_platform_selection_file _output_file)
     endif()
   endforeach()
 
-  configure_package_config_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/Internal/PlatformSelectionFile.cmake.in" "${_output_file}"
+  configure_package_config_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/Internal/ApplePlatformSelection.cmake.in" "${_output_file}"
     INSTALL_DESTINATION "${_gpsf_INSTALL_DESTINATION}"
     NO_SET_AND_CHECK_MACRO
     NO_CHECK_REQUIRED_COMPONENTS_MACRO
