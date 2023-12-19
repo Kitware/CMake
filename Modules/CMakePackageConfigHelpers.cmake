@@ -8,9 +8,6 @@ CMakePackageConfigHelpers
 Helpers functions for creating config files that can be included by other
 projects to find and use a package.
 
-Adds the :command:`configure_package_config_file()` and
-:command:`write_basic_package_version_file()` commands.
-
 Generating a Package Configuration File
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
