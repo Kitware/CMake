@@ -1142,7 +1142,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     std::vector<cmSourceFile const*> swiftSources;
 
     for (cmSourceFile const* sf : objectSources) {
-      if (sf->GetLanguage() == "Swift") {
+      if (this->GetLocalGenerator()->IsSplitSwiftBuild() &&
+          sf->GetLanguage() == "Swift") {
         swiftSources.push_back(sf);
       } else {
         this->WriteObjectBuildStatement(sf, config, fileConfig,
