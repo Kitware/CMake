@@ -1,0 +1,8 @@
+@PACKAGE_INIT@
+
+if(NOT CMAKE_OSX_ARCHITECTURES)
+  message(FATAL_ERROR "CMAKE_OSX_ARCHITECTURES must be explicitly set for this package")
+endif()
+@_branch_code@
+
+message(FATAL_ERROR "Architecture not supported")
