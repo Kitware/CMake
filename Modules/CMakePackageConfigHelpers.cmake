@@ -203,6 +203,7 @@ Generating an Apple Platform Selection File
 
     generate_apple_platform_selection_file(<filename>
       INSTALL_DESTINATION <path>
+      [INSTALL_PREFIX <path>]
       [MACOS_CONFIG_FILE <file>]
       [IOS_CONFIG_FILE <file>]
       [IOS_SIMULATOR_CONFIG_FILE <file>]
@@ -221,7 +222,15 @@ Generating an Apple Platform Selection File
   built for any Apple platform can use them.
 
   ``INSTALL_DESTINATION <path>``
-    Path that the file will be installed to.
+    Path to which the file will be installed by the caller, e.g., via
+    :command:`install(FILES)`.  The path may be either relative to the
+    ``INSTALL_PREFIX`` or absolute.
+
+  ``INSTALL_PREFIX <path>``
+    Path prefix to which the package will be installed by the caller.
+    The ``<path>`` argument must be an absolute path.  If this argument
+    is not passed, the :variable:`CMAKE_INSTALL_PREFIX` variable will be
+    used instead.
 
   ``MACOS_CONFIG_FILE <file>``
     File to include if the platform is macOS.
@@ -425,6 +434,7 @@ function(generate_apple_platform_selection_file _output_file)
   set(_options)
   set(_single
     INSTALL_DESTINATION
+    INSTALL_PREFIX
     ${_config_file_options}
     )
   set(_multi)
@@ -432,6 +442,11 @@ function(generate_apple_platform_selection_file _output_file)
 
   if(NOT _gpsf_INSTALL_DESTINATION)
     message(FATAL_ERROR "No INSTALL_DESTINATION given to generate_apple_platform_selection_file()")
+  endif()
+  if(_gpsf_INSTALL_PREFIX)
+    set(maybe_INSTALL_PREFIX INSTALL_PREFIX ${_gpsf_INSTALL_PREFIX})
+  else()
+    set(maybe_INSTALL_PREFIX "")
   endif()
 
   set(_have_relative 0)
@@ -450,6 +465,7 @@ function(generate_apple_platform_selection_file _output_file)
 
   configure_package_config_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/Internal/ApplePlatformSelection.cmake.in" "${_output_file}"
     INSTALL_DESTINATION "${_gpsf_INSTALL_DESTINATION}"
+    ${maybe_INSTALL_PREFIX}
     NO_SET_AND_CHECK_MACRO
     NO_CHECK_REQUIRED_COMPONENTS_MACRO
     )

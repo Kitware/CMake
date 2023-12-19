@@ -9,6 +9,7 @@ install(EXPORT mylib-targets DESTINATION lib/${platform_name}/cmake/mylib)
 include(CMakePackageConfigHelpers)
 generate_apple_platform_selection_file(mylib-config-install.cmake
   INSTALL_DESTINATION lib/cmake/mylib
+  INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX}
   MACOS_CONFIG_FILE lib/macos/cmake/mylib/mylib-targets.cmake
   IOS_CONFIG_FILE lib/ios/cmake/mylib/mylib-targets.cmake
   IOS_SIMULATOR_CONFIG_FILE lib/ios-simulator/cmake/mylib/mylib-targets.cmake
