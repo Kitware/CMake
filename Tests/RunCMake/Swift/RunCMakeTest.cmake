@@ -49,9 +49,17 @@ elseif(RunCMake_GENERATOR STREQUAL Ninja)
       run_cmake_command(IncrementalSwift-second ${CMAKE_COMMAND} --build ${IncrementalSwift_TEST_BINARY_DIR} -- -d explain)
     endblock()
 
-    run_cmake(CMP0157-NEW)
-    run_cmake(CMP0157-OLD)
-    run_cmake(CMP0157-WARN)
+    block()
+      set(CMP0157-OLD_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CMP0157-OLD-build)
+      set(CMP0157-OLD_TEST_NO_CLEAN 1)
+      set(CMP0157-OLD_TEST_OUTPUT_MERGE 1)
+
+      run_cmake(CMP0157-NEW)
+      run_cmake(CMP0157-OLD)
+      # -n: dry-run to avoid actually compiling, -v: verbose to capture executed command
+      run_cmake_command(CMP0157-OLD-build ${CMAKE_COMMAND} --build ${CMP0157-OLD_TEST_BINARY_DIR} -- -n -v)
+      run_cmake(CMP0157-WARN)
+    endblock()
 
   endif()
 elseif(RunCMake_GENERATOR STREQUAL "Ninja Multi-Config")
