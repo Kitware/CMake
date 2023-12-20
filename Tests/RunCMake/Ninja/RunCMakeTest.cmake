@@ -405,3 +405,5 @@ endfunction()
 if(CMake_TEST_Qt_version)
   run_QtAutoMocSkipPch()
 endif()
+
+run_cmake(LINK_OPTIONSWithNewlines)
