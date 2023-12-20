@@ -7,16 +7,23 @@ endif()
 function(apple_export platform system_name archs sysroot)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/apple-export-${platform}-build)
   string(REPLACE ";" "\\;" archs "${archs}")
+  if(select_archs)
+    string(REPLACE ";" "\\\\;" maybe_IOS_SIMULATOR_SELECT_ARCHS "-DIOS_SIMULATOR_SELECT_ARCHS=${select_archs}")
+  endif()
   run_cmake_with_options(apple-export-${platform}
     "-DCMAKE_SYSTEM_NAME=${system_name}"
     "-DCMAKE_OSX_ARCHITECTURES=${archs}"
     "-DCMAKE_OSX_SYSROOT=${sysroot}"
     "-DCMAKE_INSTALL_PREFIX=${apple_install}"
     ${maybe_CMAKE_BUILD_TYPE}
+    ${maybe_IOS_SIMULATOR_SELECT_ARCHS}
     )
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command(apple-export-${platform}-build ${CMAKE_COMMAND} --build . --config Release)
   run_cmake_command(apple-export-${platform}-install ${CMAKE_COMMAND} --install . --config Release)
+  file(APPEND "${apple_install}/lib/${platform}/cmake/mylib/mylib-targets.cmake" "\n"
+    "message(STATUS \"loaded: '\${CMAKE_CURRENT_LIST_FILE}'\")\n"
+    )
 endfunction()
 
 function(apple_import platform system_name archs sysroot)
@@ -44,9 +51,11 @@ if(APPLE AND CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
   if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 12)
     set(macos_archs "x86_64;arm64")
     set(watch_sim_archs "x86_64")
+    set(select_archs "arm64;x86_64")
   else()
     set(macos_archs "x86_64")
     set(watch_sim_archs "i386")
+    set(select_archs "")
   endif()
 
   if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 9)
@@ -68,6 +77,12 @@ if(APPLE AND CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
   endif()
   apple_export(watchos watchOS "${watch_archs}" watchos)
   apple_export(ios-simulator iOS "${macos_archs}" iphonesimulator)
+  if(select_archs)
+    foreach(arch IN LISTS macos_archs)
+      apple_export(ios-simulator-${arch} iOS "${arch}" iphonesimulator)
+    endforeach()
+  endif()
+
   apple_export(tvos-simulator tvOS "${macos_archs}" appletvsimulator)
   if(enable_visionos)
     apple_export(visionos-simulator visionOS "${macos_archs}" xrsimulator)
@@ -82,6 +97,11 @@ if(APPLE AND CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
   endif()
   apple_import(watchos watchOS "${watch_archs}" watchos)
   apple_import(ios-simulator iOS "${macos_archs}" iphonesimulator)
+  if(select_archs)
+    foreach(arch IN LISTS macos_archs)
+      apple_import(ios-simulator-${arch} iOS "${arch}" iphonesimulator)
+    endforeach()
+  endif()
   apple_import(tvos-simulator tvOS "${macos_archs}" appletvsimulator)
   if(enable_visionos)
     apple_import(visionos-simulator visionOS "${macos_archs}" xrsimulator)
