@@ -42,6 +42,12 @@ directory the test is created in.
 
         <emulator> <command>
 
+      .. versionchanged:: 3.29
+
+        The emulator is used only when
+        :variable:`cross-compiling <CMAKE_CROSSCOMPILING>`.
+        See policy :policy:`CMP0158`.
+
   * .. versionadded:: 3.29
 
       The target's :prop_tgt:`TEST_LAUNCHER`, if set, will be

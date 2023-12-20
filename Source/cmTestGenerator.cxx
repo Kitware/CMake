@@ -167,6 +167,8 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   if (target && target->GetType() == cmStateEnums::EXECUTABLE) {
     // Use the target file on disk.
     exe = target->GetFullPath(config);
+    auto useEmulator = !this->GetTest()->GetCMP0158IsNew() ||
+      this->LG->GetMakefile()->IsOn("CMAKE_CROSSCOMPILING");
 
     // Prepend with the test launcher if specified.
     cmValue launcher = target->GetProperty("TEST_LAUNCHER");
@@ -182,7 +184,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 
     // Prepend with the emulator when cross compiling if required.
     cmValue emulator = target->GetProperty("CROSSCOMPILING_EMULATOR");
-    if (cmNonempty(emulator)) {
+    if (cmNonempty(emulator) && useEmulator) {
       cmList emulatorWithArgs{ *emulator };
       std::string emulatorExe(emulatorWithArgs[0]);
       cmSystemTools::ConvertToUnixSlashes(emulatorExe);

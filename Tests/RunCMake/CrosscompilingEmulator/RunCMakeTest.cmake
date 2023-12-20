@@ -6,6 +6,8 @@ set(RunCMake_TEST_OPTIONS
 run_cmake(CrosscompilingEmulatorProperty)
 run_cmake(TryRun)
 run_cmake(AddTest)
+run_cmake(AddTest-CMP0158-OLD)
+run_cmake(AddTest-CMP0158-NEW)
 
 function(CustomCommandGenerator_run_and_build case)
   # Use a single build tree for a few tests without cleaning.
