@@ -1,0 +1,4 @@
+swiftc [^
+]* -c @CMakeFiles/L.dir/L.o.swift.rsp [^
+]*
+.*swiftc -emit-library -static -o libL.a @CMakeFiles/L.rsp.*

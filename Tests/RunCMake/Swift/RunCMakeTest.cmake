@@ -69,6 +69,13 @@ elseif(RunCMake_GENERATOR STREQUAL Ninja)
       run_cmake(CompileCommands)
       run_cmake_command(CompileCommands-check ${CMAKE_COMMAND} --build ${CompileCommands_TEST_BINARY_DIR})
     endblock()
+
+    block()
+      set(ForceResponseFile_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ForceResponseFile-build)
+      run_cmake(ForceResponseFile)
+      # -v: verbose to capture executed commands -n: dry-run to avoid actually compiling
+      run_cmake_command(ForceResponseFile-check ${CMAKE_COMMAND} --build ${ForceResponseFile_TEST_BINARY_DIR} -- -vn)
+    endblock()
   endif()
 elseif(RunCMake_GENERATOR STREQUAL "Ninja Multi-Config")
   if(CMake_TEST_Swift)
