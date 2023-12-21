@@ -1,7 +1,7 @@
 CMake Error in CMakeLists.txt:
   export called with target "exported" which requires target "doubleexported"
-  that is not in this export set, but in multiple other export sets:
-  .*/Tests/RunCMake/export/DependOnDoubleExport-build/exportset.cmake,
+  that is not in this export set, but in multiple other export sets:.*
+  .*/Tests/RunCMake/export/DependOnDoubleExport-build/exportset.cmake,.*
   .*/Tests/RunCMake/export/DependOnDoubleExport-build/manual.cmake.
 +
   An exported target cannot depend upon another target which is exported
