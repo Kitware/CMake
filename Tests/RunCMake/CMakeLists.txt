@@ -1050,6 +1050,31 @@ set(cpack_tests
 if(APPLE)
   list(APPEND cpack_tests DragNDrop)
 endif()
+
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "e2k" AND NOT DEFINED CMake_TEST_E2K_BROKEN_LIBC)
+  # Exclude tests that fail due to a broken libc version on Elbrus.
+  find_program(DPKG_QUERY "dpkg-query" )
+  execute_process(COMMAND "${DPKG_QUERY}" "-f" "\${Version}" "-W" "glibc" OUTPUT_VARIABLE LIBC_VERSION)
+  if(LIBC_VERSION MATCHES "2.29-25.*")
+    list(REMOVE_ITEM cpack_tests
+      DEB.AUTO_SUFFIXES
+      DEB.CUSTOM_NAMES
+      DEB.DEB_PACKAGE_VERSION_BACK_COMPATIBILITY
+      DEB.PROJECT_META DEB.DEPENDENCIES
+      RPM.PARTIALLY_RELOCATABLE_WARNING
+      RPM.PER_COMPONENT_FIELDS
+      RPM.USER_FILELIST
+      RPM.DIST
+      RPM.AUTO_SUFFIXES
+      TGZ
+      ZIP
+      STGZ
+      External
+      )
+    set(CMake_TEST_E2K_BROKEN_LIBC 1)
+  endif()
+endif()
+
 add_RunCMake_test_group(CPack "${cpack_tests}")
 # add a test to make sure symbols are exported from a shared library
 # for MSVC compilers CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS property is used
@@ -1104,14 +1129,16 @@ add_RunCMake_test(CMakePresetsBuild
   -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
   -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
   )
-add_RunCMake_test(CMakePresetsTest
-  -DPython_EXECUTABLE=${Python_EXECUTABLE}
-  -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
-  )
-add_RunCMake_test(CMakePresetsPackage
-  -DPython_EXECUTABLE=${Python_EXECUTABLE}
-  -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
-  )
+if(NOT CMake_TEST_E2K_BROKEN_LIBC)
+  add_RunCMake_test(CMakePresetsTest
+    -DPython_EXECUTABLE=${Python_EXECUTABLE}
+    -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
+    )
+  add_RunCMake_test(CMakePresetsPackage
+    -DPython_EXECUTABLE=${Python_EXECUTABLE}
+    -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
+    )
+endif()
 add_RunCMake_test(CMakePresetsWorkflow
   -DPython_EXECUTABLE=${Python_EXECUTABLE}
   -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}
