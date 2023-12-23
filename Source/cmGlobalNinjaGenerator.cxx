@@ -579,6 +579,7 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
     this->Comspec = "cmd.exe";
   }
 #endif
+  cm->GetState()->SetNinja(true);
   this->FindMakeProgramFile = "CMakeNinjaFindMake.cmake";
 }
 

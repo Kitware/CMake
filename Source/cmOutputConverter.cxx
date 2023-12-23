@@ -275,6 +275,9 @@ std::string cmOutputConverter::EscapeForShell(cm::string_view str,
   if (this->GetState()->UseNMake()) {
     flags |= Shell_Flag_NMake;
   }
+  if (this->GetState()->UseNinja()) {
+    flags |= Shell_Flag_Ninja;
+  }
   if (!this->GetState()->UseWindowsShell()) {
     flags |= Shell_Flag_IsUnix;
   }
@@ -676,6 +679,12 @@ std::string cmOutputConverter::Shell_GetArgument(cm::string_view in, int flags)
       } else {
         /* Otherwise a semicolon is written just ;. */
         out += ';';
+      }
+    } else if (*cit == '\n') {
+      if (flags & Shell_Flag_Ninja) {
+        out += "$\n";
+      } else {
+        out += '\n';
       }
     } else {
       /* Store this character.  */
