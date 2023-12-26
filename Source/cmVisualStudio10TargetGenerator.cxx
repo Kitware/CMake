@@ -2784,7 +2784,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
           isCppModule = true;
           if (shouldScanForModules &&
               this->GlobalGenerator->IsScanDependenciesSupported()) {
-            // ScanSourceforModuleDependencies uses 'cl /scanDependencies' and
+            // ScanSourceForModuleDependencies uses 'cl /scanDependencies' and
             // can distinguish module interface units and internal partitions.
             compileAsPerConfig = "CompileAsCpp";
           } else {
@@ -2856,9 +2856,9 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         clOptions.AddFlag("CompileAs", compileAsPerConfig);
       }
       if (shouldScanForModules) {
-        clOptions.AddFlag("ScanSourceforModuleDependencies", "true");
+        clOptions.AddFlag("ScanSourceForModuleDependencies", "true");
       } else {
-        clOptions.AddFlag("ScanSourceforModuleDependencies", "false");
+        clOptions.AddFlag("ScanSourceForModuleDependencies", "false");
       }
       if (noWinRT) {
         clOptions.AddFlag("CompileAsWinRT", "false");
