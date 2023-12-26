@@ -2827,7 +2827,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     // use them
     if (!flags.empty() || !options.empty() || !configDefines.empty() ||
         !includes.empty() || compileAsPerConfig || noWinRT ||
-        !options.empty() || needsPCHFlags) {
+        !options.empty() || needsPCHFlags || shouldScanForModules) {
       cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
       cmIDEFlagTable const* flagtable = nullptr;
       const std::string& srclang = source->GetLanguage();
@@ -2857,8 +2857,6 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       }
       if (shouldScanForModules) {
         clOptions.AddFlag("ScanSourceForModuleDependencies", "true");
-      } else {
-        clOptions.AddFlag("ScanSourceForModuleDependencies", "false");
       }
       if (noWinRT) {
         clOptions.AddFlag("CompileAsWinRT", "false");
@@ -3564,6 +3562,9 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
       e2.Element("AdditionalUsingDirectories", dirs);
     }
   }
+
+  // Disable C++ source scanning by default.
+  e2.Element("ScanSourceForModuleDependencies", "false");
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeRcOptions()
