@@ -1024,6 +1024,15 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
   }
 
   {
+    // Ensure that the object directory exists. If there are no objects in the
+    // target (e.g., an empty `OBJECT` library), the directory is still listed
+    // as an order-only depends in the build files. Alternate `ninja`
+    // implementations may not allow this (such as `samu`). See #25526.
+    auto const objectDir = this->GetObjectFileDir(config);
+    this->EnsureDirectoryExists(objectDir);
+  }
+
+  {
     cmNinjaBuild build("phony");
     build.Comment =
       cmStrCat("Order-only phony target for ", this->GetTargetName());
