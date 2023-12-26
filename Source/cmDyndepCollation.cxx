@@ -493,7 +493,8 @@ bool cmDyndepCollation::WriteDyndepMetadata(
       if (!has_provides) {
         cmSystemTools::Error(
           cmStrCat("Output ", object.PrimaryOutput,
-                   " is of type `CXX_MODULES` but does not provide a module"));
+                   " is of type `CXX_MODULES` but does not provide a module "
+                   "interface unit or partition"));
         result = false;
         continue;
       }
