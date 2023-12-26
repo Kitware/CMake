@@ -411,28 +411,29 @@ std::string cmNinjaTargetGenerator::GetCompiledSourceNinjaPath(
   return this->ConvertToNinjaAbsPath(source->GetFullPath());
 }
 
-std::string cmNinjaTargetGenerator::GetObjectFilePath(
-  cmSourceFile const* source, const std::string& config) const
+std::string cmNinjaTargetGenerator::GetObjectFileDir(
+  const std::string& config) const
 {
   std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
   if (!path.empty()) {
     path += '/';
   }
-  std::string const& objectName = this->GeneratorTarget->GetObjectName(source);
-  path += cmStrCat(
-    this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-    this->GetGlobalGenerator()->ConfigDirectory(config), '/', objectName);
+  path +=
+    cmStrCat(this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
+             this->GetGlobalGenerator()->ConfigDirectory(config));
   return path;
+}
+
+std::string cmNinjaTargetGenerator::GetObjectFilePath(
+  cmSourceFile const* source, const std::string& config) const
+{
+  std::string const& objectName = this->GeneratorTarget->GetObjectName(source);
+  return cmStrCat(this->GetObjectFileDir(config), '/', objectName);
 }
 
 std::string cmNinjaTargetGenerator::GetBmiFilePath(
   cmSourceFile const* source, const std::string& config) const
 {
-  std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
-  if (!path.empty()) {
-    path += '/';
-  }
-
   auto& importedConfigInfo = this->Configs.at(config).ImportedCxxModules;
   if (!importedConfigInfo.Initialized()) {
     std::string configUpper = cmSystemTools::UpperCase(config);
@@ -444,10 +445,7 @@ std::string cmNinjaTargetGenerator::GetBmiFilePath(
   std::string bmiName =
     importedConfigInfo.BmiNameForSource(source->GetFullPath());
 
-  path += cmStrCat(
-    this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-    this->GetGlobalGenerator()->ConfigDirectory(config), '/', bmiName);
-  return path;
+  return cmStrCat(this->GetObjectFileDir(config), '/', bmiName);
 }
 
 std::string cmNinjaTargetGenerator::GetClangTidyReplacementsFilePath(
