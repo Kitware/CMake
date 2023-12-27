@@ -1,0 +1,10 @@
+{
+  "version": 9,
+  "include": ["${sourceDir}/IncludeCommon.json"],
+  "configurePresets": [
+    {
+      "name": "Include",
+      "inherits": ["IncludeCommon"]
+    }
+  ]
+}

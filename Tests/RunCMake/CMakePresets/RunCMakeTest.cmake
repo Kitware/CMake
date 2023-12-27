@@ -407,6 +407,7 @@ set(CMakePresets_EXTRA_FILES
 set(ENV{TEST_ENV_INCLUDE_DIR} ${RunCMake_BINARY_DIR}/IncludeExpansion)
 run_cmake_presets(IncludeExpansion --list-presets)
 unset(ENV{TEST_ENV_INCLUDE_DIR})
+run_cmake_presets(IncludeExpansionOtherMacros --list-presets)
 unset(CMakePresets_EXTRA_FILES)
 run_cmake_presets(IncludeNotFound)
 run_cmake_presets(IncludeCycle)

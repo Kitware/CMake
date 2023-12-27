@@ -36,10 +36,11 @@ using JSONHelperBuilder = cmJSONHelperBuilder;
 using ExpandMacroResult = cmCMakePresetsGraphInternal::ExpandMacroResult;
 using MacroExpander = cmCMakePresetsGraphInternal::MacroExpander;
 using MacroExpanderVector = cmCMakePresetsGraphInternal::MacroExpanderVector;
+using cmCMakePresetsGraphInternal::BaseMacroExpander;
 using cmCMakePresetsGraphInternal::ExpandMacros;
 
 constexpr int MIN_VERSION = 1;
-constexpr int MAX_VERSION = 8;
+constexpr int MAX_VERSION = 9;
 
 struct CMakeVersion
 {
@@ -732,6 +733,10 @@ bool cmCMakePresetsGraph::ReadJSONFile(const std::string& filename,
 
   MacroExpanderVector macroExpanders{};
 
+  if (v >= 9) {
+    macroExpanders.push_back(
+      cm::make_unique<BaseMacroExpander>(*this, filename));
+  }
   macroExpanders.push_back(cm::make_unique<EnvironmentMacroExpander>());
 
   for (Json::ArrayIndex i = 0; i < presets.Include.size(); ++i) {
