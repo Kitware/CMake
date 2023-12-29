@@ -294,6 +294,9 @@ function(_cpack_nuget_render_spec)
     # attributes: "type", "url", "branch", and "commit". While all fields are
     # considered optional, they are not independent. Currently unsupported.
 
+    # NuGet >= 5.10
+    _cpack_nuget_variable_fallback_and_wrap_into_element(readme README)
+
     # Handle dependencies
     _cpack_nuget_variable_fallback(_deps DEPENDENCIES)
     set(_collected_deps)
