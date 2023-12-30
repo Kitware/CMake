@@ -611,9 +611,11 @@ Variable :variable:`CMAKE_OSX_ARCHITECTURES` can be used to set architectures
 for both device and simulator. Variable :variable:`CMAKE_OSX_DEPLOYMENT_TARGET`
 can be used to set an iOS/tvOS/visionOS/watchOS deployment target.
 
-Next configuration will install fat 5 architectures iOS library
-and add the ``-miphoneos-version-min=9.3``/``-mios-simulator-version-min=9.3``
-flags to the compiler:
+The next example installs five architectures in a universal binary for an iOS
+library.  It adds the relevant ``-miphoneos-version-min=9.3`` or
+``-mios-simulator-version-min=9.3`` compiler flag where appropriate.
+Note that the :variable:`CMAKE_IOS_INSTALL_COMBINED` variable used in the
+example is now deprecated, so this approach is no longer recommended.
 
 .. code-block:: console
 
