@@ -583,7 +583,7 @@ generator is recommended.  The :generator:`Unix Makefiles` or
 :generator:`Ninja` generators can also be used, but they require the
 project to handle more areas like target CPU selection and code signing.
 
-Any of the three systems can be targeted by setting the
+Any of the Apple device platforms can be targeted by setting the
 :variable:`CMAKE_SYSTEM_NAME` variable to a value from the table below.
 By default, the latest Device SDK is chosen.  As for all Apple platforms,
 a different SDK (e.g. a simulator) can be selected by setting the
