@@ -224,7 +224,7 @@ For example::
  They interpret the opening bracket as the start of an
  `Unquoted Argument`_.
 
-.. _`Lua`: http://www.lua.org/
+.. _`Lua`: https://www.lua.org/
 
 .. _`Quoted Argument`:
 
