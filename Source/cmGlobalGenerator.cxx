@@ -1587,6 +1587,13 @@ bool cmGlobalGenerator::Compute()
     }
   }
 
+  // Add unity sources after computing compile features.  Unity sources do
+  // not change the set of languages or features, but we need to know them
+  // to filter out sources that are scanned for C++ module dependencies.
+  if (!this->AddUnitySources()) {
+    return false;
+  }
+
   for (const auto& localGen : this->LocalGenerators) {
     cmMakefile* mf = localGen->GetMakefile();
     for (const auto& g : mf->GetInstallGenerators()) {
@@ -1863,7 +1870,6 @@ bool cmGlobalGenerator::AddAutomaticSources()
       if (!gt->CanCompileSources()) {
         continue;
       }
-      lg->AddUnityBuild(gt.get());
       lg->AddISPCDependencies(gt.get());
       // Targets that reuse a PCH are handled below.
       if (!gt->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM")) {
@@ -1884,6 +1890,28 @@ bool cmGlobalGenerator::AddAutomaticSources()
     }
   }
   // The above transformations may have changed the classification of sources.
+  // Clear the source list and classification cache (KindedSources) of all
+  // targets so that it will be recomputed correctly by the generators later
+  // now that the above transformations are done for all targets.
+  for (const auto& lg : this->LocalGenerators) {
+    for (const auto& gt : lg->GetGeneratorTargets()) {
+      gt->ClearSourcesCache();
+    }
+  }
+  return true;
+}
+
+bool cmGlobalGenerator::AddUnitySources()
+{
+  for (const auto& lg : this->LocalGenerators) {
+    for (const auto& gt : lg->GetGeneratorTargets()) {
+      if (!gt->CanCompileSources()) {
+        continue;
+      }
+      lg->AddUnityBuild(gt.get());
+    }
+  }
+  // The above transformation may have changed the classification of sources.
   // Clear the source list and classification cache (KindedSources) of all
   // targets so that it will be recomputed correctly by the generators later
   // now that the above transformations are done for all targets.

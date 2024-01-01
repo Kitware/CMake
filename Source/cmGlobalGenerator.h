@@ -677,6 +677,7 @@ protected:
   bool AddHeaderSetVerification();
 
   bool AddAutomaticSources();
+  bool AddUnitySources();
 
   std::string SelectMakeProgram(const std::string& makeProgram,
                                 const std::string& makeDefault = "") const;
