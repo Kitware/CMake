@@ -17,7 +17,7 @@ packages and/or feature for a build tree such as::
     PNG, A PNG image library., <http://www.libpng.org/pub/png/>
        * Enables saving screenshots
     -- The following OPTIONAL packages have not been found:
-    Lua51, The Lua scripting language., <http://www.lua.org>
+    Lua51, The Lua scripting language., <https://www.lua.org>
        * Enables macros in MyWordProcessor
     Foo, Foo provides cool stuff.
 
