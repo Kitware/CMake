@@ -1594,17 +1594,20 @@ that running several of these tests at once does not exhaust the GPU's memory
 pool.
 
 Please note that CTest has no concept of what a GPU is or how much memory it
-has, nor does it have any way of communicating with a GPU to retrieve this
-information or perform any memory management. CTest simply keeps track of a
-list of abstract resource types, each of which has a certain number of slots
-available for tests to use. Each test specifies the number of slots that it
-requires from a certain resource, and CTest then schedules them in a way that
-prevents the total number of slots in use from exceeding the listed capacity.
-When a test is executed, and slots from a resource are allocated to that test,
-tests may assume that they have exclusive use of those slots for the duration
-of the test's process.
+has. It does not have any way of communicating with a GPU to retrieve this
+information or perform any memory management, although the project can define
+a test that provides details about the test machine (see
+:ref:`ctest-resource-dynamically-generated-spec-file`).
 
-The CTest resource allocation feature consists of two inputs:
+CTest keeps track of a list of abstract resource types, each of which has a
+certain number of slots available for tests to use. Each test specifies the
+number of slots that it requires from a certain resource, and CTest then
+schedules them in a way that prevents the total number of slots in use from
+exceeding the listed capacity. When a test is executed, and slots from a
+resource are allocated to that test, tests may assume that they have exclusive
+use of those slots for the duration of the test's process.
+
+The CTest resource allocation feature consists of at least two inputs:
 
 * The :ref:`resource specification file <ctest-resource-specification-file>`,
   described below, which describes the resources available on the system.
@@ -1645,15 +1648,20 @@ properties to indicate a skipped test.
 Resource Specification File
 ---------------------------
 
-The resource specification file is a JSON file which is passed to CTest, either
-on the command line as :option:`ctest --resource-spec-file`, or as the
-``RESOURCE_SPEC_FILE`` argument of :command:`ctest_test`. If a dashboard script
-is used and ``RESOURCE_SPEC_FILE`` is not specified, the value of
-:variable:`CTEST_RESOURCE_SPEC_FILE` in the dashboard script is used instead.
-If :option:`--resource-spec-file <ctest --resource-spec-file>`, ``RESOURCE_SPEC_FILE``,
-and :variable:`CTEST_RESOURCE_SPEC_FILE` in the dashboard script are not specified,
-the value of :variable:`CTEST_RESOURCE_SPEC_FILE` in the CMake build is used
-instead. If none of these are specified, no resource spec file is used.
+The resource specification file is a JSON file which is passed to CTest in one
+of a number of ways. It can be specified on the command line with the
+:option:`ctest --resource-spec-file` option, it can be given using the
+``RESOURCE_SPEC_FILE`` argument of :command:`ctest_test`, or it can be
+generated dynamically as part of test execution (see
+:ref:`ctest-resource-dynamically-generated-spec-file`).
+
+If a dashboard script is used and ``RESOURCE_SPEC_FILE`` is not specified, the
+value of :variable:`CTEST_RESOURCE_SPEC_FILE` in the dashboard script is used
+instead.  If :option:`--resource-spec-file <ctest --resource-spec-file>`,
+``RESOURCE_SPEC_FILE``, and :variable:`CTEST_RESOURCE_SPEC_FILE` in the
+dashboard script are not specified, the value of
+:variable:`CTEST_RESOURCE_SPEC_FILE` in the CMake build is used instead.
+If none of these are specified, no resource spec file is used.
 
 The resource specification file must be a JSON object. All examples in this
 document assume the following resource specification file:
