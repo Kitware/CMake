@@ -835,7 +835,13 @@ private:
   std::string DebuggerDapLogFile;
 #endif
 
+  cm::optional<int> ScriptModeExitCode;
+
 public:
+  bool HasScriptModeExitCode() const { return ScriptModeExitCode.has_value(); }
+  void SetScriptModeExitCode(int code) { ScriptModeExitCode = code; }
+  int GetScriptModeExitCode() const { return ScriptModeExitCode.value_or(-1); }
+
   static cmDocumentationEntry CMAKE_STANDARD_OPTIONS_TABLE[18];
 };
 
