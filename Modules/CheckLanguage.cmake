@@ -66,7 +66,7 @@ macro(check_language lang)
 
     set(extra_compiler_variables)
     if("${lang}" MATCHES "^(CUDA|HIP)$" AND NOT CMAKE_GENERATOR MATCHES "Visual Studio")
-      set(extra_compiler_variables "set(CMAKE_CUDA_HOST_COMPILER \\\"\${CMAKE_CUDA_HOST_COMPILER}\\\")")
+      set(extra_compiler_variables "set(CMAKE_${lang}_HOST_COMPILER \\\"\${CMAKE_${lang}_HOST_COMPILER}\\\")")
     endif()
 
     set(_cl_content
