@@ -898,6 +898,11 @@ void cmMakefile::RunListFile(cmListFile const& listFile,
     if (cmSystemTools::GetFatalErrorOccurred()) {
       break;
     }
+    if (status.HasExitCode()) {
+      // cmake_language EXIT was requested, early break.
+      this->GetCMakeInstance()->SetScriptModeExitCode(status.GetExitCode());
+      break;
+    }
     if (status.GetReturnInvoked()) {
       this->RaiseScope(status.GetReturnVariables());
       // Exit early due to return command.
