@@ -1,0 +1,5 @@
+-- results from: CMP0159
+-- CMAKE_MATCH_0: -->real-value: 1<--
+-- CMAKE_MATCH_1: -->real-value<--
+-- CMAKE_MATCH_2: -->1<--
+-- CMAKE_MATCH_COUNT: -->2<--

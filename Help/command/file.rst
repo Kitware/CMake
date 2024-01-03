@@ -113,6 +113,11 @@ Reading
       Consider only strings that match the given regular expression,
       as described under :ref:`string(REGEX) <Regex Specification>`.
 
+      .. versionchanged:: 3.29
+        Capture groups from the last match in the file are stored in
+        :variable:`CMAKE_MATCH_<n>`, similar to
+        :command:`string(REGEX MATCHALL)`.  See policy :policy:`CMP0159`.
+
     ``ENCODING <encoding-type>``
       .. versionadded:: 3.1
 
