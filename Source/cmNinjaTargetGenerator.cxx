@@ -1390,8 +1390,10 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   bool const needDyndep = !isPch &&
     this->GeneratorTarget->NeedDyndepForSource(language, config, source);
 
-  cmNinjaBuild objBuild(this->LanguageCompilerRule(
-    language, config, needDyndep ? WithScanning::Yes : WithScanning::No));
+  WithScanning withScanning =
+    needDyndep ? WithScanning::Yes : WithScanning::No;
+  cmNinjaBuild objBuild(
+    this->LanguageCompilerRule(language, config, withScanning));
   cmNinjaVars& vars = objBuild.Variables;
   vars["FLAGS"] =
     this->ComputeFlagsForObject(source, language, config, objectFileName);
@@ -1454,7 +1456,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
     this->ExportObjectCompileCommand(
       language, sourceFilePath, objectDir, objectFileName, objectFileDir,
       vars["FLAGS"], vars["DEFINES"], vars["INCLUDES"],
-      vars["TARGET_COMPILE_PDB"], vars["TARGET_PDB"], config);
+      vars["TARGET_COMPILE_PDB"], vars["TARGET_PDB"], config, withScanning);
   }
 
   objBuild.Outputs.push_back(objectFileName);
@@ -1801,7 +1803,7 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
     this->ExportObjectCompileCommand(
       language, sourceFilePath, bmiDir, bmiFileName, bmiFileDir, vars["FLAGS"],
       vars["DEFINES"], vars["INCLUDES"], vars["TARGET_COMPILE_PDB"],
-      vars["TARGET_PDB"], config);
+      vars["TARGET_PDB"], config, WithScanning::Yes);
   }
 
   bmiBuild.Outputs.push_back(bmiFileName);
@@ -2031,7 +2033,7 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
           language, sourceFilePath, objectDir, targetObjectFilename,
           cmSystemTools::GetFilenamePath(targetObjectFilename), vars["FLAGS"],
           vars["DEFINES"], vars["INCLUDES"],
-          /*compile pdb*/ "", /*target pdb*/ "", config);
+          /*compile pdb*/ "", /*target pdb*/ "", config, WithScanning::No);
       }
     } else {
       // Object outputs
@@ -2051,7 +2053,7 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
           cmSystemTools::GetFilenamePath(objectFilepath), vars["FLAGS"],
           vars["DEFINES"], vars["INCLUDES"],
           /*compile pdb*/ "",
-          /*target pdb*/ "", config);
+          /*target pdb*/ "", config, WithScanning::No);
       }
     }
   }
@@ -2220,7 +2222,7 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   std::string const& objectFileDir, std::string const& flags,
   std::string const& defines, std::string const& includes,
   std::string const& targetCompilePdb, std::string const& targetPdb,
-  std::string const& outputConfig)
+  std::string const& outputConfig, WithScanning withScanning)
 {
   if (!this->GeneratorTarget->GetPropertyAsBool("EXPORT_COMPILE_COMMANDS")) {
     return;
@@ -2243,14 +2245,12 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
     escapedSourceFileName, cmOutputConverter::SHELL);
 
   std::string fullFlags = flags;
-  {
-    bool const needDyndep =
-      this->GetGeneratorTarget()->NeedDyndep(language, outputConfig);
+  if (withScanning == WithScanning::Yes) {
     std::string const modmapFormatVar =
       cmStrCat("CMAKE_", language, "_MODULE_MAP_FORMAT");
     std::string const modmapFormat =
       this->Makefile->GetSafeDefinition(modmapFormatVar);
-    if (needDyndep && !modmapFormat.empty()) {
+    if (!modmapFormat.empty()) {
       std::string modmapFlags = this->GetMakefile()->GetRequiredDefinition(
         cmStrCat("CMAKE_", language, "_MODULE_MAP_FLAG"));
       // XXX(modmap): If changing this path construction, change

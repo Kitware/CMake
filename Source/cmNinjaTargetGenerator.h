@@ -193,7 +193,7 @@ protected:
     std::string const& objectFileDir, std::string const& flags,
     std::string const& defines, std::string const& includes,
     std::string const& targetCompilePdb, std::string const& targetPdb,
-    std::string const& outputConfig);
+    std::string const& outputConfig, WithScanning withScanning);
 
   void AdditionalCleanFiles(const std::string& config);
 
