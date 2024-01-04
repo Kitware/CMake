@@ -1,3 +1,4 @@
 libs=imf;svml;irng;stdc\+\+;m;ipgo;decimal;cilkrts;stdc\+\+;gcc;gcc_s;irc;svml;c;gcc;gcc_s;irc_s;dl;c
 dirs=/opt/intel/compilers_and_libraries_2018.0.128/linux/ipp/lib/intel64;/opt/intel/compilers_and_libraries_2018.0.128/linux/compiler/lib/intel64_lin;/opt/intel/compilers_and_libraries_2018.0.128/linux/mkl/lib/intel64_lin;/opt/intel/compilers_and_libraries_2018.0.128/linux/tbb/lib/intel64/gcc4.7;/usr/lib/gcc/x86_64-redhat-linux/4.8.5;/usr/lib64;/lib64;/usr/lib;/lib
 library_arch=
+linker_tool=ld

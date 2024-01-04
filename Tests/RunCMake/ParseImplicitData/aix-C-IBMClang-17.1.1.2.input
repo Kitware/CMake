@@ -1,0 +1,43 @@
+CMAKE_LANG=C
+CMAKE_LINKER=/usr/bin/ld
+CMAKE_C_COMPILER_ABI=
+CMAKE_C_COMPILER_AR=
+CMAKE_C_COMPILER_ARCHITECTURE_ID=
+CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_C_COMPILER_ID=IBMClang
+CMAKE_C_COMPILER_LAUNCHER=
+CMAKE_C_COMPILER_LOADED=1
+CMAKE_C_COMPILER_RANLIB=
+CMAKE_C_COMPILER_TARGET=
+CMAKE_C_COMPILER_VERSION=17.1.1.2
+CMAKE_C_COMPILER_VERSION_INTERAL=
+Change Dir: '/tmp/ii/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): /tmp/cmake-build/bin/cmake -E env VERBOSE=1 /opt/freeware/bin/gmake -f Makefile cmTC_b9ba2/fast
+/opt/freeware/bin/gmake  -f CMakeFiles/cmTC_b9ba2.dir/build.make CMakeFiles/cmTC_b9ba2.dir/build
+gmake[1]: Entering directory '/tmp/ii/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_b9ba2.dir/CMakeCCompilerABI.c.o
+/opt/IBM/openxlC/17.1.1/bin/ibm-clang_r   -v -MD -MT CMakeFiles/cmTC_b9ba2.dir/CMakeCCompilerABI.c.o -MF CMakeFiles/cmTC_b9ba2.dir/CMakeCCompilerABI.c.o.d -o CMakeFiles/cmTC_b9ba2.dir/CMakeCCompilerABI.c.o -c /tmp/cmake/Modules/CMakeCCompilerABI.c
+IBM Open XL C/C++ for AIX 17.1.1 (5725-C72, 5765-J18), version 17.1.1.2, clang version 15.0.0 (build 3948f09)
+Target: powerpc-ibm-aix7.3.0.0
+Thread model: posix
+InstalledDir: /opt/IBM/openxlC/17.1.1/bin
+ "/opt/IBM/openxlC/17.1.1/bin/.ibm-clang.orig" -cc1 -triple powerpc-ibm-aix7.3.0.0 -S -disable-free -clear-ast-before-backend -main-file-name CMakeCCompilerABI.c -mrelocation-model pic -pic-level 2 -mframe-pointer=all -fmath-errno -ffp-contract=on -fno-rounding-math -fno-verbose-asm -mconstructor-aliases -target-cpu pwr7 -mfloat-abi hard -mllvm -treat-scalable-fixed-error-as-warning -gstrict-dwarf -gno-column-info -debugger-tuning=dbx -fno-dwarf-directory-asm -v -fdata-sections -fcoverage-compilation-dir=/tmp/ii/CMakeFiles/CMakeTmp -resource-dir /opt/IBM/openxlC/17.1.1/lib/clang/15.0.0 -dependency-file CMakeFiles/cmTC_b9ba2.dir/CMakeCCompilerABI.c.o.d -MT CMakeFiles/cmTC_b9ba2.dir/CMakeCCompilerABI.c.o -sys-header-deps -internal-isystem /opt/IBM/openxlC/17.1.1/lib/clang/15.0.0/include/ppc_wrappers -internal-isystem /opt/IBM/openxlC/17.1.1/lib/clang/15.0.0/include -internal-isystem /usr/include -internal-isystem /opt/IBM/xlmass/10.1.1/include -fdebug-compilation-dir=/tmp/ii/CMakeFiles/CMakeTmp -ferror-limit 19 -pthread -fno-signed-char -fno-use-cxa-atexit -fgnuc-version=4.2.1 -no-opaque-pointers -fexec-charset UTF-8 -fxl-pragma-pack -o /tmp/CMakeCCompilerABI-a15e67.s -x c /tmp/cmake/Modules/CMakeCCompilerABI.c
+clang -cc1 version 15.0.0 based upon LLVM 15.0.0git default target powerpc-ibm-aix7.3.0.0
+#include "..." search starts here:
+#include <...> search starts here:
+ /opt/IBM/openxlC/17.1.1/lib/clang/15.0.0/include/ppc_wrappers
+ /opt/IBM/openxlC/17.1.1/lib/clang/15.0.0/include
+ /usr/include
+ /opt/IBM/xlmass/10.1.1/include
+End of search list.
+ "/usr/bin/as" -a32 -many -o CMakeFiles/cmTC_b9ba2.dir/CMakeCCompilerABI.c.o /tmp/CMakeCCompilerABI-a15e67.s
+Linking C executable cmTC_b9ba2
+/tmp/cmake-build/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b9ba2.dir/link.txt --verbose=1
+/opt/IBM/openxlC/17.1.1/bin/ibm-clang_r -Wl,-bnoipath  -v -Wl,-v -Wl,-bexpall CMakeFiles/cmTC_b9ba2.dir/CMakeCCompilerABI.c.o -o cmTC_b9ba2  -Wl,-blibpath:/opt/IBM/xlmass/10.1.1/lib:/usr/lib:/lib
+IBM Open XL C/C++ for AIX 17.1.1 (5725-C72, 5765-J18), version 17.1.1.2, clang version 15.0.0 (build 3948f09)
+Target: powerpc-ibm-aix7.3.0.0
+Thread model: posix
+InstalledDir: /opt/IBM/openxlC/17.1.1/bin
+ "/usr/bin/ld" -o cmTC_b9ba2 -b32 -bpT:0x10000000 -bpD:0x20000000 /usr/lib/crt0.o /usr/lib/crti.o -bcdtors:all:0:s -bnoipath -v -bexpall CMakeFiles/cmTC_b9ba2.dir/CMakeCCompilerABI.c.o -blibpath:/opt/IBM/xlmass/10.1.1/lib:/usr/lib:/lib -L/opt/IBM/xlmass/10.1.1/lib /opt/IBM/openxlC/17.1.1/lib/clang/15.0.0/lib/aix/libxlopt.a /opt/IBM/openxlC/17.1.1/lib/clang/15.0.0/lib/aix/libclang_rt.builtins-powerpc.a -lunwind -lpthreads -lc
+gmake[1]: Leaving directory '/tmp/ii/CMakeFiles/CMakeTmp'

@@ -35,7 +35,14 @@ function(cmake_determine_linker_id lang linker)
                     OUTPUT_STRIP_TRAILING_WHITESPACE
                     ERROR_STRIP_TRAILING_WHITESPACE)
 
-    if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND linker_desc MATCHES "@\\(#\\)PROGRAM:ld.+PROJECT:[a-z0-9]+-([0-9.]+).+")
+    string(JOIN "\" \"" flags_string ${flags})
+    string(REGEX REPLACE "\n\n.*" "" linker_desc_head "${linker_desc}")
+    message(CONFIGURE_LOG
+      "Running the ${lang} compiler's linker: \"${linker}\" \"${flags_string}\"\n"
+      "${linker_desc_head}\n"
+      )
+
+    if(CMAKE_EFFECTIVE_SYSTEM_NAME STREQUAL "Apple" AND linker_desc MATCHES "@\\(#\\)PROGRAM:ld.+PROJECT:[a-z0-9]+-([0-9.]+).+")
       set(linker_id "AppleClang")
       set(linker_frontend "GNU")
       set(linker_version "${CMAKE_MATCH_1}")
@@ -58,10 +65,10 @@ function(cmake_determine_linker_id lang linker)
         set(linker_frontend "MSVC")
       endif()
       break()
-    elseif(linker_desc MATCHES "GNU ld \\([^)]+\\) ([0-9.]+)")
+    elseif(linker_desc MATCHES "GNU ld (\\([^)]+\\)|version) ([0-9.]+)")
       set(linker_id "GNU")
       set(linker_frontend "GNU")
-      set(linker_version "${CMAKE_MATCH_1}")
+      set(linker_version "${CMAKE_MATCH_2}")
       break()
     elseif(linker_desc MATCHES "GNU gold \\([^)]+\\) ([0-9.]+)")
       set(linker_id "GNUgold")
@@ -83,10 +90,6 @@ function(cmake_determine_linker_id lang linker)
       break()
     endif()
   endforeach()
-  if(NOT linker_id)
-    # unknown linker
-    set(linker_id "UNKNOWN")
-  endif()
 
   set(CMAKE_${lang}_COMPILER_LINKER_ID "${linker_id}" PARENT_SCOPE)
   if (linker_frontend)
