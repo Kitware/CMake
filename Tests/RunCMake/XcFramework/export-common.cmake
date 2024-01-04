@@ -34,9 +34,9 @@ configure_package_config_file(mylib-config.cmake.in lib/${platform_name}/cmake/m
 
 generate_apple_platform_selection_file(mylib-config-top.cmake
   INSTALL_DESTINATION lib/cmake/mylib
-  MACOS_CONFIG_FILE lib/macos/cmake/mylib/mylib-config.cmake
-  IOS_CONFIG_FILE lib/ios/cmake/mylib/mylib-config.cmake
-  IOS_SIMULATOR_CONFIG_FILE lib/ios-simulator/cmake/mylib/mylib-config.cmake
+  MACOS_INCLUDE_FILE lib/macos/cmake/mylib/mylib-config.cmake
+  IOS_INCLUDE_FILE lib/ios/cmake/mylib/mylib-config.cmake
+  IOS_SIMULATOR_INCLUDE_FILE lib/ios-simulator/cmake/mylib/mylib-config.cmake
   )
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/mylib-config-top.cmake DESTINATION lib/cmake/mylib RENAME mylib-config.cmake)
 

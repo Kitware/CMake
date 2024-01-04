@@ -2,23 +2,23 @@
 
 string(TOLOWER "${CMAKE_OSX_SYSROOT}" _CMAKE_OSX_SYSROOT_LOWER)
 if(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)iphonesimulator")
-  @_branch_IOS_SIMULATOR_CONFIG_FILE@
+  @_branch_IOS_SIMULATOR_INCLUDE_FILE@
 elseif(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)iphoneos")
-  @_branch_IOS_CONFIG_FILE@
+  @_branch_IOS_INCLUDE_FILE@
 elseif(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)appletvsimulator")
-  @_branch_TVOS_SIMULATOR_CONFIG_FILE@
+  @_branch_TVOS_SIMULATOR_INCLUDE_FILE@
 elseif(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)appletvos")
-  @_branch_TVOS_CONFIG_FILE@
+  @_branch_TVOS_INCLUDE_FILE@
 elseif(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)watchsimulator")
-  @_branch_WATCHOS_SIMULATOR_CONFIG_FILE@
+  @_branch_WATCHOS_SIMULATOR_INCLUDE_FILE@
 elseif(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)watchos")
-  @_branch_WATCHOS_CONFIG_FILE@
+  @_branch_WATCHOS_INCLUDE_FILE@
 elseif(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)xrsimulator")
-  @_branch_VISIONOS_SIMULATOR_CONFIG_FILE@
+  @_branch_VISIONOS_SIMULATOR_INCLUDE_FILE@
 elseif(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)xros")
-  @_branch_VISIONOS_CONFIG_FILE@
+  @_branch_VISIONOS_INCLUDE_FILE@
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
-  @_branch_MACOS_CONFIG_FILE@
+  @_branch_MACOS_INCLUDE_FILE@
 else()
   message(FATAL_ERROR "Platform not supported")
 endif()
