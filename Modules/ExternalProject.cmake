@@ -2836,7 +2836,6 @@ function(_ep_add_download_command name)
   set(comment)
   set(work_dir)
   set(extra_repo_info)
-  set(byproduct_file)
 
   if(cmd_set)
     set(work_dir ${download_dir})
@@ -3117,16 +3116,14 @@ hash=${hash}
           get_filename_component(fname "${fname}" NAME)
         else()
           # Fall back to a default file name.  The actual file name does not
-          # matter as long as it doesn't conflict with other projects because
-          # it is used only internally and our extraction tool inspects the
-          # file content directly.  If it turns out the wrong URL was given
-          # that will be revealed during the build which is an easier place for
-          # users to diagnose than an error here anyway.
-          set(fname "${name}-archive.tar")
+          # matter because it is used only internally and our extraction tool
+          # inspects the file content directly.  If it turns out the wrong URL
+          # was given that will be revealed during the build which is an easier
+          # place for users to diagnose than an error here anyway.
+          set(fname "archive.tar")
         endif()
         string(REPLACE ";" "-" fname "${fname}")
         set(file ${download_dir}/${fname})
-        set(byproduct_file "${download_dir}/${fname}")
         get_property(timeout TARGET ${name} PROPERTY _EP_TIMEOUT)
         get_property(inactivity_timeout
           TARGET ${name}
@@ -3303,7 +3300,6 @@ hash=${hash}
       COMMAND ${__cmdQuoted}
       WORKING_DIRECTORY \${work_dir}
       DEPENDS \${depends}
-      BYPRODUCTS \${byproduct_file}
       DEPENDEES mkdir
       ${log}
       ${uses_terminal}
