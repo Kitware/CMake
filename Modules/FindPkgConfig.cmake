@@ -656,6 +656,9 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
 
       if (APPLE AND "-framework" IN_LIST ${_prefix}_LDFLAGS_OTHER)
         _pkgconfig_extract_frameworks("${_prefix}")
+        # Using _pkgconfig_set in this scope so that a future policy can switch to normal variables
+        _pkgconfig_set("${_pkg_check_prefix}_LIBRARIES" "${${_pkg_check_prefix}_LIBRARIES}")
+        _pkgconfig_set("${_pkg_check_prefix}_LDFLAGS_OTHER" "${${_pkg_check_prefix}_LDFLAGS_OTHER}")
       endif()
 
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" INCLUDE_DIRS  "(^| )(-I|-isystem ?)" --cflags-only-I )
@@ -664,6 +667,9 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
 
       if (${_prefix}_CFLAGS_OTHER MATCHES "-isystem")
         _pkgconfig_extract_isystem("${_prefix}")
+        # Using _pkgconfig_set in this scope so that a future policy can switch to normal variables
+        _pkgconfig_set("${_pkg_check_prefix}_CFLAGS_OTHER" "${${_pkg_check_prefix}_CFLAGS_OTHER}")
+        _pkgconfig_set("${_pkg_check_prefix}_INCLUDE_DIRS" "${${_pkg_check_prefix}_INCLUDE_DIRS}")
       endif ()
 
       _pkg_recalculate("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} ${_imp_target_global})
