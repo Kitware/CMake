@@ -35,7 +35,11 @@
 namespace {
 bool cmExecuteProcessCommandIsWhitespace(char c)
 {
-  return (isspace(static_cast<int>(c)) || c == '\n' || c == '\r');
+  // isspace takes 'int' but documents that the value must be representable
+  // by 'unsigned char', or EOF.  Cast to 'unsigned char' to avoid sign
+  // extension while casting to 'int'.
+  return (isspace(static_cast<int>(static_cast<unsigned char>(c))) ||
+          c == '\n' || c == '\r');
 }
 
 void cmExecuteProcessCommandFixText(std::vector<char>& output,
