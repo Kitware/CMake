@@ -5,9 +5,9 @@ Targets can have properties that affect how they are built.
 
 .. code-block:: cmake
 
-  set_target_properties(target1 target2 ...
-                        PROPERTIES prop1 value1
-                        prop2 value2 ...)
+  set_target_properties(<targets> ...
+                        PROPERTIES <prop1> <value1>
+                        [<prop2> <value2>] ...)
 
 Sets properties on targets.  The syntax for the command is to list all
 the targets you want to change, and then provide the values you want to

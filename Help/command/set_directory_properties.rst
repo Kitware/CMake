@@ -5,9 +5,10 @@ Set properties of the current directory and subdirectories.
 
 .. code-block:: cmake
 
-  set_directory_properties(PROPERTIES prop1 value1 [prop2 value2] ...)
+  set_directory_properties(PROPERTIES <prop1> <value1> [<prop2> <value2>] ...)
 
-Sets properties of the current directory and its subdirectories in key-value pairs.
+Sets properties of the current directory and its subdirectories in key-value
+pairs.
 
 See also the :command:`set_property(DIRECTORY)` command.
 
