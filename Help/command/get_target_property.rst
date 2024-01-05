@@ -5,7 +5,7 @@ Get a property from a target.
 
 .. code-block:: cmake
 
-  get_target_property(<VAR> target property)
+  get_target_property(<VAR> <target> <property>)
 
 Get a property from a target.  The value of the property is stored in
 the variable ``<VAR>``.  If the target property is not found, the behavior
