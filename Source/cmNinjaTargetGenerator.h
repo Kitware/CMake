@@ -195,6 +195,12 @@ protected:
     std::string const& targetCompilePdb, std::string const& targetPdb,
     std::string const& outputConfig, WithScanning withScanning);
 
+  void ExportSwiftObjectCompileCommand(
+    std::vector<cmSourceFile const*> const& moduleSourceFiles,
+    std::string const& moduleObjectFilename, std::string const& flags,
+    std::string const& defines, std::string const& includes,
+    std::string const& outputConfig, bool singleOutput);
+
   void AdditionalCleanFiles(const std::string& config);
 
   cmNinjaDeps GetObjects(const std::string& config) const;
