@@ -5,16 +5,14 @@ Get a property of the test.
 
 .. code-block:: cmake
 
-  get_test_property(test property [DIRECTORY <dir>] VAR)
+  get_test_property(<test> <property> [DIRECTORY <dir>] <variable>)
 
 Get a property from the test.  The value of the property is stored in
-the variable ``VAR``.  If the test property is not found, the behavior
-depends on whether it has been defined to be an ``INHERITED`` property
-or not (see :command:`define_property`).  Non-inherited properties will
-set ``VAR`` to "NOTFOUND", whereas inherited properties will search the
-relevant parent scope as described for the :command:`define_property`
-command and if still unable to find the property, ``VAR`` will be set to
-an empty string.
+the specified ``<variable>``.  If the ``<test>`` is not defined, or the
+test property is not found, ``<variable>`` will be set to ``NOTFOUND``.
+If the test property was defined to be an ``INHERITED`` property (see
+:command:`define_property`), the search will include the relevant parent
+scopes, as described for the :command:`define_property` command.
 
 For a list of standard properties you can type
 :option:`cmake --help-property-list`.

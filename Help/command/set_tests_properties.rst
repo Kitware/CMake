@@ -5,7 +5,10 @@ Set a property of the tests.
 
 .. code-block:: cmake
 
-  set_tests_properties(test1 [test2...] PROPERTIES prop1 value1 prop2 value2)
+  set_tests_properties(<tests>...
+                       [DIRECTORY <dir>]
+                       PROPERTIES <prop1> <value1>
+                       [<prop2> <value2>]...)
 
 Sets a property for the tests.  If the test is not found, CMake
 will report an error.

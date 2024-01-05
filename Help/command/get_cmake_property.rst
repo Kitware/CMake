@@ -5,11 +5,11 @@ Get a global property of the CMake instance.
 
 .. code-block:: cmake
 
-  get_cmake_property(<var> <property>)
+  get_cmake_property(<variable> <property>)
 
 Gets a global property from the CMake instance.  The value of
-the ``<property>`` is stored in the variable ``<var>``.
-If the property is not found, ``<var>`` will be set to ``NOTFOUND``.
+the ``<property>`` is stored in the specified ``<variable>``.
+If the property is not found, ``<variable>`` will be set to ``NOTFOUND``.
 See the :manual:`cmake-properties(7)` manual for available properties.
 
 In addition to global properties, this command (for historical reasons)
