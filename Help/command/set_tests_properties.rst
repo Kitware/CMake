@@ -6,6 +6,7 @@ Set a property of the tests.
 .. code-block:: cmake
 
   set_tests_properties(<tests>...
+                       [DIRECTORY <dir>]
                        PROPERTIES <prop1> <value1>
                        [<prop2> <value2>]...)
 
