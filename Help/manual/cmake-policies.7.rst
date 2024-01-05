@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.29
 .. toctree::
    :maxdepth: 1
 
+   CMP0160: More read-only target properties now error when trying to set them. </policy/CMP0160>
    CMP0159: file(STRINGS) with REGEX updates CMAKE_MATCH_<n>. </policy/CMP0159>
    CMP0158: add_test() honors CMAKE_CROSSCOMPILING_EMULATOR only when cross-compiling. </policy/CMP0158>
    CMP0157: Swift compilation mode is selected by an abstraction. </policy/CMP0157>

@@ -487,7 +487,11 @@ class cmMakefile;
          3, 29, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0159,                                                     \
          "file(STRINGS) with REGEX updates CMAKE_MATCH_<n>.", 3, 29, 0,       \
-         cmPolicies::WARN)
+         cmPolicies::WARN)                                                    \
+  SELECT(                                                                     \
+    POLICY, CMP0160,                                                          \
+    "More read-only target properties now error when trying to set them.", 3, \
+    29, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -529,7 +533,8 @@ class cmMakefile;
   F(CMP0154)                                                                  \
   F(CMP0155)                                                                  \
   F(CMP0156)                                                                  \
-  F(CMP0157)
+  F(CMP0157)                                                                  \
+  F(CMP0160)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \

@@ -1,0 +1,233 @@
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  HEADER_SETS property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  INTERFACE_HEADER_SETS property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  MANUALLY_ADDED_DEPENDENCIES property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  NAME property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  TYPE property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  ALIAS_GLOBAL property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  BINARY_DIR property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  CXX_MODULE_SETS property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  IMPORTED property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  INTERFACE_CXX_MODULE_SETS property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  LOCATION property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  LOCATION_CONFIG property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  SOURCE_DIR property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  IMPORTED_GLOBAL property can't be set on non-imported
+  targets\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  HEADER_SETS property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  INTERFACE_HEADER_SETS property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  MANUALLY_ADDED_DEPENDENCIES property is read-only for
+  target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  NAME property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  TYPE property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  ALIAS_GLOBAL property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  BINARY_DIR property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  CXX_MODULE_SETS property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  IMPORTED property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  INTERFACE_CXX_MODULE_SETS property is read-only for
+  target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  LOCATION property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  LOCATION_CONFIG property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  SOURCE_DIR property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  EXPORT_NAME property can't be set on imported targets\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  SOURCES property can't be set on imported targets\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-NEW.cmake:4 \(include\)
+  CMakeLists.txt:3 \(include\)
