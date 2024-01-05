@@ -27,6 +27,9 @@ elseif(RunCMake_GENERATOR STREQUAL Ninja)
       set(RunCMake_TEST_OUTPUT_MERGE 1)
       run_cmake_command(NoWorkToDo-build ${CMAKE_COMMAND} --build .)
       run_cmake_command(NoWorkToDo-nowork ${CMAKE_COMMAND} --build . -- -d explain)
+      file(WRITE ${RunCMake_TEST_BINARY_DIR}/hello.swift "//No-op change\n")
+      run_cmake_command(NoWorkToDo-norelink ${CMAKE_COMMAND} --build . -- -d explain)
+      run_cmake_command(NoWorkToDo-nowork ${CMAKE_COMMAND} --build . -- -d explain)
     endblock()
 
     # Test that intermediate static libraries are rebuilt when the public

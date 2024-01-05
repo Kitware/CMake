@@ -1950,6 +1950,10 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
     this->LanguageCompilerRule(language, config, WithScanning::No));
   cmNinjaVars& vars = objBuild.Variables;
 
+  // The swift toolchain leaves outputs untouched if there are no meaningful
+  // changes to input files (e.g. addition of a comment).
+  vars.emplace("restat", "1");
+
   std::string const moduleName =
     getTargetPropertyOrDefault(target, "Swift_MODULE_NAME", target.GetName());
   std::string const moduleDirectory = getTargetPropertyOrDefault(
