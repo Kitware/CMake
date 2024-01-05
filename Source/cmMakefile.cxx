@@ -529,6 +529,12 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
           cmSystemTools::SetFatalErrorOccurred();
         }
       }
+      if (this->GetCMakeInstance()->HasScriptModeExitCode() &&
+          this->GetCMakeInstance()->GetWorkingMode() == cmake::SCRIPT_MODE) {
+        // pass-through the exit code from inner cmake_language(EXIT) ,
+        // possibly from include() or similar command...
+        status.SetExitCode(this->GetCMakeInstance()->GetScriptModeExitCode());
+      }
     }
   } else {
     if (!cmSystemTools::GetFatalErrorOccurred()) {
