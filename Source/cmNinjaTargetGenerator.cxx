@@ -1023,7 +1023,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     }
   }
 
-  {
+  if (!this->GetGlobalGenerator()->SupportsCWDDepend()) {
     // Ensure that the object directory exists. If there are no objects in the
     // target (e.g., an empty `OBJECT` library), the directory is still listed
     // as an order-only depends in the build files. Alternate `ninja`
@@ -1106,11 +1106,15 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     // that "output ... of phony edge with no inputs doesn't exist" and
     // consider the phony output "dirty".
     if (orderOnlyDeps.empty()) {
-      // Any path that always exists will work here.  It would be nice to
-      // use just "." but that is not supported by Ninja < 1.7.
-      std::string tgtDir = cmStrCat(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
-        this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget));
+      std::string tgtDir;
+      if (this->GetGlobalGenerator()->SupportsCWDDepend()) {
+        tgtDir = ".";
+      } else {
+        // Any path that always exists will work here.
+        tgtDir = cmStrCat(
+          this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
+          this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget));
+      }
       orderOnlyDeps.push_back(this->ConvertToNinjaPath(tgtDir));
     }
 

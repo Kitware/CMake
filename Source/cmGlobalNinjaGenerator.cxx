@@ -828,6 +828,9 @@ void cmGlobalNinjaGenerator::CheckNinjaFeatures()
     this->NinjaExpectedEncoding = codecvt_Encoding::ANSI;
   }
 #endif
+  this->NinjaSupportsCWDDepend =
+    !cmSystemTools::VersionCompare(cmSystemTools::OP_LESS, this->NinjaVersion,
+                                   RequiredNinjaVersionForCWDDepend());
 }
 
 void cmGlobalNinjaGenerator::CheckNinjaCodePage()
@@ -1994,6 +1997,11 @@ bool cmGlobalNinjaGenerator::SupportsManifestRestat() const
 bool cmGlobalNinjaGenerator::SupportsMultilineDepfile() const
 {
   return this->NinjaSupportsMultilineDepfile;
+}
+
+bool cmGlobalNinjaGenerator::SupportsCWDDepend() const
+{
+  return this->NinjaSupportsCWDDepend;
 }
 
 bool cmGlobalNinjaGenerator::WriteTargetCleanAdditional(std::ostream& os)
