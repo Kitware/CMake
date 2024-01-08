@@ -254,7 +254,7 @@ private:
   std::unique_ptr<cmOrderDirectories> OrderRuntimeSearchPath;
 
   bool OldLinkDirMode;
-  bool OpenBSD;
+  bool IsOpenBSD;
   bool LinkDependsNoShared;
   bool RuntimeUseChrpath;
   bool NoSONameUsesPath;
