@@ -5596,6 +5596,20 @@ std::string cmGeneratorTarget::GetLinkerTool(const std::string& lang,
   return linkerTool;
 }
 
+bool cmGeneratorTarget::LinkerEnforcesNoAllowShLibUndefined(
+  std::string const& config) const
+{
+  // FIXME(#25486): Account for the LINKER_TYPE target property.
+  // Also factor out the hard-coded list below into a platform
+  // information table based on the linker id.
+  std::string ll = this->GetLinkerLanguage(config);
+  std::string linkerIdVar = cmStrCat("CMAKE_", ll, "_COMPILER_LINKER_ID");
+  cmValue linkerId = this->Makefile->GetDefinition(linkerIdVar);
+  // The GNU bfd-based linker may enforce '--no-allow-shlib-undefined'
+  // recursively by default.  The Solaris linker has similar behavior.
+  return linkerId && (*linkerId == "GNU" || *linkerId == "Solaris");
+}
+
 std::string cmGeneratorTarget::GetPDBOutputName(
   const std::string& config) const
 {

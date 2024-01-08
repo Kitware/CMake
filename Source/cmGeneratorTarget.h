@@ -805,6 +805,9 @@ public:
   std::string GetLinkerTool(const std::string& lang,
                             const std::string& config) const;
 
+  /** Is the linker known to enforce '--no-allow-shlib-undefined'? */
+  bool LinkerEnforcesNoAllowShLibUndefined(std::string const& config) const;
+
   /** Does this target have a GNU implib to convert to MS format?  */
   bool HasImplibGNUtoMS(std::string const& config) const;
 
