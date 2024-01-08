@@ -25,7 +25,7 @@ const cmDocumentationEntry cmDocumentationName = {
 
 const cmDocumentationEntry cmDocumentationUsage = { {}, "  ctest [options]" };
 
-const cmDocumentationEntry cmDocumentationOptions[74] = {
+const cmDocumentationEntry cmDocumentationOptions[] = {
   { "--preset <preset>, --preset=<preset>",
     "Read arguments from a test preset." },
   { "--list-presets", "List available test presets." },
@@ -143,6 +143,7 @@ const cmDocumentationEntry cmDocumentationOptions[74] = {
   { "--tomorrow-tag", "Nightly or experimental starts with next day tag." },
   { "--overwrite", "Overwrite CTest configuration option." },
   { "--extra-submit <file>[;<file>]", "Submit extra files to the dashboard." },
+  { "--http-header <header>", "Append HTTP header when submitting" },
   { "--force-new-ctest-process",
     "Run child CTest instances as new processes" },
   { "--schedule-random", "Use a random order for scheduling tests" },
