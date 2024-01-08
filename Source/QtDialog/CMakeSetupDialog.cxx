@@ -875,7 +875,7 @@ bool CMakeSetupDialog::setupFirstConfigure()
     if (preset.setToolset) {
       dialog.setToolset(preset.toolset);
     }
-    dialog.setCompilerOption(CompilerOption::DefaultNative);
+    dialog.setCompilerOption(CompilerOption::DefaultPreset);
   }
 
   if (dialog.exec() == QDialog::Accepted) {
