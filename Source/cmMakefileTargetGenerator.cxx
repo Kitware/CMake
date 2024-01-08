@@ -1726,7 +1726,7 @@ void cmMakefileTargetGenerator::GenerateCustomRuleFile(
       this->LocalGenerator->MaybeRelativeToTopBinDir(
         cmStrCat(this->TargetBuildDirectoryFull, "/compiler_depend.ts")));
 
-    depends.push_back(dependTimestamp);
+    depends.emplace_back(std::move(dependTimestamp));
   }
 
   // Write the rule.
