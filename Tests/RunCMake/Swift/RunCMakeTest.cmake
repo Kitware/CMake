@@ -76,6 +76,12 @@ elseif(RunCMake_GENERATOR STREQUAL Ninja)
       # -v: verbose to capture executed commands -n: dry-run to avoid actually compiling
       run_cmake_command(ForceResponseFile-check ${CMAKE_COMMAND} --build ${ForceResponseFile_TEST_BINARY_DIR} -- -vn)
     endblock()
+
+    block()
+      set(SwiftLibraryModuleCommand_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SwiftLibraryModuleCommand-build)
+      run_cmake(SwiftLibraryModuleCommand)
+      run_cmake_command(SwiftLibraryModuleCommand-check ${CMAKE_COMMAND} --build ${SwiftLibraryModuleCommand_TEST_BINARY_DIR} -- -n -v)
+    endblock()
   endif()
 elseif(RunCMake_GENERATOR STREQUAL "Ninja Multi-Config")
   if(CMake_TEST_Swift)

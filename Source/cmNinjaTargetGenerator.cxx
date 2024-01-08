@@ -1987,6 +1987,18 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
     return !isMultiThread && compileMode == cmSwiftCompileMode::Wholemodule;
   }();
 
+  // Without `-emit-library` or `-emit-executable`, targets with a single
+  // source file parse as a Swift script instead of like normal source. For
+  // non-executable targets, append this to ensure that they are parsed like a
+  // normal source.
+  if (target.GetType() != cmStateEnums::EXECUTABLE) {
+    this->LocalGenerator->AppendFlags(vars["FLAGS"], "-parse-as-library");
+  }
+
+  if (target.GetType() == cmStateEnums::STATIC_LIBRARY) {
+    this->LocalGenerator->AppendFlags(vars["FLAGS"], "-static");
+  }
+
   // Swift modules only make sense to emit from things that can be imported.
   // Executables that don't export symbols can't be imported, so don't try to
   // emit a swiftmodule for them. It will break.
@@ -2009,14 +2021,6 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
       this->GetGeneratorTarget()->GetLibraryNames(config).Base;
     this->LocalGenerator->AppendFlags(
       vars["FLAGS"], cmStrCat(libraryLinkNameFlag, ' ', libraryLinkName));
-  }
-
-  // Without `-emit-library` or `-emit-executable`, targets with a single
-  // source file parse as a Swift script instead of like normal source. For
-  // non-executable targets, append this to ensure that they are parsed like a
-  // normal source.
-  if (target.GetType() != cmStateEnums::EXECUTABLE) {
-    this->LocalGenerator->AppendFlags(vars["FLAGS"], "-parse-as-library");
   }
 
   this->LocalGenerator->AppendFlags(vars["FLAGS"],
