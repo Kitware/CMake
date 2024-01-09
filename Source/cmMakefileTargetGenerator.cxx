@@ -1926,8 +1926,7 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(
     this->LocalGenerator->MaybeRelativeToTopBinDir(buildTargetRuleName);
 
   // Build the list of target outputs to drive.
-  std::vector<std::string> depends;
-  depends.push_back(main_output);
+  std::vector<std::string> depends{ main_output };
 
   const char* comment = nullptr;
   if (relink) {
