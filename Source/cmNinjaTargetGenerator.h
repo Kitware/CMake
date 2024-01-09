@@ -128,6 +128,7 @@ protected:
   /// @return the source file path for the given @a source.
   std::string GetCompiledSourceNinjaPath(cmSourceFile const* source) const;
 
+  std::string GetObjectFileDir(const std::string& config) const;
   /// @return the object file path for the given @a source.
   std::string GetObjectFilePath(cmSourceFile const* source,
                                 const std::string& config) const;

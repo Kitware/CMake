@@ -411,28 +411,29 @@ std::string cmNinjaTargetGenerator::GetCompiledSourceNinjaPath(
   return this->ConvertToNinjaAbsPath(source->GetFullPath());
 }
 
-std::string cmNinjaTargetGenerator::GetObjectFilePath(
-  cmSourceFile const* source, const std::string& config) const
+std::string cmNinjaTargetGenerator::GetObjectFileDir(
+  const std::string& config) const
 {
   std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
   if (!path.empty()) {
     path += '/';
   }
-  std::string const& objectName = this->GeneratorTarget->GetObjectName(source);
-  path += cmStrCat(
-    this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-    this->GetGlobalGenerator()->ConfigDirectory(config), '/', objectName);
+  path +=
+    cmStrCat(this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
+             this->GetGlobalGenerator()->ConfigDirectory(config));
   return path;
+}
+
+std::string cmNinjaTargetGenerator::GetObjectFilePath(
+  cmSourceFile const* source, const std::string& config) const
+{
+  std::string const& objectName = this->GeneratorTarget->GetObjectName(source);
+  return cmStrCat(this->GetObjectFileDir(config), '/', objectName);
 }
 
 std::string cmNinjaTargetGenerator::GetBmiFilePath(
   cmSourceFile const* source, const std::string& config) const
 {
-  std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
-  if (!path.empty()) {
-    path += '/';
-  }
-
   auto& importedConfigInfo = this->Configs.at(config).ImportedCxxModules;
   if (!importedConfigInfo.Initialized()) {
     std::string configUpper = cmSystemTools::UpperCase(config);
@@ -444,10 +445,7 @@ std::string cmNinjaTargetGenerator::GetBmiFilePath(
   std::string bmiName =
     importedConfigInfo.BmiNameForSource(source->GetFullPath());
 
-  path += cmStrCat(
-    this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
-    this->GetGlobalGenerator()->ConfigDirectory(config), '/', bmiName);
-  return path;
+  return cmStrCat(this->GetObjectFileDir(config), '/', bmiName);
 }
 
 std::string cmNinjaTargetGenerator::GetClangTidyReplacementsFilePath(
@@ -1025,6 +1023,15 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     }
   }
 
+  if (!this->GetGlobalGenerator()->SupportsCWDDepend()) {
+    // Ensure that the object directory exists. If there are no objects in the
+    // target (e.g., an empty `OBJECT` library), the directory is still listed
+    // as an order-only depends in the build files. Alternate `ninja`
+    // implementations may not allow this (such as `samu`). See #25526.
+    auto const objectDir = this->GetObjectFileDir(config);
+    this->EnsureDirectoryExists(objectDir);
+  }
+
   {
     cmNinjaBuild build("phony");
     build.Comment =
@@ -1099,11 +1106,15 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
     // that "output ... of phony edge with no inputs doesn't exist" and
     // consider the phony output "dirty".
     if (orderOnlyDeps.empty()) {
-      // Any path that always exists will work here.  It would be nice to
-      // use just "." but that is not supported by Ninja < 1.7.
-      std::string tgtDir = cmStrCat(
-        this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
-        this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget));
+      std::string tgtDir;
+      if (this->GetGlobalGenerator()->SupportsCWDDepend()) {
+        tgtDir = ".";
+      } else {
+        // Any path that always exists will work here.
+        tgtDir = cmStrCat(
+          this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
+          this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget));
+      }
       orderOnlyDeps.push_back(this->ConvertToNinjaPath(tgtDir));
     }
 

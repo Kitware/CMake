@@ -415,10 +415,12 @@ public:
     return "1.10.2";
   }
   static std::string RequiredNinjaVersionForCodePage() { return "1.11"; }
+  static std::string RequiredNinjaVersionForCWDDepend() { return "1.7"; }
   bool SupportsDirectConsole() const override;
   bool SupportsImplicitOuts() const;
   bool SupportsManifestRestat() const;
   bool SupportsMultilineDepfile() const;
+  bool SupportsCWDDepend() const;
 
   std::string NinjaOutputPath(std::string const& path) const;
   bool HasOutputPathPrefix() const { return !this->OutputPathPrefix.empty(); }
@@ -597,6 +599,7 @@ private:
   bool NinjaSupportsMultipleOutputs = false;
   bool NinjaSupportsMetadataOnRegeneration = false;
   bool NinjaSupportsCodePage = false;
+  bool NinjaSupportsCWDDepend = false;
 
   codecvt_Encoding NinjaExpectedEncoding = codecvt_Encoding::None;
 
