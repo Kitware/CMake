@@ -91,10 +91,6 @@ public slots:
                       const QString& description, const QVariant& value,
                       bool advanced);
 
-  // set the view type
-  void setViewType(ViewType t);
-  ViewType viewType() const;
-
 public:
   // get the properties
   QCMakePropertyList properties() const;
@@ -111,6 +107,10 @@ public:
 
   // get the data in the model for this property
   void getPropertyData(const QModelIndex& idx1, QCMakeProperty& prop) const;
+
+  // set the view type
+  void setViewType(ViewType t);
+  ViewType viewType() const;
 
 protected:
   bool EditEnabled;
