@@ -754,6 +754,16 @@ The available ``<dashboard-options>`` are the following:
 
  This option will submit extra files to the dashboard.
 
+.. option:: --http-header <header>
+
+ .. versionadded:: 3.29
+
+ Append HTTP header when submitting to the dashboard.
+
+ This option will cause CTest to append the specified header
+ when submitting to the dashboard.
+ This option may be specified more than once.
+
 .. option:: --http1.0
 
  Submit using `HTTP 1.0`.
