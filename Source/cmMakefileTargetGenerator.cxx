@@ -1800,7 +1800,6 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
   *this->BuildFileStream << "# Object files for target "
                          << this->GeneratorTarget->GetName() << "\n"
                          << variableName << " =";
-  std::string object;
   const auto& lineContinue = this->GlobalGenerator->LineContinueDirective;
 
   cmValue pchExtension = this->Makefile->GetDefinition("CMAKE_PCH_EXTENSION");
@@ -1828,7 +1827,6 @@ void cmMakefileTargetGenerator::WriteObjectsVariable(
     << variableNameExternal << " =";
   /* clang-format on */
   for (std::string const& obj : this->ExternalObjects) {
-    object = this->LocalGenerator->MaybeRelativeToCurBinDir(obj);
     *this->BuildFileStream << " " << lineContinue;
     *this->BuildFileStream
       << cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(
