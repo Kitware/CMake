@@ -1921,7 +1921,7 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(
   std::string dir =
     this->LocalGenerator->GetRelativeTargetDirectory(this->GeneratorTarget);
   std::string buildTargetRuleName =
-    cmStrCat(dir, relink ? "/preinstall" : "/build");
+    cmStrCat(std::move(dir), relink ? "/preinstall" : "/build");
   buildTargetRuleName =
     this->LocalGenerator->MaybeRelativeToTopBinDir(buildTargetRuleName);
 
@@ -2202,9 +2202,9 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
       responseFileName, linkLibs, makefile_depends, responseLang);
 
     // Reference the response file.
-    linkLibs = cmStrCat(responseFlag,
+    linkLibs = cmStrCat(std::move(responseFlag),
                         this->LocalGenerator->ConvertToOutputFormat(
-                          link_rsp, cmOutputConverter::SHELL));
+                          std::move(link_rsp), cmOutputConverter::SHELL));
   }
 }
 
