@@ -453,7 +453,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
     vars.Language = lang.c_str();
     vars.AIXExports = "$AIX_EXPORTS";
 
-    if (this->TargetLinkLanguage(config) == "Swift") {
+    if (!this->GetLocalGenerator()->IsSplitSwiftBuild() &&
+        this->TargetLinkLanguage(config) == "Swift") {
       vars.SwiftLibraryName = "$SWIFT_LIBRARY_NAME";
       vars.SwiftModule = "$SWIFT_MODULE";
       vars.SwiftModuleName = "$SWIFT_MODULE_NAME";
@@ -508,7 +509,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
         vars.LinkLibraries = "$LINK_PATH $LINK_LIBRARIES";
       }
 
-      if (this->TargetLinkLanguage(config) == "Swift") {
+      if (!this->GetLocalGenerator()->IsSplitSwiftBuild() &&
+          this->TargetLinkLanguage(config) == "Swift") {
         vars.SwiftSources = responseFlag.c_str();
       } else {
         vars.Objects = responseFlag.c_str();

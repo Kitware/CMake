@@ -2028,6 +2028,7 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
   std::string const targetObjectFilename = this->ConvertToNinjaPath(cmStrCat(
     objectDir, '/', moduleName,
     this->GetGlobalGenerator()->GetLanguageOutputExtension(language)));
+  objBuild.RspFile = cmStrCat(targetObjectFilename, ".swift.rsp");
 
   if (isSingleOutput) {
     this->LocalGenerator->AppendFlags(vars["FLAGS"],
@@ -2087,7 +2088,8 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
 
   // Write object build
   this->GetGlobalGenerator()->WriteBuild(this->GetImplFileStream(fileConfig),
-                                         objBuild);
+                                         objBuild,
+                                         this->ForceResponseFile() ? -1 : 0);
 }
 
 void cmNinjaTargetGenerator::WriteTargetDependInfo(std::string const& lang,
