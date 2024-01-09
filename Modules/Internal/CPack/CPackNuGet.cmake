@@ -294,6 +294,27 @@ function(_cpack_nuget_render_spec)
     # attributes: "type", "url", "branch", and "commit". While all fields are
     # considered optional, they are not independent. Currently unsupported.
 
+    # NuGet >= 5.10
+    _cpack_nuget_variable_fallback_and_wrap_into_element(readme README)
+
+    set(_CPACK_NUGET_REPOSITORY_TAG)
+    _cpack_nuget_variable_fallback(_repo_type REPOSITORY_TYPE)
+    _cpack_nuget_variable_fallback(_repo_url REPOSITORY_URL)
+    if(_repo_type AND _repo_url)
+        set(_CPACK_NUGET_REPOSITORY_TAG "<repository type=\"${_repo_type}\" url=\"${_repo_url}\"")
+        _cpack_nuget_variable_fallback(_repo_br REPOSITORY_BRANCH)
+        if(_repo_br)
+            string(APPEND _CPACK_NUGET_REPOSITORY_TAG " branch=\"${_repo_br}\"")
+        endif()
+        _cpack_nuget_variable_fallback(_repo_commit REPOSITORY_COMMIT)
+        if(_repo_commit)
+            string(APPEND _CPACK_NUGET_REPOSITORY_TAG " commit=\"${_repo_commit}\"")
+        endif()
+        string(APPEND _CPACK_NUGET_REPOSITORY_TAG " />")
+    else()
+        message(AUTHOR_WARNING "Skip adding the `<repository .../>` element due to missing URL or type")
+    endif()
+
     # Handle dependencies
     _cpack_nuget_variable_fallback(_deps DEPENDENCIES)
     set(_collected_deps)
