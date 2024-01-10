@@ -1,0 +1,3 @@
+.*swiftc(.exe)? .* -parse-as-library -static -emit-module .* -module-name StaticLibrary [^
+]*
+.*swiftc(.exe)? .* -parse-as-library -emit-module .* -module-name DynamicLibrary
