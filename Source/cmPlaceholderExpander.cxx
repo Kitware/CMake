@@ -48,6 +48,10 @@ std::string& cmPlaceholderExpander::ExpandVariables(std::string& s)
   }
   // add the rest of the input
   expandedInput += s.substr(pos, s.size() - pos);
+  // remove trailing whitespace
+  if (!expandedInput.empty() && expandedInput.back() == ' ') {
+    expandedInput.pop_back();
+  }
   s = expandedInput;
 
   return s;

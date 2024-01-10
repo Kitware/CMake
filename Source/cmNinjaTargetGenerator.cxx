@@ -848,6 +848,14 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     flags = cmStrCat(responseFlag, rule.RspFile);
     vars.Defines = "";
     vars.Includes = "";
+
+    // Swift consumes all source files in a module at once, which reaches
+    // command line length limits pretty quickly. Inject source files into the
+    // response file in this case as well.
+    if (lang == "Swift") {
+      rule.RspContent = cmStrCat(rule.RspContent, ' ', vars.Source);
+      vars.Source = "";
+    }
   }
 
   // Tell ninja dependency format so all deps can be loaded into a database
@@ -1925,8 +1933,6 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
   //  For that, we need the "NEW" behavior for CMP0157. Otherwise, we have to
   //  fall back on the old "linker" build. Otherwise, this should be
   //  indistinguishable from the old behavior.
-  //
-  //  FIXME(#25490): Add response file support to Swift object build step
 
   if (sources.empty()) {
     return;
