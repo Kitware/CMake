@@ -18,8 +18,10 @@ string(REPLACE "<DEFINES>" "<DEFINES> -DCMAKE_SCANNED_THIS_SOURCE"
 
 set_property(SOURCE always_scan.cxx
   PROPERTY CXX_SCAN_FOR_MODULES 1)
-set_property(SOURCE never_scan.cxx
+set_property(SOURCE never_scan.ixx
   PROPERTY CXX_SCAN_FOR_MODULES 0)
+set_property(SOURCE never_scan.ixx
+  PROPERTY LANGUAGE CXX)
 
 add_executable(scans_everything)
 target_sources(scans_everything
@@ -27,7 +29,7 @@ target_sources(scans_everything
     main.cxx
     join.cxx
     always_scan.cxx
-    never_scan.cxx
+    never_scan.ixx
   PRIVATE
     FILE_SET CXX_MODULES
       BASE_DIRS
@@ -46,7 +48,7 @@ target_sources(no_scan_everything
     main.cxx
     join.cxx
     always_scan.cxx
-    never_scan.cxx
+    never_scan.ixx
   PRIVATE
     FILE_SET CXX_MODULES
       BASE_DIRS
