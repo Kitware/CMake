@@ -30,6 +30,10 @@ following queries. The first query that provides a yes/no answer is used.
 - Otherwise, the source file will be scanned if the compiler and generator
   support scanning.  See policy :policy:`CMP0155`.
 
+Note that any scanned source will be excluded from any unity build (see
+:prop_tgt:`UNITY_BUILD`) because module-related statements can only happen at
+one place within a C++ translation unit.
+
 Compiler Support
 ================
 

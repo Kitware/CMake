@@ -76,6 +76,11 @@ a number of measures to help address such problems:
   :prop_sf:`INCLUDE_DIRECTORIES` source property will not be combined
   into a unity source.
 
+* Any source file which is scanned for C++ module sources via
+  :prop_tgt:`CXX_SCAN_FOR_MODULES`, :prop_sf:`CXX_SCAN_FOR_MODULES`, or
+  membership of a ``CXX_MODULES`` file set will not be combined into a unity
+  source.  See :manual:`cmake-cxxmodules(7)` for details.
+
 * Projects can prevent an individual source file from being combined into
   a unity source by setting its :prop_sf:`SKIP_UNITY_BUILD_INCLUSION`
   source property to true.  This can be a more effective way to prevent
