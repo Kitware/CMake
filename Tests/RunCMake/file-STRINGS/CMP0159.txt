@@ -1,0 +1,3 @@
+overwritten-value: -1
+real-value: 1
+ignored = -2
