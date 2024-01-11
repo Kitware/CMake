@@ -8,7 +8,7 @@ readonly name="zlib"
 readonly ownership="zlib upstream <kwrobot@kitware.com>"
 readonly subtree="Utilities/cmzlib"
 readonly repo="https://github.com/madler/zlib.git"
-readonly tag="v1.2.12"
+readonly tag="v1.2.13"
 readonly shortlog=false
 readonly paths="
   README
