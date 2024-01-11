@@ -381,8 +381,7 @@ endmacro()
 macro(matlab_get_release_name_from_version version release_name)
 
   # only the major.minor version is used
-  string(REGEX MATCH "([0-9]+\\.[0-9]+)" _match ${version})
-  if(CMAKE_MATCH_1)
+  if(version MATCHES "([0-9]+\\.[0-9]+)")
     set(short_version ${CMAKE_MATCH_1})
   else()
     set(short_version ${version})
@@ -485,26 +484,21 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
     )
 
     if(_reg)
-
       string(REGEX MATCHALL "([0-9]+\\.[0-9]+)" _versions_regex "${_reg}")
 
-      foreach(match IN LISTS _versions_regex)
-        string(REGEX MATCH "([0-9]+\\.[0-9]+)" current_match "${match}")
+      foreach(_match IN LISTS _versions_regex)
+        if(_match MATCHES "([0-9]+\\.[0-9]+)")
+          cmake_host_system_information(RESULT _reg
+            QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/${_installation_type}/${CMAKE_MATCH_1}"
+            VALUE "MATLABROOT"
+          )
 
-        if(NOT CMAKE_MATCH_1)
-          continue()
-        endif()
-
-        cmake_host_system_information(RESULT _reg
-          QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/${_installation_type}/${CMAKE_MATCH_1}"
-          VALUE "MATLABROOT"
-        )
-
-        _Matlab_VersionInfoXML("${_reg}" _matlab_version_tmp)
-        if(NOT "${_matlab_version_tmp}" STREQUAL "unknown")
-          list(APPEND matlabs_from_registry ${_matlab_version_tmp})
-        else()
-          list(APPEND matlabs_from_registry ${match})
+          _Matlab_VersionInfoXML("${_reg}" _matlab_version_tmp)
+          if("${_matlab_version_tmp}" STREQUAL "unknown")
+            list(APPEND matlabs_from_registry ${_match})
+          else()
+            list(APPEND matlabs_from_registry ${_matlab_version_tmp})
+          endif()
         endif()
       endforeach()
 
@@ -560,42 +554,58 @@ function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_
   # extract_matlab_versions_from_registry_brute_force or
   # matlab_extract_all_installed_versions_from_registry.
 
+  # only the major.minor version is used in Mathworks Windows Registry keys
+  list(TRANSFORM matlab_versions REPLACE "^([0-9]+\\.[0-9]+).*" "\\1")
+
   set(_matlab_roots_list )
   # check for Matlab installations
   foreach(_matlab_current_version IN LISTS matlab_versions)
-    get_filename_component(
-      current_MATLAB_ROOT
-      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MathWorks\\MATLAB\\${_matlab_current_version};MATLABROOT]"
-      ABSOLUTE)
+    cmake_host_system_information(RESULT current_MATLAB_ROOT
+      QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/MATLAB/${_matlab_current_version}"
+      VALUE "MATLABROOT"
+    )
+    cmake_path(CONVERT "${current_MATLAB_ROOT}" TO_CMAKE_PATH_LIST current_MATLAB_ROOT)
 
     if(IS_DIRECTORY "${current_MATLAB_ROOT}")
-      list(APPEND _matlab_roots_list "MATLAB" ${_matlab_current_version} ${current_MATLAB_ROOT})
+      _Matlab_VersionInfoXML("${current_MATLAB_ROOT}" _matlab_version_tmp)
+      if("${_matlab_version_tmp}" STREQUAL "unknown")
+        list(APPEND _matlab_roots_list "MATLAB" ${_matlab_current_version} ${current_MATLAB_ROOT})
+      else()
+        list(APPEND _matlab_roots_list "MATLAB" ${_matlab_version_tmp} ${current_MATLAB_ROOT})
+      endif()
     endif()
 
   endforeach()
 
   # Check for MCR installations
   foreach(_matlab_current_version IN LISTS matlab_versions)
-    get_filename_component(
-      current_MATLAB_ROOT
-      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MathWorks\\MATLAB Runtime\\${_matlab_current_version};MATLABROOT]"
-      ABSOLUTE)
+    cmake_host_system_information(RESULT current_MATLAB_ROOT
+      QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/MATLAB Runtime/${_matlab_current_version}"
+      VALUE "MATLABROOT"
+    )
+    cmake_path(CONVERT "${current_MATLAB_ROOT}" TO_CMAKE_PATH_LIST current_MATLAB_ROOT)
 
     # remove the dot
     string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
 
     if(IS_DIRECTORY "${current_MATLAB_ROOT}")
-      list(APPEND _matlab_roots_list "MCR" ${_matlab_current_version} "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
+      _Matlab_VersionInfoXML("${current_MATLAB_ROOT}" _matlab_version_tmp)
+      if("${_matlab_version_tmp}" STREQUAL "unknown")
+        list(APPEND _matlab_roots_list "MCR" ${_matlab_current_version} "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
+      else()
+        list(APPEND _matlab_roots_list "MCR" ${_matlab_version_tmp} "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
+      endif()
     endif()
 
   endforeach()
 
   # Check for old MCR installations
   foreach(_matlab_current_version IN LISTS matlab_versions)
-    get_filename_component(
-      current_MATLAB_ROOT
-      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MathWorks\\MATLAB Compiler Runtime\\${_matlab_current_version};MATLABROOT]"
-      ABSOLUTE)
+    cmake_host_system_information(RESULT current_MATLAB_ROOT
+      QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/MATLAB Compiler Runtime/${_matlab_current_version}"
+      VALUE "MATLABROOT"
+    )
+    cmake_path(CONVERT "${current_MATLAB_ROOT}" TO_CMAKE_PATH_LIST current_MATLAB_ROOT)
 
     # remove the dot
     string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
@@ -1412,19 +1422,11 @@ function(_Matlab_VersionInfoXML matlab_root _version)
 
   set(_XMLfile ${matlab_root}/VersionInfo.xml)
   if(EXISTS ${_XMLfile})
-
     file(READ ${_XMLfile} versioninfo_string)
 
-    if(versioninfo_string)
-      # parses "<version>23.2.0.2365128</version>"
-      string(REGEX MATCH "<version>([0-9]+(\\.[0-9]+)+)</version>"
-        version_reg_match
-        ${versioninfo_string}
-        )
-
-      if(CMAKE_MATCH_1)
-        set(_ver "${CMAKE_MATCH_1}")
-      endif()
+    # parses "<version>23.2.0.2365128</version>"
+    if(versioninfo_string MATCHES "<version>([0-9]+(\\.[0-9]+)+)</version>")
+      set(_ver "${CMAKE_MATCH_1}")
     endif()
   endif()
 
