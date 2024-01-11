@@ -22,9 +22,8 @@ when inserting into the :prop_tgt:`COMPILE_OPTIONS` property.
 The ``NEW`` behavior for this policy is to honor the ``BEFORE`` keyword in
 all cases.
 
-This policy was introduced in CMake version 3.17.  Use the
-:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
-Unlike many policies, CMake version |release| does *not* warn
-when this policy is not set and simply uses ``OLD`` behavior.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.17
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

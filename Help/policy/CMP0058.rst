@@ -104,12 +104,12 @@ rules for unknown dependencies in the build tree.  The ``NEW``
 behavior for this policy is to not generate these and instead
 require projects to specify custom command ``BYPRODUCTS`` explicitly.
 
-This policy was introduced in CMake version 3.3.
-CMake version |release| warns when it sees unknown dependencies in
-out-of-source build trees if the policy is not set and then uses
-``OLD`` behavior.  Use the :command:`cmake_policy` command to set
-the policy to ``OLD`` or ``NEW`` explicitly.  The policy setting
-must be in scope at the end of the top-level ``CMakeLists.txt``
-file of the project and has global effect.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.3
+.. |WARNS_OR_DOES_NOT_WARN| replace::
+   warns when it sees unknown dependencies in out-of-source build trees
+.. include:: STANDARD_ADVICE.txt
+
+The policy setting must be in scope at the end of the top-level
+``CMakeLists.txt`` file of the project and has global effect.
 
 .. include:: DEPRECATED.txt

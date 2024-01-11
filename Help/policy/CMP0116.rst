@@ -33,9 +33,13 @@ time of the custom command's creation, and you can have custom commands in the
 same directory with different values for ``CMP0116`` by setting the policy
 before each custom command.
 
-This policy was introduced in CMake version 3.20.  Unlike most policies,
-CMake version |release| does *not* warn by default when this policy is not set
-(unless ``DEPFILE`` is used in a subdirectory) and simply uses ``OLD``
-behavior.  See documentation of the
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.20
+.. |WARNS_OR_DOES_NOT_WARN| replace::
+   does *not* warn by default (unless ``DEPFILE`` is used in a subdirectory)
+.. include:: STANDARD_ADVICE.txt
+
+See documentation of the
 :variable:`CMAKE_POLICY_WARNING_CMP0116 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
 variable to control the warning.
+
+.. include:: DEPRECATED.txt

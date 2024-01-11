@@ -28,9 +28,8 @@ The ``OLD`` behavior for this policy is to use registry views ``64`` and
 The ``NEW`` behavior for this policy is to use registry views ``TARGET`` and
 ``BOTH`` as default.
 
-This policy was introduced in CMake version 3.24.  Use the
-:command:`cmake_policy` command to set this policy to ``OLD`` or ``NEW``
-explicitly. Unlike many policies, CMake version |release| does *not* warn
-when this policy is not set and simply uses ``OLD`` behavior.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.24
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

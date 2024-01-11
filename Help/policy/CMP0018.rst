@@ -27,9 +27,8 @@ The ``NEW`` behavior for this policy is to ignore
 ``CMAKE_SHARED_LIBRARY_<Lang>_FLAGS`` whether it is modified or not and
 honor the :prop_tgt:`POSITION_INDEPENDENT_CODE` target property.
 
-This policy was introduced in CMake version 2.8.9.  CMake version
-|release| warns when the policy is not set and uses ``OLD`` behavior.  Use
-the :command:`cmake_policy` command to set it to ``OLD`` or ``NEW``
-explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.8.9
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt
