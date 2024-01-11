@@ -201,26 +201,26 @@ Generating an Apple Platform Selection File
     generate_apple_platform_selection_file(<filename>
       INSTALL_DESTINATION <path>
       [INSTALL_PREFIX <path>]
-      [MACOS_CONFIG_FILE <file>]
-      [IOS_CONFIG_FILE <file>]
-      [IOS_SIMULATOR_CONFIG_FILE <file>]
-      [TVOS_CONFIG_FILE <file>]
-      [TVOS_SIMULATOR_CONFIG_FILE <file>]
-      [WATCHOS_CONFIG_FILE <file>]
-      [WATCHOS_SIMULATOR_CONFIG_FILE <file>]
-      [VISIONOS_CONFIG_FILE <file>]
-      [VISIONOS_SIMULATOR_CONFIG_FILE <file>]
+      [MACOS_INCLUDE_FILE <file>]
+      [IOS_INCLUDE_FILE <file>]
+      [IOS_SIMULATOR_INCLUDE_FILE <file>]
+      [TVOS_INCLUDE_FILE <file>]
+      [TVOS_SIMULATOR_INCLUDE_FILE <file>]
+      [WATCHOS_INCLUDE_FILE <file>]
+      [WATCHOS_SIMULATOR_INCLUDE_FILE <file>]
+      [VISIONOS_INCLUDE_FILE <file>]
+      [VISIONOS_SIMULATOR_INCLUDE_FILE <file>]
       )
 
-  Writes a file for use as ``<PackageName>Config.cmake`` which can include an
-  Apple-platform-specific ``<PackageName>Config.cmake`` from a different
-  directory. This can be used in conjunction with the ``XCFRAMEWORK_LOCATION``
-  argument of :command:`export(SETUP)` to export packages in a way that a project
+  Write a file that includes an Apple-platform-specific ``.cmake`` file,
+  e.g., for use as ``<PackageName>Config.cmake``.  This can be used in
+  conjunction with the ``XCFRAMEWORK_LOCATION`` argument of
+  :command:`export(SETUP)` to export packages in a way that a project
   built for any Apple platform can use them.
 
   ``INSTALL_DESTINATION <path>``
-    Path to which the file will be installed by the caller, e.g., via
-    :command:`install(FILES)`.  The path may be either relative to the
+    Path to which the generated file will be installed by the caller, e.g.,
+    via :command:`install(FILES)`.  The path may be either relative to the
     ``INSTALL_PREFIX`` or absolute.
 
   ``INSTALL_PREFIX <path>``
@@ -229,35 +229,35 @@ Generating an Apple Platform Selection File
     is not passed, the :variable:`CMAKE_INSTALL_PREFIX` variable will be
     used instead.
 
-  ``MACOS_CONFIG_FILE <file>``
+  ``MACOS_INCLUDE_FILE <file>``
     File to include if the platform is macOS.
 
-  ``IOS_CONFIG_FILE <file>``
+  ``IOS_INCLUDE_FILE <file>``
     File to include if the platform is iOS.
 
-  ``IOS_SIMULATOR_CONFIG_FILE <file>``
+  ``IOS_SIMULATOR_INCLUDE_FILE <file>``
     File to include if the platform is iOS Simulator.
 
-  ``TVOS_CONFIG_FILE <file>``
+  ``TVOS_INCLUDE_FILE <file>``
     File to include if the platform is tvOS.
 
-  ``TVOS_SIMULATOR_CONFIG_FILE <file>``
+  ``TVOS_SIMULATOR_INCLUDE_FILE <file>``
     File to include if the platform is tvOS Simulator.
 
-  ``WATCHOS_CONFIG_FILE <file>``
+  ``WATCHOS_INCLUDE_FILE <file>``
     File to include if the platform is watchOS.
 
-  ``WATCHOS_SIMULATOR_CONFIG_FILE <file>``
+  ``WATCHOS_SIMULATOR_INCLUDE_FILE <file>``
     File to include if the platform is watchOS Simulator.
 
-  ``VISIONOS_CONFIG_FILE <file>``
+  ``VISIONOS_INCLUDE_FILE <file>``
     File to include if the platform is visionOS.
 
-  ``VISIONOS_SIMULATOR_CONFIG_FILE <file>``
+  ``VISIONOS_SIMULATOR_INCLUDE_FILE <file>``
     File to include if the platform is visionOS Simulator.
 
-  If any of the optional config files are not specified, and the consuming
-  project is built for their corresponding platform, an error will be thrown
+  If any of the optional include files is not specified, and the consuming
+  project is built for its corresponding platform, an error will be thrown
   when including the generated file.
 
 .. command:: generate_apple_architecture_selection_file
@@ -272,18 +272,18 @@ Generating an Apple Platform Selection File
       INSTALL_DESTINATION <path>
       [INSTALL_PREFIX <path>]
       [SINGLE_ARCHITECTURES <archs>
-       SINGLE_ARCHITECTURE_CONFIG_FILES <files>]
+       SINGLE_ARCHITECTURE_INCLUDE_FILES <files>]
       [UNIVERSAL_ARCHITECTURES <archs>
-       UNIVERSAL_CONFIG_FILE <file>]
+       UNIVERSAL_INCLUDE_FILE <file>]
       )
 
-  Writes a file for use as ``<PackageName>Config.cmake`` on Apple platforms
-  which can include an architecture-specific ``<PackageName>Config.cmake``
-  from a different directory based on :variable:`CMAKE_OSX_ARCHITECTURES`.
+  Write a file that includes an Apple-architecture-specific ``.cmake`` file
+  based on :variable:`CMAKE_OSX_ARCHITECTURES`, e.g., for inclusion from an
+  Apple-specific ``<PackageName>Config.cmake`` file.
 
   ``INSTALL_DESTINATION <path>``
-    Path to which the file will be installed by the caller, e.g., via
-    :command:`install(FILES)`.  The path may be either relative to the
+    Path to which the generated file will be installed by the caller, e.g.,
+    via :command:`install(FILES)`.  The path may be either relative to the
     ``INSTALL_PREFIX`` or absolute.
 
   ``INSTALL_PREFIX <path>``
@@ -295,9 +295,9 @@ Generating an Apple Platform Selection File
   ``SINGLE_ARCHITECTURES <archs>``
     A :ref:`semicolon-separated list <CMake Language Lists>` of
     architectures provided by entries of
-    ``SINGLE_ARCHITECTURE_CONFIG_FILES``.
+    ``SINGLE_ARCHITECTURE_INCLUDE_FILES``.
 
-  ``SINGLE_ARCHITECTURE_CONFIG_FILES <files>``
+  ``SINGLE_ARCHITECTURE_INCLUDE_FILES <files>``
     A :ref:`semicolon-separated list <CMake Language Lists>` of
     architecture-specific files.  One of them will be loaded
     when :variable:`CMAKE_OSX_ARCHITECTURES` contains a single
@@ -306,9 +306,9 @@ Generating an Apple Platform Selection File
 
   ``UNIVERSAL_ARCHITECTURES <archs>``
     A :ref:`semicolon-separated list <CMake Language Lists>` of
-    architectures provided by the ``UNIVERSAL_CONFIG_FILE``.
+    architectures provided by the ``UNIVERSAL_INCLUDE_FILE``.
 
-  ``UNIVERSAL_CONFIG_FILE <file>``
+  ``UNIVERSAL_INCLUDE_FILE <file>``
     A file to load when :variable:`CMAKE_OSX_ARCHITECTURES` contains
     a (non-strict) subset of the ``UNIVERSAL_ARCHITECTURES`` and
     does not match any one of the ``SINGLE_ARCHITECTURES``.
@@ -470,15 +470,15 @@ endfunction()
 
 function(generate_apple_platform_selection_file _output_file)
   set(_config_file_options
-    MACOS_CONFIG_FILE
-    IOS_CONFIG_FILE
-    IOS_SIMULATOR_CONFIG_FILE
-    TVOS_CONFIG_FILE
-    TVOS_SIMULATOR_CONFIG_FILE
-    WATCHOS_CONFIG_FILE
-    WATCHOS_SIMULATOR_CONFIG_FILE
-    VISIONOS_CONFIG_FILE
-    VISIONOS_SIMULATOR_CONFIG_FILE
+    MACOS_INCLUDE_FILE
+    IOS_INCLUDE_FILE
+    IOS_SIMULATOR_INCLUDE_FILE
+    TVOS_INCLUDE_FILE
+    TVOS_SIMULATOR_INCLUDE_FILE
+    WATCHOS_INCLUDE_FILE
+    WATCHOS_SIMULATOR_INCLUDE_FILE
+    VISIONOS_INCLUDE_FILE
+    VISIONOS_SIMULATOR_INCLUDE_FILE
     )
 
   set(_options)
@@ -527,9 +527,9 @@ function(generate_apple_architecture_selection_file _output_file)
     INSTALL_DESTINATION
     INSTALL_PREFIX
     SINGLE_ARCHITECTURES
-    SINGLE_ARCHITECTURE_CONFIG_FILES
+    SINGLE_ARCHITECTURE_INCLUDE_FILES
     UNIVERSAL_ARCHITECTURES
-    UNIVERSAL_CONFIG_FILE
+    UNIVERSAL_INCLUDE_FILE
     )
   set(_multi)
   cmake_parse_arguments(PARSE_ARGV 0 _gasf "${_options}" "${_single}" "${_multi}")
@@ -544,14 +544,14 @@ function(generate_apple_architecture_selection_file _output_file)
   endif()
 
   list(LENGTH _gasf_SINGLE_ARCHITECTURES _gasf_SINGLE_ARCHITECTURES_len)
-  list(LENGTH _gasf_SINGLE_ARCHITECTURE_CONFIG_FILES _gasf_SINGLE_ARCHITECTURE_CONFIG_FILES_len)
-  if(NOT _gasf_SINGLE_ARCHITECTURES_len EQUAL _gasf_SINGLE_ARCHITECTURE_CONFIG_FILES_len)
-    message(FATAL_ERROR "SINGLE_ARCHITECTURES and SINGLE_ARCHITECTURE_CONFIG_FILES do not have the same number of entries.")
+  list(LENGTH _gasf_SINGLE_ARCHITECTURE_INCLUDE_FILES _gasf_SINGLE_ARCHITECTURE_INCLUDE_FILES_len)
+  if(NOT _gasf_SINGLE_ARCHITECTURES_len EQUAL _gasf_SINGLE_ARCHITECTURE_INCLUDE_FILES_len)
+    message(FATAL_ERROR "SINGLE_ARCHITECTURES and SINGLE_ARCHITECTURE_INCLUDE_FILES do not have the same number of entries.")
   endif()
 
   set(_branch_code "")
 
-  foreach(pair IN ZIP_LISTS _gasf_SINGLE_ARCHITECTURES _gasf_SINGLE_ARCHITECTURE_CONFIG_FILES)
+  foreach(pair IN ZIP_LISTS _gasf_SINGLE_ARCHITECTURES _gasf_SINGLE_ARCHITECTURE_INCLUDE_FILES)
     set(arch "${pair_0}")
     set(config_file "${pair_1}")
     if(NOT IS_ABSOLUTE "${config_file}")
@@ -566,9 +566,9 @@ function(generate_apple_architecture_selection_file _output_file)
       )
   endforeach()
 
-  if(_gasf_UNIVERSAL_ARCHITECTURES AND _gasf_UNIVERSAL_CONFIG_FILE)
+  if(_gasf_UNIVERSAL_ARCHITECTURES AND _gasf_UNIVERSAL_INCLUDE_FILE)
     string(JOIN " " universal_archs "${_gasf_UNIVERSAL_ARCHITECTURES}")
-    set(config_file "${_gasf_UNIVERSAL_CONFIG_FILE}")
+    set(config_file "${_gasf_UNIVERSAL_INCLUDE_FILE}")
     if(NOT IS_ABSOLUTE "${config_file}")
       string(PREPEND config_file [[${PACKAGE_PREFIX_DIR}/]])
     endif()
@@ -582,9 +582,9 @@ function(generate_apple_architecture_selection_file _output_file)
       "endif()\n"
       )
   elseif(_gasf_UNIVERSAL_ARCHITECTURES)
-    message(FATAL_ERROR "UNIVERSAL_CONFIG_FILE requires UNIVERSAL_ARCHITECTURES")
-  elseif(_gasf_UNIVERSAL_CONFIG_FILE)
-    message(FATAL_ERROR "UNIVERSAL_ARCHITECTURES requires UNIVERSAL_CONFIG_FILE")
+    message(FATAL_ERROR "UNIVERSAL_INCLUDE_FILE requires UNIVERSAL_ARCHITECTURES")
+  elseif(_gasf_UNIVERSAL_INCLUDE_FILE)
+    message(FATAL_ERROR "UNIVERSAL_ARCHITECTURES requires UNIVERSAL_INCLUDE_FILE")
   endif()
 
   configure_package_config_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/Internal/AppleArchitectureSelection.cmake.in" "${_output_file}"
