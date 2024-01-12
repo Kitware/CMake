@@ -2356,6 +2356,8 @@ void cmNinjaTargetGenerator::ExportSwiftObjectCompileCommand(
     return this->LocalGenerator->ConvertToOutputFormat(
       srcFilename, cmOutputConverter::SHELL);
   };
+  auto escapedModuleObjectFilename =
+    this->ConvertToNinjaPath(moduleObjectFilename);
 
   cmRulePlaceholderExpander::RuleVariables compileObjectVars;
   compileObjectVars.Language = "Swift";
@@ -2384,11 +2386,12 @@ void cmNinjaTargetGenerator::ExportSwiftObjectCompileCommand(
 
   for (cmSourceFile const* sf : moduleSourceFiles) {
     std::string const sourceFilename = this->GetCompiledSourceNinjaPath(sf);
-    std::string objectFilename = moduleObjectFilename;
+    std::string objectFilename = escapedModuleObjectFilename;
 
     if (!singleOutput) {
       // If it's not single-output, each source file gets a separate object
-      objectFilename = this->GetObjectFilePath(sf, outputConfig);
+      objectFilename =
+        this->ConvertToNinjaPath(this->GetObjectFilePath(sf, outputConfig));
     }
     compileObjectVars.Objects = objectFilename.c_str();
 
