@@ -37,6 +37,7 @@ function(find_package_message pkg msg details)
     set(DETAILS_VAR FIND_PACKAGE_MESSAGE_DETAILS_${pkg})
     if(NOT "${details}" STREQUAL "${${DETAILS_VAR}}")
       # The message has not yet been printed.
+      string(STRIP "${msg}" msg)
       message(STATUS "${msg}")
 
       # Save the find details in the cache to avoid printing the same
