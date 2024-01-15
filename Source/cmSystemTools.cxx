@@ -1673,7 +1673,7 @@ void cmSystemTools::EnvDiff::PutEnv(const std::string& env)
 
 void cmSystemTools::EnvDiff::UnPutEnv(const std::string& env)
 {
-  diff[env] = {};
+  diff[env] = cm::nullopt;
 }
 
 bool cmSystemTools::EnvDiff::ParseOperation(const std::string& envmod)
@@ -1728,7 +1728,7 @@ bool cmSystemTools::EnvDiff::ParseOperation(const std::string& envmod)
   } else if (op == "set"_s) {
     diff[name] = value;
   } else if (op == "unset"_s) {
-    diff[name] = {};
+    diff[name] = cm::nullopt;
   } else if (op == "string_append"_s) {
     apply_diff(name, [&value](std::string& output) { output += value; });
   } else if (op == "string_prepend"_s) {
