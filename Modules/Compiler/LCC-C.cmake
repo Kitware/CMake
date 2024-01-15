@@ -33,4 +33,4 @@ if(CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 1.26)
   set(CMAKE_C17_EXTENSION_COMPILE_OPTION "-std=gnu17")
 endif()
 
-__compiler_check_default_language_standard(C 1.23 90 1.20 11 1.26 17)
+__compiler_check_default_language_standard(C 1.17 89 1.23 99 1.26 17)
