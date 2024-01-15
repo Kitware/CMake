@@ -293,9 +293,9 @@ typedef unsigned long sslerr_t;
 #define HAVE_SSL_X509_STORE_SHARE
 #endif
 
-/* FIXME: On a specific machine using LCC 1.23, OpenSSL 2.0.0
- * is found but does not seem to have X509_STORE_up_ref. */
-#if defined(__LCC__) && defined(__EDG__) && (__LCC__ == 123)
+/* FIXME: On LCC <= 1.23, OpenSSL 2.0.0 may be
+ * found but does not seem to have X509_STORE_up_ref. */
+#if defined(__LCC__) && defined(__EDG__) && (__LCC__ <= 123)
 #undef HAVE_SSL_X509_STORE_SHARE
 #endif
 
