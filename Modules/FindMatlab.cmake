@@ -378,31 +378,21 @@ endmacro()
 
   Returns the release name from the version of Matlab
 #]=======================================================================]
-macro(matlab_get_release_name_from_version version release_name)
+function(matlab_get_release_name_from_version version release_name)
 
   # only the major.minor version is used
-  if(version MATCHES "([0-9]+\\.[0-9]+)")
-    set(short_version ${CMAKE_MATCH_1})
-  else()
-    set(short_version ${version})
-  endif()
+  string(REGEX REPLACE "^([0-9]+\\.[0-9]+).*" "\\1" version "${version}")
 
-  set(${release_name} "")
   foreach(_var IN LISTS MATLAB_VERSIONS_MAPPING)
-    string(REGEX MATCHALL "(.+)=${short_version}" _matched ${_var})
-    if(NOT _matched STREQUAL "")
-      set(${release_name} ${CMAKE_MATCH_1})
-      break()
+    if(_var MATCHES "(.+)=${version}")
+      set(${release_name} ${CMAKE_MATCH_1} PARENT_SCOPE)
+      return()
     endif()
   endforeach()
 
-  unset(_var)
-  unset(_matched)
-  if(${release_name} STREQUAL "")
-    message(WARNING "[MATLAB] The version ${short_version} is not registered")
-  endif()
+  message(WARNING "[MATLAB] The version ${version} is not registered")
 
-endmacro()
+endfunction()
 
 
 # extracts all the supported release names (R2022b...) of Matlab
