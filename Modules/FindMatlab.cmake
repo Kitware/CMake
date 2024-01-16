@@ -503,6 +503,8 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
         _Matlab_VersionInfoXML("${_reg}" _matlab_version_tmp)
         if(NOT "${_matlab_version_tmp}" STREQUAL "unknown")
           list(APPEND matlabs_from_registry ${_matlab_version_tmp})
+        else()
+          list(APPEND matlabs_from_registry ${match})
         endif()
       endforeach()
 
@@ -1409,21 +1411,20 @@ function(_Matlab_VersionInfoXML matlab_root _version)
   set(_ver "unknown")
 
   set(_XMLfile ${matlab_root}/VersionInfo.xml)
-  if(NOT EXISTS ${_XMLfile})
-    return()
-  endif()
+  if(EXISTS ${_XMLfile})
 
-  file(READ ${_XMLfile} versioninfo_string)
+    file(READ ${_XMLfile} versioninfo_string)
 
-  if(versioninfo_string)
-    # parses "<version>23.2.0.2365128</version>"
-    string(REGEX MATCH "<version>([0-9]+(\\.[0-9]+)+)</version>"
-      version_reg_match
-      ${versioninfo_string}
-      )
+    if(versioninfo_string)
+      # parses "<version>23.2.0.2365128</version>"
+      string(REGEX MATCH "<version>([0-9]+(\\.[0-9]+)+)</version>"
+        version_reg_match
+        ${versioninfo_string}
+        )
 
-    if(CMAKE_MATCH_1)
-      set(_ver "${CMAKE_MATCH_1}")
+      if(CMAKE_MATCH_1)
+        set(_ver "${CMAKE_MATCH_1}")
+      endif()
     endif()
   endif()
 
