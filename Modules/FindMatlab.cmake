@@ -660,23 +660,23 @@ function(matlab_get_mex_suffix matlab_root mex_suffix)
     set(devnull INPUT_FILE NUL)
   endif()
 
+  set(_arch)
   if(WIN32)
     # this environment variable is used to determine the arch on Windows
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-      set(ENV{MATLAB_ARCH} "win64")
+      set(_arch "MATLAB_ARCH=win64")
     else()
-      set(ENV{MATLAB_ARCH} "win32")
+      set(_arch "MATLAB_ARCH=win32")
     endif()
   endif()
 
   # this is the preferred way. If this does not work properly (eg. MCR on Windows), then we use our own knowledge
   execute_process(
-    COMMAND ${Matlab_MEXEXTENSIONS_PROG}
+    COMMAND ${CMAKE_COMMAND} -E env ${_arch} ${Matlab_MEXEXTENSIONS_PROG}
     OUTPUT_VARIABLE _matlab_mex_extension
     ERROR_VARIABLE _matlab_mex_extension_error
     OUTPUT_STRIP_TRAILING_WHITESPACE
     ${devnull})
-  unset(ENV{MATLAB_ARCH})
 
   if(_matlab_mex_extension_error)
     if(WIN32)
