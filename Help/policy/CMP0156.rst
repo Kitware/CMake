@@ -16,7 +16,7 @@ symbols in the unresolved set.
 Handling mutually dependent archives may be awkward when using a traditional
 linker. Archive files may have to be specified multiple times.
 
-Some linkers (for instance Apple or Windows linkers, as well as``LLVM LLD``)
+Some linkers (for instance Apple or Windows linkers, as well as ``LLVM LLD``)
 records all symbols found in objects and archives as it iterates over command
 line arguments. When one of these linkers encounters an undefined symbol that
 can be resolved by an object file contained in a previously processed archive
