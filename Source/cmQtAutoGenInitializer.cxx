@@ -70,7 +70,7 @@ unsigned int GetParallelCPUCount()
   return count;
 }
 
-std::string FileProjectRelativePath(cmMakefile* makefile,
+std::string FileProjectRelativePath(cmMakefile const* makefile,
                                     std::string const& fileName)
 {
   std::string res;
