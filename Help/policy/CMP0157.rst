@@ -40,9 +40,8 @@ The ``NEW`` behavior for this policy is to apply the compilation mode specified
 in the :prop_tgt:`Swift_COMPILATION_MODE` target property, initialized as each
 target is created by the :variable:`CMAKE_Swift_COMPILATION_MODE` variable.
 
-This policy was introduced in CMake version 3.29. Use the
-:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
-Unlike many policies, CMake version |release| does *not* warn when this policy
-is not set and simply uses ``OLD`` behavior.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.29
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

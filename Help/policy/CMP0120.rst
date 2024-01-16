@@ -38,9 +38,9 @@ The ``OLD`` behavior of this policy is for inclusion of the deprecated
 :module:`WriteCompilerDetectionHeader` module to work.  The ``NEW``
 behavior is for inclusion of the module to fail as if it does not exist.
 
-This policy was introduced in CMake version 3.20.  CMake version |release|
-warns when the policy is not set and uses ``OLD`` behavior. Use the
-:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.20
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt
 

@@ -14,8 +14,8 @@ this policy is to allow duplicate binary directories.  The NEW
 behavior for this policy is to disallow duplicate binary directories
 with an error.
 
-This policy was introduced in CMake version 2.8.0.  CMake version
-|release| warns when the policy is not set and uses ``OLD`` behavior.  Use
-the :command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.8.0
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

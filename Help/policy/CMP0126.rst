@@ -24,14 +24,16 @@ regardless of the ``CMP0126`` policy setting.  The :command:`option` command
 will *not* set the cache variable if a non-cache variable of the same name
 already exists and :policy:`CMP0077` is set to ``NEW``.
 
-Policy ``CMP0126`` was introduced in CMake version 3.21. Use the
-:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly
-within a project.  Use the :variable:`CMAKE_POLICY_DEFAULT_CMP0126
-<CMAKE_POLICY_DEFAULT_CMP\<NNNN\>>` variable to set the policy for
-a third-party project in a subdirectory without modifying it.
-Unlike many policies, CMake version |release| does *not* warn when the policy
-is not set and simply uses ``OLD`` behavior.  See documentation of the
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.21
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn by default
+.. include:: STANDARD_ADVICE.txt
+
+See documentation of the
 :variable:`CMAKE_POLICY_WARNING_CMP0126 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
 variable to control the warning.
+
+The :variable:`CMAKE_POLICY_DEFAULT_CMP0126 <CMAKE_POLICY_DEFAULT_CMP\<NNNN\>>`
+variable may be used to set the policy for a third-party project in a
+subdirectory without modifying it.
 
 .. include:: DEPRECATED.txt

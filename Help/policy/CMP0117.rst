@@ -35,9 +35,8 @@ default :variable:`CMAKE_CXX_FLAGS <CMAKE_<LANG>_FLAGS>` cache entry.  The
 ``NEW`` behavior for this policy is to *not* place the MSVC ``/GR`` flag in
 the default cache entry.
 
-This policy was introduced in CMake version 3.20.  Use the
-:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
-Unlike many policies, CMake version |release| does *not* warn
-when this policy is not set and simply uses ``OLD`` behavior.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.20
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

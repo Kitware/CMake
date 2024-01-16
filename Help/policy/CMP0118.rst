@@ -17,9 +17,11 @@ The ``OLD`` behavior of this policy is to only allow ``GENERATED`` to be
 visible from the directory scope for which it was set.  The ``NEW``
 behavior on the other hand allows it to be visible from any scope.
 
-This policy was introduced in CMake version 3.20.  Use the
-:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
-Unlike many policies, CMake version |release| does *not* warn
-when this policy is not set and simply uses ``OLD`` behavior with regard
-to visibility of the ``GENERATED`` property.  However, CMake does warn
-about setting the ``GENERATED`` property to a non-boolean value.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.20
+.. |WARNS_OR_DOES_NOT_WARN| replace::
+   does *not* warn with regard to visibility of the ``GENERATED``
+   property, but does warn about setting the ``GENERATED`` property
+   to a non-boolean value,
+.. include:: STANDARD_ADVICE.txt
+
+.. include:: DEPRECATED.txt

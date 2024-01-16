@@ -42,9 +42,8 @@ For example:
 Under the ``OLD`` behavior, this code prints ``var1: value`` and ``var2:``.
 Under the ``NEW`` behavior, this code prints only ``var1: value``.
 
-This policy was introduced in CMake version 3.21. Use the
-:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
-Unlike many policies, CMake version |release| does *not* warn when the policy
-is not set and simply uses ``OLD`` behavior.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.21
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt
