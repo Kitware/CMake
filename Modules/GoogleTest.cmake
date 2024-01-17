@@ -475,10 +475,29 @@ function(gtest_discover_tests TARGET)
   set(ctest_file_base "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}[${counter}]")
   set(ctest_include_file "${ctest_file_base}_include.cmake")
   set(ctest_tests_file "${ctest_file_base}_tests.cmake")
-  get_property(crosscompiling_emulator
+  get_property(test_launcher
     TARGET ${TARGET}
-    PROPERTY CROSSCOMPILING_EMULATOR
+    PROPERTY TEST_LAUNCHER
   )
+  cmake_policy(GET CMP0158 _CMP0158
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+  )
+  if(NOT _CMP0158 OR _CMP0158 STREQUAL "OLD" OR _CMP0158 STREQUAL "NEW" AND CMAKE_CROSSCOMPILING)
+    get_property(crosscompiling_emulator
+      TARGET ${TARGET}
+      PROPERTY CROSSCOMPILING_EMULATOR
+    )
+  endif()
+
+  if(test_launcher AND crosscompiling_emulator)
+    set(test_executor "${test_launcher}" "${crosscompiling_emulator}")
+  elseif(test_launcher)
+    set(test_executor "${test_launcher}")
+  elseif(crosscompiling_emulator)
+    set(test_executor "${crosscompiling_emulator}")
+  else()
+    set(test_executor "")
+  endif()
 
   if(_DISCOVERY_MODE STREQUAL "POST_BUILD")
     add_custom_command(
@@ -487,7 +506,7 @@ function(gtest_discover_tests TARGET)
       COMMAND "${CMAKE_COMMAND}"
               -D "TEST_TARGET=${TARGET}"
               -D "TEST_EXECUTABLE=$<TARGET_FILE:${TARGET}>"
-              -D "TEST_EXECUTOR=${crosscompiling_emulator}"
+              -D "TEST_EXECUTOR=${test_executor}"
               -D "TEST_WORKING_DIR=${_WORKING_DIRECTORY}"
               -D "TEST_EXTRA_ARGS=${_EXTRA_ARGS}"
               -D "TEST_PROPERTIES=${_PROPERTIES}"
@@ -529,7 +548,7 @@ function(gtest_discover_tests TARGET)
       "    include(\"${CMAKE_ROOT}/Modules/GoogleTestAddTests.cmake\")"            "\n"
       "    gtest_discover_tests_impl("                                             "\n"
       "      TEST_EXECUTABLE"        " [==[" "$<TARGET_FILE:${TARGET}>"   "]==]"   "\n"
-      "      TEST_EXECUTOR"          " [==[" "${crosscompiling_emulator}" "]==]"   "\n"
+      "      TEST_EXECUTOR"          " [==[" "${test_executor}"           "]==]"   "\n"
       "      TEST_WORKING_DIR"       " [==[" "${_WORKING_DIRECTORY}"      "]==]"   "\n"
       "      TEST_EXTRA_ARGS"        " [==[" "${_EXTRA_ARGS}"             "]==]"   "\n"
       "      TEST_PROPERTIES"        " [==[" "${_PROPERTIES}"             "]==]"   "\n"

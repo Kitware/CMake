@@ -425,7 +425,11 @@ endif()
 add_RunCMake_test(GeneratorToolset)
 add_RunCMake_test(GetPrerequisites -DSAMPLE_EXE=$<TARGET_FILE:exit_code>)
 add_RunCMake_test(GNUInstallDirs -DSYSTEM_NAME=${CMAKE_SYSTEM_NAME})
-add_RunCMake_test(GoogleTest) # Note: does not actually depend on Google Test
+add_RunCMake_test(GoogleTest # Note: does not actually depend on Google Test
+  -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
+  -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}
+  -DCMAKE_VS_PLATFORM_NAME=${CMAKE_VS_PLATFORM_NAME}
+  )
 add_RunCMake_test(Graphviz)
 add_RunCMake_test(Languages)
 add_RunCMake_test(LinkItemValidation)
