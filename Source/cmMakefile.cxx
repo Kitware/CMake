@@ -1438,8 +1438,8 @@ static void s_RemoveDefineFlag(std::string const& flag, std::string& dflags)
   for (std::string::size_type lpos = dflags.find(flag, 0);
        lpos != std::string::npos; lpos = dflags.find(flag, lpos)) {
     std::string::size_type rpos = lpos + len;
-    if ((lpos <= 0 || isspace(dflags[lpos - 1])) &&
-        (rpos >= dflags.size() || isspace(dflags[rpos]))) {
+    if ((lpos <= 0 || cmIsSpace(dflags[lpos - 1])) &&
+        (rpos >= dflags.size() || cmIsSpace(dflags[rpos]))) {
       dflags.erase(lpos, len);
     } else {
       ++lpos;

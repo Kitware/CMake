@@ -178,7 +178,7 @@ cm::optional<std::pair<std::string, std::string>> ParseOSReleaseLine(
         if (std::isalpha(ch) || ch == '_') {
           key += ch;
           state = PARSE_KEY;
-        } else if (!std::isspace(ch)) {
+        } else if (!cmIsSpace(ch)) {
           state = IGNORE_REST;
         }
         break;
@@ -238,7 +238,7 @@ cm::optional<std::pair<std::string, std::string>> ParseOSReleaseLine(
         break;
 
       case PARSE_VALUE:
-        if (ch == '#' || std::isspace(ch)) {
+        if (ch == '#' || cmIsSpace(ch)) {
           state = IGNORE_REST;
         } else {
           value += ch;

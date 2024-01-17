@@ -486,7 +486,7 @@ bool cmSystemTools::SplitProgramFromArgs(std::string const& command,
   const char* c = command.c_str();
 
   // Skip leading whitespace.
-  while (isspace(static_cast<unsigned char>(*c))) {
+  while (cmIsSpace(*c)) {
     ++c;
   }
 
@@ -516,7 +516,7 @@ bool cmSystemTools::SplitProgramFromArgs(std::string const& command,
       in_double = true;
     } else if (*c == '\'') {
       in_single = true;
-    } else if (isspace(static_cast<unsigned char>(*c))) {
+    } else if (cmIsSpace(*c)) {
       break;
     } else {
       program += *c;
