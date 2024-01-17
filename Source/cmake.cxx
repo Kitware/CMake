@@ -2820,7 +2820,7 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     if (cmSystemTools::GetErrorOccurredFlag()) {
       return -1;
     }
-    return 0;
+    return this->HasScriptModeExitCode() ? this->GetScriptModeExitCode() : 0;
   }
 
   // If MAKEFLAGS are given in the environment, remove the environment

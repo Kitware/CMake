@@ -529,6 +529,12 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
           cmSystemTools::SetFatalErrorOccurred();
         }
       }
+      if (this->GetCMakeInstance()->HasScriptModeExitCode() &&
+          this->GetCMakeInstance()->GetWorkingMode() == cmake::SCRIPT_MODE) {
+        // pass-through the exit code from inner cmake_language(EXIT) ,
+        // possibly from include() or similar command...
+        status.SetExitCode(this->GetCMakeInstance()->GetScriptModeExitCode());
+      }
     }
   } else {
     if (!cmSystemTools::GetFatalErrorOccurred()) {
@@ -896,6 +902,11 @@ void cmMakefile::RunListFile(cmListFile const& listFile,
     cmExecutionStatus status(*this);
     this->ExecuteCommand(listFile.Functions[i], status);
     if (cmSystemTools::GetFatalErrorOccurred()) {
+      break;
+    }
+    if (status.HasExitCode()) {
+      // cmake_language EXIT was requested, early break.
+      this->GetCMakeInstance()->SetScriptModeExitCode(status.GetExitCode());
       break;
     }
     if (status.GetReturnInvoked()) {
