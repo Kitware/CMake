@@ -3578,7 +3578,7 @@ void cmGeneratorTarget::AddCUDAArchitectureFlagsImpl(cmBuildStep compileOrLink,
 
       flags += "]\"";
     }
-  } else if (compiler == "Clang") {
+  } else if (compiler == "Clang" && compileOrLink == cmBuildStep::Compile) {
     for (CudaArchitecture& architecture : architectures) {
       flags += " --cuda-gpu-arch=sm_" + architecture.name;
 
