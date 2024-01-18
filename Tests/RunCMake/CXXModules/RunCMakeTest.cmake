@@ -88,6 +88,7 @@ run_cmake(InstallBMIGenericArgs)
 run_cmake(InstallBMIIgnore)
 
 run_cmake(ExportBuildCxxModules)
+run_cmake(ExportBuildCxxModulesTargets)
 run_cmake(ExportInstallCxxModules)
 
 # Generator-specific tests.
