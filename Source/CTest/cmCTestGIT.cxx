@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestGIT.h"
 
-#include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
@@ -414,14 +413,14 @@ protected:
 
   const char* ConsumeSpace(const char* c)
   {
-    while (*c && isspace(*c)) {
+    while (*c && cmIsSpace(*c)) {
       ++c;
     }
     return c;
   }
   const char* ConsumeField(const char* c)
   {
-    while (*c && !isspace(*c)) {
+    while (*c && !cmIsSpace(*c)) {
       ++c;
     }
     return c;
@@ -481,7 +480,7 @@ private:
   {
     // Person Name <person@domain.com> 1234567890 +0000
     const char* c = str;
-    while (*c && isspace(*c)) {
+    while (*c && cmIsSpace(*c)) {
       ++c;
     }
 
@@ -490,7 +489,7 @@ private:
       ++c;
     }
     const char* name_last = c;
-    while (name_last != name_first && isspace(*(name_last - 1))) {
+    while (name_last != name_first && cmIsSpace(*(name_last - 1))) {
       --name_last;
     }
     person.Name.assign(name_first, name_last - name_first);
