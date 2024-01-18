@@ -57,7 +57,7 @@ set(npp_libs nppc nppial nppicc nppidei nppif nppig nppim nppist nppitc npps npp
 if(CUDAToolkit_VERSION_MAJOR VERSION_LESS 11)
   list(APPEND npp_libs nppicom)
 endif()
-foreach (cuda_lib )
+foreach (cuda_lib IN LISTS npp_libs)
   if(NOT CUDA_${cuda_lib}_LIBRARY)
     message(FATAL_ERROR "expected CUDAToolkit variable CUDA_${cuda_lib}_LIBRARY not found")
   elseif(CUDA_${cuda_lib}_LIBRARY MATCHES [[\.\./]])
