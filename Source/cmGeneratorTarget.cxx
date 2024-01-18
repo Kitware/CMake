@@ -8417,14 +8417,14 @@ bool cmGeneratorTarget::DiscoverSyntheticTargets(cmSyntheticTargetCache& cache,
     }
 
     if (gt->HaveCxx20ModuleSources()) {
-      auto hasher = cmCryptoHash::New("SHA3_512");
+      cmCryptoHash hasher(cmCryptoHash::AlgoSHA3_512);
       constexpr size_t HASH_TRUNCATION = 12;
-      auto dirhash = hasher->HashString(
+      auto dirhash = hasher.HashString(
         gt->GetLocalGenerator()->GetCurrentBinaryDirectory());
       std::string safeName = gt->GetName();
       cmSystemTools::ReplaceString(safeName, ":", "_");
       auto targetIdent =
-        hasher->HashString(cmStrCat("@d_", dirhash, "@u_", usage.GetHash()));
+        hasher.HashString(cmStrCat("@d_", dirhash, "@u_", usage.GetHash()));
       std::string targetName =
         cmStrCat(safeName, "@synth_", targetIdent.substr(0, HASH_TRUNCATION));
 

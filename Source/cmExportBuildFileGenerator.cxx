@@ -3,6 +3,7 @@
 #include "cmExportBuildFileGenerator.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <map>
 #include <memory>
 #include <set>
@@ -12,6 +13,7 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmCryptoHash.h"
 #include "cmExportSet.h"
 #include "cmFileSet.h"
 #include "cmGeneratedFileStream.h"
@@ -156,7 +158,19 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
     this->GenerateTargetFileSets(gte, os);
   }
 
-  this->GenerateCxxModuleInformation(os);
+  std::string cxx_modules_name;
+  if (this->ExportSet) {
+    cxx_modules_name = this->ExportSet->GetName();
+  } else {
+    cmCryptoHash hasher(cmCryptoHash::AlgoSHA3_512);
+    constexpr std::size_t HASH_TRUNCATION = 12;
+    for (auto const& target : this->Targets) {
+      hasher.Append(target.Name);
+    }
+    cxx_modules_name = hasher.FinalizeHex().substr(0, HASH_TRUNCATION);
+  }
+
+  this->GenerateCxxModuleInformation(cxx_modules_name, os);
 
   // Generate import file content for each configuration.
   for (std::string const& c : this->Configurations) {
@@ -165,7 +179,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 
   // Generate import file content for each configuration.
   for (std::string const& c : this->Configurations) {
-    this->GenerateImportCxxModuleConfigTargetInclusion(c);
+    this->GenerateImportCxxModuleConfigTargetInclusion(cxx_modules_name, c);
   }
 
   this->GenerateMissingTargetsCheckCode(os);
@@ -526,7 +540,7 @@ std::string cmExportBuildFileGenerator::GetCxxModulesDirectory() const
 }
 
 void cmExportBuildFileGenerator::GenerateCxxModuleConfigInformation(
-  std::ostream& os) const
+  std::string const& name, std::ostream& os) const
 {
   const char* opt = "";
   if (this->Configurations.size() > 1) {
@@ -539,13 +553,13 @@ void cmExportBuildFileGenerator::GenerateCxxModuleConfigInformation(
     if (c.empty()) {
       c = "noconfig";
     }
-    os << "include(\"${CMAKE_CURRENT_LIST_DIR}/cxx-modules-" << c << ".cmake\""
-       << opt << ")\n";
+    os << "include(\"${CMAKE_CURRENT_LIST_DIR}/cxx-modules-" << name << '-'
+       << c << ".cmake\"" << opt << ")\n";
   }
 }
 
 bool cmExportBuildFileGenerator::GenerateImportCxxModuleConfigTargetInclusion(
-  std::string config) const
+  std::string const& name, std::string config) const
 {
   auto cxx_modules_dirname = this->GetCxxModulesDirectory();
   if (cxx_modules_dirname.empty()) {
@@ -556,8 +570,9 @@ bool cmExportBuildFileGenerator::GenerateImportCxxModuleConfigTargetInclusion(
     config = "noconfig";
   }
 
-  std::string fileName = cmStrCat(this->FileDir, '/', cxx_modules_dirname,
-                                  "/cxx-modules-", config, ".cmake");
+  std::string fileName =
+    cmStrCat(this->FileDir, '/', cxx_modules_dirname, "/cxx-modules-", name,
+             '-', config, ".cmake");
 
   cmGeneratedFileStream os(fileName, true);
   if (!os) {
