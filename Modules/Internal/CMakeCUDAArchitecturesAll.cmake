@@ -68,10 +68,8 @@ function(cmake_cuda_architectures_all lang lang_var_)
   endif()
 
   if(${lang_var_}TOOLKIT_VERSION VERSION_GREATER_EQUAL 12.0)
-    if(CMAKE_${lang}_COMPILER_ID STREQUAL "NVIDIA")
-      list(REMOVE_ITEM CMAKE_CUDA_ARCHITECTURES_ALL 35 37)
-      list(REMOVE_ITEM CMAKE_CUDA_ARCHITECTURES_ALL_MAJOR 35)
-    endif()
+    list(REMOVE_ITEM CMAKE_CUDA_ARCHITECTURES_ALL 35 37)
+    list(REMOVE_ITEM CMAKE_CUDA_ARCHITECTURES_ALL_MAJOR 35)
   endif()
 
   # only generate jit code for the newest arch for all/all-major
