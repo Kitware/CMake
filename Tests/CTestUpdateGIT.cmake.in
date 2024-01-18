@@ -193,7 +193,7 @@ run_child(
   )
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${GIT} push origin
+  COMMAND ${GIT} push origin HEAD
   )
 
 #-----------------------------------------------------------------------------
@@ -214,7 +214,7 @@ run_child(
   )
 run_child(
   WORKING_DIRECTORY ${TOP}/user-source
-  COMMAND ${GIT} push origin
+  COMMAND ${GIT} push origin HEAD
   )
 
 #-----------------------------------------------------------------------------
