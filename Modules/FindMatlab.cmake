@@ -661,23 +661,23 @@ function(matlab_get_mex_suffix matlab_root mex_suffix)
     set(devnull INPUT_FILE NUL)
   endif()
 
+  set(_arch)
   if(WIN32)
     # this environment variable is used to determine the arch on Windows
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-      set(ENV{MATLAB_ARCH} "win64")
+      set(_arch "MATLAB_ARCH=win64")
     else()
-      set(ENV{MATLAB_ARCH} "win32")
+      set(_arch "MATLAB_ARCH=win32")
     endif()
   endif()
 
   # this is the preferred way. If this does not work properly (eg. MCR on Windows), then we use our own knowledge
   execute_process(
-    COMMAND ${Matlab_MEXEXTENSIONS_PROG}
+    COMMAND ${CMAKE_COMMAND} -E env ${_arch} ${Matlab_MEXEXTENSIONS_PROG}
     OUTPUT_VARIABLE _matlab_mex_extension
     ERROR_VARIABLE _matlab_mex_extension_error
     OUTPUT_STRIP_TRAILING_WHITESPACE
     ${devnull})
-  unset(ENV{MATLAB_ARCH})
 
   if(_matlab_mex_extension_error)
     if(WIN32)
@@ -1333,7 +1333,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
 
       find_program(
           _matlab_current_program
-          matlab
+          NAMES matlab
           ${_find_matlab_options}
           DOC "Matlab main program"
         )
@@ -1838,7 +1838,7 @@ set(_matlab_required_variables)
 # the MEX library/header are required
 find_path(
   Matlab_INCLUDE_DIRS
-  mex.h
+  NAMES mex.h
   PATHS ${MATLAB_INCLUDE_DIR_TO_LOOK}
   NO_DEFAULT_PATH
   )
@@ -1848,7 +1848,7 @@ if(Matlab_Or_MCR STREQUAL "MATLAB" OR Matlab_Or_MCR STREQUAL "UNKNOWN")
   _Matlab_find_library(
     ${_matlab_lib_prefix_for_search}
     Matlab_MEX_LIBRARY
-    mex
+    NAMES mex
     PATHS ${_matlab_lib_dir_for_search}
     NO_DEFAULT_PATH
   )
@@ -1864,7 +1864,7 @@ if(Matlab_Or_MCR STREQUAL "MATLAB" OR Matlab_Or_MCR STREQUAL "UNKNOWN")
   _Matlab_find_library(
     ${_matlab_lib_prefix_for_search}
     Matlab_MX_LIBRARY
-    mx
+    NAMES mx
     PATHS ${_matlab_lib_dir_for_search}
     NO_DEFAULT_PATH
   )
@@ -1880,7 +1880,7 @@ if(Matlab_HAS_CPP_API)
   _Matlab_find_library(
     ${_matlab_lib_prefix_for_search}
     Matlab_ENGINE_LIBRARY
-    MatlabEngine
+    NAMES MatlabEngine
     PATHS ${_matlab_lib_dir_for_search}
     DOC "MatlabEngine Library"
     NO_DEFAULT_PATH
@@ -1893,7 +1893,7 @@ if(Matlab_HAS_CPP_API)
   _Matlab_find_library(
     ${_matlab_lib_prefix_for_search}
     Matlab_DATAARRAY_LIBRARY
-    MatlabDataArray
+    NAMES MatlabDataArray
     PATHS ${_matlab_lib_dir_for_search}
     DOC "MatlabDataArray Library"
     NO_DEFAULT_PATH
@@ -1909,7 +1909,7 @@ if("ENG_LIBRARY" IN_LIST Matlab_FIND_COMPONENTS)
   _Matlab_find_library(
     ${_matlab_lib_prefix_for_search}
     Matlab_ENG_LIBRARY
-    eng
+    NAMES eng
     PATHS ${_matlab_lib_dir_for_search}
     NO_DEFAULT_PATH
   )
@@ -1923,7 +1923,7 @@ if("MAT_LIBRARY" IN_LIST Matlab_FIND_COMPONENTS)
   _Matlab_find_library(
     ${_matlab_lib_prefix_for_search}
     Matlab_MAT_LIBRARY
-    mat
+    NAMES mat
     PATHS ${_matlab_lib_dir_for_search}
     NO_DEFAULT_PATH
   )
@@ -1936,7 +1936,7 @@ endif()
 if("SIMULINK" IN_LIST Matlab_FIND_COMPONENTS)
   find_path(
     Matlab_SIMULINK_INCLUDE_DIR
-    simstruc.h
+    NAMES simstruc.h
     PATHS "${Matlab_ROOT_DIR}/simulink/include"
     NO_DEFAULT_PATH
     )
@@ -1950,7 +1950,7 @@ endif()
 if("MAIN_PROGRAM" IN_LIST Matlab_FIND_COMPONENTS)
   find_program(
     Matlab_MAIN_PROGRAM
-    matlab
+    NAMES matlab
     PATHS ${Matlab_ROOT_DIR} ${Matlab_ROOT_DIR}/bin
     DOC "Matlab main program"
     NO_DEFAULT_PATH
@@ -1964,7 +1964,7 @@ endif()
 if("MEX_COMPILER" IN_LIST Matlab_FIND_COMPONENTS)
   find_program(
     Matlab_MEX_COMPILER
-    "mex"
+    NAMES "mex"
     PATHS ${Matlab_BINARIES_DIR}
     DOC "Matlab MEX compiler"
     NO_DEFAULT_PATH
@@ -1978,7 +1978,7 @@ endif()
 if("MCC_COMPILER" IN_LIST Matlab_FIND_COMPONENTS)
   find_program(
     Matlab_MCC_COMPILER
-    "mcc"
+    NAMES "mcc"
     PATHS ${Matlab_BINARIES_DIR}
     DOC "Matlab MCC compiler"
     NO_DEFAULT_PATH
