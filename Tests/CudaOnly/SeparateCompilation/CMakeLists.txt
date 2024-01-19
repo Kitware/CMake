@@ -20,7 +20,7 @@ set_target_properties(CUDASeparateLibA
                       POSITION_INDEPENDENT_CODE ON)
 unset(CMAKE_CUDA_SEPARABLE_COMPILATION)
 
-if(CMAKE_CUDA_SIMULATE_ID STREQUAL "MSVC")
+if(CMAKE_CUDA_COMPILER_ID STREQUAL "NVIDIA" AND CMAKE_CUDA_SIMULATE_ID STREQUAL "MSVC")
   # Test adding a flag that is not in our CUDA flag table for VS.
   if(NOT CMAKE_CUDA_COMPILER_VERSION VERSION_LESS 8)
     string(APPEND CMAKE_CUDA_FLAGS " --ftemplate-depth 50")

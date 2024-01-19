@@ -1,6 +1,3 @@
-
-#include <iostream>
-
 #include "file1.h"
 #include "file2.h"
 

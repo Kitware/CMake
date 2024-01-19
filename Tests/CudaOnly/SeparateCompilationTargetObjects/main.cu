@@ -1,6 +1,3 @@
-// main.cu
-#include <iostream>
-
 #ifdef _WIN32
 #  define IMPORT __declspec(dllimport)
 #else
