@@ -476,8 +476,8 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
   foreach(_installation_type IN ITEMS "MATLAB" "MATLAB Runtime" "MATLAB Compiler Runtime")
 
     cmake_host_system_information(RESULT _reg
-    QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/${_installation_type}"
-    SUBKEYS VIEW ${_view}
+      QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/${_installation_type}"
+      SUBKEYS VIEW ${_view}
     )
 
     if(_reg)
