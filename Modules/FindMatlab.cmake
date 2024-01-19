@@ -1785,7 +1785,7 @@ unset(_matlab_64Build)
 
 
 if(MATLAB_FIND_DEBUG)
-  message(STATUS "[MATLAB] [DEBUG]_matlab_lib_prefix_for_search = ${_matlab_lib_prefix_for_search} | _matlab_lib_dir_for_search = ${_matlab_lib_dir_for_search}")
+  message(STATUS "[MATLAB] _matlab_lib_prefix_for_search = ${_matlab_lib_prefix_for_search} | _matlab_lib_dir_for_search = ${_matlab_lib_dir_for_search}")
 endif()
 
 
