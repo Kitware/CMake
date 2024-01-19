@@ -480,16 +480,10 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
       SUBKEYS VIEW ${_view}
     )
 
-    if(_reg)
-      string(REGEX MATCHALL "([0-9]+(\\.[0-9]+)+)" _versions_regex "${_reg}")
+    string(REGEX MATCHALL "([0-9]+(\\.[0-9]+)+)" _versions_regex "${_reg}")
 
-      foreach(_match IN LISTS _versions_regex)
-        if(_match MATCHES "([0-9]+(\\.[0-9]+)+)")
-          list(APPEND matlabs_from_registry ${_match})
-        endif()
-      endforeach()
+    list(APPEND matlabs_from_registry ${_versions_regex})
 
-    endif()
   endforeach()
 
   if(matlabs_from_registry)
