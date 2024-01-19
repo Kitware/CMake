@@ -118,8 +118,10 @@ protected:
                               cmTargetExport* te) override;
 
   std::string GetCxxModulesDirectory() const override;
-  void GenerateCxxModuleConfigInformation(std::ostream&) const override;
-  bool GenerateImportCxxModuleConfigTargetInclusion(std::string const&);
+  void GenerateCxxModuleConfigInformation(std::string const&,
+                                          std::ostream&) const override;
+  bool GenerateImportCxxModuleConfigTargetInclusion(std::string const&,
+                                                    std::string const&);
 
   cmInstallExportGenerator* IEGen;
 

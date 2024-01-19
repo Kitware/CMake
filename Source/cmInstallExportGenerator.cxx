@@ -158,10 +158,11 @@ void cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
     // Remove old per-configuration export files if the main changes.
     std::string installedDir = cmStrCat(
       "$ENV{DESTDIR}", ConvertToAbsoluteDestination(cxx_module_dest), '/');
-    std::string installedFile = cmStrCat(installedDir, "/cxx-modules.cmake");
+    std::string installedFile = cmStrCat(installedDir, "/cxx-modules-",
+                                         this->ExportSet->GetName(), ".cmake");
     std::string toInstallFile =
       cmStrCat(cmSystemTools::GetFilenamePath(config_file_example),
-               "/cxx-modules.cmake");
+               "/cxx-modules-", this->ExportSet->GetName(), ".cmake");
     os << indent << "if(EXISTS \"" << installedFile << "\")\n";
     Indent indentN = indent.Next();
     Indent indentNN = indentN.Next();
