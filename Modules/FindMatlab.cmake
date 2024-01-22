@@ -438,9 +438,10 @@ endmacro()
   are installed. The found versions are returned in `matlab_versions`.
   Set `win64` to `TRUE` if the 64 bit version of Matlab should be looked for
   The returned list contains all versions under
-  ``HKLM\\SOFTWARE\\Mathworks\\MATLAB`` and
-  ``HKLM\\SOFTWARE\\Mathworks\\MATLAB Runtime`` or an empty list in case an
-  error occurred (or nothing found).
+  ``HKLM\\SOFTWARE\\Mathworks\\MATLAB``,
+  ``HKLM\\SOFTWARE\\Mathworks\\MATLAB Runtime`` and
+  ``HKLM\\SOFTWARE\\Mathworks\\MATLAB Compiler Runtime`` or an empty list in
+  case an error occurred (or nothing found).
 
   .. note::
 
