@@ -95,8 +95,8 @@ private:
 std::string cmCTestHG::GetWorkingRevision()
 {
   // Run plumbing "hg identify" to get work tree revision.
-  std::string hg = this->CommandLineTool;
-  std::vector<std::string> hg_identify = { hg, "identify", "-i" };
+  const char* hg = this->CommandLineTool.c_str();
+  const char* hg_identify[] = { hg, "identify", "-i", nullptr };
   std::string rev;
   IdentifyParser out(this, "rev-out> ", rev);
   OutputLogger err(this->Log, "rev-err> ");
@@ -127,16 +127,16 @@ bool cmCTestHG::UpdateImpl()
 {
   // Use "hg pull" followed by "hg update" to update the working tree.
   {
-    std::string hg = this->CommandLineTool;
-    std::vector<std::string> hg_pull = { hg, "pull", "-v" };
+    const char* hg = this->CommandLineTool.c_str();
+    const char* hg_pull[] = { hg, "pull", "-v", nullptr };
     OutputLogger out(this->Log, "pull-out> ");
     OutputLogger err(this->Log, "pull-err> ");
-    this->RunChild(hg_pull, &out, &err);
+    this->RunChild(&hg_pull[0], &out, &err);
   }
 
   // TODO: if(this->CTest->GetTestModel() == cmCTest::NIGHTLY)
 
-  std::vector<std::string> hg_update;
+  std::vector<char const*> hg_update;
   hg_update.push_back(this->CommandLineTool.c_str());
   hg_update.push_back("update");
   hg_update.push_back("-v");
@@ -147,11 +147,16 @@ bool cmCTestHG::UpdateImpl()
     opts = this->CTest->GetCTestConfiguration("HGUpdateOptions");
   }
   std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
-  cm::append(hg_update, args);
+  for (std::string const& arg : args) {
+    hg_update.push_back(arg.c_str());
+  }
+
+  // Sentinel argument.
+  hg_update.push_back(nullptr);
 
   OutputLogger out(this->Log, "update-out> ");
   OutputLogger err(this->Log, "update-err> ");
-  return this->RunUpdateCommand(hg_update, &out, &err);
+  return this->RunUpdateCommand(hg_update.data(), &out, &err);
 }
 
 class cmCTestHG::LogParser
@@ -272,8 +277,8 @@ bool cmCTestHG::LoadRevisions()
   // the project has spaces in the path.  Also, they may not have
   // proper XML escapes.
   std::string range = this->OldRevision + ":" + this->NewRevision;
-  std::string hg = this->CommandLineTool;
-  std::string hgXMLTemplate = "<logentry\n"
+  const char* hg = this->CommandLineTool.c_str();
+  const char* hgXMLTemplate = "<logentry\n"
                               "   revision=\"{node|short}\">\n"
                               "  <author>{author|person}</author>\n"
                               "  <email>{author|email}</email>\n"
@@ -283,8 +288,10 @@ bool cmCTestHG::LoadRevisions()
                               "  <file_adds>{file_adds}</file_adds>\n"
                               "  <file_dels>{file_dels}</file_dels>\n"
                               "</logentry>\n";
-  std::vector<std::string> hg_log = { hg,    "log",        "--removed",  "-r",
-                                      range, "--template", hgXMLTemplate };
+  const char* hg_log[] = {
+    hg,           "log",         "--removed", "-r", range.c_str(),
+    "--template", hgXMLTemplate, nullptr
+  };
 
   LogParser out(this, "log-out> ");
   out.Process("<?xml version=\"1.0\"?>\n"
@@ -298,8 +305,8 @@ bool cmCTestHG::LoadRevisions()
 bool cmCTestHG::LoadModifications()
 {
   // Use 'hg status' to get modified files.
-  std::string hg = this->CommandLineTool;
-  std::vector<std::string> hg_status = { hg, "status" };
+  const char* hg = this->CommandLineTool.c_str();
+  const char* hg_status[] = { hg, "status", nullptr };
   StatusParser out(this, "status-out> ");
   OutputLogger err(this->Log, "status-err> ");
   this->RunChild(hg_status, &out, &err);

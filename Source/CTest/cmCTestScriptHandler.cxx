@@ -11,9 +11,8 @@
 
 #include <cm/memory>
 
-#include <cm3p/uv.h>
-
 #include "cmsys/Directory.hxx"
+#include "cmsys/Process.h"
 
 #include "cmCTest.h"
 #include "cmCTestBuildCommand.h"
@@ -41,8 +40,6 @@
 #include "cmStateSnapshot.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmUVHandlePtr.h"
-#include "cmUVProcessChain.h"
 #include "cmValue.h"
 #include "cmake.h"
 
@@ -151,65 +148,66 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   // now pass through all the other arguments
   std::vector<std::string>& initArgs =
     this->CTest->GetInitialCommandLineArguments();
+  //*** need to make sure this does not have the current script ***
+  for (size_t i = 1; i < initArgs.size(); ++i) {
+    argv.push_back(initArgs[i].c_str());
+  }
+  argv.push_back(nullptr);
 
   // Now create process object
-  cmUVProcessChainBuilder builder;
-  builder.AddCommand(initArgs)
-    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT)
-    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_ERROR);
-  auto process = builder.Start();
-  cm::uv_pipe_ptr outPipe;
-  outPipe.init(process.GetLoop(), 0);
-  uv_pipe_open(outPipe, process.OutputStream());
-  cm::uv_pipe_ptr errPipe;
-  errPipe.init(process.GetLoop(), 0);
-  uv_pipe_open(errPipe, process.ErrorStream());
+  cmsysProcess* cp = cmsysProcess_New();
+  cmsysProcess_SetCommand(cp, argv.data());
+  // cmsysProcess_SetWorkingDirectory(cp, dir);
+  cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
+  // cmsysProcess_SetTimeout(cp, timeout);
+  cmsysProcess_Execute(cp);
 
   std::vector<char> out;
   std::vector<char> err;
   std::string line;
-  auto pipe =
-    cmSystemTools::WaitForLine(&process.GetLoop(), outPipe, errPipe, line,
-                               std::chrono::seconds(100), out, err);
-  while (pipe != cmSystemTools::WaitForLineResult::None) {
+  int pipe =
+    cmSystemTools::WaitForLine(cp, line, std::chrono::seconds(100), out, err);
+  while (pipe != cmsysProcess_Pipe_None) {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                "Output: " << line << "\n");
-    if (pipe == cmSystemTools::WaitForLineResult::STDERR) {
+    if (pipe == cmsysProcess_Pipe_STDERR) {
       cmCTestLog(this->CTest, ERROR_MESSAGE, line << "\n");
-    } else if (pipe == cmSystemTools::WaitForLineResult::STDOUT) {
+    } else if (pipe == cmsysProcess_Pipe_STDOUT) {
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, line << "\n");
     }
-    pipe =
-      cmSystemTools::WaitForLine(&process.GetLoop(), outPipe, errPipe, line,
-                                 std::chrono::seconds(100), out, err);
+    pipe = cmSystemTools::WaitForLine(cp, line, std::chrono::seconds(100), out,
+                                      err);
   }
 
   // Properly handle output of the build command
-  process.Wait();
-  auto const& status = process.GetStatus(0);
-  auto result = status.GetException();
+  cmsysProcess_WaitForExit(cp, nullptr);
+  int result = cmsysProcess_GetState(cp);
   int retVal = 0;
   bool failed = false;
-  switch (result.first) {
-    case cmUVProcessChain::ExceptionCode::None:
-      retVal = static_cast<int>(status.ExitStatus);
-      break;
-    case cmUVProcessChain::ExceptionCode::Spawn:
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "\tError executing ctest: " << result.second << std::endl);
-      failed = true;
-      break;
-    default:
-      retVal = status.TermSignal;
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "\tThere was an exception: " << result.second << " " << retVal
-                                              << std::endl);
-      failed = true;
+  if (result == cmsysProcess_State_Exited) {
+    retVal = cmsysProcess_GetExitValue(cp);
+  } else if (result == cmsysProcess_State_Exception) {
+    retVal = cmsysProcess_GetExitException(cp);
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "\tThere was an exception: "
+                 << cmsysProcess_GetExceptionString(cp) << " " << retVal
+                 << std::endl);
+    failed = true;
+  } else if (result == cmsysProcess_State_Expired) {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "\tThere was a timeout" << std::endl);
+    failed = true;
+  } else if (result == cmsysProcess_State_Error) {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "\tError executing ctest: " << cmsysProcess_GetErrorString(cp)
+                                           << std::endl);
+    failed = true;
   }
+  cmsysProcess_Delete(cp);
   if (failed) {
     std::ostringstream message;
     message << "Error running command: [";
-    message << static_cast<int>(result.first) << "] ";
+    message << result << "] ";
     for (const char* arg : argv) {
       if (arg) {
         message << arg << " ";
