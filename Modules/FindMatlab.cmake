@@ -452,7 +452,7 @@ endmacro()
 function(matlab_extract_all_installed_versions_from_registry win64 matlab_versions)
 
   if(NOT CMAKE_HOST_WIN32)
-    message(FATAL_ERROR "[MATLAB] This macro can only be called by a Windows host")
+    message(FATAL_ERROR "[MATLAB] This function can only be called by a Windows host")
   endif()
 
   if(${win64} AND CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "64")
