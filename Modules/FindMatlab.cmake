@@ -189,17 +189,13 @@ Cached variables
   the location of the root of the Matlab installation found. If this value
   is changed by the user, the result variables are recomputed.
 
-Provided macros
-^^^^^^^^^^^^^^^
+Provided commands
+^^^^^^^^^^^^^^^^^
 
 :command:`matlab_get_version_from_release_name`
   returns the version from the release name
 :command:`matlab_get_release_name_from_version`
   returns the release name from the Matlab version
-
-Provided functions
-^^^^^^^^^^^^^^^^^^
-
 :command:`matlab_add_mex`
   adds a target compiling a MEX file.
 :command:`matlab_add_unit_test`
