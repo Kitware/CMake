@@ -301,9 +301,9 @@ if(WIN32)
   set(_MPI_Intel_Fortran_COMPILER_NAMES      mpiifort.bat mpif77.bat mpif90.bat)
 
   # Intel MPI compiler names
-  set(_MPI_IntelLLVM_C_COMPILER_NAMES            mpiicc.bat)
-  set(_MPI_IntelLLVM_CXX_COMPILER_NAMES          mpiicpc.bat)
-  set(_MPI_IntelLLVM_Fortran_COMPILER_NAMES      mpiifort.bat mpif77.bat mpif90.bat)
+  set(_MPI_IntelLLVM_C_COMPILER_NAMES            mpiicx.bat mpiicc.bat)
+  set(_MPI_IntelLLVM_CXX_COMPILER_NAMES          mpiicpx.bat mpiicpc.bat)
+  set(_MPI_IntelLLVM_Fortran_COMPILER_NAMES      mpiifx.bat mpiifort.bat mpif77.bat mpif90.bat)
 
   # Intel MPI compiler names for MSMPI
   set(_MPI_MSVC_C_COMPILER_NAMES             mpicl.bat)
@@ -315,9 +315,9 @@ else()
   set(_MPI_Intel_Fortran_COMPILER_NAMES      mpiifort mpiif95 mpiif90 mpiif77)
 
   # Intel compiler names
-  set(_MPI_IntelLLVM_C_COMPILER_NAMES            mpiicc)
-  set(_MPI_IntelLLVM_CXX_COMPILER_NAMES          mpiicpc  mpiicxx mpiic++)
-  set(_MPI_IntelLLVM_Fortran_COMPILER_NAMES      mpiifort mpiif95 mpiif90 mpiif77)
+  set(_MPI_IntelLLVM_C_COMPILER_NAMES            mpiicx mpiicc)
+  set(_MPI_IntelLLVM_CXX_COMPILER_NAMES          mpiicpx mpiicpc mpiicxx mpiic++)
+  set(_MPI_IntelLLVM_Fortran_COMPILER_NAMES      mpiifx mpiifort mpiif95 mpiif90 mpiif77)
 endif()
 
 # PGI compiler names
