@@ -53,6 +53,7 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_${lang}_LINK_OPTIONS_PIE "")
   set(CMAKE_${lang}_LINK_OPTIONS_NO_PIE "")
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "")
+  set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-shared")
 
   set(CMAKE_${lang}_LINK_LIBRARIES_PROCESSING ORDER=FORWARD UNICITY=ALL)
 
@@ -184,18 +185,19 @@ endmacro()
 
 if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
     OR "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC"
+    OR "x${CMAKE_CUDA_SIMULATE_ID}" STREQUAL "xMSVC"
     OR "x${CMAKE_HIP_SIMULATE_ID}" STREQUAL "xMSVC")
 
   __verify_same_language_values(COMPILER_ID
                                 "The current configuration mixes Clang and MSVC or "
                                 "some other CL compatible compiler tool. This is not supported. "
-                                "Use either clang or MSVC as both C, C++ and/or HIP compilers.")
+                                "Use either Clang or MSVC as the compiler for all of C, C++, CUDA and/or HIP.")
 
   __verify_same_language_values(COMPILER_FRONTEND_VARIANT
                                 "The current configuration uses the Clang compiler "
                                 "tool with mixed frontend variants, both the GNU and in MSVC CL "
                                 "like variants. This is not supported. Use either clang/clang++ "
-                                "or clang-cl as both C, C++ and/or HIP compilers.")
+                                "or clang-cl as all C, C++, CUDA and/or HIP compilers.")
 
   if(NOT CMAKE_RC_COMPILER_INIT)
     # Check if rc is already in the path
@@ -217,6 +219,7 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
 
   if ( "x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC"
       OR "x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC"
+      OR "x${CMAKE_CUDA_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC"
       OR "x${CMAKE_HIP_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
 
     include(Platform/Windows-MSVC)
