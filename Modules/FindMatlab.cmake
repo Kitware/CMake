@@ -189,17 +189,13 @@ Cached variables
   the location of the root of the Matlab installation found. If this value
   is changed by the user, the result variables are recomputed.
 
-Provided macros
-^^^^^^^^^^^^^^^
+Provided commands
+^^^^^^^^^^^^^^^^^
 
 :command:`matlab_get_version_from_release_name`
   returns the version from the release name
 :command:`matlab_get_release_name_from_version`
   returns the release name from the Matlab version
-
-Provided functions
-^^^^^^^^^^^^^^^^^^
-
 :command:`matlab_add_mex`
   adds a target compiling a MEX file.
 :command:`matlab_add_unit_test`
@@ -442,9 +438,10 @@ endmacro()
   are installed. The found versions are returned in `matlab_versions`.
   Set `win64` to `TRUE` if the 64 bit version of Matlab should be looked for
   The returned list contains all versions under
-  ``HKLM\\SOFTWARE\\Mathworks\\MATLAB`` and
-  ``HKLM\\SOFTWARE\\Mathworks\\MATLAB Runtime`` or an empty list in case an
-  error occurred (or nothing found).
+  ``HKLM\\SOFTWARE\\Mathworks\\MATLAB``,
+  ``HKLM\\SOFTWARE\\Mathworks\\MATLAB Runtime`` and
+  ``HKLM\\SOFTWARE\\Mathworks\\MATLAB Compiler Runtime`` or an empty list in
+  case an error occurred (or nothing found).
 
   .. note::
 
@@ -455,7 +452,7 @@ endmacro()
 function(matlab_extract_all_installed_versions_from_registry win64 matlab_versions)
 
   if(NOT CMAKE_HOST_WIN32)
-    message(FATAL_ERROR "[MATLAB] This macro can only be called by a Windows host")
+    message(FATAL_ERROR "[MATLAB] This function can only be called by a Windows host")
   endif()
 
   if(${win64} AND CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "64")
