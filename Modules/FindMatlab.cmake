@@ -560,42 +560,26 @@ function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_
   endforeach()
 
   # Check for MCR installations
-  foreach(_matlab_current_version IN LISTS matlab_versions)
-    cmake_host_system_information(RESULT current_MATLAB_ROOT
-      QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/MATLAB Runtime/${_matlab_current_version}"
-      VALUE "MATLABROOT"
-    )
-    cmake_path(CONVERT "${current_MATLAB_ROOT}" TO_CMAKE_PATH_LIST current_MATLAB_ROOT)
+  foreach(_installation_type IN ITEMS "MATLAB Runtime" "MATLAB Compiler Runtime")
+    foreach(_matlab_current_version IN LISTS matlab_versions)
+      cmake_host_system_information(RESULT current_MATLAB_ROOT
+        QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/${_installation_type}/${_matlab_current_version}"
+        VALUE "MATLABROOT"
+      )
+      cmake_path(CONVERT "${current_MATLAB_ROOT}" TO_CMAKE_PATH_LIST current_MATLAB_ROOT)
 
-    # remove the dot
-    string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
+      # remove the dot
+      string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
 
-    if(IS_DIRECTORY "${current_MATLAB_ROOT}")
-      _Matlab_VersionInfoXML("${current_MATLAB_ROOT}" _matlab_version_tmp)
-      if("${_matlab_version_tmp}" STREQUAL "unknown")
-        list(APPEND _matlab_roots_list "MCR" ${_matlab_current_version} "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
-      else()
-        list(APPEND _matlab_roots_list "MCR" ${_matlab_version_tmp} "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
+      if(IS_DIRECTORY "${current_MATLAB_ROOT}")
+        _Matlab_VersionInfoXML("${current_MATLAB_ROOT}" _matlab_version_tmp)
+        if("${_matlab_version_tmp}" STREQUAL "unknown")
+          list(APPEND _matlab_roots_list "MCR" ${_matlab_current_version} "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
+        else()
+          list(APPEND _matlab_roots_list "MCR" ${_matlab_version_tmp} "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
+        endif()
       endif()
-    endif()
-
-  endforeach()
-
-  # Check for old MCR installations
-  foreach(_matlab_current_version IN LISTS matlab_versions)
-    cmake_host_system_information(RESULT current_MATLAB_ROOT
-      QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/MATLAB Compiler Runtime/${_matlab_current_version}"
-      VALUE "MATLABROOT"
-    )
-    cmake_path(CONVERT "${current_MATLAB_ROOT}" TO_CMAKE_PATH_LIST current_MATLAB_ROOT)
-
-    # remove the dot
-    string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
-
-    if(IS_DIRECTORY "${current_MATLAB_ROOT}")
-      list(APPEND _matlab_roots_list "MCR" ${_matlab_current_version} "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
-    endif()
-
+    endforeach()
   endforeach()
   set(${matlab_roots} ${_matlab_roots_list} PARENT_SCOPE)
 endfunction()
