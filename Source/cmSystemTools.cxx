@@ -2377,43 +2377,30 @@ cmSystemTools::WaitForLineResult cmSystemTools::WaitForLine(
 }
 
 #ifdef _WIN32
-static void EnsureStdPipe(DWORD fd)
+static void EnsureStdPipe(int stdFd, DWORD nStdHandle, FILE* stream,
+                          const wchar_t* mode)
 {
-  if (GetStdHandle(fd) != INVALID_HANDLE_VALUE) {
+  if (fileno(stream) >= 0) {
     return;
   }
-  SECURITY_ATTRIBUTES sa;
-  sa.nLength = sizeof(sa);
-  sa.lpSecurityDescriptor = nullptr;
-  sa.bInheritHandle = TRUE;
-
-  HANDLE h = CreateFileW(
-    L"NUL",
-    fd == STD_INPUT_HANDLE ? FILE_GENERIC_READ
-                           : FILE_GENERIC_WRITE | FILE_READ_ATTRIBUTES,
-    FILE_SHARE_READ | FILE_SHARE_WRITE, &sa, OPEN_EXISTING, 0, nullptr);
-
-  if (h == INVALID_HANDLE_VALUE) {
-    LPSTR message = nullptr;
-    DWORD size = FormatMessageA(
-      FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-        FORMAT_MESSAGE_IGNORE_INSERTS,
-      nullptr, GetLastError(), MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-      (LPSTR)&message, 0, nullptr);
-    std::string msg = std::string(message, size);
-    LocalFree(message);
-    std::cerr << "failed to open NUL for missing stdio pipe: " << msg;
+  _close(stdFd);
+  _wfreopen(L"NUL", mode, stream);
+  int fd = fileno(stream);
+  if (fd < 0) {
+    perror("failed to open NUL for missing stdio pipe");
     abort();
   }
-
-  SetStdHandle(fd, h);
+  if (fd != stdFd) {
+    _dup2(fd, stdFd);
+  }
+  SetStdHandle(nStdHandle, reinterpret_cast<HANDLE>(_get_osfhandle(fd)));
 }
 
 void cmSystemTools::EnsureStdPipes()
 {
-  EnsureStdPipe(STD_INPUT_HANDLE);
-  EnsureStdPipe(STD_OUTPUT_HANDLE);
-  EnsureStdPipe(STD_ERROR_HANDLE);
+  EnsureStdPipe(0, STD_INPUT_HANDLE, stdin, L"rb");
+  EnsureStdPipe(1, STD_OUTPUT_HANDLE, stdout, L"wb");
+  EnsureStdPipe(2, STD_ERROR_HANDLE, stderr, L"wb");
 }
 #else
 static void EnsureStdPipe(int fd)
