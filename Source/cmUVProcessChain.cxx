@@ -12,6 +12,8 @@
 
 #include <cm3p/uv.h>
 
+#include "cm_fileno.hxx"
+
 #include "cmGetPipes.h"
 #include "cmUVHandlePtr.h"
 
@@ -115,6 +117,12 @@ cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetExternalStream(
     }
   }
   return *this;
+}
+
+cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetExternalStream(
+  Stream stdio, FILE* stream)
+{
+  return this->SetExternalStream(stdio, cm_fileno(stream));
 }
 
 cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetMergedBuiltinStreams()

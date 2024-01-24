@@ -21,8 +21,6 @@
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 
-#include "cm_fileno.hxx"
-
 #include "cmCTest.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
@@ -1887,9 +1885,9 @@ int cmCTestCoverageHandler::RunBullseyeCommand(
     cmsys::SystemTools::Fopen(stderrFile, "w"), fclose);
   builder.AddCommand(args)
     .SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT,
-                       cm_fileno(stdoutHandle.get()))
+                       stdoutHandle.get())
     .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR,
-                       cm_fileno(stderrHandle.get()));
+                       stderrHandle.get());
   // since we set the output file names wait for it to end
   auto chain = builder.Start();
   chain.Wait();
