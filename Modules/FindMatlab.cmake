@@ -1717,12 +1717,6 @@ if(Matlab_ROOT_DIR)
   file(TO_CMAKE_PATH ${Matlab_ROOT_DIR} Matlab_ROOT_DIR)
 endif()
 
-if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-  set(_matlab_64Build FALSE)
-else()
-  set(_matlab_64Build TRUE)
-endif()
-
 
 if(NOT DEFINED Matlab_MEX_EXTENSION)
   set(_matlab_mex_extension "")
@@ -1756,7 +1750,7 @@ endif()
 
 
 set(MATLAB_INCLUDE_DIR_TO_LOOK ${Matlab_ROOT_DIR}/extern/include)
-if(_matlab_64Build)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(_matlab_current_suffix ${_matlab_bin_suffix_64bits})
 else()
   set(_matlab_current_suffix ${_matlab_bin_suffix_32bits})
@@ -1780,8 +1774,6 @@ else()
   set(_matlab_lib_dir_for_search ${Matlab_BINARIES_DIR} ${Matlab_EXTERN_BINARIES_DIR})
   set(_matlab_lib_prefix_for_search "lib")
 endif()
-
-unset(_matlab_64Build)
 
 
 if(MATLAB_FIND_DEBUG)
