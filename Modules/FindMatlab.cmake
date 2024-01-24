@@ -1638,7 +1638,7 @@ if(_numbers_of_matlab_roots GREATER 0)
   set(_list_index -1)
   foreach(_matlab_root_index RANGE 1 ${_numbers_of_matlab_roots} 3)
     list(GET _matlab_possible_roots ${_matlab_root_index} _matlab_root_version)
-    find_package_check_version(${_matlab_root_version} _matlab_version_ok)
+    find_package_check_version(${_matlab_root_version} _matlab_version_ok HANDLE_VERSION_RANGE)
     if(_matlab_version_ok)
       set(_list_index ${_matlab_root_index})
       break()
@@ -2008,6 +2008,7 @@ find_package_handle_standard_args(
   FOUND_VAR Matlab_FOUND
   REQUIRED_VARS ${_matlab_required_variables}
   VERSION_VAR Matlab_VERSION
+  HANDLE_VERSION_RANGE
   HANDLE_COMPONENTS)
 
 unset(_matlab_required_variables)
