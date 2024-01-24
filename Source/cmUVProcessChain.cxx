@@ -57,12 +57,7 @@ struct cmUVProcessChain::InternalData
   void Finish();
 };
 
-cmUVProcessChainBuilder::cmUVProcessChainBuilder()
-{
-  this->SetNoStream(Stream_INPUT)
-    .SetNoStream(Stream_OUTPUT)
-    .SetNoStream(Stream_ERROR);
-}
+cmUVProcessChainBuilder::cmUVProcessChainBuilder() = default;
 
 cmUVProcessChainBuilder& cmUVProcessChainBuilder::AddCommand(
   const std::vector<std::string>& arguments)

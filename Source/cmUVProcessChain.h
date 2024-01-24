@@ -50,8 +50,8 @@ private:
 
   struct StdioConfiguration
   {
-    StdioType Type;
-    int FileDescriptor;
+    StdioType Type = None;
+    int FileDescriptor = -1;
   };
 
   struct ProcessConfiguration
