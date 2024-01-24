@@ -1,0 +1,297 @@
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  HEADER_SETS property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  INTERFACE_HEADER_SETS property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  MANUALLY_ADDED_DEPENDENCIES property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  NAME property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  TYPE property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  Policy CMP0160 is not set: More read-only target properties now error when
+  trying to set them.  Run "cmake --help-policy CMP0160" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  ALIAS_GLOBAL property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  Policy CMP0160 is not set: More read-only target properties now error when
+  trying to set them.  Run "cmake --help-policy CMP0160" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  BINARY_DIR property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  Policy CMP0160 is not set: More read-only target properties now error when
+  trying to set them.  Run "cmake --help-policy CMP0160" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  CXX_MODULE_SETS property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  Policy CMP0160 is not set: More read-only target properties now error when
+  trying to set them.  Run "cmake --help-policy CMP0160" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  IMPORTED property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  Policy CMP0160 is not set: More read-only target properties now error when
+  trying to set them.  Run "cmake --help-policy CMP0160" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  INTERFACE_CXX_MODULE_SETS property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  Policy CMP0160 is not set: More read-only target properties now error when
+  trying to set them.  Run "cmake --help-policy CMP0160" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  LOCATION property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  Policy CMP0160 is not set: More read-only target properties now error when
+  trying to set them.  Run "cmake --help-policy CMP0160" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  LOCATION_CONFIG property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  Policy CMP0160 is not set: More read-only target properties now error when
+  trying to set them.  Run "cmake --help-policy CMP0160" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  SOURCE_DIR property is read-only for target\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  IMPORTED_GLOBAL property can't be set on non-imported
+  targets\("ReadOnlyLib"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  HEADER_SETS property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  INTERFACE_HEADER_SETS property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  MANUALLY_ADDED_DEPENDENCIES property is read-only for
+  target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  NAME property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  TYPE property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  Policy CMP0160 is not set: More read-only target properties now error when
+  trying to set them.  Run "cmake --help-policy CMP0160" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  ALIAS_GLOBAL property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  Policy CMP0160 is not set: More read-only target properties now error when
+  trying to set them.  Run "cmake --help-policy CMP0160" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  BINARY_DIR property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  Policy CMP0160 is not set: More read-only target properties now error when
+  trying to set them.  Run "cmake --help-policy CMP0160" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  CXX_MODULE_SETS property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  Policy CMP0160 is not set: More read-only target properties now error when
+  trying to set them.  Run "cmake --help-policy CMP0160" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  IMPORTED property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  Policy CMP0160 is not set: More read-only target properties now error when
+  trying to set them.  Run "cmake --help-policy CMP0160" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  INTERFACE_CXX_MODULE_SETS property is read-only for
+  target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  Policy CMP0160 is not set: More read-only target properties now error when
+  trying to set them.  Run "cmake --help-policy CMP0160" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  LOCATION property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  Policy CMP0160 is not set: More read-only target properties now error when
+  trying to set them.  Run "cmake --help-policy CMP0160" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  LOCATION_CONFIG property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning \(dev\) at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  Policy CMP0160 is not set: More read-only target properties now error when
+  trying to set them.  Run "cmake --help-policy CMP0160" for policy details.
+  Use the cmake_policy command to set the policy and suppress this warning.
+
+  SOURCE_DIR property is read-only for target\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  EXPORT_NAME property can't be set on imported targets\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
+
+
+CMake Error at READONLY_PROPERTIES.cmake:44 \(set_target_properties\):
+  SOURCES property can't be set on imported targets\("ReadOnlyImport"\)
+
+Call Stack \(most recent call first\):
+  CMP0160-WARN.cmake:3 \(include\)
+  CMakeLists.txt:3 \(include\)
