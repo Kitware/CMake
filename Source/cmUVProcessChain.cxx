@@ -122,7 +122,11 @@ cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetExternalStream(
 cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetExternalStream(
   Stream stdio, FILE* stream)
 {
-  return this->SetExternalStream(stdio, cm_fileno(stream));
+  int fd = cm_fileno(stream);
+  if (fd >= 0) {
+    return this->SetExternalStream(stdio, fd);
+  }
+  return this->SetNoStream(stdio);
 }
 
 cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetMergedBuiltinStreams()
