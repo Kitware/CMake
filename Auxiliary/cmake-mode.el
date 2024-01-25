@@ -258,15 +258,6 @@ Return t unless search stops due to end of buffer."
       (forward-line)
       t)))
 
-(defun cmake-mark-defun ()
-  "Mark the current CMake function or macro.
-
-This puts the mark at the end, and point at the beginning."
-  (interactive)
-  (cmake-end-of-defun)
-  (push-mark nil :nomsg :activate)
-  (cmake-beginning-of-defun))
-
 
 ;------------------------------------------------------------------------------
 
@@ -346,6 +337,10 @@ This puts the mark at the end, and point at the beginning."
 (define-derived-mode cmake-mode prog-mode "CMake"
   "Major mode for editing CMake source files."
 
+  ;; Setup jumping to beginning/end of a CMake function/macro.
+  (set (make-local-variable 'beginning-of-defun-function) #'cmake-beginning-of-defun)
+  (set (make-local-variable 'end-of-defun-function) #'cmake-end-of-defun)
+
   ; Setup font-lock mode.
   (set (make-local-variable 'font-lock-defaults) '(cmake-font-lock-keywords))
   ; Setup indentation function.
@@ -355,11 +350,6 @@ This puts the mark at the end, and point at the beginning."
   ;; Setup syntax propertization
   (set (make-local-variable 'syntax-propertize-function) cmake--syntax-propertize-function)
   (add-hook 'syntax-propertize-extend-region-functions #'syntax-propertize-multiline nil t))
-
-;; Default cmake-mode key bindings
-(define-key cmake-mode-map "\e\C-a" #'cmake-beginning-of-defun)
-(define-key cmake-mode-map "\e\C-e" #'cmake-end-of-defun)
-(define-key cmake-mode-map "\e\C-h" #'cmake-mark-defun)
 
 
 ; Help mode starts here
