@@ -11,8 +11,6 @@
 #include <cm3p/uv.h>
 #include <fcntl.h>
 
-#include "cm_fileno.hxx"
-
 #include "cmCommandLineArgument.h"
 #include "cmConsoleBuf.h"
 #include "cmCryptoHash.h"
@@ -1917,11 +1915,8 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string> const& args)
     cmUVProcessChainBuilder builder;
 
     // Children should share stdout and stderr with this process.
-    builder
-      .SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT,
-                         cm_fileno(stdout))
-      .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR,
-                         cm_fileno(stderr));
+    builder.SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT, stdout)
+      .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR, stderr);
 
     // Setup this command line.
     std::vector<std::string> args2;

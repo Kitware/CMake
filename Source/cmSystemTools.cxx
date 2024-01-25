@@ -25,8 +25,6 @@
 
 #include <cm3p/uv.h>
 
-#include "cm_fileno.hxx"
-
 #include "cmDuration.h"
 #include "cmELF.h"
 #include "cmMessageMetadata.h"
@@ -576,8 +574,7 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
                                      cmDuration timeout, Encoding encoding)
 {
   cmUVProcessChainBuilder builder;
-  builder
-    .SetExternalStream(cmUVProcessChainBuilder::Stream_INPUT, cm_fileno(stdin))
+  builder.SetExternalStream(cmUVProcessChainBuilder::Stream_INPUT, stdin)
     .AddCommand(command);
   if (dir) {
     builder.SetWorkingDirectory(dir);
@@ -586,11 +583,8 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
   if (outputflag == OUTPUT_PASSTHROUGH) {
     captureStdOut = nullptr;
     captureStdErr = nullptr;
-    builder
-      .SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT,
-                         cm_fileno(stdout))
-      .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR,
-                         cm_fileno(stderr));
+    builder.SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT, stdout)
+      .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR, stderr);
   } else if (outputflag == OUTPUT_MERGE ||
              (captureStdErr && captureStdErr == captureStdOut)) {
     builder.SetMergedBuiltinStreams();
