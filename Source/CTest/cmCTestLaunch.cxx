@@ -13,8 +13,6 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
-#include "cm_fileno.hxx"
-
 #include "cmCTestLaunchReporter.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -158,11 +156,8 @@ void cmCTestLaunch::RunChild()
   cmsys::ofstream ferr;
   if (this->Reporter.Passthru) {
     // In passthru mode we just share the output pipes.
-    builder
-      .SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT,
-                         cm_fileno(stdout))
-      .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR,
-                         cm_fileno(stderr));
+    builder.SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT, stdout)
+      .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR, stderr);
   } else {
     // In full mode we record the child output pipes to log files.
     builder.SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT)
