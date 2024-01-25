@@ -68,7 +68,10 @@ if(NOT RunCMake_GENERATOR STREQUAL "Xcode")
   unset(run_BuildDepends_skip_step_2)
 endif()
 
-if(CMake_TEST_Fortran)
+if(CMake_TEST_Fortran
+    # FIXME(lfortran): The compiler fails on the test's includes.
+    AND NOT CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran"
+    )
   run_BuildDepends(FortranInclude)
 endif()
 

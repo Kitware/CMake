@@ -32,6 +32,7 @@ Value                           Name
 ``Intel``                       Intel Classic Compiler
 ``IntelLLVM``                   `Intel LLVM-Based Compiler`_
 ``LCC``                         MCST Elbrus C/C++/Fortran Compiler
+``LFortran``                    LFortran Fortran Compiler
 ``MSVC``                        `Microsoft Visual Studio`_
 ``NVHPC``                       `NVIDIA HPC Compiler`_
 ``NVIDIA``                      `NVIDIA CUDA Compiler`_
