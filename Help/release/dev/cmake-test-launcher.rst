@@ -9,3 +9,6 @@ cmake-test-launcher
 * The :command:`add_test` command now honors
   :variable:`CMAKE_CROSSCOMPILING_EMULATOR` only when cross-compiling.
   See policy :policy:`CMP0158`.
+
+* The :prop_tgt:`CROSSCOMPILING_EMULATOR` target property now
+  supports :manual:`generator expressions <cmake-generator-expressions(7)>`.

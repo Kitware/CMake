@@ -168,12 +168,14 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
     // Use the target file on disk.
     exe = target->GetFullPath(config);
 
-    auto addLauncher = [&os, target](std::string const& propertyName) {
+    auto addLauncher = [this, &config, &ge, &os,
+                        target](std::string const& propertyName) {
       cmValue launcher = target->GetProperty(propertyName);
       if (!cmNonempty(launcher)) {
         return;
       }
-      cmList launcherWithArgs{ *launcher };
+      cmList launcherWithArgs{ ge.Parse(*launcher)->Evaluate(this->LG,
+                                                             config) };
       if (!launcherWithArgs.empty() && !launcherWithArgs[0].empty()) {
         std::string launcherExe(launcherWithArgs[0]);
         cmSystemTools::ConvertToUnixSlashes(launcherExe);

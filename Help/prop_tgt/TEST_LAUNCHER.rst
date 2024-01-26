@@ -15,6 +15,9 @@ If this property contains a :ref:`semicolon-separated list <CMake Language
 Lists>`, then the first value is the command and remaining values are its
 arguments.
 
+Contents of ``TEST_LAUNCHER`` may use
+:manual:`generator expressions <cmake-generator-expressions(7)>`.
+
 This property is initialized by the value of the
 :variable:`CMAKE_TEST_LAUNCHER` variable if it is set when a target
 is created.
