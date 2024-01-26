@@ -163,6 +163,22 @@ add_test(NAME NotRunTest COMMAND ${CMAKE_COMMAND} -E true)
 endfunction()
 run_stop_on_failure()
 
+
+# test include/exclude tests from file
+function(run_tests_from_file mode)
+  set(CASE_CTEST_TEST_ARGS ${mode} ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList.txt)
+  set(CASE_CMAKELISTS_SUFFIX_CODE [[
+add_test(NAME Test1 COMMAND ${CMAKE_COMMAND} -E true)
+add_test(NAME Test2 COMMAND ${CMAKE_COMMAND} -E true)
+add_test(NAME Test11 COMMAND ${CMAKE_COMMAND} -E true)
+  ]])
+
+  run_ctest(TestsFromFile-${mode})
+endfunction()
+run_tests_from_file(INCLUDE_FROM_FILE)
+run_tests_from_file(EXCLUDE_FROM_FILE)
+
+
 # Make sure environment gets logged
 function(run_environment)
   set(ENV{BAD_ENVIRONMENT_VARIABLE} "Bad environment variable")

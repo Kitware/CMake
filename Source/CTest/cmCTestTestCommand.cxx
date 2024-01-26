@@ -26,6 +26,8 @@ void cmCTestTestCommand::BindArguments()
   this->Bind("INCLUDE"_s, this->Include);
   this->Bind("EXCLUDE_LABEL"_s, this->ExcludeLabel);
   this->Bind("INCLUDE_LABEL"_s, this->IncludeLabel);
+  this->Bind("EXCLUDE_FROM_FILE"_s, this->ExcludeTestsFromFile);
+  this->Bind("INCLUDE_FROM_FILE"_s, this->IncludeTestsFromFile);
   this->Bind("EXCLUDE_FIXTURE"_s, this->ExcludeFixture);
   this->Bind("EXCLUDE_FIXTURE_SETUP"_s, this->ExcludeFixtureSetup);
   this->Bind("EXCLUDE_FIXTURE_CLEANUP"_s, this->ExcludeFixtureCleanup);
@@ -80,6 +82,14 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   if (!this->IncludeLabel.empty()) {
     handler->AddMultiOption("LabelRegularExpression", this->IncludeLabel);
   }
+
+  if (!this->ExcludeTestsFromFile.empty()) {
+    handler->SetOption("ExcludeTestListFile", this->ExcludeTestsFromFile);
+  }
+  if (!this->IncludeTestsFromFile.empty()) {
+    handler->SetOption("TestListFile", this->IncludeTestsFromFile);
+  }
+
   if (!this->ExcludeFixture.empty()) {
     handler->SetOption("ExcludeFixtureRegularExpression",
                        this->ExcludeFixture);

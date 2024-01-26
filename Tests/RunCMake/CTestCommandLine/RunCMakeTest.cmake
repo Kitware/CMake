@@ -207,6 +207,24 @@ set_tests_properties(test1 PROPERTIES SKIP_REGULAR_EXPRESSION \"test1\")
 endfunction()
 run_SkipRegexFoundTest()
 
+
+function(run_TestsFromFileTest arg)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestsFromFile)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(Test1 \"${CMAKE_COMMAND}\" -E echo \"test1\")
+add_test(Test2 \"${CMAKE_COMMAND}\" -E echo \"test2\")
+add_test(Test11 \"${CMAKE_COMMAND}\" -E echo \"test11\")
+")
+  run_cmake_command(TestsFromFile-${arg} ${CMAKE_CTEST_COMMAND} --${arg} ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList.txt )
+endfunction()
+run_TestsFromFileTest(tests-from-file)
+run_TestsFromFileTest(exclude-from-file)
+
+
 function(run_SerialFailed)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SerialFailed)
   set(RunCMake_TEST_NO_CLEAN 1)
