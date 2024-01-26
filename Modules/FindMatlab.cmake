@@ -471,10 +471,10 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
     )
 
     if(_reg)
-      string(REGEX MATCHALL "([0-9]+\\.[0-9]+)" _versions_regex "${_reg}")
+      string(REGEX MATCHALL "([0-9]+(\\.[0-9]+)+)" _versions_regex "${_reg}")
 
       foreach(_match IN LISTS _versions_regex)
-        if(_match MATCHES "([0-9]+\\.[0-9]+)")
+        if(_match MATCHES "([0-9]+(\\.[0-9]+)+)")
           cmake_host_system_information(RESULT _reg
             QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/${_installation_type}/${CMAKE_MATCH_1}"
             VALUE "MATLABROOT"
@@ -542,8 +542,9 @@ function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_
   # extract_matlab_versions_from_registry_brute_force or
   # matlab_extract_all_installed_versions_from_registry.
 
-  # only the major.minor version is used in Mathworks Windows Registry keys
-  list(TRANSFORM matlab_versions REPLACE "^([0-9]+\\.[0-9]+).*" "\\1")
+  # Mostly the major.minor version is used in Mathworks Windows Registry keys.
+  # If the patch is not zero, major.minor.patch is used.
+  list(TRANSFORM matlab_versions REPLACE "^([0-9]+\\.[0-9]+(\\.[1-9][0-9]*)?).*" "\\1")
 
   set(_matlab_roots_list )
   # check for Matlab installations
