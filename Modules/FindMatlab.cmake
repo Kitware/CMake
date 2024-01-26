@@ -193,7 +193,7 @@ Provided commands
 ^^^^^^^^^^^^^^^^^
 
 :command:`matlab_get_version_from_release_name`
-  returns the version from the release name
+  returns the version from the Matlab release name
 :command:`matlab_get_release_name_from_version`
   returns the release name from the Matlab version
 :command:`matlab_add_mex`
@@ -346,6 +346,11 @@ file(MAKE_DIRECTORY "${_matlab_temporary_folder}")
   * Output: ``version`` is the version of Matlab (e.g. 23.2.0)
 
   Returns the version of Matlab from a release name
+
+  .. note::
+
+    This command provides correct versions mappings for Matlab but not MCR.
+
 #]=======================================================================]
 macro(matlab_get_version_from_release_name release_name version_name)
 
@@ -373,6 +378,11 @@ endmacro()
   * Output: ``release_name`` is the release name (R2023b)
 
   Returns the release name from the version of Matlab
+
+  .. note::
+
+    This command provides correct version mappings for Matlab but not MCR.
+
 #]=======================================================================]
 function(matlab_get_release_name_from_version version release_name)
 
