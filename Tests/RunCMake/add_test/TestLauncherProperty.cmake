@@ -2,16 +2,15 @@
 # This tests setting the TEST_LAUNCHER target property from the
 # CMAKE_TEST_LAUNCHER variable.
 
-# -DCMAKE_TEST_LAUNCHER=/path/to/pseudo_test_launcher is passed to this
+enable_language(C)
+
+# -DCMAKE_TEST_LAUNCHER=/path/to/pseudo_emulator is passed to this
 # test
 
-project(test_launcher LANGUAGES C)
-
-add_executable(target_with_test_launcher simple_src_exiterror.cxx)
-set_target_properties(target_with_test_launcher PROPERTIES LINKER_LANGUAGE C)
+add_executable(target_with_test_launcher main.c)
 get_property(launcher TARGET target_with_test_launcher
              PROPERTY TEST_LAUNCHER)
-if(NOT "${launcher}" MATCHES "pseudo_test_launcher")
+if(NOT "${launcher}" MATCHES "pseudo_emulator")
   message(SEND_ERROR "Default TEST_LAUNCHER property not set")
 endif()
 
@@ -25,16 +24,14 @@ if(NOT "${launcher}" MATCHES "another_test_launcher")
 endif()
 
 unset(CMAKE_TEST_LAUNCHER CACHE)
-add_executable(target_without_test_launcher simple_src_exiterror.cxx)
-set_target_properties(target_without_test_launcher PROPERTIES LINKER_LANGUAGE C)
+add_executable(target_without_test_launcher main.c)
 get_property(launcher TARGET target_without_test_launcher
              PROPERTY TEST_LAUNCHER)
 if(NOT "${launcher}" STREQUAL "")
   message(SEND_ERROR "Default TEST_LAUNCHER property not set to null")
 endif()
 
-add_executable(target_with_empty_test_launcher simple_src_exiterror.cxx)
-set_target_properties(target_with_empty_test_launcher PROPERTIES LINKER_LANGUAGE C)
+add_executable(target_with_empty_test_launcher main.c)
 set_property(TARGET target_with_empty_test_launcher PROPERTY TEST_LAUNCHER "")
 
 enable_testing()
