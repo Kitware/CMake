@@ -33,7 +33,7 @@ if(testfile_contents MATCHES "add_test[(]DoesNotUseEmulatorWithExecTargetFromSub
   return()
 endif()
 
-if(NOT testfile_contents MATCHES "add_test[(]UsesTestLauncherAndEmulator[^\n]+pseudo_test_launcher.*pseudo_emulator[^\n]+\n")
+if(NOT testfile_contents MATCHES "add_test[(]UsesTestLauncherAndEmulator[^\n]+pseudo_emulator[^\n]+pseudo_emulator[^\n]+\n")
   set(RunCMake_TEST_FAILED "Did not use test launcher and emulator when they should be used. ${error_details}")
   return()
 endif()

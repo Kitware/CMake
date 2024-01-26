@@ -21,8 +21,8 @@ add_test(NAME UsesEmulatorWithExecTargetFromSubdirAddedWithoutGenex
 add_test(NAME DoesNotUseEmulatorWithExecTargetFromSubdirAddedWithGenex
   COMMAND $<TARGET_FILE:subdir_exe_with_genex>)
 
+set(CMAKE_TEST_LAUNCHER ${CMAKE_CROSSCOMPILING_EMULATOR})
 add_executable(exe_test_launcher main.c)
-set_property(TARGET exe_test_launcher PROPERTY TEST_LAUNCHER "pseudo_test_launcher")
 
 add_test(NAME UsesTestLauncherAndEmulator
   COMMAND exe_test_launcher)
