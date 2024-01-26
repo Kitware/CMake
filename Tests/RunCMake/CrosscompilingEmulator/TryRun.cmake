@@ -1,5 +1,7 @@
 set(CMAKE_CROSSCOMPILING 1)
 
+set(ENV{PSEUDO_EMULATOR_FAIL} 1)
+
 try_run(run_result compile_result
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/simple_src_exiterror.cxx
