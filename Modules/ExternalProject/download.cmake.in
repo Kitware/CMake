@@ -107,7 +107,7 @@ foreach(i RANGE ${retry_number})
   if(status_code IN_LIST download_retry_codes)
     sleep_before_download(${i})
   endif()
-  foreach(url @REMOTE@)
+  foreach(url IN ITEMS @REMOTE@)
     if(NOT url IN_LIST skip_url_list)
       message(STATUS "Using src='${url}'")
 

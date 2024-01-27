@@ -1525,6 +1525,14 @@ function(_ep_write_downloadfile_script
     message(FATAL_ERROR "LOCAL can't be empty")
   endif()
 
+  # REMOTE could contain special characters that parse as separate arguments.
+  # Things like parentheses are legitimate characters in a URL, but would be
+  # seen as the start of a new unquoted argument by the cmake language parser.
+  # Avoid those special cases by preparing quoted strings for direct inclusion
+  # in the foreach() call that iterates over the set of URLs in REMOTE.
+  set(REMOTE "[====[${REMOTE}]====]")
+  string(REPLACE ";" "]====] [====[" REMOTE "${REMOTE}")
+
   if(timeout)
     set(TIMEOUT_ARGS TIMEOUT ${timeout})
     set(TIMEOUT_MSG "${timeout} seconds")
