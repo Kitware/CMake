@@ -2746,12 +2746,10 @@ function(ExternalProject_Add_StepDependencies name step)
       OUTPUT ${stamp_file}
       DEPENDS ${dep}
     )
-    if(TARGET ${name}-${step})
-      foreach(dep ${dependencies})
-        add_dependencies(${name}-${step} ${dep})
-      endforeach()
-    endif()
   endforeach()
+  if(TARGET ${name}-${step})
+    add_dependencies(${name}-${step} ${dependencies})
+  endif()
 
 endfunction()
 
