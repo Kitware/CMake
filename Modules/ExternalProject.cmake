@@ -1599,7 +1599,7 @@ function(_ep_write_downloadfile_script
 
   set(HTTP_HEADERS_ARGS "")
   if(NOT http_headers STREQUAL "")
-    foreach(header ${http_headers})
+    foreach(header IN LISTS http_headers)
       string(PREPEND HTTP_HEADERS_ARGS
         "HTTPHEADER \"${header}\"\n        "
       )
@@ -1724,7 +1724,7 @@ function(_ep_set_directories name)
 
   # Apply defaults and convert to absolute paths.
   set(places stamp download source binary install tmp)
-  foreach(var ${places})
+  foreach(var IN LISTS places)
     string(TOUPPER "${var}" VAR)
     get_property(${var}_dir TARGET ${name} PROPERTY _EP_${VAR}_DIR)
     if(NOT ${var}_dir)
@@ -1796,9 +1796,9 @@ endfunction()
 #
 macro(_ep_replace_location_tags target_name)
   set(vars ${ARGN})
-  foreach(var ${vars})
-    if(${var})
-      foreach(dir
+  foreach(var IN LISTS vars)
+    if(var)
+      foreach(dir IN ITEMS
         SOURCE_DIR
         SOURCE_SUBDIR
         BINARY_DIR
@@ -1828,7 +1828,7 @@ function(_ep_command_line_to_initial_cache
   if(force)
     set(forceArg "FORCE")
   endif()
-  foreach(line ${args})
+  foreach(line IN LISTS args)
     if("${line}" MATCHES "^-D(.*)")
       set(line "${CMAKE_MATCH_1}")
       if(NOT "${setArg}" STREQUAL "")
@@ -1884,7 +1884,7 @@ endfunction()
 
 
 function(ExternalProject_Get_Property name)
-  foreach(var ${ARGN})
+  foreach(var IN LISTS ARGN)
     string(TOUPPER "${var}" VAR)
     get_property(is_set TARGET ${name} PROPERTY _EP_${VAR} SET)
     if(NOT is_set)
@@ -2372,7 +2372,7 @@ function(ExternalProject_Add_StepTargets name)
     endif()
     message(AUTHOR_WARNING "${_cmp0114_warning}")
   endif()
-  foreach(step ${steps})
+  foreach(step IN LISTS steps)
     _ep_step_add_target("${name}" "${step}" "${no_deps}")
   endforeach()
 endfunction()
@@ -2553,7 +2553,7 @@ function(ExternalProject_Add_Step name step)
     get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
     if(_isMultiConfig)
       _ep_get_configuration_subdir_genex(cfgdir)
-      foreach(cfg ${CMAKE_CONFIGURATION_TYPES})
+      foreach(cfg IN LISTS CMAKE_CONFIGURATION_TYPES)
         string(REPLACE "${cfgdir}" "/${cfg}"
           stamp_file_config "${stamp_file}"
         )
@@ -2628,7 +2628,7 @@ function(ExternalProject_Add_Step name step)
       PROPERTY EP_STEP_TARGETS
     )
   endif()
-  foreach(st ${step_targets})
+  foreach(st IN LISTS step_targets)
     if("${st}" STREQUAL "${step}")
       _ep_step_add_target("${name}" "${step}" "FALSE")
       break()
@@ -2675,7 +2675,7 @@ function(ExternalProject_Add_Step name step)
         message(AUTHOR_WARNING "${_cmp0114_warning}")
       endif()
     endif()
-    foreach(st ${independent_step_targets})
+    foreach(st IN LISTS independent_step_targets)
       if("${st}" STREQUAL "${step}")
         _ep_step_add_target("${name}" "${step}" "TRUE")
         break()
@@ -2741,7 +2741,7 @@ function(ExternalProject_Add_StepDependencies name step)
   # Always add file-level dependency, but add target-level dependency
   # only if the target exists for that step.
   _ep_get_step_stampfile(${name} ${step} stamp_file)
-  foreach(dep ${dependencies})
+  foreach(dep IN LISTS dependencies)
     add_custom_command(APPEND
       OUTPUT ${stamp_file}
       DEPENDS ${dep}
@@ -3077,7 +3077,7 @@ hash=${hash}
 
     list(LENGTH url url_list_length)
     if(NOT "${url_list_length}" STREQUAL "1")
-      foreach(entry ${url})
+      foreach(entry IN LISTS url)
         if(NOT "${entry}" MATCHES "^[a-z]+://")
           message(FATAL_ERROR
             "At least one entry of URL is a path (invalid in a list)"
