@@ -1518,6 +1518,13 @@ function(_ep_write_downloadfile_script
   netrc
   netrc_file
 )
+  if("x${REMOTE}" STREQUAL "x")
+    message(FATAL_ERROR "REMOTE can't be empty")
+  endif()
+  if("x${LOCAL}" STREQUAL "x")
+    message(FATAL_ERROR "LOCAL can't be empty")
+  endif()
+
   if(timeout)
     set(TIMEOUT_ARGS TIMEOUT ${timeout})
     set(TIMEOUT_MSG "${timeout} seconds")

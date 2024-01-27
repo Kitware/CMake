@@ -71,14 +71,6 @@ function(sleep_before_download attempt)
   execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep "${sleep_seconds}")
 endfunction()
 
-if("@LOCAL@" STREQUAL "")
-  message(FATAL_ERROR "LOCAL can't be empty")
-endif()
-
-if("@REMOTE@" STREQUAL "")
-  message(FATAL_ERROR "REMOTE can't be empty")
-endif()
-
 if(EXISTS "@LOCAL@")
   check_file_hash(has_hash hash_is_good)
   if(has_hash)
