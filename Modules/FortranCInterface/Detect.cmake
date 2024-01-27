@@ -177,7 +177,6 @@ endforeach()
 # Record the detection results.
 configure_file(${FortranCInterface_SOURCE_DIR}/Output.cmake.in
                ${FortranCInterface_BINARY_DIR}/Output.cmake @ONLY)
-file(APPEND ${FortranCInterface_BINARY_DIR}/Output.cmake "\n")
 
 # Report the results.
 if(FortranCInterface_GLOBAL_FOUND)
