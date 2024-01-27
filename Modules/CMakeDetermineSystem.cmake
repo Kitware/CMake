@@ -183,13 +183,11 @@ if(CMAKE_SYSTEM_NAME)
   if(NOT DEFINED CMAKE_CROSSCOMPILING)
     set(CMAKE_CROSSCOMPILING TRUE)
   endif()
-  set(PRESET_CMAKE_SYSTEM_NAME TRUE)
 elseif(CMAKE_VS_WINCE_VERSION)
   set(CMAKE_SYSTEM_NAME      "WindowsCE")
   set(CMAKE_SYSTEM_VERSION   "${CMAKE_VS_WINCE_VERSION}")
   set(CMAKE_SYSTEM_PROCESSOR "${MSVC_C_ARCHITECTURE_ID}")
   set(CMAKE_CROSSCOMPILING TRUE)
-  set(PRESET_CMAKE_SYSTEM_NAME TRUE)
 else()
   # Build for the host platform and architecture by default.
   set(CMAKE_SYSTEM_NAME      "${CMAKE_HOST_SYSTEM_NAME}")
@@ -205,7 +203,6 @@ else()
       )
   endif()
   set(CMAKE_CROSSCOMPILING FALSE)
-  set(PRESET_CMAKE_SYSTEM_NAME FALSE)
 endif()
 
 include(Platform/${CMAKE_SYSTEM_NAME}-Determine OPTIONAL)
@@ -223,7 +220,7 @@ endif()
 # in this case there is no CMAKE_BINARY_DIR
 if(CMAKE_BINARY_DIR)
   # write entry to the log file
-  if(PRESET_CMAKE_SYSTEM_NAME)
+  if(CMAKE_CROSSCOMPILING)
     message(CONFIGURE_LOG
       "The target system is: ${CMAKE_SYSTEM_NAME} - ${CMAKE_SYSTEM_VERSION} - ${CMAKE_SYSTEM_PROCESSOR}\n"
       "The host system is: ${CMAKE_HOST_SYSTEM_NAME} - ${CMAKE_HOST_SYSTEM_VERSION} - ${CMAKE_HOST_SYSTEM_PROCESSOR}\n"
