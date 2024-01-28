@@ -1,7 +1,8 @@
+enable_language(C)
 set(CMAKE_CROSSCOMPILING 1)
 
 # Executable: Return error code different from 0
-add_executable(generated_exe_emulator_expected simple_src_exiterror.cxx)
+add_executable(generated_exe_emulator_expected simple_src_exiterror.c)
 
 add_custom_command(OUTPUT output
   COMMAND generated_exe_emulator_expected

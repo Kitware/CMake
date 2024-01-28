@@ -1,10 +1,11 @@
+enable_language(C)
 set(CMAKE_CROSSCOMPILING 1)
 
 # Executable: Return error code different from 0
-add_executable(generated_exe_emulator_expected simple_src_exiterror.cxx)
+add_executable(generated_exe_emulator_expected simple_src_exiterror.c)
 
 # Executable: Return error code equal to 0
-add_executable(generated_exe_emulator_unexpected generated_exe_emulator_unexpected.cxx)
+add_executable(generated_exe_emulator_unexpected emulator_unexpected.c)
 # Place the executable in a predictable location.
 set_property(TARGET generated_exe_emulator_unexpected PROPERTY RUNTIME_OUTPUT_DIRECTORY $<1:${CMAKE_CURRENT_BINARY_DIR}>)
 
