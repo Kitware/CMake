@@ -883,6 +883,24 @@ endif()
 # WiX specific variables
 _cpack_set_default(CPACK_WIX_SIZEOF_VOID_P "${CMAKE_SIZEOF_VOID_P}")
 
+# productbuild specific variables
+cmake_policy(GET CMP0161 _CPack_CMP0161)
+if("x${_CPack_CMP0161}x" STREQUAL "xNEWx")
+  _cpack_set_default(CPACK_PRODUCTBUILD_DOMAINS ON)
+elseif(APPLE AND CPACK_BINARY_PRODUCTBUILD AND
+       NOT DEFINED CPACK_PRODUCTBUILD_DOMAINS AND
+       NOT "x${_CPack_CMP0161}x" STREQUAL "xOLDx")
+  cmake_policy(GET_WARNING CMP0161 _CMP0161_warning)
+  message(AUTHOR_WARNING
+    "${_CMP0161_warning}\n"
+    "For compatibility, CPACK_PRODUCTBUILD_DOMAINS will remain unset. "
+    "Explicitly setting CPACK_PRODUCTBUILD_DOMAINS or setting policy CMP0161 "
+    "to NEW will prevent this warning."
+  )
+  unset(_CMP0161_warning)
+endif()
+unset(_CPack_CMP0161)
+
 # set sysroot so SDK tools can be used
 if(CMAKE_OSX_SYSROOT)
   _cpack_set_default(CPACK_OSX_SYSROOT "${_CMAKE_OSX_SYSROOT_PATH}")
