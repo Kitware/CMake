@@ -866,6 +866,7 @@ if(NOT DEFINED CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE
         "${_CMP0133_warning}\n"
         "For compatibility, CMake will enable the SLA in the CPack DragNDrop Generator."
         )
+      unset(_CMP0133_warning)
     endif()
     _cpack_set_default(CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE ON)
   endif()
