@@ -136,6 +136,7 @@ function(_ICU_FIND)
             HINTS ${icu_roots}
             PATH_SUFFIXES ${icu_include_suffixes}
             DOC "ICU include directory")
+  mark_as_advanced(ICU_INCLUDE_DIR)
   set(ICU_INCLUDE_DIR "${ICU_INCLUDE_DIR}" PARENT_SCOPE)
 
   # Get version
