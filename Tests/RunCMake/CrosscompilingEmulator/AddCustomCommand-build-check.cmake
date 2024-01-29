@@ -1,4 +1,4 @@
-foreach(output IN ITEMS output1 output2 output3 output4)
+foreach(output IN ITEMS output1 output2 output3 output4 output5)
   if(NOT EXISTS "${RunCMake_TEST_BINARY_DIR}/${output}")
     set(RunCMake_TEST_FAILED "Failed to create output:\n  ${RunCMake_TEST_BINARY_DIR}/${output}")
     return()

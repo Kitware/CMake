@@ -2092,18 +2092,22 @@ Json::Value Target::DumpLauncher(const char* name, const char* type)
   cmValue property = this->GT->GetProperty(name);
   Json::Value launcher;
   if (property) {
-    cmList commandWithArgs{ *property };
-    std::string command(commandWithArgs[0]);
-    cmSystemTools::ConvertToUnixSlashes(command);
-    launcher = Json::objectValue;
-    launcher["command"] = RelativeIfUnder(this->TopSource, command);
-    launcher["type"] = type;
-    Json::Value args;
-    for (std::string const& arg : cmMakeRange(commandWithArgs).advance(1)) {
-      args.append(arg);
-    }
-    if (!args.empty()) {
-      launcher["arguments"] = std::move(args);
+    cmLocalGenerator* lg = this->GT->GetLocalGenerator();
+    cmGeneratorExpression ge(*lg->GetCMakeInstance());
+    cmList commandWithArgs{ ge.Parse(*property)->Evaluate(lg, this->Config) };
+    if (!commandWithArgs.empty() && !commandWithArgs[0].empty()) {
+      std::string command(commandWithArgs[0]);
+      cmSystemTools::ConvertToUnixSlashes(command);
+      launcher = Json::objectValue;
+      launcher["command"] = RelativeIfUnder(this->TopSource, command);
+      launcher["type"] = type;
+      Json::Value args;
+      for (std::string const& arg : cmMakeRange(commandWithArgs).advance(1)) {
+        args.append(arg);
+      }
+      if (!args.empty()) {
+        launcher["arguments"] = std::move(args);
+      }
     }
   }
   return launcher;
