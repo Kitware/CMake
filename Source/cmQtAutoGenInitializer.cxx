@@ -72,7 +72,7 @@ unsigned int GetParallelCPUCount()
   return count;
 }
 
-std::string FileProjectRelativePath(cmMakefile* makefile,
+std::string FileProjectRelativePath(cmMakefile const* makefile,
                                     std::string const& fileName)
 {
   std::string res;
@@ -1462,7 +1462,6 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     std::vector<std::string> dependencies(
       this->AutogenTarget.DependFiles.begin(),
       this->AutogenTarget.DependFiles.end());
-
     if (useDepfile) {
       // Create a custom command that generates a timestamp file and
       // has a depfile assigned. The depfile is created by JobDepFilesMergeT.
@@ -1501,6 +1500,16 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       cc->SetEscapeOldStyle(false);
       cmTarget* timestampTarget = this->LocalGen->AddUtilityCommand(
         timestampTargetName, true, std::move(cc));
+      auto const isMake =
+        this->GlobalGen->GetName().find("Make") != std::string::npos;
+      if (this->AutogenTarget.DependOrigin && isMake) {
+        for (BT<std::pair<std::string, bool>> const& depName :
+             this->GenTarget->GetUtilities()) {
+          timestampTarget->AddUtility(depName.Value.first, false,
+                                      this->Makefile);
+        }
+      }
+
       this->LocalGen->AddGeneratorTarget(
         cm::make_unique<cmGeneratorTarget>(timestampTarget, this->LocalGen));
 
