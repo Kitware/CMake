@@ -8,7 +8,7 @@ readonly name="zlib"
 readonly ownership="zlib upstream <kwrobot@kitware.com>"
 readonly subtree="Utilities/cmzlib"
 readonly repo="https://github.com/madler/zlib.git"
-readonly tag="v1.2.13"
+readonly tag="v1.2.13" # When updating, sync Copyright.txt below!
 readonly shortlog=false
 readonly paths="
   README
@@ -45,7 +45,7 @@ extract_source () {
     pushd "${extractdir}/${name}-reduced"
     echo "* -whitespace" > .gitattributes
     echo -n "'zlib' general purpose compression library
-version 1.2.12, March 27th, 2022
+version 1.2.13, October 13th, 2022
 
 Copyright " > Copyright.txt
     sed -n '/^ (C) 1995-/,+19 {s/^  \?//;p}' README >> Copyright.txt
