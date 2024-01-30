@@ -1144,9 +1144,15 @@ cmTarget* cmMakefile::GetCustomCommandTarget(
   const std::string& target, cmObjectLibraryCommands objLibCommands,
   const cmListFileBacktrace& lfbt) const
 {
-  // Find the target to which to add the custom command.
-  auto ti = this->Targets.find(target);
+  auto realTarget = target;
 
+  auto ai = this->AliasTargets.find(target);
+  if (ai != this->AliasTargets.end()) {
+    realTarget = ai->second;
+  }
+
+  // Find the target to which to add the custom command.
+  auto ti = this->Targets.find(realTarget);
   if (ti == this->Targets.end()) {
     MessageType messageType = MessageType::AUTHOR_WARNING;
     bool issueMessage = false;
