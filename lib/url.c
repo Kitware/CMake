@@ -298,6 +298,10 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_safefree(data->info.contenttype);
   Curl_safefree(data->info.wouldredirect);
 
+  /* this destroys the channel and we cannot use it anymore after this */
+  Curl_resolver_cancel(data);
+  Curl_resolver_cleanup(data->state.async.resolver);
+
   data_priority_cleanup(data);
 
   /* No longer a dirty share, if it exists */
@@ -430,11 +434,13 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 
   /* Set the default CA cert bundle/path detected/specified at build time.
    *
-   * If Schannel is the selected SSL backend then these locations are
-   * ignored. We allow setting CA location for schannel only when explicitly
-   * specified by the user via CURLOPT_CAINFO / --cacert.
+   * If Schannel or SecureTransport is the selected SSL backend then these
+   * locations are ignored. We allow setting CA location for schannel and
+   * securetransport when explicitly specified by the user via
+   *  CURLOPT_CAINFO / --cacert.
    */
-  if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL) {
+  if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL &&
+     Curl_ssl_backend() != CURLSSLBACKEND_SECURETRANSPORT) {
 #if defined(CURL_CA_BUNDLE)
     result = Curl_setstropt(&set->str[STRING_SSL_CAFILE], CURL_CA_BUNDLE);
     if(result)
@@ -514,6 +520,13 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
 
+  result = Curl_resolver_init(data, &data->state.async.resolver);
+  if(result) {
+    DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
+    free(data);
+    return result;
+  }
+
   result = Curl_init_userdefined(data);
   if(!result) {
     Curl_dyn_init(&data->state.headerb, CURL_MAX_HTTP_HEADER);
@@ -530,6 +543,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
   }
 
   if(result) {
+    Curl_resolver_cleanup(data->state.async.resolver);
     Curl_dyn_free(&data->state.headerb);
     Curl_freeset(data);
     free(data);
@@ -563,7 +577,6 @@ static void conn_free(struct Curl_easy *data, struct connectdata *conn)
     Curl_conn_cf_discard_all(data, conn, (int)i);
   }
 
-  Curl_resolver_cleanup(conn->resolve_async.resolver);
   Curl_free_idnconverted_hostname(&conn->host);
   Curl_free_idnconverted_hostname(&conn->conn_to_host);
 #ifndef CURL_DISABLE_PROXY
@@ -581,9 +594,6 @@ static void conn_free(struct Curl_easy *data, struct connectdata *conn)
   Curl_safefree(conn->sasl_authzid);
   Curl_safefree(conn->options);
   Curl_safefree(conn->oauth_bearer);
-#ifndef CURL_DISABLE_HTTP
-  Curl_dyn_free(&conn->trailer);
-#endif
   Curl_safefree(conn->host.rawalloc); /* host name buffer */
   Curl_safefree(conn->conn_to_host.rawalloc); /* host name buffer */
   Curl_safefree(conn->hostname_resolve);
@@ -663,7 +673,6 @@ void Curl_disconnect(struct Curl_easy *data,
     conn->handler->disconnect(data, conn, dead_connection);
 
   conn_shutdown(data);
-  Curl_resolver_cancel(data);
 
   /* detach it again */
   Curl_detach_connection(data);
@@ -1346,6 +1355,8 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
 
   conn->sock[FIRSTSOCKET] = CURL_SOCKET_BAD;     /* no file descriptor */
   conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD; /* no file descriptor */
+  conn->sockfd = CURL_SOCKET_BAD;
+  conn->writesockfd = CURL_SOCKET_BAD;
   conn->connection_id = -1;    /* no ID */
   conn->port = -1; /* unknown at this point */
   conn->remote_port = -1; /* unknown at this point */
@@ -1680,8 +1691,9 @@ static CURLcode findprotocol(struct Curl_easy *data,
   /* The protocol was not found in the table, but we don't have to assign it
      to anything since it is already assigned to a dummy-struct in the
      create_conn() function when the connectdata struct is allocated. */
-  failf(data, "Protocol \"%s\" not supported or disabled in " LIBCURL_NAME,
-        protostr);
+  failf(data, "Protocol \"%s\" %s%s", protostr,
+        p ? "disabled" : "not supported",
+        data->state.this_is_a_follow ? " (in redirect)":"");
 
   return CURLE_UNSUPPORTED_PROTOCOL;
 }
@@ -3739,35 +3751,7 @@ static CURLcode create_conn(struct Curl_easy *data,
         goto out;
       }
 
-      result = Curl_resolver_init(data, &conn->resolve_async.resolver);
-      if(result) {
-        DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
-        goto out;
-      }
-
       Curl_attach_connection(data, conn);
-
-#ifdef USE_ARES
-      result = Curl_set_dns_servers(data, data->set.str[STRING_DNS_SERVERS]);
-      if(result && result != CURLE_NOT_BUILT_IN)
-        goto out;
-
-      result = Curl_set_dns_interface(data,
-                                      data->set.str[STRING_DNS_INTERFACE]);
-      if(result && result != CURLE_NOT_BUILT_IN)
-        goto out;
-
-      result = Curl_set_dns_local_ip4(data,
-                                      data->set.str[STRING_DNS_LOCAL_IP4]);
-      if(result && result != CURLE_NOT_BUILT_IN)
-        goto out;
-
-      result = Curl_set_dns_local_ip6(data,
-                                      data->set.str[STRING_DNS_LOCAL_IP6]);
-      if(result && result != CURLE_NOT_BUILT_IN)
-        goto out;
-#endif /* USE_ARES */
-
       result = Curl_conncache_add_conn(data);
       if(result)
         goto out;

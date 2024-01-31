@@ -36,6 +36,13 @@
 /* Define this to enable lots of debugging for mbedTLS */
 /* #define MBEDTLS_DEBUG */
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+/* mbedTLS (as of v3.5.1) has a duplicate function declaration
+   in its public headers. Disable the warning that detects it. */
+#pragma GCC diagnostic ignored "-Wredundant-decls"
+#endif
+
 #include <mbedtls/version.h>
 #if MBEDTLS_VERSION_NUMBER >= 0x02040000
 #include <mbedtls/net_sockets.h>
@@ -56,6 +63,10 @@
 #  endif
 #endif
 
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif
+
 #include "urldata.h"
 #include "sendf.h"
 #include "inet_pton.h"
@@ -67,6 +78,7 @@
 #include "select.h"
 #include "multiif.h"
 #include "mbedtls_threadlock.h"
+#include "strdup.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -153,7 +165,6 @@ static void mbed_debug(void *context, int level, const char *f_name,
   infof(data, "%s", line);
   (void) level;
 }
-#else
 #endif
 
 static int mbedtls_bio_cf_write(void *bio,
@@ -165,6 +176,9 @@ static int mbedtls_bio_cf_write(void *bio,
   CURLcode result;
 
   DEBUGASSERT(data);
+  if(!data)
+    return 0;
+
   nwritten = Curl_conn_cf_send(cf->next, data, (char *)buf, blen, &result);
   CURL_TRC_CF(data, cf, "mbedtls_bio_cf_out_write(len=%zu) -> %zd, err=%d",
               blen, nwritten, result);
@@ -182,6 +196,8 @@ static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
   CURLcode result;
 
   DEBUGASSERT(data);
+  if(!data)
+    return 0;
   /* OpenSSL catches this case, so should we. */
   if(!buf)
     return 0;
@@ -367,11 +383,10 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     /* Unfortunately, mbedtls_x509_crt_parse() requires the data to be null
        terminated even when provided the exact length, forcing us to waste
        extra memory here. */
-    unsigned char *newblob = malloc(ca_info_blob->len + 1);
+    unsigned char *newblob = Curl_memdup0(ca_info_blob->data,
+                                          ca_info_blob->len);
     if(!newblob)
       return CURLE_OUT_OF_MEMORY;
-    memcpy(newblob, ca_info_blob->data, ca_info_blob->len);
-    newblob[ca_info_blob->len] = 0; /* null terminate */
     ret = mbedtls_x509_crt_parse(&backend->cacert, newblob,
                                  ca_info_blob->len + 1);
     free(newblob);
@@ -441,11 +456,10 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     /* Unfortunately, mbedtls_x509_crt_parse() requires the data to be null
        terminated even when provided the exact length, forcing us to waste
        extra memory here. */
-    unsigned char *newblob = malloc(ssl_cert_blob->len + 1);
+    unsigned char *newblob = Curl_memdup0(ssl_cert_blob->data,
+                                          ssl_cert_blob->len);
     if(!newblob)
       return CURLE_OUT_OF_MEMORY;
-    memcpy(newblob, ssl_cert_blob->data, ssl_cert_blob->len);
-    newblob[ssl_cert_blob->len] = 0; /* null terminate */
     ret = mbedtls_x509_crt_parse(&backend->clicert, newblob,
                                  ssl_cert_blob->len + 1);
     free(newblob);
@@ -1207,6 +1221,9 @@ static int mbedtls_init(void)
 
 static void mbedtls_cleanup(void)
 {
+#ifdef THREADING_SUPPORT
+  mbedtls_entropy_free(&ts_entropy);
+#endif /* THREADING_SUPPORT */
   (void)Curl_mbedtlsthreadlock_thread_cleanup();
 }
 
