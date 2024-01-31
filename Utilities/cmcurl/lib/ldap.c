@@ -137,7 +137,7 @@ static void _ldap_free_urldesc(LDAPURLDesc *ludp);
                             _ldap_trace x; \
                           } while(0)
 
-  static void _ldap_trace(const char *fmt, ...);
+  static void _ldap_trace(const char *fmt, ...) CURL_PRINTF(1, 2);
 #else
   #define LDAP_TRACE(x)   Curl_nop_stmt
 #endif
@@ -177,7 +177,7 @@ const struct Curl_handler Curl_handler_ldap = {
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_LDAP,                            /* defport */
@@ -205,7 +205,7 @@ const struct Curl_handler Curl_handler_ldaps = {
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_LDAPS,                           /* defport */

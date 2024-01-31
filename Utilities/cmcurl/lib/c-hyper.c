@@ -148,7 +148,7 @@ static int hyper_each_header(void *userdata,
 
   if(name_len + value_len + 2 > CURL_MAX_HTTP_HEADER) {
     failf(data, "Too long response header");
-    data->state.hresult = CURLE_OUT_OF_MEMORY;
+    data->state.hresult = CURLE_TOO_LARGE;
     return HYPER_ITER_BREAK;
   }
 
@@ -325,6 +325,9 @@ static CURLcode empty_header(struct Curl_easy *data)
       CURLE_WRITE_ERROR : CURLE_OK;
     if(result)
       failf(data, "hyperstream: couldn't pass blank header");
+    /* Hyper does chunked decoding itself. If it was added during
+     * response header processing, remove it again. */
+    Curl_cwriter_remove_by_name(data, "chunked");
   }
   return result;
 }
