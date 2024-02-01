@@ -422,6 +422,7 @@ if(BUILD_TESTING)
   endif()
   if(CMAKE_Fortran_COMPILER)
     ADD_TEST_MACRO(FortranOnly FortranOnly)
+    set_property(TEST FortranOnly APPEND PROPERTY LABELS "Fortran")
   endif()
   # test Visual Studio GNU Fortran mixing with cmake_add_fortran_subdirectory
   # run this project if we have a working fortran compiler or
@@ -455,6 +456,7 @@ if(BUILD_TESTING)
     endif()
     if(NOT CMAKE_SKIP_VSGNUFortran)
       ADD_TEST_MACRO(VSGNUFortran ${CMAKE_CMAKE_COMMAND} -P runtest.cmake)
+      set_property(TEST VSGNUFortran APPEND PROPERTY LABELS "Fortran")
     endif()
   endif()
 
@@ -509,15 +511,18 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(PolicyScope PolicyScope)
   ADD_TEST_MACRO(EmptyLibrary EmptyLibrary)
   ADD_TEST_MACRO(CompileDefinitions CompileDefinitions)
-  if(CMAKE_Fortran_COMPILER)
-    set(CompileOptions_BUILD_OPTIONS -DTEST_FORTRAN=1)
-  endif()
+
   if(_isMultiConfig)
     set(CompileOptions_CTEST_OPTIONS --build-config $<CONFIGURATION>)
   else()
     set(CompileOptions_BUILD_OPTIONS -DCMAKE_BUILD_TYPE=$<CONFIGURATION>)
   endif()
+  if(CMAKE_Fortran_COMPILER)
+    list(APPEND CompileOptions_BUILD_OPTIONS -DTEST_FORTRAN=1)
+  endif()
   ADD_TEST_MACRO(CompileOptions CompileOptions)
+  set_property(TEST CompileOptions APPEND PROPERTY LABELS "Fortran")
+
   ADD_TEST_MACRO(CompatibleInterface CompatibleInterface)
   ADD_TEST_MACRO(AliasTarget AliasTarget)
   ADD_TEST_MACRO(StagingPrefix StagingPrefix)
@@ -660,6 +665,7 @@ if(BUILD_TESTING)
   if(CMAKE_Fortran_COMPILER)
     set(Module.CheckIPOSupported-Fortran_BUILD_OPTIONS -DCMake_TEST_IPO_WORKS_Fortran=${CMake_TEST_IPO_WORKS_Fortran})
     ADD_TEST_MACRO(Module.CheckIPOSupported-Fortran CheckIPOSupported-Fortran)
+    set_property(TEST Module.CheckIPOSupported-Fortran APPEND PROPERTY LABELS "Fortran")
   endif()
 
   add_test(Module.ExternalData ${CMAKE_CTEST_COMMAND}
@@ -2160,7 +2166,7 @@ if(BUILD_TESTING)
     endif()
     ADD_TEST_MACRO(MSVCDebugInformationFormat)
     set_property(TEST MSVCDebugInformationFormat APPEND
-      PROPERTY LABELS "CUDA")
+      PROPERTY LABELS "CUDA" "Fortran")
 
     set(MSVCRuntimeLibrary_BUILD_OPTIONS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
     ADD_TEST_MACRO(MSVCRuntimeLibrary)
@@ -2168,6 +2174,7 @@ if(BUILD_TESTING)
       PROPERTY LABELS "CUDA")
     if(CMAKE_Fortran_COMPILER)
       ADD_TEST_MACRO(MSVCRuntimeLibrary.Fortran)
+      set_property(TEST MSVCRuntimeLibrary.Fortran APPEND PROPERTY LABELS "Fortran")
     endif()
   endif()
   if(MSVC OR
@@ -3362,6 +3369,7 @@ if(BUILD_TESTING)
       --build-two-config
       --test-command testf)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Fortran")
+    set_property(TEST Fortran APPEND PROPERTY LABELS "Fortran")
 
     if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
       add_test(FortranModules ${CMAKE_CTEST_COMMAND}
@@ -3376,6 +3384,7 @@ if(BUILD_TESTING)
           ${CMake_TEST_FortranModules_BUILD_OPTIONS}
         )
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/FortranModules")
+      set_property(TEST FortranModules APPEND PROPERTY LABELS "Fortran")
     endif()
 
     # FortranCInterface tests.
@@ -3385,6 +3394,7 @@ if(BUILD_TESTING)
       add_test(FortranC.Flags ${CMAKE_CMAKE_COMMAND} -P
         ${CMAKE_CURRENT_BINARY_DIR}/FortranC/Flags.cmake)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/FortranC/Flags")
+      set_property(TEST FortranC.Flags APPEND PROPERTY LABELS "Fortran")
     else()
       add_test(FortranC ${CMAKE_CTEST_COMMAND}
         --build-and-test
@@ -3395,6 +3405,7 @@ if(BUILD_TESTING)
         --build-two-config
         --test-command CMakeFiles/FortranCInterface/FortranCInterface)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/FortranC")
+      set_property(TEST FortranC APPEND PROPERTY LABELS "Fortran")
     endif()
   endif()
 

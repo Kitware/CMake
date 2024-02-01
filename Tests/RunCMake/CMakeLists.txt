@@ -151,6 +151,7 @@ if("${CMAKE_C_COMPILER_ID}" STREQUAL "LCC" OR
    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "LCC" OR
    "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "LCC")
   add_RunCMake_test("CMP0129")
+  set_property(TEST RunCMake.CMP0129 APPEND PROPERTY LABELS "Fortran")
 endif()
 
 add_RunCMake_test(CMP0132)
@@ -225,6 +226,7 @@ if(CMAKE_GENERATOR MATCHES "Ninja")
     endif()
   endif()
   add_RunCMake_test(Ninja)
+  set_property(TEST RunCMake.Ninja APPEND PROPERTY LABELS "Fortran")
   set(NinjaMultiConfig_ARGS
     -DCYGWIN=${CYGWIN} -DMSYS=${MSYS}
     )
@@ -321,6 +323,7 @@ add_RunCMake_test(BuildDepends
   -DCMAKE_C_LINK_DEPENDS_USE_COMPILER=${CMAKE_C_LINK_DEPENDS_USE_COMPILER}
   -DCMake_TEST_BuildDepends_GNU_AS=${CMake_TEST_BuildDepends_GNU_AS}
   )
+set_property(TEST RunCMake.BuildDepends APPEND PROPERTY LABELS "Fortran")
 add_RunCMake_test(BuiltinTargets)
 if(UNIX AND "${CMAKE_GENERATOR}" MATCHES "Unix Makefiles|Ninja")
   add_RunCMake_test(Byproducts)
@@ -364,7 +367,7 @@ foreach(lang IN ITEMS CUDA HIP ISPC)
   endif()
 endforeach()
 add_RunCMake_test(CompilerTest)
-set_property(TEST RunCMake.CompilerTest APPEND PROPERTY LABELS "CUDA" "HIP" "ISPC")
+set_property(TEST RunCMake.CompilerTest APPEND PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran")
 add_RunCMake_test(Configure -DMSVC_IDE=${MSVC_IDE})
 add_RunCMake_test(DisallowedCommands)
 if("${CMAKE_GENERATOR}" MATCHES "Unix Makefiles|Ninja")
@@ -490,6 +493,7 @@ add_RunCMake_test(add_dependencies)
 add_RunCMake_test(add_executable)
 add_RunCMake_test(add_library)
 add_RunCMake_test(add_subdirectory -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER})
+set_property(TEST RunCMake.add_subdirectory APPEND PROPERTY LABELS "Fortran")
 add_RunCMake_test(add_test -DPSEUDO_EMULATOR=$<TARGET_FILE:pseudo_emulator>)
 add_RunCMake_test(build_command)
 add_executable(exit_code exit_code.c)
@@ -611,6 +615,8 @@ if(CMAKE_Fortran_COMPILER)
   list(APPEND try_run_ARGS -DCMake_TEST_Fortran=1)
 endif()
 add_RunCMake_test(try_run)
+set_property(TEST RunCMake.try_run APPEND PROPERTY LABELS "Fortran")
+
 add_RunCMake_test(set)
 add_RunCMake_test(variable_watch)
 add_RunCMake_test(while)
@@ -629,7 +635,9 @@ if(CMake_TEST_CUDA)
   add_RunCMake_test(CUDA_architectures)
   set_property(TEST RunCMake.CUDA_architectures APPEND PROPERTY LABELS "CUDA")
 endif()
+
 add_RunCMake_test(DependencyGraph -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER})
+set_property(TEST RunCMake.DependencyGraph APPEND PROPERTY LABELS "Fortran")
 
 # Add C++ Module tests.
 add_RunCMake_test(CXXModules -DCMake_TEST_MODULE_COMPILATION=${CMake_TEST_MODULE_COMPILATION} -DCMake_TEST_MODULE_COMPILATION_RULES=${CMake_TEST_MODULE_COMPILATION_RULES})
@@ -839,14 +847,10 @@ add_RunCMake_test(CheckSourceRuns     -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
 set_property(TEST RunCMake.CheckCompilerFlag
                   RunCMake.CheckSourceCompiles
                   RunCMake.CheckSourceRuns
-    APPEND PROPERTY LABELS "CUDA")
+    APPEND PROPERTY LABELS "CUDA" "HIP" "Fortran")
 set_property(TEST RunCMake.CheckSourceCompiles
                   RunCMake.CheckCompilerFlag
     APPEND PROPERTY LABELS "ISPC")
-set_property(TEST RunCMake.CheckCompilerFlag
-                  RunCMake.CheckSourceCompiles
-                  RunCMake.CheckSourceRuns
-    APPEND PROPERTY LABELS "HIP")
 add_RunCMake_test(CheckModules)
 add_RunCMake_test(CheckIPOSupported)
 if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin)"
@@ -855,8 +859,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin)"
                                     -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
                                     -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
                                     -DCMake_TEST_HIP=${CMake_TEST_HIP})
-  set_property(TEST RunCMake.CheckLinkerFlag APPEND PROPERTY LABELS "CUDA")
-  set_property(TEST RunCMake.CheckLinkerFlag APPEND PROPERTY LABELS "HIP")
+  set_property(TEST RunCMake.CheckLinkerFlag APPEND PROPERTY LABELS "CUDA" "HIP" "Fortran")
 endif()
 
 
@@ -974,6 +977,7 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
     -DPSEUDO_CPPLINT=$<TARGET_FILE:pseudo_cpplint>
     -DPSEUDO_CPPCHECK=$<TARGET_FILE:pseudo_cppcheck>
     )
+
   if(DEFINED CMake_TEST_CUDA)
     list(APPEND CompilerLauncher_ARGS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
   endif()
@@ -992,7 +996,8 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
   endif()
   add_RunCMake_test(CompilerLauncher)
   set_property(TEST RunCMake.CompilerLauncher APPEND
-    PROPERTY LABELS "CUDA;HIP;ISPC")
+    PROPERTY LABELS "CUDA" "HIP" "ISPC" "Fortran")
+
   add_RunCMake_test(ctest_labels_for_subprojects)
   add_RunCMake_test(CompilerArgs)
   add_RunCMake_test(LinkerLauncher)
