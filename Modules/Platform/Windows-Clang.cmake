@@ -167,37 +167,32 @@ macro(__enable_llvm_rc_preprocessing clang_option_prefix extra_pp_flags)
   endif()
 endmacro()
 
-macro(__verify_same_language_values variable)
-  foreach(lang "C" "CXX" "HIP")
-    if(DEFINED CMAKE_${lang}_${variable})
-      list(APPEND __LANGUAGE_VALUES_${variable} "${CMAKE_${lang}_${variable}}")
-    endif()
+function(__verify_same_language_values variable langs)
+  foreach(lang IN LISTS langs)
+    list(APPEND __LANGUAGE_VALUES_${variable} ${CMAKE_${lang}_${variable}})
   endforeach()
   list(REMOVE_DUPLICATES __LANGUAGE_VALUES_${variable})
   list(LENGTH __LANGUAGE_VALUES_${variable} __NUM_VALUES)
-
   if(__NUM_VALUES GREATER 1)
     message(FATAL_ERROR ${ARGN})
   endif()
-  unset(__NUM_VALUES)
-  unset(__LANGUAGE_VALUES_${variable})
-endmacro()
+endfunction()
 
 if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
     OR "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC"
     OR "x${CMAKE_CUDA_SIMULATE_ID}" STREQUAL "xMSVC"
     OR "x${CMAKE_HIP_SIMULATE_ID}" STREQUAL "xMSVC")
 
-  __verify_same_language_values(COMPILER_ID
+  __verify_same_language_values(COMPILER_ID "C;CXX;HIP"
                                 "The current configuration mixes Clang and MSVC or "
                                 "some other CL compatible compiler tool. This is not supported. "
-                                "Use either Clang or MSVC as the compiler for all of C, C++, CUDA and/or HIP.")
+                                "Use either Clang or MSVC as the compiler for all of C, C++, and/or HIP.")
 
-  __verify_same_language_values(COMPILER_FRONTEND_VARIANT
+  __verify_same_language_values(COMPILER_FRONTEND_VARIANT "C;CXX;CUDA;HIP"
                                 "The current configuration uses the Clang compiler "
                                 "tool with mixed frontend variants, both the GNU and in MSVC CL "
                                 "like variants. This is not supported. Use either clang/clang++ "
-                                "or clang-cl as all C, C++, CUDA and/or HIP compilers.")
+                                "or clang-cl as all C, C++, CUDA, and/or HIP compilers.")
 
   if(NOT CMAKE_RC_COMPILER_INIT)
     # Check if rc is already in the path
