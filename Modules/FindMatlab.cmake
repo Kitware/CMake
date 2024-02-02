@@ -1047,14 +1047,6 @@ endfunction()
 #]=======================================================================]
 function(matlab_add_mex)
 
-  if(NOT WIN32)
-    # we do not need all this on Windows
-    # we should use try_compile instead, the link flags are discarded from
-    # this compiler_flag function.
-    #check_cxx_compiler_flag(-Wl,--exclude-libs,ALL HAS_SYMBOL_HIDING_CAPABILITY)
-
-  endif()
-
   set(options EXECUTABLE MODULE SHARED R2017b R2018a EXCLUDE_FROM_ALL NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES)
   set(oneValueArgs NAME DOCUMENTATION OUTPUT_NAME)
   set(multiValueArgs LINK_TO SRC)
