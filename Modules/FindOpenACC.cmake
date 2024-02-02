@@ -147,6 +147,7 @@ function(_OPENACC_GET_FLAGS_CANDIDATE LANG FLAG_VAR)
   set(ACC_FLAG_PGI "-acc")
   set(ACC_FLAG_GNU "-fopenacc")
   set(ACC_FLAG_Cray "-h acc")
+  set(ACC_FLAG_Clang "-fopenacc")
 
   if(DEFINED ACC_FLAG_${CMAKE_${LANG}_COMPILER_ID})
     set("${FLAG_VAR}" "${ACC_FLAG_${CMAKE_${LANG}_COMPILER_ID}}" PARENT_SCOPE)
