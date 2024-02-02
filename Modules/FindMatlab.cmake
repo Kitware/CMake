@@ -287,9 +287,12 @@ cmake_policy(SET CMP0057 NEW) # if IN_LIST
 set(_FindMatlab_SELF_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-include(CheckCXXCompilerFlag)
-include(CheckCCompilerFlag)
 
+if(NOT WIN32 AND NOT APPLE AND NOT Threads_FOUND)
+  # MEX files use pthread if available
+  set(THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package(Threads)
+endif()
 
 # The currently supported versions. Other version can be added by the user by
 # providing MATLAB_ADDITIONAL_VERSIONS
@@ -1046,12 +1049,6 @@ function(matlab_add_mex)
 
   if(NOT WIN32)
     # we do not need all this on Windows
-    # pthread options
-    if(CMAKE_CXX_COMPILER_LOADED)
-      check_cxx_compiler_flag(-pthread HAS_MINUS_PTHREAD)
-    elseif(CMAKE_C_COMPILER_LOADED)
-      check_c_compiler_flag(-pthread HAS_MINUS_PTHREAD)
-    endif()
     # we should use try_compile instead, the link flags are discarded from
     # this compiler_flag function.
     #check_cxx_compiler_flag(-Wl,--exclude-libs,ALL HAS_SYMBOL_HIDING_CAPABILITY)
@@ -1225,10 +1222,8 @@ function(matlab_add_mex)
 
     else() # Linux
 
-      if(HAS_MINUS_PTHREAD)
-        # Apparently, compiling with -pthread generated the proper link flags
-        # and some defines at compilation
-        target_compile_options(${${prefix}_NAME} PRIVATE "-pthread")
+      if(Threads_FOUND)
+        target_link_libraries(${${prefix}_NAME} Threads::Threads)
       endif()
 
       string(APPEND _link_flags " -Wl,--as-needed")
