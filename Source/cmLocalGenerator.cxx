@@ -3131,6 +3131,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
 
   for (size_t ci = 0; ci < configs.size(); ++ci) {
     // FIXME: Refactor collection of sources to not evaluate object libraries.
+    // Their final set of object files might be transformed by unity builds.
     std::vector<cmSourceFile*> sources;
     target->GetSourceFiles(sources, configs[ci]);
     for (cmSourceFile* sf : sources) {

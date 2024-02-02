@@ -1892,7 +1892,8 @@ bool cmGlobalGenerator::AddAutomaticSources()
       }
     }
   }
-  // The above transformations may have changed the classification of sources.
+  // The above transformations may have changed the classification of sources,
+  // e.g., sources that go into unity builds become SourceKindUnityBatched.
   // Clear the source list and classification cache (KindedSources) of all
   // targets so that it will be recomputed correctly by the generators later
   // now that the above transformations are done for all targets.
