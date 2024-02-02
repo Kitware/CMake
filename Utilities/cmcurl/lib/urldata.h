@@ -583,7 +583,7 @@ struct hostname {
   (((data)->req.keepon & KEEP_SENDBITS) == KEEP_SEND)
 /* transfer receive is not on PAUSE or HOLD */
 #define CURL_WANT_RECV(data) \
-  (!((data)->req.keepon & (KEEP_RECV_PAUSE|KEEP_RECV_HOLD)))
+  (((data)->req.keepon & KEEP_RECVBITS) == KEEP_RECV)
 
 #if defined(CURLRES_ASYNCH) || !defined(CURL_DISABLE_DOH)
 #define USE_CURL_ASYNC
@@ -683,7 +683,8 @@ struct SingleRequest {
   enum expect100 exp100;        /* expect 100 continue state */
   enum upgrade101 upgr101;      /* 101 upgrade state */
 
-  /* Content unencoding stack. See sec 3.5, RFC2616. */
+  /* Client Writer stack, handles trasnfer- and content-encodings, protocol
+   * checks, pausing by client callbacks. */
   struct Curl_cwriter *writer_stack;
   time_t timeofdoc;
   long bodywrites;
@@ -730,11 +731,10 @@ struct SingleRequest {
 #ifndef CURL_DISABLE_COOKIES
   unsigned char setcookies;
 #endif
-  unsigned char writer_stack_depth; /* Unencoding stack depth. */
   BIT(header);        /* incoming data has HTTP header */
-  BIT(badheader);     /* header parsing found sth not a header */
   BIT(content_range); /* set TRUE if Content-Range: was found */
   BIT(download_done); /* set to TRUE when download is complete */
+  BIT(eos_written);   /* iff EOS has been written to client */
   BIT(upload_done);   /* set to TRUE when doing chunked transfer-encoding
                          upload and we're uploading the last chunk */
   BIT(ignorebody);    /* we read a response-body but we ignore it! */
@@ -816,10 +816,10 @@ struct Curl_handler {
                          bool dead_connection);
 
   /* If used, this function gets called from transfer.c:readwrite_data() to
-     allow the protocol to do extra reads/writes */
-  CURLcode (*readwrite)(struct Curl_easy *data, struct connectdata *conn,
-                        const char *buf, size_t blen,
-                        size_t *pconsumed, bool *readmore);
+     allow the protocol to do extra handling in writing response to
+     the client. */
+  CURLcode (*write_resp)(struct Curl_easy *data, const char *buf, size_t blen,
+                         bool is_eos, bool *done);
 
   /* This function can perform various checks on the connection. See
      CONNCHECK_* for more information about the checks that can be performed,
@@ -898,11 +898,6 @@ struct ldapconninfo;
 struct connectdata {
   struct Curl_llist_element bundle_node; /* conncache */
 
-  /* chunk is for HTTP chunked encoding, but is in the general connectdata
-     struct only because we can do just about any protocol through an HTTP
-     proxy and an HTTP proxy may in fact respond using chunked encoding */
-  struct Curl_chunker chunk;
-
   curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
   void *closesocket_client;
 
@@ -921,9 +916,6 @@ struct connectdata {
      multi_done(). This entry will be NULL if the connection is reused as then
      there is no name resolve done. */
   struct Curl_dns_entry *dns_entry;
-#ifdef USE_CURL_ASYNC
-  struct Curl_async resolve_async;  /* asynchronous name resolver data */
-#endif
 
   /* 'remote_addr' is the particular IP we connected to. it is owned, set
    * and NULLed by the connected socket filter (if there is one). */
@@ -1028,11 +1020,6 @@ struct connectdata {
   struct negotiatedata proxyneg; /* state data for proxy Negotiate auth */
 #endif
 
-#ifndef CURL_DISABLE_HTTP
-  /* for chunked-encoded trailer */
-  struct dynbuf trailer;
-#endif
-
   union {
 #ifndef CURL_DISABLE_FTP
     struct ftp_conn ftpc;
@@ -1103,7 +1090,6 @@ struct connectdata {
   unsigned short localport;
   unsigned short secondary_port; /* secondary socket remote port to connect to
                                     (ftp) */
-  unsigned char cselect_bits; /* bitmask of socket events */
   unsigned char alpn; /* APLN TLS negotiated protocol, a CURL_HTTP_VERSION*
                          value */
 #ifndef CURL_DISABLE_PROXY
@@ -1193,6 +1179,7 @@ struct Progress {
   curl_off_t dlspeed;
   curl_off_t ulspeed;
 
+  timediff_t t_postqueue;
   timediff_t t_nslookup;
   timediff_t t_connect;
   timediff_t t_appconnect;
@@ -1382,6 +1369,9 @@ struct UrlState {
 #endif
   struct auth authhost;  /* auth details for host */
   struct auth authproxy; /* auth details for proxy */
+#ifdef USE_CURL_ASYNC
+  struct Curl_async async;  /* asynchronous name resolver data */
+#endif
 
 #if defined(USE_OPENSSL)
   /* void instead of ENGINE to avoid bleeding OpenSSL into this header */
@@ -1479,7 +1469,7 @@ struct UrlState {
                                 server involved in this request */
   unsigned char httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
                             is this */
-  unsigned char dselect_bits; /* != 0 -> bitmask of socket events for this
+  unsigned char select_bits; /* != 0 -> bitmask of socket events for this
                                  transfer overriding anything the socket may
                                  report */
 #ifdef CURLDEBUG

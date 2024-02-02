@@ -100,24 +100,14 @@
  * Forward declarations.
  */
 
-static int http_getsock_do(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           curl_socket_t *socks);
 static bool http_should_fail(struct Curl_easy *data);
-
-static CURLcode http_setup_conn(struct Curl_easy *data,
-                                struct connectdata *conn);
-#ifdef USE_WEBSOCKETS
-static CURLcode ws_setup_conn(struct Curl_easy *data,
-                              struct connectdata *conn);
-#endif
 
 /*
  * HTTP handler interface.
  */
 const struct Curl_handler Curl_handler_http = {
   "HTTP",                               /* scheme */
-  http_setup_conn,                      /* setup_connection */
+  Curl_http_setup_conn,                 /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
@@ -125,11 +115,11 @@ const struct Curl_handler Curl_handler_http = {
   ZERO_NULL,                            /* connecting */
   ZERO_NULL,                            /* doing */
   ZERO_NULL,                            /* proto_getsock */
-  http_getsock_do,                      /* doing_getsock */
+  Curl_http_getsock_do,                 /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
+  Curl_http_write_resp,                 /* write_resp */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTP,                            /* defport */
@@ -139,39 +129,13 @@ const struct Curl_handler Curl_handler_http = {
   PROTOPT_USERPWDCTRL
 };
 
-#ifdef USE_WEBSOCKETS
-const struct Curl_handler Curl_handler_ws = {
-  "WS",                                 /* scheme */
-  ws_setup_conn,                        /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  Curl_http_connect,                    /* connect_it */
-  ZERO_NULL,                            /* connecting */
-  ZERO_NULL,                            /* doing */
-  ZERO_NULL,                            /* proto_getsock */
-  http_getsock_do,                      /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  Curl_ws_disconnect,                   /* disconnect */
-  ZERO_NULL,                            /* readwrite */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  PORT_HTTP,                            /* defport */
-  CURLPROTO_WS,                         /* protocol */
-  CURLPROTO_HTTP,                       /* family */
-  PROTOPT_CREDSPERREQUEST |             /* flags */
-  PROTOPT_USERPWDCTRL
-};
-#endif
-
 #ifdef USE_SSL
 /*
  * HTTPS handler interface.
  */
 const struct Curl_handler Curl_handler_https = {
   "HTTPS",                              /* scheme */
-  http_setup_conn,                      /* setup_connection */
+  Curl_http_setup_conn,                 /* setup_connection */
   Curl_http,                            /* do_it */
   Curl_http_done,                       /* done */
   ZERO_NULL,                            /* do_more */
@@ -179,11 +143,11 @@ const struct Curl_handler Curl_handler_https = {
   NULL,                                 /* connecting */
   ZERO_NULL,                            /* doing */
   NULL,                                 /* proto_getsock */
-  http_getsock_do,                      /* doing_getsock */
+  Curl_http_getsock_do,                 /* doing_getsock */
   ZERO_NULL,                            /* domore_getsock */
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
-  ZERO_NULL,                            /* readwrite */
+  Curl_http_write_resp,                 /* write_resp */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTPS,                           /* defport */
@@ -193,36 +157,10 @@ const struct Curl_handler Curl_handler_https = {
   PROTOPT_USERPWDCTRL
 };
 
-#ifdef USE_WEBSOCKETS
-const struct Curl_handler Curl_handler_wss = {
-  "WSS",                                /* scheme */
-  ws_setup_conn,                        /* setup_connection */
-  Curl_http,                            /* do_it */
-  Curl_http_done,                       /* done */
-  ZERO_NULL,                            /* do_more */
-  Curl_http_connect,                    /* connect_it */
-  NULL,                                 /* connecting */
-  ZERO_NULL,                            /* doing */
-  NULL,                                 /* proto_getsock */
-  http_getsock_do,                      /* doing_getsock */
-  ZERO_NULL,                            /* domore_getsock */
-  ZERO_NULL,                            /* perform_getsock */
-  Curl_ws_disconnect,                   /* disconnect */
-  ZERO_NULL,                            /* readwrite */
-  ZERO_NULL,                            /* connection_check */
-  ZERO_NULL,                            /* attach connection */
-  PORT_HTTPS,                           /* defport */
-  CURLPROTO_WSS,                        /* protocol */
-  CURLPROTO_HTTP,                       /* family */
-  PROTOPT_SSL | PROTOPT_CREDSPERREQUEST | /* flags */
-  PROTOPT_USERPWDCTRL
-};
 #endif
 
-#endif
-
-static CURLcode http_setup_conn(struct Curl_easy *data,
-                                struct connectdata *conn)
+CURLcode Curl_http_setup_conn(struct Curl_easy *data,
+                              struct connectdata *conn)
 {
   /* allocate the HTTP-specific struct for the Curl_easy, only to survive
      during this request */
@@ -244,16 +182,6 @@ static CURLcode http_setup_conn(struct Curl_easy *data,
 
   return CURLE_OK;
 }
-
-#ifdef USE_WEBSOCKETS
-static CURLcode ws_setup_conn(struct Curl_easy *data,
-                              struct connectdata *conn)
-{
-  /* websockets is 1.1 only (for now) */
-  data->state.httpwant = CURL_HTTP_VERSION_1_1;
-  return http_setup_conn(data, conn);
-}
-#endif
 
 #ifndef CURL_DISABLE_PROXY
 /*
@@ -297,7 +225,6 @@ char *Curl_copy_header_value(const char *header)
 {
   const char *start;
   const char *end;
-  char *value;
   size_t len;
 
   /* Find the end of the header name */
@@ -330,14 +257,7 @@ char *Curl_copy_header_value(const char *header)
   /* get length of the type */
   len = end - start + 1;
 
-  value = malloc(len + 1);
-  if(!value)
-    return NULL;
-
-  memcpy(value, start, len);
-  value[len] = 0; /* null-terminate */
-
-  return value;
+  return Curl_memdup0(start, len);
 }
 
 #ifndef CURL_DISABLE_HTTP_AUTH
@@ -1597,9 +1517,9 @@ CURLcode Curl_http_connect(struct Curl_easy *data, bool *done)
 /* this returns the socket to wait for in the DO and DOING state for the multi
    interface and then we're always _sending_ a request and thus we wait for
    the single socket to become writable only */
-static int http_getsock_do(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           curl_socket_t *socks)
+int Curl_http_getsock_do(struct Curl_easy *data,
+                         struct connectdata *conn,
+                         curl_socket_t *socks)
 {
   /* write mode */
   (void)conn;
@@ -2103,6 +2023,7 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
 
   switch(data->set.timecondition) {
   default:
+    DEBUGF(infof(data, "invalid time condition"));
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   case CURL_TIMECOND_IFMODSINCE:
@@ -2271,7 +2192,7 @@ CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn)
     }
 #endif
 
-    if(strcmp("Host:", ptr)) {
+    if(!strcasecompare("Host:", ptr)) {
       aptr->host = aprintf("Host:%s\r\n", &ptr[5]);
       if(!aptr->host)
         return CURLE_OUT_OF_MEMORY;
@@ -2359,9 +2280,7 @@ CURLcode Curl_http_target(struct Curl_easy *data,
         return CURLE_OUT_OF_MEMORY;
       }
     }
-    /* Extract the URL to use in the request. Store in STRING_TEMP_URL for
-       clean-up reasons if the function returns before the free() further
-       down. */
+    /* Extract the URL to use in the request. */
     uc = curl_url_get(h, CURLUPART_URL, &url, CURLU_NO_DEFAULT_PORT);
     if(uc) {
       curl_url_cleanup(h);
@@ -3021,13 +2940,14 @@ CURLcode Curl_http_resume(struct Curl_easy *data,
         }
         /* when seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
         do {
+          char scratch[4*1024];
           size_t readthisamountnow =
-            (data->state.resume_from - passed > data->set.buffer_size) ?
-            (size_t)data->set.buffer_size :
+            (data->state.resume_from - passed > (curl_off_t)sizeof(scratch)) ?
+            sizeof(scratch) :
             curlx_sotouz(data->state.resume_from - passed);
 
           size_t actuallyread =
-            data->state.fread_func(data->state.buffer, 1, readthisamountnow,
+            data->state.fread_func(scratch, 1, readthisamountnow,
                                    data->state.in);
 
           passed += actuallyread;
@@ -3062,6 +2982,7 @@ CURLcode Curl_http_firstwrite(struct Curl_easy *data,
 {
   struct SingleRequest *k = &data->req;
 
+  *done = FALSE;
   if(data->req.newurl) {
     if(conn->bits.close) {
       /* Abort after the headers if "follow Location" is set
@@ -3187,7 +3108,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       ) {
       result = Curl_http2_switch(data, conn, FIRSTSOCKET);
       if(result)
-        return result;
+        goto fail;
     }
     else
 #endif
@@ -3202,7 +3123,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
       DEBUGF(infof(data, "HTTP/2 over clean TCP"));
       result = Curl_http2_switch(data, conn, FIRSTSOCKET);
       if(result)
-        return result;
+        goto fail;
     }
     break;
   }
@@ -3212,11 +3133,11 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   result = Curl_http_host(data, conn);
   if(result)
-    return result;
+    goto fail;
 
   result = Curl_http_useragent(data);
   if(result)
-    return result;
+    goto fail;
 
   Curl_http_method(data, conn, &request, &httpreq);
 
@@ -3232,7 +3153,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
                                    (pq ? pq : data->state.up.path), FALSE);
     free(pq);
     if(result)
-      return result;
+      goto fail;
   }
 
   Curl_safefree(data->state.aptr.ref);
@@ -3257,23 +3178,23 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   /* we only consider transfer-encoding magic if libz support is built-in */
   result = Curl_transferencode(data);
   if(result)
-    return result;
+    goto fail;
 #endif
 
   result = Curl_http_body(data, conn, httpreq, &te);
   if(result)
-    return result;
+    goto fail;
 
   p_accept = Curl_checkheaders(data,
                                STRCONST("Accept"))?NULL:"Accept: */*\r\n";
 
   result = Curl_http_resume(data, conn, httpreq);
   if(result)
-    return result;
+    goto fail;
 
   result = Curl_http_range(data, httpreq);
   if(result)
-    return result;
+    goto fail;
 
   httpstring = get_http_string(data, conn);
 
@@ -3291,7 +3212,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     result = Curl_http_target(data, conn, &req);
   if(result) {
     Curl_dyn_free(&req);
-    return result;
+    goto fail;
   }
 
 #ifndef CURL_DISABLE_ALTSVC
@@ -3362,7 +3283,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   if(result) {
     Curl_dyn_free(&req);
-    return result;
+    goto fail;
   }
 
   if(!(conn->handler->flags&PROTOPT_SSL) &&
@@ -3398,7 +3319,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
   if(result) {
     Curl_dyn_free(&req);
-    return result;
+    goto fail;
   }
 
   if((http->postsize > -1) &&
@@ -3434,6 +3355,9 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
        but is disabled here again to avoid that the chunked encoded version is
        actually used when sending the request body over h2 */
     data->req.upload_chunky = FALSE;
+fail:
+  if(CURLE_TOO_LARGE == result)
+    failf(data, "HTTP request too large");
   return result;
 }
 
@@ -3896,7 +3820,7 @@ CURLcode Curl_http_statusline(struct Curl_easy *data,
      * fields.  */
     if(data->set.timecondition)
       data->info.timecond = TRUE;
-    /* FALLTHROUGH */
+    FALLTHROUGH();
   case 204:
     /* (quote from RFC2616, section 10.2.5): The server has
      * fulfilled the request but does not need to return an
@@ -3995,15 +3919,16 @@ CURLcode Curl_bump_headersize(struct Curl_easy *data,
 /*
  * Read any HTTP header lines from the server and pass them to the client app.
  */
-CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
-                                     struct connectdata *conn,
-                                     const char *buf, size_t blen,
-                                     size_t *pconsumed)
+static CURLcode http_rw_headers(struct Curl_easy *data,
+                                const char *buf, size_t blen,
+                                size_t *pconsumed)
 {
-  CURLcode result;
+  struct connectdata *conn = data->conn;
+  CURLcode result = CURLE_OK;
   struct SingleRequest *k = &data->req;
   char *headp;
   char *end_ptr;
+  bool leftover_body = FALSE;
 
   /* header line within buffer loop */
   *pconsumed = 0;
@@ -4032,12 +3957,12 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
         if(st == STATUS_BAD) {
           /* this is not the beginning of a protocol first header line */
           k->header = FALSE;
-          k->badheader = TRUE;
           streamclose(conn, "bad HTTP: No end-of-message indicator");
           if(!data->set.http09_allowed) {
             failf(data, "Received HTTP/0.9 when not allowed");
             return CURLE_UNSUPPORTED_PROTOCOL;
           }
+          leftover_body = TRUE;
           goto out;
         }
       }
@@ -4071,15 +3996,8 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           return CURLE_UNSUPPORTED_PROTOCOL;
         }
         k->header = FALSE;
-        if(blen)
-          /* since there's more, this is a partial bad header */
-          k->badheader = TRUE;
-        else {
-          /* this was all we read so it's all a bad header */
-          k->badheader = TRUE;
-          return CURLE_OK;
-        }
-        break;
+        leftover_body = TRUE;
+        goto out;
       }
     }
 
@@ -4088,6 +4006,7 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
     headp = Curl_dyn_ptr(&data->state.headerb);
     if((0x0a == *headp) || (0x0d == *headp)) {
       size_t headerlen;
+      bool switch_to_h2 = FALSE;
       /* Zero-length header line means end of headers! */
 
       if('\r' == *headp)
@@ -4117,42 +4036,40 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
           }
           break;
         case 101:
-          /* Switching Protocols */
-          if(k->upgr101 == UPGR101_H2) {
-            /* Switching to HTTP/2 */
-            DEBUGASSERT(conn->httpversion < 20);
-            infof(data, "Received 101, Switching to HTTP/2");
-            k->upgr101 = UPGR101_RECEIVED;
+          if(conn->httpversion == 11) {
+            /* Switching Protocols only allowed from HTTP/1.1 */
+            if(k->upgr101 == UPGR101_H2) {
+              /* Switching to HTTP/2 */
+              infof(data, "Received 101, Switching to HTTP/2");
+              k->upgr101 = UPGR101_RECEIVED;
 
-            /* we'll get more headers (HTTP/2 response) */
-            k->header = TRUE;
-            k->headerline = 0; /* restart the header line counter */
-
-            /* switch to http2 now. The bytes after response headers
-               are also processed here, otherwise they are lost. */
-            result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
-            if(result)
-              return result;
-            *pconsumed += blen;
-            blen = 0;
-          }
+              /* we'll get more headers (HTTP/2 response) */
+              k->header = TRUE;
+              k->headerline = 0; /* restart the header line counter */
+              switch_to_h2 = TRUE;
+            }
 #ifdef USE_WEBSOCKETS
-          else if(k->upgr101 == UPGR101_WS) {
-            /* verify the response */
-            result = Curl_ws_accept(data, buf, blen);
-            if(result)
-              return result;
-            k->header = FALSE; /* no more header to parse! */
-            if(data->set.connect_only) {
-              k->keepon &= ~KEEP_RECV; /* read no more content */
-              *pconsumed += blen;
+            else if(k->upgr101 == UPGR101_WS) {
+              /* verify the response */
+              result = Curl_ws_accept(data, buf, blen);
+              if(result)
+                return result;
+              k->header = FALSE; /* no more header to parse! */
+              *pconsumed += blen; /* ws accept handled the data */
               blen = 0;
+              if(data->set.connect_only)
+                k->keepon &= ~KEEP_RECV; /* read no more content */
+            }
+#endif
+            else {
+              /* Not switching to another protocol */
+              k->header = FALSE; /* no more header to parse! */
             }
           }
-#endif
           else {
-            /* Not switching to another protocol */
-            k->header = FALSE; /* no more header to parse! */
+            /* invalid for other HTTP versions */
+            failf(data, "unexpected 101 response code");
+            return CURLE_WEIRD_SERVER_REPLY;
           }
           break;
         default:
@@ -4359,16 +4276,6 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
          */
         if(data->req.no_body)
           k->download_done = TRUE;
-#ifndef CURL_DISABLE_RTSP
-        else if((conn->handler->protocol & CURLPROTO_RTSP) &&
-                (data->set.rtspreq == RTSPREQ_DESCRIBE) &&
-                (k->size <= -1))
-          /* Respect section 4.4 of rfc2326: If the Content-Length header is
-             absent, a length 0 must be assumed.  It will prevent libcurl from
-             hanging on DESCRIBE request that got refused for whatever
-             reason */
-          k->download_done = TRUE;
-#endif
 
         /* If max download size is *zero* (nothing) we already have
            nothing and can safely return ok now!  But for HTTP/2, we'd
@@ -4388,6 +4295,17 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
 
       /* We continue reading headers, reset the line-based header */
       Curl_dyn_reset(&data->state.headerb);
+      if(switch_to_h2) {
+        /* Having handled the headers, we can do the HTTP/2 switch.
+         * Any remaining `buf` bytes are already HTTP/2 and passed to
+         * be processed. */
+        result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
+        if(result)
+          return result;
+        *pconsumed += blen;
+        blen = 0;
+      }
+
       continue;
     }
 
@@ -4578,9 +4496,78 @@ CURLcode Curl_http_readwrite_headers(struct Curl_easy *data,
      there might be a non-header part left in the end of the read
      buffer. */
 out:
+  if(!k->header && !leftover_body) {
+    Curl_dyn_free(&data->state.headerb);
+  }
   return CURLE_OK;
 }
 
+/*
+ * HTTP protocol `write_resp` implementation. Will parse headers
+ * when not done yet and otherwise return without consuming data.
+ */
+CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
+                                  const char *buf, size_t blen,
+                                  size_t *pconsumed,
+                                  bool *done)
+{
+  *done = FALSE;
+  if(!data->req.header) {
+    *pconsumed = 0;
+    return CURLE_OK;
+  }
+  else {
+    CURLcode result;
+
+    result = http_rw_headers(data, buf, blen, pconsumed);
+    if(!result && !data->req.header) {
+      /* we have successfully finished parsing the HEADERs */
+      result = Curl_http_firstwrite(data, data->conn, done);
+
+      if(!data->req.no_body && Curl_dyn_len(&data->state.headerb)) {
+        /* leftover from parsing something that turned out not
+         * to be a header, only happens if we allow for
+         * HTTP/0.9 like responses */
+        result = Curl_client_write(data, CLIENTWRITE_BODY,
+                                   Curl_dyn_ptr(&data->state.headerb),
+                                   Curl_dyn_len(&data->state.headerb));
+      }
+      Curl_dyn_free(&data->state.headerb);
+    }
+    return result;
+  }
+}
+
+CURLcode Curl_http_write_resp(struct Curl_easy *data,
+                              const char *buf, size_t blen,
+                              bool is_eos,
+                              bool *done)
+{
+  CURLcode result;
+  size_t consumed;
+  int flags;
+
+  *done = FALSE;
+  result = Curl_http_write_resp_hds(data, buf, blen, &consumed, done);
+  if(result || *done)
+    goto out;
+
+  DEBUGASSERT(consumed <= blen);
+  blen -= consumed;
+  buf += consumed;
+  /* either all was consumed in header parsing, or we have data left
+   * and are done with heders, e.g. it is BODY data */
+  DEBUGASSERT(!blen || !data->req.header);
+  if(!data->req.header && (blen || is_eos)) {
+    /* BODY data after header been parsed, write and consume */
+    flags = CLIENTWRITE_BODY;
+    if(is_eos)
+      flags |= CLIENTWRITE_EOS;
+    result = Curl_client_write(data, flags, (char *)buf, blen);
+  }
+out:
+  return result;
+}
 
 /* Decode HTTP status code string. */
 CURLcode Curl_http_decode_status(int *pstatus, const char *s, size_t len)
@@ -4617,7 +4604,7 @@ CURLcode Curl_http_req_make(struct httpreq **preq,
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   DEBUGASSERT(method);
-  if(m_len + 1 >= sizeof(req->method))
+  if(m_len + 1 > sizeof(req->method))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   req = calloc(1, sizeof(*req));
@@ -4625,17 +4612,17 @@ CURLcode Curl_http_req_make(struct httpreq **preq,
     goto out;
   memcpy(req->method, method, m_len);
   if(scheme) {
-    req->scheme = Curl_strndup(scheme, s_len);
+    req->scheme = Curl_memdup0(scheme, s_len);
     if(!req->scheme)
       goto out;
   }
   if(authority) {
-    req->authority = Curl_strndup(authority, a_len);
+    req->authority = Curl_memdup0(authority, a_len);
     if(!req->authority)
       goto out;
   }
   if(path) {
-    req->path = Curl_strndup(path, p_len);
+    req->path = Curl_memdup0(path, p_len);
     if(!req->path)
       goto out;
   }
@@ -4773,7 +4760,7 @@ CURLcode Curl_http_req_make2(struct httpreq **preq,
   CURLUcode uc;
 
   DEBUGASSERT(method);
-  if(m_len + 1 >= sizeof(req->method))
+  if(m_len + 1 > sizeof(req->method))
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   req = calloc(1, sizeof(*req));

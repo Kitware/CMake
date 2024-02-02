@@ -138,7 +138,7 @@ const struct Curl_handler Curl_handler_scp = {
   ZERO_NULL,                            /* domore_getsock */
   ssh_getsock,                          /* perform_getsock */
   scp_disconnect,                       /* disconnect */
-  ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* connection_check */
   ssh_attach,                           /* attach */
   PORT_SSH,                             /* defport */
@@ -167,7 +167,7 @@ const struct Curl_handler Curl_handler_sftp = {
   ZERO_NULL,                            /* domore_getsock */
   ssh_getsock,                          /* perform_getsock */
   sftp_disconnect,                      /* disconnect */
-  ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* connection_check */
   ssh_attach,                           /* attach */
   PORT_SSH,                             /* defport */
@@ -589,10 +589,9 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
 
     switch(rc) {
     default: /* unknown return codes will equal reject */
-      /* FALLTHROUGH */
     case CURLKHSTAT_REJECT:
       state(data, SSH_SESSION_FREE);
-      /* FALLTHROUGH */
+      FALLTHROUGH();
     case CURLKHSTAT_DEFER:
       /* DEFER means bail out but keep the SSH_HOSTKEY state */
       result = sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
@@ -601,9 +600,8 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
       /* remove old host+key that doesn't match */
       if(host)
         libssh2_knownhost_del(sshc->kh, host);
-        /* FALLTHROUGH */
+      FALLTHROUGH();
     case CURLKHSTAT_FINE:
-        /* FALLTHROUGH */
     case CURLKHSTAT_FINE_ADD_TO_FILE:
       /* proceed */
       if(keycheck != LIBSSH2_KNOWNHOST_CHECK_MATCH) {
@@ -997,7 +995,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       state(data, SSH_S_STARTUP);
-      /* FALLTHROUGH */
+      FALLTHROUGH();
 
     case SSH_S_STARTUP:
       rc = session_startup(sshc->ssh_session, sock);
@@ -1016,7 +1014,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
 
       state(data, SSH_HOSTKEY);
 
-      /* FALLTHROUGH */
+      FALLTHROUGH();
     case SSH_HOSTKEY:
       /*
        * Before we authenticate we should check the hostkey's fingerprint
@@ -1961,22 +1959,22 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       }
       else if(rc == 0) {
         #ifdef _MSC_VER
-        #define LIBSSH2_VFS_SIZE_MASK "I64u"
+        #define CURL_LIBSSH2_VFS_SIZE_MASK "I64u"
         #else
-        #define LIBSSH2_VFS_SIZE_MASK "llu"
+        #define CURL_LIBSSH2_VFS_SIZE_MASK "llu"
         #endif
         char *tmp = aprintf("statvfs:\n"
-                            "f_bsize: %" LIBSSH2_VFS_SIZE_MASK "\n"
-                            "f_frsize: %" LIBSSH2_VFS_SIZE_MASK "\n"
-                            "f_blocks: %" LIBSSH2_VFS_SIZE_MASK "\n"
-                            "f_bfree: %" LIBSSH2_VFS_SIZE_MASK "\n"
-                            "f_bavail: %" LIBSSH2_VFS_SIZE_MASK "\n"
-                            "f_files: %" LIBSSH2_VFS_SIZE_MASK "\n"
-                            "f_ffree: %" LIBSSH2_VFS_SIZE_MASK "\n"
-                            "f_favail: %" LIBSSH2_VFS_SIZE_MASK "\n"
-                            "f_fsid: %" LIBSSH2_VFS_SIZE_MASK "\n"
-                            "f_flag: %" LIBSSH2_VFS_SIZE_MASK "\n"
-                            "f_namemax: %" LIBSSH2_VFS_SIZE_MASK "\n",
+                            "f_bsize: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_frsize: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_blocks: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_bfree: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_bavail: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_files: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_ffree: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_favail: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_fsid: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_flag: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n"
+                            "f_namemax: %" CURL_LIBSSH2_VFS_SIZE_MASK "\n",
                             statvfs.f_bsize, statvfs.f_frsize,
                             statvfs.f_blocks, statvfs.f_bfree,
                             statvfs.f_bavail, statvfs.f_files,
@@ -2160,14 +2158,15 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           }
           /* seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
           do {
+            char scratch[4*1024];
             size_t readthisamountnow =
-              (data->state.resume_from - passed > data->set.buffer_size) ?
-              (size_t)data->set.buffer_size :
-              curlx_sotouz(data->state.resume_from - passed);
+              (data->state.resume_from - passed >
+                (curl_off_t)sizeof(scratch)) ?
+              sizeof(scratch) : curlx_sotouz(data->state.resume_from - passed);
 
             size_t actuallyread;
             Curl_set_in_callback(data, true);
-            actuallyread = data->state.fread_func(data->state.buffer, 1,
+            actuallyread = data->state.fread_func(scratch, 1,
                                                   readthisamountnow,
                                                   data->state.in);
             Curl_set_in_callback(data, false);
@@ -2213,7 +2212,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         /* we want to use the _sending_ function even when the socket turns
            out readable as the underlying libssh2 sftp send function will deal
            with both accordingly */
-        conn->cselect_bits = CURL_CSELECT_OUT;
+        data->state.select_bits = CURL_CSELECT_OUT;
 
         /* since we don't really wait for anything at this point, we want the
            state machine to move on as soon as possible so we set a very short
@@ -2602,7 +2601,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
     /* we want to use the _receiving_ function even when the socket turns
        out writableable as the underlying libssh2 recv function will deal
        with both accordingly */
-    conn->cselect_bits = CURL_CSELECT_IN;
+    data->state.select_bits = CURL_CSELECT_IN;
 
     if(result) {
       /* this should never occur; the close state should be entered
@@ -2757,7 +2756,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         /* we want to use the _sending_ function even when the socket turns
            out readable as the underlying libssh2 scp send function will deal
            with both accordingly */
-        conn->cselect_bits = CURL_CSELECT_OUT;
+        data->state.select_bits = CURL_CSELECT_OUT;
 
         state(data, SSH_STOP);
       }
@@ -2819,7 +2818,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       /* we want to use the _receiving_ function even when the socket turns
          out writableable as the underlying libssh2 recv function will deal
          with both accordingly */
-      conn->cselect_bits = CURL_CSELECT_IN;
+      data->state.select_bits = CURL_CSELECT_IN;
 
       if(result) {
         state(data, SSH_SCP_CHANNEL_FREE);
@@ -3024,7 +3023,6 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       break;
 
     case SSH_QUIT:
-      /* fallthrough, just stop! */
     default:
       /* internal error */
       sshc->nextstate = SSH_NO_STATE;
@@ -3293,6 +3291,27 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
 #ifndef CURL_DISABLE_PROXY
   if(conn->http_proxy.proxytype == CURLPROXY_HTTPS) {
     /*
+      Setup libssh2 callbacks to make it read/write TLS from the socket.
+
+      ssize_t
+      recvcb(libssh2_socket_t sock, void *buffer, size_t length,
+      int flags, void **abstract);
+
+      ssize_t
+      sendcb(libssh2_socket_t sock, const void *buffer, size_t length,
+      int flags, void **abstract);
+
+    */
+#if LIBSSH2_VERSION_NUM >= 0x010b01
+    infof(data, "Uses HTTPS proxy");
+    libssh2_session_callback_set2(sshc->ssh_session,
+                                  LIBSSH2_CALLBACK_RECV,
+                                  (libssh2_cb_generic *)ssh_tls_recv);
+    libssh2_session_callback_set2(sshc->ssh_session,
+                                  LIBSSH2_CALLBACK_SEND,
+                                  (libssh2_cb_generic *)ssh_tls_send);
+#else
+    /*
      * This crazy union dance is here to avoid assigning a void pointer a
      * function pointer as it is invalid C. The problem is of course that
      * libssh2 has such an API...
@@ -3312,22 +3331,11 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
     sshsend.sendptr = ssh_tls_send;
 
     infof(data, "Uses HTTPS proxy");
-    /*
-      Setup libssh2 callbacks to make it read/write TLS from the socket.
-
-      ssize_t
-      recvcb(libssh2_socket_t sock, void *buffer, size_t length,
-      int flags, void **abstract);
-
-      ssize_t
-      sendcb(libssh2_socket_t sock, const void *buffer, size_t length,
-      int flags, void **abstract);
-
-    */
     libssh2_session_callback_set(sshc->ssh_session,
                                  LIBSSH2_CALLBACK_RECV, sshrecv.recvp);
     libssh2_session_callback_set(sshc->ssh_session,
                                  LIBSSH2_CALLBACK_SEND, sshsend.sendp);
+#endif
 
     /* Store the underlying TLS recv/send function pointers to be used when
        reading from the proxy */
