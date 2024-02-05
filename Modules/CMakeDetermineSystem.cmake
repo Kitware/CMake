@@ -6,30 +6,6 @@
 # CMAKE_SYSTEM_NAME - on unix this is uname -s, for windows it is Windows
 # CMAKE_SYSTEM_VERSION - on unix this is uname -r, for windows it is empty
 # CMAKE_SYSTEM - ${CMAKE_SYSTEM}-${CMAKE_SYSTEM_VERSION}, for windows: ${CMAKE_SYSTEM}
-#
-#  Expected uname -s output:
-#
-# AIX                           AIX
-# BSD/OS                        BSD/OS
-# FreeBSD                       FreeBSD
-# HP-UX                         HP-UX
-# Linux                         Linux
-# GNU/kFreeBSD                  GNU/kFreeBSD
-# NetBSD                        NetBSD
-# OpenBSD                       OpenBSD
-# OFS/1 (Digital Unix)          OSF1
-# SCO OpenServer 5              SCO_SV
-# SCO UnixWare 7                UnixWare
-# SCO UnixWare (pre release 7)  UNIX_SV
-# SCO XENIX                     Xenix
-# Solaris                       SunOS
-# SunOS                         SunOS
-# Tru64                         Tru64
-# Ultrix                        ULTRIX
-# cygwin                        CYGWIN_NT-5.1
-# MSYS                          MSYS_NT-6.1
-# MacOSX                        Darwin
-
 
 # find out on which system cmake runs
 if(CMAKE_HOST_UNIX)
