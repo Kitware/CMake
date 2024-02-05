@@ -1,16 +1,18 @@
 VERSION
 -------
 
-What version number is this target.
+Version number of a shared library target.
 
 For shared libraries ``VERSION`` and :prop_tgt:`SOVERSION` can be used
-to specify the build version and API version respectively.  When building or
+to specify the build version and ABI version respectively.  When building or
 installing appropriate symlinks are created if the platform supports
 symlinks and the linker supports so-names.  If only one of both is
 specified the missing is assumed to have the same version number.  For
 executables ``VERSION`` can be used to specify the build version.  When
 building or installing appropriate symlinks are created if the
 platform supports symlinks.
+
+.. include:: VERSION_SOVERSION_EXAMPLE.txt
 
 Windows Versions
 ^^^^^^^^^^^^^^^^
