@@ -5,8 +5,10 @@ Should the target be processed with auto-rcc (for Qt projects).
 
 ``AUTORCC`` is a boolean specifying whether CMake will handle
 the Qt ``rcc`` code generator automatically, i.e. without having to use
-commands like :module:`QT4_ADD_RESOURCES() <FindQt4>`, ``QT5_ADD_RESOURCES()``,
+commands like :module:`QT4_ADD_RESOURCES() <FindQt4>`, `qt5_add_resources()`_,
 etc.  Currently, Qt versions 4 to 6 are supported.
+
+.. _`qt5_add_resources()`: https://doc.qt.io/qt-5/qtcore-cmake-qt5-add-resources.html
 
 When this property is ``ON``, CMake will handle ``.qrc`` files added
 as target sources at build time and invoke ``rcc`` accordingly.
