@@ -204,10 +204,10 @@ else()
     endif()
     list(PREPEND _CMAKE_NM_NAMES "llvm-nm")
     if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_VERSION}" VERSION_GREATER_EQUAL 9)
-      # llvm-objdump versions prior to 9 did not support everything we need.
+      # llvm-objcopy and llvm-objdump on versions prior to 9 did not support everything we need.
+      list(PREPEND _CMAKE_OBJCOPY_NAMES "llvm-objcopy")
       list(PREPEND _CMAKE_OBJDUMP_NAMES "llvm-objdump")
     endif()
-    list(PREPEND _CMAKE_OBJCOPY_NAMES "llvm-objcopy")
     list(PREPEND _CMAKE_READELF_NAMES "llvm-readelf")
     list(PREPEND _CMAKE_DLLTOOL_NAMES "llvm-dlltool")
     list(PREPEND _CMAKE_ADDR2LINE_NAMES "llvm-addr2line")
