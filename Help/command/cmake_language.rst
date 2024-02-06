@@ -513,11 +513,6 @@ Terminating Scripts
 
 .. versionadded:: 3.29
 
-.. _EXIT:
-.. _exit-code:
-
-.. code-block:: cmake
-
 .. signature::
   cmake_language(EXIT <exit-code>)
 

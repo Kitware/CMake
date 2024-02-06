@@ -178,10 +178,9 @@ File Operations
 
   False if the given path is an empty string.
 
-  .. warning::
-    To check the readability of a file, use preferably ``if(IS_READABLE)``
-    because this test will evolve to check file existence only in a future
-    release.
+  .. note::
+    Prefer ``if(IS_READABLE)`` to check file readability.  ``if(EXISTS)``
+    may be changed in the future to to only check file existence.
 
 .. signature:: if(IS_READABLE <path-to-file-or-directory>)
 
