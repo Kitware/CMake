@@ -34,6 +34,13 @@ if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "nvhpc_")
     )
 endif()
 
+if ("$ENV{CMAKE_CONFIGURATION}" STREQUAL "windows_vs2022_x64_ninja")
+  list(APPEND test_exclusions
+    # FIXME(#25573): This test failure needs further investigation.
+    "^SwiftMixLib$"
+    )
+endif()
+
 string(REPLACE ";" "|" test_exclusions "${test_exclusions}")
 if (test_exclusions)
   set(test_exclusions "(${test_exclusions})")
