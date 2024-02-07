@@ -537,13 +537,7 @@ _Vulkan_set_library_component_found(glslang-oglcompiler NO_WARNING)
 _Vulkan_set_library_component_found(glslang-osdependent NO_WARNING)
 _Vulkan_set_library_component_found(glslang-machineindependent NO_WARNING)
 _Vulkan_set_library_component_found(glslang-genericcodegen NO_WARNING)
-_Vulkan_set_library_component_found(glslang
-  DEPENDENT_COMPONENTS
-    glslang-spirv
-    glslang-oglcompiler
-    glslang-osdependent
-    glslang-machineindependent
-    glslang-genericcodegen)
+_Vulkan_set_library_component_found(glslang DEPENDENT_COMPONENTS glslang-spirv)
 _Vulkan_set_library_component_found(shaderc_combined)
 _Vulkan_set_library_component_found(SPIRV-Tools)
 _Vulkan_set_library_component_found(volk)
@@ -747,10 +741,6 @@ if(Vulkan_FOUND)
 
   if((Vulkan_glslang_LIBRARY OR Vulkan_glslang_DEBUG_LIBRARY)
       AND TARGET Vulkan::glslang-spirv
-      AND TARGET Vulkan::glslang-oglcompiler
-      AND TARGET Vulkan::glslang-osdependent
-      AND TARGET Vulkan::glslang-machineindependent
-      AND TARGET Vulkan::glslang-genericcodegen
       AND NOT TARGET Vulkan::glslang)
     add_library(Vulkan::glslang STATIC IMPORTED)
     set_property(TARGET Vulkan::glslang
@@ -775,10 +765,13 @@ if(Vulkan_FOUND)
     target_link_libraries(Vulkan::glslang
       INTERFACE
         Vulkan::glslang-spirv
-        Vulkan::glslang-oglcompiler
-        Vulkan::glslang-osdependent
-        Vulkan::glslang-machineindependent
-        Vulkan::glslang-genericcodegen
+        # OGLCompiler library has been fully removed since version 14.0.0
+        # OSDependent, MachineIndependent, and GenericCodeGen may also be removed in the future.
+        # See https://github.com/KhronosGroup/glslang/issues/3462
+        $<TARGET_NAME_IF_EXISTS:Vulkan::glslang-oglcompiler>
+        $<TARGET_NAME_IF_EXISTS:Vulkan::glslang-osdependent>
+        $<TARGET_NAME_IF_EXISTS:Vulkan::glslang-machineindependent>
+        $<TARGET_NAME_IF_EXISTS:Vulkan::glslang-genericcodegen>
     )
   endif()
 
