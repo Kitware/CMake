@@ -49,7 +49,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
     bool globalAutoGenTarget = false;
     bool globalAutoRccTarget = false;
     {
-      cmMakefile* makefile = localGen->GetMakefile();
+      cmMakefile const* makefile = localGen->GetMakefile();
       // Detect global autogen target name
       if (makefile->IsOn("CMAKE_GLOBAL_AUTOGEN_TARGET")) {
         std::string targetName =
@@ -118,7 +118,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
           target->GetSafeProperty(this->kw().AUTORCC_EXECUTABLE);
 
         // We support Qt4, Qt5 and Qt6
-        auto qtVersion =
+        auto const qtVersion =
           cmQtAutoGenInitializer::GetQtVersion(target.get(), mocExec);
         bool const validQt = (qtVersion.first.Major == 4) ||
           (qtVersion.first.Major == 5) || (qtVersion.first.Major == 6);
@@ -167,7 +167,7 @@ void cmQtAutoGenGlobalInitializer::GetOrCreateGlobalTarget(
 {
   // Test if the target already exists
   if (localGen->FindGeneratorTargetToUse(name) == nullptr) {
-    cmMakefile* makefile = localGen->GetMakefile();
+    cmMakefile const* makefile = localGen->GetMakefile();
 
     // Create utility target
     auto cc = cm::make_unique<cmCustomCommand>();
@@ -192,9 +192,10 @@ void cmQtAutoGenGlobalInitializer::GetOrCreateGlobalTarget(
 void cmQtAutoGenGlobalInitializer::AddToGlobalAutoGen(
   cmLocalGenerator* localGen, std::string const& targetName)
 {
-  auto it = this->GlobalAutoGenTargets_.find(localGen);
+  auto const it = this->GlobalAutoGenTargets_.find(localGen);
   if (it != this->GlobalAutoGenTargets_.end()) {
-    cmGeneratorTarget* target = localGen->FindGeneratorTargetToUse(it->second);
+    cmGeneratorTarget const* target =
+      localGen->FindGeneratorTargetToUse(it->second);
     if (target != nullptr) {
       target->Target->AddUtility(targetName, false, localGen->GetMakefile());
     }
@@ -204,9 +205,10 @@ void cmQtAutoGenGlobalInitializer::AddToGlobalAutoGen(
 void cmQtAutoGenGlobalInitializer::AddToGlobalAutoRcc(
   cmLocalGenerator* localGen, std::string const& targetName)
 {
-  auto it = this->GlobalAutoRccTargets_.find(localGen);
+  auto const it = this->GlobalAutoRccTargets_.find(localGen);
   if (it != this->GlobalAutoRccTargets_.end()) {
-    cmGeneratorTarget* target = localGen->FindGeneratorTargetToUse(it->second);
+    cmGeneratorTarget const* target =
+      localGen->FindGeneratorTargetToUse(it->second);
     if (target != nullptr) {
       target->Target->AddUtility(targetName, false, localGen->GetMakefile());
     }
@@ -216,7 +218,7 @@ void cmQtAutoGenGlobalInitializer::AddToGlobalAutoRcc(
 cmQtAutoGen::ConfigStrings<cmQtAutoGen::CompilerFeaturesHandle>
 cmQtAutoGenGlobalInitializer::GetCompilerFeatures(
   std::string const& generator, cmQtAutoGen::ConfigString const& executable,
-  std::string& error, bool const isMultiConfig, bool UseBetterGraph)
+  std::string& error, bool const isMultiConfig, bool const UseBetterGraph)
 {
   cmQtAutoGen::ConfigStrings<cmQtAutoGen::CompilerFeaturesHandle> res;
   if (isMultiConfig && UseBetterGraph) {
@@ -275,7 +277,7 @@ cmQtAutoGenGlobalInitializer::GetCompilerFeatures(
 
   // Check if we have cached features
   {
-    auto it = this->CompilerFeatures_.Default.find(executable.Default);
+    auto const it = this->CompilerFeatures_.Default.find(executable.Default);
     if (it != this->CompilerFeatures_.Default.end()) {
       res.Default = it->second;
       return res;
