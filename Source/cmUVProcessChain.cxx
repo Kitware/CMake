@@ -311,6 +311,9 @@ void cmUVProcessChain::InternalData::SpawnProcess(
   arguments.push_back(nullptr);
   options.args = const_cast<char**>(arguments.data());
   options.flags = UV_PROCESS_WINDOWS_HIDE;
+#if UV_VERSION_MAJOR > 1 || (UV_VERSION_MAJOR == 1 && UV_VERSION_MINOR >= 48)
+  options.flags |= UV_PROCESS_WINDOWS_FILE_PATH_EXACT_NAME;
+#endif
   if (!this->Builder->WorkingDirectory.empty()) {
     options.cwd = this->Builder->WorkingDirectory.c_str();
   }
