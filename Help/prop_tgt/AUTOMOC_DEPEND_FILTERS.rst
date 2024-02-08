@@ -22,14 +22,14 @@ file gets rebuilt even when the source file itself doesn't change.
 
 If any of the extracted files is :prop_sf:`GENERATED` or if it is not in the
 target's sources, then it might be necessary to add it to the
-``_autogen`` target  dependencies.
+:ref:`<ORIGIN>_autogen` target  dependencies.
 See :prop_tgt:`AUTOGEN_TARGET_DEPENDS` for reference.
 
 By default ``AUTOMOC_DEPEND_FILTERS`` is initialized from
 :variable:`CMAKE_AUTOMOC_DEPEND_FILTERS`, which is empty by default.
 
-From Qt 5.15.0 on this variable is ignored as moc is able to output the correct
-dependencies.
+From Qt 5.15.0 on this variable is ignored as ``moc`` is able to output the
+correct dependencies.
 
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.
