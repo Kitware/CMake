@@ -485,18 +485,7 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
 
       foreach(_match IN LISTS _versions_regex)
         if(_match MATCHES "([0-9]+(\\.[0-9]+)+)")
-          cmake_host_system_information(RESULT _reg
-            QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/${_installation_type}/${CMAKE_MATCH_1}"
-            VALUE "MATLABROOT"
-            VIEW ${_view}
-          )
-
-          _Matlab_VersionInfoXML("${_reg}" _matlab_version_tmp)
-          if("${_matlab_version_tmp}" STREQUAL "unknown")
-            list(APPEND matlabs_from_registry ${_match})
-          else()
-            list(APPEND matlabs_from_registry ${_matlab_version_tmp})
-          endif()
+          list(APPEND matlabs_from_registry ${_match})
         endif()
       endforeach()
 
