@@ -43,7 +43,11 @@ The module supports the following components:
   components.  These libraries are found unconditionally.
 
 .. versionadded:: 3.30
-  Added support for specifying a version range to :command:`find_package`
+  Added support for specifying a version range to :command:`find_package` and
+  added support for specifying ``REGISTRY_VIEW`` to :command:`find_package`,
+  :command:`matlab_extract_all_installed_versions_from_registry` and
+  :command:`matlab_get_all_valid_matlab_roots_from_registry`. The default
+  behavior remained unchanged, by using the registry view ``TARGET``.
 
 .. note::
 
@@ -59,7 +63,8 @@ the path of the desired Matlab version. Otherwise, the behavior is platform
 specific:
 
 * Windows: The installed versions of Matlab/MCR are retrieved from the
-  Windows registry
+  Windows registry. The ``REGISTRY_VIEW`` argument may optionally be specified
+  to manually control whether 32bit or 64bit versions shall be searched for.
 * macOS: The installed versions of Matlab/MCR are given by the MATLAB
   default installation paths in ``/Application``. If no such application is
   found, it falls back to the one that might be accessible from the ``PATH``.
@@ -443,20 +448,33 @@ endmacro()
 #[=======================================================================[.rst:
 .. command:: matlab_extract_all_installed_versions_from_registry
 
-  .. code-block:: cmake
+  This function parses the Windows registry and finds the Matlab versions that
+  are installed. The found versions are stored in ``matlab_versions``.
 
+  .. signature::
+    matlab_extract_all_installed_versions_from_registry(matlab_versions
+      [REGISTRY_VIEW view])
+
+    .. versionadded:: 3.30
+
+    * Output: ``matlab_versions`` is a list of all the versions of Matlab found
+    * Input: ``REGISTRY_VIEW`` Optional registry view to use for registry
+      interaction. The argument is passed (or omitted) to
+      :command:`cmake_host_system_information` without further checks or
+      modification.
+
+  .. signature::
     matlab_extract_all_installed_versions_from_registry(win64 matlab_versions)
 
-  * Input: ``win64`` is a boolean to search for the 64 bit version of Matlab
-  * Output: ``matlab_versions`` is a list of all the versions of Matlab found
+    * Input: ``win64`` is a boolean to search for the 64 bit version of
+      Matlab. Set to ``ON`` to use the 64bit registry view or ``OFF`` to use the
+      32bit registry view. If finer control is needed, see signature above.
+    * Output: ``matlab_versions`` is a list of all the versions of Matlab found
 
-  This function parses the Windows registry and founds the Matlab versions that
-  are installed. The found versions are returned in `matlab_versions`.
-  Set `win64` to `TRUE` if the 64 bit version of Matlab should be looked for
   The returned list contains all versions under
-  ``HKLM\\SOFTWARE\\Mathworks\\MATLAB``,
-  ``HKLM\\SOFTWARE\\Mathworks\\MATLAB Runtime`` and
-  ``HKLM\\SOFTWARE\\Mathworks\\MATLAB Compiler Runtime`` or an empty list in
+  ``HKLM\SOFTWARE\Mathworks\MATLAB``,
+  ``HKLM\SOFTWARE\Mathworks\MATLAB Runtime`` and
+  ``HKLM\SOFTWARE\Mathworks\MATLAB Compiler Runtime`` or an empty list in
   case an error occurred (or nothing found).
 
   .. note::
@@ -465,16 +483,32 @@ endmacro()
     installation referenced in the registry,
 
 #]=======================================================================]
-function(matlab_extract_all_installed_versions_from_registry win64 matlab_versions)
+function(matlab_extract_all_installed_versions_from_registry win64_or_matlab_versions)
 
   if(NOT CMAKE_HOST_WIN32)
     message(FATAL_ERROR "[MATLAB] This function can only be called by a Windows host")
   endif()
 
-  if(${win64})
-    set(_view "64")
+  set(_registry_view_args)
+  if("${ARGC}" EQUAL "2")
+    # Old API: <win64> <matlab_versions>
+    if(${win64_or_matlab_versions})
+      set(_registry_view_args VIEW 64)
+    else()
+      set(_registry_view_args VIEW 32)
+    endif()
+    set(matlab_versions ${ARGV1})
   else()
-    set(_view "32")
+    # New API: <matlab_versions> [REGISTRY_VIEW <view>]
+    set(matlab_versions ${win64_or_matlab_versions})
+    cmake_parse_arguments(_Matlab "" "REGISTRY_VIEW" "" ${ARGN})
+    if(_Matlab_REGISTRY_VIEW)
+      set(_registry_view_args VIEW "${_Matlab_REGISTRY_VIEW}")
+    endif()
+  endif()
+
+  if(MATLAB_FIND_DEBUG)
+    message(STATUS "[MATLAB] Extracting MATLAB versions with registry view args '${_registry_view_args}'")
   endif()
 
   set(matlabs_from_registry)
@@ -483,7 +517,8 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
 
     cmake_host_system_information(RESULT _reg
       QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/${_installation_type}"
-      SUBKEYS VIEW ${_view}
+      SUBKEYS
+      ${_registry_view_args}
     )
 
     string(REGEX MATCHALL "([0-9]+(\\.[0-9]+)+)" _versions_regex "${_reg}")
@@ -530,16 +565,34 @@ endmacro()
 
   .. code-block:: cmake
 
-    matlab_get_all_valid_matlab_roots_from_registry(matlab_versions matlab_roots)
+    matlab_get_all_valid_matlab_roots_from_registry(matlab_versions matlab_roots [REGISTRY_VIEW view])
 
   * Input: ``matlab_versions`` of each of the Matlab or MCR installations
   * Output: ``matlab_roots`` location of each of the Matlab or MCR installations
+  * Input: ``REGISTRY_VIEW`` Optional registry view to use for registry
+    interaction. The argument is passed (or omitted) to
+    :command:`cmake_host_system_information` without further checks or
+    modification.
+
+  .. versionadded:: 3.30
+    The optional ``REGISTRY_VIEW`` argument was added to provide a more precise
+    interface on how to interact with the Windows Registry.
+
 #]=======================================================================]
 function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_roots)
 
   # The matlab_versions comes either from
   # extract_matlab_versions_from_registry_brute_force or
   # matlab_extract_all_installed_versions_from_registry.
+
+  cmake_parse_arguments(_Matlab "" "REGISTRY_VIEW" "" ${ARGN})
+  set(_registry_view_args)
+  if(_Matlab_REGISTRY_VIEW)
+    set(_registry_view_args VIEW "${_Matlab_REGISTRY_VIEW}")
+  endif()
+  if(MATLAB_FIND_DEBUG)
+    message(STATUS "[MATLAB] Getting MATLAB roots with registry view args '${_registry_view_args}'")
+  endif()
 
   # Mostly the major.minor version is used in Mathworks Windows Registry keys.
   # If the patch is not zero, major.minor.patch is used.
@@ -551,6 +604,7 @@ function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_
     cmake_host_system_information(RESULT current_MATLAB_ROOT
       QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/MATLAB/${_matlab_current_version}"
       VALUE "MATLABROOT"
+      ${_registry_view_args}
     )
     cmake_path(CONVERT "${current_MATLAB_ROOT}" TO_CMAKE_PATH_LIST current_MATLAB_ROOT)
 
@@ -570,6 +624,7 @@ function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_
       cmake_host_system_information(RESULT current_MATLAB_ROOT
         QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/${_installation_type}/${_matlab_current_version}"
         VALUE "MATLABROOT"
+        ${_registry_view_args}
       )
       cmake_path(CONVERT "${current_MATLAB_ROOT}" TO_CMAKE_PATH_LIST current_MATLAB_ROOT)
 
@@ -1411,13 +1466,7 @@ function(_Matlab_find_instances_win32 matlab_roots)
   # testing if we are able to extract the needed information from the registry
   set(_matlab_versions_from_registry)
 
-  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set(_matlab_win64 ON)
-  else()
-    set(_matlab_win64 OFF)
-  endif()
-
-  matlab_extract_all_installed_versions_from_registry(_matlab_win64 _matlab_versions_from_registry)
+  matlab_extract_all_installed_versions_from_registry(_matlab_versions_from_registry ${ARGN})
 
   # the returned list is empty, doing the search on all known versions
   if(NOT _matlab_versions_from_registry)
@@ -1428,7 +1477,7 @@ function(_Matlab_find_instances_win32 matlab_roots)
   endif()
 
   # filtering the results with the registry keys
-  matlab_get_all_valid_matlab_roots_from_registry("${_matlab_versions_from_registry}" _matlab_possible_roots)
+  matlab_get_all_valid_matlab_roots_from_registry("${_matlab_versions_from_registry}" _matlab_possible_roots ${ARGN})
   set(${matlab_roots} ${_matlab_possible_roots} PARENT_SCOPE)
 
 endfunction()
@@ -1578,7 +1627,10 @@ else()
   # one installation using the appropriate heuristics.
   # There is apparently no standard way on Linux.
   if(CMAKE_HOST_WIN32)
-    _Matlab_find_instances_win32(_matlab_possible_roots_win32)
+    if(NOT DEFINED Matlab_FIND_REGISTRY_VIEW)
+      set(Matlab_FIND_REGISTRY_VIEW TARGET)
+    endif()
+    _Matlab_find_instances_win32(_matlab_possible_roots_win32 REGISTRY_VIEW ${Matlab_FIND_REGISTRY_VIEW})
     list(APPEND _matlab_possible_roots ${_matlab_possible_roots_win32})
   elseif(APPLE)
     _Matlab_find_instances_macos(_matlab_possible_roots_macos)
