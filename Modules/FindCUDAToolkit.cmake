@@ -1136,18 +1136,12 @@ if(CUDAToolkit_FOUND)
 
   _CUDAToolkit_find_and_add_import_lib(cuda_driver ALT cuda)
 
-  _CUDAToolkit_find_and_add_import_lib(cudart)
-  _CUDAToolkit_find_and_add_import_lib(cudart_static)
 
-  # setup dependencies that are required for cudart_static when building
+  # setup dependencies that are required for cudart/cudart_static when building
   # on linux. These are generally only required when using the CUDA toolkit
   # when CUDA language is disabled
-  if(NOT TARGET CUDA::cudart_static_deps
-     AND TARGET CUDA::cudart_static)
-
+  if(NOT TARGET CUDA::cudart_static_deps)
     add_library(CUDA::cudart_static_deps IMPORTED INTERFACE)
-    target_link_libraries(CUDA::cudart_static INTERFACE CUDA::cudart_static_deps)
-
     if(UNIX AND (CMAKE_C_COMPILER OR CMAKE_CXX_COMPILER))
       find_package(Threads REQUIRED)
       target_link_libraries(CUDA::cudart_static_deps INTERFACE Threads::Threads ${CMAKE_DL_LIBS})
@@ -1164,6 +1158,9 @@ if(CUDAToolkit_FOUND)
       endif()
     endif()
   endif()
+
+  _CUDAToolkit_find_and_add_import_lib(cudart DEPS cudart_static_deps)
+  _CUDAToolkit_find_and_add_import_lib(cudart_static DEPS cudart_static_deps)
 
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 12.0.0)
     _CUDAToolkit_find_and_add_import_lib(nvJitLink)
