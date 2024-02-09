@@ -217,6 +217,7 @@ function(run_cmake test)
     "|[^\n]*offset in archive not a multiple of 8"
     "|[^\n]*from Time Machine by path"
     "|[^\n]*Bullseye Testing Technology"
+    ${RunCMake_TEST_EXTRA_IGNORE_LINE_REGEX}
     ")[^\n]*\n)+"
     )
   if(RunCMake_IGNORE_POLICY_VERSION_DEPRECATION)
