@@ -123,6 +123,8 @@ of the following libraries that are part of the CUDAToolkit:
 - :ref:`nvidia-ML<cuda_toolkit_nvML>`
 - :ref:`nvPTX Compiler<cuda_toolkit_nvptx>`
 - :ref:`nvRTC<cuda_toolkit_nvRTC>`
+- :ref:`nvJitLink<cuda_toolkit_nvJitLink>`
+- :ref:`nvFatBin<cuda_toolkit_nvfatbin>`
 - :ref:`nvToolsExt<cuda_toolkit_nvToolsExt>`
 - :ref:`nvtx3<cuda_toolkit_nvtx3>`
 - :ref:`OpenCL<cuda_toolkit_opencl>`
@@ -417,6 +419,20 @@ Targets Created:
 
 - ``CUDA::nvJitLink`` starting in CUDA 12.0
 - ``CUDA::nvJitLink_static``  starting in CUDA 12.0
+
+.. _`cuda_toolkit_nvfatbin`:
+
+nvFatBin
+"""""""""
+
+.. versionadded:: 3.30
+
+The `nvFatBin <https://docs.nvidia.com/cuda/>`_ (Runtime fatbin creation) library.
+
+Targets Created:
+
+- ``CUDA::nvfatbin`` starting in CUDA 12.4
+- ``CUDA::nvfatbin_static``  starting in CUDA 12.4
 
 .. _`cuda_toolkit_nvml`:
 
@@ -1166,6 +1182,11 @@ if(CUDAToolkit_FOUND)
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 12.0.0)
     _CUDAToolkit_find_and_add_import_lib(nvJitLink)
     _CUDAToolkit_find_and_add_import_lib(nvJitLink_static DEPS cudart_static_deps)
+  endif()
+
+  if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 12.4.0)
+    _CUDAToolkit_find_and_add_import_lib(nvfatbin DEPS cudart_static_deps)
+    _CUDAToolkit_find_and_add_import_lib(nvfatbin_static DEPS cudart_static_deps)
   endif()
 
   _CUDAToolkit_find_and_add_import_lib(culibos) # it's a static library
