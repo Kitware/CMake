@@ -1,2 +1,4 @@
 ^All tests that have RESOURCE_GROUPS must include the resource spec generator fixture in their FIXTURES_REQUIRED
-No tests were found!!!$
+CMake Error at [^
+]*/Tests/RunCMake/CTestResourceAllocation/dynamic-resource-circular-no-required-fixtures-ctest-s/test\.cmake:[0-9]+ \(message\):
+  Tests did not pass$

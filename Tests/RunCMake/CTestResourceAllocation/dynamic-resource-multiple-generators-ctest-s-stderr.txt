@@ -1,2 +1,4 @@
 ^Only one test may define the GENERATED_RESOURCE_SPEC_FILE property
-No tests were found!!!$
+CMake Error at [^
+]*/Tests/RunCMake/CTestResourceAllocation/dynamic-resource-multiple-generators-ctest-s/test\.cmake:[0-9]+ \(message\):
+  Tests did not pass$

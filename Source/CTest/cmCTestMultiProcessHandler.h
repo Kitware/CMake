@@ -61,7 +61,7 @@ public:
   cmCTestMultiProcessHandler();
   virtual ~cmCTestMultiProcessHandler();
   // Set the tests
-  void SetTests(TestMap tests, PropertiesMap properties);
+  bool SetTests(TestMap tests, PropertiesMap properties);
   // Set the max number of tests that can be run at the same time.
   void SetParallelLevel(size_t);
   void SetTestLoad(unsigned long load);
