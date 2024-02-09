@@ -1978,14 +1978,16 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
 
     cmValue deploymentTarget =
       this->Makefile->GetDefinition("CMAKE_OSX_DEPLOYMENT_TARGET");
-    std::string deploymentTargetFlagVar =
-      "CMAKE_" + lang + "_OSX_DEPLOYMENT_TARGET_FLAG";
-    cmValue deploymentTargetFlag =
-      this->Makefile->GetDefinition(deploymentTargetFlagVar);
-    if (cmNonempty(deploymentTargetFlag) && cmNonempty(deploymentTarget)) {
-      flags += " ";
-      flags += *deploymentTargetFlag;
-      flags += *deploymentTarget;
+    if (cmNonempty(deploymentTarget)) {
+      std::string deploymentTargetFlagVar =
+        "CMAKE_" + lang + "_OSX_DEPLOYMENT_TARGET_FLAG";
+      cmValue deploymentTargetFlag =
+        this->Makefile->GetDefinition(deploymentTargetFlagVar);
+      if (cmNonempty(deploymentTargetFlag)) {
+        flags += " ";
+        flags += *deploymentTargetFlag;
+        flags += *deploymentTarget;
+      }
     }
   }
 }
