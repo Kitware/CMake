@@ -21,8 +21,8 @@ generate_apple_platform_selection_file(mylib-config-install.cmake
   IOS_SIMULATOR_INCLUDE_FILE ${IOS_SIMULATOR_INCLUDE_FILE}
   TVOS_INCLUDE_FILE lib/tvos/cmake/mylib/mylib-targets.cmake
   TVOS_SIMULATOR_INCLUDE_FILE lib/tvos-simulator/cmake/mylib/mylib-targets.cmake
-  VISIONOS_INCLUDE_FILE lib/watchos/cmake/mylib/mylib-targets.cmake
-  VISIONOS_SIMULATOR_INCLUDE_FILE lib/watchos-simulator/cmake/mylib/mylib-targets.cmake
+  VISIONOS_INCLUDE_FILE lib/visionos/cmake/mylib/mylib-targets.cmake
+  VISIONOS_SIMULATOR_INCLUDE_FILE lib/visionos-simulator/cmake/mylib/mylib-targets.cmake
   WATCHOS_INCLUDE_FILE lib/watchos/cmake/mylib/mylib-targets.cmake
   WATCHOS_SIMULATOR_INCLUDE_FILE lib/watchos-simulator/cmake/mylib/mylib-targets.cmake
   )
