@@ -1,0 +1,574 @@
+# This Yaml Document has been converted by ESAI Yaml Pipeline Conversion Tool.
+# Please make sure to check all the converted content, it is your team's responsibility to make sure that the pipeline is still valid and functions as expected.
+# The SBOM tasks have been removed because they are not required for the unofficial template.
+# You can manually enable SBOM in the unofficial template if needed, othewise its automatically enabled when using official template. https://eng.ms/docs/cloud-ai-platform/devdiv/one-engineering-system-1es/1es-docs/1es-pipeline-templates/features/sbom
+# This pipeline will be extended to the MicroBuild template
+# The Task 'PublishBuildArtifacts@1' has been converted to an output named 'Publish Symbols Artifacts ' in the templateContext section.
+# The Task 'PublishPipelineArtifact@1' has been converted to an output named 'Publish Pipeline Artifact - NuGet Package' in the templateContext section.
+# The Task 'NuGetCommand@2' has been converted to an output named 'NuGet publish for VS Insertion' in the templateContext section.
+# The Task 'PublishPipelineArtifact@1' has been converted to an output named 'Publish Generate Doc log (process.py.log)' in the templateContext section.
+trigger: none
+name: $(date:yyMMdd)$(rev:rr)
+resources:
+  repositories:
+  - repository: self
+    type: git
+    ref: refs/heads/cmake-daemon
+  - repository: MicroBuildTemplate
+    type: git
+    name: 1ESPipelineTemplates/MicroBuildTemplate
+    ref: refs/tags/release
+variables:
+- name: ApiScanClientId
+  value: 1d6a3de7-4a6a-4b75-b15d-e305293c75af
+- name: ApiScanSecret
+  value: ''
+- name: ApiScanTenant
+  value: 72f988bf-86f1-41af-91ab-2d7cd011db47
+- name: ArtifactServices.Symbol.AccountName
+  value: devdiv
+- name: ArtifactServices.Symbol.PAT
+  value: ''
+- name: ArtifactServices.Symbol.UseAAD
+  value: false
+- name: BuildConfiguration
+  value: RelWithDebInfo
+- name: BuildPlatform
+  value: Any CPU
+- name: CMakeBuildDirectory
+  value: $(Build.ArtifactStagingDirectory)\build
+- name: CMakeInstallDirectory
+  value: $(Build.ArtifactStagingDirectory)\output
+- name: Codeql.Enabled
+  value: true
+- name: Codeql.TSAEnabled
+  value: true
+- name: Codeql.TSAOptionsPath
+  value: $(Agent.BuildDirectory)/config.gdntsa
+- name: DisableDockerDetector
+  value: True
+- name: DropRoot
+  value: '\\cpvsbuild\drops'
+- name: GitCommitDescription
+  value: CMake insertion
+- name: InsertDescription
+  value: 'Associated insertion pipeline: https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=$(Build.BuildId). If generated IntelliSense documentation looks wrong, check the process.py.log pipeline artifact for errors.'
+- name: InsertIntoVS
+  value: true
+- name: InsertPayloadName
+  value: CMake Version $(CMakeVersion)
+- name: InsertReviewers
+  value: bemcmorr@microsoft.com,gcampbell@microsoft.com,snehara@microsoft.com,itodirel@microsoft.com
+- name: PackagingSolutionRoot
+  value: $(Build.ArtifactStagingDirectory)\VSInsertion\Packaging
+- name: SigningSolutionRoot
+  value: $(Build.ArtifactStagingDirectory)\VSInsertion\Signing
+- name: skipComponentGovernanceDetection
+  value: true
+- name: SymbolsDirectory
+  value: $(Build.ArtifactStagingDirectory)\symbols
+- name: TargetBranch
+  value: main
+- name: TeamEmail
+  value: cmaketools@microsoft.com
+- name: TeamName
+  value: vcls
+- name: VstsDropNames
+  value: ''
+extends:
+  template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
+  parameters:
+    pool:
+      name: AzurePipelines-EO
+      image: AzurePipelinesWindows2022compliantGPT
+      os: windows
+    customBuildTags:
+    - ES365AIMigrationTooling
+    stages:
+    - stage: stage
+      jobs:
+      - job: Phase_1
+        displayName: Phase 1
+        timeoutInMinutes: 360
+        cancelTimeoutInMinutes: 1
+        pool:
+          name: VSEngSS-MicroBuild2022-1ES
+        templateContext:
+          mb:
+            signing:
+              enabled: true
+              signType: real
+              zipSources: false
+          outputs:
+          - output: pipelineArtifact
+            displayName: 'Publish Symbols Artifacts '
+            targetPath: $(SymbolsDirectory)
+            artifactName: Symbols
+          - output: pipelineArtifact
+            displayName: 'Publish Pipeline Artifact - NuGet Package'
+            targetPath: $(Build.ArtifactStagingDirectory)/package/
+            artifactName: NuGetPackage
+          - output: nuget
+            displayName: 'NuGet publish for VS Insertion'
+            packageParentPath: '$(Build.ArtifactStagingDirectory)'
+            searchPatternPush: $(Build.ArtifactStagingDirectory)/package/*.nupkg
+            feedPublish: 97a41293-2972-4f48-8c0e-05493ae82010
+            allowPackageConflicts: true
+          - output: pipelineArtifact
+            displayName: 'Publish Generate Doc log (process.py.log)'
+            condition: and(succeeded(), eq(variables.InsertIntoVS, 'true'))
+            targetPath: $(System.DefaultWorkingDirectory)/process.py.log
+            artifactName: GenerateDocLog
+        steps:
+        - checkout: self
+          clean: true
+          fetchTags: false
+          persistCredentials: True
+        - task: CMake@1
+          name: CMake1
+          displayName: CMake version
+          inputs:
+            cwd: $(CMakeBuildDirectory)
+            cmakeArgs: --version
+        - task: CmdLine@2
+          displayName: Create Staging Directories If Not Exist
+          inputs:
+            script: |
+              if not exist "$(SigningSolutionRoot)" mkdir "$(SigningSolutionRoot)"
+              if not exist "$(PackagingSolutionRoot)" mkdir "$(PackagingSolutionRoot)"
+        - task: CopyFiles@2
+          name: CopyFiles1
+          displayName: Copy Signing Solution to Staging Area
+          inputs:
+            SourceFolder: $(Build.SourcesDirectory)\VSInsertion\Signing
+            TargetFolder: $(SigningSolutionRoot)
+            CleanTargetFolder: true
+        - task: PowerShell@2
+          displayName: Update Commit Hash in Cgmanifest.json
+          inputs:
+            targetType: inline
+            script: (gc cgmanifest.json) -replace '\$CommitHashPlaceholder\$', (git rev-parse HEAD) | Out-File -encoding ASCII cgmanifest.json
+            workingDirectory: $(Build.SourcesDirectory)/VSInsertion/Packaging
+        - task: CopyFiles@2
+          name: CopyFiles2
+          displayName: Copy Packaging Solution to Staging Area
+          inputs:
+            SourceFolder: $(Build.SourcesDirectory)/VSInsertion/Packaging
+            TargetFolder: $(PackagingSolutionRoot)
+            CleanTargetFolder: true
+        - task: DownloadPipelineArtifact@2
+          displayName: x64 - Download Pipeline Artifact
+          inputs:
+            source: specific
+            project: 0bdbc590-a062-4c3f-b0f6-9383f67865ee
+            pipeline: 7580
+            preferTriggeringPipeline: true
+            runVersion: latestFromBranch
+            runBranch: refs/heads/cmake-daemon
+            artifact: CMakeInstallX64
+            patterns: '*.zip'
+        - task: ms-devlabs.utilitytasks.task-unzip.unzip@0
+          displayName: x64 - UnZip CMake
+          inputs:
+            pathToZipFile: $(Pipeline.Workspace)/cmake_install_x64.zip
+            pathToZipFolder: $(Pipeline.Workspace)
+        - task: CopyFiles@2
+          displayName: x64 - Copy CMake Files
+          inputs:
+            SourceFolder: $(Pipeline.Workspace)/cmake_install_x64
+            TargetFolder: $(PackagingSolutionRoot)/runtimes/win-x64/native
+        - task: PowerShell@2
+          displayName: Extract CMake binary version to $CMakeVersion
+          inputs:
+            targetType: inline
+            script: |-
+              $cmd="$(PackagingSolutionRoot)/runtimes/win-x64/native/bin/cmake.exe --version"
+              $version = "$(((Invoke-Expression $cmd) -Split " ")[2])"
+              Write-Host "##vso[task.setvariable variable=CMakeVersion]$version"
+        - task: DownloadPipelineArtifact@2
+          displayName: x86 - Download Pipeline Artifact
+          inputs:
+            source: specific
+            project: 0bdbc590-a062-4c3f-b0f6-9383f67865ee
+            pipeline: 7580
+            preferTriggeringPipeline: true
+            runVersion: latestFromBranch
+            runBranch: refs/heads/cmake-daemon
+            artifact: CMakeInstallX86
+            patterns: '*.zip'
+        - task: ms-devlabs.utilitytasks.task-unzip.unzip@0
+          displayName: x86 - UnZip CMake
+          inputs:
+            pathToZipFile: $(Pipeline.Workspace)/cmake_install_x86.zip
+            pathToZipFolder: $(Pipeline.Workspace)
+        - task: CopyFiles@2
+          displayName: x86 - Copy CMake Files
+          inputs:
+            SourceFolder: $(Pipeline.Workspace)/cmake_install_x86
+            TargetFolder: $(PackagingSolutionRoot)/runtimes/win-x86/native
+        - task: DownloadPipelineArtifact@2
+          displayName: ARM64 - Download Pipeline Artifact
+          inputs:
+            source: specific
+            project: 0bdbc590-a062-4c3f-b0f6-9383f67865ee
+            pipeline: 7580
+            preferTriggeringPipeline: true
+            runVersion: latestFromBranch
+            runBranch: refs/heads/cmake-daemon
+            artifact: CMakeInstallArm64
+            patterns: '*.zip'
+        - task: ms-devlabs.utilitytasks.task-unzip.unzip@0
+          displayName: ARM64 - UnZip CMake
+          inputs:
+            pathToZipFile: $(Pipeline.Workspace)/cmake_install_arm64.zip
+            pathToZipFolder: $(Pipeline.Workspace)
+        - task: CopyFiles@2
+          displayName: ARM64 - Copy CMake Files
+          inputs:
+            SourceFolder: $(Pipeline.Workspace)/cmake_install_arm64
+            TargetFolder: $(PackagingSolutionRoot)/runtimes/win-arm64/native
+        - task: CmdLine@2
+          displayName: Create $(SigningSolutionRoot)\input If Not Exist copy
+          inputs:
+            script: |
+              if not exist "$(SigningSolutionRoot)\input" mkdir "$(SigningSolutionRoot)\input"
+        - task: CopyFiles@2
+          name: CopyFiles13
+          displayName: x64 - Collect Files to Sign
+          inputs:
+            SourceFolder: $(PackagingSolutionRoot)/runtimes/win-x64/native/bin
+            Contents: '*.exe'
+            TargetFolder: $(SigningSolutionRoot)\input
+            CleanTargetFolder: true
+        - task: CopyFiles@2
+          displayName: x64 - Collect Catalogs to Sign
+          inputs:
+            SourceFolder: $(PackagingSolutionRoot)/runtimes/win-x64/native/_manifest/spdx_2.2
+            Contents: '*.cat'
+            TargetFolder: $(SigningSolutionRoot)\input
+        - task: NuGetCommand@2
+          name: NuGetCommand10
+          displayName: NuGet restore for Signing Solution
+          inputs:
+            solution: $(SigningSolutionRoot)/SigningSolution.sln
+            selectOrConfig: config
+        - task: VSBuild@1
+          name: VSBuild12
+          displayName: x64 - Trigger Signing
+          inputs:
+            solution: $(SigningSolutionRoot)\SigningSolution.sln
+            vsVersion: 17.0
+            platform: $(BuildPlatform)
+            configuration: Debug
+        - task: CopyFiles@2
+          name: CopyFiles14
+          displayName: x64 - Copy Signed Files to Packaging Location
+          inputs:
+            SourceFolder: $(SigningSolutionRoot)/out/Signed
+            Contents: '*.exe'
+            TargetFolder: $(PackagingSolutionRoot)/runtimes/win-x64/native/bin
+            OverWrite: true
+        - task: CopyFiles@2
+          displayName: x64 - Copy Signed Catalogs to Packaging Location
+          inputs:
+            SourceFolder: $(SigningSolutionRoot)/out/Signed
+            Contents: '*.cat'
+            TargetFolder: $(PackagingSolutionRoot)/runtimes/win-x64/native/_manifest/spdx_2.2
+            OverWrite: true
+        - task: DeleteFiles@1
+          displayName: x64 - Signing Cleanup
+          inputs:
+            SourceFolder: $(SigningSolutionRoot)/out/Signed
+            Contents: '*.exe'
+        - task: CopyFiles@2
+          displayName: x86 - Collect Files to Sign
+          inputs:
+            SourceFolder: $(PackagingSolutionRoot)/runtimes/win-x86/native/bin
+            Contents: '*.exe'
+            TargetFolder: $(SigningSolutionRoot)/input/
+            CleanTargetFolder: true
+        - task: CopyFiles@2
+          displayName: x86 - Collect Catalogs to Sign
+          inputs:
+            SourceFolder: $(PackagingSolutionRoot)/runtimes/win-x86/native/_manifest/spdx_2.2
+            Contents: '*.cat'
+            TargetFolder: $(SigningSolutionRoot)/input/
+        - task: VSBuild@1
+          displayName: x86 - Trigger Signing
+          inputs:
+            solution: $(SigningSolutionRoot)\SigningSolution.sln
+            vsVersion: 17.0
+            platform: $(BuildPlatform)
+            configuration: Debug
+        - task: CopyFiles@2
+          displayName: x86 - Copy Signed Files to Packaging Location
+          inputs:
+            SourceFolder: $(SigningSolutionRoot)/out/Signed
+            Contents: '*.exe'
+            TargetFolder: $(PackagingSolutionRoot)/runtimes/win-x86/native/bin
+            OverWrite: true
+        - task: CopyFiles@2
+          displayName: x86 - Copy Signed Catalogs to Packaging Location
+          inputs:
+            SourceFolder: $(SigningSolutionRoot)/out/Signed
+            Contents: '*.cat'
+            TargetFolder: $(PackagingSolutionRoot)/runtimes/win-x86/native/_manifest/spdx_2.2
+            OverWrite: true
+        - task: DeleteFiles@1
+          displayName: x86 - Signing Cleanup
+          inputs:
+            SourceFolder: $(SigningSolutionRoot)/out/Signed
+            Contents: '*.exe'
+        - task: CopyFiles@2
+          displayName: ARM64 - Collect Files to Sign
+          inputs:
+            SourceFolder: $(PackagingSolutionRoot)/runtimes/win-arm64/native/bin
+            Contents: '*.exe'
+            TargetFolder: $(SigningSolutionRoot)/input/
+            CleanTargetFolder: true
+        - task: CopyFiles@2
+          displayName: ARM64 - Collect Catalogs to Sign
+          inputs:
+            SourceFolder: $(PackagingSolutionRoot)/runtimes/win-arm64/native/_manifest/spdx_2.2
+            Contents: '*.cat'
+            TargetFolder: $(SigningSolutionRoot)/input/
+        - task: VSBuild@1
+          displayName: ARM64 - Trigger Signing
+          inputs:
+            solution: $(SigningSolutionRoot)\SigningSolution.sln
+            vsVersion: 17.0
+            platform: $(BuildPlatform)
+            configuration: Debug
+        - task: CopyFiles@2
+          displayName: ARM64 - Copy Signed Files to Packaging Location
+          inputs:
+            SourceFolder: $(SigningSolutionRoot)/out/Signed
+            Contents: '*.exe'
+            TargetFolder: $(PackagingSolutionRoot)/runtimes/win-arm64/native/bin
+            OverWrite: true
+        - task: CopyFiles@2
+          displayName: ARM64 - Copy Signed Catalogs to Packaging Location
+          inputs:
+            SourceFolder: $(SigningSolutionRoot)/out/Signed
+            Contents: '*.cat'
+            TargetFolder: $(PackagingSolutionRoot)/runtimes/win-arm64/native/_manifest/spdx_2.2
+            OverWrite: true
+        - task: DeleteFiles@1
+          displayName: ARM64 - Signing Cleanup
+          inputs:
+            SourceFolder: $(SigningSolutionRoot)/out/Signed
+            Contents: '*.exe'
+        - task: CopyFiles@2
+          displayName: x64 - Copy cgmanifest.json to Packaging Location
+          inputs:
+            SourceFolder: $(PackagingSolutionRoot)
+            Contents: cgmanifest.json
+            TargetFolder: $(PackagingSolutionRoot)/runtimes/win-x64/native
+        - task: CopyFiles@2
+          displayName: x86 - Copy cgmanifest.json to Packaging Location
+          inputs:
+            SourceFolder: $(PackagingSolutionRoot)
+            Contents: cgmanifest.json
+            TargetFolder: $(PackagingSolutionRoot)/runtimes/win-x86/native
+        - task: CopyFiles@2
+          displayName: ARM64 - Copy cgmanifest.json to Packaging Location
+          inputs:
+            SourceFolder: $(PackagingSolutionRoot)
+            Contents: cgmanifest.json
+            TargetFolder: $(PackagingSolutionRoot)/runtimes/win-arm64/native
+        - task: DownloadPipelineArtifact@2
+          displayName: x64 - Download Pipeline Artifact - PDB
+          inputs:
+            source: specific
+            project: 0bdbc590-a062-4c3f-b0f6-9383f67865ee
+            pipeline: 7580
+            preferTriggeringPipeline: true
+            runVersion: latestFromBranch
+            runBranch: refs/heads/cmake-daemon
+            artifact: CMakePDBX64
+            patterns: '*.zip'
+        - task: ms-devlabs.utilitytasks.task-unzip.unzip@0
+          displayName: x64 - UnZip CMake PDB
+          inputs:
+            pathToZipFile: $(Pipeline.Workspace)/cmake_pdb_x64.zip
+            pathToZipFolder: $(Pipeline.Workspace)
+        - task: CopyFiles@2
+          name: CopyFiles10
+          displayName: x64 - Collect Build PDB
+          inputs:
+            SourceFolder: $(Pipeline.Workspace)/$(BuildConfiguration)/
+            Contents: '*.pdb'
+            TargetFolder: $(SymbolsDirectory)/x64
+        - task: CopyFiles@2
+          displayName: x64 - Collect Build exes
+          inputs:
+            SourceFolder: $(PackagingSolutionRoot)/runtimes/win-x64/native/bin
+            Contents: '*.exe'
+            TargetFolder: $(SymbolsDirectory)/x64
+        - task: DeleteFiles@1
+          displayName: x64 - PDB Cleanup
+          inputs:
+            SourceFolder: $(Pipeline.Workspace)/$(BuildConfiguration)
+            Contents: '*'
+            RemoveSourceFolder: true
+        - task: DownloadPipelineArtifact@2
+          displayName: x86 - Download Pipeline Artifact - PDB
+          inputs:
+            source: specific
+            project: 0bdbc590-a062-4c3f-b0f6-9383f67865ee
+            pipeline: 7580
+            preferTriggeringPipeline: true
+            runVersion: latestFromBranch
+            runBranch: refs/heads/cmake-daemon
+            artifact: CMakePDBX86
+            patterns: '*.zip'
+        - task: ms-devlabs.utilitytasks.task-unzip.unzip@0
+          displayName: x86 - UnZip CMake PDB
+          inputs:
+            pathToZipFile: $(Pipeline.Workspace)/cmake_pdb_x86.zip
+            pathToZipFolder: $(Pipeline.Workspace)
+        - task: CopyFiles@2
+          displayName: x86 - Collect Build PDB
+          inputs:
+            SourceFolder: $(Pipeline.Workspace)/$(BuildConfiguration)/
+            Contents: '*.pdb'
+            TargetFolder: $(SymbolsDirectory)/x86
+        - task: CopyFiles@2
+          displayName: x86 - Collect Build exes
+          inputs:
+            SourceFolder: $(PackagingSolutionRoot)/runtimes/win-x86/native/bin
+            Contents: '*.exe'
+            TargetFolder: $(SymbolsDirectory)/x86
+        - task: DeleteFiles@1
+          displayName: x86 - PDB Cleanup
+          inputs:
+            SourceFolder: $(Pipeline.Workspace)/$(BuildConfiguration)
+            Contents: '*'
+            RemoveSourceFolder: true
+        - task: DownloadPipelineArtifact@2
+          displayName: ARM64 - Download Pipeline Artifact - PDB
+          inputs:
+            source: specific
+            project: 0bdbc590-a062-4c3f-b0f6-9383f67865ee
+            pipeline: 7580
+            preferTriggeringPipeline: true
+            runVersion: latestFromBranch
+            runBranch: refs/heads/cmake-daemon
+            artifact: CMakePDBArm64
+            patterns: '*.zip'
+        - task: ms-devlabs.utilitytasks.task-unzip.unzip@0
+          displayName: ARM64 - UnZip CMake PDB
+          inputs:
+            pathToZipFile: $(Pipeline.Workspace)/cmake_pdb_arm64.zip
+            pathToZipFolder: $(Pipeline.Workspace)
+        - task: CopyFiles@2
+          displayName: ARM64 - Collect Build pdbs
+          inputs:
+            SourceFolder: $(Pipeline.Workspace)/$(BuildConfiguration)/
+            Contents: '*.pdb'
+            TargetFolder: $(SymbolsDirectory)/arm64
+        - task: CopyFiles@2
+          displayName: ARM64 - Collect Build exes
+          inputs:
+            SourceFolder: $(PackagingSolutionRoot)/runtimes/win-arm64/native/bin
+            Contents: '*.exe'
+            TargetFolder: $(SymbolsDirectory)/arm64
+        - task: PublishSymbols@2
+          name: PublishSymbols14
+          displayName: Enable Source Server - x64 x86 ARM64
+          inputs:
+            SymbolsFolder: $(SymbolsDirectory)
+            SearchPattern: '**/*.pdb'
+            IndexSources: false
+            SymbolServerType: TeamServices
+            SymbolsArtifactName: ''
+          continueOnError: true
+        - task: NuGetCommand@2
+          name: NuGetCommand15
+          displayName: NuGet pack for VS Insertion
+          inputs:
+            command: pack
+            searchPatternPack: $(PackagingSolutionRoot)/CopyFiles.nuspec
+            outputDir: $(Build.ArtifactStagingDirectory)/package
+            buildProperties: version=$(CMakeVersion)
+        - task: CopyFiles@2
+          displayName: NuGet - Collect Files to Sign
+          inputs:
+            SourceFolder: $(Build.ArtifactStagingDirectory)/package
+            Contents: '*.nupkg'
+            TargetFolder: $(SigningSolutionRoot)/input/
+            CleanTargetFolder: true
+        - task: VSBuild@1
+          displayName: NuGet - Trigger Signing
+          inputs:
+            solution: $(SigningSolutionRoot)\SigningSolution.sln
+            vsVersion: 17.0
+            platform: $(BuildPlatform)
+            configuration: Debug
+        - task: CopyFiles@2
+          displayName: NuGet - Copy Signed Files to Packaging Location
+          inputs:
+            SourceFolder: $(SigningSolutionRoot)/out/Signed
+            Contents: '*.nupkg'
+            TargetFolder: $(Build.ArtifactStagingDirectory)/package
+            OverWrite: true
+        - task: CmdLine@2
+          displayName: Set APIScan environment
+          inputs:
+            script: setx AzureServicesAuthConnectionString runAs=App;AppId=$(ApiScanClientId);TenantId=$(ApiScanTenant);AppKey=$(ApiScanSecret) /m
+        - task: CmdLine@2
+          displayName: Clear APIScan environment
+          inputs:
+            script: setx AzureServicesAuthConnectionString "" /m
+        - task: PowerShell@2
+          displayName: Generate TSAv2 config
+          inputs:
+            targetType: inline
+            script: |
+              $configName = "config.gdntsa"
+              $config = @"
+              {
+                  "tsaVersion": "TsaV2",
+                  "tsaStamp": "DevDiv",
+                  "tsaEnvironment": "PROD",
+                  "codebase": "NewOrUpdate",
+                  "codebaseName": "MicrosoftCMake_cmake-daemon",
+                  "notificationAliases": [
+                      "cmake@microsoft.com"
+                  ],
+                  "codebaseAdmins": [
+                      "NORTHAMERICA\\itodirel"
+                  ],
+                  "instanceUrl": "https://devdiv.visualstudio.com",
+                  "projectName": "DevDiv",
+                  "areaPath": "DevDiv\\Cpp Developer Experience\\Cross Platform\\CMake\\Upstream",
+                  "iterationPath": "DevDiv\\Future Backlog",
+                  "allTools": true,
+                  "repositoryName": "MicrosoftCMake_cmake-daemon"
+              }
+              "@
+              Out-File -FilePath "$(Agent.BuildDirectory)/$configName" -InputObject $config
+        - task: stevedower.python.InstallPython.InstallPython@1
+          displayName: Install Python
+          inputs:
+            version: python==3.10.2
+            dependencies: pip
+        - task: DeleteFiles@1
+          displayName: Delete Manifest Before Insertion
+          inputs:
+            SourceFolder: $(PackagingSolutionRoot)/runtimes/win-x64/native/_manifest
+            Contents: '**/*'
+            RemoveSourceFolder: true
+        - task: ms-vseng.MicroBuildShipTasks.55100717-a81d-45ea-a363-b8fe3ec375ad.MicroBuildInsertVsPayload@4
+          displayName: Insert CMake into VS
+          condition: and(succeeded(), eq(variables.InsertIntoVS, 'true'))
+          inputs:
+            TargetBranch: $(TargetBranch)
+            TeamName: $(TeamName)
+            TeamEmail: $(TeamEmail)
+            DefaultConfigValues: VS.ExternalAPIs.Microsoft.CMake=$(CMakeVersion)
+            RevisionTextFiles: src\SetupPackages\VC\CMake\MicrosoftCMake\revision.txt
+            CustomScriptExecutionCommand: $ErrorActionPreference="Continue";$(System.DefaultWorkingDirectory)/VS/src/vc/scripts/InsertCMake.ps1 -CMakeRepoRoot "$(Build.SourcesDirectory)" -CMakeExternalApisInstallRoot "runtimes\win-`$(ProductArch)\native" -CMakeInstallRoot "$(PackagingSolutionRoot)/runtimes/win-x64/native" -StageAndCommit $true -LogLocation $(System.DefaultWorkingDirectory) -CommitTitle "CMake Version $(CMakeVersion)" -CommitDescription "from vcls-cmake repo"
+            AllowTopicBranchUpdate: true
+            AddCommitsToPR: false
+            LinkWorkItemsToPR: false

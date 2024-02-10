@@ -1,0 +1,224 @@
+# This Yaml Document has been converted by ESAI Yaml Pipeline Conversion Tool.
+# Please make sure to check all the converted content, it is your team's responsibility to make sure that the pipeline is still valid and functions as expected.
+# This pipeline will be extended to the MicroBuild template
+# The Task 'PublishPipelineArtifact@1' has been converted to an output named 'Publish CMake x64 Artifact' in the templateContext section.
+# The Task 'PublishPipelineArtifact@1' has been converted to an output named 'Publish Pipeline Artifact - x64 PDB' in the templateContext section.
+# The Task 'PublishPipelineArtifact@1' has been converted to an output named 'Publish CMake ARM64 Artifact' in the templateContext section.
+# The Task 'PublishPipelineArtifact@1' has been converted to an output named 'Publish Pipeline Artifact - ARM64 PDB' in the templateContext section.
+# The Task 'PublishPipelineArtifact@1' has been converted to an output named 'Publish CMake x86 Artifact' in the templateContext section.
+# The Task 'PublishPipelineArtifact@1' has been converted to an output named 'Publish Pipeline Artifact - x86 PDB' in the templateContext section.
+trigger:
+  branches:
+    include:
+    - cmake-daemon
+name: $(date:yyyyMMdd)$(rev:.r)
+resources:
+  repositories:
+  - repository: self
+    type: git
+    ref: refs/heads/cmake-daemon
+  - repository: MicroBuildTemplate
+    type: git
+    name: 1ESPipelineTemplates/MicroBuildTemplate
+    ref: refs/tags/release
+variables:
+- name: BuildConfiguration
+  value: RelWithDebInfo
+- name: BuildPlatform
+  value: Any CPU
+- name: CMakeBuildDirectory
+  value: $(Build.ArtifactStagingDirectory)/build
+- name: CMakeInstallDirectory
+  value: $(Build.ArtifactStagingDirectory)/output
+- name: Codeql.Enabled
+  value: true
+- name: DisableDockerDetector
+  value: true
+- name: PackagingSolutionRoot
+  value: $(Build.ArtifactStagingDirectory)/VSInsertion/Packaging
+- name: PYTHONUTF8
+  value: 1
+- name: SigningSolutionRoot
+  value: $(Build.ArtifactStagingDirectory)/VSInsertion/Signing
+- name: SymbolsDirectory
+  value: $(Build.ArtifactStagingDirectory)/symbols
+extends:
+  template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
+  parameters:
+    pool:
+      name: AzurePipelines-EO
+      image: AzurePipelinesWindows2022compliantGPT
+      os: windows
+    customBuildTags:
+    - ES365AIMigrationTooling
+    stages:
+    - stage: stage
+      jobs:
+      - job: Phase_1
+        displayName: CMake x64 Build and Test
+        timeoutInMinutes: 360
+        cancelTimeoutInMinutes: 1
+        pool:
+          name: VSEngSS-MicroBuild2022-1ES
+        templateContext:
+          outputs:
+          - output: pipelineArtifact
+            displayName: 'Publish CMake x64 Artifact'
+            targetPath: $(CMakeBuildDirectory)/cmake_install_x64.zip
+            artifactName: CMakeInstallX64
+          - output: pipelineArtifact
+            displayName: 'Publish Pipeline Artifact - x64 PDB'
+            targetPath: $(Build.ArtifactStagingDirectory)/cmake_pdb_x64.zip
+            artifactName: CMakePDBX64
+        steps:
+        - checkout: self
+          clean: true
+          fetchTags: false
+          persistCredentials: True
+        - task: CMake@1
+          name: CMake1
+          displayName: CMake x64 Cache Generation
+          inputs:
+            cwd: $(CMakeBuildDirectory)
+            cmakeArgs: -DCMAKE_INSTALL_PREFIX:PATH=$(CMakeInstallDirectory) -DCMAKE_CONFIGURATION_TYPES=$(BuildConfiguration) -DCMake_VERSION_MICROSOFT_SCHEME=true -DCMake_VERSION_NO_GIT=true -DMicrosoft_CMake_VERSION_PATCH=$(Build.BuildNumber) $(Build.SourcesDirectory) -DCMAKE_CXX_FLAGS_INIT="/W3 /Qspectre /guard:cf /ZH:SHA_256" -DCMAKE_C_FLAGS_INIT="/W3 /Qspectre /guard:cf /ZH:SHA_256" -DCMAKE_EXE_LINKER_FLAGS_INIT="/incremental:no /profile /guard:cf /CETCOMPAT" -S $(Build.SourcesDirectory) -B $(CMakeBuildDirectory) -DCPACK_BINARY_NSIS=OFF -DCPACK_BINARY_ZIP=ON -DCPACK_PACKAGE_FILE_NAME=cmake_install_x64
+        - task: CMake@1
+          name: CMake2
+          displayName: CMake x64 Build Install and Package
+          inputs:
+            cwd: $(CMakeBuildDirectory)
+            cmakeArgs: --build . --target package install --config $(BuildConfiguration) -- -m
+        - task: CmdLine@1
+          name: CmdLine3
+          displayName: Run tests
+          inputs:
+            filename: $(CMakeBuildDirectory)\bin\$(BuildConfiguration)\ctest
+            arguments: -C $(BuildConfiguration) -E "VSExcludeFromDefaultBuild-RelWithDebInfo|CMakeOnly.MajorVersionSelection-PythonInterp_2|RunCMake.AutoExportDll" --output-on-failure -E VSExcludeFromDefaultBuild-RelWithDebInfo
+            workingFolder: $(CMakeBuildDirectory)
+        - task: DeleteFiles@1
+          displayName: Delete CMake x64 Executables and ctresalloc.pdb
+          inputs:
+            SourceFolder: $(CMakeBuildDirectory)/bin/$(BuildConfiguration)/
+            Contents: |-
+              *.exe
+              ctresalloc.pdb
+        - task: ArchiveFiles@2
+          displayName: Archive CMake x64 PDB Files
+          inputs:
+            rootFolderOrFile: $(CMakeBuildDirectory)/bin/$(BuildConfiguration)/
+            archiveFile: $(Build.ArtifactStagingDirectory)/cmake_pdb_x64.zip
+        - task: PowerShell@2
+          displayName: Generate TSA config
+          inputs:
+            targetType: inline
+            script: |
+              $configName = "config.gdntsa"
+              $config = @"
+              {
+                  "codebaseName": "MicrosoftCMake_cmake-daemon",
+                  "notificationAliases": [
+                      "cmake@microsoft.com"
+                  ],
+                  "codebaseAdmins": [
+                      "NORTHAMERICA\\itodirel"
+                  ],
+                  "instanceUrl": "https://devdiv.visualstudio.com",
+                  "projectName": "DevDiv",
+                  "areaPath": "DevDiv\\Cpp Developer Experience\\Cross Platform\\CMake\\Upstream",
+                  "iterationPath": "DevDiv\\Future Backlog",
+                  "allTools": true
+              }
+              "@
+              Out-File -FilePath "$(Agent.BuildDirectory)/$configName" -InputObject $config
+        - task: PowerShell@2
+          displayName: Create and Publish Version Tag
+          inputs:
+            targetType: inline
+            script: |
+              $cmd="$(CMakeBuildDirectory)/bin/$(BuildConfiguration)/cmake.exe --version"
+              $version = "$(((Invoke-Expression $cmd) -Split " ")[2])"
+              echo Creating Tag "v$version"
+              git tag "v$version"
+              git push origin "v$version"
+      - job: Job_1
+        displayName: CMake ARM64 Build
+        timeoutInMinutes: 360
+        cancelTimeoutInMinutes: 1
+        pool:
+          name: VSEngSS-MicroBuild2022-1ES
+        templateContext:
+          outputs:
+          - output: pipelineArtifact
+            displayName: 'Publish CMake ARM64 Artifact'
+            targetPath: $(CMakeBuildDirectory)/cmake_install_arm64.zip
+            artifactName: CMakeInstallArm64
+          - output: pipelineArtifact
+            displayName: 'Publish Pipeline Artifact - ARM64 PDB'
+            targetPath: $(Build.ArtifactStagingDirectory)/cmake_pdb_arm64.zip
+            artifactName: CMakePDBArm64
+        steps:
+        - checkout: self
+          clean: true
+          fetchTags: false
+        - task: CMake@1
+          displayName: CMake ARM64 Cache Generation
+          inputs:
+            cwd: $(CMakeBuildDirectory)
+            cmakeArgs: -DCMAKE_INSTALL_PREFIX:PATH=$(CMakeInstallDirectory) -DCMAKE_CONFIGURATION_TYPES=$(BuildConfiguration) -DCMake_VERSION_MICROSOFT_SCHEME=true -DCMake_VERSION_NO_GIT=true -DMicrosoft_CMake_VERSION_PATCH=$(Build.BuildNumber) -DCMAKE_CXX_FLAGS_INIT="/W3 /Qspectre /guard:cf /ZH:SHA_256" -DCMAKE_C_FLAGS_INIT="/W3 /Qspectre /guard:cf /ZH:SHA_256" -DCMAKE_EXE_LINKER_FLAGS_INIT="/incremental:no /profile /guard:cf" -S $(Build.SourcesDirectory) -B $(CMakeBuildDirectory) -G "Visual Studio 17 2022" -A ARM64 -DCPACK_BINARY_NSIS=OFF -DCPACK_BINARY_ZIP=ON -DCPACK_PACKAGE_FILE_NAME=cmake_install_arm64
+        - task: CMake@1
+          displayName: CMake ARM64 Build and Package
+          inputs:
+            cwd: $(CMakeBuildDirectory)
+            cmakeArgs: --build . --target package --config $(BuildConfiguration) -- -m
+        - task: DeleteFiles@1
+          displayName: Delete CMake ARM64 Executables and ctresalloc.pdb
+          inputs:
+            SourceFolder: $(CMakeBuildDirectory)/bin/$(BuildConfiguration)/
+            Contents: |-
+              *.exe
+              ctresalloc.pdb
+        - task: ArchiveFiles@2
+          displayName: Archive CMake ARM64 PDB Files
+          inputs:
+            rootFolderOrFile: $(CMakeBuildDirectory)/bin/$(BuildConfiguration)/
+            archiveFile: $(Build.ArtifactStagingDirectory)/cmake_pdb_arm64.zip
+      - job: Job_2
+        displayName: CMake x86 Build
+        timeoutInMinutes: 360
+        pool:
+          name: VSEngSS-MicroBuild2022-1ES
+        templateContext:
+          outputs:
+          - output: pipelineArtifact
+            displayName: 'Publish CMake x86 Artifact'
+            targetPath: $(CMakeBuildDirectory)/cmake_install_x86.zip
+            artifactName: CMakeInstallX86
+          - output: pipelineArtifact
+            displayName: 'Publish Pipeline Artifact - x86 PDB'
+            targetPath: $(Build.ArtifactStagingDirectory)/cmake_pdb_x86.zip
+            artifactName: CMakePDBX86
+        steps:
+        - checkout: self
+          clean: true
+          fetchTags: false
+        - task: CMake@1
+          displayName: CMake x86 Cache Generation
+          inputs:
+            cwd: $(CMakeBuildDirectory)
+            cmakeArgs: -DCMAKE_INSTALL_PREFIX:PATH=$(CMakeInstallDirectory) -DCMAKE_CONFIGURATION_TYPES=$(BuildConfiguration) -DCMake_VERSION_MICROSOFT_SCHEME=true -DCMake_VERSION_NO_GIT=true -DMicrosoft_CMake_VERSION_PATCH=$(Build.BuildNumber) -DCMAKE_CXX_FLAGS_INIT="/W3 /Qspectre /guard:cf /ZH:SHA_256" -DCMAKE_C_FLAGS_INIT="/W3 /Qspectre /guard:cf /ZH:SHA_256" -DCMAKE_EXE_LINKER_FLAGS_INIT="/incremental:no /profile /guard:cf /CETCOMPAT" -S $(Build.SourcesDirectory) -B $(CMakeBuildDirectory) -G "Visual Studio 17 2022" -A Win32 -DCPACK_BINARY_NSIS=OFF -DCPACK_BINARY_ZIP=ON -DCPACK_PACKAGE_FILE_NAME=cmake_install_x86
+        - task: CMake@1
+          displayName: CMake x86 Build and Package
+          inputs:
+            cwd: $(CMakeBuildDirectory)
+            cmakeArgs: --build . --target package --config $(BuildConfiguration) -- -m
+        - task: DeleteFiles@1
+          displayName: Delete CMake x86 Executables and ctresalloc.pdb
+          inputs:
+            SourceFolder: $(CMakeBuildDirectory)/bin/$(BuildConfiguration)/
+            Contents: |-
+              *.exe
+              ctresalloc.pdb
+        - task: ArchiveFiles@2
+          displayName: Archive CMake x86 PDB Files
+          inputs:
+            rootFolderOrFile: $(CMakeBuildDirectory)/bin/$(BuildConfiguration)/
+            archiveFile: $(Build.ArtifactStagingDirectory)/cmake_pdb_x86.zip
