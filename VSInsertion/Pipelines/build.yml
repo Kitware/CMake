@@ -42,6 +42,10 @@ variables:
   value: $(Build.ArtifactStagingDirectory)/VSInsertion/Signing
 - name: SymbolsDirectory
   value: $(Build.ArtifactStagingDirectory)/symbols
+- name: TeamName
+  value: vcls
+- name: TeamEmail
+  value: cmaketools@microsoft.com
 extends:
   template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
   parameters:
