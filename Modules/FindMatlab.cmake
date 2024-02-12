@@ -1098,14 +1098,27 @@ function(matlab_add_mex)
   endif()
 
   if(NOT Matlab_VERSION_STRING VERSION_LESS "9.1") # For 9.1 (R2016b) and newer, add version source file
+    # Compilers officially supported by Matlab 9.1 (R2016b):
+    #   MinGW 4.9, MSVC 2012, Intel C++ 2013, Xcode 6, GCC 4.9
+    # These compilers definitely support the -w flag to suppress warnings.
+    # Other compilers (Clang) may support the -w flag and can be added here.
+    set(_Matlab_silenceable_compilers AppleClang Clang GNU Intel IntelLLVM MSVC)
+
     # Add the correct version file depending on which languages are enabled in the project
     if(CMAKE_C_COMPILER_LOADED)
       # If C is enabled, use the .c file as it will work fine also with C++
       set(MEX_VERSION_FILE "${Matlab_ROOT_DIR}/extern/version/c_mexapi_version.c")
+      # Silence warnings for version source file
+      if("${CMAKE_C_COMPILER_ID}" IN_LIST _Matlab_silenceable_compilers)
+        set_source_files_properties("${MEX_VERSION_FILE}" PROPERTIES COMPILE_OPTIONS -w)
+      endif()
     elseif(CMAKE_CXX_COMPILER_LOADED)
       # If C is not enabled, check if CXX is enabled and use the .cpp file
       # to avoid that the .c file is silently ignored
       set(MEX_VERSION_FILE "${Matlab_ROOT_DIR}/extern/version/cpp_mexapi_version.cpp")
+      if("${CMAKE_CXX_COMPILER_ID}" IN_LIST _Matlab_silenceable_compilers)
+        set_source_files_properties("${MEX_VERSION_FILE}" PROPERTIES COMPILE_OPTIONS -w)
+      endif()
     else()
       # If neither C or CXX is enabled, warn because we cannot add the source.
       # TODO: add support for fortran mex files
