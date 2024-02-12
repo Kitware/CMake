@@ -9,3 +9,7 @@ target_link_libraries(dummy Qt${with_qt_version}::Core
                             Qt${with_qt_version}::Gui)
 
 set_target_properties(dummy PROPERTIES AUTORCC ON)
+
+if(DEFINED ZSTD_VALUE)
+  set(QT_FEATURE_zstd ${ZSTD_VALUE})
+endif()
