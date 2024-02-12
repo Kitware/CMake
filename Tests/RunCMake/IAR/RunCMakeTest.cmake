@@ -15,16 +15,22 @@ foreach(_iar_toolchain IN LISTS _iar_toolchains)
   cmake_path(GET TOOLKIT_DIR FILENAME ARCH)
 
   # Sets the minimal requirements for linking each target architecture
-  if(ARCH STREQUAL rl78)
-    set(LINK_OPTS
-"--config_def _STACK_SIZE=256 \
---config_def _NEAR_HEAP_SIZE=0x400 \
---config_def _FAR_HEAP_SIZE=4096 \
---config_def _HUGE_HEAP_SIZE=0 \
---config_def _NEAR_CONST_LOCATION_START=0x2000 \
---config_def _NEAR_CONST_LOCATION_SIZE=0x6F00 \
---define_symbol _NEAR_CONST_LOCATION=0 \
---config ${TOOLKIT_DIR}/config/lnkrl78_s3.icf" )
+  if(ARCH STREQUAL "avr")
+    string(CONCAT LINK_OPTS
+      "-I${TOOLKIT_DIR}/../lib "
+      "-f ${TOOLKIT_DIR}/../src/template/lnk3s.xcl "
+    )
+  elseif(ARCH STREQUAL "rl78")
+    string(CONCAT LINK_OPTS
+      "--config_def _STACK_SIZE=256 "
+      "--config_def _NEAR_HEAP_SIZE=0x400 "
+      "--config_def _FAR_HEAP_SIZE=4096 "
+      "--config_def _HUGE_HEAP_SIZE=0 "
+      "--config_def _NEAR_CONST_LOCATION_START=0x2000 "
+      "--config_def _NEAR_CONST_LOCATION_SIZE=0x6F00 "
+      "--define_symbol _NEAR_CONST_LOCATION=0 "
+      "--config ${TOOLKIT_DIR}/config/lnkrl78_s3.icf "
+    )
   else()
     set(LINK_OPTS "")
   endif()
