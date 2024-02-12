@@ -70,6 +70,7 @@ add_custom_target(check-part1 ALL
     -Dtest_strequal_comma=$<STREQUAL:$<COMMA>,$<COMMA>>
     -Dtest_strequal_semicolon=$<STREQUAL:$<SEMICOLON>,$<SEMICOLON>>
     -Dtest_strequal_angle_r_comma=$<STREQUAL:$<ANGLE-R>,$<COMMA>>
+    -Dtest_strequal_quote=$<STREQUAL:$<QUOTE>,$<QUOTE>>
     -Dtest_strequal_both_empty=$<STREQUAL:,>
     -Dtest_strequal_one_empty=$<STREQUAL:something,>
     -Dtest_inlist_true=$<IN_LIST:a,a$<SEMICOLON>b>

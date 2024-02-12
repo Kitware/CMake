@@ -1859,6 +1859,7 @@ struct CharacterNode : public cmGeneratorExpressionNode
 static const CharacterNode<'>'> angle_rNode;
 static const CharacterNode<','> commaNode;
 static const CharacterNode<';'> semicolonNode;
+static const CharacterNode<'"'> quoteNode;
 
 struct CompilerIdNode : public cmGeneratorExpressionNode
 {
@@ -4529,6 +4530,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "ANGLE-R", &angle_rNode },
     { "COMMA", &commaNode },
     { "SEMICOLON", &semicolonNode },
+    { "QUOTE", &quoteNode },
     { "TARGET_PROPERTY", &targetPropertyNode },
     { "TARGET_NAME", &targetNameNode },
     { "TARGET_OBJECTS", &targetObjectsNode },
