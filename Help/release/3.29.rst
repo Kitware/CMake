@@ -39,6 +39,11 @@ Compilers
 * The LLVM/Clang GNU-like frontend on Windows (``clang++``) may now be used
   to compile ``CUDA`` language sources.
 
+* Compilers targeting the GNU ABI on Windows (MinGW) may now be used to
+  compile Objective C (``OBJC``) and Objective C++ (``OBJCXX``).  These
+  include GNU compilers (``gcc`` and ``g++``) and the LLVM/Clang GNU-like
+  frontends (``clang`` and ``clang++``).
+
 * TI Clang-based compilers are now supported with
   :variable:`compiler id <CMAKE_<LANG>_COMPILER_ID>` ``TIClang``.
 
