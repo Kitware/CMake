@@ -80,6 +80,7 @@ function(compiler_id_detection outvar lang)
       ARMCC
       AppleClang
       ARMClang
+      TIClang
     )
     list(APPEND ordered_compilers
       Clang
