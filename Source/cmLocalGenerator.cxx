@@ -1978,14 +1978,49 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
 
     cmValue deploymentTarget =
       this->Makefile->GetDefinition("CMAKE_OSX_DEPLOYMENT_TARGET");
-    std::string deploymentTargetFlagVar =
-      "CMAKE_" + lang + "_OSX_DEPLOYMENT_TARGET_FLAG";
-    cmValue deploymentTargetFlag =
-      this->Makefile->GetDefinition(deploymentTargetFlagVar);
-    if (cmNonempty(deploymentTargetFlag) && cmNonempty(deploymentTarget)) {
-      flags += " ";
-      flags += *deploymentTargetFlag;
-      flags += *deploymentTarget;
+    if (cmNonempty(deploymentTarget)) {
+      std::string deploymentTargetFlagVar =
+        "CMAKE_" + lang + "_OSX_DEPLOYMENT_TARGET_FLAG";
+      cmValue deploymentTargetFlag =
+        this->Makefile->GetDefinition(deploymentTargetFlagVar);
+      if (cmNonempty(deploymentTargetFlag) &&
+          // CMAKE_<LANG>_COMPILER_TARGET overrides a --target= for
+          // CMAKE_OSX_DEPLOYMENT_TARGET, e.g., for visionOS.
+          (!cmHasLiteralPrefix(*deploymentTarget, "--target=") ||
+           this->Makefile
+             ->GetDefinition(cmStrCat("CMAKE_", lang, "_COMPILER_TARGET"))
+             .IsEmpty())) {
+        std::string flag = *deploymentTargetFlag;
+
+        // Add the deployment target architecture to the flag, if needed.
+        static const std::string kARCH = "<ARCH>";
+        std::string::size_type archPos = flag.find(kARCH);
+        if (archPos != std::string::npos) {
+          // This placeholder is meant for visionOS, so default to arm64
+          // unless only non-arm64 archs are given.
+          std::string const arch =
+            (archs.empty() || cm::contains(archs, "arm64")) ? "arm64"
+                                                            : archs[0];
+          // Replace the placeholder with its value.
+          flag = cmStrCat(flag.substr(0, archPos), arch,
+                          flag.substr(archPos + kARCH.size()));
+        }
+
+        // Add the deployment target version to the flag.
+        static const std::string kVERSION_MIN = "<VERSION_MIN>";
+        std::string::size_type verPos = flag.find(kVERSION_MIN);
+        if (verPos != std::string::npos) {
+          // Replace the placeholder with its value.
+          flag = cmStrCat(flag.substr(0, verPos), *deploymentTarget,
+                          flag.substr(verPos + kVERSION_MIN.size()));
+        } else {
+          // There is no placeholder, so append the value.
+          flag = cmStrCat(flag, *deploymentTarget);
+        }
+
+        flags += " ";
+        flags += flag;
+      }
     }
   }
 }
