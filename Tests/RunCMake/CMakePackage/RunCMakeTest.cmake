@@ -64,10 +64,9 @@ if(APPLE AND CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
     set(watch_archs "armv7k")
   endif()
 
-  #FIXME(#25266): Xcode 15.0 does not have visionOS.  Improve this condition.
-  #if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 15)
-  #  set(enable_visionos 1)
-  #endif()
+  if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 15.2)
+    set(enable_visionos 1)
+  endif()
 
   apple_export(macos Darwin "${macos_archs}" macosx)
   apple_export(ios iOS "arm64" iphoneos)
