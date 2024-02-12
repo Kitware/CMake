@@ -1624,62 +1624,29 @@ list(LENGTH _matlab_possible_roots _numbers_of_matlab_roots)
 set(Matlab_VERSION_STRING "NOTFOUND")
 set(Matlab_Or_MCR "UNKNOWN")
 if(_numbers_of_matlab_roots GREATER 0)
-  if(Matlab_FIND_VERSION_EXACT)
-    set(_list_index -1)
-    foreach(_matlab_root_index RANGE 1 ${_numbers_of_matlab_roots} 3)
-      list(GET _matlab_possible_roots ${_matlab_root_index} _matlab_root_version)
-      # only the major.minor version is used
-      string(REGEX REPLACE "^([0-9]+\\.[0-9]+).*" "\\1" _matlab_root_version "${_matlab_root_version}")
-      if(_matlab_root_version VERSION_EQUAL Matlab_FIND_VERSION)
-        set(_list_index ${_matlab_root_index})
-        break()
-      endif()
-    endforeach()
-
-    if(_list_index LESS 0)
-      set(_list_index 1)
+  set(_list_index -1)
+  foreach(_matlab_root_index RANGE 1 ${_numbers_of_matlab_roots} 3)
+    list(GET _matlab_possible_roots ${_matlab_root_index} _matlab_root_version)
+    find_package_check_version(${_matlab_root_version} _matlab_version_ok HANDLE_VERSION_RANGE)
+    if(_matlab_version_ok)
+      set(_list_index ${_matlab_root_index})
+      break()
     endif()
+  endforeach()
 
-    math(EXPR _matlab_or_mcr_index "${_list_index} - 1")
-    math(EXPR _matlab_root_dir_index "${_list_index} + 1")
+  if(_list_index LESS 0)
+    set(_list_index 1)
+  endif()
 
-    list(GET _matlab_possible_roots ${_matlab_or_mcr_index} Matlab_Or_MCR)
-    list(GET _matlab_possible_roots ${_list_index} Matlab_VERSION_STRING)
-    list(GET _matlab_possible_roots ${_matlab_root_dir_index} Matlab_ROOT_DIR)
-  elseif(DEFINED Matlab_FIND_VERSION)
-    set(_list_index -1)
-    foreach(_matlab_root_index RANGE 1 ${_numbers_of_matlab_roots} 3)
-      list(GET _matlab_possible_roots ${_matlab_root_index} _matlab_root_version)
-      if(_matlab_root_version VERSION_GREATER_EQUAL Matlab_FIND_VERSION)
-        set(_list_index ${_matlab_root_index})
-        break()
-      endif()
-    endforeach()
-
-    if(_list_index LESS 0)
-      set(_list_index 1)
-    endif()
-
-    math(EXPR _matlab_or_mcr_index "${_list_index} - 1")
-    math(EXPR _matlab_root_dir_index "${_list_index} + 1")
-    list(GET _matlab_possible_roots ${_matlab_or_mcr_index} Matlab_Or_MCR)
-    list(GET _matlab_possible_roots ${_list_index} Matlab_VERSION_STRING)
-    list(GET _matlab_possible_roots ${_matlab_root_dir_index} Matlab_ROOT_DIR)
-    # adding a warning in case of ambiguity
-    if(_numbers_of_matlab_roots GREATER 3 AND MATLAB_FIND_DEBUG)
-      message(WARNING "[MATLAB] Found several distributions of Matlab. Setting the current version to ${Matlab_VERSION_STRING} (located ${Matlab_ROOT_DIR})."
-                      " If this is not the desired behavior, use the EXACT keyword or provide the -DMatlab_ROOT_DIR=... on the command line")
-    endif()
-  else()
-    list(GET _matlab_possible_roots 0 Matlab_Or_MCR)
-    list(GET _matlab_possible_roots 1 Matlab_VERSION_STRING)
-    list(GET _matlab_possible_roots 2 Matlab_ROOT_DIR)
-
-    # adding a warning in case of ambiguity
-    if(_numbers_of_matlab_roots GREATER 3 AND MATLAB_FIND_DEBUG)
-      message(WARNING "[MATLAB] Found several distributions of Matlab. Setting the current version to ${Matlab_VERSION_STRING} (located ${Matlab_ROOT_DIR})."
-                      " If this is not the desired behavior, use the EXACT keyword or provide the -DMatlab_ROOT_DIR=... on the command line")
-    endif()
+  math(EXPR _matlab_or_mcr_index "${_list_index} - 1")
+  math(EXPR _matlab_root_dir_index "${_list_index} + 1")
+  list(GET _matlab_possible_roots ${_matlab_or_mcr_index} Matlab_Or_MCR)
+  list(GET _matlab_possible_roots ${_list_index} Matlab_VERSION_STRING)
+  list(GET _matlab_possible_roots ${_matlab_root_dir_index} Matlab_ROOT_DIR)
+  # adding a warning in case of ambiguity
+  if(_numbers_of_matlab_roots GREATER 3 AND NOT Matlab_FIND_VERSION_EXACT AND MATLAB_FIND_DEBUG)
+    message(WARNING "[MATLAB] Found several distributions of Matlab. Setting the current version to ${Matlab_VERSION_STRING} (located ${Matlab_ROOT_DIR})."
+                    " If this is not the desired behavior, use the EXACT keyword or provide the -DMatlab_ROOT_DIR=... on the command line")
   endif()
 endif()
 
@@ -2030,6 +1997,7 @@ find_package_handle_standard_args(
   FOUND_VAR Matlab_FOUND
   REQUIRED_VARS ${_matlab_required_variables}
   VERSION_VAR Matlab_VERSION
+  HANDLE_VERSION_RANGE
   HANDLE_COMPONENTS)
 
 unset(_matlab_required_variables)
