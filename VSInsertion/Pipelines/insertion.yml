@@ -100,7 +100,7 @@ extends:
         pool:
           name: VSEngSS-MicroBuild2022-1ES
         templateContext:
-         sdl:
+          sdl:
             binskim:
               analyzeTargetGlob: '$(SymbolsDirectory)/**/*.dll;$(SymbolsDirectory)/**/*.exe;'
               AnalyzeIgnorePdbLoadError: true
