@@ -21,8 +21,6 @@ resources:
 variables:
 - name: ApiScanClientId
   value: 1d6a3de7-4a6a-4b75-b15d-e305293c75af
-- name: ApiScanSecret
-  value: ''
 - name: ApiScanTenant
   value: 72f988bf-86f1-41af-91ab-2d7cd011db47
 - name: ArtifactServices.Symbol.AccountName
