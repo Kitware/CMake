@@ -9,7 +9,7 @@ macro(VsJustMyCode_check tgt jmc_expect)
 
   file(STRINGS "${vcProjectFile}" lines)
   foreach(line IN LISTS lines)
-    if(line MATCHES "^ *<SupportJustMyCode>([^<>]+)</SupportJustMyCode>")
+    if(line MATCHES "^ *<SupportJustMyCode>([^<>]*)</SupportJustMyCode>")
       set(jmc_actual "${CMAKE_MATCH_1}")
       if(NOT "${jmc_actual}" STREQUAL "${jmc_expect}")
         set(RunCMake_TEST_FAILED "Project file ${tgt}.vcxproj has <SupportJustMyCode> '${jmc_actual}', not '${jmc_expect}'.")

@@ -3155,7 +3155,10 @@ void cmVisualStudio10TargetGenerator::OutputLinkIncremental(
   Options& linkOptions = *(this->LinkOptions[configName]);
   const std::string cond = this->CalcCondition(configName);
 
-  if (this->IPOEnabledConfigurations.count(configName) == 0) {
+  if (this->IPOEnabledConfigurations.count(configName) > 0) {
+    // Suppress LinkIncremental in favor of WholeProgramOptimization.
+    e1.WritePlatformConfigTag("LinkIncremental", cond, "");
+  } else {
     const char* incremental = linkOptions.GetFlag("LinkIncremental");
     e1.WritePlatformConfigTag("LinkIncremental", cond,
                               (incremental ? incremental : "true"));
@@ -3498,6 +3501,23 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   // Such flags are unnecessary and break our model of language selection.
   if (langForClCompile == "C"_s || langForClCompile == "CXX"_s) {
     clOptions.RemoveFlag("CompileAs");
+  }
+
+  if (this->ProjectType == VsProjectType::vcxproj && this->MSTools) {
+    // Suppress Microsoft.Cl.Common.props default settings for which the
+    // project specifies no flags.  Do not let UseDebugLibraries affect them.
+    if (!clOptions.HasFlag("BasicRuntimeChecks")) {
+      clOptions.AddFlag("BasicRuntimeChecks", "Default");
+    }
+    if (!clOptions.HasFlag("Optimization")) {
+      clOptions.AddFlag("Optimization", "");
+    }
+    if (!clOptions.HasFlag("RuntimeLibrary")) {
+      clOptions.AddFlag("RuntimeLibrary", "");
+    }
+    if (!clOptions.HasFlag("SupportJustMyCode")) {
+      clOptions.AddFlag("SupportJustMyCode", "");
+    }
   }
 
   this->ClOptions[configName] = std::move(pOptions);
