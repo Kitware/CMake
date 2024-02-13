@@ -110,7 +110,7 @@ void cmVisualStudioGeneratorOptions::SetVerboseMakefile(bool verbose)
   }
 }
 
-bool cmVisualStudioGeneratorOptions::IsDebug() const
+bool cmVisualStudioGeneratorOptions::UsingDebugInfo() const
 {
   if (this->CurrentTool != CSharpCompiler) {
     return this->FlagMap.find("DebugInformationFormat") != this->FlagMap.end();

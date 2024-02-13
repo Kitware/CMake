@@ -1577,7 +1577,7 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
 
   Options& o = *(this->ClOptions[config]);
 
-  if (o.IsDebug()) {
+  if (o.UsingDebugInfo()) {
     e1.Element("DebugSymbols", "true");
     e1.Element("DefineDebug", "true");
   }
@@ -3581,7 +3581,7 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     // without value so PDBs don't get generated uselessly. Each tag
     // goes on its own line because Visual Studio corrects it this
     // way when saving the project after CMake generates it.
-    if (!clOptions.IsDebug()) {
+    if (!clOptions.UsingDebugInfo()) {
       Elem e3(e2, "DebugInformationFormat");
       e3.SetHasElements();
     }

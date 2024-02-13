@@ -65,7 +65,7 @@ public:
 
   void FixManifestUACFlags();
 
-  bool IsDebug() const;
+  bool UsingDebugInfo() const;
   bool IsWinRt() const;
   bool IsManaged() const;
   // Write options to output.
