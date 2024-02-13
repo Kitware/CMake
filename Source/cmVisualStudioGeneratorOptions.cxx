@@ -124,6 +124,15 @@ bool cmVisualStudioGeneratorOptions::UsingDebugInfo() const
   return false;
 }
 
+cm::optional<bool> cmVisualStudioGeneratorOptions::UsingDebugRuntime() const
+{
+  cm::optional<bool> result;
+  if (const char* rtl = this->GetFlag("RuntimeLibrary")) {
+    result = strstr(rtl, "Debug") != nullptr;
+  }
+  return result;
+}
+
 bool cmVisualStudioGeneratorOptions::IsWinRt() const
 {
   return this->FlagMap.find("CompileAsWinRT") != this->FlagMap.end();

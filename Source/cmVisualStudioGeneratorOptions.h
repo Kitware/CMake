@@ -7,6 +7,8 @@
 #include <iosfwd>
 #include <string>
 
+#include <cm/optional>
+
 #include "cmGlobalVisualStudioGenerator.h"
 #include "cmIDEFlagTable.h"
 #include "cmIDEOptions.h"
@@ -66,6 +68,7 @@ public:
   void FixManifestUACFlags();
 
   bool UsingDebugInfo() const;
+  cm::optional<bool> UsingDebugRuntime() const;
   bool IsWinRt() const;
   bool IsManaged() const;
   // Write options to output.
