@@ -1137,9 +1137,6 @@ if(CUDAToolkit_FOUND)
     target_link_directories(CUDA::toolkit INTERFACE "${CUDAToolkit_LIBRARY_DIR}")
   endif()
 
-  _CUDAToolkit_find_and_add_import_lib(cuda_driver ALT cuda)
-
-
   # setup dependencies that are required for cudart/cudart_static when building
   # on linux. These are generally only required when using the CUDA toolkit
   # when CUDA language is disabled
@@ -1162,6 +1159,7 @@ if(CUDAToolkit_FOUND)
     endif()
   endif()
 
+  _CUDAToolkit_find_and_add_import_lib(cuda_driver ALT cuda DEPS cudart_static_deps)
   _CUDAToolkit_find_and_add_import_lib(cudart DEPS cudart_static_deps)
   _CUDAToolkit_find_and_add_import_lib(cudart_static DEPS cudart_static_deps)
 
