@@ -78,6 +78,9 @@ variables:
 extends:
   template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
   parameters:
+    sdl:
+      suppression:
+        suppressionFile: $(Build.SourcesDirectory)\VSInsertion\Pipelines\credscan.gdnsuppress
     pool:
       name: AzurePipelines-EO
       image: AzurePipelinesWindows2022compliantGPT
@@ -97,7 +100,7 @@ extends:
           mb:
             signing:
               enabled: true
-              signType: real
+              signType: test
               zipSources: false
           outputs:
           - output: pipelineArtifact
