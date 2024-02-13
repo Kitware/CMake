@@ -1195,6 +1195,8 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
                this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget),
                this->GetGlobalGenerator()->ConfigDirectory(config), '/',
                language, "Modules.json"));
+    build.ImplicitDeps.emplace_back(
+      this->GetTargetDependInfoPath(language, config));
     for (auto const& scanFiles : scanningFiles) {
       if (!scanFiles.ScanningOutput.empty()) {
         build.ExplicitDeps.push_back(scanFiles.ScanningOutput);
