@@ -79,6 +79,9 @@ extends:
   template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
   parameters:
     sdl:
+      tsa:
+        enabled: true
+        configFile: '$(Agent.BuildDirectory)/config.gdntsa'
       suppression:
         suppressionFile: $(Build.SourcesDirectory)\VSInsertion\credscan.gdnsuppress
     pool:
@@ -97,6 +100,10 @@ extends:
         pool:
           name: VSEngSS-MicroBuild2022-1ES
         templateContext:
+         sdl:
+            binskim:
+              analyzeTargetGlob: '$(SymbolsDirectory)/**/*.dll;$(SymbolsDirectory)/**/*.exe;'
+              AnalyzeIgnorePdbLoadError: true
           mb:
             signing:
               enabled: true
@@ -180,6 +187,12 @@ extends:
           inputs:
             SourceFolder: $(Pipeline.Workspace)/cmake_install_x64
             TargetFolder: $(PackagingSolutionRoot)/runtimes/win-x64/native
+        - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+          displayName: 'x64 - Manifest Generator'
+          inputs:
+            BuildDropPath: '$(PackagingSolutionRoot)/runtimes/win-x64/native'
+            PackageName: MicrosoftCMake
+            PackageVersion: '$(CMakeVersion)'
         - task: PowerShell@2
           displayName: Extract CMake binary version to $CMakeVersion
           inputs:
@@ -209,6 +222,12 @@ extends:
           inputs:
             SourceFolder: $(Pipeline.Workspace)/cmake_install_x86
             TargetFolder: $(PackagingSolutionRoot)/runtimes/win-x86/native
+        - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+          displayName: 'x86 - Manifest Generator'
+          inputs:
+            BuildDropPath: '$(PackagingSolutionRoot)/runtimes/win-x86/native'
+            PackageName: MicrosoftCMake
+            PackageVersion: '$(CMakeVersion)'
         - task: DownloadPipelineArtifact@2
           displayName: ARM64 - Download Pipeline Artifact
           inputs:
@@ -230,6 +249,12 @@ extends:
           inputs:
             SourceFolder: $(Pipeline.Workspace)/cmake_install_arm64
             TargetFolder: $(PackagingSolutionRoot)/runtimes/win-arm64/native
+        - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
+          displayName: 'x64 - Manifest Generator'
+          inputs:
+            BuildDropPath: '$(PackagingSolutionRoot)/runtimes/win-x64/native'
+            PackageName: MicrosoftCMake
+            PackageVersion: '$(CMakeVersion)'
         - task: CmdLine@2
           displayName: Create $(SigningSolutionRoot)\input If Not Exist copy
           inputs:
@@ -519,6 +544,14 @@ extends:
           displayName: Set APIScan environment
           inputs:
             script: setx AzureServicesAuthConnectionString runAs=App;AppId=$(ApiScanClientId);TenantId=$(ApiScanTenant);AppKey=$(ApiScanSecret) /m
+        - task: securedevelopmentteam.vss-secure-development-tools.build-task-apiscan.APIScan@2
+          displayName: 'Run APIScan - x64 x86'
+          inputs:
+            softwareFolder: '$(SymbolsDirectory)/x64;$(SymbolsDirectory)/x86'
+            softwareName: CMake
+            softwareVersionNum: '$(CMakeVersion)'
+            symbolsFolder: '$(SymbolsDirectory)'
+            isLargeApp: false
         - task: CmdLine@2
           displayName: Clear APIScan environment
           inputs:
