@@ -250,9 +250,9 @@ extends:
             SourceFolder: $(Pipeline.Workspace)/cmake_install_arm64
             TargetFolder: $(PackagingSolutionRoot)/runtimes/win-arm64/native
         - task: AzureArtifacts.manifest-generator-task.manifest-generator-task.ManifestGeneratorTask@0
-          displayName: 'x64 - Manifest Generator'
+          displayName: 'arm64 - Manifest Generator'
           inputs:
-            BuildDropPath: '$(PackagingSolutionRoot)/runtimes/win-x64/native'
+            BuildDropPath: '$(PackagingSolutionRoot)/runtimes/win-arm64/native'
             PackageName: MicrosoftCMake
             PackageVersion: '$(CMakeVersion)'
         - task: CmdLine@2
