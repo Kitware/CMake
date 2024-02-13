@@ -78,10 +78,6 @@ variables:
 extends:
   template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
   parameters:
-    sdl:
-      tsa:
-        enabled: true
-        configFile: '$(Agent.BuildDirectory)/config.gdntsa'
       suppression:
         suppressionFile: $(Build.SourcesDirectory)\VSInsertion\credscan.gdnsuppress
     pool:
@@ -101,6 +97,9 @@ extends:
           name: VSEngSS-MicroBuild2022-1ES
         templateContext:
           sdl:
+            tsa:
+              enabled: true
+              configFile: '$(Agent.BuildDirectory)/config.gdntsa'
             binskim:
               analyzeTargetGlob: '$(SymbolsDirectory)/**/*.dll;$(SymbolsDirectory)/**/*.exe;'
               AnalyzeIgnorePdbLoadError: true
