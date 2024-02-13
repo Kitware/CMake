@@ -91,6 +91,13 @@ run_cmake_script(exit_5_script)
 run_cmake_script(exit_0_script_with_command)
 run_cmake_script(exit_7_script_in_include)
 run_cmake_script(exit_8_script_in_recursive_cmake_language)
+run_cmake_script(exit_9_script_block)
+run_cmake_script(exit_9_script_control)
+run_cmake_script(exit_9_script_if)
+run_cmake_script(exit_9_script_foreach)
+run_cmake_script(exit_9_script_function)
+run_cmake_script(exit_9_script_macro)
+run_cmake_script(exit_9_script_while)
 
 # Default log level
 run_cmake_command(
