@@ -46,6 +46,8 @@ variables:
   value: vcls
 - name: TeamEmail
   value: cmaketools@microsoft.com
+-name: ArchiveDir
+ value: $(Build.ArtifactStagingDirectory)/archive
 extends:
   template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
   parameters:
@@ -66,17 +68,14 @@ extends:
         pool:
           name: VSEngSS-MicroBuild2022-1ES
         templateContext:
-          sdl:
-            credscan:
-              scanFolder: '$(CMakeBuildDirectory)/bin' #scan only binaries built as sources already scanned
           outputs:
           - output: pipelineArtifact
             displayName: 'Publish CMake x64 Artifact'
-            targetPath: $(CMakeBuildDirectory)/cmake_install_x64.zip
+            targetPath: $(ArchiveDir)/cmake_install_x64.zip
             artifactName: CMakeInstallX64
           - output: pipelineArtifact
             displayName: 'Publish Pipeline Artifact - x64 PDB'
-            targetPath: $(Build.ArtifactStagingDirectory)/cmake_pdb_x64.zip
+            targetPath: $(ArchiveDir)/cmake_pdb_x64.zip
             artifactName: CMakePDBX64
         steps:
         - checkout: self
@@ -157,11 +156,11 @@ extends:
           outputs:
           - output: pipelineArtifact
             displayName: 'Publish CMake ARM64 Artifact'
-            targetPath: $(CMakeBuildDirectory)/cmake_install_arm64.zip
+            targetPath: $(ArchiveDir)/cmake_install_arm64.zip
             artifactName: CMakeInstallArm64
           - output: pipelineArtifact
             displayName: 'Publish Pipeline Artifact - ARM64 PDB'
-            targetPath: $(Build.ArtifactStagingDirectory)/cmake_pdb_arm64.zip
+            targetPath: $(ArchiveDir)/cmake_pdb_arm64.zip
             artifactName: CMakePDBArm64
         steps:
         - checkout: self
@@ -177,6 +176,15 @@ extends:
           inputs:
             cwd: $(CMakeBuildDirectory)
             cmakeArgs: --build . --target package --config $(BuildConfiguration) -- -m
+        - task: CopyFiles@2
+          name: Copy zip
+          displayName: Copy arm64 zip
+          inputs:
+            SourceFolder:  $(CMakeBuildDirectory)
+            Contents: 'cmake_install_arm64.zip'
+            TargetFolder: $(ArchiveDir)
+            CleanTargetFolder: true
+            OverWrite: true
         - task: DeleteFiles@1
           displayName: Delete CMake ARM64 Executables and ctresalloc.pdb
           inputs:
@@ -188,7 +196,7 @@ extends:
           displayName: Archive CMake ARM64 PDB Files
           inputs:
             rootFolderOrFile: $(CMakeBuildDirectory)/bin/$(BuildConfiguration)/
-            archiveFile: $(Build.ArtifactStagingDirectory)/cmake_pdb_arm64.zip
+            archiveFile: $(ArchiveDir)/cmake_pdb_arm64.zip
       - job: Job_2
         displayName: CMake x86 Build
         timeoutInMinutes: 360
@@ -198,11 +206,11 @@ extends:
           outputs:
           - output: pipelineArtifact
             displayName: 'Publish CMake x86 Artifact'
-            targetPath: $(CMakeBuildDirectory)/cmake_install_x86.zip
+            targetPath: $(ArchiveDir)/cmake_install_x86.zip
             artifactName: CMakeInstallX86
           - output: pipelineArtifact
             displayName: 'Publish Pipeline Artifact - x86 PDB'
-            targetPath: $(Build.ArtifactStagingDirectory)/cmake_pdb_x86.zip
+            targetPath: $(ArchiveDir)/cmake_pdb_x86.zip
             artifactName: CMakePDBX86
         steps:
         - checkout: self
@@ -218,6 +226,15 @@ extends:
           inputs:
             cwd: $(CMakeBuildDirectory)
             cmakeArgs: --build . --target package --config $(BuildConfiguration) -- -m
+        - task: CopyFiles@2
+          name: Copy zip
+          displayName: Copy x86 zip
+          inputs:
+            SourceFolder:  $(CMakeBuildDirectory)
+            Contents: 'cmake_install_x86.zip'
+            TargetFolder: $(ArchiveDir)
+            CleanTargetFolder: true
+            OverWrite: true
         - task: DeleteFiles@1
           displayName: Delete CMake x86 Executables and ctresalloc.pdb
           inputs:
@@ -229,4 +246,4 @@ extends:
           displayName: Archive CMake x86 PDB Files
           inputs:
             rootFolderOrFile: $(CMakeBuildDirectory)/bin/$(BuildConfiguration)/
-            archiveFile: $(Build.ArtifactStagingDirectory)/cmake_pdb_x86.zip
+            archiveFile: $(ArchiveDir)/cmake_pdb_x86.zip
