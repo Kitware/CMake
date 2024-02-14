@@ -46,8 +46,8 @@ variables:
   value: vcls
 - name: TeamEmail
   value: cmaketools@microsoft.com
--name: ArchiveDir
- value: $(Build.ArtifactStagingDirectory)/archive
+- name: ArchiveDir
+  value: $(Build.ArtifactStagingDirectory)/archive
 extends:
   template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
   parameters:
