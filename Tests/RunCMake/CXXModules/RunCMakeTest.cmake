@@ -214,6 +214,7 @@ if ("collation" IN_LIST CMake_TEST_MODULE_COMPILATION)
   set(RunCMake_CXXModules_NO_TEST 1)
   run_cxx_module_test(req-private-other-target)
   unset(RunCMake_CXXModules_NO_TEST)
+  run_cxx_module_test_rebuild(depchain-modmap)
 endif ()
 
 # Tests which use named modules in shared libraries.
