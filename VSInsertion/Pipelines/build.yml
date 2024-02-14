@@ -49,7 +49,7 @@ variables:
 extends:
   template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
   parameters:
-    sdl:
+    # sdl:
       # suppression:
       #   suppressionFile: $(Build.SourcesDirectory)\VSInsertion\credscan.gdnsuppress
     pool:
