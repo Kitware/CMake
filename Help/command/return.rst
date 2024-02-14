@@ -40,7 +40,7 @@ command.  All arguments are ignored unless that policy is set to ``NEW``.
   .. code-block:: cmake
     :caption: CMakeLists.txt
 
-    cmake_version_required(VERSION 3.25)
+    cmake_minimum_required(VERSION 3.25)
     project(example)
 
     set(var1 "top-value")
