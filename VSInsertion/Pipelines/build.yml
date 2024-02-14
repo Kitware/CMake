@@ -144,7 +144,7 @@ extends:
         #       echo Creating Tag "v$version"
         #       git tag "v$version"
         #       git push origin "v$version"
-         - task: PowerShell@2
+        - task: PowerShell@2
           displayName: Create and Publish Version Tag
           inputs:
             targetType: inline
