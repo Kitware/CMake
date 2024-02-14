@@ -55,7 +55,6 @@ int cmCPackIFWGenerator::PackageFiles()
 std::vector<std::string> cmCPackIFWGenerator::BuildRepogenCommand()
 {
   std::vector<std::string> ifwCmd;
-  std::string ifwArg;
 
   ifwCmd.emplace_back(this->RepoGen);
 
@@ -104,7 +103,7 @@ std::vector<std::string> cmCPackIFWGenerator::BuildRepogenCommand()
   if (!this->OnlineOnly && !this->DownloadedPackages.empty()) {
     ifwCmd.emplace_back("-i");
     auto it = this->DownloadedPackages.begin();
-    ifwArg = (*it)->Name;
+    std::string ifwArg = (*it)->Name;
     ++it;
     while (it != this->DownloadedPackages.end()) {
       ifwArg += "," + (*it)->Name;
