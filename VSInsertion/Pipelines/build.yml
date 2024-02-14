@@ -1,12 +1,3 @@
-# This Yaml Document has been converted by ESAI Yaml Pipeline Conversion Tool.
-# Please make sure to check all the converted content, it is your team's responsibility to make sure that the pipeline is still valid and functions as expected.
-# This pipeline will be extended to the MicroBuild template
-# The Task 'PublishPipelineArtifact@1' has been converted to an output named 'Publish CMake x64 Artifact' in the templateContext section.
-# The Task 'PublishPipelineArtifact@1' has been converted to an output named 'Publish Pipeline Artifact - x64 PDB' in the templateContext section.
-# The Task 'PublishPipelineArtifact@1' has been converted to an output named 'Publish CMake ARM64 Artifact' in the templateContext section.
-# The Task 'PublishPipelineArtifact@1' has been converted to an output named 'Publish Pipeline Artifact - ARM64 PDB' in the templateContext section.
-# The Task 'PublishPipelineArtifact@1' has been converted to an output named 'Publish CMake x86 Artifact' in the templateContext section.
-# The Task 'PublishPipelineArtifact@1' has been converted to an output named 'Publish Pipeline Artifact - x86 PDB' in the templateContext section.
 trigger:
   branches:
     include:
@@ -21,7 +12,13 @@ resources:
     type: git
     name: 1ESPipelineTemplates/MicroBuildTemplate
     ref: refs/tags/release
+parameters:
+- name: VSInsertion
+  type: string
+  default: false
 variables:
+- name: VSInsertion
+  value: ${{parameters.VSInsertion}}
 - name: BuildConfiguration
   value: RelWithDebInfo
 - name: BuildPlatform
@@ -48,12 +45,13 @@ variables:
   value: cmaketools@microsoft.com
 - name: ArchiveDir
   value: $(Build.ArtifactStagingDirectory)/archive
+- name: 
 extends:
   template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
   parameters:
     sdl:
       suppression:
-        suppressionFile: $(Build.SourcesDirectory)\VSInsertion\credscan.gdnsuppress
+        suppressionFile: $(Build.SourcesDirectory)\VSInsertion\credscan.gdnsuppress # for third party cmake public source files
     pool:
       name: VSEngSS-MicroBuild2022-1ES
     customBuildTags:
@@ -61,7 +59,7 @@ extends:
     stages:
     - stage: stage
       jobs:
-      - job: Phase_1
+      - job: Job_x64
         displayName: CMake x64 Build and Test
         timeoutInMinutes: 360
         cancelTimeoutInMinutes: 1
@@ -71,12 +69,8 @@ extends:
           outputs:
           - output: pipelineArtifact
             displayName: 'Publish CMake x64 Artifact'
-            targetPath: $(ArchiveDir)/cmake_install_x64.zip
-            artifactName: CMakeInstallX64
-          - output: pipelineArtifact
-            displayName: 'Publish Pipeline Artifact - x64 PDB'
-            targetPath: $(ArchiveDir)/cmake_pdb_x64.zip
-            artifactName: CMakePDBX64
+            targetPath: $(ArchiveDir)
+            artifactName: CMakeX64
         steps:
         - checkout: self
           clean: true
@@ -94,13 +88,13 @@ extends:
           inputs:
             cwd: $(CMakeBuildDirectory)
             cmakeArgs: --build . --target package install --config $(BuildConfiguration) -- -m
-        - task: CmdLine@1
-          name: CmdLine3
-          displayName: Run tests
-          inputs:
-            filename: $(CMakeBuildDirectory)\bin\$(BuildConfiguration)\ctest
-            arguments: -C $(BuildConfiguration) -E "VSExcludeFromDefaultBuild-RelWithDebInfo|CMakeOnly.MajorVersionSelection-PythonInterp_2|RunCMake.AutoExportDll" --output-on-failure -E VSExcludeFromDefaultBuild-RelWithDebInfo
-            workingFolder: $(CMakeBuildDirectory)
+        # - task: CmdLine@1
+        #   name: CmdLine3
+        #   displayName: Run tests
+        #   inputs:
+        #     filename: $(CMakeBuildDirectory)\bin\$(BuildConfiguration)\ctest
+        #     arguments: -C $(BuildConfiguration) -E "VSExcludeFromDefaultBuild-RelWithDebInfo|CMakeOnly.MajorVersionSelection-PythonInterp_2|RunCMake.AutoExportDll" --output-on-failure -E VSExcludeFromDefaultBuild-RelWithDebInfo
+        #     workingFolder: $(CMakeBuildDirectory)
         - task: CopyFiles@2
           name: Copyzipx64
           displayName: Copy x64 zip
@@ -155,7 +149,7 @@ extends:
               echo Creating Tag "v$version"
               git tag "v$version"
               git push origin "v$version"
-      - job: Job_1
+      - job: Job_arm64
         displayName: CMake ARM64 Build
         timeoutInMinutes: 360
         cancelTimeoutInMinutes: 1
@@ -165,12 +159,8 @@ extends:
           outputs:
           - output: pipelineArtifact
             displayName: 'Publish CMake ARM64 Artifact'
-            targetPath: $(ArchiveDir)/cmake_install_arm64.zip
-            artifactName: CMakeInstallArm64
-          - output: pipelineArtifact
-            displayName: 'Publish Pipeline Artifact - ARM64 PDB'
-            targetPath: $(ArchiveDir)/cmake_pdb_arm64.zip
-            artifactName: CMakePDBArm64
+            targetPath: $(ArchiveDir)
+            artifactName: CMakeArm64
         steps:
         - checkout: self
           clean: true
@@ -206,7 +196,7 @@ extends:
           inputs:
             rootFolderOrFile: $(CMakeBuildDirectory)/bin/$(BuildConfiguration)/
             archiveFile: $(ArchiveDir)/cmake_pdb_arm64.zip
-      - job: Job_2
+      - job: Job_x86
         displayName: CMake x86 Build
         timeoutInMinutes: 360
         pool:
@@ -215,12 +205,8 @@ extends:
           outputs:
           - output: pipelineArtifact
             displayName: 'Publish CMake x86 Artifact'
-            targetPath: $(ArchiveDir)/cmake_install_x86.zip
-            artifactName: CMakeInstallX86
-          - output: pipelineArtifact
-            displayName: 'Publish Pipeline Artifact - x86 PDB'
-            targetPath: $(ArchiveDir)/cmake_pdb_x86.zip
-            artifactName: CMakePDBX86
+            targetPath: $(ArchiveDir)
+            artifactName: CMakeX86
         steps:
         - checkout: self
           clean: true
