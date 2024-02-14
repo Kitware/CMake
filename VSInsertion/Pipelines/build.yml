@@ -101,6 +101,15 @@ extends:
             filename: $(CMakeBuildDirectory)\bin\$(BuildConfiguration)\ctest
             arguments: -C $(BuildConfiguration) -E "VSExcludeFromDefaultBuild-RelWithDebInfo|CMakeOnly.MajorVersionSelection-PythonInterp_2|RunCMake.AutoExportDll" --output-on-failure -E VSExcludeFromDefaultBuild-RelWithDebInfo
             workingFolder: $(CMakeBuildDirectory)
+        - task: CopyFiles@2
+          name: Copyzipx64
+          displayName: Copy x64 zip
+          inputs:
+            SourceFolder:  $(CMakeBuildDirectory)
+            Contents: 'cmake_install_x64.zip'
+            TargetFolder: $(ArchiveDir)
+            CleanTargetFolder: true
+            OverWrite: true
         - task: DeleteFiles@1
           displayName: Delete CMake x64 Executables and ctresalloc.pdb
           inputs:
@@ -177,7 +186,7 @@ extends:
             cwd: $(CMakeBuildDirectory)
             cmakeArgs: --build . --target package --config $(BuildConfiguration) -- -m
         - task: CopyFiles@2
-          name: Copy zip
+          name: Copyziparm64
           displayName: Copy arm64 zip
           inputs:
             SourceFolder:  $(CMakeBuildDirectory)
@@ -227,7 +236,7 @@ extends:
             cwd: $(CMakeBuildDirectory)
             cmakeArgs: --build . --target package --config $(BuildConfiguration) -- -m
         - task: CopyFiles@2
-          name: Copy zip
+          name: Copyzipx86
           displayName: Copy x86 zip
           inputs:
             SourceFolder:  $(CMakeBuildDirectory)
