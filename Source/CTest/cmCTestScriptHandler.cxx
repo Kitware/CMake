@@ -563,7 +563,6 @@ int cmCTestScriptHandler::RunCurrentScript()
 
 int cmCTestScriptHandler::CheckOutSourceDir()
 {
-  std::string command;
   std::string output;
   int retVal;
   bool res;

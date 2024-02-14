@@ -3,7 +3,6 @@
 #include "cmCPackSTGZGenerator.h"
 
 #include <cstdio>
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -71,7 +70,6 @@ int cmCPackSTGZGenerator::PackageFiles()
 int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Writing header" << std::endl);
-  std::ostringstream str;
   int counter = 0;
 
   std::string inLicFile = this->GetOption("CPACK_RESOURCE_FILE_LICENSE");

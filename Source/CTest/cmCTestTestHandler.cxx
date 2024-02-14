@@ -920,7 +920,6 @@ bool cmCTestTestHandler::ComputeTestList()
   // Now create a final list of tests to run
   int cnt = 0;
   inREcnt = 0;
-  std::string last_directory;
   ListOfTests finalList;
   for (cmCTestTestProperties& tp : this->TestList) {
     cnt++;
