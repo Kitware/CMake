@@ -77,8 +77,8 @@ extends:
   template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
   parameters:
     sdl:
-      # suppression:
-      #   suppressionFile: $(Build.SourcesDirectory)\VSInsertion\credscan.gdnsuppress
+      suppression:
+        suppressionFile: $(Build.SourcesDirectory)\VSInsertion\credscan.gdnsuppress
       spotBugs:
         enabled: false
     pool:
@@ -104,6 +104,8 @@ extends:
             binskim:
               analyzeTargetGlob: '$(SymbolsDirectory)/**/*.dll;$(SymbolsDirectory)/**/*.exe;'
               AnalyzeIgnorePdbLoadError: true
+            credscan:
+              scanFolder: '$(SymbolsDirectory)'
           mb:
             signing:
               enabled: true
