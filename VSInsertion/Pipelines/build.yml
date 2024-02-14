@@ -50,12 +50,10 @@ extends:
   template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
   parameters:
     sdl:
-      suppression:
-        suppressionFile: $(Build.SourcesDirectory)\VSInsertion\credscan.gdnsuppress
+      # suppression:
+      #   suppressionFile: $(Build.SourcesDirectory)\VSInsertion\credscan.gdnsuppress
     pool:
-      name: AzurePipelines-EO
-      image: AzurePipelinesWindows2022compliantGPT
-      os: windows
+      name: VSEngSS-MicroBuild2022-1ES
     customBuildTags:
     - ES365AIMigrationTooling
     stages:
