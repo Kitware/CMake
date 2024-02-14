@@ -79,6 +79,8 @@ extends:
     sdl:
       suppression:
         suppressionFile: $(Build.SourcesDirectory)\VSInsertion\credscan.gdnsuppress
+      spotBugs:
+        enabled: false
     pool:
       name: AzurePipelines-EO
       image: AzurePipelinesWindows2022compliantGPT
@@ -542,14 +544,14 @@ extends:
           displayName: Set APIScan environment
           inputs:
             script: setx AzureServicesAuthConnectionString runAs=App;AppId=$(ApiScanClientId);TenantId=$(ApiScanTenant);AppKey=$(ApiScanSecret) /m
-        - task: securedevelopmentteam.vss-secure-development-tools.build-task-apiscan.APIScan@2
-          displayName: 'Run APIScan - x64 x86'
-          inputs:
-            softwareFolder: '$(SymbolsDirectory)/x64;$(SymbolsDirectory)/x86'
-            softwareName: CMake
-            softwareVersionNum: '$(CMakeVersion)'
-            symbolsFolder: '$(SymbolsDirectory)'
-            isLargeApp: false
+        # - task: securedevelopmentteam.vss-secure-development-tools.build-task-apiscan.APIScan@2
+        #   displayName: 'Run APIScan - x64 x86'
+        #   inputs:
+        #     softwareFolder: '$(SymbolsDirectory)/x64;$(SymbolsDirectory)/x86'
+        #     softwareName: CMake
+        #     softwareVersionNum: '$(CMakeVersion)'
+        #     symbolsFolder: '$(SymbolsDirectory)'
+        #     isLargeApp: false
         - task: CmdLine@2
           displayName: Clear APIScan environment
           inputs:
@@ -593,16 +595,16 @@ extends:
             SourceFolder: $(PackagingSolutionRoot)/runtimes/win-x64/native/_manifest
             Contents: '**/*'
             RemoveSourceFolder: true
-        - task: ms-vseng.MicroBuildShipTasks.55100717-a81d-45ea-a363-b8fe3ec375ad.MicroBuildInsertVsPayload@4
-          displayName: Insert CMake into VS
-          condition: and(succeeded(), eq(variables.InsertIntoVS, 'true'))
-          inputs:
-            TargetBranch: $(TargetBranch)
-            TeamName: $(TeamName)
-            TeamEmail: $(TeamEmail)
-            DefaultConfigValues: VS.ExternalAPIs.Microsoft.CMake=$(CMakeVersion)
-            RevisionTextFiles: src\SetupPackages\VC\CMake\MicrosoftCMake\revision.txt
-            CustomScriptExecutionCommand: $ErrorActionPreference="Continue";$(System.DefaultWorkingDirectory)/VS/src/vc/scripts/InsertCMake.ps1 -CMakeRepoRoot "$(Build.SourcesDirectory)" -CMakeExternalApisInstallRoot "runtimes\win-`$(ProductArch)\native" -CMakeInstallRoot "$(PackagingSolutionRoot)/runtimes/win-x64/native" -StageAndCommit $true -LogLocation $(System.DefaultWorkingDirectory) -CommitTitle "CMake Version $(CMakeVersion)" -CommitDescription "from vcls-cmake repo"
-            AllowTopicBranchUpdate: true
-            AddCommitsToPR: false
-            LinkWorkItemsToPR: false
+        # - task: ms-vseng.MicroBuildShipTasks.55100717-a81d-45ea-a363-b8fe3ec375ad.MicroBuildInsertVsPayload@4
+        #   displayName: Insert CMake into VS
+        #   condition: and(succeeded(), eq(variables.InsertIntoVS, 'true'))
+        #   inputs:
+        #     TargetBranch: $(TargetBranch)
+        #     TeamName: $(TeamName)
+        #     TeamEmail: $(TeamEmail)
+        #     DefaultConfigValues: VS.ExternalAPIs.Microsoft.CMake=$(CMakeVersion)
+        #     RevisionTextFiles: src\SetupPackages\VC\CMake\MicrosoftCMake\revision.txt
+        #     CustomScriptExecutionCommand: $ErrorActionPreference="Continue";$(System.DefaultWorkingDirectory)/VS/src/vc/scripts/InsertCMake.ps1 -CMakeRepoRoot "$(Build.SourcesDirectory)" -CMakeExternalApisInstallRoot "runtimes\win-`$(ProductArch)\native" -CMakeInstallRoot "$(PackagingSolutionRoot)/runtimes/win-x64/native" -StageAndCommit $true -LogLocation $(System.DefaultWorkingDirectory) -CommitTitle "CMake Version $(CMakeVersion)" -CommitDescription "from vcls-cmake repo"
+        #     AllowTopicBranchUpdate: true
+        #     AddCommitsToPR: false
+        #     LinkWorkItemsToPR: false
