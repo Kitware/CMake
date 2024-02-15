@@ -76,7 +76,6 @@ variables:
   value: cmaketools@microsoft.com
 - name: ArchiveDir
   value: $(Build.ArtifactStagingDirectory)/archive
-- name: 
 extends:
   template: azure-pipelines/MicroBuild.1ES.Official.yml@MicroBuildTemplate
   parameters:
