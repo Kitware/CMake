@@ -287,9 +287,12 @@ cmake_policy(SET CMP0057 NEW) # if IN_LIST
 set(_FindMatlab_SELF_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-include(CheckCXXCompilerFlag)
-include(CheckCCompilerFlag)
 
+if(NOT WIN32 AND NOT APPLE AND NOT Threads_FOUND)
+  # MEX files use pthread if available
+  set(THREADS_PREFER_PTHREAD_FLAG ON)
+  find_package(Threads)
+endif()
 
 # The currently supported versions. Other version can be added by the user by
 # providing MATLAB_ADDITIONAL_VERSIONS
@@ -465,7 +468,7 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
     message(FATAL_ERROR "[MATLAB] This function can only be called by a Windows host")
   endif()
 
-  if(${win64} AND CMAKE_HOST_SYSTEM_PROCESSOR MATCHES "64")
+  if(${win64})
     set(_view "64")
   else()
     set(_view "32")
@@ -476,20 +479,14 @@ function(matlab_extract_all_installed_versions_from_registry win64 matlab_versio
   foreach(_installation_type IN ITEMS "MATLAB" "MATLAB Runtime" "MATLAB Compiler Runtime")
 
     cmake_host_system_information(RESULT _reg
-    QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/${_installation_type}"
-    SUBKEYS VIEW ${_view}
+      QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/${_installation_type}"
+      SUBKEYS VIEW ${_view}
     )
 
-    if(_reg)
-      string(REGEX MATCHALL "([0-9]+(\\.[0-9]+)+)" _versions_regex "${_reg}")
+    string(REGEX MATCHALL "([0-9]+(\\.[0-9]+)+)" _versions_regex "${_reg}")
 
-      foreach(_match IN LISTS _versions_regex)
-        if(_match MATCHES "([0-9]+(\\.[0-9]+)+)")
-          list(APPEND matlabs_from_registry ${_match})
-        endif()
-      endforeach()
+    list(APPEND matlabs_from_registry ${_versions_regex})
 
-    endif()
   endforeach()
 
   if(matlabs_from_registry)
@@ -557,51 +554,33 @@ function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_
     if(IS_DIRECTORY "${current_MATLAB_ROOT}")
       _Matlab_VersionInfoXML("${current_MATLAB_ROOT}" _matlab_version_tmp)
       if("${_matlab_version_tmp}" STREQUAL "unknown")
-        list(APPEND _matlab_roots_list "MATLAB" ${_matlab_current_version} ${current_MATLAB_ROOT})
-      else()
-        list(APPEND _matlab_roots_list "MATLAB" ${_matlab_version_tmp} ${current_MATLAB_ROOT})
+        set(_matlab_version_tmp ${_matlab_current_version})
       endif()
+      list(APPEND _matlab_roots_list "MATLAB" ${_matlab_version_tmp} ${current_MATLAB_ROOT})
     endif()
 
   endforeach()
 
   # Check for MCR installations
-  foreach(_matlab_current_version IN LISTS matlab_versions)
-    cmake_host_system_information(RESULT current_MATLAB_ROOT
-      QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/MATLAB Runtime/${_matlab_current_version}"
-      VALUE "MATLABROOT"
-    )
-    cmake_path(CONVERT "${current_MATLAB_ROOT}" TO_CMAKE_PATH_LIST current_MATLAB_ROOT)
+  foreach(_installation_type IN ITEMS "MATLAB Runtime" "MATLAB Compiler Runtime")
+    foreach(_matlab_current_version IN LISTS matlab_versions)
+      cmake_host_system_information(RESULT current_MATLAB_ROOT
+        QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/${_installation_type}/${_matlab_current_version}"
+        VALUE "MATLABROOT"
+      )
+      cmake_path(CONVERT "${current_MATLAB_ROOT}" TO_CMAKE_PATH_LIST current_MATLAB_ROOT)
 
-    # remove the dot
-    string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
+      # remove the dot
+      string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
 
-    if(IS_DIRECTORY "${current_MATLAB_ROOT}")
-      _Matlab_VersionInfoXML("${current_MATLAB_ROOT}" _matlab_version_tmp)
-      if("${_matlab_version_tmp}" STREQUAL "unknown")
-        list(APPEND _matlab_roots_list "MCR" ${_matlab_current_version} "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
-      else()
+      if(IS_DIRECTORY "${current_MATLAB_ROOT}")
+        _Matlab_VersionInfoXML("${current_MATLAB_ROOT}" _matlab_version_tmp)
+        if("${_matlab_version_tmp}" STREQUAL "unknown")
+          set(_matlab_version_tmp ${_matlab_current_version})
+        endif()
         list(APPEND _matlab_roots_list "MCR" ${_matlab_version_tmp} "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
       endif()
-    endif()
-
-  endforeach()
-
-  # Check for old MCR installations
-  foreach(_matlab_current_version IN LISTS matlab_versions)
-    cmake_host_system_information(RESULT current_MATLAB_ROOT
-      QUERY WINDOWS_REGISTRY "HKLM/SOFTWARE/Mathworks/MATLAB Compiler Runtime/${_matlab_current_version}"
-      VALUE "MATLABROOT"
-    )
-    cmake_path(CONVERT "${current_MATLAB_ROOT}" TO_CMAKE_PATH_LIST current_MATLAB_ROOT)
-
-    # remove the dot
-    string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
-
-    if(IS_DIRECTORY "${current_MATLAB_ROOT}")
-      list(APPEND _matlab_roots_list "MCR" ${_matlab_current_version} "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
-    endif()
-
+    endforeach()
   endforeach()
   set(${matlab_roots} ${_matlab_roots_list} PARENT_SCOPE)
 endfunction()
@@ -1068,20 +1047,6 @@ endfunction()
 #]=======================================================================]
 function(matlab_add_mex)
 
-  if(NOT WIN32)
-    # we do not need all this on Windows
-    # pthread options
-    if(CMAKE_CXX_COMPILER_LOADED)
-      check_cxx_compiler_flag(-pthread HAS_MINUS_PTHREAD)
-    elseif(CMAKE_C_COMPILER_LOADED)
-      check_c_compiler_flag(-pthread HAS_MINUS_PTHREAD)
-    endif()
-    # we should use try_compile instead, the link flags are discarded from
-    # this compiler_flag function.
-    #check_cxx_compiler_flag(-Wl,--exclude-libs,ALL HAS_SYMBOL_HIDING_CAPABILITY)
-
-  endif()
-
   set(options EXECUTABLE MODULE SHARED R2017b R2018a EXCLUDE_FROM_ALL NO_IMPLICIT_LINK_TO_MATLAB_LIBRARIES)
   set(oneValueArgs NAME DOCUMENTATION OUTPUT_NAME)
   set(multiValueArgs LINK_TO SRC)
@@ -1249,10 +1214,8 @@ function(matlab_add_mex)
 
     else() # Linux
 
-      if(HAS_MINUS_PTHREAD)
-        # Apparently, compiling with -pthread generated the proper link flags
-        # and some defines at compilation
-        target_compile_options(${${prefix}_NAME} PRIVATE "-pthread")
+      if(Threads_FOUND)
+        target_link_libraries(${${prefix}_NAME} Threads::Threads)
       endif()
 
       string(APPEND _link_flags " -Wl,--as-needed")
@@ -1723,12 +1686,6 @@ if(Matlab_ROOT_DIR)
   file(TO_CMAKE_PATH ${Matlab_ROOT_DIR} Matlab_ROOT_DIR)
 endif()
 
-if(CMAKE_SIZEOF_VOID_P EQUAL 4)
-  set(_matlab_64Build FALSE)
-else()
-  set(_matlab_64Build TRUE)
-endif()
-
 
 if(NOT DEFINED Matlab_MEX_EXTENSION)
   set(_matlab_mex_extension "")
@@ -1762,7 +1719,7 @@ endif()
 
 
 set(MATLAB_INCLUDE_DIR_TO_LOOK ${Matlab_ROOT_DIR}/extern/include)
-if(_matlab_64Build)
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   set(_matlab_current_suffix ${_matlab_bin_suffix_64bits})
 else()
   set(_matlab_current_suffix ${_matlab_bin_suffix_32bits})
@@ -1787,11 +1744,9 @@ else()
   set(_matlab_lib_prefix_for_search "lib")
 endif()
 
-unset(_matlab_64Build)
-
 
 if(MATLAB_FIND_DEBUG)
-  message(STATUS "[MATLAB] [DEBUG]_matlab_lib_prefix_for_search = ${_matlab_lib_prefix_for_search} | _matlab_lib_dir_for_search = ${_matlab_lib_dir_for_search}")
+  message(STATUS "[MATLAB] _matlab_lib_prefix_for_search = ${_matlab_lib_prefix_for_search} | _matlab_lib_dir_for_search = ${_matlab_lib_dir_for_search}")
 endif()
 
 
