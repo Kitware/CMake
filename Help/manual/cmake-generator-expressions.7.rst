@@ -2410,6 +2410,13 @@ special meaning.
 
   A literal ``;``. Used to prevent list expansion on an argument with ``;``.
 
+.. genex:: $<QUOTE>
+
+  .. versionadded:: 3.30
+
+  A literal ``"``. Used to allow string literal quotes inside a generator expression.
+
+
 Deprecated Expressions
 ----------------------
 
