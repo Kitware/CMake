@@ -216,6 +216,9 @@ if ("collation" IN_LIST CMake_TEST_MODULE_COMPILATION)
   unset(RunCMake_CXXModules_NO_TEST)
   run_cxx_module_test_rebuild(depchain-modmap)
   run_cxx_module_test_rebuild(depchain-modules-json-file)
+  if (RunCMake_GENERATOR MATCHES "Ninja")
+    run_cxx_module_test_rebuild(depchain-collation-restat)
+  endif ()
 endif ()
 
 # Tests which use named modules in shared libraries.
