@@ -171,6 +171,7 @@ run_cxx_module_test(scan-with-pch)
 # Tests which use named modules.
 if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(simple)
+  run_cxx_module_test(file-sets-with-dot)
   run_cxx_module_test(vs-without-flags)
   run_cxx_module_test(library library-static -DBUILD_SHARED_LIBS=OFF)
   run_cxx_module_test(unity-build)

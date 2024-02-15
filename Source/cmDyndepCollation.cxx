@@ -119,7 +119,8 @@ Json::Value CollationInformationCxxModules(
 
     for (auto const& files_per_dir : files_per_dirs) {
       for (auto const& file : files_per_dir.second) {
-        auto lookup = sf_map.find(file);
+        auto const full_file = cmSystemTools::CollapseFullPath(file);
+        auto lookup = sf_map.find(full_file);
         if (lookup == sf_map.end()) {
           gt->Makefile->IssueMessage(
             MessageType::FATAL_ERROR,
@@ -147,7 +148,7 @@ Json::Value CollationInformationCxxModules(
         Json::Value& tdi_module_info = tdi_cxx_module_info[obj_path] =
           Json::objectValue;
 
-        tdi_module_info["source"] = file;
+        tdi_module_info["source"] = full_file;
         tdi_module_info["bmi-only"] = ct == CompileType::BmiOnly;
         tdi_module_info["relative-directory"] = files_per_dir.first;
         tdi_module_info["name"] = file_set->GetName();
