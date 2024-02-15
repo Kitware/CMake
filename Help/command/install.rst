@@ -47,22 +47,25 @@ signatures that specify them.  The common options are:
 
 ``DESTINATION <dir>``
   Specify the directory on disk to which a file will be installed.
-  Arguments can be relative or absolute paths.
+  ``<dir>`` should be a relative path.  An absolute path is allowed,
+  but not recommended.
 
-  If a relative path is given it is interpreted relative to the value
+  When a relative path is given it is interpreted relative to the value
   of the :variable:`CMAKE_INSTALL_PREFIX` variable.
   The prefix can be relocated at install time using the ``DESTDIR``
   mechanism explained in the :variable:`CMAKE_INSTALL_PREFIX` variable
   documentation.
 
-  If an absolute path (with a leading slash or drive letter) is given
-  it is used verbatim.
-
-  As absolute paths are not supported by :manual:`cpack <cpack(1)>` installer
-  generators, it is preferable to use relative paths throughout.
+  As absolute paths do not work with the ``cmake --install`` command's
+  :option:`--prefix <cmake--install --prefix>` option, or with the
+  :manual:`cpack <cpack(1)>` installer generators, it is strongly recommended
+  to use relative paths throughout for best support by package maintainers.
   In particular, there is no need to make paths absolute by prepending
   :variable:`CMAKE_INSTALL_PREFIX`; this prefix is used by default if
   the DESTINATION is a relative path.
+
+  If an absolute path (with a leading slash or drive letter) is given
+  it is used verbatim.
 
 ``PERMISSIONS <permission>...``
   Specify permissions for installed files.  Valid permissions are
@@ -280,8 +283,8 @@ Signatures
   instead of being able to rely on the above (see next example below).
 
   To make packages compliant with distribution filesystem layout policies, if
-  projects must specify a ``DESTINATION``, it is recommended that they use a
-  path that begins with the appropriate :module:`GNUInstallDirs` variable.
+  projects must specify a ``DESTINATION``, it is strongly recommended that they use
+  a path that begins with the appropriate relative :module:`GNUInstallDirs` variable.
   This allows package maintainers to control the install destination by setting
   the appropriate cache variables.  The following example shows a static library
   being installed to the default destination provided by
@@ -572,8 +575,8 @@ Signatures
   ``DATA`` instead.
 
   To make packages compliant with distribution filesystem layout policies, if
-  projects must specify a ``DESTINATION``, it is recommended that they use a
-  path that begins with the appropriate :module:`GNUInstallDirs` variable.
+  projects must specify a ``DESTINATION``, it is strongly recommended that they use
+  a path that begins with the appropriate relative :module:`GNUInstallDirs` variable.
   This allows package maintainers to control the install destination by setting
   the appropriate cache variables.  The following example shows how to follow
   this advice while installing an image to a project-specific documentation
@@ -719,8 +722,8 @@ Signatures
   ``DATA`` instead.
 
   To make packages compliant with distribution filesystem layout policies, if
-  projects must specify a ``DESTINATION``, it is recommended that they use a
-  path that begins with the appropriate :module:`GNUInstallDirs` variable.
+  projects must specify a ``DESTINATION``, it is strongly recommended that they use
+  a path that begins with the appropriate relative :module:`GNUInstallDirs` variable.
   This allows package maintainers to control the install destination by setting
   the appropriate cache variables.
 
