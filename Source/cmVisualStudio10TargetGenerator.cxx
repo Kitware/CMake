@@ -1512,7 +1512,6 @@ void cmVisualStudio10TargetGenerator::WriteCEDebugProjectConfigurationValues(
 void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
   Elem& e1, std::string const& config)
 {
-  cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
   cmValue mfcFlag = this->Makefile->GetDefinition("CMAKE_MFC_FLAG");
   if (mfcFlag) {
     std::string const mfcFlagValue =
@@ -1543,12 +1542,9 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
   } else {
     e1.Element("CharacterSet", "MultiByte");
   }
-  if (cmValue projectToolsetOverride =
-        this->GeneratorTarget->GetProperty("VS_PLATFORM_TOOLSET")) {
-    e1.Element("PlatformToolset", *projectToolsetOverride);
-  } else if (const char* toolset = gg->GetPlatformToolset()) {
-    e1.Element("PlatformToolset", toolset);
-  }
+
+  this->WriteMSToolConfigurationValuesCommon(e1, config);
+
   if (this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_COMPONENT") ||
       this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_EXTENSIONS")) {
     e1.Element("WindowsAppContainer", "true");
@@ -1579,8 +1575,6 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
     return;
   }
 
-  cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
-
   Options& o = *(this->ClOptions[config]);
 
   if (o.IsDebug()) {
@@ -1598,12 +1592,7 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
     o.RemoveFlag("Platform");
   }
 
-  if (cmValue projectToolsetOverride =
-        this->GeneratorTarget->GetProperty("VS_PLATFORM_TOOLSET")) {
-    e1.Element("PlatformToolset", *projectToolsetOverride);
-  } else if (const char* toolset = gg->GetPlatformToolset()) {
-    e1.Element("PlatformToolset", toolset);
-  }
+  this->WriteMSToolConfigurationValuesCommon(e1, config);
 
   std::string postfixName =
     cmStrCat(cmSystemTools::UpperCase(config), "_POSTFIX");
@@ -1621,6 +1610,18 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
 
   OptionsHelper oh(o, e1);
   oh.OutputFlagMap();
+}
+
+void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesCommon(
+  Elem& e1, std::string const& config)
+{
+  cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
+  if (cmValue projectToolsetOverride =
+        this->GeneratorTarget->GetProperty("VS_PLATFORM_TOOLSET")) {
+    e1.Element("PlatformToolset", *projectToolsetOverride);
+  } else if (const char* toolset = gg->GetPlatformToolset()) {
+    e1.Element("PlatformToolset", toolset);
+  }
 }
 
 //----------------------------------------------------------------------------
