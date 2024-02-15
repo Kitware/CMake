@@ -1,0 +1,5 @@
+if(1)
+  cmake_language(EXIT 9)
+  message(FATAL_ERROR "This should not be reached!")
+endif()
+message(FATAL_ERROR "This should not be reached!")
