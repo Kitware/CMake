@@ -265,6 +265,10 @@
  * due to a limitation in the kernel source generator */
 #  define ZSTD_ALIGNOF(T) __alignof(T)
 
+# elif defined(__SUNPRO_C) || defined(__SUNPRO_CC)
+/* Oracle Studio */
+#  define ZSTD_ALIGNOF(T) _Alignof(T)
+
 # elif defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 201112L)
 /* C11 support */
 #  include <stdalign.h>
