@@ -4890,7 +4890,7 @@ std::string SystemInformationImplementation::ParseValueFromKStat(
   args.reserve(3 + args_string.size());
   args.push_back("kstat");
   args.push_back("-p");
-  for (auto& i : args_string) {
+  for (const auto& i : args_string) {
     args.push_back(i.c_str());
   }
   args.push_back(nullptr);
