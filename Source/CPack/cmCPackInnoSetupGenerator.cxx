@@ -7,7 +7,6 @@ file Copyright.txt or https://cmake.org/licensing for details. */
 #include <cctype>
 #include <cstdlib>
 #include <ostream>
-#include <stack>
 #include <utility>
 
 #include "cmsys/RegularExpression.hxx"
@@ -613,7 +612,6 @@ bool cmCPackInnoSetupGenerator::ProcessComponents()
 
   // Components
   std::vector<cmCPackComponent*> downloadedComponents;
-  std::stack<cmCPackComponentGroup*> groups;
   for (auto& i : Components) {
     cmCPackInnoSetupKeyValuePairs params;
     cmCPackComponent* component = &i.second;

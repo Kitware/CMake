@@ -194,7 +194,7 @@ int runTest(int argc, char* argv[])
     R"("command" *: *"disconnect".*"success" *: *true.*"type" *: *"response")"
   };
 
-  for (auto& regexString : expectedResponses) {
+  for (const auto& regexString : expectedResponses) {
     cmsys::RegularExpression regex(regexString);
     if (!regex.find(debuggerResponse)) {
       std::cout << "Expected response not found: " << regexString << std::endl;

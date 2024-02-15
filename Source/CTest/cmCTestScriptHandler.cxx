@@ -563,10 +563,8 @@ int cmCTestScriptHandler::RunCurrentScript()
 
 int cmCTestScriptHandler::CheckOutSourceDir()
 {
-  std::string command;
   std::string output;
   int retVal;
-  bool res;
 
   if (!cmSystemTools::FileExists(this->SourceDir) &&
       !this->CVSCheckOut.empty()) {
@@ -574,7 +572,7 @@ int cmCTestScriptHandler::CheckOutSourceDir()
     output.clear();
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                "Run cvs: " << this->CVSCheckOut << std::endl);
-    res = cmSystemTools::RunSingleCommand(
+    bool res = cmSystemTools::RunSingleCommand(
       this->CVSCheckOut, &output, &output, &retVal, this->CTestRoot.c_str(),
       this->HandlerVerbose, cmDuration::zero() /*this->TimeOut*/);
     if (!res || retVal != 0) {
@@ -587,8 +585,6 @@ int cmCTestScriptHandler::CheckOutSourceDir()
 
 int cmCTestScriptHandler::BackupDirectories()
 {
-  int retVal;
-
   // compute the backup names
   this->BackupSourceDir = cmStrCat(this->SourceDir, "_CMakeBackup");
   this->BackupBinaryDir = cmStrCat(this->BinaryDir, "_CMakeBackup");
@@ -608,7 +604,7 @@ int cmCTestScriptHandler::BackupDirectories()
     rename(this->BinaryDir.c_str(), this->BackupBinaryDir.c_str());
 
     // we must now checkout the src dir
-    retVal = this->CheckOutSourceDir();
+    int retVal = this->CheckOutSourceDir();
     if (retVal) {
       this->RestoreBackupDirectories();
       return retVal;

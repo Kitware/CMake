@@ -360,7 +360,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
       cmCPackLogger(cmCPackLog::LOG_DEBUG, "Find files" << std::endl);
       cmsys::Glob gl;
       std::string top = *it;
-      it++;
+      ++it;
       std::string subdir = *it;
       std::string findExpr = cmStrCat(top, "/*");
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
