@@ -108,103 +108,106 @@ extends:
           clean: true
           fetchTags: false
           persistCredentials: true
-        # - task: CMake@1
-        #   name: CMake1
-        #   displayName: CMake x64 Cache Generation
+        - task: CMake@1
+          name: CMake1
+          displayName: CMake x64 Cache Generation
+          inputs:
+            cwd: $(CMakeBuildDirectory)
+            cmakeArgs: -DCMAKE_INSTALL_PREFIX:PATH=$(CMakeInstallDirectory) -DCMAKE_CONFIGURATION_TYPES=$(BuildConfiguration) -DCMake_VERSION_MICROSOFT_SCHEME=true -DCMake_VERSION_NO_GIT=true -DMicrosoft_CMake_VERSION_PATCH=$(Build.BuildNumber) $(Build.SourcesDirectory) -DCMAKE_CXX_FLAGS_INIT="/W3 /Qspectre /guard:cf /ZH:SHA_256" -DCMAKE_C_FLAGS_INIT="/W3 /Qspectre /guard:cf /ZH:SHA_256" -DCMAKE_EXE_LINKER_FLAGS_INIT="/incremental:no /profile /guard:cf /CETCOMPAT" -S $(Build.SourcesDirectory) -B $(CMakeBuildDirectory) -DCPACK_BINARY_NSIS=OFF -DCPACK_BINARY_ZIP=ON -DCPACK_PACKAGE_FILE_NAME=cmake_install_x64
+        - task: CMake@1
+          name: CMake2
+          displayName: CMake x64 Build Install and Package
+          inputs:
+            cwd: $(CMakeBuildDirectory)
+            cmakeArgs: --build . --target package install --config $(BuildConfiguration) -- -m
+        - task: MSBuild@1
+          displayName: 'Build solution $(CMakeBuildDirectory)/package.vcxproj'
+          inputs:
+            solution: '$(CMakeBuildDirectory)/package.vcxproj'
+            msbuildArchitecture: x64
+            platform: x64
+            configuration: '$(BuildConfiguration)'
+            clean: true
+            createLogFile: true
+            logFileVerbosity: diagnostic
+        - task: MSBuild@1
+          displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
+          inputs:
+            solution: '$(CMakeBuildDirectory)/install.vcxproj'
+            msbuildArchitecture: x64
+            platform: x64
+            configuration: '$(BuildConfiguration)'
+            createLogFile: true
+            logFileVerbosity: diagnostic
+        - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
+          displayName: 'Run the PREfast SDL Native Rules for MSBuild'
+          env:
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+          inputs:
+            publishXML: true
+            userProvideBuildInfo: auto
+            setupCommandlinePicker: vs2022
+        # - task: CmdLine@1
+        #   name: CmdLine3
+        #   displayName: Run tests
         #   inputs:
-        #     cwd: $(CMakeBuildDirectory)
-        #     cmakeArgs: -DCMAKE_INSTALL_PREFIX:PATH=$(CMakeInstallDirectory) -DCMAKE_CONFIGURATION_TYPES=$(BuildConfiguration) -DCMake_VERSION_MICROSOFT_SCHEME=true -DCMake_VERSION_NO_GIT=true -DMicrosoft_CMake_VERSION_PATCH=$(Build.BuildNumber) $(Build.SourcesDirectory) -DCMAKE_CXX_FLAGS_INIT="/W3 /Qspectre /guard:cf /ZH:SHA_256" -DCMAKE_C_FLAGS_INIT="/W3 /Qspectre /guard:cf /ZH:SHA_256" -DCMAKE_EXE_LINKER_FLAGS_INIT="/incremental:no /profile /guard:cf /CETCOMPAT" -S $(Build.SourcesDirectory) -B $(CMakeBuildDirectory) -DCPACK_BINARY_NSIS=OFF -DCPACK_BINARY_ZIP=ON -DCPACK_PACKAGE_FILE_NAME=cmake_install_x64
-        # - task: CMake@1
-        #   name: CMake2
-        #   displayName: CMake x64 Build Install and Package
-        #   inputs:
-        #     cwd: $(CMakeBuildDirectory)
-        #     cmakeArgs: --build . --target package install --config $(BuildConfiguration) -- -m
-        # - task: MSBuild@1
-        #   displayName: 'Build solution $(CMakeBuildDirectory)/package.vcxproj'
-        #   inputs:
-        #     solution: '$(CMakeBuildDirectory)/package.vcxproj'
-        #     msbuildArchitecture: x64
-        #     platform: x64
-        #     configuration: '$(BuildConfiguration)'
-        #     clean: true
-        #     createLogFile: true
-        #     logFileVerbosity: diagnostic
-        # - task: MSBuild@1
-        #   displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
-        #   inputs:
-        #     solution: '$(CMakeBuildDirectory)/install.vcxproj'
-        #     msbuildArchitecture: x64
-        #     platform: x64
-        #     configuration: '$(BuildConfiguration)'
-        #     createLogFile: true
-        #     logFileVerbosity: diagnostic
-        # - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
-        #   displayName: 'Run the PREfast SDL Native Rules for MSBuild'
-        #   env:
-        #     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-        #   inputs:
-        #     publishXML: true
-        #     userProvideBuildInfo: auto
-        #     setupCommandlinePicker: vs2022
-        # # - task: CmdLine@1
-        # #   name: CmdLine3
-        # #   displayName: Run tests
-        # #   inputs:
-        # #     filename: $(CMakeBuildDirectory)\bin\$(BuildConfiguration)\ctest
-        # #     arguments: -C $(BuildConfiguration) -E "VSExcludeFromDefaultBuild-RelWithDebInfo|CMakeOnly.MajorVersionSelection-PythonInterp_2|RunCMake.AutoExportDll" --output-on-failure -E VSExcludeFromDefaultBuild-RelWithDebInfo
-        # #     workingFolder: $(CMakeBuildDirectory)
-        # - task: CopyFiles@2
-        #   name: Copyzipx64
-        #   displayName: Copy x64 zip
-        #   inputs:
-        #     SourceFolder:  $(CMakeBuildDirectory)
-        #     Contents: 'cmake_install_x64.zip'
-        #     TargetFolder: $(ArchiveDir)
-        #     CleanTargetFolder: true
-        #     OverWrite: true
-        # - task: DeleteFiles@1
-        #   displayName: Delete CMake x64 Executables and ctresalloc.pdb
-        #   inputs:
-        #     SourceFolder: $(CMakeBuildDirectory)/bin/$(BuildConfiguration)/
-        #     Contents: |-
-        #       *.exe
-        #       ctresalloc.pdb
-        # - task: ArchiveFiles@2
-        #   displayName: Archive CMake x64 PDB Files
-        #   inputs:
-        #     rootFolderOrFile: $(CMakeBuildDirectory)/bin/$(BuildConfiguration)/
-        #     archiveFile: $(Build.ArtifactStagingDirectory)/cmake_pdb_x64.zip
-        # - task: PowerShell@2
-        #   displayName: Generate TSA config
-        #   inputs:
-        #     targetType: inline
-        #     script: |
-        #       $configName = "config.gdntsa"
-        #       $config = @"
-        #       {
-        #           "codebaseName": "MicrosoftCMake_cmake-daemon",
-        #           "notificationAliases": [
-        #               "cmake@microsoft.com"
-        #           ],
-        #           "codebaseAdmins": [
-        #               "NORTHAMERICA\\itodirel"
-        #           ],
-        #           "instanceUrl": "https://devdiv.visualstudio.com",
-        #           "projectName": "DevDiv",
-        #           "areaPath": "DevDiv\\Cpp Developer Experience\\Cross Platform\\CMake\\Upstream",
-        #           "iterationPath": "DevDiv\\Future Backlog",
-        #           "allTools": true
-        #       }
-        #       "@
-        #       Out-File -FilePath "$(Agent.BuildDirectory)/$configName" -InputObject $config
+        #     filename: $(CMakeBuildDirectory)\bin\$(BuildConfiguration)\ctest
+        #     arguments: -C $(BuildConfiguration) -E "VSExcludeFromDefaultBuild-RelWithDebInfo|CMakeOnly.MajorVersionSelection-PythonInterp_2|RunCMake.AutoExportDll" --output-on-failure -E VSExcludeFromDefaultBuild-RelWithDebInfo
+        #     workingFolder: $(CMakeBuildDirectory)
+        - task: CopyFiles@2
+          name: Copyzipx64
+          displayName: Copy x64 zip
+          inputs:
+            SourceFolder:  $(CMakeBuildDirectory)
+            Contents: 'cmake_install_x64.zip'
+            TargetFolder: $(ArchiveDir)
+            CleanTargetFolder: true
+            OverWrite: true
+        - task: DeleteFiles@1
+          displayName: Delete CMake x64 Executables and ctresalloc.pdb
+          inputs:
+            SourceFolder: $(CMakeBuildDirectory)/bin/$(BuildConfiguration)/
+            Contents: |-
+              *.exe
+              ctresalloc.pdb
+        - task: ArchiveFiles@2
+          displayName: Archive CMake x64 PDB Files
+          inputs:
+            rootFolderOrFile: $(CMakeBuildDirectory)/bin/$(BuildConfiguration)/
+            archiveFile: $(Build.ArtifactStagingDirectory)/cmake_pdb_x64.zip
+        - task: PowerShell@2
+          displayName: Generate TSA config
+          inputs:
+            targetType: inline
+            script: |
+              $configName = "config.gdntsa"
+              $config = @"
+              {
+                  "codebaseName": "MicrosoftCMake_cmake-daemon",
+                  "notificationAliases": [
+                      "cmake@microsoft.com"
+                  ],
+                  "codebaseAdmins": [
+                      "NORTHAMERICA\\itodirel"
+                  ],
+                  "instanceUrl": "https://devdiv.visualstudio.com",
+                  "projectName": "DevDiv",
+                  "areaPath": "DevDiv\\Cpp Developer Experience\\Cross Platform\\CMake\\Upstream",
+                  "iterationPath": "DevDiv\\Future Backlog",
+                  "allTools": true
+              }
+              "@
+              Out-File -FilePath "$(Agent.BuildDirectory)/$configName" -InputObject $config
         - task: PowerShell@2
           displayName: Create and Publish Version Tag
           inputs:
             targetType: inline
             script: |
-              git tag "v2test"
-              git push origin "v2test"
+              $cmd="$(CMakeInstallDirectory)/bin/cmake.exe --version"
+              $version = "$(((Invoke-Expression $cmd) -Split " ")[2])"
+              echo Creating Tag "v$version"
+              git tag "v$version"
+              git push origin "v$version"
       - job: Job_arm64
         displayName: CMake ARM64 Build
         timeoutInMinutes: 360
