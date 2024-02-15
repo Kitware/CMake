@@ -168,11 +168,11 @@ macro(__compiler_gnu lang)
     #
     # [1]: https://gcc.gnu.org/onlinedocs/gcc-4.9.4/gcc/Optimize-Options.html
     set(CMAKE_${lang}_ARCHIVE_CREATE_IPO
-      "\"${CMAKE_${lang}_COMPILER_AR}\" cr <TARGET> <LINK_FLAGS> <OBJECTS>"
+      "\"${CMAKE_${lang}_COMPILER_AR}\" qc <TARGET> <LINK_FLAGS> <OBJECTS>"
     )
 
     set(CMAKE_${lang}_ARCHIVE_APPEND_IPO
-      "\"${CMAKE_${lang}_COMPILER_AR}\" r <TARGET> <LINK_FLAGS> <OBJECTS>"
+      "\"${CMAKE_${lang}_COMPILER_AR}\" q <TARGET> <LINK_FLAGS> <OBJECTS>"
     )
 
     set(CMAKE_${lang}_ARCHIVE_FINISH_IPO

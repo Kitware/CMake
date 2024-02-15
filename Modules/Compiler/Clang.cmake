@@ -95,11 +95,11 @@ else()
     endif()
 
     set(CMAKE_${lang}_ARCHIVE_CREATE_IPO
-      "\"${__ar}\" cr <TARGET> <LINK_FLAGS> <OBJECTS>"
+      "\"${__ar}\" qc <TARGET> <LINK_FLAGS> <OBJECTS>"
     )
 
     set(CMAKE_${lang}_ARCHIVE_APPEND_IPO
-      "\"${__ar}\" r <TARGET> <LINK_FLAGS> <OBJECTS>"
+      "\"${__ar}\" q <TARGET> <LINK_FLAGS> <OBJECTS>"
     )
 
     set(CMAKE_${lang}_ARCHIVE_FINISH_IPO
