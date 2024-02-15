@@ -305,7 +305,7 @@ cm::static_string_view CxxModuleMapExtension(
 
 std::set<std::string> CxxModuleUsageSeed(
   CxxModuleLocations const& loc, std::vector<cmScanDepInfo> const& objects,
-  CxxModuleUsage& usages)
+  CxxModuleUsage& usages, bool& private_usage_found)
 {
   // Track inner usages to populate usages from internal bits.
   //
@@ -334,6 +334,7 @@ std::set<std::string> CxxModuleUsageSeed(
           cmStrCat("Unable to use module '", r.LogicalName,
                    "' as it is 'PRIVATE' and therefore not accessible outside "
                    "of its owning target."));
+        private_usage_found = true;
         continue;
       }
 
