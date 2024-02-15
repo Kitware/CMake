@@ -207,3 +207,8 @@ Changes made since CMake 3.28.0 include the following.
 * These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
+
+.. 3.28.4 (unreleased)
+
+  * Apple visionOS support has been updated for the official Xcode 15.2
+    release of the  ``xros`` and ``xrsimulator`` SDKs.
