@@ -107,7 +107,7 @@ extends:
         - checkout: self
           clean: true
           fetchTags: false
-          persistCredentials: True
+          persistCredentials: true
         # - task: CMake@1
         #   name: CMake1
         #   displayName: CMake x64 Cache Generation
