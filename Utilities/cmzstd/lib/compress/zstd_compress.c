@@ -4741,7 +4741,7 @@ static size_t ZSTD_loadDictionaryContent(ZSTD_matchState_t* ms,
         U32 maxDictSize = 8U << MIN(MAX(params->cParams.hashLog, params->cParams.chainLog), 28);
         if (srcSize > maxDictSize) {
             ip = iend - maxDictSize;
-            src = ip;
+            /* src = ip; deadcode.DeadStores */
             srcSize = maxDictSize;
         }
     }
