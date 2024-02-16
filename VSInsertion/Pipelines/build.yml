@@ -26,8 +26,6 @@ variables:
   value: 72f988bf-86f1-41af-91ab-2d7cd011db47
 - name: ArtifactServices.Symbol.AccountName
   value: devdiv
-- name: ArtifactServices.Symbol.PAT
-  value: ''
 - name: ArtifactServices.Symbol.UseAAD
   value: false
 - name: DropRoot
@@ -677,12 +675,13 @@ extends:
         - task: PublishSymbols@2
           name: PublishSymbols14
           displayName: Enable Source Server - x64 x86 ARM64
+          env:
+            ARTIFACTSERVICES_SYMBOL_PAT: $(ArtifactServices.Symbol.PAT)
           inputs:
             SymbolsFolder: $(SymbolsDirectory)
             SearchPattern: '**/*.pdb'
             IndexSources: false
             SymbolServerType: TeamServices
-            SymbolsArtifactName: ''
           continueOnError: true
         - task: NuGetCommand@2
           name: NuGetCommand15
