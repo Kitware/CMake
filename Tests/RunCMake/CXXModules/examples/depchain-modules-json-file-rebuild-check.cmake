@@ -1,8 +1,8 @@
 if (RunCMake_GENERATOR_IS_MULTI_CONFIG)
-  set(dep_modules_json_path "CMakeFiles/depchain_modules_json_file.dir/Debug/CXXModules.json")
+  set(dep_modules_json_path "CMakeFiles/depchain_modules_json_file.dir/Debug/CXX.dd")
   set(modules_json_path "CMakeFiles/depchain_with_modules_json_file.dir/Debug/CXXModules.json")
 else ()
-  set(dep_modules_json_path "CMakeFiles/depchain_modules_json_file.dir/CXXModules.json")
+  set(dep_modules_json_path "CMakeFiles/depchain_modules_json_file.dir/CXX.dd")
   set(modules_json_path "CMakeFiles/depchain_with_modules_json_file.dir/CXXModules.json")
 endif ()
 
