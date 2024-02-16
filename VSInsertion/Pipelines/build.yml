@@ -174,7 +174,7 @@ extends:
           displayName: Archive CMake x64 PDB Files
           inputs:
             rootFolderOrFile: $(CMakeBuildDirectory)/bin/$(BuildConfiguration)/
-            archiveFile: $(Build.ArtifactStagingDirectory)/cmake_pdb_x64.zip
+            archiveFile: $(ArchiveDir)/cmake_pdb_x64.zip
         - task: PowerShell@2
           displayName: Generate TSA config
           inputs:
