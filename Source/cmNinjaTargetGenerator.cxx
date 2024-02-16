@@ -1600,7 +1600,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
       // corresponding file path.
       std::string ddModmapFile = cmStrCat(objectFileName, ".modmap");
       vars["DYNDEP_MODULE_MAP_FILE"] = ddModmapFile;
-      objBuild.OrderOnlyDeps.push_back(ddModmapFile);
+      objBuild.ImplicitDeps.push_back(ddModmapFile);
       scanningFiles.ModuleMapFile = std::move(ddModmapFile);
     }
 
