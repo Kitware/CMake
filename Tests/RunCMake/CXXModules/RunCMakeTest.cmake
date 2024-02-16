@@ -335,3 +335,7 @@ endfunction ()
 
 # Installation happens within `run_cxx_module_test_ninja`.
 set(RunCMake_CXXModules_INSTALL 0)
+
+set(test_set modules-from-ninja)
+run_cxx_module_test_ninja("export-${test_set}")
+run_cxx_module_test(import-modules "import-${test_set}" "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/export-${test_set}-ninja-install" -DFROM_NINJA=1)
