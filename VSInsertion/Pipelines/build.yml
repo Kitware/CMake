@@ -335,8 +335,8 @@ extends:
               displayName: 'NuGet publish for VS Insertion'
               packageParentPath: '$(OutputParentPath)'
               condition: eq(variables.InsertIntoVS, 'true')
-              searchPatternPush: $(OutputParentPath)/package/*.nupkg
-              feedPublish: 97a41293-2972-4f48-8c0e-05493ae82010
+              packagesToPush: $(OutputParentPath)/package/*.nupkg
+              publishVstsFeed: 97a41293-2972-4f48-8c0e-05493ae82010
               allowPackageConflicts: true
             - output: pipelineArtifact
               displayName: 'Publish Generate Doc log (process.py.log)'
@@ -784,6 +784,6 @@ extends:
           displayName: Copy Generate Doc log (process.py.log)
           inputs:
             condition: eq(variables.InsertIntoVS, 'true')
-            SourceFolder: $(System.DefaultWorkingDirectory)
+            SourceFolder: $(Build.SourcesDirectory)
             Contents: 'process.py.log'
             TargetFolder: $(OutputParentPath)
