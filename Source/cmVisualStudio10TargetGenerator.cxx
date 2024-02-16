@@ -1622,6 +1622,25 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesCommon(
   } else if (const char* toolset = gg->GetPlatformToolset()) {
     e1.Element("PlatformToolset", toolset);
   }
+
+  cm::optional<bool> maybeUseDebugLibraries;
+  if (cmValue useDebugLibrariesProp =
+        this->GeneratorTarget->GetProperty("VS_USE_DEBUG_LIBRARIES")) {
+    // The project explicitly specified a value for this target.
+    // An empty string suppresses generation of the setting altogether.
+    std::string const useDebugLibraries = cmGeneratorExpression::Evaluate(
+      *useDebugLibrariesProp, this->LocalGenerator, config);
+    if (!useDebugLibraries.empty()) {
+      maybeUseDebugLibraries = cmIsOn(useDebugLibraries);
+    }
+  }
+  if (maybeUseDebugLibraries) {
+    if (*maybeUseDebugLibraries) {
+      e1.Element("UseDebugLibraries", "true");
+    } else {
+      e1.Element("UseDebugLibraries", "false");
+    }
+  }
 }
 
 //----------------------------------------------------------------------------
