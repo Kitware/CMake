@@ -815,6 +815,11 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
     // dyndep rules
     rule.RspFile = "$out.rsp";
     rule.RspContent = "$in";
+    // Ninja's collator writes all outputs using `cmGeneratedFileStream`, so
+    // they are only updated if contents actually change. Avoid running
+    // dependent jobs if the contents don't change by telling `ninja` to check
+    // the timestamp again.
+    rule.Restat = "1";
 
     // Run CMake dependency scanner on the source file (using the preprocessed
     // source if that was performed).
