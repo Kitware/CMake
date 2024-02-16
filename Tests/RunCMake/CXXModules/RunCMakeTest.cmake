@@ -147,11 +147,24 @@ function (run_cxx_module_test directory)
   if (NOT RunCMake_CXXModules_NO_TEST)
     run_cmake_command("examples/${test_name}-test" "${CMAKE_CTEST_COMMAND}" -C Debug --output-on-failure)
   endif ()
+  if (RunCMake_CXXModules_REBUILD)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 1.125) # handle 1s resolution
+    include("${RunCMake_TEST_SOURCE_DIR}/pre-rebuild.cmake")
+    execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 1.125) # handle 1s resolution
+    run_cmake_command("examples/${test_name}-rebuild" "${CMAKE_COMMAND}" --build . --config Debug)
+  endif ()
 endfunction ()
 
 function (run_cxx_module_test_target directory target)
   set(RunCMake_CXXModules_TARGET "${target}")
   set(RunCMake_CXXModules_NO_TEST 1)
+  run_cxx_module_test("${directory}" ${ARGN})
+endfunction ()
+
+function (run_cxx_module_test_rebuild directory)
+  set(RunCMake_CXXModules_INSTALL 0)
+  set(RunCMake_CXXModules_NO_TEST 1)
+  set(RunCMake_CXXModules_REBUILD 1)
   run_cxx_module_test("${directory}" ${ARGN})
 endfunction ()
 
@@ -202,6 +215,7 @@ if ("collation" IN_LIST CMake_TEST_MODULE_COMPILATION)
   set(RunCMake_CXXModules_NO_TEST 1)
   run_cxx_module_test(req-private-other-target)
   unset(RunCMake_CXXModules_NO_TEST)
+  run_cxx_module_test_rebuild(depchain-modmap)
 endif ()
 
 # Tests which use named modules in shared libraries.
