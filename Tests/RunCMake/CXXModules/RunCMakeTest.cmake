@@ -168,6 +168,18 @@ function (run_cxx_module_test_rebuild directory)
   run_cxx_module_test("${directory}" ${ARGN})
 endfunction ()
 
+# Module compilation features:
+# Compiler-based:
+# - `named`: basic support for named modules is available
+# - `shared`: shared libraries are supported
+# - `partitions`: module partitions are supported
+# - `internal_partitions`: internal module partitions are supported
+# - `bmionly`: the compiler supports BMI-only builds
+#
+# Generator-based:
+# - `compile_commands`: the generator supports `compile_commands.json`
+# - `collation`: the generator supports module collation features
+# - `export_bmi`: the generator supports exporting BMIs
 string(REPLACE "," ";" CMake_TEST_MODULE_COMPILATION "${CMake_TEST_MODULE_COMPILATION}")
 
 if (RunCMake_GENERATOR MATCHES "Ninja")
