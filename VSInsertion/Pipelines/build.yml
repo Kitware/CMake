@@ -360,6 +360,7 @@ extends:
             script: |
               if not exist "$(SigningSolutionRoot)" mkdir "$(SigningSolutionRoot)"
               if not exist "$(PackagingSolutionRoot)" mkdir "$(PackagingSolutionRoot)"
+              if not exist "$(OutputParentPath)/log" mkdir "$(OutputParentPath)/log"
         - task: CopyFiles@2
           name: CopyFiles1
           displayName: Copy Signing Solution to Staging Area
