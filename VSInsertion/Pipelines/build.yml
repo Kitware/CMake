@@ -341,7 +341,7 @@ extends:
             - output: pipelineArtifact
               displayName: 'Publish Generate Doc log (process.py.log)'
               condition: eq(variables.InsertIntoVS, 'true')
-              targetPath: $(OutputParentPath)/process.py.log #
+              targetPath: $(OutputParentPath)/log/process.py.log #
               artifactName: GenerateDocLog
         steps:
         - checkout: self
@@ -776,14 +776,7 @@ extends:
             TeamEmail: $(TeamEmail)
             DefaultConfigValues: VS.ExternalAPIs.Microsoft.CMake=$(CMakeVersion)
             RevisionTextFiles: src\SetupPackages\VC\CMake\MicrosoftCMake\revision.txt
-            CustomScriptExecutionCommand: $ErrorActionPreference="Continue";$(System.DefaultWorkingDirectory)/VS/src/vc/scripts/InsertCMake.ps1 -CMakeRepoRoot "$(Build.SourcesDirectory)" -CMakeExternalApisInstallRoot "runtimes\win-`$(ProductArch)\native" -CMakeInstallRoot "$(PackagingSolutionRoot)/runtimes/win-x64/native" -StageAndCommit $true -LogLocation $(System.DefaultWorkingDirectory) -CommitTitle "CMake Version $(CMakeVersion)" -CommitDescription "from vcls-cmake repo"
+            CustomScriptExecutionCommand: $ErrorActionPreference="Continue";$(System.DefaultWorkingDirectory)/VS/src/vc/scripts/InsertCMake.ps1 -CMakeRepoRoot "$(Build.SourcesDirectory)" -CMakeExternalApisInstallRoot "runtimes\win-`$(ProductArch)\native" -CMakeInstallRoot "$(PackagingSolutionRoot)/runtimes/win-x64/native" -StageAndCommit $true -LogLocation $(OutputParentPath)/log -CommitTitle "CMake Version $(CMakeVersion)" -CommitDescription "from vcls-cmake repo"
             AllowTopicBranchUpdate: true
             AddCommitsToPR: false
             LinkWorkItemsToPR: false
-        - task: CopyFiles@2
-          displayName: Copy Generate Doc log (process.py.log)
-          inputs:
-            condition: eq(variables.InsertIntoVS, 'true')
-            SourceFolder: $(Build.SourcesDirectory)
-            Contents: 'process.py.log'
-            TargetFolder: $(OutputParentPath)
