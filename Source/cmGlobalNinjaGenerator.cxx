@@ -2786,6 +2786,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
         // `cmNinjaTargetGenerator::ExportObjectCompileCommand` to generate the
         // corresponding file path.
         cmGeneratedFileStream mmf(cmStrCat(object.PrimaryOutput, ".modmap"));
+        mmf.SetCopyIfDifferent(true);
         mmf << mm;
       }
 
@@ -2875,6 +2876,7 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
   }
 
   cmGeneratedFileStream tmf(target_mods_file);
+  tmf.SetCopyIfDifferent(true);
   tmf << target_module_info;
 
   cmDyndepMetadataCallbacks cb;
