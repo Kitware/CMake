@@ -51,6 +51,14 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.30
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0162: Visual Studio generators add UseDebugLibraries indicators by default. </policy/CMP0162>
+
 Policies Introduced by CMake 3.29
 =================================
 

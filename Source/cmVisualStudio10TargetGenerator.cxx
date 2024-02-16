@@ -1633,6 +1633,19 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesCommon(
     if (!useDebugLibraries.empty()) {
       maybeUseDebugLibraries = cmIsOn(useDebugLibraries);
     }
+  } else if (this->GeneratorTarget->GetPolicyStatusCMP0162() ==
+             cmPolicies::NEW) {
+    // The project did not explicitly specify a value for this target.
+    // If the target compiles sources for a known MSVC runtime library,
+    // base our default value on that.
+    if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
+      maybeUseDebugLibraries = this->ClOptions[config]->UsingDebugRuntime();
+    }
+    // For other targets, such as UTILITY targets, base our default
+    // on the configuration name.
+    if (!maybeUseDebugLibraries) {
+      maybeUseDebugLibraries = cmSystemTools::UpperCase(config) == "DEBUG"_s;
+    }
   }
   if (maybeUseDebugLibraries) {
     if (*maybeUseDebugLibraries) {
