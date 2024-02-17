@@ -116,40 +116,40 @@ extends:
           inputs:
             cwd: $(CMakeBuildDirectory)
             cmakeArgs: --build . --target package install --config $(BuildConfiguration) -- -m
-        # - task: MSBuild@1
-        #   displayName: 'Build solution $(CMakeBuildDirectory)/package.vcxproj'
-        #   inputs:
-        #     solution: '$(CMakeBuildDirectory)/package.vcxproj'
-        #     msbuildArchitecture: x64
-        #     platform: x64
-        #     configuration: '$(BuildConfiguration)'
-        #     clean: true
-        #     createLogFile: true
-        #     logFileVerbosity: diagnostic
-        # - task: MSBuild@1
-        #   displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
-        #   inputs:
-        #     solution: '$(CMakeBuildDirectory)/install.vcxproj'
-        #     msbuildArchitecture: x64
-        #     platform: x64
-        #     configuration: '$(BuildConfiguration)'
-        #     createLogFile: true
-        #     logFileVerbosity: diagnostic
-        # - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
-        #   displayName: 'Run the PREfast SDL Native Rules for MSBuild'
-        #   env:
-        #     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-        #   inputs:
-        #     publishXML: true
-        #     userProvideBuildInfo: auto
-        #     setupCommandlinePicker: vs2022
-        # - task: CmdLine@1
-        #   name: CmdLine3
-        #   displayName: Run tests
-        #   inputs:
-        #     filename: $(CMakeBuildDirectory)\bin\$(BuildConfiguration)\ctest
-        #     arguments: -C $(BuildConfiguration) -E "VSExcludeFromDefaultBuild-RelWithDebInfo|CMakeOnly.MajorVersionSelection-PythonInterp_2|RunCMake.AutoExportDll" --output-on-failure -E VSExcludeFromDefaultBuild-RelWithDebInfo
-        #     workingFolder: $(CMakeBuildDirectory)
+        - task: MSBuild@1
+          displayName: 'Build solution $(CMakeBuildDirectory)/package.vcxproj'
+          inputs:
+            solution: '$(CMakeBuildDirectory)/package.vcxproj'
+            msbuildArchitecture: x64
+            platform: x64
+            configuration: '$(BuildConfiguration)'
+            clean: true
+            createLogFile: true
+            logFileVerbosity: diagnostic
+        - task: MSBuild@1
+          displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
+          inputs:
+            solution: '$(CMakeBuildDirectory)/install.vcxproj'
+            msbuildArchitecture: x64
+            platform: x64
+            configuration: '$(BuildConfiguration)'
+            createLogFile: true
+            logFileVerbosity: diagnostic
+        - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
+          displayName: 'Run the PREfast SDL Native Rules for MSBuild'
+          env:
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+          inputs:
+            publishXML: true
+            userProvideBuildInfo: auto
+            setupCommandlinePicker: vs2022
+        - task: CmdLine@1
+          name: CmdLine3
+          displayName: Run tests
+          inputs:
+            filename: $(CMakeBuildDirectory)\bin\$(BuildConfiguration)\ctest
+            arguments: -C $(BuildConfiguration) -E "VSExcludeFromDefaultBuild-RelWithDebInfo|CMakeOnly.MajorVersionSelection-PythonInterp_2|RunCMake.AutoExportDll" --output-on-failure -E VSExcludeFromDefaultBuild-RelWithDebInfo
+            workingFolder: $(CMakeBuildDirectory)
         - task: CopyFiles@2
           name: Copyzipx64
           displayName: Copy x64 zip
@@ -338,11 +338,13 @@ extends:
               packagesToPush: $(OutputParentPath)/package/*.nupkg
               publishVstsFeed: 97a41293-2972-4f48-8c0e-05493ae82010
               allowPackageConflicts: true
+              sbomEnabled: false
             - output: pipelineArtifact
               displayName: 'Publish Generate Doc log (process.py.log)'
               condition: eq(variables.InsertIntoVS, 'true')
-              targetPath: $(OutputParentPath)/log/process.py.log #
+              targetPath: $(OutputParentPath)/log/process.py.log
               artifactName: GenerateDocLog
+              sbomEnabled: false
         steps:
         - checkout: self
           clean: true
@@ -717,14 +719,14 @@ extends:
           displayName: Set APIScan environment
           inputs:
             script: setx AzureServicesAuthConnectionString runAs=App;AppId=$(ApiScanClientId);TenantId=$(ApiScanTenant);AppKey=$(ApiScanSecret) /m
-        # - task: securedevelopmentteam.vss-secure-development-tools.build-task-apiscan.APIScan@2
-        #   displayName: 'Run APIScan - x64 x86'
-        #   inputs:
-        #     softwareFolder: '$(SymbolsDirectory)/x64;$(SymbolsDirectory)/x86'
-        #     softwareName: CMake
-        #     softwareVersionNum: '$(CMakeVersion)'
-        #     symbolsFolder: '$(SymbolsDirectory)'
-        #     isLargeApp: false
+        - task: securedevelopmentteam.vss-secure-development-tools.build-task-apiscan.APIScan@2
+          displayName: 'Run APIScan - x64 x86'
+          inputs:
+            softwareFolder: '$(SymbolsDirectory)/x64;$(SymbolsDirectory)/x86'
+            softwareName: CMake
+            softwareVersionNum: '$(CMakeVersion)'
+            symbolsFolder: '$(SymbolsDirectory)'
+            isLargeApp: false
         - task: CmdLine@2
           displayName: Clear APIScan environment
           inputs:
