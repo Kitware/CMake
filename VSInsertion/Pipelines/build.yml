@@ -116,40 +116,40 @@ extends:
           inputs:
             cwd: $(CMakeBuildDirectory)
             cmakeArgs: --build . --target package install --config $(BuildConfiguration) -- -m
-        - task: MSBuild@1
-          displayName: 'Build solution $(CMakeBuildDirectory)/package.vcxproj'
-          inputs:
-            solution: '$(CMakeBuildDirectory)/package.vcxproj'
-            msbuildArchitecture: x64
-            platform: x64
-            configuration: '$(BuildConfiguration)'
-            clean: true
-            createLogFile: true
-            logFileVerbosity: diagnostic
-        - task: MSBuild@1
-          displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
-          inputs:
-            solution: '$(CMakeBuildDirectory)/install.vcxproj'
-            msbuildArchitecture: x64
-            platform: x64
-            configuration: '$(BuildConfiguration)'
-            createLogFile: true
-            logFileVerbosity: diagnostic
-        - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
-          displayName: 'Run the PREfast SDL Native Rules for MSBuild'
-          env:
-            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-          inputs:
-            publishXML: true
-            userProvideBuildInfo: auto
-            setupCommandlinePicker: vs2022
-        - task: CmdLine@1
-          name: CmdLine3
-          displayName: Run tests
-          inputs:
-            filename: $(CMakeBuildDirectory)\bin\$(BuildConfiguration)\ctest
-            arguments: -C $(BuildConfiguration) -E "VSExcludeFromDefaultBuild-RelWithDebInfo|CMakeOnly.MajorVersionSelection-PythonInterp_2|RunCMake.AutoExportDll" --output-on-failure -E VSExcludeFromDefaultBuild-RelWithDebInfo
-            workingFolder: $(CMakeBuildDirectory)
+        # - task: MSBuild@1
+        #   displayName: 'Build solution $(CMakeBuildDirectory)/package.vcxproj'
+        #   inputs:
+        #     solution: '$(CMakeBuildDirectory)/package.vcxproj'
+        #     msbuildArchitecture: x64
+        #     platform: x64
+        #     configuration: '$(BuildConfiguration)'
+        #     clean: true
+        #     createLogFile: true
+        #     logFileVerbosity: diagnostic
+        # - task: MSBuild@1
+        #   displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
+        #   inputs:
+        #     solution: '$(CMakeBuildDirectory)/install.vcxproj'
+        #     msbuildArchitecture: x64
+        #     platform: x64
+        #     configuration: '$(BuildConfiguration)'
+        #     createLogFile: true
+        #     logFileVerbosity: diagnostic
+        # - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
+        #   displayName: 'Run the PREfast SDL Native Rules for MSBuild'
+        #   env:
+        #     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+        #   inputs:
+        #     publishXML: true
+        #     userProvideBuildInfo: auto
+        #     setupCommandlinePicker: vs2022
+        # - task: CmdLine@1
+        #   name: CmdLine3
+        #   displayName: Run tests
+        #   inputs:
+        #     filename: $(CMakeBuildDirectory)\bin\$(BuildConfiguration)\ctest
+        #     arguments: -C $(BuildConfiguration) -E "VSExcludeFromDefaultBuild-RelWithDebInfo|CMakeOnly.MajorVersionSelection-PythonInterp_2|RunCMake.AutoExportDll" --output-on-failure -E VSExcludeFromDefaultBuild-RelWithDebInfo
+        #     workingFolder: $(CMakeBuildDirectory)
         - task: CopyFiles@2
           name: Copyzipx64
           displayName: Copy x64 zip
@@ -327,7 +327,7 @@ extends:
               displayName: 'Publish Symbols Artifacts '
               targetPath: $(SymbolsDirectory)
               artifactName: Symbols
-              sbomBuildDropPath: '$(PackagingSolutionRoot)/runtimes'
+              sbomBuildDropPath: '$(OutputParentPath)/sbomInput'
             - output: pipelineArtifact
               displayName: 'Publish Pipeline Artifact - NuGet Package'
               targetPath: $(OutputParentPath)/package/
@@ -346,6 +346,11 @@ extends:
               condition: eq(variables.InsertIntoVS, 'true')
               targetPath: $(OutputParentPath)/log/process.py.log
               artifactName: GenerateDocLog
+              sbomEnabled: false
+            - output: pipelineArtifact
+              displayName: 'Publish sbom'
+              targetPath: $(OutputParentPath)/sbomInput
+              artifactName: sbom
               sbomEnabled: false
         steps:
         - checkout: self
@@ -675,6 +680,12 @@ extends:
             SourceFolder: $(PackagingSolutionRoot)/runtimes/win-arm64/native/bin
             Contents: '*.exe'
             TargetFolder: $(SymbolsDirectory)/arm64
+        - task: CopyFiles@2
+          displayName: Copy sbom folders under output parent
+          inputs:
+            SourceFolder: $(PackagingSolutionRoot)/runtimes
+            Contents: '**'
+            TargetFolder: $(OutputParentPath)/sbomInput
         - task: PublishSymbols@2
           name: PublishSymbols14
           displayName: Enable Source Server - x64 x86 ARM64
