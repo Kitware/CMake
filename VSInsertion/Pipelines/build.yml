@@ -327,7 +327,7 @@ extends:
               displayName: 'Publish Symbols Artifacts '
               targetPath: $(SymbolsDirectory)
               artifactName: Symbols
-              sbomBuildDropPath: '$(OutputParentPath)/sbomInput'
+              sbomBuildDropPath: '$(PackagingSolutionRoot)/runtimes'
             - output: pipelineArtifact
               displayName: 'Publish Pipeline Artifact - NuGet Package'
               targetPath: $(OutputParentPath)/package/
@@ -346,11 +346,6 @@ extends:
               condition: eq(variables.InsertIntoVS, 'true')
               targetPath: $(OutputParentPath)/log/process.py.log
               artifactName: GenerateDocLog
-              sbomEnabled: false
-            - output: pipelineArtifact
-              displayName: 'Publish sbom'
-              targetPath: $(OutputParentPath)/sbomInput
-              artifactName: sbom
               sbomEnabled: false
         steps:
         - checkout: self
@@ -680,12 +675,6 @@ extends:
             SourceFolder: $(PackagingSolutionRoot)/runtimes/win-arm64/native/bin
             Contents: '*.exe'
             TargetFolder: $(SymbolsDirectory)/arm64
-        - task: CopyFiles@2
-          displayName: Copy sbom folders under output parent
-          inputs:
-            SourceFolder: $(PackagingSolutionRoot)/runtimes
-            Contents: '**'
-            TargetFolder: $(OutputParentPath)/sbomInput
         - task: PublishSymbols@2
           name: PublishSymbols14
           displayName: Enable Source Server - x64 x86 ARM64
