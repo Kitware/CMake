@@ -327,10 +327,12 @@ extends:
               displayName: 'Publish Symbols Artifacts '
               targetPath: $(SymbolsDirectory)
               artifactName: Symbols
+              sbomBuildDropPath: '$(PackagingSolutionRoot)/runtimes'
             - output: pipelineArtifact
               displayName: 'Publish Pipeline Artifact - NuGet Package'
               targetPath: $(OutputParentPath)/package/
               artifactName: NuGetPackage
+              sbomEnabled: false
             - output: nuget
               displayName: 'NuGet publish for VS Insertion'
               packageParentPath: '$(OutputParentPath)'
