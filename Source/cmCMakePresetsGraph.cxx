@@ -10,6 +10,7 @@
 #include <iterator>
 #include <utility>
 
+#include <cm/memory>
 #include <cm/string_view>
 
 #include "cmsys/RegularExpression.hxx"
@@ -49,6 +50,11 @@ template <typename T>
 using PresetPair = cmCMakePresetsGraph::PresetPair<T>;
 using ExpandMacroResult = cmCMakePresetsGraphInternal::ExpandMacroResult;
 using MacroExpander = cmCMakePresetsGraphInternal::MacroExpander;
+using MacroExpanderVector = cmCMakePresetsGraphInternal::MacroExpanderVector;
+using BaseMacroExpander = cmCMakePresetsGraphInternal::BaseMacroExpander;
+template <typename T>
+using PresetMacroExpander =
+  cmCMakePresetsGraphInternal::PresetMacroExpander<T>;
 using cmCMakePresetsGraphInternal::ExpandMacros;
 
 void InheritString(std::string& child, const std::string& parent)
@@ -203,13 +209,61 @@ bool IsValidMacroNamespace(const std::string& str)
 }
 
 ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
-                           const std::vector<MacroExpander>& macroExpanders,
+                           MacroExpanderVector const& macroExpanders,
                            int version);
+template <class T>
+class EnvironmentMacroExpander : public MacroExpander
+{
+  std::map<std::string, CycleStatus>& EnvCycles;
+  cm::optional<T>& Out;
+  MacroExpanderVector& MacroExpanders;
+
+public:
+  EnvironmentMacroExpander(MacroExpanderVector& macroExpanders,
+                           cm::optional<T>& out,
+                           std::map<std::string, CycleStatus>& envCycles)
+    : EnvCycles(envCycles)
+    , Out(out)
+    , MacroExpanders(macroExpanders)
+  {
+  }
+  ExpandMacroResult operator()(const std::string& macroNamespace,
+                               const std::string& macroName,
+                               std::string& macroOut,
+                               int version) const override
+  {
+    if (macroNamespace == "env" && !macroName.empty() && Out) {
+      auto v = Out->Environment.find(macroName);
+      if (v != Out->Environment.end() && v->second) {
+        auto e =
+          VisitEnv(*v->second, EnvCycles[macroName], MacroExpanders, version);
+        if (e != ExpandMacroResult::Ok) {
+          return e;
+        }
+        macroOut += *v->second;
+        return ExpandMacroResult::Ok;
+      }
+    }
+
+    if (macroNamespace == "env" || macroNamespace == "penv") {
+      if (macroName.empty()) {
+        return ExpandMacroResult::Error;
+      }
+      if (cm::optional<std::string> value =
+            cmSystemTools::GetEnvVar(macroName)) {
+        macroOut += *value;
+      }
+      return ExpandMacroResult::Ok;
+    }
+
+    return ExpandMacroResult::Ignore;
+  }
+};
 
 bool ExpandMacros(const cmCMakePresetsGraph& graph,
                   const ConfigurePreset& preset,
                   cm::optional<ConfigurePreset>& out,
-                  const std::vector<MacroExpander>& macroExpanders)
+                  MacroExpanderVector const& macroExpanders)
 {
   std::string binaryDir = preset.BinaryDir;
   CHECK_EXPAND(out, binaryDir, macroExpanders, graph.GetVersion(preset));
@@ -251,7 +305,7 @@ bool ExpandMacros(const cmCMakePresetsGraph& graph,
 
 bool ExpandMacros(const cmCMakePresetsGraph& graph, const BuildPreset& preset,
                   cm::optional<BuildPreset>& out,
-                  const std::vector<MacroExpander>& macroExpanders)
+                  MacroExpanderVector const& macroExpanders)
 {
   for (auto& target : out->Targets) {
     CHECK_EXPAND(out, target, macroExpanders, graph.GetVersion(preset));
@@ -267,7 +321,7 @@ bool ExpandMacros(const cmCMakePresetsGraph& graph, const BuildPreset& preset,
 
 bool ExpandMacros(const cmCMakePresetsGraph& graph, const TestPreset& preset,
                   cm::optional<TestPreset>& out,
-                  const std::vector<MacroExpander>& macroExpanders)
+                  MacroExpanderVector const& macroExpanders)
 {
   for (auto& overwrite : out->OverwriteConfigurationFile) {
     CHECK_EXPAND(out, overwrite, macroExpanders, graph.GetVersion(preset));
@@ -321,7 +375,7 @@ bool ExpandMacros(const cmCMakePresetsGraph& graph, const TestPreset& preset,
 bool ExpandMacros(const cmCMakePresetsGraph& graph,
                   const PackagePreset& preset,
                   cm::optional<PackagePreset>& out,
-                  const std::vector<MacroExpander>& macroExpanders)
+                  MacroExpanderVector const& macroExpanders)
 {
   for (auto& variable : out->Variables) {
     CHECK_EXPAND(out, variable.second, macroExpanders,
@@ -343,7 +397,7 @@ bool ExpandMacros(const cmCMakePresetsGraph& graph,
 bool ExpandMacros(const cmCMakePresetsGraph& /*graph*/,
                   const WorkflowPreset& /*preset*/,
                   cm::optional<WorkflowPreset>& /*out*/,
-                  const std::vector<MacroExpander>& /*macroExpanders*/)
+                  MacroExpanderVector const& /*macroExpanders*/)
 {
   return true;
 }
@@ -359,100 +413,13 @@ bool ExpandMacros(cmCMakePresetsGraph& graph, const T& preset,
     envCycles[v.first] = CycleStatus::Unvisited;
   }
 
-  std::vector<MacroExpander> macroExpanders;
+  MacroExpanderVector macroExpanders{};
 
-  MacroExpander defaultMacroExpander =
-    [&graph, &preset](const std::string& macroNamespace,
-                      const std::string& macroName, std::string& macroOut,
-                      int version) -> ExpandMacroResult {
-    if (macroNamespace.empty()) {
-      if (macroName == "sourceDir") {
-        macroOut += graph.SourceDir;
-        return ExpandMacroResult::Ok;
-      }
-      if (macroName == "sourceParentDir") {
-        macroOut += cmSystemTools::GetParentDirectory(graph.SourceDir);
-        return ExpandMacroResult::Ok;
-      }
-      if (macroName == "sourceDirName") {
-        macroOut += cmSystemTools::GetFilenameName(graph.SourceDir);
-        return ExpandMacroResult::Ok;
-      }
-      if (macroName == "presetName") {
-        macroOut += preset.Name;
-        return ExpandMacroResult::Ok;
-      }
-      if (macroName == "generator") {
-        // Generator only makes sense if preset is not hidden.
-        if (!preset.Hidden) {
-          macroOut += graph.GetGeneratorForPreset(preset.Name);
-        }
-        return ExpandMacroResult::Ok;
-      }
-      if (macroName == "dollar") {
-        macroOut += '$';
-        return ExpandMacroResult::Ok;
-      }
-      if (macroName == "hostSystemName") {
-        if (version < 3) {
-          return ExpandMacroResult::Error;
-        }
-        macroOut += cmSystemTools::GetSystemName();
-        return ExpandMacroResult::Ok;
-      }
-      if (macroName == "fileDir") {
-        if (version < 4) {
-          return ExpandMacroResult::Error;
-        }
-        macroOut +=
-          cmSystemTools::GetParentDirectory(preset.OriginFile->Filename);
-        return ExpandMacroResult::Ok;
-      }
-      if (macroName == "pathListSep") {
-        if (version < 5) {
-          return ExpandMacroResult::Error;
-        }
-        macroOut += cmSystemTools::GetSystemPathlistSeparator();
-        return ExpandMacroResult::Ok;
-      }
-    }
-
-    return ExpandMacroResult::Ignore;
-  };
-
-  MacroExpander environmentMacroExpander =
-    [&macroExpanders, &out, &envCycles](
-      const std::string& macroNamespace, const std::string& macroName,
-      std::string& result, int version) -> ExpandMacroResult {
-    if (macroNamespace == "env" && !macroName.empty() && out) {
-      auto v = out->Environment.find(macroName);
-      if (v != out->Environment.end() && v->second) {
-        auto e =
-          VisitEnv(*v->second, envCycles[macroName], macroExpanders, version);
-        if (e != ExpandMacroResult::Ok) {
-          return e;
-        }
-        result += *v->second;
-        return ExpandMacroResult::Ok;
-      }
-    }
-
-    if (macroNamespace == "env" || macroNamespace == "penv") {
-      if (macroName.empty()) {
-        return ExpandMacroResult::Error;
-      }
-      if (cm::optional<std::string> value =
-            cmSystemTools::GetEnvVar(macroName)) {
-        result += *value;
-      }
-      return ExpandMacroResult::Ok;
-    }
-
-    return ExpandMacroResult::Ignore;
-  };
-
-  macroExpanders.push_back(defaultMacroExpander);
-  macroExpanders.push_back(environmentMacroExpander);
+  macroExpanders.push_back(cm::make_unique<BaseMacroExpander>(graph));
+  macroExpanders.push_back(
+    cm::make_unique<PresetMacroExpander<T>>(graph, preset));
+  macroExpanders.push_back(cm::make_unique<EnvironmentMacroExpander<T>>(
+    macroExpanders, out, envCycles));
 
   for (auto& v : out->Environment) {
     if (v.second) {
@@ -490,7 +457,7 @@ bool ExpandMacros(cmCMakePresetsGraph& graph, const T& preset,
 }
 
 ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
-                           const std::vector<MacroExpander>& macroExpanders,
+                           MacroExpanderVector const& macroExpanders,
                            int version)
 {
   if (status == CycleStatus::Verified) {
@@ -511,8 +478,7 @@ ExpandMacroResult VisitEnv(std::string& value, CycleStatus& status,
 }
 
 ExpandMacroResult cmCMakePresetsGraphInternal::ExpandMacros(
-  std::string& out, const std::vector<MacroExpander>& macroExpanders,
-  int version)
+  std::string& out, MacroExpanderVector const& macroExpanders, int version)
 {
   std::string result;
   std::string macroNamespace;
@@ -591,11 +557,11 @@ ExpandMacroResult cmCMakePresetsGraphInternal::ExpandMacros(
 
 ExpandMacroResult cmCMakePresetsGraphInternal::ExpandMacro(
   std::string& out, const std::string& macroNamespace,
-  const std::string& macroName,
-  const std::vector<MacroExpander>& macroExpanders, int version)
+  const std::string& macroName, MacroExpanderVector const& macroExpanders,
+  int version)
 {
   for (auto const& macroExpander : macroExpanders) {
-    auto result = macroExpander(macroNamespace, macroName, out, version);
+    auto result = (*macroExpander)(macroNamespace, macroName, out, version);
     if (result != ExpandMacroResult::Ignore) {
       return result;
     }
@@ -651,8 +617,56 @@ bool TryReachPresetFromWorkflow(
 }
 }
 
+ExpandMacroResult BaseMacroExpander::operator()(
+  const std::string& macroNamespace, const std::string& macroName,
+  std::string& macroOut, int version) const
+{
+  if (macroNamespace.empty()) {
+    if (macroName == "sourceDir") {
+      macroOut += Graph.SourceDir;
+      return ExpandMacroResult::Ok;
+    }
+    if (macroName == "sourceParentDir") {
+      macroOut += cmSystemTools::GetParentDirectory(Graph.SourceDir);
+      return ExpandMacroResult::Ok;
+    }
+    if (macroName == "sourceDirName") {
+      macroOut += cmSystemTools::GetFilenameName(Graph.SourceDir);
+      return ExpandMacroResult::Ok;
+    }
+    if (macroName == "dollar") {
+      macroOut += '$';
+      return ExpandMacroResult::Ok;
+    }
+    if (macroName == "hostSystemName") {
+      if (version < 3) {
+        return ExpandMacroResult::Error;
+      }
+      macroOut += cmSystemTools::GetSystemName();
+      return ExpandMacroResult::Ok;
+    }
+    // Enable fileDir macro expansion for non-preset expanders
+    if (macroName == "fileDir" && File) {
+      if (version < 4) {
+        return ExpandMacroResult::Error;
+      }
+      macroOut += cmSystemTools::GetParentDirectory(File.value());
+      return ExpandMacroResult::Ok;
+    }
+    if (macroName == "pathListSep") {
+      if (version < 5) {
+        return ExpandMacroResult::Error;
+      }
+      macroOut += cmSystemTools::GetSystemPathlistSeparator();
+      return ExpandMacroResult::Ok;
+    }
+  }
+
+  return ExpandMacroResult::Ignore;
+}
+
 bool cmCMakePresetsGraphInternal::EqualsCondition::Evaluate(
-  const std::vector<MacroExpander>& expanders, int version,
+  MacroExpanderVector const& expanders, int version,
   cm::optional<bool>& out) const
 {
   std::string lhs = this->Lhs;
@@ -666,7 +680,7 @@ bool cmCMakePresetsGraphInternal::EqualsCondition::Evaluate(
 }
 
 bool cmCMakePresetsGraphInternal::InListCondition::Evaluate(
-  const std::vector<MacroExpander>& expanders, int version,
+  MacroExpanderVector const& expanders, int version,
   cm::optional<bool>& out) const
 {
   std::string str = this->String;
@@ -685,7 +699,7 @@ bool cmCMakePresetsGraphInternal::InListCondition::Evaluate(
 }
 
 bool cmCMakePresetsGraphInternal::MatchesCondition::Evaluate(
-  const std::vector<MacroExpander>& expanders, int version,
+  MacroExpanderVector const& expanders, int version,
   cm::optional<bool>& out) const
 {
   std::string str = this->String;
@@ -703,7 +717,7 @@ bool cmCMakePresetsGraphInternal::MatchesCondition::Evaluate(
 }
 
 bool cmCMakePresetsGraphInternal::AnyAllOfCondition::Evaluate(
-  const std::vector<MacroExpander>& expanders, int version,
+  MacroExpanderVector const& expanders, int version,
   cm::optional<bool>& out) const
 {
   for (auto const& condition : this->Conditions) {
@@ -729,7 +743,7 @@ bool cmCMakePresetsGraphInternal::AnyAllOfCondition::Evaluate(
 }
 
 bool cmCMakePresetsGraphInternal::NotCondition::Evaluate(
-  const std::vector<MacroExpander>& expanders, int version,
+  MacroExpanderVector const& expanders, int version,
   cm::optional<bool>& out) const
 {
   out.reset();
