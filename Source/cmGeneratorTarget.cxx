@@ -8477,6 +8477,7 @@ bool cmGeneratorTarget::DiscoverSyntheticTargets(cmSyntheticTargetCache& cache,
         // Create the generator target and attach it to the local generator.
         auto gtp = cm::make_unique<cmGeneratorTarget>(tgt, lg);
         synthDep = gtp.get();
+        cache.CxxModuleTargets[targetName] = synthDep;
         lg->AddGeneratorTarget(std::move(gtp));
       } else {
         synthDep = cached->second;

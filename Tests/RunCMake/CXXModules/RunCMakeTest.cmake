@@ -168,7 +168,25 @@ function (run_cxx_module_test_rebuild directory)
   run_cxx_module_test("${directory}" ${ARGN})
 endfunction ()
 
+# Module compilation features:
+# Compiler-based:
+# - `named`: basic support for named modules is available
+# - `shared`: shared libraries are supported
+# - `partitions`: module partitions are supported
+# - `internal_partitions`: internal module partitions are supported
+# - `bmionly`: the compiler supports BMI-only builds
+#
+# Generator-based:
+# - `compile_commands`: the generator supports `compile_commands.json`
+# - `collation`: the generator supports module collation features
+# - `export_bmi`: the generator supports exporting BMIs
+# - `ninja`: a `ninja` binary is available to perform `Ninja`-only testing
+#   (assumed if the generator matches `Ninja`).
 string(REPLACE "," ";" CMake_TEST_MODULE_COMPILATION "${CMake_TEST_MODULE_COMPILATION}")
+if (RunCMake_GENERATOR MATCHES "Ninja")
+  list(APPEND CMake_TEST_MODULE_COMPILATION
+    "ninja")
+endif ()
 
 if (RunCMake_GENERATOR MATCHES "Ninja")
   if (RunCMake_GENERATOR_IS_MULTI_CONFIG)
@@ -294,3 +312,30 @@ if ("install_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
     endif ()
   endif ()
 endif ()
+
+# All remaining tests require a working `Ninja` generator to set up a test case
+# for the current generator.
+if (NOT "ninja" IN_LIST CMake_TEST_MODULE_COMPILATION)
+  return ()
+endif ()
+# All remaining tests require `bmionly` in order to consume from the `ninja`
+# build.
+if (NOT "bmionly" IN_LIST CMake_TEST_MODULE_COMPILATION)
+  return ()
+endif ()
+
+function (run_cxx_module_test_ninja directory)
+  set(RunCMake_GENERATOR "Ninja")
+  set(RunCMake_CXXModules_NO_TEST 1)
+  set(RunCMake_CXXModules_INSTALL 1)
+  # `Ninja` is not a multi-config generator.
+  set(RunCMake_GENERATOR_IS_MULTI_CONFIG 0)
+  run_cxx_module_test("${directory}" "${directory}-ninja" ${ARGN})
+endfunction ()
+
+# Installation happens within `run_cxx_module_test_ninja`.
+set(RunCMake_CXXModules_INSTALL 0)
+
+set(test_set modules-from-ninja)
+run_cxx_module_test_ninja("export-${test_set}")
+run_cxx_module_test(import-modules "import-${test_set}" "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/export-${test_set}-ninja-install" -DFROM_NINJA=1)
