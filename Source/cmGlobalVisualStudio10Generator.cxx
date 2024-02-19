@@ -218,15 +218,17 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     if (vcPlatformToolsetRegex.find(platformToolset) ||
         platformToolset == "Test Toolset"_s) {
       std::string versionToolset = this->GeneratorToolsetVersion;
-      cmsys::RegularExpression versionToolsetRegex("^[0-9][0-9]\\.[0-9][0-9]");
+      cmsys::RegularExpression versionToolsetRegex(
+        "^([0-9][0-9])\\.([0-9])[0-9](\\.|$)");
       if (versionToolsetRegex.find(versionToolset)) {
-        versionToolset = cmStrCat('v', versionToolset.erase(2, 1));
+        versionToolset = cmStrCat('v', versionToolsetRegex.match(1),
+                                  versionToolsetRegex.match(2));
       } else {
         // Version not recognized. Clear it.
         versionToolset.clear();
       }
 
-      if (!cmHasPrefix(versionToolset, platformToolset)) {
+      if (versionToolset != platformToolset) {
         mf->IssueMessage(
           MessageType::FATAL_ERROR,
           cmStrCat("Generator\n"
