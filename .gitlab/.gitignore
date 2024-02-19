@@ -18,6 +18,7 @@
 /sccache*
 /swift
 /ticlang
+/tmp
 /unstable-jom*
 /watcom
 /wix*
