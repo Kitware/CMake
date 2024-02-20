@@ -1512,7 +1512,6 @@ void cmVisualStudio10TargetGenerator::WriteCEDebugProjectConfigurationValues(
 void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
   Elem& e1, std::string const& config)
 {
-  cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
   cmValue mfcFlag = this->Makefile->GetDefinition("CMAKE_MFC_FLAG");
   if (mfcFlag) {
     std::string const mfcFlagValue =
@@ -1543,12 +1542,9 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValues(
   } else {
     e1.Element("CharacterSet", "MultiByte");
   }
-  if (cmValue projectToolsetOverride =
-        this->GeneratorTarget->GetProperty("VS_PLATFORM_TOOLSET")) {
-    e1.Element("PlatformToolset", *projectToolsetOverride);
-  } else if (const char* toolset = gg->GetPlatformToolset()) {
-    e1.Element("PlatformToolset", toolset);
-  }
+
+  this->WriteMSToolConfigurationValuesCommon(e1, config);
+
   if (this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_COMPONENT") ||
       this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_EXTENSIONS")) {
     e1.Element("WindowsAppContainer", "true");
@@ -1579,8 +1575,6 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
     return;
   }
 
-  cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
-
   Options& o = *(this->ClOptions[config]);
 
   if (o.IsDebug()) {
@@ -1598,12 +1592,7 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
     o.RemoveFlag("Platform");
   }
 
-  if (cmValue projectToolsetOverride =
-        this->GeneratorTarget->GetProperty("VS_PLATFORM_TOOLSET")) {
-    e1.Element("PlatformToolset", *projectToolsetOverride);
-  } else if (const char* toolset = gg->GetPlatformToolset()) {
-    e1.Element("PlatformToolset", toolset);
-  }
+  this->WriteMSToolConfigurationValuesCommon(e1, config);
 
   std::string postfixName =
     cmStrCat(cmSystemTools::UpperCase(config), "_POSTFIX");
@@ -1621,6 +1610,37 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
 
   OptionsHelper oh(o, e1);
   oh.OutputFlagMap();
+}
+
+void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesCommon(
+  Elem& e1, std::string const& config)
+{
+  cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
+  if (cmValue projectToolsetOverride =
+        this->GeneratorTarget->GetProperty("VS_PLATFORM_TOOLSET")) {
+    e1.Element("PlatformToolset", *projectToolsetOverride);
+  } else if (const char* toolset = gg->GetPlatformToolset()) {
+    e1.Element("PlatformToolset", toolset);
+  }
+
+  cm::optional<bool> maybeUseDebugLibraries;
+  if (cmValue useDebugLibrariesProp =
+        this->GeneratorTarget->GetProperty("VS_USE_DEBUG_LIBRARIES")) {
+    // The project explicitly specified a value for this target.
+    // An empty string suppresses generation of the setting altogether.
+    std::string const useDebugLibraries = cmGeneratorExpression::Evaluate(
+      *useDebugLibrariesProp, this->LocalGenerator, config);
+    if (!useDebugLibraries.empty()) {
+      maybeUseDebugLibraries = cmIsOn(useDebugLibraries);
+    }
+  }
+  if (maybeUseDebugLibraries) {
+    if (*maybeUseDebugLibraries) {
+      e1.Element("UseDebugLibraries", "true");
+    } else {
+      e1.Element("UseDebugLibraries", "false");
+    }
+  }
 }
 
 //----------------------------------------------------------------------------
@@ -3154,7 +3174,10 @@ void cmVisualStudio10TargetGenerator::OutputLinkIncremental(
   Options& linkOptions = *(this->LinkOptions[configName]);
   const std::string cond = this->CalcCondition(configName);
 
-  if (this->IPOEnabledConfigurations.count(configName) == 0) {
+  if (this->IPOEnabledConfigurations.count(configName) > 0) {
+    // Suppress LinkIncremental in favor of WholeProgramOptimization.
+    e1.WritePlatformConfigTag("LinkIncremental", cond, "");
+  } else {
     const char* incremental = linkOptions.GetFlag("LinkIncremental");
     e1.WritePlatformConfigTag("LinkIncremental", cond,
                               (incremental ? incremental : "true"));
@@ -3497,6 +3520,23 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   // Such flags are unnecessary and break our model of language selection.
   if (langForClCompile == "C"_s || langForClCompile == "CXX"_s) {
     clOptions.RemoveFlag("CompileAs");
+  }
+
+  if (this->ProjectType == VsProjectType::vcxproj && this->MSTools) {
+    // Suppress Microsoft.Cl.Common.props default settings for which the
+    // project specifies no flags.  Do not let UseDebugLibraries affect them.
+    if (!clOptions.HasFlag("BasicRuntimeChecks")) {
+      clOptions.AddFlag("BasicRuntimeChecks", "Default");
+    }
+    if (!clOptions.HasFlag("Optimization")) {
+      clOptions.AddFlag("Optimization", "");
+    }
+    if (!clOptions.HasFlag("RuntimeLibrary")) {
+      clOptions.AddFlag("RuntimeLibrary", "");
+    }
+    if (!clOptions.HasFlag("SupportJustMyCode")) {
+      clOptions.AddFlag("SupportJustMyCode", "");
+    }
   }
 
   this->ClOptions[configName] = std::move(pOptions);
