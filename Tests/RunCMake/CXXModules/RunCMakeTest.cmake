@@ -262,6 +262,7 @@ if ("export_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(export-include-directories-build)
   run_cxx_module_test(export-usage-build)
   run_cxx_module_test(export-bmi-and-interface-build)
+  run_cxx_module_test(export-transitive-targets-build)
 
   if ("collation" IN_LIST CMake_TEST_MODULE_COMPILATION AND
       "bmionly" IN_LIST CMake_TEST_MODULE_COMPILATION)
@@ -276,6 +277,9 @@ if ("export_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
 
     set(test_suffix export-bmi-and-interface-build)
     run_cxx_module_test(import-modules "import-modules-${test_suffix}" "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/${test_suffix}-build" -DWITH_BMIS=1)
+
+    set(test_suffix export-transitive-targets-build)
+    run_cxx_module_test(import-modules "import-modules-${test_suffix}" "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/${test_suffix}-build" -DTRANSITIVE_TARGETS=1)
   endif ()
 endif ()
 
@@ -293,6 +297,7 @@ if ("install_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
     run_cxx_module_test(export-include-directories-install)
     run_cxx_module_test(export-usage-install)
     run_cxx_module_test(export-bmi-and-interface-install)
+    run_cxx_module_test(export-transitive-targets-install)
 
     if ("collation" IN_LIST CMake_TEST_MODULE_COMPILATION AND
         "bmionly" IN_LIST CMake_TEST_MODULE_COMPILATION)
@@ -308,6 +313,9 @@ if ("install_bmi" IN_LIST CMake_TEST_MODULE_COMPILATION)
 
       set(test_suffix export-bmi-and-interface-install)
       run_cxx_module_test(import-modules "import-modules-${test_suffix}" "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/${test_suffix}-install" -DWITH_BMIS=1)
+
+      set(test_suffix export-transitive-targets-install)
+      run_cxx_module_test(import-modules "import-modules-${test_suffix}" "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/${test_suffix}-install" -DTRANSITIVE_TARGETS=1)
       set(RunCMake_CXXModules_INSTALL 1)
     endif ()
   endif ()
