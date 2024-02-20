@@ -42,6 +42,9 @@ The module supports the following components:
   Removed the ``MX_LIBRARY``, ``ENGINE_LIBRARY`` and ``DATAARRAY_LIBRARY``
   components.  These libraries are found unconditionally.
 
+.. versionadded:: 3.30
+  Added support for specifying a version range to :command:`find_package`
+
 .. note::
 
   The version given to the :command:`find_package` directive is the Matlab
