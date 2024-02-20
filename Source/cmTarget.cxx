@@ -1788,7 +1788,7 @@ void cmTarget::CopyImportedCxxModulesEntries(cmTarget const* tgt)
     cmMakeRange(tgt->impl->ImportedCxxModulesCompileOptions.Entries));
   this->impl->LinkLibraries.Entries.clear();
   this->impl->LinkLibraries.CopyFromEntries(
-    cmMakeRange(tgt->impl->LinkLibraries.Entries));
+    cmMakeRange(tgt->impl->ImportedCxxModulesLinkLibraries.Entries));
 
   // Copy the C++ module fileset entries from `tgt`'s `INTERFACE` to this
   // target's `PRIVATE`.
