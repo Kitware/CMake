@@ -171,6 +171,10 @@ extends:
           inputs:
             rootFolderOrFile: $(CMakeBuildDirectory)/bin/$(BuildConfiguration)/
             archiveFile: $(ArchiveDir)/cmake_pdb_x64.zip
+        - task: securedevelopmentteam.vss-secure-development-tools.build-task-policheck.PoliCheck@2
+          displayName: 'Run PoliCheck'
+          inputs:
+            targetType: F
         - task: PowerShell@2
           displayName: Generate TSA config
           inputs:
@@ -194,6 +198,12 @@ extends:
               }
               "@
               Out-File -FilePath "$(Agent.BuildDirectory)/$configName" -InputObject $config
+          - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@2
+            displayName: 'TSA upload'
+            inputs:
+              GdnPublishTsaOnboard: true
+              GdnPublishTsaConfigFile: '$(Agent.BuildDirectory)/config.gdntsa'
+              GdnPublishTsaExportedResultsPublishable: true
         - task: PowerShell@2
           displayName: Create and Publish Version Tag
           inputs:
