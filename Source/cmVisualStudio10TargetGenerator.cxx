@@ -3528,6 +3528,9 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     if (!clOptions.HasFlag("BasicRuntimeChecks")) {
       clOptions.AddFlag("BasicRuntimeChecks", "Default");
     }
+    if (!clOptions.HasFlag("MinimalRebuild")) {
+      clOptions.AddFlag("MinimalRebuild", "");
+    }
     if (!clOptions.HasFlag("Optimization")) {
       clOptions.AddFlag("Optimization", "");
     }
