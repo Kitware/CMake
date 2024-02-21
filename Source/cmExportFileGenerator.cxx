@@ -1486,11 +1486,7 @@ bool cmExportFileGenerator::PopulateCxxModuleExportProperties(
       auto value = cmGeneratorExpression::Preprocess(*prop, ctx);
       this->ResolveTargetsInGeneratorExpressions(
         value, gte, cmExportFileGenerator::ReplaceFreeTargets);
-      std::vector<std::string> wrappedValues;
-      for (auto& item : cmList{ value }) {
-        wrappedValues.push_back(cmStrCat("$<COMPILE_ONLY:", item, '>'));
-      }
-      properties[exportedPropName] = cmJoin(wrappedValues, ";");
+      properties[exportedPropName] = value;
     }
   }
 
