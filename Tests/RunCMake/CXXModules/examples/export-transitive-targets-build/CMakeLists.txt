@@ -6,6 +6,7 @@ include("${CMAKE_SOURCE_DIR}/../cxx-modules-rules.cmake")
 add_library(usage_reqs INTERFACE
   include/include.h
   includes/includes.h)
+target_compile_features(usage_reqs INTERFACE cxx_std_20)
 target_compile_definitions(usage_reqs
   INTERFACE
     FROM_USAGE_REQS)
@@ -32,7 +33,6 @@ target_sources(export_transitive_targets
         importable.cxx
         subdir/importable.cxx
   )
-target_compile_features(export_transitive_targets PUBLIC cxx_std_20)
 target_link_libraries(export_transitive_targets PRIVATE usage_reqs)
 
 add_library(no_modules STATIC no_modules.cxx)
