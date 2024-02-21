@@ -8478,6 +8478,7 @@ bool cmGeneratorTarget::DiscoverSyntheticTargets(cmSyntheticTargetCache& cache,
         auto gtp = cm::make_unique<cmGeneratorTarget>(tgt, lg);
         synthDep = gtp.get();
         cache.CxxModuleTargets[targetName] = synthDep;
+        gtp->DiscoverSyntheticTargets(cache, config);
         lg->AddGeneratorTarget(std::move(gtp));
       } else {
         synthDep = cached->second;

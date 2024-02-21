@@ -41,7 +41,7 @@ check_property("/usr/exported;/usr/installiface" "IMPORTED_CXX_MODULES_INCLUDE_D
 check_property("exported;installiface" "IMPORTED_CXX_MODULES_COMPILE_DEFINITIONS")
 check_property("cxx_std_20;cxx_std_11;cxx_std_17" "IMPORTED_CXX_MODULES_COMPILE_FEATURES")
 check_property("${export_interfaces_flag}100;${export_interfaces_flag}300" "IMPORTED_CXX_MODULES_COMPILE_OPTIONS")
-check_property("$<COMPILE_ONLY:CXXModules::export_used>;$<COMPILE_ONLY:CXXModules::export_install>" "IMPORTED_CXX_MODULES_LINK_LIBRARIES")
+check_property("CXXModules::export_used;CXXModules::export_install" "IMPORTED_CXX_MODULES_LINK_LIBRARIES")
 
 # Extract the export-dependent targets from the export file.
 file(STRINGS "${export_usage_DIR}/export_usage-targets.cmake" usage_dependent_targets
