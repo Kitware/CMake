@@ -199,11 +199,11 @@ extends:
               "@
               Out-File -FilePath "$(Agent.BuildDirectory)/$configName" -InputObject $config
         - task: securedevelopmentteam.vss-secure-development-tools.build-task-uploadtotsa.TSAUpload@2
-            displayName: 'TSA upload'
-            inputs:
-              GdnPublishTsaOnboard: true
-              GdnPublishTsaConfigFile: '$(Agent.BuildDirectory)/config.gdntsa'
-              GdnPublishTsaExportedResultsPublishable: true
+          displayName: 'TSA upload'
+          inputs:
+            GdnPublishTsaOnboard: true
+            GdnPublishTsaConfigFile: '$(Agent.BuildDirectory)/config.gdntsa'
+            GdnPublishTsaExportedResultsPublishable: true
         - task: PowerShell@2
           displayName: Create and Publish Version Tag
           inputs:
