@@ -19,6 +19,11 @@ large libraries to shrink the total required size.
     to build the test driver.  The list will contain the ``<test>...`` sources
     and the generated ``<driverName>`` source.
 
+    .. versionchanged:: 3.29
+
+      The test driver source is listed by absolute path in the build tree.
+      Previously it was listed only as ``<driverName>``.
+
   ``<driverName>``
     Name of the test driver source file to be generated into the build tree.
     The source file will contain a ``main()`` program entry point that
