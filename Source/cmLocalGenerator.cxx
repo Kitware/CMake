@@ -2864,15 +2864,10 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
                   cm::nullopt, true);
               } else if (reuseTarget->GetType() ==
                          cmStateEnums::OBJECT_LIBRARY) {
-                // FIXME: This can propagate more than one level, unlike
-                // the rest of the object files in an object library.
-                // Find another way to do this.
                 target->Target->AppendProperty(
                   "INTERFACE_LINK_LIBRARIES",
                   cmStrCat("$<$<CONFIG:", config,
                            ">:$<LINK_ONLY:", pchSourceObj, ">>"));
-                // We updated the link interface, so ensure it is recomputed.
-                target->ClearLinkInterfaceCache();
               }
             }
           } else {
