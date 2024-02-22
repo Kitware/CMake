@@ -89,6 +89,8 @@ set(CMake_TEST_FindwxWidgets "ON" CACHE BOOL "")
 set(CMake_TEST_FindX11 "ON" CACHE BOOL "")
 set(CMake_TEST_FindXalanC "ON" CACHE BOOL "")
 set(CMake_TEST_FindXercesC "ON" CACHE BOOL "")
+
+set(CMake_TEST_ELF_LARGE "ON" CACHE BOOL "")
 set(CMake_TEST_Fortran_SUBMODULES "ON" CACHE BOOL "")
 set(CMake_TEST_IPO_WORKS_C "ON" CACHE BOOL "")
 set(CMake_TEST_IPO_WORKS_CXX "ON" CACHE BOOL "")
