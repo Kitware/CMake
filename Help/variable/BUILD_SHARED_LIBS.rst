@@ -32,3 +32,12 @@ often create a cache entry for it using the :command:`option` command:
   option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 This provides a switch that users can control, e.g., with :option:`cmake -D`.
+If adding such an option to the project, do so in the top level
+``CMakeLists.txt`` file, before any :command:`add_library` calls.
+Note that if bringing external dependencies directly into the build, such as
+with :module:`FetchContent` or a direct call to :command:`add_subdirectory`,
+and one of those dependencies has such a call to
+:command:`option(BUILD_SHARED_LIBS ...) <option>`, the top level project must
+also call :command:`option(BUILD_SHARED_LIBS ...) <option>` before bringing in
+its dependencies.  Failure to do so can lead to different behavior between the
+first and subsequent CMake runs.
