@@ -289,6 +289,27 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     set(CMAKE_${lang}_COMPILER_FRONTEND_VARIANT "")
   endif()
 
+  # `clang-scan-deps` needs to know the resource directory. This only matters
+  # for C++ and the GNU-frontend variant.
+  set(CMAKE_${lang}_COMPILER_CLANG_RESOURCE_DIR "")
+  if ("x${lang}" STREQUAL "xCXX" AND
+      "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xClang" AND
+      "x${CMAKE_${lang}_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
+    execute_process(
+      COMMAND "${CMAKE_${lang}_COMPILER}" -print-resource-dir
+      OUTPUT_VARIABLE _clang_resource_dir_out
+      ERROR_VARIABLE _clang_resource_dir_err
+      RESULT_VARIABLE _clang_resource_dir_res
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_STRIP_TRAILING_WHITESPACE)
+    if (_clang_resource_dir_res EQUAL 0)
+      file(TO_CMAKE_PATH "${_clang_resource_dir_out}" _clang_resource_dir_out)
+      if(IS_DIRECTORY "${_clang_resource_dir_out}")
+        set(CMAKE_${lang}_COMPILER_CLANG_RESOURCE_DIR "${_clang_resource_dir_out}")
+      endif()
+    endif ()
+  endif ()
+
   # Display the final identification result.
   if(CMAKE_${lang}_COMPILER_ID)
     if(CMAKE_${lang}_COMPILER_VERSION)
@@ -331,6 +352,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   set(CMAKE_${lang}_EXTENSIONS_COMPUTED_DEFAULT "${CMAKE_${lang}_EXTENSIONS_COMPUTED_DEFAULT}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_PRODUCED_OUTPUT "${COMPILER_${lang}_PRODUCED_OUTPUT}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_PRODUCED_FILES "${COMPILER_${lang}_PRODUCED_FILES}" PARENT_SCOPE)
+  set(CMAKE_${lang}_COMPILER_CLANG_RESOURCE_DIR "${CMAKE_${lang}_COMPILER_CLANG_RESOURCE_DIR}" PARENT_SCOPE)
 endfunction()
 
 include(CMakeCompilerIdDetection)
