@@ -1577,7 +1577,7 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
 
   Options& o = *(this->ClOptions[config]);
 
-  if (o.IsDebug()) {
+  if (o.UsingDebugInfo()) {
     e1.Element("DebugSymbols", "true");
     e1.Element("DefineDebug", "true");
   }
@@ -1632,6 +1632,19 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesCommon(
       *useDebugLibrariesProp, this->LocalGenerator, config);
     if (!useDebugLibraries.empty()) {
       maybeUseDebugLibraries = cmIsOn(useDebugLibraries);
+    }
+  } else if (this->GeneratorTarget->GetPolicyStatusCMP0162() ==
+             cmPolicies::NEW) {
+    // The project did not explicitly specify a value for this target.
+    // If the target compiles sources for a known MSVC runtime library,
+    // base our default value on that.
+    if (this->GeneratorTarget->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
+      maybeUseDebugLibraries = this->ClOptions[config]->UsingDebugRuntime();
+    }
+    // For other targets, such as UTILITY targets, base our default
+    // on the configuration name.
+    if (!maybeUseDebugLibraries) {
+      maybeUseDebugLibraries = cmSystemTools::UpperCase(config) == "DEBUG"_s;
     }
   }
   if (maybeUseDebugLibraries) {
@@ -3528,6 +3541,9 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     if (!clOptions.HasFlag("BasicRuntimeChecks")) {
       clOptions.AddFlag("BasicRuntimeChecks", "Default");
     }
+    if (!clOptions.HasFlag("MinimalRebuild")) {
+      clOptions.AddFlag("MinimalRebuild", "");
+    }
     if (!clOptions.HasFlag("Optimization")) {
       clOptions.AddFlag("Optimization", "");
     }
@@ -3581,7 +3597,7 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     // without value so PDBs don't get generated uselessly. Each tag
     // goes on its own line because Visual Studio corrects it this
     // way when saving the project after CMake generates it.
-    if (!clOptions.IsDebug()) {
+    if (!clOptions.UsingDebugInfo()) {
       Elem e3(e2, "DebugInformationFormat");
       e3.SetHasElements();
     }

@@ -23,5 +23,6 @@ to be non-debug configurations.
 
 The property is initialized from the value of the
 :variable:`CMAKE_VS_USE_DEBUG_LIBRARIES` variable, if it is set.
-If the property is not set, then CMake does not generate any
-``UseDebugLibraries`` indicator.
+If the property is not set then CMake generates ``UseDebugLibraries`` using
+heuristics to determine which configurations are debug configurations.
+See policy :policy:`CMP0162`.

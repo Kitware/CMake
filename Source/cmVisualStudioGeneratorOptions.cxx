@@ -110,7 +110,7 @@ void cmVisualStudioGeneratorOptions::SetVerboseMakefile(bool verbose)
   }
 }
 
-bool cmVisualStudioGeneratorOptions::IsDebug() const
+bool cmVisualStudioGeneratorOptions::UsingDebugInfo() const
 {
   if (this->CurrentTool != CSharpCompiler) {
     return this->FlagMap.find("DebugInformationFormat") != this->FlagMap.end();
@@ -122,6 +122,15 @@ bool cmVisualStudioGeneratorOptions::IsDebug() const
     }
   }
   return false;
+}
+
+cm::optional<bool> cmVisualStudioGeneratorOptions::UsingDebugRuntime() const
+{
+  cm::optional<bool> result;
+  if (const char* rtl = this->GetFlag("RuntimeLibrary")) {
+    result = strstr(rtl, "Debug") != nullptr;
+  }
+  return result;
 }
 
 bool cmVisualStudioGeneratorOptions::IsWinRt() const

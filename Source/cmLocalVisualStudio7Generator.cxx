@@ -1135,7 +1135,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
         cmStrCat(target->GetPDBDirectory(configName), '/', targetNames.PDB);
       fout << "\t\t\t\tProgramDatabaseFile=\""
            << this->ConvertToXMLOutputPathSingle(temp) << "\"\n";
-      if (targetOptions.IsDebug()) {
+      if (targetOptions.UsingDebugInfo()) {
         fout << "\t\t\t\tGenerateDebugInformation=\"true\"\n";
       }
       if (this->WindowsCEProject) {
@@ -1223,7 +1223,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
         target->GetPDBDirectory(configName));
       fout << "\t\t\t\tProgramDatabaseFile=\"" << path << "/"
            << targetNames.PDB << "\"\n";
-      if (targetOptions.IsDebug()) {
+      if (targetOptions.UsingDebugInfo()) {
         fout << "\t\t\t\tGenerateDebugInformation=\"true\"\n";
       }
       if (this->WindowsCEProject) {
