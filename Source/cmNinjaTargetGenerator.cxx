@@ -2024,11 +2024,9 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
     this->LocalGenerator->AppendFlags(
       vars["FLAGS"], { emitModuleFlag, modulePathFlag, moduleFilepath });
     objBuild.Outputs.push_back(moduleFilepath);
-
-    std::string const moduleNameFlag = "-module-name";
-    this->LocalGenerator->AppendFlags(
-      vars["FLAGS"], cmStrCat(moduleNameFlag, ' ', moduleName));
   }
+  this->LocalGenerator->AppendFlags(vars["FLAGS"],
+                                    cmStrCat("-module-name ", moduleName));
 
   if (target.GetType() != cmStateEnums::EXECUTABLE) {
     std::string const libraryLinkNameFlag = "-module-link-name";
