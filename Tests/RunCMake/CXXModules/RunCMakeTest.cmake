@@ -175,6 +175,7 @@ endfunction ()
 # - `partitions`: module partitions are supported
 # - `internal_partitions`: internal module partitions are supported
 # - `bmionly`: the compiler supports BMI-only builds
+# - `import_std23`: the compiler supports `import std` for C++23
 #
 # Generator-based:
 # - `compile_commands`: the generator supports `compile_commands.json`
@@ -221,6 +222,11 @@ if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(same-src-name)
   run_cxx_module_test(scan_properties)
   run_cxx_module_test(target-objects)
+
+  if ("cxx_std_23" IN_LIST CMAKE_CXX_COMPILE_FEATURES AND
+      "import_std23" IN_LIST CMake_TEST_MODULE_COMPILATION)
+    run_cxx_module_test(import-std)
+  endif ()
 endif ()
 
 # Tests which require compile commands support.
