@@ -201,3 +201,38 @@ macro(cmake_record_hip_compile_features)
   _has_compiler_features_hip(11)
   _has_compiler_features_hip(98)
 endmacro()
+
+function(cmake_create_cxx_import_std std variable)
+  set(_cmake_supported_import_std_features
+    # Compilers support `import std` in C++20 as an extension. Skip
+    # for now.
+    # 20
+    23
+    26)
+  list(FIND _cmake_supported_import_std_features "${std}" _cmake_supported_import_std_idx)
+  if (_cmake_supported_import_std_idx EQUAL "-1")
+    return ()
+  endif ()
+  # If the target exists, skip. A toolchain file may have provided it.
+  if (TARGET "__CMAKE::CXX${std}")
+    return ()
+  endif ()
+  # The generator must support imported C++ modules.
+  if (NOT CMAKE_GENERATOR MATCHES "Ninja")
+    return ()
+  endif ()
+  # Check if the compiler understands how to `import std;`.
+  include("${CMAKE_ROOT}/Modules/Compiler/${CMAKE_CXX_COMPILER_ID}-CXX-CXXImportStd.cmake" OPTIONAL RESULT_VARIABLE _cmake_import_std_res)
+  if (NOT _cmake_import_std_res)
+    return ()
+  endif ()
+  if (NOT COMMAND _cmake_cxx_import_std)
+    return ()
+  endif ()
+  _cmake_cxx_import_std("${std}" target_definition)
+  string(CONCAT guarded_target_definition
+    "if (NOT TARGET \"__CMAKE::CXX${std}\")\n"
+    "${target_definition}"
+    "endif ()\n")
+  set("${variable}" "${guarded_target_definition}" PARENT_SCOPE)
+endfunction()
