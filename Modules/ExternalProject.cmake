@@ -1379,8 +1379,6 @@ function(_ep_write_gitclone_script
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
   endif()
 
-  set(git_submodules_config_options "")
-
   if(GIT_VERSION_STRING VERSION_LESS 2.20 OR
      2.21 VERSION_LESS_EQUAL GIT_VERSION_STRING)
     set(git_clone_options "--no-checkout")
@@ -1403,21 +1401,23 @@ function(_ep_write_gitclone_script
   if(NOT ${git_remote_name} STREQUAL "origin")
     list(APPEND git_clone_options --origin \"${git_remote_name}\")
   endif()
+
+  # The clone config option is sticky, it will apply to all subsequent git
+  # update operations. The submodules config option is not sticky, because
+  # git doesn't provide any way to do that. Thus, we will have to pass the
+  # same config option in the update step too for submodules, but not for
+  # the main git repo.
+  set(git_submodules_config_options "")
   if(NOT "x${tls_verify}" STREQUAL "x")
-    # The clone config option is sticky, it will apply to all subsequent git
-    # update operations. The submodules config option is not sticky, because
-    # git doesn't provide any way to do that. Thus, we will have to pass the
-    # same config option in the update step too for submodules, but not for
-    # the main git repo.
     if(tls_verify)
       # Default git behavior is "true", but the user might have changed the
       # global default to "false". Since TLS_VERIFY was given, ensure we honor
       # the specified setting regardless of what the global default might be.
       list(APPEND git_clone_options -c http.sslVerify=true)
-      set(git_submodules_config_options -c http.sslVerify=true)
+      list(APPEND git_submodules_config_options -c http.sslVerify=true)
     else()
       list(APPEND git_clone_options -c http.sslVerify=false)
-      set(git_submodules_config_options -c http.sslVerify=false)
+      list(APPEND git_submodules_config_options -c http.sslVerify=false)
     endif()
   endif()
 
@@ -1480,19 +1480,19 @@ function(_ep_write_gitupdate_script
     list(APPEND git_stash_save_options --all)
   endif()
 
+  # The submodules config option is not sticky, git doesn't provide any way
+  # to do that. We have to pass this config option for the update step too.
+  # We don't need to set it for the non-submodule update because it gets
+  # recorded as part of the clone operation in a sticky manner.
   set(git_submodules_config_options "")
   if(NOT "x${tls_verify}" STREQUAL "x")
-    # The submodules config option is not sticky, git doesn't provide any way
-    # to do that. We have to pass this config option for the update step too.
-    # We don't need to set it for the non-submodule update because it gets
-    # recorded as part of the clone operation in a sticky manner.
     if(tls_verify)
       # Default git behavior is "true", but the user might have changed the
       # global default to "false". Since TLS_VERIFY was given, ensure we honor
       # the specified setting regardless of what the global default might be.
-      set(git_submodules_config_options -c http.sslVerify=true)
+      list(APPEND git_submodules_config_options -c http.sslVerify=true)
     else()
-      set(git_submodules_config_options -c http.sslVerify=false)
+      list(APPEND git_submodules_config_options -c http.sslVerify=false)
     endif()
   endif()
 
