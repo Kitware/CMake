@@ -2030,6 +2030,12 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
       tls_version = *v;
     }
   }
+  if (!tls_version) {
+    if (cm::optional<std::string> v =
+          cmSystemTools::GetEnvVar("CMAKE_TLS_VERSION")) {
+      tls_version = std::move(v);
+    }
+  }
 
   // Can't calculate hash if we don't save the file.
   // TODO Incrementally calculate hash in the write callback as the file is
@@ -2419,6 +2425,12 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
   if (!tls_version) {
     if (cmValue v = status.GetMakefile().GetDefinition("CMAKE_TLS_VERSION")) {
       tls_version = *v;
+    }
+  }
+  if (!tls_version) {
+    if (cm::optional<std::string> v =
+          cmSystemTools::GetEnvVar("CMAKE_TLS_VERSION")) {
+      tls_version = std::move(v);
     }
   }
 
