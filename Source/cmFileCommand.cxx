@@ -2025,6 +2025,12 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     ++i;
   }
 
+  if (!tls_version) {
+    if (cmValue v = status.GetMakefile().GetDefinition("CMAKE_TLS_VERSION")) {
+      tls_version = *v;
+    }
+  }
+
   // Can't calculate hash if we don't save the file.
   // TODO Incrementally calculate hash in the write callback as the file is
   // being downloaded so this check can be relaxed.
@@ -2408,6 +2414,12 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
     }
 
     ++i;
+  }
+
+  if (!tls_version) {
+    if (cmValue v = status.GetMakefile().GetDefinition("CMAKE_TLS_VERSION")) {
+      tls_version = *v;
+    }
   }
 
   // Open file for reading:

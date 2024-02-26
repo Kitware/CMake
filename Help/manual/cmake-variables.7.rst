@@ -272,6 +272,7 @@ Variables that Change Behavior
    /variable/CMAKE_SYSTEM_PROGRAM_PATH
    /variable/CMAKE_TLS_CAINFO
    /variable/CMAKE_TLS_VERIFY
+   /variable/CMAKE_TLS_VERSION
    /variable/CMAKE_USER_MAKE_RULES_OVERRIDE
    /variable/CMAKE_WARN_DEPRECATED
    /variable/CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION
