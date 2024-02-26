@@ -250,10 +250,16 @@ if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
 
     if ("collation" IN_LIST CMake_TEST_MODULE_COMPILATION)
       run_cxx_module_test(import-std-not-in-export-build)
+      run_cxx_module_test(import-std-transitive import-std-transitive-not-in-export-build "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/import-std-not-in-export-build-build")
 
       set(RunCMake_CXXModules_INSTALL 1)
       run_cxx_module_test(import-std-not-in-export-install)
       unset(RunCMake_CXXModules_INSTALL)
+      run_cxx_module_test(import-std-transitive import-std-transitive-not-in-export-install "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/import-std-not-in-export-install-install")
+
+      run_cxx_module_test(import-std-transitive import-std-transitive-export-no-std-build "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/import-std-export-no-std-build-build" -DEXPORT_NO_STD=1)
+      run_cxx_module_test(import-std-transitive import-std-transitive-export-no-std-install "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/import-std-export-no-std-install-install" -DEXPORT_NO_STD=1)
+    endif ()
   endif ()
 endif ()
 
