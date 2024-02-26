@@ -318,7 +318,14 @@ if(WIN32 AND NOT CYGWIN)
       set(_OPENSSL_STATIC_SUFFIX
         "_static"
       )
-      set(_OPENSSL_PATH_SUFFIXES
+      set(_OPENSSL_PATH_SUFFIXES_DEBUG
+        "lib/VC/x${_OPENSSL_MSVC_ARCH_SUFFIX}/${_OPENSSL_MSVC_RT_MODE}d"
+        "lib/VC/static"
+        "VC/static"
+        "lib"
+        )
+      set(_OPENSSL_PATH_SUFFIXES_RELEASE
+        "lib/VC/x${_OPENSSL_MSVC_ARCH_SUFFIX}/${_OPENSSL_MSVC_RT_MODE}"
         "lib/VC/static"
         "VC/static"
         "lib"
@@ -327,7 +334,14 @@ if(WIN32 AND NOT CYGWIN)
       set(_OPENSSL_STATIC_SUFFIX
         ""
       )
-      set(_OPENSSL_PATH_SUFFIXES
+      set(_OPENSSL_PATH_SUFFIXES_DEBUG
+        "lib/VC/x${_OPENSSL_MSVC_ARCH_SUFFIX}/${_OPENSSL_MSVC_RT_MODE}d"
+        "lib/VC"
+        "VC"
+        "lib"
+        )
+      set(_OPENSSL_PATH_SUFFIXES_RELEASE
+        "lib/VC/x${_OPENSSL_MSVC_ARCH_SUFFIX}/${_OPENSSL_MSVC_RT_MODE}"
         "lib/VC"
         "VC"
         "lib"
@@ -356,7 +370,7 @@ if(WIN32 AND NOT CYGWIN)
       NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
-        ${_OPENSSL_PATH_SUFFIXES}
+        ${_OPENSSL_PATH_SUFFIXES_DEBUG}
     )
 
     find_library(LIB_EAY_RELEASE
@@ -381,7 +395,7 @@ if(WIN32 AND NOT CYGWIN)
       NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
-        ${_OPENSSL_PATH_SUFFIXES}
+        ${_OPENSSL_PATH_SUFFIXES_RELEASE}
     )
 
     find_library(SSL_EAY_DEBUG
@@ -406,7 +420,7 @@ if(WIN32 AND NOT CYGWIN)
       NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
-        ${_OPENSSL_PATH_SUFFIXES}
+        ${_OPENSSL_PATH_SUFFIXES_DEBUG}
     )
 
     find_library(SSL_EAY_RELEASE
@@ -431,7 +445,7 @@ if(WIN32 AND NOT CYGWIN)
       NAMES_PER_DIR
       ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
-        ${_OPENSSL_PATH_SUFFIXES}
+        ${_OPENSSL_PATH_SUFFIXES_RELEASE}
     )
 
     set(LIB_EAY_LIBRARY_DEBUG "${LIB_EAY_DEBUG}")
