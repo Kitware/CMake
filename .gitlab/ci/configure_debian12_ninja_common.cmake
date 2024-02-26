@@ -97,6 +97,7 @@ set(CMake_TEST_IPO_WORKS_Fortran "ON" CACHE BOOL "")
 set(CMake_TEST_JQ "/usr/bin/jq" CACHE PATH "")
 set(CMake_TEST_Qt5 "ON" CACHE BOOL "")
 set(CMake_TEST_TLS_VERIFY_URL "https://gitlab.kitware.com" CACHE STRING "")
+set(CMake_TEST_TLS_VERSION "1.3" CACHE STRING "")
 
 if (NOT "$ENV{SWIFTC}" STREQUAL "")
   set(CMAKE_Swift_COMPILER "$ENV{SWIFTC}" CACHE FILEPATH "")
