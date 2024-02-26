@@ -92,6 +92,9 @@ Compilers which CMake natively supports module dependency scanning include:
 Support for ``import std`` is limited to the following toolchain and standard
 library combinations:
 
+* MSVC toolset 14.36 and newer (provided with Visual Studio 17.6 Preview 2 and
+  newer)
+
 .. note ::
 
    This support is provided only when experimental support for
