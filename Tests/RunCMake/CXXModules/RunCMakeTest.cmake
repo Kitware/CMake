@@ -243,6 +243,13 @@ if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
     set(RunCMake_CXXModules_NO_TEST 1)
     run_cxx_module_test(import-std-no-std-property)
     unset(RunCMake_CXXModules_NO_TEST)
+
+    if ("collation" IN_LIST CMake_TEST_MODULE_COMPILATION)
+      run_cxx_module_test(import-std-not-in-export-build)
+
+      set(RunCMake_CXXModules_INSTALL 1)
+      run_cxx_module_test(import-std-not-in-export-install)
+      unset(RunCMake_CXXModules_INSTALL)
   endif ()
 endif ()
 
