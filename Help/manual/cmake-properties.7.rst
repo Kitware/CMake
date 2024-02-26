@@ -194,6 +194,7 @@ Properties on Targets
    /prop_tgt/CXX_MODULE_SET
    /prop_tgt/CXX_MODULE_SET_NAME
    /prop_tgt/CXX_MODULE_SETS
+   /prop_tgt/CXX_MODULE_STD
    /prop_tgt/CXX_SCAN_FOR_MODULES
    /prop_tgt/CXX_STANDARD
    /prop_tgt/CXX_STANDARD_REQUIRED
