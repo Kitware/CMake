@@ -226,6 +226,9 @@ if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   if ("cxx_std_23" IN_LIST CMAKE_CXX_COMPILE_FEATURES AND
       "import_std23" IN_LIST CMake_TEST_MODULE_COMPILATION)
     run_cxx_module_test(import-std)
+    set(RunCMake_CXXModules_NO_TEST 1)
+    run_cxx_module_test(import-std-no-std-property)
+    unset(RunCMake_CXXModules_NO_TEST)
   endif ()
 endif ()
 
