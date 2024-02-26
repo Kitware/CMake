@@ -17,3 +17,7 @@ The value may be one of:
 * ``1.2``
 
 * ``1.3``
+
+This variable is also used by the :module:`ExternalProject` and
+:module:`FetchContent` modules for internal calls to
+:command:`file(DOWNLOAD)` and ``git clone``.

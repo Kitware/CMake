@@ -225,6 +225,21 @@ URL
   Provides an arbitrary list of HTTP headers for the download operation.
   This can be useful for accessing content in systems like AWS, etc.
 
+``TLS_VERSION <min>``
+  .. versionadded:: 3.30
+
+  Specify minimum TLS version for ``https://`` URLs.  If this option is
+  not provided, the value of the :variable:`CMAKE_TLS_VERSION` variable
+  or the :envvar:`CMAKE_TLS_VERSION` environment variable will be used
+  instead (see :command:`file(DOWNLOAD)`).
+
+  This option also applies to ``git clone`` invocations, although the
+  default behavior is different.  If none of the ``TLS_VERSION`` option,
+  :variable:`CMAKE_TLS_VERSION` variable, or :envvar:`CMAKE_TLS_VERSION`
+  environment variable is specified, the behavior will be determined by
+  git's default or a ``http.sslVersion`` git config option the user may
+  have set at a global level.
+
 ``TLS_VERIFY <bool>``
   Specifies whether certificate verification should be performed for
   ``https://`` URLs. If this option is not provided, the default behavior
@@ -1345,6 +1360,27 @@ define_property(DIRECTORY PROPERTY "EP_STEP_TARGETS" INHERITED)
 define_property(DIRECTORY PROPERTY "EP_INDEPENDENT_STEP_TARGETS" INHERITED)
 define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED)
 
+function(_ep_get_tls_version name tls_version_var)
+  set(tls_version_regex "^1\\.[0-3]$")
+  get_property(tls_version TARGET ${name} PROPERTY _EP_TLS_VERSION)
+  if(NOT "x${tls_version}" STREQUAL "x")
+    if(NOT tls_version MATCHES "${tls_version_regex}")
+      message(FATAL_ERROR "TLS_VERSION '${tls_version}' not known")
+    endif()
+  elseif(NOT "x${CMAKE_TLS_VERSION}" STREQUAL "x")
+    set(tls_version "${CMAKE_TLS_VERSION}")
+    if(NOT tls_version MATCHES "${tls_version_regex}")
+      message(FATAL_ERROR "CMAKE_TLS_VERSION '${tls_version}' not known")
+    endif()
+  elseif(NOT "x$ENV{CMAKE_TLS_VERSION}" STREQUAL "x")
+    set(tls_version "$ENV{CMAKE_TLS_VERSION}")
+    if(NOT tls_version MATCHES "${tls_version_regex}")
+      message(FATAL_ERROR "ENV{CMAKE_TLS_VERSION} '${tls_version}' not known")
+    endif()
+  endif()
+  set("${tls_version_var}" "${tls_version}" PARENT_SCOPE)
+endfunction()
+
 function(_ep_get_tls_verify name tls_verify_var)
   get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
   if("x${tls_verify}" STREQUAL "x" AND DEFINED CMAKE_TLS_VERIFY)
@@ -1394,6 +1430,7 @@ function(_ep_write_gitclone_script
   work_dir
   gitclone_infofile
   gitclone_stampfile
+  tls_version
   tls_verify
 )
 
@@ -1439,6 +1476,10 @@ function(_ep_write_gitclone_script
   # same config option in the update step too for submodules, but not for
   # the main git repo.
   set(git_submodules_config_options "")
+  if(NOT "x${tls_version}" STREQUAL "x")
+    list(APPEND git_clone_options -c http.sslVersion=tlsv${tls_version})
+    list(APPEND git_submodules_config_options -c http.sslVersion=tlsv${tls_version})
+  endif()
   if(NOT "x${tls_verify}" STREQUAL "x")
     if(tls_verify)
       # Default git behavior is "true", but the user might have changed the
@@ -1496,6 +1537,7 @@ function(_ep_write_gitupdate_script
   git_repository
   work_dir
   git_update_strategy
+  tls_version
   tls_verify
 )
 
@@ -1516,6 +1558,9 @@ function(_ep_write_gitupdate_script
   # We don't need to set it for the non-submodule update because it gets
   # recorded as part of the clone operation in a sticky manner.
   set(git_submodules_config_options "")
+  if(NOT "x${tls_version}" STREQUAL "x")
+    list(APPEND git_submodules_config_options -c http.sslVersion=tlsv${tls_version})
+  endif()
   if(NOT "x${tls_verify}" STREQUAL "x")
     if(tls_verify)
       # Default git behavior is "true", but the user might have changed the
@@ -1542,6 +1587,7 @@ function(_ep_write_downloadfile_script
   inactivity_timeout
   no_progress
   hash
+  tls_version
   tls_verify
   tls_cainfo
   userpwd
@@ -1594,6 +1640,11 @@ function(_ep_write_downloadfile_script
     set(EXPECT_VALUE "")
   endif()
 
+  set(TLS_VERSION_CODE "")
+  if(NOT "x${tls_version}" STREQUAL "x")
+    set(TLS_VERSION_CODE "set(CMAKE_TLS_VERSION \"${tls_version}\")")
+  endif()
+
   set(TLS_VERIFY_CODE "")
   if(NOT "x${tls_verify}" STREQUAL "x")
     set(TLS_VERIFY_CODE "set(CMAKE_TLS_VERIFY \"${tls_verify}\")")
@@ -1630,6 +1681,7 @@ function(_ep_write_downloadfile_script
   endif()
 
   # Used variables:
+  # * TLS_VERSION_CODE
   # * TLS_VERIFY_CODE
   # * TLS_CAINFO_CODE
   # * ALGO
@@ -2967,6 +3019,7 @@ function(_ep_add_download_command name)
       set(git_remote_name "origin")
     endif()
 
+    _ep_get_tls_version(${name} tls_version)
     _ep_get_tls_verify(${name} tls_verify)
     get_property(git_shallow TARGET ${name} PROPERTY _EP_GIT_SHALLOW)
     get_property(git_progress TARGET ${name} PROPERTY _EP_GIT_PROGRESS)
@@ -3017,6 +3070,7 @@ CMP0097=${_EP_CMP0097}
       ${work_dir}
       ${stamp_dir}/${name}-gitinfo.txt
       ${stamp_dir}/${name}-gitclone-lastrun.txt
+      "${tls_version}"
       "${tls_verify}"
     )
     set(comment "Performing download step (git clone) for '${name}'")
@@ -3151,6 +3205,7 @@ hash=${hash}
           TARGET ${name}
           PROPERTY _EP_DOWNLOAD_NO_PROGRESS
         )
+        _ep_get_tls_version(${name} tls_version)
         _ep_get_tls_verify(${name} tls_verify)
         _ep_get_tls_cainfo(${name} tls_cainfo)
         _ep_get_netrc(${name} netrc)
@@ -3167,6 +3222,7 @@ hash=${hash}
           "${inactivity_timeout}"
           "${no_progress}"
           "${hash}"
+          "${tls_version}"
           "${tls_verify}"
           "${tls_cainfo}"
           "${http_username}:${http_password}"
@@ -3477,6 +3533,7 @@ function(_ep_add_update_command name)
 
     _ep_get_git_submodules_recurse(git_submodules_recurse)
 
+    _ep_get_tls_version(${name} tls_version)
     _ep_get_tls_verify(${name} tls_verify)
 
     set(update_script "${tmp_dir}/${name}-gitupdate.cmake")
@@ -3492,6 +3549,7 @@ function(_ep_add_update_command name)
       "${git_repository}"
       "${work_dir}"
       "${git_update_strategy}"
+      "${tls_version}"
       "${tls_verify}"
     )
     set(cmd              ${CMAKE_COMMAND} -Dcan_fetch=YES -P ${update_script})
@@ -4265,6 +4323,7 @@ function(ExternalProject_Add name)
     HTTP_USERNAME
     HTTP_PASSWORD
     HTTP_HEADER
+    TLS_VERSION    # Also used for git clone operations
     TLS_VERIFY     # Also used for git clone operations
     TLS_CAINFO
     NETRC
