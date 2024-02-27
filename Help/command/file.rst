@@ -1254,6 +1254,13 @@ Archiving
 
   ``LIST_ONLY`` will list the files in the archive rather than extract them.
 
+  .. note::
+    The working directory for this subcommand is the ``DESTINATION`` directory
+    (provided or computed) except when ``LIST_ONLY`` is specified. Therefore,
+    outside of script mode, it may be best to provide absolute paths to
+    ``INPUT`` archives as they are unlikely to be extracted where a relative
+    path works.
+
   .. versionadded:: 3.24
     The ``TOUCH`` option gives extracted files a current local
     timestamp instead of extracting file timestamps from the archive.
