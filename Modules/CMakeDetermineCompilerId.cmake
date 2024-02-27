@@ -296,7 +296,9 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
       "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xClang" AND
       "x${CMAKE_${lang}_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
     execute_process(
-      COMMAND "${CMAKE_${lang}_COMPILER}" -print-resource-dir
+      COMMAND "${CMAKE_${lang}_COMPILER}"
+        ${CMAKE_${lang}_COMPILER_ID_ARG1}
+        -print-resource-dir
       OUTPUT_VARIABLE _clang_resource_dir_out
       ERROR_VARIABLE _clang_resource_dir_err
       RESULT_VARIABLE _clang_resource_dir_res
