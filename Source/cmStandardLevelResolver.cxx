@@ -541,6 +541,21 @@ std::string cmStandardLevelResolver::GetEffectiveStandard(
   return mapping->second.GetEffectiveStandard(this->Makefile, target, config);
 }
 
+std::string cmStandardLevelResolver::GetLevelString(
+  std::string const& lang, cmStandardLevel const& level) const
+{
+  auto mapping = StandardComputerMapping.find(lang);
+  if (mapping == StandardComputerMapping.end()) {
+    return {};
+  }
+
+  if (mapping->second.LevelsAsStrings.size() <= level.Index()) {
+    return {};
+  }
+
+  return mapping->second.LevelsAsStrings[level.Index()];
+}
+
 bool cmStandardLevelResolver::AddRequiredTargetFeature(
   cmTarget* target, const std::string& feature, std::string* error) const
 {
