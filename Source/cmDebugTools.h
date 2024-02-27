@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+#include "cmSystemTools.h"
+
 #define CM_DBG(expr) cm::dbg_impl(__FILE__, __LINE__, #expr, expr)
 
 namespace cm {
@@ -13,8 +15,10 @@ namespace {
 template <typename T>
 T dbg_impl(const char* fname, int line, const char* expr, T value)
 {
-  std::cerr << fname << ':' << line << ": " << expr << " = " << value
-            << std::endl;
+  if (!cmSystemTools::GetEnvVar("CMAKE_NO_DBG")) {
+    std::cerr << fname << ':' << line << ": " << expr << " = " << value
+              << std::endl;
+  }
   return value;
 }
 
