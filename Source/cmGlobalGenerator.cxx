@@ -1594,6 +1594,16 @@ bool cmGlobalGenerator::Compute()
     }
   }
 
+  // We now have all targets set up and std levels constructed. Add
+  // `__CMAKE::CXX*` targets as link dependencies to all targets which need
+  // them.
+  //
+  // Synthetic targets performed this inside of
+  // `cmLocalGenerator::DiscoverSyntheticTargets`
+  if (!this->ApplyCXXStdTargets()) {
+    return false;
+  }
+
   // Iterate through all targets and set up C++20 module targets.
   // Create target templates for each imported target with C++20 modules.
   // INTERFACE library with BMI-generating rules and a collation step?
@@ -1828,6 +1838,19 @@ void cmGlobalGenerator::ComputeTargetOrder(cmGeneratorTarget const* gt,
   }
 
   entry->second = index++;
+}
+
+bool cmGlobalGenerator::ApplyCXXStdTargets()
+{
+  for (auto const& gen : this->LocalGenerators) {
+    for (auto const& tgt : gen->GetGeneratorTargets()) {
+      if (!tgt->ApplyCXXStdTargets()) {
+        return false;
+      }
+    }
+  }
+
+  return true;
 }
 
 bool cmGlobalGenerator::DiscoverSyntheticTargets()

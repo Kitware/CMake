@@ -8411,6 +8411,106 @@ void ComputeLinkImplTransitive(cmGeneratorTarget const* self,
 }
 }
 
+bool cmGeneratorTarget::ApplyCXXStdTargets()
+{
+  cmStandardLevelResolver standardResolver(this->Makefile);
+  cmStandardLevel const cxxStd23 =
+    *standardResolver.LanguageStandardLevel("CXX", "23");
+  std::vector<std::string> const& configs =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+  auto std_prop = this->GetProperty("CXX_MODULE_STD");
+  if (!std_prop) {
+    // TODO(cxxmodules): Add a target policy to flip the default here. Set
+    // `std_prop` based on it.
+    return true;
+  }
+
+  std::string std_prop_value;
+  if (std_prop) {
+    // Evaluate generator expressions.
+    cmGeneratorExpression ge(*this->LocalGenerator->GetCMakeInstance());
+    auto cge = ge.Parse(*std_prop);
+    if (!cge) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat(R"(The "CXX_MODULE_STD" property on the target ")",
+                 this->GetName(), "\" is not a valid generator expression."));
+      return false;
+    }
+    // But do not allow context-sensitive queries. Whether a target uses
+    // `import std` should not depend on configuration or properties of the
+    // consumer (head target). The link language also shouldn't matter, so ban
+    // it as well.
+    if (cge->GetHadHeadSensitiveCondition()) {
+      // Not reachable; all target-sensitive genexes actually fail to parse.
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat(R"(The "CXX_MODULE_STD" property on the target ")",
+                 this->GetName(),
+                 "\" contains a condition that queries the "
+                 "consuming target which is not supported."));
+      return false;
+    }
+    if (cge->GetHadLinkLanguageSensitiveCondition()) {
+      // Not reachable; all link language genexes actually fail to parse.
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat(R"(The "CXX_MODULE_STD" property on the target ")",
+                 this->GetName(),
+                 "\" contains a condition that queries the "
+                 "link language which is not supported."));
+      return false;
+    }
+    std_prop_value = cge->Evaluate(this->LocalGenerator, "");
+    if (cge->GetHadContextSensitiveCondition()) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat(R"(The "CXX_MODULE_STD" property on the target ")",
+                 this->GetName(),
+                 "\" contains a context-sensitive condition "
+                 "that is not supported."));
+      return false;
+    }
+  }
+  auto use_std = cmIsOn(std_prop_value);
+
+  // If we have a value and it is not true, there's nothing to do.
+  if (std_prop && !use_std) {
+    return true;
+  }
+
+  for (auto const& config : configs) {
+    if (this->HaveCxxModuleSupport(config) != Cxx20SupportLevel::Supported) {
+      continue;
+    }
+
+    cm::optional<cmStandardLevel> explicitLevel =
+      this->GetExplicitStandardLevel("CXX", config);
+    if (!explicitLevel || *explicitLevel < cxxStd23) {
+      continue;
+    }
+
+    auto const targetName = cmStrCat(
+      "__CMAKE::CXX", standardResolver.GetLevelString("CXX", *explicitLevel));
+    if (!this->Makefile->FindTargetToUse(targetName)) {
+      this->Makefile->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat(
+          R"(The "CXX_MODULE_STD" property on the target ")", this->GetName(),
+          "\" requires that the \"", targetName,
+          "\" target exist, but it was not provided by the toolchain."));
+      break;
+    }
+
+    this->Target->AppendProperty(
+      "LINK_LIBRARIES",
+      cmStrCat("$<BUILD_LOCAL_INTERFACE:$<$<CONFIG:", config, ">:", targetName,
+               ">>"));
+  }
+
+  return true;
+}
+
 bool cmGeneratorTarget::DiscoverSyntheticTargets(cmSyntheticTargetCache& cache,
                                                  std::string const& config)
 {
@@ -8500,6 +8600,9 @@ bool cmGeneratorTarget::DiscoverSyntheticTargets(cmSyntheticTargetCache& cache,
         for (auto const& innerConfig : allConfigs) {
           gtp->ComputeCompileFeatures(innerConfig);
         }
+        // See `cmGlobalGenerator::ApplyCXXStdTargets` in
+        // `cmGlobalGenerator::Compute` for non-synthetic target resolutions.
+        gtp->ApplyCXXStdTargets();
 
         gtp->DiscoverSyntheticTargets(cache, config);
 

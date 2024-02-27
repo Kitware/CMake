@@ -86,6 +86,12 @@ Compilers which CMake natively supports module dependency scanning include:
 * LLVM/Clang 16.0 and newer
 * GCC 14 (for the in-development branch, after 2023-09-20) and newer
 
+``import std`` Support
+======================
+
+Support for ``import std`` is limited to the following toolchain and standard
+library combinations:
+
 Generator Support
 =================
 
@@ -116,6 +122,7 @@ For the :ref:`Visual Studio Generators`:
 - Only Visual Studio 2022 and MSVC toolsets 14.34 (Visual Studio
   17.4) and newer.
 - No support for exporting or installing BMI or module information.
-- No support for compiling BMIs from ``IMPORTED`` targets with C++ modules.
+- No support for compiling BMIs from ``IMPORTED`` targets with C++ modules
+  (including ``import std``).
 - No diagnosis of using modules provided by ``PRIVATE`` sources from
   ``PUBLIC`` module sources.
