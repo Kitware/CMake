@@ -1,6 +1,9 @@
 # Enable scanning by default for targets that explicitly use C++ 20.
 cmake_policy(SET CMP0155 NEW)
 
+# Block making C++ `import std` targets.
+add_library(__CMAKE::CXX23 IMPORTED INTERFACE)
+
 # Force CMAKE_CXX_STANDARD_DEFAULT to be C++ 20.
 set(ENV{CXXFLAGS} "$ENV{CXXFLAGS} ${CMAKE_CXX20_STANDARD_COMPILE_OPTION}")
 enable_language(CXX)
