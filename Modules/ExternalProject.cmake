@@ -1345,6 +1345,14 @@ define_property(DIRECTORY PROPERTY "EP_STEP_TARGETS" INHERITED)
 define_property(DIRECTORY PROPERTY "EP_INDEPENDENT_STEP_TARGETS" INHERITED)
 define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED)
 
+function(_ep_get_tls_verify name tls_verify_var)
+  get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
+  if("x${tls_verify}" STREQUAL "x" AND DEFINED CMAKE_TLS_VERIFY)
+    set(tls_verify "${CMAKE_TLS_VERIFY}")
+  endif()
+  set("${tls_verify_var}" "${tls_verify}" PARENT_SCOPE)
+endfunction()
+
 function(_ep_write_gitclone_script
   script_filename
   source_dir
@@ -1563,14 +1571,15 @@ function(_ep_write_downloadfile_script
   endif()
 
   set(TLS_VERIFY_CODE "")
+  if(NOT "x${tls_verify}" STREQUAL "x")
+    set(TLS_VERIFY_CODE "set(CMAKE_TLS_VERIFY \"${tls_verify}\")")
+  endif()
+
   set(TLS_CAINFO_CODE "")
   set(NETRC_CODE "")
   set(NETRC_FILE_CODE "")
 
   # check for curl globals in the project
-  if(DEFINED CMAKE_TLS_VERIFY)
-    set(TLS_VERIFY_CODE "set(CMAKE_TLS_VERIFY ${CMAKE_TLS_VERIFY})")
-  endif()
   if(DEFINED CMAKE_TLS_CAINFO)
     set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${CMAKE_TLS_CAINFO}\")")
   endif()
@@ -1584,11 +1593,6 @@ function(_ep_write_downloadfile_script
   # now check for curl locals so that the local values
   # will override the globals
 
-  # check for tls_verify argument
-  string(LENGTH "${tls_verify}" tls_verify_len)
-  if(tls_verify_len GREATER 0)
-    set(TLS_VERIFY_CODE "set(CMAKE_TLS_VERIFY ${tls_verify})")
-  endif()
   # check for tls_cainfo argument
   string(LENGTH "${tls_cainfo}" tls_cainfo_len)
   if(tls_cainfo_len GREATER 0)
@@ -2958,10 +2962,7 @@ function(_ep_add_download_command name)
       set(git_remote_name "origin")
     endif()
 
-    get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
-    if("x${tls_verify}" STREQUAL "x" AND DEFINED CMAKE_TLS_VERIFY)
-      set(tls_verify "${CMAKE_TLS_VERIFY}")
-    endif()
+    _ep_get_tls_verify(${name} tls_verify)
     get_property(git_shallow TARGET ${name} PROPERTY _EP_GIT_SHALLOW)
     get_property(git_progress TARGET ${name} PROPERTY _EP_GIT_PROGRESS)
     get_property(git_config TARGET ${name} PROPERTY _EP_GIT_CONFIG)
@@ -3145,7 +3146,7 @@ hash=${hash}
           TARGET ${name}
           PROPERTY _EP_DOWNLOAD_NO_PROGRESS
         )
-        get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
+        _ep_get_tls_verify(${name} tls_verify)
         get_property(tls_cainfo TARGET ${name} PROPERTY _EP_TLS_CAINFO)
         get_property(netrc TARGET ${name} PROPERTY _EP_NETRC)
         get_property(netrc_file TARGET ${name} PROPERTY _EP_NETRC_FILE)
@@ -3471,10 +3472,7 @@ function(_ep_add_update_command name)
 
     _ep_get_git_submodules_recurse(git_submodules_recurse)
 
-    get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
-    if("x${tls_verify}" STREQUAL "x" AND DEFINED CMAKE_TLS_VERIFY)
-      set(tls_verify "${CMAKE_TLS_VERIFY}")
-    endif()
+    _ep_get_tls_verify(${name} tls_verify)
 
     set(update_script "${tmp_dir}/${name}-gitupdate.cmake")
     list(APPEND file_deps ${update_script})
