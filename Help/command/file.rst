@@ -1097,6 +1097,14 @@ Transfer
       is not specified, the value of the :variable:`CMAKE_NETRC_FILE` variable
       will be used instead.
 
+    ``TLS_VERSION <min>``
+      .. versionadded:: 3.30
+
+      Specify minimum TLS version for ``https://`` URLs.
+      If this option is not specified, the value of the
+      :variable:`CMAKE_TLS_VERSION` variable will be used instead.
+      See that variable for allowed values.
+
     ``TLS_VERIFY <ON|OFF>``
       Specify whether to verify the server certificate for ``https://`` URLs.
       The default is to *not* verify. If this option is not specified, the

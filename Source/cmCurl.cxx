@@ -2,6 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCurl.h"
 
+#include <cm/string_view>
+#include <cmext/string_view>
+
 #if !defined(CMAKE_USE_SYSTEM_CURL) && !defined(_WIN32) &&                    \
   !defined(__APPLE__) && !defined(CURL_CA_BUNDLE) && !defined(CURL_CA_PATH)
 #  define CMAKE_FIND_CAFILE
@@ -30,6 +33,26 @@
       e += ::curl_easy_strerror(result);                                      \
     }                                                                         \
   } while (false)
+
+cm::optional<int> cmCurlParseTLSVersion(std::string const& tls_version)
+{
+  cm::optional<int> v;
+  if (tls_version == "1.0"_s) {
+    v = CURL_SSLVERSION_TLSv1_0;
+  } else if (tls_version == "1.1"_s) {
+    v = CURL_SSLVERSION_TLSv1_1;
+  } else if (tls_version == "1.2"_s) {
+    v = CURL_SSLVERSION_TLSv1_2;
+  } else if (tls_version == "1.3"_s) {
+    // curl version 7.52.0 introduced TLS 1.3 support
+#if defined(LIBCURL_VERSION_NUM) && LIBCURL_VERSION_NUM >= 0x073400
+    v = CURL_SSLVERSION_TLSv1_3;
+#else
+    v = CURL_SSLVERSION_LAST;
+#endif
+  }
+  return v;
+}
 
 std::string cmCurlSetCAInfo(::CURL* curl, const std::string& cafile)
 {
