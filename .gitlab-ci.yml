@@ -1160,6 +1160,8 @@ b:windows-vs2022-x64-ninja:
         - .cmake_build_artifacts
         - .windows_x86_64_tags_nonconcurrent_vs2022
         - .run_manually
+    variables:
+        CMAKE_CI_JOB_CONTINUOUS: "true"
 
 b:windows-vs2022-x64-pch:
     extends:
@@ -1182,6 +1184,7 @@ t:windows-vs2022-x64-ninja:
     needs:
         - b:windows-vs2022-x64-ninja
     variables:
+        CMAKE_CI_JOB_CONTINUOUS: "true"
         CMAKE_CI_JOB_NIGHTLY_NINJA: "true"
 
 t:windows-vs2022-x64-ninja-multi:
