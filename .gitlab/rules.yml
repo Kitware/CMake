@@ -4,6 +4,8 @@
     rules:
         - if: '$CMAKE_CI_PACKAGE != null'
           when: never
+        - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false")'
+          when: never
         - if: '$CMAKE_CI_NIGHTLY == "true"'
           when: on_success
         - if: '$CMAKE_CI_JOB_NIGHTLY == "true"'
@@ -25,6 +27,8 @@
     rules:
         - if: '$CMAKE_CI_PACKAGE != null'
           when: never
+        - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false")'
+          when: never
         - if: '$CMAKE_CI_NIGHTLY == "true"'
           when: on_success
         - if: '$CMAKE_CI_JOB_NIGHTLY == "true"'
@@ -45,6 +49,8 @@
 .run_dependent:
     rules:
         - if: '$CMAKE_CI_PACKAGE != null'
+          when: never
+        - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_JOB_NIGHTLY == "false")'
           when: never
         - if: '($CMAKE_CI_NIGHTLY == "true" && $CMAKE_CI_NIGHTLY_IGNORE_DEPS == "true")'
           when: always
