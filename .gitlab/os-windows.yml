@@ -337,6 +337,16 @@
         - msvc-19.36
         - concurrent
 
+.windows_x86_64_tags_concurrent_vs2022_android:
+    tags:
+        - cmake # Since this is a bare runner, pin to a project.
+        - windows-x86_64
+        - shell
+        - vs2022
+        - vs17-android
+        - msvc-19.36
+        - concurrent
+
 .windows_x86_64_tags_concurrent_vs2019_android:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
