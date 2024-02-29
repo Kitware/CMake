@@ -54,6 +54,26 @@ cm::optional<int> cmCurlParseTLSVersion(cm::string_view tls_version)
   return v;
 }
 
+cm::optional<std::string> cmCurlPrintTLSVersion(int curl_tls_version)
+{
+  cm::optional<std::string> s;
+  switch (curl_tls_version) {
+    case CURL_SSLVERSION_TLSv1_0:
+      s = "CURL_SSLVERSION_TLSv1_0"_s;
+      break;
+    case CURL_SSLVERSION_TLSv1_1:
+      s = "CURL_SSLVERSION_TLSv1_1"_s;
+      break;
+    case CURL_SSLVERSION_TLSv1_2:
+      s = "CURL_SSLVERSION_TLSv1_2"_s;
+      break;
+    case CURL_SSLVERSION_TLSv1_3:
+      s = "CURL_SSLVERSION_TLSv1_3"_s;
+      break;
+  }
+  return s;
+}
+
 std::string cmCurlSetCAInfo(::CURL* curl, const std::string& cafile)
 {
   std::string e;
