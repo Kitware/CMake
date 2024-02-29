@@ -34,7 +34,7 @@
     }                                                                         \
   } while (false)
 
-cm::optional<int> cmCurlParseTLSVersion(std::string const& tls_version)
+cm::optional<int> cmCurlParseTLSVersion(cm::string_view tls_version)
 {
   cm::optional<int> v;
   if (tls_version == "1.0"_s) {

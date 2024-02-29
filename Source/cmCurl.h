@@ -7,10 +7,11 @@
 #include <string>
 
 #include <cm/optional>
+#include <cm/string_view>
 
 #include <cm3p/curl/curl.h>
 
-cm::optional<int> cmCurlParseTLSVersion(std::string const& tls_version);
+cm::optional<int> cmCurlParseTLSVersion(cm::string_view tls_version);
 std::string cmCurlSetCAInfo(::CURL* curl, const std::string& cafile = {});
 std::string cmCurlSetNETRCOption(::CURL* curl, const std::string& netrc_level,
                                  const std::string& netrc_file);
