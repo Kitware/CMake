@@ -34,6 +34,11 @@
     }                                                                         \
   } while (false)
 
+// curl versions before 7.52.0 did not provide TLS 1.3 support
+#if defined(LIBCURL_VERSION_NUM) && LIBCURL_VERSION_NUM < 0x073400
+#  define CURL_SSLVERSION_TLSv1_3 CURL_SSLVERSION_LAST
+#endif
+
 cm::optional<int> cmCurlParseTLSVersion(cm::string_view tls_version)
 {
   cm::optional<int> v;
@@ -44,12 +49,7 @@ cm::optional<int> cmCurlParseTLSVersion(cm::string_view tls_version)
   } else if (tls_version == "1.2"_s) {
     v = CURL_SSLVERSION_TLSv1_2;
   } else if (tls_version == "1.3"_s) {
-    // curl version 7.52.0 introduced TLS 1.3 support
-#if defined(LIBCURL_VERSION_NUM) && LIBCURL_VERSION_NUM >= 0x073400
     v = CURL_SSLVERSION_TLSv1_3;
-#else
-    v = CURL_SSLVERSION_LAST;
-#endif
   }
   return v;
 }
