@@ -1361,6 +1361,22 @@ function(_ep_get_tls_cainfo name tls_cainfo_var)
   set("${tls_cainfo_var}" "${tls_cainfo}" PARENT_SCOPE)
 endfunction()
 
+function(_ep_get_netrc name netrc_var)
+  get_property(netrc TARGET ${name} PROPERTY _EP_NETRC)
+  if("x${netrc}" STREQUAL "x" AND DEFINED CMAKE_NETRC)
+    set(netrc "${CMAKE_NETRC}")
+  endif()
+  set("${netrc_var}" "${netrc}" PARENT_SCOPE)
+endfunction()
+
+function(_ep_get_netrc_file name netrc_file_var)
+  get_property(netrc_file TARGET ${name} PROPERTY _EP_NETRC_FILE)
+  if("x${netrc_file}" STREQUAL "x" AND DEFINED CMAKE_NETRC_FILE)
+    set(netrc_file "${CMAKE_NETRC_FILE}")
+  endif()
+  set("${netrc_file_var}" "${netrc_file}" PARENT_SCOPE)
+endfunction()
+
 function(_ep_write_gitclone_script
   script_filename
   source_dir
@@ -1589,27 +1605,12 @@ function(_ep_write_downloadfile_script
   endif()
 
   set(NETRC_CODE "")
-  set(NETRC_FILE_CODE "")
-
-  # check for curl globals in the project
-  if(DEFINED CMAKE_NETRC)
-    set(NETRC_CODE "set(CMAKE_NETRC \"${CMAKE_NETRC}\")")
-  endif()
-  if(DEFINED CMAKE_NETRC_FILE)
-    set(NETRC_FILE_CODE "set(CMAKE_NETRC_FILE \"${CMAKE_NETRC_FILE}\")")
-  endif()
-
-  # now check for curl locals so that the local values
-  # will override the globals
-
-  # check for netrc argument
-  string(LENGTH "${netrc}" netrc_len)
-  if(netrc_len GREATER 0)
+  if(NOT "x${netrc}" STREQUAL "x")
     set(NETRC_CODE "set(CMAKE_NETRC \"${netrc}\")")
   endif()
-  # check for netrc_file argument
-  string(LENGTH "${netrc_file}" netrc_file_len)
-  if(netrc_file_len GREATER 0)
+
+  set(NETRC_FILE_CODE "")
+  if(NOT "x${netrc_file}" STREQUAL "x")
     set(NETRC_FILE_CODE "set(CMAKE_NETRC_FILE \"${netrc_file}\")")
   endif()
 
@@ -3152,8 +3153,8 @@ hash=${hash}
         )
         _ep_get_tls_verify(${name} tls_verify)
         _ep_get_tls_cainfo(${name} tls_cainfo)
-        get_property(netrc TARGET ${name} PROPERTY _EP_NETRC)
-        get_property(netrc_file TARGET ${name} PROPERTY _EP_NETRC_FILE)
+        _ep_get_netrc(${name} netrc)
+        _ep_get_netrc_file(${name} netrc_file)
         get_property(http_username TARGET ${name} PROPERTY _EP_HTTP_USERNAME)
         get_property(http_password TARGET ${name} PROPERTY _EP_HTTP_PASSWORD)
         get_property(http_headers TARGET ${name} PROPERTY _EP_HTTP_HEADER)
