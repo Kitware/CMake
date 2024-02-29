@@ -178,6 +178,16 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
     curl = curl_easy_init();
     if (curl) {
       cmCurlSetCAInfo(curl);
+      if (curlOpts.TLSVersionOpt) {
+        cm::optional<std::string> tlsVersionStr =
+          cmCurlPrintTLSVersion(*curlOpts.TLSVersionOpt);
+        cmCTestOptionalLog(
+          this->CTest, HANDLER_VERBOSE_OUTPUT,
+          "  Set CURLOPT_SSLVERSION to "
+            << (tlsVersionStr ? *tlsVersionStr : "unknown value") << "\n",
+          this->Quiet);
+        curl_easy_setopt(curl, CURLOPT_SSLVERSION, *curlOpts.TLSVersionOpt);
+      }
       if (curlOpts.TLSVerifyOpt) {
         cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                            "  Set CURLOPT_SSL_VERIFYPEER to "

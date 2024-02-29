@@ -17,5 +17,6 @@ curl-tls-version
   to ``https://`` URLs.
 
 * The :command:`ctest_submit` command and :option:`ctest -T Submit <ctest -T>`
-  step gained a ``TLSVerify`` option to control negotiation with
-  ``https://`` URLs.  See the :variable:`CTEST_TLS_VERIFY` variable.
+  step gained ``TLSVersion`` and ``TLSVerify`` options to control negotiation
+  with ``https://`` URLs.  See the :variable:`CTEST_TLS_VERSION` and
+  :variable:`CTEST_TLS_VERIFY` variables.

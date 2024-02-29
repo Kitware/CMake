@@ -16,6 +16,7 @@ class cmCTest;
 struct cmCTestCurlOpts
 {
   cmCTestCurlOpts(cmCTest* ctest);
+  cm::optional<int> TLSVersionOpt;
   cm::optional<bool> TLSVerifyOpt;
   bool VerifyHostOff = false;
 };

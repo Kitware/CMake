@@ -496,6 +496,7 @@ function(run_FailDrop case)
     ${CMAKE_CTEST_COMMAND} -M Experimental -T Submit -VV
     )
 endfunction()
+run_FailDrop(TLSVersion-1.1 -DCTEST_TLS_VERSION=1.1)
 run_FailDrop(TLSVerify-ON -DCTEST_TLS_VERIFY=ON)
 run_FailDrop(TLSVerify-OFF -DCTEST_TLS_VERIFY=OFF)
 

@@ -58,6 +58,9 @@ size_t curlDebugCallback(CURL* /*unused*/, curl_infotype /*unused*/,
 
 cmCTestCurlOpts::cmCTestCurlOpts(cmCTest* ctest)
 {
+  this->TLSVersionOpt =
+    cmCurlParseTLSVersion(ctest->GetCTestConfiguration("TLSVersion"));
+
   std::string tlsVerify = ctest->GetCTestConfiguration("TLSVerify");
   if (!tlsVerify.empty()) {
     this->TLSVerifyOpt = cmIsOn(tlsVerify);
@@ -80,6 +83,10 @@ bool cmCTestCurl::InitCurl()
     return false;
   }
   cmCurlSetCAInfo(this->Curl);
+  if (this->CurlOpts.TLSVersionOpt) {
+    curl_easy_setopt(this->Curl, CURLOPT_SSLVERSION,
+                     *this->CurlOpts.TLSVersionOpt);
+  }
   if (this->CurlOpts.TLSVerifyOpt) {
     curl_easy_setopt(this->Curl, CURLOPT_SSL_VERIFYPEER,
                      *this->CurlOpts.TLSVerifyOpt ? 1 : 0);

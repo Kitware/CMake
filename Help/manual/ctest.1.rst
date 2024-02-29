@@ -1551,6 +1551,15 @@ Configuration settings include:
   * `CTest Script`_ variable: :variable:`CTEST_SUBMIT_INACTIVITY_TIMEOUT`
   * :module:`CTest` module variable: ``CTEST_SUBMIT_INACTIVITY_TIMEOUT``
 
+``TLSVersion``
+  .. versionadded:: 3.30
+
+  Specify a minimum TLS version allowed when submitting to a dashboard
+  via ``https://`` URLs.
+
+  * `CTest Script`_ variable: :variable:`CTEST_TLS_VERSION`
+  * :module:`CTest` module variable: ``CTEST_TLS_VERSION``
+
 ``TLSVerify``
   .. versionadded:: 3.30
 
