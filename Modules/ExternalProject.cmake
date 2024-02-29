@@ -1353,6 +1353,14 @@ function(_ep_get_tls_verify name tls_verify_var)
   set("${tls_verify_var}" "${tls_verify}" PARENT_SCOPE)
 endfunction()
 
+function(_ep_get_tls_cainfo name tls_cainfo_var)
+  get_property(tls_cainfo TARGET ${name} PROPERTY _EP_TLS_CAINFO)
+  if("x${tls_cainfo}" STREQUAL "x" AND DEFINED CMAKE_TLS_CAINFO)
+    set(tls_cainfo "${CMAKE_TLS_CAINFO}")
+  endif()
+  set("${tls_cainfo_var}" "${tls_cainfo}" PARENT_SCOPE)
+endfunction()
+
 function(_ep_write_gitclone_script
   script_filename
   source_dir
@@ -1576,13 +1584,14 @@ function(_ep_write_downloadfile_script
   endif()
 
   set(TLS_CAINFO_CODE "")
+  if(NOT "x${tls_cainfo}" STREQUAL "x")
+    set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${tls_cainfo}\")")
+  endif()
+
   set(NETRC_CODE "")
   set(NETRC_FILE_CODE "")
 
   # check for curl globals in the project
-  if(DEFINED CMAKE_TLS_CAINFO)
-    set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${CMAKE_TLS_CAINFO}\")")
-  endif()
   if(DEFINED CMAKE_NETRC)
     set(NETRC_CODE "set(CMAKE_NETRC \"${CMAKE_NETRC}\")")
   endif()
@@ -1593,11 +1602,6 @@ function(_ep_write_downloadfile_script
   # now check for curl locals so that the local values
   # will override the globals
 
-  # check for tls_cainfo argument
-  string(LENGTH "${tls_cainfo}" tls_cainfo_len)
-  if(tls_cainfo_len GREATER 0)
-    set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${tls_cainfo}\")")
-  endif()
   # check for netrc argument
   string(LENGTH "${netrc}" netrc_len)
   if(netrc_len GREATER 0)
@@ -3147,7 +3151,7 @@ hash=${hash}
           PROPERTY _EP_DOWNLOAD_NO_PROGRESS
         )
         _ep_get_tls_verify(${name} tls_verify)
-        get_property(tls_cainfo TARGET ${name} PROPERTY _EP_TLS_CAINFO)
+        _ep_get_tls_cainfo(${name} tls_cainfo)
         get_property(netrc TARGET ${name} PROPERTY _EP_NETRC)
         get_property(netrc_file TARGET ${name} PROPERTY _EP_NETRC_FILE)
         get_property(http_username TARGET ${name} PROPERTY _EP_HTTP_USERNAME)
