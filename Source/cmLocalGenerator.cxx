@@ -909,8 +909,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
   for (std::string const& i : includes) {
     if (cmNonempty(fwSearchFlag) && this->Makefile->IsOn("APPLE") &&
         cmSystemTools::IsPathToFramework(i)) {
-      std::string const frameworkDir =
-        cmSystemTools::CollapseFullPath(cmStrCat(i, "/../"));
+      std::string const frameworkDir = cmSystemTools::GetFilenamePath(i);
       if (emitted.insert(frameworkDir).second) {
         if (sysFwSearchFlag && target &&
             target->IsSystemIncludeDirectory(frameworkDir, config, lang)) {
