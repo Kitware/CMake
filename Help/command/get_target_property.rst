@@ -5,16 +5,14 @@ Get a property from a target.
 
 .. code-block:: cmake
 
-  get_target_property(<VAR> target property)
+  get_target_property(<variable> <target> <property>)
 
-Get a property from a target.  The value of the property is stored in
-the variable ``<VAR>``.  If the target property is not found, the behavior
-depends on whether it has been defined to be an ``INHERITED`` property
-or not (see :command:`define_property`).  Non-inherited properties will
-set ``<VAR>`` to ``<VAR>-NOTFOUND``, whereas inherited properties will search
-the relevant parent scope as described for the :command:`define_property`
-command and if still unable to find the property, ``<VAR>`` will be set to
-an empty string.
+Get a property from a target.  The value of the property is stored in the
+specified ``<variable>``.  If the target property is not found, ``<variable>``
+will be set to ``<variable>-NOTFOUND``.  If the target property was defined to
+be an ``INHERITED`` property (see :command:`define_property`), the search will
+include the relevant parent scopes, as described for the
+:command:`define_property` command.
 
 Use :command:`set_target_properties` to set target property values.
 Properties are usually used to control how a target is built, but some

@@ -2928,6 +2928,7 @@ void cmLocalGenerator::CopyPchCompilePdb(
   } else {
     cc->SetOutputs(outputs);
     cmSourceFile* copy_rule = this->AddCustomCommandToOutput(std::move(cc));
+    copy_rule->SetProperty("CXX_SCAN_FOR_MODULES", "0");
 
     if (copy_rule) {
       target->AddSource(copy_rule->ResolveFullPath());
@@ -3130,9 +3131,19 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
 
   for (size_t ci = 0; ci < configs.size(); ++ci) {
     // FIXME: Refactor collection of sources to not evaluate object libraries.
+    // Their final set of object files might be transformed by unity builds.
     std::vector<cmSourceFile*> sources;
     target->GetSourceFiles(sources, configs[ci]);
     for (cmSourceFile* sf : sources) {
+      // Files which need C++ scanning cannot participate in unity builds as
+      // there is a single place in TUs that may perform module-dependency bits
+      // and a unity source cannot `#include` them in-order and represent a
+      // valid TU.
+      if (sf->GetLanguage() == "CXX"_s &&
+          target->NeedDyndepForSource("CXX", configs[ci], sf)) {
+        continue;
+      }
+
       auto mi = index.find(sf);
       if (mi == index.end()) {
         unitySources.emplace_back(sf);
@@ -3195,6 +3206,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
       target->AddSource(file.Path, true);
       unity->SetProperty("SKIP_UNITY_BUILD_INCLUSION", "ON");
       unity->SetProperty("UNITY_SOURCE_FILE", file.Path);
+      unity->SetProperty("CXX_SCAN_FOR_MODULES", "0");
       if (file.PerConfig) {
         unity->SetProperty("COMPILE_DEFINITIONS",
                            "CMAKE_UNITY_CONFIG_$<UPPER_CASE:$<CONFIG>>");

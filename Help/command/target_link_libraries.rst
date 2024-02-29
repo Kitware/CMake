@@ -68,9 +68,9 @@ Each ``<item>`` may be:
 
   .. versionadded:: 3.28
 
-    The library file may point to a ``.xcframework`` folder on macOS. If it
-    does, the target will get the selected library's ``Headers`` directory as
-    a usage requirement.
+    The library file may point to a ``.xcframework`` folder on Apple platforms.
+    If it does, the target will get the selected library's ``Headers``
+    directory as a usage requirement.
 
   .. versionadded:: 3.8
     On :ref:`Visual Studio Generators` for VS 2010 and above, library files

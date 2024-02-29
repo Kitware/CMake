@@ -9,14 +9,12 @@ Get a property for a source file.
                            [DIRECTORY <dir> | TARGET_DIRECTORY <target>]
                            <property>)
 
-Gets a property from a source file.  The value of the property is
-stored in the specified ``<variable>``.  If the source property is not found,
-the behavior depends on whether it has been defined to be an ``INHERITED``
-property or not (see :command:`define_property`).  Non-inherited properties
-will set ``variable`` to ``NOTFOUND``, whereas inherited properties will search
-the relevant parent scope as described for the :command:`define_property`
-command and if still unable to find the property, ``variable`` will be set to
-an empty string.
+Gets a property from a source file.  The value of the property is stored in
+the specified ``<variable>``.  If the ``<file>`` is not a source file, or the
+source property is not found, ``<variable>`` will be set to ``NOTFOUND``.
+If the source property was defined to be an ``INHERITED`` property (see
+:command:`define_property`), the search will include the relevant parent
+scopes, as described for the :command:`define_property` command.
 
 By default, the source file's property will be read from the current source
 directory's scope.

@@ -9,6 +9,10 @@
 
 #include "cmSystemTools.h"
 
+#ifdef _WIN32
+#  include <windows.h>
+#endif
+
 static std::string getStdin()
 {
   char buffer[1024];

@@ -6,7 +6,6 @@
 
 #include <iosfwd>
 #include <string>
-#include <vector>
 
 #include "cmProcessOutput.h"
 #include "cmProcessTools.h"
@@ -109,15 +108,15 @@ protected:
   };
 
   /** Convert a list of arguments to a human-readable command line.  */
-  static std::string ComputeCommandLine(const std::vector<std::string>& cmd);
+  static std::string ComputeCommandLine(char const* const* cmd);
 
   /** Run a command line and send output to given parsers.  */
-  bool RunChild(const std::vector<std::string>& cmd, OutputParser* out,
-                OutputParser* err, std::string workDir = {},
+  bool RunChild(char const* const* cmd, OutputParser* out, OutputParser* err,
+                const char* workDir = nullptr,
                 Encoding encoding = cmProcessOutput::Auto);
 
   /** Run VC update command line and send output to given parsers.  */
-  bool RunUpdateCommand(const std::vector<std::string>& cmd, OutputParser* out,
+  bool RunUpdateCommand(char const* const* cmd, OutputParser* out,
                         OutputParser* err = nullptr,
                         Encoding encoding = cmProcessOutput::Auto);
 

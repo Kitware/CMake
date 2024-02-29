@@ -676,6 +676,7 @@ protected:
 
   bool AddHeaderSetVerification();
 
+  void CreateFileGenerateOutputs();
   bool AddAutomaticSources();
 
   std::string SelectMakeProgram(const std::string& makeProgram,

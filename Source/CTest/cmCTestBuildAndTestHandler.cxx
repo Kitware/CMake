@@ -7,6 +7,8 @@
 #include <cstring>
 #include <ratio>
 
+#include "cmsys/Process.h"
+
 #include "cmBuildOptions.h"
 #include "cmCTest.h"
 #include "cmCTestTestHandler.h"
@@ -306,11 +308,12 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     return 1;
   }
 
-  std::vector<std::string> testCommand;
-  testCommand.push_back(fullPath);
+  std::vector<const char*> testCommand;
+  testCommand.push_back(fullPath.c_str());
   for (std::string const& testCommandArg : this->TestCommandArgs) {
-    testCommand.push_back(testCommandArg);
+    testCommand.push_back(testCommandArg.c_str());
   }
+  testCommand.push_back(nullptr);
   std::string outs;
   int retval = 0;
   // run the test from the this->BuildRunDir if set
@@ -346,10 +349,10 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     }
   }
 
-  bool runTestRes = this->CTest->RunTest(testCommand, &outs, &retval, nullptr,
-                                         remainingTime, nullptr);
+  int runTestRes = this->CTest->RunTest(testCommand, &outs, &retval, nullptr,
+                                        remainingTime, nullptr);
 
-  if (!runTestRes || retval != 0) {
+  if (runTestRes != cmsysProcess_State_Exited || retval != 0) {
     out << "Test command failed: " << testCommand[0] << "\n";
     retval = 1;
   }

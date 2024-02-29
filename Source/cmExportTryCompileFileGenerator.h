@@ -56,7 +56,10 @@ protected:
                               cmTargetExport* te) override;
 
   std::string GetCxxModulesDirectory() const override { return {}; }
-  void GenerateCxxModuleConfigInformation(std::ostream&) const override {}
+  void GenerateCxxModuleConfigInformation(std::string const&,
+                                          std::ostream&) const override
+  {
+  }
 
 private:
   std::string FindTargets(const std::string& prop,

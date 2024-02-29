@@ -9,7 +9,6 @@
 #include <cstring>
 #include <iomanip>
 #include <iterator>
-#include <memory>
 #include <ratio>
 #include <sstream>
 #include <type_traits>
@@ -19,9 +18,8 @@
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
+#include "cmsys/Process.h"
 #include "cmsys/RegularExpression.hxx"
-
-#include "cm_fileno.hxx"
 
 #include "cmCTest.h"
 #include "cmDuration.h"
@@ -35,13 +33,91 @@
 #include "cmParsePHPCoverage.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmUVProcessChain.h"
 #include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"
 
 class cmMakefile;
 
 #define SAFEDIV(x, y) (((y) != 0) ? ((x) / (y)) : (0))
+
+class cmCTestRunProcess
+{
+public:
+  cmCTestRunProcess()
+  {
+    this->Process = cmsysProcess_New();
+    this->PipeState = -1;
+    this->TimeOut = cmDuration(-1);
+  }
+  ~cmCTestRunProcess()
+  {
+    if (this->PipeState != -1 && this->PipeState != cmsysProcess_Pipe_None &&
+        this->PipeState != cmsysProcess_Pipe_Timeout) {
+      this->WaitForExit();
+    }
+    cmsysProcess_Delete(this->Process);
+  }
+  cmCTestRunProcess(const cmCTestRunProcess&) = delete;
+  cmCTestRunProcess& operator=(const cmCTestRunProcess&) = delete;
+  void SetCommand(const char* command)
+  {
+    this->CommandLineStrings.clear();
+    this->CommandLineStrings.emplace_back(command);
+  }
+  void AddArgument(const char* arg)
+  {
+    if (arg) {
+      this->CommandLineStrings.emplace_back(arg);
+    }
+  }
+  void SetWorkingDirectory(const char* dir) { this->WorkingDirectory = dir; }
+  void SetTimeout(cmDuration t) { this->TimeOut = t; }
+  bool StartProcess()
+  {
+    std::vector<const char*> args;
+    args.reserve(this->CommandLineStrings.size());
+    for (std::string const& cl : this->CommandLineStrings) {
+      args.push_back(cl.c_str());
+    }
+    args.push_back(nullptr); // null terminate
+    cmsysProcess_SetCommand(this->Process, args.data());
+    if (!this->WorkingDirectory.empty()) {
+      cmsysProcess_SetWorkingDirectory(this->Process,
+                                       this->WorkingDirectory.c_str());
+    }
+
+    cmsysProcess_SetOption(this->Process, cmsysProcess_Option_HideWindow, 1);
+    if (this->TimeOut >= cmDuration::zero()) {
+      cmsysProcess_SetTimeout(this->Process, this->TimeOut.count());
+    }
+    cmsysProcess_Execute(this->Process);
+    this->PipeState = cmsysProcess_GetState(this->Process);
+    // if the process is running or exited return true
+    return this->PipeState == cmsysProcess_State_Executing ||
+      this->PipeState == cmsysProcess_State_Exited;
+  }
+  void SetStdoutFile(const char* fname)
+  {
+    cmsysProcess_SetPipeFile(this->Process, cmsysProcess_Pipe_STDOUT, fname);
+  }
+  void SetStderrFile(const char* fname)
+  {
+    cmsysProcess_SetPipeFile(this->Process, cmsysProcess_Pipe_STDERR, fname);
+  }
+  int WaitForExit(double* timeout = nullptr)
+  {
+    this->PipeState = cmsysProcess_WaitForExit(this->Process, timeout);
+    return this->PipeState;
+  }
+  int GetProcessState() const { return this->PipeState; }
+
+private:
+  int PipeState;
+  cmsysProcess* Process;
+  std::vector<std::string> CommandLineStrings;
+  std::string WorkingDirectory;
+  cmDuration TimeOut;
+};
 
 cmCTestCoverageHandler::cmCTestCoverageHandler() = default;
 
@@ -1864,35 +1940,34 @@ int cmCTestCoverageHandler::RunBullseyeCommand(
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot find :" << cmd << "\n");
     return 0;
   }
-  std::vector<std::string> args{ cmd };
   if (arg) {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "Run : " << program << " " << arg << "\n", this->Quiet);
-    args.emplace_back(arg);
   } else {
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        "Run : " << program << "\n", this->Quiet);
   }
   // create a process object and start it
-  cmUVProcessChainBuilder builder;
+  cmCTestRunProcess runCoverageSrc;
+  runCoverageSrc.SetCommand(program.c_str());
+  runCoverageSrc.AddArgument(arg);
   std::string stdoutFile =
     cmStrCat(cont->BinaryDir, "/Testing/Temporary/",
              this->GetCTestInstance()->GetCurrentTag(), '-', cmd);
   std::string stderrFile = stdoutFile;
   stdoutFile += ".stdout";
   stderrFile += ".stderr";
-  std::unique_ptr<FILE, int (*)(FILE*)> stdoutHandle(
-    cmsys::SystemTools::Fopen(stdoutFile, "w"), fclose);
-  std::unique_ptr<FILE, int (*)(FILE*)> stderrHandle(
-    cmsys::SystemTools::Fopen(stderrFile, "w"), fclose);
-  builder.AddCommand(args)
-    .SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT,
-                       cm_fileno(stdoutHandle.get()))
-    .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR,
-                       cm_fileno(stderrHandle.get()));
+  runCoverageSrc.SetStdoutFile(stdoutFile.c_str());
+  runCoverageSrc.SetStderrFile(stderrFile.c_str());
+  if (!runCoverageSrc.StartProcess()) {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Could not run : " << program << " " << arg << "\n"
+                                  << "kwsys process state : "
+                                  << runCoverageSrc.GetProcessState());
+    return 0;
+  }
   // since we set the output file names wait for it to end
-  auto chain = builder.Start();
-  chain.Wait();
+  runCoverageSrc.WaitForExit();
   outputFile = stdoutFile;
   return 1;
 }

@@ -116,12 +116,6 @@ Modules
   Additionally, the :command:`ExternalProject_Add_Step` command
   has been updated to support the new ``JOB_SERVER_AWARE`` option.
 
-* The :module:`ExternalProject` module now declares ``BYPRODUCTS`` for the
-  downloaded file for generated ``download`` steps. Previously, if multiple
-  external projects downloaded to the same file, hash verification could fail.
-  Now, when using the :ref:`Ninja Generators`, this scenario is detected and
-  Ninja will raise an error stating that multiple rules generate the same file.
-
 * The :module:`FetchContent` module's :command:`FetchContent_Declare` command
   gained an ``EXCLUDE_FROM_ALL`` option, which propagates through to the
   :command:`add_subdirectory` call made by
@@ -201,3 +195,15 @@ Other Changes
 
 * The precompiled Linux ``x86_64`` binaries provided on
   `cmake.org <https://cmake.org/download/>`_ now require GLIBC 2.17 or higher.
+
+Updates
+=======
+
+Changes made since CMake 3.28.0 include the following.
+
+3.28.1, 3.28.2, 3.28.3
+----------------------
+
+* These versions made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.

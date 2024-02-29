@@ -207,7 +207,7 @@ struct cmFindLibraryHelper
   std::string BestPath;
 
   // Support for OpenBSD shared library naming: lib<name>.so.<major>.<minor>
-  bool OpenBSD;
+  bool IsOpenBSD;
 
   bool DebugMode;
 
@@ -320,7 +320,7 @@ cmFindLibraryHelper::cmFindLibraryHelper(std::string debugName, cmMakefile* mf,
   this->RegexFromList(this->SuffixRegexStr, this->Suffixes);
 
   // Check whether to use OpenBSD-style library version comparisons.
-  this->OpenBSD = this->Makefile->GetState()->GetGlobalPropertyAsBool(
+  this->IsOpenBSD = this->Makefile->GetState()->GetGlobalPropertyAsBool(
     "FIND_LIBRARY_USE_OPENBSD_VERSIONING");
 }
 
@@ -390,7 +390,7 @@ void cmFindLibraryHelper::AddName(std::string const& name)
   std::string regex = cmStrCat('^', this->PrefixRegexStr);
   this->RegexFromLiteral(regex, name);
   regex += this->SuffixRegexStr;
-  if (this->OpenBSD) {
+  if (this->IsOpenBSD) {
     regex += "(\\.[0-9]+\\.[0-9]+)?";
   }
   regex += "$";
@@ -472,7 +472,7 @@ bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
         size_type suffix = this->GetSuffixIndex(name.Regex.match(2));
         unsigned int major = 0;
         unsigned int minor = 0;
-        if (this->OpenBSD) {
+        if (this->IsOpenBSD) {
           sscanf(name.Regex.match(3).c_str(), ".%u.%u", &major, &minor);
         }
         if (this->BestPath.empty() || prefix < bestPrefix ||

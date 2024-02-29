@@ -22,7 +22,7 @@ Synopsis
     string(`JOIN`_ <glue> <out-var> [<input>...])
     string(`TOLOWER`_ <string> <out-var>)
     string(`TOUPPER`_ <string> <out-var>)
-    string(`LENGTH`_ <string> <out-var>)
+    string(`LENGTH <LENGTH_>`_ <string> <out-var>)
     string(`SUBSTRING`_ <string> <begin> <length> <out-var>)
     string(`STRIP`_ <string> <out-var>)
     string(`GENEX_STRIP`_ <string> <out-var>)

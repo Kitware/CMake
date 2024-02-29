@@ -1543,10 +1543,7 @@ bool cmGlobalGenerator::Compute()
   // so create the map from project name to vector of local generators
   this->FillProjectMap();
 
-  // Add automatically generated sources (e.g. unity build).
-  if (!this->AddAutomaticSources()) {
-    return false;
-  }
+  this->CreateFileGenerateOutputs();
 
   // Iterate through all targets and add verification targets for header sets
   if (!this->AddHeaderSetVerification()) {
@@ -1585,6 +1582,14 @@ bool cmGlobalGenerator::Compute()
     if (!localGen->ComputeTargetCompileFeatures()) {
       return false;
     }
+  }
+
+  // Add automatically generated sources (e.g. unity build).
+  // Add unity sources after computing compile features.  Unity sources do
+  // not change the set of languages or features, but we need to know them
+  // to filter out sources that are scanned for C++ module dependencies.
+  if (!this->AddAutomaticSources()) {
+    return false;
   }
 
   for (const auto& localGen : this->LocalGenerators) {
@@ -1853,11 +1858,15 @@ bool cmGlobalGenerator::AddHeaderSetVerification()
   return true;
 }
 
-bool cmGlobalGenerator::AddAutomaticSources()
+void cmGlobalGenerator::CreateFileGenerateOutputs()
 {
   for (const auto& lg : this->LocalGenerators) {
     lg->CreateEvaluationFileOutputs();
   }
+}
+
+bool cmGlobalGenerator::AddAutomaticSources()
+{
   for (const auto& lg : this->LocalGenerators) {
     for (const auto& gt : lg->GetGeneratorTargets()) {
       if (!gt->CanCompileSources()) {
@@ -1883,7 +1892,8 @@ bool cmGlobalGenerator::AddAutomaticSources()
       }
     }
   }
-  // The above transformations may have changed the classification of sources.
+  // The above transformations may have changed the classification of sources,
+  // e.g., sources that go into unity builds become SourceKindUnityBatched.
   // Clear the source list and classification cache (KindedSources) of all
   // targets so that it will be recomputed correctly by the generators later
   // now that the above transformations are done for all targets.

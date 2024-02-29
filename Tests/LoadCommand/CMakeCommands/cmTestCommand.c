@@ -16,14 +16,14 @@ static int CCONV InitialPass(void* inf, void* mf, int argc, char* argv[])
 {
   char* file;
   char* str;
-  char* srcs;
+  const char* srcs;
   const char* cstr;
   char buffer[1024];
   void* source_file;
   char* args[2];
-  char* ccArgs[4];
-  char* ccDep[1];
-  char* ccOut[1];
+  const char* ccArgs[4];
+  const char* ccDep[1];
+  const char* ccOut[1];
   cmLoadedCommandInfo* info = (cmLoadedCommandInfo*)inf;
 
   cmVTKWrapTclData* cdata =
@@ -148,7 +148,10 @@ static int CCONV InitialPass(void* inf, void* mf, int argc, char* argv[])
   if (info->CAPI->GetTotalArgumentSize(2, args) != 13) {
     return 0;
   }
-  info->CAPI->ExecuteCommand(mf, "SET", 2, args);
+
+  ccArgs[0] = "TEST_EXEC";
+  ccArgs[1] = "TRUE";
+  info->CAPI->ExecuteCommand(mf, "SET", 2, ccArgs);
 
   /* make sure we can find the source file */
   if (!info->CAPI->GetSource(mf, argv[1])) {

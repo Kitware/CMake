@@ -7,6 +7,7 @@
 #include <array>
 #include <cstddef> // IWYU pragma: keep
 #include <cstdint>
+#include <cstdio>
 #include <memory>
 #include <string>
 #include <utility>
@@ -34,6 +35,7 @@ public:
   cmUVProcessChainBuilder& SetBuiltinStream(Stream stdio);
   cmUVProcessChainBuilder& SetMergedBuiltinStreams();
   cmUVProcessChainBuilder& SetExternalStream(Stream stdio, int fd);
+  cmUVProcessChainBuilder& SetExternalStream(Stream stdio, FILE* stream);
   cmUVProcessChainBuilder& SetWorkingDirectory(std::string dir);
 
   cmUVProcessChain Start() const;
@@ -50,8 +52,8 @@ private:
 
   struct StdioConfiguration
   {
-    StdioType Type;
-    int FileDescriptor;
+    StdioType Type = None;
+    int FileDescriptor = -1;
   };
 
   struct ProcessConfiguration

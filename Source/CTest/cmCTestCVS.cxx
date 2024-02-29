@@ -5,7 +5,6 @@
 #include <utility>
 
 #include <cm/string_view>
-#include <cmext/algorithm>
 
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
@@ -90,15 +89,18 @@ bool cmCTestCVS::UpdateImpl()
   }
 
   // Run "cvs update" to update the work tree.
-  std::vector<std::string> cvs_update;
-  cvs_update.push_back(this->CommandLineTool);
+  std::vector<char const*> cvs_update;
+  cvs_update.push_back(this->CommandLineTool.c_str());
   cvs_update.push_back("-z3");
   cvs_update.push_back("update");
-  cm::append(cvs_update, args);
+  for (std::string const& arg : args) {
+    cvs_update.push_back(arg.c_str());
+  }
+  cvs_update.push_back(nullptr);
 
   UpdateParser out(this, "up-out> ");
   UpdateParser err(this, "up-err> ");
-  return this->RunUpdateCommand(cvs_update, &out, &err);
+  return this->RunUpdateCommand(cvs_update.data(), &out, &err);
 }
 
 class cmCTestCVS::LogParser : public cmCTestVC::LineParser
@@ -219,8 +221,10 @@ void cmCTestCVS::LoadRevisions(std::string const& file, const char* branchFlag,
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "." << std::flush);
 
   // Run "cvs log" to get revisions of this file on this branch.
-  std::string cvs = this->CommandLineTool;
-  std::vector<std::string> cvs_log = { cvs, "log", "-N", branchFlag, file };
+  const char* cvs = this->CommandLineTool.c_str();
+  const char* cvs_log[] = {
+    cvs, "log", "-N", branchFlag, file.c_str(), nullptr
+  };
 
   LogParser out(this, "log-out> ", revisions);
   OutputLogger err(this->Log, "log-err> ");

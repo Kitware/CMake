@@ -752,6 +752,16 @@ bool cmState::UseMSYSShell() const
   return this->MSYSShell;
 }
 
+void cmState::SetNinja(bool ninja)
+{
+  this->Ninja = ninja;
+}
+
+bool cmState::UseNinja() const
+{
+  return this->Ninja;
+}
+
 void cmState::SetNinjaMulti(bool ninjaMulti)
 {
   this->NinjaMulti = ninjaMulti;

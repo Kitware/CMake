@@ -1461,7 +1461,8 @@ void cmExportFileGenerator::GenerateTargetFileSets(cmGeneratorTarget* gte,
   }
 }
 
-void cmExportFileGenerator::GenerateCxxModuleInformation(std::ostream& os)
+void cmExportFileGenerator::GenerateCxxModuleInformation(
+  std::string const& name, std::ostream& os)
 {
   auto const cxx_module_dirname = this->GetCxxModulesDirectory();
   if (cxx_module_dirname.empty()) {
@@ -1471,17 +1472,17 @@ void cmExportFileGenerator::GenerateCxxModuleInformation(std::ostream& os)
   // Write the include.
   os << "# Include C++ module properties\n"
      << "include(\"${CMAKE_CURRENT_LIST_DIR}/" << cxx_module_dirname
-     << "/cxx-modules.cmake\")\n\n";
+     << "/cxx-modules-" << name << ".cmake\")\n\n";
 
   // Get the path to the file we're going to write.
   std::string path = this->MainImportFile;
   path = cmSystemTools::GetFilenamePath(path);
   auto trampoline_path =
-    cmStrCat(path, '/', cxx_module_dirname, "/cxx-modules.cmake");
+    cmStrCat(path, '/', cxx_module_dirname, "/cxx-modules-", name, ".cmake");
 
   // Include all configuration-specific include files.
   cmGeneratedFileStream ap(trampoline_path, true);
   ap.SetCopyIfDifferent(true);
 
-  this->GenerateCxxModuleConfigInformation(ap);
+  this->GenerateCxxModuleConfigInformation(name, ap);
 }

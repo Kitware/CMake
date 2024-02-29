@@ -2,8 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExecuteProcessCommand.h"
 
+#include <algorithm>
 #include <cctype> /* isspace */
-#include <cstdint>
 #include <cstdio>
 #include <iostream>
 #include <map>
@@ -16,9 +16,7 @@
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
-#include <cm3p/uv.h>
-
-#include "cm_fileno.hxx"
+#include "cmsys/Process.h"
 
 #include "cmArgumentParser.h"
 #include "cmExecutionStatus.h"
@@ -28,9 +26,6 @@
 #include "cmProcessOutput.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmUVHandlePtr.h"
-#include "cmUVProcessChain.h"
-#include "cmUVStream.h"
 
 namespace {
 bool cmExecuteProcessCommandIsWhitespace(char c)
@@ -41,7 +36,7 @@ bool cmExecuteProcessCommandIsWhitespace(char c)
 void cmExecuteProcessCommandFixText(std::vector<char>& output,
                                     bool strip_trailing_whitespace);
 void cmExecuteProcessCommandAppend(std::vector<char>& output, const char* data,
-                                   std::size_t length);
+                                   int length);
 }
 
 // cmExecuteProcessCommand
@@ -166,69 +161,57 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
     }
   }
   // Create a process instance.
-  cmUVProcessChainBuilder builder;
+  std::unique_ptr<cmsysProcess, void (*)(cmsysProcess*)> cp_ptr(
+    cmsysProcess_New(), cmsysProcess_Delete);
+  cmsysProcess* cp = cp_ptr.get();
 
   // Set the command sequence.
   for (std::vector<std::string> const& cmd : arguments.Commands) {
-    builder.AddCommand(cmd);
+    std::vector<const char*> argv(cmd.size() + 1);
+    std::transform(cmd.begin(), cmd.end(), argv.begin(),
+                   [](std::string const& s) { return s.c_str(); });
+    argv.back() = nullptr;
+    cmsysProcess_AddCommand(cp, argv.data());
   }
 
   // Set the process working directory.
   if (!arguments.WorkingDirectory.empty()) {
-    builder.SetWorkingDirectory(arguments.WorkingDirectory);
+    cmsysProcess_SetWorkingDirectory(cp, arguments.WorkingDirectory.c_str());
   }
+
+  // Always hide the process window.
+  cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
 
   // Check the output variables.
-  std::unique_ptr<FILE, int (*)(FILE*)> inputFile(nullptr, fclose);
-  if (!inputFilename.empty()) {
-    inputFile.reset(cmsys::SystemTools::Fopen(inputFilename, "rb"));
-    if (inputFile) {
-      builder.SetExternalStream(cmUVProcessChainBuilder::Stream_INPUT,
-                                cm_fileno(inputFile.get()));
-    }
-  } else {
-    builder.SetExternalStream(cmUVProcessChainBuilder::Stream_INPUT,
-                              cm_fileno(stdin));
+  bool merge_output = false;
+  if (!arguments.InputFile.empty()) {
+    cmsysProcess_SetPipeFile(cp, cmsysProcess_Pipe_STDIN,
+                             arguments.InputFile.c_str());
   }
-
-  std::unique_ptr<FILE, int (*)(FILE*)> outputFile(nullptr, fclose);
-  if (!outputFilename.empty()) {
-    outputFile.reset(cmsys::SystemTools::Fopen(outputFilename, "wb"));
-    if (outputFile) {
-      builder.SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT,
-                                cm_fileno(outputFile.get()));
-    }
-  } else {
-    if (arguments.OutputVariable == arguments.ErrorVariable &&
-        !arguments.ErrorVariable.empty()) {
-      builder.SetMergedBuiltinStreams();
+  if (!arguments.OutputFile.empty()) {
+    cmsysProcess_SetPipeFile(cp, cmsysProcess_Pipe_STDOUT,
+                             arguments.OutputFile.c_str());
+  }
+  if (!arguments.ErrorFile.empty()) {
+    if (arguments.ErrorFile == arguments.OutputFile) {
+      merge_output = true;
     } else {
-      builder.SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT);
+      cmsysProcess_SetPipeFile(cp, cmsysProcess_Pipe_STDERR,
+                               arguments.ErrorFile.c_str());
     }
   }
-
-  std::unique_ptr<FILE, int (*)(FILE*)> errorFile(nullptr, fclose);
-  if (!errorFilename.empty()) {
-    if (errorFilename == outputFilename) {
-      if (outputFile) {
-        builder.SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR,
-                                  cm_fileno(outputFile.get()));
-      }
-    } else {
-      errorFile.reset(cmsys::SystemTools::Fopen(errorFilename, "wb"));
-      if (errorFile) {
-        builder.SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR,
-                                  cm_fileno(errorFile.get()));
-      }
-    }
-  } else if (arguments.ErrorVariable.empty() ||
-             (!arguments.ErrorVariable.empty() &&
-              arguments.OutputVariable != arguments.ErrorVariable)) {
-    builder.SetBuiltinStream(cmUVProcessChainBuilder::Stream_ERROR);
+  if (!arguments.OutputVariable.empty() &&
+      arguments.OutputVariable == arguments.ErrorVariable) {
+    merge_output = true;
+  }
+  if (merge_output) {
+    cmsysProcess_SetOption(cp, cmsysProcess_Option_MergeOutput, 1);
   }
 
   // Set the timeout if any.
-  int64_t timeoutMillis = static_cast<int64_t>(timeout * 1000.0);
+  if (timeout >= 0) {
+    cmsysProcess_SetTimeout(cp, timeout);
+  }
 
   bool echo_stdout = false;
   bool echo_stderr = false;
@@ -276,86 +259,36 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
     }
   }
   // Start the process.
-  auto chain = builder.Start();
-
-  bool timedOut = false;
-  cm::uv_timer_ptr timer;
-
-  if (timeoutMillis >= 0) {
-    timer.init(chain.GetLoop(), &timedOut);
-    timer.start(
-      [](uv_timer_t* handle) {
-        auto* timeoutPtr = static_cast<bool*>(handle->data);
-        *timeoutPtr = true;
-      },
-      timeoutMillis, 0);
-  }
+  cmsysProcess_Execute(cp);
 
   // Read the process output.
-  struct ReadData
-  {
-    bool Finished = false;
-    std::vector<char> Output;
-    cm::uv_pipe_ptr Stream;
-  };
-  ReadData outputData;
-  ReadData errorData;
+  std::vector<char> tempOutput;
+  std::vector<char> tempError;
+  int length;
+  char* data;
+  int p;
   cmProcessOutput processOutput(
     cmProcessOutput::FindEncoding(arguments.Encoding));
   std::string strdata;
-
-  std::unique_ptr<cmUVStreamReadHandle> outputHandle;
-  if (chain.OutputStream() >= 0) {
-    outputData.Stream.init(chain.GetLoop(), 0);
-    uv_pipe_open(outputData.Stream, chain.OutputStream());
-    outputHandle = cmUVStreamRead(
-      outputData.Stream,
-      [&arguments, &processOutput, &outputData,
-       &strdata](std::vector<char> data) {
-        if (!arguments.OutputQuiet) {
-          if (arguments.OutputVariable.empty() ||
-              arguments.EchoOutputVariable) {
-            processOutput.DecodeText(data.data(), data.size(), strdata, 1);
-            cmSystemTools::Stdout(strdata);
-          }
-          if (!arguments.OutputVariable.empty()) {
-            cmExecuteProcessCommandAppend(outputData.Output, data.data(),
-                                          data.size());
-          }
-        }
-      },
-      [&outputData]() { outputData.Finished = true; });
-  } else {
-    outputData.Finished = true;
-  }
-  std::unique_ptr<cmUVStreamReadHandle> errorHandle;
-  if (chain.ErrorStream() >= 0 &&
-      chain.ErrorStream() != chain.OutputStream()) {
-    errorData.Stream.init(chain.GetLoop(), 0);
-    uv_pipe_open(errorData.Stream, chain.ErrorStream());
-    errorHandle = cmUVStreamRead(
-      errorData.Stream,
-      [&arguments, &processOutput, &errorData,
-       &strdata](std::vector<char> data) {
-        if (!arguments.ErrorQuiet) {
-          if (arguments.ErrorVariable.empty() || arguments.EchoErrorVariable) {
-            processOutput.DecodeText(data.data(), data.size(), strdata, 2);
-            cmSystemTools::Stderr(strdata);
-          }
-          if (!arguments.ErrorVariable.empty()) {
-            cmExecuteProcessCommandAppend(errorData.Output, data.data(),
-                                          data.size());
-          }
-        }
-      },
-      [&errorData]() { errorData.Finished = true; });
-  } else {
-    errorData.Finished = true;
-  }
-
-  while (chain.Valid() && !timedOut &&
-         !(chain.Finished() && outputData.Finished && errorData.Finished)) {
-    uv_run(&chain.GetLoop(), UV_RUN_ONCE);
+  while ((p = cmsysProcess_WaitForData(cp, &data, &length, nullptr))) {
+    // Put the output in the right place.
+    if (p == cmsysProcess_Pipe_STDOUT && !arguments.OutputQuiet) {
+      if (arguments.OutputVariable.empty() || arguments.EchoOutputVariable) {
+        processOutput.DecodeText(data, length, strdata, 1);
+        cmSystemTools::Stdout(strdata);
+      }
+      if (!arguments.OutputVariable.empty()) {
+        cmExecuteProcessCommandAppend(tempOutput, data, length);
+      }
+    } else if (p == cmsysProcess_Pipe_STDERR && !arguments.ErrorQuiet) {
+      if (arguments.ErrorVariable.empty() || arguments.EchoErrorVariable) {
+        processOutput.DecodeText(data, length, strdata, 2);
+        cmSystemTools::Stderr(strdata);
+      }
+      if (!arguments.ErrorVariable.empty()) {
+        cmExecuteProcessCommandAppend(tempError, data, length);
+      }
+    }
   }
   if (!arguments.OutputQuiet &&
       (arguments.OutputVariable.empty() || arguments.EchoOutputVariable)) {
@@ -372,102 +305,151 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
     }
   }
 
-  // All output has been read.
-  processOutput.DecodeText(outputData.Output, outputData.Output);
-  processOutput.DecodeText(errorData.Output, errorData.Output);
+  // All output has been read.  Wait for the process to exit.
+  cmsysProcess_WaitForExit(cp, nullptr);
+  processOutput.DecodeText(tempOutput, tempOutput);
+  processOutput.DecodeText(tempError, tempError);
 
   // Fix the text in the output strings.
-  cmExecuteProcessCommandFixText(outputData.Output,
+  cmExecuteProcessCommandFixText(tempOutput,
                                  arguments.OutputStripTrailingWhitespace);
-  cmExecuteProcessCommandFixText(errorData.Output,
+  cmExecuteProcessCommandFixText(tempError,
                                  arguments.ErrorStripTrailingWhitespace);
 
   // Store the output obtained.
-  if (!arguments.OutputVariable.empty() && !outputData.Output.empty()) {
+  if (!arguments.OutputVariable.empty() && !tempOutput.empty()) {
     status.GetMakefile().AddDefinition(arguments.OutputVariable,
-                                       outputData.Output.data());
+                                       tempOutput.data());
   }
-  if (arguments.ErrorVariable != arguments.OutputVariable &&
-      !arguments.ErrorVariable.empty() && !errorData.Output.empty()) {
+  if (!merge_output && !arguments.ErrorVariable.empty() &&
+      !tempError.empty()) {
     status.GetMakefile().AddDefinition(arguments.ErrorVariable,
-                                       errorData.Output.data());
+                                       tempError.data());
   }
 
   // Store the result of running the process.
   if (!arguments.ResultVariable.empty()) {
-    if (timedOut) {
-      status.GetMakefile().AddDefinition(arguments.ResultVariable,
-                                         "Process terminated due to timeout");
-    } else {
-      auto const* lastStatus = chain.GetStatus().back();
-      auto exception = lastStatus->GetException();
-      if (exception.first == cmUVProcessChain::ExceptionCode::None) {
+    switch (cmsysProcess_GetState(cp)) {
+      case cmsysProcess_State_Exited: {
+        int v = cmsysProcess_GetExitValue(cp);
+        char buf[16];
+        snprintf(buf, sizeof(buf), "%d", v);
+        status.GetMakefile().AddDefinition(arguments.ResultVariable, buf);
+      } break;
+      case cmsysProcess_State_Exception:
         status.GetMakefile().AddDefinition(
-          arguments.ResultVariable,
-          std::to_string(static_cast<int>(lastStatus->ExitStatus)));
-      } else {
+          arguments.ResultVariable, cmsysProcess_GetExceptionString(cp));
+        break;
+      case cmsysProcess_State_Error:
         status.GetMakefile().AddDefinition(arguments.ResultVariable,
-                                           exception.second);
-      }
+                                           cmsysProcess_GetErrorString(cp));
+        break;
+      case cmsysProcess_State_Expired:
+        status.GetMakefile().AddDefinition(
+          arguments.ResultVariable, "Process terminated due to timeout");
+        break;
     }
   }
   // Store the result of running the processes.
   if (!arguments.ResultsVariable.empty()) {
-    if (timedOut) {
-      status.GetMakefile().AddDefinition(arguments.ResultsVariable,
-                                         "Process terminated due to timeout");
-    } else {
-      std::vector<std::string> res;
-      for (auto const* processStatus : chain.GetStatus()) {
-        auto exception = processStatus->GetException();
-        if (exception.first == cmUVProcessChain::ExceptionCode::None) {
-          res.emplace_back(
-            std::to_string(static_cast<int>(processStatus->ExitStatus)));
-        } else {
-          res.emplace_back(exception.second);
+    switch (cmsysProcess_GetState(cp)) {
+      case cmsysProcess_State_Exited: {
+        std::vector<std::string> res;
+        for (size_t i = 0; i < arguments.Commands.size(); ++i) {
+          switch (cmsysProcess_GetStateByIndex(cp, static_cast<int>(i))) {
+            case kwsysProcess_StateByIndex_Exited: {
+              int exitCode =
+                cmsysProcess_GetExitValueByIndex(cp, static_cast<int>(i));
+              char buf[16];
+              snprintf(buf, sizeof(buf), "%d", exitCode);
+              res.emplace_back(buf);
+            } break;
+            case kwsysProcess_StateByIndex_Exception:
+              res.emplace_back(cmsysProcess_GetExceptionStringByIndex(
+                cp, static_cast<int>(i)));
+              break;
+            case kwsysProcess_StateByIndex_Error:
+            default:
+              res.emplace_back("Error getting the child return code");
+              break;
+          }
         }
-      }
-      status.GetMakefile().AddDefinition(arguments.ResultsVariable,
-                                         cmList::to_string(res));
+        status.GetMakefile().AddDefinition(arguments.ResultsVariable,
+                                           cmList::to_string(res));
+      } break;
+      case cmsysProcess_State_Exception:
+        status.GetMakefile().AddDefinition(
+          arguments.ResultsVariable, cmsysProcess_GetExceptionString(cp));
+        break;
+      case cmsysProcess_State_Error:
+        status.GetMakefile().AddDefinition(arguments.ResultsVariable,
+                                           cmsysProcess_GetErrorString(cp));
+        break;
+      case cmsysProcess_State_Expired:
+        status.GetMakefile().AddDefinition(
+          arguments.ResultsVariable, "Process terminated due to timeout");
+        break;
     }
   }
 
-  auto queryProcessStatusByIndex = [&chain](std::size_t index) -> std::string {
-    auto const& processStatus = chain.GetStatus(index);
-    auto exception = processStatus.GetException();
-    if (exception.first == cmUVProcessChain::ExceptionCode::None) {
-      if (processStatus.ExitStatus) {
-        return cmStrCat("Child return code: ", processStatus.ExitStatus);
+  auto queryProcessStatusByIndex = [&cp](int index) -> std::string {
+    std::string processStatus;
+    switch (cmsysProcess_GetStateByIndex(cp, static_cast<int>(index))) {
+      case kwsysProcess_StateByIndex_Exited: {
+        int exitCode = cmsysProcess_GetExitValueByIndex(cp, index);
+        if (exitCode) {
+          processStatus = "Child return code: " + std::to_string(exitCode);
+        }
+      } break;
+      case kwsysProcess_StateByIndex_Exception: {
+        processStatus = cmStrCat(
+          "Abnormal exit with child return code: ",
+          cmsysProcess_GetExceptionStringByIndex(cp, static_cast<int>(index)));
+        break;
       }
-      return "";
+      case kwsysProcess_StateByIndex_Error:
+      default:
+        processStatus = "Error getting the child return code";
+        break;
     }
-    return cmStrCat("Abnormal exit with child return code: ",
-                    exception.second);
+    return processStatus;
   };
 
   if (arguments.CommandErrorIsFatal == "ANY"_s) {
     bool ret = true;
-    if (timedOut) {
-      status.SetError("Process terminated due to timeout");
-      ret = false;
-    } else {
-      std::map<std::size_t, std::string> failureIndices;
-      auto statuses = chain.GetStatus();
-      for (std::size_t i = 0; i < statuses.size(); ++i) {
-        std::string processStatus = queryProcessStatusByIndex(i);
-        if (!processStatus.empty()) {
-          failureIndices[i] = processStatus;
+    switch (cmsysProcess_GetState(cp)) {
+      case cmsysProcess_State_Exited: {
+        std::map<int, std::string> failureIndices;
+        for (int i = 0; i < static_cast<int>(arguments.Commands.size()); ++i) {
+          std::string processStatus = queryProcessStatusByIndex(i);
+          if (!processStatus.empty()) {
+            failureIndices[i] = processStatus;
+          }
+          if (!failureIndices.empty()) {
+            std::ostringstream oss;
+            oss << "failed command indexes:\n";
+            for (auto const& e : failureIndices) {
+              oss << "  " << e.first + 1 << ": \"" << e.second << "\"\n";
+            }
+            status.SetError(oss.str());
+            ret = false;
+          }
         }
-      }
-      if (!failureIndices.empty()) {
-        std::ostringstream oss;
-        oss << "failed command indexes:\n";
-        for (auto const& e : failureIndices) {
-          oss << "  " << e.first + 1 << ": \"" << e.second << "\"\n";
-        }
-        status.SetError(oss.str());
+      } break;
+      case cmsysProcess_State_Exception:
+        status.SetError(
+          cmStrCat("abnormal exit: ", cmsysProcess_GetExceptionString(cp)));
         ret = false;
-      }
+        break;
+      case cmsysProcess_State_Error:
+        status.SetError(cmStrCat("error getting child return code: ",
+                                 cmsysProcess_GetErrorString(cp)));
+        ret = false;
+        break;
+      case cmsysProcess_State_Expired:
+        status.SetError("Process terminated due to timeout");
+        ret = false;
+        break;
     }
 
     if (!ret) {
@@ -478,23 +460,29 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
 
   if (arguments.CommandErrorIsFatal == "LAST"_s) {
     bool ret = true;
-    if (timedOut) {
-      status.SetError("Process terminated due to timeout");
-      ret = false;
-    } else {
-      auto const& lastStatus = chain.GetStatus(arguments.Commands.size() - 1);
-      auto exception = lastStatus.GetException();
-      if (exception.first != cmUVProcessChain::ExceptionCode::None) {
-        status.SetError(cmStrCat("Abnormal exit: ", exception.second));
-        ret = false;
-      } else {
+    switch (cmsysProcess_GetState(cp)) {
+      case cmsysProcess_State_Exited: {
         int lastIndex = static_cast<int>(arguments.Commands.size() - 1);
         const std::string processStatus = queryProcessStatusByIndex(lastIndex);
         if (!processStatus.empty()) {
           status.SetError("last command failed");
           ret = false;
         }
-      }
+      } break;
+      case cmsysProcess_State_Exception:
+        status.SetError(
+          cmStrCat("Abnormal exit: ", cmsysProcess_GetExceptionString(cp)));
+        ret = false;
+        break;
+      case cmsysProcess_State_Error:
+        status.SetError(cmStrCat("Error getting child return code: ",
+                                 cmsysProcess_GetErrorString(cp)));
+        ret = false;
+        break;
+      case cmsysProcess_State_Expired:
+        status.SetError("Process terminated due to timeout");
+        ret = false;
+        break;
     }
     if (!ret) {
       cmSystemTools::SetFatalErrorOccurred();
@@ -537,7 +525,7 @@ void cmExecuteProcessCommandFixText(std::vector<char>& output,
 }
 
 void cmExecuteProcessCommandAppend(std::vector<char>& output, const char* data,
-                                   std::size_t length)
+                                   int length)
 {
 #if defined(__APPLE__)
   // HACK on Apple to work around bug with inserting at the
