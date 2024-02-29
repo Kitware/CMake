@@ -11,6 +11,7 @@
 
 #include <cm/memory>
 #include <cm/optional>
+#include <cm/string_view>
 #include <cmext/string_view>
 
 #include "cmsys/FStream.hxx"
@@ -1578,7 +1579,9 @@ void cmExportFileGenerator::GenerateTargetFileSets(cmGeneratorTarget* gte,
         return;
       }
 
-      os << "\n      " << this->GetFileSetDirectories(gte, fileSet, te);
+      if (fileSet->GetType() == "HEADERS"_s) {
+        os << "\n      " << this->GetFileSetDirectories(gte, fileSet, te);
+      }
     }
     os << "\n  )\nendif()\n\n";
   }
