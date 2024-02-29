@@ -1454,11 +1454,18 @@ Configuration settings include:
 ``CurlOptions``
   Specify a semicolon-separated list of options to control the
   Curl library that CTest uses internally to connect to the
-  server.  Possible options are ``CURLOPT_SSL_VERIFYPEER_OFF``
-  and ``CURLOPT_SSL_VERIFYHOST_OFF``.
+  server.
 
   * `CTest Script`_ variable: :variable:`CTEST_CURL_OPTIONS`
   * :module:`CTest` module variable: ``CTEST_CURL_OPTIONS``
+
+  Possible options are:
+
+  ``CURLOPT_SSL_VERIFYPEER_OFF``
+    Disable the ``CURLOPT_SSL_VERIFYPEER`` curl option.
+
+  ``CURLOPT_SSL_VERIFYHOST_OFF``
+    Disable the ``CURLOPT_SSL_VERIFYHOST`` curl option.
 
 ``DropLocation``
   Legacy option.  When ``SubmitURL`` is not set, it is constructed from
