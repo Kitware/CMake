@@ -337,12 +337,13 @@
         - msvc-19.36
         - concurrent
 
-.windows_x86_64_tags_concurrent_vs2019:
+.windows_x86_64_tags_concurrent_vs2019_android:
     tags:
         - cmake # Since this is a bare runner, pin to a project.
         - windows-x86_64
         - shell
         - vs2019
+        - vs16-android
         - msvc-19.29-16.11
         - concurrent
 

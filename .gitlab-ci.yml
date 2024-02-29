@@ -1217,7 +1217,7 @@ t:windows-vs2019-x64:
     extends:
         - .windows_vs2019_x64
         - .cmake_test_windows_external
-        - .windows_x86_64_tags_concurrent_vs2019
+        - .windows_x86_64_tags_concurrent_vs2019_android
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
