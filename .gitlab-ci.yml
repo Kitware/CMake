@@ -1201,11 +1201,10 @@ t:windows-vs2022-x64-ninja-multi:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:windows-vs2022-x64:
+.t:windows-vs2022-x64:
     extends:
         - .windows_vs2022_x64
         - .cmake_test_windows_external
-        - .windows_x86_64_tags_concurrent_vs2022
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
@@ -1213,11 +1212,25 @@ t:windows-vs2022-x64:
     needs:
         - t:windows-vs2022-x64-ninja
 
+t:windows-vs2022-x64:
+    extends:
+        - .t:windows-vs2022-x64
+        - .windows_x86_64_tags_concurrent_vs2022
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "false"
+
+t:windows-vs2022-x64-nightly:
+    extends:
+        - .t:windows-vs2022-x64
+        - .windows_x86_64_tags_concurrent_vs2022_android
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:windows-vs2019-x64:
     extends:
         - .windows_vs2019_x64
         - .cmake_test_windows_external
-        - .windows_x86_64_tags_concurrent_vs2019
+        - .windows_x86_64_tags_concurrent_vs2019_android
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
