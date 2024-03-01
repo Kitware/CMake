@@ -4,6 +4,7 @@ include(RunCTest)
 set(CASE_DROP_METHOD "http")
 set(CASE_DROP_SITE "badhostname.invalid")
 set(CASE_CTEST_SUBMIT_ARGS "")
+set(CASE_TEST_PREFIX_CODE "")
 
 # Do not use any proxy for lookup of an invalid site.
 # DNS failure by proxy looks different than DNS failure without proxy.
@@ -54,3 +55,10 @@ endfunction()
 
 run_ctest_submit_FailDrop(http)
 run_ctest_submit_FailDrop(https)
+block()
+  set(CASE_DROP_METHOD "https")
+  set(CASE_TEST_PREFIX_CODE "set(CTEST_TLS_VERIFY ON)")
+  run_ctest(FailDrop-TLSVerify-ON -VV)
+  set(CASE_TEST_PREFIX_CODE "set(CTEST_TLS_VERIFY OFF)")
+  run_ctest(FailDrop-TLSVerify-OFF -VV)
+endblock()

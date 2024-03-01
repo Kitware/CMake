@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/optional>
+
 #include <cm3p/curl/curl.h>
 
 class cmCTest;
@@ -14,7 +16,7 @@ class cmCTest;
 struct cmCTestCurlOpts
 {
   cmCTestCurlOpts(cmCTest* ctest);
-  bool VerifyPeerOff = false;
+  cm::optional<bool> TLSVerifyOpt;
   bool VerifyHostOff = false;
 };
 

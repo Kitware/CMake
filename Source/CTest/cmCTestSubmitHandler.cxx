@@ -8,6 +8,7 @@
 #include <sstream>
 
 #include <cm/iomanip>
+#include <cm/optional>
 #include <cmext/algorithm>
 
 #include <cm3p/curl/curl.h>
@@ -177,11 +178,14 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
     curl = curl_easy_init();
     if (curl) {
       cmCurlSetCAInfo(curl);
-      if (curlOpts.VerifyPeerOff) {
+      if (curlOpts.TLSVerifyOpt) {
         cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                           "  Set CURLOPT_SSL_VERIFYPEER to off\n",
+                           "  Set CURLOPT_SSL_VERIFYPEER to "
+                             << (*curlOpts.TLSVerifyOpt ? "on" : "off")
+                             << "\n",
                            this->Quiet);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER,
+                         *curlOpts.TLSVerifyOpt ? 1 : 0);
       }
       if (curlOpts.VerifyHostOff) {
         cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,

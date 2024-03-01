@@ -12,6 +12,7 @@
 #include "cmList.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmValue.h"
 
 cmCTestCurl::cmCTestCurl(cmCTest* ctest)
   : CTest(ctest)
@@ -57,13 +58,18 @@ size_t curlDebugCallback(CURL* /*unused*/, curl_infotype /*unused*/,
 
 cmCTestCurlOpts::cmCTestCurlOpts(cmCTest* ctest)
 {
-  cmList args{ ctest->GetCTestConfiguration("CurlOptions") };
-  for (std::string const& arg : args) {
-    if (arg == "CURLOPT_SSL_VERIFYPEER_OFF") {
-      this->VerifyPeerOff = true;
-    }
-    if (arg == "CURLOPT_SSL_VERIFYHOST_OFF") {
-      this->VerifyHostOff = true;
+  std::string tlsVerify = ctest->GetCTestConfiguration("TLSVerify");
+  if (!tlsVerify.empty()) {
+    this->TLSVerifyOpt = cmIsOn(tlsVerify);
+  } else {
+    cmList args{ ctest->GetCTestConfiguration("CurlOptions") };
+    for (std::string const& arg : args) {
+      if (arg == "CURLOPT_SSL_VERIFYPEER_OFF") {
+        this->TLSVerifyOpt = false;
+      }
+      if (arg == "CURLOPT_SSL_VERIFYHOST_OFF") {
+        this->VerifyHostOff = true;
+      }
     }
   }
 }
@@ -74,8 +80,9 @@ bool cmCTestCurl::InitCurl()
     return false;
   }
   cmCurlSetCAInfo(this->Curl);
-  if (this->CurlOpts.VerifyPeerOff) {
-    curl_easy_setopt(this->Curl, CURLOPT_SSL_VERIFYPEER, 0);
+  if (this->CurlOpts.TLSVerifyOpt) {
+    curl_easy_setopt(this->Curl, CURLOPT_SSL_VERIFYPEER,
+                     *this->CurlOpts.TLSVerifyOpt ? 1 : 0);
   }
   if (this->CurlOpts.VerifyHostOff) {
     curl_easy_setopt(this->Curl, CURLOPT_SSL_VERIFYHOST, 0);

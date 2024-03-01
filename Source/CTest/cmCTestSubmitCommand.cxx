@@ -56,6 +56,8 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
   }
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(
+    this->Makefile, "TLSVerify", "CTEST_TLS_VERIFY", this->Quiet);
+  this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "CurlOptions", "CTEST_CURL_OPTIONS", this->Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "SubmitInactivityTimeout",

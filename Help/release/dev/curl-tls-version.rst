@@ -15,3 +15,7 @@ curl-tls-version
   :variable:`CMAKE_TLS_VERSION` variable and :envvar:`CMAKE_TLS_VERSION`
   environment variable, to specify the minimum TLS version for connections
   to ``https://`` URLs.
+
+* The :command:`ctest_submit` command and :option:`ctest -T Submit <ctest -T>`
+  step gained a ``TLSVerify`` option to control negotiation with
+  ``https://`` URLs.  See the :variable:`CTEST_TLS_VERIFY` variable.
