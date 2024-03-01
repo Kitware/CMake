@@ -2811,7 +2811,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
           isCppModule = true;
           if (shouldScanForModules &&
               this->GlobalGenerator->IsScanDependenciesSupported()) {
-            // ScanSourceforModuleDependencies uses 'cl /scanDependencies' and
+            // ScanSourceForModuleDependencies uses 'cl /scanDependencies' and
             // can distinguish module interface units and internal partitions.
             compileAsPerConfig = "CompileAsCpp";
           } else {
@@ -2854,7 +2854,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     // use them
     if (!flags.empty() || !options.empty() || !configDefines.empty() ||
         !includes.empty() || compileAsPerConfig || noWinRT ||
-        !options.empty() || needsPCHFlags) {
+        !options.empty() || needsPCHFlags || shouldScanForModules) {
       cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
       cmIDEFlagTable const* flagtable = nullptr;
       const std::string& srclang = source->GetLanguage();
@@ -2883,9 +2883,7 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         clOptions.AddFlag("CompileAs", compileAsPerConfig);
       }
       if (shouldScanForModules) {
-        clOptions.AddFlag("ScanSourceforModuleDependencies", "true");
-      } else {
-        clOptions.AddFlag("ScanSourceforModuleDependencies", "false");
+        clOptions.AddFlag("ScanSourceForModuleDependencies", "true");
       }
       if (noWinRT) {
         clOptions.AddFlag("CompileAsWinRT", "false");
@@ -3612,6 +3610,9 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
       e2.Element("AdditionalUsingDirectories", dirs);
     }
   }
+
+  // Disable C++ source scanning by default.
+  e2.Element("ScanSourceForModuleDependencies", "false");
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeRcOptions()

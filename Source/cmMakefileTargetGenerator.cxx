@@ -1722,11 +1722,10 @@ void cmMakefileTargetGenerator::GenerateCustomRuleFile(
 
   if (!ccg.GetCC().GetDepfile().empty()) {
     // Add dependency over timestamp file for dependencies management
-    auto dependTimestamp = cmSystemTools::ConvertToOutputPath(
-      this->LocalGenerator->MaybeRelativeToTopBinDir(
-        cmStrCat(this->TargetBuildDirectoryFull, "/compiler_depend.ts")));
+    auto dependTimestamp = this->LocalGenerator->MaybeRelativeToTopBinDir(
+      cmStrCat(this->TargetBuildDirectoryFull, "/compiler_depend.ts"));
 
-    depends.push_back(dependTimestamp);
+    depends.emplace_back(std::move(dependTimestamp));
   }
 
   // Write the rule.

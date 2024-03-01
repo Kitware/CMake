@@ -135,14 +135,14 @@ private:
 std::string cmCTestBZR::LoadInfo()
 {
   // Run "bzr info" to get the repository info from the work tree.
-  std::string bzr = this->CommandLineTool;
-  std::vector<std::string> bzr_info = { bzr, "info" };
+  const char* bzr = this->CommandLineTool.c_str();
+  const char* bzr_info[] = { bzr, "info", nullptr };
   InfoParser iout(this, "info-out> ");
   OutputLogger ierr(this->Log, "info-err> ");
   this->RunChild(bzr_info, &iout, &ierr);
 
   // Run "bzr revno" to get the repository revision number from the work tree.
-  std::vector<std::string> bzr_revno = { bzr, "revno" };
+  const char* bzr_revno[] = { bzr, "revno", nullptr };
   std::string rev;
   RevnoParser rout(this, "revno-out> ", rev);
   OutputLogger rerr(this->Log, "revno-err> ");
@@ -372,18 +372,22 @@ bool cmCTestBZR::UpdateImpl()
   // TODO: if(this->CTest->GetTestModel() == cmCTest::NIGHTLY)
 
   // Use "bzr pull" to update the working tree.
-  std::vector<std::string> bzr_update;
-  bzr_update.push_back(this->CommandLineTool);
+  std::vector<char const*> bzr_update;
+  bzr_update.push_back(this->CommandLineTool.c_str());
   bzr_update.push_back("pull");
 
-  cm::append(bzr_update, args);
+  for (std::string const& arg : args) {
+    bzr_update.push_back(arg.c_str());
+  }
 
-  bzr_update.push_back(this->URL);
+  bzr_update.push_back(this->URL.c_str());
+
+  bzr_update.push_back(nullptr);
 
   // For some reason bzr uses stderr to display the update status.
   OutputLogger out(this->Log, "pull-out> ");
   UpdateParser err(this, "pull-err> ");
-  return this->RunUpdateCommand(bzr_update, &out, &err);
+  return this->RunUpdateCommand(bzr_update.data(), &out, &err);
 }
 
 bool cmCTestBZR::LoadRevisions()
@@ -404,9 +408,10 @@ bool cmCTestBZR::LoadRevisions()
   }
 
   // Run "bzr log" to get all global revisions of interest.
-  std::string bzr = this->CommandLineTool;
-  std::vector<std::string> bzr_log = { bzr,  "log",   "-v",     "-r",
-                                       revs, "--xml", this->URL };
+  const char* bzr = this->CommandLineTool.c_str();
+  const char* bzr_log[] = {
+    bzr, "log", "-v", "-r", revs.c_str(), "--xml", this->URL.c_str(), nullptr
+  };
   {
     LogParser out(this, "log-out> ");
     OutputLogger err(this->Log, "log-err> ");
@@ -462,8 +467,8 @@ private:
 bool cmCTestBZR::LoadModifications()
 {
   // Run "bzr status" which reports local modifications.
-  std::string bzr = this->CommandLineTool;
-  std::vector<std::string> bzr_status = { bzr, "status", "-SV" };
+  const char* bzr = this->CommandLineTool.c_str();
+  const char* bzr_status[] = { bzr, "status", "-SV", nullptr };
   StatusParser out(this, "status-out> ");
   OutputLogger err(this->Log, "status-err> ");
   this->RunChild(bzr_status, &out, &err);

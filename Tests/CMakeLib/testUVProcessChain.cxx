@@ -12,8 +12,6 @@
 
 #include <cm3p/uv.h>
 
-#include "cm_fileno.hxx"
-
 #include "cmGetPipes.h"
 #include "cmStringAlgorithms.h"
 #include "cmUVHandlePtr.h"
@@ -632,8 +630,7 @@ bool testUVProcessChainInputFile(const char* helperCommand)
 
   cmUVProcessChainBuilder builder;
   builder.AddCommand({ helperCommand, "dedup" })
-    .SetExternalStream(cmUVProcessChainBuilder::Stream_INPUT,
-                       cm_fileno(f.get()))
+    .SetExternalStream(cmUVProcessChainBuilder::Stream_INPUT, f.get())
     .SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT);
 
   auto chain = builder.Start();

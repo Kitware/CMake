@@ -12,6 +12,8 @@
 
 #include <cm3p/uv.h>
 
+#include "cm_fileno.hxx"
+
 #include "cmGetPipes.h"
 #include "cmUVHandlePtr.h"
 
@@ -57,12 +59,7 @@ struct cmUVProcessChain::InternalData
   void Finish();
 };
 
-cmUVProcessChainBuilder::cmUVProcessChainBuilder()
-{
-  this->SetNoStream(Stream_INPUT)
-    .SetNoStream(Stream_OUTPUT)
-    .SetNoStream(Stream_ERROR);
-}
+cmUVProcessChainBuilder::cmUVProcessChainBuilder() = default;
 
 cmUVProcessChainBuilder& cmUVProcessChainBuilder::AddCommand(
   const std::vector<std::string>& arguments)
@@ -120,6 +117,16 @@ cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetExternalStream(
     }
   }
   return *this;
+}
+
+cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetExternalStream(
+  Stream stdio, FILE* stream)
+{
+  int fd = cm_fileno(stream);
+  if (fd >= 0) {
+    return this->SetExternalStream(stdio, fd);
+  }
+  return this->SetNoStream(stdio);
 }
 
 cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetMergedBuiltinStreams()

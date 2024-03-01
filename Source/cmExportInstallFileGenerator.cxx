@@ -181,10 +181,12 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 
   bool result = true;
 
-  this->GenerateCxxModuleInformation(os);
+  std::string cxx_modules_name = this->IEGen->GetExportSet()->GetName();
+  this->GenerateCxxModuleInformation(cxx_modules_name, os);
   if (requiresConfigFiles) {
     for (std::string const& c : this->Configurations) {
-      if (!this->GenerateImportCxxModuleConfigTargetInclusion(c)) {
+      if (!this->GenerateImportCxxModuleConfigTargetInclusion(cxx_modules_name,
+                                                              c)) {
         result = false;
       }
     }
@@ -718,12 +720,12 @@ std::string cmExportInstallFileGenerator::GetCxxModulesDirectory() const
 }
 
 void cmExportInstallFileGenerator::GenerateCxxModuleConfigInformation(
-  std::ostream& os) const
+  std::string const& name, std::ostream& os) const
 {
   // Now load per-configuration properties for them.
   /* clang-format off */
   os << "# Load information for each installed configuration.\n"
-        "file(GLOB _cmake_cxx_module_includes \"${CMAKE_CURRENT_LIST_DIR}/cxx-modules-*.cmake\")\n"
+        "file(GLOB _cmake_cxx_module_includes \"${CMAKE_CURRENT_LIST_DIR}/cxx-modules-" << name << "-*.cmake\")\n"
         "foreach(_cmake_cxx_module_include IN LISTS _cmake_cxx_module_includes)\n"
         "  include(\"${_cmake_cxx_module_include}\")\n"
         "endforeach()\n"
@@ -733,7 +735,8 @@ void cmExportInstallFileGenerator::GenerateCxxModuleConfigInformation(
 }
 
 bool cmExportInstallFileGenerator::
-  GenerateImportCxxModuleConfigTargetInclusion(std::string const& config)
+  GenerateImportCxxModuleConfigTargetInclusion(std::string const& name,
+                                               std::string const& config)
 {
   auto cxx_modules_dirname = this->GetCxxModulesDirectory();
   if (cxx_modules_dirname.empty()) {
@@ -748,7 +751,7 @@ bool cmExportInstallFileGenerator::
   std::string const dest =
     cmStrCat(this->FileDir, '/', cxx_modules_dirname, '/');
   std::string fileName =
-    cmStrCat(dest, "cxx-modules-", filename_config, ".cmake");
+    cmStrCat(dest, "cxx-modules-", name, '-', filename_config, ".cmake");
 
   cmGeneratedFileStream os(fileName, true);
   if (!os) {

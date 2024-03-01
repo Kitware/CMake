@@ -1,1 +1,5 @@
-.*ninja: error: .* multiple rules generate.*src.ispc_avx512skx.o.*
+ninja: error:([^
+]+multiple rules generate[^
+]+src\.ispc_avx512skx\.o|[^
+]+src\.ispc_avx512skx\.o[^
+]+is defined as an output multiple times)

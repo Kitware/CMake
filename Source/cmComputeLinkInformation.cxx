@@ -260,7 +260,7 @@ cmComputeLinkInformation::cmComputeLinkInformation(
   , Config(config)
 {
   // Check whether to recognize OpenBSD-style library versioned names.
-  this->OpenBSD = this->Makefile->GetState()->GetGlobalPropertyAsBool(
+  this->IsOpenBSD = this->Makefile->GetState()->GetGlobalPropertyAsBool(
     "FIND_LIBRARY_USE_OPENBSD_VERSIONING");
 
   // Allocate internals.
@@ -553,7 +553,8 @@ bool cmComputeLinkInformation::Compute()
         this->Target->GetType() == cmStateEnums::MODULE_LIBRARY ||
         this->Target->GetType() == cmStateEnums::STATIC_LIBRARY ||
         (this->Target->CanCompileSources() &&
-         (this->Target->HaveCxx20ModuleSources() ||
+         (this->Target->HaveCxxModuleSupport(this->Config) ==
+            cmGeneratorTarget::Cxx20SupportLevel::Supported ||
           this->Target->HaveFortranSources())))) {
     return false;
   }
@@ -1574,7 +1575,7 @@ std::string cmComputeLinkInformation::CreateExtensionRegex(
   libext += ')';
 
   // Add an optional OpenBSD-style version or major.minor.version component.
-  if (this->OpenBSD || type == LinkShared) {
+  if (this->IsOpenBSD || type == LinkShared) {
     libext += "(\\.[0-9]+)*";
   }
 

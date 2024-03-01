@@ -187,7 +187,7 @@ protected:
   void GenerateTargetFileSets(cmGeneratorTarget* gte, std::ostream& os,
                               cmTargetExport* te = nullptr);
 
-  void GenerateCxxModuleInformation(std::ostream& os);
+  void GenerateCxxModuleInformation(std::string const& name, std::ostream& os);
 
   virtual std::string GetFileSetDirectories(cmGeneratorTarget* gte,
                                             cmFileSet* fileSet,
@@ -235,5 +235,6 @@ private:
                                      const std::string& config) = 0;
 
   virtual std::string GetCxxModulesDirectory() const = 0;
-  virtual void GenerateCxxModuleConfigInformation(std::ostream& os) const = 0;
+  virtual void GenerateCxxModuleConfigInformation(std::string const&,
+                                                  std::ostream& os) const = 0;
 };

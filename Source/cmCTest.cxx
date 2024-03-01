@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <cctype>
 #include <chrono>
-#include <cstdint>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -25,13 +24,13 @@
 #include <cmext/string_view>
 
 #include <cm3p/curl/curl.h>
-#include <cm3p/uv.h>
 #include <cm3p/zlib.h>
 
 #include "cmsys/Base64.h"
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
+#include "cmsys/Process.h"
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/SystemInformation.hxx"
 #if defined(_WIN32)
@@ -65,9 +64,6 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
-#include "cmUVHandlePtr.h"
-#include "cmUVProcessChain.h"
-#include "cmUVStream.h"
 #include "cmValue.h"
 #include "cmVersion.h"
 #include "cmVersionConfig.h"
@@ -1077,9 +1073,9 @@ int cmCTest::GetTestModelFromString(const std::string& str)
 // ######################################################################
 // ######################################################################
 
-bool cmCTest::RunMakeCommand(const std::string& command, std::string& output,
-                             int* retVal, const char* dir, cmDuration timeout,
-                             std::ostream& ofs, Encoding encoding)
+int cmCTest::RunMakeCommand(const std::string& command, std::string& output,
+                            int* retVal, const char* dir, cmDuration timeout,
+                            std::ostream& ofs, Encoding encoding)
 {
   // First generate the command and arguments
   std::vector<std::string> args = cmSystemTools::ParseArguments(command);
@@ -1088,107 +1084,107 @@ bool cmCTest::RunMakeCommand(const std::string& command, std::string& output,
     return false;
   }
 
+  std::vector<const char*> argv;
+  argv.reserve(args.size() + 1);
+  for (std::string const& a : args) {
+    argv.push_back(a.c_str());
+  }
+  argv.push_back(nullptr);
+
   output.clear();
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "Run command:");
-  for (auto const& arg : args) {
+  for (char const* arg : argv) {
+    if (!arg) {
+      break;
+    }
     cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, " \"" << arg << "\"");
   }
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, std::endl);
 
   // Now create process object
-  cmUVProcessChainBuilder builder;
-  builder.AddCommand(args).SetMergedBuiltinStreams();
-  if (dir) {
-    builder.SetWorkingDirectory(dir);
-  }
-  auto chain = builder.Start();
-  cm::uv_pipe_ptr outputStream;
-  outputStream.init(chain.GetLoop(), 0);
-  uv_pipe_open(outputStream, chain.OutputStream());
+  cmsysProcess* cp = cmsysProcess_New();
+  cmsysProcess_SetCommand(cp, argv.data());
+  cmsysProcess_SetWorkingDirectory(cp, dir);
+  cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
+  cmsysProcess_SetTimeout(cp, timeout.count());
+  cmsysProcess_Execute(cp);
 
   // Initialize tick's
   std::string::size_type tick = 0;
   std::string::size_type tick_len = 1024;
   std::string::size_type tick_line_len = 50;
 
+  char* data;
+  int length;
   cmProcessOutput processOutput(encoding);
+  std::string strdata;
   cmCTestLog(this, HANDLER_PROGRESS_OUTPUT,
              "   Each . represents " << tick_len
                                      << " bytes of output\n"
                                         "    "
                                      << std::flush);
-  auto outputHandle = cmUVStreamRead(
-    outputStream,
-    [this, &processOutput, &output, &tick, &tick_len, &tick_line_len,
-     &ofs](std::vector<char> data) {
-      std::string strdata;
-      processOutput.DecodeText(data.data(), data.size(), strdata);
-      for (char& cc : strdata) {
-        if (cc == 0) {
-          cc = '\n';
-        }
+  while (cmsysProcess_WaitForData(cp, &data, &length, nullptr)) {
+    processOutput.DecodeText(data, length, strdata);
+    for (char& cc : strdata) {
+      if (cc == 0) {
+        cc = '\n';
       }
-      output.append(strdata);
-      while (output.size() > (tick * tick_len)) {
-        tick++;
-        cmCTestLog(this, HANDLER_PROGRESS_OUTPUT, "." << std::flush);
-        if (tick % tick_line_len == 0 && tick > 0) {
-          cmCTestLog(this, HANDLER_PROGRESS_OUTPUT,
-                     "  Size: " << int((double(output.size()) / 1024.0) + 1)
-                                << "K\n    " << std::flush);
-        }
+    }
+    output.append(strdata);
+    while (output.size() > (tick * tick_len)) {
+      tick++;
+      cmCTestLog(this, HANDLER_PROGRESS_OUTPUT, "." << std::flush);
+      if (tick % tick_line_len == 0 && tick > 0) {
+        cmCTestLog(this, HANDLER_PROGRESS_OUTPUT,
+                   "  Size: " << int((double(output.size()) / 1024.0) + 1)
+                              << "K\n    " << std::flush);
       }
-      cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-                 cmCTestLogWrite(strdata.c_str(), strdata.size()));
-      if (ofs) {
-        ofs << cmCTestLogWrite(strdata.c_str(), strdata.size());
-      }
-    },
-    [this, &processOutput, &output, &ofs]() {
-      std::string strdata;
-      processOutput.DecodeText(std::string(), strdata);
-      if (!strdata.empty()) {
-        output.append(strdata);
-        cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-                   cmCTestLogWrite(strdata.c_str(), strdata.size()));
-        if (ofs) {
-          ofs << cmCTestLogWrite(strdata.c_str(), strdata.size());
-        }
-      }
-    });
-
-  bool finished = chain.Wait(static_cast<uint64_t>(timeout.count() * 1000.0));
+    }
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
+               cmCTestLogWrite(strdata.c_str(), strdata.size()));
+    if (ofs) {
+      ofs << cmCTestLogWrite(strdata.c_str(), strdata.size());
+    }
+  }
+  processOutput.DecodeText(std::string(), strdata);
+  if (!strdata.empty()) {
+    output.append(strdata);
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
+               cmCTestLogWrite(strdata.c_str(), strdata.size()));
+    if (ofs) {
+      ofs << cmCTestLogWrite(strdata.c_str(), strdata.size());
+    }
+  }
   cmCTestLog(this, HANDLER_PROGRESS_OUTPUT,
              " Size of output: " << int(double(output.size()) / 1024.0) << "K"
                                  << std::endl);
 
-  if (finished) {
-    auto const& status = chain.GetStatus(0);
-    auto exception = status.GetException();
-    switch (exception.first) {
-      case cmUVProcessChain::ExceptionCode::None:
-        *retVal = static_cast<int>(status.ExitStatus);
-        cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-                   "Command exited with the value: " << *retVal << std::endl);
-        break;
-      case cmUVProcessChain::ExceptionCode::Spawn:
-        output += "\n*** ERROR executing: ";
-        output += exception.second;
-        output += "\n***The build process failed.";
-        cmCTestLog(this, ERROR_MESSAGE,
-                   "There was an error: " << exception.second << std::endl);
-        break;
-      default:
-        *retVal = static_cast<int>(exception.first);
-        cmCTestLog(this, WARNING,
-                   "There was an exception: " << *retVal << std::endl);
-        break;
-    }
-  } else {
+  cmsysProcess_WaitForExit(cp, nullptr);
+
+  int result = cmsysProcess_GetState(cp);
+
+  if (result == cmsysProcess_State_Exited) {
+    *retVal = cmsysProcess_GetExitValue(cp);
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
+               "Command exited with the value: " << *retVal << std::endl);
+  } else if (result == cmsysProcess_State_Exception) {
+    *retVal = cmsysProcess_GetExitException(cp);
+    cmCTestLog(this, WARNING,
+               "There was an exception: " << *retVal << std::endl);
+  } else if (result == cmsysProcess_State_Expired) {
     cmCTestLog(this, WARNING, "There was a timeout" << std::endl);
+  } else if (result == cmsysProcess_State_Error) {
+    output += "\n*** ERROR executing: ";
+    output += cmsysProcess_GetErrorString(cp);
+    output += "\n***The build process failed.";
+    cmCTestLog(this, ERROR_MESSAGE,
+               "There was an error: " << cmsysProcess_GetErrorString(cp)
+                                      << std::endl);
   }
 
-  return true;
+  cmsysProcess_Delete(cp);
+
+  return result;
 }
 
 // ######################################################################
@@ -1196,10 +1192,9 @@ bool cmCTest::RunMakeCommand(const std::string& command, std::string& output,
 // ######################################################################
 // ######################################################################
 
-bool cmCTest::RunTest(const std::vector<std::string>& argv,
-                      std::string* output, int* retVal, std::ostream* log,
-                      cmDuration testTimeOut,
-                      std::vector<std::string>* environment, Encoding encoding)
+int cmCTest::RunTest(std::vector<const char*> argv, std::string* output,
+                     int* retVal, std::ostream* log, cmDuration testTimeOut,
+                     std::vector<std::string>* environment, Encoding encoding)
 {
   bool modifyEnv = (environment && !environment->empty());
 
@@ -1238,16 +1233,19 @@ bool cmCTest::RunTest(const std::vector<std::string>& argv,
     inst.SetStreams(&oss, &oss);
 
     std::vector<std::string> args;
-    for (auto const& i : argv) {
-      // make sure we pass the timeout in for any build and test
-      // invocations. Since --build-generator is required this is a
-      // good place to check for it, and to add the arguments in
-      if (i == "--build-generator" && timeout != cmCTest::MaxDuration() &&
-          timeout > cmDuration::zero()) {
-        args.emplace_back("--test-timeout");
-        args.push_back(std::to_string(cmDurationTo<unsigned int>(timeout)));
+    for (char const* i : argv) {
+      if (i) {
+        // make sure we pass the timeout in for any build and test
+        // invocations. Since --build-generator is required this is a
+        // good place to check for it, and to add the arguments in
+        if (strcmp(i, "--build-generator") == 0 &&
+            timeout != cmCTest::MaxDuration() &&
+            timeout > cmDuration::zero()) {
+          args.emplace_back("--test-timeout");
+          args.push_back(std::to_string(cmDurationTo<unsigned int>(timeout)));
+        }
+        args.emplace_back(i);
       }
-      args.emplace_back(i);
     }
     if (log) {
       *log << "* Run internal CTest" << std::endl;
@@ -1273,7 +1271,7 @@ bool cmCTest::RunTest(const std::vector<std::string>& argv,
                                                              << std::endl);
     }
 
-    return true;
+    return cmsysProcess_State_Exited;
   }
   std::vector<char> tempOutput;
   if (output) {
@@ -1286,43 +1284,41 @@ bool cmCTest::RunTest(const std::vector<std::string>& argv,
     cmSystemTools::AppendEnv(*environment);
   }
 
-  cmUVProcessChainBuilder builder;
-  builder.AddCommand(argv).SetMergedBuiltinStreams();
+  cmsysProcess* cp = cmsysProcess_New();
+  cmsysProcess_SetCommand(cp, argv.data());
   cmCTestLog(this, DEBUG, "Command is: " << argv[0] << std::endl);
-  auto chain = builder.Start();
+  if (cmSystemTools::GetRunCommandHideConsole()) {
+    cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
+  }
 
+  cmsysProcess_SetTimeout(cp, timeout.count());
+  cmsysProcess_Execute(cp);
+
+  char* data;
+  int length;
   cmProcessOutput processOutput(encoding);
-  cm::uv_pipe_ptr outputStream;
-  outputStream.init(chain.GetLoop(), 0);
-  uv_pipe_open(outputStream, chain.OutputStream());
-  auto outputHandle = cmUVStreamRead(
-    outputStream,
-    [this, &processOutput, &output, &tempOutput,
-     &log](std::vector<char> data) {
-      std::string strdata;
-      processOutput.DecodeText(data.data(), data.size(), strdata);
-      if (output) {
-        cm::append(tempOutput, data.data(), data.data() + data.size());
-      }
-      cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-                 cmCTestLogWrite(strdata.c_str(), strdata.size()));
-      if (log) {
-        log->write(strdata.c_str(), strdata.size());
-      }
-    },
-    [this, &processOutput, &log]() {
-      std::string strdata;
-      processOutput.DecodeText(std::string(), strdata);
-      if (!strdata.empty()) {
-        cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-                   cmCTestLogWrite(strdata.c_str(), strdata.size()));
-        if (log) {
-          log->write(strdata.c_str(), strdata.size());
-        }
-      }
-    });
+  std::string strdata;
+  while (cmsysProcess_WaitForData(cp, &data, &length, nullptr)) {
+    processOutput.DecodeText(data, length, strdata);
+    if (output) {
+      cm::append(tempOutput, data, data + length);
+    }
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
+               cmCTestLogWrite(strdata.c_str(), strdata.size()));
+    if (log) {
+      log->write(strdata.c_str(), strdata.size());
+    }
+  }
+  processOutput.DecodeText(std::string(), strdata);
+  if (!strdata.empty()) {
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
+               cmCTestLogWrite(strdata.c_str(), strdata.size()));
+    if (log) {
+      log->write(strdata.c_str(), strdata.size());
+    }
+  }
 
-  bool complete = chain.Wait(static_cast<uint64_t>(timeout.count() * 1000.0));
+  cmsysProcess_WaitForExit(cp, nullptr);
   processOutput.DecodeText(tempOutput, tempOutput);
   if (output && tempOutput.begin() != tempOutput.end()) {
     output->append(tempOutput.data(), tempOutput.size());
@@ -1330,41 +1326,33 @@ bool cmCTest::RunTest(const std::vector<std::string>& argv,
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
              "-- Process completed" << std::endl);
 
-  bool result = false;
+  int result = cmsysProcess_GetState(cp);
 
-  if (complete) {
-    auto const& status = chain.GetStatus(0);
-    auto exception = status.GetException();
-    switch (exception.first) {
-      case cmUVProcessChain::ExceptionCode::None:
-        *retVal = static_cast<int>(status.ExitStatus);
-        if (*retVal != 0 && this->Impl->OutputTestOutputOnTestFailure) {
-          this->OutputTestErrors(tempOutput);
-        }
-        result = true;
-        break;
-      case cmUVProcessChain::ExceptionCode::Spawn: {
-        std::string outerr =
-          cmStrCat("\n*** ERROR executing: ", exception.second);
-        if (output) {
-          *output += outerr;
-        }
-        cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, outerr << std::endl);
-      } break;
-      default: {
-        if (this->Impl->OutputTestOutputOnTestFailure) {
-          this->OutputTestErrors(tempOutput);
-        }
-        *retVal = status.TermSignal;
-        std::string outerr =
-          cmStrCat("\n*** Exception executing: ", exception.second);
-        if (output) {
-          *output += outerr;
-        }
-        cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, outerr << std::endl);
-      } break;
+  if (result == cmsysProcess_State_Exited) {
+    *retVal = cmsysProcess_GetExitValue(cp);
+    if (*retVal != 0 && this->Impl->OutputTestOutputOnTestFailure) {
+      this->OutputTestErrors(tempOutput);
     }
+  } else if (result == cmsysProcess_State_Exception) {
+    if (this->Impl->OutputTestOutputOnTestFailure) {
+      this->OutputTestErrors(tempOutput);
+    }
+    *retVal = cmsysProcess_GetExitException(cp);
+    std::string outerr = cmStrCat("\n*** Exception executing: ",
+                                  cmsysProcess_GetExceptionString(cp));
+    if (output) {
+      *output += outerr;
+    }
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, outerr << std::endl);
+  } else if (result == cmsysProcess_State_Error) {
+    std::string outerr =
+      cmStrCat("\n*** ERROR executing: ", cmsysProcess_GetErrorString(cp));
+    if (output) {
+      *output += outerr;
+    }
+    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, outerr << std::endl);
   }
+  cmsysProcess_Delete(cp);
 
   return result;
 }
@@ -3482,70 +3470,49 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
   stdOut->clear();
   stdErr->clear();
 
-  cmUVProcessChainBuilder builder;
-  builder.AddCommand(args)
-    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT)
-    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_ERROR);
-  if (dir) {
-    builder.SetWorkingDirectory(dir);
+  cmsysProcess* cp = cmsysProcess_New();
+  cmsysProcess_SetCommand(cp, argv.data());
+  cmsysProcess_SetWorkingDirectory(cp, dir);
+  if (cmSystemTools::GetRunCommandHideConsole()) {
+    cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
   }
-  auto chain = builder.Start();
-
-  cm::uv_timer_ptr timer;
-  bool timedOut = false;
-  if (timeout.count()) {
-    timer.init(chain.GetLoop(), &timedOut);
-    timer.start(
-      [](uv_timer_t* t) {
-        auto* timedOutPtr = static_cast<bool*>(t->data);
-        *timedOutPtr = true;
-      },
-      static_cast<uint64_t>(timeout.count() * 1000.0), 0);
-  }
+  cmsysProcess_SetTimeout(cp, timeout.count());
+  cmsysProcess_Execute(cp);
 
   std::vector<char> tempOutput;
-  bool outFinished = false;
-  cm::uv_pipe_ptr outStream;
   std::vector<char> tempError;
-  bool errFinished = false;
-  cm::uv_pipe_ptr errStream;
+  char* data;
+  int length;
   cmProcessOutput processOutput(encoding);
-  auto startRead = [this, &chain, &processOutput](
-                     cm::uv_pipe_ptr& pipe, int stream,
-                     std::vector<char>& temp,
-                     bool& finished) -> std::unique_ptr<cmUVStreamReadHandle> {
-    pipe.init(chain.GetLoop(), 0);
-    uv_pipe_open(pipe, stream);
-    return cmUVStreamRead(
-      pipe,
-      [this, &temp, &processOutput](std::vector<char> data) {
-        cm::append(temp, data);
-        if (this->Impl->ExtraVerbose) {
-          std::string strdata;
-          processOutput.DecodeText(data.data(), data.size(), strdata);
-          cmSystemTools::Stdout(strdata);
-        }
-      },
-      [&finished]() { finished = true; });
-  };
-  auto outputHandle =
-    startRead(outStream, chain.OutputStream(), tempOutput, outFinished);
-  auto errorHandle =
-    startRead(errStream, chain.ErrorStream(), tempError, errFinished);
-  while (!timedOut && !(outFinished && errFinished)) {
-    uv_run(&chain.GetLoop(), UV_RUN_ONCE);
+  std::string strdata;
+  int res;
+  bool done = false;
+  while (!done) {
+    res = cmsysProcess_WaitForData(cp, &data, &length, nullptr);
+    switch (res) {
+      case cmsysProcess_Pipe_STDOUT:
+        cm::append(tempOutput, data, data + length);
+        break;
+      case cmsysProcess_Pipe_STDERR:
+        cm::append(tempError, data, data + length);
+        break;
+      default:
+        done = true;
+    }
+    if ((res == cmsysProcess_Pipe_STDOUT || res == cmsysProcess_Pipe_STDERR) &&
+        this->Impl->ExtraVerbose) {
+      processOutput.DecodeText(data, length, strdata);
+      cmSystemTools::Stdout(strdata);
+    }
   }
   if (this->Impl->ExtraVerbose) {
-    std::string strdata;
     processOutput.DecodeText(std::string(), strdata);
     if (!strdata.empty()) {
       cmSystemTools::Stdout(strdata);
     }
   }
 
-  while (!timedOut && !chain.Finished()) {
-    uv_run(&chain.GetLoop(), UV_RUN_ONCE);
-  }
+  cmsysProcess_WaitForExit(cp, nullptr);
   if (!tempOutput.empty()) {
     processOutput.DecodeText(tempOutput, tempOutput);
     stdOut->append(tempOutput.data(), tempOutput.size());
@@ -3556,32 +3523,32 @@ bool cmCTest::RunCommand(std::vector<std::string> const& args,
   }
 
   bool result = true;
-  if (timedOut) {
+  if (cmsysProcess_GetState(cp) == cmsysProcess_State_Exited) {
+    if (retVal) {
+      *retVal = cmsysProcess_GetExitValue(cp);
+    } else {
+      if (cmsysProcess_GetExitValue(cp) != 0) {
+        result = false;
+      }
+    }
+  } else if (cmsysProcess_GetState(cp) == cmsysProcess_State_Exception) {
+    const char* exception_str = cmsysProcess_GetExceptionString(cp);
+    cmCTestLog(this, ERROR_MESSAGE, exception_str << std::endl);
+    stdErr->append(exception_str, strlen(exception_str));
+    result = false;
+  } else if (cmsysProcess_GetState(cp) == cmsysProcess_State_Error) {
+    const char* error_str = cmsysProcess_GetErrorString(cp);
+    cmCTestLog(this, ERROR_MESSAGE, error_str << std::endl);
+    stdErr->append(error_str, strlen(error_str));
+    result = false;
+  } else if (cmsysProcess_GetState(cp) == cmsysProcess_State_Expired) {
     const char* error_str = "Process terminated due to timeout\n";
     cmCTestLog(this, ERROR_MESSAGE, error_str << std::endl);
     stdErr->append(error_str, strlen(error_str));
     result = false;
-  } else {
-    auto const& status = chain.GetStatus(0);
-    auto exception = status.GetException();
-    switch (exception.first) {
-      case cmUVProcessChain::ExceptionCode::None:
-        if (retVal) {
-          *retVal = static_cast<int>(status.ExitStatus);
-        } else {
-          if (status.ExitStatus != 0) {
-            result = false;
-          }
-        }
-        break;
-      default: {
-        cmCTestLog(this, ERROR_MESSAGE, exception.second << std::endl);
-        stdErr->append(exception.second);
-        result = false;
-      } break;
-    }
   }
 
+  cmsysProcess_Delete(cp);
   return result;
 }
 

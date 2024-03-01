@@ -1,0 +1,2 @@
+module;
+export module a;
