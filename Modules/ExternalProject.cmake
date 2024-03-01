@@ -225,10 +225,25 @@ URL
   Provides an arbitrary list of HTTP headers for the download operation.
   This can be useful for accessing content in systems like AWS, etc.
 
+``TLS_VERSION <min>``
+  .. versionadded:: 3.30
+
+  Specify minimum TLS version for ``https://`` URLs.  If this option is
+  not provided, the value of the :variable:`CMAKE_TLS_VERSION` variable
+  or the :envvar:`CMAKE_TLS_VERSION` environment variable will be used
+  instead (see :command:`file(DOWNLOAD)`).
+
+  This option also applies to ``git clone`` invocations, although the
+  default behavior is different.  If none of the ``TLS_VERSION`` option,
+  :variable:`CMAKE_TLS_VERSION` variable, or :envvar:`CMAKE_TLS_VERSION`
+  environment variable is specified, the behavior will be determined by
+  git's default or a ``http.sslVersion`` git config option the user may
+  have set at a global level.
+
 ``TLS_VERIFY <bool>``
   Specifies whether certificate verification should be performed for
-  https URLs. If this option is not provided, the default behavior is
-  determined by the :variable:`CMAKE_TLS_VERIFY` variable (see
+  ``https://`` URLs. If this option is not provided, the default behavior
+  is determined by the :variable:`CMAKE_TLS_VERIFY` variable (see
   :command:`file(DOWNLOAD)`). If that is also not set, certificate
   verification will not be performed. In situations where ``URL_HASH``
   cannot be provided, this option can be an alternative verification
@@ -236,11 +251,10 @@ URL
 
   .. versionchanged:: 3.6
     This option also applies to ``git clone`` invocations, although the
-    default behavior is different.  If ``TLS_VERIFY`` is not given and
-    :variable:`CMAKE_TLS_VERIFY` is not set, the behavior will be
-    determined by git's defaults.  Normally, the ``sslVerify`` git
-    config setting defaults to true, but the user may have overridden
-    this at a global level.
+    default behavior is different.  If neither the ``TLS_VERIFY`` option
+    or :variable:`CMAKE_TLS_VERIFY` variable is specified, the behavior
+    will be determined by git's default (true) or a ``http.sslVerify``
+    git config option the user may have set at a global level.
 
 ``TLS_CAINFO <file>``
   Specify a custom certificate authority file to use if ``TLS_VERIFY``
@@ -1346,6 +1360,59 @@ define_property(DIRECTORY PROPERTY "EP_STEP_TARGETS" INHERITED)
 define_property(DIRECTORY PROPERTY "EP_INDEPENDENT_STEP_TARGETS" INHERITED)
 define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED)
 
+function(_ep_get_tls_version name tls_version_var)
+  set(tls_version_regex "^1\\.[0-3]$")
+  get_property(tls_version TARGET ${name} PROPERTY _EP_TLS_VERSION)
+  if(NOT "x${tls_version}" STREQUAL "x")
+    if(NOT tls_version MATCHES "${tls_version_regex}")
+      message(FATAL_ERROR "TLS_VERSION '${tls_version}' not known")
+    endif()
+  elseif(NOT "x${CMAKE_TLS_VERSION}" STREQUAL "x")
+    set(tls_version "${CMAKE_TLS_VERSION}")
+    if(NOT tls_version MATCHES "${tls_version_regex}")
+      message(FATAL_ERROR "CMAKE_TLS_VERSION '${tls_version}' not known")
+    endif()
+  elseif(NOT "x$ENV{CMAKE_TLS_VERSION}" STREQUAL "x")
+    set(tls_version "$ENV{CMAKE_TLS_VERSION}")
+    if(NOT tls_version MATCHES "${tls_version_regex}")
+      message(FATAL_ERROR "ENV{CMAKE_TLS_VERSION} '${tls_version}' not known")
+    endif()
+  endif()
+  set("${tls_version_var}" "${tls_version}" PARENT_SCOPE)
+endfunction()
+
+function(_ep_get_tls_verify name tls_verify_var)
+  get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
+  if("x${tls_verify}" STREQUAL "x" AND DEFINED CMAKE_TLS_VERIFY)
+    set(tls_verify "${CMAKE_TLS_VERIFY}")
+  endif()
+  set("${tls_verify_var}" "${tls_verify}" PARENT_SCOPE)
+endfunction()
+
+function(_ep_get_tls_cainfo name tls_cainfo_var)
+  get_property(tls_cainfo TARGET ${name} PROPERTY _EP_TLS_CAINFO)
+  if("x${tls_cainfo}" STREQUAL "x" AND DEFINED CMAKE_TLS_CAINFO)
+    set(tls_cainfo "${CMAKE_TLS_CAINFO}")
+  endif()
+  set("${tls_cainfo_var}" "${tls_cainfo}" PARENT_SCOPE)
+endfunction()
+
+function(_ep_get_netrc name netrc_var)
+  get_property(netrc TARGET ${name} PROPERTY _EP_NETRC)
+  if("x${netrc}" STREQUAL "x" AND DEFINED CMAKE_NETRC)
+    set(netrc "${CMAKE_NETRC}")
+  endif()
+  set("${netrc_var}" "${netrc}" PARENT_SCOPE)
+endfunction()
+
+function(_ep_get_netrc_file name netrc_file_var)
+  get_property(netrc_file TARGET ${name} PROPERTY _EP_NETRC_FILE)
+  if("x${netrc_file}" STREQUAL "x" AND DEFINED CMAKE_NETRC_FILE)
+    set(netrc_file "${CMAKE_NETRC_FILE}")
+  endif()
+  set("${netrc_file_var}" "${netrc_file}" PARENT_SCOPE)
+endfunction()
+
 function(_ep_write_gitclone_script
   script_filename
   source_dir
@@ -1363,6 +1430,7 @@ function(_ep_write_gitclone_script
   work_dir
   gitclone_infofile
   gitclone_stampfile
+  tls_version
   tls_verify
 )
 
@@ -1378,8 +1446,6 @@ function(_ep_write_gitclone_script
   if("${git_tag}" STREQUAL "")
     message(FATAL_ERROR "Tag for git checkout should not be empty.")
   endif()
-
-  set(git_submodules_config_options "")
 
   if(GIT_VERSION_STRING VERSION_LESS 2.20 OR
      2.21 VERSION_LESS_EQUAL GIT_VERSION_STRING)
@@ -1403,21 +1469,27 @@ function(_ep_write_gitclone_script
   if(NOT ${git_remote_name} STREQUAL "origin")
     list(APPEND git_clone_options --origin \"${git_remote_name}\")
   endif()
+
+  # The clone config option is sticky, it will apply to all subsequent git
+  # update operations. The submodules config option is not sticky, because
+  # git doesn't provide any way to do that. Thus, we will have to pass the
+  # same config option in the update step too for submodules, but not for
+  # the main git repo.
+  set(git_submodules_config_options "")
+  if(NOT "x${tls_version}" STREQUAL "x")
+    list(APPEND git_clone_options -c http.sslVersion=tlsv${tls_version})
+    list(APPEND git_submodules_config_options -c http.sslVersion=tlsv${tls_version})
+  endif()
   if(NOT "x${tls_verify}" STREQUAL "x")
-    # The clone config option is sticky, it will apply to all subsequent git
-    # update operations. The submodules config option is not sticky, because
-    # git doesn't provide any way to do that. Thus, we will have to pass the
-    # same config option in the update step too for submodules, but not for
-    # the main git repo.
     if(tls_verify)
       # Default git behavior is "true", but the user might have changed the
       # global default to "false". Since TLS_VERIFY was given, ensure we honor
       # the specified setting regardless of what the global default might be.
       list(APPEND git_clone_options -c http.sslVerify=true)
-      set(git_submodules_config_options -c http.sslVerify=true)
+      list(APPEND git_submodules_config_options -c http.sslVerify=true)
     else()
       list(APPEND git_clone_options -c http.sslVerify=false)
-      set(git_submodules_config_options -c http.sslVerify=false)
+      list(APPEND git_submodules_config_options -c http.sslVerify=false)
     endif()
   endif()
 
@@ -1465,6 +1537,7 @@ function(_ep_write_gitupdate_script
   git_repository
   work_dir
   git_update_strategy
+  tls_version
   tls_verify
 )
 
@@ -1480,19 +1553,22 @@ function(_ep_write_gitupdate_script
     list(APPEND git_stash_save_options --all)
   endif()
 
+  # The submodules config option is not sticky, git doesn't provide any way
+  # to do that. We have to pass this config option for the update step too.
+  # We don't need to set it for the non-submodule update because it gets
+  # recorded as part of the clone operation in a sticky manner.
   set(git_submodules_config_options "")
+  if(NOT "x${tls_version}" STREQUAL "x")
+    list(APPEND git_submodules_config_options -c http.sslVersion=tlsv${tls_version})
+  endif()
   if(NOT "x${tls_verify}" STREQUAL "x")
-    # The submodules config option is not sticky, git doesn't provide any way
-    # to do that. We have to pass this config option for the update step too.
-    # We don't need to set it for the non-submodule update because it gets
-    # recorded as part of the clone operation in a sticky manner.
     if(tls_verify)
       # Default git behavior is "true", but the user might have changed the
       # global default to "false". Since TLS_VERIFY was given, ensure we honor
       # the specified setting regardless of what the global default might be.
-      set(git_submodules_config_options -c http.sslVerify=true)
+      list(APPEND git_submodules_config_options -c http.sslVerify=true)
     else()
-      set(git_submodules_config_options -c http.sslVerify=false)
+      list(APPEND git_submodules_config_options -c http.sslVerify=false)
     endif()
   endif()
 
@@ -1511,6 +1587,7 @@ function(_ep_write_downloadfile_script
   inactivity_timeout
   no_progress
   hash
+  tls_version
   tls_verify
   tls_cainfo
   userpwd
@@ -1563,46 +1640,28 @@ function(_ep_write_downloadfile_script
     set(EXPECT_VALUE "")
   endif()
 
+  set(TLS_VERSION_CODE "")
+  if(NOT "x${tls_version}" STREQUAL "x")
+    set(TLS_VERSION_CODE "set(CMAKE_TLS_VERSION \"${tls_version}\")")
+  endif()
+
   set(TLS_VERIFY_CODE "")
+  if(NOT "x${tls_verify}" STREQUAL "x")
+    set(TLS_VERIFY_CODE "set(CMAKE_TLS_VERIFY \"${tls_verify}\")")
+  endif()
+
   set(TLS_CAINFO_CODE "")
-  set(NETRC_CODE "")
-  set(NETRC_FILE_CODE "")
-
-  # check for curl globals in the project
-  if(DEFINED CMAKE_TLS_VERIFY)
-    set(TLS_VERIFY_CODE "set(CMAKE_TLS_VERIFY ${CMAKE_TLS_VERIFY})")
-  endif()
-  if(DEFINED CMAKE_TLS_CAINFO)
-    set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${CMAKE_TLS_CAINFO}\")")
-  endif()
-  if(DEFINED CMAKE_NETRC)
-    set(NETRC_CODE "set(CMAKE_NETRC \"${CMAKE_NETRC}\")")
-  endif()
-  if(DEFINED CMAKE_NETRC_FILE)
-    set(NETRC_FILE_CODE "set(CMAKE_NETRC_FILE \"${CMAKE_NETRC_FILE}\")")
-  endif()
-
-  # now check for curl locals so that the local values
-  # will override the globals
-
-  # check for tls_verify argument
-  string(LENGTH "${tls_verify}" tls_verify_len)
-  if(tls_verify_len GREATER 0)
-    set(TLS_VERIFY_CODE "set(CMAKE_TLS_VERIFY ${tls_verify})")
-  endif()
-  # check for tls_cainfo argument
-  string(LENGTH "${tls_cainfo}" tls_cainfo_len)
-  if(tls_cainfo_len GREATER 0)
+  if(NOT "x${tls_cainfo}" STREQUAL "x")
     set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${tls_cainfo}\")")
   endif()
-  # check for netrc argument
-  string(LENGTH "${netrc}" netrc_len)
-  if(netrc_len GREATER 0)
+
+  set(NETRC_CODE "")
+  if(NOT "x${netrc}" STREQUAL "x")
     set(NETRC_CODE "set(CMAKE_NETRC \"${netrc}\")")
   endif()
-  # check for netrc_file argument
-  string(LENGTH "${netrc_file}" netrc_file_len)
-  if(netrc_file_len GREATER 0)
+
+  set(NETRC_FILE_CODE "")
+  if(NOT "x${netrc_file}" STREQUAL "x")
     set(NETRC_FILE_CODE "set(CMAKE_NETRC_FILE \"${netrc_file}\")")
   endif()
 
@@ -1622,6 +1681,7 @@ function(_ep_write_downloadfile_script
   endif()
 
   # Used variables:
+  # * TLS_VERSION_CODE
   # * TLS_VERIFY_CODE
   # * TLS_CAINFO_CODE
   # * ALGO
@@ -2959,10 +3019,8 @@ function(_ep_add_download_command name)
       set(git_remote_name "origin")
     endif()
 
-    get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
-    if("x${tls_verify}" STREQUAL "x" AND DEFINED CMAKE_TLS_VERIFY)
-      set(tls_verify "${CMAKE_TLS_VERIFY}")
-    endif()
+    _ep_get_tls_version(${name} tls_version)
+    _ep_get_tls_verify(${name} tls_verify)
     get_property(git_shallow TARGET ${name} PROPERTY _EP_GIT_SHALLOW)
     get_property(git_progress TARGET ${name} PROPERTY _EP_GIT_PROGRESS)
     get_property(git_config TARGET ${name} PROPERTY _EP_GIT_CONFIG)
@@ -3012,6 +3070,7 @@ CMP0097=${_EP_CMP0097}
       ${work_dir}
       ${stamp_dir}/${name}-gitinfo.txt
       ${stamp_dir}/${name}-gitclone-lastrun.txt
+      "${tls_version}"
       "${tls_verify}"
     )
     set(comment "Performing download step (git clone) for '${name}'")
@@ -3146,10 +3205,11 @@ hash=${hash}
           TARGET ${name}
           PROPERTY _EP_DOWNLOAD_NO_PROGRESS
         )
-        get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
-        get_property(tls_cainfo TARGET ${name} PROPERTY _EP_TLS_CAINFO)
-        get_property(netrc TARGET ${name} PROPERTY _EP_NETRC)
-        get_property(netrc_file TARGET ${name} PROPERTY _EP_NETRC_FILE)
+        _ep_get_tls_version(${name} tls_version)
+        _ep_get_tls_verify(${name} tls_verify)
+        _ep_get_tls_cainfo(${name} tls_cainfo)
+        _ep_get_netrc(${name} netrc)
+        _ep_get_netrc_file(${name} netrc_file)
         get_property(http_username TARGET ${name} PROPERTY _EP_HTTP_USERNAME)
         get_property(http_password TARGET ${name} PROPERTY _EP_HTTP_PASSWORD)
         get_property(http_headers TARGET ${name} PROPERTY _EP_HTTP_HEADER)
@@ -3162,6 +3222,7 @@ hash=${hash}
           "${inactivity_timeout}"
           "${no_progress}"
           "${hash}"
+          "${tls_version}"
           "${tls_verify}"
           "${tls_cainfo}"
           "${http_username}:${http_password}"
@@ -3472,10 +3533,8 @@ function(_ep_add_update_command name)
 
     _ep_get_git_submodules_recurse(git_submodules_recurse)
 
-    get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
-    if("x${tls_verify}" STREQUAL "x" AND DEFINED CMAKE_TLS_VERIFY)
-      set(tls_verify "${CMAKE_TLS_VERIFY}")
-    endif()
+    _ep_get_tls_version(${name} tls_version)
+    _ep_get_tls_verify(${name} tls_verify)
 
     set(update_script "${tmp_dir}/${name}-gitupdate.cmake")
     list(APPEND file_deps ${update_script})
@@ -3490,6 +3549,7 @@ function(_ep_add_update_command name)
       "${git_repository}"
       "${work_dir}"
       "${git_update_strategy}"
+      "${tls_version}"
       "${tls_verify}"
     )
     set(cmd              ${CMAKE_COMMAND} -Dcan_fetch=YES -P ${update_script})
@@ -4263,6 +4323,7 @@ function(ExternalProject_Add name)
     HTTP_USERNAME
     HTTP_PASSWORD
     HTTP_HEADER
+    TLS_VERSION    # Also used for git clone operations
     TLS_VERIFY     # Also used for git clone operations
     TLS_CAINFO
     NETRC

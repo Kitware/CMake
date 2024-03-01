@@ -111,6 +111,7 @@ foreach(i RANGE ${retry_number})
     if(NOT url IN_LIST skip_url_list)
       message(STATUS "Using src='${url}'")
 
+      @TLS_VERSION_CODE@
       @TLS_VERIFY_CODE@
       @TLS_CAINFO_CODE@
       @NETRC_CODE@

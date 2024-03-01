@@ -5,6 +5,7 @@ set(CMAKE_TLS_VERIFY BBBB)
 set(CMAKE_TLS_CAINFO CCCC)
 set(CMAKE_NETRC DDDD)
 set(CMAKE_NETRC_FILE EEEE)
+set(CMAKE_TLS_VERSION FFFF)
 
 FetchContent_Declare(PassThrough
   DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E echo "Download command executed"
@@ -19,6 +20,10 @@ file(READ ${gen_file} contents)
 
 if(NOT contents MATCHES "CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY \\[==\\[AAAA\\]==\\]")
   message(FATAL_ERROR "Missing CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY")
+endif()
+
+if(NOT contents MATCHES "CMAKE_TLS_VERSION \\[==\\[FFFF\\]==\\]")
+  message(FATAL_ERROR "Missing CMAKE_TLS_VERSION")
 endif()
 
 if(NOT contents MATCHES "CMAKE_TLS_VERIFY \\[==\\[BBBB\\]==\\]")

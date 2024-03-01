@@ -1,0 +1,10 @@
+^CMake Error at [^
+]*/Modules/ExternalProject\.cmake:[0-9]+ \(message\):
+  ENV{CMAKE_TLS_VERSION} 'bad-env' not known
+Call Stack \(most recent call first\):
+  [^
+]*/Modules/ExternalProject\.cmake:[0-9]+ \(_ep_get_tls_version\)
+  [^
+]*/Modules/ExternalProject\.cmake:[0-9]+ \(_ep_add_download_command\)
+  TLSVersionBadEnv\.cmake:[0-9]+ \(ExternalProject_Add\)
+  CMakeLists\.txt:[0-9]+ \(include\)$
