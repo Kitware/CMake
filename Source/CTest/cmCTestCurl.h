@@ -40,14 +40,14 @@ protected:
 
 private:
   cmCTest* CTest;
-  CURL* Curl;
+  CURL* Curl = nullptr;
   std::vector<std::string> HttpHeaders;
   std::string HTTPProxyAuth;
   std::string HTTPProxy;
   curl_proxytype HTTPProxyType;
-  bool VerifyHostOff;
-  bool VerifyPeerOff;
-  bool UseHttp10;
-  bool Quiet;
-  int TimeOutSeconds;
+  bool VerifyHostOff = false;
+  bool VerifyPeerOff = false;
+  bool UseHttp10 = false;
+  bool Quiet = false;
+  int TimeOutSeconds = 0;
 };

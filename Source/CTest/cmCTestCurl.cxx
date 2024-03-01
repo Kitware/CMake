@@ -13,17 +13,11 @@
 #include "cmSystemTools.h"
 
 cmCTestCurl::cmCTestCurl(cmCTest* ctest)
+  : CTest(ctest)
 {
-  this->CTest = ctest;
   this->SetProxyType();
-  this->UseHttp10 = false;
   // In windows, this will init the winsock stuff
   ::curl_global_init(CURL_GLOBAL_ALL);
-  // default is to verify https
-  this->VerifyPeerOff = false;
-  this->VerifyHostOff = false;
-  this->Quiet = false;
-  this->TimeOutSeconds = 0;
   this->Curl = curl_easy_init();
 }
 
