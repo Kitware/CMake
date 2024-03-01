@@ -16,6 +16,9 @@ parameters:
 - name: InsertIntoVS
   type: string
   default: false
+- name: RunTests
+  type: string
+  default: true
 - name: SignType
   type: string
   default: real
@@ -42,6 +45,8 @@ variables:
   value: ''
 - name: InsertIntoVS
   value: ${{parameters.InsertIntoVS}}
+- name: RunTests
+  value: ${{parameters.RunTests}}
 - name: SignType
   value: ${{parameters.SignType}}
 - name: BuildConfiguration
@@ -145,6 +150,7 @@ extends:
             setupCommandlinePicker: vs2022
         - task: CmdLine@1
           name: CmdLine3
+          condition: eq(variables.RunTests, 'true')
           displayName: Run tests
           inputs:
             filename: $(CMakeBuildDirectory)\bin\$(BuildConfiguration)\ctest
