@@ -9,11 +9,13 @@
 
 #include "cmCTest.h"
 #include "cmCurl.h"
+#include "cmList.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmCTestCurl::cmCTestCurl(cmCTest* ctest)
   : CTest(ctest)
+  , CurlOpts(ctest)
 {
   this->SetProxyType();
   // In windows, this will init the winsock stuff
@@ -53,8 +55,9 @@ size_t curlDebugCallback(CURL* /*unused*/, curl_infotype /*unused*/,
 }
 }
 
-void cmCTestCurl::SetCurlOptions(std::vector<std::string> const& args)
+cmCTestCurlOpts::cmCTestCurlOpts(cmCTest* ctest)
 {
+  cmList args{ ctest->GetCTestConfiguration("CurlOptions") };
   for (std::string const& arg : args) {
     if (arg == "CURLOPT_SSL_VERIFYPEER_OFF") {
       this->VerifyPeerOff = true;
@@ -71,10 +74,10 @@ bool cmCTestCurl::InitCurl()
     return false;
   }
   cmCurlSetCAInfo(this->Curl);
-  if (this->VerifyPeerOff) {
+  if (this->CurlOpts.VerifyPeerOff) {
     curl_easy_setopt(this->Curl, CURLOPT_SSL_VERIFYPEER, 0);
   }
-  if (this->VerifyHostOff) {
+  if (this->CurlOpts.VerifyHostOff) {
     curl_easy_setopt(this->Curl, CURLOPT_SSL_VERIFYHOST, 0);
   }
   if (!this->HTTPProxy.empty()) {

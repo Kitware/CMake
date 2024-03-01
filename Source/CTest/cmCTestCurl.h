@@ -11,6 +11,13 @@
 
 class cmCTest;
 
+struct cmCTestCurlOpts
+{
+  cmCTestCurlOpts(cmCTest* ctest);
+  bool VerifyPeerOff = false;
+  bool VerifyHostOff = false;
+};
+
 class cmCTestCurl
 {
 public:
@@ -22,9 +29,6 @@ public:
                   std::string const& fields, std::string& response);
   bool HttpRequest(std::string const& url, std::string const& fields,
                    std::string& response);
-  // currently only supports CURLOPT_SSL_VERIFYPEER_OFF
-  // and CURLOPT_SSL_VERIFYHOST_OFF
-  void SetCurlOptions(std::vector<std::string> const& args);
   void SetHttpHeaders(std::vector<std::string> const& v)
   {
     this->HttpHeaders = v;
@@ -40,13 +44,12 @@ protected:
 
 private:
   cmCTest* CTest;
+  cmCTestCurlOpts CurlOpts;
   CURL* Curl = nullptr;
   std::vector<std::string> HttpHeaders;
   std::string HTTPProxyAuth;
   std::string HTTPProxy;
   curl_proxytype HTTPProxyType;
-  bool VerifyHostOff = false;
-  bool VerifyPeerOff = false;
   bool UseHttp10 = false;
   bool Quiet = false;
   int TimeOutSeconds = 0;

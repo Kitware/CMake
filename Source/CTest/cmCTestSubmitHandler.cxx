@@ -22,7 +22,6 @@
 #include "cmCurl.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
-#include "cmList.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -172,30 +171,19 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
 
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
-  std::string curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
-  cmList args{ curlopt };
-  bool verifyPeerOff = false;
-  bool verifyHostOff = false;
-  for (std::string const& arg : args) {
-    if (arg == "CURLOPT_SSL_VERIFYPEER_OFF") {
-      verifyPeerOff = true;
-    }
-    if (arg == "CURLOPT_SSL_VERIFYHOST_OFF") {
-      verifyHostOff = true;
-    }
-  }
+  cmCTestCurlOpts curlOpts(this->CTest);
   for (std::string const& file : files) {
     /* get a curl handle */
     curl = curl_easy_init();
     if (curl) {
       cmCurlSetCAInfo(curl);
-      if (verifyPeerOff) {
+      if (curlOpts.VerifyPeerOff) {
         cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                            "  Set CURLOPT_SSL_VERIFYPEER to off\n",
                            this->Quiet);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
       }
-      if (verifyHostOff) {
+      if (curlOpts.VerifyHostOff) {
         cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                            "  Set CURLOPT_SSL_VERIFYHOST to off\n",
                            this->Quiet);
@@ -518,9 +506,6 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   }
   cmCTestCurl curl(this->CTest);
   curl.SetQuiet(this->Quiet);
-  std::string curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
-  cmList args{ curlopt };
-  curl.SetCurlOptions(args);
   auto submitInactivityTimeout = this->GetSubmitInactivityTimeout();
   if (submitInactivityTimeout != 0) {
     curl.SetTimeOutSeconds(submitInactivityTimeout);
