@@ -8414,6 +8414,8 @@ void ComputeLinkImplTransitive(cmGeneratorTarget const* self,
 bool cmGeneratorTarget::DiscoverSyntheticTargets(cmSyntheticTargetCache& cache,
                                                  std::string const& config)
 {
+  std::vector<std::string> allConfigs =
+    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
   cmOptionalLinkImplementation impl;
   this->ComputeLinkImplementationLibraries(config, impl, this,
                                            LinkInterfaceFor::Link);
@@ -8488,9 +8490,19 @@ bool cmGeneratorTarget::DiscoverSyntheticTargets(cmSyntheticTargetCache& cache,
 
         // Create the generator target and attach it to the local generator.
         auto gtp = cm::make_unique<cmGeneratorTarget>(tgt, lg);
+
         synthDep = gtp.get();
         cache.CxxModuleTargets[targetName] = synthDep;
+
+        // See `localGen->ComputeTargetCompileFeatures()` call in
+        // `cmGlobalGenerator::Compute` for where non-synthetic targets resolve
+        // this.
+        for (auto const& innerConfig : allConfigs) {
+          gtp->ComputeCompileFeatures(innerConfig);
+        }
+
         gtp->DiscoverSyntheticTargets(cache, config);
+
         lg->AddGeneratorTarget(std::move(gtp));
       } else {
         synthDep = cached->second;

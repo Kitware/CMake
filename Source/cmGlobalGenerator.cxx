@@ -1581,6 +1581,19 @@ bool cmGlobalGenerator::Compute()
   }
 #endif
 
+  // Perform up-front computation in order to handle errors (such as unknown
+  // features) at this point. While processing the compile features we also
+  // calculate and cache the language standard required by the compile
+  // features.
+  //
+  // Synthetic targets performed this inside of
+  // `cmLocalGenerator::DiscoverSyntheticTargets`
+  for (const auto& localGen : this->LocalGenerators) {
+    if (!localGen->ComputeTargetCompileFeatures()) {
+      return false;
+    }
+  }
+
   // Iterate through all targets and set up C++20 module targets.
   // Create target templates for each imported target with C++20 modules.
   // INTERFACE library with BMI-generating rules and a collation step?
@@ -1588,6 +1601,9 @@ bool cmGlobalGenerator::Compute()
   // Make `add_dependencies(imported_target
   // $<$<TARGET_NAME_IF_EXISTS:uses_imported>:synth1>
   // $<$<TARGET_NAME_IF_EXISTS:other_uses_imported>:synth2>)`
+  //
+  // Note that synthetic target creation performs the above marked
+  // steps on the created targets.
   if (!this->DiscoverSyntheticTargets()) {
     return false;
   }
@@ -1595,16 +1611,6 @@ bool cmGlobalGenerator::Compute()
   // Add generator specific helper commands
   for (const auto& localGen : this->LocalGenerators) {
     localGen->AddHelperCommands();
-  }
-
-  // Perform up-front computation in order to handle errors (such as unknown
-  // features) at this point. While processing the compile features we also
-  // calculate and cache the language standard required by the compile
-  // features.
-  for (const auto& localGen : this->LocalGenerators) {
-    if (!localGen->ComputeTargetCompileFeatures()) {
-      return false;
-    }
   }
 
   // Add automatically generated sources (e.g. unity build).
