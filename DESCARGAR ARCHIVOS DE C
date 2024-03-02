@@ -1,0 +1,21 @@
+import requests
+
+def descargar_archivo(url, nombre_archivo):
+    try:
+        # Realizar la solicitud GET para descargar el archivo
+        respuesta = requests.get(url)
+        # Verificar si la solicitud fue exitosa (código de estado 200)
+        if respuesta.status_code == 200:
+            # Escribir el contenido del archivo en un archivo local
+            with open(nombre_archivo, 'wb') as archivo:
+                archivo.write(respuesta.content)
+            print(f"El archivo {nombre_archivo} se ha descargado exitosamente.")
+        else:
+            print(f"No se pudo descargar el archivo. Código de estado: {respuesta.status_code}")
+    except Exception as e:
+        print(f"Ocurrió un error: {e}")
+
+# Ejemplo de uso
+url = 'https://www.ejemplo.com/archivo.zip'
+nombre_archivo = 'archivo.zip'
+descargar_archivo(url, nombre_archivo)
