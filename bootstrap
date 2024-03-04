@@ -1787,20 +1787,26 @@ if test "x${bootstrap_system_libuv}" = "x"; then
 else
   if test `which pkg-config`; then
     use_uv_flags="`pkg-config --cflags libuv`"
+    use_uv_ldflags="`pkg-config --libs libuv`"
     cmake_c_flags="${cmake_c_flags} ${use_uv_flags}"
     cmake_cxx_flags="${cmake_cxx_flags} ${use_uv_flags}"
+  else
+    use_librhash_ldflags="-luv"
   fi
-  libs="${libs} -luv"
+  libs="${libs} ${use_uv_ldflags}"
 fi
 
 librhash_c_flags="-DNO_IMPORT_EXPORT"
 if test "x${bootstrap_system_librhash}" != "x"; then
   if test `which pkg-config`; then
     use_librhash_flags="`pkg-config --cflags librhash`"
+    use_librhash_ldflags="`pkg-config --libs librhash`"
     cmake_c_flags="${cmake_c_flags} ${use_librhash_flags}"
     cmake_cxx_flags="${cmake_cxx_flags} ${use_librhash_flags}"
+  else
+    use_librhash_ldflags="-lrhash"
   fi
-  libs="${libs} -lrhash"
+  libs="${libs} ${use_librhash_ldflags}"
 fi
 
 jsoncpp_cxx_flags=
@@ -1809,9 +1815,12 @@ if test "x${bootstrap_system_jsoncpp}" = "x"; then
 else
   if test `which pkg-config`; then
     use_jsoncpp_flags="`pkg-config --cflags jsoncpp`"
+    use_jsoncpp_ldflags="`pkg-config --libs jsoncpp`"
     cmake_cxx_flags="${cmake_cxx_flags} ${use_jsoncpp_flags}"
+  else
+    use_librhash_ldflags="-ljsoncpp"
   fi
-  libs="${libs} -ljsoncpp"
+  libs="${libs} ${use_jsoncpp_ldflags}"
 fi
 
 if test "x${cmake_ansi_cxx_flags}" != "x"; then
