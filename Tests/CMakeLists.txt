@@ -498,6 +498,10 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(ReturnTest ReturnTest)
   ADD_TEST_MACRO(Properties Properties)
   ADD_TEST_MACRO(Assembler HelloAsm)
+  # relies on Linux syscall interface
+  if(CMake_TEST_ASM_NASM AND CMAKE_SYSTEM_NAME MATCHES "Linux" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    ADD_TEST_MACRO(NasmOnly NasmOnly)
+  endif()
   ADD_TEST_MACRO(SourceGroups SourceGroups)
   ADD_TEST_MACRO(Preprocess Preprocess)
   set(ExportImport_BUILD_OPTIONS -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}

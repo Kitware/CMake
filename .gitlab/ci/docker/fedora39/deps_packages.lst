@@ -46,6 +46,9 @@ file
 jq
 which
 
+# Install ASM_NASM language toolchain.
+nasm
+
 # Install HIP language toolchain.
 hsakmt-devel
 lld

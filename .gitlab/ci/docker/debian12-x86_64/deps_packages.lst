@@ -32,6 +32,9 @@ cvs
 subversion
 mercurial
 
+# Install ASM_NASM language toolchain.
+nasm
+
 # Install HIP language toolchain.
 hipcc
 
