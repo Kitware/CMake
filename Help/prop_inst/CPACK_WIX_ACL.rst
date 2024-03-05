@@ -18,6 +18,6 @@ each of which has to match the following format.
 
 ``<permission>`` is any of the YesNoType attributes listed here::
 
- http://wixtoolset.org/documentation/manual/v3/xsd/wix/permission.html
+ https://wixtoolset.org/documentation/manual/v3/xsd/wix/permission.html
 
 The property is currently only supported by the :cpack_gen:`CPack WIX Generator`.

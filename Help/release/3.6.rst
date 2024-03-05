@@ -122,7 +122,7 @@ Modules
   from git repositories.
 
 * The :module:`FindBLAS` and :module:`FindLAPACK` modules learned to
-  support `OpenBLAS <http://www.openblas.net>`__.
+  support `OpenBLAS <https://www.openblas.net>`__.
 
 * The :module:`FindCUDA` module learned to find the ``cublas_device`` library.
 
