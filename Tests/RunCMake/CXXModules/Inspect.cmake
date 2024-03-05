@@ -15,11 +15,17 @@ if (CMAKE_CXX_FLAGS MATCHES "-std=")
   set(forced_cxx_standard 1)
 endif ()
 
+set(have_cxx23_import_std 0)
+if (TARGET "__CMAKE::CXX23")
+  set(have_cxx23_import_std 1)
+endif ()
+
 # Forward information about the C++ compile features.
 string(APPEND info "\
 set(CMAKE_CXX_COMPILE_FEATURES \"${CMAKE_CXX_COMPILE_FEATURES}\")
 set(CMAKE_MAKE_PROGRAM \"${CMAKE_MAKE_PROGRAM}\")
 set(forced_cxx_standard \"${forced_cxx_standard}\")
+set(have_cxx23_import_std \"${have_cxx23_import_std}\")
 set(CMAKE_CXX_COMPILER_VERSION \"${CMAKE_CXX_COMPILER_VERSION}\")
 set(CMAKE_CXX_OUTPUT_EXTENSION \"${CMAKE_CXX_OUTPUT_EXTENSION}\")
 set(CXXModules_default_build_type \"${CMAKE_BUILD_TYPE}\")

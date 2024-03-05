@@ -90,6 +90,13 @@ if ("cxx_std_23" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
   run_cmake(CXXImportStdInvalidGenex)
 endif ()
 
+if ("cxx_std_23" IN_LIST CMAKE_CXX_COMPILE_FEATURES AND
+    NOT have_cxx23_import_std)
+  run_cmake(NoCXX23TargetUnset)
+  run_cmake(NoCXX23TargetNotRequired)
+  run_cmake(NoCXX23TargetRequired)
+endif ()
+
 run_cmake(InstallBMI)
 run_cmake(InstallBMIGenericArgs)
 run_cmake(InstallBMIIgnore)

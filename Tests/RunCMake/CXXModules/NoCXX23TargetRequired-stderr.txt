@@ -1,0 +1,4 @@
+CMake Error in CMakeLists.txt:
+  The "CXX_MODULE_STD" property on the target "nocxx23target" requires that
+  the "__CMAKE::CXX23" target exist, but it was not provided by the
+  toolchain.
