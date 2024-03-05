@@ -1,0 +1,3 @@
+CMake Error in CMakeLists.txt:
+  The "CXX_MODULE_STD" property on the target "nocxx23target" contains a
+  context-sensitive condition that is not supported.
