@@ -10,13 +10,7 @@ If this variable is not set, the commands check the
 
 The value may be one of:
 
-* ``1.0``
-
-* ``1.1``
-
-* ``1.2``
-
-* ``1.3``
+.. include:: CMAKE_TLS_VERSION-VALUES.txt
 
 This variable is also used by the :module:`ExternalProject` and
 :module:`FetchContent` modules for internal calls to
