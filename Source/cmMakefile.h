@@ -803,7 +803,7 @@ public:
   /**
    * Return a location of a file in cmake or custom modules directory
    */
-  std::string GetModulesFile(const std::string& name) const
+  std::string GetModulesFile(cm::string_view name) const
   {
     bool system;
     std::string debugBuffer;
@@ -813,13 +813,13 @@ public:
   /**
    * Return a location of a file in cmake or custom modules directory
    */
-  std::string GetModulesFile(const std::string& name, bool& system) const
+  std::string GetModulesFile(cm::string_view name, bool& system) const
   {
     std::string debugBuffer;
     return this->GetModulesFile(name, system, false, debugBuffer);
   }
 
-  std::string GetModulesFile(const std::string& name, bool& system, bool debug,
+  std::string GetModulesFile(cm::string_view name, bool& system, bool debug,
                              std::string& debugBuffer) const;
 
   //! Set/Get a property of this directory

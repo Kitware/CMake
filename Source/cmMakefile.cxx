@@ -3906,8 +3906,8 @@ void cmMakefile::DisplayStatus(const std::string& message, float s) const
 #endif
 }
 
-std::string cmMakefile::GetModulesFile(const std::string& filename,
-                                       bool& system, bool debug,
+std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
+                                       bool debug,
                                        std::string& debugBuffer) const
 {
   std::string result;
