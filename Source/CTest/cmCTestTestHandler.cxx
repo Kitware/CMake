@@ -548,9 +548,21 @@ bool cmCTestTestHandler::ProcessOptions()
       return false;
     }
   }
-  if (this->GetOption("ParallelLevel")) {
-    this->CTest->SetParallelLevel(
-      std::stoi(*this->GetOption("ParallelLevel")));
+  if (cmValue parallelLevel = this->GetOption("ParallelLevel")) {
+    if (parallelLevel.IsEmpty()) {
+      // An empty value tells ctest to choose a default.
+      this->CTest->SetParallelLevel(cm::nullopt);
+    } else {
+      // A non-empty value must be a non-negative integer.
+      unsigned long plevel = 0;
+      if (!cmStrToULong(*parallelLevel, &plevel)) {
+        cmCTestLog(this->CTest, ERROR_MESSAGE,
+                   "ParallelLevel invalid value: " << *parallelLevel
+                                                   << std::endl);
+        return false;
+      }
+      this->CTest->SetParallelLevel(plevel);
+    }
   }
 
   if (this->GetOption("StopOnFailure")) {

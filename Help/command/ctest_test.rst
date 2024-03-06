@@ -18,7 +18,7 @@ Perform the :ref:`CTest Test Step` as a :ref:`Dashboard Client`.
              [EXCLUDE_FIXTURE <regex>]
              [EXCLUDE_FIXTURE_SETUP <regex>]
              [EXCLUDE_FIXTURE_CLEANUP <regex>]
-             [PARALLEL_LEVEL <level>]
+             [PARALLEL_LEVEL [<level>]]
              [RESOURCE_SPEC_FILE <file>]
              [TEST_LOAD <threshold>]
              [SCHEDULE_RANDOM <ON|OFF>]
@@ -104,9 +104,14 @@ The options are:
 
   Same as ``EXCLUDE_FIXTURE`` except only matching cleanup tests are excluded.
 
-``PARALLEL_LEVEL <level>``
-  Specify a positive number representing the number of tests to
-  be run in parallel.
+``PARALLEL_LEVEL [<level>]``
+  Run tests in parallel, limited to a given level of parallelism.
+
+  .. versionadded:: 3.29
+
+    The ``<level>`` may be omitted, or ``0``, to let ctest use a default
+    level of parallelism, or unbounded parallelism, respectively, as
+    documented by the :option:`ctest --parallel` option.
 
 ``RESOURCE_SPEC_FILE <file>``
   .. versionadded:: 3.16

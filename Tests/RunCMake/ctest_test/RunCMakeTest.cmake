@@ -1,8 +1,10 @@
 include(RunCTest)
+
 set(RunCMake_TEST_TIMEOUT 60)
 
 set(CASE_CTEST_TEST_ARGS "")
 set(CASE_CTEST_TEST_LOAD "")
+set(CASE_CTEST_TEST_RAW_ARGS "")
 
 function(run_ctest_test CASE_NAME)
   set(CASE_CTEST_TEST_ARGS "${ARGN}")
@@ -11,6 +13,7 @@ endfunction()
 
 run_ctest_test(TestQuiet QUIET)
 
+set(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING} 4)
 set(CASE_CMAKELISTS_SUFFIX_CODE [[
 foreach(i RANGE 1 6)
   add_test(NAME test${i} COMMAND ${CMAKE_COMMAND} -E true)
@@ -25,6 +28,7 @@ set_property(TEST test6 PROPERTY DEPENDS test1)
 ]])
 run_ctest_test(SerialOrder INCLUDE test)
 unset(CASE_CMAKELISTS_SUFFIX_CODE)
+unset(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING)
 
 set(CASE_CMAKELISTS_SUFFIX_CODE [[
 add_test(NAME skip COMMAND ${CMAKE_COMMAND} -E true)
@@ -32,6 +36,36 @@ set_property(TEST skip PROPERTY SKIP_RETURN_CODE 0)
 ]])
 run_ctest_test(SkipReturnCode)
 unset(CASE_CMAKELISTS_SUFFIX_CODE)
+
+# Spoof a number of processors to make these tests predictable.
+set(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING} 1)
+set(CASE_CMAKELISTS_SUFFIX_CODE [[
+foreach(i RANGE 1 6)
+  add_test(NAME test${i} COMMAND ${CMAKE_COMMAND} -E true)
+endforeach()
+]])
+run_ctest_test(ParallelBad   INCLUDE test PARALLEL_LEVEL bad)
+set(CASE_CTEST_TEST_RAW_ARGS "PARALLEL_LEVEL \"\"")
+run_ctest_test(ParallelEmpty INCLUDE test) # With 1 processor, defaults to 2.
+unset(CASE_CTEST_TEST_RAW_ARGS)
+run_ctest_test(ParallelOmit  INCLUDE test PARALLEL_LEVEL) # With 1 processor, defaults to 2.
+run_ctest_test(Parallel0     INCLUDE test PARALLEL_LEVEL 0)
+run_ctest_test(Parallel4     INCLUDE test PARALLEL_LEVEL 4)
+set(ENV{CTEST_PARALLEL_LEVEL} bad)
+run_ctest_test(ParallelEnvBad INCLUDE test)
+if(CMAKE_HOST_WIN32)
+  set(ENV{CTEST_PARALLEL_LEVEL} " ")
+else()
+  set(ENV{CTEST_PARALLEL_LEVEL} "")
+endif()
+run_ctest_test(ParallelEnvEmpty INCLUDE test) # With 1 processor, defaults to 2.
+set(ENV{CTEST_PARALLEL_LEVEL} 0)
+run_ctest_test(ParallelEnv0  INCLUDE test)
+set(ENV{CTEST_PARALLEL_LEVEL} 3)
+run_ctest_test(ParallelEnv3  INCLUDE test)
+unset(ENV{CTEST_PARALLEL_LEVEL})
+unset(CASE_CMAKELISTS_SUFFIX_CODE)
+unset(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING)
 
 # Tests for the 'Test Load' feature of ctest
 #

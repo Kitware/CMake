@@ -63,7 +63,7 @@ public:
   // Set the tests
   void SetTests(TestMap tests, PropertiesMap properties);
   // Set the max number of tests that can be run at the same time.
-  void SetParallelLevel(size_t);
+  void SetParallelLevel(cm::optional<size_t> level);
   void SetTestLoad(unsigned long load);
   virtual void RunTests();
   void PrintOutputAsJson();
@@ -201,7 +201,15 @@ private:
     ResourceAvailabilityErrors;
   cmCTestResourceAllocator ResourceAllocator;
   std::vector<cmCTestTestHandler::cmCTestTestResult>* TestResults;
-  size_t ParallelLevel = 1; // max number of process that can be run at once
+
+  // Get the maximum number of processors that may be used at once.
+  size_t GetParallelLevel() const;
+
+  // With no '-j' option, default to serial testing.
+  cm::optional<size_t> ParallelLevel = 1;
+
+  // Fallback parallelism limit when '-j' is given with no value.
+  size_t ParallelLevelDefault;
 
   // 'make' jobserver client.  If connected, we acquire a token
   // for each test before running its process.

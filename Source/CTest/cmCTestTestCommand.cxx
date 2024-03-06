@@ -105,8 +105,8 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   if (this->StopOnFailure) {
     handler->SetOption("StopOnFailure", "ON");
   }
-  if (!this->ParallelLevel.empty()) {
-    handler->SetOption("ParallelLevel", this->ParallelLevel);
+  if (this->ParallelLevel) {
+    handler->SetOption("ParallelLevel", *this->ParallelLevel);
   }
   if (!this->Repeat.empty()) {
     handler->SetOption("Repeat", this->Repeat);

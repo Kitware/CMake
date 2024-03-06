@@ -48,9 +48,9 @@ const cmDocumentationEntry cmDocumentationOptions[] = {
     "Truncate 'tail' (default), 'middle' or 'head' of test output once "
     "maximum output size is reached" },
   { "-F", "Enable failover." },
-  { "-j <jobs>, --parallel <jobs>",
-    "Run the tests in parallel using the "
-    "given number of jobs." },
+  { "-j [<level>], --parallel [<level>]",
+    "Run tests in parallel, "
+    "optionally limited to a given level of parallelism." },
   { "-Q,--quiet", "Make ctest quiet." },
   { "-O <file>, --output-log <file>", "Output to log file" },
   { "--output-junit <file>", "Output test results to JUnit XML file." },

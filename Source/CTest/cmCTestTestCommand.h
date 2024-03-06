@@ -8,7 +8,9 @@
 #include <utility>
 
 #include <cm/memory>
+#include <cm/optional>
 
+#include "cmArgumentParserTypes.h"
 #include "cmCTestHandlerCommand.h"
 #include "cmCommand.h"
 
@@ -56,7 +58,7 @@ protected:
   std::string ExcludeFixture;
   std::string ExcludeFixtureSetup;
   std::string ExcludeFixtureCleanup;
-  std::string ParallelLevel;
+  cm::optional<ArgumentParser::Maybe<std::string>> ParallelLevel;
   std::string Repeat;
   std::string ScheduleRandom;
   std::string StopTime;
