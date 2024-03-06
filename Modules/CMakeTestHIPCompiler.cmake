@@ -83,8 +83,8 @@ unset(__CMAKE_HIP_FLAGS)
 
 
 # Try to identify the compiler features
-include(${CMAKE_ROOT}/Modules/CMakeDetermineCompileFeatures.cmake)
-CMAKE_DETERMINE_COMPILE_FEATURES(HIP)
+include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerSupport.cmake)
+CMAKE_DETERMINE_COMPILER_SUPPORT(HIP)
 
 if(CMAKE_HIP_COMPILER_ID STREQUAL "NVIDIA")
   include(Internal/CMakeNVCCFilterImplicitInfo)
