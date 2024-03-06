@@ -341,8 +341,8 @@ private:
   std::string GetTestStatus(cmCTestTestResult const&);
   void ExpandTestsToRunInformation(size_t numPossibleTests);
   void ExpandTestsToRunInformationForRerunFailed();
-  std::set<std::string> ReadTestListFile(
-    const std::string& testListFileName) const;
+  bool ReadTestListFile(std::string const& testListFileName,
+                        std::set<std::string>& testNames) const;
 
   std::vector<std::string> CustomPreTest;
   std::vector<std::string> CustomPostTest;

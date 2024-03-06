@@ -223,6 +223,8 @@ add_test(Test11 \"${CMAKE_COMMAND}\" -E echo \"test11\")
 endfunction()
 run_TestsFromFileTest(include --tests-from-file ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList.txt)
 run_TestsFromFileTest(exclude --exclude-from-file ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList.txt)
+run_TestsFromFileTest(include-missing --tests-from-file ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList-missing.txt)
+run_TestsFromFileTest(exclude-missing --exclude-from-file ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList-missing.txt)
 
 
 function(run_SerialFailed)
