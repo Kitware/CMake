@@ -57,8 +57,19 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "TLSVersion", "CTEST_TLS_VERSION", this->Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "TLSVerify", "CTEST_TLS_VERIFY", this->Quiet);
+  if (!this->CTest->SetCTestConfigurationFromCMakeVariable(
+        this->Makefile, "TLSVerify", "CTEST_TLS_VERIFY", this->Quiet)) {
+    if (cmValue tlsVerifyVar =
+          this->Makefile->GetDefinition("CMAKE_TLS_VERIFY")) {
+      cmCTestOptionalLog(
+        this->CTest, HANDLER_VERBOSE_OUTPUT,
+        "SetCTestConfiguration from CMAKE_TLS_VERIFY:TLSVerify:"
+          << *tlsVerifyVar << std::endl,
+        this->Quiet);
+      this->CTest->SetCTestConfiguration("TLSVerify", *tlsVerifyVar,
+                                         this->Quiet);
+    }
+  }
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "CurlOptions", "CTEST_CURL_OPTIONS", this->Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(

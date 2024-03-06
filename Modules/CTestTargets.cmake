@@ -21,6 +21,9 @@ mark_as_advanced(CMAKE_CTEST_COMMAND)
 # configure files
 
 block()
+  if(NOT DEFINED CTEST_TLS_VERIFY AND DEFINED CMAKE_TLS_VERIFY)
+    set(CTEST_TLS_VERIFY "${CMAKE_TLS_VERIFY}")
+  endif()
   if(CTEST_NEW_FORMAT)
     configure_file(
       ${CMAKE_ROOT}/Modules/DartConfiguration.tcl.in

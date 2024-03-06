@@ -61,6 +61,6 @@ block()
   run_ctest(FailDrop-TLSVersion-1.1 -VV)
   set(CASE_TEST_PREFIX_CODE "set(CTEST_TLS_VERIFY ON)")
   run_ctest(FailDrop-TLSVerify-ON -VV)
-  set(CASE_TEST_PREFIX_CODE "set(CTEST_TLS_VERIFY OFF)")
+  set(CASE_TEST_PREFIX_CODE "set(CMAKE_TLS_VERIFY OFF)") # Test fallback to CMake variable.
   run_ctest(FailDrop-TLSVerify-OFF -VV)
 endblock()

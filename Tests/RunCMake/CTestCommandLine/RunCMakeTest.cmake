@@ -498,7 +498,7 @@ function(run_FailDrop case)
 endfunction()
 run_FailDrop(TLSVersion-1.1 -DCTEST_TLS_VERSION=1.1)
 run_FailDrop(TLSVerify-ON -DCTEST_TLS_VERIFY=ON)
-run_FailDrop(TLSVerify-OFF -DCTEST_TLS_VERIFY=OFF)
+run_FailDrop(TLSVerify-OFF -DCMAKE_TLS_VERIFY=OFF) # Test fallback to CMake variable.
 
 run_cmake_command(EmptyDirCoverage-ctest
   ${CMAKE_CTEST_COMMAND} -C Debug -M Experimental -T Coverage

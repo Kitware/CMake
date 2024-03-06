@@ -8,3 +8,6 @@ Specify the CTest ``TLSVerify`` setting in a :manual:`ctest(1)`
 before including the :module:`CTest` module.  The value is a boolean
 indicating whether to  verify the server certificate when submitting
 to a dashboard via ``https://`` URLs.
+
+If ``CTEST_TLS_VERIFY`` is not set, :variable:`CMAKE_TLS_VERIFY` is
+used instead.
