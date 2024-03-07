@@ -978,16 +978,8 @@ if(BUILD_TESTING)
     endif()
   endif()
 
-  # On Windows run the CPackWiXGenerator test
-  # if the WiX Toolset seems to be available
   if(WIN32)
-    file(TO_CMAKE_PATH "$ENV{WIX}" WIX_ROOT)
-
-    find_program(WIX_LIGHT_EXECUTABLE light
-      PATHS "${WIX_ROOT}/bin"
-      DOC "WiX Toolset light.exe location")
-
-    if(WIX_LIGHT_EXECUTABLE)
+    if(CMake_TEST_CPACK_WIX)
       add_test(CPackWiXGenerator ${CMAKE_CTEST_COMMAND}
         -C \${CTEST_CONFIGURATION_TYPE}
         --build-and-test
