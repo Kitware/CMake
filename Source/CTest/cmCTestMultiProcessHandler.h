@@ -58,7 +58,7 @@ public:
     unsigned int Slots;
   };
 
-  cmCTestMultiProcessHandler();
+  cmCTestMultiProcessHandler(cmCTest* ctest, cmCTestTestHandler* handler);
   virtual ~cmCTestMultiProcessHandler();
   // Set the tests
   void SetTests(TestMap tests, PropertiesMap properties);
@@ -79,13 +79,6 @@ public:
   void SetTestResults(std::vector<cmCTestTestHandler::cmCTestTestResult>* r)
   {
     this->TestResults = r;
-  }
-
-  void SetCTest(cmCTest* ctest) { this->CTest = ctest; }
-
-  void SetTestHandler(cmCTestTestHandler* handler)
-  {
-    this->TestHandler = handler;
   }
 
   cmCTestTestHandler* GetTestHandler() { return this->TestHandler; }
@@ -171,22 +164,26 @@ protected:
   bool InitResourceAllocator(std::string& error);
   bool CheckGeneratedResourceSpec();
 
+private:
+  cmCTest* CTest;
+  cmCTestTestHandler* TestHandler;
+
   bool UseResourceSpec = false;
   cmCTestResourceSpec ResourceSpec;
   std::string ResourceSpecFile;
   std::string ResourceSpecSetupFixture;
   cm::optional<std::size_t> ResourceSpecSetupTest;
-  bool HasInvalidGeneratedResourceSpec;
+  bool HasInvalidGeneratedResourceSpec = false;
 
   // Tests pending selection to start.  They may have dependencies.
   TestMap PendingTests;
   // List of pending test indexes, ordered by cost.
   std::list<int> OrderedTests;
   // Total number of tests we'll be running
-  size_t Total;
+  size_t Total = 0;
   // Number of tests that are complete
-  size_t Completed;
-  size_t RunningCount;
+  size_t Completed = 0;
+  size_t RunningCount = 0;
   std::set<size_t> ProcessorsAvailable;
   size_t HaveAffinity;
   bool StopTimePassed = false;
@@ -204,7 +201,7 @@ protected:
     ResourceAvailabilityErrors;
   cmCTestResourceAllocator ResourceAllocator;
   std::vector<cmCTestTestHandler::cmCTestTestResult>* TestResults;
-  size_t ParallelLevel; // max number of process that can be run at once
+  size_t ParallelLevel = 1; // max number of process that can be run at once
 
   // 'make' jobserver client.  If connected, we acquire a token
   // for each test before running its process.
@@ -214,16 +211,14 @@ protected:
   // Callback invoked when a token is received.
   void JobServerReceivedToken();
 
-  unsigned long TestLoad;
-  unsigned long FakeLoadForTesting;
+  unsigned long TestLoad = 0;
+  unsigned long FakeLoadForTesting = 0;
   cm::uv_loop_ptr Loop;
   cm::uv_idle_ptr StartNextTestsOnIdle_;
   cm::uv_timer_ptr StartNextTestsOnTimer_;
-  cmCTestTestHandler* TestHandler;
-  cmCTest* CTest;
-  bool HasCycles;
+  bool HasCycles = false;
   cmCTest::Repeat RepeatMode = cmCTest::Repeat::Never;
   int RepeatCount = 1;
-  bool Quiet;
-  bool SerialTestRunning;
+  bool Quiet = false;
+  bool SerialTestRunning = false;
 };

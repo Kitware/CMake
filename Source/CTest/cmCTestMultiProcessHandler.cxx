@@ -66,18 +66,13 @@ private:
   cmCTestMultiProcessHandler* Handler;
 };
 
-cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
+cmCTestMultiProcessHandler::cmCTestMultiProcessHandler(
+  cmCTest* ctest, cmCTestTestHandler* handler)
+  : CTest(ctest)
+  , TestHandler(handler)
+  , ProcessorsAvailable(cmAffinity::GetProcessorsAvailable())
+  , HaveAffinity(this->ProcessorsAvailable.size())
 {
-  this->ParallelLevel = 1;
-  this->TestLoad = 0;
-  this->FakeLoadForTesting = 0;
-  this->Completed = 0;
-  this->RunningCount = 0;
-  this->ProcessorsAvailable = cmAffinity::GetProcessorsAvailable();
-  this->HaveAffinity = this->ProcessorsAvailable.size();
-  this->HasCycles = false;
-  this->HasInvalidGeneratedResourceSpec = false;
-  this->SerialTestRunning = false;
 }
 
 cmCTestMultiProcessHandler::~cmCTestMultiProcessHandler() = default;

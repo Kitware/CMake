@@ -1359,10 +1359,9 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   this->StartTestTime = std::chrono::system_clock::now();
   auto elapsed_time_start = std::chrono::steady_clock::now();
 
-  auto parallel = cm::make_unique<cmCTestMultiProcessHandler>();
-  parallel->SetCTest(this->CTest);
+  auto parallel =
+    cm::make_unique<cmCTestMultiProcessHandler>(this->CTest, this);
   parallel->SetParallelLevel(this->CTest->GetParallelLevel());
-  parallel->SetTestHandler(this);
   if (this->RepeatMode != cmCTest::Repeat::Never) {
     parallel->SetRepeatMode(this->RepeatMode, this->RepeatCount);
   } else {
