@@ -39,6 +39,14 @@
 #  define CURL_SSLVERSION_TLSv1_3 CURL_SSLVERSION_LAST
 #endif
 
+// Make sure we keep up with new TLS versions supported by curl.
+// Do this only for our vendored curl to avoid breaking builds
+// against external future versions of curl.
+#if !defined(CMAKE_USE_SYSTEM_CURL)
+static_assert(CURL_SSLVERSION_LAST == 8,
+              "A new CURL_SSLVERSION_ may be available!");
+#endif
+
 cm::optional<int> cmCurlParseTLSVersion(cm::string_view tls_version)
 {
   cm::optional<int> v;
