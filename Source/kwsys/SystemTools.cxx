@@ -4875,7 +4875,7 @@ SystemToolsManager::~SystemToolsManager()
 
 #if defined(__VMS)
 // On VMS we configure the run time C library to be more UNIX like.
-// http://h71000.www7.hp.com/doc/732final/5763/5763pro_004.html
+// https://h71000.www7.hp.com/doc/732final/5763/5763pro_004.html
 extern "C" int decc$feature_get_index(char* name);
 extern "C" int decc$feature_set_value(int index, int mode, int value);
 static int SetVMSFeature(char* name, int value)

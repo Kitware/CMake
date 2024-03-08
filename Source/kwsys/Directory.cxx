@@ -269,7 +269,7 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const std::string& name,
 #  include <string.h>
 
 // PGI with glibc has trouble with dirent and large file support:
-//  http://www.pgroup.com/userforum/viewtopic.php?
+//  https://www.pgroup.com/userforum/viewtopic.php?
 //  p=1992&sid=f16167f51964f1a68fe5041b8eb213b6
 // Work around the problem by mapping dirent the same way as readdir.
 #  if defined(__PGI) && defined(__GLIBC__)
