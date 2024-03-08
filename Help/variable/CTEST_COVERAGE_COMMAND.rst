@@ -59,4 +59,4 @@ The rest of the supplied arguments consist of the full paths to the
 ``/src/main/java`` directories of each module within the source tree. These
 directories are needed and should not be forgotten.
 
-.. _`Cobertura`: http://cobertura.github.io/cobertura/
+.. _`Cobertura`: https://cobertura.github.io/cobertura/

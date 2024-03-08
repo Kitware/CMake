@@ -15,22 +15,22 @@ the following top level CMakeLists.txt:
 .. code-block:: cmake
 
   cmake_minimum_required(VERSION 3.0)
-  project(First HOMEPAGE_URL "http://first.example.com")
-  project(Second HOMEPAGE_URL "http://second.example.com")
+  project(First HOMEPAGE_URL "https://first.example.com")
+  project(Second HOMEPAGE_URL "https://second.example.com")
   add_subdirectory(sub)
-  project(Third HOMEPAGE_URL "http://third.example.com")
+  project(Third HOMEPAGE_URL "https://third.example.com")
 
 And ``sub/CMakeLists.txt`` with the following contents:
 
 .. code-block:: cmake
 
-  project(SubProj HOMEPAGE_URL "http://subproj.example.com")
+  project(SubProj HOMEPAGE_URL "https://subproj.example.com")
   message("CMAKE_PROJECT_HOMEPAGE_URL = ${CMAKE_PROJECT_HOMEPAGE_URL}")
 
 The most recently seen :command:`project` command from the top level
 CMakeLists.txt would be ``project(Second ...)``, so this will print::
 
-  CMAKE_PROJECT_HOMEPAGE_URL = http://second.example.com
+  CMAKE_PROJECT_HOMEPAGE_URL = https://second.example.com
 
 To obtain the homepage URL from the most recent call to :command:`project` in
 the current directory scope or above, see the :variable:`PROJECT_HOMEPAGE_URL`

@@ -13,8 +13,8 @@ The ``Help`` directory contains CMake help manual source files.
 They are written using the `reStructuredText`_ markup syntax and
 processed by `Sphinx`_ to generate the CMake help manuals.
 
-.. _`reStructuredText`: http://docutils.sourceforge.net/docs/ref/rst/introduction.html
-.. _`Sphinx`: http://sphinx-doc.org
+.. _`reStructuredText`: https://docutils.sourceforge.net/docs/ref/rst/introduction.html
+.. _`Sphinx`: https://sphinx-doc.org
 
 Markup Constructs
 -----------------
@@ -338,7 +338,7 @@ Document a "variable" object:
 
 The directive requires a single argument, the variable name.
 
-.. _`Sphinx Domain`: http://sphinx-doc.org/domains.html
+.. _`Sphinx Domain`: https://sphinx-doc.org/domains.html
 .. _`cmake(1)`: https://cmake.org/cmake/help/latest/manual/cmake.1.html
 .. _`cmake-env-variables(7)`: https://cmake.org/cmake/help/latest/manual/cmake-env-variables.7.html
 .. _`cmake-generator-expressions(7)`: https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html
@@ -520,7 +520,7 @@ Style: Cross-References
 
 Mark up linkable references as links, including repeats.
 An alternative, which is used by wikipedia
-(`<http://en.wikipedia.org/wiki/WP:REPEATLINK>`_),
+(`<https://en.wikipedia.org/wiki/WP:REPEATLINK>`_),
 is to link to a reference only once per article. That style is not used
 in CMake documentation.
 
