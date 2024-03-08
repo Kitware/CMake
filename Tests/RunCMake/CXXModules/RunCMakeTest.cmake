@@ -220,6 +220,7 @@ if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   unset(RunCMake_CXXModules_NO_TEST)
   run_cxx_module_test(same-src-name)
   run_cxx_module_test(scan_properties)
+  run_cxx_module_test(target-objects)
 endif ()
 
 # Tests which require compile commands support.
