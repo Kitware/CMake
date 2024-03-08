@@ -145,6 +145,7 @@ public:
     std::vector<std::pair<cmsys::RegularExpression, std::string>>
       TimeoutRegularExpressions;
     std::map<std::string, std::string> Measurements;
+    std::map<std::string, std::string> CustomProperties;
     bool IsInBasedOnREOptions = true;
     bool WillFail = false;
     bool Disabled = false;

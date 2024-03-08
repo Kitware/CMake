@@ -144,13 +144,23 @@ def check_workingdir_property(p):
     assert p["name"] == "WORKING_DIRECTORY"
     assert p["value"].endswith("Tests/RunCMake/CTestCommandLine/ShowOnly")
 
+def check_defined_properties(p_list):
+    for property_id, p in zip(["A", "B"], p_list):
+        assert is_dict(p)
+        assert sorted(p.keys()) == ["name", "value"]
+        assert is_string(p["name"])
+        assert is_string(p["value"])
+        assert p["name"] == "USER_DEFINED_" + property_id
+        assert p["value"] == "User defined property " + property_id + " value"
+
 def check_properties(p):
     assert is_list(p)
-    assert len(p) == 4
+    assert len(p) == 6
     check_resource_groups_property(p[0])
     check_reqfiles_property(p[1])
     check_willfail_property(p[2])
     check_workingdir_property(p[3])
+    check_defined_properties(p[4:5])
 
 def check_tests(t):
     assert is_list(t)

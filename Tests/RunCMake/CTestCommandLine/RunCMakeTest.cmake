@@ -393,6 +393,8 @@ function(run_ShowOnly)
       RESOURCE_GROUPS \"2,threads:2,gpus:4;gpus:2,threads:4\"
       REQUIRED_FILES RequiredFileDoesNotExist
       _BACKTRACE_TRIPLES \"file1;1;add_test;file0;;\"
+      USER_DEFINED_A \"User defined property A value\"
+      USER_DEFINED_B \"User defined property B value\"
       )
     add_test(ShowOnlyNotAvailable NOT_AVAILABLE)
 ")

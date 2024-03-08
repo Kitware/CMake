@@ -2439,6 +2439,8 @@ bool cmCTestTestHandler::SetTestsProperties(
                 rt.TimeoutRegularExpressions.emplace_back(cr, cr);
               }
             }
+          } else {
+            rt.CustomProperties[key] = val;
           }
         }
       }

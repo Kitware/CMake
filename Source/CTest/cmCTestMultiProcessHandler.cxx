@@ -1166,6 +1166,11 @@ static Json::Value DumpCTestProperties(
     properties.append(
       DumpCTestProperty("WORKING_DIRECTORY", testProperties.Directory));
   }
+  if (!testProperties.CustomProperties.empty()) {
+    for (auto const& it : testProperties.CustomProperties) {
+      properties.append(DumpCTestProperty(it.first, it.second));
+    }
+  }
   return properties;
 }
 
