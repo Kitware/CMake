@@ -2037,12 +2037,9 @@ cm::optional<std::set<std::string>> cmCTestTestHandler::ReadTestListFile(
     std::set<std::string> testNames;
     std::string line;
     while (cmSystemTools::GetLineFromStream(ifs, line)) {
-      std::string trimmed = cmTrimWhitespace(line);
-      if (trimmed.empty() || (trimmed[0] == '#')) {
-        continue;
+      if (!line.empty()) {
+        testNames.insert(line);
       }
-
-      testNames.insert(trimmed);
     }
     result = std::move(testNames);
   } else {
