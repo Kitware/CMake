@@ -177,6 +177,8 @@ add_test(NAME Test11 COMMAND ${CMAKE_COMMAND} -E true)
 endfunction()
 run_tests_from_file(include INCLUDE_FROM_FILE ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList.txt)
 run_tests_from_file(exclude EXCLUDE_FROM_FILE ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList.txt)
+run_tests_from_file(include-empty INCLUDE_FROM_FILE ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList-empty.txt)
+run_tests_from_file(exclude-empty EXCLUDE_FROM_FILE ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList-empty.txt)
 run_tests_from_file(include-missing INCLUDE_FROM_FILE ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList-missing.txt)
 run_tests_from_file(exclude-missing EXCLUDE_FROM_FILE ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList-missing.txt)
 
