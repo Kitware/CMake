@@ -1845,11 +1845,15 @@ bool cmCTestTestHandler::GetListOfTests()
   }
 
   if (!this->TestListFile.empty()) {
-    this->TestsToRunByName = this->ReadTestListFile(this->TestListFile);
+    if (!this->ReadTestListFile(this->TestListFile, this->TestsToRunByName)) {
+      return false;
+    }
   }
   if (!this->ExcludeTestListFile.empty()) {
-    this->TestsToExcludeByName =
-      this->ReadTestListFile(this->ExcludeTestListFile);
+    if (!this->ReadTestListFile(this->ExcludeTestListFile,
+                                this->TestsToExcludeByName)) {
+      return false;
+    }
   }
 
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -2020,11 +2024,10 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
   }
 }
 
-std::set<std::string> cmCTestTestHandler::ReadTestListFile(
-  const std::string& testListFileName) const
+bool cmCTestTestHandler::ReadTestListFile(
+  std::string const& testListFileName, std::set<std::string>& testNames) const
 {
-  std::set<std::string> testNames;
-
+  testNames.clear();
   cmsys::ifstream ifs(testListFileName.c_str());
   if (ifs) {
     std::string line;
@@ -2043,9 +2046,10 @@ std::set<std::string> cmCTestTestHandler::ReadTestListFile(
                "Problem reading test list file: "
                  << testListFileName
                  << " while generating list of tests to run." << std::endl);
+    return false;
   }
 
-  return testNames;
+  return true;
 }
 
 void cmCTestTestHandler::RecordCustomTestMeasurements(cmXMLWriter& xml,
