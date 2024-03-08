@@ -209,7 +209,7 @@ run_SkipRegexFoundTest()
 
 
 function(run_TestsFromFileTest case)
-  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestsFromFile)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestsFromFile-${case})
   set(RunCMake_TEST_NO_CLEAN 1)
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
