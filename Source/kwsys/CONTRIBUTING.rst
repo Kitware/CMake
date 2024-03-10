@@ -34,7 +34,7 @@ code.  It automatically runs ``clang-format`` on the set of source files
 for which we enforce style.  The script also has options to format only
 a subset of files, such as those that are locally modified.
 
-.. _`clang-format`: http://clang.llvm.org/docs/ClangFormat.html
+.. _`clang-format`: https://clang.llvm.org/docs/ClangFormat.html
 .. _`.clang-format`: .clang-format
 .. _`clang-format.bash`: clang-format.bash
 

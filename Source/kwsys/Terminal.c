@@ -168,7 +168,7 @@ static const char* kwsysTerminalVT100Names[] = { "Eterm",
 static int kwsysTerminalStreamIsVT100(FILE* stream, int default_vt100,
                                       int default_tty)
 {
-  /* Force color according to http://bixense.com/clicolors/ convention.  */
+  /* Force color according to https://bixense.com/clicolors/ convention.  */
   {
     const char* clicolor_force = getenv("CLICOLOR_FORCE");
     if (clicolor_force && *clicolor_force &&
@@ -177,7 +177,7 @@ static int kwsysTerminalStreamIsVT100(FILE* stream, int default_vt100,
     }
   }
 
-  /* Disable color according to http://bixense.com/clicolors/ convention. */
+  /* Disable color according to https://bixense.com/clicolors/ convention. */
   {
     const char* clicolor = getenv("CLICOLOR");
     if (clicolor && strcmp(clicolor, "0") == 0) {
