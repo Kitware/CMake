@@ -1,0 +1,8 @@
+Test project [^
+]*/Tests/RunCMake/ctest_test/SkipReturnCode-build
+    Start 1: RunCMakeVersion
+1/2 Test #1: RunCMakeVersion ..................   Passed +[0-9.]+ sec
+    Start 2: skip
+2/2 Test #2: skip .............................\*\*\*Skipped +[0-9.]+ sec
++
+100% tests passed, 0 tests failed out of 2

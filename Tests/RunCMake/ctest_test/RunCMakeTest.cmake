@@ -26,6 +26,13 @@ set_property(TEST test6 PROPERTY DEPENDS test1)
 run_ctest_test(SerialOrder INCLUDE test)
 unset(CASE_CMAKELISTS_SUFFIX_CODE)
 
+set(CASE_CMAKELISTS_SUFFIX_CODE [[
+add_test(NAME skip COMMAND ${CMAKE_COMMAND} -E true)
+set_property(TEST skip PROPERTY SKIP_RETURN_CODE 0)
+]])
+run_ctest_test(SkipReturnCode)
+unset(CASE_CMAKELISTS_SUFFIX_CODE)
+
 # Tests for the 'Test Load' feature of ctest
 #
 # Spoof a load average value to make these tests more reliable.
