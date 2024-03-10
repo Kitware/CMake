@@ -3095,10 +3095,6 @@ if(BUILD_TESTING)
     PASS_REGULAR_EXPRESSION "\\*\\*\\*Not Run"
   )
 
-  ADD_TEST_MACRO(CTestTestSerialOrder ${CMAKE_CTEST_COMMAND}
-    --output-on-failure -C "\${CTestTest_CONFIG}")
-  set_property(TEST CTestTestSerialOrder PROPERTY ENVIRONMENT CTEST_PARALLEL_LEVEL=)
-
   if(NOT BORLAND)
     set(CTestLimitDashJ_CTEST_OPTIONS --force-new-ctest-process)
     add_test_macro(CTestLimitDashJ ${CMAKE_CTEST_COMMAND} -j 4

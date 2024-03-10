@@ -1,0 +1,16 @@
+Test project [^
+]*/Tests/RunCMake/ctest_test/SerialOrder-build
+    Start 2: test1
+1/6 Test #2: test1 ............................   Passed +[0-9.]+ sec
+    Start 7: test6
+2/6 Test #7: test6 ............................   Passed +[0-9.]+ sec
+    Start 6: test5
+3/6 Test #6: test5 ............................   Passed +[0-9.]+ sec
+    Start 5: test4
+4/6 Test #5: test4 ............................   Passed +[0-9.]+ sec
+    Start 4: test3
+5/6 Test #4: test3 ............................   Passed +[0-9.]+ sec
+    Start 3: test2
+6/6 Test #3: test2 ............................   Passed +[0-9.]+ sec
++
+100% tests passed, 0 tests failed out of 6

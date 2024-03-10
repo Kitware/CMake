@@ -11,6 +11,21 @@ endfunction()
 
 run_ctest_test(TestQuiet QUIET)
 
+set(CASE_CMAKELISTS_SUFFIX_CODE [[
+foreach(i RANGE 1 6)
+  add_test(NAME test${i} COMMAND ${CMAKE_COMMAND} -E true)
+endforeach()
+set_property(TEST test1 PROPERTY COST -2)
+set_property(TEST test2 PROPERTY COST -1)
+set_property(TEST test3 PROPERTY COST 0)
+set_property(TEST test4 PROPERTY COST 1)
+set_property(TEST test5 PROPERTY COST 2)
+set_property(TEST test6 PROPERTY COST 3)
+set_property(TEST test6 PROPERTY DEPENDS test1)
+]])
+run_ctest_test(SerialOrder INCLUDE test)
+unset(CASE_CMAKELISTS_SUFFIX_CODE)
+
 # Tests for the 'Test Load' feature of ctest
 #
 # Spoof a load average value to make these tests more reliable.
