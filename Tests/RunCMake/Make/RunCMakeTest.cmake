@@ -90,10 +90,13 @@ function(run_CTestJobServer)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CTestJobServer-build)
   run_cmake(CTestJobServer)
   set(RunCMake_TEST_NO_CLEAN 1)
+  # Spoof a number of processors to make sure jobserver integration is unbounded.
+  set(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING} 1)
   run_make_rule(CTestJobServer NoPipe 2)
   run_make_rule(CTestJobServer NoTests 2)
   run_make_rule(CTestJobServer Tests 2)
   run_make_rule(CTestJobServer Tests 3)
+  unset(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING)
 endfunction()
 
 # Jobservers are currently only supported by GNU makes, except MSYS2 make

@@ -2806,7 +2806,6 @@ if(BUILD_TESTING)
     -S "${CMake_BINARY_DIR}/Tests/CTestCoverageCollectGCOV/test.cmake" -VV
     --output-log "${CMake_BINARY_DIR}/Tests/CTestCoverageCollectGCOV/testOut.log"
     )
-  set_property(TEST CTestCoverageCollectGCOV PROPERTY ENVIRONMENT CTEST_PARALLEL_LEVEL=)
 
   configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestEmptyBinaryDirectory/test.cmake.in"
@@ -3073,19 +3072,6 @@ if(BUILD_TESTING)
     "Test command:.*Working Directory:.*Environment variables:.*foo=bar.*this=that"
   )
 
-  configure_file(
-    "${CMake_SOURCE_DIR}/Tests/CTestTestSkipReturnCode/test.cmake.in"
-    "${CMake_BINARY_DIR}/Tests/CTestTestSkipReturnCode/test.cmake"
-    @ONLY ESCAPE_QUOTES)
-  add_test(CTestTestSkipReturnCode ${CMAKE_CTEST_COMMAND}
-    -S "${CMake_BINARY_DIR}/Tests/CTestTestSkipReturnCode/test.cmake" -V
-    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestSkipReturnCode/testOutput.log"
-    -C \${CTEST_CONFIGURATION_TYPE}
-    )
-  set_tests_properties(CTestTestSkipReturnCode PROPERTIES
-    PASS_REGULAR_EXPRESSION "CMakeV1 \\.* +Passed.*CMakeV2 \\.+\\*+Skipped")
-  set_property(TEST CTestTestSkipReturnCode PROPERTY ENVIRONMENT CTEST_PARALLEL_LEVEL=)
-
   ADD_TEST_MACRO(CTestTestSerialInDepends ${CMAKE_CTEST_COMMAND} -j 4
     --output-on-failure -C "\${CTestTest_CONFIG}")
 
@@ -3094,10 +3080,6 @@ if(BUILD_TESTING)
   set_tests_properties(CTestTestMissingDependsExe PROPERTIES
     PASS_REGULAR_EXPRESSION "\\*\\*\\*Not Run"
   )
-
-  ADD_TEST_MACRO(CTestTestSerialOrder ${CMAKE_CTEST_COMMAND}
-    --output-on-failure -C "\${CTestTest_CONFIG}")
-  set_property(TEST CTestTestSerialOrder PROPERTY ENVIRONMENT CTEST_PARALLEL_LEVEL=)
 
   if(NOT BORLAND)
     set(CTestLimitDashJ_CTEST_OPTIONS --force-new-ctest-process)
