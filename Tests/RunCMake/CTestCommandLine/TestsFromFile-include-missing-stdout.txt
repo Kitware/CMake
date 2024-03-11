@@ -1,2 +1,2 @@
 Test project [^
-]*/Tests/RunCMake/CTestCommandLine/TestsFromFile$
+]*/Tests/RunCMake/CTestCommandLine/TestsFromFile-include-missing$

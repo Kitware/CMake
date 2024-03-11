@@ -240,9 +240,9 @@ Run Tests
 
  Run tests listed in the given file.
 
- This option tells CTest to run the tests which are listed in the given
- file. The file must contain one exact test name per line.
- Lines can be commented out using a ``#``.
+ This option tells CTest to run tests that are listed in the given file.
+ The file must contain one exact test name per line.
+ Lines that do not exactly match any test names are ignored.
  This option can be combined with the other options like
  ``-R``, ``-E``, ``-L`` or ``-LE``.
 
@@ -252,9 +252,9 @@ Run Tests
 
  Exclude tests listed in the given file.
 
- This option tells CTest to NOT run the tests which are listed in the given
- file. The file must contain one exact test name per line.
- Lines can be commented out using a ``#``.
+ This option tells CTest to NOT run tests that are listed in the given file.
+ The file must contain one exact test name per line.
+ Lines that do not exactly match any test names are ignored.
  This option can be combined with the other options like
  ``-R``, ``-E``, ``-L`` or ``-LE``.
 
