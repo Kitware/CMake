@@ -347,6 +347,8 @@ void cmCTestTestHandler::Initialize()
   this->ExcludeFixtureCleanupRegExp.clear();
   this->TestListFile.clear();
   this->ExcludeTestListFile.clear();
+  this->TestsToRunByName.reset();
+  this->TestsToExcludeByName.reset();
 
   this->TestsToRunString.clear();
   this->UseUnion = false;
@@ -944,16 +946,16 @@ bool cmCTestTestHandler::ComputeTestList()
       }
     }
 
-    if (!this->TestsToRunByName.empty()) {
-      if (this->TestsToRunByName.find(tp.Name) ==
-          this->TestsToRunByName.end()) {
+    if (this->TestsToRunByName) {
+      if (this->TestsToRunByName->find(tp.Name) ==
+          this->TestsToRunByName->end()) {
         continue;
       }
     }
 
-    if (!this->TestsToExcludeByName.empty()) {
-      if (this->TestsToExcludeByName.find(tp.Name) !=
-          this->TestsToExcludeByName.end()) {
+    if (this->TestsToExcludeByName) {
+      if (this->TestsToExcludeByName->find(tp.Name) !=
+          this->TestsToExcludeByName->end()) {
         continue;
       }
     }
@@ -1845,13 +1847,15 @@ bool cmCTestTestHandler::GetListOfTests()
   }
 
   if (!this->TestListFile.empty()) {
-    if (!this->ReadTestListFile(this->TestListFile, this->TestsToRunByName)) {
+    this->TestsToRunByName = this->ReadTestListFile(this->TestListFile);
+    if (!this->TestsToRunByName) {
       return false;
     }
   }
   if (!this->ExcludeTestListFile.empty()) {
-    if (!this->ReadTestListFile(this->ExcludeTestListFile,
-                                this->TestsToExcludeByName)) {
+    this->TestsToExcludeByName =
+      this->ReadTestListFile(this->ExcludeTestListFile);
+    if (!this->TestsToExcludeByName) {
       return false;
     }
   }
@@ -2024,32 +2028,27 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
   }
 }
 
-bool cmCTestTestHandler::ReadTestListFile(
-  std::string const& testListFileName, std::set<std::string>& testNames) const
+cm::optional<std::set<std::string>> cmCTestTestHandler::ReadTestListFile(
+  std::string const& testListFileName) const
 {
-  testNames.clear();
+  cm::optional<std::set<std::string>> result;
   cmsys::ifstream ifs(testListFileName.c_str());
   if (ifs) {
+    std::set<std::string> testNames;
     std::string line;
     while (cmSystemTools::GetLineFromStream(ifs, line)) {
-      std::string trimmed = cmTrimWhitespace(line);
-      if (trimmed.empty() || (trimmed[0] == '#')) {
-        continue;
+      if (!line.empty()) {
+        testNames.insert(line);
       }
-
-      testNames.insert(trimmed);
     }
-    ifs.close();
-  } else if (!this->CTest->GetShowOnly() &&
-             !this->CTest->ShouldPrintLabels()) {
+    result = std::move(testNames);
+  } else {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Problem reading test list file: "
                  << testListFileName
                  << " while generating list of tests to run." << std::endl);
-    return false;
   }
-
-  return true;
+  return result;
 }
 
 void cmCTestTestHandler::RecordCustomTestMeasurements(cmXMLWriter& xml,

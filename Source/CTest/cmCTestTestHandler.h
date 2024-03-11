@@ -341,8 +341,8 @@ private:
   std::string GetTestStatus(cmCTestTestResult const&);
   void ExpandTestsToRunInformation(size_t numPossibleTests);
   void ExpandTestsToRunInformationForRerunFailed();
-  bool ReadTestListFile(std::string const& testListFileName,
-                        std::set<std::string>& testNames) const;
+  cm::optional<std::set<std::string>> ReadTestListFile(
+    std::string const& testListFileName) const;
 
   std::vector<std::string> CustomPreTest;
   std::vector<std::string> CustomPostTest;
@@ -363,8 +363,8 @@ private:
   cmsys::RegularExpression ExcludeTestsRegularExpression;
   std::string TestListFile;
   std::string ExcludeTestListFile;
-  std::set<std::string> TestsToRunByName;
-  std::set<std::string> TestsToExcludeByName;
+  cm::optional<std::set<std::string>> TestsToRunByName;
+  cm::optional<std::set<std::string>> TestsToExcludeByName;
 
   std::string ResourceSpecFile;
 
