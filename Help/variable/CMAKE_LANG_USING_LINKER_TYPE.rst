@@ -9,6 +9,12 @@ property :prop_tgt:`LINKER_TYPE`. It can hold compiler flags for the link step
 or directly the linker tool. The type of data is given by the variable
 :variable:`CMAKE_<LANG>_USING_LINKER_MODE`.
 
+.. note::
+
+  The specified linker tool is expected to be accessible through
+  the ``PATH`` environment variable, particularly when the
+  :variable:`CMAKE_<LANG>_USING_LINKER_MODE` variable is set to ``FLAG``.
+
 For example, to specify the ``LLVM`` linker for ``GNU`` compilers, we have:
 
 .. code-block:: cmake
