@@ -748,7 +748,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     set(gp_regex_cmp_count 1)
   elseif(gp_tool MATCHES "objdump(\\.exe)?$")
     set(gp_cmd_args "-p")
-    set(gp_regex "^\t*DLL Name: (.*\\.[Dd][Ll][Ll])${eol_char}$")
+    set(gp_regex "^[\t ]*DLL Name: (.*\\.[Dd][Ll][Ll])${eol_char}$")
     set(gp_regex_error "")
     set(gp_regex_fallback "")
     set(gp_regex_cmp_count 1)
