@@ -1,0 +1,1 @@
+^CMake Error: '-j' given invalid value 'bad'$

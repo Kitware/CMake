@@ -179,7 +179,7 @@ struct cmCTest::Private
 
   int MaxTestNameWidth = 30;
 
-  int ParallelLevel = 1;
+  cm::optional<size_t> ParallelLevel = 1;
   bool ParallelLevelSetInCli = false;
 
   unsigned long TestLoad = 0;
@@ -380,14 +380,14 @@ cmCTest::cmCTest()
 
 cmCTest::~cmCTest() = default;
 
-int cmCTest::GetParallelLevel() const
+cm::optional<size_t> cmCTest::GetParallelLevel() const
 {
   return this->Impl->ParallelLevel;
 }
 
-void cmCTest::SetParallelLevel(int level)
+void cmCTest::SetParallelLevel(cm::optional<size_t> level)
 {
-  this->Impl->ParallelLevel = level < 1 ? 1 : level;
+  this->Impl->ParallelLevel = level;
 }
 
 unsigned long cmCTest::GetTestLoad() const
@@ -1892,14 +1892,31 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   std::string arg = args[i];
   if (this->CheckArgument(arg, "-F"_s)) {
     this->Impl->Failover = true;
-  } else if (this->CheckArgument(arg, "-j"_s, "--parallel") &&
-             i < args.size() - 1) {
-    i++;
-    int plevel = atoi(args[i].c_str());
-    this->SetParallelLevel(plevel);
+  } else if (this->CheckArgument(arg, "-j"_s, "--parallel")) {
+    cm::optional<size_t> parallelLevel;
+    // No value or an empty value tells ctest to choose a default.
+    if (i + 1 < args.size() && !cmHasLiteralPrefix(args[i + 1], "-")) {
+      ++i;
+      if (!args[i].empty()) {
+        // A non-empty value must be a non-negative integer.
+        unsigned long plevel = 0;
+        if (!cmStrToULong(args[i], &plevel)) {
+          errormsg =
+            cmStrCat("'", arg, "' given invalid value '", args[i], "'");
+          return false;
+        }
+        parallelLevel = plevel;
+      }
+    }
+    this->SetParallelLevel(parallelLevel);
     this->Impl->ParallelLevelSetInCli = true;
   } else if (cmHasPrefix(arg, "-j")) {
-    int plevel = atoi(arg.substr(2).c_str());
+    // The value must be a non-negative integer.
+    unsigned long plevel = 0;
+    if (!cmStrToULong(arg.substr(2), &plevel)) {
+      errormsg = cmStrCat("'", arg, "' given invalid value '", args[i], "'");
+      return false;
+    }
     this->SetParallelLevel(plevel);
     this->Impl->ParallelLevelSetInCli = true;
   }
@@ -2799,10 +2816,20 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
 
   // handle CTEST_PARALLEL_LEVEL environment variable
   if (!this->Impl->ParallelLevelSetInCli) {
-    std::string parallel;
-    if (cmSystemTools::GetEnv("CTEST_PARALLEL_LEVEL", parallel)) {
-      int plevel = atoi(parallel.c_str());
-      this->SetParallelLevel(plevel);
+    if (cm::optional<std::string> parallelEnv =
+          cmSystemTools::GetEnvVar("CTEST_PARALLEL_LEVEL")) {
+      if (parallelEnv->empty() ||
+          parallelEnv->find_first_not_of(" \t") == std::string::npos) {
+        // An empty value tells ctest to choose a default.
+        this->SetParallelLevel(cm::nullopt);
+      } else {
+        // A non-empty value must be a non-negative integer.
+        // Otherwise, ignore it.
+        unsigned long plevel = 0;
+        if (cmStrToULong(*parallelEnv, &plevel)) {
+          this->SetParallelLevel(plevel);
+        }
+      }
     }
   }
 
