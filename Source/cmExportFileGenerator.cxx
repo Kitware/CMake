@@ -1260,7 +1260,7 @@ void cmExportFileGenerator::GenerateFindDependencyCalls(std::ostream& os)
 
   for (auto const& it : packageDependenciesSorted) {
     if (it.second.Enabled == cmExportSet::PackageDependencyExportEnabled::On) {
-      os << "find_dependency(" << it.first << " REQUIRED";
+      os << "find_dependency(" << it.first;
       for (auto const& arg : it.second.ExtraArguments) {
         os << " " << cmOutputConverter::EscapeForCMake(arg);
       }
