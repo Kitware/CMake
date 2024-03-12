@@ -1,7 +1,9 @@
 EXPORT_FIND_PACKAGE_NAME
 ------------------------
 
-.. versionadded:: 3.29
+.. note::
+
+  Experimental. Gated by ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES``.
 
 Control the package name associated with a dependency target when exporting a
 :command:`find_dependency` call in :command:`install(EXPORT)` or

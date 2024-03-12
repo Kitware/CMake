@@ -57,18 +57,12 @@ Commands
   :option:`cmake -P` scripts with a specified exit code.
 
 * The :command:`export(SETUP)` sub-command was added to configure export sets.
-  Its ``PACKAGE_DEPENDENCY`` option configures how :command:`find_dependency`
-  calls are exported.  Its ``TARGET`` option's ``XCFRAMEWORK_LOCATION``
-  setting specifies the location of a ``.xcframework`` that can be
-  substituted for an installed target.
+  Its ``TARGET`` option's ``XCFRAMEWORK_LOCATION`` setting specifies the
+  location of a ``.xcframework`` that can be substituted for an installed
+  target.
 
 * The :command:`if` command gained new tests ``IS_READABLE``, ``IS_WRITABLE``
   and ``IS_EXECUTABLE`` to check file or directory permissions.
-
-* :command:`install(EXPORT)` and :command:`export(EXPORT)` learned a new
-  ``EXPORT_PACKAGE_DEPENDENCIES`` argument, which can be used to generate
-  :command:`find_dependency` calls based on what targets the exported targets
-  depend on.
 
 Variables
 ---------
@@ -109,11 +103,6 @@ Properties
 
 * The :prop_tgt:`CROSSCOMPILING_EMULATOR` target property now
   supports :manual:`generator expressions <cmake-generator-expressions(7)>`.
-
-* The :prop_tgt:`EXPORT_FIND_PACKAGE_NAME` target property was added to
-  allow targets to specify what package name to pass when exporting
-  :command:`find_dependency` calls. This property is initialized with a new
-  :variable:`CMAKE_EXPORT_FIND_PACKAGE_NAME` variable.
 
 * The :prop_tgt:`UNITY_BUILD` target property now supports the
   Objective C (``OBJC``) and Objective C++ (``OBJCXX``) languages.
@@ -184,9 +173,6 @@ Other Changes
 * The :command:`add_test` command now honors
   :variable:`CMAKE_CROSSCOMPILING_EMULATOR` only when cross-compiling.
   See policy :policy:`CMP0158`.
-
-* :command:`FetchContent_MakeAvailable` now sets the
-  :variable:`CMAKE_EXPORT_FIND_PACKAGE_NAME` variable for CMake projects.
 
 * On Windows, when targeting the MSVC ABI, the :command:`find_library` command
   now accepts ``.a`` file names after first considering ``.lib``.  This is

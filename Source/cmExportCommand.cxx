@@ -17,6 +17,7 @@
 #include "cmArgumentParserTypes.h"
 #include "cmCryptoHash.h"
 #include "cmExecutionStatus.h"
+#include "cmExperimental.h"
 #include "cmExportBuildAndroidMKGenerator.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmExportSet.h"
@@ -83,12 +84,20 @@ bool cmExportCommand(std::vector<std::string> const& args,
       .Bind("CXX_MODULES_DIRECTORY"_s, &Arguments::CxxModulesDirectory);
 
   if (args[0] == "EXPORT") {
-    parser.Bind("EXPORT"_s, &Arguments::ExportSetName)
-      .Bind("EXPORT_PACKAGE_DEPENDENCIES"_s,
-            &Arguments::ExportPackageDependencies);
+    parser.Bind("EXPORT"_s, &Arguments::ExportSetName);
+    if (cmExperimental::HasSupportEnabled(
+          status.GetMakefile(),
+          cmExperimental::Feature::ExportPackageDependencies)) {
+      parser.Bind("EXPORT_PACKAGE_DEPENDENCIES"_s,
+                  &Arguments::ExportPackageDependencies);
+    }
   } else if (args[0] == "SETUP") {
     parser.Bind("SETUP"_s, &Arguments::ExportSetName);
-    parser.Bind("PACKAGE_DEPENDENCY"_s, &Arguments::PackageDependencyArgs);
+    if (cmExperimental::HasSupportEnabled(
+          status.GetMakefile(),
+          cmExperimental::Feature::ExportPackageDependencies)) {
+      parser.Bind("PACKAGE_DEPENDENCY"_s, &Arguments::PackageDependencyArgs);
+    }
     parser.Bind("TARGET"_s, &Arguments::TargetArgs);
   } else {
     parser.Bind("TARGETS"_s, &Arguments::Targets);

@@ -120,7 +120,9 @@ associated with the export ``<export-name>`` using the ``EXPORT`` option
 of the :command:`install(TARGETS)` command.
 
 ``EXPORT_PACKAGE_DEPENDENCIES``
-  .. versionadded:: 3.29
+  .. note::
+
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES``.
 
   Specify that :command:`find_dependency` calls should be exported. See
   :command:`install(EXPORT)` for details on how this works.
@@ -180,6 +182,10 @@ Configuring Exports
 Configure the parameters of an export. The arguments are as follows:
 
 ``PACKAGE_DEPENDENCY <dep>``
+  .. note::
+
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES``.
+
   Specify a package dependency to configure. This changes how
   :command:`find_dependency` calls are written during
   :command:`export(EXPORT)` and :command:`install(EXPORT)`. ``<dep>`` is the

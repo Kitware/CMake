@@ -21,6 +21,7 @@
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
 #include "cmExecutionStatus.h"
+#include "cmExperimental.h"
 #include "cmExportSet.h"
 #include "cmFileSet.h"
 #include "cmGeneratorExpression.h"
@@ -2061,7 +2062,12 @@ bool HandleExportMode(std::vector<std::string> const& args,
   ica.Bind("EXPORT_LINK_INTERFACE_LIBRARIES"_s, exportOld);
   ica.Bind("FILE"_s, filename);
   ica.Bind("CXX_MODULES_DIRECTORY"_s, cxx_modules_directory);
-  ica.Bind("EXPORT_PACKAGE_DEPENDENCIES"_s, exportPackageDependencies);
+
+  if (cmExperimental::HasSupportEnabled(
+        status.GetMakefile(),
+        cmExperimental::Feature::ExportPackageDependencies)) {
+    ica.Bind("EXPORT_PACKAGE_DEPENDENCIES"_s, exportPackageDependencies);
+  }
 
   std::vector<std::string> unknownArgs;
   ica.Parse(args, &unknownArgs);
