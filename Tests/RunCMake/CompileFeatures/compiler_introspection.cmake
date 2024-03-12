@@ -16,6 +16,13 @@ set(CMAKE_XCODE_BUILD_SYSTEM ${CMAKE_XCODE_BUILD_SYSTEM})
 ")
 endif()
 
+if(XCODE_VERSION)
+  string(APPEND info "
+set(XCODE_VERSION ${XCODE_VERSION})
+
+")
+endif()
+
 macro(info lang)
   string(APPEND info "\
 set(${lang}_STANDARD_DEFAULT ${CMAKE_${lang}_STANDARD_DEFAULT})
