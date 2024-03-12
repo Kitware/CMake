@@ -5588,7 +5588,7 @@ std::string cmGeneratorTarget::GetLinkerTool(const std::string& lang,
       this->LocalGenerator->IssueMessage(
         MessageType::FATAL_ERROR,
         cmStrCat("LINKER_TYPE '", linkerType,
-                 "' is unknown. Did you forgot to define '", usingLinker,
+                 "' is unknown. Did you forget to define '", usingLinker,
                  "' variable?"));
     }
   }

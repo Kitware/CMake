@@ -3359,7 +3359,7 @@ void cmLocalGenerator::AppendLinkerTypeFlags(std::string& flags,
   } else if (linkerType != "DEFAULT"_s) {
     this->IssueMessage(MessageType::FATAL_ERROR,
                        cmStrCat("LINKER_TYPE '", linkerType,
-                                "' is unknown. Did you forgot to define '",
+                                "' is unknown. Did you forget to define '",
                                 usingLinker, "' variable?"));
   }
 }
