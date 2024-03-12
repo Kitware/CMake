@@ -2,9 +2,12 @@ include(RunCTest)
 
 # Default case parameters.
 set(CASE_DROP_METHOD "http")
-set(CASE_DROP_SITE "-no-site-")
+set(CASE_DROP_SITE "badhostname.invalid")
 set(CASE_CTEST_SUBMIT_ARGS "")
 
+# Do not use any proxy for lookup of an invalid site.
+# DNS failure by proxy looks different than DNS failure without proxy.
+set(ENV{no_proxy} "$ENV{no_proxy},badhostname.invalid")
 
 function(run_ctest_submit CASE_NAME)
   set(CASE_CTEST_SUBMIT_ARGS "${ARGN}")

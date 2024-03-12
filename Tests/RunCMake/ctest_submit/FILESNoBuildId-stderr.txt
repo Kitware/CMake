@@ -1,1 +1,1 @@
- *Error message was: ([Cc]ould *n.t resolve host:? '?-no-site-'?.*|The requested URL returned error:.*)
+ *Error message was: ([Cc]ould *n.t resolve host:? '?badhostname.invalid'?.*|The requested URL returned error:.*)

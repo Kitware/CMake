@@ -3,7 +3,3 @@
 # so that any ctest_submit calls fail with an error message.
 set(CTEST_DROP_METHOD "@CASE_DROP_METHOD@")
 set(CTEST_DROP_SITE "@CASE_DROP_SITE@")
-
-# do not use proxy for lookup of invalid site (DNS failure by proxy looks
-# different than DNS failure without proxy)
-set(ENV{no_proxy} "$ENV{no_proxy},@CASE_DROP_SITE@")
