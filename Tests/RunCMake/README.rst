@@ -71,6 +71,8 @@ but do not actually build anything.  To add a test:
     Top of test binary tree
 
    and an failure must store a message in ``RunCMake_TEST_FAILED``.
+   The check script may optionally set ``RunCMake_TEST_FAILURE_MESSAGE``
+   with additional text to be included in the message if the test fails.
 
 To speed up local testing, you can choose to run only a subset of
 ``run_cmake()`` tests in a ``RunCMakeTest.cmake`` script by using the
