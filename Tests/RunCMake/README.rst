@@ -32,6 +32,16 @@ but do not actually build anything.  To add a test:
    and create ``test.cmake.in``, ``CTestConfig.cmake.in``, and
    ``CMakeLists.txt.in`` files to be configured for each case.
 
+   Alternatively, if the test is to cover running ``cpack -G`` then use::
+
+    include(RunCPack)
+    run_cpack(Sample1)
+    ...
+    run_cpack(SampleN)
+
+   where ``Sample1`` through ``SampleN`` are sample project directories
+   in the ``RunCPack/`` directory adjacent to this file.
+
 4. Create file ``<Test>/CMakeLists.txt`` in the directory containing::
 
     cmake_minimum_required(...)
