@@ -34,7 +34,20 @@
     }                                                                         \
   } while (false)
 
-cm::optional<int> cmCurlParseTLSVersion(std::string const& tls_version)
+// curl versions before 7.52.0 did not provide TLS 1.3 support
+#if defined(LIBCURL_VERSION_NUM) && LIBCURL_VERSION_NUM < 0x073400
+#  define CURL_SSLVERSION_TLSv1_3 CURL_SSLVERSION_LAST
+#endif
+
+// Make sure we keep up with new TLS versions supported by curl.
+// Do this only for our vendored curl to avoid breaking builds
+// against external future versions of curl.
+#if !defined(CMAKE_USE_SYSTEM_CURL)
+static_assert(CURL_SSLVERSION_LAST == 8,
+              "A new CURL_SSLVERSION_ may be available!");
+#endif
+
+cm::optional<int> cmCurlParseTLSVersion(cm::string_view tls_version)
 {
   cm::optional<int> v;
   if (tls_version == "1.0"_s) {
@@ -44,14 +57,29 @@ cm::optional<int> cmCurlParseTLSVersion(std::string const& tls_version)
   } else if (tls_version == "1.2"_s) {
     v = CURL_SSLVERSION_TLSv1_2;
   } else if (tls_version == "1.3"_s) {
-    // curl version 7.52.0 introduced TLS 1.3 support
-#if defined(LIBCURL_VERSION_NUM) && LIBCURL_VERSION_NUM >= 0x073400
     v = CURL_SSLVERSION_TLSv1_3;
-#else
-    v = CURL_SSLVERSION_LAST;
-#endif
   }
   return v;
+}
+
+cm::optional<std::string> cmCurlPrintTLSVersion(int curl_tls_version)
+{
+  cm::optional<std::string> s;
+  switch (curl_tls_version) {
+    case CURL_SSLVERSION_TLSv1_0:
+      s = "CURL_SSLVERSION_TLSv1_0"_s;
+      break;
+    case CURL_SSLVERSION_TLSv1_1:
+      s = "CURL_SSLVERSION_TLSv1_1"_s;
+      break;
+    case CURL_SSLVERSION_TLSv1_2:
+      s = "CURL_SSLVERSION_TLSv1_2"_s;
+      break;
+    case CURL_SSLVERSION_TLSv1_3:
+      s = "CURL_SSLVERSION_TLSv1_3"_s;
+      break;
+  }
+  return s;
 }
 
 std::string cmCurlSetCAInfo(::CURL* curl, const std::string& cafile)

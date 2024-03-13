@@ -95,6 +95,9 @@ TimeOut: @DART_TESTING_TIMEOUT@
 # so would cause the system load to exceed this value.
 TestLoad: @CTEST_TEST_LOAD@
 
+TLSVerify: @CTEST_TLS_VERIFY@
+TLSVersion: @CTEST_TLS_VERSION@
+
 UseLaunchers: @CTEST_USE_LAUNCHERS@
 CurlOptions: @CTEST_CURL_OPTIONS@
 # warning, if you add new options here that have to do with submit,

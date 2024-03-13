@@ -1,6 +1,10 @@
 include(RunCMake)
 include(RunCTest)
 
+# Do not use any proxy for lookup of an invalid site.
+# DNS failure by proxy looks different than DNS failure without proxy.
+set(ENV{no_proxy} "$ENV{no_proxy},badhostname.invalid")
+
 set(RunCMake_TEST_TIMEOUT 60)
 
 run_cmake_command(repeat-opt-bad1
@@ -483,6 +487,23 @@ run_NoTests()
 
 # Check the configuration type variable is passed
 run_ctest(check-configuration-type)
+
+function(run_FailDrop case)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/FailDrop-${case}-build)
+  run_cmake_with_options(FailDrop-${case} ${ARGN})
+  unset(ENV{CMAKE_TLS_VERSION}) # Test that env variable is saved in ctest config file.
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(FailDrop-${case}-ctest
+    ${CMAKE_CTEST_COMMAND} -M Experimental -T Submit -VV
+    )
+endfunction()
+run_FailDrop(TLSVersion-1.1 -DCTEST_TLS_VERSION=1.1)
+run_FailDrop(TLSVersion-1.1-cmake -DCMAKE_TLS_VERSION=1.1) # Test fallback to CMake variable.
+set(ENV{CMAKE_TLS_VERSION} 1.1) # Test fallback to env variable.
+run_FailDrop(TLSVersion-1.1-env)
+unset(ENV{CMAKE_TLS_VERSION})
+run_FailDrop(TLSVerify-ON -DCTEST_TLS_VERIFY=ON)
+run_FailDrop(TLSVerify-OFF -DCMAKE_TLS_VERIFY=OFF) # Test fallback to CMake variable.
 
 run_cmake_command(EmptyDirCoverage-ctest
   ${CMAKE_CTEST_COMMAND} -C Debug -M Experimental -T Coverage

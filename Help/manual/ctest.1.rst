@@ -1452,13 +1452,24 @@ Configuration settings include:
   * :module:`CTest` module variable: ``CTEST_SUBMIT_RETRY_DELAY``
 
 ``CurlOptions``
+  .. deprecated:: 3.30
+
+    Use ``TLSVerify`` instead.
+
   Specify a semicolon-separated list of options to control the
   Curl library that CTest uses internally to connect to the
-  server.  Possible options are ``CURLOPT_SSL_VERIFYPEER_OFF``
-  and ``CURLOPT_SSL_VERIFYHOST_OFF``.
+  server.
 
   * `CTest Script`_ variable: :variable:`CTEST_CURL_OPTIONS`
   * :module:`CTest` module variable: ``CTEST_CURL_OPTIONS``
+
+  Possible options are:
+
+  ``CURLOPT_SSL_VERIFYPEER_OFF``
+    Disable the ``CURLOPT_SSL_VERIFYPEER`` curl option.
+
+  ``CURLOPT_SSL_VERIFYHOST_OFF``
+    Disable the ``CURLOPT_SSL_VERIFYHOST`` curl option.
 
 ``DropLocation``
   Legacy option.  When ``SubmitURL`` is not set, it is constructed from
@@ -1539,6 +1550,24 @@ Configuration settings include:
 
   * `CTest Script`_ variable: :variable:`CTEST_SUBMIT_INACTIVITY_TIMEOUT`
   * :module:`CTest` module variable: ``CTEST_SUBMIT_INACTIVITY_TIMEOUT``
+
+``TLSVersion``
+  .. versionadded:: 3.30
+
+  Specify a minimum TLS version allowed when submitting to a dashboard
+  via ``https://`` URLs.
+
+  * `CTest Script`_ variable: :variable:`CTEST_TLS_VERSION`
+  * :module:`CTest` module variable: ``CTEST_TLS_VERSION``
+
+``TLSVerify``
+  .. versionadded:: 3.30
+
+  Specify a boolean value indicating whether to verify the server
+  certificate when submitting to a dashboard via ``https://`` URLs.
+
+  * `CTest Script`_ variable: :variable:`CTEST_TLS_VERIFY`
+  * :module:`CTest` module variable: ``CTEST_TLS_VERIFY``
 
 ``TriggerSite``
   Legacy option.  Not used.
