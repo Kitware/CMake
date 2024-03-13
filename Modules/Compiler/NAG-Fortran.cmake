@@ -28,6 +28,13 @@ if(NOT CMAKE_Fortran_COMPILER_WORKS AND NOT CMAKE_Fortran_COMPILER_FORCED)
   endif()
 endif()
 
+# Initial configuration flags.
+string(APPEND CMAKE_Fortran_FLAGS_INIT " ")
+string(APPEND CMAKE_Fortran_FLAGS_DEBUG_INIT " -g")
+string(APPEND CMAKE_Fortran_FLAGS_MINSIZEREL_INIT " -O2 -DNDEBUG")
+string(APPEND CMAKE_Fortran_FLAGS_RELEASE_INIT " -O4 -DNDEBUG")
+string(APPEND CMAKE_Fortran_FLAGS_RELWITHDEBINFO_INIT " -O2 -g -DNDEBUG")
+
 set(CMAKE_Fortran_SUBMODULE_SEP ".")
 set(CMAKE_Fortran_SUBMODULE_EXT ".sub")
 set(CMAKE_Fortran_MODDIR_FLAG "-mdir ")
