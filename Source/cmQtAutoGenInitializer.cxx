@@ -1366,6 +1366,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       }
     }
 
+    cmTarget* timestampTarget = nullptr;
     std::vector<std::string> dependencies(
       this->AutogenTarget.DependFiles.begin(),
       this->AutogenTarget.DependFiles.end());
@@ -1390,24 +1391,8 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       cc->SetWorkingDirectory(this->Dir.Work.c_str());
       cc->SetDepends(dependencies);
       cc->SetEscapeOldStyle(false);
-      cmTarget* timestampTarget = this->LocalGen->AddUtilityCommand(
-        timestampTargetName, true, std::move(cc));
-
-      // Add additional autogen target dependencies to
-      // '_autogen_timestamp_deps'.
-      for (const cmTarget* t : this->AutogenTarget.DependTargets) {
-        timestampTarget->AddUtility(t->GetName(), false, this->Makefile);
-      }
-
-      auto const isMake =
-        this->GlobalGen->GetName().find("Make") != std::string::npos;
-      if (this->AutogenTarget.DependOrigin && isMake) {
-        for (BT<std::pair<std::string, bool>> const& depName :
-             this->GenTarget->GetUtilities()) {
-          timestampTarget->AddUtility(depName.Value.first, false,
-                                      this->Makefile);
-        }
-      }
+      timestampTarget = this->LocalGen->AddUtilityCommand(timestampTargetName,
+                                                          true, std::move(cc));
 
       this->LocalGen->AddGeneratorTarget(
         cm::make_unique<cmGeneratorTarget>(timestampTarget, this->LocalGen));
@@ -1471,18 +1456,19 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     this->LocalGen->AddGeneratorTarget(
       cm::make_unique<cmGeneratorTarget>(autogenTarget, this->LocalGen));
 
+    // Order the autogen target(s) just before the original target.
+    cmTarget* orderTarget = timestampTarget ? timestampTarget : autogenTarget;
     // Forward origin utilities to autogen target
     if (this->AutogenTarget.DependOrigin) {
       for (BT<std::pair<std::string, bool>> const& depName :
            this->GenTarget->GetUtilities()) {
-        autogenTarget->AddUtility(depName.Value.first, false, this->Makefile);
+        orderTarget->AddUtility(depName.Value.first, false, this->Makefile);
       }
     }
-    if (!useDepfile) {
-      // Add additional autogen target dependencies to autogen target
-      for (cmTarget const* depTarget : this->AutogenTarget.DependTargets) {
-        autogenTarget->AddUtility(depTarget->GetName(), false, this->Makefile);
-      }
+
+    // Add additional autogen target dependencies to autogen target
+    for (cmTarget const* depTarget : this->AutogenTarget.DependTargets) {
+      orderTarget->AddUtility(depTarget->GetName(), false, this->Makefile);
     }
 
     // Set FOLDER property in autogen target
