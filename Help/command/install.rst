@@ -853,7 +853,9 @@ Signatures
     targets in the export set will support being imported in consuming targets.
 
   ``EXPORT_PACKAGE_DEPENDENCIES``
-    .. versionadded:: 3.29
+    .. note::
+
+      Experimental. Gated by ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES``.
 
     Specify that :command:`find_dependency` calls should be exported. If this
     argument is specified, CMake examines all targets in the export set and
