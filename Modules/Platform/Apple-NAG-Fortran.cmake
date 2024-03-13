@@ -3,9 +3,13 @@
 
 set(CMAKE_Fortran_VERBOSE_FLAG "-Wl,-v") # Runs gcc under the hood.
 
-# Need -fpp explicitly on case-insensitive filesystem.
-set(CMAKE_Fortran_COMPILE_OBJECT
-  "<CMAKE_Fortran_COMPILER> -fpp -o <OBJECT> <DEFINES> <INCLUDES> <FLAGS> -c <SOURCE>")
+# FIXME(#25900): We need -fpp explicitly on case-insensitive filesystems,
+# but this does not work with the Ninja generator's separate preprocessing
+# and compilation steps.
+if(NOT CMAKE_GENERATOR MATCHES "^Ninja")
+  set(CMAKE_Fortran_COMPILE_OBJECT
+    "<CMAKE_Fortran_COMPILER> -fpp -o <OBJECT> <DEFINES> <INCLUDES> <FLAGS> -c <SOURCE>")
+endif()
 
 set(CMAKE_Fortran_OSX_COMPATIBILITY_VERSION_FLAG "-Wl,-compatibility_version -Wl,")
 set(CMAKE_Fortran_OSX_CURRENT_VERSION_FLAG "-Wl,-current_version -Wl,")
