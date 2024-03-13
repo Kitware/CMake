@@ -46,11 +46,11 @@ else(WORDS_BIGENDIAN)
 endif(WORDS_BIGENDIAN)
 
 if(HAVE_SYS_TYPES_H)
-    check_symbol_exists("off_t" "sys/types.h" OFF_T)
-    check_symbol_exists("size_t" "sys/types.h" SIZE_T)
+    check_symbol_exists("off_t" "sys/types.h" off_t)
+    check_symbol_exists("size_t" "sys/types.h" size_t)
 else(HAVE_SYS_TYPES_H)
-    set(OFF_T "long")
-    set(SIZE_T "unsigned")
+    set(off_t "long")
+    set(size_t "unsigned")
 endif(HAVE_SYS_TYPES_H)
 
 check_c_source_compiles("
