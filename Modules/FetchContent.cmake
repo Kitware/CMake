@@ -1967,7 +1967,12 @@ macro(FetchContent_MakeAvailable)
           "${__cmake_contentName}"
         )
 
-        list(APPEND __cmake_fcCurrentVarsStack "__fcprefix__${CMAKE_EXPORT_FIND_PACKAGE_NAME}")
+        if(DEFINED CMAKE_EXPORT_FIND_PACKAGE_NAME)
+          list(APPEND __cmake_fcCurrentVarsStack "${CMAKE_EXPORT_FIND_PACKAGE_NAME}")
+        else()
+          # This just needs to be something that can't be a real package name
+          list(APPEND __cmake_fcCurrentVarsStack "<<::VAR_NOT_SET::>>")
+        endif()
         set(CMAKE_EXPORT_FIND_PACKAGE_NAME "${__cmake_contentName}")
 
         # It's still valid if there are no saved details. The project may have
@@ -2015,7 +2020,11 @@ macro(FetchContent_MakeAvailable)
         list(POP_BACK __cmake_fcCurrentVarsStack
           __cmake_contentNameLower
           __cmake_contentName
+          CMAKE_EXPORT_FIND_PACKAGE_NAME
         )
+        if(CMAKE_EXPORT_FIND_PACKAGE_NAME STREQUAL "<<::VAR_NOT_SET::>>")
+          unset(CMAKE_EXPORT_FIND_PACKAGE_NAME)
+        endif()
 
         unset(__cmake_fcProvider_${__cmake_contentNameLower})
         unset(__cmake_providerArgs)
@@ -2023,12 +2032,6 @@ macro(FetchContent_MakeAvailable)
         unset(__cmake_fpargs)
         unset(__cmake_item)
         unset(__cmake_contentDetails)
-
-        list(POP_BACK __cmake_fcCurrentVarsStack __cmake_original_export_find_package_name)
-        string(SUBSTRING "${__cmake_original_export_find_package_name}"
-          12 -1 __cmake_original_export_find_package_name
-        )
-        set(CMAKE_EXPORT_FIND_PACKAGE_NAME ${__cmake_original_export_find_package_name})
 
         FetchContent_GetProperties(${__cmake_contentName})
         if(${__cmake_contentNameLower}_POPULATED)
@@ -2099,7 +2102,12 @@ macro(FetchContent_MakeAvailable)
       endif()
 
       if(EXISTS ${__cmake_srcdir}/CMakeLists.txt)
-        list(APPEND __cmake_fcCurrentVarsStack "__fcprefix__${CMAKE_EXPORT_FIND_PACKAGE_NAME}")
+        if(DEFINED CMAKE_EXPORT_FIND_PACKAGE_NAME)
+          list(APPEND __cmake_fcCurrentVarsStack "${CMAKE_EXPORT_FIND_PACKAGE_NAME}")
+        else()
+          # This just needs to be something that can't be a real package name
+          list(APPEND __cmake_fcCurrentVarsStack "<<::VAR_NOT_SET::>>")
+        endif()
         set(CMAKE_EXPORT_FIND_PACKAGE_NAME "${__cmake_contentName}")
 
         set(__cmake_add_subdirectory_args ${__cmake_srcdir} ${${__cmake_contentNameLower}_BINARY_DIR})
@@ -2111,11 +2119,10 @@ macro(FetchContent_MakeAvailable)
         endif()
         add_subdirectory(${__cmake_add_subdirectory_args})
 
-        list(POP_BACK __cmake_fcCurrentVarsStack __cmake_original_export_find_package_name)
-        string(SUBSTRING "${__cmake_original_export_find_package_name}"
-          12 -1 __cmake_original_export_find_package_name
-        )
-        set(CMAKE_EXPORT_FIND_PACKAGE_NAME ${__cmake_original_export_find_package_name})
+        list(POP_BACK __cmake_fcCurrentVarsStack CMAKE_EXPORT_FIND_PACKAGE_NAME)
+        if(CMAKE_EXPORT_FIND_PACKAGE_NAME STREQUAL "<<::VAR_NOT_SET::>>")
+          unset(CMAKE_EXPORT_FIND_PACKAGE_NAME)
+        endif()
       endif()
 
       unset(__cmake_srcdir)
