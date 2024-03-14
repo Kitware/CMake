@@ -6,6 +6,7 @@ set_property(TARGET foo PROPERTY ENABLE_EXPORTS TRUE)
 add_executable(main main.c)
 target_link_libraries(main PRIVATE foo)
 
+add_subdirectory(SUBDIR)
 
 install(TARGETS foo DESTINATION "${CMAKE_BINARY_DIR}/INSTALL")
 
@@ -24,15 +25,20 @@ macro (CHECK_FILE test_msg path)
   endif()
 endmacro()
 
-check_file("DYLIB file" "$<TARGET_FILE:foo>")
+check_file("foo DYLIB file" "$<TARGET_FILE:foo>")
+check_file("foo2 DYLIB file" "$<TARGET_FILE:foo2>")
 check_file("executable file" "$<TARGET_FILE:main>")
 
+check_file("Installed foo DYLIB file" "${RunCMake_TEST_BINARY_DIR}/INSTALL/$<TARGET_FILE_NAME:foo>")
+check_file("Installed foo2 DYLIB file" "${RunCMake_TEST_BINARY_DIR}/INSTALL/$<TARGET_FILE_NAME:foo2>")
 check_file("Installed DYLIB file" "${RunCMake_TEST_BINARY_DIR}/INSTALL2/lib/$<TARGET_FILE_NAME:foo>")
 
 if (APPLE_TEXT_STUBS_SUPPORTED)
-  check_file("TBD file" "$<TARGET_IMPORT_FILE:foo>")
+  check_file("foo TBD file" "$<TARGET_IMPORT_FILE:foo>")
+  check_file("foo2 TBD file" "$<TARGET_IMPORT_FILE:foo2>")
 
-  check_file("Installed TBD file" "${RunCMake_TEST_BINARY_DIR}/INSTALL/$<TARGET_IMPORT_FILE_NAME:foo>")
+  check_file("Installed foo TBD file" "${RunCMake_TEST_BINARY_DIR}/INSTALL/$<TARGET_IMPORT_FILE_NAME:foo>")
+  check_file("Installed foo2 TBD file" "${RunCMake_TEST_BINARY_DIR}/INSTALL/$<TARGET_IMPORT_FILE_NAME:foo2>")
   check_file("Installed TBD file" "${RunCMake_TEST_BINARY_DIR}/INSTALL2/dev/$<TARGET_IMPORT_FILE_NAME:foo>")
 endif()
 ]])
