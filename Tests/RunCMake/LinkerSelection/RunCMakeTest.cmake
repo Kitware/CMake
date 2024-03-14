@@ -5,7 +5,8 @@ if (RunCMake_GENERATOR MATCHES "Visual Studio 9 2008")
   return()
 endif()
 
-run_cmake(InvalidLinkerType)
+run_cmake(InvalidLinkerType1)
+run_cmake(InvalidLinkerType2)
 
 # look-up for LLVM linker
 if (WIN32)

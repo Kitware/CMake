@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <initializer_list>
@@ -3357,10 +3358,22 @@ void cmLocalGenerator::AppendLinkerTypeFlags(std::string& flags,
       this->AppendFlags(flags, linkerFlags);
     }
   } else if (linkerType != "DEFAULT"_s) {
-    this->IssueMessage(MessageType::FATAL_ERROR,
-                       cmStrCat("LINKER_TYPE '", linkerType,
-                                "' is unknown. Did you forgot to define '",
-                                usingLinker, "' variable?"));
+    auto isCMakeLinkerType = [](const std::string& type) -> bool {
+      return std::all_of(type.cbegin(), type.cend(),
+                         [](char c) { return std::isupper(c); });
+    };
+    if (isCMakeLinkerType(linkerType)) {
+      this->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("LINKER_TYPE '", linkerType,
+                 "' is unknown or not supported by this toolchain."));
+    } else {
+      this->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("LINKER_TYPE '", linkerType,
+                 "' is unknown. Did you forget to define the '", usingLinker,
+                 "' variable?"));
+    }
   }
 }
 
