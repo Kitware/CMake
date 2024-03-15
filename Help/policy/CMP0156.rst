@@ -17,20 +17,20 @@ Handling mutually dependent archives may be awkward when using a traditional
 linker. Archive files may have to be specified multiple times.
 
 Some linkers (for instance Apple or Windows linkers, as well as ``LLVM LLD``)
-records all symbols found in objects and archives as it iterates over command
+record all symbols found in objects and archives as they iterate over command
 line arguments. When one of these linkers encounters an undefined symbol that
 can be resolved by an object file contained in a previously processed archive
 file, it immediately extracts and links it into the output object.
 
 CMake 3.28 and below may generate link lines that repeat static libraries as
-a traditional linker would need, even when using a linker does not need it.
+a traditional linker would need, even when using a linker that does not need it.
 They may also de-duplicate shared libraries by keeping their last occurrence,
 which on Windows platforms can change DLL load order.
 
 CMake 3.29 and above prefer to apply different strategies based on linker
 capabilities.  So, when targeting Apple and Windows platforms, all
 libraries are de-duplicated.  Moreover, on Windows platforms, libraries
-are de-duplicated by keeping their fist occurrence, thus respecting the
+are de-duplicated by keeping their first occurrence, thus respecting the
 project-specified order.  This policy provides compatibility with projects
 that have not been updated to expect the latter behavior.
 
