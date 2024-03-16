@@ -861,7 +861,7 @@ function(cpack_rpm_generate_package)
 
   # If rpmbuild is found
   # we try to discover alien since we may be on non RPM distro like Debian.
-  # In this case we may try to to use more advanced features
+  # In this case we may try to use more advanced features
   # like generating RPM directly from DEB using alien.
   # FIXME feature not finished (yet)
   find_program(ALIEN_EXECUTABLE alien)
