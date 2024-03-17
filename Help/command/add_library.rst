@@ -84,6 +84,13 @@ See also :prop_sf:`HEADER_FILE_ONLY` on what to do if some sources are
 pre-processed, and you want to have the original sources reachable from
 within IDE.
 
+.. versionchanged:: 3.30
+
+  On platforms that do not support shared libraries, ``add_library``
+  now fails on calls creating ``SHARED`` libraries instead of
+  automatically converting them to ``STATIC`` libraries as before.
+  See policy :policy:`CMP0164`.
+
 Object Libraries
 ^^^^^^^^^^^^^^^^
 

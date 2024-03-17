@@ -22,3 +22,7 @@ run_cmake(STATICwithNoSourcesButLinkObjects)
 run_cmake(SHAREDwithNoSourcesButLinkObjects)
 run_cmake(MODULEwithNoSourcesButLinkObjects)
 run_cmake(UNKNOWNwithNoSourcesButLinkObjects)
+
+run_cmake(TARGET_SUPPORTS_SHARED_LIBS_CMP0164_OLD)
+run_cmake(TARGET_SUPPORTS_SHARED_LIBS_CMP0164_NEW)
+run_cmake(TARGET_SUPPORTS_SHARED_LIBS_CMP0164_WARN)
