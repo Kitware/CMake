@@ -399,7 +399,7 @@ bool cmConditionEvaluator::GetBooleanValue(
 
   // Check definition.
   cmValue def = this->GetDefinitionIfUnquoted(arg);
-  return !cmIsOff(def);
+  return !def.IsOff();
 }
 
 //=========================================================================
@@ -416,14 +416,14 @@ bool cmConditionEvaluator::GetBooleanValueOld(
       return true;
     }
     cmValue def = this->GetDefinitionIfUnquoted(arg);
-    return !cmIsOff(def);
+    return !def.IsOff();
   }
   // Old GetVariableOrNumber behavior.
   cmValue def = this->GetDefinitionIfUnquoted(arg);
   if (!def && std::atoi(arg.GetValue().c_str())) {
     def = cmValue(arg.GetValue());
   }
-  return !cmIsOff(def);
+  return !def.IsOff();
 }
 
 //=========================================================================

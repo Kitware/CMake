@@ -442,7 +442,7 @@ const std::string& cmSourceFile::GetSafeProperty(const std::string& prop) const
 
 bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const
 {
-  return cmIsOn(this->GetProperty(prop));
+  return this->GetProperty(prop).IsOn();
 }
 
 void cmSourceFile::MarkAsGenerated()

@@ -365,7 +365,7 @@ int cmCPackNSISGenerator::PackageFiles()
 
     if (anyDownloadedComponents) {
       defines += "!define CPACK_USES_DOWNLOAD\n";
-      if (cmIsOn(this->GetOption("CPACK_ADD_REMOVE"))) {
+      if (this->GetOption("CPACK_ADD_REMOVE").IsOn()) {
         defines += "!define CPACK_NSIS_ADD_REMOVE\n";
       }
     }
@@ -412,7 +412,7 @@ int cmCPackNSISGenerator::PackageFiles()
 
 int cmCPackNSISGenerator::InitializeInternal()
 {
-  if (cmIsOn(this->GetOption("CPACK_INCLUDE_TOPLEVEL_DIRECTORY"))) {
+  if (this->GetOption("CPACK_INCLUDE_TOPLEVEL_DIRECTORY").IsOn()) {
     cmCPackLogger(
       cmCPackLog::LOG_WARNING,
       "NSIS Generator cannot work with CPACK_INCLUDE_TOPLEVEL_DIRECTORY set. "
@@ -801,7 +801,7 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
     // size of the installed component.
     std::string zipListFileName = cmStrCat(
       this->GetOption("CPACK_TEMPORARY_DIRECTORY"), "/winZip.filelist");
-    bool needQuotesInFile = cmIsOn(this->GetOption("CPACK_ZIP_NEED_QUOTES"));
+    bool needQuotesInFile = this->GetOption("CPACK_ZIP_NEED_QUOTES").IsOn();
     unsigned long totalSize = 0;
     { // the scope is needed for cmGeneratedFileStream
       cmGeneratedFileStream out(zipListFileName);

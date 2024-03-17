@@ -223,7 +223,7 @@ std::string cmGlobalGenerator::SelectMakeProgram(
   if (cmIsOff(makeProgram)) {
     cmValue makeProgramCSTR =
       this->CMakeInstance->GetCacheDefinition("CMAKE_MAKE_PROGRAM");
-    if (cmIsOff(makeProgramCSTR)) {
+    if (makeProgramCSTR.IsOff()) {
       makeProgram = makeDefault;
     } else {
       makeProgram = *makeProgramCSTR;
@@ -336,7 +336,7 @@ bool cmGlobalGenerator::CheckTargetsForMissingSources() const
   for (const auto& localGen : this->LocalGenerators) {
     for (const auto& target : localGen->GetGeneratorTargets()) {
       if (!target->CanCompileSources() ||
-          cmIsOn(target->GetProperty("ghs_integrity_app"))) {
+          target->GetProperty("ghs_integrity_app").IsOn()) {
         continue;
       }
 
@@ -408,7 +408,7 @@ bool cmGlobalGenerator::CheckTargetsForPchCompilePdb() const
   for (const auto& generator : this->LocalGenerators) {
     for (const auto& target : generator->GetGeneratorTargets()) {
       if (!target->CanCompileSources() ||
-          cmIsOn(target->GetProperty("ghs_integrity_app"))) {
+          target->GetProperty("ghs_integrity_app").IsOn()) {
         continue;
       }
 
@@ -452,13 +452,13 @@ bool cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
       "all generators must specify this->FindMakeProgramFile");
     return false;
   }
-  if (cmIsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
+  if (mf->GetDefinition("CMAKE_MAKE_PROGRAM").IsOff()) {
     std::string setMakeProgram = mf->GetModulesFile(this->FindMakeProgramFile);
     if (!setMakeProgram.empty()) {
       mf->ReadListFile(setMakeProgram);
     }
   }
-  if (cmIsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
+  if (mf->GetDefinition("CMAKE_MAKE_PROGRAM").IsOff()) {
     std::ostringstream err;
     err << "CMake was unable to find a build program corresponding to \""
         << this->GetName() << "\".  CMAKE_MAKE_PROGRAM is not set.  You "
@@ -2823,7 +2823,7 @@ void cmGlobalGenerator::AddGlobalTarget_Package(
   } else {
     cmValue noPackageAll =
       mf->GetDefinition("CMAKE_SKIP_PACKAGE_ALL_DEPENDENCY");
-    if (cmIsOff(noPackageAll)) {
+    if (noPackageAll.IsOff()) {
       gti.Depends.emplace_back(this->GetAllTargetName());
     }
   }
@@ -2891,7 +2891,7 @@ void cmGlobalGenerator::AddGlobalTarget_Test(
   // by default.  Enable it only if CMAKE_SKIP_TEST_ALL_DEPENDENCY is
   // explicitly set to OFF.
   if (cmValue noall = mf->GetDefinition("CMAKE_SKIP_TEST_ALL_DEPENDENCY")) {
-    if (cmIsOff(noall)) {
+    if (noall.IsOff()) {
       gti.Depends.emplace_back(this->GetAllTargetName());
     }
   }
@@ -3015,7 +3015,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
       gti.Depends.emplace_back(this->GetPreinstallTargetName());
     } else {
       cmValue noall = mf->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
-      if (cmIsOff(noall)) {
+      if (noall.IsOff()) {
         gti.Depends.emplace_back(this->GetAllTargetName());
       }
     }
@@ -3097,7 +3097,7 @@ bool cmGlobalGenerator::UseFolderProperty() const
 
   // If this property is defined, let the setter turn this on or off.
   if (prop) {
-    return cmIsOn(*prop);
+    return prop.IsOn();
   }
 
   // If CMP0143 is NEW `treat` "USE_FOLDERS" as ON. Otherwise `treat` it as OFF

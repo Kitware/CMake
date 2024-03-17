@@ -26,7 +26,7 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
   // Library type defaults to value of BUILD_SHARED_LIBS, if it exists,
   // otherwise it defaults to static library.
   cmStateEnums::TargetType type = cmStateEnums::SHARED_LIBRARY;
-  if (cmIsOff(mf.GetDefinition("BUILD_SHARED_LIBS"))) {
+  if (mf.GetDefinition("BUILD_SHARED_LIBS").IsOff()) {
     type = cmStateEnums::STATIC_LIBRARY;
   }
   bool excludeFromAll = false;

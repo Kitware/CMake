@@ -522,8 +522,8 @@ bool cmCTestTestHandler::ProcessOptions()
 {
   // Update internal data structure from generic one
   this->SetTestsToRunInformation(this->GetOption("TestsToRunInformation"));
-  this->SetUseUnion(cmIsOn(this->GetOption("UseUnion")));
-  if (cmIsOn(this->GetOption("ScheduleRandom"))) {
+  this->SetUseUnion(this->GetOption("UseUnion").IsOn());
+  if (this->GetOption("ScheduleRandom").IsOn()) {
     this->CTest->SetScheduleType("Random");
   }
   if (cmValue repeat = this->GetOption("Repeat")) {
@@ -609,7 +609,7 @@ bool cmCTestTestHandler::ProcessOptions()
   if (val) {
     this->ExcludeTestListFile = val;
   }
-  this->SetRerunFailed(cmIsOn(this->GetOption("RerunFailed")));
+  this->SetRerunFailed(this->GetOption("RerunFailed").IsOn());
 
   return true;
 }

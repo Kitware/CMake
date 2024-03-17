@@ -628,7 +628,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   // priority over the deprecated CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY
   if (cmValue const def =
         this->Makefile->GetDefinition("CMAKE_FIND_USE_PACKAGE_REGISTRY")) {
-    this->NoUserRegistry = !cmIsOn(*def);
+    this->NoUserRegistry = !def.IsOn();
   } else if (this->Makefile->IsOn("CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY")) {
     this->NoUserRegistry = true;
   }
@@ -638,7 +638,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   // priority over the deprecated CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY
   if (cmValue const def = this->Makefile->GetDefinition(
         "CMAKE_FIND_USE_SYSTEM_PACKAGE_REGISTRY")) {
-    this->NoSystemRegistry = !cmIsOn(*def);
+    this->NoSystemRegistry = !def.IsOn();
   } else if (this->Makefile->IsOn(
                "CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY")) {
     this->NoSystemRegistry = true;
@@ -1420,7 +1420,7 @@ bool cmFindPackageCommand::HandlePackageMode(
   // Try to load the config file if the directory is known
   bool fileFound = false;
   if (this->UseConfigFiles) {
-    if (!cmIsOff(def)) {
+    if (!def.IsOff()) {
       // Get the directory from the variable value.
       std::string dir = *def;
       cmSystemTools::ConvertToUnixSlashes(dir);
@@ -1440,7 +1440,7 @@ bool cmFindPackageCommand::HandlePackageMode(
     }
 
     // Search for the config file if it is not already found.
-    if (cmIsOff(def) || !fileFound) {
+    if (def.IsOff() || !fileFound) {
       fileFound = this->FindConfig();
     }
 

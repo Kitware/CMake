@@ -527,7 +527,7 @@ cmCPackDebGenerator::~cmCPackDebGenerator() = default;
 int cmCPackDebGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/usr");
-  if (cmIsOff(this->GetOption("CPACK_SET_DESTDIR"))) {
+  if (this->GetOption("CPACK_SET_DESTDIR").IsOff()) {
     this->SetOption("CPACK_SET_DESTDIR", "I_ON");
   }
   return this->Superclass::InitializeInternal();

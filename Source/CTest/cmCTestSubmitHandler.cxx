@@ -297,7 +297,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
 
       upload_as += "&MD5=";
 
-      if (cmIsOn(this->GetOption("InternalTest"))) {
+      if (this->GetOption("InternalTest").IsOn()) {
         upload_as += "ffffffffffffffffffffffffffffffff";
       } else {
         cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
@@ -539,7 +539,7 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
     fields = url.substr(pos + 1);
     url.erase(pos);
   }
-  bool internalTest = cmIsOn(this->GetOption("InternalTest"));
+  bool internalTest = this->GetOption("InternalTest").IsOn();
 
   // Get RETRY_COUNT and RETRY_DELAY values if they were set.
   std::string retryDelayString = *this->GetOption("RetryDelay");

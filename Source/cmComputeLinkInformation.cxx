@@ -646,7 +646,7 @@ bool cmComputeLinkInformation::Compute()
   // Restore the target link type so the correct system runtime
   // libraries are found.
   cmValue lss = this->Target->GetProperty("LINK_SEARCH_END_STATIC");
-  if (cmIsOn(lss)) {
+  if (lss.IsOn()) {
     this->SetCurrentLinkType(LinkStatic);
   } else {
     this->SetCurrentLinkType(this->StartLinkType);
@@ -1451,7 +1451,7 @@ void cmComputeLinkInformation::ComputeLinkTypeInfo()
 
   // Lookup the starting link type from the target (linked statically?).
   cmValue lss = this->Target->GetProperty("LINK_SEARCH_START_STATIC");
-  this->StartLinkType = cmIsOn(lss) ? LinkStatic : LinkShared;
+  this->StartLinkType = lss.IsOn() ? LinkStatic : LinkShared;
   this->CurrentLinkType = this->StartLinkType;
 }
 

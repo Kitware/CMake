@@ -65,7 +65,7 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
   this->NoRuleMessages = false;
   if (cmValue ruleStatus =
         cm->GetState()->GetGlobalProperty("RULE_MESSAGES")) {
-    this->NoRuleMessages = cmIsOff(*ruleStatus);
+    this->NoRuleMessages = ruleStatus.IsOff();
   }
   switch (this->GeneratorTarget->GetPolicyStatusCMP0113()) {
     case cmPolicies::WARN:
@@ -244,7 +244,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   }
 
   // add custom commands to the clean rules?
-  bool const clean = cmIsOff(this->Makefile->GetProperty("CLEAN_NO_CUSTOM"));
+  bool const clean = this->Makefile->GetProperty("CLEAN_NO_CUSTOM").IsOff();
 
   // First generate the object rule files.  Save a list of all object
   // files for this target.
@@ -613,8 +613,9 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   // Use compiler to generate dependencies, if supported.
   bool const compilerGenerateDeps =
     this->GlobalGenerator->SupportsCompilerDependencies() &&
-    cmIsOn(this->Makefile->GetDefinition(
-      cmStrCat("CMAKE_", lang, "_DEPENDS_USE_COMPILER")));
+    this->Makefile
+      ->GetDefinition(cmStrCat("CMAKE_", lang, "_DEPENDS_USE_COMPILER"))
+      .IsOn();
   auto const scanner = compilerGenerateDeps ? cmDependencyScannerKind::Compiler
                                             : cmDependencyScannerKind::CMake;
 
@@ -2082,7 +2083,7 @@ bool cmMakefileTargetGenerator::CheckUseResponseFileForObjects(
     "CMAKE_" + l + "_USE_RESPONSE_FILE_FOR_OBJECTS";
   if (cmValue val = this->Makefile->GetDefinition(responseVar)) {
     if (!val->empty()) {
-      return cmIsOn(val);
+      return val.IsOn();
     }
   }
 
@@ -2121,7 +2122,7 @@ bool cmMakefileTargetGenerator::CheckUseResponseFileForLibraries(
     "CMAKE_" + l + "_USE_RESPONSE_FILE_FOR_LIBRARIES";
   if (cmValue val = this->Makefile->GetDefinition(responseVar)) {
     if (!val->empty()) {
-      return cmIsOn(val);
+      return val.IsOn();
     }
   }
 

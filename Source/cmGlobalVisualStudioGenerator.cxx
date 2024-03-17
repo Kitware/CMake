@@ -491,7 +491,7 @@ bool cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
   // Visual Studio generators know how to lookup their build tool
   // directly instead of needing a helper module to do it, so we
   // do not actually need to put CMAKE_MAKE_PROGRAM into the cache.
-  if (cmIsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
+  if (mf->GetDefinition("CMAKE_MAKE_PROGRAM").IsOff()) {
     mf->AddDefinition("CMAKE_MAKE_PROGRAM", this->GetVSMakeProgram());
   }
   return true;

@@ -601,7 +601,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 
     if (this->Moc.Enabled) {
       // Path prefix
-      if (cmIsOn(this->GenTarget->GetProperty("AUTOMOC_PATH_PREFIX"))) {
+      if (this->GenTarget->GetProperty("AUTOMOC_PATH_PREFIX").IsOn()) {
         this->Moc.PathPrefix = true;
       }
 
@@ -657,7 +657,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     auto const& value =
       this->GenTarget->GetProperty("AUTOGEN_USE_SYSTEM_INCLUDE");
     if (value.IsSet()) {
-      if (cmIsOn(value)) {
+      if (value.IsOn()) {
         this->GenTarget->AddSystemIncludeDirectory(this->Dir.IncludeGenExp,
                                                    "CXX");
       } else {
