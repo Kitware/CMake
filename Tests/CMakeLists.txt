@@ -978,28 +978,6 @@ if(BUILD_TESTING)
     endif()
   endif()
 
-  if(WIN32)
-    if(CMake_TEST_CPACK_WIX)
-      add_test(CPackWiXGenerator ${CMAKE_CTEST_COMMAND}
-        -C \${CTEST_CONFIGURATION_TYPE}
-        --build-and-test
-        "${CMake_SOURCE_DIR}/Tests/CPackWiXGenerator"
-        "${CMake_BINARY_DIR}/Tests/CPackWiXGenerator"
-        ${build_generator_args}
-        --build-project CPackWiXGenerator
-        --build-options
-        --test-command ${CMAKE_CMAKE_COMMAND}
-          "-DCPackWiXGenerator_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackWiXGenerator"
-          "-Dno_verify:BOOL=${CMake_TEST_WIX_NO_VERIFY}"
-          "-Dconfig=\${CTEST_CONFIGURATION_TYPE}"
-          -P "${CMake_SOURCE_DIR}/Tests/CPackWiXGenerator/RunCPackVerifyResult.cmake")
-
-      set_property(TEST CPackWiXGenerator PROPERTY
-        ATTACHED_FILES_ON_FAIL
-        "${CMake_BINARY_DIR}/Tests/CPackWiXGenerator/_CPack_Packages/win32/WIX/wix.log")
-    endif()
-  endif()
-
   # On Windows run the CPackInnoSetupGenerator test
   if(WIN32 AND CMake_TEST_CPACK_INNOSETUP)
     add_test(CPackInnoSetupGenerator ${CMAKE_CTEST_COMMAND}

@@ -1096,6 +1096,11 @@ if(CMAKE_SYSTEM_PROCESSOR STREQUAL "e2k" AND NOT DEFINED CMake_TEST_E2K_BROKEN_L
 endif()
 
 add_RunCMake_test_group(CPack "${cpack_tests}")
+
+if(CMake_TEST_CPACK_WIX)
+  add_RunCMake_test(CPack_WIX)
+endif()
+
 # add a test to make sure symbols are exported from a shared library
 # for MSVC compilers CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS property is used
 add_RunCMake_test(AutoExportDll
