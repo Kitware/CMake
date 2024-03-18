@@ -1,4 +1,4 @@
--- MyLib-1\.0\.0-win64\.msi
+-- MyLib-1\.0\.0-(win64|windows-arm64)\.msi
 Component: 'CM_CP_applications.bin.my_libapp.exe' 'CM_DP_applications.bin'
 Component: 'CM_SHORTCUT_applications' 'PROGRAM_MENU_FOLDER'
 Component: 'CM_SHORTCUT_DESKTOP_applications' 'DesktopFolder'
