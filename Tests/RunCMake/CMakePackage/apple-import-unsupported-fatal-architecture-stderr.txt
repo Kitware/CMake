@@ -1,0 +1,6 @@
+^CMake Error at [^
+]*/Tests/RunCMake/CMakePackage/apple-install/lib/cmake/bad-arch-fatal/bad-arch-fatal-config.cmake:[0-9]+ \(message\):
+  Architecture not supported
+Call Stack \(most recent call first\):
+  apple-import-unsupported-fatal-architecture\.cmake:[0-9]+ \(find_package\)
+  CMakeLists\.txt:[0-9]+ \(include\)$

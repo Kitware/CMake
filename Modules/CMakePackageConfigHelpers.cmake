@@ -210,6 +210,7 @@ Generating an Apple Platform Selection File
       [WATCHOS_SIMULATOR_INCLUDE_FILE <file>]
       [VISIONOS_INCLUDE_FILE <file>]
       [VISIONOS_SIMULATOR_INCLUDE_FILE <file>]
+      [ERROR_VARIABLE <variable>]
       )
 
   Write a file that includes an Apple-platform-specific ``.cmake`` file,
@@ -256,9 +257,16 @@ Generating an Apple Platform Selection File
   ``VISIONOS_SIMULATOR_INCLUDE_FILE <file>``
     File to include if the platform is visionOS Simulator.
 
+  ``ERROR_VARIABLE <variable>``
+    If the consuming project is built for an unsupported platform,
+    set ``<variable>`` to an error message.  The includer may use this
+    information to pretend the package was not found.  If this option
+    is not given, the default behavior is to issue a fatal error.
+
   If any of the optional include files is not specified, and the consuming
-  project is built for its corresponding platform, an error will be thrown
-  when including the generated file.
+  project is built for its corresponding platform, the generated file will
+  consider the platform to be unsupported.  The behavior is determined
+  by the ``ERROR_VARIABLE`` option.
 
 .. command:: generate_apple_architecture_selection_file
 
@@ -275,6 +283,7 @@ Generating an Apple Platform Selection File
        SINGLE_ARCHITECTURE_INCLUDE_FILES <file>...]
       [UNIVERSAL_ARCHITECTURES <arch>...
        UNIVERSAL_INCLUDE_FILE <file>]
+      [ERROR_VARIABLE <variable>]
       )
 
   Write a file that includes an Apple-architecture-specific ``.cmake`` file
@@ -312,6 +321,12 @@ Generating an Apple Platform Selection File
     A file to load when :variable:`CMAKE_OSX_ARCHITECTURES` contains
     a (non-strict) subset of the ``UNIVERSAL_ARCHITECTURES`` and
     does not match any one of the ``SINGLE_ARCHITECTURES``.
+
+  ``ERROR_VARIABLE <variable>``
+    If the consuming project is built for an unsupported architecture,
+    set ``<variable>`` to an error message.  The includer may use this
+    information to pretend the package was not found.  If this option
+    is not given, the default behavior is to issue a fatal error.
 
 Example Generating Package Files
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -486,6 +501,7 @@ function(generate_apple_platform_selection_file _output_file)
     INSTALL_DESTINATION
     INSTALL_PREFIX
     ${_config_file_options}
+    ERROR_VARIABLE
     )
   set(_multi)
   cmake_parse_arguments(PARSE_ARGV 0 _gpsf "${_options}" "${_single}" "${_multi}")
@@ -499,8 +515,15 @@ function(generate_apple_platform_selection_file _output_file)
     set(maybe_INSTALL_PREFIX "")
   endif()
 
+  if(_gpsf_ERROR_VARIABLE)
+    set(_branch_INIT "set(\"${_gpsf_ERROR_VARIABLE}\" \"\")")
+  else()
+    set(_branch_INIT "")
+  endif()
+
+  set(_else ELSE)
   set(_have_relative 0)
-  foreach(_opt IN LISTS _config_file_options)
+  foreach(_opt IN LISTS _config_file_options _else)
     if(_gpsf_${_opt})
       set(_config_file "${_gpsf_${_opt}}")
       if(NOT IS_ABSOLUTE "${_config_file}")
@@ -508,6 +531,8 @@ function(generate_apple_platform_selection_file _output_file)
         set(_have_relative 1)
       endif()
       set(_branch_${_opt} "include(\"${_config_file}\")")
+    elseif(_gpsf_ERROR_VARIABLE)
+      set(_branch_${_opt} "set(\"${_gpsf_ERROR_VARIABLE}\" \"Platform not supported\")")
     else()
       set(_branch_${_opt} "message(FATAL_ERROR \"Platform not supported\")")
     endif()
@@ -527,6 +552,7 @@ function(generate_apple_architecture_selection_file _output_file)
     INSTALL_DESTINATION
     INSTALL_PREFIX
     UNIVERSAL_INCLUDE_FILE
+    ERROR_VARIABLE
     )
   set(_multi
     SINGLE_ARCHITECTURES
@@ -551,6 +577,30 @@ function(generate_apple_architecture_selection_file _output_file)
   endif()
 
   set(_branch_code "")
+
+  if(_gasf_ERROR_VARIABLE)
+    string(APPEND _branch_code
+      "set(\"${_gasf_ERROR_VARIABLE}\" \"\")\n"
+      )
+  endif()
+
+  string(APPEND _branch_code
+    "\n"
+    "if(NOT CMAKE_OSX_ARCHITECTURES)\n"
+    )
+  if(_gasf_ERROR_VARIABLE)
+    string(APPEND _branch_code
+      "  set(\"${_gasf_ERROR_VARIABLE}\" \"CMAKE_OSX_ARCHITECTURES must be explicitly set for this package\")\n"
+      "  return()\n"
+      )
+  else()
+    string(APPEND _branch_code
+      "  message(FATAL_ERROR \"CMAKE_OSX_ARCHITECTURES must be explicitly set for this package\")\n"
+      )
+  endif()
+  string(APPEND _branch_code
+    "endif()\n"
+    )
 
   foreach(pair IN ZIP_LISTS _gasf_SINGLE_ARCHITECTURES _gasf_SINGLE_ARCHITECTURE_INCLUDE_FILES)
     set(arch "${pair_0}")
@@ -586,6 +636,13 @@ function(generate_apple_architecture_selection_file _output_file)
     message(FATAL_ERROR "UNIVERSAL_INCLUDE_FILE requires UNIVERSAL_ARCHITECTURES")
   elseif(_gasf_UNIVERSAL_INCLUDE_FILE)
     message(FATAL_ERROR "UNIVERSAL_ARCHITECTURES requires UNIVERSAL_INCLUDE_FILE")
+  endif()
+
+  string(APPEND _branch_code "\n")
+  if(_gasf_ERROR_VARIABLE)
+    string(APPEND _branch_code "set(\"${_gasf_ERROR_VARIABLE}\" \"Architecture not supported\")")
+  else()
+    string(APPEND _branch_code "message(FATAL_ERROR \"Architecture not supported\")")
   endif()
 
   configure_package_config_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/Internal/AppleArchitectureSelection.cmake.in" "${_output_file}"
