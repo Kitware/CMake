@@ -3,3 +3,5 @@ if ("$env:CMAKE_CI_NIGHTLY" -eq "true") {
   . ".gitlab/ci/ispc-env.ps1"
   . ".gitlab/ci/swift-env.ps1"
 }
+
+. .gitlab/ci/wix3-env.ps1

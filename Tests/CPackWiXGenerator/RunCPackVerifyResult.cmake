@@ -39,9 +39,8 @@ endif()
 
 function(run_wix_command command)
   file(TO_CMAKE_PATH "$ENV{WIX}" WIX_ROOT)
-  set(WIX_PROGRAM "${WIX_ROOT}/bin/${command}.exe")
-
-  if(NOT EXISTS "${WIX_PROGRAM}")
+  find_program(WIX_PROGRAM NAMES ${command} NO_CACHE PATHS "${WIX_ROOT}" PATH_SUFFIXES "bin")
+  if(NOT WIX_PROGRAM)
     message(FATAL_ERROR "Failed to find WiX Tool: ${WIX_PROGRAM}")
   endif()
 
