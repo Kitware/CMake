@@ -271,9 +271,9 @@ Generating an Apple Platform Selection File
     generate_apple_architecture_selection_file(<filename>
       INSTALL_DESTINATION <path>
       [INSTALL_PREFIX <path>]
-      [SINGLE_ARCHITECTURES <archs>
-       SINGLE_ARCHITECTURE_INCLUDE_FILES <files>]
-      [UNIVERSAL_ARCHITECTURES <archs>
+      [SINGLE_ARCHITECTURES <arch>...
+       SINGLE_ARCHITECTURE_INCLUDE_FILES <file>...]
+      [UNIVERSAL_ARCHITECTURES <arch>...
        UNIVERSAL_INCLUDE_FILE <file>]
       )
 
@@ -292,21 +292,17 @@ Generating an Apple Platform Selection File
     is not passed, the :variable:`CMAKE_INSTALL_PREFIX` variable will be
     used instead.
 
-  ``SINGLE_ARCHITECTURES <archs>``
-    A :ref:`semicolon-separated list <CMake Language Lists>` of
-    architectures provided by entries of
-    ``SINGLE_ARCHITECTURE_INCLUDE_FILES``.
+  ``SINGLE_ARCHITECTURES <arch>...``
+    Architectures provided by entries of ``SINGLE_ARCHITECTURE_INCLUDE_FILES``.
 
-  ``SINGLE_ARCHITECTURE_INCLUDE_FILES <files>``
-    A :ref:`semicolon-separated list <CMake Language Lists>` of
-    architecture-specific files.  One of them will be loaded
+  ``SINGLE_ARCHITECTURE_INCLUDE_FILES <file>...``
+    Architecture-specific files.  One of them will be loaded
     when :variable:`CMAKE_OSX_ARCHITECTURES` contains a single
     architecture matching the corresponding entry of
     ``SINGLE_ARCHITECTURES``.
 
-  ``UNIVERSAL_ARCHITECTURES <archs>``
-    A :ref:`semicolon-separated list <CMake Language Lists>` of
-    architectures provided by the ``UNIVERSAL_INCLUDE_FILE``.
+  ``UNIVERSAL_ARCHITECTURES <arch>...``
+    Architectures provided by the ``UNIVERSAL_INCLUDE_FILE``.
 
   ``UNIVERSAL_INCLUDE_FILE <file>``
     A file to load when :variable:`CMAKE_OSX_ARCHITECTURES` contains
@@ -526,12 +522,13 @@ function(generate_apple_architecture_selection_file _output_file)
   set(_single
     INSTALL_DESTINATION
     INSTALL_PREFIX
+    UNIVERSAL_INCLUDE_FILE
+    )
+  set(_multi
     SINGLE_ARCHITECTURES
     SINGLE_ARCHITECTURE_INCLUDE_FILES
     UNIVERSAL_ARCHITECTURES
-    UNIVERSAL_INCLUDE_FILE
     )
-  set(_multi)
   cmake_parse_arguments(PARSE_ARGV 0 _gasf "${_options}" "${_single}" "${_multi}")
 
   if(NOT _gasf_INSTALL_DESTINATION)
