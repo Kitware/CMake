@@ -10,7 +10,8 @@ discussion of files potentially included during a :command:`project` call.
 .. versionadded:: 3.29
   This variable can be a :ref:`semicolon-separated list <CMake Language Lists>`
   of CMake language files to be included sequentially. It can also now refer to
-  module names to be found in :variable:`CMAKE_MODULE_PATH` or builtin to CMake.
+  module names to be found in :variable:`CMAKE_MODULE_PATH` or as a builtin
+  CMake module.
 
 See also the :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE_BEFORE`,
 :variable:`CMAKE_PROJECT_INCLUDE`, :variable:`CMAKE_PROJECT_INCLUDE_BEFORE`,
