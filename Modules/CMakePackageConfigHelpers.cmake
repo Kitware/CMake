@@ -304,6 +304,10 @@ Generating an Apple Platform Selection File
   ``UNIVERSAL_ARCHITECTURES <arch>...``
     Architectures provided by the ``UNIVERSAL_INCLUDE_FILE``.
 
+    The list may include ``$(ARCHS_STANDARD)`` to support consumption using
+    the :generator:`Xcode` generator, but the architectures should always
+    be listed individually too.
+
   ``UNIVERSAL_INCLUDE_FILE <file>``
     A file to load when :variable:`CMAKE_OSX_ARCHITECTURES` contains
     a (non-strict) subset of the ``UNIVERSAL_ARCHITECTURES`` and
