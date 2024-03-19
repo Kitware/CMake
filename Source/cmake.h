@@ -53,6 +53,7 @@ class cmMakefile;
 class cmMessenger;
 class cmVariableWatch;
 struct cmBuildOptions;
+struct cmGlobCacheEntry;
 
 /** \brief Represents a cmake invocation.
  *
@@ -351,10 +352,7 @@ public:
   bool DoWriteGlobVerifyTarget() const;
   std::string const& GetGlobVerifyScript() const;
   std::string const& GetGlobVerifyStamp() const;
-  void AddGlobCacheEntry(bool recurse, bool listDirectories,
-                         bool followSymlinks, const std::string& relative,
-                         const std::string& expression,
-                         const std::vector<std::string>& files,
+  void AddGlobCacheEntry(const cmGlobCacheEntry& entry,
                          const std::string& variable,
                          cmListFileBacktrace const& bt);
 

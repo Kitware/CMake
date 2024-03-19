@@ -41,6 +41,7 @@
 #include "cmFileTimes.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
+#include "cmGlobCacheEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmHexFileConverter.h"
 #include "cmList.h"
@@ -810,11 +811,16 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
         std::sort(foundFiles.begin(), foundFiles.end());
         foundFiles.erase(std::unique(foundFiles.begin(), foundFiles.end()),
                          foundFiles.end());
-        cm->AddGlobCacheEntry(
-          recurse, (recurse ? g.GetRecurseListDirs() : g.GetListDirs()),
+        auto entry = cmGlobCacheEntry{
+          recurse,
+          (recurse ? g.GetRecurseListDirs() : g.GetListDirs()),
           (recurse ? g.GetRecurseThroughSymlinks() : false),
-          (g.GetRelative() ? g.GetRelative() : ""), expr, foundFiles, variable,
-          status.GetMakefile().GetBacktrace());
+          (g.GetRelative() ? g.GetRelative() : ""),
+          expr,
+          foundFiles
+        };
+        cm->AddGlobCacheEntry(entry, variable,
+                              status.GetMakefile().GetBacktrace());
       } else {
         warnConfigureLate = true;
       }

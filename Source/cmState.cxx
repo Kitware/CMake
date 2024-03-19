@@ -16,6 +16,7 @@
 #include "cmCommand.h"
 #include "cmDefinitions.h"
 #include "cmExecutionStatus.h"
+#include "cmGlobCacheEntry.h"
 #include "cmGlobVerificationManager.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -238,15 +239,13 @@ bool cmState::SaveVerificationScript(const std::string& path,
                                                                messenger);
 }
 
-void cmState::AddGlobCacheEntry(
-  bool recurse, bool listDirectories, bool followSymlinks,
-  const std::string& relative, const std::string& expression,
-  const std::vector<std::string>& files, const std::string& variable,
-  cmListFileBacktrace const& backtrace, cmMessenger* messenger)
+void cmState::AddGlobCacheEntry(const cmGlobCacheEntry& entry,
+                                const std::string& variable,
+                                cmListFileBacktrace const& backtrace,
+                                cmMessenger* messenger)
 {
-  this->GlobVerificationManager->AddCacheEntry(
-    recurse, listDirectories, followSymlinks, relative, expression, files,
-    variable, backtrace, messenger);
+  this->GlobVerificationManager->AddCacheEntry(entry, variable, backtrace,
+                                               messenger);
 }
 
 void cmState::RemoveCacheEntry(std::string const& key)

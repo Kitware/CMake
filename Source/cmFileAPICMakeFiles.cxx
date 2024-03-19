@@ -4,11 +4,13 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cm3p/json/value.h>
 
 #include "cmFileAPI.h"
+#include "cmGlobCacheEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
