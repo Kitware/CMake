@@ -133,7 +133,7 @@ Helper functions which are used by the above ones
     Name of the variable in which the list of keys is stored
 
   ``<fileN>``
-    filename(s) as given to to CSharp target using :command:`add_library`
+    filename(s) as given to CSharp target using :command:`add_library`
     or :command:`add_executable`
 
   In some way the function applies a canonicalization to the source names.

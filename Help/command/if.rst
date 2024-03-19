@@ -180,7 +180,7 @@ File Operations
 
   .. note::
     Prefer ``if(IS_READABLE)`` to check file readability.  ``if(EXISTS)``
-    may be changed in the future to to only check file existence.
+    may be changed in the future to only check file existence.
 
 .. signature:: if(IS_READABLE <path-to-file-or-directory>)
 
