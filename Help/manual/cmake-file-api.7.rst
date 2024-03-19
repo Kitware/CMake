@@ -1489,7 +1489,7 @@ There is only one ``cmakeFiles`` object major version, version 1.
 
   {
     "kind": "cmakeFiles",
-    "version": { "major": 1, "minor": 0 },
+    "version": { "major": 1, "minor": 1 },
     "paths": {
       "build": "/path/to/top-level-build-dir",
       "source": "/path/to/top-level-source-dir"
@@ -1510,6 +1510,16 @@ There is only one ``cmakeFiles`` object major version, version 1.
         "isCMake": true,
         "isExternal": true,
         "path": "/path/to/cmake/Modules/CMakeGenericSystem.cmake"
+      }
+    ],
+    "globsDependent": [
+      {
+        "expression": "src/*.cxx",
+        "recurse": true,
+        "files": [
+          "src/foo.cxx",
+          "src/bar.cxx"
+        ]
       }
     ]
   }
@@ -1552,6 +1562,44 @@ The members specific to ``cmakeFiles`` objects are:
   ``isCMake``
     Optional member that is present with boolean value ``true``
     if the path specifies a file in the CMake installation.
+
+``globsDependent``
+  Optional member that is present when the project calls :command:`file(GLOB)`
+  or :command:`file(GLOB_RECURSE)` with the ``CONFIGURE_DEPENDS`` option.
+  The value is a JSON array of JSON objects, each specifying a globbing
+  expression and the list of paths it matched.  If the globbing expression
+  no longer matches the same list of paths, CMake considers the build system
+  to be out of date.
+
+  This field was added in ``cmakeFiles`` version 1.1.
+
+  The members of each entry are:
+
+  ``expression``
+    A string specifying the globbing expression.
+
+  ``recurse``
+    Optional member that is present with boolean value ``true``
+    if the entry corresponds to a :command:`file(GLOB_RECURSE)` call.
+    Otherwise the entry corresponds to a :command:`file(GLOB)` call.
+
+  ``listDirectories``
+    Optional member that is present with boolean value ``true`` if
+    :command:`file(GLOB)` was called without ``LIST_DIRECTORIES false`` or
+    :command:`file(GLOB_RECURSE)` was called with ``LIST_DIRECTORIES true``.
+
+  ``followSymlinks``
+    Optional member that is present with boolean value ``true`` if
+    :command:`file(GLOB)` was called with the ``FOLLOW_SYMLINKS`` option.
+
+  ``relative``
+    Optional member that is present if :command:`file(GLOB)` was called
+    with the ``RELATIVE <path>`` option.  The value is a string containing
+    the ``<path>`` given.
+
+  ``paths``
+    A JSON array of strings specifying the paths matched by the call
+    to :command:`file(GLOB)` or :command:`file(GLOB_RECURSE)`.
 
 Object Kind "toolchains"
 ------------------------

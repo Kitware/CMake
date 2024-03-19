@@ -176,6 +176,21 @@ void cmGlobVerificationManager::AddCacheEntry(
   }
 }
 
+std::vector<cmGlobCacheEntry> cmGlobVerificationManager::GetCacheEntries()
+  const
+{
+  std::vector<cmGlobCacheEntry> entries;
+  for (auto const& i : this->Cache) {
+    CacheEntryKey k = std::get<0>(i);
+    CacheEntryValue v = std::get<1>(i);
+    if (v.Initialized) {
+      entries.emplace_back(k.Recurse, k.ListDirectories, k.FollowSymlinks,
+                           k.Relative, k.Expression, v.Files);
+    }
+  }
+  return entries;
+}
+
 void cmGlobVerificationManager::Reset()
 {
   this->Cache.clear();

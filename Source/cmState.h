@@ -268,6 +268,7 @@ private:
                          const std::string& variable,
                          cmListFileBacktrace const& bt,
                          cmMessenger* messenger);
+  std::vector<cmGlobCacheEntry> GetGlobCacheEntries() const;
 
   cmPropertyDefinitionMap PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;

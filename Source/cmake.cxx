@@ -2958,6 +2958,11 @@ void cmake::AddGlobCacheEntry(const cmGlobCacheEntry& entry,
                                  this->Messenger.get());
 }
 
+std::vector<cmGlobCacheEntry> cmake::GetGlobCacheEntries() const
+{
+  return this->State->GetGlobCacheEntries();
+}
+
 std::vector<std::string> cmake::GetAllExtensions() const
 {
   std::vector<std::string> allExt = this->CLikeSourceFileExtensions.ordered;

@@ -248,6 +248,11 @@ void cmState::AddGlobCacheEntry(const cmGlobCacheEntry& entry,
                                                messenger);
 }
 
+std::vector<cmGlobCacheEntry> cmState::GetGlobCacheEntries() const
+{
+  return this->GlobVerificationManager->GetCacheEntries();
+}
+
 void cmState::RemoveCacheEntry(std::string const& key)
 {
   this->CacheManager->RemoveCacheEntry(key);

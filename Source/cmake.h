@@ -355,6 +355,7 @@ public:
   void AddGlobCacheEntry(const cmGlobCacheEntry& entry,
                          const std::string& variable,
                          cmListFileBacktrace const& bt);
+  std::vector<cmGlobCacheEntry> GetGlobCacheEntries() const;
 
   /**
    * Get the system information and write it to the file specified

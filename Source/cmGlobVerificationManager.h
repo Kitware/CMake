@@ -33,6 +33,9 @@ protected:
                      const std::string& variable,
                      const cmListFileBacktrace& bt, cmMessenger* messenger);
 
+  //! Get all cache entries
+  std::vector<cmGlobCacheEntry> GetCacheEntries() const;
+
   //! Clear the glob cache for state reset.
   void Reset();
 
