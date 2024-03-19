@@ -74,7 +74,7 @@ bool cmCPackWIXGenerator::RunWiXCommand(std::string const& command)
 
   if (!status || returnValue) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Problem running WiX candle. "
+                  "Problem running WiX. "
                   "Please check '"
                     << logFileName << "' for errors." << std::endl);
 
