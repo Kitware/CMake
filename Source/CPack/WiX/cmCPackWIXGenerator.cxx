@@ -1184,12 +1184,7 @@ void cmCPackWIXGenerator::CollectExtensions(std::string const& variableName,
 void cmCPackWIXGenerator::CollectXmlNamespaces(std::string const& variableName,
                                                xmlns_map_t& namespaces)
 {
-  cmValue variableContent = GetOption(variableName);
-  if (!variableContent) {
-    return;
-  }
-
-  cmList list{ variableContent };
+  cmList list{ GetOption(variableName) };
   for (std::string const& str : list) {
     auto pos = str.find('=');
     if (pos != std::string::npos) {
@@ -1203,12 +1198,12 @@ void cmCPackWIXGenerator::CollectXmlNamespaces(std::string const& variableName,
                       << str << '"' << std::endl);
     }
   }
-  std::ostringstream oss;
+  std::string xmlns;
   for (auto& ns : namespaces) {
-    oss << " xmlns:" << ns.first << "=\""
-        << cmWIXSourceWriter::EscapeAttributeValue(ns.second) << '"';
+    xmlns = cmStrCat(xmlns, "\n    xmlns:", ns.first, "=\"",
+                     cmWIXSourceWriter::EscapeAttributeValue(ns.second), '"');
   }
-  SetOption("CPACK_WIX_CUSTOM_XMLNS_EXPANDED", oss.str());
+  SetOption("CPACK_WIX_CUSTOM_XMLNS_EXPANDED", xmlns);
 }
 
 void cmCPackWIXGenerator::AddCustomFlags(std::string const& variableName,
