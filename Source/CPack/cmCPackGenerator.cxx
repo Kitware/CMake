@@ -187,7 +187,7 @@ int cmCPackGenerator::InstallProject()
   std::string bareTempInstallDirectory =
     this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
   std::string tempInstallDirectoryStr = bareTempInstallDirectory;
-  bool setDestDir = cmIsOn(this->GetOption("CPACK_SET_DESTDIR")) ||
+  bool setDestDir = this->GetOption("CPACK_SET_DESTDIR").IsOn() ||
     cmIsInternallyOn(this->GetOption("CPACK_SET_DESTDIR"));
   if (!setDestDir) {
     tempInstallDirectoryStr += this->GetPackagingInstallPrefix();
@@ -855,7 +855,7 @@ int cmCPackGenerator::InstallCMakeProject(
 
   // strip on TRUE, ON, 1, one or several file names, but not on
   // FALSE, OFF, 0 and an empty string
-  if (!cmIsOff(this->GetOption("CPACK_STRIP_FILES"))) {
+  if (!this->GetOption("CPACK_STRIP_FILES").IsOff()) {
     mf.AddDefinition("CMAKE_INSTALL_DO_STRIP", "1");
   }
   // Remember the list of files before installation
@@ -1041,7 +1041,7 @@ int cmCPackGenerator::DoPackage()
     return 0;
   }
 
-  if (cmIsOn(this->GetOption("CPACK_REMOVE_TOPLEVEL_DIRECTORY"))) {
+  if (this->GetOption("CPACK_REMOVE_TOPLEVEL_DIRECTORY").IsOn()) {
     cmValue toplevelDirectory = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     if (toplevelDirectory && cmSystemTools::FileExists(*toplevelDirectory)) {
       cmCPackLogger(cmCPackLog::LOG_VERBOSE,
@@ -1089,7 +1089,7 @@ int cmCPackGenerator::DoPackage()
                   "Remove old package file" << std::endl);
     cmSystemTools::RemoveFile(*tempPackageFileName);
   }
-  if (cmIsOn(this->GetOption("CPACK_INCLUDE_TOPLEVEL_DIRECTORY"))) {
+  if (this->GetOption("CPACK_INCLUDE_TOPLEVEL_DIRECTORY").IsOn()) {
     tempDirectory = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   }
 
@@ -1231,14 +1231,14 @@ bool cmCPackGenerator::IsSet(const std::string& name) const
 
 bool cmCPackGenerator::IsOn(const std::string& name) const
 {
-  return cmIsOn(this->GetOption(name));
+  return this->GetOption(name).IsOn();
 }
 
 bool cmCPackGenerator::IsSetToOff(const std::string& op) const
 {
   cmValue ret = this->MakefileMap->GetDefinition(op);
   if (cmNonempty(ret)) {
-    return cmIsOff(*ret);
+    return ret.IsOff();
   }
   return false;
 }
@@ -1560,7 +1560,7 @@ cmCPackComponent* cmCPackGenerator::GetComponent(
     component->IsRequired = this->IsOn(macroPrefix + "_REQUIRED");
     component->IsDisabledByDefault = this->IsOn(macroPrefix + "_DISABLED");
     component->IsDownloaded = this->IsOn(macroPrefix + "_DOWNLOADED") ||
-      cmIsOn(this->GetOption("CPACK_DOWNLOAD_ALL"));
+      this->GetOption("CPACK_DOWNLOAD_ALL").IsOn();
 
     cmValue archiveFile = this->GetOption(macroPrefix + "_ARCHIVE_FILE");
     if (cmNonempty(archiveFile)) {

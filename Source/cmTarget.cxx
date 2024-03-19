@@ -2151,7 +2151,7 @@ void cmTarget::SetProperty(const std::string& prop, cmValue value)
   }
 
   if (prop == propIMPORTED_GLOBAL) {
-    if (!cmIsOn(value)) {
+    if (!value.IsOn()) {
       std::ostringstream e;
       e << "IMPORTED_GLOBAL property can't be set to FALSE on targets (\""
         << this->impl->Name << "\")\n";
@@ -2845,7 +2845,7 @@ std::string const& cmTarget::GetSafeProperty(std::string const& prop) const
 
 bool cmTarget::GetPropertyAsBool(const std::string& prop) const
 {
-  return cmIsOn(this->GetProperty(prop));
+  return this->GetProperty(prop).IsOn();
 }
 
 cmPropertyMap const& cmTarget::GetProperties() const

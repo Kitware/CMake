@@ -269,7 +269,7 @@ bool cmGlobalXCodeGenerator::FindMakeProgram(cmMakefile* mf)
   // The Xcode generator knows how to lookup its build tool
   // directly instead of needing a helper module to do it, so we
   // do not actually need to put CMAKE_MAKE_PROGRAM into the cache.
-  if (cmIsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
+  if (mf->GetDefinition("CMAKE_MAKE_PROGRAM").IsOff()) {
     mf->AddDefinition("CMAKE_MAKE_PROGRAM", this->GetXcodeBuildCommand());
   }
   return true;
@@ -4223,18 +4223,18 @@ void cmGlobalXCodeGenerator::AddEmbeddedObjects(
     cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
 
     bool removeHeaders = actionsOnByDefault & RemoveHeadersOnCopyByDefault;
-    if (auto prop = gt->GetProperty(
+    if (cmValue prop = gt->GetProperty(
           cmStrCat(embedPropertyName, "_REMOVE_HEADERS_ON_COPY"))) {
-      removeHeaders = cmIsOn(*prop);
+      removeHeaders = prop.IsOn();
     }
     if (removeHeaders) {
       attrs->AddObject(this->CreateString("RemoveHeadersOnCopy"));
     }
 
     bool codeSign = actionsOnByDefault & CodeSignOnCopyByDefault;
-    if (auto prop =
+    if (cmValue prop =
           gt->GetProperty(cmStrCat(embedPropertyName, "_CODE_SIGN_ON_COPY"))) {
-      codeSign = cmIsOn(*prop);
+      codeSign = prop.IsOn();
     }
     if (codeSign) {
       attrs->AddObject(this->CreateString("CodeSignOnCopy"));
@@ -5298,7 +5298,7 @@ bool cmGlobalXCodeGenerator::UseEffectivePlatformName(cmMakefile* mf) const
     return mf->PlatformIsAppleEmbedded();
   }
 
-  return cmIsOn(*epnValue);
+  return epnValue.IsOn();
 }
 
 bool cmGlobalXCodeGenerator::ShouldStripResourcePath(cmMakefile*) const

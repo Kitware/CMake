@@ -1167,7 +1167,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReference(
     const char* privateReference = "True";
     if (cmValue value = this->GeneratorTarget->GetProperty(
           "VS_DOTNET_REFERENCES_COPY_LOCAL")) {
-      if (cmIsOff(*value)) {
+      if (value.IsOff()) {
         privateReference = "False";
       }
     }
@@ -4217,9 +4217,9 @@ void cmVisualStudio10TargetGenerator::WriteManifestOptions(
     if (dpiAware) {
       if (*dpiAware == "PerMonitor"_s) {
         e2.Element("EnableDpiAwareness", "PerMonitorHighDPIAware");
-      } else if (cmIsOn(*dpiAware)) {
+      } else if (dpiAware.IsOn()) {
         e2.Element("EnableDpiAwareness", "true");
-      } else if (cmIsOff(*dpiAware)) {
+      } else if (dpiAware.IsOff()) {
         e2.Element("EnableDpiAwareness", "false");
       } else {
         cmSystemTools::Error(

@@ -34,7 +34,7 @@ bool cmCPackInnoSetupGenerator::CanGenerate()
 
 int cmCPackInnoSetupGenerator::InitializeInternal()
 {
-  if (cmIsOn(GetOption("CPACK_INCLUDE_TOPLEVEL_DIRECTORY"))) {
+  if (GetOption("CPACK_INCLUDE_TOPLEVEL_DIRECTORY").IsOn()) {
     cmCPackLogger(cmCPackLog::LOG_WARNING,
                   "Inno Setup Generator cannot work with "
                   "CPACK_INCLUDE_TOPLEVEL_DIRECTORY set. "
@@ -938,7 +938,7 @@ bool cmCPackInnoSetupGenerator::BuildDownloadedComponentArchive(
   // Build the list of files to go into this archive
   const std::string& zipListFileName =
     cmStrCat(GetOption("CPACK_TEMPORARY_DIRECTORY"), "/winZip.filelist");
-  const bool needQuotesInFile = cmIsOn(GetOption("CPACK_ZIP_NEED_QUOTES"));
+  const bool needQuotesInFile = GetOption("CPACK_ZIP_NEED_QUOTES").IsOn();
   { // the scope is needed for cmGeneratedFileStream
     cmGeneratedFileStream out(zipListFileName);
     for (const std::string& i : component->Files) {

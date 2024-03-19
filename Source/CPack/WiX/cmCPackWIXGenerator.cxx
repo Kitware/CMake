@@ -235,7 +235,7 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
   CollectExtensions("CPACK_WIX_EXTENSIONS", this->CandleExtensions);
   CollectExtensions("CPACK_WIX_CANDLE_EXTENSIONS", this->CandleExtensions);
 
-  if (!cmIsOn(GetOption("CPACK_WIX_SKIP_WIX_UI_EXTENSION"))) {
+  if (!GetOption("CPACK_WIX_SKIP_WIX_UI_EXTENSION").IsOn()) {
     this->LightExtensions.insert("WixUIExtension");
   }
   CollectExtensions("CPACK_WIX_EXTENSIONS", this->LightExtensions);
@@ -255,7 +255,7 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
 
   // if install folder is supposed to be set absolutely, the default
   // component guid "*" cannot be used
-  if (cmIsOn(GetOption("CPACK_WIX_SKIP_PROGRAM_FOLDER"))) {
+  if (GetOption("CPACK_WIX_SKIP_PROGRAM_FOLDER").IsOn()) {
     this->ComponentGuidType = cmWIXSourceWriter::CMAKE_GENERATED_GUID;
   }
 
@@ -613,7 +613,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
 std::string cmCPackWIXGenerator::GetRootFolderId() const
 {
-  if (cmIsOn(GetOption("CPACK_WIX_SKIP_PROGRAM_FOLDER"))) {
+  if (GetOption("CPACK_WIX_SKIP_PROGRAM_FOLDER").IsOn()) {
     return "";
   }
 

@@ -3424,7 +3424,7 @@ void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
   const std::string mode = cmIsOn(PICValue) ? "PIE" : "NO_PIE";
 
   std::string supported = "CMAKE_" + lang + "_LINK_" + mode + "_SUPPORTED";
-  if (cmIsOff(this->Makefile->GetDefinition(supported))) {
+  if (this->Makefile->GetDefinition(supported).IsOff()) {
     return;
   }
 

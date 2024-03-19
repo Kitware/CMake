@@ -918,7 +918,7 @@ bool cmGeneratorTarget::IsIPOEnabled(std::string const& lang,
 {
   cmValue feature = this->GetFeature("INTERPROCEDURAL_OPTIMIZATION", config);
 
-  if (!cmIsOn(feature)) {
+  if (!feature.IsOn()) {
     // 'INTERPROCEDURAL_OPTIMIZATION' is off, no need to check policies
     return false;
   }
@@ -1084,8 +1084,8 @@ cmValue cmGeneratorTarget::GetLanguageExtensions(std::string const& lang) const
 bool cmGeneratorTarget::GetLanguageStandardRequired(
   std::string const& lang) const
 {
-  return cmIsOn(
-    this->GetPropertyWithPairedLanguageSupport(lang, "_STANDARD_REQUIRED"));
+  return this->GetPropertyWithPairedLanguageSupport(lang, "_STANDARD_REQUIRED")
+    .IsOn();
 }
 
 void cmGeneratorTarget::GetModuleDefinitionSources(
@@ -2422,7 +2422,7 @@ bool cmGeneratorTarget::MacOSXUseInstallNameDir() const
   cmValue build_with_install_name =
     this->GetProperty("BUILD_WITH_INSTALL_NAME_DIR");
   if (build_with_install_name) {
-    return cmIsOn(*build_with_install_name);
+    return build_with_install_name.IsOn();
   }
 
   cmPolicies::PolicyStatus cmp0068 = this->GetPolicyStatusCMP0068();
@@ -6768,7 +6768,7 @@ bool cmGeneratorTarget::IsFortranBuildingInstrinsicModules() const
 {
   if (cmValue prop =
         this->GetProperty("Fortran_BUILDING_INSTRINSIC_MODULES")) {
-    return cmIsOn(*prop);
+    return prop.IsOn();
   }
   return false;
 }
@@ -7881,9 +7881,9 @@ void cmGeneratorTarget::ComputeImportInfo(std::string const& desired_config,
   if (this->GetType() == cmStateEnums::SHARED_LIBRARY) {
     std::string soProp = cmStrCat("IMPORTED_NO_SONAME", suffix);
     if (cmValue config_no_soname = this->GetProperty(soProp)) {
-      info.NoSOName = cmIsOn(*config_no_soname);
+      info.NoSOName = config_no_soname.IsOn();
     } else if (cmValue no_soname = this->GetProperty("IMPORTED_NO_SONAME")) {
-      info.NoSOName = cmIsOn(*no_soname);
+      info.NoSOName = no_soname.IsOn();
     }
   }
 

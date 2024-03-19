@@ -2346,16 +2346,16 @@ int cmake::Configure()
   // so we cannot rely on command line options alone. Always ensure our
   // messenger is in sync with the cache.
   cmValue value = this->State->GetCacheEntryValue("CMAKE_WARN_DEPRECATED");
-  this->Messenger->SetSuppressDeprecatedWarnings(value && cmIsOff(*value));
+  this->Messenger->SetSuppressDeprecatedWarnings(value && value.IsOff());
 
   value = this->State->GetCacheEntryValue("CMAKE_ERROR_DEPRECATED");
-  this->Messenger->SetDeprecatedWarningsAsErrors(cmIsOn(value));
+  this->Messenger->SetDeprecatedWarningsAsErrors(value.IsOn());
 
   value = this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
-  this->Messenger->SetSuppressDevWarnings(cmIsOn(value));
+  this->Messenger->SetSuppressDevWarnings(value.IsOn());
 
   value = this->State->GetCacheEntryValue("CMAKE_SUPPRESS_DEVELOPER_ERRORS");
-  this->Messenger->SetDevWarningsAsErrors(value && cmIsOff(*value));
+  this->Messenger->SetDevWarningsAsErrors(value && value.IsOff());
 
   int ret = this->ActualConfigure();
   cmValue delCacheVars =
@@ -2924,13 +2924,13 @@ void cmake::AddCacheEntry(const std::string& key, cmValue value,
   this->UnwatchUnusedCli(key);
 
   if (key == "CMAKE_WARN_DEPRECATED"_s) {
-    this->Messenger->SetSuppressDeprecatedWarnings(value && cmIsOff(value));
+    this->Messenger->SetSuppressDeprecatedWarnings(value && value.IsOff());
   } else if (key == "CMAKE_ERROR_DEPRECATED"_s) {
-    this->Messenger->SetDeprecatedWarningsAsErrors(cmIsOn(value));
+    this->Messenger->SetDeprecatedWarningsAsErrors(value.IsOn());
   } else if (key == "CMAKE_SUPPRESS_DEVELOPER_WARNINGS"_s) {
-    this->Messenger->SetSuppressDevWarnings(cmIsOn(value));
+    this->Messenger->SetSuppressDevWarnings(value.IsOn());
   } else if (key == "CMAKE_SUPPRESS_DEVELOPER_ERRORS"_s) {
-    this->Messenger->SetDevWarningsAsErrors(value && cmIsOff(value));
+    this->Messenger->SetDevWarningsAsErrors(value && value.IsOff());
   }
 }
 
@@ -3769,7 +3769,7 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
   }
   projName = *cachedProjectName;
 
-  if (cmIsOn(this->State->GetCacheEntryValue("CMAKE_VERBOSE_MAKEFILE"))) {
+  if (this->State->GetCacheEntryValue("CMAKE_VERBOSE_MAKEFILE").IsOn()) {
     verbose = true;
   }
 

@@ -416,10 +416,10 @@ int cmCPackIFWGenerator::InitializeInternal()
   }
 
   if (cmValue ifwDownloadAll = this->GetOption("CPACK_IFW_DOWNLOAD_ALL")) {
-    this->OnlineOnly = cmIsOn(ifwDownloadAll);
+    this->OnlineOnly = ifwDownloadAll.IsOn();
   } else if (cmValue cpackDownloadAll =
                this->GetOption("CPACK_DOWNLOAD_ALL")) {
-    this->OnlineOnly = cmIsOn(cpackDownloadAll);
+    this->OnlineOnly = cpackDownloadAll.IsOn();
   } else {
     this->OnlineOnly = false;
   }
