@@ -12,10 +12,10 @@ Generated_with_full_path2\.txt: # 3a # GENERATED = `0`
 Generated_with_full_path2\.txt: # 3b # GENERATED = `0`
 Generated_with_full_path3\.txt: # 1a # GENERATED = `0`
 Generated_with_full_path3\.txt: # 1b # GENERATED = `0`
-Generated_with_full_path3\.txt: # 2a # GENERATED = `0`
-Generated_with_full_path3\.txt: # 2b # GENERATED = `0`
-Generated_with_full_path3\.txt: # 3a # GENERATED = `0`
-Generated_with_full_path3\.txt: # 3b # GENERATED = `0`
+Generated_with_full_path3\.txt: # 2a # GENERATED = `1`
+Generated_with_full_path3\.txt: # 2b # GENERATED = `1`
+Generated_with_full_path3\.txt: # 3a # GENERATED = `1`
+Generated_with_full_path3\.txt: # 3b # GENERATED = `1`
 Generated_with_relative_path1\.txt: # 1a # GENERATED = `1`
 Generated_with_relative_path1\.txt: # 1b # GENERATED = `1`
 Generated_with_relative_path1\.txt: # 2a # GENERATED = `1`
@@ -48,14 +48,14 @@ Generated_with_full_source_path2\.txt: # 3a # GENERATED = `0`
 Generated_with_full_source_path2\.txt: # 3b # GENERATED = `0`
 Generated_with_full_source_path3\.txt: # 1a # GENERATED = `0`
 Generated_with_full_source_path3\.txt: # 1b # GENERATED = `0`
-Generated_with_full_source_path3\.txt: # 2a # GENERATED = `0`
-Generated_with_full_source_path3\.txt: # 2b # GENERATED = `0`
-Generated_with_full_source_path3\.txt: # 3a # GENERATED = `0`
-Generated_with_full_source_path3\.txt: # 3b # GENERATED = `0`
+Generated_with_full_source_path3\.txt: # 2a # GENERATED = `1`
+Generated_with_full_source_path3\.txt: # 2b # GENERATED = `1`
+Generated_with_full_source_path3\.txt: # 3a # GENERATED = `1`
+Generated_with_full_source_path3\.txt: # 3b # GENERATED = `1`
 CMake Error at CMP0118-Common-Test3\.cmake:[0-9]+ \(target_sources\):
   Cannot find source file:
 
-[ \t]*.*Tests/RunCMake/CMP0118/(Generated_with_full_source_path[1-3]\.txt|CMP0118-WARN-Test3-build/Generated_with_full_path3\.txt)
+[ \t]*.*Tests/RunCMake/CMP0118/(Generated_with_full_source_path[1-2]\.txt|CMP0118-WARN-Test3-build/Generated_with_full_path3\.txt)
 Call Stack \(most recent call first\):
   CMP0118-WARN-Test3\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -63,7 +63,7 @@ Call Stack \(most recent call first\):
 CMake Error at CMP0118-Common-Test3\.cmake:[0-9]+ \(target_sources\):
   Cannot find source file:
 
-[ \t]*.*Tests/RunCMake/CMP0118/(Generated_with_full_source_path[1-3]\.txt|CMP0118-WARN-Test3-build/Generated_with_full_path3\.txt)
+[ \t]*.*Tests/RunCMake/CMP0118/(Generated_with_full_source_path[1-2]\.txt|CMP0118-WARN-Test3-build/Generated_with_full_path3\.txt)
 Call Stack \(most recent call first\):
   CMP0118-WARN-Test3\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)
@@ -71,15 +71,7 @@ Call Stack \(most recent call first\):
 CMake Error at CMP0118-Common-Test3\.cmake:[0-9]+ \(target_sources\):
   Cannot find source file:
 
-[ \t]*.*Tests/RunCMake/CMP0118/(Generated_with_full_source_path[1-3]\.txt|CMP0118-WARN-Test3-build/Generated_with_full_path3\.txt)
-Call Stack \(most recent call first\):
-  CMP0118-WARN-Test3\.cmake:[0-9]+ \(include\)
-  CMakeLists\.txt:[0-9]+ \(include\)
-+
-CMake Error at CMP0118-Common-Test3\.cmake:[0-9]+ \(target_sources\):
-  Cannot find source file:
-
-[ \t]*.*Tests/RunCMake/CMP0118/(Generated_with_full_source_path[1-3]\.txt|CMP0118-WARN-Test3-build/Generated_with_full_path3\.txt)
+[ \t]*.*Tests/RunCMake/CMP0118/(Generated_with_full_source_path[1-2]\.txt|CMP0118-WARN-Test3-build/Generated_with_full_path3\.txt)
 Call Stack \(most recent call first\):
   CMP0118-WARN-Test3\.cmake:[0-9]+ \(include\)
   CMakeLists\.txt:[0-9]+ \(include\)

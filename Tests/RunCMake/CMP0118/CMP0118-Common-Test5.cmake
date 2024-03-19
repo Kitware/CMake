@@ -65,7 +65,7 @@ set_property(SOURCE "Generated_with_relative_path3.txt"
 get_and_print_GENERATED_property("Generated_with_relative_path3.txt")
 
 
-set_property(SOURCE "${CMAKE_CURRENT_BINARY_DIR}/Generated_with_full_source_path1.txt"
+set_property(SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/Generated_with_full_source_path1.txt"
   PROPERTY GENERATED "tRue")
 get_and_print_GENERATED_property("Generated_with_full_source_path1.txt")
 
@@ -73,6 +73,6 @@ set_property(SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/Generated_with_full_source_path
   PROPERTY GENERATED "SomeVar-NOTFOUND")
 get_and_print_GENERATED_property("Generated_with_full_source_path2.txt")
 
-set_property(SOURCE ${CMAKE_CURRENT_SOURCE_DIR}/"Generated_with_full_source_path3.txt"
+set_property(SOURCE "${CMAKE_CURRENT_SOURCE_DIR}/Generated_with_full_source_path3.txt"
   PROPERTY GENERATED "Junk-value")
 get_and_print_GENERATED_property("Generated_with_full_source_path3.txt")
