@@ -56,7 +56,7 @@ step finished normally, ends with a ``...`` document marker line:
 A new document is appended to the log every time CMake configures
 the build tree and logs new events.
 
-The keys of the each document root mapping are:
+The keys of each document root mapping are:
 
 ``events``
   A YAML block sequence of nodes corresponding to events logged during
