@@ -8,11 +8,13 @@
 #include "cmCryptoHash.h"
 #include "cmUuid.h"
 
-cmWIXSourceWriter::cmWIXSourceWriter(cmCPackLog* logger,
+cmWIXSourceWriter::cmWIXSourceWriter(unsigned long wixVersion,
+                                     cmCPackLog* logger,
                                      std::string const& filename,
                                      GuidType componentGuidType,
                                      RootElementType rootElementType)
-  : Logger(logger)
+  : WixVersion(wixVersion)
+  , Logger(logger)
   , File(filename.c_str())
   , State(DEFAULT)
   , SourceFilename(filename)
@@ -26,7 +28,11 @@ cmWIXSourceWriter::cmWIXSourceWriter(cmCPackLog* logger,
     BeginElement("Wix");
   }
 
-  AddAttribute("xmlns", "http://schemas.microsoft.com/wix/2006/wi");
+  if (this->WixVersion >= 4) {
+    AddAttribute("xmlns", "http://wixtoolset.org/schemas/v4/wxs");
+  } else {
+    AddAttribute("xmlns", "http://schemas.microsoft.com/wix/2006/wi");
+  }
 }
 
 cmWIXSourceWriter::~cmWIXSourceWriter()
@@ -40,6 +46,24 @@ cmWIXSourceWriter::~cmWIXSourceWriter()
   }
 
   EndElement(Elements.back());
+}
+
+void cmWIXSourceWriter::BeginElement_StandardDirectory()
+{
+  if (this->WixVersion >= 4) {
+    BeginElement("StandardDirectory");
+  } else {
+    BeginElement("Directory");
+  }
+}
+
+void cmWIXSourceWriter::EndElement_StandardDirectory()
+{
+  if (this->WixVersion >= 4) {
+    EndElement("StandardDirectory");
+  } else {
+    EndElement("Directory");
+  }
 }
 
 void cmWIXSourceWriter::BeginElement(std::string const& name)

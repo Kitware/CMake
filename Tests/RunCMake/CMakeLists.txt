@@ -1100,9 +1100,10 @@ endif()
 
 add_RunCMake_test_group(CPack "${cpack_tests}")
 
-if(CMake_TEST_CPACK_WIX3)
+if(CMake_TEST_CPACK_WIX3 OR CMake_TEST_CPACK_WIX4)
   add_RunCMake_test(CPack_WIX
     -DCMake_TEST_CPACK_WIX3=${CMake_TEST_CPACK_WIX3}
+    -DCMake_TEST_CPACK_WIX4=${CMake_TEST_CPACK_WIX4}
     )
 endif()
 

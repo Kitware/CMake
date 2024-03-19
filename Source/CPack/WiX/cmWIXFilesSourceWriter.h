@@ -13,7 +13,8 @@
 class cmWIXFilesSourceWriter : public cmWIXSourceWriter
 {
 public:
-  cmWIXFilesSourceWriter(cmCPackLog* logger, std::string const& filename,
+  cmWIXFilesSourceWriter(unsigned long wixVersion, cmCPackLog* logger,
+                         std::string const& filename,
                          GuidType componentGuidType);
 
   void EmitShortcut(std::string const& id, cmWIXShortcut const& shortcut,
