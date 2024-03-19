@@ -171,7 +171,7 @@ Policies Introduced by CMake 3.20
 
    CMP0120: The WriteCompilerDetectionHeader module is removed. </policy/CMP0120>
    CMP0119: LANGUAGE source file property explicitly compiles as language. </policy/CMP0119>
-   CMP0118: The GENERATED source file property is now visible in all directories. </policy/CMP0118>
+   CMP0118: GENERATED sources may be used across directories without manual marking. </policy/CMP0118>
    CMP0117: MSVC RTTI flag /GR is not added to CMAKE_CXX_FLAGS by default. </policy/CMP0117>
    CMP0116: Ninja generators transform DEPFILEs from add_custom_command(). </policy/CMP0116>
    CMP0115: Source file extensions must be explicit. </policy/CMP0115>
