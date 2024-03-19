@@ -1097,8 +1097,10 @@ endif()
 
 add_RunCMake_test_group(CPack "${cpack_tests}")
 
-if(CMake_TEST_CPACK_WIX)
-  add_RunCMake_test(CPack_WIX)
+if(CMake_TEST_CPACK_WIX3)
+  add_RunCMake_test(CPack_WIX
+    -DCMake_TEST_CPACK_WIX3=${CMake_TEST_CPACK_WIX3}
+    )
 endif()
 
 # add a test to make sure symbols are exported from a shared library
