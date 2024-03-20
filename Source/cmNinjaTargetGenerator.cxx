@@ -590,13 +590,15 @@ void cmNinjaTargetGenerator::WriteLanguageRules(const std::string& language,
 
 namespace {
 // Create the command to run the dependency scanner
-std::string GetScanCommand(cm::string_view cmakeCmd, cm::string_view tdi,
-                           cm::string_view lang, cm::string_view srcFile,
-                           cm::string_view ddiFile)
+std::string GetScanCommand(
+  cm::string_view cmakeCmd, cm::string_view tdi, cm::string_view lang,
+  cm::string_view srcFile, cm::string_view ddiFile,
+  cm::optional<cm::string_view> srcOrigFile = cm::nullopt)
 {
   return cmStrCat(cmakeCmd, " -E cmake_ninja_depends --tdi=", tdi,
                   " --lang=", lang, " --src=", srcFile, " --out=$out",
-                  " --dep=$DEP_FILE --obj=$OBJ_FILE --ddi=", ddiFile);
+                  " --dep=$DEP_FILE --obj=$OBJ_FILE --ddi=", ddiFile,
+                  srcOrigFile ? cmStrCat(" --src-orig=", *srcOrigFile) : "");
 }
 
 // Helper function to create dependency scanning rule that may or may
@@ -760,8 +762,8 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
         for (auto& i : scanCommands) {
           i = cmStrCat(launcher, i);
         }
-        scanCommands.emplace_back(GetScanCommand(cmakeCmd, tdi, lang, "$out",
-                                                 "$DYNDEP_INTERMEDIATE_FILE"));
+        scanCommands.emplace_back(GetScanCommand(
+          cmakeCmd, tdi, lang, "$out", "$DYNDEP_INTERMEDIATE_FILE", "$in"));
       }
 
       auto scanRule = GetScanRule(
