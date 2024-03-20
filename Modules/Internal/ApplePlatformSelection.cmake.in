@@ -1,6 +1,7 @@
 @PACKAGE_INIT@
 
 string(TOLOWER "${CMAKE_OSX_SYSROOT}" _CMAKE_OSX_SYSROOT_LOWER)
+@_branch_INIT@
 if(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)iphonesimulator")
   @_branch_IOS_SIMULATOR_INCLUDE_FILE@
 elseif(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)iphoneos")
@@ -20,5 +21,5 @@ elseif(_CMAKE_OSX_SYSROOT_LOWER MATCHES "(^|/)xros")
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
   @_branch_MACOS_INCLUDE_FILE@
 else()
-  message(FATAL_ERROR "Platform not supported")
+  @_branch_ELSE@
 endif()
