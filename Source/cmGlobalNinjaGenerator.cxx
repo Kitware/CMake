@@ -2327,7 +2327,8 @@ struct cmSourceInfo
 };
 
 cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
-  std::string const& arg_tdi, std::string const& arg_src);
+  std::string const& arg_tdi, std::string const& arg_src,
+  std::string const& arg_src_orig);
 }
 
 int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
@@ -2335,6 +2336,7 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
 {
   std::string arg_tdi;
   std::string arg_src;
+  std::string arg_src_orig;
   std::string arg_out;
   std::string arg_dep;
   std::string arg_obj;
@@ -2345,6 +2347,8 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
       arg_tdi = arg.substr(6);
     } else if (cmHasLiteralPrefix(arg, "--src=")) {
       arg_src = arg.substr(6);
+    } else if (cmHasLiteralPrefix(arg, "--src-orig=")) {
+      arg_src_orig = arg.substr(11);
     } else if (cmHasLiteralPrefix(arg, "--out=")) {
       arg_out = arg.substr(6);
     } else if (cmHasLiteralPrefix(arg, "--dep=")) {
@@ -2396,7 +2400,7 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
 
   cm::optional<cmSourceInfo> info;
   if (arg_lang == "Fortran") {
-    info = cmcmd_cmake_ninja_depends_fortran(arg_tdi, arg_src);
+    info = cmcmd_cmake_ninja_depends_fortran(arg_tdi, arg_src, arg_src_orig);
   } else {
     cmSystemTools::Error(
       cmStrCat("-E cmake_ninja_depends does not understand the ", arg_lang,
@@ -2431,13 +2435,24 @@ int cmcmd_cmake_ninja_depends(std::vector<std::string>::const_iterator argBeg,
 namespace {
 
 cm::optional<cmSourceInfo> cmcmd_cmake_ninja_depends_fortran(
-  std::string const& arg_tdi, std::string const& arg_src)
+  std::string const& arg_tdi, std::string const& arg_src,
+  std::string const& arg_src_orig)
 {
   cm::optional<cmSourceInfo> info;
   cmFortranCompiler fc;
   std::vector<std::string> includes;
   std::string dir_top_bld;
   std::string module_dir;
+
+  if (!arg_src_orig.empty()) {
+    // Prepend the original source file's directory as an include directory
+    // so Fortran INCLUDE statements can look for files in it.
+    std::string src_orig_dir = cmSystemTools::GetParentDirectory(arg_src_orig);
+    if (!src_orig_dir.empty()) {
+      includes.push_back(src_orig_dir);
+    }
+  }
+
   {
     Json::Value tdio;
     Json::Value const& tdi = tdio;
