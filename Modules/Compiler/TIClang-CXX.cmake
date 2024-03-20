@@ -24,6 +24,8 @@ set(CMAKE_CXX14_STANDARD__HAS_FULL_SUPPORT ON)
 set(CMAKE_CXX17_STANDARD_COMPILE_OPTION "-std=c++17")
 set(CMAKE_CXX17_EXTENSION_COMPILE_OPTION "-std=gnu++17")
 
+set(CMAKE_CXX_STANDARD_LATEST 17)
+
 # Including the "${CMAKE_ROOT}/Modules/Compiler/Clang-CXX.cmake" script above may set several other compile option
 # variables which do not necessarily apply here. So, we unset those variables accordingly.
 unset(CMAKE_CXX20_STANDARD_COMPILE_OPTION)

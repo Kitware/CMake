@@ -42,6 +42,8 @@ if(CMAKE_CXX_COMPILER_VERSION GREATER_EQUAL 4)
 
   set(CMAKE_CXX17_STANDARD_COMPILE_OPTION  -std=c++17)
   set(CMAKE_CXX17_EXTENSION_COMPILE_OPTION -std=gnu++17)
+
+  set(CMAKE_CXX_STANDARD_LATEST 17)
 endif()
 
 __compiler_check_default_language_standard(CXX 4 14)
