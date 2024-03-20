@@ -86,7 +86,7 @@ if (NOT _SWIG_NAMES)
   set (_SWIG_NAMES swig4.0 swig3.0 swig2.0)
 endif()
 
-find_program(SWIG_EXECUTABLE NAMES ${_SWIG_NAMES} swig)
+find_program(SWIG_EXECUTABLE NAMES ${_SWIG_NAMES} swig NAMES_PER_DIR)
 unset(_SWIG_NAMES)
 
 if(SWIG_EXECUTABLE AND NOT SWIG_DIR)
