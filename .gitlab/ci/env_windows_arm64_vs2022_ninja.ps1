@@ -1,1 +1,1 @@
-. .gitlab/ci/wix3-env.ps1
+& "$pwsh" -File .gitlab/ci/wix3.ps1
