@@ -1,5 +1,5 @@
-INCLUDE "non_pp_include.f90"
+include "non_pp_include.f90"
 
-PROGRAM MAINF90
-   CALL NON_PP_INCLUDE_SUBROUTINE
-END PROGRAM MAINF90
+program test_non_pp_include_main
+  call non_pp_include_subroutine
+end program
