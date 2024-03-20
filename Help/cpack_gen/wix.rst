@@ -1,10 +1,43 @@
 CPack WIX Generator
 -------------------
 
-CPack WIX generator specific options
+Use the `WiX Toolset`_ to produce a Windows Installer ``.msi`` database.
+
+.. _`WiX Toolset`: https://wixtoolset.org/
 
 .. versionadded:: 3.7
-  Support :variable:`CPACK_COMPONENT_<compName>_DISABLED` variable.
+  The :variable:`CPACK_COMPONENT_<compName>_DISABLED` variable is now
+  supported.
+
+WiX Toolset v3
+^^^^^^^^^^^^^^
+
+Packaging is performed using the following tools:
+
+``candle``
+  Compiles WiX source files into ``.wixobj`` files.
+
+  Invocations may be customized using tool-specific variables:
+
+  * :variable:`CPACK_WIX_CANDLE_EXTENSIONS <CPACK_WIX_<TOOL>_EXTENSIONS>`
+  * :variable:`CPACK_WIX_CANDLE_EXTRA_FLAGS <CPACK_WIX_<TOOL>_EXTRA_FLAGS>`
+
+``light``
+  Links ``.wixobj`` files into a Windows Installer ``.msi`` database.
+
+  Invocations may be customized using tool-specific variables:
+
+  * :variable:`CPACK_WIX_LIGHT_EXTENSIONS <CPACK_WIX_<TOOL>_EXTENSIONS>`
+  * :variable:`CPACK_WIX_LIGHT_EXTRA_FLAGS <CPACK_WIX_<TOOL>_EXTRA_FLAGS>`
+
+CPack invokes both tools as needed.  Intermediate ``.wixobj`` files
+are considered implementation details.
+
+WiX extensions must be named with the form ``Wix<Name>Extension``.
+
+CPack expects the above tools to be available for command-line
+use via the ``PATH``.  Or, if the ``WIX`` environment variable is set,
+CPack looks for the tools in ``%WIX%`` and ``%WIX%\bin``.
 
 Variables specific to CPack WIX generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -68,8 +101,8 @@ Windows using WiX.
 
 .. variable:: CPACK_WIX_UI_REF
 
- This variable allows you to override the Id of the ``<UIRef>`` element
- in the WiX template.
+ Specify the WiX ``UI`` extension's dialog set.
+ This is the Id of the ``<UIRef>`` element in the default WiX template.
 
  The default is ``WixUI_InstallDir`` in case no CPack components have
  been defined and ``WixUI_FeatureTree`` otherwise.
@@ -107,7 +140,7 @@ Windows using WiX.
 
  Language(s) of the installer
 
- Languages are compiled into the WixUI extension library.  To use them,
+ Languages are compiled into the Wix ``UI`` extension library.  To use them,
  simply provide the name of the culture.  If you specify more than one
  culture identifier in a comma or semicolon delimited list, the first one
  that is found will be used.  You can find a list of supported languages at:
@@ -196,38 +229,34 @@ Windows using WiX.
 
  Extra WiX source files
 
- This variable provides an optional list of extra WiX source files (.wxs)
- that should be compiled and linked.  The full path to source files is
- required.
+ This variable provides an optional list of extra WiX source files (``.wxs``)
+ that should be compiled and linked.  The paths must be absolute.
 
 .. variable:: CPACK_WIX_EXTRA_OBJECTS
 
- Extra WiX object files or libraries
+ Extra WiX object files or libraries.
 
- This variable provides an optional list of extra WiX object (.wixobj)
- and/or WiX library (.wixlib) files.  The full path to objects and libraries
- is required.
+ This variable provides an optional list of extra WiX object (``.wixobj``)
+ and/or WiX library (``.wixlib``) files.  The paths must be absolute.
 
 .. variable:: CPACK_WIX_EXTENSIONS
 
- This variable provides a list of additional extensions for the WiX
- tools light and candle.
+ Specify a list of additional extensions for WiX tools.
+ See `WiX Toolset v3`_ for extension naming patterns.
 
 .. variable:: CPACK_WIX_<TOOL>_EXTENSIONS
 
- This is the tool specific version of CPACK_WIX_EXTENSIONS.
- ``<TOOL>`` can be either LIGHT or CANDLE.
+ Specify a list of additional extensions for a specific WiX tool.
+ See `WiX Toolset v3`_ for possible ``<TOOL>`` names.
 
 .. variable:: CPACK_WIX_<TOOL>_EXTRA_FLAGS
 
- This list variable allows you to pass additional
- flags to the WiX tool ``<TOOL>``.
+ Specify a list of additional command-line flags for a specific WiX tool.
+ See `WiX Toolset v3`_ for possible ``<TOOL>`` names.
 
  Use it at your own risk.
  Future versions of CPack may generate flags which may be in conflict
  with your own flags.
-
- ``<TOOL>`` can be either LIGHT or CANDLE.
 
 .. variable:: CPACK_WIX_CMAKE_PACKAGE_REGISTRY
 
@@ -326,9 +355,9 @@ Windows using WiX.
 
  .. versionadded:: 3.23
 
- If this variable is set then the inclusion of WixUIExtensions is skipped,
- i.e. the ``-ext "WixUIExtension"`` command line is not included during
- the execution of the WiX light tool.
+ If this variable is set to true, the default inclusion of the WiX ``UI``
+ extension is skipped, i.e., the ``-ext WixUIExtension`` flag is not
+ passed to WiX tools.
 
 .. variable:: CPACK_WIX_ARCHITECTURE
 
