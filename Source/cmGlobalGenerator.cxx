@@ -1627,6 +1627,13 @@ bool cmGlobalGenerator::Compute()
     return false;
   }
 
+  // Perform after-generator-target generator actions. These involve collecting
+  // information gathered during the construction of generator targets.
+  for (unsigned int i = 0; i < this->Makefiles.size(); ++i) {
+    this->Makefiles[i]->GenerateAfterGeneratorTargets(
+      *this->LocalGenerators[i]);
+  }
+
   // Add generator specific helper commands
   for (const auto& localGen : this->LocalGenerators) {
     localGen->AddHelperCommands();
