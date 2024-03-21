@@ -108,6 +108,7 @@ public:
 
   cmStateEnums::TargetType GetType() const;
   const std::string& GetName() const;
+  std::string GetFamilyName() const;
   std::string GetExportName() const;
   std::string GetFilesystemExportName() const;
 

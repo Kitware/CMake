@@ -173,6 +173,20 @@ const std::string& cmGeneratorTarget::GetName() const
   return this->Target->GetName();
 }
 
+std::string cmGeneratorTarget::GetFamilyName() const
+{
+  if (!this->IsImported() && !this->IsSynthetic()) {
+    return this->Target->GetTemplateName();
+  }
+  cmCryptoHash hasher(cmCryptoHash::AlgoSHA3_512);
+  constexpr size_t HASH_TRUNCATION = 12;
+  auto dirhash =
+    hasher.HashString(this->GetLocalGenerator()->GetCurrentBinaryDirectory());
+  auto targetIdent = hasher.HashString(cmStrCat("@d_", dirhash));
+  return cmStrCat(this->Target->GetTemplateName(), '@',
+                  targetIdent.substr(0, HASH_TRUNCATION));
+}
+
 std::string cmGeneratorTarget::GetExportName() const
 {
   cmValue exportName = this->GetProperty("EXPORT_NAME");

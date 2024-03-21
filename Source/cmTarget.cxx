@@ -645,6 +645,7 @@ public:
   cmStateEnums::TargetType TargetType;
   cmMakefile* Makefile;
   cmPolicies::PolicyMap PolicyMap;
+  cmTarget const* TemplateTarget;
   std::string Name;
   std::string InstallPath;
   std::string RuntimeInstallPath;
@@ -931,6 +932,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   this->impl->TargetType = type;
   this->impl->Makefile = mf;
   this->impl->Name = name;
+  this->impl->TemplateTarget = nullptr;
   this->impl->IsGeneratorProvided = false;
   this->impl->HaveInstallRule = false;
   this->impl->IsDLLPlatform = false;
@@ -1183,6 +1185,14 @@ cmPolicies::PolicyMap const& cmTarget::GetPolicyMap() const
 
 const std::string& cmTarget::GetName() const
 {
+  return this->impl->Name;
+}
+
+const std::string& cmTarget::GetTemplateName() const
+{
+  if (this->impl->TemplateTarget) {
+    return this->impl->TemplateTarget->GetTemplateName();
+  }
   return this->impl->Name;
 }
 
@@ -1784,6 +1794,7 @@ void cmTarget::CopyPolicyStatuses(cmTarget const* tgt)
   assert(tgt->IsImported());
 
   this->impl->PolicyMap = tgt->impl->PolicyMap;
+  this->impl->TemplateTarget = tgt;
 }
 
 void cmTarget::CopyImportedCxxModulesEntries(cmTarget const* tgt)
