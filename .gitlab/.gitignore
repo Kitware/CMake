@@ -22,5 +22,6 @@
 /unstable-jom*
 /watcom
 /wix3
+/wix4
 /clang-tidy-fixes
 /num_warnings.txt
