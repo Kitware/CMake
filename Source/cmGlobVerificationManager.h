@@ -13,6 +13,7 @@
 #include "cmListFileCache.h"
 
 class cmMessenger;
+struct cmGlobCacheEntry;
 
 /** \class cmGlobVerificationManager
  * \brief Class for expressing build-time dependencies on glob expressions.
@@ -28,12 +29,12 @@ protected:
   bool SaveVerificationScript(const std::string& path, cmMessenger* messenger);
 
   //! Add an entry into the glob cache
-  void AddCacheEntry(bool recurse, bool listDirectories, bool followSymlinks,
-                     const std::string& relative,
-                     const std::string& expression,
-                     const std::vector<std::string>& files,
+  void AddCacheEntry(const cmGlobCacheEntry& entry,
                      const std::string& variable,
                      const cmListFileBacktrace& bt, cmMessenger* messenger);
+
+  //! Get all cache entries
+  std::vector<cmGlobCacheEntry> GetCacheEntries() const;
 
   //! Clear the glob cache for state reset.
   void Reset();

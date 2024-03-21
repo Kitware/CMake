@@ -48,6 +48,7 @@
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmFileTimeCache.h"
 #include "cmGeneratorTarget.h"
+#include "cmGlobCacheEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
 #include "cmLinkLineComputer.h"
@@ -2949,16 +2950,17 @@ std::string const& cmake::GetGlobVerifyStamp() const
   return this->State->GetGlobVerifyStamp();
 }
 
-void cmake::AddGlobCacheEntry(bool recurse, bool listDirectories,
-                              bool followSymlinks, const std::string& relative,
-                              const std::string& expression,
-                              const std::vector<std::string>& files,
+void cmake::AddGlobCacheEntry(const cmGlobCacheEntry& entry,
                               const std::string& variable,
                               cmListFileBacktrace const& backtrace)
 {
-  this->State->AddGlobCacheEntry(recurse, listDirectories, followSymlinks,
-                                 relative, expression, files, variable,
-                                 backtrace, this->Messenger.get());
+  this->State->AddGlobCacheEntry(entry, variable, backtrace,
+                                 this->Messenger.get());
+}
+
+std::vector<cmGlobCacheEntry> cmake::GetGlobCacheEntries() const
+{
+  return this->State->GetGlobCacheEntries();
 }
 
 std::vector<std::string> cmake::GetAllExtensions() const
