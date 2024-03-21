@@ -101,7 +101,7 @@ if(NOT DEFINED Iconv_IS_BUILT_IN)
       "
       #include <stddef.h>
       #include <iconv.h>
-      int main() {
+      int main(void) {
         char *a, *b;
         size_t i, j;
         iconv_t ic;

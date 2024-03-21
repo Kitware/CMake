@@ -72,7 +72,7 @@ be returned with OpenACC_<lang>_FLAGS.
 
 set(OpenACC_C_CXX_TEST_SOURCE
 "
-int main(){
+int main(void){
 #ifdef _OPENACC
   return 0;
 #else
@@ -102,7 +102,7 @@ const char accver_str[] = { 'I', 'N', 'F', 'O', ':', 'O', 'p', 'e', 'n', 'A',
                             ('0' + ((_OPENACC/10)%10)),
                             ('0' + ((_OPENACC/1)%10)),
                             ']', '\\0' };
-int main()
+int main(void)
 {
   puts(accver_str);
   return 0;
