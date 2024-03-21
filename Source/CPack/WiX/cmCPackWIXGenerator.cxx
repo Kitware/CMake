@@ -635,9 +635,13 @@ std::string cmCPackWIXGenerator::GetRootFolderId() const
 
 bool cmCPackWIXGenerator::GenerateMainSourceFileFromTemplate()
 {
-  std::string wixTemplate = FindTemplate("WIX.template.in");
+  std::string wixTemplate;
   if (cmValue wixtpl = GetOption("CPACK_WIX_TEMPLATE")) {
     wixTemplate = *wixtpl;
+  } else {
+    cm::optional<cm::string_view> alt;
+    alt = "WIX-v3/"_s;
+    wixTemplate = FindTemplate("WIX.template.in"_s, alt);
   }
 
   if (wixTemplate.empty()) {
