@@ -58,6 +58,50 @@ optional Fortran support:
 
 #]=======================================================================]
 
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+
+function(_swig_get_version _swig_executable _swig_version)
+  unset(${_swig_version} PARENT_SCOPE)
+  # Determine SWIG version
+  execute_process(COMMAND "${_swig_executable}" -version
+    OUTPUT_VARIABLE _swig_output
+    ERROR_VARIABLE _swig_output
+    RESULT_VARIABLE _swig_result)
+  if(_swig_result)
+    set_property (CACHE _SWIG_REASON_FAILURE PROPERTY VALUE "Cannot use the executable \"${_swig_executable}\"")
+    if (_swig_output)
+      set_property (CACHE _SWIG_REASON_FAILURE APPEND_STRING PROPERTY VALUE ": ${_swig_output}")
+    endif()
+  else()
+    string(REGEX REPLACE ".*SWIG Version[^0-9.]*\([0-9.]+\).*" "\\1"
+                         _swig_output "${_swig_output}")
+    set(${_swig_version} ${_swig_output} PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(_swig_validate_find_executable status executable)
+  _swig_get_version("${executable}" _swig_find_version)
+  if(NOT _swig_find_version)
+    # executable is unusable
+    set (${status} FALSE PARENT_SCOPE)
+    return()
+  endif()
+  if(NOT SWIG_FIND_VERSION)
+    return()
+  endif()
+
+  find_package_check_version(${_swig_find_version}  _swig_version_is_valid HANDLE_VERSION_RANGE)
+  if(_swig_version_is_valid)
+    unset(_SWIG_REASON_FAILURE CACHE)
+  else()
+    set (${status} FALSE PARENT_SCOPE)
+    set_property (CACHE _SWIG_REASON_FAILURE PROPERTY VALUE "Could NOT find SWIG: Found unsuitable version \"${_swig_find_version}\" for the executable \"${executable}\"")
+  endif()
+endfunction()
+
+unset (_SWIG_REASON_FAILURE)
+set (_SWIG_REASON_FAILURE CACHE INTERNAL "SWIG reason failure")
+
 # compute list of possible names
 unset (_SWIG_NAMES)
 if (SWIG_FIND_VERSION_RANGE)
@@ -86,7 +130,8 @@ if (NOT _SWIG_NAMES)
   set (_SWIG_NAMES swig4.0 swig3.0 swig2.0)
 endif()
 
-find_program(SWIG_EXECUTABLE NAMES ${_SWIG_NAMES} swig)
+find_program(SWIG_EXECUTABLE NAMES ${_SWIG_NAMES} swig NAMES_PER_DIR
+                             VALIDATOR _swig_validate_find_executable)
 unset(_SWIG_NAMES)
 
 if(SWIG_EXECUTABLE AND NOT SWIG_DIR)
@@ -115,17 +160,8 @@ endif()
 
 if(SWIG_EXECUTABLE AND SWIG_DIR AND NOT SWIG_VERSION)
   # Determine SWIG version
-  execute_process(COMMAND "${SWIG_EXECUTABLE}" -version
-    OUTPUT_VARIABLE _swig_output
-    ERROR_VARIABLE _swig_output
-    RESULT_VARIABLE _swig_result)
-  if(_swig_result)
-    message(SEND_ERROR "Command \"${SWIG_EXECUTABLE} -version\" failed with output:\n${_swig_output}")
-  else()
-    string(REGEX REPLACE ".*SWIG Version[^0-9.]*\([0-9.]+\).*" "\\1"
-      _swig_output "${_swig_output}")
-    set(SWIG_VERSION ${_swig_output} CACHE STRING "Swig version" FORCE)
-  endif()
+  _swig_get_version("${SWIG_EXECUTABLE}" _swig_output)
+  set(SWIG_VERSION ${_swig_output} CACHE STRING "Swig version" FORCE)
 endif()
 
 if(SWIG_EXECUTABLE AND SWIG_FIND_COMPONENTS)
@@ -145,16 +181,18 @@ if(SWIG_EXECUTABLE AND SWIG_FIND_COMPONENTS)
   endif()
 endif()
 
-unset(_swig_output)
-unset(_swig_error)
-unset(_swig_result)
-
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(
   SWIG HANDLE_COMPONENTS
   REQUIRED_VARS SWIG_EXECUTABLE SWIG_DIR
   VERSION_VAR SWIG_VERSION
-  HANDLE_VERSION_RANGE)
+  HANDLE_VERSION_RANGE
+  FAIL_MESSAGE "${_SWIG_REASON_FAILURE}")
+
+unset(_swig_output)
+unset(_swig_error)
+unset(_swig_result)
+
+unset(_SWIG_REASON_FAILURE CACHE)
 
 if(SWIG_FOUND)
   set(SWIG_USE_FILE "${CMAKE_CURRENT_LIST_DIR}/UseSWIG.cmake")
