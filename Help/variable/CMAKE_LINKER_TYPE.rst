@@ -5,10 +5,6 @@ CMAKE_LINKER_TYPE
 
 Specify which linker will be used for the link step.
 
-.. note::
-  It is assumed that the linker specified is fully compatible with the standard
-  one. CMake will not do any options translation.
-
 This variable is used to initialize the :prop_tgt:`LINKER_TYPE` property
 on each target created by a call to :command:`add_library` or
 :command:`add_executable`.  It is meaningful only for targets having a

@@ -1,59 +1,64 @@
+.. note::
+  It is assumed that the linker specified is fully compatible with the default
+  one the compiler would normally invoke. CMake will not do any option
+  translation.
+
 Linker types are case-sensitive and may only contain letters, numbers and
 underscores. Linker types defined in all uppercase are reserved for CMake's own
 built-in types. The pre-defined linker types are:
 
 ``DEFAULT``
-  This type corresponds to standard linking, essentially equivalent to
-  not specifying :prop_tgt:`LINKER_TYPE` target property.
+  This type corresponds to standard linking, essentially equivalent to the
+  :prop_tgt:`LINKER_TYPE` target property not being set at all.
 
 ``SYSTEM``
-  Use the standard linker delivered by the platform or the standard toolkit
-  (for example, ``SYSTEM`` imply Microsoft linker for all ``MSVC`` compatible
-  compilers). This type is supported for the following platforms/compilers:
+  Use the standard linker provided by the platform or toolchain. For example,
+  this implies the Microsoft linker for all ``MSVC``-compatible compilers.
+  This type is supported for the following platform-compiler combinations:
 
-  * Linux, for ``GNU``, ``Clang``, ``LLVMFlang`` and ``NVIDIA`` compilers.
-  * All Apple variants for ``AppleClang``, ``Clang`` and ``GNU`` compilers.
-  * Windows, for ``MSVC``, ``GNU``, ``Clang`` and ``NVIDIA`` compilers.
+  * Linux: ``GNU``, ``Clang``, ``LLVMFlang`` and ``NVIDIA`` compilers.
+  * All Apple variants: ``AppleClang``, ``Clang`` and ``GNU`` compilers.
+  * Windows: ``MSVC``, ``GNU``, ``Clang`` and ``NVIDIA`` compilers.
 
 ``LLD``
   Use the ``LLVM`` linker. This type is supported for the following
-  platforms/compilers:
+  platform-compiler combinations:
 
-  * Linux, for ``GNU``, ``Clang``, ``LLVMFlang`` and ``NVIDIA`` compilers.
-  * All Apple variants for ``Clang`` and ``AppleClang`` compilers.
-  * Windows, for ``GNU``, ``Clang`` compilers with ``GNU`` front-end and
-    ``CLang``, ``MSVC`` and ``NVIDIA`` compilers with ``MSVC`` front-end.
+  * Linux: ``GNU``, ``Clang``, ``LLVMFlang`` and ``NVIDIA`` compilers.
+  * All Apple variants: ``Clang`` and ``AppleClang`` compilers.
+  * Windows: ``GNU``, ``Clang``, ``Clang`` compilers with ``GNU`` front-end,
+    ``MSVC`` and ``NVIDIA`` compilers with ``MSVC`` front-end.
 
 ``BFD``
   Use the ``GNU`` linker.  This type is supported for the following
-  platforms/compilers:
+  platform-compiler combinations:
 
-  * Linux, for ``GNU``, ``Clang``, ``LLVMFlang`` and ``NVIDIA`` compilers.
-  * Windows, for ``GNU``, ``Clang`` compilers with ``GNU`` front-end.
+  * Linux: ``GNU``, ``Clang``, ``LLVMFlang`` and ``NVIDIA`` compilers.
+  * Windows: ``GNU``, ``Clang`` compilers with ``GNU`` front-end.
 
 ``GOLD``
-  Supported on Linux platform for ``GNU``, ``Clang``, ``LLVMFlang`` and
+  Supported on Linux platform with ``GNU``, ``Clang``, ``LLVMFlang`` and
   ``NVIDIA`` compilers.
 
 ``MOLD``
   Use the `mold linker <https://github.com/rui314/mold>`_. This type is
-  supported on the following platforms:
+  supported on the following platform-compiler combinations:
 
-  * Linux platform for ``GNU``, ``Clang``, ``LLVMFlang`` and ``NVIDIA``
-    compilers.
-  * All Apple variants for ``Clang`` and ``AppleClang`` compilers as an
-    alias to ``SOLD``.
+  * Linux: ``GNU``, ``Clang``, ``LLVMFlang`` and ``NVIDIA`` compilers.
+  * All Apple variants: ``Clang`` and ``AppleClang`` compilers (acts as an
+    alias to the `sold linker`_).
 
 ``SOLD``
-  Use the `sold linker <https://github.com/bluewhalesystems/sold>`_. This type
-  is only supported on Apple platforms for ``Clang`` and ``AppleClang``
-  compilers.
+  Use the `sold linker`_. This type is only supported on Apple platforms
+  with ``Clang`` and ``AppleClang`` compilers.
 
 ``APPLE_CLASSIC``
   Use the Apple linker in the classic behavior (i.e. before ``Xcode 15.0``).
-  This type is only supported on Apple platforms for ``GNU``, ``Clang`` and
+  This type is only supported on Apple platforms with ``GNU``, ``Clang`` and
   ``AppleClang`` compilers.
 
 ``MSVC``
-  Use the Microsoft linker. This type is only supported on Windows
-  platform for ``MSVC`` and ``Clang`` compiler with ``MSVC`` front-end.
+  Use the Microsoft linker. This type is only supported on the Windows
+  platform with ``MSVC`` and ``Clang`` compiler with ``MSVC`` front-end.
+
+.. _sold linker: https://github.com/bluewhalesystems/sold
