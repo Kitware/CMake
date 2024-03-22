@@ -199,3 +199,9 @@ Other Changes
   ``perMachine`` value.  Previously, without a custom WiX template,
   it produced installers that would only create start menu and uninstall
   entries for the current user, even though they install for all users.
+
+.. 3.29.1 (unreleased)
+
+  * The :variable:`CMAKE_LINKER_TYPE` variable and corresponding
+    :prop_tgt:`LINKER_TYPE` target property now work with compilers
+    for the ``Swift`` language.

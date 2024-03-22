@@ -11,6 +11,11 @@ if(CMake_TEST_CUDA)
   add_executable(mainCU main.cu)
 endif()
 
+if(CMake_TEST_Swift)
+  enable_language(Swift)
+  add_executable(mainSwift main.swift)
+endif()
+
 #
 # Generate file for validation
 #
@@ -26,6 +31,14 @@ if(CMake_TEST_CUDA)
     set(CUDA_LINKER "${CMAKE_CUDA_USING_LINKER_LLD}")
   endif()
   string(APPEND LINKER_TYPE_OPTION "|${CUDA_LINKER}")
+endif()
+if(CMake_TEST_Swift)
+  if(CMAKE_Swift_USING_LINKER_MODE STREQUAL "TOOL")
+    cmake_path(GET CMAKE_Swift_USING_LINKER_LLD FILENAME LINKER_TYPE_OPTION)
+  else()
+    set(Swift_LINKER "${CMAKE_Swift_USING_LINKER_LLD}")
+  endif()
+  string(APPEND LINKER_TYPE_OPTION "|${Swift_LINKER}")
 endif()
 
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/LINKER_TYPE_OPTION.cmake"
