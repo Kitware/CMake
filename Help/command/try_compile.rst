@@ -188,7 +188,7 @@ The options for the above signatures are:
   set the :prop_tgt:`STATIC_LIBRARY_OPTIONS` target property in the generated
   project, depending on the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` variable.
 
-``LINKER_LANGUAGE <lang>```
+``LINKER_LANGUAGE <lang>``
   .. versionadded:: 3.29
 
   Specify the :prop_tgt:`LINKER_LANGUAGE` target property of the generated
