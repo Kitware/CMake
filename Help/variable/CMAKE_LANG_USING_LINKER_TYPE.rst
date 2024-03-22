@@ -34,3 +34,11 @@ compiler frontend:
 
   set(CMAKE_C_USING_LINKER_LLD "/path/to/lld-link.exe")
   set(CMAKE_C_USING_LINKER_MODE TOOL)
+
+A custom linker type can also be defined, usually in a toolchain file:
+
+.. code-block:: cmake
+
+  set(CMAKE_LINKER_TYPE lld_launcher)
+  set(CMAKE_C_USING_LINKER_lld_launcher "-fuse-ld=/path/to/lld-launcher.sh")
+  set(CMAKE_C_USING_LINKER_MODE FLAG)
