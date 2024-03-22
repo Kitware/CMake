@@ -8,8 +8,8 @@ CMake Error at subdir-Common-Test13/CMakeLists\.txt:[0-9]+ \(add_custom_command\
   TARGET 'custom[4-6]' was not created in this directory\.
 +
 ((CMake Warning \(dev\) at subdir-Common-Test13/CMakeLists\.txt:[0-9]+ \(set_property\):
-  Policy CMP0118 is not set: The GENERATED source file property is now
-  visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
+  Policy CMP0118 is not set: GENERATED sources may be used across directories
+  without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
   warning\.
 
@@ -18,8 +18,8 @@ CMake Error at subdir-Common-Test13/CMakeLists\.txt:[0-9]+ \(add_custom_command\
 This warning is for project developers\.  Use -Wno-dev to suppress it\.
 +)+
 (CMake Warning \(dev\) at CMP0118-Common-Test13\.cmake:[0-9]+ \(add_subdirectory\):
-  Policy CMP0118 is not set: The GENERATED source file property is now
-  visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
+  Policy CMP0118 is not set: GENERATED sources may be used across directories
+  without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
   warning\.
 

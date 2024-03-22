@@ -349,10 +349,10 @@ class cmMakefile;
   SELECT(POLICY, CMP0117,                                                     \
          "MSVC RTTI flag /GR is not added to CMAKE_CXX_FLAGS by default.", 3, \
          20, 0, cmPolicies::WARN)                                             \
-  SELECT(                                                                     \
-    POLICY, CMP0118,                                                          \
-    "The GENERATED source file property is now visible in all directories.",  \
-    3, 20, 0, cmPolicies::WARN)                                               \
+  SELECT(POLICY, CMP0118,                                                     \
+         "GENERATED sources may be used across directories without manual "   \
+         "marking.",                                                          \
+         3, 20, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0119,                                                     \
          "LANGUAGE source file property explicitly compiles as specified "    \
          "language.",                                                         \

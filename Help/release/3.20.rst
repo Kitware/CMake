@@ -147,8 +147,9 @@ Properties
   for the associated :variable:`CMAKE_EXPORT_COMPILE_COMMANDS` variable
   to allow for configuration of exporting compile commands per target.
 
-* The :prop_sf:`GENERATED` source-file property is now visible
-  from any directory scope, regardless of the scope in which it is set.
+* Generated sources may be used across directories without manual marking.
+  Additionally, the :prop_sf:`GENERATED` source file property can no longer be
+  turned off once turned on, nor can it be set to other than boolean values.
   See policy :policy:`CMP0118`.
 
 * The :prop_tgt:`UNITY_BUILD_UNIQUE_ID` target property
