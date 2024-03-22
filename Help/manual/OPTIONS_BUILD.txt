@@ -108,7 +108,9 @@
  .. versionadded:: 3.21
 
  Specify the cross compiling toolchain file, equivalent to setting
- :variable:`CMAKE_TOOLCHAIN_FILE` variable.
+ :variable:`CMAKE_TOOLCHAIN_FILE` variable. Relative paths are interpreted as
+ relative to the build directory, and if not found, relative to the source
+ directory.
 
 .. option:: --install-prefix <directory>
 
