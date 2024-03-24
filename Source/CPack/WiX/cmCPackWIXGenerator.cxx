@@ -74,7 +74,7 @@ bool cmCPackWIXGenerator::RunWiXCommand(std::string const& command)
 
   if (!status || returnValue) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Problem running WiX candle. "
+                  "Problem running WiX. "
                   "Please check '"
                     << logFileName << "' for errors." << std::endl);
 
@@ -635,9 +635,13 @@ std::string cmCPackWIXGenerator::GetRootFolderId() const
 
 bool cmCPackWIXGenerator::GenerateMainSourceFileFromTemplate()
 {
-  std::string wixTemplate = FindTemplate("WIX.template.in");
+  std::string wixTemplate;
   if (cmValue wixtpl = GetOption("CPACK_WIX_TEMPLATE")) {
     wixTemplate = *wixtpl;
+  } else {
+    cm::optional<cm::string_view> alt;
+    alt = "WIX-v3/"_s;
+    wixTemplate = FindTemplate("WIX.template.in"_s, alt);
   }
 
   if (wixTemplate.empty()) {
@@ -1180,12 +1184,7 @@ void cmCPackWIXGenerator::CollectExtensions(std::string const& variableName,
 void cmCPackWIXGenerator::CollectXmlNamespaces(std::string const& variableName,
                                                xmlns_map_t& namespaces)
 {
-  cmValue variableContent = GetOption(variableName);
-  if (!variableContent) {
-    return;
-  }
-
-  cmList list{ variableContent };
+  cmList list{ GetOption(variableName) };
   for (std::string const& str : list) {
     auto pos = str.find('=');
     if (pos != std::string::npos) {
@@ -1199,12 +1198,12 @@ void cmCPackWIXGenerator::CollectXmlNamespaces(std::string const& variableName,
                       << str << '"' << std::endl);
     }
   }
-  std::ostringstream oss;
+  std::string xmlns;
   for (auto& ns : namespaces) {
-    oss << " xmlns:" << ns.first << "=\""
-        << cmWIXSourceWriter::EscapeAttributeValue(ns.second) << '"';
+    xmlns = cmStrCat(xmlns, "\n    xmlns:", ns.first, "=\"",
+                     cmWIXSourceWriter::EscapeAttributeValue(ns.second), '"');
   }
-  SetOption("CPACK_WIX_CUSTOM_XMLNS_EXPANDED", oss.str());
+  SetOption("CPACK_WIX_CUSTOM_XMLNS_EXPANDED", xmlns);
 }
 
 void cmCPackWIXGenerator::AddCustomFlags(std::string const& variableName,

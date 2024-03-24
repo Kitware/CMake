@@ -7,6 +7,8 @@
 #include <memory>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmsys/FStream.hxx"
 #include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
@@ -1315,17 +1317,17 @@ const char* cmCPackGenerator::GetPackagingInstallPrefix()
   return this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX")->c_str();
 }
 
-std::string cmCPackGenerator::FindTemplate(const char* name)
+std::string cmCPackGenerator::FindTemplate(cm::string_view name,
+                                           cm::optional<cm::string_view> alt)
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                "Look for template: " << (name ? name : "(NULL)")
-                                      << std::endl);
+                "Look for template: " << name << std::endl);
   // Search CMAKE_MODULE_PATH for a custom template.
   std::string ffile = this->MakefileMap->GetModulesFile(name);
   if (ffile.empty()) {
     // Fall back to our internal builtin default.
     ffile = cmStrCat(cmSystemTools::GetCMakeRoot(), "/Modules/Internal/CPack/",
-                     name);
+                     alt ? *alt : ""_s, name);
     cmSystemTools::ConvertToUnixSlashes(ffile);
     if (!cmSystemTools::FileExists(ffile)) {
       ffile.clear();

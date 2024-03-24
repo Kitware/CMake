@@ -9,6 +9,9 @@
 #include <string>
 #include <vector>
 
+#include <cm/optional>
+#include <cm/string_view>
+
 #include "cm_sys_stat.h"
 
 #include "cmCPackComponentGroup.h"
@@ -179,7 +182,8 @@ protected:
   virtual const char* GetInstallPath();
   virtual const char* GetPackagingInstallPrefix();
 
-  virtual std::string FindTemplate(const char* name);
+  std::string FindTemplate(cm::string_view name,
+                           cm::optional<cm::string_view> alt = cm::nullopt);
   virtual bool ConfigureFile(const std::string& inName,
                              const std::string& outName,
                              bool copyOnly = false);
