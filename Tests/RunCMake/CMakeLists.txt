@@ -560,7 +560,10 @@ foreach(var
   endif()
 endforeach()
 add_RunCMake_test(file-DOWNLOAD)
-add_RunCMake_test(file-RPATH -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
+add_RunCMake_test(file-RPATH
+  -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+  -DCMake_TEST_ELF_LARGE=${CMake_TEST_ELF_LARGE}
+)
 add_RunCMake_test(file-STRINGS)
 add_RunCMake_test(find_file -DMINGW=${MINGW})
 add_RunCMake_test(find_library -DMINGW=${MINGW} -DCYGWIN=${CYGWIN} -DMSYS=${MSYS} -DMSVC=${MSVC})
