@@ -117,6 +117,8 @@ if(NOT CURL_LIBRARY)
       curllib_static
     # Windows older "Win32 - MSVC" prebuilts (libcurl.lib, e.g. libcurl-7.15.5-win32-msvc.zip):
       libcurl
+    # Some Windows prebuilt versions distribute `libcurl_a.lib` instead of `libcurl.lib`
+      libcurl_a
       NAMES_PER_DIR
       HINTS ${PC_CURL_LIBRARY_DIRS}
   )
