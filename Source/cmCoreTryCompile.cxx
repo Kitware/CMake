@@ -1163,7 +1163,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       vars.insert(kCMAKE_LINKER_TYPE);
       auto defs = this->Makefile->GetDefinitions();
       cmsys::RegularExpression linkerTypeDef{
-        "^CMAKE_[A-Za-z]+_USING_LINKER_"
+        "^CMAKE_[A-Za-z_-]+_USING_LINKER_"
       };
       for (auto const& def : defs) {
         if (linkerTypeDef.find(def)) {
