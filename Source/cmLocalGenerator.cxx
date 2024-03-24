@@ -1478,7 +1478,7 @@ void cmLocalGenerator::GetTargetFlags(
       CM_FALLTHROUGH;
     case cmStateEnums::SHARED_LIBRARY: {
       std::string sharedLibFlags;
-      if (linkLanguage != "Swift") {
+      if (this->IsSplitSwiftBuild() || linkLanguage != "Swift") {
         sharedLibFlags = cmStrCat(
           this->Makefile->GetSafeDefinition(libraryLinkVariable), ' ');
         if (!configUpper.empty()) {
@@ -1521,6 +1521,13 @@ void cmLocalGenerator::GetTargetFlags(
     } break;
     case cmStateEnums::EXECUTABLE: {
       std::string exeFlags;
+      if (linkLanguage.empty()) {
+        cmSystemTools::Error(
+          "CMake can not determine linker language for target: " +
+          target->GetName());
+        return;
+      }
+
       if (linkLanguage != "Swift") {
         exeFlags = this->Makefile->GetSafeDefinition("CMAKE_EXE_LINKER_FLAGS");
         exeFlags += " ";
@@ -1529,28 +1536,22 @@ void cmLocalGenerator::GetTargetFlags(
             cmStrCat("CMAKE_EXE_LINKER_FLAGS_", configUpper));
           exeFlags += " ";
         }
-        if (linkLanguage.empty()) {
-          cmSystemTools::Error(
-            "CMake can not determine linker language for target: " +
-            target->GetName());
-          return;
-        }
+      }
 
-        if (target->IsWin32Executable(config)) {
-          exeFlags += this->Makefile->GetSafeDefinition(
-            cmStrCat("CMAKE_", linkLanguage, "_CREATE_WIN32_EXE"));
-          exeFlags += " ";
-        } else {
-          exeFlags += this->Makefile->GetSafeDefinition(
-            cmStrCat("CMAKE_", linkLanguage, "_CREATE_CONSOLE_EXE"));
-          exeFlags += " ";
-        }
+      if (target->IsWin32Executable(config)) {
+        exeFlags += this->Makefile->GetSafeDefinition(
+          cmStrCat("CMAKE_", linkLanguage, "_CREATE_WIN32_EXE"));
+        exeFlags += " ";
+      } else {
+        exeFlags += this->Makefile->GetSafeDefinition(
+          cmStrCat("CMAKE_", linkLanguage, "_CREATE_CONSOLE_EXE"));
+        exeFlags += " ";
+      }
 
-        if (target->IsExecutableWithExports()) {
-          exeFlags += this->Makefile->GetSafeDefinition(
-            cmStrCat("CMAKE_EXE_EXPORTS_", linkLanguage, "_FLAG"));
-          exeFlags += " ";
-        }
+      if (target->IsExecutableWithExports()) {
+        exeFlags += this->Makefile->GetSafeDefinition(
+          cmStrCat("CMAKE_EXE_EXPORTS_", linkLanguage, "_FLAG"));
+        exeFlags += " ";
       }
 
       this->AddLanguageFlagsForLinking(flags, target, linkLanguage, config);

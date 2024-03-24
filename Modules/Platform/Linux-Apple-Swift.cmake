@@ -1,3 +1,5 @@
+set(CMAKE_EXE_EXPORTS_Swift_FLAG "-Xclang-linker -Wl,--export-dynamic")
+
 # Linker Selection
 # BFD is known to mislink Swift objects resulting in missing type info
 set(CMAKE_Swift_USING_LINKER_SYSTEM "")
