@@ -39,13 +39,55 @@
 
 namespace {
 
-Json::Value CollationInformationCxxModules(
-  cmGeneratorTarget const* gt, std::string const& config,
-  cmDyndepGeneratorCallbacks const& cb)
+struct TdiSourceInfo
 {
+  Json::Value Sources;
+  Json::Value CxxModules;
+};
+
+TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
+                                          std::string const& config,
+                                          cmDyndepGeneratorCallbacks const& cb)
+{
+  TdiSourceInfo info;
   cmTarget const* tgt = gt->Target;
   auto all_file_sets = tgt->GetAllFileSetNames();
-  Json::Value tdi_cxx_module_info = Json::objectValue;
+  Json::Value& tdi_sources = info.Sources = Json::objectValue;
+  Json::Value& tdi_cxx_module_info = info.CxxModules = Json::objectValue;
+
+  enum class CompileType
+  {
+    ObjectAndBmi,
+    BmiOnly,
+  };
+  std::map<std::string, std::pair<cmSourceFile const*, CompileType>> sf_map;
+  {
+    auto fill_sf_map = [gt, tgt, &sf_map](cmSourceFile const* sf,
+                                          CompileType type) {
+      auto full_path = sf->GetFullPath();
+      if (full_path.empty()) {
+        gt->Makefile->IssueMessage(
+          MessageType::INTERNAL_ERROR,
+          cmStrCat("Target \"", tgt->GetName(),
+                   "\" has a full path-less source file."));
+        return;
+      }
+      sf_map[full_path] = std::make_pair(sf, type);
+    };
+
+    std::vector<cmSourceFile const*> objectSources;
+    gt->GetObjectSources(objectSources, config);
+    for (auto const* sf : objectSources) {
+      fill_sf_map(sf, CompileType::ObjectAndBmi);
+    }
+
+    std::vector<cmSourceFile const*> cxxModuleSources;
+    gt->GetCxxModuleSources(cxxModuleSources, config);
+    for (auto const* sf : cxxModuleSources) {
+      fill_sf_map(sf, CompileType::BmiOnly);
+    }
+  }
+
   for (auto const& file_set_name : all_file_sets) {
     auto const* file_set = tgt->GetFileSet(file_set_name);
     if (!file_set) {
@@ -71,39 +113,6 @@ Json::Value CollationInformationCxxModules(
     for (auto const& entry : fileEntries) {
       file_set->EvaluateFileEntry(directories, files_per_dirs, entry,
                                   gt->LocalGenerator, config, gt);
-    }
-
-    enum class CompileType
-    {
-      ObjectAndBmi,
-      BmiOnly,
-    };
-    std::map<std::string, std::pair<cmSourceFile const*, CompileType>> sf_map;
-    {
-      auto fill_sf_map = [gt, tgt, &sf_map](cmSourceFile const* sf,
-                                            CompileType type) {
-        auto full_path = sf->GetFullPath();
-        if (full_path.empty()) {
-          gt->Makefile->IssueMessage(
-            MessageType::INTERNAL_ERROR,
-            cmStrCat("Target \"", tgt->GetName(),
-                     "\" has a full path-less source file."));
-          return;
-        }
-        sf_map[full_path] = std::make_pair(sf, type);
-      };
-
-      std::vector<cmSourceFile const*> objectSources;
-      gt->GetObjectSources(objectSources, config);
-      for (auto const* sf : objectSources) {
-        fill_sf_map(sf, CompileType::ObjectAndBmi);
-      }
-
-      std::vector<cmSourceFile const*> cxxModuleSources;
-      gt->GetCxxModuleSources(cxxModuleSources, config);
-      for (auto const* sf : cxxModuleSources) {
-        fill_sf_map(sf, CompileType::BmiOnly);
-      }
     }
 
     Json::Value fs_dest = Json::nullValue;
@@ -134,6 +143,8 @@ Json::Value CollationInformationCxxModules(
         auto const* sf = lookup->second.first;
         CompileType const ct = lookup->second.second;
 
+        sf_map.erase(lookup);
+
         if (!sf) {
           gt->Makefile->IssueMessage(
             MessageType::INTERNAL_ERROR,
@@ -160,7 +171,26 @@ Json::Value CollationInformationCxxModules(
     }
   }
 
-  return tdi_cxx_module_info;
+  for (auto const& sf_entry : sf_map) {
+    CompileType const ct = sf_entry.second.second;
+    if (ct == CompileType::BmiOnly) {
+      continue;
+    }
+
+    auto const* sf = sf_entry.second.first;
+    if (!gt->NeedDyndepForSource(sf->GetLanguage(), config, sf)) {
+      continue;
+    }
+
+    auto full_file = cmSystemTools::CollapseFullPath(sf->GetFullPath());
+    auto obj_path = cb.ObjectFilePath(sf, config);
+    Json::Value& tdi_source_info = tdi_sources[obj_path] = Json::objectValue;
+
+    tdi_source_info["source"] = full_file;
+    tdi_source_info["language"] = sf->GetLanguage();
+  }
+
+  return info;
 }
 
 Json::Value CollationInformationBmiInstallation(cmGeneratorTarget const* gt,
@@ -289,11 +319,19 @@ void cmDyndepCollation::AddCollationInformation(
   Json::Value& tdi, cmGeneratorTarget const* gt, std::string const& config,
   cmDyndepGeneratorCallbacks const& cb)
 {
-  tdi["cxx-modules"] = CollationInformationCxxModules(gt, config, cb);
+  auto sourcesInfo = CollationInformationSources(gt, config, cb);
+  tdi["sources"] = sourcesInfo.Sources;
+  tdi["cxx-modules"] = sourcesInfo.CxxModules;
   tdi["bmi-installation"] = CollationInformationBmiInstallation(gt, config);
   tdi["exports"] = CollationInformationExports(gt);
   tdi["config"] = config;
 }
+
+struct SourceInfo
+{
+  std::string SourcePath;
+  std::string Language;
+};
 
 struct CxxModuleFileSet
 {
@@ -330,6 +368,7 @@ struct CxxModuleExport
 
 struct cmCxxModuleExportInfo
 {
+  std::map<std::string, SourceInfo> ObjectToSource;
   std::map<std::string, CxxModuleFileSet> ObjectToFileSet;
   cm::optional<CxxModuleBmiInstall> BmiInstallation;
   std::vector<CxxModuleExport> Exports;
@@ -403,6 +442,15 @@ cmDyndepCollation::ParseExportInfo(Json::Value const& tdi)
       if (tdi_fs_dest.isString()) {
         fsi.Destination = tdi_fs_dest.asString();
       }
+    }
+  }
+  Json::Value const& tdi_sources = tdi["sources"];
+  if (tdi_sources.isObject()) {
+    for (auto i = tdi_sources.begin(); i != tdi_sources.end(); ++i) {
+      SourceInfo& si = export_info->ObjectToSource[i.key().asString()];
+      auto const& tdi_source = *i;
+      si.SourcePath = tdi_source["source"].asString();
+      si.Language = tdi_source["language"].asString();
     }
   }
 

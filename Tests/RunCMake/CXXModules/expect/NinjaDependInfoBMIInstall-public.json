@@ -47,5 +47,6 @@
   "language": "CXX",
   "forward-modules-from-target-dirs": [],
   "linked-target-dirs": [],
-  "module-dir": "<BINARY_DIR>/CMakeFiles/ninja-bmi-install-public.dir<CONFIG_DIR>"
+  "module-dir": "<BINARY_DIR>/CMakeFiles/ninja-bmi-install-public.dir<CONFIG_DIR>",
+  "sources": {}
 }
