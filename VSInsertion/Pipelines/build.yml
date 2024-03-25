@@ -27,8 +27,6 @@ variables:
   value: 1d6a3de7-4a6a-4b75-b15d-e305293c75af
 - name: ApiScanTenant
   value: 72f988bf-86f1-41af-91ab-2d7cd011db47
-- name: ArtifactServices.Symbol.UseAAD
-  value: false
 - name: DropRoot
   value: '\\cpvsbuild\drops'
 - name: GitCommitDescription
@@ -38,7 +36,7 @@ variables:
 - name: InsertPayloadName
   value: CMake Version $(CMakeVersion)
 - name: InsertReviewers
-  value: bemcmorr@microsoft.com,gcampbell@microsoft.com,snehara@microsoft.com,itodirel@microsoft.com
+  value: bemcmorr@microsoft.com,gcampbell@microsoft.com,snehara@microsoft.com,itodirel@microsoft.com, elmorrow@microsoft.com
 - name: TargetBranch
   value: main
 - name: VstsDropNames
@@ -700,9 +698,6 @@ extends:
             IndexSources: false
             SymbolServerType: TeamServices
             TreatNotIndexedAsWarning: true
-            ArtifactServices.Symbol.AccountName: microsoft
-            ArtifactServices.Symbol.PAT: $(System.AccessToken)
-            ArtifactServices.Symbol.UseAAD: false
           continueOnError: true
         - task: NuGetCommand@2
           name: NuGetCommand15
