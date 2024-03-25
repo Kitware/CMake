@@ -7,7 +7,7 @@ project(CompileFeatures)
 set(ext_C c)
 set(ext_CXX cpp)
 set(std_C 90 99 11 17 23)
-set(std_CXX 98 11 14 17 20 23)
+set(std_CXX 98 11 14 17 20 23 26)
 
 foreach(lang C CXX)
   foreach(std IN LISTS std_${lang})
