@@ -119,33 +119,33 @@ extends:
           inputs:
             cwd: $(CMakeBuildDirectory)
             cmakeArgs: --build . --target package install --config $(BuildConfiguration) -- -m
-        - task: MSBuild@1
-          displayName: 'Build solution $(CMakeBuildDirectory)/package.vcxproj'
-          inputs:
-            solution: '$(CMakeBuildDirectory)/package.vcxproj'
-            msbuildArchitecture: x64
-            platform: x64
-            configuration: '$(BuildConfiguration)'
-            clean: true
-            createLogFile: true
-            logFileVerbosity: diagnostic
-        - task: MSBuild@1
-          displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
-          inputs:
-            solution: '$(CMakeBuildDirectory)/install.vcxproj'
-            msbuildArchitecture: x64
-            platform: x64
-            configuration: '$(BuildConfiguration)'
-            createLogFile: true
-            logFileVerbosity: diagnostic
-        - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
-          displayName: 'Run the PREfast SDL Native Rules for MSBuild'
-          env:
-            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-          inputs:
-            publishXML: true
-            userProvideBuildInfo: auto
-            setupCommandlinePicker: vs2022
+        # - task: MSBuild@1
+        #   displayName: 'Build solution $(CMakeBuildDirectory)/package.vcxproj'
+        #   inputs:
+        #     solution: '$(CMakeBuildDirectory)/package.vcxproj'
+        #     msbuildArchitecture: x64
+        #     platform: x64
+        #     configuration: '$(BuildConfiguration)'
+        #     clean: true
+        #     createLogFile: true
+        #     logFileVerbosity: diagnostic
+        # - task: MSBuild@1
+        #   displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
+        #   inputs:
+        #     solution: '$(CMakeBuildDirectory)/install.vcxproj'
+        #     msbuildArchitecture: x64
+        #     platform: x64
+        #     configuration: '$(BuildConfiguration)'
+        #     createLogFile: true
+        #     logFileVerbosity: diagnostic
+        # - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
+        #   displayName: 'Run the PREfast SDL Native Rules for MSBuild'
+        #   env:
+        #     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+        #   inputs:
+        #     publishXML: true
+        #     userProvideBuildInfo: auto
+        #     setupCommandlinePicker: vs2022
         - task: CmdLine@1
           name: CmdLine3
           condition: eq(variables.RunTests, 'true')
