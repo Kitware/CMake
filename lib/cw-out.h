@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_MBEDTLS_THREADLOCK_H
-#define HEADER_CURL_MBEDTLS_THREADLOCK_H
+#ifndef HEADER_CURL_CW_OUT_H
+#define HEADER_CURL_CW_OUT_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -8,7 +8,6 @@
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
- * Copyright (C) Hoi-Ho Chan, <hoiho.chan@gmail.com>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,27 +23,31 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+
 #include "curl_setup.h"
 
-#ifdef USE_MBEDTLS
+#include "sendf.h"
 
-#if (defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) || \
-    defined(_WIN32)
+/**
+ * The client writer type "cw-out" that does the actual writing to
+ * the client callbacks. Intended to be the last installed in the
+ * client writer stack of a transfer.
+ */
+extern struct Curl_cwtype Curl_cwt_out;
 
-int Curl_mbedtlsthreadlock_thread_setup(void);
-int Curl_mbedtlsthreadlock_thread_cleanup(void);
-int Curl_mbedtlsthreadlock_lock_function(int n);
-int Curl_mbedtlsthreadlock_unlock_function(int n);
+/**
+ * Return TRUE iff 'cw-out' client write has paused data.
+ */
+bool Curl_cw_out_is_paused(struct Curl_easy *data);
 
-#else
+/**
+ * Flush any buffered date to the client, chunk collation still applies.
+ */
+CURLcode Curl_cw_out_flush(struct Curl_easy *data);
 
-#define Curl_mbedtlsthreadlock_thread_setup() 1
-#define Curl_mbedtlsthreadlock_thread_cleanup() 1
-#define Curl_mbedtlsthreadlock_lock_function(x) 1
-#define Curl_mbedtlsthreadlock_unlock_function(x) 1
+/**
+ * Mark EndOfStream reached and flush ALL data to the client.
+ */
+CURLcode Curl_cw_out_done(struct Curl_easy *data);
 
-#endif /* (USE_THREADS_POSIX && HAVE_PTHREAD_H) || _WIN32 */
-
-#endif /* USE_MBEDTLS */
-
-#endif /* HEADER_CURL_MBEDTLS_THREADLOCK_H */
+#endif /* HEADER_CURL_CW_OUT_H */
