@@ -265,6 +265,7 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
 
   set(CPACK_WIX_EXTRA_SOURCES
     "@CMake_SOURCE_DIR@/Utilities/Release/WiX/install_dir.wxs"
+    "@CMake_SOURCE_DIR@/Utilities/Release/WiX/options.wxs"
     "@CMake_SOURCE_DIR@/Utilities/Release/WiX/options_dlg.wxs"
   )
 
