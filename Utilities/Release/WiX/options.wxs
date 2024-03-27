@@ -4,7 +4,7 @@
         <Property Id="CMAKE_IN_PATH" Value="Init" />
 
         <!-- Always initialize the checkbox value so it cannot be directly overridden from the command line.  -->
-        <SetProperty Action="Set_CMAKE_IN_PATH_Init"       Id="CMAKE_IN_PATH" After="AppSearch"                    Sequence="first" Value="{}" />
+        <SetProperty Action="Set_CMAKE_IN_PATH_Init"       Id="CMAKE_IN_PATH" After="AppSearch"                    Sequence="first" Value="1" />
 
         <!-- Read the "CMAKE_IN_PATH" checkbox value from the registry, if it was stored previously.
              Properties using RegistrySearch cannot be private, so use a private-looking public name. -->
