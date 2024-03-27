@@ -39,16 +39,13 @@
         <?endif?>
 
         <DirectoryRef Id="TARGETDIR">
-            <Component Id="CMakeRegistry">
-                <RegistryKey Root="HKLM" Key="Software\Kitware\CMake">
-                    <RegistryValue Type="string" Name="InstallDir"
-                        Value="[INSTALL_ROOT]" KeyPath="yes"/>
-                 </RegistryKey>
+            <Component Id="CMakeRegistry_InstallDir">
+                <RegistryValue Root="HKLM" Key="Software\Kitware\CMake" Name="InstallDir" Type="string" Value="[INSTALL_ROOT]" />
             </Component>
         </DirectoryRef>
 
         <FeatureRef Id="ProductFeature">
-            <ComponentRef Id="CMakeRegistry"/>
+            <ComponentRef Id="CMakeRegistry_InstallDir" />
         </FeatureRef>
 
         <UIRef Id="$(var.CPACK_WIX_UI_REF)" />
