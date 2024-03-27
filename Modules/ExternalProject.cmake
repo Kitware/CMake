@@ -909,7 +909,18 @@ Miscellaneous Options
   replace ``;`` with ``<sep>`` in the specified command lines.
   This can be useful where list variables may be given in commands where
   they should end up as space-separated arguments (``<sep>`` would be a
-  single space character string in this case).
+  single space character string in this case). Note that the separator should
+  be chosen to avoid being confused for non-list-separator usages of the
+  sequence. For example, using ``LIST_SEPARATOR`` allows for passing list
+  values to CMake cache variables on the command line:
+
+  .. code-block:: cmake
+
+    ExternalProject_Add(example
+      ... # Download options, etc.
+      LIST_SEPARATOR ","
+      CMAKE_ARGS "-DCMAKE_PREFIX_PATH:STRING=${first_prefix},${second_prefix}"
+    )
 
 ``COMMAND <cmd>...``
   Any of the other ``..._COMMAND`` options can have additional commands
