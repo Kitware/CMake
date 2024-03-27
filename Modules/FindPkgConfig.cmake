@@ -56,14 +56,29 @@ endif()
 set(PKG_CONFIG_NAMES "pkg-config")
 if(CMAKE_HOST_WIN32)
   list(PREPEND PKG_CONFIG_NAMES "pkg-config.bat")
+  set(_PKG_CONFIG_VALIDATOR VALIDATOR __FindPkgConfig_EXECUTABLE_VALIDATOR)
+  function(__FindPkgConfig_EXECUTABLE_VALIDATOR result_var candidate)
+    if(candidate MATCHES "\\.[Ee][Xx][Ee]$")
+      return()
+    endif()
+    # Exclude the pkg-config distributed with Strawberry Perl.
+    execute_process(COMMAND "${candidate}" --help OUTPUT_VARIABLE _output ERROR_VARIABLE  _output RESULT_VARIABLE _result)
+    if(NOT _result EQUAL 0 OR _output MATCHES "Pure-Perl")
+      set("${result_var}" FALSE PARENT_SCOPE)
+    endif()
+  endfunction()
+else()
+  set(_PKG_CONFIG_VALIDATOR "")
 endif()
 list(APPEND PKG_CONFIG_NAMES "pkgconf")
 
 find_program(PKG_CONFIG_EXECUTABLE
   NAMES ${PKG_CONFIG_NAMES}
   NAMES_PER_DIR
-  DOC "pkg-config executable")
+  DOC "pkg-config executable"
+  ${_PKG_CONFIG_VALIDATOR})
 mark_as_advanced(PKG_CONFIG_EXECUTABLE)
+unset(_PKG_CONFIG_VALIDATOR)
 
 set(PKG_CONFIG_ARGN "${PKG_CONFIG_ARGN}" CACHE STRING "Arguments to supply to pkg-config")
 mark_as_advanced(PKG_CONFIG_ARGN)
