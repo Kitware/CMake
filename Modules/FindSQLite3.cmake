@@ -32,12 +32,21 @@ This module will set the following variables if found:
 
 #]=======================================================================]
 
+find_package(PkgConfig QUIET)
+pkg_check_modules(PC_SQLite3 QUIET sqlite3)
+
 # Look for the necessary header
-find_path(SQLite3_INCLUDE_DIR NAMES sqlite3.h)
+find_path(SQLite3_INCLUDE_DIR NAMES sqlite3.h
+  HINTS
+    ${PC_SQLite3_INCLUDE_DIRS}
+)
 mark_as_advanced(SQLite3_INCLUDE_DIR)
 
 # Look for the necessary library
-find_library(SQLite3_LIBRARY NAMES sqlite3 sqlite)
+find_library(SQLite3_LIBRARY NAMES sqlite3 sqlite
+  HINTS
+    ${PC_SQLite3_LIBRARY_DIRS}
+)
 mark_as_advanced(SQLite3_LIBRARY)
 
 # Extract version information from the header file
