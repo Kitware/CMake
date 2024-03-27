@@ -17,8 +17,8 @@ Value                           Name
                                 ``bfd``)
 ``GNUgold``                     `GNU Binutils - gold linker`_
 ``MSVC``                        `Microsoft Visual Studio`_
-``MOLD``                        `mold: A Modern Linker`_ or, on Apple, `sold`_
-                                linker
+``MOLD``                        `mold: A Modern Linker`_, or on Apple the
+                                `sold`_ linker
 ``AIX``                         AIX system linker
 ``Solaris``                     SunOS system linker
 =============================== ===============================================
