@@ -12,7 +12,7 @@
         Manufacturer="$(var.CPACK_PACKAGE_VENDOR)"
         UpgradeCode="$(var.CPACK_WIX_UPGRADE_GUID)">
 
-        <Package InstallerVersion="301" Compressed="yes" InstallScope="perMachine"/>
+        <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine"/>
 
         <Media Id="1" Cabinet="media1.cab" EmbedCab="yes"/>
 
