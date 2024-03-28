@@ -284,7 +284,8 @@ bool HandleAndValidateSourceFilePropertyGENERATED(
 {
   const auto& mf = *sf->GetLocation().GetMakefile();
 
-  auto isProblematic = [&mf, &propertyValue, op](cm::string_view policy) {
+  auto isProblematic = [&mf, &propertyValue,
+                        op](cm::string_view policy) -> bool {
     if (!cmIsOn(propertyValue) && !cmIsOff(propertyValue)) {
       mf.IssueMessage(
         MessageType::AUTHOR_ERROR,
@@ -312,6 +313,16 @@ bool HandleAndValidateSourceFilePropertyGENERATED(
     }
     return false;
   };
+
+  const auto cmp0163PolicyStatus = mf.GetPolicyStatus(cmPolicies::CMP0163);
+  const bool cmp0163PolicyNEW = cmp0163PolicyStatus != cmPolicies::OLD &&
+    cmp0163PolicyStatus != cmPolicies::WARN;
+  if (cmp0163PolicyNEW) {
+    if (!isProblematic("CMP0163")) {
+      sf->MarkAsGenerated();
+    }
+    return true;
+  }
 
   const auto cmp0118PolicyStatus = mf.GetPolicyStatus(cmPolicies::CMP0118);
   const bool cmp0118PolicyWARN = cmp0118PolicyStatus == cmPolicies::WARN;

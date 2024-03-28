@@ -24,6 +24,12 @@ The ``NEW`` behavior of this policy is to allow generated files to be used
 in other directories without explicitly turning on the ``GENERATED`` property
 for those directories.
 
+.. versionadded:: 3.30
+
+  Policy :policy:`CMP0163` additionally makes the :prop_sf:`GENERATED` source
+  file property visible to :command:`get_property` and
+  :command:`get_source_file_property` calls in other directories.
+
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.20
 .. |WARNS_OR_DOES_NOT_WARN| replace::
    warns about setting the ``GENERATED`` property to a non-boolean value
