@@ -76,7 +76,7 @@ endmacro()
 
 macro(__CHECK_SYMBOL_EXISTS_FILTER_FLAGS LANG)
     set(__CMAKE_${LANG}_FLAGS_SAVED "${CMAKE_${LANG}_FLAGS}")
-    string(REGEX REPLACE "(^| )-Werror([= ][^ ]*)?( |$)" " " CMAKE_${LANG}_FLAGS "${CMAKE_${LANG}_FLAGS}")
+    string(REGEX REPLACE "(^| )-Werror([= ][^-][^ ]*)?( |$)" " " CMAKE_${LANG}_FLAGS "${CMAKE_${LANG}_FLAGS}")
     string(REGEX REPLACE "(^| )-pedantic-errors( |$)" " " CMAKE_${LANG}_FLAGS "${CMAKE_${LANG}_FLAGS}")
 endmacro()
 
