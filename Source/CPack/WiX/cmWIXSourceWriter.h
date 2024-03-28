@@ -27,11 +27,14 @@ public:
     INCLUDE_ELEMENT_ROOT
   };
 
-  cmWIXSourceWriter(cmCPackLog* logger, std::string const& filename,
-                    GuidType componentGuidType,
+  cmWIXSourceWriter(unsigned long wixVersion, cmCPackLog* logger,
+                    std::string const& filename, GuidType componentGuidType,
                     RootElementType rootElementType = WIX_ELEMENT_ROOT);
 
   ~cmWIXSourceWriter();
+
+  void BeginElement_StandardDirectory();
+  void EndElement_StandardDirectory();
 
   void BeginElement(std::string const& name);
 
@@ -52,6 +55,7 @@ public:
   static std::string EscapeAttributeValue(std::string const& value);
 
 protected:
+  unsigned long WixVersion;
   cmCPackLog* Logger;
 
 private:

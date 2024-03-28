@@ -15,10 +15,11 @@
 #include "cmUuid.h"
 #include "cmWIXAccessControlList.h"
 
-cmWIXFilesSourceWriter::cmWIXFilesSourceWriter(cmCPackLog* logger,
+cmWIXFilesSourceWriter::cmWIXFilesSourceWriter(unsigned long wixVersion,
+                                               cmCPackLog* logger,
                                                std::string const& filename,
                                                GuidType componentGuidType)
-  : cmWIXSourceWriter(logger, filename, componentGuidType)
+  : cmWIXSourceWriter(wixVersion, logger, filename, componentGuidType)
 {
 }
 

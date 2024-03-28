@@ -59,6 +59,8 @@ private:
   bool InitializeWiXConfiguration();
 
   bool PackageFilesImpl();
+  bool PackageWithWix();
+  bool PackageWithWix3();
 
   void CreateWiXVariablesIncludeFile();
 
@@ -160,6 +162,7 @@ private:
   id_map_t PathToIdMap;
   ambiguity_map_t IdAmbiguityCounter;
 
+  extension_set_t WixExtensions;
   extension_set_t CandleExtensions;
   extension_set_t LightExtensions;
   xmlns_map_t CustomXmlNamespaces;
@@ -167,6 +170,8 @@ private:
   std::string CPackTopLevel;
 
   std::unique_ptr<cmWIXPatch> Patch;
+
+  unsigned long WixVersion = 3;
 
   cmWIXSourceWriter::GuidType ComponentGuidType;
 };
