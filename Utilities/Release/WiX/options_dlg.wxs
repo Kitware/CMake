@@ -2,7 +2,7 @@
     <Fragment>
         <UI>
             <Property Id="ADD_CMAKE_TO_PATH" Value="None"/>
-            <Dialog Id="CMakeExtraDialog" Width="370" Height="270" Title="Install Options">
+            <Dialog Id="CMakeOptionsDlg" Width="370" Height="270" Title="Install Options">
 
                 <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="!(loc.WixUINext)"/>
                 <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="!(loc.WixUIBack)"/>

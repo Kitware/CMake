@@ -265,7 +265,7 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
 
   set(CPACK_WIX_EXTRA_SOURCES
     "@CMake_SOURCE_DIR@/Utilities/Release/WiX/install_dir.wxs"
-    "@CMake_SOURCE_DIR@/Utilities/Release/WiX/cmake_extra_dialog.wxs"
+    "@CMake_SOURCE_DIR@/Utilities/Release/WiX/options_dlg.wxs"
   )
 
   set(_WIX_CUSTOM_ACTION_ENABLED "@CMake_BUILD_WIX_CUSTOM_ACTION@")
