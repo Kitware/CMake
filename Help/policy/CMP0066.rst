@@ -18,7 +18,7 @@ variables like :variable:`CMAKE_<LANG>_FLAGS_DEBUG` and only use CMake's
 built-in defaults for the current compiler and platform.
 
 The ``NEW`` behavior of this policy is to honor config-specific flag
-variabldes like :variable:`CMAKE_<LANG>_FLAGS_DEBUG`.
+variables like :variable:`CMAKE_<LANG>_FLAGS_DEBUG`.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.7
 .. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn by default
