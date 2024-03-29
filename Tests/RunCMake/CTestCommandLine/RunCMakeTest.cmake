@@ -503,7 +503,9 @@ set(ENV{CMAKE_TLS_VERSION} 1.1) # Test fallback to env variable.
 run_FailDrop(TLSVersion-1.1-env)
 unset(ENV{CMAKE_TLS_VERSION})
 run_FailDrop(TLSVerify-ON -DCTEST_TLS_VERIFY=ON)
-run_FailDrop(TLSVerify-OFF -DCMAKE_TLS_VERIFY=OFF) # Test fallback to CMake variable.
+run_FailDrop(TLSVerify-ON-cmake -DCMAKE_TLS_VERIFY=ON) # Test fallback to CMake variable.
+run_FailDrop(TLSVerify-OFF -DCTEST_TLS_VERIFY=OFF)
+run_FailDrop(TLSVerify-OFF-cmake -DCMAKE_TLS_VERIFY=OFF) # Test fallback to CMake variable.
 
 run_cmake_command(EmptyDirCoverage-ctest
   ${CMAKE_CTEST_COMMAND} -C Debug -M Experimental -T Coverage
