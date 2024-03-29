@@ -491,6 +491,7 @@ run_ctest(check-configuration-type)
 function(run_FailDrop case)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/FailDrop-${case}-build)
   run_cmake_with_options(FailDrop-${case} ${ARGN})
+  unset(ENV{CMAKE_TLS_VERIFY}) # Test that env variable is saved in ctest config file.
   unset(ENV{CMAKE_TLS_VERSION}) # Test that env variable is saved in ctest config file.
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command(FailDrop-${case}-ctest
@@ -504,8 +505,14 @@ run_FailDrop(TLSVersion-1.1-env)
 unset(ENV{CMAKE_TLS_VERSION})
 run_FailDrop(TLSVerify-ON -DCTEST_TLS_VERIFY=ON)
 run_FailDrop(TLSVerify-ON-cmake -DCMAKE_TLS_VERIFY=ON) # Test fallback to CMake variable.
+set(ENV{CMAKE_TLS_VERIFY} 1) # Test fallback to env variable.
+run_FailDrop(TLSVerify-ON-env)
+unset(ENV{CMAKE_TLS_VERIFY})
 run_FailDrop(TLSVerify-OFF -DCTEST_TLS_VERIFY=OFF)
 run_FailDrop(TLSVerify-OFF-cmake -DCMAKE_TLS_VERIFY=OFF) # Test fallback to CMake variable.
+set(ENV{CMAKE_TLS_VERIFY} 0) # Test fallback to env variable.
+run_FailDrop(TLSVerify-OFF-env)
+unset(ENV{CMAKE_TLS_VERIFY})
 
 run_cmake_command(EmptyDirCoverage-ctest
   ${CMAKE_CTEST_COMMAND} -C Debug -M Experimental -T Coverage

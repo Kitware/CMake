@@ -1,0 +1,4 @@
+SetCTestConfiguration from ENV{CMAKE_TLS_VERIFY}:TLSVerify:OFF
+SetCTestConfiguration:TLSVerify:OFF
+.*
+  Set CURLOPT_SSL_VERIFYPEER to off
