@@ -25,6 +25,9 @@ Once done this will define
   HSPELL_MINOR_VERSION  - The minor version of Hspell
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 find_path(HSPELL_INCLUDE_DIR hspell.h)
 
 find_library(HSPELL_LIBRARIES NAMES hspell)
@@ -43,3 +46,5 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(HSPELL
                                   VERSION_VAR HSPELL_VERSION_STRING)
 
 mark_as_advanced(HSPELL_INCLUDE_DIR HSPELL_LIBRARIES)
+
+cmake_policy(POP)

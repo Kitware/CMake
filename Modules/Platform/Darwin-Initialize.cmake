@@ -159,7 +159,10 @@ function(_apple_resolve_supported_archs_for_sdk_from_system_lib sdk_path ret ret
   # Newer SDKs ship text based dylib stub files which contain the architectures supported by the
   # library in text form.
   if(EXISTS "${system_lib_tbd_path}")
+    cmake_policy(PUSH)
+    cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
     file(STRINGS "${system_lib_tbd_path}" tbd_lines REGEX "^(archs|targets): +\\[.+\\]")
+    cmake_policy(POP)
     if(NOT tbd_lines)
       set(${ret_failed} TRUE PARENT_SCOPE)
       return()

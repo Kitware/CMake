@@ -32,6 +32,7 @@ endif()
 
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 # If using Android tools for Visual Studio, compile a sample project to get the
 # NDK path and set the processor from the generator platform.

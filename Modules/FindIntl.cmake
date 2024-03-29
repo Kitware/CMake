@@ -82,6 +82,9 @@ The following cache variables may also be set:
   ``msgfmt``, etc.), use :module:`FindGettext`.
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
 if(CMAKE_C_COMPILER_LOADED)
   include(${CMAKE_CURRENT_LIST_DIR}/CheckCSourceCompiles.cmake)
@@ -181,3 +184,5 @@ if(Intl_FOUND)
       INTERFACE_LINK_LIBRARIES "${Intl_LIBRARIES}")
   endif()
 endif()
+
+cmake_policy(POP)

@@ -52,8 +52,11 @@ macro(_record_compiler_features lang compile_flags feature_list)
 
   if (_result EQUAL 0)
     if(EXISTS "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.bin")
+      cmake_policy(PUSH)
+      cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
       file(STRINGS "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.bin"
         features REGEX "${lang}_FEATURE:.*")
+      cmake_policy(POP)
       foreach(info ${features})
         string(REPLACE "${lang}_FEATURE:" "" info ${info})
         string(SUBSTRING ${info} 0 1 has_feature)

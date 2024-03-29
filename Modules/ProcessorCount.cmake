@@ -207,7 +207,10 @@ function(ProcessorCount var)
     # Systems with /proc/cpuinfo:
     set(cpuinfo_file /proc/cpuinfo)
     if(EXISTS "${cpuinfo_file}")
+      cmake_policy(PUSH)
+      cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
       file(STRINGS "${cpuinfo_file}" procs REGEX "^processor.: [0-9]+$")
+      cmake_policy(POP)
       list(LENGTH procs count)
       #message("ProcessorCount: trying cpuinfo '${cpuinfo_file}'")
     endif()

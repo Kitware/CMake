@@ -223,7 +223,10 @@ endif()
 
 # Read version from GL/glew.h file
 if(EXISTS "${GLEW_INCLUDE_DIR}/GL/glew.h")
+  cmake_policy(PUSH)
+  cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
   file(STRINGS "${GLEW_INCLUDE_DIR}/GL/glew.h" _contents REGEX "^VERSION_.+ [0-9]+")
+  cmake_policy(POP)
   if(_contents)
     string(REGEX REPLACE ".*VERSION_MAJOR[ \t]+([0-9]+).*" "\\1" GLEW_VERSION_MAJOR "${_contents}")
     string(REGEX REPLACE ".*VERSION_MINOR[ \t]+([0-9]+).*" "\\1" GLEW_VERSION_MINOR "${_contents}")

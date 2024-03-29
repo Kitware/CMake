@@ -213,7 +213,10 @@ macro(KDE3_AUTOMOC)
 
     if (EXISTS ${_abs_FILE} AND NOT _skip)
 
+      cmake_policy(PUSH)
+      cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
       file(STRINGS ${_abs_FILE} _match REGEX "#include +[^ ]+\\.moc[\">]")
+      cmake_policy(POP)
 
       get_filename_component(_abs_PATH ${_abs_FILE} PATH)
 

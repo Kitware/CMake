@@ -89,6 +89,9 @@ Other variables one may set to control this module are::
   ICU_DEBUG - Set to ON to enable debug output from FindICU.
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 # Written by Roger Leigh <rleigh@codelibre.net>
 
 set(icu_programs
@@ -435,3 +438,5 @@ if(ICU_DEBUG)
 endif()
 
 unset(icu_programs)
+
+cmake_policy(POP)

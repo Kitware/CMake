@@ -3,6 +3,9 @@
 
 # This script deletes compiled Java class files.
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 if(CMAKE_JAVA_CLASS_OUTPUT_PATH)
   if(EXISTS "${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist")
     file(STRINGS "${CMAKE_JAVA_CLASS_OUTPUT_PATH}/java_class_filelist" classes)
@@ -15,3 +18,5 @@ if(CMAKE_JAVA_CLASS_OUTPUT_PATH)
 else()
   message(FATAL_ERROR "Can't find CMAKE_JAVA_CLASS_OUTPUT_PATH")
 endif()
+
+cmake_policy(POP)

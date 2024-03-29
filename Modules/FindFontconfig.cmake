@@ -34,6 +34,8 @@ This will define the following variables in your project:
 
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 # use pkg-config to get the directories and then use these values
 # in the FIND_PATH() and FIND_LIBRARY() calls
@@ -101,3 +103,5 @@ if(Fontconfig_FOUND)
   set(Fontconfig_LIBRARIES ${Fontconfig_LIBRARY})
   set(Fontconfig_INCLUDE_DIRS ${Fontconfig_INCLUDE_DIR})
 endif()
+
+cmake_policy(POP)

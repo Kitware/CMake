@@ -20,6 +20,8 @@ cmake_policy (SET CMP0057 NEW)
 cmake_policy (SET CMP0124 NEW)
 # registry view behavior
 cmake_policy (SET CMP0134 NEW)
+# file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+cmake_policy(SET CMP0159 NEW)
 
 if (NOT DEFINED _PYTHON_PREFIX)
   message (FATAL_ERROR "FindPython: INTERNAL ERROR")

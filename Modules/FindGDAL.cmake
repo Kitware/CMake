@@ -72,6 +72,9 @@ The following variables may be set to modify the search strategy:
 #
 #include "gdal.h"
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 find_path(GDAL_INCLUDE_DIR gdal.h
   HINTS
     ENV GDAL_DIR
@@ -197,3 +200,5 @@ if (GDAL_FOUND)
             INTERFACE_INCLUDE_DIRECTORIES "${GDAL_INCLUDE_DIR}")
     endif ()
 endif ()
+
+cmake_policy(POP)
