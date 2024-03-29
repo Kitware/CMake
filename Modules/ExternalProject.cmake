@@ -242,19 +242,22 @@ URL
 
 ``TLS_VERIFY <bool>``
   Specifies whether certificate verification should be performed for
-  ``https://`` URLs. If this option is not provided, the default behavior
-  is determined by the :variable:`CMAKE_TLS_VERIFY` variable (see
-  :command:`file(DOWNLOAD)`). If that is also not set, certificate
-  verification will not be performed. In situations where ``URL_HASH``
-  cannot be provided, this option can be an alternative verification
-  measure.
+  ``https://`` URLs.  If this option is not provided, the value of the
+  :variable:`CMAKE_TLS_VERIFY` variable will be used instead (see
+  :command:`file(DOWNLOAD)`).
+  If that is also not set, certificate verification will not be performed.
+  In situations where ``URL_HASH`` cannot be provided, this option can
+  be an alternative verification measure.
+
+  This option also applies to ``git clone`` invocations, although the
+  default behavior is different.  If neither the ``TLS_VERIFY`` option
+  or :variable:`CMAKE_TLS_VERIFY` variable is specified, the behavior
+  will be determined by git's default (true) or a ``http.sslVerify``
+  git config option the user may have set at a global level.
 
   .. versionchanged:: 3.6
-    This option also applies to ``git clone`` invocations, although the
-    default behavior is different.  If neither the ``TLS_VERIFY`` option
-    or :variable:`CMAKE_TLS_VERIFY` variable is specified, the behavior
-    will be determined by git's default (true) or a ``http.sslVerify``
-    git config option the user may have set at a global level.
+
+    Previously this option did not apply to ``git clone`` invocations.
 
 ``TLS_CAINFO <file>``
   Specify a custom certificate authority file to use if ``TLS_VERIFY``
