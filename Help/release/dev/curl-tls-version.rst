@@ -10,6 +10,10 @@ curl-tls-version
   for connections to ``https://`` URLs by the :command:`file(DOWNLOAD)`
   and :command:`file(UPLOAD)` commands.
 
+* The :envvar:`CMAKE_TLS_VERIFY` environment variable was added as a fallback
+  to the existing :variable:`CMAKE_TLS_VERIFY` variable.  It specifies
+  whether to verify the server certificate for ``https://`` URLs by default.
+
 * The :module:`ExternalProject` module's :command:`ExternalProject_Add`
   command gained a ``TLS_VERSION <min>`` option, and support for the
   :variable:`CMAKE_TLS_VERSION` variable and :envvar:`CMAKE_TLS_VERSION`

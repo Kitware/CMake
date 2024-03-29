@@ -2036,6 +2036,12 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
       tls_verify = v.IsOn();
     }
   }
+  if (!tls_verify) {
+    if (cm::optional<std::string> v =
+          cmSystemTools::GetEnvVar("CMAKE_TLS_VERIFY")) {
+      tls_verify = cmIsOn(*v);
+    }
+  }
 
   if (!tls_version) {
     if (cmValue v = status.GetMakefile().GetDefinition("CMAKE_TLS_VERSION")) {
@@ -2437,6 +2443,12 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
   if (!tls_verify) {
     if (cmValue v = status.GetMakefile().GetDefinition("CMAKE_TLS_VERIFY")) {
       tls_verify = v.IsOn();
+    }
+  }
+  if (!tls_verify) {
+    if (cm::optional<std::string> v =
+          cmSystemTools::GetEnvVar("CMAKE_TLS_VERIFY")) {
+      tls_verify = cmIsOn(*v);
     }
   }
 
