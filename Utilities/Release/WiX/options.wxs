@@ -1,0 +1,18 @@
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment>
+        <!-- Hold the "CMAKE_IN_PATH" checkbox value in a public property to propagate to the InstallExecuteSequence. -->
+        <Property Id="CMAKE_IN_PATH" Value="Init" />
+
+        <!-- Always initialize the checkbox value so it cannot be directly overridden from the command line.  -->
+        <SetProperty Action="Set_CMAKE_IN_PATH_Init"       Id="CMAKE_IN_PATH" After="AppSearch"                    Sequence="first" Value="{}" />
+
+        <!-- Override the default "CMAKE_IN_PATH" checkbox with a value specified on the command line, if any.  -->
+        <SetProperty Action="Set_CMAKE_IN_PATH_CMD_0"      Id="CMAKE_IN_PATH" After="Set_CMAKE_IN_PATH_Init"       Sequence="first" Value="{}">  ADD_CMAKE_TO_PATH = "0"                     </SetProperty>
+        <SetProperty Action="Set_CMAKE_IN_PATH_CMD_1"      Id="CMAKE_IN_PATH" After="Set_CMAKE_IN_PATH_CMD_0"      Sequence="first" Value="1">   ADD_CMAKE_TO_PATH = "1"                     </SetProperty>
+        <!-- Support legacy values too.  -->
+        <SetProperty Action="Set_CMAKE_IN_PATH_CMD_None"   Id="CMAKE_IN_PATH" After="Set_CMAKE_IN_PATH_CMD_1"      Sequence="first" Value="{}">  ADD_CMAKE_TO_PATH = "None"                  </SetProperty>
+        <SetProperty Action="Set_CMAKE_IN_PATH_CMD_System" Id="CMAKE_IN_PATH" After="Set_CMAKE_IN_PATH_CMD_None"   Sequence="first" Value="1">   ADD_CMAKE_TO_PATH = "System" AND ALLUSERS   </SetProperty>
+        <!-- Per-user installation is not implemented, but reserve the old value for future use.  -->
+        <SetProperty Action="Set_CMAKE_IN_PATH_CMD_User"   Id="CMAKE_IN_PATH" After="Set_CMAKE_IN_PATH_CMD_System" Sequence="first" Value="1">   ADD_CMAKE_TO_PATH = "User" AND NOT ALLUSERS </SetProperty>
+    </Fragment>
+</Wix>
