@@ -1866,7 +1866,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   std::string logVar;
   std::string statusVar;
   cm::optional<std::string> tls_version;
-  bool tls_verify = status.GetMakefile().IsOn("CMAKE_TLS_VERIFY");
+  cm::optional<bool> tls_verify;
   cmValue cainfo = status.GetMakefile().GetDefinition("CMAKE_TLS_CAINFO");
   std::string netrc_level =
     status.GetMakefile().GetSafeDefinition("CMAKE_NETRC");
@@ -2031,6 +2031,12 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     ++i;
   }
 
+  if (!tls_verify) {
+    if (cmValue v = status.GetMakefile().GetDefinition("CMAKE_TLS_VERIFY")) {
+      tls_verify = v.IsOn();
+    }
+  }
+
   if (!tls_version) {
     if (cmValue v = status.GetMakefile().GetDefinition("CMAKE_TLS_VERSION")) {
       tls_version = *v;
@@ -2133,7 +2139,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   }
 
   // check to see if TLS verification is requested
-  if (tls_verify) {
+  if (tls_verify && *tls_verify) {
     res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
     check_curl_result(res, "DOWNLOAD cannot set TLS/SSL Verify on: ");
   } else {
@@ -2322,7 +2328,7 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
   std::string statusVar;
   bool showProgress = false;
   cm::optional<std::string> tls_version;
-  bool tls_verify = status.GetMakefile().IsOn("CMAKE_TLS_VERIFY");
+  cm::optional<bool> tls_verify;
   cmValue cainfo = status.GetMakefile().GetDefinition("CMAKE_TLS_CAINFO");
   std::string userpwd;
   std::string netrc_level =
@@ -2428,6 +2434,12 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
     ++i;
   }
 
+  if (!tls_verify) {
+    if (cmValue v = status.GetMakefile().GetDefinition("CMAKE_TLS_VERIFY")) {
+      tls_verify = v.IsOn();
+    }
+  }
+
   if (!tls_version) {
     if (cmValue v = status.GetMakefile().GetDefinition("CMAKE_TLS_VERSION")) {
       tls_version = *v;
@@ -2498,7 +2510,7 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
   }
 
   // check to see if TLS verification is requested
-  if (tls_verify) {
+  if (tls_verify && *tls_verify) {
     res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
     check_curl_result(res, "UPLOAD cannot set TLS/SSL Verify on: ");
   } else {
