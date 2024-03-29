@@ -1102,8 +1102,9 @@ Transfer
 
       Specify minimum TLS version for ``https://`` URLs.
       If this option is not specified, the value of the
-      :variable:`CMAKE_TLS_VERSION` variable will be used instead.
-      See that variable for allowed values.
+      :variable:`CMAKE_TLS_VERSION` variable or :envvar:`CMAKE_TLS_VERSION`
+      environment variable will be used instead.
+      See :variable:`CMAKE_TLS_VERSION` for allowed values.
 
     ``TLS_VERIFY <ON|OFF>``
       Specify whether to verify the server certificate for ``https://`` URLs.
