@@ -3,6 +3,10 @@
 #include "cmGetPropertyCommand.h"
 
 #include <cstddef>
+#include <functional>
+
+#include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
@@ -267,6 +271,38 @@ bool cmGetPropertyCommand(std::vector<std::string> const& args,
   return true;
 }
 
+namespace GetPropertyCommand {
+bool GetSourceFilePropertyGENERATED(
+  const std::string& name, cmMakefile& mf,
+  const std::function<bool(bool)>& storeResult)
+{
+  // Globally set as generated?
+  // Note: If the given "name" only contains a filename or a relative path
+  //       the file's location is ambiguous. In general, one would expect
+  //       it in the source-directory, because that is where source files
+  //       are located normally. However, generated files are normally
+  //       generated in the build-directory. Therefore, we first check for
+  //       a generated file in the build-directory before we check for a
+  //       generated file in the source-directory.
+  {
+    auto file =
+      cmSystemTools::CollapseFullPath(name, mf.GetCurrentBinaryDirectory());
+    if (mf.GetGlobalGenerator()->IsGeneratedFile(file)) {
+      return storeResult(true);
+    }
+  }
+  {
+    auto file =
+      cmSystemTools::CollapseFullPath(name, mf.GetCurrentSourceDirectory());
+    if (mf.GetGlobalGenerator()->IsGeneratedFile(file)) {
+      return storeResult(true);
+    }
+  }
+  // Skip checking the traditional/local property.
+  return storeResult(false);
+}
+}
+
 namespace {
 
 // Implementation of result storage.
@@ -405,12 +441,32 @@ bool HandleSourceMode(cmExecutionStatus& status, const std::string& name,
     return false;
   }
 
+  // Special handling for GENERATED property.
+  // Note: Only, if CMP0163 is set to NEW!
+  if (propertyName == "GENERATED"_s) {
+    auto& mf = status.GetMakefile();
+    auto cmp0163 = directory_makefile.GetPolicyStatus(cmPolicies::CMP0163);
+    bool const cmp0163new =
+      cmp0163 != cmPolicies::OLD && cmp0163 != cmPolicies::WARN;
+    if (cmp0163new) {
+      return GetPropertyCommand::GetSourceFilePropertyGENERATED(
+        name, mf, [infoType, &variable, &mf](bool isGenerated) -> bool {
+          // Set the value on the original Makefile scope, not the scope of the
+          // requested directory.
+          return StoreResult(infoType, mf, variable,
+                             (isGenerated) ? cmValue("1") : cmValue("0"));
+        });
+    }
+  }
+
   // Get the source file.
   const std::string source_file_absolute_path =
     SetPropertyCommand::MakeSourceFilePathAbsoluteIfNeeded(
       status, name, source_file_paths_should_be_absolute);
   if (cmSourceFile* sf =
         directory_makefile.GetOrCreateSource(source_file_absolute_path)) {
+    // Set the value on the original Makefile scope, not the scope of the
+    // requested directory.
     return StoreResult(infoType, status.GetMakefile(), variable,
                        sf->GetPropertyForUser(propertyName));
   }

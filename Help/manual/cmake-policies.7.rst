@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.30
 .. toctree::
    :maxdepth: 1
 
+   CMP0163: The GENERATED source file property is now visible in all directories. </policy/CMP0163>
    CMP0162: Visual Studio generators add UseDebugLibraries indicators by default. </policy/CMP0162>
 
 Policies Introduced by CMake 3.29

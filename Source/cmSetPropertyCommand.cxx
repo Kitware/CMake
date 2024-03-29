@@ -6,6 +6,8 @@
 #include <sstream>
 #include <unordered_set>
 
+#include <cm/string_view>
+
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstalledFile.h"
@@ -281,12 +283,60 @@ bool HandleAndValidateSourceFilePropertyGENERATED(
   cmSourceFile* sf, std::string const& propertyValue, PropertyOp op)
 {
   const auto& mf = *sf->GetLocation().GetMakefile();
-  auto policyStatus = mf.GetPolicyStatus(cmPolicies::CMP0118);
 
-  const bool policyWARN = policyStatus == cmPolicies::WARN;
-  const bool policyNEW = policyStatus != cmPolicies::OLD && !policyWARN;
+  auto isProblematic = [&mf, &propertyValue,
+                        op](cm::string_view policy) -> bool {
+    if (!cmIsOn(propertyValue) && !cmIsOff(propertyValue)) {
+      mf.IssueMessage(
+        MessageType::AUTHOR_ERROR,
+        cmStrCat("Policy ", policy,
+                 " is set to NEW and the following non-boolean value given "
+                 "for property 'GENERATED' is therefore not allowed:\n",
+                 propertyValue, "\nReplace it with a boolean value!\n"));
+      return true;
+    }
+    if (cmIsOff(propertyValue)) {
+      mf.IssueMessage(
+        MessageType::AUTHOR_ERROR,
+        cmStrCat("Unsetting the 'GENERATED' property is not allowed under ",
+                 policy, "!\n"));
+      return true;
+    }
+    if (op == PropertyOp::Append || op == PropertyOp::AppendAsString) {
+      mf.IssueMessage(
+        MessageType::AUTHOR_ERROR,
+        cmStrCat(
+          "Policy ", policy,
+          " is set to NEW and appending to the 'GENERATED' property is "
+          "therefore not allowed. Only setting it to \"1\" is allowed!\n"));
+      return true;
+    }
+    return false;
+  };
 
-  if (policyWARN) {
+  const auto cmp0163PolicyStatus = mf.GetPolicyStatus(cmPolicies::CMP0163);
+  const bool cmp0163PolicyNEW = cmp0163PolicyStatus != cmPolicies::OLD &&
+    cmp0163PolicyStatus != cmPolicies::WARN;
+  if (cmp0163PolicyNEW) {
+    if (!isProblematic("CMP0163")) {
+      sf->MarkAsGenerated();
+    }
+    return true;
+  }
+
+  const auto cmp0118PolicyStatus = mf.GetPolicyStatus(cmPolicies::CMP0118);
+  const bool cmp0118PolicyWARN = cmp0118PolicyStatus == cmPolicies::WARN;
+  const bool cmp0118PolicyNEW =
+    cmp0118PolicyStatus != cmPolicies::OLD && !cmp0118PolicyWARN;
+
+  if (cmp0118PolicyNEW) {
+    if (!isProblematic("CMP0118")) {
+      sf->MarkAsGenerated();
+    }
+    return true;
+  }
+
+  if (cmp0118PolicyWARN) {
     if (!cmIsOn(propertyValue) && !cmIsOff(propertyValue)) {
       mf.IssueMessage(
         MessageType::AUTHOR_WARNING,
@@ -312,50 +362,22 @@ bool HandleAndValidateSourceFilePropertyGENERATED(
                  "\nAppending to property 'GENERATED' will not be allowed "
                  "under policy CMP0118!\n"));
     }
-  } else if (policyNEW) {
-    if (!cmIsOn(propertyValue) && !cmIsOff(propertyValue)) {
-      mf.IssueMessage(
-        MessageType::AUTHOR_ERROR,
-        cmStrCat(
-          "Policy CMP0118 is set to NEW and the following non-boolean value "
-          "given for property 'GENERATED' is therefore not allowed:\n",
-          propertyValue, "\nReplace it with a boolean value!\n"));
-      return true;
-    }
-    if (cmIsOff(propertyValue)) {
-      mf.IssueMessage(
-        MessageType::AUTHOR_ERROR,
-        "Unsetting the 'GENERATED' property is not allowed under CMP0118!\n");
-      return true;
-    }
-    if (op == PropertyOp::Append || op == PropertyOp::AppendAsString) {
-      mf.IssueMessage(MessageType::AUTHOR_ERROR,
-                      "Policy CMP0118 is set to NEW and appending to the "
-                      "'GENERATED' property is therefore not allowed. Only "
-                      "setting it to \"1\" is allowed!\n");
-      return true;
-    }
   }
 
-  // Set property.
-  if (!policyNEW) {
-    // Do it the traditional way.
-    switch (op) {
-      case PropertyOp::Append:
-        sf->AppendProperty("GENERATED", propertyValue, false);
-        break;
-      case PropertyOp::AppendAsString:
-        sf->AppendProperty("GENERATED", propertyValue, true);
-        break;
-      case PropertyOp::Remove:
-        sf->RemoveProperty("GENERATED");
-        break;
-      case PropertyOp::Set:
-        sf->SetProperty("GENERATED", propertyValue);
-        break;
-    }
-  } else {
-    sf->MarkAsGenerated();
+  // Set property the traditional way.
+  switch (op) {
+    case PropertyOp::Append:
+      sf->AppendProperty("GENERATED", propertyValue, false);
+      break;
+    case PropertyOp::AppendAsString:
+      sf->AppendProperty("GENERATED", propertyValue, true);
+      break;
+    case PropertyOp::Remove:
+      sf->RemoveProperty("GENERATED");
+      break;
+    case PropertyOp::Set:
+      sf->SetProperty("GENERATED", propertyValue);
+      break;
   }
   return true;
 }

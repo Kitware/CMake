@@ -1,0 +1,79 @@
+^Generated_with_full_path1\.txt: # 1a # GENERATED = `1`
+Generated_with_full_path1\.txt: # 1b # GENERATED = `1`
+Generated_with_full_path1\.txt: # 2a # GENERATED = `1`
+Generated_with_full_path1\.txt: # 2b # GENERATED = `1`
+Generated_with_full_path1\.txt: # 3a # GENERATED = `0`
+Generated_with_full_path1\.txt: # 3b # GENERATED = `0`
+Generated_with_full_path2\.txt: # 1a # GENERATED = `1`
+Generated_with_full_path2\.txt: # 1b # GENERATED = `1`
+Generated_with_full_path2\.txt: # 2a # GENERATED = `1`
+Generated_with_full_path2\.txt: # 2b # GENERATED = `1`
+Generated_with_full_path2\.txt: # 3a # GENERATED = `0`
+Generated_with_full_path2\.txt: # 3b # GENERATED = `0`
+Generated_with_full_path3\.txt: # 1a # GENERATED = `0`
+Generated_with_full_path3\.txt: # 1b # GENERATED = `0`
+Generated_with_full_path3\.txt: # 2a # GENERATED = `1`
+Generated_with_full_path3\.txt: # 2b # GENERATED = `1`
+Generated_with_full_path3\.txt: # 3a # GENERATED = `1`
+Generated_with_full_path3\.txt: # 3b # GENERATED = `1`
+Generated_with_relative_path1\.txt: # 1a # GENERATED = `1`
+Generated_with_relative_path1\.txt: # 1b # GENERATED = `1`
+Generated_with_relative_path1\.txt: # 2a # GENERATED = `1`
+Generated_with_relative_path1\.txt: # 2b # GENERATED = `1`
+Generated_with_relative_path1\.txt: # 3a # GENERATED = `0`
+Generated_with_relative_path1\.txt: # 3b # GENERATED = `0`
+Generated_with_relative_path2\.txt: # 1a # GENERATED = `1`
+Generated_with_relative_path2\.txt: # 1b # GENERATED = `1`
+Generated_with_relative_path2\.txt: # 2a # GENERATED = `1`
+Generated_with_relative_path2\.txt: # 2b # GENERATED = `1`
+Generated_with_relative_path2\.txt: # 3a # GENERATED = `0`
+Generated_with_relative_path2\.txt: # 3b # GENERATED = `0`
+Generated_with_relative_path3\.txt: # 1a # GENERATED = `0`
+Generated_with_relative_path3\.txt: # 1b # GENERATED = `0`
+Generated_with_relative_path3\.txt: # 2a # GENERATED = `1`
+Generated_with_relative_path3\.txt: # 2b # GENERATED = `1`
+Generated_with_relative_path3\.txt: # 3a # GENERATED = `1`
+Generated_with_relative_path3\.txt: # 3b # GENERATED = `1`
+Generated_with_full_source_path1\.txt: # 1a # GENERATED = `1`
+Generated_with_full_source_path1\.txt: # 1b # GENERATED = `1`
+Generated_with_full_source_path1\.txt: # 2a # GENERATED = `1`
+Generated_with_full_source_path1\.txt: # 2b # GENERATED = `1`
+Generated_with_full_source_path1\.txt: # 3a # GENERATED = `0`
+Generated_with_full_source_path1\.txt: # 3b # GENERATED = `0`
+Generated_with_full_source_path2\.txt: # 1a # GENERATED = `1`
+Generated_with_full_source_path2\.txt: # 1b # GENERATED = `1`
+Generated_with_full_source_path2\.txt: # 2a # GENERATED = `1`
+Generated_with_full_source_path2\.txt: # 2b # GENERATED = `1`
+Generated_with_full_source_path2\.txt: # 3a # GENERATED = `0`
+Generated_with_full_source_path2\.txt: # 3b # GENERATED = `0`
+Generated_with_full_source_path3\.txt: # 1a # GENERATED = `0`
+Generated_with_full_source_path3\.txt: # 1b # GENERATED = `0`
+Generated_with_full_source_path3\.txt: # 2a # GENERATED = `1`
+Generated_with_full_source_path3\.txt: # 2b # GENERATED = `1`
+Generated_with_full_source_path3\.txt: # 3a # GENERATED = `1`
+Generated_with_full_source_path3\.txt: # 3b # GENERATED = `1`
+CMake Error at CMP0163-Common-Test3\.cmake:[0-9]+ \(target_sources\):
+  Cannot find source file:
+
+[ \t]*.*Tests/RunCMake/CMP0163/(Generated_with_full_source_path[1-2]\.txt|CMP0118-WARN/CMP0163-OLD-Test3-build/Generated_with_full_path3\.txt)
+Call Stack \(most recent call first\):
+  CMP0118-WARN/CMP0163-OLD-Test3\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at CMP0163-Common-Test3\.cmake:[0-9]+ \(target_sources\):
+  Cannot find source file:
+
+[ \t]*.*Tests/RunCMake/CMP0163/(Generated_with_full_source_path[1-2]\.txt|CMP0118-WARN/CMP0163-OLD-Test3-build/Generated_with_full_path3\.txt)
+Call Stack \(most recent call first\):
+  CMP0118-WARN/CMP0163-OLD-Test3\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at CMP0163-Common-Test3\.cmake:[0-9]+ \(target_sources\):
+  Cannot find source file:
+
+[ \t]*.*Tests/RunCMake/CMP0163/(Generated_with_full_source_path[1-2]\.txt|CMP0118-WARN/CMP0163-OLD-Test3-build/Generated_with_full_path3\.txt)
+Call Stack \(most recent call first\):
+  CMP0118-WARN/CMP0163-OLD-Test3\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Generate step failed\.  Build files cannot be regenerated correctly\.$
