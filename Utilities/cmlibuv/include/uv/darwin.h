@@ -30,6 +30,8 @@
 # define UV_PLATFORM_SEM_T semaphore_t
 #endif
 
+#define UV_HAVE_KQUEUE 1
+
 #define UV_IO_PRIVATE_PLATFORM_FIELDS                                         \
   int rcount;                                                                 \
   int wcount;                                                                 \
@@ -55,7 +57,5 @@
 
 #define UV_STREAM_PRIVATE_PLATFORM_FIELDS                                     \
   void* select;                                                               \
-
-#define UV_HAVE_KQUEUE 1
 
 #endif /* UV_DARWIN_H */
