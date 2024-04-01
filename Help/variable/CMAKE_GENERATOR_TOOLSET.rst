@@ -51,8 +51,8 @@ Supported pairs are:
 ``fortran=<compiler>``
   .. versionadded:: 3.29
 
-  Specify the Fortran compiler to use, among those that integrate with VS.
-  The value may be one of:
+  Specify the Fortran compiler to use, among those that have the required
+  Visual Studio Integration feature installed.  The value may be one of:
 
   ``ifort``
     Intel classic Fortran compiler.
