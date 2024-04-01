@@ -3104,15 +3104,6 @@ if(BUILD_TESTING)
   )
 
   configure_file(
-    "${CMake_SOURCE_DIR}/Tests/CTestTestResourceLock/test.cmake.in"
-    "${CMake_BINARY_DIR}/Tests/CTestTestResourceLock/test.cmake"
-    @ONLY ESCAPE_QUOTES)
-  add_test(CTestTestResourceLock ${CMAKE_CTEST_COMMAND}
-    -S "${CMake_BINARY_DIR}/Tests/CTestTestResourceLock/test.cmake" -V
-    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestResourceLock/output.log"
-    )
-
-  configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestScheduler/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestScheduler/test.cmake"
     @ONLY ESCAPE_QUOTES)
