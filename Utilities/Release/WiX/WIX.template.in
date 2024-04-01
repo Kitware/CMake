@@ -46,6 +46,7 @@
 
         <FeatureRef Id="ProductFeature">
             <ComponentRef Id="CMakeRegistry_InstallDir" />
+            <ComponentRef Id="CMakeRegistry_InstallInPATH" />
         </FeatureRef>
 
         <UIRef Id="$(var.CPACK_WIX_UI_REF)" />
