@@ -466,7 +466,10 @@ function(SWIG_GET_EXTRA_OUTPUT_FILES language outfiles generatedpath infile)
 
     # try to get module name from "%module foo" syntax
     if ( EXISTS "${infile}" )
+      cmake_policy(PUSH)
+      cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
       file ( STRINGS "${infile}" module_basename REGEX "[ ]*%module[ ]*[a-zA-Z0-9_]+.*" )
+      cmake_policy(POP)
     endif ()
     if ( module_basename )
       string ( REGEX REPLACE "[ ]*%module[ ]*([a-zA-Z0-9_]+).*" "\\1" module_basename "${module_basename}" )
@@ -474,7 +477,10 @@ function(SWIG_GET_EXTRA_OUTPUT_FILES language outfiles generatedpath infile)
     else ()
       # try to get module name from "%module (options=...) foo" syntax
       if ( EXISTS "${infile}" )
+        cmake_policy(PUSH)
+        cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
         file ( STRINGS "${infile}" module_basename REGEX "[ ]*%module[ ]*\\(.*\\)[ ]*[a-zA-Z0-9_]+.*" )
+        cmake_policy(POP)
       endif ()
       if ( module_basename )
         string ( REGEX REPLACE "[ ]*%module[ ]*\\(.*\\)[ ]*([a-zA-Z0-9_]+).*" "\\1" module_basename "${module_basename}" )

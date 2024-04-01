@@ -96,7 +96,10 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     # Load the resulting information strings.
     if(CMAKE_${lang}_ABI_COMPILED)
       message(CHECK_PASS "done")
+      cmake_policy(PUSH)
+      cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
       file(STRINGS "${BIN}" ABI_STRINGS LIMIT_COUNT 32 REGEX "INFO:[A-Za-z0-9_]+\\[[^]]*\\]")
+      cmake_policy(POP)
       set(ABI_SIZEOF_DPTR "NOTFOUND")
       set(ABI_BYTE_ORDER "NOTFOUND")
       set(ABI_NAME "NOTFOUND")

@@ -52,6 +52,9 @@ The following cache variables may also be set:
   path to the LibXml2 library
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 # use pkg-config to get the directories and then use these values
 # in the find_path() and find_library() calls
 find_package(PkgConfig QUIET)
@@ -122,3 +125,5 @@ if(LIBXML2_XMLLINT_EXECUTABLE AND NOT TARGET LibXml2::xmllint)
   add_executable(LibXml2::xmllint IMPORTED)
   set_target_properties(LibXml2::xmllint PROPERTIES IMPORTED_LOCATION "${LIBXML2_XMLLINT_EXECUTABLE}")
 endif()
+
+cmake_policy(POP)

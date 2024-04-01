@@ -24,6 +24,9 @@ This module defines:
 ``./configure --prefix=$SDLDIR`` used in building SDL.
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 find_path(SDL_GFX_INCLUDE_DIRS
   NAMES
     SDL_framerate.h
@@ -84,3 +87,5 @@ if(SDL_gfx_FOUND)
       INTERFACE_LINK_LIBRARIES "${SDL_GFX_LIBRARIES}")
   endif()
 endif()
+
+cmake_policy(POP)

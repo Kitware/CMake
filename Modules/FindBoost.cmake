@@ -387,6 +387,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
 cmake_policy(SET CMP0102 NEW) # if mark_as_advanced(non_cache_var)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 function(_boost_get_existing_target component target_var)
   set(names "${component}")

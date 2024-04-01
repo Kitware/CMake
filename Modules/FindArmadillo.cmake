@@ -34,6 +34,9 @@ This module sets the following variables:
   ARMADILLO_VERSION_NAME - name of the version (ex: "Antipodean Antileech")
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 find_path(ARMADILLO_INCLUDE_DIR
   NAMES armadillo
   PATHS "$ENV{ProgramFiles}/Armadillo/include"
@@ -133,3 +136,5 @@ unset(_ARMA_USE_ARPACK)
 unset(_ARMA_USE_HDF5)
 unset(_ARMA_CONFIG_CONTENTS)
 unset(_ARMA_HEADER_CONTENTS)
+
+cmake_policy(POP)

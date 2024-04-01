@@ -72,6 +72,9 @@ Hints
 
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 if(NOT CURL_NO_CURL_CMAKE)
@@ -86,6 +89,8 @@ if(NOT CURL_NO_CURL_CMAKE)
     find_package_handle_standard_args(CURL HANDLE_COMPONENTS CONFIG_MODE)
     # The upstream curl package sets CURL_VERSION, not CURL_VERSION_STRING.
     set(CURL_VERSION_STRING "${CURL_VERSION}")
+
+    cmake_policy(POP)
     return()
   endif()
 endif()
@@ -241,3 +246,5 @@ if(CURL_FOUND)
 
   endif()
 endif()
+
+cmake_policy(POP)

@@ -67,6 +67,7 @@ The following cache variables may also be set:
 
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 set(_TIFF_args)
 if (TIFF_FIND_VERSION)
