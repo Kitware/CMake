@@ -81,11 +81,7 @@ extern char **environ;
 
 #ifdef CMAKE_BOOTSTRAP
 #define UV_USE_SIGCHLD
-#elif defined(__APPLE__) || \
-    defined(__DragonFly__) || \
-    defined(__FreeBSD__) || \
-    defined(__NetBSD__) || \
-    defined(__OpenBSD__)
+#elif defined(UV_HAVE_KQUEUE)
 #include <sys/event.h>
 #else
 #define UV_USE_SIGCHLD

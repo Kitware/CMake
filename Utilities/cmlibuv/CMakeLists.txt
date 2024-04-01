@@ -191,8 +191,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     src/unix/bsd-ifaddrs.c
     src/unix/darwin.c
     src/unix/darwin-proctitle.c
-    src/unix/fsevents.c
-    src/unix/kqueue.c
+    src/unix/no-fsevents.c
+    src/unix/posix-poll.c
     src/unix/proctitle.c
     )
 endif()
