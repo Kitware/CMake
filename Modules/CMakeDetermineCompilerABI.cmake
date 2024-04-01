@@ -50,7 +50,14 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     __TestCompiler_setTryCompileTargetType()
 
     # Avoid failing ABI detection on warnings.
-    string(REGEX REPLACE "(^| )-Werror([= ][^-][^ ]*)?( |$)" " " CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS}")
+    if(CMAKE_TRY_COMPILE_CONFIGURATION)
+      string(TOUPPER "${CMAKE_TRY_COMPILE_CONFIGURATION}" _tc_config)
+    else()
+      set(_tc_config "DEBUG")
+    endif()
+    foreach(v CMAKE_${lang}_FLAGS CMAKE_${lang}_FLAGS_${_tc_config})
+      string(REGEX REPLACE "(^| )-Werror([= ][^-][^ ]*)?( |$)" " " ${v} "${${v}}")
+    endforeach()
 
     # Save the current LC_ALL, LC_MESSAGES, and LANG environment variables
     # and set them to "C" that way GCC's "search starts here" text is in
