@@ -4,6 +4,8 @@ if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
   set(maybe_CMAKE_BUILD_TYPE -DCMAKE_BUILD_TYPE=Release)
 endif()
 
+run_cmake_with_options(NestedConfigFile ${maybe_CMAKE_BUILD_TYPE})
+
 function(apple_export platform system_name archs sysroot)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/apple-export-${platform}-build)
   string(REPLACE ";" "\\;" archs "${archs}")
@@ -77,6 +79,12 @@ if(APPLE AND CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
   if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 15.2)
     set(enable_visionos 1)
   endif()
+
+  string(REPLACE ";" "\\;" macos_archs_for_cmd "${macos_archs}")
+  run_cmake_with_options(ApplePlatformGenSubdir
+    "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_for_cmd}"
+    ${maybe_CMAKE_BUILD_TYPE}
+  )
 
   apple_export(macos Darwin "${macos_archs}" macosx)
   apple_export(ios iOS "arm64" iphoneos)
