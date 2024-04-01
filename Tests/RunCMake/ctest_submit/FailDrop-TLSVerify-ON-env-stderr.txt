@@ -1,0 +1,2 @@
+Error message was: ([Cc]ould *n.t resolve host:? '?badhostname.invalid'?|The requested URL returned error:|Protocol "https" (not supported or disabled|not supported|disabled)|.* was built with SSL disabled).*
+   Problems when submitting via HTTP

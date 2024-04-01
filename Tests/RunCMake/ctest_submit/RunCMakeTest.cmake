@@ -67,6 +67,18 @@ block()
   unset(ENV{CMAKE_TLS_VERSION})
   set(CASE_TEST_PREFIX_CODE "set(CTEST_TLS_VERIFY ON)")
   run_ctest(FailDrop-TLSVerify-ON -VV)
-  set(CASE_TEST_PREFIX_CODE "set(CMAKE_TLS_VERIFY OFF)") # Test fallback to CMake variable.
+  set(CASE_TEST_PREFIX_CODE "set(CMAKE_TLS_VERIFY ON)") # Test fallback to CMake variable.
+  run_ctest(FailDrop-TLSVerify-ON-cmake -VV)
+  set(ENV{CMAKE_TLS_VERIFY} ON) # Test fallback to env variable.
+  set(CASE_TEST_PREFIX_CODE "")
+  run_ctest(FailDrop-TLSVerify-ON-env -VV)
+  unset(ENV{CMAKE_TLS_VERIFY})
+  set(CASE_TEST_PREFIX_CODE "set(CTEST_TLS_VERIFY OFF)")
   run_ctest(FailDrop-TLSVerify-OFF -VV)
+  set(CASE_TEST_PREFIX_CODE "set(CMAKE_TLS_VERIFY OFF)") # Test fallback to CMake variable.
+  run_ctest(FailDrop-TLSVerify-OFF-cmake -VV)
+  set(ENV{CMAKE_TLS_VERIFY} OFF) # Test fallback to env variable.
+  set(CASE_TEST_PREFIX_CODE "")
+  run_ctest(FailDrop-TLSVerify-OFF-env -VV)
+  unset(ENV{CMAKE_TLS_VERIFY})
 endblock()

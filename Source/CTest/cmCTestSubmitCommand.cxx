@@ -88,6 +88,15 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
         this->Quiet);
       this->CTest->SetCTestConfiguration("TLSVerify", *tlsVerifyVar,
                                          this->Quiet);
+    } else if (cm::optional<std::string> tlsVerifyEnv =
+                 cmSystemTools::GetEnvVar("CMAKE_TLS_VERIFY")) {
+      cmCTestOptionalLog(
+        this->CTest, HANDLER_VERBOSE_OUTPUT,
+        "SetCTestConfiguration from ENV{CMAKE_TLS_VERIFY}:TLSVerify:"
+          << *tlsVerifyEnv << std::endl,
+        this->Quiet);
+      this->CTest->SetCTestConfiguration("TLSVerify", *tlsVerifyEnv,
+                                         this->Quiet);
     }
   }
   this->CTest->SetCTestConfigurationFromCMakeVariable(
