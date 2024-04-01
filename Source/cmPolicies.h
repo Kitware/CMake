@@ -501,7 +501,11 @@ class cmMakefile;
   SELECT(                                                                     \
     POLICY, CMP0163,                                                          \
     "The GENERATED source file property is now visible in all directories.",  \
-    3, 30, 0, cmPolicies::WARN)
+    3, 30, 0, cmPolicies::WARN)                                               \
+  SELECT(POLICY, CMP0164,                                                     \
+         "add_library() rejects SHARED libraries when not supported by the "  \
+         "platform.",                                                         \
+         3, 30, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
