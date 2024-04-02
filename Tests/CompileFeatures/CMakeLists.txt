@@ -6,6 +6,18 @@ project(CompileFeatures)
 
 set(ext_C c)
 set(ext_CXX cpp)
+set(std_C 90 99 11 17 23)
+set(std_CXX 98 11 14 17 20 23)
+
+foreach(lang C CXX)
+  foreach(std IN LISTS std_${lang})
+    string(TOLOWER "${lang}_std_${std}" feature)
+    if(CMAKE_${lang}${std}_STANDARD_COMPILE_OPTION)
+      add_library(test_${feature} OBJECT ${feature}.${ext_${lang}})
+      target_compile_features(test_${feature} PRIVATE ${feature})
+    endif()
+  endforeach()
+endforeach()
 
 macro(run_test feature lang)
   if (${feature} IN_LIST CMAKE_${lang}_COMPILE_FEATURES)
