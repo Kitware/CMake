@@ -160,7 +160,7 @@ Targets Created:
 cuBLAS
 """"""
 
-The `cuBLAS <https://docs.nvidia.com/cuda/cublas/index.html>`_ library.
+The `cuBLAS <https://docs.nvidia.com/cuda/cublas>`_ library.
 
 Targets Created:
 
@@ -176,7 +176,7 @@ cuDLA
 
 .. versionadded:: 3.27
 
-The NVIDIA Tegra Deep Learning Accelerator `cuDLA <https://docs.nvidia.com/cuda/cublas/index.html>`_ library.
+The NVIDIA Tegra Deep Learning Accelerator `cuDLA <https://docs.nvidia.com/cuda/cublas>`_ library.
 
 Targets Created:
 
@@ -189,7 +189,7 @@ cuFile
 
 .. versionadded:: 3.25
 
-The NVIDIA GPUDirect Storage `cuFile <https://docs.nvidia.com/gpudirect-storage/api-reference-guide/index.html>`_ library.
+The NVIDIA GPUDirect Storage `cuFile <https://docs.nvidia.com/gpudirect-storage/api-reference-guide>`_ library.
 
 Targets Created:
 
@@ -203,7 +203,7 @@ Targets Created:
 cuFFT
 """""
 
-The `cuFFT <https://docs.nvidia.com/cuda/cufft/index.html>`_ library.
+The `cuFFT <https://docs.nvidia.com/cuda/cufft>`_ library.
 
 Targets Created:
 
@@ -216,7 +216,7 @@ Targets Created:
 cuRAND
 """"""
 
-The `cuRAND <https://docs.nvidia.com/cuda/curand/index.html>`_ library.
+The `cuRAND <https://docs.nvidia.com/cuda/curand>`_ library.
 
 Targets Created:
 
@@ -228,7 +228,7 @@ Targets Created:
 cuSOLVER
 """"""""
 
-The `cuSOLVER <https://docs.nvidia.com/cuda/cusolver/index.html>`_ library.
+The `cuSOLVER <https://docs.nvidia.com/cuda/cusolver>`_ library.
 
 Targets Created:
 
@@ -240,7 +240,7 @@ Targets Created:
 cuSPARSE
 """"""""
 
-The `cuSPARSE <https://docs.nvidia.com/cuda/cusparse/index.html>`_ library.
+The `cuSPARSE <https://docs.nvidia.com/cuda/cusparse>`_ library.
 
 Targets Created:
 
@@ -271,7 +271,7 @@ Targets Created:
 NPP
 """
 
-The `NPP <https://docs.nvidia.com/cuda/npp/index.html>`_ libraries.
+The `NPP <https://docs.nvidia.com/cuda/npp>`_ libraries.
 
 Targets Created:
 
@@ -341,7 +341,7 @@ Targets Created:
 nvBLAS
 """"""
 
-The `nvBLAS <https://docs.nvidia.com/cuda/nvblas/index.html>`_ libraries.
+The `nvBLAS <https://docs.nvidia.com/cuda/nvblas>`_ libraries.
 This is a shared library only.
 
 Targets Created:
@@ -367,7 +367,7 @@ Targets Created:
 nvJPEG
 """"""
 
-The `nvJPEG <https://docs.nvidia.com/cuda/nvjpeg/index.html>`_ library.
+The `nvJPEG <https://docs.nvidia.com/cuda/nvjpeg>`_ library.
 Introduced in CUDA 10.
 
 Targets Created:
@@ -382,7 +382,7 @@ nvPTX Compiler
 
 .. versionadded:: 3.25
 
-The `nvPTX <https://docs.nvidia.com/cuda/ptx-compiler-api/index.html>`_ (PTX Compilation) library.
+The `nvPTX <https://docs.nvidia.com/cuda/ptx-compiler-api>`_ (PTX Compilation) library.
 The PTX Compiler APIs are a set of APIs which can be used to compile a PTX program into GPU assembly code.
 Introduced in CUDA 11.1
 This is a static library only.
@@ -396,7 +396,7 @@ Targets Created:
 nvRTC
 """""
 
-The `nvRTC <https://docs.nvidia.com/cuda/nvrtc/index.html>`_ (Runtime Compilation) library.
+The `nvRTC <https://docs.nvidia.com/cuda/nvrtc>`_ (Runtime Compilation) library.
 
 Targets Created:
 
@@ -467,7 +467,7 @@ nvtx3
 
 .. versionadded:: 3.25
 
-The header-only `NVIDIA Tools Extension Library <https://nvidia.github.io/NVTX/doxygen/index.html>`_.
+The header-only `NVIDIA Tools Extension Library <https://nvidia.github.io/NVTX/doxygen>`_.
 Introduced in CUDA 10.0.
 
 Targets created:
@@ -1204,7 +1204,7 @@ if(CUDAToolkit_FOUND)
 
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 11.0.0)
     # cublas depends on cublasLt
-    # https://docs.nvidia.com/cuda/archive/11.0/cublas/index.html#static-library
+    # https://docs.nvidia.com/cuda/archive/11.0/cublas#static-library
     _CUDAToolkit_find_and_add_import_lib(cublas DEPS cublasLt culibos)
     _CUDAToolkit_find_and_add_import_lib(cublas_static DEPS cublasLt_static culibos)
   else()
@@ -1237,14 +1237,14 @@ if(CUDAToolkit_FOUND)
   set(cusolver_static_deps cublas_static cusparse_static culibos)
   if(CUDAToolkit_VERSION VERSION_GREATER 11.2.1)
     # cusolver depends on libcusolver_metis and cublasLt
-    # https://docs.nvidia.com/cuda/archive/11.2.2/cusolver/index.html#link-dependency
+    # https://docs.nvidia.com/cuda/archive/11.2.2/cusolver#link-dependency
     list(APPEND cusolver_deps cublasLt)
     _CUDAToolkit_find_and_add_import_lib(cusolver_metis_static ALT metis_static) # implementation detail static lib
     list(APPEND cusolver_static_deps cusolver_metis_static cublasLt_static)
   endif()
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 10.1.2)
     # cusolver depends on liblapack_static.a starting with CUDA 10.1 update 2,
-    # https://docs.nvidia.com/cuda/archive/11.5.0/cusolver/index.html#static-link-lapack
+    # https://docs.nvidia.com/cuda/archive/11.5.0/cusolver#static-link-lapack
     _CUDAToolkit_find_and_add_import_lib(cusolver_lapack_static ALT lapack_static) # implementation detail static lib
     list(APPEND cusolver_static_deps cusolver_lapack_static)
   endif()
