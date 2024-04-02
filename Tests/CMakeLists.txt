@@ -392,7 +392,15 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(TryCompile TryCompile)
   ADD_TEST_MACRO(SystemInformation SystemInformation)
   ADD_TEST_MACRO(MathTest MathTest)
+
+  string(REPLACE ";" "$<SEMICOLON>" TEST_STDS_C "${CMake_TEST_C_STANDARDS}")
+  string(REPLACE ";" "$<SEMICOLON>" TEST_STDS_CXX "${CMake_TEST_CXX_STANDARDS}")
+  set(CompileFeatures_BUILD_OPTIONS
+    -DCMake_TEST_C_STANDARDS=${TEST_STDS_C}
+    -DCMake_TEST_CXX_STANDARDS=${TEST_STDS_CXX}
+    )
   ADD_TEST_MACRO(CompileFeatures CompileFeatures)
+
   ADD_TEST_MACRO(CMakeCommands.target_compile_features)
 
   if(CMake_TEST_RESOURCES)
