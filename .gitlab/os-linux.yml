@@ -508,8 +508,8 @@
         - dnf install --setopt=install_weak_deps=False -y git-core
         - v="$(.gitlab/ci/cmake_version.sh)"
         - mkdir -p build/
-        - git archive --format=tgz "--prefix=cmake-$v/" -o "build/cmake-$v.tar.gz" HEAD
-        - git -c core.autocrlf=true -c core.eol=crlf archive --format=zip --prefix="cmake-$v/" -o "build/cmake-$v.zip" HEAD
+        - git archive --format=tgz --prefix="cmake-$v/" -o "build/cmake-$v.tar.gz" HEAD
+        - git archive --format=zip --prefix="cmake-$v/" -o "build/cmake-$v.zip" HEAD
 
     interruptible: true
 
