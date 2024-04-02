@@ -73,8 +73,8 @@ if(NOT CMAKE_C_COMPILER_WORKS)
 endif()
 
 # Try to identify the compiler features
-include(${CMAKE_ROOT}/Modules/CMakeDetermineCompileFeatures.cmake)
-CMAKE_DETERMINE_COMPILE_FEATURES(C)
+include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerSupport.cmake)
+CMAKE_DETERMINE_COMPILER_SUPPORT(C)
 
 # Re-configure to save learned information.
 configure_file(

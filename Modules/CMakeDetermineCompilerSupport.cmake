@@ -2,7 +2,7 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 
-function(cmake_determine_compile_features lang)
+function(cmake_determine_compiler_support lang)
 
   if("x${lang}" STREQUAL "xC" AND COMMAND cmake_record_c_compile_features)
     message(CHECK_START "Detecting ${lang} compile features")
