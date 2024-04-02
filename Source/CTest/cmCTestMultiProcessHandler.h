@@ -143,6 +143,7 @@ protected:
   void InitializeLoop();
   void FinalizeLoop();
 
+  bool ResourceLocksAvailable(int test);
   void LockResources(int index);
   void UnlockResources(int index);
 

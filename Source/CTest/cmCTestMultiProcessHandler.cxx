@@ -442,6 +442,15 @@ void cmCTestMultiProcessHandler::SetStopTimePassed()
   }
 }
 
+bool cmCTestMultiProcessHandler::ResourceLocksAvailable(int test)
+{
+  return std::all_of(this->Properties[test]->ProjectResources.begin(),
+                     this->Properties[test]->ProjectResources.end(),
+                     [this](std::string const& r) -> bool {
+                       return !cm::contains(this->ProjectResourcesLocked, r);
+                     });
+}
+
 void cmCTestMultiProcessHandler::LockResources(int index)
 {
   this->RunningCount += this->GetProcessorsUsed(index);
@@ -643,10 +652,8 @@ void cmCTestMultiProcessHandler::StartNextTests()
     }
 
     // Exclude tests that depend on currently-locked project resources.
-    for (std::string const& i : this->Properties[test]->ProjectResources) {
-      if (cm::contains(this->ProjectResourcesLocked, i)) {
-        continue;
-      }
+    if (!this->ResourceLocksAvailable(test)) {
+      continue;
     }
 
     // Allocate system resources needed by this test.

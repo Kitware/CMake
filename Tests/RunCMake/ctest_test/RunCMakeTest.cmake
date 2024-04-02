@@ -13,6 +13,15 @@ endfunction()
 
 run_ctest_test(TestQuiet QUIET)
 
+set(CASE_CMAKELISTS_SUFFIX_CODE [[
+foreach(i RANGE 1 4)
+  add_test(NAME test${i} COMMAND ${CMAKE_COMMAND} -E true)
+  set_property(TEST test${i} PROPERTY RESOURCE_LOCK resource)
+endforeach()
+]])
+run_ctest_test(ResourceLock INCLUDE test PARALLEL_LEVEL 4)
+unset(CASE_CMAKELISTS_SUFFIX_CODE)
+
 set(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING} 4)
 set(CASE_CMAKELISTS_SUFFIX_CODE [[
 foreach(i RANGE 1 6)
