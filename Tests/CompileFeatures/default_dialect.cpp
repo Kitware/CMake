@@ -47,6 +47,8 @@ struct Outputter;
 #  else
 #    define CXX_STD __cplusplus
 #  endif
+#elif __cplusplus == 1 && defined(__GXX_EXPERIMENTAL_CXX0X__)
+#  define CXX_STD CXX_STD_11
 #else
 #  define CXX_STD __cplusplus
 #endif
