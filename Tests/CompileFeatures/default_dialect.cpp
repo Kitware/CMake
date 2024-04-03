@@ -35,6 +35,12 @@ struct Outputter;
 #  else
 #    define CXX_STD __cplusplus
 #  endif
+#elif (defined(__IBMCPP__) || defined(__ibmxl__)) && defined(__linux__)
+#  if __cplusplus == CXX_STD_11 && defined(__cpp_aggregate_nsdmi)
+#    define CXX_STD CXX_STD_14
+#  else
+#    define CXX_STD __cplusplus
+#  endif
 #else
 #  define CXX_STD __cplusplus
 #endif
