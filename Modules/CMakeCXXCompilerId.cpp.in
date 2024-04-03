@@ -40,14 +40,19 @@ char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
 #define CXX_STD_20 202002L
 #define CXX_STD_23 202302L
 
-#if defined(__INTEL_COMPILER) && defined(_MSVC_LANG) &&                       \
-  _MSVC_LANG <= CXX_STD_14
-#  if defined(__INTEL_CXX11_MODE__)
-#    if defined(__cpp_aggregate_nsdmi)
-#      define CXX_STD CXX_STD_14
-#    else
-#      define CXX_STD CXX_STD_11
-#    endif
+#if defined(__INTEL_COMPILER) && defined(_MSVC_LANG)
+#  if _MSVC_LANG > CXX_STD_17
+#    define CXX_STD _MSVC_LANG
+#  elif _MSVC_LANG == CXX_STD_17 && defined(__cpp_aggregate_paren_init)
+#    define CXX_STD CXX_STD_20
+#  elif _MSVC_LANG > CXX_STD_14 && __cplusplus > CXX_STD_17
+#    define CXX_STD CXX_STD_20
+#  elif _MSVC_LANG > CXX_STD_14
+#    define CXX_STD CXX_STD_17
+#  elif defined(__INTEL_CXX11_MODE__) && defined(__cpp_aggregate_nsdmi)
+#    define CXX_STD CXX_STD_14
+#  elif defined(__INTEL_CXX11_MODE__)
+#    define CXX_STD CXX_STD_11
 #  else
 #    define CXX_STD CXX_STD_98
 #  endif
