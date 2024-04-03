@@ -33,7 +33,7 @@ struct Outputter;
 #  else
 #    define CXX_STD __cplusplus
 #  endif
-#elif defined(__INTEL_COMPILER)
+#elif defined(__INTEL_COMPILER) || defined(__PGI)
 #  if __cplusplus == CXX_STD_11 && defined(__cpp_namespace_attributes)
 #    define CXX_STD CXX_STD_17
 #  elif __cplusplus == CXX_STD_11 && defined(__cpp_aggregate_nsdmi)
