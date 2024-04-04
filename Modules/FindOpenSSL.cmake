@@ -310,8 +310,10 @@ if(WIN32 AND NOT CYGWIN)
     # Since OpenSSL 1.1, lib names are like libcrypto32MTd.lib and libssl32MTd.lib
     if( "${CMAKE_SIZEOF_VOID_P}" STREQUAL "8" )
         set(_OPENSSL_MSVC_ARCH_SUFFIX "64")
+        set(_OPENSSL_MSVC_FOLDER_SUFFIX "64")
     else()
         set(_OPENSSL_MSVC_ARCH_SUFFIX "32")
+        set(_OPENSSL_MSVC_FOLDER_SUFFIX "86")
     endif()
 
     if(OPENSSL_USE_STATIC_LIBS)
@@ -319,13 +321,13 @@ if(WIN32 AND NOT CYGWIN)
         "_static"
       )
       set(_OPENSSL_PATH_SUFFIXES_DEBUG
-        "lib/VC/x${_OPENSSL_MSVC_ARCH_SUFFIX}/${_OPENSSL_MSVC_RT_MODE}d"
+        "lib/VC/x${_OPENSSL_MSVC_FOLDER_SUFFIX}/${_OPENSSL_MSVC_RT_MODE}d"
         "lib/VC/static"
         "VC/static"
         "lib"
         )
       set(_OPENSSL_PATH_SUFFIXES_RELEASE
-        "lib/VC/x${_OPENSSL_MSVC_ARCH_SUFFIX}/${_OPENSSL_MSVC_RT_MODE}"
+        "lib/VC/x${_OPENSSL_MSVC_FOLDER_SUFFIX}/${_OPENSSL_MSVC_RT_MODE}"
         "lib/VC/static"
         "VC/static"
         "lib"
@@ -335,13 +337,13 @@ if(WIN32 AND NOT CYGWIN)
         ""
       )
       set(_OPENSSL_PATH_SUFFIXES_DEBUG
-        "lib/VC/x${_OPENSSL_MSVC_ARCH_SUFFIX}/${_OPENSSL_MSVC_RT_MODE}d"
+        "lib/VC/x${_OPENSSL_MSVC_FOLDER_SUFFIX}/${_OPENSSL_MSVC_RT_MODE}d"
         "lib/VC"
         "VC"
         "lib"
         )
       set(_OPENSSL_PATH_SUFFIXES_RELEASE
-        "lib/VC/x${_OPENSSL_MSVC_ARCH_SUFFIX}/${_OPENSSL_MSVC_RT_MODE}"
+        "lib/VC/x${_OPENSSL_MSVC_FOLDER_SUFFIX}/${_OPENSSL_MSVC_RT_MODE}"
         "lib/VC"
         "VC"
         "lib"
@@ -356,6 +358,7 @@ if(WIN32 AND NOT CYGWIN)
         libcrypto${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
         libcrypto${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
         libcrypto${_OPENSSL_STATIC_SUFFIX}d
+        libcrypto${_OPENSSL_STATIC_SUFFIX}
         libeay32${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
         libeay32${_OPENSSL_STATIC_SUFFIX}d
         crypto${_OPENSSL_STATIC_SUFFIX}d
@@ -406,6 +409,7 @@ if(WIN32 AND NOT CYGWIN)
         libssl${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_ARCH_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
         libssl${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
         libssl${_OPENSSL_STATIC_SUFFIX}d
+        libssl${_OPENSSL_STATIC_SUFFIX}
         ssleay32${_OPENSSL_STATIC_SUFFIX}${_OPENSSL_MSVC_RT_MODE}d
         ssleay32${_OPENSSL_STATIC_SUFFIX}d
         ssl${_OPENSSL_STATIC_SUFFIX}d
