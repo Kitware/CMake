@@ -35,9 +35,9 @@ public:
   void Initialize() override;
 
   //! Set all the submit arguments
-  int ProcessCommandLineArguments(
-    const std::string& currentArg, size_t& idx,
-    const std::vector<std::string>& allArgs) override;
+  int ProcessCommandLineArguments(const std::string& currentArg, size_t& idx,
+                                  const std::vector<std::string>& allArgs,
+                                  bool& validArg) override;
 
   /** Specify a set of parts (by name) to submit.  */
   void SelectParts(std::set<cmCTest::Part> const& parts);

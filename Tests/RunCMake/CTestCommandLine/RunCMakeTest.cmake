@@ -566,6 +566,8 @@ set_tests_properties(test5 PROPERTIES  SKIP_REGULAR_EXPRESSION \"please skip\")
 endfunction()
 run_output_junit()
 
+run_cmake_command(invalid-ctest-argument ${CMAKE_CTEST_COMMAND} --not-a-valid-ctest-argument)
+
 if(WIN32)
   block()
     set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TimeoutSignalWindows)
