@@ -27,6 +27,14 @@ struct Outputter;
 #  endif
 #elif defined(_MSC_VER) && defined(_MSVC_LANG)
 #  define CXX_STD _MSVC_LANG
+#elif defined(__INTEL_COMPILER)
+#  if __cplusplus == CXX_STD_11 && defined(__cpp_namespace_attributes)
+#    define CXX_STD CXX_STD_17
+#  elif __cplusplus == CXX_STD_11 && defined(__cpp_aggregate_nsdmi)
+#    define CXX_STD CXX_STD_14
+#  else
+#    define CXX_STD __cplusplus
+#  endif
 #else
 #  define CXX_STD __cplusplus
 #endif
