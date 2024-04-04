@@ -4,7 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#if defined(__SUNPRO_CC)
+#if defined(__SUNPRO_CC) || defined(__EDG__)
 
 #  include <string>
 #  include <vector>
