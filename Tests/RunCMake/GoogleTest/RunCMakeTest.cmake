@@ -134,7 +134,7 @@ function(run_GoogleTestLauncher DISCOVERY_MODE)
     ${CMAKE_CTEST_COMMAND}
     -C Debug
     -V
-    --no-label-sumary
+    --no-label-summary
   )
 endfunction()
 
@@ -197,7 +197,7 @@ function(run_GoogleTest_discovery_timeout DISCOVERY_MODE)
     ${CMAKE_CTEST_COMMAND}
     -C Debug
     -R discovery_timeout_test
-    --no-label-sumary
+    --no-label-summary
   )
 endfunction()
 
