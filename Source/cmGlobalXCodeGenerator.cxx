@@ -3115,8 +3115,12 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateUtilityTarget(
     "shellScript", this->CreateString("# shell script goes here\nexit 0"));
   shellBuildPhase->AddAttribute("showEnvVarsInLog", this->CreateString("0"));
 
-  cmXCodeObject* target =
-    this->CreateObject(cmXCodeObject::PBXAggregateTarget);
+  std::string targetBinaryPath = cmStrCat(
+    gtgt->Makefile->GetCurrentBinaryDirectory(), '/', gtgt->GetName());
+
+  cmXCodeObject* target = this->CreateObject(
+    cmXCodeObject::PBXAggregateTarget,
+    cmStrCat("PBXAggregateTarget:", gtgt->GetName(), ":", targetBinaryPath));
   target->SetComment(gtgt->GetName());
   cmXCodeObject* buildPhases = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   std::vector<cmXCodeObject*> emptyContentVector;
@@ -3340,7 +3344,14 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeTarget(
   if (!gtgt->IsInBuildSystem()) {
     return nullptr;
   }
-  cmXCodeObject* target = this->CreateObject(cmXCodeObject::PBXNativeTarget);
+
+  std::string targetBinaryPath = this->RelativeToRootBinary(cmStrCat(
+    gtgt->Makefile->GetCurrentBinaryDirectory(), '/', gtgt->GetName()));
+
+  cmXCodeObject* target = this->CreateObject(
+    cmXCodeObject::PBXNativeTarget,
+    cmStrCat("PBXNativeTarget:", gtgt->GetName(), ":", targetBinaryPath));
+
   target->AddAttribute("buildPhases", buildPhases);
   cmXCodeObject* buildRules = this->CreateObject(cmXCodeObject::OBJECT_LIST);
   target->AddAttribute("buildRules", buildRules);
@@ -5128,6 +5139,17 @@ std::string cmGlobalXCodeGenerator::RelativeToSource(const std::string& p)
     return cmSystemTools::ForceToRelativePath(rootSrc, p);
   }
   return p;
+}
+
+std::string cmGlobalXCodeGenerator::RelativeToRootBinary(const std::string& p)
+{
+  std::string binaryDirectory =
+    this->CurrentRootGenerator->GetCurrentBinaryDirectory();
+  if (cmSystemTools::IsSubDirectory(p, binaryDirectory)) {
+    binaryDirectory = cmSystemTools::ForceToRelativePath(binaryDirectory, p);
+  }
+
+  return binaryDirectory;
 }
 
 std::string cmGlobalXCodeGenerator::RelativeToBinary(const std::string& p)
