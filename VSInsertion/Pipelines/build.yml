@@ -27,8 +27,6 @@ variables:
   value: 1d6a3de7-4a6a-4b75-b15d-e305293c75af
 - name: ApiScanTenant
   value: 72f988bf-86f1-41af-91ab-2d7cd011db47
-- name: ArtifactServices.Symbol.UseAAD
-  value: false
 - name: DropRoot
   value: '\\cpvsbuild\drops'
 - name: GitCommitDescription
@@ -38,7 +36,7 @@ variables:
 - name: InsertPayloadName
   value: CMake Version $(CMakeVersion)
 - name: InsertReviewers
-  value: bemcmorr@microsoft.com,gcampbell@microsoft.com,snehara@microsoft.com,itodirel@microsoft.com
+  value: bemcmorr@microsoft.com,gcampbell@microsoft.com,snehara@microsoft.com,itodirel@microsoft.com, elmorrow@microsoft.com
 - name: TargetBranch
   value: main
 - name: VstsDropNames
@@ -121,33 +119,33 @@ extends:
           inputs:
             cwd: $(CMakeBuildDirectory)
             cmakeArgs: --build . --target package install --config $(BuildConfiguration) -- -m
-        - task: MSBuild@1
-          displayName: 'Build solution $(CMakeBuildDirectory)/package.vcxproj'
-          inputs:
-            solution: '$(CMakeBuildDirectory)/package.vcxproj'
-            msbuildArchitecture: x64
-            platform: x64
-            configuration: '$(BuildConfiguration)'
-            clean: true
-            createLogFile: true
-            logFileVerbosity: diagnostic
-        - task: MSBuild@1
-          displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
-          inputs:
-            solution: '$(CMakeBuildDirectory)/install.vcxproj'
-            msbuildArchitecture: x64
-            platform: x64
-            configuration: '$(BuildConfiguration)'
-            createLogFile: true
-            logFileVerbosity: diagnostic
-        - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
-          displayName: 'Run the PREfast SDL Native Rules for MSBuild'
-          env:
-            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-          inputs:
-            publishXML: true
-            userProvideBuildInfo: auto
-            setupCommandlinePicker: vs2022
+        # - task: MSBuild@1
+        #   displayName: 'Build solution $(CMakeBuildDirectory)/package.vcxproj'
+        #   inputs:
+        #     solution: '$(CMakeBuildDirectory)/package.vcxproj'
+        #     msbuildArchitecture: x64
+        #     platform: x64
+        #     configuration: '$(BuildConfiguration)'
+        #     clean: true
+        #     createLogFile: true
+        #     logFileVerbosity: diagnostic
+        # - task: MSBuild@1
+        #   displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
+        #   inputs:
+        #     solution: '$(CMakeBuildDirectory)/install.vcxproj'
+        #     msbuildArchitecture: x64
+        #     platform: x64
+        #     configuration: '$(BuildConfiguration)'
+        #     createLogFile: true
+        #     logFileVerbosity: diagnostic
+        # - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
+        #   displayName: 'Run the PREfast SDL Native Rules for MSBuild'
+        #   env:
+        #     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+        #   inputs:
+        #     publishXML: true
+        #     userProvideBuildInfo: auto
+        #     setupCommandlinePicker: vs2022
         - task: CmdLine@1
           name: CmdLine3
           condition: eq(variables.RunTests, 'true')
@@ -700,9 +698,6 @@ extends:
             IndexSources: false
             SymbolServerType: TeamServices
             TreatNotIndexedAsWarning: true
-            ArtifactServices.Symbol.AccountName: microsoft
-            ArtifactServices.Symbol.PAT: $(System.AccessToken)
-            ArtifactServices.Symbol.UseAAD: false
           continueOnError: true
         - task: NuGetCommand@2
           name: NuGetCommand15
