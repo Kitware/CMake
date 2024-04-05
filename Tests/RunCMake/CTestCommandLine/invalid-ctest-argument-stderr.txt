@@ -1,0 +1,1 @@
+CMake Error: Invalid argument: --not-a-valid-ctest-argument

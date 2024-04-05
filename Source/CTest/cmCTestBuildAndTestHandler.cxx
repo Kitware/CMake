@@ -365,8 +365,9 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
 int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
   const std::string& currentArg, size_t& idx,
-  const std::vector<std::string>& allArgs)
+  const std::vector<std::string>& allArgs, bool& validArg)
 {
+  bool buildAndTestArg = true;
   // --build-and-test options
   if (cmHasLiteralPrefix(currentArg, "--build-and-test") &&
       idx < allArgs.size() - 1) {
@@ -385,78 +386,68 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
                    << std::endl);
       return 0;
     }
-  }
-  if (cmHasLiteralPrefix(currentArg, "--build-target") &&
-      idx < allArgs.size() - 1) {
+  } else if (cmHasLiteralPrefix(currentArg, "--build-target") &&
+             idx < allArgs.size() - 1) {
     idx++;
     this->BuildTargets.push_back(allArgs[idx]);
-  }
-  if (cmHasLiteralPrefix(currentArg, "--build-nocmake")) {
+  } else if (cmHasLiteralPrefix(currentArg, "--build-nocmake")) {
     this->BuildNoCMake = true;
-  }
-  if (cmHasLiteralPrefix(currentArg, "--build-run-dir") &&
-      idx < allArgs.size() - 1) {
+  } else if (cmHasLiteralPrefix(currentArg, "--build-run-dir") &&
+             idx < allArgs.size() - 1) {
     idx++;
     this->BuildRunDir = allArgs[idx];
-  }
-  if (cmHasLiteralPrefix(currentArg, "--build-two-config")) {
+  } else if (cmHasLiteralPrefix(currentArg, "--build-two-config")) {
     this->BuildTwoConfig = true;
-  }
-  if (cmHasLiteralPrefix(currentArg, "--build-exe-dir") &&
-      idx < allArgs.size() - 1) {
+  } else if (cmHasLiteralPrefix(currentArg, "--build-exe-dir") &&
+             idx < allArgs.size() - 1) {
     idx++;
     this->ExecutableDirectory = allArgs[idx];
-  }
-  if (cmHasLiteralPrefix(currentArg, "--test-timeout") &&
-      idx < allArgs.size() - 1) {
+  } else if (cmHasLiteralPrefix(currentArg, "--test-timeout") &&
+             idx < allArgs.size() - 1) {
     idx++;
     this->Timeout = cmDuration(atof(allArgs[idx].c_str()));
-  }
-  if (currentArg == "--build-generator" && idx < allArgs.size() - 1) {
+  } else if (currentArg == "--build-generator" && idx < allArgs.size() - 1) {
     idx++;
     this->BuildGenerator = allArgs[idx];
-  }
-  if (currentArg == "--build-generator-platform" && idx < allArgs.size() - 1) {
+  } else if (currentArg == "--build-generator-platform" &&
+             idx < allArgs.size() - 1) {
     idx++;
     this->BuildGeneratorPlatform = allArgs[idx];
-  }
-  if (currentArg == "--build-generator-toolset" && idx < allArgs.size() - 1) {
+  } else if (currentArg == "--build-generator-toolset" &&
+             idx < allArgs.size() - 1) {
     idx++;
     this->BuildGeneratorToolset = allArgs[idx];
-  }
-  if (cmHasLiteralPrefix(currentArg, "--build-project") &&
-      idx < allArgs.size() - 1) {
+  } else if (cmHasLiteralPrefix(currentArg, "--build-project") &&
+             idx < allArgs.size() - 1) {
     idx++;
     this->BuildProject = allArgs[idx];
-  }
-  if (cmHasLiteralPrefix(currentArg, "--build-makeprogram") &&
-      idx < allArgs.size() - 1) {
+  } else if (cmHasLiteralPrefix(currentArg, "--build-makeprogram") &&
+             idx < allArgs.size() - 1) {
     idx++;
     this->BuildMakeProgram = allArgs[idx];
-  }
-  if (cmHasLiteralPrefix(currentArg, "--build-config-sample") &&
-      idx < allArgs.size() - 1) {
+  } else if (cmHasLiteralPrefix(currentArg, "--build-config-sample") &&
+             idx < allArgs.size() - 1) {
     idx++;
     this->ConfigSample = allArgs[idx];
-  }
-  if (cmHasLiteralPrefix(currentArg, "--build-noclean")) {
+  } else if (cmHasLiteralPrefix(currentArg, "--build-noclean")) {
     this->BuildNoClean = true;
-  }
-  if (cmHasLiteralPrefix(currentArg, "--build-options")) {
+  } else if (cmHasLiteralPrefix(currentArg, "--build-options")) {
     while (idx + 1 < allArgs.size() && allArgs[idx + 1] != "--build-target" &&
            allArgs[idx + 1] != "--test-command") {
       ++idx;
       this->BuildOptions.push_back(allArgs[idx]);
     }
-  }
-  if (cmHasLiteralPrefix(currentArg, "--test-command") &&
-      idx < allArgs.size() - 1) {
+  } else if (cmHasLiteralPrefix(currentArg, "--test-command") &&
+             idx < allArgs.size() - 1) {
     ++idx;
     this->TestCommand = allArgs[idx];
     while (idx + 1 < allArgs.size()) {
       ++idx;
       this->TestCommandArgs.push_back(allArgs[idx]);
     }
+  } else {
+    buildAndTestArg = false;
   }
+  validArg = validArg || buildAndTestArg;
   return 1;
 }

@@ -48,7 +48,7 @@ public:
    */
   virtual int ProcessCommandLineArguments(
     const std::string& /*currentArg*/, size_t& /*idx*/,
-    const std::vector<std::string>& /*allArgs*/)
+    const std::vector<std::string>& /*allArgs*/, bool& /*valid*/)
   {
     return 1;
   }
