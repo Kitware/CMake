@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_MBEDTLS_THREADLOCK_H
-#define HEADER_CURL_MBEDTLS_THREADLOCK_H
+#ifndef HEADER_CURL_SHA512_256_H
+#define HEADER_CURL_SHA512_256_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,8 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
- * Copyright (C) Hoi-Ho Chan, <hoiho.chan@gmail.com>
+ * Copyright (C) Evgeny Grin (Karlson2k), <k2k@narod.ru>.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -24,27 +23,22 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "curl_setup.h"
 
-#ifdef USE_MBEDTLS
+#if !defined(CURL_DISABLE_DIGEST_AUTH) && !defined(CURL_DISABLE_SHA512_256)
 
-#if (defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) || \
-    defined(_WIN32)
+#include <curl/curl.h>
+#include "curl_hmac.h"
 
-int Curl_mbedtlsthreadlock_thread_setup(void);
-int Curl_mbedtlsthreadlock_thread_cleanup(void);
-int Curl_mbedtlsthreadlock_lock_function(int n);
-int Curl_mbedtlsthreadlock_unlock_function(int n);
+#define CURL_HAVE_SHA512_256
 
-#else
+extern const struct HMAC_params Curl_HMAC_SHA512_256[1];
 
-#define Curl_mbedtlsthreadlock_thread_setup() 1
-#define Curl_mbedtlsthreadlock_thread_cleanup() 1
-#define Curl_mbedtlsthreadlock_lock_function(x) 1
-#define Curl_mbedtlsthreadlock_unlock_function(x) 1
+#define SHA512_256_DIGEST_LENGTH 32
 
-#endif /* (USE_THREADS_POSIX && HAVE_PTHREAD_H) || _WIN32 */
+CURLcode
+Curl_sha512_256it(unsigned char *output, const unsigned char *input,
+                  size_t input_size);
 
-#endif /* USE_MBEDTLS */
+#endif /* !CURL_DISABLE_DIGEST_AUTH && !CURL_DISABLE_SHA512_256 */
 
-#endif /* HEADER_CURL_MBEDTLS_THREADLOCK_H */
+#endif /* HEADER_CURL_SHA256_H */
