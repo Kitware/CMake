@@ -1,1 +1,2 @@
--- g_ir_scanner: .*/g-ir-scanner
+-- g_ir_scanner: [^
+]*g-ir-scanner
