@@ -93,6 +93,7 @@ set(SHARE_LIB_OBJECT OFF)
 set(USE_LIBIDN2 ON)
 set(USE_NGHTTP2 ON)
 set(USE_NGTCP2 OFF)
+set(USE_OPENSSL_QUIC OFF)
 set(USE_QUICHE OFF)
 set(USE_WIN32_IDN OFF)
 set(USE_WIN32_LDAP OFF CACHE INTERNAL "No curl Windows LDAP")
@@ -909,10 +910,12 @@ if(USE_OPENSSL_QUIC)
   list(APPEND CURL_LIBS ${NGHTTP3_LIBRARIES})
 endif()
 
+if(0) # This code not needed for building within CMake.
 if(USE_MBEDTLS OR
    USE_BEARSSL OR
    USE_SECTRANSP)
   message(WARNING "A selected TLS library does not support TLS 1.3.")
+endif()
 endif()
 
 if(CURL_WITH_MULTI_SSL AND (USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC))
