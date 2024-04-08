@@ -225,12 +225,12 @@ cmGeneratorTarget const* cmGeneratorExpressionDAGChecker::TopTarget() const
   return this->Top()->Target;
 }
 
-enum TransitiveProperty
+enum class TransitiveProperty
 {
 #define DEFINE_ENUM_ENTRY(NAME) NAME,
   CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(DEFINE_ENUM_ENTRY)
 #undef DEFINE_ENUM_ENTRY
-    TransitivePropertyTerminal
+    Terminal
 };
 
 template <TransitiveProperty>
@@ -240,7 +240,8 @@ bool additionalTest(const char* const /*unused*/)
 }
 
 template <>
-bool additionalTest<COMPILE_DEFINITIONS>(const char* const prop)
+bool additionalTest<TransitiveProperty::COMPILE_DEFINITIONS>(
+  const char* const prop)
 {
   return cmHasLiteralPrefix(prop, "COMPILE_DEFINITIONS_");
 }
@@ -253,7 +254,7 @@ bool additionalTest<COMPILE_DEFINITIONS>(const char* const prop)
         strcmp(prop, "INTERFACE_" #PROPERTY) == 0) {                          \
       return true;                                                            \
     }                                                                         \
-    return additionalTest<PROPERTY>(prop);                                    \
+    return additionalTest<TransitiveProperty::PROPERTY>(prop);                \
   }
 
 CM_FOR_EACH_TRANSITIVE_PROPERTY(DEFINE_TRANSITIVE_PROPERTY_METHOD)
