@@ -36,15 +36,9 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   cmGeneratorTarget const* target, std::string property,
   const GeneratorExpressionContent* content,
   cmGeneratorExpressionDAGChecker* parent)
-  : Parent(parent)
-  , Target(target)
-  , Property(std::move(property))
-  , Content(content)
-  , Backtrace()
-  , TransitivePropertiesOnly(false)
-  , CMP0131(false)
+  : cmGeneratorExpressionDAGChecker(cmListFileBacktrace(), target,
+                                    std::move(property), content, parent)
 {
-  this->Initialize();
 }
 
 void cmGeneratorExpressionDAGChecker::Initialize()
