@@ -94,13 +94,13 @@ struct cmGeneratorExpressionDAGChecker
   bool GetTransitivePropertiesOnlyCMP0131() const;
   void SetTransitivePropertiesOnlyCMP0131() { this->CMP0131 = true; }
 
-  cmGeneratorExpressionDAGChecker const* Top() const;
   cmGeneratorTarget const* TopTarget() const;
 
 private:
   Result CheckGraph() const;
 
   const cmGeneratorExpressionDAGChecker* const Parent;
+  const cmGeneratorExpressionDAGChecker* const Top;
   cmGeneratorTarget const* Target;
   const std::string Property;
   mutable std::map<cmGeneratorTarget const*, std::set<std::string>> Seen;
