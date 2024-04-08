@@ -22,7 +22,11 @@
 #    define CXX_STD CXX_STD_98
 #  endif
 #elif defined(_MSC_VER) && defined(_MSVC_LANG)
-#  define CXX_STD _MSVC_LANG
+#  if _MSVC_LANG > __cplusplus
+#    define CXX_STD _MSVC_LANG
+#  else
+#    define CXX_STD __cplusplus
+#  endif
 #elif defined(__NVCOMPILER)
 #  if __cplusplus == CXX_STD_17 && defined(__cpp_aggregate_paren_init)
 #    define CXX_STD CXX_STD_20
