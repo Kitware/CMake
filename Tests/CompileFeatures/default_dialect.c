@@ -1,18 +1,26 @@
+#define C_STD_99 199901L
+#define C_STD_11 201112L
+#define C_STD_17 201710L
+#define C_STD_23 202311L
+
+#ifdef __STDC_VERSION__
+#  define C_STD __STDC_VERSION__
+#endif
 
 #if DEFAULT_C23
-#  if __STDC_VERSION__ <= 201710L
+#  if C_STD <= C_STD_17
 #    error Unexpected value for __STDC_VERSION__.
 #  endif
 #elif DEFAULT_C17
-#  if __STDC_VERSION__ < 201710L
+#  if C_STD <= C_STD_11
 #    error Unexpected value for __STDC_VERSION__.
 #  endif
 #elif DEFAULT_C11
-#  if __STDC_VERSION__ < 201112L
+#  if C_STD <= C_STD_99
 #    error Unexpected value for __STDC_VERSION__.
 #  endif
 #elif DEFAULT_C99
-#  if __STDC_VERSION__ != 199901L
+#  if C_STD != C_STD_99
 #    error Unexpected value for __STDC_VERSION__.
 #  endif
 #else
