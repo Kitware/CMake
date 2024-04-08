@@ -18,6 +18,15 @@
 #include "cmake.h"
 
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
+  cmGeneratorTarget const* target, std::string property,
+  const GeneratorExpressionContent* content,
+  cmGeneratorExpressionDAGChecker* parent)
+  : cmGeneratorExpressionDAGChecker(cmListFileBacktrace(), target,
+                                    std::move(property), content, parent)
+{
+}
+
+cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   cmListFileBacktrace backtrace, cmGeneratorTarget const* target,
   std::string property, const GeneratorExpressionContent* content,
   cmGeneratorExpressionDAGChecker* parent)
@@ -28,20 +37,6 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   , Backtrace(std::move(backtrace))
   , TransitivePropertiesOnly(false)
   , CMP0131(false)
-{
-  this->Initialize();
-}
-
-cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
-  cmGeneratorTarget const* target, std::string property,
-  const GeneratorExpressionContent* content,
-  cmGeneratorExpressionDAGChecker* parent)
-  : cmGeneratorExpressionDAGChecker(cmListFileBacktrace(), target,
-                                    std::move(property), content, parent)
-{
-}
-
-void cmGeneratorExpressionDAGChecker::Initialize()
 {
   const auto* top = this->Top();
   this->CheckResult = this->CheckGraph();

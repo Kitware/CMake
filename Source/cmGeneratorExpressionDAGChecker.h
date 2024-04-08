@@ -99,7 +99,6 @@ struct cmGeneratorExpressionDAGChecker
 
 private:
   Result CheckGraph() const;
-  void Initialize();
 
   const cmGeneratorExpressionDAGChecker* const Parent;
   cmGeneratorTarget const* Target;
