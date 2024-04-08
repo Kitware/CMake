@@ -107,6 +107,6 @@ private:
   const GeneratorExpressionContent* const Content;
   const cmListFileBacktrace Backtrace;
   Result CheckResult;
-  bool TransitivePropertiesOnly;
-  bool CMP0131;
+  bool TransitivePropertiesOnly = false;
+  bool CMP0131 = false;
 };

@@ -35,8 +35,6 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   , Property(std::move(property))
   , Content(content)
   , Backtrace(std::move(backtrace))
-  , TransitivePropertiesOnly(false)
-  , CMP0131(false)
 {
   const auto* top = this->Top();
   this->CheckResult = this->CheckGraph();
