@@ -1,3 +1,6 @@
+set(CMake_TEST_C_STANDARDS "90;99;11;17;23" CACHE STRING "")
+set(CMake_TEST_CXX_STANDARDS "98;11;14;17;20;23" CACHE STRING "")
+
 set(CMake_TEST_CTestUpdate_BZR "ON" CACHE BOOL "")
 set(CMake_TEST_CTestUpdate_CVS "ON" CACHE BOOL "")
 set(CMake_TEST_CTestUpdate_GIT "ON" CACHE BOOL "")
