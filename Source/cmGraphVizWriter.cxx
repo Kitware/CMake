@@ -284,7 +284,8 @@ void cmGraphVizWriter::Write()
       // Reserved targets have inconsistent names across platforms (e.g. 'all'
       // vs. 'ALL_BUILD'), which can disrupt the traversal ordering.
       // We don't need or want them anyway.
-      if (!cmGlobalGenerator::IsReservedTarget(gt->GetName())) {
+      if (!cmGlobalGenerator::IsReservedTarget(gt->GetName()) &&
+          !cmHasLiteralPrefix(gt->GetName(), "__cmake_")) {
         sortedGeneratorTargets.insert(gt.get());
       }
     }
