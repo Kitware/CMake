@@ -9,7 +9,7 @@ function(check_file target filename)
   if(filename MATCHES "^(.*)(\\.[a-z]+)$")
     set(header_filename "${CMAKE_MATCH_1}")
   endif()
-  set(expected_contents "#include <${header_filename}> // IWYU pragma: associated\n")
+  set(expected_contents "/* NOLINTNEXTLINE(misc-header-include-cycle,misc-include-cleaner) */\n#include <${header_filename}> /* IWYU pragma: associated */\n")
   file(READ "${full_filename}" actual_contents)
 
   if(NOT actual_contents STREQUAL expected_contents)

@@ -3134,7 +3134,10 @@ void cmLocalGenerator::WriteUnitySourceInclude(
     unity_file << *beforeInclude << "\n";
   }
 
-  unity_file << "/* NOLINTNEXTLINE(bugprone-suspicious-include) */\n";
+  // clang-tidy-17 has new include checks that needs NOLINT too.
+  unity_file
+    << "/* NOLINTNEXTLINE(bugprone-suspicious-include,misc-include-cleaner) "
+       "*/\n";
   unity_file << "#include \"" << sf_full_path << "\"\n";
 
   if (afterInclude) {

@@ -9194,7 +9194,10 @@ std::string cmGeneratorTarget::GenerateHeaderSetVerificationFile(
   // consider the headerFile as part of the entire language
   // unit within include-what-you-use and as a result allows
   // one to get IWYU advice for headers.
-  fout << "#include <" << headerFilename << "> // IWYU pragma: associated\n";
+  // Also suppress clang-tidy include checks in generated code.
+  fout
+    << "/* NOLINTNEXTLINE(misc-header-include-cycle,misc-include-cleaner) */\n"
+    << "#include <" << headerFilename << "> /* IWYU pragma: associated */\n";
   fout.close();
 
   return filename;
