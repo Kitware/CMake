@@ -1,0 +1,2 @@
+-- CMAKE_C_COMPILER is '[^']*/Tests/RunCMake/CompilerChange/cc1.sh'
+-- CACHE_ENTRY='cached'
