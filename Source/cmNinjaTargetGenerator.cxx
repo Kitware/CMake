@@ -2016,11 +2016,21 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
     this->LocalGenerator->AppendFlags(vars["FLAGS"], "-static");
   }
 
+  // Does this swift target emit a module file for importing into other
+  // targets?
+  auto isImportableTarget = [](cmGeneratorTarget const& tgt) -> bool {
+    // Everything except for executables that don't export anything should emit
+    // some way to import them.
+    if (tgt.GetType() == cmStateEnums::EXECUTABLE) {
+      return tgt.IsExecutableWithExports();
+    }
+    return true;
+  };
+
   // Swift modules only make sense to emit from things that can be imported.
   // Executables that don't export symbols can't be imported, so don't try to
   // emit a swiftmodule for them. It will break.
-  if (target.GetType() != cmStateEnums::EXECUTABLE ||
-      target.IsExecutableWithExports()) {
+  if (isImportableTarget(target)) {
     std::string const emitModuleFlag = "-emit-module";
     std::string const modulePathFlag = "-emit-module-path";
     this->LocalGenerator->AppendFlags(
@@ -2089,18 +2099,21 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
     if (!dep->IsLanguageUsed("Swift", config)) {
       continue;
     }
-    // Add dependencies on the emitted swiftmodule file from swift targets we
-    // depend on
-    std::string const depModuleName =
-      getTargetPropertyOrDefault(*dep, "Swift_MODULE_NAME", dep->GetName());
-    std::string const depModuleDir = getTargetPropertyOrDefault(
-      *dep, "Swift_MODULE_DIRECTORY",
-      dep->LocalGenerator->GetCurrentBinaryDirectory());
-    std::string const depModuleFilename = getTargetPropertyOrDefault(
-      *dep, "Swift_MODULE", cmStrCat(depModuleName, ".swiftmodule"));
-    std::string const depModuleFilepath =
-      this->ConvertToNinjaPath(cmStrCat(depModuleDir, '/', depModuleFilename));
-    objBuild.ImplicitDeps.push_back(depModuleFilepath);
+
+    // If the dependency emits a swiftmodule, add a dependency edge on that
+    // swiftmodule to the ninja build graph.
+    if (isImportableTarget(*dep)) {
+      std::string const depModuleName =
+        getTargetPropertyOrDefault(*dep, "Swift_MODULE_NAME", dep->GetName());
+      std::string const depModuleDir = getTargetPropertyOrDefault(
+        *dep, "Swift_MODULE_DIRECTORY",
+        dep->LocalGenerator->GetCurrentBinaryDirectory());
+      std::string const depModuleFilename = getTargetPropertyOrDefault(
+        *dep, "Swift_MODULE", cmStrCat(depModuleName, ".swiftmodule"));
+      std::string const depModuleFilepath = this->ConvertToNinjaPath(
+        cmStrCat(depModuleDir, '/', depModuleFilename));
+      objBuild.ImplicitDeps.push_back(depModuleFilepath);
+    }
   }
 
   objBuild.OrderOnlyDeps.push_back(this->OrderDependsTargetForTarget(config));
