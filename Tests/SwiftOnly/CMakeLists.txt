@@ -50,6 +50,9 @@ if(NOT XCODE_VERSION OR XCODE_VERSION VERSION_GREATER_EQUAL 9.0)
   set_target_properties(O PROPERTIES Swift_COMPILATION_MODE "incremental")
 endif()
 
+add_library(P L.swift)
+add_dependencies(P SwiftOnly)
+
 # Dummy to make sure generation works with such targets.
 add_library(SwiftIface INTERFACE)
 target_link_libraries(SwiftOnly PRIVATE SwiftIface)
