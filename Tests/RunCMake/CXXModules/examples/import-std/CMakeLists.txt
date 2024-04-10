@@ -1,3 +1,6 @@
+set(CMAKE_EXPERIMENTAL_CXX_IMPORT_STD
+  "0e5b6991-d74f-4b3d-a41c-cf096e0b2508")
+
 cmake_minimum_required(VERSION 3.29)
 project(cxx_modules_import_std CXX)
 

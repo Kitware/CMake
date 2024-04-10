@@ -92,6 +92,12 @@ Compilers which CMake natively supports module dependency scanning include:
 Support for ``import std`` is limited to the following toolchain and standard
 library combinations:
 
+.. note ::
+
+   This support is provided only when experimental support for
+   ``import std;`` has been enabled by the
+   ``CMAKE_EXPERIMENTAL_CXX_IMPORT_STD`` gate.
+
 Generator Support
 =================
 

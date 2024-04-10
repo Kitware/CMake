@@ -157,6 +157,8 @@ run_cmake_command(
     -P ${RunCMake_SOURCE_DIR}/get_message_log_level.cmake
   )
 
+run_cmake(Experimental/CxxImportStd-set)
+run_cmake(Experimental/CxxImportStd-unset)
 run_cmake(Experimental/ExportPackageDependencies-set)
 run_cmake(Experimental/ExportPackageDependencies-unset)
 run_cmake(Experimental/WindowsKernelModeDriver-set)

@@ -6,6 +6,11 @@ CXX_MODULE_STD
 ``CXX_MODULE_STD`` is a boolean specifying whether the target may use
 ``import std;`` its C++ sources or not.
 
+.. note ::
+
+   This setting is meaningful only when experimental support for ``import
+   std;`` has been enabled by the ``CMAKE_EXPERIMENTAL_CXX_IMPORT_STD`` gate.
+
 When this property is explicitly set to ``ON``, CMake will add a dependency to
 a target which provides the C++ standard library's modules for the C++
 standard applied to the target. This target is only applicable within the

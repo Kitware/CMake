@@ -32,6 +32,7 @@
 #include "cmCustomCommandGenerator.h"
 #include "cmCxxModuleUsageEffects.h"
 #include "cmEvaluatedTargetProperty.h"
+#include "cmExperimental.h"
 #include "cmFileSet.h"
 #include "cmFileTimes.h"
 #include "cmGeneratedFileStream.h"
@@ -8499,6 +8500,14 @@ bool cmGeneratorTarget::ApplyCXXStdTargets()
           R"(The "CXX_MODULE_STD" property on the target ")", this->GetName(),
           "\" requires that the \"", targetName,
           "\" target exist, but it was not provided by the toolchain."));
+      break;
+    }
+
+    // Check the experimental feature here as well. A toolchain may have
+    // provided the target and skipped the check in the toolchain preparation
+    // logic.
+    if (!cmExperimental::HasSupportEnabled(
+          *this->Makefile, cmExperimental::Feature::CxxImportStd)) {
       break;
     }
 

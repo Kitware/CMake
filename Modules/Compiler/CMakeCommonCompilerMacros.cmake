@@ -229,6 +229,17 @@ function(cmake_create_cxx_import_std std variable)
   if (NOT COMMAND _cmake_cxx_import_std)
     return ()
   endif ()
+
+  # Check the experimental flag. Check it here to avoid triggering warnings in
+  # situations that don't support the feature anyways.
+  set(_cmake_supported_import_std_experimental "")
+  cmake_language(GET_EXPERIMENTAL_FEATURE_ENABLED
+    "CxxImportStd"
+    _cmake_supported_import_std_experimental)
+  if (NOT _cmake_supported_import_std_experimental)
+    return ()
+  endif ()
+
   _cmake_cxx_import_std("${std}" target_definition)
   string(CONCAT guarded_target_definition
     "if (NOT TARGET \"__CMAKE::CXX${std}\")\n"
