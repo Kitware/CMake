@@ -94,20 +94,19 @@ struct cmGeneratorExpressionDAGChecker
   bool GetTransitivePropertiesOnlyCMP0131() const;
   void SetTransitivePropertiesOnlyCMP0131() { this->CMP0131 = true; }
 
-  cmGeneratorExpressionDAGChecker const* Top() const;
   cmGeneratorTarget const* TopTarget() const;
 
 private:
   Result CheckGraph() const;
-  void Initialize();
 
   const cmGeneratorExpressionDAGChecker* const Parent;
+  const cmGeneratorExpressionDAGChecker* const Top;
   cmGeneratorTarget const* Target;
   const std::string Property;
   mutable std::map<cmGeneratorTarget const*, std::set<std::string>> Seen;
   const GeneratorExpressionContent* const Content;
   const cmListFileBacktrace Backtrace;
   Result CheckResult;
-  bool TransitivePropertiesOnly;
-  bool CMP0131;
+  bool TransitivePropertiesOnly = false;
+  bool CMP0131 = false;
 };
