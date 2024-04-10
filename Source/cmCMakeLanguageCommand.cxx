@@ -345,25 +345,16 @@ bool cmCMakeLanguageCommandGET_EXPERIMENTAL_FEATURE_ENABLED(
   auto const& featureName = expandedArgs[1];
   auto const& variableName = expandedArgs[2];
 
-  auto feature = cmExperimental::Feature::Sentinel;
-  for (std::size_t i = 0;
-       i < static_cast<std::size_t>(cmExperimental::Feature::Sentinel); i++) {
-    if (cmExperimental::DataForFeature(static_cast<cmExperimental::Feature>(i))
-          .Name == featureName) {
-      feature = static_cast<cmExperimental::Feature>(i);
-      break;
+  if (auto feature = cmExperimental::FeatureByName(featureName)) {
+    if (cmExperimental::HasSupportEnabled(makefile, *feature)) {
+      makefile.AddDefinition(variableName, "TRUE");
+    } else {
+      makefile.AddDefinition(variableName, "FALSE");
     }
-  }
-  if (feature == cmExperimental::Feature::Sentinel) {
+  } else {
     return FatalError(status,
                       cmStrCat("Experimental feature name \"", featureName,
                                "\" does not exist."));
-  }
-
-  if (cmExperimental::HasSupportEnabled(makefile, feature)) {
-    makefile.AddDefinition(variableName, "TRUE");
-  } else {
-    makefile.AddDefinition(variableName, "FALSE");
   }
 
   return true;
