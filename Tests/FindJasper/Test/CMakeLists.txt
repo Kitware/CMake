@@ -4,7 +4,7 @@ include(CTest)
 
 find_package(Jasper)
 
-add_definitions(-DCMAKE_EXPECTED_JASPER_VERSION=${JASPER_VERSION_STRING})
+add_definitions(-DCMAKE_EXPECTED_JASPER_VERSION="${JASPER_VERSION_STRING}")
 
 add_executable(test_jasper_tgt main.c)
 target_link_libraries(test_jasper_tgt Jasper::Jasper)
