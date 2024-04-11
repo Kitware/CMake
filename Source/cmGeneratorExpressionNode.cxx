@@ -547,6 +547,7 @@ static const struct TargetGenexEvalNode : public GenexEvaluator
       return expression;
     }
 
+    // Replace the surrounding context with the named target.
     cmGeneratorExpressionContext targetContext(
       context->LG, context->Config, context->Quiet, target, target,
       context->EvaluateForBuildsystem, context->Backtrace, context->Language);
@@ -2897,6 +2898,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     bool evaluatingLinkLibraries = false;
 
     if (dagCheckerParent) {
+      // This $<TARGET_PROPERTY:...> node has been reached while evaluating
+      // another target property value.  Check that the outermost evaluation
+      // expects such nested evaluations.
       if (dagCheckerParent->EvaluatingGenexExpression() ||
           dagCheckerParent->EvaluatingPICExpression() ||
           dagCheckerParent->EvaluatingLinkerLauncher()) {

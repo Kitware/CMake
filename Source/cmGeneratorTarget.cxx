@@ -6375,6 +6375,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
   std::string interfaceProperty = "INTERFACE_" + p;
   std::unique_ptr<cmGeneratorExpressionInterpreter> genexInterpreter;
   if (p == "POSITION_INDEPENDENT_CODE") {
+    // Corresponds to EvaluatingPICExpression.
     genexInterpreter = cm::make_unique<cmGeneratorExpressionInterpreter>(
       tgt->GetLocalGenerator(), config, tgt);
   }

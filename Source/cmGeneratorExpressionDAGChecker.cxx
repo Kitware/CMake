@@ -141,12 +141,15 @@ bool cmGeneratorExpressionDAGChecker::GetTransitivePropertiesOnlyCMP0131()
 
 bool cmGeneratorExpressionDAGChecker::EvaluatingGenexExpression() const
 {
+  // Corresponds to GenexEvaluator::EvaluateExpression.
   return cmHasLiteralPrefix(this->Property, "TARGET_GENEX_EVAL:") ||
     cmHasLiteralPrefix(this->Property, "GENEX_EVAL:");
 }
 
 bool cmGeneratorExpressionDAGChecker::EvaluatingPICExpression() const
 {
+  // Corresponds to checkInterfacePropertyCompatibility's special case
+  // that evaluates the value of POSITION_INDEPENDENT_CODE as a genex.
   return this->Top->Property == "INTERFACE_POSITION_INDEPENDENT_CODE";
 }
 
