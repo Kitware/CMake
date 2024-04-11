@@ -54,6 +54,20 @@ const cmExperimental::FeatureData& cmExperimental::DataForFeature(Feature f)
   return ::DataForFeature(f);
 }
 
+cm::optional<cmExperimental::Feature> cmExperimental::FeatureByName(
+  std::string const& name)
+{
+  size_t idx = 0;
+  for (auto const& feature : LookupTable) {
+    if (feature.Name == name) {
+      return static_cast<Feature>(idx);
+    }
+    ++idx;
+  }
+
+  return {};
+}
+
 bool cmExperimental::HasSupportEnabled(cmMakefile const& mf, Feature f)
 {
   bool enabled = false;
