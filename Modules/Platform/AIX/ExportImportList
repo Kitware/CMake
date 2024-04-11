@@ -63,7 +63,7 @@ if test -z "$no_objects"; then
                     V["EXPORTED"]=" export"
                     V["PROTECTED"]=" protected"
                 }
-                /^\[[0-9]+\]\tm +[^ ]+ +\.(text|data|bss) +[^ ]+ +(extern|weak) +(EXPORTED|PROTECTED| ) / {
+                /^\[[0-9]+\]\tm +[^ ]+ +\.(text|data|tdata|bss) +[^ ]+ +(extern|weak) +(EXPORTED|PROTECTED| ) / {
                     if (!match($NF,/^(\.|__sinit|__sterm|__[0-9]+__)/)) {
                         print $NF V[$(NF-1)]
                     }
