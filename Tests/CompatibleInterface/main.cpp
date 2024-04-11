@@ -23,6 +23,102 @@
 #  error Expected STRING_PROP3
 #endif
 
+#ifndef STATIC1_BOOL_PROP1
+#  error Expected STATIC1_BOOL_PROP1
+#endif
+
+#ifndef STATIC1_STRING_PROP1
+#  error Expected STATIC1_STRING_PROP1
+#endif
+
+#ifndef STATIC1_NUMBER_MAX_PROP3
+#  error Expected STATIC1_NUMBER_MAX_PROP3
+#endif
+
+#ifndef STATIC1_NUMBER_MIN_PROP5
+#  error Expected STATIC1_NUMBER_MIN_PROP5
+#endif
+
+#ifdef OBJECT1_BOOL_PROP1
+#  error Unexpected OBJECT1_BOOL_PROP1
+#endif
+
+#ifdef OBJECT1_STRING_PROP1
+#  error Unexpected OBJECT1_STRING_PROP1
+#endif
+
+#ifdef OBJECT1_NUMBER_MAX_PROP3
+#  error Unexpected OBJECT1_NUMBER_MAX_PROP3
+#endif
+
+#ifdef OBJECT1_NUMBER_MIN_PROP5
+#  error Unexpected OBJECT1_NUMBER_MIN_PROP5
+#endif
+
+#ifdef IFACE3_BOOL_PROP1
+#  error Unexpected IFACE3_BOOL_PROP1
+#endif
+
+#ifdef IFACE3_STRING_PROP1
+#  error Unexpected IFACE3_STRING_PROP1
+#endif
+
+#ifdef IFACE3_NUMBER_MAX_PROP3
+#  error Unexpected IFACE3_NUMBER_MAX_PROP3
+#endif
+
+#ifdef IFACE3_NUMBER_MIN_PROP5
+#  error Unexpected IFACE3_NUMBER_MIN_PROP5
+#endif
+
+#ifndef STATIC1_BOOL_PROP5
+#  error Expected STATIC1_BOOL_PROP5
+#endif
+
+#ifndef STATIC1_STRING_PROP4
+#  error Expected STATIC1_STRING_PROP4
+#endif
+
+#ifndef STATIC1_NUMBER_MIN_PROP6
+#  error Expected STATIC1_NUMBER_MIN_PROP6
+#endif
+
+#ifndef STATIC1_NUMBER_MAX_PROP4
+#  error Expected STATIC1_NUMBER_MAX_PROP4
+#endif
+
+#ifndef OBJECT1_BOOL_PROP5
+#  error Expected OBJECT1_BOOL_PROP5
+#endif
+
+#ifndef OBJECT1_STRING_PROP4
+#  error Expected OBJECT1_STRING_PROP4
+#endif
+
+#ifndef OBJECT1_NUMBER_MIN_PROP6
+#  error Expected OBJECT1_NUMBER_MIN_PROP6
+#endif
+
+#ifndef OBJECT1_NUMBER_MAX_PROP4
+#  error Expected OBJECT1_NUMBER_MAX_PROP4
+#endif
+
+#ifndef IFACE3_BOOL_PROP5
+#  error Expected IFACE3_BOOL_PROP5
+#endif
+
+#ifndef IFACE3_STRING_PROP4
+#  error Expected IFACE3_STRING_PROP4
+#endif
+
+#ifndef IFACE3_NUMBER_MIN_PROP6
+#  error Expected IFACE3_NUMBER_MIN_PROP6
+#endif
+
+#ifndef IFACE3_NUMBER_MAX_PROP4
+#  error Expected IFACE3_NUMBER_MAX_PROP4
+#endif
+
 template <bool test>
 struct CMakeStaticAssert;
 
