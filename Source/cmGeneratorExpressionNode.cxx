@@ -2963,8 +2963,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     //
     // For COMPATIBLE_INTERFACE_NUMBER_{MAX,MIN} we always compute the value
     // from this target and the transitive link closure to get the max or min.
-    if (!haveProp && !target->IsImported() &&
-        target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+    if (!haveProp && !target->IsImported()) {
       if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
                                                        context->Config)) {
         context->HadContextSensitiveCondition = true;
