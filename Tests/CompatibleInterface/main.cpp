@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <string.h>
 
 #ifndef BOOL_PROP1
 #  error Expected BOOL_PROP1
@@ -149,6 +151,14 @@ __declspec(dllimport)
 
 int main(int argc, char** argv)
 {
+  int result = 0;
+  for (int i = 2; i < argc; i += 2) {
+    if (strcmp(argv[i - 1], argv[i]) != 0) {
+      fprintf(stderr, "Argument %d expected '%s' but got '%s'.\n", i,
+              argv[i - 1], argv[i]);
+      result = 1;
+    }
+  }
   Iface2 if2;
-  return if2.foo() + foo() + bar();
+  return result + if2.foo() + foo() + bar();
 }

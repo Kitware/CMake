@@ -201,3 +201,44 @@ set_property(TARGET iface3 PROPERTY STRING_PROP4 prop4)
 set_property(TARGET iface3 PROPERTY NUMBER_MIN_PROP6 7)
 set_property(TARGET iface3 PROPERTY NUMBER_MAX_PROP4 1)
 target_link_libraries(iface3 INTERFACE iface1)
+
+# Test COMPATIBLE_INTERFACE_* property evaluation outside of usage requirements.
+add_custom_target(check ALL VERBATIM
+  COMMAND CompatibleInterface
+  # expect     actual
+    "1"        "$<TARGET_PROPERTY:CompatibleInterface,BOOL_PROP1>"
+    "prop1"    "$<TARGET_PROPERTY:CompatibleInterface,STRING_PROP1>"
+    "3"        "$<TARGET_PROPERTY:CompatibleInterface,NUMBER_MAX_PROP3>"
+    "5"        "$<TARGET_PROPERTY:CompatibleInterface,NUMBER_MIN_PROP5>"
+
+    "1"        "$<TARGET_PROPERTY:static1,BOOL_PROP1>"
+    "prop1"    "$<TARGET_PROPERTY:static1,STRING_PROP1>"
+    "3"        "$<TARGET_PROPERTY:static1,NUMBER_MAX_PROP3>"
+    "5"        "$<TARGET_PROPERTY:static1,NUMBER_MIN_PROP5>"
+
+    ""         "$<TARGET_PROPERTY:object1,BOOL_PROP1>"
+    ""         "$<TARGET_PROPERTY:object1,STRING_PROP1>"
+    ""         "$<TARGET_PROPERTY:object1,NUMBER_MAX_PROP3>"
+    ""         "$<TARGET_PROPERTY:object1,NUMBER_MIN_PROP5>"
+
+    ""         "$<TARGET_PROPERTY:iface3,BOOL_PROP1>"
+    ""         "$<TARGET_PROPERTY:iface3,STRING_PROP1>"
+    ""         "$<TARGET_PROPERTY:iface3,NUMBER_MAX_PROP3>"
+    ""         "$<TARGET_PROPERTY:iface3,NUMBER_MIN_PROP5>"
+
+    "ON"       "$<TARGET_PROPERTY:static1,BOOL_PROP5>"
+    "prop4"    "$<TARGET_PROPERTY:static1,STRING_PROP4>"
+    #FIXME: These two cases do not work correctly.
+    #"6"        "$<TARGET_PROPERTY:static1,NUMBER_MIN_PROP6>"
+    #"4"        "$<TARGET_PROPERTY:static1,NUMBER_MAX_PROP4>"
+
+    "ON"       "$<TARGET_PROPERTY:object1,BOOL_PROP5>"
+    "prop4"    "$<TARGET_PROPERTY:object1,STRING_PROP4>"
+    "7"        "$<TARGET_PROPERTY:object1,NUMBER_MIN_PROP6>"
+    "1"        "$<TARGET_PROPERTY:object1,NUMBER_MAX_PROP4>"
+
+    "ON"       "$<TARGET_PROPERTY:iface3,BOOL_PROP5>"
+    "prop4"    "$<TARGET_PROPERTY:iface3,STRING_PROP4>"
+    "7"        "$<TARGET_PROPERTY:iface3,NUMBER_MIN_PROP6>"
+    "1"        "$<TARGET_PROPERTY:iface3,NUMBER_MAX_PROP4>"
+  )
