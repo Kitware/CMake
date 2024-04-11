@@ -211,3 +211,10 @@ Changes made since CMake 3.29.0 include the following.
 * The :variable:`CMAKE_LINKER_TYPE` variable and corresponding
   :prop_tgt:`LINKER_TYPE` target property now work with compilers
   for the ``Swift`` language.
+
+3.29.2
+------
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
