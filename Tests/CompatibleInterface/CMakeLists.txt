@@ -228,9 +228,8 @@ add_custom_target(check ALL VERBATIM
 
     "ON"       "$<TARGET_PROPERTY:static1,BOOL_PROP5>"
     "prop4"    "$<TARGET_PROPERTY:static1,STRING_PROP4>"
-    #FIXME: These two cases do not work correctly.
-    #"6"        "$<TARGET_PROPERTY:static1,NUMBER_MIN_PROP6>"
-    #"4"        "$<TARGET_PROPERTY:static1,NUMBER_MAX_PROP4>"
+    "6"        "$<TARGET_PROPERTY:static1,NUMBER_MIN_PROP6>"
+    "4"        "$<TARGET_PROPERTY:static1,NUMBER_MAX_PROP4>"
 
     "ON"       "$<TARGET_PROPERTY:object1,BOOL_PROP5>"
     "prop4"    "$<TARGET_PROPERTY:object1,STRING_PROP4>"

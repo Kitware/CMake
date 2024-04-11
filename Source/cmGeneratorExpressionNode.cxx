@@ -2980,29 +2980,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                                           context->Config);
         return propContent ? propContent : "";
       }
-      // FIXME: This duplicates the COMPATIBLE_INTERFACE_NUMBER_{MAX,MIN}
-      // evaluation below because it is not reached when evaluating outside of
-      // usage requirements, such as in add_custom_target, because there is no
-      // dagCheckerParent.
-      if (target->IsLinkInterfaceDependentNumberMinProperty(propertyName,
-                                                            context->Config)) {
-        context->HadContextSensitiveCondition = true;
-        const char* propContent =
-          target->GetLinkInterfaceDependentNumberMinProperty(propertyName,
-                                                             context->Config);
-        return propContent ? propContent : "";
-      }
-      if (target->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
-                                                            context->Config)) {
-        context->HadContextSensitiveCondition = true;
-        const char* propContent =
-          target->GetLinkInterfaceDependentNumberMaxProperty(propertyName,
-                                                             context->Config);
-        return propContent ? propContent : "";
-      }
     }
-    if (!target->IsImported() && dagCheckerParent &&
-        !dagCheckerParent->EvaluatingLinkLibraries()) {
+    if (!evaluatingLinkLibraries && !target->IsImported()) {
       if (target->IsLinkInterfaceDependentNumberMinProperty(propertyName,
                                                             context->Config)) {
         context->HadContextSensitiveCondition = true;
