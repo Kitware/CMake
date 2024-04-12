@@ -66,6 +66,7 @@ struct cmGeneratorExpressionDAGChecker
   void ReportError(cmGeneratorExpressionContext* context,
                    const std::string& expr);
 
+  bool EvaluatingTransitiveProperty() const;
   bool EvaluatingGenexExpression() const;
   bool EvaluatingPICExpression() const;
   bool EvaluatingCompileExpression() const;
@@ -109,4 +110,5 @@ private:
   Result CheckResult;
   bool TransitivePropertiesOnly = false;
   bool CMP0131 = false;
+  bool TopIsTransitiveProperty = false;
 };
