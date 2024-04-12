@@ -2950,8 +2950,20 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       return std::string();
     }
 
-    if (!haveProp && !target->IsImported() &&
-        target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+    // Properties named by COMPATIBLE_INTERFACE_ properties combine over
+    // the transitive link closure as a single order-independent value.
+    // Imported targets do not themselves have a defined value for these
+    // properties, but they can contribute to the value of a non-imported
+    // dependent.
+    //
+    // For COMPATIBLE_INTERFACE_{BOOL,STRING}:
+    // * If set on this target, use the value directly.  It is checked
+    //   elsewhere for consistency over the transitive link closure.
+    // * If not set on this target, compute the value from the closure.
+    //
+    // For COMPATIBLE_INTERFACE_NUMBER_{MAX,MIN} we always compute the value
+    // from this target and the transitive link closure to get the max or min.
+    if (!haveProp && !target->IsImported()) {
       if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
                                                        context->Config)) {
         context->HadContextSensitiveCondition = true;
@@ -2968,6 +2980,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                                           context->Config);
         return propContent ? propContent : "";
       }
+    }
+    if (!evaluatingLinkLibraries && !target->IsImported()) {
       if (target->IsLinkInterfaceDependentNumberMinProperty(propertyName,
                                                             context->Config)) {
         context->HadContextSensitiveCondition = true;
@@ -2986,26 +3000,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
     }
 
-    if (!target->IsImported() && dagCheckerParent &&
-        !dagCheckerParent->EvaluatingLinkLibraries()) {
-      if (target->IsLinkInterfaceDependentNumberMinProperty(propertyName,
-                                                            context->Config)) {
-        context->HadContextSensitiveCondition = true;
-        const char* propContent =
-          target->GetLinkInterfaceDependentNumberMinProperty(propertyName,
-                                                             context->Config);
-        return propContent ? propContent : "";
-      }
-      if (target->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
-                                                            context->Config)) {
-        context->HadContextSensitiveCondition = true;
-        const char* propContent =
-          target->GetLinkInterfaceDependentNumberMaxProperty(propertyName,
-                                                             context->Config);
-        return propContent ? propContent : "";
-      }
-    }
-
+    // Some properties, such as usage requirements, combine over the
+    // transitive link closure as an ordered list.
     if (!interfacePropertyName.empty()) {
       result = cmGeneratorExpression::StripEmptyListElements(
         this->EvaluateDependentExpression(result, context->LG, context, target,
