@@ -2714,8 +2714,9 @@ static std::string getLinkedTargetsContent(
           target->GetLocalGenerator(), context->Config, context->Quiet, target,
           target, context->EvaluateForBuildsystem, lib.Backtrace,
           context->Language);
-        std::string libResult =
-          lib.Target->EvaluateInterfaceProperty(prop, &libContext, dagChecker);
+        std::string libResult = lib.Target->EvaluateInterfaceProperty(
+          prop, &libContext, dagChecker,
+          cmGeneratorTarget::LinkInterfaceFor::Usage);
         if (!libResult.empty()) {
           if (result.empty()) {
             result = std::move(libResult);
@@ -2920,8 +2921,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     if (isInterfaceProperty) {
       return cmGeneratorExpression::StripEmptyListElements(
-        target->EvaluateInterfaceProperty(propertyName, context,
-                                          dagCheckerParent));
+        target->EvaluateInterfaceProperty(
+          propertyName, context, dagCheckerParent,
+          cmGeneratorTarget::LinkInterfaceFor::Usage));
     }
 
     cmGeneratorExpressionDAGChecker dagChecker(

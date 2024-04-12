@@ -883,7 +883,7 @@ public:
   std::string EvaluateInterfaceProperty(
     std::string const& prop, cmGeneratorExpressionContext* context,
     cmGeneratorExpressionDAGChecker* dagCheckerParent,
-    LinkInterfaceFor interfaceFor = LinkInterfaceFor::Usage) const;
+    LinkInterfaceFor interfaceFor) const;
 
   bool HaveInstallTreeRPATH(const std::string& config) const;
 
