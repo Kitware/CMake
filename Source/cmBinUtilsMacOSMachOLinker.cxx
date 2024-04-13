@@ -126,10 +126,16 @@ bool cmBinUtilsMacOSMachOLinker::GetFileDependencies(
 
           this->Archive->AddResolvedPath(filename, path, unique,
                                          dep_file_info->rpaths);
-          if (unique &&
-              !this->ScanDependencies(path, dep_file_info->libs,
-                                      dep_file_info->rpaths, executablePath)) {
-            return false;
+          if (unique) {
+            std::vector<std::string> combinedParentRpaths =
+              dep_file_info->rpaths;
+            combinedParentRpaths.insert(combinedParentRpaths.end(),
+                                        rpaths.begin(), rpaths.end());
+            if (!this->ScanDependencies(path, dep_file_info->libs,
+                                        combinedParentRpaths,
+                                        executablePath)) {
+              return false;
+            }
           }
         }
       } else {
