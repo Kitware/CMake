@@ -286,6 +286,7 @@ if (CMAKE_CXX_COMPILE_FEATURES)
     if (std_flag_idx EQUAL -1)
       add_executable(default_dialect default_dialect.cpp)
       target_compile_definitions(default_dialect PRIVATE
+        DEFAULT_CXX26=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},26>
         DEFAULT_CXX23=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},23>
         DEFAULT_CXX20=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},20>
         DEFAULT_CXX17=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},17>

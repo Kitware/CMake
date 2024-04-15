@@ -3,7 +3,11 @@
 template <long l>
 struct Outputter;
 
-#if DEFAULT_CXX23
+#if DEFAULT_CXX26
+#  if CXX_STD <= CXX_STD_23
+Outputter<CXX_STD> o;
+#  endif
+#elif DEFAULT_CXX23
 #  if CXX_STD <= CXX_STD_20
 Outputter<CXX_STD> o;
 #  endif
