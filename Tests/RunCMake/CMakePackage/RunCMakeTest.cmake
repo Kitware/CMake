@@ -48,9 +48,6 @@ if(APPLE)
 endif()
 
 if(APPLE AND CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
-  set(apple_install ${RunCMake_BINARY_DIR}/apple-install)
-  file(REMOVE_RECURSE "${apple_install}")
-
   if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 12)
     set(macos_archs "x86_64;arm64")
     set(tvos_sim_archs "x86_64;arm64")
@@ -77,6 +74,10 @@ if(APPLE AND CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
   if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 15.2)
     set(enable_visionos 1)
   endif()
+
+  # Place all export/import steps in a single install prefix.
+  set(apple_install ${RunCMake_BINARY_DIR}/apple-install)
+  file(REMOVE_RECURSE "${apple_install}")
 
   apple_export(macos Darwin "${macos_archs}" macosx)
   apple_export(ios iOS "arm64" iphoneos)
