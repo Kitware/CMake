@@ -1,0 +1,8 @@
+CMake Warning \(dev\) at .*/Modules/Compiler/CMakeCommonCompilerMacros.cmake:[0-9]* \(cmake_language\):
+  CMake's support for `import std;` in C\+\+23 and newer is experimental.  It
+  is meant only for experimentation and feedback to CMake developers.
+Call Stack \(most recent call first\):
+  .*/Modules/CMakeDetermineCompilerSupport.cmake:[0-9]* \(cmake_create_cxx_import_std\)
+  .*/Modules/CMakeTestCXXCompiler.cmake:[0-9]* \(CMAKE_DETERMINE_COMPILER_SUPPORT\)
+  CMakeLists.txt:[0-9]* \(project\)
+This warning is for project developers.  Use -Wno-dev to suppress it.

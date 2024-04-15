@@ -100,6 +100,7 @@ set(properties
   "C_LINKER_LAUNCHER"                       "ccache"            "<SAME>"
   ### C++
   "CXX_LINKER_LAUNCHER"                     "ccache"            "<SAME>"
+  "CXX_MODULE_STD"                          "ON"                "<SAME>"
   ### CUDA
   "CUDA_RESOLVE_DEVICE_SYMBOLS"             "ON"                "<SAME>"
   "CUDA_RUNTIME_LIBRARY"                    "Static"            "<SAME>"

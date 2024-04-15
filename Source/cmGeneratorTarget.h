@@ -961,6 +961,7 @@ public:
 
   std::string GetImportedXcFrameworkPath(const std::string& config) const;
 
+  bool ApplyCXXStdTargets();
   bool DiscoverSyntheticTargets(cmSyntheticTargetCache& cache,
                                 std::string const& config);
 

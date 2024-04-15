@@ -424,6 +424,7 @@ Variables that Control the Build
    /variable/CMAKE_CUDA_RESOLVE_DEVICE_SYMBOLS
    /variable/CMAKE_CUDA_RUNTIME_LIBRARY
    /variable/CMAKE_CUDA_SEPARABLE_COMPILATION
+   /variable/CMAKE_CXX_MODULE_STD
    /variable/CMAKE_CXX_SCAN_FOR_MODULES
    /variable/CMAKE_DEBUG_POSTFIX
    /variable/CMAKE_DEFAULT_BUILD_TYPE

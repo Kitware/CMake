@@ -674,6 +674,7 @@ protected:
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const;
 
+  bool ApplyCXXStdTargets();
   bool DiscoverSyntheticTargets();
 
   bool AddHeaderSetVerification();

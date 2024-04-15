@@ -29,6 +29,9 @@ public:
                                    std::string const& lang,
                                    std::string const& config) const;
 
+  std::string GetLevelString(std::string const& lang,
+                             cmStandardLevel const& level) const;
+
   bool AddRequiredTargetFeature(cmTarget* target, const std::string& feature,
                                 std::string* error = nullptr) const;
 

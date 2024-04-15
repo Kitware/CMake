@@ -1,6 +1,9 @@
 # Enable scanning by default for targets that explicitly use C++ 20.
 cmake_policy(SET CMP0155 NEW)
 
+# Block making C++ `import std` targets.
+add_library(__CMAKE::CXX23 IMPORTED INTERFACE)
+
 enable_language(CXX)
 
 # Hide any real scanning rule that may be available.

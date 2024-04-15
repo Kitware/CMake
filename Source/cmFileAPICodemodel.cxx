@@ -685,6 +685,11 @@ Json::Value CodemodelConfig::DumpTargets()
       continue;
     }
 
+    // Ignore targets starting with `__cmake_` as they are internal.
+    if (cmHasLiteralPrefix(gt->GetName(), "__cmake_")) {
+      continue;
+    }
+
     targets.append(this->DumpTarget(gt, targets.size()));
   }
 

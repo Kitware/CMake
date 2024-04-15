@@ -1388,6 +1388,12 @@ void cmExportFileGenerator::GenerateImportedFileChecksCode(
   os << ")\n\n";
 }
 
+enum class ExportWhen
+{
+  Defined,
+  Always,
+};
+
 enum class PropertyType
 {
   Strings,
@@ -1409,6 +1415,12 @@ bool PropertyTypeIsForPaths(PropertyType pt)
 }
 }
 
+struct ModuleTargetPropertyTable
+{
+  cm::static_string_view Name;
+  ExportWhen Cond;
+};
+
 struct ModulePropertyTable
 {
   cm::static_string_view Name;
@@ -1424,18 +1436,29 @@ bool cmExportFileGenerator::PopulateCxxModuleExportProperties(
     return true;
   }
 
-  const cm::static_string_view exportedDirectModuleProperties[] = {
-    "CXX_EXTENSIONS"_s,
+  const ModuleTargetPropertyTable exportedDirectModuleProperties[] = {
+    { "CXX_EXTENSIONS"_s, ExportWhen::Defined },
+    // Always define this property as it is an intrinsic property of the target
+    // and should not be inherited from the in-scope `CMAKE_CXX_MODULE_STD`
+    // variable.
+    //
+    // TODO(cxxmodules): A future policy may make this "ON" based on the target
+    // policies if unset. Add a new `ExportWhen` condition to handle it when
+    // this happens.
+    { "CXX_MODULE_STD"_s, ExportWhen::Always },
   };
-  for (auto const& propName : exportedDirectModuleProperties) {
-    auto const propNameStr = std::string(propName);
-    cmValue prop = gte->Target->GetComputedProperty(
+  for (auto const& prop : exportedDirectModuleProperties) {
+    auto const propNameStr = std::string(prop.Name);
+    cmValue propValue = gte->Target->GetComputedProperty(
       propNameStr, *gte->Target->GetMakefile());
-    if (!prop) {
-      prop = gte->Target->GetProperty(propNameStr);
+    if (!propValue) {
+      propValue = gte->Target->GetProperty(propNameStr);
     }
-    if (prop) {
-      properties[propNameStr] = cmGeneratorExpression::Preprocess(*prop, ctx);
+    if (propValue) {
+      properties[propNameStr] =
+        cmGeneratorExpression::Preprocess(*propValue, ctx);
+    } else if (prop.Cond == ExportWhen::Always) {
+      properties[propNameStr] = "";
     }
   }
 
