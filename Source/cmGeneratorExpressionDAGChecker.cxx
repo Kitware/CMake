@@ -37,16 +37,19 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   , Content(content)
   , Backtrace(std::move(backtrace))
 {
-  const auto* top = this->Top;
+  if (parent) {
+    this->TopIsTransitiveProperty = parent->TopIsTransitiveProperty;
+  } else {
+#define TEST_TRANSITIVE_PROPERTY_METHOD(METHOD) this->METHOD() ||
+    this->TopIsTransitiveProperty = (CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
+      TEST_TRANSITIVE_PROPERTY_METHOD) false); // NOLINT(*)
+#undef TEST_TRANSITIVE_PROPERTY_METHOD
+  }
+
   this->CheckResult = this->CheckGraph();
 
-#define TEST_TRANSITIVE_PROPERTY_METHOD(METHOD) top->METHOD() ||
-
-  if (this->CheckResult == DAG &&
-      (CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
-        TEST_TRANSITIVE_PROPERTY_METHOD) false)) // NOLINT(*)
-#undef TEST_TRANSITIVE_PROPERTY_METHOD
-  {
+  if (this->CheckResult == DAG && this->EvaluatingTransitiveProperty()) {
+    const auto* top = this->Top;
     auto it = top->Seen.find(this->Target);
     if (it != top->Seen.end()) {
       const std::set<std::string>& propSet = it->second;
@@ -139,14 +142,22 @@ bool cmGeneratorExpressionDAGChecker::GetTransitivePropertiesOnlyCMP0131()
   return this->Top->CMP0131;
 }
 
+bool cmGeneratorExpressionDAGChecker::EvaluatingTransitiveProperty() const
+{
+  return this->TopIsTransitiveProperty;
+}
+
 bool cmGeneratorExpressionDAGChecker::EvaluatingGenexExpression() const
 {
+  // Corresponds to GenexEvaluator::EvaluateExpression.
   return cmHasLiteralPrefix(this->Property, "TARGET_GENEX_EVAL:") ||
     cmHasLiteralPrefix(this->Property, "GENEX_EVAL:");
 }
 
 bool cmGeneratorExpressionDAGChecker::EvaluatingPICExpression() const
 {
+  // Corresponds to checkInterfacePropertyCompatibility's special case
+  // that evaluates the value of POSITION_INDEPENDENT_CODE as a genex.
   return this->Top->Property == "INTERFACE_POSITION_INDEPENDENT_CODE";
 }
 

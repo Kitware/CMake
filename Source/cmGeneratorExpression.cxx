@@ -70,13 +70,6 @@ const std::string& cmCompiledGeneratorExpression::Evaluate(
     currentTarget ? currentTarget : headTarget, this->EvaluateForBuildsystem,
     this->Backtrace, language);
 
-  return this->EvaluateWithContext(context, dagChecker);
-}
-
-const std::string& cmCompiledGeneratorExpression::EvaluateWithContext(
-  cmGeneratorExpressionContext& context,
-  cmGeneratorExpressionDAGChecker* dagChecker) const
-{
   if (!this->NeedsEvaluation) {
     return this->Input;
   }

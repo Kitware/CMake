@@ -547,6 +547,7 @@ static const struct TargetGenexEvalNode : public GenexEvaluator
       return expression;
     }
 
+    // Replace the surrounding context with the named target.
     cmGeneratorExpressionContext targetContext(
       context->LG, context->Config, context->Quiet, target, target,
       context->EvaluateForBuildsystem, context->Backtrace, context->Language);
@@ -2714,8 +2715,9 @@ static std::string getLinkedTargetsContent(
           target->GetLocalGenerator(), context->Config, context->Quiet, target,
           target, context->EvaluateForBuildsystem, lib.Backtrace,
           context->Language);
-        std::string libResult =
-          lib.Target->EvaluateInterfaceProperty(prop, &libContext, dagChecker);
+        std::string libResult = lib.Target->EvaluateInterfaceProperty(
+          prop, &libContext, dagChecker,
+          cmGeneratorTarget::LinkInterfaceFor::Usage);
         if (!libResult.empty()) {
           if (result.empty()) {
             result = std::move(libResult);
@@ -2896,6 +2898,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     bool evaluatingLinkLibraries = false;
 
     if (dagCheckerParent) {
+      // This $<TARGET_PROPERTY:...> node has been reached while evaluating
+      // another target property value.  Check that the outermost evaluation
+      // expects such nested evaluations.
       if (dagCheckerParent->EvaluatingGenexExpression() ||
           dagCheckerParent->EvaluatingPICExpression() ||
           dagCheckerParent->EvaluatingLinkerLauncher()) {
@@ -2911,17 +2916,16 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           return std::string();
         }
       } else {
-#define ASSERT_TRANSITIVE_PROPERTY_METHOD(METHOD) dagCheckerParent->METHOD() ||
-        assert(CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
-          ASSERT_TRANSITIVE_PROPERTY_METHOD) false); // NOLINT(clang-tidy)
-#undef ASSERT_TRANSITIVE_PROPERTY_METHOD
+        assert(dagCheckerParent
+                 ->EvaluatingTransitiveProperty()); // NOLINT(clang-tidy)
       }
     }
 
     if (isInterfaceProperty) {
       return cmGeneratorExpression::StripEmptyListElements(
-        target->EvaluateInterfaceProperty(propertyName, context,
-                                          dagCheckerParent));
+        target->EvaluateInterfaceProperty(
+          propertyName, context, dagCheckerParent,
+          cmGeneratorTarget::LinkInterfaceFor::Usage));
     }
 
     cmGeneratorExpressionDAGChecker dagChecker(
