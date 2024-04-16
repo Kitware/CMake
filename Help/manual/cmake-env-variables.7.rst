@@ -92,7 +92,9 @@ Environment Variables for Languages
    /envvar/ISPC
    /envvar/ISPCFLAGS
    /envvar/OBJC
+   /envvar/OBJCFLAGS
    /envvar/OBJCXX
+   /envvar/OBJCXXFLAGS
    /envvar/RC
    /envvar/RCFLAGS
    /envvar/SWIFTC
