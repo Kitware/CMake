@@ -306,6 +306,10 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
     endif()
     find_path(GTK2_${_var}_INCLUDE_DIR ${_hdr}
         PATHS
+            ${PC_GLIB2_INCLUDEDIR}
+            ${PC_GLIB2_LIBDIR}
+            ${PC_GTK2_INCLUDEDIR}
+            ${PC_GTK2_LIBDIR}
             ${_gtk2_arch_dir}
             /usr/local/libx32
             /usr/local/lib64
@@ -614,6 +618,23 @@ set(GTK2_DEFINITIONS)
 if(NOT GTK2_FIND_COMPONENTS)
     # Assume they only want GTK
     set(GTK2_FIND_COMPONENTS gtk)
+endif()
+
+# Retrieve LIBDIR from the GTK2 and GLIB2 pkg-config files, which are
+# used to compute the arch-specific include prefixes. While at it,
+# also retrieve their INCLUDEDIR, to accommodate non-standard layouts.
+find_package(PkgConfig QUIET)
+if(PKG_CONFIG_FOUND)
+  pkg_check_modules(PC_GTK2 QUIET gtk+-2.0)
+  if(PC_GTK2_FOUND)
+    pkg_get_variable(PC_GTK2_INCLUDEDIR gtk+-2.0 includedir)
+    pkg_get_variable(PC_GTK2_LIBDIR gtk+-2.0 libdir)
+  endif()
+  pkg_check_modules(PC_GLIB2 QUIET glib-2.0)
+  if(PC_GLIB2_FOUND)
+    pkg_get_variable(PC_GLIB2_INCLUDEDIR glib-2.0 includedir)
+    pkg_get_variable(PC_GLIB2_LIBDIR glib-2.0 libdir)
+  endif()
 endif()
 
 #
