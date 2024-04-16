@@ -1,4 +1,3 @@
-@_alwaysEmitIntoClient
-public func exported() -> Int { 32 }
+public func exported() -> Int { return 32 }
 
 print(exported())
