@@ -21,8 +21,7 @@ char const* qnxnto = "INFO" ":" "qnxnto[]";
 @CMAKE_OBJC_COMPILER_ID_ERROR_FOR_TEST@
 
 #if !defined(__STDC__)
-# if (defined(_MSC_VER) && !defined(__clang__)) \
-  || (defined(__ibmxl__) || defined(__IBMC__))
+# if defined(__ibmxl__) || defined(__IBMC__)
 #  define C_VERSION "90"
 # else
 #  define C_VERSION
