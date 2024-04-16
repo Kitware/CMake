@@ -24,12 +24,7 @@ cmCPackInnoSetupGenerator::~cmCPackInnoSetupGenerator() = default;
 
 bool cmCPackInnoSetupGenerator::CanGenerate()
 {
-  // Inno Setup is only available for Windows
-#ifdef _WIN32
   return true;
-#else
-  return false;
-#endif
 }
 
 int cmCPackInnoSetupGenerator::InitializeInternal()
@@ -63,7 +58,8 @@ int cmCPackInnoSetupGenerator::InitializeInternal()
     return 0;
   }
 
-  const std::string isccCmd = cmStrCat(QuotePath(isccPath), "/?");
+  const std::string isccCmd =
+    cmStrCat(QuotePath(isccPath, PathType::Native), "/?");
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Test Inno Setup version: " << isccCmd << std::endl);
   std::string output;
@@ -869,8 +865,8 @@ bool cmCPackInnoSetupGenerator::Compile()
   }
 
   const std::string& isccCmd =
-    cmStrCat(QuotePath(GetOption("CPACK_INSTALLER_PROGRAM")), ' ',
-             cmJoin(isccArgs, " "), ' ', QuotePath(isScriptFile));
+    cmStrCat(QuotePath(GetOption("CPACK_INSTALLER_PROGRAM"), PathType::Native),
+             ' ', cmJoin(isccArgs, " "), ' ', QuotePath(isScriptFile));
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << isccCmd << std::endl);
 
@@ -1136,8 +1132,16 @@ std::string cmCPackInnoSetupGenerator::Quote(const std::string& string)
   return cmStrCat('"', nString, '"');
 }
 
-std::string cmCPackInnoSetupGenerator::QuotePath(const std::string& path)
+std::string cmCPackInnoSetupGenerator::QuotePath(const std::string& path,
+                                                 PathType type)
 {
+#ifdef _WIN32
+  static_cast<void>(type);
+#else
+  if (type == PathType::Native) {
+    return Quote(cmSystemTools::ConvertToUnixOutputPath(path));
+  }
+#endif
   return Quote(cmSystemTools::ConvertToWindowsOutputPath(path));
 }
 

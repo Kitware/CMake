@@ -12,7 +12,11 @@ The generator provides a lot of options like components. Unfortunately, not
 all features (e.g. component dependencies) are currently supported by
 Inno Setup and they're ignored by the generator for now.
 
-CPack requires Inno Setup 6 or greater and only works on Windows.
+CPack requires Inno Setup 6 or greater.
+
+.. versionadded:: 3.30
+  The generator is now available on non-Windows hosts,
+  but requires Wine to run the Inno Setup tools.
 
 Variables specific to CPack Inno Setup generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
