@@ -222,7 +222,7 @@ t:debian12-hip-radeon:
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:fedora39-hip-radeon:
     extends:
@@ -232,7 +232,7 @@ t:fedora39-hip-radeon:
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:fedora39-ninja-clang:
     extends:
@@ -303,7 +303,7 @@ t:cuda9.2-nvidia:
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:cuda10.2-nvidia:
     extends:
@@ -313,6 +313,8 @@ t:cuda10.2-nvidia:
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:cuda10.2-clang:
     extends:
@@ -322,7 +324,7 @@ t:cuda10.2-clang:
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:cuda11.6-nvidia:
     extends:
@@ -332,6 +334,8 @@ t:cuda11.6-nvidia:
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:cuda11.6-clang:
     extends:
@@ -341,7 +345,7 @@ t:cuda11.6-clang:
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:cuda11.8-minimal-ninja:
     extends:
@@ -351,7 +355,7 @@ t:cuda11.8-minimal-ninja:
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:cuda11.8-minimal-splayed-ninja:
     extends:
@@ -361,7 +365,7 @@ t:cuda11.8-minimal-splayed-ninja:
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:cuda12.2-nvidia:
     extends:
@@ -371,8 +375,6 @@ t:cuda12.2-nvidia:
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos7_x86_64
-    variables:
-        CMAKE_CI_NO_MR: "true"
 
 t:cuda12.2-clang:
     extends:
@@ -382,7 +384,7 @@ t:cuda12.2-clang:
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:hip5.5-nvidia:
     extends:
@@ -392,7 +394,7 @@ t:hip5.5-nvidia:
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:hip5.5-radeon:
     extends:
@@ -402,7 +404,7 @@ t:hip5.5-radeon:
         - .run_dependent
         - .needs_centos7_x86_64
     variables:
-        CMAKE_CI_NO_MR: "true"
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:linux-gcc-cxx-modules-ninja:
     extends:
@@ -531,82 +533,12 @@ t:fedora39-ninja-multi:
     needs:
         - t:fedora39-ninja
 
-t:intel2016-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2016_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2016-el7
-
-t:intel2016u1-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2016u1_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2016u1-el7
-
 t:intel2016u2-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2016u2_makefiles
         CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2016u2-el7
-
-t:intel2017-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2017_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017-el7
-
-t:intel2017u1-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2017u1_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u1-el7
-
-t:intel2017u2-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2017u2_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u2-el7
-
-t:intel2017u3-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2017u3_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u3-el7
-
-t:intel2017u4-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2017u4_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u4-el7
-
-t:intel2017u5-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2017u5_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u5-el7
-
-t:intel2017u6-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2017u6_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u6-el7
-
-t:intel2017u7-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2017u7_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u7-el7
 
 t:intel2017u8-makefiles:
     extends:
@@ -615,34 +547,6 @@ t:intel2017u8-makefiles:
         CMAKE_CI_BUILD_NAME: intel2017u8_makefiles
         CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2017u8-el7
 
-t:intel2018-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2018_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2018-el7
-
-t:intel2018u1-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2018u1_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2018u1-el7
-
-t:intel2018u2-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2018u2_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2018u2-el7
-
-t:intel2018u3-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2018u3_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2018u3-el7
-
 t:intel2018u4-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
@@ -650,54 +554,12 @@ t:intel2018u4-makefiles:
         CMAKE_CI_BUILD_NAME: intel2018u4_makefiles
         CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2018u4-el7
 
-t:intel2019-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2019_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2019-el7
-
-t:intel2019u1-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2019u1_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2019u1-el7
-
-t:intel2019u2-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2019u2_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2019u2-el7
-
-t:intel2019u3-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2019u3_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2019u3-el7
-
 t:intel2019u4-makefiles:
     extends:
         - .cmake_test_linux_intelclassic_makefiles
     variables:
         CMAKE_CI_BUILD_NAME: intel2019u4_makefiles
         CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2019u4-el7
-
-t:intel2020-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2020_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2020-el8
-
-t:intel2020u2-makefiles:
-    extends:
-        - .cmake_test_linux_intelclassic_makefiles
-    variables:
-        CMAKE_CI_BUILD_NAME: intel2020u2_makefiles
-        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2020u2-el8
 
 t:intel2020u4-makefiles:
     extends:
