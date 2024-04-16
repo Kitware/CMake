@@ -760,9 +760,7 @@ bool cmCTest::UpdateCTestConfiguration()
   }
   if (!this->GetCTestConfiguration("BuildDirectory").empty()) {
     this->Impl->BinaryDir = this->GetCTestConfiguration("BuildDirectory");
-    if (this->Impl->TestDir.empty()) {
-      cmSystemTools::ChangeDirectory(this->Impl->BinaryDir);
-    }
+    cmSystemTools::ChangeDirectory(this->Impl->BinaryDir);
   }
   this->Impl->TimeOut =
     std::chrono::seconds(atoi(this->GetCTestConfiguration("TimeOut").c_str()));
@@ -2830,7 +2828,8 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
 
     if (!validArg && cmHasLiteralPrefix(arg, "-") &&
         !cmHasLiteralPrefix(arg, "--preset")) {
-      cmSystemTools::Error(cmStrCat("Invalid argument: ", arg));
+      cmSystemTools::Error(cmStrCat("Unknown argument: ", arg));
+      cmSystemTools::Error("Run 'ctest --help' for all supported options.");
       return 1;
     }
   } // the close of the for argument loop
