@@ -43,7 +43,7 @@ function(cm_check_cxx_feature name)
     # Filter out MSVC output that looks like a command-line warning.
     string(REGEX REPLACE "[^\n]*warning D[0-9][0-9][0-9][0-9][^\n]*" "" check_output "${check_output}")
     # Filter out warnings caused by user flags.
-    string(REGEX REPLACE "[^\n]*warning:[^\n]*-Winvalid-command-line-argument[^\n]*" "" check_output "${check_output}")
+    string(REGEX REPLACE "[^\n]*warning:[^\n]*-W(invalid|unused)-command-line-argument[^\n]*" "" check_output "${check_output}")
     # Filter out warnings caused by local configuration.
     string(REGEX REPLACE "[^\n]*warning:[^\n]*directory not found for option[^\n]*" "" check_output "${check_output}")
     string(REGEX REPLACE "[^\n]*warning:[^\n]*object file compiled with -mlong-branch which is no longer needed[^\n]*" "" check_output "${check_output}")
