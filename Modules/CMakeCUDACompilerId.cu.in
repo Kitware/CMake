@@ -22,7 +22,15 @@ char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";
 #define CXX_STD_20 202002L
 #define CXX_STD_23 202302L
 
-#define CXX_STD __cplusplus
+#if defined(_MSC_VER) && defined(_MSVC_LANG)
+#  if _MSVC_LANG > __cplusplus
+#    define CXX_STD _MSVC_LANG
+#  else
+#    define CXX_STD __cplusplus
+#  endif
+#else
+#  define CXX_STD __cplusplus
+#endif
 
 const char* info_language_standard_default = "INFO" ":" "standard_default["
 #if CXX_STD > CXX_STD_23
