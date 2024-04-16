@@ -57,6 +57,8 @@ variables:
   value: $(Build.ArtifactStagingDirectory)/output
 - name: Codeql.Enabled
   value: true
+- name: Codeql.Language
+  value: cpp,csharp,javascript,powershell,python,ruby
 - name: DisableDockerDetector
   value: true
 - name: PackagingSolutionRoot
@@ -321,7 +323,7 @@ extends:
         timeoutInMinutes: 360
         pool:
           name: VSEngSS-MicroBuild2022-1ES
-        
+
         templateContext:
           sdl:
             tsa:

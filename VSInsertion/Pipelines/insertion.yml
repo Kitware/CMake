@@ -41,6 +41,8 @@ variables:
   value: true
 - name: Codeql.TSAEnabled
   value: true
+- name: Codeql.Language
+  value: cpp,csharp,javascript,powershell,python,ruby
 - name: Codeql.TSAOptionsPath
   value: $(Agent.BuildDirectory)/config.gdntsa
 - name: DisableDockerDetector
