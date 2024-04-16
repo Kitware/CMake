@@ -20,9 +20,7 @@ resources:
     ref: refs/tags/release
 variables:
 - name: ApiScanClientId
-  value: 1d6a3de7-4a6a-4b75-b15d-e305293c75af
-- name: ApiScanTenant
-  value: 72f988bf-86f1-41af-91ab-2d7cd011db47
+  value: d318cba7-db4d-4fb3-99e1-01879cb74e91
 - name: ArtifactServices.Symbol.AccountName
   value: devdiv
 - name: ArtifactServices.Symbol.PAT
@@ -547,7 +545,7 @@ extends:
         - task: CmdLine@2
           displayName: Set APIScan environment
           inputs:
-            script: setx AzureServicesAuthConnectionString runAs=App;AppId=$(ApiScanClientId);TenantId=$(ApiScanTenant);AppKey=$(ApiScanSecret) /m
+            script: setx AzureServicesAuthConnectionString runAs=App;AppId=$(ApiScanClientId) /m
         # - task: securedevelopmentteam.vss-secure-development-tools.build-task-apiscan.APIScan@2
         #   displayName: 'Run APIScan - x64 x86'
         #   inputs:
