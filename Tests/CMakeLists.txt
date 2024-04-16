@@ -1455,6 +1455,7 @@ if(BUILD_TESTING)
   _mod
   IN ITEMS
       ALSA
+      Backtrace
       BLAS
       Boost
       BZip2
