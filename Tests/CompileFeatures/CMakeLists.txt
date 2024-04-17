@@ -9,7 +9,13 @@ set(ext_CXX cpp)
 set(std_C 90 99 11 17 23)
 set(std_CXX 98 11 14 17 20 23 26)
 
-foreach(lang C CXX)
+if(CMake_TEST_CUDA)
+  enable_language(CUDA)
+  set(ext_CUDA cu)
+  set(std_CUDA 03 11 14 17 20 23 26)
+endif()
+
+foreach(lang C CXX CUDA)
   foreach(std IN LISTS std_${lang})
     string(TOLOWER "${lang}_std_${std}" feature)
     if("${std}" IN_LIST CMake_TEST_${lang}_STANDARDS
