@@ -20,6 +20,16 @@ Supported values are:
 ``11``
   Objective C11
 
+``17``
+  .. versionadded:: 3.21
+
+  Objective C17
+
+``23``
+  .. versionadded:: 3.21
+
+  Objective C23
+
 If the value requested does not result in a compile flag being added for
 the compiler in use, a previous standard flag will be added instead.  This
 means that using:
