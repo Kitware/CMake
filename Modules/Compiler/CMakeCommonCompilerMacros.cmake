@@ -244,6 +244,9 @@ function(cmake_create_cxx_import_std std variable)
   string(CONCAT guarded_target_definition
     "if (NOT TARGET \"__CMAKE::CXX${std}\")\n"
     "${target_definition}"
+    "endif ()\n"
+    "if (TARGET \"__CMAKE::CXX${std}\")\n"
+    "  list(APPEND CMAKE_CXX_COMPILER_IMPORT_STD \"${std}\")\n"
     "endif ()\n")
   set("${variable}" "${guarded_target_definition}" PARENT_SCOPE)
 endfunction()
