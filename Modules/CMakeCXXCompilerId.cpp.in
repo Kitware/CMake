@@ -89,7 +89,9 @@ char const *info_cray = "INFO" ":" "compiler_wrapper[CrayPrgEnv]";
 #endif
 
 const char* info_language_standard_default = "INFO" ":" "standard_default["
-#if CXX_STD > CXX_STD_20
+#if CXX_STD > CXX_STD_23
+  "26"
+#elif CXX_STD > CXX_STD_20
   "23"
 #elif CXX_STD > CXX_STD_17
   "20"
