@@ -298,6 +298,22 @@ if (CMAKE_CXX_COMPILE_FEATURES)
   endif()
 endif ()
 
+if (CMake_TEST_CUDA
+    AND CMAKE_CUDA_COMPILE_FEATURES
+    AND CMAKE_CUDA_STANDARD_DEFAULT
+    AND NOT CMAKE_CUDA_FLAGS MATCHES "-std=")
+  add_executable(default_dialect_cuda default_dialect.cu)
+  target_compile_definitions(default_dialect_cuda PRIVATE
+    DEFAULT_CXX26=$<EQUAL:${CMAKE_CUDA_STANDARD_DEFAULT},26>
+    DEFAULT_CXX23=$<EQUAL:${CMAKE_CUDA_STANDARD_DEFAULT},23>
+    DEFAULT_CXX20=$<EQUAL:${CMAKE_CUDA_STANDARD_DEFAULT},20>
+    DEFAULT_CXX17=$<EQUAL:${CMAKE_CUDA_STANDARD_DEFAULT},17>
+    DEFAULT_CXX14=$<EQUAL:${CMAKE_CUDA_STANDARD_DEFAULT},14>
+    DEFAULT_CXX11=$<EQUAL:${CMAKE_CUDA_STANDARD_DEFAULT},11>
+    DEFAULT_CXX98=$<EQUAL:${CMAKE_CUDA_STANDARD_DEFAULT},03>
+  )
+endif ()
+
 # always add a target "CompileFeatures"
 if ((NOT CXX_expected_features) OR
     (NOT cxx_auto_type IN_LIST CXX_expected_features))
