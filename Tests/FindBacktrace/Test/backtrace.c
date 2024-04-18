@@ -13,6 +13,7 @@ void myfunc3(void)
   int nptrs;
   void* buffer[BT_BUF_SIZE];
   char** strings;
+  size_t j;
 
   nptrs = backtrace(buffer, BT_BUF_SIZE);
   printf("backtrace() returned %d addresses\n", nptrs);
@@ -26,8 +27,9 @@ void myfunc3(void)
     exit(EXIT_FAILURE);
   }
 
-  for (size_t j = 0; j < nptrs; j++)
+  for (j = 0; j < nptrs; j++) {
     printf("%s\n", strings[j]);
+  }
 
   free(strings);
 }
@@ -40,10 +42,11 @@ myfunc2(void)
 
 void myfunc(int ncalls)
 {
-  if (ncalls > 1)
+  if (ncalls > 1) {
     myfunc(ncalls - 1);
-  else
+  } else {
     myfunc2();
+  }
 }
 
 int main(int argc, char* argv[])
