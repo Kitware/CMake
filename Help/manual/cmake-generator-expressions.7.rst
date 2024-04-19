@@ -1707,17 +1707,10 @@ Link Context
 Target-Dependent Expressions
 ----------------------------
 
-These queries refer to a target ``tgt``. Unless otherwise stated, this can
-be any runtime artifact, namely:
+Target Meta-Data
+^^^^^^^^^^^^^^^^
 
-* An executable target created by :command:`add_executable`.
-* A shared library target (``.so``, ``.dll`` but not their ``.lib`` import
-  library) created by :command:`add_library`.
-* A static library target created by :command:`add_library`.
-
-In the following, the phrase "the ``tgt`` filename" means the name of the
-``tgt`` binary file. This has to be distinguished from the phrase
-"the target name", which is just the string ``tgt``.
+These expressions look up information about a target.
 
 .. genex:: $<TARGET_EXISTS:tgt>
 
@@ -1739,6 +1732,20 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   Marks ``...`` as being the name of a target.  This is required if exporting
   targets to multiple dependent export sets.  The ``...`` must be a literal
   name of a target, it may not contain generator expressions.
+
+.. genex:: $<TARGET_POLICY:policy>
+
+  ``1`` if the ``policy`` was ``NEW`` when the 'head' target was created,
+  else ``0``.  If the ``policy`` was not set, the warning message for the policy
+  will be emitted. This generator expression only works for a subset of
+  policies.
+
+
+Target Properties
+^^^^^^^^^^^^^^^^^
+
+These expressions look up the values of
+:ref:`target properties <Target Properties>`.
 
 .. genex:: $<TARGET_PROPERTY:tgt,prop>
 
@@ -1763,19 +1770,22 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   :ref:`usage requirements <Target Usage Requirements>` this is the
   consuming target rather than the target specifying the requirement.
 
-.. genex:: $<TARGET_OBJECTS:tgt>
 
-  .. versionadded:: 3.1
+Target Artifacts
+^^^^^^^^^^^^^^^^
 
-  List of objects resulting from building ``tgt``.  This would typically be
-  used on :ref:`object library <Object Libraries>` targets.
+These expressions look up information about artifacts associated with
+a given target ``tgt``.  Unless otherwise stated, this can be any
+runtime artifact, namely:
 
-.. genex:: $<TARGET_POLICY:policy>
+* An executable target created by :command:`add_executable`.
+* A shared library target (``.so``, ``.dll`` but not their ``.lib`` import
+  library) created by :command:`add_library`.
+* A static library target created by :command:`add_library`.
 
-  ``1`` if the ``policy`` was ``NEW`` when the 'head' target was created,
-  else ``0``.  If the ``policy`` was not set, the warning message for the policy
-  will be emitted. This generator expression only works for a subset of
-  policies.
+In the following, the phrase "the ``tgt`` filename" means the name of the
+``tgt`` binary file. This has to be distinguished from the phrase
+"the target name", which is just the string ``tgt``.
 
 .. genex:: $<TARGET_FILE:tgt>
 
@@ -2256,6 +2266,13 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on (see policy :policy:`CMP0112`).
+
+.. genex:: $<TARGET_OBJECTS:tgt>
+
+  .. versionadded:: 3.1
+
+  List of objects resulting from building ``tgt``.  This would typically be
+  used on :ref:`object library <Object Libraries>` targets.
 
 .. genex:: $<TARGET_RUNTIME_DLLS:tgt>
 
