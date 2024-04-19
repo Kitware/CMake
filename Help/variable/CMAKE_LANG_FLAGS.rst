@@ -24,6 +24,10 @@ combination with CMake's builtin defaults for the toolchain:
   Initialized by the :envvar:`HIPFLAGS` environment variable.
 * ``CMAKE_ISPC_FLAGS``:
   Initialized by the :envvar:`ISPCFLAGS` environment variable.
+* ``CMAKE_OBJC_FLAGS``:
+  Initialized by the :envvar:`OBJCFLAGS` environment variable.
+* ``CMAKE_OBJCXX_FLAGS``:
+  Initialized by the :envvar:`OBJCXXFLAGS` environment variable.
 
 This value is a command-line string fragment. Therefore, multiple options
 should be separated by spaces, and options with spaces should be quoted.
