@@ -75,6 +75,13 @@ if(APPLE AND CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
     set(enable_visionos 1)
   endif()
 
+  string(REPLACE ";" "\\;" macos_archs_for_cmd "${macos_archs}")
+  run_cmake_with_options(ApplePlatformGenSubdir
+    "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_for_cmd}"
+    ${maybe_CMAKE_BUILD_TYPE}
+  )
+  unset(macos_archs_for_cmd)
+
   # Place all export/import steps in a single install prefix.
   set(apple_install ${RunCMake_BINARY_DIR}/apple-install)
   file(REMOVE_RECURSE "${apple_install}")
