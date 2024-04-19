@@ -599,8 +599,15 @@ function(generate_apple_architecture_selection_file _output_file)
       )
   endif()
   string(APPEND _branch_code
-    "endif()\n"
+    "endif()\n\n"
+    "set(_cmake_apple_archs \"\${CMAKE_OSX_ARCHITECTURES}\")\n"
     )
+  if(NOT "${_gasf_UNIVERSAL_ARCHITECTURES}" STREQUAL "")
+    string(APPEND _branch_code "list(REMOVE_ITEM _cmake_apple_archs ${_gasf_UNIVERSAL_ARCHITECTURES})\n")
+  endif()
+  string(APPEND _branch_code "\n")
+
+  set(maybe_else "")
 
   foreach(pair IN ZIP_LISTS _gasf_SINGLE_ARCHITECTURES _gasf_SINGLE_ARCHITECTURE_INCLUDE_FILES)
     set(arch "${pair_0}")
@@ -609,40 +616,45 @@ function(generate_apple_architecture_selection_file _output_file)
       string(PREPEND config_file [[${PACKAGE_PREFIX_DIR}/]])
     endif()
     string(APPEND _branch_code
-      "\n"
-      "if(CMAKE_OSX_ARCHITECTURES STREQUAL \"${arch}\")\n"
+      "${maybe_else}if(CMAKE_OSX_ARCHITECTURES STREQUAL \"${arch}\")\n"
       "  include(\"${config_file}\")\n"
-      "  return()\n"
-      "endif()\n"
       )
+    set(maybe_else else)
   endforeach()
 
   if(_gasf_UNIVERSAL_ARCHITECTURES AND _gasf_UNIVERSAL_INCLUDE_FILE)
-    string(JOIN " " universal_archs "${_gasf_UNIVERSAL_ARCHITECTURES}")
     set(config_file "${_gasf_UNIVERSAL_INCLUDE_FILE}")
     if(NOT IS_ABSOLUTE "${config_file}")
       string(PREPEND config_file [[${PACKAGE_PREFIX_DIR}/]])
     endif()
     string(APPEND _branch_code
-      "\n"
-      "set(_cmake_apple_archs \"\${CMAKE_OSX_ARCHITECTURES}\")\n"
-      "list(REMOVE_ITEM _cmake_apple_archs ${universal_archs})\n"
-      "if(NOT _cmake_apple_archs)\n"
+      "${maybe_else}if(NOT _cmake_apple_archs)\n"
       "  include(\"${config_file}\")\n"
-      "  return()\n"
-      "endif()\n"
       )
+    set(maybe_else else)
   elseif(_gasf_UNIVERSAL_ARCHITECTURES)
     message(FATAL_ERROR "UNIVERSAL_INCLUDE_FILE requires UNIVERSAL_ARCHITECTURES")
   elseif(_gasf_UNIVERSAL_INCLUDE_FILE)
     message(FATAL_ERROR "UNIVERSAL_ARCHITECTURES requires UNIVERSAL_INCLUDE_FILE")
   endif()
 
-  string(APPEND _branch_code "\n")
-  if(_gasf_ERROR_VARIABLE)
-    string(APPEND _branch_code "set(\"${_gasf_ERROR_VARIABLE}\" \"Architecture not supported\")")
+  if(maybe_else)
+    string(APPEND _branch_code "else()\n")
+    set(_indent "  ")
   else()
-    string(APPEND _branch_code "message(FATAL_ERROR \"Architecture not supported\")")
+    set(_indent "")
+  endif()
+  if(_gasf_ERROR_VARIABLE)
+    string(APPEND _branch_code
+      "${_indent}set(\"${_gasf_ERROR_VARIABLE}\" \"Architecture not supported\")\n"
+      )
+  else()
+    string(APPEND _branch_code
+      "${_indent}message(FATAL_ERROR \"Architecture not supported\")\n"
+      )
+  endif()
+  if(maybe_else)
+    string(APPEND _branch_code "endif()\n")
   endif()
 
   configure_package_config_file("${CMAKE_CURRENT_FUNCTION_LIST_DIR}/Internal/AppleArchitectureSelection.cmake.in" "${_output_file}"
