@@ -13,5 +13,5 @@ by project code to change the default without overriding a user-provided value:
 .. code-block:: cmake
 
   if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(CMAKE_INSTALL_PREFIX "/my/default" CACHE PATH "..." FORCE)
+    set_property(CACHE CMAKE_INSTALL_PREFIX PROPERTY VALUE "/my/default")
   endif()
