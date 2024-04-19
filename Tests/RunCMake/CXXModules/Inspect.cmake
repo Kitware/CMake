@@ -15,10 +15,21 @@ if (CMAKE_CXX_FLAGS MATCHES "-std=")
   set(forced_cxx_standard 1)
 endif ()
 
-set(have_cxx23_import_std 0)
-if (TARGET "__CMAKE::CXX23")
-  set(have_cxx23_import_std 1)
-endif ()
+macro (cxx_check_import_std version)
+  set(have_cxx${version}_import_std 0)
+  if ("${version}" IN_LIST CMAKE_CXX_COMPILER_IMPORT_STD)
+    set(have_cxx${version}_import_std 1)
+  endif ()
+
+  if (TARGET "__CMAKE:CXX${version}" AND NOT have_cxx${version}_import_std)
+    message(FATAL_ERROR
+      "The toolchain's C++${version} target exists, but the user variable does "
+      "not indicate it.")
+  endif ()
+endmacro ()
+
+cxx_check_import_std(23)
+cxx_check_import_std(26)
 
 # Forward information about the C++ compile features.
 string(APPEND info "\

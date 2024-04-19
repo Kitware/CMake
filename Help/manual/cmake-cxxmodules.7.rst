@@ -96,6 +96,9 @@ library combinations:
 * MSVC toolset 14.36 and newer (provided with Visual Studio 17.6 Preview 2 and
   newer)
 
+The :variable:`CMAKE_CXX_COMPILER_IMPORT_STD` variable may be used to detect
+support for a standard level with the active C++ toolchain.
+
 .. note ::
 
    This support is provided only when experimental support for
