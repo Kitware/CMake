@@ -1702,7 +1702,7 @@ Link Context
   only be used to specify link options.
 
 
-.. _`Target-Dependent Queries`:
+.. _`Target-Dependent Expressions`:
 
 Target-Dependent Expressions
 ----------------------------
