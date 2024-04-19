@@ -1095,7 +1095,7 @@ std::string GetSourcecodeValueFromFileExtension(
   bool& keepLastKnownFileType, const std::vector<std::string>& enabled_langs)
 {
   std::string ext = cmSystemTools::LowerCase(_ext);
-  std::string sourcecode = "sourcecode";
+  std::string sourcecode = "default";
 
   if (ext == "o"_s) {
     keepLastKnownFileType = true;
@@ -1110,42 +1110,42 @@ std::string GetSourcecodeValueFromFileExtension(
     sourcecode = "file.storyboard";
     // NOLINTNEXTLINE(bugprone-branch-clone)
   } else if (ext == "mm"_s && !cm::contains(enabled_langs, "OBJCXX")) {
-    sourcecode += ".cpp.objcpp";
+    sourcecode = "sourcecode.cpp.objcpp";
     // NOLINTNEXTLINE(bugprone-branch-clone)
   } else if (ext == "m"_s && !cm::contains(enabled_langs, "OBJC")) {
-    sourcecode += ".c.objc";
+    sourcecode = "sourcecode.c.objc";
   } else if (ext == "swift"_s) {
-    sourcecode += ".swift";
+    sourcecode = "sourcecode.swift";
   } else if (ext == "plist"_s) {
-    sourcecode += ".text.plist";
+    sourcecode = "sourcecode.text.plist";
   } else if (ext == "h"_s) {
-    sourcecode += ".c.h";
+    sourcecode = "sourcecode.c.h";
   } else if (ext == "hxx"_s || ext == "hpp"_s || ext == "txx"_s ||
              ext == "pch"_s || ext == "hh"_s || ext == "inl"_s) {
-    sourcecode += ".cpp.h";
+    sourcecode = "sourcecode.cpp.h";
   } else if (ext == "png"_s || ext == "gif"_s || ext == "jpg"_s) {
     keepLastKnownFileType = true;
     sourcecode = "image";
   } else if (ext == "txt"_s) {
-    sourcecode += ".text";
+    sourcecode = "sourcecode.text";
   } else if (lang == "CXX"_s) {
-    sourcecode += ".cpp.cpp";
+    sourcecode = "sourcecode.cpp.cpp";
   } else if (lang == "C"_s) {
-    sourcecode += ".c.c";
+    sourcecode = "sourcecode.c.c";
   } else if (lang == "OBJCXX"_s) {
-    sourcecode += ".cpp.objcpp";
+    sourcecode = "sourcecode.cpp.objcpp";
   } else if (lang == "OBJC"_s) {
-    sourcecode += ".c.objc";
+    sourcecode = "sourcecode.c.objc";
   } else if (lang == "Fortran"_s) {
-    sourcecode += ".fortran.f90";
+    sourcecode = "sourcecode.fortran.f90";
   } else if (lang == "ASM"_s) {
-    sourcecode += ".asm";
+    sourcecode = "sourcecode.asm";
   } else if (ext == "metal"_s) {
-    sourcecode += ".metal";
+    sourcecode = "sourcecode.metal";
   } else if (ext == "mig"_s) {
-    sourcecode += ".mig";
+    sourcecode = "sourcecode.mig";
   } else if (ext == "tbd"_s) {
-    sourcecode += ".text-based-dylib-definition";
+    sourcecode = "sourcecode.text-based-dylib-definition";
   } else if (ext == "a"_s) {
     keepLastKnownFileType = true;
     sourcecode = "archive.ar";
