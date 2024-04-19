@@ -266,6 +266,9 @@ Generating an Apple Platform Selection File
   consider the platform to be unsupported.  The behavior is determined
   by the ``ERROR_VARIABLE`` option.
 
+Generating an Apple Architecture Selection File
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. command:: generate_apple_architecture_selection_file
 
   .. versionadded:: 3.29
