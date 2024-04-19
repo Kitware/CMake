@@ -1757,8 +1757,7 @@ These expressions look up the values of
   expression is evaluated on.
 
   .. versionchanged:: 3.26
-    When encountered during evaluation of
-    :ref:`usage requirements <Target Usage Requirements>`,
+    When encountered during evaluation of :ref:`Target Usage Requirements`,
     typically in an ``INTERFACE_*`` target property, lookup of the ``tgt``
     name occurs in the directory of the target specifying the requirement,
     rather than the directory of the consuming target for which the
@@ -1768,9 +1767,38 @@ These expressions look up the values of
   :target: TARGET_PROPERTY:prop
 
   Value of the property ``prop`` on the target for which the expression
-  is being evaluated. Note that for generator expressions in
-  :ref:`usage requirements <Target Usage Requirements>` this is the
-  consuming target rather than the target specifying the requirement.
+  is being evaluated.  Note that for generator expressions in
+  :ref:`Target Usage Requirements` this is the consuming target rather
+  than the target specifying the requirement.
+
+The expressions have special evaluation rules for some properties:
+
+* :ref:`Target Build Specification` properties evaluate as a
+  :ref:`semicolon-separated list <CMake Language Lists>` representing the union
+  of the value on the target itself with the values of the corresponding
+  :ref:`Target Usage Requirements` on targets named by the target's
+  :prop_tgt:`LINK_LIBRARIES`.  Evaluation of the usage requirements is
+  transitive over the closure of the linked targets'
+  :prop_tgt:`INTERFACE_LINK_LIBRARIES`.
+
+  Evaluation of :prop_tgt:`LINK_LIBRARIES` itself is not transitive.
+
+* :ref:`Target Usage Requirements` evaluate as a
+  :ref:`semicolon-separated list <CMake Language Lists>` representing the union
+  of the value on the target itself with the values of the same properties on
+  targets named by the target's :prop_tgt:`INTERFACE_LINK_LIBRARIES`.
+  Evaluation is transitive over the closure of the target's
+  :prop_tgt:`INTERFACE_LINK_LIBRARIES`.
+
+  Evaluation of :prop_tgt:`INTERFACE_LINK_LIBRARIES` itself is not transitive.
+
+* :ref:`Compatible Interface Properties` evaluate as a single value
+  combined from the target itself, from targets named by the target's
+  :prop_tgt:`LINK_LIBRARIES`, and from the transitive closure of the
+  linked targets' :prop_tgt:`INTERFACE_LINK_LIBRARIES`.  Values of a
+  compatible interface property from multiple targets combine based on
+  the type of compatibility required by the ``COMPATIBLE_INTERFACE_*``
+  property defining it.
 
 
 Target Artifacts
