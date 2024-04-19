@@ -1727,11 +1727,13 @@ These expressions look up information about a target.
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 
-.. genex:: $<TARGET_NAME:...>
+.. genex:: $<TARGET_NAME:tgt>
 
-  Marks ``...`` as being the name of a target.  This is required if exporting
-  targets to multiple dependent export sets.  The ``...`` must be a literal
-  name of a target, it may not contain generator expressions.
+  The target name ``tgt`` as written.  This marks ``tgt`` as being the name
+  of a target inside a larger expression, which is required if exporting
+  targets to multiple dependent export sets.  The ``tgt`` text must be a
+  literal name of a target; it may not contain generator expressions.
+  The target does not have to exist.
 
 .. genex:: $<TARGET_POLICY:policy>
 
