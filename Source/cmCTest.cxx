@@ -760,7 +760,9 @@ bool cmCTest::UpdateCTestConfiguration()
   }
   if (!this->GetCTestConfiguration("BuildDirectory").empty()) {
     this->Impl->BinaryDir = this->GetCTestConfiguration("BuildDirectory");
-    cmSystemTools::ChangeDirectory(this->Impl->BinaryDir);
+    if (this->Impl->TestDir.empty()) {
+      cmSystemTools::ChangeDirectory(this->Impl->BinaryDir);
+    }
   }
   this->Impl->TimeOut =
     std::chrono::seconds(atoi(this->GetCTestConfiguration("TimeOut").c_str()));

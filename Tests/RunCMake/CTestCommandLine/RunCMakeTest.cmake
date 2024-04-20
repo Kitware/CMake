@@ -542,7 +542,7 @@ run_MemCheckSan(UndefinedBehavior "simulate_sanitizer=1")
 run_cmake_command(test-dir-invalid-arg ${CMAKE_CTEST_COMMAND} --test-dir)
 run_cmake_command(test-dir-non-existing-dir ${CMAKE_CTEST_COMMAND} --test-dir non-existing-dir)
 
-function(run_testDir)
+function(run_testDir testName testPreset)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/testDir)
   set(RunCMake_TEST_NO_CLEAN 1)
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
@@ -552,9 +552,16 @@ function(run_testDir)
   add_test(Test1 \"${CMAKE_COMMAND}\" -E true)
   add_test(Test2 \"${CMAKE_COMMAND}\" -E true)
   ")
-  run_cmake_command(testDir ${CMAKE_CTEST_COMMAND} --test-dir "${RunCMake_TEST_BINARY_DIR}/sub")
+  if (testPreset)
+    set(presetCommandLine --preset=default)
+    configure_file(
+      ${RunCMake_SOURCE_DIR}/testDir-presets.json.in
+      ${RunCMake_TEST_BINARY_DIR}/CMakePresets.json)
+  endif()
+  run_cmake_command(${testName} ${CMAKE_CTEST_COMMAND} --test-dir "${RunCMake_TEST_BINARY_DIR}/sub" ${presetCommandLine})
 endfunction()
-run_testDir()
+run_testDir(testDir 0)
+run_testDir(testDir-preset 1)
 
 # Test --output-junit
 function(run_output_junit)
