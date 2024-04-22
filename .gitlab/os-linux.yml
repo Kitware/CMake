@@ -512,9 +512,7 @@
 .before_script_linux: &before_script_linux
     - source .gitlab/ci/env.sh
     - source .gitlab/ci/cmake-env.sh
-    - .gitlab/ci/ninja.sh
-    - export PATH=$PWD/.gitlab:$PATH
-    - ninja --version
+    - source .gitlab/ci/ninja-env.sh
 
 .cmake_prep_source_linux:
     stage: prep

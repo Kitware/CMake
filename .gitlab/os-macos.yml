@@ -176,9 +176,7 @@
 .before_script_macos: &before_script_macos
     - source .gitlab/ci/env.sh
     - source .gitlab/ci/cmake-env.sh
-    - .gitlab/ci/ninja.sh
-    - export PATH=$PWD/.gitlab:$PATH
-    - ninja --version
+    - source .gitlab/ci/ninja-env.sh
     # Download Qt
     - cmake -P .gitlab/ci/download_qt.cmake
     - export CMAKE_PREFIX_PATH=$PWD/.gitlab/qt${CMAKE_PREFIX_PATH:+:$CMAKE_PREFIX_PATH}
