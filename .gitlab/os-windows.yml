@@ -400,7 +400,7 @@
 
     script:
         - *before_script_windows
-        - Set-Item -Force -Path "env:PATH" -Value "$env:PATH;$env:SCCACHE_PATH"
+        - . .gitlab/ci/sccache-env.ps1
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
         - sccache --start-server
         - sccache --show-stats

@@ -587,8 +587,7 @@
         - mkdir -p build/
         - cp Utilities/Release/linux/$CMAKE_ARCH/cache.txt build/CMakeCache.txt
         # Make sccache available.
-        - .gitlab/ci/sccache.sh
-        - export PATH=$PWD/.gitlab:$PATH
+        - source .gitlab/ci/sccache-env.sh
         # Append sccache settings to the cache.
         - echo "CMAKE_C_COMPILER_LAUNCHER:STRING=sccache" >> build/CMakeCache.txt
         - echo "CMAKE_CXX_COMPILER_LAUNCHER:STRING=sccache" >> build/CMakeCache.txt
