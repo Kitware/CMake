@@ -1,12 +1,3 @@
-# FIXME: TARGET_PROPERTY evaluation does not pierce LINK_ONLY
-set(expect [[
-# file\(GENERATE\) produced:
-main LINK_LIBRARIES: 'foo1' # not transitive
-main LINK_DIRECTORIES: '[^';]*/Tests/RunCMake/GenEx-TARGET_PROPERTY/dirM;[^';]*/Tests/RunCMake/GenEx-TARGET_PROPERTY/dir1'
-main LINK_OPTIONS: '-optM;-opt1'
-main LINK_DEPENDS: '[^';]*/Tests/RunCMake/GenEx-TARGET_PROPERTY/TransitiveLink-build/depM;[^';]*/Tests/RunCMake/GenEx-TARGET_PROPERTY/TransitiveLink-build/dep1'
-]])
-
 string(REGEX REPLACE "\r\n" "\n" expect "${expect}")
 string(REGEX REPLACE "\n+$" "" expect "${expect}")
 

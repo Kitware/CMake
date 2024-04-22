@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.30
 .. toctree::
    :maxdepth: 1
 
+   CMP0166: TARGET_PROPERTY evaluates link properties transitively over private dependencies of static libraries. </policy/CMP0166>
    CMP0165: enable_language() must not be called before project(). </policy/CMP0165>
    CMP0164: add_library() rejects SHARED libraries when not supported by the platform. </policy/CMP0164>
    CMP0163: The GENERATED source file property is now visible in all directories. </policy/CMP0163>

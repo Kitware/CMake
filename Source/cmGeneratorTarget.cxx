@@ -89,11 +89,11 @@ const std::map<cm::string_view, TransitiveProperty>
     { "INCLUDE_DIRECTORIES"_s,
       { "INTERFACE_INCLUDE_DIRECTORIES"_s, LinkInterfaceFor::Usage } },
     { "LINK_DEPENDS"_s,
-      { "INTERFACE_LINK_DEPENDS"_s, LinkInterfaceFor::Usage } },
+      { "INTERFACE_LINK_DEPENDS"_s, LinkInterfaceFor::Link } },
     { "LINK_DIRECTORIES"_s,
-      { "INTERFACE_LINK_DIRECTORIES"_s, LinkInterfaceFor::Usage } },
+      { "INTERFACE_LINK_DIRECTORIES"_s, LinkInterfaceFor::Link } },
     { "LINK_OPTIONS"_s,
-      { "INTERFACE_LINK_OPTIONS"_s, LinkInterfaceFor::Usage } },
+      { "INTERFACE_LINK_OPTIONS"_s, LinkInterfaceFor::Link } },
     { "PRECOMPILE_HEADERS"_s,
       { "INTERFACE_PRECOMPILE_HEADERS"_s, LinkInterfaceFor::Usage } },
     { "SOURCES"_s, { "INTERFACE_SOURCES"_s, LinkInterfaceFor::Usage } },
@@ -1557,6 +1557,15 @@ cmGeneratorTarget::IsTransitiveProperty(cm::string_view prop,
   auto i = BuiltinTransitiveProperties.find(prop);
   if (i != BuiltinTransitiveProperties.end()) {
     result = i->second;
+    if (result->InterfaceFor != cmGeneratorTarget::LinkInterfaceFor::Usage) {
+      cmPolicies::PolicyStatus cmp0166 =
+        lg->GetPolicyStatus(cmPolicies::CMP0166);
+      if ((cmp0166 == cmPolicies::WARN || cmp0166 == cmPolicies::OLD) &&
+          (prop == "LINK_DIRECTORIES"_s || prop == "LINK_DEPENDS"_s ||
+           prop == "LINK_OPTIONS"_s)) {
+        result->InterfaceFor = cmGeneratorTarget::LinkInterfaceFor::Usage;
+      }
+    }
   } else if (cmHasLiteralPrefix(prop, "COMPILE_DEFINITIONS_")) {
     cmPolicies::PolicyStatus cmp0043 =
       lg->GetPolicyStatus(cmPolicies::CMP0043);

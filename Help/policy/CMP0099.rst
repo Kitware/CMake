@@ -21,6 +21,12 @@ The ``OLD`` behavior for this policy is to not propagate interface link
 properties. The ``NEW`` behavior of this policy is to propagate interface link
 properties.
 
+.. versionadded:: 3.30
+
+  Policy :policy:`CMP0166` makes :genex:`TARGET_PROPERTY` evaluation of
+  these three transitive link properties follow private dependencies of
+  static libraries too.
+
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.17
 .. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
 .. include:: STANDARD_ADVICE.txt

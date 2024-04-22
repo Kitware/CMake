@@ -1282,7 +1282,7 @@ Compile Context
   .. versionadded:: 3.27
 
   Content of ``...``, when collecting
-  :ref:`usage requirements <Target Usage Requirements>`,
+  :ref:`transitive build properties <Transitive Build Properties>`,
   otherwise it is the empty string.  This is intended for use in an
   :prop_tgt:`INTERFACE_LINK_LIBRARIES` and :prop_tgt:`LINK_LIBRARIES` target
   properties, typically populated via the :command:`target_link_libraries` command.
@@ -1670,8 +1670,8 @@ Link Context
 
   .. versionadded:: 3.1
 
-  Content of ``...``, except while collecting
-  :ref:`usage requirements <Target Usage Requirements>`,
+  Content of ``...``, except while collecting usage requirements from
+  :ref:`transitive build properties <Transitive Build Properties>`,
   in which case it is the empty string.  This is intended for use in an
   :prop_tgt:`INTERFACE_LINK_LIBRARIES` target property, typically populated
   via the :command:`target_link_libraries` command, to specify private link
@@ -1788,7 +1788,16 @@ The expressions have special evaluation rules for some properties:
   of the value on the target itself with the values of the same properties on
   targets named by the target's :prop_tgt:`INTERFACE_LINK_LIBRARIES`.
   Evaluation is transitive over the closure of the target's
-  :prop_tgt:`INTERFACE_LINK_LIBRARIES`.
+  :prop_tgt:`INTERFACE_LINK_LIBRARIES`:
+
+  * For :ref:`Transitive Build Properties`, the transitive closure
+    *excludes* entries of :prop_tgt:`INTERFACE_LINK_LIBRARIES` guarded
+    by the :genex:`LINK_ONLY` generator expression.
+
+  * For :ref:`Transitive Link Properties`, the transitive closure is
+    *includes* entries of :prop_tgt:`INTERFACE_LINK_LIBRARIES` guarded
+    by the :genex:`LINK_ONLY` generator expression.
+    See policy :policy:`CMP0166`.
 
   Evaluation of :prop_tgt:`INTERFACE_LINK_LIBRARIES` itself is not transitive.
 
