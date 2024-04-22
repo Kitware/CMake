@@ -395,11 +395,15 @@ if(BUILD_TESTING)
 
   string(REPLACE ";" "$<SEMICOLON>" TEST_STDS_C "${CMake_TEST_C_STANDARDS}")
   string(REPLACE ";" "$<SEMICOLON>" TEST_STDS_CXX "${CMake_TEST_CXX_STANDARDS}")
+  string(REPLACE ";" "$<SEMICOLON>" TEST_STDS_CUDA "${CMake_TEST_CUDA_STANDARDS}")
   set(CompileFeatures_BUILD_OPTIONS
     -DCMake_TEST_C_STANDARDS=${TEST_STDS_C}
     -DCMake_TEST_CXX_STANDARDS=${TEST_STDS_CXX}
+    -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+    -DCMake_TEST_CUDA_STANDARDS=${TEST_STDS_CUDA}
     )
   ADD_TEST_MACRO(CompileFeatures CompileFeatures)
+  set_property(TEST CompileFeatures APPEND PROPERTY LABELS "CUDA")
 
   ADD_TEST_MACRO(CMakeCommands.target_compile_features)
 
