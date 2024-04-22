@@ -14,6 +14,7 @@ run_cmake(LinkImplementationCycle6)
 run_cmake(LOCATION)
 run_cmake(SOURCES)
 run_cmake(TransitiveBuild)
+run_cmake(TransitiveLink)
 
 block()
   run_cmake(Scope)
