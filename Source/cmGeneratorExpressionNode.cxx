@@ -2916,8 +2916,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           return std::string();
         }
       } else {
-        assert(dagCheckerParent
-                 ->EvaluatingTransitiveProperty()); // NOLINT(clang-tidy)
+        assert(dagCheckerParent->EvaluatingTransitiveProperty());
       }
     }
 
