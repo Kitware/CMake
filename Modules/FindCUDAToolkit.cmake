@@ -439,7 +439,7 @@ Targets Created:
 nvidia-ML
 """""""""
 
-The `NVIDIA Management Library <https://developer.nvidia.com/nvidia-management-library-nvml>`_.
+The `NVIDIA Management Library <https://developer.nvidia.com/management-library-nvml>`_.
 This is a shared library only.
 
 Targets Created:
