@@ -28,7 +28,7 @@ instead of being appended.  See policy :policy:`CMP0101` which affects
 whether ``BEFORE`` will be ignored in certain cases.
 
 The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to
-specify the :ref:`scope <Target Usage Requirements>` of the following arguments.
+specify the :ref:`scope <Target Command Scope>` of the following arguments.
 ``PRIVATE`` and ``PUBLIC`` items will populate the :prop_tgt:`COMPILE_OPTIONS`
 property of ``<target>``.  ``PUBLIC`` and ``INTERFACE`` items will populate the
 :prop_tgt:`INTERFACE_COMPILE_OPTIONS` property of ``<target>``.

@@ -1281,7 +1281,8 @@ Compile Context
 
   .. versionadded:: 3.27
 
-  Content of ``...``, when collecting :ref:`Target Usage Requirements`,
+  Content of ``...``, when collecting
+  :ref:`usage requirements <Target Usage Requirements>`,
   otherwise it is the empty string.  This is intended for use in an
   :prop_tgt:`INTERFACE_LINK_LIBRARIES` and :prop_tgt:`LINK_LIBRARIES` target
   properties, typically populated via the :command:`target_link_libraries` command.
@@ -1669,7 +1670,8 @@ Link Context
 
   .. versionadded:: 3.1
 
-  Content of ``...``, except while collecting :ref:`Target Usage Requirements`,
+  Content of ``...``, except while collecting
+  :ref:`usage requirements <Target Usage Requirements>`,
   in which case it is the empty string.  This is intended for use in an
   :prop_tgt:`INTERFACE_LINK_LIBRARIES` target property, typically populated
   via the :command:`target_link_libraries` command, to specify private link
@@ -1746,7 +1748,8 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   expression is evaluated on.
 
   .. versionchanged:: 3.26
-    When encountered during evaluation of :ref:`Target Usage Requirements`,
+    When encountered during evaluation of
+    :ref:`usage requirements <Target Usage Requirements>`,
     typically in an ``INTERFACE_*`` target property, lookup of the ``tgt``
     name occurs in the directory of the target specifying the requirement,
     rather than the directory of the consuming target for which the
@@ -1757,8 +1760,8 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
 
   Value of the property ``prop`` on the target for which the expression
   is being evaluated. Note that for generator expressions in
-  :ref:`Target Usage Requirements` this is the consuming target rather
-  than the target specifying the requirement.
+  :ref:`usage requirements <Target Usage Requirements>` this is the
+  consuming target rather than the target specifying the requirement.
 
 .. genex:: $<TARGET_OBJECTS:tgt>
 
