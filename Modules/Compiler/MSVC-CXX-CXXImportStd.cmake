@@ -6,6 +6,7 @@ function (_cmake_cxx_import_std std variable)
     PATHS
       "$ENV{INCLUDE}"
       "${CMAKE_CXX_COMPILER}/../../.."
+      "${CMAKE_CXX_COMPILER}/../.."    # msvc-wine layout
     PATH_SUFFIXES
       ../modules
     NO_CACHE)
