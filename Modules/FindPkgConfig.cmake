@@ -158,6 +158,17 @@ macro(_pkgconfig_invoke _pkglist _prefix _varname _regexp)
       string(REGEX REPLACE "${_regexp}" " " _pkgconfig_invoke_result "${_pkgconfig_invoke_result}")
     endif()
 
+    # pkg-config <0.29.1 and pkgconf <1.5.1 prints quoted variables without unquoting
+    # unquote only if quotes are first and last characters
+    if((PKG_CONFIG_VERSION_STRING VERSION_LESS 0.29.1) OR
+        (PKG_CONFIG_VERSION_STRING VERSION_GREATER_EQUAL 1.0 AND PKG_CONFIG_VERSION_STRING VERSION_LESS 1.5.1))
+      if (_pkgconfig_invoke_result MATCHES "^\"(.*)\"$")
+        set(_pkgconfig_invoke_result "${CMAKE_MATCH_1}")
+      elseif(_pkgconfig_invoke_result MATCHES "^'(.*)'$")
+        set(_pkgconfig_invoke_result "${CMAKE_MATCH_1}")
+      endif()
+    endif()
+
     # pkg-config can represent "spaces within an argument" by backslash-escaping the space.
     # UNIX_COMMAND mode treats backslash-escaped spaces as "not a space that delimits arguments".
     separate_arguments(_pkgconfig_invoke_result UNIX_COMMAND "${_pkgconfig_invoke_result}")

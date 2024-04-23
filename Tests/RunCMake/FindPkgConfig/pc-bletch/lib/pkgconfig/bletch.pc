@@ -4,9 +4,11 @@ libdir=${exec_prefix}/lib
 includedir=${prefix}/include
 
 jackpot=bletch-lives
+multiple_values1="item1 item2 item3 item\ with\ spaces"
+multiple_values2='item1 item2 item3 item\ with\ spaces'
 
 Name: Bletch
-Description: Dummy packaget to test variable support
+Description: Dummy package to test variable support
 Version: 1.0
 Libs: -L${libdir} -lbletch
 Cflags: -Dbletch_version=1
