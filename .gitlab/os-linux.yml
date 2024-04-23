@@ -511,12 +511,8 @@
 
 .before_script_linux: &before_script_linux
     - source .gitlab/ci/env.sh
-    - .gitlab/ci/cmake.sh
-    - export PATH=$PWD/.gitlab/cmake/bin:$PATH
-    - .gitlab/ci/ninja.sh
-    - export PATH=$PWD/.gitlab:$PATH
-    - cmake --version
-    - ninja --version
+    - source .gitlab/ci/cmake-env.sh
+    - source .gitlab/ci/ninja-env.sh
 
 .cmake_prep_source_linux:
     stage: prep
@@ -591,8 +587,7 @@
         - mkdir -p build/
         - cp Utilities/Release/linux/$CMAKE_ARCH/cache.txt build/CMakeCache.txt
         # Make sccache available.
-        - .gitlab/ci/sccache.sh
-        - export PATH=$PWD/.gitlab:$PATH
+        - source .gitlab/ci/sccache-env.sh
         # Append sccache settings to the cache.
         - echo "CMAKE_C_COMPILER_LAUNCHER:STRING=sccache" >> build/CMakeCache.txt
         - echo "CMAKE_CXX_COMPILER_LAUNCHER:STRING=sccache" >> build/CMakeCache.txt

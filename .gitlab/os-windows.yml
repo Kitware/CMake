@@ -386,12 +386,8 @@
 
 .before_script_windows: &before_script_windows
     - . .gitlab/ci/env.ps1
-    - $pwdpath = $pwd.Path
-    - (& "$pwsh" -File ".gitlab/ci/cmake.ps1")
-    - Set-Item -Force -Path "env:PATH" -Value "$pwdpath\.gitlab\cmake\bin;$env:PATH"
-    - $cmake = "cmake"
+    - . .gitlab/ci/cmake-env.ps1
     - . .gitlab/ci/ninja-env.ps1
-    - cmake --version
     - . .gitlab/ci/qt-env.ps1
     - . .gitlab/ci/python-env.ps1
 
@@ -404,7 +400,7 @@
 
     script:
         - *before_script_windows
-        - Set-Item -Force -Path "env:PATH" -Value "$env:PATH;$env:SCCACHE_PATH"
+        - . .gitlab/ci/sccache-env.ps1
         - Invoke-Expression -Command .gitlab/ci/vcvarsall.ps1
         - sccache --start-server
         - sccache --show-stats
