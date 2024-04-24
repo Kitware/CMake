@@ -130,6 +130,8 @@ public:
   QCMakePropertyList properties() const;
   /// get the current binary directory
   QString binaryDirectory() const;
+  /// get the current binary directory, possibly a relative path
+  QString relativeBinaryDirectory() const;
   /// get the current source directory
   QString sourceDirectory() const;
   /// get the current generator
@@ -196,6 +198,7 @@ protected:
   bool WarnUninitializedMode;
   QString SourceDirectory;
   QString BinaryDirectory;
+  QString MaybeRelativeBinaryDirectory;
   QString Generator;
   QString Platform;
   QString Toolset;
