@@ -1,4 +1,4 @@
-set(expect-default "explicitFileType = sourcecode")
+set(expect-default "explicitFileType = default")
 set(expect-explicit "explicitFileType = sourcecode.c.h")
 set(expect-lastKnown "lastKnownFileType = sourcecode.c.h")
 foreach(src default explicit lastKnown)
