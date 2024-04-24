@@ -113,11 +113,15 @@ target_link_libraries(FortranCInterface PUBLIC symbols)
 if(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU" AND
   CMAKE_Fortran_COMPILER_VERSION VERSION_GREATER_EQUAL 12)
   target_compile_options(FortranCInterface PRIVATE "-fno-lto")
-  target_compile_options(myfort PRIVATE "-flto=auto" "-ffat-lto-objects")
+  if(NOT APPLE)
+    target_compile_options(myfort PRIVATE "-flto=auto" "-ffat-lto-objects")
+  endif()
 endif()
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
   CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 12)
-  target_compile_options(symbols PRIVATE "-flto=auto" "-ffat-lto-objects")
+  if(NOT APPLE)
+    target_compile_options(symbols PRIVATE "-flto=auto" "-ffat-lto-objects")
+  endif()
 endif()
 
 file(GENERATE OUTPUT exe-$<CONFIG>.cmake CONTENT [[
