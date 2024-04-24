@@ -75,6 +75,13 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci/long file name for testing purposes"
         CMAKE_ARCH: x86_64
 
+.fedora39_hip:
+    image: "kitware/cmake:ci-fedora39-hip-x86_64-2024-04-24"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        CMAKE_ARCH: x86_64
+
 #### Lint builds
 
 .fedora39_tidy:
@@ -410,7 +417,7 @@
         CTEST_LABELS: "HIP"
 
 .fedora39_hip_radeon:
-    extends: .fedora39
+    extends: .fedora39_hip
 
     variables:
         CMAKE_CONFIGURATION: fedora39_hip_radeon
