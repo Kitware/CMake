@@ -621,7 +621,19 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
 
       // Make sure the whole value was read.
       if (!(*this->Stream)) {
-        this->SetErrorMessage("Dynamic section specifies unreadable RPATH.");
+        if (tag == cmELF::TagRPath) {
+          this->SetErrorMessage(
+            "Dynamic section specifies unreadable DT_RPATH");
+        } else if (tag == cmELF::TagRunPath) {
+          this->SetErrorMessage(
+            "Dynamic section specifies unreadable DT_RUNPATH");
+        } else if (tag == cmELF::TagMipsRldMapRel) {
+          this->SetErrorMessage(
+            "Dynamic section specifies unreadable DT_MIPS_RLD_MAP_REL");
+        } else {
+          this->SetErrorMessage("Dynamic section specifies unreadable value"
+                                " for unexpected attribute");
+        }
         se.Value = "";
         return nullptr;
       }
