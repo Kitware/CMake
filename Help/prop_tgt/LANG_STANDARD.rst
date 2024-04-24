@@ -18,7 +18,7 @@ controlled with the :prop_tgt:`<LANG>_STANDARD_REQUIRED` target property.
 Note that the actual language standard used may be higher than that specified
 by ``<LANG>_STANDARD``, regardless of the value of
 :prop_tgt:`<LANG>_STANDARD_REQUIRED`.  In particular,
-:ref:`transitive usage requirements <Target Usage Requirements>` or the use of
+:ref:`usage requirements <Target Usage Requirements>` or the use of
 :manual:`compile features <cmake-compile-features(7)>` can raise the required
 language standard above what ``<LANG>_STANDARD`` specifies.
 

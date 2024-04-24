@@ -20,7 +20,7 @@ error will be issued if that requirement cannot be met.
 Note that the actual language standard used may be higher than that specified
 by :prop_tgt:`<LANG>_STANDARD`, regardless of the value of
 ``<LANG>_STANDARD_REQUIRED``.  In particular,
-:ref:`transitive usage requirements <Target Usage Requirements>` or the use of
+:ref:`usage requirements <Target Usage Requirements>` or the use of
 :manual:`compile features <cmake-compile-features(7)>` can raise the required
 language standard above what :prop_tgt:`<LANG>_STANDARD` specifies.
 
