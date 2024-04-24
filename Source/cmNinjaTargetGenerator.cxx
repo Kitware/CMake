@@ -1992,6 +1992,11 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
   std::string const moduleFilepath =
     this->ConvertToNinjaPath(cmStrCat(moduleDirectory, '/', moduleFilename));
 
+  vars.emplace("description",
+               cmStrCat("Building Swift Module '", moduleName, "' with ",
+                        sources.size(),
+                        sources.size() == 1 ? " source" : " sources"));
+
   bool const isSingleOutput = [this, compileMode]() -> bool {
     bool isMultiThread = false;
     if (cmValue numThreadStr =
