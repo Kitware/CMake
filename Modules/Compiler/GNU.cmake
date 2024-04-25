@@ -151,7 +151,7 @@ macro(__compiler_gnu lang)
       list(APPEND __lto_flags -flto)
     endif()
 
-    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4.7)
+    if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4.7 AND NOT APPLE)
       # '-ffat-lto-objects' introduced since GCC 4.7:
       # * https://gcc.gnu.org/onlinedocs/gcc-4.6.4/gcc/Option-Summary.html (no)
       # * https://gcc.gnu.org/onlinedocs/gcc-4.7.4/gcc/Option-Summary.html (yes)
