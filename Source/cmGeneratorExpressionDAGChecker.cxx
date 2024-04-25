@@ -20,16 +20,17 @@
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   cmGeneratorTarget const* target, std::string property,
   const GeneratorExpressionContent* content,
-  cmGeneratorExpressionDAGChecker* parent)
+  cmGeneratorExpressionDAGChecker* parent, cmLocalGenerator const* contextLG)
   : cmGeneratorExpressionDAGChecker(cmListFileBacktrace(), target,
-                                    std::move(property), content, parent)
+                                    std::move(property), content, parent,
+                                    contextLG)
 {
 }
 
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   cmListFileBacktrace backtrace, cmGeneratorTarget const* target,
   std::string property, const GeneratorExpressionContent* content,
-  cmGeneratorExpressionDAGChecker* parent)
+  cmGeneratorExpressionDAGChecker* parent, cmLocalGenerator const* contextLG)
   : Parent(parent)
   , Top(parent ? parent->Top : this)
   , Target(target)
@@ -37,6 +38,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   , Content(content)
   , Backtrace(std::move(backtrace))
 {
+  static_cast<void>(contextLG);
   if (parent) {
     this->TopIsTransitiveProperty = parent->TopIsTransitiveProperty;
   } else {

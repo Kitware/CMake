@@ -76,10 +76,10 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
     // To please constraint checks of DAGChecker, this property must have
     // LINK_OPTIONS property as parent
     parentDagChecker = cm::make_unique<cmGeneratorExpressionDAGChecker>(
-      tgt, "LINK_OPTIONS", nullptr, nullptr);
+      tgt, "LINK_OPTIONS", nullptr, nullptr, tgt->GetLocalGenerator());
   }
-  cmGeneratorExpressionDAGChecker dagChecker(tgt, propName, nullptr,
-                                             parentDagChecker.get());
+  cmGeneratorExpressionDAGChecker dagChecker(
+    tgt, propName, nullptr, parentDagChecker.get(), tgt->GetLocalGenerator());
 
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*prop);
 

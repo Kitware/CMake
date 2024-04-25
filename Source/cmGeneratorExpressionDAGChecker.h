@@ -13,6 +13,7 @@
 struct GeneratorExpressionContent;
 struct cmGeneratorExpressionContext;
 class cmGeneratorTarget;
+class cmLocalGenerator;
 
 #define CM_SELECT_BOTH(F, A1, A2) F(A1, A2)
 #define CM_SELECT_FIRST(F, A1, A2) F(A1)
@@ -47,11 +48,13 @@ struct cmGeneratorExpressionDAGChecker
                                   cmGeneratorTarget const* target,
                                   std::string property,
                                   const GeneratorExpressionContent* content,
-                                  cmGeneratorExpressionDAGChecker* parent);
+                                  cmGeneratorExpressionDAGChecker* parent,
+                                  cmLocalGenerator const* contextLG);
   cmGeneratorExpressionDAGChecker(cmGeneratorTarget const* target,
                                   std::string property,
                                   const GeneratorExpressionContent* content,
-                                  cmGeneratorExpressionDAGChecker* parent);
+                                  cmGeneratorExpressionDAGChecker* parent,
+                                  cmLocalGenerator const* contextLG);
 
   enum Result
   {
