@@ -1702,22 +1702,15 @@ Link Context
   only be used to specify link options.
 
 
-.. _`Target-Dependent Queries`:
+.. _`Target-Dependent Expressions`:
 
 Target-Dependent Expressions
 ----------------------------
 
-These queries refer to a target ``tgt``. Unless otherwise stated, this can
-be any runtime artifact, namely:
+Target Meta-Data
+^^^^^^^^^^^^^^^^
 
-* An executable target created by :command:`add_executable`.
-* A shared library target (``.so``, ``.dll`` but not their ``.lib`` import
-  library) created by :command:`add_library`.
-* A static library target created by :command:`add_library`.
-
-In the following, the phrase "the ``tgt`` filename" means the name of the
-``tgt`` binary file. This has to be distinguished from the phrase
-"the target name", which is just the string ``tgt``.
+These expressions look up information about a target.
 
 .. genex:: $<TARGET_EXISTS:tgt>
 
@@ -1734,11 +1727,27 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
 
-.. genex:: $<TARGET_NAME:...>
+.. genex:: $<TARGET_NAME:tgt>
 
-  Marks ``...`` as being the name of a target.  This is required if exporting
-  targets to multiple dependent export sets.  The ``...`` must be a literal
-  name of a target, it may not contain generator expressions.
+  The target name ``tgt`` as written.  This marks ``tgt`` as being the name
+  of a target inside a larger expression, which is required if exporting
+  targets to multiple dependent export sets.  The ``tgt`` text must be a
+  literal name of a target; it may not contain generator expressions.
+  The target does not have to exist.
+
+.. genex:: $<TARGET_POLICY:policy>
+
+  ``1`` if the ``policy`` was ``NEW`` when the 'head' target was created,
+  else ``0``.  If the ``policy`` was not set, the warning message for the policy
+  will be emitted. This generator expression only works for a subset of
+  policies.
+
+
+Target Properties
+^^^^^^^^^^^^^^^^^
+
+These expressions look up the values of
+:ref:`target properties <Target Properties>`.
 
 .. genex:: $<TARGET_PROPERTY:tgt,prop>
 
@@ -1748,8 +1757,7 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   expression is evaluated on.
 
   .. versionchanged:: 3.26
-    When encountered during evaluation of
-    :ref:`usage requirements <Target Usage Requirements>`,
+    When encountered during evaluation of :ref:`Target Usage Requirements`,
     typically in an ``INTERFACE_*`` target property, lookup of the ``tgt``
     name occurs in the directory of the target specifying the requirement,
     rather than the directory of the consuming target for which the
@@ -1759,23 +1767,55 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
   :target: TARGET_PROPERTY:prop
 
   Value of the property ``prop`` on the target for which the expression
-  is being evaluated. Note that for generator expressions in
-  :ref:`usage requirements <Target Usage Requirements>` this is the
-  consuming target rather than the target specifying the requirement.
+  is being evaluated.  Note that for generator expressions in
+  :ref:`Target Usage Requirements` this is the consuming target rather
+  than the target specifying the requirement.
 
-.. genex:: $<TARGET_OBJECTS:tgt>
+The expressions have special evaluation rules for some properties:
 
-  .. versionadded:: 3.1
+* :ref:`Target Build Specification` properties evaluate as a
+  :ref:`semicolon-separated list <CMake Language Lists>` representing the union
+  of the value on the target itself with the values of the corresponding
+  :ref:`Target Usage Requirements` on targets named by the target's
+  :prop_tgt:`LINK_LIBRARIES`.  Evaluation of the usage requirements is
+  transitive over the closure of the linked targets'
+  :prop_tgt:`INTERFACE_LINK_LIBRARIES`.
 
-  List of objects resulting from building ``tgt``.  This would typically be
-  used on :ref:`object library <Object Libraries>` targets.
+  Evaluation of :prop_tgt:`LINK_LIBRARIES` itself is not transitive.
 
-.. genex:: $<TARGET_POLICY:policy>
+* :ref:`Target Usage Requirements` evaluate as a
+  :ref:`semicolon-separated list <CMake Language Lists>` representing the union
+  of the value on the target itself with the values of the same properties on
+  targets named by the target's :prop_tgt:`INTERFACE_LINK_LIBRARIES`.
+  Evaluation is transitive over the closure of the target's
+  :prop_tgt:`INTERFACE_LINK_LIBRARIES`.
 
-  ``1`` if the ``policy`` was ``NEW`` when the 'head' target was created,
-  else ``0``.  If the ``policy`` was not set, the warning message for the policy
-  will be emitted. This generator expression only works for a subset of
-  policies.
+  Evaluation of :prop_tgt:`INTERFACE_LINK_LIBRARIES` itself is not transitive.
+
+* :ref:`Compatible Interface Properties` evaluate as a single value
+  combined from the target itself, from targets named by the target's
+  :prop_tgt:`LINK_LIBRARIES`, and from the transitive closure of the
+  linked targets' :prop_tgt:`INTERFACE_LINK_LIBRARIES`.  Values of a
+  compatible interface property from multiple targets combine based on
+  the type of compatibility required by the ``COMPATIBLE_INTERFACE_*``
+  property defining it.
+
+
+Target Artifacts
+^^^^^^^^^^^^^^^^
+
+These expressions look up information about artifacts associated with
+a given target ``tgt``.  Unless otherwise stated, this can be any
+runtime artifact, namely:
+
+* An executable target created by :command:`add_executable`.
+* A shared library target (``.so``, ``.dll`` but not their ``.lib`` import
+  library) created by :command:`add_library`.
+* A static library target created by :command:`add_library`.
+
+In the following, the phrase "the ``tgt`` filename" means the name of the
+``tgt`` binary file. This has to be distinguished from the phrase
+"the target name", which is just the string ``tgt``.
 
 .. genex:: $<TARGET_FILE:tgt>
 
@@ -2256,6 +2296,13 @@ In the following, the phrase "the ``tgt`` filename" means the name of the
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on (see policy :policy:`CMP0112`).
+
+.. genex:: $<TARGET_OBJECTS:tgt>
+
+  .. versionadded:: 3.1
+
+  List of objects resulting from building ``tgt``.  This would typically be
+  used on :ref:`object library <Object Libraries>` targets.
 
 .. genex:: $<TARGET_RUNTIME_DLLS:tgt>
 
