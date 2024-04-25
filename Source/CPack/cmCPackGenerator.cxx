@@ -187,7 +187,7 @@ int cmCPackGenerator::InstallProject()
   this->CleanTemporaryDirectory();
 
   std::string bareTempInstallDirectory =
-    this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
+    this->GetOption("CPACK_TEMPORARY_DIRECTORY");
   std::string tempInstallDirectoryStr = bareTempInstallDirectory;
   bool setDestDir = this->GetOption("CPACK_SET_DESTDIR").IsOn() ||
     cmIsInternallyOn(this->GetOption("CPACK_SET_DESTDIR"));
@@ -1218,6 +1218,60 @@ int cmCPackGenerator::Initialize(const std::string& name, cmMakefile* mf)
   // it, the default value should be:
   this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/");
 
+  // Special handling for CPACK_TEMPORARY[_INSTALL]_DIRECTORY.
+  // Note: Make sure that if only one of these variables is already set, the
+  //       other will be set to the same value. If they are set to different
+  //       values, however, we cannot proceed.
+  cmValue val1 =
+    this->MakefileMap->GetDefinition("CPACK_TEMPORARY_INSTALL_DIRECTORY");
+  cmValue val2 = this->MakefileMap->GetDefinition("CPACK_TEMPORARY_DIRECTORY");
+  if (val1 != val2) {
+    // One variable is set but not the other?
+    // Then set the other variable to the same value (even if it is invalid).
+    if (val1.Get() != nullptr && val2.Get() == nullptr) {
+      cmCPackLogger(cmCPackLog::LOG_WARNING,
+                    "Variable CPACK_TEMPORARY_INSTALL_DIRECTORY is set, which "
+                    "is not recommended. For backwards-compatibility we will "
+                    "also set CPACK_TEMPORARY_DIRECTORY to the same value and "
+                    "proceed. However, better set neither of them!"
+                      << std::endl);
+      this->MakefileMap->AddDefinition("CPACK_TEMPORARY_DIRECTORY", val1);
+    } else if (val1.Get() == nullptr && val2.Get() != nullptr) {
+      cmCPackLogger(
+        cmCPackLog::LOG_WARNING,
+        "Variable CPACK_TEMPORARY_DIRECTORY is set, which is not recommended."
+          << std::endl);
+      cmCPackLogger(
+        cmCPackLog::LOG_DEBUG,
+        "For backwards-compatibility we will set "
+        "CPACK_TEMPORARY_INSTALL_DIRECTORY to the same value as "
+        "CPACK_TEMPORARY_DIRECTORY. However, better set neither of them!"
+          << std::endl);
+      this->MakefileMap->AddDefinition("CPACK_TEMPORARY_INSTALL_DIRECTORY",
+                                       val2);
+    } else {
+      cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                    "CPACK_TEMPORARY_INSTALL_DIRECTORY is already set to: "
+                      << val1 << std::endl);
+      cmCPackLogger(
+        cmCPackLog::LOG_VERBOSE,
+        "CPACK_TEMPORARY_DIRECTORY is already set to: " << val2 << std::endl);
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Variables CPACK_TEMPORARY_DIRECTORY and "
+                    "CPACK_TEMPORARY_INSTALL_DIRECTORY are both set but to "
+                    "different values. This is not supported!"
+                      << std::endl);
+      return 0;
+    }
+  } else if (val1.Get() != nullptr && val2.Get() != nullptr) {
+    cmCPackLogger(cmCPackLog::LOG_WARNING,
+                  "Variables CPACK_TEMPORARY_DIRECTORY and "
+                  "CPACK_TEMPORARY_INSTALL_DIRECTORY are both set. Because "
+                  "they are set to the same value we can still proceed. "
+                  "However, better set neither of them!"
+                    << std::endl);
+  }
+
   return result;
 }
 
@@ -1356,7 +1410,7 @@ bool cmCPackGenerator::ConfigureFile(const std::string& inName,
 int cmCPackGenerator::CleanTemporaryDirectory()
 {
   std::string tempInstallDirectory =
-    this->GetOption("CPACK_TEMPORARY_INSTALL_DIRECTORY");
+    this->GetOption("CPACK_TEMPORARY_DIRECTORY");
   if (cmsys::SystemTools::FileExists(tempInstallDirectory)) {
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                   "- Clean temporary : " << tempInstallDirectory << std::endl);
