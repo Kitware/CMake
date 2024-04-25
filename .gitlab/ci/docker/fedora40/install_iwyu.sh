@@ -18,13 +18,13 @@ readonly llvm_version="$( echo "$llvm_full_version" | cut -d. -f-1 )"
 git checkout "clang_$llvm_version"
 git apply <<EOF
 diff --git a/iwyu_driver.cc b/iwyu_driver.cc
-index 42fea35..fbb77a9 100644
+index dd4b046..cfd568a 100644
 --- a/iwyu_driver.cc
 +++ b/iwyu_driver.cc
-@@ -167,6 +167,7 @@ CompilerInstance* CreateCompilerInstance(int argc, const char **argv) {
-   DiagnosticsEngine diagnostics(diagnostic_id, &*diagnostic_options,
-                                 diagnostic_client);
-   Driver driver(path, getDefaultTargetTriple(), diagnostics);
+@@ -249,6 +249,7 @@ bool ExecuteAction(int argc, const char** argv,
+                                           /*CodeGenOpts=*/nullptr);
+
+   Driver driver(path, getDefaultTargetTriple(), *diagnostics);
 +  driver.ResourceDir = "/usr/lib64/clang/$llvm_full_version";
    driver.setTitle("include what you use");
 

@@ -1,5 +1,5 @@
 set(CMake_TEST_C_STANDARDS "90;99;11;17;23" CACHE STRING "")
-set(CMake_TEST_CXX_STANDARDS "98;11;14;17;20;23" CACHE STRING "")
+set(CMake_TEST_CXX_STANDARDS "98;11;14;17;20;23;26" CACHE STRING "")
 
 set(CMake_TEST_CTestUpdate_BZR "ON" CACHE BOOL "")
 set(CMake_TEST_CTestUpdate_GIT "ON" CACHE BOOL "")
@@ -67,6 +67,9 @@ set(CMake_TEST_FindMPI_ENVMOD "PATH=path_list_prepend:/usr/lib64/mpich/bin;LD_LI
 set(CMake_TEST_FindMPI "ON" CACHE BOOL "")
 set(CMake_TEST_FindODBC "ON" CACHE BOOL "")
 set(CMake_TEST_FindOpenACC "ON" CACHE BOOL "")
+set(CMake_TEST_FindOpenACC_C "ON" CACHE BOOL "")
+set(CMake_TEST_FindOpenACC_CXX "ON" CACHE BOOL "")
+set(CMake_TEST_FindOpenACC_Fortran "ON" CACHE BOOL "")
 set(CMake_TEST_FindOpenAL "ON" CACHE BOOL "")
 set(CMake_TEST_FindOpenGL "ON" CACHE BOOL "")
 set(CMake_TEST_FindOpenMP_C "ON" CACHE BOOL "")

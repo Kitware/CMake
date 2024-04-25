@@ -59,7 +59,7 @@ p:source-package:
 
 p:doc-package:
     extends:
-        - .fedora39_sphinx_package
+        - .fedora40_sphinx_package
         - .cmake_prep_doc_linux
         - .linux_x86_64_tags
         - .cmake_doc_artifacts
@@ -108,18 +108,18 @@ l:iwyu-debian12:
         - .cmake_cdash_artifacts
         - .run_automatically
 
-l:tidy-fedora39:
+l:tidy-fedora40:
     extends:
-        - .fedora39_tidy
+        - .fedora40_tidy
         - .cmake_build_linux
         - .cmake_tidy_artifacts
         - .linux_x86_64_tags
         - .cmake_cdash_artifacts
         - .run_automatically
 
-l:sphinx-fedora39:
+l:sphinx-fedora40:
     extends:
-        - .fedora39_sphinx
+        - .fedora40_sphinx
         - .cmake_build_linux
         - .cmake_sphinx_artifacts
         - .linux_x86_64_tags
@@ -128,9 +128,9 @@ l:sphinx-fedora39:
         CMAKE_CI_JOB_CONTINUOUS: "true"
         CMAKE_CI_JOB_HELP: "true"
 
-l:clang-analyzer-fedora39:
+l:clang-analyzer-fedora40:
     extends:
-        - .fedora39_clang_analyzer
+        - .fedora40_clang_analyzer
         - .cmake_build_linux
         - .linux_x86_64_tags
         - .run_automatically
@@ -234,9 +234,9 @@ t:fedora39-hip-radeon:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora39-ninja-clang:
+t:fedora40-ninja-clang:
     extends:
-        - .fedora39_ninja_clang
+        - .fedora40_ninja_clang
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
@@ -244,9 +244,9 @@ t:fedora39-ninja-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora39-ninja-multi-clang:
+t:fedora40-ninja-multi-clang:
     extends:
-        - .fedora39_ninja_multi_clang
+        - .fedora40_ninja_multi_clang
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
@@ -254,9 +254,9 @@ t:fedora39-ninja-multi-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora39-makefiles-clang:
+t:fedora40-makefiles-clang:
     extends:
-        - .fedora39_makefiles_clang
+        - .fedora40_makefiles_clang
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
@@ -264,17 +264,17 @@ t:fedora39-makefiles-clang:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora39-makefiles:
+t:fedora40-makefiles:
     extends:
-        - .fedora39_makefiles
+        - .fedora40_makefiles
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .run_dependent
         - .needs_centos7_x86_64
 
-t:fedora39-makefiles-nospace:
+t:fedora40-makefiles-nospace:
     extends:
-        - .fedora39_makefiles
+        - .fedora40_makefiles
         - .cmake_test_linux_release
         - .linux_x86_64_tags
         - .cmake_junit_artifacts
@@ -282,7 +282,7 @@ t:fedora39-makefiles-nospace:
         - .needs_centos7_x86_64
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
-        CMAKE_CI_BUILD_NAME: fedora39_makefiles_nospace
+        CMAKE_CI_BUILD_NAME: fedora40_makefiles_nospace
         CMAKE_CI_JOB_NIGHTLY: "true"
 
 t:nvhpc22.11-ninja:
@@ -406,26 +406,6 @@ t:hip5.5-radeon:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:linux-gcc-cxx-modules-ninja:
-    extends:
-        - .gcc_cxx_modules_ninja
-        - .cmake_test_linux_release
-        - .linux_x86_64_tags
-        - .run_dependent
-        - .needs_centos7_x86_64
-    variables:
-        CMAKE_CI_JOB_NIGHTLY: "true"
-
-t:linux-gcc-cxx-modules-ninja-multi:
-    extends:
-        - .gcc_cxx_modules_ninja_multi
-        - .cmake_test_linux_release
-        - .linux_x86_64_tags
-        - .run_dependent
-        - .needs_centos7_x86_64
-    variables:
-        CMAKE_CI_JOB_NIGHTLY: "true"
-
 t:debian10-legacy:
     extends:
         - .debian10_legacy
@@ -437,9 +417,9 @@ t:debian10-legacy:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-b:fedora39-ninja:
+b:fedora40-ninja:
     extends:
-        - .fedora39_ninja
+        - .fedora40_ninja
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_x86_64_tags
@@ -447,9 +427,9 @@ b:fedora39-ninja:
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
 
-b:fedora39-makefiles-symlinked:
+b:fedora40-makefiles-symlinked:
     extends:
-        - .fedora39_makefiles_symlinked
+        - .fedora40_makefiles_symlinked
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_x86_64_tags
@@ -484,54 +464,54 @@ b:debian12-aarch64-extdeps:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-b:fedora39-extdeps:
+b:fedora40-extdeps:
     extends:
-        - .fedora39_extdeps
+        - .fedora40_extdeps
         - .cmake_build_linux_standalone
         - .linux_x86_64_tags
         - .run_manually
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora39-ninja:
+t:fedora40-ninja:
     extends:
-        - .fedora39_ninja
+        - .fedora40_ninja
         - .cmake_test_linux
         - .linux_x86_64_tags_x11
         - .cmake_test_artifacts
         - .run_dependent
     dependencies:
-        - b:fedora39-ninja
+        - b:fedora40-ninja
     needs:
-        - b:fedora39-ninja
+        - b:fedora40-ninja
     variables:
         CMAKE_CI_JOB_CONTINUOUS: "true"
 
-t:fedora39-makefiles-symlinked:
+t:fedora40-makefiles-symlinked:
     extends:
-        - .fedora39_makefiles_symlinked
+        - .fedora40_makefiles_symlinked
         - .cmake_test_linux
         - .linux_x86_64_tags_x11
         - .cmake_test_artifacts
         - .run_dependent
     dependencies:
-        - b:fedora39-makefiles-symlinked
+        - b:fedora40-makefiles-symlinked
     needs:
-        - b:fedora39-makefiles-symlinked
+        - b:fedora40-makefiles-symlinked
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora39-ninja-multi:
+t:fedora40-ninja-multi:
     extends:
-        - .fedora39_ninja_multi
+        - .fedora40_ninja_multi
         - .cmake_test_linux_external
         - .linux_x86_64_tags
         - .cmake_junit_artifacts
         - .run_dependent
     dependencies:
-        - t:fedora39-ninja
+        - t:fedora40-ninja
     needs:
-        - t:fedora39-ninja
+        - t:fedora40-ninja
 
 t:intel2016u2-makefiles:
     extends:
@@ -786,9 +766,9 @@ u:linux-aarch64-package:
 
 ## Sanitizer builds
 
-b:fedora39-asan:
+b:fedora40-asan:
     extends:
-        - .fedora39_asan
+        - .fedora40_asan
         - .cmake_build_linux
         - .cmake_build_artifacts
         - .linux_x86_64_tags
@@ -796,16 +776,16 @@ b:fedora39-asan:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora39-asan:
+t:fedora40-asan:
     extends:
-        - .fedora39_asan
+        - .fedora40_asan
         - .cmake_memcheck_linux
         - .linux_x86_64_tags
         - .run_dependent
     dependencies:
-        - b:fedora39-asan
+        - b:fedora40-asan
     needs:
-        - b:fedora39-asan
+        - b:fedora40-asan
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 

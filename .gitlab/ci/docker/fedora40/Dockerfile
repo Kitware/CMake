@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG BASE_IMAGE=fedora:39
+ARG BASE_IMAGE=fedora:40
 
 FROM ${BASE_IMAGE} AS dnf-cache
 # Populate DNF cache w/ the fresh metadata and prefetch packages.

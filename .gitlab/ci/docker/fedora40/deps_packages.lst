@@ -11,7 +11,6 @@ clang-tools-extra
 clang-tools-extra-devel
 compiler-rt
 flang
-flang-devel
 gcc-c++
 git-core
 llvm-devel
@@ -32,6 +31,7 @@ zlib-devel
 
 # Install documentation tools.
 python3-sphinx
+python3-sphinxcontrib-qthelp
 texinfo
 qt5-qttools-devel
 qt6-qttools-devel
@@ -48,13 +48,6 @@ which
 
 # Install ASM_NASM language toolchain.
 nasm
-
-# Install HIP language toolchain.
-hsakmt-devel
-lld
-rocm-comgr-devel
-rocm-hip-devel
-rocm-runtime-devel
 
 # Packages needed to test CTest.
 breezy
@@ -99,6 +92,7 @@ libcurl-devel
 libicu-devel
 libinput-devel systemd-devel
 libjpeg-turbo-devel
+libomp-devel
 libpng-devel
 opensp-devel
 postgresql-server-devel
@@ -126,3 +120,6 @@ wxGTK-devel
 xalan-c-devel
 xerces-c-devel
 xz-devel
+
+# Packages needed to test third-party binaries.
+ncurses-compat-libs
