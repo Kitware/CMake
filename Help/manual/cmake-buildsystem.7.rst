@@ -195,7 +195,7 @@ Target Commands
 ---------------
 
 Target-specific commands populate the
-`build specification <Target Build Specification>`_ of `Binary Targets`_ and
+`build specification <Target Build Specification_>`_ of `Binary Targets`_ and
 `usage requirements <Target Usage Requirements_>`_ of `Binary Targets`_,
 `Interface Libraries`_, and `Imported Targets`_.
 
