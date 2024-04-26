@@ -600,7 +600,7 @@ For example:
 
   # filename is now already empty, the following removes nothing
   cmake_path(REMOVE_FILENAME path)
-  message("Second path is \"${result}\"")
+  message("Second path is \"${path}\"")
 
 Output::
 
