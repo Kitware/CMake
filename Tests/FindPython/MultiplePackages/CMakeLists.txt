@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15)
 
 project(TestMultiplePackages C)
 
@@ -20,7 +20,7 @@ if (CMake_TEST_FindPython2)
 
   add_test (NAME python2_spam2
             COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:spam3>"
-            "${Python2_EXECUTABLE}" -c "import spam2; spam2.system(\"cd\")")
+            "${Python2_INTERPRETER}" -c "import spam2; spam2.system(\"cd\")")
 
 endif()
 
@@ -40,6 +40,6 @@ if (CMake_TEST_FindPython3)
 
   add_test (NAME python3_spam3
             COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:spam3>"
-            "${Python3_EXECUTABLE}" -c "import spam3; spam3.system(\"cd\")")
+            "${Python3_INTERPRETER}" -c "import spam3; spam3.system(\"cd\")")
 
 endif()
