@@ -406,8 +406,8 @@ class cmMakefile;
          "is not usable.",                                                    \
          3, 24, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0135,                                                     \
-         "ExternalProject ignores timestamps in archives by default for the " \
-         "URL download method",                                               \
+         "ExternalProject and FetchContent ignore timestamps in archives by " \
+         "default for the URL download method",                               \
          3, 24, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0136,                                                     \
          "Watcom runtime library flags are selected by an abstraction.", 3,   \
