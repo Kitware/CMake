@@ -299,24 +299,19 @@ if(BUILD_TESTING)
     "Should the tests that use '--build-target package' be run?"
     ON)
   mark_as_advanced(CTEST_TEST_CPACK)
-  set(CTEST_TEST_OSX_ARCH 0)
   set(CMake_TEST_XCODE_VERSION 0)
   if(APPLE)
-    set(CTEST_TEST_OSX_ARCH 1)
     if(XCODE_VERSION)
       set(CMake_TEST_XCODE_VERSION "${XCODE_VERSION}")
     else()
       execute_process(
         COMMAND xcodebuild -version
-        OUTPUT_VARIABLE _version ERROR_VARIABLE _version_err
+        OUTPUT_VARIABLE _version
+        RESULT_VARIABLE _failed
         )
-      if(_version MATCHES "^Xcode ([0-9]+(\\.[0-9]+)*)")
+      if(NOT _failed AND _version MATCHES "^Xcode ([0-9]+(\\.[0-9]+)*)")
         set(CMake_TEST_XCODE_VERSION "${CMAKE_MATCH_1}")
       endif()
-    endif()
-    if(NOT CMake_TEST_XCODE_VERSION VERSION_LESS 10)
-      # Since Xcode 10 we do not have two supported architectures for the host.
-      set(CTEST_TEST_OSX_ARCH 0)
     endif()
     if(CMAKE_OSX_SYSROOT)
       execute_process(
@@ -952,6 +947,8 @@ if(BUILD_TESTING)
     "${CMake_BINARY_DIR}/Tests/BuildDepends"
     ${build_generator_args}
     --build-project BuildDepends
+    --build-options
+    "-DCMake_TEST_XCODE_VERSION=${CMake_TEST_XCODE_VERSION}"
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BuildDepends")
 
