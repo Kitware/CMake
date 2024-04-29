@@ -294,8 +294,8 @@ class cmMakefile;
          "FindFLEX runs flex in CMAKE_CURRENT_BINARY_DIR when executing.", 3, \
          17, 0, cmPolicies::WARN)                                             \
   SELECT(POLICY, CMP0099,                                                     \
-         "Link properties are transitive over private dependency on static "  \
-         "libraries.",                                                        \
+         "Link properties are transitive over private dependencies of "       \
+         "static libraries.",                                                 \
          3, 17, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0100, "Let AUTOMOC and AUTOUIC process .hh files.", 3,    \
          17, 0, cmPolicies::WARN)                                             \
