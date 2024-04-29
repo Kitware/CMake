@@ -2877,24 +2877,11 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     std::string interfacePropertyName;
     bool isInterfaceProperty = false;
 
-#define POPULATE_INTERFACE_PROPERTY_NAME(prop)                                \
-  if (propertyName == #prop) {                                                \
-    interfacePropertyName = "INTERFACE_" #prop;                               \
-  } else if (propertyName == "INTERFACE_" #prop) {                            \
-    interfacePropertyName = "INTERFACE_" #prop;                               \
-    isInterfaceProperty = true;                                               \
-  } else
-
-    CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(POPULATE_INTERFACE_PROPERTY_NAME)
-    // Note that the above macro terminates with an else
-    /* else */ if (cmHasLiteralPrefix(propertyName, "COMPILE_DEFINITIONS_")) {
-      cmPolicies::PolicyStatus polSt =
-        context->LG->GetPolicyStatus(cmPolicies::CMP0043);
-      if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {
-        interfacePropertyName = "INTERFACE_COMPILE_DEFINITIONS";
-      }
+    if (cm::optional<cmGeneratorTarget::TransitiveProperty> transitiveProp =
+          target->IsTransitiveProperty(propertyName, context->LG)) {
+      interfacePropertyName = std::string(transitiveProp->InterfaceName);
+      isInterfaceProperty = transitiveProp->InterfaceName == propertyName;
     }
-#undef POPULATE_INTERFACE_PROPERTY_NAME
 
     bool evaluatingLinkLibraries = false;
 

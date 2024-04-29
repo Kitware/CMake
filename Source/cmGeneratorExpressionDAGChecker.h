@@ -15,33 +15,6 @@ struct cmGeneratorExpressionContext;
 class cmGeneratorTarget;
 class cmLocalGenerator;
 
-#define CM_SELECT_BOTH(F, A1, A2) F(A1, A2)
-#define CM_SELECT_FIRST(F, A1, A2) F(A1)
-#define CM_SELECT_SECOND(F, A1, A2) F(A2)
-
-#define CM_FOR_EACH_TRANSITIVE_PROPERTY_IMPL(F, SELECT)                       \
-  SELECT(F, EvaluatingIncludeDirectories, INCLUDE_DIRECTORIES)                \
-  SELECT(F, EvaluatingSystemIncludeDirectories, SYSTEM_INCLUDE_DIRECTORIES)   \
-  SELECT(F, EvaluatingCompileDefinitions, COMPILE_DEFINITIONS)                \
-  SELECT(F, EvaluatingCompileOptions, COMPILE_OPTIONS)                        \
-  SELECT(F, EvaluatingAutoMocMacroNames, AUTOMOC_MACRO_NAMES)                 \
-  SELECT(F, EvaluatingAutoUicOptions, AUTOUIC_OPTIONS)                        \
-  SELECT(F, EvaluatingSources, SOURCES)                                       \
-  SELECT(F, EvaluatingCompileFeatures, COMPILE_FEATURES)                      \
-  SELECT(F, EvaluatingLinkOptions, LINK_OPTIONS)                              \
-  SELECT(F, EvaluatingLinkDirectories, LINK_DIRECTORIES)                      \
-  SELECT(F, EvaluatingLinkDepends, LINK_DEPENDS)                              \
-  SELECT(F, EvaluatingPrecompileHeaders, PRECOMPILE_HEADERS)
-
-#define CM_FOR_EACH_TRANSITIVE_PROPERTY(F)                                    \
-  CM_FOR_EACH_TRANSITIVE_PROPERTY_IMPL(F, CM_SELECT_BOTH)
-
-#define CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(F)                             \
-  CM_FOR_EACH_TRANSITIVE_PROPERTY_IMPL(F, CM_SELECT_FIRST)
-
-#define CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(F)                               \
-  CM_FOR_EACH_TRANSITIVE_PROPERTY_IMPL(F, CM_SELECT_SECOND)
-
 struct cmGeneratorExpressionDAGChecker
 {
   cmGeneratorExpressionDAGChecker(cmListFileBacktrace backtrace,
@@ -86,11 +59,7 @@ struct cmGeneratorExpressionDAGChecker
   bool EvaluatingLinkLibraries(cmGeneratorTarget const* tgt = nullptr,
                                ForGenex genex = ForGenex::ANY) const;
 
-#define DECLARE_TRANSITIVE_PROPERTY_METHOD(METHOD) bool METHOD() const;
-
-  CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(DECLARE_TRANSITIVE_PROPERTY_METHOD)
-
-#undef DECLARE_TRANSITIVE_PROPERTY_METHOD
+  bool EvaluatingSources() const;
 
   bool GetTransitivePropertiesOnly() const;
   void SetTransitivePropertiesOnly() { this->TransitivePropertiesOnly = true; }

@@ -65,6 +65,7 @@
 
 namespace {
 using LinkInterfaceFor = cmGeneratorTarget::LinkInterfaceFor;
+using TransitiveProperty = cmGeneratorTarget::TransitiveProperty;
 
 const std::string kINTERFACE_LINK_LIBRARIES = "INTERFACE_LINK_LIBRARIES";
 const std::string kINTERFACE_LINK_LIBRARIES_DIRECT =
@@ -72,6 +73,23 @@ const std::string kINTERFACE_LINK_LIBRARIES_DIRECT =
 const std::string kINTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE =
   "INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE";
 }
+
+const std::map<cm::string_view, TransitiveProperty>
+  cmGeneratorTarget::BuiltinTransitiveProperties = {
+    { "AUTOMOC_MACRO_NAMES"_s, { "INTERFACE_AUTOMOC_MACRO_NAMES"_s } },
+    { "AUTOUIC_OPTIONS"_s, { "INTERFACE_AUTOUIC_OPTIONS"_s } },
+    { "COMPILE_DEFINITIONS"_s, { "INTERFACE_COMPILE_DEFINITIONS"_s } },
+    { "COMPILE_FEATURES"_s, { "INTERFACE_COMPILE_FEATURES"_s } },
+    { "COMPILE_OPTIONS"_s, { "INTERFACE_COMPILE_OPTIONS"_s } },
+    { "INCLUDE_DIRECTORIES"_s, { "INTERFACE_INCLUDE_DIRECTORIES"_s } },
+    { "LINK_DEPENDS"_s, { "INTERFACE_LINK_DEPENDS"_s } },
+    { "LINK_DIRECTORIES"_s, { "INTERFACE_LINK_DIRECTORIES"_s } },
+    { "LINK_OPTIONS"_s, { "INTERFACE_LINK_OPTIONS"_s } },
+    { "PRECOMPILE_HEADERS"_s, { "INTERFACE_PRECOMPILE_HEADERS"_s } },
+    { "SOURCES"_s, { "INTERFACE_SOURCES"_s } },
+    { "SYSTEM_INCLUDE_DIRECTORIES"_s,
+      { "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES"_s } },
+  };
 
 template <>
 cmValue cmTargetPropertyComputer::GetSources<cmGeneratorTarget>(
@@ -1514,6 +1532,28 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
     }
   }
 
+  return result;
+}
+
+cm::optional<cmGeneratorTarget::TransitiveProperty>
+cmGeneratorTarget::IsTransitiveProperty(cm::string_view prop,
+                                        cmLocalGenerator const* lg) const
+{
+  cm::optional<TransitiveProperty> result;
+  static const cm::string_view kINTERFACE_ = "INTERFACE_"_s;
+  if (cmHasPrefix(prop, kINTERFACE_)) {
+    prop = prop.substr(kINTERFACE_.length());
+  }
+  auto i = BuiltinTransitiveProperties.find(prop);
+  if (i != BuiltinTransitiveProperties.end()) {
+    result = i->second;
+  } else if (cmHasLiteralPrefix(prop, "COMPILE_DEFINITIONS_")) {
+    cmPolicies::PolicyStatus cmp0043 =
+      lg->GetPolicyStatus(cmPolicies::CMP0043);
+    if (cmp0043 == cmPolicies::WARN || cmp0043 == cmPolicies::OLD) {
+      result = TransitiveProperty{ "INTERFACE_COMPILE_DEFINITIONS"_s };
+    }
+  }
   return result;
 }
 
