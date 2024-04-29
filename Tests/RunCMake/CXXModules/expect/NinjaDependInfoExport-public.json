@@ -43,6 +43,7 @@
       "destination" : "lib/cmake/export1",
       "export-name" : "with-public",
       "export-prefix" : "<BINARY_DIR>/CMakeFiles/Export/d2e2673818fd2bd8c45c0e3ed0e38fcd",
+      "filesystem-export-name" : "with-public",
       "install" : true,
       "namespace" : "export1::"
     },
@@ -51,6 +52,7 @@
       "destination" : "lib/cmake/export2",
       "export-name" : "with-public",
       "export-prefix" : "<BINARY_DIR>/CMakeFiles/Export/28cd47cb4c96ad5cadaa3fb1b0201ae8",
+      "filesystem-export-name" : "with-public",
       "install" : true,
       "namespace" : ""
     },
@@ -59,6 +61,7 @@
       "destination" : "<BINARY_DIR>/lib/cmake/export1",
       "export-name" : "with-public",
       "export-prefix" : "<BINARY_DIR>/lib/cmake/export1",
+      "filesystem-export-name" : "with-public",
       "install" : false,
       "namespace" : "export1::"
     },
@@ -67,6 +70,7 @@
       "destination" : "<BINARY_DIR>/lib/cmake/export2",
       "export-name" : "with-public",
       "export-prefix" : "<BINARY_DIR>/lib/cmake/export2",
+      "filesystem-export-name" : "with-public",
       "install" : false,
       "namespace" : ""
     }
