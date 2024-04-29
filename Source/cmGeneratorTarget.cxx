@@ -76,19 +76,29 @@ const std::string kINTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE =
 
 const std::map<cm::string_view, TransitiveProperty>
   cmGeneratorTarget::BuiltinTransitiveProperties = {
-    { "AUTOMOC_MACRO_NAMES"_s, { "INTERFACE_AUTOMOC_MACRO_NAMES"_s } },
-    { "AUTOUIC_OPTIONS"_s, { "INTERFACE_AUTOUIC_OPTIONS"_s } },
-    { "COMPILE_DEFINITIONS"_s, { "INTERFACE_COMPILE_DEFINITIONS"_s } },
-    { "COMPILE_FEATURES"_s, { "INTERFACE_COMPILE_FEATURES"_s } },
-    { "COMPILE_OPTIONS"_s, { "INTERFACE_COMPILE_OPTIONS"_s } },
-    { "INCLUDE_DIRECTORIES"_s, { "INTERFACE_INCLUDE_DIRECTORIES"_s } },
-    { "LINK_DEPENDS"_s, { "INTERFACE_LINK_DEPENDS"_s } },
-    { "LINK_DIRECTORIES"_s, { "INTERFACE_LINK_DIRECTORIES"_s } },
-    { "LINK_OPTIONS"_s, { "INTERFACE_LINK_OPTIONS"_s } },
-    { "PRECOMPILE_HEADERS"_s, { "INTERFACE_PRECOMPILE_HEADERS"_s } },
-    { "SOURCES"_s, { "INTERFACE_SOURCES"_s } },
+    { "AUTOMOC_MACRO_NAMES"_s,
+      { "INTERFACE_AUTOMOC_MACRO_NAMES"_s, LinkInterfaceFor::Usage } },
+    { "AUTOUIC_OPTIONS"_s,
+      { "INTERFACE_AUTOUIC_OPTIONS"_s, LinkInterfaceFor::Usage } },
+    { "COMPILE_DEFINITIONS"_s,
+      { "INTERFACE_COMPILE_DEFINITIONS"_s, LinkInterfaceFor::Usage } },
+    { "COMPILE_FEATURES"_s,
+      { "INTERFACE_COMPILE_FEATURES"_s, LinkInterfaceFor::Usage } },
+    { "COMPILE_OPTIONS"_s,
+      { "INTERFACE_COMPILE_OPTIONS"_s, LinkInterfaceFor::Usage } },
+    { "INCLUDE_DIRECTORIES"_s,
+      { "INTERFACE_INCLUDE_DIRECTORIES"_s, LinkInterfaceFor::Usage } },
+    { "LINK_DEPENDS"_s,
+      { "INTERFACE_LINK_DEPENDS"_s, LinkInterfaceFor::Usage } },
+    { "LINK_DIRECTORIES"_s,
+      { "INTERFACE_LINK_DIRECTORIES"_s, LinkInterfaceFor::Usage } },
+    { "LINK_OPTIONS"_s,
+      { "INTERFACE_LINK_OPTIONS"_s, LinkInterfaceFor::Usage } },
+    { "PRECOMPILE_HEADERS"_s,
+      { "INTERFACE_PRECOMPILE_HEADERS"_s, LinkInterfaceFor::Usage } },
+    { "SOURCES"_s, { "INTERFACE_SOURCES"_s, LinkInterfaceFor::Usage } },
     { "SYSTEM_INCLUDE_DIRECTORIES"_s,
-      { "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES"_s } },
+      { "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES"_s, LinkInterfaceFor::Usage } },
   };
 
 template <>
@@ -1551,7 +1561,8 @@ cmGeneratorTarget::IsTransitiveProperty(cm::string_view prop,
     cmPolicies::PolicyStatus cmp0043 =
       lg->GetPolicyStatus(cmPolicies::CMP0043);
     if (cmp0043 == cmPolicies::WARN || cmp0043 == cmPolicies::OLD) {
-      result = TransitiveProperty{ "INTERFACE_COMPILE_DEFINITIONS"_s };
+      result = TransitiveProperty{ "INTERFACE_COMPILE_DEFINITIONS"_s,
+                                   LinkInterfaceFor::Usage };
     }
   }
   return result;

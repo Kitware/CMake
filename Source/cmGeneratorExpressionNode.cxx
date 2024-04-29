@@ -2701,7 +2701,8 @@ static const struct DeviceLinkNode : public cmGeneratorExpressionNode
 static std::string getLinkedTargetsContent(
   cmGeneratorTarget const* target, std::string const& prop,
   cmGeneratorExpressionContext* context,
-  cmGeneratorExpressionDAGChecker* dagChecker)
+  cmGeneratorExpressionDAGChecker* dagChecker,
+  cmGeneratorTarget::LinkInterfaceFor interfaceFor)
 {
   std::string result;
   if (cmLinkImplementationLibraries const* impl =
@@ -2717,8 +2718,7 @@ static std::string getLinkedTargetsContent(
           target, context->EvaluateForBuildsystem, lib.Backtrace,
           context->Language);
         std::string libResult = lib.Target->EvaluateInterfaceProperty(
-          prop, &libContext, dagChecker,
-          cmGeneratorTarget::LinkInterfaceFor::Usage);
+          prop, &libContext, dagChecker, interfaceFor);
         if (!libResult.empty()) {
           if (result.empty()) {
             result = std::move(libResult);
@@ -2876,11 +2876,14 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     std::string interfacePropertyName;
     bool isInterfaceProperty = false;
+    cmGeneratorTarget::LinkInterfaceFor interfaceFor =
+      cmGeneratorTarget::LinkInterfaceFor::Usage;
 
     if (cm::optional<cmGeneratorTarget::TransitiveProperty> transitiveProp =
           target->IsTransitiveProperty(propertyName, context->LG)) {
       interfacePropertyName = std::string(transitiveProp->InterfaceName);
       isInterfaceProperty = transitiveProp->InterfaceName == propertyName;
+      interfaceFor = transitiveProp->InterfaceFor;
     }
 
     bool evaluatingLinkLibraries = false;
@@ -2910,9 +2913,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     if (isInterfaceProperty) {
       return cmGeneratorExpression::StripEmptyListElements(
-        target->EvaluateInterfaceProperty(
-          propertyName, context, dagCheckerParent,
-          cmGeneratorTarget::LinkInterfaceFor::Usage));
+        target->EvaluateInterfaceProperty(propertyName, context,
+                                          dagCheckerParent, interfaceFor));
     }
 
     cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace, target,
@@ -2999,7 +3001,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         this->EvaluateDependentExpression(result, context->LG, context, target,
                                           &dagChecker, target));
       std::string linkedTargetsContent = getLinkedTargetsContent(
-        target, interfacePropertyName, context, &dagChecker);
+        target, interfacePropertyName, context, &dagChecker, interfaceFor);
       if (!linkedTargetsContent.empty()) {
         result += (result.empty() ? "" : ";") + linkedTargetsContent;
       }

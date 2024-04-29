@@ -889,6 +889,7 @@ public:
   struct TransitiveProperty
   {
     cm::string_view InterfaceName;
+    LinkInterfaceFor InterfaceFor;
   };
 
   static const std::map<cm::string_view, TransitiveProperty>
