@@ -578,10 +578,13 @@ if(BUILD_TESTING)
   if("${CMAKE_GENERATOR}" MATCHES "Make")
     ADD_TEST_MACRO(Policy0002 Policy0002)
   endif()
-  if(CTEST_TEST_OSX_ARCH)
+  if(CMake_TEST_XCODE_VERSION)
+    set(Architecture_BUILD_OPTIONS -DCMake_TEST_XCODE_VERSION=${CMake_TEST_XCODE_VERSION})
     ADD_TEST_MACRO(Architecture Architecture)
     set_tests_properties(Architecture PROPERTIES
       PASS_REGULAR_EXPRESSION "(file is not of required architecture|does not match cputype|not the architecture being linked|but attempting to link with file built for)")
+    set_property(TEST Architecture APPEND PROPERTY
+      PASS_REGULAR_EXPRESSION "Skip test x86_64 only|found architecture '.*', required architecture '.*'")
   endif()
 
   list(APPEND TEST_BUILD_DIRS ${CMake_TEST_INSTALL_PREFIX})
