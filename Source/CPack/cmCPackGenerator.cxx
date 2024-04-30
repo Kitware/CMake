@@ -1094,6 +1094,7 @@ int cmCPackGenerator::DoPackage()
     return 0;
   }
 
+  // Possibly remove the top-level packaging-directory.
   if (this->GetOption("CPACK_REMOVE_TOPLEVEL_DIRECTORY").IsOn()) {
     cmValue toplevelDirectory = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     if (toplevelDirectory && cmSystemTools::FileExists(*toplevelDirectory)) {
@@ -1108,55 +1109,68 @@ int cmCPackGenerator::DoPackage()
       }
     }
   }
+
+  // Install the project (to the temporary install-directory).
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
                 "About to install project " << std::endl);
-
   if (!this->InstallProject()) {
     return 0;
   }
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Done install project " << std::endl);
 
-  cmValue tempPackageFileName =
-    this->GetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME");
+  // Determine the temporary directory whose content shall be packaged.
   cmValue tempDirectory = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
 
+  // Determine and store internally the list of files to be installed.
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Find files" << std::endl);
-  cmsys::Glob gl;
-  std::string findExpr = cmStrCat(tempDirectory, "/*");
-  gl.RecurseOn();
-  gl.SetRecurseListDirs(true);
-  gl.SetRecurseThroughSymlinks(false);
-  if (!gl.FindFiles(findExpr)) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Cannot find any files in the packaging tree" << std::endl);
-    return 0;
+  {
+    cmsys::Glob gl;
+    std::string findExpr = cmStrCat(tempDirectory, "/*");
+    gl.RecurseOn();
+    gl.SetRecurseListDirs(true);
+    gl.SetRecurseThroughSymlinks(false);
+    if (!gl.FindFiles(findExpr)) {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Cannot find any files in the packaging tree"
+                      << std::endl);
+      return 0;
+    }
+    this->files = gl.GetFiles();
   }
 
-  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Create package" << std::endl);
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE,
-                "Package files to: "
-                  << (tempPackageFileName ? *tempPackageFileName : "(NULL)")
-                  << std::endl);
-  if (tempPackageFileName && cmSystemTools::FileExists(*tempPackageFileName)) {
-    cmCPackLogger(cmCPackLog::LOG_VERBOSE,
-                  "Remove old package file" << std::endl);
-    cmSystemTools::RemoveFile(*tempPackageFileName);
-  }
+  // Determine and store internally the directory that shall be packaged.
   if (this->GetOption("CPACK_INCLUDE_TOPLEVEL_DIRECTORY").IsOn()) {
     tempDirectory = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   }
-
-  // The files to be installed
-  this->files = gl.GetFiles();
-
-  this->packageFileNames.clear();
-  /* Put at least one file name into the list of
-   * wanted packageFileNames. The specific generator
-   * may update this during PackageFiles.
-   * (either putting several names or updating the provided one)
-   */
-  this->packageFileNames.emplace_back(tempPackageFileName);
   this->toplevel = *tempDirectory;
+
+  cmCPackLogger(cmCPackLog::LOG_OUTPUT, "Create package" << std::endl);
+
+  // Determine and store internally the list of packages to create.
+  // Note: Initially, this only contains a single package.
+  {
+    cmValue tempPackageFileName =
+      this->GetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME");
+    cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                  "Package files to: "
+                    << (tempPackageFileName ? *tempPackageFileName : "(NULL)")
+                    << std::endl);
+    if (tempPackageFileName &&
+        cmSystemTools::FileExists(*tempPackageFileName)) {
+      cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+                    "Remove old package file" << std::endl);
+      cmSystemTools::RemoveFile(*tempPackageFileName);
+    }
+    this->packageFileNames.clear();
+    /* Put at least one file name into the list of
+     * wanted packageFileNames. The specific generator
+     * may update this during PackageFiles.
+     * (either putting several names or updating the provided one)
+     */
+    this->packageFileNames.emplace_back(tempPackageFileName);
+  }
+
+  // Do package the files (using the derived CPack generators.
   { // scope that enables package generators to run internal scripts with
     // latest CMake policies enabled
     cmMakefile::ScopePushPop pp{ this->MakefileMap };
@@ -1169,6 +1183,7 @@ int cmCPackGenerator::DoPackage()
       return 0;
     }
   }
+
   // Run post-build actions
   cmValue postBuildScripts = this->GetOption("CPACK_POST_BUILD_SCRIPTS");
   if (postBuildScripts) {
