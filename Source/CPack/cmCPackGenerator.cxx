@@ -974,6 +974,25 @@ int cmCPackGenerator::InstallCMakeProject(
   return 1;
 }
 
+bool cmCPackGenerator::GenerateChecksumFile(cmCryptoHash& crypto,
+                                            cm::string_view filename) const
+{
+  std::string packageFileName =
+    cmStrCat(this->GetOption("CPACK_OUTPUT_FILE_PREFIX"), "/", filename);
+  std::string hashFile = cmStrCat(
+    packageFileName, "." + cmSystemTools::LowerCase(crypto.GetHashAlgoName()));
+  cmsys::ofstream outF(hashFile.c_str());
+  if (!outF) {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "Cannot create checksum file: " << hashFile << std::endl);
+    return false;
+  }
+  outF << crypto.HashFile(packageFileName) << "  " << filename << "\n";
+  cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+                "- checksum file: " << hashFile << " generated." << std::endl);
+  return true;
+}
+
 bool cmCPackGenerator::ReadListFile(const char* moduleName)
 {
   bool retval;
@@ -1177,20 +1196,9 @@ int cmCPackGenerator::DoPackage()
 
     /* Generate checksum file */
     if (crypto) {
-      std::string hashFile(this->GetOption("CPACK_OUTPUT_FILE_PREFIX"));
-      hashFile += "/" + filename;
-      hashFile += "." + cmSystemTools::LowerCase(algo);
-      cmsys::ofstream outF(hashFile.c_str());
-      if (!outF) {
-        cmCPackLogger(cmCPackLog::LOG_ERROR,
-                      "Cannot create checksum file: " << hashFile
-                                                      << std::endl);
+      if (!this->GenerateChecksumFile(*crypto, filename)) {
         return 0;
       }
-      outF << crypto->HashFile(packageFileName) << "  " << filename << "\n";
-      cmCPackLogger(cmCPackLog::LOG_OUTPUT,
-                    "- checksum file: " << hashFile << " generated."
-                                        << std::endl);
     }
   }
 
