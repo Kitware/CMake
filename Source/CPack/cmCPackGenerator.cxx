@@ -993,6 +993,29 @@ bool cmCPackGenerator::GenerateChecksumFile(cmCryptoHash& crypto,
   return true;
 }
 
+bool cmCPackGenerator::CopyPackageFile(const std::string& srcFilePath,
+                                       cm::string_view filename) const
+{
+  std::string destFilePath =
+    cmStrCat(this->GetOption("CPACK_OUTPUT_FILE_PREFIX"), "/", filename);
+  cmCPackLogger(cmCPackLog::LOG_DEBUG,
+                "Copy final package(s): "
+                  << (!srcFilePath.empty() ? srcFilePath : "(NULL)") << " to "
+                  << (!destFilePath.empty() ? destFilePath : "(NULL)")
+                  << std::endl);
+  if (!cmSystemTools::CopyFileIfDifferent(srcFilePath, destFilePath)) {
+    cmCPackLogger(
+      cmCPackLog::LOG_ERROR,
+      "Problem copying the package: "
+        << (!srcFilePath.empty() ? srcFilePath : "(NULL)") << " to "
+        << (!destFilePath.empty() ? destFilePath : "(NULL)") << std::endl);
+    return false;
+  }
+  cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+                "- package: " << destFilePath << " generated." << std::endl);
+  return true;
+}
+
 bool cmCPackGenerator::ReadListFile(const char* moduleName)
 {
   bool retval;
@@ -1172,28 +1195,10 @@ int cmCPackGenerator::DoPackage()
                                              << "]:" << std::endl);
   /* now copy package one by one */
   for (std::string const& pkgFileName : this->packageFileNames) {
-    std::string tmpPF(this->GetOption("CPACK_OUTPUT_FILE_PREFIX"));
     std::string filename(cmSystemTools::GetFilenameName(pkgFileName));
-    tempPackageFileName = cmValue(pkgFileName);
-    tmpPF += "/" + filename;
-    const char* packageFileName = tmpPF.c_str();
-    cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                  "Copy final package(s): "
-                    << (tempPackageFileName ? *tempPackageFileName : "(NULL)")
-                    << " to " << (packageFileName ? packageFileName : "(NULL)")
-                    << std::endl);
-    if (!cmSystemTools::CopyFileIfDifferent(pkgFileName, tmpPF)) {
-      cmCPackLogger(
-        cmCPackLog::LOG_ERROR,
-        "Problem copying the package: "
-          << (tempPackageFileName ? *tempPackageFileName : "(NULL)") << " to "
-          << (packageFileName ? packageFileName : "(NULL)") << std::endl);
+    if (!this->CopyPackageFile(pkgFileName, filename)) {
       return 0;
     }
-    cmCPackLogger(cmCPackLog::LOG_OUTPUT,
-                  "- package: " << packageFileName << " generated."
-                                << std::endl);
-
     /* Generate checksum file */
     if (crypto) {
       if (!this->GenerateChecksumFile(*crypto, filename)) {
