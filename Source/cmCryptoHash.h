@@ -74,6 +74,10 @@ public:
   ///         An empty string otherwise.
   std::string HashFile(const std::string& file);
 
+  /// @brief Returns the name of the hash type.
+  /// @return The name of the hash type associated with this hash generator.
+  std::string GetHashAlgoName() const;
+
   void Initialize();
   void Append(void const*, size_t);
   void Append(cm::string_view input);
