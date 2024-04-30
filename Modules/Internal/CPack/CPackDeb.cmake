@@ -487,7 +487,7 @@ function(cpack_deb_prepare_package_vars)
       if(DEFINED ${_component_var})
         set(CPACK_DEBIAN_PACKAGE_${value_type_} "${${_component_var}}")
         if(CPACK_DEBIAN_PACKAGE_DEBUG)
-          message("CPackDeb Debug: component '${_local_component_name}' ${value_type_} "
+          message("CPackDeb Debug: component '${CPACK_DEB_PACKAGE_COMPONENT}' ${value_type_} "
             "value set to '${CPACK_DEBIAN_PACKAGE_${value_type_}}'")
         endif()
       endif()
