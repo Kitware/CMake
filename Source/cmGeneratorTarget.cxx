@@ -8595,6 +8595,10 @@ bool cmGeneratorTarget::DiscoverSyntheticTargets(cmSyntheticTargetCache& cache,
         // generation.
         tgt->CopyImportedCxxModulesProperties(model);
 
+        tgt->AddLinkLibrary(*mf,
+                            cmStrCat("$<COMPILE_ONLY:", model->GetName(), '>'),
+                            GENERAL_LibraryType);
+
         // Apply usage requirements to the target.
         usage.ApplyToTarget(tgt);
 
