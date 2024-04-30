@@ -79,51 +79,60 @@ int cmCPackGenerator::PrepareNames()
     }
   }
 
-  std::string tempDirectory =
-    cmStrCat(this->GetOption("CPACK_PACKAGE_DIRECTORY"), "/_CPack_Packages/");
-  cmValue toplevelTag = this->GetOption("CPACK_TOPLEVEL_TAG");
-  if (toplevelTag) {
-    tempDirectory += *toplevelTag;
-    tempDirectory += "/";
+  // Determine package-directory.
+  cmValue pkgDirectory = this->GetOption("CPACK_PACKAGE_DIRECTORY");
+  if (!pkgDirectory) {
+    cmCPackLogger(cmCPackLog::LOG_ERROR,
+                  "CPACK_PACKAGE_DIRECTORY not specified" << std::endl);
+    return 0;
   }
-  tempDirectory += *this->GetOption("CPACK_GENERATOR");
-  std::string topDirectory = tempDirectory;
-  cmValue pfname = this->GetOption("CPACK_PACKAGE_FILE_NAME");
-  if (!pfname) {
+  // Determine base-filename of the package.
+  cmValue pkgBaseFileName = this->GetOption("CPACK_PACKAGE_FILE_NAME");
+  if (!pkgBaseFileName) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "CPACK_PACKAGE_FILE_NAME not specified" << std::endl);
     return 0;
   }
-  std::string outName = *pfname;
-  tempDirectory += "/" + outName;
+  // Determine filename of the package.
   if (!this->GetOutputExtension()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "No output extension specified" << std::endl);
     return 0;
   }
-  outName += this->GetOutputExtension();
-  cmValue pdir = this->GetOption("CPACK_PACKAGE_DIRECTORY");
-  if (!pdir) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "CPACK_PACKAGE_DIRECTORY not specified" << std::endl);
-    return 0;
+  std::string pkgFileName =
+    cmStrCat(pkgBaseFileName, this->GetOutputExtension());
+  // Determine path to the package.
+  std::string pkgFilePath = cmStrCat(pkgDirectory, "/", pkgFileName);
+  // Determine top-level directory for packaging.
+  std::string topDirectory = cmStrCat(pkgDirectory, "/_CPack_Packages/");
+  {
+    cmValue toplevelTag = this->GetOption("CPACK_TOPLEVEL_TAG");
+    if (toplevelTag) {
+      topDirectory += cmStrCat(toplevelTag, "/");
+    }
   }
+  topDirectory += *this->GetOption("CPACK_GENERATOR");
+  // Determine temporary packaging-directory.
+  std::string tmpDirectory = cmStrCat(topDirectory, "/", pkgBaseFileName);
+  // Determine path to temporary package file.
+  std::string tmpPkgFilePath = topDirectory + "/" + pkgFileName;
 
-  std::string destFile = *pdir;
-  this->SetOptionIfNotSet("CPACK_OUTPUT_FILE_PREFIX", destFile);
-  destFile += "/" + outName;
-  std::string outFile = topDirectory + "/" + outName;
+  // Set CPack variables which are not set already.
+  this->SetOptionIfNotSet("CPACK_REMOVE_TOPLEVEL_DIRECTORY", "1");
   this->SetOptionIfNotSet("CPACK_TOPLEVEL_DIRECTORY", topDirectory);
-  this->SetOptionIfNotSet("CPACK_TEMPORARY_DIRECTORY", tempDirectory);
-  this->SetOptionIfNotSet("CPACK_OUTPUT_FILE_NAME", outName);
-  this->SetOptionIfNotSet("CPACK_OUTPUT_FILE_PATH", destFile);
-  this->SetOptionIfNotSet("CPACK_TEMPORARY_PACKAGE_FILE_NAME", outFile);
+  this->SetOptionIfNotSet("CPACK_TEMPORARY_DIRECTORY", tmpDirectory);
+  this->SetOptionIfNotSet("CPACK_TEMPORARY_INSTALL_DIRECTORY", tmpDirectory);
+  this->SetOptionIfNotSet("CPACK_OUTPUT_FILE_PREFIX", pkgDirectory);
+  this->SetOptionIfNotSet("CPACK_OUTPUT_FILE_NAME", pkgFileName);
+  this->SetOptionIfNotSet("CPACK_OUTPUT_FILE_PATH", pkgFilePath);
+  this->SetOptionIfNotSet("CPACK_TEMPORARY_PACKAGE_FILE_NAME", tmpPkgFilePath);
   this->SetOptionIfNotSet("CPACK_INSTALL_DIRECTORY", this->GetInstallPath());
   this->SetOptionIfNotSet(
     "CPACK_NATIVE_INSTALL_DIRECTORY",
     cmsys::SystemTools::ConvertToOutputPath(this->GetInstallPath()));
-  this->SetOptionIfNotSet("CPACK_TEMPORARY_INSTALL_DIRECTORY", tempDirectory);
 
+  // Determine description of the package and set as CPack variable,
+  // if not already set.
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
                 "Look for: CPACK_PACKAGE_DESCRIPTION_FILE" << std::endl);
   cmValue descFileName = this->GetOption("CPACK_PACKAGE_DESCRIPTION_FILE");
@@ -143,14 +152,14 @@ int cmCPackGenerator::PrepareNames()
                                                           << std::endl);
       return 0;
     }
-    std::ostringstream ostr;
-    std::string line;
-
     cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                   "Read description file: " << *descFileName << std::endl);
+    std::ostringstream ostr;
+    std::string line;
     while (ifs && cmSystemTools::GetLineFromStream(ifs, line)) {
       ostr << cmXMLSafe(line) << std::endl;
     }
+
     this->SetOption("CPACK_PACKAGE_DESCRIPTION", ostr.str());
     cmValue defFileName =
       this->GetOption("CPACK_DEFAULT_PACKAGE_DESCRIPTION_FILE");
@@ -166,6 +175,8 @@ int cmCPackGenerator::PrepareNames()
         << std::endl);
     return 0;
   }
+
+  // Check algorithm for calculating the checksum of the package.
   cmValue algoSignature = this->GetOption("CPACK_PACKAGE_CHECKSUM");
   if (algoSignature) {
     if (!cmCryptoHash::New(*algoSignature)) {
@@ -175,8 +186,6 @@ int cmCPackGenerator::PrepareNames()
       return 0;
     }
   }
-
-  this->SetOptionIfNotSet("CPACK_REMOVE_TOPLEVEL_DIRECTORY", "1");
 
   return 1;
 }
