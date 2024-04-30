@@ -1532,8 +1532,8 @@ int cmCPackGenerator::PrepareGroupingKind()
     this->componentPackageMethod = method;
   }
 
-  const char* method_names[] = { "ALL_COMPONENTS_IN_ONE", "IGNORE_GROUPS",
-                                 "ONE_PER_GROUP" };
+  const char* method_names[] = { "ALL_COMPONENTS_IN_ONE", "IGNORE",
+                                 "ONE_PER_GROUP", "UNKNOWN" };
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "[" << this->Name << "]"
