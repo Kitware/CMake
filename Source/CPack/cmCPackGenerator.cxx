@@ -197,20 +197,20 @@ int cmCPackGenerator::InstallProject()
 
   std::string bareTempInstallDirectory =
     this->GetOption("CPACK_TEMPORARY_DIRECTORY");
-  std::string tempInstallDirectoryStr = bareTempInstallDirectory;
+  std::string tempInstallDirectory = bareTempInstallDirectory;
   bool setDestDir = this->GetOption("CPACK_SET_DESTDIR").IsOn() ||
     cmIsInternallyOn(this->GetOption("CPACK_SET_DESTDIR"));
   if (!setDestDir) {
-    tempInstallDirectoryStr += this->GetPackagingInstallPrefix();
+    tempInstallDirectory += this->GetPackagingInstallPrefix();
   }
 
-  const char* tempInstallDirectory = tempInstallDirectoryStr.c_str();
   int res = 1;
   if (!cmsys::SystemTools::MakeDirectory(bareTempInstallDirectory)) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Problem creating temporary directory: "
-                    << (tempInstallDirectory ? tempInstallDirectory : "(NULL)")
-                    << std::endl);
+    cmCPackLogger(
+      cmCPackLog::LOG_ERROR,
+      "Problem creating temporary directory: "
+        << (!tempInstallDirectory.empty() ? tempInstallDirectory : "(NULL)")
+        << std::endl);
     return 0;
   }
 
