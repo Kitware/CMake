@@ -780,8 +780,8 @@ bool cmExportInstallFileGenerator::
       continue;
     }
 
-    auto prop_filename = cmStrCat("target-", tgt->GetExportName(), '-',
-                                  filename_config, ".cmake");
+    auto prop_filename = cmStrCat("target-", tgt->GetFilesystemExportName(),
+                                  '-', filename_config, ".cmake");
     prop_files.emplace_back(cmStrCat(dest, prop_filename));
     os << "include(\"${CMAKE_CURRENT_LIST_DIR}/" << prop_filename << "\")\n";
   }

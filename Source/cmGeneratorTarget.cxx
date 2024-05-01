@@ -369,6 +369,16 @@ std::string cmGeneratorTarget::GetExportName() const
   return this->GetName();
 }
 
+std::string cmGeneratorTarget::GetFilesystemExportName() const
+{
+  auto fs_safe = this->GetExportName();
+  // First escape any `_` characters to avoid collisions.
+  cmSystemTools::ReplaceString(fs_safe, "_", "__");
+  // Escape other characters that are not generally filesystem-safe.
+  cmSystemTools::ReplaceString(fs_safe, ":", "_c");
+  return fs_safe;
+}
+
 cmValue cmGeneratorTarget::GetProperty(const std::string& prop) const
 {
   if (cmValue result =
