@@ -47,6 +47,10 @@ if(NOT CMAKE_GENERATOR MATCHES "Visual Studio ([^9]|9[0-9])")
   list(APPEND _cmake_options "-DTEST_MULTI3=1")
 endif()
 
+if (APPLE)
+  list(APPEND _cmake_options "-DCMake_TEST_XCODE_VERSION=${CMake_TEST_XCODE_VERSION}")
+endif()
+
 file(MAKE_DIRECTORY ${BuildDepends_BINARY_DIR}/Project)
 message("Creating Project/foo.cxx")
 write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx

@@ -299,24 +299,19 @@ if(BUILD_TESTING)
     "Should the tests that use '--build-target package' be run?"
     ON)
   mark_as_advanced(CTEST_TEST_CPACK)
-  set(CTEST_TEST_OSX_ARCH 0)
   set(CMake_TEST_XCODE_VERSION 0)
   if(APPLE)
-    set(CTEST_TEST_OSX_ARCH 1)
     if(XCODE_VERSION)
       set(CMake_TEST_XCODE_VERSION "${XCODE_VERSION}")
     else()
       execute_process(
         COMMAND xcodebuild -version
-        OUTPUT_VARIABLE _version ERROR_VARIABLE _version_err
+        OUTPUT_VARIABLE _version
+        RESULT_VARIABLE _failed
         )
-      if(_version MATCHES "^Xcode ([0-9]+(\\.[0-9]+)*)")
+      if(NOT _failed AND _version MATCHES "^Xcode ([0-9]+(\\.[0-9]+)*)")
         set(CMake_TEST_XCODE_VERSION "${CMAKE_MATCH_1}")
       endif()
-    endif()
-    if(NOT CMake_TEST_XCODE_VERSION VERSION_LESS 10)
-      # Since Xcode 10 we do not have two supported architectures for the host.
-      set(CTEST_TEST_OSX_ARCH 0)
     endif()
     if(CMAKE_OSX_SYSROOT)
       execute_process(
@@ -578,10 +573,13 @@ if(BUILD_TESTING)
   if("${CMAKE_GENERATOR}" MATCHES "Make")
     ADD_TEST_MACRO(Policy0002 Policy0002)
   endif()
-  if(CTEST_TEST_OSX_ARCH)
+  if(CMake_TEST_XCODE_VERSION)
+    set(Architecture_BUILD_OPTIONS -DCMake_TEST_XCODE_VERSION=${CMake_TEST_XCODE_VERSION})
     ADD_TEST_MACRO(Architecture Architecture)
     set_tests_properties(Architecture PROPERTIES
       PASS_REGULAR_EXPRESSION "(file is not of required architecture|does not match cputype|not the architecture being linked|but attempting to link with file built for)")
+    set_property(TEST Architecture APPEND PROPERTY
+      PASS_REGULAR_EXPRESSION "Skip test x86_64 only|found architecture '.*', required architecture '.*'")
   endif()
 
   list(APPEND TEST_BUILD_DIRS ${CMake_TEST_INSTALL_PREFIX})
@@ -949,6 +947,8 @@ if(BUILD_TESTING)
     "${CMake_BINARY_DIR}/Tests/BuildDepends"
     ${build_generator_args}
     --build-project BuildDepends
+    --build-options
+    "-DCMake_TEST_XCODE_VERSION=${CMake_TEST_XCODE_VERSION}"
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BuildDepends")
 
