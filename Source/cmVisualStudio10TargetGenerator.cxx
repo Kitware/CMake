@@ -2074,6 +2074,18 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
                    "gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms");
       }
     }
+    {
+      if (cmValue p = this->GeneratorTarget->GetProperty("VS_FILTER_PROPS")) {
+        auto props = *p;
+        if (!props.empty()) {
+          ConvertToWindowsSlash(props);
+          Elem(e0, "Import")
+            .Attribute("Project", props)
+            .Attribute("Condition", cmStrCat("exists('", props, "')"))
+            .Attribute("Label", "LocalAppDataPlatform");
+        }
+      }
+    }
   }
   fout << '\n';
 

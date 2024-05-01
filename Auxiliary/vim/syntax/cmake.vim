@@ -450,6 +450,7 @@ syn keyword cmakeProperty contained
             \ VS_STARTUP_PROJECT
             \ VS_TOOL_OVERRIDE
             \ VS_USER_PROPS
+            \ VS_FILTER_PROPS
             \ VS_WINDOWS_TARGET_PLATFORM_MIN_VERSION
             \ VS_WINRT_COMPONENT
             \ VS_WINRT_EXTENSIONS
