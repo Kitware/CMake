@@ -30,7 +30,9 @@ private:
   char const* GetVisibleTypeName() const;
   void WriteLanguagesRules(std::string const& config);
 
-  void WriteLinkRule(bool useResponseFile, std::string const& config);
+  void WriteLinkRule(bool useResponseFile, std::string const& config,
+                     std::vector<std::string> const& preLinkComments,
+                     std::vector<std::string> const& postBuildComments);
   void WriteDeviceLinkRules(std::string const& config);
   void WriteNvidiaDeviceLinkRule(bool useResponseFile,
                                  std::string const& config);
