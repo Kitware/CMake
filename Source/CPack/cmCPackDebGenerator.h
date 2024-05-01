@@ -59,6 +59,8 @@ protected:
   int PackageFiles() override;
   const char* GetOutputExtension() override { return ".deb"; }
   bool SupportsComponentInstallation() const override;
+  std::string GetComponentInstallSuffix(
+    const std::string& componentName) override;
   std::string GetComponentInstallDirNameSuffix(
     const std::string& componentName) override;
 
