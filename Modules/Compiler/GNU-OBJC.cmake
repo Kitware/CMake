@@ -1,5 +1,6 @@
 include(Compiler/GNU)
 __compiler_gnu(OBJC)
+__compiler_gnu_c_standards(OBJC)
 
 
 if((NOT DEFINED CMAKE_DEPENDS_USE_COMPILER OR CMAKE_DEPENDS_USE_COMPILER)

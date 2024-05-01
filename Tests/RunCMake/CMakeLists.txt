@@ -440,6 +440,16 @@ add_RunCMake_test(GoogleTest # Note: does not actually depend on Google Test
   )
 add_RunCMake_test(Graphviz)
 add_RunCMake_test(Languages)
+
+add_RunCMake_test(LanguageStandards
+  -DCMake_NO_C_STANDARD=${CMake_NO_C_STANDARD}
+  -DCMake_NO_CXX_STANDARD=${CMake_NO_CXX_STANDARD}
+  -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+  -DCMake_TEST_HIP=${CMake_TEST_HIP}
+  -DCMake_TEST_OBJC=${CMake_TEST_OBJC}
+)
+set_property(TEST RunCMake.LanguageStandards APPEND PROPERTY LABELS "CUDA" "HIP")
+
 add_RunCMake_test(LinkItemValidation)
 add_RunCMake_test(LinkStatic)
 if(CMAKE_CXX_COMPILER_ID MATCHES "^(Cray|PGI|NVHPC|XL|XLClang|IBMClang|Fujitsu|FujitsuClang)$")

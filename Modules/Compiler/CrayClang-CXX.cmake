@@ -32,4 +32,6 @@ set(CMAKE_CXX20_EXTENSION_COMPILE_OPTION -std=gnu++20)
 set(CMAKE_CXX23_STANDARD_COMPILE_OPTION  -std=c++2b)
 set(CMAKE_CXX23_EXTENSION_COMPILE_OPTION -std=gnu++2b)
 
+set(CMAKE_CXX_STANDARD_LATEST 23)
+
 __compiler_check_default_language_standard(CXX 15.0.0 14)

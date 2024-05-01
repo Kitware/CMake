@@ -21,3 +21,13 @@ set(CMAKE_C99_STANDARD__HAS_FULL_SUPPORT ON)
 set(CMAKE_C11_STANDARD_COMPILE_OPTION "-std=c11")
 set(CMAKE_C11_EXTENSION_COMPILE_OPTION "-std=gnu11")
 set(CMAKE_C11_STANDARD__HAS_FULL_SUPPORT ON)
+
+set(CMAKE_C_STANDARD_LATEST 11)
+
+# Including the "${CMAKE_ROOT}/Modules/Compiler/Clang-C.cmake" script above may set several other compile option
+# variables which do not necessarily apply here. So, we unset those variables accordingly.
+unset(CMAKE_C17_STANDARD_COMPILE_OPTION)
+unset(CMAKE_C17_EXTENSION_COMPILE_OPTION)
+
+unset(CMAKE_C23_STANDARD_COMPILE_OPTION)
+unset(CMAKE_C23_EXTENSION_COMPILE_OPTION)
