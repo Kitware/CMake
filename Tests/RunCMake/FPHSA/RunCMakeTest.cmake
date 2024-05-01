@@ -1,6 +1,8 @@
 include(RunCMake)
 
 run_cmake(BadFoundVar)
+run_cmake(BeforeProject-Error)
+run_cmake(BeforeProject-Missing)
 run_cmake(NameMismatch)
 
 # The pseudo module will "find" a package with the given version. Check if the
