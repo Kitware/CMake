@@ -26,7 +26,7 @@ cmFindCommon::PathLabel cmFindCommon::PathLabel::CMakeEnvironment(
   "CMAKE_ENVIRONMENT");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::Hints("HINTS");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::SystemEnvironment(
-  "SYSTM_ENVIRONMENT");
+  "SYSTEM_ENVIRONMENT");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::CMakeSystem("CMAKE_SYSTEM");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::Guess("GUESS");
 
