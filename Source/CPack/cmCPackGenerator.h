@@ -19,6 +19,7 @@
 #include "cmValue.h"
 
 class cmCPackLog;
+class cmCryptoHash;
 class cmGlobalGenerator;
 class cmInstalledFile;
 class cmMakefile;
@@ -181,6 +182,11 @@ protected:
   virtual int PackageFiles();
   virtual const char* GetInstallPath();
   virtual const char* GetPackagingInstallPrefix();
+
+  bool GenerateChecksumFile(cmCryptoHash& crypto,
+                            cm::string_view filename) const;
+  bool CopyPackageFile(const std::string& srcFilePath,
+                       cm::string_view filename) const;
 
   std::string FindTemplate(cm::string_view name,
                            cm::optional<cm::string_view> alt = cm::nullopt);
