@@ -2,9 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportTryCompileFileGenerator.h"
 
+#include <map>
 #include <utility>
 
 #include <cm/memory>
+#include <cm/string_view>
 
 #include "cmFileSet.h"
 #include "cmGeneratorExpression.h"
@@ -44,12 +46,10 @@ bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)
       ImportPropertyMap properties;
 
       for (std::string const& lang : this->Languages) {
-#define FIND_TARGETS(PROPERTY)                                                \
-  this->FindTargets("INTERFACE_" #PROPERTY, te, lang, emittedDeps);
-
-        CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(FIND_TARGETS)
-
-#undef FIND_TARGETS
+        for (auto i : cmGeneratorTarget::BuiltinTransitiveProperties) {
+          this->FindTargets(std::string(i.second.InterfaceName), te, lang,
+                            emittedDeps);
+        }
       }
 
       this->PopulateProperties(te, properties, emittedDeps);
@@ -76,10 +76,10 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
     // To please constraint checks of DAGChecker, this property must have
     // LINK_OPTIONS property as parent
     parentDagChecker = cm::make_unique<cmGeneratorExpressionDAGChecker>(
-      tgt, "LINK_OPTIONS", nullptr, nullptr);
+      tgt, "LINK_OPTIONS", nullptr, nullptr, tgt->GetLocalGenerator());
   }
-  cmGeneratorExpressionDAGChecker dagChecker(tgt, propName, nullptr,
-                                             parentDagChecker.get());
+  cmGeneratorExpressionDAGChecker dagChecker(
+    tgt, propName, nullptr, parentDagChecker.get(), tgt->GetLocalGenerator());
 
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*prop);
 

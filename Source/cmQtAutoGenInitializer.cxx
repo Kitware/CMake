@@ -1918,8 +1918,9 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
     info.SetBool("MOC_RELAXED_MODE", this->Moc.RelaxedMode);
     info.SetBool("MOC_PATH_PREFIX", this->Moc.PathPrefix);
 
-    cmGeneratorExpressionDAGChecker dagChecker(
-      this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr, nullptr);
+    cmGeneratorExpressionDAGChecker dagChecker(this->GenTarget,
+                                               "AUTOMOC_MACRO_NAMES", nullptr,
+                                               nullptr, this->LocalGen);
     EvaluatedTargetPropertyEntries InterfaceAutoMocMacroNamesEntries;
 
     if (this->MultiConfig) {

@@ -294,8 +294,8 @@ class cmMakefile;
          "FindFLEX runs flex in CMAKE_CURRENT_BINARY_DIR when executing.", 3, \
          17, 0, cmPolicies::WARN)                                             \
   SELECT(POLICY, CMP0099,                                                     \
-         "Link properties are transitive over private dependency on static "  \
-         "libraries.",                                                        \
+         "Link properties are transitive over private dependencies of "       \
+         "static libraries.",                                                 \
          3, 17, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0100, "Let AUTOMOC and AUTOUIC process .hh files.", 3,    \
          17, 0, cmPolicies::WARN)                                             \
@@ -508,7 +508,11 @@ class cmMakefile;
          3, 30, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0165,                                                     \
          "enable_language() must not be called before project().", 3, 30, 0,  \
-         cmPolicies::WARN)
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0166,                                                     \
+         "TARGET_PROPERTY evaluates link properties transitively over "       \
+         "private dependencies of static libraries.",                         \
+         3, 30, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

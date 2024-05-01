@@ -425,7 +425,7 @@ const std::string& cmGeneratorExpressionInterpreter::Evaluate(
   cmGeneratorExpressionDAGChecker dagChecker(
     this->HeadTarget,
     property == "COMPILE_FLAGS" ? "COMPILE_OPTIONS" : property, nullptr,
-    nullptr);
+    nullptr, this->LocalGenerator);
 
   return this->CompiledGeneratorExpression->Evaluate(
     this->LocalGenerator, this->Config, this->HeadTarget, &dagChecker, nullptr,

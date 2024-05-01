@@ -2,10 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGeneratorExpressionDAGChecker.h"
 
-#include <cstring>
 #include <sstream>
 #include <utility>
 
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
 
@@ -20,16 +20,17 @@
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   cmGeneratorTarget const* target, std::string property,
   const GeneratorExpressionContent* content,
-  cmGeneratorExpressionDAGChecker* parent)
+  cmGeneratorExpressionDAGChecker* parent, cmLocalGenerator const* contextLG)
   : cmGeneratorExpressionDAGChecker(cmListFileBacktrace(), target,
-                                    std::move(property), content, parent)
+                                    std::move(property), content, parent,
+                                    contextLG)
 {
 }
 
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   cmListFileBacktrace backtrace, cmGeneratorTarget const* target,
   std::string property, const GeneratorExpressionContent* content,
-  cmGeneratorExpressionDAGChecker* parent)
+  cmGeneratorExpressionDAGChecker* parent, cmLocalGenerator const* contextLG)
   : Parent(parent)
   , Top(parent ? parent->Top : this)
   , Target(target)
@@ -40,10 +41,9 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   if (parent) {
     this->TopIsTransitiveProperty = parent->TopIsTransitiveProperty;
   } else {
-#define TEST_TRANSITIVE_PROPERTY_METHOD(METHOD) this->METHOD() ||
-    this->TopIsTransitiveProperty = (CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
-      TEST_TRANSITIVE_PROPERTY_METHOD) false); // NOLINT(*)
-#undef TEST_TRANSITIVE_PROPERTY_METHOD
+    this->TopIsTransitiveProperty =
+      this->Target->IsTransitiveProperty(this->Property, contextLG)
+        .has_value();
   }
 
   this->CheckResult = this->CheckGraph();
@@ -169,6 +169,12 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingCompileExpression() const
     property == "COMPILE_DEFINITIONS"_s || property == "COMPILE_OPTIONS"_s;
 }
 
+bool cmGeneratorExpressionDAGChecker::EvaluatingSources() const
+{
+  return this->Property == "SOURCES"_s ||
+    this->Property == "INTERFACE_SOURCES"_s;
+}
+
 bool cmGeneratorExpressionDAGChecker::EvaluatingLinkExpression() const
 {
   cm::string_view property(this->Top->Property);
@@ -222,39 +228,3 @@ cmGeneratorTarget const* cmGeneratorExpressionDAGChecker::TopTarget() const
 {
   return this->Top->Target;
 }
-
-enum class TransitiveProperty
-{
-#define DEFINE_ENUM_ENTRY(NAME) NAME,
-  CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(DEFINE_ENUM_ENTRY)
-#undef DEFINE_ENUM_ENTRY
-    Terminal
-};
-
-template <TransitiveProperty>
-bool additionalTest(const char* const /*unused*/)
-{
-  return false;
-}
-
-template <>
-bool additionalTest<TransitiveProperty::COMPILE_DEFINITIONS>(
-  const char* const prop)
-{
-  return cmHasLiteralPrefix(prop, "COMPILE_DEFINITIONS_");
-}
-
-#define DEFINE_TRANSITIVE_PROPERTY_METHOD(METHOD, PROPERTY)                   \
-  bool cmGeneratorExpressionDAGChecker::METHOD() const                        \
-  {                                                                           \
-    const char* const prop = this->Property.c_str();                          \
-    if (strcmp(prop, #PROPERTY) == 0 ||                                       \
-        strcmp(prop, "INTERFACE_" #PROPERTY) == 0) {                          \
-      return true;                                                            \
-    }                                                                         \
-    return additionalTest<TransitiveProperty::PROPERTY>(prop);                \
-  }
-
-CM_FOR_EACH_TRANSITIVE_PROPERTY(DEFINE_TRANSITIVE_PROPERTY_METHOD)
-
-#undef DEFINE_TRANSITIVE_PROPERTY_METHOD

@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cm/string_view>
 
 #include "cmAlgorithms.h"
 #include "cmComputeLinkInformation.h"
@@ -885,6 +886,18 @@ public:
     std::string const& prop, cmGeneratorExpressionContext* context,
     cmGeneratorExpressionDAGChecker* dagCheckerParent,
     LinkInterfaceFor interfaceFor) const;
+
+  struct TransitiveProperty
+  {
+    cm::string_view InterfaceName;
+    LinkInterfaceFor InterfaceFor;
+  };
+
+  static const std::map<cm::string_view, TransitiveProperty>
+    BuiltinTransitiveProperties;
+
+  cm::optional<TransitiveProperty> IsTransitiveProperty(
+    cm::string_view prop, cmLocalGenerator const* lg) const;
 
   bool HaveInstallTreeRPATH(const std::string& config) const;
 

@@ -487,7 +487,8 @@ protected:
     if (context->HeadTarget) {
       cmGeneratorExpressionDAGChecker dagChecker(
         context->Backtrace, context->HeadTarget,
-        genexOperator + ":" + expression, content, dagCheckerParent);
+        genexOperator + ":" + expression, content, dagCheckerParent,
+        context->LG);
       switch (dagChecker.Check()) {
         case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
         case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE: {
@@ -2700,7 +2701,8 @@ static const struct DeviceLinkNode : public cmGeneratorExpressionNode
 static std::string getLinkedTargetsContent(
   cmGeneratorTarget const* target, std::string const& prop,
   cmGeneratorExpressionContext* context,
-  cmGeneratorExpressionDAGChecker* dagChecker)
+  cmGeneratorExpressionDAGChecker* dagChecker,
+  cmGeneratorTarget::LinkInterfaceFor interfaceFor)
 {
   std::string result;
   if (cmLinkImplementationLibraries const* impl =
@@ -2716,8 +2718,7 @@ static std::string getLinkedTargetsContent(
           target, context->EvaluateForBuildsystem, lib.Backtrace,
           context->Language);
         std::string libResult = lib.Target->EvaluateInterfaceProperty(
-          prop, &libContext, dagChecker,
-          cmGeneratorTarget::LinkInterfaceFor::Usage);
+          prop, &libContext, dagChecker, interfaceFor);
         if (!libResult.empty()) {
           if (result.empty()) {
             result = std::move(libResult);
@@ -2875,25 +2876,15 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     std::string interfacePropertyName;
     bool isInterfaceProperty = false;
+    cmGeneratorTarget::LinkInterfaceFor interfaceFor =
+      cmGeneratorTarget::LinkInterfaceFor::Usage;
 
-#define POPULATE_INTERFACE_PROPERTY_NAME(prop)                                \
-  if (propertyName == #prop) {                                                \
-    interfacePropertyName = "INTERFACE_" #prop;                               \
-  } else if (propertyName == "INTERFACE_" #prop) {                            \
-    interfacePropertyName = "INTERFACE_" #prop;                               \
-    isInterfaceProperty = true;                                               \
-  } else
-
-    CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(POPULATE_INTERFACE_PROPERTY_NAME)
-    // Note that the above macro terminates with an else
-    /* else */ if (cmHasLiteralPrefix(propertyName, "COMPILE_DEFINITIONS_")) {
-      cmPolicies::PolicyStatus polSt =
-        context->LG->GetPolicyStatus(cmPolicies::CMP0043);
-      if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {
-        interfacePropertyName = "INTERFACE_COMPILE_DEFINITIONS";
-      }
+    if (cm::optional<cmGeneratorTarget::TransitiveProperty> transitiveProp =
+          target->IsTransitiveProperty(propertyName, context->LG)) {
+      interfacePropertyName = std::string(transitiveProp->InterfaceName);
+      isInterfaceProperty = transitiveProp->InterfaceName == propertyName;
+      interfaceFor = transitiveProp->InterfaceFor;
     }
-#undef POPULATE_INTERFACE_PROPERTY_NAME
 
     bool evaluatingLinkLibraries = false;
 
@@ -2916,20 +2907,19 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           return std::string();
         }
       } else {
-        assert(dagCheckerParent
-                 ->EvaluatingTransitiveProperty()); // NOLINT(clang-tidy)
+        assert(dagCheckerParent->EvaluatingTransitiveProperty());
       }
     }
 
     if (isInterfaceProperty) {
       return cmGeneratorExpression::StripEmptyListElements(
-        target->EvaluateInterfaceProperty(
-          propertyName, context, dagCheckerParent,
-          cmGeneratorTarget::LinkInterfaceFor::Usage));
+        target->EvaluateInterfaceProperty(propertyName, context,
+                                          dagCheckerParent, interfaceFor));
     }
 
-    cmGeneratorExpressionDAGChecker dagChecker(
-      context->Backtrace, target, propertyName, content, dagCheckerParent);
+    cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace, target,
+                                               propertyName, content,
+                                               dagCheckerParent, context->LG);
 
     switch (dagChecker.Check()) {
       case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
@@ -3011,7 +3001,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         this->EvaluateDependentExpression(result, context->LG, context, target,
                                           &dagChecker, target));
       std::string linkedTargetsContent = getLinkedTargetsContent(
-        target, interfacePropertyName, context, &dagChecker);
+        target, interfacePropertyName, context, &dagChecker, interfaceFor);
       if (!linkedTargetsContent.empty()) {
         result += (result.empty() ? "" : ";") + linkedTargetsContent;
       }

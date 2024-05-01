@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.30
 .. toctree::
    :maxdepth: 1
 
+   CMP0166: TARGET_PROPERTY evaluates link properties transitively over private dependencies of static libraries. </policy/CMP0166>
    CMP0165: enable_language() must not be called before project(). </policy/CMP0165>
    CMP0164: add_library() rejects SHARED libraries when not supported by the platform. </policy/CMP0164>
    CMP0163: The GENERATED source file property is now visible in all directories. </policy/CMP0163>
@@ -214,7 +215,7 @@ Policies Introduced by CMake 3.17
    CMP0102: mark_as_advanced() does nothing if a cache entry does not exist. </policy/CMP0102>
    CMP0101: target_compile_options honors BEFORE keyword in all scopes. </policy/CMP0101>
    CMP0100: Let AUTOMOC and AUTOUIC process .hh header files. </policy/CMP0100>
-   CMP0099: Link properties are transitive over private dependency on static libraries. </policy/CMP0099>
+   CMP0099: Link properties are transitive over private dependencies of static libraries. </policy/CMP0099>
    CMP0098: FindFLEX runs flex in CMAKE_CURRENT_BINARY_DIR when executing. </policy/CMP0098>
 
 Policies Introduced by CMake 3.16
