@@ -95,6 +95,7 @@ run_cmake(ExportInstallCxxModules)
 if (RunCMake_GENERATOR MATCHES "Ninja")
   run_cmake(NinjaDependInfoFileSet)
   run_cmake(NinjaDependInfoExport)
+  run_cmake(NinjaDependInfoExportFilesystemSafe)
   run_cmake(NinjaDependInfoBMIInstall)
   run_cmake(NinjaForceResponseFile) # issue#25367
 elseif (RunCMake_GENERATOR MATCHES "Visual Studio")

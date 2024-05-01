@@ -207,6 +207,7 @@ Json::Value CollationInformationExports(cmGeneratorTarget const* gt)
 {
   Json::Value tdi_exports = Json::arrayValue;
   std::string export_name = gt->GetExportName();
+  std::string fs_export_name = gt->GetFilesystemExportName();
 
   auto const& all_install_exports = gt->GetGlobalGenerator()->GetExportSets();
   for (auto const& exp : all_install_exports) {
@@ -232,6 +233,7 @@ Json::Value CollationInformationExports(cmGeneratorTarget const* gt)
 
       tdi_export_info["namespace"] = ns;
       tdi_export_info["export-name"] = export_name;
+      tdi_export_info["filesystem-export-name"] = fs_export_name;
       tdi_export_info["destination"] = dest;
       tdi_export_info["cxx-module-info-dir"] = cxxm_dir;
       tdi_export_info["export-prefix"] = export_prefix;
@@ -266,6 +268,7 @@ Json::Value CollationInformationExports(cmGeneratorTarget const* gt)
 
     tdi_export_info["namespace"] = ns;
     tdi_export_info["export-name"] = export_name;
+    tdi_export_info["filesystem-export-name"] = fs_export_name;
     tdi_export_info["destination"] = dest;
     tdi_export_info["cxx-module-info-dir"] = cxxm_dir;
     tdi_export_info["export-prefix"] = export_prefix;
@@ -313,6 +316,7 @@ struct CxxModuleBmiInstall
 struct CxxModuleExport
 {
   std::string Name;
+  std::string FilesystemName;
   std::string Destination;
   std::string Prefix;
   std::string CxxModuleInfoDir;
@@ -350,6 +354,7 @@ cmDyndepCollation::ParseExportInfo(Json::Value const& tdi)
       CxxModuleExport exp;
       exp.Install = tdi_export["install"].asBool();
       exp.Name = tdi_export["export-name"].asString();
+      exp.FilesystemName = tdi_export["filesystem-export-name"].asString();
       exp.Destination = tdi_export["destination"].asString();
       exp.Prefix = tdi_export["export-prefix"].asString();
       exp.CxxModuleInfoDir = tdi_export["cxx-module-info-dir"].asString();
@@ -424,8 +429,9 @@ bool cmDyndepCollation::WriteDyndepMetadata(
 
     std::string const export_dir =
       cmStrCat(exp.Prefix, '/', exp.CxxModuleInfoDir, '/');
-    std::string const property_file_path = cmStrCat(
-      export_dir, "target-", exp.Name, '-', export_info.Config, ".cmake");
+    std::string const property_file_path =
+      cmStrCat(export_dir, "target-", exp.FilesystemName, '-',
+               export_info.Config, ".cmake");
     properties = cm::make_unique<cmGeneratedFileStream>(property_file_path);
 
     // Set up the preamble.
