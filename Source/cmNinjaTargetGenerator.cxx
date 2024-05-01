@@ -1841,12 +1841,6 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
 
   std::vector<std::string> depList;
 
-  std::vector<std::string> architectures =
-    this->GeneratorTarget->GetAppleArchs(config, language);
-  if (architectures.empty()) {
-    architectures.emplace_back();
-  }
-
   bmiBuild.OrderOnlyDeps.push_back(this->OrderDependsTargetForTarget(config));
 
   // For some cases we scan to dynamically discover dependencies.
