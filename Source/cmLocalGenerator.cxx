@@ -2721,15 +2721,10 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
         continue;
       }
 
-      std::vector<std::string> architectures;
-      if (!this->GetGlobalGenerator()->IsXcode()) {
-        architectures = target->GetAppleArchs(config, lang);
-      }
-      if (architectures.empty()) {
-        architectures.emplace_back();
-      } else {
+      std::vector<std::string> pchArchs = target->GetPchArchs(config, lang);
+      if (pchArchs.size() > 1) {
         std::string useMultiArchPch;
-        for (const std::string& arch : architectures) {
+        for (const std::string& arch : pchArchs) {
           const std::string pchHeader =
             target->GetPchHeader(config, lang, arch);
           if (!pchHeader.empty()) {
@@ -2746,7 +2741,7 @@ void cmLocalGenerator::AddPchDependencies(cmGeneratorTarget* target)
         }
       }
 
-      for (const std::string& arch : architectures) {
+      for (const std::string& arch : pchArchs) {
         const std::string pchSource = target->GetPchSource(config, lang, arch);
         const std::string pchHeader = target->GetPchHeader(config, lang, arch);
 

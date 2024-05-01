@@ -598,6 +598,8 @@ public:
   std::vector<BT<std::string>> GetPrecompileHeaders(
     const std::string& config, const std::string& language) const;
 
+  std::vector<std::string> GetPchArchs(std::string const& config,
+                                       std::string const& lang) const;
   std::string GetPchHeader(const std::string& config,
                            const std::string& language,
                            const std::string& arch = std::string()) const;

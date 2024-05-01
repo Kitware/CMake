@@ -672,15 +672,12 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   std::string const configUpper = cmSystemTools::UpperCase(config);
 
   // Add precompile headers dependencies
-  std::vector<std::string> architectures =
-    this->GeneratorTarget->GetAppleArchs(config, lang);
-  if (architectures.empty()) {
-    architectures.emplace_back();
-  }
+  std::vector<std::string> pchArchs =
+    this->GeneratorTarget->GetPchArchs(config, lang);
 
   std::string filterArch;
   std::unordered_map<std::string, std::string> pchSources;
-  for (const std::string& arch : architectures) {
+  for (const std::string& arch : pchArchs) {
     const std::string pchSource =
       this->GeneratorTarget->GetPchSource(config, lang, arch);
     if (pchSource == source.GetFullPath()) {
@@ -692,7 +689,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   }
 
   if (!pchSources.empty() && !source.GetProperty("SKIP_PRECOMPILE_HEADERS")) {
-    for (const std::string& arch : architectures) {
+    for (const std::string& arch : pchArchs) {
       std::string const& pchHeader =
         this->GeneratorTarget->GetPchHeader(config, lang, arch);
       depends.push_back(pchHeader);

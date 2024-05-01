@@ -4304,6 +4304,20 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetPrecompileHeaders(
   return list;
 }
 
+std::vector<std::string> cmGeneratorTarget::GetPchArchs(
+  std::string const& config, std::string const& lang) const
+{
+  std::vector<std::string> pchArchs;
+  if (!this->GetGlobalGenerator()->IsXcode()) {
+    pchArchs = this->GetAppleArchs(config, lang);
+  }
+  if (pchArchs.size() < 2) {
+    // We do not need per-arch PCH files when building for one architecture.
+    pchArchs = { {} };
+  }
+  return pchArchs;
+}
+
 std::string cmGeneratorTarget::GetPchHeader(const std::string& config,
                                             const std::string& language,
                                             const std::string& arch) const

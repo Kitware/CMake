@@ -189,14 +189,11 @@ std::string cmNinjaTargetGenerator::ComputeFlagsForObject(
   const std::string& config, const std::string& objectFileName)
 {
   std::unordered_map<std::string, std::string> pchSources;
-  std::vector<std::string> architectures =
-    this->GeneratorTarget->GetAppleArchs(config, language);
-  if (architectures.empty()) {
-    architectures.emplace_back();
-  }
+  std::vector<std::string> pchArchs =
+    this->GeneratorTarget->GetPchArchs(config, language);
 
   std::string filterArch;
-  for (const std::string& arch : architectures) {
+  for (const std::string& arch : pchArchs) {
     const std::string pchSource =
       this->GeneratorTarget->GetPchSource(config, language, arch);
     if (pchSource == source->GetFullPath()) {
@@ -1500,14 +1497,11 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   // Add precompile headers dependencies
   std::vector<std::string> depList;
 
-  std::vector<std::string> architectures =
-    this->GeneratorTarget->GetAppleArchs(config, language);
-  if (architectures.empty()) {
-    architectures.emplace_back();
-  }
+  std::vector<std::string> pchArchs =
+    this->GeneratorTarget->GetPchArchs(config, language);
 
   std::unordered_set<std::string> pchSources;
-  for (const std::string& arch : architectures) {
+  for (const std::string& arch : pchArchs) {
     const std::string pchSource =
       this->GeneratorTarget->GetPchSource(config, language, arch);
 
@@ -1517,7 +1511,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
   }
 
   if (!pchSources.empty() && !source->GetProperty("SKIP_PRECOMPILE_HEADERS")) {
-    for (const std::string& arch : architectures) {
+    for (const std::string& arch : pchArchs) {
       depList.push_back(
         this->GeneratorTarget->GetPchHeader(config, language, arch));
       if (pchSources.find(source->GetFullPath()) == pchSources.end()) {
