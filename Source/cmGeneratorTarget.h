@@ -99,6 +99,7 @@ public:
   cmStateEnums::TargetType GetType() const;
   const std::string& GetName() const;
   std::string GetExportName() const;
+  std::string GetFilesystemExportName() const;
 
   std::vector<std::string> GetPropertyKeys() const;
   //! Might return a nullptr if the property is not set or invalid

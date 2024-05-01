@@ -591,8 +591,8 @@ bool cmExportBuildFileGenerator::GenerateImportCxxModuleConfigTargetInclusion(
       continue;
     }
 
-    os << "include(\"${CMAKE_CURRENT_LIST_DIR}/target-" << tgt->GetExportName()
-       << '-' << config << ".cmake\")\n";
+    os << "include(\"${CMAKE_CURRENT_LIST_DIR}/target-"
+       << tgt->GetFilesystemExportName() << '-' << config << ".cmake\")\n";
   }
 
   return true;

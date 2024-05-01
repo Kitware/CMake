@@ -41,36 +41,36 @@
     {
       "cxx-module-info-dir" : "cxx-modules",
       "destination" : "lib/cmake/export1",
-      "export-name" : "with-private",
+      "export-name" : "with::private_",
       "export-prefix" : "<BINARY_DIR>/CMakeFiles/Export/d2e2673818fd2bd8c45c0e3ed0e38fcd",
-      "filesystem-export-name" : "with-private",
+      "filesystem-export-name" : "with_c_cprivate__",
       "install" : true,
       "namespace" : "export1::"
     },
     {
       "cxx-module-info-dir" : "cxx-modules",
       "destination" : "lib/cmake/export2",
-      "export-name" : "with-private",
+      "export-name" : "with::private_",
+      "filesystem-export-name" : "with_c_cprivate__",
       "export-prefix" : "<BINARY_DIR>/CMakeFiles/Export/28cd47cb4c96ad5cadaa3fb1b0201ae8",
-      "filesystem-export-name" : "with-private",
       "install" : true,
       "namespace" : ""
     },
     {
       "cxx-module-info-dir" : "cxx-modules",
       "destination" : "<BINARY_DIR>/lib/cmake/export1",
-      "export-name" : "with-private",
+      "export-name" : "with::private_",
       "export-prefix" : "<BINARY_DIR>/lib/cmake/export1",
-      "filesystem-export-name" : "with-private",
+      "filesystem-export-name" : "with_c_cprivate__",
       "install" : false,
       "namespace" : "export1::"
     },
     {
       "cxx-module-info-dir" : "cxx-modules",
       "destination" : "<BINARY_DIR>/lib/cmake/export2",
-      "export-name" : "with-private",
+      "export-name" : "with::private_",
       "export-prefix" : "<BINARY_DIR>/lib/cmake/export2",
-      "filesystem-export-name" : "with-private",
+      "filesystem-export-name" : "with_c_cprivate__",
       "install" : false,
       "namespace" : ""
     }
