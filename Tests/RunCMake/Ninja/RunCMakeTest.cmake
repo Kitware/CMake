@@ -389,6 +389,21 @@ function (run_ChangeBuildType)
 endfunction()
 run_ChangeBuildType()
 
+function (run_CustomCommandTargetComments)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CustomCommandTargetComments-build)
+  run_cmake(CustomCommandTargetComments)
+  unset(RunCMake_TEST_OPTIONS)
+  run_ninja("${RunCMake_TEST_BINARY_DIR}" ${maybe_w_dupbuild_err})
+  if (NOT ninja_stdout MATCHES [[pre-build: genex; pre-link: genex; Linking C executable hello(\.exe)?; post-build: genex]])
+    string(REPLACE "\n" "\n  " ninja_stdout "${ninja_stdout}")
+    message(SEND_ERROR
+      "Custom command comments are not part of the description:\n"
+      "  ${ninja_stdout}"
+    )
+  endif ()
+endfunction()
+run_CustomCommandTargetComments()
+
 function(run_QtAutoMocSkipPch)
   set(QtX Qt${CMake_TEST_Qt_version})
   if(CMake_TEST_${QtX}Core_Version VERSION_GREATER_EQUAL 5.15.0)

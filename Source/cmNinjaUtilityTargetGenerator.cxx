@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <array>
 #include <iterator>
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
@@ -13,6 +14,7 @@
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalNinjaGenerator.h"
 #include "cmLocalNinjaGenerator.h"
@@ -76,6 +78,8 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
   cmGlobalNinjaGenerator::CCOutputs util_outputs(gg);
   util_outputs.ExplicitOuts.emplace_back(utilCommandName);
 
+  std::string commandDesc;
+  cmGeneratorExpression ge(*this->GetLocalGenerator()->GetCMakeInstance());
   bool uses_terminal = false;
   {
     std::array<std::vector<cmCustomCommand> const*, 2> const cmdLists = {
@@ -87,6 +91,13 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
         cmCustomCommandGenerator ccg(ci, fileConfig, lg);
         lg->AppendCustomCommandDeps(ccg, deps, fileConfig);
         lg->AppendCustomCommandLines(ccg, commands);
+        if (ci.GetComment()) {
+          if (!commandDesc.empty()) {
+            commandDesc += "; ";
+          }
+          auto cge = ge.Parse(ci.GetComment());
+          commandDesc += cge->Evaluate(this->GetLocalGenerator(), config);
+        }
         util_outputs.Add(ccg.GetByproducts());
         if (ci.GetUsesTerminal()) {
           uses_terminal = true;
@@ -144,6 +155,8 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
     cmValue echoStr = genTarget->GetProperty("EchoString");
     if (echoStr) {
       desc = *echoStr;
+    } else if (!commandDesc.empty()) {
+      desc = commandDesc;
     } else {
       desc = "Running utility command for " + this->GetTargetName();
     }
