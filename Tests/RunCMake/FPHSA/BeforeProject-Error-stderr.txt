@@ -1,0 +1,12 @@
+^CMake Error at [^
+]*/Modules/FindPackageHandleStandardArgs\.cmake:[0-9]+ \(message\):
+  Could NOT find BeforeProject \(missing: SOME_VAR\)
+
+  Hint: The project\(\) command has not yet been called\.  It sets up
+  system-specific search paths\.
+Call Stack \(most recent call first\):
+  [^
+]*/Modules/FindPackageHandleStandardArgs\.cmake:[0-9]+ \(_FPHSA_FAILURE_MESSAGE\)
+  FindBeforeProject\.cmake:[0-9]+ \(find_package_handle_standard_args\)
+  BeforeProject-Error\.cmake:[0-9]+ \(find_package\)
+  CMakeLists\.txt:[0-9]+ \(include\)$
