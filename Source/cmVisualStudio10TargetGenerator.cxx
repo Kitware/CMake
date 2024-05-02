@@ -281,6 +281,16 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
     this->Makefile->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
   this->NsightTegra = gg->IsNsightTegra();
   this->Android = gg->TargetsAndroid();
+  auto scanProp = target->GetProperty("CXX_SCAN_FOR_MODULES");
+  for (auto const& config : this->Configurations) {
+    if (scanProp.IsSet()) {
+      this->ScanSourceForModuleDependencies[config] = scanProp.IsOn();
+    } else {
+      this->ScanSourceForModuleDependencies[config] =
+        target->NeedCxxDyndep(config) ==
+        cmGeneratorTarget::CxxModuleSupport::Enabled;
+    }
+  }
   for (unsigned int& version : this->NsightTegraVersion) {
     version = 0;
   }
@@ -2827,7 +2837,9 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     // use them
     if (!flags.empty() || !options.empty() || !configDefines.empty() ||
         !includes.empty() || compileAsPerConfig || noWinRT ||
-        !options.empty() || needsPCHFlags || shouldScanForModules) {
+        !options.empty() || needsPCHFlags ||
+        (shouldScanForModules !=
+         this->ScanSourceForModuleDependencies[config])) {
       cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
       cmIDEFlagTable const* flagtable = nullptr;
       const std::string& srclang = source->GetLanguage();
@@ -2855,8 +2867,10 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       if (compileAsPerConfig) {
         clOptions.AddFlag("CompileAs", compileAsPerConfig);
       }
-      if (shouldScanForModules) {
-        clOptions.AddFlag("ScanSourceForModuleDependencies", "true");
+      if (shouldScanForModules !=
+          this->ScanSourceForModuleDependencies[config]) {
+        clOptions.AddFlag("ScanSourceForModuleDependencies",
+                          shouldScanForModules ? "true" : "false");
       }
       if (noWinRT) {
         clOptions.AddFlag("CompileAsWinRT", "false");
@@ -3573,8 +3587,9 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     }
   }
 
-  // Disable C++ source scanning by default.
-  e2.Element("ScanSourceForModuleDependencies", "false");
+  e2.Element("ScanSourceForModuleDependencies",
+             this->ScanSourceForModuleDependencies[configName] ? "true"
+                                                               : "false");
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeRcOptions()
