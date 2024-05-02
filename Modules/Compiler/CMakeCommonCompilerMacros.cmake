@@ -211,6 +211,9 @@ function(cmake_create_cxx_import_std std variable)
     26)
   list(FIND _cmake_supported_import_std_features "${std}" _cmake_supported_import_std_idx)
   if (_cmake_supported_import_std_idx EQUAL "-1")
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Unsupported C++ standard: C++${std}\")\n"
+      PARENT_SCOPE)
     return ()
   endif ()
   # If the target exists, skip. A toolchain file may have provided it.
@@ -219,14 +222,23 @@ function(cmake_create_cxx_import_std std variable)
   endif ()
   # The generator must support imported C++ modules.
   if (NOT CMAKE_GENERATOR MATCHES "Ninja")
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Unsupported generator: ${CMAKE_GENERATOR}\")\n"
+      PARENT_SCOPE)
     return ()
   endif ()
   # Check if the compiler understands how to `import std;`.
   include("${CMAKE_ROOT}/Modules/Compiler/${CMAKE_CXX_COMPILER_ID}-CXX-CXXImportStd.cmake" OPTIONAL RESULT_VARIABLE _cmake_import_std_res)
   if (NOT _cmake_import_std_res)
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Toolchain does not support discovering `import std` support\")\n"
+      PARENT_SCOPE)
     return ()
   endif ()
   if (NOT COMMAND _cmake_cxx_import_std)
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Toolchain does not provide `import std` discovery command\")\n"
+      PARENT_SCOPE)
     return ()
   endif ()
 
@@ -237,6 +249,9 @@ function(cmake_create_cxx_import_std std variable)
     "CxxImportStd"
     _cmake_supported_import_std_experimental)
   if (NOT _cmake_supported_import_std_experimental)
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Experimental `import std` support not enabled when detecting toolchain\")\n"
+      PARENT_SCOPE)
     return ()
   endif ()
 

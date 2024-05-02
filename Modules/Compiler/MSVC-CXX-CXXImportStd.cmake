@@ -12,6 +12,9 @@ function (_cmake_cxx_import_std std variable)
     NO_CACHE)
   # Without this file, we do not have modules installed.
   if (NOT EXISTS "${_msvc_modules_json_file}")
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Could not find `modules.json` resource\")\n"
+      PARENT_SCOPE)
     return ()
   endif ()
 
@@ -20,18 +23,27 @@ function (_cmake_cxx_import_std std variable)
   string(JSON _msvc_json_revision GET "${_msvc_modules_json}" "revision")
   # Require version 1.
   if (NOT _msvc_json_version EQUAL "1")
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"`modules.json` version ${_msvc_json_version}.${_msvc_json_revision} is not recognized\")\n"
+      PARENT_SCOPE)
     return ()
   endif ()
 
   string(JSON _msvc_json_library GET "${_msvc_modules_json}" "library")
   # Bail if we don't understand the library.
   if (NOT _msvc_json_library STREQUAL "microsoft/STL")
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"`modules.json` library `${_msvc_json_library}` is not recognized\")\n"
+      PARENT_SCOPE)
     return ()
   endif ()
 
   string(JSON _msvc_json_nmodules LENGTH "${_msvc_modules_json}" "module-sources")
   # Don't declare the target without any modules.
   if (NOT _msvc_json_nmodules)
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"`modules.json` does not list any available modules\")\n"
+      PARENT_SCOPE)
     return ()
   endif ()
 
