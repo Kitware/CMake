@@ -26,7 +26,20 @@ foreach(c C CXX Fortran)
   endif()
 endforeach()
 
+if(CMAKE_C_COMPILER_ID STREQUAL "MSVC"
+    AND CMAKE_C_COMPILER_VERSION VERSION_GREATER_EQUAL 19.30
+    AND NOT CMAKE_C_COMPILER_ARCHITECTURE_ID STREQUAL "ARM64")
+  set(test_msvc_runtime 1)
+  set(OpenMP_RUNTIME_MSVC "llvm")
+endif()
+
 find_package(OpenMP REQUIRED)
+
+if(test_msvc_runtime)
+  if(NOT OpenMP_C_FLAGS STREQUAL "-openmp:llvm")
+    message(FATAL_ERROR "OpenMP_RUNTIME_MSVC='${OpenMP_RUNTIME_MSVC}' not honored: '${OpenMP_C_FLAGS}'")
+  endif()
+endif()
 
 foreach(c C CXX Fortran)
   if(NOT "${OpenMP_TEST_${c}}")
