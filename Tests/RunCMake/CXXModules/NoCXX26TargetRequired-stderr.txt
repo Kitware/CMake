@@ -1,0 +1,9 @@
+CMake Error in CMakeLists.txt:
+  The "CXX_MODULE_STD" property on the target "nocxx26target" requires that
+  the "__CMAKE::CXX26" target exist, but it was not provided by the
+  toolchain.  Reason:
+
+    (Toolchain does not support discovering `import std` support|Experimental `import std` support not enabled when detecting toolchain|Unsupported generator: [^\n]*)
+
+
+CMake Generate step failed.  Build files cannot be regenerated correctly.
