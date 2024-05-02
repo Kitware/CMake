@@ -1355,6 +1355,13 @@ public:
                                        cmSourceFile const* sf) const;
   bool NeedDyndepForSource(std::string const& lang, std::string const& config,
                            cmSourceFile const* sf) const;
+  enum class CxxModuleSupport
+  {
+    Unavailable,
+    Enabled,
+    Disabled,
+  };
+  CxxModuleSupport NeedCxxDyndep(std::string const& config) const;
 
 private:
   void BuildFileSetInfoCache(std::string const& config) const;
