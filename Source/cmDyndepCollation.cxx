@@ -243,8 +243,10 @@ Json::Value CollationInformationExports(cmGeneratorTarget const* gt)
     }
   }
 
-  auto const& all_build_exports = gt->Makefile->GetExportBuildFileGenerators();
-  for (auto const& exp : all_build_exports) {
+  auto const& all_build_exports =
+    gt->GetGlobalGenerator()->GetBuildExportSets();
+  for (auto const& exp_entry : all_build_exports) {
+    auto const* exp = exp_entry.second;
     std::vector<std::string> targets;
     exp->GetTargets(targets);
 
