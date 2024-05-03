@@ -4271,55 +4271,8 @@ function(_ep_add_test_command name)
 endfunction()
 
 
-function(ExternalProject_Add name)
-  cmake_policy(GET CMP0097 _EP_CMP0097
-    PARENT_SCOPE # undocumented, do not use outside of CMake
-  )
-  cmake_policy(GET CMP0114 cmp0114
-    PARENT_SCOPE # undocumented, do not use outside of CMake
-  )
-  if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12 AND
-     NOT cmp0114 STREQUAL "NEW")
-    message(AUTHOR_WARNING
-      "Policy CMP0114 is not set to NEW.  "
-      "In order to support the Xcode \"new build system\", "
-      "this project must be updated to set policy CMP0114 to NEW."
-      "\n"
-      "Since CMake is generating for the Xcode \"new build system\", "
-      "ExternalProject_Add will use policy CMP0114's NEW behavior anyway, "
-      "but the generated build system may not match what the project intends."
-    )
-    set(cmp0114 "NEW")
-  endif()
-  cmake_policy(GET CMP0135 _EP_CMP0135
-    PARENT_SCOPE # undocumented, do not use outside of CMake
-  )
-
-  _ep_get_configuration_subdir_genex(cfgdir)
-
-  # Add a custom target for the external project.
-  set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
-  _ep_get_complete_stampfile(${name} complete_stamp_file)
-
-  cmake_policy(PUSH)
-  if(cmp0114 STREQUAL "NEW")
-    # To implement CMP0114 NEW behavior with Makefile generators,
-    # we need CMP0113 NEW behavior.
-    cmake_policy(SET CMP0113 NEW)
-  endif()
-  # The "ALL" option to add_custom_target just tells it to not set the
-  # EXCLUDE_FROM_ALL target property. Later, if the EXCLUDE_FROM_ALL
-  # argument was passed, we explicitly set it for the target.
-  add_custom_target(${name} ALL DEPENDS ${complete_stamp_file})
-  cmake_policy(POP)
-  set_target_properties(${name} PROPERTIES
-    _EP_IS_EXTERNAL_PROJECT 1
-    LABELS ${name}
-    FOLDER "ExternalProjectTargets/${name}"
-    _EP_CMP0114 "${cmp0114}"
-  )
-
-  set(keywords
+macro(_ep_get_add_keywords out_var)
+  set(${out_var}
     #
     # Directory options
     #
@@ -4457,6 +4410,58 @@ function(ExternalProject_Add name)
     #
     EXTERNALPROJECT_INTERNAL_ARGUMENT_SEPARATOR
   )
+endmacro()
+
+
+function(ExternalProject_Add name)
+  cmake_policy(GET CMP0097 _EP_CMP0097
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+  )
+  cmake_policy(GET CMP0114 cmp0114
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+  )
+  if(CMAKE_XCODE_BUILD_SYSTEM VERSION_GREATER_EQUAL 12 AND
+     NOT cmp0114 STREQUAL "NEW")
+    message(AUTHOR_WARNING
+      "Policy CMP0114 is not set to NEW.  "
+      "In order to support the Xcode \"new build system\", "
+      "this project must be updated to set policy CMP0114 to NEW."
+      "\n"
+      "Since CMake is generating for the Xcode \"new build system\", "
+      "ExternalProject_Add will use policy CMP0114's NEW behavior anyway, "
+      "but the generated build system may not match what the project intends."
+    )
+    set(cmp0114 "NEW")
+  endif()
+  cmake_policy(GET CMP0135 _EP_CMP0135
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+  )
+
+  _ep_get_configuration_subdir_genex(cfgdir)
+
+  # Add a custom target for the external project.
+  set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
+  _ep_get_complete_stampfile(${name} complete_stamp_file)
+
+  cmake_policy(PUSH)
+  if(cmp0114 STREQUAL "NEW")
+    # To implement CMP0114 NEW behavior with Makefile generators,
+    # we need CMP0113 NEW behavior.
+    cmake_policy(SET CMP0113 NEW)
+  endif()
+  # The "ALL" option to add_custom_target just tells it to not set the
+  # EXCLUDE_FROM_ALL target property. Later, if the EXCLUDE_FROM_ALL
+  # argument was passed, we explicitly set it for the target.
+  add_custom_target(${name} ALL DEPENDS ${complete_stamp_file})
+  cmake_policy(POP)
+  set_target_properties(${name} PROPERTIES
+    _EP_IS_EXTERNAL_PROJECT 1
+    LABELS ${name}
+    FOLDER "ExternalProjectTargets/${name}"
+    _EP_CMP0114 "${cmp0114}"
+  )
+
+  _ep_get_add_keywords(keywords)
   _ep_parse_arguments(
     ExternalProject_Add
     "${keywords}"
