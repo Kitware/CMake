@@ -1341,7 +1341,7 @@ function(_ep_parse_arguments
     if(arg MATCHES "^[A-Z][A-Z0-9_][A-Z0-9_]+$" AND
         NOT (("x${arg}x" STREQUAL "x${key}x") AND
              ("x${key}x" STREQUAL "xCOMMANDx")) AND
-        NOT arg MATCHES "^(TRUE|FALSE)$")
+        NOT arg MATCHES "^(TRUE|FALSE|YES)$")
       if(arg IN_LIST keywords)
         set(is_value 0)
       endif()
