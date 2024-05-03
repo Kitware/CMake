@@ -8583,15 +8583,22 @@ bool cmGeneratorTarget::ApplyCXXStdTargets()
       continue;
     }
 
-    auto const targetName = cmStrCat(
-      "__CMAKE::CXX", standardResolver.GetLevelString("CXX", *explicitLevel));
+    auto const stdLevel =
+      standardResolver.GetLevelString("CXX", *explicitLevel);
+    auto const targetName = cmStrCat("__CMAKE::CXX", stdLevel);
     if (!this->Makefile->FindTargetToUse(targetName)) {
+      auto basicReason = this->Makefile->GetDefinition(cmStrCat(
+        "CMAKE_CXX", stdLevel, "_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE"));
+      std::string reason;
+      if (!basicReason.IsEmpty()) {
+        reason = cmStrCat("  Reason:\n  ", basicReason);
+      }
       this->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat(
-          R"(The "CXX_MODULE_STD" property on the target ")", this->GetName(),
-          "\" requires that the \"", targetName,
-          "\" target exist, but it was not provided by the toolchain."));
+        cmStrCat(R"(The "CXX_MODULE_STD" property on the target ")",
+                 this->GetName(), "\" requires that the \"", targetName,
+                 "\" target exist, but it was not provided by the toolchain.",
+                 reason));
       break;
     }
 

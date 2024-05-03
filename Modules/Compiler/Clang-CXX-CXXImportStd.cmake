@@ -14,11 +14,17 @@ function (_cmake_cxx_import_std std variable)
     OUTPUT_STRIP_TRAILING_WHITESPACE
     ERROR_STRIP_TRAILING_WHITESPACE)
   if (_clang_libcxx_modules_json_file_res)
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Could not find `libc++.modules.json` resource\")\n"
+      PARENT_SCOPE)
     return ()
   endif ()
 
   # Without this file, we do not have modules installed.
   if (NOT EXISTS "${_clang_libcxx_modules_json_file}")
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"`libc++.modules.json` resource does not exist\")\n"
+      PARENT_SCOPE)
     return ()
   endif ()
 
@@ -26,6 +32,9 @@ function (_cmake_cxx_import_std std variable)
     # The original PR had a key spelling mismatch internally. Do not support it
     # and instead require a release known to have the fix.
     # https://github.com/llvm/llvm-project/pull/83036
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"LLVM 18.1.2 is required for `libc++.modules.json` format fix\")\n"
+      PARENT_SCOPE)
     return ()
   endif ()
 
@@ -34,12 +43,18 @@ function (_cmake_cxx_import_std std variable)
   string(JSON _clang_modules_json_revision GET "${_clang_libcxx_modules_json}" "revision")
   # Require version 1.
   if (NOT _clang_modules_json_version EQUAL "1")
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"`libc++.modules.json` version ${_clang_modules_json_version}.${_clang_modules_json_revision} is not recognized\")\n"
+      PARENT_SCOPE)
     return ()
   endif ()
 
   string(JSON _clang_modules_json_nmodules LENGTH "${_clang_libcxx_modules_json}" "modules")
   # Don't declare the target without any modules.
   if (NOT _clang_modules_json_nmodules)
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"`libc++.modules.json` does not list any available modules\")\n"
+      PARENT_SCOPE)
     return ()
   endif ()
 
