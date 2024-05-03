@@ -108,7 +108,7 @@ void cmLinkItemGraphVisitor::GetDependencies(cmGeneratorTarget const& target,
   }
 
   const auto* interfaceLibraries = target.GetLinkInterfaceLibraries(
-    config, &target, cmGeneratorTarget::LinkInterfaceFor::Usage);
+    config, &target, cmGeneratorTarget::LinkInterfaceFor::Compile);
   if (interfaceLibraries != nullptr) {
     for (auto const& lib : interfaceLibraries->Libraries) {
       auto const& name = lib.AsStr();

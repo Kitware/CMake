@@ -2707,7 +2707,7 @@ static std::string getLinkedTargetsContent(
   std::string result;
   if (cmLinkImplementationLibraries const* impl =
         target->GetLinkImplementationLibraries(
-          context->Config, cmGeneratorTarget::LinkInterfaceFor::Usage)) {
+          context->Config, cmGeneratorTarget::LinkInterfaceFor::Compile)) {
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target) {
         // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our
@@ -2877,7 +2877,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     std::string interfacePropertyName;
     bool isInterfaceProperty = false;
     cmGeneratorTarget::LinkInterfaceFor interfaceFor =
-      cmGeneratorTarget::LinkInterfaceFor::Usage;
+      cmGeneratorTarget::LinkInterfaceFor::Compile;
 
     if (cm::optional<cmGeneratorTarget::TransitiveProperty> transitiveProp =
           target->IsTransitiveProperty(propertyName, context->LG)) {

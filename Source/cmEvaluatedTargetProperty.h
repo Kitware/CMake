@@ -77,4 +77,4 @@ void AddInterfaceEntries(cmGeneratorTarget const* headTarget,
                          EvaluatedTargetPropertyEntries& entries,
                          IncludeRuntimeInterface searchRuntime,
                          cmGeneratorTarget::LinkInterfaceFor interfaceFor =
-                           cmGeneratorTarget::LinkInterfaceFor::Usage);
+                           cmGeneratorTarget::LinkInterfaceFor::Compile);
