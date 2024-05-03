@@ -1282,7 +1282,7 @@ Compile Context
   .. versionadded:: 3.27
 
   Content of ``...``, when collecting
-  :ref:`transitive build properties <Transitive Build Properties>`,
+  :ref:`transitive compile properties <Transitive Compile Properties>`,
   otherwise it is the empty string.  This is intended for use in an
   :prop_tgt:`INTERFACE_LINK_LIBRARIES` and :prop_tgt:`LINK_LIBRARIES` target
   properties, typically populated via the :command:`target_link_libraries` command.
@@ -1671,7 +1671,7 @@ Link Context
   .. versionadded:: 3.1
 
   Content of ``...``, except while collecting usage requirements from
-  :ref:`transitive build properties <Transitive Build Properties>`,
+  :ref:`transitive compile properties <Transitive Compile Properties>`,
   in which case it is the empty string.  This is intended for use in an
   :prop_tgt:`INTERFACE_LINK_LIBRARIES` target property, typically populated
   via the :command:`target_link_libraries` command, to specify private link
@@ -1790,7 +1790,7 @@ The expressions have special evaluation rules for some properties:
   Evaluation is transitive over the closure of the target's
   :prop_tgt:`INTERFACE_LINK_LIBRARIES`:
 
-  * For :ref:`Transitive Build Properties`, the transitive closure
+  * For :ref:`Transitive Compile Properties`, the transitive closure
     *excludes* entries of :prop_tgt:`INTERFACE_LINK_LIBRARIES` guarded
     by the :genex:`LINK_ONLY` generator expression.
 
