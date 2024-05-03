@@ -302,17 +302,17 @@ Target Build Specification
 --------------------------
 
 The build specification of `Binary Targets`_ is represented by target
-properties.  For each of the following `build <Target Build Properties_>`_
+properties.  For each of the following `compile <Target Compile Properties_>`_
 and `link <Target Link Properties_>`_ properties, compilation and linking
 of the target is affected both by its own value and by the corresponding
 `usage requirement <Target Usage Requirements_>`_ property, named with
 an ``INTERFACE_`` prefix, collected from the transitive closure of link
 dependencies.
 
-.. _`Target Build Properties`:
+.. _`Target Compile Properties`:
 
-Target Build Properties
-^^^^^^^^^^^^^^^^^^^^^^^
+Target Compile Properties
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :prop_tgt:`COMPILE_DEFINITIONS`
   List of compile definitions for compiling sources in the target.
@@ -422,7 +422,7 @@ Target Usage Requirements
 The *usage requirements* of a target are settings that propagate to consumers,
 which link to the target via :command:`target_link_libraries`, in order to
 correctly compile and link with it.  They are represented by transitive
-`build <Transitive Build Properties_>`_ and
+`compile <Transitive Compile Properties_>`_ and
 `link <Transitive Link Properties_>`_ properties.
 
 Note that usage requirements are not designed as a way to make downstreams
@@ -505,10 +505,10 @@ Note that care must be taken when specifying usage requirements for targets
 which will be exported for installation using the :command:`install(EXPORT)`
 command.  See :ref:`Creating Packages` for more.
 
-.. _`Transitive Build Properties`:
+.. _`Transitive Compile Properties`:
 
-Transitive Build Properties
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Transitive Compile Properties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 :prop_tgt:`INTERFACE_COMPILE_DEFINITIONS`
   List of compile definitions for compiling sources in the target's consumers.
