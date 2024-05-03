@@ -854,7 +854,7 @@ void cmComputeLinkDepends::AddDirectLinkEntries()
 {
   // Add direct link dependencies in this configuration.
   cmLinkImplementation const* impl = this->Target->GetLinkImplementation(
-    this->Config, cmGeneratorTarget::LinkInterfaceFor::Link);
+    this->Config, cmGeneratorTarget::UseTo::Link);
   this->AddLinkEntries(cmComputeComponentGraph::INVALID_COMPONENT,
                        impl->Libraries);
   this->AddLinkObjects(impl->Objects);
