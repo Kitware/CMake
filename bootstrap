@@ -353,6 +353,7 @@ CMAKE_CXX_SOURCES="\
   cmExprParserHelper \
   cmExternalMakefileProjectGenerator \
   cmFileCommand \
+  cmFileCommand_ReadMacho \
   cmFileCopier \
   cmFileInstaller \
   cmFileSet \
@@ -520,6 +521,12 @@ CMAKE_CXX_SOURCES="\
   cmcmd  \
   cm_fileno \
 "
+
+if ${cmake_system_darwin}; then
+  CMAKE_CXX_SOURCES="${CMAKE_CXX_SOURCES}\
+    cmMachO \
+  "
+fi
 
 if ${cmake_system_mingw}; then
   CMAKE_CXX_SOURCES="${CMAKE_CXX_SOURCES}\
@@ -1667,6 +1674,10 @@ if test "${cmake_bootstrap_generator}" = "Ninja"; then
   cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP_NINJA"
 else
   cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP_MAKEFILES"
+fi
+
+if ${cmake_system_darwin}; then
+  cmake_report cmConfigure.h${_tmp} "#define CMake_USE_MACH_PARSER"
 fi
 
 if ${cmake_system_mingw}; then

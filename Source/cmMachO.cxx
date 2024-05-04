@@ -4,7 +4,6 @@
 
 #include <cstddef>
 #include <string>
-#include <vector>
 
 #include <cm/memory>
 
@@ -13,8 +12,12 @@
 #include "cmAlgorithms.h"
 
 // Include the Mach-O format information system header.
+#include <mach-o/arch.h>
 #include <mach-o/fat.h>
 #include <mach-o/loader.h>
+#if __MAC_OS_X_VERSION_MIN_REQUIRED >= 130000
+#  include <mach-o/utils.h>
+#endif
 
 /**
 
@@ -115,12 +118,15 @@ public:
     return v;
   }
 
+  struct cmMachO::MachHeader mach_header() const { return MachHeader; }
+
 protected:
   bool read_load_commands(uint32_t ncmds, uint32_t sizeofcmds,
                           cmsys::ifstream& fin);
 
   bool Swap;
   std::vector<RawLoadCommand> LoadCommands;
+  struct cmMachO::MachHeader MachHeader;
 };
 
 // Implementation for reading Mach-O header and load commands.
@@ -138,9 +144,11 @@ public:
     if (!read(fin, this->Header)) {
       return false;
     }
-    this->Header.cputype = swap(this->Header.cputype);
-    this->Header.cpusubtype = swap(this->Header.cpusubtype);
-    this->Header.filetype = swap(this->Header.filetype);
+    // swap the header data and export a (potentially) useful subset via the
+    // parent class.
+    this->MachHeader.CpuType = swap(this->Header.cputype);
+    this->MachHeader.CpuSubType = swap(this->Header.cpusubtype);
+    this->MachHeader.FileType = swap(this->Header.filetype);
     this->Header.ncmds = swap(this->Header.ncmds);
     this->Header.sizeofcmds = swap(this->Header.sizeofcmds);
     this->Header.flags = swap(this->Header.flags);
@@ -311,6 +319,9 @@ bool cmMachOInternal::read_mach_o(uint32_t file_offset)
 cmMachO::cmMachO(const char* fname)
   : Internal(cm::make_unique<cmMachOInternal>(fname))
 {
+  for (const auto& m : this->Internal->MachOList) {
+    Headers.push_back(m->mach_header());
+  }
 }
 
 cmMachO::~cmMachO() = default;
@@ -354,4 +365,40 @@ bool cmMachO::GetInstallName(std::string& install_name)
 
 void cmMachO::PrintInfo(std::ostream& /*os*/) const
 {
+}
+
+cmMachO::StringList cmMachO::GetArchitectures() const
+{
+  cmMachO::StringList archs;
+  if (Valid() && !this->Headers.empty()) {
+    for (const auto& header : this->Headers) {
+      const char* archName = "unknown";
+#if __MAC_OS_X_VERSION_MIN_REQUIRED >= 130000
+      if (__builtin_available(macOS 13.0, *)) {
+        archName = (header.CpuType & CPU_TYPE_ARM)
+          ? macho_arch_name_for_cpu_type(header.CpuType, header.CpuSubType)
+          : macho_arch_name_for_cpu_type(header.CpuType, CPU_SUBTYPE_MULTIPLE);
+      } else
+#endif
+      {
+#if defined __clang__
+#  define CM_MACOS_DEPRECATED_NXGetArchInfoFromCpuType
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wdeprecated-declarations"
+#endif
+        const NXArchInfo* archInfo = (header.CpuType & CPU_TYPE_ARM)
+          ? NXGetArchInfoFromCpuType(header.CpuType, header.CpuSubType)
+          : NXGetArchInfoFromCpuType(header.CpuType, CPU_SUBTYPE_MULTIPLE);
+#ifdef CM_MACOS_DEPRECATED_NXGetArchInfoFromCpuType
+#  undef CM_MACOS_DEPRECATED_NXGetArchInfoFromCpuType
+#  pragma clang diagnostic pop
+#endif
+        if (archInfo) {
+          archName = archInfo->name;
+        }
+      }
+      archs.push_back(archName);
+    }
+  }
+  return archs;
 }
