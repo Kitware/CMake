@@ -27,9 +27,11 @@ if(NOT CMake_TEST_NO_NETWORK)
 endif()
 
 run_cmake_with_options(TLS_VERSION-bad)
+if(CMake_TEST_TLS_VERIFY_URL_BAD)
+  run_cmake_with_options(TLS_VERIFY-bad -Durl=${CMake_TEST_TLS_VERIFY_URL_BAD})
+endif()
 
 if(CMake_TEST_TLS_VERIFY_URL)
-  run_cmake(TLS_VERIFY-bad)
   run_cmake_with_options(TLS_VERIFY-good -Durl=${CMake_TEST_TLS_VERIFY_URL})
   if(CMake_TEST_TLS_VERSION)
     run_cmake_with_options(TLS_VERSION-good -Durl=${CMake_TEST_TLS_VERIFY_URL} -Dtls_version=${CMake_TEST_TLS_VERSION})

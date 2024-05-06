@@ -1,5 +1,6 @@
 function(download case)
-  file(DOWNLOAD https://expired.badssl.com ${ARGN} STATUS status LOG log)
+  # URL with semantics like https://expired.badssl.com is provided by caller
+  file(DOWNLOAD ${url} ${ARGN} STATUS status LOG log)
   message(STATUS "${case}: ${status}")
   if(case MATCHES "1$" AND NOT status MATCHES "^(35|60);")
     message("${log}")
