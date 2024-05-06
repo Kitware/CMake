@@ -403,8 +403,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
         std::string mapping;
 
         // On VS 19 and above, always map .NET SDK projects to "Any CPU".
-        if (target->IsDotNetSdkTarget() &&
-            this->GetVersion() >= VSVersion::VS16 &&
+        if (target->IsDotNetSdkTarget() && this->Version >= VSVersion::VS16 &&
             !cmGlobalVisualStudio7Generator::IsReservedTarget(
               target->GetName())) {
           mapping = "Any CPU";

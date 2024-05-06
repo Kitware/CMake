@@ -518,7 +518,7 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
 
   this->DefaultPlatformToolset = this->SelectWindowsCEToolset();
 
-  if (this->GetVersion() == cmGlobalVisualStudioGenerator::VSVersion::VS12) {
+  if (this->Version == cmGlobalVisualStudioGenerator::VSVersion::VS12) {
     // VS 12 .NET CF defaults to .NET framework 3.9 for Windows CE.
     this->DefaultTargetFrameworkVersion = "v3.9";
     this->DefaultTargetFrameworkIdentifier = "WindowsEmbeddedCompact";
