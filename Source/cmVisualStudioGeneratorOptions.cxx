@@ -75,21 +75,14 @@ void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
   // initialization to off, but the user has the option of removing
   // the flag to disable exception handling.  When the user does
   // remove the flag we need to override the IDE default of on.
-  switch (this->Version) {
-    case cmGlobalVisualStudioGenerator::VSVersion::VS12:
-    case cmGlobalVisualStudioGenerator::VSVersion::VS14:
-    case cmGlobalVisualStudioGenerator::VSVersion::VS15:
-    case cmGlobalVisualStudioGenerator::VSVersion::VS16:
-    case cmGlobalVisualStudioGenerator::VSVersion::VS17:
-      // by default VS puts <ExceptionHandling></ExceptionHandling> empty
-      // for a project, to make our projects look the same put a new line
-      // and space over for the closing </ExceptionHandling> as the default
-      // value
-      this->FlagMap["ExceptionHandling"] = "\n      ";
-      break;
-    default:
-      this->FlagMap["ExceptionHandling"] = "0";
-      break;
+  if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9) {
+    // by default VS puts <ExceptionHandling></ExceptionHandling> empty
+    // for a project, to make our projects look the same put a new line
+    // and space over for the closing </ExceptionHandling> as the default
+    // value
+    this->FlagMap["ExceptionHandling"] = "\n      ";
+  } else {
+    this->FlagMap["ExceptionHandling"] = "0";
   }
 }
 
@@ -105,8 +98,8 @@ void cmVisualStudioGeneratorOptions::SetVerboseMakefile(bool verbose)
   if (verbose &&
       this->FlagMap.find("SuppressStartupBanner") == this->FlagMap.end()) {
     this->FlagMap["SuppressStartupBanner"] =
-      this->Version == cmGlobalVisualStudioGenerator::VSVersion::VS9 ? "FALSE"
-                                                                     : "";
+      this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9 ? ""
+                                                                     : "FALSE";
   }
 }
 
@@ -378,19 +371,17 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   }
   auto de = cmRemoveDuplicates(this->Defines);
   for (std::string const& di : cmMakeRange(this->Defines.cbegin(), de)) {
-    // Escape the definition for the compiler.
     std::string define;
-    if (this->Version == cmGlobalVisualStudioGenerator::VSVersion::VS9) {
-      define = this->LocalGenerator->EscapeForShell(di, true);
-    } else {
-      define = di;
-    }
-    // Escape this flag for the MSBuild.
     if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9) {
+      // Escape the definition for MSBuild.
+      define = di;
       cmVS10EscapeForMSBuild(define);
       if (lang == "RC"_s) {
         cmSystemTools::ReplaceString(define, "\"", "\\\"");
       }
+    } else {
+      // Escape the definition for the compiler.
+      define = this->LocalGenerator->EscapeForShell(di, true);
     }
     // Store the flag in the project file.
     oss << ';' << define;
