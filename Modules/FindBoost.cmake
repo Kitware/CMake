@@ -5,6 +5,11 @@
 FindBoost
 ---------
 
+.. versionchanged:: 3.30
+  This module is available only if policy :policy:`CMP0167` is not set to
+  ``NEW``.  Port projects to upstream Boost's ``BoostConfig.cmake`` package
+  configuration file, for which ``find_package(Boost)`` now searches.
+
 Find Boost include dirs and libraries
 
 Use this module by invoking :command:`find_package` with the form:
@@ -378,6 +383,16 @@ the Boost CMake package configuration for details on what it provides.
 
 Set ``Boost_NO_BOOST_CMAKE`` to ``ON``, to disable the search for boost-cmake.
 #]=======================================================================]
+
+cmake_policy(GET CMP0167 _FindBoost_CMP0167)
+if(_FindBoost_CMP0167 STREQUAL "NEW")
+  message(FATAL_ERROR "The FindBoost module has been removed by policy CMP0167.")
+endif()
+
+if(_FindBoost_testing)
+  set(_FindBoost_included TRUE)
+  return()
+endif()
 
 # The FPHSA helper provides standard way of reporting final search results to
 # the user including the version and component checks.

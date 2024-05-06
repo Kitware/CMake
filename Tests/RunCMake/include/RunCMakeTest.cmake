@@ -21,3 +21,8 @@ run_cmake(CMP0148-Libs-OLD)
 run_cmake(CMP0148-Libs-WARN)
 run_cmake(CMP0148-Libs-NEW-name)
 run_cmake(CMP0148-Libs-NEW-path)
+
+run_cmake(CMP0167-OLD)
+run_cmake(CMP0167-WARN)
+run_cmake(CMP0167-NEW-name)
+run_cmake(CMP0167-NEW-path)
