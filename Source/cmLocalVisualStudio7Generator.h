@@ -91,6 +91,8 @@ public:
     return this->SourcesVisited[target];
   };
 
+  bool IsVFProj() const override { return this->FortranProject; }
+
 protected:
   virtual void GenerateTarget(cmGeneratorTarget* target);
 

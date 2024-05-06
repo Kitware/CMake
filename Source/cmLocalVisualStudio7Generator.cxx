@@ -196,13 +196,6 @@ void cmLocalVisualStudio7Generator::GenerateTarget(cmGeneratorTarget* target)
   this->FortranProject = gg->TargetIsFortranOnly(target);
   this->WindowsCEProject = gg->TargetsWindowsCE();
 
-  // Intel Fortran always uses VS9 format ".vfproj" files.
-  cmGlobalVisualStudioGenerator::VSVersion realVersion = gg->GetVersion();
-  if (this->FortranProject &&
-      gg->GetVersion() >= cmGlobalVisualStudioGenerator::VSVersion::VS12) {
-    gg->SetVersion(cmGlobalVisualStudioGenerator::VSVersion::VS9);
-  }
-
   // add to the list of projects
   target->Target->SetProperty("GENERATOR_FILE_NAME", lname);
   // create the dsp.cmake file
@@ -226,7 +219,6 @@ void cmLocalVisualStudio7Generator::GenerateTarget(cmGeneratorTarget* target)
 
   this->WindowsCEProject = false;
   this->FortranProject = false;
-  gg->SetVersion(realVersion);
 }
 
 cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()

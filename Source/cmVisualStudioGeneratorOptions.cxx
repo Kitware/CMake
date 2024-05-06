@@ -75,7 +75,8 @@ void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
   // initialization to off, but the user has the option of removing
   // the flag to disable exception handling.  When the user does
   // remove the flag we need to override the IDE default of on.
-  if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9) {
+  if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9 &&
+      !this->LocalGenerator->IsVFProj()) {
     // by default VS puts <ExceptionHandling></ExceptionHandling> empty
     // for a project, to make our projects look the same put a new line
     // and space over for the closing </ExceptionHandling> as the default
@@ -98,8 +99,10 @@ void cmVisualStudioGeneratorOptions::SetVerboseMakefile(bool verbose)
   if (verbose &&
       this->FlagMap.find("SuppressStartupBanner") == this->FlagMap.end()) {
     this->FlagMap["SuppressStartupBanner"] =
-      this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9 ? ""
-                                                                     : "FALSE";
+      this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9 &&
+        !this->LocalGenerator->IsVFProj()
+      ? ""
+      : "FALSE";
   }
 }
 
@@ -366,13 +369,15 @@ void cmVisualStudioGeneratorOptions::OutputPreprocessorDefinitions(
   }
 
   std::ostringstream oss;
-  if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9) {
+  if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9 &&
+      !this->LocalGenerator->IsVFProj()) {
     oss << "%(" << tag << ')';
   }
   auto de = cmRemoveDuplicates(this->Defines);
   for (std::string const& di : cmMakeRange(this->Defines.cbegin(), de)) {
     std::string define;
-    if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9) {
+    if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9 &&
+        !this->LocalGenerator->IsVFProj()) {
       // Escape the definition for MSBuild.
       define = di;
       cmVS10EscapeForMSBuild(define);
@@ -419,7 +424,8 @@ void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
     }
 
     // Escape this include for the MSBuild.
-    if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9) {
+    if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9 &&
+        !this->LocalGenerator->IsVFProj()) {
       cmVS10EscapeForMSBuild(include);
     }
     oss << sep << include;
@@ -431,7 +437,8 @@ void cmVisualStudioGeneratorOptions::OutputAdditionalIncludeDirectories(
     }
   }
 
-  if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9) {
+  if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9 &&
+      !this->LocalGenerator->IsVFProj()) {
     oss << sep << "%(" << tag << ')';
   }
 
@@ -445,7 +452,8 @@ void cmVisualStudioGeneratorOptions::OutputFlagMap(std::ostream& fout,
     std::ostringstream oss;
     const char* sep = "";
     for (std::string i : m.second) {
-      if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9) {
+      if (this->Version != cmGlobalVisualStudioGenerator::VSVersion::VS9 &&
+          !this->LocalGenerator->IsVFProj()) {
         cmVS10EscapeForMSBuild(i);
       }
       oss << sep << i;
