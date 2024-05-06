@@ -220,7 +220,7 @@ void cmComputeTargetDepends::CollectTargetDepends(size_t depender_index)
       emitted.insert(cmLinkItem(depender, true, cmListFileBacktrace()));
 
       if (cmLinkImplementation const* impl = depender->GetLinkImplementation(
-            it, cmGeneratorTarget::LinkInterfaceFor::Link)) {
+            it, cmGeneratorTarget::UseTo::Link)) {
         for (cmLinkImplItem const& lib : impl->Libraries) {
           // Don't emit the same library twice for this target.
           if (emitted.insert(lib).second) {

@@ -156,8 +156,8 @@ void cmLinkLineDeviceComputer::ComputeLinkLibraries(
       linkLib.Value += " ";
 
       const cmLinkImplementation* linkImpl =
-        cli.GetTarget()->GetLinkImplementation(
-          cli.GetConfig(), cmGeneratorTarget::LinkInterfaceFor::Link);
+        cli.GetTarget()->GetLinkImplementation(cli.GetConfig(),
+                                               cmGeneratorTarget::UseTo::Link);
 
       for (const cmLinkImplItem& iter : linkImpl->Libraries) {
         if (iter.Target != nullptr &&

@@ -109,8 +109,8 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
         std::string sharedLibs;
         std::string ldlibs;
         cmLinkInterfaceLibraries const* linkIFace =
-          target->GetLinkInterfaceLibraries(
-            config, target, cmGeneratorTarget::LinkInterfaceFor::Link);
+          target->GetLinkInterfaceLibraries(config, target,
+                                            cmGeneratorTarget::UseTo::Link);
         for (cmLinkItem const& item : linkIFace->Libraries) {
           cmGeneratorTarget const* gt = item.Target;
           std::string const& lib = item.AsStr();
@@ -170,8 +170,8 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
 
   // Tell the NDK build system if prebuilt static libraries use C++.
   if (target->GetType() == cmStateEnums::STATIC_LIBRARY) {
-    cmLinkImplementation const* li = target->GetLinkImplementation(
-      config, cmGeneratorTarget::LinkInterfaceFor::Link);
+    cmLinkImplementation const* li =
+      target->GetLinkImplementation(config, cmGeneratorTarget::UseTo::Link);
     if (cm::contains(li->Languages, "CXX")) {
       os << "LOCAL_HAS_CPP := true\n";
     }

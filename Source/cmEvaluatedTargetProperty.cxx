@@ -55,7 +55,7 @@ void addInterfaceEntry(cmGeneratorTarget const* headTarget,
                        std::string const& lang,
                        cmGeneratorExpressionDAGChecker* dagChecker,
                        EvaluatedTargetPropertyEntries& entries,
-                       cmGeneratorTarget::LinkInterfaceFor interfaceFor,
+                       cmGeneratorTarget::UseTo usage,
                        std::vector<cmLinkImplItem> const& libraries)
 {
   for (cmLinkImplItem const& lib : libraries) {
@@ -67,8 +67,8 @@ void addInterfaceEntry(cmGeneratorTarget const* headTarget,
       cmGeneratorExpressionContext context(
         headTarget->GetLocalGenerator(), config, false, headTarget, headTarget,
         true, lib.Backtrace, lang);
-      cmExpandList(lib.Target->EvaluateInterfaceProperty(
-                     prop, &context, dagChecker, interfaceFor),
+      cmExpandList(lib.Target->EvaluateInterfaceProperty(prop, &context,
+                                                         dagChecker, usage),
                    ee.Values);
       ee.ContextDependent = context.HadContextSensitiveCondition;
       entries.Entries.emplace_back(std::move(ee));
@@ -83,29 +83,29 @@ void AddInterfaceEntries(cmGeneratorTarget const* headTarget,
                          cmGeneratorExpressionDAGChecker* dagChecker,
                          EvaluatedTargetPropertyEntries& entries,
                          IncludeRuntimeInterface searchRuntime,
-                         cmGeneratorTarget::LinkInterfaceFor interfaceFor)
+                         cmGeneratorTarget::UseTo usage)
 {
   if (searchRuntime == IncludeRuntimeInterface::Yes) {
     if (cmLinkImplementation const* impl =
-          headTarget->GetLinkImplementation(config, interfaceFor)) {
+          headTarget->GetLinkImplementation(config, usage)) {
       entries.HadContextSensitiveCondition =
         impl->HadContextSensitiveCondition;
 
       auto runtimeLibIt = impl->LanguageRuntimeLibraries.find(lang);
       if (runtimeLibIt != impl->LanguageRuntimeLibraries.end()) {
         addInterfaceEntry(headTarget, config, prop, lang, dagChecker, entries,
-                          interfaceFor, runtimeLibIt->second);
+                          usage, runtimeLibIt->second);
       }
       addInterfaceEntry(headTarget, config, prop, lang, dagChecker, entries,
-                        interfaceFor, impl->Libraries);
+                        usage, impl->Libraries);
     }
   } else {
     if (cmLinkImplementationLibraries const* impl =
-          headTarget->GetLinkImplementationLibraries(config, interfaceFor)) {
+          headTarget->GetLinkImplementationLibraries(config, usage)) {
       entries.HadContextSensitiveCondition =
         impl->HadContextSensitiveCondition;
       addInterfaceEntry(headTarget, config, prop, lang, dagChecker, entries,
-                        interfaceFor, impl->Libraries);
+                        usage, impl->Libraries);
     }
   }
 }

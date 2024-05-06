@@ -2701,13 +2701,12 @@ static const struct DeviceLinkNode : public cmGeneratorExpressionNode
 static std::string getLinkedTargetsContent(
   cmGeneratorTarget const* target, std::string const& prop,
   cmGeneratorExpressionContext* context,
-  cmGeneratorExpressionDAGChecker* dagChecker,
-  cmGeneratorTarget::LinkInterfaceFor interfaceFor)
+  cmGeneratorExpressionDAGChecker* dagChecker, cmGeneratorTarget::UseTo usage)
 {
   std::string result;
   if (cmLinkImplementationLibraries const* impl =
         target->GetLinkImplementationLibraries(
-          context->Config, cmGeneratorTarget::LinkInterfaceFor::Usage)) {
+          context->Config, cmGeneratorTarget::UseTo::Compile)) {
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target) {
         // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our
@@ -2718,7 +2717,7 @@ static std::string getLinkedTargetsContent(
           target, context->EvaluateForBuildsystem, lib.Backtrace,
           context->Language);
         std::string libResult = lib.Target->EvaluateInterfaceProperty(
-          prop, &libContext, dagChecker, interfaceFor);
+          prop, &libContext, dagChecker, usage);
         if (!libResult.empty()) {
           if (result.empty()) {
             result = std::move(libResult);
@@ -2876,14 +2875,13 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     std::string interfacePropertyName;
     bool isInterfaceProperty = false;
-    cmGeneratorTarget::LinkInterfaceFor interfaceFor =
-      cmGeneratorTarget::LinkInterfaceFor::Usage;
+    cmGeneratorTarget::UseTo usage = cmGeneratorTarget::UseTo::Compile;
 
     if (cm::optional<cmGeneratorTarget::TransitiveProperty> transitiveProp =
           target->IsTransitiveProperty(propertyName, context->LG)) {
       interfacePropertyName = std::string(transitiveProp->InterfaceName);
       isInterfaceProperty = transitiveProp->InterfaceName == propertyName;
-      interfaceFor = transitiveProp->InterfaceFor;
+      usage = transitiveProp->Usage;
     }
 
     bool evaluatingLinkLibraries = false;
@@ -2914,7 +2912,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     if (isInterfaceProperty) {
       return cmGeneratorExpression::StripEmptyListElements(
         target->EvaluateInterfaceProperty(propertyName, context,
-                                          dagCheckerParent, interfaceFor));
+                                          dagCheckerParent, usage));
     }
 
     cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace, target,
@@ -3001,7 +2999,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         this->EvaluateDependentExpression(result, context->LG, context, target,
                                           &dagChecker, target));
       std::string linkedTargetsContent = getLinkedTargetsContent(
-        target, interfacePropertyName, context, &dagChecker, interfaceFor);
+        target, interfacePropertyName, context, &dagChecker, usage);
       if (!linkedTargetsContent.empty()) {
         result += (result.empty() ? "" : ";") + linkedTargetsContent;
       }

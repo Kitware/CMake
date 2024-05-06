@@ -258,20 +258,20 @@ public:
                             cmOptionalLinkInterface& iface,
                             const cmGeneratorTarget* head) const;
 
-  enum class LinkInterfaceFor
+  enum class UseTo
   {
-    Usage, // Interface for usage requirements excludes $<LINK_ONLY>.
-    Link,  // Interface for linking includes $<LINK_ONLY>.
+    Compile, // Usage requirements for compiling.  Excludes $<LINK_ONLY>.
+    Link,    // Usage requirements for linking.  Includes $<LINK_ONLY>.
   };
 
   cmLinkInterfaceLibraries const* GetLinkInterfaceLibraries(
     const std::string& config, const cmGeneratorTarget* headTarget,
-    LinkInterfaceFor interfaceFor) const;
+    UseTo usage) const;
 
   void ComputeLinkInterfaceLibraries(const std::string& config,
                                      cmOptionalLinkInterface& iface,
                                      const cmGeneratorTarget* head,
-                                     LinkInterfaceFor interfaceFor) const;
+                                     UseTo usage) const;
 
   /** Get the library name for an imported interface library.  */
   std::string GetImportedLibName(std::string const& config) const;
@@ -429,19 +429,19 @@ public:
 
   LinkClosure const* GetLinkClosure(const std::string& config) const;
 
-  cmLinkImplementation const* GetLinkImplementation(
-    const std::string& config, LinkInterfaceFor implFor) const;
+  cmLinkImplementation const* GetLinkImplementation(const std::string& config,
+                                                    UseTo usage) const;
 
   void ComputeLinkImplementationLanguages(
     const std::string& config, cmOptionalLinkImplementation& impl) const;
 
   cmLinkImplementationLibraries const* GetLinkImplementationLibraries(
-    const std::string& config, LinkInterfaceFor implFor) const;
+    const std::string& config, UseTo usage) const;
 
   void ComputeLinkImplementationLibraries(const std::string& config,
                                           cmOptionalLinkImplementation& impl,
                                           const cmGeneratorTarget* head,
-                                          LinkInterfaceFor implFor) const;
+                                          UseTo usage) const;
 
   struct TargetOrString
   {
@@ -886,13 +886,12 @@ public:
 
   std::string EvaluateInterfaceProperty(
     std::string const& prop, cmGeneratorExpressionContext* context,
-    cmGeneratorExpressionDAGChecker* dagCheckerParent,
-    LinkInterfaceFor interfaceFor) const;
+    cmGeneratorExpressionDAGChecker* dagCheckerParent, UseTo usage) const;
 
   struct TransitiveProperty
   {
     cm::string_view InterfaceName;
-    LinkInterfaceFor InterfaceFor;
+    UseTo Usage;
   };
 
   static const std::map<cm::string_view, TransitiveProperty>
@@ -1102,7 +1101,7 @@ private:
                             const cmGeneratorTarget* head,
                             bool secondPass) const;
   cmLinkImplementation const* GetLinkImplementation(const std::string& config,
-                                                    LinkInterfaceFor implFor,
+                                                    UseTo usage,
                                                     bool secondPass) const;
 
   enum class LinkItemRole
@@ -1143,7 +1142,7 @@ private:
 
   cmLinkInterface const* GetImportLinkInterface(const std::string& config,
                                                 const cmGeneratorTarget* head,
-                                                LinkInterfaceFor interfaceFor,
+                                                UseTo usage,
                                                 bool secondPass = false) const;
 
   using KindedSourcesMapType = std::map<std::string, KindedSources>;
@@ -1157,7 +1156,7 @@ private:
   mutable std::unordered_map<std::string, bool> MaybeInterfacePropertyExists;
   bool MaybeHaveInterfaceProperty(std::string const& prop,
                                   cmGeneratorExpressionContext* context,
-                                  LinkInterfaceFor interfaceFor) const;
+                                  UseTo usage) const;
 
   using TargetPropertyEntryVector =
     std::vector<std::unique_ptr<TargetPropertyEntry>>;
@@ -1193,9 +1192,8 @@ private:
   };
   void ExpandLinkItems(std::string const& prop, cmBTStringRange entries,
                        std::string const& config,
-                       const cmGeneratorTarget* headTarget,
-                       LinkInterfaceFor interfaceFor, LinkInterfaceField field,
-                       cmLinkInterface& iface) const;
+                       const cmGeneratorTarget* headTarget, UseTo usage,
+                       LinkInterfaceField field, cmLinkInterface& iface) const;
 
   struct LookupLinkItemScope
   {
@@ -1234,7 +1232,7 @@ private:
 
   cmLinkImplementationLibraries const* GetLinkImplementationLibrariesInternal(
     const std::string& config, const cmGeneratorTarget* head,
-    LinkInterfaceFor implFor) const;
+    UseTo usage) const;
   bool ComputeOutputDir(const std::string& config,
                         cmStateEnums::ArtifactType artifact,
                         std::string& out) const;
