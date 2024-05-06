@@ -1275,12 +1275,6 @@ std::string cmGlobalVisualStudio10Generator::Encoding()
 const char* cmGlobalVisualStudio10Generator::GetToolsVersion() const
 {
   switch (this->Version) {
-    case cmGlobalVisualStudioGenerator::VSVersion::VS9:
-      return "4.0";
-
-      // in Visual Studio 2013 they detached the MSBuild tools version
-      // from the .Net Framework version and instead made it have it's own
-      // version number
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
       return "12.0";
     case cmGlobalVisualStudioGenerator::VSVersion::VS14:

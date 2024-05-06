@@ -886,8 +886,6 @@ if(WIN32)
         cmGlobalVisualStudio7Generator.h
         cmGlobalVisualStudio8Generator.cxx
         cmGlobalVisualStudio8Generator.h
-        cmGlobalVisualStudio9Generator.cxx
-        cmGlobalVisualStudio9Generator.h
         cmVisualStudioGeneratorOptions.h
         cmVisualStudioGeneratorOptions.cxx
         cmVsProjectType.h

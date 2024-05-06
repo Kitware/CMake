@@ -180,8 +180,7 @@ if (RunCMake_GENERATOR MATCHES "Makefiles")
   unset(RunCMake_TEST_NO_CLEAN)
 endif()
 
-if(RunCMake_GENERATOR MATCHES "Make|Ninja|Visual Studio|Xcode" AND
-    NOT RunCMake_GENERATOR MATCHES "Visual Studio (9|10)( |$)")
+if(RunCMake_GENERATOR MATCHES "Make|Ninja|Visual Studio|Xcode")
   unset(run_BuildDepends_skip_step_3)
   run_BuildDepends(CustomCommandDepfile)
   set(run_BuildDepends_skip_step_3 1)
@@ -191,8 +190,7 @@ if(RunCMake_GENERATOR MATCHES "Make")
   run_BuildDepends(MakeDependencies)
 endif()
 
-if(RunCMake_GENERATOR MATCHES "^Visual Studio 9 " OR
-   (RunCMake_GENERATOR MATCHES "Ninja" AND ninja_version VERSION_LESS 1.7))
+if(RunCMake_GENERATOR MATCHES "Ninja" AND ninja_version VERSION_LESS 1.7)
   # This build tool misses the dependency.
   set(run_BuildDepends_skip_step_2 1)
 endif()

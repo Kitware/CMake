@@ -1,10 +1,5 @@
 include(RunCMake)
 
-if (RunCMake_GENERATOR MATCHES "Visual Studio 9 2008")
-  run_cmake(UnsupportedLinkerType)
-  return()
-endif()
-
 run_cmake(InvalidLinkerType1)
 run_cmake(InvalidLinkerType2)
 

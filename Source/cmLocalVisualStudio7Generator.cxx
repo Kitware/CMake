@@ -1133,12 +1133,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
         fout << "\t\t\t\tGenerateDebugInformation=\"true\"\n";
       }
       if (this->WindowsCEProject) {
-        if (this->GetVersion() <
-            cmGlobalVisualStudioGenerator::VSVersion::VS9) {
-          fout << "\t\t\t\tSubSystem=\"9\"\n";
-        } else {
-          fout << "\t\t\t\tSubSystem=\"8\"\n";
-        }
+        fout << "\t\t\t\tSubSystem=\"8\"\n";
       }
       std::string stackVar = cmStrCat("CMAKE_", linkLanguage, "_STACK_SIZE");
       cmValue stackVal = this->Makefile->GetDefinition(stackVar);
@@ -1221,12 +1216,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
         fout << "\t\t\t\tGenerateDebugInformation=\"true\"\n";
       }
       if (this->WindowsCEProject) {
-        if (this->GetVersion() <
-            cmGlobalVisualStudioGenerator::VSVersion::VS9) {
-          fout << "\t\t\t\tSubSystem=\"9\"\n";
-        } else {
-          fout << "\t\t\t\tSubSystem=\"8\"\n";
-        }
+        fout << "\t\t\t\tSubSystem=\"8\"\n";
 
         if (!linkOptions.GetFlag("EntryPointSymbol")) {
           const char* entryPointSymbol = targetOptions.UsingUnicode()

@@ -17,6 +17,6 @@ pairs.  Each such pair will be transformed into an entry in the
 solution global section.  Whitespace around key and value is ignored.
 List elements which do not contain an equal sign are skipped.
 
-This property only works for Visual Studio 9 and above; it is ignored
+This property only works for Visual Studio 12 and above; it is ignored
 on other generators.  The property only applies when set on a
 directory whose ``CMakeLists.txt`` contains a :command:`project` command.

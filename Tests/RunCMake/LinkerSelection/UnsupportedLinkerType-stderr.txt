@@ -1,3 +1,0 @@
-CMake Error at UnsupportedLinkerType.cmake:[0-9]+ \(add_executable\):
-  'LINKER_TYPE' property, specified on target 'main', is not supported by
-  this generator.
