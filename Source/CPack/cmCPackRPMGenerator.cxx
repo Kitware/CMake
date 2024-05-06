@@ -12,6 +12,7 @@
 #include "cmCPackComponentGroup.h"
 #include "cmCPackGenerator.h"
 #include "cmCPackLog.h"
+#include "cmCryptoHash.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
@@ -62,7 +63,15 @@ void cmCPackRPMGenerator::AddGeneratedPackageNames()
 int cmCPackRPMGenerator::PackageOnePack(std::string const& initialToplevel,
                                         std::string const& packageName)
 {
-  int retval = 1;
+  // Determine the sanitized package name that can be used in file-names on
+  // the file-system.
+  std::string sanitizedPkgNameSuffix =
+    this->GetSanitizedDirOrFileName(packageName, false);
+  // Determine the sanitized packaging directory-name that can be used on the
+  // file-system.
+  std::string sanitizedPkgDirName =
+    this->GetSanitizedDirOrFileName(packageName);
+
   // Begin the archive for this pack
   std::string localToplevel(initialToplevel);
   std::string packageFileName(
@@ -72,7 +81,7 @@ int cmCPackRPMGenerator::PackageOnePack(std::string const& initialToplevel,
       this->GetOption("CPACK_PACKAGE_FILE_NAME"), packageName, true) +
     this->GetOutputExtension());
 
-  localToplevel += "/" + packageName;
+  localToplevel += "/" + sanitizedPkgDirName;
   /* replace the TEMP DIRECTORY with the component one */
   this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel);
   packageFileName += "/" + outputFileName;
@@ -82,16 +91,34 @@ int cmCPackRPMGenerator::PackageOnePack(std::string const& initialToplevel,
   this->SetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME", packageFileName);
   // Tell CPackRPM.cmake the name of the component NAME.
   this->SetOption("CPACK_RPM_PACKAGE_COMPONENT", packageName);
+  // Tell CPackRPM.cmake the suffix for the component NAME.
+  this->SetOption("CPACK_RPM_PACKAGE_COMPONENT_PART_NAME",
+                  sanitizedPkgNameSuffix);
   // Tell CPackRPM.cmake the path where the component is.
-  std::string component_path = cmStrCat('/', packageName);
+  std::string component_path = cmStrCat('/', sanitizedPkgDirName);
   this->SetOption("CPACK_RPM_PACKAGE_COMPONENT_PART_PATH", component_path);
   if (!this->ReadListFile("Internal/CPack/CPackRPM.cmake")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Error while execution CPackRPM.cmake" << std::endl);
-    retval = 0;
+    return 0;
   }
 
-  return retval;
+  return 1;
+}
+
+std::string cmCPackRPMGenerator::GetSanitizedDirOrFileName(
+  const std::string& name, bool isFullName) const
+{
+  auto sanitizedName =
+    this->cmCPackGenerator::GetSanitizedDirOrFileName(name, isFullName);
+  if (sanitizedName == name && !isFullName) {
+    // Make sure to also sanitize if name contains a colon (':').
+    if (name.find_first_of(':') != std::string::npos) {
+      cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
+      return hasher.HashString(name);
+    }
+  }
+  return sanitizedName;
 }
 
 int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
@@ -417,7 +444,7 @@ bool cmCPackRPMGenerator::SupportsComponentInstallation() const
   return this->IsOn("CPACK_RPM_COMPONENT_INSTALL");
 }
 
-std::string cmCPackRPMGenerator::GetComponentInstallDirNameSuffix(
+std::string cmCPackRPMGenerator::GetComponentInstallSuffix(
   const std::string& componentName)
 {
   if (this->componentPackageMethod == ONE_PACKAGE_PER_COMPONENT) {
@@ -432,7 +459,14 @@ std::string cmCPackRPMGenerator::GetComponentInstallDirNameSuffix(
   std::string groupVar =
     "CPACK_COMPONENT_" + cmSystemTools::UpperCase(componentName) + "_GROUP";
   if (nullptr != this->GetOption(groupVar)) {
-    return std::string(this->GetOption(groupVar));
+    return *this->GetOption(groupVar);
   }
   return componentName;
+}
+
+std::string cmCPackRPMGenerator::GetComponentInstallDirNameSuffix(
+  const std::string& componentName)
+{
+  return this->GetSanitizedDirOrFileName(
+    this->GetComponentInstallSuffix(componentName));
 }

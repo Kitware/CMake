@@ -461,7 +461,7 @@ int cmCPackIFWGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-std::string cmCPackIFWGenerator::GetComponentInstallDirNameSuffix(
+std::string cmCPackIFWGenerator::GetComponentInstallSuffix(
   const std::string& componentName)
 {
   const std::string prefix = "packages/";
@@ -473,6 +473,22 @@ std::string cmCPackIFWGenerator::GetComponentInstallDirNameSuffix(
 
   return prefix +
     this->GetComponentPackageName(&this->Components[componentName]) + suffix;
+}
+
+std::string cmCPackIFWGenerator::GetComponentInstallDirNameSuffix(
+  const std::string& componentName)
+{
+  const std::string prefix = "packages/";
+  const std::string suffix = "/data";
+
+  if (this->componentPackageMethod == this->ONE_PACKAGE) {
+    return cmStrCat(prefix, this->GetRootPackageName(), suffix);
+  }
+
+  return prefix +
+    this->GetSanitizedDirOrFileName(
+      this->GetComponentPackageName(&this->Components[componentName])) +
+    suffix;
 }
 
 cmCPackComponent* cmCPackIFWGenerator::GetComponent(

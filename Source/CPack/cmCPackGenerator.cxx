@@ -761,6 +761,7 @@ int cmCPackGenerator::InstallCMakeProject(
     // instead of the default
     //  one install directory for each component.
     tempInstallDirectory += this->GetComponentInstallDirNameSuffix(component);
+
     if (this->IsOn("CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY")) {
       tempInstallDirectory += "/";
       tempInstallDirectory += *this->GetOption("CPACK_PACKAGE_FILE_NAME");
@@ -965,7 +966,7 @@ int cmCPackGenerator::InstallCMakeProject(
     if (componentInstall) {
       std::string absoluteDestFileComponent =
         std::string("CPACK_ABSOLUTE_DESTINATION_FILES") + "_" +
-        this->GetComponentInstallDirNameSuffix(component);
+        this->GetComponentInstallSuffix(component);
       if (nullptr != this->GetOption(absoluteDestFileComponent)) {
         std::string absoluteDestFilesListComponent =
           cmStrCat(this->GetOption(absoluteDestFileComponent), ';', *d);
@@ -1544,11 +1545,62 @@ int cmCPackGenerator::PrepareGroupingKind()
   return 1;
 }
 
-std::string cmCPackGenerator::GetComponentInstallDirNameSuffix(
+std::string cmCPackGenerator::GetSanitizedDirOrFileName(
+  const std::string& name, bool isFullName) const
+{
+  if (isFullName) {
+#ifdef _WIN32
+    // Given name matches a reserved name (on Windows)?
+    // Then return it prepended with an underscore.
+    cmsys::RegularExpression reserved_pattern("^("
+                                              "[Cc][Oo][Nn]|"
+                                              "[Pp][Rr][Nn]|"
+                                              "[Aa][Uu][Xx]|"
+                                              "[Nn][Uu][Ll]|"
+                                              "[Cc][Oo][Mm][1-9]|"
+                                              "[Ll][Pp][Tt][1-9]"
+                                              ")([.].+)?");
+    if (reserved_pattern.find(name)) {
+      return "_" + name;
+    }
+    // Given name ends in a dot (on Windows)?
+    // Then return it appended with an underscore.
+    if (name.back() == '.') {
+      return name + '_';
+    }
+#endif
+  }
+
+#ifndef _WIN32
+  constexpr const char* prohibited_chars = "<>\"/\\|?*`";
+#else
+  // Note: Windows also excludes the colon.
+  constexpr const char* prohibited_chars = "<>\"/\\|?*`:";
+#endif
+  // Given name contains non-supported character?
+  // Then return its MD5 hash.
+  if (name.find_first_of(prohibited_chars) != std::string::npos) {
+    cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
+    return hasher.HashString(name);
+  }
+
+  // Otherwise return unmodified.
+  return name;
+}
+
+std::string cmCPackGenerator::GetComponentInstallSuffix(
   const std::string& componentName)
 {
   return componentName;
 }
+
+std::string cmCPackGenerator::GetComponentInstallDirNameSuffix(
+  const std::string& componentName)
+{
+  return this->GetSanitizedDirOrFileName(
+    this->GetComponentInstallSuffix(componentName));
+}
+
 std::string cmCPackGenerator::GetComponentPackageFileName(
   const std::string& initialPackageFileName,
   const std::string& groupOrComponentName, bool isGroupName)
