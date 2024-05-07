@@ -224,6 +224,8 @@ void cmLocalVisualStudio7Generator::GenerateTarget(cmGeneratorTarget* target)
     this->GlobalGenerator->FileReplacedDuringGenerate(fname);
   }
 
+  this->WindowsCEProject = false;
+  this->FortranProject = false;
   gg->SetVersion(realVersion);
 }
 

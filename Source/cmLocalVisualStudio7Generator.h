@@ -153,8 +153,8 @@ private:
 
   friend class EventWriter;
 
-  bool FortranProject;
-  bool WindowsCEProject;
+  bool FortranProject = false;
+  bool WindowsCEProject = false;
   std::unique_ptr<cmLocalVisualStudio7GeneratorInternals> Internal;
 
   std::map<cmGeneratorTarget const*, std::set<cmSourceFile const*>>
