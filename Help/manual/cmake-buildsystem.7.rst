@@ -314,6 +314,9 @@ dependencies.
 Target Compile Properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
+These represent the `build specification <Target Build Specification_>`_
+for compiling a target.
+
 :prop_tgt:`COMPILE_DEFINITIONS`
   List of compile definitions for compiling sources in the target.
   These are passed to the compiler with ``-D`` flags, or equivalent,
@@ -377,6 +380,9 @@ Target Compile Properties
 
 Target Link Properties
 ^^^^^^^^^^^^^^^^^^^^^^
+
+These represent the `build specification <Target Build Specification_>`_
+for linking a target.
 
 :prop_tgt:`LINK_LIBRARIES`
   List of link libraries for linking the target, if it is an executable,
@@ -510,6 +516,9 @@ command.  See :ref:`Creating Packages` for more.
 Transitive Compile Properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+These represent `usage requirements <Target Usage Requirements_>`_ for
+compiling consumers.
+
 :prop_tgt:`INTERFACE_COMPILE_DEFINITIONS`
   List of compile definitions for compiling sources in the target's consumers.
   Typically these are used by the target's header files.
@@ -560,6 +569,9 @@ Transitive Compile Properties
 
 Transitive Link Properties
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These represent `usage requirements <Target Usage Requirements_>`_ for
+linking consumers.
 
 :prop_tgt:`INTERFACE_LINK_LIBRARIES`
   List of link libraries for linking the target's consumers, for
