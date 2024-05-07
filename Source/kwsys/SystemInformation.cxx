@@ -4646,7 +4646,7 @@ bool SystemInformationImplementation::ParseSysCtl()
     err = sysctlbyname("hw.machine", &tempBuff, &len, nullptr, 0);
     if (err == 0) {
       std::string machineBuf(tempBuff);
-      if (machineBuf.find_first_of("Power") != std::string::npos) {
+      if (machineBuf.find("Power") != std::string::npos) {
         this->ChipID.Vendor = "IBM";
 
         err = kw_sysctlbyname_int32("hw.cputype", &tempInt32);
@@ -4660,10 +4660,15 @@ bool SystemInformationImplementation::ParseSysCtl()
         }
 
         this->FindManufacturer();
-      } else if (machineBuf.find_first_of("arm64") != std::string::npos) {
+      } else if (machineBuf.find("arm64") != std::string::npos) {
         this->ChipID.Vendor = "Apple";
 
         this->FindManufacturer();
+
+        err = kw_sysctlbyname_int32("hw.optional.floatingpoint", &tempInt32);
+        if (err == 0) {
+          this->Features.HasFPU = static_cast<bool>(tempInt32);
+        }
       }
     }
   } else {
