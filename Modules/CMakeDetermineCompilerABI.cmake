@@ -39,6 +39,9 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       endif()
       set(CMAKE_${lang}_RUNTIME_LIBRARY "Static")
     endif()
+    if(lang STREQUAL "CXX")
+      set(CMAKE_${lang}_SCAN_FOR_MODULES OFF)
+    endif()
     if(NOT "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xMSVC")
       # Avoid adding our own platform standard libraries for compilers
       # from which we might detect implicit link libraries.
