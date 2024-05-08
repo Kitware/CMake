@@ -488,7 +488,7 @@ protected:
       cmGeneratorExpressionDAGChecker dagChecker(
         context->Backtrace, context->HeadTarget,
         genexOperator + ":" + expression, content, dagCheckerParent,
-        context->LG);
+        context->LG, context->Config);
       switch (dagChecker.Check()) {
         case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
         case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE: {
@@ -2915,9 +2915,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                           dagCheckerParent, usage));
     }
 
-    cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace, target,
-                                               propertyName, content,
-                                               dagCheckerParent, context->LG);
+    cmGeneratorExpressionDAGChecker dagChecker(
+      context->Backtrace, target, propertyName, content, dagCheckerParent,
+      context->LG, context->Config);
 
     switch (dagChecker.Check()) {
       case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:

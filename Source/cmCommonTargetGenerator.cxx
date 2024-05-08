@@ -500,9 +500,9 @@ std::string cmCommonTargetGenerator::GetLinkerLauncher(
   std::string propName = lang + "_LINKER_LAUNCHER";
   cmValue launcherProp = this->GeneratorTarget->GetProperty(propName);
   if (cmNonempty(launcherProp)) {
-    cmGeneratorExpressionDAGChecker dagChecker(this->GeneratorTarget, propName,
-                                               nullptr, nullptr,
-                                               this->LocalCommonGenerator);
+    cmGeneratorExpressionDAGChecker dagChecker(
+      this->GeneratorTarget, propName, nullptr, nullptr,
+      this->LocalCommonGenerator, config);
     std::string evaluatedLinklauncher = cmGeneratorExpression::Evaluate(
       *launcherProp, this->LocalCommonGenerator, config, this->GeneratorTarget,
       &dagChecker, this->GeneratorTarget, lang);

@@ -48,8 +48,8 @@ std::string AddLangSpecificInterfaceIncludeDirectories(
   cmGeneratorExpressionDAGChecker* context)
 {
   cmGeneratorExpressionDAGChecker dag{
-    target->GetBacktrace(),     target, propertyName, nullptr, context,
-    target->GetLocalGenerator()
+    target->GetBacktrace(),      target, propertyName, nullptr, context,
+    target->GetLocalGenerator(), config
   };
   switch (dag.Check()) {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
@@ -101,8 +101,8 @@ void AddLangSpecificImplicitIncludeDirectories(
   if (const auto* libraries =
         target->GetLinkImplementationLibraries(config, UseTo::Compile)) {
     cmGeneratorExpressionDAGChecker dag{
-      target->GetBacktrace(),     target, propertyName, nullptr, nullptr,
-      target->GetLocalGenerator()
+      target->GetBacktrace(),      target, propertyName, nullptr, nullptr,
+      target->GetLocalGenerator(), config
     };
 
     for (const cmLinkImplItem& library : libraries->Libraries) {
@@ -254,8 +254,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   std::vector<BT<std::string>> includes;
   std::unordered_set<std::string> uniqueIncludes;
 
-  cmGeneratorExpressionDAGChecker dagChecker(
-    this, "INCLUDE_DIRECTORIES", nullptr, nullptr, this->LocalGenerator);
+  cmGeneratorExpressionDAGChecker dagChecker(this, "INCLUDE_DIRECTORIES",
+                                             nullptr, nullptr,
+                                             this->LocalGenerator, config);
 
   cmList debugProperties{ this->Makefile->GetDefinition(
     "CMAKE_DEBUG_TARGET_PROPERTIES") };

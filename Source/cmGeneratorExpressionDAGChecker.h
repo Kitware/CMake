@@ -22,12 +22,14 @@ struct cmGeneratorExpressionDAGChecker
                                   std::string property,
                                   const GeneratorExpressionContent* content,
                                   cmGeneratorExpressionDAGChecker* parent,
-                                  cmLocalGenerator const* contextLG);
+                                  cmLocalGenerator const* contextLG,
+                                  std::string const& contextConfig);
   cmGeneratorExpressionDAGChecker(cmGeneratorTarget const* target,
                                   std::string property,
                                   const GeneratorExpressionContent* content,
                                   cmGeneratorExpressionDAGChecker* parent,
-                                  cmLocalGenerator const* contextLG);
+                                  cmLocalGenerator const* contextLG,
+                                  std::string const& contextConfig);
 
   enum Result
   {
