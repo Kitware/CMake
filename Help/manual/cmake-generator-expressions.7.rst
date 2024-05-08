@@ -1777,26 +1777,32 @@ The expressions have special evaluation rules for some properties:
   :ref:`semicolon-separated list <CMake Language Lists>` representing the union
   of the value on the target itself with the values of the corresponding
   :ref:`Target Usage Requirements` on targets named by the target's
-  :prop_tgt:`LINK_LIBRARIES`.  Evaluation of the usage requirements is
-  transitive over the closure of the linked targets'
-  :prop_tgt:`INTERFACE_LINK_LIBRARIES`.
+  :prop_tgt:`LINK_LIBRARIES`:
+
+  * For :ref:`Target Compile Properties`, evaluation of corresponding usage
+    requirements is transitive over the closure of the linked targets'
+    :prop_tgt:`INTERFACE_LINK_LIBRARIES` *excluding* entries guarded by the
+    :genex:`LINK_ONLY` generator expression.
+
+  * For :ref:`Target Link Properties`, evaluation of corresponding usage
+    requirements is transitive over the closure of the linked targets'
+    :prop_tgt:`INTERFACE_LINK_LIBRARIES` *including* entries guarded by the
+    :genex:`LINK_ONLY` generator expression.  See policy :policy:`CMP0166`.
 
   Evaluation of :prop_tgt:`LINK_LIBRARIES` itself is not transitive.
 
 * :ref:`Target Usage Requirements` evaluate as a
   :ref:`semicolon-separated list <CMake Language Lists>` representing the union
   of the value on the target itself with the values of the same properties on
-  targets named by the target's :prop_tgt:`INTERFACE_LINK_LIBRARIES`.
-  Evaluation is transitive over the closure of the target's
-  :prop_tgt:`INTERFACE_LINK_LIBRARIES`:
+  targets named by the target's :prop_tgt:`INTERFACE_LINK_LIBRARIES`:
 
-  * For :ref:`Transitive Compile Properties`, the transitive closure
-    *excludes* entries of :prop_tgt:`INTERFACE_LINK_LIBRARIES` guarded
-    by the :genex:`LINK_ONLY` generator expression.
+  * For :ref:`Transitive Compile Properties`, evaluation is transitive over
+    the closure of the target's :prop_tgt:`INTERFACE_LINK_LIBRARIES`
+    *excluding* entries guarded by the :genex:`LINK_ONLY` generator expression.
 
-  * For :ref:`Transitive Link Properties`, the transitive closure is
-    *includes* entries of :prop_tgt:`INTERFACE_LINK_LIBRARIES` guarded
-    by the :genex:`LINK_ONLY` generator expression.
+  * For :ref:`Transitive Link Properties`, evaluation is transitive over
+    the closure of the target's :prop_tgt:`INTERFACE_LINK_LIBRARIES`
+    *including* entries guarded by the :genex:`LINK_ONLY` generator expression.
     See policy :policy:`CMP0166`.
 
   Evaluation of :prop_tgt:`INTERFACE_LINK_LIBRARIES` itself is not transitive.
