@@ -565,6 +565,7 @@ add_RunCMake_test(file-CHMOD -DMSYS=${MSYS})
 foreach(var
     CMake_TEST_NO_NETWORK
     CMake_TEST_TLS_VERIFY_URL
+    CMake_TEST_TLS_VERIFY_URL_BAD
     CMake_TEST_TLS_VERSION
     )
   if(DEFINED ${var})
