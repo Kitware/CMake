@@ -1087,7 +1087,8 @@ private:
   {
     bool Done = false;
   };
-  mutable std::map<std::string, LinkImplClosure> LinkImplClosureMap;
+  mutable std::map<std::string, LinkImplClosure> LinkImplClosureForLinkMap;
+  mutable std::map<std::string, LinkImplClosure> LinkImplClosureForUsageMap;
 
   using LinkInterfaceMapType = std::map<std::string, cmHeadToLinkInterfaceMap>;
   mutable LinkInterfaceMapType LinkInterfaceMap;
@@ -1307,7 +1308,7 @@ private:
 
 public:
   const std::vector<const cmGeneratorTarget*>& GetLinkImplementationClosure(
-    const std::string& config) const;
+    const std::string& config, UseTo usage) const;
 
   mutable std::map<std::string, std::string> MaxLanguageStandards;
   std::map<std::string, std::string> const& GetMaxLanguageStandards() const

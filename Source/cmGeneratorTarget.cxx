@@ -511,6 +511,8 @@ void cmGeneratorTarget::ClearSourcesCache()
   this->SourcesAreContextDependent = Tribool::Indeterminate;
   this->Objects.clear();
   this->VisitedConfigsForObjects.clear();
+  this->LinkImplClosureForLinkMap.clear();
+  this->LinkImplClosureForUsageMap.clear();
   this->LinkImplMap.clear();
   this->LinkImplUsageRequirementsOnlyMap.clear();
   this->IncludeDirectoriesCache.clear();
@@ -1186,7 +1188,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
     }
 
     std::vector<cmGeneratorTarget const*> const& deps =
-      this->GetLinkImplementationClosure(config);
+      this->GetLinkImplementationClosure(config, UseTo::Compile);
     for (cmGeneratorTarget const* dep : deps) {
       handleSystemIncludesDep(this->LocalGenerator, dep, config, this,
                               &dagChecker, result, excludeImported, language);

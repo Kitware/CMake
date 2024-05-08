@@ -268,23 +268,23 @@ static void processILibs(const std::string& config,
                          cmGeneratorTarget const* headTarget,
                          cmLinkItem const& item, cmGlobalGenerator* gg,
                          std::vector<cmGeneratorTarget const*>& tgts,
-                         std::set<cmGeneratorTarget const*>& emitted)
+                         std::set<cmGeneratorTarget const*>& emitted,
+                         UseTo usage)
 {
   if (item.Target && emitted.insert(item.Target).second) {
     tgts.push_back(item.Target);
     if (cmLinkInterfaceLibraries const* iface =
-          item.Target->GetLinkInterfaceLibraries(config, headTarget,
-                                                 UseTo::Compile)) {
+          item.Target->GetLinkInterfaceLibraries(config, headTarget, usage)) {
       for (cmLinkItem const& lib : iface->Libraries) {
-        processILibs(config, headTarget, lib, gg, tgts, emitted);
+        processILibs(config, headTarget, lib, gg, tgts, emitted, usage);
       }
     }
   }
 }
 
 const std::vector<const cmGeneratorTarget*>&
-cmGeneratorTarget::GetLinkImplementationClosure(
-  const std::string& config) const
+cmGeneratorTarget::GetLinkImplementationClosure(const std::string& config,
+                                                UseTo usage) const
 {
   // There is no link implementation for targets that cannot compile sources.
   if (!this->CanCompileSources()) {
@@ -292,18 +292,21 @@ cmGeneratorTarget::GetLinkImplementationClosure(
     return empty;
   }
 
-  LinkImplClosure& tgts = this->LinkImplClosureMap[config];
+  LinkImplClosure& tgts =
+    (usage == UseTo::Compile ? this->LinkImplClosureForUsageMap[config]
+                             : this->LinkImplClosureForLinkMap[config]);
   if (!tgts.Done) {
     tgts.Done = true;
     std::set<cmGeneratorTarget const*> emitted;
 
     cmLinkImplementationLibraries const* impl =
-      this->GetLinkImplementationLibraries(config, UseTo::Compile);
+      this->GetLinkImplementationLibraries(config, usage);
     assert(impl);
 
     for (cmLinkImplItem const& lib : impl->Libraries) {
       processILibs(config, this, lib,
-                   this->LocalGenerator->GetGlobalGenerator(), tgts, emitted);
+                   this->LocalGenerator->GetGlobalGenerator(), tgts, emitted,
+                   usage);
     }
   }
   return tgts;
