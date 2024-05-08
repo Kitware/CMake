@@ -135,4 +135,5 @@ if ((CMAKE_SYSTEM_NAME STREQUAL "Windows" AND
     OR CMAKE_SYSTEM_NAME MATCHES "Darwin|iOS|tvOS|visionOS|watchOS|Linux|BSD|MSYS|CYGWIN")
   run_cmake(feature-WHOLE_ARCHIVE)
   run_cmake_target(feature-WHOLE_ARCHIVE link-exe main)
+  run_cmake_target(feature-WHOLE_ARCHIVE circular-exe main_circular)
 endif()

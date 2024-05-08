@@ -35,3 +35,10 @@ run_cmake(override-features2)
 run_cmake(override-features3)
 run_cmake(override-features4)
 run_cmake(override-features5)
+
+# testing feature properties specification
+run_cmake(bad-feature-properties1)
+run_cmake(bad-feature-properties2)
+run_cmake(bad-feature-properties3)
+run_cmake(bad-feature-properties4)
+run_cmake(bad-feature-properties5)

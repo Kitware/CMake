@@ -140,6 +140,7 @@ macro(__windows_compiler_clang_gnu lang)
     ## WHOLE_ARCHIVE: Force loading all members of an archive
     set(CMAKE_${lang}_LINK_LIBRARY_USING_WHOLE_ARCHIVE "LINKER:/WHOLEARCHIVE:<LIBRARY>")
     set(CMAKE_${lang}_LINK_LIBRARY_USING_WHOLE_ARCHIVE_SUPPORTED TRUE)
+    set(CMAKE_${lang}_LINK_LIBRARY_WHOLE_ARCHIVE_PROPERTIES LIBRARY_TYPE=STATIC UNICITY=YES OVERRIDE=DEFAULT)
   endif()
 
   enable_language(RC)
