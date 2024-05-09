@@ -1,11 +1,11 @@
-TRANSITIVE_COMPILE_PROPERTIES
------------------------------
+TRANSITIVE_LINK_PROPERTIES
+--------------------------
 
 .. versionadded:: 3.30
 
 Properties that the :genex:`TARGET_PROPERTY` generator expression, on the
 target and its dependents, evaluates as the union of values collected from
-the transitive closure of link dependencies, excluding entries guarded by
+the transitive closure of link dependencies, including entries guarded by
 :genex:`LINK_ONLY`.
 
 The value is a :ref:`semicolon-separated list <CMake Language Lists>`
@@ -15,5 +15,5 @@ treated as just ``PROP``.
 
 See documentation of the :genex:`TARGET_PROPERTY` generator expression
 for details of custom transitive property evaluation.  See also the
-:prop_tgt:`TRANSITIVE_LINK_PROPERTIES` target property, which includes
-entries guarded by :genex:`LINK_ONLY`.
+:prop_tgt:`TRANSITIVE_COMPILE_PROPERTIES` target property, which excludes
+entries guarded by :genex:`LINK_ONLY`..

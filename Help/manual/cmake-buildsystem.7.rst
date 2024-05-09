@@ -614,7 +614,8 @@ The :genex:`TARGET_PROPERTY` generator expression evaluates the above
 `usage requirement <Target Usage Requirements_>`_ properties
 as builtin transitive properties.  It also supports custom transitive
 properties defined by the :prop_tgt:`TRANSITIVE_COMPILE_PROPERTIES`
-property on the target and its link dependencies.
+and :prop_tgt:`TRANSITIVE_LINK_PROPERTIES` properties on the target
+and its link dependencies.
 
 For example:
 
@@ -623,21 +624,26 @@ For example:
   add_library(example INTERFACE)
   set_target_properties(example PROPERTIES
     TRANSITIVE_COMPILE_PROPERTIES "CUSTOM_C"
+    TRANSITIVE_LINK_PROPERTIES    "CUSTOM_L"
 
     INTERFACE_CUSTOM_C "EXAMPLE_CUSTOM_C"
+    INTERFACE_CUSTOM_L "EXAMPLE_CUSTOM_L"
     )
 
   add_library(mylib STATIC mylib.c)
   target_link_libraries(mylib PRIVATE example)
   set_target_properties(mylib PROPERTIES
     CUSTOM_C           "MYLIB_PRIVATE_CUSTOM_C"
+    CUSTOM_L           "MYLIB_PRIVATE_CUSTOM_L"
     INTERFACE_CUSTOM_C "MYLIB_IFACE_CUSTOM_C"
+    INTERFACE_CUSTOM_L "MYLIB_IFACE_CUSTOM_L"
     )
 
   add_executable(myexe myexe.c)
   target_link_libraries(myexe PRIVATE mylib)
   set_target_properties(myexe PROPERTIES
     CUSTOM_C "MYEXE_CUSTOM_C"
+    CUSTOM_L "MYEXE_CUSTOM_L"
     )
 
   add_custom_target(print ALL VERBATIM
@@ -645,8 +651,14 @@ For example:
       # Prints "MYLIB_PRIVATE_CUSTOM_C;EXAMPLE_CUSTOM_C"
       "$<TARGET_PROPERTY:mylib,CUSTOM_C>"
 
+      # Prints "MYLIB_PRIVATE_CUSTOM_L;EXAMPLE_CUSTOM_L"
+      "$<TARGET_PROPERTY:mylib,CUSTOM_L>"
+
       # Prints "MYEXE_CUSTOM_C"
       "$<TARGET_PROPERTY:myexe,CUSTOM_C>"
+
+      # Prints "MYEXE_CUSTOM_L;MYLIB_IFACE_CUSTOM_L;EXAMPLE_CUSTOM_L"
+      "$<TARGET_PROPERTY:myexe,CUSTOM_L>"
     )
 
 .. _`Compatible Interface Properties`:

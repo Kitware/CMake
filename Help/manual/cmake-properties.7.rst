@@ -402,6 +402,7 @@ Properties on Targets
    /prop_tgt/SYSTEM
    /prop_tgt/TEST_LAUNCHER
    /prop_tgt/TRANSITIVE_COMPILE_PROPERTIES
+   /prop_tgt/TRANSITIVE_LINK_PROPERTIES
    /prop_tgt/TYPE
    /prop_tgt/UNITY_BUILD
    /prop_tgt/UNITY_BUILD_BATCH_SIZE

@@ -210,7 +210,7 @@ cmGeneratorTarget::IsTransitiveProperty(cm::string_view prop,
                                    UseTo::Compile };
     }
   } else if (!evaluatingLinkLibraries) {
-    // Honor TRANSITIVE_COMPILE_PROPERTIES
+    // Honor TRANSITIVE_COMPILE_PROPERTIES and TRANSITIVE_LINK_PROPERTIES
     // from the link closure when we are not evaluating the closure itself.
     CustomTransitiveProperties const& ctp =
       this->GetCustomTransitiveProperties(config, propertyFor);
@@ -286,6 +286,7 @@ cmGeneratorTarget::GetCustomTransitiveProperties(std::string const& config,
         }
       }
     };
+    addTransitiveProperties("TRANSITIVE_LINK_PROPERTIES", UseTo::Link);
     addTransitiveProperties("TRANSITIVE_COMPILE_PROPERTIES", UseTo::Compile);
     i = ctpm.emplace(config, std::move(ctp)).first;
   }

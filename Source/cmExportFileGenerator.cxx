@@ -611,6 +611,8 @@ void cmExportFileGenerator::PopulateCustomTransitiveInterfaceProperties(
 {
   this->PopulateInterfaceProperty("TRANSITIVE_COMPILE_PROPERTIES", target,
                                   properties);
+  this->PopulateInterfaceProperty("TRANSITIVE_LINK_PROPERTIES", target,
+                                  properties);
   std::set<std::string> ifaceProperties;
   for (std::string const& config : this->Configurations) {
     for (auto const& i : target->GetCustomTransitiveProperties(
