@@ -178,6 +178,9 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
       string(TOLOWER "${util}" lutil)
       set(CMAKE_USE_SYSTEM_${util} "${CMAKE_USE_SYSTEM_LIBRARY_${util}}"
         CACHE BOOL "Use system-installed ${lutil}" FORCE)
+    elseif(util STREQUAL "CURL" AND APPLE)
+      # macOS provides a curl with backends configured by Apple.
+      set(CMAKE_USE_SYSTEM_LIBRARY_${util} ON)
     else()
       set(CMAKE_USE_SYSTEM_LIBRARY_${util} OFF)
     endif()
