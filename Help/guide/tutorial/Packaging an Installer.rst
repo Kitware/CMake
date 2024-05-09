@@ -23,8 +23,9 @@ libraries that are needed by the project for the current platform. Next we set
 some CPack variables to where we have stored the license and version
 information for this project. The version information was set earlier in this
 tutorial and the ``License.txt`` has been included in the top-level source
-directory for this step.  The :variable:`CPACK_SOURCE_GENERATOR` variable
-selects a file format for the source package.
+directory for this step.  The :variable:`CPACK_GENERATOR` and
+:variable:`CPACK_SOURCE_GENERATOR` variables select the generators used for
+binary and source installations, respectively.
 
 Finally we include the :module:`CPack module <CPack>` which will use these
 variables and some other properties of the current system to setup an
@@ -38,8 +39,9 @@ binary directory run:
 
   cpack
 
-To specify the generator, use the :option:`-G <cpack -G>` option. For multi-config builds,
-use :option:`-C <cpack -C>` to specify the configuration. For example:
+To specify the binary generator, use the :option:`-G <cpack -G>` option. For
+multi-config builds, use :option:`-C <cpack -C>` to specify the configuration.
+For example:
 
 .. code-block:: console
 
