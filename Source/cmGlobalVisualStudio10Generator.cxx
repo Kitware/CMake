@@ -518,7 +518,7 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
 
   this->DefaultPlatformToolset = this->SelectWindowsCEToolset();
 
-  if (this->GetVersion() == cmGlobalVisualStudioGenerator::VSVersion::VS12) {
+  if (this->Version == cmGlobalVisualStudioGenerator::VSVersion::VS12) {
     // VS 12 .NET CF defaults to .NET framework 3.9 for Windows CE.
     this->DefaultTargetFrameworkVersion = "v3.9";
     this->DefaultTargetFrameworkIdentifier = "WindowsEmbeddedCompact";
@@ -1275,12 +1275,6 @@ std::string cmGlobalVisualStudio10Generator::Encoding()
 const char* cmGlobalVisualStudio10Generator::GetToolsVersion() const
 {
   switch (this->Version) {
-    case cmGlobalVisualStudioGenerator::VSVersion::VS9:
-      return "4.0";
-
-      // in Visual Studio 2013 they detached the MSBuild tools version
-      // from the .Net Framework version and instead made it have it's own
-      // version number
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
       return "12.0";
     case cmGlobalVisualStudioGenerator::VSVersion::VS14:

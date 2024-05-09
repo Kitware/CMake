@@ -310,26 +310,6 @@ void cmGlobalVisualStudio7Generator::Generate()
                                 GetSLNFile(this->LocalGenerators[0].get()));
   }
 
-  if (this->Version == VSVersion::VS9 &&
-      !this->CMakeInstance->GetIsInTryCompile()) {
-    std::string cmakeWarnVS9;
-    if (cmValue cached = this->CMakeInstance->GetState()->GetCacheEntryValue(
-          "CMAKE_WARN_VS9")) {
-      this->CMakeInstance->MarkCliAsUsed("CMAKE_WARN_VS9");
-      cmakeWarnVS9 = *cached;
-    } else {
-      cmSystemTools::GetEnv("CMAKE_WARN_VS9", cmakeWarnVS9);
-    }
-    if (cmakeWarnVS9.empty() || !cmIsOff(cmakeWarnVS9)) {
-      this->CMakeInstance->IssueMessage(
-        MessageType::WARNING,
-        "The \"Visual Studio 9 2008\" generator is deprecated "
-        "and will be removed in a future version of CMake."
-        "\n"
-        "Add CMAKE_WARN_VS9=OFF to the cache to disable this warning.");
-    }
-  }
-
   if (this->Version == VSVersion::VS12 &&
       !this->CMakeInstance->GetIsInTryCompile()) {
     std::string cmakeWarnVS12;
@@ -403,8 +383,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
         std::string mapping;
 
         // On VS 19 and above, always map .NET SDK projects to "Any CPU".
-        if (target->IsDotNetSdkTarget() &&
-            this->GetVersion() >= VSVersion::VS16 &&
+        if (target->IsDotNetSdkTarget() && this->Version >= VSVersion::VS16 &&
             !cmGlobalVisualStudio7Generator::IsReservedTarget(
               target->GetName())) {
           mapping = "Any CPU";

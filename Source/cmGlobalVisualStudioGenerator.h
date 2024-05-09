@@ -34,7 +34,6 @@ public:
   /** Known versions of Visual Studio.  */
   enum class VSVersion : uint16_t
   {
-    VS9 = 90,
     VS12 = 120,
     /* VS13 = 130 was skipped */
     VS14 = 140,

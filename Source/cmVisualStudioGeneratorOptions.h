@@ -87,7 +87,6 @@ protected:
 
 private:
   cmLocalVisualStudioGenerator* LocalGenerator;
-  cmGlobalVisualStudioGenerator::VSVersion Version;
 
   std::string Configuration;
   Tool CurrentTool;

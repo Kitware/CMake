@@ -40,9 +40,7 @@ set(ENV{HOME} \"${TEST_HOME}\")
 endif()
 
 # Suppress generator deprecation warnings in test suite.
-if(CMAKE_GENERATOR MATCHES "^Visual Studio 9 2008")
-  set(TEST_WARN_VS_CODE "set(ENV{CMAKE_WARN_VS9} OFF)")
-elseif(CMAKE_GENERATOR MATCHES "^Visual Studio 12 2013")
+if(CMAKE_GENERATOR MATCHES "^Visual Studio 12 2013")
   set(TEST_WARN_VS_CODE "set(ENV{CMAKE_WARN_VS12} OFF)")
 else()
   set(TEST_WARN_VS_CODE "")
@@ -74,9 +72,6 @@ if(BUILD_TESTING)
   set(CMake_TEST_DEVENV "")
   if(CMAKE_VS_DEVENV_COMMAND)
     set(CMake_TEST_DEVENV "${CMAKE_VS_DEVENV_COMMAND}")
-  elseif(CMAKE_GENERATOR MATCHES "Visual Studio 9 " AND
-      NOT CMAKE_MAKE_PROGRAM MATCHES "[mM][sS][bB][uU][iI][lL][dD]\\.[eE][xX][eE]")
-    set(CMake_TEST_DEVENV "${CMAKE_MAKE_PROGRAM}")
   endif()
 
   if(CMAKE_GENERATOR MATCHES "Visual Studio|Xcode")
@@ -472,7 +467,7 @@ if(BUILD_TESTING)
     add_subdirectory(ObjCXX)
   endif()
 
-  if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^9]|[9][0-9])")
+  if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
     ADD_TEST_MACRO(CSharpOnly CSharpOnly)
     if(NOT CMAKE_VS_PLATFORM_NAME STREQUAL "ARM64")
       ADD_TEST_MACRO(CSharpLinkToCxx CSharpLinkToCxx)
@@ -2209,8 +2204,6 @@ if(BUILD_TESTING)
   endif()
 
   if(MSVC AND NOT MSVC_VERSION LESS 1310
-     AND (NOT CMAKE_GENERATOR MATCHES "Visual Studio 9 "
-          OR CMAKE_SIZEOF_VOID_P EQUAL 4)
      AND (NOT CMAKE_C_COMPILER_ARCHITECTURE_ID STREQUAL "ARM64")
       )
     ADD_TEST_MACRO(VSMASM VSMASM)
@@ -2221,8 +2214,7 @@ if(BUILD_TESTING)
       ADD_TEST_MACRO(SBCS SBCS)
     endif()
 
-    if(NOT "${CMAKE_GENERATOR}" MATCHES "Visual Studio 9 "
-        AND NOT CMAKE_GENERATOR_TOOLSET STREQUAL "v90"
+    if(NOT CMAKE_GENERATOR_TOOLSET STREQUAL "v90"
         AND NOT CMAKE_VS_PLATFORM_NAME STREQUAL "ARM64")
       ADD_TEST_MACRO(VSWindowsFormsResx VSWindowsFormsResx)
       ADD_TEST_MACRO(VSManagedCustomCommand)
@@ -2373,7 +2365,7 @@ if(BUILD_TESTING)
     endif()
   endif()
 
-  if(CMAKE_GENERATOR MATCHES "Visual Studio ([^9]|9[0-9])" AND nasm)
+  if(CMAKE_GENERATOR MATCHES "Visual Studio" AND nasm)
     ADD_TEST_MACRO(VSNASM VSNASM)
   endif()
 

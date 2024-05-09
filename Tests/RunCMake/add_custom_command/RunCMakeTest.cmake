@@ -19,7 +19,7 @@ run_cmake(TargetImported)
 run_cmake(TargetLiteralQuotes)
 run_cmake(TargetNotInDir)
 
-if(${RunCMake_GENERATOR} MATCHES "Visual Studio ([^89]|[89][0-9])")
+if(RunCMake_GENERATOR MATCHES "Visual Studio")
   run_cmake(RemoveEmptyCommands)
 endif()
 

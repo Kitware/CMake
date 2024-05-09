@@ -97,7 +97,6 @@
 #    include "cmGlobalNMakeMakefileGenerator.h"
 #    include "cmGlobalVisualStudio12Generator.h"
 #    include "cmGlobalVisualStudio14Generator.h"
-#    include "cmGlobalVisualStudio9Generator.h"
 #    include "cmGlobalVisualStudioVersionedGenerator.h"
 #    include "cmVSSetupHelper.h"
 
@@ -2636,7 +2635,6 @@ std::unique_ptr<cmGlobalGenerator> cmake::EvaluateDefaultGlobalGenerator()
   static VSVersionedGenerator const vsGenerators[] = {
     { "14.0", "Visual Studio 14 2015" }, //
     { "12.0", "Visual Studio 12 2013" }, //
-    { "9.0", "Visual Studio 9 2008" }
   };
   static const char* const vsEntries[] = {
     "\\Setup\\VC;ProductDir", //
@@ -3021,7 +3019,6 @@ void cmake::AddDefaultGenerators()
     cmGlobalVisualStudioVersionedGenerator::NewFactory15());
   this->Generators.push_back(cmGlobalVisualStudio14Generator::NewFactory());
   this->Generators.push_back(cmGlobalVisualStudio12Generator::NewFactory());
-  this->Generators.push_back(cmGlobalVisualStudio9Generator::NewFactory());
   this->Generators.push_back(cmGlobalBorlandMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalNMakeMakefileGenerator::NewFactory());
   this->Generators.push_back(cmGlobalJOMMakefileGenerator::NewFactory());
@@ -3781,22 +3778,12 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
   // itself, there is the risk of building an out-of-date solution file due
   // to limitations of the underlying build system.
   std::string const stampList = cachePath + "/" + "CMakeFiles/" +
-    cmGlobalVisualStudio9Generator::GetGenerateStampList();
+    cmGlobalVisualStudio12Generator::GetGenerateStampList();
 
   // Note that the stampList file only exists for VS generators.
   if (cmSystemTools::FileExists(stampList)) {
 
-    // Check if running for Visual Studio 9 - we need to explicitly run
-    // the glob verification script before starting the build
     this->AddScriptingCommands();
-    if (this->GlobalGenerator->MatchesGeneratorName("Visual Studio 9 2008")) {
-      std::string const globVerifyScript =
-        cachePath + "/" + "CMakeFiles/" + "VerifyGlobs.cmake";
-      if (cmSystemTools::FileExists(globVerifyScript)) {
-        std::vector<std::string> args;
-        this->ReadListFile(args, globVerifyScript);
-      }
-    }
 
     if (!cmakeCheckStampList(stampList)) {
       // Correctly initialize the home (=source) and home output (=binary)
