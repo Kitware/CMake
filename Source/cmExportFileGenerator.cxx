@@ -604,6 +604,25 @@ void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
   }
 }
 
+void cmExportFileGenerator::PopulateCustomTransitiveInterfaceProperties(
+  cmGeneratorTarget const* target,
+  cmGeneratorExpression::PreprocessContext preprocessRule,
+  ImportPropertyMap& properties)
+{
+  this->PopulateInterfaceProperty("TRANSITIVE_COMPILE_PROPERTIES", target,
+                                  properties);
+  std::set<std::string> ifaceProperties;
+  for (std::string const& config : this->Configurations) {
+    for (auto const& i : target->GetCustomTransitiveProperties(
+           config, cmGeneratorTarget::PropertyFor::Interface)) {
+      ifaceProperties.emplace(i.second.InterfaceName);
+    }
+  }
+  for (std::string const& ip : ifaceProperties) {
+    this->PopulateInterfaceProperty(ip, target, preprocessRule, properties);
+  }
+}
+
 void cmExportFileGenerator::GenerateInterfaceProperties(
   const cmGeneratorTarget* target, std::ostream& os,
   const ImportPropertyMap& properties)

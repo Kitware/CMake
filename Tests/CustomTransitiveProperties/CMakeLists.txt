@@ -1,0 +1,100 @@
+cmake_minimum_required(VERSION 3.29)
+cmake_policy(SET CMP0166 NEW)
+project(CustomTransitiveProperties C)
+
+add_library(iface1 INTERFACE)
+set_target_properties(iface1 PROPERTIES
+  TRANSITIVE_COMPILE_PROPERTIES "CUSTOM_A" # LINK_ONLY not pierced
+
+  INTERFACE_CUSTOM_A "CUSTOM_A_IFACE1;CUSTOM_A_TARGET_NAME_$<UPPER_CASE:$<TARGET_PROPERTY:NAME>>"
+  INTERFACE_CUSTOM_B "CUSTOM_B_IFACE1"
+  INTERFACE_CUSTOM_C "CUSTOM_C_IFACE1"
+  )
+
+add_library(iface2 INTERFACE)
+set_target_properties(iface2 PROPERTIES
+  INTERFACE_CUSTOM_A "CUSTOM_A_IFACE2;CUSTOM_A_TARGET_TYPE_$<TARGET_PROPERTY:TYPE>"
+  )
+target_link_libraries(iface2 INTERFACE iface1)
+
+# Test that the INTERFACE prefix is removed.
+set(unnecessary_INTERFACE_ "INTERFACE_")
+
+add_library(static1 STATIC static1.c)
+target_link_libraries(static1 PRIVATE iface2)
+set_target_properties(static1 PROPERTIES
+  TRANSITIVE_COMPILE_PROPERTIES "${unnecessary_INTERFACE_}CUSTOM_B" # LINK_ONLY not pierced
+
+  CUSTOM_A "CUSTOM_A_STATIC1"
+  CUSTOM_B "CUSTOM_B_STATIC1"
+  INTERFACE_CUSTOM_A "CUSTOM_A_STATIC1_IFACE"
+  INTERFACE_CUSTOM_B "CUSTOM_B_STATIC1_IFACE"
+  )
+target_compile_definitions(static1 PRIVATE
+  $<TARGET_PROPERTY:CUSTOM_A>
+  $<TARGET_PROPERTY:CUSTOM_B>
+  )
+
+add_library(object1 OBJECT object1.c)
+target_link_libraries(object1 PRIVATE iface2)
+set_target_properties(object1 PROPERTIES
+  TRANSITIVE_COMPILE_PROPERTIES "${unnecessary_INTERFACE_}CUSTOM_C" # LINK_ONLY not pierced
+
+  CUSTOM_A "CUSTOM_A_OBJECT1"
+  CUSTOM_C "CUSTOM_C_OBJECT1"
+  INTERFACE_CUSTOM_A "CUSTOM_A_OBJECT1_IFACE"
+  INTERFACE_CUSTOM_C "CUSTOM_C_OBJECT1_IFACE"
+  )
+target_compile_definitions(object1 PRIVATE
+  $<TARGET_PROPERTY:CUSTOM_A>
+  $<TARGET_PROPERTY:CUSTOM_C>
+  )
+
+add_executable(CustomTransitiveProperties main.c)
+target_link_libraries(CustomTransitiveProperties PRIVATE static1 object1)
+set_target_properties(CustomTransitiveProperties PROPERTIES
+  CUSTOM_A "CUSTOM_A_MAIN"
+  CUSTOM_B "CUSTOM_B_MAIN"
+  CUSTOM_C "CUSTOM_C_MAIN"
+  )
+
+# Test TRANSITIVE_*_PROPERTY evaluation within usage requirements.
+target_compile_definitions(CustomTransitiveProperties PRIVATE
+  $<TARGET_PROPERTY:CUSTOM_A>
+  $<TARGET_PROPERTY:CUSTOM_B>
+  $<TARGET_PROPERTY:CUSTOM_C>
+  )
+
+# Test TRANSITIVE_*_PROPERTY evaluation outside of usage requirements.
+set(out "${CMAKE_CURRENT_BINARY_DIR}/out-$<CONFIG>.txt")
+file(GENERATE OUTPUT "${out}" CONTENT "# file(GENERATE) produced:
+iface1 CUSTOM_A: '$<TARGET_PROPERTY:iface1,CUSTOM_A>'
+iface1 INTERFACE_CUSTOM_A: '$<TARGET_PROPERTY:iface1,INTERFACE_CUSTOM_A>'
+iface2 CUSTOM_A: '$<TARGET_PROPERTY:iface2,CUSTOM_A>'
+iface2 INTERFACE_CUSTOM_A: '$<TARGET_PROPERTY:iface2,INTERFACE_CUSTOM_A>'
+static1 CUSTOM_A: '$<TARGET_PROPERTY:static1,CUSTOM_A>'
+static1 INTERFACE_CUSTOM_A: '$<TARGET_PROPERTY:static1,INTERFACE_CUSTOM_A>'
+static1 CUSTOM_B: '$<TARGET_PROPERTY:static1,CUSTOM_B>'
+static1 INTERFACE_CUSTOM_B: '$<TARGET_PROPERTY:static1,INTERFACE_CUSTOM_B>'
+object1 CUSTOM_A: '$<TARGET_PROPERTY:object1,CUSTOM_A>'
+object1 INTERFACE_CUSTOM_A: '$<TARGET_PROPERTY:object1,INTERFACE_CUSTOM_A>'
+object1 CUSTOM_C: '$<TARGET_PROPERTY:object1,CUSTOM_C>'
+object1 INTERFACE_CUSTOM_C: '$<TARGET_PROPERTY:object1,INTERFACE_CUSTOM_C>'
+main CUSTOM_A: '$<TARGET_PROPERTY:CustomTransitiveProperties,CUSTOM_A>'
+main INTERFACE_CUSTOM_A: '$<TARGET_PROPERTY:CustomTransitiveProperties,INTERFACE_CUSTOM_A>'
+main CUSTOM_B: '$<TARGET_PROPERTY:CustomTransitiveProperties,CUSTOM_B>'
+main INTERFACE_CUSTOM_B: '$<TARGET_PROPERTY:CustomTransitiveProperties,INTERFACE_CUSTOM_B>'
+main CUSTOM_C: '$<TARGET_PROPERTY:CustomTransitiveProperties,CUSTOM_C>'
+main INTERFACE_CUSTOM_C: '$<TARGET_PROPERTY:CustomTransitiveProperties,INTERFACE_CUSTOM_C>'
+")
+add_custom_target(check ALL VERBATIM
+  COMMAND ${CMAKE_COMMAND} -Dconfig=$<CONFIG> -Dout=${out} -P${CMAKE_CURRENT_SOURCE_DIR}/check.cmake
+  COMMAND CustomTransitiveProperties
+  "$<TARGET_PROPERTY:static1,CUSTOM_A>" "CUSTOM_A_STATIC1;CUSTOM_A_IFACE2;CUSTOM_A_TARGET_TYPE_STATIC_LIBRARY;CUSTOM_A_IFACE1;CUSTOM_A_TARGET_NAME_STATIC1"
+  "$<TARGET_PROPERTY:static1,CUSTOM_B>" "CUSTOM_B_STATIC1;CUSTOM_B_IFACE1"
+  "$<TARGET_PROPERTY:object1,CUSTOM_A>" "CUSTOM_A_OBJECT1;CUSTOM_A_IFACE2;CUSTOM_A_TARGET_TYPE_OBJECT_LIBRARY;CUSTOM_A_IFACE1;CUSTOM_A_TARGET_NAME_OBJECT1"
+  "$<TARGET_PROPERTY:object1,CUSTOM_C>" "CUSTOM_C_OBJECT1;CUSTOM_C_IFACE1"
+  "$<TARGET_PROPERTY:CustomTransitiveProperties,CUSTOM_A>" "CUSTOM_A_MAIN"
+  "$<TARGET_PROPERTY:CustomTransitiveProperties,CUSTOM_B>" "CUSTOM_B_MAIN;CUSTOM_B_STATIC1_IFACE"
+  "$<TARGET_PROPERTY:CustomTransitiveProperties,CUSTOM_C>" "CUSTOM_C_MAIN;CUSTOM_C_OBJECT1_IFACE"
+  )

@@ -907,7 +907,8 @@ public:
     BuiltinTransitiveProperties;
 
   cm::optional<TransitiveProperty> IsTransitiveProperty(
-    cm::string_view prop, cmLocalGenerator const* lg) const;
+    cm::string_view prop, cmLocalGenerator const* lg,
+    std::string const& config, bool evaluatingLinkLibraries) const;
 
   bool HaveInstallTreeRPATH(const std::string& config) const;
 
@@ -989,6 +990,30 @@ public:
   bool DiscoverSyntheticTargets(cmSyntheticTargetCache& cache,
                                 std::string const& config);
 
+  class CustomTransitiveProperty : public TransitiveProperty
+  {
+    std::unique_ptr<std::string> InterfaceNameBuf;
+    CustomTransitiveProperty(std::unique_ptr<std::string> interfaceNameBuf,
+                             UseTo usage);
+
+  public:
+    CustomTransitiveProperty(std::string interfaceName, UseTo usage);
+  };
+  struct CustomTransitiveProperties
+    : public std::map<std::string, CustomTransitiveProperty>
+  {
+    void Add(cmValue props, UseTo usage);
+  };
+
+  enum class PropertyFor
+  {
+    Build,
+    Interface,
+  };
+
+  CustomTransitiveProperties const& GetCustomTransitiveProperties(
+    std::string const& config, PropertyFor propertyFor) const;
+
 private:
   void AddSourceCommon(const std::string& src, bool before = false);
 
@@ -1055,6 +1080,11 @@ private:
   void ComputeVersionedName(std::string& vName, std::string const& prefix,
                             std::string const& base, std::string const& suffix,
                             std::string const& name, cmValue version) const;
+
+  mutable std::map<std::string, CustomTransitiveProperties>
+    CustomTransitiveBuildPropertiesMap;
+  mutable std::map<std::string, CustomTransitiveProperties>
+    CustomTransitiveInterfacePropertiesMap;
 
   struct CompatibleInterfacesBase
   {
@@ -1305,6 +1335,12 @@ private:
 
   void ComputeLinkInterfaceRuntimeLibraries(
     const std::string& config, cmOptionalLinkInterface& iface) const;
+
+  // If this method is made public, or call sites are added outside of
+  // methods computing cached members, add dedicated caching members.
+  std::vector<cmGeneratorTarget const*> GetLinkInterfaceClosure(
+    std::string const& config, cmGeneratorTarget const* headTarget,
+    UseTo usage) const;
 
 public:
   const std::vector<const cmGeneratorTarget*>& GetLinkImplementationClosure(

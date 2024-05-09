@@ -527,6 +527,7 @@ if(BUILD_TESTING)
   set_property(TEST CompileOptions APPEND PROPERTY LABELS "Fortran")
 
   ADD_TEST_MACRO(CompatibleInterface CompatibleInterface)
+  ADD_TEST_MACRO(CustomTransitiveProperties CustomTransitiveProperties)
   ADD_TEST_MACRO(AliasTarget AliasTarget)
   ADD_TEST_MACRO(StagingPrefix StagingPrefix)
   ADD_TEST_MACRO(ImportedSameName ImportedSameName)

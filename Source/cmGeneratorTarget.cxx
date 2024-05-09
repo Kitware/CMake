@@ -518,6 +518,8 @@ void cmGeneratorTarget::ClearSourcesCache()
   this->IncludeDirectoriesCache.clear();
   this->CompileOptionsCache.clear();
   this->CompileDefinitionsCache.clear();
+  this->CustomTransitiveBuildPropertiesMap.clear();
+  this->CustomTransitiveInterfacePropertiesMap.clear();
   this->PrecompileHeadersCache.clear();
   this->LinkOptionsCache.clear();
   this->LinkDirectoriesCache.clear();

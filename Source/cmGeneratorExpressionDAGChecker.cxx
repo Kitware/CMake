@@ -40,12 +40,13 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   , Content(content)
   , Backtrace(std::move(backtrace))
 {
-  static_cast<void>(contextConfig);
   if (parent) {
     this->TopIsTransitiveProperty = parent->TopIsTransitiveProperty;
   } else {
     this->TopIsTransitiveProperty =
-      this->Target->IsTransitiveProperty(this->Property, contextLG)
+      this->Target
+        ->IsTransitiveProperty(this->Property, contextLG, contextConfig,
+                               this->EvaluatingLinkLibraries())
         .has_value();
   }
 

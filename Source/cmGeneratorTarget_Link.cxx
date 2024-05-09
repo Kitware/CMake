@@ -282,6 +282,23 @@ static void processILibs(const std::string& config,
   }
 }
 
+std::vector<cmGeneratorTarget const*>
+cmGeneratorTarget::GetLinkInterfaceClosure(std::string const& config,
+                                           cmGeneratorTarget const* headTarget,
+                                           UseTo usage) const
+{
+  cmGlobalGenerator* gg = this->GetLocalGenerator()->GetGlobalGenerator();
+  std::vector<cmGeneratorTarget const*> tgts;
+  std::set<cmGeneratorTarget const*> emitted;
+  if (cmLinkInterfaceLibraries const* iface =
+        this->GetLinkInterfaceLibraries(config, headTarget, usage)) {
+    for (cmLinkItem const& lib : iface->Libraries) {
+      processILibs(config, headTarget, lib, gg, tgts, emitted, usage);
+    }
+  }
+  return tgts;
+}
+
 const std::vector<const cmGeneratorTarget*>&
 cmGeneratorTarget::GetLinkImplementationClosure(const std::string& config,
                                                 UseTo usage) const

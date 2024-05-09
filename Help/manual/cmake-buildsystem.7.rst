@@ -602,6 +602,53 @@ linking consumers.
   List of files on which linking the target's consumers depends, for
   those that are executables, shared libraries, or module libraries.
 
+.. _`Custom Transitive Properties`:
+
+Custom Transitive Properties
+----------------------------
+
+.. versionadded:: 3.30
+
+The :genex:`TARGET_PROPERTY` generator expression evaluates the above
+`build specification <Target Build Specification_>`_ and
+`usage requirement <Target Usage Requirements_>`_ properties
+as builtin transitive properties.  It also supports custom transitive
+properties defined by the :prop_tgt:`TRANSITIVE_COMPILE_PROPERTIES`
+property on the target and its link dependencies.
+
+For example:
+
+.. code-block:: cmake
+
+  add_library(example INTERFACE)
+  set_target_properties(example PROPERTIES
+    TRANSITIVE_COMPILE_PROPERTIES "CUSTOM_C"
+
+    INTERFACE_CUSTOM_C "EXAMPLE_CUSTOM_C"
+    )
+
+  add_library(mylib STATIC mylib.c)
+  target_link_libraries(mylib PRIVATE example)
+  set_target_properties(mylib PROPERTIES
+    CUSTOM_C           "MYLIB_PRIVATE_CUSTOM_C"
+    INTERFACE_CUSTOM_C "MYLIB_IFACE_CUSTOM_C"
+    )
+
+  add_executable(myexe myexe.c)
+  target_link_libraries(myexe PRIVATE mylib)
+  set_target_properties(myexe PROPERTIES
+    CUSTOM_C "MYEXE_CUSTOM_C"
+    )
+
+  add_custom_target(print ALL VERBATIM
+    COMMAND ${CMAKE_COMMAND} -E echo
+      # Prints "MYLIB_PRIVATE_CUSTOM_C;EXAMPLE_CUSTOM_C"
+      "$<TARGET_PROPERTY:mylib,CUSTOM_C>"
+
+      # Prints "MYEXE_CUSTOM_C"
+      "$<TARGET_PROPERTY:myexe,CUSTOM_C>"
+    )
+
 .. _`Compatible Interface Properties`:
 
 Compatible Interface Properties
