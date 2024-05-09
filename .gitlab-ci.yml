@@ -821,6 +821,16 @@ b:macos-arm64-ninja-symlinked:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+b:macos-arm64-curl:
+    extends:
+        - .macos_arm64_curl
+        - .cmake_build_macos
+        - .cmake_build_artifacts
+        - .macos_arm64_tags
+        - .run_manually
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 b:macos-arm64-pch:
     extends:
         - .macos_arm64_pch
@@ -873,6 +883,19 @@ t:macos-arm64-ninja-symlinked:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
         CMAKE_CI_JOB_NIGHTLY_NINJA: "true"
+
+t:macos-arm64-curl:
+    extends:
+        - .macos_arm64_curl
+        - .cmake_test_macos
+        - .macos_arm64_tags
+        - .run_dependent
+    dependencies:
+        - b:macos-arm64-curl
+    needs:
+        - b:macos-arm64-curl
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
 
 b:macos-x86_64-makefiles:
     extends:
