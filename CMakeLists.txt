@@ -215,6 +215,10 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
   mark_as_advanced(CMAKE_USE_SYSTEM_KWIML)
 
   # Mention to the user what system libraries are being used.
+  if(CMAKE_USE_SYSTEM_CURL)
+    # Avoid messaging about curl-only dependencies.
+    list(REMOVE_ITEM UTILITIES NGHTTP2)
+  endif()
   foreach(util IN LISTS UTILITIES ITEMS KWIML)
     if(CMAKE_USE_SYSTEM_${util})
       message(STATUS "Using system-installed ${util}")
