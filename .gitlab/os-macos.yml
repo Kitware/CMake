@@ -47,6 +47,13 @@
         CMAKE_CI_IN_SYMLINK_TREE: 1
         CMAKE_CI_BUILD_DIR: "real_work/work/build"
 
+.macos_arm64_curl:
+    extends: .macos_build
+
+    variables:
+        CMAKE_CONFIGURATION: macos_arm64_curl
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
 .macos_arm64_pch:
     extends: .macos_arm64_ninja
 
