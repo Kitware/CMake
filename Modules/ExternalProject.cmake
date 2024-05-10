@@ -1754,7 +1754,8 @@ function(_ep_write_extractfile_script
   script_filename
   name
   filename
-  directory options
+  directory
+  options
 )
   set(args "")
 
