@@ -156,8 +156,9 @@ The options for the above signatures are:
   Specify flags of the form :option:`-DVAR:TYPE=VALUE <cmake -D>` to be passed
   to the :manual:`cmake(1)` command-line used to drive the test build.
   The above example shows how values for variables
-  ``INCLUDE_DIRECTORIES``, ``LINK_DIRECTORIES``, and ``LINK_LIBRARIES``
-  are used.
+  ``COMPILE_DEFINITIONS``, ``INCLUDE_DIRECTORIES``, ``LINK_DIRECTORIES``,
+  ``LINK_LIBRARIES``, and ``LINK_OPTIONS`` are used. Compiler options
+  can be passed in like `CMAKE_FLAGS -DCOMPILE_DEFINITIONS=-Werror`.
 
 ``COMPILE_DEFINITIONS <defs>...``
   Specify ``-Ddefinition`` arguments to pass to :command:`add_definitions`
