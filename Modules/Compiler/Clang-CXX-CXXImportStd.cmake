@@ -1,5 +1,8 @@
 function (_cmake_cxx_import_std std variable)
   if (NOT CMAKE_CXX_STANDARD_LIBRARY STREQUAL "libc++")
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Only `libc++` is supported\")\n"
+      PARENT_SCOPE)
     return ()
   endif ()
 
