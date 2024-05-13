@@ -225,11 +225,6 @@ std::string cmGlobalVisualStudio8Generator::GetGenerateStampList()
   return "generate.stamp.list";
 }
 
-void cmGlobalVisualStudio8Generator::Configure()
-{
-  this->cmGlobalVisualStudio7Generator::Configure();
-}
-
 bool cmGlobalVisualStudio8Generator::UseFolderProperty() const
 {
   // NOLINTNEXTLINE(bugprone-parent-virtual-call)

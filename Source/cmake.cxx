@@ -4,10 +4,12 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <initializer_list>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
@@ -2557,7 +2559,22 @@ int cmake::ActualConfigure()
 #endif
 
   // actually do the configure
+  auto startTime = std::chrono::steady_clock::now();
   this->GlobalGenerator->Configure();
+  auto endTime = std::chrono::steady_clock::now();
+
+  if (this->GetWorkingMode() == cmake::NORMAL_MODE) {
+    std::ostringstream msg;
+    if (cmSystemTools::GetErrorOccurredFlag()) {
+      msg << "Configuring incomplete, errors occurred!";
+    } else {
+      auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+        endTime - startTime);
+      msg << "Configuring done (" << std::fixed << std::setprecision(1)
+          << ms.count() / 1000.0L << "s)";
+    }
+    this->UpdateProgress(msg.str(), -1);
+  }
 
 #if !defined(CMAKE_BOOTSTRAP)
   this->ConfigureLog.reset();
@@ -2889,10 +2906,20 @@ int cmake::Generate()
   auto profilingRAII = this->CreateProfilingEntry("project", "generate");
 #endif
 
+  auto startTime = std::chrono::steady_clock::now();
   if (!this->GlobalGenerator->Compute()) {
     return -1;
   }
   this->GlobalGenerator->Generate();
+  auto endTime = std::chrono::steady_clock::now();
+  {
+    auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(endTime -
+                                                                    startTime);
+    std::ostringstream msg;
+    msg << "Generating done (" << std::fixed << std::setprecision(1)
+        << ms.count() / 1000.0L << "s)";
+    this->UpdateProgress(msg.str(), -1);
+  }
   if (!this->GraphVizFile.empty()) {
     std::cout << "Generate graphviz: " << this->GraphVizFile << '\n';
     this->GenerateGraphViz(this->GraphVizFile);

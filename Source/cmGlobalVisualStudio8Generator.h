@@ -40,12 +40,6 @@ public:
   cm::optional<std::string> const& GetTargetFrameworkIdentifier() const;
   cm::optional<std::string> const& GetTargetFrameworkTargetsVersion() const;
 
-  /**
-   * Override Configure and Generate to add the build-system check
-   * target.
-   */
-  void Configure() override;
-
   /** Return true if the target project file should have the option
       LinkLibraryDependencies and link to .sln dependencies. */
   bool NeedLinkLibraryDependencies(cmGeneratorTarget* target) override;
