@@ -1,5 +1,4 @@
-execute_process(COMMAND "${Python_EXECUTABLE}" -c
-    "import os; os.kill(os.getpid(),11)"
+execute_process(COMMAND "${EXIT_CRASH_EXE}"
   COMMAND ${CMAKE_COMMAND} -E true
   COMMAND_ERROR_IS_FATAL ANY
   )
