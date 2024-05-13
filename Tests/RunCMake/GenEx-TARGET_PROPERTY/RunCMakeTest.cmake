@@ -16,6 +16,7 @@ run_cmake(SOURCES)
 run_cmake(TransitiveBuild)
 run_cmake(TransitiveLink-CMP0166-OLD)
 run_cmake(TransitiveLink-CMP0166-NEW)
+run_cmake(Unset)
 
 block()
   run_cmake(Scope)

@@ -1751,7 +1751,8 @@ These expressions look up the values of
 
 .. genex:: $<TARGET_PROPERTY:tgt,prop>
 
-  Value of the property ``prop`` on the target ``tgt``.
+  Value of the property ``prop`` on the target ``tgt``, or empty if
+  the property is not set.
 
   Note that ``tgt`` is not added as a dependency of the target this
   expression is evaluated on.
@@ -1767,9 +1768,10 @@ These expressions look up the values of
   :target: TARGET_PROPERTY:prop
 
   Value of the property ``prop`` on the target for which the expression
-  is being evaluated.  Note that for generator expressions in
-  :ref:`Target Usage Requirements` this is the consuming target rather
-  than the target specifying the requirement.
+  is being evaluated, or empty if the property is not set.
+  Note that for generator expressions in :ref:`Target Usage Requirements`
+  this is the consuming target rather than the target specifying the
+  requirement.
 
 The expressions have special evaluation rules for some properties:
 
