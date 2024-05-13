@@ -55,18 +55,24 @@ foreach(lang IN ITEMS ${LANGUAGES})
   set(outfile "${CMAKE_PLATFORM_INFO_DIR}/test${lang}.out")
   set(CMAKE_FLAGS )
   set(COMPILE_DEFINITIONS )
+  set(LINK_OPTIONS )
   if(DEFINED CMAKE_${lang}_VERBOSE_FLAG)
-    set(CMAKE_FLAGS "-DEXE_LINKER_FLAGS=${CMAKE_${lang}_VERBOSE_FLAG}")
+    set(LINK_OPTIONS "${CMAKE_${lang}_VERBOSE_FLAG}")
     set(COMPILE_DEFINITIONS "${CMAKE_${lang}_VERBOSE_FLAG}")
   endif()
   if(DEFINED CMAKE_${lang}_VERBOSE_COMPILE_FLAG)
     set(COMPILE_DEFINITIONS "${CMAKE_${lang}_VERBOSE_COMPILE_FLAG}")
+  endif()
+  if(DEFINED CMAKE_${lang}_VERBOSE_LINK_FLAG)
+    list(APPEND LINK_OPTIONS "${CMAKE_${lang}_VERBOSE_LINK_FLAG}")
   endif()
   if(NOT "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xMSVC")
     # Avoid adding our own platform standard libraries for compilers
     # from which we might detect implicit link libraries.
     list(APPEND CMAKE_FLAGS "-DCMAKE_${lang}_STANDARD_LIBRARIES=")
   endif()
+  list(JOIN LINK_OPTIONS " " LINK_OPTIONS)
+  list(APPEND CMAKE_FLAGS "-DEXE_LINKER_FLAGS=${LINK_OPTIONS}")
 
   try_compile(rv ${CMAKE_BINARY_DIR} ${file}
     CMAKE_FLAGS ${CMAKE_FLAGS}

@@ -389,13 +389,16 @@ int do_cmake(int ac, char const* const* av)
     }
   }
 
-  // Always return a non-negative value.  Windows tools do not always
-  // interpret negative return values as errors.
+  // Always return a non-negative value (except exit code from SCRIPT_MODE).
+  // Windows tools do not always interpret negative return values as errors.
   if (res != 0) {
+    auto scriptModeExitCode =
+      cm.HasScriptModeExitCode() ? cm.GetScriptModeExitCode() : 0;
+    res = scriptModeExitCode ? scriptModeExitCode : 1;
 #ifdef CMake_ENABLE_DEBUGGER
-    cm.StopDebuggerIfNeeded(1);
+    cm.StopDebuggerIfNeeded(res);
 #endif
-    return 1;
+    return res;
   }
 #ifdef CMake_ENABLE_DEBUGGER
   cm.StopDebuggerIfNeeded(0);

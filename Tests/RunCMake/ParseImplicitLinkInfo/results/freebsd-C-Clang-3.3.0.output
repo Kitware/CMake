@@ -1,2 +1,3 @@
 libs=gcc;gcc_s;c;gcc;gcc_s
 dirs=/usr/lib
+linker_tool=/usr/bin/ld

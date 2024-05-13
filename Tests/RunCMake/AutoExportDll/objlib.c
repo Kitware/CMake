@@ -1,4 +1,4 @@
-int objlib()
+int objlib(void)
 {
   return 7;
 }

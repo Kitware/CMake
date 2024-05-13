@@ -97,8 +97,8 @@ Note that the warning for this policy will be issued for at most one
 target.  This avoids flooding users with messages for every target
 when setting the policy once will probably fix all targets.
 
-This policy was introduced in CMake version 2.6.0.  CMake version
-|release| warns when the policy is not set and uses ``OLD`` behavior.  Use
-the :command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.6.0
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

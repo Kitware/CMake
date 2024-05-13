@@ -10,4 +10,5 @@
  * Process AUTORCC
  * @return true on success
  */
-bool cmQtAutoRcc(cm::string_view infoFile, cm::string_view config);
+bool cmQtAutoRcc(cm::string_view infoFile, cm::string_view config,
+                 cm::string_view executableConfig);

@@ -500,7 +500,7 @@ if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREA
       OUTPUT_VARIABLE OUTPUT
       )
     if(NOT BLD_ERROR_VARIABLE)
-      message(SEND_ERROR "BLD_ERROR_VARIABLE try_compile failed, but it was expected to succeed.")
+      message(SEND_ERROR "BLD_ERROR_VARIABLE try_compile failed, but it was expected to succeed. ${OUTPUT}")
     endif()
 
     if(NOT CMAKE_CROSSCOMPILING)
@@ -518,6 +518,91 @@ if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREA
       endif()
     endif()
   endif()
+
+  # Testing try_compile with ALIAS targets.
+  # These assume that previous test were successful, or at least the failures will be at the linking stage
+  # with symbol not found errors
+
+  # First make sure that if the test run without appropriate alias targets, they should error out
+  try_compile(FAILING_LIBRARY_ALIAS_ERROR_VARIABLE
+          "${CMAKE_CURRENT_BINARY_DIR}/test_failing_library_alias"
+          "${CMAKE_CURRENT_SOURCE_DIR}/test_system.cpp"
+          LINK_LIBRARIES not_existing_library
+          OUTPUT_VARIABLE OUTPUT
+          NO_CACHE
+  )
+  if(FAILING_LIBRARY_ALIAS_ERROR_VARIABLE)
+    message(SEND_ERROR "FAILING_LIBRARY_ALIAS_ERROR_VARIABLE try_compile succeeded, but it was expected to fail ${OUTPUT}.")
+  endif()
+
+  # FIXME: CMAKE_TRY_COMPILE_TARGET_TYPE=MODULE is needed to properly link and test targets linked to an executable
+#  set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+#  try_compile(FAILING_EXE_ALIAS_ERROR_VARIABLE
+#          "${CMAKE_CURRENT_BINARY_DIR}/test_failing_exe_alias"
+#          "${CMAKE_CURRENT_SOURCE_DIR}/imp_mod1.c"
+#          LINK_LIBRARIES not_existing_executable
+#          OUTPUT_VARIABLE OUTPUT
+#          NO_CACHE
+#  )
+#  unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
+#  if(FAILING_EXE_ALIAS_ERROR_VARIABLE)
+#    message(SEND_ERROR "FAILING_EXE_ALIAS_ERROR_VARIABLE try_compile succeeded, but it was expected to fail ${OUTPUT}.")
+#  endif()
+
+  # Do the actual try_compile tests for ALIAS targets
+  add_library(exp_systemlib_alias ALIAS exp_systemlib)
+  try_compile(EXP_LIBRARY_ALIAS_ERROR_VARIABLE
+          "${CMAKE_CURRENT_BINARY_DIR}/test_library_alias"
+          "${CMAKE_CURRENT_SOURCE_DIR}/test_system.cpp"
+          LINK_LIBRARIES exp_systemlib_alias
+          OUTPUT_VARIABLE OUTPUT
+          NO_CACHE
+  )
+  if(NOT EXP_LIBRARY_ALIAS_ERROR_VARIABLE)
+    message(SEND_ERROR "EXP_LIBRARY_ALIAS_ERROR_VARIABLE try_compile failed with library aliased target, but it was expected to succeed ${OUTPUT}.")
+  endif()
+
+  # FIXME: CMAKE_TRY_COMPILE_TARGET_TYPE=MODULE is needed to properly link and test targets linked to an executable
+#  set(CMAKE_TRY_COMPILE_TARGET_TYPE MODULE)
+#  add_executable(exp_exe_alias ALIAS exp_testExe2)
+#  try_compile(EXP_EXE_ALIAS_ERROR_VARIABLE
+#          "${CMAKE_CURRENT_BINARY_DIR}/test_exe_alias"
+#          "${CMAKE_CURRENT_SOURCE_DIR}/imp_mod1.c"
+#          LINK_LIBRARIES exp_exe_alias
+#          OUTPUT_VARIABLE OUTPUT
+#          NO_CACHE
+#  )
+#  unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
+#  if(NOT EXP_EXE_ALIAS_ERROR_VARIABLE)
+#    message(SEND_ERROR "EXP_EXE_ALIAS_ERROR_VARIABLE try_compile failed with executable aliased target, but it was expected to succeed ${OUTPUT}.")
+#  endif()
+
+  add_library(bld_systemlib_alias ALIAS bld_systemlib)
+  try_compile(BLD_LIBRARY_ALIAS_ERROR_VARIABLE
+          "${CMAKE_CURRENT_BINARY_DIR}/test_library_alias"
+          "${CMAKE_CURRENT_SOURCE_DIR}/test_system.cpp"
+          LINK_LIBRARIES bld_systemlib_alias
+          OUTPUT_VARIABLE OUTPUT
+          NO_CACHE
+  )
+  if(NOT BLD_LIBRARY_ALIAS_ERROR_VARIABLE)
+    message(SEND_ERROR "BLD_LIBRARY_ALIAS_ERROR_VARIABLE try_compile failed with library aliased target, but it was expected to succeed. ${OUTPUT}")
+  endif()
+
+  # FIXME: CMAKE_TRY_COMPILE_TARGET_TYPE=MODULE is needed to properly link and test targets linked to an executable
+#  set(CMAKE_TRY_COMPILE_TARGET_TYPE MODULE)
+#  add_executable(bld_exe_alias ALIAS bld_testExe2)
+#  try_compile(BLD_EXE_ALIAS_ERROR_VARIABLE
+#          "${CMAKE_CURRENT_BINARY_DIR}/test_exe_alias"
+#          "${CMAKE_CURRENT_SOURCE_DIR}/imp_mod1.c"
+#          LINK_LIBRARIES bld_exe_alias
+#          OUTPUT_VARIABLE OUTPUT
+#          NO_CACHE
+#  )
+#  unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
+#  if(NOT BLD_EXE_ALIAS_ERROR_VARIABLE)
+#    message(SEND_ERROR "BLD_EXE_ALIAS_ERROR_VARIABLE try_compile failed with executable aliased target, but it was expected to succeed. ${OUTPUT}")
+#  endif()
 endif()
 
 #---------------------------------------------------------------------------------

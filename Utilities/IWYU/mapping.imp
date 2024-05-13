@@ -75,6 +75,10 @@
   { include: [ "<ostream>", public, "\"cmsys/FStream.hxx\"", public ] },
   { include: [ "<fstream>", public, "\"cmsys/FStream.hxx\"", public ] },
 
+  { symbol: [ "mode_t", private, "\"cm_sys_stat.h\"", public ] },
+  { symbol: [ "S_IWUSR", private, "\"cm_sys_stat.h\"", public ] },
+  { symbol: [ "S_IWGRP", private, "\"cm_sys_stat.h\"", public ] },
+
   { include: [ "<filesystem>", public, "<cm/filesystem>", public ] },
   { include: [ "<optional>", public, "<cm/optional>", public ] },
   { include: [ "<shared_mutex>", public, "<cm/shared_mutex>", public ] },

@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <cm/string_view>
@@ -16,6 +17,22 @@
 class cmQtAutoGen
 {
 public:
+  /** String value with per configuration variants.  */
+  class ConfigString
+  {
+  public:
+    std::string Default;
+    std::unordered_map<std::string, std::string> Config;
+  };
+
+  /** String values with per configuration variants.  */
+  template <typename C>
+  class ConfigStrings
+  {
+  public:
+    C Default;
+    std::unordered_map<std::string, C> Config;
+  };
   /** Integer version.  */
   struct IntegerVersion
   {
@@ -63,11 +80,6 @@ public:
 
   /// @brief Maximum number of parallel threads/processes in a generator
   static unsigned int const ParallelMax;
-
-#ifdef _WIN32
-  /// @brief Maximum number of characters on command line
-  static size_t const CommandLineLengthMax;
-#endif
 
   /// @brief Returns the generator name
   static cm::string_view GeneratorName(GenT genType);

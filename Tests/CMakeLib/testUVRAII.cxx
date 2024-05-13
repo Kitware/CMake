@@ -37,7 +37,7 @@ static bool testAsyncShutdown()
       return false;
     }
 
-    if (signal.get()) {
+    if (signal) {
       std::cerr << "Loop exited with signal not being cleaned up" << std::endl;
       return false;
     }
@@ -125,13 +125,13 @@ static bool testCrossAssignment()
     pipe.init(Loop, 0);
 
     cm::uv_stream_ptr stream = std::move(pipe);
-    if (pipe.get()) {
+    if (pipe) {
       std::cerr << "Move should be sure to invalidate the previous ptr"
                 << std::endl;
       return false;
     }
     cm::uv_handle_ptr handle = std::move(stream);
-    if (stream.get()) {
+    if (stream) {
       std::cerr << "Move should be sure to invalidate the previous ptr"
                 << std::endl;
       return false;
@@ -162,6 +162,7 @@ static bool testAllMoves()
     uv_async_ptr _13;
     uv_signal_ptr _14;
     uv_handle_ptr _15;
+    uv_idle_ptr _16;
   };
 
   allTypes a;

@@ -459,6 +459,15 @@ elseif(RunCMake_GENERATOR MATCHES "Ninja Multi-Config|Visual Studio|Xcode")
   run_EnvironmentConfigTypes()
 endif()
 
+function(run_EnvironmentInstallPrefix)
+  set(ENV{CMAKE_INSTALL_PREFIX} "${RunCMake_BINARY_DIR}/install_prefix_set_via_env_var")
+  run_cmake(EnvInstallPrefix)
+  run_cmake_with_options(EnvInstallPrefixOverrideWithVar -DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/install_prefix_set_via_var)
+  run_cmake_with_options(EnvInstallPrefixOverrideWithCmdLineOpt --install-prefix ${RunCMake_BINARY_DIR}/install_prefix_set_cmd_line_opt)
+  unset(ENV{CMAKE_INSTALL_PREFIX})
+endfunction()
+run_EnvironmentInstallPrefix()
+
 function(run_EnvironmentToolchain)
   set(ENV{CMAKE_TOOLCHAIN_FILE} "${RunCMake_SOURCE_DIR}/EnvToolchain-toolchain.cmake")
   run_cmake(EnvToolchainAbsolute)
@@ -781,6 +790,8 @@ run_cmake_command(E_cat-with-double-dash ${CMAKE_COMMAND} -E cat -- "-file-start
 run_cmake_command(E_cat-without-double-dash ${CMAKE_COMMAND} -E cat "-file-starting-with-dash.txt")
 unset(RunCMake_TEST_COMMAND_WORKING_DIRECTORY)
 unset(out)
+
+run_cmake_command(E_cat-stdin ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/E_cat-stdin.cmake)
 
 # Unset environment variables that are used for testing cmake -E
 unset(ENV{TEST_ENV})

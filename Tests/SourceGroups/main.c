@@ -14,7 +14,7 @@ extern int tree_foobar(void);
 extern int tree_baz(void);
 extern int nested(void);
 
-int main()
+int main(void)
 {
   printf("foo: %d bar: %d foobar: %d barbar: %d baz: %d\n", foo(), bar(),
          foobar(), barbar(), baz());

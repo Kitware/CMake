@@ -177,20 +177,27 @@ endfunction()
 # was initialized by the block below.  This is useful for user
 # projects to change the default prefix while still allowing the
 # command line to override it.
-if(NOT DEFINED CMAKE_INSTALL_PREFIX)
+if(NOT DEFINED CMAKE_INSTALL_PREFIX AND
+   NOT DEFINED ENV{CMAKE_INSTALL_PREFIX})
   set(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT 1)
 endif()
 
-# Choose a default install prefix for this platform.
-if(CMAKE_HOST_UNIX)
-  set(CMAKE_INSTALL_PREFIX "/usr/local"
+if(DEFINED ENV{CMAKE_INSTALL_PREFIX})
+  set(CMAKE_INSTALL_PREFIX "$ENV{CMAKE_INSTALL_PREFIX}"
     CACHE PATH "Install path prefix, prepended onto install directories.")
 else()
-  GetDefaultWindowsPrefixBase(CMAKE_GENERIC_PROGRAM_FILES)
-  set(CMAKE_INSTALL_PREFIX
-    "${CMAKE_GENERIC_PROGRAM_FILES}/${PROJECT_NAME}"
-    CACHE PATH "Install path prefix, prepended onto install directories.")
-  set(CMAKE_GENERIC_PROGRAM_FILES)
+  # If CMAKE_INSTALL_PREFIX env variable is not set,
+  # choose a default install prefix for this platform.
+  if(CMAKE_HOST_UNIX)
+    set(CMAKE_INSTALL_PREFIX "/usr/local"
+      CACHE PATH "Install path prefix, prepended onto install directories.")
+  else()
+    GetDefaultWindowsPrefixBase(CMAKE_GENERIC_PROGRAM_FILES)
+    set(CMAKE_INSTALL_PREFIX
+      "${CMAKE_GENERIC_PROGRAM_FILES}/${PROJECT_NAME}"
+      CACHE PATH "Install path prefix, prepended onto install directories.")
+    set(CMAKE_GENERIC_PROGRAM_FILES)
+  endif()
 endif()
 
 # Set a variable which will be used as component name in install() commands

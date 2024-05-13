@@ -39,7 +39,7 @@
 
 #ifdef USE_ARES
 #  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
-  defined(WIN32)
+  defined(_WIN32)
 #    define CARES_STATICLIB
 #  endif
 #  include <ares.h>
@@ -211,8 +211,12 @@ char *curl_version(void)
 #endif
 
 #ifdef USE_LIBPSL
-  msnprintf(psl_version, sizeof(psl_version), "libpsl/%s", psl_get_version());
-  src[i++] = psl_version;
+  {
+    int num = psl_check_version_number(0);
+    msnprintf(psl_version, sizeof(psl_version), "libpsl/%d.%d.%d",
+              num >> 16, (num >> 8) & 0xff, num & 0xff);
+    src[i++] = psl_version;
+  }
 #endif
 
 #ifdef USE_SSH
@@ -409,7 +413,8 @@ static int idn_present(curl_version_info_data *info)
 #define idn_present     NULL
 #endif
 
-#if defined(USE_SSL) && !defined(CURL_DISABLE_PROXY)
+#if defined(USE_SSL) && !defined(CURL_DISABLE_PROXY) && \
+  !defined(CURL_DISABLE_HTTP)
 static int https_proxy_present(curl_version_info_data *info)
 {
   (void) info;
@@ -454,13 +459,14 @@ static const struct feat features_table[] = {
 #ifndef CURL_DISABLE_HSTS
   FEATURE("HSTS",        NULL,                CURL_VERSION_HSTS),
 #endif
-#if defined(USE_NGHTTP2) || defined(USE_HYPER)
+#if defined(USE_NGHTTP2)
   FEATURE("HTTP2",       NULL,                CURL_VERSION_HTTP2),
 #endif
 #if defined(ENABLE_QUIC)
   FEATURE("HTTP3",       NULL,                CURL_VERSION_HTTP3),
 #endif
-#if defined(USE_SSL) && !defined(CURL_DISABLE_PROXY)
+#if defined(USE_SSL) && !defined(CURL_DISABLE_PROXY) && \
+  !defined(CURL_DISABLE_HTTP)
   FEATURE("HTTPS-proxy", https_proxy_present, CURL_VERSION_HTTPS_PROXY),
 #endif
 #if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN)
@@ -510,7 +516,7 @@ static const struct feat features_table[] = {
 #ifdef CURLDEBUG
   FEATURE("TrackMemory", NULL,                CURL_VERSION_CURLDEBUG),
 #endif
-#if defined(WIN32) && defined(UNICODE) && defined(_UNICODE)
+#if defined(_WIN32) && defined(UNICODE) && defined(_UNICODE)
   FEATURE("Unicode",     NULL,                CURL_VERSION_UNICODE),
 #endif
 #ifdef USE_UNIX_SOCKETS

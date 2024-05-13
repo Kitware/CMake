@@ -1,0 +1,68 @@
+test 1
+    Start 1: DoesNotUseEmulator
+
+1: Test command: "?[^
+]*[/\]cmake(\.exe)?"? "-E" "echo" "Hi"
+1: Working Directory: [^
+]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-build
+1: Test timeout computed to be: [0-9]+
+1: Hi
+1/7 Test #1: DoesNotUseEmulator [.]* +Passed +[0-9.]+ sec
+test 2
+    Start 2: UsesEmulator
+
+2: Test command: "?[^
+]*[/\]Tests[/\]RunCMake([/\][^/\]+)?[/\]pseudo_emulator(\.exe)?"? "[^"]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-build(/Debug)?/exe(\.exe)?"
+2: Working Directory: [^
+]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-build
+2: Test timeout computed to be: [0-9]+
+2: Command: "[^"]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-build(/Debug)?/exe(\.exe)?"
+2/7 Test #2: UsesEmulator [.]* +Passed +[0-9.]+ sec
+test 3
+    Start 3: DoesNotUseEmulatorWithGenex
+
+3: Test command: "?[^
+]*[/\]Tests[/\]RunCMake[/\]CrosscompilingEmulator[/\]AddTest-build([/\]Debug)?[/\]exe(\.exe)?"?
+3: Working Directory: [^
+]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-build
+3: Test timeout computed to be: [0-9]+
+3/7 Test #3: DoesNotUseEmulatorWithGenex [.]* +Passed +[0-9.]+ sec
+test 4
+    Start 4: UsesEmulatorWithExecTargetFromSubdirAddedWithoutGenex
+
+4: Test command: "?[^
+]*[/\]Tests[/\]RunCMake([/\][^/\]+)?[/\]pseudo_emulator(\.exe)?"? "[^"]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-build/AddTest(/Debug)?/subdir_exe_no_genex(\.exe)?"
+4: Working Directory: [^
+]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-build
+4: Test timeout computed to be: [0-9]+
+4: Command: "[^"]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-build/AddTest(/Debug)?/subdir_exe_no_genex(\.exe)?"
+4/7 Test #4: UsesEmulatorWithExecTargetFromSubdirAddedWithoutGenex [.]* +Passed +[0-9.]+ sec
+test 5
+    Start 5: DoesNotUseEmulatorWithExecTargetFromSubdirAddedWithGenex
+
+5: Test command: "?[^
+]*[/\]Tests[/\]RunCMake[/\]CrosscompilingEmulator[/\]AddTest-build[/\]AddTest([/\]Debug)?[/\]subdir_exe_with_genex(\.exe)?"?
+5: Working Directory: [^
+]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-build
+5: Test timeout computed to be: [0-9]+
+5/7 Test #5: DoesNotUseEmulatorWithExecTargetFromSubdirAddedWithGenex [.]* +Passed +[0-9.]+ sec
+test 6
+    Start 6: UsesTestLauncherAndEmulator
+
+6: Test command: "?[^
+]*[/\]Tests[/\]RunCMake([/\][^/\]+)?[/\]pseudo_emulator(\.exe)?"? "[^"]*/Tests/RunCMake(/[^/]+)?/pseudo_emulator(\.exe)?" "[^"]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-build(/Debug)?/exe_test_launcher(\.exe)?"
+6: Working Directory: [^
+]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-build
+6: Test timeout computed to be: [0-9]+
+6: Command: "[^"]*/Tests/RunCMake(/[^/]+)?/pseudo_emulator(\.exe)?" "[^"]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-build(/Debug)?/exe_test_launcher(\.exe)?"
+6/7 Test #6: UsesTestLauncherAndEmulator [.]* +Passed +[0-9.]+ sec
+test 7
+    Start 7: UsesLocalEmulator
+
+7: Test command: "?[^
+]*[/\]Tests[/\]RunCMake[/\]CrosscompilingEmulator[/\]AddTest-build([/\]Debug)?[/\]local_emulator(\.exe)?"? "[^"]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-build(/Debug)?/use_emulator_local(\.exe)?"
+7: Working Directory: [^
+]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-build
+7: Test timeout computed to be: [0-9]+
+7: Command: "[^"]*/use_emulator_local[^"]*"
+7/7 Test #7: UsesLocalEmulator [.]* +Passed +[0-9.]+ sec

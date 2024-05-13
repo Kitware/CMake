@@ -10,15 +10,28 @@ Add an executable to the project using the specified source files.
 Normal Executables
 ^^^^^^^^^^^^^^^^^^
 
-.. code-block:: cmake
+.. signature::
+  add_executable(<name> <options>... <sources>...)
+  :target: normal
 
-  add_executable(<name> [WIN32] [MACOSX_BUNDLE]
-                 [EXCLUDE_FROM_ALL]
-                 [source1] [source2 ...])
+  Add an executable target called ``<name>`` to be built from the source
+  files listed in the command invocation.
 
-Adds an executable target called ``<name>`` to be built from the source
-files listed in the command invocation.  The
-``<name>`` corresponds to the logical target name and must be globally
+  The options are:
+
+  ``WIN32``
+    Set the :prop_tgt:`WIN32_EXECUTABLE` target property automatically.
+    See documentation of that target property for details.
+
+  ``MACOSX_BUNDLE``
+    Set the :prop_tgt:`MACOSX_BUNDLE` target property automatically.
+    See documentation of that target property for details.
+
+  ``EXCLUDE_FROM_ALL``
+    Set the :prop_tgt:`EXCLUDE_FROM_ALL` target property automatically.
+    See documentation of that target property for details.
+
+The ``<name>`` corresponds to the logical target name and must be globally
 unique within a project.  The actual file name of the executable built is
 constructed based on conventions of the native platform (such as
 ``<name>.exe`` or just ``<name>``).
@@ -39,18 +52,6 @@ command was invoked.  See documentation of the
 location.  See documentation of the :prop_tgt:`OUTPUT_NAME` target property
 to change the ``<name>`` part of the final file name.
 
-If ``WIN32`` is given the property :prop_tgt:`WIN32_EXECUTABLE` will be
-set on the target created.  See documentation of that target property for
-details.
-
-If ``MACOSX_BUNDLE`` is given the corresponding property will be set on
-the created target.  See documentation of the :prop_tgt:`MACOSX_BUNDLE`
-target property for details.
-
-If ``EXCLUDE_FROM_ALL`` is given the corresponding property will be set on
-the created target.  See documentation of the :prop_tgt:`EXCLUDE_FROM_ALL`
-target property for details.
-
 See the :manual:`cmake-buildsystem(7)` manual for more on defining
 buildsystem properties.
 
@@ -61,17 +62,25 @@ within IDE.
 Imported Executables
 ^^^^^^^^^^^^^^^^^^^^
 
-.. code-block:: cmake
-
+.. signature::
   add_executable(<name> IMPORTED [GLOBAL])
+  :target: IMPORTED
 
-An :ref:`IMPORTED executable target <Imported Targets>` references an
-executable file located outside the project.  No rules are generated to
-build it, and the :prop_tgt:`IMPORTED` target property is ``True``.  The
-target name has scope in the directory in which it is created and below, but
-the ``GLOBAL`` option extends visibility.  It may be referenced like any
-target built within the project.  ``IMPORTED`` executables are useful
-for convenient reference from commands like :command:`add_custom_command`.
+  Add an :ref:`IMPORTED executable target <Imported Targets>` to reference
+  an executable file located outside the project.  The target name may be
+  referenced like any target built within the project, except that by
+  default it is visible only in the directory in which it is created,
+  and below.
+
+  The options are:
+
+  ``GLOBAL``
+    Make the target name globally visible.
+
+No rules are generated to build imported targets, and the :prop_tgt:`IMPORTED`
+target property is ``True``.  Imported executables are useful for convenient
+reference from commands like :command:`add_custom_command`.
+
 Details about the imported executable are specified by setting properties
 whose names begin in ``IMPORTED_``.  The most important such property is
 :prop_tgt:`IMPORTED_LOCATION` (and its per-configuration version
@@ -82,14 +91,14 @@ properties for more information.
 Alias Executables
 ^^^^^^^^^^^^^^^^^
 
-.. code-block:: cmake
-
+.. signature::
   add_executable(<name> ALIAS <target>)
+  :target: ALIAS
 
-Creates an :ref:`Alias Target <Alias Targets>`, such that ``<name>`` can
-be used to refer to ``<target>`` in subsequent commands.  The ``<name>``
-does not appear in the generated buildsystem as a make target.  The
-``<target>`` may not be an ``ALIAS``.
+  Creates an :ref:`Alias Target <Alias Targets>`, such that ``<name>`` can
+  be used to refer to ``<target>`` in subsequent commands.  The ``<name>``
+  does not appear in the generated buildsystem as a make target.  The
+  ``<target>`` may not be an ``ALIAS``.
 
 .. versionadded:: 3.11
   An ``ALIAS`` can target a ``GLOBAL`` :ref:`Imported Target <Imported Targets>`

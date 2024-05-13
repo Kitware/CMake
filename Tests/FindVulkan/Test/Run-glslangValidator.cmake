@@ -11,8 +11,10 @@ function(run_glslangValidator exe exe_display)
     message(SEND_ERROR "Result of ${exe_display} --help is ${result}, should be 1")
   endif()
 
-  if(NOT output MATCHES "^Usage: glslangValidator")
-    message(SEND_ERROR "Output of ${exe_display} --help is \"${output}\", should begin with \"Usage: glslangValidator\"")
+  # NOTE: Newer version prefer just "glslang" since it's no longer really just a validator.
+  # This approach is still compatible with older version that output glslangValidator
+  if(NOT output MATCHES "^Usage: glslang")
+    message(SEND_ERROR "Output of ${exe_display} --help is \"${output}\", should begin with \"Usage: glslang\"")
   endif()
 endfunction()
 

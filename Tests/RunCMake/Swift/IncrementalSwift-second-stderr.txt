@@ -1,2 +1,2 @@
 ninja explain: A.swiftmodule is dirty
-ninja explain: libB.a is dirty
+ninja explain: (libB.a|B.lib) is dirty

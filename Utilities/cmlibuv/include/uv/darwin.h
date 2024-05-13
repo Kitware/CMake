@@ -30,6 +30,11 @@
 # define UV_PLATFORM_SEM_T semaphore_t
 #endif
 
+#if 1 /* FIXME(#25839): use posix poll to avoid kqueue hangs on macOS.  */
+# include "posix.h"
+#else
+#define UV_HAVE_KQUEUE 1
+
 #define UV_IO_PRIVATE_PLATFORM_FIELDS                                         \
   int rcount;                                                                 \
   int wcount;                                                                 \
@@ -53,9 +58,9 @@
   int cf_error;                                                               \
   uv_mutex_t cf_mutex;                                                        \
 
+#endif
+
 #define UV_STREAM_PRIVATE_PLATFORM_FIELDS                                     \
   void* select;                                                               \
-
-#define UV_HAVE_KQUEUE 1
 
 #endif /* UV_DARWIN_H */

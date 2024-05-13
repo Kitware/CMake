@@ -17,6 +17,7 @@ set(__pch_header_OBJCXX "objective-c++-header")
 
 if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
     OR "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC"
+    OR "x${CMAKE_CUDA_SIMULATE_ID}" STREQUAL "xMSVC"
     OR "x${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "xMSVC")
   macro(__compiler_clang lang)
   endmacro()
@@ -94,11 +95,11 @@ else()
     endif()
 
     set(CMAKE_${lang}_ARCHIVE_CREATE_IPO
-      "\"${__ar}\" cr <TARGET> <LINK_FLAGS> <OBJECTS>"
+      "\"${__ar}\" qc <TARGET> <LINK_FLAGS> <OBJECTS>"
     )
 
     set(CMAKE_${lang}_ARCHIVE_APPEND_IPO
-      "\"${__ar}\" r <TARGET> <LINK_FLAGS> <OBJECTS>"
+      "\"${__ar}\" q <TARGET> <LINK_FLAGS> <OBJECTS>"
     )
 
     set(CMAKE_${lang}_ARCHIVE_FINISH_IPO

@@ -7,7 +7,7 @@
 #ifndef testLibAbs1b
 #  error "testLibAbs1b not defined"
 #endif
-int main()
+int main(void)
 {
   return 0 + testLibAbs1();
 }

@@ -74,36 +74,49 @@ macro(__compiler_gnu lang)
 
     if (NOT DEFINED CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED)
       ## check if this feature is supported by the linker
-      execute_process(COMMAND "${CMAKE_${lang}_COMPILER}" -Wl,--help
-        OUTPUT_VARIABLE _linker_capabilities
-        ERROR_VARIABLE _linker_capabilities)
-      if(_linker_capabilities MATCHES "--dependency-file")
-        set(CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED TRUE)
+      if (CMAKE_${lang}_COMPILER_LINKER AND CMAKE_${lang}_COMPILER_LINKER_ID MATCHES "GNU|LLD")
+        execute_process(COMMAND "${CMAKE_${lang}_COMPILER_LINKER}" --help
+                        OUTPUT_VARIABLE _linker_capabilities
+                        ERROR_VARIABLE _linker_capabilities)
+        if(_linker_capabilities MATCHES "--dependency-file")
+          set(CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED TRUE)
+        else()
+          set(CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED FALSE)
+        endif()
+        unset(_linker_capabilities)
       else()
         set(CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED FALSE)
       endif()
-      unset(_linker_capabilities)
     endif()
   endif()
   if (CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED)
     set(CMAKE_${lang}_LINK_DEPENDS_USE_LINKER TRUE)
   else()
-    unset(CMAKE_${lang}_LINK_DEPENDS_USE_LINKER)
+    set(CMAKE_${lang}_LINK_DEPENDS_USE_LINKER FALSE)
   endif()
 
-  # For now, due to GNU binutils ld bug when LTO is enabled (see GNU bug
-    # `30568 <https://sourceware.org/bugzilla/show_bug.cgi?id=30568>`_),
-  # deactivate this feature.
-  if (NOT DEFINED CMAKE_LINK_DEPENDS_USE_LINKER)
-    set(CMAKE_LINK_DEPENDS_USE_LINKER FALSE)
+  # Due to GNU binutils ld bug when LTO is enabled (see GNU bug
+  # `30568 <https://sourceware.org/bugzilla/show_bug.cgi?id=30568>`_),
+  # deactivate this feature if the version is less than 2.41.
+  # For now, all known versions of gold linker have also this bug.
+  if (CMAKE_${lang}_COMPILER_LINKER_ID
+      AND (CMAKE_${lang}_COMPILER_LINKER_ID STREQUAL "GNUgold"
+           OR (CMAKE_${lang}_COMPILER_LINKER_ID STREQUAL "GNU"
+               AND CMAKE_${lang}_COMPILER_LINKER_VERSION VERSION_LESS "2.41")))
+    set(CMAKE_${lang}_LINK_DEPENDS_USE_LINKER FALSE)
   endif()
 
   # Initial configuration flags.
   string(APPEND CMAKE_${lang}_FLAGS_INIT " ")
   string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -g")
-  string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -Os -DNDEBUG")
-  string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -O3 -DNDEBUG")
-  string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -O2 -g -DNDEBUG")
+  string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -Os")
+  string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -O3")
+  string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -O2 -g")
+  if(NOT "x${lang}" STREQUAL "xFortran")
+    string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -DNDEBUG")
+    string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -DNDEBUG")
+    string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -DNDEBUG")
+  endif()
   set(CMAKE_${lang}_CREATE_PREPROCESSED_SOURCE "<CMAKE_${lang}_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>")
   set(CMAKE_${lang}_CREATE_ASSEMBLY_SOURCE "<CMAKE_${lang}_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -S <SOURCE> -o <ASSEMBLY_SOURCE>")
   if(NOT APPLE OR NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4) # work around #4462
@@ -155,11 +168,11 @@ macro(__compiler_gnu lang)
     #
     # [1]: https://gcc.gnu.org/onlinedocs/gcc-4.9.4/gcc/Optimize-Options.html
     set(CMAKE_${lang}_ARCHIVE_CREATE_IPO
-      "\"${CMAKE_${lang}_COMPILER_AR}\" cr <TARGET> <LINK_FLAGS> <OBJECTS>"
+      "\"${CMAKE_${lang}_COMPILER_AR}\" qc <TARGET> <LINK_FLAGS> <OBJECTS>"
     )
 
     set(CMAKE_${lang}_ARCHIVE_APPEND_IPO
-      "\"${CMAKE_${lang}_COMPILER_AR}\" r <TARGET> <LINK_FLAGS> <OBJECTS>"
+      "\"${CMAKE_${lang}_COMPILER_AR}\" q <TARGET> <LINK_FLAGS> <OBJECTS>"
     )
 
     set(CMAKE_${lang}_ARCHIVE_FINISH_IPO

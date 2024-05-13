@@ -1,6 +1,6 @@
-extern int c2();
+extern int c2(void);
 
-int d()
+int d(void)
 {
   return c2() + 2;
 }

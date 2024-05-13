@@ -1,0 +1,12 @@
+^CMake Error at [^
+]*/Tests/RunCMake/ctest_empty_binary_directory/NoCache/test.cmake:[0-9]+ \(ctest_empty_binary_directory\):
+  Did not remove the binary directory:
+
+   [^
+]*/Tests/RunCMake/ctest_empty_binary_directory/NoCache-build
+
+  because:
+
+   path does not contain an existing CMakeCache\.txt file
++
+script continues after ctest_empty_binary_directory error$

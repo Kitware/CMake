@@ -100,9 +100,9 @@ if (_TIFF_component_opt)
 endif ()
 unset(_TIFF_component_opt)
 # Always find with QUIET to avoid noise when it is not found.
-find_package(tiff CONFIG QUIET ${_TIFF_args})
+find_package(Tiff CONFIG QUIET ${_TIFF_args})
 unset(_TIFF_args)
-if (tiff_FOUND)
+if (Tiff_FOUND)
   if (NOT TARGET TIFF::TIFF)
     add_library(TIFF::TIFF IMPORTED INTERFACE)
     set_target_properties(TIFF::TIFF PROPERTIES
@@ -201,15 +201,16 @@ if (tiff_FOUND)
       endif ()
     endif ()
   endif ()
-  set(TIFF_VERSION_STRING "${tiff_VERSION}")
+  set(TIFF_VERSION_STRING "${Tiff_VERSION}")
   foreach (_TIFF_component IN LISTS TIFF_FIND_COMPONENTS)
-    set(TIFF_${_TIFF_component}_FOUND "${tiff_${_TIFF_component}_FOUND}")
+    set(TIFF_${_TIFF_component}_FOUND "${Tiff_${_TIFF_component}_FOUND}")
   endforeach ()
   unset(_TIFF_component)
 
   include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
   find_package_handle_standard_args(TIFF
                                     HANDLE_COMPONENTS
+                                    REQUIRED_VARS Tiff_DIR
                                     VERSION_VAR TIFF_VERSION_STRING)
 
   cmake_policy(POP)

@@ -1,8 +1,6 @@
 CMAKE_MATCH_<n>
 ---------------
 
-.. versionadded:: 3.9
-
 Capture group ``<n>`` matched by the last regular expression, for groups
 0 through 9.  Group 0 is the entire match.  Groups 1 through 9 are the
 subexpressions captured by ``()`` syntax.

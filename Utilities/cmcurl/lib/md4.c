@@ -32,9 +32,8 @@
 #include "warnless.h"
 
 #ifdef USE_OPENSSL
-#include <openssl/opensslconf.h>
-#if defined(OPENSSL_VERSION_MAJOR) && (OPENSSL_VERSION_MAJOR >= 3) && \
-   !defined(USE_AMISSL)
+#include <openssl/opensslv.h>
+#if (OPENSSL_VERSION_NUMBER >= 0x30000000L) && !defined(USE_AMISSL)
 /* OpenSSL 3.0.0 marks the MD4 functions as deprecated */
 #define OPENSSL_NO_MD4
 #endif
@@ -195,11 +194,9 @@ static int MD4_Init(MD4_CTX *ctx)
 static void MD4_Update(MD4_CTX *ctx, const void *data, unsigned long size)
 {
   if(!ctx->data) {
-    ctx->data = malloc(size);
-    if(ctx->data) {
-      memcpy(ctx->data, data, size);
+    ctx->data = Curl_memdup(data, size);
+    if(ctx->data)
       ctx->size = size;
-    }
   }
 }
 

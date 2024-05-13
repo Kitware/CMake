@@ -205,18 +205,23 @@ void Curl_sasl_init(struct SASL *sasl, struct Curl_easy *data,
   sasl->force_ir = FALSE;          /* Respect external option */
 
   if(auth != CURLAUTH_BASIC) {
-    sasl->resetprefs = FALSE;
-    sasl->prefmech = SASL_AUTH_NONE;
+    unsigned short mechs = SASL_AUTH_NONE;
+
+    /* If some usable http authentication options have been set, determine
+       new defaults from them. */
     if(auth & CURLAUTH_BASIC)
-      sasl->prefmech |= SASL_MECH_PLAIN | SASL_MECH_LOGIN;
+      mechs |= SASL_MECH_PLAIN | SASL_MECH_LOGIN;
     if(auth & CURLAUTH_DIGEST)
-      sasl->prefmech |= SASL_MECH_DIGEST_MD5;
+      mechs |= SASL_MECH_DIGEST_MD5;
     if(auth & CURLAUTH_NTLM)
-      sasl->prefmech |= SASL_MECH_NTLM;
+      mechs |= SASL_MECH_NTLM;
     if(auth & CURLAUTH_BEARER)
-      sasl->prefmech |= SASL_MECH_OAUTHBEARER | SASL_MECH_XOAUTH2;
+      mechs |= SASL_MECH_OAUTHBEARER | SASL_MECH_XOAUTH2;
     if(auth & CURLAUTH_GSSAPI)
-      sasl->prefmech |= SASL_MECH_GSSAPI;
+      mechs |= SASL_MECH_GSSAPI;
+
+    if(mechs != SASL_AUTH_NONE)
+      sasl->prefmech = mechs;
   }
 }
 
@@ -262,6 +267,8 @@ static void sasl_state(struct SASL *sasl, struct Curl_easy *data,
   sasl->state = newstate;
 }
 
+#if defined(USE_NTLM) || defined(USE_GSASL) || defined(USE_KERBEROS5) || \
+  !defined(CURL_DISABLE_DIGEST_AUTH)
 /* Get the SASL server message and convert it to binary. */
 static CURLcode get_server_message(struct SASL *sasl, struct Curl_easy *data,
                                    struct bufref *out)
@@ -284,6 +291,7 @@ static CURLcode get_server_message(struct SASL *sasl, struct Curl_easy *data,
   }
   return result;
 }
+#endif
 
 /* Encode the outgoing SASL message. */
 static CURLcode build_message(struct SASL *sasl, struct bufref *msg)

@@ -1,6 +1,6 @@
 #include <vulkan/vulkan.h>
 
-int main()
+int main(void)
 {
   VkInstanceCreateInfo instanceCreateInfo = { 0 };
   instanceCreateInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;

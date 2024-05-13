@@ -27,9 +27,37 @@ directory the test is created in.
 ``add_test`` options are:
 
 ``COMMAND``
-  Specify the test command-line.  If ``<command>`` specifies an executable
-  target created by :command:`add_executable`, it will automatically be
-  replaced by the location of the executable created at build time.
+  Specify the test command-line.
+
+  If ``<command>`` specifies an executable target created by
+  :command:`add_executable`:
+
+  * It will automatically be replaced by the location of the executable
+    created at build time.
+
+  * .. versionadded:: 3.3
+
+      The target's :prop_tgt:`CROSSCOMPILING_EMULATOR`, if set, will be
+      used to run the command on the host::
+
+        <emulator> <command>
+
+      .. versionchanged:: 3.29
+
+        The emulator is used only when
+        :variable:`cross-compiling <CMAKE_CROSSCOMPILING>`.
+        See policy :policy:`CMP0158`.
+
+  * .. versionadded:: 3.29
+
+      The target's :prop_tgt:`TEST_LAUNCHER`, if set, will be
+      used to launch the command::
+
+        <launcher> <command>
+
+      If the :prop_tgt:`CROSSCOMPILING_EMULATOR` is also set, both are used::
+
+        <launcher> <emulator> <command>
 
   The command may be specified using
   :manual:`generator expressions <cmake-generator-expressions(7)>`.

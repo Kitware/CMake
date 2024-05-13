@@ -1,0 +1,48 @@
+CMAKE_LANG=CXX
+CMAKE_LINKER=C:/Program Files/Microsoft Visual Studio/2022/Professional/VC/Tools/MSVC/14.38.33130/bin/Hostx64/x64/link.exe
+CMAKE_CXX_COMPILER_ABI=
+CMAKE_CXX_COMPILER_AR=
+CMAKE_CXX_COMPILER_ARCHITECTURE_ID=x64
+CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_CXX_COMPILER_ID=MSVC
+CMAKE_CXX_COMPILER_LAUNCHER=
+CMAKE_CXX_COMPILER_LOADED=1
+CMAKE_CXX_COMPILER_RANLIB=
+CMAKE_CXX_COMPILER_TARGET=
+CMAKE_CXX_COMPILER_VERSION=19.38.33130.0
+CMAKE_CXX_COMPILER_VERSION_INTERAL=
+CMAKE_HOST_SYSTEM_NAME=Windows
+Change Dir: 'C:/DoesNotExist/Temp/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_29675.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+MSBuild version 17.8.3+195e7f5a3 for .NET Framework
+Build started 12/14/2023 11:53:28 AM.
+
+Project "C:\DoesNotExist\Temp\CMakeFiles\CMakeTmp\cmTC_29675.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "cmTC_29675.dir\Debug\".
+  Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+  Creating directory "C:\DoesNotExist\Temp\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTC_29675.dir\Debug\cmTC_29675.tlog\".
+InitializeBuildStatus:
+  Creating "cmTC_29675.dir\Debug\cmTC_29675.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+  Touching "cmTC_29675.dir\Debug\cmTC_29675.tlog\unsuccessfulbuild".
+ClCompile:
+  C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.38.33130\bin\HostX64\x64\CL.exe /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /Gm- /EHsc /RTC1 /MDd /GS /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_29675.dir\Debug\\" /Fd"cmTC_29675.dir\Debug\vc143.pdb" /external:W3 /Gd /TP /errorReport:queue "C:\DoesNotExist\CMake\Modules\CMakeCXXCompilerABI.cpp"
+  Microsoft (R) C/C++ Optimizing Compiler Version 19.38.33130 for x64
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /Gm- /EHsc /RTC1 /MDd /GS /Zc:wchar_t /Zc:forScope /Zc:inline /GR /Fo"cmTC_29675.dir\Debug\\" /Fd"cmTC_29675.dir\Debug\vc143.pdb" /external:W3 /Gd /TP /errorReport:queue "C:\DoesNotExist\CMake\Modules\CMakeCXXCompilerABI.cpp"
+  CMakeCXXCompilerABI.cpp
+Link:
+  C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.38.33130\bin\HostX64\x64\link.exe /ERRORREPORT:QUEUE /OUT:"C:\DoesNotExist\Temp\CMakeFiles\CMakeTmp\Debug\cmTC_29675.exe" /INCREMENTAL /ILK:"cmTC_29675.dir\Debug\cmTC_29675.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/DoesNotExist/Temp/CMakeFiles/CMakeTmp/Debug/cmTC_29675.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/DoesNotExist/Temp/CMakeFiles/CMakeTmp/Debug/cmTC_29675.lib" /MACHINE:X64  /machine:x64 cmTC_29675.dir\Debug\CMakeCXXCompilerABI.obj
+  cmTC_29675.vcxproj -> C:\DoesNotExist\Temp\CMakeFiles\CMakeTmp\Debug\cmTC_29675.exe
+FinalizeBuildStatus:
+  Deleting file "cmTC_29675.dir\Debug\cmTC_29675.tlog\unsuccessfulbuild".
+  Touching "cmTC_29675.dir\Debug\cmTC_29675.tlog\cmTC_29675.lastbuildstate".
+Done Building Project "C:\DoesNotExist\Temp\CMakeFiles\CMakeTmp\cmTC_29675.vcxproj" (default targets).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.92

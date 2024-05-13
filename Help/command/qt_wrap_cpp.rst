@@ -8,7 +8,7 @@ qt_wrap_cpp
   :module:`FindQt4` module provides the ``qt4_wrap_cpp()`` macro, which
   should be used instead for Qt 4 projects.  For projects using Qt 5 or
   later, use the equivalent macro provided by Qt itself (e.g. Qt 5 provides
-  ``qt5_wrap_cpp()``).
+  `qt5_wrap_cpp() <https://doc.qt.io/qt-5/qtcore-cmake-qt5-wrap-cpp.html>`_).
 
 Manually create Qt Wrappers.
 

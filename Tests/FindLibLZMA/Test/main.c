@@ -4,7 +4,7 @@
 
 static const uint8_t test_string[9] = "123456789";
 
-int main()
+int main(void)
 {
   static const uint32_t test_vector = 0xCBF43926;
 

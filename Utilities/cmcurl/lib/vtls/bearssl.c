@@ -509,7 +509,6 @@ static CURLcode bearssl_set_selected_ciphers(struct Curl_easy *data,
 {
   uint16_t selected_ciphers[NUM_OF_CIPHERS];
   size_t selected_count = 0;
-  char cipher_name[CIPHER_NAME_BUF_LEN];
   const char *cipher_start = ciphers;
   const char *cipher_end;
   size_t i, j;
@@ -518,41 +517,48 @@ static CURLcode bearssl_set_selected_ciphers(struct Curl_easy *data,
     return CURLE_SSL_CIPHER;
 
   while(true) {
+    const char *cipher;
+    size_t clen;
+
     /* Extract the next cipher name from the ciphers string */
     while(is_separator(*cipher_start))
       ++cipher_start;
-    if(*cipher_start == '\0')
+    if(!*cipher_start)
       break;
     cipher_end = cipher_start;
-    while(*cipher_end != '\0' && !is_separator(*cipher_end))
+    while(*cipher_end && !is_separator(*cipher_end))
       ++cipher_end;
-    j = cipher_end - cipher_start < CIPHER_NAME_BUF_LEN - 1 ?
-        cipher_end - cipher_start : CIPHER_NAME_BUF_LEN - 1;
-    strncpy(cipher_name, cipher_start, j);
-    cipher_name[j] = '\0';
+
+    clen = cipher_end - cipher_start;
+    cipher = cipher_start;
+
     cipher_start = cipher_end;
 
     /* Lookup the cipher name in the table of available ciphers. If the cipher
        name starts with "TLS_" we do the lookup by IANA name. Otherwise, we try
        to match cipher name by an (OpenSSL) alias. */
-    if(strncasecompare(cipher_name, "TLS_", 4)) {
+    if(strncasecompare(cipher, "TLS_", 4)) {
       for(i = 0; i < NUM_OF_CIPHERS &&
-                 !strcasecompare(cipher_name, ciphertable[i].name); ++i);
+            (strlen(ciphertable[i].name) == clen) &&
+            !strncasecompare(cipher, ciphertable[i].name, clen); ++i);
     }
     else {
       for(i = 0; i < NUM_OF_CIPHERS &&
-                 !strcasecompare(cipher_name, ciphertable[i].alias_name); ++i);
+            (strlen(ciphertable[i].alias_name) == clen) &&
+            !strncasecompare(cipher, ciphertable[i].alias_name, clen); ++i);
     }
     if(i == NUM_OF_CIPHERS) {
-      infof(data, "BearSSL: unknown cipher in list: %s", cipher_name);
+      infof(data, "BearSSL: unknown cipher in list: %.*s",
+            (int)clen, cipher);
       continue;
     }
 
     /* No duplicates allowed */
     for(j = 0; j < selected_count &&
-               selected_ciphers[j] != ciphertable[i].num; j++);
+          selected_ciphers[j] != ciphertable[i].num; j++);
     if(j < selected_count) {
-      infof(data, "BearSSL: duplicate cipher in list: %s", cipher_name);
+      infof(data, "BearSSL: duplicate cipher in list: %.*s",
+            (int)clen, cipher);
       continue;
     }
 
@@ -582,17 +588,12 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
   const char * const ssl_cafile =
     /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
     (ca_info_blob ? NULL : conn_config->CAfile);
-  const char *hostname = connssl->hostname;
+  const char *hostname = connssl->peer.hostname;
   const bool verifypeer = conn_config->verifypeer;
   const bool verifyhost = conn_config->verifyhost;
   CURLcode ret;
   unsigned version_min, version_max;
   int session_set = 0;
-#ifdef ENABLE_IPV6
-  struct in6_addr addr;
-#else
-  struct in_addr addr;
-#endif
 
   DEBUGASSERT(backend);
   CURL_TRC_CF(data, cf, "connect_step1");
@@ -706,11 +707,7 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
     infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
   }
 
-  if((1 == Curl_inet_pton(AF_INET, hostname, &addr))
-#ifdef ENABLE_IPV6
-      || (1 == Curl_inet_pton(AF_INET6, hostname, &addr))
-#endif
-     ) {
+  if(connssl->peer.is_ip_address) {
     if(verifyhost) {
       failf(data, "BearSSL: "
             "host verification of IP address is not supported");
@@ -719,12 +716,11 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
     hostname = NULL;
   }
   else {
-    char *snihost = Curl_ssl_snihost(data, hostname, NULL);
-    if(!snihost) {
+    if(!connssl->peer.sni) {
       failf(data, "Failed to set SNI");
       return CURLE_SSL_CONNECT_ERROR;
     }
-    hostname = snihost;
+    hostname = connssl->peer.sni;
     CURL_TRC_CF(data, cf, "connect_step1, SNI set");
   }
 
@@ -749,26 +745,26 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static int bearssl_get_select_socks(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
-                                    curl_socket_t *socks)
+static void bearssl_adjust_pollset(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   struct easy_pollset *ps)
 {
-  struct ssl_connect_data *connssl = cf->ctx;
-  curl_socket_t sock = Curl_conn_cf_get_socket(cf->next, data);
+  if(!cf->connected) {
+    curl_socket_t sock = Curl_conn_cf_get_socket(cf->next, data);
+    if(sock != CURL_SOCKET_BAD) {
+      struct ssl_connect_data *connssl = cf->ctx;
+      struct bearssl_ssl_backend_data *backend =
+        (struct bearssl_ssl_backend_data *)connssl->backend;
+      unsigned state = br_ssl_engine_current_state(&backend->ctx.eng);
 
-  if(sock == CURL_SOCKET_BAD)
-    return GETSOCK_BLANK;
-  else {
-    struct bearssl_ssl_backend_data *backend =
-      (struct bearssl_ssl_backend_data *)connssl->backend;
-    unsigned state = br_ssl_engine_current_state(&backend->ctx.eng);
-    if(state & BR_SSL_SENDREC) {
-      socks[0] = sock;
-      return GETSOCK_WRITESOCK(0);
+      if(state & BR_SSL_SENDREC) {
+        Curl_pollset_set_out_only(data, ps, sock);
+      }
+      else {
+        Curl_pollset_set_in_only(data, ps, sock);
+      }
     }
   }
-  socks[0] = sock;
-  return GETSOCK_READSOCK(0);
 }
 
 static CURLcode bearssl_run_until(struct Curl_cfilter *cf,
@@ -1210,7 +1206,7 @@ const struct Curl_ssl Curl_ssl_bearssl = {
   Curl_none_cert_status_request,   /* cert_status_request */
   bearssl_connect,                 /* connect */
   bearssl_connect_nonblocking,     /* connect_nonblocking */
-  bearssl_get_select_socks,        /* getsock */
+  bearssl_adjust_pollset,          /* adjust_pollset */
   bearssl_get_internals,           /* get_internals */
   bearssl_close,                   /* close_one */
   Curl_none_close_all,             /* close_all */

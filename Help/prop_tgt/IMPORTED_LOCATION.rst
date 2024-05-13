@@ -32,7 +32,7 @@ listed in the :prop_tgt:`IMPORTED_CONFIGURATIONS` target property may be
 selected and its :prop_tgt:`IMPORTED_LOCATION_<CONFIG>` value used.
 
 To get the location of an imported target read one of the :prop_tgt:`LOCATION`
-or ``LOCATION_<CONFIG>`` properties.
+or :prop_tgt:`LOCATION_<CONFIG>` properties.
 
 For platforms with import libraries (e.g. Windows, AIX or Apple) see also
 :prop_tgt:`IMPORTED_IMPLIB`.

@@ -987,7 +987,7 @@ if( NOT HDF5_FOUND )
                 HDF5_VERSION_DEFINE
                 REGEX "^[ \t]*#[ \t]*define[ \t]+H5_VERSION[ \t]+" )
             if( "${HDF5_VERSION_DEFINE}" MATCHES
-                "H5_VERSION[ \t]+\"([0-9]+\\.[0-9]+\\.[0-9]+)(-patch([0-9]+))?\"" )
+                "H5_VERSION[ \t]+\"([0-9\\.]+)(-patch([0-9]+))?\"" )
                 set( HDF5_VERSION "${CMAKE_MATCH_1}" )
                 if( CMAKE_MATCH_3 )
                   set( HDF5_VERSION ${HDF5_VERSION}.${CMAKE_MATCH_3})

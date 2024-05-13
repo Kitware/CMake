@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int main()
+int main(void)
 {
   /* 'cl /showIncludes' encodes output in the console output code page.  */
   unsigned int cp = GetConsoleOutputCP();
@@ -28,10 +28,18 @@ int main()
   printf("OEM code page: %u\n", GetOEMCP());
   printf("VSLANG: %s\n", vslang);
 
-  // clang-cl (special case for test, not a real VS value).
-  if (strcmp(vslang, "clang-cl") == 0) {
+  // clang-cl <= 17 (special case for test, not a real VS value).
+  if (strcmp(vslang, "clang-cl-17") == 0) {
     if (cp == 437 || cp == 65001) {
       printf("Note: including file: ./foo.h\n");
+      return 0;
+    }
+  }
+
+  // clang-cl >= 18 (special case for test, not a real VS value).
+  if (strcmp(vslang, "clang-cl-18") == 0) {
+    if (cp == 437 || cp == 65001) {
+      printf("Note: including file: .\\\\foo.h\n");
       return 0;
     }
   }

@@ -13,7 +13,7 @@ typedef int64_t blas_int;
 // declare what parts of the blas C-API we need
 void dswap_(blas_int* N, double* X, blas_int* incX, double* Y, blas_int* incY);
 
-int main()
+int main(void)
 {
   double x[4] = { 1, 2, 3, 4 };
   double y[4] = { 8, 7, 7, 6 };

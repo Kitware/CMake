@@ -1,3 +1,3 @@
-.*Linking Swift static library libA.a
-.*Linking Swift static library libB.a
-FAILED: libB.a CMakeFiles/B.dir/b.swift.o B.swiftmodule
+.*Building Swift object A.swiftmodule CMakeFiles(/|\\)A.dir(/|\\)a.swift.o(bj)?
+.*Building Swift object B.swiftmodule CMakeFiles(/|\\)B.dir(/|\\)b.swift.o(bj)?
+FAILED: B.swiftmodule CMakeFiles(/|\\)B.dir(/|\\)b.swift.o(bj)?

@@ -22,9 +22,8 @@ for static libraries, object libraries, and executables without exports.
 The ``NEW`` behavior for this policy is to honor the visibility properties
 for all target types.
 
-This policy was introduced in CMake version 3.3.  CMake version
-|release| warns when the policy is not set and uses ``OLD`` behavior.  Use
-the :command:`cmake_policy()` command to set it to ``OLD`` or ``NEW``
-explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.3
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

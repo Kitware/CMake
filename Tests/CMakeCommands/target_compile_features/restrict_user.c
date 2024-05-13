@@ -8,7 +8,7 @@ int bar(int* restrict a, int* restrict b)
   return foo(a, b);
 }
 
-int main()
+int main(void)
 {
   return 0;
 }

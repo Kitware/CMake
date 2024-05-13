@@ -15,3 +15,4 @@ set(CMAKE_INSTALL_PREFIX "@ExportImport_BINARY_DIR@/Root" CACHE STRING "Installa
 set(CMAKE_SKIP_RPATH ON CACHE BOOL "No RPATH")
 set(CMAKE_GNUtoMS "@ExportImport_GNUtoMS@" CACHE BOOL "CMAKE_GNUtoMS")
 set(CMake_TEST_CUDA "@CMake_TEST_CUDA@" CACHE BOOL "CMake_TEST_CUDA")
+set(Foo_DIR "@CMAKE_CURRENT_SOURCE_DIR@/External" CACHE PATH "Foo cmake package directory")

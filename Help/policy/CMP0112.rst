@@ -34,9 +34,11 @@ target for the above generator expressions.  The ``NEW`` behavior of
 this policy is to not add a dependency on the evaluated target for the
 above generator expressions.
 
-This policy was introduced in CMake version 3.19.  Unlike many policies,
-CMake version |release| does *not* warn by default when this policy
-is not set and simply uses ``OLD`` behavior.  See documentation of the
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.19
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn by default
+.. include:: STANDARD_ADVICE.txt
+
+See documentation of the
 :variable:`CMAKE_POLICY_WARNING_CMP0112 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
 variable to control the warning.
 

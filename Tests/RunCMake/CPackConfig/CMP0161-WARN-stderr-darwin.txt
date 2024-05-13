@@ -1,0 +1,12 @@
+^CMake Warning \(dev\) at [^
+]*/Modules/CPack\.cmake:[0-9]+ \(message\):
+  Policy CMP0161 is not set: CPACK_PRODUCTBUILD_DOMAINS defaults to true\.
+  Run "cmake --help-policy CMP0161" for policy details\.  Use the cmake_policy
+  command to set the policy and suppress this warning\.
+
+  For compatibility, CPACK_PRODUCTBUILD_DOMAINS will remain unset\.
+  Explicitly setting CPACK_PRODUCTBUILD_DOMAINS or setting policy CMP0161 to
+  NEW will prevent this warning\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.$

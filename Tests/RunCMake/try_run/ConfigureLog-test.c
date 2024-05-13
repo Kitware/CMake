@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int main()
+int main(void)
 {
   fprintf(stderr, "Output, with backslash '\\', on stderr!\n");
   fflush(stderr); /* make output deterministic even if stderr is buffered */

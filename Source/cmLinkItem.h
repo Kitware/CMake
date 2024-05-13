@@ -10,6 +10,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include <cm/optional>
 #include <cmext/algorithm>
 
 #include "cmListFileCache.h"
@@ -25,14 +26,20 @@ class cmLinkItem
   std::string String;
 
 public:
+  // default feature: link library without decoration
+  static const std::string DEFAULT;
+
   cmLinkItem();
-  cmLinkItem(std::string s, bool c, cmListFileBacktrace bt);
-  cmLinkItem(cmGeneratorTarget const* t, bool c, cmListFileBacktrace bt);
+  cmLinkItem(std::string s, bool c, cmListFileBacktrace bt,
+             std::string feature = DEFAULT);
+  cmLinkItem(cmGeneratorTarget const* t, bool c, cmListFileBacktrace bt,
+             std::string feature = DEFAULT);
   std::string const& AsStr() const;
   cmGeneratorTarget const* Target = nullptr;
   // The source file representing the external object (used when linking
   // `$<TARGET_OBJECTS>`)
   cmSourceFile const* ObjectSource = nullptr;
+  std::string Feature;
   bool Cross = false;
   cmListFileBacktrace Backtrace;
   friend bool operator<(cmLinkItem const& l, cmLinkItem const& r);
@@ -160,3 +167,6 @@ inline cmTargetLinkLibraryType CMP0003_ComputeLinkType(
   // The current configuration is not a debug configuration.
   return OPTIMIZED_LibraryType;
 }
+
+// Parse LINK_LIBRARY genex markers.
+cm::optional<std::string> ParseLinkFeature(std::string const& item);

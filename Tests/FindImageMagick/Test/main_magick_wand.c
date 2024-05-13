@@ -1,6 +1,6 @@
 #include <wand/MagickWand.h>
 
-int main()
+int main(void)
 {
   MagickWand* wand = NewMagickWand();
   wand = DestroyMagickWand(wand);

@@ -10,6 +10,8 @@ macro(__compiler_adsp lang)
 
   set(_CMAKE_${lang}_ADSP_FLAGS "-proc=${CMAKE_ADSP_PROCESSOR}")
 
+  set(CMAKE_DEPFILE_FLAGS_${lang} "-MD -Mo <DEP_FILE>")
+
   set(CMAKE_${lang}_COMPILE_OBJECT
     "<CMAKE_${lang}_COMPILER> ${_CMAKE_${lang}_ADSP_FLAGS} <DEFINES> <INCLUDES> <FLAGS> -o <OBJECT> -c <SOURCE>")
 

@@ -17,9 +17,8 @@ The ``OLD`` behavior for this policy is to expand such variables when processing
 the target sources.  The ``NEW`` behavior for this policy is to issue an error
 if such variables need to be expanded.
 
-This policy was introduced in CMake version 3.0.
-CMake version |release| warns when the policy is not set and uses
-``OLD`` behavior.  Use the :command:`cmake_policy` command to set
-it to ``OLD`` or ``NEW`` explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.0
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

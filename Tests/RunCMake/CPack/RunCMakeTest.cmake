@@ -9,6 +9,7 @@ find_program(DEBUGEDIT debugedit)
 # run_cpack_test args: TEST_NAME "GENERATORS" RUN_CMAKE_BUILD_STEP "PACKAGING_TYPES"
 run_cpack_test(CUSTOM_BINARY_SPEC_FILE "RPM.CUSTOM_BINARY_SPEC_FILE" false "MONOLITHIC;COMPONENT")
 run_cpack_test(CUSTOM_NAMES "RPM.CUSTOM_NAMES;DEB.CUSTOM_NAMES;TGZ;DragNDrop" true "COMPONENT")
+run_cpack_test(AUTO_SUFFIXES "RPM.AUTO_SUFFIXES;DEB.AUTO_SUFFIXES" false "MONOLITHIC")
 run_cpack_test(DEBUGINFO "DEB.DEBUGINFO" true "COMPONENT")
 if(NOT "${DEBUGEDIT}" STREQUAL "DEBUGEDIT-NOTFOUND")
   run_cpack_test(DEBUGINFO "RPM.DEBUGINFO" true "COMPONENT")
@@ -69,3 +70,4 @@ run_cpack_test_subtests(
 )
 run_cpack_test(PROJECT_META "RPM.PROJECT_META;DEB.PROJECT_META" false "MONOLITHIC;COMPONENT")
 run_cpack_test_package_target(PRE_POST_SCRIPTS "ZIP" false "MONOLITHIC;COMPONENT")
+run_cpack_test_subtests(DUPLICATE_FILE "success;conflict_file;conflict_symlink" "TGZ" false "COMPONENT;GROUP")

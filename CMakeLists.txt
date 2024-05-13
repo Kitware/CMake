@@ -1,7 +1,7 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-cmake_minimum_required(VERSION 3.13...3.26 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.13...3.27 FATAL_ERROR)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_C ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideC.cmake)
 set(CMAKE_USER_MAKE_RULES_OVERRIDE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/Source/Modules/OverrideCXX.cmake)
 
@@ -140,6 +140,7 @@ if(NOT CMake_TEST_EXTERNAL_CMAKE)
     if(CMAKE_SYSTEM_NAME MATCHES "Windows|Darwin|Linux|BSD|DragonFly|CYGWIN|MSYS"
         AND NOT (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.16)
         AND NOT (CMAKE_CXX_COMPILER_ID STREQUAL "XLClang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 16.1)
+        AND NOT (CMAKE_CXX_COMPILER_ID STREQUAL "LCC" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 1.23)
         )
       set(CMake_ENABLE_DEBUGGER 1)
     else()

@@ -1,0 +1,83 @@
+{
+  "bmi-installation": null,
+  "compiler-id": "<IGNORE>",
+  "compiler-frontend-variant": "<IGNORE>",
+  "compiler-simulate-id": "<IGNORE>",
+  "config": "<CONFIG>",
+  "cxx-modules": {
+    "CMakeFiles/ninja-exports-private.dir<CONFIG_DIR>/sources/module-internal-part.cxx<OBJEXT>": {
+      "bmi-only": false,
+      "destination": null,
+      "name": "internal_partitions",
+      "relative-directory": "sources",
+      "source": "<SOURCE_DIR>/sources/module-internal-part.cxx",
+      "type": "CXX_MODULES",
+      "visibility": "PRIVATE"
+    },
+    "CMakeFiles/ninja-exports-private.dir<CONFIG_DIR>/sources/module-part.cxx<OBJEXT>": {
+      "bmi-only": false,
+      "destination": null,
+      "name": "modules",
+      "relative-directory": "",
+      "source": "<SOURCE_DIR>/sources/module-part.cxx",
+      "type": "CXX_MODULES",
+      "visibility": "PRIVATE"
+    },
+    "CMakeFiles/ninja-exports-private.dir<CONFIG_DIR>/sources/module.cxx<OBJEXT>": {
+      "bmi-only": false,
+      "destination": null,
+      "name": "modules",
+      "relative-directory": "",
+      "source": "<SOURCE_DIR>/sources/module.cxx",
+      "type": "CXX_MODULES",
+      "visibility": "PRIVATE"
+    }
+  },
+  "dir-cur-bld": "<BINARY_DIR>",
+  "dir-cur-src": "<SOURCE_DIR>",
+  "dir-top-bld": "<BINARY_DIR>",
+  "dir-top-src": "<SOURCE_DIR>",
+  "exports": [
+    {
+      "cxx-module-info-dir" : "cxx-modules",
+      "destination" : "lib/cmake/export1",
+      "export-name" : "with::private_",
+      "export-prefix" : "<BINARY_DIR>/CMakeFiles/Export/d2e2673818fd2bd8c45c0e3ed0e38fcd",
+      "filesystem-export-name" : "with_c_cprivate__",
+      "install" : true,
+      "namespace" : "export1::"
+    },
+    {
+      "cxx-module-info-dir" : "cxx-modules",
+      "destination" : "lib/cmake/export2",
+      "export-name" : "with::private_",
+      "filesystem-export-name" : "with_c_cprivate__",
+      "export-prefix" : "<BINARY_DIR>/CMakeFiles/Export/28cd47cb4c96ad5cadaa3fb1b0201ae8",
+      "install" : true,
+      "namespace" : ""
+    },
+    {
+      "cxx-module-info-dir" : "cxx-modules",
+      "destination" : "<BINARY_DIR>/lib/cmake/export1",
+      "export-name" : "with::private_",
+      "export-prefix" : "<BINARY_DIR>/lib/cmake/export1",
+      "filesystem-export-name" : "with_c_cprivate__",
+      "install" : false,
+      "namespace" : "export1::"
+    },
+    {
+      "cxx-module-info-dir" : "cxx-modules",
+      "destination" : "<BINARY_DIR>/lib/cmake/export2",
+      "export-name" : "with::private_",
+      "export-prefix" : "<BINARY_DIR>/lib/cmake/export2",
+      "filesystem-export-name" : "with_c_cprivate__",
+      "install" : false,
+      "namespace" : ""
+    }
+  ],
+  "include-dirs": [],
+  "language": "CXX",
+  "forward-modules-from-target-dirs": [],
+  "linked-target-dirs": [],
+  "module-dir": "<BINARY_DIR>/CMakeFiles/ninja-exports-private.dir<CONFIG_DIR>"
+}

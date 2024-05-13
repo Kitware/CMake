@@ -1,0 +1,2 @@
+swiftc(.exe)? -j [0-9]+ -num-threads [0-9]+ -c @CMakeFiles(/|\\)L.dir(/|\\)L.o(bj)?.swift.rsp
+.*swiftc(.exe)? -emit-library -static -o (libL.a|L.lib) @CMakeFiles(/|\\)L.rsp

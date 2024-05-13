@@ -1,2 +1,3 @@
 libs=fsu;sunmath;mtsk;m;c
 dirs=/opt/developerstudio12.6/lib/compilers/sparcvis2;/opt/developerstudio12.6/lib/compilers;/opt/developerstudio12.6/lib;/usr/ccs/lib;/lib;/usr/lib
+linker_tool=/usr/ccs/bin/ld

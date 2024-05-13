@@ -39,6 +39,6 @@
 #  error Expected LANG_IS_C_OR_CXX
 #endif
 
-void consumer_c()
+void consumer_c(void)
 {
 }

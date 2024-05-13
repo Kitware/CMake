@@ -19,8 +19,8 @@ policy used when checking the library names is that in effect when the
 target is created by an :command:`add_executable` or :command:`add_library`
 command.
 
-This policy was introduced in CMake version 2.6.0.  CMake version
-|release| warns when the policy is not set and uses ``OLD`` behavior.  Use
-the :command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.6.0
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

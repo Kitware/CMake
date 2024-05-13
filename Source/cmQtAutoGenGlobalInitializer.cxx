@@ -49,7 +49,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
     bool globalAutoGenTarget = false;
     bool globalAutoRccTarget = false;
     {
-      cmMakefile* makefile = localGen->GetMakefile();
+      cmMakefile const* makefile = localGen->GetMakefile();
       // Detect global autogen target name
       if (makefile->IsOn("CMAKE_GLOBAL_AUTOGEN_TARGET")) {
         std::string targetName =
@@ -118,7 +118,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
           target->GetSafeProperty(this->kw().AUTORCC_EXECUTABLE);
 
         // We support Qt4, Qt5 and Qt6
-        auto qtVersion =
+        auto const qtVersion =
           cmQtAutoGenInitializer::GetQtVersion(target.get(), mocExec);
         bool const validQt = (qtVersion.first.Major == 4) ||
           (qtVersion.first.Major == 5) || (qtVersion.first.Major == 6);
@@ -167,7 +167,7 @@ void cmQtAutoGenGlobalInitializer::GetOrCreateGlobalTarget(
 {
   // Test if the target already exists
   if (localGen->FindGeneratorTargetToUse(name) == nullptr) {
-    cmMakefile* makefile = localGen->GetMakefile();
+    cmMakefile const* makefile = localGen->GetMakefile();
 
     // Create utility target
     auto cc = cm::make_unique<cmCustomCommand>();
@@ -192,9 +192,10 @@ void cmQtAutoGenGlobalInitializer::GetOrCreateGlobalTarget(
 void cmQtAutoGenGlobalInitializer::AddToGlobalAutoGen(
   cmLocalGenerator* localGen, std::string const& targetName)
 {
-  auto it = this->GlobalAutoGenTargets_.find(localGen);
+  auto const it = this->GlobalAutoGenTargets_.find(localGen);
   if (it != this->GlobalAutoGenTargets_.end()) {
-    cmGeneratorTarget* target = localGen->FindGeneratorTargetToUse(it->second);
+    cmGeneratorTarget const* target =
+      localGen->FindGeneratorTargetToUse(it->second);
     if (target != nullptr) {
       target->Target->AddUtility(targetName, false, localGen->GetMakefile());
     }
@@ -204,33 +205,91 @@ void cmQtAutoGenGlobalInitializer::AddToGlobalAutoGen(
 void cmQtAutoGenGlobalInitializer::AddToGlobalAutoRcc(
   cmLocalGenerator* localGen, std::string const& targetName)
 {
-  auto it = this->GlobalAutoRccTargets_.find(localGen);
+  auto const it = this->GlobalAutoRccTargets_.find(localGen);
   if (it != this->GlobalAutoRccTargets_.end()) {
-    cmGeneratorTarget* target = localGen->FindGeneratorTargetToUse(it->second);
+    cmGeneratorTarget const* target =
+      localGen->FindGeneratorTargetToUse(it->second);
     if (target != nullptr) {
       target->Target->AddUtility(targetName, false, localGen->GetMakefile());
     }
   }
 }
 
-cmQtAutoGen::CompilerFeaturesHandle
+cmQtAutoGen::ConfigStrings<cmQtAutoGen::CompilerFeaturesHandle>
 cmQtAutoGenGlobalInitializer::GetCompilerFeatures(
-  std::string const& generator, std::string const& executable,
-  std::string& error)
+  std::string const& generator, cmQtAutoGen::ConfigString const& executable,
+  std::string& error, bool const isMultiConfig, bool const UseBetterGraph)
 {
+  cmQtAutoGen::ConfigStrings<cmQtAutoGen::CompilerFeaturesHandle> res;
+  if (isMultiConfig && UseBetterGraph) {
+    for (auto const& config : executable.Config) {
+      auto const exe = config.second;
+      // Check if we have cached features
+      {
+        auto it = this->CompilerFeatures_.Config[config.first].find(exe);
+        if (it != this->CompilerFeatures_.Config[config.first].end()) {
+          res.Config[config.first] = it->second;
+          continue;
+        }
+      }
+
+      // Check if the executable exists
+      if (!cmSystemTools::FileExists(exe, true)) {
+        error = cmStrCat("The \"", generator, "\" executable ",
+                         cmQtAutoGen::Quoted(exe), " does not exist.");
+        res.Config[config.first] = {};
+        continue;
+      }
+
+      // Test the executable
+      std::string stdOut;
+      {
+        std::string stdErr;
+        std::vector<std::string> command;
+        command.emplace_back(exe);
+        command.emplace_back("-h");
+        int retVal = 0;
+        const bool runResult = cmSystemTools::RunSingleCommand(
+          command, &stdOut, &stdErr, &retVal, nullptr,
+          cmSystemTools::OUTPUT_NONE, cmDuration::zero(),
+          cmProcessOutput::Auto);
+        if (!runResult) {
+          error = cmStrCat("Test run of \"", generator, "\" executable ",
+                           cmQtAutoGen::Quoted(exe), " failed.\n",
+                           cmQtAutoGen::QuotedCommand(command), '\n', stdOut,
+                           '\n', stdErr);
+          res.Config[config.first] = {};
+          continue;
+        }
+      }
+
+      // Create valid handle
+      res.Config[config.first] =
+        std::make_shared<cmQtAutoGen::CompilerFeatures>();
+      res.Config[config.first]->HelpOutput = std::move(stdOut);
+
+      // Register compiler features
+      this->CompilerFeatures_.Config[config.first].emplace(
+        exe, res.Config[config.first]);
+    }
+    return res;
+  }
+
   // Check if we have cached features
   {
-    auto it = this->CompilerFeatures_.find(executable);
-    if (it != this->CompilerFeatures_.end()) {
-      return it->second;
+    auto const it = this->CompilerFeatures_.Default.find(executable.Default);
+    if (it != this->CompilerFeatures_.Default.end()) {
+      res.Default = it->second;
+      return res;
     }
   }
 
   // Check if the executable exists
-  if (!cmSystemTools::FileExists(executable, true)) {
-    error = cmStrCat("The \"", generator, "\" executable ",
-                     cmQtAutoGen::Quoted(executable), " does not exist.");
-    return cmQtAutoGen::CompilerFeaturesHandle();
+  if (!cmSystemTools::FileExists(executable.Default, true)) {
+    error =
+      cmStrCat("The \"", generator, "\" executable ",
+               cmQtAutoGen::Quoted(executable.Default), " does not exist.");
+    return cmQtAutoGen::ConfigStrings<cmQtAutoGen::CompilerFeaturesHandle>();
   }
 
   // Test the executable
@@ -238,7 +297,7 @@ cmQtAutoGenGlobalInitializer::GetCompilerFeatures(
   {
     std::string stdErr;
     std::vector<std::string> command;
-    command.emplace_back(executable);
+    command.emplace_back(executable.Default);
     command.emplace_back("-h");
     int retVal = 0;
     const bool runResult = cmSystemTools::RunSingleCommand(
@@ -246,20 +305,18 @@ cmQtAutoGenGlobalInitializer::GetCompilerFeatures(
       cmDuration::zero(), cmProcessOutput::Auto);
     if (!runResult) {
       error = cmStrCat("Test run of \"", generator, "\" executable ",
-                       cmQtAutoGen::Quoted(executable), " failed.\n",
+                       cmQtAutoGen::Quoted(executable.Default), " failed.\n",
                        cmQtAutoGen::QuotedCommand(command), '\n', stdOut, '\n',
                        stdErr);
-      return cmQtAutoGen::CompilerFeaturesHandle();
+      return cmQtAutoGen::ConfigStrings<cmQtAutoGen::CompilerFeaturesHandle>();
     }
   }
 
-  // Create valid handle
-  cmQtAutoGen::CompilerFeaturesHandle res =
-    std::make_shared<cmQtAutoGen::CompilerFeatures>();
-  res->HelpOutput = std::move(stdOut);
+  res.Default = std::make_shared<cmQtAutoGen::CompilerFeatures>();
+  res.Default->HelpOutput = std::move(stdOut);
 
   // Register compiler features
-  this->CompilerFeatures_.emplace(executable, res);
+  this->CompilerFeatures_.Default.emplace(executable.Default, res.Default);
 
   return res;
 }

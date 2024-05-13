@@ -5,8 +5,10 @@ Should the target be processed with auto-uic (for Qt projects).
 
 ``AUTOUIC`` is a boolean specifying whether CMake will handle
 the Qt ``uic`` code generator automatically, i.e. without having to use
-commands like :module:`QT4_WRAP_UI() <FindQt4>`, ``QT5_WRAP_UI()``, etc.
+commands like :module:`QT4_WRAP_UI() <FindQt4>`, `qt5_wrap_ui()`_, etc.
 Currently, Qt versions 4 to 6 are supported.
+
+.. _`qt5_wrap_ui()`: https://doc.qt.io/qt-5/qtwidgets-cmake-qt5-wrap-ui.html
 
 This property is initialized by the value of the :variable:`CMAKE_AUTOUIC`
 variable if it is set when a target is created.
@@ -74,12 +76,16 @@ e.g.  in MSVS.
 
 :variable:`CMAKE_GLOBAL_AUTOGEN_TARGET`:
 A global ``autogen`` target, that depends on all :prop_tgt:`AUTOMOC` or
-``AUTOUIC`` generated ``<ORIGIN>_autogen`` targets in the project,
+``AUTOUIC`` generated :ref:`<ORIGIN>_autogen` targets in the project,
 will be generated when this variable is ``ON``.
 
 :prop_tgt:`AUTOGEN_PARALLEL`:
 This target property controls the number of ``moc`` or ``uic`` processes to
 start in parallel during builds.
+
+:prop_tgt:`AUTOGEN_COMMAND_LINE_LENGTH_MAX`:
+This target property controls the limit when to use response files for
+``moc`` or ``uic`` processes on Windows.
 
 See the :manual:`cmake-qt(7)` manual for more information on using CMake
 with Qt.

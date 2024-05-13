@@ -18,3 +18,7 @@ find_program(CPACK_WIX_LIGHT_EXECUTABLE light
 if(NOT CPACK_WIX_LIGHT_EXECUTABLE)
   message(FATAL_ERROR "Could not find the WiX light executable.")
 endif()
+
+if(NOT DEFINED CPACK_WIX_INSTALL_SCOPE)
+  set(CPACK_WIX_INSTALL_SCOPE "perMachine")
+endif()

@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-int main()
+int main(void)
 {
   // test the linker
   gnutls_session_t session;

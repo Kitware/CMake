@@ -91,8 +91,9 @@ macOS using ProductBuild:
  .. versionadded:: 3.23
 
  This option enables more granular control over where the product may be
- installed. When it is set to true, a ``domains`` element of the following
- form will be added to the productbuild Distribution XML:
+ installed. When it is set to true (see policy :policy:`CMP0161`), a
+ ``domains`` element of the following form will be added to the
+ productbuild Distribution XML:
 
  .. code-block:: xml
 

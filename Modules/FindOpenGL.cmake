@@ -92,12 +92,17 @@ This module sets the following variables:
  Defined if the system has GLES3.
 ``OPENGL_INCLUDE_DIR``
  Path to the OpenGL include directory.
+ The ``OPENGL_INCLUDE_DIRS`` variable is preferred.
 ``OPENGL_EGL_INCLUDE_DIRS``
  Path to the EGL include directory.
 ``OPENGL_LIBRARIES``
  Paths to the OpenGL library, windowing system libraries, and GLU libraries.
  On Linux, this assumes GLX and is never correct for EGL-based targets.
  Clients are encouraged to use the ``OpenGL::*`` import targets instead.
+``OPENGL_INCLUDE_DIRS``
+  .. versionadded:: 3.29
+
+  Paths to the OpenGL include directories.
 
 .. versionadded:: 3.10
   Variables for GLVND-specific libraries ``OpenGL``, ``EGL`` and ``GLX``.
@@ -126,6 +131,11 @@ The following cache variables may also be set:
   .. versionadded:: 3.27
 
   Path to the OpenGL GLES3 library.
+
+``OPENGL_GLU_INCLUDE_DIR``
+  .. versionadded:: 3.29
+
+  Path to the OpenGL GLU include directory.
 
 .. versionadded:: 3.10
   Variables for GLVND-specific libraries ``OpenGL``, ``EGL`` and ``GLX``.
@@ -177,9 +187,24 @@ GLVND.  For non-GLVND Linux and other systems these are left undefined.
 macOS-Specific
 ^^^^^^^^^^^^^^
 
-On OSX FindOpenGL defaults to using the framework version of OpenGL. People
-will have to change the cache values of OPENGL_glu_LIBRARY and
-OPENGL_gl_LIBRARY to use OpenGL with X11 on OSX.
+On macOS this module defaults to using the macOS-native framework
+version of OpenGL.  To use the X11 version of OpenGL on macOS, one
+can disable searching of frameworks.  For example:
+
+.. code-block:: cmake
+
+  find_package(X11)
+  if(APPLE AND X11_FOUND)
+    set(CMAKE_FIND_FRAMEWORK NEVER)
+    find_package(OpenGL)
+    unset(CMAKE_FIND_FRAMEWORK)
+  else()
+    find_package(OpenGL)
+  endif()
+
+An end user building this project may need to point CMake at their
+X11 installation, e.g., with ``-DOpenGL_ROOT=/opt/X11``.
+
 #]=======================================================================]
 
 set(_OpenGL_REQUIRED_VARS OPENGL_gl_LIBRARY)
@@ -207,15 +232,21 @@ if (WIN32)
     OPENGL_glu_LIBRARY
     )
 elseif (APPLE)
-  # The OpenGL.framework provides both gl and glu
-  find_library(OPENGL_gl_LIBRARY OpenGL DOC "OpenGL library for OS X")
-  find_library(OPENGL_glu_LIBRARY OpenGL DOC
-    "GLU library for OS X (usually same as OpenGL library)")
-  find_path(OPENGL_INCLUDE_DIR OpenGL/gl.h DOC "Include for OpenGL on OS X")
+  # The OpenGL.framework provides both gl and glu in OpenGL
+  # XQuartz provides libgl and libglu
+  find_library(OPENGL_gl_LIBRARY NAMES OpenGL GL DOC
+    "OpenGL GL library")
+  find_library(OPENGL_glu_LIBRARY NAMES OpenGL GLU DOC
+    "OpenGL GLU library")
+  find_path(OPENGL_INCLUDE_DIR NAMES OpenGL/gl.h GL/gl.h DOC
+    "Include for OpenGL")
+  find_path(OPENGL_GLU_INCLUDE_DIR NAMES OpenGL/glu.h GL/glu.h DOC
+    "Include for the OpenGL GLU library")
   list(APPEND _OpenGL_REQUIRED_VARS OPENGL_INCLUDE_DIR)
 
   list(APPEND _OpenGL_CACHE_VARS
     OPENGL_INCLUDE_DIR
+    OPENGL_GLU_INCLUDE_DIR
     OPENGL_gl_LIBRARY
     OPENGL_glu_LIBRARY
     )
@@ -271,6 +302,8 @@ else()
     /opt/graphics/OpenGL/include
   )
 
+  find_path(OPENGL_GLU_INCLUDE_DIR GL/glu.h ${_OPENGL_INCLUDE_PATH})
+
   list(APPEND _OpenGL_CACHE_VARS
     OPENGL_INCLUDE_DIR
     OPENGL_GLX_INCLUDE_DIR
@@ -278,6 +311,7 @@ else()
     OPENGL_GLES2_INCLUDE_DIR
     OPENGL_GLES3_INCLUDE_DIR
     OPENGL_xmesa_INCLUDE_DIR
+    OPENGL_GLU_INCLUDE_DIR
     )
 
   # Search for the GLVND libraries.  We do this regardless of COMPONENTS; we'll
@@ -491,7 +525,7 @@ else()
   set( OPENGL_XMESA_FOUND "NO" )
 endif()
 
-if(OPENGL_glu_LIBRARY)
+if(OPENGL_glu_LIBRARY AND (WIN32 OR OPENGL_GLU_INCLUDE_DIR))
   set( OPENGL_GLU_FOUND "YES" )
 else()
   set( OPENGL_GLU_FOUND "NO" )
@@ -549,6 +583,8 @@ unset(_OpenGL_REQUIRED_VARS)
 
 # OpenGL:: targets
 if(OPENGL_FOUND)
+  set(OPENGL_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR})
+
   # ::OpenGL is a GLVND library, and thus Linux-only: we don't bother checking
   # for a framework version of this library.
   if(OPENGL_opengl_LIBRARY AND NOT TARGET OpenGL::OpenGL)
@@ -582,6 +618,7 @@ if(OPENGL_FOUND)
                           OpenGL::OpenGL)
     set_target_properties(OpenGL::GLX PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
                           "${OPENGL_GLX_INCLUDE_DIR}")
+    list(APPEND OPENGL_INCLUDE_DIRS ${OPENGL_GLX_INCLUDE_DIR})
   endif()
 
   # ::GLES2 is a GLVND library, and thus Linux-only: we don't bother checking
@@ -611,6 +648,7 @@ if(OPENGL_FOUND)
         INTERFACE_INCLUDE_DIRECTORIES
           "${OPENGL_GLES2_INCLUDE_DIR}"
     )
+    list(APPEND OPENGL_INCLUDE_DIRS ${OPENGL_GLES2_INCLUDE_DIR})
 
     if (OPENGL_USE_GLES2)
       set(_OpenGL_EGL_IMPL OpenGL::GLES2)
@@ -644,6 +682,7 @@ if(OPENGL_FOUND)
       INTERFACE_INCLUDE_DIRECTORIES
         "${OPENGL_GLES3_INCLUDE_DIR}"
     )
+    list(APPEND OPENGL_INCLUDE_DIRS ${OPENGL_GLES3_INCLUDE_DIR})
 
     if (OPENGL_USE_GLES3)
       set(_OpenGL_EGL_IMPL OpenGL::GLES3)
@@ -695,6 +734,7 @@ if(OPENGL_FOUND)
     # Note that EGL's include directory is different from OpenGL/GLX's!
     set_target_properties(OpenGL::EGL PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
                           "${OPENGL_EGL_INCLUDE_DIR}")
+    list(APPEND OPENGL_INCLUDE_DIRS ${OPENGL_EGL_INCLUDE_DIR})
   endif()
 
   if(OPENGL_GLU_FOUND AND NOT TARGET OpenGL::GLU)
@@ -709,6 +749,10 @@ if(OPENGL_FOUND)
     endif()
     set_target_properties(OpenGL::GLU PROPERTIES
       INTERFACE_LINK_LIBRARIES OpenGL::GL)
+    # Note that GLU's include directory may be different from OpenGL's!
+    set_target_properties(OpenGL::GLU PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                          "${OPENGL_GLU_INCLUDE_DIR}")
+    list(APPEND OPENGL_INCLUDE_DIRS ${OPENGL_GLU_INCLUDE_DIR})
   endif()
 
   # OPENGL_LIBRARIES mirrors OpenGL::GL's logic ...
@@ -724,6 +768,8 @@ if(OPENGL_FOUND)
     list(APPEND OPENGL_LIBRARIES ${OPENGL_glu_LIBRARY})
   endif()
 endif()
+
+list(REMOVE_DUPLICATES OPENGL_INCLUDE_DIRS)
 
 # This deprecated setting is for backward compatibility with CMake1.4
 set(OPENGL_LIBRARY ${OPENGL_LIBRARIES})

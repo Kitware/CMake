@@ -14,8 +14,11 @@ macro(__aix_compiler_gnu lang)
   string(APPEND CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS " -Wl,-bnoipath")
   set(CMAKE_SHARED_LIBRARY_LINK_${lang}_FLAGS "-Wl,-bexpall") # CMP0065 old behavior
   set(CMAKE_${lang}_USE_IMPLICIT_LINK_DIRECTORIES_IN_RUNTIME_PATH 1)
+  set(CMAKE_${lang}_VERBOSE_LINK_FLAG "-Wl,-v")
 
   set(CMAKE_${lang}_LINK_FLAGS "-Wl,-bnoipath")
+  set(CMAKE_${lang}_LINK_LIBRARIES_PROCESSING ORDER=REVERSE UNICITY=ALL)
+
   if(CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 7 OR CMAKE_SYSTEM_VERSION VERSION_LESS 7.1)
     unset(CMAKE_${lang}_COMPILE_OPTIONS_VISIBILITY)
   endif()

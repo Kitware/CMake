@@ -31,12 +31,16 @@ public:
 
   cmUVProcessChainBuilder& AddCommand(
     const std::vector<std::string>& arguments);
+  cmUVProcessChainBuilder& SetBuiltinLoop();
+  cmUVProcessChainBuilder& SetExternalLoop(uv_loop_t& loop);
   cmUVProcessChainBuilder& SetNoStream(Stream stdio);
   cmUVProcessChainBuilder& SetBuiltinStream(Stream stdio);
   cmUVProcessChainBuilder& SetMergedBuiltinStreams();
   cmUVProcessChainBuilder& SetExternalStream(Stream stdio, int fd);
   cmUVProcessChainBuilder& SetExternalStream(Stream stdio, FILE* stream);
   cmUVProcessChainBuilder& SetWorkingDirectory(std::string dir);
+
+  uv_loop_t* GetLoop() const;
 
   cmUVProcessChain Start() const;
 
@@ -65,6 +69,7 @@ private:
   std::vector<ProcessConfiguration> Processes;
   std::string WorkingDirectory;
   bool MergedBuiltinStreams = false;
+  uv_loop_t* Loop = nullptr;
 };
 
 class cmUVProcessChain

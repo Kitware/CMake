@@ -1,8 +1,10 @@
 include(RunCTest)
+
 set(RunCMake_TEST_TIMEOUT 60)
 
 set(CASE_CTEST_TEST_ARGS "")
 set(CASE_CTEST_TEST_LOAD "")
+set(CASE_CTEST_TEST_RAW_ARGS "")
 
 function(run_ctest_test CASE_NAME)
   set(CASE_CTEST_TEST_ARGS "${ARGN}")
@@ -11,19 +13,86 @@ endfunction()
 
 run_ctest_test(TestQuiet QUIET)
 
+set(CASE_CMAKELISTS_SUFFIX_CODE [[
+foreach(i RANGE 1 4)
+  add_test(NAME test${i} COMMAND ${CMAKE_COMMAND} -E true)
+  set_property(TEST test${i} PROPERTY RESOURCE_LOCK resource)
+endforeach()
+]])
+run_ctest_test(ResourceLock INCLUDE test PARALLEL_LEVEL 4)
+unset(CASE_CMAKELISTS_SUFFIX_CODE)
+
+set(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING} 4)
+set(CASE_CMAKELISTS_SUFFIX_CODE [[
+foreach(i RANGE 1 6)
+  add_test(NAME test${i} COMMAND ${CMAKE_COMMAND} -E true)
+endforeach()
+set_property(TEST test1 PROPERTY COST -2)
+set_property(TEST test2 PROPERTY COST -1)
+set_property(TEST test3 PROPERTY COST 0)
+set_property(TEST test4 PROPERTY COST 1)
+set_property(TEST test5 PROPERTY COST 2)
+set_property(TEST test6 PROPERTY COST 3)
+set_property(TEST test6 PROPERTY DEPENDS test1)
+]])
+run_ctest_test(SerialOrder INCLUDE test)
+unset(CASE_CMAKELISTS_SUFFIX_CODE)
+unset(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING)
+
+set(CASE_CMAKELISTS_SUFFIX_CODE [[
+add_test(NAME skip COMMAND ${CMAKE_COMMAND} -E true)
+set_property(TEST skip PROPERTY SKIP_RETURN_CODE 0)
+]])
+run_ctest_test(SkipReturnCode)
+unset(CASE_CMAKELISTS_SUFFIX_CODE)
+
+# Spoof a number of processors to make these tests predictable.
+set(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING} 1)
+set(CASE_CMAKELISTS_SUFFIX_CODE [[
+foreach(i RANGE 1 6)
+  add_test(NAME test${i} COMMAND ${CMAKE_COMMAND} -E true)
+endforeach()
+]])
+run_ctest_test(ParallelBad   INCLUDE test PARALLEL_LEVEL bad)
+set(CASE_CTEST_TEST_RAW_ARGS "PARALLEL_LEVEL \"\"")
+run_ctest_test(ParallelEmpty INCLUDE test) # With 1 processor, defaults to 2.
+unset(CASE_CTEST_TEST_RAW_ARGS)
+run_ctest_test(ParallelOmit  INCLUDE test PARALLEL_LEVEL) # With 1 processor, defaults to 2.
+run_ctest_test(Parallel0     INCLUDE test PARALLEL_LEVEL 0)
+run_ctest_test(Parallel4     INCLUDE test PARALLEL_LEVEL 4)
+set(ENV{CTEST_PARALLEL_LEVEL} bad)
+run_ctest_test(ParallelEnvBad INCLUDE test)
+if(CMAKE_HOST_WIN32)
+  set(ENV{CTEST_PARALLEL_LEVEL} " ")
+else()
+  set(ENV{CTEST_PARALLEL_LEVEL} "")
+endif()
+run_ctest_test(ParallelEnvEmpty INCLUDE test) # With 1 processor, defaults to 2.
+set(ENV{CTEST_PARALLEL_LEVEL} 0)
+run_ctest_test(ParallelEnv0  INCLUDE test)
+set(ENV{CTEST_PARALLEL_LEVEL} 3)
+run_ctest_test(ParallelEnv3  INCLUDE test)
+unset(ENV{CTEST_PARALLEL_LEVEL})
+unset(CASE_CMAKELISTS_SUFFIX_CODE)
+unset(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING)
+
 # Tests for the 'Test Load' feature of ctest
 #
 # Spoof a load average value to make these tests more reliable.
-set(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING} 5)
+set(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING} 7)
 set(RunCTest_VERBOSE_FLAG -VV)
+set(CASE_CMAKELISTS_SUFFIX_CODE [[
+set_property(TEST RunCMakeVersion PROPERTY PROCESSORS 2)
+]])
 
 # Verify that new tests are started when the load average falls below
 # our threshold.
-run_ctest_test(TestLoadPass TEST_LOAD 6)
+run_ctest_test(TestLoadPass TEST_LOAD 8)
 
 # Verify that new tests are not started when the load average exceeds
 # our threshold and that they then run once the load average drops.
-run_ctest_test(TestLoadWait TEST_LOAD 2)
+run_ctest_test(TestLoadWait0 TEST_LOAD 4 PARALLEL_LEVEL 8)
+run_ctest_test(TestLoadWait1 TEST_LOAD 8 PARALLEL_LEVEL 8)
 
 # Verify that when an invalid "TEST_LOAD" value is given, a warning
 # message is displayed and the value is ignored.
@@ -31,13 +100,15 @@ run_ctest_test(TestLoadInvalid TEST_LOAD "ERR1")
 
 # Verify that new tests are started when the load average falls below
 # our threshold.
-set(CASE_CTEST_TEST_LOAD 7)
+set(CASE_CTEST_TEST_LOAD 9)
 run_ctest_test(CTestTestLoadPass)
 
 # Verify that new tests are not started when the load average exceeds
 # our threshold and that they then run once the load average drops.
-set(CASE_CTEST_TEST_LOAD 4)
-run_ctest_test(CTestTestLoadWait)
+set(CASE_CTEST_TEST_LOAD 6)
+run_ctest_test(CTestTestLoadWait0 PARALLEL_LEVEL 8)
+set(CASE_CTEST_TEST_LOAD 8)
+run_ctest_test(CTestTestLoadWait1 PARALLEL_LEVEL 8)
 
 # Verify that when an invalid "CTEST_TEST_LOAD" value is given,
 # a warning message is displayed and the value is ignored.
@@ -51,6 +122,7 @@ run_ctest_test(TestLoadOrder TEST_LOAD "ERR4")
 
 unset(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING})
 unset(CASE_CTEST_TEST_LOAD)
+unset(CASE_CMAKELISTS_SUFFIX_CODE)
 unset(RunCTest_VERBOSE_FLAG)
 
 block()
@@ -155,6 +227,26 @@ add_test(NAME NotRunTest COMMAND ${CMAKE_COMMAND} -E true)
   run_ctest_test(stop-on-failure STOP_ON_FAILURE)
 endfunction()
 run_stop_on_failure()
+
+
+# test include/exclude tests from file
+function(run_tests_from_file case)
+  set(CASE_CTEST_TEST_ARGS ${ARGN})
+  set(CASE_CMAKELISTS_SUFFIX_CODE [[
+add_test(NAME Test1 COMMAND ${CMAKE_COMMAND} -E true)
+add_test(NAME Test2 COMMAND ${CMAKE_COMMAND} -E true)
+add_test(NAME Test11 COMMAND ${CMAKE_COMMAND} -E true)
+  ]])
+
+  run_ctest(TestsFromFile-${case})
+endfunction()
+run_tests_from_file(include INCLUDE_FROM_FILE ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList.txt)
+run_tests_from_file(exclude EXCLUDE_FROM_FILE ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList.txt)
+run_tests_from_file(include-empty INCLUDE_FROM_FILE ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList-empty.txt)
+run_tests_from_file(exclude-empty EXCLUDE_FROM_FILE ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList-empty.txt)
+run_tests_from_file(include-missing INCLUDE_FROM_FILE ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList-missing.txt)
+run_tests_from_file(exclude-missing EXCLUDE_FROM_FILE ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList-missing.txt)
+
 
 # Make sure environment gets logged
 function(run_environment)

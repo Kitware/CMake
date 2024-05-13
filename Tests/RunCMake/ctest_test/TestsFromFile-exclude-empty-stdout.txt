@@ -1,0 +1,12 @@
+Test project [^
+]*/Tests/RunCMake/ctest_test/TestsFromFile-exclude-empty-build
+ +Start 1: RunCMakeVersion
+1/4 Test #1: RunCMakeVersion ..................   Passed +[0-9.]+ sec
+ +Start 2: Test1
+2/4 Test #2: Test1 ............................   Passed +[0-9.]+ sec
+ +Start 3: Test2
+3/4 Test #3: Test2 ............................   Passed +[0-9.]+ sec
+ +Start 4: Test11
+4/4 Test #4: Test11 ...........................   Passed +[0-9.]+ sec
++
+100% tests passed, 0 tests failed out of 4

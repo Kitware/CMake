@@ -159,6 +159,10 @@ void StartCompilerSetup::setCompilerOption(CompilerOption option)
 {
   std::size_t index = 0;
   switch (option) {
+    case CompilerOption::DefaultPreset:
+      this->CompilerSetupOptions[0]->setText(
+        tr("Use default preset compilers"));
+      CM_FALLTHROUGH;
     case CompilerOption::DefaultNative:
       index = 0;
       break;

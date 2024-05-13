@@ -2,7 +2,7 @@
 #include <libxslt/xslt.h>
 #include <libxslt/xsltInternals.h>
 
-int main()
+int main(void)
 {
   xsltInit();
 

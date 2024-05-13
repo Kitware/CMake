@@ -1,3 +1,4 @@
 libs=cudadevrt;cudart_static;rt;pthread;dl;stdc\+\+;m;gcc_s;gcc;c;gcc_s;gcc
 dirs=/usr/lib/x86_64-linux-gnu/stubs;/usr/lib/gcc/x86_64-linux-gnu/5;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib
 library_arch=x86_64-linux-gnu
+linker_tool=

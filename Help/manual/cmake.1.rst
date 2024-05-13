@@ -891,6 +891,10 @@ Available commands are:
     ``-`` will result in an error. Use ``--`` to indicate the end of options, in
     case a file starts with ``-``.
 
+  .. versionadded:: 3.29
+
+    ``cat`` can now print the standard input by passing the ``-`` argument.
+
 .. program:: cmake-E
 
 .. option:: chdir <dir> <cmd> [<arg>...]
@@ -1311,6 +1315,7 @@ The following ``cmake -E`` commands are available only on Windows:
 
   Write Windows registry value.
 
+.. _`Find-Package Tool Mode`:
 
 Run the Find-Package Tool
 =========================

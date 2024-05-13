@@ -17,6 +17,7 @@ macro(__aix_compiler_xl lang)
   set(CMAKE_SHARED_MODULE_${lang}_FLAGS  " ")
 
   set(CMAKE_${lang}_LINK_FLAGS "-Wl,-bnoipath")
+  set(CMAKE_${lang}_LINK_LIBRARIES_PROCESSING ORDER=REVERSE UNICITY=ALL)
 
   set(_OBJECTS " <OBJECTS>")
   if(DEFINED CMAKE_XL_CreateExportList AND CMAKE_XL_CreateExportList STREQUAL "")

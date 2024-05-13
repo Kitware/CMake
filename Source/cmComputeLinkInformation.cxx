@@ -1332,7 +1332,17 @@ void cmComputeLinkInformation::AddSharedDepItem(LinkEntry const& entry)
   }
 
   // If in linking mode, just link to the shared library.
-  if (this->SharedDependencyMode == SharedDepModeLink) {
+  if (this->SharedDependencyMode == SharedDepModeLink ||
+      // For an imported shared library without a known runtime artifact,
+      // such as a CUDA stub, a library file named with the real soname
+      // may not be available at all, so '-rpath-link' cannot help linkers
+      // find it to satisfy '--no-allow-shlib-undefined' recursively.
+      // Pass this dependency to the linker explicitly just in case.
+      // If the linker also uses '--as-needed' behavior, this will not
+      // add an unnecessary direct dependency.
+      (tgt && tgt->IsImported() &&
+       !tgt->HasKnownRuntimeArtifactLocation(this->Config) &&
+       this->Target->LinkerEnforcesNoAllowShLibUndefined(this->Config))) {
     this->AddItem(entry);
     return;
   }

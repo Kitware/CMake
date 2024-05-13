@@ -359,6 +359,7 @@ void cmCPackWIXGenerator::CreateWiXVariablesIncludeFile()
                     GetOption("CPACK_PACKAGE_NAME"));
   CopyDefinition(includeFile, "CPACK_WIX_PROGRAM_MENU_FOLDER");
   CopyDefinition(includeFile, "CPACK_WIX_UI_REF");
+  CopyDefinition(includeFile, "CPACK_WIX_INSTALL_SCOPE");
 }
 
 void cmCPackWIXGenerator::CreateWiXPropertiesIncludeFile()

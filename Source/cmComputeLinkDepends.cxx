@@ -16,6 +16,8 @@
 #include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmsys/RegularExpression.hxx"
+
 #include "cmComputeComponentGraph.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
@@ -26,6 +28,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
@@ -184,15 +187,6 @@ items that we know the linker will reuse automatically (shared libs).
 
 namespace {
 // LINK_LIBRARY helpers
-const auto LL_BEGIN = "<LINK_LIBRARY:"_s;
-const auto LL_END = "</LINK_LIBRARY:"_s;
-
-inline std::string ExtractFeature(std::string const& item)
-{
-  return item.substr(LL_BEGIN.length(),
-                     item.find('>', LL_BEGIN.length()) - LL_BEGIN.length());
-}
-
 bool IsFeatureSupported(cmMakefile* makefile, std::string const& linkLanguage,
                         std::string const& feature)
 {
@@ -231,9 +225,208 @@ bool IsGroupFeatureSupported(cmMakefile* makefile,
     cmStrCat("CMAKE_LINK_GROUP_USING_", feature, "_SUPPORTED");
   return makefile->GetDefinition(featureSupported).IsOn();
 }
+
+class EntriesProcessing
+{
+public:
+  using LinkEntry = cmComputeLinkDepends::LinkEntry;
+  using EntryVector = cmComputeLinkDepends::EntryVector;
+
+  EntriesProcessing(const cmGeneratorTarget* target,
+                    const std::string& linkLanguage, EntryVector& entries,
+                    EntryVector& finalEntries)
+    : Entries(entries)
+    , FinalEntries(finalEntries)
+  {
+    const auto* makefile = target->Makefile;
+
+    switch (target->GetPolicyStatusCMP0156()) {
+      case cmPolicies::WARN:
+        if (!makefile->GetCMakeInstance()->GetIsInTryCompile() &&
+            makefile->PolicyOptionalWarningEnabled(
+              "CMAKE_POLICY_WARNING_CMP0156")) {
+          makefile->GetCMakeInstance()->IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0156),
+                     "\nSince the policy is not set, legacy libraries "
+                     "de-duplication strategy will be applied."),
+            target->GetBacktrace());
+        }
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
+        // rely on default initialization of the class
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        makefile->GetCMakeInstance()->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0156),
+          target->GetBacktrace());
+        CM_FALLTHROUGH;
+      case cmPolicies::NEW: {
+        if (auto libProcessing = makefile->GetDefinition(cmStrCat(
+              "CMAKE_", linkLanguage, "_LINK_LIBRARIES_PROCESSING"))) {
+          cmsys::RegularExpression processingOption{
+            "^(ORDER|UNICITY)=(FORWARD|REVERSE|ALL|NONE|SHARED)$"
+          };
+          std::string errorMessage;
+          for (auto const& option : cmList{ libProcessing }) {
+            if (processingOption.find(option)) {
+              if (processingOption.match(1) == "ORDER") {
+                if (processingOption.match(2) == "FORWARD") {
+                  this->Order = Forward;
+                } else if (processingOption.match(2) == "REVERSE") {
+                  this->Order = Reverse;
+                } else {
+                  errorMessage += cmStrCat("  ", option, '\n');
+                }
+              } else if (processingOption.match(1) == "UNICITY") {
+                if (processingOption.match(2) == "ALL") {
+                  this->Unicity = All;
+                } else if (processingOption.match(2) == "NONE") {
+                  this->Unicity = None;
+                } else if (processingOption.match(2) == "SHARED") {
+                  this->Unicity = Shared;
+                } else {
+                  errorMessage += cmStrCat("  ", option, '\n');
+                }
+              }
+            } else {
+              errorMessage += cmStrCat("  ", option, '\n');
+            }
+          }
+          if (!errorMessage.empty()) {
+            makefile->GetCMakeInstance()->IssueMessage(
+              MessageType::FATAL_ERROR,
+              cmStrCat("Erroneous option(s) for 'CMAKE_", linkLanguage,
+                       "_LINK_LIBRARIES_PROCESSING':\n", errorMessage),
+              target->GetBacktrace());
+          }
+        }
+      }
+    }
+  }
+
+  void AddGroups(const std::map<size_t, std::vector<size_t>>& groups)
+  {
+    if (!groups.empty()) {
+      this->Groups = &groups;
+      // record all libraries as part of groups to ensure correct
+      // deduplication: libraries as part of groups are always kept.
+      for (const auto& group : groups) {
+        for (auto index : group.second) {
+          this->Emitted.insert(index);
+        }
+      }
+    }
+  }
+
+  void AddLibraries(const std::vector<size_t>& libEntries)
+  {
+    if (this->Order == Reverse) {
+      // Iterate in reverse order so we can keep only the last occurrence
+      // of a library.
+      this->AddLibraries(cmReverseRange(libEntries));
+    } else {
+      this->AddLibraries(cmMakeRange(libEntries));
+    }
+  }
+
+  void AddObjects(const std::vector<size_t>& objectEntries)
+  {
+    // Place explicitly linked object files in the front.  The linker will
+    // always use them anyway, and they may depend on symbols from libraries.
+    if (this->Order == Reverse) {
+      // Append in reverse order at the end since we reverse the final order.
+      for (auto index : cmReverseRange(objectEntries)) {
+        this->FinalEntries.emplace_back(this->Entries[index]);
+      }
+    } else {
+      // Append in reverse order to ensure correct final order
+      for (auto index : cmReverseRange(objectEntries)) {
+        this->FinalEntries.emplace(this->FinalEntries.begin(),
+                                   this->Entries[index]);
+      }
+    }
+  }
+
+  void Finalize()
+  {
+    if (this->Order == Reverse) {
+      // Reverse the resulting order since we iterated in reverse.
+      std::reverse(this->FinalEntries.begin(), this->FinalEntries.end());
+    }
+
+    // expand groups
+    if (this->Groups != nullptr) {
+      for (const auto& group : *this->Groups) {
+        const LinkEntry& groupEntry = this->Entries[group.first];
+        auto it = this->FinalEntries.begin();
+        while (true) {
+          it = std::find_if(it, this->FinalEntries.end(),
+                            [&groupEntry](const LinkEntry& entry) -> bool {
+                              return groupEntry.Item == entry.Item;
+                            });
+          if (it == this->FinalEntries.end()) {
+            break;
+          }
+          it->Item.Value = "</LINK_GROUP>";
+          for (auto index = group.second.rbegin();
+               index != group.second.rend(); ++index) {
+            it = this->FinalEntries.insert(it, this->Entries[*index]);
+          }
+          it = this->FinalEntries.insert(it, groupEntry);
+          it->Item.Value = "<LINK_GROUP>";
+        }
+      }
+    }
+  }
+
+private:
+  enum OrderKind
+  {
+    Forward,
+    Reverse
+  };
+
+  enum UnicityKind
+  {
+    None,
+    Shared,
+    All
+  };
+
+  bool IncludeEntry(LinkEntry const& entry) const
+  {
+    return this->Unicity == None ||
+      (this->Unicity == Shared &&
+       (entry.Target == nullptr ||
+        entry.Target->GetType() != cmStateEnums::SHARED_LIBRARY)) ||
+      (this->Unicity == All && entry.Kind != LinkEntry::Library);
+  }
+
+  template <typename Range>
+  void AddLibraries(const Range& libEntries)
+  {
+    for (auto index : libEntries) {
+      LinkEntry const& entry = this->Entries[index];
+      if (this->IncludeEntry(entry) || this->Emitted.insert(index).second) {
+        this->FinalEntries.emplace_back(entry);
+      }
+    }
+  }
+
+  OrderKind Order = Reverse;
+  UnicityKind Unicity = Shared;
+  EntryVector& Entries;
+  EntryVector& FinalEntries;
+  std::set<size_t> Emitted;
+  const std::map<size_t, std::vector<size_t>>* Groups = nullptr;
+};
 }
 
-const std::string cmComputeLinkDepends::LinkEntry::DEFAULT = "DEFAULT";
+std::string const& cmComputeLinkDepends::LinkEntry::DEFAULT =
+  cmLinkItem::DEFAULT;
 
 cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
                                            const std::string& config,
@@ -376,49 +569,14 @@ cmComputeLinkDepends::Compute()
   this->OrderLinkEntries();
 
   // Compute the final set of link entries.
-  // Iterate in reverse order so we can keep only the last occurrence
-  // of a shared library.
-  std::set<size_t> emitted;
-  for (size_t i : cmReverseRange(this->FinalLinkOrder)) {
-    LinkEntry const& e = this->EntryList[i];
-    cmGeneratorTarget const* t = e.Target;
-    // Entries that we know the linker will reuse do not need to be repeated.
-    bool uniquify = t && t->GetType() == cmStateEnums::SHARED_LIBRARY;
-    if (!uniquify || emitted.insert(i).second) {
-      this->FinalLinkEntries.push_back(e);
-    }
-  }
-  // Place explicitly linked object files in the front.  The linker will
-  // always use them anyway, and they may depend on symbols from libraries.
-  // Append in reverse order since we reverse the final order below.
-  for (size_t i : cmReverseRange(this->ObjectEntries)) {
-    this->FinalLinkEntries.emplace_back(this->EntryList[i]);
-  }
-  // Reverse the resulting order since we iterated in reverse.
-  std::reverse(this->FinalLinkEntries.begin(), this->FinalLinkEntries.end());
-
-  // Expand group items
-  if (!this->GroupItems.empty()) {
-    for (const auto& group : this->GroupItems) {
-      const LinkEntry& groupEntry = this->EntryList[group.first];
-      auto it = this->FinalLinkEntries.begin();
-      while (true) {
-        it = std::find_if(it, this->FinalLinkEntries.end(),
-                          [&groupEntry](const LinkEntry& entry) -> bool {
-                            return groupEntry.Item == entry.Item;
-                          });
-        if (it == this->FinalLinkEntries.end()) {
-          break;
-        }
-        it->Item.Value = "</LINK_GROUP>";
-        for (auto i = group.second.rbegin(); i != group.second.rend(); ++i) {
-          it = this->FinalLinkEntries.insert(it, this->EntryList[*i]);
-        }
-        it = this->FinalLinkEntries.insert(it, groupEntry);
-        it->Item.Value = "<LINK_GROUP>";
-      }
-    }
-  }
+  EntriesProcessing entriesProcessing{ this->Target, this->LinkLanguage,
+                                       this->EntryList,
+                                       this->FinalLinkEntries };
+  // Add groups first, to ensure that libraries of the groups are always kept.
+  entriesProcessing.AddGroups(this->GroupItems);
+  entriesProcessing.AddLibraries(this->FinalLinkOrder);
+  entriesProcessing.AddObjects(this->ObjectEntries);
+  entriesProcessing.Finalize();
 
   // Display the final set.
   if (this->DebugMode) {
@@ -466,10 +624,12 @@ std::pair<size_t, bool> cmComputeLinkDepends::AddLinkEntry(
   LinkEntry& entry = this->EntryList[index];
   entry.Item = BT<std::string>(item.AsStr(), item.Backtrace);
   entry.Target = item.Target;
+  entry.Feature = item.Feature;
   if (!entry.Target && entry.Item.Value[0] == '-' &&
       entry.Item.Value[1] != 'l' &&
       entry.Item.Value.substr(0, 10) != "-framework") {
     entry.Kind = LinkEntry::Flag;
+    entry.Feature = LinkEntry::DEFAULT;
   } else if (cmHasPrefix(entry.Item.Value, LG_BEGIN) &&
              cmHasSuffix(entry.Item.Value, '>')) {
     entry.Kind = LinkEntry::Group;
@@ -710,7 +870,6 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
 {
   // Track inferred dependency sets implied by this list.
   std::map<size_t, DependSet> dependSets;
-  std::string feature = LinkEntry::DEFAULT;
 
   bool inGroup = false;
   std::pair<size_t, bool> groupIndex{
@@ -727,34 +886,27 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
       continue;
     }
 
-    if (cmHasPrefix(item.AsStr(), LL_BEGIN) &&
-        cmHasSuffix(item.AsStr(), '>')) {
-      feature = ExtractFeature(item.AsStr());
-      // emit a warning if an undefined feature is used as part of
-      // an imported target
-      if (depender_index != cmComputeComponentGraph::INVALID_COMPONENT) {
-        const auto& depender = this->EntryList[depender_index];
-        if (depender.Target != nullptr && depender.Target->IsImported() &&
-            !IsFeatureSupported(this->Makefile, this->LinkLanguage, feature)) {
-          this->CMakeInstance->IssueMessage(
-            MessageType::AUTHOR_ERROR,
-            cmStrCat("The 'IMPORTED' target '", depender.Target->GetName(),
-                     "' uses the generator-expression '$<LINK_LIBRARY>' with "
-                     "the feature '",
-                     feature,
-                     "', which is undefined or unsupported.\nDid you miss to "
-                     "define it by setting variables \"CMAKE_",
-                     this->LinkLanguage, "_LINK_LIBRARY_USING_", feature,
-                     "\" and \"CMAKE_", this->LinkLanguage,
-                     "_LINK_LIBRARY_USING_", feature, "_SUPPORTED\"?"),
-            this->Target->GetBacktrace());
-        }
+    // emit a warning if an undefined feature is used as part of
+    // an imported target
+    if (item.Feature != LinkEntry::DEFAULT &&
+        depender_index != cmComputeComponentGraph::INVALID_COMPONENT) {
+      const auto& depender = this->EntryList[depender_index];
+      if (depender.Target != nullptr && depender.Target->IsImported() &&
+          !IsFeatureSupported(this->Makefile, this->LinkLanguage,
+                              item.Feature)) {
+        this->CMakeInstance->IssueMessage(
+          MessageType::AUTHOR_ERROR,
+          cmStrCat("The 'IMPORTED' target '", depender.Target->GetName(),
+                   "' uses the generator-expression '$<LINK_LIBRARY>' with "
+                   "the feature '",
+                   item.Feature,
+                   "', which is undefined or unsupported.\nDid you miss to "
+                   "define it by setting variables \"CMAKE_",
+                   this->LinkLanguage, "_LINK_LIBRARY_USING_", item.Feature,
+                   "\" and \"CMAKE_", this->LinkLanguage,
+                   "_LINK_LIBRARY_USING_", item.Feature, "_SUPPORTED\"?"),
+          this->Target->GetBacktrace());
       }
-      continue;
-    }
-    if (cmHasPrefix(item.AsStr(), LL_END) && cmHasSuffix(item.AsStr(), '>')) {
-      feature = LinkEntry::DEFAULT;
-      continue;
     }
 
     if (cmHasPrefix(item.AsStr(), LG_BEGIN) &&
@@ -815,7 +967,7 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
     dependee_index = ale.first;
     LinkEntry& entry = this->EntryList[dependee_index];
     auto const& itemFeature =
-      this->GetCurrentFeature(entry.Item.Value, feature);
+      this->GetCurrentFeature(entry.Item.Value, item.Feature);
     if (inGroup && ale.second && entry.Target != nullptr &&
         (entry.Target->GetType() == cmStateEnums::TargetType::OBJECT_LIBRARY ||
          entry.Target->GetType() ==
@@ -834,30 +986,27 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
           " library '", entry.Item.Value, "'."),
         this->Target->GetBacktrace());
     }
-    if (itemFeature != LinkEntry::DEFAULT) {
-      if (ale.second) {
-        // current item not yet defined
-        if (entry.Target != nullptr &&
-            (entry.Target->GetType() ==
-               cmStateEnums::TargetType::OBJECT_LIBRARY ||
-             entry.Target->GetType() ==
-               cmStateEnums::TargetType::INTERFACE_LIBRARY)) {
-          this->CMakeInstance->IssueMessage(
-            MessageType::AUTHOR_WARNING,
-            cmStrCat("The feature '", feature,
-                     "', specified as part of a generator-expression "
-                     "'$",
-                     LL_BEGIN, feature, ">', will not be applied to the ",
-                     (entry.Target->GetType() ==
-                          cmStateEnums::TargetType::OBJECT_LIBRARY
-                        ? "OBJECT"
-                        : "INTERFACE"),
-                     " library '", entry.Item.Value, "'."),
-            this->Target->GetBacktrace());
-        } else {
-          entry.Feature = itemFeature;
-        }
+    if (ale.second) {
+      // current item not yet defined
+      if (itemFeature != LinkEntry::DEFAULT && entry.Target != nullptr &&
+          (entry.Target->GetType() ==
+             cmStateEnums::TargetType::OBJECT_LIBRARY ||
+           entry.Target->GetType() ==
+             cmStateEnums::TargetType::INTERFACE_LIBRARY)) {
+        this->CMakeInstance->IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat("The feature '", itemFeature,
+                   "', specified as part of a generator-expression "
+                   "'$<LINK_LIBRARY:",
+                   itemFeature, ">', will not be applied to the ",
+                   (entry.Target->GetType() ==
+                        cmStateEnums::TargetType::OBJECT_LIBRARY
+                      ? "OBJECT"
+                      : "INTERFACE"),
+                   " library '", entry.Item.Value, "'."),
+          this->Target->GetBacktrace());
       }
+      entry.Feature = itemFeature;
     }
 
     bool supportedItem = entry.Target == nullptr ||

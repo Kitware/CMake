@@ -8,6 +8,7 @@
 set(targets
   aix-C-XL-13.1.3 aix-CXX-XL-13.1.3
   aix-C-XLClang-16.1.0.1 aix-CXX-XLClang-16.1.0.1
+  aix-C-IBMClang-17.1.1.2 aix-CXX-IBMClang-17.1.1.2
   craype-C-Cray-8.7 craype-CXX-Cray-8.7 craype-Fortran-Cray-8.7
   craype-C-Cray-9.0-hlist-ad craype-CXX-Cray-9.0-hlist-ad craype-Fortran-Cray-9.0-hlist-ad
   craype-C-GNU-7.3.0 craype-CXX-GNU-7.3.0 craype-Fortran-GNU-7.3.0
@@ -23,7 +24,10 @@ set(targets
   linux-C-GNU-10.2.1-static-libgcc
     linux-CXX-GNU-10.2.1-static-libstdc++
     linux-Fortran-GNU-10.2.1-static-libgfortran
+  linux-C-GNU-12.2.0 linux-CXX-GNU-12.2.0 linux-Fortran-GNU-12.2.0
   linux-C-Intel-18.0.0.20170811 linux-CXX-Intel-18.0.0.20170811
+  linux-C-Intel-2021.10.0.20230609 linux-CXX-Intel-2021.10.0.20230609 linux-Fortran-Intel-2021.10.0.20230609
+  linux-C-IntelLLVM-2023.2.0 linux-CXX-IntelLLVM-2023.2.0 linux-Fortran-IntelLLVM-2023.2.0
   linux-C-PGI-18.10.1 linux-CXX-PGI-18.10.1
     linux-Fortran-PGI-18.10.1 linux_pgf77-Fortran-PGI-18.10.1
     linux_nostdinc-C-PGI-18.10.1 linux_nostdinc-CXX-PGI-18.10.1
@@ -42,7 +46,14 @@ set(targets
     netbsd_nostdinc-C-GNU-4.8.5 netbsd_nostdinc-CXX-GNU-4.8.5
   openbsd-C-Clang-5.0.1 openbsd-CXX-Clang-5.0.1
   sunos-C-SunPro-5.13.0 sunos-CXX-SunPro-5.13.0 sunos-Fortran-SunPro-8.8.0
+  sunos5.10_sparc32-C-GNU-5.5.0 sunos5.10_sparc32-CXX-GNU-5.5.0 sunos5.10_sparc32-Fortran-GNU-5.5.0
+  sunos5.11_i386-C-GNU-5.5.0 sunos5.11_i386-CXX-GNU-5.5.0 sunos5.11_i386-Fortran-GNU-5.5.0
+  windows_x86_64-C-MSVC-19.36.32543.0 windows_x86_64-CXX-MSVC-19.36.32543.0
+  windows_x86_64-C-MSVC-19.38.33130.0-VS windows_x86_64-CXX-MSVC-19.38.33130.0-VS
   windows_x86_64-C-Clang-17.0.1-MSVC windows_x86_64-CXX-Clang-17.0.1-MSVC windows_x86_64-Fortran-LLVMFlang-17.0.1-MSVC
+  windows_x86_64-Fortran-LLVMFlang-18.0.0-MSVC
+  windows_x86_64-C-Intel-2021.9.0.20230302 windows_x86_64-CXX-Intel-2021.9.0.20230302 windows_x86_64-Fortran-Intel-2021.9.0.20230302
+  windows_x86_64-C-IntelLLVM-2023.1.0 windows_x86_64-CXX-IntelLLVM-2023.1.0 windows_x86_64-Fortran-IntelLLVM-2023.1.0
   windows_arm64-C-Clang-17.0.1-MSVC windows_arm64-CXX-Clang-17.0.1-MSVC windows_arm64-Fortran-LLVMFlang-17.0.1-MSVC
   )
 
@@ -93,16 +104,6 @@ function(load_compiler_info infile lang_var outcmvars_var outstr_var)
 endfunction()
 
 #
-# unload_compiler_info: clear out any CMAKE_* vars load previously set
-#
-function(unload_compiler_info cmvars)
-  foreach(var IN LISTS cmvars)
-    unset("${var}" PARENT_SCOPE)
-  endforeach()
-endfunction()
-
-
-#
 # load_platform_info: establish CMAKE_LIBRARY_ARCHITECTURE_REGEX
 # based on the target platform.
 #
@@ -131,49 +132,64 @@ foreach(t ${targets})
     continue()
   endif()
 
-  load_compiler_info(${infile} lang cmvars input)
-  load_platform_info(${t})
+  block()
+    load_compiler_info(${infile} lang cmvars input)
+    load_platform_info(${t})
 
-  # Need to handle files with empty entries for both libs or dirs
-  set(implicit_lib_output "")
-  set(idirs_output "")
-  set(implicit_objs "")
-  set(library_arch_output "")
-  file(STRINGS ${outfile} outputs)
-  foreach(line IN LISTS outputs)
-    if(line MATCHES "libs=")
-      string(REPLACE "libs=" "" implicit_lib_output "${line}")
+    # Need to handle files with empty entries for both libs or dirs
+    set(implicit_lib_output "")
+    set(idirs_output "")
+    set(implicit_objs "")
+    set(library_arch_output "")
+    set(linker_tool_output "")
+    file(STRINGS ${outfile} outputs)
+    foreach(line IN LISTS outputs)
+      if(line MATCHES "libs=")
+        string(REPLACE "libs=" "" implicit_lib_output "${line}")
+      endif()
+      if(line MATCHES "dirs=")
+        string(REPLACE "dirs=" "" idirs_output "${line}")
+      endif()
+      if(line MATCHES "library_arch=")
+        string(REPLACE "library_arch=" "" library_arch_output "${line}")
+      endif()
+      if(line MATCHES "linker_tool=")
+        string(REPLACE "linker_tool=" "" linker_tool_output "${line}")
+      endif()
+    endforeach()
+
+    cmake_parse_implicit_link_info2("${input}" log
+        "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}"
+        LANGUAGE ${lang}
+        COMPUTE_LINKER linker_tool
+        COMPUTE_IMPLICIT_LIBS implicit_libs
+        COMPUTE_IMPLICIT_DIRS idirs
+        COMPUTE_IMPLICIT_FWKS implicit_fwks
+        COMPUTE_IMPLICIT_OBJECTS implicit_objs)
+
+    set(library_arch)
+    cmake_parse_library_architecture(${lang} "${idirs}" "${implicit_objs}" library_arch)
+
+    # File format
+    # file(WRITE ${outfile} "libs=${implicit_libs}\ndirs=${idirs}\nlibrary_arch=${library_arch}\nlinker_tool=${linker_tool}\n")
+
+    if(t MATCHES "windows" AND NOT CMAKE_HOST_WIN32)
+      string(REPLACE "\\" "/" linker_tool "${linker_tool}")
+      cmake_path(NORMAL_PATH linker_tool)
     endif()
-    if(line MATCHES "dirs=")
-      string(REPLACE "dirs=" "" idirs_output "${line}")
+
+    if(t MATCHES "-empty$")          # empty isn't supposed to parse
+      if("${state}" STREQUAL "done")
+        message("empty parse failed: ${idirs}, log=${log}")
+      endif()
+    elseif(NOT "${idirs}" MATCHES "^${idirs_output}$")
+      message("${t} parse failed: state=${state}, '${idirs}' does not match '^${idirs_output}$'")
+    elseif(NOT "${implicit_libs}" MATCHES "^${implicit_lib_output}$")
+      message("${t} parse failed: state=${state}, '${implicit_libs}' does not match '^${implicit_lib_output}$'")
+    elseif((library_arch OR library_arch_output) AND NOT "${library_arch}" MATCHES "^${library_arch_output}$")
+      message("${t} parse failed: state=${state}, '${library_arch}' does not match '^${library_arch_output}$'")
+    elseif((linker_tool OR linker_tool_output) AND NOT "${linker_tool}" MATCHES "^${linker_tool_output}$")
+      message("${t} parse failed: state=${state}, '${linker_tool}' does not match '^${linker_tool_output}$'")
     endif()
-    if(line MATCHES "library_arch=")
-      string(REPLACE "library_arch=" "" library_arch_output "${line}")
-    endif()
-  endforeach()
-
-  cmake_parse_implicit_link_info("${input}" implicit_libs idirs implicit_fwks log
-      "${CMAKE_${lang}_IMPLICIT_OBJECT_REGEX}"
-      LANGUAGE ${lang}
-      COMPUTE_IMPLICIT_OBJECTS implicit_objs)
-
-  set(library_arch)
-  cmake_parse_library_architecture(${lang} "${idirs}" "${implicit_objs}" library_arch)
-
-  # File format
-  # file(WRITE ${outfile} "libs=${implicit_libs}\ndirs=${idirs}\nlibrary_arch=${library_arch}")
-
-  if(t MATCHES "-empty$")          # empty isn't supposed to parse
-    if("${state}" STREQUAL "done")
-      message("empty parse failed: ${idirs}, log=${log}")
-    endif()
-  elseif(NOT "${idirs}" MATCHES "^${idirs_output}$")
-    message("${t} parse failed: state=${state}, '${idirs}' does not match '^${idirs_output}$'")
-  elseif(NOT "${implicit_libs}" MATCHES "^${implicit_lib_output}$")
-    message("${t} parse failed: state=${state}, '${implicit_libs}' does not match '^${implicit_lib_output}$'")
-  elseif((library_arch OR library_arch_output) AND NOT "${library_arch}" MATCHES "^${library_arch_output}$")
-    message("${t} parse failed: state=${state}, '${library_arch}' does not match '^${library_arch_output}$'")
-  endif()
-
-  unload_compiler_info("${cmvars}")
+  endblock()
 endforeach(t)

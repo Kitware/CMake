@@ -41,6 +41,7 @@ static mach_timebase_info_data_t timebase;
 
 typedef unsigned char UInt8;
 
+#ifdef UV_HAVE_KQUEUE
 int uv__platform_loop_init(uv_loop_t* loop) {
   loop->cf_state = NULL;
 
@@ -54,6 +55,7 @@ int uv__platform_loop_init(uv_loop_t* loop) {
 void uv__platform_loop_delete(uv_loop_t* loop) {
   uv__fsevents_loop_delete(loop);
 }
+#endif
 
 
 static void uv__hrtime_init_once(void) {

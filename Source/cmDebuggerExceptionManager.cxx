@@ -78,7 +78,7 @@ cmDebuggerExceptionManager::HandleExceptionInfoRequest()
     response.exceptionId = TheException->Id;
     response.breakMode = "always";
     response.description = TheException->Description;
-    TheException = {};
+    TheException = cm::nullopt;
   }
   return response;
 }

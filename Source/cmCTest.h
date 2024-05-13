@@ -12,6 +12,7 @@
 #include <string>
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 
 #include "cmDuration.h"
@@ -116,8 +117,8 @@ public:
   cmDuration GetGlobalTimeout() const;
 
   /** how many test to run at the same time */
-  int GetParallelLevel() const;
-  void SetParallelLevel(int);
+  cm::optional<size_t> GetParallelLevel() const;
+  void SetParallelLevel(cm::optional<size_t> level);
 
   unsigned long GetTestLoad() const;
   void SetTestLoad(unsigned long);
@@ -254,10 +255,10 @@ public:
    * Run command specialized for make and configure. Returns process status
    * and retVal is return value or exception.
    */
-  int RunMakeCommand(const std::string& command, std::string& output,
-                     int* retVal, const char* dir, cmDuration timeout,
-                     std::ostream& ofs,
-                     Encoding encoding = cmProcessOutput::Auto);
+  bool RunMakeCommand(const std::string& command, std::string& output,
+                      int* retVal, const char* dir, cmDuration timeout,
+                      std::ostream& ofs,
+                      Encoding encoding = cmProcessOutput::Auto);
 
   /** Return the current tag */
   std::string GetCurrentTag();
@@ -303,10 +304,10 @@ public:
    * environment variables prior to running the test. After running the test,
    * environment variables are restored to their previous values.
    */
-  int RunTest(std::vector<const char*> args, std::string* output, int* retVal,
-              std::ostream* logfile, cmDuration testTimeOut,
-              std::vector<std::string>* environment,
-              Encoding encoding = cmProcessOutput::Auto);
+  bool RunTest(const std::vector<std::string>& args, std::string* output,
+               int* retVal, std::ostream* logfile, cmDuration testTimeOut,
+               std::vector<std::string>* environment,
+               Encoding encoding = cmProcessOutput::Auto);
 
   /**
    * Get the handler object

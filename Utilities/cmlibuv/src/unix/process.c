@@ -37,7 +37,11 @@
 #include <sched.h>
 
 #if defined(__APPLE__)
-# include <spawn.h>
+  /* macOS 10.8 and later have a working posix_spawn */
+# if MAC_OS_X_VERSION_MIN_REQUIRED >= 1080
+#  define UV_USE_APPLE_POSIX_SPAWN
+#  include <spawn.h>
+# endif
 # include <paths.h>
 # include <sys/kauth.h>
 # include <sys/types.h>
@@ -77,11 +81,7 @@ extern char **environ;
 
 #ifdef CMAKE_BOOTSTRAP
 #define UV_USE_SIGCHLD
-#elif defined(__APPLE__) || \
-    defined(__DragonFly__) || \
-    defined(__FreeBSD__) || \
-    defined(__NetBSD__) || \
-    defined(__OpenBSD__)
+#elif defined(UV_HAVE_KQUEUE)
 #include <sys/event.h>
 #else
 #define UV_USE_SIGCHLD
@@ -430,7 +430,7 @@ static void uv__process_child_init(const uv_process_options_t* options,
 #endif
 
 
-#if defined(__APPLE__)
+#if defined(UV_USE_APPLE_POSIX_SPAWN)
 typedef struct uv__posix_spawn_fncs_tag {
   struct {
     int (*addchdir_np)(const posix_spawn_file_actions_t *, const char *);
@@ -882,7 +882,7 @@ static int uv__spawn_and_init_child(
   int exec_errorno;
   ssize_t r;
 
-#if defined(__APPLE__)
+#if defined(UV_USE_APPLE_POSIX_SPAWN)
   uv_once(&posix_spawn_init_once, uv__spawn_init_posix_spawn);
 
   /* Special child process spawn case for macOS Big Sur (11.0) onwards
@@ -1008,6 +1008,7 @@ int uv_spawn(uv_loop_t* loop,
   assert(!(options->flags & ~(UV_PROCESS_DETACHED |
                               UV_PROCESS_SETGID |
                               UV_PROCESS_SETUID |
+                              UV_PROCESS_WINDOWS_FILE_PATH_EXACT_NAME |
                               UV_PROCESS_WINDOWS_HIDE |
                               UV_PROCESS_WINDOWS_HIDE_CONSOLE |
                               UV_PROCESS_WINDOWS_HIDE_GUI |

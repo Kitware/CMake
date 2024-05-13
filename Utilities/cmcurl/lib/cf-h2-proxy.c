@@ -155,7 +155,7 @@ static void h2_tunnel_go_state(struct Curl_cfilter *cf,
     infof(data, "CONNECT phase completed");
     data->state.authproxy.done = TRUE;
     data->state.authproxy.multipass = FALSE;
-    /* FALLTHROUGH */
+    FALLTHROUGH();
   case H2_TUNNEL_FAILED:
     if(new_state == H2_TUNNEL_FAILED)
       CURL_TRC_CF(data, cf, "[%d] new tunnel state 'failed'", ts->stream_id);
@@ -221,10 +221,10 @@ static void drain_tunnel(struct Curl_cfilter *cf,
   bits = CURL_CSELECT_IN;
   if(!tunnel->closed && !tunnel->reset && tunnel->upload_blocked_len)
     bits |= CURL_CSELECT_OUT;
-  if(data->state.dselect_bits != bits) {
-    CURL_TRC_CF(data, cf, "[%d] DRAIN dselect_bits=%x",
+  if(data->state.select_bits != bits) {
+    CURL_TRC_CF(data, cf, "[%d] DRAIN select_bits=%x",
                 tunnel->stream_id, bits);
-    data->state.dselect_bits = bits;
+    data->state.select_bits = bits;
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
 }
@@ -688,12 +688,8 @@ static int proxy_h2_on_frame_recv(nghttp2_session *session,
        * window and *assume* that we treat this like a WINDOW_UPDATE. Some
        * servers send an explicit WINDOW_UPDATE, but not all seem to do that.
        * To be safe, we UNHOLD a stream in order not to stall. */
-      if((data->req.keepon & KEEP_SEND_HOLD) &&
-         (data->req.keepon & KEEP_SEND)) {
-        data->req.keepon &= ~KEEP_SEND_HOLD;
+      if(CURL_WANT_SEND(data)) {
         drain_tunnel(cf, data, &ctx->tunnel);
-        CURL_TRC_CF(data, cf, "[%d] un-holding after SETTINGS",
-                    stream_id);
       }
       break;
     case NGHTTP2_GOAWAY:
@@ -727,12 +723,8 @@ static int proxy_h2_on_frame_recv(nghttp2_session *session,
     }
     break;
   case NGHTTP2_WINDOW_UPDATE:
-    if((data->req.keepon & KEEP_SEND_HOLD) &&
-       (data->req.keepon & KEEP_SEND)) {
-      data->req.keepon &= ~KEEP_SEND_HOLD;
-      Curl_expire(data, 0, EXPIRE_RUN_NOW);
-      CURL_TRC_CF(data, cf, "[%d] unpausing after win update",
-                  stream_id);
+    if(CURL_WANT_SEND(data)) {
+      drain_tunnel(cf, data, &ctx->tunnel);
     }
     break;
   default:
@@ -909,7 +901,6 @@ static CURLcode proxy_h2_submit(int32_t *pstream_id,
 {
   struct dynhds h2_headers;
   nghttp2_nv *nva = NULL;
-  unsigned int i;
   int32_t stream_id = -1;
   size_t nheader;
   CURLcode result;
@@ -920,20 +911,10 @@ static CURLcode proxy_h2_submit(int32_t *pstream_id,
   if(result)
     goto out;
 
-  nheader = Curl_dynhds_count(&h2_headers);
-  nva = malloc(sizeof(nghttp2_nv) * nheader);
+  nva = Curl_dynhds_to_nva(&h2_headers, &nheader);
   if(!nva) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
-  }
-
-  for(i = 0; i < nheader; ++i) {
-    struct dynhds_entry *e = Curl_dynhds_getn(&h2_headers, i);
-    nva[i].name = (unsigned char *)e->name;
-    nva[i].namelen = e->namelen;
-    nva[i].value = (unsigned char *)e->value;
-    nva[i].valuelen = e->valuelen;
-    nva[i].flags = NGHTTP2_NV_FLAG_NONE;
   }
 
   if(read_callback) {
@@ -1052,7 +1033,7 @@ static CURLcode H2_CONNECT(struct Curl_cfilter *cf,
       if(result)
         goto out;
       h2_tunnel_go_state(cf, ts, H2_TUNNEL_CONNECT, data);
-      /* FALLTHROUGH */
+      FALLTHROUGH();
 
     case H2_TUNNEL_CONNECT:
       /* see that the request is completely sent */
@@ -1071,7 +1052,7 @@ static CURLcode H2_CONNECT(struct Curl_cfilter *cf,
         result = CURLE_OK;
         goto out;
       }
-      /* FALLTHROUGH */
+      FALLTHROUGH();
 
     case H2_TUNNEL_RESPONSE:
       DEBUGASSERT(ts->has_final_response);
@@ -1187,25 +1168,31 @@ static bool cf_h2_proxy_data_pending(struct Curl_cfilter *cf,
   return cf->next? cf->next->cft->has_data_pending(cf->next, data) : FALSE;
 }
 
-static int cf_h2_proxy_get_select_socks(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data,
-                                        curl_socket_t *sock)
+static void cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
+                                       struct Curl_easy *data,
+                                       struct easy_pollset *ps)
 {
   struct cf_h2_proxy_ctx *ctx = cf->ctx;
-  int bitmap = GETSOCK_BLANK;
-  struct cf_call_data save;
+  curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
+  bool want_recv, want_send;
 
-  CF_DATA_SAVE(save, cf, data);
-  sock[0] = Curl_conn_cf_get_socket(cf, data);
-  bitmap |= GETSOCK_READSOCK(0);
+  Curl_pollset_check(data, ps, sock, &want_recv, &want_send);
+  if(ctx->h2 && (want_recv || want_send)) {
+    struct cf_call_data save;
+    bool c_exhaust, s_exhaust;
 
-  /* HTTP/2 layer wants to send data) AND there's a window to send data in */
-  if(nghttp2_session_want_write(ctx->h2) &&
-     nghttp2_session_get_remote_window_size(ctx->h2))
-    bitmap |= GETSOCK_WRITESOCK(0);
+    CF_DATA_SAVE(save, cf, data);
+    c_exhaust = !nghttp2_session_get_remote_window_size(ctx->h2);
+    s_exhaust = ctx->tunnel.stream_id >= 0 &&
+                !nghttp2_session_get_stream_remote_window_size(
+                   ctx->h2, ctx->tunnel.stream_id);
+    want_recv = (want_recv || c_exhaust || s_exhaust);
+    want_send = (!s_exhaust && want_send) ||
+                (!c_exhaust && nghttp2_session_want_write(ctx->h2));
 
-  CF_DATA_RESTORE(cf, save);
-  return bitmap;
+    Curl_pollset_set(data, ps, sock, want_recv, want_send);
+    CF_DATA_RESTORE(cf, save);
+  }
 }
 
 static ssize_t h2_handle_tunnel_close(struct Curl_cfilter *cf,
@@ -1542,7 +1529,7 @@ struct Curl_cftype Curl_cft_h2_proxy = {
   cf_h2_proxy_connect,
   cf_h2_proxy_close,
   Curl_cf_http_proxy_get_host,
-  cf_h2_proxy_get_select_socks,
+  cf_h2_proxy_adjust_pollset,
   cf_h2_proxy_data_pending,
   cf_h2_proxy_send,
   cf_h2_proxy_recv,
@@ -1560,7 +1547,7 @@ CURLcode Curl_cf_h2_proxy_insert_after(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   (void)data;
-  ctx = calloc(sizeof(*ctx), 1);
+  ctx = calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
 

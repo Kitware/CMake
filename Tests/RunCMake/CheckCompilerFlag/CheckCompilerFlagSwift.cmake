@@ -1,3 +1,4 @@
+cmake_policy(SET CMP0157 NEW)
 enable_language (Swift)
 include(CheckCompilerFlag)
 
@@ -12,9 +13,9 @@ if(SHOULD_FAIL)
   message(SEND_ERROR "invalid Swift compile flag didn't fail.")
 endif()
 
-check_compiler_flag(Swift "-parseable-output" SHOULD_WORK)
+check_compiler_flag(Swift "-Onone" SHOULD_WORK)
 if(NOT SHOULD_WORK)
-  message(SEND_ERROR "Swift compiler flag '-parseable-output' check failed")
+  message(SEND_ERROR "Swift compiler flag '-Onone' check failed")
 endif()
 
 # Reset locale

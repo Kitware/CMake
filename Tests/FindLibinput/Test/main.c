@@ -1,7 +1,7 @@
 #include <libinput.h>
 #include <stdio.h>
 
-int main()
+int main(void)
 {
   struct libinput_interface interface;
   interface.open_restricted = 0;

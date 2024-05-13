@@ -1,6 +1,6 @@
 #include <SDL.h>
 
-int main()
+int main(void)
 {
   // Test 1 requires headers only.
   SDL_version compiled;

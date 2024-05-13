@@ -1,6 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmExportSet.h"
+#include "cmExportSet.h" // IWYU pragma: associated
 
 #include <algorithm>
 #include <tuple>
@@ -11,7 +11,7 @@
 #include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
 #include "cmTarget.h"
-#include "cmTargetExport.h"
+#include "cmTargetExport.h" // IWYU pragma: associated
 
 cmExportSet::cmExportSet(std::string name)
   : Name(std::move(name))
@@ -19,6 +19,17 @@ cmExportSet::cmExportSet(std::string name)
 }
 
 cmExportSet::~cmExportSet() = default;
+
+cmExportSet::PackageDependency& cmExportSet::GetPackageDependencyForSetup(
+  const std::string& name)
+{
+  auto& dep = this->PackageDependencies[name];
+  if (!dep.SpecifiedIndex) {
+    dep.SpecifiedIndex = this->NextPackageDependencyIndex;
+    this->NextPackageDependencyIndex++;
+  }
+  return dep;
+}
 
 bool cmExportSet::Compute(cmLocalGenerator* lg)
 {
@@ -59,6 +70,16 @@ void cmExportSet::AddTargetExport(std::unique_ptr<cmTargetExport> te)
 void cmExportSet::AddInstallation(cmInstallExportGenerator const* installation)
 {
   this->Installations.push_back(installation);
+}
+
+void cmExportSet::SetXcFrameworkLocation(const std::string& name,
+                                         const std::string& location)
+{
+  for (auto& te : this->TargetExports) {
+    if (name == te->TargetName) {
+      te->XcFrameworkLocation = location;
+    }
+  }
 }
 
 cmExportSet& cmExportSetMap::operator[](const std::string& name)

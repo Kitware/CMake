@@ -17,10 +17,6 @@ endif()
 
 set(CMAKE_Fortran_POSTPROCESS_FLAG "-fpreprocessed")
 
-# No -DNDEBUG for Fortran.
-string(APPEND CMAKE_Fortran_FLAGS_MINSIZEREL_INIT " -Os")
-string(APPEND CMAKE_Fortran_FLAGS_RELEASE_INIT " -O3")
-
 # No -isystem for Fortran because it will not find .mod files.
 unset(CMAKE_INCLUDE_SYSTEM_FLAG_Fortran)
 

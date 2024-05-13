@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <array>
 #include <cassert>
+#include <cctype>
 #include <cerrno>
 #include <cstddef>
 #include <cstdio>
@@ -365,6 +366,16 @@ std::string cmGeneratorTarget::GetExportName() const
     return *exportName;
   }
   return this->GetName();
+}
+
+std::string cmGeneratorTarget::GetFilesystemExportName() const
+{
+  auto fs_safe = this->GetExportName();
+  // First escape any `_` characters to avoid collisions.
+  cmSystemTools::ReplaceString(fs_safe, "_", "__");
+  // Escape other characters that are not generally filesystem-safe.
+  cmSystemTools::ReplaceString(fs_safe, ":", "_c");
+  return fs_safe;
 }
 
 cmValue cmGeneratorTarget::GetProperty(const std::string& prop) const
@@ -866,6 +877,31 @@ cmValue cmGeneratorTarget::GetFeature(const std::string& feature,
     return value;
   }
   return this->LocalGenerator->GetFeature(feature, config);
+}
+
+std::string cmGeneratorTarget::GetLinkerTypeProperty(
+  std::string const& lang, std::string const& config) const
+{
+  std::string propName{ "LINKER_TYPE" };
+  auto linkerType = this->GetProperty(propName);
+  if (!linkerType.IsEmpty()) {
+    cmGeneratorExpressionDAGChecker dagChecker(this, propName, nullptr,
+                                               nullptr);
+    auto ltype =
+      cmGeneratorExpression::Evaluate(*linkerType, this->GetLocalGenerator(),
+                                      config, this, &dagChecker, this, lang);
+    if (this->IsDeviceLink()) {
+      cmList list{ ltype };
+      const auto DL_BEGIN = "<DEVICE_LINK>"_s;
+      const auto DL_END = "</DEVICE_LINK>"_s;
+      cm::erase_if(list, [&](const std::string& item) {
+        return item == DL_BEGIN || item == DL_END;
+      });
+      return list.to_string();
+    }
+    return ltype;
+  }
+  return std::string{};
 }
 
 const char* cmGeneratorTarget::GetLinkPIEProperty(
@@ -1821,32 +1857,31 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
   AddInterfaceEntries(this, config, "INTERFACE_SOURCES", std::string(),
                       &dagChecker, linkInterfaceSourcesEntries,
                       IncludeRuntimeInterface::No, LinkInterfaceFor::Usage);
-  std::vector<std::string>::size_type numFilesBefore = files.size();
   bool contextDependentInterfaceSources = processSources(
     this, linkInterfaceSourcesEntries, files, uniqueSrcs, debugSources);
 
   // Collect TARGET_OBJECTS of direct object link-dependencies.
   bool contextDependentObjects = false;
-  std::vector<std::string>::size_type numFilesBefore2 = files.size();
   if (this->GetType() != cmStateEnums::OBJECT_LIBRARY) {
     EvaluatedTargetPropertyEntries linkObjectsEntries;
     AddObjectEntries(this, config, &dagChecker, linkObjectsEntries);
     contextDependentObjects = processSources(this, linkObjectsEntries, files,
                                              uniqueSrcs, debugSources);
+    // Note that for imported targets or multi-config generators supporting
+    // cross-config builds the paths to the object files must be per-config,
+    // so contextDependentObjects will be true here even if object libraries
+    // are specified without per-config generator expressions.
   }
 
   // Collect this target's file sets.
-  std::vector<std::string>::size_type numFilesBefore3 = files.size();
   EvaluatedTargetPropertyEntries fileSetEntries;
   AddFileSetEntries(this, config, &dagChecker, fileSetEntries);
   bool contextDependentFileSets =
     processSources(this, fileSetEntries, files, uniqueSrcs, debugSources);
 
   // Determine if sources are context-dependent or not.
-  if (!contextDependentDirectSources &&
-      !(contextDependentInterfaceSources && numFilesBefore < files.size()) &&
-      !(contextDependentObjects && numFilesBefore2 < files.size()) &&
-      !(contextDependentFileSets && numFilesBefore3 < files.size())) {
+  if (!contextDependentDirectSources && !contextDependentInterfaceSources &&
+      !contextDependentObjects && !contextDependentFileSets) {
     this->SourcesAreContextDependent = Tribool::False;
   } else {
     this->SourcesAreContextDependent = Tribool::True;
@@ -3554,7 +3589,7 @@ void cmGeneratorTarget::AddCUDAArchitectureFlagsImpl(cmBuildStep compileOrLink,
 
       flags += "]\"";
     }
-  } else if (compiler == "Clang") {
+  } else if (compiler == "Clang" && compileOrLink == cmBuildStep::Compile) {
     for (CudaArchitecture& architecture : architectures) {
       flags += " --cuda-gpu-arch=sm_" + architecture.name;
 
@@ -5528,6 +5563,75 @@ std::string cmGeneratorTarget::GetLinkerLanguage(
   return this->GetLinkClosure(config)->LinkerLanguage;
 }
 
+std::string cmGeneratorTarget::GetLinkerTool(const std::string& config) const
+{
+  return this->GetLinkerTool(this->GetLinkerLanguage(config), config);
+}
+
+std::string cmGeneratorTarget::GetLinkerTool(const std::string& lang,
+                                             const std::string& config) const
+{
+  auto usingLinker =
+    cmStrCat("CMAKE_", lang, "_USING_", this->IsDeviceLink() ? "DEVICE_" : "",
+             "LINKER_");
+  auto format = this->Makefile->GetDefinition(cmStrCat(usingLinker, "MODE"));
+  if (!format || format != "TOOL"_s) {
+    return this->Makefile->GetDefinition("CMAKE_LINKER");
+  }
+
+  auto linkerType = this->GetLinkerTypeProperty(lang, config);
+  if (linkerType.empty()) {
+    linkerType = "DEFAULT";
+  }
+  usingLinker = cmStrCat(usingLinker, linkerType);
+  auto linkerTool = this->Makefile->GetDefinition(usingLinker);
+
+  if (!linkerTool) {
+    if (this->GetGlobalGenerator()->IsVisualStudio() &&
+        linkerType == "DEFAULT"_s) {
+      return std::string{};
+    }
+
+    // fall-back to generic definition
+    linkerTool = this->Makefile->GetDefinition("CMAKE_LINKER");
+
+    if (linkerType != "DEFAULT"_s) {
+      auto isCMakeLinkerType = [](const std::string& type) -> bool {
+        return std::all_of(type.cbegin(), type.cend(),
+                           [](char c) { return std::isupper(c); });
+      };
+      if (isCMakeLinkerType(linkerType)) {
+        this->LocalGenerator->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("LINKER_TYPE '", linkerType,
+                   "' is unknown or not supported by this toolchain."));
+      } else {
+        this->LocalGenerator->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("LINKER_TYPE '", linkerType,
+                   "' is unknown. Did you forget to define the '", usingLinker,
+                   "' variable?"));
+      }
+    }
+  }
+
+  return linkerTool;
+}
+
+bool cmGeneratorTarget::LinkerEnforcesNoAllowShLibUndefined(
+  std::string const& config) const
+{
+  // FIXME(#25486): Account for the LINKER_TYPE target property.
+  // Also factor out the hard-coded list below into a platform
+  // information table based on the linker id.
+  std::string ll = this->GetLinkerLanguage(config);
+  std::string linkerIdVar = cmStrCat("CMAKE_", ll, "_COMPILER_LINKER_ID");
+  cmValue linkerId = this->Makefile->GetDefinition(linkerIdVar);
+  // The GNU bfd-based linker may enforce '--no-allow-shlib-undefined'
+  // recursively by default.  The Solaris linker has similar behavior.
+  return linkerId && (*linkerId == "GNU" || *linkerId == "Solaris");
+}
+
 std::string cmGeneratorTarget::GetPDBOutputName(
   const std::string& config) const
 {
@@ -6846,7 +6950,8 @@ bool cmGeneratorTarget::IsLinkLookupScope(std::string const& n,
 
 cm::optional<cmLinkItem> cmGeneratorTarget::LookupLinkItem(
   std::string const& n, cmListFileBacktrace const& bt,
-  LookupLinkItemScope* scope, LookupSelf lookupSelf) const
+  std::string const& linkFeature, LookupLinkItemScope* scope,
+  LookupSelf lookupSelf) const
 {
   cm::optional<cmLinkItem> maybeItem;
   if (this->IsLinkLookupScope(n, scope->LG)) {
@@ -6858,7 +6963,8 @@ cm::optional<cmLinkItem> cmGeneratorTarget::LookupLinkItem(
       (lookupSelf == LookupSelf::No && name == this->GetName())) {
     return maybeItem;
   }
-  maybeItem = this->ResolveLinkItem(BT<std::string>(name, bt), scope->LG);
+  maybeItem =
+    this->ResolveLinkItem(BT<std::string>(name, bt), scope->LG, linkFeature);
   return maybeItem;
 }
 
@@ -6889,9 +6995,16 @@ void cmGeneratorTarget::ExpandLinkItems(
     cmList libs{ cge->Evaluate(this->LocalGenerator, config, headTarget,
                                &dagChecker, this,
                                headTarget->LinkerLanguage) };
+
+    auto linkFeature = cmLinkItem::DEFAULT;
     for (auto const& lib : libs) {
+      if (auto maybeLinkFeature = ParseLinkFeature(lib)) {
+        linkFeature = std::move(*maybeLinkFeature);
+        continue;
+      }
+
       if (cm::optional<cmLinkItem> maybeItem = this->LookupLinkItem(
-            lib, cge->GetBacktrace(), &scope,
+            lib, cge->GetBacktrace(), linkFeature, &scope,
             field == LinkInterfaceField::Libraries ? LookupSelf::No
                                                    : LookupSelf::Yes)) {
         cmLinkItem item = std::move(*maybeItem);
@@ -7637,9 +7750,16 @@ const cmLinkInterface* cmGeneratorTarget::GetImportLinkInterface(
                           LinkInterfaceField::Libraries, iface);
     cmList deps{ info->SharedDeps };
     LookupLinkItemScope scope{ this->LocalGenerator };
+
+    auto linkFeature = cmLinkItem::DEFAULT;
     for (auto const& dep : deps) {
+      if (auto maybeLinkFeature = ParseLinkFeature(dep)) {
+        linkFeature = std::move(*maybeLinkFeature);
+        continue;
+      }
+
       if (cm::optional<cmLinkItem> maybeItem = this->LookupLinkItem(
-            dep, cmListFileBacktrace(), &scope, LookupSelf::No)) {
+            dep, cmListFileBacktrace(), linkFeature, &scope, LookupSelf::No)) {
         iface.SharedDeps.emplace_back(std::move(*maybeItem));
       }
     }
@@ -8373,12 +8493,18 @@ bool cmGeneratorTarget::DiscoverSyntheticTargets(cmSyntheticTargetCache& cache,
         // generation.
         tgt->CopyImportedCxxModulesProperties(model);
 
+        tgt->AddLinkLibrary(*mf,
+                            cmStrCat("$<COMPILE_ONLY:", model->GetName(), '>'),
+                            GENERAL_LibraryType);
+
         // Apply usage requirements to the target.
         usage.ApplyToTarget(tgt);
 
         // Create the generator target and attach it to the local generator.
         auto gtp = cm::make_unique<cmGeneratorTarget>(tgt, lg);
         synthDep = gtp.get();
+        cache.CxxModuleTargets[targetName] = synthDep;
+        gtp->DiscoverSyntheticTargets(cache, config);
         lg->AddGeneratorTarget(std::move(gtp));
       } else {
         synthDep = cached->second;
@@ -8439,7 +8565,13 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       impl.HadLinkLanguageSensitiveCondition = true;
     }
 
+    auto linkFeature = cmLinkItem::DEFAULT;
     for (auto const& lib : llibs) {
+      if (auto maybeLinkFeature = ParseLinkFeature(lib)) {
+        linkFeature = std::move(*maybeLinkFeature);
+        continue;
+      }
+
       if (this->IsLinkLookupScope(lib, lg)) {
         continue;
       }
@@ -8486,8 +8618,8 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       }
 
       // The entry is meant for this configuration.
-      cmLinkItem item =
-        this->ResolveLinkItem(BT<std::string>(name, entry.Backtrace), lg);
+      cmLinkItem item = this->ResolveLinkItem(
+        BT<std::string>(name, entry.Backtrace), lg, linkFeature);
       if (item.Target) {
         auto depsForTarget = synthTargetsForConfig.find(item.Target);
         if (depsForTarget != synthTargetsForConfig.end()) {
@@ -8535,7 +8667,14 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     CMP0003_ComputeLinkType(config, debugConfigs);
   cmTarget::LinkLibraryVectorType const& oldllibs =
     this->Target->GetOriginalLinkLibraries();
+
+  auto linkFeature = cmLinkItem::DEFAULT;
   for (cmTarget::LibraryID const& oldllib : oldllibs) {
+    if (auto maybeLinkFeature = ParseLinkFeature(oldllib.first)) {
+      linkFeature = std::move(*maybeLinkFeature);
+      continue;
+    }
+
     if (oldllib.second != GENERAL_LibraryType && oldllib.second != linkType) {
       std::string name = this->CheckCMP0004(oldllib.first);
       if (name == this->GetName() || name.empty()) {
@@ -8543,7 +8682,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       }
       // Support OLD behavior for CMP0003.
       impl.WrongConfigLibraries.push_back(
-        this->ResolveLinkItem(BT<std::string>(name)));
+        this->ResolveLinkItem(BT<std::string>(name), linkFeature));
     }
   }
 }
@@ -8569,19 +8708,20 @@ cmGeneratorTarget::TargetOrString cmGeneratorTarget::ResolveTargetReference(
 }
 
 cmLinkItem cmGeneratorTarget::ResolveLinkItem(
-  BT<std::string> const& name) const
+  BT<std::string> const& name, std::string const& linkFeature) const
 {
-  return this->ResolveLinkItem(name, this->LocalGenerator);
+  return this->ResolveLinkItem(name, this->LocalGenerator, linkFeature);
 }
 
-cmLinkItem cmGeneratorTarget::ResolveLinkItem(BT<std::string> const& name,
-                                              cmLocalGenerator const* lg) const
+cmLinkItem cmGeneratorTarget::ResolveLinkItem(
+  BT<std::string> const& name, cmLocalGenerator const* lg,
+  std::string const& linkFeature) const
 {
   auto bt = name.Backtrace;
   TargetOrString resolved = this->ResolveTargetReference(name.Value, lg);
 
   if (!resolved.Target) {
-    return cmLinkItem(resolved.String, false, bt);
+    return cmLinkItem(resolved.String, false, bt, linkFeature);
   }
 
   // Check deprecation, issue message with `bt` backtrace.
@@ -8602,10 +8742,10 @@ cmLinkItem cmGeneratorTarget::ResolveLinkItem(BT<std::string> const& name,
   // within the project.
   if (resolved.Target->GetType() == cmStateEnums::EXECUTABLE &&
       !resolved.Target->IsExecutableWithExports()) {
-    return cmLinkItem(resolved.Target->GetName(), false, bt);
+    return cmLinkItem(resolved.Target->GetName(), false, bt, linkFeature);
   }
 
-  return cmLinkItem(resolved.Target, false, bt);
+  return cmLinkItem(resolved.Target, false, bt, linkFeature);
 }
 
 bool cmGeneratorTarget::HasPackageReferences() const
@@ -9358,11 +9498,25 @@ bool cmGeneratorTarget::NeedDyndepForSource(std::string const& lang,
     return true;
   }
 
+  auto targetDyndep = this->NeedCxxDyndep(config);
+  if (targetDyndep == CxxModuleSupport::Unavailable) {
+    return false;
+  }
+  auto const sfProp = sf->GetProperty("CXX_SCAN_FOR_MODULES");
+  if (sfProp.IsSet()) {
+    return sfProp.IsOn();
+  }
+  return targetDyndep == CxxModuleSupport::Enabled;
+}
+
+cmGeneratorTarget::CxxModuleSupport cmGeneratorTarget::NeedCxxDyndep(
+  std::string const& config) const
+{
   bool haveRule = false;
   switch (this->HaveCxxModuleSupport(config)) {
     case Cxx20SupportLevel::MissingCxx:
     case Cxx20SupportLevel::NoCxx20:
-      return false;
+      return CxxModuleSupport::Unavailable;
     case Cxx20SupportLevel::MissingRule:
       break;
     case Cxx20SupportLevel::Supported:
@@ -9372,28 +9526,29 @@ bool cmGeneratorTarget::NeedDyndepForSource(std::string const& lang,
   bool haveGeneratorSupport =
     this->GetGlobalGenerator()->CheckCxxModuleSupport(
       cmGlobalGenerator::CxxModuleSupportQuery::Inspect);
-  auto const sfProp = sf->GetProperty("CXX_SCAN_FOR_MODULES");
-  if (sfProp.IsSet()) {
-    return sfProp.IsOn();
-  }
   auto const tgtProp = this->GetProperty("CXX_SCAN_FOR_MODULES");
   if (tgtProp.IsSet()) {
-    return tgtProp.IsOn();
+    return tgtProp.IsOn() ? CxxModuleSupport::Enabled
+                          : CxxModuleSupport::Disabled;
   }
 
-  bool policyAnswer = false;
+  CxxModuleSupport policyAnswer = CxxModuleSupport::Unavailable;
   switch (this->GetPolicyStatusCMP0155()) {
     case cmPolicies::WARN:
     case cmPolicies::OLD:
       // The OLD behavior is to not scan the source.
-      policyAnswer = false;
+      policyAnswer = CxxModuleSupport::Disabled;
       break;
     case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::NEW:
       // The NEW behavior is to scan the source if the compiler supports
       // scanning and the generator supports it.
-      policyAnswer = haveRule && haveGeneratorSupport;
+      if (haveRule && haveGeneratorSupport) {
+        policyAnswer = CxxModuleSupport::Enabled;
+      } else {
+        policyAnswer = CxxModuleSupport::Disabled;
+      }
       break;
   }
   return policyAnswer;
@@ -9433,7 +9588,8 @@ void cmGeneratorTarget::BuildFileSetInfoCache(std::string const& config) const
 
     for (auto const& it : files) {
       for (auto const& filename : it.second) {
-        per_config.FileSetCache[filename] = file_set;
+        auto collapsedFile = cmSystemTools::CollapseFullPath(filename);
+        per_config.FileSetCache[collapsedFile] = file_set;
       }
     }
   }

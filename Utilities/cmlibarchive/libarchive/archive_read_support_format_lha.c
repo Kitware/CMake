@@ -1819,7 +1819,7 @@ lha_crc16(uint16_t crc, const void *pp, size_t len)
 		 * remove the statement which will not be executed. */
 #undef bswap16
 #ifndef __has_builtin
-#  define __has_builtin(x) 0
+#define __has_builtin(x) 0
 #endif
 #if defined(_MSC_VER) && _MSC_VER >= 1400  /* Visual Studio */
 #  define bswap16(x) _byteswap_ushort(x)
@@ -1827,7 +1827,7 @@ lha_crc16(uint16_t crc, const void *pp, size_t len)
 /* GCC 4.8 and later has __builtin_bswap16() */
 #  define bswap16(x) __builtin_bswap16(x)
 #elif defined(__clang__) && __has_builtin(__builtin_bswap16)
-/* All clang versions have __builtin_bswap16() */
+/* Newer clang versions have __builtin_bswap16() */
 #  define bswap16(x) __builtin_bswap16(x)
 #else
 #  define bswap16(x) ((((x) >> 8) & 0xff) | ((x) << 8))
@@ -2012,10 +2012,10 @@ lzh_br_fillup(struct lzh_stream *strm, struct lzh_br *br)
 				    ((uint64_t)strm->next_in[0]) << 48 |
 				    ((uint64_t)strm->next_in[1]) << 40 |
 				    ((uint64_t)strm->next_in[2]) << 32 |
-				    ((uint32_t)strm->next_in[3]) << 24 |
-				    ((uint32_t)strm->next_in[4]) << 16 |
-				    ((uint32_t)strm->next_in[5]) << 8 |
-				     (uint32_t)strm->next_in[6];
+				    ((uint64_t)strm->next_in[3]) << 24 |
+				    ((uint64_t)strm->next_in[4]) << 16 |
+				    ((uint64_t)strm->next_in[5]) << 8 |
+				     (uint64_t)strm->next_in[6];
 				strm->next_in += 7;
 				strm->avail_in -= 7;
 				br->cache_avail += 7 * 8;
@@ -2025,10 +2025,10 @@ lzh_br_fillup(struct lzh_stream *strm, struct lzh_br *br)
 		 		   (br->cache_buffer << 48) |
 				    ((uint64_t)strm->next_in[0]) << 40 |
 				    ((uint64_t)strm->next_in[1]) << 32 |
-				    ((uint32_t)strm->next_in[2]) << 24 |
-				    ((uint32_t)strm->next_in[3]) << 16 |
-				    ((uint32_t)strm->next_in[4]) << 8 |
-				     (uint32_t)strm->next_in[5];
+				    ((uint64_t)strm->next_in[2]) << 24 |
+				    ((uint64_t)strm->next_in[3]) << 16 |
+				    ((uint64_t)strm->next_in[4]) << 8 |
+				     (uint64_t)strm->next_in[5];
 				strm->next_in += 6;
 				strm->avail_in -= 6;
 				br->cache_avail += 6 * 8;

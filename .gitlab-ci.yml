@@ -112,6 +112,7 @@ l:tidy-fedora39:
     extends:
         - .fedora39_tidy
         - .cmake_build_linux
+        - .cmake_tidy_artifacts
         - .linux_x86_64_tags
         - .cmake_cdash_artifacts
         - .run_automatically
@@ -754,6 +755,13 @@ t:intel2021.9.0-makefiles:
         CMAKE_CI_BUILD_NAME: intel2021.9.0_makefiles
         CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2023.1.0-el8
 
+t:intel2021.10.0-makefiles:
+    extends:
+        - .cmake_test_linux_intelclassic_makefiles
+    variables:
+        CMAKE_CI_BUILD_NAME: intel2021.10.0_makefiles
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2023.2.1-el8
+
 t:oneapi2021.1.1-makefiles:
     extends:
         - .cmake_test_linux_inteloneapi_makefiles
@@ -823,6 +831,20 @@ t:oneapi2023.1.0-makefiles:
     variables:
         CMAKE_CI_BUILD_NAME: oneapi2023.1.0_makefiles
         CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2023.1.0-el8
+
+t:oneapi2023.2.0-makefiles:
+    extends:
+        - .cmake_test_linux_inteloneapi_makefiles
+    variables:
+        CMAKE_CI_BUILD_NAME: oneapi2023.2.1_makefiles
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2023.2.1-el8
+
+t:oneapi2024.0.0-makefiles:
+    extends:
+        - .cmake_test_linux_inteloneapi_makefiles
+    variables:
+        CMAKE_CI_BUILD_NAME: oneapi2024.0.0_makefiles
+        CMAKE_CI_INTELCOMPILER_IMAGE_TAG: 2024.0.0-el8
 
 b:linux-x86_64-package:
     extends:

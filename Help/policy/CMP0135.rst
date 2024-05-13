@@ -22,8 +22,8 @@ given, this policy controls the default behavior. The ``OLD`` behavior for
 this policy is to restore the timestamps from the archive. The ``NEW``
 behavior sets the timestamps of extracted contents to the time of extraction.
 
-This policy was introduced in CMake version 3.24.  CMake version |release|
-warns when the policy is not set and uses ``OLD`` behavior.  Use the
-:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.24
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

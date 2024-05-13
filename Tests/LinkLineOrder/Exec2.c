@@ -1,7 +1,7 @@
 /* Directly depends on Two */
 void TwoFunc();
 
-int main()
+int main(void)
 {
   TwoFunc();
   return 0;

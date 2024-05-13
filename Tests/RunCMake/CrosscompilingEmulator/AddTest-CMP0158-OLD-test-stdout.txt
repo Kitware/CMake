@@ -1,0 +1,48 @@
+test 1
+    Start 1: DoesNotUseEmulator
+
+1: Test command: "?[^
+]*[/\]cmake(\.exe)?"? "-E" "echo" "Hi"
+1: Working Directory: [^
+]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-CMP0158-OLD-build
+1: Test timeout computed to be: [0-9]+
+1: Hi
+1/5 Test #1: DoesNotUseEmulator [.]* +Passed +[0-9.]+ sec
+test 2
+    Start 2: UsesEmulator
+
+2: Test command: "?[^
+]*[/\]Tests[/\]RunCMake([/\][^/\]+)?[/\]pseudo_emulator(\.exe)?"? "[^"]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-CMP0158-OLD-build(/Debug)?/exe(\.exe)?"
+2: Working Directory: [^
+]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-CMP0158-OLD-build
+2: Test timeout computed to be: [0-9]+
+2: Command: "[^"]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-CMP0158-OLD-build(/Debug)?/exe(\.exe)?"
+2/5 Test #2: UsesEmulator [.]* +Passed +[0-9.]+ sec
+test 3
+    Start 3: DoesNotUseEmulatorWithGenex
+
+3: Test command: "?[^
+]*[/\]Tests[/\]RunCMake[/\]CrosscompilingEmulator[/\]AddTest-CMP0158-OLD-build([/\]Debug)?[/\]exe(\.exe)?"?
+3: Working Directory: [^
+]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-CMP0158-OLD-build
+3: Test timeout computed to be: [0-9]+
+3/5 Test #3: DoesNotUseEmulatorWithGenex [.]* +Passed +[0-9.]+ sec
+test 4
+    Start 4: UsesEmulatorWithExecTargetFromSubdirAddedWithoutGenex
+
+4: Test command: "?[^
+]*[/\]Tests[/\]RunCMake([/\][^/\]+)?[/\]pseudo_emulator(\.exe)?"? "[^"]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-CMP0158-OLD-build/AddTest(/Debug)?/subdir_exe_no_genex(\.exe)?"
+4: Working Directory: [^
+]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-CMP0158-OLD-build
+4: Test timeout computed to be: [0-9]+
+4: Command: "[^"]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-CMP0158-OLD-build/AddTest(/Debug)?/subdir_exe_no_genex(\.exe)?"
+4/5 Test #4: UsesEmulatorWithExecTargetFromSubdirAddedWithoutGenex [.]* +Passed +[0-9.]+ sec
+test 5
+    Start 5: DoesNotUseEmulatorWithExecTargetFromSubdirAddedWithGenex
+
+5: Test command: "?[^
+]*[/\]Tests[/\]RunCMake[/\]CrosscompilingEmulator[/\]AddTest-CMP0158-OLD-build[/\]AddTest([/\]Debug)?[/\]subdir_exe_with_genex(\.exe)?"?
+5: Working Directory: [^
+]*/Tests/RunCMake/CrosscompilingEmulator/AddTest-CMP0158-OLD-build
+5: Test timeout computed to be: [0-9]+
+5/5 Test #5: DoesNotUseEmulatorWithExecTargetFromSubdirAddedWithGenex [.]* +Passed +[0-9.]+ sec

@@ -315,6 +315,7 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
   unsigned int limit_count = 0;
   cmsys::RegularExpression regex;
   bool have_regex = false;
+  bool store_regex = true;
   bool newline_consume = false;
   bool hex_conversion_enabled = true;
   enum
@@ -399,6 +400,26 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
         return false;
       }
       have_regex = true;
+      switch (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0159)) {
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::NEW:
+          // store_regex = true
+          break;
+        case cmPolicies::WARN:
+          if (status.GetMakefile().PolicyOptionalWarningEnabled(
+                "CMAKE_POLICY_WARNING_CMP0159")) {
+            status.GetMakefile().IssueMessage(
+              MessageType::AUTHOR_WARNING,
+              cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0159), '\n',
+                       "For compatibility, CMake is leaving CMAKE_MATCH_<n> "
+                       "unchanged."));
+          }
+          CM_FALLTHROUGH;
+        case cmPolicies::OLD:
+          store_regex = false;
+          break;
+      }
       arg_mode = arg_none;
     } else if (arg_mode == arg_encoding) {
       if (args[i] == "UTF-8") {
@@ -539,6 +560,10 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
       // string matches the requirements.  The length may now be as
       // low as zero since blank lines are allowed.
       if (s.length() >= minlen && (!have_regex || regex.find(s))) {
+        if (store_regex) {
+          status.GetMakefile().ClearMatches();
+          status.GetMakefile().StoreMatches(regex);
+        }
         output_size += static_cast<int>(s.size()) + 1;
         if (limit_output >= 0 && output_size >= limit_output) {
           s.clear();
@@ -555,6 +580,10 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
       // be at least one no matter what the user specified.
       if (s.length() >= minlen && !s.empty() &&
           (!have_regex || regex.find(s))) {
+        if (store_regex) {
+          status.GetMakefile().ClearMatches();
+          status.GetMakefile().StoreMatches(regex);
+        }
         output_size += static_cast<int>(s.size()) + 1;
         if (limit_output >= 0 && output_size >= limit_output) {
           s.clear();
@@ -572,6 +601,10 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
     if (maxlen > 0 && s.size() == maxlen) {
       // Terminate a string if the maximum length is reached.
       if (s.length() >= minlen && (!have_regex || regex.find(s))) {
+        if (store_regex) {
+          status.GetMakefile().ClearMatches();
+          status.GetMakefile().StoreMatches(regex);
+        }
         output_size += static_cast<int>(s.size()) + 1;
         if (limit_output >= 0 && output_size >= limit_output) {
           s.clear();
@@ -588,6 +621,10 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
   // matches the requirements.
   if ((!limit_count || strings.size() < limit_count) && !s.empty() &&
       s.length() >= minlen && (!have_regex || regex.find(s))) {
+    if (store_regex) {
+      status.GetMakefile().ClearMatches();
+      status.GetMakefile().StoreMatches(regex);
+    }
     output_size += static_cast<int>(s.size()) + 1;
     if (limit_output < 0 || output_size < limit_output) {
       strings.push_back(s);
@@ -1322,13 +1359,15 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
       if (oldPolicyPath != realPath) {
         status.GetMakefile().IssueMessage(
           MessageType::AUTHOR_WARNING,
-          cmStrCat(
-            cmPolicies::GetPolicyWarning(cmPolicies::CMP0152), '\n',
-            "From input path:\n  ", input,
-            "\nthe policy OLD behavior produces path:\n  ", oldPolicyPath,
-            "\nbut the policy NEW behavior produces path:\n  ", realPath,
-            "\nSince the policy is not set, CMake is using the OLD "
-            "behavior for compatibility."));
+          cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0152),
+                   "\n"
+                   "From input path:\n  ",
+                   input, "\nthe policy OLD behavior produces path:\n  ",
+                   oldPolicyPath,
+                   "\nbut the policy NEW behavior produces path:\n  ",
+                   realPath,
+                   "\nSince the policy is not set, CMake is using the OLD "
+                   "behavior for compatibility."));
       }
     }
     realPath = oldPolicyPath;

@@ -1,7 +1,7 @@
 
-extern void func1();
+extern void func1(void);
 
-int main()
+int main(void)
 {
   func1();
 }

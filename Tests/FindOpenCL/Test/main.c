@@ -4,7 +4,7 @@
 #  include <CL/cl.h>
 #endif
 
-int main()
+int main(void)
 {
   cl_uint platformIdCount;
 

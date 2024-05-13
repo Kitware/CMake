@@ -35,6 +35,11 @@ public:
 private:
   // -- Utility
   bool IsMultiConfig() const { return this->MultiConfig_; }
+  std::string const& GetGenerator() const { return this->Generator_; }
+  bool IsXcode() const
+  {
+    return this->GetGenerator().find("Xcode") != std::string::npos;
+  }
   std::string MultiConfigOutput() const;
 
   // -- Abstract processing interface
@@ -53,6 +58,9 @@ private:
 
   // -- Config settings
   bool MultiConfig_ = false;
+  bool CrossConfig_ = false;
+  bool UseBetterGraph_ = false;
+  std::string Generator_;
   // -- Directories
   std::string AutogenBuildDir_;
   std::string IncludeDir_;
@@ -92,26 +100,57 @@ bool cmQtAutoRccT::InitFromInfo(InfoT const& info)
 {
   // -- Required settings
   if (!info.GetBool("MULTI_CONFIG", this->MultiConfig_, true) ||
+      !info.GetString("GENERATOR", this->Generator_, true) ||
+      !info.GetBool("CROSS_CONFIG", this->CrossConfig_, true) ||
+      !info.GetBool("USE_BETTER_GRAPH", this->UseBetterGraph_, true) ||
       !info.GetString("BUILD_DIR", this->AutogenBuildDir_, true) ||
       !info.GetStringConfig("INCLUDE_DIR", this->IncludeDir_, true) ||
-      !info.GetString("RCC_EXECUTABLE", this->RccExecutable_, true) ||
-      !info.GetArray("RCC_LIST_OPTIONS", this->RccListOptions_, false) ||
+      !info.GetArrayConfig("RCC_LIST_OPTIONS", this->RccListOptions_, false) ||
       !info.GetString("LOCK_FILE", this->LockFile_, true) ||
       !info.GetStringConfig("SETTINGS_FILE", this->SettingsFile_, true) ||
       !info.GetString("SOURCE", this->QrcFile_, true) ||
       !info.GetString("OUTPUT_CHECKSUM", this->RccPathChecksum_, true) ||
       !info.GetString("OUTPUT_NAME", this->RccFileName_, true) ||
-      !info.GetArray("OPTIONS", this->Options_, false) ||
-      !info.GetArray("INPUTS", this->Inputs_, false)) {
+      !info.GetArray("OPTIONS", this->Options_, false)) {
     return false;
+  }
+  if (this->UseBetterGraph_) {
+    if (!info.GetArrayConfig("INPUTS", this->Inputs_, false)) {
+      return false;
+    }
+    if (this->CrossConfig_) {
+      std::string const rccExecutableWithConfig =
+        "RCC_EXECUTABLE_" + this->ExecutableConfig();
+      if (!info.GetString(rccExecutableWithConfig, this->RccExecutable_,
+                          true)) {
+        return false;
+      }
+    } else {
+      if (!info.GetStringConfig("RCC_EXECUTABLE", this->RccExecutable_,
+                                true)) {
+        return false;
+      }
+    }
+  } else {
+    if (!info.GetString("RCC_EXECUTABLE", this->RccExecutable_, true) ||
+        !info.GetArray("RCC_LIST_OPTIONS", this->RccListOptions_, false) ||
+        !info.GetArray("INPUTS", this->Inputs_, false)) {
+      return false;
+    }
   }
 
   // -- Derive information
   this->QrcFileName_ = cmSystemTools::GetFilenameName(this->QrcFile_);
   this->QrcFileDir_ = cmSystemTools::GetFilenamePath(this->QrcFile_);
-  this->RccFilePublic_ =
-    cmStrCat(this->AutogenBuildDir_, '/', this->RccPathChecksum_, '/',
-             this->RccFileName_);
+  if (IsMultiConfig() && !this->IsXcode() && this->UseBetterGraph_) {
+    this->RccFilePublic_ =
+      cmStrCat(this->AutogenBuildDir_, '/', this->RccPathChecksum_, "_",
+               this->InfoConfig(), '/', this->RccFileName_);
+  } else {
+    this->RccFilePublic_ =
+      cmStrCat(this->AutogenBuildDir_, '/', this->RccPathChecksum_, '/',
+               this->RccFileName_);
+  }
 
   // rcc output file name
   if (this->IsMultiConfig()) {
@@ -520,7 +559,8 @@ bool cmQtAutoRccT::GenerateWrapper()
 
 } // End of unnamed namespace
 
-bool cmQtAutoRcc(cm::string_view infoFile, cm::string_view config)
+bool cmQtAutoRcc(cm::string_view infoFile, cm::string_view config,
+                 cm::string_view executableConfig)
 {
-  return cmQtAutoRccT().Run(infoFile, config);
+  return cmQtAutoRccT().Run(infoFile, config, executableConfig);
 }

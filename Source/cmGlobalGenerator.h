@@ -349,6 +349,8 @@ public:
   int GetLinkerPreference(const std::string& lang) const;
   //! What is the object file extension for a given source file?
   std::string GetLanguageOutputExtension(cmSourceFile const&) const;
+  //! What is the object file extension for a given language?
+  std::string GetLanguageOutputExtension(std::string const& lang) const;
 
   //! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGIntDir() const { return "."; }

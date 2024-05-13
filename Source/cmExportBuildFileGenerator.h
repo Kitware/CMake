@@ -33,15 +33,27 @@ class cmTargetExport;
 class cmExportBuildFileGenerator : public cmExportFileGenerator
 {
 public:
+  struct TargetExport
+  {
+    TargetExport(std::string name, std::string xcFrameworkLocation)
+      : Name(std::move(name))
+      , XcFrameworkLocation(std::move(xcFrameworkLocation))
+    {
+    }
+
+    std::string Name;
+    std::string XcFrameworkLocation;
+  };
+
   cmExportBuildFileGenerator();
 
   /** Set the list of targets to export.  */
-  void SetTargets(std::vector<std::string> const& targets)
+  void SetTargets(std::vector<TargetExport> const& targets)
   {
     this->Targets = targets;
   }
-  void GetTargets(std::vector<std::string>& targets) const;
-  void AppendTargets(std::vector<std::string> const& targets)
+  void GetTargets(std::vector<TargetExport>& targets) const;
+  void AppendTargets(std::vector<TargetExport> const& targets)
   {
     cm::append(this->Targets, targets);
   }
@@ -90,6 +102,7 @@ protected:
                                     cmTargetExport* te) override;
   std::string GetFileSetFiles(cmGeneratorTarget* gte, cmFileSet* fileSet,
                               cmTargetExport* te) override;
+  cmExportSet* GetExportSet() const override { return this->ExportSet; }
 
   std::string GetCxxModulesDirectory() const override;
   void GenerateCxxModuleConfigInformation(std::string const&,
@@ -100,9 +113,22 @@ protected:
   std::pair<std::vector<std::string>, std::string> FindBuildExportInfo(
     cmGlobalGenerator* gg, const std::string& name);
 
-  std::vector<std::string> Targets;
+  struct TargetExportPrivate
+  {
+    TargetExportPrivate(cmGeneratorTarget* target,
+                        std::string xcFrameworkLocation)
+      : Target(target)
+      , XcFrameworkLocation(std::move(xcFrameworkLocation))
+    {
+    }
+
+    cmGeneratorTarget* Target;
+    std::string XcFrameworkLocation;
+  };
+
+  std::vector<TargetExport> Targets;
   cmExportSet* ExportSet;
-  std::vector<cmGeneratorTarget*> Exports;
+  std::vector<TargetExportPrivate> Exports;
   cmLocalGenerator* LG;
   // The directory for C++ module information.
   std::string CxxModulesDirectory;

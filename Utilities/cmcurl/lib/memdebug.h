@@ -64,7 +64,7 @@ CURL_EXTERN ALLOC_SIZE(2) void *curl_dbg_realloc(void *ptr,
 CURL_EXTERN void curl_dbg_free(void *ptr, int line, const char *source);
 CURL_EXTERN ALLOC_FUNC char *curl_dbg_strdup(const char *str, int line,
                                              const char *src);
-#if defined(WIN32) && defined(UNICODE)
+#if defined(_WIN32) && defined(UNICODE)
 CURL_EXTERN ALLOC_FUNC wchar_t *curl_dbg_wcsdup(const wchar_t *str,
                                                 int line,
                                                 const char *source);
@@ -72,7 +72,7 @@ CURL_EXTERN ALLOC_FUNC wchar_t *curl_dbg_wcsdup(const wchar_t *str,
 
 CURL_EXTERN void curl_dbg_memdebug(const char *logname);
 CURL_EXTERN void curl_dbg_memlimit(long limit);
-CURL_EXTERN void curl_dbg_log(const char *format, ...);
+CURL_EXTERN void curl_dbg_log(const char *format, ...) CURL_PRINTF(1, 2);
 
 /* file descriptor manipulators */
 CURL_EXTERN curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
@@ -121,7 +121,7 @@ CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
 #define send(a,b,c,d) curl_dbg_send(a,b,c,d, __LINE__, __FILE__)
 #define recv(a,b,c,d) curl_dbg_recv(a,b,c,d, __LINE__, __FILE__)
 
-#ifdef WIN32
+#ifdef _WIN32
 #  ifdef UNICODE
 #    undef wcsdup
 #    define wcsdup(ptr) curl_dbg_wcsdup(ptr, __LINE__, __FILE__)

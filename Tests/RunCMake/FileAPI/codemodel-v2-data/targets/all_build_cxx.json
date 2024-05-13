@@ -83,6 +83,22 @@
             "backtrace": null
         },
         {
+            "id": "^cxx_exe_cross_emulator::@ee4a268216d1f53c4e2e$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_exe_cross_emulator_args::@ee4a268216d1f53c4e2e$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_exe_test_launcher_and_cross_emulator::@ee4a268216d1f53c4e2e$",
+            "backtrace": null
+        },
+        {
+            "id": "^cxx_exe_test_launcher::@a56b12a3f5c0529fb296$",
+            "backtrace": null
+        },
+        {
             "id": "^cxx_standard_compile_feature_exe::@a56b12a3f5c0529fb296$",
             "backtrace": null
         },

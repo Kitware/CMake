@@ -1,0 +1,3 @@
+libs=
+dirs=C:/DoesNotExist/LLVM/lib;C:/DoesNotExist/LLVM/lib/clang/18/lib/windows
+linker_tool=C:/Program Files/Microsoft Visual Studio/2022/Professional/VC/Tools/MSVC/14.36.32532/bin/Hostx64/x64/link.exe

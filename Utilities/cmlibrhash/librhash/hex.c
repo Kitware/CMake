@@ -14,7 +14,7 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 #include "hex.h"
-#include <assert.h>
+#include "util.h"
 #include <ctype.h>
 #include <string.h>
 
@@ -113,8 +113,8 @@ size_t rhash_base64_url_encoded_helper(char* dst, const unsigned char* src, size
 	#ifdef __clang_analyzer__
 	memset(buffer, 0, sizeof(buffer));
 	#endif
-	assert((BASE64_LENGTH(B64_CHUNK_SIZE) + 4) <= sizeof(buffer));
-	assert((B64_CHUNK_SIZE % 6) == 0);
+	RHASH_ASSERT((BASE64_LENGTH(B64_CHUNK_SIZE) + 4) <= sizeof(buffer));
+	RHASH_ASSERT((B64_CHUNK_SIZE % 6) == 0);
 	if (url_encode) {
 		size_t result_length = 0;
 		for (; length > 0; src += B64_CHUNK_SIZE) {

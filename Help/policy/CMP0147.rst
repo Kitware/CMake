@@ -16,9 +16,8 @@ The ``OLD`` behavior for this policy is to not add ``BuildInParallel``.
 The ``NEW`` behavior for this policy is to add ``BuildInParallel`` for
 VS 15.8 and newer.
 
-This policy was introduced in CMake version 3.27.  Use the
-:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
-Unlike many policies, CMake version |release| does *not* warn
-when this policy is not set and simply uses ``OLD`` behavior.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.27
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

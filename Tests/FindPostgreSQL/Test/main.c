@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-int main()
+int main(void)
 {
   int version = PQlibVersion();
   char version_string[100];

@@ -30,6 +30,7 @@
 #include "warnless.h"
 #include "urldata.h"
 #include "sendf.h"
+#include "strdup.h"
 
 #if !defined(CURL_DISABLE_MIME) && (!defined(CURL_DISABLE_HTTP) ||      \
                                     !defined(CURL_DISABLE_SMTP) ||      \
@@ -48,7 +49,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifdef WIN32
+#ifdef _WIN32
 # ifndef R_OK
 #  define R_OK 4
 # endif
@@ -311,8 +312,7 @@ static char *escape_string(struct Curl_easy *data,
   table = formtable;
   /* data can be NULL when this function is called indirectly from
      curl_formget(). */
-  if(strategy == MIMESTRATEGY_MAIL ||
-     (data && (data->set.mime_options & CURLMIMEOPT_FORMESCAPE)))
+  if(strategy == MIMESTRATEGY_MAIL || (data && (data->set.mime_formescape)))
     table = mimetable;
 
   Curl_dyn_init(&db, CURL_MAX_INPUT_LENGTH);
@@ -818,7 +818,7 @@ static size_t read_part_content(curl_mimepart *part,
     case MIMEKIND_FILE:
       if(part->fp && feof(part->fp))
         break;  /* At EOF. */
-      /* FALLTHROUGH */
+      FALLTHROUGH();
     default:
       if(part->readfunc) {
         if(!(part->flags & MIME_FAST_READ)) {
@@ -937,7 +937,7 @@ static size_t readback_part(curl_mimepart *part,
         mimesetstate(&part->state, MIMESTATE_USERHEADERS, hdr->next);
         break;
       }
-      /* FALLTHROUGH */
+      FALLTHROUGH();
     case MIMESTATE_CURLHEADERS:
       if(!hdr)
         mimesetstate(&part->state, MIMESTATE_USERHEADERS, part->userheaders);
@@ -971,7 +971,7 @@ static size_t readback_part(curl_mimepart *part,
           fclose(part->fp);
           part->fp = NULL;
         }
-        /* FALLTHROUGH */
+        FALLTHROUGH();
       case CURL_READFUNC_ABORT:
       case CURL_READFUNC_PAUSE:
       case READ_ERROR:
@@ -1236,6 +1236,7 @@ CURLcode Curl_mime_duppart(struct Curl_easy *data,
     }
     break;
   default:  /* Invalid kind: should not occur. */
+    DEBUGF(infof(data, "invalid MIMEKIND* attempt"));
     res = CURLE_BAD_FUNCTION_ARGUMENT;  /* Internal error? */
     break;
   }
@@ -1371,27 +1372,22 @@ CURLcode curl_mime_filename(curl_mimepart *part, const char *filename)
 
 /* Set mime part content from memory data. */
 CURLcode curl_mime_data(curl_mimepart *part,
-                        const char *data, size_t datasize)
+                        const char *ptr, size_t datasize)
 {
   if(!part)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   cleanup_part_content(part);
 
-  if(data) {
+  if(ptr) {
     if(datasize == CURL_ZERO_TERMINATED)
-      datasize = strlen(data);
+      datasize = strlen(ptr);
 
-    part->data = malloc(datasize + 1);
+    part->data = Curl_memdup0(ptr, datasize);
     if(!part->data)
       return CURLE_OUT_OF_MEMORY;
 
     part->datasize = datasize;
-
-    if(datasize)
-      memcpy(part->data, data, datasize);
-    part->data[datasize] = '\0';    /* Set a null terminator as sentinel. */
-
     part->readfunc = mime_mem_read;
     part->seekfunc = mime_mem_seek;
     part->freefunc = mime_mem_free;

@@ -37,29 +37,35 @@ if ((RunCMake_GENERATOR MATCHES "Makefiles|Ninja|Xcode"
     set(LINK_EXTERN_LIBRARY_SUFFIX "${CMAKE_IMPORT_LIBRARY_SUFFIX}")
   endif()
 
-  run_cmake(LINK_LIBRARY)
+  foreach(policy IN ITEMS OLD NEW)
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/LINK_LIBRARY-CMP0156-${policy}-build)
+    run_cmake_with_options(LINK_LIBRARY -DCMP0156=${policy})
 
-  run_cmake_target(LINK_LIBRARY simple1 LinkLibrary_simple1)
-  run_cmake_target(LINK_LIBRARY simple2 LinkLibrary_simple2)
-  run_cmake_target(LINK_LIBRARY group1 LinkLibrary_group1)
-  run_cmake_target(LINK_LIBRARY group2 LinkLibrary_group2)
-  run_cmake_target(LINK_LIBRARY nested-feature1 LinkLibrary_nested_feature1)
-  run_cmake_target(LINK_LIBRARY nested-feature2 LinkLibrary_nested_feature2)
-  run_cmake_target(LINK_LIBRARY link-items1 LinkLibrary_link_items1)
-  run_cmake_target(LINK_LIBRARY link-items2 LinkLibrary_link_items2)
-  run_cmake_target(LINK_LIBRARY link-items3 LinkLibrary_link_items3)
-  run_cmake_target(LINK_LIBRARY link-items4 LinkLibrary_link_items4)
-  run_cmake_target(LINK_LIBRARY mix-features1 LinkLibrary_mix_features1)
-  run_cmake_target(LINK_LIBRARY mix-features2 LinkLibrary_mix_features2)
-  run_cmake_target(LINK_LIBRARY mix-features3 LinkLibrary_mix_features3)
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} simple1 LinkLibrary_simple1)
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} simple2 LinkLibrary_simple2)
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} group1 LinkLibrary_group1)
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} group2 LinkLibrary_group2)
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} nested-feature1 LinkLibrary_nested_feature1)
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} nested-feature2 LinkLibrary_nested_feature2)
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} link-items1 LinkLibrary_link_items1)
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} link-items2 LinkLibrary_link_items2)
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} link-items3 LinkLibrary_link_items3)
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} link-items4 LinkLibrary_link_items4)
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} mix-features1 LinkLibrary_mix_features1)
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} mix-features2 LinkLibrary_mix_features2)
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} mix-features3 LinkLibrary_mix_features3)
 
-  # testing target property LINK_LIBRARY_OVERRIDE
-  run_cmake_target(LINK_LIBRARY override-features1 LinkLibrary_override_features1)
-  run_cmake_target(LINK_LIBRARY override-features2 LinkLibrary_override_features2)
-  run_cmake_target(LINK_LIBRARY override-with-DEFAULT LinkLibrary_override_with_default)
-  # testing target property LINK_LIBRARY_OVERRIDE_<LIBRARY>
-  run_cmake_target(LINK_LIBRARY override-features3 LinkLibrary_override_features3)
-  run_cmake_target(LINK_LIBRARY override-features4 LinkLibrary_override_features4)
+    # testing target property LINK_LIBRARY_OVERRIDE
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} override-features1 LinkLibrary_override_features1)
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} override-features2 LinkLibrary_override_features2)
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} override-with-DEFAULT LinkLibrary_override_with_default)
+    # testing target property LINK_LIBRARY_OVERRIDE_<LIBRARY>
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} override-features3 LinkLibrary_override_features3)
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} override-features4 LinkLibrary_override_features4)
+
+    # testing target property INTERFACE_LINK_LIBRARIES_DIRECT
+    run_cmake_target(LINK_LIBRARY-CMP0156-${policy} consuming_LINK_LIBRARIES_DIRECT LinkLibrary_consuming_LINK_LIBRARIES_DIRECT)
+  endforeach()
 
   run_cmake(imported-target)
 

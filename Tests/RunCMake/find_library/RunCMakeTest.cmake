@@ -24,6 +24,10 @@ if(CMAKE_HOST_WIN32 AND MINGW)
   run_cmake(MSYSTEM_PREFIX)
 endif()
 
+if(CMAKE_HOST_WIN32 AND MSVC)
+  run_cmake(Windows-MSVC)
+endif()
+
 run_cmake_script(FromScriptMode "-DTEMP_DIR=${RunCMake_BINARY_DIR}/FromScriptMode-temp")
 
 run_cmake_with_options(FromPATHEnvDebugVar --debug-find-var=CREATED_LIBRARY)

@@ -1,0 +1,21 @@
+CMAKE_LANG=Fortran
+CMAKE_LINKER=C:/Program Files/Microsoft Visual Studio/2022/Professional/VC/Tools/MSVC/14.36.32532/bin/Hostx64/x64/link.exe
+CMAKE_Fortran_COMPILER_ABI=
+CMAKE_Fortran_COMPILER_AR=C:/DoesNotExist/intel/compiler/latest/windows/bin-llvm/llvm-ar.exe
+CMAKE_Fortran_COMPILER_ARCHITECTURE_ID=x64
+CMAKE_Fortran_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_Fortran_COMPILER_ID=IntelLLVM
+CMAKE_Fortran_COMPILER_LAUNCHER=
+CMAKE_Fortran_COMPILER_LOADED=1
+CMAKE_Fortran_COMPILER_RANLIB=C:/Program Files/Microsoft Visual Studio/2022/Professional/VC/Tools/Llvm/x64/bin/llvm-ranlib.exe
+CMAKE_Fortran_COMPILER_TARGET=
+CMAKE_Fortran_COMPILER_VERSION=2023.1.0
+CMAKE_Fortran_COMPILER_VERSION_INTERAL=
+CMAKE_HOST_SYSTEM_NAME=Windows
+Change Dir: 'C:/DoesNotExist/Temp/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): C:/DoesNotExist/ninja/bin/ninja.exe -v cmTC_26e9b
+[1/4] C:\Windows\system32\cmd.exe /C "C:\DoesNotExist\intel\compiler\latest\windows\bin\ifx.exe -fpp   /W1 /nologo /fpp /libs:dll /threads  /Od /debug:full /dbglibs -P "C:\DoesNotExist\CMake\Modules\CMakeFortranCompilerABI.F" -FiCMakeFiles\cmTC_26e9b.dir\CMakeFortranCompilerABI.F-pp.f && "C:\DoesNotExist\CMake\build\bin\cmake.exe" -E cmake_ninja_depends --tdi=CMakeFiles\cmTC_26e9b.dir\FortranDependInfo.json --lang=Fortran --src=CMakeFiles\cmTC_26e9b.dir\CMakeFortranCompilerABI.F-pp.f --out=CMakeFiles\cmTC_26e9b.dir\CMakeFortranCompilerABI.F-pp.f --dep=CMakeFiles\cmTC_26e9b.dir\CMakeFortranCompilerABI.F-pp.f.d --obj=CMakeFiles\cmTC_26e9b.dir\CMakeFortranCompilerABI.F.obj --ddi=CMakeFiles\cmTC_26e9b.dir\CMakeFortranCompilerABI.F.obj.ddi"
+[2/4] "C:\DoesNotExist\CMake\build\bin\cmake.exe" -E cmake_ninja_dyndep --tdi=CMakeFiles\cmTC_26e9b.dir\FortranDependInfo.json --lang=Fortran --dd=CMakeFiles\cmTC_26e9b.dir\Fortran.dd @CMakeFiles\cmTC_26e9b.dir\Fortran.dd.rsp
+[3/4] C:\DoesNotExist\intel\compiler\latest\windows\bin\ifx.exe  /nologo /fpp  -I"C:\DoesNotExist\CMake\Modules" /W1 /nologo /fpp /libs:dll /threads  /Od /debug:full /dbglibs /FoCMakeFiles\cmTC_26e9b.dir\CMakeFortranCompilerABI.F.obj /Fd -c CMakeFiles\cmTC_26e9b.dir\CMakeFortranCompilerABI.F-pp.f
+[4/4] C:\Windows\system32\cmd.exe /C "cd . && "C:\DoesNotExist\CMake\build\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_26e9b.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100226~1.0\x64\rc.exe --mt="" --manifests  -- C:\DoesNotExist\intel\compiler\latest\windows\bin\ifx.exe /nologo CMakeFiles\cmTC_26e9b.dir\CMakeFortranCompilerABI.F.obj  /Qoption,link,/machine:x64  /debug /INCREMENTAL /Qoption,link,/subsystem:console   /link /out:cmTC_26e9b.exe /implib:cmTC_26e9b.lib /pdb:cmTC_26e9b.exe.dbg /version:0.0  && cd ."

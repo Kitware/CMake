@@ -1,0 +1,16 @@
+{
+    "source": "^cxx/cross$",
+    "build": "^cxx/cross$",
+    "parentSource": "^cxx$",
+    "parentIndex": 2,
+    "childSources": null,
+    "targetIds": [
+        "^cxx_exe_cross_emulator::@ee4a268216d1f53c4e2e$",
+        "^cxx_exe_cross_emulator_args::@ee4a268216d1f53c4e2e$",
+        "^cxx_exe_test_launcher_and_cross_emulator::@ee4a268216d1f53c4e2e$"
+    ],
+    "projectName": "Cxx",
+    "minimumCMakeVersion": "3.13",
+    "hasInstallRule": null,
+    "installers": []
+}

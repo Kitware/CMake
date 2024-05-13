@@ -116,6 +116,19 @@ void cmGhsMultiTargetGenerator::Generate()
 
 void cmGhsMultiTargetGenerator::GenerateTarget()
 {
+  if (this->GeneratorTarget->GetType() == cmStateEnums::EXECUTABLE &&
+      !this->GeneratorTarget
+         ->GetLinkerTypeProperty(
+           this->GeneratorTarget->GetLinkerLanguage(this->ConfigName),
+           this->ConfigName)
+         .empty()) {
+    // Green Hill MULTI does not support this feature.
+    cmSystemTools::Message(
+      cmStrCat("'LINKER_TYPE' property, specified on target '",
+               this->GeneratorTarget->GetName(),
+               "', is not supported by this generator."));
+  }
+
   // Open the target file in copy-if-different mode.
   std::string fproj =
     cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',

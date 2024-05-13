@@ -1,5 +1,12 @@
 enable_language(C)
 
+if(CMP0156 STREQUAL "NEW")
+  cmake_policy(SET CMP0156 NEW)
+  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/LIBRARIES_PROCESSING.cmake" "set(CMAKE_C_LINK_LIBRARIES_PROCESSING \"${CMAKE_C_LINK_LIBRARIES_PROCESSING}\")\n")
+else()
+  cmake_policy(SET CMP0156 OLD)
+endif()
+
 # ensure command line is always displayed and do not use any response file
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 set(CMAKE_C_USE_RESPONSE_FILE_FOR_LIBRARIES FALSE)
@@ -101,3 +108,10 @@ target_link_libraries(LinkLibrary_override_features4 PRIVATE "$<LINK_LIBRARY:fea
 set_property(TARGET LinkLibrary_override_features4 PROPERTY LINK_LIBRARY_OVERRIDE "feat3,base1,other1")
 set_property(TARGET LinkLibrary_override_features4 PROPERTY LINK_LIBRARY_OVERRIDE_base1 feat2)
 set_property(TARGET LinkLibrary_override_features4 PROPERTY LINK_LIBRARY_OVERRIDE_other1 feat2)
+
+# testing NTERFACE_LINK_LIBRARIES_DIRECT property
+add_library(lib_with_LINK_LIBRARIES_DIRECT SHARED base.c)
+set_property(TARGET lib_with_LINK_LIBRARIES_DIRECT PROPERTY INTERFACE_LINK_LIBRARIES_DIRECT base1)
+
+add_library(LinkLibrary_consuming_LINK_LIBRARIES_DIRECT SHARED lib.c)
+target_link_libraries(LinkLibrary_consuming_LINK_LIBRARIES_DIRECT PRIVATE $<LINK_LIBRARY:feat1,lib_with_LINK_LIBRARIES_DIRECT>)

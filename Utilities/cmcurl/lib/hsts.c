@@ -40,6 +40,7 @@
 #include "fopen.h"
 #include "rename.h"
 #include "share.h"
+#include "strdup.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -76,7 +77,7 @@ static time_t hsts_debugtime(void *unused)
 
 struct hsts *Curl_hsts_init(void)
 {
-  struct hsts *h = calloc(sizeof(struct hsts), 1);
+  struct hsts *h = calloc(1, sizeof(struct hsts));
   if(h) {
     Curl_llist_init(&h->list, NULL);
   }
@@ -108,7 +109,7 @@ void Curl_hsts_cleanup(struct hsts **hp)
 
 static struct stsentry *hsts_entry(void)
 {
-  return calloc(sizeof(struct stsentry), 1);
+  return calloc(1, sizeof(struct stsentry));
 }
 
 static CURLcode hsts_create(struct hsts *h,
@@ -116,27 +117,31 @@ static CURLcode hsts_create(struct hsts *h,
                             bool subdomains,
                             curl_off_t expires)
 {
-  struct stsentry *sts = hsts_entry();
-  char *duphost;
   size_t hlen;
-  if(!sts)
-    return CURLE_OUT_OF_MEMORY;
+  DEBUGASSERT(h);
+  DEBUGASSERT(hostname);
 
-  duphost = strdup(hostname);
-  if(!duphost) {
-    free(sts);
-    return CURLE_OUT_OF_MEMORY;
+  hlen = strlen(hostname);
+  if(hlen && (hostname[hlen - 1] == '.'))
+    /* strip off any trailing dot */
+    --hlen;
+  if(hlen) {
+    char *duphost;
+    struct stsentry *sts = hsts_entry();
+    if(!sts)
+      return CURLE_OUT_OF_MEMORY;
+
+    duphost = Curl_memdup0(hostname, hlen);
+    if(!duphost) {
+      free(sts);
+      return CURLE_OUT_OF_MEMORY;
+    }
+
+    sts->host = duphost;
+    sts->expires = expires;
+    sts->includeSubDomains = subdomains;
+    Curl_llist_insert_next(&h->list, h->list.tail, sts, &sts->node);
   }
-
-  hlen = strlen(duphost);
-  if(duphost[hlen - 1] == '.')
-    /* strip off trailing any dot */
-    duphost[--hlen] = 0;
-
-  sts->host = duphost;
-  sts->expires = expires;
-  sts->includeSubDomains = subdomains;
-  Curl_llist_insert_next(&h->list, h->list.tail, sts, &sts->node);
   return CURLE_OK;
 }
 
@@ -473,6 +478,7 @@ static CURLcode hsts_pull(struct Curl_easy *data, struct hsts *h)
       if(sc == CURLSTS_OK) {
         time_t expires;
         CURLcode result;
+        DEBUGASSERT(e.name[0]);
         if(!e.name[0])
           /* bail out if no name was stored */
           return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -564,7 +570,7 @@ CURLcode Curl_hsts_loadcb(struct Curl_easy *data, struct hsts *h)
 
 void Curl_hsts_loadfiles(struct Curl_easy *data)
 {
-  struct curl_slist *l = data->set.hstslist;
+  struct curl_slist *l = data->state.hstslist;
   if(l) {
     Curl_share_lock(data, CURL_LOCK_DATA_HSTS, CURL_LOCK_ACCESS_SINGLE);
 

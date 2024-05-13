@@ -5,6 +5,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <type_traits>
 
@@ -61,10 +62,11 @@ public:
    * Allow less verbose calling of uv_loop_* functions
    * @return reinterpreted handle
    */
-  operator uv_loop_t*();
+  operator uv_loop_t*() const;
 
   uv_loop_t* get() const;
   uv_loop_t* operator->() const noexcept;
+  uv_loop_t& operator*() const;
 };
 
 /***
@@ -130,6 +132,16 @@ public:
   uv_handle_ptr_base_(std::nullptr_t) {}
   ~uv_handle_ptr_base_() { this->reset(); }
 
+#if defined(__SUNPRO_CC)
+  // The Oracle Studio compiler recognizes 'explicit operator bool()' in
+  // 'if(foo)' but not 'if(foo && ...)'.  The purpose of 'explicit' here
+  // is to avoid accidental conversion in non-boolean contexts.  Just
+  // leave it out on this compiler so we can compile valid code.
+  operator bool() const;
+#else
+  explicit operator bool() const;
+#endif
+
   /**
    * Properly close the handle if needed and sets the inner handle to nullptr
    */
@@ -139,7 +151,7 @@ public:
    * Allow less verbose calling of uv_handle_* functions
    * @return reinterpreted handle
    */
-  operator uv_handle_t*();
+  operator uv_handle_t*() const;
 
   T* get() const;
   T* operator->() const noexcept;
@@ -194,6 +206,17 @@ public:
   void send();
 };
 
+struct uv_idle_ptr : public uv_handle_ptr_<uv_idle_t>
+{
+  CM_INHERIT_CTOR(uv_idle_ptr, uv_handle_ptr_, <uv_idle_t>);
+
+  int init(uv_loop_t& loop, void* data = nullptr);
+
+  int start(uv_idle_cb cb);
+
+  void stop();
+};
+
 struct uv_signal_ptr : public uv_handle_ptr_<uv_signal_t>
 {
   CM_INHERIT_CTOR(uv_signal_ptr, uv_handle_ptr_, <uv_signal_t>);
@@ -229,6 +252,8 @@ struct uv_timer_ptr : public uv_handle_ptr_<uv_timer_t>
   int init(uv_loop_t& loop, void* data = nullptr);
 
   int start(uv_timer_cb cb, uint64_t timeout, uint64_t repeat);
+
+  void stop();
 };
 
 struct uv_tty_ptr : public uv_handle_ptr_<uv_tty_t>
@@ -253,6 +278,8 @@ extern template class uv_handle_ptr_base_<uv_handle_t>;
 
 UV_HANDLE_PTR_INSTANTIATE_EXTERN(async)
 
+UV_HANDLE_PTR_INSTANTIATE_EXTERN(idle)
+
 UV_HANDLE_PTR_INSTANTIATE_EXTERN(signal)
 
 UV_HANDLE_PTR_INSTANTIATE_EXTERN(pipe)
@@ -268,4 +295,27 @@ UV_HANDLE_PTR_INSTANTIATE_EXTERN(tty)
 #  undef UV_HANDLE_PTR_INSTANTIATE_EXTERN
 
 #endif
+
+/**
+ * Wraps uv_write to add synchronous cancellation.
+ *
+ * libuv provides no way to synchronously cancel a write request.
+ * Closing a write handle will cancel its pending write request, but its
+ * callback will still be called asynchronously later with UV_ECANCELED.
+ *
+ * This wrapper provides a solution by handing ownership of the uv_write_t
+ * request object to the event loop and taking it back in the callback.
+ * Use this in combination with uv_loop_ptr to ensure the event loop
+ * runs to completion and cleans up all resources.
+ *
+ * The caller may optionally provide a callback it owns with std::shared_ptr.
+ * If the caller's lifetime ends before the write request completes, the
+ * callback can be safely deleted and will not be called.
+ *
+ * The bufs array does not need to live beyond this call, but the memory
+ * referenced by the uv_buf_t values must remain alive until the callback
+ * is made or the stream is closed.
+ */
+int uv_write(uv_stream_t* handle, const uv_buf_t bufs[], unsigned int nbufs,
+             std::weak_ptr<std::function<void(int)>> cb);
 }

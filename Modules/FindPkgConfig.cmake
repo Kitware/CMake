@@ -56,14 +56,29 @@ endif()
 set(PKG_CONFIG_NAMES "pkg-config")
 if(CMAKE_HOST_WIN32)
   list(PREPEND PKG_CONFIG_NAMES "pkg-config.bat")
+  set(_PKG_CONFIG_VALIDATOR VALIDATOR __FindPkgConfig_EXECUTABLE_VALIDATOR)
+  function(__FindPkgConfig_EXECUTABLE_VALIDATOR result_var candidate)
+    if(candidate MATCHES "\\.[Ee][Xx][Ee]$")
+      return()
+    endif()
+    # Exclude the pkg-config distributed with Strawberry Perl.
+    execute_process(COMMAND "${candidate}" --help OUTPUT_VARIABLE _output ERROR_VARIABLE  _output RESULT_VARIABLE _result)
+    if(NOT _result EQUAL 0 OR _output MATCHES "Pure-Perl")
+      set("${result_var}" FALSE PARENT_SCOPE)
+    endif()
+  endfunction()
+else()
+  set(_PKG_CONFIG_VALIDATOR "")
 endif()
 list(APPEND PKG_CONFIG_NAMES "pkgconf")
 
 find_program(PKG_CONFIG_EXECUTABLE
   NAMES ${PKG_CONFIG_NAMES}
   NAMES_PER_DIR
-  DOC "pkg-config executable")
+  DOC "pkg-config executable"
+  ${_PKG_CONFIG_VALIDATOR})
 mark_as_advanced(PKG_CONFIG_EXECUTABLE)
+unset(_PKG_CONFIG_VALIDATOR)
 
 set(PKG_CONFIG_ARGN "${PKG_CONFIG_ARGN}" CACHE STRING "Arguments to supply to pkg-config")
 mark_as_advanced(PKG_CONFIG_ARGN)
@@ -656,6 +671,9 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
 
       if (APPLE AND "-framework" IN_LIST ${_prefix}_LDFLAGS_OTHER)
         _pkgconfig_extract_frameworks("${_prefix}")
+        # Using _pkgconfig_set in this scope so that a future policy can switch to normal variables
+        _pkgconfig_set("${_pkg_check_prefix}_LIBRARIES" "${${_pkg_check_prefix}_LIBRARIES}")
+        _pkgconfig_set("${_pkg_check_prefix}_LDFLAGS_OTHER" "${${_pkg_check_prefix}_LDFLAGS_OTHER}")
       endif()
 
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" INCLUDE_DIRS  "(^| )(-I|-isystem ?)" --cflags-only-I )
@@ -664,6 +682,9 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
 
       if (${_prefix}_CFLAGS_OTHER MATCHES "-isystem")
         _pkgconfig_extract_isystem("${_prefix}")
+        # Using _pkgconfig_set in this scope so that a future policy can switch to normal variables
+        _pkgconfig_set("${_pkg_check_prefix}_CFLAGS_OTHER" "${${_pkg_check_prefix}_CFLAGS_OTHER}")
+        _pkgconfig_set("${_pkg_check_prefix}_INCLUDE_DIRS" "${${_pkg_check_prefix}_INCLUDE_DIRS}")
       endif ()
 
       _pkg_recalculate("${_prefix}" ${_no_cmake_path} ${_no_cmake_environment_path} ${_imp_target} ${_imp_target_global})

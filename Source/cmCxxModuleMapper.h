@@ -93,7 +93,7 @@ cm::static_string_view CxxModuleMapExtension(
 // import cycle).
 std::set<std::string> CxxModuleUsageSeed(
   CxxModuleLocations const& loc, std::vector<cmScanDepInfo> const& objects,
-  CxxModuleUsage& usages);
+  CxxModuleUsage& usages, bool& private_usage_found);
 
 // Return the contents of the module map in the given format for the
 // object file.
