@@ -748,7 +748,8 @@ if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
   endif()
 endif()
 
-if(CMAKE_GENERATOR MATCHES "^Visual Studio (1[6-9]|[2-9][0-9])")
+if(CMAKE_GENERATOR MATCHES "^Visual Studio (1[6-9]|[2-9][0-9])"
+    AND NOT CMAKE_GENERATOR_TOOLSET MATCHES "^(v80|v90|v100|v110|v120)$")
   add_RunCMake_test(VsDotnetSdk)
   add_RunCMake_test(VsNugetPackageRestore)
 endif()
