@@ -24,7 +24,10 @@ if(NOT CMAKE_Swift_COMPILER_WORKS)
   # Clear result from normal variable.
   unset(CMAKE_Swift_COMPILER_WORKS)
   # Puts test result in cache variable.
-  set(__CMAKE_Swift_TEST_SOURCE "print(\"CMake\")\n")
+  string(CONCAT __CMAKE_Swift_TEST_SOURCE
+  "public struct CMakeStruct {"
+  "  let x: Int"
+  "}")
   try_compile(CMAKE_Swift_COMPILER_WORKS
     SOURCE_FROM_VAR main.swift __CMAKE_Swift_TEST_SOURCE
     OUTPUT_VARIABLE __CMAKE_Swift_COMPILER_OUTPUT)

@@ -70,6 +70,20 @@ elseif(RunCMake_GENERATOR STREQUAL Ninja)
     endblock()
 
     block()
+      # Try enabling Swift with a static-library try-compile
+      set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/StaticLibTryCompile-build)
+      set(RunCMake_TEST_OPTIONS -DCMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY)
+      run_cmake(EnableSwift)
+    endblock()
+
+    block()
+      # Try enabling Swift with an executable try-compile
+      set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ExecutableTryCompile-build)
+      set(RunCMake_TEST_OPTIONS -DCMAKE_TRY_COMPILE_TARGET_TYPE=EXECUTABLE)
+      run_cmake(EnableSwift)
+    endblock()
+
+    block()
       set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/ForceResponseFile-build)
       run_cmake(ForceResponseFile)
       set(RunCMake_TEST_NO_CLEAN 1)
