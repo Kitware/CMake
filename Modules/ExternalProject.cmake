@@ -1317,21 +1317,22 @@ macro(_ep_get_hash_regex out_var)
   set(${out_var} "^(${${out_var}})=([0-9A-Fa-f]+)$")
 endmacro()
 
-function(_ep_parse_arguments
+function(_ep_parse_arguments_to_vars
   f
   keywords
   name
   ns
   args
 )
-  # Transfer the arguments to this function into target properties for the
-  # new custom target we just added so that we can set up all the build steps
-  # correctly based on target properties.
-  #
+  # Transfer the arguments into variables in the calling scope.
   # Because some keywords can be repeated, we can't use cmake_parse_arguments().
-  # Instead, we loop through ARGN and consider the namespace starting with an
-  # upper-case letter followed by at least two more upper-case letters,
+  # Instead, we loop through the args and consider the namespace starting with
+  # an upper-case letter followed by at least two more upper-case letters,
   # numbers or underscores to be keywords.
+
+  foreach(key IN LISTS keywords)
+    unset(${ns}${key})
+  endforeach()
 
   set(key)
 
@@ -1350,17 +1351,7 @@ function(_ep_parse_arguments
     if(is_value)
       if(key)
         # Value
-        if(NOT arg STREQUAL "")
-          set_property(TARGET ${name} APPEND PROPERTY ${ns}${key} "${arg}")
-        else()
-          get_property(have_key TARGET ${name} PROPERTY ${ns}${key} SET)
-          if(have_key)
-            get_property(value TARGET ${name} PROPERTY ${ns}${key})
-            set_property(TARGET ${name} PROPERTY ${ns}${key} "${value};${arg}")
-          else()
-            set_property(TARGET ${name} PROPERTY ${ns}${key} "${arg}")
-          endif()
-        endif()
+        list(APPEND ${ns}${key} "${arg}")
       else()
         # Missing Keyword
         message(AUTHOR_WARNING
@@ -1371,6 +1362,50 @@ function(_ep_parse_arguments
       set(key "${arg}")
     endif()
   endforeach()
+
+  foreach(key IN LISTS keywords)
+    if(DEFINED ${ns}${key})
+      set(${ns}${key} "${${ns}${key}}" PARENT_SCOPE)
+    else()
+      unset(${ns}${key} PARENT_SCOPE)
+    endif()
+  endforeach()
+
+endfunction()
+
+# NOTE: This cannot be a macro because that will evaluate anything that looks
+#       like a CMake variable in any of the args.
+function(_ep_parse_arguments
+  f
+  keywords
+  name
+  ns
+  args
+)
+  _ep_parse_arguments_to_vars(
+    "${f}"
+    "${keywords}"
+    ${name}
+    ${ns}
+    "${args}"
+  )
+
+  foreach(key IN LISTS keywords)
+    if(DEFINED ${ns}${key})
+      set(${ns}${key} "${${ns}${key}}" PARENT_SCOPE)
+    else()
+      unset(${ns}${key} PARENT_SCOPE)
+    endif()
+  endforeach()
+
+  # Transfer the arguments to the target as target properties. These are
+  # read by the various steps, potentially from different scopes.
+  foreach(key IN LISTS keywords)
+    if(DEFINED ${ns}${key})
+      set_property(TARGET ${name} PROPERTY ${ns}${key} "${${ns}${key}}")
+    endif()
+  endforeach()
+
 endfunction()
 
 
@@ -1381,8 +1416,11 @@ define_property(DIRECTORY PROPERTY "EP_INDEPENDENT_STEP_TARGETS" INHERITED)
 define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED)
 
 function(_ep_get_tls_version name tls_version_var)
+  # Note that the arguments are assumed to have already been parsed and have
+  # been translated into variables with the prefix _EP_... by a call to
+  # ep_parse_arguments() or ep_parse_arguments_to_vars().
   set(tls_version_regex "^1\\.[0-3]$")
-  get_property(tls_version TARGET ${name} PROPERTY _EP_TLS_VERSION)
+  set(tls_version "${_EP_TLS_VERSION}")
   if(NOT "x${tls_version}" STREQUAL "x")
     if(NOT tls_version MATCHES "${tls_version_regex}")
       message(FATAL_ERROR "TLS_VERSION '${tls_version}' not known")
@@ -1402,7 +1440,10 @@ function(_ep_get_tls_version name tls_version_var)
 endfunction()
 
 function(_ep_get_tls_verify name tls_verify_var)
-  get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
+  # Note that the arguments are assumed to have already been parsed and have
+  # been translated into variables with the prefix _EP_... by a call to
+  # ep_parse_arguments() or ep_parse_arguments_to_vars().
+  set(tls_verify "${_EP_TLS_VERIFY}")
   if("x${tls_verify}" STREQUAL "x")
     if(NOT "x${CMAKE_TLS_VERIFY}" STREQUAL "x")
       set(tls_verify "${CMAKE_TLS_VERIFY}")
@@ -1414,7 +1455,10 @@ function(_ep_get_tls_verify name tls_verify_var)
 endfunction()
 
 function(_ep_get_tls_cainfo name tls_cainfo_var)
-  get_property(tls_cainfo TARGET ${name} PROPERTY _EP_TLS_CAINFO)
+  # Note that the arguments are assumed to have already been parsed and have
+  # been translated into variables with the prefix _EP_... by a call to
+  # ep_parse_arguments() or ep_parse_arguments_to_vars().
+  set(tls_cainfo "${_EP_TLS_CAINFO}")
   if("x${tls_cainfo}" STREQUAL "x" AND DEFINED CMAKE_TLS_CAINFO)
     set(tls_cainfo "${CMAKE_TLS_CAINFO}")
   endif()
@@ -1422,7 +1466,10 @@ function(_ep_get_tls_cainfo name tls_cainfo_var)
 endfunction()
 
 function(_ep_get_netrc name netrc_var)
-  get_property(netrc TARGET ${name} PROPERTY _EP_NETRC)
+  # Note that the arguments are assumed to have already been parsed and have
+  # been translated into variables with the prefix _EP_... by a call to
+  # ep_parse_arguments() or ep_parse_arguments_to_vars().
+  set(netrc "${_EP_NETRC}")
   if("x${netrc}" STREQUAL "x" AND DEFINED CMAKE_NETRC)
     set(netrc "${CMAKE_NETRC}")
   endif()
@@ -1430,7 +1477,10 @@ function(_ep_get_netrc name netrc_var)
 endfunction()
 
 function(_ep_get_netrc_file name netrc_file_var)
-  get_property(netrc_file TARGET ${name} PROPERTY _EP_NETRC_FILE)
+  # Note that the arguments are assumed to have already been parsed and have
+  # been translated into variables with the prefix _EP_... by a call to
+  # ep_parse_arguments() or ep_parse_arguments_to_vars().
+  set(netrc_file "${_EP_NETRC_FILE}")
   if("x${netrc_file}" STREQUAL "x" AND DEFINED CMAKE_NETRC_FILE)
     set(netrc_file "${CMAKE_NETRC_FILE}")
   endif()
@@ -1835,6 +1885,7 @@ function(_ep_set_directories name)
     endif()
     file(TO_CMAKE_PATH "${${var}_dir}" ${var}_dir)
     set_property(TARGET ${name} PROPERTY _EP_${VAR}_DIR "${${var}_dir}")
+    set(_EP_${VAR}_DIR "${${var}_dir}" PARENT_SCOPE)
   endforeach()
 
   # Special case for default log directory based on stamp directory.
@@ -1847,10 +1898,12 @@ function(_ep_set_directories name)
   endif()
   file(TO_CMAKE_PATH "${log_dir}" log_dir)
   set_property(TARGET ${name} PROPERTY _EP_LOG_DIR "${log_dir}")
+  set(_EP_LOG_DIR "${log_dir}" PARENT_SCOPE)
 
   get_property(source_subdir TARGET ${name} PROPERTY _EP_SOURCE_SUBDIR)
   if(NOT source_subdir)
     set_property(TARGET ${name} PROPERTY _EP_SOURCE_SUBDIR "")
+    set(_EP_SOURCE_SUBDIR "" PARENT_SCOPE)
   elseif(IS_ABSOLUTE "${source_subdir}")
     message(FATAL_ERROR
       "External project ${name} has non-relative SOURCE_SUBDIR!"
@@ -1860,6 +1913,7 @@ function(_ep_set_directories name)
     # behaves as expected.
     file(TO_CMAKE_PATH "${source_subdir}" source_subdir)
     set_property(TARGET ${name} PROPERTY _EP_SOURCE_SUBDIR "/${source_subdir}")
+    set(_EP_SOURCE_SUBDIR "/${source_subdir}" PARENT_SCOPE)
   endif()
   if(build_in_source)
     get_property(source_dir TARGET ${name} PROPERTY _EP_SOURCE_DIR)
@@ -1867,10 +1921,12 @@ function(_ep_set_directories name)
       set_property(TARGET ${name} PROPERTY
         _EP_BINARY_DIR "${source_dir}/${source_subdir}"
       )
+      set(_EP_BINARY_DIR "${source_dir}/${source_subdir}" PARENT_SCOPE)
     else()
       set_property(TARGET ${name} PROPERTY
         _EP_BINARY_DIR "${source_dir}"
       )
+      set(_EP_BINARY_DIR "${source_dir}" PARENT_SCOPE)
     endif()
   endif()
 
@@ -2877,22 +2933,16 @@ function(_ep_is_dir_empty dir empty_var)
 endfunction()
 
 function(_ep_get_git_submodules_recurse git_submodules_recurse)
-  # Checks for GIT_SUBMODULES_RECURSE property. Default is ON, which sets
+  # Checks for GIT_SUBMODULES_RECURSE argument. Default is ON, which sets
   # git_submodules_recurse output variable to "--recursive". Otherwise, the
   # output variable is set to an empty value "".
-  get_property(git_submodules_recurse_set
-    TARGET ${name}
-    PROPERTY _EP_GIT_SUBMODULES_RECURSE
-    SET
-  )
-  if(NOT git_submodules_recurse_set)
+  # Note that the arguments are assumed to have already been parsed and have
+  # been translated into variables with the prefix _EP_... by a call to
+  # ep_parse_arguments() or ep_parse_arguments_to_vars().
+  if(NOT DEFINED _EP_GIT_SUBMODULES_RECURSE)
     set(recurseFlag "--recursive")
   else()
-    get_property(git_submodules_recurse_value
-      TARGET ${name}
-      PROPERTY _EP_GIT_SUBMODULES_RECURSE
-    )
-    if(git_submodules_recurse_value)
+    if(_EP_GIT_SUBMODULES_RECURSE)
       set(recurseFlag "--recursive")
     else()
       set(recurseFlag "")
@@ -2911,21 +2961,24 @@ endfunction()
 
 
 function(_ep_add_download_command name)
-  ExternalProject_Get_Property(${name}
-    source_dir
-    stamp_dir
-    download_dir
-    tmp_dir
-  )
+  # The various _EP_... variables mentioned here and throughout this function
+  # are expected to already have been set by the caller via a call to
+  # _ep_parse_arguments() or ep_parse_arguments_to_vars(). Other variables
+  # with different names are assigned to for historical reasons only to keep
+  # the code more readable and minimize change.
 
-  get_property(cmd_set TARGET ${name} PROPERTY _EP_DOWNLOAD_COMMAND SET)
-  get_property(cmd TARGET ${name} PROPERTY _EP_DOWNLOAD_COMMAND)
-  get_property(cvs_repository TARGET ${name} PROPERTY _EP_CVS_REPOSITORY)
-  get_property(svn_repository TARGET ${name} PROPERTY _EP_SVN_REPOSITORY)
-  get_property(git_repository TARGET ${name} PROPERTY _EP_GIT_REPOSITORY)
-  get_property(hg_repository  TARGET ${name} PROPERTY _EP_HG_REPOSITORY )
-  get_property(url TARGET ${name} PROPERTY _EP_URL)
-  get_property(fname TARGET ${name} PROPERTY _EP_DOWNLOAD_NAME)
+  set(source_dir     "${_EP_SOURCE_DIR}")
+  set(stamp_dir      "${_EP_STAMP_DIR}")
+  set(download_dir   "${_EP_DOWNLOAD_DIR}")
+  set(tmp_dir        "${_EP_TMP_DIR}")
+
+  set(cmd            "${_EP_DOWNLOAD_COMMAND}")
+  set(cvs_repository "${_EP_CVS_REPOSITORY}")
+  set(svn_repository "${_EP_SVN_REPOSITORY}")
+  set(git_repository "${_EP_GIT_REPOSITORY}")
+  set(hg_repository  "${_EP_HG_REPOSITORY}")
+  set(url            "${_EP_URL}")
+  set(fname          "${_EP_DOWNLOAD_NAME}")
 
   # TODO: Perhaps file:// should be copied to download dir before extraction.
   string(REGEX REPLACE "file://" "" url "${url}")
@@ -2935,7 +2988,7 @@ function(_ep_add_download_command name)
   set(work_dir)
   set(extra_repo_info)
 
-  if(cmd_set)
+  if(DEFINED _EP_DOWNLOAD_COMMAND)
     set(work_dir ${download_dir})
     set(method custom)
   elseif(cvs_repository)
@@ -2945,12 +2998,12 @@ function(_ep_add_download_command name)
       message(FATAL_ERROR "error: could not find cvs for checkout of ${name}")
     endif()
 
-    get_target_property(cvs_module ${name} _EP_CVS_MODULE)
+    set(cvs_module "${_EP_CVS_MODULE}")
     if(NOT cvs_module)
       message(FATAL_ERROR "error: no CVS_MODULE")
     endif()
 
-    get_property(cvs_tag TARGET ${name} PROPERTY _EP_CVS_TAG)
+    set(cvs_tag "${_EP_CVS_TAG}")
     get_filename_component(src_name "${source_dir}" NAME)
     get_filename_component(work_dir "${source_dir}" PATH)
     set(comment "Performing download step (CVS checkout) for '${name}'")
@@ -2970,14 +3023,11 @@ function(_ep_add_download_command name)
       message(FATAL_ERROR "error: could not find svn for checkout of ${name}")
     endif()
 
-    get_property(svn_revision TARGET ${name} PROPERTY _EP_SVN_REVISION)
-    get_property(svn_username TARGET ${name} PROPERTY _EP_SVN_USERNAME)
-    get_property(svn_password TARGET ${name} PROPERTY _EP_SVN_PASSWORD)
-    get_property(svn_trust_cert TARGET ${name} PROPERTY _EP_SVN_TRUST_CERT)
-    get_property(uses_terminal
-      TARGET ${name}
-      PROPERTY _EP_USES_TERMINAL_DOWNLOAD
-    )
+    set(svn_revision   "${_EP_SVN_REVISION}")
+    set(svn_username   "${_EP_SVN_USERNAME}")
+    set(svn_password   "${_EP_SVN_PASSWORD}")
+    set(svn_trust_cert "${_EP_SVN_TRUST_CERT}")
+    set(uses_terminal  "${_EP_USES_TERMINAL_DOWNLOAD}")
     # The --trust-server-cert option requires --non-interactive
     if(uses_terminal AND NOT svn_trust_cert)
       set(svn_interactive_args "")
@@ -2989,10 +3039,10 @@ function(_ep_add_download_command name)
     get_filename_component(work_dir "${source_dir}" PATH)
     set(comment "Performing download step (SVN checkout) for '${name}'")
     set(svn_user_pw_args "")
-    if(DEFINED svn_username)
+    if(DEFINED _EP_SVN_USERNAME)
       set(svn_user_pw_args ${svn_user_pw_args} "--username=${svn_username}")
     endif()
-    if(DEFINED svn_password)
+    if(DEFINED _EP_SVN_PASSWORD)
       set(svn_user_pw_args ${svn_user_pw_args} "--password=${svn_password}")
     endif()
     if(svn_trust_cert)
@@ -3022,33 +3072,29 @@ function(_ep_add_download_command name)
 
     _ep_get_git_submodules_recurse(git_submodules_recurse)
 
-    get_property(git_tag TARGET ${name} PROPERTY _EP_GIT_TAG)
+    set(git_tag "${_EP_GIT_TAG}")
     if(NOT git_tag)
       set(git_tag "master")
     endif()
 
     set(git_init_submodules TRUE)
-    get_property(git_submodules_set
-      TARGET ${name}
-      PROPERTY _EP_GIT_SUBMODULES SET
-    )
-    if(git_submodules_set)
-      get_property(git_submodules TARGET ${name} PROPERTY _EP_GIT_SUBMODULES)
-      if(git_submodules  STREQUAL "" AND _EP_CMP0097 STREQUAL "NEW")
+    if(DEFINED _EP_GIT_SUBMODULES)
+      set(git_submodules "${_EP_GIT_SUBMODULES}")
+      if(git_submodules STREQUAL "" AND _EP_CMP0097 STREQUAL "NEW")
         set(git_init_submodules FALSE)
       endif()
     endif()
 
-    get_property(git_remote_name TARGET ${name} PROPERTY _EP_GIT_REMOTE_NAME)
+    set(git_remote_name "${_EP_GIT_REMOTE_NAME}")
     if(NOT git_remote_name)
       set(git_remote_name "origin")
     endif()
 
     _ep_get_tls_version(${name} tls_version)
     _ep_get_tls_verify(${name} tls_verify)
-    get_property(git_shallow TARGET ${name} PROPERTY _EP_GIT_SHALLOW)
-    get_property(git_progress TARGET ${name} PROPERTY _EP_GIT_PROGRESS)
-    get_property(git_config TARGET ${name} PROPERTY _EP_GIT_CONFIG)
+    set(git_shallow  "${_EP_GIT_SHALLOW}")
+    set(git_progress "${_EP_GIT_PROGRESS}")
+    set(git_config   "${_EP_GIT_CONFIG}")
 
     # If git supports it, make checkouts quiet when checking out a git hash.
     # This avoids the very noisy detached head message.
@@ -3108,7 +3154,7 @@ CMP0097=${_EP_CMP0097}
       message(FATAL_ERROR "error: could not find hg for clone of ${name}")
     endif()
 
-    get_property(hg_tag TARGET ${name} PROPERTY _EP_HG_TAG)
+    set(hg_tag "${_EP_HG_TAG}")
     if(NOT hg_tag)
       set(hg_tag "tip")
     endif()
@@ -3145,7 +3191,7 @@ CMP0097=${_EP_CMP0097}
   elseif(url)
     set(method url)
     get_filename_component(work_dir "${source_dir}" PATH)
-    get_property(hash TARGET ${name} PROPERTY _EP_URL_HASH)
+    set(hash "${_EP_URL_HASH}")
     _ep_get_hash_regex(_ep_hash_regex)
     if(hash AND NOT "${hash}" MATCHES "${_ep_hash_regex}")
       _ep_get_hash_algos(_ep_hash_algos)
@@ -3158,7 +3204,7 @@ CMP0097=${_EP_CMP0097}
         "and value is a hex string."
       )
     endif()
-    get_property(md5 TARGET ${name} PROPERTY _EP_URL_MD5)
+    set(md5 "${_EP_URL_MD5}")
     if(md5 AND NOT "MD5=${md5}" MATCHES "${_ep_hash_regex}")
       message(FATAL_ERROR
         "URL_MD5 is set to\n"
@@ -3196,10 +3242,7 @@ hash=${hash}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${abs_dir} ${source_dir}
       )
     else()
-      get_property(no_extract
-        TARGET "${name}"
-        PROPERTY _EP_DOWNLOAD_NO_EXTRACT
-      )
+      set(no_extract "${_EP_DOWNLOAD_NO_EXTRACT}")
       string(APPEND extra_repo_info "no_extract=${no_extract}\n")
       if("${url}" MATCHES "^[a-z]+://")
         # TODO: Should download and extraction be different steps?
@@ -3221,23 +3264,17 @@ hash=${hash}
         endif()
         string(REPLACE ";" "-" fname "${fname}")
         set(file ${download_dir}/${fname})
-        get_property(timeout TARGET ${name} PROPERTY _EP_TIMEOUT)
-        get_property(inactivity_timeout
-          TARGET ${name}
-          PROPERTY _EP_INACTIVITY_TIMEOUT
-        )
-        get_property(no_progress
-          TARGET ${name}
-          PROPERTY _EP_DOWNLOAD_NO_PROGRESS
-        )
+        set(timeout "${_EP_TIMEOUT}")
+        set(inactivity_timeout "${_EP_INACTIVITY_TIMEOUT}")
+        set(no_progress "${_EP_DOWNLOAD_NO_PROGRESS}")
         _ep_get_tls_version(${name} tls_version)
         _ep_get_tls_verify(${name} tls_verify)
         _ep_get_tls_cainfo(${name} tls_cainfo)
         _ep_get_netrc(${name} netrc)
         _ep_get_netrc_file(${name} netrc_file)
-        get_property(http_username TARGET ${name} PROPERTY _EP_HTTP_USERNAME)
-        get_property(http_password TARGET ${name} PROPERTY _EP_HTTP_PASSWORD)
-        get_property(http_headers TARGET ${name} PROPERTY _EP_HTTP_HEADER)
+        set(http_username "${_EP_HTTP_USERNAME}")
+        set(http_password "${_EP_HTTP_PASSWORD}")
+        set(http_headers  "${_EP_HTTP_HEADER}")
         set(download_script "${stamp_dir}/download-${name}.cmake")
         _ep_write_downloadfile_script(
           "${download_script}"
@@ -3287,11 +3324,9 @@ hash=${hash}
         )
       endif()
       list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/verify-${name}.cmake)
-      get_target_property(extract_timestamp ${name}
-        _EP_DOWNLOAD_EXTRACT_TIMESTAMP
-      )
+      set(extract_timestamp "${_EP_DOWNLOAD_EXTRACT_TIMESTAMP}")
       if(no_extract)
-        if(NOT extract_timestamp STREQUAL "extract_timestamp-NOTFOUND")
+        if(DEFINED _EP_DOWNLOAD_EXTRACT_TIMESTAMP)
           message(FATAL_ERROR
             "Cannot specify DOWNLOAD_EXTRACT_TIMESTAMP when using "
             "DOWNLOAD_NO_EXTRACT TRUE"
@@ -3299,7 +3334,7 @@ hash=${hash}
         endif()
         set_property(TARGET ${name} PROPERTY _EP_DOWNLOADED_FILE ${file})
       else()
-        if(extract_timestamp STREQUAL "extract_timestamp-NOTFOUND")
+        if(NOT DEFINED _EP_DOWNLOAD_EXTRACT_TIMESTAMP)
           # Default depends on policy CMP0135
           if(_EP_CMP0135 STREQUAL "")
             message(AUTHOR_WARNING
@@ -3368,21 +3403,13 @@ hash=${hash}
     @ONLY
   )
 
-  get_property(log
-    TARGET ${name}
-    PROPERTY _EP_LOG_DOWNLOAD
-  )
-  if(log)
+  if(_EP_LOG_DOWNLOAD)
     set(log LOG 1)
   else()
     set(log "")
   endif()
 
-  get_property(uses_terminal
-    TARGET ${name}
-    PROPERTY _EP_USES_TERMINAL_DOWNLOAD
-  )
-  if(uses_terminal)
+  if(_EP_USES_TERMINAL_DOWNLOAD)
     set(uses_terminal USES_TERMINAL 1)
   else()
     set(uses_terminal "")
@@ -3407,16 +3434,11 @@ hash=${hash}
 endfunction()
 
 function(_ep_get_update_disconnected var name)
-  get_property(update_disconnected_set
-    TARGET ${name}
-    PROPERTY _EP_UPDATE_DISCONNECTED
-    SET
-  )
-  if(update_disconnected_set)
-    get_property(update_disconnected
-      TARGET ${name}
-      PROPERTY _EP_UPDATE_DISCONNECTED
-    )
+  # Note that the arguments are assumed to have already been parsed and have
+  # been translated into variables with the prefix _EP_... by a call to
+  # ep_parse_arguments() or ep_parse_arguments_to_vars().
+  if(DEFINED _EP_UPDATE_DISCONNECTED)
+    set(update_disconnected "${_EP_UPDATE_DISCONNECTED}")
   else()
     get_property(update_disconnected
       DIRECTORY
@@ -3427,14 +3449,21 @@ function(_ep_get_update_disconnected var name)
 endfunction()
 
 function(_ep_add_update_command name)
-  ExternalProject_Get_Property(${name} source_dir stamp_dir tmp_dir)
+  # The various _EP_... variables mentioned here and throughout this function
+  # are expected to already have been set by the caller via a call to
+  # _ep_parse_arguments() or ep_parse_arguments_to_vars(). Other variables
+  # with different names are assigned to for historical reasons only to keep
+  # the code more readable and minimize change.
 
-  get_property(cmd_set TARGET ${name} PROPERTY _EP_UPDATE_COMMAND SET)
-  get_property(cmd TARGET ${name} PROPERTY _EP_UPDATE_COMMAND)
-  get_property(cvs_repository TARGET ${name} PROPERTY _EP_CVS_REPOSITORY)
-  get_property(svn_repository TARGET ${name} PROPERTY _EP_SVN_REPOSITORY)
-  get_property(git_repository TARGET ${name} PROPERTY _EP_GIT_REPOSITORY)
-  get_property(hg_repository  TARGET ${name} PROPERTY _EP_HG_REPOSITORY )
+  set(source_dir     "${_EP_SOURCE_DIR}")
+  set(stamp_dir      "${_EP_STAMP_DIR}")
+  set(tmp_dir        "${_EP_TMP_DIR}")
+
+  set(cmd            "${_EP_UPDATE_COMMAND}")
+  set(cvs_repository "${_EP_CVS_REPOSITORY}")
+  set(svn_repository "${_EP_SVN_REPOSITORY}")
+  set(git_repository "${_EP_GIT_REPOSITORY}")
+  set(hg_repository  "${_EP_HG_REPOSITORY}")
 
   _ep_get_update_disconnected(update_disconnected ${name})
 
@@ -3443,7 +3472,7 @@ function(_ep_add_update_command name)
   set(always)
   set(file_deps)
 
-  if(cmd_set)
+  if(DEFINED _EP_UPDATE_COMMAND)
     set(work_dir ${source_dir})
     if(NOT "x${cmd}" STREQUAL "x")
       set(always 1)
@@ -3454,7 +3483,7 @@ function(_ep_add_update_command name)
     endif()
     set(work_dir ${source_dir})
     set(comment "Performing update step (CVS update) for '${name}'")
-    get_property(cvs_tag TARGET ${name} PROPERTY _EP_CVS_TAG)
+    set(cvs_tag "${_EP_CVS_TAG}")
     set(cmd ${CVS_EXECUTABLE} -d ${cvs_repository} -q up -dP ${cvs_tag})
     set(always 1)
   elseif(svn_repository)
@@ -3463,11 +3492,11 @@ function(_ep_add_update_command name)
     endif()
     set(work_dir ${source_dir})
     set(comment "Performing update step (SVN update) for '${name}'")
-    get_property(svn_revision TARGET ${name} PROPERTY _EP_SVN_REVISION)
-    get_property(svn_username TARGET ${name} PROPERTY _EP_SVN_USERNAME)
-    get_property(svn_password TARGET ${name} PROPERTY _EP_SVN_PASSWORD)
-    get_property(svn_trust_cert TARGET ${name} PROPERTY _EP_SVN_TRUST_CERT)
-    get_property(uses_terminal TARGET ${name} PROPERTY _EP_USES_TERMINAL_UPDATE)
+    set(svn_revision   "${_EP_SVN_REVISION}")
+    set(svn_username   "${_EP_SVN_USERNAME}")
+    set(svn_password   "${_EP_SVN_PASSWORD}")
+    set(svn_trust_cert "${_EP_SVN_TRUST_CERT}")
+    set(uses_terminal  "${_EP_USES_TERMINAL_UPDATE}")
     # The --trust-server-cert option requires --non-interactive
     if(uses_terminal AND NOT svn_trust_cert)
       set(svn_interactive_args "")
@@ -3506,42 +3535,25 @@ function(_ep_add_update_command name)
     set(comment "Performing update step for '${name}'")
     set(comment_disconnected "Performing disconnected update step for '${name}'")
 
-    get_property(git_tag
-      TARGET ${name}
-      PROPERTY _EP_GIT_TAG
-    )
+    set(git_tag "${_EP_GIT_TAG}")
     if(NOT git_tag)
       set(git_tag "master")
     endif()
 
-    get_property(git_remote_name
-      TARGET ${name}
-      PROPERTY _EP_GIT_REMOTE_NAME
-    )
+    set(git_remote_name "${_EP_GIT_REMOTE_NAME}")
     if(NOT git_remote_name)
       set(git_remote_name "origin")
     endif()
 
     set(git_init_submodules TRUE)
-    get_property(git_submodules_set
-      TARGET ${name}
-      PROPERTY _EP_GIT_SUBMODULES
-      SET
-    )
-    if(git_submodules_set)
-      get_property(git_submodules
-        TARGET ${name}
-        PROPERTY _EP_GIT_SUBMODULES
-      )
-      if(git_submodules  STREQUAL "" AND _EP_CMP0097 STREQUAL "NEW")
+    if(DEFINED _EP_GIT_SUBMODULES)
+      set(git_submodules "${_EP_GIT_SUBMODULES}")
+      if(git_submodules STREQUAL "" AND _EP_CMP0097 STREQUAL "NEW")
         set(git_init_submodules FALSE)
       endif()
     endif()
 
-    get_property(git_update_strategy
-      TARGET ${name}
-      PROPERTY _EP_GIT_REMOTE_UPDATE_STRATEGY
-    )
+    set(git_update_strategy "${_EP_GIT_REMOTE_UPDATE_STRATEGY}")
     if(NOT git_update_strategy)
       set(git_update_strategy "${CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY}")
     endif()
@@ -3588,10 +3600,7 @@ function(_ep_add_update_command name)
     set(comment "Performing update step (hg pull) for '${name}'")
     set(comment_disconnected "Performing disconnected update step for '${name}'")
 
-    get_property(hg_tag
-      TARGET ${name}
-      PROPERTY _EP_HG_TAG
-    )
+    set(hg_tag "${_EP_HG_TAG}")
     if(NOT hg_tag)
       set(hg_tag "tip")
     endif()
@@ -3629,21 +3638,13 @@ Update to Mercurial >= 2.1.1.
     @ONLY
   )
 
-  get_property(log
-    TARGET ${name}
-    PROPERTY _EP_LOG_UPDATE
-  )
-  if(log)
+  if(_EP_LOG_UPDATE)
     set(log LOG 1)
   else()
     set(log "")
   endif()
 
-  get_property(uses_terminal
-    TARGET ${name}
-    PROPERTY _EP_USES_TERMINAL_UPDATE
-  )
-  if(uses_terminal)
+  if(_EP_USES_TERMINAL_UPDATE)
     set(uses_terminal USES_TERMINAL 1)
   else()
     set(uses_terminal "")
@@ -3694,14 +3695,19 @@ endfunction()
 
 
 function(_ep_add_patch_command name)
-  ExternalProject_Get_Property(${name} source_dir stamp_dir)
+  # The various _EP_... variables mentioned here and throughout this function
+  # are expected to already have been set by the caller via a call to
+  # _ep_parse_arguments() or ep_parse_arguments_to_vars(). Other variables
+  # with different names are assigned to for historical reasons only to keep
+  # the code more readable and minimize change.
 
-  get_property(cmd_set TARGET ${name} PROPERTY _EP_PATCH_COMMAND SET)
-  get_property(cmd TARGET ${name} PROPERTY _EP_PATCH_COMMAND)
+  set(source_dir "${_EP_SOURCE_DIR}")
+  set(stamp_dir  "${_EP_STAMP_DIR}")
+
+  set(cmd "${_EP_PATCH_COMMAND}")
 
   set(work_dir)
-
-  if(cmd_set)
+  if(DEFINED _EP_PATCH_COMMAND)
     set(work_dir ${source_dir})
   endif()
 
@@ -3714,21 +3720,13 @@ function(_ep_add_patch_command name)
     @ONLY
   )
 
-  get_property(log
-    TARGET ${name}
-    PROPERTY _EP_LOG_PATCH
-  )
-  if(log)
+  if(_EP_LOG_PATCH)
     set(log LOG 1)
   else()
     set(log "")
   endif()
 
-  get_property(uses_terminal
-    TARGET ${name}
-    PROPERTY _EP_USES_TERMINAL_PATCH
-  )
-  if(uses_terminal)
+  if(_EP_USES_TERMINAL_PATCH)
     set(uses_terminal USES_TERMINAL 1)
   else()
     set(uses_terminal "")
@@ -4491,6 +4489,7 @@ function(ExternalProject_Add name)
     get_filename_component(work_dir "${source_dir}" PATH)
     _ep_resolve_git_remote(resolved_git_repository "${repo}" "${cmp0150}" "${work_dir}")
     set_property(TARGET ${name} PROPERTY _EP_GIT_REPOSITORY ${resolved_git_repository})
+    set(_EP_GIT_REPOSITORY "${resolved_git_repository}")
   endif()
 
   # The 'complete' step depends on all other steps and creates a
