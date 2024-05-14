@@ -213,6 +213,8 @@ public:
   bool UseWindowsVSIDE() const;
   void SetGhsMultiIDE(bool ghsMultiIDE);
   bool UseGhsMultiIDE() const;
+  void SetBorlandMake(bool borlandMake);
+  bool UseBorlandMake() const;
   void SetWatcomWMake(bool watcomWMake);
   bool UseWatcomWMake() const;
   void SetMinGWMake(bool minGWMake);
@@ -294,6 +296,7 @@ private:
   bool WindowsShell = false;
   bool WindowsVSIDE = false;
   bool GhsMultiIDE = false;
+  bool BorlandMake = false;
   bool WatcomWMake = false;
   bool MinGWMake = false;
   bool NMake = false;
