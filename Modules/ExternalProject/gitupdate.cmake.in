@@ -70,7 +70,7 @@ elseif(show_ref_output MATCHES "^[a-z0-9]+[ \\t]+refs/tags/")
   # FIXME: We should provide an option to always fetch for this case
   get_hash_for_ref("@git_tag@" tag_sha error_msg)
   if(tag_sha STREQUAL head_sha)
-    message(VERBOSE "Already at requested tag: ${tag_sha}")
+    message(VERBOSE "Already at requested tag: @git_tag@")
     return()
   endif()
 
