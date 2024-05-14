@@ -11,7 +11,8 @@ if(RunCMake_GENERATOR MATCHES "Visual Studio")
   run_cmake(VSCSharpReference)
 endif()
 
-if(RunCMake_GENERATOR MATCHES "^Visual Studio (1[6-9]|[2-9][0-9])")
+if(RunCMake_GENERATOR MATCHES "^Visual Studio (1[6-9]|[2-9][0-9])"
+    AND NOT RunCMake_GENERATOR_TOOLSET MATCHES "^(v80|v90|v100|v110|v120)$")
   function(run_VSCSharpOnlyProject)
     set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/VSCSharpOnlyProject-build)
     run_cmake(VSCSharpOnlyProject)
