@@ -360,7 +360,11 @@ function (_PYTHON_GET_NAMES _PYTHON_PGN_NAMES)
   foreach (implementation IN LISTS _PGN_IMPLEMENTATIONS)
     if (implementation STREQUAL "CPython")
       if (_PGN_INTERPRETER AND _${_PYTHON_PREFIX}_FIND_UNVERSIONED_NAMES STREQUAL "FIRST")
-        list (APPEND names python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR} python)
+        if (_PGN_DEBUG)
+          list (APPEND names python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}_d python_d)
+        else()
+          list (APPEND names python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR} python)
+        endif()
       endif()
       foreach (version IN LISTS _PGN_VERSION)
         if (_PGN_WIN32)
@@ -412,7 +416,11 @@ function (_PYTHON_GET_NAMES _PYTHON_PGN_NAMES)
         endif()
       endforeach()
       if (_PGN_INTERPRETER AND _${_PYTHON_PREFIX}_FIND_UNVERSIONED_NAMES STREQUAL "LAST")
-        list (APPEND names python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR} python)
+        if (_PGN_DEBUG)
+          list (APPEND names python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR}_d python_d)
+        else()
+          list (APPEND names python${_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR} python)
+        endif()
       endif()
     elseif (implementation STREQUAL "IronPython")
       if (_PGN_INTERPRETER)
@@ -458,7 +466,7 @@ endfunction()
 function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
   unset (${_PYTHON_PGCV_VALUE} PARENT_SCOPE)
 
-  if (NOT NAME MATCHES "^(PREFIX|ABIFLAGS|CONFIGDIR|INCLUDES|LIBS|SOABI|SOSABI)$")
+  if (NOT NAME MATCHES "^(PREFIX|ABIFLAGS|CONFIGDIR|INCLUDES|LIBS|SOABI|SOSABI|POSTFIX)$")
     return()
   endif()
 
@@ -494,7 +502,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
         if (_values MATCHES "^(${CMAKE_SHARED_LIBRARY_SUFFIX}|\\.so|\\.pyd)$")
           set(_values "")
         else()
-          string (REGEX REPLACE "^[.-](.+)(${CMAKE_SHARED_LIBRARY_SUFFIX}|\\.(so|pyd))$" "\\1" _values "${_values}")
+          string (REGEX REPLACE "^([.-]|_d\\.)(.+)(${CMAKE_SHARED_LIBRARY_SUFFIX}|\\.(so|pyd))$" "\\2" _values "${_values}")
         endif()
       endif()
     endif()
@@ -545,7 +553,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
           if (_values MATCHES "^(${CMAKE_SHARED_LIBRARY_SUFFIX}|\\.so|\\.pyd)$")
             set(_values "")
           else()
-            string (REGEX REPLACE "^[.-](.+)(${CMAKE_SHARED_LIBRARY_SUFFIX}|\\.(so|pyd))$" "\\1" _values "${_values}")
+            string (REGEX REPLACE "^([.-]|_d\\.)(.+)(${CMAKE_SHARED_LIBRARY_SUFFIX}|\\.(so|pyd))$" "\\2" _values "${_values}")
           endif()
         endif()
       endif()
@@ -572,7 +580,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
             if (_values MATCHES "^(${CMAKE_SHARED_LIBRARY_SUFFIX}|\\.so|\\.pyd)$")
               set(_values "")
             else()
-              string (REGEX REPLACE "^[.-](.+)(${CMAKE_SHARED_LIBRARY_SUFFIX}|\\.(so|pyd))$" "\\1" _values "${_values}")
+              string (REGEX REPLACE "^([.-]|_d\\.)(.+)(${CMAKE_SHARED_LIBRARY_SUFFIX}|\\.(so|pyd))$" "\\1" _values "${_values}")
             endif()
           endif()
         endif()
@@ -587,6 +595,10 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
         unset (_values)
       else()
         string (REGEX REPLACE "^\\.(.+)\\.[^.]+$" "\\1" _values "${_values}")
+      endif()
+    elseif (NAME STREQUAL "POSTFIX")
+      if (WIN32 AND _${_PYTHON_PREFIX}_LIBRARY_DEBUG MATCHES "_d${CMAKE_IMPORT_LIBRARY_SUFFIX}$")
+        set (_values "_d")
       endif()
     else()
       set (config_flag "${NAME}")
@@ -605,7 +617,7 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
     endif()
   endif()
 
-  if (NAME STREQUAL "ABIFLAGS" OR NAME STREQUAL "SOABI" OR NAME STREQUAL "SOSABI")
+  if (NAME STREQUAL "ABIFLAGS" OR NAME STREQUAL "SOABI" OR NAME STREQUAL "SOSABI" OR NAME STREQUAL "POSTFIX")
     set (${_PYTHON_PGCV_VALUE} "${_values}" PARENT_SCOPE)
     return()
   endif()
@@ -817,6 +829,7 @@ endfunction()
 
 function (_PYTHON_VALIDATE_INTERPRETER)
   if (NOT _${_PYTHON_PREFIX}_EXECUTABLE)
+    unset (_${_PYTHON_PREFIX}_EXECUTABLE_DEBUG CACHE)
     return()
   endif()
 
@@ -826,6 +839,9 @@ function (_PYTHON_VALIDATE_INTERPRETER)
     # interpreter does not exist anymore
     set_property (CACHE _${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE PROPERTY VALUE "Cannot find the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
     set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
+    if (WIN32)
+      set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE_DEBUG PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE_DEBUG-NOTFOUND")
+    endif()
     return()
   endif()
 
@@ -863,6 +879,9 @@ function (_PYTHON_VALIDATE_INTERPRETER)
       # interpreter is not usable
       set_property (CACHE _${_PYTHON_PREFIX}_Interpreter_REASON_FAILURE PROPERTY VALUE "Cannot use the interpreter \"${_${_PYTHON_PREFIX}_EXECUTABLE}\"")
       set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE-NOTFOUND")
+      if (WIN32)
+        set_property (CACHE _${_PYTHON_PREFIX}_EXECUTABLE_DEBUG PROPERTY VALUE "${_PYTHON_PREFIX}_EXECUTABLE_DEBUG-NOTFOUND")
+      endif()
       return()
     endif()
 
@@ -1106,7 +1125,7 @@ endfunction()
 
 function (_PYTHON_VALIDATE_LIBRARY)
   if (NOT _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
-    unset (_${_PYTHON_PREFIX}_LIBRARY_DEBUG)
+    unset (_${_PYTHON_PREFIX}_LIBRARY_DEBUG CACHE)
     return()
   endif()
 
@@ -1173,7 +1192,7 @@ endfunction()
 
 function (_PYTHON_VALIDATE_SABI_LIBRARY)
   if (NOT _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE)
-    unset (_${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG)
+    unset (_${_PYTHON_PREFIX}_SABI_LIBRARY_DEBUG CACHE)
     return()
   endif()
 
@@ -1451,6 +1470,9 @@ else()
 endif()
 unset (${_PYTHON_PREFIX}_SOABI)
 unset (${_PYTHON_PREFIX}_SOSABI)
+
+# Windows CPython implementation may be requiring a postfix in debug mode
+unset (${_PYTHON_PREFIX}_DEBUG_POSTFIX)
 
 # Define lookup strategy
 cmake_policy (GET CMP0094 _${_PYTHON_PREFIX}_LOOKUP_POLICY)
@@ -1788,6 +1810,7 @@ endif()
 # first step, search for the interpreter
 if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
   list (APPEND _${_PYTHON_PREFIX}_CACHED_VARS _${_PYTHON_PREFIX}_EXECUTABLE
+                                              _${_PYTHON_PREFIX}_EXECUTABLE_DEBUG
                                               _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES)
   if (${_PYTHON_PREFIX}_FIND_REQUIRED_Interpreter)
     list (APPEND _${_PYTHON_PREFIX}_REQUIRED_VARS ${_PYTHON_PREFIX}_EXECUTABLE)
@@ -1800,6 +1823,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       unset (_${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES CACHE)
     endif()
     set (_${_PYTHON_PREFIX}_EXECUTABLE "${${_PYTHON_PREFIX}_EXECUTABLE}" CACHE INTERNAL "")
+    unset (_${_PYTHON_PREFIX}_EXECUTABLE_DEBUG CACHE)
   elseif (DEFINED _${_PYTHON_PREFIX}_EXECUTABLE)
     # compute interpreter signature and check validity of definition
     string (MD5 __${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE "${_${_PYTHON_PREFIX}_SIGNATURE}:${_${_PYTHON_PREFIX}_EXECUTABLE}")
@@ -1816,6 +1840,7 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
       endif()
     else()
       unset (_${_PYTHON_PREFIX}_EXECUTABLE CACHE)
+      unset (_${_PYTHON_PREFIX}_EXECUTABLE_DEBUG CACHE)
     endif()
     if (NOT _${_PYTHON_PREFIX}_EXECUTABLE)
       unset (_${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE CACHE)
@@ -2263,7 +2288,30 @@ if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS)
     set (${_PYTHON_PREFIX}_EXECUTABLE "${_${_PYTHON_PREFIX}_EXECUTABLE}" CACHE FILEPATH "${_PYTHON_PREFIX} Interpreter")
   endif()
 
+  if (WIN32 AND _${_PYTHON_PREFIX}_EXECUTABLE AND "CPython" IN_LIST _${_PYTHON_PREFIX}_FIND_IMPLEMENTATIONS)
+    # search for debug interpreter
+    # use release interpreter location as a hint
+    _python_get_names (_${_PYTHON_PREFIX}_INTERPRETER_NAMES_DEBUG VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS} IMPLEMENTATIONS CPython INTERPRETER WIN32 DEBUG)
+    get_filename_component (_${_PYTHON_PREFIX}_PATH "${_${_PYTHON_PREFIX}_EXECUTABLE}" DIRECTORY)
+    set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
+
+    find_program (_${_PYTHON_PREFIX}_EXECUTABLE_DEBUG
+                  NAMES ${_${_PYTHON_PREFIX}_INTERPRETER_NAMES_DEBUG}
+                  NAMES_PER_DIR
+                  HINTS "${_${_PYTHON_PREFIX}_PATH}" ${${_PYTHON_PREFIX}_HINTS}
+                  NO_DEFAULT_PATH)
+    # second try including CMAKE variables to catch-up non conventional layouts
+    find_program (_${_PYTHON_PREFIX}_EXECUTABLE_DEBUG
+                  NAMES ${_${_PYTHON_PREFIX}_INTERPRETER_NAMES_DEBUG}
+                  NAMES_PER_DIR
+                  NO_SYSTEM_ENVIRONMENT_PATH
+                  NO_CMAKE_SYSTEM_PATH)
+  endif()
+  set (${_PYTHON_PREFIX}_EXECUTABLE_DEBUG "${_${_PYTHON_PREFIX}_EXECUTABLE_DEBUG}")
+  set (${_PYTHON_PREFIX}_INTERPRETER "$<IF:$<AND:$<CONFIG:Debug>,$<BOOL:${WIN32}>,$<BOOL:${${_PYTHON_PREFIX}_EXECUTABLE_DEBUG}>>,${${_PYTHON_PREFIX}_EXECUTABLE_DEBUG},${${_PYTHON_PREFIX}_EXECUTABLE}>")
+
   _python_mark_as_internal (_${_PYTHON_PREFIX}_EXECUTABLE
+                            _${_PYTHON_PREFIX}_EXECUTABLE_DEBUG
                             _${_PYTHON_PREFIX}_INTERPRETER_PROPERTIES
                             _${_PYTHON_PREFIX}_INTERPRETER_SIGNATURE)
 endif()
@@ -3730,6 +3778,10 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     _python_get_config_var (${_PYTHON_PREFIX}_SOSABI SOSABI)
   endif()
 
+  if (WIN32 AND NOT DEFINED ${_PYTHON_PREFIX}_DEBUG_POSTFIX)
+    _python_get_config_var (${_PYTHON_PREFIX}_DEBUG_POSTFIX POSTFIX)
+  endif()
+
   _python_compute_development_signature (Module)
   _python_compute_development_signature (SABIModule)
   _python_compute_development_signature (Embed)
@@ -3892,11 +3944,27 @@ find_package_handle_standard_args (${_PYTHON_PREFIX}
 # Create imported targets and helper functions
 if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
   if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
-      AND ${_PYTHON_PREFIX}_Interpreter_FOUND
-      AND NOT TARGET ${_PYTHON_PREFIX}::Interpreter)
-    add_executable (${_PYTHON_PREFIX}::Interpreter IMPORTED)
-    set_property (TARGET ${_PYTHON_PREFIX}::Interpreter
-                  PROPERTY IMPORTED_LOCATION "${${_PYTHON_PREFIX}_EXECUTABLE}")
+      AND ${_PYTHON_PREFIX}_Interpreter_FOUND)
+    if(NOT TARGET ${_PYTHON_PREFIX}::Interpreter)
+      add_executable (${_PYTHON_PREFIX}::Interpreter IMPORTED)
+      set_property (TARGET ${_PYTHON_PREFIX}::Interpreter
+                    PROPERTY IMPORTED_LOCATION "${${_PYTHON_PREFIX}_EXECUTABLE}")
+    endif()
+    if(${_PYTHON_PREFIX}_EXECUTABLE_DEBUG AND NOT TARGET ${_PYTHON_PREFIX}::InterpreterDebug)
+      add_executable (${_PYTHON_PREFIX}::InterpreterDebug IMPORTED)
+      set_property (TARGET ${_PYTHON_PREFIX}::InterpreterDebug
+                    PROPERTY IMPORTED_LOCATION "${${_PYTHON_PREFIX}_EXECUTABLE_DEBUG}")
+    endif()
+    if(NOT TARGET ${_PYTHON_PREFIX}::InterpreterMultiConfig)
+      add_executable (${_PYTHON_PREFIX}::InterpreterMultiConfig IMPORTED)
+      set_property (TARGET ${_PYTHON_PREFIX}::InterpreterMultiConfig
+                    PROPERTY IMPORTED_LOCATION "${${_PYTHON_PREFIX}_EXECUTABLE}")
+      if(${_PYTHON_PREFIX}_EXECUTABLE_DEBUG)
+        set_target_properties (${_PYTHON_PREFIX}::InterpreterMultiConfig
+                               PROPERTIES IMPORTED_CONFIGURATIONS DEBUG
+                                          IMPORTED_LOCATION_DEBUG "${${_PYTHON_PREFIX}_EXECUTABLE_DEBUG}")
+      endif()
+    endif()
   endif()
 
   if ("Compiler" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
@@ -4108,6 +4176,9 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
         set_property (TARGET ${name} PROPERTY PREFIX "")
         if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
           set_property (TARGET ${name} PROPERTY SUFFIX ".pyd")
+          if (${prefix}_DEBUG_POSTFIX)
+            set_property (TARGET ${name} PROPERTY DEBUG_POSTFIX "${${prefix}_DEBUG_POSTFIX}")
+          endif()
         endif()
 
         if (PYTHON_ADD_LIBRARY_WITH_SOABI)

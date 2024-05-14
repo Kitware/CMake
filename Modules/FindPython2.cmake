@@ -71,9 +71,25 @@ This module defines the following :ref:`Imported Targets <Imported Targets>`:
   :prop_gbl:`CMAKE_ROLE` is ``PROJECT``.
 
 ``Python2::Interpreter``
-  Python 2 interpreter. Target defined if component ``Interpreter`` is found.
+  Python 2 interpreter. This target is defined only if the ``Interpreter``
+  component is found.
+``Python2::InterpreterDebug``
+  .. versionadded:: 3.30
+
+  Python 2 debug interpreter. This target is defined only if the
+  ``Interpreter`` component is found and the ``Python2_EXECUTABLE_DEBUG``
+  variable is defined. The target is only defined on the ``Windows`` platform.
+
+``Python2::InterpreterMultiConfig``
+  .. versionadded:: 3.30
+
+  Python 2 interpreter. The release or debug version of the interpreter will be
+  used, based on the context (platform, configuration).
+  This target is defined only if the ``Interpreter`` component is found
+
 ``Python2::Compiler``
-  Python 2 compiler. Target defined if component ``Compiler`` is found.
+  Python 2 compiler. This target is defined only if the ``Compiler`` component
+  is found.
 ``Python2::Module``
   .. versionadded:: 3.15
 
@@ -101,6 +117,20 @@ This module will set the following variables in your project
   System has the Python 2 interpreter.
 ``Python2_EXECUTABLE``
   Path to the Python 2 interpreter.
+``Python2_EXECUTABLE_DEBUG``
+  .. versionadded:: 3.30
+
+  Path to the debug Python 2 interpreter. It is only defined on the ``Windows``
+  platform.
+
+``Python2_INTERPRETER``
+  .. versionadded:: 3.30
+
+  Path to the Python 2 interpreter, defined as a
+  :manual:`generator expression <cmake-generator-expressions(7)>` selecting
+  the ``Python2_EXECUTABLE`` or ``Python2_EXECUTABLE_DEBUG`` variable based on
+  the context (platform, configuration).
+
 ``Python2_INTERPRETER_ID``
   A short string unique to the interpreter. Possible values include:
     * Python
@@ -157,6 +187,12 @@ This module will set the following variables in your project
 
 ``Python2_INCLUDE_DIRS``
   The Python 2 include directories.
+
+``Python2_DEBUG_POSTFIX``
+  .. versionadded.. 3.30
+
+  Postfix of debug python module. This variable can be used to define the
+  :prop_tgt:`DEBUG_POSTFIX` target property.
 
 ``Python2_LINK_OPTIONS``
   .. versionadded:: 3.19
@@ -417,6 +453,10 @@ of Python module naming rules::
                        <source1> [<source2> ...])
 
 If library type is not specified, ``MODULE`` is assumed.
+
+.. versionadded:: 3.30
+  For ``MODULE`` type, the :prop_tgt:`DEBUG_POSTFIX` target property is
+  initialized with the value of ``Python2_DEBUG_POSTFIX`` variable if defined.
 #]=======================================================================]
 
 
