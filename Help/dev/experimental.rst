@@ -50,7 +50,8 @@ set
 
 This UUID may change in future versions of CMake.  Be sure to use the value
 documented here by the source tree of the version of CMake with which you are
-experimenting.
+experimenting.  It must be set before the ``CXX`` toolchain is discovered by
+CMake, usually as part of a :command:`project` call.
 
 When activated, this experimental feature provides the following:
 
