@@ -2224,7 +2224,16 @@ function(_ep_get_configuration_subdir_genex suffix_var)
   set(suffix "")
   get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
   if(_isMultiConfig)
-    set(suffix "/$<CONFIG>")
+    if(CMAKE_GENERATOR STREQUAL "Xcode")
+      # The Xcode generator does not support per-config sources,
+      # so use the underlying build system's placeholder instead.
+      # FIXME(#23652): We have no test for the use case requiring
+      # CMAKE_CFG_INTDIR for XCODE_EMIT_EFFECTIVE_PLATFORM_NAME,
+      # but $<CONFIG> does not work.
+      set(suffix "/${CMAKE_CFG_INTDIR}")
+    else()
+      set(suffix "/$<CONFIG>")
+    endif()
   endif()
   set(${suffix_var} "${suffix}" PARENT_SCOPE)
 endfunction()
