@@ -10,6 +10,7 @@
 /mingw
 /msvc*
 /ninja*
+/nuget
 /openmp
 /open-watcom*
 /orangec
