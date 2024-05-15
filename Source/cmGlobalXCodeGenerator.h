@@ -163,7 +163,6 @@ private:
   std::string RelativeToSource(const std::string& p);
   std::string RelativeToRootBinary(const std::string& p);
   std::string RelativeToBinary(const std::string& p);
-  std::string ConvertToRelativeForMake(std::string const& p);
   void CreateCustomCommands(
     cmXCodeObject* buildPhases, cmXCodeObject* sourceBuildPhase,
     cmXCodeObject* headerBuildPhase, cmXCodeObject* resourceBuildPhase,
