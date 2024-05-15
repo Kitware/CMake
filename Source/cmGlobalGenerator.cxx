@@ -2730,6 +2730,7 @@ cmGlobalGenerator::SplitFrameworkPath(const std::string& path,
 }
 
 static bool RaiseCMP0037Message(cmake* cm, cmTarget* tgt,
+                                std::string const& targetNameAsWritten,
                                 std::string const& reason)
 {
   MessageType messageType = MessageType::AUTHOR_WARNING;
@@ -2750,8 +2751,8 @@ static bool RaiseCMP0037Message(cmake* cm, cmTarget* tgt,
       break;
   }
   if (issueMessage) {
-    e << "The target name \"" << tgt->GetName() << "\" is reserved " << reason
-      << ".";
+    e << "The target name \"" << targetNameAsWritten << "\" is reserved "
+      << reason << ".";
     if (messageType == MessageType::AUTHOR_WARNING) {
       e << "  It may result in undefined behavior.";
     }
@@ -2770,7 +2771,8 @@ bool cmGlobalGenerator::CheckCMP0037(std::string const& targetName,
   if (!tgt) {
     return true;
   }
-  return RaiseCMP0037Message(this->GetCMakeInstance(), tgt, reason);
+  return RaiseCMP0037Message(this->GetCMakeInstance(), tgt, targetName,
+                             reason);
 }
 
 void cmGlobalGenerator::CreateDefaultGlobalTargets(
