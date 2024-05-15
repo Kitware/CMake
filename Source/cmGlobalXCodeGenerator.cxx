@@ -267,7 +267,21 @@ cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(const std::string& name,
 namespace {
 std::string ConvertToMakefilePath(std::string const& path)
 {
-  return cmSystemTools::ConvertToOutputPath(path);
+  std::string result;
+  result.reserve(path.size());
+  for (char c : path) {
+    switch (c) {
+      case '\\':
+      case ' ':
+      case '#':
+        result.push_back('\\');
+        CM_FALLTHROUGH;
+      default:
+        result.push_back(c);
+        break;
+    }
+  }
+  return result;
 }
 }
 
