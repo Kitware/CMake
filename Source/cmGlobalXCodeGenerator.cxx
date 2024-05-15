@@ -659,7 +659,8 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   bool isGenerateProject = isTopLevel || !generateTopLevelProjectOnly;
   if (regenerate && isGenerateProject) {
     this->CreateReRunCMakeFile(root, gens);
-    std::string file = ConvertToMakefilePath(this->CurrentReRunCMakeMakefile);
+    std::string file =
+      cmSystemTools::ConvertToOutputPath(this->CurrentReRunCMakeMakefile);
     cmSystemTools::ReplaceString(file, "\\ ", " ");
     cc = cm::make_unique<cmCustomCommand>();
     cc->SetCommandLines(cmMakeSingleCommandLine({ "make", "-f", file }));
@@ -2205,11 +2206,10 @@ void cmGlobalXCodeGenerator::AddCommandsToBuildPhase(
   }
 
   std::string cdir = this->CurrentLocalGenerator->GetCurrentBinaryDirectory();
-  cdir = ConvertToMakefilePath(cdir);
-  std::string makecmd =
-    cmStrCat("make -C ", cdir, " -f ",
-             ConvertToMakefilePath(cmStrCat(makefile, "$CONFIGURATION")),
-             " OBJDIR=$(basename \"$OBJECT_FILE_DIR_normal\") all");
+  cdir = cmSystemTools::ConvertToOutputPath(cdir);
+  std::string makecmd = cmStrCat(
+    "make -C ", cdir, " -f ", cmSystemTools::ConvertToOutputPath(makefile),
+    "$CONFIGURATION", " OBJDIR=$(basename \"$OBJECT_FILE_DIR_normal\") all");
   buildphase->AddAttribute("shellScript", this->CreateString(makecmd));
   buildphase->AddAttribute("showEnvVarsInLog", this->CreateString("0"));
 }
