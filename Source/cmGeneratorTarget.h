@@ -892,6 +892,13 @@ public:
 
   struct TransitiveProperty
   {
+#if defined(__SUNPRO_CC) || (defined(__ibmxl__) && defined(__clang__))
+    TransitiveProperty(cm::string_view interfaceName, UseTo usage)
+      : InterfaceName(interfaceName)
+      , Usage(usage)
+    {
+    }
+#endif
     cm::string_view InterfaceName;
     UseTo Usage;
   };
