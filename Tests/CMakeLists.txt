@@ -167,10 +167,7 @@ if(BUILD_TESTING)
     set(CPACK_BINARY_DEB OFF)
   endif()
 
-  # Look for NuGet to use for tests.
-  find_program(NUGET_EXECUTABLE NAMES NuGet nuget)
-
-  if(NUGET_EXECUTABLE)
+  if(CMake_TEST_CPACK_NUGET)
     set(CPACK_BINARY_NUGET ON)
   else()
     set(CPACK_BINARY_NUGET OFF)
@@ -1115,9 +1112,7 @@ if(BUILD_TESTING)
     if(CPACK_BINARY_DEB)
       list(APPEND ACTIVE_CPACK_GENERATORS DEB)
     endif()
-    # Check whether if NuGet command is found
-    # before adding NuGet tests
-    if(CPACK_BINARY_NUGET)
+    if(CMake_TEST_CPACK_NUGET)
       list(APPEND ACTIVE_CPACK_GENERATORS NUGET)
       set(CPACK_GENERATOR_STRING_NUGET NuGet)
     endif()
