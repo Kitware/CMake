@@ -285,6 +285,7 @@ add_library(
   cmGeneratorExpression.h
   cmGeneratorTarget.cxx
   cmGeneratorTarget.h
+  cmGeneratorTarget_Sources.cxx
   cmGeneratorTarget_TargetPropertyEntry.cxx
   cmLinkItemGraphVisitor.cxx
   cmLinkItemGraphVisitor.h
