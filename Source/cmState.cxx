@@ -716,6 +716,16 @@ bool cmState::UseGhsMultiIDE() const
   return this->GhsMultiIDE;
 }
 
+void cmState::SetBorlandMake(bool borlandMake)
+{
+  this->BorlandMake = borlandMake;
+}
+
+bool cmState::UseBorlandMake() const
+{
+  return this->BorlandMake;
+}
+
 void cmState::SetWatcomWMake(bool watcomWMake)
 {
   this->WatcomWMake = watcomWMake;

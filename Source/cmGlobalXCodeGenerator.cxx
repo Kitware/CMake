@@ -264,6 +264,27 @@ cmGlobalXCodeGenerator::Factory::CreateGlobalGenerator(const std::string& name,
 #endif
 }
 
+namespace {
+std::string ConvertToMakefilePath(std::string const& path)
+{
+  std::string result;
+  result.reserve(path.size());
+  for (char c : path) {
+    switch (c) {
+      case '\\':
+      case ' ':
+      case '#':
+        result.push_back('\\');
+        CM_FALLTHROUGH;
+      default:
+        result.push_back(c);
+        break;
+    }
+  }
+  return result;
+}
+}
+
 bool cmGlobalXCodeGenerator::FindMakeProgram(cmMakefile* mf)
 {
   // The Xcode generator knows how to lookup its build tool
@@ -653,7 +674,7 @@ void cmGlobalXCodeGenerator::AddExtraTargets(
   if (regenerate && isGenerateProject) {
     this->CreateReRunCMakeFile(root, gens);
     std::string file =
-      this->ConvertToRelativeForMake(this->CurrentReRunCMakeMakefile);
+      cmSystemTools::ConvertToOutputPath(this->CurrentReRunCMakeMakefile);
     cmSystemTools::ReplaceString(file, "\\ ", " ");
     cc = cm::make_unique<cmCustomCommand>();
     cc->SetCommandLines(cmMakeSingleCommandLine({ "make", "-f", file }));
@@ -732,7 +753,7 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
 
   for (const auto& lfile : lfiles) {
     makefileStream << "TARGETS += $(subst $(space),$(spaceplus),$(wildcard "
-                   << this->ConvertToRelativeForMake(lfile) << "))\n";
+                   << ConvertToMakefilePath(lfile) << "))\n";
   }
   makefileStream << '\n';
 
@@ -743,25 +764,25 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
     makefileStream << ".NOTPARALLEL:\n\n"
                       ".PHONY: all VERIFY_GLOBS\n\n"
                       "all: VERIFY_GLOBS "
-                   << this->ConvertToRelativeForMake(checkCache)
+                   << ConvertToMakefilePath(checkCache)
                    << "\n\n"
                       "VERIFY_GLOBS:\n"
                       "\t"
-                   << this->ConvertToRelativeForMake(
-                        cmSystemTools::GetCMakeCommand())
+                   << ConvertToMakefilePath(cmSystemTools::GetCMakeCommand())
                    << " -P "
-                   << this->ConvertToRelativeForMake(cm->GetGlobVerifyScript())
+                   << ConvertToMakefilePath(cm->GetGlobVerifyScript())
                    << "\n\n";
   }
 
-  makefileStream << this->ConvertToRelativeForMake(checkCache)
-                 << ": $(TARGETS)\n";
-  makefileStream
-    << '\t' << this->ConvertToRelativeForMake(cmSystemTools::GetCMakeCommand())
-    << " -S" << this->ConvertToRelativeForMake(root->GetSourceDirectory())
-    << " -B" << this->ConvertToRelativeForMake(root->GetBinaryDirectory())
-    << (cm->GetIgnoreWarningAsError() ? " --compile-no-warning-as-error" : "")
-    << '\n';
+  makefileStream << ConvertToMakefilePath(checkCache) << ": $(TARGETS)\n";
+  makefileStream << '\t'
+                 << ConvertToMakefilePath(cmSystemTools::GetCMakeCommand())
+                 << " -S" << ConvertToMakefilePath(root->GetSourceDirectory())
+                 << " -B" << ConvertToMakefilePath(root->GetBinaryDirectory())
+                 << (cm->GetIgnoreWarningAsError()
+                       ? " --compile-no-warning-as-error"
+                       : "")
+                 << '\n';
 }
 
 static bool objectIdLessThan(const std::unique_ptr<cmXCodeObject>& l,
@@ -2199,11 +2220,10 @@ void cmGlobalXCodeGenerator::AddCommandsToBuildPhase(
   }
 
   std::string cdir = this->CurrentLocalGenerator->GetCurrentBinaryDirectory();
-  cdir = this->ConvertToRelativeForMake(cdir);
+  cdir = cmSystemTools::ConvertToOutputPath(cdir);
   std::string makecmd = cmStrCat(
-    "make -C ", cdir, " -f ",
-    this->ConvertToRelativeForMake(cmStrCat(makefile, "$CONFIGURATION")),
-    " OBJDIR=$(basename \"$OBJECT_FILE_DIR_normal\") all");
+    "make -C ", cdir, " -f ", cmSystemTools::ConvertToOutputPath(makefile),
+    "$CONFIGURATION", " OBJDIR=$(basename \"$OBJECT_FILE_DIR_normal\") all");
   buildphase->AddAttribute("shellScript", this->CreateString(makecmd));
   buildphase->AddAttribute("showEnvVarsInLog", this->CreateString("0"));
 }
@@ -2237,7 +2257,7 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
       const std::vector<std::string>& outputs = ccg.GetOutputs();
       if (!outputs.empty()) {
         for (auto const& output : outputs) {
-          makefileStream << "\\\n\t" << this->ConvertToRelativeForMake(output);
+          makefileStream << "\\\n\t" << ConvertToMakefilePath(output);
         }
       } else {
         std::ostringstream str;
@@ -2291,7 +2311,7 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
         // There is at least one output, start the rule for it
         const char* sep = "";
         for (auto const& output : outputs) {
-          makefileStream << sep << this->ConvertToRelativeForMake(output);
+          makefileStream << sep << ConvertToMakefilePath(output);
           sep = " ";
         }
         makefileStream << ": ";
@@ -2300,7 +2320,7 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
         makefileStream << tname[&ccg.GetCC()] << ": ";
       }
       for (auto const& dep : realDepends) {
-        makefileStream << "\\\n" << this->ConvertToRelativeForMake(dep);
+        makefileStream << "\\\n" << ConvertToMakefilePath(dep);
       }
       makefileStream << '\n';
 
@@ -2317,12 +2337,12 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
         // Build the command line in a single string.
         std::string cmd2 = ccg.GetCommand(c);
         cmSystemTools::ReplaceString(cmd2, "/./", "/");
-        cmd2 = this->ConvertToRelativeForMake(cmd2);
+        cmd2 = ConvertToMakefilePath(cmd2);
         std::string cmd;
         std::string wd = ccg.GetWorkingDirectory();
         if (!wd.empty()) {
           cmd += "cd ";
-          cmd += this->ConvertToRelativeForMake(wd);
+          cmd += ConvertToMakefilePath(wd);
           cmd += " && ";
         }
         cmd += cmd2;
@@ -2336,7 +2356,7 @@ void cmGlobalXCodeGenerator::CreateCustomRulesMakefile(
               target->GetLocalGenerator()->GetMakefile()->GetSource(
                 dep, cmSourceFileLocationKind::Known)) {
           if (dsf->GetPropertyAsBool("SYMBOLIC")) {
-            makefileStream << this->ConvertToRelativeForMake(dep) << ":\n";
+            makefileStream << ConvertToMakefilePath(dep) << ":\n";
           }
         }
       }
@@ -4865,7 +4885,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
           gt->GetType() == cmStateEnums::SHARED_LIBRARY ||
           gt->GetType() == cmStateEnums::MODULE_LIBRARY) {
         std::string tfull = gt->GetFullPath(configName);
-        std::string trel = this->ConvertToRelativeForMake(tfull);
+        std::string trel = ConvertToMakefilePath(tfull);
 
         // Add this target to the post-build phases of its dependencies.
         auto const y = target->GetDependTargets().find(configName);
@@ -4891,7 +4911,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
         auto const x = target->GetDependLibraries().find(configName);
         if (x != target->GetDependLibraries().end()) {
           for (auto const& deplib : x->second) {
-            std::string file = this->ConvertToRelativeForMake(deplib);
+            std::string file = ConvertToMakefilePath(deplib);
             makefileStream << "\\\n\t" << file;
             dummyRules.insert(file);
           }
@@ -4903,7 +4923,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
           std::string d = cmStrCat(this->GetTargetTempDir(gt, configName),
                                    "/lib", objLibName, ".a");
 
-          std::string dependency = this->ConvertToRelativeForMake(d);
+          std::string dependency = ConvertToMakefilePath(d);
           makefileStream << "\\\n\t" << dependency;
           dummyRules.insert(dependency);
         }
@@ -4911,7 +4931,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
         // Write the action to remove the target if it is out of date.
         makefileStream << "\n"
                           "\t/bin/rm -f "
-                       << this->ConvertToRelativeForMake(tfull) << '\n';
+                       << ConvertToMakefilePath(tfull) << '\n';
         // if building for more than one architecture
         // then remove those executables as well
         if (this->Architectures.size() > 1) {
@@ -4921,8 +4941,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
             std::string universalFile = cmStrCat(universal, architecture, '/',
                                                  gt->GetFullName(configName));
             makefileStream << "\t/bin/rm -f "
-                           << this->ConvertToRelativeForMake(universalFile)
-                           << '\n';
+                           << ConvertToMakefilePath(universalFile) << '\n';
           }
         }
         makefileStream << "\n\n";
@@ -5121,12 +5140,6 @@ cmDocumentationEntry cmGlobalXCodeGenerator::GetDocumentation()
 {
   return { cmGlobalXCodeGenerator::GetActualName(),
            "Generate Xcode project files." };
-}
-
-std::string cmGlobalXCodeGenerator::ConvertToRelativeForMake(
-  std::string const& p)
-{
-  return cmSystemTools::ConvertToOutputPath(p);
 }
 
 std::string cmGlobalXCodeGenerator::RelativeToSource(const std::string& p)

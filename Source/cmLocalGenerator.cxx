@@ -4403,7 +4403,12 @@ void CreateGeneratedSource(cmLocalGenerator& lg, const std::string& output,
   }
 
   // Make sure the output file name has no invalid characters.
-  std::string::size_type pos = output.find_first_of("#<>");
+  const bool hashNotAllowed = lg.GetState()->UseBorlandMake();
+  std::string::size_type pos = output.find_first_of("<>");
+  if (pos == std::string::npos && hashNotAllowed) {
+    pos = output.find_first_of('#');
+  }
+
   if (pos != std::string::npos) {
     lg.GetCMakeInstance()->IssueMessage(
       MessageType::FATAL_ERROR,
