@@ -437,6 +437,8 @@ add_library(
   cmTargetPropertyComputer.cxx
   cmTargetPropertyComputer.h
   cmTargetExport.h
+  cmTargetTraceDependencies.cxx
+  cmTargetTraceDependencies.h
   cmTest.cxx
   cmTest.h
   cmTestGenerator.cxx
