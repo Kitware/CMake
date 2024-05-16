@@ -91,24 +91,6 @@ if(CMAKE_USER_MAKE_RULES_OVERRIDE_OBJC)
   set(CMAKE_USER_MAKE_RULES_OVERRIDE_OBJC "${_override}")
 endif()
 
-if(CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
-  if(NOT DEFINED CMAKE_OBJC_LINK_WHAT_YOU_USE_FLAG)
-    set(CMAKE_OBJC_LINK_WHAT_YOU_USE_FLAG "LINKER:--no-as-needed")
-  endif()
-  if(NOT DEFINED CMAKE_LINK_WHAT_YOU_USE_CHECK)
-    set(CMAKE_LINK_WHAT_YOU_USE_CHECK ldd -u -r)
-  endif()
-endif()
-
-
-# for most systems a module is the same as a shared library
-# so unless the variable CMAKE_MODULE_EXISTS is set just
-# copy the values from the LIBRARY variables
-if(NOT CMAKE_MODULE_EXISTS)
-  set(CMAKE_SHARED_MODULE_OBJC_FLAGS ${CMAKE_SHARED_LIBRARY_OBJC_FLAGS})
-  set(CMAKE_SHARED_MODULE_CREATE_OBJC_FLAGS ${CMAKE_SHARED_LIBRARY_CREATE_OBJC_FLAGS})
-endif()
-
 set(CMAKE_OBJC_FLAGS_INIT "$ENV{OBJCFLAGS} ${CMAKE_OBJC_FLAGS_INIT}")
 
 cmake_initialize_per_config_variable(CMAKE_OBJC_FLAGS "Flags used by the Objective-C compiler")
@@ -130,6 +112,7 @@ if(NOT CMAKE_OBJC_LINKER_LAUNCHER AND DEFINED ENV{CMAKE_OBJC_LINKER_LAUNCHER})
 endif()
 
 include(CMakeCommonLanguageInclude)
+_cmake_common_language_platform_flags(OBJC)
 
 # now define the following rule variables
 
