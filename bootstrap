@@ -382,6 +382,7 @@ CMAKE_CXX_SOURCES="\
   cmGeneratorExpressionParser \
   cmGeneratorTarget \
   cmGeneratorTarget_IncludeDirectories \
+  cmGeneratorTarget_LinkDirectories \
   cmGeneratorTarget_Sources \
   cmGeneratorTarget_TargetPropertyEntry \
   cmGetCMakePropertyCommand \

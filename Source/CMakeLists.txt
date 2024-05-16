@@ -286,6 +286,7 @@ add_library(
   cmGeneratorTarget.cxx
   cmGeneratorTarget.h
   cmGeneratorTarget_IncludeDirectories.cxx
+  cmGeneratorTarget_LinkDirectories.cxx
   cmGeneratorTarget_Sources.cxx
   cmGeneratorTarget_TargetPropertyEntry.cxx
   cmLinkItemGraphVisitor.cxx
