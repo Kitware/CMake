@@ -26,7 +26,9 @@
 #include "cmStateTypes.h"
 #include "cmValue.h"
 
+class cmake;
 enum class cmBuildStep;
+class cmCompiledGeneratorExpression;
 class cmCustomCommand;
 class cmFileSet;
 class cmGlobalGenerator;
@@ -1383,6 +1385,14 @@ protected:
 public:
   TargetPropertyEntry(cmLinkImplItem const& item);
   virtual ~TargetPropertyEntry() = default;
+
+  static std::unique_ptr<TargetPropertyEntry> Create(
+    cmake& cmakeInstance, const BT<std::string>& propertyValue,
+    bool evaluateForBuildsystem = false);
+  static std::unique_ptr<TargetPropertyEntry> CreateFileSet(
+    std::vector<std::string> dirs, bool contextSensitiveDirs,
+    std::unique_ptr<cmCompiledGeneratorExpression> entryCge,
+    const cmFileSet* fileSet, cmLinkImplItem const& item = NoLinkImplItem);
 
   virtual const std::string& Evaluate(
     cmLocalGenerator* lg, const std::string& config,

@@ -245,15 +245,10 @@ private:
   const cmFileSet* FileSet;
 };
 
-std::unique_ptr<
-  cmGeneratorTarget::
-    TargetPropertyEntry> static CreateTargetPropertyEntry(cmake& cmakeInstance,
-                                                          const BT<
-                                                            std::string>&
-                                                            propertyValue,
-                                                          bool
-                                                            evaluateForBuildsystem =
-                                                              false)
+std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>
+cmGeneratorTarget::TargetPropertyEntry::Create(
+  cmake& cmakeInstance, const BT<std::string>& propertyValue,
+  bool evaluateForBuildsystem)
 {
   if (cmGeneratorExpression::Find(propertyValue.Value) != std::string::npos) {
     cmGeneratorExpression ge(cmakeInstance, propertyValue.Backtrace);
@@ -266,6 +261,16 @@ std::unique_ptr<
 
   return std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>(
     cm::make_unique<TargetPropertyEntryString>(propertyValue));
+}
+
+std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>
+cmGeneratorTarget::TargetPropertyEntry::CreateFileSet(
+  std::vector<std::string> dirs, bool contextSensitiveDirs,
+  std::unique_ptr<cmCompiledGeneratorExpression> entryCge,
+  const cmFileSet* fileSet, cmLinkImplItem const& item)
+{
+  return cm::make_unique<TargetPropertyEntryFileSet>(
+    std::move(dirs), contextSensitiveDirs, std::move(entryCge), fileSet, item);
 }
 
 cmGeneratorTarget::TargetPropertyEntry::TargetPropertyEntry(
@@ -286,8 +291,8 @@ static void CreatePropertyGeneratorExpressions(
   bool evaluateForBuildsystem = false)
 {
   for (auto const& entry : entries) {
-    items.push_back(
-      CreateTargetPropertyEntry(cmakeInstance, entry, evaluateForBuildsystem));
+    items.push_back(cmGeneratorTarget::TargetPropertyEntry::Create(
+      cmakeInstance, entry, evaluateForBuildsystem));
   }
 }
 
@@ -734,7 +739,7 @@ void cmGeneratorTarget::AddSourceCommon(const std::string& src, bool before)
 {
   this->SourceEntries.insert(
     before ? this->SourceEntries.begin() : this->SourceEntries.end(),
-    CreateTargetPropertyEntry(
+    TargetPropertyEntry::Create(
       *this->LocalGenerator->GetCMakeInstance(),
       BT<std::string>(src, this->Makefile->GetBacktrace()), true));
   this->ClearSourcesCache();
@@ -762,7 +767,7 @@ void cmGeneratorTarget::AddIncludeDirectory(const std::string& src,
   this->IncludeDirectoriesEntries.insert(
     before ? this->IncludeDirectoriesEntries.begin()
            : this->IncludeDirectoriesEntries.end(),
-    CreateTargetPropertyEntry(
+    TargetPropertyEntry::Create(
       *this->Makefile->GetCMakeInstance(),
       BT<std::string>(src, this->Makefile->GetBacktrace()), true));
 }
@@ -1733,10 +1738,10 @@ void addFileSetEntry(cmGeneratorTarget const* headTarget,
   }
   cmake* cm = headTarget->GetLocalGenerator()->GetCMakeInstance();
   for (auto& entryCge : fileSet->CompileFileEntries()) {
-    TargetPropertyEntryFileSet tpe(dirs, contextSensitiveDirs,
-                                   std::move(entryCge), fileSet);
+    auto tpe = cmGeneratorTarget::TargetPropertyEntry::CreateFileSet(
+      dirs, contextSensitiveDirs, std::move(entryCge), fileSet);
     entries.Entries.emplace_back(
-      EvaluateTargetPropertyEntry(headTarget, config, "", dagChecker, tpe));
+      EvaluateTargetPropertyEntry(headTarget, config, "", dagChecker, *tpe));
     EvaluatedTargetPropertyEntry const& entry = entries.Entries.back();
     for (auto const& file : entry.Values) {
       auto* sf = headTarget->Makefile->GetOrCreateSource(file);
@@ -4056,7 +4061,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
         }
         case cmPolicies::OLD: {
           std::unique_ptr<TargetPropertyEntry> entry =
-            CreateTargetPropertyEntry(
+            TargetPropertyEntry::Create(
               *this->LocalGenerator->GetCMakeInstance(), *configProp);
           entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
             this, config, language, &dagChecker, *entry));
@@ -4665,7 +4670,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetStaticLibraryLinkOptions(
 
   EvaluatedTargetPropertyEntries entries;
   if (cmValue linkOptions = this->GetProperty("STATIC_LIBRARY_OPTIONS")) {
-    std::unique_ptr<TargetPropertyEntry> entry = CreateTargetPropertyEntry(
+    std::unique_ptr<TargetPropertyEntry> entry = TargetPropertyEntry::Create(
       *this->LocalGenerator->GetCMakeInstance(), *linkOptions);
     entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
       this, config, language, &dagChecker, *entry));
@@ -4824,7 +4829,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDepends(
   if (cmValue linkDepends = this->GetProperty("LINK_DEPENDS")) {
     cmList depends{ *linkDepends };
     for (const auto& depend : depends) {
-      std::unique_ptr<TargetPropertyEntry> entry = CreateTargetPropertyEntry(
+      std::unique_ptr<TargetPropertyEntry> entry = TargetPropertyEntry::Create(
         *this->LocalGenerator->GetCMakeInstance(), depend);
       entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
         this, config, language, &dagChecker, *entry));
