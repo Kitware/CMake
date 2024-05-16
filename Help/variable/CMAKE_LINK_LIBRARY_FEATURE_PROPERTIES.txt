@@ -1,0 +1,87 @@
+Feature Properties Definition
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+A feature properties definition is a
+:ref:`semicolon-separated list <CMake Language Lists>` of ``property=value(s)``
+items. In the case of multiple values can be specified, they are separated by
+a comma.
+
+The following properties are supported:
+
+``LIBRARY_TYPE=<library_type-list>``
+  Specify which library types are supported by this feature. The possible
+  values are: ``STATIC``, ``SHARED``, ``MODULE`` or ``EXECUTABLE``.
+
+  If this property is not specified, the default is
+  ``LIBRARY_TYPE=STATIC,SHARED,MODULE,EXECUTABLE``.
+
+  If the feature is used with an unsupported library type, CMake will emit a
+  developer warning and the feature will be ignored.
+
+``OVERRIDE=<feature-list>``
+  Specify which features will be replaced by this one in the event of a
+  conflict. This override mechanism is superseded by any
+  :prop_tgt:`LINK_LIBRARY_OVERRIDE` or
+  :prop_tgt:`LINK_LIBRARY_OVERRIDE_<LIBRARY>` target properties definitions.
+
+  If this property is not specified, the default is an empty list.
+
+``UNICITY=YES|NO|DEFAULT``
+  Manage the strategy of de-duplication for the libraries using this feature.
+
+  ``YES``
+    Libraries are de-duplicated regardless the default strategy applied by
+    CMake.
+
+  ``NO``
+    Libraries are not de-duplicated regardless the default strategy applied
+    by CMake.
+
+  ``DEFAULT``
+    Apply the default CMake strategy.
+
+  If this property is not specified, ``DEFAULT`` will be used.
+
+Example
+^^^^^^^
+
+A common need is the loading of a full archive as part of the creation of a
+shared library or an executable. For that purpose, the ``WHOLE_ARCHIVE``
+feature can be used.
+
+Currently, the associated properties with this feature are defined as follows:
+
+.. code-block:: cmake
+
+  set(CMAKE_LINK_LIBRARY_WHOLE_ARCHIVE_PROPERTIES LIBRARY_TYPE=STATIC
+                                                  OVERRIDE=DEFAULT
+                                                  UNICITY=YES)
+
+``LIBRARY_TYPE=STATIC``
+  Obviously, this feature is only meaningful for static libraries.
+``OVERRIDE=DEFAULT``
+  The ``DEFAULT`` feature will be overridden by the ``WHOLE_ARCHIVE`` feature
+  because they are compatible and enhance the user's experience: standard
+  library specification and ``$<LINK_LIBRARY:WHOLE_ARCHIVE>`` can be used
+  freely.
+``UNICITY=YES``
+  When this feature is used, all symbols from the static library are loaded
+  by the linker, so there is no need to duplicate the library on the link
+  command.
+
+A typical usage of the ``WHOLE_ARCHIVE`` can be:
+
+.. code-block:: cmake
+
+  add_library(A STATIC ...)
+  add_library(B STATIC ...)
+
+  target_link_libraries(B PUBLIC A)
+  target_link_libraries(A PUBLIC B)
+
+  add_library(global SHARED ...)
+  target_link_libraries(global PRIVATE $<LINK_LIBRARY:WHOLE_ARCHIVE,A>)
+
+The resulting link command will only have one iteration of the ``A`` library
+specified with the needed linker flags to ensure the load of all the symbols
+of the library.

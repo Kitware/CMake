@@ -2,6 +2,9 @@ Feature names are case-sensitive and may only contain letters, numbers
 and underscores.  Feature names defined in all uppercase are reserved for
 CMake's own built-in features (see `Predefined Features`_ further below).
 
+The feature behavior can be described using the
+:variable:`CMAKE_<LANG>_LINK_LIBRARY_<FEATURE>_PROPERTIES` or
+:variable:`CMAKE_LINK_LIBRARY_<FEATURE>_PROPERTIES` variables.
 
 Feature Definitions
 ^^^^^^^^^^^^^^^^^^^

@@ -37,6 +37,7 @@ else()
                                              "LINKER:--no-whole-archive")
 endif()
 set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE_SUPPORTED TRUE)
+set(CMAKE_LINK_LIBRARY_WHOLE_ARCHIVE_PROPERTIES LIBRARY_TYPE=STATIC UNICITY=YES OVERRIDE=DEFAULT)
 
 
 # Features for LINK_GROUP generator expression

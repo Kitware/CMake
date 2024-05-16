@@ -19,6 +19,7 @@ macro(__apple_compiler_clang lang)
 
   set(CMAKE_${lang}_LINK_LIBRARY_USING_FRAMEWORK "-framework <LIBRARY>")
   set(CMAKE_${lang}_LINK_LIBRARY_USING_FRAMEWORK_SUPPORTED TRUE)
+  set(CMAKE_${lang}_LINK_LIBRARY_FRAMEWORK_PROPERTIES LIBRARY_TYPE=STATIC,SHARED UNICITY=DEFAULT OVERRIDE=DEFAULT)
 
   # linker selection
   set(CMAKE_${lang}_USING_LINKER_SYSTEM "-fuse-ld=ld")
