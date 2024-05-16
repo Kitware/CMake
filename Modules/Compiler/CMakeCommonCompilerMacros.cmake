@@ -250,7 +250,7 @@ function(cmake_create_cxx_import_std std variable)
     _cmake_supported_import_std_experimental)
   if (NOT _cmake_supported_import_std_experimental)
     set("${variable}"
-      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Experimental `import std` support not enabled when detecting toolchain\")\n"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Experimental `import std` support not enabled when detecting toolchain; it must be set before `CXX` is enabled (usually a `project()` call)\")\n"
       PARENT_SCOPE)
     return ()
   endif ()
