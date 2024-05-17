@@ -292,6 +292,7 @@ add_library(
   cmGeneratorTarget_Options.cxx
   cmGeneratorTarget_Sources.cxx
   cmGeneratorTarget_TargetPropertyEntry.cxx
+  cmGeneratorTarget_TransitiveProperty.cxx
   cmLinkItemGraphVisitor.cxx
   cmLinkItemGraphVisitor.h
   cmGetPipes.cxx

@@ -388,6 +388,7 @@ CMAKE_CXX_SOURCES="\
   cmGeneratorTarget_Options \
   cmGeneratorTarget_Sources \
   cmGeneratorTarget_TargetPropertyEntry \
+  cmGeneratorTarget_TransitiveProperty \
   cmGetCMakePropertyCommand \
   cmGetDirectoryPropertyCommand \
   cmGetFilenameComponentCommand \
