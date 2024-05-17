@@ -287,6 +287,7 @@ add_library(
   cmGeneratorTarget.h
   cmGeneratorTarget_CompatibleInterface.cxx
   cmGeneratorTarget_IncludeDirectories.cxx
+  cmGeneratorTarget_Link.cxx
   cmGeneratorTarget_LinkDirectories.cxx
   cmGeneratorTarget_Options.cxx
   cmGeneratorTarget_Sources.cxx

@@ -18,7 +18,6 @@
 #include <cm/string_view>
 
 #include "cmAlgorithms.h"
-#include "cmComputeLinkInformation.h"
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
@@ -29,6 +28,7 @@
 class cmake;
 enum class cmBuildStep;
 class cmCompiledGeneratorExpression;
+class cmComputeLinkInformation;
 class cmCustomCommand;
 class cmFileSet;
 class cmGlobalGenerator;
