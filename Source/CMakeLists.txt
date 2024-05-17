@@ -285,6 +285,7 @@ add_library(
   cmGeneratorExpression.h
   cmGeneratorTarget.cxx
   cmGeneratorTarget.h
+  cmGeneratorTarget_CompatibleInterface.cxx
   cmGeneratorTarget_IncludeDirectories.cxx
   cmGeneratorTarget_LinkDirectories.cxx
   cmGeneratorTarget_Options.cxx

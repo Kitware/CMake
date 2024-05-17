@@ -381,6 +381,7 @@ CMAKE_CXX_SOURCES="\
   cmGeneratorExpressionNode \
   cmGeneratorExpressionParser \
   cmGeneratorTarget \
+  cmGeneratorTarget_CompatibleInterface \
   cmGeneratorTarget_IncludeDirectories \
   cmGeneratorTarget_LinkDirectories \
   cmGeneratorTarget_Options \
