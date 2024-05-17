@@ -434,3 +434,17 @@ std::string CxxModuleMapContent(CxxModuleMapFormat format,
   assert(false);
   return {};
 }
+
+CxxModuleMapMode CxxModuleMapOpenMode(CxxModuleMapFormat format)
+{
+  switch (format) {
+    case CxxModuleMapFormat::Gcc:
+      return CxxModuleMapMode::Binary;
+    case CxxModuleMapFormat::Clang:
+    case CxxModuleMapFormat::Msvc:
+      return CxxModuleMapMode::Default;
+  }
+
+  assert(false);
+  return CxxModuleMapMode::Default;
+}
