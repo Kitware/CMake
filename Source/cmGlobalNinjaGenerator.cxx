@@ -2783,7 +2783,10 @@ bool cmGlobalNinjaGenerator::WriteDyndepFile(
         // `cmNinjaTargetGenerator::WriteObjectBuildStatements` and
         // `cmNinjaTargetGenerator::ExportObjectCompileCommand` to generate the
         // corresponding file path.
-        cmGeneratedFileStream mmf(cmStrCat(object.PrimaryOutput, ".modmap"));
+        cmGeneratedFileStream mmf;
+        mmf.Open(cmStrCat(object.PrimaryOutput, ".modmap"), false,
+                 CxxModuleMapOpenMode(*modmap_fmt) ==
+                   CxxModuleMapMode::Binary);
         mmf.SetCopyIfDifferent(true);
         mmf << mm;
       }
