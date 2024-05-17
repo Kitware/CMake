@@ -764,7 +764,62 @@ function(_ep_get_git_submodules_recurse git_submodules_recurse)
 endfunction()
 
 
+function(_ep_add_script_commands script_var work_dir cmd)
+  # We only support a subset of what ep_replace_location_tags() handles
+  set(location_tags
+    SOURCE_DIR
+    SOURCE_SUBDIR
+    BINARY_DIR
+    TMP_DIR
+    DOWNLOAD_DIR
+    DOWNLOADED_FILE
+  )
+
+  # There can be multiple COMMANDs, but we have to split those up to
+  # one command per call to execute_process()
+  set(execute_process_cmd
+    "execute_process(\n"
+    "  WORKING_DIRECTORY \"${work_dir}\"\n"
+    "  COMMAND_ERROR_IS_FATAL LAST\n"
+  )
+  cmake_language(GET_MESSAGE_LOG_LEVEL active_log_level)
+  if(active_log_level MATCHES "VERBOSE|DEBUG|TRACE")
+    string(APPEND execute_process_cmd "  COMMAND_ECHO STDOUT\n")
+  endif()
+  string(APPEND execute_process_cmd "  COMMAND ")
+
+  string(APPEND ${script_var} "${execute_process_cmd}")
+
+  foreach(cmd_arg IN LISTS cmd)
+    if(cmd_arg STREQUAL "COMMAND")
+      string(APPEND ${script_var} "\n)\n${execute_process_cmd}")
+    else()
+      if(_EP_LIST_SEPARATOR)
+        string(REPLACE "${_EP_LIST_SEPARATOR}" "\\;" cmd_arg "${cmd_arg}")
+      endif()
+      foreach(dir IN LISTS location_tags)
+        string(REPLACE "<${dir}>" "${_EP_${dir}}" cmd_arg "${cmd_arg}")
+      endforeach()
+      string(APPEND ${script_var} " [====[${cmd_arg}]====]")
+    endif()
+  endforeach()
+
+  string(APPEND ${script_var} "\n)")
+  set(${script_var} "${${script_var}}" PARENT_SCOPE)
+endfunction()
+
+
 function(_ep_add_download_command name)
+  set(noValueOptions )
+  set(singleValueOptions
+    SCRIPT_FILE        # These should only be used by FetchContent
+    DEPENDS_VARIABLE   #
+  )
+  set(multiValueOptions )
+  cmake_parse_arguments(PARSE_ARGV 1 arg
+    "${noValueOptions}" "${singleValueOptions}" "${multiValueOptions}"
+  )
+
   # The various _EP_... variables mentioned here and throughout this function
   # are expected to already have been set by the caller via a call to
   # _ep_parse_arguments() or ep_parse_arguments_to_vars(). Other variables
@@ -787,6 +842,7 @@ function(_ep_add_download_command name)
   # TODO: Perhaps file:// should be copied to download dir before extraction.
   string(REGEX REPLACE "file://" "" url "${url}")
 
+  set(step_script_contents)
   set(depends)
   set(comment)
   set(work_dir)
@@ -795,6 +851,14 @@ function(_ep_add_download_command name)
   if(DEFINED _EP_DOWNLOAD_COMMAND)
     set(work_dir ${download_dir})
     set(method custom)
+    if(NOT "x${cmd}" STREQUAL "x" AND arg_SCRIPT_FILE)
+      _ep_add_script_commands(
+        step_script_contents
+        "${work_dir}"
+        "${cmd}"   # Must be a single quoted argument
+      )
+    endif()
+
   elseif(cvs_repository)
     set(method cvs)
     find_package(CVS QUIET)
@@ -819,6 +883,13 @@ function(_ep_add_download_command name)
       -d ${src_name}
       ${cvs_module}
     )
+    if(arg_SCRIPT_FILE)
+      _ep_add_script_commands(
+        step_script_contents
+        "${work_dir}"
+        "${cmd}"   # Must be a single quoted argument
+      )
+    endif()
 
   elseif(svn_repository)
     set(method svn)
@@ -862,6 +933,13 @@ function(_ep_add_download_command name)
       ${svn_user_pw_args}
       ${src_name}
     )
+    if(arg_SCRIPT_FILE)
+      _ep_add_script_commands(
+        step_script_contents
+        "${work_dir}"
+        "${cmd}"   # Must be a single quoted argument
+      )
+    endif()
 
   elseif(git_repository)
     set(method git)
@@ -928,8 +1006,9 @@ CMP0097=${_EP_CMP0097}
     # create a cmake script to invoke as download command.
     # The script will delete the source directory and then call git clone.
     #
+    set(clone_script ${tmp_dir}/${name}-gitclone.cmake)
     _ep_write_gitclone_script(
-      ${tmp_dir}/${name}-gitclone.cmake
+      ${clone_script}
       ${source_dir}
       ${GIT_EXECUTABLE}
       ${git_repository}
@@ -949,7 +1028,15 @@ CMP0097=${_EP_CMP0097}
       "${tls_verify}"
     )
     set(comment "Performing download step (git clone) for '${name}'")
-    set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitclone.cmake)
+    set(cmd ${CMAKE_COMMAND}
+      -DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE
+      -P ${clone_script}
+    )
+
+    if(arg_SCRIPT_FILE)
+      set(step_script_contents "include(\"${clone_script}\")")
+      list(APPEND depends ${clone_script})
+    endif()
 
   elseif(hg_repository)
     set(method hg)
@@ -978,8 +1065,9 @@ CMP0097=${_EP_CMP0097}
     # create a cmake script to invoke as download command.
     # The script will delete the source directory and then call hg clone.
     #
+    set(clone_script ${tmp_dir}/${name}-hgclone.cmake)
     _ep_write_hgclone_script(
-      ${tmp_dir}/${name}-hgclone.cmake
+      ${clone_script}
       ${source_dir}
       ${HG_EXECUTABLE}
       ${hg_repository}
@@ -990,7 +1078,15 @@ CMP0097=${_EP_CMP0097}
       ${stamp_dir}/${name}-hgclone-lastrun.txt
     )
     set(comment "Performing download step (hg clone) for '${name}'")
-    set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-hgclone.cmake)
+    set(cmd ${CMAKE_COMMAND}
+      -DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE
+      -P ${clone_script}
+    )
+
+    if(arg_SCRIPT_FILE)
+      set(step_script_contents "include(\"${clone_script}\")")
+      list(APPEND depends ${clone_script})
+    endif()
 
   elseif(url)
     set(method url)
@@ -1045,9 +1141,21 @@ hash=${hash}
         ${CMAKE_COMMAND} -E rm -rf ${source_dir}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${abs_dir} ${source_dir}
       )
+      if(arg_SCRIPT_FILE)
+        # While it may be tempting to implement the two operations directly
+        # with file(), the behavior is different. file(COPY) preserves input
+        # file timestamps, which we don't want. Therefore, still use the same
+        # external commands so that we get the same behavior.
+        _ep_add_script_commands(
+          step_script_contents
+          "${work_dir}"
+          "${cmd}"   # Must be a single quoted argument
+        )
+      endif()
     else()
       set(no_extract "${_EP_DOWNLOAD_NO_EXTRACT}")
       string(APPEND extra_repo_info "no_extract=${no_extract}\n")
+      set(verify_script "${stamp_dir}/verify-${name}.cmake")
       if("${url}" MATCHES "^[a-z]+://")
         # TODO: Should download and extraction be different steps?
         if("x${fname}" STREQUAL "x")
@@ -1097,9 +1205,15 @@ hash=${hash}
           "${netrc_file}"
         )
         set(cmd
-          ${CMAKE_COMMAND} -P "${download_script}"
+          ${CMAKE_COMMAND}
+            -DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE
+            -P "${download_script}"
           COMMAND
         )
+        if(arg_SCRIPT_FILE)
+          set(step_script_contents "include(\"${download_script}\")\n")
+        endif()
+
         if (no_extract)
           set(steps "download and verify")
         else ()
@@ -1107,7 +1221,7 @@ hash=${hash}
         endif ()
         set(comment "Performing download step (${steps}) for '${name}'")
         # already verified by 'download_script'
-        file(WRITE "${stamp_dir}/verify-${name}.cmake" "")
+        file(WRITE "${verify_script}" "")
 
         # Rather than adding everything to the RepositoryInfo.txt file, it is
         # more robust to just depend on the download script. That way, we will
@@ -1122,12 +1236,19 @@ hash=${hash}
         endif ()
         set(comment "Performing download step (${steps}) for '${name}'")
         _ep_write_verifyfile_script(
-          "${stamp_dir}/verify-${name}.cmake"
+          "${verify_script}"
           "${file}"
           "${hash}"
         )
       endif()
-      list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/verify-${name}.cmake)
+      list(APPEND cmd ${CMAKE_COMMAND}
+        -DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE
+        -P ${verify_script}
+      )
+      if(arg_SCRIPT_FILE)
+        string(APPEND step_script_contents "include(\"${verify_script}\")\n")
+        list(APPEND depends ${verify_script})
+      endif()
       set(extract_timestamp "${_EP_DOWNLOAD_EXTRACT_TIMESTAMP}")
       if(no_extract)
         if(DEFINED _EP_DOWNLOAD_EXTRACT_TIMESTAMP)
@@ -1136,7 +1257,24 @@ hash=${hash}
             "DOWNLOAD_NO_EXTRACT TRUE"
           )
         endif()
-        set_property(TARGET ${name} PROPERTY _EP_DOWNLOADED_FILE ${file})
+        if(arg_SCRIPT_FILE)
+          # There's no target to record the location of the downloaded file.
+          # Instead, we copy it to the source directory within the script,
+          # which is what FetchContent always does in this situation.
+          cmake_path(SET safe_file NORMALIZE "${file}")
+          cmake_path(GET safe_file FILENAME filename)
+          string(APPEND step_script_contents
+            "file(COPY_FILE\n"
+            "  \"${file}\"\n"
+            "  \"${source_dir}/${filename}\"\n"
+            "  ONLY_IF_DIFFERENT\n"
+            "  INPUT_MAY_BE_RECENT\n"
+            ")"
+          )
+          list(APPEND depends ${source_dir}/${filename})
+        else()
+          set_property(TARGET ${name} PROPERTY _EP_DOWNLOADED_FILE ${file})
+        endif()
       else()
         if(NOT DEFINED _EP_DOWNLOAD_EXTRACT_TIMESTAMP)
           # Default depends on policy CMP0135
@@ -1165,16 +1303,23 @@ hash=${hash}
         else()
           set(options "--touch")
         endif()
+        set(extract_script "${stamp_dir}/extract-${name}.cmake")
         _ep_write_extractfile_script(
-          "${stamp_dir}/extract-${name}.cmake"
+          "${extract_script}"
           "${name}"
           "${file}"
           "${source_dir}"
           "${options}"
         )
         list(APPEND cmd
-          COMMAND ${CMAKE_COMMAND} -P ${stamp_dir}/extract-${name}.cmake
+          COMMAND ${CMAKE_COMMAND}
+            -DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE
+            -P ${extract_script}
         )
+        if(arg_SCRIPT_FILE)
+          string(APPEND step_script_contents "include(\"${extract_script}\")\n")
+          list(APPEND depends ${extract_script})
+        endif()
       endif ()
     endif()
   else()
@@ -1194,6 +1339,9 @@ hash=${hash}
         " * CVS_REPOSITORY and CVS_MODULE"
       )
     endif()
+    if(arg_SCRIPT_FILE)
+      set(step_script_contents "message(VERBOSE [[Using SOURCE_DIR as is]])")
+    endif()
   endif()
 
   # We use configure_file() to write the repo_info_file so that the file's
@@ -1206,6 +1354,20 @@ hash=${hash}
     "${repo_info_file}"
     @ONLY
   )
+
+  if(arg_SCRIPT_FILE)
+    set(step_name download)
+    configure_file(
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/stepscript.cmake.in"
+      "${arg_SCRIPT_FILE}"
+      @ONLY
+    )
+    set(${arg_DEPENDS_VARIABLE} "${depends}" PARENT_SCOPE)
+    return()
+  endif()
+
+  # Nothing below this point is applicable when we've been asked to put the
+  # download step in a script file (which is the FetchContent case).
 
   if(_EP_LOG_DOWNLOAD)
     set(log LOG 1)
@@ -1253,6 +1415,16 @@ function(_ep_get_update_disconnected var name)
 endfunction()
 
 function(_ep_add_update_command name)
+  set(noValueOptions )
+  set(singleValueOptions
+    SCRIPT_FILE       # These should only be used by FetchContent
+    DEPEND_VARIABLE   #
+  )
+  set(multiValueOptions )
+  cmake_parse_arguments(PARSE_ARGV 1 arg
+    "${noValueOptions}" "${singleValueOptions}" "${multiValueOptions}"
+  )
+
   # The various _EP_... variables mentioned here and throughout this function
   # are expected to already have been set by the caller via a call to
   # _ep_parse_arguments() or ep_parse_arguments_to_vars(). Other variables
@@ -1280,7 +1452,13 @@ function(_ep_add_update_command name)
     set(work_dir ${source_dir})
     if(NOT "x${cmd}" STREQUAL "x")
       set(always 1)
+      _ep_add_script_commands(
+        step_script_contents
+        "${work_dir}"
+        "${cmd}"   # Must be a single quoted argument
+      )
     endif()
+
   elseif(cvs_repository)
     if(NOT CVS_EXECUTABLE)
       message(FATAL_ERROR "error: could not find cvs for update of ${name}")
@@ -1290,6 +1468,15 @@ function(_ep_add_update_command name)
     set(cvs_tag "${_EP_CVS_TAG}")
     set(cmd ${CVS_EXECUTABLE} -d ${cvs_repository} -q up -dP ${cvs_tag})
     set(always 1)
+
+    if(arg_SCRIPT_FILE)
+      _ep_add_script_commands(
+        step_script_contents
+        "${work_dir}"
+        "${cmd}"   # Must be a single quoted argument
+      )
+    endif()
+
   elseif(svn_repository)
     if(NOT Subversion_SVN_EXECUTABLE)
       message(FATAL_ERROR "error: could not find svn for update of ${name}")
@@ -1326,6 +1513,15 @@ function(_ep_add_update_command name)
       ${svn_user_pw_args}
     )
     set(always 1)
+
+    if(arg_SCRIPT_FILE)
+      _ep_add_script_commands(
+        step_script_contents
+        "${work_dir}"
+        "${cmd}"   # Must be a single quoted argument
+      )
+    endif()
+
   elseif(git_repository)
     # FetchContent gives us these directly, so don't try to recompute them
     if(NOT GIT_EXECUTABLE OR NOT GIT_VERSION_STRING)
@@ -1393,9 +1589,27 @@ function(_ep_add_update_command name)
       "${tls_version}"
       "${tls_verify}"
     )
-    set(cmd              ${CMAKE_COMMAND} -Dcan_fetch=YES -P ${update_script})
-    set(cmd_disconnected ${CMAKE_COMMAND} -Dcan_fetch=NO  -P ${update_script})
+    set(cmd ${CMAKE_COMMAND}
+      -Dcan_fetch=YES
+      -DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE
+      -P ${update_script}
+    )
+    set(cmd_disconnected ${CMAKE_COMMAND}
+      -Dcan_fetch=NO
+      -DCMAKE_MESSAGE_LOG_LEVEL=VERBOSE
+      -P ${update_script}
+    )
     set(always 1)
+
+    if(arg_SCRIPT_FILE)
+      if(update_disconnected)
+        set(can_fetch_default NO)
+      else()
+        set(can_fetch_default YES)
+      endif()
+      set(step_script_contents "include(\"${update_script}\")")
+    endif()
+
   elseif(hg_repository)
     if(NOT HG_EXECUTABLE)
       message(FATAL_ERROR "error: could not find hg for pull of ${name}")
@@ -1427,6 +1641,28 @@ Update to Mercurial >= 2.1.1.
     )
     set(cmd_disconnected ${HG_EXECUTABLE} update ${hg_tag})
     set(always 1)
+
+    if(arg_SCRIPT_FILE)
+      # These commands are simple, and we know whether updates need to be
+      # disconnected or not for this case, so write them directly instead of
+      # forming them from "cmd" and "cmd_disconnected".
+      if(NOT update_disconnected)
+        string(APPEND step_script_contents
+          "execute_process(\n"
+          "  WORKING_DIRECTORY \"${work_dir}\"\n"
+          "  COMMAND_ERROR_IS_FATAL LAST\n"
+          "  COMMAND \"${HG_EXECUTABLE}\" pull\n"
+          ")"
+        )
+      endif()
+      string(APPEND step_script_contents
+        "execute_process(\n"
+        "  WORKING_DIRECTORY \"${work_dir}\"\n"
+        "  COMMAND_ERROR_IS_FATAL LAST\n"
+        "  COMMAND \"${HG_EXECUTABLE}\" update \"${hg_tag}\"\n"
+        ")"
+      )
+    endif()
   endif()
 
   # We use configure_file() to write the update_info_file so that the file's
@@ -1441,6 +1677,20 @@ Update to Mercurial >= 2.1.1.
     "${update_info_file}"
     @ONLY
   )
+
+  if(arg_SCRIPT_FILE)
+    set(step_name update)
+    configure_file(
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/stepscript.cmake.in"
+      "${arg_SCRIPT_FILE}"
+      @ONLY
+    )
+    set(${arg_DEPENDS_VARIABLE} "${file_deps}" PARENT_SCOPE)
+    return()
+  endif()
+
+  # Nothing below this point is applicable when we've been asked to put the
+  # update step in a script file (which is the FetchContent case).
 
   if(_EP_LOG_UPDATE)
     set(log LOG 1)
@@ -1499,6 +1749,15 @@ endfunction()
 
 
 function(_ep_add_patch_command name)
+  set(noValueOptions )
+  set(singleValueOptions
+    SCRIPT_FILE        # These should only be used by FetchContent
+  )
+  set(multiValueOptions )
+  cmake_parse_arguments(PARSE_ARGV 1 arg
+    "${noValueOptions}" "${singleValueOptions}" "${multiValueOptions}"
+  )
+
   # The various _EP_... variables mentioned here and throughout this function
   # are expected to already have been set by the caller via a call to
   # _ep_parse_arguments() or ep_parse_arguments_to_vars(). Other variables
@@ -1509,10 +1768,18 @@ function(_ep_add_patch_command name)
   set(stamp_dir  "${_EP_STAMP_DIR}")
 
   set(cmd "${_EP_PATCH_COMMAND}")
+  set(step_script_contents "")
 
   set(work_dir)
   if(DEFINED _EP_PATCH_COMMAND)
     set(work_dir ${source_dir})
+    if(arg_SCRIPT_FILE)
+      _ep_add_script_commands(
+        step_script_contents
+        "${work_dir}"
+        "${cmd}"   # Must be a single quoted argument
+      )
+    endif()
   endif()
 
   # We use configure_file() to write the patch_info_file so that the file's
@@ -1523,6 +1790,19 @@ function(_ep_add_patch_command name)
     "${patch_info_file}"
     @ONLY
   )
+
+  if(arg_SCRIPT_FILE)
+    set(step_name patch)
+    configure_file(
+      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/stepscript.cmake.in"
+      "${arg_SCRIPT_FILE}"
+      @ONLY
+    )
+    return()
+  endif()
+
+  # Nothing below this point is applicable when we've been asked to put the
+  # patch step in a script file (which is the FetchContent case).
 
   if(_EP_LOG_PATCH)
     set(log LOG 1)
