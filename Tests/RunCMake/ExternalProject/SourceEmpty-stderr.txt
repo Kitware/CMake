@@ -1,4 +1,4 @@
-^CMake Error at .*/Modules/ExternalProject.cmake:[0-9]+ \(message\):
+^CMake Error at .*/Modules/ExternalProject/shared_internal_commands\.cmake:[0-9]+ \(message\):
   No download info given for 'MyProj' and its source directory:
 
    .*/Tests/RunCMake/ExternalProject/SourceEmpty-build/SourceEmpty

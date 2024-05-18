@@ -1,3 +1,5 @@
+cmake_policy(SET CMP0168 ${CMP0168})
+
 include(FetchContent)
 
 file(WRITE tmpFile.txt "Generated contents, not important")

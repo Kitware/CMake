@@ -141,6 +141,11 @@ Commands
   exception, see :command:`FetchContent_MakeAvailable` for details on how that
   affects behavior.
 
+  .. versionchanged:: 3.30
+    When policy :policy:`CMP0168` is set to ``NEW``, some output-related and
+    directory-related options are ignored.  See the policy documentation for
+    details.
+
   In most cases, ``<contentOptions>`` will just be a couple of options defining
   the download method and method-specific details like a commit tag or archive
   hash.  For example:
@@ -437,12 +442,13 @@ Commands
   like variable or directory scope.  Therefore, it doesn't matter where in the
   project the details were previously declared, as long as they have been
   declared before the call to ``FetchContent_Populate()``.  Those saved details
-  are then used to construct a call to :command:`ExternalProject_Add` in a
-  private sub-build to perform the content population immediately.  The
-  implementation of ``ExternalProject_Add()`` ensures that if the content has
-  already been populated in a previous CMake run, that content will be reused
-  rather than repopulating them again.  For the common case where population
-  involves downloading content, the cost of the download is only paid once.
+  are then used to populate the content using a method based on
+  :command:`ExternalProject_Add` (see policy :policy:`CMP0168` for important
+  behavioral aspects of how that is done).  The implementation ensures that if
+  the content has already been populated in a previous CMake run, that content
+  will be reused rather than repopulating them again.  For the common case
+  where population involves downloading content, the cost of the download is
+  only paid once.
 
   An internal global property records when a particular content population
   request has been processed.  If ``FetchContent_Populate()`` is called more
@@ -529,6 +535,13 @@ Commands
     cache variable has no effect on ``FetchContent_Populate()`` calls where the
     content details are provided directly.
 
+    .. versionchanged:: 3.30
+      The ``QUIET`` option and global ``FETCHCONTENT_QUIET`` variable have no
+      effect when policy :policy:`CMP0168` is set to ``NEW``. The output is
+      still quiet by default in that case, but verbosity is controlled by the
+      message logging level (see :variable:`CMAKE_MESSAGE_LOG_LEVEL` and
+      :option:`--log-level <cmake --log-level>`).
+
   ``SUBBUILD_DIR``
     The ``SUBBUILD_DIR`` argument can be provided to change the location of the
     sub-build created to perform the population.  The default value is
@@ -537,6 +550,10 @@ Commands
     it will be interpreted as relative to :variable:`CMAKE_CURRENT_BINARY_DIR`.
     This option should not be confused with the ``SOURCE_SUBDIR`` option which
     only affects the :command:`FetchContent_MakeAvailable` command.
+
+    .. versionchanged:: 3.30
+      ``SUBBUILD_DIR`` is ignored when policy :policy:`CMP0168` is set to
+      ``NEW``, since there is no sub-build in that case.
 
   ``SOURCE_DIR``, ``BINARY_DIR``
     The ``SOURCE_DIR`` and ``BINARY_DIR`` arguments are supported by
@@ -548,7 +565,7 @@ Commands
     :variable:`CMAKE_CURRENT_BINARY_DIR`.
 
   In addition to the above explicit options, any other unrecognized options are
-  passed through unmodified to :command:`ExternalProject_Add` to perform the
+  passed through unmodified to :command:`ExternalProject_Add` to set up the
   download, patch and update steps.  The following options are explicitly
   prohibited (they are disabled by the ``FetchContent_Populate()`` command):
 
@@ -563,6 +580,11 @@ Commands
   default, then the :variable:`CMAKE_GENERATOR` and/or
   :variable:`CMAKE_MAKE_PROGRAM` variables will need to be set appropriately
   on the command line invoking the script.
+
+  .. versionchanged:: 3.30
+    If policy :policy:`CMP0168` is set to ``NEW``, no sub-build is used.
+    Within CMake's script mode, that allows ``FetchContent_Populate()`` to be
+    called without any build tool or CMake generator.
 
   .. versionadded:: 3.18
     Added support for the ``DOWNLOAD_NO_EXTRACT`` option.
@@ -675,6 +697,13 @@ A number of cache variables can influence the behavior where details from a
   problems with hung downloads, temporarily switching this option off may
   help diagnose which content population is causing the issue.
 
+  .. versionchanged:: 3.30
+    ``FETCHCONTENT_QUIET`` is ignored if policy :policy:`CMP0168` is set to
+    ``NEW``.  The output is still quiet by default in that case, but verbosity
+    is controlled by the message logging level (see
+    :variable:`CMAKE_MESSAGE_LOG_LEVEL` and
+    :option:`--log-level <cmake --log-level>`).
+
 .. variable:: FETCHCONTENT_FULLY_DISCONNECTED
 
   When this option is enabled, no attempt is made to download or update
@@ -682,7 +711,7 @@ A number of cache variables can influence the behavior where details from a
   a previous run or the source directories have been pointed at existing
   contents the developer has provided manually (using options described
   further below).  When the developer knows that no changes have been made to
-  any content details, turning this option ``ON`` can significantly speed up
+  any content details, turning this option ``ON`` can speed up
   the configure stage.  It is ``OFF`` by default.
 
   .. note::
@@ -1167,7 +1196,13 @@ function(__FetchContent_declareDetails contentName)
   set(__findPackageArgs)
   set(__sawQuietKeyword NO)
   set(__sawGlobalKeyword NO)
+  set(__direct_population NO)
   foreach(__item IN LISTS ARGN)
+    if(__item STREQUAL "__DIRECT_POPULATION")
+      set(__direct_population YES)
+      continue()
+    endif()
+
     if(DEFINED __findPackageArgs)
       # All remaining args are for find_package()
       string(APPEND __findPackageArgs " [==[${__item}]==]")
@@ -1205,6 +1240,10 @@ function(__FetchContent_declareDetails contentName)
 
     string(APPEND __cmdArgs " [==[${__item}]==]")
   endforeach()
+
+  set_property(GLOBAL PROPERTY
+    "_FetchContent_${contentNameLower}_direct_population" ${__direct_population}
+  )
 
   define_property(GLOBAL PROPERTY ${savedDetailsPropertyName})
   cmake_language(EVAL CODE
@@ -1372,16 +1411,24 @@ function(FetchContent_Declare contentName)
   endif()
 
   # Add back in the keyword args we pulled out and potentially tweaked/added
+  set(forward_args "${ARG_UNPARSED_ARGUMENTS}")
   set(sep EXTERNALPROJECT_INTERNAL_ARGUMENT_SEPARATOR)
   foreach(key IN LISTS oneValueArgs)
     if(DEFINED ARG_${key})
-      list(PREPEND ARG_UNPARSED_ARGUMENTS ${key} "${ARG_${key}}" ${sep})
+      list(PREPEND forward_args ${key} "${ARG_${key}}" ${sep})
       set(sep "")
     endif()
   endforeach()
 
+  cmake_policy(GET CMP0168 cmp0168
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+  )
+  if(cmp0168 STREQUAL "NEW")
+    list(PREPEND forward_args __DIRECT_POPULATION ${sep})
+  endif()
+
   set(__argsQuoted)
-  foreach(__item IN LISTS ARG_UNPARSED_ARGUMENTS)
+  foreach(__item IN LISTS forward_args)
     string(APPEND __argsQuoted " [==[${__item}]==]")
   endforeach()
   cmake_language(EVAL CODE
@@ -1498,7 +1545,7 @@ endfunction()
 # The value of contentName will always have been lowercased by the caller.
 # All other arguments are assumed to be options that are understood by
 # ExternalProject_Add(), except for QUIET and SUBBUILD_DIR.
-function(__FetchContent_directPopulate contentName)
+function(__FetchContent_doPopulation contentName)
 
   set(options
       QUIET
@@ -1533,8 +1580,14 @@ function(__FetchContent_directPopulate contentName)
   cmake_parse_arguments(PARSE_ARGV 1 ARG
     "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
+  get_property(direct_population GLOBAL PROPERTY
+    "_FetchContent_${contentNameLower}_direct_population"
+  )
+
   if(NOT ARG_SUBBUILD_DIR)
-    message(FATAL_ERROR "Internal error: SUBBUILD_DIR not set")
+    if(NOT direct_population)
+      message(FATAL_ERROR "Internal error: SUBBUILD_DIR not set")
+    endif()
   elseif(NOT IS_ABSOLUTE "${ARG_SUBBUILD_DIR}")
     set(ARG_SUBBUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/${ARG_SUBBUILD_DIR}")
   endif()
@@ -1557,6 +1610,148 @@ function(__FetchContent_directPopulate contentName)
   # the content details set by the project.
   set(${contentName}_SOURCE_DIR "${ARG_SOURCE_DIR}" PARENT_SCOPE)
   set(${contentName}_BINARY_DIR "${ARG_BINARY_DIR}" PARENT_SCOPE)
+
+  if(direct_population)
+    __FetchContent_populateDirect()
+  else()
+    __FetchContent_populateSubbuild()
+  endif()
+endfunction()
+
+
+function(__FetchContent_populateDirect)
+  # Policies CMP0097, CMP0135 and CMP0150 are handled in FetchContent_Declare()
+  # and the stored arguments already account for them.
+  # For CMP0097, the arguments will always assume NEW behavior by the time
+  # we get to here, so ensure ExternalProject sees that.
+  set(_EP_CMP0097 NEW)
+
+  set(args_to_parse
+    "${ARG_UNPARSED_ARGUMENTS}"
+    SOURCE_DIR "${ARG_SOURCE_DIR}"
+    BINARY_DIR "${ARG_BINARY_DIR}"
+  )
+  if(ARG_DOWNLOAD_NO_EXTRACT)
+    list(APPEND args_to_parse DOWNLOAD_NO_EXTRACT YES)
+  endif()
+
+  get_property(cmake_role GLOBAL PROPERTY CMAKE_ROLE)
+  if(cmake_role STREQUAL "PROJECT")
+    # We don't support direct population where a project makes a direct call
+    # to FetchContent_Populate(). That always goes through ExternalProject and
+    # will soon be deprecated anyway.
+    set(function_for_args FetchContent_Declare)
+  elseif(cmake_role STREQUAL "SCRIPT")
+    set(function_for_args FetchContent_Populate)
+  else()
+    message(FATAL_ERROR "Unsupported context for direct population")
+  endif()
+
+  _ep_get_add_keywords(keywords)
+  _ep_parse_arguments_to_vars(
+    ${function_for_args}
+    "${keywords}"
+    ${contentName}
+    _EP_
+    "${args_to_parse}"
+  )
+
+  # We use a simplified set of directories here. We do not need the full set
+  # of directories that ExternalProject supports, and we don't need the
+  # extensive customization options it supports either. Note that
+  # _EP_SOURCE_DIR and _EP_BINARY_DIR are always included in the saved args,
+  # so we must not set them here.
+  set(_EP_STAMP_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-stamp")
+  set(_EP_TMP_DIR   "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-tmp")
+  set(_EP_DOWNLOAD_DIR "${_EP_TMP_DIR}")
+
+  file(MAKE_DIRECTORY
+    "${_EP_SOURCE_DIR}"
+    "${_EP_BINARY_DIR}"
+    "${_EP_STAMP_DIR}"
+    "${_EP_TMP_DIR}"
+  )
+
+  # We take over the stamp files and use our own for detecting whether each
+  # step is up-to-date. The method used by ExternalProject is specific to
+  # using a sub-build and is not appropriate for us here.
+
+  set(download_script ${_EP_TMP_DIR}/download.cmake)
+  set(update_script   ${_EP_TMP_DIR}/upload.cmake)
+  set(patch_script    ${_EP_TMP_DIR}/patch.cmake)
+  _ep_add_download_command(${contentName}
+    SCRIPT_FILE ${download_script}
+    DEPENDS_VARIABLE download_depends
+  )
+  _ep_add_update_command(${contentName}
+    SCRIPT_FILE ${update_script}
+    DEPENDS_VARIABLE update_depends
+  )
+  _ep_add_patch_command(${contentName}
+    SCRIPT_FILE ${patch_script}
+    # No additional dependencies for the patch step
+  )
+
+  set(download_stamp ${_EP_STAMP_DIR}/download.stamp)
+  set(update_stamp   ${_EP_STAMP_DIR}/upload.stamp)
+  set(patch_stamp    ${_EP_STAMP_DIR}/patch.stamp)
+  __FetchContent_doStepDirect(
+    SCRIPT_FILE ${download_script}
+    STAMP_FILE  ${download_stamp}
+    DEPENDS     ${download_depends}
+  )
+  __FetchContent_doStepDirect(
+    SCRIPT_FILE ${update_script}
+    STAMP_FILE  ${update_stamp}
+    DEPENDS     ${update_depends} ${download_stamp}
+  )
+  __FetchContent_doStepDirect(
+    SCRIPT_FILE ${patch_script}
+    STAMP_FILE  ${patch_stamp}
+    DEPENDS     ${update_stamp}
+  )
+
+endfunction()
+
+
+function(__FetchContent_doStepDirect)
+  set(noValueOptions )
+  set(singleValueOptions
+    SCRIPT_FILE
+    STAMP_FILE
+  )
+  set(multiValueOptions
+    DEPENDS
+  )
+  cmake_parse_arguments(PARSE_ARGV 0 arg
+    "${noValueOptions}" "${singleValueOptions}" "${multiValueOptions}"
+  )
+
+  if(NOT EXISTS ${arg_STAMP_FILE})
+    set(do_step YES)
+  else()
+    set(do_step NO)
+    foreach(dep_file IN LISTS arg_DEPENDS arg_SCRIPT_FILE)
+      if(NOT EXISTS "${arg_STAMP_FILE}" OR
+        NOT EXISTS "${dep_file}" OR
+        NOT "${arg_STAMP_FILE}" IS_NEWER_THAN "${dep_file}")
+        set(do_step YES)
+        break()
+      endif()
+    endforeach()
+  endif()
+
+  if(do_step)
+    include(${arg_SCRIPT_FILE})
+    file(TOUCH "${arg_STAMP_FILE}")
+  endif()
+endfunction()
+
+
+function(__FetchContent_populateSubbuild)
+  # All argument parsing is done in __FetchContent_doPopulate(), since it is
+  # common to both the subbuild and direct population strategies.
+  # Parsed arguments are in ARG_... variables.
 
   # The unparsed arguments may contain spaces, so build up ARG_EXTRA
   # in such a way that it correctly substitutes into the generated
@@ -1736,7 +1931,7 @@ function(FetchContent_Populate contentName)
   if(ARGN)
     # This is the direct population form with details fully specified
     # as part of the call, so we already have everything we need
-    __FetchContent_directPopulate(
+    __FetchContent_doPopulation(
       ${contentNameLower}
       SUBBUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}/${contentNameLower}-subbuild"
       SOURCE_DIR   "${CMAKE_CURRENT_BINARY_DIR}/${contentNameLower}-src"
@@ -1853,7 +2048,7 @@ function(FetchContent_Populate contentName)
       endif()
     endforeach()
     cmake_language(EVAL CODE "
-      __FetchContent_directPopulate(
+      __FetchContent_doPopulation(
         ${contentNameLower}
         ${quietFlag}
         UPDATE_DISCONNECTED ${disconnectUpdates}

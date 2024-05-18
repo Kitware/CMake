@@ -514,7 +514,11 @@ class cmMakefile;
          "private dependencies of static libraries.",                         \
          3, 30, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0167, "The FindBoost module is removed.", 3, 30, 0,       \
-         cmPolicies::WARN)
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0168,                                                     \
+         "FetchContent implements steps directly instead of through a "       \
+         "sub-build.",                                                        \
+         3, 30, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
