@@ -25,7 +25,10 @@ details (use :variable:`CMAKE_TOOLCHAIN_FILE` for that).
 
 By default, this variable is empty.  It is intended to be set by the user.
 
-See also the :variable:`CMAKE_PROJECT_INCLUDE`,
-:variable:`CMAKE_PROJECT_INCLUDE_BEFORE`,
-:variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE`, and
-:variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE_BEFORE` variables.
+See also:
+
+* :variable:`CMAKE_PROJECT_INCLUDE`
+* :variable:`CMAKE_PROJECT_INCLUDE_BEFORE`
+* :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE`
+* :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE_BEFORE`
+* :prop_gbl:`PROPAGATE_TOP_LEVEL_INCLUDES_TO_TRY_COMPILE`

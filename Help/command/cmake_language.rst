@@ -271,6 +271,11 @@ Dependency Providers
   :command:`project`.  Calling ``cmake_language(SET_DEPENDENCY_PROVIDER)``
   outside of that context will result in an error.
 
+  .. versionadded:: 3.30
+    The :prop_gbl:`PROPAGATE_TOP_LEVEL_INCLUDES_TO_TRY_COMPILE` global
+    property can be set if the dependency provider also wants to be enabled
+    in whole-project calls to :command:`try_compile`.
+
   .. note::
     The choice of dependency provider should always be under the user's control.
     As a convenience, a project may choose to provide a file that users can
