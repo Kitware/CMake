@@ -46,7 +46,7 @@ you will see that CMake will generate an error that looks like:
 
   which is prefixed in the source directory.
 
-What CMake is trying to say is that during generating the export information
+CMake is telling you that during the generation of the export information
 it will export a path that is intrinsically tied to the current machine and
 will not be valid on other machines. The solution to this is to update the
 ``MathFunctions`` :command:`target_include_directories` to understand that it
