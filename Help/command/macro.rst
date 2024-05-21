@@ -61,7 +61,7 @@ with the arguments passed, and then invoked as normal commands.
 
 In addition to referencing the formal parameters you can reference the
 values ``${ARGC}`` which will be set to the number of arguments passed
-into the function as well as ``${ARGV0}``, ``${ARGV1}``, ``${ARGV2}``,
+into the macro as well as ``${ARGV0}``, ``${ARGV1}``, ``${ARGV2}``,
 ...  which will have the actual values of the arguments passed in.
 This facilitates creating macros with optional arguments.
 
