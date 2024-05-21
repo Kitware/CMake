@@ -285,6 +285,14 @@ add_library(
   cmGeneratorExpression.h
   cmGeneratorTarget.cxx
   cmGeneratorTarget.h
+  cmGeneratorTarget_CompatibleInterface.cxx
+  cmGeneratorTarget_IncludeDirectories.cxx
+  cmGeneratorTarget_Link.cxx
+  cmGeneratorTarget_LinkDirectories.cxx
+  cmGeneratorTarget_Options.cxx
+  cmGeneratorTarget_Sources.cxx
+  cmGeneratorTarget_TargetPropertyEntry.cxx
+  cmGeneratorTarget_TransitiveProperty.cxx
   cmLinkItemGraphVisitor.cxx
   cmLinkItemGraphVisitor.h
   cmGetPipes.cxx
@@ -437,6 +445,8 @@ add_library(
   cmTargetPropertyComputer.cxx
   cmTargetPropertyComputer.h
   cmTargetExport.h
+  cmTargetTraceDependencies.cxx
+  cmTargetTraceDependencies.h
   cmTest.cxx
   cmTest.h
   cmTestGenerator.cxx
