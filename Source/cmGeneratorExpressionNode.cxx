@@ -2013,6 +2013,76 @@ static const CompilerVersionNode cCompilerVersionNode("C"),
   fortranCompilerVersionNode("Fortran"), ispcCompilerVersionNode("ISPC"),
   hipCompilerVersionNode("HIP");
 
+struct CompilerFrontendVariantNode : public cmGeneratorExpressionNode
+{
+  CompilerFrontendVariantNode(const char* compilerLang)
+    : CompilerLanguage(compilerLang)
+  {
+  }
+
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget) {
+      std::ostringstream e;
+      e << "$<" << this->CompilerLanguage
+        << "_COMPILER_FRONTEND_VARIANT> may only be used with binary targets. "
+           " It may not be used with add_custom_command or add_custom_target.";
+      reportError(context, content->GetOriginalExpression(), e.str());
+      return {};
+    }
+    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
+                                      this->CompilerLanguage);
+  }
+
+  std::string EvaluateWithLanguage(const std::vector<std::string>& parameters,
+                                   cmGeneratorExpressionContext* context,
+                                   const GeneratorExpressionContent* content,
+                                   cmGeneratorExpressionDAGChecker* /*unused*/,
+                                   const std::string& lang) const
+  {
+    std::string const& compilerFrontendVariant =
+      context->LG->GetMakefile()->GetSafeDefinition(
+        "CMAKE_" + lang + "_COMPILER_FRONTEND_VARIANT");
+    if (parameters.empty()) {
+      return compilerFrontendVariant;
+    }
+    if (compilerFrontendVariant.empty()) {
+      return parameters.front().empty() ? "1" : "0";
+    }
+    static cmsys::RegularExpression compilerFrontendVariantValidator(
+      "^[A-Za-z0-9_]*$");
+
+    for (auto const& param : parameters) {
+      if (!compilerFrontendVariantValidator.find(param)) {
+        reportError(context, content->GetOriginalExpression(),
+                    "Expression syntax not recognized.");
+        return {};
+      }
+      if (strcmp(param.c_str(), compilerFrontendVariant.c_str()) == 0) {
+        return "1";
+      }
+    }
+    return "0";
+  }
+
+  const char* const CompilerLanguage;
+};
+
+static const CompilerFrontendVariantNode cCompilerFrontendVariantNode("C"),
+  cxxCompilerFrontendVariantNode("CXX"),
+  cudaCompilerFrontendVariantNode("CUDA"),
+  objcCompilerFrontendVariantNode("OBJC"),
+  objcxxCompilerFrontendVariantNode("OBJCXX"),
+  fortranCompilerFrontendVariantNode("Fortran"),
+  hipCompilerFrontendVariantNode("HIP"),
+  ispcCompilerFrontendVariantNode("ISPC");
+
 struct PlatformIdNode : public cmGeneratorExpressionNode
 {
   PlatformIdNode() {} // NOLINT(modernize-use-equals-default)
@@ -4449,6 +4519,14 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "OBJCXX_COMPILER_VERSION", &objcxxCompilerVersionNode },
     { "Fortran_COMPILER_VERSION", &fortranCompilerVersionNode },
     { "HIP_COMPILER_VERSION", &hipCompilerVersionNode },
+    { "C_COMPILER_FRONTEND_VARIANT", &cCompilerFrontendVariantNode },
+    { "CXX_COMPILER_FRONTEND_VARIANT", &cxxCompilerFrontendVariantNode },
+    { "CUDA_COMPILER_FRONTEND_VARIANT", &cudaCompilerFrontendVariantNode },
+    { "OBJC_COMPILER_FRONTEND_VARIANT", &objcCompilerFrontendVariantNode },
+    { "OBJCXX_COMPILER_FRONTEND_VARIANT", &objcxxCompilerFrontendVariantNode },
+    { "Fortran_COMPILER_FRONTEND_VARIANT",
+      &fortranCompilerFrontendVariantNode },
+    { "HIP_COMPILER_FRONTEND_VARIANT", &hipCompilerFrontendVariantNode },
     { "PLATFORM_ID", &platformIdNode },
     { "COMPILE_FEATURES", &compileFeaturesNode },
     { "CONFIGURATION", &configurationNode },

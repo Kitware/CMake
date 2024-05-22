@@ -1037,10 +1037,11 @@ closely related to the expressions in this sub-section.
 
   ``1`` if the version of the ISPC compiler matches ``version``, otherwise ``0``.
 
-Compiler Language And ID
-^^^^^^^^^^^^^^^^^^^^^^^^
+Compiler Language, ID, and Frontend-Variant
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable, which is closely
+See also the :variable:`CMAKE_<LANG>_COMPILER_ID` and
+:variable:`CMAKE_<LANG>_COMPILER_FRONTEND_VARIANT` variables, which are closely
 related to most of the expressions in this sub-section.
 
 .. genex:: $<C_COMPILER_ID>
@@ -1153,6 +1154,118 @@ related to most of the expressions in this sub-section.
 
   where ``compiler_ids`` is a comma-separated list.
   ``1`` if CMake's compiler id of the ISPC compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+
+.. genex:: $<C_COMPILER_FRONTEND_VARIANT>
+
+  .. versionadded:: 3.30
+
+  CMake's compiler frontend variant of the C compiler used.
+
+.. genex:: $<C_COMPILER_FRONTEND_VARIANT:compiler_ids>
+
+  .. versionadded:: 3.30
+
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if CMake's compiler frontend variant of the C compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+
+.. genex:: $<CXX_COMPILER_FRONTEND_VARIANT>
+
+  .. versionadded:: 3.30
+
+  CMake's compiler frontend variant of the C++ compiler used.
+
+.. genex:: $<CXX_COMPILER_FRONTEND_VARIANT:compiler_ids>
+
+  .. versionadded:: 3.30
+
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if CMake's compiler frontend variant of the C++ compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+
+.. genex:: $<CUDA_COMPILER_FRONTEND_VARIANT>
+
+  .. versionadded:: 3.30
+
+  CMake's compiler id of the CUDA compiler used.
+
+.. genex:: $<CUDA_COMPILER_FRONTEND_VARIANT:compiler_ids>
+
+  .. versionadded:: 3.30
+
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if CMake's compiler frontend variant of the CUDA compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+
+.. genex:: $<OBJC_COMPILER_FRONTEND_VARIANT>
+
+  .. versionadded:: 3.30
+
+  CMake's compiler frontend variant of the Objective-C compiler used.
+
+.. genex:: $<OBJC_COMPILER_FRONTEND_VARIANT:compiler_ids>
+
+  .. versionadded:: 3.30
+
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if CMake's compiler frontend variant of the Objective-C compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+
+.. genex:: $<OBJCXX_COMPILER_FRONTEND_VARIANT>
+
+  .. versionadded:: 3.30
+
+  CMake's compiler frontend variant of the Objective-C++ compiler used.
+
+.. genex:: $<OBJCXX_COMPILER_FRONTEND_VARIANT:compiler_ids>
+
+  .. versionadded:: 3.30
+
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if CMake's compiler frontend variant of the Objective-C++ compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+
+.. genex:: $<Fortran_COMPILER_FRONTEND_VARIANT>
+
+  .. versionadded:: 3.30
+
+  CMake's compiler id of the Fortran compiler used.
+
+.. genex:: $<Fortran_COMPILER_FRONTEND_VARIANT:compiler_ids>
+
+  .. versionadded:: 3.30
+
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if CMake's compiler frontend variant of the Fortran compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+
+.. genex:: $<HIP_COMPILER_FRONTEND_VARIANT>
+
+  .. versionadded:: 3.30
+
+  CMake's compiler id of the HIP compiler used.
+
+.. genex:: $<HIP_COMPILER_FRONTEND_VARIANT:compiler_ids>
+
+  .. versionadded:: 3.30
+
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if CMake's compiler frontend variant of the HIP compiler matches any one
+  of the entries in ``compiler_ids``, otherwise ``0``.
+
+.. genex:: $<ISPC_COMPILER_FRONTEND_VARIANT>
+
+  .. versionadded:: 3.30
+
+  CMake's compiler id of the ISPC compiler used.
+
+.. genex:: $<ISPC_COMPILER_FRONTEND_VARIANT:compiler_ids>
+
+  .. versionadded:: 3.30
+
+  where ``compiler_ids`` is a comma-separated list.
+  ``1`` if CMake's compiler frontend variant of the ISPC compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
 
 .. genex:: $<COMPILE_LANGUAGE>
