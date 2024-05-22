@@ -43,6 +43,17 @@ add_library(N N.swift)
 target_link_libraries(N PUBLIC
   M)
 
+# FIXME(#25989): The Xcode generator doesn't respect CMAKE_Swift_MODULE_DIRECTORY.
+if(NOT CMAKE_GENERATOR STREQUAL "Xcode")
+  add_custom_command(TARGET M
+    POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E compare_files
+    "${CMAKE_Swift_MODULE_DIRECTORY}/M.swiftmodule"
+    "${CMAKE_Swift_MODULE_DIRECTORY}/M.swiftmodule"
+    COMMENT "check that .swiftmodule files are generated in CMAKE_Swift_MODULE_DIRECTORY"
+    VERBATIM)
+endif()
+
 if(NOT XCODE_VERSION OR XCODE_VERSION VERSION_GREATER_EQUAL 9.0)
   # TODO: Add a wholemodule object-library test once that is working
   add_library(O OBJECT O.swift L.swift)
