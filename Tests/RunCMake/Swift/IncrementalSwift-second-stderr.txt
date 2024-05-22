@@ -1,1 +1,1 @@
-ninja explain: A.swiftmodule is dirty
+ninja explain: (Debug(/|\\))?A.swiftmodule is dirty

@@ -1,1 +1,1 @@
-swiftc(.exe)? .* -output-file-map CMakeFiles(/|\\)greetings_default.dir(//|\\\\)output-file-map.json .*
+swiftc(.exe)? .* -output-file-map CMakeFiles(/|\\)greetings_default.dir(/|\\)(Debug)?(/|\\)output-file-map.json .*
