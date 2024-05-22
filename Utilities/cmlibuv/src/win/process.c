@@ -1083,8 +1083,15 @@ int uv_spawn(uv_loop_t* loop,
   startup.lpTitle = NULL;
   startup.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
 
+#if 1
+  /* cmake does not need libuv's support for passing file descriptors >= 3
+     to the MSVC C run-time in the child.  Avoid using reserved members.  */
+  startup.cbReserved2 = 0;
+  startup.lpReserved2 = NULL;
+#else
   startup.cbReserved2 = uv__stdio_size(process->child_stdio_buffer);
   startup.lpReserved2 = (BYTE*) process->child_stdio_buffer;
+#endif
 
   startup.hStdInput = uv__stdio_handle(process->child_stdio_buffer, 0);
   startup.hStdOutput = uv__stdio_handle(process->child_stdio_buffer, 1);
