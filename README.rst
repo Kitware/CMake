@@ -47,6 +47,23 @@ had experience with the platform.
 
 .. _`CMake Discourse Forum`: https://discourse.cmake.org
 
+Building CMake with CMake
+-------------------------
+
+You can build CMake as any other project with a CMake-based build system:
+run the installed CMake on the sources of this CMake with your preferred
+options and generators. Then build it and install it.
+For instructions how to do this, see documentation on `Running CMake`_.
+
+.. _`Running CMake`: https://cmake.org/runningcmake
+
+To build the documentation, install `Sphinx`_ and configure CMake with
+``-DSPHINX_HTML=ON`` and/or ``-DSPHINX_MAN=ON`` to enable the "html" or
+"man" builder.  Add ``-DSPHINX_EXECUTABLE=/path/to/sphinx-build`` if the
+tool is not found automatically.
+
+.. _`Sphinx`: https://sphinx-doc.org
+
 Building CMake from Scratch
 ---------------------------
 
@@ -79,7 +96,7 @@ There are two ways for building CMake under Windows:
 1. Compile with MSVC from VS 2015 or later.
    You need to download and install a binary release of CMake.  You can get
    these releases from the `CMake Download Page`_.  Then proceed with the
-   instructions below for `Building CMake with CMake`_.
+   instructions above for `Building CMake with CMake`_.
 
 2. Bootstrap with MinGW under MSYS2.
    Download and install `MSYS2`_.  Then install the required build tools::
@@ -90,23 +107,6 @@ There are two ways for building CMake under Windows:
 
 .. _`CMake Download Page`: https://cmake.org/download
 .. _`MSYS2`: https://www.msys2.org/
-
-Building CMake with CMake
--------------------------
-
-You can build CMake as any other project with a CMake-based build system:
-run the installed CMake on the sources of this CMake with your preferred
-options and generators. Then build it and install it.
-For instructions how to do this, see documentation on `Running CMake`_.
-
-.. _`Running CMake`: https://cmake.org/runningcmake
-
-To build the documentation, install `Sphinx`_ and configure CMake with
-``-DSPHINX_HTML=ON`` and/or ``-DSPHINX_MAN=ON`` to enable the "html" or
-"man" builder.  Add ``-DSPHINX_EXECUTABLE=/path/to/sphinx-build`` if the
-tool is not found automatically.
-
-.. _`Sphinx`: https://sphinx-doc.org
 
 Reporting Bugs
 ==============
