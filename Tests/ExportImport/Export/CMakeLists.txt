@@ -116,6 +116,37 @@ target_link_libraries(testLib9 INTERFACE testLib9ObjIface PUBLIC testLib9ObjPub 
 target_link_libraries(testLib9 PUBLIC Foo::Foo)
 cmake_policy(POP)
 
+block()
+  cmake_policy(SET CMP0022 NEW)
+  add_library(testLib10 STATIC testLib10.c)
+  set_target_properties(testLib10 PROPERTIES
+    TRANSITIVE_COMPILE_PROPERTIES "CUSTOM_C"
+    TRANSITIVE_LINK_PROPERTIES    "CUSTOM_L"
+    INTERFACE_CUSTOM_C "TESTLIB10_INTERFACE_CUSTOM_C"
+    INTERFACE_CUSTOM_L "TESTLIB10_INTERFACE_CUSTOM_L"
+    )
+  target_compile_definitions(testLib10 INTERFACE
+    "$<TARGET_PROPERTY:CUSTOM_C>"
+    "$<TARGET_PROPERTY:CUSTOM_L>"
+    )
+  add_library(testLib11 STATIC testLib11.c)
+  target_link_libraries(testLib11 PRIVATE testLib10)
+  set_target_properties(testLib11 PROPERTIES
+    INTERFACE_CUSTOM_C "TESTLIB11_INTERFACE_CUSTOM_C"
+    INTERFACE_CUSTOM_L "TESTLIB11_INTERFACE_CUSTOM_L"
+    TRANSITIVE_COMPILE_PROPERTIES "CUSTOM_D"
+    TRANSITIVE_LINK_PROPERTIES    "CUSTOM_M"
+    INTERFACE_CUSTOM_D "TESTLIB11_INTERFACE_CUSTOM_D"
+    INTERFACE_CUSTOM_M "TESTLIB11_INTERFACE_CUSTOM_M"
+    )
+  target_compile_definitions(testLib11 INTERFACE
+    "$<TARGET_PROPERTY:CUSTOM_C>"
+    "$<TARGET_PROPERTY:CUSTOM_D>"
+    "$<TARGET_PROPERTY:CUSTOM_L>"
+    "$<TARGET_PROPERTY:CUSTOM_M>"
+    )
+endblock()
+
 # Test using the target_link_libraries command to set the
 # LINK_INTERFACE_LIBRARIES* properties.  We construct two libraries
 # providing the same two symbols.  In each library one of the symbols
@@ -574,6 +605,7 @@ install(
   testExe2lib testLib4lib testLib4libdbg testLib4libopt
   testLib6 testLib7 testLib8
   testLib9
+  testLib10 testLib11
   testLibDeprecation
   testLibCycleA testLibCycleB
   testLibNoSONAME
@@ -653,6 +685,7 @@ export(TARGETS testExe1 testLib1 testLib2 testLib3
 export(TARGETS testExe2 testLib4 testLib5 testLib6 testLib7 testExe3 testExe4 testExe2lib
   testLib8
   testLib9 testLib9ObjPub testLib9ObjPriv testLib9ObjIface
+  testLib10 testLib11
   testLibDeprecation
   testLib4lib testLib4libdbg testLib4libopt
   testLibCycleA testLibCycleB

@@ -488,7 +488,7 @@ protected:
       cmGeneratorExpressionDAGChecker dagChecker(
         context->Backtrace, context->HeadTarget,
         genexOperator + ":" + expression, content, dagCheckerParent,
-        context->LG);
+        context->LG, context->Config);
       switch (dagChecker.Check()) {
         case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
         case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE: {
@@ -2873,18 +2873,21 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       return target->GetLinkerLanguage(context->Config);
     }
 
+    bool const evaluatingLinkLibraries =
+      dagCheckerParent && dagCheckerParent->EvaluatingLinkLibraries();
+
     std::string interfacePropertyName;
     bool isInterfaceProperty = false;
     cmGeneratorTarget::UseTo usage = cmGeneratorTarget::UseTo::Compile;
 
     if (cm::optional<cmGeneratorTarget::TransitiveProperty> transitiveProp =
-          target->IsTransitiveProperty(propertyName, context->LG)) {
+          target->IsTransitiveProperty(propertyName, context->LG,
+                                       context->Config,
+                                       evaluatingLinkLibraries)) {
       interfacePropertyName = std::string(transitiveProp->InterfaceName);
       isInterfaceProperty = transitiveProp->InterfaceName == propertyName;
       usage = transitiveProp->Usage;
     }
-
-    bool evaluatingLinkLibraries = false;
 
     if (dagCheckerParent) {
       // This $<TARGET_PROPERTY:...> node has been reached while evaluating
@@ -2894,8 +2897,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           dagCheckerParent->EvaluatingPICExpression() ||
           dagCheckerParent->EvaluatingLinkerLauncher()) {
         // No check required.
-      } else if (dagCheckerParent->EvaluatingLinkLibraries()) {
-        evaluatingLinkLibraries = true;
+      } else if (evaluatingLinkLibraries) {
         if (!interfacePropertyName.empty()) {
           reportError(
             context, content->GetOriginalExpression(),
@@ -2915,9 +2917,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                           dagCheckerParent, usage));
     }
 
-    cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace, target,
-                                               propertyName, content,
-                                               dagCheckerParent, context->LG);
+    cmGeneratorExpressionDAGChecker dagChecker(
+      context->Backtrace, target, propertyName, content, dagCheckerParent,
+      context->LG, context->Config);
 
     switch (dagChecker.Check()) {
       case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:

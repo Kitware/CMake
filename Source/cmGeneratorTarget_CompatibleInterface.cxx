@@ -31,6 +31,10 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
+namespace {
+using UseTo = cmGeneratorTarget::UseTo;
+}
+
 const cmGeneratorTarget::CompatibleInterfacesBase&
 cmGeneratorTarget::GetCompatibleInterfaces(std::string const& config) const
 {
@@ -41,7 +45,7 @@ cmGeneratorTarget::GetCompatibleInterfaces(std::string const& config) const
     compat.PropsBool.insert("POSITION_INDEPENDENT_CODE");
     compat.PropsString.insert("AUTOUIC_OPTIONS");
     std::vector<cmGeneratorTarget const*> const& deps =
-      this->GetLinkImplementationClosure(config);
+      this->GetLinkImplementationClosure(config, UseTo::Compile);
     for (cmGeneratorTarget const* li : deps) {
 #define CM_READ_COMPATIBLE_INTERFACE(X, x)                                    \
   if (cmValue prop = li->GetProperty("COMPATIBLE_INTERFACE_" #X)) {           \
@@ -573,7 +577,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
   assert((impliedByUse ^ explicitlySet) || (!impliedByUse && !explicitlySet));
 
   std::vector<cmGeneratorTarget const*> const& deps =
-    tgt->GetLinkImplementationClosure(config);
+    tgt->GetLinkImplementationClosure(config, UseTo::Compile);
 
   if (deps.empty()) {
     return propContent;

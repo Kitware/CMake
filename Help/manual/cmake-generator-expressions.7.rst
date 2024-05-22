@@ -1775,11 +1775,11 @@ These expressions look up the values of
 
 The expressions have special evaluation rules for some properties:
 
-* :ref:`Target Build Specification` properties evaluate as a
-  :ref:`semicolon-separated list <CMake Language Lists>` representing the union
-  of the value on the target itself with the values of the corresponding
-  :ref:`Target Usage Requirements` on targets named by the target's
-  :prop_tgt:`LINK_LIBRARIES`:
+:ref:`Target Build Specification Properties <Target Build Specification>`
+  These evaluate as a :ref:`semicolon-separated list <CMake Language Lists>`
+  representing the union of the value on the target itself with the values
+  of the corresponding :ref:`Target Usage Requirements` on targets named by
+  the target's :prop_tgt:`LINK_LIBRARIES`:
 
   * For :ref:`Target Compile Properties`, evaluation of corresponding usage
     requirements is transitive over the closure of the linked targets'
@@ -1793,10 +1793,11 @@ The expressions have special evaluation rules for some properties:
 
   Evaluation of :prop_tgt:`LINK_LIBRARIES` itself is not transitive.
 
-* :ref:`Target Usage Requirements` evaluate as a
-  :ref:`semicolon-separated list <CMake Language Lists>` representing the union
-  of the value on the target itself with the values of the same properties on
-  targets named by the target's :prop_tgt:`INTERFACE_LINK_LIBRARIES`:
+:ref:`Target Usage Requirement Properties <Target Usage Requirements>`
+  These evaluate as a :ref:`semicolon-separated list <CMake Language Lists>`
+  representing the union of the value on the target itself with the values
+  of the same properties on targets named by the target's
+  :prop_tgt:`INTERFACE_LINK_LIBRARIES`:
 
   * For :ref:`Transitive Compile Properties`, evaluation is transitive over
     the closure of the target's :prop_tgt:`INTERFACE_LINK_LIBRARIES`
@@ -1809,13 +1810,70 @@ The expressions have special evaluation rules for some properties:
 
   Evaluation of :prop_tgt:`INTERFACE_LINK_LIBRARIES` itself is not transitive.
 
-* :ref:`Compatible Interface Properties` evaluate as a single value
-  combined from the target itself, from targets named by the target's
-  :prop_tgt:`LINK_LIBRARIES`, and from the transitive closure of the
-  linked targets' :prop_tgt:`INTERFACE_LINK_LIBRARIES`.  Values of a
-  compatible interface property from multiple targets combine based on
-  the type of compatibility required by the ``COMPATIBLE_INTERFACE_*``
-  property defining it.
+:ref:`Custom Transitive Properties`
+  .. versionadded:: 3.30
+
+  These are processed during evaluation as follows:
+
+  * Evaluation of :genex:`$<TARGET_PROPERTY:tgt,PROP>` for some property
+    ``PROP``, named without an ``INTERFACE_`` prefix,
+    checks the :prop_tgt:`TRANSITIVE_COMPILE_PROPERTIES`
+    and :prop_tgt:`TRANSITIVE_LINK_PROPERTIES` properties on target ``tgt``,
+    on targets named by its :prop_tgt:`LINK_LIBRARIES`, and on the
+    transitive closure of targets named by the linked targets'
+    :prop_tgt:`INTERFACE_LINK_LIBRARIES`.
+
+    If ``PROP`` is listed by one of those properties, then it evaluates as
+    a :ref:`semicolon-separated list <CMake Language Lists>` representing
+    the union of the value on the target itself with the values of the
+    corresponding ``INTERFACE_PROP`` on targets named by the target's
+    :prop_tgt:`LINK_LIBRARIES`:
+
+    * If ``PROP`` is named by :prop_tgt:`TRANSITIVE_COMPILE_PROPERTIES`,
+      evaluation of the corresponding ``INTERFACE_PROP`` is transitive over
+      the closure of the linked targets' :prop_tgt:`INTERFACE_LINK_LIBRARIES`,
+      excluding entries guarded by the :genex:`LINK_ONLY` generator expression.
+
+    * If ``PROP`` is named by :prop_tgt:`TRANSITIVE_LINK_PROPERTIES`,
+      evaluation of the corresponding ``INTERFACE_PROP`` is transitive over
+      the closure of the linked targets' :prop_tgt:`INTERFACE_LINK_LIBRARIES`,
+      including entries guarded by the :genex:`LINK_ONLY` generator expression.
+
+  * Evaluation of :genex:`$<TARGET_PROPERTY:tgt,INTERFACE_PROP>` for some
+    property ``INTERFACE_PROP``, named with an ``INTERFACE_`` prefix,
+    checks the :prop_tgt:`TRANSITIVE_COMPILE_PROPERTIES`
+    and :prop_tgt:`TRANSITIVE_LINK_PROPERTIES` properties on target ``tgt``,
+    and on the transitive closure of targets named by its
+    :prop_tgt:`INTERFACE_LINK_LIBRARIES`.
+
+    If the corresponding ``PROP`` is listed by one of those properties,
+    then ``INTERFACE_PROP`` evaluates as a
+    :ref:`semicolon-separated list <CMake Language Lists>` representing the
+    union of the value on the target itself with the value of the same
+    property on targets named by the target's
+    :prop_tgt:`INTERFACE_LINK_LIBRARIES`:
+
+    * If ``PROP`` is named by :prop_tgt:`TRANSITIVE_COMPILE_PROPERTIES`,
+      evaluation of the corresponding ``INTERFACE_PROP`` is transitive over
+      the closure of the target's :prop_tgt:`INTERFACE_LINK_LIBRARIES`,
+      excluding entries guarded by the :genex:`LINK_ONLY` generator expression.
+
+    * If ``PROP`` is named by :prop_tgt:`TRANSITIVE_LINK_PROPERTIES`,
+      evaluation of the corresponding ``INTERFACE_PROP`` is transitive over
+      the closure of the target's :prop_tgt:`INTERFACE_LINK_LIBRARIES`,
+      including entries guarded by the :genex:`LINK_ONLY` generator expression.
+
+  If a ``PROP`` is named by both :prop_tgt:`TRANSITIVE_COMPILE_PROPERTIES`
+  and :prop_tgt:`TRANSITIVE_LINK_PROPERTIES`, the latter takes precedence.
+
+:ref:`Compatible Interface Properties`
+  These evaluate as a single value combined from the target itself,
+  from targets named by the target's :prop_tgt:`LINK_LIBRARIES`, and
+  from the transitive closure of the linked targets'
+  :prop_tgt:`INTERFACE_LINK_LIBRARIES`.  Values of a compatible
+  interface property from multiple targets combine based on the type
+  of compatibility required by the ``COMPATIBLE_INTERFACE_*`` property
+  defining it.
 
 
 Target Artifacts

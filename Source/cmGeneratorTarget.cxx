@@ -511,11 +511,15 @@ void cmGeneratorTarget::ClearSourcesCache()
   this->SourcesAreContextDependent = Tribool::Indeterminate;
   this->Objects.clear();
   this->VisitedConfigsForObjects.clear();
+  this->LinkImplClosureForLinkMap.clear();
+  this->LinkImplClosureForUsageMap.clear();
   this->LinkImplMap.clear();
   this->LinkImplUsageRequirementsOnlyMap.clear();
   this->IncludeDirectoriesCache.clear();
   this->CompileOptionsCache.clear();
   this->CompileDefinitionsCache.clear();
+  this->CustomTransitiveBuildPropertiesMap.clear();
+  this->CustomTransitiveInterfacePropertiesMap.clear();
   this->PrecompileHeadersCache.clear();
   this->LinkOptionsCache.clear();
   this->LinkDirectoriesCache.clear();
@@ -707,8 +711,8 @@ std::string cmGeneratorTarget::GetLinkerTypeProperty(
   std::string propName{ "LINKER_TYPE" };
   auto linkerType = this->GetProperty(propName);
   if (!linkerType.IsEmpty()) {
-    cmGeneratorExpressionDAGChecker dagChecker(this, propName, nullptr,
-                                               nullptr, this->LocalGenerator);
+    cmGeneratorExpressionDAGChecker dagChecker(
+      this, propName, nullptr, nullptr, this->LocalGenerator, config);
     auto ltype =
       cmGeneratorExpression::Evaluate(*linkerType, this->GetLocalGenerator(),
                                       config, this, &dagChecker, this, lang);
@@ -1174,7 +1178,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
   if (iter == this->SystemIncludesCache.end()) {
     cmGeneratorExpressionDAGChecker dagChecker(
       this, "SYSTEM_INCLUDE_DIRECTORIES", nullptr, nullptr,
-      this->LocalGenerator);
+      this->LocalGenerator, config);
 
     bool excludeImported = this->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED");
 
@@ -1186,7 +1190,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
     }
 
     std::vector<cmGeneratorTarget const*> const& deps =
-      this->GetLinkImplementationClosure(config);
+      this->GetLinkImplementationClosure(config, UseTo::Compile);
     for (cmGeneratorTarget const* dep : deps) {
       handleSystemIncludesDep(this->LocalGenerator, dep, config, this,
                               &dagChecker, result, excludeImported, language);
@@ -1934,8 +1938,8 @@ void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string>& result,
     return;
   }
 
-  cmGeneratorExpressionDAGChecker dagChecker(this, "AUTOUIC_OPTIONS", nullptr,
-                                             nullptr, this->LocalGenerator);
+  cmGeneratorExpressionDAGChecker dagChecker(
+    this, "AUTOUIC_OPTIONS", nullptr, nullptr, this->LocalGenerator, config);
   cmExpandList(cmGeneratorExpression::Evaluate(prop, this->LocalGenerator,
                                                config, this, &dagChecker),
                result);

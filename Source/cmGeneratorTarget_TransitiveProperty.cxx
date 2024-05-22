@@ -10,6 +10,7 @@
 #include <utility>
 #include <vector>
 
+#include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
 #include <cmext/string_view>
@@ -19,6 +20,7 @@
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpressionNode.h"
 #include "cmLinkItem.h"
+#include "cmList.h"
 #include "cmLocalGenerator.h"
 #include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
@@ -107,9 +109,9 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
   // Evaluate $<TARGET_PROPERTY:this,prop> as if it were compiled.  This is
   // a subset of TargetPropertyNode::Evaluate without stringify/parse steps
   // but sufficient for transitive interface properties.
-  cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace, this, prop,
-                                             nullptr, dagCheckerParent,
-                                             this->LocalGenerator);
+  cmGeneratorExpressionDAGChecker dagChecker(
+    context->Backtrace, this, prop, nullptr, dagCheckerParent,
+    this->LocalGenerator, context->Config);
   switch (dagChecker.Check()) {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
       dagChecker.ReportError(
@@ -176,11 +178,16 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
 
 cm::optional<cmGeneratorTarget::TransitiveProperty>
 cmGeneratorTarget::IsTransitiveProperty(cm::string_view prop,
-                                        cmLocalGenerator const* lg) const
+                                        cmLocalGenerator const* lg,
+                                        std::string const& config,
+                                        bool evaluatingLinkLibraries) const
 {
   cm::optional<TransitiveProperty> result;
   static const cm::string_view kINTERFACE_ = "INTERFACE_"_s;
-  if (cmHasPrefix(prop, kINTERFACE_)) {
+  PropertyFor const propertyFor = cmHasPrefix(prop, kINTERFACE_)
+    ? PropertyFor::Interface
+    : PropertyFor::Build;
+  if (propertyFor == PropertyFor::Interface) {
     prop = prop.substr(kINTERFACE_.length());
   }
   auto i = BuiltinTransitiveProperties.find(prop);
@@ -202,6 +209,86 @@ cmGeneratorTarget::IsTransitiveProperty(cm::string_view prop,
       result = TransitiveProperty{ "INTERFACE_COMPILE_DEFINITIONS"_s,
                                    UseTo::Compile };
     }
+  } else if (!evaluatingLinkLibraries) {
+    // Honor TRANSITIVE_COMPILE_PROPERTIES and TRANSITIVE_LINK_PROPERTIES
+    // from the link closure when we are not evaluating the closure itself.
+    CustomTransitiveProperties const& ctp =
+      this->GetCustomTransitiveProperties(config, propertyFor);
+    auto ci = ctp.find(std::string(prop));
+    if (ci != ctp.end()) {
+      result = ci->second;
+    }
   }
   return result;
+}
+
+cmGeneratorTarget::CustomTransitiveProperty::CustomTransitiveProperty(
+  std::string interfaceName, UseTo usage)
+  : CustomTransitiveProperty(
+      cm::make_unique<std::string>(std::move(interfaceName)), usage)
+{
+}
+cmGeneratorTarget::CustomTransitiveProperty::CustomTransitiveProperty(
+  std::unique_ptr<std::string> interfaceNameBuf, UseTo usage)
+  : TransitiveProperty{ *interfaceNameBuf, usage }
+  , InterfaceNameBuf(std::move(interfaceNameBuf))
+{
+}
+
+void cmGeneratorTarget::CustomTransitiveProperties::Add(cmValue props,
+                                                        UseTo usage)
+{
+  if (props) {
+    cmList propsList(*props);
+    for (std::string p : propsList) {
+      std::string ip;
+      static const cm::string_view kINTERFACE_ = "INTERFACE_"_s;
+      if (cmHasPrefix(p, kINTERFACE_)) {
+        ip = std::move(p);
+        p = ip.substr(kINTERFACE_.length());
+      } else {
+        ip = cmStrCat(kINTERFACE_, p);
+      }
+      this->emplace(std::move(p),
+                    CustomTransitiveProperty(std::move(ip), usage));
+    }
+  }
+}
+
+cmGeneratorTarget::CustomTransitiveProperties const&
+cmGeneratorTarget::GetCustomTransitiveProperties(std::string const& config,
+                                                 PropertyFor propertyFor) const
+{
+  std::map<std::string, CustomTransitiveProperties>& ctpm =
+    propertyFor == PropertyFor::Build
+    ? this->CustomTransitiveBuildPropertiesMap
+    : this->CustomTransitiveInterfacePropertiesMap;
+  auto i = ctpm.find(config);
+  if (i == ctpm.end()) {
+    CustomTransitiveProperties ctp;
+    auto addTransitiveProperties = [this, &config, propertyFor,
+                                    &ctp](std::string const& tp, UseTo usage) {
+      // Add transitive properties named by the target itself.
+      ctp.Add(this->GetProperty(tp), usage);
+      // Add transitive properties named by the target's link dependencies.
+      if (propertyFor == PropertyFor::Build) {
+        for (cmGeneratorTarget const* gt :
+             this->GetLinkImplementationClosure(config, usage)) {
+          ctp.Add(gt->GetProperty(tp), usage);
+        }
+      } else {
+        // The set of custom transitive INTERFACE_ properties does not
+        // depend on the consumer.  Use the target as its own head.
+        cmGeneratorTarget const* headTarget = this;
+        for (cmGeneratorTarget const* gt :
+             this->GetLinkInterfaceClosure(config, headTarget, usage)) {
+          ctp.Add(gt->GetProperty(tp), usage);
+        }
+      }
+    };
+    addTransitiveProperties("TRANSITIVE_LINK_PROPERTIES", UseTo::Link);
+    addTransitiveProperties("TRANSITIVE_COMPILE_PROPERTIES", UseTo::Compile);
+    i = ctpm.emplace(config, std::move(ctp)).first;
+  }
+  return i->second;
 }
