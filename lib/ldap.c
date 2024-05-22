@@ -164,7 +164,7 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done);
  */
 
 const struct Curl_handler Curl_handler_ldap = {
-  "LDAP",                               /* scheme */
+  "ldap",                               /* scheme */
   ZERO_NULL,                            /* setup_connection */
   ldap_do,                              /* do_it */
   ZERO_NULL,                            /* done */
@@ -178,6 +178,7 @@ const struct Curl_handler Curl_handler_ldap = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_LDAP,                            /* defport */
@@ -192,7 +193,7 @@ const struct Curl_handler Curl_handler_ldap = {
  */
 
 const struct Curl_handler Curl_handler_ldaps = {
-  "LDAPS",                              /* scheme */
+  "ldaps",                              /* scheme */
   ZERO_NULL,                            /* setup_connection */
   ldap_do,                              /* do_it */
   ZERO_NULL,                            /* done */
@@ -206,6 +207,7 @@ const struct Curl_handler Curl_handler_ldaps = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_LDAPS,                           /* defport */
@@ -483,6 +485,8 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     }
 */
 #else
+    (void)ldap_option;
+    (void)ldap_ca;
     /* we should probably never come up to here since configure
        should check in first place if we can support LDAP SSL/TLS */
     failf(data, "LDAP local: SSL/TLS not supported with this version "
@@ -544,7 +548,8 @@ static CURLcode ldap_do(struct Curl_easy *data, bool *done)
     goto quit;
   }
 
-  for(num = 0, entryIterator = ldap_first_entry(server, ldapmsg);
+  num = 0;
+  for(entryIterator = ldap_first_entry(server, ldapmsg);
       entryIterator;
       entryIterator = ldap_next_entry(server, entryIterator), num++) {
     BerElement *ber = NULL;

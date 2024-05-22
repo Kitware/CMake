@@ -1453,7 +1453,7 @@ static bool is_cipher_suite_strong(SSLCipherSuite suite_num)
   return true;
 }
 
-static bool is_separator(char c)
+static bool sectransp_is_separator(char c)
 {
   /* Return whether character is a cipher list separator. */
   switch(c) {
@@ -1547,7 +1547,7 @@ static CURLcode sectransp_set_selected_ciphers(struct Curl_easy *data,
   if(!ciphers)
     return CURLE_OK;
 
-  while(is_separator(*ciphers))     /* Skip initial separators. */
+  while(sectransp_is_separator(*ciphers))  /* Skip initial separators. */
     ciphers++;
   if(!*ciphers)
     return CURLE_OK;
@@ -1561,14 +1561,14 @@ static CURLcode sectransp_set_selected_ciphers(struct Curl_easy *data,
     size_t i;
 
     /* Skip separators */
-    while(is_separator(*cipher_start))
+    while(sectransp_is_separator(*cipher_start))
       cipher_start++;
     if(*cipher_start == '\0') {
       break;
     }
     /* Find last position of a cipher in the ciphers string */
     cipher_end = cipher_start;
-    while(*cipher_end != '\0' && !is_separator(*cipher_end)) {
+    while(*cipher_end != '\0' && !sectransp_is_separator(*cipher_end)) {
       ++cipher_end;
     }
 
@@ -1634,6 +1634,18 @@ static CURLcode sectransp_set_selected_ciphers(struct Curl_easy *data,
     return CURLE_SSL_CIPHER;
   }
   return CURLE_OK;
+}
+
+static void sectransp_session_free(void *sessionid, size_t idsize)
+{
+  /* ST, as of iOS 5 and Mountain Lion, has no public method of deleting a
+     cached session ID inside the Security framework. There is a private
+     function that does this, but I don't want to have to explain to you why I
+     got your application rejected from the App Store due to the use of a
+     private API, so the best we can do is free up our own char array that we
+     created way back in sectransp_connect_step1... */
+  (void)idsize;
+  Curl_safefree(sessionid);
 }
 
 static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
@@ -2047,8 +2059,8 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     size_t ssl_sessionid_len;
 
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, (void **)&ssl_sessionid,
-                              &ssl_sessionid_len)) {
+    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
+                              (void **)&ssl_sessionid, &ssl_sessionid_len)) {
       /* we got a session id, use it! */
       err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
       Curl_ssl_sessionid_unlock(data);
@@ -2067,7 +2079,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
         aprintf("%s:%d:%d:%s:%d",
                 ssl_cafile ? ssl_cafile : "(blob memory)",
                 verifypeer, conn_config->verifyhost, connssl->peer.hostname,
-                connssl->port);
+                connssl->peer.port);
       ssl_sessionid_len = strlen(ssl_sessionid);
 
       err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
@@ -2077,13 +2089,12 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
         return CURLE_SSL_CONNECT_ERROR;
       }
 
-      result = Curl_ssl_addsessionid(cf, data, ssl_sessionid,
-                                     ssl_sessionid_len, NULL);
+      result = Curl_ssl_addsessionid(cf, data, &connssl->peer, ssl_sessionid,
+                                     ssl_sessionid_len,
+                                     sectransp_session_free);
       Curl_ssl_sessionid_unlock(data);
-      if(result) {
-        failf(data, "failed to store ssl session");
+      if(result)
         return result;
-      }
     }
   }
 
@@ -3225,17 +3236,6 @@ static int sectransp_shutdown(struct Curl_cfilter *cf,
   return rc;
 }
 
-static void sectransp_session_free(void *ptr)
-{
-  /* ST, as of iOS 5 and Mountain Lion, has no public method of deleting a
-     cached session ID inside the Security framework. There is a private
-     function that does this, but I don't want to have to explain to you why I
-     got your application rejected from the App Store due to the use of a
-     private API, so the best we can do is free up our own char array that we
-     created way back in sectransp_connect_step1... */
-  Curl_safefree(ptr);
-}
-
 static size_t sectransp_version(char *buffer, size_t size)
 {
   return msnprintf(buffer, size, "SecureTransport");
@@ -3469,7 +3469,6 @@ const struct Curl_ssl Curl_ssl_sectransp = {
   sectransp_get_internals,            /* get_internals */
   sectransp_close,                    /* close_one */
   Curl_none_close_all,                /* close_all */
-  sectransp_session_free,             /* session_free */
   Curl_none_set_engine,               /* set_engine */
   Curl_none_set_engine_default,       /* set_engine_default */
   Curl_none_engines_list,             /* engines_list */

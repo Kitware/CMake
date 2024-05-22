@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_NTLM_WB_H
-#define HEADER_CURL_NTLM_WB_H
+#ifndef HEADER_CURL_CIPHER_SUITE_H
+#define HEADER_CURL_CIPHER_SUITE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) Jan Venekamp, <jan@venekamp.net>
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -26,20 +26,21 @@
 
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
-    defined(NTLM_WB_ENABLED)
+#if defined(USE_MBEDTLS) || defined(USE_BEARSSL)
+#include <stdint.h>
 
-/* this is for ntlm header input */
-CURLcode Curl_input_ntlm_wb(struct Curl_easy *data,
-                            struct connectdata *conn, bool proxy,
-                            const char *header);
+/* Lookup IANA id for cipher suite string, returns 0 if not recognized */
+uint16_t Curl_cipher_suite_lookup_id(const char *cs_str, size_t cs_len);
 
-/* this is for creating ntlm header output */
-CURLcode Curl_output_ntlm_wb(struct Curl_easy *data, struct connectdata *conn,
-                             bool proxy);
+/* Walk over cipher suite string, update str and end pointers to next
+   cipher suite in string, returns IANA id of that suite if recognized */
+uint16_t Curl_cipher_suite_walk_str(const char **str, const char **end);
 
-void Curl_http_auth_cleanup_ntlm_wb(struct connectdata *conn);
+/* Copy openssl or RFC name for cipher suite in supplied buffer.
+   Caller is responsible to supply sufficiently large buffer (size
+   of 64 should suffice), excess bytes are silently truncated. */
+int Curl_cipher_suite_get_str(uint16_t id, char *buf, size_t buf_size,
+                              bool prefer_rfc);
 
-#endif /* !CURL_DISABLE_HTTP && USE_NTLM && NTLM_WB_ENABLED */
-
-#endif /* HEADER_CURL_NTLM_WB_H */
+#endif /* defined(USE_MBEDTLS) || defined(USE_BEARSSL) */
+#endif /* HEADER_CURL_CIPHER_SUITE_H */

@@ -81,7 +81,7 @@
 #include "memdebug.h"
 
 
-#if defined(ENABLE_IPV6) && defined(IPV6_V6ONLY) && defined(_WIN32)
+#if defined(USE_IPV6) && defined(IPV6_V6ONLY) && defined(_WIN32)
 /* It makes support for IPv4-mapped IPv6 addresses.
  * Linux kernel, NetBSD, FreeBSD and Darwin: default is off;
  * Windows Vista and later: default is on;
@@ -287,7 +287,7 @@ static CURLcode socket_open(struct Curl_easy *data,
     /* no socket, no connection */
     return CURLE_COULDNT_CONNECT;
 
-#if defined(ENABLE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
+#if defined(USE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
   if(data->conn->scope_id && (addr->family == AF_INET6)) {
     struct sockaddr_in6 * const sa6 = (void *)&addr->sa_addr;
     sa6->sin6_scope_id = data->conn->scope_id;
@@ -405,7 +405,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
   struct sockaddr *sock = (struct sockaddr *)&sa;  /* bind to this address */
   curl_socklen_t sizeof_sa = 0; /* size of the data sock points to */
   struct sockaddr_in *si4 = (struct sockaddr_in *)&sa;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   struct sockaddr_in6 *si6 = (struct sockaddr_in6 *)&sa;
 #endif
 
@@ -419,7 +419,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
 #ifdef IP_BIND_ADDRESS_NO_PORT
   int on = 1;
 #endif
-#ifndef ENABLE_IPV6
+#ifndef USE_IPV6
   (void)scope;
 #endif
 
@@ -475,7 +475,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
 #endif
 
       switch(Curl_if2ip(af,
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
                         scope, conn->scope_id,
 #endif
                         dev, myhost, sizeof(myhost))) {
@@ -514,7 +514,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
 
       if(af == AF_INET)
         conn->ip_version = CURL_IPRESOLVE_V4;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
       else if(af == AF_INET6)
         conn->ip_version = CURL_IPRESOLVE_V6;
 #endif
@@ -547,7 +547,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
     }
 
     if(done > 0) {
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
       /* IPv6 address */
       if(af == AF_INET6) {
 #ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
@@ -596,7 +596,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
   }
   else {
     /* no device was given, prepare sa to match af's needs */
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     if(af == AF_INET6) {
       si6->sin6_family = AF_INET6;
       si6->sin6_port = htons(port);
@@ -616,16 +616,6 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
   for(;;) {
     if(bind(sockfd, sock, sizeof_sa) >= 0) {
       /* we succeeded to bind */
-      struct Curl_sockaddr_storage add;
-      curl_socklen_t size = sizeof(add);
-      memset(&add, 0, sizeof(struct Curl_sockaddr_storage));
-      if(getsockname(sockfd, (struct sockaddr *) &add, &size) < 0) {
-        char buffer[STRERROR_LEN];
-        data->state.os_errno = error = SOCKERRNO;
-        failf(data, "getsockname() failed with errno %d: %s",
-              error, Curl_strerror(error, buffer, sizeof(buffer)));
-        return CURLE_INTERFACE_FAILED;
-      }
       infof(data, "Local port: %hu", port);
       conn->bits.bound = TRUE;
       return CURLE_OK;
@@ -639,7 +629,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
       /* We reuse/clobber the port variable here below */
       if(sock->sa_family == AF_INET)
         si4->sin_port = ntohs(port);
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
       else
         si6->sin6_port = ntohs(port);
 #endif
@@ -923,7 +913,8 @@ static CURLcode set_local_ip(struct Curl_cfilter *cf,
   struct cf_socket_ctx *ctx = cf->ctx;
 
 #ifdef HAVE_GETSOCKNAME
-  if(!(data->conn->handler->protocol & CURLPROTO_TFTP)) {
+  if((ctx->sock != CURL_SOCKET_BAD) &&
+     !(data->conn->handler->protocol & CURLPROTO_TFTP)) {
     /* TFTP does not connect, so it cannot get the IP like this */
 
     char buffer[STRERROR_LEN];
@@ -946,8 +937,8 @@ static CURLcode set_local_ip(struct Curl_cfilter *cf,
   }
 #else
   (void)data;
-  ctx->l_ip[0] = 0;
-  ctx->l_port = -1;
+  ctx->ip.local_ip[0] = 0;
+  ctx->ip.local_port = -1;
 #endif
   return CURLE_OK;
 }
@@ -991,7 +982,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
   if(result)
     goto out;
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   if(ctx->addr.family == AF_INET6) {
     set_ipv6_v6only(ctx->sock, 0);
     infof(data, "  Trying [%s]:%d...", ctx->ip.remote_ip, ctx->ip.remote_port);
@@ -1000,7 +991,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 #endif
     infof(data, "  Trying %s:%d...", ctx->ip.remote_ip, ctx->ip.remote_port);
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   is_tcp = (ctx->addr.family == AF_INET
             || ctx->addr.family == AF_INET6) &&
            ctx->addr.socktype == SOCK_STREAM;
@@ -1037,7 +1028,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 #ifndef CURL_DISABLE_BINDLOCAL
   /* possibly bind the local end to an IP, interface or port */
   if(ctx->addr.family == AF_INET
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
      || ctx->addr.family == AF_INET6
 #endif
     ) {
@@ -1288,7 +1279,7 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 #ifdef DEBUGBUILD
   /* simulate network blocking/partial writes */
   if(ctx->wblock_percent > 0) {
-    unsigned char c;
+    unsigned char c = 0;
     Curl_rand(data, &c, 1);
     if(c >= ((100-ctx->wblock_percent)*256/100)) {
       CURL_TRC_CF(data, cf, "send(len=%zu) SIMULATE EWOULDBLOCK", orig_len);
@@ -1366,7 +1357,7 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 #ifdef DEBUGBUILD
   /* simulate network blocking/partial reads */
   if(cf->cft != &Curl_cft_udp && ctx->rblock_percent > 0) {
-    unsigned char c;
+    unsigned char c = 0;
     Curl_rand(data, &c, 1);
     if(c >= ((100-ctx->rblock_percent)*256/100)) {
       CURL_TRC_CF(data, cf, "recv(len=%zu) SIMULATE EWOULDBLOCK", len);
@@ -1449,7 +1440,7 @@ static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* the first socket info gets some specials */
   if(cf->sockindex == FIRSTSOCKET) {
     cf->conn->remote_addr = &ctx->addr;
-  #ifdef ENABLE_IPV6
+  #ifdef USE_IPV6
     cf->conn->bits.ipv6 = (ctx->addr.family == AF_INET6)? TRUE : FALSE;
   #endif
     Curl_persistconninfo(data, cf->conn, &ctx->ip);
