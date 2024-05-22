@@ -967,7 +967,7 @@ closely related to the expressions in this sub-section.
 
 .. genex:: $<CXX_COMPILER_VERSION:version>
 
-  ``1`` if the version of the CXX compiler matches ``version``, otherwise ``0``.
+  ``1`` if the version of the C++ compiler matches ``version``, otherwise ``0``.
 
 .. genex:: $<CUDA_COMPILER_VERSION>
 
@@ -979,31 +979,31 @@ closely related to the expressions in this sub-section.
 
   .. versionadded:: 3.15
 
-  ``1`` if the version of the CXX compiler matches ``version``, otherwise ``0``.
+  ``1`` if the version of the C++ compiler matches ``version``, otherwise ``0``.
 
 .. genex:: $<OBJC_COMPILER_VERSION>
 
   .. versionadded:: 3.16
 
-  The version of the OBJC compiler used.
+  The version of the Objective-C compiler used.
 
 .. genex:: $<OBJC_COMPILER_VERSION:version>
 
   .. versionadded:: 3.16
 
-  ``1`` if the version of the OBJC compiler matches ``version``, otherwise ``0``.
+  ``1`` if the version of the Objective-C compiler matches ``version``, otherwise ``0``.
 
 .. genex:: $<OBJCXX_COMPILER_VERSION>
 
   .. versionadded:: 3.16
 
-  The version of the OBJCXX compiler used.
+  The version of the Objective-C++ compiler used.
 
 .. genex:: $<OBJCXX_COMPILER_VERSION:version>
 
   .. versionadded:: 3.16
 
-  ``1`` if the version of the OBJCXX compiler matches ``version``, otherwise ``0``.
+  ``1`` if the version of the Objective-C++ compiler matches ``version``, otherwise ``0``.
 
 .. genex:: $<Fortran_COMPILER_VERSION>
 
@@ -1059,12 +1059,12 @@ related to most of the expressions in this sub-section.
 
 .. genex:: $<CXX_COMPILER_ID>
 
-  CMake's compiler id of the CXX compiler used.
+  CMake's compiler id of the C++ compiler used.
 
 .. genex:: $<CXX_COMPILER_ID:compiler_ids>
 
   where ``compiler_ids`` is a comma-separated list.
-  ``1`` if CMake's compiler id of the CXX compiler matches any one
+  ``1`` if CMake's compiler id of the C++ compiler matches any one
   of the entries in ``compiler_ids``, otherwise ``0``.
 
   .. versionchanged:: 3.15
@@ -1089,7 +1089,7 @@ related to most of the expressions in this sub-section.
 
   .. versionadded:: 3.16
 
-  CMake's compiler id of the OBJC compiler used.
+  CMake's compiler id of the Objective-C compiler used.
 
 .. genex:: $<OBJC_COMPILER_ID:compiler_ids>
 
@@ -1103,7 +1103,7 @@ related to most of the expressions in this sub-section.
 
   .. versionadded:: 3.16
 
-  CMake's compiler id of the OBJCXX compiler used.
+  CMake's compiler id of the Objective-C++ compiler used.
 
 .. genex:: $<OBJCXX_COMPILER_ID:compiler_ids>
 
