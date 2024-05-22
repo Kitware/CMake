@@ -1,0 +1,5 @@
+installing:.*
+installing:.*
+installing:.*
+installing:.*
+installing:.*

@@ -3048,7 +3048,9 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
     if (const char* install_local = this->GetInstallLocalTargetName()) {
       gti.Name = install_local;
       gti.Message = "Installing only the local directory...";
-      gti.UsesTerminal = true;
+      gti.UsesTerminal =
+        !this->GetCMakeInstance()->GetState()->GetGlobalPropertyAsBool(
+          "INSTALL_PARALLEL");
       gti.CommandLines.clear();
 
       cmCustomCommandLine localCmdLine = singleLine;

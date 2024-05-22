@@ -24,6 +24,13 @@ Builtin Targets
     The ``CMAKE_STRIP`` variable will contain the platform's ``strip`` utility, which
     removes symbols information from generated binaries.
 
+``install/parallel``
+
+  .. versionadded:: 3.30
+
+    Created only if the :prop_gbl:`INSTALL_PARALLEL` global property is ``ON``.
+    Runs the install step for each subdirectory independently and in parallel.
+
 For each subdirectory ``sub/dir`` of the project, additional targets
 are generated:
 

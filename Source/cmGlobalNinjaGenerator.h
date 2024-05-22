@@ -218,6 +218,10 @@ public:
   {
     return "install/strip";
   }
+  const char* GetInstallParallelTargetName() const
+  {
+    return "install/parallel";
+  }
   const char* GetTestTargetName() const override { return "test"; }
   const char* GetPackageTargetName() const override { return "package"; }
   const char* GetPackageSourceTargetName() const override
