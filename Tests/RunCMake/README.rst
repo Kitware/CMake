@@ -25,25 +25,25 @@ To add a test:
 3. Create script ``<Test>/RunCMakeTest.cmake`` in the directory containing::
 
     include(RunCMake)
-    run_cmake(SubTest1)
+    run_cmake(Case1)
     ...
-    run_cmake(SubTestN)
+    run_cmake(CaseN)
 
-   where ``SubTest1`` through ``SubTestN`` are sub-test names each
-   corresponding to an independent CMake run and project configuration.
+   where ``Case1`` through ``CaseN`` are case names each corresponding to
+   an independent CMake run and project configuration.
 
    One may also add calls of the form::
 
-    run_cmake_command(SubTestI ${CMAKE_COMMAND} ...)
+    run_cmake_command(CaseI ${CMAKE_COMMAND} ...)
 
    to fully customize the test case command-line.
 
    Alternatively, if the test is to cover running ``ctest -S`` then use::
 
     include(RunCTest)
-    run_ctest(SubTest1)
+    run_ctest(Case1)
     ...
-    run_ctest(SubTestN)
+    run_ctest(CaseN)
 
    and create ``test.cmake.in``, ``CTestConfig.cmake.in``, and
    ``CMakeLists.txt.in`` files to be configured for each case.
@@ -66,30 +66,30 @@ To add a test:
 
    where ``${RunCMake_TEST}`` is literal.  A value for ``RunCMake_TEST``
    will be passed to CMake by the ``run_cmake`` macro when running each
-   sub-test.
+   case.
 
-5. Create a ``<Test>/<SubTest>.cmake`` file for each sub-test named
+5. Create a ``<Test>/<case>.cmake`` file for each case named
    above containing the actual test code.  Optionally create files
    containing expected test results:
 
-   ``<SubTest>-result.txt``
+   ``<case>-result.txt``
     Regex matching expected process result, if not ``0``
-   ``<SubTest>-stdout.txt``
+   ``<case>-stdout.txt``
     Regex matching expected stdout content
-   ``<SubTest>-stderr.txt``
+   ``<case>-stderr.txt``
     Regex matching expected stderr content, if not ``^$``
-   ``<SubTest>-check.cmake``
+   ``<case>-check.cmake``
     Custom result check.
 
   Note that when a specific platform expects differing stdout or stderr that
   can be done by adding a platform specific output file. These follow the
   naming convention of:
-   ``<SubTest>-stdout-<platform_lower_case>.txt``
-   ``<SubTest>-stderr-<platform_lower_case>.txt``
+   ``<case>-stdout-<platform_lower_case>.txt``
+   ``<case>-stderr-<platform_lower_case>.txt``
 
    Note that trailing newlines will be stripped from actual and expected
    test output before matching against the stdout and stderr expressions.
-   The code in ``<SubTest>-check.cmake`` may use variables
+   The code in ``<case>-check.cmake`` may use variables
 
    ``RunCMake_TEST_SOURCE_DIR``
     Top of test source tree
@@ -116,7 +116,7 @@ match the regular expression are not run. For example::
 
   $ RunCMake_TEST_FILTER="^example" ctest -R '^RunCMake\.Example$'
 
-This will only run subtests in ``RunCMake.Example`` that start with
+This will only run cases in ``RunCMake.Example`` that start with
 ``example``.
 
 To speed up the process of creating a new ``RunCMake`` test, you can run a
