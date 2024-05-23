@@ -195,6 +195,8 @@ customized by setting the following variables before a call.
   ``${RunCMake_TEST_BINARY_DIR}`` directory before running the test case.
   If not set, or if set to a false value, the directory is removed.
 
+  This is useful to run `Multi-Step Test Cases`_.
+
 ``RunCMake_TEST_COMMAND``
   The command for ``run_cmake(<case>)`` to execute.
   If not set, defaults to running CMake to generate a project::
@@ -220,6 +222,30 @@ customized by setting the following variables before a call.
 ``RunCMake_TEST_TIMEOUT``
   Specify a timeout, in seconds, for ``run_cmake(<case>)`` to pass to its
   underlying ``execute_process()`` call using the ``TIMEOUT`` option.
+
+Multi-Step Test Cases
+=====================
+
+Normally each ``run_cmake(<case>)`` call corresponds to one standalone
+test case with its own build tree.  However, some test cases may require
+multiple steps to be performed in a single build tree.  This can be
+achieved as follows::
+
+  block()
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/example-build)
+    run_cmake(example)
+    set(RunCMake_TEST_NO_CLEAN 1)
+    set(RunCMake_TEST_OUTPUT_MERGE 1)
+    run_cmake_command(example-build ${CMAKE_COMMAND} --build . --config Debug)
+  endblock()
+
+In this example, ``block() ... endblock()`` is used to isolate the
+variable settings from later cases.  A single build tree is used for
+all cases inside the block.  The first step cleans the build tree and
+runs CMake to configure the case's project.  The second step runs
+``cmake --build`` to drive the generated build system and merges the
+build tool's ``stderr`` into its ``stdout``.  Note that each call uses
+a unique case name so that expected results can be expressed individually.
 
 Running a Test
 ==============
