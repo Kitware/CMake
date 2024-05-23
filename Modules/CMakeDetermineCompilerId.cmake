@@ -567,7 +567,7 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       if(CMAKE_VS_PLATFORM_NAME STREQUAL x64)
         set(cuda_target "<TargetMachinePlatform>64</TargetMachinePlatform>")
       endif()
-      set(id_ItemDefinitionGroup_entry "<CudaCompile>${cuda_target}<AdditionalOptions>%(AdditionalOptions)-v</AdditionalOptions></CudaCompile>")
+      set(id_ItemDefinitionGroup_entry "<CudaCompile>${cuda_target}<AdditionalOptions>%(AdditionalOptions)-v -allow-unsupported-compiler</AdditionalOptions></CudaCompile>")
       set(id_PostBuildEvent_Command [[echo CMAKE_CUDA_COMPILER=$(CudaToolkitBinDir)\nvcc.exe]])
       if(CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR)
         # check for legacy cuda custom toolkit folder structure
