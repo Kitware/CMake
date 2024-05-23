@@ -1078,34 +1078,16 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
   this->WriteNvidiaDeviceLinkRule(usedResponseFile, config);
 }
 
-/// Get the target property if it exists, or return a default
-static std::string GetTargetPropertyOrDefault(cmGeneratorTarget const* target,
-                                              std::string const& property,
-                                              std::string defaultValue)
-{
-  if (cmValue name = target->GetProperty(property)) {
-    return *name;
-  }
-  return defaultValue;
-}
-
-/// Compute the swift module name for target
-static std::string GetSwiftModuleName(cmGeneratorTarget const* target)
-{
-  return GetTargetPropertyOrDefault(target, "Swift_MODULE_NAME",
-                                    target->GetName());
-}
-
-/// Compute the swift module path for the target
+/// Compute the swift module path for the target, sans any config-specific
+/// subdirectory.
 /// The returned path will need to be converted to the generator path
-static std::string GetSwiftModulePath(cmGeneratorTarget const* target)
+static std::string GetSwiftModulePathTree(cmGeneratorTarget const* target)
 {
-  std::string moduleName = GetSwiftModuleName(target);
-  std::string moduleDirectory = GetTargetPropertyOrDefault(
-    target, "Swift_MODULE_DIRECTORY",
+  std::string moduleName = target->GetSwiftModuleName();
+  std::string moduleDirectory = target->GetPropertyOrDefault(
+    "Swift_MODULE_DIRECTORY",
     target->LocalGenerator->GetCurrentBinaryDirectory());
-  std::string moduleFileName = GetTargetPropertyOrDefault(
-    target, "Swift_MODULE", moduleName + ".swiftmodule");
+  std::string moduleFileName = target->GetSwiftModuleFileName();
   return moduleDirectory + "/" + moduleFileName;
 }
 
@@ -1221,9 +1203,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
       return targetNames.Base;
     }();
 
-    vars["SWIFT_MODULE_NAME"] = GetSwiftModuleName(gt);
+    vars["SWIFT_MODULE_NAME"] = gt->GetSwiftModuleName();
     vars["SWIFT_MODULE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-      this->ConvertToNinjaPath(GetSwiftModulePath(gt)),
+      this->ConvertToNinjaPath(GetSwiftModulePathTree(gt)),
       cmOutputConverter::SHELL);
 
     vars["SWIFT_SOURCES"] = [this, config]() -> std::string {
@@ -1555,8 +1537,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
         // in order for there to be a swiftmodule to depend on
         if (dependency.Target &&
             dependency.Target->GetLinkerLanguage(config) == "Swift") {
-          std::string swiftmodule =
-            this->ConvertToNinjaPath(GetSwiftModulePath(dependency.Target));
+          std::string swiftmodule = this->ConvertToNinjaPath(
+            GetSwiftModulePathTree(dependency.Target));
           linkBuild.ImplicitDeps.emplace_back(swiftmodule);
         }
       }

@@ -537,7 +537,27 @@ public:
 
   std::string GetClangTidyExportFixesDirectory(const std::string& lang) const;
 
+  /** Return the swift module name for this target. */
+  std::string GetSwiftModuleName() const;
+
+  /** Return the path of the `.swiftmodule` for this target in
+      the given configuration.  */
+  std::string GetSwiftModulePath(std::string const& config) const;
+
+  /** Return the given property of this target if it exists; otherwise
+      return defaultValue. */
+  std::string GetPropertyOrDefault(std::string const& property,
+                                   std::string defaultValue) const;
+
+  /** Return the name of the `.swiftmodule` file for this target. */
+  std::string GetSwiftModuleFileName() const;
+
 private:
+  /** Return the directory containing Swift module interface
+      descriptions for this target (including its `.swiftmodule`,
+      `.abi.json`, and `.swiftdoc`) in the given configuration.  */
+  std::string GetSwiftModuleDirectory(std::string const& config) const;
+
   using ConfigAndLanguage = std::pair<std::string, std::string>;
   using ConfigAndLanguageToBTStrings =
     std::map<ConfigAndLanguage, std::vector<BT<std::string>>>;
