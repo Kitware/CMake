@@ -10,12 +10,16 @@ See also `../README.rst`_ and the `CMake Source Code Guide`_.
 
 .. _`../README.rst`: ../README.rst
 .. _`CMake Source Code Guide`: ../../Help/dev/source.rst
+.. _`CMakeLists.txt`: CMakeLists.txt
+
+Adding a Test
+=============
 
 To add a test:
 
 1. Add a subdirectory named for the test, say ``<Test>/``.
 
-2. In ``./CMakeLists.txt`` call ``add_RunCMake_test`` and pass the
+2. In `CMakeLists.txt`_ call ``add_RunCMake_test`` and pass the
    test directory name ``<Test>``.
 
 3. Create script ``<Test>/RunCMakeTest.cmake`` in the directory containing::
@@ -95,6 +99,14 @@ To add a test:
    and an failure must store a message in ``RunCMake_TEST_FAILED``.
    The check script may optionally set ``RunCMake_TEST_FAILURE_MESSAGE``
    with additional text to be included in the message if the test fails.
+
+Running a Test
+==============
+
+Each call to ``add_RunCMake_test(Example)`` in `CMakeLists.txt`_ creates
+a test named ``RunCMake.Example`` that may be run with ``ctest``::
+
+  $ ctest -R "^RunCMake\.Example$"
 
 To speed up local testing, you can choose to run only a subset of
 ``run_cmake()`` tests in a ``RunCMakeTest.cmake`` script by using the
