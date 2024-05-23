@@ -544,6 +544,12 @@ public:
       the given configuration.  */
   std::string GetSwiftModulePath(std::string const& config) const;
 
+  /** Return the directory containing Swift module interface
+      descriptions for this target (including its `.swiftmodule`,
+      `.abi.json`, and `.swiftdoc`) in the given configuration.  */
+  std::string GetSwiftModuleDirectory(std::string const& config) const;
+
+private:
   /** Return the given property of this target if it exists; otherwise
       return defaultValue. */
   std::string GetPropertyOrDefault(std::string const& property,
@@ -551,12 +557,6 @@ public:
 
   /** Return the name of the `.swiftmodule` file for this target. */
   std::string GetSwiftModuleFileName() const;
-
-private:
-  /** Return the directory containing Swift module interface
-      descriptions for this target (including its `.swiftmodule`,
-      `.abi.json`, and `.swiftdoc`) in the given configuration.  */
-  std::string GetSwiftModuleDirectory(std::string const& config) const;
 
   using ConfigAndLanguage = std::pair<std::string, std::string>;
   using ConfigAndLanguageToBTStrings =

@@ -28,6 +28,10 @@ endif()
 add_subdirectory(SubA)
 add_subdirectory(SubB)
 
+add_subdirectory(SubC)
+add_subdirectory(SubD)
+add_subdirectory(SubE)
+
 set(CMAKE_Swift_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/swift)
 
 add_executable(SwiftOnly main.swift)

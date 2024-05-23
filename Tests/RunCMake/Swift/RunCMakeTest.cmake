@@ -19,9 +19,7 @@ block()
   run_cmake(CMP0157-NEW)
   run_cmake(CMP0157-WARN)
 
-  if(RunCMake_GENERATOR MATCHES "Ninja.*")
-    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CMP0157-OLD-build)
-  endif()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CMP0157-OLD-build)
 
   run_cmake(CMP0157-OLD)
 
@@ -32,9 +30,25 @@ block()
   endif()
 endblock()
 
-if(RunCMake_GENERATOR MATCHES "Ninja")
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SwiftSimple-build)
   run_cmake(SwiftSimple)
+  if(RunCMake_GENERATOR_IS_MULTI_CONFIG AND
+      # Older Xcode versions didn't support Swift static libraries.
+      NOT (RunCMake_GENERATOR STREQUAL "Xcode" AND XCODE_VERSION VERSION_LESS 9.0))
+    # Check that .swiftmodule files get their own directories
+    set(RunCMake_TEST_NO_CLEAN 1)
+    run_cmake_command(SwiftSimple-build-Debug ${CMAKE_COMMAND} --build . --config Debug)
+    run_cmake_command(SwiftSimple-build-Release ${CMAKE_COMMAND} --build . --config Release)
 
+    # Will fail if either path doesn't exist. Passing -r because Xcode
+    # generates .swiftmodule directories.
+    run_cmake_command(SwiftSimple-verify ${CMAKE_COMMAND} -E
+      rm -r Debug/L.swiftmodule Release/L.swiftmodule)
+  endif()
+endblock()
+
+if(RunCMake_GENERATOR MATCHES "Ninja")
   block()
     if (CMAKE_SYSTEM_NAME MATCHES "Windows")
       run_cmake_with_options(Win32ExecutableDisallowed)

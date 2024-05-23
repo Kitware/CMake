@@ -1078,19 +1078,6 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
   this->WriteNvidiaDeviceLinkRule(usedResponseFile, config);
 }
 
-/// Compute the swift module path for the target, sans any config-specific
-/// subdirectory.
-/// The returned path will need to be converted to the generator path
-static std::string GetSwiftModulePathTree(cmGeneratorTarget const* target)
-{
-  std::string moduleName = target->GetSwiftModuleName();
-  std::string moduleDirectory = target->GetPropertyOrDefault(
-    "Swift_MODULE_DIRECTORY",
-    target->LocalGenerator->GetCurrentBinaryDirectory());
-  std::string moduleFileName = target->GetSwiftModuleFileName();
-  return moduleDirectory + "/" + moduleFileName;
-}
-
 void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   const std::string& config, const std::string& fileConfig,
   bool firstForConfig)
@@ -1205,7 +1192,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
 
     vars["SWIFT_MODULE_NAME"] = gt->GetSwiftModuleName();
     vars["SWIFT_MODULE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-      this->ConvertToNinjaPath(GetSwiftModulePathTree(gt)),
+      this->ConvertToNinjaPath(gt->GetSwiftModulePath(config)),
       cmOutputConverter::SHELL);
 
     vars["SWIFT_SOURCES"] = [this, config]() -> std::string {
@@ -1538,7 +1525,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
         if (dependency.Target &&
             dependency.Target->GetLinkerLanguage(config) == "Swift") {
           std::string swiftmodule = this->ConvertToNinjaPath(
-            GetSwiftModulePathTree(dependency.Target));
+            dependency.Target->GetSwiftModulePath(config));
           linkBuild.ImplicitDeps.emplace_back(swiftmodule);
         }
       }
