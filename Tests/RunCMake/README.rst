@@ -1,5 +1,17 @@
-This directory contains tests that run CMake to configure a project
-but do not actually build anything.  To add a test:
+CMake Tests/RunCMake Directory
+******************************
+
+This directory contains tests that run CMake and/or other tools while
+precisely checking their return code and stdout/stderr content.
+The RunCMake infrastructure is useful for testing error cases and
+diagnostic output.
+
+See also `../README.rst`_ and the `CMake Source Code Guide`_.
+
+.. _`../README.rst`: ../README.rst
+.. _`CMake Source Code Guide`: ../../Help/dev/source.rst
+
+To add a test:
 
 1. Add a subdirectory named for the test, say ``<Test>/``.
 
