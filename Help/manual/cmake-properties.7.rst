@@ -39,6 +39,7 @@ Properties of Global Scope
    /prop_gbl/GENERATOR_IS_MULTI_CONFIG
    /prop_gbl/GLOBAL_DEPENDS_DEBUG_MODE
    /prop_gbl/GLOBAL_DEPENDS_NO_CYCLES
+   /prop_gbl/INSTALL_PARALLEL
    /prop_gbl/IN_TRY_COMPILE
    /prop_gbl/JOB_POOLS
    /prop_gbl/PACKAGES_FOUND

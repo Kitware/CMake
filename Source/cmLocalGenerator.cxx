@@ -730,10 +730,12 @@ void cmLocalGenerator::GenerateInstallRules()
       "  set(CMAKE_INSTALL_MANIFEST \"install_manifest.txt\")\n"
       "endif()\n"
       "\n"
-      "string(REPLACE \";\" \"\\n\" CMAKE_INSTALL_MANIFEST_CONTENT\n"
+      "if(NOT CMAKE_INSTALL_LOCAL_ONLY)\n"
+      "  string(REPLACE \";\" \"\\n\" CMAKE_INSTALL_MANIFEST_CONTENT\n"
       "       \"${CMAKE_INSTALL_MANIFEST_FILES}\")\n"
-      "file(WRITE \"" << homedir << "/${CMAKE_INSTALL_MANIFEST}\"\n"
-      "     \"${CMAKE_INSTALL_MANIFEST_CONTENT}\")\n";
+      "  file(WRITE \"" << homedir << "/${CMAKE_INSTALL_MANIFEST}\"\n"
+      "     \"${CMAKE_INSTALL_MANIFEST_CONTENT}\")\n"
+      "endif()\n";
     /* clang-format on */
   }
 }

@@ -1835,6 +1835,21 @@ void cmGlobalNinjaGenerator::WriteBuiltinTargets(std::ostream& os)
   if (!this->DefaultFileConfig.empty()) {
     this->WriteTargetDefault(*this->GetDefaultFileStream());
   }
+
+  if (this->InstallTargetEnabled &&
+      this->GetCMakeInstance()->GetState()->GetGlobalPropertyAsBool(
+        "INSTALL_PARALLEL") &&
+      !this->Makefiles[0]->IsOn("CMAKE_SKIP_INSTALL_RULES")) {
+    cmNinjaBuild build("phony");
+    build.Comment = "Install every subdirectory in parallel";
+    build.Outputs.emplace_back(this->GetInstallParallelTargetName());
+    for (auto const& mf : this->Makefiles) {
+      build.ExplicitDeps.emplace_back(
+        this->ConvertToNinjaPath(cmStrCat(mf->GetCurrentBinaryDirectory(), "/",
+                                          this->GetInstallLocalTargetName())));
+    }
+    WriteBuild(os, build);
+  }
 }
 
 void cmGlobalNinjaGenerator::WriteTargetDefault(std::ostream& os)
