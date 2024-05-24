@@ -1,5 +1,13 @@
-# a macro for tests that have a simple format where the name matches the
-# directory and project
+# Creates a test named <NAME> that runs ctest --build-and-test on the
+# subdirectory of this one named by replacing "." with "/" in
+# <NAME>. Any arguments following NAME are passed to ctest as a
+# --test-command.  See the implementation for additional details.
+#
+# The subdirectory is added to TEST_BUILD_DIRS in the caller's scope.
+#
+# Requires: the name of the project in the subdirectory is the part of
+# <NAME> following the last dot ("."), or all of <NAME> if there is no
+# "." in <NAME>.
 macro(ADD_TEST_MACRO NAME)
   if(${ARGC} GREATER 1)
     set(_test_command --test-command ${ARGN})
