@@ -1,3 +1,5 @@
+cmake_policy(SET CMP0169 OLD)
+
 include(FetchContent)
 
 # The file hash depends on the line endings used by git
