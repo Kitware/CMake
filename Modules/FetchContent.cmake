@@ -1574,15 +1574,25 @@ function(__FetchContent_doPopulation contentName)
       USES_TERMINAL_DOWNLOAD
       USES_TERMINAL_UPDATE
       USES_TERMINAL_PATCH
+      # Internal options, may change at any time
+      __DIRECT_POPULATION
   )
   set(multiValueArgs "")
 
   cmake_parse_arguments(PARSE_ARGV 1 ARG
     "${options}" "${oneValueArgs}" "${multiValueArgs}")
 
-  get_property(direct_population GLOBAL PROPERTY
-    "_FetchContent_${contentNameLower}_direct_population"
-  )
+  if(DEFINED ARG___DIRECT_POPULATION)
+    # Direct call to FetchContent_Populate() with full details. The policy
+    # setting of its caller is included in the function arguments.
+    set(direct_population ${ARG___DIRECT_POPULATION})
+  else()
+    # FetchContent_Populate() called with only the name of a dependency.
+    # We need the policy setting of the corresponding FetchContent_Declare().
+    get_property(direct_population GLOBAL PROPERTY
+      "_FetchContent_${contentNameLower}_direct_population"
+    )
+  endif()
 
   if(NOT ARG_SUBBUILD_DIR)
     if(NOT direct_population)
@@ -1926,6 +1936,19 @@ function(FetchContent_Populate contentName)
     message(FATAL_ERROR "Empty contentName not allowed for FetchContent_Populate()")
   endif()
 
+  if(ARGC EQUAL 1)
+    set(__doDirectArgs)
+  else()
+    cmake_policy(GET CMP0168 cmp0168
+      PARENT_SCOPE # undocumented, do not use outside of CMake
+    )
+    if(cmp0168 STREQUAL "NEW")
+      set(__doDirectArgs __DIRECT_POPULATION YES)
+    else()
+      set(__doDirectArgs __DIRECT_POPULATION NO)
+    endif()
+  endif()
+
   string(TOLOWER ${contentName} contentNameLower)
 
   if(ARGN)
@@ -1937,6 +1960,7 @@ function(FetchContent_Populate contentName)
       SOURCE_DIR   "${CMAKE_CURRENT_BINARY_DIR}/${contentNameLower}-src"
       BINARY_DIR   "${CMAKE_CURRENT_BINARY_DIR}/${contentNameLower}-build"
       ${ARGN}  # Could override any of the above ..._DIR variables
+      ${__doDirectArgs}
     )
 
     # Pass source and binary dir variables back to the caller
