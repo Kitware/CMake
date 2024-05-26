@@ -1148,6 +1148,12 @@ current working directory.
 
 #]=======================================================================]
 
+# Control policies for most of the things defined by this module. Only a few
+# FetchContent_MakeAvailable() implementation details are excluded for
+# backward compatibility reasons (see just after the endblock()).
+block(SCOPE_FOR POLICIES)
+cmake_policy(VERSION 3.29)
+
 include(${CMAKE_CURRENT_LIST_DIR}/ExternalProject/shared_internal_commands.cmake)
 
 #=======================================================================
@@ -2210,7 +2216,13 @@ macro(FetchContent_MakeAvailable)
         )
 
         set(__cmake_fcProvider_${__cmake_contentNameLower} YES)
-        cmake_language(EVAL CODE "${__cmake_providerCommand}(${__cmake_providerArgs})")
+
+        # The provider needs to see policies from our caller, so we need a
+        # helper macro defined outside our policy block. We pass through a
+        # variable name rather than variable contents to avoid any potential
+        # problems with parsing macro arguments.
+        set(__cmake_fcCode "${__cmake_providerCommand}(${__cmake_providerArgs})")
+        __FetchContent_MakeAvailable_eval_code(__cmake_fcCode)
 
         list(POP_BACK __cmake_fcCurrentVarsStack
           __cmake_contentNameLower
@@ -2221,6 +2233,7 @@ macro(FetchContent_MakeAvailable)
           unset(CMAKE_EXPORT_FIND_PACKAGE_NAME)
         endif()
 
+        unset(__cmake_fcCode)
         unset(__cmake_fcProvider_${__cmake_contentNameLower})
         unset(__cmake_providerArgs)
         unset(__cmake_addfpargs)
@@ -2255,7 +2268,9 @@ macro(FetchContent_MakeAvailable)
           ${__cmake_contentName}
           ${__cmake_contentNameLower}
         )
-        find_package(${__cmake_contentName} ${__cmake_fpArgs})
+        # We pass variable names rather than their contents so as to avoid any
+        # potential problems with macro argument parsing
+        __FetchContent_MakeAvailable_find_package(__cmake_contentName __cmake_fpArgs)
         list(POP_BACK __cmake_fcCurrentNameStack
           __cmake_contentNameLower
           __cmake_contentName
@@ -2312,7 +2327,12 @@ macro(FetchContent_MakeAvailable)
         if(__cmake_arg_SYSTEM)
           list(APPEND __cmake_add_subdirectory_args SYSTEM)
         endif()
-        add_subdirectory(${__cmake_add_subdirectory_args})
+
+        # We pass a variable name rather than its contents so as to avoid any
+        # potential problems with macro argument parsing. It's highly unlikely
+        # in this case, but still theoretically possible someone might try to
+        # use a directory name that looks like a CMake variable evaluation.
+        __FetchContent_MakeAvailable_add_subdirectory(__cmake_add_subdirectory_args)
 
         list(POP_BACK __cmake_fcCurrentVarsStack CMAKE_EXPORT_FIND_PACKAGE_NAME)
         if(CMAKE_EXPORT_FIND_PACKAGE_NAME STREQUAL "<<::VAR_NOT_SET::>>")
@@ -2343,4 +2363,22 @@ macro(FetchContent_MakeAvailable)
   unset(__cmake_providerCommand)
   unset(__cmake_original_verify_setting)
 
+endmacro()
+
+endblock()   # End of FetchContent module's policy scope
+
+# These are factored out here outside our policies block to preserve policy
+# settings of the scope from which FetchContent was included. Any project or
+# user code that actually relies on this is fragile and should enforce its own
+# policies instead, but we keep these here to preserve backward compatibility.
+macro(__FetchContent_MakeAvailable_eval_code code_var)
+  cmake_language(EVAL CODE "${${code_var}}")
+endmacro()
+
+macro(__FetchContent_MakeAvailable_find_package first_arg_var remaining_args_var)
+  find_package(${${first_arg_var}} ${${remaining_args_var}})
+endmacro()
+
+macro(__FetchContent_MakeAvailable_add_subdirectory args_var)
+  add_subdirectory(${${args_var}})
 endmacro()
