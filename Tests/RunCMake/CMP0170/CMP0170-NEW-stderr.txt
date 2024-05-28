@@ -1,0 +1,14 @@
+CMake Error at .*/Modules/FetchContent\.cmake:[0-9]+ \(message\):
+  FETCHCONTENT_FULLY_DISCONNECTED is set to true, which requires the source
+  directory for dependency t1 to already be populated\.  This generally means
+  it must not be set to true the first time CMake is run in a build
+  directory\.  The following source directory should already be populated, but
+  it doesn't exist:[
+]+    .*/Tests/RunCMake/CMP0170/IdoNotExist[
+]+  Policy CMP0170 controls enforcement of this requirement\.
+Call Stack \(most recent call first\):
+  .*/Modules/FetchContent\.cmake:[0-9]+:EVAL:1 \(__FetchContent_Populate\)
+  .*/Modules/FetchContent\.cmake:[0-9]+ \(cmake_language\)
+  CMP0170\.cmake:[0-9]+ \(FetchContent_Populate\)
+  CMP0170-NEW\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)

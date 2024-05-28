@@ -522,7 +522,10 @@ class cmMakefile;
   SELECT(POLICY, CMP0169,                                                     \
          "FetchContent_Populate(depName) single-argument signature is "       \
          "deprecated.",                                                       \
-         3, 30, 0, cmPolicies::WARN)
+         3, 30, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0170,                                                     \
+         "FETCHCONTENT_FULLY_DISCONNECTED requirements are enforced.", 3, 30, \
+         0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

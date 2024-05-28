@@ -176,6 +176,7 @@ add_RunCMake_test(CMP0160)
 add_RunCMake_test(CMP0163)
 add_RunCMake_test(CMP0165)
 add_RunCMake_test(CMP0169)
+add_RunCMake_test(CMP0170)
 
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
