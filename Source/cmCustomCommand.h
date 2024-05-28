@@ -132,6 +132,10 @@ public:
   const std::string& GetTarget() const;
   void SetTarget(const std::string& target);
 
+  /** Record if the custom command can be used for code generation. */
+  bool GetCodegen() const { return Codegen; }
+  void SetCodegen(bool b) { Codegen = b; }
+
 private:
   std::vector<std::string> Outputs;
   std::vector<std::string> Byproducts;
@@ -153,6 +157,7 @@ private:
   bool StdPipesUTF8 = false;
   bool HasMainDependency_ = false;
   bool DependsExplicitOnly = false;
+  bool Codegen = false;
 
 // Policies are NEW for synthesized custom commands, and set by cmMakefile for
 // user-created custom commands.

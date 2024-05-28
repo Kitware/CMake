@@ -1,0 +1,4 @@
+^CMake Error at implicit-depends-append-codegen\.cmake:[0-9]+ \(add_custom_command\):
+  add_custom_command CODEGEN may not be used with APPEND\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

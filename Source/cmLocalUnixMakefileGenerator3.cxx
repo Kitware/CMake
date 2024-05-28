@@ -1763,6 +1763,21 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   this->WriteMakeRule(ruleFileStream, "The main all target", "all", depends,
                       commands, true);
 
+  // Write the codegen rule.
+  if (this->GetGlobalGenerator()->CheckCMP0171()) {
+    recursiveTarget = cmStrCat(this->GetCurrentBinaryDirectory(), "/codegen");
+    depends.clear();
+    commands.clear();
+    if (regenerate) {
+      depends.emplace_back("cmake_check_build_system");
+    }
+    commands.push_back(this->GetRecursiveMakeCall(mf2Dir, recursiveTarget));
+    AppendEcho(commands, "Finished generating code",
+               cmLocalUnixMakefileGenerator3::EchoColor::EchoGenerate);
+    this->WriteMakeRule(ruleFileStream, "The main codegen target", "codegen",
+                        depends, commands, true);
+  }
+
   // Write the clean rule.
   recursiveTarget = cmStrCat(this->GetCurrentBinaryDirectory(), "/clean");
   commands.clear();

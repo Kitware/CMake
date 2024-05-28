@@ -657,6 +657,7 @@ public:
   bool PerConfig;
   cmTarget::Visibility TargetVisibility;
   std::set<BT<std::pair<std::string, bool>>> Utilities;
+  std::set<std::string> CodegenDependencies;
   std::vector<cmCustomCommand> PreBuildCommands;
   std::vector<cmCustomCommand> PreLinkCommands;
   std::vector<cmCustomCommand> PostBuildCommands;
@@ -1236,6 +1237,16 @@ void cmTarget::AddUtility(std::string const& name, bool cross,
 void cmTarget::AddUtility(BT<std::pair<std::string, bool>> util)
 {
   this->impl->Utilities.emplace(std::move(util));
+}
+
+void cmTarget::AddCodegenDependency(std::string const& name)
+{
+  this->impl->CodegenDependencies.emplace(name);
+}
+
+std::set<std::string> const& cmTarget::GetCodegenDeps() const
+{
+  return this->impl->CodegenDependencies;
 }
 
 std::set<BT<std::pair<std::string, bool>>> const& cmTarget::GetUtilities()

@@ -173,6 +173,11 @@ public:
   void AddUtility(std::string const& name, bool cross,
                   cmMakefile const* mf = nullptr);
   void AddUtility(BT<std::pair<std::string, bool>> util);
+
+  void AddCodegenDependency(std::string const& name);
+
+  std::set<std::string> const& GetCodegenDeps() const;
+
   //! Get the utilities used by this target
   std::set<BT<std::pair<std::string, bool>>> const& GetUtilities() const;
 

@@ -1,0 +1,4 @@
+CMake Error at no-output\.cmake:[0-9]+ \(add_custom_command\):
+  add_custom_command CODEGEN requires at least 1 OUTPUT\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

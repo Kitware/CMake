@@ -1,0 +1,4 @@
+CMake Error at CMP0171-NEW\.cmake:[0-9]+ \(add_custom_target\):
+  The target name "codegen" is reserved\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

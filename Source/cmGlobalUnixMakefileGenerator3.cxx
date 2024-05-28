@@ -23,6 +23,7 @@
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmTarget.h"
 #include "cmTargetDepend.h"
 #include "cmValue.h"
 #include "cmake.h"
@@ -438,6 +439,10 @@ void cmGlobalUnixMakefileGenerator3::WriteDirectoryRules2(
   // Write directory-level rules for "all".
   this->WriteDirectoryRule2(ruleFileStream, rootLG, dt, "all", true, false);
 
+  // Write directory-level rules for "codegen".
+  this->WriteDirectoryRule2(ruleFileStream, rootLG, dt, "codegen", true,
+                            false);
+
   // Write directory-level rules for "preinstall".
   this->WriteDirectoryRule2(ruleFileStream, rootLG, dt, "preinstall", true,
                             true);
@@ -765,6 +770,17 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
                              depends, commands, true);
       }
 
+      // add the codegen rule
+      localName = lg.GetRelativeTargetDirectory(gtarget.get());
+      depends.clear();
+      commands.clear();
+      makeTargetName = cmStrCat(localName, "/codegen");
+      commands.push_back(
+        lg.GetRecursiveMakeCall(makefileName, makeTargetName));
+      this->AppendCodegenTargetDepends(depends, gtarget.get());
+      rootLG.WriteMakeRule(ruleFileStream, "codegen rule for target.",
+                           makeTargetName, depends, commands, true);
+
       // add the clean rule
       localName = lg.GetRelativeTargetDirectory(gtarget.get());
       makeTargetName = cmStrCat(localName, "/clean");
@@ -890,6 +906,29 @@ void cmGlobalUnixMakefileGenerator3::AppendGlobalTargetDepends(
       lg3->GetRelativeTargetDirectory(const_cast<cmGeneratorTarget*>(dep)),
       "/all");
     depends.push_back(tgtName);
+  }
+}
+
+void cmGlobalUnixMakefileGenerator3::AppendCodegenTargetDepends(
+  std::vector<std::string>& depends, cmGeneratorTarget* target)
+{
+  const std::set<std::string>& codegen_depends =
+    target->Target->GetCodegenDeps();
+
+  for (cmTargetDepend const& i : this->GetTargetDirectDepends(target)) {
+    // Create the target-level dependency.
+    cmGeneratorTarget const* dep = i;
+    if (!dep->IsInBuildSystem()) {
+      continue;
+    }
+    if (codegen_depends.find(dep->GetName()) != codegen_depends.end()) {
+      cmLocalUnixMakefileGenerator3* lg3 =
+        static_cast<cmLocalUnixMakefileGenerator3*>(dep->GetLocalGenerator());
+      std::string tgtName = cmStrCat(
+        lg3->GetRelativeTargetDirectory(const_cast<cmGeneratorTarget*>(dep)),
+        "/all");
+      depends.push_back(tgtName);
+    }
   }
 }
 
