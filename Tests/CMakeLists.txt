@@ -391,14 +391,17 @@ if(BUILD_TESTING)
   string(REPLACE ";" "$<SEMICOLON>" TEST_STDS_C "${CMake_TEST_C_STANDARDS}")
   string(REPLACE ";" "$<SEMICOLON>" TEST_STDS_CXX "${CMake_TEST_CXX_STANDARDS}")
   string(REPLACE ";" "$<SEMICOLON>" TEST_STDS_CUDA "${CMake_TEST_CUDA_STANDARDS}")
+  string(REPLACE ";" "$<SEMICOLON>" TEST_STDS_HIP "${CMake_TEST_HIP_STANDARDS}")
   set(CompileFeatures_BUILD_OPTIONS
     -DCMake_TEST_C_STANDARDS=${TEST_STDS_C}
     -DCMake_TEST_CXX_STANDARDS=${TEST_STDS_CXX}
     -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
     -DCMake_TEST_CUDA_STANDARDS=${TEST_STDS_CUDA}
+    -DCMake_TEST_HIP=${CMake_TEST_HIP}
+    -DCMake_TEST_HIP_STANDARDS=${TEST_STDS_HIP}
     )
   ADD_TEST_MACRO(CompileFeatures CompileFeatures)
-  set_property(TEST CompileFeatures APPEND PROPERTY LABELS "CUDA")
+  set_property(TEST CompileFeatures APPEND PROPERTY LABELS "CUDA" "HIP")
 
   ADD_TEST_MACRO(CMakeCommands.target_compile_features)
 
