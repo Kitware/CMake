@@ -53,3 +53,7 @@ if(WIN32 OR CYGWIN)
   set(RunCMake_TEST_NO_CLEAN 1)
   run_cmake_command(WindowsNoExtension-build ${CMAKE_COMMAND} --build . --config Debug --target RunScript)
 endif()
+
+if(TEST_STARTUPINFO_EXE)
+  run_cmake_script(StartupInfo -DTEST_STARTUPINFO_EXE=${TEST_STARTUPINFO_EXE})
+endif()
