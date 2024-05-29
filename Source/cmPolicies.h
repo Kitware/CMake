@@ -518,6 +518,10 @@ class cmMakefile;
   SELECT(POLICY, CMP0168,                                                     \
          "FetchContent implements steps directly instead of through a "       \
          "sub-build.",                                                        \
+         3, 30, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0169,                                                     \
+         "FetchContent_Populate(depName) single-argument signature is "       \
+         "deprecated.",                                                       \
          3, 30, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)

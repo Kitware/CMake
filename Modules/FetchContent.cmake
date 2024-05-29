@@ -52,7 +52,7 @@ dependencies and then ensuring they are populated with a separate call:
   FetchContent_MakeAvailable(googletest myCompanyIcons)
 
 The :command:`FetchContent_MakeAvailable` command ensures the named
-dependencies have been populated, either by an earlier call or by populating
+dependencies have been populated, either by an earlier call, or by populating
 them itself.  When performing the population, it will also add them to the
 main build, if possible, so that the main build can use the populated
 projects' targets, etc.  See the command's documentation for how these steps
@@ -68,37 +68,11 @@ first instead of repeating the population again.
 See the :ref:`Examples <fetch-content-examples>` which demonstrate
 this scenario.
 
-In some cases, the main project may need to have more precise control over
-the population, or it may be required to explicitly define the population
-steps in a way that cannot be captured by the declared details alone.
-For such situations, the lower level :command:`FetchContent_GetProperties` and
-:command:`FetchContent_Populate` commands can be used.  These lack the richer
-features provided by :command:`FetchContent_MakeAvailable` though, so their
-direct use should be considered a last resort.  The typical pattern of such
-custom steps looks like this:
-
-.. code-block:: cmake
-
-  # NOTE: Where possible, prefer to use FetchContent_MakeAvailable()
-  #       instead of custom logic like this
-
-  # Check if population has already been performed
-  FetchContent_GetProperties(depname)
-  if(NOT depname_POPULATED)
-    # Fetch the content using previously declared details
-    FetchContent_Populate(depname)
-
-    # Set custom variables, policies, etc.
-    # ...
-
-    # Bring the populated content into the build
-    add_subdirectory(${depname_SOURCE_DIR} ${depname_BINARY_DIR})
-  endif()
-
 The ``FetchContent`` module also supports defining and populating
 content in a single call, with no check for whether the content has been
 populated elsewhere already.  This should not be done in projects, but may
-be appropriate for populating content in CMake's script mode.
+be appropriate for populating content in
+:ref:`CMake script mode <Script Processing Mode>`.
 See :command:`FetchContent_Populate` for details.
 
 Commands
@@ -125,19 +99,19 @@ Commands
   projects to have parent projects override content details of child projects.
 
   The content ``<name>`` can be any string without spaces, but good practice
-  would be to use only letters, numbers and underscores.  The name will be
-  treated case-insensitively and it should be obvious for the content it
-  represents, often being the name of the child project or the value given
+  would be to use only letters, numbers, and underscores.  The name will be
+  treated case-insensitively, and it should be obvious for the content it
+  represents. It is often the name of the child project, or the value given
   to its top level :command:`project` command (if it is a CMake project).
   For well-known public projects, the name should generally be the official
   name of the project.  Choosing an unusual name makes it unlikely that other
   projects needing that same content will use the same name, leading to
   the content being populated multiple times.
 
-  The ``<contentOptions>`` can be any of the download, update or patch options
+  The ``<contentOptions>`` can be any of the download, update, or patch options
   that the :command:`ExternalProject_Add` command understands.  The configure,
-  build, install and test steps are explicitly disabled and therefore options
-  related to them will be ignored.  The ``SOURCE_SUBDIR`` option is an
+  build, install, and test steps are explicitly disabled, so options related
+  to those steps will be ignored.  The ``SOURCE_SUBDIR`` option is an
   exception, see :command:`FetchContent_MakeAvailable` for details on how that
   affects behavior.
 
@@ -176,13 +150,13 @@ Commands
   confirm that the downloaded contents are what you expected.
 
   .. versionchanged:: 3.14
-    Commands for the download, update or patch steps can access the terminal.
+    Commands for the download, update, or patch steps can access the terminal.
     This may be needed for things like password prompts or real-time display
     of command progress.
 
   .. versionadded:: 3.22
     The :variable:`CMAKE_TLS_VERIFY`, :variable:`CMAKE_TLS_CAINFO`,
-    :variable:`CMAKE_NETRC` and :variable:`CMAKE_NETRC_FILE` variables now
+    :variable:`CMAKE_NETRC`, and :variable:`CMAKE_NETRC_FILE` variables now
     provide the defaults for their corresponding content options, just like
     they do for :command:`ExternalProject_Add`. Previously, these variables
     were ignored by the ``FetchContent`` module.
@@ -198,7 +172,7 @@ Commands
       appended after the ``<name>``.  ``FIND_PACKAGE_ARGS`` can also be given
       with nothing after it, which indicates that :command:`find_package` can
       still be called if :variable:`FETCHCONTENT_TRY_FIND_PACKAGE_MODE` is
-      set to ``OPT_IN`` or is not set.
+      set to ``OPT_IN``, or is not set.
 
       It would not normally be appropriate to specify ``REQUIRED`` as one of
       the additional arguments after ``FIND_PACKAGE_ARGS``.  Doing so would
@@ -288,7 +262,7 @@ Commands
       when the details were declared, any ``FIND_PACKAGE_ARGS`` will be
       omitted.  The ``OVERRIDE_FIND_PACKAGE`` keyword is also always omitted.
       If the provider fulfilled the request, ``FetchContent_MakeAvailable()``
-      will consider that dependency handled, skip the remaining steps below
+      will consider that dependency handled, skip the remaining steps below,
       and move on to the next dependency in the list.
 
   * .. versionadded:: 3.24
@@ -310,13 +284,13 @@ Commands
   the following logic to make the dependency available:
 
   * If the dependency has already been populated earlier in this run, set
-    the ``<lowercaseName>_POPULATED``, ``<lowercaseName>_SOURCE_DIR`` and
+    the ``<lowercaseName>_POPULATED``, ``<lowercaseName>_SOURCE_DIR``, and
     ``<lowercaseName>_BINARY_DIR`` variables in the same way as a call to
     :command:`FetchContent_GetProperties`, then skip the remaining steps
     below and move on to the next dependency in the list.
 
-  * Call :command:`FetchContent_Populate` to populate the dependency using
-    the details recorded by an earlier call to :command:`FetchContent_Declare`.
+  * Populate the dependency using the details recorded by an earlier call
+    to :command:`FetchContent_Declare`.
     Halt with a fatal error if no such details have been recorded.
     :variable:`FETCHCONTENT_SOURCE_DIR_<uppercaseName>` can be used to override
     the declared details and use content provided at the specified location
@@ -326,14 +300,14 @@ Commands
 
       Ensure the :variable:`CMAKE_FIND_PACKAGE_REDIRECTS_DIR` directory
       contains a ``<lowercaseName>-config.cmake`` and a
-      ``<lowercaseName>-config-version.cmake`` file (or equivalently
+      ``<lowercaseName>-config-version.cmake`` file (or equivalently,
       ``<name>Config.cmake`` and ``<name>ConfigVersion.cmake``).
       The directory that the :variable:`CMAKE_FIND_PACKAGE_REDIRECTS_DIR`
       variable points to is cleared at the start of every CMake run.
-      If no config file exists when :command:`FetchContent_Populate` returns,
-      a minimal one will be written which :command:`includes <include>` any
-      ``<lowercaseName>-extra.cmake`` or ``<name>Extra.cmake`` file with the
-      ``OPTIONAL`` flag (so the files can be missing and won't generate a
+      If no config file exists after populating the dependency in the previous
+      step, a minimal one will be written which :command:`includes <include>`
+      any ``<lowercaseName>-extra.cmake`` or ``<name>Extra.cmake`` file with
+      the ``OPTIONAL`` flag (so the files can be missing and won't generate a
       warning).  Similarly, if no config version file exists, a very simple
       one will be written which sets ``PACKAGE_VERSION_COMPATIBLE`` and
       ``PACKAGE_VERSION_EXACT`` to true.  This ensures all future calls to
@@ -346,7 +320,7 @@ Commands
       in :variable:`CMAKE_FIND_PACKAGE_REDIRECTS_DIR` with one that also sets
       ``PACKAGE_VERSION``.
       The dependency may also write a ``<lowercaseName>-extra.cmake`` or
-      ``<name>Extra.cmake`` file to perform custom processing or define any
+      ``<name>Extra.cmake`` file to perform custom processing, or define any
       variables that their normal (installed) package config file would
       otherwise usually define (many projects don't do any custom processing
       or set any variables and therefore have no need to do this).
@@ -367,9 +341,9 @@ Commands
       The ``SOURCE_SUBDIR`` option can be given in the declared details to
       look somewhere below the top directory instead (i.e. the same way that
       ``SOURCE_SUBDIR`` is used by the :command:`ExternalProject_Add`
-      command).  The path provided with ``SOURCE_SUBDIR`` must be relative
-      and will be treated as relative to the top directory.  It can also
-      point to a directory that does not contain a ``CMakeLists.txt`` file
+      command).  The path provided with ``SOURCE_SUBDIR`` must be relative,
+      and it will be treated as relative to the top directory.  It can also
+      point to a directory that does not contain a ``CMakeLists.txt`` file,
       or even to a directory that doesn't exist.  This can be used to avoid
       adding a project that contains a ``CMakeLists.txt`` file in its top
       directory.
@@ -377,12 +351,12 @@ Commands
     .. versionadded:: 3.25
       If the ``SYSTEM`` keyword was included in the call to
       :command:`FetchContent_Declare`, the ``SYSTEM`` keyword will be
-      added to the :command:`add_subdirectory` command as well.
+      added to the :command:`add_subdirectory` command.
 
     .. versionadded:: 3.28
       If the ``EXCLUDE_FROM_ALL`` keyword was included in the call to
       :command:`FetchContent_Declare`, the ``EXCLUDE_FROM_ALL`` keyword will
-      be added to the :command:`add_subdirectory` command as well.
+      be added to the :command:`add_subdirectory` command.
 
     .. versionadded:: 3.29
       :variable:`CMAKE_EXPORT_FIND_PACKAGE_NAME` is set to the dependency name
@@ -427,68 +401,13 @@ Commands
 
 .. command:: FetchContent_Populate
 
-  .. note::
-    Where possible, prefer to use :command:`FetchContent_MakeAvailable`
-    instead of implementing population manually with this command.
-
-  .. code-block:: cmake
-
-    FetchContent_Populate(<name>)
-
-  In most cases, the only argument given to ``FetchContent_Populate()`` is the
-  ``<name>``.  When used this way, the command assumes the content details have
-  been recorded by an earlier call to :command:`FetchContent_Declare`.  The
-  details are stored in a global property, so they are unaffected by things
-  like variable or directory scope.  Therefore, it doesn't matter where in the
-  project the details were previously declared, as long as they have been
-  declared before the call to ``FetchContent_Populate()``.  Those saved details
-  are then used to populate the content using a method based on
-  :command:`ExternalProject_Add` (see policy :policy:`CMP0168` for important
-  behavioral aspects of how that is done).  The implementation ensures that if
-  the content has already been populated in a previous CMake run, that content
-  will be reused rather than repopulating them again.  For the common case
-  where population involves downloading content, the cost of the download is
-  only paid once.
-
-  An internal global property records when a particular content population
-  request has been processed.  If ``FetchContent_Populate()`` is called more
-  than once for the same content name within a configure run, the second call
-  will halt with an error.  Projects can and should check whether content
-  population has already been processed with the
-  :command:`FetchContent_GetProperties` command before calling
-  ``FetchContent_Populate()``.
-
-  ``FetchContent_Populate()`` will set three variables in the scope of the
-  caller:
-
-  ``<lowercaseName>_POPULATED``
-    This will always be set to ``TRUE`` by the call.
-
-  ``<lowercaseName>_SOURCE_DIR``
-    The location where the populated content can be found upon return.
-
-  ``<lowercaseName>_BINARY_DIR``
-    A directory intended for use as a corresponding build directory.
-
-  The main use case for the ``<lowercaseName>_SOURCE_DIR`` and
-  ``<lowercaseName>_BINARY_DIR`` variables is to call
-  :command:`add_subdirectory` immediately after population:
-
-  .. code-block:: cmake
-
-    FetchContent_Populate(FooBar)
-    add_subdirectory(${foobar_SOURCE_DIR} ${foobar_BINARY_DIR})
-
-  The values of the three variables can also be retrieved from anywhere in the
-  project hierarchy using the :command:`FetchContent_GetProperties` command.
-
-  The ``FetchContent_Populate()`` command also supports a syntax allowing the
-  content details to be specified directly rather than using any saved
-  details.  This is more low-level and use of this form is generally to be
-  avoided in favor of using saved content details as outlined above.
-  Nevertheless, in certain situations it can be useful to invoke the content
-  population as an isolated operation (typically as part of implementing some
-  other higher level feature or when using CMake in script mode):
+  The ``FetchContent_Populate()`` command is a self-contained call which can
+  be used to perform content population as an isolated operation.
+  It is rarely the right command to use, projects should almost always use
+  :command:`FetchContent_Declare` and :command:`FetchContent_MakeAvailable`
+  instead. The main use case for ``FetchContent_Populate()`` is in
+  :ref:`CMake script mode <Script Processing Mode>` as part of implementing
+  some other higher level custom feature.
 
   .. code-block:: cmake
 
@@ -501,42 +420,32 @@ Commands
       ...
     )
 
-  This form has a number of key differences to that where only ``<name>`` is
-  provided:
-
-  - All required population details are assumed to have been provided directly
-    in the call to ``FetchContent_Populate()``. Any saved details for
-    ``<name>`` are ignored.
-  - No check is made for whether content for ``<name>`` has already been
-    populated.
-  - No global property is set to record that the population has occurred.
-  - No global properties record the source or binary directories used for the
-    populated content.
-  - The ``FETCHCONTENT_FULLY_DISCONNECTED`` and
-    ``FETCHCONTENT_UPDATES_DISCONNECTED`` cache variables are ignored.
-
-  The ``<lowercaseName>_SOURCE_DIR`` and ``<lowercaseName>_BINARY_DIR``
-  variables are still returned to the caller, but since these locations are
-  not stored as global properties when this form is used, they are only
-  available to the calling scope and below rather than the entire project
-  hierarchy.  No ``<lowercaseName>_POPULATED`` variable is set in the caller's
-  scope with this form.
-
+  At least one option must be specified after `<name>`, otherwise the call
+  is interpreted differently (see :ref:`below <FetchContent_Populate-depName>`).
   The supported options for ``FetchContent_Populate()`` are the same as those
-  for :command:`FetchContent_Declare()`.  Those few options shown just
-  above are either specific to ``FetchContent_Populate()`` or their behavior is
-  slightly modified from how :command:`ExternalProject_Add` treats them:
+  for :command:`FetchContent_Declare()`, with a few exceptions. The following
+  do not relate to populating content with ``FetchContent_Populate()`` and
+  therefore are not supported:
+
+  * ``EXCLUDE_FROM_ALL``
+  * ``SYSTEM``
+  * ``OVERRIDE_FIND_PACKAGE``
+  * ``FIND_PACKAGE_ARGS``
+
+  The few options shown in the signature above are either specific to
+  ``FetchContent_Populate()``, or their behavior is slightly modified from how
+  :command:`ExternalProject_Add` treats them:
 
   ``QUIET``
     The ``QUIET`` option can be given to hide the output associated with
     populating the specified content.  If the population fails, the output will
     be shown regardless of whether this option was given or not so that the
-    cause of the failure can be diagnosed.  The global ``FETCHCONTENT_QUIET``
-    cache variable has no effect on ``FetchContent_Populate()`` calls where the
-    content details are provided directly.
+    cause of the failure can be diagnosed.  The :variable:`FETCHCONTENT_QUIET`
+    variable has no effect on ``FetchContent_Populate()`` calls of this form
+    where the content details are provided directly.
 
     .. versionchanged:: 3.30
-      The ``QUIET`` option and global ``FETCHCONTENT_QUIET`` variable have no
+      The ``QUIET`` option and :variable:`FETCHCONTENT_QUIET` variable have no
       effect when policy :policy:`CMP0168` is set to ``NEW``. The output is
       still quiet by default in that case, but verbosity is controlled by the
       message logging level (see :variable:`CMAKE_MESSAGE_LOG_LEVEL` and
@@ -545,10 +454,10 @@ Commands
   ``SUBBUILD_DIR``
     The ``SUBBUILD_DIR`` argument can be provided to change the location of the
     sub-build created to perform the population.  The default value is
-    ``${CMAKE_CURRENT_BINARY_DIR}/<lowercaseName>-subbuild`` and it would be
+    ``${CMAKE_CURRENT_BINARY_DIR}/<lowercaseName>-subbuild``, and it would be
     unusual to need to override this default.  If a relative path is specified,
     it will be interpreted as relative to :variable:`CMAKE_CURRENT_BINARY_DIR`.
-    This option should not be confused with the ``SOURCE_SUBDIR`` option which
+    This option should not be confused with the ``SOURCE_SUBDIR`` option, which
     only affects the :command:`FetchContent_MakeAvailable` command.
 
     .. versionchanged:: 3.30
@@ -559,14 +468,14 @@ Commands
     The ``SOURCE_DIR`` and ``BINARY_DIR`` arguments are supported by
     :command:`ExternalProject_Add`, but different default values are used by
     ``FetchContent_Populate()``.  ``SOURCE_DIR`` defaults to
-    ``${CMAKE_CURRENT_BINARY_DIR}/<lowercaseName>-src`` and ``BINARY_DIR``
+    ``${CMAKE_CURRENT_BINARY_DIR}/<lowercaseName>-src``, and ``BINARY_DIR``
     defaults to ``${CMAKE_CURRENT_BINARY_DIR}/<lowercaseName>-build``.
     If a relative path is specified, it will be interpreted as relative to
     :variable:`CMAKE_CURRENT_BINARY_DIR`.
 
   In addition to the above explicit options, any other unrecognized options are
   passed through unmodified to :command:`ExternalProject_Add` to set up the
-  download, patch and update steps.  The following options are explicitly
+  download, patch, and update steps.  The following options are explicitly
   prohibited (they are disabled by the ``FetchContent_Populate()`` command):
 
   - ``CONFIGURE_COMMAND``
@@ -574,20 +483,83 @@ Commands
   - ``INSTALL_COMMAND``
   - ``TEST_COMMAND``
 
-  If using ``FetchContent_Populate()`` within CMake's script mode, be aware
-  that the implementation sets up a sub-build which therefore requires a CMake
+  With this form, the :variable:`FETCHCONTENT_FULLY_DISCONNECTED` and
+  :variable:`FETCHCONTENT_UPDATES_DISCONNECTED` variables are ignored.
+
+  When this form of ``FetchContent_Populate()`` returns, the following
+  variables will be set in the scope of the caller:
+
+  ``<lowercaseName>_SOURCE_DIR``
+    The location where the populated content can be found upon return.
+
+  ``<lowercaseName>_BINARY_DIR``
+    A directory originally intended for use as a corresponding build directory,
+    but is unlikely to be relevant when using this form of the command.
+
+  If using ``FetchContent_Populate()`` within
+  :ref:`CMake script mode <Script Processing Mode>`, be aware that the
+  implementation sets up a sub-build which therefore requires a CMake
   generator and build tool to be available. If these cannot be found by
-  default, then the :variable:`CMAKE_GENERATOR` and/or
+  default, then the :variable:`CMAKE_GENERATOR` and potentially the
   :variable:`CMAKE_MAKE_PROGRAM` variables will need to be set appropriately
   on the command line invoking the script.
 
   .. versionchanged:: 3.30
     If policy :policy:`CMP0168` is set to ``NEW``, no sub-build is used.
-    Within CMake's script mode, that allows ``FetchContent_Populate()`` to be
-    called without any build tool or CMake generator.
+    Within :ref:`CMake script mode <Script Processing Mode>`, that allows
+    ``FetchContent_Populate()`` to be called without any build tool or
+    CMake generator.
 
   .. versionadded:: 3.18
     Added support for the ``DOWNLOAD_NO_EXTRACT`` option.
+
+.. _`FetchContent_Populate-depName`:
+
+  The command supports another form, although it should no longer be used:
+
+  .. code-block:: cmake
+
+    FetchContent_Populate(<name>)
+
+  .. versionchanged:: 3.30
+    This form is deprecated. Policy :policy:`CMP0169` provides backward
+    compatibility for projects that still need to use this form, but projects
+    should be updated to use :command:`FetchContent_MakeAvailable` instead.
+
+  In this form, the only argument given to ``FetchContent_Populate()`` is the
+  ``<name>``.  When used this way, the command assumes the content details have
+  been recorded by an earlier call to :command:`FetchContent_Declare`.  The
+  details are stored in a global property, so they are unaffected by things
+  like variable or directory scope.  Therefore, it doesn't matter where in the
+  project the details were previously declared, as long as they have been
+  declared before the call to ``FetchContent_Populate()``.  Those saved details
+  are then used to populate the content using a method based on
+  :command:`ExternalProject_Add` (see policy :policy:`CMP0168` for important
+  behavioral aspects of how that is done).
+
+  When this form of ``FetchContent_Populate()`` returns, the following
+  variables will be set in the scope of the caller:
+
+  ``<lowercaseName>_POPULATED``
+    This will always be set to ``TRUE`` by the call.
+
+  ``<lowercaseName>_SOURCE_DIR``
+    The location where the populated content can be found upon return.
+
+  ``<lowercaseName>_BINARY_DIR``
+    A directory intended for use as a corresponding build directory.
+
+  The values of the three variables can also be retrieved from anywhere in the
+  project hierarchy using the :command:`FetchContent_GetProperties` command.
+
+  The implementation ensures that if the content has already been populated
+  in a previous CMake run, that content will be reused rather than repopulating
+  again.  For the common case where population involves downloading content,
+  the cost of the download is only paid once. But note that it is an error to
+  call ``FetchContent_Populate(<name>)`` with the same ``<name>`` more than
+  once within a single CMake run. See :command:`FetchContent_GetProperties`
+  for how to determine if population of a ``<name>`` has already been
+  performed in the current run.
 
 .. command:: FetchContent_GetProperties
 
@@ -595,7 +567,7 @@ Commands
   :command:`FetchContent_MakeAvailable` or :command:`FetchContent_Populate`
   records information in global properties which can be queried at any time.
   This information may include the source and binary directories associated with
-  the content and also whether or not the content population has been processed
+  the content, and also whether or not the content population has been processed
   during the current configure run.
 
   .. code-block:: cmake
@@ -607,7 +579,7 @@ Commands
       [POPULATED <doneVar>]
     )
 
-  The ``SOURCE_DIR``, ``BINARY_DIR`` and ``POPULATED`` options can be used to
+  The ``SOURCE_DIR``, ``BINARY_DIR``, and ``POPULATED`` options can be used to
   specify which properties should be retrieved.  Each option accepts a value
   which is the name of the variable in which to store that property.  Most of
   the time though, only ``<name>`` is given, in which case the call will then
@@ -619,13 +591,15 @@ Commands
 
   This command is rarely needed when using
   :command:`FetchContent_MakeAvailable`.  It is more commonly used as part of
-  implementing the following pattern with :command:`FetchContent_Populate`,
+  implementing the deprecated pattern with :command:`FetchContent_Populate`,
   which ensures that the relevant variables will always be defined regardless
   of whether or not the population has been performed elsewhere in the project
   already:
 
   .. code-block:: cmake
 
+    # WARNING: This pattern is deprecated, don't use it!
+    #
     # Check if population has already been performed
     FetchContent_GetProperties(depname)
     if(NOT depname_POPULATED)
@@ -679,7 +653,7 @@ A number of cache variables can influence the behavior where details from a
 .. variable:: FETCHCONTENT_BASE_DIR
 
   In most cases, the saved details do not specify any options relating to the
-  directories to use for the internal sub-build, final source and build areas.
+  directories to use for the internal sub-build, final source, and build areas.
   It is generally best to leave these decisions up to the ``FetchContent``
   module to handle on the project's behalf.  The ``FETCHCONTENT_BASE_DIR``
   cache variable controls the point under which all content population
@@ -708,7 +682,7 @@ A number of cache variables can influence the behavior where details from a
 
   When this option is enabled, no attempt is made to download or update
   any content.  It is assumed that all content has already been populated in
-  a previous run or the source directories have been pointed at existing
+  a previous run, or the source directories have been pointed at existing
   contents the developer has provided manually (using options described
   further below).  When the developer knows that no changes have been made to
   any content details, turning this option ``ON`` can speed up
@@ -1057,16 +1031,7 @@ that all five projects are available on a company git server.  The
     GIT_TAG        7d9a17ad2c962aa13e2fbb8043fb6b8a
   )
 
-  # This particular version of projD requires workarounds
-  FetchContent_GetProperties(projD)
-  if(NOT projd_POPULATED)
-    FetchContent_Populate(projD)
-
-    # Copy an additional/replacement file into the populated source
-    file(COPY someFile.c DESTINATION ${projd_SOURCE_DIR}/src)
-
-    add_subdirectory(${projd_SOURCE_DIR} ${projd_BINARY_DIR})
-  endif()
+  FetchContent_MakeAvailable(projD)
 
 A few key points should be noted in the above:
 
@@ -1078,15 +1043,20 @@ A few key points should be noted in the above:
   it is up to the higher level project to ensure that the details it does
   define still make sense for the child projects.
 - In the ``projA`` call to :command:`FetchContent_MakeAvailable`, ``projD``
-  is listed ahead of ``projB`` and ``projC`` to ensure that ``projA`` is in
-  control of how ``projD`` is populated.
+  is listed ahead of ``projB`` and ``projC``, so it will be populated before
+  either ``projB`` or ``projC``. It isn't required for ``projA`` to do this,
+  doing so ensures that ``projA`` fully controls the environment in which
+  ``projD`` is brought into the build (directory properties are particularly
+  relevant).
 - While ``projA`` defines content details for ``projE``, it does not need
   to explicitly call ``FetchContent_MakeAvailable(projE)`` or
   ``FetchContent_Populate(projD)`` itself.  Instead, it leaves that to the
   child ``projB``.  For higher level projects, it is often enough to just
   define the override content details and leave the actual population to the
   child projects.  This saves repeating the same thing at each level of the
-  project hierarchy unnecessarily.
+  project hierarchy unnecessarily, but it should only be done if directory
+  properties set by dependencies are not expected to influence the population
+  of the shared dependency (``projE`` in this case).
 
 Populating Content Without Adding It To The Build
 """""""""""""""""""""""""""""""""""""""""""""""""
@@ -1129,9 +1099,9 @@ Populating Content In CMake Script Mode
 """""""""""""""""""""""""""""""""""""""
 
 This last example demonstrates how one might download and unpack a
-firmware tarball using CMake's :manual:`script mode <cmake(1)>`.  The call to
-:command:`FetchContent_Populate` specifies all the content details and the
-unpacked firmware will be placed in a ``firmware`` directory below the
+firmware tarball using CMake's :ref:`script mode <Script Processing Mode>`.
+The call to :command:`FetchContent_Populate` specifies all the content details
+and the unpacked firmware will be placed in a ``firmware`` directory below the
 current working directory.
 
 .. code-block:: cmake
@@ -1943,6 +1913,24 @@ function(FetchContent_Populate contentName)
   endif()
 
   if(ARGC EQUAL 1)
+    cmake_policy(GET CMP0169 cmp0169
+      PARENT_SCOPE # undocumented, do not use outside of CMake
+    )
+    if(NOT cmp0169 STREQUAL "OLD")
+      string(CONCAT msg
+        "Calling FetchContent_Populate(${contentName}) is deprecated, call "
+        "FetchContent_MakeAvailable(${contentName}) instead. "
+        "Policy CMP0169 can be set to OLD to allow "
+        "FetchContent_Populate(${contentName}) to be called directly for now, "
+        "but the ability to call it with declared details will be removed "
+        "completely in a future version."
+      )
+      if(cmp0169 STREQUAL "NEW")
+        message(FATAL_ERROR "${msg}")
+      else()
+        message(AUTHOR_WARNING "${msg}")
+      endif()
+    endif()
     set(__doDirectArgs)
   else()
     cmake_policy(GET CMP0168 cmp0168
@@ -1955,6 +1943,26 @@ function(FetchContent_Populate contentName)
     endif()
   endif()
 
+  cmake_parse_arguments(PARSE_ARGV 0 __arg "" "" "")
+  set(__argsQuoted)
+  foreach(__item IN LISTS __arg_UNPARSED_ARGUMENTS __doDirectArgs)
+    string(APPEND __argsQuoted " [==[${__item}]==]")
+  endforeach()
+
+  cmake_language(EVAL CODE "__FetchContent_Populate(${__argsQuoted})")
+
+  string(TOLOWER ${contentName} contentNameLower)
+  foreach(var IN ITEMS SOURCE_DIR BINARY_DIR POPULATED)
+    set(var "${contentNameLower}_${var}")
+    if(DEFINED ${var})
+      set(${var} "${${var}}" PARENT_SCOPE)
+    endif()
+  endforeach()
+
+endfunction()
+
+function(__FetchContent_Populate contentName)
+
   string(TOLOWER ${contentName} contentNameLower)
 
   if(ARGN)
@@ -1966,7 +1974,6 @@ function(FetchContent_Populate contentName)
       SOURCE_DIR   "${CMAKE_CURRENT_BINARY_DIR}/${contentNameLower}-src"
       BINARY_DIR   "${CMAKE_CURRENT_BINARY_DIR}/${contentNameLower}-build"
       ${ARGN}  # Could override any of the above ..._DIR variables
-      ${__doDirectArgs}
     )
 
     # Pass source and binary dir variables back to the caller
@@ -2313,7 +2320,7 @@ macro(FetchContent_MakeAvailable)
 
     FetchContent_GetProperties(${__cmake_contentName})
     if(NOT ${__cmake_contentNameLower}_POPULATED)
-      FetchContent_Populate(${__cmake_contentName})
+      __FetchContent_Populate(${__cmake_contentName})
       __FetchContent_setupFindPackageRedirection(${__cmake_contentName})
 
       # Only try to call add_subdirectory() if the populated content

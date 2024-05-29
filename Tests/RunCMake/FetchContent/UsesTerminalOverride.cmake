@@ -1,3 +1,5 @@
+cmake_policy(SET CMP0169 OLD)
+
 include(FetchContent)
 
 set(FETCHCONTENT_QUIET NO)

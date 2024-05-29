@@ -1,3 +1,5 @@
+cmake_policy(SET CMP0169 OLD)
+
 include(FetchContent)
 
 set(CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY AAAA)

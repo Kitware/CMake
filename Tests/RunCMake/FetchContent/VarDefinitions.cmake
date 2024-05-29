@@ -3,6 +3,8 @@ unset(FETCHCONTENT_UPDATES_DISCONNECTED CACHE)
 unset(FETCHCONTENT_QUIET CACHE)
 unset(FETCHCONTENT_BASE_DIR CACHE)
 
+cmake_policy(SET CMP0169 OLD)
+
 include(FetchContent)
 
 # Each of the cache entries should be defined and have the
