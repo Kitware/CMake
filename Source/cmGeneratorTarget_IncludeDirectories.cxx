@@ -114,7 +114,10 @@ void AddLangSpecificImplicitIncludeDirectories(
           auto* lg = dependency->GetLocalGenerator();
           EvaluatedTargetPropertyEntry entry{ library, library.Backtrace };
 
-          if (cmValue val = dependency->GetProperty(propertyName)) {
+          if (lang == "Swift") {
+            entry.Values.emplace_back(
+              dependency->GetSwiftModuleDirectory(config));
+          } else if (cmValue val = dependency->GetProperty(propertyName)) {
             entry.Values.emplace_back(*val);
           } else {
             if (mode == IncludeDirectoryFallBack::BINARY) {

@@ -11,13 +11,13 @@ set(expected_compile_commands
   "directory": ".*(/Tests/RunCMake/Swift/CompileCommands-build|\\\\Tests\\\\RunCMake\\\\Swift\\\\CompileCommands-build)",
   "command": ".*swiftc .* (\\")?.*(/Tests/RunCMake/Swift/E.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\E.swift)(\\")? (\\")?.*(/Tests/RunCMake/Swift/L.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\L.swift)(\\")?",
   "file": ".*(/Tests/RunCMake/Swift/E.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\E.swift)",
-  "output": "CMakeFiles/CompileCommandLib.dir/E.swift.o|CMakeFiles\\\\CompileCommandLib.dir\\\\E.swift.obj"
+  "output": "CMakeFiles/CompileCommandLib.dir/(Debug(/|\\))?E.swift.o|CMakeFiles\\\\CompileCommandLib.dir\\\\E.swift.obj"
 },
 {
   "directory": ".*(/Tests/RunCMake/Swift/CompileCommands-build|\\\\Tests\\\\RunCMake\\\\Swift\\\\CompileCommands-build)",
   "command": ".*swiftc .* (\\")?.*(/Tests/RunCMake/Swift/E.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\E.swift)(\\")? (\\")?.*(/Tests/RunCMake/Swift/L.swift|\\\\Tests\\\\RunCMake\\\\Swift\\\\L.swift)(\\")?",
   "file": ".*/Tests/RunCMake/Swift/L.swift",
-  "output": "CMakeFiles/CompileCommandLib.dir/L.swift.o|CMakeFiles\\\\CompileCommandLib.dir\\\\L.swift.obj"
+  "output": "CMakeFiles/CompileCommandLib.dir/(Debug(/|\\))?L.swift.o|CMakeFiles\\\\CompileCommandLib.dir\\\\L.swift.obj"
 }
 ]$]==]
 )

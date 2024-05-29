@@ -5501,3 +5501,45 @@ void cmGeneratorTarget::BuildFileSetInfoCache(std::string const& config) const
 
   per_config.BuiltFileSetCache = true;
 }
+
+std::string cmGeneratorTarget::GetSwiftModuleName() const
+{
+  return this->GetPropertyOrDefault("Swift_MODULE_NAME", this->GetName());
+}
+
+std::string cmGeneratorTarget::GetSwiftModuleFileName() const
+{
+  return this->GetPropertyOrDefault(
+    "Swift_MODULE", this->GetSwiftModuleName() + ".swiftmodule");
+}
+
+std::string cmGeneratorTarget::GetSwiftModuleDirectory(
+  std::string const& config) const
+{
+  std::string moduleDirectory =
+    this->GetPropertyOrDefault("Swift_MODULE_DIRECTORY", "");
+
+  if (moduleDirectory.empty()) {
+    moduleDirectory = this->LocalGenerator->GetCurrentBinaryDirectory();
+    this->LocalGenerator->GetGlobalGenerator()->AppendDirectoryForConfig(
+      "/", config, "", moduleDirectory);
+  }
+
+  return moduleDirectory;
+}
+
+std::string cmGeneratorTarget::GetSwiftModulePath(
+  std::string const& config) const
+{
+  return this->GetSwiftModuleDirectory(config) + "/" +
+    this->GetSwiftModuleFileName();
+}
+
+std::string cmGeneratorTarget::GetPropertyOrDefault(
+  std::string const& property, std::string defaultValue) const
+{
+  if (cmValue name = this->GetProperty(property)) {
+    return *name;
+  }
+  return defaultValue;
+}

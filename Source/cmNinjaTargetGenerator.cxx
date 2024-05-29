@@ -1947,15 +1947,6 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
     return;
   }
 
-  auto getTargetPropertyOrDefault =
-    [](cmGeneratorTarget const& target, std::string const& property,
-       std::string defaultValue) -> std::string {
-    if (cmValue value = target.GetProperty(property)) {
-      return *value;
-    }
-    return defaultValue;
-  };
-
   std::string const language = "Swift";
   std::string const objectDir = this->ConvertToNinjaPath(
     cmStrCat(this->GeneratorTarget->GetSupportDirectory(),
@@ -1970,15 +1961,9 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
   // changes to input files (e.g. addition of a comment).
   vars.emplace("restat", "1");
 
-  std::string const moduleName =
-    getTargetPropertyOrDefault(target, "Swift_MODULE_NAME", target.GetName());
-  std::string const moduleDirectory = getTargetPropertyOrDefault(
-    target, "Swift_MODULE_DIRECTORY",
-    target.LocalGenerator->GetCurrentBinaryDirectory());
-  std::string const moduleFilename = getTargetPropertyOrDefault(
-    target, "Swift_MODULE", cmStrCat(moduleName, ".swiftmodule"));
+  std::string const moduleName = target.GetSwiftModuleName();
   std::string const moduleFilepath =
-    this->ConvertToNinjaPath(cmStrCat(moduleDirectory, '/', moduleFilename));
+    this->ConvertToNinjaPath(target.GetSwiftModulePath(config));
 
   vars.emplace("description",
                cmStrCat("Building Swift Module '", moduleName, "' with ",
@@ -2096,15 +2081,8 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
     // If the dependency emits a swiftmodule, add a dependency edge on that
     // swiftmodule to the ninja build graph.
     if (isImportableTarget(*dep)) {
-      std::string const depModuleName =
-        getTargetPropertyOrDefault(*dep, "Swift_MODULE_NAME", dep->GetName());
-      std::string const depModuleDir = getTargetPropertyOrDefault(
-        *dep, "Swift_MODULE_DIRECTORY",
-        dep->LocalGenerator->GetCurrentBinaryDirectory());
-      std::string const depModuleFilename = getTargetPropertyOrDefault(
-        *dep, "Swift_MODULE", cmStrCat(depModuleName, ".swiftmodule"));
-      std::string const depModuleFilepath = this->ConvertToNinjaPath(
-        cmStrCat(depModuleDir, '/', depModuleFilename));
+      std::string const depModuleFilepath =
+        this->ConvertToNinjaPath(dep->GetSwiftModulePath(config));
       objBuild.ImplicitDeps.push_back(depModuleFilepath);
     }
   }
