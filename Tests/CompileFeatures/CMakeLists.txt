@@ -15,7 +15,13 @@ if(CMake_TEST_CUDA)
   set(std_CUDA 03 11 14 17 20 23 26)
 endif()
 
-foreach(lang C CXX CUDA)
+if(CMake_TEST_HIP)
+  enable_language(HIP)
+  set(ext_HIP hip)
+  set(std_HIP 98 11 14 17 20 23 26)
+endif()
+
+foreach(lang C CXX CUDA HIP)
   foreach(std IN LISTS std_${lang})
     string(TOLOWER "${lang}_std_${std}" feature)
     if("${std}" IN_LIST CMake_TEST_${lang}_STANDARDS
