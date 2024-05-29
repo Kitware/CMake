@@ -139,6 +139,7 @@ const struct Curl_handler Curl_handler_scp = {
   ssh_getsock,                          /* perform_getsock */
   scp_disconnect,                       /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ssh_attach,                           /* attach */
   PORT_SSH,                             /* defport */
@@ -168,6 +169,7 @@ const struct Curl_handler Curl_handler_sftp = {
   ssh_getsock,                          /* perform_getsock */
   sftp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ssh_attach,                           /* attach */
   PORT_SSH,                             /* defport */
@@ -201,7 +203,8 @@ kbd_callback(const char *name, int name_len, const char *instruction,
   if(num_prompts == 1) {
     struct connectdata *conn = data->conn;
     responses[0].text = strdup(conn->passwd);
-    responses[0].length = curlx_uztoui(strlen(conn->passwd));
+    responses[0].length =
+      responses[0].text == NULL ? 0 : curlx_uztoui(strlen(conn->passwd));
   }
   (void)prompts;
 } /* kbd_callback */
@@ -1083,6 +1086,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           /* To ponder about: should really the lib be messing about with the
              HOME environment variable etc? */
           char *home = curl_getenv("HOME");
+          struct_stat sbuf;
 
           /* If no private key file is specified, try some common paths. */
           if(home) {
@@ -1090,12 +1094,12 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
             sshc->rsa = aprintf("%s/.ssh/id_rsa", home);
             if(!sshc->rsa)
               out_of_memory = TRUE;
-            else if(access(sshc->rsa, R_OK) != 0) {
+            else if(stat(sshc->rsa, &sbuf)) {
               Curl_safefree(sshc->rsa);
               sshc->rsa = aprintf("%s/.ssh/id_dsa", home);
               if(!sshc->rsa)
                 out_of_memory = TRUE;
-              else if(access(sshc->rsa, R_OK) != 0) {
+              else if(stat(sshc->rsa, &sbuf)) {
                 Curl_safefree(sshc->rsa);
               }
             }
@@ -1104,10 +1108,10 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           if(!out_of_memory && !sshc->rsa) {
             /* Nothing found; try the current dir. */
             sshc->rsa = strdup("id_rsa");
-            if(sshc->rsa && access(sshc->rsa, R_OK) != 0) {
+            if(sshc->rsa && stat(sshc->rsa, &sbuf)) {
               Curl_safefree(sshc->rsa);
               sshc->rsa = strdup("id_dsa");
-              if(sshc->rsa && access(sshc->rsa, R_OK) != 0) {
+              if(sshc->rsa && stat(sshc->rsa, &sbuf)) {
                 Curl_safefree(sshc->rsa);
                 /* Out of guesses. Set to the empty string to avoid
                  * surprising info messages. */
@@ -3282,14 +3286,12 @@ static CURLcode ssh_connect(struct Curl_easy *data, bool *done)
     return CURLE_FAILED_INIT;
   }
 
-#ifdef HAVE_LIBSSH2_VERSION
   /* Set the packet read timeout if the libssh2 version supports it */
 #if LIBSSH2_VERSION_NUM >= 0x010B00
   if(data->set.server_response_timeout > 0) {
     libssh2_session_set_read_timeout(sshc->ssh_session,
                                      data->set.server_response_timeout / 1000);
   }
-#endif
 #endif
 
 #ifndef CURL_DISABLE_PROXY

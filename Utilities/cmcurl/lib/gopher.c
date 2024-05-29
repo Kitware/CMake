@@ -62,7 +62,7 @@ static CURLcode gopher_connecting(struct Curl_easy *data, bool *done);
  */
 
 const struct Curl_handler Curl_handler_gopher = {
-  "GOPHER",                             /* scheme */
+  "gopher",                             /* scheme */
   ZERO_NULL,                            /* setup_connection */
   gopher_do,                            /* do_it */
   ZERO_NULL,                            /* done */
@@ -76,6 +76,7 @@ const struct Curl_handler Curl_handler_gopher = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_GOPHER,                          /* defport */
@@ -86,7 +87,7 @@ const struct Curl_handler Curl_handler_gopher = {
 
 #ifdef USE_SSL
 const struct Curl_handler Curl_handler_gophers = {
-  "GOPHERS",                            /* scheme */
+  "gophers",                            /* scheme */
   ZERO_NULL,                            /* setup_connection */
   gopher_do,                            /* do_it */
   ZERO_NULL,                            /* done */
@@ -100,6 +101,7 @@ const struct Curl_handler Curl_handler_gophers = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_GOPHER,                          /* defport */

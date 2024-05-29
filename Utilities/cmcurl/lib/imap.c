@@ -117,7 +117,7 @@ static CURLcode imap_get_message(struct Curl_easy *data, struct bufref *out);
  */
 
 const struct Curl_handler Curl_handler_imap = {
-  "IMAP",                           /* scheme */
+  "imap",                           /* scheme */
   imap_setup_connection,            /* setup_connection */
   imap_do,                          /* do_it */
   imap_done,                        /* done */
@@ -131,6 +131,7 @@ const struct Curl_handler Curl_handler_imap = {
   ZERO_NULL,                        /* perform_getsock */
   imap_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* write_resp */
+  ZERO_NULL,                        /* write_resp_hd */
   ZERO_NULL,                        /* connection_check */
   ZERO_NULL,                        /* attach connection */
   PORT_IMAP,                        /* defport */
@@ -146,7 +147,7 @@ const struct Curl_handler Curl_handler_imap = {
  */
 
 const struct Curl_handler Curl_handler_imaps = {
-  "IMAPS",                          /* scheme */
+  "imaps",                          /* scheme */
   imap_setup_connection,            /* setup_connection */
   imap_do,                          /* do_it */
   imap_done,                        /* done */
@@ -160,6 +161,7 @@ const struct Curl_handler Curl_handler_imaps = {
   ZERO_NULL,                        /* perform_getsock */
   imap_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* write_resp */
+  ZERO_NULL,                        /* write_resp_hd */
   ZERO_NULL,                        /* connection_check */
   ZERO_NULL,                        /* attach connection */
   PORT_IMAPS,                       /* defport */
