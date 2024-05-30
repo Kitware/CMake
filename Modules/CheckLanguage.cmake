@@ -85,6 +85,7 @@ macro(check_language lang)
 
     set(_cl_content
       "cmake_minimum_required(VERSION ${CMAKE_VERSION})
+set(CMAKE_MODULE_PATH \"${CMAKE_MODULE_PATH}\")
 project(Check${lang} ${lang})
 file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
   \"set(CMAKE_${lang}_COMPILER \\\"\${CMAKE_${lang}_COMPILER}\\\")\\n\"
