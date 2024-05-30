@@ -168,7 +168,7 @@ static CURLcode tftp_translate_code(tftp_error_t error);
  */
 
 const struct Curl_handler Curl_handler_tftp = {
-  "TFTP",                               /* scheme */
+  "tftp",                               /* scheme */
   tftp_setup_connection,                /* setup_connection */
   tftp_do,                              /* do_it */
   tftp_done,                            /* done */
@@ -182,6 +182,7 @@ const struct Curl_handler Curl_handler_tftp = {
   ZERO_NULL,                            /* perform_getsock */
   tftp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_TFTP,                            /* defport */
@@ -1203,7 +1204,7 @@ static timediff_t tftp_state_timeout(struct Curl_easy *data,
     state->state = TFTP_STATE_FIN;
     return 0;
   }
-  time(&current);
+  current = time(NULL);
   if(current > state->rx_time + state->retry_time) {
     if(event)
       *event = TFTP_EVENT_TIMEOUT;

@@ -173,7 +173,7 @@ struct TELNET {
  */
 
 const struct Curl_handler Curl_handler_telnet = {
-  "TELNET",                             /* scheme */
+  "telnet",                             /* scheme */
   ZERO_NULL,                            /* setup_connection */
   telnet_do,                            /* do_it */
   telnet_done,                          /* done */
@@ -187,6 +187,7 @@ const struct Curl_handler Curl_handler_telnet = {
   ZERO_NULL,                            /* perform_getsock */
   ZERO_NULL,                            /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_TELNET,                          /* defport */
@@ -1534,6 +1535,11 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
     pfd[1].events = POLLIN;
     poll_cnt = 2;
     interval_ms = 1 * 1000;
+    if(pfd[1].fd < 0) {
+      failf(data, "cannot read input");
+      result = CURLE_RECV_ERROR;
+      keepon = FALSE;
+    }
   }
 
   while(keepon) {

@@ -38,15 +38,16 @@ void Curl_attach_connection(struct Curl_easy *data,
 void Curl_detach_connection(struct Curl_easy *data);
 bool Curl_multiplex_wanted(const struct Curl_multi *multi);
 void Curl_set_in_callback(struct Curl_easy *data, bool value);
-bool Curl_is_in_callback(struct Curl_easy *easy);
+bool Curl_is_in_callback(struct Curl_easy *data);
 CURLcode Curl_preconnect(struct Curl_easy *data);
 
 void Curl_multi_connchanged(struct Curl_multi *multi);
 
 /* Internal version of curl_multi_init() accepts size parameters for the
    socket, connection and dns hashes */
-struct Curl_multi *Curl_multi_handle(int hashsize, int chashsize,
-                                     int dnssize);
+struct Curl_multi *Curl_multi_handle(size_t hashsize,
+                                     size_t chashsize,
+                                     size_t dnssize);
 
 /* the write bits start at bit 16 for the *getsock() bitmap */
 #define GETSOCK_WRITEBITSTART 16
