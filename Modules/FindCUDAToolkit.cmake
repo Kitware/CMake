@@ -22,7 +22,11 @@ The CUDA Toolkit search behavior uses the following order:
 1. If the ``CUDA`` language has been enabled we will use the directory
    containing the compiler as the first search location for ``nvcc``.
 
-2. If the ``CUDAToolkit_ROOT`` cmake configuration variable (e.g.,
+2. If the variable :variable:`CMAKE_CUDA_COMPILER <CMAKE_<LANG>_COMPILER>` or
+   the environment variable :envvar:`CUDACXX` is defined, it will be used
+   as the path to the ``nvcc`` executable.
+
+3. If the ``CUDAToolkit_ROOT`` cmake configuration variable (e.g.,
    ``-DCUDAToolkit_ROOT=/some/path``) *or* environment variable is defined, it
    will be searched.  If both an environment variable **and** a
    configuration variable are specified, the *configuration* variable takes
@@ -32,19 +36,19 @@ The CUDA Toolkit search behavior uses the following order:
    the appropriate ``version.txt`` or ``version.json`` file can be found
    underneath the specified directory.
 
-3. If the CUDA_PATH environment variable is defined, it will be searched
+4. If the CUDA_PATH environment variable is defined, it will be searched
    for ``nvcc``.
 
-4. The user's path is searched for ``nvcc`` using :command:`find_program`.  If
+5. The user's path is searched for ``nvcc`` using :command:`find_program`.  If
    this is found, no subsequent search attempts are performed.  Users are
    responsible for ensuring that the first ``nvcc`` to show up in the path is
    the desired path in the event that multiple CUDA Toolkits are installed.
 
-5. On Unix systems, if the symbolic link ``/usr/local/cuda`` exists, this is
+6. On Unix systems, if the symbolic link ``/usr/local/cuda`` exists, this is
    used.  No subsequent search attempts are performed.  No default symbolic link
    location exists for the Windows platform.
 
-6. The platform specific default install locations are searched.  If exactly one
+7. The platform specific default install locations are searched.  If exactly one
    candidate is found, this is used.  The default CUDA Toolkit install locations
    searched are:
 
@@ -628,9 +632,27 @@ if(CMAKE_CUDA_COMPILER_TOOLKIT_ROOT)
   endif()
 else()
   function(_CUDAToolkit_find_root_dir )
-    cmake_parse_arguments(arg "" "" "SEARCH_PATHS;FIND_FLAGS" ${ARGN})
+    cmake_parse_arguments(arg "COMPILER_PATHS" "" "SEARCH_PATHS;FIND_FLAGS" ${ARGN})
 
     if(NOT CUDAToolkit_BIN_DIR)
+      if(arg_COMPILER_PATHS)
+        # need to find parent dir, since this could clang and not nvcc
+        if(EXISTS "${CMAKE_CUDA_COMPILER}")
+          get_filename_component(possible_nvcc_path "${CMAKE_CUDA_COMPILER}" PROGRAM PROGRAM_ARGS CUDAToolkit_compiler_args)
+          get_filename_component(possible_nvcc_path "${possible_nvcc_path}" DIRECTORY)
+        elseif(EXISTS "$ENV{CUDACXX}")
+          get_filename_component(possible_nvcc_path "$ENV{CUDACXX}" PROGRAM PROGRAM_ARGS CUDAToolkit_compiler_args)
+          get_filename_component(possible_nvcc_path "${possible_nvcc_path}" DIRECTORY)
+        endif()
+        if(possible_nvcc_path)
+          find_program(CUDAToolkit_NVCC_EXECUTABLE
+            NAMES nvcc nvcc.exe
+            NO_DEFAULT_PATH
+            PATHS ${possible_nvcc_path}
+          )
+        endif()
+      endif()
+
       if(NOT CUDAToolkit_SENTINEL_FILE)
         find_program(CUDAToolkit_NVCC_EXECUTABLE
           NAMES nvcc nvcc.exe
@@ -775,6 +797,7 @@ else()
   endif()
 
   # Try user provided path
+  _CUDAToolkit_find_root_dir(COMPILER_PATHS)
   if(NOT CUDAToolkit_ROOT_DIR AND CUDAToolkit_ROOT)
     _CUDAToolkit_find_root_dir(SEARCH_PATHS "${CUDAToolkit_ROOT}" FIND_FLAGS PATH_SUFFIXES bin NO_DEFAULT_PATH)
   endif()
