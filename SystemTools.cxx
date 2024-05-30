@@ -1356,6 +1356,75 @@ bool SystemTools::DeleteRegistryValue(const std::string&, KeyWOW64)
 }
 #endif
 
+#ifdef _WIN32
+SystemTools::WindowsFileId::WindowsFileId(unsigned long volumeSerialNumber,
+                                          unsigned long fileIndexHigh,
+                                          unsigned long fileIndexLow)
+  : m_volumeSerialNumber(volumeSerialNumber)
+  , m_fileIndexHigh(fileIndexHigh)
+  , m_fileIndexLow(fileIndexLow)
+{
+}
+
+bool SystemTools::WindowsFileId::operator==(const WindowsFileId& o) const
+{
+  return (m_volumeSerialNumber == o.m_volumeSerialNumber &&
+          m_fileIndexHigh == o.m_fileIndexHigh &&
+          m_fileIndexLow == o.m_fileIndexLow);
+}
+
+bool SystemTools::WindowsFileId::operator!=(const WindowsFileId& o) const
+{
+  return !(*this == o);
+}
+#else
+SystemTools::UnixFileId::UnixFileId(dev_t volumeSerialNumber,
+                                    ino_t fileSerialNumber, off_t fileSize)
+  : m_volumeSerialNumber(volumeSerialNumber)
+  , m_fileSerialNumber(fileSerialNumber)
+  , m_fileSize(fileSize)
+{
+}
+
+bool SystemTools::UnixFileId::operator==(const UnixFileId& o) const
+{
+  return (m_volumeSerialNumber == o.m_volumeSerialNumber &&
+          m_fileSerialNumber == o.m_fileSerialNumber &&
+          m_fileSize == o.m_fileSize);
+}
+
+bool SystemTools::UnixFileId::operator!=(const UnixFileId& o) const
+{
+  return !(*this == o);
+}
+#endif
+
+bool SystemTools::GetFileId(const std::string& file, FileId& id)
+{
+#ifdef _WIN32
+  HANDLE hFile =
+    CreateFileW(Encoding::ToWide(file).c_str(), GENERIC_READ, FILE_SHARE_READ,
+                nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
+  if (hFile != INVALID_HANDLE_VALUE) {
+    BY_HANDLE_FILE_INFORMATION fiBuf;
+    GetFileInformationByHandle(hFile, &fiBuf);
+    CloseHandle(hFile);
+    id = FileId(fiBuf.dwVolumeSerialNumber, fiBuf.nFileIndexHigh,
+                fiBuf.nFileIndexLow);
+    return true;
+  } else {
+    return false;
+  }
+#else
+  struct stat fileStat;
+  if (stat(file.c_str(), &fileStat) == 0) {
+    id = FileId(fileStat.st_dev, fileStat.st_ino, fileStat.st_size);
+    return true;
+  }
+  return false;
+#endif
+}
+
 bool SystemTools::SameFile(const std::string& file1, const std::string& file2)
 {
 #ifdef _WIN32
