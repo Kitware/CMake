@@ -5,6 +5,10 @@
 # which supports CPack components.
 
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+# Make sure to properly escape RPATH/RUNPATH entries.
+if (POLICY CMP0095)
+  cmake_policy(SET CMP0095 NEW)
+endif()
 project(CPackComponentsDEB VERSION 1.0.3)
 
 # Use GNUInstallDirs in order to enforce lib64 if needed
@@ -29,6 +33,14 @@ if (CPackDEBConfiguration MATCHES "shlibdeps-with-private-lib")
   target_link_libraries(mylibapp3 myprivatelib)
 endif()
 
+if (CPackDEBConfiguration MATCHES "shlibdeps-with-ORIGIN-RPATH")
+  add_subdirectory("subdir")
+  add_executable(mylibapp4 mylibapp.cpp)
+  target_compile_definitions(mylibapp4 PRIVATE -DSHLIBDEPS_OTHER)
+  target_link_libraries(mylibapp4 PUBLIC myotherlib)
+  set_target_properties(mylibapp4 PROPERTIES INSTALL_RPATH "\${ORIGIN};$ORIGIN/../lib")
+endif()
+
 # Create installation targets. Note that we put each kind of file
 # into a different component via COMPONENT. These components will
 # be used to create the installation components.
@@ -39,17 +51,28 @@ install(TARGETS mylib
 
 install(TARGETS mylibapp
   RUNTIME
-  DESTINATION bin
+  DESTINATION ${CMAKE_INSTALL_BINDIR}
   COMPONENT applications)
 
 install(FILES mylib.h
-        DESTINATION include
-        COMPONENT headers)
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  COMPONENT headers)
 
 if (CPackDEBConfiguration MATCHES "shlibdeps-with-private-lib")
   install(TARGETS mylibapp3
     RUNTIME
-    DESTINATION bin
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
+    COMPONENT applications)
+endif()
+
+if (CPackDEBConfiguration MATCHES "shlibdeps-with-ORIGIN-RPATH")
+  install(TARGETS myotherlib
+    LIBRARY
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    COMPONENT libraries)
+  install(TARGETS mylibapp4
+    RUNTIME
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
     COMPONENT applications)
 endif()
 

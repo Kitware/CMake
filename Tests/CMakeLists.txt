@@ -1199,13 +1199,17 @@ if(BUILD_TESTING)
         else()
           unset(SHLIBDEPS_EXECUTABLE_VERSION)
         endif()
+        # Check if distro has symbols or shlibs data
+        file(GLOB SHLIBS_FILES_EXIST "/var/lib/dpkg/info/*.shlibs" "/var/lib/dpkg/info/*.symbols")
         if(NOT SHLIBDEPS_EXECUTABLE_VERSION VERSION_LESS 1.19 OR
           (NOT SHLIBDEPS_EXECUTABLE_VERSION VERSION_LESS 1.17 AND NOT CMAKE_BINARY_DIR MATCHES ".*[ ].*"))
             list(APPEND DEB_CONFIGURATIONS_TO_TEST "shlibdeps-with-private-lib-failure"
-                                                   "shlibdeps-with-private-lib-success")
+                                                   "shlibdeps-with-private-lib-success"
+                                                   "shlibdeps-with-ORIGIN-RPATH-failure")
+            if(SHLIBS_FILES_EXIST)
+                list(APPEND DEB_CONFIGURATIONS_TO_TEST "shlibdeps-with-ORIGIN-RPATH-success")
+            endif()
         endif()
-        # Check if distro has symbols or shlibs data
-        file(GLOB SHLIBS_FILES_EXIST "/var/lib/dpkg/info/*.shlibs" "/var/lib/dpkg/info/*.symbols")
         if(SHLIBS_FILES_EXIST)
           list(APPEND DEB_CONFIGURATIONS_TO_TEST "components-depend2")
         endif()
