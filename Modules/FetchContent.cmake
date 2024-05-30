@@ -484,7 +484,8 @@ Commands
   - ``TEST_COMMAND``
 
   With this form, the :variable:`FETCHCONTENT_FULLY_DISCONNECTED` and
-  :variable:`FETCHCONTENT_UPDATES_DISCONNECTED` variables are ignored.
+  :variable:`FETCHCONTENT_UPDATES_DISCONNECTED` variables and policy
+  :policy:`CMP0170` are ignored.
 
   When this form of ``FetchContent_Populate()`` returns, the following
   variables will be set in the scope of the caller:
@@ -698,6 +699,11 @@ A number of cache variables can influence the behavior where details from a
     If you want to prevent network access even on the first run, use a
     :ref:`dependency provider <dependency_providers>` and populate the
     dependency from local content instead.
+
+  .. versionchanged:: 3.30
+    The constraint that the source directory has already been populated when
+    ``FETCHCONTENT_FULLY_DISCONNECTED`` is true is now enforced.
+    See policy :policy:`CMP0170`.
 
 .. variable:: FETCHCONTENT_UPDATES_DISCONNECTED
 
@@ -1943,8 +1949,12 @@ function(FetchContent_Populate contentName)
     endif()
   endif()
 
-  cmake_parse_arguments(PARSE_ARGV 0 __arg "" "" "")
-  set(__argsQuoted)
+  cmake_policy(GET CMP0170 cmp0170
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+  )
+
+  cmake_parse_arguments(PARSE_ARGV 1 __arg "" "" "")
+  set(__argsQuoted "[==[${contentName}]==] [==[${cmp0170}]==]")
   foreach(__item IN LISTS __arg_UNPARSED_ARGUMENTS __doDirectArgs)
     string(APPEND __argsQuoted " [==[${__item}]==]")
   endforeach()
@@ -1961,7 +1971,7 @@ function(FetchContent_Populate contentName)
 
 endfunction()
 
-function(__FetchContent_Populate contentName)
+function(__FetchContent_Populate contentName cmp0170)
 
   string(TOLOWER ${contentName} contentNameLower)
 
@@ -2052,6 +2062,38 @@ function(__FetchContent_Populate contentName)
       set(${contentNameLower}_SOURCE_DIR ${savedDetails_SOURCE_DIR})
     else()
       set(${contentNameLower}_SOURCE_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-src")
+    endif()
+    if(NOT IS_ABSOLUTE "${${contentNameLower}_SOURCE_DIR}")
+      message(WARNING
+        "Relative source directory specified. This is not safe, as it depends "
+        "on the calling directory scope.\n"
+        "  ${${contentNameLower}_SOURCE_DIR}"
+      )
+      set(${contentNameLower}_SOURCE_DIR
+        "${CMAKE_CURRENT_BINARY_DIR}/${${contentNameLower}_SOURCE_DIR}"
+      )
+    endif()
+    if(NOT EXISTS "${${contentNameLower}_SOURCE_DIR}")
+      if(cmp0170 STREQUAL "")
+        set(cmp0170 WARN)
+      endif()
+      string(CONCAT msg
+        "FETCHCONTENT_FULLY_DISCONNECTED is set to true, which requires the "
+        "source directory for dependency ${contentName} to already be populated. "
+        "This generally means it must not be set to true the first time CMake "
+        "is run in a build directory. The following source directory should "
+        "already be populated, but it doesn't exist:\n"
+        "  ${${contentNameLower}_SOURCE_DIR}\n"
+        "Policy CMP0170 controls enforcement of this requirement."
+      )
+      if(cmp0170 STREQUAL "NEW")
+        message(FATAL_ERROR "${msg}")
+      elseif(NOT cmp0170 STREQUAL "OLD")
+        # Note that this is a user warning, not a project author warning.
+        # The user has set FETCHCONTENT_FULLY_DISCONNECTED in a scenario
+        # where that is not allowed.
+        message(WARNING "${msg}")
+      endif()
     endif()
 
     if(savedDetails_BINARY_DIR)
@@ -2320,7 +2362,11 @@ macro(FetchContent_MakeAvailable)
 
     FetchContent_GetProperties(${__cmake_contentName})
     if(NOT ${__cmake_contentNameLower}_POPULATED)
-      __FetchContent_Populate(${__cmake_contentName})
+      cmake_policy(GET CMP0170 __cmake_fc_cmp0170
+        PARENT_SCOPE # undocumented, do not use outside of CMake
+      )
+      __FetchContent_Populate(${__cmake_contentName} "${__cmake_fc_cmp0170}")
+      unset(__cmake_fc_cmp0170)
       __FetchContent_setupFindPackageRedirection(${__cmake_contentName})
 
       # Only try to call add_subdirectory() if the populated content

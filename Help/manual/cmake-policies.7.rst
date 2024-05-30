@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.30
 .. toctree::
    :maxdepth: 1
 
+   CMP0170: FETCHCONTENT_FULLY_DISCONNECTED requirements are enforced. </policy/CMP0170>
    CMP0169: FetchContent_Populate(depName) single-argument signature is deprecated. </policy/CMP0169>
    CMP0168: FetchContent implements steps directly instead of through a sub-build. </policy/CMP0168>
    CMP0167: The FindBoost module is removed. </policy/CMP0167>
