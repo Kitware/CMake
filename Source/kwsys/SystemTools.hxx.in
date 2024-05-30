@@ -617,6 +617,52 @@ public:
                                      std::string const& destination);
 
   /**
+   * Object encapsulating a unique identifier for a file
+   * or directory
+   */
+#ifdef _WIN32
+  class WindowsFileId
+  {
+  public:
+    WindowsFileId() = default;
+    WindowsFileId(unsigned long volumeSerialNumber,
+                  unsigned long fileIndexHigh, unsigned long fileIndexLow);
+
+    bool operator==(const WindowsFileId& o) const;
+    bool operator!=(const WindowsFileId& o) const;
+
+  private:
+    unsigned long m_volumeSerialNumber;
+    unsigned long m_fileIndexHigh;
+    unsigned long m_fileIndexLow;
+  };
+  using FileId = WindowsFileId;
+#else
+  class UnixFileId
+  {
+  public:
+    UnixFileId() = default;
+    UnixFileId(dev_t volumeSerialNumber, ino_t fileSerialNumber,
+               off_t fileSize);
+
+    bool operator==(const UnixFileId& o) const;
+    bool operator!=(const UnixFileId& o) const;
+
+  private:
+    dev_t m_volumeSerialNumber;
+    ino_t m_fileSerialNumber;
+    off_t m_fileSize;
+  };
+  using FileId = UnixFileId;
+#endif
+
+  /**
+   * Outputs a FileId for the given file or directory.
+   * Returns true on success, false on failure
+   */
+  static bool GetFileId(const std::string& file, FileId& id);
+
+  /**
    * Return true if the two files are the same file
    */
   static bool SameFile(const std::string& file1, const std::string& file2);
