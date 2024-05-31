@@ -61,10 +61,10 @@ drive testing and submit results to the `CMake CDash Page`_.  Anyone is
 welcome to provide testing machines in order to help keep support for their
 platforms working.
 
-See documentation on `CMake Testing Process`_ for more information.
+See documentation on `CMake Integration Testing`_ for more information.
 
 .. _`CMake CDash Page`: https://open.cdash.org/index.php?project=CMake
-.. _`CMake Testing Process`: Help/dev/testing.rst
+.. _`CMake Integration Testing`: Help/dev/integration-testing.rst
 
 License
 =======
