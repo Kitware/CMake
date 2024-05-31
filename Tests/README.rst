@@ -2,8 +2,9 @@ CMake Tests Directory
 *********************
 
 This directory contains the CMake test suite.
-See also the `CMake Source Code Guide`_.
+See also the `CMake Testing Guide`_ and the `CMake Source Code Guide`_.
 
+.. _`CMake Testing Guide`: ../Help/dev/testing.rst
 .. _`CMake Source Code Guide`: ../Help/dev/source.rst
 
 Many tests exist as immediate subdirectories, but some tests

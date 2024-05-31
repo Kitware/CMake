@@ -59,7 +59,11 @@ To build the documentation, install `Sphinx`_ and configure CMake with
 "man" builder.  Add ``-DSPHINX_EXECUTABLE=/path/to/sphinx-build`` if the
 tool is not found automatically.
 
+To run the test suite, run ``ctest`` in the CMake build directory after
+building.  See the `CMake Testing Guide`_ for details.
+
 .. _`Sphinx`: https://sphinx-doc.org
+.. _`CMake Testing Guide`: Help/dev/testing.rst
 
 Building CMake from Scratch
 ---------------------------

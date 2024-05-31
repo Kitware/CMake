@@ -4,7 +4,10 @@ CMake Integration Testing
 The following documents how to run integration testing builds.
 See documentation on `CMake Development`_ for more information.
 
+See the `CMake Testing Guide`_ for running the test suite locally.
+
 .. _`CMake Development`: README.rst
+.. _`CMake Testing Guide`: testing.rst
 
 CMake Dashboard Scripts
 =======================
