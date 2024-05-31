@@ -106,3 +106,5 @@ run_cmake_command(ScriptMode-direct
   -DCMP0168=NEW
   -P ${CMAKE_CURRENT_LIST_DIR}/ScriptMode.cmake
 )
+
+run_cmake(DisableSourceChanges)
