@@ -1240,6 +1240,17 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     }
   }
 
+  if (!this->SrcFileSignature &&
+      this->Makefile->GetState()->GetGlobalPropertyAsBool(
+        "PROPAGATE_TOP_LEVEL_INCLUDES_TO_TRY_COMPILE")) {
+    const std::string var = "CMAKE_PROJECT_TOP_LEVEL_INCLUDES";
+    if (cmValue val = this->Makefile->GetDefinition(var)) {
+      std::string flag = cmStrCat("-D", var, "=\'", *val, '\'');
+      arguments.CMakeFlags.emplace_back(std::move(flag));
+      cmakeVariables.emplace(var, *val);
+    }
+  }
+
   if (this->Makefile->GetState()->UseGhsMultiIDE()) {
     // Forward the GHS variables to the inner project cache.
     for (std::string const& var : ghs_platform_vars) {

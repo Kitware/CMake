@@ -47,6 +47,11 @@ below for the meaning of other options.
   :ref:`configure-log try_compile event <try_compile configure-log event>`
   if the ``NO_LOG`` option is not specified.
 
+.. versionadded:: 3.30
+  If the :prop_gbl:`PROPAGATE_TOP_LEVEL_INCLUDES_TO_TRY_COMPILE` global
+  property is set to true, :variable:`CMAKE_PROJECT_TOP_LEVEL_INCLUDES` is
+  propagated into the project's build configuration.
+
 This command supports an alternate signature for CMake older than 3.25.
 The signature above is recommended for clarity.
 
@@ -387,6 +392,12 @@ configuration:
   If :policy:`CMP0141` is set to ``NEW``, one can use
   :variable:`CMAKE_MSVC_DEBUG_INFORMATION_FORMAT` to specify the MSVC debug
   information format.
+
+.. versionadded:: 3.30
+  If the :prop_gbl:`PROPAGATE_TOP_LEVEL_INCLUDES_TO_TRY_COMPILE` global
+  property is set to true, :variable:`CMAKE_PROJECT_TOP_LEVEL_INCLUDES` is
+  propagated into the test project's build configuration when using the
+  :ref:`whole-project signature <Try Compiling Whole Projects>`.
 
 See Also
 ^^^^^^^^
