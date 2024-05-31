@@ -112,6 +112,15 @@ target_link_libraries(empty3 LINK_PUBLIC empty2 empty4)
 add_library(empty5 empty.cpp)
 target_include_directories(empty5 PRIVATE /empty5/private1 /empty5/private2)
 
+add_library(interface1 INTERFACE)
+target_sources(interface1 INTERFACE foo.c bar.cpp)
+
+set(interface1Sources $<TARGET_PROPERTY:interface1,INTERFACE_SOURCES>)
+set(interface1MergeSources $<LIST:APPEND,$<LIST:FILTER,${interface1Sources},INCLUDE,.*\\.c$>,$<LIST:FILTER,${interface1Sources},EXCLUDE,.*\\.c$>>)
+
+add_library(interface2 INTERFACE)
+target_sources(interface2 INTERFACE ${interface1MergeSources})
+
 add_custom_target(check-part2 ALL
   COMMAND ${msys2_no_conv} ${CMAKE_COMMAND}
     -Dtest_incomplete_1=$<
@@ -147,6 +156,8 @@ add_custom_target(check-part2 ALL
     -Dtest_target_includes6=$<TARGET_PROPERTY:empty3,INCLUDE_DIRECTORIES>
     -Dtest_target_includes7=$<TARGET_PROPERTY:empty1,INTERFACE_INCLUDE_DIRECTORIES>
     -Dtest_target_includes8=$<TARGET_PROPERTY:empty5,INCLUDE_DIRECTORIES>
+    -Dtest_target_closure1=$<JOIN:$<LIST:SORT,${interface1MergeSources}>,$<COMMA>>
+    -Dtest_target_closure2=$<JOIN:$<LIST:SORT,$<TARGET_PROPERTY:interface2,INTERFACE_SOURCES>>,$<COMMA>>
     -Dtest_arbitrary_content_comma_1=$<1:a,>
     -Dtest_arbitrary_content_comma_2=$<1:,a>
     -Dtest_arbitrary_content_comma_3=$<1:a,,>
