@@ -897,6 +897,8 @@ run_cmake_command(P_working-dir ${CMAKE_COMMAND} -DEXPECTED_WORKING_DIR=${RunCMa
 file(COPY ${RunCMake_SOURCE_DIR}/C_basic_initial-cache.txt DESTINATION ${RunCMake_BINARY_DIR})
 run_cmake_with_options(C_basic -C ../C_basic_initial-cache.txt)
 run_cmake_with_options(C_basic_fullpath -C ${RunCMake_BINARY_DIR}/C_basic_initial-cache.txt)
+file(COPY ${RunCMake_SOURCE_DIR}/C_target-commands_initial-cache.cmake DESTINATION ${RunCMake_BINARY_DIR})
+run_cmake_command(C_target-commands ${CMAKE_COMMAND} -S ${RunCMake_SOURCE_DIR} -DRunCMake_TEST=C_target-commands -C ../C_target-commands_initial-cache.cmake)
 
 set(RunCMake_TEST_OPTIONS
   "-DFOO=-DBAR:BOOL=BAZ")
