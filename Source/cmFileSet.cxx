@@ -4,9 +4,11 @@
 
 #include <sstream>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -158,6 +160,13 @@ std::vector<std::string> cmFileSet::EvaluateDirectoryEntries(
   const cmGeneratorTarget* target,
   cmGeneratorExpressionDAGChecker* dagChecker) const
 {
+  struct DirCacheEntry
+  {
+    std::string collapsedDir;
+    cm::optional<cmSystemTools::FileId> fileId;
+  };
+
+  std::unordered_map<std::string, DirCacheEntry> dirCache;
   std::vector<std::string> result;
   for (auto const& cge : cges) {
     auto entry = cge->Evaluate(lg, config, target, dagChecker);
@@ -166,12 +175,29 @@ std::vector<std::string> cmFileSet::EvaluateDirectoryEntries(
       if (!cmSystemTools::FileIsFullPath(dir)) {
         dir = cmStrCat(lg->GetCurrentSourceDirectory(), '/', dir);
       }
-      auto collapsedDir = cmSystemTools::CollapseFullPath(dir);
+
+      auto dirCacheResult = dirCache.emplace(dir, DirCacheEntry());
+      auto& dirCacheEntry = dirCacheResult.first->second;
+      const auto isNewCacheEntry = dirCacheResult.second;
+
+      if (isNewCacheEntry) {
+        cmSystemTools::FileId fileId;
+        auto isFileIdValid = cmSystemTools::GetFileId(dir, fileId);
+        dirCacheEntry.collapsedDir = cmSystemTools::CollapseFullPath(dir);
+        dirCacheEntry.fileId =
+          isFileIdValid ? cm::optional<decltype(fileId)>(fileId) : cm::nullopt;
+      }
+
       for (auto const& priorDir : result) {
-        auto collapsedPriorDir = cmSystemTools::CollapseFullPath(priorDir);
-        if (!cmSystemTools::SameFile(collapsedDir, collapsedPriorDir) &&
-            (cmSystemTools::IsSubDirectory(collapsedDir, collapsedPriorDir) ||
-             cmSystemTools::IsSubDirectory(collapsedPriorDir, collapsedDir))) {
+        auto priorDirCacheEntry = dirCache.at(priorDir);
+        bool sameFile = dirCacheEntry.fileId.has_value() &&
+          priorDirCacheEntry.fileId.has_value() &&
+          (*dirCacheEntry.fileId == *priorDirCacheEntry.fileId);
+        if (!sameFile &&
+            (cmSystemTools::IsSubDirectory(dirCacheEntry.collapsedDir,
+                                           priorDirCacheEntry.collapsedDir) ||
+             cmSystemTools::IsSubDirectory(priorDirCacheEntry.collapsedDir,
+                                           dirCacheEntry.collapsedDir))) {
           lg->GetCMakeInstance()->IssueMessage(
             MessageType::FATAL_ERROR,
             cmStrCat(
