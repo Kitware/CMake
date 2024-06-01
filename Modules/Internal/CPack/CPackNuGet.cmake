@@ -316,27 +316,21 @@ function(_cpack_nuget_render_spec)
     endif()
 
     # Handle dependencies
-    _cpack_nuget_variable_fallback(_deps DEPENDENCIES)
-    set(_collected_deps)
-    foreach(_dep IN LISTS _deps)
-        _cpack_nuget_debug("  checking dependency `${_dep}`")
+    # Primary deps (not specific to any framework)
+    _cpack_nuget_render_deps_group("" rendered_group)
+    string(APPEND _CPACK_NUGET_DEPENDENCIES_TAG "${rendered_group}")
 
-        _cpack_nuget_variable_fallback(_ver DEPENDENCIES_${_dep}_VERSION)
-
-        if(NOT _ver)
-            string(TOUPPER "${_dep}" _dep_upper)
-            _cpack_nuget_variable_fallback(_ver DEPENDENCIES_${_dep_upper}_VERSION)
-        endif()
-
-        if(_ver)
-            _cpack_nuget_debug("  got `${_dep}` dependency version ${_ver}")
-            string(CONCAT _collected_deps "${_collected_deps}" "            <dependency id=\"${_dep}\" version=\"${_ver}\" />\n")
-        endif()
+    # Framework-specific deps
+    _cpack_nuget_variable_fallback(_tfms TFMS)
+    foreach(tfm IN LISTS _tfms)
+        _cpack_nuget_render_deps_group("${tfm}" rendered_group)
+        string(APPEND _CPACK_NUGET_DEPENDENCIES_TAG "${rendered_group}")
     endforeach()
 
-    # Render deps into the variable
-    if(_collected_deps)
-        string(CONCAT _CPACK_NUGET_DEPENDENCIES_TAG "<dependencies>\n" "${_collected_deps}" "        </dependencies>")
+    # If there are any dependencies to include, wrap them with the appropriate tag
+    if(_CPACK_NUGET_DEPENDENCIES_TAG)
+        string(PREPEND _CPACK_NUGET_DEPENDENCIES_TAG "<dependencies>\n")
+        string(APPEND _CPACK_NUGET_DEPENDENCIES_TAG "        </dependencies>")
     endif()
 
     # Render the spec file
@@ -348,6 +342,106 @@ function(_cpack_nuget_render_spec)
         "${CPACK_TEMPORARY_DIRECTORY}/CPack.NuGet.nuspec"
         @ONLY
       )
+endfunction()
+
+# Call this function once for each TWFM (e.g., 'net48') to generate the dependencies for
+# that framework. It can also be called with an empty TWFM for the "general" set of
+# dependencies, which are not specific to a framework.
+function(_cpack_nuget_render_deps_group TFM OUTPUT_VAR_NAME)
+    _cpack_nuget_debug("  rendering deps for ${TFM}")
+    if(TFM)
+        set(_tfm "_${TFM}")
+    else()
+        set(_tfm "")
+    endif()
+    _cpack_nuget_variable_fallback(_deps DEPENDENCIES${_tfm})
+    set(_collected_deps)
+    foreach(_dep IN LISTS _deps)
+        set(_ver)  # Ensure we don't accidentally use the version from the previous dep in the list
+        _cpack_nuget_debug("  checking dependency `${_dep}`")
+
+        _cpack_nuget_variable_fallback(_ver DEPENDENCIES${_tfm}_${_dep}_VERSION)
+
+        if(NOT _ver)
+            string(TOUPPER "${_dep}" _dep_upper)
+            _cpack_nuget_variable_fallback(_ver DEPENDENCIES${_tfm}_${_dep_upper}_VERSION)
+        endif()
+
+        if(_ver)
+            _cpack_nuget_debug("  got `${_dep}` dependency version ${_ver}")
+            string(APPEND _collected_deps "                <dependency id=\"${_dep}\" version=\"${_ver}\" />\n")
+        endif()
+    endforeach()
+
+    # Render deps into the variable
+    if(TFM)
+        _cpack_nuget_convert_tfm_to_frameworkname("${TFM}" framework_name)
+        _cpack_nuget_debug("  converted ${TFM} to ${framework_name}")
+    endif()
+    set(rendered_group)
+    if(_collected_deps)
+        if(TFM)
+            _cpack_nuget_debug("  rendering group for framework ${framework_name}")
+            string(CONCAT rendered_group "            <group targetFramework=\"${framework_name}\">\n" "${_collected_deps}" "            </group>\n")
+        else()
+            _cpack_nuget_debug("  rendering primary group")
+            string(CONCAT rendered_group "            <group>\n" "${_collected_deps}" "            </group>\n")
+        endif()
+    elseif(TFM)
+        _cpack_nuget_debug("  no deps for ${TFM}, rendering empty group")
+        # Insert an empty group for a framework that doesn't have any specific dependencies listed, as the existence
+        # of this group can be used by NuGet to see that the framework is supported.
+        string(CONCAT rendered_group "            <group targetFramework=\"${framework_name}\" />\n")
+    endif()
+    set(${OUTPUT_VAR_NAME} "${rendered_group}" PARENT_SCOPE)
+endfunction()
+
+# Tries to look up a Framework Name (e.g., '.NETFramework4.8') from a Target Framework Moniker (TFM) (e.g., 'net48')
+function(_cpack_nuget_convert_tfm_to_frameworkname TFM OUTPUT_VAR_NAME)
+    # There are a few patterns to handle:
+    # 1a. net4          -> .NETFramework4
+    # 1b. net5.0        -> net5.0            From version 5 onwards, the name just looks the same as the moniker, and both need to have a dot
+    # 2. netstandard13  -> .NETStandard1.3
+    # 3. netcoreapp21   -> .NETCoreApp2.1
+    # 4. dotnet50       -> .NETPlatform5.0
+    if(TFM MATCHES "^net([1-4](.[\.0-9])?)$") # CMAKE_MATCH_1 holds the version part
+        _cpack_nuget_get_dotted_version("${CMAKE_MATCH_1}" dotted_version)
+        set(framework_name ".NETFramework${dotted_version}")
+    elseif(TFM MATCHES "^net[1-9](\.[0-9]+)+$")
+        set(framework_name "${TFM}")
+    elseif(TFM MATCHES "^netstandard([0-9]+(\.[0-9]+)*)$")
+        _cpack_nuget_get_dotted_version("${CMAKE_MATCH_1}" dotted_version)
+        set(framework_name ".NETStandard${dotted_version}")
+    elseif(TFM MATCHES "^netcoreapp([0-9]+(\.[0-9]+)*)$")
+        _cpack_nuget_get_dotted_version("${CMAKE_MATCH_1}" dotted_version)
+        set(framework_name ".NETCoreApp${dotted_version}")
+    elseif(TFM MATCHES "^dotnet([0-9]+(\.[0-9]+)*)$")
+        _cpack_nuget_get_dotted_version("${CMAKE_MATCH_1}" dotted_version)
+        set(framework_name ".NETPlatform${dotted_version}")
+    else()
+        message(FATAL_ERROR "Target Framework Moniker '${TFM}' not recognized")
+    endif()
+    set(${OUTPUT_VAR_NAME} ${framework_name} PARENT_SCOPE)
+endfunction()
+
+function(_cpack_nuget_get_dotted_version VERSION OUTPUT_VAR_NAME)
+    if(VERSION MATCHES "\.")
+        # The version already has dots in it, just reuse the numbers given
+        set(dotted_version "${VERSION}")
+    else()
+        # No dots in the version, treat each digit as a version part
+        string(LENGTH "${VERSION}" length)
+        math(EXPR last_index "${length} - 1")
+        string(SUBSTRING "${VERSION}" 0 1 digit)
+        set(dotted_version "${digit}")
+        foreach(i RANGE 1 ${last_index})
+            string(SUBSTRING "${VERSION}" ${i} 1 digit)
+            string(APPEND dotted_version ".${digit}")
+        endforeach()
+    endif()
+    # This would be a good place to remove any superfluous ".0"s from the end of the version string, but
+    # for now it should be fine to just expect the caller not to supply them in the first place.
+    set(${OUTPUT_VAR_NAME} "${dotted_version}" PARENT_SCOPE)
 endfunction()
 
 function(_cpack_nuget_make_files_tag)
