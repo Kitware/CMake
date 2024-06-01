@@ -238,10 +238,16 @@ void QCMake::configure()
 #ifdef Q_OS_WIN
     UINT lastErrorMode = SetErrorMode(0);
 #endif
+    // Apply the same transformations that the command-line invocation does
+    auto sanitizePath = [](QString const& value) -> std::string {
+      std::string path = cmSystemTools::CollapseFullPath(value.toStdString());
+      cmSystemTools::ConvertToUnixSlashes(path);
+      return path;
+    };
 
-    this->CMakeInstance->SetHomeDirectory(this->SourceDirectory.toStdString());
+    this->CMakeInstance->SetHomeDirectory(sanitizePath(this->SourceDirectory));
     this->CMakeInstance->SetHomeOutputDirectory(
-      this->BinaryDirectory.toStdString());
+      sanitizePath(this->BinaryDirectory));
     this->CMakeInstance->SetGlobalGenerator(
       this->CMakeInstance->CreateGlobalGenerator(
         this->Generator.toStdString()));
