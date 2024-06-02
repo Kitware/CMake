@@ -57,6 +57,8 @@ function(cm_check_cxx_feature name)
     string(REGEX REPLACE "[^\n]*icpc: command line warning #10121: overriding [^\n]*" "" check_output "${check_output}")
     # Filter out ld warnings.
     string(REGEX REPLACE "[^\n]*ld: warning: [^\n]*" "" check_output "${check_output}")
+    # Filter out distcc.
+    string(REGEX REPLACE "[^\n]*distcc\\[[0-9]+\\][^\n]*[Ww]arning:[^\n]*" "" check_output "${check_output}")
     # If using the feature causes warnings, treat it as broken/unavailable.
     if(check_output MATCHES "(^|[ :])[Ww][Aa][Rr][Nn][Ii][Nn][Gg]")
       set(CMake_HAVE_CXX_${FEATURE} OFF CACHE INTERNAL "TRY_COMPILE" FORCE)
