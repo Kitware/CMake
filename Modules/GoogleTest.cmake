@@ -286,8 +286,8 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
 #]=======================================================================]
 
 # Save project's policies
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
+block(SCOPE_FOR POLICIES)
+cmake_policy(VERSION 3.30)
 
 #------------------------------------------------------------------------------
 function(gtest_add_tests)
@@ -630,4 +630,4 @@ endfunction()
 ###############################################################################
 
 # Restore project's policies
-cmake_policy(POP)
+endblock()
