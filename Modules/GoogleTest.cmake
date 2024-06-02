@@ -584,20 +584,20 @@ function(gtest_discover_tests TARGET)
       "     NOT \"${ctest_tests_file}\" IS_NEWER_THAN \"\${CMAKE_CURRENT_LIST_FILE}\")\n"
       "    include(\"${CMAKE_ROOT}/Modules/GoogleTestAddTests.cmake\")"            "\n"
       "    gtest_discover_tests_impl("                                             "\n"
-      "      TEST_EXECUTABLE"        " [==[" "$<TARGET_FILE:${TARGET}>"   "]==]"   "\n"
-      "      TEST_EXECUTOR"          " [==[" "${test_executor}"           "]==]"   "\n"
-      "      TEST_WORKING_DIR"       " [==[" "${_WORKING_DIRECTORY}"      "]==]"   "\n"
-      "      TEST_EXTRA_ARGS"        " [==[" "${_EXTRA_ARGS}"             "]==]"   "\n"
-      "      TEST_PROPERTIES"        " [==[" "${_PROPERTIES}"             "]==]"   "\n"
-      "      TEST_PREFIX"            " [==[" "${_TEST_PREFIX}"            "]==]"   "\n"
-      "      TEST_SUFFIX"            " [==[" "${_TEST_SUFFIX}"            "]==]"   "\n"
-      "      TEST_FILTER"            " [==[" "${_TEST_FILTER}"            "]==]"   "\n"
-      "      NO_PRETTY_TYPES"        " [==[" "${_NO_PRETTY_TYPES}"        "]==]"   "\n"
-      "      NO_PRETTY_VALUES"       " [==[" "${_NO_PRETTY_VALUES}"       "]==]"   "\n"
-      "      TEST_LIST"              " [==[" "${_TEST_LIST}"              "]==]"   "\n"
-      "      CTEST_FILE"             " [==[" "${ctest_tests_file}"        "]==]"   "\n"
-      "      TEST_DISCOVERY_TIMEOUT" " [==[" "${_DISCOVERY_TIMEOUT}"      "]==]"   "\n"
-      "      TEST_XML_OUTPUT_DIR"    " [==[" "${_XML_OUTPUT_DIR}"         "]==]"   "\n"
+      "      TEST_EXECUTABLE"        " [==[$<TARGET_FILE:${TARGET}>]==]"           "\n"
+      "      TEST_EXECUTOR"          " [==[${test_executor}]==]"                   "\n"
+      "      TEST_WORKING_DIR"       " [==[${_WORKING_DIRECTORY}]==]"              "\n"
+      "      TEST_EXTRA_ARGS"        " [==[${_EXTRA_ARGS}]==]"                     "\n"
+      "      TEST_PROPERTIES"        " [==[${_PROPERTIES}]==]"                     "\n"
+      "      TEST_PREFIX"            " [==[${_TEST_PREFIX}]==]"                    "\n"
+      "      TEST_SUFFIX"            " [==[${_TEST_SUFFIX}]==]"                    "\n"
+      "      TEST_FILTER"            " [==[${_TEST_FILTER}]==]"                    "\n"
+      "      NO_PRETTY_TYPES"        " [==[${_NO_PRETTY_TYPES}]==]"                "\n"
+      "      NO_PRETTY_VALUES"       " [==[${_NO_PRETTY_VALUES}]==]"               "\n"
+      "      TEST_LIST"              " [==[${_TEST_LIST}]==]"                      "\n"
+      "      CTEST_FILE"             " [==[${ctest_tests_file}]==]"                "\n"
+      "      TEST_DISCOVERY_TIMEOUT" " [==[${_DISCOVERY_TIMEOUT}]==]"              "\n"
+      "      TEST_XML_OUTPUT_DIR"    " [==[${_XML_OUTPUT_DIR}]==]"                 "\n"
       "    )"                                                                      "\n"
       "  endif()"                                                                  "\n"
       "  include(\"${ctest_tests_file}\")"                                         "\n"
@@ -608,12 +608,23 @@ function(gtest_discover_tests TARGET)
 
     if(GENERATOR_IS_MULTI_CONFIG)
       foreach(_config ${CMAKE_CONFIGURATION_TYPES})
-        file(GENERATE OUTPUT "${ctest_file_base}_include-${_config}.cmake" CONTENT "${ctest_include_content}" CONDITION $<CONFIG:${_config}>)
+        file(GENERATE
+          OUTPUT "${ctest_file_base}_include-${_config}.cmake"
+          CONTENT "${ctest_include_content}"
+          CONDITION $<CONFIG:${_config}>
+        )
       endforeach()
-      file(WRITE "${ctest_include_file}" "include(\"${ctest_file_base}_include-\${CTEST_CONFIGURATION_TYPE}.cmake\")")
+      file(WRITE "${ctest_include_file}"
+        "include(\"${ctest_file_base}_include-\${CTEST_CONFIGURATION_TYPE}.cmake\")"
+      )
     else()
-      file(GENERATE OUTPUT "${ctest_file_base}_include.cmake" CONTENT "${ctest_include_content}")
-      file(WRITE "${ctest_include_file}" "include(\"${ctest_file_base}_include.cmake\")")
+      file(GENERATE
+        OUTPUT "${ctest_file_base}_include.cmake"
+        CONTENT "${ctest_include_content}"
+      )
+      file(WRITE "${ctest_include_file}"
+        "include(\"${ctest_file_base}_include.cmake\")"
+      )
     endif()
 
   else()
