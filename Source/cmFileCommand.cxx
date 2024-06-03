@@ -73,6 +73,11 @@ namespace {
 bool HandleWriteImpl(std::vector<std::string> const& args, bool append,
                      cmExecutionStatus& status)
 {
+  if (args.size() < 2) {
+    status.SetError(cmStrCat(
+      args[0], " must be called with at least one additional argument."));
+    return false;
+  }
   auto i = args.begin();
 
   i++; // Get rid of subcommand
@@ -658,8 +663,11 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
 bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
                     cmExecutionStatus& status)
 {
-  // File commands has at least one argument
-  assert(args.size() > 1);
+  if (args.size() < 2) {
+    status.SetError(cmStrCat(
+      args[0], " must be called with at least one additional argument."));
+    return false;
+  }
 
   auto i = args.begin();
 
@@ -869,8 +877,8 @@ bool HandleGlobRecurseCommand(std::vector<std::string> const& args,
 bool HandleMakeDirectoryCommand(std::vector<std::string> const& args,
                                 cmExecutionStatus& status)
 {
-  // File command has at least one argument
-  assert(args.size() > 1);
+  // Projects might pass a dynamically generated list of directories, and it
+  // could be an empty list. We should not assume there is at least one.
 
   std::string expr;
   for (std::string const& arg :
@@ -903,8 +911,8 @@ bool HandleMakeDirectoryCommand(std::vector<std::string> const& args,
 bool HandleTouchImpl(std::vector<std::string> const& args, bool create,
                      cmExecutionStatus& status)
 {
-  // File command has at least one argument
-  assert(args.size() > 1);
+  // Projects might pass a dynamically generated list of files, and it
+  // could be an empty list. We should not assume there is at least one.
 
   for (std::string const& arg :
        cmMakeRange(args).advance(1)) // Get rid of subcommand
@@ -3918,8 +3926,9 @@ bool HandleChmodRecurseCommand(std::vector<std::string> const& args,
 bool cmFileCommand(std::vector<std::string> const& args,
                    cmExecutionStatus& status)
 {
-  if (args.size() < 2) {
-    status.SetError("must be called with at least two arguments.");
+  if (args.empty()) {
+    status.SetError(
+      "given no arguments, but it requires at least a sub-command.");
     return false;
   }
 

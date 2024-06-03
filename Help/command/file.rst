@@ -192,6 +192,10 @@ Writing
   With ``TOUCH`` and ``TOUCH_NOCREATE``, the contents of an existing file
   will not be modified.
 
+  .. versionchanged:: 3.30
+    ``<files>`` can be an empty list. CMake 3.29 and earlier required
+    at least one file to be given.
+
 .. signature::
   file(GENERATE [...])
 
@@ -397,6 +401,10 @@ Filesystem
   file(MAKE_DIRECTORY <directories>...)
 
   Create the given directories and their parents as needed.
+
+  .. versionchanged:: 3.30
+    ``<directories>`` can be an empty list. CMake 3.29 and earlier required
+    at least one directory to be given.
 
 .. signature::
   file(REMOVE <files>...)
