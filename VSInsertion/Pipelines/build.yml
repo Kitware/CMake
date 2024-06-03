@@ -218,6 +218,33 @@ extends:
               echo Creating Tag "v$version"
               git tag "v$version"
               git push origin "v$version"
+        - task: MSBuild@1
+          displayName: 'Build solution $(CMakeBuildDirectory)/package.vcxproj'
+          inputs:
+            solution: '$(CMakeBuildDirectory)/package.vcxproj'
+            msbuildArchitecture: x64
+            platform: x64
+            configuration: '$(BuildConfiguration)'
+            clean: true
+            createLogFile: true
+            logFileVerbosity: diagnostic
+        - task: MSBuild@1
+          displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
+          inputs:
+            solution: '$(CMakeBuildDirectory)/install.vcxproj'
+            msbuildArchitecture: x64
+            platform: x64
+            configuration: '$(BuildConfiguration)'
+            createLogFile: true
+            logFileVerbosity: diagnostic
+        - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
+          displayName: 'Run the PREfast SDL Native Rules for MSBuild'
+          env:
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+          inputs:
+            publishXML: true
+            userProvideBuildInfo: auto
+            setupCommandlinePicker: vs2022
       - job: Job_arm64
         displayName: CMake ARM64 Build
         timeoutInMinutes: 360
