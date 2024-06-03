@@ -85,8 +85,7 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
   }
 
   // Lookup the target for which libraries are specified.
-  cmTarget* target =
-    mf.GetCMakeInstance()->GetGlobalGenerator()->FindTarget(args[0]);
+  cmTarget* target = mf.GetGlobalGenerator()->FindTarget(args[0]);
   if (!target) {
     for (const auto& importedTarget : mf.GetOwnedImportedTargets()) {
       if (importedTarget->GetName() == args[0]) {
