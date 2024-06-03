@@ -219,3 +219,10 @@ Changes made since CMake 3.28.0 include the following.
 
 * This version made no changes to documented features or interfaces.
   Some implementation updates were made to C++ modules support.
+
+3.28.6
+------
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
