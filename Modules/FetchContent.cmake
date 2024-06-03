@@ -1657,8 +1657,13 @@ function(__FetchContent_populateDirect)
   set(_EP_TMP_DIR   "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-tmp")
   set(_EP_DOWNLOAD_DIR "${_EP_TMP_DIR}")
 
+  # If CMAKE_DISABLE_SOURCE_CHANGES is set to true and _EP_SOURCE_DIR is an
+  # existing directory in our source tree, calling file(MAKE_DIRECTORY) on it
+  # would cause a fatal error, even though it would be a no-op.
+  if(NOT EXISTS "${_EP_SOURCE_DIR}")
+    file(MAKE_DIRECTORY "${_EP_SOURCE_DIR}")
+  endif()
   file(MAKE_DIRECTORY
-    "${_EP_SOURCE_DIR}"
     "${_EP_BINARY_DIR}"
     "${_EP_STAMP_DIR}"
     "${_EP_TMP_DIR}"
