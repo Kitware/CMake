@@ -53,8 +53,10 @@ function(cm_check_cxx_feature name)
     string(REGEX REPLACE "[^\n]*libhugetlbfs [^\n]*: WARNING[^\n]*" "" check_output "${check_output}")
     # Filter out xcodebuild warnings.
     string(REGEX REPLACE "[^\n]* xcodebuild\\[[0-9]*:[0-9]*\\][^\n]*[Ww]arning: [^\n]*" "" check_output "${check_output}")
-    # Filter out icpc warnings
+    # Filter out Intel classic warnings about overridden flags
     string(REGEX REPLACE "[^\n]*icpc: command line warning #10121: overriding [^\n]*" "" check_output "${check_output}")
+    # Filter out Intel oneAPI warnings about overridden flags
+    string(REGEX REPLACE "[^\n]*icpx: warning: overriding [^\n]*" "" check_output "${check_output}")
     # Filter out ld warnings.
     string(REGEX REPLACE "[^\n]*ld: warning: [^\n]*" "" check_output "${check_output}")
     # Filter out distcc.
