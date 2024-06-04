@@ -58,7 +58,7 @@ endif()
 
 # Link separately with Matlab::mx and Matlab::mex to ensure that compilation
 # and run of the test is successful
-target_link_libraries(cmake_matlab_test_wrapper1 PRIVATE Matlab::mx Matlab::mex)
+target_link_libraries(cmake_matlab_test_wrapper1 Matlab::mx Matlab::mex)
 
 if(RUN_UNIT_TESTS)
     matlab_add_unit_test(
