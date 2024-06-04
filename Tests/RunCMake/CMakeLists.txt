@@ -1141,6 +1141,10 @@ if(CMake_TEST_CPACK_WIX3 OR CMake_TEST_CPACK_WIX4)
     )
 endif()
 
+if(CMake_TEST_CPACK_NUGET)
+  add_RunCMake_test(CPack_NuGet)
+endif()
+
 # add a test to make sure symbols are exported from a shared library
 # for MSVC compilers CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS property is used
 add_RunCMake_test(AutoExportDll
