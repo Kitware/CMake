@@ -308,42 +308,53 @@ Hints
   This variable defines which ABIs, as defined in :pep:`3149`, should be
   searched.
 
-  .. note::
+  The ``Python3_FIND_ABI`` variable is a 4-tuple specifying, in that order,
+  ``pydebug`` (``d``), ``pymalloc`` (``m``), ``unicode`` (``u``) and
+  ``gil_disabled`` (``t``) flags.
 
-    If ``Python3_FIND_ABI`` is not defined, any ABI will be searched.
+  .. versionadded:: 3.30
+    A fourth element, specifying the ``gil_disabled`` flag (i.e. free
+    threaded python), is added and is optional. If not specified, the value is
+    ``OFF``.
 
-  The ``Python3_FIND_ABI`` variable is a 3-tuple specifying, in that order,
-  ``pydebug`` (``d``), ``pymalloc`` (``m``) and ``unicode`` (``u``) flags.
   Each element can be set to one of the following:
 
   * ``ON``: Corresponding flag is selected.
   * ``OFF``: Corresponding flag is not selected.
   * ``ANY``: The two possibilities (``ON`` and ``OFF``) will be searched.
 
-  From this 3-tuple, various ABIs will be searched starting from the most
-  specialized to the most general. Moreover, ``debug`` versions will be
-  searched **after** ``non-debug`` ones.
+  .. note::
+
+    If ``Python3_FIND_ABI`` is not defined, any ABI will be searched.
+
+  From this 4-tuple, various ABIs will be searched starting from the most
+  specialized to the most general. Moreover, when ``ANY`` is specified for
+  ``pydebug`` and ``gil_disabled``, ``debug`` and ``free threaded`` versions
+  will be searched **after** ``non-debug`` and ``non-gil-disabled`` ones.
 
   For example, if we have::
 
-    set (Python3_FIND_ABI "ON" "ANY" "ANY")
+    set (Python3_FIND_ABI "ON" "ANY" "ANY" "ON")
 
   The following flags combinations will be appended, in that order, to the
-  artifact names: ``dmu``, ``dm``, ``du``, and ``d``.
+  artifact names: ``tdmu``, ``tdm``, ``tdu``, and ``td``.
 
   And to search any possible ABIs::
 
-    set (Python3_FIND_ABI "ANY" "ANY" "ANY")
+    set (Python3_FIND_ABI "ANY" "ANY" "ANY" "ANY")
 
   The following combinations, in that order, will be used: ``mu``, ``m``,
-  ``u``, ``<empty>``, ``dmu``, ``dm``, ``du`` and ``d``.
+  ``u``, ``<empty>``, ``dmu``, ``dm``, ``du``, ``d``, ``tmu``, ``tm``, ``tu``,
+  ``t``, ``tdmu``, ``tdm``, ``tdu``, and ``td``.
 
   .. note::
 
-    This hint is useful only on ``POSIX`` systems. So, on ``Windows`` systems,
-    when ``Python3_FIND_ABI`` is defined, ``Python`` distributions from
-    `python.org <https://www.python.org/>`_ will be found only if value for
-    each flag is ``OFF`` or ``ANY``.
+    This hint is useful only on ``POSIX`` systems except for the
+    ``gil_disabled`` flag. So, on ``Windows`` systems,
+    when ``Python_FIND_ABI`` is defined, ``Python`` distributions from
+    `python.org <https://www.python.org/>`_ will be found only if the value for
+    each flag is ``OFF`` or ``ANY`` except for the fourth one
+    (``gil_disabled``).
 
 ``Python3_FIND_STRATEGY``
   .. versionadded:: 3.15
