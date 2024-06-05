@@ -557,6 +557,8 @@ add_library(
   cmFLTKWrapUICommand.h
   cmFileCommand.cxx
   cmFileCommand.h
+  cmFileCommand_ReadMacho.cxx
+  cmFileCommand_ReadMacho.h
   cmFindBase.cxx
   cmFindBase.h
   cmFindCommon.cxx
