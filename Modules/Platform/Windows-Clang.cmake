@@ -55,8 +55,6 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "")
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-shared")
 
-  set(CMAKE_${lang}_LINK_LIBRARIES_PROCESSING ORDER=FORWARD DEDUPLICATION=ALL)
-
   # linker selection
   set(CMAKE_${lang}_USING_LINKER_DEFAULT "-fuse-ld=lld-link")
   set(CMAKE_${lang}_USING_LINKER_SYSTEM "-fuse-ld=link")
