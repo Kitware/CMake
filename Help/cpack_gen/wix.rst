@@ -346,7 +346,7 @@ Windows using WiX.
  This variable can be optionally set to specify the ``InstallScope``
  of the installer:
 
- ``perMachine`` (default)
+ ``perMachine``
    Create an installer that installs for all users and requires
    administrative privileges.  Start menu entries created by the
    installer are visible to all users.
@@ -357,6 +357,8 @@ Windows using WiX.
  ``NONE``
    Create an installer without any ``InstallScope`` attribute.
 
+   This is the default to preserve compatibility with CPack 3.28 and older.
+
    .. deprecated:: 3.29
 
      This value is only for compatibility with the inconsistent behavior used
@@ -364,5 +366,14 @@ Windows using WiX.
      privileges and installs into the system-wide ``ProgramFiles`` directory,
      but the start menu entry and uninstaller registration are created only
      for the current user.
+
+   .. warning::
+
+     An installation performed by an installer created without any
+     ``InstallScope`` cannot be cleanly updated or replaced by an
+     installer with an ``InstallScope``.  In order to transition
+     a project's installers from ``NONE`` to ``perMachine``, the
+     latter installer should be distributed with instructions to
+     first manually uninstall any older version.
 
  See https://wixtoolset.org/docs/v3/xsd/wix/package/

@@ -193,13 +193,6 @@ Other Changes
 * The :variable:`CPACK_PRODUCTBUILD_DOMAINS` variable now defaults to true.
   See policy :policy:`CMP0161`.
 
-* The :cpack_gen:`CPack WIX Generator` now produces WiX MSI installers
-  that create start menu and uninstall entries for all users by default,
-  as documented by the :variable:`CPACK_WIX_INSTALL_SCOPE` variable
-  ``perMachine`` value.  Previously, without a custom WiX template,
-  it produced installers that would only create start menu and uninstall
-  entries for the current user, even though they install for all users.
-
 Updates
 =======
 
@@ -218,3 +211,22 @@ Changes made since CMake 3.29.0 include the following.
 * These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
+
+3.29.5
+------
+
+* The :cpack_gen:`CPack WIX Generator`'s :variable:`CPACK_WIX_INSTALL_SCOPE`
+  variable, new in 3.29, now defaults to ``NONE``.  This restores
+  compatibility with behavior of 3.28 and below: without a custom WiX
+  template, it produces installers that only create start menu and
+  uninstall entries for the current user, even though they install
+  for all users.
+
+  In 3.29.0 through 3.29.4, ``CPACK_WIX_INSTALL_SCOPE`` defaulted to
+  ``perMachine``.  This created MSI installers that create start menu
+  and uninstall entries for all users by default.  While this behavior
+  is better on its own, these installers do not cleanly replace existing
+  installations created with MSI installers produced by 3.28 and below.
+  3.29.5 reverts the default for compatibility.  Projects may transition
+  to ``perMachine`` on their own schedule by setting
+  ``CPACK_WIX_INSTALL_SCOPE``.
