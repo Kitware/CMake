@@ -206,6 +206,9 @@ if("${CPACK_GENERATOR}" STREQUAL "DragNDrop")
 endif()
 
 if("${CPACK_GENERATOR}" STREQUAL "WIX")
+  set(CPACK_WIX_VERSION 4)
+  set(CPACK_WIX_BUILD_EXTRA_FLAGS "")
+
   # Reset CPACK_PACKAGE_VERSION to deal with WiX restriction.
   # But the file names still use the full CMake_VERSION value:
   set(CPACK_PACKAGE_FILE_NAME
@@ -246,14 +249,7 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
     CPACK_START_MENU_SHORTCUTS "CMake Web Site"
   )
 
-  set(CPACK_WIX_LIGHT_EXTRA_FLAGS "-dcl:high")
-
-  if(NOT "$ENV{CMAKE_CI_PACKAGE}" STREQUAL "")
-    # Suppress validation.  It does not work without
-    # an interactive session or an admin account.
-    # https://github.com/wixtoolset/issues/issues/3968
-    list(APPEND CPACK_WIX_LIGHT_EXTRA_FLAGS "-sval")
-  endif()
+  list(APPEND CPACK_WIX_BUILD_EXTRA_FLAGS -dcl high)
 
   set(CPACK_WIX_UI_BANNER
     "@CMake_SOURCE_DIR@/Utilities/Release/WiX/ui_banner.jpg"
@@ -274,7 +270,7 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
     list(APPEND CPACK_WIX_EXTRA_SOURCES
       "@CMake_SOURCE_DIR@/Utilities/Release/WiX/cmake_nsis_overwrite_dialog.wxs"
       )
-    list(APPEND CPACK_WIX_CANDLE_EXTRA_FLAGS -dCHECK_NSIS=1)
+    list(APPEND CPACK_WIX_BUILD_EXTRA_FLAGS -d CHECK_NSIS=1)
 
     set(_WIX_CUSTOM_ACTION_MULTI_CONFIG "@CMake_BUILD_WIX_CUSTOM_ACTION_MULTI_CONFIG@")
     if(_WIX_CUSTOM_ACTION_MULTI_CONFIG)
@@ -292,7 +288,7 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
     endif()
   endif()
 
-  set(CPACK_WIX_UI_REF "CMakeUI_InstallDir")
+  set(CPACK_WIX_UI_REF "CMakeUI_InstallDir_$(sys.BUILDARCHSHORT)")
 
   set(CPACK_WIX_PATCH_FILE
     "@CMake_SOURCE_DIR@/Utilities/Release/WiX/patch_path_env.xml"
@@ -308,6 +304,6 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
     list(APPEND CPACK_WIX_PATCH_FILE
       "@CMake_SOURCE_DIR@/Utilities/Release/WiX/patch_desktop_shortcut.xml"
       )
-    list(APPEND CPACK_WIX_CANDLE_EXTRA_FLAGS -dBUILD_QtDialog=1)
+    list(APPEND CPACK_WIX_BUILD_EXTRA_FLAGS -d BUILD_QtDialog=1)
   endif()
 endif()

@@ -1,1 +1,1 @@
-. .gitlab/ci/wix3-env.ps1
+. .gitlab/ci/wix4-env.ps1
