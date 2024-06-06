@@ -306,6 +306,10 @@ void ImplPosix::ConnectFIFO(const char* path)
   if (fd < 0) {
     return;
   }
+  if (fcntl(fd, F_SETFD, FD_CLOEXEC) == -1) {
+    close(fd);
+    return;
+  }
 
   cm::uv_pipe_ptr connFIFO;
   connFIFO.init(this->Loop, 0, this);
