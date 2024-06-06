@@ -466,7 +466,10 @@ archive_write_odc_close(struct archive_write *a)
 {
 	int er;
 	struct archive_entry *trailer;
-
+	trailer = archive_entry_new2(NULL);
+	if (trailer == NULL) {
+		return ARCHIVE_FATAL;
+	}
 	trailer = archive_entry_new2(NULL);
 	/* nlink = 1 here for GNU cpio compat. */
 	archive_entry_set_nlink(trailer, 1);
