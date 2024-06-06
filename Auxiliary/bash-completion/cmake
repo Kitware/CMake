@@ -2,14 +2,22 @@
 
 _cmake()
 {
-    local cur prev words cword split=false
-    if type -t _init_completion >/dev/null; then
-        _init_completion -n = || return
+    local is_old_completion=false
+    local is_init_completion=false
+
+    local cur prev words cword split was_split
+    if type -t _comp_initialize >/dev/null; then
+        _comp_initialize -s || return
+    elif type -t _init_completion >/dev/null; then
+        _init_completion -s || return
+        is_init_completion=true
     else
         # manual initialization for older bash completion versions
         COMPREPLY=()
         cur="${COMP_WORDS[COMP_CWORD]}"
         prev="${COMP_WORDS[COMP_CWORD-1]}"
+        is_old_completion=true
+        split=false
     fi
 
     # Workaround for options like -DCMAKE_BUILD_TYPE=Release
@@ -89,7 +97,9 @@ _cmake()
             ;;
     esac
 
-    _split_longopt && split=true
+    if $is_old_completion; then
+        _split_longopt && split=true
+    fi
 
     case "$prev" in
         -C|-P|--graphviz|--system-information)
@@ -187,7 +197,11 @@ _cmake()
             ;;
     esac
 
-    $split && return
+    if  ($is_old_completion || $is_init_completion); then
+        $split && return
+    else
+        [[ $was_split ]] && return
+    fi
 
     if [[ "$cur" == -* ]]; then
         COMPREPLY=( $(compgen -W '$( _parse_help "$1" --help )' -- ${cur}) )
