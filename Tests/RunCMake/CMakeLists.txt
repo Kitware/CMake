@@ -153,6 +153,9 @@ add_RunCMake_test(CMP0126)
 if("${CMAKE_C_COMPILER_ID}" STREQUAL "LCC" OR
    "${CMAKE_CXX_COMPILER_ID}" STREQUAL "LCC" OR
    "${CMAKE_Fortran_COMPILER_ID}" STREQUAL "LCC")
+  if(CMAKE_Fortran_COMPILER)
+    list(APPEND CMP0129_ARGS -DCMake_TEST_Fortran=1)
+  endif()
   add_RunCMake_test("CMP0129")
   set_property(TEST RunCMake.CMP0129 APPEND PROPERTY LABELS "Fortran")
 endif()
