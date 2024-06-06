@@ -909,7 +909,7 @@ static CURLcode proxy_h2_submit(int32_t *pstream_id,
 {
   struct dynhds h2_headers;
   nghttp2_nv *nva = NULL;
-  unsigned int i;
+  size_t i;
   int32_t stream_id = -1;
   size_t nheader;
   CURLcode result;
