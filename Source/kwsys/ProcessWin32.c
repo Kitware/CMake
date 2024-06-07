@@ -2671,7 +2671,7 @@ static int kwsysProcessesAdd(HANDLE hProcess, DWORD dwProcessid,
     if ((newArray = (kwsysProcessInstance*)malloc(
            newSize * sizeof(kwsysProcessInstance)))) {
       /* Copy the old process handles to the new memory.  */
-      if (kwsysProcesses.Count > 0) {
+      if (newArray != NULL && kwsysProcesses.Count > 0) {
         memcpy(newArray, kwsysProcesses.Processes,
                kwsysProcesses.Count * sizeof(kwsysProcessInstance));
       }
