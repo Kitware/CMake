@@ -1674,7 +1674,7 @@ function(__FetchContent_populateDirect)
   # using a sub-build and is not appropriate for us here.
 
   set(download_script ${_EP_TMP_DIR}/download.cmake)
-  set(update_script   ${_EP_TMP_DIR}/upload.cmake)
+  set(update_script   ${_EP_TMP_DIR}/update.cmake)
   set(patch_script    ${_EP_TMP_DIR}/patch.cmake)
   _ep_add_download_command(${contentName}
     SCRIPT_FILE ${download_script}
@@ -1690,7 +1690,7 @@ function(__FetchContent_populateDirect)
   )
 
   set(download_stamp ${_EP_STAMP_DIR}/download.stamp)
-  set(update_stamp   ${_EP_STAMP_DIR}/upload.stamp)
+  set(update_stamp   ${_EP_STAMP_DIR}/update.stamp)
   set(patch_stamp    ${_EP_STAMP_DIR}/patch.stamp)
   __FetchContent_doStepDirect(
     SCRIPT_FILE ${download_script}
