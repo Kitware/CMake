@@ -17,6 +17,14 @@ run_cmake_with_options(VarPassthroughs -D CMP0168=OLD)
 
 run_cmake_with_cmp0168(DirectIgnoresDetails)
 run_cmake_with_cmp0168(FirstDetailsWin)
+block(SCOPE_FOR VARIABLES)
+  # Reuse this test to also verify that "cmake --fresh" re-executes the steps
+  # when using the direct mode
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/FirstDetailsWin-direct-build)
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-direct-fresh")
+  run_cmake_with_options(FirstDetailsWin -D CMP0168=NEW --fresh)
+endblock()
 run_cmake_with_cmp0168(DownloadTwice)
 run_cmake_with_cmp0168(DownloadFile)
 run_cmake_with_cmp0168(IgnoreToolchainFile)
