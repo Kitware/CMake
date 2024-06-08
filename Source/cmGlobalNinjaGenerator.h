@@ -484,6 +484,8 @@ public:
 
   bool CheckCxxModuleSupport(CxxModuleSupportQuery query) override;
 
+  std::string ConvertToOutputPath(std::string path) const override;
+
 protected:
   std::vector<std::string> const& GetConfigNames() const;
 

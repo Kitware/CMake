@@ -594,6 +594,18 @@ public:
   virtual bool SupportsCrossConfigs() const { return false; }
   virtual bool SupportsDefaultConfigs() const { return false; }
 
+  virtual std::string ConvertToOutputPath(std::string path) const
+  {
+    return path;
+  }
+  virtual std::string GetConfigDirectory(std::string const& config) const
+  {
+    if (!this->IsMultiConfig() || config.empty()) {
+      return {};
+    }
+    return cmStrCat('/', config);
+  }
+
   static std::string EscapeJSON(const std::string& s);
 
   void ProcessEvaluationFiles();
