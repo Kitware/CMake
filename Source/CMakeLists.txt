@@ -140,6 +140,7 @@ add_library(
   cmCMakePresetsGraphReadJSONTestPresets.cxx
   cmCMakePresetsGraphReadJSONWorkflowPresets.cxx
   cmCommandArgumentParserHelper.cxx
+  cmCommandLineArgument.h
   cmCommonTargetGenerator.cxx
   cmCommonTargetGenerator.h
   cmComputeComponentGraph.cxx
