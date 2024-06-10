@@ -1653,9 +1653,19 @@ function(__FetchContent_populateDirect)
   # extensive customization options it supports either. Note that
   # _EP_SOURCE_DIR and _EP_BINARY_DIR are always included in the saved args,
   # so we must not set them here.
-  set(_EP_STAMP_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-stamp")
-  set(_EP_TMP_DIR   "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-tmp")
-  set(_EP_DOWNLOAD_DIR "${_EP_TMP_DIR}")
+  if(cmake_role STREQUAL "PROJECT")
+    # Put these under CMakeFiles so that they are removed by "cmake --fresh",
+    # which will cause the steps to re-run.
+    set(_EP_STAMP_DIR "${CMAKE_BINARY_DIR}/CMakeFiles/fc-stamp/${contentNameLower}")
+    set(_EP_TMP_DIR   "${CMAKE_BINARY_DIR}/CMakeFiles/fc-tmp/${contentNameLower}")
+  else()
+    # We have no CMakeFiles in script mode, so keep everything together.
+    set(_EP_STAMP_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-stamp")
+    set(_EP_TMP_DIR   "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-tmp")
+  endif()
+  # Always put downloaded things under FETCHCONTENT_BASE_DIR so that we can
+  # reuse previously downloaded content, even after a "cmake --fresh".
+  set(_EP_DOWNLOAD_DIR "${FETCHCONTENT_BASE_DIR}/${contentNameLower}-tmp")
 
   # If CMAKE_DISABLE_SOURCE_CHANGES is set to true and _EP_SOURCE_DIR is an
   # existing directory in our source tree, calling file(MAKE_DIRECTORY) on it
@@ -1667,6 +1677,7 @@ function(__FetchContent_populateDirect)
     "${_EP_BINARY_DIR}"
     "${_EP_STAMP_DIR}"
     "${_EP_TMP_DIR}"
+    "${_EP_DOWNLOAD_DIR}"
   )
 
   # We take over the stamp files and use our own for detecting whether each
@@ -1674,7 +1685,7 @@ function(__FetchContent_populateDirect)
   # using a sub-build and is not appropriate for us here.
 
   set(download_script ${_EP_TMP_DIR}/download.cmake)
-  set(update_script   ${_EP_TMP_DIR}/upload.cmake)
+  set(update_script   ${_EP_TMP_DIR}/update.cmake)
   set(patch_script    ${_EP_TMP_DIR}/patch.cmake)
   _ep_add_download_command(${contentName}
     SCRIPT_FILE ${download_script}
@@ -1690,7 +1701,7 @@ function(__FetchContent_populateDirect)
   )
 
   set(download_stamp ${_EP_STAMP_DIR}/download.stamp)
-  set(update_stamp   ${_EP_STAMP_DIR}/upload.stamp)
+  set(update_stamp   ${_EP_STAMP_DIR}/update.stamp)
   set(patch_stamp    ${_EP_STAMP_DIR}/patch.stamp)
   __FetchContent_doStepDirect(
     SCRIPT_FILE ${download_script}
