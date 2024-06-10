@@ -213,6 +213,13 @@ Options
  This removes any existing ``CMakeCache.txt`` file and associated
  ``CMakeFiles/`` directory, and recreates them from scratch.
 
+ .. versionchanged:: 3.30
+
+   For dependencies previously populated by :module:`FetchContent` with the
+   ``NEW`` setting for policy :policy:`CMP0168`, their stamp and script files
+   from any previous run will be removed. The download, update, and patch
+   steps will therefore be forced to re-execute.
+
 .. option:: -L[A][H]
 
  List non-advanced cached variables.
@@ -1381,9 +1388,8 @@ The options are:
 
 .. option:: --fresh
 
-  Perform a fresh configuration of the build tree.
-  This removes any existing ``CMakeCache.txt`` file and associated
-  ``CMakeFiles/`` directory, and recreates them from scratch.
+  Perform a fresh configuration of the build tree, which has the same effect
+  as :option:`cmake --fresh`.
 
 View Help
 =========

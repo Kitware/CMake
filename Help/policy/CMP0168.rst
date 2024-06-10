@@ -31,6 +31,11 @@ The ``NEW`` behavior has the following characteristics:
 * The ``PREFIX``, ``TMP_DIR``, ``STAMP_DIR``, ``LOG_DIR``, and ``DOWNLOAD_DIR``
   options and their associated directory properties are ignored. The
   :module:`FetchContent` module controls those locations internally.
+* :option:`cmake --fresh` will remove the stamp and script files used for
+  tracking and populating the dependency. This will force the dependency's
+  download, update, and patch steps to be re-executed. The directory used for
+  downloads is not affected by :option:`cmake --fresh`, so any previously
+  downloaded files for the ``URL`` download method can still be re-used.
 
 The ``OLD`` behavior has the following characteristics:
 
@@ -44,6 +49,9 @@ The ``OLD`` behavior has the following characteristics:
   update, or patch steps are supported.
 * If the ``QUIET`` option is used, or the :variable:`FETCHCONTENT_QUIET`
   variable is set to true, warnings will not be shown in the output.
+* :option:`cmake --fresh` has no effect on the dependency's stamp or script
+  files. Previously executed steps will only re-run if details about the
+  dependency have changed.
 
 There's a reasonably good chance that users can set the
 :variable:`CMAKE_POLICY_DEFAULT_CMP0168 <CMAKE_POLICY_DEFAULT_CMP<NNNN>>`

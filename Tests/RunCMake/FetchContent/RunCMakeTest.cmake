@@ -4,7 +4,8 @@ unset(RunCMake_TEST_NO_CLEAN)
 
 function(run_cmake_with_cmp0168 name)
   run_cmake_with_options("${name}" -D CMP0168=OLD ${ARGN})
-  run_cmake_with_options("${name}-direct" -D CMP0168=NEW ${ARGN})
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-direct")
+  run_cmake_with_options("${name}" -D CMP0168=NEW ${ARGN})
 endfunction()
 
 # Won't get to the part where CMP0168 matters
@@ -16,6 +17,14 @@ run_cmake_with_options(VarPassthroughs -D CMP0168=OLD)
 
 run_cmake_with_cmp0168(DirectIgnoresDetails)
 run_cmake_with_cmp0168(FirstDetailsWin)
+block(SCOPE_FOR VARIABLES)
+  # Reuse this test to also verify that "cmake --fresh" re-executes the steps
+  # when using the direct mode
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/FirstDetailsWin-direct-build)
+  set(RunCMake_TEST_VARIANT_DESCRIPTION "-direct-fresh")
+  run_cmake_with_options(FirstDetailsWin -D CMP0168=NEW --fresh)
+endblock()
 run_cmake_with_cmp0168(DownloadTwice)
 run_cmake_with_cmp0168(DownloadFile)
 run_cmake_with_cmp0168(IgnoreToolchainFile)
@@ -46,18 +55,16 @@ run_cmake_with_cmp0168(ManualSourceDirectoryRelative
 
 function(run_FetchContent_DirOverrides cmp0168)
   if(cmp0168 STREQUAL "NEW")
-    set(suffix "-direct")
-  else()
-    set(suffix "")
+    set(RunCMake_TEST_VARIANT_DESCRIPTION "-direct")
   endif()
-  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/DirOverrides${suffix}-build)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/DirOverrides${RunCMake_TEST_VARIANT_DESCRIPTION}-build)
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
 
-  run_cmake_with_options(DirOverrides${suffix} -D CMP0168=${cmp0168})
+  run_cmake_with_options(DirOverrides -D CMP0168=${cmp0168})
 
   set(RunCMake_TEST_NO_CLEAN 1)
-  run_cmake_with_options(DirOverridesDisconnected${suffix}
+  run_cmake_with_options(DirOverridesDisconnected
     -D CMP0168=${cmp0168}
     -D FETCHCONTENT_FULLY_DISCONNECTED=YES
   )

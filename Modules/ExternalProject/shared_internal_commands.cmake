@@ -777,7 +777,7 @@ function(_ep_add_script_commands script_var work_dir cmd)
 
   # There can be multiple COMMANDs, but we have to split those up to
   # one command per call to execute_process()
-  set(execute_process_cmd
+  string(CONCAT execute_process_cmd
     "execute_process(\n"
     "  WORKING_DIRECTORY \"${work_dir}\"\n"
     "  COMMAND_ERROR_IS_FATAL LAST\n"
