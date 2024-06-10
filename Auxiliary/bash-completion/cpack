@@ -3,7 +3,9 @@
 _cpack()
 {
     local cur prev words cword
-    if type -t _init_completion >/dev/null; then
+    if type -t _comp_initialize >/dev/null; then
+        _comp_initialize -n = || return
+    elif type -t _init_completion >/dev/null; then
         _init_completion -n = || return
     else
         # manual initialization for older bash completion versions
