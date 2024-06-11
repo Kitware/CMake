@@ -2,17 +2,22 @@
 
 <?include "cpack_variables.wxi"?>
 
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
-    RequiredVersion="3.6.3303.0">
+<Wix
+    xmlns="http://wixtoolset.org/schemas/v4/wxs"@CPACK_WIX_CUSTOM_XMLNS_EXPANDED@
+    RequiredVersion="4.0"
+    >
 
-    <Product Id="$(var.CPACK_WIX_PRODUCT_GUID)"
+    <Package
         Name="$(var.CPACK_PACKAGE_NAME)"
-        Language="1033"
         Version="$(var.CPACK_PACKAGE_VERSION)"
         Manufacturer="$(var.CPACK_PACKAGE_VENDOR)"
-        UpgradeCode="$(var.CPACK_WIX_UPGRADE_GUID)">
-
-        <Package InstallerVersion="500" Compressed="yes" InstallScope="perMachine"/>
+        UpgradeCode="$(var.CPACK_WIX_UPGRADE_GUID)"
+        ProductCode="$(var.CPACK_WIX_PRODUCT_GUID)"
+        Scope="perMachine"
+        InstallerVersion="500"
+        Language="1033"
+        Compressed="yes"
+        >
 
         <Media Id="1" Cabinet="media1.cab" EmbedCab="yes"/>
 
@@ -26,7 +31,7 @@
         <Property Id="WIXUI_INSTALLDIR" Value="INSTALL_ROOT"/>
 
         <?ifdef CPACK_WIX_PRODUCT_ICON?>
-        <Property Id="ARPPRODUCTICON">ProductIcon.ico</Property>
+        <Property Id="ARPPRODUCTICON" Value="ProductIcon.ico" />
         <Icon Id="ProductIcon.ico" SourceFile="$(var.CPACK_WIX_PRODUCT_ICON)"/>
         <?endif?>
 
@@ -38,11 +43,11 @@
         <WixVariable Id="WixUIDialogBmp" Value="$(var.CPACK_WIX_UI_DIALOG)"/>
         <?endif?>
 
-        <DirectoryRef Id="TARGETDIR">
+        <StandardDirectory Id="TARGETDIR">
             <Component Id="CMakeRegistry_InstallDir">
                 <RegistryValue Root="HKLM" Key="Software\Kitware\CMake" Name="InstallDir" Type="string" Value="[INSTALL_ROOT]" />
             </Component>
-        </DirectoryRef>
+        </StandardDirectory>
 
         <FeatureRef Id="ProductFeature">
             <ComponentRef Id="CMakeRegistry_InstallDir" />
@@ -54,5 +59,5 @@
 
         <?include "properties.wxi"?>
         <?include "product_fragment.wxi"?>
-    </Product>
+    </Package>
 </Wix>

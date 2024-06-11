@@ -2,22 +2,22 @@
 
 set -e
 
-readonly version="3.27.6"
+readonly version="3.30.0-rc1"
 
 case "$(uname -s)-$(uname -m)" in
     Linux-x86_64)
         shatool="sha256sum"
-        sha256sum="26373a283daa8490d772dc8a179450cd6d391cb2a9db8d4242fe09e361efc42e"
+        sha256sum="fe625fb078cbfe53cdaa48417a1b87be7fca19de224836e9bf0c15f80696ddd8"
         platform="linux-x86_64"
         ;;
     Linux-aarch64)
         shatool="sha256sum"
-        sha256sum="811e5040ad7f3fb4924a875373d2a1a174a01400233a81a638a989157438a5e3"
+        sha256sum="fad0c4b4562b33922ddd394e1d229bbc3ea941b41ce9f058decda40ea0def0ea"
         platform="linux-aarch64"
         ;;
     Darwin-*)
         shatool="shasum -a 256"
-        sha256sum="a66b497289ab8c769b601d93833448eaae985beb762993837a51a79916d12f23"
+        sha256sum="f927d88d54503b7dbbf31aae063e924806d51cec266293d2c2156fc2701292cd"
         platform="macos-universal"
         ;;
     *)
