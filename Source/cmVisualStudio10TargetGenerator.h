@@ -65,7 +65,7 @@ private:
                        std::unordered_map<std::string, std::string>>;
 
   std::string ConvertPath(std::string const& path, bool forceRelative);
-  std::string CalcCondition(const std::string& config) const;
+  std::string CalcCondition(const std::string& config, const std::string& platform = "") const;
   void WriteProjectConfigurations(Elem& e0);
   void WriteProjectConfigurationValues(Elem& e0);
   void WriteMSToolConfigurationValues(Elem& e1, std::string const& config);
@@ -122,10 +122,10 @@ private:
 
   bool ComputeClOptions();
   bool ComputeClOptions(std::string const& configName);
-  void WriteClOptions(Elem& e1, std::string const& config);
+  void WriteClOptions(Elem& e1, std::string const& config, std::string const& platform = "");
   bool ComputeRcOptions();
   bool ComputeRcOptions(std::string const& config);
-  void WriteRCOptions(Elem& e1, std::string const& config);
+  void WriteRCOptions(Elem& e1, std::string const& config, std::string const& platform = "");
   bool ComputeCudaOptions();
   bool ComputeCudaOptions(std::string const& config);
   void WriteCudaOptions(Elem& e1, std::string const& config);
@@ -151,7 +151,8 @@ private:
   void WriteLinkOptions(Elem& e1, std::string const& config);
   void WriteMidlOptions(Elem& e1, std::string const& config);
   void WriteAntBuildOptions(Elem& e1, std::string const& config);
-  void OutputLinkIncremental(Elem& e1, std::string const& configName);
+  void OutputLinkIncremental(Elem& e1, std::string const& configName,
+                             std::string const& platName);
   void WriteCustomRule(Elem& e0, cmSourceFile const* source,
                        cmCustomCommand const& command);
   enum class BuildInParallel
@@ -236,6 +237,7 @@ private:
   bool MSTools;
   bool Managed;
   bool NsightTegra;
+  bool BuildAsX;
   bool Android;
   bool HaveCustomCommandDepfile = false;
   std::map<std::string, bool> ScanSourceForModuleDependencies;

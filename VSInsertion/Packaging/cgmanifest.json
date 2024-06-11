@@ -1,0 +1,13 @@
+{
+    "Registrations": [
+        {
+            "Component": {
+                "Type": "git",
+                "Git": {
+                    "RepositoryUrl": "https://github.com/microsoft/CMake.git",
+                    "CommitHash": "5e984bb35232116a54de7db39788cb162ca7c263"
+                }
+            }
+        }
+    ]
+}

@@ -144,7 +144,7 @@ void nghttp2_map_print_distance(nghttp2_map *map) {
 
     idx = h2idx(bkt->hash, map->tablelenbits);
     fprintf(stderr, "@%u hash=%08x key=%d base=%zu distance=%zu\n", i,
-            bkt->hash, bkt->key, idx,
+            bkt->hash, (uint32_t)(bkt->key), idx,
             distance(map->tablelen, map->tablelenbits, bkt, idx));
   }
 }

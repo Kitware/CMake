@@ -2598,7 +2598,7 @@ static void cmListFileLexerAppend(cmListFileLexer* lexer, const char* text,
 
   /* We need to extend the buffer.  */
   temp = malloc(newSize);
-  if (lexer->token.text) {
+  if (temp != NULL && lexer->token.text) {
     memcpy(temp, lexer->token.text, lexer->token.length);
     free(lexer->token.text);
   }
@@ -2722,11 +2722,11 @@ static cmListFileLexer_BOM cmListFileLexer_ReadBOM(FILE* f)
       }
     } else if (b[0] == 0xFF && b[1] == 0xFE) {
       fpos_t p;
-      fgetpos(f, &p);
+      int getPosSuccess = fgetpos(f, &p);
       if (fread(b, 1, 2, f) == 2 && b[0] == 0 && b[1] == 0) {
         return cmListFileLexer_BOM_UTF32LE;
       }
-      if (fsetpos(f, &p) != 0) {
+      if (getPosSuccess != 0 || fsetpos(f, &p) != 0) {
         return cmListFileLexer_BOM_Broken;
       }
       return cmListFileLexer_BOM_UTF16LE;

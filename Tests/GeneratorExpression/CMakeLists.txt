@@ -231,6 +231,11 @@ set_property(TARGET importedFallback4 PROPERTY IMPORTED_IMPLIB imp_loc)
 add_library(importedFallback5 SHARED IMPORTED)
 set_property(TARGET importedFallback5 PROPERTY IMPORTED_IMPLIB imp_loc)
 
+# START MICROSOFT CHANGE
+# We build RelWithDebInfo, but Kitware only builds Debug and Release for tests.
+set_property(TARGET importedFallback2 PROPERTY MAP_IMPORTED_CONFIG_RELWITHDEBINFO SPECIAL "")
+# END MICROSOFT CHANGE
+
 add_library(importedFallback_genex STATIC IMPORTED)
 set_property(TARGET importedFallback_genex PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
 set_property(TARGET importedFallback_genex PROPERTY IMPORTED_LOCATION_RELEASE release_loc)

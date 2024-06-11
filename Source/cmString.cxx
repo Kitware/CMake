@@ -56,7 +56,7 @@ std::string const* String::str_if_stable() const
 std::string const& String::str()
 {
   if (std::string const* s = this->str_if_stable()) {
-    return *s;
+    return *s; // CodeQL [SM02311] False Positive: CodeQL wrongly detected because the above if statement checks for NULL
   }
   // Mutate to hold a std::string that is stable for the lifetime
   // of our current value.

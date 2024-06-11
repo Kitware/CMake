@@ -58,9 +58,12 @@ int testEncode(int argc, char* argv[])
   /* Test MD5 digest.  */
   {
     kwsysMD5* md5 = kwsysMD5_New();
-    result |= testMD5_1(md5);
-    result |= testMD5_2(md5);
-    kwsysMD5_Delete(md5);
+    if (md5 != NULL)
+    {
+      result |= testMD5_1(md5);
+      result |= testMD5_2(md5);
+      kwsysMD5_Delete(md5);
+    }
   }
 
   return result;

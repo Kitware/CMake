@@ -1120,7 +1120,7 @@ int RegExpFind::regmatch(const char* prog)
 
         const char* save;
 
-        if (OP(next) != BRANCH) // No choice.
+        if (next != NULL && OP(next) != BRANCH) // No choice.
           next = OPERAND(scan); // Avoid recursion.
         else {
           do {
@@ -1146,7 +1146,7 @@ int RegExpFind::regmatch(const char* prog)
         // what character comes next.
         //
         nextch = '\0';
-        if (OP(next) == EXACTLY)
+        if (next != NULL && OP(next) == EXACTLY)
           nextch = *OPERAND(next);
         min_no = (OP(scan) == STAR) ? 0 : 1;
         save = reginput;

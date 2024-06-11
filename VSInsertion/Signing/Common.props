@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <EnlistmentRoot>$(MSBuildThisFileDirectory)</EnlistmentRoot>
+
+        <InternalAPIs>$(EnlistmentRoot)InternalAPIs\</InternalAPIs>
+        <OutDir>$(EnlistmentRoot)out\Signed\</OutDir>
+        <OutputPath>$(OutDir)</OutputPath>
+
+        <IntDir>$(EnlistmentRoot)out\intermediate\$(SolutionName)\$(Configuration)\$(ProjectName)\</IntDir>
+        <IntermediateOutputPath>$(IntDir)</IntermediateOutputPath>
+        <BaseIntermediateOutputPath>$(IntDir)</BaseIntermediateOutputPath>
+
+        <NuGetPackages>$(EnlistmentRoot)NuGetPackages\</NuGetPackages>
+
+        <UseCommonOutputDirectory>True</UseCommonOutputDirectory>
+    </PropertyGroup>
+
+    <ItemDefinitionGroup>
+        <Reference>
+            <Private>False</Private>
+            <UseInBuild>True</UseInBuild>
+            <CopyLocalSatelliteAssemblies>True</CopyLocalSatelliteAssemblies>
+            <CopyLocalDependencies>True</CopyLocalDependencies>
+            <UseDependenciesInBuild>True</UseDependenciesInBuild>
+        </Reference>
+    </ItemDefinitionGroup>
+
+</Project>

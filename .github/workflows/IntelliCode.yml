@@ -1,0 +1,30 @@
+name: Train IntelliCode
+
+on:
+  workflow_dispatch:
+
+jobs:
+  Train:
+    runs-on: windows-latest
+
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    
+    - name: setup-msbuild
+      uses: microsoft/setup-msbuild@v1.0.1
+
+    # Runs CMake generation for VS2019 to generate .vcxproj files (Optional, currently recommended if CMake uses any complex configurations)
+    - name: run-cmake
+      uses: lukka/run-cmake@v2.5
+      with:
+        cmakeGenerator: VS16Win64
+        buildDirectory: ${{ github.workspace }}\build
+
+    # Trains an IntelliCode model
+    - name: IntelliCode Team Completions
+      uses: microsoft/vs-intellicode@v1.0
+      with:
+        logs: debug

@@ -745,6 +745,10 @@ void cmake::ProcessCacheArg(const std::string& var, const std::string& value,
     }
   }
 
+  if (var == "MSVC_BUILD_AS_X") {
+    this->BuildAsX = true;
+  }
+
   this->AddCacheEntry(
     var, value, "No help, variable specified on the command line.", type);
 

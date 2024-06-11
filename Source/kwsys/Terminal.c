@@ -172,7 +172,7 @@ static int kwsysTerminalStreamIsVT100(FILE* stream, int default_vt100,
   {
     const char* clicolor_force = getenv("CLICOLOR_FORCE");
     if (clicolor_force && *clicolor_force &&
-        strcmp(clicolor_force, "0") != 0) {
+        strcmp(clicolor_force, "0") != 0) { // CodeQL [SM02345] False Positive: CodeQL wrongly detected because the if conditions check for NULL
       return 1;
     }
   }

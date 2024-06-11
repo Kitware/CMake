@@ -372,6 +372,12 @@ public:
   //! Is this cmake running as a result of a TRY_COMPILE command
   bool GetIsInTryCompile() const;
 
+  //! Return if building as ARM64X is set
+  bool GetBuildAsX()
+  {
+    return this->BuildAsX;
+  }
+
 #ifndef CMAKE_BOOTSTRAP
   void SetWarningFromPreset(const std::string& name,
                             const cm::optional<bool>& warning,
@@ -707,6 +713,7 @@ protected:
   std::string GeneratorInstance;
   std::string GeneratorPlatform;
   std::string GeneratorToolset;
+  bool BuildAsX = false;
   bool GeneratorInstanceSet = false;
   bool GeneratorPlatformSet = false;
   bool GeneratorToolsetSet = false;

@@ -101,6 +101,11 @@ std::string const& cmGlobalVisualStudioGenerator::GetPlatformName() const
   return this->DefaultPlatformName;
 }
 
+bool cmGlobalVisualStudioGenerator::GetBuildAsX() const
+{
+  return this->CMakeInstance->GetBuildAsX();
+}
+
 const char* cmGlobalVisualStudioGenerator::GetIDEVersion() const
 {
   switch (this->Version) {
