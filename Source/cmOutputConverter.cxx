@@ -450,7 +450,8 @@ bool cmOutputConverter::Shell_CharNeedsQuotes(char c, int flags)
     }
   } else {
     /* On Windows several special characters need quotes to preserve them.  */
-    if (Shell_CharNeedsQuotesOnWindows(c)) {
+    if (Shell_CharNeedsQuotesOnWindows(c) ||
+        (c == ';' && (flags & Shell_Flag_VSIDE))) {
       return true;
     }
   }
@@ -670,11 +671,8 @@ std::string cmOutputConverter::Shell_GetArgument(cm::string_view in, int flags)
       }
     } else if (*cit == ';') {
       if (flags & Shell_Flag_VSIDE) {
-        /* In a VS IDE a semicolon is written ";".  If this is written
-           in an un-quoted argument it starts a quoted segment,
-           inserts the ; and ends the segment.  If it is written in a
-           quoted argument it ends quoting, inserts the ; and restarts
-           quoting.  Either way the ; is isolated.  */
+        /* In VS a semicolon is written `";"` inside a quoted argument.
+           It ends quoting, inserts the `;`, and restarts quoting.  */
         out += "\";\"";
       } else {
         /* Otherwise a semicolon is written just ;. */
