@@ -1,5 +1,5 @@
 extern int pass2b(void);
-int main()
+int main(void)
 {
   return pass2b();
 }

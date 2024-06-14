@@ -25,3 +25,6 @@ The supported values for ``<type>`` are:
 
 ``RESOURCES``
   .. versionadded:: 3.28
+
+``XPC_SERVICES``
+  .. versionadded:: 3.29

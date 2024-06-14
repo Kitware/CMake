@@ -27,7 +27,7 @@ foreach(line IN LISTS tgt_projects_strings)
   endif()
 endforeach()
 
-string(REPLACE "\\" "/" unity_source_line ${unity_source_line})
+string(REPLACE "\\" "/" unity_source_line "${unity_source_line}")
 string(FIND "${unity_source_line}" "CMakeFiles/tgt.dir/Unity/unity_0_c.c" unity_source_file_position)
 if (unity_source_file_position EQUAL "-1")
   set(RunCMake_TEST_FAILED "Generated project should include the generated unity source file.")

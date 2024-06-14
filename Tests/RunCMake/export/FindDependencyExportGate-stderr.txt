@@ -1,0 +1,4 @@
+^CMake Error at FindDependencyExportGate\.cmake:[0-9]+ \(export\):
+  export Unknown argument: "EXPORT_PACKAGE_DEPENDENCIES"\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cstddef>
 #include <iosfwd>
 #include <set>
 #include <string>
@@ -33,6 +34,11 @@ public:
 
   void Initialize() override;
 
+  //! Set all the submit arguments
+  int ProcessCommandLineArguments(
+    const std::string& currentArg, size_t& idx,
+    const std::vector<std::string>& allArgs) override;
+
   /** Specify a set of parts (by name) to submit.  */
   void SelectParts(std::set<cmCTest::Part> const& parts);
 
@@ -44,7 +50,12 @@ public:
 
   void SetHttpHeaders(std::vector<std::string> const& v)
   {
-    this->HttpHeaders = v;
+    if (this->CommandLineHttpHeaders.empty()) {
+      this->HttpHeaders = v;
+    } else {
+      this->HttpHeaders = this->CommandLineHttpHeaders;
+      this->HttpHeaders.insert(this->HttpHeaders.end(), v.begin(), v.end());
+    }
   }
 
 private:
@@ -75,5 +86,6 @@ private:
   bool HasWarnings;
   bool HasErrors;
   std::set<std::string> Files;
+  std::vector<std::string> CommandLineHttpHeaders;
   std::vector<std::string> HttpHeaders;
 };

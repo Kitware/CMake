@@ -1,0 +1,2 @@
+add_library(l2 IMPORTED INTERFACE)
+set(P2_FOUND TRUE)

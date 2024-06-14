@@ -28,6 +28,7 @@ set(librhash_sources
   librhash/sha512.c
   librhash/sha512.h
   librhash/ustd.h
+  librhash/util.c
   librhash/util.h
   )
 
@@ -36,5 +37,6 @@ include_directories(
   )
 
 add_library(cmlibrhash ${librhash_sources})
+target_compile_definitions(cmlibrhash PRIVATE NO_IMPORT_EXPORT)
 
 install(FILES COPYING DESTINATION ${CMAKE_DOC_DIR}/cmlibrhash)

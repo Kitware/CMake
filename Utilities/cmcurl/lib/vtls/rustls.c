@@ -39,6 +39,7 @@
 #include "select.h"
 #include "strerror.h"
 #include "multiif.h"
+#include "connect.h" /* for the connect timeout */
 
 struct rustls_ssl_backend_data
 {
@@ -73,14 +74,6 @@ cr_data_pending(struct Curl_cfilter *cf, const struct Curl_easy *data)
   DEBUGASSERT(ctx && ctx->backend);
   backend = (struct rustls_ssl_backend_data *)ctx->backend;
   return backend->data_pending;
-}
-
-static CURLcode
-cr_connect(struct Curl_cfilter *cf UNUSED_PARAM,
-           struct Curl_easy *data UNUSED_PARAM)
-{
-  infof(data, "rustls_connect: unimplemented");
-  return CURLE_SSL_CONNECT_ERROR;
 }
 
 struct io_ctx {
@@ -163,7 +156,7 @@ static ssize_t tls_recv_more(struct Curl_cfilter *cf,
     size_t errorlen;
     rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
     failf(data, "rustls_connection_process_new_packets: %.*s",
-      errorlen, errorbuf);
+      (int)errorlen, errorbuf);
     *err = map_error(rresult);
     return -1;
   }
@@ -232,7 +225,7 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       char errorbuf[255];
       size_t errorlen;
       rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
-      failf(data, "rustls_connection_read: %.*s", errorlen, errorbuf);
+      failf(data, "rustls_connection_read: %.*s", (int)errorlen, errorbuf);
       *err = CURLE_READ_ERROR;
       nread = -1;
       goto out;
@@ -308,7 +301,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                                       &plainwritten);
     if(rresult != RUSTLS_RESULT_OK) {
       rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
-      failf(data, "rustls_connection_write: %.*s", errorlen, errorbuf);
+      failf(data, "rustls_connection_write: %.*s", (int)errorlen, errorbuf);
       *err = CURLE_WRITE_ERROR;
       return -1;
     }
@@ -386,7 +379,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* CURLOPT_CAINFO_BLOB overrides CURLOPT_CAINFO */
     (ca_info_blob ? NULL : conn_config->CAfile);
   const bool verifypeer = conn_config->verifypeer;
-  const char *hostname = connssl->hostname;
+  const char *hostname = connssl->peer.hostname;
   char errorbuf[256];
   size_t errorlen;
   int result;
@@ -458,16 +451,15 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
   backend->config = rustls_client_config_builder_build(config_builder);
   DEBUGASSERT(rconn == NULL);
   {
-    char *snihost = Curl_ssl_snihost(data, hostname, NULL);
-    if(!snihost) {
-      failf(data, "rustls: failed to get SNI");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-    result = rustls_client_connection_new(backend->config, snihost, &rconn);
+    /* rustls claims to manage ip address hostnames as well here. So,
+     * if we have an SNI, we use it, otherwise we pass the hostname */
+    char *server = connssl->peer.sni?
+                   connssl->peer.sni : connssl->peer.hostname;
+    result = rustls_client_connection_new(backend->config, server, &rconn);
   }
   if(result != RUSTLS_RESULT_OK) {
     rustls_error(result, errorbuf, sizeof(errorbuf), &errorlen);
-    failf(data, "rustls_client_connection_new: %.*s", errorlen, errorbuf);
+    failf(data, "rustls_client_connection_new: %.*s", (int)errorlen, errorbuf);
     return CURLE_COULDNT_CONNECT;
   }
   rustls_connection_set_userdata(rconn, backend);
@@ -486,9 +478,20 @@ cr_set_negotiated_alpn(struct Curl_cfilter *cf, struct Curl_easy *data,
   Curl_alpn_set_negotiated(cf, data, protocol, len);
 }
 
+/* Given an established network connection, do a TLS handshake.
+ *
+ * If `blocking` is true, this function will block until the handshake is
+ * complete. Otherwise it will return as soon as I/O would block.
+ *
+ * For the non-blocking I/O case, this function will set `*done` to true
+ * once the handshake is complete. This function never reads the value of
+ * `*done*`.
+ */
 static CURLcode
-cr_connect_nonblocking(struct Curl_cfilter *cf,
-                       struct Curl_easy *data, bool *done)
+cr_connect_common(struct Curl_cfilter *cf,
+                  struct Curl_easy *data,
+                  bool blocking,
+                  bool *done)
 {
   struct ssl_connect_data *const connssl = cf->ctx;
   curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
@@ -502,6 +505,8 @@ cr_connect_nonblocking(struct Curl_cfilter *cf,
   bool wants_write;
   curl_socket_t writefd;
   curl_socket_t readfd;
+  timediff_t timeout_ms;
+  timediff_t socket_check_timeout;
 
   DEBUGASSERT(backend);
 
@@ -539,11 +544,28 @@ cr_connect_nonblocking(struct Curl_cfilter *cf,
     writefd = wants_write?sockfd:CURL_SOCKET_BAD;
     readfd = wants_read?sockfd:CURL_SOCKET_BAD;
 
-    what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd, 0);
+    /* check allowed time left */
+    timeout_ms = Curl_timeleft(data, NULL, TRUE);
+
+    if(timeout_ms < 0) {
+      /* no need to continue if time already is up */
+      failf(data, "rustls: operation timed out before socket check");
+      return CURLE_OPERATION_TIMEDOUT;
+    }
+
+    socket_check_timeout = blocking?timeout_ms:0;
+
+    what = Curl_socket_check(
+      readfd, CURL_SOCKET_BAD, writefd, socket_check_timeout);
     if(what < 0) {
       /* fatal error */
       failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
       return CURLE_SSL_CONNECT_ERROR;
+    }
+    if(blocking && 0 == what) {
+      failf(data, "rustls connection timeout after %"
+        CURL_FORMAT_TIMEDIFF_T " ms", socket_check_timeout);
+      return CURLE_OPERATION_TIMEDOUT;
     }
     if(0 == what) {
       infof(data, "Curl_socket_check: %s would block",
@@ -589,32 +611,43 @@ cr_connect_nonblocking(struct Curl_cfilter *cf,
   DEBUGASSERT(false);
 }
 
-/* returns a bitmap of flags for this connection's first socket indicating
-   whether we want to read or write */
-static int
-cr_get_select_socks(struct Curl_cfilter *cf, struct Curl_easy *data,
-                    curl_socket_t *socks)
+static CURLcode
+cr_connect_nonblocking(struct Curl_cfilter *cf,
+                       struct Curl_easy *data, bool *done)
 {
-  struct ssl_connect_data *const connssl = cf->ctx;
-  curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
-  struct rustls_ssl_backend_data *const backend =
-    (struct rustls_ssl_backend_data *)connssl->backend;
-  struct rustls_connection *rconn = NULL;
+  return cr_connect_common(cf, data, false, done);
+}
 
-  (void)data;
-  DEBUGASSERT(backend);
-  rconn = backend->conn;
+static CURLcode
+cr_connect_blocking(struct Curl_cfilter *cf UNUSED_PARAM,
+           struct Curl_easy *data UNUSED_PARAM)
+{
+  bool done; /* unused */
+  return cr_connect_common(cf, data, true, &done);
+}
 
-  if(rustls_connection_wants_write(rconn)) {
-    socks[0] = sockfd;
-    return GETSOCK_WRITESOCK(0);
+static void cr_adjust_pollset(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              struct easy_pollset *ps)
+{
+  if(!cf->connected) {
+    curl_socket_t sock = Curl_conn_cf_get_socket(cf->next, data);
+    struct ssl_connect_data *const connssl = cf->ctx;
+    struct rustls_ssl_backend_data *const backend =
+      (struct rustls_ssl_backend_data *)connssl->backend;
+    struct rustls_connection *rconn = NULL;
+
+    (void)data;
+    DEBUGASSERT(backend);
+    rconn = backend->conn;
+
+    if(rustls_connection_wants_write(rconn)) {
+      Curl_pollset_add_out(data, ps, sock);
+    }
+    if(rustls_connection_wants_read(rconn)) {
+      Curl_pollset_add_in(data, ps, sock);
+    }
   }
-  if(rustls_connection_wants_read(rconn)) {
-    socks[0] = sockfd;
-    return GETSOCK_READSOCK(0);
-  }
-
-  return GETSOCK_BLANK;
 }
 
 static void *
@@ -675,9 +708,9 @@ const struct Curl_ssl Curl_ssl_rustls = {
   cr_data_pending,                 /* data_pending */
   Curl_none_random,                /* random */
   Curl_none_cert_status_request,   /* cert_status_request */
-  cr_connect,                      /* connect */
+  cr_connect_blocking,             /* connect */
   cr_connect_nonblocking,          /* connect_nonblocking */
-  cr_get_select_socks,             /* get_select_socks */
+  cr_adjust_pollset,               /* adjust_pollset */
   cr_get_internals,                /* get_internals */
   cr_close,                        /* close_one */
   Curl_none_close_all,             /* close_all */

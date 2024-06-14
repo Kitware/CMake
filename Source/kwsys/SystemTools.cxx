@@ -412,18 +412,6 @@ inline void Realpath(const std::string& path, std::string& resolved_path,
 }
 #endif
 
-#if !defined(_WIN32) && defined(__COMO__)
-// Hack for como strict mode to avoid defining _SVID_SOURCE or _BSD_SOURCE.
-extern "C" {
-extern FILE* popen(__const char* __command, __const char* __modes) __THROW;
-extern int pclose(FILE* __stream) __THROW;
-extern char* realpath(__const char* __restrict __name,
-                      char* __restrict __resolved) __THROW;
-extern char* strdup(__const char* __s) __THROW;
-extern int putenv(char* __string) __THROW;
-}
-#endif
-
 namespace KWSYS_NAMESPACE {
 
 double SystemTools::GetTime()
@@ -777,12 +765,16 @@ const char* SystemTools::GetEnv(const std::string& key)
 bool SystemTools::GetEnv(const char* key, std::string& result)
 {
 #if defined(_WIN32)
-  const std::wstring wkey = Encoding::ToWide(key);
-  const wchar_t* wv = _wgetenv(wkey.c_str());
-  if (wv) {
-    result = Encoding::ToNarrow(wv);
-    return true;
+  auto wide_key = Encoding::ToWide(key);
+  auto result_size = GetEnvironmentVariableW(wide_key.data(), nullptr, 0);
+  if (result_size <= 0) {
+    return false;
   }
+  std::wstring wide_result;
+  wide_result.resize(result_size - 1);
+  GetEnvironmentVariableW(wide_key.data(), &wide_result[0], result_size);
+  result = Encoding::ToNarrow(wide_result);
+  return true;
 #else
   const char* v = getenv(key);
   if (v) {
@@ -2802,14 +2794,14 @@ Status SystemTools::RemoveFile(std::string const& source)
 
 Status SystemTools::RemoveADirectory(std::string const& source)
 {
-  // Add write permission to the directory so we can modify its
-  // content to remove files and directories from it.
+  // Add read and write permission to the directory so we can read
+  // and modify its content to remove files and directories from it.
   mode_t mode = 0;
   if (SystemTools::GetPermissions(source, mode)) {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-    mode |= S_IWRITE;
+    mode |= S_IREAD | S_IWRITE;
 #else
-    mode |= S_IWUSR;
+    mode |= S_IRUSR | S_IWUSR;
 #endif
     SystemTools::SetPermissions(source, mode);
   }

@@ -37,6 +37,13 @@ endif()
 # any makefiles or projects.
 if(NOT CMAKE_CXX_COMPILER_WORKS)
   PrintTestCompilerStatus("CXX")
+  # FIXME: Use a block() to isolate the variables we set/unset here.
+  if(DEFINED CMAKE_CXX_SCAN_FOR_MODULES)
+    set(__CMAKE_SAVED_CXX_SCAN_FOR_MODULES "${CMAKE_CXX_SCAN_FOR_MODULES}")
+  else()
+    unset(__CMAKE_SAVED_CXX_SCAN_FOR_MODULES)
+  endif()
+  set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
   __TestCompiler_setTryCompileTargetType()
   string(CONCAT __TestCompiler_testCXXCompilerSource
     "#ifndef __cplusplus\n"
@@ -49,6 +56,12 @@ if(NOT CMAKE_CXX_COMPILER_WORKS)
   try_compile(CMAKE_CXX_COMPILER_WORKS
     SOURCE_FROM_VAR testCXXCompiler.cxx __TestCompiler_testCXXCompilerSource
     OUTPUT_VARIABLE __CMAKE_CXX_COMPILER_OUTPUT)
+  if(DEFINED __CMAKE_SAVED_CXX_SCAN_FOR_MODULES)
+    set(CMAKE_CXX_SCAN_FOR_MODULES "${__CMAKE_SAVED_CXX_SCAN_FOR_MODULES}")
+    unset(__CMAKE_SAVED_CXX_SCAN_FOR_MODULES)
+  else()
+    unset(CMAKE_CXX_SCAN_FOR_MODULES)
+  endif()
   unset(__TestCompiler_testCXXCompilerSource)
   # Move result from cache to normal variable.
   set(CMAKE_CXX_COMPILER_WORKS ${CMAKE_CXX_COMPILER_WORKS})

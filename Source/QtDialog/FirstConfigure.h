@@ -24,6 +24,7 @@ enum FirstConfigurePages
 
 enum class CompilerOption
 {
+  DefaultPreset,
   DefaultNative,
   SpecifyNative,
   ToolchainFile,

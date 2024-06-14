@@ -1,3 +1,3 @@
-void c()
+void c(void)
 {
 }

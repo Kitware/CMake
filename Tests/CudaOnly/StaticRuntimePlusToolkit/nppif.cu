@@ -8,7 +8,6 @@
 #endif
 
 #include <cstdio>
-#include <iostream>
 
 #include <assert.h>
 #include <cuda_runtime_api.h>

@@ -345,6 +345,10 @@ void cmCTestTestHandler::Initialize()
   this->ExcludeFixtureRegExp.clear();
   this->ExcludeFixtureSetupRegExp.clear();
   this->ExcludeFixtureCleanupRegExp.clear();
+  this->TestListFile.clear();
+  this->ExcludeTestListFile.clear();
+  this->TestsToRunByName.reset();
+  this->TestsToExcludeByName.reset();
 
   this->TestsToRunString.clear();
   this->UseUnion = false;
@@ -546,9 +550,21 @@ bool cmCTestTestHandler::ProcessOptions()
       return false;
     }
   }
-  if (this->GetOption("ParallelLevel")) {
-    this->CTest->SetParallelLevel(
-      std::stoi(*this->GetOption("ParallelLevel")));
+  if (cmValue parallelLevel = this->GetOption("ParallelLevel")) {
+    if (parallelLevel.IsEmpty()) {
+      // An empty value tells ctest to choose a default.
+      this->CTest->SetParallelLevel(cm::nullopt);
+    } else {
+      // A non-empty value must be a non-negative integer.
+      unsigned long plevel = 0;
+      if (!cmStrToULong(*parallelLevel, &plevel)) {
+        cmCTestLog(this->CTest, ERROR_MESSAGE,
+                   "ParallelLevel invalid value: " << *parallelLevel
+                                                   << std::endl);
+        return false;
+      }
+      this->CTest->SetParallelLevel(plevel);
+    }
   }
 
   if (this->GetOption("StopOnFailure")) {
@@ -584,6 +600,14 @@ bool cmCTestTestHandler::ProcessOptions()
   val = this->GetOption("ResourceSpecFile");
   if (val) {
     this->ResourceSpecFile = *val;
+  }
+  val = this->GetOption("TestListFile");
+  if (val) {
+    this->TestListFile = val;
+  }
+  val = this->GetOption("ExcludeTestListFile");
+  if (val) {
+    this->ExcludeTestListFile = val;
   }
   this->SetRerunFailed(cmIsOn(this->GetOption("RerunFailed")));
 
@@ -933,6 +957,21 @@ bool cmCTestTestHandler::ComputeTestList()
         continue;
       }
     }
+
+    if (this->TestsToRunByName) {
+      if (this->TestsToRunByName->find(tp.Name) ==
+          this->TestsToRunByName->end()) {
+        continue;
+      }
+    }
+
+    if (this->TestsToExcludeByName) {
+      if (this->TestsToExcludeByName->find(tp.Name) !=
+          this->TestsToExcludeByName->end()) {
+        continue;
+      }
+    }
+
     tp.Index = cnt; // save the index into the test list for this test
     finalList.push_back(tp);
   }
@@ -1334,10 +1373,9 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
   this->StartTestTime = std::chrono::system_clock::now();
   auto elapsed_time_start = std::chrono::steady_clock::now();
 
-  auto parallel = cm::make_unique<cmCTestMultiProcessHandler>();
-  parallel->SetCTest(this->CTest);
+  auto parallel =
+    cm::make_unique<cmCTestMultiProcessHandler>(this->CTest, this);
   parallel->SetParallelLevel(this->CTest->GetParallelLevel());
-  parallel->SetTestHandler(this);
   if (this->RepeatMode != cmCTest::Repeat::Never) {
     parallel->SetRepeatMode(this->RepeatMode, this->RepeatCount);
   } else {
@@ -1381,15 +1419,15 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
         }
       }
     }
-    tests[p.Index] = depends;
+    tests[p.Index].Depends = depends;
     properties[p.Index] = &p;
   }
   parallel->SetResourceSpecFile(this->ResourceSpecFile);
-  parallel->SetTests(tests, properties);
+  parallel->SetTests(std::move(tests), std::move(properties));
   parallel->SetPassFailVectors(&passed, &failed);
   this->TestResults.clear();
   parallel->SetTestResults(&this->TestResults);
-  parallel->CheckResourcesAvailable();
+  parallel->CheckResourceAvailability();
 
   if (this->CTest->ShouldPrintLabels()) {
     parallel->PrintLabels();
@@ -1818,6 +1856,21 @@ bool cmCTestTestHandler::GetListOfTests()
   if (this->ResourceSpecFile.empty() && specFile) {
     this->ResourceSpecFile = *specFile;
   }
+
+  if (!this->TestListFile.empty()) {
+    this->TestsToRunByName = this->ReadTestListFile(this->TestListFile);
+    if (!this->TestsToRunByName) {
+      return false;
+    }
+  }
+  if (!this->ExcludeTestListFile.empty()) {
+    this->TestsToExcludeByName =
+      this->ReadTestListFile(this->ExcludeTestListFile);
+    if (!this->TestsToExcludeByName) {
+      return false;
+    }
+  }
+
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Done constructing a list of tests" << std::endl,
                      this->Quiet);
@@ -1984,6 +2037,29 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
                  << " while generating list of previously failed tests."
                  << std::endl);
   }
+}
+
+cm::optional<std::set<std::string>> cmCTestTestHandler::ReadTestListFile(
+  std::string const& testListFileName) const
+{
+  cm::optional<std::set<std::string>> result;
+  cmsys::ifstream ifs(testListFileName.c_str());
+  if (ifs) {
+    std::set<std::string> testNames;
+    std::string line;
+    while (cmSystemTools::GetLineFromStream(ifs, line)) {
+      if (!line.empty()) {
+        testNames.insert(line);
+      }
+    }
+    result = std::move(testNames);
+  } else {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Problem reading test list file: "
+                 << testListFileName
+                 << " while generating list of tests to run." << std::endl);
+  }
+  return result;
 }
 
 void cmCTestTestHandler::RecordCustomTestMeasurements(cmXMLWriter& xml,
@@ -2233,7 +2309,7 @@ bool cmCTestTestHandler::SetTestsProperties(
           } else if (key == "RESOURCE_LOCK"_s) {
             cmList lval{ val };
 
-            rt.LockedResources.insert(lval.begin(), lval.end());
+            rt.ProjectResources.insert(lval.begin(), lval.end());
           } else if (key == "FIXTURES_SETUP"_s) {
             cmList lval{ val };
 

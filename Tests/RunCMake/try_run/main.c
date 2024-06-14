@@ -1,4 +1,4 @@
-extern void func();
+extern void func(void);
 
 int main(void)
 {

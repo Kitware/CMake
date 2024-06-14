@@ -1,0 +1,10 @@
+CMake Warning \(dev\) at CMP0159-Common.cmake:[0-9]+ \(file\):
+  Policy CMP0159 is not set: file\(STRINGS\) with REGEX updates
+  CMAKE_MATCH_<n>\.  Run "cmake --help-policy CMP0159" for policy details\.
+  Use the cmake_policy command to set the policy and suppress this warning\.
+
+  For compatibility, CMake is leaving CMAKE_MATCH_<n> unchanged\.
+Call Stack \(most recent call first\):
+  CMP0159-WARN.cmake:[0-9]+ \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.

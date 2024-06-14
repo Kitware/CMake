@@ -16,7 +16,7 @@ references useful guides and recipes.
 CMake is maintained and supported by `Kitware`_ and developed in
 collaboration with a productive community of contributors.
 
-.. _`Kitware`: http://www.kitware.com/cmake
+.. _`Kitware`: https://www.kitware.com/cmake
 
 License
 =======
@@ -106,7 +106,7 @@ To build the documentation, install `Sphinx`_ and configure CMake with
 "man" builder.  Add ``-DSPHINX_EXECUTABLE=/path/to/sphinx-build`` if the
 tool is not found automatically.
 
-.. _`Sphinx`: http://sphinx-doc.org
+.. _`Sphinx`: https://sphinx-doc.org
 
 Reporting Bugs
 ==============

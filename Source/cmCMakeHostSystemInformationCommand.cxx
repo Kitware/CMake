@@ -178,7 +178,7 @@ cm::optional<std::pair<std::string, std::string>> ParseOSReleaseLine(
         if (std::isalpha(ch) || ch == '_') {
           key += ch;
           state = PARSE_KEY;
-        } else if (!std::isspace(ch)) {
+        } else if (!cmIsSpace(ch)) {
           state = IGNORE_REST;
         }
         break;
@@ -238,7 +238,7 @@ cm::optional<std::pair<std::string, std::string>> ParseOSReleaseLine(
         break;
 
       case PARSE_VALUE:
-        if (ch == '#' || std::isspace(ch)) {
+        if (ch == '#' || cmIsSpace(ch)) {
           state = IGNORE_REST;
         } else {
           value += ch;
@@ -270,7 +270,7 @@ std::map<std::string, std::string> GetOSReleaseVariables(
 
   std::map<std::string, std::string> data;
   // Based on
-  // https://www.freedesktop.org/software/systemd/man/os-release.html
+  // https://www.freedesktop.org/software/systemd/man/latest/os-release.html
   for (auto name : { "/etc/os-release"_s, "/usr/lib/os-release"_s }) {
     const auto& filename = cmStrCat(sysroot, name);
     if (cmSystemTools::FileExists(filename)) {

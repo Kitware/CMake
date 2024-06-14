@@ -2,7 +2,11 @@
 ADD_AUTOGEN_TEST(AutogenOriginDependsOff autogenOriginDependsOff)
 ADD_AUTOGEN_TEST(AutogenOriginDependsOn)
 ADD_AUTOGEN_TEST(AutogenTargetDepends)
+
+set(Autogen_CTEST_OPTIONS --build-target Exe)
 ADD_AUTOGEN_TEST(AutogenTimestampDeps)
+unset(Autogen_CTEST_OPTIONS)
+
 ADD_AUTOGEN_TEST(AutoMocGeneratedFile)
 ADD_AUTOGEN_TEST(Complex QtAutogen)
 ADD_AUTOGEN_TEST(GlobalAutogenSystemUseInclude)

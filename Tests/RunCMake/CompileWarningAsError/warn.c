@@ -1,4 +1,4 @@
-static void unused_function();
+static void unused_function(void);
 
 #ifdef __SUNPRO_C
 KandR(x) int x;

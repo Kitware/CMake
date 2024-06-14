@@ -21,7 +21,8 @@ an empty string to initialize and update all git submodules.
 The ``NEW`` behavior for this policy is for ``GIT_SUBMODULES`` when set to
 an empty string to initialize and update no git submodules.
 
-This policy was introduced in CMake version 3.16.  Use the
-:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
-Unlike most policies, CMake version |release| does *not* warn
-when this policy is not set and simply uses ``OLD`` behavior.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.16
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: STANDARD_ADVICE.txt
+
+.. include:: DEPRECATED.txt

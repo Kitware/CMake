@@ -1,5 +1,5 @@
-extern int foo();
-int main()
+extern int foo(void);
+int main(void)
 {
   return foo();
 }

@@ -19,9 +19,8 @@ working directory of CMake.  The ``NEW`` behavior for this policy is to
 interpret relative paths with respect to the current source or binary
 directory of the caller.
 
-This policy was introduced in CMake version 3.10.  CMake version
-|release| warns when the policy is not set and uses ``OLD`` behavior.
-Use the :command:`cmake_policy` command to set it to ``OLD`` or ``NEW``
-explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.10
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

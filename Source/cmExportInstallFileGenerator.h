@@ -12,12 +12,13 @@
 #include <vector>
 
 #include "cmExportFileGenerator.h"
+#include "cmInstallExportGenerator.h"
 #include "cmStateTypes.h"
 
+class cmExportSet;
 class cmFileSet;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
-class cmInstallExportGenerator;
 class cmInstallTargetGenerator;
 class cmTargetExport;
 
@@ -122,6 +123,11 @@ protected:
                                           std::ostream&) const override;
   bool GenerateImportCxxModuleConfigTargetInclusion(std::string const&,
                                                     std::string const&);
+
+  cmExportSet* GetExportSet() const override
+  {
+    return this->IEGen->GetExportSet();
+  }
 
   cmInstallExportGenerator* IEGen;
 

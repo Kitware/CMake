@@ -7,7 +7,7 @@ void vcl_stuff();
 #ifdef CMAKE_PAREN
 void testOdd();
 #endif
-int main()
+int main(void)
 {
   printf("Hello from subdirectory\n");
   secondone();

@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+#include <cm/optional>
+
 class cmInstallExportGenerator;
 class cmLocalGenerator;
 class cmTargetExport;
@@ -31,6 +33,9 @@ public:
 
   void AddInstallation(cmInstallExportGenerator const* installation);
 
+  void SetXcFrameworkLocation(const std::string& name,
+                              const std::string& location);
+
   std::string const& GetName() const { return this->Name; }
 
   std::vector<std::unique_ptr<cmTargetExport>> const& GetTargetExports() const
@@ -43,10 +48,36 @@ public:
     return &this->Installations;
   }
 
+  enum class PackageDependencyExportEnabled
+  {
+    Auto,
+    Off,
+    On,
+  };
+
+  struct PackageDependency
+  {
+    PackageDependencyExportEnabled Enabled =
+      PackageDependencyExportEnabled::Auto;
+    std::vector<std::string> ExtraArguments;
+    cm::optional<unsigned int> SpecifiedIndex;
+    cm::optional<unsigned int> FindPackageIndex;
+  };
+
+  PackageDependency& GetPackageDependencyForSetup(const std::string& name);
+
+  const std::map<std::string, PackageDependency>& GetPackageDependencies()
+    const
+  {
+    return this->PackageDependencies;
+  }
+
 private:
   std::vector<std::unique_ptr<cmTargetExport>> TargetExports;
   std::string Name;
   std::vector<cmInstallExportGenerator const*> Installations;
+  std::map<std::string, PackageDependency> PackageDependencies;
+  unsigned int NextPackageDependencyIndex = 0;
 };
 
 /// A name -> cmExportSet map with overloaded operator[].

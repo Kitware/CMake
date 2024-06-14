@@ -962,6 +962,11 @@ int cmCursesMainForm::LoadCache(const char* /*unused*/)
   if (r < 0) {
     return r;
   }
+
+  // Process presets before loading the cache
+  this->CMakeInstance->ProcessPresetVariables();
+  this->CMakeInstance->ProcessPresetEnvironment();
+
   this->CMakeInstance->SetCacheArgs(this->Args);
   this->CMakeInstance->PreLoadCMakeFiles();
   return r;

@@ -1,0 +1,105 @@
+{
+    "name": "cxx_exe_cross_emulator",
+    "id": "^cxx_exe_cross_emulator::@ee4a268216d1f53c4e2e$",
+    "directorySource": "^cxx/cross$",
+    "projectName": "Cxx",
+    "type": "EXECUTABLE",
+    "isGeneratorProvided": null,
+    "fileSets": null,
+    "sources": [
+        {
+            "path": "^empty\\.cxx$",
+            "isGenerated": null,
+            "fileSetName": null,
+            "sourceGroupName": "Source Files",
+            "compileGroupLanguage": "CXX",
+            "backtrace": [
+                {
+                    "file": "^cxx/cross/CMakeLists\\.txt$",
+                    "line": 3,
+                    "command": "add_executable",
+                    "hasParent": true
+                },
+                {
+                    "file": "^cxx/cross/CMakeLists\\.txt$",
+                    "line": null,
+                    "command": null,
+                    "hasParent": false
+                }
+            ]
+        }
+    ],
+    "sourceGroups": [
+        {
+            "name": "Source Files",
+            "sourcePaths": [
+                "^empty\\.cxx$"
+            ]
+        }
+    ],
+    "compileGroups": [
+        {
+            "language": "CXX",
+            "sourcePaths": [
+                "^empty\\.cxx$"
+            ],
+            "includes": null,
+            "frameworks": null,
+            "defines": null,
+            "compileCommandFragments": null
+        }
+    ],
+    "backtrace": [
+        {
+            "file": "^cxx/cross/CMakeLists\\.txt$",
+            "line": 3,
+            "command": "add_executable",
+            "hasParent": true
+        },
+        {
+            "file": "^cxx/cross/CMakeLists\\.txt$",
+            "line": null,
+            "command": null,
+            "hasParent": false
+        }
+    ],
+    "folder": null,
+    "nameOnDisk": "^cxx_exe_cross_emulator(\\.exe)?$",
+    "artifacts": [
+        {
+            "path": "^cxx/cross/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?cxx_exe_cross_emulator(\\.exe)?$",
+            "_dllExtra": false
+        },
+        {
+            "path": "^cxx/cross/((Debug|Release|RelWithDebInfo|MinSizeRel)/)?cxx_exe_cross_emulator\\.pdb$",
+            "_dllExtra": true
+        }
+    ],
+    "build": "^cxx/cross$",
+    "source": "^cxx/cross$",
+    "install": null,
+    "launchers" : [
+        {
+            "command": "^no-such-emulator(\\.exe)?$",
+            "type" : "emulator"
+        }
+    ],
+    "link": {
+        "language": "CXX",
+        "lto": null,
+        "commandFragments": [
+            {
+                "fragment" : ".*",
+                "role" : "flags",
+                "backtrace": null
+            }
+        ]
+    },
+    "archive": null,
+    "dependencies": [
+        {
+            "id": "^ZERO_CHECK::@6890427a1f51a3e7e1df$",
+            "backtrace": null
+        }
+    ]
+}

@@ -1,0 +1,21 @@
+CMAKE_LANG=Fortran
+CMAKE_LINKER=C:/DoesNotExist/Intel/oneAPI/compiler/latest/windows/bin/intel64/xilink.exe
+CMAKE_Fortran_COMPILER_ABI=
+CMAKE_Fortran_COMPILER_AR=
+CMAKE_Fortran_COMPILER_ARCHITECTURE_ID=x64
+CMAKE_Fortran_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_Fortran_COMPILER_ID=Intel
+CMAKE_Fortran_COMPILER_LAUNCHER=
+CMAKE_Fortran_COMPILER_LOADED=1
+CMAKE_Fortran_COMPILER_RANLIB=
+CMAKE_Fortran_COMPILER_TARGET=
+CMAKE_Fortran_COMPILER_VERSION=2021.9.0.20230302
+CMAKE_Fortran_COMPILER_VERSION_INTERAL=
+CMAKE_HOST_SYSTEM_NAME=Windows
+Change Dir: 'C:/DoesNotExist/Temp/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): C:/DoesNotExist/ninja/bin/ninja.exe -v cmTC_40ac9
+[1/4] C:\Windows\system32\cmd.exe /C "C:\DoesNotExist\Intel\oneAPI\compiler\latest\windows\bin\intel64\ifort.exe -fpp   /W1 /nologo /fpp /libs:dll /threads  /Od /debug:full /dbglibs -P "C:\DoesNotExist\CMake\Modules\CMakeFortranCompilerABI.F" -FiCMakeFiles\cmTC_40ac9.dir\CMakeFortranCompilerABI.F-pp.f && "C:\DoesNotExist\CMake\build\bin\cmake.exe" -E cmake_ninja_depends --tdi=CMakeFiles\cmTC_40ac9.dir\FortranDependInfo.json --lang=Fortran --src=CMakeFiles\cmTC_40ac9.dir\CMakeFortranCompilerABI.F-pp.f --out=CMakeFiles\cmTC_40ac9.dir\CMakeFortranCompilerABI.F-pp.f --dep=CMakeFiles\cmTC_40ac9.dir\CMakeFortranCompilerABI.F-pp.f.d --obj=CMakeFiles\cmTC_40ac9.dir\CMakeFortranCompilerABI.F.obj --ddi=CMakeFiles\cmTC_40ac9.dir\CMakeFortranCompilerABI.F.obj.ddi"
+[2/4] "C:\DoesNotExist\CMake\build\bin\cmake.exe" -E cmake_ninja_dyndep --tdi=CMakeFiles\cmTC_40ac9.dir\FortranDependInfo.json --lang=Fortran --dd=CMakeFiles\cmTC_40ac9.dir\Fortran.dd @CMakeFiles\cmTC_40ac9.dir\Fortran.dd.rsp
+[3/4] C:\DoesNotExist\Intel\oneAPI\compiler\latest\windows\bin\intel64\ifort.exe  /nologo /fpp  -I"C:\DoesNotExist\CMake\Modules" /W1 /nologo /fpp /libs:dll /threads  /Od /debug:full /dbglibs /FoCMakeFiles\cmTC_40ac9.dir\CMakeFortranCompilerABI.F.obj /Fd -c CMakeFiles\cmTC_40ac9.dir\CMakeFortranCompilerABI.F-pp.f
+[4/4] C:\Windows\system32\cmd.exe /C "cd . && "C:\DoesNotExist\build\bin\cmake.exe" -E vs_link_exe --intdir=CMakeFiles\cmTC_40ac9.dir --rc=C:\PROGRA~2\WI3CF2~1\10\bin\100226~1.0\x64\rc.exe --mt="" --manifests  -- C:\DoesNotExist\Intel\oneAPI\compiler\latest\windows\bin\intel64\xilink.exe /nologo CMakeFiles\cmTC_40ac9.dir\CMakeFortranCompilerABI.F.obj  /out:cmTC_40ac9.exe /implib:cmTC_40ac9.lib /pdb:cmTC_40ac9.exe.dbg /version:0.0 /machine:x64  /debug /INCREMENTAL /subsystem:console   && cd ."

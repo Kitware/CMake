@@ -476,6 +476,22 @@ static int testFile()
 #    define _WIN32_WINNT_VISTA 0x0600
 #  endif
 
+static bool consoleIsConhost()
+{
+  wchar_t consoleClassNameBuf[64];
+  int const consoleClassNameLen = GetClassNameW(
+    GetConsoleWindow(), &consoleClassNameBuf[0], sizeof(consoleClassNameBuf));
+  // Windows Console Host: ConsoleWindowClass
+  // Windows Terminal / ConPTY: PseudoConsoleWindow (undocumented)
+  return (consoleClassNameLen > 0 &&
+          wcscmp(consoleClassNameBuf, L"ConsoleWindowClass") == 0);
+}
+
+static bool charIsNUL(wchar_t c)
+{
+  return c == 0;
+}
+
 static int testConsole()
 {
   int didFail = 1;
@@ -691,7 +707,15 @@ static int testConsole()
         throw std::runtime_error("ReadConsoleOutputCharacter failed!");
       }
       std::wstring wideTestString = kwsys::Encoding::ToWide(encodedTestString);
-      std::replace(wideTestString.begin(), wideTestString.end(), '\0', ' ');
+      if (consoleIsConhost()) {
+        // Windows Console Host converts NUL bytes to spaces.
+        std::replace(wideTestString.begin(), wideTestString.end(), '\0', ' ');
+      } else {
+        // Windows Terminal / ConPTY removes NUL bytes.
+        wideTestString.erase(std::remove_if(wideTestString.begin(),
+                                            wideTestString.end(), charIsNUL),
+                             wideTestString.end());
+      }
       std::wstring wideInputTestString =
         kwsys::Encoding::ToWide(encodedInputTestString);
       if (memcmp(outputBuffer, wideTestString.c_str(),

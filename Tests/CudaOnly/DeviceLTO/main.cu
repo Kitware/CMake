@@ -2,13 +2,7 @@
 
 #include "cuda.h"
 
-#ifdef _WIN32
-#  define IMPORT __declspec(dllimport)
-#else
-#  define IMPORT
-#endif
-
-IMPORT int launch_kernel(int x);
+int launch_kernel(int x);
 
 int choose_cuda_device()
 {

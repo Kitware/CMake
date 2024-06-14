@@ -57,8 +57,8 @@ void cmExportBuildAndroidMKGenerator::GenerateImportTargetCode(
 }
 
 void cmExportBuildAndroidMKGenerator::GenerateImportPropertyCode(
-  std::ostream&, const std::string&, cmGeneratorTarget const*,
-  ImportPropertyMap const&)
+  std::ostream&, const std::string&, const std::string&,
+  cmGeneratorTarget const*, ImportPropertyMap const&, const std::string&)
 {
 }
 

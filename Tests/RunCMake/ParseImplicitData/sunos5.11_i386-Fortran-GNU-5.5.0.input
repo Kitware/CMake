@@ -1,0 +1,70 @@
+CMAKE_LANG=Fortran
+CMAKE_LINKER=/usr/bin/ld
+CMAKE_Fortran_COMPILER_ABI=
+CMAKE_Fortran_COMPILER_AR=/opt/csw/bin/gcc-ar-5.5
+CMAKE_Fortran_COMPILER_ARCHITECTURE_ID=
+CMAKE_Fortran_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_Fortran_COMPILER_ID=GNU
+CMAKE_Fortran_COMPILER_LAUNCHER=
+CMAKE_Fortran_COMPILER_LOADED=1
+CMAKE_Fortran_COMPILER_RANLIB=/opt/csw/bin/gcc-ranlib-5.5
+CMAKE_Fortran_COMPILER_TARGET=
+CMAKE_Fortran_COMPILER_VERSION=5.5.0
+CMAKE_Fortran_COMPILER_VERSION_INTERAL=
+Change Dir: '/tmp/ii/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): "/tmp/cmake/build/bin/cmake" -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_437d4/fast
+/usr/bin/gmake  -f CMakeFiles/cmTC_437d4.dir/build.make CMakeFiles/cmTC_437d4.dir/build
+gmake[1]: Entering directory `/tmp/ii/CMakeFiles/CMakeTmp'
+Building Fortran object CMakeFiles/cmTC_437d4.dir/CMakeFortranCompilerABI.F.o
+/opt/csw/gcc5/bin/gfortran   -v -c "/tmp/cmake/Modules/CMakeFortranCompilerABI.F" -o CMakeFiles/cmTC_437d4.dir/CMakeFortranCompilerABI.F.o
+Reading specs from /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/specs
+COLLECT_GCC=/opt/csw/gcc5/bin/gfortran
+Target: i386-pc-solaris2.10
+Configured with: /home/dam/mgar/pkg/gcc5/trunk/work/solaris10-i386/build-isa-pentium_pro/gcc-5.5.0/configure --prefix=/opt/csw --exec_prefix=/opt/csw --bindir=/opt/csw/bin --sbindir=/opt/csw/sbin --libexecdir=/opt/csw/libexec --datadir=/opt/csw/share --sysconfdir=/etc/opt/csw --sharedstatedir=/opt/csw/share --localstatedir=/var/opt/csw --libdir=/opt/csw/lib --infodir=/opt/csw/share/info --includedir=/opt/csw/include --mandir=/opt/csw/share/man --enable-cloog-backend=isl --enable-java-awt=xlib --enable-languages=ada,c,c++,fortran,go,java,objc --enable-libada --enable-libssp --enable-nls --enable-objc-gc --enable-threads=posix --program-suffix=-5.5 --with-cloog=/opt/csw --with-gmp=/opt/csw --with-included-gettext --with-ld=/usr/ccs/bin/ld --without-gnu-ld --with-libiconv-prefix=/opt/csw --with-mpfr=/opt/csw --with-ppl=/opt/csw --with-system-zlib=/opt/csw --with-gnu-as --with-as=/opt/csw/bin/gas
+Thread model: posix
+gcc version 5.5.0 (GCC)
+COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_437d4.dir/CMakeFortranCompilerABI.F.o' '-mtune=generic' '-march=pentium4'
+ /opt/csw/libexec/gcc/i386-pc-solaris2.10/5.5.0/f951 /tmp/cmake/Modules/CMakeFortranCompilerABI.F -ffixed-form -cpp=/var/tmp//ccq6gvEa.f90 -quiet -v /tmp/cmake/Modules/CMakeFortranCompilerABI.F -quiet -dumpbase CMakeFortranCompilerABI.F -mtune=generic -march=pentium4 -auxbase-strip CMakeFiles/cmTC_437d4.dir/CMakeFortranCompilerABI.F.o -version -fintrinsic-modules-path /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/finclude -o /var/tmp//ccSeT27a.s
+GNU Fortran (GCC) version 5.5.0 (i386-pc-solaris2.10)
+	compiled by GNU C version 5.5.0, GMP version 6.1.2, MPFR version 3.1.5, MPC version 1.0.2
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring nonexistent directory "/usr/local/include"
+ignoring nonexistent directory "/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../../i386-pc-solaris2.10/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/finclude
+ /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/include
+ /opt/csw/include
+ /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/include-fixed
+ /usr/include
+End of search list.
+GNU Fortran2008 (GCC) version 5.5.0 (i386-pc-solaris2.10)
+	compiled by GNU C version 5.5.0, GMP version 6.1.2, MPFR version 3.1.5, MPC version 1.0.2
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_437d4.dir/CMakeFortranCompilerABI.F.o' '-mtune=generic' '-march=pentium4'
+ /opt/csw/bin/gas -v -V -Qy -s --32 -o CMakeFiles/cmTC_437d4.dir/CMakeFortranCompilerABI.F.o /var/tmp//ccSeT27a.s
+GNU assembler version 2.24 (i386-pc-solaris2.10) using BFD version (GNU Binutils) 2.24
+COMPILER_PATH=/opt/csw/libexec/gcc/i386-pc-solaris2.10/5.5.0/:/opt/csw/libexec/gcc/i386-pc-solaris2.10/5.5.0/:/opt/csw/libexec/gcc/i386-pc-solaris2.10/:/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/:/opt/csw/lib/gcc/i386-pc-solaris2.10/:/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../../i386-pc-solaris2.10/bin/:/usr/ccs/bin/
+LIBRARY_PATH=/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/:/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../../i386-pc-solaris2.10/lib/:/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-c' '-o' 'CMakeFiles/cmTC_437d4.dir/CMakeFortranCompilerABI.F.o' '-mtune=generic' '-march=pentium4'
+Linking Fortran executable cmTC_437d4
+"/tmp/cmake/build/bin/cmake" -E cmake_link_script CMakeFiles/cmTC_437d4.dir/link.txt --verbose=1
+/opt/csw/gcc5/bin/gfortran  -v CMakeFiles/cmTC_437d4.dir/CMakeFortranCompilerABI.F.o -o cmTC_437d4
+Driving: /opt/csw/gcc5/bin/gfortran -v CMakeFiles/cmTC_437d4.dir/CMakeFortranCompilerABI.F.o -o cmTC_437d4 -l gfortran -l m -shared-libgcc
+Reading specs from /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/specs
+COLLECT_GCC=/opt/csw/gcc5/bin/gfortran
+COLLECT_LTO_WRAPPER=/opt/csw/libexec/gcc/i386-pc-solaris2.10/5.5.0/lto-wrapper
+Target: i386-pc-solaris2.10
+Configured with: /home/dam/mgar/pkg/gcc5/trunk/work/solaris10-i386/build-isa-pentium_pro/gcc-5.5.0/configure --prefix=/opt/csw --exec_prefix=/opt/csw --bindir=/opt/csw/bin --sbindir=/opt/csw/sbin --libexecdir=/opt/csw/libexec --datadir=/opt/csw/share --sysconfdir=/etc/opt/csw --sharedstatedir=/opt/csw/share --localstatedir=/var/opt/csw --libdir=/opt/csw/lib --infodir=/opt/csw/share/info --includedir=/opt/csw/include --mandir=/opt/csw/share/man --enable-cloog-backend=isl --enable-java-awt=xlib --enable-languages=ada,c,c++,fortran,go,java,objc --enable-libada --enable-libssp --enable-nls --enable-objc-gc --enable-threads=posix --program-suffix=-5.5 --with-cloog=/opt/csw --with-gmp=/opt/csw --with-included-gettext --with-ld=/usr/ccs/bin/ld --without-gnu-ld --with-libiconv-prefix=/opt/csw --with-mpfr=/opt/csw --with-ppl=/opt/csw --with-system-zlib=/opt/csw --with-gnu-as --with-as=/opt/csw/bin/gas
+Thread model: posix
+gcc version 5.5.0 (GCC)
+Reading specs from /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../libgfortran.spec
+rename spec lib to liborig
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_437d4' '-shared-libgcc' '-mtune=generic' '-march=pentium4'
+COMPILER_PATH=/opt/csw/libexec/gcc/i386-pc-solaris2.10/5.5.0/:/opt/csw/libexec/gcc/i386-pc-solaris2.10/5.5.0/:/opt/csw/libexec/gcc/i386-pc-solaris2.10/:/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/:/opt/csw/lib/gcc/i386-pc-solaris2.10/:/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../../i386-pc-solaris2.10/bin/:/usr/ccs/bin/
+LIBRARY_PATH=/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/:/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../../i386-pc-solaris2.10/lib/:/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_437d4' '-shared-libgcc' '-mtune=generic' '-march=pentium4'
+ /usr/ccs/bin/ld -V -M /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../libgcc-unwind.map -Y P,/lib:/usr/lib -Qy -o cmTC_437d4 /usr/lib/crt1.o /usr/lib/crti.o /usr/lib/values-Xa.o /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/crtbegin.o -L/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0 -L/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../../i386-pc-solaris2.10/lib -L/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../.. CMakeFiles/cmTC_437d4.dir/CMakeFortranCompilerABI.F.o -lgfortran -lm -lgcc_s -lgcc -lquadmath -lm -lgcc_s -lgcc -lc -R /opt/csw/lib -lgcc_s -lgcc /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/crtend.o /usr/lib/crtn.o
+ld: Software Generation Utilities - Solaris Link Editors: 5.11-1.2458
+gmake[1]: Leaving directory `/tmp/ii/CMakeFiles/CMakeTmp'

@@ -1,0 +1,58 @@
+test 1
+    Start 1: DoesNotUseLauncher
++
+1: Test command: "?[^
+]*[/\]cmake(\.exe)?"? "-E" "echo" "Hi"
+1: Working Directory: [^
+]*/Tests/RunCMake/add_test/TestLauncher-build
+1: Test timeout computed to be: [0-9]+
+1: Hi
+1/6 Test #1: DoesNotUseLauncher [.]* +Passed +[0-9.]+ sec
+test 2
+    Start 2: UsesTestLauncher
++
+2: Test command: "?[^
+]*[/\]Tests[/\]RunCMake([/\][^/\]+)?[/\]pseudo_emulator(\.exe)?"? "[^"]*/Tests/RunCMake/add_test/TestLauncher-build(/Debug)?/exe(\.exe)?"
+2: Working Directory: [^
+]*Tests/RunCMake/add_test/TestLauncher-build
+2: Test timeout computed to be: [0-9]+
+2: Command: "[^"]*/Tests/RunCMake/add_test/TestLauncher-build(/Debug)?/exe(\.exe)?"
+2/6 Test #2: UsesTestLauncher [.]* +Passed +[0-9.]+ sec
+test 3
+    Start 3: DoesNotUseTestLauncherWithGenex
++
+3: Test command: "?[^
+]*[/\]Tests[/\]RunCMake[/\]add_test[/\]TestLauncher-build([/\]Debug)?[/\]exe(\.exe)?"?
+3: Working Directory: [^
+]*Tests/RunCMake/add_test/TestLauncher-build
+3: Test timeout computed to be: [0-9]+
+3/6 Test #3: DoesNotUseTestLauncherWithGenex [.]* +Passed +[0-9.]+ sec
+test 4
+    Start 4: UsesTestLauncherWithExecTargetFromSubdirAddedWithoutGenex
++
+4: Test command: "?[^
+]*[/\]Tests[/\]RunCMake([/\][^/\]+)?[/\]pseudo_emulator(\.exe)?"? "[^"]*/Tests/RunCMake/add_test/TestLauncher-build/TestLauncher(/Debug)?/subdir_exe_no_genex(\.exe)?"
+4: Working Directory: [^
+]*Tests/RunCMake/add_test/TestLauncher-build
+4: Test timeout computed to be: [0-9]+
+4: Command: "[^"]*/Tests/RunCMake/add_test/TestLauncher-build/TestLauncher(/Debug)?/subdir_exe_no_genex(\.exe)?"
+4/6 Test #4: UsesTestLauncherWithExecTargetFromSubdirAddedWithoutGenex [.]* +Passed +[0-9.]+ sec
+test 5
+    Start 5: DoesNotUseTestLauncherWithExecTargetFromSubdirAddedWithGenex
++
+5: Test command: "?[^
+]*[/\]Tests[/\]RunCMake[/\]add_test[/\]TestLauncher-build[/\]TestLauncher([/\]Debug)?[/\]subdir_exe_with_genex(\.exe)?"?
+5: Working Directory: [^
+]*Tests/RunCMake/add_test/TestLauncher-build
+5: Test timeout computed to be: [0-9]+
+5/6 Test #5: DoesNotUseTestLauncherWithExecTargetFromSubdirAddedWithGenex [.]* +Passed +[0-9.]+ sec
+test 6
+    Start 6: UsesLocalLauncher
+
+6: Test command: "?[^
+]*[/\]Tests[/\]RunCMake[/\]add_test[/\]TestLauncher-build([/\]Debug)?[/\]local_launcher(\.exe)?"? "[^"]*/Tests/RunCMake/add_test/TestLauncher-build(/Debug)?/use_launcher_local(\.exe)?"
+6: Working Directory: [^
+]*/Tests/RunCMake/add_test/TestLauncher-build
+6: Test timeout computed to be: [0-9]+
+6: Command: "[^"]*/Tests/RunCMake/add_test/TestLauncher-build(/Debug)?/use_launcher_local(\.exe)?"
+6/6 Test #6: UsesLocalLauncher [.]* +Passed +[0-9.]+ sec

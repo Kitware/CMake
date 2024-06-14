@@ -1,5 +1,5 @@
 #include <omp.h>
-int main()
+int main(void)
 {
 #ifndef _OPENMP
   breaks_on_purpose

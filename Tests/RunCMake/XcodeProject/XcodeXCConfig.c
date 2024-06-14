@@ -15,6 +15,6 @@
 #  error TARGET_DEBUG does not match BUILD_DEBUG
 #endif
 
-void some_symbol()
+void some_symbol(void)
 {
 }

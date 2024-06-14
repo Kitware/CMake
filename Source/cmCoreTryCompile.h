@@ -91,6 +91,7 @@ public:
     cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>>
       LinkLibraries;
     ArgumentParser::MaybeEmpty<std::vector<std::string>> LinkOptions;
+    cm::optional<std::string> LinkerLanguage;
     std::map<std::string, std::string> LangProps;
     std::string CMakeInternal;
     cm::optional<std::string> OutputVariable;

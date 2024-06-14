@@ -21,6 +21,7 @@
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
 #include "cmExecutionStatus.h"
+#include "cmExperimental.h"
 #include "cmExportSet.h"
 #include "cmFileSet.h"
 #include "cmGeneratorExpression.h"
@@ -2030,7 +2031,7 @@ bool HandleExportAndroidMKMode(std::vector<std::string> const& args,
     cm::make_unique<cmInstallExportGenerator>(
       &exportSet, ica.GetDestination(), ica.GetPermissions(),
       ica.GetConfigurations(), ica.GetComponent(), message,
-      ica.GetExcludeFromAll(), fname, name_space, "", exportOld, true,
+      ica.GetExcludeFromAll(), fname, name_space, "", exportOld, true, false,
       helper.Makefile->GetBacktrace()));
 
   return true;
@@ -2054,12 +2055,19 @@ bool HandleExportMode(std::vector<std::string> const& args,
   bool exportOld = false;
   std::string filename;
   std::string cxx_modules_directory;
+  bool exportPackageDependencies = false;
 
   ica.Bind("EXPORT"_s, exp);
   ica.Bind("NAMESPACE"_s, name_space);
   ica.Bind("EXPORT_LINK_INTERFACE_LIBRARIES"_s, exportOld);
   ica.Bind("FILE"_s, filename);
   ica.Bind("CXX_MODULES_DIRECTORY"_s, cxx_modules_directory);
+
+  if (cmExperimental::HasSupportEnabled(
+        status.GetMakefile(),
+        cmExperimental::Feature::ExportPackageDependencies)) {
+    ica.Bind("EXPORT_PACKAGE_DEPENDENCIES"_s, exportPackageDependencies);
+  }
 
   std::vector<std::string> unknownArgs;
   ica.Parse(args, &unknownArgs);
@@ -2147,7 +2155,8 @@ bool HandleExportMode(std::vector<std::string> const& args,
       &exportSet, ica.GetDestination(), ica.GetPermissions(),
       ica.GetConfigurations(), ica.GetComponent(), message,
       ica.GetExcludeFromAll(), fname, name_space, cxx_modules_directory,
-      exportOld, false, helper.Makefile->GetBacktrace()));
+      exportOld, false, exportPackageDependencies,
+      helper.Makefile->GetBacktrace()));
 
   return true;
 }

@@ -28,7 +28,7 @@
     result = 1;                                                               \
   } while (0)
 
-int main()
+int main(void)
 {
   int result = 0;
   struct somestruct x;

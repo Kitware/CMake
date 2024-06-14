@@ -16,6 +16,9 @@
 /python*
 /qt*
 /sccache*
+/ticlang
 /unstable-jom*
 /watcom
 /wix*
+/clang-tidy-fixes
+/num_warnings.txt

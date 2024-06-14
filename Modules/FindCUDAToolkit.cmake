@@ -1100,7 +1100,10 @@ if(CUDAToolkit_FOUND)
     if(CUDA_${lib_name}_LIBRARY MATCHES "/stubs/" AND NOT WIN32)
       # Use a SHARED library with IMPORTED_IMPLIB, but not IMPORTED_LOCATION,
       # to indicate that the stub is for linkers but not dynamic loaders.
-      # It will not contribute any RPATH entry.
+      # It will not contribute any RPATH entry.  When encountered as
+      # a private transitive dependency of another shared library,
+      # it will be passed explicitly to linkers so they can find it
+      # even when the runtime library file does not exist on disk.
       set(CUDA_IMPORT_PROPERTY IMPORTED_IMPLIB)
       set(CUDA_IMPORT_TYPE     SHARED)
     endif()
@@ -1134,20 +1137,11 @@ if(CUDAToolkit_FOUND)
     target_link_directories(CUDA::toolkit INTERFACE "${CUDAToolkit_LIBRARY_DIR}")
   endif()
 
-  _CUDAToolkit_find_and_add_import_lib(cuda_driver ALT cuda)
-
-  _CUDAToolkit_find_and_add_import_lib(cudart)
-  _CUDAToolkit_find_and_add_import_lib(cudart_static)
-
-  # setup dependencies that are required for cudart_static when building
+  # setup dependencies that are required for cudart/cudart_static when building
   # on linux. These are generally only required when using the CUDA toolkit
   # when CUDA language is disabled
-  if(NOT TARGET CUDA::cudart_static_deps
-     AND TARGET CUDA::cudart_static)
-
+  if(NOT TARGET CUDA::cudart_static_deps)
     add_library(CUDA::cudart_static_deps IMPORTED INTERFACE)
-    target_link_libraries(CUDA::cudart_static INTERFACE CUDA::cudart_static_deps)
-
     if(UNIX AND (CMAKE_C_COMPILER OR CMAKE_CXX_COMPILER))
       find_package(Threads REQUIRED)
       target_link_libraries(CUDA::cudart_static_deps INTERFACE Threads::Threads ${CMAKE_DL_LIBS})
@@ -1164,6 +1158,10 @@ if(CUDAToolkit_FOUND)
       endif()
     endif()
   endif()
+
+  _CUDAToolkit_find_and_add_import_lib(cuda_driver ALT cuda DEPS cudart_static_deps)
+  _CUDAToolkit_find_and_add_import_lib(cudart DEPS cudart_static_deps)
+  _CUDAToolkit_find_and_add_import_lib(cudart_static DEPS cudart_static_deps)
 
   if(CUDAToolkit_VERSION VERSION_GREATER_EQUAL 12.0.0)
     _CUDAToolkit_find_and_add_import_lib(nvJitLink)

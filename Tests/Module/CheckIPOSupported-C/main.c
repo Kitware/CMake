@@ -1,7 +1,7 @@
 int foo();
 int bar();
 
-int main()
+int main(void)
 {
   if (foo() != bar()) {
     return 1;

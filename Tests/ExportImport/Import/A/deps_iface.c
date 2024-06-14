@@ -26,7 +26,7 @@
 
 extern int testLibDepends(void);
 
-int main()
+int main(void)
 {
   return testLibDepends();
 }

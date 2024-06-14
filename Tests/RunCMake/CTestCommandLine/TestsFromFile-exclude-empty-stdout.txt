@@ -1,0 +1,10 @@
+Test project [^
+]*/Tests/RunCMake/CTestCommandLine/TestsFromFile-exclude-empty
+ +Start 1: Test1
+1/3 Test #1: Test1 ............................   Passed +[0-9.]+ sec
+ +Start 2: Test2
+2/3 Test #2: Test2 ............................   Passed +[0-9.]+ sec
+ +Start 3: Test11
+3/3 Test #3: Test11 ...........................   Passed +[0-9.]+ sec
++
+100% tests passed, 0 tests failed out of 3

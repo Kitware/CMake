@@ -1,4 +1,4 @@
 /* No dependencies */
-void NoDepY_func()
+void NoDepY_func(void)
 {
 }

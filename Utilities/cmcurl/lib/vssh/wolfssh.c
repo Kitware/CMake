@@ -42,6 +42,7 @@
 #include "select.h"
 #include "multiif.h"
 #include "warnless.h"
+#include "strdup.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -92,7 +93,7 @@ const struct Curl_handler Curl_handler_scp = {
   ZERO_NULL,                            /* domore_getsock */
   wssh_getsock,                         /* perform_getsock */
   wscp_disconnect,                      /* disconnect */
-  ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_SSH,                             /* defport */
@@ -121,7 +122,7 @@ const struct Curl_handler Curl_handler_sftp = {
   ZERO_NULL,                            /* domore_getsock */
   wssh_getsock,                         /* perform_getsock */
   wsftp_disconnect,                     /* disconnect */
-  ZERO_NULL,                            /* readwrite */
+  ZERO_NULL,                            /* write_resp */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_SSH,                             /* defport */
@@ -343,9 +344,6 @@ static CURLcode wssh_setup_connection(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static Curl_recv wscp_recv, wsftp_recv;
-static Curl_send wscp_send, wsftp_send;
-
 static int userauth(byte authtype,
                     WS_UserAuthData* authdata,
                     void *ctx)
@@ -515,15 +513,9 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
         return CURLE_OK;
       }
       else if(name && (rc == WS_SUCCESS)) {
-        sshc->homedir = malloc(name->fSz + 1);
-        if(!sshc->homedir) {
+        sshc->homedir = Curl_memdup0(name->fName, name->fSz);
+        if(!sshc->homedir)
           sshc->actualcode = CURLE_OUT_OF_MEMORY;
-        }
-        else {
-          memcpy(sshc->homedir, name->fName, name->fSz);
-          sshc->homedir[name->fSz] = 0;
-          infof(data, "wolfssh SFTP realpath succeeded");
-        }
         wolfSSH_SFTPNAME_list_free(name);
         state(data, SSH_STOP);
         return CURLE_OK;
@@ -649,14 +641,15 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
           }
           /* seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
           do {
+            char scratch[4*1024];
             size_t readthisamountnow =
-              (data->state.resume_from - passed > data->set.buffer_size) ?
-              (size_t)data->set.buffer_size :
-              curlx_sotouz(data->state.resume_from - passed);
+              (data->state.resume_from - passed >
+                (curl_off_t)sizeof(scratch)) ?
+              sizeof(scratch) : curlx_sotouz(data->state.resume_from - passed);
 
             size_t actuallyread;
             Curl_set_in_callback(data, true);
-            actuallyread = data->state.fread_func(data->state.buffer, 1,
+            actuallyread = data->state.fread_func(scratch, 1,
                                                   readthisamountnow,
                                                   data->state.in);
             Curl_set_in_callback(data, false);
@@ -702,7 +695,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
         /* we want to use the _sending_ function even when the socket turns
            out readable as the underlying libssh2 sftp send function will deal
            with both accordingly */
-        conn->cselect_bits = CURL_CSELECT_OUT;
+        data->state.select_bits = CURL_CSELECT_OUT;
 
         /* since we don't really wait for anything at this point, we want the
            state machine to move on as soon as possible so we set a very short
@@ -798,7 +791,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
       /* we want to use the _receiving_ function even when the socket turns
          out writableable as the underlying libssh2 recv function will deal
          with both accordingly */
-      conn->cselect_bits = CURL_CSELECT_IN;
+      data->state.select_bits = CURL_CSELECT_IN;
 
       if(result) {
         /* this should never occur; the close state should be entered

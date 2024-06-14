@@ -77,6 +77,7 @@
 #include "curl_sasl.h"
 #include "curl_md5.h"
 #include "warnless.h"
+#include "strdup.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -124,7 +125,7 @@ const struct Curl_handler Curl_handler_pop3 = {
   ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
-  ZERO_NULL,                        /* readwrite */
+  ZERO_NULL,                        /* write_resp */
   ZERO_NULL,                        /* connection_check */
   ZERO_NULL,                        /* attach connection */
   PORT_POP3,                        /* defport */
@@ -153,7 +154,7 @@ const struct Curl_handler Curl_handler_pop3s = {
   ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
-  ZERO_NULL,                        /* readwrite */
+  ZERO_NULL,                        /* write_resp */
   ZERO_NULL,                        /* connection_check */
   ZERO_NULL,                        /* attach connection */
   PORT_POP3S,                       /* defport */
@@ -251,8 +252,8 @@ static bool pop3_endofresp(struct Curl_easy *data, struct connectdata *conn,
  */
 static CURLcode pop3_get_message(struct Curl_easy *data, struct bufref *out)
 {
-  char *message = data->state.buffer;
-  size_t len = strlen(message);
+  char *message = Curl_dyn_ptr(&data->conn->proto.pop3c.pp.recvbuf);
+  size_t len = data->conn->proto.pop3c.pp.nfinal;
 
   if(len > 2) {
     /* Find the start of the message */
@@ -648,8 +649,8 @@ static CURLcode pop3_state_servergreet_resp(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  const char *line = data->state.buffer;
-  size_t len = strlen(line);
+  const char *line = Curl_dyn_ptr(&data->conn->proto.pop3c.pp.recvbuf);
+  size_t len = data->conn->proto.pop3c.pp.nfinal;
 
   (void)instate; /* no use for this yet */
 
@@ -657,44 +658,35 @@ static CURLcode pop3_state_servergreet_resp(struct Curl_easy *data,
     failf(data, "Got unexpected pop3-server response");
     result = CURLE_WEIRD_SERVER_REPLY;
   }
-  else {
+  else if(len > 3) {
     /* Does the server support APOP authentication? */
-    if(len >= 4 && line[len - 2] == '>') {
-      /* Look for the APOP timestamp */
-      size_t i;
-      for(i = 3; i < len - 2; ++i) {
-        if(line[i] == '<') {
-          /* Calculate the length of the timestamp */
-          size_t timestamplen = len - 1 - i;
-          char *at;
-          if(!timestamplen)
-            break;
+    char *lt;
+    char *gt = NULL;
 
-          /* Allocate some memory for the timestamp */
-          pop3c->apoptimestamp = (char *)calloc(1, timestamplen + 1);
-
-          if(!pop3c->apoptimestamp)
-            break;
-
-          /* Copy the timestamp */
-          memcpy(pop3c->apoptimestamp, line + i, timestamplen);
-          pop3c->apoptimestamp[timestamplen] = '\0';
-
-          /* If the timestamp does not contain '@' it is not (as required by
-             RFC-1939) conformant to the RFC-822 message id syntax, and we
-             therefore do not use APOP authentication. */
-          at = strchr(pop3c->apoptimestamp, '@');
-          if(!at)
-            Curl_safefree(pop3c->apoptimestamp);
-          else
-            /* Store the APOP capability */
-            pop3c->authtypes |= POP3_TYPE_APOP;
-          break;
-        }
+    /* Look for the APOP timestamp */
+    lt = memchr(line, '<', len);
+    if(lt)
+      /* search the remainder for '>' */
+      gt = memchr(lt, '>', len - (lt - line));
+    if(gt) {
+      /* the length of the timestamp, including the brackets */
+      size_t timestamplen = gt - lt + 1;
+      char *at = memchr(lt, '@', timestamplen);
+      /* If the timestamp does not contain '@' it is not (as required by
+         RFC-1939) conformant to the RFC-822 message id syntax, and we
+         therefore do not use APOP authentication. */
+      if(at) {
+        /* dupe the timestamp */
+        pop3c->apoptimestamp = Curl_memdup0(lt, timestamplen);
+        if(!pop3c->apoptimestamp)
+          return CURLE_OUT_OF_MEMORY;
+        /* Store the APOP capability */
+        pop3c->authtypes |= POP3_TYPE_APOP;
       }
     }
 
-    result = pop3_perform_capa(data, conn);
+    if(!result)
+      result = pop3_perform_capa(data, conn);
   }
 
   return result;
@@ -707,8 +699,8 @@ static CURLcode pop3_state_capa_resp(struct Curl_easy *data, int pop3code,
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
-  const char *line = data->state.buffer;
-  size_t len = strlen(line);
+  const char *line = Curl_dyn_ptr(&data->conn->proto.pop3c.pp.recvbuf);
+  size_t len = data->conn->proto.pop3c.pp.nfinal;
 
   (void)instate; /* no use for this yet */
 
@@ -795,7 +787,7 @@ static CURLcode pop3_state_starttls_resp(struct Curl_easy *data,
   (void)instate; /* no use for this yet */
 
   /* Pipelining in response is forbidden. */
-  if(data->conn->proto.pop3c.pp.cache_size)
+  if(data->conn->proto.pop3c.pp.overflow)
     return CURLE_WEIRD_SERVER_REPLY;
 
   if(pop3code != '+') {
@@ -944,24 +936,29 @@ static CURLcode pop3_state_command_resp(struct Curl_easy *data,
     /* POP3 download */
     Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
 
-    if(pp->cache) {
-      /* The header "cache" contains a bunch of data that is actually body
-         content so send it as such. Note that there may even be additional
-         "headers" after the body */
+    if(pp->overflow) {
+      /* The recv buffer contains data that is actually body content so send
+         it as such. Note that there may even be additional "headers" after
+         the body */
+
+      /* keep only the overflow */
+      Curl_dyn_tail(&pp->recvbuf, pp->overflow);
+      pp->nfinal = 0; /* done */
 
       if(!data->req.no_body) {
-        result = Curl_pop3_write(data, pp->cache, pp->cache_size);
+        result = Curl_pop3_write(data, Curl_dyn_ptr(&pp->recvbuf),
+                                 Curl_dyn_len(&pp->recvbuf));
         if(result)
           return result;
       }
 
-      /* Free the cache */
-      Curl_safefree(pp->cache);
-
-      /* Reset the cache size */
-      pp->cache_size = 0;
+      /* reset the buffer */
+      Curl_dyn_reset(&pp->recvbuf);
+      pp->overflow = 0;
     }
   }
+  else
+    pp->overflow = 0;
 
   /* End of DO phase */
   pop3_state(data, POP3_STOP);
@@ -1088,7 +1085,7 @@ static CURLcode pop3_init(struct Curl_easy *data)
   CURLcode result = CURLE_OK;
   struct POP3 *pop3;
 
-  pop3 = data->req.p.pop3 = calloc(sizeof(struct POP3), 1);
+  pop3 = data->req.p.pop3 = calloc(1, sizeof(struct POP3));
   if(!pop3)
     result = CURLE_OUT_OF_MEMORY;
 
@@ -1131,8 +1128,7 @@ static CURLcode pop3_connect(struct Curl_easy *data, bool *done)
   Curl_sasl_init(&pop3c->sasl, data, &saslpop3);
 
   /* Initialise the pingpong layer */
-  Curl_pp_setup(pp);
-  Curl_pp_init(data, pp);
+  Curl_pp_init(pp);
 
   /* Parse the URL options */
   result = pop3_parse_url_options(conn);

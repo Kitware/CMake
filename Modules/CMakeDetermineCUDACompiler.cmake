@@ -74,10 +74,6 @@ if(NOT CMAKE_CUDA_COMPILER_ID_RUN)
     set(CMAKE_CUDA_COMPILER_ID_VENDOR_REGEX_Clang "(clang version)")
     CMAKE_DETERMINE_COMPILER_ID_VENDOR(CUDA "--version")
 
-    if(CMAKE_CUDA_COMPILER_ID STREQUAL "Clang" AND WIN32)
-      message(FATAL_ERROR "Clang with CUDA is not yet supported on Windows. See CMake issue #20776.")
-    endif()
-
     # Find the CUDA toolkit to get:
     # - CMAKE_CUDA_COMPILER_TOOLKIT_VERSION
     # - CMAKE_CUDA_COMPILER_TOOLKIT_ROOT

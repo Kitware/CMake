@@ -257,6 +257,15 @@ If supported, the default value is read from
 The value is interpreted as a decimal integer specifying the
 compression level. Supported values depend on the library version,
 common values are from 1 to 22.
+.It Cm long
+Enables long distance matching. The value is interpreted as a
+decimal integer specifying log2 window size in bytes. Values from
+10 to 30 for 32 bit, or 31 for 64 bit, are supported.
+.It Cm threads
+The value is interpreted as a decimal integer specifying the
+number of threads for multi-threaded zstd compression.
+If set to 0, zstd will attempt to detect and use the number
+of physical CPU cores.
 .El
 .It Format 7zip
 .Bl -tag -compact -width indent

@@ -134,6 +134,7 @@ if (CMake_TEST_UseSWIG_Fortran)
       --build-options ${build_options}
       --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
       )
+    set_property(TEST UseSWIG.BasicFortran APPEND PROPERTY LABELS "Fortran")
   endif()
 endif()
 

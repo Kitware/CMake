@@ -1,2 +1,3 @@
 libs=mingw32;gcc;moldname;mingwex;advapi32;shell32;user32;kernel32;mingw32;gcc;moldname;mingwex
 dirs=C:/DoesNotExist/mingw/lib/gcc/mingw32/4.9.3;C:/DoesNotExist/mingw/lib/gcc;C:/DoesNotExist/mingw/mingw32/lib;C:/DoesNotExist/mingw/lib
+linker_tool=

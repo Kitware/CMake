@@ -26,9 +26,8 @@ to be re-written as::
 Policy ``CMP0127`` provides compatibility for projects that have not
 been updated to expect the new behavior.
 
-This policy was introduced in CMake version 3.22.  CMake version
-|release| warns when the policy is not set and uses ``OLD`` behavior.
-Use the :command:`cmake_policy` command to set it to ``OLD`` or ``NEW``
-explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.22
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

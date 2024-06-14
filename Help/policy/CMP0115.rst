@@ -27,8 +27,8 @@ The ``OLD`` behavior for this policy is to implicitly append known extensions
 to source files if they can't be found. The ``NEW`` behavior of this policy is
 to not append known extensions and require them to be explicit.
 
-This policy was introduced in CMake version 3.20.  CMake version |release|
-warns when the policy is not set and uses ``OLD`` behavior. Use the
-:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.20
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

@@ -1,0 +1,20 @@
+CMAKE_LANG=Fortran
+CMAKE_LINKER=
+CMAKE_Fortran_COMPILER_ABI=
+CMAKE_Fortran_COMPILER_AR=
+CMAKE_Fortran_COMPILER_ARCHITECTURE_ID=x64
+CMAKE_Fortran_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_Fortran_COMPILER_ID=LLVMFlang
+CMAKE_Fortran_COMPILER_LAUNCHER=
+CMAKE_Fortran_COMPILER_LOADED=1
+CMAKE_Fortran_COMPILER_RANLIB=
+CMAKE_Fortran_COMPILER_TARGET=
+CMAKE_Fortran_COMPILER_VERSION=18.0.0
+CMAKE_Fortran_COMPILER_VERSION_INTERAL=
+CMAKE_Fortran_SIMULATE_ID=MSVC
+flang-new version 18.0.0
+Target: x86_64-pc-windows-msvc
+Thread model: posix
+InstalledDir: C:\DoesNotExist\LLVM\bin
+ "C:\\DoesNotExist\\LLVM\\bin\\flang-new" -fc1 -triple x86_64-pc-windows-msvc19.36.32543 -emit-obj -mrelocation-model pic -pic-level 2 -target-cpu x86-64 --dependent-lib=clang_rt.builtins-x86_64.lib -D_MT --dependent-lib=libcmt --dependent-lib=Fortran_main.static.lib --dependent-lib=FortranRuntime.static.lib --dependent-lib=FortranDecimal.static.lib -D_MSC_VER=1936 -D_MSC_FULL_VER=193632543 -D_WIN32 -D_M_X64=100 -mframe-pointer=none -o "C:\\DoesNotExist\\Temp\\CMakeFortranCompilerABI-e91f95.o" -x f95-cpp-input CMakeFortranCompilerABI.F
+ "C:\\Program Files\\Microsoft Visual Studio\\2022\\Professional\\VC\\Tools\\MSVC\\14.36.32532\\bin\\Hostx64\\x64\\link.exe" -out:a.exe "-libpath:C:\\DoesNotExist\\LLVM\\lib" /WHOLEARCHIVE:Fortran_main.static.lib /subsystem:console "-libpath:C:\\DoesNotExist\\LLVM\\lib\\clang\\18\\lib\\windows" -nologo "C:\\DoesNotExist\\Temp\\CMakeFortranCompilerABI-e91f95.o"

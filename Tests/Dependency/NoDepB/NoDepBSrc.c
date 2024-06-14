@@ -1,6 +1,6 @@
-void NoDepAFunction();
+void NoDepAFunction(void);
 
-void NoDepBFunction()
+void NoDepBFunction(void)
 {
   NoDepAFunction();
 }

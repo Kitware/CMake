@@ -1,6 +1,6 @@
-void TwoFunction();
+void TwoFunction(void);
 
-void FiveFunction()
+void FiveFunction(void)
 {
   TwoFunction();
 }

@@ -36,8 +36,8 @@ The ``OLD`` behavior for this policy is to duplicate custom commands in
 dependent targets.  The ``NEW`` behavior of this policy is to not duplicate
 custom commands in dependent targets.
 
-This policy was introduced in CMake version 3.19.  Unlike many policies,
-CMake version |release| does *not* warn when this policy is not set and
-simply uses ``OLD`` behavior.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.19
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

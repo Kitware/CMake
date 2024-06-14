@@ -3,7 +3,7 @@
 #endif
 #include <sql.h>
 
-int main()
+int main(void)
 {
   SQLHENV env;
   SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &env);

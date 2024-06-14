@@ -1,0 +1,4 @@
+libs=gcc;gcc_s;c;gcc;gcc_s
+dirs=/usr/lib/gcc/x86_64-linux-gnu/12;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib
+library_arch=x86_64-linux-gnu
+linker_tool=/usr/bin/ld

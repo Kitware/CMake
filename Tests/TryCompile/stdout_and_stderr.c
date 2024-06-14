@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int main()
+int main(void)
 {
   fputs("error\n", stderr);
   puts("hello world\n");

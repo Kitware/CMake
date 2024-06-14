@@ -9,9 +9,9 @@ macro(__platform_adsp_init)
     set(CMAKE_ADSP_PROCESSOR "ADSP-${CMAKE_SYSTEM_PROCESSOR}")
     string(TOUPPER "${CMAKE_ADSP_PROCESSOR}" CMAKE_ADSP_PROCESSOR)
 
-    set(CMAKE_ADSP_COMPILER_NAME cc21k.exe)
+    set(CMAKE_ADSP_COMPILER_NAME "cc21k${CMAKE_EXECUTABLE_SUFFIX}")
     if(CMAKE_ADSP_PROCESSOR MATCHES "^ADSP-BF")
-      set(CMAKE_ADSP_COMPILER_NAME ccblkfn.exe)
+      set(CMAKE_ADSP_COMPILER_NAME "ccblkfn${CMAKE_EXECUTABLE_SUFFIX}")
     endif()
 
     set(CMAKE_ADSP_PLATFORM_INITIALIZED TRUE)
@@ -20,7 +20,12 @@ endmacro()
 
 macro(__platform_adsp lang)
   __platform_adsp_init()
-  set(CMAKE_${lang}_COMPILER "${CMAKE_ADSP_ROOT}/${CMAKE_ADSP_COMPILER_NAME}")
+  find_program(
+    CMAKE_${lang}_COMPILER
+    "${CMAKE_ADSP_COMPILER_NAME}"
+    PATHS "${CMAKE_ADSP_ROOT}"
+    REQUIRED
+  )
 
   execute_process(
     COMMAND "${CMAKE_${lang}_COMPILER}" "-proc=${CMAKE_ADSP_PROCESSOR}" "-version"

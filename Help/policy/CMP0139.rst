@@ -9,9 +9,8 @@ operator.
 The ``OLD`` behavior for this policy is to ignore the ``PATH_EQUAL`` operator.
 The ``NEW`` behavior is to interpret the ``PATH_EQUAL`` operator.
 
-This policy was introduced in CMake version 3.24.
-CMake version |release| warns when the policy is not set and uses
-``OLD`` behavior.  Use the :command:`cmake_policy` command to set
-it to ``OLD`` or ``NEW`` explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.24
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

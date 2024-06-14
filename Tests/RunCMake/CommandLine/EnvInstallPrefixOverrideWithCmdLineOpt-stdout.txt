@@ -1,0 +1,3 @@
+-- ENV{CMAKE_INSTALL_PREFIX}='[^']*/Tests/RunCMake/CommandLine/install_prefix_set_via_env_var'
+-- CMAKE_INSTALL_PREFIX='[^']*/Tests/RunCMake/CommandLine/install_prefix_set_cmd_line_opt'
+-- CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT=''

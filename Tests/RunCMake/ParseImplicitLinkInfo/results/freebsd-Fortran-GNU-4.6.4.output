@@ -1,2 +1,3 @@
 libs=gfortran;m;gcc_s;gcc;quadmath;m;gcc_s;gcc;c;gcc_s;gcc
 dirs=/usr/local/lib/gcc46/gcc/x86_64-portbld-freebsd10.0/4.6.4;/usr/local/x86_64-portbld-freebsd10.0/lib;/usr/local/lib/gcc46
+linker_tool=/usr/local/bin/ld

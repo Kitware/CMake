@@ -8,6 +8,7 @@
 #include <map>
 #include <set>
 #include <sstream>
+#include <unordered_map>
 #include <unordered_set>
 
 #include <cm/memory>
@@ -20,6 +21,7 @@
 #include "cmAlgorithms.h"
 #include "cmCustomCommand.h"
 #include "cmFileSet.h"
+#include "cmFindPackageStack.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
@@ -438,6 +440,7 @@ TargetProperty const StaticTargetProperties[] = {
   // ---- Swift
   { "Swift_LANGUAGE_VERSION"_s, IC::CanCompileSources },
   { "Swift_MODULE_DIRECTORY"_s, IC::CanCompileSources },
+  { "Swift_COMPILATION_MODE"_s, IC::CanCompileSources },
   // ---- moc
   { "AUTOMOC"_s, IC::CanCompileSources },
   { "AUTOMOC_COMPILER_PREDEFINES"_s, IC::CanCompileSources },
@@ -456,6 +459,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "AUTORCC_EXECUTABLE"_s, IC::CanCompileSources },
 
   // Linking properties
+  { "LINKER_TYPE"_s, IC::CanCompileSources },
   { "ENABLE_EXPORTS"_s, IC::TargetWithSymbolExports },
   { "LINK_LIBRARIES_ONLY_TARGETS"_s, IC::NormalNonImportedTarget },
   { "LINK_SEARCH_START_STATIC"_s, IC::CanCompileSources },
@@ -549,9 +553,11 @@ TargetProperty const StaticTargetProperties[] = {
   { "ANDROID_PROCESS_MAX"_s, IC::CanCompileSources },
   { "ANDROID_SKIP_ANT_STEP"_s, IC::CanCompileSources },
   // -- Autogen
+  { "AUTOGEN_COMMAND_LINE_LENGTH_MAX"_s, IC::CanCompileSources },
   { "AUTOGEN_ORIGIN_DEPENDS"_s, IC::CanCompileSources },
   { "AUTOGEN_PARALLEL"_s, IC::CanCompileSources },
   { "AUTOGEN_USE_SYSTEM_INCLUDE"_s, IC::CanCompileSources },
+  { "AUTOGEN_BETTER_GRAPH_MULTI_CONFIG"_s, IC::CanCompileSources },
   // -- moc
   { "AUTOMOC_DEPEND_FILTERS"_s, IC::CanCompileSources },
   // -- C++
@@ -584,11 +590,13 @@ TargetProperty const StaticTargetProperties[] = {
   // Usage requirement properties
   { "LINK_INTERFACE_LIBRARIES"_s, IC::CanCompileSources },
   { "MAP_IMPORTED_CONFIG_"_s, IC::NormalTarget, R::PerConfig },
+  { "EXPORT_FIND_PACKAGE_NAME"_s, IC::NormalTarget },
 
   // Metadata
   { "CROSSCOMPILING_EMULATOR"_s, IC::ExecutableTarget },
   { "EXPORT_COMPILE_COMMANDS"_s, IC::CanCompileSources },
   { "FOLDER"_s },
+  { "TEST_LAUNCHER"_s, IC::ExecutableTarget },
 
   // Xcode properties
   { "XCODE_GENERATE_SCHEME"_s, IC::NeedsXcode },
@@ -660,6 +668,7 @@ public:
     TLLCommands;
   std::map<std::string, cmFileSet> FileSets;
   cmListFileBacktrace Backtrace;
+  cmFindPackageStack FindPackageStack;
 
   UsageRequirementProperty IncludeDirectories;
   UsageRequirementProperty CompileOptions;
@@ -792,18 +801,6 @@ bool FileSetType::WriteProperties(cmTarget* tgt, cmTargetInternals* impl,
         cmStrCat(this->ArbitraryDescription, " \"", fileSetName, "\""),
         action);
     }
-    return true;
-  }
-  if (prop == this->SelfEntries.PropertyName) {
-    impl->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      cmStrCat(this->SelfEntries.PropertyName, " property is read-only\n"));
-    return true;
-  }
-  if (prop == this->InterfaceEntries.PropertyName) {
-    impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
-                                 cmStrCat(this->InterfaceEntries.PropertyName,
-                                          " property is read-only\n"));
     return true;
   }
   return false;
@@ -960,6 +957,9 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
 
   // Save the backtrace of target construction.
   this->impl->Backtrace = this->impl->Makefile->GetBacktrace();
+  if (this->impl->IsImported()) {
+    this->impl->FindPackageStack = this->impl->Makefile->GetFindPackageStack();
+  }
 
   if (this->IsNormal()) {
     // Initialize the INCLUDE_DIRECTORIES property based on the current value
@@ -1245,6 +1245,11 @@ std::set<BT<std::pair<std::string, bool>>> const& cmTarget::GetUtilities()
 cmListFileBacktrace const& cmTarget::GetBacktrace() const
 {
   return this->impl->Backtrace;
+}
+
+cmFindPackageStack const& cmTarget::GetFindPackageStack() const
+{
+  return this->impl->FindPackageStack;
 }
 
 bool cmTarget::IsExecutableWithExports() const
@@ -1783,7 +1788,7 @@ void cmTarget::CopyImportedCxxModulesEntries(cmTarget const* tgt)
     cmMakeRange(tgt->impl->ImportedCxxModulesCompileOptions.Entries));
   this->impl->LinkLibraries.Entries.clear();
   this->impl->LinkLibraries.CopyFromEntries(
-    cmMakeRange(tgt->impl->LinkLibraries.Entries));
+    cmMakeRange(tgt->impl->ImportedCxxModulesLinkLibraries.Entries));
 
   // Copy the C++ module fileset entries from `tgt`'s `INTERFACE` to this
   // target's `PRIVATE`.
@@ -1965,7 +1970,6 @@ MAKE_PROP(CUDA_CUBIN_COMPILATION);
 MAKE_PROP(CUDA_FATBIN_COMPILATION);
 MAKE_PROP(CUDA_OPTIX_COMPILATION);
 MAKE_PROP(CUDA_PTX_COMPILATION);
-MAKE_PROP(EXPORT_NAME);
 MAKE_PROP(IMPORTED);
 MAKE_PROP(IMPORTED_GLOBAL);
 MAKE_PROP(INCLUDE_DIRECTORIES);
@@ -1991,43 +1995,118 @@ MAKE_PROP(INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE);
 #undef MAKE_PROP
 }
 
+namespace {
+
+enum class ReadOnlyCondition
+{
+  All,
+  Imported,
+  NonImported,
+};
+
+struct ReadOnlyProperty
+{
+  ReadOnlyProperty(ReadOnlyCondition cond)
+    : Condition{ cond }
+    , Policy{} {};
+  ReadOnlyProperty(ReadOnlyCondition cond, cmPolicies::PolicyID id)
+    : Condition{ cond }
+    , Policy{ id } {};
+
+  ReadOnlyCondition Condition;
+  cm::optional<cmPolicies::PolicyID> Policy;
+
+  std::string message(const std::string& prop, cmTarget* target) const
+  {
+    std::string msg;
+    if (this->Condition == ReadOnlyCondition::All) {
+      msg = " property is read-only for target(\"";
+    } else if (this->Condition == ReadOnlyCondition::Imported) {
+      msg = " property can't be set on imported targets(\"";
+    } else if (this->Condition == ReadOnlyCondition::NonImported) {
+      msg = " property can't be set on non-imported targets(\"";
+    }
+    return cmStrCat(prop, msg, target->GetName(), "\")\n");
+  }
+
+  bool isReadOnly(const std::string& prop, cmMakefile* context,
+                  cmTarget* target) const
+  {
+    auto importedTarget = target->IsImported();
+    bool matchingCondition = true;
+    if ((!importedTarget && this->Condition == ReadOnlyCondition::Imported) ||
+        (importedTarget &&
+         this->Condition == ReadOnlyCondition::NonImported)) {
+      matchingCondition = false;
+    }
+    if (!matchingCondition) {
+      // Not read-only in this scenario
+      return false;
+    }
+
+    bool readOnly = true;
+    if (!this->Policy) {
+      // No policy associated, so is always read-only
+      context->IssueMessage(MessageType::FATAL_ERROR,
+                            this->message(prop, target));
+    } else {
+      switch (target->GetPolicyStatus(*this->Policy)) {
+        case cmPolicies::WARN:
+          context->IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmPolicies::GetPolicyWarning(cmPolicies::CMP0160) + "\n" +
+              this->message(prop, target));
+          CM_FALLTHROUGH;
+        case cmPolicies::OLD:
+          readOnly = false;
+          break;
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::NEW:
+          context->IssueMessage(MessageType::FATAL_ERROR,
+                                this->message(prop, target));
+          break;
+      }
+    }
+    return readOnly;
+  }
+};
+
+bool IsSetableProperty(cmMakefile* context, cmTarget* target,
+                       const std::string& prop)
+{
+  using ROC = ReadOnlyCondition;
+  static std::unordered_map<std::string, ReadOnlyProperty> const readOnlyProps{
+    { "EXPORT_NAME", { ROC::Imported } },
+    { "HEADER_SETS", { ROC::All } },
+    { "IMPORTED_GLOBAL", { ROC::NonImported } },
+    { "INTERFACE_HEADER_SETS", { ROC::All } },
+    { "MANUALLY_ADDED_DEPENDENCIES", { ROC::All } },
+    { "NAME", { ROC::All } },
+    { "SOURCES", { ROC::Imported } },
+    { "TYPE", { ROC::All } },
+    { "ALIAS_GLOBAL", { ROC::All, cmPolicies::CMP0160 } },
+    { "BINARY_DIR", { ROC::All, cmPolicies::CMP0160 } },
+    { "CXX_MODULE_SETS", { ROC::All, cmPolicies::CMP0160 } },
+    { "IMPORTED", { ROC::All, cmPolicies::CMP0160 } },
+    { "INTERFACE_CXX_MODULE_SETS", { ROC::All, cmPolicies::CMP0160 } },
+    { "LOCATION", { ROC::All, cmPolicies::CMP0160 } },
+    { "LOCATION_CONFIG", { ROC::All, cmPolicies::CMP0160 } },
+    { "SOURCE_DIR", { ROC::All, cmPolicies::CMP0160 } }
+  };
+
+  auto it = readOnlyProps.find(prop);
+
+  if (it != readOnlyProps.end()) {
+    return !(it->second.isReadOnly(prop, context, target));
+  }
+  return true;
+}
+}
+
 void cmTarget::SetProperty(const std::string& prop, cmValue value)
 {
-  if (prop == propMANUALLY_ADDED_DEPENDENCIES) {
-    this->impl->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      "MANUALLY_ADDED_DEPENDENCIES property is read-only\n");
-    return;
-  }
-  if (prop == propNAME) {
-    this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
-                                       "NAME property is read-only\n");
-    return;
-  }
-  if (prop == propTYPE) {
-    this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
-                                       "TYPE property is read-only\n");
-    return;
-  }
-  if (prop == propEXPORT_NAME && this->IsImported()) {
-    std::ostringstream e;
-    e << "EXPORT_NAME property can't be set on imported targets (\""
-      << this->impl->Name << "\")\n";
-    this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    return;
-  }
-  if (prop == propSOURCES && this->IsImported()) {
-    std::ostringstream e;
-    e << "SOURCES property can't be set on imported targets (\""
-      << this->impl->Name << "\")\n";
-    this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    return;
-  }
-  if (prop == propIMPORTED_GLOBAL && !this->IsImported()) {
-    std::ostringstream e;
-    e << "IMPORTED_GLOBAL property can't be set on non-imported targets (\""
-      << this->impl->Name << "\")\n";
-    this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  if (!IsSetableProperty(this->impl->Makefile, this, prop)) {
     return;
   }
 
@@ -2172,40 +2251,23 @@ void cmTarget::AppendProperty(const std::string& prop,
                               cm::optional<cmListFileBacktrace> const& bt,
                               bool asString)
 {
-  if (prop == "NAME") {
-    this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR,
-                                       "NAME property is read-only\n");
-    return;
-  }
-  if (prop == "EXPORT_NAME" && this->IsImported()) {
-    std::ostringstream e;
-    e << "EXPORT_NAME property can't be set on imported targets (\""
-      << this->impl->Name << "\")\n";
-    this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    return;
-  }
-  if (prop == "SOURCES" && this->IsImported()) {
-    std::ostringstream e;
-    e << "SOURCES property can't be set on imported targets (\""
-      << this->impl->Name << "\")\n";
-    this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+  if (!IsSetableProperty(this->impl->Makefile, this, prop)) {
     return;
   }
   if (prop == "IMPORTED_GLOBAL") {
-    std::ostringstream e;
-    e << "IMPORTED_GLOBAL property can't be appended, only set on imported "
-         "targets (\""
-      << this->impl->Name << "\")\n";
-    this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
-    return;
+    this->impl->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("IMPORTED_GLOBAL property can't be appended, only set on "
+               "imported targets (\"",
+               this->impl->Name, "\")\n"));
   }
   if (prop == propPRECOMPILE_HEADERS &&
       this->GetProperty("PRECOMPILE_HEADERS_REUSE_FROM")) {
-    std::ostringstream e;
-    e << "PRECOMPILE_HEADERS_REUSE_FROM property is already set on target "
-         "(\""
-      << this->impl->Name << "\")\n";
-    this->impl->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+    this->impl->Makefile->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(
+        "PRECOMPILE_HEADERS_REUSE_FROM property is already set on target (\"",
+        this->impl->Name, "\")\n"));
     return;
   }
 

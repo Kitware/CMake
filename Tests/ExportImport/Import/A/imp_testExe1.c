@@ -21,7 +21,7 @@ extern int testStaticLibPlugin(void);
 #endif
 extern int testLib4libcfg(void);
 
-int main()
+int main(void)
 {
   return (testLib2() + generated_by_testExe1() + testLib3() + testLib4() +
           testLib5() + testLib6() + testLib7() + testLibCycleA1() +

@@ -34,19 +34,27 @@ extern "C" {
 
 #if (defined(__GNUC__) || defined(__clang__)) &&                        \
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
-  !defined(__MINGW32__) && !defined(CURL_NO_FMT_CHECKS)
-#define CURL_TEMP_PRINTF(a,b) __attribute__ ((format(printf, a, b)))
+  !defined(CURL_NO_FMT_CHECKS)
+#if defined(__MINGW32__) && !defined(__clang__)
+#define CURL_TEMP_PRINTF(fmt, arg) \
+  __attribute__((format(gnu_printf, fmt, arg)))
 #else
-#define CURL_TEMP_PRINTF(a,b)
+#define CURL_TEMP_PRINTF(fmt, arg) \
+  __attribute__((format(printf, fmt, arg)))
+#endif
+#else
+#define CURL_TEMP_PRINTF(fmt, arg)
 #endif
 
-CURL_EXTERN int curl_mprintf(const char *format, ...) CURL_TEMP_PRINTF(1, 2);
+CURL_EXTERN int curl_mprintf(const char *format, ...)
+  CURL_TEMP_PRINTF(1, 2);
 CURL_EXTERN int curl_mfprintf(FILE *fd, const char *format, ...)
   CURL_TEMP_PRINTF(2, 3);
 CURL_EXTERN int curl_msprintf(char *buffer, const char *format, ...)
   CURL_TEMP_PRINTF(2, 3);
 CURL_EXTERN int curl_msnprintf(char *buffer, size_t maxlength,
-                               const char *format, ...) CURL_TEMP_PRINTF(3, 4);
+                               const char *format, ...)
+  CURL_TEMP_PRINTF(3, 4);
 CURL_EXTERN int curl_mvprintf(const char *format, va_list args)
   CURL_TEMP_PRINTF(1, 0);
 CURL_EXTERN int curl_mvfprintf(FILE *fd, const char *format, va_list args)

@@ -15,6 +15,9 @@ set(CMAKE_Fortran_POSTPROCESS_FLAG "-ffixed-line-length-72")
 
 set(CMAKE_Fortran_COMPILE_OPTIONS_TARGET "--target=")
 
+set(CMAKE_Fortran_LINKER_WRAPPER_FLAG "-Wl,")
+set(CMAKE_Fortran_LINKER_WRAPPER_FLAG_SEP ",")
+
 if(NOT "x${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "xMSVC")
   set(CMAKE_Fortran_VERBOSE_FLAG "-v")
 

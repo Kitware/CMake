@@ -8,7 +8,7 @@ void vecaddgpu(float* r, float* a, float* b, int n)
     r[i] = a[i] + b[i];
 }
 
-int main()
+int main(void)
 {
   int n = 100000; /* vector length */
   float* a;       /* input vector 1 */

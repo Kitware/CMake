@@ -15,6 +15,7 @@ Synopsis
   cmake_language(`DEFER`_ <options>... CALL <command> [<arg>...])
   cmake_language(`SET_DEPENDENCY_PROVIDER`_ <command> SUPPORTED_METHODS <methods>...)
   cmake_language(`GET_MESSAGE_LOG_LEVEL`_ <out-var>)
+  cmake_language(`EXIT`_ <exit-code>)
 
 Introduction
 ^^^^^^^^^^^^
@@ -317,7 +318,7 @@ be one of the ``<methods>`` that was specified when setting the provider.
   implementation as part of its processing, it can do so by including the
   ``BYPASS_PROVIDER`` keyword as one of the arguments.
 
-``FETCHCONTENT_MAKEAVAILABE_SERIAL``
+``FETCHCONTENT_MAKEAVAILABLE_SERIAL``
   The ``<method-specific-args>`` will be everything passed to the
   :command:`FetchContent_Declare` call that corresponds to the requested
   dependency, with the following exceptions:
@@ -506,3 +507,25 @@ Getting current message log level
   If both the command line option and the variable are set, the command line
   option takes precedence. If neither are set, the default logging level
   is returned.
+
+Terminating Scripts
+^^^^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.29
+
+.. signature::
+  cmake_language(EXIT <exit-code>)
+
+  Terminate the current :option:`cmake -P` script and exit with ``<exit-code>``.
+
+  This command works only in :ref:`script mode <Script Processing Mode>`.
+  If used outside of that context, it will cause a fatal error.
+
+  The ``<exit-code>`` should be non-negative.
+  If ``<exit-code>`` is negative, then the behavior
+  is unspecified (e.g., on Windows the error code -1
+  becomes ``0xffffffff``, and on Linux it becomes 255).
+  Exit codes above 255 may not be supported by the underlying
+  shell or platform, and some shells may interpret values
+  above 125 specially.  Therefore, it is advisable to only
+  specify an ``<exit-code>`` in the range 0 to 125.

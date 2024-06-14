@@ -1,0 +1,3 @@
+
+project(ReadOnly LANGUAGES NONE)
+include(${CMAKE_CURRENT_LIST_DIR}/READONLY_PROPERTIES.cmake)

@@ -1,0 +1,10 @@
+Test project [^
+]*/Tests/RunCMake/CTestCommandLine/Parallel-N
+  Test #1: test1
+  Test #2: test2
+  Test #3: test3
+  Test #4: test4
+  Test #5: test5
+  Test #6: test6
+
+Total Tests: 6

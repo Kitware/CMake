@@ -4,6 +4,10 @@
 #  endif
 #endif
 
+#ifdef FROM_USAGE_REQS
+#  error "compile definitions leaked from private module requirements"
+#endif
+
 import importable;
 
 int main(int argc, char* argv[])

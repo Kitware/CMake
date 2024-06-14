@@ -118,17 +118,27 @@ Run Tests
  previously interrupted.  If no interruption occurred, the ``-F`` option
  will have no effect.
 
-.. option:: -j <jobs>, --parallel <jobs>
+.. option:: -j [<level>], --parallel [<level>]
 
- Run the tests in parallel using the given number of jobs.
+ Run tests in parallel, optionally limited to a given level of parallelism.
 
- This option tells CTest to run the tests in parallel using given
- number of jobs. This option can also be set by setting the
- :envvar:`CTEST_PARALLEL_LEVEL` environment variable.
+ .. versionadded:: 3.29
+
+    The ``<level>`` may be omitted, or ``0``, in which case:
+
+    * Under `Job Server Integration`_, parallelism is limited by
+      available job tokens.
+
+    * Otherwise, if the value is omitted, parallelism is limited
+      by the number of processors, or 2, whichever is larger.
+
+    * Otherwise, if the value is ``0``, parallelism is unbounded.
+
+ This option may instead be specified by the :envvar:`CTEST_PARALLEL_LEVEL`
+ environment variable.
 
  This option can be used with the :prop_test:`PROCESSORS` test property.
-
- See `Label and Subproject Summary`_.
+ See the `Label and Subproject Summary`_.
 
 .. option:: --resource-spec-file <file>
 
@@ -233,6 +243,30 @@ Run Tests
  a test will only be excluded if each regular expression matches at least one
  of the test's labels (i.e. the multiple ``-LE`` labels form an ``AND``
  relationship).  See `Label Matching`_.
+
+.. option:: --tests-from-file <filename>
+
+ .. versionadded:: 3.29
+
+ Run tests listed in the given file.
+
+ This option tells CTest to run tests that are listed in the given file.
+ The file must contain one exact test name per line.
+ Lines that do not exactly match any test names are ignored.
+ This option can be combined with the other options like
+ ``-R``, ``-E``, ``-L`` or ``-LE``.
+
+.. option:: --exclude-from-file <filename>
+
+ .. versionadded:: 3.29
+
+ Exclude tests listed in the given file.
+
+ This option tells CTest to NOT run tests that are listed in the given file.
+ The file must contain one exact test name per line.
+ Lines that do not exactly match any test names are ignored.
+ This option can be combined with the other options like
+ ``-R``, ``-E``, ``-L`` or ``-LE``.
 
 .. option:: -FA <regex>, --fixture-exclude-any <regex>
 
@@ -353,6 +387,8 @@ Run Tests
  See `Label and Subproject Summary`_.
 
 .. option:: --test-dir <dir>
+
+ .. versionadded:: 3.20
 
  Specify the directory in which to look for tests, typically a CMake project
  build directory. If not specified, the current directory is used.
@@ -751,6 +787,16 @@ The available ``<dashboard-options>`` are the following:
  Submit extra files to the dashboard.
 
  This option will submit extra files to the dashboard.
+
+.. option:: --http-header <header>
+
+ .. versionadded:: 3.29
+
+ Append HTTP header when submitting to the dashboard.
+
+ This option will cause CTest to append the specified header
+ when submitting to the dashboard.
+ This option may be specified more than once.
 
 .. option:: --http1.0
 
@@ -1846,6 +1892,31 @@ exists, all tests that have :prop_test:`RESOURCE_GROUPS` set must have the
 fixture in their :prop_test:`FIXTURES_REQUIRED`, and a resource spec file may
 not be specified with the ``--resource-spec-file`` argument or the
 :variable:`CTEST_RESOURCE_SPEC_FILE` variable.
+
+.. _`ctest-job-server-integration`:
+
+Job Server Integration
+======================
+
+.. versionadded:: 3.29
+
+On POSIX systems, when running under the context of a `Job Server`_,
+CTest shares its job slots.  This is independent of the :prop_test:`PROCESSORS`
+test property, which still counts against CTest's :option:`-j <ctest -j>`
+parallel level.  CTest acquires exactly one token from the job server before
+running each test, and returns it when the test finishes.
+
+For example, consider the ``Makefile``:
+
+.. literalinclude:: CTEST_EXAMPLE_MAKEFILE_JOB_SERVER.make
+  :language: make
+
+When invoked via ``make -j 2 test``, ``ctest`` connects to the job server,
+acquires a token for each test, and runs at most 2 tests concurrently.
+
+On Windows systems, job server integration is not yet implemented.
+
+.. _`Job Server`: https://www.gnu.org/software/make/manual/html_node/Job-Slots.html
 
 See Also
 ========

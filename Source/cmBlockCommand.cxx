@@ -127,6 +127,10 @@ bool cmBlockFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
       inStatus.SetContinueInvoked();
       return true;
     }
+    if (status.HasExitCode()) {
+      inStatus.SetExitCode(status.GetExitCode());
+      return true;
+    }
     if (cmSystemTools::GetFatalErrorOccurred()) {
       return true;
     }

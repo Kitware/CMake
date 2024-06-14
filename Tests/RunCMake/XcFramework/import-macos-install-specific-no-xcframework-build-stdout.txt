@@ -1,0 +1,2 @@
+mylib location: [^
+]*/Tests/RunCMake/XcFramework/export-install/lib/macos/libmylib\.a

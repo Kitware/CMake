@@ -1,5 +1,5 @@
 
-cmake_policy(VERSION 3.1)
+cmake_policy(VERSION 3.5)
 
 file(STRINGS "${RunCMake_TEST_BINARY_DIR}/CMP0122-library-name.txt" prefixes)
 

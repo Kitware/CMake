@@ -15,9 +15,8 @@ The ``OLD`` behavior of this policy is for ``$<IN_LIST:...>`` to always return
 ``0`` if the first argument is empty. The ``NEW`` behavior is to return ``1``
 if the first argument is empty and the list contains an empty item.
 
-This policy was introduced in CMake version 3.14.  CMake version
-|release| warns when the policy is not set and uses ``OLD`` behavior.
-Use the :command:`cmake_policy` command to set it to ``OLD`` or ``NEW``
-explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.14
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

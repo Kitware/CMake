@@ -16,9 +16,8 @@ The ``OLD`` behavior for this policy is to ignore the multiple occurrences of
 The ``NEW`` behavior of this policy is to raise an error on second call to
 :command:`export` command with same ``FILE`` without ``APPEND``.
 
-This policy was introduced in CMake version 3.18.  CMake version
-|release| warns when the policy is not set and uses ``OLD`` behavior.
-Use the :command:`cmake_policy` command to set it to ``OLD`` or ``NEW``
-explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.18
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

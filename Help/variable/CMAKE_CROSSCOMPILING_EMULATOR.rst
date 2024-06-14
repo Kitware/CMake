@@ -19,5 +19,8 @@ for the target system.
 The command will be used to run :command:`try_run` generated executables,
 which avoids manual population of the ``TryRunResults.cmake`` file.
 
-It is also used as the default value for the
-:prop_tgt:`CROSSCOMPILING_EMULATOR` target property of executables.
+This variable is also used as the default value for the
+:prop_tgt:`CROSSCOMPILING_EMULATOR` target property of executables.  However,
+while :manual:`generator expressions <cmake-generator-expressions(7)>` are
+supported by the target property (since CMake 3.29), they are *not* supported
+by this variable's :command:`try_run` functionality.

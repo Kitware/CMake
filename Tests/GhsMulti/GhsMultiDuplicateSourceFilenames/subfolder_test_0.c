@@ -1,4 +1,4 @@
-int test_d()
+int test_d(void)
 {
   return 1;
 }

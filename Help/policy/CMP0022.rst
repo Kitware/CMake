@@ -32,8 +32,8 @@ The ``NEW`` behavior for this policy is to use the ``INTERFACE_LINK_LIBRARIES``
 property for in-build targets, and ignore the old properties matching
 ``(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?``.
 
-This policy was introduced in CMake version 2.8.12.  CMake version
-|release| warns when the policy is not set and uses ``OLD`` behavior.  Use
-the :command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.8.12
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

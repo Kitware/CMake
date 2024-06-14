@@ -14,6 +14,7 @@
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
 
 #include "cmArgumentParser.h"
 #include "cmConfigureLog.h"
@@ -83,6 +84,7 @@ std::string const kCMAKE_HIP_PLATFORM = "CMAKE_HIP_PLATFORM";
 std::string const kCMAKE_HIP_RUNTIME_LIBRARY = "CMAKE_HIP_RUNTIME_LIBRARY";
 std::string const kCMAKE_ISPC_INSTRUCTION_SETS = "CMAKE_ISPC_INSTRUCTION_SETS";
 std::string const kCMAKE_ISPC_HEADER_SUFFIX = "CMAKE_ISPC_HEADER_SUFFIX";
+std::string const kCMAKE_LINKER_TYPE = "CMAKE_LINKER_TYPE";
 std::string const kCMAKE_LINK_SEARCH_END_STATIC =
   "CMAKE_LINK_SEARCH_END_STATIC";
 std::string const kCMAKE_LINK_SEARCH_START_STATIC =
@@ -176,6 +178,7 @@ auto const TryCompileBaseSourcesArgParser =
           ArgumentParser::ExpectAtLeast{ 0 })
     .Bind("LINK_LIBRARIES"_s, &Arguments::LinkLibraries)
     .Bind("LINK_OPTIONS"_s, &Arguments::LinkOptions)
+    .Bind("LINKER_LANGUAGE"_s, &Arguments::LinkerLanguage)
     .Bind("COPY_FILE"_s, &Arguments::CopyFileTo)
     .Bind("COPY_FILE_ERROR"_s, &Arguments::CopyFileError)
     .BIND_LANG_PROPS(C)
@@ -852,8 +855,30 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
         fclose(fout);
         return cm::nullopt;
       }
-      fprintf(fout, "\ninclude(\"${CMAKE_CURRENT_LIST_DIR}/%s\")\n\n",
+      fprintf(fout, "\ninclude(\"${CMAKE_CURRENT_LIST_DIR}/%s\")\n",
               fname.c_str());
+      // Create all relevant alias targets
+      if (arguments.LinkLibraries) {
+        const auto& aliasTargets = this->Makefile->GetAliasTargets();
+        for (std::string const& i : *arguments.LinkLibraries) {
+          auto alias = aliasTargets.find(i);
+          if (alias != aliasTargets.end()) {
+            const auto& aliasTarget =
+              this->Makefile->FindTargetToUse(alias->second);
+            // Create equivalent library/executable alias
+            if (aliasTarget->GetType() == cmStateEnums::EXECUTABLE) {
+              fprintf(fout, "add_executable(\"%s\" ALIAS \"%s\")\n", i.c_str(),
+                      alias->second.c_str());
+            } else {
+              // Other cases like UTILITY and GLOBAL_TARGET are excluded when
+              // arguments.LinkLibraries is initially parsed in this function.
+              fprintf(fout, "add_library(\"%s\" ALIAS \"%s\")\n", i.c_str(),
+                      alias->second.c_str());
+            }
+          }
+        }
+      }
+      fprintf(fout, "\n");
     }
 
     /* Set the appropriate policy information for ENABLE_EXPORTS */
@@ -876,6 +901,14 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
                 cmPolicies::NEW
               ? "NEW"
               : "OLD");
+
+    /* Set the appropriate policy information for Swift compilation mode */
+    fprintf(
+      fout, "cmake_policy(SET CMP0157 %s)\n",
+      this->Makefile->GetDefinition("CMAKE_Swift_COMPILATION_MODE_DEFAULT")
+          .IsEmpty()
+        ? "OLD"
+        : "NEW");
 
     // Workaround for -Wl,-headerpad_max_install_names issue until we can avoid
     // adding that flag in the platform and compiler language files
@@ -1041,6 +1074,19 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       }
     }
 
+    if (arguments.LinkerLanguage) {
+      std::string LinkerLanguage = *arguments.LinkerLanguage;
+      if (testLangs.find(LinkerLanguage) == testLangs.end()) {
+        this->Makefile->IssueMessage(
+          MessageType::FATAL_ERROR,
+          "Linker language '" + LinkerLanguage +
+            "' must be enabled in project(LANGUAGES).");
+      }
+
+      fprintf(fout, "set_property(TARGET %s PROPERTY LINKER_LANGUAGE %s)\n",
+              targetName.c_str(), LinkerLanguage.c_str());
+    }
+
     if (arguments.LinkLibraries) {
       std::string libsToLink = " ";
       for (std::string const& i : *arguments.LinkLibraries) {
@@ -1110,6 +1156,20 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
           kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {
       cmList varList{ *varListStr };
       vars.insert(varList.begin(), varList.end());
+    }
+
+    if (this->Makefile->GetDefinition(kCMAKE_LINKER_TYPE)) {
+      // propagate various variables to support linker selection
+      vars.insert(kCMAKE_LINKER_TYPE);
+      auto defs = this->Makefile->GetDefinitions();
+      cmsys::RegularExpression linkerTypeDef{
+        "^CMAKE_[A-Za-z_-]+_USING_LINKER_"
+      };
+      for (auto const& def : defs) {
+        if (linkerTypeDef.find(def)) {
+          vars.insert(def);
+        }
+      }
     }
 
     if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0083) ==

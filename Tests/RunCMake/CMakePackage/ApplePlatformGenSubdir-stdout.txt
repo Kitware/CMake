@@ -1,0 +1,3 @@
+(-- )?Hello from platform switch
+(-- )?Hello from arch switch
+(-- )?Hello from pkg_a

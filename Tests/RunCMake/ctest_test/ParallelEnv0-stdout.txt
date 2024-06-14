@@ -1,0 +1,9 @@
+Test project [^
+]*/Tests/RunCMake/ctest_test/ParallelEnv0-build
+    Start [0-9]+: test[0-9]+
+    Start [0-9]+: test[0-9]+
+    Start [0-9]+: test[0-9]+
+    Start [0-9]+: test[0-9]+
+    Start [0-9]+: test[0-9]+
+    Start [0-9]+: test[0-9]+
+1/6 Test #[0-9]+: test[0-9]+ ............................   Passed +[0-9.]+ sec

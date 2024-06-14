@@ -12,7 +12,12 @@
         Manufacturer="$(var.CPACK_PACKAGE_VENDOR)"
         UpgradeCode="$(var.CPACK_WIX_UPGRADE_GUID)">
 
+
+        <?if $(var.CPACK_WIX_INSTALL_SCOPE) = "NONE" ?>
         <Package InstallerVersion="301" Compressed="yes"/>
+        <?else?>
+        <Package InstallerVersion="301" Compressed="yes" InstallScope="$(var.CPACK_WIX_INSTALL_SCOPE)"/>
+        <?endif?>
 
         <Media Id="1" Cabinet="media1.cab" EmbedCab="yes"/>
 
@@ -40,6 +45,7 @@
         <FeatureRef Id="ProductFeature"/>
 
         <UIRef Id="$(var.CPACK_WIX_UI_REF)" />
+        <UIRef Id="WixUI_ErrorProgressText" />
 
         <?include "properties.wxi"?>
         <?include "product_fragment.wxi"?>

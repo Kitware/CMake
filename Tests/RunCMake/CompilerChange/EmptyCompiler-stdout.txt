@@ -1,0 +1,3 @@
+-- CMAKE_C_COMPILER is '[^']*/Tests/RunCMake/CompilerChange/cc2.sh'
+.*
+-- CMAKE_C_COMPILER is 'CMAKE_C_COMPILER-NOTFOUND'

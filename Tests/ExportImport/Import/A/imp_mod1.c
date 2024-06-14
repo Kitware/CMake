@@ -7,7 +7,7 @@
 testExe2_IMPORT int testExe2Func(void);
 testExe2_IMPORT int testExe2lib(void);
 
-int imp_mod1()
+int imp_mod1(void)
 {
   return testExe2Func() + testExe2lib();
 }

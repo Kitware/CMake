@@ -1,4 +1,4 @@
 
-void objlib2()
+void objlib2(void)
 {
 }

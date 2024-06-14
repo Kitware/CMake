@@ -172,9 +172,9 @@ typedef unsigned char _Bool;
 #	include <memory.h>
 #endif
 
-// As of MSVC 2013, inline and restrict are supported with
+// As of MSVC 2013 and LCC <= 1.21, inline and restrict are supported with
 // non-standard keywords.
-#if defined(_WIN32) && defined(_MSC_VER)
+#if (defined(_WIN32) && defined(_MSC_VER)) || (defined(__EDG__) && defined(__LCC__))
 #	ifndef inline
 #		define inline __inline
 #	endif

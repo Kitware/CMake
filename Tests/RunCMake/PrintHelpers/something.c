@@ -1,6 +1,6 @@
 #include "something.h"
 
-int main()
+int main(void)
 {
   nothing();
   return 0;

@@ -298,14 +298,6 @@ endif()
 set(KWSYS_HEADER_INSTALL_DIR)
 set(KWSYS_LIBRARY_INSTALL_DIR)
 
-# Generated source files will need this header.
-string(COMPARE EQUAL "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}"
-  KWSYS_IN_SOURCE_BUILD)
-if(NOT KWSYS_IN_SOURCE_BUILD)
-  configure_file(${PROJECT_SOURCE_DIR}/kwsysPrivate.h
-    ${PROJECT_BINARY_DIR}/kwsysPrivate.h COPYONLY IMMEDIATE)
-endif()
-
 # Select plugin module file name convention.
 if(NOT KWSYS_DynamicLoader_PREFIX)
   set(KWSYS_DynamicLoader_PREFIX ${CMAKE_SHARED_MODULE_PREFIX})

@@ -24,7 +24,7 @@ Logical, Informational, and Output expressions.
 
 Logical expressions are used to create conditional output. The basic
 expressions are the ``0`` and ``1`` expressions. A ``$<0:...>`` results in the
-empty string, and ``<1:...>`` results in the content of ``...``.  They can also
+empty string, and ``$<1:...>`` results in the content of ``...``.  They can also
 be nested.
 
 Exercise 1 - Adding Compiler Warning Flags with Generator Expressions

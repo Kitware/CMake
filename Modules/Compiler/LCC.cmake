@@ -65,11 +65,11 @@ macro(__compiler_lcc lang)
   set(CMAKE_${lang}_COMPILE_OPTIONS_IPO ${__lto_flags})
 
   set(CMAKE_${lang}_ARCHIVE_CREATE_IPO
-    "\"${CMAKE_${lang}_COMPILER_AR}\" cr <TARGET> <LINK_FLAGS> <OBJECTS>"
+    "\"${CMAKE_${lang}_COMPILER_AR}\" qc <TARGET> <LINK_FLAGS> <OBJECTS>"
   )
 
   set(CMAKE_${lang}_ARCHIVE_APPEND_IPO
-    "\"${CMAKE_${lang}_COMPILER_AR}\" r <TARGET> <LINK_FLAGS> <OBJECTS>"
+    "\"${CMAKE_${lang}_COMPILER_AR}\" q <TARGET> <LINK_FLAGS> <OBJECTS>"
   )
 
   set(CMAKE_${lang}_ARCHIVE_FINISH_IPO

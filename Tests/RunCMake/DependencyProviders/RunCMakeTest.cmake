@@ -61,6 +61,11 @@ run_cmake_with_options(RedirectFetchContentSerial
   -D "provider_command=redirect_FetchContentSerial_provider"
   -D "provider_methods=FETCHCONTENT_MAKEAVAILABLE_SERIAL"
 )
+run_cmake_with_options(ProviderFirst
+  -D "CMAKE_PROJECT_TOP_LEVEL_INCLUDES=set_provider.cmake"
+  -D "provider_command=FetchContentSerial_provider"
+  -D "provider_methods=FETCHCONTENT_MAKEAVAILABLE_SERIAL"
+)
 run_cmake_with_options(Bypass
   -D "CMAKE_PROJECT_TOP_LEVEL_INCLUDES=set_provider.cmake"
   -D "provider_command=forward_find_package"

@@ -19,10 +19,10 @@ endif
 let s:keepcpo= &cpo
 set cpo&vim
 
-syn region cmakeBracketArgument start="\[\z(=\?\|=[0-9]*\)\[" end="\]\z1\]" contains=cmakeTodo,@Spell
+syn region cmakeBracketArgument start="\[\z(=*\)\[" end="\]\z1\]" contains=cmakeTodo,@Spell
 
-syn region cmakeComment start="#" end="$" contains=cmakeTodo,@Spell
-syn region cmakeBracketComment start="\[\z(=*\)\[" end="\]\z1\]" contains=cmakeTodo,@Spell
+syn region cmakeComment start="#\(\[=*\[\)\@!" end="$" contains=cmakeTodo,@Spell
+syn region cmakeBracketComment start="#\[\z(=*\)\[" end="\]\z1\]" contains=cmakeTodo,@Spell
 
 syn match cmakeEscaped /\(\\\\\|\\"\|\\n\|\\t\)/ contained
 syn region cmakeRegistry start="\[" end="]" contained oneline contains=cmakeTodo,cmakeEscaped
@@ -70,6 +70,7 @@ syn keyword cmakeProperty contained
             \ ATTACHED_FILES
             \ ATTACHED_FILES_ON_FAIL
             \ AUTOGEN_BUILD_DIR
+            \ AUTOGEN_COMMAND_LINE_LENGTH_MAX
             \ AUTOGEN_ORIGIN_DEPENDS
             \ AUTOGEN_PARALLEL
             \ AUTOGEN_SOURCE_GROUP
@@ -77,6 +78,7 @@ syn keyword cmakeProperty contained
             \ AUTOGEN_TARGETS_FOLDER
             \ AUTOGEN_TARGET_DEPENDS
             \ AUTOGEN_USE_SYSTEM_INCLUDE
+            \ AUTOGEN_BETTER_GRAPH_MULTI_CONFIG
             \ AUTOMOC
             \ AUTOMOC_COMPILER_PREDEFINES
             \ AUTOMOC_DEPEND_FILTERS
@@ -374,6 +376,7 @@ syn keyword cmakeProperty contained
             \ Swift_LANGUAGE_VERSION
             \ Swift_MODULE_DIRECTORY
             \ Swift_MODULE_NAME
+            \ Swift_COMPILATION_MODE
             \ TARGET_ARCHIVES_MAY_BE_SHARED_LIBS
             \ TARGET_MESSAGES
             \ TARGET_SUPPORTS_SHARED_LIBS
@@ -764,6 +767,8 @@ syn keyword cmakeVariable contained
             \ CMAKE_ASM_STANDARD_REQUIRED
             \ CMAKE_ASM_SUPPORTED
             \ CMAKE_ASM_VISIBILITY_PRESET
+            \ CMAKE_AUTOGEN_BETTER_GRAPH_MULTI_CONFIG
+            \ CMAKE_AUTOGEN_COMMAND_LINE_LENGTH_MAX
             \ CMAKE_AUTOGEN_ORIGIN_DEPENDS
             \ CMAKE_AUTOGEN_PARALLEL
             \ CMAKE_AUTOGEN_USE_SYSTEM_INCLUDE
@@ -1656,6 +1661,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_SKIP_INSTALL_RPATH
             \ CMAKE_SKIP_INSTALL_RULES
             \ CMAKE_SKIP_RPATH
+            \ CMAKE_SKIP_TEST_ALL_DEPENDENCY
             \ CMAKE_SOURCE_DIR
             \ CMAKE_STAGING_PREFIX
             \ CMAKE_STATIC_LIBRARY_PREFIX
@@ -2760,7 +2766,6 @@ syn keyword cmakeKWcmake_language contained
             \ DIRECTORY
             \ EVAL
             \ FALSE
-            \ FETCHCONTENT_MAKEAVAILABE_SERIAL
             \ FETCHCONTENT_MAKEAVAILABLE_SERIAL
             \ FETCHCONTENT_SOURCE_DIR_
             \ FETCHCONTENT_TRY_FIND_PACKAGE_MODE

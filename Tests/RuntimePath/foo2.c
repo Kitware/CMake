@@ -1,4 +1,4 @@
-int foo2()
+int foo2(void)
 {
   return 0;
 }

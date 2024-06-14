@@ -1,6 +1,6 @@
 int foo();
 
-int main()
+int main(void)
 {
   return foo();
 }

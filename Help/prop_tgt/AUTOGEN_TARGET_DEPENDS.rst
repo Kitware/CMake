@@ -1,18 +1,28 @@
 AUTOGEN_TARGET_DEPENDS
 ----------------------
 
-Additional target dependencies of the corresponding ``_autogen`` target.
+Additional target dependencies of the corresponding :ref:`<ORIGIN>_autogen`
+target.
+
+  .. note::
+
+    If Qt 5.15 or later is used and the generator is either :generator:`Ninja`
+    or :ref:`Makefile Generators`, additional target dependencies are added to
+    the :ref:`<ORIGIN>_autogen_timestamp_deps` target instead of the
+    :ref:`<ORIGIN>_autogen` target.
+
 
 Targets which have their :prop_tgt:`AUTOMOC` or :prop_tgt:`AUTOUIC` property
-``ON`` have a corresponding ``_autogen`` target which generates
-``moc`` and ``uic`` files.  As this ``_autogen`` target is created at
-generate-time, it is not possible to define dependencies of it using
-e.g.  :command:`add_dependencies`.  Instead the
-``AUTOGEN_TARGET_DEPENDS`` target property can be set to a
-:ref:`;-list <CMake Language Lists>` of additional dependencies for the
-``_autogen`` target.  Dependencies can be target names or file names.
+``ON`` have a corresponding :ref:`<ORIGIN>_autogen`  target which generates
+``moc`` and ``uic`` files.  As this :ref:`<ORIGIN>_autogen`  target is created
+at generate-time, it is not possible to define dependencies of it using e.g.
+:command:`add_dependencies`.  Instead the ``AUTOGEN_TARGET_DEPENDS`` target
+property can be set to a :ref:`;-list <CMake Language Lists>` of additional
+dependencies for the :ref:`<ORIGIN>_autogen`  target. Dependencies can be target
+names or file names.
 
-In total the dependencies of the ``_autogen`` target are composed from
+In total the dependencies of the :ref:`<ORIGIN>_autogen`  target are composed
+from
 
 - forwarded origin target dependencies
   (enabled by default via :prop_tgt:`AUTOGEN_ORIGIN_DEPENDS`)

@@ -14,7 +14,7 @@ collaboration with a productive community of contributors.
 Please post to the ``Development`` category of the `CMake Forum`_ to raise
 discussion of development topics.
 
-.. _`Kitware`: http://www.kitware.com/cmake
+.. _`Kitware`: https://www.kitware.com/cmake
 .. _`CMake Forum`: https://discourse.cmake.org
 
 Patches

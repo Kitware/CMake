@@ -1,0 +1,1 @@
+^CMake Error: '--parallel' given invalid value 'bad'$

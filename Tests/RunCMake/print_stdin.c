@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int main()
+int main(void)
 {
   char buf[1024];
   size_t nIn = sizeof(buf);

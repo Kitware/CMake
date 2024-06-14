@@ -21,6 +21,8 @@ handling whitespace and special characters properly (if not using the
 mentioned workaround).  The ``NEW`` behavior on the other hand allows names
 with whitespace and special characters for tests created by ``add_test``.
 
-This policy was introduced in CMake version 3.19.  CMake version |release|
-warns when the policy is not set and uses ``OLD`` behavior. Use the
-:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.19
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
+
+.. include:: DEPRECATED.txt

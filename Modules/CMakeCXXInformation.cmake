@@ -66,7 +66,7 @@ if (NOT _INCLUDED_FILE)
 endif ()
 
 if(CMAKE_CXX_SIZEOF_DATA_PTR)
-  foreach(f ${CMAKE_CXX_ABI_FILES})
+  foreach(f IN LISTS CMAKE_CXX_ABI_FILES)
     include(${f})
   endforeach()
   unset(CMAKE_CXX_ABI_FILES)
@@ -182,7 +182,7 @@ if(NOT CMAKE_SHARED_MODULE_CXX_FLAGS)
 endif()
 
 # Initialize CXX link type selection flags from C versions.
-foreach(type SHARED_LIBRARY SHARED_MODULE EXE)
+foreach(type IN ITEMS SHARED_LIBRARY SHARED_MODULE EXE)
   if(NOT CMAKE_${type}_LINK_STATIC_CXX_FLAGS)
     set(CMAKE_${type}_LINK_STATIC_CXX_FLAGS
       ${CMAKE_${type}_LINK_STATIC_C_FLAGS})

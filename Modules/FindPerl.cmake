@@ -5,15 +5,20 @@
 FindPerl
 --------
 
-Find perl
+Find a Perl interpreter.
 
-this module looks for Perl
+This module defines the following variables:
 
-::
+``PERL_EXECUTABLE``
+  The full path to Perl.
 
-  PERL_EXECUTABLE     - the full path to perl
-  PERL_FOUND          - If false, don't attempt to use perl.
-  PERL_VERSION_STRING - version of perl found (since CMake 2.8.8)
+``PERL_FOUND``
+  True if the Perl executable was found.
+
+``PERL_VERSION_STRING``
+  .. versionadded:: 2.8.8
+
+  The version of Perl found.
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindCygwin.cmake)

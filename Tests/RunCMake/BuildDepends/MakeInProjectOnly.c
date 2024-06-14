@@ -1,5 +1,5 @@
 #include <MakeInProjectOnly.h>
-int main()
+int main(void)
 {
   return MakeInProjectOnly();
 }

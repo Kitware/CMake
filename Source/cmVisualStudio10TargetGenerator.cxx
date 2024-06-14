@@ -155,8 +155,8 @@ public:
   cmVS10GeneratorOptions(cmLocalVisualStudioGenerator* lg, Tool tool,
                          cmVS7FlagTable const* table,
                          cmVisualStudio10TargetGenerator* g = nullptr)
-    : cmVisualStudioGeneratorOptions(
-        lg, tool, table, nullptr, g == nullptr ? false : g->BuildAsX)
+    : cmVisualStudioGeneratorOptions(lg, tool, table, nullptr,
+                                     g == nullptr ? false : g->BuildAsX)
     , TargetGenerator(g)
   {
   }
@@ -191,9 +191,11 @@ struct cmVisualStudio10TargetGenerator::OptionsHelper
   }
   ~OptionsHelper() { O.Parent = nullptr; }
 
-  void OutputPreprocessorDefinitions(const std::string& lang, std::string const& platform = "")
+  void OutputPreprocessorDefinitions(const std::string& lang,
+                                     std::string const& platform = "")
   {
-    O.OutputPreprocessorDefinitions(O.Parent->S, O.Parent->Indent + 1, lang, platform);
+    O.OutputPreprocessorDefinitions(O.Parent->S, O.Parent->Indent + 1, lang,
+                                    platform);
   }
   void OutputAdditionalIncludeDirectories(const std::string& lang)
   {
@@ -282,6 +284,16 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
     this->Makefile->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
   this->NsightTegra = gg->IsNsightTegra();
   this->Android = gg->TargetsAndroid();
+  auto scanProp = target->GetProperty("CXX_SCAN_FOR_MODULES");
+  for (auto const& config : this->Configurations) {
+    if (scanProp.IsSet()) {
+      this->ScanSourceForModuleDependencies[config] = scanProp.IsOn();
+    } else {
+      this->ScanSourceForModuleDependencies[config] =
+        target->NeedCxxDyndep(config) ==
+        cmGeneratorTarget::CxxModuleSupport::Enabled;
+    }
+  }
   for (unsigned int& version : this->NsightTegraVersion) {
     version = 0;
   }
@@ -304,8 +316,7 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
 cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator() = default;
 
 std::string cmVisualStudio10TargetGenerator::CalcCondition(
-  const std::string& config,
-  const std::string& platform) const
+  const std::string& config, const std::string& platform) const
 {
   std::string platformSet = platform != "" ? platform : this->Platform;
   std::ostringstream oss;
@@ -1447,8 +1458,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues(Elem& e0)
         std::string configType;
         if (cmValue vsConfigurationType =
               this->GeneratorTarget->GetProperty("VS_CONFIGURATION_TYPE")) {
-          configType = cmGeneratorExpression::Evaluate(*vsConfigurationType,
-                                                      this->LocalGenerator, c);
+          configType = cmGeneratorExpression::Evaluate(
+            *vsConfigurationType, this->LocalGenerator, c);
         } else {
           switch (this->GeneratorTarget->GetType()) {
             case cmStateEnums::SHARED_LIBRARY:
@@ -2606,7 +2617,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
         }
         e2.Attribute("Condition", conditions.str());
       } else if (this->BuildAsX && tool == "ResourceCompile") {
-                   e2.Attribute("Condition", "'$(Platform)'=='ARM64EC'");
+        e2.Attribute("Condition", "'$(Platform)'=='ARM64EC'");
       }
       this->WriteSource(e2, si.Source);
 
@@ -2854,7 +2865,9 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     // use them
     if (!flags.empty() || !options.empty() || !configDefines.empty() ||
         !includes.empty() || compileAsPerConfig || noWinRT ||
-        !options.empty() || needsPCHFlags || shouldScanForModules) {
+        !options.empty() || needsPCHFlags ||
+        (shouldScanForModules !=
+         this->ScanSourceForModuleDependencies[config])) {
       cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
       cmIDEFlagTable const* flagtable = nullptr;
       const std::string& srclang = source->GetLanguage();
@@ -2882,8 +2895,10 @@ void cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       if (compileAsPerConfig) {
         clOptions.AddFlag("CompileAs", compileAsPerConfig);
       }
-      if (shouldScanForModules) {
-        clOptions.AddFlag("ScanSourceForModuleDependencies", "true");
+      if (shouldScanForModules !=
+          this->ScanSourceForModuleDependencies[config]) {
+        clOptions.AddFlag("ScanSourceForModuleDependencies",
+                          shouldScanForModules ? "true" : "false");
       }
       if (noWinRT) {
         clOptions.AddFlag("CompileAsWinRT", "false");
@@ -3022,13 +3037,23 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
     for (std::string const& config : this->Configurations) {
       const std::string cond = this->CalcCondition(config, p);
       if (this->BuildAsX && p == this->Platform) {
-          e1.WritePlatformConfigTag("BuildAsX", cond, "true");
+        e1.WritePlatformConfigTag("BuildAsX", cond, "true");
       }
 
       if (ttype >= cmStateEnums::UTILITY) {
         e1.WritePlatformConfigTag(
-          "IntDir", cond, "$(Platform)\\$(Configuration)\\$(ProjectName)\\");
+          "IntDir", cond, R"($(Platform)\$(Configuration)\$(ProjectName)\)");
       } else {
+        if (ttype == cmStateEnums::SHARED_LIBRARY ||
+            ttype == cmStateEnums::MODULE_LIBRARY ||
+            ttype == cmStateEnums::EXECUTABLE) {
+          auto linker = this->GeneratorTarget->GetLinkerTool(config);
+          if (!linker.empty()) {
+            ConvertToWindowsSlash(linker);
+            e1.WritePlatformConfigTag("LinkToolExe", cond, linker);
+          }
+        }
+
         std::string intermediateDir = cmStrCat(
           this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget), '/',
           config, '/');
@@ -3060,7 +3085,8 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
 
         if (cmValue sdkIncludeDirectories = this->Makefile->GetDefinition(
               "CMAKE_VS_SDK_INCLUDE_DIRECTORIES")) {
-          e1.WritePlatformConfigTag("IncludePath", cond, *sdkIncludeDirectories);
+          e1.WritePlatformConfigTag("IncludePath", cond,
+                                    *sdkIncludeDirectories);
         }
 
         if (cmValue sdkReferenceDirectories = this->Makefile->GetDefinition(
@@ -3071,7 +3097,8 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
 
         if (cmValue sdkLibraryDirectories = this->Makefile->GetDefinition(
               "CMAKE_VS_SDK_LIBRARY_DIRECTORIES")) {
-          e1.WritePlatformConfigTag("LibraryPath", cond, *sdkLibraryDirectories);
+          e1.WritePlatformConfigTag("LibraryPath", cond,
+                                    *sdkLibraryDirectories);
         }
 
         if (cmValue sdkLibraryWDirectories = this->Makefile->GetDefinition(
@@ -3080,14 +3107,15 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
                                     *sdkLibraryWDirectories);
         }
 
-        if (cmValue sdkSourceDirectories =
-              this->Makefile->GetDefinition("CMAKE_VS_SDK_SOURCE_DIRECTORIES")) {
+        if (cmValue sdkSourceDirectories = this->Makefile->GetDefinition(
+              "CMAKE_VS_SDK_SOURCE_DIRECTORIES")) {
           e1.WritePlatformConfigTag("SourcePath", cond, *sdkSourceDirectories);
         }
 
         if (cmValue sdkExcludeDirectories = this->Makefile->GetDefinition(
               "CMAKE_VS_SDK_EXCLUDE_DIRECTORIES")) {
-          e1.WritePlatformConfigTag("ExcludePath", cond, *sdkExcludeDirectories);
+          e1.WritePlatformConfigTag("ExcludePath", cond,
+                                    *sdkExcludeDirectories);
         }
 
         std::string name =
@@ -3611,8 +3639,9 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     }
   }
 
-  // Disable C++ source scanning by default.
-  e2.Element("ScanSourceForModuleDependencies", "false");
+  e2.Element("ScanSourceForModuleDependencies",
+             this->ScanSourceForModuleDependencies[configName] ? "true"
+                                                               : "false");
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeRcOptions()
@@ -3626,8 +3655,9 @@ bool cmVisualStudio10TargetGenerator::ComputeRcOptions(
   std::string const& configName)
 {
   cmGlobalVisualStudio10Generator* gg = this->GlobalGenerator;
-  auto pOptions = cm::make_unique<Options>(
-    this->LocalGenerator, Options::ResourceCompiler, gg->GetRcFlagTable(), this);
+  auto pOptions =
+    cm::make_unique<Options>(this->LocalGenerator, Options::ResourceCompiler,
+                             gg->GetRcFlagTable(), this);
   Options& rcOptions = *pOptions;
 
   std::string CONFIG = cmSystemTools::UpperCase(configName);

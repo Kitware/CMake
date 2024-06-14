@@ -5,6 +5,7 @@ add_test(NAME FindVulkan.Test COMMAND
   "${CMake_BINARY_DIR}/Tests/FindVulkan/Test"
   ${build_generator_args}
   --build-project TestFindVulkan
-  --build-options ${build_options}
+  # Use --fresh to make testing multiple SDK versions on the same computer easier
+  --build-options ${build_options} --fresh
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )

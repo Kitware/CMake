@@ -32,6 +32,12 @@ endif()
 
 if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0)
   if("x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
+    if (CMAKE_CXX_COMPILER_CLANG_RESOURCE_DIR)
+      set(_clang_scan_deps_resource_dir
+        " -resource-dir \"${CMAKE_CXX_COMPILER_CLANG_RESOURCE_DIR}\"")
+    else()
+      set(_clang_scan_deps_resource_dir "")
+    endif ()
     if (CMAKE_HOST_WIN32)
       # `rename` doesn't overwrite and doesn't retry in case of "target file is
       # busy".
@@ -45,6 +51,7 @@ if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0)
       " --"
       " <CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS>"
       " -x c++ <SOURCE> -c -o <OBJECT>"
+      "${_clang_scan_deps_resource_dir}"
       " -MT <DYNDEP_FILE>"
       " -MD -MF <DEP_FILE>"
       # Write to a temporary file. If the scan fails, we do not want to update
@@ -55,6 +62,7 @@ if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 16.0)
       # analogous to `ninja`'s `restat = 1`. It would also leave behind the
       # `.tmp` file.
       " && ${_clang_scan_deps_mv} <DYNDEP_FILE>.tmp <DYNDEP_FILE>")
+    unset(_clang_scan_deps_resource_dir)
     unset(_clang_scan_deps_mv)
     set(CMAKE_CXX_MODULE_MAP_FORMAT "clang")
     set(CMAKE_CXX_MODULE_MAP_FLAG "@<MODULE_MAP_FILE>")

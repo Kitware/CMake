@@ -8,7 +8,7 @@ FindRuby
 Find Ruby
 
 This module finds if Ruby is installed and determines where the
-include files and libraries are.  Ruby 1.8 through 3.2 are
+include files and libraries are.  Ruby 1.8 through 3.3 are
 supported.
 
 The minimum required version of Ruby can be specified using the
@@ -136,13 +136,13 @@ set(Ruby_FIND_VERSION_SHORT_NODOT "${Ruby_FIND_VERSION_MAJOR}${Ruby_FIND_VERSION
 
 # Set name of possible executables, ignoring the minor
 # Eg:
-# 2.1.1 => from ruby32 to ruby21 included
-# 2.1   => from ruby32 to ruby21 included
-# 2     => from ruby32 to ruby20 included
-# empty => from ruby32 to ruby18 included
+# 2.1.1 => from ruby33 to ruby21 included
+# 2.1   => from ruby33 to ruby21 included
+# 2     => from ruby33 to ruby20 included
+# empty => from ruby33 to ruby18 included
 if(NOT Ruby_FIND_VERSION_EXACT)
 
-  foreach(_ruby_version RANGE 32 18 -1)
+  foreach(_ruby_version RANGE 33 18 -1)
     string(SUBSTRING "${_ruby_version}" 0 1 _ruby_major_version)
     string(SUBSTRING "${_ruby_version}" 1 1 _ruby_minor_version)
 
@@ -417,7 +417,7 @@ endif()
 set(_Ruby_POSSIBLE_LIB_NAMES ruby ruby-static ruby${_Ruby_VERSION_SHORT} ruby${_Ruby_VERSION_SHORT_NODOT} ruby${_Ruby_NODOT_VERSION} ruby-${_Ruby_VERSION_SHORT} ruby-${Ruby_VERSION})
 
 if(WIN32)
-  set(_Ruby_POSSIBLE_MSVC_RUNTIMES "msvcrt;vcruntime140;vcruntime140_1")
+  set(_Ruby_POSSIBLE_MSVC_RUNTIMES "ucrt;msvcrt;vcruntime140;vcruntime140_1")
   if(MSVC_TOOLSET_VERSION)
     list(APPEND _Ruby_POSSIBLE_MSVC_RUNTIMES "msvcr${MSVC_TOOLSET_VERSION}")
   else()
@@ -426,16 +426,19 @@ if(WIN32)
 
   set(_Ruby_POSSIBLE_VERSION_SUFFICES "${_Ruby_NODOT_VERSION};${_Ruby_NODOT_VERSION_ZERO_PATCH}")
 
-  set(_Ruby_ARCH_PREFIX "")
   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-    set(_Ruby_ARCH_PREFIX "x64-")
+    set(_Ruby_POSSIBLE_ARCH_PREFIXS "libx64-;x64-")
+  else()
+    set(_Ruby_POSSIBLE_ARCH_PREFIXS "lib")
   endif()
 
   foreach(_Ruby_MSVC_RUNTIME ${_Ruby_POSSIBLE_MSVC_RUNTIMES})
     foreach(_Ruby_VERSION_SUFFIX ${_Ruby_POSSIBLE_VERSION_SUFFICES})
-      list(APPEND _Ruby_POSSIBLE_LIB_NAMES
-                 "${_Ruby_ARCH_PREFIX}${_Ruby_MSVC_RUNTIME}-ruby${_Ruby_VERSION_SUFFIX}"
-                 "${_Ruby_ARCH_PREFIX}${_Ruby_MSVC_RUNTIME}-ruby${_Ruby_VERSION_SUFFIX}-static")
+      foreach(_Ruby_ARCH_PREFIX ${_Ruby_POSSIBLE_ARCH_PREFIXS})
+        list(APPEND _Ruby_POSSIBLE_LIB_NAMES
+                   "${_Ruby_ARCH_PREFIX}${_Ruby_MSVC_RUNTIME}-ruby${_Ruby_VERSION_SUFFIX}"
+                   "${_Ruby_ARCH_PREFIX}${_Ruby_MSVC_RUNTIME}-ruby${_Ruby_VERSION_SUFFIX}-static")
+      endforeach()
     endforeach()
   endforeach()
 endif()

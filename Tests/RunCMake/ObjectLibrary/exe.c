@@ -5,7 +5,7 @@
 #endif
 
 extern IMPORT int b(void);
-int main()
+int main(void)
 {
   return b();
 }

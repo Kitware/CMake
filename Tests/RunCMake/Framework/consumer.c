@@ -1,7 +1,7 @@
 
 #include <Gui2/Gui.h>
 
-int consumer()
+int consumer(void)
 {
   foo();
 

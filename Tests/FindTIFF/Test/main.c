@@ -1,7 +1,7 @@
 #include <assert.h>
 #include <tiffio.h>
 
-int main()
+int main(void)
 {
   /* Without any TIFF file to open, test that the call fails as
      expected.  This tests that linking worked. */

@@ -46,6 +46,7 @@
 #include "curl_trc.h"
 #include "curl_msh3.h"
 #include "curl_ngtcp2.h"
+#include "curl_osslq.h"
 #include "curl_quiche.h"
 #include "rand.h"
 #include "vquic.h"
@@ -74,6 +75,8 @@ void Curl_quic_ver(char *p, size_t len)
 {
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
   Curl_ngtcp2_ver(p, len);
+#elif defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)
+  Curl_osslq_ver(p, len);
 #elif defined(USE_QUICHE)
   Curl_quiche_ver(p, len);
 #elif defined(USE_MSH3)
@@ -100,6 +103,7 @@ CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx)
     }
   }
 #endif
+  vquic_ctx_update_time(qctx);
 
   return CURLE_OK;
 }
@@ -107,6 +111,11 @@ CURLcode vquic_ctx_init(struct cf_quic_ctx *qctx)
 void vquic_ctx_free(struct cf_quic_ctx *qctx)
 {
   Curl_bufq_free(&qctx->sendbuf);
+}
+
+void vquic_ctx_update_time(struct cf_quic_ctx *qctx)
+{
+  qctx->last_op = Curl_now();
 }
 
 static CURLcode send_packet_no_gso(struct Curl_cfilter *cf,
@@ -173,7 +182,7 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
         qctx->no_gso = TRUE;
         return send_packet_no_gso(cf, data, qctx, pkt, pktlen, gsolen, psent);
       }
-      /* FALLTHROUGH */
+      FALLTHROUGH();
     default:
       failf(data, "sendmsg() returned %zd (errno %d)", sent, SOCKERRNO);
       return CURLE_SEND_ERROR;
@@ -242,6 +251,7 @@ static CURLcode vquic_send_packets(struct Curl_cfilter *cf,
                                    const uint8_t *pkt, size_t pktlen,
                                    size_t gsolen, size_t *psent)
 {
+  CURLcode result;
 #ifdef DEBUGBUILD
   /* simulate network blocking/partial writes */
   if(qctx->wblock_percent > 0) {
@@ -254,10 +264,14 @@ static CURLcode vquic_send_packets(struct Curl_cfilter *cf,
   }
 #endif
   if(qctx->no_gso && pktlen > gsolen) {
-    return send_packet_no_gso(cf, data, qctx, pkt, pktlen, gsolen, psent);
+    result = send_packet_no_gso(cf, data, qctx, pkt, pktlen, gsolen, psent);
   }
-
-  return do_sendmsg(cf, data, qctx, pkt, pktlen, gsolen, psent);
+  else {
+    result = do_sendmsg(cf, data, qctx, pkt, pktlen, gsolen, psent);
+  }
+  if(!result)
+    qctx->last_io = qctx->last_op;
+  return result;
 }
 
 CURLcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -524,13 +538,22 @@ CURLcode vquic_recv_packets(struct Curl_cfilter *cf,
                             size_t max_pkts,
                             vquic_recv_pkt_cb *recv_cb, void *userp)
 {
+  CURLcode result;
 #if defined(HAVE_SENDMMSG)
-  return recvmmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp);
+  result = recvmmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp);
 #elif defined(HAVE_SENDMSG)
-  return recvmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp);
+  result = recvmsg_packets(cf, data, qctx, max_pkts, recv_cb, userp);
 #else
-  return recvfrom_packets(cf, data, qctx, max_pkts, recv_cb, userp);
+  result = recvfrom_packets(cf, data, qctx, max_pkts, recv_cb, userp);
 #endif
+  if(!result) {
+    if(!qctx->got_first_byte) {
+      qctx->got_first_byte = TRUE;
+      qctx->first_byte_at = qctx->last_op;
+    }
+    qctx->last_io = qctx->last_op;
+  }
+  return result;
 }
 
 /*
@@ -588,6 +611,8 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
   DEBUGASSERT(transport == TRNSPRT_QUIC);
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
   return Curl_cf_ngtcp2_create(pcf, data, conn, ai);
+#elif defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)
+  return Curl_cf_osslq_create(pcf, data, conn, ai);
 #elif defined(USE_QUICHE)
   return Curl_cf_quiche_create(pcf, data, conn, ai);
 #elif defined(USE_MSH3)
@@ -607,6 +632,8 @@ bool Curl_conn_is_http3(const struct Curl_easy *data,
 {
 #if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
   return Curl_conn_is_ngtcp2(data, conn, sockindex);
+#elif defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)
+  return Curl_conn_is_osslq(data, conn, sockindex);
 #elif defined(USE_QUICHE)
   return Curl_conn_is_quiche(data, conn, sockindex);
 #elif defined(USE_MSH3)

@@ -10,7 +10,10 @@ set(msg "${msg} ${msg}")
 set(msg "${msg} ${msg}")
 set(msg "${msg} ${msg}")
 set(msg "${msg} ${msg}")
-foreach(i RANGE 1 1000)
+set(msg "${msg} ${msg}")
+set(msg "${msg} ${msg}")
+set(msg "${msg} ${msg}")
+foreach(i RANGE 1 125)
   add_custom_command(TARGET CommandLength POST_BUILD VERBATIM
     COMMAND ${CMAKE_COMMAND} -E echo "${i} ${msg}" > log/${i}
     )

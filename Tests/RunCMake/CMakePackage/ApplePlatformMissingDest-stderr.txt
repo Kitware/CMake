@@ -1,0 +1,6 @@
+^CMake Error at [^
+]*/Modules/CMakePackageConfigHelpers\.cmake:[0-9]+ \(message\):
+  No INSTALL_DESTINATION given to generate_apple_platform_selection_file\(\)
+Call Stack \(most recent call first\):
+  ApplePlatformMissingDest\.cmake:[0-9]+ \(generate_apple_platform_selection_file\)
+  CMakeLists.txt:[0-9]+ \(include\)$

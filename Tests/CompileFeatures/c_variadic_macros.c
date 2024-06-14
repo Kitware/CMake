@@ -9,7 +9,7 @@ int someFunc(int i1, char c, int i2)
 
 #define FUNC_WRAPPER(...) someFunc(__VA_ARGS__)
 
-void otherFunc()
+void otherFunc(void)
 {
   FUNC_WRAPPER(42, 'a', 7);
 }

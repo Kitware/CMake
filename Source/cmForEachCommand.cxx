@@ -272,6 +272,11 @@ auto cmForEachFunctionBlocker::invoke(
     if (status.GetContinueInvoked()) {
       break;
     }
+    if (status.HasExitCode()) {
+      inStatus.SetExitCode(status.GetExitCode());
+      result.Break = true;
+      break;
+    }
     if (cmSystemTools::GetFatalErrorOccurred()) {
       result.Restore = false;
       result.Break = true;

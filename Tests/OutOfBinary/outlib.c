@@ -1,4 +1,4 @@
-int outlib()
+int outlib(void)
 {
   return 456;
 }

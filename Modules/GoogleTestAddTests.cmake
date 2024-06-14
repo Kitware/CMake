@@ -112,6 +112,7 @@ function(gtest_discover_tests_impl)
     message(FATAL_ERROR
       "Error running test executable.\n"
       "  Path: '${path}'\n"
+      "  Working directory: '${_TEST_WORKING_DIR}'\n"
       "  Result: ${result}\n"
       "  Output:\n"
       "    ${output}\n"

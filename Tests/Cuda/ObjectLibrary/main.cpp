@@ -1,6 +1,3 @@
-
-#include <iostream>
-
 int cpp_sq_func(int);
 int cu1_sq_func(int);
 int cu2_sq_func(int);

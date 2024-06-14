@@ -43,7 +43,7 @@ if (NOT _INCLUDED_FILE)
 endif ()
 
 if(CMAKE_Fortran_SIZEOF_DATA_PTR)
-  foreach(f ${CMAKE_Fortran_ABI_FILES})
+  foreach(f IN LISTS CMAKE_Fortran_ABI_FILES)
     include(${f})
   endforeach()
   unset(CMAKE_Fortran_ABI_FILES)

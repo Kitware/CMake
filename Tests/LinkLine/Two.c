@@ -1,6 +1,6 @@
-void OneFunc();
+void OneFunc(void);
 
-void TwoFunc()
+void TwoFunc(void)
 {
   static int i = 0;
   ++i;

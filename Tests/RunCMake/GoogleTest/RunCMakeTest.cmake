@@ -101,6 +101,43 @@ function(run_GoogleTest DISCOVERY_MODE)
   )
 endfunction()
 
+function(run_GoogleTestLauncher DISCOVERY_MODE)
+  if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND CMAKE_C_COMPILER_VERSION VERSION_LESS "14.0")
+    return()
+  endif()
+  if(CMAKE_VS_PLATFORM_NAME STREQUAL "ARM64" AND CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND CMAKE_C_COMPILER_VERSION VERSION_LESS "19.36")
+    return()
+  endif()
+
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/GoogleTestLauncher-build)
+  if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+  endif()
+
+  run_cmake_with_options(GoogleTestLauncher
+    -DCMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE=${DISCOVERY_MODE}
+  )
+
+  set(RunCMake_TEST_NO_CLEAN 1)
+
+  # do not issue any warnings on stderr that would cause the build to fail
+  set(RunCMake_TEST_OUTPUT_MERGE 1)
+  run_cmake_command(GoogleTestLauncher-build
+    ${CMAKE_COMMAND}
+    --build .
+    --config Debug
+  )
+  unset(RunCMake_TEST_OUTPUT_MERGE)
+
+  run_cmake_command(GoogleTestLauncher-test
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    -V
+    --no-label-sumary
+  )
+endfunction()
+
 function(run_GoogleTestXML DISCOVERY_MODE)
   # Use a single build tree for a few tests without cleaning.
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/GoogleTestXML-build)
@@ -292,9 +329,36 @@ function(run_GoogleTest_discovery_flush_script DISCOVERY_MODE)
   )
 endfunction()
 
+function(run_GoogleTest_discovery_test_list_scoped DISCOVERY_MODE)
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/GoogleTest-discovery-test-list-scoped-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  if(NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+  endif()
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake_with_options(GoogleTestDiscoveryTestListScoped -DCMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE=${DISCOVERY_MODE})
+
+  run_cmake_command(GoogleTest-discovery-test-list-scoped-build
+    ${CMAKE_COMMAND}
+    --build .
+    --config Debug
+    --target test_list_scoped_test
+  )
+
+  run_cmake_command(GoogleTest-discovery-test-list-scoped-test
+    ${CMAKE_CTEST_COMMAND}
+    -C Debug
+    --no-label-summary
+  )
+endfunction()
+
 foreach(DISCOVERY_MODE POST_BUILD PRE_TEST)
   message("Testing ${DISCOVERY_MODE} discovery mode via CMAKE_GTEST_DISCOVER_TESTS_DISCOVERY_MODE global override...")
   run_GoogleTest(${DISCOVERY_MODE})
+  run_GoogleTestLauncher(${DISCOVERY_MODE})
   run_GoogleTestXML(${DISCOVERY_MODE})
   message("Testing ${DISCOVERY_MODE} discovery mode via DISCOVERY_MODE option...")
   run_GoogleTest_discovery_timeout(${DISCOVERY_MODE})
@@ -303,6 +367,7 @@ foreach(DISCOVERY_MODE POST_BUILD PRE_TEST)
     run_GoogleTest_discovery_arg_change(${DISCOVERY_MODE})
   endif()
   run_GoogleTest_discovery_test_list(${DISCOVERY_MODE})
+  run_GoogleTest_discovery_test_list_scoped(${DISCOVERY_MODE})
   run_GoogleTest_discovery_flush_script(${DISCOVERY_MODE})
 endforeach()
 

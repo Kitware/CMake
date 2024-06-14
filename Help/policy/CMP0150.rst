@@ -31,9 +31,9 @@ The remote is selected according to the following (the first match is used):
 If an appropriate remote cannot be determined from the above, a fatal error
 will be raised.
 
-This policy was introduced in CMake version 3.27.  CMake version |release|
-warns when a relative path is encountered and the policy is not set,
-falling back to using ``OLD`` behavior.  Use the :command:`cmake_policy`
-command to set it to ``OLD`` or ``NEW`` explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.27
+.. |WARNS_OR_DOES_NOT_WARN| replace::
+   warns when a relative path is encountered
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

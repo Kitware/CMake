@@ -37,7 +37,7 @@ function(generate_output_files)
       set(exe_file " [==[$<TARGET_FILE_DIR:${tgt}>/$<TARGET_FILE_PREFIX:${tgt}>$<TARGET_FILE_BASE_NAME:${tgt}>$<TARGET_FILE_SUFFIX:${tgt}>]==]")
       set(exe_filename " [==[$<TARGET_FILE_PREFIX:${tgt}>$<TARGET_FILE_BASE_NAME:${tgt}>$<TARGET_FILE_SUFFIX:${tgt}>]==]")
 
-      if(WIN32)
+      if(WIN32 AND NOT generate_output_files_NO_EXE_LIB)
         set(exe_lib_file " [==[$<TARGET_FILE_DIR:${tgt}>/$<TARGET_FILE_PREFIX:${tgt}>$<TARGET_FILE_BASE_NAME:${tgt}>.lib]==]")
         string(APPEND content "set(TARGET_EXE_LIB_FILE_${tgt}_$<CONFIG>${exe_lib_file})\n")
       endif()

@@ -2,7 +2,7 @@ extern int b();
 extern int c();
 extern int d();
 
-int main()
+int main(void)
 {
   c();
   b();

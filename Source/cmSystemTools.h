@@ -18,7 +18,8 @@
 #include <cm/optional>
 #include <cm/string_view>
 
-#include "cmsys/Process.h"
+#include <cm3p/uv.h>
+
 #include "cmsys/Status.hxx"      // IWYU pragma: export
 #include "cmsys/SystemTools.hxx" // IWYU pragma: export
 
@@ -339,10 +340,20 @@ public:
    */
   static void ReportLastSystemError(const char* m);
 
-  /** a general output handler for cmsysProcess  */
-  static int WaitForLine(cmsysProcess* process, std::string& line,
-                         cmDuration timeout, std::vector<char>& out,
-                         std::vector<char>& err);
+  enum class WaitForLineResult
+  {
+    None,
+    STDOUT,
+    STDERR,
+    Timeout,
+  };
+
+  /** a general output handler for libuv  */
+  static WaitForLineResult WaitForLine(uv_loop_t* loop, uv_stream_t* outPipe,
+                                       uv_stream_t* errPipe, std::string& line,
+                                       cmDuration timeout,
+                                       std::vector<char>& out,
+                                       std::vector<char>& err);
 
   static void SetForceUnixPaths(bool v) { s_ForceUnixPaths = v; }
   static bool GetForceUnixPaths() { return s_ForceUnixPaths; }

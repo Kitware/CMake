@@ -97,7 +97,7 @@ static struct altsvc *altsvc_createid(const char *srchost,
                                       unsigned int srcport,
                                       unsigned int dstport)
 {
-  struct altsvc *as = calloc(sizeof(struct altsvc), 1);
+  struct altsvc *as = calloc(1, sizeof(struct altsvc));
   size_t hlen;
   size_t dlen;
   if(!as)
@@ -106,9 +106,11 @@ static struct altsvc *altsvc_createid(const char *srchost,
   dlen = strlen(dsthost);
   DEBUGASSERT(hlen);
   DEBUGASSERT(dlen);
-  if(!hlen || !dlen)
+  if(!hlen || !dlen) {
     /* bad input */
+    free(as);
     return NULL;
+  }
   if((hlen > 2) && srchost[0] == '[') {
     /* IPv6 address, strip off brackets */
     srchost++;
@@ -123,15 +125,13 @@ static struct altsvc *altsvc_createid(const char *srchost,
     dlen -= 2;
   }
 
-  as->src.host = Curl_memdup(srchost, hlen + 1);
+  as->src.host = Curl_memdup0(srchost, hlen);
   if(!as->src.host)
     goto error;
-  as->src.host[hlen] = 0;
 
-  as->dst.host = Curl_memdup(dsthost, dlen + 1);
+  as->dst.host = Curl_memdup0(dsthost, dlen);
   if(!as->dst.host)
     goto error;
-  as->dst.host[dlen] = 0;
 
   as->src.alpnid = srcalpnid;
   as->dst.alpnid = dstalpnid;
@@ -301,7 +301,7 @@ static CURLcode altsvc_out(struct altsvc *as, FILE *fp)
  */
 struct altsvcinfo *Curl_altsvc_init(void)
 {
-  struct altsvcinfo *asi = calloc(sizeof(struct altsvcinfo), 1);
+  struct altsvcinfo *asi = calloc(1, sizeof(struct altsvcinfo));
   if(!asi)
     return NULL;
   Curl_llist_init(&asi->list, NULL);
@@ -335,9 +335,6 @@ CURLcode Curl_altsvc_load(struct altsvcinfo *asi, const char *file)
 CURLcode Curl_altsvc_ctrl(struct altsvcinfo *asi, const long ctrl)
 {
   DEBUGASSERT(asi);
-  if(!ctrl)
-    /* unexpected */
-    return CURLE_BAD_FUNCTION_ARGUMENT;
   asi->flags = ctrl;
   return CURLE_OK;
 }

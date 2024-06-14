@@ -19,9 +19,11 @@ The ``OLD`` behavior for this policy is to run the install rules from
 behavior for this policy is to run all install rules in the order they are
 declared.
 
-This policy was introduced in CMake version 3.14.  Unlike most policies,
-CMake version |release| does *not* warn by default when this policy
-is not set and simply uses ``OLD`` behavior.  See documentation of the
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.14
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn by default
+.. include:: STANDARD_ADVICE.txt
+
+See documentation of the
 :variable:`CMAKE_POLICY_WARNING_CMP0082 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
 variable to control the warning.
 

@@ -191,6 +191,23 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     }
   }
 
+  if (this->GeneratorToolsetFortran) {
+    if (*this->GeneratorToolsetFortran != "ifx" &&
+        *this->GeneratorToolsetFortran != "ifort") {
+      mf->IssueMessage(MessageType::FATAL_ERROR,
+                       cmStrCat("Generator\n"
+                                "  ",
+                                this->GetName(),
+                                "\n"
+                                "given toolset\n"
+                                "  fortran=",
+                                *this->GeneratorToolsetFortran,
+                                "\n"
+                                "but the value is not \"ifx\" or \"ifort\"."));
+      this->GeneratorToolsetFortran = cm::nullopt;
+    }
+  }
+
   if (!this->GeneratorToolsetVersion.empty() &&
       this->GeneratorToolsetVersion != "Test Toolset Version"_s) {
     // If a specific minor version of the MSVC toolset is requested, verify
@@ -201,15 +218,25 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     if (vcPlatformToolsetRegex.find(platformToolset) ||
         platformToolset == "Test Toolset"_s) {
       std::string versionToolset = this->GeneratorToolsetVersion;
-      cmsys::RegularExpression versionToolsetRegex("^[0-9][0-9]\\.[0-9][0-9]");
+      cmsys::RegularExpression versionToolsetRegex(
+        "^([0-9][0-9])\\.([0-9])[0-9](\\.|$)");
       if (versionToolsetRegex.find(versionToolset)) {
-        versionToolset = cmStrCat('v', versionToolset.erase(2, 1));
+        versionToolset = cmStrCat('v', versionToolsetRegex.match(1),
+                                  versionToolsetRegex.match(2));
+        // Hard-code special cases for toolset versions whose first
+        // three digits do not match their toolset name.
+        if (platformToolset == "v143"_s && versionToolset == "v144"_s &&
+            // VS 17.10 toolset v143 version 14.40.
+            (this->GeneratorToolsetVersion == "14.40"_s ||
+             cmHasLiteralPrefix(this->GeneratorToolsetVersion, "14.40."))) {
+          versionToolset = "v143";
+        }
       } else {
         // Version not recognized. Clear it.
         versionToolset.clear();
       }
 
-      if (!cmHasPrefix(versionToolset, platformToolset)) {
+      if (versionToolset != platformToolset) {
         mf->IssueMessage(
           MessageType::FATAL_ERROR,
           cmStrCat("Generator\n"
@@ -299,6 +326,9 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
   }
   if (const char* cudaDir = this->GetPlatformToolsetCudaCustomDir()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR", cudaDir);
+  }
+  if (cm::optional<std::string> fortran = this->GetPlatformToolsetFortran()) {
+    mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_FORTRAN", *fortran);
   }
   if (const char* vcTargetsDir = this->GetCustomVCTargetsPath()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_VCTARGETS_CUSTOM_DIR",
@@ -408,6 +438,10 @@ bool cmGlobalVisualStudio10Generator::ProcessGeneratorToolsetField(
   if (key == "customFlagTableDir"_s) {
     this->CustomFlagTableDir = value;
     cmSystemTools::ConvertToUnixSlashes(this->CustomFlagTableDir);
+    return true;
+  }
+  if (key == "fortran"_s) {
+    this->GeneratorToolsetFortran = value;
     return true;
   }
   if (key == "version"_s) {

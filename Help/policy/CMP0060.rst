@@ -58,9 +58,11 @@ libraries whose full paths are known to be in implicit link directories.
 The ``NEW`` behavior for this policy is to link libraries by full path even
 if they are in implicit link directories.
 
-This policy was introduced in CMake version 3.3.  Unlike most policies,
-CMake version |release| does *not* warn by default when this policy
-is not set and simply uses ``OLD`` behavior.  See documentation of the
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.3
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn by default
+.. include:: STANDARD_ADVICE.txt
+
+See documentation of the
 :variable:`CMAKE_POLICY_WARNING_CMP0060 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
 variable to control the warning.
 

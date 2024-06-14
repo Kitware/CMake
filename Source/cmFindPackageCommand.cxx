@@ -1044,6 +1044,8 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   PushPopRootPathStack pushPopRootPathStack(*this);
   SetRestoreFindDefinitions setRestoreFindDefinitions(*this, components,
                                                       componentVarDefs);
+  cmMakefile::FindPackageStackRAII findPackageStackRAII(this->Makefile,
+                                                        this->Name);
 
   // See if we have been told to delegate to FetchContent or some other
   // redirected config package first. We have to check all names that

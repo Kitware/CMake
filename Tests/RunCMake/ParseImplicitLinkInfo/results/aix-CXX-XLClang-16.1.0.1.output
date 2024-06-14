@@ -1,2 +1,3 @@
 libs=xlopt;xlipa;xl;c\+\+;Ccore;pthreads;m;c
 dirs=/opt/IBM/xlmass/9.1.0/lib/aix61;/opt/IBM/xlc/16.1.0/lib;/opt/IBM/xlC/16.1.0/lib
+linker_tool=/bin/ld

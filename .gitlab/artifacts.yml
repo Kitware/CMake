@@ -119,6 +119,8 @@
             # Take the sphinx logs.
             - ${CMAKE_CI_BUILD_DIR}/build-*.log
             - ${CMAKE_CI_BUILD_DIR}/linkcheck/output.*
+            # Take the HTML output.
+            - ${CMAKE_CI_BUILD_DIR}/html/
 
 .cmake_test_artifacts:
     artifacts:
@@ -151,3 +153,10 @@
             - ${CMAKE_CI_BUILD_DIR}/html
         exclude:
             - ${CMAKE_CI_BUILD_DIR}/html/.buildinfo
+
+.cmake_tidy_artifacts:
+    artifacts:
+        expire_in: 1d
+        when: always
+        paths:
+            - clang-tidy-fixes.patch

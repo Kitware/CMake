@@ -89,10 +89,6 @@ protected:
   /** Called by ReportXmlParseError with basic error info.  */
   virtual void ReportError(int line, int column, const char* msg);
 
-  //! Utility for convenience of subclasses.  Wraps isspace C library
-  // routine.
-  static int IsSpace(char c);
-
   //! Send the given buffer to the XML parser.
   virtual int ParseBuffer(const char* buffer, std::string::size_type length);
 

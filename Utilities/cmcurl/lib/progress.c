@@ -174,9 +174,17 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
     data->progress.t_startop = timestamp;
     break;
   case TIMER_STARTSINGLE:
-    /* This is set at the start of each single fetch */
+    /* This is set at the start of each single transfer */
     data->progress.t_startsingle = timestamp;
     data->progress.is_t_startransfer_set = false;
+    break;
+  case TIMER_POSTQUEUE:
+    /* Set when the transfer starts (after potentially having been brought
+       back from the waiting queue). It needs to count from t_startop and not
+       t_startsingle since the latter is reset when a connection is brought
+       back from the pending queue. */
+    data->progress.t_postqueue =
+      Curl_timediff_us(timestamp, data->progress.t_startop);
     break;
   case TIMER_STARTACCEPT:
     data->progress.t_acceptdata = timestamp;
@@ -304,7 +312,7 @@ timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
    * 'actual' is the time in milliseconds it took to actually download the
    * last 'size' bytes.
    */
-  actual = Curl_timediff(now, start);
+  actual = Curl_timediff_ceil(now, start);
   if(actual < minimum) {
     /* if it downloaded the data faster than the limit, make it wait the
        difference */
@@ -319,12 +327,6 @@ timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
  */
 CURLcode Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 {
-  if(data->set.max_filesize && (size > data->set.max_filesize)) {
-    failf(data, "Exceeded the maximum allowed file size "
-          "(%" CURL_FORMAT_CURL_OFF_T ")",
-          data->set.max_filesize);
-    return CURLE_FILESIZE_EXCEEDED;
-  }
   data->progress.downloaded = size;
   return CURLE_OK;
 }

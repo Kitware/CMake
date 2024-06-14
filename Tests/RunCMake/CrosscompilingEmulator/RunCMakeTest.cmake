@@ -5,7 +5,24 @@ set(RunCMake_TEST_OPTIONS
 
 run_cmake(CrosscompilingEmulatorProperty)
 run_cmake(TryRun)
-run_cmake(AddTest)
+
+function(run_AddTest case)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${case}-build)
+
+  run_cmake(${case})
+  unset(RunCMake_TEST_OPTIONS)
+
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_OUTPUT_MERGE 1)
+  run_cmake_command(${case}-build ${CMAKE_COMMAND} --build . --config Debug)
+  unset(RunCMake_TEST_OUTPUT_MERGE)
+
+  run_cmake_command(${case}-test ${CMAKE_CTEST_COMMAND} -C Debug -V)
+endfunction()
+
+run_AddTest(AddTest)
+run_AddTest(AddTest-CMP0158-OLD)
+run_AddTest(AddTest-CMP0158-NEW)
 
 function(CustomCommandGenerator_run_and_build case)
   # Use a single build tree for a few tests without cleaning.

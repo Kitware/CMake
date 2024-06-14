@@ -1,7 +1,7 @@
 #include "INTEGRITY.h"
 #include "boottable.h"
 
-void main()
+void main(void)
 {
   Exit(0);
 }

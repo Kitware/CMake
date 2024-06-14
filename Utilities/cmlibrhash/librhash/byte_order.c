@@ -74,7 +74,7 @@ unsigned rhash_ctz(unsigned x)
 void rhash_swap_copy_str_to_u32(void* to, int index, const void* from, size_t length)
 {
 	/* if all pointers and length are 32-bits aligned */
-	if ( 0 == (( (int)((char*)to - (char*)0) | ((char*)from - (char*)0) | index | length ) & 3) ) {
+	if ( 0 == (( (uintptr_t)to | (uintptr_t)from | (uintptr_t)index | length ) & 3) ) {
 		/* copy memory as 32-bit words */
 		const uint32_t* src = (const uint32_t*)from;
 		const uint32_t* end = (const uint32_t*)((const char*)src + length);
@@ -101,7 +101,7 @@ void rhash_swap_copy_str_to_u32(void* to, int index, const void* from, size_t le
 void rhash_swap_copy_str_to_u64(void* to, int index, const void* from, size_t length)
 {
 	/* if all pointers and length are 64-bits aligned */
-	if ( 0 == (( (int)((char*)to - (char*)0) | ((char*)from - (char*)0) | index | length ) & 7) ) {
+	if ( 0 == (( (uintptr_t)to | (uintptr_t)from | (uintptr_t)index | length ) & 7) ) {
 		/* copy aligned memory block as 64-bit integers */
 		const uint64_t* src = (const uint64_t*)from;
 		const uint64_t* end = (const uint64_t*)((const char*)src + length);
@@ -124,7 +124,7 @@ void rhash_swap_copy_str_to_u64(void* to, int index, const void* from, size_t le
 void rhash_swap_copy_u64_to_str(void* to, const void* from, size_t length)
 {
 	/* if all pointers and length are 64-bits aligned */
-	if ( 0 == (( (int)((char*)to - (char*)0) | ((char*)from - (char*)0) | length ) & 7) ) {
+	if ( 0 == (( (uintptr_t)to | (uintptr_t)from | length ) & 7) ) {
 		/* copy aligned memory block as 64-bit integers */
 		const uint64_t* src = (const uint64_t*)from;
 		const uint64_t* end = (const uint64_t*)((const char*)src + length);

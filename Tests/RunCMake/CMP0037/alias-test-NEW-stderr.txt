@@ -1,0 +1,5 @@
+^CMake Error at alias-test-common\.cmake:[0-9]+ \(add_library\):
+  The target name "test" is reserved when CTest testing is enabled\.
+Call Stack \(most recent call first\):
+  alias-test-NEW\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)$

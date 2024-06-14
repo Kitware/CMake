@@ -19,9 +19,8 @@ not been updated to avoid using them.
 The ``OLD`` behavior for this policy is to set ``<tgt>_LIB_DEPENDS`` cache
 entries.  The ``NEW`` behavior for this policy is to not set them.
 
-This policy was introduced in CMake version 3.12.  Use the
-:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
-Unlike most policies, CMake version |release| does *not* warn
-when this policy is not set and simply uses ``OLD`` behavior.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.12
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

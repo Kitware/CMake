@@ -2,7 +2,7 @@
 #include <spirv-tools/libspirv.h>
 #include <stdio.h>
 
-int main()
+int main(void)
 {
   const char* spv_version = spvSoftwareVersionString();
   const char* spv_details = spvSoftwareVersionDetailsString();

@@ -1,0 +1,2 @@
+-- Platform not supported
+-- Architecture not supported

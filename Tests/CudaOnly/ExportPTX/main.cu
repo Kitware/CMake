@@ -1,6 +1,3 @@
-
-#include <iostream>
-
 /*
   Define GENERATED_HEADER macro to allow c++ files to include headers
   generated based on different configuration types.

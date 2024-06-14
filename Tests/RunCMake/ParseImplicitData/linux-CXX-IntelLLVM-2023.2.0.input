@@ -1,0 +1,62 @@
+CMAKE_LANG=CXX
+CMAKE_LINKER=/usr/bin/ld
+CMAKE_CXX_COMPILER_ABI=ELF
+CMAKE_CXX_COMPILER_AR=/opt/intel/oneapi/compiler/2023.2.1/linux/bin-llvm/llvm-ar
+CMAKE_CXX_COMPILER_ARCHITECTURE_ID=
+CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_CXX_COMPILER_ID=IntelLLVM
+CMAKE_CXX_COMPILER_LAUNCHER=
+CMAKE_CXX_COMPILER_LOADED=1
+CMAKE_CXX_COMPILER_RANLIB=/opt/intel/oneapi/compiler/2023.2.1/linux/bin-llvm/llvm-ranlib
+CMAKE_CXX_COMPILER_TARGET=
+CMAKE_CXX_COMPILER_VERSION=2023.2.0
+CMAKE_CXX_COMPILER_VERSION_INTERAL=
+Change Dir: '/tmp/ii/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): /tmp/cmake/.gitlab/ninja -v cmTC_05be3
+[1/2] /opt/intel/oneapi/compiler/2023.2.1/linux/bin/icpx   -v -MD -MT CMakeFiles/cmTC_05be3.dir/CMakeCXXCompilerABI.cpp.o -MF CMakeFiles/cmTC_05be3.dir/CMakeCXXCompilerABI.cpp.o.d -o CMakeFiles/cmTC_05be3.dir/CMakeCXXCompilerABI.cpp.o -c /tmp/cmake/Modules/CMakeCXXCompilerABI.cpp
+Intel(R) oneAPI DPC++/C++ Compiler 2023.2.0 (2023.2.0.20230721)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /opt/intel/oneapi/compiler/2023.2.1/linux/bin-llvm
+Configuration file: /opt/intel/oneapi/compiler/2023.2.1/linux/bin-llvm/../bin/icpx.cfg
+Found candidate GCC installation: /usr/lib/gcc/i686-redhat-linux/8
+Found candidate GCC installation: /usr/lib/gcc/x86_64-redhat-linux/8
+Selected GCC installation: /usr/lib/gcc/x86_64-redhat-linux/8
+Candidate multilib: .@m64
+Candidate multilib: 32@m32
+Selected multilib: .@m64
+ (in-process)
+ "/opt/intel/oneapi/compiler/2023.2.1/linux/bin-llvm/clang" -cc1 -triple x86_64-unknown-linux-gnu -emit-obj -disable-free -clear-ast-before-backend -disable-llvm-verifier -discard-value-names -main-file-name CMakeCXXCompilerABI.cpp -mrelocation-model static -fveclib=SVML -mframe-pointer=none -menable-no-infs -menable-no-nans -fapprox-func -funsafe-math-optimizations -fno-signed-zeros -mreassociate -freciprocal-math -fdenormal-fp-math=preserve-sign,preserve-sign -ffp-contract=fast -fno-rounding-math -ffast-math -ffinite-math-only -mconstructor-aliases -funwind-tables=2 -target-cpu x86-64 -mllvm -x86-enable-unaligned-vector-move=true -tune-cpu generic -debugger-tuning=gdb -v -fcoverage-compilation-dir=/tmp/ii/CMakeFiles/CMakeTmp -resource-dir /opt/intel/oneapi/compiler/2023.2.1/linux/lib/clang/17 -dependency-file CMakeFiles/cmTC_05be3.dir/CMakeCXXCompilerABI.cpp.o.d -MT CMakeFiles/cmTC_05be3.dir/CMakeCXXCompilerABI.cpp.o -sys-header-deps -I/opt/intel/oneapi/tbb/2021.10.0/env/../include -I/opt/intel/oneapi/mpi/2021.10.0//include -I/opt/intel/oneapi/mkl/2023.2.0/include -I/opt/intel/oneapi/dpcpp-ct/2023.2.0/include -I/opt/intel/oneapi/dev-utilities/2021.10.0/include -I/opt/intel/oneapi/compiler/2023.2.1/linux/lib/oclfpga/include -internal-isystem /opt/intel/oneapi/compiler/2023.2.1/linux/bin-llvm/../compiler/include -internal-isystem /usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8 -internal-isystem /usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/x86_64-redhat-linux -internal-isystem /usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/backward -internal-isystem /opt/intel/oneapi/compiler/2023.2.1/linux/lib/clang/17/include -internal-isystem /usr/local/include -internal-isystem /usr/lib/gcc/x86_64-redhat-linux/8/../../../../x86_64-redhat-linux/include -internal-externc-isystem /include -internal-externc-isystem /usr/include -O2 -fdeprecated-macro -fdebug-compilation-dir=/tmp/ii/CMakeFiles/CMakeTmp -ferror-limit 19 -fheinous-gnu-extensions -fgnuc-version=4.2.1 -fcxx-exceptions -fexceptions -vectorize-loops -vectorize-slp -D__GCC_HAVE_DWARF2_CFI_ASM=1 -fintel-compatibility -fintel-libirc-allowed -mllvm -disable-hir-generate-mkl-call -mllvm -loopopt=1 -floopopt-pipeline=light -mllvm -intel-abi-compatible=true -o CMakeFiles/cmTC_05be3.dir/CMakeCXXCompilerABI.cpp.o -x c++ /tmp/cmake/Modules/CMakeCXXCompilerABI.cpp
+clang -cc1 version 17.0.0 based upon LLVM 17.0.0git default target x86_64-unknown-linux-gnu
+ignoring nonexistent directory "/usr/lib/gcc/x86_64-redhat-linux/8/../../../../x86_64-redhat-linux/include"
+ignoring nonexistent directory "/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /opt/intel/oneapi/tbb/2021.10.0/env/../include
+ /opt/intel/oneapi/mpi/2021.10.0//include
+ /opt/intel/oneapi/mkl/2023.2.0/include
+ /opt/intel/oneapi/dpcpp-ct/2023.2.0/include
+ /opt/intel/oneapi/dev-utilities/2021.10.0/include
+ /opt/intel/oneapi/compiler/2023.2.1/linux/lib/oclfpga/include
+ /opt/intel/oneapi/compiler/2023.2.1/linux/bin-llvm/../compiler/include
+ /usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8
+ /usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/x86_64-redhat-linux
+ /usr/lib/gcc/x86_64-redhat-linux/8/../../../../include/c++/8/backward
+ /opt/intel/oneapi/compiler/2023.2.1/linux/lib/clang/17/include
+ /usr/local/include
+ /usr/include
+End of search list.
+[2/2] : && /opt/intel/oneapi/compiler/2023.2.1/linux/bin/icpx  -v  -rdynamic CMakeFiles/cmTC_05be3.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_05be3   && :
+Intel(R) oneAPI DPC++/C++ Compiler 2023.2.0 (2023.2.0.20230721)
+Target: x86_64-unknown-linux-gnu
+Thread model: posix
+InstalledDir: /opt/intel/oneapi/compiler/2023.2.1/linux/bin-llvm
+Configuration file: /opt/intel/oneapi/compiler/2023.2.1/linux/bin-llvm/../bin/icpx.cfg
+Found candidate GCC installation: /usr/lib/gcc/i686-redhat-linux/8
+Found candidate GCC installation: /usr/lib/gcc/x86_64-redhat-linux/8
+Selected GCC installation: /usr/lib/gcc/x86_64-redhat-linux/8
+Candidate multilib: .@m64
+Candidate multilib: 32@m32
+Selected multilib: .@m64
+ "/usr/bin/ld" -export-dynamic --hash-style=gnu --eh-frame-hdr -m elf_x86_64 -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_05be3 /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crt1.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crti.o /usr/lib/gcc/x86_64-redhat-linux/8/crtbegin.o -L/opt/intel/oneapi/compiler/2023.2.1/linux/compiler/lib/intel64_lin -L/opt/intel/oneapi/compiler/2023.2.1/linux/bin-llvm/../lib -L/opt/intel/oneapi/compiler/2023.2.1/linux/compiler/lib/intel64_lin -L/usr/lib/gcc/x86_64-redhat-linux/8 -L/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64 -L/lib/../lib64 -L/usr/lib/../lib64 -L/usr/lib/gcc/x86_64-redhat-linux/8/../../.. -L/opt/intel/oneapi/compiler/2023.2.1/linux/bin-llvm/../lib -L/lib -L/usr/lib -L/opt/intel/oneapi/tbb/2021.10.0/env/../lib/intel64/gcc4.8 -L/opt/intel/oneapi/mpi/2021.10.0//libfabric/lib -L/opt/intel/oneapi/mpi/2021.10.0//lib/release -L/opt/intel/oneapi/mpi/2021.10.0//lib -L/opt/intel/oneapi/mkl/2023.2.0/lib/intel64 -L/opt/intel/oneapi/compiler/2023.2.1/linux/compiler/lib/intel64_lin -L/opt/intel/oneapi/compiler/2023.2.1/linux/lib CMakeFiles/cmTC_05be3.dir/CMakeCXXCompilerABI.cpp.o -Bstatic -lsvml -Bdynamic -Bstatic -lirng -Bdynamic -lstdc++ -Bstatic -limf -Bdynamic -lm -lgcc_s -lgcc -Bstatic -lirc -Bdynamic -ldl -lgcc_s -lgcc -lc -lgcc_s -lgcc -Bstatic -lirc_s -Bdynamic /usr/lib/gcc/x86_64-redhat-linux/8/crtend.o /usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/crtn.o

@@ -30,11 +30,23 @@ values:
 If no explicit :prop_tgt:`UNITY_BUILD_MODE` has been specified, CMake will
 default to ``BATCH``.
 
-Unity builds are not currently supported for all languages.  CMake version
-|release| supports combining ``C`` and ``CXX`` source files.  For targets that
-mix source files from more than one language, CMake will separate the languages
-such that each generated unity source file only contains sources for a single
-language.
+Unity builds are supported for the following languages:
+
+``C``
+  .. versionadded:: 3.16
+
+``CXX``
+  .. versionadded:: 3.16
+
+``OBJC``
+  .. versionadded:: 3.29
+
+``OBJCXX``
+  .. versionadded:: 3.29
+
+For targets that mix source files from more than one language, CMake
+separates the languages such that each generated unity source file only
+contains sources for a single language.
 
 This property is initialized by the value of the :variable:`CMAKE_UNITY_BUILD`
 variable when a target is created.

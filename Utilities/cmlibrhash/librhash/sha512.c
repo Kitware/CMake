@@ -91,7 +91,7 @@ void rhash_sha512_init(sha512_ctx* ctx)
 		I64(0xa54ff53a5f1d36f1), I64(0x510e527fade682d1), I64(0x9b05688c2b3e6c1f),
 		I64(0x1f83d9abfb41bd6b), I64(0x5be0cd19137e2179)
 	};
-
+	memset(ctx->message, 0, sizeof(ctx->message));
 	ctx->length = 0;
 	ctx->digest_length = sha512_hash_size;
 
@@ -100,7 +100,7 @@ void rhash_sha512_init(sha512_ctx* ctx)
 }
 
 /**
- * Initialize context before calculaing hash.
+ * Initialize context before calculating hash.
  *
  * @param ctx context to initialize
  */
@@ -114,7 +114,7 @@ void rhash_sha384_init(struct sha512_ctx* ctx)
 		I64(0x152fecd8f70e5939), I64(0x67332667ffc00b31), I64(0x8eb44a8768581511),
 		I64(0xdb0c2e0d64f98fa7), I64(0x47b5481dbefa4fa4)
 	};
-
+	memset(ctx->message, 0, sizeof(ctx->message));
 	ctx->length = 0;
 	ctx->digest_length = sha384_hash_size;
 

@@ -1,4 +1,4 @@
 
-void func()
+void func(void)
 {
 }

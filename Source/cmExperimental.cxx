@@ -19,6 +19,15 @@ namespace {
  * up-to-date.
  */
 cmExperimental::FeatureData LookupTable[] = {
+  // ExportPackageDependencies
+  { "ExportPackageDependencies",
+    "1942b4fa-b2c5-4546-9385-83f254070067",
+    "CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES",
+    "CMake's EXPORT_PACKAGE_DEPENDENCIES support is experimental. It is meant "
+    "only for experimentation and feedback to CMake developers.",
+    {},
+    cmExperimental::TryCompileCondition::Always,
+    false },
   // WindowsKernelModeDriver
   { "WindowsKernelModeDriver",
     "5c2d848d-4efa-4529-a768-efd57171bf68",

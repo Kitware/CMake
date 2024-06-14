@@ -861,7 +861,7 @@ function(cpack_rpm_generate_package)
 
   # If rpmbuild is found
   # we try to discover alien since we may be on non RPM distro like Debian.
-  # In this case we may try to to use more advanced features
+  # In this case we may try to use more advanced features
   # like generating RPM directly from DEB using alien.
   # FIXME feature not finished (yet)
   find_program(ALIEN_EXECUTABLE alien)
@@ -1041,7 +1041,11 @@ function(cpack_rpm_generate_package)
        set(CPACK_RPM_COMPRESSION_TYPE_TMP "%define _binary_payload w9.lzdio")
      endif()
      if(CPACK_RPM_COMPRESSION_TYPE STREQUAL "xz")
-       set(CPACK_RPM_COMPRESSION_TYPE_TMP "%define _binary_payload w7.xzdio")
+       if(CPACK_THREADS GREATER "0")
+         set(CPACK_RPM_COMPRESSION_TYPE_TMP "%define _binary_payload w7T${CPACK_THREADS}.xzdio")
+       else()
+         set(CPACK_RPM_COMPRESSION_TYPE_TMP "%define _binary_payload w7T.xzdio")
+       endif()
      endif()
      if(CPACK_RPM_COMPRESSION_TYPE STREQUAL "bzip2")
        set(CPACK_RPM_COMPRESSION_TYPE_TMP "%define _binary_payload w9.bzdio")
@@ -1577,7 +1581,7 @@ ${TMP_DEBUGINFO_ADDITIONAL_SOURCES}
   if(NOT CPACK_RPM_FILE_NAME STREQUAL "RPM-DEFAULT")
     if(CPACK_RPM_FILE_NAME)
       if(NOT CPACK_RPM_FILE_NAME MATCHES ".*\\.rpm")
-        message(FATAL_ERROR "'${CPACK_RPM_FILE_NAME}' is not a valid RPM package file name as it must end with '.rpm'!")
+        set(CPACK_RPM_FILE_NAME "${CPACK_RPM_FILE_NAME}.rpm")
       endif()
     else()
       # old file name format for back compatibility

@@ -1,9 +1,11 @@
 # This tests setting the CROSSCOMPILING_EMULATOR target property from the
 # CMAKE_CROSSCOMPILING_EMULATOR variable.
 
+enable_language(C)
+
 # -DCMAKE_CROSSCOMPILING_EMULATOR=/path/to/pseudo_emulator is passed to this
 # test
-add_executable(target_with_emulator simple_src_exiterror.cxx)
+add_executable(target_with_emulator main.c)
 get_property(emulator TARGET target_with_emulator
              PROPERTY CROSSCOMPILING_EMULATOR)
 if(NOT "${emulator}" MATCHES "pseudo_emulator")
@@ -20,14 +22,14 @@ if(NOT "${emulator}" MATCHES "another_emulator")
 endif()
 
 unset(CMAKE_CROSSCOMPILING_EMULATOR CACHE)
-add_executable(target_without_emulator simple_src_exiterror.cxx)
+add_executable(target_without_emulator main.c)
 get_property(emulator TARGET target_without_emulator
              PROPERTY CROSSCOMPILING_EMULATOR)
 if(NOT "${emulator}" STREQUAL "")
   message(SEND_ERROR "Default CROSSCOMPILING_EMULATOR property not set to null")
 endif()
 
-add_executable(target_with_empty_emulator simple_src_exiterror.cxx)
+add_executable(target_with_empty_emulator main.c)
 set_property(TARGET target_with_empty_emulator PROPERTY CROSSCOMPILING_EMULATOR "")
 
 enable_testing()

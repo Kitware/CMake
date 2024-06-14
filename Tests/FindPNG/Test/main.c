@@ -2,7 +2,7 @@
 #include <png.h>
 #include <string.h>
 
-int main()
+int main(void)
 {
   png_uint_32 png_version;
   char png_version_string[16];

@@ -1,4 +1,4 @@
-int test_e()
+int test_e(void)
 {
   return 1;
 }

@@ -16,6 +16,9 @@ set_target_properties(simplecudaobj simplecudashared
 add_executable(simplecudaexe main.cu )
 target_link_libraries(simplecudaexe PRIVATE simplecudashared)
 
+if(WIN32 AND CMAKE_CUDA_COMPILER_ID STREQUAL "Clang")
+  set(generate_output_files_NO_EXE_LIB 1)
+endif()
 include(${CMAKE_CURRENT_LIST_DIR}/Common.cmake)
 generate_output_files(simplecudaexe simplecudashared simplecudaobj)
 

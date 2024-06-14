@@ -1,6 +1,3 @@
-
-#include <iostream>
-
 #ifdef _WIN32
 #  define EXPORT __declspec(dllexport)
 #else

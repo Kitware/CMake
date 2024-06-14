@@ -15,7 +15,7 @@ macro(_cmake_find_compiler lang)
     set(_${lang}_COMPILER_LIST "${CMAKE_${lang}_COMPILER_LIST}")
     set(CMAKE_${lang}_COMPILER_LIST "")
     # Prefer vendors of compilers from reference languages.
-    foreach(l ${_languages})
+    foreach(l IN LISTS _languages)
       list(APPEND CMAKE_${lang}_COMPILER_LIST
         ${_${lang}_COMPILER_NAMES_${CMAKE_${l}_COMPILER_ID}})
     endforeach()
@@ -33,7 +33,7 @@ macro(_cmake_find_compiler lang)
 
   # Look for directories containing compilers of reference languages.
   set(_${lang}_COMPILER_HINTS "${CMAKE_${lang}_COMPILER_HINTS}")
-  foreach(l ${_languages})
+  foreach(l IN LISTS _languages)
     if(CMAKE_${l}_COMPILER AND IS_ABSOLUTE "${CMAKE_${l}_COMPILER}")
       get_filename_component(_hint "${CMAKE_${l}_COMPILER}" PATH)
       if(IS_DIRECTORY "${_hint}")
@@ -99,7 +99,7 @@ macro(_cmake_find_compiler lang)
     if (CMAKE_${lang}_COMPILER MATCHES "^/usr/bin/(.+)$")
       _query_xcrun("${CMAKE_MATCH_1}" RESULT_VAR xcrun_result)
     elseif (CMAKE_${lang}_COMPILER STREQUAL "CMAKE_${lang}_COMPILER-NOTFOUND")
-      foreach(comp ${CMAKE_${lang}_COMPILER_LIST})
+      foreach(comp IN LISTS CMAKE_${lang}_COMPILER_LIST)
         _query_xcrun("${comp}" RESULT_VAR xcrun_result)
         if(xcrun_result)
           break()
@@ -120,6 +120,10 @@ macro(_cmake_find_compiler_path lang)
     # CMAKE_${lang}_COMPILER and the rest as CMAKE_${lang}_COMPILER_ARG1
     # Otherwise, preserve any existing CMAKE_${lang}_COMPILER_ARG1 that might
     # have been saved by CMakeDetermine${lang}Compiler in a previous run.
+
+    # Necessary for Windows paths to avoid improper escaping of backslashes
+    cmake_path(CONVERT "${CMAKE_${lang}_COMPILER}" TO_CMAKE_PATH_LIST CMAKE_${lang}_COMPILER NORMALIZE)
+
     list(LENGTH CMAKE_${lang}_COMPILER _CMAKE_${lang}_COMPILER_LENGTH)
     if(_CMAKE_${lang}_COMPILER_LENGTH GREATER 1)
       set(CMAKE_${lang}_COMPILER_ARG1 "${CMAKE_${lang}_COMPILER}")

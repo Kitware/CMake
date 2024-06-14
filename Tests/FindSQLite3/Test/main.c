@@ -1,7 +1,7 @@
 #include <sqlite3.h>
 #include <string.h>
 
-int main()
+int main(void)
 {
   char sqlite3_version[] = SQLITE_VERSION;
 

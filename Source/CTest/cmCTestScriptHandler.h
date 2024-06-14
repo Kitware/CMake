@@ -9,6 +9,8 @@
 #include <string>
 #include <vector>
 
+#include "cmsys/Status.hxx"
+
 #include "cmCTestGenericHandler.h"
 #include "cmDuration.h"
 
@@ -80,7 +82,7 @@ public:
   /*
    * Empty Binary Directory
    */
-  static bool EmptyBinaryDirectory(const std::string& dir);
+  static bool EmptyBinaryDirectory(const std::string& dir, std::string& err);
 
   /*
    * Write an initial CMakeCache.txt from the given contents.
@@ -139,7 +141,8 @@ private:
                        std::unique_ptr<cmCTestCommand> command);
 
   // Try to remove the binary directory once
-  static bool TryToRemoveBinaryDirectoryOnce(const std::string& directoryPath);
+  static cmsys::Status TryToRemoveBinaryDirectoryOnce(
+    const std::string& directoryPath);
 
   std::vector<std::string> ConfigurationScripts;
   std::vector<bool> ScriptProcessScope;

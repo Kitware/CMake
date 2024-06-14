@@ -107,14 +107,14 @@ static int populate_settings(nghttp2_settings_entry *iv,
   return 3;
 }
 
-static size_t populate_binsettings(uint8_t *binsettings,
-                                   struct Curl_easy *data)
+static ssize_t populate_binsettings(uint8_t *binsettings,
+                                    struct Curl_easy *data)
 {
   nghttp2_settings_entry iv[H2_SETTINGS_IV_LEN];
   int ivlen;
 
   ivlen = populate_settings(iv, data);
-  /* this returns number of bytes it wrote */
+  /* this returns number of bytes it wrote or a negative number on error. */
   return nghttp2_pack_settings_payload(binsettings, H2_BINSETTINGS_LEN,
                                        iv, ivlen);
 }
@@ -219,10 +219,10 @@ static void drain_stream(struct Curl_cfilter *cf,
   if(!stream->send_closed &&
      (stream->upload_left || stream->upload_blocked_len))
     bits |= CURL_CSELECT_OUT;
-  if(data->state.dselect_bits != bits) {
-    CURL_TRC_CF(data, cf, "[%d] DRAIN dselect_bits=%x",
+  if(data->state.select_bits != bits) {
+    CURL_TRC_CF(data, cf, "[%d] DRAIN select_bits=%x",
                 stream->id, bits);
-    data->state.dselect_bits = bits;
+    data->state.select_bits = bits;
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
 }
@@ -283,13 +283,20 @@ static void http2_data_done(struct Curl_cfilter *cf,
     return;
 
   if(ctx->h2) {
+    bool flush_egress = FALSE;
+    /* returns error if stream not known, which is fine here */
+    (void)nghttp2_session_set_stream_user_data(ctx->h2, stream->id, NULL);
+
     if(!stream->closed && stream->id > 0) {
       /* RST_STREAM */
       CURL_TRC_CF(data, cf, "[%d] premature DATA_DONE, RST stream",
                   stream->id);
-      if(!nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
-                                    stream->id, NGHTTP2_STREAM_CLOSED))
-        (void)nghttp2_session_send(ctx->h2);
+      stream->closed = TRUE;
+      stream->reset = TRUE;
+      stream->send_closed = TRUE;
+      nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
+                                stream->id, NGHTTP2_STREAM_CLOSED);
+      flush_egress = TRUE;
     }
     if(!Curl_bufq_is_empty(&stream->recvbuf)) {
       /* Anything in the recvbuf is still being counted
@@ -299,19 +306,11 @@ static void http2_data_done(struct Curl_cfilter *cf,
       nghttp2_session_consume(ctx->h2, stream->id,
                               Curl_bufq_len(&stream->recvbuf));
       /* give WINDOW_UPATE a chance to be sent, but ignore any error */
-      (void)h2_progress_egress(cf, data);
+      flush_egress = TRUE;
     }
 
-    /* -1 means unassigned and 0 means cleared */
-    if(nghttp2_session_get_stream_user_data(ctx->h2, stream->id)) {
-      int rv = nghttp2_session_set_stream_user_data(ctx->h2,
-                                                    stream->id, 0);
-      if(rv) {
-        infof(data, "http/2: failed to clear user_data for stream %u",
-              stream->id);
-        DEBUGASSERT(0);
-      }
-    }
+    if(flush_egress)
+      nghttp2_session_send(ctx->h2);
   }
 
   Curl_bufq_free(&stream->sendbuf);
@@ -369,12 +368,15 @@ static ssize_t nw_out_writer(void *writer_ctx,
 {
   struct Curl_cfilter *cf = writer_ctx;
   struct Curl_easy *data = CF_DATA_CURRENT(cf);
-  ssize_t nwritten;
 
-  nwritten = Curl_conn_cf_send(cf->next, data, (const char *)buf, buflen, err);
-  if(nwritten > 0)
-    CURL_TRC_CF(data, cf, "[0] egress: wrote %zd bytes", nwritten);
-  return nwritten;
+  if(data) {
+    ssize_t nwritten = Curl_conn_cf_send(cf->next, data,
+                                         (const char *)buf, buflen, err);
+    if(nwritten > 0)
+      CURL_TRC_CF(data, cf, "[0] egress: wrote %zd bytes", nwritten);
+    return nwritten;
+  }
+  return 0;
 }
 
 static ssize_t send_callback(nghttp2_session *h2,
@@ -452,9 +454,14 @@ static CURLcode cf_h2_ctx_init(struct Curl_cfilter *cf,
      * in the H1 request and we upgrade from there. This stream
      * is opened implicitly as #1. */
     uint8_t binsettings[H2_BINSETTINGS_LEN];
-    size_t  binlen; /* length of the binsettings data */
+    ssize_t binlen; /* length of the binsettings data */
 
     binlen = populate_binsettings(binsettings, data);
+    if(binlen <= 0) {
+      failf(data, "nghttp2 unexpectedly failed on pack_settings_payload");
+      result = CURLE_FAILED_INIT;
+      goto out;
+    }
 
     result = http2_data_setup(cf, data, &stream);
     if(result)
@@ -1076,16 +1083,11 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
       stream->reset = TRUE;
     }
     stream->send_closed = TRUE;
-    data->req.keepon &= ~KEEP_SEND_HOLD;
     drain_stream(cf, data, stream);
     break;
   case NGHTTP2_WINDOW_UPDATE:
-    if((data->req.keepon & KEEP_SEND_HOLD) &&
-       (data->req.keepon & KEEP_SEND)) {
-      data->req.keepon &= ~KEEP_SEND_HOLD;
+    if(CURL_WANT_SEND(data)) {
       drain_stream(cf, data, stream);
-      CURL_TRC_CF(data, cf, "[%d] un-holding after win update",
-                  stream_id);
     }
     break;
   default:
@@ -1230,15 +1232,10 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
          * window and *assume* that we treat this like a WINDOW_UPDATE. Some
          * servers send an explicit WINDOW_UPDATE, but not all seem to do that.
          * To be safe, we UNHOLD a stream in order not to stall. */
-        if((data->req.keepon & KEEP_SEND_HOLD) &&
-           (data->req.keepon & KEEP_SEND)) {
+        if(CURL_WANT_SEND(data)) {
           struct stream_ctx *stream = H2_STREAM_CTX(data);
-          data->req.keepon &= ~KEEP_SEND_HOLD;
-          if(stream) {
+          if(stream)
             drain_stream(cf, data, stream);
-            CURL_TRC_CF(data, cf, "[%d] un-holding after SETTINGS",
-                        stream_id);
-          }
         }
       }
       break;
@@ -1318,27 +1315,43 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
                            uint32_t error_code, void *userp)
 {
   struct Curl_cfilter *cf = userp;
-  struct Curl_easy *data_s;
+  struct Curl_easy *data_s, *call_data = CF_DATA_CURRENT(cf);
   struct stream_ctx *stream;
   int rv;
   (void)session;
 
+  DEBUGASSERT(call_data);
   /* get the stream from the hash based on Stream ID, stream ID zero is for
      connection-oriented stuff */
   data_s = stream_id?
              nghttp2_session_get_stream_user_data(session, stream_id) : NULL;
   if(!data_s) {
+    CURL_TRC_CF(call_data, cf,
+                "[%d] on_stream_close, no easy set on stream", stream_id);
     return 0;
   }
-  stream = H2_STREAM_CTX(data_s);
-  if(!stream)
+  if(!GOOD_EASY_HANDLE(data_s)) {
+    /* nghttp2 still has an easy registered for the stream which has
+     * been freed be libcurl. This points to a code path that does not
+     * trigger DONE or DETACH events as it must. */
+    CURL_TRC_CF(call_data, cf,
+                "[%d] on_stream_close, not a GOOD easy on stream", stream_id);
+    (void)nghttp2_session_set_stream_user_data(session, stream_id, 0);
     return NGHTTP2_ERR_CALLBACK_FAILURE;
+  }
+  stream = H2_STREAM_CTX(data_s);
+  if(!stream) {
+    CURL_TRC_CF(data_s, cf,
+                "[%d] on_stream_close, GOOD easy but no stream", stream_id);
+    return NGHTTP2_ERR_CALLBACK_FAILURE;
+  }
 
   stream->closed = TRUE;
   stream->error = error_code;
-  if(stream->error)
+  if(stream->error) {
     stream->reset = TRUE;
-  data_s->req.keepon &= ~KEEP_SEND_HOLD;
+    stream->send_closed = TRUE;
+  }
 
   if(stream->error)
     CURL_TRC_CF(data_s, cf, "[%d] RESET: %s (err %d)",
@@ -1602,10 +1615,10 @@ static int error_callback(nghttp2_session *session,
                           size_t len,
                           void *userp)
 {
+  struct Curl_cfilter *cf = userp;
+  struct Curl_easy *data = CF_DATA_CURRENT(cf);
   (void)session;
-  (void)msg;
-  (void)len;
-  (void)userp;
+  failf(data, "%.*s", (int)len, msg);
   return 0;
 }
 #endif
@@ -1621,7 +1634,7 @@ CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
   size_t blen;
   struct SingleRequest *k = &data->req;
   uint8_t binsettings[H2_BINSETTINGS_LEN];
-  size_t  binlen; /* length of the binsettings data */
+  ssize_t binlen; /* length of the binsettings data */
 
   binlen = populate_binsettings(binsettings, data);
   if(binlen <= 0) {
@@ -2052,21 +2065,11 @@ static ssize_t h2_submit(struct stream_ctx **pstream,
   /* no longer needed */
   Curl_h1_req_parse_free(&stream->h1);
 
-  nheader = Curl_dynhds_count(&h2_headers);
-  nva = malloc(sizeof(nghttp2_nv) * nheader);
+  nva = Curl_dynhds_to_nva(&h2_headers, &nheader);
   if(!nva) {
     *err = CURLE_OUT_OF_MEMORY;
     nwritten = -1;
     goto out;
-  }
-
-  for(i = 0; i < nheader; ++i) {
-    struct dynhds_entry *e = Curl_dynhds_getn(&h2_headers, i);
-    nva[i].name = (unsigned char *)e->name;
-    nva[i].namelen = e->namelen;
-    nva[i].value = (unsigned char *)e->value;
-    nva[i].valuelen = e->valuelen;
-    nva[i].flags = NGHTTP2_NV_FLAG_NONE;
   }
 
   h2_pri_spec(data, &pri_spec);
@@ -2272,14 +2275,6 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
      * frame buffer or our network out buffer. */
     size_t rwin = nghttp2_session_get_stream_remote_window_size(ctx->h2,
                                                                 stream->id);
-    if(rwin == 0) {
-      /* H2 flow window exhaustion. We need to HOLD upload until we get
-       * a WINDOW_UPDATE from the server. */
-      data->req.keepon |= KEEP_SEND_HOLD;
-      CURL_TRC_CF(data, cf, "[%d] holding send as remote flow "
-                  "window is exhausted", stream->id);
-    }
-
     /* Whatever the cause, we need to return CURL_EAGAIN for this call.
      * We have unwritten state that needs us being invoked again and EAGAIN
      * is the only way to ensure that. */
@@ -2331,37 +2326,37 @@ out:
   return nwritten;
 }
 
-static int cf_h2_get_select_socks(struct Curl_cfilter *cf,
-                                  struct Curl_easy *data,
-                                  curl_socket_t *sock)
+static void cf_h2_adjust_pollset(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 struct easy_pollset *ps)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
-  struct SingleRequest *k = &data->req;
-  struct stream_ctx *stream = H2_STREAM_CTX(data);
-  int bitmap = GETSOCK_BLANK;
-  struct cf_call_data save;
+  curl_socket_t sock;
+  bool want_recv, want_send;
 
-  CF_DATA_SAVE(save, cf, data);
-  sock[0] = Curl_conn_cf_get_socket(cf, data);
+  if(!ctx->h2)
+    return;
 
-  if(!(k->keepon & (KEEP_RECV_PAUSE|KEEP_RECV_HOLD)))
-    /* Unless paused - in an HTTP/2 connection we can basically always get a
-       frame so we should always be ready for one */
-    bitmap |= GETSOCK_READSOCK(0);
+  sock = Curl_conn_cf_get_socket(cf, data);
+  Curl_pollset_check(data, ps, sock, &want_recv, &want_send);
+  if(want_recv || want_send) {
+    struct stream_ctx *stream = H2_STREAM_CTX(data);
+    struct cf_call_data save;
+    bool c_exhaust, s_exhaust;
 
-  /* we're (still uploading OR the HTTP/2 layer wants to send data) AND
-     there's a window to send data in */
-  if((((k->keepon & KEEP_SENDBITS) == KEEP_SEND) ||
-      nghttp2_session_want_write(ctx->h2)) &&
-     (nghttp2_session_get_remote_window_size(ctx->h2) &&
-      nghttp2_session_get_stream_remote_window_size(ctx->h2,
-                                                    stream->id)))
-    bitmap |= GETSOCK_WRITESOCK(0);
+    CF_DATA_SAVE(save, cf, data);
+    c_exhaust = want_send && !nghttp2_session_get_remote_window_size(ctx->h2);
+    s_exhaust = want_send && stream && stream->id >= 0 &&
+                !nghttp2_session_get_stream_remote_window_size(ctx->h2,
+                                                               stream->id);
+    want_recv = (want_recv || c_exhaust || s_exhaust);
+    want_send = (!s_exhaust && want_send) ||
+                (!c_exhaust && nghttp2_session_want_write(ctx->h2));
 
-  CF_DATA_RESTORE(cf, save);
-  return bitmap;
+    Curl_pollset_set(data, ps, sock, want_recv, want_send);
+    CF_DATA_RESTORE(cf, save);
+  }
 }
-
 
 static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
@@ -2511,14 +2506,15 @@ static CURLcode cf_h2_cntrl(struct Curl_cfilter *cf,
   case CF_CTRL_DATA_PAUSE:
     result = http2_data_pause(cf, data, (arg1 != 0));
     break;
-  case CF_CTRL_DATA_DONE_SEND: {
+  case CF_CTRL_DATA_DONE_SEND:
     result = http2_data_done_send(cf, data);
     break;
-  }
-  case CF_CTRL_DATA_DONE: {
+  case CF_CTRL_DATA_DETACH:
+    http2_data_done(cf, data, TRUE);
+    break;
+  case CF_CTRL_DATA_DONE:
     http2_data_done(cf, data, arg1 != 0);
     break;
-  }
   default:
     break;
   }
@@ -2606,7 +2602,7 @@ struct Curl_cftype Curl_cft_nghttp2 = {
   cf_h2_connect,
   cf_h2_close,
   Curl_cf_def_get_host,
-  cf_h2_get_select_socks,
+  cf_h2_adjust_pollset,
   cf_h2_data_pending,
   cf_h2_send,
   cf_h2_recv,
@@ -2626,7 +2622,7 @@ static CURLcode http2_cfilter_add(struct Curl_cfilter **pcf,
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   DEBUGASSERT(data->conn);
-  ctx = calloc(sizeof(*ctx), 1);
+  ctx = calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
 
@@ -2652,7 +2648,7 @@ static CURLcode http2_cfilter_insert_after(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
   (void)data;
-  ctx = calloc(sizeof(*ctx), 1);
+  ctx = calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
 

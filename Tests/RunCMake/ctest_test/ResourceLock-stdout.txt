@@ -1,0 +1,12 @@
+Test project [^
+]*/Tests/RunCMake/ctest_test/ResourceLock-build
+    Start 2: test1
+1/4 Test #2: test1 ............................   Passed +[0-9.]+ sec
+    Start 3: test2
+2/4 Test #3: test2 ............................   Passed +[0-9.]+ sec
+    Start 4: test3
+3/4 Test #4: test3 ............................   Passed +[0-9.]+ sec
+    Start 5: test4
+4/4 Test #5: test4 ............................   Passed +[0-9.]+ sec
++
+100% tests passed, 0 tests failed out of 4

@@ -266,6 +266,7 @@ versions specified for each:
 * ``PGI``: PGI version 12.10+.
 * ``NVHPC``: NVIDIA HPC compilers version 11.0+.
 * ``TI``: Texas Instruments compiler.
+* ``TIClang``: Texas Instruments Clang-based compilers.
 * ``XL``: IBM XL version 10.1+.
 
 CMake is currently aware of the :prop_tgt:`C standards <C_STANDARD>` and

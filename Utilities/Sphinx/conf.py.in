@@ -88,7 +88,11 @@ html_favicon = '@conf_path@/static/cmake-favicon.ico'
 # qthelp_namespace = "org.cmake"
 # qthelp_qch_name = "CMake.qch"
 
-linkcheck_ignore = [r'about:|https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack']
+linkcheck_ignore = [
+    r'about:',
+    r'https://gitlab\.kitware\.com/cmake/community/-/wikis/doc/cpack',
+    r'https://www.intel.com/',
+]
 
 linkcheck_allowed_redirects = {
     r'https://cdash\.org': r'https://www\.cdash\.org/',

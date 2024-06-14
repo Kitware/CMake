@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 
-int main()
+int main(void)
 {
   FcInit();
   printf("Found Fontconfig.\n");

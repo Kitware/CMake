@@ -64,7 +64,7 @@ Main functions provided by the module
   Sets source file properties of ``.Designer.cs`` files depending on
   sibling filenames. Use this, if your CSharp target does **not**
   use Windows Forms (for Windows Forms use
-  :command:`csharp_set_designer_cs_properties` instead)::
+  :command:`csharp_set_windows_forms_properties` instead)::
 
     csharp_set_designer_cs_properties([<file1> [<file2> [...]]])
 
@@ -133,7 +133,7 @@ Helper functions which are used by the above ones
     Name of the variable in which the list of keys is stored
 
   ``<fileN>``
-    filename(s) as given to to CSharp target using :command:`add_library`
+    filename(s) as given to CSharp target using :command:`add_library`
     or :command:`add_executable`
 
   In some way the function applies a canonicalization to the source names.

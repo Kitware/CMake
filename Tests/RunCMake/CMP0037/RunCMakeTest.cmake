@@ -45,6 +45,10 @@ run_cmake(WARN-cond)
 run_cmake(WARN-cond-test)
 run_cmake(WARN-cond-package)
 
+run_cmake(alias-test-NEW)
+run_cmake(alias-test-OLD)
+run_cmake(alias-test-WARN)
+
 if(RunCMake_GENERATOR MATCHES "Make|Ninja")
   run_cmake(NEW-cond-package_source)
   run_cmake(OLD-cond-package_source)

@@ -123,12 +123,12 @@ The following outlines the steps performed during a ``project()`` call:
 
 * .. versionadded:: 3.15
     For every ``project()`` call regardless of the project
-    name, include the file named by :variable:`CMAKE_PROJECT_INCLUDE_BEFORE`,
-    if set.
+    name, include the file(s) and module(s) named by
+    :variable:`CMAKE_PROJECT_INCLUDE_BEFORE`, if set.
 
 * .. versionadded:: 3.17
     If the ``project()`` command specifies ``<PROJECT-NAME>`` as its project
-    name, include the file named by
+    name, include the file(s) and module(s) named by
     :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE_BEFORE`, if set.
 
 * Set the various project-specific variables detailed in the `Synopsis`_
@@ -156,11 +156,11 @@ The following outlines the steps performed during a ``project()`` call:
 
 * .. versionadded:: 3.15
     For every ``project()`` call regardless of the project
-    name, include the file named by :variable:`CMAKE_PROJECT_INCLUDE`,
-    if set.
+    name, include the file(s) and module(s) named by
+    :variable:`CMAKE_PROJECT_INCLUDE`, if set.
 
 * If the ``project()`` command specifies ``<PROJECT-NAME>`` as its project
-  name, include the file named by
+  name, include the file(s) and module(s) named by
   :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE`, if set.
 
 Usage

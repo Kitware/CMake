@@ -2,8 +2,9 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestLaunchReporter.h"
 
+#include <utility>
+
 #include "cmsys/FStream.hxx"
-#include "cmsys/Process.h"
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmCryptoHash.h"
@@ -22,6 +23,7 @@
 cmCTestLaunchReporter::cmCTestLaunchReporter()
 {
   this->Passthru = true;
+  this->Status.Finished = true;
   this->ExitCode = 1;
   this->CWD = cmSystemTools::GetCurrentWorkingDirectory();
 
@@ -231,35 +233,23 @@ void cmCTestLaunchReporter::WriteXMLResult(cmXMLElement& e2)
 
   // ExitCondition
   cmXMLElement e4(e3, "ExitCondition");
-  cmsysProcess* cp = this->Process;
-  switch (cmsysProcess_GetState(cp)) {
-    case cmsysProcess_State_Starting:
-      e4.Content("No process has been executed");
-      break;
-    case cmsysProcess_State_Executing:
-      e4.Content("The process is still executing");
-      break;
-    case cmsysProcess_State_Disowned:
-      e4.Content("Disowned");
-      break;
-    case cmsysProcess_State_Killed:
-      e4.Content("Killed by parent");
-      break;
-
-    case cmsysProcess_State_Expired:
-      e4.Content("Killed when timeout expired");
-      break;
-    case cmsysProcess_State_Exited:
-      e4.Content(this->ExitCode);
-      break;
-    case cmsysProcess_State_Exception:
-      e4.Content("Terminated abnormally: ");
-      e4.Content(cmsysProcess_GetExceptionString(cp));
-      break;
-    case cmsysProcess_State_Error:
-      e4.Content("Error administrating child process: ");
-      e4.Content(cmsysProcess_GetErrorString(cp));
-      break;
+  if (this->Status.Finished) {
+    auto exception = this->Status.GetException();
+    switch (exception.first) {
+      case cmUVProcessChain::ExceptionCode::None:
+        e4.Content(this->ExitCode);
+        break;
+      case cmUVProcessChain::ExceptionCode::Spawn:
+        e4.Content("Error administrating child process: ");
+        e4.Content(exception.second);
+        break;
+      default:
+        e4.Content("Terminated abnormally: ");
+        e4.Content(exception.second);
+        break;
+    }
+  } else {
+    e4.Content("Killed when timeout expired");
   }
 }
 

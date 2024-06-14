@@ -4,7 +4,7 @@
 #include "libc1.h"
 #include "libc2.h"
 
-int main()
+int main(void)
 {
   int class = 0;
   if (LibC1Func() != 2.0) {

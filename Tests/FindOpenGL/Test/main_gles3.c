@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 
-int main()
+int main(void)
 {
   /* Reference a GL symbol without requiring a context at runtime.  */
   printf("&glGetString = %p\n", &glGetString);

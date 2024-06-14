@@ -79,7 +79,8 @@ is to use the above-documented behavior from 3.18 and below.  The ``NEW``
 behavior for this policy is to use the above-documented behavior preferred
 by 3.19 and above.
 
-This policy was introduced in CMake version 3.19.  CMake version
-|release| warns when the policy is not set and uses ``OLD`` behavior.
-Use the :command:`cmake_policy` command to set it to ``OLD`` or ``NEW``
-explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.19
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
+
+.. include:: DEPRECATED.txt

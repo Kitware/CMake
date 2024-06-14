@@ -47,22 +47,25 @@ signatures that specify them.  The common options are:
 
 ``DESTINATION <dir>``
   Specify the directory on disk to which a file will be installed.
-  Arguments can be relative or absolute paths.
+  ``<dir>`` should be a relative path.  An absolute path is allowed,
+  but not recommended.
 
-  If a relative path is given it is interpreted relative to the value
+  When a relative path is given it is interpreted relative to the value
   of the :variable:`CMAKE_INSTALL_PREFIX` variable.
   The prefix can be relocated at install time using the ``DESTDIR``
   mechanism explained in the :variable:`CMAKE_INSTALL_PREFIX` variable
   documentation.
 
-  If an absolute path (with a leading slash or drive letter) is given
-  it is used verbatim.
-
-  As absolute paths are not supported by :manual:`cpack <cpack(1)>` installer
-  generators, it is preferable to use relative paths throughout.
+  As absolute paths do not work with the ``cmake --install`` command's
+  :option:`--prefix <cmake--install --prefix>` option, or with the
+  :manual:`cpack <cpack(1)>` installer generators, it is strongly recommended
+  to use relative paths throughout for best support by package maintainers.
   In particular, there is no need to make paths absolute by prepending
   :variable:`CMAKE_INSTALL_PREFIX`; this prefix is used by default if
   the DESTINATION is a relative path.
+
+  If an absolute path (with a leading slash or drive letter) is given
+  it is used verbatim.
 
 ``PERMISSIONS <permission>...``
   Specify permissions for installed files.  Valid permissions are
@@ -280,8 +283,8 @@ Signatures
   instead of being able to rely on the above (see next example below).
 
   To make packages compliant with distribution filesystem layout policies, if
-  projects must specify a ``DESTINATION``, it is recommended that they use a
-  path that begins with the appropriate :module:`GNUInstallDirs` variable.
+  projects must specify a ``DESTINATION``, it is strongly recommended that they use
+  a path that begins with the appropriate relative :module:`GNUInstallDirs` variable.
   This allows package maintainers to control the install destination by setting
   the appropriate cache variables.  The following example shows a static library
   being installed to the default destination provided by
@@ -572,8 +575,8 @@ Signatures
   ``DATA`` instead.
 
   To make packages compliant with distribution filesystem layout policies, if
-  projects must specify a ``DESTINATION``, it is recommended that they use a
-  path that begins with the appropriate :module:`GNUInstallDirs` variable.
+  projects must specify a ``DESTINATION``, it is strongly recommended that they use
+  a path that begins with the appropriate relative :module:`GNUInstallDirs` variable.
   This allows package maintainers to control the install destination by setting
   the appropriate cache variables.  The following example shows how to follow
   this advice while installing an image to a project-specific documentation
@@ -719,8 +722,8 @@ Signatures
   ``DATA`` instead.
 
   To make packages compliant with distribution filesystem layout policies, if
-  projects must specify a ``DESTINATION``, it is recommended that they use a
-  path that begins with the appropriate :module:`GNUInstallDirs` variable.
+  projects must specify a ``DESTINATION``, it is strongly recommended that they use
+  a path that begins with the appropriate relative :module:`GNUInstallDirs` variable.
   This allows package maintainers to control the install destination by setting
   the appropriate cache variables.
 
@@ -784,7 +787,8 @@ Signatures
             [CXX_MODULES_DIRECTORY <directory>]
             [EXPORT_LINK_INTERFACE_LIBRARIES]
             [COMPONENT <component>]
-            [EXCLUDE_FROM_ALL])
+            [EXCLUDE_FROM_ALL]
+            [EXPORT_PACKAGE_DEPENDENCIES])
     install(EXPORT_ANDROID_MK <export-name> DESTINATION <dir> [...])
 
   The ``EXPORT`` form generates and installs a CMake file containing code to
@@ -848,6 +852,36 @@ Signatures
     without this information, none of the C++ modules which are part of the
     targets in the export set will support being imported in consuming targets.
 
+  ``EXPORT_PACKAGE_DEPENDENCIES``
+    .. note::
+
+      Experimental. Gated by ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_DEPENDENCIES``.
+
+    Specify that :command:`find_dependency` calls should be exported. If this
+    argument is specified, CMake examines all targets in the export set and
+    gathers their ``INTERFACE`` link targets. If any such targets either were
+    found with :command:`find_package` or have the
+    :prop_tgt:`EXPORT_FIND_PACKAGE_NAME` property set, and such package
+    dependency was not disabled by passing ``ENABLED OFF`` to
+    :command:`export(SETUP)`, then a :command:`find_dependency` call is
+    written with the target's corresponding package name, a ``REQUIRED``
+    argument, and any additional arguments specified by the ``EXTRA_ARGS``
+    argument of :command:`export(SETUP)`. Any package dependencies that were
+    manually specified by passing ``ENABLED ON`` to :command:`export(SETUP)`
+    are also added, even if the exported targets don't depend on any targets
+    from them.
+
+    The :command:`find_dependency` calls are written in the following order:
+
+    1. Any package dependencies that were listed in :command:`export(SETUP)`
+       are written in the order they were first specified, regardless of
+       whether or not they contain ``INTERFACE`` dependencies of the
+       exported targets.
+    2. Any package dependencies that contain ``INTERFACE`` link dependencies
+       of the exported targets and that were never specified in
+       :command:`export(SETUP)` are written in the order they were first
+       found.
+
   The ``EXPORT`` form is useful to help outside projects use targets built
   and installed by the current project.  For example, the code
 
@@ -863,16 +897,6 @@ Signatures
   may load this file with the include command and reference the ``myexe``
   executable from the installation tree using the imported target name
   ``mp_myexe`` as if the target were built in its own tree.
-
-  .. note::
-    This command supersedes the :command:`install_targets` command and
-    the :prop_tgt:`PRE_INSTALL_SCRIPT` and :prop_tgt:`POST_INSTALL_SCRIPT`
-    target properties.  It also replaces the ``FILES`` forms of the
-    :command:`install_files` and :command:`install_programs` commands.
-    The processing order of these install rules relative to
-    those generated by :command:`install_targets`,
-    :command:`install_files`, and :command:`install_programs` commands
-    is not defined.
 
 .. signature::
   install(RUNTIME_DEPENDENCY_SET <set-name> [...])
@@ -936,6 +960,16 @@ Signatures
   * ``POST_EXCLUDE_REGEXES <regex>...``
   * ``POST_INCLUDE_FILES <file>...``
   * ``POST_EXCLUDE_FILES <file>...``
+
+.. note::
+  This command supersedes the :command:`install_targets` command and
+  the :prop_tgt:`PRE_INSTALL_SCRIPT` and :prop_tgt:`POST_INSTALL_SCRIPT`
+  target properties.  It also replaces the ``FILES`` forms of the
+  :command:`install_files` and :command:`install_programs` commands.
+  The processing order of these install rules relative to
+  those generated by :command:`install_targets`,
+  :command:`install_files`, and :command:`install_programs` commands
+  is not defined.
 
 Examples
 ^^^^^^^^

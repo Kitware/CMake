@@ -93,25 +93,24 @@ if(NOT XCODE_VERSION VERSION_LESS 7.1)
   unset(RunCMake_TEST_OPTIONS)
 endif()
 
-#FIXME(#25266): Xcode 15.0 does not have visionOS.  Improve this condition.
-#if(NOT XCODE_VERSION VERSION_LESS 15)
-#  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeBundlesVisionOS-build)
-#  set(RunCMake_TEST_NO_CLEAN 1)
-#  set(RunCMake_TEST_OPTIONS
-#    "-DCMAKE_SYSTEM_NAME=visionOS"
-#    "-DCMAKE_INSTALL_PREFIX:PATH=${RunCMake_TEST_BINARY_DIR}/_install")
-#
-#  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
-#  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
-#
-#  run_cmake(XcodeBundles)
-#  run_cmake_command(XcodeBundles-build-visionOS ${CMAKE_COMMAND} --build .)
-#  run_cmake_command(XcodeBundles-install-visionOS ${CMAKE_COMMAND} --build . --target install)
-#
-#  unset(RunCMake_TEST_BINARY_DIR)
-#  unset(RunCMake_TEST_NO_CLEAN)
-#  unset(RunCMake_TEST_OPTIONS)
-#endif()
+if(NOT XCODE_VERSION VERSION_LESS 15.2)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/XcodeBundlesVisionOS-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_OPTIONS
+    "-DCMAKE_SYSTEM_NAME=visionOS"
+    "-DCMAKE_INSTALL_PREFIX:PATH=${RunCMake_TEST_BINARY_DIR}/_install")
+
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake(XcodeBundles)
+  run_cmake_command(XcodeBundles-build-visionOS ${CMAKE_COMMAND} --build .)
+  run_cmake_command(XcodeBundles-install-visionOS ${CMAKE_COMMAND} --build . --target install)
+
+  unset(RunCMake_TEST_BINARY_DIR)
+  unset(RunCMake_TEST_NO_CLEAN)
+  unset(RunCMake_TEST_OPTIONS)
+endif()
 
 if(NOT XCODE_VERSION VERSION_LESS 7)
   set(RunCMake_TEST_OPTIONS "-DCMAKE_TOOLCHAIN_FILE=${RunCMake_SOURCE_DIR}/osx.cmake")
@@ -262,11 +261,10 @@ if(XCODE_VERSION VERSION_GREATER_EQUAL 8)
   deployment_target_test(tvOS appletvsimulator)
   deployment_target_test(watchOS watchos)
   deployment_target_test(watchOS watchsimulator)
-  #FIXME(#25266): Xcode 15.0 does not have visionOS.  Improve this condition.
-  #if(XCODE_VERSION VERSION_GREATER_EQUAL 15)
-  #  deployment_target_test(visionOS xros)
-  #  deployment_target_test(visionOS xrsimulator)
-  #endif()
+  if(XCODE_VERSION VERSION_GREATER_EQUAL 15.2)
+    deployment_target_test(visionOS xros)
+    deployment_target_test(visionOS xrsimulator)
+  endif()
 endif()
 
 if(XCODE_VERSION VERSION_GREATER_EQUAL 8)

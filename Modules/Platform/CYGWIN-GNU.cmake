@@ -52,6 +52,8 @@ macro(__cygwin_compiler_gnu lang)
     "<CMAKE_${lang}_COMPILER> <FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS> -o <TARGET> -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <LINK_LIBRARIES>")
   set(CMAKE_${lang}_CREATE_WIN32_EXE "-mwindows")
 
+  set(CMAKE_${lang}_VERBOSE_LINK_FLAG "-Wl,-v")
+
    # No -fPIC on cygwin
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "")
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIE "")

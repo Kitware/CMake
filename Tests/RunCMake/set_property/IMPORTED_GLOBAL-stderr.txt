@@ -23,8 +23,8 @@ Call Stack \(most recent call first\):
 
 
 CMake Error at IMPORTED_GLOBAL.cmake:32 \(set_property\):
-  IMPORTED_GLOBAL property can't be set on non-imported targets
-  \(\"NonImportedTarget\"\)
+  IMPORTED_GLOBAL property can't be set on non-imported
+  targets\(\"NonImportedTarget\"\)
 
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

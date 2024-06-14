@@ -56,6 +56,7 @@ set(CMAKE_Swift_LIBRARY_PATH_TERMINATOR "")
 set(CMAKE_Swift_LINK_LIBRARY_FLAG "-l")
 set(CMAKE_Swift_LINKER_WRAPPER_FLAG "-Xlinker" " ")
 set(CMAKE_Swift_RESPONSE_FILE_LINK_FLAG @)
+set(CMAKE_Swift_RESPONSE_FILE_FLAG @)
 
 set(CMAKE_Swift_LINKER_PREFERENCE 50)
 set(CMAKE_Swift_LINKER_PREFERENCE_PROPAGATES 1)
@@ -68,30 +69,42 @@ set(CMAKE_Swift_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDLL -libc MD)
 set(CMAKE_Swift_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebug -libc MTd)
 set(CMAKE_Swift_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_MultiThreadedDebugDLL -libc MDd)
 
+set(CMAKE_Swift_FLAGS_DEBUG_INIT "-Onone -g")
+set(CMAKE_Swift_FLAGS_RELEASE_INIT "-O")
+set(CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT "-O -g")
+set(CMAKE_Swift_FLAGS_MINSIZEREL_INIT "-Osize")
+
 if(CMAKE_GENERATOR STREQUAL "Xcode")
+  string(APPEND CMAKE_Swift_FLAGS_DEBUG_INIT " ${CMAKE_Swift_FLAGS_DEBUG_LINKER_FLAGS}")
+  string(APPEND CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT " ${CMAKE_Swift_FLAGS_RELWITHDEBINFO_LINKER_FLAGS}")
+endif()
+
+# Warns if unset and uses old policy.
+# Old policy flag-smashes the wmo and incremental flags onto the compiler flags.
+# New policy respects the Swift_COMPILATION_MODE target property to add
+# incremental and wholemodule optimization flags as appropriate.
+cmake_policy(GET CMP0157 __SWIFT_COMP_MODE_CMP0157)
+if(__SWIFT_COMP_MODE_CMP0157 STREQUAL "NEW")
+  set(CMAKE_Swift_COMPILATION_MODE_DEFAULT "incremental")
+else()
   # Xcode has a separate Xcode project option (SWIFT_COMPILATION_MODE) used to set
   # whether compiling with whole-module optimizations or incrementally. Setting
   # these options here will have no effect when compiling with the built-in driver,
   # and will explode violently, leaving build products in the source directory, when
-  # using the old swift driver.
-  set(CMAKE_Swift_FLAGS_DEBUG_INIT "-Onone -g ${CMAKE_Swift_FLAGS_DEBUG_LINKER_FLAGS}")
-  set(CMAKE_Swift_FLAGS_RELEASE_INIT "-O")
-  set(CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT "-O -g ${CMAKE_Swift_FLAGS_RELWITHDEBINFO_LINKER_FLAGS}")
-  set(CMAKE_Swift_FLAGS_MINSIZEREL_INIT "-Osize")
-else()
-  set(CMAKE_Swift_FLAGS_DEBUG_INIT "-Onone -g -incremental")
-  set(CMAKE_Swift_FLAGS_RELEASE_INIT "-O")
-  set(CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT "-O -g")
-  set(CMAKE_Swift_FLAGS_MINSIZEREL_INIT "-Osize")
-
-  # Enable Whole Module Optimization by default unless the old
-  # C++ driver is being used, which behaves differently under WMO.
-  if(NOT CMAKE_Swift_COMPILER_USE_OLD_DRIVER)
-    string(APPEND CMAKE_Swift_FLAGS_RELEASE_INIT " -wmo")
-    string(APPEND CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT " -wmo")
-    string(APPEND CMAKE_Swift_FLAGS_MINSIZEREL_INIT " -wmo")
+  # using the old swift driver. Don't append `-incremental` or `-wmo` to the
+  # flags in the Xcode generator.
+  if(NOT CMAKE_GENERATOR STREQUAL "Xcode")
+    # Enable Whole Module Optimization by default unless the old
+    # C++ driver is being used, which behaves differently under WMO.
+    if(NOT CMAKE_Swift_COMPILER_USE_OLD_DRIVER)
+      string(APPEND CMAKE_Swift_FLAGS_RELEASE_INIT " -wmo")
+      string(APPEND CMAKE_Swift_FLAGS_RELWITHDEBINFO_INIT " -wmo")
+      string(APPEND CMAKE_Swift_FLAGS_MINSIZEREL_INIT " -wmo")
+    endif()
+    string(APPEND CMAKE_Swift_FLAGS_DEBUG_INIT " -incremental")
   endif()
 endif()
+unset(__SWIFT_COMP_MODE_CMP0157)
 
 if(CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
   if(NOT DEFINED CMAKE_Swift_LINK_WHAT_YOU_USE_FLAG)
@@ -104,36 +117,66 @@ endif()
 
 cmake_initialize_per_config_variable(CMAKE_Swift_FLAGS "Swift Compiler Flags")
 
-# NOTE(compnerd) we do not have an object compile rule since we build the objects as part of the link step
-if(NOT CMAKE_Swift_COMPILE_OBJECT)
-  set(CMAKE_Swift_COMPILE_OBJECT ":")
-endif()
-
 if(NOT CMAKE_Swift_NUM_THREADS MATCHES "^[0-9]+$")
   cmake_host_system_information(RESULT CMAKE_Swift_NUM_THREADS QUERY NUMBER_OF_LOGICAL_CORES)
 endif()
 
-if(NOT CMAKE_Swift_CREATE_SHARED_LIBRARY)
-  set(CMAKE_Swift_CREATE_SHARED_LIBRARY "<CMAKE_Swift_COMPILER> -j ${CMAKE_Swift_NUM_THREADS} -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-library -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <SONAME_FLAG> <TARGET_INSTALLNAME_DIR><TARGET_SONAME> ${CMAKE_Swift_IMPLIB_LINKER_FLAGS} <LINK_LIBRARIES>")
-endif()
+# Swift split-compilation requires CMP0157 NEW policy
+if(CMAKE_Swift_COMPILATION_MODE_DEFAULT)
+  set(CMAKE_Swift_PARALLEL_FLAGS "-j ${CMAKE_Swift_NUM_THREADS} -num-threads ${CMAKE_Swift_NUM_THREADS}")
+  if(NOT CMAKE_Swift_COMPILE_OBJECT)
+    # Omit the object output. The output is controlled by the output-file-map
+    # for normal builds. For wholemodule builds, CMake appends the appropriate
+    # flags.
+    set(CMAKE_Swift_COMPILE_OBJECT "<CMAKE_Swift_COMPILER> ${CMAKE_Swift_PARALLEL_FLAGS} -c <DEFINES> <FLAGS> <INCLUDES> <SOURCE>")
+  endif()
 
-if(NOT CMAKE_Swift_CREATE_SHARED_MODULE)
-  set(CMAKE_Swift_CREATE_SHARED_MODULE ${CMAKE_Swift_CREATE_SHARED_LIBRARY})
-endif()
+  if(NOT CMAKE_Swift_CREATE_SHARED_LIBRARY)
+    set(CMAKE_Swift_CREATE_SHARED_LIBRARY "<CMAKE_Swift_COMPILER> ${CMAKE_Swift_PARALLEL_FLAGS} -emit-library <CMAKE_SHARED_LIBRARY_Swift_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> ${CMAKE_Swift_IMPLIB_LINKER_FLAGS} <SONAME_FLAG> <TARGET_SONAME> -o <TARGET> <OBJECTS> <LINK_LIBRARIES>")
+  endif()
 
-if(NOT CMAKE_Swift_LINK_EXECUTABLE)
-  set(CMAKE_Swift_LINK_EXECUTABLE "<CMAKE_Swift_COMPILER> -j ${CMAKE_Swift_NUM_THREADS} -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-executable -o <TARGET> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
-endif()
+  if(NOT CMAKE_Swift_CREATE_SHARED_MODULE)
+    set(CMAKE_Swift_CREATE_SHARED_MODULE ${CMAKE_Swift_CREATE_SHARED_LIBRARY})
+  endif()
 
-if(NOT CMAKE_Swift_LINK_EXECUTABLE_WITH_EXPORTS)
-  set(CMAKE_Swift_LINK_EXECUTABLE_WITH_EXPORTS "${CMAKE_Swift_LINK_EXECUTABLE} -emit-module -emit-module-path <SWIFT_MODULE> ${CMAKE_Swift_IMPLIB_LINKER_FLAGS}")
-endif()
+  if(NOT CMAKE_Swift_LINK_EXECUTABLE)
+    set(CMAKE_Swift_LINK_EXECUTABLE "<CMAKE_Swift_COMPILER> ${CMAKE_Swift_PARALLEL_FLAGS} -emit-executable -o <TARGET> <FLAGS> <OBJECTS> <LINK_FLAGS> <LINK_LIBRARIES>")
+  endif()
 
-if(NOT CMAKE_Swift_CREATE_STATIC_LIBRARY)
-  set(CMAKE_Swift_CREATE_STATIC_LIBRARY "<CMAKE_Swift_COMPILER> -j ${CMAKE_Swift_NUM_THREADS} -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-library -static -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
+  if(NOT CMAKE_Swift_CREATE_STATIC_LIBRARY)
+    set(CMAKE_Swift_CREATE_STATIC_LIBRARY "<CMAKE_Swift_COMPILER> -emit-library -static -o <TARGET> <OBJECTS> <LINK_FLAGS>")
+    set(CMAKE_Swift_ARCHIVE_CREATE "<CMAKE_AR> crs <TARGET> <OBJECTS>")
+    set(CMAKE_Swift_ARCHIVE_FINISH "")
+  endif()
+  unset(CMAKE_Swift_PARALLEL_FLAGS)
+else()
+  # NOTE(compnerd) we do not have an object compile rule since we build the objects as part of the link step
+  if(NOT CMAKE_Swift_COMPILE_OBJECT)
+    set(CMAKE_Swift_COMPILE_OBJECT ":")
+  endif()
 
-  set(CMAKE_Swift_ARCHIVE_CREATE "<CMAKE_AR> crs <TARGET> <OBJECTS>")
-  set(CMAKE_Swift_ARCHIVE_FINISH "")
+  if(NOT CMAKE_Swift_CREATE_SHARED_LIBRARY)
+    set(CMAKE_Swift_CREATE_SHARED_LIBRARY "<CMAKE_Swift_COMPILER> -j ${CMAKE_Swift_NUM_THREADS} -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-library -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <SONAME_FLAG> <TARGET_INSTALLNAME_DIR><TARGET_SONAME> ${CMAKE_Swift_IMPLIB_LINKER_FLAGS} <LINK_LIBRARIES>")
+  endif()
+
+  if(NOT CMAKE_Swift_CREATE_SHARED_MODULE)
+    set(CMAKE_Swift_CREATE_SHARED_MODULE ${CMAKE_Swift_CREATE_SHARED_LIBRARY})
+  endif()
+
+  if(NOT CMAKE_Swift_LINK_EXECUTABLE)
+    set(CMAKE_Swift_LINK_EXECUTABLE "<CMAKE_Swift_COMPILER> -j ${CMAKE_Swift_NUM_THREADS} -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-executable -o <TARGET> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
+  endif()
+
+  if(NOT CMAKE_Swift_LINK_EXECUTABLE_WITH_EXPORTS)
+    set(CMAKE_Swift_LINK_EXECUTABLE_WITH_EXPORTS "${CMAKE_Swift_LINK_EXECUTABLE} -emit-module -emit-module-path <SWIFT_MODULE> ${CMAKE_Swift_IMPLIB_LINKER_FLAGS}")
+  endif()
+
+  if(NOT CMAKE_Swift_CREATE_STATIC_LIBRARY)
+    set(CMAKE_Swift_CREATE_STATIC_LIBRARY "<CMAKE_Swift_COMPILER> -j ${CMAKE_Swift_NUM_THREADS} -num-threads ${CMAKE_Swift_NUM_THREADS} -emit-library -static -o <TARGET> -module-name <SWIFT_MODULE_NAME> -module-link-name <SWIFT_LIBRARY_NAME> -emit-module -emit-module-path <SWIFT_MODULE> -emit-dependencies <DEFINES> <FLAGS> <INCLUDES> <SWIFT_SOURCES> <LINK_FLAGS> <LINK_LIBRARIES>")
+
+    set(CMAKE_Swift_ARCHIVE_CREATE "<CMAKE_AR> crs <TARGET> <OBJECTS>")
+    set(CMAKE_Swift_ARCHIVE_FINISH "")
+  endif()
 endif()
 
 set(CMAKE_Swift_INFORMATION_LOADED 1)

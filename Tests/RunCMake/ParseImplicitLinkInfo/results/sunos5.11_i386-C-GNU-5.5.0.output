@@ -1,0 +1,3 @@
+libs=gcc;c;gcc
+dirs=/lib;/usr/lib;/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0;/opt/csw/i386-pc-solaris2.10/lib;/opt/csw/lib
+linker_tool=/usr/ccs/bin/ld

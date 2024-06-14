@@ -1,7 +1,7 @@
 # A dummy checker implementation that does not write the requested output file
 # so it triggers an error for every checker.
 
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/ret0.c.in" "int main(){return 0;}\n")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/ret0.c.in" "int main(void){return 0;}\n")
 
 configure_file(
   "${CMAKE_CURRENT_BINARY_DIR}/ret0.c.in"

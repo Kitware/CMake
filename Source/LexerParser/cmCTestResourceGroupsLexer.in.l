@@ -26,6 +26,10 @@ Modify cmCTestResourceGroupsLexer.cxx:
 
 #include <cstddef>
 
+#ifndef _WIN32
+#  include <termios.h>
+#endif
+
 /*--------------------------------------------------------------------------*/
 %}
 

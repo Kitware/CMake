@@ -61,9 +61,10 @@ using :variable:`CMAKE_<LANG>_FLAGS_INIT`) then they will affect the detected
 default :variable:`standard <CMAKE_<LANG>_STANDARD_DEFAULT>` and
 :variable:`extensions <CMAKE_<LANG>_EXTENSIONS_DEFAULT>`.
 
-Unlike many policies, CMake version |release| does *not* warn when the policy
-is not set and simply uses the ``OLD`` behavior. Use the
-:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.22
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn by default
+.. include:: STANDARD_ADVICE.txt
+
 See documentation of the
 :variable:`CMAKE_POLICY_WARNING_CMP0128 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
 variable to control the warning.

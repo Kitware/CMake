@@ -1,7 +1,7 @@
 void OneFunc();
 void TwoFunc();
 
-int main()
+int main(void)
 {
   OneFunc();
   TwoFunc();

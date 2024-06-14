@@ -3,7 +3,7 @@
 void FiveFunction();
 void EightFunction();
 
-int main()
+int main(void)
 {
   FiveFunction();
   EightFunction();

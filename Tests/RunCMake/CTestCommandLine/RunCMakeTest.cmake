@@ -207,6 +207,28 @@ set_tests_properties(test1 PROPERTIES SKIP_REGULAR_EXPRESSION \"test1\")
 endfunction()
 run_SkipRegexFoundTest()
 
+
+function(run_TestsFromFileTest case)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestsFromFile-${case})
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(Test1 \"${CMAKE_COMMAND}\" -E echo \"test1\")
+add_test(Test2 \"${CMAKE_COMMAND}\" -E echo \"test2\")
+add_test(Test11 \"${CMAKE_COMMAND}\" -E echo \"test11\")
+")
+  run_cmake_command(TestsFromFile-${case} ${CMAKE_CTEST_COMMAND} ${ARGN})
+endfunction()
+run_TestsFromFileTest(include --tests-from-file ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList.txt)
+run_TestsFromFileTest(exclude --exclude-from-file ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList.txt)
+run_TestsFromFileTest(include-empty --tests-from-file ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList-empty.txt)
+run_TestsFromFileTest(exclude-empty --exclude-from-file ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList-empty.txt)
+run_TestsFromFileTest(include-missing --tests-from-file ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList-missing.txt)
+run_TestsFromFileTest(exclude-missing --exclude-from-file ${RunCMake_SOURCE_DIR}/TestsFromFile-TestList-missing.txt)
+
+
 function(run_SerialFailed)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/SerialFailed)
   set(RunCMake_TEST_NO_CLEAN 1)
@@ -222,6 +244,44 @@ add_test(Echo \"${CMAKE_COMMAND}\" -E echo \"EchoTest\")
 endfunction()
 run_SerialFailed()
 
+function(run_Parallel case)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Parallel-${case})
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+foreach(i RANGE 1 6)
+  add_test(test\${i} \"${CMAKE_COMMAND}\" -E true)
+endforeach()
+")
+  run_cmake_command(Parallel-${case} ${CMAKE_CTEST_COMMAND} ${ARGN})
+endfunction()
+# Spoof a number of processors to make these tests predictable.
+set(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING} 1)
+run_Parallel(bad --parallel bad)
+run_Parallel(j-bad -j bad)
+set(RunCMake_TEST_RAW_ARGS [[--parallel ""]])
+run_Parallel(empty) # With 1 processor, defaults to 2.
+unset(RunCMake_TEST_RAW_ARGS)
+run_Parallel(j -j) # With 1 processor, defaults to 2.
+run_Parallel(0 -j0)
+run_Parallel(4 --parallel 4)
+run_Parallel(N --parallel -N)
+set(ENV{CTEST_PARALLEL_LEVEL} bad)
+run_Parallel(env-bad)
+if(CMAKE_HOST_WIN32)
+  set(ENV{CTEST_PARALLEL_LEVEL} " ")
+else()
+  set(ENV{CTEST_PARALLEL_LEVEL} "")
+endif()
+run_Parallel(env-empty) # With 1 processor, defaults to 2.
+set(ENV{CTEST_PARALLEL_LEVEL} 0)
+run_Parallel(env-0)
+set(ENV{CTEST_PARALLEL_LEVEL} 3)
+run_Parallel(env-3)
+unset(ENV{CTEST_PARALLEL_LEVEL})
+unset(ENV{__CTEST_FAKE_PROCESSOR_COUNT_FOR_TESTING)
+
 function(run_TestLoad name load)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestLoad)
   set(RunCMake_TEST_NO_CLEAN 1)
@@ -229,19 +289,22 @@ function(run_TestLoad name load)
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
   file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
   add_test(TestLoad1 \"${CMAKE_COMMAND}\" -E echo \"test of --test-load\")
+  set_tests_properties(TestLoad1 PROPERTIES PROCESSORS 2)
   add_test(TestLoad2 \"${CMAKE_COMMAND}\" -E echo \"test of --test-load\")
+  set_tests_properties(TestLoad2 PROPERTIES PROCESSORS 2)
 ")
-  run_cmake_command(${name} ${CMAKE_CTEST_COMMAND} -VV -j2 --test-load ${load})
+  run_cmake_command(${name} ${CMAKE_CTEST_COMMAND} -VV -j8 --test-load ${load})
 endfunction()
 
 # Tests for the --test-load feature of ctest
 #
 # Spoof a load average value to make these tests more reliable.
-set(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING} 5)
+set(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING} 7)
 
 # Verify that new tests are not started when the load average exceeds
 # our threshold and that they then run once the load average drops.
-run_TestLoad(test-load-wait 3)
+run_TestLoad(test-load-wait0 5)
+run_TestLoad(test-load-wait1 8)
 
 # Verify that warning message is displayed but tests still start when
 # an invalid argument is given.
@@ -249,7 +312,7 @@ run_TestLoad(test-load-invalid 'two')
 
 # Verify that new tests are started when the load average falls below
 # our threshold.
-run_TestLoad(test-load-pass 10)
+run_TestLoad(test-load-pass 12)
 
 unset(ENV{__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING})
 

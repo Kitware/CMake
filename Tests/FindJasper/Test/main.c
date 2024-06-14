@@ -4,7 +4,7 @@
 #include <jasper/jasper.h>
 // clang-format on
 
-int main()
+int main(void)
 {
   /* Without any JPEG file to open, test that the call fails as
      expected.  This tests that linking worked. */

@@ -9,7 +9,7 @@ testExe2_EXPORT int testExe2Func(void)
   return 123;
 }
 
-int main()
+int main(void)
 {
   return 0;
 }

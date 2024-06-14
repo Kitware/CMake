@@ -1,0 +1,3 @@
+void no_modules()
+{
+}

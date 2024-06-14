@@ -25,13 +25,17 @@
 #include "cmProcess.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmUVHandlePtr.h"
 #include "cmWorkingDirectory.h"
 
-cmCTestRunTest::cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler)
+cmCTestRunTest::cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler,
+                               int index)
   : MultiTestHandler(multiHandler)
+  , Index(index)
+  , CTest(MultiTestHandler.CTest)
+  , TestHandler(MultiTestHandler.TestHandler)
+  , TestProperties(MultiTestHandler.Properties[Index])
 {
-  this->CTest = multiHandler.CTest;
-  this->TestHandler = multiHandler.TestHandler;
 }
 
 void cmCTestRunTest::CheckOutput(std::string const& line)
@@ -161,7 +165,7 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
       reason = "Invalid resource spec file";
       forceFail = true;
     } else {
-      this->MultiTestHandler.CheckResourcesAvailable();
+      this->MultiTestHandler.CheckResourceAvailability();
     }
   }
   std::ostringstream outputStream;
@@ -526,7 +530,7 @@ std::string cmCTestRunTest::GetTestPrefix(size_t completed, size_t total) const
   return outputStream.str();
 }
 
-bool cmCTestRunTest::StartTest(std::unique_ptr<cmCTestRunTest> runner,
+void cmCTestRunTest::StartTest(std::unique_ptr<cmCTestRunTest> runner,
                                size_t completed, size_t total)
 {
   auto* testRun = runner.get();
@@ -535,10 +539,7 @@ bool cmCTestRunTest::StartTest(std::unique_ptr<cmCTestRunTest> runner,
 
   if (!testRun->StartTest(completed, total)) {
     testRun->FinalizeTest(false);
-    return false;
   }
-
-  return true;
 }
 
 // Starts the execution of a test.  Returns once it has started
@@ -887,7 +888,7 @@ bool cmCTestRunTest::ForkProcess()
   this->TestResult.Environment.erase(this->TestResult.Environment.length() -
                                      1);
 
-  return this->TestProcess->StartProcess(this->MultiTestHandler.Loop,
+  return this->TestProcess->StartProcess(*this->MultiTestHandler.Loop,
                                          &this->TestProperties->Affinity);
 }
 

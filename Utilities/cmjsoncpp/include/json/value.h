@@ -33,6 +33,10 @@
 #if __clang_major__ == 3 && __clang_minor__ <= 8
 #define JSONCPP_TEMPLATE_DELETE
 #endif
+#elif defined(__EDG__) && defined(__LCC__)
+#if __LCC__ < 123
+#define JSONCPP_TEMPLATE_DELETE
+#endif
 #endif
 #if !defined(JSONCPP_TEMPLATE_DELETE)
 #define JSONCPP_TEMPLATE_DELETE = delete

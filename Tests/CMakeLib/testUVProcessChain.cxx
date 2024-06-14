@@ -295,7 +295,12 @@ bool testUVProcessChainBuiltin(const char* helperCommand)
     .AddCommand({ helperCommand, "capitalize" })
     .AddCommand({ helperCommand, "dedup" })
     .SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT)
-    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_ERROR);
+    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_ERROR)
+    .SetBuiltinLoop();
+  if (builder.GetLoop()) {
+    std::cout << "GetLoop() should return null" << std::endl;
+    return false;
+  }
 
   if (!checkExecution(builder, chain)) {
     return false;
@@ -398,6 +403,10 @@ bool testUVProcessChainExternal(const char* helperCommand)
     .AddCommand({ helperCommand, "dedup" })
     .SetExternalStream(cmUVProcessChainBuilder::Stream_OUTPUT, outputPipe[1])
     .SetExternalStream(cmUVProcessChainBuilder::Stream_ERROR, errorPipe[1]);
+  if (builder.GetLoop()) {
+    std::cout << "GetLoop() should return null" << std::endl;
+    return false;
+  }
 
   if (!checkExecution(builder, chain)) {
     return false;
@@ -665,6 +674,43 @@ bool testUVProcessChainWait0(const char* helperCommand)
   return true;
 }
 
+bool testUVProcessChainExternalLoop(const char* helperCommand)
+{
+  cm::uv_loop_ptr loop;
+  loop.init();
+
+  cmUVProcessChainBuilder builder;
+  builder.AddCommand({ helperCommand, "echo" })
+    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT)
+    .SetExternalLoop(*loop);
+  if (builder.GetLoop() != loop) {
+    std::cout << "GetLoop() should return external loop" << std::endl;
+    return false;
+  }
+
+  auto chain = builder.Start();
+
+  if (&chain.GetLoop() != loop) {
+    std::cout << "GetLoop() should return external loop" << std::endl;
+    return false;
+  }
+
+  if (!chain.Wait()) {
+    std::cout << "Wait() timed out" << std::endl;
+    return false;
+  }
+
+  cmUVPipeIStream stream(chain.GetLoop(), chain.OutputStream());
+  std::string output = getInput(stream);
+  if (output != "HELLO world!") {
+    std::cout << "Output was \"" << output << "\", expected \"HELLO world!\""
+              << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
 int testUVProcessChain(int argc, char** const argv)
 {
   if (argc < 2) {
@@ -714,6 +760,11 @@ int testUVProcessChain(int argc, char** const argv)
 
   if (!testUVProcessChainWait0(argv[1])) {
     std::cout << "While executing testUVProcessChainWait0().\n";
+    return -1;
+  }
+
+  if (!testUVProcessChainExternalLoop(argv[1])) {
+    std::cout << "While executing testUVProcessChainExternalLoop().\n";
     return -1;
   }
 

@@ -45,22 +45,22 @@ protected:
   void GenerateExpectedTargetsCode(
     std::ostream& os, const std::string& expectedTargets) override;
   void GenerateImportPropertyCode(
-    std::ostream& os, const std::string& config,
-    cmGeneratorTarget const* target,
-    ImportPropertyMap const& properties) override;
+    std::ostream& os, const std::string& config, const std::string& suffix,
+    cmGeneratorTarget const* target, ImportPropertyMap const& properties,
+    const std::string& importedXcFrameworkLocation) override;
   void GenerateMissingTargetsCheckCode(std::ostream& os) override;
+  void GenerateFindDependencyCalls(std::ostream&) override {}
   void GenerateInterfaceProperties(
     cmGeneratorTarget const* target, std::ostream& os,
     const ImportPropertyMap& properties) override;
   void GenerateImportPrefix(std::ostream& os) override;
   void LoadConfigFiles(std::ostream&) override;
-  void GenerateRequiredCMakeVersion(std::ostream& os,
-                                    const char* versionString) override;
   void CleanupTemporaryVariables(std::ostream&) override;
   void GenerateImportedFileCheckLoop(std::ostream& os) override;
   void GenerateImportedFileChecksCode(
     std::ostream& os, cmGeneratorTarget* target,
     ImportPropertyMap const& properties,
-    const std::set<std::string>& importedLocations) override;
+    const std::set<std::string>& importedLocations,
+    const std::string& importedXcFrameworkLocation) override;
   bool GenerateImportFileConfig(const std::string& config) override;
 };

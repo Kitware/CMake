@@ -1,2 +1,3 @@
 libs=Fortran_main;FortranRuntime;FortranDecimal;m;gcc;gcc_s;c;gcc;gcc_s
 dirs=/usr/lib/gcc/x86_64-redhat-linux/12;/usr/lib64;/lib64;/lib;/usr/lib
+linker_tool=/usr/bin/ld

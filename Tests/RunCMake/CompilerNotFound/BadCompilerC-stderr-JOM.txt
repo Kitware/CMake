@@ -3,7 +3,8 @@ CMake Error at BadCompilerC.cmake:2 \(enable_language\):
 
     no-C-compiler
 
-  is not a full path and was not found in the PATH.
+  is not a full path and was not found in the PATH.(  Perhaps the extension is
+  missing\?)?
 
   To use the JOM generator with Visual C\+\+, cmake must be run from a shell
   that can use the compiler cl from the command line.  This environment is

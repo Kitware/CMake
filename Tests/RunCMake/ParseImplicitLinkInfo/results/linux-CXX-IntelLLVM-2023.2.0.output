@@ -1,0 +1,4 @@
+libs=svml;irng;stdc\+\+;imf;m;gcc_s;gcc;irc;dl;gcc_s;gcc;c;gcc_s;gcc;irc_s
+dirs=/opt/intel/oneapi/compiler/2023.2.1/linux/compiler/lib/intel64_lin;/opt/intel/oneapi/compiler/2023.2.1/linux/lib;/usr/lib/gcc/x86_64-redhat-linux/8;/usr/lib64;/lib64;/usr/lib;/lib;/opt/intel/oneapi/tbb/2021.10.0/lib/intel64/gcc4.8;/opt/intel/oneapi/mpi/2021.10.0/libfabric/lib;/opt/intel/oneapi/mpi/2021.10.0/lib/release;/opt/intel/oneapi/mpi/2021.10.0/lib;/opt/intel/oneapi/mkl/2023.2.0/lib/intel64
+library_arch=
+linker_tool=/usr/bin/ld

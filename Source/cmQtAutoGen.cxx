@@ -76,13 +76,6 @@ static void MergeOptions(std::vector<std::string>& baseOpts,
 
 unsigned int const cmQtAutoGen::ParallelMax = 64;
 
-#ifdef _WIN32
-// Actually 32767 (see
-// https://devblogs.microsoft.com/oldnewthing/20031210-00/?p=41553) but we
-// allow for a small margin
-size_t const cmQtAutoGen::CommandLineLengthMax = 32000;
-#endif
-
 cm::string_view cmQtAutoGen::GeneratorName(GenT genType)
 {
   switch (genType) {

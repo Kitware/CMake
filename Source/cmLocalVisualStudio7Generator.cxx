@@ -32,6 +32,7 @@
 #include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
+#include "cmMessageType.h"
 #include "cmOutputConverter.h"
 #include "cmPolicies.h"
 #include "cmSourceFile.h"
@@ -794,6 +795,9 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
       target->GetType() == cmStateEnums::OBJECT_LIBRARY
       ? ".lib"
       : cmSystemTools::GetFilenameLastExtension(targetNameFull);
+    if (cm::optional<std::string> fortran = gg->GetPlatformToolsetFortran()) {
+      fout << "\t\t\tUseCompiler=\"" << *fortran << "Compiler\"\n";
+    }
     /* clang-format off */
     fout <<
       "\t\t\tTargetName=\"" << this->EscapeForXML(targetName) << "\"\n"
@@ -1085,6 +1089,16 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       cmComputeLinkInformation& cli = *pcli;
       std::string linkLanguage = cli.GetLinkLanguage();
 
+      if (!target->GetLinkerTypeProperty(linkLanguage, configName).empty()) {
+        // Visual Studio 10 or upper is required for this feature
+        this->GetCMakeInstance()->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("'LINKER_TYPE' property, specified on target '",
+                   target->GetName(),
+                   "', is not supported by this generator."),
+          target->GetBacktrace());
+      }
+
       // Compute the variable name to lookup standard libraries for this
       // language.
       std::string standardLibsVar =
@@ -1160,6 +1174,16 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
       }
       cmComputeLinkInformation& cli = *pcli;
       std::string linkLanguage = cli.GetLinkLanguage();
+
+      if (!target->GetLinkerTypeProperty(linkLanguage, configName).empty()) {
+        // Visual Studio 10 or upper is required for this feature
+        this->GetCMakeInstance()->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("'LINKER_TYPE' property, specified on target '",
+                   target->GetName(),
+                   "', is not supported by this generator."),
+          target->GetBacktrace());
+      }
 
       bool isWin32Executable = target->IsWin32Executable(configName);
 

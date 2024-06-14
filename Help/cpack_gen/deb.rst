@@ -69,28 +69,32 @@ List of CPack DEB generator specific variables:
  :Mandatory: Yes
  :Default: ``<CPACK_PACKAGE_FILE_NAME>[-<component>].deb``
 
- This may be set to ``DEB-DEFAULT`` to allow the CPack DEB generator to generate
- package file name by itself in deb format::
+ This may be set to:
 
-   <PackageName>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
+ ``DEB-DEFAULT``
+   Tell CPack to automatically generate the package file name in deb format::
 
- Alternatively provided package file name must end
- with either ``.deb`` or ``.ipk`` suffix.
+     <PackageName>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb
 
- .. versionadded:: 3.10
-  ``.ipk`` suffix used by OPKG packaging system.
+   This setting recommended as the preferred behavior, but for backward
+   compatibility with the CPack DEB generator in CMake prior to version 3.6,
+   this is not the default.   Without this, duplicate names may occur.
+   Duplicate files get overwritten and it is up to the packager to set
+   the variables in a manner that will prevent such errors.
 
- .. note::
+ ``<file-name>[.deb]``
+   Use the given file name.
 
-   Preferred setting of this variable is ``DEB-DEFAULT`` but for backward
-   compatibility with the CPack DEB generator in CMake prior to version 3.6 this
-   feature is disabled by default.
+   .. versionchanged:: 3.29
 
- .. note::
+     The ``.deb`` suffix will be automatically added if the file name does
+     not end in ``.deb`` or ``.ipk``.  Previously the suffix was required.
 
-   By using non default filenames duplicate names may occur. Duplicate files
-   get overwritten and it is up to the packager to set the variables in a
-   manner that will prevent such errors.
+ ``<file-name>.ipk``
+   .. versionadded:: 3.10
+
+   Use the given file name.
+   The ``.ipk`` suffix is used by the OPKG packaging system.
 
 .. variable:: CPACK_DEBIAN_PACKAGE_EPOCH
 

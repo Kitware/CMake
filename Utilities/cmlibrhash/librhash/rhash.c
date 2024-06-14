@@ -38,15 +38,24 @@
 #include <string.h>
 
 #define STATE_ACTIVE  0xb01dbabe
-#define STATE_STOPED  0xdeadbeef
+#define STATE_STOPPED 0xdeadbeef
 #define STATE_DELETED 0xdecea5ed
+#define IS_BAD_STATE(s) ((s) != STATE_ACTIVE && (s) != STATE_STOPPED)
 #define RCTX_AUTO_FINAL 0x1
 #define RCTX_FINALIZED  0x2
 #define RCTX_FINALIZED_MASK (RCTX_AUTO_FINAL | RCTX_FINALIZED)
 #define RHPR_FORMAT (RHPR_RAW | RHPR_HEX | RHPR_BASE32 | RHPR_BASE64)
 #define RHPR_MODIFIER (RHPR_UPPERCASE | RHPR_URLENCODE | RHPR_REVERSE)
 
-void rhash_library_init(void)
+#define HAS_ZERO_OR_ONE_BIT(id) (((id) & ((id) - 1)) == 0)
+#define IS_VALID_HASH_MASK(bitmask) ((bitmask) != 0 && ((bitmask) & ~RHASH_ALL_HASHES) == 0)
+#define IS_VALID_HASH_ID(id) (IS_VALID_HASH_MASK(id) && HAS_ZERO_OR_ONE_BIT(id))
+
+/* each hash function context must be aligned to DEFAULT_ALIGNMENT bytes */
+#define GET_CTX_ALIGNED(size) ALIGN_SIZE_BY((size), DEFAULT_ALIGNMENT)
+#define GET_EXPORT_ALIGNED(size) ALIGN_SIZE_BY((size), 8)
+
+RHASH_API void rhash_library_init(void)
 {
 	rhash_init_algorithms(RHASH_ALL_HASHES);
 #ifdef USE_OPENSSL
@@ -54,103 +63,120 @@ void rhash_library_init(void)
 #endif
 }
 
-int RHASH_API rhash_count(void)
+RHASH_API int rhash_count(void)
 {
 	return rhash_info_size;
 }
 
 /* LOW-LEVEL LIBRHASH INTERFACE */
 
-RHASH_API rhash rhash_init(unsigned hash_id)
+/**
+ * Allocate and initialize RHash context for calculating a single or multiple hash functions.
+ * The context after usage must be freed by calling rhash_free().
+ *
+ * @param count the size of the hash_ids array, the count must be greater than zero
+ * @param hash_ids array of identifiers of hash functions. Each element must
+ *        be an identifier of one hash function
+ * @param need_init initialize context for each hash function
+ * @return initialized rhash context, NULL on fail with error code stored in errno
+ */
+static rhash_context_ext* rhash_alloc_multi(size_t count, const unsigned hash_ids[], int need_init)
 {
-	unsigned tail_bit_index; /* index of hash_id trailing bit */
-	unsigned num = 0;        /* number of hashes to compute */
+	struct rhash_hash_info* info;   /* hash algorithm information */
 	rhash_context_ext* rctx = NULL; /* allocated rhash context */
-	size_t hash_size_sum = 0;   /* size of hash contexts to store in rctx */
-
-	unsigned i, bit_index, id;
-	struct rhash_hash_info* info;
-	size_t aligned_size;
+	const size_t header_size = GET_CTX_ALIGNED(sizeof(rhash_context_ext) + sizeof(rhash_vector_item) * count);
+	size_t ctx_size_sum = 0;   /* size of hash contexts to store in rctx */
+	size_t i;
 	char* phash_ctx;
+	unsigned hash_bitmask = 0;
 
-	hash_id &= RHASH_ALL_HASHES;
-	if (hash_id == 0) {
+	if (count < 1) {
 		errno = EINVAL;
 		return NULL;
 	}
-
-	tail_bit_index = rhash_ctz(hash_id); /* get trailing bit index */
-	assert(tail_bit_index < RHASH_HASH_COUNT);
-
-	id = 1 << tail_bit_index;
-
-	if (hash_id == id) {
-		/* handle the most common case of only one hash */
-		num = 1;
-		info = &rhash_info_table[tail_bit_index];
-		hash_size_sum = info->context_size;
-	} else {
-		/* another case: hash_id contains several hashes */
-		for (bit_index = tail_bit_index; id <= hash_id; bit_index++, id = id << 1) {
-			assert(id != 0);
-			assert(bit_index < RHASH_HASH_COUNT);
-			info = &rhash_info_table[bit_index];
-			if (hash_id & id) {
-				/* align sizes by 8 bytes */
-				aligned_size = (info->context_size + 7) & ~7;
-				hash_size_sum += aligned_size;
-				num++;
-			}
+	for (i = 0; i < count; i++) {
+		unsigned hash_index;
+		if (!IS_VALID_HASH_ID(hash_ids[i])) {
+			errno = EINVAL;
+			return NULL;
 		}
-		assert(num > 1);
+		hash_bitmask |= hash_ids[i];
+		hash_index = rhash_ctz(hash_ids[i]);
+		assert(hash_index < RHASH_HASH_COUNT); /* correct until extended hash_ids are supported */
+		info = &rhash_info_table[hash_index];
+
+		/* align context sizes and sum up */
+		ctx_size_sum += GET_CTX_ALIGNED(info->context_size);
 	}
 
-	/* align the size of the rhash context common part */
-	aligned_size = ((offsetof(rhash_context_ext, vector) + sizeof(rhash_vector_item) * num) + 7) & ~7;
-	assert(aligned_size >= sizeof(rhash_context_ext));
-
-	/* allocate rhash context with enough memory to store contexts of all used hashes */
-	rctx = (rhash_context_ext*)malloc(aligned_size + hash_size_sum);
-	if (rctx == NULL) return NULL;
+	/* allocate rhash context with enough memory to store contexts of all selected hash functions */
+	rctx = (rhash_context_ext*)rhash_aligned_alloc(DEFAULT_ALIGNMENT, header_size + ctx_size_sum);
+	if (rctx == NULL)
+		return NULL;
 
 	/* initialize common fields of the rhash context */
-	memset(rctx, 0, sizeof(rhash_context_ext));
-	rctx->rc.hash_id = hash_id;
+	memset(rctx, 0, header_size);
+	rctx->rc.hash_id = hash_bitmask;
 	rctx->flags = RCTX_AUTO_FINAL; /* turn on auto-final by default */
 	rctx->state = STATE_ACTIVE;
-	rctx->hash_vector_size = num;
+	rctx->hash_vector_size = count;
 
-	/* aligned hash contexts follows rctx->vector[num] in the same memory block */
-	phash_ctx = (char*)rctx + aligned_size;
-	assert(phash_ctx >= (char*)&rctx->vector[num]);
+	/* calculate aligned pointer >= (&rctx->vector[count]) */
+	phash_ctx = (char*)rctx + header_size;
+	assert(phash_ctx >= (char*)&rctx->vector[count]);
+	assert(phash_ctx < ((char*)&rctx->vector[count] + DEFAULT_ALIGNMENT));
 
-	/* initialize context for every hash in a loop */
-	for (bit_index = tail_bit_index, id = 1 << tail_bit_index, i = 0;
-		id <= hash_id; bit_index++, id = id << 1)
-	{
-		/* check if a hash function with given id shall be included into rctx */
-		if ((hash_id & id) != 0) {
-			info = &rhash_info_table[bit_index];
-			assert(info->context_size > 0);
-			assert(((phash_ctx - (char*)0) & 7) == 0); /* hash context is aligned */
-			assert(info->init != NULL);
+	for (i = 0; i < count; i++) {
+		unsigned hash_index = rhash_ctz(hash_ids[i]);
+		info = &rhash_info_table[hash_index];
+		assert(info->context_size > 0);
+		assert(info->init != NULL);
+		assert(IS_PTR_ALIGNED_BY(phash_ctx, DEFAULT_ALIGNMENT)); /* hash context is aligned */
 
-			rctx->vector[i].hash_info = info;
-			rctx->vector[i].context = phash_ctx;
+		rctx->vector[i].hash_info = info;
+		rctx->vector[i].context = phash_ctx;
 
 #if 0
-			/* BTIH initialization is complex, save pointer for later */
-			if ((id & RHASH_BTIH) != 0) rctx->bt_ctx = phash_ctx;
+		/* BTIH initialization is a bit complicated, so store the context pointer for later usage */
+		if ((hash_ids[i] & RHASH_BTIH) != 0)
+			rctx->bt_ctx = phash_ctx;
 #endif
-			phash_ctx += (info->context_size + 7) & ~7;
+		phash_ctx += GET_CTX_ALIGNED(info->context_size);
 
-			/* initialize the i-th hash context */
+		/* initialize the i-th hash context */
+		if (need_init)
 			info->init(rctx->vector[i].context);
-			i++;
-		}
 	}
+	return rctx;
+}
 
-	return &rctx->rc; /* return allocated and initialized rhash context */
+RHASH_API rhash rhash_init_multi(size_t count, const unsigned hash_ids[])
+{
+	rhash_context_ext* ectx = rhash_alloc_multi(count, hash_ids, 1);
+	return &ectx->rc; /* return initialized rhash context */
+}
+
+RHASH_API rhash rhash_init(unsigned hash_id)
+{
+	if (!IS_VALID_HASH_MASK(hash_id)) {
+		errno = EINVAL;
+		return NULL;
+	}
+	if (HAS_ZERO_OR_ONE_BIT(hash_id)) {
+		return rhash_init_multi(1, &hash_id);
+	} else {
+		/* handle the depricated case, when hash_id is a bitwise union of several hash function identifiers */
+		size_t count;
+		unsigned hash_ids[32];
+		unsigned id = hash_id & -hash_id; /* get the trailing bit */
+		for (count = 0; id <= hash_id; id = id << 1) {
+			assert(id != 0);
+			if (hash_id & id)
+				hash_ids[count++] = id;
+		}
+		assert(count > 1);
+		return rhash_init_multi(count, hash_ids);
+	}
 }
 
 void rhash_free(rhash ctx)
@@ -159,7 +185,6 @@ void rhash_free(rhash ctx)
 	unsigned i;
 
 	if (ctx == 0) return;
-	assert(ectx->hash_vector_size <= RHASH_HASH_COUNT);
 	ectx->state = STATE_DELETED; /* mark memory block as being removed */
 
 	/* clean the hash functions, which require additional clean up */
@@ -169,8 +194,7 @@ void rhash_free(rhash ctx)
 			info->cleanup(ectx->vector[i].context);
 		}
 	}
-
-	free(ectx);
+	rhash_aligned_free(ectx);
 }
 
 RHASH_API void rhash_reset(rhash ctx)
@@ -239,6 +263,161 @@ RHASH_API int rhash_final(rhash ctx, unsigned char* first_result)
 }
 
 /**
+ * Header block for rhash context import/export.
+ */
+typedef struct export_header
+{
+	uint32_t state;
+	uint16_t hash_vector_size;
+	uint16_t flags;
+	uint64_t msg_size;
+} export_header;
+
+/**
+ * Process export error. Returns 0 and set errno to EINVAL.
+ *
+ * @return NULL
+ */
+static size_t export_error_einval(void)
+{
+	errno = EINVAL;
+	return 0;
+}
+
+/**
+ * Process import error. Returns NULL and set errno to EINVAL.
+ *
+ * @return NULL
+ */
+static rhash import_error_einval(void)
+{
+	errno = EINVAL;
+	return NULL;
+}
+
+RHASH_API size_t rhash_export(rhash ctx, void* out, size_t size)
+{
+#if !defined(NO_IMPORT_EXPORT)
+	size_t export_size;
+	size_t i;
+	rhash_context_ext* const ectx = (rhash_context_ext*)ctx;
+	export_header* header = (export_header*)out;
+	unsigned* hash_ids = NULL;
+	if (!ctx || (out && size < sizeof(export_header)) || IS_BAD_STATE(ectx->state))
+		return export_error_einval();
+	export_size = sizeof(export_header) + sizeof(unsigned) * ectx->hash_vector_size;
+	if (out != NULL) {
+		memset(out, 0, size);
+		header->state = ectx->state;
+		header->hash_vector_size = (uint16_t)(ectx->hash_vector_size);
+		header->flags = (uint16_t)(ectx->flags);
+		header->msg_size = ctx->msg_size;
+		hash_ids = (unsigned*)(void*)(header + 1);
+	}
+	for (i = 0; i < ectx->hash_vector_size; i++) {
+		void* src_context = ectx->vector[i].context;
+		struct rhash_hash_info* hash_info = ectx->vector[i].hash_info;
+		unsigned is_special = (hash_info->info->flags & F_SPCEXP);
+		size_t item_size;
+		if (out != NULL) {
+			if (size <= export_size)
+				return export_error_einval();
+			hash_ids[i] = hash_info->info->hash_id;
+			if (is_special) {
+				char* dst_item;
+				size_t left_size;
+				export_size = GET_EXPORT_ALIGNED(export_size);
+				dst_item = (char*)out + export_size;
+				left_size = size - export_size;
+				item_size = rhash_export_alg(hash_info->info->hash_id,
+					src_context, dst_item, left_size);
+				if (!item_size)
+					return export_error_einval();
+			} else {
+				char* dst_item = (char*)out + export_size;
+				item_size = hash_info->context_size;
+				if (size < (export_size + item_size))
+					return export_error_einval();
+				memcpy(dst_item, src_context, item_size);
+			}
+		} else {
+			if (is_special) {
+				export_size = GET_EXPORT_ALIGNED(export_size);
+				item_size = rhash_export_alg(
+					hash_info->info->hash_id, src_context, NULL, 0);
+			} else
+				item_size = hash_info->context_size;
+		}
+		export_size += item_size;
+	}
+	if (export_size < size)
+		return export_error_einval();
+	return export_size;
+#else
+	return export_error_einval();
+#endif /* !defined(NO_IMPORT_EXPORT) */
+}
+
+RHASH_API rhash rhash_import(const void* in, size_t size)
+{
+#if !defined(NO_IMPORT_EXPORT)
+	const export_header* header = (const export_header*)in;
+	size_t i;
+	size_t imported_size;
+	const unsigned* hash_ids;
+	const char* src_item;
+	rhash_context_ext* ectx;
+	if (!header || IS_BAD_STATE(header->state) || size < sizeof(export_header))
+		return import_error_einval();
+	imported_size = sizeof(export_header) + sizeof(unsigned) * header->hash_vector_size;
+	if (!header->hash_vector_size || size < imported_size)
+		return import_error_einval();
+	hash_ids = (const unsigned*)(const void*)(header + 1);
+	ectx = (rhash_context_ext*)rhash_alloc_multi(header->hash_vector_size, hash_ids, 0);
+	if (!ectx)
+		return NULL; /* errno must be set by the previous function */
+	ectx->state = header->state;
+	ectx->hash_vector_size = header->hash_vector_size;
+	ectx->flags = header->flags;
+	ectx->rc.msg_size = header->msg_size;
+	for (i = 0; i < ectx->hash_vector_size; i++) {
+		void* dst_context = ectx->vector[i].context;
+		struct rhash_hash_info* hash_info = ectx->vector[i].hash_info;
+		unsigned is_special = (hash_info->info->flags & F_SPCEXP);
+		size_t item_size;
+
+		if (is_special) {
+			size_t left_size;
+			imported_size = GET_EXPORT_ALIGNED(imported_size);
+			src_item = (const char*)in + imported_size;
+			left_size = size - imported_size;
+			assert(size >= imported_size);
+			item_size = rhash_import_alg(hash_ids[i], dst_context, src_item, left_size);
+			imported_size += item_size;
+			if (!item_size || size < imported_size) {
+				ectx->hash_vector_size = i + 1; /* clean only initialized contextes */
+				rhash_free(&ectx->rc);
+				return import_error_einval();
+			}
+		} else {
+			src_item = (const char*)in + imported_size;
+			item_size = hash_info->context_size;
+			imported_size += item_size;
+			if (size < imported_size) {
+				ectx->hash_vector_size = i + 1;
+				rhash_free(&ectx->rc);
+				return import_error_einval();
+			}
+			memcpy(dst_context, src_item, item_size);
+		}
+	}
+	return &ectx->rc;
+#else
+	return import_error_einval();
+#endif /* !defined(NO_IMPORT_EXPORT) */
+}
+
+/**
  * Store digest for given hash_id.
  * If hash_id is zero, function stores digest for a hash with the lowest id found in the context.
  * For nonzero hash_id the context must contain it, otherwise function silently does nothing.
@@ -290,7 +469,7 @@ static void rhash_put_digest(rhash ctx, unsigned hash_id, unsigned char* result)
 
 RHASH_API void rhash_set_callback(rhash ctx, rhash_callback_t callback, void* callback_data)
 {
-	((rhash_context_ext*)ctx)->callback = (void*)callback;
+	((rhash_context_ext*)ctx)->callback = callback;
 	((rhash_context_ext*)ctx)->callback_data = callback_data;
 }
 
@@ -313,26 +492,21 @@ RHASH_API int rhash_file_update(rhash ctx, FILE* fd)
 	rhash_context_ext* const ectx = (rhash_context_ext*)ctx;
 	const size_t block_size = 8192;
 	unsigned char* buffer;
-	unsigned char* pmem;
-	size_t length = 0, align8;
+	size_t length = 0;
 	int res = 0;
-	if (ectx->state != STATE_ACTIVE) return 0; /* do nothing if canceled */
-
+	if (ectx->state != STATE_ACTIVE)
+		return 0; /* do nothing if canceled */
 	if (ctx == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
-
-	pmem = (unsigned char*)malloc(block_size + 8);
-	if (!pmem) return -1; /* errno is set to ENOMEM according to UNIX 98 */
-
-	align8 = ((unsigned char*)0 - pmem) & 7;
-	buffer = pmem + align8;
+	buffer = (unsigned char*)rhash_aligned_alloc(DEFAULT_ALIGNMENT, block_size);
+	if (!buffer)
+		return -1; /* errno is set to ENOMEM according to UNIX 98 */
 
 	while (!feof(fd)) {
-		/* stop if canceled */
-		if (ectx->state != STATE_ACTIVE) break;
-
+		if (ectx->state != STATE_ACTIVE)
+			break; /* stop if canceled */
 		length = fread(buffer, 1, block_size, fd);
 
 		if (ferror(fd)) {
@@ -346,10 +520,15 @@ RHASH_API int rhash_file_update(rhash ctx, FILE* fd)
 			}
 		}
 	}
-
-	free(buffer);
+	rhash_aligned_free(buffer);
 	return res;
 }
+
+#ifdef _WIN32
+# define FOPEN_MODE "rbS"
+#else
+# define FOPEN_MODE "rb"
+#endif
 
 RHASH_API int rhash_file(unsigned hash_id, const char* filepath, unsigned char* result)
 {
@@ -363,17 +542,19 @@ RHASH_API int rhash_file(unsigned hash_id, const char* filepath, unsigned char* 
 		return -1;
 	}
 
-	if ((fd = fopen(filepath, "rb")) == NULL) return -1;
+	fd = fopen(filepath, FOPEN_MODE);
+	if (!fd)
+		return -1;
 
-	if ((ctx = rhash_init(hash_id)) == NULL) {
+	ctx = rhash_init(hash_id);
+	if (!ctx) {
 		fclose(fd);
 		return -1;
 	}
-
 	res = rhash_file_update(ctx, fd); /* hash the file */
 	fclose(fd);
-
-	rhash_final(ctx, result);
+	if (res >= 0)
+		rhash_final(ctx, result);
 	rhash_free(ctx);
 	return res;
 }
@@ -393,17 +574,19 @@ RHASH_API int rhash_wfile(unsigned hash_id, const wchar_t* filepath, unsigned ch
 		return -1;
 	}
 
-	if ((fd = _wfsopen(filepath, L"rb", _SH_DENYWR)) == NULL) return -1;
+	fd = _wfsopen(filepath, L"rbS", _SH_DENYWR);
+	if (!fd)
+		return -1;
 
-	if ((ctx = rhash_init(hash_id)) == NULL) {
+	ctx = rhash_init(hash_id);
+	if (!ctx) {
 		fclose(fd);
 		return -1;
 	}
-
 	res = rhash_file_update(ctx, fd); /* hash the file */
 	fclose(fd);
-
-	rhash_final(ctx, result);
+	if (res >= 0)
+		rhash_final(ctx, result);
 	rhash_free(ctx);
 	return res;
 }
@@ -576,7 +759,7 @@ size_t rhash_print_bytes(char* output, const unsigned char* bytes, size_t size, 
 	return result_length;
 }
 
-size_t RHASH_API rhash_print(char* output, rhash context, unsigned hash_id, int flags)
+RHASH_API size_t rhash_print(char* output, rhash context, unsigned hash_id, int flags)
 {
 	const rhash_info* info;
 	unsigned char digest[80];
@@ -654,6 +837,7 @@ RHASH_API rhash_uptr_t rhash_transmit(unsigned msg_id, void* dst, rhash_uptr_t l
 {
 	/* for messages working with rhash context */
 	rhash_context_ext* const ctx = (rhash_context_ext*)dst;
+	(void)rdata;
 
 	switch (msg_id) {
 	case RMSG_GET_CONTEXT:
@@ -669,11 +853,11 @@ RHASH_API rhash_uptr_t rhash_transmit(unsigned msg_id, void* dst, rhash_uptr_t l
 
 	case RMSG_CANCEL:
 		/* mark rhash context as canceled, in a multithreaded program */
-		atomic_compare_and_swap(&ctx->state, STATE_ACTIVE, STATE_STOPED);
+		atomic_compare_and_swap(&ctx->state, STATE_ACTIVE, STATE_STOPPED);
 		return 0;
 
 	case RMSG_IS_CANCELED:
-		return (ctx->state == STATE_STOPED);
+		return (ctx->state == STATE_STOPPED);
 
 	case RMSG_GET_FINALIZED:
 		return ((ctx->flags & RCTX_FINALIZED) != 0);
@@ -694,6 +878,9 @@ RHASH_API rhash_uptr_t rhash_transmit(unsigned msg_id, void* dst, rhash_uptr_t l
 		return rhash_get_openssl_supported_hash_mask();
 	case RMSG_GET_OPENSSL_AVAILABLE_MASK:
 		return rhash_get_openssl_available_hash_mask();
+
+	case RMSG_GET_LIBRHASH_VERSION:
+		return RHASH_XVERSION;
 
 	default:
 		return RHASH_ERROR; /* unknown message */

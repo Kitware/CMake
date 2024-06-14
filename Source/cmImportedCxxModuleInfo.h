@@ -16,7 +16,6 @@ struct ImportedCxxModuleInfo
 
 struct ImportedCxxModuleGeneratorInfo
 {
-  ImportedCxxModuleInfo const* ImportedInfo;
   std::string const BmiName;
 };
 

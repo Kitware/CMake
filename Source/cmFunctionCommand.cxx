@@ -124,6 +124,10 @@ bool cmFunctionHelperCommand::operator()(
       makefile.RaiseScope(status.GetReturnVariables());
       break;
     }
+    if (status.HasExitCode()) {
+      inStatus.SetExitCode(status.GetExitCode());
+      break;
+    }
   }
 
   // pop scope on the makefile

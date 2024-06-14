@@ -20,7 +20,7 @@
 #include "sha1.h"
 
 /**
- * Initialize context before calculaing hash.
+ * Initialize context before calculating hash.
  *
  * @param ctx context to initialize
  */
@@ -36,6 +36,23 @@ void rhash_sha1_init(sha1_ctx* ctx)
 	ctx->hash[4] = 0xc3d2e1f0;
 }
 
+/* constants for SHA1 rounds */
+static const uint32_t K0 = 0x5a827999;
+static const uint32_t K1 = 0x6ed9eba1;
+static const uint32_t K2 = 0x8f1bbcdc;
+static const uint32_t K3 = 0xca62c1d6;
+
+/* round functions for SHA1 */
+#define CHO(X,Y,Z) (((X)&(Y))|((~(X))&(Z)))
+#define PAR(X,Y,Z) ((X)^(Y)^(Z))
+#define MAJ(X,Y,Z) (((X)&(Y))|((X)&(Z))|((Y)&(Z)))
+
+#define ROUND_0(a,b,c,d,e, FF, k, w) e +=              FF(b,       c,           d    )+ROTL32(a,5)+k+w
+#define ROUND_1(a,b,c,d,e, FF, k, w) e +=              FF(b,ROTL32(c,30),       d    )+ROTL32(a,5)+k+w
+#define ROUND_2(a,b,c,d,e, FF, k, w) e +=              FF(b,ROTL32(c,30),ROTL32(d,30))+ROTL32(a,5)+k+w
+#define ROUND(a,b,c,d,e, FF, k, w)   e  = ROTL32(e,30)+FF(b,ROTL32(c,30),ROTL32(d,30))+ROTL32(a,5)+k+w
+
+
 /**
  * The core transformation. Process a 512-bit block.
  * The function has been taken from RFC 3174 with little changes.
@@ -45,21 +62,9 @@ void rhash_sha1_init(sha1_ctx* ctx)
  */
 static void rhash_sha1_process_block(unsigned* hash, const unsigned* block)
 {
-	int           t;                 /* Loop counter */
-	uint32_t      temp;              /* Temporary word value */
 	uint32_t      W[80];             /* Word sequence */
 	uint32_t      A, B, C, D, E;     /* Word buffers */
 
-	/* initialize the first 16 words in the array W */
-	for (t = 0; t < 16; t++) {
-		/* note: it is much faster to apply be2me here, then using be32_copy */
-		W[t] = be2me_32(block[t]);
-	}
-
-	/* initialize the rest */
-	for (t = 16; t < 80; t++) {
-		W[t] = ROTL32(W[t - 3] ^ W[t - 8] ^ W[t - 14] ^ W[t - 16], 1);
-	}
 
 	A = hash[0];
 	B = hash[1];
@@ -67,50 +72,189 @@ static void rhash_sha1_process_block(unsigned* hash, const unsigned* block)
 	D = hash[3];
 	E = hash[4];
 
-	for (t = 0; t < 20; t++) {
-		/* the following is faster than ((B & C) | ((~B) & D)) */
-		temp =  ROTL32(A, 5) + (((C ^ D) & B) ^ D)
-			+ E + W[t] + 0x5A827999;
-		E = D;
-		D = C;
-		C = ROTL32(B, 30);
-		B = A;
-		A = temp;
-	}
+	/* 0..19 */
+	W[ 0] = be2me_32(block[ 0]);
+	ROUND_0(A,B,C,D,E, CHO, K0, W[ 0]);
+	W[ 1] = be2me_32(block[ 1]);
+	ROUND_1(E,A,B,C,D, CHO, K0, W[ 1]);
+	W[ 2] = be2me_32(block[ 2]);
+	ROUND_2(D,E,A,B,C, CHO, K0, W[ 2]);
+	W[ 3] = be2me_32(block[ 3]);
+	ROUND(C,D,E,A,B, CHO, K0, W[ 3]);
+	W[ 4] = be2me_32(block[ 4]);
+	ROUND(B,C,D,E,A, CHO, K0, W[ 4]);
 
-	for (t = 20; t < 40; t++) {
-		temp = ROTL32(A, 5) + (B ^ C ^ D) + E + W[t] + 0x6ED9EBA1;
-		E = D;
-		D = C;
-		C = ROTL32(B, 30);
-		B = A;
-		A = temp;
-	}
+	W[ 5] = be2me_32(block[ 5]);
+	ROUND(A,B,C,D,E, CHO, K0, W[ 5]);
+	W[ 6] = be2me_32(block[ 6]);
+	ROUND(E,A,B,C,D, CHO, K0, W[ 6]);
+	W[ 7] = be2me_32(block[ 7]);
+	ROUND(D,E,A,B,C, CHO, K0, W[ 7]);
+	W[ 8] = be2me_32(block[ 8]);
+	ROUND(C,D,E,A,B, CHO, K0, W[ 8]);
+	W[ 9] = be2me_32(block[ 9]);
+	ROUND(B,C,D,E,A, CHO, K0, W[ 9]);
 
-	for (t = 40; t < 60; t++) {
-		temp = ROTL32(A, 5) + ((B & C) | (B & D) | (C & D))
-			+ E + W[t] + 0x8F1BBCDC;
-		E = D;
-		D = C;
-		C = ROTL32(B, 30);
-		B = A;
-		A = temp;
-	}
+	W[10] = be2me_32(block[10]);
+	ROUND(A,B,C,D,E, CHO, K0, W[10]);
+	W[11] = be2me_32(block[11]);
+	ROUND(E,A,B,C,D, CHO, K0, W[11]);
+	W[12] = be2me_32(block[12]);
+	ROUND(D,E,A,B,C, CHO, K0, W[12]);
+	W[13] = be2me_32(block[13]);
+	ROUND(C,D,E,A,B, CHO, K0, W[13]);
+	W[14] = be2me_32(block[14]);
+	ROUND(B,C,D,E,A, CHO, K0, W[14]);
 
-	for (t = 60; t < 80; t++) {
-		temp = ROTL32(A, 5) + (B ^ C ^ D) + E + W[t] + 0xCA62C1D6;
-		E = D;
-		D = C;
-		C = ROTL32(B, 30);
-		B = A;
-		A = temp;
-	}
+	W[15] = be2me_32(block[15]);
+	ROUND(A,B,C,D,E, CHO, K0, W[15]);
+	W[16] = ROTL32(W[13] ^ W[ 8] ^ W[ 2] ^ W[ 0], 1);
+	ROUND(E,A,B,C,D, CHO, K0, W[16]);
+	W[17] = ROTL32(W[14] ^ W[ 9] ^ W[ 3] ^ W[ 1], 1);
+	ROUND(D,E,A,B,C, CHO, K0, W[17]);
+	W[18] = ROTL32(W[15] ^ W[10] ^ W[ 4] ^ W[ 2], 1);
+	ROUND(C,D,E,A,B, CHO, K0, W[18]);
+	W[19] = ROTL32(W[16] ^ W[11] ^ W[ 5] ^ W[ 3], 1);
+	ROUND(B,C,D,E,A, CHO, K0, W[19]);
+	/* 20..39 */
+	W[20] = ROTL32(W[17] ^ W[12] ^ W[ 6] ^ W[ 4], 1);
+	ROUND(A,B,C,D,E, PAR, K1, W[20]);
+	W[21] = ROTL32(W[18] ^ W[13] ^ W[ 7] ^ W[ 5], 1);
+	ROUND(E,A,B,C,D, PAR, K1, W[21]);
+	W[22] = ROTL32(W[19] ^ W[14] ^ W[ 8] ^ W[ 6], 1);
+	ROUND(D,E,A,B,C, PAR, K1, W[22]);
+	W[23] = ROTL32(W[20] ^ W[15] ^ W[ 9] ^ W[ 7], 1);
+	ROUND(C,D,E,A,B, PAR, K1, W[23]);
+	W[24] = ROTL32(W[21] ^ W[16] ^ W[10] ^ W[ 8], 1);
+	ROUND(B,C,D,E,A, PAR, K1, W[24]);
+
+	W[25] = ROTL32(W[22] ^ W[17] ^ W[11] ^ W[ 9], 1);
+	ROUND(A,B,C,D,E, PAR, K1, W[25]);
+	W[26] = ROTL32(W[23] ^ W[18] ^ W[12] ^ W[10], 1);
+	ROUND(E,A,B,C,D, PAR, K1, W[26]);
+	W[27] = ROTL32(W[24] ^ W[19] ^ W[13] ^ W[11], 1);
+	ROUND(D,E,A,B,C, PAR, K1, W[27]);
+	W[28] = ROTL32(W[25] ^ W[20] ^ W[14] ^ W[12], 1);
+	ROUND(C,D,E,A,B, PAR, K1, W[28]);
+	W[29] = ROTL32(W[26] ^ W[21] ^ W[15] ^ W[13], 1);
+	ROUND(B,C,D,E,A, PAR, K1, W[29]);
+
+	W[30] = ROTL32(W[27] ^ W[22] ^ W[16] ^ W[14], 1);
+	ROUND(A,B,C,D,E, PAR, K1, W[30]);
+	W[31] = ROTL32(W[28] ^ W[23] ^ W[17] ^ W[15], 1);
+	ROUND(E,A,B,C,D, PAR, K1, W[31]);
+	W[32] = ROTL32(W[29] ^ W[24] ^ W[18] ^ W[16], 1);
+	ROUND(D,E,A,B,C, PAR, K1, W[32]);
+	W[33] = ROTL32(W[30] ^ W[25] ^ W[19] ^ W[17], 1);
+	ROUND(C,D,E,A,B, PAR, K1, W[33]);
+	W[34] = ROTL32(W[31] ^ W[26] ^ W[20] ^ W[18], 1);
+	ROUND(B,C,D,E,A, PAR, K1, W[34]);
+
+	W[35] = ROTL32(W[32] ^ W[27] ^ W[21] ^ W[19], 1);
+	ROUND(A,B,C,D,E, PAR, K1, W[35]);
+	W[36] = ROTL32(W[33] ^ W[28] ^ W[22] ^ W[20], 1);
+	ROUND(E,A,B,C,D, PAR, K1, W[36]);
+	W[37] = ROTL32(W[34] ^ W[29] ^ W[23] ^ W[21], 1);
+	ROUND(D,E,A,B,C, PAR, K1, W[37]);
+	W[38] = ROTL32(W[35] ^ W[30] ^ W[24] ^ W[22], 1);
+	ROUND(C,D,E,A,B, PAR, K1, W[38]);
+	W[39] = ROTL32(W[36] ^ W[31] ^ W[25] ^ W[23], 1);
+	ROUND(B,C,D,E,A, PAR, K1, W[39]);
+	/* 40..59 */
+	W[40] = ROTL32(W[37] ^ W[32] ^ W[26] ^ W[24], 1);
+	ROUND(A,B,C,D,E, MAJ, K2, W[40]);
+	W[41] = ROTL32(W[38] ^ W[33] ^ W[27] ^ W[25], 1);
+	ROUND(E,A,B,C,D, MAJ, K2, W[41]);
+	W[42] = ROTL32(W[39] ^ W[34] ^ W[28] ^ W[26], 1);
+	ROUND(D,E,A,B,C, MAJ, K2, W[42]);
+	W[43] = ROTL32(W[40] ^ W[35] ^ W[29] ^ W[27], 1);
+	ROUND(C,D,E,A,B, MAJ, K2, W[43]);
+	W[44] = ROTL32(W[41] ^ W[36] ^ W[30] ^ W[28], 1);
+	ROUND(B,C,D,E,A, MAJ, K2, W[44]);
+
+	W[45] = ROTL32(W[42] ^ W[37] ^ W[31] ^ W[29], 1);
+	ROUND(A,B,C,D,E, MAJ, K2, W[45]);
+	W[46] = ROTL32(W[43] ^ W[38] ^ W[32] ^ W[30], 1);
+	ROUND(E,A,B,C,D, MAJ, K2, W[46]);
+	W[47] = ROTL32(W[44] ^ W[39] ^ W[33] ^ W[31], 1);
+	ROUND(D,E,A,B,C, MAJ, K2, W[47]);
+	W[48] = ROTL32(W[45] ^ W[40] ^ W[34] ^ W[32], 1);
+	ROUND(C,D,E,A,B, MAJ, K2, W[48]);
+	W[49] = ROTL32(W[46] ^ W[41] ^ W[35] ^ W[33], 1);
+	ROUND(B,C,D,E,A, MAJ, K2, W[49]);
+
+	W[50] = ROTL32(W[47] ^ W[42] ^ W[36] ^ W[34], 1);
+	ROUND(A,B,C,D,E, MAJ, K2, W[50]);
+	W[51] = ROTL32(W[48] ^ W[43] ^ W[37] ^ W[35], 1);
+	ROUND(E,A,B,C,D, MAJ, K2, W[51]);
+	W[52] = ROTL32(W[49] ^ W[44] ^ W[38] ^ W[36], 1);
+	ROUND(D,E,A,B,C, MAJ, K2, W[52]);
+	W[53] = ROTL32(W[50] ^ W[45] ^ W[39] ^ W[37], 1);
+	ROUND(C,D,E,A,B, MAJ, K2, W[53]);
+	W[54] = ROTL32(W[51] ^ W[46] ^ W[40] ^ W[38], 1);
+	ROUND(B,C,D,E,A, MAJ, K2, W[54]);
+
+	W[55] = ROTL32(W[52] ^ W[47] ^ W[41] ^ W[39], 1);
+	ROUND(A,B,C,D,E, MAJ, K2, W[55]);
+	W[56] = ROTL32(W[53] ^ W[48] ^ W[42] ^ W[40], 1);
+	ROUND(E,A,B,C,D, MAJ, K2, W[56]);
+	W[57] = ROTL32(W[54] ^ W[49] ^ W[43] ^ W[41], 1);
+	ROUND(D,E,A,B,C, MAJ, K2, W[57]);
+	W[58] = ROTL32(W[55] ^ W[50] ^ W[44] ^ W[42], 1);
+	ROUND(C,D,E,A,B, MAJ, K2, W[58]);
+	W[59] = ROTL32(W[56] ^ W[51] ^ W[45] ^ W[43], 1);
+	ROUND(B,C,D,E,A, MAJ, K2, W[59]);
+	/* 60..79 */
+	W[60] = ROTL32(W[57] ^ W[52] ^ W[46] ^ W[44], 1);
+	ROUND(A,B,C,D,E, PAR, K3, W[60]);
+	W[61] = ROTL32(W[58] ^ W[53] ^ W[47] ^ W[45], 1);
+	ROUND(E,A,B,C,D, PAR, K3, W[61]);
+	W[62] = ROTL32(W[59] ^ W[54] ^ W[48] ^ W[46], 1);
+	ROUND(D,E,A,B,C, PAR, K3, W[62]);
+	W[63] = ROTL32(W[60] ^ W[55] ^ W[49] ^ W[47], 1);
+	ROUND(C,D,E,A,B, PAR, K3, W[63]);
+	W[64] = ROTL32(W[61] ^ W[56] ^ W[50] ^ W[48], 1);
+	ROUND(B,C,D,E,A, PAR, K3, W[64]);
+
+	W[65] = ROTL32(W[62] ^ W[57] ^ W[51] ^ W[49], 1);
+	ROUND(A,B,C,D,E, PAR, K3, W[65]);
+	W[66] = ROTL32(W[63] ^ W[58] ^ W[52] ^ W[50], 1);
+	ROUND(E,A,B,C,D, PAR, K3, W[66]);
+	W[67] = ROTL32(W[64] ^ W[59] ^ W[53] ^ W[51], 1);
+	ROUND(D,E,A,B,C, PAR, K3, W[67]);
+	W[68] = ROTL32(W[65] ^ W[60] ^ W[54] ^ W[52], 1);
+	ROUND(C,D,E,A,B, PAR, K3, W[68]);
+	W[69] = ROTL32(W[66] ^ W[61] ^ W[55] ^ W[53], 1);
+	ROUND(B,C,D,E,A, PAR, K3, W[69]);
+
+	W[70] = ROTL32(W[67] ^ W[62] ^ W[56] ^ W[54], 1);
+	ROUND(A,B,C,D,E, PAR, K3, W[70]);
+	W[71] = ROTL32(W[68] ^ W[63] ^ W[57] ^ W[55], 1);
+	ROUND(E,A,B,C,D, PAR, K3, W[71]);
+	W[72] = ROTL32(W[69] ^ W[64] ^ W[58] ^ W[56], 1);
+	ROUND(D,E,A,B,C, PAR, K3, W[72]);
+	W[73] = ROTL32(W[70] ^ W[65] ^ W[59] ^ W[57], 1);
+	ROUND(C,D,E,A,B, PAR, K3, W[73]);
+	W[74] = ROTL32(W[71] ^ W[66] ^ W[60] ^ W[58], 1);
+	ROUND(B,C,D,E,A, PAR, K3, W[74]);
+
+	W[75] = ROTL32(W[72] ^ W[67] ^ W[61] ^ W[59], 1);
+	ROUND(A,B,C,D,E, PAR, K3, W[75]);
+	W[76] = ROTL32(W[73] ^ W[68] ^ W[62] ^ W[60], 1);
+	ROUND(E,A,B,C,D, PAR, K3, W[76]);
+	W[77] = ROTL32(W[74] ^ W[69] ^ W[63] ^ W[61], 1);
+	ROUND(D,E,A,B,C, PAR, K3, W[77]);
+	W[78] = ROTL32(W[75] ^ W[70] ^ W[64] ^ W[62], 1);
+	ROUND(C,D,E,A,B, PAR, K3, W[78]);
+	W[79] = ROTL32(W[76] ^ W[71] ^ W[65] ^ W[63], 1);
+	ROUND(B,C,D,E,A, PAR, K3, W[79]);
+
 
 	hash[0] += A;
 	hash[1] += B;
-	hash[2] += C;
-	hash[3] += D;
-	hash[4] += E;
+	hash[2] += ROTL32(C,30);
+	hash[3] += ROTL32(D,30);
+	hash[4] += ROTL32(E,30);
 }
 
 /**

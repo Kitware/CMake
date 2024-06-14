@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmXMLParser.h"
 
-#include <cctype>
 #include <cstring>
 #include <iostream>
 #include <sstream>
@@ -141,11 +140,6 @@ void cmXMLParser::EndElement(const std::string& name)
 void cmXMLParser::CharacterDataHandler(const char* /*inData*/,
                                        int /*inLength*/)
 {
-}
-
-int cmXMLParser::IsSpace(char c)
-{
-  return isspace(c);
 }
 
 const char* cmXMLParser::FindAttribute(const char** atts,

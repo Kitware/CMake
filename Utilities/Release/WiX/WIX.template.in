@@ -52,6 +52,7 @@
         </FeatureRef>
 
         <UIRef Id="$(var.CPACK_WIX_UI_REF)" />
+        <UIRef Id="WixUI_ErrorProgressText" />
 
         <?include "properties.wxi"?>
         <?include "product_fragment.wxi"?>

@@ -44,7 +44,10 @@ private:
 /** Returns true if the character @a ch is a whitespace character.  **/
 inline bool cmIsSpace(char ch)
 {
-  return ((ch & 0x80) == 0) && std::isspace(ch);
+  // isspace takes 'int' but documents that the value must be representable
+  // by 'unsigned char', or be EOF.  Cast to 'unsigned char' to avoid sign
+  // extension while converting to 'int'.
+  return std::isspace(static_cast<unsigned char>(ch));
 }
 
 /** Returns a string that has whitespace removed from the start and the end. */

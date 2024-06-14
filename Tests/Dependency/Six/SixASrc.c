@@ -1,7 +1,7 @@
-void FiveFunction();
-void TwoFunction();
+void FiveFunction(void);
+void TwoFunction(void);
 
-void SixAFunction()
+void SixAFunction(void)
 {
   FiveFunction();
   TwoFunction();

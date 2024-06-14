@@ -20,11 +20,16 @@ Inclusion of this module defines the following variables:
 ``CMAKE_INSTALL_<dir>``
 
   Destination for files of a given type.  This value may be passed to
-  the ``DESTINATION`` options of :command:`install` commands for the
-  corresponding file type.  It should typically be a path relative to
-  the installation prefix so that it can be converted to an absolute
-  path in a relocatable way (see ``CMAKE_INSTALL_FULL_<dir>``).
-  However, an absolute path is also allowed.
+  the ``DESTINATION`` options of  :command:`install` commands for the
+  corresponding file type.  It should be a path relative to the installation
+  prefix so that it can be converted to an absolute path in a relocatable way.
+
+  While absolute paths are allowed, they are not recommended as they
+  do not work with the ``cmake --install`` command's
+  :option:`--prefix <cmake--install --prefix>` option, or with the
+  :manual:`cpack <cpack(1)>` installer generators. In particular, there is no
+  need to make paths absolute by prepending :variable:`CMAKE_INSTALL_PREFIX`;
+  this prefix is used by default if the DESTINATION is a relative path.
 
 ``CMAKE_INSTALL_FULL_<dir>``
 
@@ -33,6 +38,11 @@ Inclusion of this module defines the following variables:
   is constructed typically by prepending the value of the
   :variable:`CMAKE_INSTALL_PREFIX` variable.  However, there are some
   `special cases`_ as documented below.
+
+  These variables shouldn't be used in :command:`install` commands
+  as they do not work with the ``cmake --install`` command's
+  :option:`--prefix <cmake--install --prefix>` option, or with the
+  :manual:`cpack <cpack(1)>` installer generators.
 
 where ``<dir>`` is one of:
 

@@ -22,7 +22,7 @@ elseif("${CMAKE_GENERATOR}" MATCHES "Xcode")
   _cmake_find_compiler_path(Fortran)
 else()
   if(NOT CMAKE_Fortran_COMPILER)
-    # prefer the environment variable CC
+    # prefer the environment variable FC
     if(NOT $ENV{FC} STREQUAL "")
       get_filename_component(CMAKE_Fortran_COMPILER_INIT $ENV{FC} PROGRAM PROGRAM_ARGS CMAKE_Fortran_FLAGS_ENV_INIT)
       if(CMAKE_Fortran_FLAGS_ENV_INIT)
@@ -140,11 +140,11 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   set(CMAKE_Fortran_COMPILER_ID_TOOL_MATCH_INDEX 2)
 
   set(_version_info "")
-  foreach(m MAJOR MINOR PATCH TWEAK)
+  foreach(m IN ITEMS MAJOR MINOR PATCH TWEAK)
     set(_COMP "_${m}")
     string(APPEND _version_info "
 #if defined(COMPILER_VERSION${_COMP})")
-    foreach(d 1 2 3 4 5 6 7 8)
+    foreach(d RANGE 1 8)
       string(APPEND _version_info "
 # undef DEC
 # undef HEX
@@ -265,8 +265,8 @@ if("${CMAKE_Fortran_COMPILER_ID};${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "LLVMFla
       "${log}\n"
       )
     set(_CMAKE_Fortran_IMPLICIT_LINK_INFORMATION_DETERMINED_EARLY 1)
-    if("x${CMAKE_Fortran_COMPILER_ARCHITECTURE_ID}" STREQUAL "xARM64")
-      # FIXME(LLVMFlang): It does not add `-defaultlib:` fields to object
+    if("x${CMAKE_Fortran_COMPILER_ARCHITECTURE_ID}" STREQUAL "xARM64" AND CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 18.0)
+      # LLVMFlang < 18.0 does not add `-defaultlib:` fields to object
       # files to specify link dependencies on its runtime libraries.
       # For now, we add them ourselves.
       list(APPEND CMAKE_Fortran_IMPLICIT_LINK_LIBRARIES "clang_rt.builtins-aarch64.lib")

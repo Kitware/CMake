@@ -1,6 +1,10 @@
 configure_file
 --------------
 
+.. only:: html
+
+   .. contents::
+
 Copy a file to another location and modify its contents.
 
 .. code-block:: cmake
@@ -11,11 +15,79 @@ Copy a file to another location and modify its contents.
                  [COPYONLY] [ESCAPE_QUOTES] [@ONLY]
                  [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
 
-Copies an ``<input>`` file to an ``<output>`` file and substitutes
-variable values referenced as ``@VAR@``, ``${VAR}``, ``$CACHE{VAR}`` or
-``$ENV{VAR}`` in the input file content.  Each variable reference will be
-replaced with the current value of the variable, or the empty string if
-the variable is not defined.  Furthermore, input lines of the form
+Copies an ``<input>`` file to an ``<output>`` file while performing
+`transformations`_ of the input file content.
+
+If the input file is modified the build system will re-run CMake to
+re-configure the file and generate the build system again.
+The generated file is modified and its timestamp updated on subsequent
+cmake runs only if its content is changed.
+
+Options
+^^^^^^^
+
+The options are:
+
+``<input>``
+  Path to the input file.  A relative path is treated with respect to
+  the value of :variable:`CMAKE_CURRENT_SOURCE_DIR`.  The input path
+  must be a file, not a directory.
+
+``<output>``
+  Path to the output file or directory.  A relative path is treated
+  with respect to the value of :variable:`CMAKE_CURRENT_BINARY_DIR`.
+  If the path names an existing directory the output file is placed
+  in that directory with the same file name as the input file.
+  If the path contains non-existent directories, they are created.
+
+``NO_SOURCE_PERMISSIONS``
+  .. versionadded:: 3.19
+
+  Do not transfer the permissions of the input file to the output file.
+  The copied file permissions default to the standard 644 value
+  (-rw-r--r--).
+
+``USE_SOURCE_PERMISSIONS``
+  .. versionadded:: 3.20
+
+  Transfer the permissions of the input file to the output file.
+  This is already the default behavior if none of the three permissions-related
+  keywords are given (``NO_SOURCE_PERMISSIONS``, ``USE_SOURCE_PERMISSIONS``
+  or ``FILE_PERMISSIONS``).  The ``USE_SOURCE_PERMISSIONS`` keyword mostly
+  serves as a way of making the intended behavior clearer at the call site.
+
+``FILE_PERMISSIONS <permissions>...``
+  .. versionadded:: 3.20
+
+  Ignore the input file's permissions and use the specified ``<permissions>``
+  for the output file instead.
+
+``COPYONLY``
+  Copy the file without replacing any variable references or other
+  content.  This option may not be used with ``NEWLINE_STYLE``.
+
+``ESCAPE_QUOTES``
+  Escape any substituted quotes with backslashes (C-style).
+
+``@ONLY``
+  Restrict variable replacement to references of the form ``@VAR@``.
+  This is useful for configuring scripts that use ``${VAR}`` syntax.
+
+``NEWLINE_STYLE <style>``
+  Specify the newline style for the output file.  Specify
+  ``UNIX`` or ``LF`` for ``\n`` newlines, or specify
+  ``DOS``, ``WIN32``, or ``CRLF`` for ``\r\n`` newlines.
+  This option may not be used with ``COPYONLY``.
+
+Transformations
+^^^^^^^^^^^^^^^
+
+:ref:`Variables <CMake Language Variables>` referenced in the input
+file content as ``@VAR@``, ``${VAR}``, ``$CACHE{VAR}``, and
+:ref:`environment variables <CMake Language Environment Variables>`
+referenced as ``$ENV{VAR}``, will each be replaced with the current value
+of the variable, or the empty string if the variable is not defined.
+Furthermore, input lines of the form
 
 .. code-block:: c
 
@@ -78,64 +150,6 @@ which may lead to undefined behavior.
 
     #  define VAR
     #  define VAR 1
-
-If the input file is modified the build system will re-run CMake to
-re-configure the file and generate the build system again.
-The generated file is modified and its timestamp updated on subsequent
-cmake runs only if its content is changed.
-
-The arguments are:
-
-``<input>``
-  Path to the input file.  A relative path is treated with respect to
-  the value of :variable:`CMAKE_CURRENT_SOURCE_DIR`.  The input path
-  must be a file, not a directory.
-
-``<output>``
-  Path to the output file or directory.  A relative path is treated
-  with respect to the value of :variable:`CMAKE_CURRENT_BINARY_DIR`.
-  If the path names an existing directory the output file is placed
-  in that directory with the same file name as the input file.
-  If the path contains non-existent directories, they are created.
-
-``NO_SOURCE_PERMISSIONS``
-  .. versionadded:: 3.19
-
-  Do not transfer the permissions of the input file to the output file.
-  The copied file permissions default to the standard 644 value
-  (-rw-r--r--).
-
-``USE_SOURCE_PERMISSIONS``
-  .. versionadded:: 3.20
-
-  Transfer the permissions of the input file to the output file.
-  This is already the default behavior if none of the three permissions-related
-  keywords are given (``NO_SOURCE_PERMISSIONS``, ``USE_SOURCE_PERMISSIONS``
-  or ``FILE_PERMISSIONS``).  The ``USE_SOURCE_PERMISSIONS`` keyword mostly
-  serves as a way of making the intended behavior clearer at the call site.
-
-``FILE_PERMISSIONS <permissions>...``
-  .. versionadded:: 3.20
-
-  Ignore the input file's permissions and use the specified ``<permissions>``
-  for the output file instead.
-
-``COPYONLY``
-  Copy the file without replacing any variable references or other
-  content.  This option may not be used with ``NEWLINE_STYLE``.
-
-``ESCAPE_QUOTES``
-  Escape any substituted quotes with backslashes (C-style).
-
-``@ONLY``
-  Restrict variable replacement to references of the form ``@VAR@``.
-  This is useful for configuring scripts that use ``${VAR}`` syntax.
-
-``NEWLINE_STYLE <style>``
-  Specify the newline style for the output file.  Specify
-  ``UNIX`` or ``LF`` for ``\n`` newlines, or specify
-  ``DOS``, ``WIN32``, or ``CRLF`` for ``\r\n`` newlines.
-  This option may not be used with ``COPYONLY``.
 
 Example
 ^^^^^^^

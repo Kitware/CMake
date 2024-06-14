@@ -1,2 +1,3 @@
 libs=
 dirs=/usr/lib64
+linker_tool=/usr/bin/ld

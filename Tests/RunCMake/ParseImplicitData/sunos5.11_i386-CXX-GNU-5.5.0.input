@@ -1,0 +1,69 @@
+CMAKE_LANG=CXX
+CMAKE_LINKER=/usr/bin/ld
+CMAKE_CXX_COMPILER_ABI=ELF
+CMAKE_CXX_COMPILER_AR=/opt/csw/bin/gcc-ar-5.5
+CMAKE_CXX_COMPILER_ARCHITECTURE_ID=
+CMAKE_CXX_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_CXX_COMPILER_ID=GNU
+CMAKE_CXX_COMPILER_LAUNCHER=
+CMAKE_CXX_COMPILER_LOADED=1
+CMAKE_CXX_COMPILER_RANLIB=/opt/csw/bin/gcc-ranlib-5.5
+CMAKE_CXX_COMPILER_TARGET=
+CMAKE_CXX_COMPILER_VERSION=5.5.0
+CMAKE_CXX_COMPILER_VERSION_INTERAL=
+Change Dir: '/tmp/ii/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): "/tmp/cmake/build/bin/cmake" -E env VERBOSE=1 /usr/bin/gmake -f Makefile cmTC_1c2eb/fast
+/usr/bin/gmake  -f CMakeFiles/cmTC_1c2eb.dir/build.make CMakeFiles/cmTC_1c2eb.dir/build
+gmake[1]: Entering directory `/tmp/ii/CMakeFiles/CMakeTmp'
+Building CXX object CMakeFiles/cmTC_1c2eb.dir/CMakeCXXCompilerABI.cpp.o
+/opt/csw/gcc5/bin/g++   -v -o CMakeFiles/cmTC_1c2eb.dir/CMakeCXXCompilerABI.cpp.o -c "/tmp/cmake/Modules/CMakeCXXCompilerABI.cpp"
+Reading specs from /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/specs
+COLLECT_GCC=/opt/csw/gcc5/bin/g++
+Target: i386-pc-solaris2.10
+Configured with: /home/dam/mgar/pkg/gcc5/trunk/work/solaris10-i386/build-isa-pentium_pro/gcc-5.5.0/configure --prefix=/opt/csw --exec_prefix=/opt/csw --bindir=/opt/csw/bin --sbindir=/opt/csw/sbin --libexecdir=/opt/csw/libexec --datadir=/opt/csw/share --sysconfdir=/etc/opt/csw --sharedstatedir=/opt/csw/share --localstatedir=/var/opt/csw --libdir=/opt/csw/lib --infodir=/opt/csw/share/info --includedir=/opt/csw/include --mandir=/opt/csw/share/man --enable-cloog-backend=isl --enable-java-awt=xlib --enable-languages=ada,c,c++,fortran,go,java,objc --enable-libada --enable-libssp --enable-nls --enable-objc-gc --enable-threads=posix --program-suffix=-5.5 --with-cloog=/opt/csw --with-gmp=/opt/csw --with-included-gettext --with-ld=/usr/ccs/bin/ld --without-gnu-ld --with-libiconv-prefix=/opt/csw --with-mpfr=/opt/csw --with-ppl=/opt/csw --with-system-zlib=/opt/csw --with-gnu-as --with-as=/opt/csw/bin/gas
+Thread model: posix
+gcc version 5.5.0 (GCC)
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_1c2eb.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=pentium4'
+ /opt/csw/libexec/gcc/i386-pc-solaris2.10/5.5.0/cc1plus -quiet -v /tmp/cmake/Modules/CMakeCXXCompilerABI.cpp -quiet -dumpbase CMakeCXXCompilerABI.cpp -mtune=generic -march=pentium4 -auxbase-strip CMakeFiles/cmTC_1c2eb.dir/CMakeCXXCompilerABI.cpp.o -version -o /var/tmp//cca5Tfac.s
+GNU C++ (GCC) version 5.5.0 (i386-pc-solaris2.10)
+	compiled by GNU C version 5.5.0, GMP version 6.1.2, MPFR version 3.1.5, MPC version 1.0.2
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+ignoring nonexistent directory "/usr/local/include"
+ignoring nonexistent directory "/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../../i386-pc-solaris2.10/include"
+#include "..." search starts here:
+#include <...> search starts here:
+ /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../../include/c++/5.5.0
+ /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../../include/c++/5.5.0/i386-pc-solaris2.10
+ /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../../include/c++/5.5.0/backward
+ /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/include
+ /opt/csw/include
+ /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/include-fixed
+ /usr/include
+End of search list.
+GNU C++ (GCC) version 5.5.0 (i386-pc-solaris2.10)
+	compiled by GNU C version 5.5.0, GMP version 6.1.2, MPFR version 3.1.5, MPC version 1.0.2
+GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+Compiler executable checksum: d6737be2d7a7f1ff0cf51e522387e31b
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_1c2eb.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=pentium4'
+ /opt/csw/bin/gas -v -V -Qy -s --32 -o CMakeFiles/cmTC_1c2eb.dir/CMakeCXXCompilerABI.cpp.o /var/tmp//cca5Tfac.s
+GNU assembler version 2.24 (i386-pc-solaris2.10) using BFD version (GNU Binutils) 2.24
+COMPILER_PATH=/opt/csw/libexec/gcc/i386-pc-solaris2.10/5.5.0/:/opt/csw/libexec/gcc/i386-pc-solaris2.10/5.5.0/:/opt/csw/libexec/gcc/i386-pc-solaris2.10/:/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/:/opt/csw/lib/gcc/i386-pc-solaris2.10/:/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../../i386-pc-solaris2.10/bin/:/usr/ccs/bin/
+LIBRARY_PATH=/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/:/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../../i386-pc-solaris2.10/lib/:/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'CMakeFiles/cmTC_1c2eb.dir/CMakeCXXCompilerABI.cpp.o' '-c' '-shared-libgcc' '-mtune=generic' '-march=pentium4'
+Linking CXX executable cmTC_1c2eb
+"/tmp/cmake/build/bin/cmake" -E cmake_link_script CMakeFiles/cmTC_1c2eb.dir/link.txt --verbose=1
+/opt/csw/gcc5/bin/g++  -v CMakeFiles/cmTC_1c2eb.dir/CMakeCXXCompilerABI.cpp.o -o cmTC_1c2eb
+Reading specs from /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/specs
+COLLECT_GCC=/opt/csw/gcc5/bin/g++
+COLLECT_LTO_WRAPPER=/opt/csw/libexec/gcc/i386-pc-solaris2.10/5.5.0/lto-wrapper
+Target: i386-pc-solaris2.10
+Configured with: /home/dam/mgar/pkg/gcc5/trunk/work/solaris10-i386/build-isa-pentium_pro/gcc-5.5.0/configure --prefix=/opt/csw --exec_prefix=/opt/csw --bindir=/opt/csw/bin --sbindir=/opt/csw/sbin --libexecdir=/opt/csw/libexec --datadir=/opt/csw/share --sysconfdir=/etc/opt/csw --sharedstatedir=/opt/csw/share --localstatedir=/var/opt/csw --libdir=/opt/csw/lib --infodir=/opt/csw/share/info --includedir=/opt/csw/include --mandir=/opt/csw/share/man --enable-cloog-backend=isl --enable-java-awt=xlib --enable-languages=ada,c,c++,fortran,go,java,objc --enable-libada --enable-libssp --enable-nls --enable-objc-gc --enable-threads=posix --program-suffix=-5.5 --with-cloog=/opt/csw --with-gmp=/opt/csw --with-included-gettext --with-ld=/usr/ccs/bin/ld --without-gnu-ld --with-libiconv-prefix=/opt/csw --with-mpfr=/opt/csw --with-ppl=/opt/csw --with-system-zlib=/opt/csw --with-gnu-as --with-as=/opt/csw/bin/gas
+Thread model: posix
+gcc version 5.5.0 (GCC)
+COMPILER_PATH=/opt/csw/libexec/gcc/i386-pc-solaris2.10/5.5.0/:/opt/csw/libexec/gcc/i386-pc-solaris2.10/5.5.0/:/opt/csw/libexec/gcc/i386-pc-solaris2.10/:/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/:/opt/csw/lib/gcc/i386-pc-solaris2.10/:/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../../i386-pc-solaris2.10/bin/:/usr/ccs/bin/
+LIBRARY_PATH=/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/:/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../../i386-pc-solaris2.10/lib/:/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../:/lib/:/usr/lib/
+COLLECT_GCC_OPTIONS='-v' '-o' 'cmTC_1c2eb' '-shared-libgcc' '-mtune=generic' '-march=pentium4'
+ /usr/ccs/bin/ld -V -M /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../libgcc-unwind.map -Y P,/lib:/usr/lib -Qy -o cmTC_1c2eb /usr/lib/crt1.o /usr/lib/crti.o /usr/lib/values-Xa.o /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/crtbegin.o -L/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0 -L/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../../../i386-pc-solaris2.10/lib -L/opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/../../.. CMakeFiles/cmTC_1c2eb.dir/CMakeCXXCompilerABI.cpp.o -lstdc++ -lm -lrt -lgcc_s -lgcc -lc -R /opt/csw/lib -lgcc_s -lgcc /opt/csw/lib/gcc/i386-pc-solaris2.10/5.5.0/crtend.o /usr/lib/crtn.o
+ld: Software Generation Utilities - Solaris Link Editors: 5.11-1.2458
+gmake[1]: Leaving directory `/tmp/ii/CMakeFiles/CMakeTmp'

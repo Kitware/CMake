@@ -1,0 +1,2 @@
+Test project [^
+]*/Tests/RunCMake/ctest_test/TestsFromFile-exclude-missing-build$

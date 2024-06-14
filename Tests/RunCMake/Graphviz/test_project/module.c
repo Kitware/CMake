@@ -1,3 +1,3 @@
-static void some_function()
+static void some_function(void)
 {
 }

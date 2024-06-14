@@ -4,8 +4,19 @@ CMAKE_INSTALL_PREFIX
 Install directory used by :command:`install`.
 
 If ``make install`` is invoked or ``INSTALL`` is built, this directory is
-prepended onto all install directories.  This variable defaults to
-``/usr/local`` on UNIX and ``c:/Program Files/${PROJECT_NAME}`` on Windows.
+prepended onto all install directories.
+
+This variable defaults as follows:
+
+* .. versionadded:: 3.29
+
+    If the :envvar:`CMAKE_INSTALL_PREFIX` environment variable is set,
+    its value is used as default for this variable.
+
+* ``c:/Program Files/${PROJECT_NAME}`` on Windows.
+
+* ``/usr/local`` on UNIX platforms.
+
 See :variable:`CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT` for how a
 project might choose its own default.
 

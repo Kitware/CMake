@@ -185,7 +185,7 @@ struct curl_header *curl_easy_nextheader(CURL *easy,
 }
 
 static CURLcode namevalue(char *header, size_t hlen, unsigned int type,
-                           char **name, char **value)
+                          char **name, char **value)
 {
   char *end = header + hlen - 1; /* point to the last byte */
   DEBUGASSERT(hlen);
@@ -292,9 +292,10 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
   if(!end) {
     end = strchr(header, '\n');
     if(!end)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
+      /* neither CR nor LF as terminator is not a valid header */
+      return CURLE_WEIRD_SERVER_REPLY;
   }
-  hlen = end - header + 1;
+  hlen = end - header;
 
   if((header[0] == ' ') || (header[0] == '\t')) {
     if(data->state.prevhead)
@@ -319,21 +320,19 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
   hs->buffer[hlen] = 0; /* nul terminate */
 
   result = namevalue(hs->buffer, hlen, type, &name, &value);
-  if(result)
-    goto fail;
+  if(!result) {
+    hs->name = name;
+    hs->value = value;
+    hs->type = type;
+    hs->request = data->state.requests;
 
-  hs->name = name;
-  hs->value = value;
-  hs->type = type;
-  hs->request = data->state.requests;
-
-  /* insert this node into the list of headers */
-  Curl_llist_insert_next(&data->state.httphdrs, data->state.httphdrs.tail,
-                         hs, &hs->node);
-  data->state.prevhead = hs;
-  return CURLE_OK;
-fail:
-  free(hs);
+    /* insert this node into the list of headers */
+    Curl_llist_insert_next(&data->state.httphdrs, data->state.httphdrs.tail,
+                           hs, &hs->node);
+    data->state.prevhead = hs;
+  }
+  else
+    free(hs);
   return result;
 }
 

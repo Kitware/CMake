@@ -2,9 +2,9 @@
 #if defined(_WIN32)
 __declspec(dllimport)
 #endif
-  void func_c();
+  void func_c(void);
 
-int main()
+int main(void)
 {
   func_c();
 

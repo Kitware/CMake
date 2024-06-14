@@ -19,11 +19,11 @@ The ``OLD`` behavior for this policy is to create the empty cache definition.
 The ``NEW`` behavior of this policy is to ignore variables which do not
 already exist in the cache.
 
-This policy was introduced in CMake version 3.17.  Use the
-:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
-Unlike many policies, CMake version |release| does *not* warn
-when this policy is not set and simply uses ``OLD`` behavior.  See
-documentation of the :variable:`CMAKE_POLICY_WARNING_CMP0102
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.17
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn by default
+.. include:: STANDARD_ADVICE.txt
+
+See documentation of the :variable:`CMAKE_POLICY_WARNING_CMP0102
 <CMAKE_POLICY_WARNING_CMP<NNNN>>` variable to control the warning.
 
 .. include:: DEPRECATED.txt

@@ -3,7 +3,7 @@
 extern int foo();
 extern int bar();
 
-int main()
+int main(void)
 {
   int i = foo();
   int k = bar();

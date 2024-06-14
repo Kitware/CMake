@@ -1,6 +1,6 @@
 
 #ifdef NEEDED_TO_WORK
-int icasetest()
+int icasetest(void)
 {
   return 0;
 }

@@ -159,7 +159,7 @@ any& any::operator=(const std::nullptr_t&) {
 
 template <typename T>
 T& any::get() const {
-  static_assert(!std::is_same<T, std::nullptr_t>(),
+  static_assert(!std::is_same<T, std::nullptr_t>::value,
                 "Cannot get nullptr from 'any'.");
   assert(is<T>());
   return *reinterpret_cast<T*>(value);

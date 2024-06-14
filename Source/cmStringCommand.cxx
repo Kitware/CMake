@@ -6,7 +6,6 @@
 #include "cmStringCommand.h"
 
 #include <algorithm>
-#include <cctype>
 #include <cstdio>
 #include <cstdlib>
 #include <limits>
@@ -660,7 +659,7 @@ bool HandleStripCommand(std::vector<std::string> const& args,
   const char* ptr = stringValue.c_str();
   size_t cc;
   for (cc = 0; cc < inStringLength; ++cc) {
-    if (!isspace(*ptr)) {
+    if (!cmIsSpace(*ptr)) {
       if (startPos > inStringLength) {
         startPos = cc;
       }

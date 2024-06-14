@@ -8,7 +8,7 @@ readonly name="librhash"
 readonly ownership="librhash upstream <kwrobot@kitware.com>"
 readonly subtree="Utilities/cmlibrhash"
 readonly repo="https://github.com/rhash/rhash.git"
-readonly tag="v1.3.9"
+readonly tag="v1.4.4"
 readonly shortlog=false
 readonly paths="
   COPYING
@@ -31,6 +31,7 @@ readonly paths="
   librhash/sha512.c
   librhash/sha512.h
   librhash/ustd.h
+  librhash/util.c
   librhash/util.h
 "
 

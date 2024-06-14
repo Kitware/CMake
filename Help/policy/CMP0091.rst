@@ -43,9 +43,8 @@ entries and ignore the :variable:`CMAKE_MSVC_RUNTIME_LIBRARY` abstraction.
 The ``NEW`` behavior for this policy is to *not* place MSVC runtime
 library flags in the default cache entries and use the abstraction instead.
 
-This policy was introduced in CMake version 3.15.  Use the
-:command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
-Unlike many policies, CMake version |release| does *not* warn
-when this policy is not set and simply uses ``OLD`` behavior.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.15
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

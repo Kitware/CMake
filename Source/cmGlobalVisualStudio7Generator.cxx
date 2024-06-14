@@ -94,8 +94,8 @@ const std::string& cmGlobalVisualStudio7Generator::GetIntelProjectVersion()
     cmSystemTools::ReadRegistryValue(vskey, intelVersion,
                                      cmSystemTools::KeyWOW64_32);
     unsigned int intelVersionNumber = ~0u;
-    sscanf(intelVersion.c_str(), "%u", &intelVersionNumber);
-    if (intelVersionNumber >= 11) {
+    if (sscanf(intelVersion.c_str(), "%u", &intelVersionNumber) != 1 ||
+        intelVersionNumber >= 11) {
       // Default to latest known project file version.
       intelVersion = "11.0";
     } else if (intelVersionNumber == 10) {

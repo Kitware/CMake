@@ -84,9 +84,18 @@ List of CPack RPM generator specific variables:
  :Default: ``<CPACK_PACKAGE_FILE_NAME>[-<component>].rpm`` with spaces
                replaced by '-'
 
- This may be set to ``RPM-DEFAULT`` to allow ``rpmbuild`` tool to generate package
- file name by itself.
- Alternatively provided package file name must end with ``.rpm`` suffix.
+ This may be set to:
+
+ ``RPM-DEFAULT``
+    Tell ``rpmbuild`` to automatically generate the package file name.
+
+ ``<file-name>[.rpm]``
+   Use the given file name.
+
+   .. versionchanged:: 3.29
+
+     The ``.rpm`` suffix will be automatically added if missing.
+     Previously the suffix was required.
 
  .. note::
 

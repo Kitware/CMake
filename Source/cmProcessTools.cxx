@@ -2,48 +2,68 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmProcessTools.h"
 
+#include <algorithm>
+#include <iterator>
 #include <ostream>
 
-#include "cmsys/Process.h"
+#include <cm3p/uv.h>
 
 #include "cmProcessOutput.h"
+#include "cmUVHandlePtr.h"
+#include "cmUVStream.h"
 
-void cmProcessTools::RunProcess(struct cmsysProcess_s* cp, OutputParser* out,
-                                OutputParser* err, Encoding encoding)
+std::vector<cmUVProcessChain::Status> cmProcessTools::RunProcess(
+  cmUVProcessChainBuilder& builder, OutputParser* out, OutputParser* err,
+  Encoding encoding)
 {
-  cmsysProcess_Execute(cp);
-  char* data = nullptr;
-  int length = 0;
-  int p;
   cmProcessOutput processOutput(encoding);
+
+  builder.SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT)
+    .SetBuiltinStream(cmUVProcessChainBuilder::Stream_ERROR);
+
+  auto chain = builder.Start();
+
   std::string strdata;
-  while ((out || err) &&
-         (p = cmsysProcess_WaitForData(cp, &data, &length, nullptr))) {
-    if (out && p == cmsysProcess_Pipe_STDOUT) {
-      processOutput.DecodeText(data, length, strdata, 1);
-      if (!out->Process(strdata.c_str(), static_cast<int>(strdata.size()))) {
-        out = nullptr;
+  cm::uv_pipe_ptr outputPipe;
+  outputPipe.init(chain.GetLoop(), 0);
+  uv_pipe_open(outputPipe, chain.OutputStream());
+  auto outputHandle = cmUVStreamRead(
+    outputPipe,
+    [&out, &processOutput, &strdata](std::vector<char> data) {
+      if (out) {
+        processOutput.DecodeText(data.data(), data.size(), strdata, 1);
+        if (!out->Process(strdata.c_str(), static_cast<int>(strdata.size()))) {
+          out = nullptr;
+        }
       }
-    } else if (err && p == cmsysProcess_Pipe_STDERR) {
-      processOutput.DecodeText(data, length, strdata, 2);
-      if (!err->Process(strdata.c_str(), static_cast<int>(strdata.size()))) {
-        err = nullptr;
+    },
+    [&out]() { out = nullptr; });
+  cm::uv_pipe_ptr errorPipe;
+  errorPipe.init(chain.GetLoop(), 0);
+  uv_pipe_open(errorPipe, chain.ErrorStream());
+  auto errorHandle = cmUVStreamRead(
+    errorPipe,
+    [&err, &processOutput, &strdata](std::vector<char> data) {
+      if (err) {
+        processOutput.DecodeText(data.data(), data.size(), strdata, 2);
+        if (!err->Process(strdata.c_str(), static_cast<int>(strdata.size()))) {
+          err = nullptr;
+        }
       }
-    }
+    },
+    [&err]() { err = nullptr; });
+  while (out || err || !chain.Finished()) {
+    uv_run(&chain.GetLoop(), UV_RUN_ONCE);
   }
-  if (out) {
-    processOutput.DecodeText(std::string(), strdata, 1);
-    if (!strdata.empty()) {
-      out->Process(strdata.c_str(), static_cast<int>(strdata.size()));
-    }
-  }
-  if (err) {
-    processOutput.DecodeText(std::string(), strdata, 2);
-    if (!strdata.empty()) {
-      err->Process(strdata.c_str(), static_cast<int>(strdata.size()));
-    }
-  }
-  cmsysProcess_WaitForExit(cp, nullptr);
+
+  std::vector<cmUVProcessChain::Status> result;
+  auto status = chain.GetStatus();
+  std::transform(
+    status.begin(), status.end(), std::back_inserter(result),
+    [](const cmUVProcessChain::Status* s) -> cmUVProcessChain::Status {
+      return *s;
+    });
+  return result;
 }
 
 cmProcessTools::LineParser::LineParser(char sep, bool ignoreCR)

@@ -82,7 +82,7 @@ bool cmLinkItemGraphVisitor::ItemVisited(cmLinkItem const& item)
 bool cmLinkItemGraphVisitor::LinkVisited(cmLinkItem const& depender,
                                          cmLinkItem const& dependee)
 {
-  auto const link = std::make_pair<>(depender.AsStr(), dependee.AsStr());
+  auto const link = std::make_pair(depender.AsStr(), dependee.AsStr());
 
   bool const linkVisited =
     this->VisitedLinks.find(link) != this->VisitedLinks.cend();

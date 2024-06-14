@@ -3,7 +3,7 @@
 __declspec(dllimport)
 #endif
   int link_depends_no_shared_lib(void);
-int main()
+int main(void)
 {
   return link_depends_no_shared_lib() + link_depends_no_shared_exe_value;
 }

@@ -18,10 +18,10 @@ to the invocation of either command.
 The ``OLD`` behavior for this policy is to use compiler id ``Clang``.  The
 ``NEW`` behavior for this policy is to use compiler id ``AppleClang``.
 
-This policy was introduced in CMake version 3.0.  Use the
-:command:`cmake_policy` command to set this policy to ``OLD`` or ``NEW``
-explicitly.  Unlike most policies, CMake version |release| does *not* warn
-by default when this policy is not set and simply uses ``OLD`` behavior.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.0
+.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn by default
+.. include:: STANDARD_ADVICE.txt
+
 See documentation of the
 :variable:`CMAKE_POLICY_WARNING_CMP0025 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
 variable to control the warning.

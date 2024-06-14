@@ -2480,6 +2480,25 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       buildSettings->AddAttribute("SWIFT_ACTIVE_COMPILATION_CONDITIONS",
                                   swiftDefs.CreateList());
     }
+
+    if (cm::optional<cmSwiftCompileMode> swiftCompileMode =
+          this->CurrentLocalGenerator->GetSwiftCompileMode(gtgt, configName)) {
+      switch (*swiftCompileMode) {
+        case cmSwiftCompileMode::Wholemodule:
+          buildSettings->AddAttribute("SWIFT_COMPILATION_MODE",
+                                      this->CreateString("wholemodule"));
+          break;
+        case cmSwiftCompileMode::Incremental:
+        case cmSwiftCompileMode::Singlefile:
+          break;
+        case cmSwiftCompileMode::Unknown:
+          this->CurrentLocalGenerator->IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmStrCat("Unknown Swift_COMPILATION_MODE on target '",
+                     gtgt->GetName(), "'"));
+          break;
+      }
+    }
   }
 
   std::string extraLinkOptionsVar;
@@ -2501,6 +2520,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     this->CurrentLocalGenerator->GetStaticLibraryFlags(
       extraLinkOptions, configName, llang, gtgt);
   } else {
+    this->CurrentLocalGenerator->AppendLinkerTypeFlags(extraLinkOptions, gtgt,
+                                                       configName, llang);
+
     cmValue targetLinkFlags = gtgt->GetProperty("LINK_FLAGS");
     if (targetLinkFlags) {
       this->CurrentLocalGenerator->AppendFlags(extraLinkOptions,
@@ -3045,7 +3067,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   }
 
   // Precompile Headers
-  std::string pchHeader = gtgt->GetPchHeader(configName, llang);
+  std::string pchHeader =
+    gtgt->GetPchHeader(configName, langForPreprocessorDefinitions);
   if (!pchHeader.empty()) {
     buildSettings->AddAttribute("GCC_PREFIX_HEADER",
                                 this->CreateString(pchHeader));
@@ -4278,6 +4301,15 @@ void cmGlobalXCodeGenerator::AddEmbeddedResources(cmXCodeObject* target)
                            dstSubfolderSpec, NoActionOnCopyByDefault);
 }
 
+void cmGlobalXCodeGenerator::AddEmbeddedXPCServices(cmXCodeObject* target)
+{
+  static const auto dstSubfolderSpec = "16";
+
+  this->AddEmbeddedObjects(
+    target, "Embed XPC Services", "XCODE_EMBED_XPC_SERVICES", dstSubfolderSpec,
+    NoActionOnCopyByDefault, "$(CONTENTS_FOLDER_PATH)/XPCServices");
+}
+
 bool cmGlobalXCodeGenerator::CreateGroups(
   std::vector<cmLocalGenerator*>& generators)
 {
@@ -4607,6 +4639,10 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     buildSettings->AddAttribute("CODE_SIGNING_ALLOWED",
                                 this->CreateString("NO"));
   }
+
+  // This code supports the OLD behavior of CMP0157. We should be able to
+  // remove computing the debug configuration set once the old behavior is
+  // removed.
   auto debugConfigs = this->GetCMakeInstance()->GetDebugConfigs();
   std::set<std::string> debugConfigSet(debugConfigs.begin(),
                                        debugConfigs.end());
@@ -4616,9 +4652,16 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
 
     cmXCodeObject* buildSettingsForCfg = this->CreateFlatClone(buildSettings);
 
-    if (debugConfigSet.count(cmSystemTools::UpperCase(config.first)) == 0) {
-      buildSettingsForCfg->AddAttribute("SWIFT_COMPILATION_MODE",
-                                        this->CreateString("wholemodule"));
+    // Supports the OLD behavior of CMP0157. CMP0157 OLD behavior globally set
+    // wholemodule compilation for all non-debug configurations, for all
+    // targets.
+    if (this->CurrentMakefile
+          ->GetDefinition("CMAKE_Swift_COMPILATION_MODE_DEFAULT")
+          .IsEmpty()) {
+      if (debugConfigSet.count(cmSystemTools::UpperCase(config.first)) == 0) {
+        buildSettingsForCfg->AddAttribute("SWIFT_COMPILATION_MODE",
+                                          this->CreateString("wholemodule"));
+      }
     }
 
     // Put this last so it can override existing settings
@@ -4680,6 +4723,7 @@ bool cmGlobalXCodeGenerator::CreateXCodeObjects(
     this->AddEmbeddedAppExtensions(t);
     this->AddEmbeddedExtensionKitExtensions(t);
     this->AddEmbeddedResources(t);
+    this->AddEmbeddedXPCServices(t);
     // Inherit project-wide values for any target-specific search paths.
     this->InheritBuildSettingAttribute(t, "HEADER_SEARCH_PATHS");
     this->InheritBuildSettingAttribute(t, "SYSTEM_HEADER_SEARCH_PATHS");

@@ -12,6 +12,10 @@ including things like :variable:`CMAKE_<LANG>_COMPILER`, might not be set.
 See :ref:`Code Injection` for a more detailed discussion of files potentially
 included during a :command:`project` call.
 
+.. versionadded:: 3.29
+  This variable can also now refer to module names to be found in
+  :variable:`CMAKE_MODULE_PATH` or builtin to CMake.
+
 This variable is intended for specifying files that perform one-time setup
 for the build. It provides an injection point for things like configuring
 package managers, adding logic the user shares between projects (e.g. defining

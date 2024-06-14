@@ -39,7 +39,7 @@ private:
   std::vector<std::string> P4Options;
 
   User GetUserData(const std::string& username);
-  void SetP4Options(std::vector<char const*>& options);
+  void SetP4Options(std::vector<std::string>& options);
 
   std::string GetWorkingRevision();
   bool NoteOldRevision() override;

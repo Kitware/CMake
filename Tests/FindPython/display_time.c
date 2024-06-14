@@ -6,7 +6,7 @@
 
 #include "display_time.h"
 
-void display_time()
+void display_time(void)
 {
 #if defined(PYTHON3)
   wchar_t* program = Py_DecodeLocale("display_time", NULL);

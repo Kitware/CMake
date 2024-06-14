@@ -60,6 +60,13 @@ endfunction()
 __resolve_tool_path(CMAKE_LINKER "${_CMAKE_TOOLCHAIN_LOCATION}" "Default Linker")
 __resolve_tool_path(CMAKE_MT     "${_CMAKE_TOOLCHAIN_LOCATION}" "Default Manifest Tool")
 
+macro(__resolve_linker_path __linker_type __name __search_path __doc)
+  if(NOT CMAKE_LINKER_${__linker_type})
+    set( CMAKE_LINKER_${__linker_type} "${__name}")
+  endif()
+  __resolve_tool_path(CMAKE_LINKER_${__linker_type} "${__search_path}" "${__doc}")
+endmacro()
+
 set(_CMAKE_TOOL_VARS "")
 
 # if it's the MS C/CXX compiler, search for link
@@ -92,6 +99,10 @@ if(("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC" AND
   endif()
 
   list(APPEND _CMAKE_TOOL_VARS LINKER MT AR)
+
+  # look-up for possible usable linker
+  __resolve_linker_path(LINK "link" "${_CMAKE_TOOLCHAIN_LOCATION}" "link Linker")
+  __resolve_linker_path(LLD "lld-link" "${_CMAKE_TOOLCHAIN_LOCATION}" "lld-link Linker")
 
 elseif("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^x(Open)?Watcom$")
   set(_CMAKE_LINKER_NAMES "wlink")
@@ -193,10 +204,10 @@ else()
     endif()
     list(PREPEND _CMAKE_NM_NAMES "llvm-nm")
     if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_VERSION}" VERSION_GREATER_EQUAL 9)
-      # llvm-objdump versions prior to 9 did not support everything we need.
+      # llvm-objcopy and llvm-objdump on versions prior to 9 did not support everything we need.
+      list(PREPEND _CMAKE_OBJCOPY_NAMES "llvm-objcopy")
       list(PREPEND _CMAKE_OBJDUMP_NAMES "llvm-objdump")
     endif()
-    list(PREPEND _CMAKE_OBJCOPY_NAMES "llvm-objcopy")
     list(PREPEND _CMAKE_READELF_NAMES "llvm-readelf")
     list(PREPEND _CMAKE_DLLTOOL_NAMES "llvm-dlltool")
     list(PREPEND _CMAKE_ADDR2LINE_NAMES "llvm-addr2line")

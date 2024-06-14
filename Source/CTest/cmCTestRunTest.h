@@ -24,7 +24,7 @@
 class cmCTestRunTest
 {
 public:
-  explicit cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler);
+  explicit cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler, int index);
 
   void SetNumberOfRuns(int n)
   {
@@ -33,17 +33,11 @@ public:
   }
 
   void SetRepeatMode(cmCTest::Repeat r) { this->RepeatMode = r; }
-  void SetTestProperties(cmCTestTestHandler::cmCTestTestProperties* prop)
-  {
-    this->TestProperties = prop;
-  }
 
   cmCTestTestHandler::cmCTestTestProperties* GetTestProperties()
   {
     return this->TestProperties;
   }
-
-  void SetIndex(int i) { this->Index = i; }
 
   int GetIndex() { return this->Index; }
 
@@ -62,7 +56,7 @@ public:
   // Read and store output.  Returns true if it must be called again.
   void CheckOutput(std::string const& line);
 
-  static bool StartTest(std::unique_ptr<cmCTestRunTest> runner,
+  static void StartTest(std::unique_ptr<cmCTestRunTest> runner,
                         size_t completed, size_t total);
   static bool StartAgain(std::unique_ptr<cmCTestRunTest> runner,
                          size_t completed);
@@ -124,16 +118,15 @@ private:
   // Returns "completed/total Test #Index: "
   std::string GetTestPrefix(size_t completed, size_t total) const;
 
-  cmCTestTestHandler::cmCTestTestProperties* TestProperties;
-  // Pointer back to the "parent"; the handler that invoked this test run
-  cmCTestTestHandler* TestHandler;
-  cmCTest* CTest;
-  std::unique_ptr<cmProcess> TestProcess;
-  std::string ProcessOutput;
-  // The test results
-  cmCTestTestHandler::cmCTestTestResult TestResult;
   cmCTestMultiProcessHandler& MultiTestHandler;
   int Index;
+  cmCTest* CTest;
+  cmCTestTestHandler* TestHandler;
+  cmCTestTestHandler::cmCTestTestProperties* TestProperties;
+
+  std::unique_ptr<cmProcess> TestProcess;
+  std::string ProcessOutput;
+  cmCTestTestHandler::cmCTestTestResult TestResult;
   std::set<std::string> FailedDependencies;
   std::string StartTime;
   std::string ActualCommand;

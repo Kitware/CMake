@@ -4,20 +4,30 @@
 
 #include <utility> // IWYU pragma: keep
 
+#include <cm/optional>
+#include <cm/string_view>
+#include <cmext/string_view>
+
 #include "cmGeneratorTarget.h"
+#include "cmStringAlgorithms.h"
+
+const std::string cmLinkItem::DEFAULT = "DEFAULT";
 
 cmLinkItem::cmLinkItem() = default;
 
-cmLinkItem::cmLinkItem(std::string n, bool c, cmListFileBacktrace bt)
+cmLinkItem::cmLinkItem(std::string n, bool c, cmListFileBacktrace bt,
+                       std::string feature)
   : String(std::move(n))
+  , Feature(std::move(feature))
   , Cross(c)
   , Backtrace(std::move(bt))
 {
 }
 
 cmLinkItem::cmLinkItem(cmGeneratorTarget const* t, bool c,
-                       cmListFileBacktrace bt)
+                       cmListFileBacktrace bt, std::string feature)
   : Target(t)
+  , Feature(std::move(feature))
   , Cross(c)
   , Backtrace(std::move(bt))
 {
@@ -72,4 +82,20 @@ cmLinkImplItem::cmLinkImplItem(cmLinkItem item, bool checkCMP0027)
   : cmLinkItem(std::move(item))
   , CheckCMP0027(checkCMP0027)
 {
+}
+
+namespace {
+const cm::string_view LL_BEGIN = "<LINK_LIBRARY:"_s;
+const cm::string_view LL_END = "</LINK_LIBRARY:"_s;
+}
+cm::optional<std::string> ParseLinkFeature(std::string const& item)
+{
+  if (cmHasPrefix(item, LL_BEGIN) && cmHasSuffix(item, '>')) {
+    return item.substr(LL_BEGIN.length(),
+                       item.find('>', LL_BEGIN.length()) - LL_BEGIN.length());
+  }
+  if (cmHasPrefix(item, LL_END) && cmHasSuffix(item, '>')) {
+    return cmLinkItem::DEFAULT;
+  }
+  return cm::nullopt;
 }

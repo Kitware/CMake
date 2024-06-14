@@ -53,6 +53,7 @@ public:
     const char* SONameFlag = nullptr;
     const char* TargetSOName = nullptr;
     const char* TargetInstallNameDir = nullptr;
+    const char* Linker = nullptr;
     const char* LinkFlags = nullptr;
     const char* Manifests = nullptr;
     const char* LanguageCompileFlags = nullptr;

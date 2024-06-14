@@ -2,7 +2,7 @@
 #include "foo.h"
 #include "foo2.h"
 
-int main()
+int main(void)
 {
   int zeroSize = 0;
 

@@ -28,6 +28,7 @@
 #include "cm_codecvt_Encoding.hxx"
 
 #include "cmAlgorithms.h"
+#include "cmCMakePath.h"
 #include "cmCPackPropertiesGenerator.h"
 #include "cmComputeTargetDepends.h"
 #include "cmCryptoHash.h"
@@ -270,17 +271,14 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string& lang,
 
   std::string changeVars;
   if (cname && !optional) {
-    std::string cnameString;
+    cmCMakePath cachedPath;
     if (!cmSystemTools::FileIsFullPath(*cname)) {
-      cnameString = cmSystemTools::FindProgram(*cname);
+      cachedPath = cmSystemTools::FindProgram(*cname);
     } else {
-      cnameString = *cname;
+      cachedPath = *cname;
     }
-    std::string pathString = path;
-    // get rid of potentially multiple slashes:
-    cmSystemTools::ConvertToUnixSlashes(cnameString);
-    cmSystemTools::ConvertToUnixSlashes(pathString);
-    if (cnameString != pathString) {
+    cmCMakePath foundPath = path;
+    if (foundPath.Normal() != cachedPath.Normal()) {
       cmValue cvars = this->GetCMakeInstance()->GetState()->GetGlobalProperty(
         "__CMAKE_DELETE_CACHE_CHANGE_VARS_");
       if (cvars) {
@@ -694,7 +692,22 @@ void cmGlobalGenerator::EnableLanguage(
     std::string includes =
       mf->GetSafeDefinition("CMAKE_PROJECT_TOP_LEVEL_INCLUDES");
     cmList includesList{ includes };
-    for (std::string const& setupFile : includesList) {
+    for (std::string setupFile : includesList) {
+      // Any relative path without a .cmake extension is checked for valid
+      // cmake modules. This logic should be consistent with CMake's include()
+      // command. Otherwise default to checking relative path w.r.t. source
+      // directory
+      if (!cmSystemTools::FileIsFullPath(setupFile) &&
+          !cmHasLiteralSuffix(setupFile, ".cmake")) {
+        std::string mfile = mf->GetModulesFile(cmStrCat(setupFile, ".cmake"));
+        if (mfile.empty()) {
+          cmSystemTools::Error(cmStrCat(
+            "CMAKE_PROJECT_TOP_LEVEL_INCLUDES module:\n  ", setupFile));
+          mf->GetState()->SetInTopLevelIncludes(false);
+          return;
+        }
+        setupFile = mfile;
+      }
       std::string absSetupFile = cmSystemTools::CollapseFullPath(
         setupFile, mf->GetCurrentSourceDirectory());
       if (!cmSystemTools::FileExists(absSetupFile)) {
@@ -859,7 +872,11 @@ void cmGlobalGenerator::EnableLanguage(
         noCompiler <<
           "The " << compilerName << ":\n"
           "  " << *compilerFile << "\n"
-          "is not a full path and was not found in the PATH.\n"
+          "is not a full path and was not found in the PATH."
+#ifdef _WIN32
+          "  Perhaps the extension is missing?"
+#endif
+          "\n"
           ;
         /* clang-format on */
       } else if (!cmSystemTools::FileExists(*compilerFile)) {
@@ -1139,20 +1156,26 @@ std::string cmGlobalGenerator::GetLanguageOutputExtension(
 {
   const std::string& lang = source.GetLanguage();
   if (!lang.empty()) {
-    auto const it = this->LanguageToOutputExtension.find(lang);
-    if (it != this->LanguageToOutputExtension.end()) {
-      return it->second;
+    return this->GetLanguageOutputExtension(lang);
+  }
+  // if no language is found then check to see if it is already an
+  // output extension for some language.  In that case it should be ignored
+  // and in this map, so it will not be compiled but will just be used.
+  std::string const& ext = source.GetExtension();
+  if (!ext.empty()) {
+    if (this->OutputExtensions.count(ext)) {
+      return ext;
     }
-  } else {
-    // if no language is found then check to see if it is already an
-    // output extension for some language.  In that case it should be ignored
-    // and in this map, so it will not be compiled but will just be used.
-    std::string const& ext = source.GetExtension();
-    if (!ext.empty()) {
-      if (this->OutputExtensions.count(ext)) {
-        return ext;
-      }
-    }
+  }
+  return "";
+}
+
+std::string cmGlobalGenerator::GetLanguageOutputExtension(
+  std::string const& lang) const
+{
+  auto const it = this->LanguageToOutputExtension.find(lang);
+  if (it != this->LanguageToOutputExtension.end()) {
+    return it->second;
   }
   return "";
 }
@@ -1897,9 +1920,13 @@ bool cmGlobalGenerator::AddAutomaticSources()
   // Clear the source list and classification cache (KindedSources) of all
   // targets so that it will be recomputed correctly by the generators later
   // now that the above transformations are done for all targets.
+  // Also clear the link interface cache to support $<TARGET_OBJECTS:objlib>
+  // in INTERFACE_LINK_LIBRARIES because the list of object files may have
+  // been changed by conversion to a unity build or addition of a PCH source.
   for (const auto& lg : this->LocalGenerators) {
     for (const auto& gt : lg->GetGeneratorTargets()) {
       gt->ClearSourcesCache();
+      gt->ClearLinkInterfaceCache();
     }
   }
   return true;
@@ -2703,6 +2730,7 @@ cmGlobalGenerator::SplitFrameworkPath(const std::string& path,
 }
 
 static bool RaiseCMP0037Message(cmake* cm, cmTarget* tgt,
+                                std::string const& targetNameAsWritten,
                                 std::string const& reason)
 {
   MessageType messageType = MessageType::AUTHOR_WARNING;
@@ -2723,8 +2751,8 @@ static bool RaiseCMP0037Message(cmake* cm, cmTarget* tgt,
       break;
   }
   if (issueMessage) {
-    e << "The target name \"" << tgt->GetName() << "\" is reserved " << reason
-      << ".";
+    e << "The target name \"" << targetNameAsWritten << "\" is reserved "
+      << reason << ".";
     if (messageType == MessageType::AUTHOR_WARNING) {
       e << "  It may result in undefined behavior.";
     }
@@ -2743,7 +2771,8 @@ bool cmGlobalGenerator::CheckCMP0037(std::string const& targetName,
   if (!tgt) {
     return true;
   }
-  return RaiseCMP0037Message(this->GetCMakeInstance(), tgt, reason);
+  return RaiseCMP0037Message(this->GetCMakeInstance(), tgt, targetName,
+                             reason);
 }
 
 void cmGlobalGenerator::CreateDefaultGlobalTargets(
@@ -2858,6 +2887,14 @@ void cmGlobalGenerator::AddGlobalTarget_Test(
   gti.Name = this->GetTestTargetName();
   gti.Message = "Running tests...";
   gti.UsesTerminal = true;
+  // Unlike the 'install' target, the 'test' target does not depend on 'all'
+  // by default.  Enable it only if CMAKE_SKIP_TEST_ALL_DEPENDENCY is
+  // explicitly set to OFF.
+  if (cmValue noall = mf->GetDefinition("CMAKE_SKIP_TEST_ALL_DEPENDENCY")) {
+    if (cmIsOff(noall)) {
+      gti.Depends.emplace_back(this->GetAllTargetName());
+    }
+  }
   cmCustomCommandLine singleLine;
   singleLine.push_back(cmSystemTools::GetCTestCommand());
   singleLine.push_back("--force-new-ctest-process");

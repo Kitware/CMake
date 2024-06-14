@@ -41,10 +41,12 @@
 #include "cmInstallSubdirectoryGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmLinkLineComputer.h" // IWYU pragma: keep
+#include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmSourceGroup.h"
 #include "cmState.h"
@@ -503,6 +505,8 @@ class Target
   Json::Value DumpDependencies();
   Json::Value DumpDependency(cmTargetDepend const& td);
   Json::Value DumpFolder();
+  Json::Value DumpLauncher(const char* name, const char* type);
+  Json::Value DumpLaunchers();
 
 public:
   Target(cmGeneratorTarget* gt, std::string const& config);
@@ -1221,6 +1225,13 @@ Json::Value Target::Dump()
   } else if (type == cmStateEnums::STATIC_LIBRARY) {
     target["nameOnDisk"] = this->GT->GetFullName(this->Config);
     target["archive"] = this->DumpArchive();
+  }
+
+  if (type == cmStateEnums::EXECUTABLE) {
+    Json::Value launchers = this->DumpLaunchers();
+    if (!launchers.empty()) {
+      target["launchers"] = std::move(launchers);
+    }
   }
 
   Json::Value dependencies = this->DumpDependencies();
@@ -2074,6 +2085,50 @@ Json::Value Target::DumpFolder()
     folder["name"] = *f;
   }
   return folder;
+}
+
+Json::Value Target::DumpLauncher(const char* name, const char* type)
+{
+  cmValue property = this->GT->GetProperty(name);
+  Json::Value launcher;
+  if (property) {
+    cmLocalGenerator* lg = this->GT->GetLocalGenerator();
+    cmGeneratorExpression ge(*lg->GetCMakeInstance());
+    cmList commandWithArgs{ ge.Parse(*property)->Evaluate(lg, this->Config) };
+    if (!commandWithArgs.empty() && !commandWithArgs[0].empty()) {
+      std::string command(commandWithArgs[0]);
+      cmSystemTools::ConvertToUnixSlashes(command);
+      launcher = Json::objectValue;
+      launcher["command"] = RelativeIfUnder(this->TopSource, command);
+      launcher["type"] = type;
+      Json::Value args;
+      for (std::string const& arg : cmMakeRange(commandWithArgs).advance(1)) {
+        args.append(arg);
+      }
+      if (!args.empty()) {
+        launcher["arguments"] = std::move(args);
+      }
+    }
+  }
+  return launcher;
+}
+
+Json::Value Target::DumpLaunchers()
+{
+  Json::Value launchers;
+  {
+    Json::Value launcher = DumpLauncher("TEST_LAUNCHER", "test");
+    if (!launcher.empty()) {
+      launchers.append(std::move(launcher));
+    }
+  }
+  if (this->GT->Makefile->IsOn("CMAKE_CROSSCOMPILING")) {
+    Json::Value emulator = DumpLauncher("CROSSCOMPILING_EMULATOR", "emulator");
+    if (!emulator.empty()) {
+      launchers.append(std::move(emulator));
+    }
+  }
+  return launchers;
 }
 }
 

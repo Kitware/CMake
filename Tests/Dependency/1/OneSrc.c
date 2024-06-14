@@ -1,3 +1,3 @@
-void OneFunction()
+void OneFunction(void)
 {
 }

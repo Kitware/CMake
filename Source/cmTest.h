@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "cmListFileCache.h"
+#include "cmPolicies.h"
 #include "cmPropertyMap.h"
 #include "cmValue.h"
 
@@ -60,6 +61,12 @@ public:
   bool GetOldStyle() const { return this->OldStyle; }
   void SetOldStyle(bool b) { this->OldStyle = b; }
 
+  /** Get/Set if CMP0158 policy is NEW */
+  bool GetCMP0158IsNew() const
+  {
+    return this->PolicyStatusCMP0158 == cmPolicies::NEW;
+  }
+
   /** Set/Get whether lists in command lines should be expanded. */
   bool GetCommandExpandLists() const;
   void SetCommandExpandLists(bool b);
@@ -74,4 +81,5 @@ private:
 
   cmMakefile* Makefile;
   cmListFileBacktrace Backtrace;
+  cmPolicies::PolicyStatus PolicyStatusCMP0158;
 };

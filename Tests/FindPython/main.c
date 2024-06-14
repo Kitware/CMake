@@ -1,7 +1,7 @@
 
 #include "display_time.h"
 
-int main()
+int main(void)
 {
   display_time();
 }

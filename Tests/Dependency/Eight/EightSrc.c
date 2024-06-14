@@ -1,6 +1,6 @@
-void SevenFunction();
+void SevenFunction(void);
 
-void EightFunction()
+void EightFunction(void)
 {
   SevenFunction();
 }

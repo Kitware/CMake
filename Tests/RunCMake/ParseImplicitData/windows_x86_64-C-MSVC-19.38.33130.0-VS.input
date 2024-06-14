@@ -1,0 +1,48 @@
+CMAKE_LANG=C
+CMAKE_LINKER=C:/Program Files/Microsoft Visual Studio/2022/Professional/VC/Tools/MSVC/14.38.33130/bin/Hostx64/x64/link.exe
+CMAKE_C_COMPILER_ABI=
+CMAKE_C_COMPILER_AR=
+CMAKE_C_COMPILER_ARCHITECTURE_ID=x64
+CMAKE_C_COMPILER_EXTERNAL_TOOLCHAIN=
+CMAKE_C_COMPILER_ID=MSVC
+CMAKE_C_COMPILER_LAUNCHER=
+CMAKE_C_COMPILER_LOADED=1
+CMAKE_C_COMPILER_RANLIB=
+CMAKE_C_COMPILER_TARGET=
+CMAKE_C_COMPILER_VERSION=19.38.33130.0
+CMAKE_C_COMPILER_VERSION_INTERAL=
+CMAKE_HOST_SYSTEM_NAME=Windows
+Change Dir: 'C:/DoesNotExist/Temp/CMakeFiles/CMakeTmp'
+
+Run Build Command(s): "C:/Program Files/Microsoft Visual Studio/2022/Professional/MSBuild/Current/Bin/amd64/MSBuild.exe" cmTC_7cc99.vcxproj /p:Configuration=Debug /p:Platform=x64 /p:VisualStudioVersion=17.0 /v:n
+MSBuild version 17.8.3+195e7f5a3 for .NET Framework
+Build started 12/14/2023 11:53:27 AM.
+
+Project "C:\DoesNotExist\Temp\CMakeFiles\CMakeTmp\cmTC_7cc99.vcxproj" on node 1 (default targets).
+PrepareForBuild:
+  Creating directory "cmTC_7cc99.dir\Debug\".
+  Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+  Creating directory "C:\DoesNotExist\Temp\CMakeFiles\CMakeTmp\Debug\".
+  Creating directory "cmTC_7cc99.dir\Debug\cmTC_7cc99.tlog\".
+InitializeBuildStatus:
+  Creating "cmTC_7cc99.dir\Debug\cmTC_7cc99.tlog\unsuccessfulbuild" because "AlwaysCreate" was specified.
+  Touching "cmTC_7cc99.dir\Debug\cmTC_7cc99.tlog\unsuccessfulbuild".
+ClCompile:
+  C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.38.33130\bin\HostX64\x64\CL.exe /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /Gm- /RTC1 /MDd /GS /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_7cc99.dir\Debug\\" /Fd"cmTC_7cc99.dir\Debug\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\DoesNotExist\CMake\Modules\CMakeCCompilerABI.c"
+  Microsoft (R) C/C++ Optimizing Compiler Version 19.38.33130 for x64
+  Copyright (C) Microsoft Corporation.  All rights reserved.
+  cl /c /Zi /W3 /WX- /diagnostics:column /Od /Ob0 /D _MBCS /D WIN32 /D _WINDOWS /D "CMAKE_INTDIR=\"Debug\"" /Gm- /RTC1 /MDd /GS /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"cmTC_7cc99.dir\Debug\\" /Fd"cmTC_7cc99.dir\Debug\vc143.pdb" /external:W3 /Gd /TC /errorReport:queue "C:\DoesNotExist\CMake\Modules\CMakeCCompilerABI.c"
+  CMakeCCompilerABI.c
+Link:
+  C:\Program Files\Microsoft Visual Studio\2022\Professional\VC\Tools\MSVC\14.38.33130\bin\HostX64\x64\link.exe /ERRORREPORT:QUEUE /OUT:"C:\DoesNotExist\Temp\CMakeFiles\CMakeTmp\Debug\cmTC_7cc99.exe" /INCREMENTAL /ILK:"cmTC_7cc99.dir\Debug\cmTC_7cc99.ilk" /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib shell32.lib ole32.lib oleaut32.lib uuid.lib comdlg32.lib advapi32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:/DoesNotExist/Temp/CMakeFiles/CMakeTmp/Debug/cmTC_7cc99.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:/DoesNotExist/Temp/CMakeFiles/CMakeTmp/Debug/cmTC_7cc99.lib" /MACHINE:X64  /machine:x64 cmTC_7cc99.dir\Debug\CMakeCCompilerABI.obj
+  cmTC_7cc99.vcxproj -> C:\DoesNotExist\Temp\CMakeFiles\CMakeTmp\Debug\cmTC_7cc99.exe
+FinalizeBuildStatus:
+  Deleting file "cmTC_7cc99.dir\Debug\cmTC_7cc99.tlog\unsuccessfulbuild".
+  Touching "cmTC_7cc99.dir\Debug\cmTC_7cc99.tlog\cmTC_7cc99.lastbuildstate".
+Done Building Project "C:\DoesNotExist\Temp\CMakeFiles\CMakeTmp\cmTC_7cc99.vcxproj" (default targets).
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:00.86

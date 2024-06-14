@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.13...3.26 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.13...3.27 FATAL_ERROR)
 project(CheckCurses C)
 
 set(CURSES_NEED_NCURSES TRUE)

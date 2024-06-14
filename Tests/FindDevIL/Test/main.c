@@ -1,6 +1,6 @@
 #include <IL/il.h>
 
-int main()
+int main(void)
 {
   // Test 1 requires to link to the library.
   ilInit();

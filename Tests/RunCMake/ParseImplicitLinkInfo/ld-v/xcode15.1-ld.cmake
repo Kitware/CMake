@@ -1,0 +1,1 @@
+set(CMAKE_EFFECTIVE_SYSTEM_NAME "Apple")

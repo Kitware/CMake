@@ -13,8 +13,8 @@ The ``NEW`` behavior for this policy is to report an error.
 If :policy:`CMP0053` is set to ``NEW``, this policy has no effect
 and is treated as always being ``NEW``.
 
-This policy was introduced in CMake version 2.6.3.  CMake version
-|release| warns when the policy is not set and uses ``OLD`` behavior.  Use
-the :command:`cmake_policy` command to set it to ``OLD`` or ``NEW`` explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.6.3
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

@@ -4,7 +4,7 @@ extern int use_cuda(void);
 #  include <windows.h>
 #endif
 
-int main()
+int main(void)
 {
 #ifdef _WIN32
   /* Use an API that requires CMake's "standard" C libraries.  */

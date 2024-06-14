@@ -69,7 +69,6 @@ std::string ImportedCxxModuleLookup::BmiNameForSource(std::string const& path)
     bmiName = cmStrCat(dirhash.substr(0, HASH_TRUNCATION), ".bmi");
   }
 
-  this->GeneratorInfo.emplace(
-    path, ImportedCxxModuleGeneratorInfo{ &importit->second, bmiName });
+  this->GeneratorInfo.emplace(path, ImportedCxxModuleGeneratorInfo{ bmiName });
   return bmiName;
 }

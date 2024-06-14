@@ -62,7 +62,7 @@ macro(mangle_flags variable)
 
   if(RunCMake_GENERATOR MATCHES "Visual Studio" AND MSVC_TOOLSET_VERSION GREATER_EQUAL 141)
     string(REPLACE "-" "/" result "${result}")
-  elseif(RunCMake_GENERATOR STREQUAL "Xcode" AND CMAKE_XCODE_BUILD_SYSTEM GREATER_EQUAL 12)
+  elseif(RunCMake_GENERATOR STREQUAL "Xcode" AND XCODE_VERSION VERSION_LESS 15.3 AND CMAKE_XCODE_BUILD_SYSTEM GREATER_EQUAL 12)
     string(REPLACE "=" [[\\=]] result "${result}")
   endif()
 

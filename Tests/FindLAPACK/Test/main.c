@@ -14,7 +14,7 @@ typedef int64_t blas_int;
 void dgesv_(blas_int*, blas_int*, double*, blas_int*, blas_int*, double*,
             blas_int*, blas_int*);
 
-int main()
+int main(void)
 {
   double A[8] = {
     0, 1, 2, 3, 4, 5, 6, 7,

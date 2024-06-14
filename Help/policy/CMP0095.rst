@@ -24,9 +24,9 @@ intermediary ``cmake_install.cmake`` script. The ``NEW`` behavior is to properly
 escape coincidental CMake syntax in ``RPATH`` entries when generating the
 intermediary ``cmake_install.cmake`` script.
 
-This policy was introduced in CMake version 3.16. CMake version |release| warns
-when the policy is not set and detected usage of CMake-like syntax and uses
-``OLD`` behavior. Use the :command:`cmake_policy` command to set it to ``OLD``
-or ``NEW`` explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.16
+.. |WARNS_OR_DOES_NOT_WARN| replace::
+   warns when it detects use of CMake-like syntax
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

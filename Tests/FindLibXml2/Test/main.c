@@ -2,7 +2,7 @@
 #include <libxml/tree.h>
 #include <string.h>
 
-int main()
+int main(void)
 {
   xmlDoc* doc;
 

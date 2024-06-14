@@ -8,7 +8,7 @@
 #  define GIFLIB_MAJOR 4
 #endif
 
-int main()
+int main(void)
 {
   // because of the API changes we have to test different functions depending
   // on the version of GIFLIB

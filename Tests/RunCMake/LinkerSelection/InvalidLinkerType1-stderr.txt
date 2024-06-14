@@ -1,0 +1,2 @@
+CMake Error in CMakeLists.txt:
+  LINKER_TYPE 'FOO' is unknown or not supported by this toolchain.

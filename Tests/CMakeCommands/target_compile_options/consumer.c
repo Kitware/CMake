@@ -35,6 +35,6 @@
 #  endif
 #endif
 
-void consumer_c()
+void consumer_c(void)
 {
 }

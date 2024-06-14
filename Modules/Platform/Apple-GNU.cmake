@@ -17,6 +17,9 @@ macro(__apple_compiler_gnu lang)
 
   set(CMAKE_${lang}_LINK_LIBRARY_USING_FRAMEWORK "-framework <LIBRARY>")
   set(CMAKE_${lang}_LINK_LIBRARY_USING_FRAMEWORK_SUPPORTED TRUE)
+
+  set(CMAKE_${lang}_USING_LINKER_SYSTEM "")
+  set(CMAKE_${lang}_USING_LINKER_APPLE_CLASSIC "LINKER:-ld_classic")
 endmacro()
 
 macro(cmake_gnu_set_sysroot_flag lang)

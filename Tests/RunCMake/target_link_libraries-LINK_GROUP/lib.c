@@ -4,12 +4,12 @@
 __declspec(dllimport)
 #  endif
 #endif
-  void base();
+  void base(void);
 
 #if defined(_WIN32)
 __declspec(dllexport)
 #endif
-  void lib()
+  void lib(void)
 {
   base();
 }

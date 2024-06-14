@@ -89,6 +89,7 @@ and also the following more fine grained variables and targets:
   X11_Xutil_INCLUDE_PATH,                                  X11_Xutil_FOUND,          X11::Xutil
   X11_Xv_INCLUDE_PATH,             X11_Xv_LIB,             X11_Xv_FOUND,             X11::Xv
   X11_dpms_INCLUDE_PATH,           (in X11_Xext_LIB),      X11_dpms_FOUND
+  X11_Xdbe_INCLUDE_PATH,           (in X11_Xext_LIB),      X11_Xdbe_FOUND
   X11_XShm_INCLUDE_PATH,           (in X11_Xext_LIB),      X11_XShm_FOUND
   X11_Xshape_INCLUDE_PATH,         (in X11_Xext_LIB),      X11_Xshape_FOUND
   X11_XSync_INCLUDE_PATH,          (in X11_Xext_LIB),      X11_XSync_FOUND
@@ -120,6 +121,10 @@ and also the following more fine grained variables and targets:
   ``xcb_render_util``, ``xcb_res``, ``xcb_screensaver``, ``xcb_shape``,
   ``xcb_shm``, ``xcb_sync``, ``xcb_xf86dri``, ``xcb_xinerama``, ``xcb_xinput``,
   ``xcb_xrm``, ``xcb_xvmc``, and ``xcb_xv`` libraries.
+
+.. versionadded:: 3.29
+  Added coverage of double buffer extension (variables
+  ``X11_Xdbe_INCLUDE_PATH`` and ``X11_Xdbe_FOUND``).
 
 #]=======================================================================]
 
@@ -200,6 +205,7 @@ if (UNIX)
   find_path(X11_Xcomposite_INCLUDE_PATH X11/extensions/Xcomposite.h  ${X11_INC_SEARCH_PATH})
   find_path(X11_Xcursor_INCLUDE_PATH X11/Xcursor/Xcursor.h           ${X11_INC_SEARCH_PATH})
   find_path(X11_Xdamage_INCLUDE_PATH X11/extensions/Xdamage.h        ${X11_INC_SEARCH_PATH})
+  find_path(X11_Xdbe_INCLUDE_PATH X11/extensions/Xdbe.h              ${X11_INC_SEARCH_PATH})
   find_path(X11_Xdmcp_INCLUDE_PATH X11/Xdmcp.h                       ${X11_INC_SEARCH_PATH})
   find_path(X11_Xext_INCLUDE_PATH X11/extensions/Xext.h              ${X11_INC_SEARCH_PATH})
   find_path(X11_dpms_INCLUDE_PATH X11/extensions/dpms.h              ${X11_INC_SEARCH_PATH})
@@ -642,6 +648,11 @@ if (UNIX)
   if(X11_Xaw_LIB AND X11_Xaw_INCLUDE_PATH)
       set(X11_Xaw_FOUND TRUE)
   endif()
+
+  if (X11_Xdbe_INCLUDE_PATH)
+     set(X11_Xdbe_FOUND TRUE)
+     list(APPEND X11_INCLUDE_DIR ${X11_Xdbe_INCLUDE_PATH})
+  endif ()
 
   # Most of the X11 headers will be in the same directories, avoid
   # creating a huge list of duplicates.
@@ -1358,6 +1369,7 @@ if (UNIX)
     X11_XSync_INCLUDE_PATH
     X11_Xaw_LIB
     X11_Xaw_INCLUDE_PATH
+    X11_Xdbe_INCLUDE_PATH
   )
   set(CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK_SAVE})
   set(CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET_SAVE})

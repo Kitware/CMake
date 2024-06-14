@@ -225,6 +225,7 @@ private:
   void AddEmbeddedAppExtensions(cmXCodeObject* target);
   void AddEmbeddedExtensionKitExtensions(cmXCodeObject* target);
   void AddEmbeddedResources(cmXCodeObject* target);
+  void AddEmbeddedXPCServices(cmXCodeObject* target);
   void AddPositionIndependentLinkAttribute(cmGeneratorTarget* target,
                                            cmXCodeObject* buildSettings,
                                            const std::string& configName);

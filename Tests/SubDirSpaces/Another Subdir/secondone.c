@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-void secondone()
+void secondone(void)
 {
   printf("Hello again\n");
 }

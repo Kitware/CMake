@@ -10,7 +10,7 @@
 
 int testLib9(void);
 
-int main()
+int main(void)
 {
   return testLib9();
 }

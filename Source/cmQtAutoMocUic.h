@@ -10,4 +10,5 @@
  * Process AUTOMOC and AUTOUIC
  * @return true on success
  */
-bool cmQtAutoMocUic(cm::string_view infoFile, cm::string_view config);
+bool cmQtAutoMocUic(cm::string_view infoFile, cm::string_view config,
+                    cm::string_view executableConfig);

@@ -12,7 +12,7 @@ def read_codemodel_json_data(filename):
 def check_objects(o, g):
     assert is_list(o)
     assert len(o) == 1
-    check_index_object(o[0], "codemodel", 2, 6, check_object_codemodel(g))
+    check_index_object(o[0], "codemodel", 2, 7, check_object_codemodel(g))
 
 def check_backtrace(t, b, backtrace):
     btg = t["backtraceGraph"]
@@ -405,6 +405,30 @@ def check_target(c):
                              missing_exception=lambda e: "Install path: %s" % e["path"],
                              extra_exception=lambda a: "Install path: %s" % a["path"])
 
+        if "launchers" in expected:
+            if expected["launchers"] is not None:
+                expected_keys.append("launchers")
+                def check_launcher(actual, expected):
+                    assert is_dict(actual)
+                    launcher_keys = ["command", "type"]
+                    if "arguments" in expected:
+                        launcher_keys.append("arguments")
+                    assert sorted(actual.keys()) == sorted(launcher_keys)
+                    assert matches(actual["command"], expected["command"])
+                    assert matches(actual["type"], expected["type"])
+                    if "arguments" in expected:
+                        if expected["arguments"] is not None:
+                            check_list_match(lambda a, e: matches(a, e),
+                                             actual["arguments"], expected["arguments"],
+                                             missing_exception=lambda e: "argument: %s" % e,
+                                             extra_exception=lambda a: "argument: %s" % actual["arguments"])
+                check_list_match(lambda a, e: matches(a["type"], e["type"]),
+                                obj["launchers"], expected["launchers"],
+                                check=check_launcher,
+                                check_exception=lambda a, e: "launchers: %s" % a,
+                                missing_exception=lambda e: "launchers: %s" % e,
+                                extra_exception=lambda a: "launchers: %s" % a)
+
         if expected["link"] is not None:
             expected_keys.append("link")
             assert is_dict(obj["link"])
@@ -709,6 +733,7 @@ def gen_check_directories(c, g):
         read_codemodel_json_data("directories/alias.json"),
         read_codemodel_json_data("directories/custom.json"),
         read_codemodel_json_data("directories/cxx.json"),
+        read_codemodel_json_data("directories/cxx.cross.json"),
         read_codemodel_json_data("directories/imported.json"),
         read_codemodel_json_data("directories/interface.json"),
         read_codemodel_json_data("directories/object.json"),
@@ -782,6 +807,10 @@ def gen_check_targets(c, g, inSource):
         read_codemodel_json_data("targets/zero_check_cxx.json"),
         read_codemodel_json_data("targets/cxx_lib.json"),
         read_codemodel_json_data("targets/cxx_exe.json"),
+        read_codemodel_json_data("targets/cxx_exe_cross_emulator.json"),
+        read_codemodel_json_data("targets/cxx_exe_cross_emulator_args.json"),
+        read_codemodel_json_data("targets/cxx_exe_test_launcher_and_cross_emulator.json"),
+        read_codemodel_json_data("targets/cxx_exe_test_launcher.json"),
         read_codemodel_json_data("targets/cxx_standard_compile_feature_exe.json"),
         read_codemodel_json_data("targets/cxx_standard_exe.json"),
         read_codemodel_json_data("targets/cxx_shared_lib.json"),

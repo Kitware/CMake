@@ -47,10 +47,10 @@ typedef struct rhash_info
 	const char* magnet_name;
 } rhash_info;
 
-typedef void (*pinit_t)(void*);
+typedef void (*pinit_t)(void* ctx);
 typedef void (*pupdate_t)(void* ctx, const void* msg, size_t size);
-typedef void (*pfinal_t)(void*, unsigned char*);
-typedef void (*pcleanup_t)(void*);
+typedef void (*pfinal_t)(void* ctx, unsigned char* result);
+typedef void (*pcleanup_t)(void* ctx);
 
 /**
  * Information about a hash function
@@ -83,11 +83,11 @@ typedef struct rhash_context_ext
 	struct rhash_context rc;
 	unsigned hash_vector_size; /* number of contained hash sums */
 	unsigned flags;
-	unsigned state;
-	void* callback;
+	volatile unsigned state;
+	rhash_callback_t callback;
 	void* callback_data;
 	void* bt_ctx;
-	rhash_vector_item vector[1]; /* contexts of contained hash sums */
+	rhash_vector_item vector[]; /* contexts of contained hash sums */
 } rhash_context_ext;
 
 extern rhash_hash_info rhash_hash_info_default[RHASH_HASH_COUNT];
@@ -125,8 +125,9 @@ extern rhash_info info_edr512;
 
 /* rhash_info flags */
 #define F_BS32 1   /* default output in base32 */
-#define F_SWAP32 2 /* Big endian flag */
+#define F_SWAP32 2 /* big endian flag */
 #define F_SWAP64 4
+#define F_SPCEXP 8 /* needs special import/export logic */
 
 /* define endianness flags */
 #if IS_LITTLE_ENDIAN
@@ -144,8 +145,33 @@ extern rhash_info info_edr512;
 void rhash_init_algorithms(unsigned mask);
 const rhash_info* rhash_info_by_id(unsigned hash_id); /* get hash sum info by hash id */
 
+#if !defined(NO_IMPORT_EXPORT)
+size_t rhash_export_alg(unsigned hash_id, const void* ctx, void* out, size_t size);
+size_t rhash_import_alg(unsigned hash_id, void* ctx, const void* in, size_t size);
+#endif /* !defined(NO_IMPORT_EXPORT) */
+
 #if defined(OPENSSL_RUNTIME) && !defined(USE_OPENSSL)
 # define USE_OPENSSL
+#endif
+
+#ifdef USE_OPENSSL
+typedef struct rhash_hashing_methods
+{
+	pinit_t    init;
+	pupdate_t  update;
+	pfinal_t   final;
+} rhash_hashing_methods;
+
+enum rhash_methods_type
+{
+	METHODS_RHASH,
+	METHODS_OPENSSL,
+	METHODS_SELECTED,
+};
+
+void rhash_load_sha1_methods(rhash_hashing_methods* methods, int methods_type);
+
+#define ARE_OPENSSL_METHODS(methods) ((methods).init != (void (*)(void*))&rhash_sha1_init)
 #endif
 
 #ifdef __cplusplus

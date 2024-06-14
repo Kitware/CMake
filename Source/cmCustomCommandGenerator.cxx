@@ -284,8 +284,12 @@ void cmCustomCommandGenerator::FillEmulatorsWithArguments()
   if (!this->LG->GetMakefile()->IsOn("CMAKE_CROSSCOMPILING")) {
     return;
   }
+  cmGeneratorExpression ge(*this->LG->GetCMakeInstance(),
+                           this->CC->GetBacktrace());
 
   for (unsigned int c = 0; c < this->GetNumberOfCommands(); ++c) {
+    // If the command is the plain name of an executable target,
+    // launch it with its emulator.
     std::string const& argv0 = this->CommandLines[c][0];
     cmGeneratorTarget* target = this->LG->FindGeneratorTargetToUse(argv0);
     if (target && target->GetType() == cmStateEnums::EXECUTABLE &&
@@ -297,7 +301,12 @@ void cmCustomCommandGenerator::FillEmulatorsWithArguments()
         continue;
       }
 
-      cmExpandList(*emulator_property, this->EmulatorsWithArguments[c]);
+      // Plain target names are replaced by GetArgv0Location with the
+      // path to the executable artifact in the command config, so
+      // evaluate the launcher's location in the command config too.
+      std::string const emulator =
+        ge.Parse(*emulator_property)->Evaluate(this->LG, this->CommandConfig);
+      cmExpandList(emulator, this->EmulatorsWithArguments[c]);
     }
   }
 }
@@ -313,6 +322,8 @@ std::vector<std::string> cmCustomCommandGenerator::GetCrossCompilingEmulator(
 
 const char* cmCustomCommandGenerator::GetArgv0Location(unsigned int c) const
 {
+  // If the command is the plain name of an executable target, we replace it
+  // with the path to the executable artifact in the command config.
   std::string const& argv0 = this->CommandLines[c][0];
   cmGeneratorTarget* target = this->LG->FindGeneratorTargetToUse(argv0);
   if (target && target->GetType() == cmStateEnums::EXECUTABLE &&

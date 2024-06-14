@@ -15,6 +15,7 @@ class cmExperimental
 public:
   enum class Feature
   {
+    ExportPackageDependencies,
     WindowsKernelModeDriver,
 
     Sentinel,

@@ -174,27 +174,30 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     endif()
   endif()
 
-  # FIXME(LLVMFlang): It does not provide predefines identifying the MSVC ABI or architecture.
-  # It should be taught to define _MSC_VER and its _M_* architecture flags.
   if("x${lang}" STREQUAL "xFortran" AND "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xLLVMFlang")
-    # Parse the target triple to detect information we should later be able
-    # to get during preprocessing above, once LLVMFlang provides it.
+    # Parse the target triple to detect information not always available from the preprocessor.
     if(COMPILER_${lang}_PRODUCED_OUTPUT MATCHES "-triple ([0-9a-z_]*)-.*windows-msvc([0-9]+)\\.([0-9]+)")
-      set(CMAKE_${lang}_SIMULATE_ID "MSVC")
+      # CMakeFortranCompilerId.F.in does not extract the _MSC_VER minor version.
+      # We can do better using the version parsed here.
       set(CMAKE_${lang}_SIMULATE_VERSION "${CMAKE_MATCH_2}.${CMAKE_MATCH_3}")
-      set(arch ${CMAKE_MATCH_1})
-      if(arch STREQUAL "x86_64")
-        set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "x64")
-      elseif(arch STREQUAL "aarch64")
-        set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "ARM64")
-      elseif(arch STREQUAL "arm64ec")
-        set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "ARM64EC")
-      elseif(arch MATCHES "^i[3-9]86$")
-        set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "X86")
-      else()
-        message(FATAL_ERROR "LLVMFlang target architecture unrecognized: ${arch}")
+
+      if (CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 18.0)
+        # LLVMFlang < 18.0 does not provide predefines identifying the MSVC ABI or architecture.
+        set(CMAKE_${lang}_SIMULATE_ID "MSVC")
+        set(arch ${CMAKE_MATCH_1})
+        if(arch STREQUAL "x86_64")
+          set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "x64")
+        elseif(arch STREQUAL "aarch64")
+          set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "ARM64")
+        elseif(arch STREQUAL "arm64ec")
+          set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "ARM64EC")
+        elseif(arch MATCHES "^i[3-9]86$")
+          set(CMAKE_${lang}_COMPILER_ARCHITECTURE_ID "X86")
+        else()
+          message(FATAL_ERROR "LLVMFlang target architecture unrecognized: ${arch}")
+        endif()
+        set(MSVC_${lang}_ARCHITECTURE_ID "${CMAKE_${lang}_COMPILER_ARCHITECTURE_ID}")
       endif()
-      set(MSVC_${lang}_ARCHITECTURE_ID "${CMAKE_${lang}_COMPILER_ARCHITECTURE_ID}")
     elseif(COMPILER_${lang}_PRODUCED_OUTPUT MATCHES "-triple ([0-9a-z_]*)-.*windows-gnu")
       set(CMAKE_${lang}_SIMULATE_ID "GNU")
     endif()
@@ -277,13 +280,37 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     endif()
   elseif("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xGNU"
     OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xAppleClang"
-    OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xFujitsuClang")
+    OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xFujitsuClang"
+    OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xTIClang")
     set(CMAKE_${lang}_COMPILER_FRONTEND_VARIANT "GNU")
   elseif("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xMSVC")
     set(CMAKE_${lang}_COMPILER_FRONTEND_VARIANT "MSVC")
   else()
     set(CMAKE_${lang}_COMPILER_FRONTEND_VARIANT "")
   endif()
+
+  # `clang-scan-deps` needs to know the resource directory. This only matters
+  # for C++ and the GNU-frontend variant.
+  set(CMAKE_${lang}_COMPILER_CLANG_RESOURCE_DIR "")
+  if ("x${lang}" STREQUAL "xCXX" AND
+      "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xClang" AND
+      "x${CMAKE_${lang}_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
+    execute_process(
+      COMMAND "${CMAKE_${lang}_COMPILER}"
+        ${CMAKE_${lang}_COMPILER_ID_ARG1}
+        -print-resource-dir
+      OUTPUT_VARIABLE _clang_resource_dir_out
+      ERROR_VARIABLE _clang_resource_dir_err
+      RESULT_VARIABLE _clang_resource_dir_res
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      ERROR_STRIP_TRAILING_WHITESPACE)
+    if (_clang_resource_dir_res EQUAL 0)
+      file(TO_CMAKE_PATH "${_clang_resource_dir_out}" _clang_resource_dir_out)
+      if(IS_DIRECTORY "${_clang_resource_dir_out}")
+        set(CMAKE_${lang}_COMPILER_CLANG_RESOURCE_DIR "${_clang_resource_dir_out}")
+      endif()
+    endif ()
+  endif ()
 
   # Display the final identification result.
   if(CMAKE_${lang}_COMPILER_ID)
@@ -327,6 +354,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   set(CMAKE_${lang}_EXTENSIONS_COMPUTED_DEFAULT "${CMAKE_${lang}_EXTENSIONS_COMPUTED_DEFAULT}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_PRODUCED_OUTPUT "${COMPILER_${lang}_PRODUCED_OUTPUT}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_PRODUCED_FILES "${COMPILER_${lang}_PRODUCED_FILES}" PARENT_SCOPE)
+  set(CMAKE_${lang}_COMPILER_CLANG_RESOURCE_DIR "${CMAKE_${lang}_COMPILER_CLANG_RESOURCE_DIR}" PARENT_SCOPE)
 endfunction()
 
 include(CMakeCompilerIdDetection)
@@ -402,7 +430,13 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
     elseif(lang STREQUAL Fortran)
       set(v Intel)
       set(ext vfproj)
-      set(id_cl ifort.exe)
+      if(CMAKE_VS_PLATFORM_TOOLSET_FORTRAN)
+        set(id_cl "${CMAKE_VS_PLATFORM_TOOLSET_FORTRAN}.exe")
+        set(id_UseCompiler "UseCompiler=\"${CMAKE_VS_PLATFORM_TOOLSET_FORTRAN}Compiler\"")
+      else()
+        set(id_cl ifort.exe)
+        set(id_UseCompiler "")
+      endif()
     elseif(lang STREQUAL CSharp)
       set(v 10)
       set(ext csproj)
@@ -533,7 +567,7 @@ Id flags: ${testflags} ${CMAKE_${lang}_COMPILER_ID_FLAGS_ALWAYS}
       if(CMAKE_VS_PLATFORM_NAME STREQUAL x64)
         set(cuda_target "<TargetMachinePlatform>64</TargetMachinePlatform>")
       endif()
-      set(id_ItemDefinitionGroup_entry "<CudaCompile>${cuda_target}<AdditionalOptions>%(AdditionalOptions)-v</AdditionalOptions></CudaCompile>")
+      set(id_ItemDefinitionGroup_entry "<CudaCompile>${cuda_target}<AdditionalOptions>%(AdditionalOptions)-v -allow-unsupported-compiler</AdditionalOptions></CudaCompile>")
       set(id_PostBuildEvent_Command [[echo CMAKE_CUDA_COMPILER=$(CudaToolkitBinDir)\nvcc.exe]])
       if(CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR)
         # check for legacy cuda custom toolkit folder structure
@@ -1173,7 +1207,7 @@ function(CMAKE_DETERMINE_MSVC_SHOWINCLUDES_PREFIX lang userflags)
     ENCODING AUTO # cl prints in console output code page
     )
   string(REPLACE "\n" "\n  " msg "  ${out}")
-  if(res EQUAL 0 AND "${out}" MATCHES "(^|\n)([^:\n][^:\n]+:[^:\n]*[^: \n][^: \n]:?[ \t]+)([A-Za-z]:\\\\|\\./|/)")
+  if(res EQUAL 0 AND "${out}" MATCHES "(^|\n)([^:\n][^:\n]+:[^:\n]*[^: \n][^: \n]:?[ \t]+)([A-Za-z]:\\\\|\\./|\\.\\\\|/)")
     set(CMAKE_${lang}_CL_SHOWINCLUDES_PREFIX "${CMAKE_MATCH_2}" PARENT_SCOPE)
     string(APPEND msg "\nFound prefix \"${CMAKE_MATCH_2}\"")
   else()

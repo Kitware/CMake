@@ -21,9 +21,8 @@ The ``OLD`` behavior of this policy is for ``find_package(PythonInterp)``
 and ``find_package(PythonLibs)`` to load the deprecated modules.  The ``NEW``
 behavior is for uses of the modules to fail as if they do not exist.
 
-This policy was introduced in CMake version 3.27.  CMake version
-|release| warns when the policy is not set and uses ``OLD`` behavior.
-Use the :command:`cmake_policy` command to set it to ``OLD`` or ``NEW``
-explicitly.
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.27
+.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
+.. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

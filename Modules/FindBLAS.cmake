@@ -746,7 +746,11 @@ if(BLA_VENDOR STREQUAL "OpenBLAS" OR BLA_VENDOR STREQUAL "All")
   set(_blas_openblas_lib "openblas")
 
   if(_blas_sizeof_integer EQUAL 8)
-    string(APPEND _blas_openblas_lib "64")
+    if(MINGW)
+      string(APPEND _blas_openblas_lib "_64")
+    else()
+      string(APPEND _blas_openblas_lib "64")
+    endif()
   endif()
 
   if(NOT BLAS_LIBRARIES)

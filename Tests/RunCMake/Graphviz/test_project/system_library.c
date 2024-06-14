@@ -1,3 +1,3 @@
-void initialize_system()
+void initialize_system(void)
 {
 }

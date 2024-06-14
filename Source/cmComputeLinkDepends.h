@@ -49,7 +49,7 @@ public:
     {
     }
 
-    static const std::string DEFAULT;
+    static std::string const& DEFAULT;
 
     enum EntryKind
     {

@@ -378,6 +378,54 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
   this->CMakeInstance->SaveCache(this->BinaryDirectory.toStdString());
 }
 
+namespace {
+template <typename T>
+QCMakeProperty cache_to_property(const T& v)
+{
+  QCMakeProperty prop;
+  prop.Key = QString::fromStdString(v.first);
+  prop.Value = QString::fromStdString(v.second->Value);
+  prop.Type = QCMakeProperty::STRING;
+  if (!v.second->Type.empty()) {
+    auto type = cmState::StringToCacheEntryType(v.second->Type);
+    switch (type) {
+      case cmStateEnums::BOOL:
+        prop.Type = QCMakeProperty::BOOL;
+        prop.Value = cmIsOn(v.second->Value);
+        break;
+      case cmStateEnums::PATH:
+        prop.Type = QCMakeProperty::PATH;
+        break;
+      case cmStateEnums::FILEPATH:
+        prop.Type = QCMakeProperty::FILEPATH;
+        break;
+      default:
+        prop.Type = QCMakeProperty::STRING;
+        break;
+    }
+  }
+  return prop;
+}
+
+void add_to_property_list(QCMakePropertyList& list, QCMakeProperty&& prop)
+{
+  // QCMakeCacheModel prefers variables earlier in the list rather than
+  // later, so overwrite them if they already exist rather than simply
+  // appending
+  bool found = false;
+  for (auto& orig : list) {
+    if (orig.Key == prop.Key) {
+      orig = prop;
+      found = true;
+      break;
+    }
+  }
+  if (!found) {
+    list.append(prop);
+  }
+}
+}
+
 QCMakePropertyList QCMake::properties() const
 {
   QCMakePropertyList ret;
@@ -423,47 +471,21 @@ QCMakePropertyList QCMake::properties() const
     auto const& p =
       this->CMakePresetsGraph.ConfigurePresets.at(presetName).Expanded;
     if (p) {
+      if (!p->ToolchainFile.empty()) {
+        using CacheVariable = cmCMakePresetsGraph::CacheVariable;
+        CacheVariable var{ "FILEPATH", p->ToolchainFile };
+        std::pair<std::string, cm::optional<CacheVariable>> value = {
+          "CMAKE_TOOLCHAIN_FILE", var
+        };
+        auto prop = cache_to_property(value);
+        add_to_property_list(ret, std::move(prop));
+      }
       for (auto const& v : p->CacheVariables) {
         if (!v.second) {
           continue;
         }
-        QCMakeProperty prop;
-        prop.Key = QString::fromStdString(v.first);
-        prop.Value = QString::fromStdString(v.second->Value);
-        prop.Type = QCMakeProperty::STRING;
-        if (!v.second->Type.empty()) {
-          auto type = cmState::StringToCacheEntryType(v.second->Type);
-          switch (type) {
-            case cmStateEnums::BOOL:
-              prop.Type = QCMakeProperty::BOOL;
-              prop.Value = cmIsOn(v.second->Value);
-              break;
-            case cmStateEnums::PATH:
-              prop.Type = QCMakeProperty::PATH;
-              break;
-            case cmStateEnums::FILEPATH:
-              prop.Type = QCMakeProperty::FILEPATH;
-              break;
-            default:
-              prop.Type = QCMakeProperty::STRING;
-              break;
-          }
-        }
-
-        // QCMakeCacheModel prefers variables earlier in the list rather than
-        // later, so overwrite them if they already exist rather than simply
-        // appending
-        bool found = false;
-        for (auto& orig : ret) {
-          if (orig.Key == prop.Key) {
-            orig = prop;
-            found = true;
-            break;
-          }
-        }
-        if (!found) {
-          ret.append(prop);
-        }
+        auto prop = cache_to_property(v);
+        add_to_property_list(ret, std::move(prop));
       }
     }
   }

@@ -60,13 +60,13 @@
 #include "progress.h"
 #include "timediff.h"
 
-#  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
-  defined(WIN32)
-#    define CARES_STATICLIB
-#  endif
-#  include <ares.h>
-#  include <ares_version.h> /* really old c-ares didn't include this by
-                               itself */
+#if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
+  defined(_WIN32)
+#  define CARES_STATICLIB
+#endif
+#include <ares.h>
+#include <ares_version.h> /* really old c-ares didn't include this by
+                             itself */
 
 #if ARES_VERSION >= 0x010500
 /* c-ares 1.5.0 or later, the callback proto is modified */
@@ -173,10 +173,26 @@ CURLcode Curl_resolver_init(struct Curl_easy *easy, void **resolver)
   int status;
   struct ares_options options;
   int optmask = ARES_OPT_SOCK_STATE_CB;
+  static int ares_ver = 0;
   options.sock_state_cb = sock_state_cb;
   options.sock_state_cb_data = easy;
-  options.timeout = CARES_TIMEOUT_PER_ATTEMPT;
-  optmask |= ARES_OPT_TIMEOUTMS;
+  if(ares_ver == 0)
+    ares_version(&ares_ver);
+
+  if(ares_ver < 0x011400) { /* c-ares included similar change since 1.20.0 */
+    options.timeout = CARES_TIMEOUT_PER_ATTEMPT;
+    optmask |= ARES_OPT_TIMEOUTMS;
+  }
+
+  /*
+     if c ares < 1.20.0: curl set timeout to CARES_TIMEOUT_PER_ATTEMPT (2s)
+
+     if c-ares >= 1.20.0 it already has the timeout to 2s, curl does not need
+     to set the timeout value;
+
+     if c-ares >= 1.24.0, user can set the timeout via /etc/resolv.conf to
+     overwrite c-ares' timeout.
+  */
 
   status = ares_init_options((ares_channel*)resolver, &options, optmask);
   if(status != ARES_SUCCESS) {
@@ -755,7 +771,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
   size_t namelen = strlen(hostname);
   *waitp = 0; /* default to synchronous response */
 
-  res = calloc(sizeof(struct thread_data) + namelen, 1);
+  res = calloc(1, sizeof(struct thread_data) + namelen);
   if(res) {
     strcpy(res->hostname, hostname);
     data->state.async.hostname = res->hostname;
@@ -858,6 +874,7 @@ CURLcode Curl_set_dns_servers(struct Curl_easy *data,
   case ARES_ENODATA:
   case ARES_EBADSTR:
   default:
+    DEBUGF(infof(data, "bad servers set"));
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     break;
   }
@@ -896,6 +913,7 @@ CURLcode Curl_set_dns_local_ip4(struct Curl_easy *data,
   }
   else {
     if(Curl_inet_pton(AF_INET, local_ip4, &a4) != 1) {
+      DEBUGF(infof(data, "bad DNS IPv4 address"));
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
   }
@@ -923,6 +941,7 @@ CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
   }
   else {
     if(Curl_inet_pton(AF_INET6, local_ip6, a6) != 1) {
+      DEBUGF(infof(data, "bad DNS IPv6 address"));
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
   }

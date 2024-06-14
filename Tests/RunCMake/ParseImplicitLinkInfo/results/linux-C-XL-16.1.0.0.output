@@ -1,3 +1,4 @@
 libs=xlopt;xl;dl;gcc_s;pthread;gcc;m;c;gcc_s;gcc
 dirs=/opt/ibm/xlsmp/5.1.0/lib;/opt/ibm/xlmass/9.1.0/lib;/opt/ibm/xlC/16.1.0/lib;/usr/lib/gcc/ppc64le-redhat-linux/4.8.5;/usr/lib64;/lib64;/usr/lib
 library_arch=
+linker_tool=/usr/bin/ld

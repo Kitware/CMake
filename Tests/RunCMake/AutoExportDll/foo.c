@@ -4,12 +4,12 @@
 #  define WINAPI
 #endif
 
-int WINAPI foo()
+int WINAPI foo(void)
 {
   return 10;
 }
 
-int bar()
+int bar(void)
 {
   return 5;
 }

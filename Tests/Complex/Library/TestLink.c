@@ -1,4 +1,4 @@
-int TestLinkGetType()
+int TestLinkGetType(void)
 {
 #ifdef CMakeTestLinkShared_EXPORTS
   return 0;

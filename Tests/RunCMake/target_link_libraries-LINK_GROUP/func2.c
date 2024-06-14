@@ -1,7 +1,7 @@
 
-extern void func3();
+extern void func3(void);
 
-void func2()
+void func2(void)
 {
   func3();
 }
