@@ -13,3 +13,4 @@ if ($hash.Hash -ne $sha256sum) {
 }
 
 Expand-Archive -Path "$outdir\$tarball" -DestinationPath "$outdir\jom"
+Remove-Item "$outdir\$tarball"

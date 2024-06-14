@@ -39,6 +39,7 @@ curl -OL "https://github.com/Kitware/CMake/releases/download/v$version/$tarball"
 $shatool --check cmake.sha256sum
 tar xf "$tarball"
 mv "$filename" cmake
+rm "$tarball" cmake.sha256sum
 
 if [ "$( uname -s )" = "Darwin" ]; then
     ln -s CMake.app/Contents/bin cmake/bin

@@ -23,6 +23,7 @@ if ($hash.Hash -ne $sha256sum) {
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [System.IO.Compression.ZipFile]::ExtractToDirectory("$outdir\$tarball", "$outdir")
 Move-Item -Path "$outdir\$filename" -Destination "$outdir\msvc"
+Remove-Item "$outdir\$tarball"
 
 $bat = Get-Content -path "$outdir\msvc\$vcvars.in" -Raw
 $bat = $bat -replace "@VS_ROOT@","$outdir\msvc"
