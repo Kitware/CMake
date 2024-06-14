@@ -7,6 +7,22 @@ set(ENV{no_proxy} "$ENV{no_proxy},badhostname.invalid")
 
 set(RunCMake_TEST_TIMEOUT 60)
 
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/FailureLabels)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(ShortName \"${CMAKE_COMMAND}\" -E false)
+set_tests_properties(ShortName PROPERTIES LABELS \"Label1;Label2\")
+add_test(LongerName \"${CMAKE_COMMAND}\" -E false)
+set_tests_properties(LongerName PROPERTIES LABELS \"Label3\")
+add_test(Long_Test_Name_That_Is_Over_Fifty_Characters_In_Length \"${CMAKE_COMMAND}\" -E false)
+set_tests_properties(Long_Test_Name_That_Is_Over_Fifty_Characters_In_Length PROPERTIES LABELS \"Label4\")
+")
+  run_cmake_command(FailureLabels ${CMAKE_CTEST_COMMAND})
+endblock()
+
 run_cmake_command(repeat-opt-bad1
   ${CMAKE_CTEST_COMMAND} --repeat until-pass
   )
