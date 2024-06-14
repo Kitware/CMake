@@ -193,6 +193,11 @@ private:
   void WriteEvent(Elem& e1, std::string const& name,
                   std::vector<cmCustomCommand> const& commands,
                   std::string const& configName);
+  void WriteSdkStyleEvents(Elem& e0, std::string const& configName);
+  void WriteSdkStyleEvent(Elem& e0, const std::string& name,
+                          const std::string& when, const std::string& target,
+                          std::vector<cmCustomCommand> const& commands,
+                          std::string const& configName);
   void WriteGroupSources(Elem& e0, std::string const& name,
                          ToolSources const& sources,
                          std::vector<cmSourceGroup>&);
@@ -282,7 +287,7 @@ private:
   void WriteCommonPropertyGroupGlobals(
     cmVisualStudio10TargetGenerator::Elem& e1);
 
-  bool HasCustomCommands() const;
+  bool HasCustomCommandsSource() const;
 
   std::unordered_map<std::string, ConfigToSettings> ParsedToolTargetSettings;
   bool PropertyIsSameInAllConfigs(const ConfigToSettings& toolSettings,

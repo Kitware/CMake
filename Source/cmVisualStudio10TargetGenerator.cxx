@@ -914,7 +914,7 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
     return;
   }
 
-  if (this->HasCustomCommands()) {
+  if (this->HasCustomCommandsSource()) {
     std::string message = cmStrCat(
       "The target \"", this->GeneratorTarget->GetName(),
       "\" does not currently support add_custom_command as the Visual Studio "
@@ -1005,7 +1005,6 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
     e1.Attribute("Condition",
                  cmStrCat("'$(Configuration)' == '", config, '\''));
     e1.SetHasElements();
-    this->WriteEvents(e1, config);
 
     std::string outDir =
       cmStrCat(this->GeneratorTarget->GetDirectory(config), '/');
@@ -1015,6 +1014,10 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
     Options& o = *(this->ClOptions[config]);
     OptionsHelper oh(o, e1);
     oh.OutputFlagMap();
+  }
+
+  for (const std::string& config : this->Configurations) {
+    this->WriteSdkStyleEvents(e0, config);
   }
 
   this->WriteDotNetDocumentationFile(e0);
@@ -1079,14 +1082,8 @@ void cmVisualStudio10TargetGenerator::WriteCommonPropertyGroupGlobals(Elem& e1)
   }
 }
 
-bool cmVisualStudio10TargetGenerator::HasCustomCommands() const
+bool cmVisualStudio10TargetGenerator::HasCustomCommandsSource() const
 {
-  if (!this->GeneratorTarget->GetPreBuildCommands().empty() ||
-      !this->GeneratorTarget->GetPreLinkCommands().empty() ||
-      !this->GeneratorTarget->GetPostBuildCommands().empty()) {
-    return true;
-  }
-
   auto const& config_sources = this->GeneratorTarget->GetAllConfigSources();
   return std::any_of(config_sources.begin(), config_sources.end(),
                      [](cmGeneratorTarget::AllConfigSource const& si) {
@@ -4869,6 +4866,71 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
     oss << script << "\n";
     e1.Element(name, oss.str());
   }
+}
+
+void cmVisualStudio10TargetGenerator::WriteSdkStyleEvents(
+  Elem& e0, std::string const& configName)
+{
+  this->WriteSdkStyleEvent(e0, "PreLink", "BeforeTargets", "Link",
+                           this->GeneratorTarget->GetPreLinkCommands(),
+                           configName);
+  this->WriteSdkStyleEvent(e0, "PreBuild", "BeforeTargets", "PreBuildEvent",
+                           this->GeneratorTarget->GetPreBuildCommands(),
+                           configName);
+  this->WriteSdkStyleEvent(e0, "PostBuild", "AfterTargets", "PostBuildEvent",
+                           this->GeneratorTarget->GetPostBuildCommands(),
+                           configName);
+}
+
+void cmVisualStudio10TargetGenerator::WriteSdkStyleEvent(
+  Elem& e0, const std::string& name, const std::string& when,
+  const std::string& target, std::vector<cmCustomCommand> const& commands,
+  std::string const& configName)
+{
+  if (commands.empty()) {
+    return;
+  }
+  Elem e1(e0, "Target");
+  e1.Attribute("Condition",
+               cmStrCat("'$(Configuration)' == '", configName, '\''));
+  e1.Attribute("Name", name + configName);
+  e1.Attribute(when.c_str(), target);
+  e1.SetHasElements();
+
+  cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
+  std::string script;
+  const char* pre = "";
+  std::string comment;
+  bool stdPipesUTF8 = false;
+  for (cmCustomCommand const& cc : commands) {
+    cmCustomCommandGenerator ccg(cc, configName, lg);
+    if (!ccg.HasOnlyEmptyCommandLines()) {
+      comment += pre;
+      comment += lg->ConstructComment(ccg);
+      script += pre;
+      pre = "\n";
+      script += lg->ConstructScript(ccg);
+
+      stdPipesUTF8 = stdPipesUTF8 || cc.GetStdPipesUTF8();
+    }
+  }
+  if (!script.empty()) {
+    script += lg->FinishConstructScript(this->ProjectType);
+  }
+  comment = cmVS10EscapeComment(comment);
+
+  std::string strippedComment = comment;
+  strippedComment.erase(
+    std::remove(strippedComment.begin(), strippedComment.end(), '\t'),
+    strippedComment.end());
+  std::ostringstream oss;
+  if (!comment.empty() && !strippedComment.empty()) {
+    oss << "echo " << comment << "\n";
+  }
+  oss << script << "\n";
+
+  Elem e2(e1, "Exec");
+  e2.Attribute("Command", oss.str());
 }
 
 void cmVisualStudio10TargetGenerator::WriteProjectReferences(Elem& e0)
