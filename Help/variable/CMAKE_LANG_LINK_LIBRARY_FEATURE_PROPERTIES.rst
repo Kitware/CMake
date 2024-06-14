@@ -3,10 +3,8 @@ CMAKE_<LANG>_LINK_LIBRARY_<FEATURE>_PROPERTIES
 
 .. versionadded:: 3.30
 
-This variable defines the semantics of the specified ``<FEATURE>`` for the
-language ``<LANG>`` (as described by the
-:variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>` or
-:variable:`CMAKE_LINK_LIBRARY_USING_<FEATURE>` variables) used for the link
-command generation.
-
-.. include:: CMAKE_LINK_LIBRARY_FEATURE_PROPERTIES.txt
+This variable defines the semantics of the specified link library ``<FEATURE>``
+when linking with the link language ``<LANG>``. It takes precedence over
+:variable:`CMAKE_LINK_LIBRARY_<FEATURE>_PROPERTIES` if that variable is also
+defined for the same ``<FEATURE>``, but otherwise has similar effects.
+See :variable:`CMAKE_LINK_LIBRARY_<FEATURE>_PROPERTIES` for further details.
