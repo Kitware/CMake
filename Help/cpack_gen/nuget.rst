@@ -300,7 +300,7 @@ Example usage
   set(CPACK_GENERATOR NuGet)
   # Set up package metadata
   set(CPACK_PACKAGE_NAME SamplePackage)
-  set(CPACK_PACKAGE_VERSION "1.0.0")  # Why doesn't this pick up the version from the project?
+  set(CPACK_PACKAGE_VERSION "1.0.0")
   set(CPACK_PACKAGE_VENDOR "Example Inc")
   set(CPACK_NUGET_PACKAGE_OWNERS "Example Inc")
   set(CPACK_PACKAGE_DESCRIPTION "A .NET wrapper around the foobar library for frobbling bratchens")
@@ -319,10 +319,9 @@ Example usage
   set(CPACK_NUGET_PACKAGE_DEPENDENCIES "Baz")
   set(CPACK_NUGET_PACKAGE_DEPENDENCIES_Baz_VERSION "9.8.6")
   # NB: Since "net6.0" was listed but no dependencies have been specified, an empty group
-  # will be added to the nuspec file for this framework. This can be used to address `NU5128`_.
+  # will be added to the nuspec file for this framework. This can be used to address warning NU5128.
 
   include(CPack)
-
 
 
 .. _nuget.org: https://www.nuget.org
