@@ -21,3 +21,4 @@ if ($hash.Hash -ne $sha256sum) {
 
 Add-Type -AssemblyName System.IO.Compression.FileSystem
 [System.IO.Compression.ZipFile]::ExtractToDirectory("$outdir\$tarball", "$outdir")
+Remove-Item "$outdir\$tarball"
