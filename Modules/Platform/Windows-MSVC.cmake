@@ -514,7 +514,7 @@ macro(__windows_compiler_msvc lang)
     set(CMAKE_${lang}_DEPFILE_FORMAT msvc)
   endif()
 
-  set(CMAKE_${lang}_LINK_LIBRARIES_PROCESSING ORDER=FORWARD UNICITY=ALL)
+  set(CMAKE_${lang}_LINK_LIBRARIES_PROCESSING ORDER=FORWARD DEDUPLICATION=ALL)
 
   # linker selection
   set(CMAKE_${lang}_USING_LINKER_SYSTEM "${CMAKE_LINKER_LINK}")
