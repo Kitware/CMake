@@ -588,6 +588,7 @@ foreach(var
   endif()
 endforeach()
 add_RunCMake_test(file-DOWNLOAD)
+add_RunCMake_test(file-MAKE_DIRECTORY)
 add_RunCMake_test(file-RPATH
   -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
   -DCMake_TEST_ELF_LARGE=${CMake_TEST_ELF_LARGE}
