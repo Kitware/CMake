@@ -1,0 +1,6 @@
+CMake Warning \(dev\) at unsupported-library_type.cmake:[0-9]+ \(add_library\):
+  The feature 'feature', specified as part of a generator-expression
+  '\$<LINK_LIBRARY:feature>', will not be applied to the SHARED_LIBRARY 'dep'.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.
