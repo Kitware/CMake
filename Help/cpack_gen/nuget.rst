@@ -180,6 +180,17 @@ Optional metadata variables
  :Mandatory: No
  :Default: None
 
+.. variable:: CPACK_NUGET_PACKAGE_README
+              CPACK_NUGET_<compName>_PACKAGE_README
+
+ .. versionadded:: 3.30
+
+ The package path relative to the root of the package to a readme file.
+ Supported file formats include only Markdown (``*.md``).
+
+ :Mandatory: No
+ :Default: None
+
 .. variable:: CPACK_NUGET_PACKAGE_REQUIRE_LICENSE_ACCEPTANCE
 
  When set to a true value, the user will be prompted to accept the license
@@ -235,6 +246,50 @@ Optional metadata variables
  A space-delimited list of tags and keywords that describe the
  package and aid discoverability of packages through search and
  filtering.
+
+ :Mandatory: No
+ :Default: None
+
+.. variable:: CPACK_NUGET_PACKAGE_REPOSITORY_URL
+              CPACK_NUGET_<compName>_REPOSITORY_URL
+
+  .. versionadded:: 3.30
+
+ Repository metadata allows you to map the ``*.nupkg`` to the repository
+ that built it. This should be a publicly available URL that can be invoked
+ directly by a version control software. It should not be an HTML page as
+ this is meant for the computer.
+
+ :Mandatory: No
+ :Default: None
+
+.. variable:: CPACK_NUGET_PACKAGE_REPOSITORY_TYPE
+              CPACK_NUGET_<compName>_REPOSITORY_TYPE
+
+  .. versionadded:: 3.30
+
+ A type of the VCS repository.  When uploading a package to nuget.org_, the
+ type is limited to 100 characters.
+
+ :Mandatory: Yes, if repository URL has been specified
+ :Default: None
+
+.. variable:: CPACK_NUGET_PACKAGE_REPOSITORY_BRANCH
+              CPACK_NUGET_<compName>_REPOSITORY_BRANCH
+
+  .. versionadded:: 3.30
+
+ A VSC branch name to build the package.
+
+ :Mandatory: No
+ :Default: None
+
+.. variable:: CPACK_NUGET_PACKAGE_REPOSITORY_COMMIT
+              CPACK_NUGET_<compName>_REPOSITORY_COMMIT
+
+  .. versionadded:: 3.30
+
+ A SHA-1 hash of the commit to build the package.
 
  :Mandatory: No
  :Default: None
