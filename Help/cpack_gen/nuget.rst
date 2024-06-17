@@ -34,6 +34,17 @@ List of CPack NuGet generator specific variables:
  :Mandatory: No
  :Default: ``OFF``
 
+.. variable:: CPACK_NUGET_PACKAGE_DEBUG
+
+ Enable debug messages while executing CPack NuGet generator.
+
+ :Mandatory: No
+ :Default: ``OFF``
+
+
+Required metadata variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. variable:: CPACK_NUGET_PACKAGE_NAME
               CPACK_NUGET_<compName>_PACKAGE_NAME
 
@@ -74,18 +85,9 @@ List of CPack NuGet generator specific variables:
  :Mandatory: Yes
  :Default: :variable:`CPACK_PACKAGE_VENDOR`
 
-.. variable:: CPACK_NUGET_PACKAGE_TITLE
-              CPACK_NUGET_<compName>_PACKAGE_TITLE
 
- A human-friendly title of the package, typically used in UI displays
- as on nuget.org_ and the Package Manager in Visual Studio. If not
- specified, the package ID is used.
-
- :Mandatory: No
- :Default:
-
-    - :variable:`CPACK_COMPONENT_<compName>_DISPLAY_NAME`,
-    - :variable:`!CPACK_COMPONENT_GROUP_<groupName>_DISPLAY_NAME`
+Optional metadata variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. variable:: CPACK_NUGET_PACKAGE_OWNERS
               CPACK_NUGET_<compName>_PACKAGE_OWNERS
@@ -121,6 +123,19 @@ List of CPack NuGet generator specific variables:
  :Mandatory: No
  :Default: None
 
+.. variable:: CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME
+              CPACK_NUGET_<compName>_PACKAGE_LICENSE_FILE_NAME
+
+ The package's license file in :file:`.txt` or :file:`.md` format.
+
+ If :variable:`!CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME` is specified,
+ :variable:`!CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION` is ignored.
+
+ .. versionadded:: 3.20
+
+ :Mandatory: No
+ :Default: None
+
 .. variable:: CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION
               CPACK_NUGET_<compName>_PACKAGE_LICENSE_EXPRESSION
 
@@ -139,19 +154,6 @@ List of CPack NuGet generator specific variables:
  :Mandatory: No
  :Default: None
 
-.. variable:: CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME
-              CPACK_NUGET_<compName>_PACKAGE_LICENSE_FILE_NAME
-
- The package's license file in :file:`.txt` or :file:`.md` format.
-
- If :variable:`!CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME` is specified,
- :variable:`!CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION` is ignored.
-
- .. versionadded:: 3.20
-
- :Mandatory: No
- :Default: None
-
 .. variable:: CPACK_NUGET_PACKAGE_ICONURL
               CPACK_NUGET_<compName>_PACKAGE_ICONURL
 
@@ -164,14 +166,6 @@ List of CPack NuGet generator specific variables:
  :Mandatory: No
  :Default: None
 
-.. variable:: CPACK_NUGET_PACKAGE_REQUIRE_LICENSE_ACCEPTANCE
-
- When set to a true value, the user will be prompted to accept the license
- before installing the package.
-
- :Mandatory: No
- :Default: None
-
 .. variable:: CPACK_NUGET_PACKAGE_ICON
               CPACK_NUGET_<compName>_PACKAGE_ICON
 
@@ -179,6 +173,14 @@ List of CPack NuGet generator specific variables:
 
  The filename of a 64x64 image with transparency background to use as the
  icon for the package in UI display.
+
+ :Mandatory: No
+ :Default: None
+
+.. variable:: CPACK_NUGET_PACKAGE_REQUIRE_LICENSE_ACCEPTANCE
+
+ When set to a true value, the user will be prompted to accept the license
+ before installing the package.
 
  :Mandatory: No
  :Default: None
@@ -229,6 +231,23 @@ List of CPack NuGet generator specific variables:
 
  :Mandatory: No
  :Default: None
+
+.. variable:: CPACK_NUGET_PACKAGE_TITLE
+              CPACK_NUGET_<compName>_PACKAGE_TITLE
+
+ A human-friendly title of the package, typically used in UI displays
+ as on nuget.org_ and the Package Manager in Visual Studio. If not
+ specified, the package ID is used.
+
+ :Mandatory: No
+ :Default:
+
+    - :variable:`CPACK_COMPONENT_<compName>_DISPLAY_NAME`,
+    - :variable:`!CPACK_COMPONENT_GROUP_<groupName>_DISPLAY_NAME`
+
+
+Dependencies specification
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. variable:: CPACK_NUGET_PACKAGE_DEPENDENCIES
               CPACK_NUGET_<compName>_PACKAGE_DEPENDENCIES
@@ -283,13 +302,6 @@ List of CPack NuGet generator specific variables:
 
  :Mandatory: No
  :Default: None
-
-.. variable:: CPACK_NUGET_PACKAGE_DEBUG
-
- Enable debug messages while executing CPack NuGet generator.
-
- :Mandatory: No
- :Default: ``OFF``
 
 
 Example usage
