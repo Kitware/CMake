@@ -92,6 +92,9 @@ Optional metadata variables
 .. variable:: CPACK_NUGET_PACKAGE_OWNERS
               CPACK_NUGET_<compName>_PACKAGE_OWNERS
 
+ .. deprecated:: 3.30
+  Use authors (:variable:`CPACK_NUGET_PACKAGE_AUTHORS`) instead.
+
  A comma-separated list of the package creators using profile names
  on nuget.org_. This is often the same list as in authors,
  and is ignored when uploading the package to nuget.org_.
@@ -187,6 +190,10 @@ Optional metadata variables
 
 .. variable:: CPACK_NUGET_PACKAGE_DESCRIPTION_SUMMARY
               CPACK_NUGET_<compName>_PACKAGE_DESCRIPTION_SUMMARY
+
+ .. deprecated:: 3.30
+  Summary is being deprecated. Use description
+  (:variable:`CPACK_NUGET_PACKAGE_DESCRIPTION`) instead.
 
  A short description of the package for UI display. If omitted, a
  truncated version of description is used.
