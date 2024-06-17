@@ -129,12 +129,12 @@ Optional metadata variables
 .. variable:: CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME
               CPACK_NUGET_<compName>_PACKAGE_LICENSE_FILE_NAME
 
+ .. versionadded:: 3.20
+
  The package's license file in :file:`.txt` or :file:`.md` format.
 
  If :variable:`!CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME` is specified,
  :variable:`!CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION` is ignored.
-
- .. versionadded:: 3.20
 
  :Mandatory: No
  :Default: None
