@@ -230,3 +230,10 @@ Changes made since CMake 3.29.0 include the following.
   3.29.5 reverts the default for compatibility.  Projects may transition
   to ``perMachine`` on their own schedule by setting
   ``CPACK_WIX_INSTALL_SCOPE``.
+
+3.29.6
+------
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
