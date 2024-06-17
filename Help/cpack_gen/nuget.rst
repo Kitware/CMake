@@ -125,6 +125,7 @@ Optional metadata variables
 
  :Mandatory: No
  :Default: None
+ :Supported: NuGet 4.9.0 and above
 
 .. variable:: CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME
               CPACK_NUGET_<compName>_PACKAGE_LICENSE_FILE_NAME
@@ -138,6 +139,7 @@ Optional metadata variables
 
  :Mandatory: No
  :Default: None
+ :Supported: NuGet 4.9.0 and above
 
 .. variable:: CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION
               CPACK_NUGET_<compName>_PACKAGE_LICENSE_EXPRESSION
@@ -179,6 +181,8 @@ Optional metadata variables
 
  :Mandatory: No
  :Default: None
+ :Supported: NuGet 5.3.0 and above
+
 
 .. variable:: CPACK_NUGET_PACKAGE_README
               CPACK_NUGET_<compName>_PACKAGE_README
@@ -190,6 +194,7 @@ Optional metadata variables
 
  :Mandatory: No
  :Default: None
+ :Supported: NuGet 5.10.0 preview 2 and above
 
 .. variable:: CPACK_NUGET_PACKAGE_REQUIRE_LICENSE_ACCEPTANCE
 
@@ -262,6 +267,7 @@ Optional metadata variables
 
  :Mandatory: No
  :Default: None
+ :Supported: NuGet 4.0 and above
 
 .. variable:: CPACK_NUGET_PACKAGE_REPOSITORY_TYPE
               CPACK_NUGET_<compName>_REPOSITORY_TYPE
@@ -273,6 +279,7 @@ Optional metadata variables
 
  :Mandatory: Yes, if repository URL has been specified
  :Default: None
+ :Supported: NuGet 4.0 and above
 
 .. variable:: CPACK_NUGET_PACKAGE_REPOSITORY_BRANCH
               CPACK_NUGET_<compName>_REPOSITORY_BRANCH
@@ -283,6 +290,7 @@ Optional metadata variables
 
  :Mandatory: No
  :Default: None
+ :Supported: NuGet 4.6 and above
 
 .. variable:: CPACK_NUGET_PACKAGE_REPOSITORY_COMMIT
               CPACK_NUGET_<compName>_REPOSITORY_COMMIT
@@ -293,6 +301,7 @@ Optional metadata variables
 
  :Mandatory: No
  :Default: None
+ :Supported: NuGet 4.6 and above
 
 .. variable:: CPACK_NUGET_PACKAGE_TITLE
               CPACK_NUGET_<compName>_PACKAGE_TITLE
