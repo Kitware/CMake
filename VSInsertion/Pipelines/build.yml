@@ -119,33 +119,6 @@ extends:
           inputs:
             cwd: $(CMakeBuildDirectory)
             cmakeArgs: --build . --target package install --config $(BuildConfiguration) -- -m
-        # - task: MSBuild@1
-        #   displayName: 'Build solution $(CMakeBuildDirectory)/package.vcxproj'
-        #   inputs:
-        #     solution: '$(CMakeBuildDirectory)/package.vcxproj'
-        #     msbuildArchitecture: x64
-        #     platform: x64
-        #     configuration: '$(BuildConfiguration)'
-        #     clean: true
-        #     createLogFile: true
-        #     logFileVerbosity: diagnostic
-        # - task: MSBuild@1
-        #   displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
-        #   inputs:
-        #     solution: '$(CMakeBuildDirectory)/install.vcxproj'
-        #     msbuildArchitecture: x64
-        #     platform: x64
-        #     configuration: '$(BuildConfiguration)'
-        #     createLogFile: true
-        #     logFileVerbosity: diagnostic
-        # - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
-        #   displayName: 'Run the PREfast SDL Native Rules for MSBuild'
-        #   env:
-        #     SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-        #   inputs:
-        #     publishXML: true
-        #     userProvideBuildInfo: auto
-        #     setupCommandlinePicker: vs2022
         - task: CmdLine@1
           name: CmdLine3
           condition: eq(variables.RunTests, 'true')
@@ -292,6 +265,33 @@ extends:
           inputs:
             rootFolderOrFile: $(CMakeBuildDirectory)/bin/$(BuildConfiguration)/
             archiveFile: $(ArchiveDir)/cmake_pdb_arm64.zip
+        - task: MSBuild@1
+          displayName: 'Build solution $(CMakeBuildDirectory)/package.vcxproj'
+          inputs:
+            solution: '$(CMakeBuildDirectory)/package.vcxproj'
+            msbuildArchitecture: ARM64
+            platform: ARM64
+            configuration: '$(BuildConfiguration)'
+            clean: true
+            createLogFile: true
+            logFileVerbosity: diagnostic
+        - task: MSBuild@1
+          displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
+          inputs:
+            solution: '$(CMakeBuildDirectory)/install.vcxproj'
+            msbuildArchitecture: ARM64
+            platform: ARM64
+            configuration: '$(BuildConfiguration)'
+            createLogFile: true
+            logFileVerbosity: diagnostic
+        - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
+          displayName: 'Run the PREfast SDL Native Rules for MSBuild'
+          env:
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+          inputs:
+            publishXML: true
+            userProvideBuildInfo: auto
+            setupCommandlinePicker: vs2022
       - job: Job_x86
         displayName: CMake x86 Build
         timeoutInMinutes: 360
@@ -338,6 +338,33 @@ extends:
           inputs:
             rootFolderOrFile: $(CMakeBuildDirectory)/bin/$(BuildConfiguration)/
             archiveFile: $(ArchiveDir)/cmake_pdb_x86.zip
+        - task: MSBuild@1
+          displayName: 'Build solution $(CMakeBuildDirectory)/package.vcxproj'
+          inputs:
+            solution: '$(CMakeBuildDirectory)/package.vcxproj'
+            msbuildArchitecture: x86
+            platform: x86
+            configuration: '$(BuildConfiguration)'
+            clean: true
+            createLogFile: true
+            logFileVerbosity: diagnostic
+        - task: MSBuild@1
+          displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
+          inputs:
+            solution: '$(CMakeBuildDirectory)/install.vcxproj'
+            msbuildArchitecture: x86
+            platform: x86
+            configuration: '$(BuildConfiguration)'
+            createLogFile: true
+            logFileVerbosity: diagnostic
+        - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
+          displayName: 'Run the PREfast SDL Native Rules for MSBuild'
+          env:
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+          inputs:
+            publishXML: true
+            userProvideBuildInfo: auto
+            setupCommandlinePicker: vs2022
       - job: Job_Final
         displayName: Sign and Insert
         condition: eq(variables.InsertIntoVS, 'true')
@@ -348,7 +375,6 @@ extends:
         timeoutInMinutes: 360
         pool:
           name: VSEngSS-MicroBuild2022-1ES
-
         templateContext:
           sdl:
             tsa:
