@@ -20,26 +20,32 @@ else()
 endif()
 
 if(NOT IS_DIRECTORY ${framework_dir})
-  message(SEND_ERROR "Framework dir not found at ${framework_dir}")
+  set(RunCMake_TEST_FAILED "Framework dir not found at \n  ${framework_dir}")
+  return()
 endif()
 
 if(IS_DIRECTORY ${non_existent_debug_framework_dir})
-  message(SEND_ERROR
-      "A framework dir with a debug suffix should not exist at ${non_existent_debug_framework_dir}")
+  set(RunCMake_TEST_FAILED
+      "A framework dir with a debug suffix should not exist at \n  ${non_existent_debug_framework_dir}")
+  return()
 endif()
 
 if(NOT IS_SYMLINK "${symlink_release_path}")
-  message(SEND_ERROR "Release framework symlink not found at ${symlink_release_path}")
+  set(RunCMake_TEST_FAILED "Release framework symlink not found at \n  ${symlink_release_path}")
+  return()
 endif()
 
 if(NOT IS_SYMLINK "${symlink_debug_path}")
-  message(SEND_ERROR "Debug framework symlink not found at ${symlink_debug_path}")
+  set(RunCMake_TEST_FAILED "Debug framework symlink not found at \n  ${symlink_debug_path}")
+  return()
 endif()
 
 if(NOT EXISTS "${framework_release_path}")
-  message(SEND_ERROR "Release framework not found at ${framework_release_path}")
+  set(RunCMake_TEST_FAILED "Release framework not found at \n  ${framework_release_path}")
+  return()
 endif()
 
 if(NOT EXISTS "${framework_debug_path}")
-  message(SEND_ERROR "Debug framework not found at ${framework_debug_path}")
+  set(RunCMake_TEST_FAILED "Debug framework not found at \n  ${framework_debug_path}")
+  return()
 endif()
