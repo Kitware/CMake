@@ -58,3 +58,5 @@ if(NOT EXISTS ${framework-header})
   set(RunCMake_TEST_FAILED "Framework headers not found at\n  ${framework-header}")
   return()
 endif()
+
+include(${CMAKE_CURRENT_LIST_DIR}/FrameworkLayout-check-common.cmake)

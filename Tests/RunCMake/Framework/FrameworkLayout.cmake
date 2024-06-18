@@ -15,6 +15,10 @@ if("${CMAKE_FRAMEWORK}" STREQUAL "")
                         FRAMEWORK TRUE)
 endif()
 set_target_properties(Framework PROPERTIES
+                      MACOSX_FRAMEWORK_BUNDLE_NAME MyFrameworkBundleName
+                      MACOSX_FRAMEWORK_BUNDLE_VERSION 3.2.1
+                      MACOSX_FRAMEWORK_SHORT_VERSION_STRING 3
+                      MACOSX_FRAMEWORK_IDENTIFIER MyFrameworkId
                       PUBLIC_HEADER foo.h
                       RESOURCE "res.txt")
 set_source_files_properties(flatresource.txt PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
