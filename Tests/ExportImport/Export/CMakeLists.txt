@@ -479,6 +479,9 @@ add_library(testMod1 MODULE empty.cpp)
 add_library(testMod2 MODULE empty.cpp)
 set_property(TARGET testMod2 PROPERTY BUNDLE 1)
 
+add_library(testSharedLibArchiveAIX SHARED testSharedLibArchiveAIX.c)
+set_property(TARGET testSharedLibArchiveAIX PROPERTY AIX_SHARED_LIBRARY_ARCHIVE 1)
+
 install(TARGETS testLibRequired
         EXPORT RequiredExp DESTINATION lib
         INCLUDES DESTINATION
@@ -618,6 +621,7 @@ install(
   systemlib
   testInterfaceIncludeUser
   testInterfaceIncludeUser2
+  testSharedLibArchiveAIX
   EXPORT exp
   RUNTIME DESTINATION $<1:bin>$<0:/wrong>
   LIBRARY DESTINATION $<1:lib>$<0:/wrong> NAMELINK_SKIP
@@ -695,6 +699,7 @@ export(TARGETS testExe2 testLib4 testLib5 testLib6 testLib7 testExe3 testExe4 te
   testExeWithPluginHelper testExePluginHelperObj
   testMod1 testMod2
   testLibPerConfigDest
+  testSharedLibArchiveAIX
   NAMESPACE bld_
   APPEND FILE ExportBuildTree.cmake
   )

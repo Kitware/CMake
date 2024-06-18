@@ -1459,7 +1459,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
 
   cmNinjaVars symlinkVars;
   bool const symlinkNeeded =
-    (targetOutput != targetOutputReal && !gt->IsFrameworkOnApple());
+    (targetOutput != targetOutputReal && !gt->IsFrameworkOnApple() &&
+     !gt->IsArchivedAIXSharedLibrary());
   if (!symlinkNeeded) {
     vars["POST_BUILD"] = postBuildCmdLine;
   } else {

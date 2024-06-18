@@ -169,6 +169,11 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   std::string linkRuleVar =
     cmStrCat("CMAKE_", linkLanguage, "_CREATE_SHARED_LIBRARY");
 
+  if (this->GeneratorTarget->IsArchivedAIXSharedLibrary()) {
+    linkRuleVar =
+      cmStrCat("CMAKE_", linkLanguage, "_CREATE_SHARED_LIBRARY_ARCHIVE");
+  }
+
   std::string extraFlags;
   this->GetTargetLinkFlags(extraFlags, linkLanguage);
   this->LocalGenerator->AddConfigVariableFlags(
@@ -788,7 +793,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     vars.LinkLibraries = linkLibs.c_str();
     vars.ObjectsQuoted = buildObjs.c_str();
     std::string targetOutSOName;
-    if (this->GeneratorTarget->HasSOName(this->GetConfigName())) {
+    if (this->GeneratorTarget->HasSOName(this->GetConfigName()) ||
+        this->GeneratorTarget->IsArchivedAIXSharedLibrary()) {
       vars.SONameFlag = this->Makefile->GetSONameFlag(linkLanguage);
       targetOutSOName = this->LocalGenerator->ConvertToOutputFormat(
         this->TargetNames.SharedObject, cmOutputConverter::SHELL);

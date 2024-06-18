@@ -2294,6 +2294,9 @@ std::string cmGeneratorTarget::GetCreateRuleVariable(
       return this->GetFeatureSpecificLinkRuleVariable(var, lang, config);
     }
     case cmStateEnums::SHARED_LIBRARY:
+      if (this->IsArchivedAIXSharedLibrary()) {
+        return "CMAKE_" + lang + "_CREATE_SHARED_LIBRARY_ARCHIVE";
+      }
       return "CMAKE_" + lang + "_CREATE_SHARED_LIBRARY";
     case cmStateEnums::MODULE_LIBRARY:
       return "CMAKE_" + lang + "_CREATE_SHARED_MODULE";
@@ -2938,7 +2941,7 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
   cmValue soversion = this->GetProperty("SOVERSION");
   if (!this->HasSOName(config) ||
       this->Makefile->IsOn("CMAKE_PLATFORM_NO_VERSIONED_SONAME") ||
-      this->IsFrameworkOnApple()) {
+      this->IsFrameworkOnApple() || this->IsArchivedAIXSharedLibrary()) {
     // Versioning is supported only for shared libraries and modules,
     // and then only when the platform supports an soname flag.
     version = nullptr;
@@ -2971,6 +2974,11 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
     }
     targetNames.Real += cmStrCat(targetNames.Base, components.suffix);
     targetNames.SharedObject = targetNames.Real;
+  } else if (this->IsArchivedAIXSharedLibrary()) {
+    targetNames.SharedObject =
+      cmStrCat(components.prefix, targetNames.Base, ".so");
+    targetNames.Real =
+      cmStrCat(components.prefix, targetNames.Base, components.suffix);
   } else {
     // The library's soname.
     this->ComputeVersionedName(targetNames.SharedObject, components.prefix,
@@ -3054,8 +3062,13 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetExecutableNames(
 
   // The executable name.
   targetNames.Base = components.base;
-  targetNames.Output =
-    components.prefix + targetNames.Base + components.suffix;
+
+  if (this->IsArchivedAIXSharedLibrary()) {
+    targetNames.Output = components.prefix + targetNames.Base;
+  } else {
+    targetNames.Output =
+      components.prefix + targetNames.Base + components.suffix;
+  }
 
 // The executable's real name on disk.
 #if defined(__CYGWIN__)
@@ -4799,6 +4812,11 @@ bool cmGeneratorTarget::HasLinkDependencyFile(std::string const& config) const
 bool cmGeneratorTarget::IsFrameworkOnApple() const
 {
   return this->Target->IsFrameworkOnApple();
+}
+
+bool cmGeneratorTarget::IsArchivedAIXSharedLibrary() const
+{
+  return this->Target->IsArchivedAIXSharedLibrary();
 }
 
 bool cmGeneratorTarget::IsImportedFrameworkFolderOnApple(

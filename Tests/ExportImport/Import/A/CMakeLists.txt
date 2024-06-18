@@ -68,6 +68,7 @@ target_link_libraries(imp_testExe1
   exp_testLib7
   exp_testLibCycleA
   exp_testLibPerConfigDest
+  exp_testSharedLibArchiveAIX
   exp_testStaticLibWithPlugin
   )
 
@@ -123,6 +124,7 @@ target_link_libraries(imp_testExe1b
   bld_testLib7
   bld_testLibCycleA
   bld_testLibPerConfigDest
+  bld_testSharedLibArchiveAIX
   bld_testStaticLibWithPlugin
   )
 
