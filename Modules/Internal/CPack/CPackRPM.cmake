@@ -711,7 +711,7 @@ function(cpack_rpm_debugsymbol_check INSTALL_FILES WORKING_DIR)
       endif()
 
       get_file_permissions("${WORKING_DIR}/${F}" permissions_)
-      if(NOT "USER_EXECUTE" IN_LIST permissions_ AND
+      if(NOT "OWNER_EXECUTE" IN_LIST permissions_ AND
          NOT "GROUP_EXECUTE" IN_LIST permissions_ AND
          NOT "WORLD_EXECUTE" IN_LIST permissions_)
         if(CPACK_RPM_INSTALL_WITH_EXEC)
