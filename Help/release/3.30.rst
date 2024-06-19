@@ -179,6 +179,13 @@ CPack
 * The :cpack_gen:`CPack Inno Setup Generator` is now available
   on non-Windows hosts.
 
+* The :cpack_gen:`CPack NuGet Generator` gained the
+  :variable:`CPACK_NUGET_PACKAGE_README`,
+  :variable:`CPACK_NUGET_PACKAGE_REPOSITORY_URL`,
+  :variable:`CPACK_NUGET_PACKAGE_REPOSITORY_TYPE`,
+  :variable:`CPACK_NUGET_PACKAGE_REPOSITORY_BRANCH`, and
+  :variable:`CPACK_NUGET_PACKAGE_REPOSITORY_COMMIT` variables.
+
 * The :cpack_gen:`CPack NuGet Generator` can now generate dependency groups
   for framework-specific dependencies. The :variable:`CPACK_NUGET_PACKAGE_TFMS`
   variable was added to specify a list of target framework monikers (TFMs)
