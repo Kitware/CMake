@@ -336,6 +336,8 @@ add_library(
   cmInstallTargetGenerator.cxx
   cmInstallDirectoryGenerator.h
   cmInstallDirectoryGenerator.cxx
+  cmInstallScriptHandler.h
+  cmInstallScriptHandler.cxx
   cmJSONHelpers.cxx
   cmJSONHelpers.h
   cmJSONState.cxx

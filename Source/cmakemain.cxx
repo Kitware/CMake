@@ -17,6 +17,7 @@
 #include <vector>
 
 #include <cm/memory>
+#include <cm/optional>
 #include <cmext/algorithm>
 
 #include <cm3p/uv.h>
@@ -26,6 +27,7 @@
 #include "cmConsoleBuf.h"
 #include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
+#include "cmInstallScriptHandler.h"
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageMetadata.h"
@@ -429,6 +431,17 @@ int extract_job_number(std::string const& command,
   }
   return jobs;
 }
+std::function<bool(std::string const&)> extract_job_number_lambda_builder(
+  std::string& dir, int& jobs, const std::string& flag)
+{
+  return [&dir, &jobs, flag](std::string const& value) -> bool {
+    jobs = extract_job_number(flag, value);
+    if (jobs < 0) {
+      dir.clear();
+    }
+    return true;
+  };
+};
 #endif
 
 int do_build(int ac, char const* const* av)
@@ -451,20 +464,10 @@ int do_build(int ac, char const* const* av)
   std::string presetName;
   bool listPresets = false;
 
-  auto jLambda = [&](std::string const& value) -> bool {
-    jobs = extract_job_number("-j", value);
-    if (jobs < 0) {
-      dir.clear();
-    }
-    return true;
-  };
-  auto parallelLambda = [&](std::string const& value) -> bool {
-    jobs = extract_job_number("--parallel", value);
-    if (jobs < 0) {
-      dir.clear();
-    }
-    return true;
-  };
+  auto jLambda = extract_job_number_lambda_builder(dir, jobs, "-j");
+  auto parallelLambda =
+    extract_job_number_lambda_builder(dir, jobs, "--parallel");
+
   auto targetLambda = [&](std::string const& value) -> bool {
     if (!value.empty()) {
       cmList values{ value };
@@ -787,8 +790,13 @@ int do_install(int ac, char const* const* av)
   std::string defaultDirectoryPermissions;
   std::string prefix;
   std::string dir;
+  int jobs = 0;
   bool strip = false;
   bool verbose = cmSystemTools::HasEnv("VERBOSE");
+
+  auto jLambda = extract_job_number_lambda_builder(dir, jobs, "-j");
+  auto parallelLambda =
+    extract_job_number_lambda_builder(dir, jobs, "--parallel");
 
   auto verboseLambda = [&](std::string const&) -> bool {
     verbose = true;
@@ -806,6 +814,9 @@ int do_install(int ac, char const* const* av)
     CommandArgument{
       "--default-directory-permissions", CommandArgument::Values::One,
       CommandArgument::setToValue(defaultDirectoryPermissions) },
+    CommandArgument{ "-j", CommandArgument::Values::One, jLambda },
+    CommandArgument{ "--parallel", CommandArgument::Values::One,
+                     parallelLambda },
     CommandArgument{ "--prefix", CommandArgument::Values::One,
                      CommandArgument::setToValue(prefix) },
     CommandArgument{ "--strip", CommandArgument::Values::Zero,
@@ -822,7 +833,6 @@ int do_install(int ac, char const* const* av)
     inputArgs.reserve(ac - 3);
     cm::append(inputArgs, av + 3, av + ac);
     for (decltype(inputArgs.size()) i = 0; i < inputArgs.size(); ++i) {
-
       std::string const& arg = inputArgs[i];
       bool matched = false;
       bool parsed = false;
@@ -853,6 +863,10 @@ int do_install(int ac, char const* const* av)
       "  --component <comp> = Component-based install. Only install <comp>.\n"
       "  --default-directory-permissions <permission> \n"
       "     Default install permission. Use default permission <permission>.\n"
+      "  -j <jobs> --parallel <jobs>\n"
+      "     Build in parallel using the given number of jobs. \n"
+      "     The CMAKE_INSTALL_PARALLEL_LEVEL environment variable\n"
+      "     specifies a default parallel level when this option is not given.\n"
       "  --prefix <prefix>  = The installation prefix CMAKE_INSTALL_PREFIX.\n"
       "  --strip            = Performing install/strip.\n"
       "  -v --verbose       = Enable verbose output.\n"
@@ -906,9 +920,29 @@ int do_install(int ac, char const* const* av)
   }
 
   args.emplace_back("-P");
-  args.emplace_back(dir + "/cmake_install.cmake");
 
-  return cm.Run(args) ? 1 : 0;
+  auto handler = cmInstallScriptHandler(dir, args);
+  int ret = 0;
+  if (!handler.isParallel()) {
+    args.emplace_back(cmStrCat(dir, "/cmake_install.cmake"));
+    ret = int(bool(cm.Run(args)));
+  } else {
+    if (!jobs) {
+      jobs = 1;
+      auto envvar = cmSystemTools::GetEnvVar("CMAKE_INSTALL_PARALLEL_LEVEL");
+      if (envvar.has_value()) {
+        jobs = extract_job_number("", envvar.value());
+        if (jobs < 1) {
+          std::cerr << "Value of CMAKE_INSTALL_PARALLEL_LEVEL environment"
+                       " variable must be a positive integer.\n";
+          return 1;
+        }
+      }
+    }
+    ret = handler.install(jobs);
+  }
+
+  return int(ret > 0);
 #endif
 }
 

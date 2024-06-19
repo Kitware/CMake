@@ -745,6 +745,15 @@ The options are:
 
   This option can be omitted if :envvar:`VERBOSE` environment variable is set.
 
+.. option:: -j <jobs>, --parallel <jobs>
+
+  .. versionadded:: 3.31
+
+  Install in parallel using the given number of jobs. Only available if
+  :prop_gbl:`INSTALL_PARALLEL` is enabled. The
+  :envvar:`CMAKE_INSTALL_PARALLEL_LEVEL` environment variable specifies a
+  default parallel level when this option is not provided.
+
 Run :option:`cmake --install` with no options for quick help.
 
 Open a Project

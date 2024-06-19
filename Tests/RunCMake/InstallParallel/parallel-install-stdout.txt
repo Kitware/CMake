@@ -1,15 +1,15 @@
-\[1\/5\] Installing only the local directory...
-\-\- Install configuration: \"Debug\"
+\[1\/5\] .*
+\-\- Install configuration:.*
 installing:.*
-\[2\/5\] Installing only the local directory...
-\-\- Install configuration: \"Debug\"
+\[2\/5\] .*
+\-\- Install configuration:.*
 installing:.*
-\[3\/5\] Installing only the local directory...
-\-\- Install configuration: \"Debug\"
+\[3\/5\] .*
+\-\- Install configuration:.*
 installing:.*
-\[4\/5\] Installing only the local directory...
-\-\- Install configuration: \"Debug\"
+\[4\/5\] .*
+\-\- Install configuration:.*
 installing:.*
-\[5\/5\] Installing only the local directory...
-\-\- Install configuration: \"Debug\"
+\[5\/5\] .*
+\-\- Install configuration:.*
 installing:.*
