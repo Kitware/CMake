@@ -34,6 +34,17 @@ List of CPack NuGet generator specific variables:
  :Mandatory: No
  :Default: ``OFF``
 
+.. variable:: CPACK_NUGET_PACKAGE_DEBUG
+
+ Enable debug messages while executing CPack NuGet generator.
+
+ :Mandatory: No
+ :Default: ``OFF``
+
+
+Required metadata variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. variable:: CPACK_NUGET_PACKAGE_NAME
               CPACK_NUGET_<compName>_PACKAGE_NAME
 
@@ -74,21 +85,15 @@ List of CPack NuGet generator specific variables:
  :Mandatory: Yes
  :Default: :variable:`CPACK_PACKAGE_VENDOR`
 
-.. variable:: CPACK_NUGET_PACKAGE_TITLE
-              CPACK_NUGET_<compName>_PACKAGE_TITLE
 
- A human-friendly title of the package, typically used in UI displays
- as on nuget.org_ and the Package Manager in Visual Studio. If not
- specified, the package ID is used.
-
- :Mandatory: No
- :Default:
-
-    - :variable:`CPACK_COMPONENT_<compName>_DISPLAY_NAME`,
-    - :variable:`!CPACK_COMPONENT_GROUP_<groupName>_DISPLAY_NAME`
+Optional metadata variables
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. variable:: CPACK_NUGET_PACKAGE_OWNERS
               CPACK_NUGET_<compName>_PACKAGE_OWNERS
+
+ .. deprecated:: 3.30
+  Use authors (:variable:`CPACK_NUGET_PACKAGE_AUTHORS`) instead.
 
  A comma-separated list of the package creators using profile names
  on nuget.org_. This is often the same list as in authors,
@@ -120,6 +125,21 @@ List of CPack NuGet generator specific variables:
 
  :Mandatory: No
  :Default: None
+ :Supported: NuGet 4.9.0 and above
+
+.. variable:: CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME
+              CPACK_NUGET_<compName>_PACKAGE_LICENSE_FILE_NAME
+
+ .. versionadded:: 3.20
+
+ The package's license file in :file:`.txt` or :file:`.md` format.
+
+ If :variable:`!CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME` is specified,
+ :variable:`!CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION` is ignored.
+
+ :Mandatory: No
+ :Default: None
+ :Supported: NuGet 4.9.0 and above
 
 .. variable:: CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION
               CPACK_NUGET_<compName>_PACKAGE_LICENSE_EXPRESSION
@@ -139,19 +159,6 @@ List of CPack NuGet generator specific variables:
  :Mandatory: No
  :Default: None
 
-.. variable:: CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME
-              CPACK_NUGET_<compName>_PACKAGE_LICENSE_FILE_NAME
-
- The package's license file in :file:`.txt` or :file:`.md` format.
-
- If :variable:`!CPACK_NUGET_PACKAGE_LICENSE_FILE_NAME` is specified,
- :variable:`!CPACK_NUGET_PACKAGE_LICENSE_EXPRESSION` is ignored.
-
- .. versionadded:: 3.20
-
- :Mandatory: No
- :Default: None
-
 .. variable:: CPACK_NUGET_PACKAGE_ICONURL
               CPACK_NUGET_<compName>_PACKAGE_ICONURL
 
@@ -160,14 +167,6 @@ List of CPack NuGet generator specific variables:
 
  An URL for a 64x64 image with transparency background to use as the
  icon for the package in UI display.
-
- :Mandatory: No
- :Default: None
-
-.. variable:: CPACK_NUGET_PACKAGE_REQUIRE_LICENSE_ACCEPTANCE
-
- When set to a true value, the user will be prompted to accept the license
- before installing the package.
 
  :Mandatory: No
  :Default: None
@@ -182,9 +181,35 @@ List of CPack NuGet generator specific variables:
 
  :Mandatory: No
  :Default: None
+ :Supported: NuGet 5.3.0 and above
+
+
+.. variable:: CPACK_NUGET_PACKAGE_README
+              CPACK_NUGET_<compName>_PACKAGE_README
+
+ .. versionadded:: 3.30
+
+ The package path relative to the root of the package to a readme file.
+ Supported file formats include only Markdown (``*.md``).
+
+ :Mandatory: No
+ :Default: None
+ :Supported: NuGet 5.10.0 preview 2 and above
+
+.. variable:: CPACK_NUGET_PACKAGE_REQUIRE_LICENSE_ACCEPTANCE
+
+ When set to a true value, the user will be prompted to accept the license
+ before installing the package.
+
+ :Mandatory: No
+ :Default: None
 
 .. variable:: CPACK_NUGET_PACKAGE_DESCRIPTION_SUMMARY
               CPACK_NUGET_<compName>_PACKAGE_DESCRIPTION_SUMMARY
+
+ .. deprecated:: 3.30
+  Summary is being deprecated. Use description
+  (:variable:`CPACK_NUGET_PACKAGE_DESCRIPTION`) instead.
 
  A short description of the package for UI display. If omitted, a
  truncated version of description is used.
@@ -229,6 +254,71 @@ List of CPack NuGet generator specific variables:
 
  :Mandatory: No
  :Default: None
+
+.. variable:: CPACK_NUGET_PACKAGE_REPOSITORY_URL
+              CPACK_NUGET_<compName>_REPOSITORY_URL
+
+  .. versionadded:: 3.30
+
+ Repository metadata allows you to map the ``*.nupkg`` to the repository
+ that built it. This should be a publicly available URL that can be invoked
+ directly by a version control software. It should not be an HTML page as
+ this is meant for the computer.
+
+ :Mandatory: No
+ :Default: None
+ :Supported: NuGet 4.0 and above
+
+.. variable:: CPACK_NUGET_PACKAGE_REPOSITORY_TYPE
+              CPACK_NUGET_<compName>_REPOSITORY_TYPE
+
+  .. versionadded:: 3.30
+
+ A type of the VCS repository.  When uploading a package to nuget.org_, the
+ type is limited to 100 characters.
+
+ :Mandatory: Yes, if repository URL has been specified
+ :Default: None
+ :Supported: NuGet 4.0 and above
+
+.. variable:: CPACK_NUGET_PACKAGE_REPOSITORY_BRANCH
+              CPACK_NUGET_<compName>_REPOSITORY_BRANCH
+
+  .. versionadded:: 3.30
+
+ A VSC branch name to build the package.
+
+ :Mandatory: No
+ :Default: None
+ :Supported: NuGet 4.6 and above
+
+.. variable:: CPACK_NUGET_PACKAGE_REPOSITORY_COMMIT
+              CPACK_NUGET_<compName>_REPOSITORY_COMMIT
+
+  .. versionadded:: 3.30
+
+ A SHA-1 hash of the commit to build the package.
+
+ :Mandatory: No
+ :Default: None
+ :Supported: NuGet 4.6 and above
+
+.. variable:: CPACK_NUGET_PACKAGE_TITLE
+              CPACK_NUGET_<compName>_PACKAGE_TITLE
+
+ A human-friendly title of the package, typically used in UI displays
+ as on nuget.org_ and the Package Manager in Visual Studio. If not
+ specified, the package ID is used.
+
+ :Mandatory: No
+ :Default:
+
+    - :variable:`CPACK_COMPONENT_<compName>_DISPLAY_NAME`,
+    - :variable:`!CPACK_COMPONENT_GROUP_<groupName>_DISPLAY_NAME`
+
+
+Dependencies specification
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. variable:: CPACK_NUGET_PACKAGE_DEPENDENCIES
               CPACK_NUGET_<compName>_PACKAGE_DEPENDENCIES
@@ -284,13 +374,6 @@ List of CPack NuGet generator specific variables:
  :Mandatory: No
  :Default: None
 
-.. variable:: CPACK_NUGET_PACKAGE_DEBUG
-
- Enable debug messages while executing CPack NuGet generator.
-
- :Mandatory: No
- :Default: ``OFF``
-
 
 Example usage
 ^^^^^^^^^^^^^
@@ -302,9 +385,8 @@ Example usage
   set(CPACK_PACKAGE_NAME SamplePackage)
   set(CPACK_PACKAGE_VERSION "1.0.0")
   set(CPACK_PACKAGE_VENDOR "Example Inc")
-  set(CPACK_NUGET_PACKAGE_OWNERS "Example Inc")
+  set(CPACK_NUGET_PACKAGE_AUTHORS "ExampleInc")
   set(CPACK_PACKAGE_DESCRIPTION "A .NET wrapper around the foobar library for frobbling bratchens")
-  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "A .NET wrapper around the foobar library for frobbling bratchens")
   set(CPACK_PACKAGE_HOMEPAGE_URL "https://www.example.com")
   set(CPACK_NUGET_PACKAGE_REPOSITORY_URL "https://github.com/example/libfoobar.git")
   set(CPACK_NUGET_PACKAGE_REPOSITORY_TYPE git)
