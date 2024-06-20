@@ -524,6 +524,10 @@ public:
   static std::string const& GetCMakeRoot();
   static std::string const& GetHTMLDoc();
 
+  /** Get the CMake config directory **/
+  static cm::optional<std::string> GetSystemConfigDirectory();
+  static cm::optional<std::string> GetCMakeConfigDirectory();
+
   /** Get the CWD mapped through the KWSys translation map.  */
   static std::string GetCurrentWorkingDirectory();
 

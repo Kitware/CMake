@@ -1763,7 +1763,7 @@ libs=""
 uv_c_flags=""
 if ${cmake_system_mingw}; then
   uv_c_flags="${uv_c_flags} -DWIN32_LEAN_AND_MEAN -D_WIN32_WINNT=0x0600"
-  libs="${libs} -lws2_32 -lpsapi -liphlpapi -lshell32 -luserenv -lole32 -loleaut32"
+  libs="${libs} -lws2_32 -lpsapi -liphlpapi -lshell32 -luserenv -lole32 -loleaut32 -luuid"
 else
   case "${cmake_system}" in
     *AIX*)
