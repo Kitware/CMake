@@ -84,7 +84,7 @@ include(Platform/UnixPaths)
 
 # Debian has lib32 and lib64 paths only for compatibility so they should not be
 # searched.
-if(NOT CMAKE_CROSSCOMPILING)
+if(NOT CMAKE_CROSSCOMPILING AND NOT CMAKE_COMPILER_SYSROOT)
   if (EXISTS "/etc/debian_version")
     set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB32_PATHS FALSE)
     set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS FALSE)
