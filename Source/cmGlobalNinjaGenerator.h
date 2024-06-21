@@ -485,7 +485,7 @@ public:
   bool CheckCxxModuleSupport(CxxModuleSupportQuery query) override;
 
 protected:
-  std::vector<std::string> GetConfigNames() const;
+  std::vector<std::string> const& GetConfigNames() const;
 
   void Generate() override;
 

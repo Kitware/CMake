@@ -603,10 +603,11 @@ cmDocumentationEntry cmGlobalNinjaGenerator::GetDocumentation()
            "Generates build.ninja files." };
 }
 
-std::vector<std::string> cmGlobalNinjaGenerator::GetConfigNames() const
+std::vector<std::string> const& cmGlobalNinjaGenerator::GetConfigNames() const
 {
-  return this->Makefiles.front()->GetGeneratorConfigs(
-    cmMakefile::IncludeEmptyConfig);
+  return static_cast<cmLocalNinjaGenerator const*>(
+           this->LocalGenerators.front().get())
+    ->GetConfigNames();
 }
 
 // Implemented in all cmGlobaleGenerator sub-classes.
@@ -1632,8 +1633,7 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
     std::string const& currentBinaryDir = it.first;
     DirectoryTarget const& dt = it.second;
     std::vector<std::string> configs =
-      dt.LG->GetMakefile()->GetGeneratorConfigs(
-        cmMakefile::IncludeEmptyConfig);
+      static_cast<cmLocalNinjaGenerator const*>(dt.LG)->GetConfigNames();
 
     // Setup target
     cmNinjaDeps configDeps;
