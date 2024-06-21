@@ -1,0 +1,1 @@
+set(CMAKE_CONFIGURATION_TYPES NotDebug NotRelease)
