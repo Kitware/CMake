@@ -3226,11 +3226,9 @@ void cmGlobalNinjaMultiGenerator::GetQtAutoGenConfigs(
 
 bool cmGlobalNinjaMultiGenerator::InspectConfigTypeVariables()
 {
-  cmList configsList{ this->Makefiles.front()->GetDefinition(
-    "CMAKE_CONFIGURATION_TYPES") };
-  if (configsList.empty()) {
-    configsList.emplace_back();
-  }
+  std::vector<std::string> configsList =
+    this->Makefiles.front()->GetGeneratorConfigs(
+      cmMakefile::IncludeEmptyConfig);
   std::set<std::string> configs(configsList.cbegin(), configsList.cend());
 
   this->DefaultFileConfig =
