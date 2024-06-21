@@ -185,11 +185,13 @@ function(FIND_IMAGEMAGICK_API component header)
       )
     set(ImageMagick_COMPILE_OPTIONS ${ImageMagick_COMPILE_OPTIONS} PARENT_SCOPE)
 
-    add_library(ImageMagick::${component} UNKNOWN IMPORTED)
-    set_target_properties(ImageMagick::${component} PROPERTIES
-      INTERFACE_INCLUDE_DIRECTORIES "${ImageMagick_${component}_INCLUDE_DIRS}"
-      INTERFACE_COMPILE_OPTIONS "${ImageMagick_${component}_COMPILE_OPTIONS}"
-      IMPORTED_LOCATION "${ImageMagick_${component}_LIBRARY}")
+    if(NOT TARGET ImageMagick::${component})
+      add_library(ImageMagick::${component} UNKNOWN IMPORTED)
+      set_target_properties(ImageMagick::${component} PROPERTIES
+        INTERFACE_INCLUDE_DIRECTORIES "${ImageMagick_${component}_INCLUDE_DIRS}"
+        INTERFACE_COMPILE_OPTIONS "${ImageMagick_${component}_COMPILE_OPTIONS}"
+        IMPORTED_LOCATION "${ImageMagick_${component}_LIBRARY}")
+    endif()
   endif()
 endfunction()
 
