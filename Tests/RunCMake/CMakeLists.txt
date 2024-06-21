@@ -288,28 +288,35 @@ if(CMake_TEST_Qt6 AND Qt6Widgets_FOUND)
   cmake_path(GET Qt6_DIR  PARENT_PATH base_dir)  # <base>/lib/cmake
   cmake_path(GET base_dir PARENT_PATH base_dir)  # <base>/lib
   cmake_path(GET base_dir PARENT_PATH base_dir)  # <base>
-  add_RunCMake_test(AutogenQt6 TEST_DIR Autogen
-    -Dwith_qt_version=6
-    -DQtCore_VERSION=${Qt6Core_VERSION}
-    "-DQt6_DIR:PATH=${Qt6_DIR}"
-    "-DCMAKE_PREFIX_PATH:STRING=${base_dir}"
-    -DPSEUDO_TIDY=$<TARGET_FILE:pseudo_tidy>
-    -DPSEUDO_IWYU=$<TARGET_FILE:pseudo_iwyu>
-    -DPSEUDO_CPPLINT=$<TARGET_FILE:pseudo_cpplint>
-    -DPSEUDO_CPPCHECK=$<TARGET_FILE:pseudo_cppcheck>
-  )
+  # Note: Since RunCMake.Autogen tests cause time out on some CI,
+  # we split the tests.
+  set(autogen_test_number 1 2 3 4 5)
+  foreach(val IN ITEMS ${autogen_test_number})
+    add_RunCMake_test("Autogen_Qt6_${val}" TEST_DIR "Autogen_${val}"
+      -Dwith_qt_version=6
+      -DQtCore_VERSION=${Qt6Core_VERSION}
+      "-DQt6_DIR:PATH=${Qt6_DIR}"
+      "-DCMAKE_PREFIX_PATH:STRING=${base_dir}"
+      -DPSEUDO_TIDY=$<TARGET_FILE:pseudo_tidy>
+      -DPSEUDO_IWYU=$<TARGET_FILE:pseudo_iwyu>
+      -DPSEUDO_CPPLINT=$<TARGET_FILE:pseudo_cpplint>
+      -DPSEUDO_CPPCHECK=$<TARGET_FILE:pseudo_cppcheck>
+    )
+  endforeach()
   set(want_NoQt_test FALSE)
 endif ()
 if(CMake_TEST_Qt5 AND Qt5Widgets_FOUND)
-  add_RunCMake_test(AutogenQt5 TEST_DIR Autogen
-    -Dwith_qt_version=5
-    -DQtCore_VERSION=${Qt5Core_VERSION}
-    "-DQt5_DIR:PATH=${Qt5_DIR}"
-  )
+  foreach(val IN ITEMS ${autogen_test_number})
+    add_RunCMake_test("Autogen_Qt5_${val}" TEST_DIR "Autogen_${val}"
+      -Dwith_qt_version=5
+      -DQtCore_VERSION=${Qt5Core_VERSION}
+      "-DQt5_DIR:PATH=${Qt5_DIR}"
+    )
+  endforeach()
   set(want_NoQt_test FALSE)
 endif ()
 if(want_NoQt_test)
-  add_RunCMake_test(AutogenNoQt TEST_DIR Autogen)
+  add_RunCMake_test(AutogenNoQt TEST_DIR Autogen_1)
 endif()
 
 if(NOT DEFINED CMake_TEST_BuildDepends_GNU_AS
