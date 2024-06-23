@@ -40,7 +40,7 @@ using cmCMakePresetsGraphInternal::BaseMacroExpander;
 using cmCMakePresetsGraphInternal::ExpandMacros;
 
 constexpr int MIN_VERSION = 1;
-constexpr int MAX_VERSION = 9;
+constexpr int MAX_VERSION = 10;
 
 struct CMakeVersion
 {
@@ -527,6 +527,9 @@ bool cmCMakePresetsGraph::ReadJSONFile(const std::string& filename,
     cmCMakePresetsErrors::SCHEMA_UNSUPPORTED(&this->parseState);
     return false;
   }
+
+  // Support for $comment added in version 10.
+  this->parseState.allowComments = (v >= 10);
 
   RootPresets presets;
   if ((result = RootPresetsHelper(presets, &root, &parseState)) != true) {

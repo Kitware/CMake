@@ -39,6 +39,9 @@ The files are a JSON document with an object as the root:
 .. literalinclude:: presets/example.json
   :language: json
 
+Preset files specifying version ``10`` or above may include comments using the
+key ``$comment`` at any level within the JSON object to provide documentation.
+
 The root object recognizes the following fields:
 
 ``$schema``
@@ -80,6 +83,9 @@ The root object recognizes the following fields:
 
   ``9``
     .. versionadded:: 3.30
+
+  ``10``
+    .. versionadded:: 3.31
 
 ``cmakeMinimumRequired``
   An optional object representing the minimum version of CMake needed to
