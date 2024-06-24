@@ -2817,6 +2817,10 @@ cm::optional<bool> AdjustRPathELF(std::string const& file,
       return cm::nullopt; // Not a valid ELF file.
     }
 
+    if (!elf.HasDynamicSection()) {
+      return true; // No dynamic section to update.
+    }
+
     // Get the RPATH and RUNPATH entries from it.
     int se_count = 0;
     cmELF::StringEntry const* se[2] = { nullptr, nullptr };
