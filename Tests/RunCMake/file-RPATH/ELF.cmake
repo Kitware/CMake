@@ -1,4 +1,4 @@
-set(names
+set(dynamic
   elf32lsb.bin
   elf32msb.bin
   elf64lsb.bin
