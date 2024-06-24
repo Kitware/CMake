@@ -1,0 +1,1 @@
+Error: invalid value for Multi-Arch: fail\. Valid values are: same, foreign, allowed
