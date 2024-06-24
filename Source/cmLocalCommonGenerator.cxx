@@ -2,10 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmLocalCommonGenerator.h"
 
+#include <memory>
 #include <utility>
 #include <vector>
 
 #include "cmGeneratorTarget.h"
+#include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmOutputConverter.h"
 #include "cmStateDirectory.h"
@@ -13,14 +15,18 @@
 #include "cmStringAlgorithms.h"
 #include "cmValue.h"
 
-class cmGlobalGenerator;
-
 cmLocalCommonGenerator::cmLocalCommonGenerator(cmGlobalGenerator* gg,
                                                cmMakefile* mf)
   : cmLocalGenerator(gg, mf)
 {
-  this->ConfigNames =
-    this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+  // Multi-config generators define one set of configurations at the top.
+  // Single-config generators nominally define one configuration at the top,
+  // but the implementation has never been strict about that, so look up the
+  // per-directory config to preserve behavior.
+  this->ConfigNames = (gg->IsMultiConfig() && !gg->GetMakefiles().empty()
+                         ? gg->GetMakefiles().front().get()
+                         : this->Makefile)
+                        ->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
 }
 
 cmLocalCommonGenerator::~cmLocalCommonGenerator() = default;

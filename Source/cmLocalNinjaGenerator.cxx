@@ -743,8 +743,6 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
 bool cmLocalNinjaGenerator::HasUniqueByproducts(
   std::vector<std::string> const& byproducts, cmListFileBacktrace const& bt)
 {
-  std::vector<std::string> configs =
-    this->GetMakefile()->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
   cmGeneratorExpression ge(*this->GetCMakeInstance(), bt);
   for (std::string const& p : byproducts) {
     if (cmGeneratorExpression::Find(p) == std::string::npos) {
@@ -752,7 +750,7 @@ bool cmLocalNinjaGenerator::HasUniqueByproducts(
     }
     std::set<std::string> seen;
     std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(p);
-    for (std::string const& config : configs) {
+    for (std::string const& config : this->GetConfigNames()) {
       for (std::string const& b :
            this->ExpandCustomCommandOutputPaths(*cge, config)) {
         if (!seen.insert(b).second) {
@@ -800,8 +798,7 @@ std::string cmLocalNinjaGenerator::CreateUtilityOutput(
   std::string const base = cmStrCat(this->GetCurrentBinaryDirectory(),
                                     "/CMakeFiles/", targetName, '-');
   // The output is not actually created so mark it symbolic.
-  for (std::string const& config :
-       this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig)) {
+  for (std::string const& config : this->GetConfigNames()) {
     std::string const force = cmStrCat(base, config);
     if (cmSourceFile* sf = this->Makefile->GetOrCreateGeneratedSource(force)) {
       sf->SetProperty("SYMBOLIC", "1");
