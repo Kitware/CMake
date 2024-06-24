@@ -279,7 +279,7 @@ Return t unless search stops due to end of buffer."
 
 ;------------------------------------------------------------------------------
 
-(defun cmake--syntax-propertize-until-bracket-close (syntax)
+(defun cmake--syntax-propertize-until-bracket-close (syntax end)
   ;; This function assumes that a previous search has matched the
   ;; beginning of a bracket_comment or bracket_argument and that the
   ;; second capture group has matched the equal signs between the two
@@ -307,10 +307,10 @@ Return t unless search stops due to end of buffer."
   (syntax-propertize-rules
    ("\\(#\\)\\[\\(=*\\)\\["
     (1
-     (prog1 "!" (cmake--syntax-propertize-until-bracket-close "!"))))
+     (prog1 "!" (cmake--syntax-propertize-until-bracket-close "!" end))))
    ("\\(\\[\\)\\(=*\\)\\["
     (1
-     (prog1 "|" (cmake--syntax-propertize-until-bracket-close "|"))))))
+     (prog1 "|" (cmake--syntax-propertize-until-bracket-close "|" end))))))
 
 ;; Syntax table for this mode.
 (defvar cmake-mode-syntax-table nil
