@@ -12,6 +12,8 @@
 	<string>${MACOSX_FRAMEWORK_IDENTIFIER}</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>${MACOSX_FRAMEWORK_BUNDLE_NAME}</string>
 	<key>CFBundlePackageType</key>
 	<string>FMWK</string>
 	<key>CFBundleSignature</key>
