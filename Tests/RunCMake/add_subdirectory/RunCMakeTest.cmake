@@ -7,6 +7,10 @@ set(RunCMake_TEST_OPTIONS -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER})
 run_cmake(System)
 unset(RunCMake_TEST_OPTIONS)
 
+if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+  run_cmake_with_options(ChangeConfigMulti "-DCMAKE_CONFIGURATION_TYPES=Debug\\;Release")
+endif()
+
 macro(run_cmake_install case)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${case}-build)
   set(RunCMake_TEST_NO_CLEAN 1)
