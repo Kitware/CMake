@@ -148,9 +148,9 @@ Generator Expressions
   associated :variable:`CMAKE_<LANG>_COMPILER_FRONTEND_VARIANT` variables.
 
 * Link features, as used with the :genex:`LINK_LIBRARY` generator expression,
-  gained the ability to have properties that describe their behavior by
-  specifying the :variable:`CMAKE_LINK_LIBRARY_<FEATURE>_PROPERTIES` or
-  :variable:`CMAKE_<LANG>_LINK_LIBRARY_<FEATURE>_PROPERTIES` variables.
+  gained the ability to have attributes that describe their behavior by
+  specifying the :variable:`CMAKE_LINK_LIBRARY_<FEATURE>_ATTRIBUTES` or
+  :variable:`CMAKE_<LANG>_LINK_LIBRARY_<FEATURE>_ATTRIBUTES` variables.
 
 * The :genex:`QUOTE` generator expression was added to evaluate to ``"``.
 
