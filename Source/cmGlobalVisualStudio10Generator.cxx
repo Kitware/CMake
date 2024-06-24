@@ -225,10 +225,8 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
                                   versionToolsetRegex.match(2));
         // Hard-code special cases for toolset versions whose first
         // three digits do not match their toolset name.
-        if (platformToolset == "v143"_s && versionToolset == "v144"_s &&
-            // VS 17.10 toolset v143 version 14.40.
-            (this->GeneratorToolsetVersion == "14.40"_s ||
-             cmHasLiteralPrefix(this->GeneratorToolsetVersion, "14.40."))) {
+        // The v143 toolset reserves versions 14.30 through 14.49.
+        if (platformToolset == "v143"_s && versionToolset == "v144"_s) {
           versionToolset = "v143";
         }
       } else {
