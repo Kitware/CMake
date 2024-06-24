@@ -1,4 +1,4 @@
-CMAKE_LINK_LIBRARY_<FEATURE>_PROPERTIES
+CMAKE_LINK_LIBRARY_<FEATURE>_ATTRIBUTES
 ---------------------------------------
 
 .. versionadded:: 3.30
@@ -17,28 +17,29 @@ The :variable:`CMAKE_<LANG>_LINK_LIBRARY_USING_<FEATURE>_SUPPORTED` and
 control whether the ``<FEATURE>`` is available at all.
 
 When linking for a particular language ``<LANG>``,
-``CMAKE_LINK_LIBRARY_<FEATURE>_PROPERTIES`` is ignored if the
-:variable:`CMAKE_<LANG>_LINK_LIBRARY_<FEATURE>_PROPERTIES` variable is also
+``CMAKE_LINK_LIBRARY_<FEATURE>_ATTRIBUTES`` is ignored if the
+:variable:`CMAKE_<LANG>_LINK_LIBRARY_<FEATURE>_ATTRIBUTES` variable is also
 defined for the same ``<FEATURE>``.
 
-The value of ``CMAKE_LINK_LIBRARY_<FEATURE>_PROPERTIES`` and
-:variable:`CMAKE_<LANG>_LINK_LIBRARY_<FEATURE>_PROPERTIES` at the end of the
+The value of ``CMAKE_LINK_LIBRARY_<FEATURE>_ATTRIBUTES`` and
+:variable:`CMAKE_<LANG>_LINK_LIBRARY_<FEATURE>_ATTRIBUTES` at the end of the
 directory scope in which a target is defined is what matters.
 
-Feature Properties Definition
+Feature Attributes Definition
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A feature properties definition is a
-:ref:`semicolon-separated list <CMake Language Lists>` of ``property=value(s)``
-items. If a property has multiple values, those values must be comma-separated.
+A feature attributes definition is a
+:ref:`semicolon-separated list <CMake Language Lists>` of
+``attribute=value(s)`` items. If an attribute has multiple values, those values
+must be comma-separated.
 
-The following properties are supported:
+The following attributes are supported:
 
 ``LIBRARY_TYPE=<library-type-list>``
   Specify the library types supported by the feature. Supported values are:
   ``STATIC``, ``SHARED``, ``MODULE``, and ``EXECUTABLE``.
 
-  If this property is not specified, the default is
+  If this attribute is not specified, the default is
   ``LIBRARY_TYPE=STATIC,SHARED,MODULE,EXECUTABLE``.
 
   If the feature is used with an unsupported library type, CMake will emit a
@@ -51,9 +52,9 @@ The following properties are supported:
   :prop_tgt:`LINK_LIBRARY_OVERRIDE_<LIBRARY>` target property definitions,
   if defined.
 
-  If this property is not specified, the default is an empty list.
+  If this attribute is not specified, the default is an empty list.
 
-``UNICITY=YES|NO|DEFAULT``
+``DEDUPLICATION=YES|NO|DEFAULT``
   Specify the de-duplication strategy for a library using this feature.
 
   ``YES``
@@ -67,7 +68,7 @@ The following properties are supported:
   ``DEFAULT``
     Let CMake determine a de-duplication strategy automatically.
 
-  If this property is not specified, ``DEFAULT`` will be used.
+  If this attribute is not specified, ``DEFAULT`` will be used.
 
 Example
 ^^^^^^^
@@ -75,14 +76,14 @@ Example
 A common need is the loading of a full archive as part of the creation of a
 shared library. The built-in ``WHOLE_ARCHIVE`` feature can be used for that
 purpose. The implementation of that built-in feature sets the following
-link library feature properties:
+link library feature attributes:
 
 .. code-block:: cmake
 
-  set(CMAKE_LINK_LIBRARY_WHOLE_ARCHIVE_PROPERTIES
+  set(CMAKE_LINK_LIBRARY_WHOLE_ARCHIVE_ATTRIBUTES
     LIBRARY_TYPE=STATIC
     OVERRIDE=DEFAULT
-    UNICITY=YES
+    DEDUPLICATION=YES
   )
 
 ``LIBRARY_TYPE=STATIC``
@@ -92,7 +93,7 @@ link library feature properties:
   because they are compatible and enhance the user's experience: standard
   library specification and ``$<LINK_LIBRARY:WHOLE_ARCHIVE>`` can be used
   freely.
-``UNICITY=YES``
+``DEDUPLICATION=YES``
   When this feature is used, the linker loads all symbols from the static
   library, so there is no need to repeat the library on the linker
   command line.

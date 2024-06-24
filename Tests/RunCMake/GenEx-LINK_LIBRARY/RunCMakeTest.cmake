@@ -36,9 +36,12 @@ run_cmake(override-features3)
 run_cmake(override-features4)
 run_cmake(override-features5)
 
-# testing feature properties specification
-run_cmake(bad-feature-properties1)
-run_cmake(bad-feature-properties2)
-run_cmake(bad-feature-properties3)
-run_cmake(bad-feature-properties4)
-run_cmake(bad-feature-properties5)
+# testing feature attributes specification
+run_cmake(bad-feature-attributes1)
+run_cmake(bad-feature-attributes2)
+run_cmake(bad-feature-attributes3)
+run_cmake(bad-feature-attributes4)
+run_cmake(bad-feature-attributes5)
+run_cmake(unsupported-library_type)
+run_cmake(cyclic-override)
+run_cmake(multiple-override)

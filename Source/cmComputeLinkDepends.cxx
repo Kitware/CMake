@@ -202,8 +202,8 @@ bool IsFeatureSupported(cmMakefile* makefile, std::string const& linkLanguage,
   return makefile->GetDefinition(featureSupported).IsOn();
 }
 
-// LINK_LIBRARY feature properties management
-struct LinkLibraryFeaturePropertySet
+// LINK_LIBRARY feature attributes management
+struct LinkLibraryFeatureAttributeSet
 {
   std::set<cmStateEnums::TargetType> LibraryTypes = {
     cmStateEnums::EXECUTABLE, cmStateEnums::STATIC_LIBRARY,
@@ -212,84 +212,88 @@ struct LinkLibraryFeaturePropertySet
   };
   std::set<std::string> Override;
 
-  enum UnicityKind
+  enum DeduplicationKind
   {
     Default,
     Yes,
     No
   };
-  UnicityKind Unicity = Default;
+  DeduplicationKind Deduplication = Default;
 };
-std::map<std::string, LinkLibraryFeaturePropertySet>
-  LinkLibraryFeatureProperties;
-const LinkLibraryFeaturePropertySet& GetLinkLibraryFeatureProperties(
+std::map<std::string, LinkLibraryFeatureAttributeSet>
+  LinkLibraryFeatureAttributes;
+const LinkLibraryFeatureAttributeSet& GetLinkLibraryFeatureAttributes(
   cmMakefile* makefile, std::string const& linkLanguage,
   const std::string& feature)
 {
-  auto it = LinkLibraryFeatureProperties.find(feature);
-  if (it != LinkLibraryFeatureProperties.end()) {
+  auto it = LinkLibraryFeatureAttributes.find(feature);
+  if (it != LinkLibraryFeatureAttributes.end()) {
     return it->second;
   }
 
-  auto featurePropertiesVariable =
-    cmStrCat("CMAKE_", linkLanguage, "_LINK_LIBRARY_", feature, "_PROPERTIES");
-  auto featurePropertiesValues =
-    makefile->GetDefinition(featurePropertiesVariable);
-  if (featurePropertiesValues.IsEmpty()) {
+  auto featureAttributesVariable =
+    cmStrCat("CMAKE_", linkLanguage, "_LINK_LIBRARY_", feature, "_ATTRIBUTES");
+  auto featureAttributesValues =
+    makefile->GetDefinition(featureAttributesVariable);
+  if (featureAttributesValues.IsEmpty()) {
     // try language agnostic definition
-    featurePropertiesVariable =
-      cmStrCat("CMAKE_LINK_LIBRARY_", feature, "_PROPERTIES");
-    featurePropertiesValues =
-      makefile->GetDefinition(featurePropertiesVariable);
+    featureAttributesVariable =
+      cmStrCat("CMAKE_LINK_LIBRARY_", feature, "_ATTRIBUTES");
+    featureAttributesValues =
+      makefile->GetDefinition(featureAttributesVariable);
   }
-  if (!featurePropertiesValues.IsEmpty()) {
-    LinkLibraryFeaturePropertySet featureProperties;
+  if (!featureAttributesValues.IsEmpty()) {
+    LinkLibraryFeatureAttributeSet featureAttributes;
     cmsys::RegularExpression processingOption{
-      "^(LIBRARY_TYPE|UNICITY|OVERRIDE)=((STATIC|SHARED|MODULE|EXECUTABLE)(,("
+      "^(LIBRARY_TYPE|DEDUPLICATION|OVERRIDE)=((STATIC|SHARED|MODULE|"
+      "EXECUTABLE)(,("
       "STATIC|"
       "SHARED|MODULE|EXECUTABLE)"
       ")*|YES|NO|DEFAULT|[A-Za-z0-9_]+(,[A-Za-z0-9_]+)*)$"
     };
     std::string errorMessage;
-    for (auto const& option : cmList{ featurePropertiesValues }) {
+    for (auto const& option : cmList{ featureAttributesValues }) {
       if (processingOption.find(option)) {
         if (processingOption.match(1) == "LIBRARY_TYPE") {
-          featureProperties.LibraryTypes.clear();
+          featureAttributes.LibraryTypes.clear();
           for (auto const& value :
                cmTokenize(processingOption.match(2), ","_s)) {
             if (value == "STATIC") {
-              featureProperties.LibraryTypes.emplace(
+              featureAttributes.LibraryTypes.emplace(
                 cmStateEnums::STATIC_LIBRARY);
             } else if (value == "SHARED") {
-              featureProperties.LibraryTypes.emplace(
+              featureAttributes.LibraryTypes.emplace(
                 cmStateEnums::SHARED_LIBRARY);
             } else if (value == "MODULE") {
-              featureProperties.LibraryTypes.emplace(
+              featureAttributes.LibraryTypes.emplace(
                 cmStateEnums::MODULE_LIBRARY);
             } else if (value == "EXECUTABLE") {
-              featureProperties.LibraryTypes.emplace(cmStateEnums::EXECUTABLE);
+              featureAttributes.LibraryTypes.emplace(cmStateEnums::EXECUTABLE);
             } else {
               errorMessage += cmStrCat("  ", option, '\n');
               break;
             }
           }
           // Always add UNKNOWN type
-          featureProperties.LibraryTypes.emplace(
+          featureAttributes.LibraryTypes.emplace(
             cmStateEnums::UNKNOWN_LIBRARY);
-        } else if (processingOption.match(1) == "UNICITY") {
+        } else if (processingOption.match(1) == "DEDUPLICATION") {
           if (processingOption.match(2) == "YES") {
-            featureProperties.Unicity = LinkLibraryFeaturePropertySet::Yes;
+            featureAttributes.Deduplication =
+              LinkLibraryFeatureAttributeSet::Yes;
           } else if (processingOption.match(2) == "NO") {
-            featureProperties.Unicity = LinkLibraryFeaturePropertySet::No;
+            featureAttributes.Deduplication =
+              LinkLibraryFeatureAttributeSet::No;
           } else if (processingOption.match(2) == "DEFAULT") {
-            featureProperties.Unicity = LinkLibraryFeaturePropertySet::Default;
+            featureAttributes.Deduplication =
+              LinkLibraryFeatureAttributeSet::Default;
           } else {
             errorMessage += cmStrCat("  ", option, '\n');
           }
         } else if (processingOption.match(1) == "OVERRIDE") {
-          featureProperties.Override.clear();
+          featureAttributes.Override.clear();
           auto values = cmTokenize(processingOption.match(2), ","_s);
-          featureProperties.Override.insert(values.begin(), values.end());
+          featureAttributes.Override.insert(values.begin(), values.end());
         }
       } else {
         errorMessage += cmStrCat("  ", option, '\n');
@@ -298,14 +302,14 @@ const LinkLibraryFeaturePropertySet& GetLinkLibraryFeatureProperties(
     if (!errorMessage.empty()) {
       makefile->GetCMakeInstance()->IssueMessage(
         MessageType::FATAL_ERROR,
-        cmStrCat("Erroneous option(s) for '", featurePropertiesVariable,
+        cmStrCat("Erroneous option(s) for '", featureAttributesVariable,
                  "':\n", errorMessage));
     }
-    return LinkLibraryFeatureProperties.emplace(feature, featureProperties)
+    return LinkLibraryFeatureAttributes.emplace(feature, featureAttributes)
       .first->second;
   }
-  return LinkLibraryFeatureProperties
-    .emplace(feature, LinkLibraryFeaturePropertySet{})
+  return LinkLibraryFeatureAttributes
+    .emplace(feature, LinkLibraryFeatureAttributeSet{})
     .first->second;
 }
 
@@ -376,8 +380,10 @@ public:
       case cmPolicies::NEW: {
         if (auto libProcessing = makefile->GetDefinition(cmStrCat(
               "CMAKE_", linkLanguage, "_LINK_LIBRARIES_PROCESSING"))) {
+          // UNICITY keyword is just for compatibility with previous
+          // implementation
           cmsys::RegularExpression processingOption{
-            "^(ORDER|UNICITY)=(FORWARD|REVERSE|ALL|NONE|SHARED)$"
+            "^(ORDER|UNICITY|DEDUPLICATION)=(FORWARD|REVERSE|ALL|NONE|SHARED)$"
           };
           std::string errorMessage;
           for (auto const& option : cmList{ libProcessing }) {
@@ -390,13 +396,14 @@ public:
                 } else {
                   errorMessage += cmStrCat("  ", option, '\n');
                 }
-              } else if (processingOption.match(1) == "UNICITY") {
+              } else if (processingOption.match(1) == "UNICITY" ||
+                         processingOption.match(1) == "DEDUPLICATION") {
                 if (processingOption.match(2) == "ALL") {
-                  this->Unicity = All;
+                  this->Deduplication = All;
                 } else if (processingOption.match(2) == "NONE") {
-                  this->Unicity = None;
+                  this->Deduplication = None;
                 } else if (processingOption.match(2) == "SHARED") {
-                  this->Unicity = Shared;
+                  this->Deduplication = Shared;
                 } else {
                   errorMessage += cmStrCat("  ", option, '\n');
                 }
@@ -499,7 +506,7 @@ private:
     Reverse
   };
 
-  enum UnicityKind
+  enum DeduplicationKind
   {
     None,
     Shared,
@@ -509,22 +516,23 @@ private:
   bool IncludeEntry(LinkEntry const& entry) const
   {
     if (entry.Feature != cmComputeLinkDepends::LinkEntry::DEFAULT) {
-      auto const& featureProperties = GetLinkLibraryFeatureProperties(
+      auto const& featureAttributes = GetLinkLibraryFeatureAttributes(
         this->Target->Makefile, this->LinkLanguage, entry.Feature);
       if ((entry.Target == nullptr ||
-           featureProperties.LibraryTypes.find(entry.Target->GetType()) !=
-             featureProperties.LibraryTypes.end()) &&
-          featureProperties.Unicity !=
-            LinkLibraryFeaturePropertySet::Default) {
-        return featureProperties.Unicity == LinkLibraryFeaturePropertySet::No;
+           featureAttributes.LibraryTypes.find(entry.Target->GetType()) !=
+             featureAttributes.LibraryTypes.end()) &&
+          featureAttributes.Deduplication !=
+            LinkLibraryFeatureAttributeSet::Default) {
+        return featureAttributes.Deduplication ==
+          LinkLibraryFeatureAttributeSet::No;
       }
     }
 
-    return this->Unicity == None ||
-      (this->Unicity == Shared &&
+    return this->Deduplication == None ||
+      (this->Deduplication == Shared &&
        (entry.Target == nullptr ||
         entry.Target->GetType() != cmStateEnums::SHARED_LIBRARY)) ||
-      (this->Unicity == All && entry.Kind != LinkEntry::Library);
+      (this->Deduplication == All && entry.Kind != LinkEntry::Library);
   }
 
   template <typename Range>
@@ -539,7 +547,7 @@ private:
   }
 
   OrderKind Order = Reverse;
-  UnicityKind Unicity = Shared;
+  DeduplicationKind Deduplication = Shared;
   const cmGeneratorTarget* Target;
   const std::string& LinkLanguage;
   EntryVector& Entries;
@@ -1121,27 +1129,29 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
           " library '", entry.Item.Value, "'."),
         this->Target->GetBacktrace());
     }
+    // check if feature is applicable to this item
+    if (itemFeature != LinkEntry::DEFAULT && entry.Target != nullptr) {
+      auto const& featureAttributes = GetLinkLibraryFeatureAttributes(
+        this->Makefile, this->LinkLanguage, itemFeature);
+      if (featureAttributes.LibraryTypes.find(entry.Target->GetType()) ==
+          featureAttributes.LibraryTypes.end()) {
+        supportedItem = false;
+        this->CMakeInstance->IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat("The feature '", itemFeature,
+                   "', specified as part of a generator-expression "
+                   "'$<LINK_LIBRARY:",
+                   itemFeature, ">', will not be applied to the ",
+                   cmState::GetTargetTypeName(entry.Target->GetType()), " '",
+                   entry.Item.Value, "'."),
+          this->Target->GetBacktrace());
+      }
+    }
     if (ale.second) {
       // current item not yet defined
       entry.Feature = itemFeature;
-
-      if (itemFeature != LinkEntry::DEFAULT && entry.Target != nullptr) {
-        auto const& featureProperties = GetLinkLibraryFeatureProperties(
-          this->Makefile, this->LinkLanguage, itemFeature);
-        if (featureProperties.LibraryTypes.find(entry.Target->GetType()) ==
-            featureProperties.LibraryTypes.end()) {
-          supportedItem = false;
-          entry.Feature = LinkEntry::DEFAULT;
-          this->CMakeInstance->IssueMessage(
-            MessageType::AUTHOR_WARNING,
-            cmStrCat("The feature '", itemFeature,
-                     "', specified as part of a generator-expression "
-                     "'$<LINK_LIBRARY:",
-                     itemFeature, ">', will not be applied to the ",
-                     cmState::GetTargetTypeName(entry.Target->GetType()), " '",
-                     entry.Item.Value, "'."),
-            this->Target->GetBacktrace());
-        }
+      if (!supportedItem) {
+        entry.Feature = LinkEntry::DEFAULT;
       }
     }
 
@@ -1170,38 +1180,50 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
       if (entry.Feature != itemFeature) {
         bool incompatibleFeatures = true;
         // check if an override is possible
-        auto const& entryFeatureProperties = GetLinkLibraryFeatureProperties(
+        auto const& entryFeatureAttributes = GetLinkLibraryFeatureAttributes(
           this->Makefile, this->LinkLanguage, entry.Feature);
-        auto const& itemFeatureProperties = GetLinkLibraryFeatureProperties(
+        auto const& itemFeatureAttributes = GetLinkLibraryFeatureAttributes(
           this->Makefile, this->LinkLanguage, itemFeature);
-        if (entryFeatureProperties.Override.empty() &&
-            !itemFeatureProperties.Override.empty() &&
-            itemFeatureProperties.Override.find(entry.Feature) !=
-              itemFeatureProperties.Override.end()) {
-          entry.Feature = itemFeature;
-          incompatibleFeatures = false;
-        } else if (!entryFeatureProperties.Override.empty() &&
-                   itemFeatureProperties.Override.empty() &&
-                   entryFeatureProperties.Override.find(itemFeature) !=
-                     entryFeatureProperties.Override.end()) {
-          incompatibleFeatures = false;
-        }
-        if (incompatibleFeatures) {
-          // incompatibles features occurred
+        if (itemFeatureAttributes.Override.find(entry.Feature) !=
+              itemFeatureAttributes.Override.end() &&
+            entryFeatureAttributes.Override.find(itemFeature) !=
+              entryFeatureAttributes.Override.end()) {
+          // features override each other
           this->CMakeInstance->IssueMessage(
             MessageType::FATAL_ERROR,
             cmStrCat("Impossible to link target '", this->Target->GetName(),
                      "' because the link item '", entry.Item.Value,
-                     "', specified ",
-                     (itemFeature == LinkEntry::DEFAULT
-                        ? "without any feature or 'DEFAULT' feature"
-                        : cmStrCat("with the feature '", itemFeature, '\'')),
-                     ", has already occurred ",
-                     (entry.Feature == LinkEntry::DEFAULT
-                        ? "without any feature or 'DEFAULT' feature"
-                        : cmStrCat("with the feature '", entry.Feature, '\'')),
-                     ", which is not allowed."),
+                     "' is specified with the features '", itemFeature,
+                     "' and '", entry.Feature, "'",
+                     ", and both have an 'OVERRIDE' attribute that overrides "
+                     "the other. Such cycles are not allowed."),
             this->Target->GetBacktrace());
+        } else {
+          if (itemFeatureAttributes.Override.find(entry.Feature) !=
+              itemFeatureAttributes.Override.end()) {
+            entry.Feature = itemFeature;
+            incompatibleFeatures = false;
+          } else if (entryFeatureAttributes.Override.find(itemFeature) !=
+                     entryFeatureAttributes.Override.end()) {
+            incompatibleFeatures = false;
+          }
+          if (incompatibleFeatures) {
+            // incompatibles features occurred
+            this->CMakeInstance->IssueMessage(
+              MessageType::FATAL_ERROR,
+              cmStrCat(
+                "Impossible to link target '", this->Target->GetName(),
+                "' because the link item '", entry.Item.Value, "', specified ",
+                (itemFeature == LinkEntry::DEFAULT
+                   ? "without any feature or 'DEFAULT' feature"
+                   : cmStrCat("with the feature '", itemFeature, '\'')),
+                ", has already occurred ",
+                (entry.Feature == LinkEntry::DEFAULT
+                   ? "without any feature or 'DEFAULT' feature"
+                   : cmStrCat("with the feature '", entry.Feature, '\'')),
+                ", which is not allowed."),
+              this->Target->GetBacktrace());
+          }
         }
       }
     }
