@@ -789,6 +789,21 @@ bool cmCPackDebGenerator::createDeb()
   if (cmNonempty(debian_pkg_replaces)) {
     controlValues["Replaces"] = *debian_pkg_replaces;
   }
+  cmValue debian_pkg_multiarch =
+    this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_MULTIARCH");
+  if (cmNonempty(debian_pkg_multiarch)) {
+    // check for valid values: same, foreign, allowed
+    if (*debian_pkg_multiarch != "same" &&
+        *debian_pkg_multiarch != "foreign" &&
+        *debian_pkg_multiarch != "allowed") {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Error: invalid value for Multi-Arch: "
+                      << *debian_pkg_multiarch
+                      << ". Valid values are: same, foreign, allowed\n");
+      return false;
+    }
+    controlValues["Multi-Arch"] = *debian_pkg_multiarch;
+  }
 
   const std::string strGenWDIR(this->GetOption("GEN_WDIR"));
   const std::string shlibsfilename = strGenWDIR + "/shlibs";

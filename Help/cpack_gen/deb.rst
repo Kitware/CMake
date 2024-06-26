@@ -654,6 +654,31 @@ List of CPack DEB generator specific variables:
    This value is not interpreted. It is possible to pass an optional
    revision number of the referenced source package as well.
 
+.. variable:: CPACK_DEBIAN_PACKAGE_MULTIARCH
+              CPACK_DEBIAN_<COMPONENT>_PACKAGE_MULTIARCH
+
+ Sets the `Multi-Arch` field of the Debian package.
+ Packages can declare in their control file how they should handle
+ situations, where packages for different architectures are being installed
+ on the same machine.
+
+ :Mandatory: No
+ :Default:
+
+   - An empty string for non-component based installations
+   - :variable:`CPACK_DEBIAN_PACKAGE_MULTIARCH` for component-based
+     installations.
+
+ .. versionadded:: 3.31
+  Per-component :variable:`!CPACK_DEBIAN_<COMPONENT>_PACKAGE_MULTIARCH` variables.
+
+ See https://wiki.debian.org/MultiArch/Hints
+
+ .. note::
+
+   This value is validated. It must be one of the following values:
+   ``same``, ``foreign``, ``allowed``.
+
 Packaging of debug information
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
