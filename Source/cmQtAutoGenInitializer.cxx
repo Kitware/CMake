@@ -1671,13 +1671,10 @@ bool cmQtAutoGenInitializer::InitRccTargets()
       sf->SetProperty("SKIP_UNITY_BUILD_INCLUSION", "On");
     }
 
-    std::vector<std::string> ccOutput;
-    ccOutput.push_back(qrc.OutputFile);
+    std::vector<std::string> ccOutput{ qrc.OutputFile };
 
-    std::vector<std::string> ccDepends;
     // Add the .qrc and info file to the custom command dependencies
-    ccDepends.push_back(qrc.QrcFile);
-    ccDepends.push_back(qrc.InfoFile);
+    std::vector<std::string> ccDepends{ qrc.QrcFile, qrc.InfoFile };
 
     cmCustomCommandLines commandLines;
     AddCMakeProcessToCommandLines(qrc.InfoFile, "cmake_autorcc", commandLines);
