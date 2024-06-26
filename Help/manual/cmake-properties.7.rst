@@ -430,6 +430,7 @@ Properties on Targets
    /prop_tgt/VS_DOTNET_STARTUP_OBJECT
    /prop_tgt/VS_DOTNET_TARGET_FRAMEWORK_VERSION
    /prop_tgt/VS_DPI_AWARE
+   /prop_tgt/VS_FRAMEWORK_REFERENCES
    /prop_tgt/VS_GLOBAL_KEYWORD
    /prop_tgt/VS_GLOBAL_PROJECT_TYPES
    /prop_tgt/VS_GLOBAL_ROOTNAMESPACE
