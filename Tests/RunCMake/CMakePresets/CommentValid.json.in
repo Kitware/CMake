@@ -1,0 +1,14 @@
+{
+  "$comment": [
+    "example comment",
+    "with an array of strings"
+  ],
+  "version": 10,
+  "configurePresets": [
+    {
+      "name": "CommentValid",
+      "generator": "@RunCMake_GENERATOR@",
+      "binaryDir": "${sourceDir}/build"
+    }
+  ]
+}

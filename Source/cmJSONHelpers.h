@@ -119,6 +119,12 @@ struct cmJSONHelperBuilder
         extraFields = value->getMemberNames();
       }
 
+      if (state->allowComments) {
+        extraFields.erase(
+          std::remove(extraFields.begin(), extraFields.end(), "$comment"),
+          extraFields.end());
+      }
+
       for (auto const& m : this->Members) {
         std::string name(m.Name.data(), m.Name.size());
         state->push_stack(name, value);
