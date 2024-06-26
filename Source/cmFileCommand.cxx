@@ -8,6 +8,7 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <iterator>
 #include <map>
 #include <set>
 #include <sstream>
@@ -881,6 +882,42 @@ bool HandleMakeDirectoryCommand(std::vector<std::string> const& args,
   // Projects might pass a dynamically generated list of directories, and it
   // could be an empty list. We should not assume there is at least one.
 
+  cmRange<std::vector<std::string>::const_iterator> argsRange =
+    cmMakeRange(args).advance(1); // Get rid of subcommand
+
+  struct Arguments : public ArgumentParser::ParseResult
+  {
+    std::string Result;
+  };
+  Arguments arguments;
+
+  auto resultPosItr =
+    std::find(cm::begin(argsRange), cm::end(argsRange), "RESULT");
+  if (resultPosItr != cm::end(argsRange)) {
+    static auto const parser =
+      cmArgumentParser<Arguments>{}.Bind("RESULT"_s, &Arguments::Result);
+    std::vector<std::string> unparsedArguments;
+    auto resultDistanceFromBegin =
+      std::distance(cm::begin(argsRange), resultPosItr);
+    arguments =
+      parser.Parse(cmMakeRange(argsRange).advance(resultDistanceFromBegin),
+                   &unparsedArguments);
+
+    if (!unparsedArguments.empty()) {
+      std::string unexpectedArgsStr = cmJoin(
+        cmMakeRange(cm::begin(unparsedArguments), cm::end(unparsedArguments)),
+        "\n");
+      status.SetError("MAKE_DIRECTORY called with unexpected\n"
+                      "arguments:\n" +
+                      unexpectedArgsStr);
+      return false;
+    }
+
+    auto resultDistanceFromEnd =
+      std::distance(cm::end(argsRange), resultPosItr);
+    argsRange = argsRange.retreat(-resultDistanceFromEnd);
+  }
+
   std::string expr;
   for (std::string const& arg :
        cmMakeRange(args).advance(1)) // Get rid of subcommand
@@ -892,19 +929,33 @@ bool HandleMakeDirectoryCommand(std::vector<std::string> const& args,
       cdir = &expr;
     }
     if (!status.GetMakefile().CanIWriteThisFile(*cdir)) {
-      std::string e = "attempted to create a directory: " + *cdir +
-        " into a source directory.";
-      status.SetError(e);
-      cmSystemTools::SetFatalErrorOccurred();
-      return false;
+      std::string e = cmStrCat("attempted to create a directory: ", *cdir,
+                               " into a source directory.");
+      if (arguments.Result.empty()) {
+        status.SetError(e);
+        cmSystemTools::SetFatalErrorOccurred();
+        return false;
+      }
+      status.GetMakefile().AddDefinition(arguments.Result, e);
+      return true;
     }
     cmsys::Status mkdirStatus = cmSystemTools::MakeDirectory(*cdir);
     if (!mkdirStatus) {
-      std::string error = cmStrCat("failed to create directory:\n  ", *cdir,
-                                   "\nbecause: ", mkdirStatus.GetString());
-      status.SetError(error);
-      return false;
+      if (arguments.Result.empty()) {
+        std::string errorOutput =
+          cmStrCat("failed to create directory:\n  ", *cdir,
+                   "\nbecause: ", mkdirStatus.GetString());
+        status.SetError(errorOutput);
+        return false;
+      }
+      std::string errorResult = cmStrCat("Failed to create directory: ", *cdir,
+                                         " Error: ", mkdirStatus.GetString());
+      status.GetMakefile().AddDefinition(arguments.Result, errorResult);
+      return true;
     }
+  }
+  if (!arguments.Result.empty()) {
+    status.GetMakefile().AddDefinition(arguments.Result, "0");
   }
   return true;
 }

@@ -1,0 +1,9 @@
+^CMake Error at [^
+]*/MAKE_DIRECTORY-one-dir-FAIL.cmake:[0-9]+ \(file\):
+  file failed to create directory:
+
+    [^
+]*/Tests/RunCMake/file-MAKE_DIRECTORY/MAKE_DIRECTORY-one-dir-FAIL-build/file/directory
+
+  because: [^
+]+$

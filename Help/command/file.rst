@@ -398,9 +398,18 @@ Filesystem
   ============== ======================================================
 
 .. signature::
-  file(MAKE_DIRECTORY <directories>...)
+  file(MAKE_DIRECTORY <directories>... [RESULT <result>])
 
   Create the given directories and their parents as needed.
+
+  The options are:
+
+    ``RESULT <result>``
+      .. versionadded:: 3.31
+
+      Set ``<result>`` variable to ``0`` on success or an error message
+      otherwise. If ``RESULT`` is not specified and the operation fails,
+      an error is emitted.
 
   .. versionchanged:: 3.30
     ``<directories>`` can be an empty list. CMake 3.29 and earlier required
