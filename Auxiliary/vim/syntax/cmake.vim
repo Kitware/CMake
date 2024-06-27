@@ -416,6 +416,7 @@ syn keyword cmakeProperty contained
             \ VS_DOTNET_STARTUP_OBJECT
             \ VS_DOTNET_TARGET_FRAMEWORK_VERSION
             \ VS_DPI_AWARE
+            \ VS_FRAMEWORK_REFERENCES
             \ VS_GLOBAL_KEYWORD
             \ VS_GLOBAL_PROJECT_TYPES
             \ VS_GLOBAL_ROOTNAMESPACE

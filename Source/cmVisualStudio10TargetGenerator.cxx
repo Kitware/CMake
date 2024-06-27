@@ -813,6 +813,7 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
     this->WriteCustomCommands(e0);
     this->WriteAllSources(e0);
     this->WriteDotNetReferences(e0);
+    this->WriteFrameworkReferences(e0);
     this->WritePackageReferences(e0);
     this->WriteImports(e0);
     this->WriteEmbeddedResourceGroup(e0);
@@ -1185,6 +1186,21 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReference(
     e2.Element("HintPath", hint);
   }
   this->WriteDotNetReferenceCustomTags(e2, ref);
+}
+
+void cmVisualStudio10TargetGenerator::WriteFrameworkReferences(Elem& e0)
+{
+  cmList references;
+  if (cmValue vsFrameworkReferences =
+        this->GeneratorTarget->GetProperty("VS_FRAMEWORK_REFERENCES")) {
+    references.assign(*vsFrameworkReferences);
+  }
+
+  Elem e1(e0, "ItemGroup");
+  for (auto const& ref : references) {
+    Elem e2(e1, "FrameworkReference");
+    e2.Attribute("Include", ref);
+  }
 }
 
 void cmVisualStudio10TargetGenerator::WriteImports(Elem& e0)
