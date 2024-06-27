@@ -1671,13 +1671,10 @@ bool cmQtAutoGenInitializer::InitRccTargets()
       sf->SetProperty("SKIP_UNITY_BUILD_INCLUSION", "On");
     }
 
-    std::vector<std::string> ccOutput;
-    ccOutput.push_back(qrc.OutputFile);
+    std::vector<std::string> ccOutput{ qrc.OutputFile };
 
-    std::vector<std::string> ccDepends;
     // Add the .qrc and info file to the custom command dependencies
-    ccDepends.push_back(qrc.QrcFile);
-    ccDepends.push_back(qrc.InfoFile);
+    std::vector<std::string> ccDepends{ qrc.QrcFile, qrc.InfoFile };
 
     cmCustomCommandLines commandLines;
     AddCMakeProcessToCommandLines(qrc.InfoFile, "cmake_autorcc", commandLines);
@@ -1700,13 +1697,43 @@ bool cmQtAutoGenInitializer::InitRccTargets()
         if (!qrc.Unique) {
           ccName += cmStrCat('_', qrc.QrcPathChecksum);
         }
+        cmTarget* autoRccTarget = nullptr;
+        // When CMAKE_GLOBAL_AUTORCC_TARGET is ON and qrc is not generated,
+        // Add generate a timestamp file and a custom command to touch it.
+        // This will ensure that the global autorcc target is run only when the
+        // qrc file changes.
+        if (!qrc.Generated && this->Rcc.GlobalTarget) {
+          cm::string_view const timestampFileName = "global_rcc_timestamp";
+          auto const outputFile =
+            cmStrCat(this->Dir.Build, "/", timestampFileName);
+          commandLines.push_back(cmMakeCommandLine(
+            { cmSystemTools::GetCMakeCommand(), "-E", "touch", outputFile }));
+          cc->SetByproducts(ccOutput);
+          cc->SetDepends(ccDepends);
+          cc->SetEscapeOldStyle(false);
+          cc->SetOutputs(outputFile);
+          cc->SetCommandLines(commandLines);
+          this->LocalGen->AddCustomCommandToOutput(std::move(cc));
+          this->AddGeneratedSource(outputFile, this->Rcc);
+          ccDepends.clear();
+          ccDepends.push_back(outputFile);
 
-        cc->SetByproducts(ccOutput);
-        cc->SetDepends(ccDepends);
-        cc->SetEscapeOldStyle(false);
-        cmTarget* autoRccTarget =
-          this->LocalGen->AddUtilityCommand(ccName, true, std::move(cc));
+          auto ccRccTarget = cm::make_unique<cmCustomCommand>();
+          ccRccTarget->SetWorkingDirectory(this->Dir.Work.c_str());
+          ccRccTarget->SetComment(ccComment.c_str());
+          ccRccTarget->SetStdPipesUTF8(true);
+          ccRccTarget->SetDepends(ccDepends);
+          ccRccTarget->SetEscapeOldStyle(false);
 
+          autoRccTarget = this->LocalGen->AddUtilityCommand(
+            ccName, true, std::move(ccRccTarget));
+        } else {
+          cc->SetByproducts(ccOutput);
+          cc->SetDepends(ccDepends);
+          cc->SetEscapeOldStyle(false);
+          autoRccTarget =
+            this->LocalGen->AddUtilityCommand(ccName, true, std::move(cc));
+        }
         // Create autogen generator target
         this->LocalGen->AddGeneratorTarget(
           cm::make_unique<cmGeneratorTarget>(autoRccTarget, this->LocalGen));
