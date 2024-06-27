@@ -246,9 +246,8 @@ List of CPack RPM generator specific variables:
  :Default: (system default)
 
  May be used to override RPM compression type to be used to build the
- RPM. For example some Linux distribution now default to ``lzma`` or ``xz``
- compression whereas older cannot use such RPM. Using this one can enforce
- compression type to be used.
+ RPM. For example some Linux distributions default to ``xz`` or ``zstd``.
+ Using this, one can specify a specific compression type to be used.
 
  Possible values are:
 
@@ -263,6 +262,11 @@ List of CPack RPM generator specific variables:
 
   ``gzip``
     GNU Gzip compression
+
+  ``zstd``
+    .. versionadded:: 3.31
+
+    Zstandard compression
 
 .. variable:: CPACK_RPM_PACKAGE_AUTOREQ
               CPACK_RPM_<component>_PACKAGE_AUTOREQ
