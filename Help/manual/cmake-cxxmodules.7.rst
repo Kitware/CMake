@@ -44,7 +44,7 @@ targets with C++ modules.
 
 .. _`P1689R5`: https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2022/p1689r5.html
 
-.. note:
+.. note::
 
    CMake is focusing on correct builds before looking at performance
    improvements. There are known tactics within the chosen strategy which may
