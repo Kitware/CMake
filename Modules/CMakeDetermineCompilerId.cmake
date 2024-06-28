@@ -281,6 +281,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   elseif("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xGNU"
     OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xAppleClang"
     OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xFujitsuClang"
+    OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xIBMClang"
     OR "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xTIClang")
     set(CMAKE_${lang}_COMPILER_FRONTEND_VARIANT "GNU")
   elseif("x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xMSVC")

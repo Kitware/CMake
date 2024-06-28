@@ -1,4 +1,11 @@
 include(Compiler/IBMClang)
+
+set(_ibmclang_version_c "${CMAKE_C_COMPILER_VERSION}")
+set(CMAKE_C_COMPILER_VERSION "${CMAKE_C_COMPILER_VERSION_INTERNAL}")
+include(Compiler/Clang-C)
+set(CMAKE_C_COMPILER_VERSION "${_ibmclang_version_c}")
+unset(_ibmclang_version_c)
+
 __compiler_ibmclang(C)
 
 set(CMAKE_C_COMPILE_OPTIONS_EXPLICIT_LANGUAGE -x c)
