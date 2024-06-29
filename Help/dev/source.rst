@@ -249,6 +249,14 @@ These are:
   * ``cm::is_unique_ptr``:
     Checks if a type is a ``std::unique_ptr`` type.
 
+  * ``cm::remove_member_pointer``
+    Produces the underlying type of a member-pointer type, ie, given ``T C::*``,
+    returns ``T``.
+
+  * ``cm::member_pointer_class``
+    Produces the class associated with a member-pointer type, ie, given
+    ``T C::*``, returns ``C``.
+
 CMake assumes the compiler supports ``#pragma once``. Use this for all
 hand-written header files.
 
