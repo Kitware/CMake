@@ -97,6 +97,10 @@ struct Result : public ArgumentParser::ParseResult
   std::vector<cm::string_view> ParsedKeywords;
 };
 
+struct Derived : Result
+{
+};
+
 std::initializer_list<cm::string_view> const args = {
   /* clang-format off */
   "pos0",                    // position index 0
@@ -312,46 +316,56 @@ static auto const parserStaticFunc4 =
      cm::string_view arg) -> ArgumentParser::Continue {
   return result.Func4(key, arg);
 };
-static auto const parserStatic = //
-  cmArgumentParser<Result>{}
-    .Bind(0, &Result::Pos0)
-    .Bind(1, &Result::Pos1)
-    .Bind(2, &Result::Pos2)
-    .Bind("OPTION_1"_s, &Result::Option1)
-    .Bind("OPTION_2"_s, &Result::Option2)
-    .Bind("STRING_1"_s, &Result::String1)
-    .Bind("STRING_2"_s, &Result::String2)
-    .Bind("STRING_3"_s, &Result::String3)
-    .Bind("STRING_4"_s, &Result::String4)
-    .Bind("STRING_5"_s, &Result::String5)
-    .Bind("STRING_6"_s, &Result::String6)
-    .Bind("LIST_1"_s, &Result::List1)
-    .Bind("LIST_2"_s, &Result::List2)
-    .Bind("LIST_3"_s, &Result::List3)
-    .Bind("LIST_4"_s, &Result::List4)
-    .Bind("LIST_5"_s, &Result::List5)
-    .Bind("LIST_6"_s, &Result::List6)
-    .Bind("MULTI_1"_s, &Result::Multi1)
-    .Bind("MULTI_2"_s, &Result::Multi2)
-    .Bind("MULTI_3"_s, &Result::Multi3)
-    .Bind("MULTI_4"_s, &Result::Multi4)
-    .Bind("FUNC_0"_s, &Result::Func0)
-    .Bind("FUNC_1"_s, &Result::Func1)
-    .Bind("FUNC_2a"_s, &Result::Func2)
-    .Bind("FUNC_2b"_s, &Result::Func2)
-    .Bind("FUNC_3"_s,
-          [](Result& result, cm::string_view arg) -> ArgumentParser::Continue {
-            return result.Func3(arg);
-          })
-    .Bind("FUNC_4a"_s, parserStaticFunc4)
-    .Bind("FUNC_4b"_s, parserStaticFunc4)
-    .BindParsedKeywords(&Result::ParsedKeywords)
-  /* keep semicolon on own line */;
+
+#define BIND_ALL(name, resultType)                                            \
+  static auto const name =                                                    \
+    cmArgumentParser<resultType>{}                                            \
+      .Bind(0, &resultType::Pos0)                                             \
+      .Bind(1, &resultType::Pos1)                                             \
+      .Bind(2, &resultType::Pos2)                                             \
+      .Bind("OPTION_1"_s, &resultType::Option1)                               \
+      .Bind("OPTION_2"_s, &resultType::Option2)                               \
+      .Bind("STRING_1"_s, &resultType::String1)                               \
+      .Bind("STRING_2"_s, &resultType::String2)                               \
+      .Bind("STRING_3"_s, &resultType::String3)                               \
+      .Bind("STRING_4"_s, &resultType::String4)                               \
+      .Bind("STRING_5"_s, &resultType::String5)                               \
+      .Bind("STRING_6"_s, &resultType::String6)                               \
+      .Bind("LIST_1"_s, &resultType::List1)                                   \
+      .Bind("LIST_2"_s, &resultType::List2)                                   \
+      .Bind("LIST_3"_s, &resultType::List3)                                   \
+      .Bind("LIST_4"_s, &resultType::List4)                                   \
+      .Bind("LIST_5"_s, &resultType::List5)                                   \
+      .Bind("LIST_6"_s, &resultType::List6)                                   \
+      .Bind("MULTI_1"_s, &resultType::Multi1)                                 \
+      .Bind("MULTI_2"_s, &resultType::Multi2)                                 \
+      .Bind("MULTI_3"_s, &resultType::Multi3)                                 \
+      .Bind("MULTI_4"_s, &resultType::Multi4)                                 \
+      .Bind("FUNC_0"_s, &resultType::Func0)                                   \
+      .Bind("FUNC_1"_s, &resultType::Func1)                                   \
+      .Bind("FUNC_2a"_s, &resultType::Func2)                                  \
+      .Bind("FUNC_2b"_s, &resultType::Func2)                                  \
+      .Bind("FUNC_3"_s,                                                       \
+            [](resultType& result, cm::string_view arg)                       \
+              -> ArgumentParser::Continue { return result.Func3(arg); })      \
+      .Bind("FUNC_4a"_s, parserStaticFunc4)                                   \
+      .Bind("FUNC_4b"_s, parserStaticFunc4)                                   \
+      .BindParsedKeywords(&resultType::ParsedKeywords)
+
+BIND_ALL(parserStatic, Result);
+BIND_ALL(parserDerivedStatic, Derived);
 
 bool testArgumentParserStatic()
 {
   std::vector<std::string> unparsedArguments;
   Result const result = parserStatic.Parse(args, &unparsedArguments);
+  return verifyResult(result, unparsedArguments);
+}
+
+bool testArgumentParserDerivedStatic()
+{
+  std::vector<std::string> unparsedArguments;
+  Derived const result = parserDerivedStatic.Parse(args, &unparsedArguments);
   return verifyResult(result, unparsedArguments);
 }
 
@@ -374,6 +388,11 @@ int testArgumentParser(int /*unused*/, char* /*unused*/[])
 
   if (!testArgumentParserStatic()) {
     std::cout << "While executing testArgumentParserStatic().\n";
+    return -1;
+  }
+
+  if (!testArgumentParserDerivedStatic()) {
+    std::cout << "While executing testArgumentParserDerivedStatic().\n";
     return -1;
   }
 
