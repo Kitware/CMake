@@ -370,9 +370,9 @@ void cmMakefile::PrintCommandTrace(cmListFileFunction const& lff,
         val["args"].append(arg);
       }
       val["time"] = cmSystemTools::GetTime();
-      val["frame"] = (missing == CommandMissingFromStack::Yes ? 1 : 0) +
+      val["frame"] = int(missing == CommandMissingFromStack::Yes) +
         static_cast<Json::Value::UInt64>(this->ExecutionStatusStack.size());
-      val["global_frame"] = (missing == CommandMissingFromStack::Yes ? 1 : 0) +
+      val["global_frame"] = int(missing == CommandMissingFromStack::Yes) +
         static_cast<Json::Value::UInt64>(this->RecursionDepth);
       msg << Json::writeString(builder, val);
 #endif
