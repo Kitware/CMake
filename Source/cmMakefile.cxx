@@ -3218,10 +3218,10 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
           if (nextAt && nextAt != in + 1 &&
               nextAt ==
                 in + 1 +
-                  strspn(in + 1,
-                         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                         "abcdefghijklmnopqrstuvwxyz"
-                         "0123456789/_.+-")) {
+                  std::strspn(in + 1,
+                              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                              "abcdefghijklmnopqrstuvwxyz"
+                              "0123456789/_.+-")) {
             std::string variable(in + 1, nextAt - in - 1);
 
             std::string varresult;
