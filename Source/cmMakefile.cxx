@@ -4076,15 +4076,23 @@ int cmMakefile::ConfigureFile(const std::string& infile,
   }
 
   if (copyonly) {
-    if (!cmSystemTools::CopyFileIfDifferent(sinfile, soutfile)) {
-      this->IssueMessage(MessageType::FATAL_ERROR,
-                         cmSystemTools::GetLastSystemError());
-      return 0;
-    }
-    if (!cmSystemTools::SetPermissions(soutfile, permissions)) {
-      this->IssueMessage(MessageType::FATAL_ERROR,
-                         cmSystemTools::GetLastSystemError());
+    const auto copy_status =
+      cmSystemTools::CopyFileIfDifferent(sinfile, soutfile);
+    if (!copy_status) {
+      this->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("Fail to copy ",
+                 copy_status.Path == cmsys::SystemTools::CopyStatus::SourcePath
+                   ? "source"
+                   : "destination",
+                 "file: ", copy_status.GetString()));
       res = 0;
+    } else {
+      const auto status = cmSystemTools::SetPermissions(soutfile, permissions);
+      if (!status) {
+        this->IssueMessage(MessageType::FATAL_ERROR, status.GetString());
+        res = 0;
+      }
     }
     return res;
   }
@@ -4135,18 +4143,18 @@ int cmMakefile::ConfigureFile(const std::string& infile,
   // close the files before attempting to copy
   fin.close();
   fout.close();
-  if (!cmSystemTools::CopyFileIfDifferent(tempOutputFile, soutfile)) {
-    this->IssueMessage(MessageType::FATAL_ERROR,
-                       cmSystemTools::GetLastSystemError());
+
+  auto status = cmSystemTools::MoveFileIfDifferent(tempOutputFile, soutfile);
+  if (!status) {
+    this->IssueMessage(MessageType::FATAL_ERROR, status.GetString());
     res = 0;
   } else {
-    if (!cmSystemTools::SetPermissions(soutfile, permissions)) {
-      this->IssueMessage(MessageType::FATAL_ERROR,
-                         cmSystemTools::GetLastSystemError());
+    status = cmSystemTools::SetPermissions(soutfile, permissions);
+    if (!status) {
+      this->IssueMessage(MessageType::FATAL_ERROR, status.GetString());
       res = 0;
     }
   }
-  cmSystemTools::RemoveFile(tempOutputFile);
 
   return res;
 }
