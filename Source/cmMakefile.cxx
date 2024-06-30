@@ -4084,68 +4084,70 @@ int cmMakefile::ConfigureFile(const std::string& infile,
     if (!cmSystemTools::SetPermissions(soutfile, permissions)) {
       this->IssueMessage(MessageType::FATAL_ERROR,
                          cmSystemTools::GetLastSystemError());
-      return 0;
+      res = 0;
     }
+    return res;
+  }
+
+  std::string newLineCharacters;
+  std::ios::openmode omode = std::ios::out | std::ios::trunc;
+  if (newLine.IsValid()) {
+    newLineCharacters = newLine.GetCharacters();
+    omode |= std::ios::binary;
   } else {
-    std::string newLineCharacters;
-    std::ios::openmode omode = std::ios::out | std::ios::trunc;
-    if (newLine.IsValid()) {
-      newLineCharacters = newLine.GetCharacters();
-      omode |= std::ios::binary;
-    } else {
-      newLineCharacters = "\n";
-    }
-    std::string tempOutputFile = cmStrCat(soutfile, ".tmp");
-    cmsys::ofstream fout(tempOutputFile.c_str(), omode);
-    if (!fout) {
-      cmSystemTools::Error("Could not open file for write in copy operation " +
-                           tempOutputFile);
-      cmSystemTools::ReportLastSystemError("");
-      return 0;
-    }
-    cmsys::ifstream fin(sinfile.c_str());
-    if (!fin) {
-      cmSystemTools::Error("Could not open file for read in copy operation " +
-                           sinfile);
-      return 0;
-    }
+    newLineCharacters = "\n";
+  }
+  std::string tempOutputFile = cmStrCat(soutfile, ".tmp");
+  cmsys::ofstream fout(tempOutputFile.c_str(), omode);
+  if (!fout) {
+    cmSystemTools::Error("Could not open file for write in copy operation " +
+                         tempOutputFile);
+    cmSystemTools::ReportLastSystemError("");
+    return 0;
+  }
+  cmsys::ifstream fin(sinfile.c_str());
+  if (!fin) {
+    cmSystemTools::Error("Could not open file for read in copy operation " +
+                         sinfile);
+    return 0;
+  }
 
-    cmsys::FStream::BOM bom = cmsys::FStream::ReadBOM(fin);
-    if (bom != cmsys::FStream::BOM_None && bom != cmsys::FStream::BOM_UTF8) {
-      this->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat("File starts with a Byte-Order-Mark that is not UTF-8:\n  ",
-                 sinfile));
-      return 0;
-    }
-    // rewind to copy BOM to output file
-    fin.seekg(0);
+  cmsys::FStream::BOM bom = cmsys::FStream::ReadBOM(fin);
+  if (bom != cmsys::FStream::BOM_None && bom != cmsys::FStream::BOM_UTF8) {
+    this->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("File starts with a Byte-Order-Mark that is not UTF-8:\n  ",
+               sinfile));
+    return 0;
+  }
+  // rewind to copy BOM to output file
+  fin.seekg(0);
 
-    // now copy input to output and expand variables in the
-    // input file at the same time
-    std::string inLine;
-    std::string outLine;
-    while (cmSystemTools::GetLineFromStream(fin, inLine)) {
-      outLine.clear();
-      this->ConfigureString(inLine, outLine, atOnly, escapeQuotes);
-      fout << outLine << newLineCharacters;
-    }
-    // close the files before attempting to copy
-    fin.close();
-    fout.close();
-    if (!cmSystemTools::CopyFileIfDifferent(tempOutputFile, soutfile)) {
+  // now copy input to output and expand variables in the
+  // input file at the same time
+  std::string inLine;
+  std::string outLine;
+  while (cmSystemTools::GetLineFromStream(fin, inLine)) {
+    outLine.clear();
+    this->ConfigureString(inLine, outLine, atOnly, escapeQuotes);
+    fout << outLine << newLineCharacters;
+  }
+  // close the files before attempting to copy
+  fin.close();
+  fout.close();
+  if (!cmSystemTools::CopyFileIfDifferent(tempOutputFile, soutfile)) {
+    this->IssueMessage(MessageType::FATAL_ERROR,
+                       cmSystemTools::GetLastSystemError());
+    res = 0;
+  } else {
+    if (!cmSystemTools::SetPermissions(soutfile, permissions)) {
       this->IssueMessage(MessageType::FATAL_ERROR,
                          cmSystemTools::GetLastSystemError());
       res = 0;
-    } else {
-      if (!cmSystemTools::SetPermissions(soutfile, permissions)) {
-        this->IssueMessage(MessageType::FATAL_ERROR,
-                           cmSystemTools::GetLastSystemError());
-        res = 0;
-      }
     }
-    cmSystemTools::RemoveFile(tempOutputFile);
   }
+  cmSystemTools::RemoveFile(tempOutputFile);
+
   return res;
 }
 
