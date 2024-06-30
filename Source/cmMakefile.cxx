@@ -204,7 +204,7 @@ bool cmMakefile::CheckCMP0037(std::string const& targetName,
   switch (this->GetPolicyStatus(cmPolicies::CMP0037)) {
     case cmPolicies::WARN:
       if (targetType != cmStateEnums::INTERFACE_LIBRARY) {
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0037) << "\n";
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0037) << '\n';
         issueMessage = true;
       }
       CM_FALLTHROUGH;
@@ -237,14 +237,18 @@ void cmMakefile::MaybeWarnCMP0074(std::string const& rootVar, cmValue rootDef,
   // Warn if a <PackageName>_ROOT variable we may use is set.
   if ((rootDef || rootEnv) && this->WarnedCMP0074.insert(rootVar).second) {
     std::ostringstream w;
-    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0074) << "\n";
+    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0074) << '\n';
     if (rootDef) {
-      w << "CMake variable " << rootVar << " is set to:\n"
-        << "  " << *rootDef << "\n";
+      w << "CMake variable " << rootVar
+        << " is set to:\n"
+           "  "
+        << *rootDef << '\n';
     }
     if (rootEnv) {
-      w << "Environment variable " << rootVar << " is set to:\n"
-        << "  " << *rootEnv << "\n";
+      w << "Environment variable " << rootVar
+        << " is set to:\n"
+           "  "
+        << *rootEnv << '\n';
     }
     w << "For compatibility, CMake is ignoring the variable.";
     this->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
@@ -257,14 +261,18 @@ void cmMakefile::MaybeWarnCMP0144(std::string const& rootVAR, cmValue rootDEF,
   // Warn if a <PACKAGENAME>_ROOT variable we may use is set.
   if ((rootDEF || rootENV) && this->WarnedCMP0144.insert(rootVAR).second) {
     std::ostringstream w;
-    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0144) << "\n";
+    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0144) << '\n';
     if (rootDEF) {
-      w << "CMake variable " << rootVAR << " is set to:\n"
-        << "  " << *rootDEF << "\n";
+      w << "CMake variable " << rootVAR
+        << " is set to:\n"
+           "  "
+        << *rootDEF << '\n';
     }
     if (rootENV) {
-      w << "Environment variable " << rootVAR << " is set to:\n"
-        << "  " << *rootENV << "\n";
+      w << "Environment variable " << rootVAR
+        << " is set to:\n"
+           "  "
+        << *rootENV << '\n';
     }
     w << "For compatibility, find_package is ignoring the variable, but "
          "code in a .cmake module might still use it.";
@@ -379,16 +387,16 @@ void cmMakefile::PrintCommandTrace(cmListFileFunction const& lff,
       break;
     }
     case cmake::TraceFormat::Human:
-      msg << full_path << "(" << lff.Line() << "):";
+      msg << full_path << '(' << lff.Line() << "):";
       if (deferId) {
-        msg << "DEFERRED:" << *deferId << ":";
+        msg << "DEFERRED:" << *deferId << ':';
       }
-      msg << "  " << lff.OriginalName() << "(";
+      msg << "  " << lff.OriginalName() << '(';
 
       for (std::string const& arg : args) {
-        msg << arg << " ";
+        msg << arg << ' ';
       }
-      msg << ")";
+      msg << ')';
       break;
     case cmake::TraceFormat::Undefined:
       msg << "INTERNAL ERROR: Trace format is Undefined";
@@ -653,12 +661,14 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
       // Warn because the user did not set this policy.
       {
         std::ostringstream w;
+        /* clang-format off */
         w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0011) << "\n"
-          << "The included script\n  "
+            "The included script\n  "
           << this->Makefile->GetBacktrace().Top().FilePath << "\n"
-          << "affects policy settings.  "
-          << "CMake is implying the NO_POLICY_SCOPE option for compatibility, "
-          << "so the effects are applied to the including context.";
+             "affects policy settings.  "
+             "CMake is implying the NO_POLICY_SCOPE option for compatibility, "
+             "so the effects are applied to the including context.";
+        /* clang-format on */
         this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
       }
       break;
@@ -667,9 +677,9 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
       std::ostringstream e;
       /* clang-format off */
       e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0011) << "\n"
-        << "The included script\n  "
+          "The included script\n  "
         << this->Makefile->GetBacktrace().Top().FilePath << "\n"
-        << "affects policy settings, so it requires this policy to be set.";
+          "affects policy settings, so it requires this policy to be set.";
       /* clang-format on */
       this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
     } break;
@@ -957,15 +967,17 @@ void cmMakefile::EnforceDirectoryLevelRules() const
   // Diagnose a violation of CMP0000 if necessary.
   if (this->CheckCMP0000) {
     std::ostringstream msg;
+    /* clang-format off */
     msg << "No cmake_minimum_required command is present.  "
-        << "A line of code such as\n"
-        << "  cmake_minimum_required(VERSION " << cmVersion::GetMajorVersion()
+           "A line of code such as\n"
+           "  cmake_minimum_required(VERSION " << cmVersion::GetMajorVersion()
         << "." << cmVersion::GetMinorVersion() << ")\n"
-        << "should be added at the top of the file.  "
-        << "The version specified may be lower if you wish to "
-        << "support older CMake versions for this project.  "
-        << "For more information run "
-        << "\"cmake --help-policy CMP0000\".";
+           "should be added at the top of the file.  "
+           "The version specified may be lower if you wish to "
+           "support older CMake versions for this project.  "
+           "For more information run "
+           "\"cmake --help-policy CMP0000\".";
+    /* clang-format on */
     switch (this->GetPolicyStatus(cmPolicies::CMP0000)) {
       case cmPolicies::WARN:
         // Warn because the user did not provide a minimum required
@@ -1131,7 +1143,7 @@ bool cmMakefile::ValidateCustomCommand(
   for (cmCustomCommandLine const& cl : commandLines) {
     if (!cl.empty() && !cl[0].empty() && cl[0][0] == '"') {
       std::ostringstream e;
-      e << "COMMAND may not contain literal quotes:\n  " << cl[0] << "\n";
+      e << "COMMAND may not contain literal quotes:\n  " << cl[0] << '\n';
       this->IssueMessage(MessageType::FATAL_ERROR, e.str());
       return false;
     }
@@ -1159,7 +1171,7 @@ cmTarget* cmMakefile::GetCustomCommandTarget(
     std::ostringstream e;
     switch (this->GetPolicyStatus(cmPolicies::CMP0040)) {
       case cmPolicies::WARN:
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0040) << "\n";
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0040) << '\n';
         issueMessage = true;
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
@@ -1891,19 +1903,18 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
     // The file is missing.  Check policy CMP0014.
     std::ostringstream e;
     /* clang-format off */
-    e << "The source directory\n"
-      << "  " << currentStart << "\n"
-      << "does not contain a CMakeLists.txt file.";
+    e << "The source directory\n  " << currentStart << "\n"
+         "does not contain a CMakeLists.txt file.";
     /* clang-format on */
     switch (this->GetPolicyStatus(cmPolicies::CMP0014)) {
       case cmPolicies::WARN:
         // Print the warning.
         /* clang-format off */
         e << "\n"
-          << "CMake does not support this case but it used "
-          << "to work accidentally and is being allowed for "
-          << "compatibility."
-          << "\n"
+             "CMake does not support this case but it used "
+             "to work accidentally and is being allowed for "
+             "compatibility."
+             "\n"
           << cmPolicies::GetPolicyWarning(cmPolicies::CMP0014);
         /* clang-format on */
         this->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
@@ -1913,7 +1924,7 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
         break;
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
-        e << "\n" << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0014);
+        e << '\n' << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0014);
         CM_FALLTHROUGH;
       case cmPolicies::NEW:
         // NEW behavior prints the error.
@@ -2130,7 +2141,7 @@ void cmMakefile::MaybeWarnUninitialized(std::string const& variable,
     if (this->CheckSystemVars ||
         (sourceFilename && this->IsProjectFile(sourceFilename))) {
       std::ostringstream msg;
-      msg << "uninitialized variable \'" << variable << "\'";
+      msg << "uninitialized variable \'" << variable << '\'';
       this->IssueMessage(MessageType::AUTHOR_WARNING, msg.str());
     }
   }
@@ -2436,9 +2447,9 @@ void cmMakefile::ExpandVariablesCMP0019()
     if (pol == cmPolicies::WARN && dirs != *includeDirs) {
       /* clang-format off */
       w << "Evaluated directory INCLUDE_DIRECTORIES\n"
-        << "  " << *includeDirs << "\n"
-        << "as\n"
-        << "  " << dirs << "\n";
+           "  " << *includeDirs << "\n"
+           "as\n"
+           "  " << dirs << '\n';
       /* clang-format on */
     }
     this->SetProperty("INCLUDE_DIRECTORIES", dirs);
@@ -2458,9 +2469,9 @@ void cmMakefile::ExpandVariablesCMP0019()
       if (pol == cmPolicies::WARN && dirs != *includeDirs) {
         /* clang-format off */
         w << "Evaluated target " << t.GetName() << " INCLUDE_DIRECTORIES\n"
-          << "  " << *includeDirs << "\n"
-          << "as\n"
-          << "  " << dirs << "\n";
+             "  " << *includeDirs << "\n"
+             "as\n"
+             "  " << dirs << '\n';
         /* clang-format on */
       }
       t.SetProperty("INCLUDE_DIRECTORIES", dirs);
@@ -2475,9 +2486,9 @@ void cmMakefile::ExpandVariablesCMP0019()
       if (pol == cmPolicies::WARN && d != orig) {
         /* clang-format off */
         w << "Evaluated link directories\n"
-          << "  " << orig << "\n"
-          << "as\n"
-          << "  " << d << "\n";
+             "  " << orig << "\n"
+             "as\n"
+             "  " << d << '\n';
         /* clang-format on */
       }
     }
@@ -2498,9 +2509,9 @@ void cmMakefile::ExpandVariablesCMP0019()
         if (pol == cmPolicies::WARN && libName != orig) {
           /* clang-format off */
         w << "Evaluated link library\n"
-          << "  " << orig << "\n"
-          << "as\n"
-          << "  " << libName << "\n";
+             "  " << orig << "\n"
+             "as\n"
+             "  " << libName << '\n';
           /* clang-format on */
         }
       }
@@ -2512,7 +2523,7 @@ void cmMakefile::ExpandVariablesCMP0019()
     /* clang-format off */
     m << cmPolicies::GetPolicyWarning(cmPolicies::CMP0019)
       << "\n"
-      << "The following variable evaluations were encountered:\n"
+        "The following variable evaluations were encountered:\n"
       << w.str();
     /* clang-format on */
     this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING,
@@ -2930,12 +2941,9 @@ MessageType cmMakefile::ExpandVariablesInStringOld(
       // This filename and line number may be more specific than the
       // command context because one command invocation can have
       // arguments on multiple lines.
-      error << "at\n"
-            << "  " << filename << ":" << line << "\n";
+      error << "at\n  " << filename << ':' << line << '\n';
     }
-    error << "when parsing string\n"
-          << "  " << source << "\n";
-    error << emsg;
+    error << "when parsing string\n  " << source << '\n' << emsg;
 
     // If the parser failed ("res" is false) then this is a real
     // argument parsing error, so the policy applies.  Otherwise the
@@ -2948,7 +2956,7 @@ MessageType cmMakefile::ExpandVariablesInStringOld(
       // decide whether it is an error.
       switch (this->GetPolicyStatus(cmPolicies::CMP0010)) {
         case cmPolicies::WARN:
-          error << "\n" << cmPolicies::GetPolicyWarning(cmPolicies::CMP0010);
+          error << '\n' << cmPolicies::GetPolicyWarning(cmPolicies::CMP0010);
           CM_FALLTHROUGH;
         case cmPolicies::OLD:
           // OLD behavior is to just warn and continue.
@@ -2956,7 +2964,7 @@ MessageType cmMakefile::ExpandVariablesInStringOld(
           break;
         case cmPolicies::REQUIRED_IF_USED:
         case cmPolicies::REQUIRED_ALWAYS:
-          error << "\n"
+          error << '\n'
                 << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0010);
           break;
         case cmPolicies::NEW:
@@ -3311,12 +3319,9 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
       // This filename and line number may be more specific than the
       // command context because one command invocation can have
       // arguments on multiple lines.
-      emsg << "at\n"
-           << "  " << filename << ":" << line << "\n";
+      emsg << "at\n  " << filename << ':' << line << '\n';
     }
-    emsg << "when parsing string\n"
-         << "  " << source << "\n";
-    emsg << errorstr;
+    emsg << "when parsing string\n  " << source << '\n' << errorstr;
     mtype = MessageType::FATAL_ERROR;
     errorstr = emsg.str();
   } else {
@@ -3426,8 +3431,8 @@ void cmMakefile::PopFunctionBlockerBarrier(bool reportError)
       std::ostringstream e;
       /* clang-format off */
       e << "A logical block opening on the line\n"
-        << "  " << lfc << "\n"
-        << "is not closed.";
+           "  " << lfc << "\n"
+           "is not closed.";
       /* clang-format on */
       this->IssueMessage(MessageType::FATAL_ERROR, e.str());
       reportError = false;
@@ -4309,10 +4314,7 @@ std::string cmMakefile::FormatListFileStack() const
         tmp << "\n                ";
       }
       --it;
-      tmp << "[";
-      tmp << depth;
-      tmp << "]\t";
-      tmp << *it;
+      tmp << '[' << depth << "]\t" << *it;
       depth--;
     } while (it != listFiles.begin());
   }
@@ -4486,7 +4488,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
     std::ostringstream e;
     e << "cannot create target \"" << name
       << "\" because another target with the same name already exists.  "
-      << "The existing target is ";
+         "The existing target is ";
     switch (existing->GetType()) {
       case cmStateEnums::EXECUTABLE:
         e << "an executable ";
@@ -4510,8 +4512,9 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
         break;
     }
     e << "created in source directory \""
-      << existing->GetMakefile()->GetCurrentSourceDirectory() << "\".  "
-      << "See documentation for policy CMP0002 for more details.";
+      << existing->GetMakefile()->GetCurrentSourceDirectory()
+      << "\".  "
+         "See documentation for policy CMP0002 for more details.";
     msg = e.str();
     return false;
   }
@@ -4533,15 +4536,15 @@ bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
       /* clang-format off */
       e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0013)
         << "\n"
-        << "The binary directory\n"
-        << "  " << binPath << "\n"
-        << "is already used to build a source directory.  "
-        << "This command uses it to build source directory\n"
-        << "  " << srcPath << "\n"
-        << "which can generate conflicting build files.  "
-        << "CMake does not support this use case but it used "
-        << "to work accidentally and is being allowed for "
-        << "compatibility.";
+           "The binary directory\n"
+           "  " << binPath << "\n"
+           "is already used to build a source directory.  "
+           "This command uses it to build source directory\n"
+           "  " << srcPath << "\n"
+           "which can generate conflicting build files.  "
+           "CMake does not support this use case but it used "
+           "to work accidentally and is being allowed for "
+           "compatibility.";
       /* clang-format on */
       this->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
       CM_FALLTHROUGH;
@@ -4550,17 +4553,17 @@ bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
       return true;
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:
-      e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0013) << "\n";
+      e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0013) << '\n';
       CM_FALLTHROUGH;
     case cmPolicies::NEW:
       // NEW behavior prints the error.
       /* clang-format off */
       e << "The binary directory\n"
-        << "  " << binPath << "\n"
-        << "is already used to build a source directory.  "
-        << "It cannot be used to build source directory\n"
-        << "  " << srcPath << "\n"
-        << "Specify a unique binary directory name.";
+           "  " << binPath << "\n"
+           "is already used to build a source directory.  "
+           "It cannot be used to build source directory\n"
+           "  " << srcPath << "\n"
+           "Specify a unique binary directory name.";
       /* clang-format on */
       this->IssueMessage(MessageType::FATAL_ERROR, e.str());
       break;
