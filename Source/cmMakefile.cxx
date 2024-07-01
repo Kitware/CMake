@@ -4265,20 +4265,14 @@ std::string cmMakefile::FormatListFileStack() const
     return {};
   }
 
-  std::reverse(listFiles.begin(), listFiles.end());
-  std::ostringstream tmp;
-  size_t depth = listFiles.size();
-  auto it = listFiles.end();
-  do {
-    if (depth != listFiles.size()) {
-      tmp << "\n                ";
-    }
-    --it;
-    tmp << '[' << depth << "]\t" << *it;
-    depth--;
-  } while (it != listFiles.begin());
+  auto depth = 1;
+  std::transform(listFiles.begin(), listFiles.end(), listFiles.begin(),
+                 [&depth](const std::string& file) {
+                   return cmStrCat('[', depth++, "]\t", file);
+                 });
 
-  return tmp.str();
+  return cmJoinStrings(cmMakeRange(listFiles.rbegin(), listFiles.rend()),
+                       "\n                "_s, {});
 }
 
 void cmMakefile::PushScope()
