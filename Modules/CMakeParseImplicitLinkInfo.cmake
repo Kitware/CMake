@@ -34,6 +34,7 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
   endif()
 endfunction()
 
+# FIXME(#26157) linker for Intel legacy compilers is not identified
 function(cmake_parse_implicit_link_info2 text log_var obj_regex)
   set(implicit_libs_tmp "")
   set(implicit_objs_tmp "")

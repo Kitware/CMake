@@ -7,15 +7,13 @@ include_guard()
 
 block(SCOPE_FOR POLICIES)
 cmake_policy(SET CMP0054 NEW)
+cmake_policy(SET CMP0140 NEW)
 
-macro(__linker_gnu lang)
+function(__linker_gnu lang)
   # define flags for linker depfile generation
   set(CMAKE_${lang}_LINKER_DEPFILE_FLAGS "LINKER:--dependency-file,<DEP_FILE>")
   set(CMAKE_${lang}_LINKER_DEPFILE_FORMAT gcc)
 
-  block(SCOPE_FOR VARIABLES
-        PROPAGATE CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED
-                  CMAKE_${lang}_LINK_DEPENDS_USE_LINKER)
     if(NOT DEFINED CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED)
       ## Ensure ninja tool is recent enough...
       if(CMAKE_GENERATOR MATCHES "^Ninja")
@@ -61,7 +59,11 @@ macro(__linker_gnu lang)
         AND CMAKE_${lang}_COMPILER_LINKER_VERSION VERSION_LESS "2.41")
       set(CMAKE_${lang}_LINK_DEPENDS_USE_LINKER FALSE)
     endif()
-  endblock()
-endmacro()
+
+  return(PROPAGATE CMAKE_${lang}_LINKER_DEPFILE_FLAGS
+                   CMAKE_${lang}_LINKER_DEPFILE_FORMAT
+                   CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED
+                   CMAKE_${lang}_LINK_DEPENDS_USE_LINKER)
+endfunction()
 
 endblock()

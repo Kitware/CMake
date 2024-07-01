@@ -8,21 +8,6 @@ if(CMAKE_SYSTEM MATCHES "SunOS-4")
 endif()
 
 
-# Features for LINK_LIBRARY generator expression
-## WHOLE_ARCHIVE: Force loading all members of an archive
-if (CMAKE_SYSTEM_VERSION VERSION_GREATER "5.10")
-  set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE "LINKER:--whole-archive"
-                                             "<LINK_ITEM>"
-                                             "LINKER:--no-whole-archive")
-else()
-  set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE "LINKER:-z,allextract"
-                                             "<LINK_ITEM>"
-                                             "LINKER:-z,defaultextract")
-endif()
-set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE_SUPPORTED TRUE)
-set(CMAKE_LINK_LIBRARY_WHOLE_ARCHIVE_ATTRIBUTES LIBRARY_TYPE=STATIC DEDUPLICATION=YES OVERRIDE=DEFAULT)
-
-
 # Features for LINK_GROUP generator expression
 if (CMAKE_SYSTEM_VERSION VERSION_GREATER "5.9")
   ## RESCAN: request the linker to rescan static libraries until there is

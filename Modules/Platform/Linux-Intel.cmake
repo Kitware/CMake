@@ -39,6 +39,11 @@ macro(__linux_compiler_intel lang)
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Wl,")
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP ",")
 
+  # FIXME(#26157): compute CMAKE_<LANG>_COMPILER_LINKER* variables
+  # in the meantime, enforce deactivation of push/pop state linker options
+  # because xild front-end linker do not support these options even if the platform linker does...
+  set(_CMAKE_${lang}_LINKER_PUSHPOP_STATE_SUPPORTED FALSE CACHE INTERNAL "linker supports push/pop state")
+
   set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE YES)
 
   if(XIAR)
