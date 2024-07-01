@@ -4261,20 +4261,23 @@ std::string cmMakefile::FormatListFileStack() const
     listFiles.emplace_back(snp.GetExecutionListFile());
   }
 
+  if (listFiles.empty()) {
+    return {};
+  }
+
   std::reverse(listFiles.begin(), listFiles.end());
   std::ostringstream tmp;
   size_t depth = listFiles.size();
-  if (depth > 0) {
-    auto it = listFiles.end();
-    do {
-      if (depth != listFiles.size()) {
-        tmp << "\n                ";
-      }
-      --it;
-      tmp << '[' << depth << "]\t" << *it;
-      depth--;
-    } while (it != listFiles.begin());
-  }
+  auto it = listFiles.end();
+  do {
+    if (depth != listFiles.size()) {
+      tmp << "\n                ";
+    }
+    --it;
+    tmp << '[' << depth << "]\t" << *it;
+    depth--;
+  } while (it != listFiles.begin());
+
   return tmp.str();
 }
 
