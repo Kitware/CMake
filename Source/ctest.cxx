@@ -173,7 +173,6 @@ int main(int argc, char const* const* argv)
   argc = encoding_args.argc();
   argv = encoding_args.argv();
 
-  cmSystemTools::DoNotInheritStdPipes();
   cmSystemTools::InitializeLibUV();
   cmSystemTools::FindCMakeResources(argv[0]);
 
