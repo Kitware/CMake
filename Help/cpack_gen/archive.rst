@@ -91,14 +91,10 @@ CPack generators which are essentially archives at their core. These include:
 
   .. versionadded:: 3.18
 
-  :Default: ``1``
+  :Default: value of :variable:`CPACK_THREADS`
 
   If set to ``0``, the number of available cores on the machine will be used instead.
-  The default is ``1`` which limits compression to a single thread. Note that
-  not all compression modes support threading in all environments. Currently,
-  only the XZ compression may support it.
-
-  See also the :variable:`CPACK_THREADS` variable.
+  Note that not all compression modes support threading in all environments.
 
   .. versionadded:: 3.21
 
