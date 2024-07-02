@@ -1,0 +1,9 @@
+CMake Warning \(dev\) at CMP0171-WARN\.cmake:[0-9]+ \(add_custom_target\):
+  Policy CMP0171 is not set: 'codegen' is a reserved target name\.  Run "cmake
+  --help-policy CMP0171" for policy details.  Use the cmake_policy command to
+  set the policy and suppress this warning\.
+
+  The target name "codegen" is reserved\.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

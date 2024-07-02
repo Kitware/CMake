@@ -653,6 +653,8 @@ public:
 
   virtual std::string& EncodeLiteral(std::string& lit) { return lit; }
 
+  bool CheckCMP0171() const;
+
 protected:
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
@@ -718,6 +720,8 @@ protected:
     std::vector<GlobalTargetInfo>& targets) const;
   void AddGlobalTarget_Install(std::vector<GlobalTargetInfo>& targets);
   void CreateGlobalTarget(GlobalTargetInfo const& gti, cmMakefile* mf);
+
+  void ReserveGlobalTargetCodegen();
 
   std::string FindMakeProgramFile;
   std::string ConfiguredFilesPath;
@@ -891,4 +895,5 @@ protected:
   bool ToolSupportsColor;
   bool InstallTargetEnabled;
   bool ConfigureDoneCMP0026AndCMP0024;
+  bool AllowGlobalTargetCodegen;
 };

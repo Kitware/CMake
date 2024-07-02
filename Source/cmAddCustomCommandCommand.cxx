@@ -53,6 +53,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   bool command_expand_lists = false;
   bool depends_explicit_only =
     mf.IsOn("CMAKE_ADD_CUSTOM_COMMAND_DEPENDS_EXPLICIT_ONLY");
+  bool codegen = false;
   std::string implicit_depends_lang;
   cmImplicitDependsList implicit_depends;
 
@@ -111,6 +112,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   MAKE_STATIC_KEYWORD(VERBATIM);
   MAKE_STATIC_KEYWORD(WORKING_DIRECTORY);
   MAKE_STATIC_KEYWORD(DEPENDS_EXPLICIT_ONLY);
+  MAKE_STATIC_KEYWORD(CODEGEN);
 #undef MAKE_STATIC_KEYWORD
   static std::unordered_set<std::string> const keywords{
     keyAPPEND,
@@ -135,7 +137,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
     keyUSES_TERMINAL,
     keyVERBATIM,
     keyWORKING_DIRECTORY,
-    keyDEPENDS_EXPLICIT_ONLY
+    keyDEPENDS_EXPLICIT_ONLY,
+    keyCODEGEN
   };
 
   for (std::string const& copy : args) {
@@ -166,6 +169,8 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
         command_expand_lists = true;
       } else if (copy == keyDEPENDS_EXPLICIT_ONLY) {
         depends_explicit_only = true;
+      } else if (copy == keyCODEGEN) {
+        codegen = true;
       } else if (copy == keyTARGET) {
         doing = doing_target;
       } else if (copy == keyARGS) {
@@ -322,6 +327,28 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
     return false;
   }
 
+  if (codegen) {
+    if (output.empty()) {
+      status.SetError("CODEGEN requires at least 1 OUTPUT.");
+      return false;
+    }
+
+    if (append) {
+      status.SetError("CODEGEN may not be used with APPEND.");
+      return false;
+    }
+
+    if (!implicit_depends.empty()) {
+      status.SetError("CODEGEN is not compatible with IMPLICIT_DEPENDS.");
+      return false;
+    }
+
+    if (mf.GetPolicyStatus(cmPolicies::CMP0171) != cmPolicies::NEW) {
+      status.SetError("CODEGEN option requires policy CMP0171 be set to NEW!");
+      return false;
+    }
+  }
+
   // Check for an append request.
   if (append) {
     mf.AppendCustomCommandToOutput(output[0], depends, implicit_depends,
@@ -355,6 +382,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
     cc->SetOutputs(output);
     cc->SetMainDependency(main_dependency);
     cc->SetDepends(depends);
+    cc->SetCodegen(codegen);
     cc->SetImplicitDepends(implicit_depends);
     mf.AddCustomCommandToOutput(std::move(cc));
   } else {

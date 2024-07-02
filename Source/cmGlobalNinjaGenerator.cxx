@@ -25,6 +25,7 @@
 
 #include "cmsys/FStream.hxx"
 
+#include "cmCustomCommand.h"
 #include "cmCxxModuleMapper.h"
 #include "cmDyndepCollation.h"
 #include "cmFortranParser.h"
@@ -43,6 +44,7 @@
 #include "cmOutputConverter.h"
 #include "cmRange.h"
 #include "cmScanDepFormat.h"
+#include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
@@ -1627,6 +1629,90 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
   std::map<std::string, DirectoryTarget> dirTargets =
     this->ComputeDirectoryTargets();
 
+  // Codegen target
+  if (this->CheckCMP0171()) {
+    for (auto const& it : dirTargets) {
+      cmNinjaBuild build("phony");
+      cmGlobalNinjaGenerator::WriteDivider(os);
+      std::string const& currentBinaryDir = it.first;
+      DirectoryTarget const& dt = it.second;
+      std::vector<std::string> configs =
+        dt.LG->GetMakefile()->GetGeneratorConfigs(
+          cmMakefile::IncludeEmptyConfig);
+
+      // Setup target
+      cmNinjaDeps configDeps;
+      build.Comment = cmStrCat("Folder: ", currentBinaryDir);
+      build.Outputs.emplace_back();
+      std::string const buildDirAllTarget =
+        this->ConvertToNinjaPath(cmStrCat(currentBinaryDir, "/codegen"));
+
+      cmNinjaDeps& explicitDeps = build.ExplicitDeps;
+
+      for (auto const& config : configs) {
+        explicitDeps.clear();
+
+        for (DirectoryTarget::Target const& t : dt.Targets) {
+          if (this->IsExcludedFromAllInConfig(t, config)) {
+            continue;
+          }
+
+          std::vector<cmSourceFile const*> customCommandSources;
+          t.GT->GetCustomCommands(customCommandSources, config);
+          for (cmSourceFile const* sf : customCommandSources) {
+            cmCustomCommand const* cc = sf->GetCustomCommand();
+            if (cc->GetCodegen()) {
+              auto const& outputs = cc->GetOutputs();
+
+              std::transform(outputs.begin(), outputs.end(),
+                             std::back_inserter(explicitDeps),
+                             this->MapToNinjaPath());
+            }
+          }
+        }
+
+        build.Outputs.front() = this->BuildAlias(buildDirAllTarget, config);
+        // Write target
+        this->WriteBuild(this->EnableCrossConfigBuild() &&
+                             this->CrossConfigs.count(config)
+                           ? os
+                           : *this->GetImplFileStream(config),
+                         build);
+      }
+
+      // Add shortcut target
+      if (this->IsMultiConfig()) {
+        for (auto const& config : configs) {
+          build.ExplicitDeps = { this->BuildAlias(buildDirAllTarget, config) };
+          build.Outputs.front() = buildDirAllTarget;
+          this->WriteBuild(*this->GetConfigFileStream(config), build);
+        }
+
+        if (!this->DefaultFileConfig.empty()) {
+          build.ExplicitDeps.clear();
+          for (auto const& config : this->DefaultConfigs) {
+            build.ExplicitDeps.push_back(
+              this->BuildAlias(buildDirAllTarget, config));
+          }
+          build.Outputs.front() = buildDirAllTarget;
+          this->WriteBuild(*this->GetDefaultFileStream(), build);
+        }
+      }
+
+      // Add target for all configs
+      if (this->EnableCrossConfigBuild()) {
+        build.ExplicitDeps.clear();
+        for (auto const& config : this->CrossConfigs) {
+          build.ExplicitDeps.push_back(
+            this->BuildAlias(buildDirAllTarget, config));
+        }
+        build.Outputs.front() = this->BuildAlias(buildDirAllTarget, "codegen");
+        this->WriteBuild(os, build);
+      }
+    }
+  }
+
+  // All target
   for (auto const& it : dirTargets) {
     cmNinjaBuild build("phony");
     cmGlobalNinjaGenerator::WriteDivider(os);

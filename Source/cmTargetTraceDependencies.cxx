@@ -7,10 +7,12 @@
 
 #include <cmext/algorithm>
 
+#include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSourceFile.h"
@@ -132,6 +134,8 @@ void cmTargetTraceDependencies::FollowName(std::string const& name)
     // The name is a byproduct of a utility target or a PRE_BUILD, PRE_LINK, or
     // POST_BUILD command.
     this->GeneratorTarget->Target->AddUtility(t->GetName(), false);
+
+    this->GeneratorTarget->Target->AddCodegenDependency(t->GetName());
   }
   if (cmSourceFile* sf = i->second.Source) {
     // For now only follow the dependency if the source file is not a
@@ -213,6 +217,11 @@ void cmTargetTraceDependencies::CheckCustomCommand(cmCustomCommand const& cc)
       // Collect target-level dependencies referenced in command lines.
       for (auto const& util : ccg.GetUtilities()) {
         this->GeneratorTarget->Target->AddUtility(util);
+
+        if (ccg.GetCC().GetCodegen()) {
+          this->GeneratorTarget->Target->AddCodegenDependency(
+            util.Value.first);
+        }
       }
 
       // Collect file-level dependencies referenced in DEPENDS.
@@ -226,6 +235,8 @@ void cmTargetTraceDependencies::CheckCustomCommand(cmCustomCommand const& cc)
       // The dependency does not name a target and may be a file we
       // know how to generate.  Queue it.
       this->FollowName(dep);
+    } else {
+      this->GeneratorTarget->Target->AddCodegenDependency(dep);
     }
   }
 }

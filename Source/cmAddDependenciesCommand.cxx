@@ -30,6 +30,7 @@ bool cmAddDependenciesCommand(std::vector<std::string> const& args,
     // skip over target_name
     for (std::string const& arg : cmMakeRange(args).advance(1)) {
       target->AddUtility(arg, false, &mf);
+      target->AddCodegenDependency(arg);
     }
   } else {
     mf.IssueMessage(

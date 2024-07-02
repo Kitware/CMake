@@ -1398,6 +1398,8 @@ void cmGlobalGenerator::Configure()
     }
   }
 
+  this->ReserveGlobalTargetCodegen();
+
   // update the cache entry for the number of local generators, this is used
   // for progress
   this->GetCMakeInstance()->AddCacheEntry(
@@ -2912,6 +2914,53 @@ void cmGlobalGenerator::AddGlobalTarget_Test(
   }
   gti.CommandLines.push_back(std::move(singleLine));
   targets.push_back(std::move(gti));
+}
+
+void cmGlobalGenerator::ReserveGlobalTargetCodegen()
+{
+  // Read the policy value at the end of the top-level CMakeLists.txt file
+  // since it's a global policy that affects the whole project.
+  auto& mf = this->Makefiles[0];
+  const auto policyStatus = mf->GetPolicyStatus(cmPolicies::CMP0171);
+
+  this->AllowGlobalTargetCodegen = (policyStatus == cmPolicies::NEW);
+
+  cmTarget* tgt = this->FindTarget("codegen");
+  if (!tgt) {
+    return;
+  }
+
+  MessageType messageType = MessageType::AUTHOR_WARNING;
+  std::ostringstream e;
+  bool issueMessage = false;
+  switch (policyStatus) {
+    case cmPolicies::WARN:
+      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0171) << "\n";
+      issueMessage = true;
+      CM_FALLTHROUGH;
+    case cmPolicies::OLD:
+      break;
+    case cmPolicies::NEW:
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+      issueMessage = true;
+      messageType = MessageType::FATAL_ERROR;
+      break;
+  }
+  if (issueMessage) {
+    e << "The target name \"codegen\" is reserved.";
+    this->GetCMakeInstance()->IssueMessage(messageType, e.str(),
+                                           tgt->GetBacktrace());
+    if (messageType == MessageType::FATAL_ERROR) {
+      cmSystemTools::SetFatalErrorOccurred();
+      return;
+    }
+  }
+}
+
+bool cmGlobalGenerator::CheckCMP0171() const
+{
+  return this->AllowGlobalTargetCodegen;
 }
 
 void cmGlobalGenerator::AddGlobalTarget_EditCache(

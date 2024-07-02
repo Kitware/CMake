@@ -51,6 +51,14 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.31
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0171: 'codegen' is a reserved target name. </policy/CMP0171>
+
 Policies Introduced by CMake 3.30
 =================================
 
