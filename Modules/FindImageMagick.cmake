@@ -93,6 +93,8 @@ Result Variables
   Compile options of <component>.
 
 ``ImageMagick_<component>_LIBRARIES``
+  .. versionadded:: 3.31
+
   Full path to <component> libraries.
 
 
@@ -167,6 +169,12 @@ function(FIND_IMAGEMAGICK_API component header)
     list(REMOVE_DUPLICATES ImageMagick_${component}_INCLUDE_DIRS)
     set(ImageMagick_${component}_INCLUDE_DIRS
       ${ImageMagick_${component}_INCLUDE_DIRS} PARENT_SCOPE)
+
+    set(ImageMagick_${component}_LIBRARIES
+      ${ImageMagick_${component}_LIBRARY}
+      )
+    set(ImageMagick_${component}_LIBRARIES
+      ${ImageMagick_${component}_LIBRARIES} PARENT_SCOPE)
 
     set(ImageMagick_${component}_COMPILE_OPTIONS ${PC_${component}_CFLAGS_OTHER})
 
