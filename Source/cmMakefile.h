@@ -577,6 +577,9 @@ public:
   /** Return whether the target platform is an Apple simulator.  */
   bool PlatformIsAppleSimulator() const;
 
+  /** Return whether the target platform is an Apple catalyst.  */
+  bool PlatformIsAppleCatalyst() const;
+
   /** Return whether the target platform supports generation of text base stubs
      (.tbd file) describing exports (Apple specific). */
   bool PlatformSupportsAppleTextStubs() const;

@@ -173,6 +173,9 @@ const cmXcFrameworkPlistLibrary* cmXcFrameworkPlist::SelectSuitableLibrary(
   if (mf.PlatformIsAppleSimulator()) {
     systemVariant = cmXcFrameworkPlistSupportedPlatformVariant::simulator;
   }
+  if (mf.PlatformIsAppleCatalyst()) {
+    systemVariant = cmXcFrameworkPlistSupportedPlatformVariant::maccatalyst;
+  }
 
   for (auto const& lib : this->AvailableLibraries) {
     std::string supportedSystemName;
