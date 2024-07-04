@@ -68,9 +68,10 @@ const cmDocumentationEntry cmDocumentationUsageNote = {
   "Run 'cmake --help' for more information."
 };
 
-const cmDocumentationEntry cmDocumentationOptions[31] = {
+const cmDocumentationEntry cmDocumentationOptions[32] = {
   { "--preset <preset>,--preset=<preset>", "Specify a configure preset." },
   { "--list-presets[=<type>]", "List available presets." },
+  { "--workflow [<options>]", "Run a workflow preset." },
   { "-E", "CMake command mode." },
   { "-L[A][H]", "List non-advanced cached variables." },
   { "--fresh",
