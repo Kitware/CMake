@@ -173,7 +173,9 @@ _cmake()
             printf -v quoted %q "$cur"
 
             if [[ ! "${IFS}${COMP_WORDS[*]}${IFS}" =~ "${IFS}--build${IFS}" ]]; then
-                COMPREPLY=( $( compgen -W "configure${IFS}build${IFS}test${IFS}all" -- "$quoted" ) )
+                COMPREPLY=(
+                    $( compgen -W "configure${IFS}build${IFS}package${IFS}test${IFS}workflow${IFS}all" -- "$quoted" )
+                  )
             fi
             return
             ;;
@@ -182,12 +184,16 @@ _cmake()
             local quoted
             printf -v quoted %q "$cur"
 
-            local build_or_configure="configure"
-            if [[ "${IFS}${COMP_WORDS[*]}${IFS}" =~ "${IFS}--build${IFS}" ]]; then
-                build_or_configure="build"
+            local preset_type
+            if [[ "${IFS}${COMP_WORDS[*]}${IFS}" =~ "${IFS}--workflow${IFS}" ]]; then
+                preset_type="workflow"
+            elif [[ "${IFS}${COMP_WORDS[*]}${IFS}" =~ "${IFS}--build${IFS}" ]]; then
+                preset_type="build"
+            else
+                preset_type="configure"
             fi
 
-            local presets=$( cmake --list-presets="$build_or_configure" 2>/dev/null |
+            local presets=$( cmake --list-presets="$preset_type" 2>/dev/null |
                 grep -o "^  \".*\"" | sed \
                 -e "s/^  //g" \
                 -e "s/\"//g" \
@@ -204,6 +210,8 @@ _cmake()
     fi
 
     if [[ "$cur" == -* ]]; then
+        # FIXME(#26100): `cmake --help` is missing some options and does not
+        # have any mode-specific options like `cmake --build`'s `--config`.
         COMPREPLY=( $(compgen -W '$( _parse_help "$1" --help )' -- ${cur}) )
         [[ $COMPREPLY == *= ]] && compopt -o nospace
         [[ $COMPREPLY ]] && return
