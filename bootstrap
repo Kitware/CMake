@@ -408,6 +408,7 @@ CMAKE_CXX_SOURCES="\
   cmIncludeGuardCommand \
   cmIncludeDirectoryCommand \
   cmIncludeRegularExpressionCommand \
+  cmInstallCMakeConfigExportGenerator \
   cmInstallCommand \
   cmInstallCommandArguments \
   cmInstallCxxModuleBmiGenerator \

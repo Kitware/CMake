@@ -51,6 +51,9 @@ public:
     return this->ConfigImportFiles;
   }
 
+  /** Get the temporary location of the config-agnostic C++ module file.  */
+  std::string GetCxxModuleFile() const;
+
   /** Get the per-config C++ module file generated for each configuration.
       This maps from the configuration name to the file temporary location
       for installation.  */
@@ -117,6 +120,8 @@ protected:
                                     cmTargetExport* te) override;
   std::string GetFileSetFiles(cmGeneratorTarget* gte, cmFileSet* fileSet,
                               cmTargetExport* te) override;
+
+  using cmExportFileGenerator::GetCxxModuleFile;
 
   std::string GetCxxModulesDirectory() const override;
   void GenerateCxxModuleConfigInformation(std::string const&,

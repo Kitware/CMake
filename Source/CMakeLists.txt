@@ -311,6 +311,10 @@ add_library(
   cmGraphVizWriter.h
   cmImportedCxxModuleInfo.cxx
   cmImportedCxxModuleInfo.h
+  cmInstallAndroidMKExportGenerator.cxx
+  cmInstallAndroidMKExportGenerator.h
+  cmInstallCMakeConfigExportGenerator.cxx
+  cmInstallCMakeConfigExportGenerator.h
   cmInstallGenerator.h
   cmInstallGenerator.cxx
   cmInstallGetRuntimeDependenciesGenerator.h

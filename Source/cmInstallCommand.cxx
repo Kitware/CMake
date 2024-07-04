@@ -26,10 +26,11 @@
 #include "cmFileSet.h"
 #include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
+#include "cmInstallAndroidMKExportGenerator.h"
+#include "cmInstallCMakeConfigExportGenerator.h"
 #include "cmInstallCommandArguments.h"
 #include "cmInstallCxxModuleBmiGenerator.h"
 #include "cmInstallDirectoryGenerator.h"
-#include "cmInstallExportGenerator.h"
 #include "cmInstallFileSetGenerator.h"
 #include "cmInstallFilesGenerator.h"
 #include "cmInstallGenerator.h"
@@ -2028,11 +2029,11 @@ bool HandleExportAndroidMKMode(std::vector<std::string> const& args,
 
   // Create the export install generator.
   helper.Makefile->AddInstallGenerator(
-    cm::make_unique<cmInstallExportGenerator>(
+    cm::make_unique<cmInstallAndroidMKExportGenerator>(
       &exportSet, ica.GetDestination(), ica.GetPermissions(),
       ica.GetConfigurations(), ica.GetComponent(), message,
-      ica.GetExcludeFromAll(), fname, name_space, "", exportOld, true, false,
-      helper.Makefile->GetBacktrace()));
+      ica.GetExcludeFromAll(), std::move(fname), std::move(name_space),
+      exportOld, helper.Makefile->GetBacktrace()));
 
   return true;
 #else
@@ -2151,11 +2152,11 @@ bool HandleExportMode(std::vector<std::string> const& args,
 
   // Create the export install generator.
   helper.Makefile->AddInstallGenerator(
-    cm::make_unique<cmInstallExportGenerator>(
+    cm::make_unique<cmInstallCMakeConfigExportGenerator>(
       &exportSet, ica.GetDestination(), ica.GetPermissions(),
       ica.GetConfigurations(), ica.GetComponent(), message,
-      ica.GetExcludeFromAll(), fname, name_space, cxx_modules_directory,
-      exportOld, false, exportPackageDependencies,
+      ica.GetExcludeFromAll(), std::move(fname), std::move(name_space),
+      std::move(cxx_modules_directory), exportOld, exportPackageDependencies,
       helper.Makefile->GetBacktrace()));
 
   return true;

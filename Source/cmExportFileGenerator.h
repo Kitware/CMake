@@ -207,6 +207,8 @@ protected:
 
   virtual cmExportSet* GetExportSet() const { return nullptr; }
 
+  std::string GetCxxModuleFile(std::string const& name) const;
+
   void SetRequiredCMakeVersion(unsigned int major, unsigned int minor,
                                unsigned int patch);
 

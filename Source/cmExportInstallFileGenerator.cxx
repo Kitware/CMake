@@ -51,7 +51,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     std::string expectedTargets;
     std::string sep;
     for (std::unique_ptr<cmTargetExport> const& te :
-         this->IEGen->GetExportSet()->GetTargetExports()) {
+         this->GetExportSet()->GetTargetExports()) {
       if (te->NamelinkOnly) {
         continue;
       }
@@ -61,7 +61,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
         allTargets.push_back(te.get());
       } else {
         std::ostringstream e;
-        e << "install(EXPORT \"" << this->IEGen->GetExportSet()->GetName()
+        e << "install(EXPORT \"" << this->GetExportSet()->GetName()
           << "\" ...) "
           << "includes target \"" << te->Target->GetName()
           << "\" more than once in the export set.";
@@ -172,7 +172,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 
   bool result = true;
 
-  std::string cxx_modules_name = this->IEGen->GetExportSet()->GetName();
+  std::string cxx_modules_name = this->GetExportSet()->GetName();
   this->GenerateCxxModuleInformation(cxx_modules_name, os);
   if (requiresConfigFiles) {
     for (std::string const& c : this->Configurations) {
@@ -338,7 +338,7 @@ void cmExportInstallFileGenerator::GenerateImportTargetsConfig(
 {
   // Add each target in the set to the export.
   for (std::unique_ptr<cmTargetExport> const& te :
-       this->IEGen->GetExportSet()->GetTargetExports()) {
+       this->GetExportSet()->GetTargetExports()) {
     // Collect import properties for this target.
     if (this->GetExportTargetType(te.get()) ==
         cmStateEnums::INTERFACE_LIBRARY) {
@@ -559,8 +559,7 @@ void cmExportInstallFileGenerator::ComplainAboutMissingTarget(
   std::vector<std::string> const& exportFiles)
 {
   std::ostringstream e;
-  e << "install(EXPORT \"" << this->IEGen->GetExportSet()->GetName()
-    << "\" ...) "
+  e << "install(EXPORT \"" << this->GetExportSet()->GetName() << "\" ...) "
     << "includes target \"" << depender->GetName()
     << "\" which requires target \"" << dependee->GetName() << "\" ";
   if (exportFiles.empty()) {
@@ -740,6 +739,11 @@ void cmExportInstallFileGenerator::GenerateCxxModuleConfigInformation(
         "unset(_cmake_cxx_module_include)\n"
         "unset(_cmake_cxx_module_includes)\n";
   /* clang-format on */
+}
+
+std::string cmExportInstallFileGenerator::GetCxxModuleFile() const
+{
+  return this->GetCxxModuleFile(this->GetExportSet()->GetName());
 }
 
 bool cmExportInstallFileGenerator::
