@@ -82,4 +82,30 @@ using is_sequence_container =
                     !cm::is_associative_container<T>::value &&
                     !cm::is_unordered_associative_container<T>::value>;
 
+template <typename T>
+struct remove_member_pointer
+{
+  typedef T type;
+};
+template <typename T, typename U>
+struct remove_member_pointer<T U::*>
+{
+  typedef T type;
+};
+template <typename T>
+using remove_member_pointer_t = typename remove_member_pointer<T>::type;
+
+template <typename T>
+struct member_pointer_class
+{
+  typedef T type;
+};
+template <typename T, typename U>
+struct member_pointer_class<U T::*>
+{
+  typedef T type;
+};
+template <typename T>
+using member_pointer_class_t = typename member_pointer_class<T>::type;
+
 } // namespace cm
