@@ -7,7 +7,7 @@ CheckOBJCSourceCompiles
 
 .. versionadded:: 3.16
 
-Check if given Objective-C source compiles and links into an executable.
+Check once if Objective-C source can be built.
 
 .. command:: check_objc_source_compiles
 
@@ -16,19 +16,21 @@ Check if given Objective-C source compiles and links into an executable.
     check_objc_source_compiles(<code> <resultVar>
                                [FAIL_REGEX <regex1> [<regex2>...]])
 
-  Check that the source supplied in ``<code>`` can be compiled as a Objectie-C source
-  file and linked as an executable (so it must contain at least a ``main()``
-  function). The result will be stored in the internal cache variable specified
-  by ``<resultVar>``, with a boolean true value for success and boolean false
-  for failure. If ``FAIL_REGEX`` is provided, then failure is determined by
-  checking if anything in the output matches any of the specified regular
+  Check once that the source supplied in ``<code>`` can be built. The result is
+  stored in the internal cache variable specified by ``<resultVar>``, with
+  boolean ``true`` for success and boolean ``false`` for failure.
+
+  If ``FAIL_REGEX`` is provided, then failure is determined by checking
+  if anything in the compiler output matches any of the specified regular
   expressions.
 
-  The check is only performed once, with the result cached in the variable named
-  by ``<resultVar>``. Every subsequent CMake run will reuse this cached value
-  rather than performing the check again, even if the ``<code>`` changes. In
-  order to force the check to be re-evaluated, the variable named by
-  ``<resultVar>`` must be manually removed from the cache.
+  Internally, :command:`try_compile` is used to compile the source. If
+  :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` is set to ``EXECUTABLE`` (default),
+  the source is compiled and linked as an executable program. If set to
+  ``STATIC_LIBRARY``, the source is compiled but not linked. In any case, all
+  functions must be declared as usual.
+
+  See also :command:`check_source_runs` to run compiled source.
 
   The compile and link commands can be influenced by setting any of the
   following variables prior to calling ``check_objc_source_compiles()``
