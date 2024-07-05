@@ -264,6 +264,7 @@ public:
   {
     Compile, // Usage requirements for compiling.  Excludes $<LINK_ONLY>.
     Link,    // Usage requirements for linking.  Includes $<LINK_ONLY>.
+    LinkInterfaceEval,
   };
 
   cmLinkInterfaceLibraries const* GetLinkInterfaceLibraries(

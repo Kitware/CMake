@@ -286,7 +286,8 @@ cmGeneratorTarget::GetCustomTransitiveProperties(std::string const& config,
         }
       }
     };
-    addTransitiveProperties("TRANSITIVE_LINK_PROPERTIES", UseTo::Link);
+    addTransitiveProperties("TRANSITIVE_LINK_PROPERTIES",
+                            UseTo::LinkInterfaceEval);
     addTransitiveProperties("TRANSITIVE_COMPILE_PROPERTIES", UseTo::Compile);
     i = ctpm.emplace(config, std::move(ctp)).first;
   }
