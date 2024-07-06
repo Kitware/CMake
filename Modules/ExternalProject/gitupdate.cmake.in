@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.5)
 # enabling them to be shown for DEBUG may be useful to help diagnose problems.
 cmake_language(GET_MESSAGE_LOG_LEVEL active_log_level)
 if(active_log_level MATCHES "DEBUG|TRACE")
-  set(maybe_show_command "COMMAND_ECHO STDOUT")
+  set(maybe_show_command COMMAND_ECHO STDOUT)
 else()
   set(maybe_show_command "")
 endif()
