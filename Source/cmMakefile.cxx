@@ -1131,15 +1131,17 @@ bool cmMakefile::ValidateCustomCommand(
   const cmCustomCommandLines& commandLines) const
 {
   // TODO: More strict?
-  for (cmCustomCommandLine const& cl : commandLines) {
-    if (!cl.empty() && !cl[0].empty() && cl[0][0] == '"') {
-      this->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat("COMMAND may not contain literal quotes:\n  ", cl[0], '\n'));
-      return false;
-    }
+  const auto it =
+    std::find_if(commandLines.begin(), commandLines.end(),
+                 [](const cmCustomCommandLine& cl) {
+                   return !cl.empty() && !cl[0].empty() && cl[0][0] == '"';
+                 });
+  if (it != commandLines.end()) {
+    this->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("COMMAND may not contain literal quotes:\n  ", (*it)[0], '\n'));
+    return false;
   }
-
   return true;
 }
 
