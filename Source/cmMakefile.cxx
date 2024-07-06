@@ -2127,9 +2127,8 @@ void cmMakefile::MaybeWarnUninitialized(std::string const& variable,
       !this->VariableInitialized(variable)) {
     if (this->CheckSystemVars ||
         (sourceFilename && this->IsProjectFile(sourceFilename))) {
-      this->IssueMessage(
-        MessageType::AUTHOR_WARNING,
-        cmStrCat("uninitialized variable \'", variable, '\''));
+      this->IssueMessage(MessageType::AUTHOR_WARNING,
+                         cmStrCat("uninitialized variable '", variable, '\''));
     }
   }
 }
@@ -3253,11 +3252,10 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
         if (!openstack.empty() &&
             !(isalnum(inc) || inc == '_' || inc == '/' || inc == '.' ||
               inc == '+' || inc == '-')) {
-          errorstr += "Invalid character (\'";
+          errorstr += "Invalid character ('";
           errorstr += inc;
           result.append(last, in - last);
-          errorstr += cmStrCat("\') in a variable name: "
-                               "'",
+          errorstr += cmStrCat("') in a variable name: '",
                                result.substr(openstack.back().loc), '\'');
           mtype = MessageType::FATAL_ERROR;
           error = true;
@@ -3912,7 +3910,7 @@ std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
         break;
       }
       if (debug) {
-        debugBuffer = cmStrCat(debugBuffer, "  ", itempl, "\n");
+        debugBuffer = cmStrCat(debugBuffer, "  ", itempl, '\n');
       }
     }
   }
@@ -3923,7 +3921,7 @@ std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
   cmSystemTools::ConvertToUnixSlashes(moduleInCMakeRoot);
   if (!cmSystemTools::FileExists(moduleInCMakeRoot)) {
     if (debug) {
-      debugBuffer = cmStrCat(debugBuffer, "  ", moduleInCMakeRoot, "\n");
+      debugBuffer = cmStrCat(debugBuffer, "  ", moduleInCMakeRoot, '\n');
     }
     moduleInCMakeRoot.clear();
   }
@@ -3996,8 +3994,8 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
       if (!def.IsOff()) {
         const std::string indentation = this->cmDefineRegex.match(1);
         cmSystemTools::ReplaceString(line,
-                                     cmStrCat("#", indentation, "cmakedefine"),
-                                     cmStrCat("#", indentation, "define"));
+                                     cmStrCat('#', indentation, "cmakedefine"),
+                                     cmStrCat('#', indentation, "define"));
         output += line;
       } else {
         output += "/* #undef ";
@@ -4008,8 +4006,8 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
       const std::string indentation = this->cmDefine01Regex.match(1);
       cmValue def = this->GetDefinition(this->cmDefine01Regex.match(2));
       cmSystemTools::ReplaceString(line,
-                                   cmStrCat("#", indentation, "cmakedefine01"),
-                                   cmStrCat("#", indentation, "define"));
+                                   cmStrCat('#', indentation, "cmakedefine01"),
+                                   cmStrCat('#', indentation, "define"));
       output += line;
       if (!def.IsOff()) {
         output += " 1";
@@ -4021,7 +4019,7 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
     }
 
     if (haveNewline) {
-      output += "\n";
+      output += '\n';
     }
 
     // Move to the next line.
