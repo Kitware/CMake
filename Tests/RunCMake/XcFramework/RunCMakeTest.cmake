@@ -1,5 +1,11 @@
 include(RunCMake)
 
+if(RunCMake_GENERATOR STREQUAL "Xcode")
+  set(maybe_ios_catalyst "")
+else()
+  set(maybe_ios_catalyst ios-catalyst)
+endif()
+
 function(create_library type platform system_name archs sysroot)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/create-${type}-${platform}-build)
   run_cmake_with_options(create-${type}-${platform} -DCMAKE_SYSTEM_NAME=${system_name} -DCMAKE_OSX_ARCHITECTURES=${archs} -DCMAKE_OSX_SYSROOT=${sysroot} -DCMAKE_INSTALL_PREFIX=${RunCMake_TEST_BINARY_DIR}/install)
@@ -12,6 +18,9 @@ endfunction()
 function(create_libraries type)
   create_library(${type} macos Darwin "${macos_archs_2}" macosx)
   create_library(${type} ios iOS "arm64" iphoneos)
+  if(maybe_ios_catalyst)
+    create_library(${type} ios-catalyst iOS "${macos_archs_2}" macosx)
+  endif()
   create_library(${type} tvos tvOS "arm64" appletvos)
   create_library(${type} watchos watchOS "armv7k\\\\;arm64_32" watchos)
   if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 15.2)
@@ -58,6 +67,9 @@ endfunction()
 function(create_executables name type)
   create_executable(${name}-macos ${type} Darwin "${macos_archs_2}" macosx)
   create_executable(${name}-ios ${type} iOS "arm64" iphoneos)
+  if(maybe_ios_catalyst)
+    create_executable(${name}-ios-catalyst ${type} iOS "${macos_archs_2}" macosx)
+  endif()
   create_executable(${name}-tvos ${type} tvOS "arm64" appletvos)
   create_executable(${name}-watchos ${type} watchOS "armv7k\\\\;arm64_32" watchos)
   if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 15.2)
@@ -71,7 +83,7 @@ function(create_executables name type)
   endif()
 endfunction()
 
-set(xcframework_platforms macos ios tvos watchos ios-simulator tvos-simulator watchos-simulator)
+set(xcframework_platforms macos ios ${maybe_ios_catalyst} tvos watchos ios-simulator tvos-simulator watchos-simulator)
 if(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 15.2)
   list(APPEND xcframework_platforms visionos visionos-simulator)
 endif()
@@ -141,6 +153,20 @@ run_cmake_command(export-ios-install ${CMAKE_COMMAND} --install . ${_config_arg}
 unset(RunCMake_TEST_NO_CLEAN)
 unset(RunCMake_TEST_BINARY_DIR)
 
+if(maybe_ios_catalyst)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/export-ios-catalyst-build)
+  run_cmake_with_options(export-ios-catalyst -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=macosx "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_1}" -DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/export-install)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  set(_config_arg)
+  if(RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    set(_config_arg --config Release)
+  endif()
+  run_cmake_command(export-ios-catalyst-build ${CMAKE_COMMAND} --build . ${_config_arg})
+  run_cmake_command(export-ios-catalyst-install ${CMAKE_COMMAND} --install . ${_config_arg})
+  unset(RunCMake_TEST_NO_CLEAN)
+  unset(RunCMake_TEST_BINARY_DIR)
+endif()
+
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/export-ios-simulator-build)
 run_cmake_with_options(export-ios-simulator -DCMAKE_SYSTEM_NAME=iOS -DCMAKE_OSX_SYSROOT=iphonesimulator "-DCMAKE_OSX_ARCHITECTURES=${macos_archs_1}" -DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/export-install)
 set(RunCMake_TEST_NO_CLEAN 1)
@@ -175,6 +201,19 @@ else()
   set(src_dir "${RunCMake_SOURCE_DIR}")
   set(bld_dir "${RunCMake_BINARY_DIR}")
 endif()
+if(maybe_ios_catalyst)
+  set(maybe_ios_catalyst_mylib
+    -library ${bld_dir}/export-install/lib/ios-catalyst/libmylib.a
+    -headers ${src_dir}/mylib/include
+    )
+  set(maybe_ios_catalyst_mylib_genex
+    -library ${bld_dir}/export-install/lib/ios-catalyst/libmylib-genex.a
+    -headers ${src_dir}/mylib/include
+    )
+else()
+  set(maybe_ios_catalyst_mylib "")
+  set(maybe_ios_catalyst_mylib_genex "")
+endif()
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/export-install)
 run_cmake_command(export-install-xcframework xcodebuild -create-xcframework
   -output ${bld_dir}/export-install/lib/mylib.xcframework
@@ -182,6 +221,7 @@ run_cmake_command(export-install-xcframework xcodebuild -create-xcframework
   -headers ${src_dir}/mylib/include
   -library ${bld_dir}/export-install/lib/ios/libmylib.a
   -headers ${src_dir}/mylib/include
+  ${maybe_ios_catalyst_mylib}
   -library ${bld_dir}/export-install/lib/ios-simulator/libmylib.a
   -headers ${src_dir}/mylib/include
   )
@@ -191,6 +231,7 @@ run_cmake_command(export-install-xcframework-genex xcodebuild -create-xcframewor
   -headers ${src_dir}/mylib/include
   -library ${bld_dir}/export-install/lib/ios/libmylib-genex.a
   -headers ${src_dir}/mylib/include
+  ${maybe_ios_catalyst_mylib_genex}
   -library ${bld_dir}/export-install/lib/ios-simulator/libmylib-genex.a
   -headers ${src_dir}/mylib/include
   )
