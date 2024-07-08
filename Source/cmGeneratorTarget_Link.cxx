@@ -392,7 +392,7 @@ void cmGeneratorTarget::CheckLinkLibraries() const
   // should be a subset of LinkInterfaceMap (with LINK_ONLY left out).
   for (auto const& hmp : this->LinkInterfaceMap) {
     for (auto const& hmi : hmp.second) {
-      if (!hmi.second.LibrariesDone) {
+      if (!hmi.second.LibrariesDone || hmi.second.LinkOnlyEval) {
         continue;
       }
       for (cmLinkItem const& item : hmi.second.Libraries) {
@@ -642,6 +642,7 @@ cmLinkInterface const* cmGeneratorTarget::GetLinkInterface(
   if (secondPass) {
     iface = cmOptionalLinkInterface();
   }
+  iface.LinkOnlyEval = false;
   if (!iface.LibrariesDone) {
     iface.LibrariesDone = true;
     this->ComputeLinkInterfaceLibraries(config, iface, head, UseTo::Link);
@@ -765,6 +766,7 @@ const cmLinkInterfaceLibraries* cmGeneratorTarget::GetLinkInterfaceLibraries(
   }
 
   cmOptionalLinkInterface& iface = hm[head];
+  iface.LinkOnlyEval = (usage == UseTo::LinkInterfaceEval);
   if (!iface.LibrariesDone) {
     iface.LibrariesDone = true;
     this->ComputeLinkInterfaceLibraries(config, iface, head, usage);
@@ -1034,6 +1036,7 @@ const cmLinkInterface* cmGeneratorTarget::GetImportLinkInterface(
   if (secondPass) {
     iface = cmOptionalLinkInterface();
   }
+  iface.LinkOnlyEval = (usage == UseTo::LinkInterfaceEval);
   if (!iface.AllDone) {
     iface.AllDone = true;
     iface.LibrariesDone = true;
