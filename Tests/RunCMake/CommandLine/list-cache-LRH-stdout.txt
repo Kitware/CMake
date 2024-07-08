@@ -1,0 +1,6 @@
+-- Cache values
+// mid 1
+MIDDLE_ENTRY_1:STRING=1
+
+// mid 2
+MIDDLE_ENTRY_2:STRING=2$
