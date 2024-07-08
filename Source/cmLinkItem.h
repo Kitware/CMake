@@ -120,6 +120,7 @@ struct cmLinkInterface : public cmLinkInterfaceLibraries
 
 struct cmOptionalLinkInterface : public cmLinkInterface
 {
+  bool LinkOnlyEval = false;
   bool LibrariesDone = false;
   bool AllDone = false;
   bool Exists = false;
