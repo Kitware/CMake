@@ -37,22 +37,22 @@ protected:
   void GeneratePolicyHeaderCode(std::ostream&) override {}
   void GeneratePolicyFooterCode(std::ostream&) override {}
   void GenerateImportHeaderCode(std::ostream& os,
-                                const std::string& config = "") override;
+                                std::string const& config = "") override;
   void GenerateImportFooterCode(std::ostream& os) override;
   void GenerateImportTargetCode(
     std::ostream& os, cmGeneratorTarget const* target,
     cmStateEnums::TargetType /*targetType*/) override;
   void GenerateExpectedTargetsCode(
-    std::ostream& os, const std::string& expectedTargets) override;
+    std::ostream& os, std::string const& expectedTargets) override;
   void GenerateImportPropertyCode(
-    std::ostream& os, const std::string& config, const std::string& suffix,
+    std::ostream& os, std::string const& config, std::string const& suffix,
     cmGeneratorTarget const* target, ImportPropertyMap const& properties,
-    const std::string& importedXcFrameworkLocation) override;
+    std::string const& importedXcFrameworkLocation) override;
   void GenerateMissingTargetsCheckCode(std::ostream& os) override;
   void GenerateFindDependencyCalls(std::ostream&) override {}
   void GenerateInterfaceProperties(
     cmGeneratorTarget const* target, std::ostream& os,
-    const ImportPropertyMap& properties) override;
+    ImportPropertyMap const& properties) override;
   void GenerateImportPrefix(std::ostream& os) override;
   void LoadConfigFiles(std::ostream&) override;
   void CleanupTemporaryVariables(std::ostream&) override;
@@ -60,7 +60,7 @@ protected:
   void GenerateImportedFileChecksCode(
     std::ostream& os, cmGeneratorTarget* target,
     ImportPropertyMap const& properties,
-    const std::set<std::string>& importedLocations,
-    const std::string& importedXcFrameworkLocation) override;
-  bool GenerateImportFileConfig(const std::string& config) override;
+    std::set<std::string> const& importedLocations,
+    std::string const& importedXcFrameworkLocation) override;
+  bool GenerateImportFileConfig(std::string const& config) override;
 };

@@ -78,7 +78,7 @@ public:
 protected:
   // Implement virtual methods from the superclass.
   bool GenerateMainFile(std::ostream& os) override;
-  void GenerateImportTargetsConfig(std::ostream& os, const std::string& config,
+  void GenerateImportTargetsConfig(std::ostream& os, std::string const& config,
                                    std::string const& suffix) override;
   cmStateEnums::TargetType GetExportTargetType(
     cmTargetExport const* targetExport) const;
@@ -93,7 +93,7 @@ protected:
                                   std::vector<std::string> const& exportFiles);
 
   std::pair<std::vector<std::string>, std::string> FindNamespaces(
-    cmGlobalGenerator* gg, const std::string& name);
+    cmGlobalGenerator* gg, std::string const& name);
 
   /** Generate the relative import prefix.  */
   virtual void GenerateImportPrefix(std::ostream&);
@@ -104,17 +104,17 @@ protected:
   virtual void CleanupTemporaryVariables(std::ostream&);
 
   /** Generate a per-configuration file for the targets.  */
-  virtual bool GenerateImportFileConfig(const std::string& config);
+  virtual bool GenerateImportFileConfig(std::string const& config);
 
   /** Fill in properties indicating installed file locations.  */
-  void SetImportLocationProperty(const std::string& config,
+  void SetImportLocationProperty(std::string const& config,
                                  std::string const& suffix,
                                  cmInstallTargetGenerator* itgen,
                                  ImportPropertyMap& properties,
                                  std::set<std::string>& importedLocations);
 
   std::string InstallNameDir(cmGeneratorTarget const* target,
-                             const std::string& config) override;
+                             std::string const& config) override;
 
   std::string GetFileSetDirectories(cmGeneratorTarget* gte, cmFileSet* fileSet,
                                     cmTargetExport* te) override;

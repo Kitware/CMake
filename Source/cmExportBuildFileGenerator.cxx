@@ -144,7 +144,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
       return false;
     }
 
-    const bool newCMP0022Behavior =
+    bool const newCMP0022Behavior =
       gte->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
       gte->GetPolicyStatusCMP0022() != cmPolicies::OLD;
     if (newCMP0022Behavior) {
@@ -190,7 +190,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 }
 
 void cmExportBuildFileGenerator::GenerateImportTargetsConfig(
-  std::ostream& os, const std::string& config, std::string const& suffix)
+  std::ostream& os, std::string const& config, std::string const& suffix)
 {
   for (auto const& exp : this->Exports) {
     cmGeneratorTarget* target = exp.Target;
@@ -260,7 +260,7 @@ void cmExportBuildFileGenerator::SetExportSet(cmExportSet* exportSet)
 }
 
 void cmExportBuildFileGenerator::SetImportLocationProperty(
-  const std::string& config, std::string const& suffix,
+  std::string const& config, std::string const& suffix,
   cmGeneratorTarget* target, ImportPropertyMap& properties)
 {
   // Get the makefile in which to lookup target information.
@@ -276,7 +276,7 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
     std::string const obj_dir = target->GetObjectDirectory(config);
     std::vector<std::string> objects;
     for (cmSourceFile const* sf : objectSources) {
-      const std::string& obj = target->GetObjectName(sf);
+      std::string const& obj = target->GetObjectName(sf);
       objects.push_back(obj_dir + obj);
     }
 
@@ -317,7 +317,7 @@ void cmExportBuildFileGenerator::HandleMissingTarget(
 {
   // The target is not in the export.
   if (!this->AppendMode) {
-    const std::string name = dependee->GetName();
+    std::string const name = dependee->GetName();
     cmGlobalGenerator* gg =
       dependee->GetLocalGenerator()->GetGlobalGenerator();
     auto exportInfo = this->FindBuildExportInfo(gg, name);
@@ -359,7 +359,7 @@ void cmExportBuildFileGenerator::GetTargets(
 
 std::pair<std::vector<std::string>, std::string>
 cmExportBuildFileGenerator::FindBuildExportInfo(cmGlobalGenerator* gg,
-                                                const std::string& name)
+                                                std::string const& name)
 {
   std::vector<std::string> exportFiles;
   std::string ns;
@@ -367,12 +367,12 @@ cmExportBuildFileGenerator::FindBuildExportInfo(cmGlobalGenerator* gg,
   auto& exportSets = gg->GetBuildExportSets();
 
   for (auto const& exp : exportSets) {
-    const auto& exportSet = exp.second;
+    auto const& exportSet = exp.second;
     std::vector<TargetExport> targets;
     exportSet->GetTargets(targets);
     if (std::any_of(
           targets.begin(), targets.end(),
-          [&name](const TargetExport& te) { return te.Name == name; })) {
+          [&name](TargetExport const& te) { return te.Name == name; })) {
       exportFiles.push_back(exp.first);
       ns = exportSet->GetNamespace();
     }
@@ -405,7 +405,7 @@ void cmExportBuildFileGenerator::ComplainAboutMissingTarget(
 }
 
 std::string cmExportBuildFileGenerator::InstallNameDir(
-  cmGeneratorTarget const* target, const std::string& config)
+  cmGeneratorTarget const* target, std::string const& config)
 {
   std::string install_name_dir;
 
@@ -419,7 +419,7 @@ std::string cmExportBuildFileGenerator::InstallNameDir(
 
 namespace {
 bool EntryIsContextSensitive(
-  const std::unique_ptr<cmCompiledGeneratorExpression>& cge)
+  std::unique_ptr<cmCompiledGeneratorExpression> const& cge)
 {
   return cge->GetHadContextSensitiveCondition();
 }
@@ -544,7 +544,7 @@ std::string cmExportBuildFileGenerator::GetCxxModulesDirectory() const
 void cmExportBuildFileGenerator::GenerateCxxModuleConfigInformation(
   std::string const& name, std::ostream& os) const
 {
-  const char* opt = "";
+  char const* opt = "";
   if (this->Configurations.size() > 1) {
     // With more than one configuration, each individual file is optional.
     opt = " OPTIONAL";

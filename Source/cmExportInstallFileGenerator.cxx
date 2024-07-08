@@ -137,7 +137,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
       return false;
     }
 
-    const bool newCMP0022Behavior =
+    bool const newCMP0022Behavior =
       gt->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
       gt->GetPolicyStatusCMP0022() != cmPolicies::OLD;
     if (newCMP0022Behavior) {
@@ -290,7 +290,7 @@ void cmExportInstallFileGenerator::ReplaceInstallPrefix(std::string& input)
 }
 
 bool cmExportInstallFileGenerator::GenerateImportFileConfig(
-  const std::string& config)
+  std::string const& config)
 {
   // Skip configurations not enabled for this export.
   if (!this->IEGen->InstallsForConfig(config)) {
@@ -334,7 +334,7 @@ bool cmExportInstallFileGenerator::GenerateImportFileConfig(
 }
 
 void cmExportInstallFileGenerator::GenerateImportTargetsConfig(
-  std::ostream& os, const std::string& config, std::string const& suffix)
+  std::ostream& os, std::string const& config, std::string const& suffix)
 {
   // Add each target in the set to the export.
   for (std::unique_ptr<cmTargetExport> const& te :
@@ -404,7 +404,7 @@ void cmExportInstallFileGenerator::GenerateImportTargetsConfig(
 }
 
 void cmExportInstallFileGenerator::SetImportLocationProperty(
-  const std::string& config, std::string const& suffix,
+  std::string const& config, std::string const& suffix,
   cmInstallTargetGenerator* itgen, ImportPropertyMap& properties,
   std::set<std::string>& importedLocations)
 {
@@ -505,7 +505,7 @@ void cmExportInstallFileGenerator::HandleMissingTarget(
   std::string& link_libs, cmGeneratorTarget const* depender,
   cmGeneratorTarget* dependee)
 {
-  const std::string name = dependee->GetName();
+  std::string const name = dependee->GetName();
   cmGlobalGenerator* gg = dependee->GetLocalGenerator()->GetGlobalGenerator();
   auto exportInfo = this->FindNamespaces(gg, name);
   std::vector<std::string> const& exportFiles = exportInfo.first;
@@ -524,14 +524,14 @@ void cmExportInstallFileGenerator::HandleMissingTarget(
 
 std::pair<std::vector<std::string>, std::string>
 cmExportInstallFileGenerator::FindNamespaces(cmGlobalGenerator* gg,
-                                             const std::string& name)
+                                             std::string const& name)
 {
   std::vector<std::string> exportFiles;
   std::string ns;
-  const cmExportSetMap& exportSets = gg->GetExportSets();
+  cmExportSetMap const& exportSets = gg->GetExportSets();
 
   for (auto const& expIt : exportSets) {
-    const cmExportSet& exportSet = expIt.second;
+    cmExportSet const& exportSet = expIt.second;
 
     bool containsTarget = false;
     for (auto const& target : exportSet.GetTargetExports()) {
@@ -576,7 +576,7 @@ void cmExportInstallFileGenerator::ComplainAboutMissingTarget(
 }
 
 std::string cmExportInstallFileGenerator::InstallNameDir(
-  cmGeneratorTarget const* target, const std::string& config)
+  cmGeneratorTarget const* target, std::string const& config)
 {
   std::string install_name_dir;
 
@@ -591,7 +591,7 @@ std::string cmExportInstallFileGenerator::InstallNameDir(
 
 namespace {
 bool EntryIsContextSensitive(
-  const std::unique_ptr<cmCompiledGeneratorExpression>& cge)
+  std::unique_ptr<cmCompiledGeneratorExpression> const& cge)
 {
   return cge->GetHadContextSensitiveCondition();
 }

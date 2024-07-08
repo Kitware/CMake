@@ -25,7 +25,7 @@ cmExportInstallAndroidMKGenerator::cmExportInstallAndroidMKGenerator(
 }
 
 void cmExportInstallAndroidMKGenerator::GenerateImportHeaderCode(
-  std::ostream& os, const std::string&)
+  std::ostream& os, std::string const&)
 {
   std::string installDir = this->IEGen->GetDestination();
   os << "LOCAL_PATH := $(call my-dir)\n";
@@ -75,13 +75,13 @@ void cmExportInstallAndroidMKGenerator::GenerateImportTargetCode(
 }
 
 void cmExportInstallAndroidMKGenerator::GenerateExpectedTargetsCode(
-  std::ostream&, const std::string&)
+  std::ostream&, std::string const&)
 {
 }
 
 void cmExportInstallAndroidMKGenerator::GenerateImportPropertyCode(
-  std::ostream&, const std::string&, const std::string&,
-  cmGeneratorTarget const*, ImportPropertyMap const&, const std::string&)
+  std::ostream&, std::string const&, std::string const&,
+  cmGeneratorTarget const*, ImportPropertyMap const&, std::string const&)
 {
 }
 
@@ -92,7 +92,7 @@ void cmExportInstallAndroidMKGenerator::GenerateMissingTargetsCheckCode(
 
 void cmExportInstallAndroidMKGenerator::GenerateInterfaceProperties(
   cmGeneratorTarget const* target, std::ostream& os,
-  const ImportPropertyMap& properties)
+  ImportPropertyMap const& properties)
 {
   std::string config;
   if (!this->Configurations.empty()) {
@@ -122,12 +122,12 @@ void cmExportInstallAndroidMKGenerator::GenerateImportedFileCheckLoop(
 
 void cmExportInstallAndroidMKGenerator::GenerateImportedFileChecksCode(
   std::ostream&, cmGeneratorTarget*, ImportPropertyMap const&,
-  const std::set<std::string>&, const std::string&)
+  std::set<std::string> const&, std::string const&)
 {
 }
 
 bool cmExportInstallAndroidMKGenerator::GenerateImportFileConfig(
-  const std::string&)
+  std::string const&)
 {
   return true;
 }

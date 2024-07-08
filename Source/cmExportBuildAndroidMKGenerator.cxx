@@ -27,7 +27,7 @@ cmExportBuildAndroidMKGenerator::cmExportBuildAndroidMKGenerator()
 }
 
 void cmExportBuildAndroidMKGenerator::GenerateImportHeaderCode(
-  std::ostream& os, const std::string&)
+  std::ostream& os, std::string const&)
 {
   os << "LOCAL_PATH := $(call my-dir)\n\n";
 }
@@ -37,7 +37,7 @@ void cmExportBuildAndroidMKGenerator::GenerateImportFooterCode(std::ostream&)
 }
 
 void cmExportBuildAndroidMKGenerator::GenerateExpectedTargetsCode(
-  std::ostream&, const std::string&)
+  std::ostream&, std::string const&)
 {
 }
 
@@ -57,8 +57,8 @@ void cmExportBuildAndroidMKGenerator::GenerateImportTargetCode(
 }
 
 void cmExportBuildAndroidMKGenerator::GenerateImportPropertyCode(
-  std::ostream&, const std::string&, const std::string&,
-  cmGeneratorTarget const*, ImportPropertyMap const&, const std::string&)
+  std::ostream&, std::string const&, std::string const&,
+  cmGeneratorTarget const*, ImportPropertyMap const&, std::string const&)
 {
 }
 
@@ -68,8 +68,8 @@ void cmExportBuildAndroidMKGenerator::GenerateMissingTargetsCheckCode(
 }
 
 void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
-  const cmGeneratorTarget* target, std::ostream& os,
-  const ImportPropertyMap& properties)
+  cmGeneratorTarget const* target, std::ostream& os,
+  ImportPropertyMap const& properties)
 {
   std::string config;
   if (!this->Configurations.empty()) {
@@ -80,11 +80,11 @@ void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
 }
 
 void cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
-  const cmGeneratorTarget* target, std::ostream& os,
-  const ImportPropertyMap& properties, GenerateType type,
+  cmGeneratorTarget const* target, std::ostream& os,
+  ImportPropertyMap const& properties, GenerateType type,
   std::string const& config)
 {
-  const bool newCMP0022Behavior =
+  bool const newCMP0022Behavior =
     target->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
     target->GetPolicyStatusCMP0022() != cmPolicies::OLD;
   if (!newCMP0022Behavior) {

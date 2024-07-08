@@ -64,7 +64,7 @@ public:
   {
     this->CxxModulesDirectory = std::move(cxx_module_dir);
   }
-  const std::string& GetCxxModuleDirectory() const
+  std::string const& GetCxxModuleDirectory() const
   {
     return this->CxxModulesDirectory;
   }
@@ -77,7 +77,7 @@ public:
 protected:
   // Implement virtual methods from the superclass.
   bool GenerateMainFile(std::ostream& os) override;
-  void GenerateImportTargetsConfig(std::ostream& os, const std::string& config,
+  void GenerateImportTargetsConfig(std::ostream& os, std::string const& config,
                                    std::string const& suffix) override;
   cmStateEnums::TargetType GetExportTargetType(
     cmGeneratorTarget const* target) const;
@@ -90,13 +90,13 @@ protected:
                                   std::vector<std::string> const& namespaces);
 
   /** Fill in properties indicating built file locations.  */
-  void SetImportLocationProperty(const std::string& config,
+  void SetImportLocationProperty(std::string const& config,
                                  std::string const& suffix,
                                  cmGeneratorTarget* target,
                                  ImportPropertyMap& properties);
 
   std::string InstallNameDir(cmGeneratorTarget const* target,
-                             const std::string& config) override;
+                             std::string const& config) override;
 
   std::string GetFileSetDirectories(cmGeneratorTarget* gte, cmFileSet* fileSet,
                                     cmTargetExport* te) override;
@@ -111,7 +111,7 @@ protected:
                                                     std::string) const;
 
   std::pair<std::vector<std::string>, std::string> FindBuildExportInfo(
-    cmGlobalGenerator* gg, const std::string& name);
+    cmGlobalGenerator* gg, std::string const& name);
 
   struct TargetExportPrivate
   {

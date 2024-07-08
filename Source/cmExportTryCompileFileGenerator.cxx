@@ -25,7 +25,7 @@
 class cmTargetExport;
 
 cmExportTryCompileFileGenerator::cmExportTryCompileFileGenerator(
-  cmGlobalGenerator* gg, const std::vector<std::string>& targets,
+  cmGlobalGenerator* gg, std::vector<std::string> const& targets,
   cmMakefile* mf, std::set<std::string> const& langs)
   : Languages(langs.begin(), langs.end())
 {
@@ -61,7 +61,7 @@ bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)
 }
 
 std::string cmExportTryCompileFileGenerator::FindTargets(
-  const std::string& propName, cmGeneratorTarget const* tgt,
+  std::string const& propName, cmGeneratorTarget const* tgt,
   std::string const& language, std::set<cmGeneratorTarget const*>& emitted)
 {
   cmValue prop = tgt->GetProperty(propName);
@@ -94,7 +94,7 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
   std::string result = cge->Evaluate(tgt->GetLocalGenerator(), this->Config,
                                      &gDummyHead, &dagChecker, tgt, language);
 
-  const std::set<cmGeneratorTarget const*>& allTargets =
+  std::set<cmGeneratorTarget const*> const& allTargets =
     cge->GetAllTargetsSeen();
   for (cmGeneratorTarget const* target : allTargets) {
     if (emitted.insert(target).second) {
@@ -105,7 +105,7 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
 }
 
 void cmExportTryCompileFileGenerator::PopulateProperties(
-  const cmGeneratorTarget* target, ImportPropertyMap& properties,
+  cmGeneratorTarget const* target, ImportPropertyMap& properties,
   std::set<cmGeneratorTarget const*>& emitted)
 {
   // Look through all non-special properties.
@@ -140,7 +140,7 @@ void cmExportTryCompileFileGenerator::PopulateProperties(
 }
 
 std::string cmExportTryCompileFileGenerator::InstallNameDir(
-  cmGeneratorTarget const* target, const std::string& config)
+  cmGeneratorTarget const* target, std::string const& config)
 {
   std::string install_name_dir;
 
