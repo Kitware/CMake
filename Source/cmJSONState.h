@@ -65,7 +65,7 @@ public:
   std::vector<JsonPair> parseStack;
   std::vector<Error> errors;
   std::string doc;
-  bool allowComments;
+  bool allowComments = false;
 
 private:
   std::string GetJsonContext(Location loc);
