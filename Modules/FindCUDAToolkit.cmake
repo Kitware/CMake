@@ -970,6 +970,14 @@ if(CMAKE_CROSSCOMPILING)
   endforeach()
 endif()
 
+# Determine windows search path suffix for libraries
+if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Windows")
+  if(CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "AMD64")
+    set(_CUDAToolkit_win_search_dirs lib/x64)
+    set(_CUDAToolkit_win_stub_search_dirs lib/x64/stubs)
+  endif()
+endif()
+
 # If not already set we can simply use the toolkit root or it's a scattered installation.
 if(NOT CUDAToolkit_TARGET_DIR)
   # Not cross compiling
@@ -1025,12 +1033,12 @@ unset(CUDAToolkit_CUBLAS_INCLUDE_DIR)
 find_library(CUDA_CUDART
   NAMES cudart
   PATHS ${CUDAToolkit_IMPLICIT_LIBRARY_DIRECTORIES}
-  PATH_SUFFIXES lib64 lib/x64
+  PATH_SUFFIXES lib64 ${_CUDAToolkit_win_search_dirs}
 )
 find_library(CUDA_CUDART
   NAMES cudart
   PATHS ${CUDAToolkit_IMPLICIT_LIBRARY_DIRECTORIES}
-  PATH_SUFFIXES lib64/stubs lib/x64/stubs lib/stubs stubs
+  PATH_SUFFIXES lib64/stubs ${_CUDAToolkit_win_stub_search_dirs} lib/stubs stubs
 )
 
 if(NOT CUDA_CUDART AND NOT CUDAToolkit_FIND_QUIETLY)
@@ -1118,7 +1126,7 @@ if(CUDAToolkit_FOUND)
       NAMES ${search_names}
       HINTS ${CUDAToolkit_LIBRARY_SEARCH_DIRS}
             ENV CUDA_PATH
-      PATH_SUFFIXES nvidia/current lib64 lib/x64 lib
+      PATH_SUFFIXES nvidia/current lib64 ${_CUDAToolkit_win_search_dirs} lib
                     # Support NVHPC splayed math library layout
                     math_libs/${CUDAToolkit_VERSION_MAJOR}.${CUDAToolkit_VERSION_MINOR}/lib64
                     math_libs/lib64
@@ -1133,7 +1141,7 @@ if(CUDAToolkit_FOUND)
         NAMES ${search_names}
         HINTS ${CUDAToolkit_LIBRARY_SEARCH_DIRS}
               ENV CUDA_PATH
-        PATH_SUFFIXES lib64/stubs lib/x64/stubs lib/stubs stubs
+        PATH_SUFFIXES lib64/stubs ${_CUDAToolkit_win_stub_search_dirs} lib/stubs stubs
       )
     endif()
     if(CUDA_${lib_name}_LIBRARY MATCHES "/stubs/" AND NOT WIN32)
@@ -1381,3 +1389,6 @@ if(_CUDAToolkit_Pop_ROOT_PATH)
   list(REMOVE_AT CMAKE_FIND_ROOT_PATH 0)
   unset(_CUDAToolkit_Pop_ROOT_PATH)
 endif()
+
+unset(_CUDAToolkit_win_search_dirs)
+unset(_CUDAToolkit_win_stub_search_dirs)
