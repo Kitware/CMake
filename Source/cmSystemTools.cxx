@@ -1319,16 +1319,18 @@ cmSystemTools::RenameResult cmSystemTools::RenameFile(
 #endif
 }
 
-void cmSystemTools::MoveFileIfDifferent(const std::string& source,
-                                        const std::string& destination)
+cmsys::Status cmSystemTools::MoveFileIfDifferent(
+  const std::string& source, const std::string& destination)
 {
+  cmsys::Status res = {};
   if (FilesDiffer(source, destination)) {
     if (RenameFile(source, destination)) {
-      return;
+      return res;
     }
-    CopyFileAlways(source, destination);
+    res = CopyFileAlways(source, destination);
   }
   RemoveFile(source);
+  return res;
 }
 
 void cmSystemTools::Glob(const std::string& directory,

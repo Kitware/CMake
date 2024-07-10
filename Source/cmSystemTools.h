@@ -211,8 +211,8 @@ public:
                                  std::string* err = nullptr);
 
   //! Rename a file if contents are different, delete the source otherwise
-  static void MoveFileIfDifferent(const std::string& source,
-                                  const std::string& destination);
+  static cmsys::Status MoveFileIfDifferent(const std::string& source,
+                                           const std::string& destination);
 
   /**
    * Run a single executable command
