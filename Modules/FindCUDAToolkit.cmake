@@ -444,11 +444,14 @@ nvidia-ML
 """""""""
 
 The `NVIDIA Management Library <https://developer.nvidia.com/management-library-nvml>`_.
-This is a shared library only.
 
 Targets Created:
 
 - ``CUDA::nvml``
+- ``CUDA::nvml_static`` starting in CUDA 12.4
+
+.. versionadded:: 3.31
+  Added ``CUDA::nvml_static``.
 
 .. _`cuda_toolkit_nvToolsExt`:
 
@@ -1110,9 +1113,13 @@ unset(CUDAToolkit_INCLUDE_DIRECTORIES)
 if(CUDAToolkit_FOUND)
 
   function(_CUDAToolkit_find_and_add_import_lib lib_name)
-    cmake_parse_arguments(arg "" "" "ALT;DEPS;EXTRA_PATH_SUFFIXES;EXTRA_INCLUDE_DIRS" ${ARGN})
+    cmake_parse_arguments(arg "" "" "ALT;DEPS;EXTRA_PATH_SUFFIXES;EXTRA_INCLUDE_DIRS;ONLY_SEARCH_FOR" ${ARGN})
 
-    set(search_names ${lib_name} ${arg_ALT})
+    if(arg_ONLY_SEARCH_FOR)
+      set(search_names ${arg_ONLY_SEARCH_FOR})
+    else()
+      set(search_names ${lib_name} ${arg_ALT})
+    endif()
 
     find_library(CUDA_${lib_name}_LIBRARY
       NAMES ${search_names}
@@ -1136,7 +1143,7 @@ if(CUDAToolkit_FOUND)
         PATH_SUFFIXES lib64/stubs lib/x64/stubs lib/stubs stubs
       )
     endif()
-    if(CUDA_${lib_name}_LIBRARY MATCHES "/stubs/" AND NOT WIN32)
+    if(CUDA_${lib_name}_LIBRARY MATCHES "/stubs/" AND NOT CUDA_${lib_name}_LIBRARY MATCHES "\\.a$" AND NOT WIN32)
       # Use a SHARED library with IMPORTED_IMPLIB, but not IMPORTED_LOCATION,
       # to indicate that the stub is for linkers but not dynamic loaders.
       # It will not contribute any RPATH entry.  When encountered as
@@ -1345,6 +1352,7 @@ if(CUDAToolkit_FOUND)
   endif()
 
   _CUDAToolkit_find_and_add_import_lib(nvml ALT nvidia-ml nvml)
+  _CUDAToolkit_find_and_add_import_lib(nvml_static ONLY_SEARCH_FOR libnvidia-ml.a libnvml.a)
 
   if(WIN32)
     # nvtools can be installed outside the CUDA toolkit directory
