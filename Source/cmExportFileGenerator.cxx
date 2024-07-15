@@ -613,6 +613,7 @@ void cmExportFileGenerator::PopulateCustomTransitiveInterfaceProperties(
                                   properties);
   this->PopulateInterfaceProperty("TRANSITIVE_LINK_PROPERTIES", target,
                                   properties);
+  cmGeneratorTarget::CheckLinkLibrariesSuppressionRAII cllSuppressRAII;
   std::set<std::string> ifaceProperties;
   for (std::string const& config : this->Configurations) {
     for (auto const& i : target->GetCustomTransitiveProperties(
