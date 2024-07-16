@@ -3162,6 +3162,8 @@ std::string unity_file_extension(std::string const& lang)
     extension = "_c.c";
   } else if (lang == "CXX") {
     extension = "_cxx.cxx";
+  } else if (lang == "CUDA") {
+    extension = "_cu.cu";
   } else if (lang == "OBJC") {
     extension = "_m.m";
   } else if (lang == "OBJCXX") {
@@ -3291,7 +3293,7 @@ void cmLocalGenerator::AddUnityBuild(cmGeneratorTarget* target)
   cmValue afterInclude = target->GetProperty("UNITY_BUILD_CODE_AFTER_INCLUDE");
   cmValue unityMode = target->GetProperty("UNITY_BUILD_MODE");
 
-  for (std::string lang : { "C", "CXX", "OBJC", "OBJCXX" }) {
+  for (std::string lang : { "C", "CXX", "OBJC", "OBJCXX", "CUDA" }) {
     std::vector<UnityBatchedSource> filtered_sources;
     std::copy_if(unitySources.begin(), unitySources.end(),
                  std::back_inserter(filtered_sources),
