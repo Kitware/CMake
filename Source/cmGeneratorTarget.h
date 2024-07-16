@@ -99,6 +99,13 @@ public:
   // Call this after generation is complete.
   void CheckLinkLibraries() const;
 
+  class CheckLinkLibrariesSuppressionRAII
+  {
+  public:
+    CheckLinkLibrariesSuppressionRAII();
+    ~CheckLinkLibrariesSuppressionRAII();
+  };
+
   cmStateEnums::TargetType GetType() const;
   const std::string& GetName() const;
   std::string GetExportName() const;
@@ -264,7 +271,6 @@ public:
   {
     Compile, // Usage requirements for compiling.  Excludes $<LINK_ONLY>.
     Link,    // Usage requirements for linking.  Includes $<LINK_ONLY>.
-    LinkInterfaceEval,
   };
 
   cmLinkInterfaceLibraries const* GetLinkInterfaceLibraries(

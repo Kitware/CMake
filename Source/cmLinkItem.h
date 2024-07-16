@@ -120,11 +120,11 @@ struct cmLinkInterface : public cmLinkInterfaceLibraries
 
 struct cmOptionalLinkInterface : public cmLinkInterface
 {
-  bool LinkOnlyEval = false;
   bool LibrariesDone = false;
   bool AllDone = false;
   bool Exists = false;
   bool Explicit = false;
+  bool CheckLinkLibraries = false;
 };
 
 struct cmHeadToLinkInterfaceMap
@@ -149,6 +149,7 @@ struct cmOptionalLinkImplementation : public cmLinkImplementation
   bool LibrariesDone = false;
   bool LanguagesDone = false;
   bool HadHeadSensitiveCondition = false;
+  bool CheckLinkLibraries = false;
 };
 
 /** Compute the link type to use for the given configuration.  */
