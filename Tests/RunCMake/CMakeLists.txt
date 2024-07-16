@@ -284,6 +284,7 @@ if(CMake_TEST_APPLE_SILICON)
   add_RunCMake_test(AppleSilicon)
 endif()
 set(want_NoQt_test TRUE)
+set(autogen_test_number 1 2 3 4 5 6)
 if(CMake_TEST_Qt6 AND Qt6Widgets_FOUND)
   # Work around Qt6 not finding sibling dependencies without CMAKE_PREFIX_PATH
   cmake_path(GET Qt6_DIR  PARENT_PATH base_dir)  # <base>/lib/cmake
@@ -291,7 +292,6 @@ if(CMake_TEST_Qt6 AND Qt6Widgets_FOUND)
   cmake_path(GET base_dir PARENT_PATH base_dir)  # <base>
   # Note: Since RunCMake.Autogen tests cause time out on some CI,
   # we split the tests.
-  set(autogen_test_number 1 2 3 4 5)
   foreach(val IN ITEMS ${autogen_test_number})
     add_RunCMake_test("Autogen_Qt6_${val}" TEST_DIR "Autogen_${val}"
       -Dwith_qt_version=6
