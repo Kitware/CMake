@@ -3154,6 +3154,23 @@ void cmLocalGenerator::WriteUnitySourceInclude(
   unity_file << "\n";
 }
 
+namespace {
+std::string unity_file_extension(std::string const& lang)
+{
+  std::string extension;
+  if (lang == "C") {
+    extension = "_c.c";
+  } else if (lang == "CXX") {
+    extension = "_cxx.cxx";
+  } else if (lang == "OBJC") {
+    extension = "_m.m";
+  } else if (lang == "OBJCXX") {
+    extension = "_mm.mm";
+  }
+  return extension;
+}
+}
+
 std::vector<cmLocalGenerator::UnitySource>
 cmLocalGenerator::AddUnityFilesModeAuto(
   cmGeneratorTarget* target, std::string const& lang,
@@ -3172,17 +3189,8 @@ cmLocalGenerator::AddUnityFilesModeAuto(
 
     chunk = std::min(itemsLeft, batchSize);
 
-    std::string extension;
-    if (lang == "C") {
-      extension = "_c.c";
-    } else if (lang == "CXX") {
-      extension = "_cxx.cxx";
-    } else if (lang == "OBJC") {
-      extension = "_m.m";
-    } else if (lang == "OBJCXX") {
-      extension = "_mm.mm";
-    }
-    std::string filename = cmStrCat(filename_base, "unity_", batch, extension);
+    std::string filename =
+      cmStrCat(filename_base, "unity_", batch, unity_file_extension(lang));
     auto const begin = filtered_sources.begin() + batch * batchSize;
     auto const end = begin + chunk;
     unity_files.emplace_back(this->WriteUnitySource(
@@ -3220,8 +3228,8 @@ cmLocalGenerator::AddUnityFilesModeGroup(
 
   for (auto const& item : explicit_mapping) {
     auto const& name = item.first;
-    std::string filename = cmStrCat(filename_base, "unity_", name,
-                                    (lang == "C") ? "_c.c" : "_cxx.cxx");
+    std::string filename =
+      cmStrCat(filename_base, "unity_", name, unity_file_extension(lang));
     unity_files.emplace_back(this->WriteUnitySource(
       target, configs, cmMakeRange(item.second), beforeInclude, afterInclude,
       std::move(filename)));
