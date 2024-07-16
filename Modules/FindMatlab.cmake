@@ -297,7 +297,8 @@ set(_FindMatlab_SELF_DIR "${CMAKE_CURRENT_LIST_DIR}")
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
-if(NOT WIN32 AND NOT APPLE AND NOT Threads_FOUND)
+if(NOT WIN32 AND NOT APPLE AND NOT Threads_FOUND
+    AND (CMAKE_C_COMPILER_LOADED OR CMAKE_CXX_COMPILER_LOADED))
   # MEX files use pthread if available
   set(THREADS_PREFER_PTHREAD_FLAG ON)
   find_package(Threads)
@@ -1776,10 +1777,10 @@ endif()
 
 
 set(MATLAB_INCLUDE_DIR_TO_LOOK ${Matlab_ROOT_DIR}/extern/include)
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(_matlab_current_suffix ${_matlab_bin_suffix_64bits})
-else()
+if(CMAKE_SIZEOF_VOID_P EQUAL 4)
   set(_matlab_current_suffix ${_matlab_bin_suffix_32bits})
+else()
+  set(_matlab_current_suffix ${_matlab_bin_suffix_64bits})
 endif()
 
 set(Matlab_BINARIES_DIR
