@@ -85,6 +85,7 @@ Value                     Name
 ``UNIX_SV``               SCO UnixWare (pre release 7)
 ``UnixWare``              SCO UnixWare 7
 ``visionOS``              Apple mixed reality operating system
+``WASI``                  WebAssembly System Interface
 ``watchOS``               Apple watch operating system
 ``Windows``               Windows stationary operating systems
 ``WindowsCE``             Windows Embedded Compact
