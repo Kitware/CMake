@@ -112,7 +112,6 @@ They are normally called through the :command:`find_package` command.
    /module/FindBacktrace
    /module/FindBISON
    /module/FindBLAS
-   /module/FindBoost
    /module/FindBullet
    /module/FindBZip2
    /module/FindCABLE
@@ -291,6 +290,7 @@ Deprecated Find Modules
 .. toctree::
    :maxdepth: 1
 
+   /module/FindBoost
    /module/FindCUDA
    /module/FindDart
    /module/FindITK
