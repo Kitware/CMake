@@ -171,6 +171,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
     headers = ::curl_slist_append(headers, h.c_str());
   }
 
+  cmCurlInitOnce();
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
   cmCTestCurlOpts curlOpts(this->CTest);
