@@ -24,6 +24,7 @@ set(targets
   linux-C-GNU-10.2.1-static-libgcc
     linux-CXX-GNU-10.2.1-static-libstdc++
     linux-Fortran-GNU-10.2.1-static-libgfortran
+    linux-Fortran-GNU-13.3.0-static-libquadmath
   linux-C-GNU-12.2.0 linux-CXX-GNU-12.2.0 linux-Fortran-GNU-12.2.0
   linux-C-Intel-18.0.0.20170811 linux-CXX-Intel-18.0.0.20170811
   linux-C-Intel-2021.10.0.20230609 linux-CXX-Intel-2021.10.0.20230609 linux-Fortran-Intel-2021.10.0.20230609
