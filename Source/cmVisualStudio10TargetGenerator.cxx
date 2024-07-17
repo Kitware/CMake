@@ -3880,6 +3880,14 @@ bool cmVisualStudio10TargetGenerator::ComputeCudaOptions(
     cudaOptions.AddFlag("CudaRuntime", "None");
   }
 
+  if (this->ProjectType == VsProjectType::vcxproj && this->MSTools) {
+    // Suppress inheritance of host compiler optimization flags
+    // when the project does not specify any optimization flags for CUDA.
+    if (!cudaOptions.HasFlag("Optimization")) {
+      cudaOptions.AddFlag("Optimization", "");
+    }
+  }
+
   this->CudaOptions[configName] = std::move(pOptions);
   return true;
 }
