@@ -91,6 +91,9 @@ struct GeneratedMakeCommand
   bool RequiresOutputForward = false;
 };
 }
+namespace Json {
+class StreamWriter;
+}
 
 /** \class cmGlobalGenerator
  * \brief Responsible for overseeing the generation process for the entire tree
@@ -655,6 +658,8 @@ public:
 
   bool CheckCMP0171() const;
 
+  void AddInstallScript(std::string const& file);
+
 protected:
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
@@ -673,6 +678,12 @@ protected:
                                    cmValue envVar) const;
 
   virtual bool ComputeTargetDepends();
+
+#if !defined(CMAKE_BOOTSTRAP)
+  void WriteJsonContent(const std::string& fname,
+                        const Json::Value& value) const;
+  void WriteInstallJson() const;
+#endif
 
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const;
 
@@ -790,6 +801,10 @@ private:
   std::map<std::string, int> LanguageToLinkerPreference;
   std::map<std::string, std::string> LanguageToOriginalSharedLibFlags;
 
+#if !defined(CMAKE_BOOTSTRAP)
+  std::unique_ptr<Json::StreamWriter> JsonWriter;
+#endif
+
 #ifdef __APPLE__
   std::map<std::string, StripCommandStyle> StripCommandStyleMap;
 #endif
@@ -881,6 +896,8 @@ private:
     RuntimeDependencySets;
   std::map<std::string, cmInstallRuntimeDependencySet*>
     RuntimeDependencySetsByName;
+
+  std::vector<std::string> InstallScripts;
 
 #if !defined(CMAKE_BOOTSTRAP)
   // Pool of file locks

@@ -258,8 +258,8 @@ if(CMAKE_GENERATOR MATCHES "Ninja")
   add_RunCMake_test(NinjaPrivateDeps
     -DCMAKE_C_OUTPUT_EXTENSION=${CMAKE_C_OUTPUT_EXTENSION}
     -DRunCMake_GENERATOR_IS_MULTI_CONFIG=${_isMultiConfig})
-  add_RunCMake_test(InstallParallel)
 endif()
+add_RunCMake_test(InstallParallel)
 add_RunCMake_test(CTest)
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)

@@ -500,6 +500,7 @@ void cmLocalGenerator::GenerateInstallRules()
     toplevel_install = 1;
   }
   file += "/cmake_install.cmake";
+  this->GetGlobalGenerator()->AddInstallScript(file);
   cmGeneratedFileStream fout(file);
   fout.SetCopyIfDifferent(true);
 

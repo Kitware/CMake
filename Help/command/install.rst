@@ -38,6 +38,13 @@ are executed in order during installation.
   The environment variable :envvar:`CMAKE_INSTALL_MODE` can override the
   default copying behavior of ``install()``.
 
+.. versionchanged:: 3.31
+  Projects can enable :prop_gbl:`INSTALL_PARALLEL` to enable a parallel
+  installation. When using the parallel install, subdirectories added by calls
+  to the :command:`add_subdirectory` command are installed independently
+  and the order that install rules added in different subdirectories will run is
+  not guaranteed.
+
 .. _`common options`:
 
 There are multiple signatures for this command.  Some of them define

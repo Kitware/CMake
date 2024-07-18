@@ -135,6 +135,13 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   cm->GetState()->SetWatcomWMake(false);
   cm->GetState()->SetWindowsShell(false);
   cm->GetState()->SetWindowsVSIDE(false);
+
+#if !defined(CMAKE_BOOTSTRAP)
+  Json::StreamWriterBuilder wbuilder;
+  wbuilder["indentation"] = "\t";
+  this->JsonWriter =
+    std::unique_ptr<Json::StreamWriter>(wbuilder.newStreamWriter());
+#endif
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()
@@ -1757,6 +1764,30 @@ void cmGlobalGenerator::Generate()
                                            w.str());
   }
 }
+
+#if !defined(CMAKE_BOOTSTRAP)
+void cmGlobalGenerator::WriteJsonContent(const std::string& path,
+                                         const Json::Value& value) const
+{
+  cmsys::ofstream ftmp(path.c_str());
+  this->JsonWriter->write(value, &ftmp);
+  ftmp << '\n';
+  ftmp.close();
+}
+
+void cmGlobalGenerator::WriteInstallJson() const
+{
+  if (this->GetCMakeInstance()->GetState()->GetGlobalPropertyAsBool(
+        "INSTALL_PARALLEL")) {
+    Json::Value index(Json::objectValue);
+    index["InstallScripts"] = Json::arrayValue;
+    for (const auto& file : this->InstallScripts) {
+      index["InstallScripts"].append(file);
+    }
+    this->WriteJsonContent("CMakeFiles/InstallScripts.json", index);
+  }
+}
+#endif
 
 bool cmGlobalGenerator::ComputeTargetDepends()
 {
@@ -3731,4 +3762,9 @@ cmGlobalGenerator::StripCommandStyle cmGlobalGenerator::GetStripCommandStyle(
   static_cast<void>(strip);
   return StripCommandStyle::Default;
 #endif
+}
+
+void cmGlobalGenerator::AddInstallScript(std::string const& file)
+{
+  this->InstallScripts.push_back(file);
 }
