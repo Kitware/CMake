@@ -1,0 +1,12 @@
+^CMake Warning \(dev\) at [^
+]*/Modules/CPack\.cmake:[0-9]+ \(message\):
+  Policy CMP0172 is not set: The CPack module enables per-machine
+  installation by default in the CPack WIX Generator\.  Run "cmake
+  --help-policy CMP0172" for policy details\.  Use the cmake_policy command to
+  set the policy and suppress this warning.
+
+  For compatibility, CMake will not enable per-machine installation by
+  default in the CPack WIX Generator\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.$
