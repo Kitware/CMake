@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportInstallFileGenerator.h"
 
+#include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <memory>
@@ -313,18 +314,21 @@ std::string cmExportInstallFileGenerator::GetCxxModuleFile() const
 bool cmExportInstallFileGenerator::CollectExports(
   std::function<void(cmTargetExport const*)> const& visitor)
 {
-  for (auto const& te : this->GetExportSet()->GetTargetExports()) {
+  auto pred = [&](std::unique_ptr<cmTargetExport> const& te) -> bool {
     if (te->NamelinkOnly) {
-      continue;
+      return true;
     }
     if (this->ExportedTargets.insert(te->Target).second) {
       visitor(te.get());
-    } else {
-      this->ComplainAboutDuplicateTarget(te->Target->GetName());
-      return false;
+      return true;
     }
-  }
-  return true;
+
+    this->ComplainAboutDuplicateTarget(te->Target->GetName());
+    return false;
+  };
+
+  auto const& targets = this->GetExportSet()->GetTargetExports();
+  return std::all_of(targets.begin(), targets.end(), pred);
 }
 
 bool cmExportInstallFileGenerator::PopulateInterfaceProperties(

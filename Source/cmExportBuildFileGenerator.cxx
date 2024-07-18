@@ -115,20 +115,21 @@ void cmExportBuildFileGenerator::SetImportLocationProperty(
 bool cmExportBuildFileGenerator::CollectExports(
   std::function<void(cmGeneratorTarget const*)> visitor)
 {
-  std::vector<TargetExport> targets;
-  this->GetTargets(targets);
-  for (auto const& tei : targets) {
+  auto pred = [&](cmExportBuildFileGenerator::TargetExport& tei) -> bool {
     cmGeneratorTarget* te = this->LG->FindGeneratorTargetToUse(tei.Name);
     if (this->ExportedTargets.insert(te).second) {
       this->Exports.emplace_back(te, tei.XcFrameworkLocation);
       visitor(te);
-    } else {
-      this->ComplainAboutDuplicateTarget(te->GetName());
-      return false;
+      return true;
     }
-  }
 
-  return true;
+    this->ComplainAboutDuplicateTarget(te->GetName());
+    return false;
+  };
+
+  std::vector<TargetExport> targets;
+  this->GetTargets(targets);
+  return std::all_of(targets.begin(), targets.end(), pred);
 }
 
 void cmExportBuildFileGenerator::HandleMissingTarget(
