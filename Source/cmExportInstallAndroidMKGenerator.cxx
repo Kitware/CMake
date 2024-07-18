@@ -4,14 +4,15 @@
 
 #include <cstddef>
 #include <memory>
-#include <ostream>
+#include <sstream>
 #include <vector>
 
-#include "cmExportBuildAndroidMKGenerator.h"
 #include "cmExportSet.h"
+#include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallTargetGenerator.h"
+#include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -22,6 +23,53 @@ cmExportInstallAndroidMKGenerator::cmExportInstallAndroidMKGenerator(
   cmInstallExportGenerator* iegen)
   : cmExportInstallFileGenerator(iegen)
 {
+}
+
+void cmExportInstallAndroidMKGenerator::ReportDuplicateTarget(
+  std::string const& targetName) const
+{
+  std::ostringstream e;
+  e << "install(EXPORT_ANDROID_MK \"" << this->GetExportSet()->GetName()
+    << "\" ...) "
+    << "includes target \"" << targetName
+    << "\" more than once in the export set.";
+  this->ReportError(e.str());
+}
+
+bool cmExportInstallAndroidMKGenerator::GenerateMainFile(std::ostream& os)
+{
+  std::vector<cmTargetExport const*> allTargets;
+  {
+    auto visitor = [&](cmTargetExport const* te) { allTargets.push_back(te); };
+
+    if (!this->CollectExports(visitor)) {
+      return false;
+    }
+  }
+
+  // Create all the imported targets.
+  for (cmTargetExport const* te : allTargets) {
+    cmGeneratorTarget const* gt = te->Target;
+
+    this->GenerateImportTargetCode(os, gt, this->GetExportTargetType(te));
+
+    ImportPropertyMap properties;
+    if (!this->PopulateInterfaceProperties(te, properties)) {
+      return false;
+    }
+
+    bool const newCMP0022Behavior =
+      gt->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
+      gt->GetPolicyStatusCMP0022() != cmPolicies::OLD;
+    if (newCMP0022Behavior) {
+      this->PopulateInterfaceLinkLibrariesProperty(
+        gt, cmGeneratorExpression::InstallInterface, properties);
+    }
+
+    this->GenerateInterfaceProperties(gt, os, properties);
+  }
+
+  return true;
 }
 
 void cmExportInstallAndroidMKGenerator::GenerateImportHeaderCode(
@@ -53,10 +101,6 @@ void cmExportInstallAndroidMKGenerator::GenerateImportHeaderCode(
   }
 }
 
-void cmExportInstallAndroidMKGenerator::GenerateImportFooterCode(std::ostream&)
-{
-}
-
 void cmExportInstallAndroidMKGenerator::GenerateImportTargetCode(
   std::ostream& os, cmGeneratorTarget const* target,
   cmStateEnums::TargetType /*targetType*/)
@@ -72,62 +116,4 @@ void cmExportInstallAndroidMKGenerator::GenerateImportTargetCode(
     config = this->Configurations[0];
   }
   os << target->GetFullName(config) << "\n";
-}
-
-void cmExportInstallAndroidMKGenerator::GenerateExpectedTargetsCode(
-  std::ostream&, std::string const&)
-{
-}
-
-void cmExportInstallAndroidMKGenerator::GenerateImportPropertyCode(
-  std::ostream&, std::string const&, std::string const&,
-  cmGeneratorTarget const*, ImportPropertyMap const&, std::string const&)
-{
-}
-
-void cmExportInstallAndroidMKGenerator::GenerateMissingTargetsCheckCode(
-  std::ostream&)
-{
-}
-
-void cmExportInstallAndroidMKGenerator::GenerateInterfaceProperties(
-  cmGeneratorTarget const* target, std::ostream& os,
-  ImportPropertyMap const& properties)
-{
-  std::string config;
-  if (!this->Configurations.empty()) {
-    config = this->Configurations[0];
-  }
-  cmExportBuildAndroidMKGenerator::GenerateInterfaceProperties(
-    target, os, properties, cmExportBuildAndroidMKGenerator::INSTALL, config);
-}
-
-void cmExportInstallAndroidMKGenerator::LoadConfigFiles(std::ostream&)
-{
-}
-
-void cmExportInstallAndroidMKGenerator::GenerateImportPrefix(std::ostream&)
-{
-}
-
-void cmExportInstallAndroidMKGenerator::CleanupTemporaryVariables(
-  std::ostream&)
-{
-}
-
-void cmExportInstallAndroidMKGenerator::GenerateImportedFileCheckLoop(
-  std::ostream&)
-{
-}
-
-void cmExportInstallAndroidMKGenerator::GenerateImportedFileChecksCode(
-  std::ostream&, cmGeneratorTarget*, ImportPropertyMap const&,
-  std::set<std::string> const&, std::string const&)
-{
-}
-
-bool cmExportInstallAndroidMKGenerator::GenerateImportFileConfig(
-  std::string const&)
-{
-  return true;
 }

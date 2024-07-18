@@ -19,6 +19,7 @@
 #include "cmOutputConverter.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmValue.h"
 
@@ -30,6 +31,12 @@ cmExportTryCompileFileGenerator::cmExportTryCompileFileGenerator(
   : Languages(langs.begin(), langs.end())
 {
   gg->CreateImportedGenerationObjects(mf, targets, this->Exports);
+}
+
+void cmExportTryCompileFileGenerator::ReportError(
+  std::string const& errorMessage) const
+{
+  cmSystemTools::Error(errorMessage);
 }
 
 bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)
@@ -153,14 +160,14 @@ std::string cmExportTryCompileFileGenerator::InstallNameDir(
 }
 
 std::string cmExportTryCompileFileGenerator::GetFileSetDirectories(
-  cmGeneratorTarget* /*gte*/, cmFileSet* fileSet, cmTargetExport* /*te*/)
+  cmGeneratorTarget* /*gte*/, cmFileSet* fileSet, cmTargetExport const* /*te*/)
 {
   return cmOutputConverter::EscapeForCMake(
     cmList::to_string(fileSet->GetDirectoryEntries()));
 }
 
 std::string cmExportTryCompileFileGenerator::GetFileSetFiles(
-  cmGeneratorTarget* /*gte*/, cmFileSet* fileSet, cmTargetExport* /*te*/)
+  cmGeneratorTarget* /*gte*/, cmFileSet* fileSet, cmTargetExport const* /*te*/)
 {
   return cmOutputConverter::EscapeForCMake(
     cmList::to_string(fileSet->GetFileEntries()));

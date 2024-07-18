@@ -32,9 +32,9 @@ public:
   cmInstallCMakeConfigExportGenerator& operator=(
     cmInstallCMakeConfigExportGenerator const&) = delete;
 
-protected:
   char const* InstallSubcommand() const override { return "EXPORT"; }
 
+protected:
   void GenerateScript(std::ostream& os) override;
 
   bool const ExportOld;

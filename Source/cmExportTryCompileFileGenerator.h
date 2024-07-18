@@ -9,7 +9,7 @@
 #include <string>
 #include <vector>
 
-#include "cmExportFileGenerator.h"
+#include "cmExportCMakeConfigGenerator.h"
 
 class cmFileSet;
 class cmGeneratorTarget;
@@ -17,7 +17,7 @@ class cmGlobalGenerator;
 class cmMakefile;
 class cmTargetExport;
 
-class cmExportTryCompileFileGenerator : public cmExportFileGenerator
+class cmExportTryCompileFileGenerator : public cmExportCMakeConfigGenerator
 {
 public:
   cmExportTryCompileFileGenerator(cmGlobalGenerator* gg,
@@ -30,6 +30,10 @@ public:
 
 protected:
   // Implement virtual methods from the superclass.
+  void ComplainAboutDuplicateTarget(
+    std::string const& /*targetName*/) const override{};
+  void ReportError(std::string const& errorMessage) const override;
+
   bool GenerateMainFile(std::ostream& os) override;
 
   void GenerateImportTargetsConfig(std::ostream&, std::string const&,
@@ -50,10 +54,10 @@ protected:
 
   std::string GetFileSetDirectories(cmGeneratorTarget* target,
                                     cmFileSet* fileSet,
-                                    cmTargetExport* te) override;
+                                    cmTargetExport const* te) override;
 
   std::string GetFileSetFiles(cmGeneratorTarget* target, cmFileSet* fileSet,
-                              cmTargetExport* te) override;
+                              cmTargetExport const* te) override;
 
   std::string GetCxxModulesDirectory() const override { return {}; }
   void GenerateCxxModuleConfigInformation(std::string const&,

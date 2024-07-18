@@ -19,6 +19,7 @@
 #include "cmExecutionStatus.h"
 #include "cmExperimental.h"
 #include "cmExportBuildAndroidMKGenerator.h"
+#include "cmExportBuildCMakeConfigGenerator.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmExportSet.h"
 #include "cmGeneratedFileStream.h"
@@ -318,21 +319,24 @@ bool cmExportCommand(std::vector<std::string> const& args,
   // Setup export file generation.
   std::unique_ptr<cmExportBuildFileGenerator> ebfg = nullptr;
   if (android) {
-    ebfg = cm::make_unique<cmExportBuildAndroidMKGenerator>();
+    auto ebag = cm::make_unique<cmExportBuildAndroidMKGenerator>();
+    ebag->SetAppendMode(arguments.Append);
+    ebfg = std::move(ebag);
   } else {
-    ebfg = cm::make_unique<cmExportBuildFileGenerator>();
+    auto ebcg = cm::make_unique<cmExportBuildCMakeConfigGenerator>();
+    ebcg->SetAppendMode(arguments.Append);
+    ebcg->SetExportOld(arguments.ExportOld);
+    ebcg->SetExportPackageDependencies(arguments.ExportPackageDependencies);
+    ebfg = std::move(ebcg);
   }
   ebfg->SetExportFile(fname.c_str());
   ebfg->SetNamespace(arguments.Namespace);
   ebfg->SetCxxModuleDirectory(arguments.CxxModulesDirectory);
-  ebfg->SetAppendMode(arguments.Append);
   if (exportSet != nullptr) {
     ebfg->SetExportSet(exportSet);
   } else {
     ebfg->SetTargets(targets);
   }
-  ebfg->SetExportOld(arguments.ExportOld);
-  ebfg->SetExportPackageDependencies(arguments.ExportPackageDependencies);
 
   // Compute the set of configurations exported.
   std::vector<std::string> configurationTypes =

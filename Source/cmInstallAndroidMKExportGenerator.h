@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include <iosfwd>
 #include <string>
 #include <vector>
 
@@ -22,8 +21,7 @@ public:
     std::string filePermissions,
     std::vector<std::string> const& configurations, std::string component,
     MessageLevel message, bool excludeFromAll, std::string filename,
-    std::string targetNamespace, bool exportOld,
-    cmListFileBacktrace backtrace);
+    std::string targetNamespace, cmListFileBacktrace backtrace);
   cmInstallAndroidMKExportGenerator(cmInstallAndroidMKExportGenerator const&) =
     delete;
   ~cmInstallAndroidMKExportGenerator() override;
@@ -31,10 +29,8 @@ public:
   cmInstallAndroidMKExportGenerator& operator=(
     cmInstallAndroidMKExportGenerator const&) = delete;
 
-protected:
-  char const* InstallSubcommand() const override { return "EXPORT"; }
-
-  void GenerateScript(std::ostream& os) override;
-
-  bool const ExportOld;
+  char const* InstallSubcommand() const override
+  {
+    return "EXPORT_ANDROID_MK";
+  }
 };

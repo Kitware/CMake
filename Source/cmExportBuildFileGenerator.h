@@ -4,7 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <iosfwd>
+#include <functional>
 #include <string>
 #include <utility>
 #include <vector>
@@ -15,22 +15,19 @@
 #include "cmStateTypes.h"
 
 class cmExportSet;
-class cmFileSet;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmLocalGenerator;
-class cmTargetExport;
 
-/** \class cmExportBuildFileGenerator
+/** \class cmExportBuildCMakeConfigGenerator
  * \brief Generate a file exporting targets from a build tree.
  *
- * cmExportBuildFileGenerator generates a file exporting targets from
- * a build tree.  A single file exports information for all
- * configurations built.
+ * cmExportBuildCMakeConfigGenerator is the interface class for generating a
+ * file exporting targets from a build tree.
  *
  * This is used to implement the export() command.
  */
-class cmExportBuildFileGenerator : public cmExportFileGenerator
+class cmExportBuildFileGenerator : virtual public cmExportFileGenerator
 {
 public:
   struct TargetExport
@@ -69,25 +66,28 @@ public:
     return this->CxxModulesDirectory;
   }
 
-  /** Set whether to append generated code to the output file.  */
-  void SetAppendMode(bool append) { this->AppendMode = append; }
-
   void Compute(cmLocalGenerator* lg);
 
 protected:
-  // Implement virtual methods from the superclass.
-  bool GenerateMainFile(std::ostream& os) override;
-  void GenerateImportTargetsConfig(std::ostream& os, std::string const& config,
-                                   std::string const& suffix) override;
   cmStateEnums::TargetType GetExportTargetType(
     cmGeneratorTarget const* target) const;
+
+  /** Walk the list of targets to be exported.  Returns true iff no duplicates
+      are found.  */
+  bool CollectExports(std::function<void(cmGeneratorTarget const*)> visitor);
+
   void HandleMissingTarget(std::string& link_libs,
                            cmGeneratorTarget const* depender,
                            cmGeneratorTarget* dependee) override;
 
-  void ComplainAboutMissingTarget(cmGeneratorTarget const* depender,
-                                  cmGeneratorTarget const* dependee,
-                                  std::vector<std::string> const& namespaces);
+  void ComplainAboutMissingTarget(
+    cmGeneratorTarget const* depender, cmGeneratorTarget const* dependee,
+    std::vector<std::string> const& namespaces) const;
+
+  void ComplainAboutDuplicateTarget(
+    std::string const& targetName) const override;
+
+  void ReportError(std::string const& errorMessage) const override;
 
   /** Fill in properties indicating built file locations.  */
   void SetImportLocationProperty(std::string const& config,
@@ -98,20 +98,19 @@ protected:
   std::string InstallNameDir(cmGeneratorTarget const* target,
                              std::string const& config) override;
 
-  std::string GetFileSetDirectories(cmGeneratorTarget* gte, cmFileSet* fileSet,
-                                    cmTargetExport* te) override;
-  std::string GetFileSetFiles(cmGeneratorTarget* gte, cmFileSet* fileSet,
-                              cmTargetExport* te) override;
   cmExportSet* GetExportSet() const override { return this->ExportSet; }
 
-  std::string GetCxxModulesDirectory() const override;
-  void GenerateCxxModuleConfigInformation(std::string const&,
-                                          std::ostream&) const override;
-  bool GenerateImportCxxModuleConfigTargetInclusion(std::string const&,
-                                                    std::string) const;
+  std::string GetCxxModulesDirectory() const override
+  {
+    return this->CxxModulesDirectory;
+  }
 
   std::pair<std::vector<std::string>, std::string> FindBuildExportInfo(
     cmGlobalGenerator* gg, std::string const& name);
+
+  using cmExportFileGenerator::PopulateInterfaceProperties;
+  bool PopulateInterfaceProperties(cmGeneratorTarget const* target,
+                                   ImportPropertyMap& properties);
 
   struct TargetExportPrivate
   {

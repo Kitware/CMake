@@ -2,12 +2,12 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmExportAndroidMKGenerator.h"
 
-#include <map>
 #include <sstream>
 #include <utility>
 #include <vector>
 
 #include <cmext/algorithm>
+#include <cmext/string_view>
 
 #include "cmGeneratorTarget.h"
 #include "cmLinkItem.h"
@@ -20,75 +20,44 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 
-cmExportAndroidMKGenerator::cmExportAndroidMKGenerator()
+cmExportAndroidMKGenerator::cmExportAndroidMKGenerator() = default;
+
+cm::string_view cmExportAndroidMKGenerator::GetImportPrefixWithSlash() const
 {
-  this->LG = nullptr;
-  this->ExportSet = nullptr;
+  return "$(_IMPORT_PREFIX)/"_s;
 }
 
-void cmExportAndroidMKGenerator::GenerateImportHeaderCode(std::ostream& os,
-                                                          std::string const&)
+bool cmExportAndroidMKGenerator::GenerateImportFile(std::ostream& os)
 {
-  os << "LOCAL_PATH := $(call my-dir)\n\n";
-}
+  if (!this->AppendMode) {
+    // Start with the import file header.
+    this->GenerateImportHeaderCode(os);
+  }
 
-void cmExportAndroidMKGenerator::GenerateImportFooterCode(std::ostream&)
-{
-}
+  // Create all the imported targets.
+  std::stringstream mainFileBuffer;
+  bool result = this->GenerateMainFile(mainFileBuffer);
 
-void cmExportAndroidMKGenerator::GenerateExpectedTargetsCode(
-  std::ostream&, std::string const&)
-{
-}
+  // Write cached import code.
+  os << mainFileBuffer.rdbuf();
 
-void cmExportAndroidMKGenerator::GenerateImportTargetCode(
-  std::ostream& os, cmGeneratorTarget const* target,
-  cmStateEnums::TargetType /*targetType*/)
-{
-  std::string targetName = cmStrCat(this->Namespace, target->GetExportName());
-  os << "include $(CLEAR_VARS)\n";
-  os << "LOCAL_MODULE := ";
-  os << targetName << "\n";
-  os << "LOCAL_SRC_FILES := ";
-  std::string const noConfig; // FIXME: What config to use here?
-  std::string path =
-    cmSystemTools::ConvertToOutputPath(target->GetFullPath(noConfig));
-  os << path << "\n";
-}
-
-void cmExportAndroidMKGenerator::GenerateImportPropertyCode(
-  std::ostream&, std::string const&, std::string const&,
-  cmGeneratorTarget const*, ImportPropertyMap const&, std::string const&)
-{
-}
-
-void cmExportAndroidMKGenerator::GenerateMissingTargetsCheckCode(std::ostream&)
-{
+  return result;
 }
 
 void cmExportAndroidMKGenerator::GenerateInterfaceProperties(
   cmGeneratorTarget const* target, std::ostream& os,
   ImportPropertyMap const& properties)
 {
-  std::string config;
-  if (!this->Configurations.empty()) {
-    config = this->Configurations[0];
-  }
-  cmExportAndroidMKGenerator::GenerateInterfaceProperties(
-    target, os, properties, cmExportAndroidMKGenerator::BUILD, config);
-}
+  std::string const config =
+    (this->Configurations.empty() ? std::string{} : this->Configurations[0]);
+  GenerateType const type = this->GetGenerateType();
 
-void cmExportAndroidMKGenerator::GenerateInterfaceProperties(
-  cmGeneratorTarget const* target, std::ostream& os,
-  ImportPropertyMap const& properties, GenerateType type,
-  std::string const& config)
-{
   bool const newCMP0022Behavior =
     target->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
     target->GetPolicyStatusCMP0022() != cmPolicies::OLD;
   if (!newCMP0022Behavior) {
     std::ostringstream w;
-    if (type == cmExportAndroidMKGenerator::BUILD) {
+    if (type == BUILD) {
       w << "export(TARGETS ... ANDROID_MK) called with policy CMP0022";
     } else {
       w << "install( EXPORT_ANDROID_MK ...) called with policy CMP0022";
@@ -123,7 +92,7 @@ void cmExportAndroidMKGenerator::GenerateInterfaceProperties(
             }
           } else {
             bool relpath = false;
-            if (type == cmExportAndroidMKGenerator::INSTALL) {
+            if (type == INSTALL) {
               relpath = cmHasLiteralPrefix(lib, "../");
             }
             // check for full path or if it already has a -l, or

@@ -6,6 +6,7 @@
 
 #include <cm/memory>
 
+#include "cmExportInstallCMakeConfigGenerator.h"
 #include "cmExportInstallFileGenerator.h"
 #include "cmListFileCache.h"
 
@@ -25,7 +26,7 @@ cmInstallCMakeConfigExportGenerator::cmInstallCMakeConfigExportGenerator(
   , ExportOld(exportOld)
   , ExportPackageDependencies(exportPackageDependencies)
 {
-  this->EFGen = cm::make_unique<cmExportInstallFileGenerator>(this);
+  this->EFGen = cm::make_unique<cmExportInstallCMakeConfigGenerator>(this);
 }
 
 cmInstallCMakeConfigExportGenerator::~cmInstallCMakeConfigExportGenerator() =
@@ -33,8 +34,10 @@ cmInstallCMakeConfigExportGenerator::~cmInstallCMakeConfigExportGenerator() =
 
 void cmInstallCMakeConfigExportGenerator::GenerateScript(std::ostream& os)
 {
-  this->EFGen->SetExportOld(this->ExportOld);
-  this->EFGen->SetExportPackageDependencies(this->ExportPackageDependencies);
+  auto* const efgen =
+    static_cast<cmExportInstallCMakeConfigGenerator*>(this->EFGen.get());
+  efgen->SetExportOld(this->ExportOld);
+  efgen->SetExportPackageDependencies(this->ExportPackageDependencies);
 
   this->cmInstallExportGenerator::GenerateScript(os);
 }

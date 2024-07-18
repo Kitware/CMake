@@ -199,14 +199,22 @@ add_library(
   cmEvaluatedTargetProperty.cxx
   cmEvaluatedTargetProperty.h
   cmExprParserHelper.cxx
+  cmExportAndroidMKGenerator.h
+  cmExportAndroidMKGenerator.cxx
   cmExportBuildAndroidMKGenerator.h
   cmExportBuildAndroidMKGenerator.cxx
+  cmExportBuildCMakeConfigGenerator.h
+  cmExportBuildCMakeConfigGenerator.cxx
   cmExportBuildFileGenerator.h
   cmExportBuildFileGenerator.cxx
+  cmExportCMakeConfigGenerator.h
+  cmExportCMakeConfigGenerator.cxx
   cmExportFileGenerator.h
   cmExportFileGenerator.cxx
   cmExportInstallAndroidMKGenerator.h
   cmExportInstallAndroidMKGenerator.cxx
+  cmExportInstallCMakeConfigGenerator.h
+  cmExportInstallCMakeConfigGenerator.cxx
   cmExportInstallFileGenerator.h
   cmExportInstallFileGenerator.cxx
   cmExportTryCompileFileGenerator.h

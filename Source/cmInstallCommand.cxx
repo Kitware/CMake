@@ -2033,7 +2033,7 @@ bool HandleExportAndroidMKMode(std::vector<std::string> const& args,
       &exportSet, ica.GetDestination(), ica.GetPermissions(),
       ica.GetConfigurations(), ica.GetComponent(), message,
       ica.GetExcludeFromAll(), std::move(fname), std::move(name_space),
-      exportOld, helper.Makefile->GetBacktrace()));
+      helper.Makefile->GetBacktrace()));
 
   return true;
 #else

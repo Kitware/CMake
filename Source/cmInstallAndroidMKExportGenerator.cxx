@@ -16,23 +16,15 @@ cmInstallAndroidMKExportGenerator::cmInstallAndroidMKExportGenerator(
   cmExportSet* exportSet, std::string destination, std::string filePermissions,
   std::vector<std::string> const& configurations, std::string component,
   MessageLevel message, bool excludeFromAll, std::string filename,
-  std::string targetNamespace, bool exportOld, cmListFileBacktrace backtrace)
+  std::string targetNamespace, cmListFileBacktrace backtrace)
   : cmInstallExportGenerator(exportSet, std::move(destination),
                              std::move(filePermissions), configurations,
                              std::move(component), message, excludeFromAll,
                              std::move(filename), std::move(targetNamespace),
                              std::string{}, std::move(backtrace))
-  , ExportOld(exportOld)
 {
   this->EFGen = cm::make_unique<cmExportInstallAndroidMKGenerator>(this);
 }
 
 cmInstallAndroidMKExportGenerator::~cmInstallAndroidMKExportGenerator() =
   default;
-
-void cmInstallAndroidMKExportGenerator::GenerateScript(std::ostream& os)
-{
-  this->EFGen->SetExportOld(this->ExportOld);
-
-  this->cmInstallExportGenerator::GenerateScript(os);
-}

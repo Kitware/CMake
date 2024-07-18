@@ -36,6 +36,8 @@ public:
   cmInstallExportGenerator& operator=(const cmInstallExportGenerator&) =
     delete;
 
+  virtual char const* InstallSubcommand() const = 0;
+
   cmExportSet* GetExportSet() { return this->ExportSet; }
 
   bool Compute(cmLocalGenerator* lg) override;
@@ -56,8 +58,6 @@ public:
   }
 
 protected:
-  virtual char const* InstallSubcommand() const = 0;
-
   void GenerateScript(std::ostream& os) override;
   void GenerateScriptConfigs(std::ostream& os, Indent indent) override;
   void GenerateScriptActions(std::ostream& os, Indent indent) override;
