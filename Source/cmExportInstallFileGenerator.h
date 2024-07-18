@@ -78,6 +78,7 @@ protected:
     cm::string_view const& prefixWithSlash = this->GetImportPrefixWithSlash();
     return std::string(prefixWithSlash.data(), prefixWithSlash.length() - 1);
   }
+  virtual char GetConfigFileNameSeparator() const = 0;
 
   void HandleMissingTarget(std::string& link_libs,
                            cmGeneratorTarget const* depender,
@@ -95,6 +96,9 @@ protected:
   ExportInfo FindExportInfo(cmGeneratorTarget const* target) const override;
 
   void ReportError(std::string const& errorMessage) const override;
+
+  /** Generate a per-configuration file for the targets.  */
+  virtual bool GenerateImportFileConfig(std::string const& config);
 
   /** Fill in properties indicating installed file locations.  */
   void SetImportLocationProperty(std::string const& config,

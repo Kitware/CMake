@@ -87,7 +87,8 @@ protected:
 
   /** Generate per-configuration target information to the given output
       stream.  */
-  void GenerateImportConfig(std::ostream& os, std::string const& config);
+  virtual void GenerateImportConfig(std::ostream& os,
+                                    std::string const& config);
 
   /** Each subclass knows where the target files are located.  */
   virtual void GenerateImportTargetsConfig(std::ostream& os,

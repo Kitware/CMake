@@ -11,6 +11,7 @@
 #include <utility>
 
 #include "cmExportSet.h"
+#include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallTargetGenerator.h"
@@ -96,6 +97,45 @@ std::string cmExportInstallFileGenerator::GetImportXcFrameworkLocation(
   }
 
   return importedXcFrameworkLocation;
+}
+
+bool cmExportInstallFileGenerator::GenerateImportFileConfig(
+  std::string const& config)
+{
+  // Skip configurations not enabled for this export.
+  if (!this->IEGen->InstallsForConfig(config)) {
+    return true;
+  }
+
+  // Construct the name of the file to generate.
+  std::string fileName = cmStrCat(this->FileDir, '/', this->FileBase,
+                                  this->GetConfigFileNameSeparator());
+  if (!config.empty()) {
+    fileName += cmSystemTools::LowerCase(config);
+  } else {
+    fileName += "noconfig";
+  }
+  fileName += this->FileExt;
+
+  // Open the output file to generate it.
+  cmGeneratedFileStream exportFileStream(fileName, true);
+  if (!exportFileStream) {
+    std::string se = cmSystemTools::GetLastSystemError();
+    std::ostringstream e;
+    e << "cannot write to file \"" << fileName << "\": " << se;
+    cmSystemTools::Error(e.str());
+    return false;
+  }
+  exportFileStream.SetCopyIfDifferent(true);
+  std::ostream& os = exportFileStream;
+
+  // Generate the per-config target information.
+  this->GenerateImportConfig(os, config);
+
+  // Record this per-config import file.
+  this->ConfigImportFiles[config] = fileName;
+
+  return true;
 }
 
 void cmExportInstallFileGenerator::SetImportLocationProperty(

@@ -49,6 +49,10 @@ protected:
   bool GenerateMainFile(std::ostream& os) override;
   void GenerateImportTargetsConfig(std::ostream& os, std::string const& config,
                                    std::string const& suffix) override;
+  void GenerateImportConfig(std::ostream& os,
+                            std::string const& config) override;
+
+  char GetConfigFileNameSeparator() const override { return '-'; }
 
   /** Generate the relative import prefix.  */
   virtual void GenerateImportPrefix(std::ostream&);
@@ -57,9 +61,6 @@ protected:
   virtual void LoadConfigFiles(std::ostream&);
 
   virtual void CleanupTemporaryVariables(std::ostream&);
-
-  /** Generate a per-configuration file for the targets.  */
-  virtual bool GenerateImportFileConfig(std::string const& config);
 
   std::string GetFileSetDirectories(cmGeneratorTarget* gte, cmFileSet* fileSet,
                                     cmTargetExport const* te) override;
