@@ -161,10 +161,6 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
     cmSystemTools::ReplaceString(command, "$(ARGS)", "");
     command = gg->ExpandCFGIntDir(command, config);
 
-    if (command.find('$') != std::string::npos) {
-      return;
-    }
-
     std::string ccConfig;
     if (genTarget->Target->IsPerConfig() &&
         genTarget->GetType() != cmStateEnums::GLOBAL_TARGET) {
