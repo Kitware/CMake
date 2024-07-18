@@ -15,6 +15,7 @@
 
 #include "cmCPackComponentGroup.h"
 #include "cmCPackLog.h"
+#include "cmGeneratedFileStream.h"
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
@@ -48,17 +49,19 @@ int cmCPackExternalGenerator::PackageFiles()
     filename = this->packageFileNames[0];
   }
 
-  cmsys::ofstream fout(filename.c_str());
-  std::unique_ptr<Json::StreamWriter> jout(builder.newStreamWriter());
+  {
+    cmGeneratedFileStream fout(filename);
+    std::unique_ptr<Json::StreamWriter> jout(builder.newStreamWriter());
 
-  Json::Value root(Json::objectValue);
+    Json::Value root(Json::objectValue);
 
-  if (!this->Generator->WriteToJSON(root)) {
-    return 0;
-  }
+    if (!this->Generator->WriteToJSON(root)) {
+      return 0;
+    }
 
-  if (jout->write(root, &fout)) {
-    return 0;
+    if (jout->write(root, &fout)) {
+      return 0;
+    }
   }
 
   cmValue packageScript = this->GetOption("CPACK_EXTERNAL_PACKAGE_SCRIPT");
