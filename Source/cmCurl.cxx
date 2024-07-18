@@ -39,6 +39,11 @@
 #  define CURL_SSLVERSION_TLSv1_3 CURL_SSLVERSION_LAST
 #endif
 
+// curl versions before 7.64.1 referred to Secure Transport as DarwinSSL
+#if defined(LIBCURL_VERSION_NUM) && LIBCURL_VERSION_NUM < 0x074001
+#  define CURLSSLBACKEND_SECURETRANSPORT CURLSSLBACKEND_DARWINSSL
+#endif
+
 // Make sure we keep up with new TLS versions supported by curl.
 // Do this only for our vendored curl to avoid breaking builds
 // against external future versions of curl.
@@ -46,6 +51,30 @@
 static_assert(CURL_SSLVERSION_LAST == 8,
               "A new CURL_SSLVERSION_ may be available!");
 #endif
+
+void cmCurlInitOnce()
+{
+  // curl 7.56.0 introduced curl_global_sslset.
+#if defined(__APPLE__) && defined(CMAKE_USE_SYSTEM_CURL) &&                   \
+  defined(LIBCURL_VERSION_NUM) && LIBCURL_VERSION_NUM >= 0x073800
+  static bool initialized = false;
+  if (initialized) {
+    return;
+  }
+  initialized = true;
+
+  cm::optional<std::string> curl_ssl_backend =
+    cmSystemTools::GetEnvVar("CURL_SSL_BACKEND");
+  if (!curl_ssl_backend || curl_ssl_backend->empty()) {
+    curl_version_info_data* cv = curl_version_info(CURLVERSION_FIRST);
+    // curl 8.3.0 through 8.5.x did not re-initialize LibreSSL correctly,
+    // so prefer the Secure Transport backend by default in those versions.
+    if (cv->version_num >= 0x080300 && cv->version_num < 0x080600) {
+      curl_global_sslset(CURLSSLBACKEND_SECURETRANSPORT, NULL, NULL);
+    }
+  }
+#endif
+}
 
 cm::optional<int> cmCurlParseTLSVersion(cm::string_view tls_version)
 {

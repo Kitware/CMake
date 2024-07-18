@@ -11,6 +11,7 @@
 
 #include <cm3p/curl/curl.h>
 
+void cmCurlInitOnce();
 cm::optional<int> cmCurlParseTLSVersion(cm::string_view tls_version);
 cm::optional<std::string> cmCurlPrintTLSVersion(int curl_tls_version);
 std::string cmCurlSetCAInfo(::CURL* curl, const std::string& cafile = {});
