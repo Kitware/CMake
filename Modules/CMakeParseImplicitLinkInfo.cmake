@@ -187,7 +187,7 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
           if(EXTRA_PARSE_COMPUTE_IMPLICIT_LIBS)
             # Unix library.
             set(lib "${CMAKE_MATCH_1}")
-            if(search_static AND lib MATCHES "^(gfortran|stdc\\+\\+)$")
+            if(search_static AND lib MATCHES "^(gfortran|quadmath|stdc\\+\\+)$")
               # Search for the static library later, once all link dirs are known.
               set(lib "SEARCH_STATIC:${lib}")
             endif()
