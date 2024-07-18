@@ -7,7 +7,7 @@ CheckFortranSourceCompiles
 
 .. versionadded:: 3.1
 
-Check if given Fortran source compiles and links into an executable.
+Check once if Fortran source code can be built.
 
 .. command:: check_fortran_source_compiles
 
@@ -18,40 +18,25 @@ Check if given Fortran source compiles and links into an executable.
         [SRC_EXT <extension>]
     )
 
-  Checks that the source supplied in ``<code>`` can be compiled as a Fortran
-  source file and linked as an executable. The ``<code>`` must be a Fortran
-  ``program``.
-
-  .. code-block:: cmake
-
-    check_fortran_source_compiles("program test
-    error stop
-    end program"
-    HAVE_ERROR_STOP
-    SRC_EXT .F90)
-
-  This command can help avoid costly build processes when a compiler lacks support
-  for a necessary feature, or a particular vendor library is not compatible with
-  the Fortran compiler version being used. This generate-time check may advise the
-  user of such before the main build process. See also the
-  :command:`check_fortran_source_runs` command to run the compiled code.
-
-  The result will be stored in the internal cache
-  variable ``<resultVar>``, with a boolean true value for success and boolean
-  false for failure.
+  Check once that the source supplied in ``<code>`` can be built. The result is
+  stored in the internal cache variable specified by ``<resultVar>``, with
+  boolean ``true`` for success and boolean ``false`` for failure.
 
   If ``FAIL_REGEX`` is provided, then failure is determined by checking
-  if anything in the output matches any of the specified regular expressions.
+  if anything in the compiler output matches any of the specified regular
+  expressions.
 
   By default, the test source file will be given a ``.F`` file extension. The
   ``SRC_EXT`` option can be used to override this with ``.<extension>`` instead--
   ``.F90`` is a typical choice.
 
-  The check is only performed once, with the result cached in the variable named
-  by ``<resultVar>``. Every subsequent CMake run will reuse this cached value
-  rather than performing the check again, even if the ``<code>`` changes. In
-  order to force the check to be re-evaluated, the variable named by
-  ``<resultVar>`` must be manually removed from the cache.
+  See also :command:`check_source_runs` to run compiled source.
+
+  Internally, :command:`try_compile` is used to compile the source. If
+  :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` is set to ``EXECUTABLE`` (default),
+  the source is compiled and linked as an executable program. If set to
+  ``STATIC_LIBRARY``, the source is compiled but not linked. In any case, all
+  functions must be declared as usual.
 
   The compile and link commands can be influenced by setting any of the
   following variables prior to calling ``check_fortran_source_compiles()``:

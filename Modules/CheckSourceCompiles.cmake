@@ -8,7 +8,7 @@ CheckSourceCompiles
 
 .. versionadded:: 3.19
 
-Check if given source compiles and links into an executable.
+Check once if source code can be built for a given language.
 
 .. command:: check_source_compiles
 
@@ -18,40 +18,50 @@ Check if given source compiles and links into an executable.
                           [FAIL_REGEX <regex1> [<regex2>...]]
                           [SRC_EXT <extension>])
 
-  Check that the source supplied in ``<code>`` can be compiled as a source
-  file for the requested language and linked as an executable. The result
-  will be stored in the internal cache variable specified by ``<resultVar>``,
-  with a boolean true value for success and boolean false for failure. If
-  ``FAIL_REGEX`` is provided, then failure is determined by checking if
-  anything in the compiler output matches any of the specified regular
+  Check once that the source supplied in ``<code>`` can be built for code
+  language ``<lang>``. The result is stored in the internal cache variable
+  specified by ``<resultVar>``, with boolean ``true`` for success and
+  boolean ``false`` for failure.
+
+  If ``FAIL_REGEX`` is provided, then failure is determined by checking
+  if anything in the compiler output matches any of the specified regular
   expressions.
 
   By default, the test source file will be given a file extension that matches
   the requested language. The ``SRC_EXT`` option can be used to override this
   with ``.<extension>`` instead.
 
-  The ``<code>`` must contain a valid main program. For example:
+  The C example checks if the compiler supports the ``noreturn`` attribute:
 
   .. code-block:: cmake
 
+    set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
+
     check_source_compiles(C
-    "#include <stdlib.h>
-    #include <stdnoreturn.h>
-    noreturn void f(){ exit(0); }
-    int main(void) { f(); return 1; }"
+    "#if !__has_c_attribute(noreturn)
+    #error \"No noreturn attribute\"
+    #endif"
     HAVE_NORETURN)
 
-    check_source_compiles(Fortran
-    "program test
-    error stop
-    end program"
-    HAVE_ERROR_STOP)
+  The Fortran example checks if the compiler supports the ``pure`` procedure
+  attribute:
 
-  The check is only performed once, with the result cached in the variable
-  named by ``<resultVar>``. Every subsequent CMake run will reuse this cached
-  value rather than performing the check again, even if the ``<code>`` changes.
-  In order to force the check to be re-evaluated, the variable named by
-  ``<resultVar>`` must be manually removed from the cache.
+  .. code-block:: cmake
+
+    set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
+
+    check_source_compiles(Fortran
+    "pure subroutine foo()
+    end subroutine"
+    HAVE_PURE)
+
+  Internally, :command:`try_compile` is used to compile the source. If
+  :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE` is set to ``EXECUTABLE`` (default),
+  the source is compiled and linked as an executable program. If set to
+  ``STATIC_LIBRARY``, the source is compiled but not linked. In any case, all
+  functions must be declared as usual.
+
+  See also :command:`check_source_runs` to run compiled source.
 
   The compile and link commands can be influenced by setting any of the
   following variables prior to calling ``check_source_compiles()``:
