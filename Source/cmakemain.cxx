@@ -922,7 +922,7 @@ int do_install(int ac, char const* const* av)
 
   args.emplace_back("-P");
 
-  auto handler = cmInstallScriptHandler(dir, args);
+  auto handler = cmInstallScriptHandler(dir, component, args);
   int ret = 0;
   if (!handler.isParallel()) {
     args.emplace_back(cmStrCat(dir, "/cmake_install.cmake"));

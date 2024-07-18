@@ -1,1 +1,1 @@
-install(CODE "message(installing:${CMAKE_CURRENT_SOURCE_DIR})")
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/CMakeLists.txt TYPE DATA RENAME 4.txt)
