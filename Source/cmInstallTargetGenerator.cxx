@@ -66,7 +66,7 @@ void computeFilesToInstall(
   // Library interface name.
   std::string fromSOName;
   std::string toSOName;
-  if (library != output) {
+  if (!library.empty() && library != output) {
     haveNamelink = true;
     fromSOName = cmStrCat(fromDirConfig, library);
     toSOName = library;
@@ -403,6 +403,10 @@ cmInstallTargetGenerator::Files cmInstallTargetGenerator::GetFiles(
 
       files.From.emplace_back(std::move(from1));
       files.To.emplace_back(std::move(to1));
+    } else if (this->Target->IsArchivedAIXSharedLibrary()) {
+      // Install only the archive on AIX.
+      computeFilesToInstall(files, this->NamelinkMode, fromDirConfig,
+                            targetNames.Output, {}, targetNames.Real);
     } else {
       computeFilesToInstall(files, this->NamelinkMode, fromDirConfig,
                             targetNames.Output, targetNames.SharedObject,

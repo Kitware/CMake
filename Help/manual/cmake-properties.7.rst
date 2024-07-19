@@ -109,6 +109,7 @@ Properties on Targets
 
    /prop_tgt/ADDITIONAL_CLEAN_FILES
    /prop_tgt/AIX_EXPORT_ALL_SYMBOLS
+   /prop_tgt/AIX_SHARED_LIBRARY_ARCHIVE
    /prop_tgt/ALIAS_GLOBAL
    /prop_tgt/ALIASED_TARGET
    /prop_tgt/ANDROID_ANT_ADDITIONAL_OPTIONS

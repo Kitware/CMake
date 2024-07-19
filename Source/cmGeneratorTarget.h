@@ -891,6 +891,9 @@ public:
   /** Return whether this target is a CFBundle (plugin) on Apple.  */
   bool IsCFBundleOnApple() const;
 
+  /** Return whether this target is a shared library on AIX.  */
+  bool IsArchivedAIXSharedLibrary() const;
+
   /** Assembly types. The order of the values of this enum is relevant
       because of smaller/larger comparison operations! */
   enum ManagedType

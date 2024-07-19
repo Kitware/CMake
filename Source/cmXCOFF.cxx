@@ -16,9 +16,18 @@
 #  define __XCOFF32__
 #  define __XCOFF64__
 #  include <xcoff.h>
+#  define __AR_BIG__
+#  include <ar.h>
 #else
 #  error "This source may be compiled only on AIX."
 #endif
+
+// Function to align a number num with align_num bytes.
+size_t align(size_t num, int align_num)
+{
+  align_num = 1 << (align_num);
+  return (((num + align_num - 1) / align_num) * align_num);
+}
 
 class cmXCOFFInternal
 {
@@ -79,6 +88,12 @@ struct XCOFF64
 };
 const unsigned char xcoff64_magic[] = { 0x01, 0xF7 };
 
+enum class IsArchive
+{
+  No,
+  Yes,
+};
+
 template <typename XCOFF>
 class Impl : public cmXCOFFInternal
 {
@@ -92,6 +107,20 @@ class Impl : public cmXCOFFInternal
 
   std::streamoff LoaderImportFileTablePos = 0;
   std::vector<char> LoaderImportFileTable;
+
+  bool Read(fl_hdr& x)
+  {
+    // FIXME: Add byte swapping if needed.
+    return static_cast<bool>(
+      this->Stream->read(reinterpret_cast<char*>(&x), sizeof(x)));
+  }
+
+  bool Read(ar_hdr& x)
+  {
+    // FIXME: Add byte swapping if needed.
+    return static_cast<bool>(
+      this->Stream->read(reinterpret_cast<char*>(&x), sizeof(x)));
+  }
 
   bool Read(typename XCOFF::filehdr& x)
   {
@@ -130,18 +159,40 @@ class Impl : public cmXCOFFInternal
 
 public:
   Impl(cmXCOFF* external, std::unique_ptr<std::iostream> fin,
-       cmXCOFF::Mode mode);
+       cmXCOFF::Mode mode, IsArchive IsBigArchive, int nextEvenBytePos);
 
   cm::optional<cm::string_view> GetLibPath() override;
   bool SetLibPath(cm::string_view libPath) override;
   bool RemoveLibPath() override;
+
+  // Needed for SetLibPath () to move in a archive while write.
+  IsArchive is_big_archive;
+  int nextEvenByte;
+  int bytes_to_align;
 };
 
 template <typename XCOFF>
 Impl<XCOFF>::Impl(cmXCOFF* external, std::unique_ptr<std::iostream> fin,
-                  cmXCOFF::Mode mode)
+                  cmXCOFF::Mode mode, IsArchive IsBigArchive,
+                  int nextEvenBytePos)
   : cmXCOFFInternal(external, std::move(fin), mode)
 {
+  this->is_big_archive = IsBigArchive;
+  this->nextEvenByte = nextEvenBytePos;
+  if (this->is_big_archive == IsArchive::Yes) {
+    fl_hdr header;
+    this->Stream->read(reinterpret_cast<char*>(&header), sizeof(fl_hdr));
+
+    long long fstmoff = std::atoll(header.fl_fstmoff);
+    this->Stream->seekg(fstmoff, std::ios::beg);
+
+    ar_hdr arHeader;
+    this->Stream->read(reinterpret_cast<char*>(&arHeader), sizeof(ar_hdr));
+
+    // Move the pointer to next even byte after reading headers.
+    this->Stream->seekg(this->nextEvenByte, std::ios::cur);
+  }
+
   if (!this->Read(this->FileHeader)) {
     this->SetErrorMessage("Failed to read XCOFF file header.");
     return;
@@ -158,6 +209,7 @@ Impl<XCOFF>::Impl(cmXCOFF* external, std::unique_ptr<std::iostream> fin,
     this->SetErrorMessage("XCOFF loader section missing.");
     return;
   }
+  this->bytes_to_align = this->AuxHeader.o_algndata;
   if (!this->Stream->seekg((this->AuxHeader.o_snloader - 1) *
                              sizeof(typename XCOFF::scnhdr),
                            std::ios::cur)) {
@@ -172,17 +224,33 @@ Impl<XCOFF>::Impl(cmXCOFF* external, std::unique_ptr<std::iostream> fin,
     this->SetErrorMessage("XCOFF loader section header missing STYP_LOADER.");
     return;
   }
-  if (!this->Stream->seekg(this->LoaderSectionHeader.s_scnptr,
-                           std::ios::beg)) {
+  if (is_big_archive == IsArchive::Yes) {
+    size_t header_len = this->nextEvenByte + sizeof(fl_hdr) + sizeof(ar_hdr);
+    size_t scnptrFromArchiveStart = this->LoaderSectionHeader.s_scnptr +
+      align(header_len, this->bytes_to_align);
+    if (!this->Stream->seekg(scnptrFromArchiveStart, std::ios::beg)) {
+      this->SetErrorMessage("Failed to seek to XCOFF loader header.");
+      return;
+    }
+  } else if (!this->Stream->seekg(this->LoaderSectionHeader.s_scnptr,
+                                  std::ios::beg)) {
     this->SetErrorMessage("Failed to seek to XCOFF loader header.");
     return;
   }
+
   if (!this->Read(this->LoaderHeader)) {
     this->SetErrorMessage("Failed to read XCOFF loader header.");
     return;
   }
-  this->LoaderImportFileTablePos =
-    this->LoaderSectionHeader.s_scnptr + this->LoaderHeader.l_impoff;
+  if (is_big_archive == IsArchive::Yes) {
+    size_t header_len = sizeof(fl_hdr) + sizeof(ar_hdr) + this->nextEvenByte;
+    size_t scnptrFromArchiveStartPlusOff = this->LoaderSectionHeader.s_scnptr +
+      this->LoaderHeader.l_impoff + align(header_len, this->bytes_to_align);
+    this->LoaderImportFileTablePos = scnptrFromArchiveStartPlusOff;
+  } else {
+    this->LoaderImportFileTablePos =
+      this->LoaderSectionHeader.s_scnptr + this->LoaderHeader.l_impoff;
+  }
   if (!this->Stream->seekg(this->LoaderImportFileTablePos)) {
     this->SetErrorMessage(
       "Failed to seek to XCOFF loader import file id table.");
@@ -251,9 +319,18 @@ bool Impl<XCOFF>::SetLibPath(cm::string_view libPath)
     this->LoaderImportFileTable = std::move(ift);
   }
 
-  if (!this->Stream->seekp(this->LoaderSectionHeader.s_scnptr +
-                             offsetof(typename XCOFF::ldhdr, l_istlen),
-                           std::ios::beg)) {
+  size_t scnptr;
+  if (this->is_big_archive == IsArchive::Yes) {
+    size_t header_len = sizeof(fl_hdr) + sizeof(ar_hdr) + this->nextEvenByte;
+    scnptr = this->LoaderSectionHeader.s_scnptr +
+      offsetof(typename XCOFF::ldhdr, l_istlen) +
+      align(header_len, this->bytes_to_align);
+  } else {
+    scnptr = this->LoaderSectionHeader.s_scnptr +
+      offsetof(typename XCOFF::ldhdr, l_istlen);
+  }
+
+  if (!this->Stream->seekp(scnptr, std::ios::beg)) {
     this->SetErrorMessage(
       "Failed to seek to XCOFF loader header import file id table length.");
     return false;
@@ -285,6 +362,30 @@ bool Impl<XCOFF>::RemoveLibPath()
 }
 }
 
+IsArchive check_if_big_archive(const char* fname)
+{
+  int len = std::strlen(fname);
+  if (len < 2) {
+    return IsArchive::No;
+  }
+
+  if (std::strcmp(fname + len - 2, ".a") == 0) {
+    return IsArchive::Yes;
+  } else {
+    return IsArchive::No;
+  }
+}
+
+size_t getLastWordLen(const std::string& path)
+{
+  std::size_t lastSlashPos = path.find_last_of("/\\");
+  if (lastSlashPos == std::string::npos) {
+    return path.length();
+  }
+
+  return (path.length() - lastSlashPos - 1);
+}
+
 //============================================================================
 // External class implementation.
 
@@ -305,6 +406,44 @@ cmXCOFF::cmXCOFF(const char* fname, Mode mode)
 
   // Read the XCOFF magic number.
   unsigned char magic[2];
+
+  // To hold the length of the shared object name in the path.
+  int nextEvenByte = 0;
+
+  // Read archive name length.
+  int archive_name_length = 0;
+  // If a big archive, we will read the archive file headers first.
+  // Then move to the next even byte to get the magic number.
+  if (check_if_big_archive(fname) == IsArchive::Yes) {
+    fl_hdr header;
+    f->read(reinterpret_cast<char*>(&header), sizeof(fl_hdr));
+
+    if (std::strncmp(header.fl_magic, AIAMAGBIG, SAIAMAG) != 0) {
+      this->ErrorMessage = "Not a valid archive file or wrong format";
+
+      return;
+    }
+    long long fstmoff = std::atoll(header.fl_fstmoff);
+    f->seekg(fstmoff, std::ios::beg);
+
+    ar_hdr arHeader;
+    f->read(reinterpret_cast<char*>(&arHeader), sizeof(ar_hdr));
+
+    // We will sometimes get /opt/freeware/lib/libshared.a. So extract
+    // the last part only.
+    // Example: libshared.a [We need to length of "libshared.a" characters].
+    archive_name_length = static_cast<int>(getLastWordLen(std::string(fname)));
+
+    // Move to the next even byte.
+    if (archive_name_length % 2 == 0) {
+      nextEvenByte = archive_name_length + 2;
+    } else {
+      nextEvenByte = archive_name_length + 1;
+    }
+
+    f->seekg(nextEvenByte, std::ios::cur);
+  }
+
   if (!f->read(reinterpret_cast<char*>(magic), sizeof(magic))) {
     this->ErrorMessage = "Error reading XCOFF magic number.";
     return;
@@ -316,9 +455,11 @@ cmXCOFF::cmXCOFF(const char* fname, Mode mode)
 
   // Check the XCOFF type.
   if (magic[0] == xcoff32_magic[0] && magic[1] == xcoff32_magic[1]) {
-    this->Internal = cm::make_unique<Impl<XCOFF32>>(this, std::move(f), mode);
+    this->Internal = cm::make_unique<Impl<XCOFF32>>(
+      this, std::move(f), mode, check_if_big_archive(fname), nextEvenByte);
   } else if (magic[0] == xcoff64_magic[0] && magic[1] == xcoff64_magic[1]) {
-    this->Internal = cm::make_unique<Impl<XCOFF64>>(this, std::move(f), mode);
+    this->Internal = cm::make_unique<Impl<XCOFF64>>(
+      this, std::move(f), mode, check_if_big_archive(fname), nextEvenByte);
   } else {
     this->ErrorMessage = "File is not a XCOFF32 or XCOFF64 binary.";
   }

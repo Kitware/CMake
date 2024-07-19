@@ -11,6 +11,7 @@ extern int testLib7(void);
 extern int testLibCycleA1(void);
 extern int testLibPerConfigDest(void);
 extern int testStaticLibPlugin(void);
+extern int testSharedLibArchiveAIX(void);
 
 /* Switch a symbol between debug and optimized builds to make sure the
    proper library is found from the testLib4 link interface.  */
@@ -26,6 +27,6 @@ int main(void)
   return (testLib2() + generated_by_testExe1() + testLib3() + testLib4() +
           testLib5() + testLib6() + testLib7() + testLibCycleA1() +
           testLibPerConfigDest() + testStaticLibPlugin() +
-          generated_by_testExe3() + generated_by_testExe4() + testLib4lib() +
-          testLib4libcfg());
+          testSharedLibArchiveAIX() + generated_by_testExe3() +
+          generated_by_testExe4() + testLib4lib() + testLib4libcfg());
 }
