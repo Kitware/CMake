@@ -339,7 +339,7 @@ Hints
     See `IronPython <https://ironpython.net>`_.
   * ``PyPy``: This implementation use ``RPython`` language and
     ``RPython translation toolchain`` to produce the python interpreter.
-    See `PyPy <https://www.pypy.org>`_.
+    See `PyPy <https://pypy.org>`_.
 
   The default value is:
 
