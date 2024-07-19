@@ -702,13 +702,23 @@ void cmCTestTestHandler::LogFailedTests(const std::vector<std::string>& failed,
         if (this->GetTestStatus(ft) == "Not Run") {
           testColor = cmCTest::Color::YELLOW;
         }
+        std::string ft_name_and_status =
+          cmStrCat(ft.Name, " (", this->GetTestStatus(ft), ")");
+        std::string labels;
+        const cmCTestTestProperties& p = *ft.Properties;
+        if (!p.Labels.empty()) {
+          static size_t const maxLen = 50;
+          size_t const ns = ft_name_and_status.size() >= maxLen
+            ? 1
+            : maxLen - ft_name_and_status.size();
+          labels = cmStrCat(std::string(ns, ' '), cmJoin(p.Labels, " "));
+        }
         cmCTestLog(
           this->CTest, HANDLER_OUTPUT,
           "\t" << this->CTest->GetColorCode(testColor) << std::setw(3)
-               << ft.TestCount << " - " << ft.Name << " ("
-               << this->GetTestStatus(ft) << ")"
+               << ft.TestCount << " - " << ft_name_and_status
                << this->CTest->GetColorCode(cmCTest::Color::CLEAR_COLOR)
-               << std::endl);
+               << labels << std::endl);
       }
     }
   }
