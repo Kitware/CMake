@@ -1340,9 +1340,12 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
   }
 
   if (this->Uic.Enabled) {
-    for (const auto& file : this->Uic.UiHeaders) {
+    // Make all ui_*.h files byproducts of the ${target}_autogen/timestamp
+    // custom command if the generation of depfile is enabled.
+    auto& byProducts = useDepfile ? timestampByproducts : autogenByproducts;
+    for (auto const& file : this->Uic.UiHeaders) {
       this->AddGeneratedSource(file.first, this->Uic);
-      autogenByproducts.push_back(file.second);
+      byProducts.push_back(file.second);
     }
   }
 
