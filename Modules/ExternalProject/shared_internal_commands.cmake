@@ -1444,7 +1444,9 @@ function(_ep_add_update_command name)
   _ep_get_update_disconnected(update_disconnected ${name})
 
   set(work_dir)
+  set(cmd_disconnected)
   set(comment)
+  set(comment_disconnected)
   set(always)
   set(file_deps)
 
