@@ -527,7 +527,11 @@ class cmMakefile;
          "FETCHCONTENT_FULLY_DISCONNECTED requirements are enforced.", 3, 30, \
          0, cmPolicies::WARN)                                                 \
   SELECT(POLICY, CMP0171, "'codegen' is a reserved target name.", 3, 31, 0,   \
-         cmPolicies::WARN)
+         cmPolicies::WARN)                                                    \
+  SELECT(POLICY, CMP0172,                                                     \
+         "The CPack module enables per-machine installation by default in "   \
+         "the CPack WIX Generator.",                                          \
+         3, 31, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
