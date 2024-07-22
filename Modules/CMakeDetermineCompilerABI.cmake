@@ -99,7 +99,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     # Load the resulting information strings.
     if(CMAKE_${lang}_ABI_COMPILED)
       message(CHECK_PASS "done")
-      if(CMAKE_HOST_APPLE AND CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+      if(CMAKE_HOST_APPLE AND CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND NOT CMAKE_OSX_ARCHITECTURES MATCHES "\\$")
         file(READ_MACHO "${BIN}" ARCHITECTURES archs CAPTURE_ERROR macho_error) # undocumented file() subcommand
         if (NOT macho_error)
           # sort and prune the list of found architectures
