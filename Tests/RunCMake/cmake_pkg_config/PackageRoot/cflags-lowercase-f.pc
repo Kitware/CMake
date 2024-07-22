@@ -1,0 +1,5 @@
+Name: Cflags Lowercase
+Description: The f is lowercase
+Version: 1.0.0
+
+Cflags: lowercase

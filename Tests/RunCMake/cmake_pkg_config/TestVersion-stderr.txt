@@ -1,0 +1,103 @@
+CMake Warning at TestVersion.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'a' version 'aa' does not meet version requirement '<a'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestVersion.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'a' version 'aa' does not meet version requirement '>aaa'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestVersion.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'a' version 'aa' does not meet version requirement '>bb'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestVersion.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'a' version 'aa' does not meet version requirement '>1'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestVersion.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'empty-key' version '' does not meet version requirement '!='
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestVersion.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'empty-key' version '' does not meet version requirement '=0'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestVersion.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'one' version '11' does not meet version requirement '<1'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestVersion.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'one' version '11' does not meet version requirement '>111'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestVersion.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'one' version '11' does not meet version requirement '>22'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestVersion.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'one' version '11' does not meet version requirement '<a'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestVersion.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'onedot' version '1.1.1' does not meet version requirement '>1.2.1'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestVersion.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'onedot' version '1.1.1' does not meet version requirement '>
+  1.2.1'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestVersion.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'onedot' version '1.1.1' does not meet exact version requirement
+  '01.01.01'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestVersion.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'pseudo-empty' version '~0' does not meet version requirement '=~'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestVersion.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'pseudo-empty' version '~0' does not meet version requirement
+  '!=~0'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestVersion.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'tilde' version '~~1' does not meet version requirement '>~1'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+
+
+CMake Warning at TestVersion.cmake:[0-9]+ \(cmake_pkg_config\):
+  Package 'tilde' version '~~1' does not meet version requirement '<~~~1'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

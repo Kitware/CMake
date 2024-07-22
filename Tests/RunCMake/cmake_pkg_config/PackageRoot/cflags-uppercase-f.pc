@@ -1,0 +1,5 @@
+Name: CFlags Uppercase
+Description: The f is uppercase
+Version: 1.0.0
+
+CFlags: uppercase
