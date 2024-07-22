@@ -234,6 +234,25 @@
         CMAKE_CONFIGURATION: fedora40_makefiles_clang
         CMAKE_GENERATOR: "Unix Makefiles"
 
+.fedora40_makefiles_lfortran:
+    extends: .fedora40
+
+    variables:
+        # FIXME(lfortran): -rpath flags with spaces not forwarded
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
+        CMAKE_CONFIGURATION: fedora40_makefiles_lfortran
+        CMAKE_GENERATOR: "Unix Makefiles"
+        CTEST_LABELS: "Fortran"
+
+.fedora40_ninja_lfortran:
+    extends: .fedora40
+
+    variables:
+        # FIXME(lfortran): -rpath flags with spaces not forwarded
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
+        CMAKE_CONFIGURATION: fedora40_ninja_lfortran
+        CTEST_LABELS: "Fortran"
+
 .fedora40_ninja_clang:
     extends: .fedora40
 
