@@ -804,6 +804,7 @@ target_link_libraries(
     LibUV::LibUV
     Threads::Threads
     ZLIB::ZLIB
+    llpkgc::llpkgc
   )
 
 if(CMake_ENABLE_DEBUGGER)
