@@ -4,7 +4,7 @@
 #include "cmListFileCache.h"
 
 #include <memory>
-#include <sstream>
+#include <ostream>
 #include <utility>
 
 #ifdef _WIN32
@@ -15,6 +15,7 @@
 #include "cmListFileLexer.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 namespace {
@@ -177,20 +178,19 @@ bool cmListFileParser::Parse()
           return false;
         }
       } else {
-        std::ostringstream error;
-        error << "Parse error.  Expected a newline, got "
-              << cmListFileLexer_GetTypeAsString(this->Lexer.get(),
-                                                 token->type)
-              << " with text \"" << token->text << "\".";
-        this->IssueError(error.str());
+        auto error = cmStrCat(
+          "Parse error.  Expected a newline, got ",
+          cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type),
+          " with text \"", token->text, "\".");
+        this->IssueError(error);
         return false;
       }
     } else {
-      std::ostringstream error;
-      error << "Parse error.  Expected a command name, got "
-            << cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type)
-            << " with text \"" << token->text << "\".";
-      this->IssueError(error.str());
+      auto error = cmStrCat(
+        "Parse error.  Expected a command name, got ",
+        cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type),
+        " with text \"", token->text, "\".");
+      this->IssueError(error);
       return false;
     }
   }
@@ -225,11 +225,11 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
     return false;
   }
   if (token->type != cmListFileLexer_Token_ParenLeft) {
-    std::ostringstream error;
-    error << "Parse error.  Expected \"(\", got "
-          << cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type)
-          << " with text \"" << token->text << "\".";
-    this->IssueError(error.str());
+    auto error =
+      cmStrCat("Parse error.  Expected \"(\", got ",
+               cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type),
+               " with text \"", token->text, "\".");
+    this->IssueError(error);
     return false;
   }
 
@@ -279,12 +279,12 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
       this->Separation = SeparationError;
     } else {
       // Error.
-      std::ostringstream error;
-      error << "Parse error.  Function missing ending \")\".  "
-               "Instead found "
-            << cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type)
-            << " with text \"" << token->text << "\".";
-      this->IssueError(error.str());
+      auto error = cmStrCat(
+        "Parse error.  Function missing ending \")\".  "
+        "Instead found ",
+        cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type),
+        " with text \"", token->text, "\".");
+      this->IssueError(error);
       return false;
     }
   }
@@ -311,21 +311,21 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
   }
   bool isError = (this->Separation == SeparationError ||
                   delim == cmListFileArgument::Bracket);
-  std::ostringstream m;
   cmListFileContext lfc;
   lfc.FilePath = this->FileName;
   lfc.Line = token->line;
   cmListFileBacktrace lfbt = this->Backtrace;
   lfbt = lfbt.Push(lfc);
-  m << "Syntax " << (isError ? "Error" : "Warning")
-    << " in cmake code at column " << token->column
-    << "\n"
-       "Argument not separated from preceding token by whitespace.";
+  auto msg =
+    cmStrCat("Syntax ", (isError ? "Error" : "Warning"),
+             " in cmake code at column ", token->column,
+             "\n"
+             "Argument not separated from preceding token by whitespace.");
   if (isError) {
-    this->Messenger->IssueMessage(MessageType::FATAL_ERROR, m.str(), lfbt);
+    this->Messenger->IssueMessage(MessageType::FATAL_ERROR, msg, lfbt);
     return false;
   }
-  this->Messenger->IssueMessage(MessageType::AUTHOR_WARNING, m.str(), lfbt);
+  this->Messenger->IssueMessage(MessageType::AUTHOR_WARNING, msg, lfbt);
   return true;
 }
 
