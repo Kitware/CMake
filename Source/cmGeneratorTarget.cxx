@@ -1163,6 +1163,51 @@ const std::string& cmGeneratorTarget::GetLocationForBuild() const
   return location;
 }
 
+void cmGeneratorTarget::AddSystemIncludeCacheKey(
+  const std::string& key, const std::string& config,
+  const std::string& language) const
+{
+  cmGeneratorExpressionDAGChecker dagChecker(
+    this, "SYSTEM_INCLUDE_DIRECTORIES", nullptr, nullptr, this->LocalGenerator,
+    config);
+
+  bool excludeImported = this->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED");
+
+  cmList result;
+  for (std::string const& it : this->Target->GetSystemIncludeDirectories()) {
+    result.append(cmGeneratorExpression::Evaluate(
+      it, this->LocalGenerator, config, this, &dagChecker, nullptr, language));
+  }
+
+  std::vector<cmGeneratorTarget const*> const& deps =
+    this->GetLinkImplementationClosure(config, UseTo::Compile);
+  for (cmGeneratorTarget const* dep : deps) {
+    handleSystemIncludesDep(this->LocalGenerator, dep, config, this,
+                            &dagChecker, result, excludeImported, language);
+  }
+
+  cmLinkImplementation const* impl =
+    this->GetLinkImplementation(config, UseTo::Compile);
+  if (impl != nullptr) {
+    auto runtimeEntries = impl->LanguageRuntimeLibraries.find(language);
+    if (runtimeEntries != impl->LanguageRuntimeLibraries.end()) {
+      for (auto const& lib : runtimeEntries->second) {
+        if (lib.Target) {
+          handleSystemIncludesDep(this->LocalGenerator, lib.Target, config,
+                                  this, &dagChecker, result, excludeImported,
+                                  language);
+        }
+      }
+    }
+  }
+
+  std::for_each(result.begin(), result.end(),
+                cmSystemTools::ConvertToUnixSlashes);
+  std::sort(result.begin(), result.end());
+  result.erase(std::unique(result.begin(), result.end()), result.end());
+  SystemIncludesCache.emplace(key, result);
+}
+
 bool cmGeneratorTarget::IsSystemIncludeDirectory(
   const std::string& dir, const std::string& config,
   const std::string& language) const
@@ -1176,47 +1221,8 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(
   auto iter = this->SystemIncludesCache.find(key);
 
   if (iter == this->SystemIncludesCache.end()) {
-    cmGeneratorExpressionDAGChecker dagChecker(
-      this, "SYSTEM_INCLUDE_DIRECTORIES", nullptr, nullptr,
-      this->LocalGenerator, config);
-
-    bool excludeImported = this->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED");
-
-    cmList result;
-    for (std::string const& it : this->Target->GetSystemIncludeDirectories()) {
-      result.append(cmGeneratorExpression::Evaluate(it, this->LocalGenerator,
-                                                    config, this, &dagChecker,
-                                                    nullptr, language));
-    }
-
-    std::vector<cmGeneratorTarget const*> const& deps =
-      this->GetLinkImplementationClosure(config, UseTo::Compile);
-    for (cmGeneratorTarget const* dep : deps) {
-      handleSystemIncludesDep(this->LocalGenerator, dep, config, this,
-                              &dagChecker, result, excludeImported, language);
-    }
-
-    cmLinkImplementation const* impl =
-      this->GetLinkImplementation(config, UseTo::Compile);
-    if (impl != nullptr) {
-      auto runtimeEntries = impl->LanguageRuntimeLibraries.find(language);
-      if (runtimeEntries != impl->LanguageRuntimeLibraries.end()) {
-        for (auto const& lib : runtimeEntries->second) {
-          if (lib.Target) {
-            handleSystemIncludesDep(this->LocalGenerator, lib.Target, config,
-                                    this, &dagChecker, result, excludeImported,
-                                    language);
-          }
-        }
-      }
-    }
-
-    std::for_each(result.begin(), result.end(),
-                  cmSystemTools::ConvertToUnixSlashes);
-    std::sort(result.begin(), result.end());
-    result.erase(std::unique(result.begin(), result.end()), result.end());
-
-    iter = this->SystemIncludesCache.emplace(key, result).first;
+    this->AddSystemIncludeCacheKey(key, config, language);
+    iter = this->SystemIncludesCache.find(key);
   }
 
   return std::binary_search(iter->second.begin(), iter->second.end(), dir);
