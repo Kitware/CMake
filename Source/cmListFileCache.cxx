@@ -217,12 +217,8 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
          token->type == cmListFileLexer_Token_Space) {
   }
   if (!token) {
-    std::ostringstream error;
-    /* clang-format off */
-    error << "Unexpected end of file.\n"
-          << "Parse error.  Function missing opening \"(\".";
-    /* clang-format on */
-    this->IssueError(error.str());
+    this->IssueError("Unexpected end of file.\n"
+                     "Parse error.  Function missing opening \"(\".");
     return false;
   }
   if (token->type != cmListFileLexer_Token_ParenLeft) {
@@ -282,7 +278,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
       // Error.
       std::ostringstream error;
       error << "Parse error.  Function missing ending \")\".  "
-            << "Instead found "
+               "Instead found "
             << cmListFileLexer_GetTypeAsString(this->Lexer, token->type)
             << " with text \"" << token->text << "\".";
       this->IssueError(error.str());
@@ -290,15 +286,16 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
     }
   }
 
-  std::ostringstream error;
   cmListFileContext lfc;
   lfc.FilePath = this->FileName;
   lfc.Line = line;
   cmListFileBacktrace lfbt = this->Backtrace;
   lfbt = lfbt.Push(lfc);
-  error << "Parse error.  Function missing ending \")\".  "
-        << "End of file reached.";
-  this->Messenger->IssueMessage(MessageType::FATAL_ERROR, error.str(), lfbt);
+  this->Messenger->IssueMessage(
+    MessageType::FATAL_ERROR,
+    "Parse error.  Function missing ending \")\".  "
+    "End of file reached.",
+    lfbt);
   return false;
 }
 
@@ -317,11 +314,10 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
   lfc.Line = token->line;
   cmListFileBacktrace lfbt = this->Backtrace;
   lfbt = lfbt.Push(lfc);
-
-  m << "Syntax " << (isError ? "Error" : "Warning") << " in cmake code at "
-    << "column " << token->column << "\n"
-    << "Argument not separated from preceding token by whitespace.";
-  /* clang-format on */
+  m << "Syntax " << (isError ? "Error" : "Warning")
+    << " in cmake code at column " << token->column
+    << "\n"
+       "Argument not separated from preceding token by whitespace.";
   if (isError) {
     this->Messenger->IssueMessage(MessageType::FATAL_ERROR, m.str(), lfbt);
     return false;
@@ -464,9 +460,9 @@ std::ostream& operator<<(std::ostream& os, cmListFileContext const& lfc)
 {
   os << lfc.FilePath;
   if (lfc.Line > 0) {
-    os << ":" << lfc.Line;
+    os << ':' << lfc.Line;
     if (!lfc.Name.empty()) {
-      os << " (" << lfc.Name << ")";
+      os << " (" << lfc.Name << ')';
     }
   } else if (lfc.Line == cmListFileContext::DeferPlaceholderLine) {
     os << ":DEFERRED";
