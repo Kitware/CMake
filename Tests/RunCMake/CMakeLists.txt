@@ -217,7 +217,10 @@ if(CMAKE_GENERATOR MATCHES "Ninja")
     -DCMAKE_SHARED_LIBRARY_PREFIX=${CMAKE_SHARED_LIBRARY_PREFIX}
     -DCMAKE_SHARED_LIBRARY_SUFFIX=${CMAKE_SHARED_LIBRARY_SUFFIX})
   if(CMAKE_Fortran_COMPILER)
-    list(APPEND Ninja_ARGS -DTEST_Fortran=1)
+    list(APPEND Ninja_ARGS
+      -DCMake_TEST_Fortran=1
+      -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
+      )
   endif()
   if(ninja_test_with_qt_version)
     list(APPEND Ninja_ARGS
@@ -333,7 +336,10 @@ if(NOT DEFINED CMake_TEST_BuildDepends_GNU_AS
 endif()
 
 if(CMAKE_Fortran_COMPILER)
-  list(APPEND BuildDepends_ARGS -DCMake_TEST_Fortran=1)
+  list(APPEND BuildDepends_ARGS
+    -DCMake_TEST_Fortran=1
+    -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
+    )
 endif()
 
 add_RunCMake_test(BuildDepends
@@ -684,7 +690,13 @@ if(CMake_TEST_CUDA)
   set_property(TEST RunCMake.CUDA_architectures APPEND PROPERTY LABELS "CUDA")
 endif()
 
-add_RunCMake_test(DependencyGraph -DCMAKE_Fortran_COMPILER=${CMAKE_Fortran_COMPILER})
+if(CMAKE_Fortran_COMPILER)
+  list(APPEND DependencyGraph_ARGS
+    -DCMake_TEST_Fortran=1
+    -DCMAKE_Fortran_COMPILER_ID=${CMAKE_Fortran_COMPILER_ID}
+    )
+  endif()
+add_RunCMake_test(DependencyGraph)
 set_property(TEST RunCMake.DependencyGraph APPEND PROPERTY LABELS "Fortran")
 
 # Add C++ Module tests.

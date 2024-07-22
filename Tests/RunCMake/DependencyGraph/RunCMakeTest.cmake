@@ -60,7 +60,7 @@ run_cmake(Property)
 
 run_optimize_test(OptimizeShared SharedTop)
 run_optimize_test(OptimizeStatic StaticTop)
-if(CMAKE_Fortran_COMPILER)
+if(CMake_TEST_Fortran)
   run_optimize_test(OptimizeFortran FortranTop)
 endif()
 
