@@ -585,6 +585,10 @@ void cmGeneratorTarget::AddSystemIncludeDirectory(std::string const& inc,
     }
     auto const& key = cmStrCat(config_upper, "/", lang);
     this->Target->AddSystemIncludeDirectories({ inc_with_config });
+    if (this->SystemIncludesCache.find(key) ==
+        this->SystemIncludesCache.end()) {
+      this->AddSystemIncludeCacheKey(key, config, lang);
+    }
     this->SystemIncludesCache[key].emplace_back(inc_with_config);
 
     // SystemIncludesCache should be sorted so that binary search can be used
