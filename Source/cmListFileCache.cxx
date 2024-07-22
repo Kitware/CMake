@@ -41,22 +41,35 @@ bool TopIs(std::vector<NestingState>& stack, NestingStateEnum state)
   return !stack.empty() && stack.back().State == state;
 }
 
-struct cmListFileParser
+class cmListFileParser
 {
+public:
   cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
                    cmMessenger* messenger);
   ~cmListFileParser();
   cmListFileParser(const cmListFileParser&) = delete;
   cmListFileParser& operator=(const cmListFileParser&) = delete;
-  void IssueFileOpenError(std::string const& text) const;
-  void IssueError(std::string const& text) const;
+
   bool ParseFile(const char* filename);
   bool ParseString(const char* str, const char* virtual_filename);
+
+private:
   bool Parse();
   bool ParseFunction(const char* name, long line);
   bool AddArgument(cmListFileLexer_Token* token,
                    cmListFileArgument::Delimiter delim);
+  void IssueFileOpenError(std::string const& text) const;
+  void IssueError(std::string const& text) const;
+
   cm::optional<cmListFileContext> CheckNesting() const;
+
+  enum
+  {
+    SeparationOkay,
+    SeparationWarning,
+    SeparationError
+  } Separation;
+
   cmListFile* ListFile;
   cmListFileBacktrace Backtrace;
   cmMessenger* Messenger;
@@ -66,12 +79,6 @@ struct cmListFileParser
   long FunctionLine;
   long FunctionLineEnd;
   std::vector<cmListFileArgument> FunctionArguments;
-  enum
-  {
-    SeparationOkay,
-    SeparationWarning,
-    SeparationError
-  } Separation;
 };
 
 cmListFileParser::cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
