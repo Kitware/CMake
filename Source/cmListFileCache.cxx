@@ -17,6 +17,30 @@
 #include "cmMessenger.h"
 #include "cmSystemTools.h"
 
+namespace {
+
+enum class NestingStateEnum
+{
+  If,
+  Else,
+  While,
+  Foreach,
+  Function,
+  Macro,
+  Block
+};
+
+struct NestingState
+{
+  NestingStateEnum State;
+  cmListFileContext Context;
+};
+
+bool TopIs(std::vector<NestingState>& stack, NestingStateEnum state)
+{
+  return !stack.empty() && stack.back().State == state;
+}
+
 struct cmListFileParser
 {
   cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
@@ -181,38 +205,6 @@ bool cmListFileParser::Parse()
   return true;
 }
 
-bool cmListFile::ParseFile(const char* filename, cmMessenger* messenger,
-                           cmListFileBacktrace const& lfbt)
-{
-  if (!cmSystemTools::FileExists(filename) ||
-      cmSystemTools::FileIsDirectory(filename)) {
-    return false;
-  }
-
-  bool parseError = false;
-
-  {
-    cmListFileParser parser(this, lfbt, messenger);
-    parseError = !parser.ParseFile(filename);
-  }
-
-  return !parseError;
-}
-
-bool cmListFile::ParseString(const char* str, const char* virtual_filename,
-                             cmMessenger* messenger,
-                             const cmListFileBacktrace& lfbt)
-{
-  bool parseError = false;
-
-  {
-    cmListFileParser parser(this, lfbt, messenger);
-    parseError = !parser.ParseString(str, virtual_filename);
-  }
-
-  return !parseError;
-}
-
 bool cmListFileParser::ParseFunction(const char* name, long line)
 {
   // Ininitialize a new function call.
@@ -338,30 +330,6 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
   return true;
 }
 
-namespace {
-enum class NestingStateEnum
-{
-  If,
-  Else,
-  While,
-  Foreach,
-  Function,
-  Macro,
-  Block
-};
-
-struct NestingState
-{
-  NestingStateEnum State;
-  cmListFileContext Context;
-};
-
-bool TopIs(std::vector<NestingState>& stack, NestingStateEnum state)
-{
-  return !stack.empty() && stack.back().State == state;
-}
-}
-
 cm::optional<cmListFileContext> cmListFileParser::CheckNesting() const
 {
   std::vector<NestingState> stack;
@@ -453,6 +421,40 @@ cm::optional<cmListFileContext> cmListFileParser::CheckNesting() const
   }
 
   return cm::nullopt;
+}
+
+} // anonymous namespace
+
+bool cmListFile::ParseFile(const char* filename, cmMessenger* messenger,
+                           cmListFileBacktrace const& lfbt)
+{
+  if (!cmSystemTools::FileExists(filename) ||
+      cmSystemTools::FileIsDirectory(filename)) {
+    return false;
+  }
+
+  bool parseError = false;
+
+  {
+    cmListFileParser parser(this, lfbt, messenger);
+    parseError = !parser.ParseFile(filename);
+  }
+
+  return !parseError;
+}
+
+bool cmListFile::ParseString(const char* str, const char* virtual_filename,
+                             cmMessenger* messenger,
+                             const cmListFileBacktrace& lfbt)
+{
+  bool parseError = false;
+
+  {
+    cmListFileParser parser(this, lfbt, messenger);
+    parseError = !parser.ParseString(str, virtual_filename);
+  }
+
+  return !parseError;
 }
 
 #include "cmConstStack.tcc"
