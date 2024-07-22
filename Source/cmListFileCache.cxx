@@ -46,7 +46,6 @@ class cmListFileParser
 public:
   cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
                    cmMessenger* messenger);
-  ~cmListFileParser();
   cmListFileParser(const cmListFileParser&) = delete;
   cmListFileParser& operator=(const cmListFileParser&) = delete;
 
@@ -74,7 +73,7 @@ private:
   cmListFileBacktrace Backtrace;
   cmMessenger* Messenger;
   const char* FileName = nullptr;
-  cmListFileLexer* Lexer;
+  std::unique_ptr<cmListFileLexer, void (*)(cmListFileLexer*)> Lexer;
   std::string FunctionName;
   long FunctionLine;
   long FunctionLineEnd;
@@ -86,13 +85,8 @@ cmListFileParser::cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
   : ListFile(lf)
   , Backtrace(std::move(lfbt))
   , Messenger(messenger)
-  , Lexer(cmListFileLexer_New())
+  , Lexer(cmListFileLexer_New(), cmListFileLexer_Delete)
 {
-}
-
-cmListFileParser::~cmListFileParser()
-{
-  cmListFileLexer_Delete(this->Lexer);
 }
 
 void cmListFileParser::IssueFileOpenError(const std::string& text) const
@@ -105,7 +99,7 @@ void cmListFileParser::IssueError(const std::string& text) const
 {
   cmListFileContext lfc;
   lfc.FilePath = this->FileName;
-  lfc.Line = cmListFileLexer_GetCurrentLine(this->Lexer);
+  lfc.Line = cmListFileLexer_GetCurrentLine(this->Lexer.get());
   cmListFileBacktrace lfbt = this->Backtrace;
   lfbt = lfbt.Push(lfc);
   this->Messenger->IssueMessage(MessageType::FATAL_ERROR, text, lfbt);
@@ -124,13 +118,13 @@ bool cmListFileParser::ParseFile(const char* filename)
 
   // Open the file.
   cmListFileLexer_BOM bom;
-  if (!cmListFileLexer_SetFileName(this->Lexer, filename, &bom)) {
+  if (!cmListFileLexer_SetFileName(this->Lexer.get(), filename, &bom)) {
     this->IssueFileOpenError("cmListFileCache: error can not open file.");
     return false;
   }
 
   if (bom == cmListFileLexer_BOM_Broken) {
-    cmListFileLexer_SetFileName(this->Lexer, nullptr, nullptr);
+    cmListFileLexer_SetFileName(this->Lexer.get(), nullptr, nullptr);
     this->IssueFileOpenError("Error while reading Byte-Order-Mark. "
                              "File not seekable?");
     return false;
@@ -138,7 +132,7 @@ bool cmListFileParser::ParseFile(const char* filename)
 
   // Verify the Byte-Order-Mark, if any.
   if (bom != cmListFileLexer_BOM_None && bom != cmListFileLexer_BOM_UTF8) {
-    cmListFileLexer_SetFileName(this->Lexer, nullptr, nullptr);
+    cmListFileLexer_SetFileName(this->Lexer.get(), nullptr, nullptr);
     this->IssueFileOpenError(
       "File starts with a Byte-Order-Mark that is not UTF-8.");
     return false;
@@ -152,7 +146,7 @@ bool cmListFileParser::ParseString(const char* str,
 {
   this->FileName = virtual_filename;
 
-  if (!cmListFileLexer_SetString(this->Lexer, str)) {
+  if (!cmListFileLexer_SetString(this->Lexer.get(), str)) {
     this->IssueFileOpenError("cmListFileCache: cannot allocate buffer.");
     return false;
   }
@@ -165,7 +159,8 @@ bool cmListFileParser::Parse()
   // Use a simple recursive-descent parser to process the token
   // stream.
   bool haveNewline = true;
-  while (cmListFileLexer_Token* token = cmListFileLexer_Scan(this->Lexer)) {
+  while (cmListFileLexer_Token* token =
+           cmListFileLexer_Scan(this->Lexer.get())) {
     if (token->type == cmListFileLexer_Token_Space) {
     } else if (token->type == cmListFileLexer_Token_Newline) {
       haveNewline = true;
@@ -184,7 +179,8 @@ bool cmListFileParser::Parse()
       } else {
         std::ostringstream error;
         error << "Parse error.  Expected a newline, got "
-              << cmListFileLexer_GetTypeAsString(this->Lexer, token->type)
+              << cmListFileLexer_GetTypeAsString(this->Lexer.get(),
+                                                 token->type)
               << " with text \"" << token->text << "\".";
         this->IssueError(error.str());
         return false;
@@ -192,7 +188,7 @@ bool cmListFileParser::Parse()
     } else {
       std::ostringstream error;
       error << "Parse error.  Expected a command name, got "
-            << cmListFileLexer_GetTypeAsString(this->Lexer, token->type)
+            << cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type)
             << " with text \"" << token->text << "\".";
       this->IssueError(error.str());
       return false;
@@ -220,7 +216,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
 
   // Command name has already been parsed.  Read the left paren.
   cmListFileLexer_Token* token;
-  while ((token = cmListFileLexer_Scan(this->Lexer)) &&
+  while ((token = cmListFileLexer_Scan(this->Lexer.get())) &&
          token->type == cmListFileLexer_Token_Space) {
   }
   if (!token) {
@@ -231,7 +227,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
   if (token->type != cmListFileLexer_Token_ParenLeft) {
     std::ostringstream error;
     error << "Parse error.  Expected \"(\", got "
-          << cmListFileLexer_GetTypeAsString(this->Lexer, token->type)
+          << cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type)
           << " with text \"" << token->text << "\".";
     this->IssueError(error.str());
     return false;
@@ -240,7 +236,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
   // Arguments.
   unsigned long parenDepth = 0;
   this->Separation = SeparationOkay;
-  while ((token = cmListFileLexer_Scan(this->Lexer))) {
+  while ((token = cmListFileLexer_Scan(this->Lexer.get()))) {
     if (token->type == cmListFileLexer_Token_Space ||
         token->type == cmListFileLexer_Token_Newline) {
       this->Separation = SeparationOkay;
@@ -286,7 +282,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
       std::ostringstream error;
       error << "Parse error.  Function missing ending \")\".  "
                "Instead found "
-            << cmListFileLexer_GetTypeAsString(this->Lexer, token->type)
+            << cmListFileLexer_GetTypeAsString(this->Lexer.get(), token->type)
             << " with text \"" << token->text << "\".";
       this->IssueError(error.str());
       return false;
