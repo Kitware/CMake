@@ -108,15 +108,6 @@ else()
 endif()
 unset(__SWIFT_COMP_MODE_CMP0157)
 
-if(CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
-  if(NOT DEFINED CMAKE_Swift_LINK_WHAT_YOU_USE_FLAG)
-    set(CMAKE_Swift_LINK_WHAT_YOU_USE_FLAG "LINKER:--no-as-needed")
-  endif()
-  if(NOT DEFINED CMAKE_LINK_WHAT_YOU_USE_CHECK)
-    set(CMAKE_LINK_WHAT_YOU_USE_CHECK ldd -u -r)
-  endif()
-endif()
-
 cmake_initialize_per_config_variable(CMAKE_Swift_FLAGS "Swift Compiler Flags")
 
 if(NOT CMAKE_Swift_NUM_THREADS MATCHES "^[0-9]+$")

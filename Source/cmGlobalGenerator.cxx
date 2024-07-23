@@ -531,6 +531,9 @@ bool cmGlobalGenerator::CheckLanguages(
 //     - Make sure the compiler works with a try compile if
 //       CMakeDetermine(LANG) was loaded
 //
+//   CMake(LANG)LinkerInformation.cmake
+//     - loads Platform/Linker/${CMAKE_SYSTEM_NAME}-${LINKER}.cmake
+//
 // Now load a few files that can override values set in any of the above
 // (PROJECTNAME)Compatibility.cmake
 //   - load any backwards compatibility stuff for current project
@@ -955,6 +958,22 @@ void cmGlobalGenerator::EnableLanguage(
         }
       } // end if in try compile
     }   // end need test language
+
+    // load linker configuration
+    std::string langLinkerLoadedVar =
+      cmStrCat("CMAKE_", lang, "_LINKER_INFORMATION_LOADED");
+    if (!mf->GetDefinition(langLinkerLoadedVar)) {
+      fpath = cmStrCat("Internal/CMake", lang, "LinkerInformation.cmake");
+      std::string informationFile = mf->GetModulesFile(fpath);
+      if (informationFile.empty()) {
+        cmSystemTools::Error(
+          cmStrCat("Could not find cmake module file: ", fpath));
+      } else if (!mf->ReadListFile(informationFile)) {
+        cmSystemTools::Error(
+          cmStrCat("Could not process cmake module file: ", informationFile));
+      }
+    }
+
     // Store the shared library flags so that we can satisfy CMP0018
     std::string sharedLibFlagsVar =
       cmStrCat("CMAKE_SHARED_LIBRARY_", lang, "_FLAGS");
