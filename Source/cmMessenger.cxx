@@ -21,43 +21,8 @@
 #  include "cmDebuggerAdapter.h"
 #endif
 
-MessageType cmMessenger::ConvertMessageType(MessageType t) const
-{
-  if (t == MessageType::AUTHOR_WARNING || t == MessageType::AUTHOR_ERROR) {
-    if (this->GetDevWarningsAsErrors()) {
-      return MessageType::AUTHOR_ERROR;
-    }
-    return MessageType::AUTHOR_WARNING;
-  }
-  if (t == MessageType::DEPRECATION_WARNING ||
-      t == MessageType::DEPRECATION_ERROR) {
-    if (this->GetDeprecatedWarningsAsErrors()) {
-      return MessageType::DEPRECATION_ERROR;
-    }
-    return MessageType::DEPRECATION_WARNING;
-  }
-  return t;
-}
-
-bool cmMessenger::IsMessageTypeVisible(MessageType t) const
-{
-  if (t == MessageType::DEPRECATION_ERROR) {
-    return this->GetDeprecatedWarningsAsErrors();
-  }
-  if (t == MessageType::DEPRECATION_WARNING) {
-    return !this->GetSuppressDeprecatedWarnings();
-  }
-  if (t == MessageType::AUTHOR_ERROR) {
-    return this->GetDevWarningsAsErrors();
-  }
-  if (t == MessageType::AUTHOR_WARNING) {
-    return !this->GetSuppressDevWarnings();
-  }
-
-  return true;
-}
-
-static bool printMessagePreamble(MessageType t, std::ostream& msg)
+namespace {
+bool printMessagePreamble(MessageType t, std::ostream& msg)
 {
   // Construct the message header.
   if (t == MessageType::FATAL_ERROR) {
@@ -80,7 +45,7 @@ static bool printMessagePreamble(MessageType t, std::ostream& msg)
   return true;
 }
 
-static int getMessageColor(MessageType t)
+int getMessageColor(MessageType t)
 {
   switch (t) {
     case MessageType::INTERNAL_ERROR:
@@ -95,7 +60,7 @@ static int getMessageColor(MessageType t)
   }
 }
 
-static void printMessageText(std::ostream& msg, std::string const& text)
+void printMessageText(std::ostream& msg, std::string const& text)
 {
   msg << ":\n";
   cmDocumentationFormatter formatter;
@@ -103,7 +68,7 @@ static void printMessageText(std::ostream& msg, std::string const& text)
   formatter.PrintFormatted(msg, text);
 }
 
-static void displayMessage(MessageType t, std::ostringstream& msg)
+void displayMessage(MessageType t, std::ostringstream& msg)
 {
   // Add a note about warning suppression.
   if (t == MessageType::AUTHOR_WARNING) {
@@ -144,7 +109,6 @@ static void displayMessage(MessageType t, std::ostringstream& msg)
   }
 }
 
-namespace {
 void PrintCallStack(std::ostream& out, cmListFileBacktrace bt,
                     cm::optional<std::string> const& topSource)
 {
@@ -177,6 +141,43 @@ void PrintCallStack(std::ostream& out, cmListFileBacktrace bt,
     out << "  " << lfc << "\n";
   }
 }
+
+} // anonymous namespace
+
+MessageType cmMessenger::ConvertMessageType(MessageType t) const
+{
+  if (t == MessageType::AUTHOR_WARNING || t == MessageType::AUTHOR_ERROR) {
+    if (this->GetDevWarningsAsErrors()) {
+      return MessageType::AUTHOR_ERROR;
+    }
+    return MessageType::AUTHOR_WARNING;
+  }
+  if (t == MessageType::DEPRECATION_WARNING ||
+      t == MessageType::DEPRECATION_ERROR) {
+    if (this->GetDeprecatedWarningsAsErrors()) {
+      return MessageType::DEPRECATION_ERROR;
+    }
+    return MessageType::DEPRECATION_WARNING;
+  }
+  return t;
+}
+
+bool cmMessenger::IsMessageTypeVisible(MessageType t) const
+{
+  if (t == MessageType::DEPRECATION_ERROR) {
+    return this->GetDeprecatedWarningsAsErrors();
+  }
+  if (t == MessageType::DEPRECATION_WARNING) {
+    return !this->GetSuppressDeprecatedWarnings();
+  }
+  if (t == MessageType::AUTHOR_ERROR) {
+    return this->GetDevWarningsAsErrors();
+  }
+  if (t == MessageType::AUTHOR_WARNING) {
+    return !this->GetSuppressDevWarnings();
+  }
+
+  return true;
 }
 
 void cmMessenger::IssueMessage(MessageType t, const std::string& text,
