@@ -51,8 +51,8 @@ struct curltime Curl_now(void)
 #pragma warning(pop)
 #endif
 
-    now.tv_sec = milliseconds / 1000;
-    now.tv_usec = (milliseconds % 1000) * 1000;
+    now.tv_sec = (time_t)(milliseconds / 1000);
+    now.tv_usec = (int)((milliseconds % 1000) * 1000);
   }
   return now;
 }
@@ -77,7 +77,7 @@ struct curltime Curl_now(void)
 
   /*
   ** clock_gettime() may be defined by Apple's SDK as weak symbol thus
-  ** code compiles but fails during run-time if clock_gettime() is
+  ** code compiles but fails during runtime if clock_gettime() is
   ** called on unsupported OS version.
   */
 #if defined(__APPLE__) && defined(HAVE_BUILTIN_AVAILABLE) && \
@@ -95,7 +95,7 @@ struct curltime Curl_now(void)
 #endif
     (0 == clock_gettime(CLOCK_MONOTONIC_RAW, &tsnow))) {
     cnow.tv_sec = tsnow.tv_sec;
-    cnow.tv_usec = (unsigned int)(tsnow.tv_nsec / 1000);
+    cnow.tv_usec = (int)(tsnow.tv_nsec / 1000);
   }
   else
 #endif
@@ -107,18 +107,18 @@ struct curltime Curl_now(void)
 #endif
     (0 == clock_gettime(CLOCK_MONOTONIC, &tsnow))) {
     cnow.tv_sec = tsnow.tv_sec;
-    cnow.tv_usec = (unsigned int)(tsnow.tv_nsec / 1000);
+    cnow.tv_usec = (int)(tsnow.tv_nsec / 1000);
   }
   /*
   ** Even when the configure process has truly detected monotonic clock
   ** availability, it might happen that it is not actually available at
-  ** run-time. When this occurs simply fallback to other time source.
+  ** runtime. When this occurs simply fallback to other time source.
   */
 #ifdef HAVE_GETTIMEOFDAY
   else {
     (void)gettimeofday(&now, NULL);
     cnow.tv_sec = now.tv_sec;
-    cnow.tv_usec = (unsigned int)now.tv_usec;
+    cnow.tv_usec = (int)now.tv_usec;
   }
 #else
   else {

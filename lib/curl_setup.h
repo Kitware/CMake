@@ -40,6 +40,43 @@
 #include <_mingw.h>
 #endif
 
+/* Workaround for Homebrew gcc 12.4.0, 13.3.0, 14.1.0 and newer (as of 14.1.0)
+   that started advertising the `availability` attribute, which then gets used
+   by Apple SDK, but, in a way incompatible with gcc, resulting in a misc
+   errors inside SDK headers, e.g.:
+     error: attributes should be specified before the declarator in a function
+            definition
+     error: expected ',' or '}' before
+   Followed by missing declarations.
+   Fix it by overriding the built-in feature-check macro used by the headers
+   to enable the problematic attributes. This makes the feature check fail. */
+#if defined(__APPLE__) &&                \
+  !defined(__clang__) &&                 \
+  defined(__GNUC__) && __GNUC__ >= 12 && \
+  defined(__has_attribute)
+#define availability curl_pp_attribute_disabled
+#endif
+
+#if defined(__APPLE__)
+#include <sys/types.h>
+#include <TargetConditionals.h>
+/* Fixup faulty target macro initialization in macOS SDK since v14.4 (as of
+   15.0 beta). The SDK target detection in `TargetConditionals.h` correctly
+   detects macOS, but fails to set the macro's old name `TARGET_OS_OSX`, then
+   continues to set it to a default value of 0. Other parts of the SDK still
+   rely on the old name, and with this inconsistency our builds fail due to
+   missing declarations. It happens when using mainline llvm older than v18.
+   Later versions fixed it by predefining these target macros, avoiding the
+   faulty dynamic detection. gcc is not affected (for now) because it lacks
+   the necessary dynamic detection features, so the SDK falls back to
+   a codepath that sets both the old and new macro to 1. */
+#if defined(TARGET_OS_MAC) && TARGET_OS_MAC && \
+  defined(TARGET_OS_OSX) && !TARGET_OS_OSX
+#undef TARGET_OS_OSX
+#define TARGET_OS_OSX TARGET_OS_MAC
+#endif
+#endif
+
 /*
  * Disable Visual Studio warnings:
  * 4127 "conditional expression is constant"
@@ -50,7 +87,7 @@
 
 #ifdef _WIN32
 /*
- * Don't include unneeded stuff in Windows headers to avoid compiler
+ * Do not include unneeded stuff in Windows headers to avoid compiler
  * warnings and macro clashes.
  * Make sure to define this macro before including any Windows headers.
  */
@@ -306,13 +343,25 @@
 #define CURL_PRINTF(fmt, arg)
 #endif
 
+/* Workaround for mainline llvm v16 and earlier missing a built-in macro
+   expected by macOS SDK v14 / Xcode v15 (2023) and newer.
+   gcc (as of v14) is also missing it. */
+#if defined(__APPLE__) &&                                   \
+  ((!defined(__apple_build_version__) &&                    \
+    defined(__clang__) && __clang_major__ < 17) ||          \
+   (defined(__GNUC__) && __GNUC__ <= 14)) &&                \
+  defined(__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__) && \
+  !defined(__ENVIRONMENT_OS_VERSION_MIN_REQUIRED__)
+#define __ENVIRONMENT_OS_VERSION_MIN_REQUIRED__             \
+  __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__
+#endif
+
 /*
  * Use getaddrinfo to resolve the IPv4 address literal. If the current network
- * interface doesn't support IPv4, but supports IPv6, NAT64, and DNS64,
+ * interface does not support IPv4, but supports IPv6, NAT64, and DNS64,
  * performing this task will result in a synthesized IPv6 address.
  */
 #if defined(__APPLE__) && !defined(USE_ARES)
-#include <TargetConditionals.h>
 #define USE_RESOLVE_ON_IPS 1
 #  if TARGET_OS_MAC && !(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE) && \
      defined(USE_IPV6)
@@ -447,7 +496,7 @@
 #endif
 
 #ifndef SIZEOF_TIME_T
-/* assume default size of time_t to be 32 bit */
+/* assume default size of time_t to be 32 bits */
 #define SIZEOF_TIME_T 4
 #endif
 
@@ -470,7 +519,7 @@
 #endif
 
 /*
- * Default sizeof(off_t) in case it hasn't been defined in config file.
+ * Default sizeof(off_t) in case it has not been defined in config file.
  */
 
 #ifndef SIZEOF_OFF_T
@@ -537,7 +586,7 @@
 #endif
 
 #ifndef SIZE_T_MAX
-/* some limits.h headers have this defined, some don't */
+/* some limits.h headers have this defined, some do not */
 #if defined(SIZEOF_SIZE_T) && (SIZEOF_SIZE_T > 4)
 #define SIZE_T_MAX 18446744073709551615U
 #else
@@ -546,7 +595,7 @@
 #endif
 
 #ifndef SSIZE_T_MAX
-/* some limits.h headers have this defined, some don't */
+/* some limits.h headers have this defined, some do not */
 #if defined(SIZEOF_SIZE_T) && (SIZEOF_SIZE_T > 4)
 #define SSIZE_T_MAX 9223372036854775807
 #else
@@ -555,7 +604,7 @@
 #endif
 
 /*
- * Arg 2 type for gethostname in case it hasn't been defined in config file.
+ * Arg 2 type for gethostname in case it has not been defined in config file.
  */
 
 #ifndef GETHOSTNAME_TYPE_ARG2
@@ -770,7 +819,7 @@
 #endif
 
 /*
- * shutdown() flags for systems that don't define them
+ * shutdown() flags for systems that do not define them
  */
 
 #ifndef SHUT_RD
@@ -818,7 +867,7 @@ endings either CRLF or LF so 't' is appropriate.
 #define FOPEN_APPENDTEXT "a"
 #endif
 
-/* for systems that don't detect this in configure */
+/* for systems that do not detect this in configure */
 #ifndef CURL_SA_FAMILY_T
 #  if defined(HAVE_SA_FAMILY_T)
 #    define CURL_SA_FAMILY_T sa_family_t
@@ -847,7 +896,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
                size_t buflen, struct passwd **result);
 #endif
 
-#ifdef DEBUGBUILD
+#ifdef UNITTESTS
 #define UNITTEST
 #else
 #define UNITTEST static

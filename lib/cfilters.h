@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 
+#include "timediff.h"
 
 struct Curl_cfilter;
 struct Curl_easy;
@@ -36,8 +37,16 @@ struct connectdata;
 typedef void     Curl_cft_destroy_this(struct Curl_cfilter *cf,
                                        struct Curl_easy *data);
 
+/* Callback to close the connection immediately. */
 typedef void     Curl_cft_close(struct Curl_cfilter *cf,
                                 struct Curl_easy *data);
+
+/* Callback to close the connection filter gracefully, non-blocking.
+ * Implementations MUST NOT chain calls to cf->next.
+ */
+typedef CURLcode Curl_cft_shutdown(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data,
+                                   bool *done);
 
 typedef CURLcode Curl_cft_connect(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
@@ -76,10 +85,10 @@ struct easy_pollset;
  * the pollset. Filters, whose filter "below" is not connected, should
  * also do no adjustments.
  *
- * Examples: a TLS handshake, while ongoing, might remove POLL_IN
- * when it needs to write, or vice versa. A HTTP/2 filter might remove
- * POLL_OUT when a stream window is exhausted and a WINDOW_UPDATE needs
- * to be received first and add instead POLL_IN.
+ * Examples: a TLS handshake, while ongoing, might remove POLL_IN when it
+ * needs to write, or vice versa. An HTTP/2 filter might remove POLL_OUT when
+ * a stream window is exhausted and a WINDOW_UPDATE needs to be received first
+ * and add instead POLL_IN.
  *
  * @param cf     the filter to ask
  * @param data   the easy handle the pollset is about
@@ -194,6 +203,7 @@ struct Curl_cftype {
   Curl_cft_destroy_this *destroy;         /* destroy resources of this cf */
   Curl_cft_connect *do_connect;           /* establish connection */
   Curl_cft_close *do_close;               /* close conn */
+  Curl_cft_shutdown *do_shutdown;         /* shutdown conn */
   Curl_cft_get_host *get_host;            /* host filter talks to */
   Curl_cft_adjust_pollset *adjust_pollset; /* adjust transfer poll set */
   Curl_cft_data_pending *has_data_pending;/* conn has data pending */
@@ -213,6 +223,7 @@ struct Curl_cfilter {
   struct connectdata *conn;      /* the connection this filter belongs to */
   int sockindex;                 /* the index the filter is installed at */
   BIT(connected);                /* != 0 iff this filter is connected */
+  BIT(shutdown);                 /* != 0 iff this filter has shut down */
 };
 
 /* Default implementations for the type functions, implementing nop. */
@@ -244,6 +255,8 @@ CURLcode Curl_cf_def_conn_keep_alive(struct Curl_cfilter *cf,
 CURLcode Curl_cf_def_query(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
                            int query, int *pres1, void *pres2);
+CURLcode Curl_cf_def_shutdown(struct Curl_cfilter *cf,
+                              struct Curl_easy *data, bool *done);
 
 /**
  * Create a new filter instance, unattached to the filter chain.
@@ -372,6 +385,13 @@ bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex);
 void Curl_conn_close(struct Curl_easy *data, int sockindex);
 
 /**
+ * Shutdown the connection at `sockindex` non-blocking, using timeout
+ * from `data->set.shutdowntimeout`, default DEFAULT_SHUTDOWN_TIMEOUT_MS.
+ * Will return CURLE_OK and *done == FALSE if not finished.
+ */
+CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done);
+
+/**
  * Return if data is pending in some connection filter at chain
  * `sockindex` for connection `data->conn`.
  */
@@ -401,6 +421,15 @@ void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
  */
 void Curl_conn_adjust_pollset(struct Curl_easy *data,
                                struct easy_pollset *ps);
+
+/**
+ * Curl_poll() the filter chain at `cf` with timeout `timeout_ms`.
+ * Returns 0 on timeout, negative on error or number of sockets
+ * with requested poll events.
+ */
+int Curl_conn_cf_poll(struct Curl_cfilter *cf,
+                      struct Curl_easy *data,
+                      timediff_t timeout_ms);
 
 /**
  * Receive data through the filter chain at `sockindex` for connection
@@ -486,7 +515,9 @@ CURLcode Curl_conn_keep_alive(struct Curl_easy *data,
                               struct connectdata *conn,
                               int sockindex);
 
+#ifdef UNITTESTS
 void Curl_cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data);
+#endif
 void Curl_conn_get_host(struct Curl_easy *data, int sockindex,
                         const char **phost, const char **pdisplay_host,
                         int *pport);

@@ -293,7 +293,7 @@ static const MSH3_REQUEST_IF msh3_request_if = {
   msh3_data_sent
 };
 
-/* Decode HTTP status code.  Returns -1 if no valid status code was
+/* Decode HTTP status code. Returns -1 if no valid status code was
    decoded. (duplicate from http2.c) */
 static int decode_status_code(const char *value, size_t len)
 {
@@ -689,7 +689,7 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     /* TODO - msh3/msquic will hold onto this memory until the send complete
-       event. How do we make sure curl doesn't free it until then? */
+       event. How do we make sure curl does not free it until then? */
     *err = CURLE_OK;
     nwritten = len;
   }
@@ -840,7 +840,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 
   ctx->api = MsH3ApiOpen();
   if(!ctx->api) {
-    failf(data, "can't create msh3 api");
+    failf(data, "cannot create msh3 api");
     return CURLE_FAILED_INIT;
   }
 
@@ -851,7 +851,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
                                   &addr,
                                   !verify);
   if(!ctx->qconn) {
-    failf(data, "can't create msh3 connection");
+    failf(data, "cannot create msh3 connection");
     if(ctx->api) {
       MsH3ApiClose(ctx->api);
       ctx->api = NULL;
@@ -883,7 +883,7 @@ static CURLcode cf_msh3_connect(struct Curl_cfilter *cf,
   CF_DATA_SAVE(save, cf, data);
 
   if(ctx->sock[SP_LOCAL] == CURL_SOCKET_BAD) {
-    if(Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, &ctx->sock[0]) < 0) {
+    if(Curl_socketpair(AF_UNIX, SOCK_STREAM, 0, &ctx->sock[0], FALSE) < 0) {
       ctx->sock[SP_LOCAL] = CURL_SOCKET_BAD;
       ctx->sock[SP_REMOTE] = CURL_SOCKET_BAD;
       return CURLE_COULDNT_CONNECT;
@@ -1038,6 +1038,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_msh3_destroy,
   cf_msh3_connect,
   cf_msh3_close,
+  Curl_cf_def_shutdown,
   Curl_cf_def_get_host,
   cf_msh3_adjust_pollset,
   cf_msh3_data_pending,

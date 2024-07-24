@@ -54,7 +54,7 @@ static void copy_header_external(struct Curl_header_store *hs,
      impossible for applications to do == comparisons, as that would otherwise
      be very tempting and then lead to the reserved bits not being reserved
      anymore. */
-  h->origin = hs->type | (1<<27);
+  h->origin = (unsigned int)(hs->type | (1<<27));
   h->anchor = e;
 }
 
@@ -114,7 +114,7 @@ CURLHcode curl_easy_header(CURL *easy,
         break;
       }
     }
-    if(!e) /* this shouldn't happen */
+    if(!e) /* this should not happen */
       return CURLHE_MISSING;
   }
   /* this is the name we want */
@@ -302,7 +302,7 @@ CURLcode Curl_headers_push(struct Curl_easy *data, const char *header,
       /* line folding, append value to the previous header's value */
       return unfold_value(data, header, hlen);
     else {
-      /* Can't unfold without a previous header. Instead of erroring, just
+      /* cannot unfold without a previous header. Instead of erroring, just
          pass the leading blanks. */
       while(hlen && ISBLANK(*header)) {
         header++;

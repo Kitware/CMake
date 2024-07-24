@@ -64,11 +64,10 @@
 
 #define H3_STREAM_WINDOW_SIZE  (128 * 1024)
 #define H3_STREAM_CHUNK_SIZE    (16 * 1024)
-/* The pool keeps spares around and half of a full stream windows
- * seems good. More does not seem to improve performance.
- * The benefit of the pool is that stream buffer to not keep
- * spares. So memory consumption goes down when streams run empty,
- * have a large upload done, etc. */
+/* The pool keeps spares around and half of a full stream windows seems good.
+ * More does not seem to improve performance. The benefit of the pool is that
+ * stream buffer to not keep spares. Memory consumption goes down when streams
+ * run empty, have a large upload done, etc. */
 #define H3_STREAM_POOL_SPARES \
           (H3_STREAM_WINDOW_SIZE / H3_STREAM_CHUNK_SIZE ) / 2
 /* Receive and Send max number of chunks just follows from the
@@ -103,6 +102,7 @@ struct cf_quiche_ctx {
   curl_off_t data_recvd;
   BIT(goaway);                       /* got GOAWAY from server */
   BIT(x509_store_setup);             /* if x509 store has been set up */
+  BIT(shutdown_started);             /* queued shutdown packets */
 };
 
 #ifdef DEBUG_QUICHE
@@ -1120,7 +1120,7 @@ out:
     nwritten = -1;
   }
   CURL_TRC_CF(data, cf, "[%" CURL_PRIu64 "] cf_send(len=%zu) -> %zd, %d",
-              stream? stream->id : -1, len, nwritten, *err);
+              stream? stream->id : (uint64_t)~0, len, nwritten, *err);
   return nwritten;
 }
 
@@ -1271,7 +1271,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 
   ctx->cfg = quiche_config_new(QUICHE_PROTOCOL_VERSION);
   if(!ctx->cfg) {
-    failf(data, "can't create quiche config");
+    failf(data, "cannot create quiche config");
     return CURLE_FAILED_INIT;
   }
   quiche_config_enable_pacing(ctx->cfg, false);
@@ -1322,7 +1322,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
                                       &sockaddr->sa_addr, sockaddr->addrlen,
                                       ctx->cfg, ctx->tls.ossl.ssl, false);
   if(!ctx->qconn) {
-    failf(data, "can't create quiche connection");
+    failf(data, "cannot create quiche connection");
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -1464,18 +1464,60 @@ out:
   return result;
 }
 
+static CURLcode cf_quiche_shutdown(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data, bool *done)
+{
+  struct cf_quiche_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_OK;
+
+  if(cf->shutdown || !ctx || !ctx->qconn) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  *done = FALSE;
+  if(!ctx->shutdown_started) {
+    int err;
+
+    ctx->shutdown_started = TRUE;
+    vquic_ctx_update_time(&ctx->q);
+    err = quiche_conn_close(ctx->qconn, TRUE, 0, NULL, 0);
+    if(err) {
+      CURL_TRC_CF(data, cf, "error %d adding shutdown packet, "
+                  "aborting shutdown", err);
+      result = CURLE_SEND_ERROR;
+      goto out;
+    }
+  }
+
+  if(!Curl_bufq_is_empty(&ctx->q.sendbuf)) {
+    CURL_TRC_CF(data, cf, "shutdown, flushing sendbuf");
+    result = cf_flush_egress(cf, data);
+    if(result)
+      goto out;
+  }
+
+  if(Curl_bufq_is_empty(&ctx->q.sendbuf)) {
+    /* sent everything, quiche does not seem to support a graceful
+     * shutdown waiting for a reply, so ware done. */
+    CURL_TRC_CF(data, cf, "shutdown completely sent off, done");
+    *done = TRUE;
+  }
+  else {
+    CURL_TRC_CF(data, cf, "shutdown sending blocked");
+  }
+
+out:
+  return result;
+}
+
 static void cf_quiche_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
 
   if(ctx) {
-    if(ctx->qconn) {
-      vquic_ctx_update_time(&ctx->q);
-      (void)quiche_conn_close(ctx->qconn, TRUE, 0, NULL, 0);
-      /* flushing the egress is not a failsafe way to deliver all the
-         outstanding packets, but we also don't want to get stuck here... */
-      (void)cf_flush_egress(cf, data);
-    }
+    bool done;
+    (void)cf_quiche_shutdown(cf, data, &done);
     cf_quiche_ctx_clear(ctx);
   }
 }
@@ -1559,8 +1601,8 @@ static bool cf_quiche_conn_is_alive(struct Curl_cfilter *cf,
     return FALSE;
 
   if(*input_pending) {
-    /* This happens before we've sent off a request and the connection is
-       not in use by any other transfer, there shouldn't be any data here,
+    /* This happens before we have sent off a request and the connection is
+       not in use by any other transfer, there should not be any data here,
        only "protocol frames" */
     *input_pending = FALSE;
     if(cf_process_ingress(cf, data))
@@ -1580,6 +1622,7 @@ struct Curl_cftype Curl_cft_http3 = {
   cf_quiche_destroy,
   cf_quiche_connect,
   cf_quiche_close,
+  cf_quiche_shutdown,
   Curl_cf_def_get_host,
   cf_quiche_adjust_pollset,
   cf_quiche_data_pending,
