@@ -35,10 +35,6 @@ macro(add_RunCMake_test test)
     ${TEST_ARGS}
     -P "${CMAKE_CURRENT_SOURCE_DIR}/${Test_Dir}/RunCMakeTest.cmake"
     )
-  set_tests_properties("RunCMake.${test}" PROPERTIES LABELS "CMake;run")
-  if(${test} MATCHES ^CMP)
-    set_property(TEST "RunCMake.${test}" APPEND PROPERTY LABELS "policy")
-  endif()
 endmacro()
 
 function(add_RunCMake_test_group test types)
