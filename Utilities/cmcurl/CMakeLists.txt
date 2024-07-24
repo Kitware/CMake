@@ -6,6 +6,7 @@ set(BUILD_SHARED_LIBS OFF)
 set(BUILD_STATIC_LIBS ON)
 set(BUILD_STATIC_CURL OFF)
 set(CURL_USE_BEARSSL OFF)
+set(CURL_USE_GSASL OFF)
 set(CURL_USE_GSSAPI OFF)
 set(CURL_USE_LIBPSL OFF)
 set(CURL_USE_LIBSSH2 OFF)
@@ -88,7 +89,7 @@ set(HAVE_STDATOMIC_H 0)
 set(HAVE_STRCASECMP 0) # we do not vendor the code that uses this
 set(HAVE_WIN32_WINNT 0) # we do not need this info
 set(HTTP_ONLY OFF CACHE INTERNAL "Curl is not http-only")
-set(PICKY_COMPILER OFF CACHE INTERNAL "Enable picky compiler options")
+set(PICKY_COMPILER OFF)
 set(SHARE_LIB_OBJECT OFF)
 set(USE_ECH OFF)
 set(USE_HTTPSRR OFF)
@@ -276,9 +277,9 @@ if(0) # This code not needed for building within CMake.
 cmake_dependent_option(ENABLE_THREADED_RESOLVER "Set to ON to enable threaded DNS lookup"
   ON "NOT ENABLE_ARES"
   OFF)
-endif()
 
 include(PickyWarnings)
+endif()
 
 option(ENABLE_DEBUG "Set to ON to enable curl debug features" OFF)
 option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" ${ENABLE_DEBUG})
@@ -1105,6 +1106,7 @@ if(USE_LIBIDN2)
     set(LIBIDN2_LINK_LIBRARIES "idn2")
     check_include_file_concat("idn2.h" HAVE_IDN2_H)
   endif()
+  if(0) # This code not needed for building within CMake.
   if(NOT HAVE_LIBIDN2 OR NOT HAVE_IDN2_H)
     find_package(PkgConfig QUIET)
     pkg_check_modules(LIBIDN2 "libidn2")
@@ -1113,6 +1115,7 @@ if(USE_LIBIDN2)
       set(HAVE_LIBIDN2 ON)
       set(HAVE_IDN2_H ON)
     endif()
+  endif()
   endif()
   if(HAVE_LIBIDN2 AND HAVE_IDN2_H)
     set(CURL_LIBS "${LIBIDN2_LINK_LIBRARIES};${CURL_LIBS}")
