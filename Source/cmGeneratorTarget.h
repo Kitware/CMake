@@ -656,6 +656,10 @@ public:
                                 const std::string& config,
                                 const std::string& language) const;
 
+  void AddSystemIncludeCacheKey(const std::string& key,
+                                const std::string& config,
+                                const std::string& language) const;
+
   /** Add the target output files to the global generator manifest.  */
   void ComputeTargetManifest(const std::string& config) const;
 
