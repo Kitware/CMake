@@ -100,6 +100,10 @@ target_link_libraries(symbols PUBLIC myfort)
 # the C compiler produces PIC even if it is not its default.
 set_property(TARGET symbols PROPERTY POSITION_INDEPENDENT_CODE 1)
 
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran")
+  add_compile_options(--implicit-interface)
+endif()
+
 # Require symbols through Fortran.
 add_executable(FortranCInterface main.F call_sub.f ${call_mod})
 target_link_libraries(FortranCInterface PUBLIC symbols)

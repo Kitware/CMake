@@ -60,6 +60,7 @@ else()
       #  ifx: Intel Fortran LLVM-based compiler
       #  ifort: Intel Classic Fortran compiler
       #  nagfor: NAG Fortran compiler
+      #  lfortran: LFortran Fortran Compiler
       #
       #  GNU is last to be searched,
       #  so if you paid for a compiler it is picked by default.
@@ -108,6 +109,9 @@ else()
 
     # Intel on windows does not preprocess by default.
     "-fpp"
+
+    # LFortran does not preprocess by default.
+    "--cpp-infer"
     )
 endif()
 

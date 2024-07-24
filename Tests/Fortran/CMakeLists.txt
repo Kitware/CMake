@@ -37,6 +37,10 @@ if(WIN32 AND NOT CYGWIN)
   endif()
 endif()
 
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran")
+  add_compile_options(--implicit-interface)
+endif()
+
 add_library(hello STATIC hello.f)
 add_library(world ${_SHARED} world.f ${world_def})
 add_executable(testf testf.f)

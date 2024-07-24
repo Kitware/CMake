@@ -25,6 +25,10 @@ target_link_libraries(sunq sunquad)
   set(${result} "${RESULT}" PARENT_SCOPE)
 endfunction()
 
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran")
+  add_compile_options(--implicit-interface)
+endif()
+
 # check for the fortran c interface mangling
 include(FortranCInterface)
 FortranCInterface_HEADER(HelloWorldFCMangle.h

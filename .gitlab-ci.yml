@@ -234,6 +234,26 @@ t:fedora39-hip-radeon:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:fedora40-makefiles-lfortran:
+    extends:
+        - .fedora40_makefiles_lfortran
+        - .cmake_test_linux_release
+        - .linux_x86_64_tags
+        - .run_dependent
+        - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:fedora40-ninja-lfortran:
+    extends:
+        - .fedora40_ninja_lfortran
+        - .cmake_test_linux_release
+        - .linux_x86_64_tags
+        - .run_dependent
+        - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:fedora40-ninja-clang:
     extends:
         - .fedora40_ninja_clang

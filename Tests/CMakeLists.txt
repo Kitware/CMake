@@ -3335,7 +3335,10 @@ if(BUILD_TESTING)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Fortran")
     set_property(TEST Fortran APPEND PROPERTY LABELS "Fortran")
 
-    if(CMAKE_Fortran_COMPILER_SUPPORTS_F90)
+    if(CMAKE_Fortran_COMPILER_SUPPORTS_F90
+        # FIXME(lfortran): The compiler fails on the test's modules.
+        AND NOT CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran"
+        )
       add_test(FortranModules ${CMAKE_CTEST_COMMAND}
         --build-and-test
         "${CMake_SOURCE_DIR}/Tests/FortranModules"

@@ -7,6 +7,10 @@ if("${CMAKE_Fortran_COMPILER_ID};${CMAKE_Fortran_SIMULATE_ID}" MATCHES "^Intel(L
   string(APPEND CMAKE_Fortran_FLAGS_RELWITHDEBINFO " -Z7")
 endif()
 
+if(CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran")
+  add_compile_options(--implicit-interface)
+endif()
+
 # create a library with hello and world functions
 add_library(FortranOnlylib hello.f world.f)
 set_property(TARGET FortranOnlylib PROPERTY Fortran_FORMAT FIXED)
