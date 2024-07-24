@@ -1,0 +1,6 @@
+set(EARLY_ENTRY_1 "1" CACHE STRING "early")
+set(MIDDLE_ENTRY_1 "1" CACHE STRING "mid 1")
+set(MIDDLE_ENTRY_2 "2" CACHE STRING "mid 2")
+set(MIDDLE_ENTRY_3 "3" CACHE STRING "mid 3")
+mark_as_advanced(MIDDLE_ENTRY_3)
+set(LATER_ENTRY_1 "1" CACHE STRING "later")

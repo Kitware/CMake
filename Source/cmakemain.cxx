@@ -45,6 +45,7 @@
 #endif
 
 #include "cmsys/Encoding.hxx"
+#include "cmsys/RegularExpression.hxx"
 #include "cmsys/Terminal.h"
 
 namespace {
@@ -70,12 +71,13 @@ const cmDocumentationEntry cmDocumentationUsageNote = {
   "Run 'cmake --help' for more information."
 };
 
-const cmDocumentationEntry cmDocumentationOptions[32] = {
+const cmDocumentationEntry cmDocumentationOptions[33] = {
   { "--preset <preset>,--preset=<preset>", "Specify a configure preset." },
   { "--list-presets[=<type>]", "List available presets." },
   { "--workflow [<options>]", "Run a workflow preset." },
   { "-E", "CMake command mode." },
   { "-L[A][H]", "List non-advanced cached variables." },
+  { "-LR[A][H] <regex>", "Show cached variables that match the regex." },
   { "--fresh",
     "Configure a fresh build tree, removing any existing cache file." },
   { "--build <dir>", "Build a CMake-generated project binary tree." },
@@ -194,6 +196,21 @@ void cmakemainProgressCallback(const std::string& m, float prog, cmake* cm)
   }
 }
 
+std::function<bool(std::string const& value)> getShowCachedCallback(
+  bool& show_flag, bool* help_flag = nullptr, std::string* filter = nullptr)
+{
+  return [=, &show_flag](std::string const& value) -> bool {
+    show_flag = true;
+    if (help_flag) {
+      *help_flag = true;
+    }
+    if (filter) {
+      *filter = value;
+    }
+    return true;
+  };
+}
+
 int do_cmake(int ac, char const* const* av)
 {
   if (cmSystemTools::GetCurrentWorkingDirectory().empty()) {
@@ -245,6 +262,8 @@ int do_cmake(int ac, char const* const* av)
   bool list_cached = false;
   bool list_all_cached = false;
   bool list_help = false;
+  // (Regex) Filter on the cached variable(s) to print.
+  std::string filter_var_name;
   bool view_only = false;
   cmake::WorkingMode workingMode = cmake::NORMAL_MODE;
   std::vector<std::string> parsedArgs;
@@ -269,13 +288,25 @@ int do_cmake(int ac, char const* const* av)
     CommandArgument{ "-N", CommandArgument::Values::Zero,
                      CommandArgument::setToTrue(view_only) },
     CommandArgument{ "-LAH", CommandArgument::Values::Zero,
-                     CommandArgument::setToTrue(list_all_cached, list_help) },
+                     getShowCachedCallback(list_all_cached, &list_help) },
     CommandArgument{ "-LA", CommandArgument::Values::Zero,
-                     CommandArgument::setToTrue(list_all_cached) },
+                     getShowCachedCallback(list_all_cached) },
     CommandArgument{ "-LH", CommandArgument::Values::Zero,
-                     CommandArgument::setToTrue(list_cached, list_help) },
+                     getShowCachedCallback(list_cached, &list_help) },
     CommandArgument{ "-L", CommandArgument::Values::Zero,
-                     CommandArgument::setToTrue(list_cached) },
+                     getShowCachedCallback(list_cached) },
+    CommandArgument{
+      "-LRAH", CommandArgument::Values::One,
+      getShowCachedCallback(list_all_cached, &list_help, &filter_var_name) },
+    CommandArgument{
+      "-LRA", CommandArgument::Values::One,
+      getShowCachedCallback(list_all_cached, nullptr, &filter_var_name) },
+    CommandArgument{
+      "-LRH", CommandArgument::Values::One,
+      getShowCachedCallback(list_cached, &list_help, &filter_var_name) },
+    CommandArgument{
+      "-LR", CommandArgument::Values::One,
+      getShowCachedCallback(list_cached, nullptr, &filter_var_name) },
     CommandArgument{ "-P", "No script specified for argument -P",
                      CommandArgument::Values::One,
                      CommandArgument::RequiresSeparator::No,
@@ -370,7 +401,15 @@ int do_cmake(int ac, char const* const* av)
   if (list_cached || list_all_cached) {
     std::cout << "-- Cache values" << std::endl;
     std::vector<std::string> keys = cm.GetState()->GetCacheEntryKeys();
+    cmsys::RegularExpression regex_var_name;
+    if (!filter_var_name.empty()) {
+      regex_var_name.compile(filter_var_name);
+    }
     for (std::string const& k : keys) {
+      if (regex_var_name.is_valid() && !regex_var_name.find(k)) {
+        continue;
+      }
+
       cmStateEnums::CacheEntryType t = cm.GetState()->GetCacheEntryType(k);
       if (t != cmStateEnums::INTERNAL && t != cmStateEnums::STATIC &&
           t != cmStateEnums::UNINITIALIZED) {

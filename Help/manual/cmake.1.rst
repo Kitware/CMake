@@ -232,6 +232,17 @@ Options
  will display also advanced variables.  If ``H`` is specified, it will also
  display help for each variable.
 
+.. option:: -LR[A][H] <regex>
+
+ .. versionadded:: 3.31
+
+ Show specific non-advanced cached variables
+
+ Show non-``INTERNAL`` nor :prop_cache:`ADVANCED` variables from the CMake
+ ``CACHE`` that match the given regex. If ``A`` is specified, then it
+ will also show advanced variables.  If ``H`` is specified, it will also
+ display help for each variable.
+
 .. option:: -N
 
  View mode only.

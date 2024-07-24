@@ -49,6 +49,16 @@ run_cmake_command(E___run_co_compile-no--- ${CMAKE_COMMAND} -E __run_co_compile 
 run_cmake_command(E___run_co_compile-no-cc ${CMAKE_COMMAND} -E __run_co_compile --iwyu=iwyu-does-not-exist --)
 run_cmake_command(E___run_co_compile-tidy-remove-fixes ${CMAKE_COMMAND} -E __run_co_compile "--tidy=${CMAKE_COMMAND}\\;-E\\;true\\;--export-fixes=${RunCMake_BINARY_DIR}/tidy-fixes.yaml" -- ${CMAKE_COMMAND} -E true)
 
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/list-cache-build)
+  run_cmake(list-cache)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(list-cache-LR ${CMAKE_COMMAND} . -LR MIDDLE)
+  run_cmake_command(list-cache-LRA ${CMAKE_COMMAND} . -LRA MIDDLE)
+  run_cmake_command(list-cache-LRH ${CMAKE_COMMAND} . -LRH MIDDLE)
+  run_cmake_command(list-cache-LRAH ${CMAKE_COMMAND} . -LRAH MIDDLE)
+endblock()
+
 run_cmake_command(G_no-arg ${CMAKE_COMMAND} -B DummyBuildDir -G)
 run_cmake_command(G_bad-arg ${CMAKE_COMMAND} -B DummyBuildDir -G NoSuchGenerator)
 run_cmake_command(P_no-arg ${CMAKE_COMMAND} -P)
