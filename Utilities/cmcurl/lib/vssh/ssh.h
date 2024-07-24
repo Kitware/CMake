@@ -163,7 +163,7 @@ struct ssh_conn {
   unsigned kbd_state; /* 0 or 1 */
   ssh_key privkey;
   ssh_key pubkey;
-  int auth_methods;
+  unsigned int auth_methods;
   ssh_session ssh_session;
   ssh_scp scp_session;
   sftp_session sftp_session;
@@ -243,10 +243,10 @@ struct ssh_conn {
 #endif
 
 #ifdef HAVE_LIBSSH2_VERSION
-/* get it run-time if possible */
+/* get it runtime if possible */
 #define CURL_LIBSSH2_VERSION libssh2_version(0)
 #else
-/* use build-time if run-time not possible */
+/* use build-time if runtime not possible */
 #define CURL_LIBSSH2_VERSION LIBSSH2_VERSION
 #endif
 

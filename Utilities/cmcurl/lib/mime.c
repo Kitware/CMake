@@ -1137,7 +1137,7 @@ static void cleanup_part_content(curl_mimepart *part)
   part->datasize = (curl_off_t) 0;    /* No size yet. */
   cleanup_encoder_state(&part->encstate);
   part->kind = MIMEKIND_NONE;
-  part->flags &= ~MIME_FAST_READ;
+  part->flags &= ~(unsigned int)MIME_FAST_READ;
   part->lastreadstatus = 1; /* Successful read status. */
   part->state.state = MIMESTATE_BEGIN;
 }
@@ -1147,7 +1147,7 @@ static void mime_subparts_free(void *ptr)
   curl_mime *mime = (curl_mime *) ptr;
 
   if(mime && mime->parent) {
-    mime->parent->freefunc = NULL;  /* Be sure we won't be called again. */
+    mime->parent->freefunc = NULL;  /* Be sure we will not be called again. */
     cleanup_part_content(mime->parent);  /* Avoid dangling pointer in part. */
   }
   curl_mime_free(mime);
@@ -1159,7 +1159,7 @@ static void mime_subparts_unbind(void *ptr)
   curl_mime *mime = (curl_mime *) ptr;
 
   if(mime && mime->parent) {
-    mime->parent->freefunc = NULL;  /* Be sure we won't be called again. */
+    mime->parent->freefunc = NULL;  /* Be sure we will not be called again. */
     cleanup_part_content(mime->parent);  /* Avoid dangling pointer in part. */
     mime->parent = NULL;
   }
@@ -1186,7 +1186,7 @@ void curl_mime_free(curl_mime *mime)
   curl_mimepart *part;
 
   if(mime) {
-    mime_subparts_unbind(mime);  /* Be sure it's not referenced anymore. */
+    mime_subparts_unbind(mime);  /* Be sure it is not referenced anymore. */
     while(mime->firstpart) {
       part = mime->firstpart;
       mime->firstpart = part->nextpart;
@@ -1354,7 +1354,7 @@ CURLcode curl_mime_name(curl_mimepart *part, const char *name)
   return CURLE_OK;
 }
 
-/* Set mime part remote file name. */
+/* Set mime part remote filename. */
 CURLcode curl_mime_filename(curl_mimepart *part, const char *filename)
 {
   if(!part)
@@ -1497,7 +1497,7 @@ CURLcode curl_mime_headers(curl_mimepart *part,
   if(part->flags & MIME_USERHEADERS_OWNER) {
     if(part->userheaders != headers)  /* Allow setting twice the same list. */
       curl_slist_free_all(part->userheaders);
-    part->flags &= ~MIME_USERHEADERS_OWNER;
+    part->flags &= ~(unsigned int)MIME_USERHEADERS_OWNER;
   }
   part->userheaders = headers;
   if(headers && take_ownership)
@@ -1554,7 +1554,7 @@ CURLcode Curl_mime_set_subparts(curl_mimepart *part,
       while(root->parent && root->parent->parent)
         root = root->parent->parent;
       if(subparts == root) {
-        /* Can't add as a subpart of itself. */
+        /* cannot add as a subpart of itself. */
         return CURLE_BAD_FUNCTION_ARGUMENT;
       }
     }
@@ -1662,7 +1662,8 @@ static curl_off_t mime_size(curl_mimepart *part)
   if(size >= 0 && !(part->flags & MIME_BODY_ONLY)) {
     /* Compute total part size. */
     size += slist_size(part->curlheaders, 2, NULL, 0);
-    size += slist_size(part->userheaders, 2, STRCONST("Content-Type"));
+    size += slist_size(part->userheaders, 2,
+                       STRCONST("Content-Type"));
     size += 2;    /* CRLF after headers. */
   }
   return size;
@@ -1770,7 +1771,7 @@ CURLcode Curl_mime_prepare_headers(struct Curl_easy *data,
   curl_slist_free_all(part->curlheaders);
   part->curlheaders = NULL;
 
-  /* Be sure we won't access old headers later. */
+  /* Be sure we will not access old headers later. */
   if(part->state.state == MIMESTATE_CURLHEADERS)
     mimesetstate(&part->state, MIMESTATE_CURLHEADERS, NULL);
 
@@ -2071,7 +2072,7 @@ static CURLcode cr_mime_resume_from(struct Curl_easy *data,
         return CURLE_PARTIAL_FILE;
       }
     }
-    /* we've passed, proceed as normal */
+    /* we have passed, proceed as normal */
   }
   return CURLE_OK;
 }
@@ -2095,6 +2096,14 @@ static CURLcode cr_mime_unpause(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+static bool cr_mime_is_paused(struct Curl_easy *data,
+                              struct Curl_creader *reader)
+{
+  struct cr_mime_ctx *ctx = reader->ctx;
+  (void)data;
+  return (ctx->part && ctx->part->lastreadstatus == CURL_READFUNC_PAUSE);
+}
+
 static const struct Curl_crtype cr_mime = {
   "cr-mime",
   cr_mime_init,
@@ -2105,6 +2114,7 @@ static const struct Curl_crtype cr_mime = {
   cr_mime_resume_from,
   cr_mime_rewind,
   cr_mime_unpause,
+  cr_mime_is_paused,
   Curl_creader_def_done,
   sizeof(struct cr_mime_ctx)
 };
