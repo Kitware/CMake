@@ -7,6 +7,7 @@
 #include <iosfwd>
 #include <string>
 
+#include "cmExportAndroidMKGenerator.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmStateTypes.h"
 
@@ -21,42 +22,26 @@ class cmGeneratorTarget;
  *
  * This is used to implement the export() command.
  */
-class cmExportBuildAndroidMKGenerator : public cmExportBuildFileGenerator
+class cmExportBuildAndroidMKGenerator
+  : public cmExportBuildFileGenerator
+  , public cmExportAndroidMKGenerator
 {
 public:
   cmExportBuildAndroidMKGenerator();
-  // this is so cmExportInstallAndroidMKGenerator can share this
-  // function as they are almost the same
-  enum GenerateType
-  {
-    BUILD,
-    INSTALL
-  };
-  static void GenerateInterfaceProperties(cmGeneratorTarget const* target,
-                                          std::ostream& os,
-                                          const ImportPropertyMap& properties,
-                                          GenerateType type,
-                                          std::string const& config);
+
+  /** Set whether to append generated code to the output file.  */
+  void SetAppendMode(bool append) { this->AppendMode = append; }
 
 protected:
+  GenerateType GetGenerateType() const override { return BUILD; }
+
   // Implement virtual methods from the superclass.
-  void GeneratePolicyHeaderCode(std::ostream&) override {}
-  void GeneratePolicyFooterCode(std::ostream&) override {}
+  bool GenerateMainFile(std::ostream& os) override;
   void GenerateImportHeaderCode(std::ostream& os,
-                                const std::string& config = "") override;
-  void GenerateImportFooterCode(std::ostream& os) override;
+                                std::string const& config = "") override;
   void GenerateImportTargetCode(
     std::ostream& os, cmGeneratorTarget const* target,
     cmStateEnums::TargetType /*targetType*/) override;
-  void GenerateExpectedTargetsCode(
-    std::ostream& os, const std::string& expectedTargets) override;
-  void GenerateImportPropertyCode(
-    std::ostream& os, const std::string& config, const std::string& suffix,
-    cmGeneratorTarget const* target, ImportPropertyMap const& properties,
-    const std::string& importedXcFrameworkLocation) override;
-  void GenerateMissingTargetsCheckCode(std::ostream& os) override;
-  void GenerateFindDependencyCalls(std::ostream&) override {}
-  void GenerateInterfaceProperties(
-    cmGeneratorTarget const* target, std::ostream& os,
-    const ImportPropertyMap& properties) override;
+
+  std::string GetCxxModulesDirectory() const override { return {}; }
 };

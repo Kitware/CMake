@@ -17,25 +17,26 @@ class cmListFileBacktrace;
 class cmLocalGenerator;
 
 /** \class cmInstallExportGenerator
- * \brief Generate rules for creating an export files.
+ * \brief Support class for generating rules for creating export files.
  */
 class cmInstallExportGenerator : public cmInstallGenerator
 {
 public:
-  cmInstallExportGenerator(cmExportSet* exportSet, std::string const& dest,
-                           std::string file_permissions,
-                           const std::vector<std::string>& configurations,
-                           std::string const& component, MessageLevel message,
-                           bool exclude_from_all, std::string filename,
-                           std::string name_space,
-                           std::string cxx_modules_directory, bool exportOld,
-                           bool android, bool exportPackageDependencies,
+  cmInstallExportGenerator(cmExportSet* exportSet, std::string destination,
+                           std::string filePermissions,
+                           std::vector<std::string> const& configurations,
+                           std::string component, MessageLevel message,
+                           bool excludeFromAll, std::string filename,
+                           std::string targetNamespace,
+                           std::string cxxModulesDirectory,
                            cmListFileBacktrace backtrace);
   cmInstallExportGenerator(const cmInstallExportGenerator&) = delete;
   ~cmInstallExportGenerator() override;
 
   cmInstallExportGenerator& operator=(const cmInstallExportGenerator&) =
     delete;
+
+  virtual char const* InstallSubcommand() const = 0;
 
   cmExportSet* GetExportSet() { return this->ExportSet; }
 
@@ -60,8 +61,6 @@ protected:
   void GenerateScript(std::ostream& os) override;
   void GenerateScriptConfigs(std::ostream& os, Indent indent) override;
   void GenerateScriptActions(std::ostream& os, Indent indent) override;
-  void GenerateImportFile(cmExportSet const* exportSet);
-  void GenerateImportFile(const char* config, cmExportSet const* exportSet);
   std::string TempDirCalculate() const;
   void ComputeTempDir();
 
@@ -70,8 +69,6 @@ protected:
   std::string const FileName;
   std::string const Namespace;
   std::string const CxxModulesDirectory;
-  bool const ExportOld;
-  bool const ExportPackageDependencies;
   cmLocalGenerator* LocalGenerator = nullptr;
 
   std::string TempDir;
