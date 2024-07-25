@@ -22,27 +22,27 @@
 #endif
 
 namespace {
-bool printMessagePreamble(MessageType t, std::ostream& msg)
+const char* getMessageTypeStr(MessageType t)
 {
-  // Construct the message header.
-  if (t == MessageType::FATAL_ERROR) {
-    msg << "CMake Error";
-  } else if (t == MessageType::INTERNAL_ERROR) {
-    msg << "CMake Internal Error (please report a bug)";
-  } else if (t == MessageType::LOG) {
-    msg << "CMake Debug Log";
-  } else if (t == MessageType::DEPRECATION_ERROR) {
-    msg << "CMake Deprecation Error";
-  } else if (t == MessageType::DEPRECATION_WARNING) {
-    msg << "CMake Deprecation Warning";
-  } else if (t == MessageType::AUTHOR_WARNING) {
-    msg << "CMake Warning (dev)";
-  } else if (t == MessageType::AUTHOR_ERROR) {
-    msg << "CMake Error (dev)";
-  } else {
-    msg << "CMake Warning";
+  switch (t) {
+    case MessageType::FATAL_ERROR:
+      return "Error";
+    case MessageType::INTERNAL_ERROR:
+      return "Internal Error (please report a bug)";
+    case MessageType::LOG:
+      return "Debug Log";
+    case MessageType::DEPRECATION_ERROR:
+      return "Deprecation Error";
+    case MessageType::DEPRECATION_WARNING:
+      return "Deprecation Warning";
+    case MessageType::AUTHOR_WARNING:
+      return "Warning (dev)";
+    case MessageType::AUTHOR_ERROR:
+      return "Error (dev)";
+    default:
+      break;
   }
-  return true;
+  return "Warning";
 }
 
 int getMessageColor(MessageType t)
@@ -200,9 +200,9 @@ void cmMessenger::DisplayMessage(MessageType t, const std::string& text,
                                  const cmListFileBacktrace& backtrace) const
 {
   std::ostringstream msg;
-  if (!printMessagePreamble(t, msg)) {
-    return;
-  }
+
+  // Print the message preamble.
+  msg << "CMake " << getMessageTypeStr(t);
 
   // Add the immediate context.
   this->PrintBacktraceTitle(msg, backtrace);
