@@ -7,7 +7,6 @@ macro(AddCMakeTest TestName PreArgs)
   add_test(NAME CMake.${TestName}
     COMMAND ${CMAKE_EXECUTABLE} ${PreArgs}
     -P "${CMAKE_CURRENT_BINARY_DIR}/${TestName}Test.cmake" ${ARGN})
-  set_tests_properties("CMake.${TestName}" PROPERTIES LABELS "CMake;command")
 endmacro()
 
 

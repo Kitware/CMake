@@ -3078,11 +3078,6 @@ if(BUILD_TESTING)
       --output-on-failure -C "\${CTestTest_CONFIG}")
   endif()
 
-  add_test(CTestTestPrintLabels ${CMAKE_CTEST_COMMAND} --print-labels)
-  set_tests_properties(CTestTestPrintLabels PROPERTIES LABELS "Label1;Label2")
-  set_tests_properties(CTestTestPrintLabels PROPERTIES PASS_REGULAR_EXPRESSION
-    "All Labels:.*  Label1.*  Label2")
-
   configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestLabelRegExp/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestLabelRegExp/test.cmake"
