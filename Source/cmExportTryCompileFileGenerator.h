@@ -45,6 +45,11 @@ protected:
   {
   }
 
+  ExportInfo FindExportInfo(cmGeneratorTarget const* /*target*/) const override
+  {
+    return { {}, {} };
+  }
+
   void PopulateProperties(cmGeneratorTarget const* target,
                           ImportPropertyMap& properties,
                           std::set<cmGeneratorTarget const*>& emitted);

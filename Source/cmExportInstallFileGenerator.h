@@ -8,7 +8,6 @@
 #include <map>
 #include <set>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <cm/string_view>
@@ -20,7 +19,6 @@
 
 class cmExportSet;
 class cmGeneratorTarget;
-class cmGlobalGenerator;
 class cmInstallTargetGenerator;
 class cmTargetExport;
 
@@ -94,8 +92,7 @@ protected:
   void ComplainAboutDuplicateTarget(
     std::string const& targetName) const override;
 
-  std::pair<std::vector<std::string>, std::string> FindNamespaces(
-    cmGlobalGenerator* gg, std::string const& name) const;
+  ExportInfo FindExportInfo(cmGeneratorTarget const* target) const override;
 
   void ReportError(std::string const& errorMessage) const override;
 
