@@ -713,32 +713,40 @@ void cmLocalGenerator::GenerateInstallRules()
       break;
   }
 
-  // Record the install manifest.
-  if (toplevel_install) {
-    /* clang-format off */
+  /* clang-format off */
+
     fout <<
-      "if(CMAKE_INSTALL_COMPONENT)\n"
-      "  if(CMAKE_INSTALL_COMPONENT MATCHES \"^[a-zA-Z0-9_.+-]+$\")\n"
-      "    set(CMAKE_INSTALL_MANIFEST \"install_manifest_"
-      "${CMAKE_INSTALL_COMPONENT}.txt\")\n"
-      "  else()\n"
-      "    string(MD5 CMAKE_INST_COMP_HASH \"${CMAKE_INSTALL_COMPONENT}\")\n"
-      "    set(CMAKE_INSTALL_MANIFEST \"install_manifest_"
-      "${CMAKE_INST_COMP_HASH}.txt\")\n"
-      "    unset(CMAKE_INST_COMP_HASH)\n"
-      "  endif()\n"
-      "else()\n"
-      "  set(CMAKE_INSTALL_MANIFEST \"install_manifest.txt\")\n"
-      "endif()\n"
-      "\n"
-      "if(NOT CMAKE_INSTALL_LOCAL_ONLY)\n"
-      "  string(REPLACE \";\" \"\\n\" CMAKE_INSTALL_MANIFEST_CONTENT\n"
+      "string(REPLACE \";\" \"\\n\" CMAKE_INSTALL_MANIFEST_CONTENT\n"
       "       \"${CMAKE_INSTALL_MANIFEST_FILES}\")\n"
-      "  file(WRITE \"" << homedir << "/${CMAKE_INSTALL_MANIFEST}\"\n"
+      "if(CMAKE_INSTALL_LOCAL_ONLY)\n"
+      "  file(WRITE \"" <<
+      this->StateSnapshot.GetDirectory().GetCurrentBinary() <<
+      "/install_local_manifest.txt\"\n"
       "     \"${CMAKE_INSTALL_MANIFEST_CONTENT}\")\n"
       "endif()\n";
-    /* clang-format on */
-  }
+
+    if (toplevel_install) {
+      fout <<
+        "if(CMAKE_INSTALL_COMPONENT)\n"
+        "  if(CMAKE_INSTALL_COMPONENT MATCHES \"^[a-zA-Z0-9_.+-]+$\")\n"
+        "    set(CMAKE_INSTALL_MANIFEST \"install_manifest_"
+        "${CMAKE_INSTALL_COMPONENT}.txt\")\n"
+        "  else()\n"
+        "    string(MD5 CMAKE_INST_COMP_HASH \"${CMAKE_INSTALL_COMPONENT}\")\n"
+        "    set(CMAKE_INSTALL_MANIFEST \"install_manifest_"
+        "${CMAKE_INST_COMP_HASH}.txt\")\n"
+        "    unset(CMAKE_INST_COMP_HASH)\n"
+        "  endif()\n"
+        "else()\n"
+        "  set(CMAKE_INSTALL_MANIFEST \"install_manifest.txt\")\n"
+        "endif()\n"
+        "\n"
+        "if(NOT CMAKE_INSTALL_LOCAL_ONLY)\n"
+        "  file(WRITE \"" << homedir << "/${CMAKE_INSTALL_MANIFEST}\"\n"
+        "     \"${CMAKE_INSTALL_MANIFEST_CONTENT}\")\n"
+        "endif()\n";
+    }
+  /* clang-format on */
 }
 
 void cmLocalGenerator::AddGeneratorTarget(

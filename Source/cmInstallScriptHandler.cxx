@@ -16,6 +16,11 @@
 #include <cm3p/json/value.h>
 #include <cm3p/uv.h>
 
+#include "cmsys/FStream.hxx"
+#include "cmsys/RegularExpression.hxx"
+
+#include "cmCryptoHash.h"
+#include "cmGeneratedFileStream.h"
 #include "cmJSONState.h"
 #include "cmProcessOutput.h"
 #include "cmStringAlgorithms.h"
@@ -26,15 +31,19 @@
 
 using InstallScript = cmInstallScriptHandler::InstallScript;
 
-cmInstallScriptHandler::cmInstallScriptHandler(const std::string& binary_dir,
+cmInstallScriptHandler::cmInstallScriptHandler(std::string _binaryDir,
+                                               std::string _component,
                                                std::vector<std::string>& args)
+  : binaryDir(std::move(_binaryDir))
+  , component(std::move(_component))
 {
   const std::string& file =
-    cmStrCat(binary_dir, "/CMakeFiles/InstallScripts.json");
+    cmStrCat(this->binaryDir, "/CMakeFiles/InstallScripts.json");
   if (cmSystemTools::FileExists(file)) {
     int compare;
     cmSystemTools::FileTimeCompare(
-      cmStrCat(binary_dir, "/CMakeFiles/cmake.check_cache"), file, &compare);
+      cmStrCat(this->binaryDir, "/CMakeFiles/cmake.check_cache"), file,
+      &compare);
     if (compare < 1) {
       args.insert(args.end() - 1, "-DCMAKE_INSTALL_LOCAL_ONLY=1");
       Json::CharReaderBuilder rbuilder;
@@ -46,6 +55,8 @@ cmInstallScriptHandler::cmInstallScriptHandler(const std::string& binary_dir,
       for (auto const& script : value["InstallScripts"]) {
         this->commands.push_back(args);
         this->commands.back().emplace_back(script.asCString());
+        this->directories.push_back(
+          cmSystemTools::GetFilenamePath(script.asCString()));
       }
     }
   }
@@ -78,6 +89,36 @@ int cmInstallScriptHandler::install(unsigned int j)
       ++i;
     }
     uv_run(loop, UV_RUN_DEFAULT);
+  }
+
+  // Write install manifest
+  std::string install_manifest;
+  if (this->component.empty()) {
+    install_manifest = "install_manifest.txt";
+  } else {
+    cmsys::RegularExpression regEntry;
+    if (regEntry.compile("^[a-zA-Z0-9_.+-]+$") &&
+        regEntry.find(this->component)) {
+      install_manifest =
+        cmStrCat("install_manifest_", this->component, ".txt");
+    } else {
+      cmCryptoHash md5(cmCryptoHash::AlgoMD5);
+      md5.Initialize();
+      install_manifest =
+        cmStrCat("install_manifest_", md5.HashString(this->component), ".txt");
+    }
+  }
+  cmGeneratedFileStream fout(cmStrCat(this->binaryDir, "/", install_manifest));
+  fout.SetCopyIfDifferent(true);
+  for (auto const& dir : this->directories) {
+    auto local_manifest = cmStrCat(dir, "/install_local_manifest.txt");
+    if (cmSystemTools::FileExists(local_manifest)) {
+      cmsys::ifstream fin(local_manifest.c_str());
+      std::string line;
+      while (std::getline(fin, line)) {
+        fout << line << "\n";
+      }
+    }
   }
   return 0;
 }

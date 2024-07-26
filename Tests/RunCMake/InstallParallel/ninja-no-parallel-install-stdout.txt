@@ -1,5 +1,12 @@
-installing:.*
-installing:.*
-installing:.*
-installing:.*
-installing:.*
+\-\- Install configuration:[^
+]*
+\-\- Installing:[^
+]*
+\-\- Installing:[^
+]*
+\-\- Installing:[^
+]*
+\-\- Installing:[^
+]*
+\-\- Installing:[^
+]*
