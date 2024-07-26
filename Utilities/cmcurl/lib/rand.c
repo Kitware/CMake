@@ -48,7 +48,8 @@
 
 #ifdef _WIN32
 
-#if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600
+#if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600 && \
+  !defined(CURL_WINDOWS_APP)
 #  define HAVE_WIN_BCRYPTGENRANDOM
 #  include <bcrypt.h>
 #  ifdef _MSC_VER
@@ -105,7 +106,7 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
   static unsigned int randseed;
   static bool seeded = FALSE;
 
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   char *force_entropy = getenv("CURL_ENTROPY");
   if(force_entropy) {
     if(!seeded) {
@@ -150,7 +151,7 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd)
 
 #if defined(RANDOM_FILE) && !defined(_WIN32)
   if(!seeded) {
-    /* if there's a random file to read a seed from, use it */
+    /* if there is a random file to read a seed from, use it */
     int fd = open(RANDOM_FILE, O_RDONLY);
     if(fd > -1) {
       /* read random data into the randseed variable */
@@ -269,7 +270,7 @@ CURLcode Curl_rand_alnum(struct Curl_easy *data, unsigned char *rnd,
                          size_t num)
 {
   CURLcode result = CURLE_OK;
-  const int alnumspace = sizeof(alnum) - 1;
+  const unsigned int alnumspace = sizeof(alnum) - 1;
   unsigned int r;
   DEBUGASSERT(num > 1);
 
@@ -282,7 +283,7 @@ CURLcode Curl_rand_alnum(struct Curl_easy *data, unsigned char *rnd,
         return result;
     } while(r >= (UINT_MAX - UINT_MAX % alnumspace));
 
-    *rnd++ = alnum[r % alnumspace];
+    *rnd++ = (unsigned char)alnum[r % alnumspace];
     num--;
   }
   *rnd = 0;
