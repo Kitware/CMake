@@ -2140,15 +2140,14 @@ bool extract_tar(const std::string& outFileName,
 
     if (verbose) {
       if (extract) {
-        cmSystemTools::Stdout("x ");
-        cmSystemTools::Stdout(cm_archive_entry_pathname(entry));
+        cmSystemTools::Stdout(
+          cmStrCat("x ", cm_archive_entry_pathname(entry)));
       } else {
         list_item_verbose(stdout, entry);
       }
       cmSystemTools::Stdout("\n");
     } else if (!extract) {
-      cmSystemTools::Stdout(cm_archive_entry_pathname(entry));
-      cmSystemTools::Stdout("\n");
+      cmSystemTools::Stdout(cmStrCat(cm_archive_entry_pathname(entry), '\n'));
     }
     if (extract) {
       if (extractTimestamps == cmSystemTools::cmTarExtractTimestamps::Yes) {

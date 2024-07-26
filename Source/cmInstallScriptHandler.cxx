@@ -153,7 +153,7 @@ void InstallScript::start(cm::uv_loop_ptr& loop,
 
 void InstallScript::printResult(std::size_t n, std::size_t total)
 {
-  cmSystemTools::Stdout(cmStrCat("[", n, "/", total, "] ", this->name, "\n"));
+  cmSystemTools::Stdout(cmStrCat('[', n, '/', total, "] ", this->name, '\n'));
   for (auto const& line : this->output) {
     cmSystemTools::Stdout(line);
   }
