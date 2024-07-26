@@ -83,7 +83,8 @@ std::string cmExportInstallFileGenerator::GetImportXcFrameworkLocation(
   if (!importedXcFrameworkLocation.empty()) {
     importedXcFrameworkLocation = cmGeneratorExpression::Preprocess(
       importedXcFrameworkLocation,
-      cmGeneratorExpression::PreprocessContext::InstallInterface, true);
+      cmGeneratorExpression::PreprocessContext::InstallInterface,
+      this->GetImportPrefixWithSlash());
     importedXcFrameworkLocation = cmGeneratorExpression::Evaluate(
       importedXcFrameworkLocation, targetExport->Target->GetLocalGenerator(),
       config, targetExport->Target, nullptr, targetExport->Target);
@@ -156,7 +157,7 @@ void cmExportInstallFileGenerator::SetImportLocationProperty(
   std::string value;
   if (!cmSystemTools::FileIsFullPath(dest)) {
     // The target is installed relative to the installation prefix.
-    value = "${_IMPORT_PREFIX}/";
+    value = std::string{ this->GetImportPrefixWithSlash() };
   }
   value += dest;
   value += "/";
@@ -399,10 +400,11 @@ bool isSubDirectory(std::string const& a, std::string const& b)
   return (cmSystemTools::ComparePath(a, b) ||
           cmSystemTools::IsSubDirectory(a, b));
 }
+}
 
-bool checkInterfaceDirs(std::string const& prepro,
-                        cmGeneratorTarget const* target,
-                        std::string const& prop)
+bool cmExportInstallFileGenerator::CheckInterfaceDirs(
+  std::string const& prepro, cmGeneratorTarget const* target,
+  std::string const& prop) const
 {
   std::string const& installDir =
     target->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
@@ -423,7 +425,7 @@ bool checkInterfaceDirs(std::string const& prepro,
     if (genexPos == 0) {
       continue;
     }
-    if (cmHasLiteralPrefix(li, "${_IMPORT_PREFIX}")) {
+    if (cmHasPrefix(li, this->GetImportPrefixWithSlash())) {
       continue;
     }
     MessageType messageType = MessageType::FATAL_ERROR;
@@ -521,7 +523,6 @@ bool checkInterfaceDirs(std::string const& prepro,
   }
   return !hadFatalError;
 }
-}
 
 void cmExportInstallFileGenerator::PopulateSourcesInterface(
   cmGeneratorTarget const* gt,
@@ -542,12 +543,12 @@ void cmExportInstallFileGenerator::PopulateSourcesInterface(
     return;
   }
 
-  std::string prepro =
-    cmGeneratorExpression::Preprocess(*input, preprocessRule, true);
+  std::string prepro = cmGeneratorExpression::Preprocess(
+    *input, preprocessRule, this->GetImportPrefixWithSlash());
   if (!prepro.empty()) {
     this->ResolveTargetsInGeneratorExpressions(prepro, gt);
 
-    if (!checkInterfaceDirs(prepro, gt, propName)) {
+    if (!this->CheckInterfaceDirs(prepro, gt, propName)) {
       return;
     }
     properties[propName] = prepro;
@@ -571,7 +572,7 @@ void cmExportInstallFileGenerator::PopulateIncludeDirectoriesInterface(
 
   std::string dirs = cmGeneratorExpression::Preprocess(
     cmList::to_string(target->Target->GetInstallIncludeDirectoriesEntries(te)),
-    preprocessRule, true);
+    preprocessRule, this->GetImportPrefixWithSlash());
   this->ReplaceInstallPrefix(dirs);
   std::unique_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(dirs);
   std::string exportDirs =
@@ -605,12 +606,12 @@ void cmExportInstallFileGenerator::PopulateIncludeDirectoriesInterface(
   std::string includes = (input ? *input : "");
   char const* const sep = input ? ";" : "";
   includes += sep + exportDirs;
-  std::string prepro =
-    cmGeneratorExpression::Preprocess(includes, preprocessRule, true);
+  std::string prepro = cmGeneratorExpression::Preprocess(
+    includes, preprocessRule, this->GetImportPrefixWithSlash());
   if (!prepro.empty()) {
     this->ResolveTargetsInGeneratorExpressions(prepro, target);
 
-    if (!checkInterfaceDirs(prepro, target, propName)) {
+    if (!this->CheckInterfaceDirs(prepro, target, propName)) {
       return;
     }
     properties[propName] = prepro;
@@ -636,12 +637,12 @@ void cmExportInstallFileGenerator::PopulateLinkDependsInterface(
     return;
   }
 
-  std::string prepro =
-    cmGeneratorExpression::Preprocess(*input, preprocessRule, true);
+  std::string prepro = cmGeneratorExpression::Preprocess(
+    *input, preprocessRule, this->GetImportPrefixWithSlash());
   if (!prepro.empty()) {
     this->ResolveTargetsInGeneratorExpressions(prepro, gt);
 
-    if (!checkInterfaceDirs(prepro, gt, propName)) {
+    if (!this->CheckInterfaceDirs(prepro, gt, propName)) {
       return;
     }
     properties[propName] = prepro;
@@ -667,12 +668,12 @@ void cmExportInstallFileGenerator::PopulateLinkDirectoriesInterface(
     return;
   }
 
-  std::string prepro =
-    cmGeneratorExpression::Preprocess(*input, preprocessRule, true);
+  std::string prepro = cmGeneratorExpression::Preprocess(
+    *input, preprocessRule, this->GetImportPrefixWithSlash());
   if (!prepro.empty()) {
     this->ResolveTargetsInGeneratorExpressions(prepro, gt);
 
-    if (!checkInterfaceDirs(prepro, gt, propName)) {
+    if (!this->CheckInterfaceDirs(prepro, gt, propName)) {
       return;
     }
     properties[propName] = prepro;

@@ -7,6 +7,8 @@
 #include <memory>
 #include <utility>
 
+#include <cm/string_view>
+
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmGeneratorExpressionContext.h"
@@ -193,7 +195,7 @@ static std::string stripAllGeneratorExpressions(const std::string& input)
 }
 
 static void prefixItems(const std::string& content, std::string& result,
-                        const std::string& prefix)
+                        const cm::string_view& prefix)
 {
   std::vector<std::string> entries;
   cmGeneratorExpression::Split(content, entries);
@@ -211,7 +213,7 @@ static void prefixItems(const std::string& content, std::string& result,
 
 static std::string stripExportInterface(
   const std::string& input, cmGeneratorExpression::PreprocessContext context,
-  bool resolveRelative)
+  cm::string_view importPrefix)
 {
   std::string result;
 
@@ -268,8 +270,8 @@ static std::string stripExportInterface(
         } else if (context == cmGeneratorExpression::InstallInterface &&
                    foundGenex == FoundGenex::InstallInterface) {
           const std::string content = input.substr(pos, c - cStart);
-          if (resolveRelative) {
-            prefixItems(content, result, "${_IMPORT_PREFIX}/");
+          if (!importPrefix.empty()) {
+            prefixItems(content, result, importPrefix);
           } else {
             result += content;
           }
@@ -359,13 +361,13 @@ void cmGeneratorExpression::Split(const std::string& input,
 
 std::string cmGeneratorExpression::Preprocess(const std::string& input,
                                               PreprocessContext context,
-                                              bool resolveRelative)
+                                              cm::string_view importPrefix)
 {
   if (context == StripAllGeneratorExpressions) {
     return stripAllGeneratorExpressions(input);
   }
   if (context == BuildInterface || context == InstallInterface) {
-    return stripExportInterface(input, context, resolveRelative);
+    return stripExportInterface(input, context, importPrefix);
   }
 
   assert(false &&

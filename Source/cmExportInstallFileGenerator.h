@@ -145,6 +145,9 @@ protected:
   std::map<std::string, std::vector<std::string>> ConfigCxxModuleTargetFiles;
 
 private:
+  bool CheckInterfaceDirs(std::string const& prepro,
+                          cmGeneratorTarget const* target,
+                          std::string const& prop) const;
   void PopulateCompatibleInterfaceProperties(cmGeneratorTarget const* target,
                                              ImportPropertyMap& properties);
   void PopulateCustomTransitiveInterfaceProperties(
