@@ -1394,7 +1394,7 @@ hash=${hash}
       DEPENDS \${depends}
       DEPENDEES mkdir
       ${log}
-  ${uses_terminal}
+      ${uses_terminal}
     )"
   )
 endfunction()
@@ -1719,7 +1719,7 @@ Update to Mercurial >= 2.1.1.
       DEPENDEES download
       DEPENDS \${file_deps}
       ${log}
-  ${uses_terminal}
+      ${uses_terminal}
     )"
   )
   if(update_disconnected)
@@ -1740,7 +1740,7 @@ Update to Mercurial >= 2.1.1.
         DEPENDEES download
         DEPENDS \${file_deps}
         ${log}
-    ${uses_terminal}
+        ${uses_terminal}
       )"
     )
   endif()
@@ -1831,7 +1831,7 @@ function(_ep_add_patch_command name)
       DEPENDEES update
       DEPENDS \${patch_info_file}
       ${log}
-  ${uses_terminal}
+      ${uses_terminal}
     )"
   )
 
@@ -1844,7 +1844,7 @@ function(_ep_add_patch_command name)
         DEPENDEES update_disconnected
         DEPENDS \${patch_info_file}
         ${log}
-    ${uses_terminal}
+        ${uses_terminal}
       )"
     )
   endif()
