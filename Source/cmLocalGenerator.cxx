@@ -903,7 +903,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
     sysIncludeFlag = this->Makefile->GetDefinition(
       cmStrCat("CMAKE_INCLUDE_SYSTEM_FLAG_", lang));
     sysIncludeFlagWarning = this->Makefile->GetDefinition(
-      cmStrCat("_CMAKE_INCLUDE_SYSTEM_FLAG_", lang, "_WARNING"));
+      cmStrCat("CMAKE_INCLUDE_SYSTEM_FLAG_", lang, "_WARNING"));
   }
 
   cmValue fwSearchFlag = this->Makefile->GetDefinition(

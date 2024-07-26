@@ -20,6 +20,6 @@ macro(__compiler_msvc lang)
   # The `/external:I` flag was made non-experimental in 19.29.30036.3.
   if (CMAKE_${lang}_COMPILER_VERSION VERSION_GREATER_EQUAL 19.29.30036.3)
     set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-external:I")
-    set(_CMAKE_INCLUDE_SYSTEM_FLAG_${lang}_WARNING "-external:W0 ")
+    set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang}_WARNING "-external:W0 ")
   endif ()
 endmacro()
