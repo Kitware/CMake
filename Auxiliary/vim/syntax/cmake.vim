@@ -2636,7 +2636,6 @@ syn keyword cmakeKWadd_test contained
             \ SKIP_REGULAR_EXPRESSION
             \ TARGET_FILE
             \ WILL_FAIL
-            \ WILL_FALL
             \ WORKING_DIRECTORY
 
 syn keyword cmakeKWblock contained
