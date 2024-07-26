@@ -95,6 +95,11 @@ protected:
                                            std::string const& config,
                                            std::string const& suffix) = 0;
 
+  /** Record a target referenced by an exported target. */
+  virtual bool NoteLinkedTarget(cmGeneratorTarget const* target,
+                                std::string const& linkedName,
+                                cmGeneratorTarget const* linkedTarget);
+
   /** Each subclass knows how to deal with a target that is  missing from an
    *  export set.  */
   virtual void HandleMissingTarget(std::string& link_libs,

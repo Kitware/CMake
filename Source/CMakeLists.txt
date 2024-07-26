@@ -217,6 +217,10 @@ add_library(
   cmExportInstallCMakeConfigGenerator.cxx
   cmExportInstallFileGenerator.h
   cmExportInstallFileGenerator.cxx
+  cmExportInstallPackageInfoGenerator.h
+  cmExportInstallPackageInfoGenerator.cxx
+  cmExportPackageInfoGenerator.h
+  cmExportPackageInfoGenerator.cxx
   cmExportTryCompileFileGenerator.h
   cmExportTryCompileFileGenerator.cxx
   cmExportSet.h
@@ -336,6 +340,8 @@ add_library(
   cmInstallFilesGenerator.cxx
   cmInstallImportedRuntimeArtifactsGenerator.h
   cmInstallImportedRuntimeArtifactsGenerator.cxx
+  cmInstallPackageInfoExportGenerator.h
+  cmInstallPackageInfoExportGenerator.cxx
   cmInstallRuntimeDependencySet.h
   cmInstallRuntimeDependencySet.cxx
   cmInstallRuntimeDependencySetGenerator.h

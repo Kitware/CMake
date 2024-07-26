@@ -331,6 +331,14 @@ void cmExportFileGenerator::PopulateCustomTransitiveInterfaceProperties(
   }
 }
 
+bool cmExportFileGenerator::NoteLinkedTarget(
+  cmGeneratorTarget const* /*target*/, std::string const& /*linkedName*/,
+  cmGeneratorTarget const* /*linkedTarget*/)
+{
+  // Default implementation does nothing; only needed by some generators.
+  return true;
+}
+
 bool cmExportFileGenerator::AddTargetNamespace(std::string& input,
                                                cmGeneratorTarget const* target,
                                                cmLocalGenerator const* lg)
@@ -352,8 +360,9 @@ bool cmExportFileGenerator::AddTargetNamespace(std::string& input,
 
   if (tgt->IsImported()) {
     input = tgt->GetName();
-    return true;
+    return this->NoteLinkedTarget(target, input, tgt);
   }
+
   if (this->ExportedTargets.find(tgt) != this->ExportedTargets.end()) {
     input = this->Namespace + tgt->GetExportName();
   } else {
@@ -365,7 +374,8 @@ bool cmExportFileGenerator::AddTargetNamespace(std::string& input,
       input = tgt->GetName();
     }
   }
-  return true;
+
+  return this->NoteLinkedTarget(target, input, tgt);
 }
 
 void cmExportFileGenerator::ResolveTargetsInGeneratorExpressions(
