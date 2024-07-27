@@ -80,7 +80,7 @@ void displayMessage(MessageType t, std::ostringstream& msg)
   }
 
   // Add a terminating blank line.
-  msg << "\n";
+  msg << '\n';
 
 #if !defined(CMAKE_BOOTSTRAP)
   // Add a C++ stack trace to internal errors.
@@ -90,7 +90,7 @@ void displayMessage(MessageType t, std::ostringstream& msg)
       if (cmHasLiteralPrefix(stack, "WARNING:")) {
         stack = "Note:" + stack.substr(8);
       }
-      msg << stack << "\n";
+      msg << stack << '\n';
     }
   }
 #endif
@@ -138,7 +138,7 @@ void PrintCallStack(std::ostream& out, cmListFileBacktrace bt,
     if (topSource) {
       lfc.FilePath = cmSystemTools::RelativeIfUnder(*topSource, lfc.FilePath);
     }
-    out << "  " << lfc << "\n";
+    out << "  " << lfc << '\n';
   }
 }
 
