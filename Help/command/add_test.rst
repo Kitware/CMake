@@ -80,7 +80,7 @@ directory the test is created in.
 If the test command exits with code ``0`` the test passes. Non-zero exit code
 is a "failed" test. The test property :prop_test:`WILL_FAIL` inverts this
 logic. Note that system-level test failures such as segmentation faults or
-heap errors will still fail the test even if ``WILL_FALL`` is true. Output
+heap errors will still fail the test even if ``WILL_FAIL`` is true. Output
 written to stdout or stderr is captured by :manual:`ctest(1)` and only
 affects the pass/fail status via the :prop_test:`PASS_REGULAR_EXPRESSION`,
 :prop_test:`FAIL_REGULAR_EXPRESSION`, or :prop_test:`SKIP_REGULAR_EXPRESSION`
