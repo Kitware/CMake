@@ -373,6 +373,10 @@ add_library(
   cmLocalCommonGenerator.h
   cmLocalGenerator.cxx
   cmLocalGenerator.h
+  cmPkgConfigParser.cxx
+  cmPkgConfigParser.h
+  cmPkgConfigResolver.cxx
+  cmPkgConfigResolver.h
   cmPlaceholderExpander.cxx
   cmPlaceholderExpander.h
   cmRulePlaceholderExpander.cxx
@@ -537,6 +541,8 @@ add_library(
   cmCMakeMinimumRequired.h
   cmCMakePathCommand.h
   cmCMakePathCommand.cxx
+  cmCMakePkgConfigCommand.h
+  cmCMakePkgConfigCommand.cxx
   cmCMakePolicyCommand.cxx
   cmCMakePolicyCommand.h
   cmConditionEvaluator.cxx
@@ -804,6 +810,7 @@ target_link_libraries(
     LibUV::LibUV
     Threads::Threads
     ZLIB::ZLIB
+    llpkgc::llpkgc
   )
 
 if(CMake_ENABLE_DEBUGGER)

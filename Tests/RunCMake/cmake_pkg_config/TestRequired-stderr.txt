@@ -1,0 +1,4 @@
+CMake Error at TestRequired.cmake:[0-9]+ \(cmake_pkg_config\):
+  cmake_pkg_config Could not find 'does-not-exist'
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

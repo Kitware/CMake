@@ -394,3 +394,9 @@ if(CMake_ENABLE_DEBUGGER)
     CMAKE_SET_TARGET_FOLDER(cppdap "Utilities/3rdParty")
   endif()
 endif()
+
+#---------------------------------------------------------------------
+# Build llpkgc library.
+add_subdirectory(Utilities/cmllpkgc)
+add_library(llpkgc::llpkgc ALIAS cmllpkgc)
+CMAKE_SET_TARGET_FOLDER(cmllpkgc "Utilities/3rdParty")

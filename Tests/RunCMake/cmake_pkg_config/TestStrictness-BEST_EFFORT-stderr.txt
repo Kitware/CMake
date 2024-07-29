@@ -1,0 +1,3 @@
+Cflags: lowercase
+CFlags: uppercase
+Cflags: lowercase uppercase

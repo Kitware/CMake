@@ -1,0 +1,6 @@
+Name: Cflags Bothcase
+Description: The f is lowercase and uppercase
+Version: 1.0.0
+
+Cflags: lowercase
+CFlags: uppercase

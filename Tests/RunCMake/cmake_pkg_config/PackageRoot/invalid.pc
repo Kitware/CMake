@@ -1,0 +1,4 @@
+Name: Invalid
+Description: Will cause a parse error
+Version: 1.0.0
+BrokenKey
