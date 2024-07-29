@@ -153,9 +153,6 @@ public:
   std::string GetObjectLibrary() const;
 
 private:
-  template <typename ValueType>
-  void StoreProperty(const std::string& prop, ValueType value);
-
   cmSourceFileLocation Location;
   cmPropertyMap Properties;
   std::unique_ptr<cmCustomCommand> CustomCommand;

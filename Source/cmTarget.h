@@ -336,9 +336,6 @@ public:
   bool HasFileSets() const;
 
 private:
-  template <typename ValueType>
-  void StoreProperty(const std::string& prop, ValueType value);
-
   // Internal representation details.
   friend class cmGeneratorTarget;
 
