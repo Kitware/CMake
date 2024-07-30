@@ -3449,7 +3449,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
 
       if (gotOneSys) {
         if (auto sysIncludeFlagWarning = this->Makefile->GetDefinition(
-              cmStrCat("_CMAKE_INCLUDE_SYSTEM_FLAG_", this->LangForClCompile,
+              cmStrCat("CMAKE_INCLUDE_SYSTEM_FLAG_", this->LangForClCompile,
                        "_WARNING"))) {
           flags = cmStrCat(flags, ' ', *sysIncludeFlagWarning);
         }
