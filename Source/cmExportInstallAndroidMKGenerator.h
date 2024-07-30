@@ -40,6 +40,8 @@ public:
 protected:
   GenerateType GetGenerateType() const override { return INSTALL; }
 
+  char GetConfigFileNameSeparator() const override { return '-'; }
+
   // Implement virtual methods from the superclass.
   void ReportDuplicateTarget(std::string const& targetName) const;
   bool GenerateMainFile(std::ostream& os) override;

@@ -16,7 +16,6 @@
 
 class cmExportSet;
 class cmGeneratorTarget;
-class cmGlobalGenerator;
 class cmLocalGenerator;
 
 /** \class cmExportBuildCMakeConfigGenerator
@@ -82,7 +81,7 @@ protected:
 
   void ComplainAboutMissingTarget(
     cmGeneratorTarget const* depender, cmGeneratorTarget const* dependee,
-    std::vector<std::string> const& namespaces) const;
+    std::vector<std::string> const& exportFiles) const;
 
   void ComplainAboutDuplicateTarget(
     std::string const& targetName) const override;
@@ -105,8 +104,7 @@ protected:
     return this->CxxModulesDirectory;
   }
 
-  std::pair<std::vector<std::string>, std::string> FindBuildExportInfo(
-    cmGlobalGenerator* gg, std::string const& name);
+  ExportInfo FindExportInfo(cmGeneratorTarget const* target) const override;
 
   using cmExportFileGenerator::PopulateInterfaceProperties;
   bool PopulateInterfaceProperties(cmGeneratorTarget const* target,

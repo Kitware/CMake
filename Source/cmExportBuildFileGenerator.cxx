@@ -138,11 +138,8 @@ void cmExportBuildFileGenerator::HandleMissingTarget(
 {
   // The target is not in the export.
   if (!this->AppendMode) {
-    std::string const& name = dependee->GetName();
-    cmGlobalGenerator* gg =
-      dependee->GetLocalGenerator()->GetGlobalGenerator();
-    auto exportInfo = this->FindBuildExportInfo(gg, name);
-    std::vector<std::string> const& exportFiles = exportInfo.first;
+    auto const& exportInfo = this->FindExportInfo(dependee);
+    auto const& exportFiles = exportInfo.first;
 
     if (exportFiles.size() == 1) {
       std::string missingTarget = exportInfo.second;
@@ -178,14 +175,15 @@ void cmExportBuildFileGenerator::GetTargets(
   targets = this->Targets;
 }
 
-std::pair<std::vector<std::string>, std::string>
-cmExportBuildFileGenerator::FindBuildExportInfo(cmGlobalGenerator* gg,
-                                                std::string const& name)
+cmExportFileGenerator::ExportInfo cmExportBuildFileGenerator::FindExportInfo(
+  cmGeneratorTarget const* target) const
 {
   std::vector<std::string> exportFiles;
   std::string ns;
 
-  auto& exportSets = gg->GetBuildExportSets();
+  auto const& name = target->GetName();
+  auto& exportSets =
+    target->GetLocalGenerator()->GetGlobalGenerator()->GetBuildExportSets();
 
   for (auto const& exp : exportSets) {
     auto const& exportSet = exp.second;
@@ -199,7 +197,7 @@ cmExportBuildFileGenerator::FindBuildExportInfo(cmGlobalGenerator* gg,
     }
   }
 
-  return { exportFiles, ns };
+  return { exportFiles, exportFiles.size() == 1 ? ns : std::string{} };
 }
 
 void cmExportBuildFileGenerator::ComplainAboutMissingTarget(

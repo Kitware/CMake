@@ -8,7 +8,6 @@
 #include <map>
 #include <set>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <cm/string_view>
@@ -20,7 +19,6 @@
 
 class cmExportSet;
 class cmGeneratorTarget;
-class cmGlobalGenerator;
 class cmInstallTargetGenerator;
 class cmTargetExport;
 
@@ -80,6 +78,7 @@ protected:
     cm::string_view const& prefixWithSlash = this->GetImportPrefixWithSlash();
     return std::string(prefixWithSlash.data(), prefixWithSlash.length() - 1);
   }
+  virtual char GetConfigFileNameSeparator() const = 0;
 
   void HandleMissingTarget(std::string& link_libs,
                            cmGeneratorTarget const* depender,
@@ -94,10 +93,12 @@ protected:
   void ComplainAboutDuplicateTarget(
     std::string const& targetName) const override;
 
-  std::pair<std::vector<std::string>, std::string> FindNamespaces(
-    cmGlobalGenerator* gg, std::string const& name) const;
+  ExportInfo FindExportInfo(cmGeneratorTarget const* target) const override;
 
   void ReportError(std::string const& errorMessage) const override;
+
+  /** Generate a per-configuration file for the targets.  */
+  virtual bool GenerateImportFileConfig(std::string const& config);
 
   /** Fill in properties indicating installed file locations.  */
   void SetImportLocationProperty(std::string const& config,
@@ -144,6 +145,9 @@ protected:
   std::map<std::string, std::vector<std::string>> ConfigCxxModuleTargetFiles;
 
 private:
+  bool CheckInterfaceDirs(std::string const& prepro,
+                          cmGeneratorTarget const* target,
+                          std::string const& prop) const;
   void PopulateCompatibleInterfaceProperties(cmGeneratorTarget const* target,
                                              ImportPropertyMap& properties);
   void PopulateCustomTransitiveInterfaceProperties(

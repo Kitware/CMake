@@ -11,6 +11,8 @@
 #include <utility>
 #include <vector>
 
+#include <cm/string_view>
+
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
 
@@ -59,7 +61,7 @@ public:
 
   static std::string Preprocess(const std::string& input,
                                 PreprocessContext context,
-                                bool resolveRelative = false);
+                                cm::string_view importPrefix = {});
 
   static void Split(const std::string& input,
                     std::vector<std::string>& output);

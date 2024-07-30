@@ -8,6 +8,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cm/string_view>
@@ -86,7 +87,8 @@ protected:
 
   /** Generate per-configuration target information to the given output
       stream.  */
-  void GenerateImportConfig(std::ostream& os, std::string const& config);
+  virtual void GenerateImportConfig(std::ostream& os,
+                                    std::string const& config);
 
   /** Each subclass knows where the target files are located.  */
   virtual void GenerateImportTargetsConfig(std::ostream& os,
@@ -125,6 +127,12 @@ protected:
     ImportPropertyMap& properties);
 
   virtual void ReportError(std::string const& errorMessage) const = 0;
+
+  using ExportInfo = std::pair<std::vector<std::string>, std::string>;
+
+  /** Find the set of export files and the unique namespace (if any) for a
+   *  target. */
+  virtual ExportInfo FindExportInfo(cmGeneratorTarget const* target) const = 0;
 
   enum FreeTargetsReplace
   {
