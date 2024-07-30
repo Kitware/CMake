@@ -185,9 +185,6 @@ protected:
   VSDependMap VSTargetDepends;
   void ComputeVSTargetDepends(cmGeneratorTarget*);
 
-  bool CheckTargetLinks(cmGeneratorTarget& target, const std::string& name);
-  std::string GetUtilityForTarget(cmGeneratorTarget& target,
-                                  const std::string&);
   virtual std::string WriteUtilityDepend(cmGeneratorTarget const*) = 0;
   std::string GetUtilityDepend(const cmGeneratorTarget* target);
   using UtilityDependsMap = std::map<cmGeneratorTarget const*, std::string>;
