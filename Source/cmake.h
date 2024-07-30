@@ -26,6 +26,7 @@
 #include "cmState.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
+#include "cmSystemTools.h"
 #include "cmValue.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -296,6 +297,14 @@ public:
   {
     this->GeneratorToolset = ts;
     this->GeneratorToolsetSet = true;
+  }
+
+  //! Set the name of the graphviz file.
+  void SetGraphVizFile(std::string const& ts)
+  {
+    std::string path = cmSystemTools::CollapseFullPath(ts);
+    cmSystemTools::ConvertToUnixSlashes(path);
+    this->GraphVizFile = path;
   }
 
   bool IsAKnownSourceExtension(cm::string_view ext) const

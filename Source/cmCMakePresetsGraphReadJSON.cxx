@@ -611,6 +611,12 @@ bool cmCMakePresetsGraph::ReadJSONFile(const std::string& filename,
       return false;
     }
 
+    // Support for graphviz argument added in version 10.
+    if (v < 10 && !preset.GraphVizFile.empty()) {
+      cmCMakePresetsErrors::GRAPHVIZ_FILE_UNSUPPORTED(&this->parseState);
+      return false;
+    }
+
     this->ConfigurePresetOrder.push_back(preset.Name);
   }
 

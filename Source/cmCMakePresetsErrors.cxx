@@ -177,6 +177,12 @@ void TOOLCHAIN_FILE_UNSUPPORTED(cmJSONState* state)
                   "support");
 }
 
+void GRAPHVIZ_FILE_UNSUPPORTED(cmJSONState* state)
+{
+  state->AddError(
+    "File version must be 10 or higher for graphviz preset support");
+}
+
 void CYCLIC_INCLUDE(const std::string& file, cmJSONState* state)
 {
   state->AddError(cmStrCat("Cyclic include among preset files: ", file));

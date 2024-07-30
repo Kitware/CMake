@@ -1075,10 +1075,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     CommandArgument{ "--graphviz", "No file specified for --graphviz",
                      CommandArgument::Values::One,
                      [](std::string const& value, cmake* state) -> bool {
-                       std::string path =
-                         cmSystemTools::CollapseFullPath(value);
-                       cmSystemTools::ConvertToUnixSlashes(path);
-                       state->GraphVizFile = path;
+                       state->SetGraphVizFile(value);
                        return true;
                      } },
 
@@ -1587,6 +1584,12 @@ void cmake::SetArgs(const std::vector<std::string>& args)
           cmCMakePresetsGraph::ArchToolsetStrategy::Set) {
       if (!this->GeneratorToolsetSet && !expandedPreset->Toolset.empty()) {
         this->SetGeneratorToolset(expandedPreset->Toolset);
+      }
+    }
+
+    if (!expandedPreset->GraphVizFile.empty()) {
+      if (this->GraphVizFile.empty()) {
+        this->SetGraphVizFile(expandedPreset->GraphVizFile);
       }
     }
 
