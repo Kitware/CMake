@@ -231,7 +231,7 @@
 /*
  * Whether SSL_CTX_set1_curves_list is available.
  * OpenSSL: supported since 1.0.2, see
- *   https://www.openssl.org/docs/manmaster/man3/SSL_CTX_set1_groups.html
+ *   https://docs.openssl.org/master/man3/SSL_CTX_set1_curves/
  * BoringSSL: supported since 5fd1807d95f7 (committed 2016-09-30)
  * LibreSSL: since 2.5.3 (April 12, 2017)
  */
@@ -3244,7 +3244,8 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
        problems with server-sent legacy intermediates. Newer versions of
        OpenSSL do alternate chain checking by default but we do not know how to
        determine that in a reliable manner.
-       https://rt.openssl.org/Ticket/Display.html?id=3621&user=guest&pass=guest
+       https://web.archive.org/web/20190422050538/
+       rt.openssl.org/Ticket/Display.html?id=3621
     */
 #if defined(X509_V_FLAG_TRUSTED_FIRST)
     X509_STORE_set_flags(store, X509_V_FLAG_TRUSTED_FIRST);
@@ -3567,12 +3568,12 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
      CVE-2010-4180 when using previous OpenSSL versions we no longer enable
      this option regardless of OpenSSL version and SSL_OP_ALL definition.
 
-     OpenSSL added a work-around for a SSL 3.0/TLS 1.0 CBC vulnerability
-     (https://www.openssl.org/~bodo/tls-cbc.txt). In 0.9.6e they added a bit to
-     SSL_OP_ALL that _disables_ that work-around despite the fact that
-     SSL_OP_ALL is documented to do "rather harmless" workarounds. In order to
-     keep the secure work-around, the SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS bit
-     must not be set.
+     OpenSSL added a work-around for a SSL 3.0/TLS 1.0 CBC vulnerability:
+     https://web.archive.org/web/20240114184648/openssl.org/~bodo/tls-cbc.txt.
+     In 0.9.6e they added a bit to SSL_OP_ALL that _disables_ that work-around
+     despite the fact that SSL_OP_ALL is documented to do "rather harmless"
+     workarounds. In order to keep the secure work-around, the
+     SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS bit must not be set.
   */
 
   ctx_options = SSL_OP_ALL;
@@ -4363,7 +4364,7 @@ static CURLcode ossl_pkp_pin_peer_pubkey(struct Curl_easy *data, X509* cert,
     if(!buff1)
       break; /* failed */
 
-    /* https://www.openssl.org/docs/crypto/d2i_X509.html */
+    /* https://docs.openssl.org/master/man3/d2i_X509/ */
     len2 = i2d_X509_PUBKEY(X509_get_X509_PUBKEY(cert), &temp);
 
     /*
@@ -4975,7 +4976,7 @@ static ssize_t ossl_recv(struct Curl_cfilter *cf,
     default:
       /* openssl/ssl.h for SSL_ERROR_SYSCALL says "look at error stack/return
          value/errno" */
-      /* https://www.openssl.org/docs/crypto/ERR_get_error.html */
+      /* https://docs.openssl.org/master/man3/ERR_get_error/ */
       if(octx->io_result == CURLE_AGAIN) {
         *curlcode = CURLE_AGAIN;
         nread = -1;
