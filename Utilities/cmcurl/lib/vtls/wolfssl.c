@@ -212,7 +212,7 @@ static int do_file_type(const char *type)
   return -1;
 }
 
-#ifdef HAVE_LIBOQS
+#ifdef WOLFSSL_HAVE_KYBER
 struct group_name_map {
   const word16 group;
   const char   *name;
@@ -434,10 +434,10 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
     }
     infof(data, " CAfile: %s", ssl_cafile ? ssl_cafile : "none");
     infof(data, " CApath: %s", ssl_capath ? ssl_capath : "none");
-    wssl->x509_store_setup = TRUE;
   }
 #endif
   (void)store;
+  wssl->x509_store_setup = TRUE;
   return CURLE_OK;
 }
 
@@ -571,7 +571,7 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
   bool cache_criteria_met;
 
   /* Consider the X509 store cacheable if it comes exclusively from a CAfile,
-     or no source is provided and we are falling back to OpenSSL's built-in
+     or no source is provided and we are falling back to wolfSSL's built-in
      default. */
   cache_criteria_met = (data->set.general_ssl.ca_cache_timeout != 0) &&
     conn_config->verifypeer &&
@@ -580,18 +580,29 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
     !ssl_config->primary.CRLfile &&
     !ssl_config->native_ca_store;
 
-  cached_store = get_cached_x509_store(cf, data);
-  if(cached_store && cache_criteria_met
-     && wolfSSL_X509_STORE_up_ref(cached_store)) {
+  cached_store = cache_criteria_met ? get_cached_x509_store(cf, data) : NULL;
+  if(cached_store && wolfSSL_X509_STORE_up_ref(cached_store)) {
     wolfSSL_CTX_set_cert_store(wssl->ctx, cached_store);
   }
-  else {
-    X509_STORE *store = wolfSSL_CTX_get_cert_store(wssl->ctx);
+  else if(cache_criteria_met) {
+    /* wolfSSL's initial store in CTX is not shareable by default.
+     * Make a new one, suitable for adding to the cache. See #14278 */
+    X509_STORE *store = wolfSSL_X509_STORE_new();
+    if(!store) {
+      failf(data, "SSL: could not create a X509 store");
+      return CURLE_OUT_OF_MEMORY;
+    }
+    wolfSSL_CTX_set_cert_store(wssl->ctx, store);
 
     result = populate_x509_store(cf, data, store, wssl);
-    if(result == CURLE_OK && cache_criteria_met) {
+    if(!result) {
       set_cached_x509_store(cf, data, store);
     }
+  }
+  else {
+   /* We never share the CTX's store, use it. */
+   X509_STORE *store = wolfSSL_CTX_get_cert_store(wssl->ctx);
+   result = populate_x509_store(cf, data, store, wssl);
   }
 
   return result;
@@ -611,8 +622,8 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   const struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   WOLFSSL_METHOD* req_method = NULL;
-#ifdef HAVE_LIBOQS
-  word16 oqsAlg = 0;
+#ifdef WOLFSSL_HAVE_KYBER
+  word16 pqkem = 0;
   size_t idx = 0;
 #endif
 #ifdef HAVE_SNI
@@ -739,15 +750,15 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   curves = conn_config->curves;
   if(curves) {
 
-#ifdef HAVE_LIBOQS
+#ifdef WOLFSSL_HAVE_KYBER
     for(idx = 0; gnm[idx].name != NULL; idx++) {
       if(strncmp(curves, gnm[idx].name, strlen(gnm[idx].name)) == 0) {
-        oqsAlg = gnm[idx].group;
+        pqkem = gnm[idx].group;
         break;
       }
     }
 
-    if(oqsAlg == 0)
+    if(pqkem == 0)
 #endif
     {
       if(!SSL_CTX_set1_curves_list(backend->ctx, curves)) {
@@ -821,8 +832,14 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
-    CURLcode result = (*data->set.ssl.fsslctx)(data, backend->ctx,
-                                               data->set.ssl.fsslctxp);
+    CURLcode result;
+    if(!backend->x509_store_setup) {
+      result = Curl_wssl_setup_x509_store(cf, data, backend);
+      if(result)
+        return result;
+    }
+    result = (*data->set.ssl.fsslctx)(data, backend->ctx,
+                                      data->set.ssl.fsslctxp);
     if(result) {
       failf(data, "error signaled by ssl ctx callback");
       return result;
@@ -847,10 +864,10 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_OUT_OF_MEMORY;
   }
 
-#ifdef HAVE_LIBOQS
-  if(oqsAlg) {
-    if(wolfSSL_UseKeyShare(backend->handle, oqsAlg) != WOLFSSL_SUCCESS) {
-      failf(data, "unable to use oqs KEM");
+#ifdef WOLFSSL_HAVE_KYBER
+  if(pqkem) {
+    if(wolfSSL_UseKeyShare(backend->handle, pqkem) != WOLFSSL_SUCCESS) {
+      failf(data, "unable to use PQ KEM");
     }
   }
 #endif
@@ -1059,15 +1076,9 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     /* After having send off the ClientHello, we prepare the x509
      * store to verify the coming certificate from the server */
     CURLcode result;
-    struct wolfssl_ctx wssl;
-    wssl.ctx = backend->ctx;
-    wssl.handle = backend->handle;
-    wssl.io_result = CURLE_OK;
-    wssl.x509_store_setup = FALSE;
-    result = Curl_wssl_setup_x509_store(cf, data, &wssl);
+    result = Curl_wssl_setup_x509_store(cf, data, backend);
     if(result)
       return result;
-    backend->x509_store_setup = wssl.x509_store_setup;
   }
 
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
