@@ -307,6 +307,7 @@ if(BUILD_TESTING)
       execute_process(
         COMMAND xcodebuild -version
         OUTPUT_VARIABLE _version
+        ERROR_VARIABLE _stderr
         RESULT_VARIABLE _failed
         )
       if(NOT _failed AND _version MATCHES "^Xcode ([0-9]+(\\.[0-9]+)*)")
