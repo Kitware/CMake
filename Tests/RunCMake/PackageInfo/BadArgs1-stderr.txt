@@ -1,0 +1,2 @@
+CMake Error at BadArgs1.cmake:3 \(install\):
+  install COMPAT_VERSION requires VERSION.

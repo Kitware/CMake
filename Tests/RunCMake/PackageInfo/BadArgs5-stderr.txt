@@ -1,0 +1,2 @@
+CMake Error at BadArgs5.cmake:3 \(install\):
+  install APPENDIX and DEFAULT_CONFIGURATIONS are mutually exclusive.

@@ -1,0 +1,5 @@
+add_library(foo INTERFACE)
+add_library(dog INTERFACE)
+install(TARGETS foo EXPORT foo DESTINATION .)
+install(TARGETS dog EXPORT dog DESTINATION .)
+install(PACKAGE_INFO test EXPORT foo DEFAULT_TARGETS dog cat)
