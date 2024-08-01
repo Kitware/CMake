@@ -9,9 +9,10 @@ prior to a build. NuGet packages can be defined using the
 :prop_tgt:`VS_PACKAGE_REFERENCES` property on a target. If no
 package references are defined, this setting will do nothing.
 
-The command line option ``--resolve-package-references`` can be used
-alternatively to control the resolve behavior globally. This option
-will take precedence over the cache variable.
+The command line option
+:option:`--resolve-package-references <cmake--build --resolve-package-references>`
+can be used alternatively to control the resolve behavior globally.
+This option will take precedence over the cache variable.
 
 Targets that use the :prop_tgt:`DOTNET_SDK` are required to run a
 restore before building. Disabling this option may cause the build
