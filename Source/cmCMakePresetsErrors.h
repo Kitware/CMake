@@ -70,6 +70,8 @@ void CONDITION_UNSUPPORTED(cmJSONState* state);
 
 void TOOLCHAIN_FILE_UNSUPPORTED(cmJSONState* state);
 
+void GRAPHVIZ_FILE_UNSUPPORTED(cmJSONState* state);
+
 void CYCLIC_INCLUDE(const std::string& file, cmJSONState* state);
 
 void TEST_OUTPUT_TRUNCATION_UNSUPPORTED(cmJSONState* state);

@@ -293,6 +293,12 @@ bool ExpandMacros(const cmCMakePresetsGraph& graph,
     out->ToolchainFile = toolchain;
   }
 
+  if (!preset.GraphVizFile.empty()) {
+    std::string graphVizFile = preset.GraphVizFile;
+    CHECK_EXPAND(out, graphVizFile, macroExpanders, graph.GetVersion(preset));
+    out->GraphVizFile = graphVizFile;
+  }
+
   for (auto& variable : out->CacheVariables) {
     if (variable.second) {
       CHECK_EXPAND(out, variable.second->Value, macroExpanders,
@@ -775,6 +781,7 @@ bool cmCMakePresetsGraph::ConfigurePreset::VisitPresetInherit(
   InheritString(preset.BinaryDir, parent.BinaryDir);
   InheritString(preset.InstallDir, parent.InstallDir);
   InheritString(preset.ToolchainFile, parent.ToolchainFile);
+  InheritString(preset.GraphVizFile, parent.GraphVizFile);
   InheritOptionalValue(preset.WarnDev, parent.WarnDev);
   InheritOptionalValue(preset.ErrorDev, parent.ErrorDev);
   InheritOptionalValue(preset.WarnDeprecated, parent.WarnDeprecated);

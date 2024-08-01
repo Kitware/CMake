@@ -491,6 +491,10 @@
             "properties": {
               "$comment": { "$ref": "#/definitions/$comment" }
             }
+          },
+          "graphviz": {
+            "type": "string",
+            "description": "An optional string specifying the path to graphviz dot file. Available in version 10 and higher."
           }
         }
       }
@@ -743,6 +747,7 @@
           "architecture": { "$ref": "#/definitions/configurePresetsArchitectureV10" },
           "toolset": { "$ref": "#/definitions/configurePresetsToolsetV10" },
           "toolchainFile": {},
+          "graphviz": {},
           "binaryDir": {},
           "installDir": {},
           "cmakeExecutable": {},

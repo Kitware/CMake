@@ -120,6 +120,7 @@ public:
     std::string Toolset;
     cm::optional<ArchToolsetStrategy> ToolsetStrategy;
     std::string ToolchainFile;
+    std::string GraphVizFile;
     std::string BinaryDir;
     std::string InstallDir;
 
