@@ -248,9 +248,9 @@ Updates
 
 Changes made since CMake 3.30.0 include the following.
 
-3.30.1
-------
+3.30.1, 3.30.2
+--------------
 
-* This version made no changes to documented features or interfaces.
+* These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
