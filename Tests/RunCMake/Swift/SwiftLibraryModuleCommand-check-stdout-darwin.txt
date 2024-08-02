@@ -8,6 +8,6 @@
 ]*
 .*swiftc(.exe)? [^
 ]* -emit-library [^
-]* -Xlinker -soname -Xlinker libDynamicLibrary.so -o ([A-Za-z]+/)?libDynamicLibrary.so [^
+]* -Xlinker -install_name -Xlinker @rpath/libDynamicLibrary.dylib -o ([A-Za-z]+/)?libDynamicLibrary.dylib [^
 ]*
 .*swiftc(.exe)? -j [0-9]+ -num-threads [0-9]+ -c  -module-name Executable
