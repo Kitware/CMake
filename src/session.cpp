@@ -138,7 +138,7 @@ class Impl : public dap::Session {
     return send(s.dump());
   }
 
-  ~Impl() {
+  ~Impl() override {
     inbox.close();
     reader.close();
     writer.close();

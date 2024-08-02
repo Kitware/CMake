@@ -32,10 +32,17 @@ class Impl : public dap::net::Server {
   bool start(int port,
              const OnConnect& onConnect,
              const OnError& onError) override {
+    return start("localhost", port, onConnect, onError);
+  }
+
+  bool start(const char* address,
+             int port,
+             const OnConnect& onConnect,
+             const OnError& onError) override {
     std::unique_lock<std::mutex> lock(mutex);
     stopWithLock();
     socket = std::unique_ptr<dap::Socket>(
-        new dap::Socket("localhost", std::to_string(port).c_str()));
+        new dap::Socket(address, std::to_string(port).c_str()));
 
     if (!socket->isOpen()) {
       onError("Failed to open socket");
