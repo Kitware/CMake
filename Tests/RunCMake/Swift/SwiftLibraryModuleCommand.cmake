@@ -6,6 +6,7 @@ enable_language(Swift)
 
 add_library(StaticLibrary STATIC L.swift)
 add_library(DynamicLibrary SHARED L.swift)
+set_target_properties(DynamicLibrary PROPERTIES INSTALL_NAME_DIR "@rpath")
 add_executable(Executable E.swift)
 
 add_dependencies(DynamicLibrary StaticLibrary)
