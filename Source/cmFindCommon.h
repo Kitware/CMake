@@ -81,7 +81,8 @@ protected:
   void InitializeSearchPathGroups();
 
   /** Place a set of search paths under the search roots.  */
-  void RerootPaths(std::vector<std::string>& paths);
+  void RerootPaths(std::vector<std::string>& paths,
+                   std::string* debugBuffer = nullptr);
 
   /** Get ignored paths from CMAKE_[SYSTEM_]IGNORE_PATH variables.  */
   void GetIgnoredPaths(std::vector<std::string>& ignore);
@@ -97,7 +98,8 @@ protected:
     No,
     Yes,
   };
-  void ComputeFinalPaths(IgnorePaths ignorePaths);
+  void ComputeFinalPaths(IgnorePaths ignorePaths,
+                         std::string* debugBuffer = nullptr);
 
   /** Compute the current default root path mode.  */
   void SelectDefaultRootPathMode();

@@ -212,7 +212,8 @@ void cmFindCommon::SelectDefaultSearchModes()
   }
 }
 
-void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
+void cmFindCommon::RerootPaths(std::vector<std::string>& paths,
+                               std::string* debugBuffer)
 {
 #if 0
   for(std::string const& p : paths)
@@ -238,17 +239,40 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
     return;
   }
 
+  if (this->DebugMode && debugBuffer) {
+    *debugBuffer = cmStrCat(
+      *debugBuffer, "Prepending the following roots to each prefix:\n");
+  }
+
+  auto debugRoot = [this, debugBuffer](const std::string& name,
+                                       cmValue value) {
+    if (this->DebugMode && debugBuffer) {
+      *debugBuffer = cmStrCat(*debugBuffer, name, "\n");
+      cmList roots{ value };
+      if (roots.empty()) {
+        *debugBuffer = cmStrCat(*debugBuffer, "  none\n");
+      }
+      for (auto const& root : roots) {
+        *debugBuffer = cmStrCat(*debugBuffer, "  ", root, "\n");
+      }
+    }
+  };
+
   // Construct the list of path roots with no trailing slashes.
   cmList roots;
+  debugRoot("CMAKE_FIND_ROOT_PATH", rootPath);
   if (rootPath) {
     roots.assign(*rootPath);
   }
+  debugRoot("CMAKE_SYSROOT_COMPILE", sysrootCompile);
   if (sysrootCompile) {
     roots.emplace_back(*sysrootCompile);
   }
+  debugRoot("CMAKE_SYSROOT_LINK", sysrootLink);
   if (sysrootLink) {
     roots.emplace_back(*sysrootLink);
   }
+  debugRoot("CMAKE_SYSROOT", sysroot);
   if (sysroot) {
     roots.emplace_back(*sysroot);
   }
@@ -411,7 +435,8 @@ static void AddTrailingSlash(std::string& s)
     s += '/';
   }
 }
-void cmFindCommon::ComputeFinalPaths(IgnorePaths ignorePaths)
+void cmFindCommon::ComputeFinalPaths(IgnorePaths ignorePaths,
+                                     std::string* debugBuffer)
 {
   // Filter out ignored paths from the prefix list
   std::set<std::string> ignoredPaths;
@@ -430,7 +455,7 @@ void cmFindCommon::ComputeFinalPaths(IgnorePaths ignorePaths)
   }
 
   // Expand list of paths inside all search roots.
-  this->RerootPaths(this->SearchPaths);
+  this->RerootPaths(this->SearchPaths, debugBuffer);
 
   // Add a trailing slash to all paths to aid the search process.
   std::for_each(this->SearchPaths.begin(), this->SearchPaths.end(),
