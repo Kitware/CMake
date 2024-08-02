@@ -50,10 +50,11 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
   cmake_parse_arguments(EXTRA_PARSE "${keywordArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   set(is_msvc 0)
-  if(EXTRA_PARSE_LANGUAGE AND
-    ("x${CMAKE_${EXTRA_PARSE_LANGUAGE}_COMPILER_ID}" STREQUAL "xMSVC" OR
-     "x${CMAKE_${EXTRA_PARSE_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC"))
-    set(is_msvc 1)
+  if(EXTRA_PARSE_LANGUAGE)
+    if("x${CMAKE_${EXTRA_PARSE_LANGUAGE}_COMPILER_ID}" STREQUAL "xMSVC" OR
+        "x${CMAKE_${EXTRA_PARSE_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC")
+      set(is_msvc 1)
+    endif()
   endif()
   # Parse implicit linker arguments.
   set(linker "ld[0-9]*(\\.[a-z]+)?")
