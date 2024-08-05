@@ -1140,10 +1140,9 @@ bool cmCTest::RunMakeCommand(const std::string& command, std::string& output,
                                 << "K\n    " << std::flush);
         }
       }
-      cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-                 cmCTestLogWrite(strdata.c_str(), strdata.size()));
+      cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, strdata);
       if (ofs) {
-        ofs << cmCTestLogWrite(strdata.c_str(), strdata.size());
+        ofs << strdata;
       }
     },
     [this, &processOutput, &output, &ofs]() {
@@ -1151,10 +1150,9 @@ bool cmCTest::RunMakeCommand(const std::string& command, std::string& output,
       processOutput.DecodeText(std::string(), strdata);
       if (!strdata.empty()) {
         output.append(strdata);
-        cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-                   cmCTestLogWrite(strdata.c_str(), strdata.size()));
+        cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, strdata);
         if (ofs) {
-          ofs << cmCTestLogWrite(strdata.c_str(), strdata.size());
+          ofs << strdata;
         }
       }
     });
@@ -1306,8 +1304,7 @@ bool cmCTest::RunTest(const std::vector<std::string>& argv,
       if (output) {
         cm::append(tempOutput, data.data(), data.data() + data.size());
       }
-      cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-                 cmCTestLogWrite(strdata.c_str(), strdata.size()));
+      cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, strdata);
       if (log) {
         log->write(strdata.c_str(), strdata.size());
       }
@@ -1316,8 +1313,7 @@ bool cmCTest::RunTest(const std::vector<std::string>& argv,
       std::string strdata;
       processOutput.DecodeText(std::string(), strdata);
       if (!strdata.empty()) {
-        cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-                   cmCTestLogWrite(strdata.c_str(), strdata.size()));
+        cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, strdata);
         if (log) {
           log->write(strdata.c_str(), strdata.size());
         }
