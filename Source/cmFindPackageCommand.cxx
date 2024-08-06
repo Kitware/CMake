@@ -2013,7 +2013,7 @@ void cmFindPackageCommand::ComputePrefixes()
   }
   this->FillPrefixesUserGuess();
 
-  this->ComputeFinalPaths(IgnorePaths::No);
+  this->ComputeFinalPaths(IgnorePaths::No, &this->DebugBuffer);
 }
 
 void cmFindPackageCommand::FillPrefixesPackageRedirect()
