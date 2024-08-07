@@ -207,7 +207,9 @@ endfunction()
 
 if (UNIX)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(_OPENSSL QUIET openssl)
+  if(PKG_CONFIG_FOUND)
+    pkg_check_modules(_OPENSSL QUIET openssl)
+  endif()
 endif ()
 
 # Support preference of static libs by adjusting CMAKE_FIND_LIBRARY_SUFFIXES

@@ -81,10 +81,11 @@ endif()
 # This will return ``GSL_INCLUDEDIR`` and ``GSL_LIBDIR`` used below.
 if( GSL_USE_PKGCONFIG )
   find_package(PkgConfig QUIET)
-  pkg_check_modules( GSL QUIET gsl )
-
-  if( EXISTS "${GSL_INCLUDEDIR}" )
-    get_filename_component( GSL_ROOT_DIR "${GSL_INCLUDEDIR}" DIRECTORY CACHE)
+  if(PKG_CONFIG_FOUND)
+    pkg_check_modules( GSL QUIET gsl )
+    if( EXISTS "${GSL_INCLUDEDIR}" )
+      get_filename_component( GSL_ROOT_DIR "${GSL_INCLUDEDIR}" DIRECTORY CACHE)
+    endif()
   endif()
 endif()
 
