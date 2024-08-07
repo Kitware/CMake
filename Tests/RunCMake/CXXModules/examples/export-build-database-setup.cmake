@@ -1,3 +1,5 @@
+set(CMAKE_EXPERIMENTAL_EXPORT_BUILD_DATABASE "4bd552e2-b7fb-429a-ab23-c83ef53f3f13")
+
 get_property(is_multiconfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 if (is_multiconfig)
   set(CMAKE_CONFIGURATION_TYPES "Debug" "Release")

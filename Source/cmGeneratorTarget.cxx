@@ -5942,6 +5942,10 @@ std::string cmGeneratorTarget::BuildDatabasePath(
   if (!this->GetPropertyAsBool("EXPORT_BUILD_DATABASE")) {
     return {};
   }
+  if (!cmExperimental::HasSupportEnabled(
+        *this->Makefile, cmExperimental::Feature::ExportBuildDatabase)) {
+    return {};
+  }
   // Check to see if the generator supports it.
   if (!this->GetGlobalGenerator()->SupportsBuildDatabase()) {
     return {};

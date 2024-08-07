@@ -2,6 +2,8 @@
 # here.
 set(CMAKE_CXX_SCANDEP_SOURCE "")
 
+set(CMAKE_EXPERIMENTAL_EXPORT_BUILD_DATABASE "4bd552e2-b7fb-429a-ab23-c83ef53f3f13")
+
 enable_language(CXX)
 
 if (NOT CMAKE_GENERATOR MATCHES "Ninja")

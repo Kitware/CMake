@@ -34,6 +34,7 @@
 #include "cmCustomCommandLines.h"
 #include "cmCustomCommandTypes.h"
 #include "cmDuration.h"
+#include "cmExperimental.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmGeneratedFileStream.h"
@@ -3302,6 +3303,10 @@ bool cmGlobalGenerator::AddBuildDatabaseTargets()
   auto& mf = this->Makefiles[0];
   if (!mf->IsOn("CMAKE_EXPORT_BUILD_DATABASE")) {
     return true;
+  }
+  if (!cmExperimental::HasSupportEnabled(
+        *mf.get(), cmExperimental::Feature::ExportBuildDatabase)) {
+    return {};
   }
 
   static const auto reservedTargets = { "cmake_build_database" };

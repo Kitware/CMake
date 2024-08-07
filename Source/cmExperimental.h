@@ -21,6 +21,7 @@ public:
     WindowsKernelModeDriver,
     CxxImportStd,
     ExportPackageInfo,
+    ExportBuildDatabase,
 
     Sentinel,
   };

@@ -3,6 +3,12 @@ CMAKE_EXPORT_BUILD_DATABASE
 
 .. versionadded:: 3.31
 
+.. note ::
+
+   This variable is meaningful only when experimental support for build
+   databases has been enabled by the
+   ``CMAKE_EXPERIMENTAL_EXPORT_BUILD_DATABASE`` gate.
+
 Enable/Disable output of module compile commands during the build.
 
 If enabled, generates a ``build_database.json`` file containing the
