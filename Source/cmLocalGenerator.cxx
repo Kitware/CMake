@@ -1897,6 +1897,10 @@ void cmLocalGenerator::OutputLinkLibraries(
       this->Makefile->GetRequiredDefinition("CMAKE_LIBRARY_PATH_TERMINATOR");
   }
 
+  // Add standard link directories for this language
+  std::string stdLinkDirString = this->Makefile->GetSafeDefinition(
+    cmStrCat("CMAKE_", cli.GetLinkLanguage(), "_STANDARD_LINK_DIRECTORIES"));
+
   // Add standard libraries for this language.
   std::string stdLibString = this->Makefile->GetSafeDefinition(
     cmStrCat("CMAKE_", cli.GetLinkLanguage(), "_STANDARD_LIBRARIES"));
@@ -1907,7 +1911,7 @@ void cmLocalGenerator::OutputLinkLibraries(
 
   frameworkPath = linkLineComputer->ComputeFrameworkPath(cli, fwSearchFlag);
   linkLineComputer->ComputeLinkPath(cli, libPathFlag, libPathTerminator,
-                                    linkPath);
+                                    stdLinkDirString, linkPath);
   linkLineComputer->ComputeLinkLibraries(cli, stdLibString, linkLibraries);
 }
 

@@ -491,6 +491,7 @@ if(UNIX AND CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG)
     )
 endif()
 add_RunCMake_test(ScriptMode)
+add_RunCMake_test(StandardLinkDirectories)
 add_RunCMake_test(Swift -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
                         -DCMake_TEST_Swift=${CMake_TEST_Swift}
                         -DXCODE_VERSION=${XCODE_VERSION})
