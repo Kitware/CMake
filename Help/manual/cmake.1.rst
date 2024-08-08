@@ -268,6 +268,8 @@ Options
 
 .. option:: --log-level=<level>
 
+ .. versionadded:: 3.16
+
  Set the log ``<level>``.
 
  The :command:`message` command will only output messages of the specified
