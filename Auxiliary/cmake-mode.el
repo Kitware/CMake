@@ -183,7 +183,7 @@ set the path with these commands:
   )
 
 (defun cmake-point-in-indendation ()
-  (string-match "^[ \\t]*$" (buffer-substring (point-at-bol) (point))))
+  (string-match "^[ \\t]*$" (buffer-substring (line-beginning-position) (point))))
 
 (defun cmake-indent-line-to (column)
   "Indent the current line to COLUMN.
