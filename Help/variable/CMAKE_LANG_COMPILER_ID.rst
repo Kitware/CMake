@@ -41,7 +41,7 @@ Value                           Name
 ``PGI``                         The Portland Group
 ``PathScale``                   PathScale
 ``SDCC``                        `Small Device C Compiler`_
-``SunPro``                      Oracle Solaris Studio
+``SunPro``                      Oracle Developer Studio
 ``Tasking``                     `Tasking Compiler Toolsets`_
 ``TI``                          Texas Instruments
 ``TIClang``                     `Texas Instruments Clang-based Compilers`_
