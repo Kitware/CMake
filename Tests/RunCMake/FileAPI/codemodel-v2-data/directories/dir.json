@@ -3,7 +3,8 @@
     "build": "^dir$",
     "parentSource": "^\\.$",
     "childSources": [
-        "^dir/dir$"
+        "^dir/dir$",
+        "^dir/very-long$"
     ],
     "targetIds": null,
     "projectName": "codemodel-v2",

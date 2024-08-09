@@ -200,7 +200,28 @@ std::string cmFileAPI::WriteJsonFile(
   }
 
   // Compute the final name for the file.
-  fileName = prefix + "-" + computeSuffix(tmpFile) + ".json";
+  std::string suffix = computeSuffix(tmpFile);
+  std::string suffixWithExtension = cmStrCat("-", suffix, ".json");
+  fileName = cmStrCat(prefix, suffixWithExtension);
+
+  // Truncate the file name length
+  // eCryptFS has a maximal file name length recommendation of 140
+  size_t const maxFileNameLength = 140;
+  size_t const fileNameLength = fileName.size();
+  if (fileNameLength > maxFileNameLength) {
+    size_t const newHashLength = 20;
+    size_t const newSuffixLength =
+      suffixWithExtension.size() - suffix.size() + newHashLength;
+    size_t const overLength =
+      fileNameLength - maxFileNameLength + newSuffixLength;
+    size_t const startPos = fileNameLength - overLength;
+    std::string const toBeRemoved = fileName.substr(startPos, overLength);
+    suffix = cmCryptoHash(cmCryptoHash::AlgoSHA256)
+               .HashString(toBeRemoved)
+               .substr(0, newHashLength);
+    suffixWithExtension = cmStrCat("-", suffix, ".json");
+    fileName.replace(startPos, overLength, suffixWithExtension);
+  }
 
   // Create the destination.
   std::string file = this->APIv1 + "/reply";
