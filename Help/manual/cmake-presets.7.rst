@@ -267,16 +267,15 @@ that may contain the following fields:
   :variable:`CMAKE_TOOLCHAIN_FILE` value. It is allowed in preset files
   specifying version ``3`` or above.
 
-  ``graphviz``
+``graphviz``
   An optional string representing the path to the graphviz input file,
   that will contain all the library and executable dependencies
   in the project. See the documentation for :module:`CMakeGraphVizOptions`
   for more details.
 
   This field supports `macro expansion`_. If a relative path is specified,
-  it is calculated relative to the build directory, and if not found,
-  relative to the source directory. It is allowed in preset files
-  specifying version ``10`` or above.
+  it is calculated relative to the current working directory. It is allowed
+  in preset files specifying version ``10`` or above.
 
 ``binaryDir``
   An optional string representing the path to the output binary directory.
