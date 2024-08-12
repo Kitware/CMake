@@ -275,15 +275,15 @@ extends:
             clean: true
             createLogFile: true
             logFileVerbosity: diagnostic
-        - task: MSBuild@1
-          displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
-          inputs:
-            solution: '$(CMakeBuildDirectory)/install.vcxproj'
-            msbuildArchitecture: ARM64
-            platform: ARM64
-            configuration: '$(BuildConfiguration)'
-            createLogFile: true
-            logFileVerbosity: diagnostic
+        #- task: MSBuild@1
+        #  displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
+        #  inputs:
+        #    solution: '$(CMakeBuildDirectory)/install.vcxproj'
+        #    msbuildArchitecture: ARM64
+        #    platform: ARM64
+        #    configuration: '$(BuildConfiguration)'
+        #    createLogFile: true
+        #    logFileVerbosity: diagnostic
         - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
           displayName: 'Run the PREfast SDL Native Rules for MSBuild'
           env:
