@@ -115,10 +115,10 @@ extends:
             cmakeArgs: -DCMAKE_INSTALL_PREFIX:PATH=$(CMakeInstallDirectory) -DCMAKE_CONFIGURATION_TYPES=$(BuildConfiguration) -DCMake_VERSION_MICROSOFT_SCHEME=true -DCMake_VERSION_NO_GIT=true -DMicrosoft_CMake_VERSION_PATCH=$(Build.BuildNumber) $(Build.SourcesDirectory) -DCMAKE_CXX_FLAGS_INIT="/W3 /Qspectre /guard:cf /ZH:SHA_256" -DCMAKE_C_FLAGS_INIT="/W3 /Qspectre /guard:cf /ZH:SHA_256" -DCMAKE_EXE_LINKER_FLAGS_INIT="/incremental:no /profile /guard:cf /CETCOMPAT" -S $(Build.SourcesDirectory) -B $(CMakeBuildDirectory) -DCPACK_BINARY_NSIS=OFF -DCPACK_BINARY_ZIP=ON -DCPACK_PACKAGE_FILE_NAME=cmake_install_x64
         - task: CMake@1
           name: CMake2
-          displayName: CMake x64 Build Install and Package
+          displayName: CMake x64 Build Package
           inputs:
             cwd: $(CMakeBuildDirectory)
-            cmakeArgs: --build . --target package install --config $(BuildConfiguration) -- -m
+            cmakeArgs: --build . --target package --config $(BuildConfiguration) -- -m
         - task: CmdLine@1
           name: CmdLine3
           condition: eq(variables.RunTests, 'true')
@@ -186,7 +186,7 @@ extends:
           inputs:
             targetType: inline
             script: |
-              $cmd="$(CMakeInstallDirectory)/bin/cmake.exe --version"
+              $cmd="$(CMakeBuildDirectory)/bin/$(BuildConfiguration)/cmake.exe --version"
               $version = "$(((Invoke-Expression $cmd) -Split " ")[2])"
               echo Creating Tag "v$version"
               git tag "v$version"
@@ -199,15 +199,6 @@ extends:
             platform: x64
             configuration: '$(BuildConfiguration)'
             clean: true
-            createLogFile: true
-            logFileVerbosity: diagnostic
-        - task: MSBuild@1
-          displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
-          inputs:
-            solution: '$(CMakeBuildDirectory)/install.vcxproj'
-            msbuildArchitecture: x64
-            platform: x64
-            configuration: '$(BuildConfiguration)'
             createLogFile: true
             logFileVerbosity: diagnostic
         - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
@@ -275,15 +266,6 @@ extends:
             clean: true
             createLogFile: true
             logFileVerbosity: diagnostic
-        #- task: MSBuild@1
-        #  displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
-        #  inputs:
-        #    solution: '$(CMakeBuildDirectory)/install.vcxproj'
-        #    msbuildArchitecture: ARM64
-        #    platform: ARM64
-        #    configuration: '$(BuildConfiguration)'
-        #    createLogFile: true
-        #    logFileVerbosity: diagnostic
         - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
           displayName: 'Run the PREfast SDL Native Rules for MSBuild'
           env:
@@ -346,15 +328,6 @@ extends:
             platform: x86
             configuration: '$(BuildConfiguration)'
             clean: true
-            createLogFile: true
-            logFileVerbosity: diagnostic
-        - task: MSBuild@1
-          displayName: 'Build solution $(CMakeBuildDirectory)/install.vcxproj'
-          inputs:
-            solution: '$(CMakeBuildDirectory)/install.vcxproj'
-            msbuildArchitecture: x86
-            platform: x86
-            configuration: '$(BuildConfiguration)'
             createLogFile: true
             logFileVerbosity: diagnostic
         - task: securedevelopmentteam.vss-secure-development-tools.build-task-prefast.SDLNativeRules@3
