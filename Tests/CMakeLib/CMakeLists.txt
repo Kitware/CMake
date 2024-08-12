@@ -1,3 +1,6 @@
+# Render the header file with source path macro
+configure_file(testConfig.h.in testConfig.h @ONLY)
+
 include_directories(
   ${CMAKE_CURRENT_BINARY_DIR}
   ${CMake_BINARY_DIR}/Source
@@ -65,10 +68,8 @@ if(WIN32)
   list(APPEND CMakeLib_TESTS
     testVisualStudioSlnParser.cxx
     )
-  configure_file(testVisualStudioSlnParser.h.in testVisualStudioSlnParser.h @ONLY)
 endif()
 
-configure_file(testXMLParser.h.in testXMLParser.h @ONLY)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/testUVProcessChainInput.txt" "HELLO WORLD!")
 
 create_test_sourcelist(CMakeLib_TEST_SRCS CMakeLibTests.cxx ${CMakeLib_TESTS})
