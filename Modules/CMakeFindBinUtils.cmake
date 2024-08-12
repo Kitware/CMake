@@ -110,56 +110,45 @@ elseif("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^x(Open)?W
   list(APPEND _CMAKE_TOOL_VARS LINKER AR)
 
 elseif("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^xIAR$")
-  # Small helper declaring an IAR tool (e.g. linker) to avoid repeating the same idiom every time
-  macro(__append_IAR_tool TOOL_VAR NAME)
-    set(_CMAKE_${TOOL_VAR}_NAMES "${NAME}" "${NAME}.exe")
-    list(APPEND _CMAKE_TOOL_VARS ${TOOL_VAR})
-  endmacro()
-
-  # Resolve hint path from an IAR compiler
-  function(__resolve_IAR_hints COMPILER RESULT)
-    get_filename_component(_CMAKE_IAR_HINT "${COMPILER}" REALPATH)
-    get_filename_component(_CMAKE_IAR_HINT "${_CMAKE_IAR_HINT}" DIRECTORY)
-    list(APPEND _IAR_HINTS "${_CMAKE_IAR_HINT}")
-
-    get_filename_component(_CMAKE_IAR_HINT "${COMPILER}" DIRECTORY)
-    list(APPEND _IAR_HINTS "${_CMAKE_IAR_HINT}")
-
-    set(${RESULT} "${_IAR_HINTS}" PARENT_SCOPE)
-  endfunction()
-
-  __resolve_IAR_hints("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER}" _CMAKE_TOOLCHAIN_LOCATION)
-  set(_CMAKE_IAR_ITOOLS "ARM" "RX" "RH850" "RL78" "RISCV" "RISC-V" "STM8")
-  set(_CMAKE_IAR_XTOOLS "AVR" "MSP430" "V850" "8051")
-
-  string(TOLOWER "${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" _CMAKE_IAR_LOWER_ARCHITECTURE_ID)
-
-  if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" IN_LIST _CMAKE_IAR_ITOOLS)
-    __append_IAR_tool(AR "iarchive")
-    __append_IAR_tool(LINKER "ilink${_CMAKE_IAR_LOWER_ARCHITECTURE_ID}")
-
-    __append_IAR_tool(IAR_ELFDUMP "ielfdump${_CMAKE_IAR_LOWER_ARCHITECTURE_ID}")
-    __append_IAR_tool(IAR_ELFTOOL "ielftool")
-    __append_IAR_tool(IAR_OBJMANIP "iobjmanip")
-    __append_IAR_tool(IAR_SYMEXPORT "isymexport")
-
-  elseif("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" IN_LIST _CMAKE_IAR_XTOOLS)
-    __append_IAR_tool(AR "xar")
-    if("${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}" STREQUAL "AVR" AND
-      (CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_VERSION VERSION_GREATER_EQUAL 8))
-      # IAR UBROF Linker V8.10+ for Microchip AVR is `xlinkavr`
-      __append_IAR_tool(LINKER "xlink${_CMAKE_IAR_LOWER_ARCHITECTURE_ID}")
-    else()
-      __append_IAR_tool(LINKER "xlink")
-    endif()
-
-  else()
-    message(FATAL_ERROR "Failed to find linker and librarian for ${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID} on ${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ARCHITECTURE_ID}.")
-  endif()
-
-  unset(_CMAKE_IAR_LOWER_ARCHITECTURE_ID)
-  unset(_CMAKE_IAR_ITOOLS)
-  unset(_CMAKE_IAR_XTOOLS)
+  # Get the architecture from the IAR compiler parent directory
+  get_filename_component(__iar_bin_dir "${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER}" DIRECTORY)
+  get_filename_component(__iar_toolkit_dir "${__iar_bin_dir}" DIRECTORY)
+  get_filename_component(__iar_arch_id "${__iar_toolkit_dir}" NAME)
+  # IAR Archive Tool
+  set(_CMAKE_AR_NAMES
+    "iarchive" "iarchive.exe"
+    "xar" "xar.exe"
+  )
+  # IAR Linker
+  set(_CMAKE_LINKER_NAMES
+    "ilink${__iar_arch_id}" "ilink${__iar_arch_id}.exe"
+    "xlink${__iar_arch_id}" "xlink${__iar_arch_id}.exe"
+    "xlink" "xlink.exe"
+  )
+  # IAR ELF Dumper
+  set(_CMAKE_IAR_ELFDUMP_NAMES
+    "ielfdump${__iar_arch_id}" "ielfdump${__iar_arch_id}.exe"
+  )
+  # IAR ELF Tool
+  set(_CMAKE_IAR_ELFTOOL_NAMES
+    "ielftool" "ielftool.exe"
+  )
+  # IAR ELF Exe to Object Tool
+  set(_CMAKE_IAR_EXE2OBJ_NAMES
+    "iexe2obj" "iexe2obj.exe"
+  )
+  # IAR Object File Manipulator
+  set(_CMAKE_IAR_OBJMANIP_NAMES
+    "iobjmanip" "iobjmanip.exe"
+  )
+  # IAR Absolute Symbol Exporter
+  set(_CMAKE_IAR_SYMEXPORT_NAMES
+    "isymexport" "isymexport.exe"
+  )
+  list(APPEND _CMAKE_TOOL_VARS AR LINKER IAR_ELFDUMP IAR_ELFTOOL IAR_EXE2OBJ IAR_OBJMANIP IAR_SYMEXPORT)
+  unset(__iar_bin_dir)
+  unset(__iar_toolkit_dir)
+  unset(__iar_arch_id)
 
 # in all other cases search for ar, ranlib, etc.
 else()
