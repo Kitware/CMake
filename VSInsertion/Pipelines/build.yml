@@ -136,6 +136,16 @@ extends:
             TargetFolder: $(ArchiveDir)
             CleanTargetFolder: true
             OverWrite: true
+        - task: PowerShell@2
+          displayName: Create and Publish Version Tag
+          inputs:
+            targetType: inline
+            script: |
+              $cmd="$(CMakeBuildDirectory)/bin/$(BuildConfiguration)/cmake.exe --version"
+              $version = "$(((Invoke-Expression $cmd) -Split " ")[2])"
+              echo Creating Tag "v$version"
+              git tag "v$version"
+              git push origin "v$version"
         - task: DeleteFiles@1
           displayName: Delete CMake x64 Executables and ctresalloc.pdb
           inputs:
@@ -181,16 +191,6 @@ extends:
             GdnPublishTsaOnboard: true
             GdnPublishTsaConfigFile: '$(Agent.BuildDirectory)/config.gdntsa'
             GdnPublishTsaExportedResultsPublishable: true
-        - task: PowerShell@2
-          displayName: Create and Publish Version Tag
-          inputs:
-            targetType: inline
-            script: |
-              $cmd="$(CMakeBuildDirectory)/bin/$(BuildConfiguration)/cmake.exe --version"
-              $version = "$(((Invoke-Expression $cmd) -Split " ")[2])"
-              echo Creating Tag "v$version"
-              git tag "v$version"
-              git push origin "v$version"
         - task: MSBuild@1
           displayName: 'Build solution $(CMakeBuildDirectory)/package.vcxproj'
           inputs:
