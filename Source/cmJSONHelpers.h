@@ -195,7 +195,6 @@ struct cmJSONHelperBuilder
       }
       if (!value->isString()) {
         error(value, state);
-        ;
         return false;
       }
       out = value->asString();
@@ -220,7 +219,6 @@ struct cmJSONHelperBuilder
       }
       if (!value->isInt()) {
         error(value, state);
-        ;
         return false;
       }
       out = value->asInt();
@@ -245,7 +243,6 @@ struct cmJSONHelperBuilder
       }
       if (!value->isUInt()) {
         error(value, state);
-        ;
         return false;
       }
       out = value->asUInt();
@@ -270,7 +267,6 @@ struct cmJSONHelperBuilder
       }
       if (!value->isBool()) {
         error(value, state);
-        ;
         return false;
       }
       out = value->asBool();
@@ -338,7 +334,6 @@ struct cmJSONHelperBuilder
       }
       if (!value->isObject()) {
         error(value, state);
-        ;
         return false;
       }
       out.clear();
@@ -390,7 +385,6 @@ struct cmJSONHelperBuilder
                          cmJSONState* state) -> bool {
       if (!value) {
         error(value, state);
-        ;
         return false;
       }
       return func(out, value, state);
