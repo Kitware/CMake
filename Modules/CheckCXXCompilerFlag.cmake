@@ -21,6 +21,8 @@ A positive result from this check indicates only that the compiler did not
 issue a diagnostic message when given the flag.  Whether the flag has any
 effect or even a specific one is beyond the scope of this module.
 
+See also :command:`check_compiler_flag` for a more general command syntax.
+
 .. note::
   Since the :command:`try_compile` command forwards flags from variables
   like :variable:`CMAKE_CXX_FLAGS <CMAKE_<LANG>_FLAGS>`, unknown flags
