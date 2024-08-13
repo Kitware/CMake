@@ -1,0 +1,3 @@
+libs=lfortran_runtime;m
+dirs=/usr/lib64
+linker_tool=
