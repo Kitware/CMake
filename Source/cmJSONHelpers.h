@@ -339,7 +339,7 @@ struct cmJSONHelperBuilder
       out.clear();
       bool success = true;
       for (auto const& key : value->getMemberNames()) {
-        state->push_stack(cmStrCat(key, ""), &(*value)[key]);
+        state->push_stack(key, &(*value)[key]);
         if (!filter(key)) {
           state->pop_stack();
           continue;
