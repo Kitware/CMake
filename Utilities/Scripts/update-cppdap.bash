@@ -8,7 +8,7 @@ readonly name="cppdap"
 readonly ownership="cppdap Upstream <kwrobot@kitware.com>"
 readonly subtree="Utilities/cmcppdap"
 readonly repo="https://github.com/google/cppdap.git"
-readonly tag="cc2f2058846bb29e18fdadf455d5f5af71b2554f" # 2023-08-17
+readonly tag="c69444ed76f7468b232ac4f989cb8f2bdc100185" # 2024-08-02
 readonly shortlog=false
 readonly paths="
   LICENSE
