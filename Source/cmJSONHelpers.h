@@ -159,6 +159,12 @@ struct cmJSONHelperBuilder
                                               cmJSONState* state)>;
     struct Member
     {
+      Member(cm::string_view name, MemberFunction func, bool required)
+        : Name{ name }
+        , Function{ std::move(func) }
+        , Required{ required }
+      {
+      }
       cm::string_view Name;
       MemberFunction Function;
       bool Required;
@@ -171,14 +177,8 @@ struct cmJSONHelperBuilder
     Object& BindPrivate(const cm::string_view& name, MemberFunction&& func,
                         bool required)
     {
-      Member m;
-      m.Name = name;
-      m.Function = std::move(func);
-      m.Required = required;
-      this->Members.push_back(std::move(m));
-      if (required) {
-        this->AnyRequired = true;
-      }
+      this->Members.emplace_back(name, std::move(func), required);
+      this->AnyRequired = this->AnyRequired || required;
       return *this;
     }
   };
