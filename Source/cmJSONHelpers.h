@@ -348,7 +348,7 @@ struct cmJSONHelperBuilder
         if (!func(t, &(*value)[key], state)) {
           success = false;
         }
-        out[key] = std::move(t);
+        out.emplace(key, std::move(t));
         state->pop_stack();
       }
       return success;
