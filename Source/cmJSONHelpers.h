@@ -104,7 +104,6 @@ struct cmJSONHelperBuilder
     bool operator()(T& out, const Json::Value* value, cmJSONState* state) const
     {
       Json::Value::Members extraFields;
-      bool success = true;
       if (!value && this->AnyRequired) {
         Error(JsonErrors::ObjectError::RequiredMissing, extraFields)(value,
                                                                      state);
@@ -125,6 +124,7 @@ struct cmJSONHelperBuilder
           extraFields.end());
       }
 
+      bool success = true;
       for (auto const& m : this->Members) {
         std::string name(m.Name.data(), m.Name.size());
         state->push_stack(name, value);
@@ -332,7 +332,6 @@ struct cmJSONHelperBuilder
     return [error, func, filter](std::map<std::string, T>& out,
                                  const Json::Value* value,
                                  cmJSONState* state) -> bool {
-      bool success = true;
       if (!value) {
         out.clear();
         return true;
@@ -343,6 +342,7 @@ struct cmJSONHelperBuilder
         return false;
       }
       out.clear();
+      bool success = true;
       for (auto const& key : value->getMemberNames()) {
         state->push_stack(cmStrCat(key, ""), &(*value)[key]);
         if (!filter(key)) {
