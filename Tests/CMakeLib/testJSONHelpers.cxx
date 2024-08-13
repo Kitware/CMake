@@ -1,5 +1,4 @@
 #include <functional>
-#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
@@ -12,13 +11,7 @@
 #include "cmJSONHelpers.h"
 #include "cmJSONState.h"
 
-#define ASSERT_TRUE(x)                                                        \
-  do {                                                                        \
-    if (!(x)) {                                                               \
-      std::cout << "ASSERT_TRUE(" #x ") failed on line " << __LINE__ << "\n"; \
-      return false;                                                           \
-    }                                                                         \
-  } while (false)
+#include "testCommon.h"
 
 namespace {
 struct ObjectStruct

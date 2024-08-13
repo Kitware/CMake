@@ -14,13 +14,7 @@
 
 #include "cmString.hxx"
 
-#define ASSERT_TRUE(x)                                                        \
-  do {                                                                        \
-    if (!(x)) {                                                               \
-      std::cout << "ASSERT_TRUE(" #x ") failed on line " << __LINE__ << "\n"; \
-      return false;                                                           \
-    }                                                                         \
-  } while (false)
+#include "testCommon.h"
 
 static bool testConstructDefault()
 {
