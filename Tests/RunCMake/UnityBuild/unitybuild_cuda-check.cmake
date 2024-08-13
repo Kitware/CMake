@@ -1,0 +1,5 @@
+set(unitybuild_cu "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/tgt.dir/Unity/unity_0_cu.cu")
+if(NOT EXISTS "${unitybuild_cu}")
+  set(RunCMake_TEST_FAILED "Generated unity source files ${unitybuild_cu} does not exist.")
+  return()
+endif()

@@ -1210,7 +1210,10 @@ add_RunCMake_test(PrecompileHeaders -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
   -DCMAKE_C_SIMULATE_ID=${CMAKE_C_SIMULATE_ID}
   -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION})
 
-add_RunCMake_test(UnityBuild -DCMake_TEST_OBJC=${CMake_TEST_OBJC})
+add_RunCMake_test(UnityBuild -DCMake_TEST_OBJC=${CMake_TEST_OBJC} -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
+set_property(TEST RunCMake.UnityBuild APPEND
+  PROPERTY LABELS "CUDA")
+
 add_RunCMake_test(CMakePresets
   -DPython_EXECUTABLE=${Python_EXECUTABLE}
   -DCMake_TEST_JSON_SCHEMA=${CMake_TEST_JSON_SCHEMA}

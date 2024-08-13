@@ -2686,6 +2686,12 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
           }
         }
       }
+      if (haveUnityBuild && strcmp(tool, "CudaCompile") == 0 &&
+          si.Source->GetProperty("UNITY_SOURCE_FILE")) {
+        if (!si.Source->GetPropertyAsBool("SKIP_UNITY_BUILD_INCLUSION")) {
+          exclude_configs = all_configs;
+        }
+      }
 
       if (si.Kind == cmGeneratorTarget::SourceKindObjectSource ||
           si.Kind == cmGeneratorTarget::SourceKindUnityBatched) {
