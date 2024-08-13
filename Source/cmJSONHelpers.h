@@ -390,4 +390,19 @@ struct cmJSONHelperBuilder
       return func(out, value, state);
     };
   }
+
+  template <typename T, typename F, typename P>
+  static cmJSONHelper<T> Checked(const JsonErrors::ErrorGenerator& error,
+                                 F func, P predicate)
+  {
+    return [error, func, predicate](T& out, const Json::Value* value,
+                                    cmJSONState* state) -> bool {
+      bool result = func(out, value, state);
+      if (result && !predicate(out)) {
+        error(value, state);
+        result = false;
+      }
+      return result;
+    };
+  }
 };

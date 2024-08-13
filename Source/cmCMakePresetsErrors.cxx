@@ -238,6 +238,16 @@ void TRACE_UNSUPPORTED(cmJSONState* state)
   state->AddError("File version must be 7 or higher for trace preset support");
 }
 
+JsonErrors::ErrorGenerator UNRECOGNIZED_VERSION_RANGE(int min, int max)
+{
+  return [min, max](const Json::Value* value, cmJSONState* state) -> void {
+    state->AddErrorAtValue(cmStrCat("Unrecognized \"version\" ",
+                                    value->asString(), ": must be >=", min,
+                                    " and <=", max),
+                           value);
+  };
+}
+
 JsonErrors::ErrorGenerator UNRECOGNIZED_CMAKE_VERSION(
   const std::string& version, int current, int required)
 {
