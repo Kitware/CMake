@@ -96,8 +96,8 @@ set(_case_MYSUB "UPPER")
 set(_case_MY_SUB "UPPER")
 set(_global_regex  "^(_*)(mysub|MYSUB)([_$]*)$")
 set(_global__regex "^(_*)(my_sub|MY_SUB)([_$]*)$")
-set(_module_regex "^(_*)([A-Za-z$]*)(mymodule|MYMODULE)([A-Za-z_$]*)(mysub|MYSUB)([_$]*)$")
-set(_module__regex "^(_*)([A-Za-z$]*)(my_module|MY_MODULE)([A-Za-z_$]*)(my_sub|MY_SUB)([_$]*)$")
+set(_module_regex "^([A-Za-z_$]*)(mymodule|MYMODULE)([A-Za-z_$]*)(mysub|MYSUB)([_$]*)$")
+set(_module__regex "^([A-Za-z_$]*)(my_module|MY_MODULE)([A-Za-z_$]*)(my_sub|MY_SUB)([_$]*)$")
 
 # Parse the symbol names.
 foreach(symbol ${FortranCInterface_SYMBOLS})
@@ -116,7 +116,7 @@ foreach(symbol ${FortranCInterface_SYMBOLS})
 
     # Look for module symbols.
     string(REGEX REPLACE "${_module_${form}regex}"
-                         "\\1\\2;\\3;\\4;\\5;\\6" pieces "${symbol}")
+                         "\\1;\\2;\\3;\\4;\\5" pieces "${symbol}")
     list(LENGTH pieces len)
     if(len EQUAL 5)
       set(FortranCInterface_MODULE_${form}SYMBOL "${symbol}")
