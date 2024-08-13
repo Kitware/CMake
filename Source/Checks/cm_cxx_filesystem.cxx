@@ -47,7 +47,7 @@ int main()
 #if defined(__GLIBCXX__)
   // RH gcc-toolset-10 has a strange bug: it selects, in some circumstances,
   // the wrong constructor which generate error in template instantiation.
-  class my_string_view : std::string_view
+  class my_string_view : public std::string_view
   {
   public:
     my_string_view(const char* p)
