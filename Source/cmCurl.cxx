@@ -226,3 +226,15 @@ std::string cmCurlFixFileURL(std::string url)
 
   return url;
 }
+
+::CURL* cm_curl_easy_init()
+{
+  ::CURL* curl = curl_easy_init();
+  if (curl_version_info_data* cv = curl_version_info(CURLVERSION_FIRST)) {
+    // curl 8.7.x returns incorrect HTTP/2 error codes.
+    if (cv->version_num >= 0x080700 && cv->version_num < 0x080800) {
+      curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+    }
+  }
+  return curl;
+}
