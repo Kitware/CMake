@@ -3,7 +3,6 @@
 
 #include <atomic>
 #include <chrono>
-#include <functional>
 #include <future>
 #include <memory>
 #include <string>
@@ -177,9 +176,7 @@ static bool testSourceFileLoadedAfterHandleBreakpointRequest()
 
 int testDebuggerBreakpointManager(int, char*[])
 {
-  return runTests(std::vector<std::function<bool()>>{
-    testHandleBreakpointRequestBeforeFileIsLoaded,
-    testHandleBreakpointRequestAfterFileIsLoaded,
-    testSourceFileLoadedAfterHandleBreakpointRequest,
-  });
+  return runTests({ testHandleBreakpointRequestBeforeFileIsLoaded,
+                    testHandleBreakpointRequestAfterFileIsLoaded,
+                    testSourceFileLoadedAfterHandleBreakpointRequest });
 }

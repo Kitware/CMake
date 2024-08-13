@@ -9,6 +9,8 @@
 
 #include <cm/filesystem>
 
+#include "testCommon.h"
+
 namespace {
 
 namespace fs = cm::filesystem;
@@ -971,38 +973,9 @@ bool testNonMemberFunctions()
 
 int testCMFilesystemPath(int /*unused*/, char* /*unused*/[])
 {
-  int result = 0;
-
-  if (!testConstructors()) {
-    result = 1;
-  }
-  if (!testConcatenation()) {
-    result = 1;
-  }
-  if (!testModifiers()) {
-    result = 1;
-  }
-  if (!testObservers()) {
-    result = 1;
-  }
-  if (!testCompare()) {
-    result = 1;
-  }
-  if (!testGeneration()) {
-    result = 1;
-  }
-  if (!testDecomposition()) {
-    result = 1;
-  }
-  if (!testQueries()) {
-    result = 1;
-  }
-  if (!testIterators()) {
-    result = 1;
-  }
-  if (!testNonMemberFunctions()) {
-    result = 1;
-  }
-
-  return result;
+  return runTests({ testConstructors, testConcatenation, testModifiers,
+                    testObservers, testCompare, testGeneration,
+                    testDecomposition, testQueries, testIterators,
+                    testNonMemberFunctions },
+                  false);
 }

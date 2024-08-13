@@ -204,11 +204,7 @@ static bool testNoSupportsVariableType()
 
 int testDebuggerVariables(int, char*[])
 {
-  return runTests(std::vector<std::function<bool()>>{
-    testUniqueIds,
-    testConstructors,
-    testIgnoreEmptyStringEntries,
-    testSortTheResult,
-    testNoSupportsVariableType,
-  });
+  return runTests({ testUniqueIds, testConstructors,
+                    testIgnoreEmptyStringEntries, testSortTheResult,
+                    testNoSupportsVariableType });
 }
