@@ -85,7 +85,7 @@
 /* #undef XML_DTD */
 
 /* Define as 1/0 to enable/disable support for general entities. */
-#define XML_GE @XML_GE@
+#define XML_GE 0
 
 /* Define to make XML Namespaces functionality available. */
 /* #undef XML_NS */
