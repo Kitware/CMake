@@ -34,9 +34,11 @@ enum ObjectError
   ExtraField,
   MissingRequired
 };
+
 using ErrorGenerator = std::function<void(const Json::Value*, cmJSONState*)>;
 using ObjectErrorGenerator =
   std::function<ErrorGenerator(ObjectError, const Json::Value::Members&)>;
+
 ErrorGenerator EXPECTED_TYPE(const std::string& type);
 
 void INVALID_STRING(const Json::Value* value, cmJSONState* state);
