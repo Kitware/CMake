@@ -343,7 +343,9 @@ foreach(dir IN LISTS JAVA_AWT_LIBRARY_DIRECTORIES)
   list(APPEND JAVA_JVM_LIBRARY_DIRECTORIES
     "${dir}"
     "${dir}/client"
+    "${dir}/minimal"
     "${dir}/server"
+    "${dir}/zero"
     # IBM SDK, Java Technology Edition, specific paths
     "${dir}/j9vm"
     "${dir}/default"
