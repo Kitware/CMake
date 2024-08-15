@@ -43,7 +43,9 @@ if (NOT WIN32)
   # in the find_path() and find_library() calls
   # also fills in GNUTLS_DEFINITIONS, although that isn't normally useful
   find_package(PkgConfig QUIET)
-  PKG_CHECK_MODULES(PC_GNUTLS QUIET gnutls)
+  if(PKG_CONFIG_FOUND)
+    PKG_CHECK_MODULES(PC_GNUTLS QUIET gnutls)
+  endif()
   set(GNUTLS_DEFINITIONS ${PC_GNUTLS_CFLAGS_OTHER})
   set(GNUTLS_VERSION ${PC_GNUTLS_VERSION})
   # keep for backward compatibility

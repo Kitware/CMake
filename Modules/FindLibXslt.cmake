@@ -51,7 +51,9 @@ cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 # use pkg-config to get the directories and then use these values
 # in the find_path() and find_library() calls
 find_package(PkgConfig QUIET)
-PKG_CHECK_MODULES(PC_LIBXSLT QUIET libxslt)
+if(PKG_CONFIG_FOUND)
+  PKG_CHECK_MODULES(PC_LIBXSLT QUIET libxslt)
+endif()
 set(LIBXSLT_DEFINITIONS ${PC_LIBXSLT_CFLAGS_OTHER})
 
 find_path(LIBXSLT_INCLUDE_DIR NAMES libxslt/xslt.h
@@ -75,7 +77,9 @@ find_library(LIBXSLT_LIBRARY NAMES xslt libxslt
 
 set(LIBXSLT_LIBRARIES ${LIBXSLT_LIBRARY})
 
-PKG_CHECK_MODULES(PC_LIBXSLT_EXSLT QUIET libexslt)
+if(PKG_CONFIG_FOUND)
+  PKG_CHECK_MODULES(PC_LIBXSLT_EXSLT QUIET libexslt)
+endif()
 set(LIBXSLT_EXSLT_DEFINITIONS ${PC_LIBXSLT_EXSLT_CFLAGS_OTHER})
 
 find_path(LIBXSLT_EXSLT_INCLUDE_DIR NAMES libexslt/exslt.h

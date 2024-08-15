@@ -115,7 +115,9 @@ find_package(PkgConfig QUIET)
 function(FIND_IMAGEMAGICK_API component header)
   set(ImageMagick_${component}_FOUND FALSE PARENT_SCOPE)
 
-  pkg_check_modules(PC_${component} QUIET ${component})
+  if(PKG_CONFIG_FOUND)
+    pkg_check_modules(PC_${component} QUIET ${component})
+  endif()
 
   find_path(ImageMagick_${component}_INCLUDE_DIR
     NAMES ${header}

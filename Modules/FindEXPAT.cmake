@@ -49,8 +49,9 @@ cmake_policy(PUSH)
 cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 find_package(PkgConfig QUIET)
-
-pkg_check_modules(PC_EXPAT QUIET expat)
+if(PKG_CONFIG_FOUND)
+  pkg_check_modules(PC_EXPAT QUIET expat)
+endif()
 
 # Look for the header file.
 find_path(EXPAT_INCLUDE_DIR NAMES expat.h HINTS ${PC_EXPAT_INCLUDE_DIRS})
