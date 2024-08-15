@@ -17,6 +17,7 @@
 
 #include <functional>
 #include <memory>
+#include <stdint.h>
 
 namespace dap {
 class ReaderWriter;
