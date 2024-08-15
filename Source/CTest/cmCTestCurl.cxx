@@ -22,7 +22,7 @@ cmCTestCurl::cmCTestCurl(cmCTest* ctest)
   cmCurlInitOnce();
   // In windows, this will init the winsock stuff
   ::curl_global_init(CURL_GLOBAL_ALL);
-  this->Curl = curl_easy_init();
+  this->Curl = cm_curl_easy_init();
 }
 
 cmCTestCurl::~cmCTestCurl()

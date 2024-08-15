@@ -177,7 +177,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
   cmCTestCurlOpts curlOpts(this->CTest);
   for (std::string const& file : files) {
     /* get a curl handle */
-    curl = curl_easy_init();
+    curl = cm_curl_easy_init();
     if (curl) {
       cmCurlSetCAInfo(curl);
       if (curlOpts.TLSVersionOpt) {
