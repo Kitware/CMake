@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.31
 .. toctree::
    :maxdepth: 1
 
+   CMP0173: The CMakeFindFrameworks module is removed. </policy/CMP0173>
    CMP0172: The CPack module enables per-machine installation by default in the CPack WIX Generator. </policy/CMP0172>
    CMP0171: 'codegen' is a reserved target name. </policy/CMP0171>
 

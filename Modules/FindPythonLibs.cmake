@@ -81,7 +81,10 @@ if(IS_ABSOLUTE "${PYTHON_EXECUTABLE}")
   endif()
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/CMakeFindFrameworks.cmake)
+block(SCOPE_FOR POLICIES)
+  cmake_policy(SET CMP0173 OLD)
+  include(${CMAKE_CURRENT_LIST_DIR}/CMakeFindFrameworks.cmake)
+endblock()
 # Search for the python framework on Apple.
 CMAKE_FIND_FRAMEWORKS(Python)
 
