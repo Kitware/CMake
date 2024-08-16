@@ -13,7 +13,7 @@ include(Internal/CMakeCommonLinkerInformation)
 set(_INCLUDED_FILE 0)
 
 # Load linker-specific information.
-if(CMAKE_Swoft_COMPILER_LINKER_ID)
+if(CMAKE_Swift_COMPILER_LINKER_ID)
   include(Linker/${CMAKE_Swift_COMPILER_LINKER_ID}-Swift OPTIONAL)
 endif()
 
