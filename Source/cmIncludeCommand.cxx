@@ -20,6 +20,7 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
 {
   static std::map<std::string, cmPolicies::PolicyID> DeprecatedModules;
   if (DeprecatedModules.empty()) {
+    DeprecatedModules["CMakeFindFrameworks"] = cmPolicies::CMP0173;
     DeprecatedModules["Dart"] = cmPolicies::CMP0145;
     DeprecatedModules["Documentation"] = cmPolicies::CMP0106;
     DeprecatedModules["FindBoost"] = cmPolicies::CMP0167;

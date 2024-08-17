@@ -45,7 +45,10 @@ variables were moved or removed.  Changes compared to CMake 2.4 are:
       and dig from there.
 #]=======================================================================]
 
-include(${CMAKE_CURRENT_LIST_DIR}/CMakeFindFrameworks.cmake)
+block(SCOPE_FOR POLICIES)
+  cmake_policy(SET CMP0173 OLD)
+  include(${CMAKE_CURRENT_LIST_DIR}/CMakeFindFrameworks.cmake)
+endblock()
 include(${CMAKE_CURRENT_LIST_DIR}/FindTclsh.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/FindWish.cmake)
 

@@ -531,7 +531,9 @@ class cmMakefile;
   SELECT(POLICY, CMP0172,                                                     \
          "The CPack module enables per-machine installation by default in "   \
          "the CPack WIX Generator.",                                          \
-         3, 31, 0, cmPolicies::WARN)
+         3, 31, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0173, "The CMakeFindFrameworks module is removed.", 3,    \
+         31, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
