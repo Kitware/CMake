@@ -6,6 +6,7 @@
 
 enum class MessageType
 {
+  UNDEFINED,
   AUTHOR_WARNING,
   AUTHOR_ERROR,
   FATAL_ERROR,
