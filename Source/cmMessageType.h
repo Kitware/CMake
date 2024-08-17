@@ -31,4 +31,13 @@ enum class LogLevel
   LOG_DEBUG,
   LOG_TRACE
 };
+
+enum class CheckType
+{
+  UNDEFINED,
+  CHECK_START,
+  CHECK_PASS,
+  CHECK_FAIL
+};
+
 }

@@ -26,14 +26,6 @@
 
 namespace {
 
-enum class CheckingType
-{
-  UNDEFINED,
-  CHECK_START,
-  CHECK_PASS,
-  CHECK_FAIL
-};
-
 std::string IndentText(std::string text, cmMakefile& mf)
 {
   auto indent =
@@ -106,7 +98,7 @@ bool cmMessageCommand(std::vector<std::string> const& args,
   auto type = MessageType::MESSAGE;
   auto fatal = false;
   auto level = Message::LogLevel::LOG_UNDEFINED;
-  auto checkingType = CheckingType::UNDEFINED;
+  auto checkingType = Message::CheckType::UNDEFINED;
   if (*i == "SEND_ERROR") {
     type = MessageType::FATAL_ERROR;
     level = Message::LogLevel::LOG_ERROR;
@@ -135,15 +127,15 @@ bool cmMessageCommand(std::vector<std::string> const& args,
     ++i;
   } else if (*i == "CHECK_START") {
     level = Message::LogLevel::LOG_STATUS;
-    checkingType = CheckingType::CHECK_START;
+    checkingType = Message::CheckType::CHECK_START;
     ++i;
   } else if (*i == "CHECK_PASS") {
     level = Message::LogLevel::LOG_STATUS;
-    checkingType = CheckingType::CHECK_PASS;
+    checkingType = Message::CheckType::CHECK_PASS;
     ++i;
   } else if (*i == "CHECK_FAIL") {
     level = Message::LogLevel::LOG_STATUS;
-    checkingType = CheckingType::CHECK_FAIL;
+    checkingType = Message::CheckType::CHECK_FAIL;
     ++i;
   } else if (*i == "CONFIGURE_LOG") {
 #ifndef CMAKE_BOOTSTRAP
@@ -217,16 +209,16 @@ bool cmMessageCommand(std::vector<std::string> const& args,
 
     case Message::LogLevel::LOG_STATUS:
       switch (checkingType) {
-        case CheckingType::CHECK_START:
+        case Message::CheckType::CHECK_START:
           mf.DisplayStatus(IndentText(message, mf), -1);
           mf.GetCMakeInstance()->PushCheckInProgressMessage(message);
           break;
 
-        case CheckingType::CHECK_PASS:
+        case Message::CheckType::CHECK_PASS:
           ReportCheckResult("CHECK_PASS"_s, message, mf);
           break;
 
-        case CheckingType::CHECK_FAIL:
+        case Message::CheckType::CHECK_FAIL:
           ReportCheckResult("CHECK_FAIL"_s, message, mf);
           break;
 
