@@ -4,7 +4,6 @@
 
 #include <map>
 #include <set>
-#include <sstream>
 #include <utility>
 
 #include <cm/string_view>
@@ -79,13 +78,13 @@ static void PassParsedArguments(
   const options_set& keywordsMissingValues, bool parseFromArgV)
 {
   for (auto const& iter : options) {
-    makefile.AddDefinition(prefix + iter.first,
+    makefile.AddDefinition(cmStrCat(prefix, iter.first),
                            iter.second ? "TRUE" : "FALSE");
   }
 
   for (auto const& iter : singleValArgs) {
     if (!iter.second.empty()) {
-      makefile.AddDefinition(prefix + iter.first, iter.second);
+      makefile.AddDefinition(cmStrCat(prefix, iter.first), iter.second);
     } else {
       makefile.RemoveDefinition(prefix + iter.first);
     }
@@ -93,26 +92,26 @@ static void PassParsedArguments(
 
   for (auto const& iter : multiValArgs) {
     if (!iter.second.empty()) {
-      makefile.AddDefinition(prefix + iter.first,
+      makefile.AddDefinition(cmStrCat(prefix, iter.first),
                              JoinList(iter.second, parseFromArgV));
     } else {
-      makefile.RemoveDefinition(prefix + iter.first);
+      makefile.RemoveDefinition(cmStrCat(prefix, iter.first));
     }
   }
 
   if (!unparsed.empty()) {
-    makefile.AddDefinition(prefix + "UNPARSED_ARGUMENTS",
+    makefile.AddDefinition(cmStrCat(prefix, "UNPARSED_ARGUMENTS"),
                            JoinList(unparsed, parseFromArgV));
   } else {
-    makefile.RemoveDefinition(prefix + "UNPARSED_ARGUMENTS");
+    makefile.RemoveDefinition(cmStrCat(prefix, "UNPARSED_ARGUMENTS"));
   }
 
   if (!keywordsMissingValues.empty()) {
     makefile.AddDefinition(
-      prefix + "KEYWORDS_MISSING_VALUES",
+      cmStrCat(prefix, "KEYWORDS_MISSING_VALUES"),
       cmList::to_string(cmMakeRange(keywordsMissingValues)));
   } else {
-    makefile.RemoveDefinition(prefix + "KEYWORDS_MISSING_VALUES");
+    makefile.RemoveDefinition(cmStrCat(prefix, "KEYWORDS_MISSING_VALUES"));
   }
 }
 
@@ -143,9 +142,10 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
     parseFromArgV = true;
     argIter++; // move past PARSE_ARGV
     if (!cmStrToULong(*argIter, &argvStart)) {
-      status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR,
-                                        "PARSE_ARGV index '" + *argIter +
-                                          "' is not an unsigned integer");
+      status.GetMakefile().IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("PARSE_ARGV index '", *argIter,
+                 "' is not an unsigned integer"));
       cmSystemTools::SetFatalErrorOccurred();
       return true;
     }
@@ -167,7 +167,7 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
 
   auto const duplicateKey = [&status](std::string const& key) {
     status.GetMakefile().IssueMessage(
-      MessageType::WARNING, "keyword defined more than once: " + key);
+      MessageType::WARNING, cmStrCat("keyword defined more than once: ", key));
   };
 
   // the second argument is a (cmake) list of options without argument
@@ -194,21 +194,20 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
     std::string argc = status.GetMakefile().GetSafeDefinition("ARGC");
     unsigned long count;
     if (!cmStrToULong(argc, &count)) {
-      status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR,
-                                        "PARSE_ARGV called with ARGC='" +
-                                          argc +
-                                          "' that is not an unsigned integer");
+      status.GetMakefile().IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("PARSE_ARGV called with ARGC='", argc,
+                 "' that is not an unsigned integer"));
       cmSystemTools::SetFatalErrorOccurred();
       return true;
     }
     for (unsigned long i = argvStart; i < count; ++i) {
-      std::ostringstream argName;
-      argName << "ARGV" << i;
-      cmValue arg = status.GetMakefile().GetDefinition(argName.str());
+      const std::string argName{ cmStrCat("ARGV", i) };
+      cmValue arg = status.GetMakefile().GetDefinition(argName);
       if (!arg) {
-        status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR,
-                                          "PARSE_ARGV called with " +
-                                            argName.str() + " not set");
+        status.GetMakefile().IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat("PARSE_ARGV called with ", argName, " not set"));
         cmSystemTools::SetFatalErrorOccurred();
         return true;
       }
