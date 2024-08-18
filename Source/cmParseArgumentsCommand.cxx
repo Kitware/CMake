@@ -6,6 +6,7 @@
 #include <set>
 #include <utility>
 
+#include <cm/optional>
 #include <cm/string_view>
 
 #include "cmArgumentParser.h"
@@ -14,6 +15,7 @@
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -41,7 +43,7 @@ std::string JoinList(std::vector<std::string> const& arg, bool escape)
 }
 
 using options_map = std::map<std::string, bool>;
-using single_map = std::map<std::string, std::string>;
+using single_map = std::map<std::string, cm::optional<std::string>>;
 using multi_map =
   std::map<std::string, ArgumentParser::NonEmpty<std::vector<std::string>>>;
 using options_set = std::set<cm::string_view>;
@@ -82,12 +84,32 @@ static void PassParsedArguments(
                            iter.second ? "TRUE" : "FALSE");
   }
 
+  const cmPolicies::PolicyStatus cmp0174 =
+    makefile.GetPolicyStatus(cmPolicies::CMP0174);
   for (auto const& iter : singleValArgs) {
-    if (!iter.second.empty()) {
-      makefile.AddDefinition(cmStrCat(prefix, iter.first), iter.second);
-    } else {
-      makefile.RemoveDefinition(prefix + iter.first);
+    if (iter.second.has_value()) {
+      // So far, we only know that the keyword was given, not whether a value
+      // was provided after the keyword
+      if (keywordsMissingValues.find(iter.first) ==
+          keywordsMissingValues.end()) {
+        // A (possibly empty) value was given
+        if (cmp0174 == cmPolicies::NEW || !iter.second->empty()) {
+          makefile.AddDefinition(cmStrCat(prefix, iter.first), *iter.second);
+          continue;
+        }
+        if (cmp0174 == cmPolicies::WARN) {
+          makefile.IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmStrCat("An empty string was given as the value after the ",
+                     iter.first,
+                     " keyword. Policy CMP0174 is not set, so "
+                     "cmake_parse_arguments() will unset the ",
+                     prefix, iter.first,
+                     " variable rather than setting it to an empty string."));
+        }
+      }
     }
+    makefile.RemoveDefinition(prefix + iter.first);
   }
 
   for (auto const& iter : multiValArgs) {

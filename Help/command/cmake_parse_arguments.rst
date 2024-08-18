@@ -70,6 +70,12 @@ whether your macro was called with unrecognized parameters.
    received values. This can be checked to see if there were keywords without
    any values given.
 
+.. versionchanged:: 3.31
+   If a ``<one_value_keyword>`` is followed by an empty string as its value,
+   policy :policy:`CMP0174` controls whether a corresponding
+   ``<prefix>_<keyword>`` variable is defined or not.
+
+
 Consider the following example macro, ``my_install()``, which takes similar
 arguments to the real :command:`install` command:
 

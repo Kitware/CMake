@@ -1,0 +1,11 @@
+Testing CMP0174 = NEW
+Testing CMP0174 = OLD
+Testing CMP0174 = WARN
+CMake Warning \(dev\) at CornerCasesArgvN\.cmake:[0-9]+ \(cmake_parse_arguments\):
+  An empty string was given as the value after the P1 keyword\.  Policy
+  CMP0174 is not set, so cmake_parse_arguments\(\) will unset the arg_P1
+  variable rather than setting it to an empty string\.
+Call Stack \(most recent call first\):
+  CornerCasesArgvN\.cmake:[0-9]+ \(test_cmp0174_warn\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
