@@ -7,7 +7,6 @@
 #include <future>
 #include <memory>
 #include <string>
-#include <vector>
 
 #include <cm3p/cppdap/future.h>
 #include <cm3p/cppdap/io.h>
@@ -194,8 +193,6 @@ bool testThreadsRequestAfterThreadExitedEvent()
 
 int testDebuggerAdapter(int, char*[])
 {
-  return runTests(std::vector<std::function<bool()>>{
-    testBasicProtocol,
-    testThreadsRequestAfterThreadExitedEvent,
-  });
+  return runTests(
+    { testBasicProtocol, testThreadsRequestAfterThreadExitedEvent });
 }

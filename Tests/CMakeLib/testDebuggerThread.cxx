@@ -1,4 +1,3 @@
-#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
@@ -27,7 +26,5 @@ static bool testStackFrameFunctionName()
 
 int testDebuggerThread(int, char*[])
 {
-  return runTests(std::vector<std::function<bool()>>{
-    testStackFrameFunctionName,
-  });
+  return runTests({ testStackFrameFunctionName });
 }

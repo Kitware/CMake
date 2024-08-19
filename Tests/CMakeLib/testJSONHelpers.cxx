@@ -1,5 +1,4 @@
 #include <functional>
-#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
@@ -12,13 +11,7 @@
 #include "cmJSONHelpers.h"
 #include "cmJSONState.h"
 
-#define ASSERT_TRUE(x)                                                        \
-  do {                                                                        \
-    if (!(x)) {                                                               \
-      std::cout << "ASSERT_TRUE(" #x ") failed on line " << __LINE__ << "\n"; \
-      return false;                                                           \
-    }                                                                         \
-  } while (false)
+#include "testCommon.h"
 
 namespace {
 struct ObjectStruct
@@ -472,47 +465,8 @@ bool testRequired()
 
 int testJSONHelpers(int /*unused*/, char* /*unused*/[])
 {
-  if (!testInt()) {
-    return 1;
-  }
-  if (!testUInt()) {
-    return 1;
-  }
-  if (!testBool()) {
-    return 1;
-  }
-  if (!testString()) {
-    return 1;
-  }
-  if (!testObject()) {
-    return 1;
-  }
-  if (!testObjectInherited()) {
-    return 1;
-  }
-  if (!testObjectNoExtra()) {
-    return 1;
-  }
-  if (!testObjectOptional()) {
-    return 1;
-  }
-  if (!testVector()) {
-    return 1;
-  }
-  if (!testVectorFilter()) {
-    return 1;
-  }
-  if (!testMap()) {
-    return 1;
-  }
-  if (!testMapFilter()) {
-    return 1;
-  }
-  if (!testOptional()) {
-    return 1;
-  }
-  if (!testRequired()) {
-    return 1;
-  }
-  return 0;
+  return runTests({ testInt, testUInt, testBool, testString, testObject,
+                    testObjectInherited, testObjectNoExtra, testObjectOptional,
+                    testVector, testVectorFilter, testMap, testMapFilter,
+                    testOptional, testRequired });
 }
