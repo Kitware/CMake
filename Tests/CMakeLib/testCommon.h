@@ -2,14 +2,25 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
-#include <functional>
-#include <initializer_list>
-#include <iostream>
+#include <functional>       // IWYU pragma: export
+#include <initializer_list> // IWYU pragma: export
+#include <iostream>         // IWYU pragma: export
 
 #define ASSERT_TRUE(x)                                                        \
   do {                                                                        \
     if (!(x)) {                                                               \
       std::cout << "ASSERT_TRUE(" #x ") failed on line " << __LINE__ << '\n'; \
+      return false;                                                           \
+    }                                                                         \
+  } while (false)
+
+#define ASSERT_EQUAL(actual, expected)                                        \
+  do {                                                                        \
+    if (!((actual) == (expected))) {                                          \
+      std::cout << "ASSERT_EQUAL(" #actual ", " #expected ") failed on line " \
+                << __LINE__ << '\n';                                          \
+      std::cout << "  Actual: '" << (actual) << "'\n";                        \
+      std::cout << "Expected: '" << (expected) << "'\n";                      \
       return false;                                                           \
     }                                                                         \
   } while (false)

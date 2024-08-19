@@ -4,7 +4,6 @@
 #include <chrono>
 #include <cstdio>
 #include <future>
-#include <iostream>
 #include <memory>
 #include <stdexcept>
 #include <string>
