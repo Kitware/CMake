@@ -585,6 +585,9 @@ public:
     unsigned int dwBuildNumber;
   };
   static WindowsVersion GetWindowsVersion();
+
+  /** Attempt to get full path to COMSPEC, default "cmd.exe" */
+  static std::string GetComspec();
 #endif
 
   /** Get the real path for a given path, removing all symlinks.

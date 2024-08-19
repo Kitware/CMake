@@ -970,6 +970,17 @@ cmSystemTools::WindowsVersion cmSystemTools::GetWindowsVersion()
   result.dwBuildNumber = osviex.dwBuildNumber;
   return result;
 }
+
+std::string cmSystemTools::GetComspec()
+{
+  std::string comspec;
+  if (!cmSystemTools::GetEnv("COMSPEC", comspec) ||
+      !cmSystemTools::FileIsFullPath(comspec)) {
+    comspec = "cmd.exe";
+  }
+  return comspec;
+}
+
 #endif
 
 std::string cmSystemTools::GetRealPathResolvingWindowsSubst(
