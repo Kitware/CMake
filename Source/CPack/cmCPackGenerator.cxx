@@ -1552,6 +1552,7 @@ std::string cmCPackGenerator::GetSanitizedDirOrFileName(
 #ifdef _WIN32
     // Given name matches a reserved name (on Windows)?
     // Then return it prepended with an underscore.
+    // See https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file
     cmsys::RegularExpression reserved_pattern("^("
                                               "[Cc][Oo][Nn]|"
                                               "[Pp][Rr][Nn]|"
@@ -1559,7 +1560,7 @@ std::string cmCPackGenerator::GetSanitizedDirOrFileName(
                                               "[Nn][Uu][Ll]|"
                                               "[Cc][Oo][Mm][1-9]|"
                                               "[Ll][Pp][Tt][1-9]"
-                                              ")([.].+)?");
+                                              ")[.]?$");
     if (reserved_pattern.find(name)) {
       return "_" + name;
     }
