@@ -2140,15 +2140,14 @@ bool extract_tar(const std::string& outFileName,
 
     if (verbose) {
       if (extract) {
-        cmSystemTools::Stdout("x ");
-        cmSystemTools::Stdout(cm_archive_entry_pathname(entry));
+        cmSystemTools::Stdout(
+          cmStrCat("x ", cm_archive_entry_pathname(entry)));
       } else {
         list_item_verbose(stdout, entry);
       }
       cmSystemTools::Stdout("\n");
     } else if (!extract) {
-      cmSystemTools::Stdout(cm_archive_entry_pathname(entry));
-      cmSystemTools::Stdout("\n");
+      cmSystemTools::Stdout(cmStrCat(cm_archive_entry_pathname(entry), '\n'));
     }
     if (extract) {
       if (extractTimestamps == cmSystemTools::cmTarExtractTimestamps::Yes) {
@@ -3026,10 +3025,10 @@ static cm::optional<bool> ChangeRPathELF(std::string const& file,
         std::ostringstream e;
         /* clang-format off */
         e << "The current " << se_name << " is:\n"
-          << "  " << inRPath << "\n"
-          << "which does not contain:\n"
-          << "  " << oldRPath << "\n"
-          << "as was expected.";
+             "  " << inRPath << "\n"
+             "which does not contain:\n"
+             "  " << oldRPath << "\n"
+             "as was expected.";
         /* clang-format on */
         *emsg2 = e.str();
       }
@@ -3113,10 +3112,10 @@ static cm::optional<bool> ChangeRPathXCOFF(std::string const& file,
         std::ostringstream e;
         /* clang-format off */
         e << "The current RPATH is:\n"
-          << "  " << libPath << "\n"
-          << "which does not contain:\n"
-          << "  " << oldRPath << "\n"
-          << "as was expected.";
+             "  " << libPath << "\n"
+             "which does not contain:\n"
+             "  " << oldRPath << "\n"
+             "as was expected.";
         /* clang-format on */
         *emsg = e.str();
       }

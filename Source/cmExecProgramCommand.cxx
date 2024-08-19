@@ -202,9 +202,7 @@ bool RunCommand(std::string command, std::string& output, int& retVal,
 #  endif
   command = commandInDir;
   if (verbose) {
-    cmSystemTools::Stdout("running ");
-    cmSystemTools::Stdout(command);
-    cmSystemTools::Stdout("\n");
+    cmSystemTools::Stdout(cmStrCat("running ", command, '\n'));
   }
   fflush(stdout);
   fflush(stderr);
