@@ -323,10 +323,14 @@ that may contain the following fields:
   (which may not be an empty string), and the value is either ``null`` or
   a string representing the value of the variable. Each variable is set
   regardless of whether or not a value was given to it by the process's
-  environment. This field supports `macro expansion`_, and environment
-  variables in this map may reference each other, and may be listed in any
-  order, as long as such references do not cause a cycle (for example,
-  if ``ENV_1`` is ``$env{ENV_2}``, ``ENV_2`` may not be ``$env{ENV_1}``.)
+  environment.
+
+  This field supports `macro expansion`_, and environment variables in this map
+  may reference each other, and may be listed in any order, as long as such
+  references do not cause a cycle (for example, if ``ENV_1`` is
+  ``$env{ENV_2}``, ``ENV_2`` may not be ``$env{ENV_1}``).  ``$penv{NAME}``
+  allows one to prepend or append values to existing environment variables by
+  accessing only values from the parent environment.
 
   Environment variables are inherited through the ``inherits`` field, and
   the preset's environment will be the union of its own ``environment`` and
@@ -508,10 +512,14 @@ that may contain the following fields:
   (which may not be an empty string), and the value is either ``null`` or
   a string representing the value of the variable. Each variable is set
   regardless of whether or not a value was given to it by the process's
-  environment. This field supports macro expansion, and environment
-  variables in this map may reference each other, and may be listed in any
-  order, as long as such references do not cause a cycle (for example, if
-  ``ENV_1`` is ``$env{ENV_2}``, ``ENV_2`` may not be ``$env{ENV_1}``.)
+  environment.
+
+  This field supports `macro expansion`_, and environment variables in this map
+  may reference each other, and may be listed in any order, as long as such
+  references do not cause a cycle (for example, if ``ENV_1`` is
+  ``$env{ENV_2}``, ``ENV_2`` may not be ``$env{ENV_1}``).  ``$penv{NAME}``
+  allows one to prepend or append values to existing environment variables by
+  accessing only values from the parent environment.
 
   Environment variables are inherited through the ``inherits`` field, and
   the preset's environment will be the union of its own ``environment``
@@ -669,10 +677,14 @@ that may contain the following fields:
   (which may not be an empty string), and the value is either ``null`` or
   a string representing the value of the variable. Each variable is set
   regardless of whether or not a value was given to it by the process's
-  environment. This field supports macro expansion, and environment
-  variables in this map may reference each other, and may be listed in any
-  order, as long as such references do not cause a cycle (for example, if
-  ``ENV_1`` is ``$env{ENV_2}``, ``ENV_2`` may not be ``$env{ENV_1}``.)
+  environment.
+
+  This field supports `macro expansion`_, and environment variables in this map
+  may reference each other, and may be listed in any order, as long as such
+  references do not cause a cycle (for example, if ``ENV_1`` is
+  ``$env{ENV_2}``, ``ENV_2`` may not be ``$env{ENV_1}``).  ``$penv{NAME}``
+  allows one to prepend or append values to existing environment variables by
+  accessing only values from the parent environment.
 
   Environment variables are inherited through the ``inherits`` field, and
   the preset's environment will be the union of its own ``environment``
@@ -1010,10 +1022,14 @@ fields:
   (which may not be an empty string), and the value is either ``null`` or
   a string representing the value of the variable. Each variable is set
   regardless of whether or not a value was given to it by the process's
-  environment. This field supports macro expansion, and environment
-  variables in this map may reference each other, and may be listed in any
-  order, as long as such references do not cause a cycle (for example, if
-  ``ENV_1`` is ``$env{ENV_2}``, ``ENV_2`` may not be ``$env{ENV_1}``.)
+  environment.
+
+  This field supports `macro expansion`_, and environment variables in this map
+  may reference each other, and may be listed in any order, as long as such
+  references do not cause a cycle (for example, if ``ENV_1`` is
+  ``$env{ENV_2}``, ``ENV_2`` may not be ``$env{ENV_1}``).  ``$penv{NAME}``
+  allows one to prepend or append values to existing environment variables by
+  accessing only values from the parent environment.
 
   Environment variables are inherited through the ``inherits`` field, and
   the preset's environment will be the union of its own ``environment``
@@ -1280,7 +1296,7 @@ Recognized macros include:
 ``$penv{<variable-name>}``
   Similar to ``$env{<variable-name>}``, except that the value only comes from
   the parent environment, and never from the ``environment`` field. This
-  allows you to prepend or append values to existing environment variables.
+  allows one to prepend or append values to existing environment variables.
   For example, setting ``PATH`` to ``/path/to/ninja/bin:$penv{PATH}`` will
   prepend ``/path/to/ninja/bin`` to the ``PATH`` environment variable. This
   is needed because ``$env{<variable-name>}`` does not allow circular
