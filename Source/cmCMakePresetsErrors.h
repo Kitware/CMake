@@ -94,6 +94,8 @@ void CTEST_JUNIT_UNSUPPORTED(cmJSONState* state);
 
 void TRACE_UNSUPPORTED(cmJSONState* state);
 
+JsonErrors::ErrorGenerator UNRECOGNIZED_VERSION_RANGE(int min, int max);
+
 JsonErrors::ErrorGenerator UNRECOGNIZED_CMAKE_VERSION(
   const std::string& version, int current, int required);
 

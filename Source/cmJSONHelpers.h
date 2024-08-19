@@ -34,9 +34,11 @@ enum ObjectError
   ExtraField,
   MissingRequired
 };
+
 using ErrorGenerator = std::function<void(const Json::Value*, cmJSONState*)>;
 using ObjectErrorGenerator =
   std::function<ErrorGenerator(ObjectError, const Json::Value::Members&)>;
+
 ErrorGenerator EXPECTED_TYPE(const std::string& type);
 
 void INVALID_STRING(const Json::Value* value, cmJSONState* state);
@@ -104,7 +106,6 @@ struct cmJSONHelperBuilder
     bool operator()(T& out, const Json::Value* value, cmJSONState* state) const
     {
       Json::Value::Members extraFields;
-      bool success = true;
       if (!value && this->AnyRequired) {
         Error(JsonErrors::ObjectError::RequiredMissing, extraFields)(value,
                                                                      state);
@@ -125,6 +126,7 @@ struct cmJSONHelperBuilder
           extraFields.end());
       }
 
+      bool success = true;
       for (auto const& m : this->Members) {
         std::string name(m.Name.data(), m.Name.size());
         state->push_stack(name, value);
@@ -159,6 +161,12 @@ struct cmJSONHelperBuilder
                                               cmJSONState* state)>;
     struct Member
     {
+      Member(cm::string_view name, MemberFunction func, bool required)
+        : Name{ name }
+        , Function{ std::move(func) }
+        , Required{ required }
+      {
+      }
       cm::string_view Name;
       MemberFunction Function;
       bool Required;
@@ -171,14 +179,8 @@ struct cmJSONHelperBuilder
     Object& BindPrivate(const cm::string_view& name, MemberFunction&& func,
                         bool required)
     {
-      Member m;
-      m.Name = name;
-      m.Function = std::move(func);
-      m.Required = required;
-      this->Members.push_back(std::move(m));
-      if (required) {
-        this->AnyRequired = true;
-      }
+      this->Members.emplace_back(name, std::move(func), required);
+      this->AnyRequired = this->AnyRequired || required;
       return *this;
     }
   };
@@ -195,7 +197,6 @@ struct cmJSONHelperBuilder
       }
       if (!value->isString()) {
         error(value, state);
-        ;
         return false;
       }
       out = value->asString();
@@ -220,7 +221,6 @@ struct cmJSONHelperBuilder
       }
       if (!value->isInt()) {
         error(value, state);
-        ;
         return false;
       }
       out = value->asInt();
@@ -245,7 +245,6 @@ struct cmJSONHelperBuilder
       }
       if (!value->isUInt()) {
         error(value, state);
-        ;
         return false;
       }
       out = value->asUInt();
@@ -270,7 +269,6 @@ struct cmJSONHelperBuilder
       }
       if (!value->isBool()) {
         error(value, state);
-        ;
         return false;
       }
       out = value->asBool();
@@ -332,19 +330,18 @@ struct cmJSONHelperBuilder
     return [error, func, filter](std::map<std::string, T>& out,
                                  const Json::Value* value,
                                  cmJSONState* state) -> bool {
-      bool success = true;
       if (!value) {
         out.clear();
         return true;
       }
       if (!value->isObject()) {
         error(value, state);
-        ;
         return false;
       }
       out.clear();
+      bool success = true;
       for (auto const& key : value->getMemberNames()) {
-        state->push_stack(cmStrCat(key, ""), &(*value)[key]);
+        state->push_stack(key, &(*value)[key]);
         if (!filter(key)) {
           state->pop_stack();
           continue;
@@ -353,7 +350,7 @@ struct cmJSONHelperBuilder
         if (!func(t, &(*value)[key], state)) {
           success = false;
         }
-        out[key] = std::move(t);
+        out.emplace(key, std::move(t));
         state->pop_stack();
       }
       return success;
@@ -390,10 +387,24 @@ struct cmJSONHelperBuilder
                          cmJSONState* state) -> bool {
       if (!value) {
         error(value, state);
-        ;
         return false;
       }
       return func(out, value, state);
+    };
+  }
+
+  template <typename T, typename F, typename P>
+  static cmJSONHelper<T> Checked(const JsonErrors::ErrorGenerator& error,
+                                 F func, P predicate)
+  {
+    return [error, func, predicate](T& out, const Json::Value* value,
+                                    cmJSONState* state) -> bool {
+      bool result = func(out, value, state);
+      if (result && !predicate(out)) {
+        error(value, state);
+        result = false;
+      }
+      return result;
     };
   }
 };
