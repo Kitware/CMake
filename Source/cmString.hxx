@@ -518,7 +518,7 @@ public:
     *this = std::move(s);
   }
 
-  void swap(String& other)
+  void swap(String& other) noexcept
   {
     std::swap(this->string_, other.string_);
     std::swap(this->view_, other.view_);
