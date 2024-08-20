@@ -30,6 +30,8 @@ Check once if Objective-C++ source can be built.
   ``STATIC_LIBRARY``, the source is compiled but not linked. In any case, all
   functions must be declared as usual.
 
+  See also :command:`check_source_compiles` for a more general command syntax.
+
   See also :command:`check_source_runs` to run compiled source.
 
   The compile and link commands can be influenced by setting any of the

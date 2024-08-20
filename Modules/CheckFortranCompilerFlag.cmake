@@ -29,6 +29,8 @@ rather than performing the check again, even if the ``<code>`` changes. In
 order to force the check to be re-evaluated, the variable named by
 ``<resultVar>`` must be manually removed from the cache.
 
+See also :command:`check_compiler_flag` for a more general command syntax.
+
 The compile and link commands can be influenced by setting any of the
 following variables prior to calling ``check_fortran_compiler_flag()``
 

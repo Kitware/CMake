@@ -30,6 +30,8 @@ Check once if Fortran source code can be built.
   ``SRC_EXT`` option can be used to override this with ``.<extension>`` instead--
   ``.F90`` is a typical choice.
 
+  See also :command:`check_source_compiles` for a more general command syntax.
+
   See also :command:`check_source_runs` to run compiled source.
 
   Internally, :command:`try_compile` is used to compile the source. If
