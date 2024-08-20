@@ -72,8 +72,9 @@ int cmInstallScriptHandler::install(unsigned int j)
   cm::uv_loop_ptr loop;
   loop.init();
   std::vector<InstallScript> scripts;
+  scripts.reserve(this->commands.size());
   for (auto const& cmd : this->commands) {
-    scripts.push_back(InstallScript(cmd));
+    scripts.emplace_back(cmd);
   }
   std::size_t working = 0;
   std::size_t installed = 0;
