@@ -1,4 +1,5 @@
 set(_check
+  [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/linux-build/root-all/lib/conflict/libconflict\.so]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/linux-build/root-all/lib/libtest_rpath\.so]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/linux-build/root-all/lib/libtest_runpath\.so]]
   [[[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/linux-build/root-all/lib/rpath/librpath\.so]]
@@ -19,7 +20,7 @@ check_contents(deps/udeps1.txt "^${_check}$")
 check_contents(deps/udeps2.txt "^${_check}$")
 check_contents(deps/udeps3.txt "^${_check}$")
 set(_check
-  "^libconflict\\.so:[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/linux-build/root-all/lib/conflict/libconflict\\.so;[^;]*/Tests/RunCMake/file-GET_RUNTIME_DEPENDENCIES/linux-build/root-all/lib/conflict2/libconflict\\.so\n$"
+  "^$"
   )
 check_contents(deps/cdeps1.txt "${_check}")
 check_contents(deps/cdeps2.txt "${_check}")

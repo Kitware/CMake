@@ -1169,6 +1169,14 @@ Handling Runtime Binaries
 
   5. Otherwise, the dependency is unresolved.
 
+  .. versionchanged:: 3.31
+
+    Resolution of each encountered library file name occurs at most once
+    while processing a given root ELF file (executable or shared object).
+    If a library file name is encountered again in the dependency tree,
+    the original resolution is assumed.  This behavior more closely matches
+    the dynamic loader's behavior on Linux.
+
   On Windows platforms, library resolution works as follows:
 
   1. DLL dependency names are converted to lowercase for matching filters.
