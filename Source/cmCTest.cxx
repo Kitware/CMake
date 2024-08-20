@@ -235,8 +235,8 @@ struct tm* cmCTest::GetNightlyTime(std::string const& str, bool tomorrowtag)
   char buf[1024];
   // add todays year day and month to the time in str because
   // curl_getdate no longer assumes the day is today
-  snprintf(buf, sizeof(buf), "%d%02d%02d %s", lctime->tm_year + 1900,
-           lctime->tm_mon + 1, lctime->tm_mday, str.c_str());
+  std::snprintf(buf, sizeof(buf), "%d%02d%02d %s", lctime->tm_year + 1900,
+                lctime->tm_mon + 1, lctime->tm_mday, str.c_str());
   cmCTestLog(this, OUTPUT,
              "Determine Nightly Start Time" << std::endl
                                             << "   Specified time: " << str
@@ -1074,11 +1074,6 @@ int cmCTest::GetTestModelFromString(const std::string& str)
   return cmCTest::EXPERIMENTAL;
 }
 
-// ######################################################################
-// ######################################################################
-// ######################################################################
-// ######################################################################
-
 bool cmCTest::RunMakeCommand(const std::string& command, std::string& output,
                              int* retVal, const char* dir, cmDuration timeout,
                              std::ostream& ofs, Encoding encoding)
@@ -1190,11 +1185,6 @@ bool cmCTest::RunMakeCommand(const std::string& command, std::string& output,
 
   return true;
 }
-
-// ######################################################################
-// ######################################################################
-// ######################################################################
-// ######################################################################
 
 bool cmCTest::RunTest(const std::vector<std::string>& argv,
                       std::string* output, int* retVal, std::ostream* log,
@@ -1857,22 +1847,20 @@ bool cmCTest::AddTestsForDashboardType(std::string& targ)
 void cmCTest::ErrorMessageUnknownDashDValue(std::string& val)
 {
   cmCTestLog(this, ERROR_MESSAGE,
-             "CTest -D called with incorrect option: " << val << std::endl);
+             "CTest -D called with incorrect option: " << val << '\n');
 
-  cmCTestLog(
-    this, ERROR_MESSAGE,
-    "Available options are:"
-      << std::endl
-      << "  ctest -D Continuous" << std::endl
-      << "  ctest -D Continuous(Start|Update|Configure|Build)" << std::endl
-      << "  ctest -D Continuous(Test|Coverage|MemCheck|Submit)" << std::endl
-      << "  ctest -D Experimental" << std::endl
-      << "  ctest -D Experimental(Start|Update|Configure|Build)" << std::endl
-      << "  ctest -D Experimental(Test|Coverage|MemCheck|Submit)" << std::endl
-      << "  ctest -D Nightly" << std::endl
-      << "  ctest -D Nightly(Start|Update|Configure|Build)" << std::endl
-      << "  ctest -D Nightly(Test|Coverage|MemCheck|Submit)" << std::endl
-      << "  ctest -D NightlyMemoryCheck" << std::endl);
+  cmCTestLog(this, ERROR_MESSAGE,
+             "Available options are:\n"
+             "  ctest -D Continuous\n"
+             "  ctest -D Continuous(Start|Update|Configure|Build)\n"
+             "  ctest -D Continuous(Test|Coverage|MemCheck|Submit)\n"
+             "  ctest -D Experimental\n"
+             "  ctest -D Experimental(Start|Update|Configure|Build)\n"
+             "  ctest -D Experimental(Test|Coverage|MemCheck|Submit)\n"
+             "  ctest -D Nightly\n"
+             "  ctest -D Nightly(Start|Update|Configure|Build)\n"
+             "  ctest -D Nightly(Test|Coverage|MemCheck|Submit)\n"
+             "  ctest -D NightlyMemoryCheck\n");
 }
 
 bool cmCTest::CheckArgument(const std::string& arg, cm::string_view varg1,
@@ -1982,7 +1970,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
       this->SetTestLoad(load);
     } else {
       cmCTestLog(this, WARNING,
-                 "Invalid value for 'Test Load' : " << args[i] << std::endl);
+                 "Invalid value for 'Test Load' : " << args[i] << '\n');
     }
   }
 
@@ -2908,21 +2896,21 @@ bool cmCTest::HandleTestActionArgument(const char* ctestExec, size_t& i,
     if (!this->SetTest(args[i], false)) {
       success = false;
       cmCTestLog(this, ERROR_MESSAGE,
-                 "CTest -T called with incorrect option: " << args[i]
-                                                           << std::endl);
+                 "CTest -T called with incorrect option: " << args[i] << '\n');
+      /* clang-format off */
       cmCTestLog(this, ERROR_MESSAGE,
-                 "Available options are:"
-                   << std::endl
-                   << "  " << ctestExec << " -T all" << std::endl
-                   << "  " << ctestExec << " -T start" << std::endl
-                   << "  " << ctestExec << " -T update" << std::endl
-                   << "  " << ctestExec << " -T configure" << std::endl
-                   << "  " << ctestExec << " -T build" << std::endl
-                   << "  " << ctestExec << " -T test" << std::endl
-                   << "  " << ctestExec << " -T coverage" << std::endl
-                   << "  " << ctestExec << " -T memcheck" << std::endl
-                   << "  " << ctestExec << " -T notes" << std::endl
-                   << "  " << ctestExec << " -T submit" << std::endl);
+                 "Available options are:\n"
+                 "  " << ctestExec << " -T all\n"
+                 "  " << ctestExec << " -T start\n"
+                 "  " << ctestExec << " -T update\n"
+                 "  " << ctestExec << " -T configure\n"
+                 "  " << ctestExec << " -T build\n"
+                 "  " << ctestExec << " -T test\n"
+                 "  " << ctestExec << " -T coverage\n"
+                 "  " << ctestExec << " -T memcheck\n"
+                 "  " << ctestExec << " -T notes\n"
+                 "  " << ctestExec << " -T submit\n");
+      /* clang-format on */
     }
   }
   return success;
@@ -2948,14 +2936,14 @@ bool cmCTest::HandleTestModelArgument(const char* ctestExec, size_t& i,
     } else {
       success = false;
       cmCTestLog(this, ERROR_MESSAGE,
-                 "CTest -M called with incorrect option: " << str
-                                                           << std::endl);
+                 "CTest -M called with incorrect option: " << str << '\n');
+      /* clang-format off */
       cmCTestLog(this, ERROR_MESSAGE,
-                 "Available options are:"
-                   << std::endl
-                   << "  " << ctestExec << " -M Continuous" << std::endl
-                   << "  " << ctestExec << " -M Experimental" << std::endl
-                   << "  " << ctestExec << " -M Nightly" << std::endl);
+                 "Available options are:\n"
+                 "  " << ctestExec << " -M Continuous\n"
+                 "  " << ctestExec << " -M Experimental\n"
+                 "  " << ctestExec << " -M Nightly\n");
+      /* clang-format on */
     }
   }
   return success;
@@ -3497,10 +3485,10 @@ void cmCTest::AddCTestConfigurationOverwrite(const std::string& overStr)
   size_t epos = overStr.find('=');
   if (epos == std::string::npos) {
     cmCTestLog(this, ERROR_MESSAGE,
-               "CTest configuration overwrite specified in the wrong format."
-                 << std::endl
-                 << "Valid format is: --overwrite key=value" << std::endl
-                 << "The specified was: --overwrite " << overStr << std::endl);
+               "CTest configuration overwrite specified in the wrong format.\n"
+               "Valid format is: --overwrite key=value\n"
+               "The specified was: --overwrite "
+                 << overStr << '\n');
     return;
   }
   std::string key = overStr.substr(0, epos);

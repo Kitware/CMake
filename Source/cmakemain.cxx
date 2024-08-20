@@ -812,7 +812,7 @@ bool parse_default_directory_permissions(const std::string& permissions,
   std::ostringstream oss;
   for (auto i = 0u; i < parsedPermissions.size(); i++) {
     if (i != 0) {
-      oss << ";";
+      oss << ';';
     }
     oss << parsedPermissions[i];
   }

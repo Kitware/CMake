@@ -583,7 +583,7 @@ int main(int argc, char const* const* argv)
               cmValue projVersionPatch =
                 mf->GetDefinition("CPACK_PACKAGE_VERSION_PATCH");
               std::ostringstream ostr;
-              ostr << *projVersionMajor << "." << *projVersionMinor << '.'
+              ostr << *projVersionMajor << '.' << *projVersionMinor << '.'
                    << *projVersionPatch;
               mf->AddDefinition("CPACK_PACKAGE_VERSION", ostr.str());
             }
