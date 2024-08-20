@@ -267,7 +267,6 @@ macro(CMAKE_SETUP_TESTING)
   endif()
 
   # configure some files for testing
-  configure_file(Templates/CTestScript.cmake.in CTestScript.cmake @ONLY)
   configure_file(Tests/.NoDartCoverage Tests/.NoDartCoverage)
   configure_file(CTestCustom.cmake.in CTestCustom.cmake @ONLY)
 endmacro()
