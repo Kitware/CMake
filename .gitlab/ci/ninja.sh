@@ -6,25 +6,23 @@ if test "$CMAKE_CI_JOB_NIGHTLY_NINJA" = "true" -a "$CMAKE_CI_NIGHTLY" = "true"; 
     exec .gitlab/ci/ninja-nightly.sh
 fi
 
-readonly version="1.11.0"
+readonly version="1.12.1"
 baseurl="https://github.com/ninja-build/ninja/releases/download/v$version"
 
 case "$(uname -s)-$(uname -m)" in
     Linux-x86_64)
         shatool="sha256sum"
-        sha256sum="9726e730d5b8599f82654dc80265e64a10a8a817552c34153361ed0c017f9f02"
+        sha256sum="6f98805688d19672bd699fbbfa2c2cf0fc054ac3df1f0e6a47664d963d530255"
         filename="ninja-linux"
         ;;
     Linux-aarch64)
         shatool="sha256sum"
-        sha256sum="b002eb77cfcef6d329cccf8b1cc7ad138302d6e19b5b76b10b4c4d38564b47b5"
-        # Use binary built by adjacent 'docker/ninja/centos7-aarch64.bash' script.
-        baseurl="https://cmake.org/files/dependencies"
-        filename="ninja-$version-1-linux-aarch64"
+        sha256sum="5c25c6570b0155e95fce5918cb95f1ad9870df5768653afe128db822301a05a1"
+        filename="ninja-linux-aarch64"
         ;;
     Darwin-*)
         shatool="shasum -a 256"
-        sha256sum="21915277db59756bfc61f6f281c1f5e3897760b63776fd3d360f77dd7364137f"
+        sha256sum="89a287444b5b3e98f88a945afa50ce937b8ffd1dcc59c555ad9b1baf855298c9"
         filename="ninja-mac"
         ;;
     *)

@@ -5,9 +5,18 @@ if ("$env:CMAKE_CI_JOB_NIGHTLY_NINJA" -eq "true" -And "$env:CMAKE_CI_NIGHTLY" -e
     exit $LASTEXITCODE
 }
 
-$version = "1.11.0"
-$sha256sum = "D0EE3DA143211AA447E750085876C9B9D7BCDD637AB5B2C5B41349C617F22F3B"
-$filename = "ninja-win"
+$version = "1.12.1"
+
+if ("$env:PROCESSOR_ARCHITECTURE" -eq "AMD64") {
+    $sha256sum = "F550FEC705B6D6FF58F2DB3C374C2277A37691678D6ABA463ADCBB129108467A"
+    $filename = "ninja-win"
+} elseif ("$env:PROCESSOR_ARCHITECTURE" -eq "ARM64") {
+    $sha256sum = "79C96A50E0DEAFEC212CFA85AA57C6B74003F52D9D1673DDCD1EAB1C958C5900"
+    $filename = "ninja-winarm64"
+} else {
+    throw ('unknown PROCESSOR_ARCHITECTURE: ' + "$env:PROCESSOR_ARCHITECTURE")
+}
+
 $tarball = "$filename.zip"
 
 $outdir = $pwd.Path
