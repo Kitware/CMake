@@ -863,8 +863,8 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
     /* clang-format on */
     componentCode += out.str();
   } else {
-    componentCode +=
-      "  File /r \"${INST_DIR}\\" + component->Name + "\\*.*\"\n";
+    componentCode += "  File /r \"${INST_DIR}\\" +
+      this->GetSanitizedDirOrFileName(component->Name) + "\\*.*\"\n";
   }
   componentCode += "SectionEnd\n";
 
