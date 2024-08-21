@@ -434,7 +434,7 @@ bool cmCPackPKGGenerator::CopyResourcePlistFile(const std::string& name,
   }
 
   std::string inFName = cmStrCat("CPack.", name, ".in");
-  std::string inFileName = this->FindTemplate(inFName.c_str());
+  std::string inFileName = this->FindTemplate(inFName);
   if (inFileName.empty()) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
                   "Cannot find input file: " << inFName << std::endl);
