@@ -102,6 +102,7 @@ extends:
             displayName: 'Publish CMake x64 Artifact'
             targetPath: $(ArchiveDir)
             artifactName: CMakeX64
+            codeSignValidationEnabled: false
         steps:
         - checkout: self
           clean: true
@@ -221,6 +222,7 @@ extends:
             displayName: 'Publish CMake ARM64 Artifact'
             targetPath: $(ArchiveDir)
             artifactName: CMakeArm64
+            codeSignValidationEnabled: false
         steps:
         - checkout: self
           clean: true
@@ -285,6 +287,7 @@ extends:
             displayName: 'Publish CMake x86 Artifact'
             targetPath: $(ArchiveDir)
             artifactName: CMakeX86
+            codeSignValidationEnabled: false
         steps:
         - checkout: self
           clean: true
