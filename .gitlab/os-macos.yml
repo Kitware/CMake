@@ -7,7 +7,7 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci ext/$CI_CONCURRENT_ID"
         # TODO: Factor this out so that each job selects the Xcode version to
         # use so that different versions can be tested in a single pipeline.
-        DEVELOPER_DIR: "/Applications/Xcode-15.3.app/Contents/Developer"
+        DEVELOPER_DIR: "/Applications/Xcode-15.4.app/Contents/Developer"
         # Avoid conflicting with other projects running on the same machine.
         SCCACHE_SERVER_PORT: 4227
 
@@ -142,7 +142,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-x86_64
         - shell
-        - xcode-15.3
+        - xcode-15.4
         - nonconcurrent
 
 .macos_x86_64_tags_ext:
@@ -150,7 +150,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-x86_64
         - shell
-        - xcode-15.3
+        - xcode-15.4
         - concurrent
 
 .macos_arm64_tags:
@@ -158,7 +158,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-15.3
+        - xcode-15.4
         - nonconcurrent
 
 .macos_arm64_tags_ext:
@@ -166,7 +166,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-15.3
+        - xcode-15.4
         - concurrent
 
 .macos_arm64_tags_package:
@@ -174,7 +174,7 @@
         - cmake # Since this is a bare runner, pin to a project.
         - macos-arm64
         - shell
-        - xcode-15.3
+        - xcode-15.4
         - nonconcurrent
         - finder
 
