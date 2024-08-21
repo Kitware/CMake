@@ -37,7 +37,13 @@ elseif(_CLANG_MSVC_WINDOWS AND "x${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}" STREQUA
   string(APPEND CMAKE_EXE_LINKER_FLAGS " -Xlinker -stack:20000000")
 endif()
 
-#silence duplicate symbol warnings on AIX
+# Silence "Additional optimization may be attained by recompiling and
+# specifying MAXMEM option" warning on XLC (AIX)
+if(CMAKE_CXX_COMPILER_ID MATCHES "^(XL|XLClang)$")
+  string(APPEND CMAKE_CXX_FLAGS " -qmaxmem=-1")
+endif()
+
+# Silence duplicate symbol warnings on AIX
 if(CMAKE_SYSTEM_NAME MATCHES "AIX")
   if(NOT CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -bhalt:5 ")
