@@ -471,6 +471,10 @@ above-documented condition syntax accepts ``<variable|string>``:
   variables.  If so, their defined values are used otherwise the original value
   is used.
 
+* The left hand argument to `IN_LIST`_ is tested to see if it is a defined
+  variable.  If so, the variable's value is used, otherwise the original
+  value is used.
+
 * The right hand argument to `NOT`_ is tested to see if it is a boolean
   constant.  If so, the value is used, otherwise it is assumed to be a
   variable and it is dereferenced.
