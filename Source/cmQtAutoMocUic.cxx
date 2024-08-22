@@ -345,6 +345,8 @@ public:
     void MaybeWriteResponseFile(std::string const& outputFile,
                                 std::vector<std::string>& cmd) const;
 
+    static void MaybePrependCmdExe(std::vector<std::string>& cmd);
+
     /** @brief Run an external process. Use only during Process() call!  */
     bool RunProcess(GenT genType, cmWorkerPool::ProcessResultT& result,
                     std::vector<std::string> const& command,
@@ -848,6 +850,54 @@ void cmQtAutoMocUicT::JobT::MaybeWriteResponseFile(
 #endif
 }
 
+/*
+ *  According to the CreateProcessW documentation which is the underlying
+ *  function for all RunProcess calls:
+ *
+ *  "To run a batch file, you must start the command interpreter; set"
+ *  "lpApplicationName to cmd.exe and set lpCommandLine to the following"
+ *  "arguments: /c plus the name of the batch file."
+ *
+ *  we should to take care of the correctness of the command line when
+ *  attempting to execute the batch files.
+ *
+ *  Also cmd.exe is unable to parse batch file names correctly if they
+ *  contain spaces. This function uses cmSystemTools::GetShortPath conversion
+ *  to suppress this behavior.
+ *
+ *  The function is noop on platforms different from the pure WIN32 one.
+ */
+void cmQtAutoMocUicT::JobT::MaybePrependCmdExe(
+  std::vector<std::string>& cmdLine)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  if (!cmdLine.empty()) {
+    const auto& applicationName = cmdLine.at(0);
+    if (cmSystemTools::StringEndsWith(applicationName, ".bat") ||
+        cmSystemTools::StringEndsWith(applicationName, ".cmd")) {
+      std::vector<std::string> output;
+      output.reserve(cmdLine.size() + 2);
+      output.emplace_back(cmSystemTools::GetComspec());
+      output.emplace_back("/c");
+      std::string tmpShortPath;
+      if (applicationName.find(' ') != std::string::npos &&
+          cmSystemTools::GetShortPath(applicationName, tmpShortPath)) {
+        // If the batch file name contains spaces convert it to the windows
+        // short path. Otherwise it might cause issue when running cmd.exe.
+        output.emplace_back(tmpShortPath);
+      } else {
+        output.push_back(applicationName);
+      }
+      std::move(cmdLine.begin() + 1, cmdLine.end(),
+                std::back_inserter(output));
+      cmdLine = std::move(output);
+    }
+  }
+#else
+  static_cast<void>(cmdLine);
+#endif
+}
+
 bool cmQtAutoMocUicT::JobT::RunProcess(GenT genType,
                                        cmWorkerPool::ProcessResultT& result,
                                        std::vector<std::string> const& command,
@@ -891,6 +941,9 @@ void cmQtAutoMocUicT::JobMocPredefsT::Process()
       cm::append(cmd, this->MocConst().OptionsIncludes);
       // Check if response file is necessary
       MaybeWriteResponseFile(this->MocConst().PredefsFileAbs, cmd);
+
+      MaybePrependCmdExe(cmd);
+
       // Execute command
       if (!this->RunProcess(GenT::MOC, result, cmd, reason.get())) {
         this->LogCommandError(GenT::MOC,
@@ -2090,6 +2143,7 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
     cmd.push_back(sourceFile);
 
     MaybeWriteResponseFile(outputFile, cmd);
+    MaybePrependCmdExe(cmd);
   }
 
   // Execute moc command
@@ -2155,6 +2209,8 @@ void cmQtAutoMocUicT::JobCompileUicT::Process()
   cmd.emplace_back("-o");
   cmd.emplace_back(outputFile);
   cmd.emplace_back(sourceFile);
+
+  MaybePrependCmdExe(cmd);
 
   cmWorkerPool::ProcessResultT result;
   if (this->RunProcess(GenT::UIC, result, cmd, this->Reason.get())) {
