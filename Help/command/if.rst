@@ -41,13 +41,15 @@ Compound conditions are evaluated in the following order of precedence:
 
 1. `Parentheses`_.
 
-2. Unary tests such as `EXISTS`_, `COMMAND`_, and `DEFINED`_.
+2. Unary tests such as `COMMAND`_, `POLICY`_, `TARGET`_, `TEST`_,
+    `EXISTS`_, `IS_READABLE`_, `IS_WRITABLE`_, `IS_EXECUTABLE`_,
+    `IS_DIRECTORY`_, `IS_SYMLINK`_, `IS_ABSOLUTE`_, and `DEFINED`_.
 
 3. Binary tests such as `EQUAL`_, `LESS`_, `LESS_EQUAL`_, `GREATER`_,
    `GREATER_EQUAL`_, `STREQUAL`_, `STRLESS`_, `STRLESS_EQUAL`_,
    `STRGREATER`_, `STRGREATER_EQUAL`_, `VERSION_EQUAL`_, `VERSION_LESS`_,
    `VERSION_LESS_EQUAL`_, `VERSION_GREATER`_, `VERSION_GREATER_EQUAL`_,
-   `PATH_EQUAL`_, and `MATCHES`_.
+   `PATH_EQUAL`_, `IN_LIST`_, `IS_NEWER_THAN`_, and `MATCHES`_.
 
 4. Unary logical operator `NOT`_.
 
