@@ -36,7 +36,6 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/CheckSwift.cmake)
 if(NOT CTEST_NO_TEST_HOME AND (NOT WIN32 OR DEFINED ENV{HOME}))
   set(TEST_HOME "${CMake_BINARY_DIR}/Tests/CMakeFiles/TestHome")
   file(MAKE_DIRECTORY "${TEST_HOME}")
-  file(WRITE "${TEST_HOME}/.cvspass" ":pserver:anoncvs@www.cmake.org:/cvsroot/KWSys A\n")
   set(TEST_HOME_ENV_CODE "# Fake a user home directory to avoid polluting the real one.
 # But provide original ENV{HOME} value in ENV{CTEST_REAL_HOME} for tests that
 # need access to the real HOME directory.
