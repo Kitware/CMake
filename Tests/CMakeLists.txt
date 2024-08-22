@@ -32,10 +32,14 @@ endmacro()
 include(${CMAKE_CURRENT_SOURCE_DIR}/CheckFortran.cmake)
 include(${CMAKE_CURRENT_SOURCE_DIR}/CheckSwift.cmake)
 
+# Isolate tests from user-wide configuration.
+set(TEST_HOME "${CMake_BINARY_DIR}/Tests/CMakeFiles/TestHome")
+set(TEST_CONFIG_ENV_CODE "# Isolate tests from user-wide configuration.
+set(ENV{CMAKE_CONFIG_DIR} \"${TEST_HOME}/.config/cmake\")\n")
+file(MAKE_DIRECTORY "${TEST_HOME}/.config/cmake")
+
 # Fake a user home directory to avoid polluting the real one.
 if(NOT CTEST_NO_TEST_HOME AND (NOT WIN32 OR DEFINED ENV{HOME}))
-  set(TEST_HOME "${CMake_BINARY_DIR}/Tests/CMakeFiles/TestHome")
-  file(MAKE_DIRECTORY "${TEST_HOME}")
   set(TEST_HOME_ENV_CODE "# Fake a user home directory to avoid polluting the real one.
 # But provide original ENV{HOME} value in ENV{CTEST_REAL_HOME} for tests that
 # need access to the real HOME directory.
