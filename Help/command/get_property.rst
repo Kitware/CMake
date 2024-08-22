@@ -91,9 +91,10 @@ It must be one of the following:
   Scope is unique and does not accept a name.
 
 The required ``PROPERTY`` option is immediately followed by the name of
-the property to get.  If the property is not set an empty value is
-returned, although some properties support inheriting from a parent scope
-if defined to behave that way (see :command:`define_property`).
+the property to get.  If the property is not set, the named ``<variable>``
+will be unset in the calling scope upon return, although some properties
+support inheriting from a parent scope if defined to behave that way
+(see :command:`define_property`).
 
 If the ``SET`` option is given, the variable is set to a boolean
 value indicating whether the property has been set.  If the ``DEFINED``
