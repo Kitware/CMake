@@ -27,7 +27,8 @@ macro(CMAKE_CHECK_FLAG_COMMON_INIT _FUNC _LANG _SRC _PATTERNS)
       FAIL_REGEX "argument unused during compilation: .*") # Clang
   elseif("${_LANG}" STREQUAL "Fortran")
     set(${_SRC} "       program test\n       stop\n       end program")
-    set(${_PATTERNS} FAIL_REGEX "command[ -]line option .* is valid for .* but not for Fortran")
+    set(${_PATTERNS} FAIL_REGEX "command[ -]line option .* is valid for .* but not for Fortran"
+      FAIL_REGEX "argument unused during compilation: .*") # LLVMFlang
   elseif("${_LANG}" STREQUAL "HIP")
     set(${_SRC} "__host__ int main() { return 0; }")
     set(${_PATTERNS} FAIL_REGEX "argument unused during compilation: .*") # Clang
