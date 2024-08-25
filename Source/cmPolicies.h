@@ -537,6 +537,8 @@ class cmMakefile;
   SELECT(POLICY, CMP0174,                                                     \
          "cmake_parse_arguments(PARSE_ARGV) defines a variable for an empty " \
          "string after a single-value keyword.",                              \
+         3, 31, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0175, "add_custom_command() rejects invalid arguments.",  \
          3, 31, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)

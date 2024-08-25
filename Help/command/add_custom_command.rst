@@ -5,6 +5,8 @@ Add a custom build rule to the generated build system.
 
 There are two main signatures for ``add_custom_command``.
 
+.. _`add_custom_command(OUTPUT)`:
+
 Generating Files
 ^^^^^^^^^^^^^^^^
 
@@ -54,7 +56,7 @@ The options are:
   the appended commands and dependencies apply to all configurations.
 
   The ``COMMENT``, ``MAIN_DEPENDENCY``, and ``WORKING_DIRECTORY``
-  options are currently ignored when APPEND is given, but may be
+  options are currently ignored when ``APPEND`` is given, but may be
   used in the future.
 
 ``BYPRODUCTS``
@@ -82,6 +84,10 @@ The options are:
   The :ref:`Makefile Generators` will remove ``BYPRODUCTS`` and other
   :prop_sf:`GENERATED` files during ``make clean``.
 
+  This keyword cannot be used with ``APPEND`` (see policy :policy:`CMP0175`).
+  All byproducts must be set in the first call to
+  ``add_custom_command(OUTPUT...)`` for the output files.
+
   .. versionadded:: 3.20
     Arguments to ``BYPRODUCTS`` may use a restricted set of
     :manual:`generator expressions <cmake-generator-expressions(7)>`.
@@ -95,11 +101,15 @@ The options are:
 
 ``COMMAND``
   Specify the command-line(s) to execute at build time.
-  If more than one ``COMMAND`` is specified they will be executed in order,
+  At least one ``COMMAND`` would normally be given, but certain patterns
+  may omit it, such as adding commands in separate calls using `APPEND`.
+
+  If more than one ``COMMAND`` is specified, they will be executed in order,
   but *not* necessarily composed into a stateful shell or batch script.
-  (To run a full script, use the :command:`configure_file` command or the
+  To run a full script, use the :command:`configure_file` command or the
   :command:`file(GENERATE)` command to create it, and then specify
-  a ``COMMAND`` to launch it.)
+  a ``COMMAND`` to launch it.
+
   The optional ``ARGS`` argument is for backward compatibility and
   will be ignored.
 
@@ -144,7 +154,8 @@ The options are:
 
 ``COMMENT``
   Display the given message before the commands are executed at
-  build time.
+  build time.  This will be ignored if ``APPEND`` is given, although a future
+  version may use it.
 
   .. versionadded:: 3.26
     Arguments to ``COMMENT`` may use
@@ -204,6 +215,10 @@ The options are:
   ``${CC} "-I$<JOIN:$<TARGET_PROPERTY:foo,INCLUDE_DIRECTORIES>,;-I>" foo.cc``
   to be properly expanded.
 
+  This keyword cannot be used with ``APPEND`` (see policy :policy:`CMP0175`).
+  If the appended commands need this option to be set, it must be set on the
+  first call to ``add_custom_command(OUTPUT...)`` for the output files.
+
 ``CODEGEN``
   .. versionadded:: 3.31
 
@@ -215,6 +230,10 @@ The options are:
   :ref:`Makefile Generators`, and is ignored by other generators.
   Furthermore, this option is allowed only if policy :policy:`CMP0171`
   is set to ``NEW``.
+
+  This keyword cannot be used with ``APPEND`` (see policy :policy:`CMP0175`).
+  It can only be set on the first call to ``add_custom_command(OUTPUT...)``
+  for the output files.
 
 ``IMPLICIT_DEPENDS``
   Request scanning of implicit dependencies of an input file.
@@ -240,6 +259,10 @@ The options are:
   Using a pool that is not defined by :prop_gbl:`JOB_POOLS` causes
   an error by ninja at build time.
 
+  This keyword cannot be used with ``APPEND`` (see policy :policy:`CMP0175`).
+  Job pools can only be specified in the first call to
+  ``add_custom_command(OUTPUT...)`` for the output files.
+
 ``JOB_SERVER_AWARE``
   .. versionadded:: 3.28
 
@@ -251,6 +274,10 @@ The options are:
 
   This option is silently ignored by other generators.
 
+  This keyword cannot be used with ``APPEND`` (see policy :policy:`CMP0175`).
+  Job server awareness can only be specified in the first call to
+  ``add_custom_command(OUTPUT...)`` for the output files.
+
 .. _`GNU Make Documentation`: https://www.gnu.org/software/make/manual/html_node/MAKE-Variable.html
 
 ``MAIN_DEPENDENCY``
@@ -261,6 +288,9 @@ The options are:
   specifying it as its main dependency. A compile command (i.e. for a
   library or an executable) counts as an implicit main dependency which
   gets silently overwritten by a custom command specification.
+
+  This option is currently ignored if ``APPEND`` is given, but a future
+  version may use it.
 
 ``OUTPUT``
   Specify the output files the command is expected to produce.
@@ -306,6 +336,10 @@ The options are:
   With the :generator:`Ninja` generator, this places the command in
   the ``console`` :prop_gbl:`pool <JOB_POOLS>`.
 
+  This keyword cannot be used with ``APPEND`` (see policy :policy:`CMP0175`).
+  If the appended commands need access to the terminal, it must be set on
+  the first call to ``add_custom_command(OUTPUT...)`` for the output files.
+
 ``VERBATIM``
   All arguments to the commands will be escaped properly for the
   build tool so that the invoked command receives each argument
@@ -316,10 +350,17 @@ The options are:
   is platform specific because there is no protection of
   tool-specific special characters.
 
+  This keyword cannot be used with ``APPEND`` (see policy :policy:`CMP0175`).
+  If the appended commands need to be treated as ``VERBATIM``, it must be set
+  on the first call to ``add_custom_command(OUTPUT...)`` for the output files.
+
 ``WORKING_DIRECTORY``
   Execute the command with the given current working directory.
-  If it is a relative path it will be interpreted relative to the
+  If it is a relative path, it will be interpreted relative to the
   build tree directory corresponding to the current source directory.
+
+  This option is currently ignored if ``APPEND`` is given, but a future
+  version may use it.
 
   .. versionadded:: 3.13
     Arguments to ``WORKING_DIRECTORY`` may use
@@ -406,6 +447,10 @@ The options are:
   :ref:`Makefile Generators`, :ref:`Visual Studio Generators`,
   and the :generator:`Xcode` generator.
 
+  This keyword cannot be used with ``APPEND`` (see policy :policy:`CMP0175`).
+  Depfiles can only be set on the first call to
+  ``add_custom_command(OUTPUT...)`` for the output files.
+
 ``DEPENDS_EXPLICIT_ONLY``
 
   .. versionadded:: 3.27
@@ -420,6 +465,10 @@ The options are:
 
   This option can be enabled on all custom commands by setting
   :variable:`CMAKE_ADD_CUSTOM_COMMAND_DEPENDS_EXPLICIT_ONLY` to ``ON``.
+
+  This keyword cannot be used with ``APPEND`` (see policy :policy:`CMP0175`).
+  It can only be set on the first call to ``add_custom_command(OUTPUT...)``
+  for the output files.
 
   Only the :ref:`Ninja Generators` actually use this information to remove
   unnecessary implicit dependencies.
@@ -575,9 +624,11 @@ of the following is specified:
   Run after all other rules within the target have been executed.
 
 Projects should always specify one of the above three keywords when using
-the ``TARGET`` form.  For backward compatibility reasons, ``POST_BUILD`` is
-assumed if no such keyword is given, but projects should explicitly provide
-one of the keywords to make clear the behavior they expect.
+the ``TARGET`` form.  See policy :policy:`CMP0175`.
+
+All other keywords shown in the signature above have the same meaning as they
+do for the :command:`add_custom_command(OUTPUT)` form of the command.
+At least one ``COMMAND`` must be given, see policy :policy:`CMP0175`.
 
 .. note::
   Because generator expressions can be used in custom commands,

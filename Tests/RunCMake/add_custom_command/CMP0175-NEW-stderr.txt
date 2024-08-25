@@ -1,0 +1,29 @@
+CMake Error at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
+  The following keywords are not supported when using
+  add_custom_command\(TARGET\): DEPENDS, DEPENDS_EXPLICIT_ONLY, DEPFILE,
+  JOB_POOL, MAIN_DEPENDENCY
+Call Stack \(most recent call first\):
+  CMP0175-NEW\.cmake:2 \(include\)
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
+  The following keywords are not supported when using
+  add_custom_command\(TARGET\): IMPLICIT_DEPENDS, USES_TERMINAL
+Call Stack \(most recent call first\):
+  CMP0175-NEW\.cmake:2 \(include\)
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
+  Exactly one of PRE_BUILD, PRE_LINK, or POST_BUILD must be given\.
+Call Stack \(most recent call first\):
+  CMP0175-NEW\.cmake:2 \(include\)
+  CMakeLists\.txt:3 \(include\)
+
+
+CMake Error at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
+  Exactly one of PRE_BUILD, PRE_LINK, or POST_BUILD must be given\.
+Call Stack \(most recent call first\):
+  CMP0175-NEW\.cmake:2 \(include\)
+  CMakeLists\.txt:3 \(include\)
