@@ -71,7 +71,7 @@ const cmDocumentationEntry cmDocumentationUsageNote = {
   "Run 'cmake --help' for more information."
 };
 
-const cmDocumentationEntry cmDocumentationOptions[33] = {
+const cmDocumentationEntry cmDocumentationOptions[34] = {
   { "--preset <preset>,--preset=<preset>", "Specify a configure preset." },
   { "--list-presets[=<type>]", "List available presets." },
   { "--workflow [<options>]", "Run a workflow preset." },
@@ -94,6 +94,8 @@ const cmDocumentationEntry cmDocumentationOptions[33] = {
     "Generate graphviz of dependencies, see CMakeGraphVizOptions.cmake for "
     "more." },
   { "--system-information [file]", "Dump information about this system." },
+  { "--print-config-dir",
+    "Print CMake config directory for user-wide FileAPI queries." },
   { "--log-level=<ERROR|WARNING|NOTICE|STATUS|VERBOSE|DEBUG|TRACE>",
     "Set the verbosity of messages from CMake files. "
     "--loglevel is also accepted for backward compatibility reasons." },

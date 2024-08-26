@@ -266,6 +266,14 @@ Options
  from the top of a binary tree for a CMake project it will dump
  additional information such as the cache, log files etc.
 
+.. option:: --print-config-dir
+
+ .. versionadded:: 3.31
+
+ Print CMake config directory for user-wide FileAPI queries.
+
+ See :envvar:`CMAKE_CONFIG_DIR` for more details.
+
 .. option:: --log-level=<level>
 
  .. versionadded:: 3.16
