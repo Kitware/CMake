@@ -533,7 +533,11 @@ class cmMakefile;
          "the CPack WIX Generator.",                                          \
          3, 31, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0173, "The CMakeFindFrameworks module is removed.", 3,    \
-         31, 0, cmPolicies::WARN)
+         31, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0174,                                                     \
+         "cmake_parse_arguments(PARSE_ARGV) defines a variable for an empty " \
+         "string after a single-value keyword.",                              \
+         3, 31, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
