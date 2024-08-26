@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 #include <cstdint>
-#include <functional>
 #include <memory>
 #include <string>
 #include <unordered_set>

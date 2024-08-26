@@ -9,6 +9,7 @@ include_directories(
   )
 
 set(CMakeLib_TESTS
+  testAssert.cxx
   testArgumentParser.cxx
   testCTestBinPacker.cxx
   testCTestResourceAllocator.cxx

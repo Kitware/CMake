@@ -3,7 +3,6 @@
 
 #include <chrono>
 #include <cstdio>
-#include <functional>
 #include <future>
 #include <memory>
 #include <string>

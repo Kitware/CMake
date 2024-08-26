@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 
 #include <cstring>
-#include <iostream>
 #include <iterator>
 #include <sstream>
 #include <stdexcept>
