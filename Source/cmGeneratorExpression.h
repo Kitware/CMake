@@ -78,7 +78,7 @@ public:
   }
   static inline bool StartsWithGeneratorExpression(const char* input)
   {
-    return input != nullptr && input[0] == '$' && input[1] == '<';
+    return input && input[0] == '$' && input[1] == '<';
   }
 
   static void ReplaceInstallPrefix(std::string& input,

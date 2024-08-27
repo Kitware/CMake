@@ -967,7 +967,7 @@ int cmCPackGenerator::InstallCMakeProject(
       std::string absoluteDestFileComponent =
         std::string("CPACK_ABSOLUTE_DESTINATION_FILES") + "_" +
         this->GetComponentInstallSuffix(component);
-      if (nullptr != this->GetOption(absoluteDestFileComponent)) {
+      if (this->GetOption(absoluteDestFileComponent)) {
         std::string absoluteDestFilesListComponent =
           cmStrCat(this->GetOption(absoluteDestFileComponent), ';', *d);
         this->SetOption(absoluteDestFileComponent,
@@ -1266,7 +1266,7 @@ int cmCPackGenerator::Initialize(const std::string& name, cmMakefile* mf)
   if (val1 != val2) {
     // One variable is set but not the other?
     // Then set the other variable to the same value (even if it is invalid).
-    if (val1.Get() != nullptr && val2.Get() == nullptr) {
+    if (val1.Get() && !val2.Get()) {
       cmCPackLogger(cmCPackLog::LOG_WARNING,
                     "Variable CPACK_TEMPORARY_INSTALL_DIRECTORY is set, which "
                     "is not recommended. For backwards-compatibility we will "
@@ -1274,7 +1274,7 @@ int cmCPackGenerator::Initialize(const std::string& name, cmMakefile* mf)
                     "proceed. However, better set neither of them!"
                       << std::endl);
       this->MakefileMap->AddDefinition("CPACK_TEMPORARY_DIRECTORY", val1);
-    } else if (val1.Get() == nullptr && val2.Get() != nullptr) {
+    } else if (!val1.Get() && val2.Get()) {
       cmCPackLogger(
         cmCPackLog::LOG_WARNING,
         "Variable CPACK_TEMPORARY_DIRECTORY is set, which is not recommended."
@@ -1301,7 +1301,7 @@ int cmCPackGenerator::Initialize(const std::string& name, cmMakefile* mf)
                       << std::endl);
       return 0;
     }
-  } else if (val1.Get() != nullptr && val2.Get() != nullptr) {
+  } else if (val1.Get() && val2.Get()) {
     cmCPackLogger(cmCPackLog::LOG_WARNING,
                   "Variables CPACK_TEMPORARY_DIRECTORY and "
                   "CPACK_TEMPORARY_INSTALL_DIRECTORY are both set. Because "

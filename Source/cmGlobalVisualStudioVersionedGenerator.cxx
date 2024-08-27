@@ -56,7 +56,7 @@ static bool VSIsArm64Host()
   USHORT processMachine;
   USHORT nativeMachine;
 
-  return s_IsWow64Process2Impl != nullptr &&
+  return s_IsWow64Process2Impl &&
     s_IsWow64Process2Impl(GetCurrentProcess(), &processMachine,
                           &nativeMachine) &&
     nativeMachine == IMAGE_FILE_MACHINE_ARM64;

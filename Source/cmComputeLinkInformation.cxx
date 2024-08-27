@@ -578,8 +578,7 @@ bool cmComputeLinkInformation::Compute()
     if (linkEntry.Kind == cmComputeLinkDepends::LinkEntry::Group) {
       const auto& groupFeature = this->GetGroupFeature(linkEntry.Feature);
       if (groupFeature.Supported) {
-        if (linkEntry.Item.Value == "</LINK_GROUP>" &&
-            currentFeature != nullptr) {
+        if (linkEntry.Item.Value == "</LINK_GROUP>" && currentFeature) {
           // emit feature suffix, if any
           if (!currentFeature->Suffix.empty()) {
             this->Items.emplace_back(
@@ -599,8 +598,7 @@ bool cmComputeLinkInformation::Compute()
       continue;
     }
 
-    if (currentFeature != nullptr &&
-        linkEntry.Feature != currentFeature->Name) {
+    if (currentFeature && linkEntry.Feature != currentFeature->Name) {
       // emit feature suffix, if any
       if (!currentFeature->Suffix.empty()) {
         this->Items.emplace_back(
@@ -612,8 +610,7 @@ bool cmComputeLinkInformation::Compute()
     }
 
     if (linkEntry.Feature != DEFAULT &&
-        (currentFeature == nullptr ||
-         linkEntry.Feature != currentFeature->Name)) {
+        (!currentFeature || linkEntry.Feature != currentFeature->Name)) {
       if (!this->AddLibraryFeature(linkEntry.Feature)) {
         continue;
       }
@@ -633,7 +630,7 @@ bool cmComputeLinkInformation::Compute()
     }
   }
 
-  if (currentFeature != nullptr) {
+  if (currentFeature) {
     // emit feature suffix, if any
     if (!currentFeature->Suffix.empty()) {
       this->Items.emplace_back(
@@ -738,13 +735,13 @@ public:
 private:
   std::string ExpandVariable(std::string const& variable) override
   {
-    if (this->Library != nullptr && variable == "LIBRARY") {
+    if (this->Library && variable == "LIBRARY") {
       return *this->Library;
     }
-    if (this->LibItem != nullptr && variable == "LIB_ITEM") {
+    if (this->LibItem && variable == "LIB_ITEM") {
       return *this->LibItem;
     }
-    if (this->LinkItem != nullptr && variable == "LINK_ITEM") {
+    if (this->LinkItem && variable == "LINK_ITEM") {
       return *this->LinkItem;
     }
 

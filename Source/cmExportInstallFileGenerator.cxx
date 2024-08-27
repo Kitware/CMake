@@ -231,7 +231,7 @@ cmStateEnums::TargetType cmExportInstallFileGenerator::GetExportTargetType(
   // An OBJECT library installed with no OBJECTS DESTINATION
   // is transformed to an INTERFACE library.
   if (targetType == cmStateEnums::OBJECT_LIBRARY &&
-      targetExport->ObjectsGenerator == nullptr) {
+      !targetExport->ObjectsGenerator) {
     targetType = cmStateEnums::INTERFACE_LIBRARY;
   }
   return targetType;

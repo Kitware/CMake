@@ -297,7 +297,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
   // if cmExportBuildFileGenerator is already defined for the file
   // and APPEND is not specified, if CMP0103 is OLD ignore previous definition
   // else raise an error
-  if (gg->GetExportedTargetsFile(fname) != nullptr) {
+  if (gg->GetExportedTargetsFile(fname)) {
     switch (mf.GetPolicyStatus(cmPolicies::CMP0103)) {
       case cmPolicies::WARN:
         mf.IssueMessage(
@@ -332,7 +332,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
   ebfg->SetExportFile(fname.c_str());
   ebfg->SetNamespace(arguments.Namespace);
   ebfg->SetCxxModuleDirectory(arguments.CxxModulesDirectory);
-  if (exportSet != nullptr) {
+  if (exportSet) {
     ebfg->SetExportSet(exportSet);
   } else {
     ebfg->SetTargets(targets);
@@ -345,7 +345,7 @@ bool cmExportCommand(std::vector<std::string> const& args,
   for (std::string const& ct : configurationTypes) {
     ebfg->AddConfiguration(ct);
   }
-  if (exportSet != nullptr) {
+  if (exportSet) {
     gg->AddBuildExportExportSet(ebfg.get());
   } else {
     gg->AddBuildExportSet(ebfg.get());

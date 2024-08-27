@@ -21,14 +21,14 @@ public:
   SmartCOMPtr(T* p)
   {
     ptr = p;
-    if (ptr != nullptr) {
+    if (ptr) {
       ptr->AddRef();
     }
   }
   SmartCOMPtr(const SmartCOMPtr<T>& sptr)
   {
     ptr = sptr.ptr;
-    if (ptr != nullptr) {
+    if (ptr) {
       ptr->AddRef();
     }
   }
@@ -38,7 +38,7 @@ public:
   {
     if (*this != p) {
       ptr = p;
-      if (ptr != nullptr) {
+      if (ptr) {
         ptr->AddRef();
       }
     }
@@ -48,7 +48,7 @@ public:
   template <class I>
   HRESULT QueryInterface(REFCLSID rclsid, I** pp)
   {
-    if (pp != nullptr) {
+    if (pp) {
       return ptr->QueryInterface(rclsid, (void**)pp);
     }
     return E_FAIL;
@@ -62,7 +62,7 @@ public:
   }
   ~SmartCOMPtr()
   {
-    if (ptr != nullptr) {
+    if (ptr) {
       ptr->Release();
     }
   }

@@ -55,7 +55,7 @@ struct SignalHandlerGuard
 {
   explicit SignalHandlerGuard(const char* name)
   {
-    LastName = name != nullptr ? name : "????";
+    LastName = name ? name : "????";
 
     signal(SIGSEGV, TrapsForSignals);
 #ifdef SIGBUS
@@ -96,7 +96,7 @@ struct LoadedCommandImpl : cmLoadedCommandInfo
 #endif
       this->Destructor(this);
     }
-    if (this->Error != nullptr) {
+    if (this->Error) {
       free(this->Error);
     }
   }

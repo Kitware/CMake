@@ -906,7 +906,7 @@ bool cmQtAutoMocUicT::JobT::RunProcess(GenT genType,
   // Log command
   if (this->Log().Verbose()) {
     cm::string_view info;
-    if (infoMessage != nullptr) {
+    if (infoMessage) {
       info = *infoMessage;
     }
     this->Log().Info(
@@ -991,7 +991,7 @@ bool cmQtAutoMocUicT::JobMocPredefsT::Update(std::string* reason) const
 {
   // Test if the file exists
   if (!this->MocEval().PredefsTime.Load(this->MocConst().PredefsFileAbs)) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ",
                          this->MessagePath(this->MocConst().PredefsFileAbs),
                          ", because it doesn't exist.");
@@ -1001,7 +1001,7 @@ bool cmQtAutoMocUicT::JobMocPredefsT::Update(std::string* reason) const
 
   // Test if the settings changed
   if (this->MocConst().SettingsChanged) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ",
                          this->MessagePath(this->MocConst().PredefsFileAbs),
                          ", because the moc settings changed.");
@@ -1015,7 +1015,7 @@ bool cmQtAutoMocUicT::JobMocPredefsT::Update(std::string* reason) const
     cmFileTime execTime;
     if (execTime.Load(exec)) {
       if (this->MocEval().PredefsTime.Older(execTime)) {
-        if (reason != nullptr) {
+        if (reason) {
           *reason = cmStrCat(
             "Generating ", this->MessagePath(this->MocConst().PredefsFileAbs),
             " because it is older than ", this->MessagePath(exec), '.');
@@ -1853,7 +1853,7 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
   // Test if the output file exists
   cmFileTime outputFileTime;
   if (!outputFileTime.Load(outputFile)) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                          ", because it doesn't exist, from ",
                          this->MessagePath(sourceFile));
@@ -1863,7 +1863,7 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
 
   // Test if any setting changed
   if (this->MocConst().SettingsChanged) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                          ", because the moc settings changed, from ",
                          this->MessagePath(sourceFile));
@@ -1873,7 +1873,7 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
 
   // Test if the source file is newer
   if (outputFileTime.Older(mapping.SourceFile->FileTime)) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                          ", because it's older than its source file, from ",
                          this->MessagePath(sourceFile));
@@ -1884,7 +1884,7 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
   // Test if the moc_predefs file is newer
   if (!this->MocConst().PredefsFileAbs.empty()) {
     if (outputFileTime.Older(this->MocEval().PredefsTime)) {
-      if (reason != nullptr) {
+      if (reason) {
         *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                            ", because it's older than ",
                            this->MessagePath(this->MocConst().PredefsFileAbs),
@@ -1896,7 +1896,7 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
 
   // Test if the moc executable is newer
   if (outputFileTime.Older(this->MocConst().ExecutableTime)) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                          ", because it's older than the moc executable, from ",
                          this->MessagePath(sourceFile));
@@ -1915,7 +1915,7 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
       // Find dependency file
       auto const depMatch = this->FindDependency(sourceDir, dep);
       if (depMatch.first.empty()) {
-        if (reason != nullptr) {
+        if (reason) {
           *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                              " from ", this->MessagePath(sourceFile),
                              ", because its dependency ",
@@ -1928,7 +1928,7 @@ bool cmQtAutoMocUicT::JobProbeDepsMocT::Probe(MappingT const& mapping,
 
       // Test if dependency file is older
       if (outputFileTime.Older(depMatch.second)) {
-        if (reason != nullptr) {
+        if (reason) {
           *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                              ", because it's older than its dependency file ",
                              this->MessagePath(depMatch.first), ", from ",
@@ -2003,7 +2003,7 @@ bool cmQtAutoMocUicT::JobProbeDepsUicT::Probe(MappingT const& mapping,
   // Test if the build file exists
   cmFileTime outputFileTime;
   if (!outputFileTime.Load(outputFile)) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                          ", because it doesn't exist, from ",
                          this->MessagePath(sourceFile));
@@ -2013,7 +2013,7 @@ bool cmQtAutoMocUicT::JobProbeDepsUicT::Probe(MappingT const& mapping,
 
   // Test if the uic settings changed
   if (this->UicConst().SettingsChanged) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                          ", because the uic settings changed, from ",
                          this->MessagePath(sourceFile));
@@ -2023,7 +2023,7 @@ bool cmQtAutoMocUicT::JobProbeDepsUicT::Probe(MappingT const& mapping,
 
   // Test if the source file is newer
   if (outputFileTime.Older(mapping.SourceFile->FileTime)) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                          " because it's older than the source file ",
                          this->MessagePath(sourceFile));
@@ -2033,7 +2033,7 @@ bool cmQtAutoMocUicT::JobProbeDepsUicT::Probe(MappingT const& mapping,
 
   // Test if the uic executable is newer
   if (outputFileTime.Older(this->UicConst().ExecutableTime)) {
-    if (reason != nullptr) {
+    if (reason) {
       *reason = cmStrCat("Generating ", this->MessagePath(outputFile),
                          ", because it's older than the uic executable, from ",
                          this->MessagePath(sourceFile));

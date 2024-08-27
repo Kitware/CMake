@@ -1265,9 +1265,9 @@ static std::string cmLocalVisualStudio7GeneratorEscapeForXML(
 
 static std::string GetEscapedPropertyIfValueNotNULL(const char* propertyValue)
 {
-  return propertyValue == nullptr
-    ? std::string()
-    : cmLocalVisualStudio7GeneratorEscapeForXML(propertyValue);
+  return propertyValue
+    ? cmLocalVisualStudio7GeneratorEscapeForXML(propertyValue)
+    : std::string();
 }
 
 void cmLocalVisualStudio7Generator::OutputDeploymentDebuggerTool(

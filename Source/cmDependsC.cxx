@@ -96,7 +96,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   // loaded in ValidDeps with this path as a key.
   std::string obj_i = this->LocalGenerator->MaybeRelativeToTopBinDir(obj);
 
-  if (this->ValidDeps != nullptr) {
+  if (this->ValidDeps) {
     auto const tmpIt = this->ValidDeps->find(obj_i);
     if (tmpIt != this->ValidDeps->end()) {
       dependencies.insert(tmpIt->second.begin(), tmpIt->second.end());
@@ -295,7 +295,7 @@ void cmDependsC::ReadCacheFile()
           }
         }
       }
-    } else if (cacheEntry != nullptr) {
+    } else if (cacheEntry) {
       UnscannedEntry entry;
       entry.FileName = line;
       if (cmSystemTools::GetLineFromStream(fin, line)) {

@@ -1043,7 +1043,7 @@ void cmGeneratorTarget::AppendCustomCommandSideEffects(
     sideEffects.insert(this);
   } else {
     for (auto const& source : this->GetAllConfigSources()) {
-      if (source.Source->GetCustomCommand() != nullptr) {
+      if (source.Source->GetCustomCommand()) {
         sideEffects.insert(this);
         break;
       }
@@ -1192,7 +1192,7 @@ void cmGeneratorTarget::AddSystemIncludeCacheKey(
 
   cmLinkImplementation const* impl =
     this->GetLinkImplementation(config, UseTo::Compile);
-  if (impl != nullptr) {
+  if (impl) {
     auto runtimeEntries = impl->LanguageRuntimeLibraries.find(language);
     if (runtimeEntries != impl->LanguageRuntimeLibraries.end()) {
       for (auto const& lib : runtimeEntries->second) {
@@ -2846,8 +2846,7 @@ bool cmGeneratorTarget::ComputeCompileFeatures(
       }
 
       // Custom updates for the CUDA standard.
-      if (generatorTargetLanguageStandard != nullptr &&
-          (language.first == "CUDA")) {
+      if (generatorTargetLanguageStandard && (language.first == "CUDA")) {
         if (generatorTargetLanguageStandard->Value == "98") {
           this->LanguageStandardMap[key].Value = "03";
         }

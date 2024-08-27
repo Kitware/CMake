@@ -434,7 +434,7 @@ public:
         });
 #endif
 #ifdef CMake_ENABLE_DEBUGGER
-    if (this->Makefile->GetCMakeInstance()->GetDebugAdapter() != nullptr) {
+    if (this->Makefile->GetCMakeInstance()->GetDebugAdapter()) {
       this->Makefile->GetCMakeInstance()
         ->GetDebugAdapter()
         ->OnBeginFunctionCall(mf, lfc.FilePath, lff);
@@ -451,7 +451,7 @@ public:
     --this->Makefile->RecursionDepth;
     this->Makefile->Backtrace = this->Makefile->Backtrace.Pop();
 #ifdef CMake_ENABLE_DEBUGGER
-    if (this->Makefile->GetCMakeInstance()->GetDebugAdapter() != nullptr) {
+    if (this->Makefile->GetCMakeInstance()->GetDebugAdapter()) {
       this->Makefile->GetCMakeInstance()
         ->GetDebugAdapter()
         ->OnEndFunctionCall();
@@ -696,7 +696,7 @@ bool cmMakefile::ReadDependentFile(const std::string& filename,
   IncludeScope incScope(this, filenametoread, noPolicyScope);
 
 #ifdef CMake_ENABLE_DEBUGGER
-  if (this->GetCMakeInstance()->GetDebugAdapter() != nullptr) {
+  if (this->GetCMakeInstance()->GetDebugAdapter()) {
     this->GetCMakeInstance()->GetDebugAdapter()->OnBeginFileParse(
       this, filenametoread);
   }
@@ -706,7 +706,7 @@ bool cmMakefile::ReadDependentFile(const std::string& filename,
   if (!listFile.ParseFile(filenametoread.c_str(), this->GetMessenger(),
                           this->Backtrace)) {
 #ifdef CMake_ENABLE_DEBUGGER
-    if (this->GetCMakeInstance()->GetDebugAdapter() != nullptr) {
+    if (this->GetCMakeInstance()->GetDebugAdapter()) {
       this->GetCMakeInstance()->GetDebugAdapter()->OnEndFileParse();
     }
 #endif
@@ -715,7 +715,7 @@ bool cmMakefile::ReadDependentFile(const std::string& filename,
   }
 
 #ifdef CMake_ENABLE_DEBUGGER
-  if (this->GetCMakeInstance()->GetDebugAdapter() != nullptr) {
+  if (this->GetCMakeInstance()->GetDebugAdapter()) {
     this->GetCMakeInstance()->GetDebugAdapter()->OnEndFileParse();
     this->GetCMakeInstance()->GetDebugAdapter()->OnFileParsedSuccessfully(
       filenametoread, listFile.Functions);
@@ -818,7 +818,7 @@ bool cmMakefile::ReadListFile(const std::string& filename)
   ListFileScope scope(this, filenametoread);
 
 #ifdef CMake_ENABLE_DEBUGGER
-  if (this->GetCMakeInstance()->GetDebugAdapter() != nullptr) {
+  if (this->GetCMakeInstance()->GetDebugAdapter()) {
     this->GetCMakeInstance()->GetDebugAdapter()->OnBeginFileParse(
       this, filenametoread);
   }
@@ -828,7 +828,7 @@ bool cmMakefile::ReadListFile(const std::string& filename)
   if (!listFile.ParseFile(filenametoread.c_str(), this->GetMessenger(),
                           this->Backtrace)) {
 #ifdef CMake_ENABLE_DEBUGGER
-    if (this->GetCMakeInstance()->GetDebugAdapter() != nullptr) {
+    if (this->GetCMakeInstance()->GetDebugAdapter()) {
       this->GetCMakeInstance()->GetDebugAdapter()->OnEndFileParse();
     }
 #endif
@@ -837,7 +837,7 @@ bool cmMakefile::ReadListFile(const std::string& filename)
   }
 
 #ifdef CMake_ENABLE_DEBUGGER
-  if (this->GetCMakeInstance()->GetDebugAdapter() != nullptr) {
+  if (this->GetCMakeInstance()->GetDebugAdapter()) {
     this->GetCMakeInstance()->GetDebugAdapter()->OnEndFileParse();
     this->GetCMakeInstance()->GetDebugAdapter()->OnFileParsedSuccessfully(
       filenametoread, listFile.Functions);
@@ -866,7 +866,7 @@ bool cmMakefile::ReadListFileAsString(const std::string& content,
   }
 
 #ifdef CMake_ENABLE_DEBUGGER
-  if (this->GetCMakeInstance()->GetDebugAdapter() != nullptr) {
+  if (this->GetCMakeInstance()->GetDebugAdapter()) {
     this->GetCMakeInstance()->GetDebugAdapter()->OnFileParsedSuccessfully(
       filenametoread, listFile.Functions);
   }
@@ -1755,7 +1755,7 @@ void cmMakefile::Configure()
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentStart);
 
 #ifdef CMake_ENABLE_DEBUGGER
-  if (this->GetCMakeInstance()->GetDebugAdapter() != nullptr) {
+  if (this->GetCMakeInstance()->GetDebugAdapter()) {
     this->GetCMakeInstance()->GetDebugAdapter()->OnBeginFileParse(
       this, currentStart);
   }
@@ -1765,7 +1765,7 @@ void cmMakefile::Configure()
   if (!listFile.ParseFile(currentStart.c_str(), this->GetMessenger(),
                           this->Backtrace)) {
 #ifdef CMake_ENABLE_DEBUGGER
-    if (this->GetCMakeInstance()->GetDebugAdapter() != nullptr) {
+    if (this->GetCMakeInstance()->GetDebugAdapter()) {
       this->GetCMakeInstance()->GetDebugAdapter()->OnEndFileParse();
     }
 #endif
@@ -1774,7 +1774,7 @@ void cmMakefile::Configure()
   }
 
 #ifdef CMake_ENABLE_DEBUGGER
-  if (this->GetCMakeInstance()->GetDebugAdapter() != nullptr) {
+  if (this->GetCMakeInstance()->GetDebugAdapter()) {
     this->GetCMakeInstance()->GetDebugAdapter()->OnEndFileParse();
     this->GetCMakeInstance()->GetDebugAdapter()->OnFileParsedSuccessfully(
       currentStart, listFile.Functions);
@@ -2297,11 +2297,11 @@ cmSourceGroup* cmMakefile::GetSourceGroup(
     }
   }
 
-  if (sg != nullptr) {
+  if (sg) {
     // iterate through its children to find match source group
     for (unsigned int i = 1; i < name.size(); ++i) {
       sg = sg->LookupChild(name[i]);
-      if (sg == nullptr) {
+      if (!sg) {
         break;
       }
     }
@@ -2326,7 +2326,7 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
   for (i = lastElement; i >= 0; --i) {
     currentName.assign(name.begin(), name.begin() + i + 1);
     sg = this->GetSourceGroup(currentName);
-    if (sg != nullptr) {
+    if (sg) {
       break;
     }
   }
@@ -2365,7 +2365,7 @@ cmSourceGroup* cmMakefile::GetOrCreateSourceGroup(
   const std::vector<std::string>& folders)
 {
   cmSourceGroup* sg = this->GetSourceGroup(folders);
-  if (sg == nullptr) {
+  if (!sg) {
     this->AddSourceGroup(folders);
     sg = this->GetSourceGroup(folders);
   }
@@ -3872,7 +3872,7 @@ void cmMakefile::DisplayStatus(const std::string& message, float s) const
   cm->UpdateProgress(message, s);
 
 #ifdef CMake_ENABLE_DEBUGGER
-  if (cm->GetDebugAdapter() != nullptr) {
+  if (cm->GetDebugAdapter()) {
     cm->GetDebugAdapter()->OnMessageOutput(MessageType::MESSAGE, message);
   }
 #endif

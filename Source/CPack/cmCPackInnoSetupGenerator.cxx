@@ -423,7 +423,7 @@ bool cmCPackInnoSetupGenerator::ProcessFiles()
 
         params["DestDir"] = QuotePath(destDir);
 
-        if (component != nullptr && component->IsDownloaded) {
+        if (component && component->IsDownloaded) {
           const std::string& archiveName =
             cmSystemTools::GetFilenameWithoutLastExtension(
               component->ArchiveFile);
@@ -968,7 +968,7 @@ bool cmCPackInnoSetupGenerator::BuildDownloadedComponentArchive(
   }
 
   // Try to get the SHA256 hash of the archive file
-  if (hash == nullptr) {
+  if (!hash) {
     return true;
   }
 
@@ -1088,7 +1088,7 @@ std::string cmCPackInnoSetupGenerator::ISKeyValueLine(
 std::string cmCPackInnoSetupGenerator::CreateRecursiveComponentPath(
   cmCPackComponentGroup* group, const std::string& path)
 {
-  if (group == nullptr) {
+  if (!group) {
     return path;
   }
 
@@ -1100,7 +1100,7 @@ std::string cmCPackInnoSetupGenerator::CreateRecursiveComponentPath(
 void cmCPackInnoSetupGenerator::CreateRecursiveComponentGroups(
   cmCPackComponentGroup* group)
 {
-  if (group == nullptr) {
+  if (!group) {
     return;
   }
 

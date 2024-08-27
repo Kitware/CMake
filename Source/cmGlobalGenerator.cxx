@@ -3163,7 +3163,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
 
     // install_strip
     const char* install_strip = this->GetInstallStripTargetName();
-    if ((install_strip != nullptr) && (mf->IsSet("CMAKE_STRIP"))) {
+    if (install_strip && mf->IsSet("CMAKE_STRIP")) {
       gti.Name = install_strip;
       gti.Message = "Installing the project stripped...";
       gti.UsesTerminal = true;

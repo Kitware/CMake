@@ -2068,7 +2068,7 @@ std::string cmGlobalNinjaGenerator::CMakeCmd() const
 std::string cmGlobalNinjaGenerator::NinjaCmd() const
 {
   const auto& lgen = this->LocalGenerators[0];
-  if (lgen != nullptr) {
+  if (lgen) {
     return lgen->ConvertToOutputFormat(this->NinjaCommand,
                                        cmOutputConverter::SHELL);
   }

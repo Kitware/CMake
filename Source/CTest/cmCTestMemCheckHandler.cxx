@@ -68,7 +68,7 @@ public:
     std::ostringstream ostr;
     ostr << name << ":\n";
     int i = 0;
-    for (; atts[i] != nullptr; i += 2) {
+    for (; atts[i]; i += 2) {
       ostr << "   " << atts[i] << " - " << atts[i + 1] << "\n";
     }
     ostr << "\n";
@@ -79,7 +79,7 @@ public:
   const char* GetAttribute(const char* name, const char** atts)
   {
     int i = 0;
-    for (; atts[i] != nullptr; ++i) {
+    for (; atts[i]; ++i) {
       if (strcmp(name, atts[i]) == 0) {
         return atts[i + 1];
       }
@@ -282,7 +282,7 @@ void cmCTestMemCheckHandler::InitializeResultsVectors()
     nullptr
   };
   this->GlobalResults.clear();
-  for (int i = 0; cmCTestMemCheckResultStrings[i] != nullptr; ++i) {
+  for (int i = 0; cmCTestMemCheckResultStrings[i]; ++i) {
     this->ResultStrings.emplace_back(cmCTestMemCheckResultStrings[i]);
     this->ResultStringsLong.emplace_back(cmCTestMemCheckResultLongStrings[i]);
     this->GlobalResults.push_back(0);

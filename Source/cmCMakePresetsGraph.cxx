@@ -1202,12 +1202,12 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(bool allowNoFiles)
 
     const ConfigurePreset* configurePreset = nullptr;
     for (auto const& step : it.second.Unexpanded.Steps) {
-      if (configurePreset == nullptr && step.PresetType != Type::Configure) {
+      if (!configurePreset && step.PresetType != Type::Configure) {
         cmCMakePresetsErrors::FIRST_WORKFLOW_STEP_NOT_CONFIGURE(
           step.PresetName, &this->parseState);
         return false;
       }
-      if (configurePreset != nullptr && step.PresetType == Type::Configure) {
+      if (configurePreset && step.PresetType == Type::Configure) {
         cmCMakePresetsErrors::CONFIGURE_WORKFLOW_STEP_NOT_FIRST(
           step.PresetName, &this->parseState);
         return false;
@@ -1240,7 +1240,7 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(bool allowNoFiles)
       }
     }
 
-    if (configurePreset == nullptr) {
+    if (!configurePreset) {
       cmCMakePresetsErrors::NO_WORKFLOW_STEPS(it.first, &this->parseState);
       return false;
     }

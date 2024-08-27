@@ -3443,7 +3443,7 @@ void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
   }
 
   const char* PICValue = target->GetLinkPIEProperty(config);
-  if (PICValue == nullptr) {
+  if (!PICValue) {
     // POSITION_INDEPENDENT_CODE is not set
     return;
   }
@@ -3571,7 +3571,7 @@ void cmLocalGenerator::AppendCompileOptions(
   std::string& options, const std::vector<std::string>& options_vec,
   const char* regex) const
 {
-  if (regex != nullptr) {
+  if (regex) {
     // Filter flags upon specified reges.
     cmsys::RegularExpression r(regex);
 
@@ -3591,7 +3591,7 @@ void cmLocalGenerator::AppendCompileOptions(
   std::vector<BT<std::string>>& options,
   const std::vector<BT<std::string>>& options_vec, const char* regex) const
 {
-  if (regex != nullptr) {
+  if (regex) {
     // Filter flags upon specified regular expressions.
     cmsys::RegularExpression r(regex);
 

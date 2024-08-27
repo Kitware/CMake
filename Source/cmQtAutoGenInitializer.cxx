@@ -357,7 +357,7 @@ void cmQtAutoGenInitializer::AddAutogenExecutableToDependencies(
   cmQtAutoGenInitializer::GenVarsT const& genVars,
   std::vector<std::string>& dependencies) const
 {
-  if (genVars.ExecutableTarget != nullptr) {
+  if (genVars.ExecutableTarget) {
     dependencies.push_back(genVars.ExecutableTarget->Target->GetName());
   } else if (this->MultiConfig && this->UseBetterGraph) {
     cm::string_view const& configGenexWithCommandConfig =

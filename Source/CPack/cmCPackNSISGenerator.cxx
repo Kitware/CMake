@@ -304,7 +304,7 @@ int cmCPackNSISGenerator::PackageFiles()
 
     // Create installation groups first
     for (auto& group : this->ComponentGroups) {
-      if (group.second.ParentGroup == nullptr) {
+      if (!group.second.ParentGroup) {
         componentCode +=
           this->CreateComponentGroupDescription(&group.second, macrosOut);
       }

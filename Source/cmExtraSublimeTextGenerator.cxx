@@ -242,7 +242,7 @@ void cmExtraSublimeTextGenerator::AppendTarget(
   MapSourceFileFlags& sourceFileFlags, bool firstTarget)
 {
 
-  if (target != nullptr) {
+  if (target) {
     std::vector<cmSourceFile*> sourceFiles;
     target->GetSourceFiles(sourceFiles,
                            makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
