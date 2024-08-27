@@ -5,7 +5,7 @@
 CheckLibraryExists
 ------------------
 
-Check if the function exists.
+Check once if the function exists in system or specified library.
 
 .. command:: CHECK_LIBRARY_EXISTS
 
@@ -18,10 +18,11 @@ Check if the function exists.
     LIBRARY  - the name of the library you are looking for
     FUNCTION - the name of the function
     LOCATION - location where the library should be found
-    VARIABLE - variable to store the result
-               Will be created as an internal cache variable.
+    VARIABLE - internal cache variable to store the result
 
-
+Prefer using :module:`CheckSymbolExists` or :module:`CheckSourceCompiles`
+instead of this module for more robust detection if a function is available in
+a library.
 
 The following variables may be set before calling this macro to modify
 the way the check is run:
