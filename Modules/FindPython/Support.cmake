@@ -3903,11 +3903,12 @@ if ("NumPy" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Inte
 
   # Workaround Intel MKL library outputting a message in stdout, which cause
   # incorrect detection of numpy.get_include() and numpy.__version__
-  # See https://github.com/numpy/numpy/issues/23775
-  if(DEFINED ENV{MKL_ENABLE_INSTRUCTIONS})
-    set(_${_PYTHON_PREFIX}_BACKUP_ENV_VAR_MKL_ENABLE_INSTRUCTIONS ENV{MKL_ENABLE_INSTRUCTIONS})
+  # See https://github.com/numpy/numpy/issues/23775 and
+  # https://gitlab.kitware.com/cmake/cmake/-/issues/26240
+  if(NOT DEFINED ENV{MKL_ENABLE_INSTRUCTIONS})
+    set(_${_PYTHON_PREFIX}_UNSET_ENV_VAR_MKL_ENABLE_INSTRUCTIONS YES)
+    set(ENV{MKL_ENABLE_INSTRUCTIONS} "SSE4_2")
   endif()
-  set(ENV{MKL_ENABLE_INSTRUCTIONS} "SSE4_2")
 
   if (NOT _${_PYTHON_PREFIX}_NumPy_INCLUDE_DIR)
     execute_process(COMMAND ${${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c
@@ -3949,11 +3950,9 @@ if ("NumPy" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS AND ${_PYTHON_PREFIX}_Inte
     set (${_PYTHON_PREFIX}_NumPy_FOUND FALSE)
   endif()
 
-  # Restore previous value of MKL_ENABLE_INSTRUCTIONS
-  if(DEFINED _${_PYTHON_PREFIX}_BACKUP_ENV_VAR_MKL_ENABLE_INSTRUCTIONS)
-    set(ENV{MKL_ENABLE_INSTRUCTIONS} ${_${_PYTHON_PREFIX}_BACKUP_ENV_VAR_MKL_ENABLE_INSTRUCTIONS})
-    unset(_${_PYTHON_PREFIX}_BACKUP_ENV_VAR_MKL_ENABLE_INSTRUCTIONS)
-  else()
+  # Unset MKL_ENABLE_INSTRUCTIONS if set by us
+  if(DEFINED _${_PYTHON_PREFIX}_UNSET_ENV_VAR_MKL_ENABLE_INSTRUCTIONS)
+    unset(_${_PYTHON_PREFIX}_UNSET_ENV_VAR_MKL_ENABLE_INSTRUCTIONS)
     unset(ENV{MKL_ENABLE_INSTRUCTIONS})
   endif()
 
