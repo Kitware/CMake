@@ -3740,6 +3740,14 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
                                 _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_RELEASE
                                 _${_PYTHON_PREFIX}_RUNTIME_LIBRARY_DEBUG)
     endif()
+
+    if (WIN32 AND _${_PYTHON_PREFIX}_LIBRARY_RELEASE MATCHES "t${CMAKE_IMPORT_LIBRARY_SUFFIX}$")
+      # On windows, header file is shared between the different implementations
+      # So Py_GIL_DISABLED should be set explicitly
+      set (${_PYTHON_PREFIX}_DEFINITIONS Py_GIL_DISABLED=1)
+    else()
+      unset (${_PYTHON_PREFIX}_DEFINITIONS)
+    endif()
   endif()
 
   if ("SABI_LIBRARY" IN_LIST _${_PYTHON_PREFIX}_FIND_DEVELOPMENT_ARTIFACTS)
@@ -3768,6 +3776,14 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
       _python_set_library_dirs (${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_DIRS
                                 _${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_RELEASE
                                 _${_PYTHON_PREFIX}_RUNTIME_SABI_LIBRARY_DEBUG)
+    endif()
+
+    if (WIN32 AND _${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE MATCHES "t${CMAKE_IMPORT_LIBRARY_SUFFIX}$")
+      # On windows, header file is shared between the different implementations
+      # So Py_GIL_DISABLED should be set explicitly
+      set (${_PYTHON_PREFIX}_DEFINITIONS Py_GIL_DISABLED=1)
+    else()
+      unset (${_PYTHON_PREFIX}_DEFINITIONS)
     endif()
   endif()
 
@@ -4066,6 +4082,12 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
       set_property (TARGET ${__name}
                     PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${${_PYTHON_PREFIX}_INCLUDE_DIRS}")
 
+      if (${_PYTHON_PREFIX}_DEFINITIONS)
+        set_property (TARGET ${__name}
+                      PROPERTY INTERFACE_COMPILE_DEFINITIONS "${${_PYTHON_PREFIX}_DEFINITIONS}")
+      endif()
+
+
       if (${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_RUNTIME_${_PREFIX}LIBRARY_RELEASE)
         # System manage shared libraries in two parts: import and runtime
         if (${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_RELEASE AND ${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_DEBUG)
@@ -4121,6 +4143,11 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
       endif()
       set_property (TARGET ${__name}
                     PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${${_PYTHON_PREFIX}_INCLUDE_DIRS}")
+
+      if (${_PYTHON_PREFIX}_DEFINITIONS)
+        set_property (TARGET ${__name}
+                      PROPERTY INTERFACE_COMPILE_DEFINITIONS "${${_PYTHON_PREFIX}_DEFINITIONS}")
+      endif()
 
       # When available, enforce shared library generation with undefined symbols
       if (APPLE)
