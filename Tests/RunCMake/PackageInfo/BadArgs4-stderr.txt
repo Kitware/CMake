@@ -1,0 +1,2 @@
+CMake Error at BadArgs4.cmake:3 \(install\):
+  install APPENDIX and DEFAULT_TARGETS are mutually exclusive.

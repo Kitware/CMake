@@ -19,6 +19,7 @@ Synopsis
   install(`SCRIPT`_ <file> [...])
   install(`CODE`_ <code> [...])
   install(`EXPORT`_ <export-name> [...])
+  install(`PACKAGE_INFO`_ <package-name> [...])
   install(`RUNTIME_DEPENDENCY_SET`_ <set-name> [...])
 
 Introduction
@@ -905,6 +906,61 @@ Signatures
   ``mp_myexe`` as if the target were built in its own tree.
 
 .. signature::
+  install(PACKAGE_INFO <package-name> [...])
+
+  .. versionadded:: 3.31
+  .. note::
+
+    Experimental. Gated by ``CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO``.
+
+  Installs a |CPS|_ file exporting targets for dependent projects:
+
+  .. code-block:: cmake
+
+    install(PACKAGE_INFO <package-name> EXPORT <export-name>
+            [APPENDIX <appendix-name>]
+            [DESTINATION <dir>]
+            [LOWER_CASE_FILE]
+            [VERSION <version>
+             [COMPAT_VERSION <version>]
+             [VERSION_SCHEMA <string>]]
+            [DEFAULT_TARGETS <target>...]
+            [DEFAULT_CONFIGURATIONS <config>...]
+            [PERMISSIONS <permission>...]
+            [CONFIGURATIONS <config>...]
+            [COMPONENT <component>]
+            [EXCLUDE_FROM_ALL])
+
+  The ``PACKAGE_INFO`` form generates and installs a |CPS| file which describes
+  installed targets such that they can be consumed by another project.
+  Target installations are associated with the export ``<export-name>``
+  using the ``EXPORT`` option of the :command:`install(TARGETS)` signature
+  documented above.  Unlike :command:`install(EXPORT)`, this information is not
+  expressed in CMake code, and can be consumed by tools other than CMake.  When
+  imported into another CMake project, the imported targets will be prefixed
+  with ``<package-name>::``.  By default, the generated file will be called
+  ``<package-name>[-<appendix-name>].cps``.  If ``LOWER_CASE_FILE`` is given,
+  the package name as it appears on disk (in both the file name and install
+  destination) will be first converted to lower case.
+
+  If ``DESTINATION`` is not specified, a platform-specific default is used.
+
+  If ``APPENDIX`` is specified, rather than generating a top level package
+  specification, the specified targets will be exported as an appendix to the
+  named package.  Appendices may be used to separate less commonly used targets
+  (along with their external dependencies) from the rest of a package.  This
+  enables consumers to ignore transitive dependencies for targets that they
+  don't use, and also allows a single logical "package" to be composed of
+  artifacts produced by multiple build trees.
+
+  Appendices are not permitted to change basic package metadata; therefore,
+  none of ``VERSION``, ``COMPAT_VERSION``, ``VERSION_SCHEMA``,
+  ``DEFAULT_TARGETS`` or ``DEFAULT_CONFIGURATIONS`` may be specified in
+  combination with ``APPENDIX``.  Additionally, it is strongly recommended that
+  use of ``LOWER_CASE_FILE`` should be consistent between the main package and
+  any appendices.
+
+.. signature::
   install(RUNTIME_DEPENDENCY_SET <set-name> [...])
 
   .. versionadded:: 3.21
@@ -1096,3 +1152,6 @@ and by CPack. You can also invoke this script manually with
   This is an environment variable rather than a CMake variable. It allows you
   to change the installation prefix on UNIX systems. See :envvar:`DESTDIR` for
   details.
+
+.. _CPS: https://cps-org.github.io/cps/
+.. |CPS| replace:: Common Package Specification

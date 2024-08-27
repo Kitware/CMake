@@ -1,0 +1,2 @@
+CMake Error at BadArgs2.cmake:3 \(install\):
+  install VERSION_SCHEMA requires VERSION.

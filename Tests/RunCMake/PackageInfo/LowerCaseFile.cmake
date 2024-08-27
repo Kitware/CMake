@@ -1,0 +1,4 @@
+add_library(foo INTERFACE)
+install(TARGETS foo EXPORT foo DESTINATION .)
+install(PACKAGE_INFO LowerCase DESTINATION cps EXPORT foo LOWER_CASE_FILE)
+install(PACKAGE_INFO PreserveCase DESTINATION cps EXPORT foo)

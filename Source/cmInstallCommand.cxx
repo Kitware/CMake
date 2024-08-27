@@ -36,6 +36,7 @@
 #include "cmInstallGenerator.h"
 #include "cmInstallGetRuntimeDependenciesGenerator.h"
 #include "cmInstallImportedRuntimeArtifactsGenerator.h"
+#include "cmInstallPackageInfoExportGenerator.h"
 #include "cmInstallRuntimeDependencySet.h"
 #include "cmInstallRuntimeDependencySetGenerator.h"
 #include "cmInstallScriptGenerator.h"
@@ -2162,6 +2163,143 @@ bool HandleExportMode(std::vector<std::string> const& args,
   return true;
 }
 
+bool HandlePackageInfoMode(std::vector<std::string> const& args,
+                           cmExecutionStatus& status)
+{
+#ifndef CMAKE_BOOTSTRAP
+  if (!cmExperimental::HasSupportEnabled(
+        status.GetMakefile(), cmExperimental::Feature::ExportPackageInfo)) {
+    status.SetError("does not recognize sub-command PACKAGE_INFO");
+    return false;
+  }
+
+  Helper helper(status);
+
+  // This is the PACKAGE_INFO mode.
+  cmInstallCommandArguments ica(helper.DefaultComponentName);
+
+  ArgumentParser::NonEmpty<std::string> pkg;
+  ArgumentParser::NonEmpty<std::string> appendix;
+  ArgumentParser::NonEmpty<std::string> exportName;
+  bool lowerCase = false;
+  ArgumentParser::NonEmpty<std::string> version;
+  ArgumentParser::NonEmpty<std::string> versionCompat;
+  ArgumentParser::NonEmpty<std::string> versionSchema;
+  ArgumentParser::NonEmpty<std::vector<std::string>> defaultTargets;
+  ArgumentParser::NonEmpty<std::vector<std::string>> defaultConfigs;
+  ArgumentParser::NonEmpty<std::string> cxxModulesDirectory;
+
+  // TODO: Support DESTINATION.
+  ica.Bind("PACKAGE_INFO"_s, pkg);
+  ica.Bind("EXPORT"_s, exportName);
+  ica.Bind("APPENDIX"_s, appendix);
+  ica.Bind("LOWER_CASE_FILE"_s, lowerCase);
+  ica.Bind("VERSION"_s, version);
+  ica.Bind("COMPAT_VERSION"_s, versionCompat);
+  ica.Bind("VERSION_SCHEMA"_s, versionSchema);
+  ica.Bind("DEFAULT_TARGETS"_s, defaultTargets);
+  ica.Bind("DEFAULT_CONFIGURATIONS"_s, defaultConfigs);
+  // ica.Bind("CXX_MODULES_DIRECTORY"_s, cxxModulesDirectory); TODO?
+
+  std::vector<std::string> unknownArgs;
+  ica.Parse(args, &unknownArgs);
+
+  if (!unknownArgs.empty()) {
+    // Unknown argument.
+    status.SetError(
+      cmStrCat(args[0], " given unknown argument \"", unknownArgs[0], "\"."));
+    return false;
+  }
+
+  if (!ica.Finalize()) {
+    return false;
+  }
+
+  if (exportName.empty()) {
+    status.SetError(cmStrCat(args[0], " missing EXPORT."));
+    return false;
+  }
+
+  if (version.empty()) {
+    if (!versionCompat.empty()) {
+      status.SetError("COMPAT_VERSION requires VERSION.");
+      return false;
+    }
+    if (!versionSchema.empty()) {
+      status.SetError("VERSION_SCHEMA requires VERSION.");
+      return false;
+    }
+  } else {
+    if (!appendix.empty()) {
+      status.SetError("APPENDIX and VERSION are mutually exclusive.");
+      return false;
+    }
+  }
+  if (!appendix.empty()) {
+    if (!defaultTargets.empty()) {
+      status.SetError("APPENDIX and DEFAULT_TARGETS are mutually exclusive.");
+      return false;
+    }
+    if (!defaultConfigs.empty()) {
+      status.SetError("APPENDIX and DEFAULT_CONFIGURATIONS "
+                      "are mutually exclusive.");
+      return false;
+    }
+  }
+
+  // Validate the package name.
+  if (!cmGeneratorExpression::IsValidTargetName(pkg) ||
+      pkg.find(':') != std::string::npos) {
+    status.SetError(
+      cmStrCat(args[0], " given invalid package name \"", pkg, "\"."));
+    return false;
+  }
+
+  // Construct the case-normalized package name and the file name.
+  std::string const pkgNameOnDisk =
+    (lowerCase ? cmSystemTools::LowerCase(pkg) : pkg);
+  std::string pkgFileName = [&]() -> std::string {
+    if (appendix.empty()) {
+      return cmStrCat(pkgNameOnDisk, ".cps");
+    }
+    return cmStrCat(pkgNameOnDisk, '-', appendix, ".cps");
+  }();
+
+  // Get or construct the destination path.
+  std::string dest = ica.GetDestination();
+  if (dest.empty()) {
+    if (helper.Makefile->GetSafeDefinition("CMAKE_SYSTEM_NAME") == "Windows") {
+      dest = std::string{ "cps"_s };
+    } else {
+      dest = cmStrCat(helper.GetLibraryDestination(nullptr), "/cps/",
+                      pkgNameOnDisk);
+    }
+  }
+
+  cmExportSet& exportSet =
+    helper.Makefile->GetGlobalGenerator()->GetExportSets()[exportName];
+
+  cmInstallGenerator::MessageLevel message =
+    cmInstallGenerator::SelectMessageLevel(helper.Makefile);
+
+  // Create the export install generator.
+  helper.Makefile->AddInstallGenerator(
+    cm::make_unique<cmInstallPackageInfoExportGenerator>(
+      &exportSet, dest, ica.GetPermissions(), ica.GetConfigurations(),
+      ica.GetComponent(), message, ica.GetExcludeFromAll(),
+      std::move(pkgFileName), std::move(pkg), std::move(version),
+      std::move(versionCompat), std::move(versionSchema),
+      std::move(defaultTargets), std::move(defaultConfigs),
+      std::move(cxxModulesDirectory), helper.Makefile->GetBacktrace()));
+
+  return true;
+#else
+  static_cast<void>(args);
+  status.SetError("PACKAGE_INFO not supported in bootstrap cmake");
+  return false;
+#endif
+}
+
 bool HandleRuntimeDependencySetMode(std::vector<std::string> const& args,
                                     cmExecutionStatus& status)
 {
@@ -2525,6 +2663,7 @@ bool cmInstallCommand(std::vector<std::string> const& args,
     { "DIRECTORY"_s, HandleDirectoryMode },
     { "EXPORT"_s, HandleExportMode },
     { "EXPORT_ANDROID_MK"_s, HandleExportAndroidMKMode },
+    { "PACKAGE_INFO"_s, HandlePackageInfoMode },
     { "RUNTIME_DEPENDENCY_SET"_s, HandleRuntimeDependencySetMode },
   };
 

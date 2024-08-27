@@ -46,6 +46,16 @@ cmExperimental::FeatureData LookupTable[] = {
     {},
     cmExperimental::TryCompileCondition::Always,
     false },
+  // ExportPackageInfo
+  { "ExportPackageInfo",
+    "b80be207-778e-46ba-8080-b23bba22639e",
+    "CMAKE_EXPERIMENTAL_EXPORT_PACKAGE_INFO",
+    "CMake's support for exporting package information in the Common Package "
+    "Specification format. It is meant only for experimentation and feedback "
+    "to CMake developers.",
+    {},
+    cmExperimental::TryCompileCondition::Always,
+    false },
 };
 static_assert(sizeof(LookupTable) / sizeof(LookupTable[0]) ==
                 static_cast<size_t>(cmExperimental::Feature::Sentinel),
