@@ -226,6 +226,11 @@ This module will set the following variables in your project
 
   The Python 3 include directories.
 
+``Python3_DEFINITIONS``
+  .. versionadded:: 3.30.3
+
+  The Python 3 preprocessor definitions.
+
 ``Python3_DEBUG_POSTFIX``
   .. versionadded.. 3.30
 
