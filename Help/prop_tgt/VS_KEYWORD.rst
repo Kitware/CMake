@@ -6,4 +6,4 @@ for the :generator:`Visual Studio 9 2008` generator, and older,
 but all of those generators have been removed.
 
 Use the :prop_tgt:`VS_GLOBAL_KEYWORD` target property to set the
-keyword for Visual Studio 12 (2013) and newer.
+keyword for remaining :ref:`Visual Studio Generators`.

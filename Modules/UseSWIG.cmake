@@ -188,9 +188,8 @@ ensure generated files will receive the required settings.
   itself. This property is only meaningful for
   :ref:`Makefile <Makefile Generators>`,
   :ref:`Ninja <Ninja Generators>`, :generator:`Xcode`, and
-  :ref:`Visual Studio <Visual Studio Generators>`
-  (:generator:`Visual Studio 12 2013` and above) generators. Default value is
-  ``FALSE``.
+  :ref:`Visual Studio <Visual Studio Generators>` generators.
+  Default value is ``FALSE``.
 
   .. versionadded:: 3.21
     Added the support of :generator:`Xcode` generator.
@@ -352,9 +351,8 @@ as well as ``SWIG``:
   itself. This variable is only meaningful for
   :ref:`Makefile <Makefile Generators>`,
   :ref:`Ninja <Ninja Generators>`, :generator:`Xcode`, and
-  :ref:`Visual Studio <Visual Studio Generators>`
-  (:generator:`Visual Studio 12 2013` and above) generators. Default value is
-  ``FALSE``.
+  :ref:`Visual Studio <Visual Studio Generators>` generators.
+  Default value is ``FALSE``.
 
   Source file property ``USE_SWIG_DEPENDENCIES``, if not defined, will be
   initialized with the value of this variable.

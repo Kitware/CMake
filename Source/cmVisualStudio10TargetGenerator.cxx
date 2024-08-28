@@ -477,11 +477,6 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
     Elem e0(BuildFileStream, "Project");
     e0.Attribute("DefaultTargets", "Build");
     const char* toolsVersion = this->GlobalGenerator->GetToolsVersion();
-    if (this->GlobalGenerator->GetVersion() ==
-          cmGlobalVisualStudioGenerator::VSVersion::VS12 &&
-        this->GlobalGenerator->TargetsWindowsCE()) {
-      toolsVersion = "4.0";
-    }
     e0.Attribute("ToolsVersion", toolsVersion);
     e0.Attribute("xmlns",
                  "http://schemas.microsoft.com/developer/msbuild/2003");
@@ -644,11 +639,8 @@ void cmVisualStudio10TargetGenerator::WriteClassicMsBuildProjectFile(
 
       // Disable the project upgrade prompt that is displayed the first time a
       // project using an older toolset version is opened in a newer version of
-      // the IDE (respected by VS 2013 and above).
-      if (this->GlobalGenerator->GetVersion() >=
-          cmGlobalVisualStudioGenerator::VSVersion::VS12) {
-        e1.Element("VCProjectUpgraderObjectName", "NoUpgrade");
-      }
+      // the IDE.
+      e1.Element("VCProjectUpgraderObjectName", "NoUpgrade");
 
       if (const char* vcTargetsPath =
             this->GlobalGenerator->GetCustomVCTargetsPath()) {
