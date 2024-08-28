@@ -185,26 +185,6 @@ if(BUILD_TESTING)
   endif()
 
   if(WIN32)
-    # Macro to search for available Windows CE SDKs in the windows Registry
-    macro(select_wince_sdk selected_reg selected_sdk)
-      if(CMAKE_HOST_WIN32)
-        execute_process(COMMAND reg QUERY "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows CE Tools\\SDKs"
-                    OUTPUT_VARIABLE sdk_reg
-                    ERROR_VARIABLE my_err)
-        string(REGEX REPLACE "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\Wow6432Node\\\\Microsoft\\\\Windows CE Tools\\\\SDKs\\\\"  ";" sdk_list "${sdk_reg}")
-        list(LENGTH sdk_list sdk_list_len)
-        if(${sdk_list_len} GREATER 1)
-          list(GET sdk_list 1 _sdk) # The first entry is always empty due to the regex replace above
-          string(STRIP ${_sdk} _sdk) # Make sure there is no newline in the SDK name
-        endif()
-        # Build a key to be used by get_filename_component that is pointing to the SDK directory
-        set(_reg "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows CE Tools\\SDKs\\${_sdk}]")
-        # Set return values
-        set(${selected_reg} ${_reg})
-        set(${selected_sdk} ${_sdk})
-      endif(CMAKE_HOST_WIN32)
-    endmacro(select_wince_sdk)
-
     set(reg_vs10 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0;InstallDir]")
     set(reg_vs11 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0;InstallDir]")
     set(reg_vs12 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\12.0;InstallDir]")
@@ -214,10 +194,9 @@ if(BUILD_TESTING)
     set(reg_ws10_0 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\14.0\\Setup\\Build Tools for Windows 10;srcPath]")
     set(reg_wp80 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\WindowsPhone\\v8.0;InstallationFolder]")
     set(reg_wp81 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\WindowsPhone\\v8.1;InstallationFolder]")
-    select_wince_sdk(reg_wince wince_sdk)
     set(reg_tegra "[HKEY_LOCAL_MACHINE\\SOFTWARE\\NVIDIA Corporation\\Nsight Tegra;sdkRoot]")
     set(reg_nasm "[HKEY_CURRENT_USER\\SOFTWARE\\nasm]")
-    foreach(reg IN ITEMS vs10 vs11 vs12 vs14 ws80 ws81 ws10_0 wp80 wp81 wince tegra nasm)
+    foreach(reg IN ITEMS vs10 vs11 vs12 vs14 ws80 ws81 ws10_0 wp80 wp81 tegra nasm)
       get_filename_component(r "${reg_${reg}}" ABSOLUTE)
       if(IS_DIRECTORY "${r}" AND NOT "${r}" STREQUAL "/registry")
         set(${reg} 1)
@@ -2350,31 +2329,6 @@ if(BUILD_TESTING)
     if(vs12 AND wp81)
       add_test_VSWinStorePhone(vs12-phone81-X86 "Visual Studio 12 2013" WindowsPhone 8.1 Win32)
       add_test_VSWinStorePhone(vs12-phone81-ARM "Visual Studio 12 2013" WindowsPhone 8.1 ARM)
-    endif()
-  endif()
-
-  if(WIN32 AND wince)
-    macro(add_test_VSWinCE name generator systemName systemVersion generatorPlatform)
-      # TODO: Fix the tutorial to make it work in cross compile
-      # currently the MakeTable is build for target and can not be used on the host
-      # This happens in part 5 so we build only through part 4 of the tutorial.
-      foreach(STP RANGE 2 4)
-        add_test(NAME "TutorialStep${STP}.${name}" COMMAND ${CMAKE_CTEST_COMMAND}
-          --build-and-test
-          "${CMake_SOURCE_DIR}/Help/guide/tutorial/Step${STP}"
-          "${CMake_BINARY_DIR}/Tests/Tutorial/Step${STP}_${name}"
-          --build-generator "${generator}"
-          --build-project Tutorial
-          --build-config $<CONFIGURATION>
-          --build-options -DCMAKE_SYSTEM_NAME=${systemName}
-                          -DCMAKE_SYSTEM_VERSION=${systemVersion}
-                          -DCMAKE_GENERATOR_PLATFORM=${generatorPlatform})
-        list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Tutorial/Step${STP}_${name}")
-      endforeach()
-    endmacro()
-
-    if(vs12)
-      add_test_VSWinCE(vs12-ce80-ARM "Visual Studio 12 2013" WindowsCE 8.0 ${wince_sdk})
     endif()
   endif()
 
