@@ -2735,7 +2735,7 @@ bool cmake::StartDebuggerIfEnabled()
     return true;
   }
 
-  if (DebugAdapter == nullptr) {
+  if (!DebugAdapter) {
     if (this->GetDebuggerPipe().empty()) {
       std::cerr
         << "Error: --debugger-pipe must be set when debugging is enabled.\n";
@@ -2765,7 +2765,7 @@ void cmake::StopDebuggerIfNeeded(int exitCode)
   }
 
   // The debug adapter may have failed to start (e.g. invalid pipe path).
-  if (DebugAdapter != nullptr) {
+  if (DebugAdapter) {
     DebugAdapter->ReportExitCode(exitCode);
     DebugAdapter.reset();
   }

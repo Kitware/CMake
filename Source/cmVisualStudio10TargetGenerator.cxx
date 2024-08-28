@@ -5111,11 +5111,11 @@ std::string ComputeCertificateThumbprint(const std::string& source)
     cmsys::Encoding::ToWide(source.c_str()).c_str(), GENERIC_READ,
     FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 
-  if (certFile != INVALID_HANDLE_VALUE && certFile != nullptr) {
+  if (certFile != INVALID_HANDLE_VALUE && certFile) {
     DWORD fileSize = GetFileSize(certFile, nullptr);
     if (fileSize != INVALID_FILE_SIZE) {
       auto certData = cm::make_unique<BYTE[]>(fileSize);
-      if (certData != nullptr) {
+      if (certData) {
         DWORD dwRead = 0;
         if (ReadFile(certFile, certData.get(), fileSize, &dwRead, nullptr)) {
           cryptBlob.cbData = fileSize;
@@ -5126,11 +5126,11 @@ std::string ComputeCertificateThumbprint(const std::string& source)
             // Open the certificate as a store
             certStore =
               PFXImportCertStore(&cryptBlob, nullptr, CRYPT_EXPORTABLE);
-            if (certStore != nullptr) {
+            if (certStore) {
               // There should only be 1 cert.
               certContext =
                 CertEnumCertificatesInStore(certStore, certContext);
-              if (certContext != nullptr) {
+              if (certContext) {
                 // The hash is 20 bytes
                 BYTE hashData[20];
                 DWORD hashLength = 20;

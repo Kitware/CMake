@@ -538,8 +538,7 @@ int cmCTest::Initialize(const std::string& binary_dir,
         }
         tfin.close();
       }
-      if (tag.empty() || (nullptr != command) ||
-          this->Impl->Parts[PartStart]) {
+      if (tag.empty() || command || this->Impl->Parts[PartStart]) {
         cmCTestOptionalLog(
           this, DEBUG,
           "TestModel: " << this->GetTestModelString() << std::endl, quiet);
@@ -573,7 +572,7 @@ int cmCTest::Initialize(const std::string& binary_dir,
           }
         }
         ofs.close();
-        if (nullptr == command) {
+        if (!command) {
           cmCTestOptionalLog(this, OUTPUT,
                              "Create new tag: " << tag << " - "
                                                 << this->GetTestModelString()

@@ -1958,7 +1958,7 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
 
   /* Use uname if it's present, else uid. */
   p = archive_entry_uname(entry);
-  if ((p == nullptr) || (*p == '\0')) {
+  if (!p || (*p == '\0')) {
     snprintf(tmp, sizeof(tmp), "%lu ",
              static_cast<unsigned long>(archive_entry_uid(entry)));
     p = tmp;
@@ -1970,7 +1970,7 @@ void list_item_verbose(FILE* out, struct archive_entry* entry)
   fprintf(out, "%-*s ", static_cast<int>(u_width), p);
   /* Use gname if it's present, else gid. */
   p = archive_entry_gname(entry);
-  if (p != nullptr && p[0] != '\0') {
+  if (p && p[0] != '\0') {
     fprintf(out, "%s", p);
     w = strlen(p);
   } else {
@@ -2115,7 +2115,7 @@ bool extract_tar(const std::string& outFileName,
   struct archive_entry* entry;
 
   struct archive* matching = archive_match_new();
-  if (matching == nullptr) {
+  if (!matching) {
     cmSystemTools::Error("Out of memory");
     return false;
   }
@@ -2197,7 +2197,7 @@ bool extract_tar(const std::string& outFileName,
   }
 
   bool error_occured = false;
-  if (matching != nullptr) {
+  if (matching) {
     const char* p;
     int ar;
 

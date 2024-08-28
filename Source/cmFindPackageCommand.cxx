@@ -106,7 +106,7 @@ public:
 
 bool isDirentryToIgnore(const char* const fname)
 {
-  assert(fname != nullptr);
+  assert(fname);
   assert(fname[0] != 0);
   return fname[0] == '.' &&
     (fname[1] == 0 || (fname[1] == '.' && fname[2] == 0));

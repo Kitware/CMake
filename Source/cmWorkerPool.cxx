@@ -71,7 +71,7 @@ private:
 
 void cmUVPipeBuffer::reset()
 {
-  if (this->UVPipe_.get() != nullptr) {
+  if (this->UVPipe_.get()) {
     this->EndFunction_ = nullptr;
     this->DataFunction_ = nullptr;
     this->Buffer_.clear();
@@ -83,7 +83,7 @@ void cmUVPipeBuffer::reset()
 bool cmUVPipeBuffer::init(uv_loop_t* uv_loop)
 {
   this->reset();
-  if (uv_loop == nullptr) {
+  if (!uv_loop) {
     return false;
   }
   int ret = this->UVPipe_.init(*uv_loop, 0, this);
@@ -93,7 +93,7 @@ bool cmUVPipeBuffer::init(uv_loop_t* uv_loop)
 bool cmUVPipeBuffer::startRead(DataFunction dataFunction,
                                EndFunction endFunction)
 {
-  if (this->UVPipe_.get() == nullptr) {
+  if (!this->UVPipe_.get()) {
     return false;
   }
   if (!dataFunction || !endFunction) {
@@ -120,7 +120,7 @@ void cmUVPipeBuffer::UVData(uv_stream_t* stream, ssize_t nread,
 {
   auto& pipe = *reinterpret_cast<cmUVPipeBuffer*>(stream->data);
   if (nread > 0) {
-    if (buf->base != nullptr) {
+    if (buf->base) {
       // Call data function
       pipe.DataFunction_(DataRange(buf->base, buf->base + nread));
     }
@@ -200,7 +200,7 @@ void cmUVReadOnlyProcess::setup(cmWorkerPool::ProcessResultT* result,
 bool cmUVReadOnlyProcess::start(uv_loop_t* uv_loop,
                                 std::function<void()> finishedCallback)
 {
-  if (this->IsStarted() || (this->Result() == nullptr)) {
+  if (this->IsStarted() || !this->Result()) {
     return false;
   }
 
@@ -364,9 +364,8 @@ void cmUVReadOnlyProcess::UVTryFinish()
   // There still might be data in the pipes after the process has finished.
   // Therefore check if the process is finished AND all pipes are closed
   // before signaling the worker thread to continue.
-  if ((this->UVProcess_.get() != nullptr) ||
-      (this->UVPipeOut_.uv_pipe() != nullptr) ||
-      (this->UVPipeErr_.uv_pipe() != nullptr)) {
+  if ((this->UVProcess_.get()) || (this->UVPipeOut_.uv_pipe()) ||
+      (this->UVPipeErr_.uv_pipe())) {
     return;
   }
   this->IsFinished_ = true;

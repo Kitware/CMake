@@ -309,7 +309,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
           this->GetLinkImplementationLibraries(config, UseTo::Compile)) {
       for (cmLinkImplItem const& lib : impl->Libraries) {
         std::string libDir;
-        if (lib.Target == nullptr) {
+        if (!lib.Target) {
           libDir = cmSystemTools::CollapseFullPath(
             lib.AsStr(), this->Makefile->GetHomeOutputDirectory());
         } else if (lib.Target->Target->IsFrameworkOnApple() ||

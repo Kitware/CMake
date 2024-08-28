@@ -41,7 +41,7 @@ const std::string& cmInstallCommandArguments::GetDestination() const
   if (!this->DestinationString.empty()) {
     return this->DestinationString;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetDestination();
   }
   return EmptyString;
@@ -52,7 +52,7 @@ const std::string& cmInstallCommandArguments::GetComponent() const
   if (!this->Component.empty()) {
     return this->Component;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetComponent();
   }
   if (!this->DefaultComponentName.empty()) {
@@ -75,7 +75,7 @@ const std::string& cmInstallCommandArguments::GetRename() const
   if (!this->Rename.empty()) {
     return this->Rename;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetRename();
   }
   return EmptyString;
@@ -86,7 +86,7 @@ const std::string& cmInstallCommandArguments::GetPermissions() const
   if (!this->PermissionsString.empty()) {
     return this->PermissionsString;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetPermissions();
   }
   return EmptyString;
@@ -97,7 +97,7 @@ bool cmInstallCommandArguments::GetOptional() const
   if (this->Optional) {
     return true;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetOptional();
   }
   return false;
@@ -108,7 +108,7 @@ bool cmInstallCommandArguments::GetExcludeFromAll() const
   if (this->ExcludeFromAll) {
     return true;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetExcludeFromAll();
   }
   return false;
@@ -119,7 +119,7 @@ bool cmInstallCommandArguments::GetNamelinkOnly() const
   if (this->NamelinkOnly) {
     return true;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetNamelinkOnly();
   }
   return false;
@@ -130,7 +130,7 @@ bool cmInstallCommandArguments::GetNamelinkSkip() const
   if (this->NamelinkSkip) {
     return true;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetNamelinkSkip();
   }
   return false;
@@ -141,7 +141,7 @@ bool cmInstallCommandArguments::HasNamelinkComponent() const
   if (!this->NamelinkComponent.empty()) {
     return true;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->HasNamelinkComponent();
   }
   return false;
@@ -163,7 +163,7 @@ const std::vector<std::string>& cmInstallCommandArguments::GetConfigurations()
   if (!this->Configurations.empty()) {
     return this->Configurations;
   }
-  if (this->GenericArguments != nullptr) {
+  if (this->GenericArguments) {
     return this->GenericArguments->GetConfigurations();
   }
   return this->Configurations;

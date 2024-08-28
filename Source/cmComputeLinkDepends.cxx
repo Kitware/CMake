@@ -475,7 +475,7 @@ public:
     }
 
     // expand groups
-    if (this->Groups != nullptr) {
+    if (this->Groups) {
       for (const auto& group : *this->Groups) {
         const LinkEntry& groupEntry = this->Entries[group.first];
         auto it = this->FinalEntries.begin();
@@ -518,7 +518,7 @@ private:
     if (entry.Feature != cmComputeLinkDepends::LinkEntry::DEFAULT) {
       auto const& featureAttributes = GetLinkLibraryFeatureAttributes(
         this->Target->Makefile, this->LinkLanguage, entry.Feature);
-      if ((entry.Target == nullptr ||
+      if ((!entry.Target ||
            featureAttributes.LibraryTypes.find(entry.Target->GetType()) !=
              featureAttributes.LibraryTypes.end()) &&
           featureAttributes.Deduplication !=
@@ -530,7 +530,7 @@ private:
 
     return this->Deduplication == None ||
       (this->Deduplication == Shared &&
-       (entry.Target == nullptr ||
+       (!entry.Target ||
         entry.Target->GetType() != cmStateEnums::SHARED_LIBRARY)) ||
       (this->Deduplication == All && entry.Kind != LinkEntry::Library);
   }
@@ -1032,7 +1032,7 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
     if (item.Feature != LinkEntry::DEFAULT &&
         depender_index != cmComputeComponentGraph::INVALID_COMPONENT) {
       const auto& depender = this->EntryList[depender_index];
-      if (depender.Target != nullptr && depender.Target->IsImported() &&
+      if (depender.Target && depender.Target->IsImported() &&
           !IsFeatureSupported(this->Makefile, this->LinkLanguage,
                               item.Feature)) {
         this->CMakeInstance->IssueMessage(
@@ -1085,7 +1085,7 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
         inGroup) {
       const auto& depender = this->EntryList[depender_index];
       const auto& groupFeature = this->EntryList[groupIndex.first].Feature;
-      if (depender.Target != nullptr && depender.Target->IsImported() &&
+      if (depender.Target && depender.Target->IsImported() &&
           !IsGroupFeatureSupported(this->Makefile, this->LinkLanguage,
                                    groupFeature)) {
         this->CMakeInstance->IssueMessage(
@@ -1110,7 +1110,7 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
     bool supportedItem = true;
     auto const& itemFeature =
       this->GetCurrentFeature(entry.Item.Value, item.Feature);
-    if (inGroup && ale.second && entry.Target != nullptr &&
+    if (inGroup && ale.second && entry.Target &&
         (entry.Target->GetType() == cmStateEnums::TargetType::OBJECT_LIBRARY ||
          entry.Target->GetType() ==
            cmStateEnums::TargetType::INTERFACE_LIBRARY)) {
@@ -1130,7 +1130,7 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
         this->Target->GetBacktrace());
     }
     // check if feature is applicable to this item
-    if (itemFeature != LinkEntry::DEFAULT && entry.Target != nullptr) {
+    if (itemFeature != LinkEntry::DEFAULT && entry.Target) {
       auto const& featureAttributes = GetLinkLibraryFeatureAttributes(
         this->Makefile, this->LinkLanguage, itemFeature);
       if (featureAttributes.LibraryTypes.find(entry.Target->GetType()) ==

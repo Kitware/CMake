@@ -79,7 +79,7 @@ std::unique_ptr<cmCryptoHash> cmCryptoHash::New(cm::string_view algo)
   if (algo == "SHA3_512") {
     return cm::make_unique<cmCryptoHash>(AlgoSHA3_512);
   }
-  return std::unique_ptr<cmCryptoHash>(nullptr);
+  return std::unique_ptr<cmCryptoHash>();
 }
 
 std::string cmCryptoHash::GetHashAlgoName() const

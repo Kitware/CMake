@@ -309,7 +309,7 @@ void cmDependsJavaParserHelper::Error(const char* str)
 void cmDependsJavaParserHelper::UpdateCombine(const char* str1,
                                               const char* str2)
 {
-  if (this->CurrentCombine.empty() && str1 != nullptr) {
+  if (this->CurrentCombine.empty() && str1) {
     this->CurrentCombine = str1;
   }
   this->CurrentCombine += ".";

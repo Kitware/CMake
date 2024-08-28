@@ -90,10 +90,10 @@ bool cmValue::IsInternallyOn(cm::string_view value) noexcept
 
 int cmValue::Compare(cmValue value) const noexcept
 {
-  if (this->Value == nullptr && !value) {
+  if (!this->Value && !value) {
     return 0;
   }
-  if (this->Value == nullptr) {
+  if (!this->Value) {
     return -1;
   }
   if (!value) {
@@ -104,13 +104,13 @@ int cmValue::Compare(cmValue value) const noexcept
 
 int cmValue::Compare(cm::string_view value) const noexcept
 {
-  if (this->Value == nullptr && value.data() == nullptr) {
+  if (!this->Value && !value.data()) {
     return 0;
   }
-  if (this->Value == nullptr) {
+  if (!this->Value) {
     return -1;
   }
-  if (value.data() == nullptr) {
+  if (!value.data()) {
     return 1;
   }
   return cm::string_view(*this->Value).compare(value);

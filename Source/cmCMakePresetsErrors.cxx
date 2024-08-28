@@ -31,7 +31,7 @@ const Json::Value* getPreset(cmJSONState* state)
 std::string getPresetName(cmJSONState* state)
 {
   const Json::Value* preset = getPreset(state);
-  if (preset != nullptr && preset->isMember("name")) {
+  if (preset && preset->isMember("name")) {
     return preset->operator[]("name").asString();
   }
   return "";

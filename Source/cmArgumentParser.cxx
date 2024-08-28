@@ -167,7 +167,7 @@ void Instance::Consume(std::size_t pos, cm::string_view arg)
     }
   }
 
-  if (this->UnparsedArguments != nullptr) {
+  if (this->UnparsedArguments) {
     this->UnparsedArguments->emplace_back(arg);
   }
 }
@@ -178,7 +178,7 @@ void Instance::FinishKeyword()
     return;
   }
   if (this->KeywordValuesSeen < this->KeywordValuesExpected) {
-    if (this->ParseResults != nullptr) {
+    if (this->ParseResults) {
       this->ParseResults->AddKeywordError(this->Keyword,
                                           "  missing required value\n");
     }

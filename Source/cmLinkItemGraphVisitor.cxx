@@ -24,7 +24,7 @@ void cmLinkItemGraphVisitor::VisitItem(cmLinkItem const& item)
 void cmLinkItemGraphVisitor::VisitLinks(cmLinkItem const& item,
                                         cmLinkItem const& rootItem)
 {
-  if (item.Target == nullptr) {
+  if (!item.Target) {
     return;
   }
 
@@ -100,7 +100,7 @@ void cmLinkItemGraphVisitor::GetDependencies(cmGeneratorTarget const& target,
 {
   const auto* implementationLibraries = target.GetLinkImplementationLibraries(
     config, cmGeneratorTarget::UseTo::Link);
-  if (implementationLibraries != nullptr) {
+  if (implementationLibraries) {
     for (auto const& lib : implementationLibraries->Libraries) {
       auto const& name = lib.AsStr();
       dependencies[name] = Dependency(DependencyType::LinkPrivate, lib);
@@ -109,7 +109,7 @@ void cmLinkItemGraphVisitor::GetDependencies(cmGeneratorTarget const& target,
 
   const auto* interfaceLibraries = target.GetLinkInterfaceLibraries(
     config, &target, cmGeneratorTarget::UseTo::Compile);
-  if (interfaceLibraries != nullptr) {
+  if (interfaceLibraries) {
     for (auto const& lib : interfaceLibraries->Libraries) {
       auto const& name = lib.AsStr();
       if (dependencies.find(name) != dependencies.cend()) {

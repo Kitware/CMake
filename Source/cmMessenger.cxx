@@ -215,7 +215,7 @@ void cmMessenger::DisplayMessage(MessageType t, const std::string& text,
   displayMessage(t, msg);
 
 #ifdef CMake_ENABLE_DEBUGGER
-  if (DebuggerAdapter != nullptr) {
+  if (DebuggerAdapter) {
     DebuggerAdapter->OnMessageOutput(t, msg.str());
   }
 #endif

@@ -598,7 +598,7 @@ int cmCPackDebGenerator::PackageComponents(bool ignoreGroup)
   // Handle Orphan components (components not belonging to any groups)
   for (auto const& comp : this->Components) {
     // Does the component belong to a group?
-    if (comp.second.Group == nullptr) {
+    if (!comp.second.Group) {
       cmCPackLogger(
         cmCPackLog::LOG_VERBOSE,
         "Component <"
@@ -928,7 +928,7 @@ std::string cmCPackDebGenerator::GetComponentInstallSuffix(
   // the current COMPONENT belongs to.
   std::string groupVar =
     "CPACK_COMPONENT_" + cmSystemTools::UpperCase(componentName) + "_GROUP";
-  if (nullptr != this->GetOption(groupVar)) {
+  if (this->GetOption(groupVar)) {
     return *this->GetOption(groupVar);
   }
   return componentName;

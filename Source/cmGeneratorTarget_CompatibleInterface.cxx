@@ -393,7 +393,7 @@ bool getTypedProperty<bool>(cmGeneratorTarget const* tgt,
                             const std::string& prop,
                             cmGeneratorExpressionInterpreter* genexInterpreter)
 {
-  if (genexInterpreter == nullptr) {
+  if (!genexInterpreter) {
     return tgt->GetPropertyAsBool(prop);
   }
 
@@ -408,7 +408,7 @@ const char* getTypedProperty<const char*>(
 {
   cmValue value = tgt->GetProperty(prop);
 
-  if (genexInterpreter == nullptr) {
+  if (!genexInterpreter) {
     return value.GetCStr();
   }
 
@@ -422,7 +422,7 @@ std::string getTypedProperty<std::string>(
 {
   cmValue value = tgt->GetProperty(prop);
 
-  if (genexInterpreter == nullptr) {
+  if (!genexInterpreter) {
     return valueAsString(value);
   }
 
