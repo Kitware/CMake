@@ -87,7 +87,7 @@ add_test(NAME UseSWIG.BasicPerl5 COMMAND
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
 if(SWIG_FOUND AND NOT SWIG_VERSION VERSION_LESS "4.0.2"
-    AND CMAKE_GENERATOR MATCHES "Make|Ninja|Xcode|Visual Studio (1[1-9]|[2-9][0-9])")
+    AND CMAKE_GENERATOR MATCHES "Make|Ninja|Xcode|Visual Studio")
   add_test(NAME UseSWIG.Depfile.BasicPython COMMAND
     ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
     --build-and-test

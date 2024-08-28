@@ -565,7 +565,7 @@ function(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   endif()
 
   set (use_swig_dependencies ${SWIG_USE_SWIG_DEPENDENCIES})
-  if (CMAKE_GENERATOR MATCHES "Make|Ninja|Xcode|Visual Studio (1[1-9]|[2-9][0-9])")
+  if (CMAKE_GENERATOR MATCHES "Make|Ninja|Xcode|Visual Studio")
     get_property(use_swig_dependencies_set SOURCE "${infile}" PROPERTY USE_SWIG_DEPENDENCIES SET)
     if (use_swig_dependencies_set)
       get_property(use_swig_dependencies SOURCE "${infile}" PROPERTY USE_SWIG_DEPENDENCIES)
@@ -890,7 +890,7 @@ function(SWIG_ADD_LIBRARY name)
     set(SWIG_SOURCE_FILE_EXTENSIONS ".i")
   endif()
 
-  if (CMAKE_GENERATOR MATCHES "Make|Ninja|Xcode|Visual Studio (1[1-9]|[2-9][0-9])")
+  if (CMAKE_GENERATOR MATCHES "Make|Ninja|Xcode|Visual Studio")
     # For Makefiles, Ninja, Xcode and Visual Studio generators,
     # use SWIG generated dependencies if requested
     if (NOT DEFINED SWIG_USE_SWIG_DEPENDENCIES)
