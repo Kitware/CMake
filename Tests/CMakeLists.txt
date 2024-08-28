@@ -2299,21 +2299,25 @@ if(BUILD_TESTING)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSWinStorePhone/${name}")
     endmacro()
 
-    if(vs12 AND ws81)
-      add_test_VSWinStorePhone(vs12-store81-X86 "Visual Studio 12 2013" WindowsStore 8.1 Win32)
-      add_test_VSWinStorePhone(vs12-store81-ARM "Visual Studio 12 2013" WindowsStore 8.1 ARM)
-      add_test_VSWinStorePhone(vs12-store81-X64 "Visual Studio 12 2013" WindowsStore 8.1 x64)
-
+    # FIXME(#26248): Update this test to work with newer VS and Win 10.0.
+    # It previously ran with Visual Studio 12 2013 targeting Win 8.1.
+    if(FALSE AND CMAKE_GENERATOR MATCHES "Visual Studio")
       add_test(NAME VSXaml COMMAND ${CMAKE_CTEST_COMMAND}
         --build-and-test
           "${CMake_SOURCE_DIR}/Tests/VSXaml"
           "${CMake_BINARY_DIR}/Tests/VSXaml"
-          --build-generator "Visual Studio 12 2013"
+          --build-generator "${CMAKE_GENERATOR}"
           --build-project VSXaml
           --build-config $<CONFIGURATION>
           --build-options -DCMAKE_SYSTEM_NAME=WindowsStore
-                          -DCMAKE_SYSTEM_VERSION=8.1
+                          -DCMAKE_SYSTEM_VERSION=10.0
         )
+    endif()
+
+    if(vs12 AND ws81)
+      add_test_VSWinStorePhone(vs12-store81-X86 "Visual Studio 12 2013" WindowsStore 8.1 Win32)
+      add_test_VSWinStorePhone(vs12-store81-ARM "Visual Studio 12 2013" WindowsStore 8.1 ARM)
+      add_test_VSWinStorePhone(vs12-store81-X64 "Visual Studio 12 2013" WindowsStore 8.1 x64)
     endif()
     if(CMake_TEST_VSWinStorePhone_VS_2017 AND ws10_0)
       add_test_VSWinStorePhone(vs15-store10_0-X86 "Visual Studio 15 2017" WindowsStore 10.0 Win32)
