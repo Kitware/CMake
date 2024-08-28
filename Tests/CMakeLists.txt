@@ -2225,7 +2225,7 @@ if(BUILD_TESTING)
     ADD_TEST_MACRO(VSMASM VSMASM)
   endif()
 
-  if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+  if(CMAKE_GENERATOR MATCHES "Visual Studio")
     if(NOT MSVC60)
       ADD_TEST_MACRO(SBCS SBCS)
     endif()
@@ -2287,20 +2287,17 @@ if(BUILD_TESTING)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSExcludeFromDefaultBuild")
     endif()
 
-    if(CMAKE_GENERATOR MATCHES "Visual Studio ([0-5]|[6-9][0-9])")
-      # This is Visual Studio 10 or above, so the default build tool is MSBuild.
-      add_test(NAME VSProjectInSubdir COMMAND ${CMAKE_CTEST_COMMAND}
-        --build-and-test
-        "${CMake_SOURCE_DIR}/Tests/VSProjectInSubdir"
-        "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir"
-        --build-two-config
-        --build-generator ${CMAKE_GENERATOR}
-        --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
-        --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
-        --build-project VSProjectInSubdir
-        --build-target test)
-      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir")
-    endif()
+    add_test(NAME VSProjectInSubdir COMMAND ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/VSProjectInSubdir"
+      "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir"
+      --build-two-config
+      --build-generator ${CMAKE_GENERATOR}
+      --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
+      --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
+      --build-project VSProjectInSubdir
+      --build-target test)
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir")
   endif()
 
   get_filename_component(ntver "[HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\CurrentVersion;CurrentVersion]" NAME)
