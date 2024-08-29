@@ -59,9 +59,14 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   mf.AddCacheDefinition(projectName + "_BINARY_DIR",
                         mf.GetCurrentBinaryDirectory(),
                         "Value Computed by CMake", cmStateEnums::STATIC);
+  mf.AddDefinition(projectName + "_BINARY_DIR",
+                   mf.GetCurrentBinaryDirectory());
+
   mf.AddCacheDefinition(projectName + "_SOURCE_DIR",
                         mf.GetCurrentSourceDirectory(),
                         "Value Computed by CMake", cmStateEnums::STATIC);
+  mf.AddDefinition(projectName + "_SOURCE_DIR",
+                   mf.GetCurrentSourceDirectory());
 
   mf.AddDefinition("PROJECT_BINARY_DIR", mf.GetCurrentBinaryDirectory());
   mf.AddDefinition("PROJECT_SOURCE_DIR", mf.GetCurrentSourceDirectory());
@@ -72,6 +77,8 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   mf.AddCacheDefinition(projectName + "_IS_TOP_LEVEL",
                         mf.IsRootMakefile() ? "ON" : "OFF",
                         "Value Computed by CMake", cmStateEnums::STATIC);
+  mf.AddDefinition(projectName + "_IS_TOP_LEVEL",
+                   mf.IsRootMakefile() ? "ON" : "OFF");
 
   // Set the CMAKE_PROJECT_NAME variable to be the highest-level
   // project name in the tree. If there are two project commands

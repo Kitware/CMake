@@ -1,0 +1,11 @@
+cmake_policy(SET CMP0126 NEW)
+set(example_SOURCE_DIR "bad/path")
+set(example_BINARY_DIR "bad/path")
+project(example LANGUAGES)
+
+if(NOT "${example_SOURCE_DIR}" STREQUAL "${PROJECT_SOURCE_DIR}")
+  message(FATAL_ERROR "example_SOURCE_DIR not set to expected value")
+endif()
+if(NOT "${example_BINARY_DIR}" STREQUAL "${PROJECT_BINARY_DIR}")
+  message(FATAL_ERROR "example_BINARY_DIR not set to expected value")
+endif()
