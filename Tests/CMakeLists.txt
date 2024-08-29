@@ -50,13 +50,6 @@ set(ENV{HOME} \"${TEST_HOME}\")
 ")
 endif()
 
-# Suppress generator deprecation warnings in test suite.
-if(CMAKE_GENERATOR MATCHES "^Visual Studio 12 2013")
-  set(TEST_WARN_VS_CODE "set(ENV{CMAKE_WARN_VS12} OFF)")
-else()
-  set(TEST_WARN_VS_CODE "")
-endif()
-
 # 3.9 or later provides a definitive answer to whether we are multi-config
 # through a global property. Prior to 3.9, CMAKE_CONFIGURATION_TYPES being set
 # is assumed to mean multi-config, but developers might modify it so it is
@@ -185,39 +178,11 @@ if(BUILD_TESTING)
   endif()
 
   if(WIN32)
-    # Macro to search for available Windows CE SDKs in the windows Registry
-    macro(select_wince_sdk selected_reg selected_sdk)
-      if(CMAKE_HOST_WIN32)
-        execute_process(COMMAND reg QUERY "HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows CE Tools\\SDKs"
-                    OUTPUT_VARIABLE sdk_reg
-                    ERROR_VARIABLE my_err)
-        string(REGEX REPLACE "HKEY_LOCAL_MACHINE\\\\SOFTWARE\\\\Wow6432Node\\\\Microsoft\\\\Windows CE Tools\\\\SDKs\\\\"  ";" sdk_list "${sdk_reg}")
-        list(LENGTH sdk_list sdk_list_len)
-        if(${sdk_list_len} GREATER 1)
-          list(GET sdk_list 1 _sdk) # The first entry is always empty due to the regex replace above
-          string(STRIP ${_sdk} _sdk) # Make sure there is no newline in the SDK name
-        endif()
-        # Build a key to be used by get_filename_component that is pointing to the SDK directory
-        set(_reg "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows CE Tools\\SDKs\\${_sdk}]")
-        # Set return values
-        set(${selected_reg} ${_reg})
-        set(${selected_sdk} ${_sdk})
-      endif(CMAKE_HOST_WIN32)
-    endmacro(select_wince_sdk)
-
-    set(reg_vs10 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0;InstallDir]")
-    set(reg_vs11 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0;InstallDir]")
-    set(reg_vs12 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\12.0;InstallDir]")
     set(reg_vs14 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\14.0;InstallDir]")
-    set(reg_ws80 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v8.0;InstallationFolder]")
-    set(reg_ws81 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows\\v8.1;InstallationFolder]")
     set(reg_ws10_0 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\14.0\\Setup\\Build Tools for Windows 10;srcPath]")
-    set(reg_wp80 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\WindowsPhone\\v8.0;InstallationFolder]")
-    set(reg_wp81 "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\WindowsPhone\\v8.1;InstallationFolder]")
-    select_wince_sdk(reg_wince wince_sdk)
     set(reg_tegra "[HKEY_LOCAL_MACHINE\\SOFTWARE\\NVIDIA Corporation\\Nsight Tegra;sdkRoot]")
     set(reg_nasm "[HKEY_CURRENT_USER\\SOFTWARE\\nasm]")
-    foreach(reg IN ITEMS vs10 vs11 vs12 vs14 ws80 ws81 ws10_0 wp80 wp81 wince tegra nasm)
+    foreach(reg IN ITEMS vs14 ws10_0 tegra nasm)
       get_filename_component(r "${reg_${reg}}" ABSOLUTE)
       if(IS_DIRECTORY "${r}" AND NOT "${r}" STREQUAL "/registry")
         set(${reg} 1)
@@ -2225,7 +2190,7 @@ if(BUILD_TESTING)
     ADD_TEST_MACRO(VSMASM VSMASM)
   endif()
 
-  if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
+  if(CMAKE_GENERATOR MATCHES "Visual Studio")
     if(NOT MSVC60)
       ADD_TEST_MACRO(SBCS SBCS)
     endif()
@@ -2287,20 +2252,17 @@ if(BUILD_TESTING)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSExcludeFromDefaultBuild")
     endif()
 
-    if(CMAKE_GENERATOR MATCHES "Visual Studio ([0-5]|[6-9][0-9])")
-      # This is Visual Studio 10 or above, so the default build tool is MSBuild.
-      add_test(NAME VSProjectInSubdir COMMAND ${CMAKE_CTEST_COMMAND}
-        --build-and-test
-        "${CMake_SOURCE_DIR}/Tests/VSProjectInSubdir"
-        "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir"
-        --build-two-config
-        --build-generator ${CMAKE_GENERATOR}
-        --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
-        --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
-        --build-project VSProjectInSubdir
-        --build-target test)
-      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir")
-    endif()
+    add_test(NAME VSProjectInSubdir COMMAND ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/VSProjectInSubdir"
+      "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir"
+      --build-two-config
+      --build-generator ${CMAKE_GENERATOR}
+      --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
+      --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
+      --build-project VSProjectInSubdir
+      --build-target test)
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir")
   endif()
 
   get_filename_component(ntver "[HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\CurrentVersion;CurrentVersion]" NAME)
@@ -2323,22 +2285,21 @@ if(BUILD_TESTING)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSWinStorePhone/${name}")
     endmacro()
 
-    if(vs12 AND ws81)
-      add_test_VSWinStorePhone(vs12-store81-X86 "Visual Studio 12 2013" WindowsStore 8.1 Win32)
-      add_test_VSWinStorePhone(vs12-store81-ARM "Visual Studio 12 2013" WindowsStore 8.1 ARM)
-      add_test_VSWinStorePhone(vs12-store81-X64 "Visual Studio 12 2013" WindowsStore 8.1 x64)
-
+    # FIXME(#26248): Update this test to work with newer VS and Win 10.0.
+    # It previously ran with Visual Studio 12 2013 targeting Win 8.1.
+    if(FALSE AND CMAKE_GENERATOR MATCHES "Visual Studio")
       add_test(NAME VSXaml COMMAND ${CMAKE_CTEST_COMMAND}
         --build-and-test
           "${CMake_SOURCE_DIR}/Tests/VSXaml"
           "${CMake_BINARY_DIR}/Tests/VSXaml"
-          --build-generator "Visual Studio 12 2013"
+          --build-generator "${CMAKE_GENERATOR}"
           --build-project VSXaml
           --build-config $<CONFIGURATION>
           --build-options -DCMAKE_SYSTEM_NAME=WindowsStore
-                          -DCMAKE_SYSTEM_VERSION=8.1
+                          -DCMAKE_SYSTEM_VERSION=10.0
         )
     endif()
+
     if(CMake_TEST_VSWinStorePhone_VS_2017 AND ws10_0)
       add_test_VSWinStorePhone(vs15-store10_0-X86 "Visual Studio 15 2017" WindowsStore 10.0 Win32)
       add_test_VSWinStorePhone(vs15-store10_0-ARM "Visual Studio 15 2017" WindowsStore 10.0 ARM)
@@ -2349,35 +2310,6 @@ if(BUILD_TESTING)
       add_test_VSWinStorePhone(vs14-store10_0-X86 "Visual Studio 14 2015" WindowsStore 10.0 Win32)
       add_test_VSWinStorePhone(vs14-store10_0-ARM "Visual Studio 14 2015" WindowsStore 10.0 ARM)
       add_test_VSWinStorePhone(vs14-store10_0-X64 "Visual Studio 14 2015" WindowsStore 10.0 x64)
-    endif()
-    if(vs12 AND wp81)
-      add_test_VSWinStorePhone(vs12-phone81-X86 "Visual Studio 12 2013" WindowsPhone 8.1 Win32)
-      add_test_VSWinStorePhone(vs12-phone81-ARM "Visual Studio 12 2013" WindowsPhone 8.1 ARM)
-    endif()
-  endif()
-
-  if(WIN32 AND wince)
-    macro(add_test_VSWinCE name generator systemName systemVersion generatorPlatform)
-      # TODO: Fix the tutorial to make it work in cross compile
-      # currently the MakeTable is build for target and can not be used on the host
-      # This happens in part 5 so we build only through part 4 of the tutorial.
-      foreach(STP RANGE 2 4)
-        add_test(NAME "TutorialStep${STP}.${name}" COMMAND ${CMAKE_CTEST_COMMAND}
-          --build-and-test
-          "${CMake_SOURCE_DIR}/Help/guide/tutorial/Step${STP}"
-          "${CMake_BINARY_DIR}/Tests/Tutorial/Step${STP}_${name}"
-          --build-generator "${generator}"
-          --build-project Tutorial
-          --build-config $<CONFIGURATION>
-          --build-options -DCMAKE_SYSTEM_NAME=${systemName}
-                          -DCMAKE_SYSTEM_VERSION=${systemVersion}
-                          -DCMAKE_GENERATOR_PLATFORM=${generatorPlatform})
-        list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Tutorial/Step${STP}_${name}")
-      endforeach()
-    endmacro()
-
-    if(vs12)
-      add_test_VSWinCE(vs12-ce80-ARM "Visual Studio 12 2013" WindowsCE 8.0 ${wince_sdk})
     endif()
   endif()
 
@@ -2502,9 +2434,6 @@ if(BUILD_TESTING)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSAndroid/${name}")
   endmacro()
   if(tegra AND NOT "${CMake_SOURCE_DIR};${CMake_BINARY_DIR}" MATCHES " ")
-    if(vs12)
-      add_test_VSAndroid(vs12 "Visual Studio 12 2013" "Tegra-Android")
-    endif()
     if(vs14)
       add_test_VSAndroid(vs14 "Visual Studio 14 2015" "Tegra-Android")
     endif()

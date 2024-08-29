@@ -778,9 +778,6 @@ if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
     -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}
     )
   add_RunCMake_test(VS10ProjectUseDebugLibraries)
-  if( vs12 AND wince )
-    add_RunCMake_test( VS10ProjectWinCE "-DRunCMake_GENERATOR_PLATFORM=${wince_sdk}")
-  endif()
 endif()
 
 if(CMAKE_GENERATOR MATCHES "^Visual Studio (1[6-9]|[2-9][0-9])"

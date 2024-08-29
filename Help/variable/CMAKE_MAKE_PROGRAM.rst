@@ -30,8 +30,7 @@ to configure the project:
   the CMake cache then CMake will use the specified value.
 
 * The :ref:`Visual Studio Generators` set this to the full path to
-  ``MSBuild.exe`` (VS >= 10), ``devenv.com`` (VS 7,8,9), or
-  ``VCExpress.exe`` (VS Express 8,9).
+  ``MSBuild.exe`` or ``devenv.com``.
   (See also variables
   :variable:`CMAKE_VS_MSBUILD_COMMAND` and
   :variable:`CMAKE_VS_DEVENV_COMMAND`.
@@ -39,9 +38,9 @@ to configure the project:
   These generators prefer to lookup the build tool at build time
   rather than to store ``CMAKE_MAKE_PROGRAM`` in the CMake cache
   ahead of time.  This is because the tools are version-specific
-  and can be located using the Windows Registry.  It is also
+  and can be located using the Visual Studio Installer.  It is also
   necessary because the proper build tool may depend on the
-  project content (e.g. the Intel Fortran plugin to VS 10 and 11
+  project content (e.g. the Intel Fortran plugin to Visual Studio
   requires ``devenv.com`` to build its ``.vfproj`` project files
   even though ``MSBuild.exe`` is normally preferred to support
   the :variable:`CMAKE_GENERATOR_TOOLSET`).

@@ -9,18 +9,12 @@
 
 #include "cmGlobalVisualStudio11Generator.h"
 
-class cmGlobalGeneratorFactory;
 class cmMakefile;
 class cmake;
 
 /** \class cmGlobalVisualStudio12Generator  */
 class cmGlobalVisualStudio12Generator : public cmGlobalVisualStudio11Generator
 {
-public:
-  static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory();
-
-  bool MatchesGeneratorName(const std::string& name) const override;
-
 protected:
   cmGlobalVisualStudio12Generator(cmake* cm, const std::string& name,
                                   std::string const& platformInGeneratorName);
@@ -41,8 +35,4 @@ protected:
   // of the toolset is installed
   bool IsWindowsPhoneToolsetInstalled() const;
   bool IsWindowsStoreToolsetInstalled() const;
-
-private:
-  class Factory;
-  friend class Factory;
 };

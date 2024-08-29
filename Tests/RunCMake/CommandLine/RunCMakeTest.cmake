@@ -382,21 +382,18 @@ function(run_EnvironmentGenerator)
   run_cmake_command(Envgen-bad-help ${CMAKE_COMMAND} --help)
   unset(ENV{CMAKE_GENERATOR})
 
-  if(RunCMake_GENERATOR MATCHES "Visual Studio.*")
+  if(RunCMake_GENERATOR MATCHES "Visual Studio")
     set(ENV{CMAKE_GENERATOR} "${RunCMake_GENERATOR}")
     run_cmake_command(Envgen ${CMAKE_COMMAND} ${source_dir})
-    # Toolset is available since VS 2010.
-    if(RunCMake_GENERATOR MATCHES "Visual Studio [1-9][0-9]")
-      set(ENV{CMAKE_GENERATOR_TOOLSET} "invalid")
-      # Envvar shouldn't affect existing build tree
-      run_cmake_command(Envgen-toolset-existing ${CMAKE_COMMAND} -E chdir ..
-        ${CMAKE_COMMAND} --build Envgen-build)
-      run_cmake_command(Envgen-toolset-invalid ${CMAKE_COMMAND} ${source_dir})
-      # Command line -G implies -T""
-      run_cmake_command(Envgen-G-implicit-toolset ${CMAKE_COMMAND} -G "${RunCMake_GENERATOR}" ${source_dir})
-      run_cmake_command(Envgen-T-toolset ${CMAKE_COMMAND} -T "fromcli" ${source_dir})
-      unset(ENV{CMAKE_GENERATOR_TOOLSET})
-    endif()
+    set(ENV{CMAKE_GENERATOR_TOOLSET} "invalid")
+    # Envvar shouldn't affect existing build tree
+    run_cmake_command(Envgen-toolset-existing ${CMAKE_COMMAND} -E chdir ..
+      ${CMAKE_COMMAND} --build Envgen-build)
+    run_cmake_command(Envgen-toolset-invalid ${CMAKE_COMMAND} ${source_dir})
+    # Command line -G implies -T""
+    run_cmake_command(Envgen-G-implicit-toolset ${CMAKE_COMMAND} -G "${RunCMake_GENERATOR}" ${source_dir})
+    run_cmake_command(Envgen-T-toolset ${CMAKE_COMMAND} -T "fromcli" ${source_dir})
+    unset(ENV{CMAKE_GENERATOR_TOOLSET})
     # Platform can be set only if not in generator name.
     if(RunCMake_GENERATOR MATCHES "^Visual Studio [0-9]+ [0-9]+$")
       set(ENV{CMAKE_GENERATOR_PLATFORM} "invalid")
@@ -1129,13 +1126,6 @@ set(ProfilingTestOutput ${RunCMake_TEST_BINARY_DIR}/output.json)
 set(RunCMake_TEST_OPTIONS --profiling-format=google-trace --profiling-output=${ProfilingTestOutput})
 run_cmake(ProfilingTest)
 unset(RunCMake_TEST_OPTIONS)
-
-if(RunCMake_GENERATOR MATCHES "^Visual Studio 12 2013")
-  run_cmake_with_options(DeprecateVS12-WARN-ON -DCMAKE_WARN_VS12=ON)
-  unset(ENV{CMAKE_WARN_VS12})
-  run_cmake(DeprecateVS12-WARN-ON)
-  run_cmake_with_options(DeprecateVS12-WARN-OFF -DCMAKE_WARN_VS12=OFF)
-endif()
 
 run_cmake_with_options(help-arbitrary "--help" "CMAKE_CXX_IGNORE_EXTENSIONS")
 
