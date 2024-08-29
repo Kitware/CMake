@@ -4457,14 +4457,21 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     this->AddTargetsFileAndConfigPair(ti, config);
   }
 
-  std::vector<std::string> const& ldirs = cli.GetDirectories();
   std::vector<std::string> linkDirs;
+  std::vector<std::string> const& ldirs = cli.GetDirectories();
   for (std::string const& d : ldirs) {
     // first just full path
     linkDirs.push_back(d);
     // next path with configuration type Debug, Release, etc
     linkDirs.emplace_back(cmStrCat(d, "/$(Configuration)"));
   }
+
+  std::string const& linkDirsString = this->Makefile->GetSafeDefinition(
+    cmStrCat("CMAKE_", linkLanguage, "_STANDARD_LINK_DIRECTORIES"));
+  for (const std::string& d : cmList(linkDirsString)) {
+    linkDirs.push_back(d);
+  }
+
   linkDirs.push_back("%(AdditionalLibraryDirectories)");
   linkOptions.AddFlag("AdditionalLibraryDirectories", linkDirs);
 
