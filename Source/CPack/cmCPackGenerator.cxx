@@ -51,10 +51,9 @@ cmCPackGenerator::~cmCPackGenerator()
 }
 
 void cmCPackGenerator::DisplayVerboseOutput(const std::string& msg,
-                                            float progress)
+                                            float /*unused*/)
 {
-  (void)progress;
-  cmCPackLogger(cmCPackLog::LOG_VERBOSE, "" << msg << std::endl);
+  cmCPackLogger(cmCPackLog::LOG_VERBOSE, msg << std::endl);
 }
 
 int cmCPackGenerator::PrepareNames()
