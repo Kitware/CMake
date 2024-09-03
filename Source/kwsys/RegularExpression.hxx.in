@@ -86,7 +86,7 @@ inline RegularExpressionMatch::RegularExpressionMatch()
  */
 inline bool RegularExpressionMatch::isValid() const
 {
-  return (this->startp[0] != nullptr);
+  return (this->startp[0]);
 }
 
 /**
@@ -140,7 +140,7 @@ inline std::string::size_type RegularExpressionMatch::end(int n) const
  */
 inline std::string RegularExpressionMatch::match(int n) const
 {
-  if (this->startp[n] == nullptr) {
+  if (!this->startp[n]) {
     return std::string();
   } else {
     return std::string(
@@ -551,7 +551,7 @@ inline bool RegularExpression::operator!=(const RegularExpression& r) const
  */
 inline bool RegularExpression::is_valid() const
 {
-  return (this->program != nullptr);
+  return (this->program);
 }
 
 inline void RegularExpression::set_invalid()

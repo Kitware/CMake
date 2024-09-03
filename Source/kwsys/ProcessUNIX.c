@@ -2541,7 +2541,7 @@ static void kwsysProcessKill(pid_t process_id)
 /* Kill all children if we can find them.  */
 #if defined(__linux__) || defined(__CYGWIN__)
   /* First try using the /proc filesystem.  */
-  if ((procdir = opendir("/proc")) != NULL) {
+  if ((procdir = opendir("/proc"))) {
 #  if defined(MAXPATHLEN)
     char fname[MAXPATHLEN];
 #  elif defined(PATH_MAX)
