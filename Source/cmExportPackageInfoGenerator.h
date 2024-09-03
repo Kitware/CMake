@@ -111,6 +111,4 @@ private:
 
   std::map<std::string, std::string> LinkTargets;
   std::set<std::string> Requirements;
-
-  static constexpr char const* CPS_VERSION_STR = "0.12.0";
 };
