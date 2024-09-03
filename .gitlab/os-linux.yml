@@ -45,7 +45,7 @@
 ### Debian
 
 .debian12:
-    image: "kitware/cmake:ci-debian12-x86_64-2024-03-04"
+    image: "kitware/cmake:ci-debian12-x86_64-2024-08-27"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
