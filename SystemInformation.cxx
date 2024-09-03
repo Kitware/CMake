@@ -874,7 +874,7 @@ int LoadLines(FILE* file, std::vector<std::string>& lines)
   char buf[bufSize] = { '\0' };
   while (!feof(file) && !ferror(file)) {
     errno = 0;
-    if (fgets(buf, bufSize, file) == nullptr) {
+    if (!fgets(buf, bufSize, file)) {
       if (ferror(file) && (errno == EINTR)) {
         clearerr(file);
       }
@@ -900,7 +900,7 @@ int LoadLines(FILE* file, std::vector<std::string>& lines)
 int LoadLines(const char* fileName, std::vector<std::string>& lines)
 {
   FILE* file = fopen(fileName, "r");
-  if (file == nullptr) {
+  if (!file) {
     return 0;
   }
   int nRead = LoadLines(file, lines);
@@ -938,7 +938,7 @@ int GetFieldsFromFile(const char* fileName, const char** fieldNames, T* values)
     return -1;
   }
   int i = 0;
-  while (fieldNames[i] != nullptr) {
+  while (fieldNames[i]) {
     int ierr = NameValue(fields, fieldNames[i], values[i]);
     if (ierr) {
       return -(i + 2);
@@ -970,7 +970,7 @@ int GetFieldsFromCommand(const char* command, const char** fieldNames,
                          T* values)
 {
   FILE* file = popen(command, "r");
-  if (file == nullptr) {
+  if (!file) {
     return -1;
   }
   std::vector<std::string> fields;
@@ -980,7 +980,7 @@ int GetFieldsFromCommand(const char* command, const char** fieldNames,
     return -1;
   }
   int i = 0;
-  while (fieldNames[i] != nullptr) {
+  while (fieldNames[i]) {
     int ierr = NameValue(fields, fieldNames[i], values[i]);
     if (ierr) {
       return -(i + 2);
@@ -1016,7 +1016,7 @@ void StacktraceSignalHandler(int sigNo, siginfo_t* sigInfo,
       break;
 
     case SIGFPE:
-      oss << "Caught SIGFPE at " << (sigInfo->si_addr == nullptr ? "0x" : "")
+      oss << "Caught SIGFPE at " << (sigInfo->si_addr ? "" : "0x")
           << sigInfo->si_addr << " ";
       switch (sigInfo->si_code) {
 #    if defined(FPE_INTDIV)
@@ -1064,7 +1064,7 @@ void StacktraceSignalHandler(int sigNo, siginfo_t* sigInfo,
       break;
 
     case SIGSEGV:
-      oss << "Caught SIGSEGV at " << (sigInfo->si_addr == nullptr ? "0x" : "")
+      oss << "Caught SIGSEGV at " << (sigInfo->si_addr ? "" : "0x")
           << sigInfo->si_addr << " ";
       switch (sigInfo->si_code) {
         case SEGV_MAPERR:
@@ -1082,7 +1082,7 @@ void StacktraceSignalHandler(int sigNo, siginfo_t* sigInfo,
       break;
 
     case SIGBUS:
-      oss << "Caught SIGBUS at " << (sigInfo->si_addr == nullptr ? "0x" : "")
+      oss << "Caught SIGBUS at " << (sigInfo->si_addr ? "" : "0x")
           << sigInfo->si_addr << " ";
       switch (sigInfo->si_code) {
         case BUS_ADRALN:
@@ -1122,7 +1122,7 @@ void StacktraceSignalHandler(int sigNo, siginfo_t* sigInfo,
       break;
 
     case SIGILL:
-      oss << "Caught SIGILL at " << (sigInfo->si_addr == nullptr ? "0x" : "")
+      oss << "Caught SIGILL at " << (sigInfo->si_addr ? "" : "0x")
           << sigInfo->si_addr << " ";
       switch (sigInfo->si_code) {
         case ILL_ILLOPC:
@@ -1659,7 +1659,7 @@ int SystemInformationImplementation::GetFullyQualifiedDomainName(
     return -2;
   }
 
-  for (ifa = ifas; ifa != nullptr; ifa = ifa->ifa_next) {
+  for (ifa = ifas; ifa; ifa = ifa->ifa_next) {
     int fam = ifa->ifa_addr ? ifa->ifa_addr->sa_family : -1;
     // Skip Loopback interfaces
     if (((fam == AF_INET) || (fam == AF_INET6)) &&
@@ -3886,7 +3886,7 @@ long long SystemInformationImplementation::GetProcMemoryUsed()
   std::ostringstream oss;
   oss << "ps -o rss= -p " << pid;
   FILE* file = popen(oss.str().c_str(), "r");
-  if (file == nullptr) {
+  if (!file) {
     return -1;
   }
   oss.str("");
