@@ -38,6 +38,13 @@ foreach(_iar_toolchain IN LISTS _iar_toolchains)
       "--define_symbol _NEAR_CONST_LOCATION=0 "
       "--config ${TOOLKIT_DIR}/config/lnkrl78_s3.icf "
     )
+  elseif(ARCH STREQUAL "rh850")
+    string(CONCAT LINK_OPTS
+      "--config_def CSTACK_SIZE=0x1000 "
+      "--config_def HEAP_SIZE=0x1000 "
+      "--config_def _SELF_SIZE=0x20000 "
+      "--config ${TOOLKIT_DIR}/config/lnkr7f701401.icf "
+    )
   else()
     set(LINK_OPTS "")
   endif()
