@@ -2130,6 +2130,7 @@ class cmVSLink
   int Type;
   bool Verbose;
   bool Incremental = false;
+  bool LinkEmbedsManifest = true;
   bool LinkGeneratesManifest = true;
   std::vector<std::string> LinkCommand;
   std::vector<std::string> UserManifests;
@@ -2284,6 +2285,12 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
     } else if (cmHasLiteralPrefix(*arg, "--mt=")) {
       this->MtPath = arg->substr(5);
       ++arg;
+    } else if (cmHasLiteralPrefix(*arg, "--msvc-ver=")) {
+      unsigned long msvc_ver = 0;
+      if (cmStrToULong(arg->c_str() + 11, &msvc_ver)) {
+        this->LinkEmbedsManifest = msvc_ver > 1600;
+      }
+      ++arg;
     } else {
       std::cerr << "unknown argument '" << *arg << "'\n";
       return false;
@@ -2333,11 +2340,13 @@ bool cmVSLink::Parse(std::vector<std::string>::const_iterator argBeg,
     // pass it to the link command.
     this->ManifestFileRC = intDir + "/manifest.rc";
     this->ManifestFileRes = intDir + "/manifest.res";
+  }
 
-    if (this->LinkGeneratesManifest) {
-      this->LinkCommand.emplace_back("/MANIFEST");
-      this->LinkCommand.push_back("/MANIFESTFILE:" + this->LinkerManifestFile);
-    }
+  if (this->LinkGeneratesManifest &&
+      (this->Incremental || !this->LinkEmbedsManifest)) {
+    this->LinkCommand.emplace_back("/MANIFEST");
+    this->LinkCommand.emplace_back("/MANIFESTFILE:" +
+                                   this->LinkerManifestFile);
   }
 
   return true;
@@ -2471,6 +2480,24 @@ int cmVSLink::LinkIncremental()
 
 int cmVSLink::LinkNonIncremental()
 {
+  if (!this->LinkEmbedsManifest) {
+    // Run the link command (possibly generates intermediate manifest).
+    if (!RunCommand("LINK", this->LinkCommand, this->Verbose,
+                    FORMAT_DECIMAL)) {
+      return -1;
+    }
+
+    // If we have no manifest files we are done.
+    if (!this->LinkGeneratesManifest && this->UserManifests.empty()) {
+      return 0;
+    }
+
+    // Run the manifest tool to embed the final manifest in the binary.
+    std::string mtOut = "/outputresource:" + this->TargetFile +
+      (this->Type == 1 ? ";#1" : ";#2");
+    return this->RunMT(mtOut, false);
+  }
+
   // The MSVC link tool expects 'rc' to be in the PATH if it needs to embed
   // manifests, but the user might explicitly set 'CMAKE_RC_COMPILER' instead.
   // Add its location as a fallback at the end of PATH.
