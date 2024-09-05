@@ -38,6 +38,7 @@
       "visibility": "PUBLIC"
     }
   },
+  "database-info": null,
   "dir-cur-bld": "<BINARY_DIR>",
   "dir-cur-src": "<SOURCE_DIR>",
   "dir-top-bld": "<BINARY_DIR>",
@@ -47,5 +48,6 @@
   "language": "CXX",
   "forward-modules-from-target-dirs": [],
   "linked-target-dirs": [],
-  "module-dir": "<BINARY_DIR>/CMakeFiles/ninja-bmi-install-public.dir<CONFIG_DIR>"
+  "module-dir": "<BINARY_DIR>/CMakeFiles/ninja-bmi-install-public.dir<CONFIG_DIR>",
+  "sources": {}
 }

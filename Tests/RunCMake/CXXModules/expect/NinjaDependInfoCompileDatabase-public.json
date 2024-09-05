@@ -1,0 +1,51 @@
+{
+  "bmi-installation": null,
+  "compiler-id": "<IGNORE>",
+  "compiler-frontend-variant": "<IGNORE>",
+  "compiler-simulate-id": "<IGNORE>",
+  "config": "<CONFIG>",
+  "cxx-modules": {
+    "CMakeFiles/ninja-compiledb-public.dir<CONFIG_DIR>/sources/module-internal-part.cxx<OBJEXT>": {
+      "bmi-only": false,
+      "destination": null,
+      "name": "internal_partitions",
+      "relative-directory": "sources",
+      "source": "<SOURCE_DIR>/sources/module-internal-part.cxx",
+      "type": "CXX_MODULES",
+      "visibility": "PUBLIC"
+    },
+    "CMakeFiles/ninja-compiledb-public.dir<CONFIG_DIR>/sources/module-part.cxx<OBJEXT>": {
+      "bmi-only": false,
+      "destination": null,
+      "name": "modules",
+      "relative-directory": "",
+      "source": "<SOURCE_DIR>/sources/module-part.cxx",
+      "type": "CXX_MODULES",
+      "visibility": "PUBLIC"
+    },
+    "CMakeFiles/ninja-compiledb-public.dir<CONFIG_DIR>/sources/module.cxx<OBJEXT>": {
+      "bmi-only": false,
+      "destination": null,
+      "name": "modules",
+      "relative-directory": "",
+      "source": "<SOURCE_DIR>/sources/module.cxx",
+      "type": "CXX_MODULES",
+      "visibility": "PUBLIC"
+    }
+  },
+  "database-info": {
+    "template-path": "<BINARY_DIR>/CMakeFiles/ninja-compiledb-public.dir<CONFIG_DIR>/CXX_build_database.json.in",
+    "output": "<BINARY_DIR>/CMakeFiles/ninja-compiledb-public.dir<CONFIG_DIR>/CXX_build_database.json"
+  },
+  "dir-cur-bld": "<BINARY_DIR>",
+  "dir-cur-src": "<SOURCE_DIR>",
+  "dir-top-bld": "<BINARY_DIR>",
+  "dir-top-src": "<SOURCE_DIR>",
+  "exports": [],
+  "forward-modules-from-target-dirs": [],
+  "include-dirs": [],
+  "language": "CXX",
+  "linked-target-dirs": [],
+  "module-dir": "<BINARY_DIR>/CMakeFiles/ninja-compiledb-public.dir<CONFIG_DIR>",
+  "sources": {}
+}

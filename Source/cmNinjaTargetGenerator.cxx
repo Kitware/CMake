@@ -22,6 +22,7 @@
 #include <cm3p/json/value.h>
 #include <cm3p/json/writer.h>
 
+#include "cmBuildDatabase.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmDyndepCollation.h"
@@ -1232,6 +1233,21 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
                language, "Modules.json"));
     build.ImplicitDeps.emplace_back(
       this->GetTargetDependInfoPath(language, config));
+    {
+      auto bdb_path =
+        this->GeneratorTarget->BuildDatabasePath(language, config);
+      if (!bdb_path.empty()) {
+        build.ImplicitOuts.emplace_back(this->ConvertToNinjaPath(bdb_path));
+      }
+    }
+    auto bdb_path = this->GeneratorTarget->BuildDatabasePath(language, config);
+    if (!bdb_path.empty()) {
+      auto db = cmBuildDatabase::ForTarget(this->GeneratorTarget, config);
+      auto mcdb_template_path = cmStrCat(bdb_path, ".in");
+      db.Write(mcdb_template_path);
+      build.ImplicitDeps.emplace_back(std::move(mcdb_template_path));
+      build.ImplicitOuts.emplace_back(std::move(bdb_path));
+    }
     for (auto const& scanFiles : scanningFiles) {
       if (!scanFiles.ScanningOutput.empty()) {
         build.ExplicitDeps.push_back(scanFiles.ScanningOutput);

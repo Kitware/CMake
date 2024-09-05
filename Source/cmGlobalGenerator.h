@@ -171,6 +171,11 @@ public:
     return false;
   }
 
+  virtual bool SupportsBuildDatabase() const { return false; }
+  bool AddBuildDatabaseTargets();
+  void AddBuildDatabaseFile(std::string const& lang, std::string const& config,
+                            std::string const& path);
+
   virtual bool IsGNUMakeJobServerAware() const { return false; }
 
   bool Compute();
@@ -594,6 +599,18 @@ public:
   virtual bool SupportsCrossConfigs() const { return false; }
   virtual bool SupportsDefaultConfigs() const { return false; }
 
+  virtual std::string ConvertToOutputPath(std::string path) const
+  {
+    return path;
+  }
+  virtual std::string GetConfigDirectory(std::string const& config) const
+  {
+    if (!this->IsMultiConfig() || config.empty()) {
+      return {};
+    }
+    return cmStrCat('/', config);
+  }
+
   static std::string EscapeJSON(const std::string& s);
 
   void ProcessEvaluationFiles();
@@ -859,6 +876,8 @@ private:
 
   bool CheckCMP0037(std::string const& targetName,
                     std::string const& reason) const;
+  bool CheckCMP0037Prefix(std::string const& targetPrefix,
+                          std::string const& reason) const;
 
   void IndexMakefile(cmMakefile* mf);
   void IndexLocalGenerator(cmLocalGenerator* lg);
@@ -903,6 +922,13 @@ private:
   // Pool of file locks
   cmFileLockPool FileLockPool;
 #endif
+
+  using PerLanguageModuleDatabases =
+    std::map<std::string, std::vector<std::string>>;
+  using PerConfigModuleDatabases =
+    std::map<std::string, PerLanguageModuleDatabases>;
+  PerConfigModuleDatabases PerConfigModuleDbs;
+  PerLanguageModuleDatabases PerLanguageModuleDbs;
 
 protected:
   float FirstTimeProgress;

@@ -56,6 +56,15 @@ cmExperimental::FeatureData LookupTable[] = {
     {},
     cmExperimental::TryCompileCondition::Always,
     false },
+  // ExportBuildDatabase
+  { "ExportBuildDatabase",
+    "4bd552e2-b7fb-429a-ab23-c83ef53f3f13",
+    "CMAKE_EXPERIMENTAL_EXPORT_BUILD_DATABASE",
+    "CMake's support for exporting build databases is experimental. It is "
+    "meant only for experimentation and feedback to CMake developers.",
+    {},
+    cmExperimental::TryCompileCondition::Never,
+    false },
 };
 static_assert(sizeof(LookupTable) / sizeof(LookupTable[0]) ==
                 static_cast<size_t>(cmExperimental::Feature::Sentinel),

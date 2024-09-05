@@ -78,6 +78,13 @@ if(NOT DEFINED CMAKE_EXPORT_COMPILE_COMMANDS AND CMAKE_GENERATOR MATCHES "Ninja|
   mark_as_advanced(CMAKE_EXPORT_COMPILE_COMMANDS)
 endif()
 
+if(NOT DEFINED CMAKE_EXPORT_BUILD_DATABASE AND CMAKE_GENERATOR MATCHES "Ninja")
+  set(CMAKE_EXPORT_BUILD_DATABASE "$ENV{CMAKE_EXPORT_BUILD_DATABASE}"
+    CACHE BOOL "Enable/Disable output of build database during the build."
+    )
+  mark_as_advanced(CMAKE_EXPORT_BUILD_DATABASE)
+endif()
+
 # GetDefaultWindowsPrefixBase
 #
 # Compute the base directory for CMAKE_INSTALL_PREFIX based on:

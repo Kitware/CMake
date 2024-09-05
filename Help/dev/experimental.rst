@@ -80,3 +80,24 @@ When activated, this experimental feature provides the following:
 
 .. _CPS: https://cps-org.github.io/cps/
 .. |CPS| replace:: Common Package Specification
+
+Build database support
+======================
+
+In order to activate support for exporting build databases, set
+
+* variable ``CMAKE_EXPERIMENTAL_EXPORT_BUILD_DATABASE`` to
+* value ``4bd552e2-b7fb-429a-ab23-c83ef53f3f13``.
+
+This UUID may change in future versions of CMake.  Be sure to use the value
+documented here by the source tree of the version of CMake with which you are
+experimenting.
+
+When activated, this experimental feature provides the following:
+
+* The :prop_tgt:`EXPORT_BUILD_DATABASE` target property and its initializing
+  variable :variable:`CMAKE_EXPORT_BUILD_DATABASE` and environment variable
+  :envvar:`CMAKE_EXPORT_BUILD_DATABASE`.
+
+* Targets with the property set to a true value will have their C++ build
+  information exported to the build database.

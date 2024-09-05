@@ -32,7 +32,9 @@
 #include "cmCryptoHash.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
+#include "cmCustomCommandTypes.h"
 #include "cmDuration.h"
+#include "cmExperimental.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmExternalMakefileProjectGenerator.h"
 #include "cmGeneratedFileStream.h"
@@ -67,6 +69,8 @@
 
 #  include "cmQtAutoGenGlobalInitializer.h"
 #endif
+
+class cmListFileBacktrace;
 
 const std::string kCMAKE_PLATFORM_INFO_INITIALIZED =
   "CMAKE_PLATFORM_INFO_INITIALIZED";
@@ -1569,6 +1573,10 @@ bool cmGlobalGenerator::Compute()
   }
   this->FinalizeTargetConfiguration();
 
+  if (!this->AddBuildDatabaseTargets()) {
+    return false;
+  }
+
   this->CreateGenerationObjects();
 
   // at this point this->LocalGenerators has been filled,
@@ -1625,6 +1633,13 @@ bool cmGlobalGenerator::Compute()
   // steps on the created targets.
   if (!this->DiscoverSyntheticTargets()) {
     return false;
+  }
+
+  // Perform after-generator-target generator actions. These involve collecting
+  // information gathered during the construction of generator targets.
+  for (unsigned int i = 0; i < this->Makefiles.size(); ++i) {
+    this->Makefiles[i]->GenerateAfterGeneratorTargets(
+      *this->LocalGenerators[i]);
   }
 
   // Add generator specific helper commands
@@ -2827,6 +2842,20 @@ bool cmGlobalGenerator::CheckCMP0037(std::string const& targetName,
                              reason);
 }
 
+bool cmGlobalGenerator::CheckCMP0037Prefix(std::string const& targetPrefix,
+                                           std::string const& reason) const
+{
+  bool ret = true;
+  for (auto const& tgtPair : this->TargetSearchIndex) {
+    if (cmHasPrefix(tgtPair.first, targetPrefix) &&
+        !RaiseCMP0037Message(this->GetCMakeInstance(), tgtPair.second,
+                             tgtPair.first, reason)) {
+      ret = false;
+    }
+  }
+  return ret;
+}
+
 void cmGlobalGenerator::CreateDefaultGlobalTargets(
   std::vector<GlobalTargetInfo>& targets)
 {
@@ -3177,6 +3206,205 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
       targets.push_back(gti);
     }
   }
+}
+
+class ModuleCompilationDatabaseCommandAction
+{
+public:
+  ModuleCompilationDatabaseCommandAction(
+    std::string output, std::function<std::vector<std::string>()> inputs)
+    : Output(std::move(output))
+    , Inputs(std::move(inputs))
+  {
+  }
+  void operator()(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
+                  std::unique_ptr<cmCustomCommand> cc);
+
+private:
+  std::string const Output;
+  std::function<std::vector<std::string>()> const Inputs;
+};
+
+void ModuleCompilationDatabaseCommandAction::operator()(
+  cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
+  std::unique_ptr<cmCustomCommand> cc)
+{
+  auto inputs = this->Inputs();
+
+  cmCustomCommandLines command_lines;
+  cmCustomCommandLine command_line;
+  {
+    command_line.emplace_back(cmSystemTools::GetCMakeCommand());
+    command_line.emplace_back("-E");
+    command_line.emplace_back("cmake_module_compile_db");
+    command_line.emplace_back("merge");
+    command_line.emplace_back("-o");
+    command_line.emplace_back(this->Output);
+    for (auto const& input : inputs) {
+      command_line.emplace_back(input);
+    }
+  }
+  command_lines.emplace_back(std::move(command_line));
+
+  cc->SetBacktrace(lfbt);
+  cc->SetCommandLines(command_lines);
+  cc->SetWorkingDirectory(lg.GetBinaryDirectory().c_str());
+  cc->SetDependsExplicitOnly(true);
+  cc->SetOutputs(this->Output);
+  if (!inputs.empty()) {
+    cc->SetMainDependency(inputs[0]);
+  }
+  cc->SetDepends(inputs);
+  detail::AddCustomCommandToOutput(lg, cmCommandOrigin::Generator,
+                                   std::move(cc), false);
+}
+
+class ModuleCompilationDatabaseTargetAction
+{
+public:
+  ModuleCompilationDatabaseTargetAction(std::string output, cmTarget* target)
+    : Output(std::move(output))
+    , Target(target)
+  {
+  }
+  void operator()(cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
+                  std::unique_ptr<cmCustomCommand> cc);
+
+private:
+  std::string const Output;
+  cmTarget* const Target;
+};
+
+void ModuleCompilationDatabaseTargetAction::operator()(
+  cmLocalGenerator& lg, const cmListFileBacktrace& lfbt,
+  std::unique_ptr<cmCustomCommand> cc)
+{
+  cc->SetBacktrace(lfbt);
+  cc->SetWorkingDirectory(lg.GetBinaryDirectory().c_str());
+  std::vector<std::string> target_inputs;
+  target_inputs.emplace_back(this->Output);
+  cc->SetDepends(target_inputs);
+  detail::AddUtilityCommand(lg, cmCommandOrigin::Generator, this->Target,
+                            std::move(cc));
+}
+
+void cmGlobalGenerator::AddBuildDatabaseFile(std::string const& lang,
+                                             std::string const& config,
+                                             std::string const& path)
+{
+  if (!config.empty()) {
+    this->PerConfigModuleDbs[config][lang].push_back(path);
+  }
+  this->PerLanguageModuleDbs[lang].push_back(path);
+}
+
+bool cmGlobalGenerator::AddBuildDatabaseTargets()
+{
+  auto& mf = this->Makefiles[0];
+  if (!mf->IsOn("CMAKE_EXPORT_BUILD_DATABASE")) {
+    return true;
+  }
+  if (!cmExperimental::HasSupportEnabled(
+        *mf.get(), cmExperimental::Feature::ExportBuildDatabase)) {
+    return {};
+  }
+
+  static const auto reservedTargets = { "cmake_build_database" };
+  for (auto const& target : reservedTargets) {
+    if (!this->CheckCMP0037(target,
+                            "when exporting build databases are enabled")) {
+      return false;
+    }
+  }
+  static const auto reservedPrefixes = { "cmake_build_database-" };
+  for (auto const& prefix : reservedPrefixes) {
+    if (!this->CheckCMP0037Prefix(
+          prefix, "when exporting build databases are enabled")) {
+      return false;
+    }
+  }
+
+  if (!this->SupportsBuildDatabase()) {
+    return true;
+  }
+
+  auto configs = mf->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
+
+  static cm::static_string_view TargetPrefix = "cmake_build_database"_s;
+  auto AddMergeTarget =
+    [&mf](std::string const& name, const char* comment,
+          std::string const& output,
+          std::function<std::vector<std::string>()> inputs) {
+      // Add the custom command.
+      {
+        ModuleCompilationDatabaseCommandAction action{ output,
+                                                       std::move(inputs) };
+        auto cc = cm::make_unique<cmCustomCommand>();
+        cc->SetComment(comment);
+        mf->AddGeneratorAction(
+          std::move(cc), action,
+          cmMakefile::GeneratorActionWhen::AfterGeneratorTargets);
+      }
+
+      // Add a custom target with the given name.
+      {
+        cmTarget* target = mf->AddNewUtilityTarget(name, true);
+        ModuleCompilationDatabaseTargetAction action{ output, target };
+        auto cc = cm::make_unique<cmCustomCommand>();
+        mf->AddGeneratorAction(std::move(cc), action);
+      }
+    };
+
+  std::string module_languages[] = { "CXX" };
+
+  // Add per-configuration targets.
+  for (auto const& config : configs) {
+    // Add per-language targets.
+    std::vector<std::string> all_config_paths;
+    for (auto const& lang : module_languages) {
+      auto comment = cmStrCat("Combining module command databases for ", lang,
+                              " and ", config);
+      auto output = cmStrCat(mf->GetHomeOutputDirectory(), "/build_database_",
+                             lang, '_', config, ".json");
+      mf->GetOrCreateGeneratedSource(output);
+      AddMergeTarget(cmStrCat(TargetPrefix, '-', lang, '-', config),
+                     comment.c_str(), output, [this, config, lang]() {
+                       return this->PerConfigModuleDbs[config][lang];
+                     });
+      all_config_paths.emplace_back(std::move(output));
+    }
+
+    // Add the overall target.
+    auto comment = cmStrCat("Combining module command databases for ", config);
+    auto output = cmStrCat(mf->GetHomeOutputDirectory(), "/build_database_",
+                           config, ".json");
+    mf->GetOrCreateGeneratedSource(output);
+    AddMergeTarget(cmStrCat(TargetPrefix, '-', config), comment.c_str(),
+                   output, [all_config_paths]() { return all_config_paths; });
+  }
+
+  // NMC considerations
+  // Add per-language targets.
+  std::vector<std::string> all_config_paths;
+  for (auto const& lang : module_languages) {
+    auto comment = cmStrCat("Combining module command databases for ", lang);
+    auto output = cmStrCat(mf->GetHomeOutputDirectory(), "/build_database_",
+                           lang, ".json");
+    mf->GetOrCreateGeneratedSource(output);
+    AddMergeTarget(
+      cmStrCat(TargetPrefix, '-', lang), comment.c_str(), output,
+      [this, lang]() { return this->PerLanguageModuleDbs[lang]; });
+    all_config_paths.emplace_back(std::move(output));
+  }
+
+  // Add the overall target.
+  auto const* comment = "Combining all module command databases";
+  auto output = cmStrCat(mf->GetHomeOutputDirectory(), "/build_database.json");
+  mf->GetOrCreateGeneratedSource(output);
+  AddMergeTarget(std::string(TargetPrefix), comment, output,
+                 [all_config_paths]() { return all_config_paths; });
+
+  return true;
 }
 
 std::string cmGlobalGenerator::GetPredefinedTargetsFolder() const

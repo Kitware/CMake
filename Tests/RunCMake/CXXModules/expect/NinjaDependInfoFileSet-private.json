@@ -33,6 +33,7 @@
       "visibility": "PRIVATE"
     }
   },
+  "database-info": null,
   "dir-cur-bld": "<BINARY_DIR>",
   "dir-cur-src": "<SOURCE_DIR>",
   "dir-top-bld": "<BINARY_DIR>",
@@ -42,5 +43,23 @@
   "language": "CXX",
   "forward-modules-from-target-dirs": [],
   "linked-target-dirs": [],
-  "module-dir": "<BINARY_DIR>/CMakeFiles/ninja-file-sets-private.dir<CONFIG_DIR>"
+  "module-dir": "<BINARY_DIR>/CMakeFiles/ninja-file-sets-private.dir<CONFIG_DIR>",
+  "sources": {
+    "CMakeFiles/ninja-file-sets-private.dir/sources/module-impl.cxx<OBJEXT>" : {
+      "language" : "CXX",
+      "source" : "<SOURCE_DIR>/sources/module-impl.cxx"
+    },
+    "CMakeFiles/ninja-file-sets-private.dir/sources/module-internal-part-impl.cxx<OBJEXT>" : {
+      "language" : "CXX",
+      "source" : "<SOURCE_DIR>/sources/module-internal-part-impl.cxx"
+    },
+    "CMakeFiles/ninja-file-sets-private.dir/sources/module-part-impl.cxx<OBJEXT>" : {
+      "language" : "CXX",
+      "source" : "<SOURCE_DIR>/sources/module-part-impl.cxx"
+    },
+    "CMakeFiles/ninja-file-sets-private.dir/sources/module-use.cxx<OBJEXT>" : {
+      "language" : "CXX",
+      "source" : "<SOURCE_DIR>/sources/module-use.cxx"
+    }
+  }
 }

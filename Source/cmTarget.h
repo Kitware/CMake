@@ -78,6 +78,7 @@ public:
 
   //! Set/Get the name of the target
   const std::string& GetName() const;
+  const std::string& GetTemplateName() const;
 
   //! Get the policy map
   cmPolicies::PolicyMap const& GetPolicyMap() const;
