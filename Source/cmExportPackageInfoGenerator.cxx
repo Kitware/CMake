@@ -26,7 +26,7 @@
 #include "cmTarget.h"
 #include "cmValue.h"
 
-constexpr char const* cmExportPackageInfoGenerator::CPS_VERSION_STR;
+static const std::string kCPS_VERSION_STR = "0.12.0";
 
 cmExportPackageInfoGenerator::cmExportPackageInfoGenerator(
   std::string packageName, std::string version, std::string versionCompat,
@@ -102,7 +102,7 @@ Json::Value cmExportPackageInfoGenerator::GeneratePackageInfo() const
   Json::Value package;
 
   package["name"] = this->GetPackageName();
-  package["cps_version"] = this->CPS_VERSION_STR;
+  package["cps_version"] = std::string(kCPS_VERSION_STR);
 
   if (!this->PackageVersion.empty()) {
     package["version"] = this->PackageVersion;
