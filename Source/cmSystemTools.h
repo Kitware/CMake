@@ -497,6 +497,7 @@ public:
                       const std::vector<std::string>& files, bool verbose);
   static bool CreateTar(const std::string& outFileName,
                         const std::vector<std::string>& files,
+                        const std::string& workingDirectory,
                         cmTarCompression compressType, bool verbose,
                         std::string const& mtime = std::string(),
                         std::string const& format = std::string(),

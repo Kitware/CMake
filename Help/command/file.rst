@@ -903,6 +903,7 @@ Archiving
     [COMPRESSION <compression>
     [COMPRESSION_LEVEL <compression-level>]]
     [MTIME <mtime>]
+    [WORKING_DIRECTORY <dir>]
     [VERBOSE])
   :target: ARCHIVE_CREATE
   :break: verbatim
@@ -945,6 +946,14 @@ Archiving
 
   ``MTIME <mtime>``
     Specify the modification time recorded in tarball entries.
+
+  ``WORKING_DIRECTORY <dir>``
+    .. versionadded:: 3.31
+
+    Specify the directory in which the archive creation operation will
+    be executed.  Paths in the ``<paths>`` argument can be relative to
+    this directory.  If this option is not provided, the current working
+    directory will be used by default.
 
   ``VERBOSE``
     Enable verbose output from the archive operation.
