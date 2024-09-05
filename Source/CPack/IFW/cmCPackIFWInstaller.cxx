@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackIFWInstaller.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <sstream>
 #include <utility>
@@ -306,14 +307,20 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
         this->GetOption("CPACK_IFW_PACKAGE_PRODUCT_IMAGES")) {
     this->ProductImages.clear();
     cmExpandList(productImages, this->ProductImages);
-    for (const auto& file : this->ProductImages) {
+
+    auto erase_missing_file_pred = [this](const std::string& file) -> bool {
       if (!cmSystemTools::FileExists(file)) {
-        // The warning will say skipped, but there will later be a hard error
-        // when the binarycreator tool tries to read the missing file.
         this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_PRODUCT_IMAGES",
                                         file);
+        return true;
       }
-    }
+      return false;
+    };
+
+    this->ProductImages.erase(std::remove_if(this->ProductImages.begin(),
+                                             this->ProductImages.end(),
+                                             erase_missing_file_pred),
+                              this->ProductImages.end());
   }
 
   // Run program, run program arguments, and run program description
