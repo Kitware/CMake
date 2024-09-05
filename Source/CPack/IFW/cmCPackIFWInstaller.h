@@ -124,6 +124,10 @@ public:
   /// A list of images to be shown on PerformInstallationPage.
   std::vector<std::string> ProductImages;
 
+  /// A list of associated URLs linked to images to be shown on
+  /// PerformInstallationPage.
+  std::vector<std::string> ProductImageUrls;
+
   /// Command executed after the installer is done if the user accepts the
   /// action
   std::string RunProgram;

@@ -323,6 +323,25 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
                               this->ProductImages.end());
   }
 
+  if (!this->ProductImages.empty()) {
+    if (cmValue productUrls =
+          this->GetOption("CPACK_IFW_PACKAGE_PRODUCT_IMAGE_URLS")) {
+      this->ProductImageUrls.clear();
+      cmExpandList(productUrls, this->ProductImageUrls);
+      if (this->ProductImageUrls.size() != this->ProductImages.size()) {
+        cmCPackIFWLogger(
+          WARNING,
+          "Option \"CPACK_IFW_PACKAGE_PRODUCT_IMAGE_URLS\" will be skipped "
+          "because it contains "
+            << this->ProductImageUrls.size()
+            << " elements while \"CPACK_IFW_PACKAGE_PRODUCT_IMAGES\" "
+               "contains "
+            << this->ProductImages.size() << " elements." << std::endl);
+        this->ProductImageUrls.clear();
+      }
+    }
+  }
+
   // Run program, run program arguments, and run program description
   if (cmValue program = this->GetOption("CPACK_IFW_PACKAGE_RUN_PROGRAM")) {
     this->RunProgram = *program;
@@ -621,12 +640,17 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   // Product images (copy to config dir)
   if (!this->IsVersionLess("4.0") && !this->ProductImages.empty()) {
     xout.StartElement("ProductImages");
-    for (auto const& srcImg : this->ProductImages) {
+    const bool hasProductImageUrl = !this->ProductImageUrls.empty();
+    for (size_t i = 0; i < this->ProductImages.size(); ++i) {
       xout.StartElement("ProductImage");
+      auto const& srcImg = this->ProductImages[i];
       std::string name = cmSystemTools::GetFilenameName(srcImg);
       std::string dstImg = this->Directory + "/config/" + name;
       cmsys::SystemTools::CopyFileIfDifferent(srcImg, dstImg);
       xout.Element("Image", name);
+      if (hasProductImageUrl) {
+        xout.Element("Url", this->ProductImageUrls.at(i));
+      }
       xout.EndElement(); // </ProductImage>
     }
     xout.EndElement(); // </ProductImages>
