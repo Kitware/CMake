@@ -615,12 +615,14 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   if (!this->IsVersionLess("4.0") && !this->ProductImages.empty()) {
     xout.StartElement("ProductImages");
     for (auto const& srcImg : this->ProductImages) {
+      xout.StartElement("ProductImage");
       std::string name = cmSystemTools::GetFilenameName(srcImg);
       std::string dstImg = this->Directory + "/config/" + name;
       cmsys::SystemTools::CopyFileIfDifferent(srcImg, dstImg);
       xout.Element("Image", name);
+      xout.EndElement(); // </ProductImage>
     }
-    xout.EndElement();
+    xout.EndElement(); // </ProductImages>
   }
 
   // Resources (copy to resources dir)
