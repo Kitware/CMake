@@ -1221,7 +1221,9 @@ hash=${hash}
         endif ()
         set(comment "Performing download step (${steps}) for '${name}'")
         # already verified by 'download_script'
-        file(WRITE "${verify_script}" "")
+        # We use file(CONFIGURE) instead of file(WRITE) to avoid updating the
+        # timestamp when the file already existed and was empty.
+        file(CONFIGURE OUTPUT "${verify_script}" CONTENT "")
 
         # Rather than adding everything to the RepositoryInfo.txt file, it is
         # more robust to just depend on the download script. That way, we will
