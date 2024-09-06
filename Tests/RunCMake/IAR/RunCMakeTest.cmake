@@ -67,13 +67,10 @@ foreach(_iar_toolchain IN LISTS _iar_toolchains)
     -DCMAKE_EXE_LINKER_FLAGS=${LINK_OPTS}
   )
 
-  # FIXME(#26267): ASM tests fail on Windows.
-  if(NOT CMAKE_HOST_WIN32)
-    run_toolchain(iar-asm
-      -DCMAKE_SYSTEM_NAME=Generic
-      -DCMAKE_ASM_COMPILER=${IAR_ASSEMBLER}
-    )
-  endif()
+  run_toolchain(iar-asm
+    -DCMAKE_SYSTEM_NAME=Generic
+    -DCMAKE_ASM_COMPILER=${IAR_ASSEMBLER}
+  )
 
   run_toolchain(iar-lib
     -DCMAKE_SYSTEM_NAME=Generic
