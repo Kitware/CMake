@@ -450,7 +450,8 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 
   // Enumerate VS instances with either COM interface or Vswhere
   if (!EnumerateVSInstancesWithCOM(vecVSInstancesAll) &&
-      !EnumerateVSInstancesWithVswhere(vecVSInstancesAll)) {
+      !EnumerateVSInstancesWithVswhere(vecVSInstancesAll) &&
+      this->SpecifiedVSInstallLocation.empty()) {
     return false;
   }
 
