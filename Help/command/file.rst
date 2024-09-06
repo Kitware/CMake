@@ -302,7 +302,9 @@ Writing
   variable values referenced as ``@VAR@`` or ``${VAR}`` contained therein. The
   substitution rules behave the same as the :command:`configure_file` command.
   In order to match :command:`configure_file`'s behavior, generator expressions
-  are not supported for both ``OUTPUT`` and ``CONTENT``.
+  are not supported for both ``OUTPUT`` and ``CONTENT``, and the output file
+  is only modified and its timestamp updated if the content is changed or the
+  file previously didn't exist.
 
   The arguments are:
 
