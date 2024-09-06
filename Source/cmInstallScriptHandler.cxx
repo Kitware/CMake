@@ -80,17 +80,23 @@ int cmInstallScriptHandler::install(unsigned int j)
   std::size_t installed = 0;
   std::size_t i = 0;
 
-  while (installed < scripts.size()) {
+  std::function<void()> queueScripts;
+  queueScripts = [&scripts, &working, &installed, &i, &loop, j,
+                  &queueScripts]() {
     for (auto queue = std::min(j - working, scripts.size() - i); queue > 0;
          --queue) {
-      scripts[i].start(loop, [&scripts, &working, &installed, i]() {
-        scripts[i].printResult(++installed, scripts.size());
-        --working;
-      });
+      ++working;
+      scripts[i].start(loop,
+                       [&scripts, &working, &installed, i, &queueScripts]() {
+                         scripts[i].printResult(++installed, scripts.size());
+                         --working;
+                         queueScripts();
+                       });
       ++i;
     }
-    uv_run(loop, UV_RUN_DEFAULT);
-  }
+  };
+  queueScripts();
+  uv_run(loop, UV_RUN_DEFAULT);
 
   // Write install manifest
   std::string install_manifest;
