@@ -2189,7 +2189,6 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
   ArgumentParser::NonEmpty<std::vector<std::string>> defaultConfigs;
   ArgumentParser::NonEmpty<std::string> cxxModulesDirectory;
 
-  // TODO: Support DESTINATION.
   ica.Bind("PACKAGE_INFO"_s, pkg);
   ica.Bind("EXPORT"_s, exportName);
   ica.Bind("APPENDIX"_s, appendix);
