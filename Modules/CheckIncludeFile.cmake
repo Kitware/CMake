@@ -31,6 +31,8 @@ the way the check is run:
 
 .. include:: /module/CMAKE_REQUIRED_LIBRARIES.txt
 
+.. include:: /module/CMAKE_REQUIRED_LINK_DIRECTORIES.txt
+
 .. include:: /module/CMAKE_REQUIRED_QUIET.txt
 
 See the :module:`CheckIncludeFiles` module to check for multiple headers
@@ -87,6 +89,13 @@ macro(CHECK_INCLUDE_FILE INCLUDE VARIABLE)
       unset(_CIF_CMP0075)
     endif()
 
+    if(CMAKE_REQUIRED_LINK_DIRECTORIES)
+      set(_CIF_LINK_DIRECTORIES
+        "-DLINK_DIRECTORIES:STRING=${CMAKE_REQUIRED_LINK_DIRECTORIES}")
+    else()
+      set(_CIF_LINK_DIRECTORIES)
+    endif()
+
     try_compile(${VARIABLE}
       SOURCE_FROM_VAR CheckIncludeFile.c _CIF_SOURCE_CONTENT
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
@@ -95,9 +104,11 @@ macro(CHECK_INCLUDE_FILE INCLUDE VARIABLE)
       CMAKE_FLAGS
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_INCLUDE_FILE_FLAGS}
       "${CHECK_INCLUDE_FILE_C_INCLUDE_DIRS}"
+      "${_CIF_LINK_DIRECTORIES}"
       )
     unset(_CIF_LINK_OPTIONS)
     unset(_CIF_LINK_LIBRARIES)
+    unset(_CIF_LINK_DIRECTORIES)
 
     if(${ARGC} EQUAL 3)
       set(CMAKE_C_FLAGS ${CMAKE_C_FLAGS_SAVE})
