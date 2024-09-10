@@ -77,6 +77,8 @@ the way the check is run:
 
 .. include:: /module/CMAKE_REQUIRED_LIBRARIES.txt
 
+.. include:: /module/CMAKE_REQUIRED_LINK_DIRECTORIES.txt
+
 .. include:: /module/CMAKE_REQUIRED_QUIET.txt
 
 ``CMAKE_EXTRA_INCLUDE_FILES``
@@ -140,6 +142,13 @@ function(__check_type_size_impl type var map builtin language)
     string(APPEND headers "#include \"${h}\"\n")
   endforeach()
 
+  if(CMAKE_REQUIRED_LINK_DIRECTORIES)
+    set(_CTS_LINK_DIRECTORIES
+      "-DLINK_DIRECTORIES:STRING=${CMAKE_REQUIRED_LINK_DIRECTORIES}")
+  else()
+    set(_CTS_LINK_DIRECTORIES)
+  endif()
+
   # Perform the check.
   set(bin ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CheckTypeSize/${var}.bin)
   file(READ ${__check_type_size_dir}/CheckTypeSize.c.in src_content)
@@ -151,8 +160,10 @@ function(__check_type_size_impl type var map builtin language)
     CMAKE_FLAGS
       "-DCOMPILE_DEFINITIONS:STRING=${CMAKE_REQUIRED_FLAGS}"
       "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_REQUIRED_INCLUDES}"
+      "${_CTS_LINK_DIRECTORIES}"
     COPY_FILE ${bin}
     )
+  unset(_CTS_LINK_DIRECTORIES)
 
   if(HAVE_${var})
     # The check compiled.  Load information from the binary.

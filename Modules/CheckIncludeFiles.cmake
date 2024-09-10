@@ -37,6 +37,8 @@ the way the check is run:
 
 .. include:: /module/CMAKE_REQUIRED_LIBRARIES.txt
 
+.. include:: /module/CMAKE_REQUIRED_LINK_DIRECTORIES.txt
+
 .. include:: /module/CMAKE_REQUIRED_QUIET.txt
 
 See modules :module:`CheckIncludeFile` and :module:`CheckIncludeFileCXX`
@@ -126,6 +128,13 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
       unset(_CIF_CMP0075)
     endif()
 
+    if(CMAKE_REQUIRED_LINK_DIRECTORIES)
+      set(_CIF_LINK_DIRECTORIES
+        "-DLINK_DIRECTORIES:STRING=${CMAKE_REQUIRED_LINK_DIRECTORIES}")
+    else()
+      set(_CIF_LINK_DIRECTORIES)
+    endif()
+
     if(NOT CMAKE_REQUIRED_QUIET)
       message(CHECK_START "Looking for ${_description}")
     endif()
@@ -137,9 +146,11 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
       CMAKE_FLAGS
       -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_INCLUDE_FILES_FLAGS}
       "${CHECK_INCLUDE_FILES_INCLUDE_DIRS}"
+      "${_CIF_LINK_DIRECTORIES}"
       )
     unset(_CIF_LINK_OPTIONS)
     unset(_CIF_LINK_LIBRARIES)
+    unset(_CIF_LINK_DIRECTORIES)
     if(${VARIABLE})
       if(NOT CMAKE_REQUIRED_QUIET)
         message(CHECK_PASS "found")

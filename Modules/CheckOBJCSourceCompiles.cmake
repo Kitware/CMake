@@ -47,6 +47,8 @@ Check once if Objective-C source can be built.
 
 .. include:: /module/CMAKE_REQUIRED_LIBRARIES.txt
 
+.. include:: /module/CMAKE_REQUIRED_LINK_DIRECTORIES.txt
+
 .. include:: /module/CMAKE_REQUIRED_QUIET.txt
 
 #]=======================================================================]

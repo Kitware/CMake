@@ -45,6 +45,8 @@ the way the check is run:
 
 .. include:: /module/CMAKE_REQUIRED_LIBRARIES.txt
 
+.. include:: /module/CMAKE_REQUIRED_LINK_DIRECTORIES.txt
+
 .. include:: /module/CMAKE_REQUIRED_QUIET.txt
 
 #]=======================================================================]
@@ -83,6 +85,13 @@ function(check_prototype_definition _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIAB
       set(CMAKE_SYMBOL_EXISTS_INCLUDES)
     endif()
 
+    if(CMAKE_REQUIRED_LINK_DIRECTORIES)
+      set(_CPD_LINK_DIRECTORIES
+        "-DLINK_DIRECTORIES:STRING=${CMAKE_REQUIRED_LINK_DIRECTORIES}")
+    else()
+      set(_CPD_LINK_DIRECTORIES)
+    endif()
+
     foreach(_FILE ${_HEADER})
       string(APPEND CHECK_PROTOTYPE_DEFINITION_HEADER
         "#include <${_FILE}>\n")
@@ -102,7 +111,9 @@ function(check_prototype_definition _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIAB
       ${CHECK_PROTOTYPE_DEFINITION_LIBS}
       CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${CHECK_PROTOTYPE_DEFINITION_FLAGS}
       "${CMAKE_SYMBOL_EXISTS_INCLUDES}"
+      "${_CPD_LINK_DIRECTORIES}"
       )
+    unset(_CPD_LINK_DIRECTORIES)
 
     if (${_VARIABLE})
       set(${_VARIABLE} 1 CACHE INTERNAL "Have correct prototype for ${_FUNCTION}")
