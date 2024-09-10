@@ -1439,6 +1439,13 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
     realPath = oldPolicyPath;
   }
 
+  if (!cmSystemTools::FileExists(realPath)) {
+    status.GetMakefile().IssueMessage(
+      MessageType::AUTHOR_WARNING,
+      cmStrCat("Given path:\n  ", input,
+               "\ndoes not refer to an existing path on disk."));
+  }
+
   status.GetMakefile().AddDefinition(args[2], realPath);
 
   return true;
