@@ -5924,7 +5924,8 @@ void cmVisualStudio10TargetGenerator::UpdateCache()
 {
   std::vector<std::string> packageReferences;
 
-  if (this->GeneratorTarget->HasPackageReferences()) {
+  if (this->GeneratorTarget->IsDotNetSdkTarget() ||
+      this->GeneratorTarget->HasPackageReferences()) {
     // Store a cache entry that later determines, if a package restore is
     // required.
     this->GeneratorTarget->Makefile->AddCacheDefinition(
@@ -5941,7 +5942,7 @@ void cmVisualStudio10TargetGenerator::UpdateCache()
     OrderedTargetDependSet depends(unordered, CMAKE_CHECK_BUILD_SYSTEM_TARGET);
 
     for (cmGeneratorTarget const* dt : depends) {
-      if (dt->HasPackageReferences()) {
+      if (dt->IsDotNetSdkTarget() || dt->HasPackageReferences()) {
         this->GeneratorTarget->Makefile->AddCacheDefinition(
           cmStrCat(this->GeneratorTarget->GetName(),
                    "_REQUIRES_VS_PACKAGE_RESTORE"),
