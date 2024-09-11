@@ -1471,25 +1471,19 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatement(
 
   if (this->GetMakefile()->GetSafeDefinition(
         cmStrCat("CMAKE_", language, "_DEPFILE_FORMAT")) != "msvc"_s) {
-    bool replaceExt(false);
+    bool replaceExt = false;
     if (!language.empty()) {
       std::string repVar =
         cmStrCat("CMAKE_", language, "_DEPFILE_EXTENSION_REPLACE");
       replaceExt = this->Makefile->IsOn(repVar);
     }
-    if (!replaceExt) {
-      // use original code
-      vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-        cmStrCat(objectFileName, ".d"), cmOutputConverter::SHELL);
-    } else {
-      // Replace the original source file extension with the
-      // depend file extension.
-      std::string dependFileName = cmStrCat(
-        cmSystemTools::GetFilenameWithoutLastExtension(objectFileName), ".d");
-      vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-        cmStrCat(objectFileDir, '/', dependFileName),
-        cmOutputConverter::SHELL);
-    }
+    std::string depfile = replaceExt
+      ? cmStrCat(
+          objectFileDir, '/',
+          cmSystemTools::GetFilenameWithoutLastExtension(objectFileName), ".d")
+      : cmStrCat(objectFileName, ".d");
+    vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+      depfile, cmOutputConverter::SHELL);
   }
 
   this->SetMsvcTargetPdbVariable(vars, config);
@@ -1804,24 +1798,19 @@ void cmNinjaTargetGenerator::WriteCxxModuleBmiBuildStatement(
 
   if (this->GetMakefile()->GetSafeDefinition(
         cmStrCat("CMAKE_", language, "_DEPFILE_FORMAT")) != "msvc"_s) {
-    bool replaceExt(false);
+    bool replaceExt = false;
     if (!language.empty()) {
       std::string repVar =
         cmStrCat("CMAKE_", language, "_DEPFILE_EXTENSION_REPLACE");
       replaceExt = this->Makefile->IsOn(repVar);
     }
-    if (!replaceExt) {
-      // use original code
-      vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-        cmStrCat(bmiFileName, ".d"), cmOutputConverter::SHELL);
-    } else {
-      // Replace the original source file extension with the
-      // depend file extension.
-      std::string dependFileName = cmStrCat(
-        cmSystemTools::GetFilenameWithoutLastExtension(bmiFileName), ".d");
-      vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-        cmStrCat(bmiFileDir, '/', dependFileName), cmOutputConverter::SHELL);
-    }
+    std::string depfile = replaceExt
+      ? cmStrCat(bmiFileDir, '/',
+                 cmSystemTools::GetFilenameWithoutLastExtension(bmiFileName),
+                 ".d")
+      : cmStrCat(bmiFileName, ".d");
+    vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+      depfile, cmOutputConverter::SHELL);
   }
 
   std::string d =
