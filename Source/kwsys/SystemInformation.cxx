@@ -59,7 +59,7 @@
 #    include <psapi.h>
 #  endif
 #  if !defined(siginfo_t)
-typedef int siginfo_t;
+using siginfo_t = int;
 #  endif
 #else
 #  include <sys/types.h>
@@ -135,7 +135,7 @@ typedef int siginfo_t;
 using ResourceLimitType = struct rlimit64;
 #    define GetResourceLimit getrlimit64
 #  else
-typedef struct rlimit ResourceLimitType;
+using ResourceLimitType = struct rlimit;
 #    define GetResourceLimit getrlimit
 #  endif
 #elif defined(__hpux)
@@ -333,101 +333,58 @@ public:
   void RunMemoryCheck();
 
 public:
-  using ID = struct tagID
-
+  struct ID
   {
-
     int Type;
-
     int Family;
-
     int Model;
-
     int Revision;
-
     int ExtendedFamily;
-
     int ExtendedModel;
-
     std::string ProcessorName;
-
     std::string Vendor;
-
     std::string SerialNumber;
-
     std::string ModelName;
   };
 
-  using CPUPowerManagement = struct tagCPUPowerManagement
-
+  struct CPUPowerManagement
   {
-
     bool HasVoltageID;
-
     bool HasFrequencyID;
-
     bool HasTempSenseDiode;
   };
 
-  using CPUExtendedFeatures = struct tagCPUExtendedFeatures
-
+  struct CPUExtendedFeatures
   {
-
     bool Has3DNow;
-
     bool Has3DNowPlus;
-
     bool SupportsMP;
-
     bool HasMMXPlus;
-
     bool HasSSEMMX;
-
     unsigned int LogicalProcessorsPerPhysical;
-
     int APIC_ID;
-
     CPUPowerManagement PowerManagement;
   };
 
-  using CPUFeatures = struct CPUtagFeatures
-
+  struct CPUFeatures
   {
-
     bool HasFPU;
-
     bool HasTSC;
-
     bool HasMMX;
-
     bool HasSSE;
-
     bool HasSSEFP;
-
     bool HasSSE2;
-
     bool HasIA64;
-
     bool HasAPIC;
-
     bool HasCMOV;
-
     bool HasMTRR;
-
     bool HasACPI;
-
     bool HasSerial;
-
     bool HasThermal;
-
     int CPUSpeed;
-
     int L1CacheSize;
-
     int L2CacheSize;
-
     int L3CacheSize;
-
     CPUExtendedFeatures ExtendedFeatures;
   };
 
@@ -3923,8 +3880,7 @@ double SystemInformationImplementation::GetLoadAverage()
   return -0.0;
 #elif defined(KWSYS_SYSTEMINFORMATION_USE_GetSystemTimes)
   // Old windows.h headers do not provide GetSystemTimes.
-  typedef BOOL(WINAPI * GetSystemTimesType)(LPFILETIME, LPFILETIME,
-                                            LPFILETIME);
+  using GetSystemTimesType = BOOL(WINAPI*)(LPFILETIME, LPFILETIME, LPFILETIME);
   static GetSystemTimesType pGetSystemTimes =
     (GetSystemTimesType)GetProcAddress(GetModuleHandleW(L"kernel32"),
                                        "GetSystemTimes");
@@ -4469,8 +4425,8 @@ void SystemInformationImplementation::CPUCountWindows()
   this->NumberOfPhysicalCPU = 0;
   this->NumberOfLogicalCPU = 0;
 
-  typedef BOOL(WINAPI * GetLogicalProcessorInformationType)(
-    PSYSTEM_LOGICAL_PROCESSOR_INFORMATION, PDWORD);
+  using GetLogicalProcessorInformationType =
+    BOOL(WINAPI*)(PSYSTEM_LOGICAL_PROCESSOR_INFORMATION, PDWORD);
   static GetLogicalProcessorInformationType pGetLogicalProcessorInformation =
     reinterpret_cast<GetLogicalProcessorInformationType>(GetProcAddress(
       GetModuleHandleW(L"kernel32"), "GetLogicalProcessorInformation"));
@@ -4499,10 +4455,7 @@ void SystemInformationImplementation::CPUCountWindows()
     (void)rc; // Silence unused variable warning
   }
 
-  typedef std::vector<SYSTEM_LOGICAL_PROCESSOR_INFORMATION>::iterator
-    pinfoIt_t;
-  for (pinfoIt_t it = ProcInfo.begin(); it != ProcInfo.end(); ++it) {
-    SYSTEM_LOGICAL_PROCESSOR_INFORMATION PInfo = *it;
+  for (SYSTEM_LOGICAL_PROCESSOR_INFORMATION const& PInfo : ProcInfo) {
     if (PInfo.Relationship != RelationProcessorCore) {
       continue;
     }
@@ -5464,7 +5417,7 @@ bool SystemInformationImplementation::QueryOSInformation()
         this->OSVersion = operatingSystem;
       } else if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1) {
         // Windows XP and .NET server.
-        typedef BOOL(CALLBACK * LPFNPROC)(HANDLE, BOOL*);
+        using LPFNPROC = BOOL(CALLBACK*)(HANDLE, BOOL*);
         HINSTANCE hKernelDLL;
         LPFNPROC DLLProc;
 
