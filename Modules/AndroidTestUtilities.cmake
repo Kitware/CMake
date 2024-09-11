@@ -139,7 +139,6 @@ function(android_add_test_data test_name)
         get_filename_component(extern_data_basename ${output} NAME)
         add_custom_command(
           TARGET ${DATA_TARGET_NAME} POST_BUILD
-          DEPENDS ${extern_data_source}
           COMMAND ${CMAKE_COMMAND} -E copy_if_different ${extern_data_source} ${DEST}/${extern_data_basename}
         )
       endif()
