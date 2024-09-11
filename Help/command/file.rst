@@ -901,7 +901,7 @@ Archiving
     PATHS <paths>...
     [FORMAT <format>]
     [COMPRESSION <compression>
-     [COMPRESSION_LEVEL <compression-level>]]
+    [COMPRESSION_LEVEL <compression-level>]]
     [MTIME <mtime>]
     [VERBOSE])
   :target: ARCHIVE_CREATE
@@ -913,40 +913,47 @@ Archiving
   listed in ``<paths>``.  Note that ``<paths>`` must list actual files or
   directories; wildcards are not supported.
 
-  Use the ``FORMAT`` option to specify the archive format.  Supported values
-  for ``<format>`` are ``7zip``, ``gnutar``, ``pax``, ``paxr``, ``raw`` and
-  ``zip``.  If ``FORMAT`` is not given, the default format is ``paxr``.
+  The options are:
 
-  Some archive formats allow the type of compression to be specified.
-  The ``7zip`` and ``zip`` archive formats already imply a specific type of
-  compression.  The other formats use no compression by default, but can be
-  directed to do so with the ``COMPRESSION`` option.  Valid values for
-  ``<compression>`` are ``None``, ``BZip2``, ``GZip``, ``XZ``, and ``Zstd``.
+  ``FORMAT <format>``
+    Specify the archive format.  Supported values for ``<format>`` are
+    ``7zip``, ``gnutar``, ``pax``, ``paxr``, ``raw`` and ``zip``.
+    If ``FORMAT`` is not given, the default format is ``paxr``.
 
-  .. versionadded:: 3.19
+  ``COMPRESSION <compression>``
+    Some archive formats allow the type of compression to be specified.
+    The ``7zip`` and ``zip`` archive formats already imply a specific type of
+    compression.  The other formats use no compression by default, but can be
+    directed to do so with the ``COMPRESSION`` option.  Valid values for
+    ``<compression>`` are ``None``, ``BZip2``, ``GZip``, ``XZ``, and ``Zstd``.
+
+    .. note::
+      With ``FORMAT`` set to ``raw``, only one file will be compressed
+      with the compression type specified by ``COMPRESSION``.
+
+  ``COMPRESSION_LEVEL <compression-level>``
+    .. versionadded:: 3.19
+
     The compression level can be specified with the ``COMPRESSION_LEVEL``
     option.  The ``<compression-level>`` should be between 0-9, with the
     default being 0.  The ``COMPRESSION`` option must be present when
     ``COMPRESSION_LEVEL`` is given.
 
-  .. versionadded:: 3.26
-    The ``<compression-level>`` of the ``Zstd`` algorithm can be set
-    between 0-19.
+    .. versionadded:: 3.26
+      The ``<compression-level>`` of the ``Zstd`` algorithm can be set
+      between 0-19.
 
-  .. note::
-    With ``FORMAT`` set to ``raw``, only one file will be compressed with the
-    compression type specified by ``COMPRESSION``.
+  ``MTIME <mtime>``
+    Specify the modification time recorded in tarball entries.
 
-  The ``VERBOSE`` option enables verbose output for the archive operation.
-
-  To specify the modification time recorded in tarball entries, use
-  the ``MTIME`` option.
+  ``VERBOSE``
+    Enable verbose output from the archive operation.
 
 .. signature::
   file(ARCHIVE_EXTRACT
     INPUT <archive>
     [DESTINATION <dir>]
-    [PATTERNS <patterns>...]
+    [PATTERNS <pattern>...]
     [LIST_ONLY]
     [VERBOSE]
     [TOUCH])
@@ -956,17 +963,30 @@ Archiving
 
   Extracts or lists the content of the specified ``<archive>``.
 
-  The directory where the content of the archive will be extracted to can
-  be specified using the ``DESTINATION`` option.  If the directory does not
-  exist, it will be created.  If ``DESTINATION`` is not given, the current
-  binary directory will be used.
+  The options are:
 
-  If required, you may select which files and directories to list or extract
-  from the archive using the specified ``<patterns>``.  Wildcards are
-  supported.  If the ``PATTERNS`` option is not given, the entire archive will
-  be listed or extracted.
+  ``DESTINATION <dir>``
+    Specify the directory under which the content of the archive will be
+    extracted.  If the directory does not exist, it will be created.
+    If ``DESTINATION`` is not given, the current binary directory will
+    be used.
 
-  ``LIST_ONLY`` will list the files in the archive rather than extract them.
+  ``PATTERNS <pattern>...``
+    Extract/list only files and directories that match one of the given
+    patterns.  Wildcards are supported.  If the ``PATTERNS`` option is
+    not given, the entire archive will be listed or extracted.
+
+  ``LIST_ONLY``
+    List the files in the archive rather than extract them.
+
+  ``TOUCH``
+    .. versionadded:: 3.24
+
+    Give extracted files a current local timestamp instead of extracting
+    file timestamps from the archive.
+
+  ``VERBOSE``
+    Enable verbose output from the extraction operation.
 
   .. note::
     The working directory for this subcommand is the ``DESTINATION`` directory
@@ -974,12 +994,6 @@ Archiving
     outside of script mode, it may be best to provide absolute paths to
     ``INPUT`` archives as they are unlikely to be extracted where a relative
     path works.
-
-  .. versionadded:: 3.24
-    The ``TOUCH`` option gives extracted files a current local
-    timestamp instead of extracting file timestamps from the archive.
-
-  With ``VERBOSE``, the command will produce verbose output.
 
 Handling Runtime Binaries
 ^^^^^^^^^^^^^^^^^^^^^^^^^
