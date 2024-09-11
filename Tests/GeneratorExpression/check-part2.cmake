@@ -34,6 +34,8 @@ check(test_target_includes5 "/empty2/public;/empty3/public;/empty2/public;/empty
 check(test_target_includes6 "/empty3/public;/empty3/private;/empty2/public;/empty3/public;/empty4/public")
 check(test_target_includes7 "/empty1/public;/empty2/public;/empty3/public;/empty4/public")
 check(test_target_includes8 "/empty5/private1;/empty5/private2")
+check(test_target_closure1 "bar.cpp,foo.c")
+check(test_target_closure2 "bar.cpp,foo.c")
 check(test_arbitrary_content_comma_1 "a,")
 check(test_arbitrary_content_comma_2 ",a")
 check(test_arbitrary_content_comma_3 "a,,")

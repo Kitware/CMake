@@ -99,6 +99,15 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
   std::string const& prop, cmGeneratorExpressionContext* context,
   cmGeneratorExpressionDAGChecker* dagCheckerParent, UseTo usage) const
 {
+  return EvaluateInterfaceProperty(prop, context, dagCheckerParent, usage,
+                                   TransitiveClosure::Inherit);
+}
+
+std::string cmGeneratorTarget::EvaluateInterfaceProperty(
+  std::string const& prop, cmGeneratorExpressionContext* context,
+  cmGeneratorExpressionDAGChecker* dagCheckerParent, UseTo usage,
+  TransitiveClosure closure) const
+{
   std::string result;
 
   // If the property does not appear transitively at all, we are done.
@@ -106,12 +115,15 @@ std::string cmGeneratorTarget::EvaluateInterfaceProperty(
     return result;
   }
 
+  auto const dagClosure = closure == TransitiveClosure::Inherit
+    ? cmGeneratorExpressionDAGChecker::INHERIT
+    : cmGeneratorExpressionDAGChecker::SUBGRAPH;
   // Evaluate $<TARGET_PROPERTY:this,prop> as if it were compiled.  This is
   // a subset of TargetPropertyNode::Evaluate without stringify/parse steps
   // but sufficient for transitive interface properties.
   cmGeneratorExpressionDAGChecker dagChecker(
     context->Backtrace, this, prop, nullptr, dagCheckerParent,
-    this->LocalGenerator, context->Config);
+    this->LocalGenerator, context->Config, dagClosure);
   switch (dagChecker.Check()) {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
       dagChecker.ReportError(

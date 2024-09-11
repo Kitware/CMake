@@ -2983,8 +2983,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     if (isInterfaceProperty) {
       return cmGeneratorExpression::StripEmptyListElements(
-        target->EvaluateInterfaceProperty(propertyName, context,
-                                          dagCheckerParent, usage));
+        target->EvaluateInterfaceProperty(
+          propertyName, context, dagCheckerParent, usage,
+          cmGeneratorTarget::TransitiveClosure::Subgraph));
     }
 
     cmGeneratorExpressionDAGChecker dagChecker(

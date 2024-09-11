@@ -17,6 +17,17 @@ class cmLocalGenerator;
 
 struct cmGeneratorExpressionDAGChecker
 {
+  enum TransitiveClosure
+  {
+    INHERIT,
+    SUBGRAPH,
+  };
+
+  cmGeneratorExpressionDAGChecker(
+    cmListFileBacktrace backtrace, cmGeneratorTarget const* target,
+    std::string property, const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* parent, cmLocalGenerator const* contextLG,
+    std::string const& contextConfig, TransitiveClosure closure);
   cmGeneratorExpressionDAGChecker(cmListFileBacktrace backtrace,
                                   cmGeneratorTarget const* target,
                                   std::string property,
@@ -76,6 +87,7 @@ private:
 
   const cmGeneratorExpressionDAGChecker* const Parent;
   const cmGeneratorExpressionDAGChecker* const Top;
+  const cmGeneratorExpressionDAGChecker* const Closure;
   cmGeneratorTarget const* Target;
   const std::string Property;
   mutable std::map<cmGeneratorTarget const*, std::set<std::string>> Seen;
