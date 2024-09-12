@@ -12,7 +12,7 @@ set(check_exes
   \"$<TARGET_FILE:main>\"
   )
 
-if (check_step EQUAL 2)
+if (RunCMake_GENERATOR MATCHES \"Make\" AND check_step EQUAL 2)
   include(\"${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Makefile.cmake\")
   if (NOT CMAKE_DEPEND_INFO_FILES)
     set(RunCMake_TEST_FAILED \"Variable CMAKE_DEPEND_INFO_FILES not found.\")
@@ -44,6 +44,18 @@ if (check_step EQUAL 2)
         endif()
       endif()
     endforeach()
+  endif()
+endif()
+
+if (RunCMake_GENERATOR STREQUAL \"Ninja\" AND check_step EQUAL 2)
+  execute_process(
+    COMMAND \${RunCMake_MAKE_PROGRAM} -t deps
+    WORKING_DIRECTORY \${RunCMake_TEST_BINARY_DIR}
+    OUTPUT_VARIABLE deps
+  )
+  if(NOT deps MATCHES \"CompileDepends.c\" OR NOT deps MATCHES \"CompileDepends.h\")
+    string(REPLACE deps \"\\n\" \"\\n  \" \"  \${deps}\")
+    set(RunCMake_TEST_FAILED \"Dependencies not detected correctly:\\n\${deps}\")
   endif()
 endif()
 ")

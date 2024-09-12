@@ -170,7 +170,9 @@ if ((RunCMake_GENERATOR STREQUAL "Unix Makefiles"
         OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang"))
     OR (RunCMake_GENERATOR STREQUAL "NMake Makefiles"
       AND MSVC_VERSION GREATER 1300
-      AND CMAKE_C_COMPILER_ID STREQUAL "MSVC"))
+      AND CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+    OR RunCMake_GENERATOR MATCHES "Ninja"
+    )
   run_BuildDepends(CompileDepends)
   run_BuildDepends(CustomCommandDepends)
 endif()
