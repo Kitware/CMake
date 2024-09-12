@@ -39,8 +39,9 @@ file(ARCHIVE_CREATE
   OUTPUT ${FULL_OUTPUT_NAME}
   FORMAT "${ARCHIVE_FORMAT}"
   COMPRESSION "${COMPRESSION_TYPE}"
+  WORKING_DIRECTORY "${WORKING_DIRECTORY}"
   VERBOSE
-  PATHS ${COMPRESS_DIR})
+  PATHS ${FULL_COMPRESS_DIR})
 
 file(ARCHIVE_EXTRACT
   INPUT ${FULL_OUTPUT_NAME}
@@ -54,10 +55,10 @@ endif()
 
 foreach(file ${CHECK_FILES})
   set(input ${FULL_COMPRESS_DIR}/${file})
-  set(output ${FULL_DECOMPRESS_DIR}/${COMPRESS_DIR}/${file})
+  set(output ${FULL_DECOMPRESS_DIR}/${CUSTOM_OUTPUT_DIRECTORY}/${COMPRESS_DIR}/${file})
 
   if(NOT EXISTS ${input})
-    message(SEND_ERROR "Cannot find input file ${output}")
+    message(SEND_ERROR "Cannot find input file ${input}")
   endif()
 
   if(NOT EXISTS ${output})

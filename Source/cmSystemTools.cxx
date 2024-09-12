@@ -36,6 +36,7 @@
 #include "cmUVProcessChain.h"
 #include "cmUVStream.h"
 #include "cmValue.h"
+#include "cmWorkingDirectory.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
 #  include <cm3p/archive.h>
@@ -1867,12 +1868,18 @@ bool cmSystemTools::IsPathToMacOSSharedLibrary(const std::string& path)
 
 bool cmSystemTools::CreateTar(const std::string& outFileName,
                               const std::vector<std::string>& files,
+                              const std::string& workingDirectory,
                               cmTarCompression compressType, bool verbose,
                               std::string const& mtime,
                               std::string const& format, int compressionLevel)
 {
 #if !defined(CMAKE_BOOTSTRAP)
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  cmWorkingDirectory workdir(cmSystemTools::GetCurrentWorkingDirectory());
+  if (!workingDirectory.empty()) {
+    workdir.SetDirectory(workingDirectory);
+  }
+
+  const std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   cmsys::ofstream fout(outFileName.c_str(), std::ios::out | std::ios::binary);
   if (!fout) {
     std::string e = cmStrCat("Cannot open output file \"", outFileName,
