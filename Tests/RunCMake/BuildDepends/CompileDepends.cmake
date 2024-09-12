@@ -1,11 +1,12 @@
 enable_language(C)
 
-add_executable(main ${CMAKE_CURRENT_BINARY_DIR}/main.c)
+add_executable(main CompileDepends.c)
+target_include_directories(main PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/check-$<LOWER_CASE:$<CONFIG>>.cmake CONTENT "
+cmake_minimum_required(VERSION ${CMAKE_VERSION})
 set(check_pairs
-  \"$<TARGET_FILE:main>|${CMAKE_CURRENT_BINARY_DIR}/main.c\"
-  \"$<TARGET_FILE:main>|${CMAKE_CURRENT_BINARY_DIR}/main.h\"
+  \"$<TARGET_FILE:main>|${CMAKE_CURRENT_BINARY_DIR}/CompileDepends.h\"
   )
 set(check_exes
   \"$<TARGET_FILE:main>\"
@@ -35,9 +36,9 @@ if (check_step EQUAL 2)
         else()
           string(REPLACE \"\\\\ \" \" \" DEPENDS_CONTENT \"\${DEPENDS_CONTENT}\")
         endif()
-        if(NOT DEPENDS_CONTENT MATCHES \"\${OBJECT_FILE} *:.+main.c\"
-            OR NOT DEPENDS_CONTENT MATCHES \"main.h\")
-          set(RunCMake_TEST_FAILED \"Dependency file '\${TARGET_DEP_FILE}' badly generated.\")
+        if(NOT DEPENDS_CONTENT MATCHES \"\${OBJECT_FILE} *:.+[Cc]ompile[Dd]epends.c\"
+            OR NOT DEPENDS_CONTENT MATCHES \"[Cc]ompile[Dd]epends.h\")
+          set(RunCMake_TEST_FAILED \"Dependency file badly generated:\n  \${TARGET_DEP_FILE}\")
         endif()
       endif()
     endif()

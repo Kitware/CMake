@@ -171,7 +171,7 @@ if ((RunCMake_GENERATOR STREQUAL "Unix Makefiles"
     OR (RunCMake_GENERATOR STREQUAL "NMake Makefiles"
       AND MSVC_VERSION GREATER 1300
       AND CMAKE_C_COMPILER_ID STREQUAL "MSVC"))
-  run_BuildDepends(CompilerDependencies)
+  run_BuildDepends(CompileDepends)
   run_BuildDepends(CustomCommandDependencies)
 endif()
 
