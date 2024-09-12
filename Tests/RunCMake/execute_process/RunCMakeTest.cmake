@@ -9,8 +9,8 @@ run_cmake_command(MergeOutputVars ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/Mer
 
 run_cmake(EncodingMissing)
 if(TEST_ENCODING_EXE)
-  run_cmake_command(EncodingUTF8 ${CMAKE_COMMAND} -DTEST_ENCODING=UTF8 -DTEST_ENCODING_EXE=${TEST_ENCODING_EXE} -P ${RunCMake_SOURCE_DIR}/Encoding.cmake)
-  run_cmake_command(EncodingUTF-8 ${CMAKE_COMMAND} -DTEST_ENCODING=UTF-8 -DTEST_ENCODING_EXE=${TEST_ENCODING_EXE} -P ${RunCMake_SOURCE_DIR}/Encoding.cmake)
+  run_cmake_script(EncodingUTF-8 -DTEST_ENCODING_EXE=${TEST_ENCODING_EXE})
+  run_cmake_script(EncodingUTF8 -DTEST_ENCODING_EXE=${TEST_ENCODING_EXE})
 endif()
 
 if(EXIT_CODE_EXE)
