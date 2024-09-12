@@ -3,13 +3,29 @@ enable_language(C)
 add_executable(main CompileDepends.c)
 target_include_directories(main PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
+set(CODE_WITH_SPACE [[
+add_executable(main2 ../CompileDepends.c)
+target_include_directories(main2 PRIVATE ${CMAKE_BINARY_DIR})
+]])
+if(MAKE_SUPPORTS_SPACES)
+  add_subdirectory("With Space")
+  set(check_pairs_with_space "
+    \"$<TARGET_FILE:main2>|${CMAKE_CURRENT_BINARY_DIR}/CompileDepends.h\"
+  ")
+  set(check_exes_with_space "
+    \"$<TARGET_FILE:main2>\"
+  ")
+endif()
+
 file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/check-$<LOWER_CASE:$<CONFIG>>.cmake CONTENT "
 cmake_minimum_required(VERSION ${CMAKE_VERSION})
 set(check_pairs
   \"$<TARGET_FILE:main>|${CMAKE_CURRENT_BINARY_DIR}/CompileDepends.h\"
+  ${check_pairs_with_space}
   )
 set(check_exes
   \"$<TARGET_FILE:main>\"
+  ${check_exes_with_space}
   )
 
 if (RunCMake_GENERATOR MATCHES \"Make\" AND check_step EQUAL 2)
@@ -17,6 +33,7 @@ if (RunCMake_GENERATOR MATCHES \"Make\" AND check_step EQUAL 2)
   if (NOT CMAKE_DEPEND_INFO_FILES)
     set(RunCMake_TEST_FAILED \"Variable CMAKE_DEPEND_INFO_FILES not found.\")
   else()
+    list(FILTER CMAKE_DEPEND_INFO_FILES EXCLUDE REGEX main2)
     foreach(DEPEND_INFO_FILE IN LISTS CMAKE_DEPEND_INFO_FILES)
       include(\"${CMAKE_CURRENT_BINARY_DIR}/\${DEPEND_INFO_FILE}\")
       if (NOT CMAKE_DEPENDS_DEPENDENCY_FILES)

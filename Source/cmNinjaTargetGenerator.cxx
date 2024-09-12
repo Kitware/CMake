@@ -2495,16 +2495,22 @@ void cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(
   this->Generator->Configs[config].ExtraFiles.push_back(std::move(output));
 }
 
-void cmNinjaTargetGenerator::AddDepfileBinding(
-  cmNinjaVars& vars, std::string const& depfile) const
+void cmNinjaTargetGenerator::AddDepfileBinding(cmNinjaVars& vars,
+                                               std::string depfile) const
 {
-  vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-    depfile, cmOutputConverter::SHELL);
+  std::string depfileForShell =
+    this->GetLocalGenerator()->ConvertToOutputFormat(depfile,
+                                                     cmOutputConverter::SHELL);
+  if (depfile != depfileForShell) {
+    vars["depfile"] = std::move(depfile);
+  }
+  vars["DEP_FILE"] = std::move(depfileForShell);
 }
 
 void cmNinjaTargetGenerator::RemoveDepfileBinding(cmNinjaVars& vars) const
 {
   vars.erase("DEP_FILE");
+  vars.erase("depfile");
 }
 
 void cmNinjaTargetGenerator::addPoolNinjaVariable(
