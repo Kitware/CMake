@@ -140,11 +140,14 @@ Options:
  ``NONE``
    Perform no decoding.  This assumes that the process output is encoded
    in the same way as CMake's internal encoding (UTF-8).
-   This is the default.
+
+   This was the default in CMake 3.14 and older.
 
  ``AUTO``
    Use the current active console's codepage or if that isn't
    available then use ANSI.
+
+   This is the default since CMake 3.15.
 
  ``ANSI``
    Use the ANSI codepage.
