@@ -42,6 +42,9 @@ public:
 
   std::string GetTargetName() const;
 
+  void AddDepfileBinding(cmNinjaVars& vars, std::string const& depfile) const;
+  void RemoveDepfileBinding(cmNinjaVars& vars) const;
+
 protected:
   bool SetMsvcTargetPdbVariable(cmNinjaVars&, const std::string& config) const;
 
