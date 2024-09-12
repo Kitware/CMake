@@ -172,14 +172,14 @@ if ((RunCMake_GENERATOR STREQUAL "Unix Makefiles"
       AND MSVC_VERSION GREATER 1300
       AND CMAKE_C_COMPILER_ID STREQUAL "MSVC"))
   run_BuildDepends(CompileDepends)
-  run_BuildDepends(CustomCommandDependencies)
+  run_BuildDepends(CustomCommandDepends)
 endif()
 
 if (RunCMake_GENERATOR MATCHES "Makefiles")
-  run_cmake(CustomCommandDependencies-BadArgs)
-  run_cmake_with_options(CustomCommandDependencies-compiler-deps-legacy -DCMAKE_DEPENDS_USE_COMPILER=FALSE)
+  run_cmake(CustomCommandDepends-BadArgs)
+  run_cmake_with_options(CustomCommandDepends-compiler-deps-legacy -DCMAKE_DEPENDS_USE_COMPILER=FALSE)
   set(RunCMake_TEST_NO_CLEAN 1)
-  run_cmake_command(CustomCommandDependencies-compiler-deps-legacy ${CMAKE_COMMAND} --build . --config Debug)
+  run_cmake_command(CustomCommandDepends-compiler-deps-legacy ${CMAKE_COMMAND} --build . --config Debug)
   unset(RunCMake_TEST_NO_CLEAN)
 endif()
 
