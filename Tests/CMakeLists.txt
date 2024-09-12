@@ -1009,6 +1009,32 @@ if(BUILD_TESTING)
       "${CMake_BINARY_DIR}/Tests/CPackNSISGenerator/_CPack_Packages/win32/NSIS/NSISOutput.log")
   endif()
 
+  find_program(IFW_BINARYCREATOR_EXECUTABLE NAMES binarycreator
+    DOC "IFW binarycreator program location"
+  )
+
+  if(IFW_BINARYCREATOR_EXECUTABLE)
+    add_test(CPackIFWGenerator ${CMAKE_CTEST_COMMAND}
+      -C \${CTEST_CONFIGURATION_TYPE}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CPackIFWGenerator"
+      "${CMake_BINARY_DIR}/Tests/CPackIFWGenerator"
+      ${build_generator_args}
+      --build-project CPackIFWGenerator
+      --build-options
+      --test-command ${CMAKE_CMAKE_COMMAND}
+      "-DCPackIFWGenerator_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackIFWGenerator"
+      "-Dconfig=\${CTEST_CONFIGURATION_TYPE}"
+      -P "${CMake_SOURCE_DIR}/Tests/CPackIFWGenerator/RunCPackVerifyResult.cmake")
+
+    set_property(TEST CPackIFWGenerator PROPERTY
+      ATTACHED_FILES_ON_FAIL
+      "${CMake_BINARY_DIR}/Tests/CPackIFWGenerator/_CPack_Packages/Linux/IFW/IFWOutput.log"
+      "${CMake_BINARY_DIR}/Tests/CPackIFWGenerator/_CPack_Packages/Darwin/IFW/IFWOutput.log"
+      "${CMake_BINARY_DIR}/Tests/CPackIFWGenerator/_CPack_Packages/win32/IFW/IFWOutput.log"
+    )
+  endif()
+
   if(CTEST_TEST_CPACK)
     add_test(CPackUseDefaultVersion ${CMAKE_CTEST_COMMAND}
       --build-and-test
