@@ -66,8 +66,9 @@ specific:
   Windows registry. The ``REGISTRY_VIEW`` argument may optionally be specified
   to manually control whether 32bit or 64bit versions shall be searched for.
 * macOS: The installed versions of Matlab/MCR are given by the MATLAB
-  default installation paths in ``/Application``. If no such application is
-  found, it falls back to the one that might be accessible from the ``PATH``.
+  default installation paths under ``$HOME/Applications`` and ``/Applications``.
+  If no such application is found, it falls back to the one that might be
+  accessible from the ``PATH``.
 * Unix: The desired Matlab should be accessible from the ``PATH``. This does
   not work for MCR installation and :variable:`Matlab_ROOT_DIR` should be
   specified on this platform.
@@ -1489,7 +1490,7 @@ endfunction()
 function(_Matlab_find_instances_macos matlab_roots)
 
   set(_matlab_possible_roots)
-  # on mac, we look for the /Application paths
+  # on macOS, we look for the standard /Applications paths
   # this corresponds to the behavior on Windows. On Linux, we do not have
   # any other guess.
   matlab_get_supported_releases(_matlab_releases)
@@ -1499,32 +1500,33 @@ function(_Matlab_find_instances_macos matlab_roots)
   endif()
 
   foreach(_matlab_current_release IN LISTS _matlab_releases)
-    matlab_get_version_from_release_name("${_matlab_current_release}" _matlab_current_version)
-    string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
-    set(_matlab_base_path "/Applications/MATLAB_${_matlab_current_release}.app")
+    foreach(_macos_app_base IN ITEMS "$ENV{HOME}/Applications" "/Applications")
+      matlab_get_version_from_release_name("${_matlab_current_release}" _matlab_current_version)
+      string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
+      set(_matlab_base_path "${_macos_app_base}/MATLAB_${_matlab_current_release}.app")
 
-    _Matlab_VersionInfoXML("${_matlab_base_path}" _matlab_version_tmp)
-    if(NOT "${_matlab_version_tmp}" STREQUAL "unknown")
-      set(_matlab_current_version ${_matlab_version_tmp})
-    endif()
-
-    # Check Matlab, has precedence over MCR
-    if(IS_DIRECTORY "${_matlab_base_path}")
-      if(MATLAB_FIND_DEBUG)
-        message(STATUS "[MATLAB] Found version ${_matlab_current_release} (${_matlab_current_version}) in ${_matlab_base_path}")
+      _Matlab_VersionInfoXML("${_matlab_base_path}" _matlab_version_tmp)
+      if(NOT "${_matlab_version_tmp}" STREQUAL "unknown")
+        set(_matlab_current_version ${_matlab_version_tmp})
       endif()
-      list(APPEND _matlab_possible_roots "MATLAB" ${_matlab_current_version} ${_matlab_base_path})
-    endif()
 
-    # Checks MCR
-    set(_mcr_path "/Applications/MATLAB/MATLAB_Runtime/v${_matlab_current_version_without_dot}")
-    if(IS_DIRECTORY "${_mcr_path}")
-      if(MATLAB_FIND_DEBUG)
-        message(STATUS "[MATLAB] Found MCR version ${_matlab_current_release} (${_matlab_current_version}) in ${_mcr_path}")
+      # Check Matlab, has precedence over MCR
+      if(IS_DIRECTORY "${_matlab_base_path}")
+        if(MATLAB_FIND_DEBUG)
+          message(STATUS "[MATLAB] Found version ${_matlab_current_release} (${_matlab_current_version}) in ${_matlab_base_path}")
+        endif()
+        list(APPEND _matlab_possible_roots "MATLAB" ${_matlab_current_version} ${_matlab_base_path})
       endif()
-      list(APPEND _matlab_possible_roots "MCR" ${_matlab_current_version} ${_mcr_path})
-    endif()
 
+      # Checks MCR
+      set(_mcr_path "${_macos_app_base}/MATLAB/MATLAB_Runtime/v${_matlab_current_version_without_dot}")
+      if(IS_DIRECTORY "${_mcr_path}")
+        if(MATLAB_FIND_DEBUG)
+          message(STATUS "[MATLAB] Found MCR version ${_matlab_current_release} (${_matlab_current_version}) in ${_mcr_path}")
+        endif()
+        list(APPEND _matlab_possible_roots "MCR" ${_matlab_current_version} ${_mcr_path})
+      endif()
+    endforeach()
   endforeach()
   set(${matlab_roots} ${_matlab_possible_roots} PARENT_SCOPE)
 
