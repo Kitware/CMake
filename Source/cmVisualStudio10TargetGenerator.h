@@ -122,6 +122,7 @@ private:
   std::vector<std::string> GetIncludes(std::string const& config,
                                        std::string const& lang) const;
   std::string GetTargetOutputName() const;
+  std::string GetAssemblyName(std::string const& config) const;
 
   bool ComputeClOptions();
   bool ComputeClOptions(std::string const& configName);

@@ -1004,6 +1004,8 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
     ConvertToWindowsSlash(outDir);
     e1.Element("OutputPath", outDir);
 
+    e1.Element("AssemblyName", GetAssemblyName(config));
+
     Options& o = *(this->ClOptions[config]);
     OptionsHelper oh(o, e1);
     oh.OutputFlagMap();
@@ -1609,13 +1611,7 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
 
   this->WriteMSToolConfigurationValuesCommon(e1, config);
 
-  std::string postfixName =
-    cmStrCat(cmSystemTools::UpperCase(config), "_POSTFIX");
-  std::string assemblyName = this->GeneratorTarget->GetOutputName(
-    config, cmStateEnums::RuntimeBinaryArtifact);
-  if (cmValue postfix = this->GeneratorTarget->GetProperty(postfixName)) {
-    assemblyName += *postfix;
-  }
+  std::string assemblyName = GetAssemblyName(config);
   e1.Element("AssemblyName", assemblyName);
 
   if (cmStateEnums::EXECUTABLE == this->GeneratorTarget->GetType()) {
@@ -3272,6 +3268,19 @@ std::string cmVisualStudio10TargetGenerator::GetTargetOutputName() const
   const auto& nameComponents =
     this->GeneratorTarget->GetFullNameComponents(config);
   return cmStrCat(nameComponents.prefix, nameComponents.base);
+}
+
+std::string cmVisualStudio10TargetGenerator::GetAssemblyName(
+  std::string const& config) const
+{
+  std::string postfixName =
+    cmStrCat(cmSystemTools::UpperCase(config), "_POSTFIX");
+  std::string assemblyName = this->GeneratorTarget->GetOutputName(
+    config, cmStateEnums::RuntimeBinaryArtifact);
+  if (cmValue postfix = this->GeneratorTarget->GetProperty(postfixName)) {
+    assemblyName += *postfix;
+  }
+  return assemblyName;
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeClOptions()
