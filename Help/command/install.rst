@@ -568,6 +568,7 @@ Signatures
   ``LOCALE``              ``${CMAKE_INSTALL_LOCALEDIR}``     ``<DATAROOT dir>/locale``
   ``MAN``                 ``${CMAKE_INSTALL_MANDIR}``        ``<DATAROOT dir>/man``
   ``DOC``                 ``${CMAKE_INSTALL_DOCDIR}``        ``<DATAROOT dir>/doc``
+  ``LIBEXEC``             ``${CMAKE_INSTALL_LIBEXECDIR}``    ``libexec``
   ======================= ================================== =========================
 
   Projects wishing to follow the common practice of installing headers into a
@@ -605,6 +606,9 @@ Signatures
     An install rename given as a ``RENAME`` argument may
     use "generator expressions" with the syntax ``$<...>``.  See the
     :manual:`cmake-generator-expressions(7)` manual for available expressions.
+
+  .. versionadded:: 3.31
+    The ``TYPE`` argument now supports type ``LIBEXEC``.
 
 .. signature::
   install(DIRECTORY <dir>... [...])
@@ -720,6 +724,7 @@ Signatures
   ``LOCALE``              ``${CMAKE_INSTALL_LOCALEDIR}``     ``<DATAROOT dir>/locale``
   ``MAN``                 ``${CMAKE_INSTALL_MANDIR}``        ``<DATAROOT dir>/man``
   ``DOC``                 ``${CMAKE_INSTALL_DOCDIR}``        ``<DATAROOT dir>/doc``
+  ``LIBEXEC``             ``${CMAKE_INSTALL_LIBEXECDIR}``    ``libexec``
   ======================= ================================== =========================
 
   Note that some of the types' built-in defaults use the ``DATAROOT`` directory as
@@ -742,6 +747,9 @@ Signatures
   .. versionadded:: 3.5
     The list of ``dirs...`` given to ``DIRECTORY`` may use
     "generator expressions" too.
+
+  .. versionadded:: 3.31
+    The ``TYPE`` argument now supports type ``LIBEXEC``.
 
 .. signature::
   install(SCRIPT <file> [...])
