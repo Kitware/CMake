@@ -21,15 +21,15 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * $FreeBSD: head/lib/libarchive/archive_private.h 201098 2009-12-28 02:58:14Z kientzle $
  */
 
 #ifndef ARCHIVE_PRIVATE_H_INCLUDED
 #define ARCHIVE_PRIVATE_H_INCLUDED
 
 #ifndef __LIBARCHIVE_BUILD
+#ifndef __LIBARCHIVE_TEST
 #error This header is only to be used internally to libarchive.
+#endif
 #endif
 
 #if HAVE_ICONV_H
@@ -40,10 +40,12 @@
 #include "archive_string.h"
 
 #if defined(__GNUC__) && (__GNUC__ > 2 || \
-			  (__GNUC__ == 2 && __GNUC_MINOR__ >= 5))
-#define	__LA_DEAD	__attribute__((__noreturn__))
+						  (__GNUC__ == 2 && __GNUC_MINOR__ >= 5))
+#define __LA_NORETURN __attribute__((__noreturn__))
+#elif defined(_MSC_VER)
+#define __LA_NORETURN __declspec(noreturn)
 #else
-#define	__LA_DEAD
+#define __LA_NORETURN
 #endif
 
 #if defined(__GNUC__) && (__GNUC__ > 2 || \
@@ -153,7 +155,7 @@ int	__archive_check_magic(struct archive *, unsigned int magic,
 			return ARCHIVE_FATAL; \
 	} while (0)
 
-void	__archive_errx(int retvalue, const char *msg) __LA_DEAD;
+__LA_NORETURN void	__archive_errx(int retvalue, const char *msg);
 
 void	__archive_ensure_cloexec_flag(int fd);
 int	__archive_mktemp(const char *tmpdir);

@@ -21,8 +21,6 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * $FreeBSD: head/lib/libarchive/archive_entry_private.h 201096 2009-12-28 02:41:27Z kientzle $
  */
 
 #ifndef ARCHIVE_ENTRY_PRIVATE_H_INCLUDED
@@ -147,6 +145,11 @@ struct archive_entry {
 #define	AE_SET_SIZE	64
 #define	AE_SET_INO	128
 #define	AE_SET_DEV	256
+#define	AE_SET_PERM	512
+#define	AE_SET_FILETYPE	1024
+#define	AE_SET_UID	2048
+#define	AE_SET_GID	4096
+#define	AE_SET_RDEV	8192
 
 	/*
 	 * Use aes here so that we get transparent mbs<->wcs conversions.
@@ -155,9 +158,8 @@ struct archive_entry {
 	unsigned long ae_fflags_set;		/* Bitmap fflags */
 	unsigned long ae_fflags_clear;
 	struct archive_mstring ae_gname;		/* Name of owning group */
-	struct archive_mstring ae_hardlink;	/* Name of target for hardlink */
+	struct archive_mstring ae_linkname;	/* Name of target for hardlink or symlink */
 	struct archive_mstring ae_pathname;	/* Name of entry */
-	struct archive_mstring ae_symlink;		/* symlink contents */
 	struct archive_mstring ae_uname;		/* Name of owner */
 
 	/* Not used within libarchive; useful for some clients. */

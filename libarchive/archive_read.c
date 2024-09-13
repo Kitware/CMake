@@ -32,7 +32,6 @@
  */
 
 #include "archive_platform.h"
-__FBSDID("$FreeBSD: head/lib/libarchive/archive_read.c 201157 2009-12-29 05:30:23Z kientzle $");
 
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
@@ -1383,7 +1382,7 @@ __archive_read_filter_ahead(struct archive_read_filter *filter,
 		if (filter->client_avail <= 0) {
 			if (filter->end_of_file) {
 				if (avail != NULL)
-					*avail = 0;
+					*avail = filter->avail;
 				return (NULL);
 			}
 			bytes_read = (filter->vtable->read)(filter,
