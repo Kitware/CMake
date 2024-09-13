@@ -1,0 +1,9 @@
+^CMake Warning \(dev\) at REAL_PATH-non-existing.cmake:[0-9]+ \(file\):
+  Given path:
+
+    dir/bad-magic-file\.txt
+
+  does not refer to an existing path on disk.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.$

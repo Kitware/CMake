@@ -99,6 +99,8 @@ if(NOT WIN32
   endif()
 endif()
 
+run_cmake(REAL_PATH-non-existing)
+run_cmake(REAL_PATH-existing)
 run_cmake(REAL_PATH-unexpected-arg)
 run_cmake(REAL_PATH-no-base-dir)
 run_cmake(REAL_PATH)
