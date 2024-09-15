@@ -44,6 +44,12 @@ Projects should not rely on ``<PROJECT-NAME>_SOURCE_DIR`` or
 ``<PROJECT-NAME>_BINARY_DIR`` holding a particular value outside of the scope
 of the call to ``project()`` or one of its child scopes.
 
+.. versionchanged:: 3.30.4
+  If the variables ``<PROJECT-NAME>_SOURCE_DIR``,
+  ``<PROJECT-NAME>_BINARY_DIR``, or ``<PROJECT-NAME>_IS_TOP_LEVEL`` are
+  already set as non-cache variables when ``project(<PROJECT-NAME> ...)``
+  is called, the ``project()`` command will overwrite the previous values.
+
 Options
 ^^^^^^^
 
