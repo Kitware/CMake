@@ -375,14 +375,15 @@ std::string cmGeneratorExpression::Preprocess(const std::string& input,
   return std::string();
 }
 
-std::string::size_type cmGeneratorExpression::Find(const std::string& input)
+cm::string_view::size_type cmGeneratorExpression::Find(
+  const cm::string_view& input)
 {
-  const std::string::size_type openpos = input.find("$<");
-  if (openpos != std::string::npos &&
-      input.find('>', openpos) != std::string::npos) {
+  const cm::string_view::size_type openpos = input.find("$<");
+  if (openpos != cm::string_view::npos &&
+      input.find('>', openpos) != cm::string_view::npos) {
     return openpos;
   }
-  return std::string::npos;
+  return cm::string_view::npos;
 }
 
 bool cmGeneratorExpression::IsValidTargetName(const std::string& input)
