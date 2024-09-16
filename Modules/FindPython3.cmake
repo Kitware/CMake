@@ -330,7 +330,8 @@ Hints
 
   .. note::
 
-    If ``Python3_FIND_ABI`` is not defined, any ABI will be searched.
+    If ``Python3_FIND_ABI`` is not defined, any ABI, excluding the
+    ``gil_disabled`` flag, will be searched.
 
   From this 4-tuple, various ABIs will be searched starting from the most
   specialized to the most general. Moreover, when ``ANY`` is specified for
