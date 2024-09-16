@@ -1163,11 +1163,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
   cmNinjaVars& vars = linkBuild.Variables;
 
   if (this->GeneratorTarget->HasLinkDependencyFile(config)) {
-    vars["DEP_FILE"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-      this->ConvertToNinjaPath(
-        this->GetLocalGenerator()->GetLinkDependencyFile(this->GeneratorTarget,
-                                                         config)),
-      cmOutputConverter::SHELL);
+    this->AddDepfileBinding(vars,
+                            this->ConvertToNinjaPath(
+                              this->GetLocalGenerator()->GetLinkDependencyFile(
+                                this->GeneratorTarget, config)));
   }
 
   // Compute the comment.

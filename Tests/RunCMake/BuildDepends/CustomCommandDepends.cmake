@@ -1,3 +1,4 @@
+cmake_policy(SET CMP0116 NEW)
 enable_language(C)
 
 add_custom_command(OUTPUT main.c
@@ -10,21 +11,46 @@ add_custom_target(mainc ALL DEPENDS main.c)
 
 add_executable(main ${CMAKE_CURRENT_BINARY_DIR}/main.c)
 
+set(CODE_WITH_SPACE [[
+add_custom_command(OUTPUT main2.c
+  DEPFILE main2.c.d
+  COMMAND "${CMAKE_COMMAND}" -DINFILE=../main.c.in -DOUTFILE=main2.c -DDEPFILE=main2.c.d
+  -P "${CMAKE_SOURCE_DIR}/GenerateDepFile.cmake"
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
+add_custom_target(main2c ALL DEPENDS main2.c)
+
+add_executable(main2 ${CMAKE_CURRENT_BINARY_DIR}/main2.c)
+]])
+if(MAKE_SUPPORTS_SPACES)
+  add_subdirectory("With Space")
+  set(check_pairs_with_space "
+    \"$<TARGET_FILE:main2>|${CMAKE_CURRENT_BINARY_DIR}/main.c.in\"
+    \"$<TARGET_FILE:main2>|${CMAKE_CURRENT_BINARY_DIR}/With Space/main2.c\"
+  ")
+  set(check_exes_with_space "
+    \"$<TARGET_FILE:main2>\"
+  ")
+endif()
+
 file(GENERATE OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/check-$<LOWER_CASE:$<CONFIG>>.cmake CONTENT "
 cmake_minimum_required(VERSION 3.19)
 set(check_pairs
   \"$<TARGET_FILE:main>|${CMAKE_CURRENT_BINARY_DIR}/main.c.in\"
   \"$<TARGET_FILE:main>|${CMAKE_CURRENT_BINARY_DIR}/main.c\"
+  ${check_pairs_with_space}
   )
 set(check_exes
   \"$<TARGET_FILE:main>\"
+  ${check_exes_with_space}
   )
 
-if (check_step EQUAL 2)
+if (RunCMake_GENERATOR MATCHES \"Make\" AND check_step EQUAL 2)
   include(\"${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Makefile.cmake\")
   if (NOT CMAKE_DEPEND_INFO_FILES)
     set(RunCMake_TEST_FAILED \"Variable CMAKE_DEPEND_INFO_FILES not found.\")
   else()
+    list(FILTER CMAKE_DEPEND_INFO_FILES EXCLUDE REGEX main2)
     foreach(DEPEND_INFO_FILE IN LISTS CMAKE_DEPEND_INFO_FILES)
       include(\"${CMAKE_CURRENT_BINARY_DIR}/\${DEPEND_INFO_FILE}\")
       if (NOT CMAKE_DEPENDS_DEPENDENCY_FILES)
@@ -68,6 +94,18 @@ if (check_step EQUAL 2)
         endforeach()
       endif()
     endforeach()
+  endif()
+endif()
+
+if (RunCMake_GENERATOR STREQUAL \"Ninja\" AND check_step EQUAL 2)
+  execute_process(
+    COMMAND \${RunCMake_MAKE_PROGRAM} -t deps
+    WORKING_DIRECTORY \${RunCMake_TEST_BINARY_DIR}
+    OUTPUT_VARIABLE deps
+  )
+  if(NOT deps MATCHES \"main.c:.*main.c.in\")
+    string(REPLACE deps \"\\n\" \"\\n  \" \"  \${deps}\")
+    set(RunCMake_TEST_FAILED \"Dependencies not detected correctly:\\n\${deps}\")
   endif()
 endif()
 ")
