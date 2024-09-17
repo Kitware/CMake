@@ -20,6 +20,7 @@
 
 #include "cmArgumentParser.h"
 #include "cmArgumentParserTypes.h"
+#include "cmCMakePath.h"
 #include "cmExecutionStatus.h"
 #include "cmExperimental.h"
 #include "cmExportSet.h"
@@ -453,7 +454,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     runtimeDependenciesArgVector;
   std::string runtimeDependencySetArg;
   std::vector<std::string> unknownArgs;
-  cmInstallCommandArguments genericArgs(helper.DefaultComponentName);
+  cmInstallCommandArguments genericArgs(helper.DefaultComponentName,
+                                        *helper.Makefile);
   genericArgs.Bind("TARGETS"_s, targetList);
   genericArgs.Bind("EXPORT"_s, exports);
   genericArgs.Bind("RUNTIME_DEPENDENCIES"_s, runtimeDependenciesArgVector);
@@ -467,19 +469,31 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
                                          &unknownArgs)
     : RuntimeDependenciesArgs();
 
-  cmInstallCommandArguments archiveArgs(helper.DefaultComponentName);
-  cmInstallCommandArguments libraryArgs(helper.DefaultComponentName);
-  cmInstallCommandArguments runtimeArgs(helper.DefaultComponentName);
-  cmInstallCommandArguments objectArgs(helper.DefaultComponentName);
-  cmInstallCommandArguments frameworkArgs(helper.DefaultComponentName);
-  cmInstallCommandArguments bundleArgs(helper.DefaultComponentName);
-  cmInstallCommandArguments privateHeaderArgs(helper.DefaultComponentName);
-  cmInstallCommandArguments publicHeaderArgs(helper.DefaultComponentName);
-  cmInstallCommandArguments resourceArgs(helper.DefaultComponentName);
+  cmInstallCommandArguments archiveArgs(helper.DefaultComponentName,
+                                        *helper.Makefile);
+  cmInstallCommandArguments libraryArgs(helper.DefaultComponentName,
+                                        *helper.Makefile);
+  cmInstallCommandArguments runtimeArgs(helper.DefaultComponentName,
+                                        *helper.Makefile);
+  cmInstallCommandArguments objectArgs(helper.DefaultComponentName,
+                                       *helper.Makefile);
+  cmInstallCommandArguments frameworkArgs(helper.DefaultComponentName,
+                                          *helper.Makefile);
+  cmInstallCommandArguments bundleArgs(helper.DefaultComponentName,
+                                       *helper.Makefile);
+  cmInstallCommandArguments privateHeaderArgs(helper.DefaultComponentName,
+                                              *helper.Makefile);
+  cmInstallCommandArguments publicHeaderArgs(helper.DefaultComponentName,
+                                             *helper.Makefile);
+  cmInstallCommandArguments resourceArgs(helper.DefaultComponentName,
+                                         *helper.Makefile);
   cmInstallCommandIncludesArgument includesArgs;
   std::vector<cmInstallCommandFileSetArguments> fileSetArgs(
-    argVectors.FileSets.size(), { helper.DefaultComponentName });
-  cmInstallCommandArguments cxxModuleBmiArgs(helper.DefaultComponentName);
+    argVectors.FileSets.size(),
+    { cmInstallCommandFileSetArguments(helper.DefaultComponentName,
+                                       *helper.Makefile) });
+  cmInstallCommandArguments cxxModuleBmiArgs(helper.DefaultComponentName,
+                                             *helper.Makefile);
 
   // now parse the args for specific parts of the target (e.g. LIBRARY,
   // RUNTIME, ARCHIVE etc.
@@ -499,7 +513,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     // cmArgumentParser<void>::Bind() binds to a specific address, but the
     // objects in the vector can move around. So we parse in an object with a
     // fixed address and then copy the data into the vector.
-    cmInstallCommandFileSetArguments fileSetArg(helper.DefaultComponentName);
+    cmInstallCommandFileSetArguments fileSetArg(helper.DefaultComponentName,
+                                                *helper.Makefile);
     fileSetArg.Parse(argVectors.FileSets[i], &unknownArgs);
     fileSetArgs[i] = std::move(fileSetArg);
   }
@@ -1310,16 +1325,21 @@ bool HandleImportedRuntimeArtifactsMode(std::vector<std::string> const& args,
   ArgumentParser::MaybeEmpty<std::vector<std::string>> targetList;
   std::string runtimeDependencySetArg;
   std::vector<std::string> unknownArgs;
-  cmInstallCommandArguments genericArgs(helper.DefaultComponentName);
+  cmInstallCommandArguments genericArgs(helper.DefaultComponentName,
+                                        *helper.Makefile);
   genericArgs.Bind("IMPORTED_RUNTIME_ARTIFACTS"_s, targetList)
     .Bind("RUNTIME_DEPENDENCY_SET"_s, runtimeDependencySetArg);
   genericArgs.Parse(genericArgVector, &unknownArgs);
   bool success = genericArgs.Finalize();
 
-  cmInstallCommandArguments libraryArgs(helper.DefaultComponentName);
-  cmInstallCommandArguments runtimeArgs(helper.DefaultComponentName);
-  cmInstallCommandArguments frameworkArgs(helper.DefaultComponentName);
-  cmInstallCommandArguments bundleArgs(helper.DefaultComponentName);
+  cmInstallCommandArguments libraryArgs(helper.DefaultComponentName,
+                                        *helper.Makefile);
+  cmInstallCommandArguments runtimeArgs(helper.DefaultComponentName,
+                                        *helper.Makefile);
+  cmInstallCommandArguments frameworkArgs(helper.DefaultComponentName,
+                                          *helper.Makefile);
+  cmInstallCommandArguments bundleArgs(helper.DefaultComponentName,
+                                       *helper.Makefile);
 
   // now parse the args for specific parts of the target (e.g. LIBRARY,
   // RUNTIME etc.
@@ -1547,7 +1567,7 @@ bool HandleFilesMode(std::vector<std::string> const& args,
 
   // This is the FILES mode.
   bool programs = (args[0] == "PROGRAMS");
-  cmInstallCommandArguments ica(helper.DefaultComponentName);
+  cmInstallCommandArguments ica(helper.DefaultComponentName, *helper.Makefile);
   ArgumentParser::MaybeEmpty<std::vector<std::string>> files;
   ica.Bind(programs ? "PROGRAMS"_s : "FILES"_s, files);
   std::vector<std::string> unknownArgs;
@@ -1681,7 +1701,7 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
   bool exclude_from_all = false;
   bool message_never = false;
   std::vector<std::string> dirs;
-  const std::string* destination = nullptr;
+  cm::optional<std::string> destination;
   std::string permissions_file;
   std::string permissions_dir;
   std::vector<std::string> configurations;
@@ -1839,7 +1859,33 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
     } else if (doing == DoingConfigurations) {
       configurations.push_back(args[i]);
     } else if (doing == DoingDestination) {
-      destination = &args[i];
+      // A trailing slash is meaningful for this form, but normalization
+      // preserves it if present
+      switch (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0177)) {
+        case cmPolicies::NEW:
+          destination = cmCMakePath(args[i]).Normal().String();
+          break;
+        case cmPolicies::WARN:
+          // We can't be certain if a warning is appropriate if there are any
+          // generator expressions
+          if (cmGeneratorExpression::Find(args[i]) == cm::string_view::npos &&
+              args[i] != cmCMakePath(args[i]).Normal().String()) {
+            status.GetMakefile().IssueMessage(
+              MessageType::AUTHOR_WARNING,
+              cmPolicies::GetPolicyWarning(cmPolicies::CMP0177));
+          }
+          CM_FALLTHROUGH;
+        case cmPolicies::OLD:
+          destination = args[i];
+          break;
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::REQUIRED_IF_USED:
+          // We should never get here, only OLD, WARN, and NEW are used
+          status.GetMakefile().IssueMessage(
+            MessageType::FATAL_ERROR,
+            cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0177));
+          return false;
+      }
       doing = DoingNone;
     } else if (doing == DoingType) {
       if (allowedTypes.count(args[i]) == 0) {
@@ -1909,7 +1955,7 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
   }
 
   // Support installing an empty directory.
-  if (dirs.empty() && destination) {
+  if (dirs.empty() && destination.has_value()) {
     dirs.emplace_back();
   }
 
@@ -1917,15 +1963,13 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
   if (dirs.empty()) {
     return true;
   }
-  std::string destinationStr;
-  if (!destination) {
+  if (!destination.has_value()) {
     if (type.empty()) {
       // A destination is required.
       status.SetError(cmStrCat(args[0], " given no DESTINATION!"));
       return false;
     }
-    destinationStr = helper.GetDestinationForType(nullptr, type);
-    destination = &destinationStr;
+    destination = helper.GetDestinationForType(nullptr, type);
   } else if (!type.empty()) {
     status.SetError(cmStrCat(args[0],
                              " given both TYPE and DESTINATION "
@@ -1957,7 +2001,7 @@ bool HandleExportAndroidMKMode(std::vector<std::string> const& args,
   Helper helper(status);
 
   // This is the EXPORT mode.
-  cmInstallCommandArguments ica(helper.DefaultComponentName);
+  cmInstallCommandArguments ica(helper.DefaultComponentName, *helper.Makefile);
 
   std::string exp;
   std::string name_space;
@@ -2050,7 +2094,7 @@ bool HandleExportMode(std::vector<std::string> const& args,
   Helper helper(status);
 
   // This is the EXPORT mode.
-  cmInstallCommandArguments ica(helper.DefaultComponentName);
+  cmInstallCommandArguments ica(helper.DefaultComponentName, *helper.Makefile);
 
   std::string exp;
   std::string name_space;
@@ -2176,7 +2220,7 @@ bool HandlePackageInfoMode(std::vector<std::string> const& args,
   Helper helper(status);
 
   // This is the PACKAGE_INFO mode.
-  cmInstallCommandArguments ica(helper.DefaultComponentName);
+  cmInstallCommandArguments ica(helper.DefaultComponentName, *helper.Makefile);
 
   ArgumentParser::NonEmpty<std::string> pkg;
   ArgumentParser::NonEmpty<std::string> appendix;
@@ -2335,14 +2379,18 @@ bool HandleRuntimeDependencySetMode(std::vector<std::string> const& args,
   // These generic args also contain the runtime dependency set
   std::string runtimeDependencySetArg;
   std::vector<std::string> runtimeDependencyArgVector;
-  cmInstallCommandArguments genericArgs(helper.DefaultComponentName);
+  cmInstallCommandArguments genericArgs(helper.DefaultComponentName,
+                                        *helper.Makefile);
   genericArgs.Bind("RUNTIME_DEPENDENCY_SET"_s, runtimeDependencySetArg);
   genericArgs.Parse(genericArgVector, &runtimeDependencyArgVector);
   bool success = genericArgs.Finalize();
 
-  cmInstallCommandArguments libraryArgs(helper.DefaultComponentName);
-  cmInstallCommandArguments runtimeArgs(helper.DefaultComponentName);
-  cmInstallCommandArguments frameworkArgs(helper.DefaultComponentName);
+  cmInstallCommandArguments libraryArgs(helper.DefaultComponentName,
+                                        *helper.Makefile);
+  cmInstallCommandArguments runtimeArgs(helper.DefaultComponentName,
+                                        *helper.Makefile);
+  cmInstallCommandArguments frameworkArgs(helper.DefaultComponentName,
+                                          *helper.Makefile);
 
   // Now also parse the file(GET_RUNTIME_DEPENDENCY) args
   std::vector<std::string> unknownArgs;

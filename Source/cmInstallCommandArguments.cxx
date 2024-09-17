@@ -3,11 +3,19 @@
 #include "cmInstallCommandArguments.h"
 
 #include <algorithm>
+#include <functional>
 #include <utility>
 
+#include <cm/string_view>
 #include <cmext/string_view>
 
+#include "cmCMakePath.h"
+#include "cmGeneratorExpression.h"
+#include "cmMakefile.h"
+#include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmRange.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 // Table of valid permissions.
@@ -20,10 +28,53 @@ const char* cmInstallCommandArguments::PermissionsTable[] = {
 const std::string cmInstallCommandArguments::EmptyString;
 
 cmInstallCommandArguments::cmInstallCommandArguments(
-  std::string defaultComponent)
+  std::string defaultComponent, cmMakefile& makefile)
   : DefaultComponentName(std::move(defaultComponent))
 {
-  this->Bind("DESTINATION"_s, this->Destination);
+  std::function<ArgumentParser::Continue(cm::string_view)> normalizeDest;
+
+  switch (makefile.GetPolicyStatus(cmPolicies::CMP0177)) {
+    case cmPolicies::OLD:
+      normalizeDest = [this](cm::string_view arg) -> ArgumentParser::Continue {
+        this->Destination = std::string(arg.begin(), arg.end());
+        return ArgumentParser::Continue::Yes;
+      };
+      break;
+    case cmPolicies::WARN:
+      normalizeDest =
+        [this, &makefile](cm::string_view arg) -> ArgumentParser::Continue {
+        this->Destination = std::string(arg.begin(), arg.end());
+        // We can't be certain if a warning is appropriate if there are any
+        // generator expressions
+        if (cmGeneratorExpression::Find(arg) == cm::string_view::npos &&
+            arg != cmCMakePath(arg).Normal().String()) {
+          makefile.IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmPolicies::GetPolicyWarning(cmPolicies::CMP0177));
+        }
+        return ArgumentParser::Continue::Yes;
+      };
+      break;
+    case cmPolicies::NEW:
+      normalizeDest = [this](cm::string_view arg) -> ArgumentParser::Continue {
+        if (cmGeneratorExpression::Find(arg) == cm::string_view::npos) {
+          this->Destination = cmCMakePath(arg).Normal().String();
+        } else {
+          this->Destination =
+            cmStrCat("$<PATH:CMAKE_PATH,NORMALIZE,", arg, '>');
+        }
+        return ArgumentParser::Continue::Yes;
+      };
+      break;
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::REQUIRED_IF_USED:
+      // We should never get here, only OLD, WARN, and NEW are used
+      makefile.IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0177));
+  }
+
+  this->Bind("DESTINATION"_s, normalizeDest);
   this->Bind("COMPONENT"_s, this->Component);
   this->Bind("NAMELINK_COMPONENT"_s, this->NamelinkComponent);
   this->Bind("EXCLUDE_FROM_ALL"_s, this->ExcludeFromAll);
@@ -227,8 +278,8 @@ void cmInstallCommandIncludesArgument::Parse(
 }
 
 cmInstallCommandFileSetArguments::cmInstallCommandFileSetArguments(
-  std::string defaultComponent)
-  : cmInstallCommandArguments(std::move(defaultComponent))
+  std::string defaultComponent, cmMakefile& makefile)
+  : cmInstallCommandArguments(std::move(defaultComponent), makefile)
 {
   this->Bind("FILE_SET"_s, this->FileSet);
 }

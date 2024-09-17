@@ -94,6 +94,12 @@ run_cmake(CMP0062-WARN)
 run_cmake(CMP0087-OLD)
 run_cmake(CMP0087-NEW)
 run_cmake(CMP0087-WARN)
+foreach(policy IN ITEMS NEW OLD WARN)
+  run_install_test(CMP0177-${policy})
+  run_cmake_with_options(CMP0177-${policy}-verify
+    -DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/CMP0177-${policy}-build/root-all
+  )
+endforeach()
 run_cmake(TARGETS-ImportedGlobal)
 run_cmake(TARGETS-NAMELINK_COMPONENT-bad-all)
 run_cmake(TARGETS-NAMELINK_COMPONENT-bad-exc)
