@@ -103,12 +103,15 @@ private:
   std::pair<size_t, bool> AddLinkEntry(cmLinkItem const& item,
                                        cm::optional<size_t> const& groupIndex);
   void AddLinkObject(cmLinkItem const& item);
-  void AddVarLinkEntries(size_t depender_index, const char* value);
+  void AddVarLinkEntries(cm::optional<size_t> const& depender_index,
+                         const char* value);
   void AddDirectLinkEntries();
   template <typename T>
-  void AddLinkEntries(size_t depender_index, std::vector<T> const& libs);
+  void AddLinkEntries(cm::optional<size_t> const& depender_index,
+                      std::vector<T> const& libs);
   void AddLinkObjects(std::vector<cmLinkItem> const& objs);
-  cmLinkItem ResolveLinkItem(size_t depender_index, const std::string& name);
+  cmLinkItem ResolveLinkItem(cm::optional<size_t> const& depender_index,
+                             const std::string& name);
 
   // One entry for each unique item.
   std::vector<LinkEntry> EntryList;

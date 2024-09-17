@@ -941,8 +941,8 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
   }
 }
 
-void cmComputeLinkDepends::AddVarLinkEntries(size_t depender_index,
-                                             const char* value)
+void cmComputeLinkDepends::AddVarLinkEntries(
+  cm::optional<size_t> const& depender_index, const char* value)
 {
   // This is called to add the dependencies named by
   // <item>_LIB_DEPENDS.  The variable contains a semicolon-separated
@@ -1003,15 +1003,13 @@ void cmComputeLinkDepends::AddDirectLinkEntries()
   // Add direct link dependencies in this configuration.
   cmLinkImplementation const* impl = this->Target->GetLinkImplementation(
     this->Config, cmGeneratorTarget::UseTo::Link);
-  this->AddLinkEntries(cmComputeComponentGraph::INVALID_COMPONENT,
-                       impl->Libraries);
+  this->AddLinkEntries(cm::nullopt, impl->Libraries);
   this->AddLinkObjects(impl->Objects);
 
   for (auto const& language : impl->Languages) {
     auto runtimeEntries = impl->LanguageRuntimeLibraries.find(language);
     if (runtimeEntries != impl->LanguageRuntimeLibraries.end()) {
-      this->AddLinkEntries(cmComputeComponentGraph::INVALID_COMPONENT,
-                           runtimeEntries->second);
+      this->AddLinkEntries(cm::nullopt, runtimeEntries->second);
     }
   }
   for (cmLinkItem const& wi : impl->WrongConfigLibraries) {
@@ -1020,8 +1018,8 @@ void cmComputeLinkDepends::AddDirectLinkEntries()
 }
 
 template <typename T>
-void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
-                                          std::vector<T> const& libs)
+void cmComputeLinkDepends::AddLinkEntries(
+  cm::optional<size_t> const& depender_index, std::vector<T> const& libs)
 {
   // Track inferred dependency sets implied by this list.
   std::map<size_t, DependSet> dependSets;
@@ -1040,9 +1038,8 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
 
     // emit a warning if an undefined feature is used as part of
     // an imported target
-    if (item.Feature != LinkEntry::DEFAULT &&
-        depender_index != cmComputeComponentGraph::INVALID_COMPONENT) {
-      const auto& depender = this->EntryList[depender_index];
+    if (item.Feature != LinkEntry::DEFAULT && depender_index) {
+      const auto& depender = this->EntryList[*depender_index];
       if (depender.Target && depender.Target->IsImported() &&
           !IsFeatureSupported(this->Makefile, this->LinkLanguage,
                               item.Feature)) {
@@ -1068,8 +1065,8 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
         LinkEntry& entry = this->EntryList[group->first];
         entry.Feature = ExtractGroupFeature(item.AsStr());
       }
-      if (depender_index != cmComputeComponentGraph::INVALID_COMPONENT) {
-        this->EntryConstraintGraph[depender_index].emplace_back(
+      if (depender_index) {
+        this->EntryConstraintGraph[*depender_index].emplace_back(
           group->first, false, false, cmListFileBacktrace());
       } else {
         // This is a direct dependency of the target being linked.
@@ -1091,9 +1088,8 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
       continue;
     }
 
-    if (depender_index != cmComputeComponentGraph::INVALID_COMPONENT &&
-        group) {
-      const auto& depender = this->EntryList[depender_index];
+    if (depender_index && group) {
+      const auto& depender = this->EntryList[*depender_index];
       const auto& groupFeature = this->EntryList[group->first].Feature;
       if (depender.Target && depender.Target->IsImported() &&
           !IsGroupFeatureSupported(this->Makefile, this->LinkLanguage,
@@ -1261,8 +1257,8 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
 
       for (auto index : indexes) {
         // The dependee must come after the depender.
-        if (depender_index != cmComputeComponentGraph::INVALID_COMPONENT) {
-          this->EntryConstraintGraph[depender_index].emplace_back(
+        if (depender_index) {
+          this->EntryConstraintGraph[*depender_index].emplace_back(
             index, false, false, cmListFileBacktrace());
         } else {
           // This is a direct dependency of the target being linked.
@@ -1305,14 +1301,14 @@ void cmComputeLinkDepends::AddLinkObjects(std::vector<cmLinkItem> const& objs)
   }
 }
 
-cmLinkItem cmComputeLinkDepends::ResolveLinkItem(size_t depender_index,
-                                                 const std::string& name)
+cmLinkItem cmComputeLinkDepends::ResolveLinkItem(
+  cm::optional<size_t> const& depender_index, const std::string& name)
 {
   // Look for a target in the scope of the depender.
   cmGeneratorTarget const* from = this->Target;
-  if (depender_index != cmComputeComponentGraph::INVALID_COMPONENT) {
+  if (depender_index) {
     if (cmGeneratorTarget const* depender =
-          this->EntryList[depender_index].Target) {
+          this->EntryList[*depender_index].Target) {
       from = depender;
     }
   }
