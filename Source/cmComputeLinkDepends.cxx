@@ -1494,9 +1494,8 @@ void cmComputeLinkDepends::OrderLinkEntries()
   this->ComponentOrderId = n;
   // Run in reverse order so the topological order will preserve the
   // original order where there are no constraints.
-  for (size_t c = n - 1; c != cmComputeComponentGraph::INVALID_COMPONENT;
-       --c) {
-    this->VisitComponent(c);
+  for (size_t c = n; c > 0; --c) {
+    this->VisitComponent(c - 1);
   }
 
   // Display the component graph.
