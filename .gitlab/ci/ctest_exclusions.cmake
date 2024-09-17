@@ -13,6 +13,13 @@ if (CTEST_CMAKE_GENERATOR MATCHES "Visual Studio")
     "^ExternalProjectUpdateSetup$")
 endif ()
 
+if (CTEST_CMAKE_GENERATOR MATCHES "Xcode")
+  list(APPEND test_exclusions
+    # FIXME(#26301): The XCTest fails with Xcode 16.0.
+    "^XCTest$"
+    )
+endif ()
+
 if ("$ENV{CMAKE_CONFIGURATION}" MATCHES "_asan")
   list(APPEND test_exclusions
     CTestTest2 # crashes on purpose
