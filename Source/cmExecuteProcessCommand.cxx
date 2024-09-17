@@ -308,6 +308,11 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
     if (cm::optional<cmProcessOutput::Encoding> maybeEncoding =
           cmProcessOutput::FindEncoding(*arguments.Encoding)) {
       encoding = *maybeEncoding;
+    } else {
+      status.GetMakefile().IssueMessage(
+        MessageType::AUTHOR_WARNING,
+        cmStrCat("ENCODING option given unknown value \"", *arguments.Encoding,
+                 "\".  Ignoring."));
     }
   }
   cmProcessOutput processOutput(encoding);
