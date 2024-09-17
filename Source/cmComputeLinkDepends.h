@@ -13,12 +13,14 @@
 #include <utility>
 #include <vector>
 
-#include "cmComputeComponentGraph.h"
+#include <cm/optional>
+
 #include "cmGraphAdjacencyList.h"
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmTargetLinkLibraryType.h"
 
+class cmComputeComponentGraph;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
@@ -98,9 +100,8 @@ private:
 
   std::pair<std::map<cmLinkItem, size_t>::iterator, bool> AllocateLinkEntry(
     cmLinkItem const& item);
-  std::pair<size_t, bool> AddLinkEntry(
-    cmLinkItem const& item,
-    size_t groupIndex = cmComputeComponentGraph::INVALID_COMPONENT);
+  std::pair<size_t, bool> AddLinkEntry(cmLinkItem const& item,
+                                       cm::optional<size_t> const& groupIndex);
   void AddLinkObject(cmLinkItem const& item);
   void AddVarLinkEntries(size_t depender_index, const char* value);
   void AddDirectLinkEntries();
@@ -120,7 +121,7 @@ private:
   struct BFSEntry
   {
     size_t Index;
-    size_t GroupIndex;
+    cm::optional<size_t> GroupIndex;
     const char* LibDepends;
   };
   std::queue<BFSEntry> BFSQueue;
