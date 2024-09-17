@@ -431,8 +431,8 @@ public:
       this->Groups = &groups;
       // record all libraries as part of groups to ensure correct
       // deduplication: libraries as part of groups are always kept.
-      for (const auto& group : groups) {
-        for (auto index : group.second) {
+      for (const auto& g : groups) {
+        for (auto index : g.second) {
           this->Emitted.insert(index);
         }
       }
@@ -477,8 +477,8 @@ public:
 
     // expand groups
     if (this->Groups) {
-      for (const auto& group : *this->Groups) {
-        const LinkEntry& groupEntry = this->Entries[group.first];
+      for (const auto& g : *this->Groups) {
+        const LinkEntry& groupEntry = this->Entries[g.first];
         auto it = this->FinalEntries.begin();
         while (true) {
           it = std::find_if(it, this->FinalEntries.end(),
@@ -489,8 +489,8 @@ public:
             break;
           }
           it->Item.Value = "</LINK_GROUP>";
-          for (auto index = group.second.rbegin();
-               index != group.second.rend(); ++index) {
+          for (auto index = g.second.rbegin(); index != g.second.rend();
+               ++index) {
             it = this->FinalEntries.insert(it, this->Entries[*index]);
           }
           it = this->FinalEntries.insert(it, groupEntry);
@@ -1252,10 +1252,10 @@ void cmComputeLinkDepends::AddLinkEntries(size_t depender_index,
       std::vector<size_t> indexes;
       bool entryHandled = false;
       // search any occurrence of the library in already defined groups
-      for (const auto& group : this->GroupItems) {
-        for (auto index : group.second) {
+      for (const auto& g : this->GroupItems) {
+        for (auto index : g.second) {
           if (entry.Item.Value == this->EntryList[index].Item.Value) {
-            indexes.push_back(group.first);
+            indexes.push_back(g.first);
             entryHandled = true;
             break;
           }
