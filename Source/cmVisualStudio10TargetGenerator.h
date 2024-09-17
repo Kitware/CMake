@@ -289,8 +289,6 @@ private:
   void WriteCommonPropertyGroupGlobals(
     cmVisualStudio10TargetGenerator::Elem& e1);
 
-  bool HasCustomCommandsSource() const;
-
   std::unordered_map<std::string, ConfigToSettings> ParsedToolTargetSettings;
   bool PropertyIsSameInAllConfigs(const ConfigToSettings& toolSettings,
                                   const std::string& propName);
