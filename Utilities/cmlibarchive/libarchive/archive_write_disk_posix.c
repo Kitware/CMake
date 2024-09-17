@@ -26,7 +26,6 @@
  */
 
 #include "archive_platform.h"
-__FBSDID("$FreeBSD$");
 
 #if !defined(_WIN32) || defined(__CYGWIN__)
 
@@ -4197,7 +4196,7 @@ copy_xattrs(struct archive_write_disk *a, int tmpfd, int dffd)
 	}
 	for (xattr_i = 0; xattr_i < xattr_size;
 	    xattr_i += strlen(xattr_names + xattr_i) + 1) {
-		char *xattr_val_saved;
+		char *p;
 		ssize_t s;
 		int f;
 
@@ -4208,15 +4207,14 @@ copy_xattrs(struct archive_write_disk *a, int tmpfd, int dffd)
 			ret = ARCHIVE_WARN;
 			goto exit_xattr;
 		}
-		xattr_val_saved = xattr_val;
-		xattr_val = realloc(xattr_val, s);
-		if (xattr_val == NULL) {
+		p = realloc(xattr_val, s);
+		if (p == NULL) {
 			archive_set_error(&a->archive, ENOMEM,
 			    "Failed to get metadata(xattr)");
 			ret = ARCHIVE_WARN;
-			free(xattr_val_saved);
 			goto exit_xattr;
 		}
+		xattr_val = p;
 		s = fgetxattr(tmpfd, xattr_names + xattr_i, xattr_val, s, 0, 0);
 		if (s == -1) {
 			archive_set_error(&a->archive, errno,
@@ -4362,8 +4360,7 @@ set_mac_metadata(struct archive_write_disk *a, const char *pathname,
 	 * silly dance of writing the data to disk just so that
 	 * copyfile() can read it back in again. */
 	archive_string_init(&tmp);
-	archive_strcpy(&tmp, pathname);
-	archive_strcat(&tmp, ".XXXXXX");
+	archive_strcpy(&tmp, "tar.mmd.XXXXXX");
 	fd = mkstemp(tmp.s);
 
 	if (fd < 0) {
@@ -4428,7 +4425,8 @@ fixup_appledouble(struct archive_write_disk *a, const char *pathname)
 #else
 		la_stat(datafork.s, &st) == -1 ||
 #endif
-	    (st.st_mode & AE_IFMT) != AE_IFREG)
+	    (((st.st_mode & AE_IFMT) != AE_IFREG) &&
+		((st.st_mode & AE_IFMT) != AE_IFDIR)))
 		goto skip_appledouble;
 
 	/*

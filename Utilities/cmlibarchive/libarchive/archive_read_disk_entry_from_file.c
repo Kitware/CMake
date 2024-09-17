@@ -26,7 +26,6 @@
  */
 
 #include "archive_platform.h"
-__FBSDID("$FreeBSD");
 
 /* This is the tree-walking code for POSIX systems. */
 #if !defined(_WIN32) || defined(__CYGWIN__)
@@ -521,6 +520,7 @@ setup_xattr(struct archive_read_disk *a,
 	if (size == -1) {
 		archive_set_error(&a->archive, errno,
 		    "Couldn't read extended attribute");
+		free(value);
 		return (ARCHIVE_WARN);
 	}
 

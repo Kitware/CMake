@@ -24,7 +24,6 @@
  */
 
 #include "archive_platform.h"
-__FBSDID("$FreeBSD: head/lib/libarchive/archive_entry_link_resolver.c 201100 2009-12-28 03:05:31Z kientzle $");
 
 #ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -202,16 +201,26 @@ archive_entry_linkify(struct archive_entry_linkresolver *res,
 		le = find_entry(res, *e);
 		if (le != NULL) {
 			archive_entry_unset_size(*e);
+#if defined(_WIN32) && !defined(__CYGWIN__)
+			archive_entry_copy_hardlink_w(*e,
+			    archive_entry_pathname_w(le->canonical));
+#else
 			archive_entry_copy_hardlink(*e,
 			    archive_entry_pathname(le->canonical));
+#endif
 		} else
 			insert_entry(res, *e);
 		return;
 	case ARCHIVE_ENTRY_LINKIFY_LIKE_MTREE:
 		le = find_entry(res, *e);
 		if (le != NULL) {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+			archive_entry_copy_hardlink_w(*e,
+			    archive_entry_pathname_w(le->canonical));
+#else
 			archive_entry_copy_hardlink(*e,
 			    archive_entry_pathname(le->canonical));
+#endif
 		} else
 			insert_entry(res, *e);
 		return;
@@ -230,8 +239,13 @@ archive_entry_linkify(struct archive_entry_linkresolver *res,
 			le->entry = t;
 			/* Make the old entry into a hardlink. */
 			archive_entry_unset_size(*e);
+#if defined(_WIN32) && !defined(__CYGWIN__)
+			archive_entry_copy_hardlink_w(*e,
+			    archive_entry_pathname_w(le->canonical));
+#else
 			archive_entry_copy_hardlink(*e,
 			    archive_entry_pathname(le->canonical));
+#endif
 			/* If we ran out of links, return the
 			 * final entry as well. */
 			if (le->links == 0) {

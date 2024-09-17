@@ -30,10 +30,6 @@
 #ifndef CM_GET_DATE
 #include "archive_platform.h"
 #endif
-#ifdef __FreeBSD__
-#include <sys/cdefs.h>
-__FBSDID("$FreeBSD$");
-#endif
 
 #include <ctype.h>
 #include <stdio.h>

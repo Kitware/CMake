@@ -21,8 +21,6 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * $FreeBSD: head/lib/libarchive/archive_crc32.h 201102 2009-12-28 03:11:36Z kientzle $
  */
 
 #ifndef ARCHIVE_CRC32_H
@@ -31,6 +29,8 @@
 #ifndef __LIBARCHIVE_BUILD
 #error This header is only to be used internally to libarchive.
 #endif
+
+#include <stddef.h>
 
 /*
  * When zlib is unavailable, we should still be able to validate
@@ -47,6 +47,9 @@ crc32(unsigned long crc, const void *_p, size_t len)
 	const unsigned char *p = _p;
 	static volatile int crc_tbl_inited = 0;
 	static unsigned long crc_tbl[256];
+
+	if (_p == NULL)
+		return (0);
 
 	if (!crc_tbl_inited) {
 		for (b = 0; b < 256; ++b) {

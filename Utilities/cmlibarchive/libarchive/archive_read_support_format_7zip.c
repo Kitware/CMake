@@ -24,7 +24,6 @@
  */
 
 #include "archive_platform.h"
-__FBSDID("$FreeBSD$");
 
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
@@ -885,10 +884,9 @@ archive_read_format_7zip_read_data(struct archive_read *a,
 	if (zip->end_of_entry)
 		return (ARCHIVE_EOF);
 
-	const uint64_t max_read_size = 16 * 1024 * 1024;  // Don't try to read more than 16 MB at a time
-	size_t bytes_to_read = max_read_size;
+	size_t bytes_to_read = 16 * 1024 * 1024;  // Don't try to read more than 16 MB at a time
 	if ((uint64_t)bytes_to_read > zip->entry_bytes_remaining) {
-		bytes_to_read = zip->entry_bytes_remaining;
+		bytes_to_read = (size_t)zip->entry_bytes_remaining;
 	}
 	bytes = read_stream(a, buff, bytes_to_read, 0);
 	if (bytes < 0)
@@ -1071,8 +1069,8 @@ ppmd_read(void *p)
 		 */
 		ssize_t bytes_avail = 0;
 		const uint8_t* data = __archive_read_ahead(a,
-		    zip->ppstream.stream_in+1, &bytes_avail);
-		if(bytes_avail < zip->ppstream.stream_in+1) {
+		    (size_t)zip->ppstream.stream_in+1, &bytes_avail);
+		if(data == NULL || bytes_avail < zip->ppstream.stream_in+1) {
 			archive_set_error(&a->archive,
 			    ARCHIVE_ERRNO_FILE_FORMAT,
 			    "Truncated 7z file data");
@@ -1775,6 +1773,10 @@ free_decompression(struct archive_read *a, struct _7zip *zip)
 		zip->stream_valid = 0;
 	}
 #endif
+#ifdef HAVE_ZSTD_H
+	if (zip->zstdstream_valid)
+		ZSTD_freeDStream(zip->zstd_dstream);
+#endif
 	if (zip->ppmd7_valid) {
 		__archive_ppmd7_functions.Ppmd7_Free(
 			&zip->ppmd7_context);
@@ -2045,6 +2047,8 @@ read_Folder(struct archive_read *a, struct _7z_folder *f)
 			if (parse_7zip_uint64(
 			    a, &(f->coders[i].propertiesSize)) < 0)
 				return (-1);
+			if (UMAX_ENTRY < f->coders[i].propertiesSize)
+				return (-1);
 			if ((p = header_bytes(
 			    a, (size_t)f->coders[i].propertiesSize)) == NULL)
 				return (-1);
@@ -2314,7 +2318,7 @@ read_SubStreamsInfo(struct archive_read *a, struct _7z_substream_info *ss,
 	usizes = ss->unpackSizes;
 	for (i = 0; i < numFolders; i++) {
 		unsigned pack;
-		uint64_t sum;
+		uint64_t size, sum;
 
 		if (f[i].numUnpackStreams == 0)
 			continue;
@@ -2324,10 +2328,15 @@ read_SubStreamsInfo(struct archive_read *a, struct _7z_substream_info *ss,
 			for (pack = 1; pack < f[i].numUnpackStreams; pack++) {
 				if (parse_7zip_uint64(a, usizes) < 0)
 					return (-1);
+				if (*usizes > UINT64_MAX - sum)
+					return (-1);
 				sum += *usizes++;
 			}
 		}
-		*usizes++ = folder_uncompressed_size(&f[i]) - sum;
+		size = folder_uncompressed_size(&f[i]);
+		if (size < sum)
+			return (-1);
+		*usizes++ = size - sum;
 	}
 
 	if (type == kSize) {
@@ -2421,6 +2430,8 @@ read_StreamsInfo(struct archive_read *a, struct _7z_stream_info *si)
 		packPos = si->pi.pos;
 		for (i = 0; i < si->pi.numPackStreams; i++) {
 			si->pi.positions[i] = packPos;
+			if (packPos > UINT64_MAX - si->pi.sizes[i])
+				return (-1);
 			packPos += si->pi.sizes[i];
 			if (packPos > zip->header_offset)
 				return (-1);
@@ -2442,6 +2453,10 @@ read_StreamsInfo(struct archive_read *a, struct _7z_stream_info *si)
 		f = si->ci.folders;
 		for (i = 0; i < si->ci.numFolders; i++) {
 			f[i].packIndex = packIndex;
+			if (f[i].numPackedStreams > UINT32_MAX)
+				return (-1);
+			if (packIndex > UINT32_MAX - (uint32_t)f[i].numPackedStreams)
+				return (-1);
 			packIndex += (uint32_t)f[i].numPackedStreams;
 			if (packIndex > si->pi.numPackStreams)
 				return (-1);
@@ -3009,7 +3024,7 @@ slurp_central_directory(struct archive_read *a, struct _7zip *zip,
 	/* CRC check. */
 	if (crc32(0, (const unsigned char *)p + 12, 20)
 	    != archive_le32dec(p + 8)) {
-#ifdef DONT_FAIL_ON_CRC_ERROR
+#ifndef DONT_FAIL_ON_CRC_ERROR
 		archive_set_error(&a->archive, -1, "Header CRC error");
 		return (ARCHIVE_FATAL);
 #endif
@@ -3061,8 +3076,8 @@ slurp_central_directory(struct archive_read *a, struct _7zip *zip,
 
 		/* Check the EncodedHeader CRC.*/
 		if (r == 0 && zip->header_crc32 != next_header_crc) {
-			archive_set_error(&a->archive, -1,
 #ifndef DONT_FAIL_ON_CRC_ERROR
+			archive_set_error(&a->archive, -1,
 			    "Damaged 7-Zip archive");
 			r = -1;
 #endif
@@ -3151,7 +3166,7 @@ get_uncompressed_data(struct archive_read *a, const void **buff, size_t size,
 		/* Copy mode. */
 
 		*buff = __archive_read_ahead(a, minimum, &bytes_avail);
-		if (bytes_avail <= 0) {
+		if (*buff == NULL) {
 			archive_set_error(&a->archive,
 			    ARCHIVE_ERRNO_FILE_FORMAT,
 			    "Truncated 7-Zip file data");
@@ -3457,7 +3472,7 @@ read_stream(struct archive_read *a, const void **buff, size_t size,
 	/*
 	 * Skip the bytes we already has skipped in skip_stream().
 	 */
-	while (skip_bytes) {
+	while (1) {
 		ssize_t skipped;
 
 		if (zip->uncompressed_buffer_bytes_remaining == 0) {
@@ -3477,6 +3492,10 @@ read_stream(struct archive_read *a, const void **buff, size_t size,
 				return (ARCHIVE_FATAL);
 			}
 		}
+
+		if (!skip_bytes)
+			break;
+
 		skipped = get_uncompressed_data(
 			a, buff, (size_t)skip_bytes, 0);
 		if (skipped < 0)
