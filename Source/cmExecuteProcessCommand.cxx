@@ -11,6 +11,7 @@
 #include <utility>
 #include <vector>
 
+#include <cm/optional>
 #include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -22,6 +23,7 @@
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
+#include "cmPolicies.h"
 #include "cmProcessOutput.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -69,7 +71,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
     bool ErrorStripTrailingWhitespace = false;
     bool EchoOutputVariable = false;
     bool EchoErrorVariable = false;
-    std::string Encoding;
+    cm::optional<std::string> Encoding;
     std::string CommandErrorIsFatal;
   };
 
@@ -296,8 +298,19 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
   };
   ReadData outputData;
   ReadData errorData;
-  cmProcessOutput processOutput(
-    cmProcessOutput::FindEncoding(arguments.Encoding));
+  cmPolicies::PolicyStatus const cmp0176 =
+    status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0176);
+  cmProcessOutput::Encoding encoding =
+    cmp0176 == cmPolicies::OLD || cmp0176 == cmPolicies::WARN
+    ? cmProcessOutput::Auto
+    : cmProcessOutput::UTF8;
+  if (arguments.Encoding) {
+    if (cm::optional<cmProcessOutput::Encoding> maybeEncoding =
+          cmProcessOutput::FindEncoding(*arguments.Encoding)) {
+      encoding = *maybeEncoding;
+    }
+  }
+  cmProcessOutput processOutput(encoding);
   std::string strdata;
 
   std::unique_ptr<cmUVStreamReadHandle> outputHandle;

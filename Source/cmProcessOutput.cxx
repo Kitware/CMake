@@ -12,16 +12,18 @@ unsigned int cmProcessOutput::defaultCodepage =
   KWSYS_ENCODING_DEFAULT_CODEPAGE;
 #endif
 
-cmProcessOutput::Encoding cmProcessOutput::FindEncoding(
+cm::optional<cmProcessOutput::Encoding> cmProcessOutput::FindEncoding(
   std::string const& name)
 {
-  Encoding encoding = Auto;
+  cm::optional<Encoding> encoding;
   if ((name == "UTF8") || (name == "UTF-8")) {
     encoding = UTF8;
   } else if (name == "NONE") {
     encoding = None;
   } else if (name == "ANSI") {
     encoding = ANSI;
+  } else if (name == "AUTO") {
+    encoding = Auto;
   } else if (name == "OEM") {
     encoding = OEM;
   }

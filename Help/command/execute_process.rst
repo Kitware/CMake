@@ -147,7 +147,7 @@ Options:
    Use the current active console's codepage or if that isn't
    available then use ANSI.
 
-   This is the default since CMake 3.15.
+   This was the default in CMake 3.15 through 3.30.
 
  ``ANSI``
    Use the ANSI codepage.
@@ -159,6 +159,8 @@ Options:
    .. versionadded:: 3.11
 
    Use the UTF-8 codepage.
+
+   This is the default.  See policy :policy:`CMP0176`.
 
  ``UTF8``
    Use the UTF-8 codepage.  Use of this name is discouraged in favor

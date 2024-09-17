@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.31
 .. toctree::
    :maxdepth: 1
 
+   CMP0176: execute_process() ENCODING is UTF-8 by default. </policy/CMP0176>
    CMP0175: add_custom_command() rejects invalid arguments. </policy/CMP0175>
    CMP0174: cmake_parse_arguments(PARSE_ARGV) defines a variable for an empty string after a single-value keyword. </policy/CMP0174>
    CMP0173: The CMakeFindFrameworks module is removed. </policy/CMP0173>

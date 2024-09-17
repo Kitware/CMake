@@ -539,6 +539,8 @@ class cmMakefile;
          "string after a single-value keyword.",                              \
          3, 31, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0175, "add_custom_command() rejects invalid arguments.",  \
+         3, 31, 0, cmPolicies::WARN)                                          \
+  SELECT(POLICY, CMP0176, "execute_process() ENCODING is UTF-8 by default.",  \
          3, 31, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
