@@ -76,6 +76,8 @@ if(RunCMake_GENERATOR MATCHES "(Ninja|Makefile)")
 
   run_cmake_target(LINKER_expansion LINKER linker)
   run_cmake_target(LINKER_expansion LINKER_SHELL linker_shell)
+  run_cmake_target(LINKER_expansion LINKER_NESTED linker_nested)
+  run_cmake_target(LINKER_expansion LINKER_NESTED_SHELL linker_nested_shell)
 endif()
 
 run_cmake(empty_keyword_args)
