@@ -587,7 +587,8 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
   , GlobalGenerator(this->Target->GetLocalGenerator()->GetGlobalGenerator())
   , CMakeInstance(this->GlobalGenerator->GetCMakeInstance())
   , Config(config)
-  , DebugMode(this->Makefile->IsOn("CMAKE_LINK_DEPENDS_DEBUG_MODE"))
+  , DebugMode(this->Makefile->IsOn("CMAKE_LINK_DEPENDS_DEBUG_MODE") ||
+              this->Target->GetProperty("LINK_DEPENDS_DEBUG_MODE").IsOn())
   , LinkLanguage(linkLanguage)
   , LinkType(CMP0003_ComputeLinkType(
       this->Config, this->Makefile->GetCMakeInstance()->GetDebugConfigs()))
