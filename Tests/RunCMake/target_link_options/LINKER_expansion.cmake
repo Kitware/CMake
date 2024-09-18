@@ -14,26 +14,22 @@ add_executable(dump dump.c)
 string(REPLACE "${CMAKE_START_TEMP_FILE}" "" CMAKE_C_CREATE_SHARED_LIBRARY "${CMAKE_C_CREATE_SHARED_LIBRARY}")
 string(REPLACE "${CMAKE_END_TEMP_FILE}" "" CMAKE_C_CREATE_SHARED_LIBRARY "${CMAKE_C_CREATE_SHARED_LIBRARY}")
 
+function (add_test_library target_name)
+  add_library(${target_name} SHARED LinkOptionsLib.c)
+
+  # use LAUNCH facility to dump linker command
+  set_property(TARGET ${target_name} PROPERTY RULE_LAUNCH_LINK "\"${DUMP_EXE}\"")
+
+  add_dependencies(${target_name} dump)
+endfunction()
 
 # Use LINKER alone
-add_library(linker SHARED LinkOptionsLib.c)
+add_test_library(linker)
 target_link_options(linker PRIVATE "LINKER:-foo,bar")
 
-# use LAUNCH facility to dump linker command
-set_property(TARGET linker PROPERTY RULE_LAUNCH_LINK "\"${DUMP_EXE}\"")
-
-add_dependencies (linker dump)
-
-
 # Use LINKER with SHELL
-add_library(linker_shell SHARED LinkOptionsLib.c)
+add_test_library(linker_shell)
 target_link_options(linker_shell PRIVATE "LINKER:SHELL:-foo bar")
-
-# use LAUNCH facility to dump linker command
-set_property(TARGET linker_shell PROPERTY RULE_LAUNCH_LINK "\"${DUMP_EXE}\"")
-
-add_dependencies (linker_shell dump)
-
 
 # generate reference for LINKER flag
 if (CMAKE_C_LINKER_WRAPPER_FLAG)
@@ -46,9 +42,11 @@ if (CMAKE_C_LINKER_WRAPPER_FLAG)
   endif()
   list (JOIN linker_flag " " linker_flag)
   if (CMAKE_C_LINKER_WRAPPER_FLAG_SEP)
-    string (APPEND  linker_flag "${linker_space}" "-foo${CMAKE_C_LINKER_WRAPPER_FLAG_SEP}bar")
+    set(linker_sep "${CMAKE_C_LINKER_WRAPPER_FLAG_SEP}")
+    string (APPEND  linker_flag "${linker_space}" "-foo${linker_sep}bar")
   else()
-    set (linker_flag "${linker_flag}${linker_space}-foo ${linker_flag}${linker_space}bar")
+    set(linker_prefix "${linker_flag}${linker_space}")
+    set (linker_flag "${linker_prefix}-foo ${linker_prefix}bar")
   endif()
 else()
   set(linker_flag "-foo bar")
