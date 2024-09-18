@@ -1,0 +1,5 @@
+^CMake Warning \(dev\) at EncodingUnknown\.cmake:[0-9]+ \(execute_process\):
+  ENCODING option given unknown value "unknown"\.  Ignoring\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.$
