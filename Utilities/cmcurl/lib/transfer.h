@@ -44,7 +44,7 @@ typedef enum {
 
 CURLcode Curl_follow(struct Curl_easy *data, char *newurl,
                      followtype type);
-CURLcode Curl_readwrite(struct Curl_easy *data);
+CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp);
 int Curl_single_getsock(struct Curl_easy *data,
                         struct connectdata *conn, curl_socket_t *socks);
 CURLcode Curl_retry_request(struct Curl_easy *data, char **url);
@@ -114,12 +114,23 @@ void Curl_xfer_setup2(struct Curl_easy *data,
 CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature);
 
 /**
+ * Return TRUE iff transfer has pending data to send. Checks involved
+ * connection filters.
+ */
+bool Curl_xfer_needs_flush(struct Curl_easy *data);
+
+/**
+ * Flush any pending send data on the transfer connection.
+ */
+CURLcode Curl_xfer_flush(struct Curl_easy *data);
+
+/**
  * Send data on the socket/connection filter designated
  * for transfer's outgoing data.
  * Will return CURLE_OK on blocking with (*pnwritten == 0).
  */
 CURLcode Curl_xfer_send(struct Curl_easy *data,
-                        const void *buf, size_t blen,
+                        const void *buf, size_t blen, bool eos,
                         size_t *pnwritten);
 
 /**

@@ -21,25 +21,53 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# - Try to find the libssh2 library
-# Once done this will define
+# Find the rustls library
 #
-# LIBSSH2_FOUND - system has the libssh2 library
-# LIBSSH2_INCLUDE_DIR - the libssh2 include directory
-# LIBSSH2_LIBRARY - the libssh2 library name
+# Input variables:
+#
+# RUSTLS_INCLUDE_DIR   The rustls include directory
+# RUSTLS_LIBRARY       Path to rustls library
+#
+# Result variables:
+#
+# RUSTLS_FOUND         System has rustls
+# RUSTLS_INCLUDE_DIRS  The rustls include directories
+# RUSTLS_LIBRARIES     The rustls library names
+# RUSTLS_VERSION       Version of rustls
 
-find_path(LIBSSH2_INCLUDE_DIR libssh2.h)
+if(CURL_USE_PKGCONFIG)
+  find_package(PkgConfig QUIET)
+  pkg_check_modules(PC_RUSTLS "rustls")
+endif()
 
-find_library(LIBSSH2_LIBRARY NAMES ssh2 libssh2)
+find_path(RUSTLS_INCLUDE_DIR NAMES "rustls.h"
+  HINTS
+    ${PC_RUSTLS_INCLUDEDIR}
+    ${PC_RUSTLS_INCLUDE_DIRS}
+)
 
-if(LIBSSH2_INCLUDE_DIR)
-  file(STRINGS "${LIBSSH2_INCLUDE_DIR}/libssh2.h" libssh2_version_str REGEX "^#define[\t ]+LIBSSH2_VERSION[\t ]+\"(.*)\"")
-  string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1"  LIBSSH2_VERSION "${libssh2_version_str}")
+find_library(RUSTLS_LIBRARY NAMES "rustls"
+  HINTS
+    ${PC_RUSTLS_LIBDIR}
+    ${PC_RUSTLS_LIBRARY_DIRS}
+)
+
+if(PC_RUSTLS_VERSION)
+  set(RUSTLS_VERSION ${PC_RUSTLS_VERSION})
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(LibSSH2
-  REQUIRED_VARS LIBSSH2_LIBRARY LIBSSH2_INCLUDE_DIR
-  VERSION_VAR LIBSSH2_VERSION)
+find_package_handle_standard_args(Rustls
+  REQUIRED_VARS
+    RUSTLS_INCLUDE_DIR
+    RUSTLS_LIBRARY
+  VERSION_VAR
+    RUSTLS_VERSION
+)
 
-mark_as_advanced(LIBSSH2_INCLUDE_DIR LIBSSH2_LIBRARY)
+if(RUSTLS_FOUND)
+  set(RUSTLS_INCLUDE_DIRS ${RUSTLS_INCLUDE_DIR})
+  set(RUSTLS_LIBRARIES    ${RUSTLS_LIBRARY})
+endif()
+
+mark_as_advanced(RUSTLS_INCLUDE_DIR RUSTLS_LIBRARY)

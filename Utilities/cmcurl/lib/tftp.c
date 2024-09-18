@@ -240,8 +240,7 @@ static CURLcode tftp_set_timeouts(struct tftp_state_data *state)
     state->retry_time = 1;
 
   infof(state->data,
-        "set timeouts for state %d; Total % " CURL_FORMAT_CURL_OFF_T
-        ", retry %d maxtry %d",
+        "set timeouts for state %d; Total % " FMT_OFF_T ", retry %d maxtry %d",
         (int)state->state, timeout_ms, state->retry_time, state->retry_max);
 
   /* init RX time */
@@ -434,7 +433,7 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
   struct Curl_easy *data = state->data;
   CURLcode result = CURLE_OK;
 
-  /* Set ascii mode if -B flag was used */
+  /* Set ASCII mode if -B flag was used */
   if(data->state.prefer_ascii)
     mode = "netascii";
 
@@ -484,7 +483,7 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
       char buf[64];
       /* add tsize option */
       if(data->state.upload && (data->state.infilesize != -1))
-        msnprintf(buf, sizeof(buf), "%" CURL_FORMAT_CURL_OFF_T,
+        msnprintf(buf, sizeof(buf), "%" FMT_OFF_T,
                   data->state.infilesize);
       else
         strcpy(buf, "0"); /* the destination is large enough */

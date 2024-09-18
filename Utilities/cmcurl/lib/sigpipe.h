@@ -35,10 +35,12 @@ struct sigpipe_ignore {
 };
 
 #define SIGPIPE_VARIABLE(x) struct sigpipe_ignore x
+#define SIGPIPE_MEMBER(x)   struct sigpipe_ignore x
 
 static void sigpipe_init(struct sigpipe_ignore *ig)
 {
   memset(ig, 0, sizeof(*ig));
+  ig->no_signal = TRUE;
 }
 
 /*
@@ -91,6 +93,7 @@ static void sigpipe_apply(struct Curl_easy *data,
 #define sigpipe_init(x)  Curl_nop_stmt
 #define sigpipe_restore(x)  Curl_nop_stmt
 #define SIGPIPE_VARIABLE(x)
+#define SIGPIPE_MEMBER(x)   bool x
 #endif
 
 #endif /* HEADER_CURL_SIGPIPE_H */

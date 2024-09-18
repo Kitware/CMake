@@ -83,7 +83,7 @@ static int is_cr_or_lf(char c)
 
 /* Search the substring needle,needlelen into string haystack,haystacklen
  * Strings do not need to be terminated by a '\0'.
- * Similar of OSX/Linux memmem (not available on Visual Studio).
+ * Similar of macOS/Linux memmem (not available on Visual Studio).
  * Return position of beginning of first occurrence or NULL if not found
  */
 static const char *c_memmem(const void *haystack, size_t haystacklen,
@@ -452,7 +452,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
     }
     dns_w = entry->pwszDNSName;
     /* pwszDNSName is in ia5 string format and hence does not contain any
-     * non-ascii characters. */
+     * non-ASCII characters. */
     while(*dns_w != '\0') {
       *current_pos++ = (TCHAR)(*dns_w++);
     }
@@ -483,7 +483,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
   DWORD actual_len = 0;
 
   sspi_status =
-    s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
+    Curl_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
                                      SECPKG_ATTR_REMOTE_CERT_CONTEXT,
                                      &pCertContextServer);
 
@@ -612,7 +612,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
   DEBUGASSERT(BACKEND);
 
   sspi_status =
-    s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
+    Curl_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
                                      SECPKG_ATTR_REMOTE_CERT_CONTEXT,
                                      &pCertContextServer);
 

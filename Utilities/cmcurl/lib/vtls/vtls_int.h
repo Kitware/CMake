@@ -158,6 +158,9 @@ struct Curl_ssl {
   ssize_t (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
                         const void *mem, size_t len, CURLcode *code);
 
+  CURLcode (*get_channel_binding)(struct Curl_easy *data, int sockindex,
+                                  struct dynbuf *binding);
+
 };
 
 extern const struct Curl_ssl *Curl_ssl;
@@ -168,8 +171,6 @@ void Curl_none_cleanup(void);
 CURLcode Curl_none_shutdown(struct Curl_cfilter *cf, struct Curl_easy *data,
                             bool send_shutdown, bool *done);
 int Curl_none_check_cxn(struct Curl_cfilter *cf, struct Curl_easy *data);
-CURLcode Curl_none_random(struct Curl_easy *data, unsigned char *entropy,
-                          size_t length);
 void Curl_none_close_all(struct Curl_easy *data);
 void Curl_none_session_free(void *ptr);
 bool Curl_none_data_pending(struct Curl_cfilter *cf,
@@ -222,7 +223,7 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
 #include "sectransp.h"      /* SecureTransport (Darwin) version */
 #include "mbedtls.h"        /* mbedTLS versions */
 #include "bearssl.h"        /* BearSSL versions */
-#include "rustls.h"         /* rustls versions */
+#include "rustls.h"         /* Rustls versions */
 
 #endif /* USE_SSL */
 

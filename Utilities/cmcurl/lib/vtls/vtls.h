@@ -39,6 +39,7 @@ struct Curl_ssl_session;
 #define SSLSUPP_CAINFO_BLOB  (1<<6)
 #define SSLSUPP_ECH          (1<<7)
 #define SSLSUPP_CA_CACHE     (1<<8)
+#define SSLSUPP_CIPHER_LIST  (1<<9) /* supports TLS 1.0-1.2 ciphersuites */
 
 #define ALPN_ACCEPTED "ALPN: server accepted "
 
@@ -92,7 +93,7 @@ CURLcode Curl_ssl_conn_config_init(struct Curl_easy *data,
 void Curl_ssl_conn_config_cleanup(struct connectdata *conn);
 
 /**
- * Return TRUE iff SSL configuration from `conn` is functionally the
+ * Return TRUE iff SSL configuration from `data` is functionally the
  * same as the one on `candidate`.
  * @param proxy   match the proxy SSL config or the main one
  */
@@ -131,6 +132,7 @@ CURLcode Curl_ssl_initsessions(struct Curl_easy *, size_t);
 void Curl_ssl_version(char *buffer, size_t size);
 
 /* Certificate information list handling. */
+#define CURL_X509_STR_MAX  100000
 
 void Curl_ssl_free_certinfo(struct Curl_easy *data);
 CURLcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num);
@@ -180,6 +182,25 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
 bool Curl_ssl_cert_status_request(void);
 
 bool Curl_ssl_false_start(struct Curl_easy *data);
+
+/* The maximum size of the SSL channel binding is 85 bytes, as defined in
+ * RFC 5929, Section 4.1. The 'tls-server-end-point:' prefix is 21 bytes long,
+ * and SHA-512 is the longest supported hash algorithm, with a digest length of
+ * 64 bytes.
+ * The maximum size of the channel binding is therefore 21 + 64 = 85 bytes.
+ */
+#define SSL_CB_MAX_SIZE 85
+
+/* Return the tls-server-end-point channel binding, including the
+ * 'tls-server-end-point:' prefix.
+ * If successful, the data is written to the dynbuf, and CURLE_OK is returned.
+ * The dynbuf MUST HAVE a minimum toobig size of SSL_CB_MAX_SIZE.
+ * If the dynbuf is too small, CURLE_OUT_OF_MEMORY is returned.
+ * If channel binding is not supported, binding stays empty and CURLE_OK is
+ * returned.
+ */
+CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
+                                       struct dynbuf *binding);
 
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
