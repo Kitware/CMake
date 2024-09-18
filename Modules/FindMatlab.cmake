@@ -1832,7 +1832,7 @@ set(_matlab_required_variables)
 # the MEX library/header are required
 find_path(
   Matlab_INCLUDE_DIRS
-  NAMES mex.h
+  NAMES mex.h matrix.h
   PATHS ${MATLAB_INCLUDE_DIR_TO_LOOK}
   NO_DEFAULT_PATH
   )
