@@ -30,9 +30,6 @@
 
 #include <limits.h>
 
-#include <libssh2.h>
-#include <libssh2_sftp.h>
-
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -1786,7 +1783,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         }
 #if SIZEOF_TIME_T > SIZEOF_LONG
         if(date > 0xffffffff) {
-          /* if 'long' cannot old >32bit, this date cannot be sent */
+          /* if 'long' cannot old >32-bit, this date cannot be sent */
           failf(data, "date overflow");
           fail = TRUE;
         }
@@ -2069,7 +2066,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
           else {
             curl_off_t size = attrs.filesize;
             if(size < 0) {
-              failf(data, "Bad file size (%" CURL_FORMAT_CURL_OFF_T ")", size);
+              failf(data, "Bad file size (%" FMT_OFF_T ")", size);
               return CURLE_BAD_DOWNLOAD_RESUME;
             }
             data->state.resume_from = attrs.filesize;
@@ -2510,7 +2507,7 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         curl_off_t size = attrs.filesize;
 
         if(size < 0) {
-          failf(data, "Bad file size (%" CURL_FORMAT_CURL_OFF_T ")", size);
+          failf(data, "Bad file size (%" FMT_OFF_T ")", size);
           return CURLE_BAD_DOWNLOAD_RESUME;
         }
         if(data->state.use_range) {
@@ -2538,10 +2535,8 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
             to = size - 1;
           }
           if(from > size) {
-            failf(data, "Offset (%"
-                  CURL_FORMAT_CURL_OFF_T ") was beyond file size (%"
-                  CURL_FORMAT_CURL_OFF_T ")", from,
-                  (curl_off_t)attrs.filesize);
+            failf(data, "Offset (%" FMT_OFF_T ") was beyond file size (%"
+                  FMT_OFF_T ")", from, (curl_off_t)attrs.filesize);
             return CURLE_BAD_DOWNLOAD_RESUME;
           }
           if(from > to) {
@@ -2566,9 +2561,8 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         if(data->state.resume_from < 0) {
           /* We are supposed to download the last abs(from) bytes */
           if((curl_off_t)attrs.filesize < -data->state.resume_from) {
-            failf(data, "Offset (%"
-                  CURL_FORMAT_CURL_OFF_T ") was beyond file size (%"
-                  CURL_FORMAT_CURL_OFF_T ")",
+            failf(data, "Offset (%" FMT_OFF_T ") was beyond file size (%"
+                  FMT_OFF_T ")",
                   data->state.resume_from, (curl_off_t)attrs.filesize);
             return CURLE_BAD_DOWNLOAD_RESUME;
           }
@@ -2577,8 +2571,8 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
         }
         else {
           if((curl_off_t)attrs.filesize < data->state.resume_from) {
-            failf(data, "Offset (%" CURL_FORMAT_CURL_OFF_T
-                  ") was beyond file size (%" CURL_FORMAT_CURL_OFF_T ")",
+            failf(data, "Offset (%" FMT_OFF_T
+                  ") was beyond file size (%" FMT_OFF_T ")",
                   data->state.resume_from, (curl_off_t)attrs.filesize);
             return CURLE_BAD_DOWNLOAD_RESUME;
           }
@@ -3229,7 +3223,7 @@ static ssize_t ssh_tls_send(libssh2_socket_t sock, const void *buffer,
   /* swap in the TLS writer function for this call only, and then swap back
      the SSH one again */
   conn->send[0] = ssh->tls_send;
-  result = Curl_conn_send(data, socknum, buffer, length, &nwrite);
+  result = Curl_conn_send(data, socknum, buffer, length, FALSE, &nwrite);
   conn->send[0] = backup;
   if(result == CURLE_AGAIN)
     return -EAGAIN; /* magic return code for libssh2 */
@@ -3540,12 +3534,13 @@ static CURLcode scp_done(struct Curl_easy *data, CURLcode status,
 }
 
 static ssize_t scp_send(struct Curl_easy *data, int sockindex,
-                        const void *mem, size_t len, CURLcode *err)
+                        const void *mem, size_t len, bool eos, CURLcode *err)
 {
   ssize_t nwrite;
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = &conn->proto.sshc;
   (void)sockindex; /* we only support SCP on the fixed known primary socket */
+  (void)eos;
 
   /* libssh2_channel_write() returns int! */
   nwrite = (ssize_t) libssh2_channel_write(sshc->ssh_channel, mem, len);
@@ -3678,12 +3673,13 @@ static CURLcode sftp_done(struct Curl_easy *data, CURLcode status,
 
 /* return number of sent bytes */
 static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
-                         const void *mem, size_t len, CURLcode *err)
+                         const void *mem, size_t len, bool eos, CURLcode *err)
 {
   ssize_t nwrite;
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = &conn->proto.sshc;
   (void)sockindex;
+  (void)eos;
 
   nwrite = libssh2_sftp_write(sshc->sftp_handle, mem, len);
 

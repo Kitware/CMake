@@ -23,46 +23,44 @@
 ###########################################################################
 set(LIB_NAME libcurl)
 set(LIBCURL_OUTPUT_NAME libcurl CACHE STRING "Basename of the curl library")
-add_definitions(-DBUILDING_LIBCURL)
+add_definitions("-DBUILDING_LIBCURL")
 
-configure_file(curl_config.h.cmake
-  ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h)
+configure_file("curl_config.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
+# Get 'CSOURCES', 'HHEADERS' variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
-include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
+include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 # DllMain is added later for DLL builds only.
-list(REMOVE_ITEM CSOURCES dllmain.c)
+list(REMOVE_ITEM CSOURCES "dllmain.c")
 
-list(APPEND HHEADERS ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h)
+list(APPEND HHEADERS "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 
 # The rest of the build
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/../include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/..)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../include)
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/..)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
+include_directories(
+  "${CMAKE_CURRENT_BINARY_DIR}"
+  "${CMAKE_CURRENT_SOURCE_DIR}"
+)
 if(USE_ARES)
-  include_directories(${CARES_INCLUDE_DIR})
+  include_directories(${CARES_INCLUDE_DIRS})
 endif()
 
 if(BUILD_TESTING)
   add_library(
-    curlu # special libcurlu library just for unittests
+    curlu  # special libcurlu library just for unittests
     STATIC
     EXCLUDE_FROM_ALL
     ${HHEADERS} ${CSOURCES}
   )
-  target_compile_definitions(curlu PUBLIC UNITTESTS CURL_STATICLIB)
+  target_compile_definitions(curlu PUBLIC "UNITTESTS" "CURL_STATICLIB")
   target_link_libraries(curlu PRIVATE ${CURL_LIBS})
 endif()
 
 if(ENABLE_CURLDEBUG)
   # We must compile these sources separately to avoid memdebug.h redefinitions
   # applying to them.
-  set_source_files_properties(memdebug.c curl_multibyte.c PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+  set_source_files_properties("memdebug.c" "curl_multibyte.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 endif()
 
 ## Library definition
@@ -97,13 +95,12 @@ if(SHARE_LIB_OBJECT)
     # exported libcurl symbols. We handle exports via libcurl.def instead.
     # Except with symbol hiding disabled or debug mode enabled, when we export
     # _all_ symbols from libcurl DLL, without using libcurl.def.
-    set_property(TARGET ${LIB_OBJECT} APPEND
-      PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
+    set_property(TARGET ${LIB_OBJECT} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
   endif()
   target_link_libraries(${LIB_OBJECT} PRIVATE ${CURL_LIBS})
   set_target_properties(${LIB_OBJECT} PROPERTIES
     POSITION_INDEPENDENT_CODE ON)
-  if(HIDES_CURL_PRIVATE_SYMBOLS)
+  if(CURL_HIDES_PRIVATE_SYMBOLS)
     set_property(TARGET ${LIB_OBJECT} APPEND PROPERTY COMPILE_FLAGS "${CURL_CFLAG_SYMBOLS_HIDE}")
     set_property(TARGET ${LIB_OBJECT} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS")
   endif()
@@ -114,22 +111,21 @@ if(SHARE_LIB_OBJECT)
   endif()
 
   target_include_directories(${LIB_OBJECT} INTERFACE
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-    $<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>)
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    "$<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>")
 
   set(LIB_SOURCE $<TARGET_OBJECTS:${LIB_OBJECT}>)
 else()
   set(LIB_SOURCE ${HHEADERS} ${CSOURCES})
 endif()
 
-# we want it to be called libcurl on all platforms
+# We want it to be called libcurl on all platforms
 if(BUILD_STATIC_LIBS)
   list(APPEND libcurl_export ${LIB_STATIC})
   add_library(${LIB_STATIC} STATIC ${LIB_SOURCE})
   add_library(${PROJECT_NAME}::${LIB_STATIC} ALIAS ${LIB_STATIC})
   if(WIN32)
-    set_property(TARGET ${LIB_OBJECT} APPEND
-      PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
+    set_property(TARGET ${LIB_OBJECT} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
   endif()
   target_link_libraries(${LIB_STATIC} PRIVATE ${CURL_LIBS})
   # Remove the "lib" prefix since the library is already named "libcurl".
@@ -137,7 +133,7 @@ if(BUILD_STATIC_LIBS)
     PREFIX "" OUTPUT_NAME "${LIBCURL_OUTPUT_NAME}"
     SUFFIX "${STATIC_LIB_SUFFIX}${CMAKE_STATIC_LIBRARY_SUFFIX}"
     INTERFACE_COMPILE_DEFINITIONS "CURL_STATICLIB")
-  if(HIDES_CURL_PRIVATE_SYMBOLS)
+  if(CURL_HIDES_PRIVATE_SYMBOLS)
     set_property(TARGET ${LIB_STATIC} APPEND PROPERTY COMPILE_FLAGS "${CURL_CFLAG_SYMBOLS_HIDE}")
     set_property(TARGET ${LIB_STATIC} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS")
   endif()
@@ -148,8 +144,8 @@ if(BUILD_STATIC_LIBS)
   endif()
 
   target_include_directories(${LIB_STATIC} INTERFACE
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-    $<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>)
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    "$<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>")
 endif()
 
 if(BUILD_SHARED_LIBS)
@@ -160,15 +156,15 @@ if(BUILD_SHARED_LIBS)
     if(CYGWIN)
       # For Cygwin always compile dllmain.c as a separate unit since it
       # includes windows.h, which should not be included in other units.
-      set_source_files_properties(dllmain.c PROPERTIES
+      set_source_files_properties("dllmain.c" PROPERTIES
         SKIP_UNITY_BUILD_INCLUSION ON)
     endif()
-    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES dllmain.c)
+    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "dllmain.c")
   endif()
   if(WIN32)
-    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES libcurl.rc)
-    if(HIDES_CURL_PRIVATE_SYMBOLS)
-      set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "${CURL_SOURCE_DIR}/libcurl.def")
+    set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "libcurl.rc")
+    if(CURL_HIDES_PRIVATE_SYMBOLS)
+      set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "${CURL_SOURCE_DIR}/lib/libcurl.def")
     endif()
   endif()
   target_link_libraries(${LIB_SHARED} PRIVATE ${CURL_LIBS})
@@ -177,7 +173,7 @@ if(BUILD_SHARED_LIBS)
     PREFIX "" OUTPUT_NAME "${LIBCURL_OUTPUT_NAME}"
     IMPORT_PREFIX "" IMPORT_SUFFIX "${IMPORT_LIB_SUFFIX}${CMAKE_IMPORT_LIBRARY_SUFFIX}"
     POSITION_INDEPENDENT_CODE ON)
-  if(HIDES_CURL_PRIVATE_SYMBOLS)
+  if(CURL_HIDES_PRIVATE_SYMBOLS)
     set_property(TARGET ${LIB_SHARED} APPEND PROPERTY COMPILE_FLAGS "${CURL_CFLAG_SYMBOLS_HIDE}")
     set_property(TARGET ${LIB_SHARED} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS")
   endif()
@@ -188,8 +184,8 @@ if(BUILD_SHARED_LIBS)
   endif()
 
   target_include_directories(${LIB_SHARED} INTERFACE
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
-    $<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>)
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
+    "$<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>")
 
   if(CMAKE_DLL_NAME_WITH_SOVERSION OR
     CYGWIN OR
@@ -203,22 +199,64 @@ if(BUILD_SHARED_LIBS)
     # up to v3.x and ELF from v3.x. I cannot imagine someone running CMake
     # on those ancient systems.
     CMAKE_SYSTEM_NAME STREQUAL "FreeBSD")
-    set(soversion_default TRUE)
+    set(_soversion_default TRUE)
   else()
-    set(soversion_default FALSE)
+    set(_soversion_default FALSE)
   endif()
 
-  option(CURL_LIBCURL_SOVERSION "Enable libcurl SOVERSION" ${soversion_default})
+  option(CURL_LIBCURL_SOVERSION "Enable libcurl SOVERSION" ${_soversion_default})
+  option(CURL_LIBCURL_VERSIONED_SYMBOLS "Enable libcurl versioned symbols" OFF)
+
+  if(CURL_LIBCURL_SOVERSION OR CURL_LIBCURL_VERSIONED_SYMBOLS)
+    # Get 'VERSIONCHANGE', 'VERSIONADD', 'VERSIONDEL', 'VERSIONINFO' variables
+    transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
+    include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
+
+    math(EXPR _cmakesoname "${VERSIONCHANGE} - ${VERSIONDEL}")
+    set(_cmakeversion "${_cmakesoname}.${VERSIONDEL}.${VERSIONADD}")
+  endif()
 
   if(CURL_LIBCURL_SOVERSION)
-    transform_makefile_inc("Makefile.soname" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake")
-    include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.soname.cmake)
-
-    math(EXPR CMAKESONAME "${VERSIONCHANGE} - ${VERSIONDEL}")
-    set(CMAKEVERSION "${CMAKESONAME}.${VERSIONDEL}.${VERSIONADD}")
-
     set_target_properties(${LIB_SHARED} PROPERTIES
-      VERSION "${CMAKEVERSION}" SOVERSION "${CMAKESONAME}")
+      VERSION "${_cmakeversion}" SOVERSION "${_cmakesoname}")
+  endif()
+
+  ## Versioned symbols
+
+  if(CURL_LIBCURL_VERSIONED_SYMBOLS)
+    if(NOT DEFINED CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX)
+      # Default to prefixes used by autotools
+      if(CURL_WITH_MULTI_SSL)
+        set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "MULTISSL_")
+      elseif(CURL_USE_OPENSSL)
+        set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "OPENSSL_")
+      elseif(CURL_USE_MBEDTLS)
+        set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "MBEDTLS_")
+      elseif(CURL_USE_BEARSSL)
+        set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "BEARSSL_")
+      elseif(CURL_USE_WOLFSSL)
+        set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "WOLFSSL_")
+      elseif(CURL_USE_GNUTLS)
+        set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "GNUTLS_")
+      endif()
+    endif()
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/libcurl.vers" "
+      HIDDEN {};
+      CURL_${CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX}${_cmakesoname}
+      {
+        global: curl_*;
+        local: *;
+      };")
+    include(CheckCSourceCompiles)
+    set(CMAKE_REQUIRED_LINK_OPTIONS "-Wl,--version-script=${CMAKE_CURRENT_BINARY_DIR}/libcurl.vers")
+    check_c_source_compiles("int main(void) { return 0; }" HAVE_VERSIONED_SYMBOLS)
+    if(HAVE_VERSIONED_SYMBOLS)
+      # Superseded by LINK_OPTIONS in CMake 3.13 and later.
+      set_target_properties(${LIB_SHARED} PROPERTIES LINK_FLAGS "${CMAKE_REQUIRED_LINK_OPTIONS}")
+    else()
+      message(WARNING "Versioned symbols requested, but not supported by the toolchain.")
+    endif()
+    unset(CMAKE_REQUIRED_LINK_OPTIONS)
   endif()
 endif()
 
@@ -244,7 +282,7 @@ if(CURL_ENABLE_EXPORT_TARGET)
   endif()
 
   export(TARGETS ${libcurl_export}
-         FILE ${PROJECT_BINARY_DIR}/libcurl-target.cmake
-         NAMESPACE ${PROJECT_NAME}::
+    FILE "${PROJECT_BINARY_DIR}/libcurl-target.cmake"
+    NAMESPACE ${PROJECT_NAME}::
   )
 endif()

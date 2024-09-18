@@ -28,6 +28,9 @@
 #define CURL_NO_OLDIES
 #endif
 
+/* Tell "curl/curl.h" not to include "curl/mprintf.h" */
+#define CURL_SKIP_INCLUDE_MPRINTF
+
 /* FIXME: Delete this once the warnings have been fixed. */
 #if !defined(CURL_WARN_SIGN_CONVERSION)
 #ifdef __GNUC__
@@ -319,7 +322,7 @@
 
 /* curl uses its own printf() function internally. It understands the GNU
  * format. Use this format, so that is matches the GNU format attribute we
- * use with the mingw compiler, allowing it to verify them at compile-time.
+ * use with the MinGW compiler, allowing it to verify them at compile-time.
  */
 #ifdef  __MINGW32__
 #  undef CURL_FORMAT_CURL_OFF_T
@@ -344,6 +347,9 @@
 #else
 #define CURL_PRINTF(fmt, arg)
 #endif
+
+/* Override default printf mask check rules in "curl/mprintf.h" */
+#define CURL_TEMP_PRINTF CURL_PRINTF
 
 /* Workaround for mainline llvm v16 and earlier missing a built-in macro
    expected by macOS SDK v14 / Xcode v15 (2023) and newer.
@@ -444,7 +450,7 @@
 #endif
 
 /*
- * Large file (>2Gb) support using WIN32 functions.
+ * Large file (>2Gb) support using Win32 functions.
  */
 
 #ifdef USE_WIN32_LARGE_FILES
@@ -467,7 +473,7 @@
 #endif
 
 /*
- * Small file (<2Gb) support using WIN32 functions.
+ * Small file (<2Gb) support using Win32 functions.
  */
 
 #ifdef USE_WIN32_SMALL_FILES
@@ -513,11 +519,11 @@
 #endif
 
 #if SIZEOF_CURL_SOCKET_T < 8
-#  define CURL_FORMAT_SOCKET_T "d"
+#  define FMT_SOCKET_T "d"
 #elif defined(__MINGW32__)
-#  define CURL_FORMAT_SOCKET_T "zd"
+#  define FMT_SOCKET_T "zd"
 #else
-#  define CURL_FORMAT_SOCKET_T "qd"
+#  define FMT_SOCKET_T "qd"
 #endif
 
 /*
@@ -565,9 +571,12 @@
 #  endif
 #  define CURL_UINT64_SUFFIX  CURL_SUFFIX_CURL_OFF_TU
 #  define CURL_UINT64_C(val)  CURL_CONC_MACROS(val,CURL_UINT64_SUFFIX)
-# define CURL_PRId64  CURL_FORMAT_CURL_OFF_T
-# define CURL_PRIu64  CURL_FORMAT_CURL_OFF_TU
+# define FMT_PRId64  CURL_FORMAT_CURL_OFF_T
+# define FMT_PRIu64  CURL_FORMAT_CURL_OFF_TU
 #endif
+
+#define FMT_OFF_T CURL_FORMAT_CURL_OFF_T
+#define FMT_OFF_TU CURL_FORMAT_CURL_OFF_TU
 
 #if (SIZEOF_TIME_T == 4)
 #  ifdef HAVE_TIME_T_UNSIGNED
@@ -715,6 +724,11 @@
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
+#if defined(USE_WOLFSSL) && defined(USE_GNUTLS)
+/* Avoid defining unprefixed wolfSSL SHA macros colliding with nettle ones */
+#define NO_OLD_WC_NAMES
+#endif
+
 /* Single point where USE_SPNEGO definition might be defined */
 #if !defined(CURL_DISABLE_NEGOTIATE_AUTH) && \
     (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
@@ -816,7 +830,7 @@
 
 #if defined(__LWIP_OPT_H__) || defined(LWIP_HDR_OPT_H)
 #  if defined(SOCKET) || defined(USE_WINSOCK)
-#    error "WinSock and lwIP TCP/IP stack definitions shall not coexist!"
+#    error "Winsock and lwIP TCP/IP stack definitions shall not coexist!"
 #  endif
 #endif
 
@@ -854,7 +868,7 @@ Therefore we specify it explicitly. https://github.com/curl/curl/pull/258
 #define FOPEN_WRITETEXT "wt"
 #define FOPEN_APPENDTEXT "at"
 #elif defined(__CYGWIN__)
-/* Cygwin has specific behavior we need to address when WIN32 is not defined.
+/* Cygwin has specific behavior we need to address when _WIN32 is not defined.
 https://cygwin.com/cygwin-ug-net/using-textbinary.html
 For write we want our output to have line endings of LF and be compatible with
 other Cygwin utilities. For read we want to handle input that may have line
