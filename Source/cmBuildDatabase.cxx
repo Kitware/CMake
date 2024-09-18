@@ -447,7 +447,7 @@ cmBuildDatabase cmBuildDatabase::ForTarget(cmGeneratorTarget* gt,
 
     bool isCXXModule = false;
     bool isPrivate = true;
-    if (sf->GetLanguage() != "CXX"_s) {
+    if (sf->GetLanguage() == "CXX"_s) {
       auto const* fs = gt->GetFileSetForSource(config, sf);
       if (fs && fs->GetType() == "CXX_MODULES"_s) {
         isCXXModule = true;
