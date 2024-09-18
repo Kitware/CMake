@@ -642,8 +642,7 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
   }
 
   // The configuration being linked.
-  this->HasConfig = !config.empty();
-  this->Config = (this->HasConfig) ? config : std::string();
+  this->Config = config;
   std::vector<std::string> debugConfigs =
     this->Makefile->GetCMakeInstance()->GetDebugConfigs();
   this->LinkType = CMP0003_ComputeLinkType(this->Config, debugConfigs);
@@ -706,7 +705,7 @@ cmComputeLinkDepends::Compute()
             "---------------------------------------\n");
     fprintf(stderr, "Link dependency analysis for target %s, config %s\n",
             this->Target->GetName().c_str(),
-            this->HasConfig ? this->Config.c_str() : "noconfig");
+            this->Config.empty() ? "noconfig" : this->Config.c_str());
     this->DisplayConstraintGraph();
   }
 

@@ -208,7 +208,6 @@ private:
 
   size_t ComponentOrderId;
   cmTargetLinkLibraryType LinkType;
-  bool HasConfig;
   bool DebugMode;
   bool OldLinkDirMode;
 };
