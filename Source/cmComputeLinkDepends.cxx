@@ -580,15 +580,17 @@ std::string const& cmComputeLinkDepends::LinkEntry::DEFAULT =
 cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
                                            const std::string& config,
                                            const std::string& linkLanguage)
-{
-  // Store context information.
-  this->Target = target;
-  this->Makefile = this->Target->Target->GetMakefile();
-  this->GlobalGenerator =
-    this->Target->GetLocalGenerator()->GetGlobalGenerator();
-  this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
-  this->LinkLanguage = linkLanguage;
+  : Target(target)
+  , Makefile(this->Target->Target->GetMakefile())
+  , GlobalGenerator(this->Target->GetLocalGenerator()->GetGlobalGenerator())
+  , CMakeInstance(this->GlobalGenerator->GetCMakeInstance())
+  , Config(config)
+  , DebugMode(this->Makefile->IsOn("CMAKE_LINK_DEPENDS_DEBUG_MODE"))
+  , LinkLanguage(linkLanguage)
+  , LinkType(CMP0003_ComputeLinkType(
+      this->Config, this->Makefile->GetCMakeInstance()->GetDebugConfigs()))
 
+{
   // target oriented feature override property takes precedence over
   // global override property
   cm::string_view lloPrefix = "LINK_LIBRARY_OVERRIDE_"_s;
@@ -640,21 +642,6 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
                });
     }
   }
-
-  // The configuration being linked.
-  this->Config = config;
-  std::vector<std::string> debugConfigs =
-    this->Makefile->GetCMakeInstance()->GetDebugConfigs();
-  this->LinkType = CMP0003_ComputeLinkType(this->Config, debugConfigs);
-
-  // Enable debug mode if requested.
-  this->DebugMode = this->Makefile->IsOn("CMAKE_LINK_DEPENDS_DEBUG_MODE");
-
-  // Assume no compatibility until set.
-  this->OldLinkDirMode = false;
-
-  // No computation has been done.
-  this->CCG = nullptr;
 }
 
 cmComputeLinkDepends::~cmComputeLinkDepends() = default;

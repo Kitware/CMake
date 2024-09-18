@@ -86,12 +86,15 @@ public:
 
 private:
   // Context information.
-  cmGeneratorTarget const* Target;
-  cmMakefile* Makefile;
-  cmGlobalGenerator const* GlobalGenerator;
+  cmGeneratorTarget const* Target = nullptr;
+  cmMakefile* Makefile = nullptr;
+  cmGlobalGenerator const* GlobalGenerator = nullptr;
   cmake* CMakeInstance;
-  std::string LinkLanguage;
   std::string Config;
+  bool DebugMode = false;
+  std::string LinkLanguage;
+  cmTargetLinkLibraryType LinkType;
+
   EntryVector FinalLinkEntries;
   std::map<std::string, std::string> LinkLibraryOverride;
 
@@ -207,7 +210,5 @@ private:
   std::vector<size_t> ObjectEntries;
 
   size_t ComponentOrderId;
-  cmTargetLinkLibraryType LinkType;
-  bool DebugMode;
-  bool OldLinkDirMode;
+  bool OldLinkDirMode = false;
 };
