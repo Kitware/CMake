@@ -715,6 +715,11 @@ cmComputeLinkDepends::Compute()
   // Compute the final ordering.
   this->OrderLinkEntries();
 
+  // Display the final ordering.
+  if (this->DebugMode) {
+    this->DisplayOrderedEntries();
+  }
+
   // Compute the final set of link entries.
   EntriesProcessing entriesProcessing{ this->Target, this->LinkLanguage,
                                        this->EntryList,
@@ -1649,26 +1654,49 @@ size_t cmComputeLinkDepends::ComputeComponentCount(NodeList const& nl)
   return count;
 }
 
+namespace {
+void DisplayLinkEntry(int& count, cmComputeLinkDepends::LinkEntry const& entry)
+{
+  if (entry.Kind == cmComputeLinkDepends::LinkEntry::Group) {
+    if (entry.Item.Value == LG_ITEM_BEGIN) {
+      fprintf(stderr, "  start group");
+      count = 4;
+    } else if (entry.Item.Value == LG_ITEM_END) {
+      fprintf(stderr, "  end group");
+      count = 2;
+    } else {
+      fprintf(stderr, "  group");
+    }
+  } else if (entry.Target) {
+    fprintf(stderr, "%*starget [%s]", count, "",
+            entry.Target->GetName().c_str());
+  } else {
+    fprintf(stderr, "%*sitem [%s]", count, "", entry.Item.Value.c_str());
+  }
+  if (entry.Feature != cmComputeLinkDepends::LinkEntry::DEFAULT) {
+    fprintf(stderr, ", feature [%s]", entry.Feature.c_str());
+  }
+  fprintf(stderr, "\n");
+}
+}
+
+void cmComputeLinkDepends::DisplayOrderedEntries()
+{
+  fprintf(stderr, "target [%s] link dependency ordering:\n",
+          this->Target->GetName().c_str());
+  int count = 2;
+  for (auto index : this->FinalLinkOrder) {
+    DisplayLinkEntry(count, this->EntryList[index]);
+  }
+  fprintf(stderr, "\n");
+}
+
 void cmComputeLinkDepends::DisplayFinalEntries()
 {
-  fprintf(stderr, "target [%s] links to:\n", this->Target->GetName().c_str());
-  char space[] = "  ";
+  fprintf(stderr, "target [%s] link line:\n", this->Target->GetName().c_str());
   int count = 2;
-  for (LinkEntry const& lei : this->FinalLinkEntries) {
-    if (lei.Kind == LinkEntry::Group) {
-      fprintf(stderr, "  %s group",
-              lei.Item.Value == "<LINK_GROUP>" ? "start" : "end");
-      count = lei.Item.Value == "<LINK_GROUP>" ? 4 : 2;
-    } else if (lei.Target) {
-      fprintf(stderr, "%*starget [%s]", count, space,
-              lei.Target->GetName().c_str());
-    } else {
-      fprintf(stderr, "%*sitem [%s]", count, space, lei.Item.Value.c_str());
-    }
-    if (lei.Feature != LinkEntry::DEFAULT) {
-      fprintf(stderr, ", feature [%s]", lei.Feature.c_str());
-    }
-    fprintf(stderr, "\n");
+  for (LinkEntry const& entry : this->FinalLinkEntries) {
+    DisplayLinkEntry(count, entry);
   }
   fprintf(stderr, "\n");
 }

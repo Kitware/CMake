@@ -199,6 +199,7 @@ private:
   void VisitEntry(size_t index);
   PendingComponent& MakePendingComponent(size_t component);
   size_t ComputeComponentCount(NodeList const& nl);
+  void DisplayOrderedEntries();
   void DisplayFinalEntries();
 
   // Record of the original link line.
