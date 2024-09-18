@@ -111,6 +111,43 @@ std::vector<BT<std::string>> wrapOptions(
     return result;
   }
 
+  auto insertWrapped = [&](std::vector<std::string>& opts) {
+    if (!wrapperSep.empty()) {
+      if (concatFlagAndArgs) {
+        // insert flag elements except last one
+        for (auto i = wrapperFlag.begin(); i != wrapperFlag.end() - 1; ++i) {
+          result.emplace_back(*i, bt);
+        }
+        // concatenate last flag element and all list values
+        // in one option
+        result.emplace_back(wrapperFlag.back() + cmJoin(opts, wrapperSep), bt);
+      } else {
+        for (std::string const& i : wrapperFlag) {
+          result.emplace_back(i, bt);
+        }
+        // concatenate all list values in one option
+        result.emplace_back(cmJoin(opts, wrapperSep), bt);
+      }
+    } else {
+      // prefix each element of list with wrapper
+      if (concatFlagAndArgs) {
+        std::transform(opts.begin(), opts.end(), opts.begin(),
+                       [&wrapperFlag](std::string const& o) -> std::string {
+                         return wrapperFlag.back() + o;
+                       });
+      }
+      for (std::string& o : opts) {
+        for (auto i = wrapperFlag.begin(),
+                  e = concatFlagAndArgs ? wrapperFlag.end() - 1
+                                        : wrapperFlag.end();
+             i != e; ++i) {
+          result.emplace_back(*i, bt);
+        }
+        result.emplace_back(std::move(o), bt);
+      }
+    }
+  };
+
   for (std::vector<std::string>::size_type index = 0; index < options.size();
        index++) {
     if (cmHasLiteralPrefix(options[index], "LINKER:")) {
@@ -154,40 +191,7 @@ std::vector<BT<std::string>> wrapOptions(
       continue;
     }
 
-    if (!wrapperSep.empty()) {
-      if (concatFlagAndArgs) {
-        // insert flag elements except last one
-        for (auto i = wrapperFlag.begin(); i != wrapperFlag.end() - 1; ++i) {
-          result.emplace_back(*i, bt);
-        }
-        // concatenate last flag element and all list values
-        // in one option
-        result.emplace_back(wrapperFlag.back() + cmJoin(opts, wrapperSep), bt);
-      } else {
-        for (std::string const& i : wrapperFlag) {
-          result.emplace_back(i, bt);
-        }
-        // concatenate all list values in one option
-        result.emplace_back(cmJoin(opts, wrapperSep), bt);
-      }
-    } else {
-      // prefix each element of list with wrapper
-      if (concatFlagAndArgs) {
-        std::transform(opts.begin(), opts.end(), opts.begin(),
-                       [&wrapperFlag](std::string const& o) -> std::string {
-                         return wrapperFlag.back() + o;
-                       });
-      }
-      for (std::string& o : opts) {
-        for (auto i = wrapperFlag.begin(),
-                  e = concatFlagAndArgs ? wrapperFlag.end() - 1
-                                        : wrapperFlag.end();
-             i != e; ++i) {
-          result.emplace_back(*i, bt);
-        }
-        result.emplace_back(std::move(o), bt);
-      }
-    }
+    insertWrapped(opts);
   }
   return result;
 }
