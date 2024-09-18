@@ -315,8 +315,10 @@ const LinkLibraryFeatureAttributeSet& GetLinkLibraryFeatureAttributes(
 }
 
 // LINK_GROUP helpers
-const auto LG_BEGIN = "<LINK_GROUP:"_s;
-const auto LG_END = "</LINK_GROUP:"_s;
+const cm::string_view LG_BEGIN = "<LINK_GROUP:"_s;
+const cm::string_view LG_END = "</LINK_GROUP:"_s;
+const cm::string_view LG_ITEM_BEGIN = "<LINK_GROUP>"_s;
+const cm::string_view LG_ITEM_END = "</LINK_GROUP>"_s;
 
 inline std::string ExtractGroupFeature(std::string const& item)
 {
@@ -488,13 +490,13 @@ public:
           if (it == this->FinalEntries.end()) {
             break;
           }
-          it->Item.Value = "</LINK_GROUP>";
+          it->Item.Value = std::string(LG_ITEM_END);
           for (auto index = g.second.rbegin(); index != g.second.rend();
                ++index) {
             it = this->FinalEntries.insert(it, this->Entries[*index]);
           }
           it = this->FinalEntries.insert(it, groupEntry);
-          it->Item.Value = "<LINK_GROUP>";
+          it->Item.Value = std::string(LG_ITEM_BEGIN);
         }
       }
     }
