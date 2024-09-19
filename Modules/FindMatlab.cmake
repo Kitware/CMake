@@ -1318,6 +1318,10 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
   #  set(Matlab_PROG_VERSION_STRING_AUTO_DETECT "" CACHE INTERNAL "internal matlab location for the discovered version")
   #endif()
 
+  if(NOT matlab_or_mcr STREQUAL "UNKNOWN")
+    set(Matlab_OR_MCR_INTERNAL ${matlab_or_mcr} CACHE INTERNAL "Whether Matlab root contains MATLAB or MCR")
+  endif()
+
   if(NOT matlab_known_version STREQUAL "NOTFOUND")
     # the version is known, we just return it
     set(${matlab_final_version} ${matlab_known_version} PARENT_SCOPE)
@@ -1384,6 +1388,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
       endif()
       set(Matlab_PROG_VERSION_STRING_AUTO_DETECT "" CACHE INTERNAL "internal matlab location for the discovered version")
       set(Matlab_VERSION_STRING_INTERNAL "" CACHE INTERNAL "internal matlab location for the discovered version")
+      set(Matlab_OR_MCR_INTERNAL ${matlab_or_mcr} CACHE INTERNAL "Whether Matlab root contains MATLAB or MCR")
       unset(_matlab_current_program)
       unset(_matlab_current_program CACHE)
       return()
@@ -1423,6 +1428,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
 
     # set the version into the cache
     set(Matlab_VERSION_STRING_INTERNAL ${_matlab_version_tmp} CACHE INTERNAL "Matlab version (automatically determined)")
+    set(Matlab_OR_MCR_INTERNAL ${matlab_or_mcr} CACHE INTERNAL "Whether Matlab root contains MATLAB or MCR")
 
     # warning, just in case several versions found (should not happen)
     if((list_of_all_versions_length GREATER 1) AND MATLAB_FIND_DEBUG)
@@ -1436,6 +1442,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
     _Matlab_VersionInfoXML("${matlab_root}" _matlab_version_tmp)
     if(NOT "${_matlab_version_tmp}" STREQUAL "unknown")
       set(Matlab_VERSION_STRING_INTERNAL ${_matlab_version_tmp} CACHE INTERNAL "Matlab version (automatically determined)")
+      set(Matlab_OR_MCR_INTERNAL ${matlab_or_mcr} CACHE INTERNAL "Whether Matlab root contains MATLAB or MCR")
     endif()
   endif() # Matlab or MCR
 
@@ -1621,12 +1628,18 @@ if(Matlab_ROOT_DIR)
       message(WARNING "[MATLAB] the specified path for Matlab_ROOT_DIR does not exist (${Matlab_ROOT_DIR})")
     endif()
   else()
+    if("${Matlab_OR_MCR_INTERNAL}" STREQUAL "")
+      set(_matlab_cached_matlab_or_mcr "UNKNOWN")
+    else()
+      set(_matlab_cached_matlab_or_mcr "${Matlab_OR_MCR_INTERNAL}")
+    endif()
     # NOTFOUND indicates the code below to search for the version automatically
     if("${Matlab_VERSION_STRING_INTERNAL}" STREQUAL "")
-      list(APPEND _matlab_possible_roots "UNKNOWN" "NOTFOUND" ${Matlab_ROOT_DIR}) # empty version, empty MCR/Matlab indication
+      set(_matlab_cached_version "NOTFOUND") # empty version, empty MCR/Matlab indication
     else()
-      list(APPEND _matlab_possible_roots "UNKNOWN" ${Matlab_VERSION_STRING_INTERNAL} ${Matlab_ROOT_DIR}) # cached version
+      set(_matlab_cached_version "${Matlab_VERSION_STRING_INTERNAL}") # cached version
     endif()
+    list(APPEND _matlab_possible_roots "${_matlab_cached_matlab_or_mcr}" "${_matlab_cached_version}" "${Matlab_ROOT_DIR}")
   endif()
 else()
 
