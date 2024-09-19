@@ -907,16 +907,6 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
     return;
   }
 
-  if (this->HasCustomCommandsSource()) {
-    std::string message = cmStrCat(
-      "The target \"", this->GeneratorTarget->GetName(),
-      "\" does not currently support add_custom_command as the Visual Studio "
-      "generators have not yet learned how to generate custom commands in "
-      ".Net SDK-style projects.");
-    this->Makefile->IssueMessage(MessageType::FATAL_ERROR, message);
-    return;
-  }
-
   Elem e0(BuildFileStream, "Project");
   e0.Attribute("Sdk", *this->GeneratorTarget->GetProperty("DOTNET_SDK"));
 
@@ -1016,6 +1006,7 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
   }
 
   this->WriteDotNetDocumentationFile(e0);
+  this->WriteCustomCommands(e0);
   this->WriteAllSources(e0);
   this->WriteEmbeddedResourceGroup(e0);
   this->WriteXamlFilesGroup(e0);
@@ -1075,15 +1066,6 @@ void cmVisualStudio10TargetGenerator::WriteCommonPropertyGroupGlobals(Elem& e1)
     }
     e1.Element(globalKey, *value);
   }
-}
-
-bool cmVisualStudio10TargetGenerator::HasCustomCommandsSource() const
-{
-  auto const& config_sources = this->GeneratorTarget->GetAllConfigSources();
-  return std::any_of(config_sources.begin(), config_sources.end(),
-                     [](cmGeneratorTarget::AllConfigSource const& si) {
-                       return si.Source->GetCustomCommand();
-                     });
 }
 
 void cmVisualStudio10TargetGenerator::WritePackageReferences(Elem& e0)
@@ -1843,6 +1825,15 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
               symbolic = sf->GetPropertyAsBool("SYMBOLIC");
             }
           }
+
+          // Without UpToDateCheckInput VS will ignore the dependency files
+          // when doing it's fast up-to-date check and the command will not run
+          if (this->ProjectType == VsProjectType::csproj &&
+              this->GeneratorTarget->IsDotNetSdkTarget()) {
+            Elem e1(e0, "ItemGroup");
+            Elem e2(e1, "UpToDateCheckInput");
+            e2.Attribute("Include", dep);
+          }
         }
       }
       if (this->ProjectType != VsProjectType::csproj) {
@@ -1936,10 +1927,16 @@ void cmVisualStudio10TargetGenerator::WriteCustomRuleCSharp(
   }
   this->CSharpCustomCommandNames.insert(name);
   Elem e1(e0, "Target");
-  e1.Attribute("Condition", this->CalcCondition(config));
+  e1.Attribute("Condition", cmStrCat("'$(Configuration)' == '", config, '\''));
   e1.S << "\n    Name=\"" << name << "\"";
   e1.S << "\n    Inputs=\"" << cmVS10EscapeAttr(inputs) << "\"";
   e1.S << "\n    Outputs=\"" << cmVS10EscapeAttr(outputs) << "\"";
+
+  // Run before sources are compiled...
+  e1.S << "\n    BeforeTargets=\"CoreCompile\""; // BeforeBuild
+  // ...but after output directory has been created
+  e1.S << "\n    DependsOnTargets=\"PrepareForBuild\"";
+
   if (!comment.empty()) {
     Elem(e1, "Exec").Attribute("Command", cmStrCat("echo ", comment));
   }

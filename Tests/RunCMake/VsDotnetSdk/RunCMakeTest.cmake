@@ -1,7 +1,6 @@
 cmake_policy(SET CMP0053 NEW)
 include(RunCMake)
 
-run_cmake(VsDotnetSdkCustomCommandsSource)
 run_cmake(VsDotnetSdkStartupObject)
 run_cmake(VsDotnetSdkDefines)
 run_cmake(DotnetSdkVariables)
@@ -30,3 +29,4 @@ endfunction()
 
 runCmakeAndBuild(VsDotnetSdkCustomCommandsTarget)
 runCmakeAndBuild(VsDotnetSdkNugetRestore)
+runCmakeAndBuild(VsDotnetSdkCustomCommandsSource)
