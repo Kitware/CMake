@@ -309,10 +309,15 @@ typedef unsigned long sslerr_t;
 #define HAVE_SSL_X509_STORE_SHARE
 #endif
 
-/* FIXME: On LCC <= 1.23, OpenSSL 2.0.0 may be
- * found but does not seem to have X509_STORE_up_ref. */
+#if (OPENSSL_VERSION_NUMBER > 0x10100000L) /* OpenSSL > 1.1.0 */
+#define HAVE_SSL_X509_GET_SIGNATURE_NID
+#endif
+
+/* FIXME: On LCC <= 1.23, OpenSSL 2.0.0 may be found but does not seem to
+ * have X509_STORE_up_ref or X509_get_signature_nid. */
 #if defined(__LCC__) && defined(__EDG__) && (__LCC__ <= 123)
 #undef HAVE_SSL_X509_STORE_SHARE
+#undef HAVE_SSL_X509_GET_SIGNATURE_NID
 #endif
 
 /* What API version do we use? */
@@ -5124,7 +5129,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
                                          struct dynbuf *binding)
 {
   /* required for X509_get_signature_nid support */
-#if OPENSSL_VERSION_NUMBER > 0x10100000L
+#ifdef HAVE_SSL_X509_GET_SIGNATURE_NID
   X509 *cert;
   int algo_nid;
   const EVP_MD *algo_type;
