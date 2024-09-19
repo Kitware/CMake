@@ -27,6 +27,12 @@ class cmMakefile;
 class cmSourceFile;
 class cmake;
 
+enum class LinkLibrariesStrategy
+{
+  PRESERVE_ORDER,
+  REORDER,
+};
+
 /** \class cmComputeLinkDepends
  * \brief Compute link dependencies for targets.
  */
@@ -35,7 +41,8 @@ class cmComputeLinkDepends
 public:
   cmComputeLinkDepends(cmGeneratorTarget const* target,
                        const std::string& config,
-                       const std::string& linkLanguage);
+                       const std::string& linkLanguage,
+                       LinkLibrariesStrategy strategy);
   ~cmComputeLinkDepends();
 
   cmComputeLinkDepends(const cmComputeLinkDepends&) = delete;
@@ -94,6 +101,7 @@ private:
   bool DebugMode = false;
   std::string LinkLanguage;
   cmTargetLinkLibraryType LinkType;
+  LinkLibrariesStrategy Strategy;
 
   EntryVector FinalLinkEntries;
   std::map<std::string, std::string> LinkLibraryOverride;

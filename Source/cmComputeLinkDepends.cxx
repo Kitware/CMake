@@ -581,7 +581,8 @@ std::string const& cmComputeLinkDepends::LinkEntry::DEFAULT =
 
 cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
                                            const std::string& config,
-                                           const std::string& linkLanguage)
+                                           const std::string& linkLanguage,
+                                           LinkLibrariesStrategy strategy)
   : Target(target)
   , Makefile(this->Target->Target->GetMakefile())
   , GlobalGenerator(this->Target->GetLocalGenerator()->GetGlobalGenerator())
@@ -592,6 +593,7 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
   , LinkLanguage(linkLanguage)
   , LinkType(CMP0003_ComputeLinkType(
       this->Config, this->Makefile->GetCMakeInstance()->GetDebugConfigs()))
+  , Strategy(strategy)
 
 {
   // target oriented feature override property takes precedence over
@@ -1488,8 +1490,22 @@ void cmComputeLinkDepends::OrderLinkEntries()
   }
 
   // Start with the original link line.
-  for (size_t originalEntry : this->OriginalEntries) {
-    this->VisitEntry(originalEntry);
+  switch (this->Strategy) {
+    case LinkLibrariesStrategy::PRESERVE_ORDER: {
+      // Emit the direct dependencies in their original order.
+      // This gives projects control over ordering.
+      for (size_t originalEntry : this->OriginalEntries) {
+        this->VisitEntry(originalEntry);
+      }
+    } break;
+    case LinkLibrariesStrategy::REORDER: {
+      // Schedule the direct dependencies for emission in topo order.
+      // This may produce more efficient link lines.
+      for (size_t originalEntry : this->OriginalEntries) {
+        this->MakePendingComponent(
+          this->CCG->GetComponentMap()[originalEntry]);
+      }
+    } break;
   }
 
   // Now explore anything left pending.  Since the component graph is

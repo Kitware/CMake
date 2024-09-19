@@ -466,6 +466,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "LINKER_TYPE"_s, IC::CanCompileSources },
   { "ENABLE_EXPORTS"_s, IC::TargetWithSymbolExports },
   { "LINK_LIBRARIES_ONLY_TARGETS"_s, IC::NormalNonImportedTarget },
+  { "LINK_LIBRARIES_STRATEGY"_s, IC::NormalNonImportedTarget },
   { "LINK_SEARCH_START_STATIC"_s, IC::CanCompileSources },
   { "LINK_SEARCH_END_STATIC"_s, IC::CanCompileSources },
   // Initialize per-configuration name postfix property from the variable only
