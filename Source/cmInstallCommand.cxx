@@ -136,6 +136,8 @@ public:
     const cmInstallCommandArguments* args) const;
   std::string GetManDestination(const cmInstallCommandArguments* args) const;
   std::string GetDocDestination(const cmInstallCommandArguments* args) const;
+  std::string GetProgramExecutablesDestination(
+    const cmInstallCommandArguments* args) const;
   std::string GetDestinationForType(const cmInstallCommandArguments* args,
                                     const std::string& type) const;
 
@@ -291,7 +293,7 @@ void AddInstallRuntimeDependenciesGenerator(
 std::set<std::string> const allowedTypes{
   "BIN",         "SBIN",       "LIB",      "INCLUDE", "SYSCONF",
   "SHAREDSTATE", "LOCALSTATE", "RUNSTATE", "DATA",    "INFO",
-  "LOCALE",      "MAN",        "DOC",
+  "LOCALE",      "MAN",        "DOC",      "LIBEXEC",
 };
 
 template <typename T>
@@ -2591,6 +2593,12 @@ std::string Helper::GetDocDestination(
                               this->GetDataRootDestination(nullptr) + "/doc");
 }
 
+std::string Helper::GetProgramExecutablesDestination(
+  const cmInstallCommandArguments* args) const
+{
+  return this->GetDestination(args, "CMAKE_INSTALL_LIBEXECDIR", "libexec");
+}
+
 std::string Helper::GetDestinationForType(
   const cmInstallCommandArguments* args, const std::string& type) const
 {
@@ -2635,6 +2643,9 @@ std::string Helper::GetDestinationForType(
   }
   if (type == "DOC") {
     return this->GetDocDestination(nullptr);
+  }
+  if (type == "LIBEXEC") {
+    return this->GetProgramExecutablesDestination(nullptr);
   }
   return "";
 }
