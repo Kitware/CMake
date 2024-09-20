@@ -1,0 +1,3 @@
+-- CMAKE_CXX_COMPILER='[^']+'
+-- CMAKE_CXX_COMPILER_ID='[A-Za-z]+'
+-- CMAKE_CXX_COMPILER_VERSION='([0-9]+)(\.([0-9]+))?(\.([0-9]+))?(\.([0-9]+))?'
