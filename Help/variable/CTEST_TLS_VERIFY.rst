@@ -11,3 +11,9 @@ to a dashboard via ``https://`` URLs.
 
 If ``CTEST_TLS_VERIFY`` is not set, the :variable:`CMAKE_TLS_VERIFY` variable
 or :envvar:`CMAKE_TLS_VERIFY` environment variable is used instead.
+If neither is set, the default is *on*.
+
+.. versionchanged:: 3.31
+  The default is on.  Previously, the default was off.
+  Users may set the :envvar:`CMAKE_TLS_VERIFY` environment
+  variable to ``0`` to restore the old default.

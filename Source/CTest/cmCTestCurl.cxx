@@ -14,6 +14,10 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
+namespace {
+const bool TLS_VERIFY_DEFAULT = true;
+}
+
 cmCTestCurl::cmCTestCurl(cmCTest* ctest)
   : CTest(ctest)
   , CurlOpts(ctest)
@@ -75,6 +79,9 @@ cmCTestCurlOpts::cmCTestCurlOpts(cmCTest* ctest)
         this->VerifyHostOff = true;
       }
     }
+  }
+  if (!this->TLSVerifyOpt.has_value()) {
+    this->TLSVerifyOpt = TLS_VERIFY_DEFAULT;
   }
 }
 
