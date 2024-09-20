@@ -37,7 +37,7 @@ Cache variables
 
 The following cache variables may also be set:
 
-``JPEG_INCLUDE_DIRS``
+``JPEG_INCLUDE_DIR``
   where to find jpeglib.h, etc.
 ``JPEG_LIBRARY_RELEASE``
   where to find the JPEG library (optimized).
@@ -50,8 +50,6 @@ The following cache variables may also be set:
 Obsolete variables
 ^^^^^^^^^^^^^^^^^^
 
-``JPEG_INCLUDE_DIR``
-  where to find jpeglib.h, etc. (same as JPEG_INCLUDE_DIRS)
 ``JPEG_LIBRARY``
   where to find the JPEG library.
 #]=======================================================================]
