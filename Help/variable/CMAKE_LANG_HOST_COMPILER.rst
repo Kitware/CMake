@@ -42,3 +42,8 @@ variable is read-only and changes to it are undefined behavior.
 .. note::
 
   Ignored when using :ref:`Visual Studio Generators`.
+
+See the :variable:`CMAKE_<LANG>_HOST_COMPILER_ID` and
+:variable:`CMAKE_<LANG>_HOST_COMPILER_VERSION` variables for
+information about the host compiler used by ``nvcc``, whether
+by default or specified by ``CMAKE_<LANG>_HOST_COMPILER``.
