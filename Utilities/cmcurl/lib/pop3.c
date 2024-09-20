@@ -83,6 +83,10 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+#endif
+
 /* Local API functions */
 static CURLcode pop3_regular_transfer(struct Curl_easy *data, bool *done);
 static CURLcode pop3_do(struct Curl_easy *data, bool *done);
@@ -107,6 +111,11 @@ static CURLcode pop3_continue_auth(struct Curl_easy *data, const char *mech,
 static CURLcode pop3_cancel_auth(struct Curl_easy *data, const char *mech);
 static CURLcode pop3_get_message(struct Curl_easy *data, struct bufref *out);
 
+/* This function scans the body after the end-of-body and writes everything
+ * until the end is found */
+static CURLcode pop3_write(struct Curl_easy *data,
+                           const char *str, size_t nread, bool is_eos);
+
 /*
  * POP3 protocol handler.
  */
@@ -125,7 +134,7 @@ const struct Curl_handler Curl_handler_pop3 = {
   ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
-  ZERO_NULL,                        /* write_resp */
+  pop3_write,                       /* write_resp */
   ZERO_NULL,                        /* write_resp_hd */
   ZERO_NULL,                        /* connection_check */
   ZERO_NULL,                        /* attach connection */
@@ -155,7 +164,7 @@ const struct Curl_handler Curl_handler_pop3s = {
   ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
-  ZERO_NULL,                        /* write_resp */
+  pop3_write,                       /* write_resp */
   ZERO_NULL,                        /* write_resp_hd */
   ZERO_NULL,                        /* connection_check */
   ZERO_NULL,                        /* attach connection */
@@ -193,6 +202,53 @@ static void pop3_to_pop3s(struct connectdata *conn)
 #else
 #define pop3_to_pop3s(x) Curl_nop_stmt
 #endif
+
+struct pop3_cmd {
+  const char *name;
+  unsigned short nlen;
+  BIT(multiline); /* response is multi-line with last '.' line */
+  BIT(multiline_with_args); /* is multi-line when command has args */
+};
+
+static const struct pop3_cmd pop3cmds[] = {
+  { "APOP", 4, FALSE, FALSE },
+  { "AUTH", 4, FALSE, FALSE },
+  { "CAPA", 4, TRUE, TRUE },
+  { "DELE", 4, FALSE, FALSE },
+  { "LIST", 4, TRUE, FALSE },
+  { "MSG",  3, TRUE, TRUE },
+  { "NOOP", 4, FALSE, FALSE },
+  { "PASS", 4, FALSE, FALSE },
+  { "QUIT", 4, FALSE, FALSE },
+  { "RETR", 4, TRUE, TRUE },
+  { "RSET", 4, FALSE, FALSE },
+  { "STAT", 4, FALSE, FALSE },
+  { "STLS", 4, FALSE, FALSE },
+  { "TOP",  3, TRUE, TRUE },
+  { "UIDL", 4, TRUE, FALSE },
+  { "USER", 4, FALSE, FALSE },
+  { "UTF8", 4, FALSE, FALSE },
+  { "XTND", 4, TRUE, TRUE },
+};
+
+/* Return iff a command is defined as "multi-line" (RFC 1939),
+ * has a response terminated by a last line with a '.'.
+ */
+static bool pop3_is_multiline(const char *cmdline)
+{
+  size_t i;
+  for(i = 0; i < ARRAYSIZE(pop3cmds); ++i) {
+    if(strncasecompare(pop3cmds[i].name, cmdline, pop3cmds[i].nlen)) {
+      if(!cmdline[pop3cmds[i].nlen])
+        return pop3cmds[i].multiline;
+      else if(cmdline[pop3cmds[i].nlen] == ' ')
+        return pop3cmds[i].multiline_with_args;
+    }
+  }
+  /* Unknown command, assume multi-line for backward compatibility with
+   * earlier curl versions that only could do multi-line responses. */
+  return TRUE;
+}
 
 /***********************************************************************
  *
@@ -609,18 +665,20 @@ static CURLcode pop3_perform_command(struct Curl_easy *data)
   else
     command = "RETR";
 
+  if(pop3->custom && pop3->custom[0] != '\0')
+    command = pop3->custom;
+
   /* Send the command */
   if(pop3->id[0] != '\0')
     result = Curl_pp_sendf(data, &conn->proto.pop3c.pp, "%s %s",
-                           (pop3->custom && pop3->custom[0] != '\0' ?
-                            pop3->custom : command), pop3->id);
+                           command, pop3->id);
   else
-    result = Curl_pp_sendf(data, &conn->proto.pop3c.pp, "%s",
-                           (pop3->custom && pop3->custom[0] != '\0' ?
-                            pop3->custom : command));
+    result = Curl_pp_sendf(data, &conn->proto.pop3c.pp, "%s", command);
 
-  if(!result)
+  if(!result) {
     pop3_state(data, POP3_COMMAND);
+    data->req.no_body = !pop3_is_multiline(command);
+  }
 
   return result;
 }
@@ -948,8 +1006,8 @@ static CURLcode pop3_state_command_resp(struct Curl_easy *data,
       pp->nfinal = 0; /* done */
 
       if(!data->req.no_body) {
-        result = Curl_pop3_write(data, Curl_dyn_ptr(&pp->recvbuf),
-                                 Curl_dyn_len(&pp->recvbuf));
+        result = pop3_write(data, Curl_dyn_ptr(&pp->recvbuf),
+                            Curl_dyn_len(&pp->recvbuf), FALSE);
         if(result)
           return result;
       }
@@ -1447,12 +1505,13 @@ static CURLcode pop3_parse_custom_request(struct Curl_easy *data)
 
 /***********************************************************************
  *
- * Curl_pop3_write()
+ * pop3_write()
  *
  * This function scans the body after the end-of-body and writes everything
  * until the end is found.
  */
-CURLcode Curl_pop3_write(struct Curl_easy *data, const char *str, size_t nread)
+static CURLcode pop3_write(struct Curl_easy *data, const char *str,
+                           size_t nread, bool is_eos)
 {
   /* This code could be made into a special function in the handler struct */
   CURLcode result = CURLE_OK;
@@ -1462,6 +1521,7 @@ CURLcode Curl_pop3_write(struct Curl_easy *data, const char *str, size_t nread)
   bool strip_dot = FALSE;
   size_t last = 0;
   size_t i;
+  (void)is_eos;
 
   /* Search through the buffer looking for the end-of-body marker which is
      5 bytes (0d 0a 2e 0d 0a). Note that a line starting with a dot matches

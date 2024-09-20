@@ -223,7 +223,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
    * A leading slash in an AmigaDOS path denotes the parent
    * directory, and hence we block this as it is relative.
    * Absolute paths start with 'volumename:', so we check for
-   * this first. Failing that, we treat the path as a real unix
+   * this first. Failing that, we treat the path as a real Unix
    * path, but only if the application was compiled with -lunix.
    */
   fd = -1;
@@ -468,8 +468,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     static const char accept_ranges[]= { "Accept-ranges: bytes\r\n" };
     if(expected_size >= 0) {
       headerlen =
-        msnprintf(header, sizeof(header),
-                  "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
+        msnprintf(header, sizeof(header), "Content-Length: %" FMT_OFF_T "\r\n",
                   expected_size);
       result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
       if(result)

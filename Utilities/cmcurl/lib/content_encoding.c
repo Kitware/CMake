@@ -79,7 +79,7 @@
 #define GZIP_MAGIC_1 0x8b
 
 /* gzip flag byte */
-#define ASCII_FLAG   0x01 /* bit 0 set: file probably ascii text */
+#define ASCII_FLAG   0x01 /* bit 0 set: file probably ASCII text */
 #define HEAD_CRC     0x02 /* bit 1 set: header CRC present */
 #define EXTRA_FIELD  0x04 /* bit 2 set: extra field present */
 #define ORIG_NAME    0x08 /* bit 3 set: original filename present */
@@ -909,18 +909,18 @@ static CURLcode error_do_write(struct Curl_easy *data,
                                      struct Curl_cwriter *writer, int type,
                                      const char *buf, size_t nbytes)
 {
-  char all[256];
-  (void)Curl_all_content_encodings(all, sizeof(all));
-
   (void) writer;
   (void) buf;
   (void) nbytes;
 
   if(!(type & CLIENTWRITE_BODY) || !nbytes)
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
-
-  failf(data, "Unrecognized content encoding type. "
-        "libcurl understands %s content encodings.", all);
+  else {
+    char all[256];
+    (void)Curl_all_content_encodings(all, sizeof(all));
+    failf(data, "Unrecognized content encoding type. "
+          "libcurl understands %s content encodings.", all);
+  }
   return CURLE_BAD_CONTENT_ENCODING;
 }
 

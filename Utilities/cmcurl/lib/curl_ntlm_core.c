@@ -57,9 +57,14 @@
   #if !defined(OPENSSL_NO_DES) && !defined(OPENSSL_NO_DEPRECATED_3_0)
     #define USE_OPENSSL_DES
   #endif
+#elif defined(USE_WOLFSSL)
+  #include <wolfssl/options.h>
+  #if !defined(NO_DES3)
+    #define USE_OPENSSL_DES
+  #endif
 #endif
 
-#if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL)
+#if defined(USE_OPENSSL_DES)
 
 #if defined(USE_OPENSSL)
 #  include <openssl/des.h>
@@ -67,7 +72,6 @@
 #  include <openssl/ssl.h>
 #  include <openssl/rand.h>
 #else
-#  include <wolfssl/options.h>
 #  include <wolfssl/openssl/des.h>
 #  include <wolfssl/openssl/md5.h>
 #  include <wolfssl/openssl/ssl.h>
@@ -148,7 +152,7 @@ static void extend_key_56_to_64(const unsigned char *key_56, char *key)
 }
 #endif
 
-#if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL)
+#if defined(USE_OPENSSL_DES)
 /*
  * Turns a 56-bit key into a 64-bit, odd parity key and sets the key. The
  * key schedule ks is also set.
@@ -313,7 +317,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
                             const unsigned char *plaintext,
                             unsigned char *results)
 {
-#if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL)
+#if defined(USE_OPENSSL_DES)
   DES_key_schedule ks;
 
   setup_des_key(keys, DESKEY(ks));
@@ -367,7 +371,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
   {
     /* Create LanManager hashed password. */
 
-#if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL)
+#if defined(USE_OPENSSL_DES)
     DES_key_schedule ks;
 
     setup_des_key(pw, DESKEY(ks));
@@ -534,13 +538,13 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
 /*
  * Curl_ntlm_core_mk_ntlmv2_resp()
  *
- * This creates the NTLMv2 response as set in the ntlm type-3 message.
+ * This creates the NTLMv2 response as set in the NTLM type-3 message.
  *
  * Parameters:
  *
- * ntlmv2hash       [in] - The ntlmv2 hash (16 bytes)
+ * ntlmv2hash       [in] - The NTLMv2 hash (16 bytes)
  * challenge_client [in] - The client nonce (8 bytes)
- * ntlm             [in] - The ntlm data struct being used to read TargetInfo
+ * ntlm             [in] - The NTLM data struct being used to read TargetInfo
                            and Server challenge received in the type-2 message
  * ntresp          [out] - The address where a pointer to newly allocated
  *                         memory holding the NTLMv2 response.
@@ -629,11 +633,11 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 /*
  * Curl_ntlm_core_mk_lmv2_resp()
  *
- * This creates the LMv2 response as used in the ntlm type-3 message.
+ * This creates the LMv2 response as used in the NTLM type-3 message.
  *
  * Parameters:
  *
- * ntlmv2hash        [in] - The ntlmv2 hash (16 bytes)
+ * ntlmv2hash        [in] - The NTLMv2 hash (16 bytes)
  * challenge_client  [in] - The client nonce (8 bytes)
  * challenge_client  [in] - The server challenge (8 bytes)
  * lmresp           [out] - The LMv2 response (24 bytes)
@@ -657,7 +661,7 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
   if(result)
     return result;
 
-  /* Concatenate the HMAC MD5 output  with the client nonce */
+  /* Concatenate the HMAC MD5 output with the client nonce */
   memcpy(lmresp, hmac_output, 16);
   memcpy(lmresp + 16, challenge_client, 8);
 
