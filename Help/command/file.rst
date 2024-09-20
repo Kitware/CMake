@@ -813,8 +813,15 @@ Transfer
 
     ``TLS_VERIFY <ON|OFF>``
       Specify whether to verify the server certificate for ``https://`` URLs.
-      The default is to *not* verify. If this option is not specified, the
-      value of the :variable:`CMAKE_TLS_VERIFY` variable will be used instead.
+      If this option is not specified, the value of the
+      :variable:`CMAKE_TLS_VERIFY` variable or :envvar:`CMAKE_TLS_VERIFY`
+      environment variable will be used instead.
+      If neither is set, the default is *on*.
+
+      .. versionchanged:: 3.31
+        The default is on.  Previously, the default was off.
+        Users may set the :envvar:`CMAKE_TLS_VERIFY` environment
+        variable to ``0`` to restore the old default.
 
       .. versionadded:: 3.18
         Added support to ``file(UPLOAD)``.
@@ -827,9 +834,7 @@ Transfer
       .. versionadded:: 3.18
         Added support to ``file(UPLOAD)``.
 
-  For ``https://`` URLs CMake must be built with OpenSSL support.  ``TLS/SSL``
-  certificates are not checked by default.  Set ``TLS_VERIFY`` to ``ON`` to
-  check certificates.
+  For ``https://`` URLs CMake must be built with SSL/TLS support.
 
   Additional options to ``DOWNLOAD`` are:
 
