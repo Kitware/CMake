@@ -118,10 +118,12 @@ Imported targets
 This module defines the following :prop_tgt:`IMPORTED` targets:
 
 ``Matlab::mex``
-  The ``mex`` library, always available.
+  The ``mex`` library, always available for MATLAB installations. Available for
+  MCR installations if provided by MCR.
 
 ``Matlab::mx``
-  The mx library of Matlab (arrays), always available.
+  The mx library of Matlab (arrays), always available for MATLAB installations.
+  Available for MCR installations if provided by MCR.
 
 ``Matlab::eng``
   Matlab engine library. Available only if the ``ENG_LIBRARY`` component
@@ -132,10 +134,12 @@ This module defines the following :prop_tgt:`IMPORTED` targets:
   is requested.
 
 ``Matlab::MatlabEngine``
-  Matlab C++ engine library, always available for R2018a and newer.
+  Matlab C++ engine library, always available for MATLAB R2018a and newer.
+  Available for MCR installations if provided by MCR.
 
 ``Matlab::MatlabDataArray``
-  Matlab C++ data array library, always available for R2018a and newer.
+  Matlab C++ data array library, always available for MATLAB R2018a and newer.
+  Available for MCR installations if provided by MCR.
 
 Variables defined by the module
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -161,9 +165,11 @@ Result variables
 ``Matlab_INCLUDE_DIRS``
  the path of the Matlab libraries headers
 ``Matlab_MEX_LIBRARY``
-  library for mex, always available.
+  library for mex, always available for MATLAB installations. Available for MCR
+  installations if provided by MCR.
 ``Matlab_MX_LIBRARY``
-  mx library of Matlab (arrays), always available.
+  mx library of Matlab (arrays), always available for MATLAB installations.
+  Available for MCR installations if provided by MCR.
 ``Matlab_ENG_LIBRARY``
   Matlab engine library. Available only if the component ``ENG_LIBRARY``
   is requested.
@@ -173,11 +179,13 @@ Result variables
 ``Matlab_ENGINE_LIBRARY``
   .. versionadded:: 3.13
 
-  Matlab C++ engine library, always available for R2018a and newer.
+  Matlab C++ engine library, always available for MATLAB R2018a and newer.
+  Available for MCR installations if provided by MCR.
 ``Matlab_DATAARRAY_LIBRARY``
   .. versionadded:: 3.13
 
-  Matlab C++ data array library, always available for R2018a and newer.
+  Matlab C++ data array library, always available for MATLAB R2018a and newer.
+  Available for MCR installations if provided by MCR.
 ``Matlab_LIBRARIES``
   the whole set of libraries of Matlab
 ``Matlab_MEX_COMPILER``
@@ -637,11 +645,14 @@ function(matlab_get_all_valid_matlab_roots_from_registry matlab_versions matlab_
       string(REPLACE "." "" _matlab_current_version_without_dot "${_matlab_current_version}")
 
       if(IS_DIRECTORY "${current_MATLAB_ROOT}")
+        if(IS_DIRECTORY "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
+          cmake_path(APPEND current_MATLAB_ROOT "v${_matlab_current_version_without_dot}")
+        endif()
         _Matlab_VersionInfoXML("${current_MATLAB_ROOT}" _matlab_version_tmp)
         if("${_matlab_version_tmp}" STREQUAL "unknown")
           set(_matlab_version_tmp ${_matlab_current_version})
         endif()
-        list(APPEND _matlab_roots_list "MCR" ${_matlab_version_tmp} "${current_MATLAB_ROOT}/v${_matlab_current_version_without_dot}")
+        list(APPEND _matlab_roots_list "MCR" ${_matlab_version_tmp} "${current_MATLAB_ROOT}")
       endif()
     endforeach()
   endforeach()
@@ -1316,6 +1327,10 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
   #  set(Matlab_PROG_VERSION_STRING_AUTO_DETECT "" CACHE INTERNAL "internal matlab location for the discovered version")
   #endif()
 
+  if(NOT matlab_or_mcr STREQUAL "UNKNOWN")
+    set(Matlab_OR_MCR_INTERNAL ${matlab_or_mcr} CACHE INTERNAL "Whether Matlab root contains MATLAB or MCR")
+  endif()
+
   if(NOT matlab_known_version STREQUAL "NOTFOUND")
     # the version is known, we just return it
     set(${matlab_final_version} ${matlab_known_version} PARENT_SCOPE)
@@ -1382,6 +1397,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
       endif()
       set(Matlab_PROG_VERSION_STRING_AUTO_DETECT "" CACHE INTERNAL "internal matlab location for the discovered version")
       set(Matlab_VERSION_STRING_INTERNAL "" CACHE INTERNAL "internal matlab location for the discovered version")
+      set(Matlab_OR_MCR_INTERNAL ${matlab_or_mcr} CACHE INTERNAL "Whether Matlab root contains MATLAB or MCR")
       unset(_matlab_current_program)
       unset(_matlab_current_program CACHE)
       return()
@@ -1421,6 +1437,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
 
     # set the version into the cache
     set(Matlab_VERSION_STRING_INTERNAL ${_matlab_version_tmp} CACHE INTERNAL "Matlab version (automatically determined)")
+    set(Matlab_OR_MCR_INTERNAL ${matlab_or_mcr} CACHE INTERNAL "Whether Matlab root contains MATLAB or MCR")
 
     # warning, just in case several versions found (should not happen)
     if((list_of_all_versions_length GREATER 1) AND MATLAB_FIND_DEBUG)
@@ -1434,6 +1451,7 @@ function(_Matlab_get_version_from_root matlab_root matlab_or_mcr matlab_known_ve
     _Matlab_VersionInfoXML("${matlab_root}" _matlab_version_tmp)
     if(NOT "${_matlab_version_tmp}" STREQUAL "unknown")
       set(Matlab_VERSION_STRING_INTERNAL ${_matlab_version_tmp} CACHE INTERNAL "Matlab version (automatically determined)")
+      set(Matlab_OR_MCR_INTERNAL ${matlab_or_mcr} CACHE INTERNAL "Whether Matlab root contains MATLAB or MCR")
     endif()
   endif() # Matlab or MCR
 
@@ -1620,12 +1638,18 @@ if(Matlab_ROOT_DIR)
       message(WARNING "[MATLAB] the specified path for Matlab_ROOT_DIR does not exist (${Matlab_ROOT_DIR})")
     endif()
   else()
+    if("${Matlab_OR_MCR_INTERNAL}" STREQUAL "")
+      set(_matlab_cached_matlab_or_mcr "UNKNOWN")
+    else()
+      set(_matlab_cached_matlab_or_mcr "${Matlab_OR_MCR_INTERNAL}")
+    endif()
     # NOTFOUND indicates the code below to search for the version automatically
     if("${Matlab_VERSION_STRING_INTERNAL}" STREQUAL "")
-      list(APPEND _matlab_possible_roots "UNKNOWN" "NOTFOUND" ${Matlab_ROOT_DIR}) # empty version, empty MCR/Matlab indication
+      set(_matlab_cached_version "NOTFOUND") # empty version, empty MCR/Matlab indication
     else()
-      list(APPEND _matlab_possible_roots "UNKNOWN" ${Matlab_VERSION_STRING_INTERNAL} ${Matlab_ROOT_DIR}) # cached version
+      set(_matlab_cached_version "${Matlab_VERSION_STRING_INTERNAL}") # cached version
     endif()
+    list(APPEND _matlab_possible_roots "${_matlab_cached_matlab_or_mcr}" "${_matlab_cached_version}" "${Matlab_ROOT_DIR}")
   endif()
 else()
 
@@ -1821,7 +1845,9 @@ function(_Matlab_find_library _matlab_library_prefix)
 endfunction()
 
 
-set(_matlab_required_variables)
+# the matlab root is required
+set(_matlab_required_variables Matlab_ROOT_DIR)
+set(Matlab_LIBRARIES)
 
 # Order is as follow:
 # - unconditionally required libraries/headers first
@@ -1831,40 +1857,50 @@ set(_matlab_required_variables)
 # the MEX library/header are required
 find_path(
   Matlab_INCLUDE_DIRS
-  NAMES mex.h
+  NAMES mex.h matrix.h
   PATHS ${MATLAB_INCLUDE_DIR_TO_LOOK}
   NO_DEFAULT_PATH
   )
 list(APPEND _matlab_required_variables Matlab_INCLUDE_DIRS)
 
+_Matlab_find_library(
+  ${_matlab_lib_prefix_for_search}
+  Matlab_MEX_LIBRARY
+  NAMES mex
+  PATHS ${_matlab_lib_dir_for_search}
+  NO_DEFAULT_PATH
+)
+if(Matlab_MEX_LIBRARY)
+  set(Matlab_MEX_LIBRARY_FOUND TRUE)
+  list(APPEND Matlab_LIBRARIES ${Matlab_MEX_LIBRARY})
+endif()
+if(MATLAB_FIND_DEBUG)
+  message(STATUS "[MATLAB] mex C library: ${Matlab_MEX_LIBRARY}")
+endif()
+
+# The MX library is required
+_Matlab_find_library(
+  ${_matlab_lib_prefix_for_search}
+  Matlab_MX_LIBRARY
+  NAMES mx
+  PATHS ${_matlab_lib_dir_for_search}
+  NO_DEFAULT_PATH
+)
+if(Matlab_MX_LIBRARY)
+  set(Matlab_MX_LIBRARY_FOUND TRUE)
+  list(APPEND Matlab_LIBRARIES ${Matlab_MX_LIBRARY})
+endif()
+if(MATLAB_FIND_DEBUG)
+  message(STATUS "[MATLAB] mx C library: ${Matlab_MX_LIBRARY}")
+endif()
+
 if(Matlab_Or_MCR STREQUAL "MATLAB" OR Matlab_Or_MCR STREQUAL "UNKNOWN")
-  _Matlab_find_library(
-    ${_matlab_lib_prefix_for_search}
-    Matlab_MEX_LIBRARY
-    NAMES mex
-    PATHS ${_matlab_lib_dir_for_search}
-    NO_DEFAULT_PATH
-  )
   list(APPEND _matlab_required_variables Matlab_MEX_LIBRARY)
 
   # the MEX extension is required
   list(APPEND _matlab_required_variables Matlab_MEX_EXTENSION)
 
-  # the matlab root is required
-  list(APPEND _matlab_required_variables Matlab_ROOT_DIR)
-
-  # The MX library is required
-  _Matlab_find_library(
-    ${_matlab_lib_prefix_for_search}
-    Matlab_MX_LIBRARY
-    NAMES mx
-    PATHS ${_matlab_lib_dir_for_search}
-    NO_DEFAULT_PATH
-  )
   list(APPEND _matlab_required_variables Matlab_MX_LIBRARY)
-  if(Matlab_MX_LIBRARY)
-    set(Matlab_MX_LIBRARY_FOUND TRUE)
-  endif()
 endif()
 
 if(Matlab_HAS_CPP_API)
@@ -1880,6 +1916,10 @@ if(Matlab_HAS_CPP_API)
   )
   if(Matlab_ENGINE_LIBRARY)
     set(Matlab_ENGINE_LIBRARY_FOUND TRUE)
+    list(APPEND Matlab_LIBRARIES ${Matlab_ENGINE_LIBRARY})
+  endif()
+  if(MATLAB_FIND_DEBUG)
+    message(STATUS "[MATLAB] Engine C++ library: ${Matlab_ENGINE_LIBRARY}")
   endif()
 
   # The MatlabDataArray library is required for R2018a+
@@ -1893,6 +1933,10 @@ if(Matlab_HAS_CPP_API)
   )
   if(Matlab_DATAARRAY_LIBRARY)
     set(Matlab_DATAARRAY_LIBRARY_FOUND TRUE)
+    list(APPEND Matlab_LIBRARIES ${Matlab_DATAARRAY_LIBRARY})
+  endif()
+  if(MATLAB_FIND_DEBUG)
+    message(STATUS "[MATLAB] Data array C++ library: ${Matlab_DATAARRAY_LIBRARY}")
   endif()
 
 endif()
@@ -1908,6 +1952,10 @@ if("ENG_LIBRARY" IN_LIST Matlab_FIND_COMPONENTS)
   )
   if(Matlab_ENG_LIBRARY)
     set(Matlab_ENG_LIBRARY_FOUND TRUE)
+    list(APPEND Matlab_LIBRARIES ${Matlab_ENG_LIBRARY})
+  endif()
+  if(MATLAB_FIND_DEBUG)
+    message(STATUS "[MATLAB] eng C library: ${Matlab_ENG_LIBRARY}")
   endif()
 endif()
 
@@ -1922,6 +1970,10 @@ if("MAT_LIBRARY" IN_LIST Matlab_FIND_COMPONENTS)
   )
   if(Matlab_MAT_LIBRARY)
     set(Matlab_MAT_LIBRARY_FOUND TRUE)
+    list(APPEND Matlab_LIBRARIES ${Matlab_MAT_LIBRARY})
+  endif()
+  if(MATLAB_FIND_DEBUG)
+    message(STATUS "[MATLAB] mat C library: ${Matlab_MAT_LIBRARY}")
   endif()
 endif()
 
@@ -1937,6 +1989,9 @@ if("SIMULINK" IN_LIST Matlab_FIND_COMPONENTS)
     set(Matlab_SIMULINK_FOUND TRUE)
     list(APPEND Matlab_INCLUDE_DIRS "${Matlab_SIMULINK_INCLUDE_DIR}")
   endif()
+  if(MATLAB_FIND_DEBUG)
+    message(STATUS "[MATLAB] Simulink include dir: ${Matlab_SIMULINK_INCLUDE_DIR}")
+  endif()
 endif()
 
 # component Matlab program
@@ -1950,6 +2005,9 @@ if("MAIN_PROGRAM" IN_LIST Matlab_FIND_COMPONENTS)
   )
   if(Matlab_MAIN_PROGRAM)
     set(Matlab_MAIN_PROGRAM_FOUND TRUE)
+  endif()
+  if(MATLAB_FIND_DEBUG)
+    message(STATUS "[MATLAB] Main program: ${Matlab_MAIN_PROGRAM}")
   endif()
 endif()
 
@@ -1965,6 +2023,9 @@ if("MEX_COMPILER" IN_LIST Matlab_FIND_COMPONENTS)
   if(Matlab_MEX_COMPILER)
     set(Matlab_MEX_COMPILER_FOUND TRUE)
   endif()
+  if(MATLAB_FIND_DEBUG)
+    message(STATUS "[MATLAB] MEX compiler: ${Matlab_MEX_COMPILER}")
+  endif()
 endif()
 
 # component MCC Compiler
@@ -1979,18 +2040,9 @@ if("MCC_COMPILER" IN_LIST Matlab_FIND_COMPONENTS)
   if(Matlab_MCC_COMPILER)
     set(Matlab_MCC_COMPILER_FOUND TRUE)
   endif()
-endif()
-
-set(Matlab_LIBRARIES
-  ${Matlab_MEX_LIBRARY} ${Matlab_MX_LIBRARY}
-  ${Matlab_ENG_LIBRARY} ${Matlab_MAT_LIBRARY})
-
-if(Matlab_ENGINE_LIBRARY)
-  list(APPEND Matlab_LIBRARIES ${Matlab_ENGINE_LIBRARY})
-endif()
-
-if(Matlab_DATAARRAY_LIBRARY)
-  list(APPEND Matlab_LIBRARIES ${Matlab_DATAARRAY_LIBRARY})
+  if(MATLAB_FIND_DEBUG)
+    message(STATUS "[MATLAB] MCC compiler: ${Matlab_MCC_COMPILER}")
+  endif()
 endif()
 
 # internal
