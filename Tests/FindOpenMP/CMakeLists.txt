@@ -19,3 +19,6 @@ add_test(NAME FindOpenMP.Test COMMAND
   -DOpenMP_TEST_Fortran=${CMake_TEST_FindOpenMP_FLAG_Fortran}
   --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
   )
+if(CMake_TEST_FindOpenMP_FLAG_Fortran)
+  set_property(TEST FindOpenMP.Test APPEND PROPERTY LABELS "Fortran")
+endif()
