@@ -153,11 +153,13 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
     set(OMP_FLAG_Fujitsu "-Kopenmp" "-KOMP")
     set(OMP_FLAG_FujitsuClang "-fopenmp" "-Kopenmp")
 
+    set(compiler_id "${CMAKE_${LANG}_COMPILER_ID}")
+
     # If we know the correct flags, use those
-    if(DEFINED OMP_FLAG_${CMAKE_${LANG}_COMPILER_ID})
-      set(OpenMP_FLAG_CANDIDATES "${OMP_FLAG_${CMAKE_${LANG}_COMPILER_ID}}")
-    # Fall back to reasonable default tries otherwise
+    if(DEFINED OMP_FLAG_${compiler_id})
+      set(OpenMP_FLAG_CANDIDATES "${OMP_FLAG_${compiler_id}}")
     else()
+      # Fall back to reasonable default tries otherwise
       set(OpenMP_FLAG_CANDIDATES "-openmp" "-fopenmp" "-mp" " ")
     endif()
     set(OpenMP_${LANG}_FLAG_CANDIDATES "${OpenMP_FLAG_CANDIDATES}" PARENT_SCOPE)
