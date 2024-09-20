@@ -58,7 +58,7 @@ signatures that specify them.  The common options are:
   ``<dir>`` should be a relative path.  An absolute path is allowed,
   but not recommended.
 
-  When a relative path is given it is interpreted relative to the value
+  When a relative path is given, it is interpreted relative to the value
   of the :variable:`CMAKE_INSTALL_PREFIX` variable.
   The prefix can be relocated at install time using the ``DESTDIR``
   mechanism explained in the :variable:`CMAKE_INSTALL_PREFIX` variable
@@ -74,6 +74,11 @@ signatures that specify them.  The common options are:
 
   If an absolute path (with a leading slash or drive letter) is given
   it is used verbatim.
+
+  .. versionchanged:: 3.31
+    ``<dir>`` will be normalized according to the same
+    :ref:`normalization rules <Normalization>` as the
+    :command:`cmake_path` command.
 
 ``PERMISSIONS <permission>...``
   Specify permissions for installed files.  Valid permissions are
@@ -395,6 +400,12 @@ Signatures
     ``<targets>`` when exported by the :command:`install(EXPORT)` command.
     If a relative path is specified, it is treated as relative to the
     :genex:`$<INSTALL_PREFIX>`.
+
+    Unlike other ``DESTINATION`` arguments for the various ``install()``
+    subcommands, paths given after ``INCLUDES DESTINATION`` are used as
+    given.  They are not normalized, nor assumed to be normalized, although
+    it is recommended that they are given in normalized form (see
+    :ref:`Normalization`).
 
   ``RUNTIME_DEPENDENCY_SET <set-name>``
     .. versionadded:: 3.21
@@ -815,6 +826,7 @@ Signatures
   the generated file will be called ``<export-name>.cmake`` but the ``FILE``
   option may be used to specify a different name.  The value given to
   the ``FILE`` option must be a file name with the ``.cmake`` extension.
+
   If a ``CONFIGURATIONS`` option is given then the file will only be installed
   when one of the named configurations is installed.  Additionally, the
   generated import file will reference only the matching target
