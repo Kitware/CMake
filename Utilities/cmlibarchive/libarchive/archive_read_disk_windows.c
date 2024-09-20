@@ -25,7 +25,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "archive_platform.h"
-__FBSDID("$FreeBSD$");
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 
@@ -1956,6 +1955,8 @@ tree_dir_next_windows(struct tree *t, const wchar_t *pattern)
 				t->visit_type = r != 0 ? r : TREE_ERROR_DIR;
 				return (t->visit_type);
 			}
+			/* Top stack item needs a regular visit. */
+			t->current = t->stack;
 			t->findData = &t->_findData;
 			pattern = NULL;
 		} else if (!FindNextFileW(t->d, &t->_findData)) {
@@ -2439,6 +2440,7 @@ archive_read_disk_entry_from_file(struct archive *_a,
 		return (ARCHIVE_OK);
 	}
 
+	r = ARCHIVE_OK;
 	if ((a->flags & ARCHIVE_READDISK_NO_SPARSE) == 0) {
 		r = setup_sparse_from_disk(a, entry, h);
 		if (fd < 0)

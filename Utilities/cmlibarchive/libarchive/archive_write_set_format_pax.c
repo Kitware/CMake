@@ -26,7 +26,6 @@
  */
 
 #include "archive_platform.h"
-__FBSDID("$FreeBSD: head/lib/libarchive/archive_write_set_format_pax.c 201162 2009-12-29 05:47:46Z kientzle $");
 
 #ifdef HAVE_ERRNO_H
 #include <errno.h>
@@ -609,7 +608,15 @@ archive_write_pax_header(struct archive_write *a,
 	const time_t ustar_max_mtime = get_ustar_max_mtime();
 
 	/* Sanity check. */
+#if defined(_WIN32) && !defined(__CYGWIN__)
+	/* NOTE: If the caller supplied a pathname that fails WCS conversion (e.g.
+	 * if it is invalid UTF-8), we are expected to return ARCHIVE_WARN later on
+	 * in execution, hence the check for both pointers */
+	if ((archive_entry_pathname_w(entry_original) == NULL) &&
+	    (archive_entry_pathname(entry_original) == NULL)) {
+#else
 	if (archive_entry_pathname(entry_original) == NULL) {
+#endif
 		archive_set_error(&a->archive, ARCHIVE_ERRNO_MISC,
 			  "Can't record entry in tar file without pathname");
 		return (ARCHIVE_FAILED);
@@ -1032,6 +1039,14 @@ archive_write_pax_header(struct archive_write *a,
 				else
 					archive_entry_set_symlink(entry_main,
 					    "././@LongSymLink");
+			}
+			else {
+				/* Otherwise, has non-ASCII characters; update the paths to
+				 * however they got decoded above */
+				if (hardlink != NULL) 
+					archive_entry_set_hardlink(entry_main, linkpath);
+				else
+					archive_entry_set_symlink(entry_main, linkpath);
 			}
 			need_extension = 1;
 		}
