@@ -404,6 +404,7 @@ function(_cpack_nuget_convert_tfm_to_frameworkname TFM OUTPUT_VAR_NAME)
     # 2. netstandard13  -> .NETStandard1.3
     # 3. netcoreapp21   -> .NETCoreApp2.1
     # 4. dotnet50       -> .NETPlatform5.0
+    # 5. native0.0      -> native0.0         Support for native C++ and mixed C++/CLI projects
     if(TFM MATCHES "^net([1-4](.[\.0-9])?)$") # CMAKE_MATCH_1 holds the version part
         _cpack_nuget_get_dotted_version("${CMAKE_MATCH_1}" dotted_version)
         set(framework_name ".NETFramework${dotted_version}")
@@ -418,6 +419,8 @@ function(_cpack_nuget_convert_tfm_to_frameworkname TFM OUTPUT_VAR_NAME)
     elseif(TFM MATCHES "^dotnet([0-9]+(\.[0-9]+)*)$")
         _cpack_nuget_get_dotted_version("${CMAKE_MATCH_1}" dotted_version)
         set(framework_name ".NETPlatform${dotted_version}")
+    elseif(TFM STREQUAL "native0.0")
+        set(framework_name "${TFM}")
     else()
         message(FATAL_ERROR "Target Framework Moniker '${TFM}' not recognized")
     endif()
