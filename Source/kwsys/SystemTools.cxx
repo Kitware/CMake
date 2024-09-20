@@ -2597,8 +2597,12 @@ SystemTools::CopyStatus SystemTools::CloneFileContent(
 
   // NOTE: we cannot use `clonefile` as the {a,c,m}time for the file needs to
   // be updated by `copy_file_if_different` and `copy_file`.
+  // These flags are meant to be COPYFILE_METADATA | COPYFILE_CLONE, but CLONE
+  // forces COPYFILE_NOFOLLOW_SRC and that violates the invariant that this
+  // should result in a file.
   if (copyfile(source.c_str(), destination.c_str(), nullptr,
-               COPYFILE_METADATA | COPYFILE_CLONE) < 0) {
+               COPYFILE_METADATA | COPYFILE_EXCL | COPYFILE_STAT |
+                 COPYFILE_XATTR | COPYFILE_DATA) < 0) {
     return CopyStatus{ Status::POSIX_errno(), CopyStatus::NoPath };
   }
 #  if KWSYS_CXX_HAS_UTIMENSAT
