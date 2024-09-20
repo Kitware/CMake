@@ -41,7 +41,11 @@ Cache variables
 The following cache variables may also be set:
 
 ``BZIP2_INCLUDE_DIR``
-  the BZip2 include directory
+  the directory containing the BZip2 headers
+``BZIP2_LIBRARY_RELEASE``
+  the path to the BZip2 library for release configurations
+``BZIP2_LIBRARY_DEBUG``
+  the path to the BZip2 library for debug configurations
 
 Legacy Variables
 ^^^^^^^^^^^^^^^^
