@@ -811,6 +811,10 @@ Transfer
       environment variable will be used instead.
       See :variable:`CMAKE_TLS_VERSION` for allowed values.
 
+      .. versionchanged:: 3.31
+        The default is TLS 1.2.
+        Previously, no minimum version was enforced by default.
+
     ``TLS_VERIFY <ON|OFF>``
       Specify whether to verify the server certificate for ``https://`` URLs.
       If this option is not specified, the value of the
