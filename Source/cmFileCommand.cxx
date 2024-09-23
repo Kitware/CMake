@@ -1932,8 +1932,8 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   long inactivity_timeout = 0;
   std::string logVar;
   std::string statusVar;
-  cm::optional<std::string> tls_version;
-  cm::optional<bool> tls_verify;
+  cm::optional<std::string> tlsVersionOpt;
+  cm::optional<bool> tlsVerifyOpt;
   cmValue cainfo = status.GetMakefile().GetDefinition("CMAKE_TLS_CAINFO");
   std::string netrc_level =
     status.GetMakefile().GetSafeDefinition("CMAKE_NETRC");
@@ -1982,7 +1982,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     } else if (*i == "TLS_VERSION") {
       ++i;
       if (i != args.end()) {
-        tls_version = *i;
+        tlsVersionOpt = *i;
       } else {
         status.SetError("DOWNLOAD missing value for TLS_VERSION.");
         return false;
@@ -1990,7 +1990,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     } else if (*i == "TLS_VERIFY") {
       ++i;
       if (i != args.end()) {
-        tls_verify = cmIsOn(*i);
+        tlsVerifyOpt = cmIsOn(*i);
       } else {
         status.SetError("DOWNLOAD missing bool value for TLS_VERIFY.");
         return false;
@@ -2098,27 +2098,27 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     ++i;
   }
 
-  if (!tls_verify) {
+  if (!tlsVerifyOpt.has_value()) {
     if (cmValue v = status.GetMakefile().GetDefinition("CMAKE_TLS_VERIFY")) {
-      tls_verify = v.IsOn();
+      tlsVerifyOpt = v.IsOn();
     }
   }
-  if (!tls_verify) {
+  if (!tlsVerifyOpt.has_value()) {
     if (cm::optional<std::string> v =
           cmSystemTools::GetEnvVar("CMAKE_TLS_VERIFY")) {
-      tls_verify = cmIsOn(*v);
+      tlsVerifyOpt = cmIsOn(*v);
     }
   }
 
-  if (!tls_version) {
+  if (!tlsVersionOpt.has_value()) {
     if (cmValue v = status.GetMakefile().GetDefinition("CMAKE_TLS_VERSION")) {
-      tls_version = *v;
+      tlsVersionOpt = *v;
     }
   }
-  if (!tls_version) {
+  if (!tlsVersionOpt.has_value()) {
     if (cm::optional<std::string> v =
           cmSystemTools::GetEnvVar("CMAKE_TLS_VERSION")) {
-      tls_version = std::move(v);
+      tlsVersionOpt = std::move(v);
     }
   }
 
@@ -2202,21 +2202,21 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
                            cmFileCommandCurlDebugCallback);
   check_curl_result(res, "DOWNLOAD cannot set debug function: ");
 
-  if (tls_version) {
-    if (cm::optional<int> v = cmCurlParseTLSVersion(*tls_version)) {
+  if (tlsVersionOpt.has_value()) {
+    if (cm::optional<int> v = cmCurlParseTLSVersion(*tlsVersionOpt)) {
       res = ::curl_easy_setopt(curl, CURLOPT_SSLVERSION, *v);
-      check_curl_result(
-        res,
-        cmStrCat("DOWNLOAD cannot set TLS/SSL version ", *tls_version, ": "));
+      check_curl_result(res,
+                        cmStrCat("DOWNLOAD cannot set TLS/SSL version ",
+                                 *tlsVersionOpt, ": "));
     } else {
       status.SetError(
-        cmStrCat("DOWNLOAD given unknown TLS/SSL version ", *tls_version));
+        cmStrCat("DOWNLOAD given unknown TLS/SSL version ", *tlsVersionOpt));
       return false;
     }
   }
 
   // check to see if TLS verification is requested
-  if (tls_verify && *tls_verify) {
+  if (tlsVerifyOpt.has_value() && tlsVerifyOpt.value()) {
     res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
     check_curl_result(res, "DOWNLOAD cannot set TLS/SSL Verify on: ");
   } else {
@@ -2404,8 +2404,8 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
   std::string logVar;
   std::string statusVar;
   bool showProgress = false;
-  cm::optional<std::string> tls_version;
-  cm::optional<bool> tls_verify;
+  cm::optional<std::string> tlsVersionOpt;
+  cm::optional<bool> tlsVerifyOpt;
   cmValue cainfo = status.GetMakefile().GetDefinition("CMAKE_TLS_CAINFO");
   std::string userpwd;
   std::string netrc_level =
@@ -2451,7 +2451,7 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
     } else if (*i == "TLS_VERSION") {
       ++i;
       if (i != args.end()) {
-        tls_version = *i;
+        tlsVersionOpt = *i;
       } else {
         status.SetError("UPLOAD missing value for TLS_VERSION.");
         return false;
@@ -2459,7 +2459,7 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
     } else if (*i == "TLS_VERIFY") {
       ++i;
       if (i != args.end()) {
-        tls_verify = cmIsOn(*i);
+        tlsVerifyOpt = cmIsOn(*i);
       } else {
         status.SetError("UPLOAD missing bool value for TLS_VERIFY.");
         return false;
@@ -2511,27 +2511,27 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
     ++i;
   }
 
-  if (!tls_verify) {
+  if (!tlsVerifyOpt.has_value()) {
     if (cmValue v = status.GetMakefile().GetDefinition("CMAKE_TLS_VERIFY")) {
-      tls_verify = v.IsOn();
+      tlsVerifyOpt = v.IsOn();
     }
   }
-  if (!tls_verify) {
+  if (!tlsVerifyOpt.has_value()) {
     if (cm::optional<std::string> v =
           cmSystemTools::GetEnvVar("CMAKE_TLS_VERIFY")) {
-      tls_verify = cmIsOn(*v);
+      tlsVerifyOpt = cmIsOn(*v);
     }
   }
 
-  if (!tls_version) {
+  if (!tlsVersionOpt.has_value()) {
     if (cmValue v = status.GetMakefile().GetDefinition("CMAKE_TLS_VERSION")) {
-      tls_version = *v;
+      tlsVersionOpt = *v;
     }
   }
-  if (!tls_version) {
+  if (!tlsVersionOpt.has_value()) {
     if (cm::optional<std::string> v =
           cmSystemTools::GetEnvVar("CMAKE_TLS_VERSION")) {
-      tls_version = std::move(v);
+      tlsVersionOpt = std::move(v);
     }
   }
 
@@ -2580,21 +2580,21 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
                            cmFileCommandCurlDebugCallback);
   check_curl_result(res, "UPLOAD cannot set debug function: ");
 
-  if (tls_version) {
-    if (cm::optional<int> v = cmCurlParseTLSVersion(*tls_version)) {
+  if (tlsVersionOpt.has_value()) {
+    if (cm::optional<int> v = cmCurlParseTLSVersion(*tlsVersionOpt)) {
       res = ::curl_easy_setopt(curl, CURLOPT_SSLVERSION, *v);
       check_curl_result(
         res,
-        cmStrCat("UPLOAD cannot set TLS/SSL version ", *tls_version, ": "));
+        cmStrCat("UPLOAD cannot set TLS/SSL version ", *tlsVersionOpt, ": "));
     } else {
       status.SetError(
-        cmStrCat("UPLOAD given unknown TLS/SSL version ", *tls_version));
+        cmStrCat("UPLOAD given unknown TLS/SSL version ", *tlsVersionOpt));
       return false;
     }
   }
 
   // check to see if TLS verification is requested
-  if (tls_verify && *tls_verify) {
+  if (tlsVerifyOpt.has_value() && tlsVerifyOpt.value()) {
     res = ::curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 1);
     check_curl_result(res, "UPLOAD cannot set TLS/SSL Verify on: ");
   } else {
