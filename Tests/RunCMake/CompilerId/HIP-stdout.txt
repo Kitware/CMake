@@ -1,0 +1,11 @@
+(-- CMAKE_HIP_COMPILER='[^']+'
+-- CMAKE_HIP_COMPILER_ID='NVIDIA'
+-- CMAKE_HIP_COMPILER_VERSION='([0-9]+)(\.([0-9]+))?(\.([0-9]+))?(\.([0-9]+))?'
+-- CMAKE_HIP_HOST_COMPILER_ID='[A-Za-z]+'
+-- CMAKE_HIP_HOST_COMPILER_VERSION='([0-9]+)(\.([0-9]+))?(\.([0-9]+))?(\.([0-9]+))?'
+|-- CMAKE_HIP_COMPILER='[^']+'
+-- CMAKE_HIP_COMPILER_ID='([^N]|N[^V]|NV[^I]|NVI[^D]|NVID[^I]|NVIDI[^A])[A-Za-z]*'
+-- CMAKE_HIP_COMPILER_VERSION='([0-9]+)(\.([0-9]+))?(\.([0-9]+))?(\.([0-9]+))?'
+-- CMAKE_HIP_HOST_COMPILER_ID=''
+-- CMAKE_HIP_HOST_COMPILER_VERSION=''
+)

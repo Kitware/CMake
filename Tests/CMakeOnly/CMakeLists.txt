@@ -35,27 +35,9 @@ endif()
 
 add_CMakeOnly_test(CheckStructHasMember)
 
-add_CMakeOnly_test(CompilerIdC)
-add_CMakeOnly_test(CompilerIdCXX)
-
 if (APPLE AND CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
-  add_CMakeOnly_test(CompilerIdOBJC)
   add_CMakeOnly_test(CheckOBJCCompilerFlag)
-  add_CMakeOnly_test(CompilerIdOBJCXX)
   add_CMakeOnly_test(CheckOBJCXXCompilerFlag)
-endif()
-
-if(CMake_TEST_CUDA)
-  add_CMakeOnly_test(CompilerIdCUDA)
-endif()
-
-
-if(CMAKE_Fortran_COMPILER)
-  add_CMakeOnly_test(CompilerIdFortran)
-  set_property(TEST CMakeOnly.CompilerIdFortran APPEND PROPERTY LABELS "Fortran")
-endif()
-if(CMAKE_GENERATOR MATCHES "Visual Studio")
-  add_CMakeOnly_test(CompilerIdCSharp)
 endif()
 
 add_test(CMakeOnly.AllFindModules ${CMAKE_CMAKE_COMMAND}

@@ -1,0 +1,3 @@
+-- CMAKE_Fortran_COMPILER='[^']+'
+-- CMAKE_Fortran_COMPILER_ID='[A-Za-z]+'
+-- CMAKE_Fortran_COMPILER_VERSION='([0-9]+)(\.([0-9]+))?(\.([0-9]+))?(\.([0-9]+))?'
