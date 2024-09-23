@@ -16,6 +16,7 @@
 
 namespace {
 const bool TLS_VERIFY_DEFAULT = true;
+const int TLS_VERSION_DEFAULT = CURL_SSLVERSION_TLSv1_2;
 }
 
 cmCTestCurl::cmCTestCurl(cmCTest* ctest)
@@ -65,6 +66,9 @@ cmCTestCurlOpts::cmCTestCurlOpts(cmCTest* ctest)
 {
   this->TLSVersionOpt =
     cmCurlParseTLSVersion(ctest->GetCTestConfiguration("TLSVersion"));
+  if (!this->TLSVersionOpt.has_value()) {
+    this->TLSVersionOpt = TLS_VERSION_DEFAULT;
+  }
 
   std::string tlsVerify = ctest->GetCTestConfiguration("TLSVerify");
   if (!tlsVerify.empty()) {
