@@ -8,6 +8,8 @@
 #include <limits>
 #include <utility>
 
+#include <cmext/string_view>
+
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmExecutionStatus.h"
@@ -56,17 +58,21 @@ bool cmProjectCommand(std::vector<std::string> const& args,
 
   mf.SetProjectName(projectName);
 
-  mf.AddCacheDefinition(projectName + "_BINARY_DIR",
-                        mf.GetCurrentBinaryDirectory(),
+  std::string varName = cmStrCat(projectName, "_BINARY_DIR"_s);
+  bool nonCacheVarAlreadySet = mf.IsDefinitionSet(varName);
+  mf.AddCacheDefinition(varName, mf.GetCurrentBinaryDirectory(),
                         "Value Computed by CMake", cmStateEnums::STATIC);
-  mf.AddDefinition(projectName + "_BINARY_DIR",
-                   mf.GetCurrentBinaryDirectory());
+  if (nonCacheVarAlreadySet) {
+    mf.AddDefinition(varName, mf.GetCurrentBinaryDirectory());
+  }
 
-  mf.AddCacheDefinition(projectName + "_SOURCE_DIR",
-                        mf.GetCurrentSourceDirectory(),
+  varName = cmStrCat(projectName, "_SOURCE_DIR"_s);
+  nonCacheVarAlreadySet = mf.IsDefinitionSet(varName);
+  mf.AddCacheDefinition(varName, mf.GetCurrentSourceDirectory(),
                         "Value Computed by CMake", cmStateEnums::STATIC);
-  mf.AddDefinition(projectName + "_SOURCE_DIR",
-                   mf.GetCurrentSourceDirectory());
+  if (nonCacheVarAlreadySet) {
+    mf.AddDefinition(varName, mf.GetCurrentSourceDirectory());
+  }
 
   mf.AddDefinition("PROJECT_BINARY_DIR", mf.GetCurrentBinaryDirectory());
   mf.AddDefinition("PROJECT_SOURCE_DIR", mf.GetCurrentSourceDirectory());
@@ -74,11 +80,14 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   mf.AddDefinition("PROJECT_NAME", projectName);
 
   mf.AddDefinitionBool("PROJECT_IS_TOP_LEVEL", mf.IsRootMakefile());
-  mf.AddCacheDefinition(projectName + "_IS_TOP_LEVEL",
-                        mf.IsRootMakefile() ? "ON" : "OFF",
+
+  varName = cmStrCat(projectName, "_IS_TOP_LEVEL"_s);
+  nonCacheVarAlreadySet = mf.IsDefinitionSet(varName);
+  mf.AddCacheDefinition(varName, mf.IsRootMakefile() ? "ON" : "OFF",
                         "Value Computed by CMake", cmStateEnums::STATIC);
-  mf.AddDefinition(projectName + "_IS_TOP_LEVEL",
-                   mf.IsRootMakefile() ? "ON" : "OFF");
+  if (nonCacheVarAlreadySet) {
+    mf.AddDefinition(varName, mf.IsRootMakefile() ? "ON" : "OFF");
+  }
 
   // Set the CMAKE_PROJECT_NAME variable to be the highest-level
   // project name in the tree. If there are two project commands
