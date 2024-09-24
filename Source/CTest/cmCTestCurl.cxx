@@ -14,6 +14,10 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
+namespace {
+const bool TLS_VERIFY_DEFAULT = true;
+}
+
 cmCTestCurl::cmCTestCurl(cmCTest* ctest)
   : CTest(ctest)
   , CurlOpts(ctest)
@@ -76,6 +80,9 @@ cmCTestCurlOpts::cmCTestCurlOpts(cmCTest* ctest)
       }
     }
   }
+  if (!this->TLSVerifyOpt.has_value()) {
+    this->TLSVerifyOpt = TLS_VERIFY_DEFAULT;
+  }
 }
 
 bool cmCTestCurl::InitCurl()
@@ -84,11 +91,11 @@ bool cmCTestCurl::InitCurl()
     return false;
   }
   cmCurlSetCAInfo(this->Curl);
-  if (this->CurlOpts.TLSVersionOpt) {
+  if (this->CurlOpts.TLSVersionOpt.has_value()) {
     curl_easy_setopt(this->Curl, CURLOPT_SSLVERSION,
                      *this->CurlOpts.TLSVersionOpt);
   }
-  if (this->CurlOpts.TLSVerifyOpt) {
+  if (this->CurlOpts.TLSVerifyOpt.has_value()) {
     curl_easy_setopt(this->Curl, CURLOPT_SSL_VERIFYPEER,
                      *this->CurlOpts.TLSVerifyOpt ? 1 : 0);
   }

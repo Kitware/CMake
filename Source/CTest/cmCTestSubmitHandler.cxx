@@ -181,7 +181,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
     curl = cm_curl_easy_init();
     if (curl) {
       cmCurlSetCAInfo(curl);
-      if (curlOpts.TLSVersionOpt) {
+      if (curlOpts.TLSVersionOpt.has_value()) {
         cm::optional<std::string> tlsVersionStr =
           cmCurlPrintTLSVersion(*curlOpts.TLSVersionOpt);
         cmCTestOptionalLog(
@@ -191,7 +191,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
           this->Quiet);
         curl_easy_setopt(curl, CURLOPT_SSLVERSION, *curlOpts.TLSVersionOpt);
       }
-      if (curlOpts.TLSVerifyOpt) {
+      if (curlOpts.TLSVerifyOpt.has_value()) {
         cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                            "  Set CURLOPT_SSL_VERIFYPEER to "
                              << (*curlOpts.TLSVerifyOpt ? "on" : "off")
