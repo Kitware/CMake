@@ -100,6 +100,7 @@ set(CMake_TEST_Qt5 "ON" CACHE BOOL "")
 set(CMake_TEST_TLS_VERIFY_URL "https://gitlab.kitware.com" CACHE STRING "")
 set(CMake_TEST_TLS_VERIFY_URL_BAD "https://badtls-expired.kitware.com" CACHE STRING "")
 set(CMake_TEST_TLS_VERSION "1.3" CACHE STRING "")
+set(CMake_TEST_TLS_VERSION_URL_BAD "https://tls-v1-1.badssl.com:1011" CACHE STRING "")
 set(CMake_TEST_UseSWIG "ON" CACHE BOOL "")
 
 include("${CMAKE_CURRENT_LIST_DIR}/configure_external_test.cmake")
