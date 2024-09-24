@@ -1433,6 +1433,7 @@ void cmCTest::StartXML(cmXMLWriter& xml, bool append)
   xml.Attribute("VendorID", info.GetVendorID());
   xml.Attribute("FamilyID", info.GetFamilyID());
   xml.Attribute("ModelID", info.GetModelID());
+  xml.Attribute("ModelName", info.GetModelName());
   xml.Attribute("ProcessorCacheSize", info.GetProcessorCacheSize());
   xml.Attribute("NumberOfLogicalCPU", info.GetNumberOfLogicalCPU());
   xml.Attribute("NumberOfPhysicalCPU", info.GetNumberOfPhysicalCPU());
