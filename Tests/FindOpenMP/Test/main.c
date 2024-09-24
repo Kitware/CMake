@@ -1,7 +1,10 @@
 #include <omp.h>
 int main(void)
 {
-#ifndef _OPENMP
-  breaks_on_purpose
+#ifdef _OPENMP
+  omp_get_num_threads();
+#else
+#  error "_OPENMP not defined!"
 #endif
+  return 0;
 }
