@@ -396,7 +396,7 @@
 
 .cuda12.2:
     extends: .cuda
-    image: "kitware/cmake:ci-cuda12.2-x86_64-2024-04-05"
+    image: "kitware/cmake:ci-cuda12.2-x86_64-2024-09-25"
     variables:
         CMAKE_ARCH: x86_64
 
