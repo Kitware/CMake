@@ -599,6 +599,7 @@ foreach(var
     CMake_TEST_TLS_VERIFY_URL
     CMake_TEST_TLS_VERIFY_URL_BAD
     CMake_TEST_TLS_VERSION
+    CMake_TEST_TLS_VERSION_URL_BAD
     )
   if(DEFINED ${var})
     list(APPEND file-DOWNLOAD_ARGS -D${var}=${${var}})
