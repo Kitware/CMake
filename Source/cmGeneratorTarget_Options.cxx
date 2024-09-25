@@ -7,6 +7,7 @@
 #include "cmConfigure.h"
 
 #include <algorithm>
+#include <iterator>
 #include <map>
 #include <memory>
 #include <string>
@@ -91,10 +92,16 @@ void processOptions(cmGeneratorTarget const* tgt,
   }
 }
 
+enum class NestedLinkerFlags
+{
+  PreserveAsSpelled,
+  Normalize,
+};
+
 std::vector<BT<std::string>> wrapOptions(
   std::vector<std::string>& options, const cmListFileBacktrace& bt,
   const std::vector<std::string>& wrapperFlag, const std::string& wrapperSep,
-  bool concatFlagAndArgs)
+  bool concatFlagAndArgs, NestedLinkerFlags nestedLinkerFlags)
 {
   std::vector<BT<std::string>> result;
 
@@ -108,6 +115,48 @@ std::vector<BT<std::string>> wrapOptions(
     for (std::string& o : options) {
       result.emplace_back(std::move(o), bt);
     }
+    return result;
+  }
+
+  auto insertWrapped = [&](std::vector<std::string>& opts) {
+    if (!wrapperSep.empty()) {
+      if (concatFlagAndArgs) {
+        // insert flag elements except last one
+        for (auto i = wrapperFlag.begin(); i != wrapperFlag.end() - 1; ++i) {
+          result.emplace_back(*i, bt);
+        }
+        // concatenate last flag element and all list values
+        // in one option
+        result.emplace_back(wrapperFlag.back() + cmJoin(opts, wrapperSep), bt);
+      } else {
+        for (std::string const& i : wrapperFlag) {
+          result.emplace_back(i, bt);
+        }
+        // concatenate all list values in one option
+        result.emplace_back(cmJoin(opts, wrapperSep), bt);
+      }
+    } else {
+      // prefix each element of list with wrapper
+      if (concatFlagAndArgs) {
+        std::transform(opts.begin(), opts.end(), opts.begin(),
+                       [&wrapperFlag](std::string const& o) -> std::string {
+                         return wrapperFlag.back() + o;
+                       });
+      }
+      for (std::string& o : opts) {
+        for (auto i = wrapperFlag.begin(),
+                  e = concatFlagAndArgs ? wrapperFlag.end() - 1
+                                        : wrapperFlag.end();
+             i != e; ++i) {
+          result.emplace_back(*i, bt);
+        }
+        result.emplace_back(std::move(o), bt);
+      }
+    }
+  };
+
+  if (nestedLinkerFlags == NestedLinkerFlags::PreserveAsSpelled) {
+    insertWrapped(options);
     return result;
   }
 
@@ -154,40 +203,7 @@ std::vector<BT<std::string>> wrapOptions(
       continue;
     }
 
-    if (!wrapperSep.empty()) {
-      if (concatFlagAndArgs) {
-        // insert flag elements except last one
-        for (auto i = wrapperFlag.begin(); i != wrapperFlag.end() - 1; ++i) {
-          result.emplace_back(*i, bt);
-        }
-        // concatenate last flag element and all list values
-        // in one option
-        result.emplace_back(wrapperFlag.back() + cmJoin(opts, wrapperSep), bt);
-      } else {
-        for (std::string const& i : wrapperFlag) {
-          result.emplace_back(i, bt);
-        }
-        // concatenate all list values in one option
-        result.emplace_back(cmJoin(opts, wrapperSep), bt);
-      }
-    } else {
-      // prefix each element of list with wrapper
-      if (concatFlagAndArgs) {
-        std::transform(opts.begin(), opts.end(), opts.begin(),
-                       [&wrapperFlag](std::string const& o) -> std::string {
-                         return wrapperFlag.back() + o;
-                       });
-      }
-      for (std::string& o : opts) {
-        for (auto i = wrapperFlag.begin(),
-                  e = concatFlagAndArgs ? wrapperFlag.end() - 1
-                                        : wrapperFlag.end();
-             i != e; ++i) {
-          result.emplace_back(*i, bt);
-        }
-        result.emplace_back(std::move(o), bt);
-      }
-    }
+    insertWrapped(opts);
   }
   return result;
 }
@@ -484,8 +500,9 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
         // host link options must be wrapped
         std::vector<std::string> options;
         cmSystemTools::ParseUnixCommandLine(it->Value.c_str(), options);
-        auto hostOptions = wrapOptions(options, it->Backtrace, wrapperFlag,
-                                       wrapperSep, concatFlagAndArgs);
+        auto hostOptions =
+          wrapOptions(options, it->Backtrace, wrapperFlag, wrapperSep,
+                      concatFlagAndArgs, NestedLinkerFlags::Normalize);
         it = result.erase(it);
         // some compilers (like gcc 4.8 or Intel 19.0 or XLC 16) do not respect
         // C++11 standard: 'std::vector::insert()' do not returns an iterator,
@@ -534,12 +551,11 @@ std::vector<BT<std::string>>& cmGeneratorTarget::ResolveLinkerWrapper(
   const std::string SHELL{ "SHELL:" };
   const std::string LINKER_SHELL = LINKER + SHELL;
 
-  std::vector<BT<std::string>>::iterator entry;
-  while ((entry = std::find_if(result.begin(), result.end(),
-                               [&LINKER](BT<std::string> const& item) -> bool {
-                                 return item.Value.compare(0, LINKER.length(),
-                                                           LINKER) == 0;
-                               })) != result.end()) {
+  for (auto entry = result.begin(); entry != result.end(); ++entry) {
+    if (entry->Value.compare(0, LINKER.length(), LINKER) != 0) {
+      continue;
+    }
+
     std::string value = std::move(entry->Value);
     cmListFileBacktrace bt = std::move(entry->Backtrace);
     entry = result.erase(entry);
@@ -569,15 +585,19 @@ std::vector<BT<std::string>>& cmGeneratorTarget::ResolveLinkerWrapper(
       return result;
     }
 
-    std::vector<BT<std::string>> options = wrapOptions(
-      linkerOptions, bt, wrapperFlag, wrapperSep, concatFlagAndArgs);
+    // Very old versions of the C++ standard library return void for insert, so
+    // can't use it to get the new iterator
+    const auto index = entry - result.begin();
+    std::vector<BT<std::string>> options =
+      wrapOptions(linkerOptions, bt, wrapperFlag, wrapperSep,
+                  concatFlagAndArgs, NestedLinkerFlags::PreserveAsSpelled);
     if (joinItems) {
-      result.insert(entry,
-                    cmJoin(cmRange<decltype(options.cbegin())>(
-                             options.cbegin(), options.cend()),
-                           " "_s));
+      result.insert(
+        entry, cmJoin(cmMakeRange(options.begin(), options.end()), " "_s));
+      entry = std::next(result.begin(), index);
     } else {
       result.insert(entry, options.begin(), options.end());
+      entry = std::next(result.begin(), index + options.size() - 1);
     }
   }
   return result;
