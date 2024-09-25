@@ -6,6 +6,7 @@ run_cmake(VsDotnetSdkDefines)
 run_cmake(DotnetSdkVariables)
 run_cmake(VsDotnetSdkXamlFiles)
 run_cmake(VsDotnetSdkAssemblyName)
+run_cmake(VsDotnetSdkConfigurations)
 
 function(run_VsDotnetSdk)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/VsDotnetSdk-build)
