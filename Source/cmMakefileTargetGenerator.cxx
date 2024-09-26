@@ -2206,13 +2206,14 @@ void cmMakefileTargetGenerator::CreateLinkLibs(
   bool useResponseFile, std::vector<std::string>& makefile_depends,
   std::string const& linkLanguage, ResponseFlagFor responseMode)
 {
-  std::string frameworkPath;
-  std::string linkPath;
-  cmComputeLinkInformation* pcli =
-    this->GeneratorTarget->GetLinkInformation(this->GetConfigName());
-  this->LocalGenerator->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
-                                            frameworkPath, linkPath);
-  linkLibs = frameworkPath + linkPath + linkLibs;
+  if (cmComputeLinkInformation* pcli =
+        this->GeneratorTarget->GetLinkInformation(this->GetConfigName())) {
+    std::string frameworkPath;
+    std::string linkPath;
+    this->LocalGenerator->OutputLinkLibraries(pcli, linkLineComputer, linkLibs,
+                                              frameworkPath, linkPath);
+    linkLibs = frameworkPath + linkPath + linkLibs;
+  }
 
   if (useResponseFile &&
       linkLibs.find_first_not_of(' ') != std::string::npos) {

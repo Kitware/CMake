@@ -13,17 +13,25 @@
 #include <utility>
 #include <vector>
 
-#include "cmComputeComponentGraph.h"
+#include <cm/optional>
+
 #include "cmGraphAdjacencyList.h"
 #include "cmLinkItem.h"
 #include "cmListFileCache.h"
 #include "cmTargetLinkLibraryType.h"
 
+class cmComputeComponentGraph;
 class cmGeneratorTarget;
 class cmGlobalGenerator;
 class cmMakefile;
 class cmSourceFile;
 class cmake;
+
+enum class LinkLibrariesStrategy
+{
+  PRESERVE_ORDER,
+  REORDER,
+};
 
 /** \class cmComputeLinkDepends
  * \brief Compute link dependencies for targets.
@@ -33,7 +41,8 @@ class cmComputeLinkDepends
 public:
   cmComputeLinkDepends(cmGeneratorTarget const* target,
                        const std::string& config,
-                       const std::string& linkLanguage);
+                       const std::string& linkLanguage,
+                       LinkLibrariesStrategy strategy);
   ~cmComputeLinkDepends();
 
   cmComputeLinkDepends(const cmComputeLinkDepends&) = delete;
@@ -84,12 +93,16 @@ public:
 
 private:
   // Context information.
-  cmGeneratorTarget const* Target;
-  cmMakefile* Makefile;
-  cmGlobalGenerator const* GlobalGenerator;
+  cmGeneratorTarget const* Target = nullptr;
+  cmMakefile* Makefile = nullptr;
+  cmGlobalGenerator const* GlobalGenerator = nullptr;
   cmake* CMakeInstance;
-  std::string LinkLanguage;
   std::string Config;
+  bool DebugMode = false;
+  std::string LinkLanguage;
+  cmTargetLinkLibraryType LinkType;
+  LinkLibrariesStrategy Strategy;
+
   EntryVector FinalLinkEntries;
   std::map<std::string, std::string> LinkLibraryOverride;
 
@@ -98,16 +111,18 @@ private:
 
   std::pair<std::map<cmLinkItem, size_t>::iterator, bool> AllocateLinkEntry(
     cmLinkItem const& item);
-  std::pair<size_t, bool> AddLinkEntry(
-    cmLinkItem const& item,
-    size_t groupIndex = cmComputeComponentGraph::INVALID_COMPONENT);
+  std::pair<size_t, bool> AddLinkEntry(cmLinkItem const& item,
+                                       cm::optional<size_t> const& groupIndex);
   void AddLinkObject(cmLinkItem const& item);
-  void AddVarLinkEntries(size_t depender_index, const char* value);
+  void AddVarLinkEntries(cm::optional<size_t> const& depender_index,
+                         const char* value);
   void AddDirectLinkEntries();
   template <typename T>
-  void AddLinkEntries(size_t depender_index, std::vector<T> const& libs);
+  void AddLinkEntries(cm::optional<size_t> const& depender_index,
+                      std::vector<T> const& libs);
   void AddLinkObjects(std::vector<cmLinkItem> const& objs);
-  cmLinkItem ResolveLinkItem(size_t depender_index, const std::string& name);
+  cmLinkItem ResolveLinkItem(cm::optional<size_t> const& depender_index,
+                             const std::string& name);
 
   // One entry for each unique item.
   std::vector<LinkEntry> EntryList;
@@ -120,7 +135,7 @@ private:
   struct BFSEntry
   {
     size_t Index;
-    size_t GroupIndex;
+    cm::optional<size_t> GroupIndex;
     const char* LibDepends;
   };
   std::queue<BFSEntry> BFSQueue;
@@ -192,6 +207,7 @@ private:
   void VisitEntry(size_t index);
   PendingComponent& MakePendingComponent(size_t component);
   size_t ComputeComponentCount(NodeList const& nl);
+  void DisplayOrderedEntries();
   void DisplayFinalEntries();
 
   // Record of the original link line.
@@ -203,8 +219,5 @@ private:
   std::vector<size_t> ObjectEntries;
 
   size_t ComponentOrderId;
-  cmTargetLinkLibraryType LinkType;
-  bool HasConfig;
-  bool DebugMode;
-  bool OldLinkDirMode;
+  bool OldLinkDirMode = false;
 };

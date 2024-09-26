@@ -1,0 +1,9 @@
+target \[main\] link dependency ordering:
+  item \[-Flag1\]
+  target \[A\]
+  target \[B\]
+  item \[-Flag2\]
+  target \[C\]
+  item \[-Flag3\]
+
+target \[main\] link line:

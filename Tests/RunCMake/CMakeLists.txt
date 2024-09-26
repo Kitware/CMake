@@ -839,6 +839,7 @@ if (CMAKE_SYSTEM_NAME MATCHES "(Linux|Darwin|Windows)"
 endif()
 
 add_RunCMake_test(LinkLibrariesProcessing)
+add_RunCMake_test(LinkLibrariesStrategy)
 add_RunCMake_test(File_Archive)
 add_RunCMake_test(File_Configure)
 add_RunCMake_test(File_Generate)

@@ -9,6 +9,7 @@
 
 #include <cm/memory>
 #include <cm/optional>
+#include <cm/string_view>
 #include <cmext/algorithm>
 #include <cmext/string_view>
 
@@ -567,8 +568,25 @@ bool cmComputeLinkInformation::Compute()
     return false;
   }
 
+  LinkLibrariesStrategy strategy = LinkLibrariesStrategy::PRESERVE_ORDER;
+  if (cmValue s = this->Target->GetProperty("LINK_LIBRARIES_STRATEGY")) {
+    if (*s == "PRESERVE_ORDER"_s) {
+      strategy = LinkLibrariesStrategy::PRESERVE_ORDER;
+    } else if (*s == "REORDER"_s) {
+      strategy = LinkLibrariesStrategy::REORDER;
+    } else {
+      this->CMakeInstance->IssueMessage(
+        MessageType::FATAL_ERROR,
+        cmStrCat("LINK_LIBRARIES_STRATEGY value '", *s,
+                 "' is not recognized."),
+        this->Target->GetBacktrace());
+      return false;
+    }
+  }
+
   // Compute the ordered link line items.
-  cmComputeLinkDepends cld(this->Target, this->Config, this->LinkLanguage);
+  cmComputeLinkDepends cld(this->Target, this->Config, this->LinkLanguage,
+                           strategy);
   cld.SetOldLinkDirMode(this->OldLinkDirMode);
   cmComputeLinkDepends::EntryVector const& linkEntries = cld.Compute();
   FeatureDescriptor const* currentFeature = nullptr;
