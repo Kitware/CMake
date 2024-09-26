@@ -914,6 +914,8 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
     Elem e1(e0, "PropertyGroup");
     this->WriteCommonPropertyGroupGlobals(e1);
 
+    e1.Element("Configurations", cmJoinStrings(this->Configurations, ";", ""));
+
     e1.Element("EnableDefaultItems", "false");
     // Disable the project upgrade prompt that is displayed the first time a
     // project using an older toolset version is opened in a newer version
