@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.17)
-project(SharedRuntimeViaCUDAFlags NONE)
-
-set(CMAKE_CUDA_FLAGS "")
-string(APPEND CMAKE_CUDA_FLAGS "-cudart shared")
-
-enable_language(CUDA)
+set(ENV{CUDAFLAGS} "$ENV{CUDAFLAGS} -cudart shared")
+project(SharedRuntimeViaCUDAFlags CUDA)
 
 add_executable(CudaOnlySharedRuntimeViaCUDAFlags main.cu)
 
