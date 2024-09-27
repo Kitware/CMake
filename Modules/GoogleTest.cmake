@@ -162,15 +162,15 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
 
   .. versionadded:: 3.10
 
-  ``gtest_discover_tests()`` sets up a post-build command on the test executable
-  that generates the list of tests by parsing the output from running the test
-  with the ``--gtest_list_tests`` argument.  Compared to the source parsing
-  approach of :command:`gtest_add_tests`, this ensures that the full list of
-  tests, including instantiations of parameterized tests, is obtained.  Since
-  test discovery occurs at build time, it is not necessary to re-run CMake when
-  the list of tests changes.
-  However, it requires that :prop_tgt:`CROSSCOMPILING_EMULATOR` is properly set
-  in order to function in a cross-compiling environment.
+  ``gtest_discover_tests()`` sets up a post-build or pre-test command on the
+  test executable that generates the list of tests by parsing the output from
+  running the test executable with the ``--gtest_list_tests`` argument.
+  Compared to the source parsing approach of :command:`gtest_add_tests`,
+  this ensures that the full list of tests, including instantiations of
+  parameterized tests, is obtained.  Since test discovery occurs at build
+  or test time, it is not necessary to re-run CMake when the list of tests
+  changes.  However, it requires that :prop_tgt:`CROSSCOMPILING_EMULATOR`
+  is properly set in order to function in a cross-compiling environment.
 
   Additionally, setting properties on tests is somewhat less convenient, since
   the tests are not available at CMake time.  Additional test properties may be
