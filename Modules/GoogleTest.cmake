@@ -166,6 +166,7 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
                          [DISCOVERY_TIMEOUT seconds]
                          [XML_OUTPUT_DIR dir]
                          [DISCOVERY_MODE <POST_BUILD|PRE_TEST>]
+                         [DISCOVERY_EXTRA_ARGS args...]
     )
 
   .. versionadded:: 3.10
@@ -299,6 +300,11 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     passed when calling ``gtest_discover_tests()``. This provides a mechanism
     for globally selecting a preferred test discovery behavior without having
     to modify each call site.
+
+  ``DISCOVERY_EXTRA_ARGS args...``
+    .. versionadded:: 3.31
+
+    Any extra arguments to pass on the command line for the discovery command.
 
   .. versionadded:: 3.29
     The :prop_tgt:`TEST_LAUNCHER` target property is honored during test
@@ -546,6 +552,7 @@ function(gtest_discover_tests target)
   )
   set(multiValueArgs
     EXTRA_ARGS
+    DISCOVERY_EXTRA_ARGS
     PROPERTIES
     TEST_FILTER
   )
@@ -670,6 +677,7 @@ function(gtest_discover_tests target)
               -D "TEST_LIST=${arg_TEST_LIST}"
               -D "CTEST_FILE=${ctest_tests_file}"
               -D "TEST_DISCOVERY_TIMEOUT=${arg_DISCOVERY_TIMEOUT}"
+              -D "TEST_DISCOVERY_EXTRA_ARGS=${arg_DISCOVERY_EXTRA_ARGS}"
               -D "TEST_XML_OUTPUT_DIR=${arg_XML_OUTPUT_DIR}"
               -P "${CMAKE_ROOT}/Modules/GoogleTestAddTests.cmake"
       VERBATIM
@@ -712,6 +720,7 @@ function(gtest_discover_tests target)
       "      TEST_LIST"              " [==[${arg_TEST_LIST}]==]"                   "\n"
       "      CTEST_FILE"             " [==[${ctest_tests_file}]==]"                "\n"
       "      TEST_DISCOVERY_TIMEOUT" " [==[${arg_DISCOVERY_TIMEOUT}]==]"           "\n"
+      "      TEST_DISCOVERY_EXTRA_ARGS [==[${arg_DISCOVERY_EXTRA_ARGS}]==]"        "\n"
       "      TEST_XML_OUTPUT_DIR"    " [==[${arg_XML_OUTPUT_DIR}]==]"              "\n"
       "    )"                                                                      "\n"
       "  endif()"                                                                  "\n"

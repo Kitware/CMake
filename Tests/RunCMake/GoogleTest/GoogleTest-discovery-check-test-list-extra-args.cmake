@@ -1,0 +1,6 @@
+list(LENGTH test_list_extra_args_TESTS LIST_SIZE)
+set(EXPECTED_SIZE 4)
+if(NOT LIST_SIZE EQUAL ${EXPECTED_SIZE})
+  message("TEST_LIST should have ${EXPECTED_SIZE} elements but it has ${LIST_SIZE}")
+  message("The unexpected list: [${test_list_extra_args_TESTS}]")
+endif()
