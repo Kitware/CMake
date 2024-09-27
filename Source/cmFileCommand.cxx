@@ -1741,6 +1741,7 @@ bool HandleNativePathCommand(std::vector<std::string> const& args,
 #if !defined(CMAKE_BOOTSTRAP)
 
 const bool TLS_VERIFY_DEFAULT = true;
+const std::string TLS_VERSION_DEFAULT = "1.2";
 
 // Stuff for curl download/upload
 using cmFileCommandVectorOfChar = std::vector<char>;
@@ -2128,6 +2129,11 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
       tlsVersionOpt = std::move(v);
     }
   }
+  bool tlsVersionDefaulted = false;
+  if (!tlsVersionOpt.has_value()) {
+    tlsVersionOpt = TLS_VERSION_DEFAULT;
+    tlsVersionDefaulted = true;
+  }
 
   // Can't calculate hash if we don't save the file.
   // TODO Incrementally calculate hash in the write callback as the file is
@@ -2212,6 +2218,9 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
   if (tlsVersionOpt.has_value()) {
     if (cm::optional<int> v = cmCurlParseTLSVersion(*tlsVersionOpt)) {
       res = ::curl_easy_setopt(curl, CURLOPT_SSLVERSION, *v);
+      if (tlsVersionDefaulted && res == CURLE_NOT_BUILT_IN) {
+        res = CURLE_OK;
+      }
       check_curl_result(res,
                         cmStrCat("DOWNLOAD cannot set TLS/SSL version ",
                                  *tlsVersionOpt, ": "));
@@ -2554,6 +2563,11 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
       tlsVersionOpt = std::move(v);
     }
   }
+  bool tlsVersionDefaulted = false;
+  if (!tlsVersionOpt.has_value()) {
+    tlsVersionOpt = TLS_VERSION_DEFAULT;
+    tlsVersionDefaulted = true;
+  }
 
   // Open file for reading:
   //
@@ -2603,6 +2617,9 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
   if (tlsVersionOpt.has_value()) {
     if (cm::optional<int> v = cmCurlParseTLSVersion(*tlsVersionOpt)) {
       res = ::curl_easy_setopt(curl, CURLOPT_SSLVERSION, *v);
+      if (tlsVersionDefaulted && res == CURLE_NOT_BUILT_IN) {
+        res = CURLE_OK;
+      }
       check_curl_result(
         res,
         cmStrCat("UPLOAD cannot set TLS/SSL version ", *tlsVersionOpt, ": "));

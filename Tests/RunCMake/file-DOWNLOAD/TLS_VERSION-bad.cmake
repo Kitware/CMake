@@ -19,12 +19,10 @@ else()
   set(TEST_TLSv1_1 0)
 endif()
 
-if(TEST_TLSv1_1)
-  # The default is to allow 1.1.
-  unset(ENV{CMAKE_TLS_VERSION})
-  unset(CMAKE_TLS_VERSION)
-  download(def-1.1)
-endif()
+# The default is to require 1.2.
+unset(ENV{CMAKE_TLS_VERSION})
+unset(CMAKE_TLS_VERSION)
+download(def-1.2)
 
 # The environment variable overrides the default.
 set(ENV{CMAKE_TLS_VERSION} 1.2)
