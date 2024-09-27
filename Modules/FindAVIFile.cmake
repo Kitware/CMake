@@ -5,9 +5,10 @@
 FindAVIFile
 -----------
 
-Locate AVIFILE library and include paths
+Locate `AVIFILE <https://sourceforge.net/projects/avifile/>`_
+library and include paths.
 
-AVIFILE (https://avifile.sourceforge.net/) is a set of libraries for
+AVIFILE is a set of libraries for
 i386 machines to use various AVI codecs.  Support is limited beyond
 Linux.  Windows provides native AVI support, and so doesn't need this
 library.  This module defines
