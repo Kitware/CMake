@@ -381,6 +381,34 @@ public:
           target->GetBacktrace());
         CM_FALLTHROUGH;
       case cmPolicies::NEW: {
+        // Policy 0179 applies only when policy 0156 is new
+        switch (target->GetPolicyStatusCMP0179()) {
+          case cmPolicies::WARN:
+            if (!makefile->GetCMakeInstance()->GetIsInTryCompile() &&
+                makefile->PolicyOptionalWarningEnabled(
+                  "CMAKE_POLICY_WARNING_CMP0179")) {
+              makefile->GetCMakeInstance()->IssueMessage(
+                MessageType::AUTHOR_WARNING,
+                cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0179),
+                         "\nSince the policy is not set, static libraries "
+                         "de-duplication will keep the last occurrence of the "
+                         "static libraries."),
+                target->GetBacktrace());
+            }
+            CM_FALLTHROUGH;
+          case cmPolicies::OLD:
+            break;
+          case cmPolicies::REQUIRED_IF_USED:
+          case cmPolicies::REQUIRED_ALWAYS:
+            makefile->GetCMakeInstance()->IssueMessage(
+              MessageType::FATAL_ERROR,
+              cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0179),
+              target->GetBacktrace());
+            CM_FALLTHROUGH;
+          case cmPolicies::NEW:
+            break;
+        }
+
         if (auto libProcessing = makefile->GetDefinition(cmStrCat(
               "CMAKE_", linkLanguage, "_LINK_LIBRARIES_PROCESSING"))) {
           // UNICITY keyword is just for compatibility with previous
@@ -444,9 +472,42 @@ public:
   void AddLibraries(const std::vector<size_t>& libEntries)
   {
     if (this->Order == Reverse) {
+      std::vector<size_t> entries;
+      if (this->Deduplication == All &&
+          this->Target->GetPolicyStatusCMP0179() == cmPolicies::NEW) {
+        // keep the first occurrence of the static libraries
+        std::set<size_t> emitted{ this->Emitted };
+        std::set<std::string> importedEmitted;
+        for (auto index : libEntries) {
+          LinkEntry const& entry = this->Entries[index];
+          if (!entry.Target ||
+              entry.Target->GetType() != cmStateEnums::STATIC_LIBRARY) {
+            entries.emplace_back(index);
+            continue;
+          }
+          if (this->IncludeEntry(entry)) {
+            entries.emplace_back(index);
+            continue;
+          }
+          if (entry.Target->IsImported()) {
+            if (emitted.insert(index).second &&
+                importedEmitted
+                  .insert(cmSystemTools::GetRealPath(entry.Item.Value))
+                  .second) {
+              entries.emplace_back(index);
+            }
+            continue;
+          }
+          if (emitted.insert(index).second) {
+            entries.emplace_back(index);
+          }
+        }
+      } else {
+        entries = libEntries;
+      }
       // Iterate in reverse order so we can keep only the last occurrence
-      // of a library.
-      this->AddLibraries(cmReverseRange(libEntries));
+      // of the shared libraries.
+      this->AddLibraries(cmReverseRange(entries));
     } else {
       this->AddLibraries(cmMakeRange(libEntries));
     }
