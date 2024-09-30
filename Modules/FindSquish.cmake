@@ -200,6 +200,8 @@ macro(squish_v3_add_test testName testAUT testCase envVars testWraper)
     message(STATUS "Using squish_v3_add_test(), but SQUISH_VERSION_MAJOR is ${SQUISH_VERSION_MAJOR}.\nThis may not work.")
   endif()
 
+  # There's no target used for this command, so we don't need to do anything
+  # here for CMP0178.
   add_test(${testName}
     ${CMAKE_COMMAND} -V -VV
     "-Dsquish_version:STRING=3"
@@ -258,6 +260,8 @@ function(squish_v4_add_test testName)
     message("SETTINGSGROUP is deprecated and will be ignored.")
   endif()
 
+  # There's no target used for this command, so we don't need to do anything
+  # here for CMP0178.
   add_test(NAME ${testName}
     COMMAND ${CMAKE_COMMAND} -V -VV
     "-Dsquish_version:STRING=4"

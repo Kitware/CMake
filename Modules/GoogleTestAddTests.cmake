@@ -2,6 +2,7 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 cmake_minimum_required(VERSION 3.30)
+cmake_policy(SET CMP0174 NEW)   # TODO: Remove this when we can update the above to 3.31
 
 # Overwrite possibly existing ${arg_CTEST_FILE} with empty file
 set(flush_tests_MODE WRITE)
@@ -65,9 +66,9 @@ endfunction()
 
 function(gtest_discover_tests_impl)
 
-  set(options )
+  set(options "")
   set(oneValueArgs
-    NO_PRETTY_TYPES   # These two take a value, unlike gtest_discover_tests
+    NO_PRETTY_TYPES   # These two take a value, unlike gtest_discover_tests()
     NO_PRETTY_VALUES  #
     TEST_EXECUTABLE
     TEST_WORKING_DIR
@@ -77,22 +78,21 @@ function(gtest_discover_tests_impl)
     CTEST_FILE
     TEST_DISCOVERY_TIMEOUT
     TEST_XML_OUTPUT_DIR
-    TEST_FILTER   # This is a multi-value argument in gtest_discover_tests
-  )
-  set(multiValueArgs
+    # The following are all multi-value arguments in gtest_discover_tests(),
+    # but they are each given to us as a single argument. We parse them that
+    # way to avoid problems with preserving empty list values and escaping.
+    TEST_FILTER
     TEST_EXTRA_ARGS
     TEST_PROPERTIES
     TEST_EXECUTOR
   )
-  cmake_parse_arguments(arg
+  set(multiValueArgs "")
+  cmake_parse_arguments(PARSE_ARGV 0 arg
     "${options}" "${oneValueArgs}" "${multiValueArgs}"
-    ${ARGN}
   )
 
   set(prefix "${arg_TEST_PREFIX}")
   set(suffix "${arg_TEST_SUFFIX}")
-  set(extra_args ${arg_TEST_EXTRA_ARGS})
-  set(properties ${arg_TEST_PROPERTIES})
   set(script)
   set(suite)
   set(tests)
@@ -104,6 +104,16 @@ function(gtest_discover_tests_impl)
     set(filter)
   endif()
 
+  # CMP0178 has already been handled in gtest_discover_tests(), so we only need
+  # to implement NEW behavior here. This means preserving empty arguments for
+  # TEST_EXECUTOR. For OLD or WARN, gtest_discover_tests() already removed any
+  # empty arguments.
+  set(launcherArgs "")
+  if(NOT "${arg_TEST_EXECUTOR}" STREQUAL "")
+    list(JOIN arg_TEST_EXECUTOR "]==] [==[" launcherArgs)
+    set(launcherArgs "[==[${launcherArgs}]==]")
+  endif()
+
   # Run test executable to get list of available tests
   if(NOT EXISTS "${arg_TEST_EXECUTABLE}")
     message(FATAL_ERROR
@@ -111,12 +121,14 @@ function(gtest_discover_tests_impl)
       "  Path: '${arg_TEST_EXECUTABLE}'"
     )
   endif()
-  execute_process(
-    COMMAND ${arg_TEST_EXECUTOR} "${arg_TEST_EXECUTABLE}" --gtest_list_tests ${filter}
-    WORKING_DIRECTORY "${arg_TEST_WORKING_DIR}"
-    TIMEOUT ${arg_TEST_DISCOVERY_TIMEOUT}
-    OUTPUT_VARIABLE output
-    RESULT_VARIABLE result
+  cmake_language(EVAL CODE
+    "execute_process(
+      COMMAND ${launcherArgs} [==[${arg_TEST_EXECUTABLE}]==] --gtest_list_tests ${filter}
+      WORKING_DIRECTORY [==[${arg_TEST_WORKING_DIR}]==]
+      TIMEOUT ${arg_TEST_DISCOVERY_TIMEOUT}
+      OUTPUT_VARIABLE output
+      RESULT_VARIABLE result
+    )"
   )
   if(NOT ${result} EQUAL 0)
     string(REPLACE "\n" "\n    " output "${output}")
@@ -188,16 +200,36 @@ function(gtest_discover_tests_impl)
         endif()
         set(guarded_testname "${open_guard}${testname}${close_guard}")
 
-        # add to script
-        add_command(add_test
-          "${guarded_testname}"
-          ${arg_TEST_EXECUTOR}
+        # Add to script. Do not use add_command() here because it messes up the
+        # handling of empty values when forwarding arguments, and we need to
+        # preserve those carefully for arg_TEST_EXECUTOR and arg_EXTRA_ARGS.
+        string(APPEND script "add_test(${guarded_testname} ${launcherArgs}")
+        foreach(arg IN ITEMS
           "${arg_TEST_EXECUTABLE}"
           "--gtest_filter=${suite}.${test}"
           "--gtest_also_run_disabled_tests"
           ${TEST_XML_OUTPUT_PARAM}
-          ${extra_args}
-        )
+          )
+          if(arg MATCHES "[^-./:a-zA-Z0-9_]")
+            string(APPEND script " [==[${arg}]==]")
+          else()
+            string(APPEND script " ${arg}")
+          endif()
+        endforeach()
+        if(arg_TEST_EXTRA_ARGS)
+          list(JOIN arg_TEST_EXTRA_ARGS "]==] [==[" extra_args)
+          string(APPEND script " [==[${extra_args}]==]")
+        endif()
+        string(APPEND script ")\n")
+        string(LENGTH "${script}" script_len)
+        if(${script_len} GREATER "50000")
+          # flush_script() expects to set variables in the parent scope, so we
+          # need to create one since we actually want the changes in our scope
+          block(SCOPE_FOR VARIABLES)
+            flush_script()
+          endblock()
+        endif()
+
         if(suite MATCHES "^DISABLED_" OR test MATCHES "^DISABLED_")
           add_command(set_tests_properties
             "${guarded_testname}"
@@ -210,7 +242,7 @@ function(gtest_discover_tests_impl)
           PROPERTIES
           WORKING_DIRECTORY "${arg_TEST_WORKING_DIR}"
           SKIP_REGULAR_EXPRESSION "\\[  SKIPPED \\]"
-          ${properties}
+          ${arg_TEST_PROPERTIES}
         )
 
         # possibly unbalanced square brackets render lists invalid so skip such
@@ -244,7 +276,7 @@ if(CMAKE_SCRIPT_MODE_FILE)
     NO_PRETTY_TYPES ${NO_PRETTY_TYPES}
     NO_PRETTY_VALUES ${NO_PRETTY_VALUES}
     TEST_EXECUTABLE ${TEST_EXECUTABLE}
-    TEST_EXECUTOR ${TEST_EXECUTOR}
+    TEST_EXECUTOR "${TEST_EXECUTOR}"
     TEST_WORKING_DIR ${TEST_WORKING_DIR}
     TEST_PREFIX ${TEST_PREFIX}
     TEST_SUFFIX ${TEST_SUFFIX}
@@ -253,7 +285,7 @@ if(CMAKE_SCRIPT_MODE_FILE)
     CTEST_FILE ${CTEST_FILE}
     TEST_DISCOVERY_TIMEOUT ${TEST_DISCOVERY_TIMEOUT}
     TEST_XML_OUTPUT_DIR ${TEST_XML_OUTPUT_DIR}
-    TEST_EXTRA_ARGS ${TEST_EXTRA_ARGS}
-    TEST_PROPERTIES ${TEST_PROPERTIES}
+    TEST_EXTRA_ARGS "${TEST_EXTRA_ARGS}"
+    TEST_PROPERTIES "${TEST_PROPERTIES}"
   )
 endif()

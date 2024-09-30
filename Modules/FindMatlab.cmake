@@ -1012,6 +1012,10 @@ function(matlab_add_unit_test)
     endif()
   endif()
 
+  # The ${${prefix}_TEST_ARGS} and ${${prefix}_UNPARSED_ARGUMENTS} used below
+  # should have semicolons escaped, so empty arguments should be preserved.
+  # There's also no target used for the command, so we don't need to do
+  # anything here for CMP0178.
   add_test(NAME ${${prefix}_NAME}
            COMMAND ${CMAKE_COMMAND}
             "-Dtest_name=${${prefix}_NAME}"

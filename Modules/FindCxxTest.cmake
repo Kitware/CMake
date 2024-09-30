@@ -163,6 +163,8 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname _cxxtest_outfname)
     set_source_files_properties(${_cxxtest_real_outfname} PROPERTIES GENERATED true)
     add_executable(${_cxxtest_testname} ${_cxxtest_real_outfname} ${ARGN})
 
+    # There's no target used for these commands, so we don't need to do
+    # anything here for CMP0178.
     if(CMAKE_RUNTIME_OUTPUT_DIRECTORY)
         add_test(${_cxxtest_testname} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${_cxxtest_testname})
     elseif(EXECUTABLE_OUTPUT_PATH)
