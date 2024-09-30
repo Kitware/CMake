@@ -1016,7 +1016,8 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkStatement(
   vars["LANGUAGE_COMPILE_FLAGS"] = langFlags;
 
   auto const tgtNames = this->TargetNames(config);
-  if (genTarget->HasSOName(config)) {
+  if (genTarget->HasSOName(config) ||
+      genTarget->IsArchivedAIXSharedLibrary()) {
     vars["SONAME_FLAG"] =
       this->GetMakefile()->GetSONameFlag(this->TargetLinkLanguage(config));
     vars["SONAME"] = localGen.ConvertToOutputFormat(tgtNames.SharedObject,
@@ -1315,7 +1316,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
       t, gt, this->TargetLinkLanguage(config), config);
     vars["LANGUAGE_COMPILE_FLAGS"] = t;
   }
-  if (gt->HasSOName(config)) {
+  if (gt->HasSOName(config) || gt->IsArchivedAIXSharedLibrary()) {
     vars["SONAME_FLAG"] = mf->GetSONameFlag(this->TargetLinkLanguage(config));
     vars["SONAME"] = localGen.ConvertToOutputFormat(tgtNames.SharedObject,
                                                     cmOutputConverter::SHELL);
