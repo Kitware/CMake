@@ -1,14 +1,14 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-cmake_minimum_required(VERSION ${CMAKE_VERSION})
+cmake_minimum_required(VERSION 3.30)
 
-# Overwrite possibly existing ${_CTEST_FILE} with empty file
+# Overwrite possibly existing ${arg_CTEST_FILE} with empty file
 set(flush_tests_MODE WRITE)
 
-# Flushes script to ${_CTEST_FILE}
+# Flushes script to ${arg_CTEST_FILE}
 macro(flush_script)
-  file(${flush_tests_MODE} "${_CTEST_FILE}" "${script}")
+  file(${flush_tests_MODE} "${arg_CTEST_FILE}" "${script}")
   set(flush_tests_MODE APPEND PARENT_SCOPE)
 
   set(script "")
@@ -20,7 +20,7 @@ macro(flush_tests_buffer)
   set(tests_buffer "")
 endmacro()
 
-function(add_command NAME TEST_NAME)
+function(add_command name test_name)
   set(args "")
   foreach(arg ${ARGN})
     if(arg MATCHES "[^-./:a-zA-Z0-9_]")
@@ -29,7 +29,7 @@ function(add_command NAME TEST_NAME)
       string(APPEND args " ${arg}")
     endif()
   endforeach()
-  string(APPEND script "${NAME}(${TEST_NAME} ${args})\n")
+  string(APPEND script "${name}(${test_name} ${args})\n")
   string(LENGTH "${script}" script_len)
   if(${script_len} GREATER "50000")
     flush_script()
@@ -37,82 +37,98 @@ function(add_command NAME TEST_NAME)
   set(script "${script}" PARENT_SCOPE)
 endfunction()
 
-function(generate_testname_guards OUTPUT OPEN_GUARD_VAR CLOSE_GUARD_VAR)
+function(generate_testname_guards output open_guard_var close_guard_var)
   set(open_guard "[=[")
   set(close_guard "]=]")
   set(counter 1)
-  while("${OUTPUT}" MATCHES "${close_guard}")
+  while("${output}" MATCHES "${close_guard}")
     math(EXPR counter "${counter} + 1")
     string(REPEAT "=" ${counter} equals)
     set(open_guard "[${equals}[")
     set(close_guard "]${equals}]")
   endwhile()
-  set(${OPEN_GUARD_VAR} "${open_guard}" PARENT_SCOPE)
-  set(${CLOSE_GUARD_VAR} "${close_guard}" PARENT_SCOPE)
+  set(${open_guard_var} "${open_guard}" PARENT_SCOPE)
+  set(${close_guard_var} "${close_guard}" PARENT_SCOPE)
 endfunction()
 
-function(escape_square_brackets OUTPUT BRACKET PLACEHOLDER PLACEHOLDER_VAR OUTPUT_VAR)
-  if("${OUTPUT}" MATCHES "\\${BRACKET}")
-    set(placeholder "${PLACEHOLDER}")
-    while("${OUTPUT}" MATCHES "${placeholder}")
+function(escape_square_brackets output bracket placeholder placeholder_var output_var)
+  if("${output}" MATCHES "\\${bracket}")
+    set(placeholder "${placeholder}")
+    while("${output}" MATCHES "${placeholder}")
         set(placeholder "${placeholder}_")
     endwhile()
-    string(REPLACE "${BRACKET}" "${placeholder}" OUTPUT "${OUTPUT}")
-    set(${PLACEHOLDER_VAR} "${placeholder}" PARENT_SCOPE)
-    set(${OUTPUT_VAR} "${OUTPUT}" PARENT_SCOPE)
+    string(REPLACE "${bracket}" "${placeholder}" output "${output}")
+    set(${placeholder_var} "${placeholder}" PARENT_SCOPE)
+    set(${output_var} "${output}" PARENT_SCOPE)
   endif()
 endfunction()
 
 function(gtest_discover_tests_impl)
 
-  cmake_parse_arguments(
-    ""
-    ""
-    "NO_PRETTY_TYPES;NO_PRETTY_VALUES;TEST_EXECUTABLE;TEST_WORKING_DIR;TEST_PREFIX;TEST_SUFFIX;TEST_LIST;CTEST_FILE;TEST_DISCOVERY_TIMEOUT;TEST_XML_OUTPUT_DIR;TEST_FILTER"
-    "TEST_EXTRA_ARGS;TEST_PROPERTIES;TEST_EXECUTOR"
+  set(options )
+  set(oneValueArgs
+    NO_PRETTY_TYPES   # These two take a value, unlike gtest_discover_tests
+    NO_PRETTY_VALUES  #
+    TEST_EXECUTABLE
+    TEST_WORKING_DIR
+    TEST_PREFIX
+    TEST_SUFFIX
+    TEST_LIST
+    CTEST_FILE
+    TEST_DISCOVERY_TIMEOUT
+    TEST_XML_OUTPUT_DIR
+    TEST_FILTER   # This is a multi-value argument in gtest_discover_tests
+  )
+  set(multiValueArgs
+    TEST_EXTRA_ARGS
+    TEST_PROPERTIES
+    TEST_EXECUTOR
+  )
+  cmake_parse_arguments(arg
+    "${options}" "${oneValueArgs}" "${multiValueArgs}"
     ${ARGN}
   )
 
-  set(prefix "${_TEST_PREFIX}")
-  set(suffix "${_TEST_SUFFIX}")
-  set(extra_args ${_TEST_EXTRA_ARGS})
-  set(properties ${_TEST_PROPERTIES})
+  set(prefix "${arg_TEST_PREFIX}")
+  set(suffix "${arg_TEST_SUFFIX}")
+  set(extra_args ${arg_TEST_EXTRA_ARGS})
+  set(properties ${arg_TEST_PROPERTIES})
   set(script)
   set(suite)
   set(tests)
   set(tests_buffer)
 
-  if(_TEST_FILTER)
-    set(filter "--gtest_filter=${_TEST_FILTER}")
+  if(arg_TEST_FILTER)
+    set(filter "--gtest_filter=${arg_TEST_FILTER}")
   else()
     set(filter)
   endif()
 
   # Run test executable to get list of available tests
-  if(NOT EXISTS "${_TEST_EXECUTABLE}")
+  if(NOT EXISTS "${arg_TEST_EXECUTABLE}")
     message(FATAL_ERROR
       "Specified test executable does not exist.\n"
-      "  Path: '${_TEST_EXECUTABLE}'"
+      "  Path: '${arg_TEST_EXECUTABLE}'"
     )
   endif()
   execute_process(
-    COMMAND ${_TEST_EXECUTOR} "${_TEST_EXECUTABLE}" --gtest_list_tests ${filter}
-    WORKING_DIRECTORY "${_TEST_WORKING_DIR}"
-    TIMEOUT ${_TEST_DISCOVERY_TIMEOUT}
+    COMMAND ${arg_TEST_EXECUTOR} "${arg_TEST_EXECUTABLE}" --gtest_list_tests ${filter}
+    WORKING_DIRECTORY "${arg_TEST_WORKING_DIR}"
+    TIMEOUT ${arg_TEST_DISCOVERY_TIMEOUT}
     OUTPUT_VARIABLE output
     RESULT_VARIABLE result
   )
   if(NOT ${result} EQUAL 0)
     string(REPLACE "\n" "\n    " output "${output}")
-    if(_TEST_EXECUTOR)
-      set(path "${_TEST_EXECUTOR} ${_TEST_EXECUTABLE}")
+    if(arg_TEST_EXECUTOR)
+      set(path "${arg_TEST_EXECUTOR} ${arg_TEST_EXECUTABLE}")
     else()
-      set(path "${_TEST_EXECUTABLE}")
+      set(path "${arg_TEST_EXECUTABLE}")
     endif()
     message(FATAL_ERROR
       "Error running test executable.\n"
       "  Path: '${path}'\n"
-      "  Working directory: '${_TEST_WORKING_DIR}'\n"
+      "  Working directory: '${arg_TEST_WORKING_DIR}'\n"
       "  Result: ${result}\n"
       "  Output:\n"
       "    ${output}\n"
@@ -136,7 +152,7 @@ function(gtest_discover_tests_impl)
         string(REGEX REPLACE "\\.( *#.*)?$" "" suite "${line}")
         if(line MATCHES "#")
           string(REGEX REPLACE "/[0-9].*" "" pretty_suite "${line}")
-          if(NOT _NO_PRETTY_TYPES)
+          if(NOT arg_NO_PRETTY_TYPES)
             string(REGEX REPLACE ".*/[0-9]+[ .#]+TypeParam = (.*)" "\\1" type_parameter "${line}")
           else()
             string(REGEX REPLACE ".*/([0-9]+)[ .#]+TypeParam = .*" "\\1" type_parameter "${line}")
@@ -149,15 +165,15 @@ function(gtest_discover_tests_impl)
         string(REGEX REPLACE "^DISABLED_" "" pretty_suite "${pretty_suite}")
       else()
         string(STRIP "${line}" test)
-        if(test MATCHES "#" AND NOT _NO_PRETTY_VALUES)
+        if(test MATCHES "#" AND NOT arg_NO_PRETTY_VALUES)
           string(REGEX REPLACE "/[0-9]+[ #]+GetParam\\(\\) = " "/" pretty_test "${test}")
         else()
           string(REGEX REPLACE " +#.*" "" pretty_test "${test}")
         endif()
         string(REGEX REPLACE "^DISABLED_" "" pretty_test "${pretty_test}")
         string(REGEX REPLACE " +#.*" "" test "${test}")
-        if(NOT "${_TEST_XML_OUTPUT_DIR}" STREQUAL "")
-          set(TEST_XML_OUTPUT_PARAM "--gtest_output=xml:${_TEST_XML_OUTPUT_DIR}/${prefix}${suite}.${test}${suffix}.xml")
+        if(NOT "${arg_TEST_XML_OUTPUT_DIR}" STREQUAL "")
+          set(TEST_XML_OUTPUT_PARAM "--gtest_output=xml:${arg_TEST_XML_OUTPUT_DIR}/${prefix}${suite}.${test}${suffix}.xml")
         else()
           unset(TEST_XML_OUTPUT_PARAM)
         endif()
@@ -175,8 +191,8 @@ function(gtest_discover_tests_impl)
         # add to script
         add_command(add_test
           "${guarded_testname}"
-          ${_TEST_EXECUTOR}
-          "${_TEST_EXECUTABLE}"
+          ${arg_TEST_EXECUTOR}
+          "${arg_TEST_EXECUTABLE}"
           "--gtest_filter=${suite}.${test}"
           "--gtest_also_run_disabled_tests"
           ${TEST_XML_OUTPUT_PARAM}
@@ -192,12 +208,13 @@ function(gtest_discover_tests_impl)
         add_command(set_tests_properties
           "${guarded_testname}"
           PROPERTIES
-          WORKING_DIRECTORY "${_TEST_WORKING_DIR}"
+          WORKING_DIRECTORY "${arg_TEST_WORKING_DIR}"
           SKIP_REGULAR_EXPRESSION "\\[  SKIPPED \\]"
           ${properties}
         )
 
-        # possibly unbalanced square brackets render lists invalid so skip such tests in ${_TEST_LIST}
+        # possibly unbalanced square brackets render lists invalid so skip such
+        # tests in ${arg_TEST_LIST}
         if(NOT "${testname}" MATCHES [=[(\[|\])]=])
           # escape ;
           string(REPLACE [[;]] [[\\;]] testname "${testname}")
@@ -215,7 +232,7 @@ function(gtest_discover_tests_impl)
   # Create a list of all discovered tests, which users may use to e.g. set
   # properties on the tests
   flush_tests_buffer()
-  add_command(set "" ${_TEST_LIST} "${tests}")
+  add_command(set "" ${arg_TEST_LIST} "${tests}")
 
   # Write CTest script
   flush_script()
