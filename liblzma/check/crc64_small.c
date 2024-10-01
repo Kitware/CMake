@@ -1,12 +1,11 @@
+// SPDX-License-Identifier: 0BSD
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 /// \file       crc64_small.c
 /// \brief      CRC64 calculation (size-optimized)
 //
 //  Author:     Lasse Collin
-//
-//  This file has been put into the public domain.
-//  You can do whatever you want with this file.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -16,6 +15,9 @@
 static uint64_t crc64_table[256];
 
 
+#ifdef HAVE_FUNC_ATTRIBUTE_CONSTRUCTOR
+__attribute__((__constructor__))
+#endif
 static void
 crc64_init(void)
 {
@@ -40,7 +42,9 @@ crc64_init(void)
 extern LZMA_API(uint64_t)
 lzma_crc64(const uint8_t *buf, size_t size, uint64_t crc)
 {
+#ifndef HAVE_FUNC_ATTRIBUTE_CONSTRUCTOR
 	mythread_once(crc64_init);
+#endif
 
 	crc = ~crc;
 

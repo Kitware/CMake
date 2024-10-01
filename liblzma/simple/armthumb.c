@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: 0BSD
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 /// \file       armthumb.c
@@ -5,9 +7,6 @@
 ///
 //  Authors:    Igor Pavlov
 //              Lasse Collin
-//
-//  This file has been put into the public domain.
-//  You can do whatever you want with this file.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -58,6 +57,7 @@ armthumb_coder_init(lzma_next_coder *next, const lzma_allocator *allocator,
 }
 
 
+#ifdef HAVE_ENCODER_ARMTHUMB
 extern lzma_ret
 lzma_simple_armthumb_encoder_init(lzma_next_coder *next,
 		const lzma_allocator *allocator,
@@ -65,8 +65,10 @@ lzma_simple_armthumb_encoder_init(lzma_next_coder *next,
 {
 	return armthumb_coder_init(next, allocator, filters, true);
 }
+#endif
 
 
+#ifdef HAVE_DECODER_ARMTHUMB
 extern lzma_ret
 lzma_simple_armthumb_decoder_init(lzma_next_coder *next,
 		const lzma_allocator *allocator,
@@ -74,3 +76,4 @@ lzma_simple_armthumb_decoder_init(lzma_next_coder *next,
 {
 	return armthumb_coder_init(next, allocator, filters, false);
 }
+#endif

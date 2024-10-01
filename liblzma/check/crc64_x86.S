@@ -1,3 +1,5 @@
+/* SPDX-License-Identifier: 0BSD */
+
 /*
  * Speed-optimized CRC64 using slicing-by-four algorithm
  *
@@ -6,9 +8,6 @@
  *
  * Authors: Igor Pavlov (original CRC32 assembly code)
  *          Lasse Collin (CRC64 adaptation of the modified CRC32 code)
- *
- * This file has been put into the public domain.
- * You can do whatever you want with this file.
  *
  * This code needs lzma_crc64_table, which can be created using the
  * following C code:
@@ -40,6 +39,14 @@ init_table(void)
  * The prototype of the CRC64 function:
  * extern uint64_t lzma_crc64(const uint8_t *buf, size_t size, uint64_t crc);
  */
+
+/* When Intel CET is enabled, include <cet.h> in assembly code to mark
+   Intel CET support.  */
+#ifdef __CET__
+# include <cet.h>
+#else
+# define _CET_ENDBR
+#endif
 
 /*
  * On some systems, the functions need to be prefixed. The prefix is
@@ -73,6 +80,7 @@ init_table(void)
 
 	ALIGN(4, 16)
 LZMA_CRC64:
+	_CET_ENDBR
 	/*
 	 * Register usage:
 	 * %eax crc LSB
@@ -279,9 +287,9 @@ LZMA_CRC64:
 
 /*
  * This is needed to support non-executable stack. It's ugly to
- * use __linux__ here, but I don't know a way to detect when
+ * use __FreeBSD__ and __linux__ here, but I don't know a way to detect when
  * we are using GNU assembler.
  */
-#if defined(__ELF__) && defined(__linux__)
+#if defined(__ELF__) && (defined(__FreeBSD__) || defined(__linux__))
 	.section	.note.GNU-stack,"",@progbits
 #endif
