@@ -1,5 +1,3 @@
-set(CTEST_RUN_CURRENT_SCRIPT 0)
-
 set(LOCK_FILE "${TEST_NAME}.lock")
 
 # Delete the old lock file in case it's lingering from a previous failed test run

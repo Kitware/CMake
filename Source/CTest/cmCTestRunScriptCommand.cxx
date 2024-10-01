@@ -3,16 +3,15 @@
 #include "cmCTestRunScriptCommand.h"
 
 #include "cmCTestScriptHandler.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 
-class cmExecutionStatus;
-
 bool cmCTestRunScriptCommand::InitialPass(std::vector<std::string> const& args,
-                                          cmExecutionStatus& /*unused*/)
+                                          cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->CTestScriptHandler->RunCurrentScript();
-    return true;
+    status.SetError("called with incorrect number of arguments");
+    return false;
   }
 
   bool np = false;

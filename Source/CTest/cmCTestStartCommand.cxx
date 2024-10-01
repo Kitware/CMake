@@ -144,7 +144,6 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
 
-  this->CTest->SetRunCurrentScript(false);
   this->CTest->SetSuppressUpdatingCTestConfiguration(true);
   int model;
   if (smodel) {

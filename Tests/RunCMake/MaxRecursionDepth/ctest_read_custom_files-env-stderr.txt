@@ -19,7 +19,7 @@ Call Stack \(most recent call first\):
   .*/Tests/RunCMake/MaxRecursionDepth/CTestCustom\.cmake:3 \(ctest_read_custom_files\)
   .*/Tests/RunCMake/MaxRecursionDepth/CTestCustom\.cmake:3 \(ctest_read_custom_files\)
   .*/Tests/RunCMake/MaxRecursionDepth/CTestCustom\.cmake:3 \(ctest_read_custom_files\)
-  .*/Tests/RunCMake/MaxRecursionDepth/ctest_read_custom_files-env/test\.cmake:10 \(ctest_read_custom_files\)
+  .*/Tests/RunCMake/MaxRecursionDepth/ctest_read_custom_files-env/test\.cmake:5 \(ctest_read_custom_files\)
 
 
 Problem reading custom configuration: .*/Tests/RunCMake/MaxRecursionDepth/CTestCustom\.cmake

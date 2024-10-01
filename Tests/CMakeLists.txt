@@ -2589,9 +2589,9 @@ if(BUILD_TESTING)
   # A simple test for ctest in script mode
   configure_file("${CMake_SOURCE_DIR}/Tests/CTestScriptMode/CTestTestScriptMode.cmake.in"
           "${CMake_BINARY_DIR}/Tests/CTestScriptMode/CTestTestScriptMode.cmake" @ONLY)
-#  add_test(CTest.ScriptMode ${CMAKE_CTEST_COMMAND}
-#        -S "${CMake_BINARY_DIR}/Tests/CTestScriptMode/CTestTestScriptMode.cmake"
-#        )
+  add_test(CTest.ScriptMode ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestScriptMode/CTestTestScriptMode.cmake"
+    )
 
   # Test CTest Update with Subversion
   if(NOT DEFINED CMake_TEST_CTestUpdate_SVN OR CMake_TEST_CTestUpdate_SVN)

@@ -462,8 +462,6 @@ public:
   void GenerateSubprojectsOutput(cmXMLWriter& xml);
   std::vector<std::string> GetLabelsForSubprojects();
 
-  void SetRunCurrentScript(bool value);
-
 private:
   void SetPersistentOptionIfNotEmpty(const std::string& value,
                                      const std::string& optionName);
