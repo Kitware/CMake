@@ -1,0 +1,8 @@
+^CMake Error at [^
+]*/Tests/RunCMake/ctest_exit/exit1.cmake:2 \(message\):
+  send error
+
+
+CMake Error at [^
+]*/Tests/RunCMake/ctest_exit/exit1.cmake:2 \(message\):
+  send error$

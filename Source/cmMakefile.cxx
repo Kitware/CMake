@@ -525,7 +525,8 @@ bool cmMakefile::ExecuteCommand(cmListFileFunction const& lff,
           this->IssueMessage(MessageType::FATAL_ERROR, error);
         }
         result = false;
-        if (this->GetCMakeInstance()->GetWorkingMode() != cmake::NORMAL_MODE) {
+        if (this->GetCMakeInstance()->GetCommandFailureAction() ==
+            cmake::CommandFailureAction::FATAL_ERROR) {
           cmSystemTools::SetFatalErrorOccurred();
         }
       }
