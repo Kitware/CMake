@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 if(NOT RunCMake_TEST)
   set(RunCMake_TEST "$ENV{RunCMake_TEST}") # needed when cache is deleted
 endif()
