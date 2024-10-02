@@ -2544,66 +2544,73 @@ void cmVisualStudio10TargetGenerator::WriteAllSources(Elem& e0)
     }
 
     const char* tool = nullptr;
-    switch (si.Kind) {
-      case cmGeneratorTarget::SourceKindAppManifest:
-        tool = "AppxManifest";
-        break;
-      case cmGeneratorTarget::SourceKindCertificate:
-        tool = "None";
-        break;
-      case cmGeneratorTarget::SourceKindCustomCommand:
-        // Handled elsewhere.
-        break;
-      case cmGeneratorTarget::SourceKindExternalObject:
-        tool = "Object";
-        break;
-      case cmGeneratorTarget::SourceKindExtra:
-        this->WriteExtraSource(e1, si.Source, toolSettings);
-        break;
-      case cmGeneratorTarget::SourceKindHeader:
-        this->WriteHeaderSource(e1, si.Source, toolSettings);
-        break;
-      case cmGeneratorTarget::SourceKindIDL:
-        tool = "Midl";
-        break;
-      case cmGeneratorTarget::SourceKindManifest:
-        // Handled elsewhere.
-        break;
-      case cmGeneratorTarget::SourceKindModuleDefinition:
-        tool = "None";
-        break;
-      case cmGeneratorTarget::SourceKindCxxModuleSource:
-      case cmGeneratorTarget::SourceKindUnityBatched:
-      case cmGeneratorTarget::SourceKindObjectSource: {
-        const std::string& lang = si.Source->GetLanguage();
-        if (lang == "C"_s || lang == "CXX"_s) {
-          tool = "ClCompile";
-        } else if (lang == "ASM_MARMASM"_s &&
-                   this->GlobalGenerator->IsMarmasmEnabled()) {
-          tool = "MARMASM";
-        } else if (lang == "ASM_MASM"_s &&
-                   this->GlobalGenerator->IsMasmEnabled()) {
-          tool = "MASM";
-        } else if (lang == "ASM_NASM"_s &&
-                   this->GlobalGenerator->IsNasmEnabled()) {
-          tool = "NASM";
-        } else if (lang == "RC"_s) {
-          tool = "ResourceCompile";
-        } else if (lang == "CSharp"_s) {
-          tool = "Compile";
-        } else if (lang == "CUDA"_s &&
-                   this->GlobalGenerator->IsCudaEnabled()) {
-          tool = "CudaCompile";
-        } else {
+    const cmValue toolOverride = si.Source->GetProperty("VS_TOOL_OVERRIDE");
+
+    if (cmNonempty(toolOverride)) {
+      // Custom tool specified: the file will be built in a user-defined way
+      this->WriteExtraSource(e1, si.Source, toolSettings);
+    } else {
+      switch (si.Kind) {
+        case cmGeneratorTarget::SourceKindAppManifest:
+          tool = "AppxManifest";
+          break;
+        case cmGeneratorTarget::SourceKindCertificate:
           tool = "None";
-        }
-      } break;
-      case cmGeneratorTarget::SourceKindResx:
-        this->ResxObjs.push_back(si.Source);
-        break;
-      case cmGeneratorTarget::SourceKindXaml:
-        this->XamlObjs.push_back(si.Source);
-        break;
+          break;
+        case cmGeneratorTarget::SourceKindCustomCommand:
+          // Handled elsewhere.
+          break;
+        case cmGeneratorTarget::SourceKindExternalObject:
+          tool = "Object";
+          break;
+        case cmGeneratorTarget::SourceKindExtra:
+          this->WriteExtraSource(e1, si.Source, toolSettings);
+          break;
+        case cmGeneratorTarget::SourceKindHeader:
+          this->WriteHeaderSource(e1, si.Source, toolSettings);
+          break;
+        case cmGeneratorTarget::SourceKindIDL:
+          tool = "Midl";
+          break;
+        case cmGeneratorTarget::SourceKindManifest:
+          // Handled elsewhere.
+          break;
+        case cmGeneratorTarget::SourceKindModuleDefinition:
+          tool = "None";
+          break;
+        case cmGeneratorTarget::SourceKindCxxModuleSource:
+        case cmGeneratorTarget::SourceKindUnityBatched:
+        case cmGeneratorTarget::SourceKindObjectSource: {
+          const std::string& lang = si.Source->GetLanguage();
+          if (lang == "C"_s || lang == "CXX"_s) {
+            tool = "ClCompile";
+          } else if (lang == "ASM_MARMASM"_s &&
+                     this->GlobalGenerator->IsMarmasmEnabled()) {
+            tool = "MARMASM";
+          } else if (lang == "ASM_MASM"_s &&
+                     this->GlobalGenerator->IsMasmEnabled()) {
+            tool = "MASM";
+          } else if (lang == "ASM_NASM"_s &&
+                     this->GlobalGenerator->IsNasmEnabled()) {
+            tool = "NASM";
+          } else if (lang == "RC"_s) {
+            tool = "ResourceCompile";
+          } else if (lang == "CSharp"_s) {
+            tool = "Compile";
+          } else if (lang == "CUDA"_s &&
+                     this->GlobalGenerator->IsCudaEnabled()) {
+            tool = "CudaCompile";
+          } else {
+            tool = "None";
+          }
+        } break;
+        case cmGeneratorTarget::SourceKindResx:
+          this->ResxObjs.push_back(si.Source);
+          break;
+        case cmGeneratorTarget::SourceKindXaml:
+          this->XamlObjs.push_back(si.Source);
+          break;
+      }
     }
 
     std::string config;
