@@ -147,6 +147,8 @@ function(android_add_test_data test_name)
 
   if(ANDROID)
     string(REGEX REPLACE "DATA{([^ ;]+)}" "\\1"  processed_FILES "${AST_FILES}")
+    # There's no target used for this command, so we don't need to do anything
+    # here for CMP0178.
     add_test(
       NAME ${test_name}
       COMMAND ${CMAKE_COMMAND}

@@ -1,0 +1,35 @@
+test 1
+    Start 1: launcher_test\.test1
+
+1: Test command: "?[^
+]*[/\]Tests[/\]RunCMake[/\]GoogleTest[/\]Launcher-CMP0178-WARN-build([/\]Debug)?[/\]test_launcher(\.exe)?"? "launcherparam" "--" "[^"]*/Tests/RunCMake/GoogleTest/Launcher-CMP0178-WARN-build(/Debug)?/test_launcher(\.exe)?" "emulatorparam" "--" "[^"]*/Tests/RunCMake/GoogleTest/Launcher-CMP0178-WARN-build(/Debug)?/launcher_test(\.exe)?" "--gtest_filter=launcher_test\.test1" "--gtest_also_run_disabled_tests" "a" "b"
+1: Working Directory: [^
+]*/Tests/RunCMake/GoogleTest/Launcher-CMP0178-WARN-build
+1: Test timeout computed to be: [0-9]+
+1: test_launcher: got arg 0 '[^']*[/\]Tests[/\]RunCMake[/\]GoogleTest[/\]Launcher-CMP0178-WARN-build([/\]Debug)?[/\]test_launcher(\.exe)?'
+1: test_launcher: got arg 1 'launcherparam'
+1: test_launcher: got arg 2 '--'
+1: test_launcher: got arg 3 '[^']*/Tests/RunCMake/GoogleTest/Launcher-CMP0178-WARN-build(/Debug)?/test_launcher(\.exe)?'
+1: launching: "[^"]*/Tests/RunCMake/GoogleTest/Launcher-CMP0178-WARN-build(/Debug)?/test_launcher(\.exe)?" "emulatorparam" "--" "[^"]*/Tests/RunCMake/GoogleTest/Launcher-CMP0178-WARN-build(/Debug)?/launcher_test(\.exe)?" "--gtest_filter=launcher_test\.test1" "--gtest_also_run_disabled_tests" "a" "b"
+1: test_launcher: got arg 0 '[^']*[/\]Tests[/\]RunCMake[/\]GoogleTest[/\]Launcher-CMP0178-WARN-build([/\]Debug)?[/\]test_launcher(\.exe)?'
+1: test_launcher: got arg 1 'emulatorparam'
+1: test_launcher: got arg 2 '--'
+1: test_launcher: got arg 3 '[^']*/Tests/RunCMake/GoogleTest/Launcher-CMP0178-WARN-build(/Debug)?/launcher_test(\.exe)?'
+1: launching: "[^"]*/Tests/RunCMake/GoogleTest/Launcher-CMP0178-WARN-build(/Debug)?/launcher_test(\.exe)?" "--gtest_filter=launcher_test\.test1" "--gtest_also_run_disabled_tests" "a" "b"
+1: launcher_test\.test1
+1/2 Test #1: launcher_test\.test1 [.]+ +Passed +[0-9.]+ sec
+test 2
+    Start 2: launcher_test\.test1
+
+2: Test command: [^
+]*[/\]Tests[/\]RunCMake[/\]GoogleTest[/\]Launcher-CMP0178-WARN-build([/\]Debug)?[/\]test_launcher(\.exe)?"? "launcherparam" "--" "[^"]*/Tests/RunCMake/GoogleTest/Launcher-CMP0178-WARN-build(/Debug)?/launcher_test(\.exe)?" "--gtest_filter=launcher_test\.test1" "a" "b"
+2: Working Directory: [^
+]*/Tests/RunCMake/GoogleTest/Launcher-CMP0178-WARN-build
+2: Test timeout computed to be: [0-9]+
+2: test_launcher: got arg 0 '[^']*[/\]Tests[/\]RunCMake[/\]GoogleTest[/\]Launcher-CMP0178-WARN-build([/\]Debug)?[/\]test_launcher(\.exe)?'
+2: test_launcher: got arg 1 'launcherparam'
+2: test_launcher: got arg 2 '--'
+2: test_launcher: got arg 3 '[^']*/Tests/RunCMake/GoogleTest/Launcher-CMP0178-WARN-build(/Debug)?/launcher_test(\.exe)?'
+2: launching: "[^"]*/Tests/RunCMake/GoogleTest/Launcher-CMP0178-WARN-build(/Debug)?/launcher_test(\.exe)?" "--gtest_filter=launcher_test\.test1" "a" "b"
+2: launcher_test.test1
+2/2 Test #2: launcher_test\.test1 [.]+ +Passed +[0-9.]+ sec

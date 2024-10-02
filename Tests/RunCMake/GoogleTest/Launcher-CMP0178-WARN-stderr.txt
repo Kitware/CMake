@@ -1,0 +1,38 @@
+CMake Warning \(dev\) at [^
+]*/Modules/GoogleTest\.cmake:[0-9]+ \(message\):
+  The 'launcher_test' target's TEST_LAUNCHER or CROSSCOMPILING_EMULATOR test
+  properties contain one or more empty values\.  Those empty values are being
+  silently discarded to preserve backward compatibility\.
+
+  Policy CMP0178 is not set: Test command lines preserve empty arguments\.
+  Run "cmake --help-policy CMP0178" for policy details\.  Use the cmake_policy
+  command to set the policy and suppress this warning\.
+Call Stack \(most recent call first\):
+  Launcher\.cmake:[0-9]+ \(gtest_discover_tests\)
+  Launcher-CMP0178-WARN\.cmake:1 \(include\)
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+
+CMake Warning \(dev\) at [^
+]*/Modules/GoogleTest\.cmake:[0-9]+ \(message\):
+  The EXTRA_ARGS value contains one or more empty values\.  Those empty values
+  are being silently discarded to preserve backward compatibility\.
+
+  Policy CMP0178 is not set: Test command lines preserve empty arguments\.
+  Run "cmake --help-policy CMP0178" for policy details\.  Use the cmake_policy
+  command to set the policy and suppress this warning\.
+Call Stack \(most recent call first\):
+  Launcher\.cmake:[0-9]+ \(gtest_discover_tests\)
+  Launcher-CMP0178-WARN\.cmake:1 \(include\)
+  CMakeLists\.txt:3 \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
+
+CMake Warning \(dev\) in CMakeLists\.txt:
+  The TEST_LAUNCHER property of target 'launcher_test' contains empty list
+  items\.  Those empty items are being silently discarded to preserve backward
+  compatibility\.
+
+  Policy CMP0178 is not set: Test command lines preserve empty arguments\.
+  Run "cmake --help-policy CMP0178" for policy details\.  Use the cmake_policy
+  command to set the policy and suppress this warning\.
+This warning is for project developers\.  Use -Wno-dev to suppress it\.
