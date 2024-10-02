@@ -12,8 +12,6 @@
 
 #include <cm3p/uv.h>
 
-#include "cmsys/Directory.hxx"
-
 #include "cmCTest.h"
 #include "cmCTestBuildCommand.h"
 #include "cmCTestCommand.h"
@@ -36,7 +34,6 @@
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmUVHandlePtr.h"
 #include "cmUVProcessChain.h"
@@ -228,8 +225,8 @@ void cmCTestScriptHandler::CreateCMake()
                         cm::make_unique<cmCTestConfigureCommand>());
   this->AddCTestCommand("ctest_coverage",
                         cm::make_unique<cmCTestCoverageCommand>());
-  this->AddCTestCommand("ctest_empty_binary_directory",
-                        cm::make_unique<cmCTestEmptyBinaryDirectoryCommand>());
+  state->AddBuiltinCommand("ctest_empty_binary_directory",
+                           cmCTestEmptyBinaryDirectoryCommand);
   this->AddCTestCommand("ctest_memcheck",
                         cm::make_unique<cmCTestMemCheckCommand>());
   this->AddCTestCommand("ctest_read_custom_files",
@@ -374,73 +371,6 @@ bool cmCTestScriptHandler::RunScript(cmCTest* ctest, cmMakefile* mf,
     *returnValue = res;
   }
   return true;
-}
-
-bool cmCTestScriptHandler::EmptyBinaryDirectory(const std::string& sname,
-                                                std::string& err)
-{
-  // try to avoid deleting root
-  if (sname.size() < 2) {
-    err = "path too short";
-    return false;
-  }
-
-  // consider non existing target directory a success
-  if (!cmSystemTools::FileExists(sname)) {
-    return true;
-  }
-
-  // try to avoid deleting directories that we shouldn't
-  std::string check = cmStrCat(sname, "/CMakeCache.txt");
-
-  if (!cmSystemTools::FileExists(check)) {
-    err = "path does not contain an existing CMakeCache.txt file";
-    return false;
-  }
-
-  cmsys::Status status;
-  for (int i = 0; i < 5; ++i) {
-    status = TryToRemoveBinaryDirectoryOnce(sname);
-    if (status) {
-      return true;
-    }
-    cmSystemTools::Delay(100);
-  }
-
-  err = status.GetString();
-  return false;
-}
-
-cmsys::Status cmCTestScriptHandler::TryToRemoveBinaryDirectoryOnce(
-  const std::string& directoryPath)
-{
-  cmsys::Directory directory;
-  directory.Load(directoryPath);
-
-  for (unsigned long i = 0; i < directory.GetNumberOfFiles(); ++i) {
-    std::string path = directory.GetFile(i);
-
-    if (path == "." || path == ".." || path == "CMakeCache.txt") {
-      continue;
-    }
-
-    std::string fullPath = cmStrCat(directoryPath, "/", path);
-
-    bool isDirectory = cmSystemTools::FileIsDirectory(fullPath) &&
-      !cmSystemTools::FileIsSymlink(fullPath);
-
-    cmsys::Status status;
-    if (isDirectory) {
-      status = cmSystemTools::RemoveADirectory(fullPath);
-    } else {
-      status = cmSystemTools::RemoveFile(fullPath);
-    }
-    if (!status) {
-      return status;
-    }
-  }
-
-  return cmSystemTools::RemoveADirectory(directoryPath);
 }
 
 cmDuration cmCTestScriptHandler::GetRemainingTimeAllowed()
