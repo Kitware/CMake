@@ -65,4 +65,4 @@ The supported strategies are:
 
   Regardless of the strategy used, the actual linker invocation for
   some platforms may de-duplicate entries based on linker capabilities.
-  See policy :policy:`CMP0156`.
+  See policies :policy:`CMP0156` and :policy:`CMP0179`.

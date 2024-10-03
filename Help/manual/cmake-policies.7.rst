@@ -57,6 +57,7 @@ Policies Introduced by CMake 3.31
 .. toctree::
    :maxdepth: 1
 
+   CMP0179: De-duplication of static libraries on link lines keeps first occurrence. </policy/CMP0179>
    CMP0178: Test command lines preserve empty arguments. </policy/CMP0178>
    CMP0177: install() DESTINATION paths are normalized. </policy/CMP0177>
    CMP0176: execute_process() ENCODING is UTF-8 by default. </policy/CMP0176>
