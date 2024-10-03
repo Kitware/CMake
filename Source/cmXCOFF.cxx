@@ -6,6 +6,7 @@
 #include <cstddef>
 
 #include <cm/memory>
+#include <cm/string_view>
 
 #include "cmsys/FStream.hxx"
 
@@ -283,19 +284,22 @@ cm::optional<cm::string_view> Impl<XCOFF>::GetLibPath()
 template <typename XCOFF>
 bool Impl<XCOFF>::SetLibPath(cm::string_view libPath)
 {
-  // The new LIBPATH must end in the standard AIX LIBPATH.
-#define CM_AIX_LIBPATH "/usr/lib:/lib"
+  // The new LIBPATH must contain standard AIX LIBPATH entries.
   std::string libPathBuf;
-  if (libPath != CM_AIX_LIBPATH &&
-      !cmHasLiteralSuffix(libPath, ":" CM_AIX_LIBPATH)) {
-    libPathBuf = std::string(libPath);
-    if (!libPathBuf.empty() && libPathBuf.back() != ':') {
-      libPathBuf.push_back(':');
-    }
-    libPathBuf += CM_AIX_LIBPATH;
-    libPath = libPathBuf;
+#define ENSURE_ENTRY(x)                                                       \
+  if (libPath != x && !cmHasLiteralPrefix(libPath, x ":") &&                  \
+      !cmHasLiteralSuffix(libPath, ":" x) &&                                  \
+      libPath.find(":" x ":") == std::string::npos) {                         \
+    libPathBuf = std::string(libPath);                                        \
+    if (!libPathBuf.empty() && libPathBuf.back() != ':') {                    \
+      libPathBuf.push_back(':');                                              \
+    }                                                                         \
+    libPathBuf += x;                                                          \
+    libPath = libPathBuf;                                                     \
   }
-#undef CM_AIX_LIBPATH
+  ENSURE_ENTRY("/usr/lib")
+  ENSURE_ENTRY("/lib")
+#undef ENSURE_ENTRY
 
   auto oldEnd = std::find(this->LoaderImportFileTable.begin(),
                           this->LoaderImportFileTable.end(), '\0');
