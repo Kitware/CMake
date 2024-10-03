@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3.20110103)
+cmake_minimum_required(VERSION 3.10)
 project(ForceInclude C)
 
 # Make sure the proper compiler is in use.

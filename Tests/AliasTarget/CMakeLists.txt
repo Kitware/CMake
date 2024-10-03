@@ -1,5 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
-cmake_policy(SET CMP0054 NEW)
+cmake_minimum_required(VERSION 3.10)
 project(AliasTarget)
 
 add_library(foo SHARED empty.cpp)

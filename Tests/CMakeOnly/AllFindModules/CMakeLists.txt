@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.4) # new enough for CMP0017
+cmake_minimum_required(VERSION 3.10)
 project(AllFindModules)
 
 # Avoid ctest truncation of output

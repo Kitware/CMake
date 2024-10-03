@@ -4,7 +4,7 @@
 # are working the executable should relink with the new
 # value.  The subdir Project contains the CMakelists.txt
 # and source files for the test project.
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.10)
 project(BuildDepends)
 
 # This entire test takes place during the initial

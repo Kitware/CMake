@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.10)
 project(VSAndroid C CXX)
 
 set(CMAKE_ANDROID_ARCH armv7-a)

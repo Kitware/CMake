@@ -1,5 +1,5 @@
 # FIXME(#26248): This test is not executed anymore!
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(VSXaml)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)

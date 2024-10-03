@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.10.20130115)
+cmake_minimum_required(VERSION 3.10)
 project(ExternalDataTest NONE)
 
 include(CTest)

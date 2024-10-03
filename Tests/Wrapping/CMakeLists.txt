@@ -1,7 +1,7 @@
 #
 # Wrapping
 #
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required(VERSION 3.10)
 project (Wrapping)
 
 # Disable cleaning of custom command outputs to preserve the hacks
@@ -104,5 +104,7 @@ configure_file(
   ${Wrapping_SOURCE_DIR}/dummy
   ${Wrapping_BINARY_DIR}/gl.h
   COPYONLY)
+block(SCOPE_FOR POLICIES)
+cmake_policy(VERSION 2.8.12) # old enough to not set CMP0030
 use_mangled_mesa (${Wrapping_BINARY_DIR} ${Wrapping_BINARY_DIR}/mangled_mesa)
-
+endblock()

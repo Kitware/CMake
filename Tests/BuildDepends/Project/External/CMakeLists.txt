@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.10)
 project(BuildDependsExternal NONE)
 if(NOT DEFINED external_in)
   message(FATAL_ERROR "Define external_in")

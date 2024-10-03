@@ -1,4 +1,4 @@
-set(min_ver 2.7.20090305)
+set(min_ver 3.10)
 cmake_minimum_required(VERSION ${min_ver})
 
 if("${CMAKE_VERSION}" VERSION_LESS "${min_ver}")

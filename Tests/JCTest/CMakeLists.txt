@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(TestTime)
 enable_testing()
 add_executable(TestTime TestTime.cxx)
