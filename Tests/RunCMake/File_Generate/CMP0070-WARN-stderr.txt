@@ -1,4 +1,11 @@
-^(CMake Warning \(dev\) in CMakeLists.txt:
+^CMake Deprecation Warning at CMakeLists.txt:[0-9]+ \(cmake_policy\):
+  Compatibility with CMake < 3\.10 will be removed from a future version of
+  CMake\.
+
+  Update the VERSION argument <min> value or use a \.\.\.<max> suffix to tell
+  CMake that the project does not need compatibility with older versions\.
++
+(CMake Warning \(dev\) in CMakeLists.txt:
   Policy CMP0070 is not set: Define file\(GENERATE\) behavior for relative
   paths.  Run "cmake --help-policy CMP0070" for policy details.  Use the
   cmake_policy command to set the policy and suppress this warning.
