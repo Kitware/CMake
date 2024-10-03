@@ -5,4 +5,4 @@ CMake Error at FILTER-InvalidOperator.cmake:3 \(file\):
 
   \$<FILTER:...> second parameter must be either INCLUDE or EXCLUDE
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

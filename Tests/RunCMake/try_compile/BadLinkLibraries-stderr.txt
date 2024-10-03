@@ -2,4 +2,4 @@ CMake Error at BadLinkLibraries.cmake:[0-9]+ \(try_compile\):
   Only libraries may be used as try_compile or try_run IMPORTED
   LINK_LIBRARIES.  Got not_a_library of type UTILITY.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

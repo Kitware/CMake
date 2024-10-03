@@ -5,7 +5,7 @@ CMake Error at BadIF.cmake:2 \(add_custom_target\):
 
   First parameter to \$<IF> must resolve to exactly one '0' or '1' value.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Error at BadIF.cmake:2 \(add_custom_target\):
   Error evaluating generator expression:

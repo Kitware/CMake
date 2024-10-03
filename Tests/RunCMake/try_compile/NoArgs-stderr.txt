@@ -1,4 +1,4 @@
 CMake Error at NoArgs.cmake:[0-9]+ \(try_compile\):
   The try_compile\(\) command requires at least 3 arguments.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
