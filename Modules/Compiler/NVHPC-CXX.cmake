@@ -20,4 +20,11 @@ else()
   # can't occur in the same invocation
   set(CMAKE_CXX_DEPENDS_EXTRA_COMMANDS "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUDES> <FLAGS> -x c++ -M <SOURCE> -MT <OBJECT> -MD<DEP_FILE>")
 endif()
+
+if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 24.9)
+  set(CMAKE_CXX23_STANDARD_COMPILE_OPTION -std=c++23)
+  set(CMAKE_CXX23_EXTENSION_COMPILE_OPTION -std=c++23) # -std=gnu++23 is missing
+  set(CMAKE_CXX_STANDARD_LATEST 23)
+endif()
+
 __compiler_nvhpc(CXX)
