@@ -186,7 +186,8 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
   more fine-grained test control is needed, custom content may be provided
   through an external CTest script using the :prop_dir:`TEST_INCLUDE_FILES`
   directory property.  The set of discovered tests is made accessible to such a
-  script via the ``<target>_TESTS`` variable.
+  script via the ``<target>_TESTS`` variable (see the ``TEST_LIST`` option
+  below for further discussion and limitations).
 
   The options are:
 
@@ -246,6 +247,11 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     default ``<target>_TESTS``.  This can be useful when the same test
     executable is being used in multiple calls to ``gtest_discover_tests()``.
     Note that this variable is only available in CTest.
+
+    Due to a limitation of CMake's parsing rules, any test with a square
+    bracket in its name will be omitted from the list of tests stored in
+    this variable.  Such tests will still be defined and executed by
+    ``ctest`` as normal though.
 
   ``DISCOVERY_TIMEOUT num``
     .. versionadded:: 3.10.3
