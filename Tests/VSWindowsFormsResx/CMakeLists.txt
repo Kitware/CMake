@@ -4,7 +4,7 @@
 # Code modifications and example by John Farrier, john.farrier@helleboreconsulting.com
 #
 
-cmake_minimum_required(VERSION 2.8.10)
+cmake_minimum_required(VERSION 3.10)
 
 # Project Name
 project(VSWindowsFormsResx CXX)

@@ -22,7 +22,7 @@ elseif(testname STREQUAL bad_endfunction) # fail
   do_end("endfunction()\n")
 
 elseif(testname STREQUAL bad_endif) # fail
-  do_end("cmake_minimum_required(VERSION 3.5)\nendif()\n")
+  do_end("cmake_minimum_required(VERSION 3.10)\nendif()\n")
 
 elseif(testname STREQUAL endif_low_min_version) # fail
   do_end("cmake_minimum_required(VERSION 1.2)\nendif()\n")

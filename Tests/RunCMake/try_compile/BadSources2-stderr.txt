@@ -9,4 +9,4 @@ CMake Error at BadSources2.cmake:[0-9]+ \(try_compile\):
 
   See project\(\) command to enable other languages.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

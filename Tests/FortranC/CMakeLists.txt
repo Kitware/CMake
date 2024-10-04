@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(FortranC C Fortran)
 
 # Skip this test for compilers not known to be compatible.

@@ -19,8 +19,11 @@ set(STRING_VAR "CMake is great" CACHE STRING "test a cache variable")
 #
 # Test VARIABLE_REQUIRES
 #
+block(SCOPE_FOR POLICIES)
+cmake_policy(VERSION 2.8.12) # old enough to not set CMP0035
 variable_requires(ONE_VAR
                   ONE_VAR_IS_DEFINED ONE_VAR)
+endblock()
 
 #
 # Test various IF/ELSE combinations

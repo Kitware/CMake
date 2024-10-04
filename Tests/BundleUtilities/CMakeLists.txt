@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(BundleUtilities)
 
 if(CMAKE_GENERATOR STREQUAL "Xcode" AND

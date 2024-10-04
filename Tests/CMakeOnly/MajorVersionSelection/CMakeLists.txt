@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 
 if (NOT MAJOR_TEST_MODULE OR NOT MAJOR_TEST_VERSION)
   message(FATAL_ERROR "test selection variables not set up")

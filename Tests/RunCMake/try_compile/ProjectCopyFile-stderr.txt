@@ -4,4 +4,4 @@ CMake Warning \(dev\) at ProjectCopyFile.cmake:[0-9]+ \(try_compile\):
     "COPY_FILE"
     "result"
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

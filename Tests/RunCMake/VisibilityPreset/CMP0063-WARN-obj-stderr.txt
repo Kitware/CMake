@@ -1,3 +1,10 @@
+^CMake Deprecation Warning at CMakeLists.txt:[0-9]+ \(cmake_policy\):
+  Compatibility with CMake < 3\.10 will be removed from a future version of
+  CMake\.
+
+  Update the VERSION argument <min> value or use a \.\.\.<max> suffix to tell
+  CMake that the project does not need compatibility with older versions\.
++
 CMake Warning \(dev\) at CMP0063-WARN-obj.cmake:[0-9]+ \(add_library\):
   Policy CMP0063 is not set: Honor visibility properties for all target
   types.  Run "cmake --help-policy CMP0063" for policy details.  Use the

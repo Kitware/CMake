@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.4.20110303 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10)
 if(POLICY CMP0129)
   cmake_policy(SET CMP0129 NEW)
 endif()

@@ -1,4 +1,4 @@
 CMake Error at NonSourceCompileDefinitions.cmake:[0-9]+ \(try_compile\):
   COMPILE_DEFINITIONS allowed only in source file signature
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

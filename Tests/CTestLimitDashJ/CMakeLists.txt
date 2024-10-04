@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(CTestLimitDashJ NONE)
 
 # This file demonstrates https://gitlab.kitware.com/cmake/cmake/-/issues/12904

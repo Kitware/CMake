@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.9)
+cmake_minimum_required(VERSION 3.10)
 project(FortranModules Fortran)
 
 if("${CMAKE_Fortran_COMPILER_ID};${CMAKE_Fortran_SIMULATE_ID}" MATCHES "^Intel(LLVM)?;MSVC$")

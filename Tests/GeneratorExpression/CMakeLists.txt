@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.8)
+cmake_minimum_required(VERSION 3.10)
 project(GeneratorExpression)
 
 include(CTest)
@@ -504,3 +504,5 @@ if(NOT CMAKE_GENERATOR STREQUAL Xcode OR NOT CMAKE_OSX_ARCHITECTURES MATCHES "[;
     DEPENDS execobjs
   )
 endif()
+
+cmake_policy(VERSION 2.8.12) # old enough to not set CMP0044

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5...3.25) # Enable CMP0091 and CMP0141.
+cmake_minimum_required(VERSION 3.10...3.25) # Enable CMP0091 and CMP0141.
 project(FortranOnly Fortran)
 message("CTEST_FULL_OUTPUT ")
 

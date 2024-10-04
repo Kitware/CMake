@@ -121,7 +121,7 @@ if("${CMAKE_GENERATOR}" MATCHES "Makefile" AND CMAKE_MAKE_PROGRAM)
 
     # Custom target to try preprocessing invocation.
     add_custom_target(test_preprocess ${MAYBE_ALL}
-      COMMAND ${CMAKE_COMMAND} -E rm -f CMakeFiles/create_file.dir/create_file.i
+      COMMAND ${CMAKE_COMMAND} -E rm -f CMakeFiles/create_file.dir/create_file.cxx.i
       COMMAND ${CMAKE_MAKE_PROGRAM} create_file.i
       COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/test_preprocess.cmake
       WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}

@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project( Dependency )
 
 # to test directories with only one character One was changed to 1

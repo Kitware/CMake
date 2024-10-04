@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10)
 
 include(RunCMake)
 include("${RunCMake_SOURCE_DIR}/CPackTestHelpers.cmake")

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6)
+cmake_minimum_required(VERSION 3.10)
 project(Policy0002 C)
 cmake_policy(SET CMP0002 OLD)
 add_subdirectory(A)

@@ -5,7 +5,7 @@ CMake Error at BadTargetTypeObject.cmake:2 \(add_custom_target\):
 
   Target "objlib" is not an executable or library.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Error at BadTargetTypeObject.cmake:2 \(add_custom_target\):
   Error evaluating generator expression:
@@ -14,7 +14,7 @@ CMake Error at BadTargetTypeObject.cmake:2 \(add_custom_target\):
 
   Target "objlib" is not an executable or library.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Error at BadTargetTypeObject.cmake:2 \(add_custom_target\):
   Error evaluating generator expression:
@@ -23,4 +23,4 @@ CMake Error at BadTargetTypeObject.cmake:2 \(add_custom_target\):
 
   Target "objlib" is not an executable or library.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

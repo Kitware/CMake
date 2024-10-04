@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(FortranHello Fortran C)
 
 # add a function to test for -lsunquad on sunpro sun systems.

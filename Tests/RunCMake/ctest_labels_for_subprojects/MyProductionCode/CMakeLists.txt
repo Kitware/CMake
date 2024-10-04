@@ -1,5 +1,5 @@
+cmake_minimum_required(VERSION 3.10)
 project(MyProductionCode)
-cmake_minimum_required(VERSION 3.8)
 
 include(CTest)
 

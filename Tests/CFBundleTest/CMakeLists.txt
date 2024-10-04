@@ -1,8 +1,7 @@
-#this is adapted from FireBreath (http://www.firebreath.org)
-
-cmake_minimum_required(VERSION 3.5)
-
+cmake_minimum_required(VERSION 3.10)
 project(CFBundleTest)
+
+#this is adapted from FireBreath (http://www.firebreath.org)
 
 include(PluginConfig.cmake)
 

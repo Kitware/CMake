@@ -5,7 +5,7 @@ CMake Error at BadNOT.cmake:1 \(add_custom_target\):
 
   \$<NOT> expression requires exactly one parameter.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +CMake Error at BadNOT.cmake:1 \(add_custom_target\):
   Error evaluating generator expression:
 
@@ -13,7 +13,7 @@ Call Stack \(most recent call first\):
 
   \$<NOT> parameter must resolve to exactly one '0' or '1' value.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Error at BadNOT.cmake:1 \(add_custom_target\):
   Error evaluating generator expression:
@@ -22,7 +22,7 @@ CMake Error at BadNOT.cmake:1 \(add_custom_target\):
 
   \$<NOT> expression requires exactly one parameter.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Error at BadNOT.cmake:1 \(add_custom_target\):
   Error evaluating generator expression:
@@ -31,7 +31,7 @@ CMake Error at BadNOT.cmake:1 \(add_custom_target\):
 
   \$<NOT> expression requires exactly one parameter.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Error at BadNOT.cmake:1 \(add_custom_target\):
   Error evaluating generator expression:
@@ -40,7 +40,7 @@ CMake Error at BadNOT.cmake:1 \(add_custom_target\):
 
   \$<NOT> parameter must resolve to exactly one '0' or '1' value.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Error at BadNOT.cmake:1 \(add_custom_target\):
   Error evaluating generator expression:
@@ -49,6 +49,6 @@ CMake Error at BadNOT.cmake:1 \(add_custom_target\):
 
   \$<NOT> parameter must resolve to exactly one '0' or '1' value.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Generate step failed\.  Build files cannot be regenerated correctly\.$

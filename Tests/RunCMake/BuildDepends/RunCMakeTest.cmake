@@ -130,7 +130,7 @@ function(run_ReGeneration)
   file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
   file(REMOVE_RECURSE "${RunCMake_TEST_SOURCE_DIR}")
   set(ProjectHeader [=[
-    cmake_minimum_required(VERSION 3.5)
+    cmake_minimum_required(VERSION 3.10)
     project(Regenerate-Project NONE)
   ]=])
 

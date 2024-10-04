@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 set(CTEST_SOURCE_DIRECTORY              "@RunCMake_BINARY_DIR@/@CASE_NAME@")
 set(CTEST_BINARY_DIRECTORY              "@RunCMake_BINARY_DIR@/@CASE_NAME@-build")
 ctest_empty_binary_directory(${CTEST_BINARY_DIRECTORY})
