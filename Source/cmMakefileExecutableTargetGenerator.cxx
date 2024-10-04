@@ -370,7 +370,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Add flags to create an executable.
   this->LocalGenerator->AddConfigVariableFlags(
-    linkFlags, "CMAKE_EXE_LINKER_FLAGS", this->GetConfigName());
+    linkFlags, "CMAKE_EXE_LINKER_FLAGS", this->GeneratorTarget,
+    cmBuildStep::Link, linkLanguage, this->GetConfigName());
 
   if (this->GeneratorTarget->IsWin32Executable(
         this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"))) {

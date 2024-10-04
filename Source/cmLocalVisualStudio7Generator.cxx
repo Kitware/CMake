@@ -664,16 +664,16 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   }
   std::string flags;
   std::string langForClCompile;
+  const std::string& linkLanguage =
+    (this->FortranProject ? std::string("Fortran")
+                          : target->GetLinkerLanguage(configName));
+  if (linkLanguage.empty()) {
+    cmSystemTools::Error(
+      cmStrCat("CMake can not determine linker language for target: ",
+               target->GetName()));
+    return;
+  }
   if (target->GetType() <= cmStateEnums::OBJECT_LIBRARY) {
-    const std::string& linkLanguage =
-      (this->FortranProject ? std::string("Fortran")
-                            : target->GetLinkerLanguage(configName));
-    if (linkLanguage.empty()) {
-      cmSystemTools::Error(
-        cmStrCat("CMake can not determine linker language for target: ",
-                 target->GetName()));
-      return;
-    }
     langForClCompile = linkLanguage;
     if (langForClCompile == "C" || langForClCompile == "CXX" ||
         langForClCompile == "Fortran") {
@@ -957,26 +957,14 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
   }
 
   this->OutputTargetRules(fout, configName, target, libName);
-  this->OutputBuildTool(fout, configName, target, targetOptions);
+  this->OutputBuildTool(fout, linkLanguage, configName, target, targetOptions);
   this->OutputDeploymentDebuggerTool(fout, configName, target);
   fout << "\t\t</Configuration>\n";
 }
 
-std::string cmLocalVisualStudio7Generator::GetBuildTypeLinkerFlags(
-  std::string const& rootLinkerFlags, const std::string& configName)
-{
-  std::string configTypeUpper = cmSystemTools::UpperCase(configName);
-  std::string extraLinkOptionsBuildTypeDef =
-    cmStrCat(rootLinkerFlags, '_', configTypeUpper);
-
-  const std::string& extraLinkOptionsBuildType =
-    this->Makefile->GetRequiredDefinition(extraLinkOptionsBuildTypeDef);
-
-  return extraLinkOptionsBuildType;
-}
-
 void cmLocalVisualStudio7Generator::OutputBuildTool(
-  std::ostream& fout, const std::string& configName, cmGeneratorTarget* target,
+  std::ostream& fout, const std::string& linkLanguage,
+  const std::string& configName, cmGeneratorTarget* target,
   const Options& targetOptions)
 {
   cmGlobalVisualStudio7Generator* gg =
@@ -984,19 +972,19 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
   std::string temp;
   std::string extraLinkOptions;
   if (target->GetType() == cmStateEnums::EXECUTABLE) {
-    extraLinkOptions = cmStrCat(
-      this->Makefile->GetRequiredDefinition("CMAKE_EXE_LINKER_FLAGS"), ' ',
-      GetBuildTypeLinkerFlags("CMAKE_EXE_LINKER_FLAGS", configName));
+    this->AddConfigVariableFlags(extraLinkOptions, "CMAKE_EXE_LINKER_FLAGS",
+                                 target, cmBuildStep::Link, linkLanguage,
+                                 configName);
   }
   if (target->GetType() == cmStateEnums::SHARED_LIBRARY) {
-    extraLinkOptions = cmStrCat(
-      this->Makefile->GetRequiredDefinition("CMAKE_SHARED_LINKER_FLAGS"), ' ',
-      GetBuildTypeLinkerFlags("CMAKE_SHARED_LINKER_FLAGS", configName));
+    this->AddConfigVariableFlags(extraLinkOptions, "CMAKE_SHARED_LINKER_FLAGS",
+                                 target, cmBuildStep::Link, linkLanguage,
+                                 configName);
   }
   if (target->GetType() == cmStateEnums::MODULE_LIBRARY) {
-    extraLinkOptions = cmStrCat(
-      this->Makefile->GetRequiredDefinition("CMAKE_MODULE_LINKER_FLAGS"), ' ',
-      GetBuildTypeLinkerFlags("CMAKE_MODULE_LINKER_FLAGS", configName));
+    this->AddConfigVariableFlags(extraLinkOptions, "CMAKE_MODULE_LINKER_FLAGS",
+                                 target, cmBuildStep::Link, linkLanguage,
+                                 configName);
   }
 
   cmValue targetLinkFlags = target->GetProperty("LINK_FLAGS");
@@ -1089,7 +1077,6 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
         return;
       }
       cmComputeLinkInformation& cli = *pcli;
-      std::string linkLanguage = cli.GetLinkLanguage();
 
       if (!target->GetLinkerTypeProperty(linkLanguage, configName).empty()) {
         // Visual Studio 10 or upper is required for this feature
@@ -1173,7 +1160,6 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
         return;
       }
       cmComputeLinkInformation& cli = *pcli;
-      std::string linkLanguage = cli.GetLinkLanguage();
 
       if (!target->GetLinkerTypeProperty(linkLanguage, configName).empty()) {
         // Visual Studio 10 or upper is required for this feature

@@ -2538,7 +2538,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   }
   if (!extraLinkOptionsVar.empty()) {
     this->CurrentLocalGenerator->AddConfigVariableFlags(
-      extraLinkOptions, extraLinkOptionsVar, configName);
+      extraLinkOptions, extraLinkOptionsVar, gtgt, cmBuildStep::Link, llang,
+      configName);
   }
 
   if (gtgt->GetType() == cmStateEnums::OBJECT_LIBRARY ||

@@ -910,6 +910,14 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
         ? "OLD"
         : "NEW");
 
+    /* Set the appropriate policy information for the LINKER: prefix expansion
+     */
+    fprintf(fout, "cmake_policy(SET CMP0181 %s)\n",
+            this->Makefile->GetPolicyStatus(cmPolicies::CMP0181) ==
+                cmPolicies::NEW
+              ? "NEW"
+              : "OLD");
+
     // Workaround for -Wl,-headerpad_max_install_names issue until we can avoid
     // adding that flag in the platform and compiler language files
     fprintf(fout,

@@ -174,6 +174,12 @@ public:
                                 const std::string& lang);
   void AddConfigVariableFlags(std::string& flags, const std::string& var,
                               const std::string& config);
+  // Handle prefixes processing (like LINKER:)
+  void AddConfigVariableFlags(std::string& flags, const std::string& var,
+                              cmGeneratorTarget const* target,
+                              cmBuildStep compileOrLink,
+                              const std::string& lang,
+                              const std::string& config);
   void AddColorDiagnosticsFlags(std::string& flags, const std::string& lang);
   //! Append flags to a string.
   virtual void AppendFlags(std::string& flags,
@@ -182,6 +188,13 @@ public:
                            const std::vector<BT<std::string>>& newFlags) const;
   virtual void AppendFlagEscape(std::string& flags,
                                 const std::string& rawFlag) const;
+  /**
+   * Append flags after parsing, prefixes processing (like LINKER:) and
+   * escaping
+   */
+  void AppendFlags(std::string& flags, std::string const& newFlags,
+                   const std::string& name, const cmGeneratorTarget* target,
+                   cmBuildStep compileOrLink, const std::string& lang);
   void AddISPCDependencies(cmGeneratorTarget* target);
   void AddPchDependencies(cmGeneratorTarget* target);
   void AddUnityBuild(cmGeneratorTarget* target);

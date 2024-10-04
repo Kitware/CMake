@@ -552,7 +552,10 @@ class cmMakefile;
          3, 31, 0, cmPolicies::WARN)                                          \
   SELECT(POLICY, CMP0180,                                                     \
          "project() always sets <PROJECT-NAME>_* as normal variables.", 3,    \
-         31, 0, cmPolicies::WARN)
+         31, 0, cmPolicies::WARN)                                             \
+  SELECT(POLICY, CMP0181,                                                     \
+         "Link command-line fragment variables are parsed and re-quoted.", 3, \
+         32, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -597,7 +600,8 @@ class cmMakefile;
   F(CMP0157)                                                                  \
   F(CMP0160)                                                                  \
   F(CMP0162)                                                                  \
-  F(CMP0179)
+  F(CMP0179)                                                                  \
+  F(CMP0181)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \

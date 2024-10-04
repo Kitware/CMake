@@ -51,6 +51,14 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
+Policies Introduced by CMake 3.32
+=================================
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0181: Link command-line fragment variables are parsed and re-quoted. </policy/CMP0181>
+
 Policies Introduced by CMake 3.31
 =================================
 
