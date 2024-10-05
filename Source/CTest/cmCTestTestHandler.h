@@ -228,6 +228,11 @@ public:
   // Support for writing test results in JUnit XML format.
   void SetJUnitXMLFileName(const std::string& id);
 
+  /**
+   * Set CMake variables from CTest Options
+   */
+  void SetCMakeVariables(cmMakefile& mf);
+
 protected:
   using SetOfTests =
     std::set<cmCTestTestHandler::cmCTestTestResult, cmCTestTestResultLess>;

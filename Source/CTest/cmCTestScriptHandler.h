@@ -112,6 +112,7 @@ public:
 
   void CreateCMake();
   cmake* GetCMake() { return this->CMake.get(); }
+  cmMakefile* GetMakefile() { return this->Makefile.get(); }
 
   void SetRunCurrentScript(bool value);
 

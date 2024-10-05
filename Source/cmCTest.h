@@ -331,6 +331,11 @@ public:
                                               const std::string& cmake_var,
                                               bool suppress = false);
 
+  /**
+   * Set CMake variables from CTest Options
+   */
+  void SetCMakeVariables(cmMakefile& mf);
+
   /** Decode a URL to the original string.  */
   static std::string DecodeURL(const std::string&);
 
