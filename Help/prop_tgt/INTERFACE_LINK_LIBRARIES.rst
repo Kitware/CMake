@@ -32,6 +32,8 @@ direct link dependencies of a target's dependents by using the
 :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT` and
 :prop_tgt:`INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE` target properties.
 
+.. include:: ../command/LINK_LIBRARIES_LINKER.txt
+
 Creating Relocatable Packages
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

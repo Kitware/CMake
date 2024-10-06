@@ -1883,6 +1883,7 @@ void cmComputeLinkInformation::AddUserItem(LinkEntry const& entry,
   //   foo       ==>  -lfoo
   //   libfoo.a  ==>  -Wl,-Bstatic -lfoo
 
+  const cm::string_view LINKER{ "LINKER:" };
   BT<std::string> const& item = entry.Item;
 
   if (item.Value[0] == '-' || item.Value[0] == '$' || item.Value[0] == '`') {
@@ -1903,6 +1904,13 @@ void cmComputeLinkInformation::AddUserItem(LinkEntry const& entry,
 
     // Use the item verbatim.
     this->Items.emplace_back(item, ItemIsPath::No);
+    return;
+  }
+  if (cmHasPrefix(item.Value, LINKER)) {
+    std::vector<BT<std::string>> linkerFlag{ 1, item };
+    this->Target->ResolveLinkerWrapper(linkerFlag, this->GetLinkLanguage(),
+                                       true);
+    this->Items.emplace_back(linkerFlag.front(), ItemIsPath::No);
     return;
   }
 

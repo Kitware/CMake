@@ -148,6 +148,8 @@ command lines.
 See the :manual:`cmake-buildsystem(7)` manual for more on defining
 buildsystem properties.
 
+.. include:: ../command/LINK_LIBRARIES_LINKER.txt
+
 Libraries for a Target and/or its Dependents
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
