@@ -1,0 +1,16 @@
+(-- )?From subdir1:
+  CMP0180-NEW_SOURCE_DIR = [^
+]+/project/subdir1
+  CMP0180-NEW_BINARY_DIR = [^
+]+/project/CMP0180-NEW-build/subdir1
+  CMP0180-NEW_IS_TOP_LEVEL = OFF
+(-- )?From subdir2:
+  CMP0180-NEW_SOURCE_DIR = [^
+]+/project
+  CMP0180-NEW_BINARY_DIR = [^
+]+/project/CMP0180-NEW-build
+  CMP0180-NEW_IS_TOP_LEVEL = ON
+(-- )?  sub2proj_SOURCE_DIR = [^
+]+/project/subdir2
+  sub2proj_BINARY_DIR = [^
+]+/project/CMP0180-NEW-build/subdir2
