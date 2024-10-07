@@ -5,7 +5,7 @@
 FindAVIFile
 -----------
 
-Locate `AVIFILE <https://sourceforge.net/projects/avifile/>`_
+Locate `AVIFILE <https://avifile.sourceforge.net/>`_
 library and include paths.
 
 AVIFILE is a set of libraries for
