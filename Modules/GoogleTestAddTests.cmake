@@ -83,6 +83,7 @@ function(gtest_discover_tests_impl)
     # way to avoid problems with preserving empty list values and escaping.
     TEST_FILTER
     TEST_EXTRA_ARGS
+    TEST_DISCOVERY_EXTRA_ARGS
     TEST_PROPERTIES
     TEST_EXECUTOR
   )
@@ -121,9 +122,16 @@ function(gtest_discover_tests_impl)
       "  Path: '${arg_TEST_EXECUTABLE}'"
     )
   endif()
+
+  set(discovery_extra_args "")
+  if(NOT "${arg_TEST_DISCOVERY_EXTRA_ARGS}" STREQUAL "")
+    list(JOIN arg_TEST_DISCOVERY_EXTRA_ARGS "]==] [==[" discovery_extra_args)
+    set(discovery_extra_args "[==[${discovery_extra_args}]==]")
+  endif()
+
   cmake_language(EVAL CODE
     "execute_process(
-      COMMAND ${launcherArgs} [==[${arg_TEST_EXECUTABLE}]==] --gtest_list_tests ${filter}
+      COMMAND ${launcherArgs} [==[${arg_TEST_EXECUTABLE}]==] --gtest_list_tests ${filter} ${discovery_extra_args}
       WORKING_DIRECTORY [==[${arg_TEST_WORKING_DIR}]==]
       TIMEOUT ${arg_TEST_DISCOVERY_TIMEOUT}
       OUTPUT_VARIABLE output
@@ -286,6 +294,7 @@ if(CMAKE_SCRIPT_MODE_FILE)
     TEST_DISCOVERY_TIMEOUT ${TEST_DISCOVERY_TIMEOUT}
     TEST_XML_OUTPUT_DIR ${TEST_XML_OUTPUT_DIR}
     TEST_EXTRA_ARGS "${TEST_EXTRA_ARGS}"
+    TEST_DISCOVERY_EXTRA_ARGS "${TEST_DISCOVERY_EXTRA_ARGS}"
     TEST_PROPERTIES "${TEST_PROPERTIES}"
   )
 endif()

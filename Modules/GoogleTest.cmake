@@ -166,6 +166,7 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
                          [DISCOVERY_TIMEOUT seconds]
                          [XML_OUTPUT_DIR dir]
                          [DISCOVERY_MODE <POST_BUILD|PRE_TEST>]
+                         [DISCOVERY_EXTRA_ARGS args...]
     )
 
   .. versionadded:: 3.10
@@ -186,7 +187,8 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
   more fine-grained test control is needed, custom content may be provided
   through an external CTest script using the :prop_dir:`TEST_INCLUDE_FILES`
   directory property.  The set of discovered tests is made accessible to such a
-  script via the ``<target>_TESTS`` variable.
+  script via the ``<target>_TESTS`` variable (see the ``TEST_LIST`` option
+  below for further discussion and limitations).
 
   The options are:
 
@@ -247,6 +249,11 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     executable is being used in multiple calls to ``gtest_discover_tests()``.
     Note that this variable is only available in CTest.
 
+    Due to a limitation of CMake's parsing rules, any test with a square
+    bracket in its name will be omitted from the list of tests stored in
+    this variable.  Such tests will still be defined and executed by
+    ``ctest`` as normal though.
+
   ``DISCOVERY_TIMEOUT num``
     .. versionadded:: 3.10.3
 
@@ -293,6 +300,11 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     passed when calling ``gtest_discover_tests()``. This provides a mechanism
     for globally selecting a preferred test discovery behavior without having
     to modify each call site.
+
+  ``DISCOVERY_EXTRA_ARGS args...``
+    .. versionadded:: 3.31
+
+    Any extra arguments to pass on the command line for the discovery command.
 
   .. versionadded:: 3.29
     The :prop_tgt:`TEST_LAUNCHER` target property is honored during test
@@ -540,6 +552,7 @@ function(gtest_discover_tests target)
   )
   set(multiValueArgs
     EXTRA_ARGS
+    DISCOVERY_EXTRA_ARGS
     PROPERTIES
     TEST_FILTER
   )
@@ -664,6 +677,7 @@ function(gtest_discover_tests target)
               -D "TEST_LIST=${arg_TEST_LIST}"
               -D "CTEST_FILE=${ctest_tests_file}"
               -D "TEST_DISCOVERY_TIMEOUT=${arg_DISCOVERY_TIMEOUT}"
+              -D "TEST_DISCOVERY_EXTRA_ARGS=${arg_DISCOVERY_EXTRA_ARGS}"
               -D "TEST_XML_OUTPUT_DIR=${arg_XML_OUTPUT_DIR}"
               -P "${CMAKE_ROOT}/Modules/GoogleTestAddTests.cmake"
       VERBATIM
@@ -706,6 +720,7 @@ function(gtest_discover_tests target)
       "      TEST_LIST"              " [==[${arg_TEST_LIST}]==]"                   "\n"
       "      CTEST_FILE"             " [==[${ctest_tests_file}]==]"                "\n"
       "      TEST_DISCOVERY_TIMEOUT" " [==[${arg_DISCOVERY_TIMEOUT}]==]"           "\n"
+      "      TEST_DISCOVERY_EXTRA_ARGS [==[${arg_DISCOVERY_EXTRA_ARGS}]==]"        "\n"
       "      TEST_XML_OUTPUT_DIR"    " [==[${arg_XML_OUTPUT_DIR}]==]"              "\n"
       "    )"                                                                      "\n"
       "  endif()"                                                                  "\n"
