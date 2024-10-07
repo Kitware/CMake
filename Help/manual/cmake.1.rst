@@ -31,7 +31,7 @@ Synopsis
   cmake --find-package [<options>]
 
  `Run a Workflow Preset`_
-  cmake --workflow [<options>]
+  cmake --workflow <options>
 
  `View Help`_
   cmake --help[-<topic>]
@@ -1394,7 +1394,7 @@ build steps in order:
 
 .. code-block:: shell
 
-  cmake --workflow [<options>]
+  cmake --workflow <options>
 
 The options are:
 
@@ -1410,6 +1410,15 @@ The options are:
   is inferred from the initial configure preset. The current working directory
   must contain CMake preset files.
   See :manual:`preset <cmake-presets(7)>` for more details.
+
+  .. versionchanged:: 3.31
+    When following immediately after the ``--workflow`` option,
+    the ``--preset`` argument can be omitted and just the ``<preset>``
+    name can be given.  This means the following syntax is valid:
+
+    .. code-block:: console
+
+      $ cmake --workflow my-preset
 
 .. option:: --list-presets
 
