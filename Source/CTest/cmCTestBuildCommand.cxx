@@ -24,7 +24,6 @@ std::unique_ptr<cmCommand> cmCTestBuildCommand::Clone()
 {
   auto ni = cm::make_unique<cmCTestBuildCommand>();
   ni->CTest = this->CTest;
-  ni->CTestScriptHandler = this->CTestScriptHandler;
   return std::unique_ptr<cmCommand>(std::move(ni));
 }
 

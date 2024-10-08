@@ -33,7 +33,6 @@ public:
   {
     auto ni = cm::make_unique<cmCTestStartCommand>();
     ni->CTest = this->CTest;
-    ni->CTestScriptHandler = this->CTestScriptHandler;
     ni->CreateNewTag = this->CreateNewTag;
     ni->Quiet = this->Quiet;
     return std::unique_ptr<cmCommand>(std::move(ni));

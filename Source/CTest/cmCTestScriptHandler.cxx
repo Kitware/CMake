@@ -108,7 +108,6 @@ void cmCTestScriptHandler::AddCTestCommand(
   std::string const& name, std::unique_ptr<cmCTestCommand> command)
 {
   command->CTest = this->CTest;
-  command->CTestScriptHandler = this;
   this->CMake->GetState()->AddBuiltinCommand(name, std::move(command));
 }
 
