@@ -44,11 +44,27 @@ Projects should not rely on ``<PROJECT-NAME>_SOURCE_DIR`` or
 ``<PROJECT-NAME>_BINARY_DIR`` holding a particular value outside of the scope
 of the call to ``project()`` or one of its child scopes.
 
+.. versionchanged:: 3.30.3
+  ``<PROJECT-NAME>_SOURCE_DIR``, ``<PROJECT-NAME>_BINARY_DIR``, and
+  ``<PROJECT-NAME>_IS_TOP_LEVEL`` are always set as non-cache variables by
+  ``project(<PROJECT-NAME> ...)``.
+
 .. versionchanged:: 3.30.4
-  If the variables ``<PROJECT-NAME>_SOURCE_DIR``,
-  ``<PROJECT-NAME>_BINARY_DIR``, or ``<PROJECT-NAME>_IS_TOP_LEVEL`` are
-  already set as non-cache variables when ``project(<PROJECT-NAME> ...)``
-  is called, the ``project()`` command will overwrite the previous values.
+  The variables ``<PROJECT-NAME>_SOURCE_DIR``, ``<PROJECT-NAME>_BINARY_DIR``,
+  and ``<PROJECT-NAME>_IS_TOP_LEVEL`` are only set as non-cache variables if
+  they are already set as cache or non-cache variables when
+  ``project(<PROJECT-NAME> ...)`` is called.
+  Note that this logic is flawed, as it can result in different behavior
+  between the first and subsequent runs because cache variables won't exist
+  on the first run, but they will on subsequent runs.
+
+.. versionchanged:: 3.30.5
+  The variables ``<PROJECT-NAME>_SOURCE_DIR``, ``<PROJECT-NAME>_BINARY_DIR``,
+  and ``<PROJECT-NAME>_IS_TOP_LEVEL`` are only set as non-cache variables if
+  they are already set as non-cache variables when
+  ``project(<PROJECT-NAME> ...)`` is called.
+  Unlike the flawed behavior of 3.30.4, non-cache variables will not be set
+  if only cache variables of the same name are set.
 
 Options
 ^^^^^^^

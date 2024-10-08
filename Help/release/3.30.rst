@@ -277,7 +277,23 @@ Changes made since CMake 3.30.0 include the following.
 * The :command:`project(<PROJECT-NAME>)` command now sets
   :variable:`<PROJECT-NAME>_SOURCE_DIR`, :variable:`<PROJECT-NAME>_BINARY_DIR`,
   and :variable:`<PROJECT-NAME>_IS_TOP_LEVEL` as normal variables only if they
-  are already set as normal variables when :command:`project` is invoked.
-  Cache entries by the same names are always set as before.
+  are already set as cache or non-cache variables when :command:`project` is
+  invoked.  Cache entries by the same names are always set as before.
   This refines 3.30.3's behavior change to restore behavior of nested
-  directories that call :command:`project` with the same project name.
+  directories that call :command:`project` with the same project name,
+  but the implementation in this release is flawed (this release note has
+  been retoractively updated).  It can result in different behavior between
+  the first and subsequent runs.  Do not use CMake 3.30.4 if your project
+  contains nested calls to :command:`project` with the same project name
+  and you use these variables.
+
+.. 3.30.5 (unreleased)
+
+  * The :command:`project(<PROJECT-NAME>)` command now sets
+    :variable:`<PROJECT-NAME>_SOURCE_DIR`, :variable:`<PROJECT-NAME>_BINARY_DIR`,
+    and :variable:`<PROJECT-NAME>_IS_TOP_LEVEL` as non-cache variables only if
+    they are already set as non-cache variables when :command:`project` is
+    invoked.  Cache entries by the same names are always set as before.
+    This refines 3.30.3's behavior change to restore behavior of nested
+    directories that call :command:`project` with the same project name,
+    and it addresses the bug in the implementation introduced in 3.30.4.
