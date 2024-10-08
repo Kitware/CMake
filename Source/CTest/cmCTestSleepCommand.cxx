@@ -20,8 +20,6 @@ bool cmCTestSleepCommand::InitialPass(std::vector<std::string> const& args,
   unsigned int time1 = atoi(args[0].c_str());
   if (args.size() == 1) {
     cmCTestScriptHandler::SleepInSeconds(time1);
-    // update the elapsed time since it could have slept for a while
-    this->CTestScriptHandler->UpdateElapsedTime();
     return true;
   }
 
@@ -32,8 +30,6 @@ bool cmCTestSleepCommand::InitialPass(std::vector<std::string> const& args,
     if (time1 + duration > time2) {
       duration = (time1 + duration - time2);
       cmCTestScriptHandler::SleepInSeconds(duration);
-      // update the elapsed time since it could have slept for a while
-      this->CTestScriptHandler->UpdateElapsedTime();
     }
     return true;
   }
