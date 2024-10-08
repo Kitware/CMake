@@ -70,7 +70,7 @@ if(CMake_TEST_FindProtobuf_gRPC)
   # NOTE: with IMPORT_DIRS msgs/, generated files will be placed under ${CMAKE_CURRENT_BINARY_DIR}/grpc/
   target_include_directories(msgs_grpc_IMPORT_DIRS PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/grpc/)
   target_link_libraries(msgs_grpc_IMPORT_DIRS PUBLIC ${Protobuf_LIBRARIES})
-  protobuf_generate(TARGET msgs_grpc_IMPORT_DIRS LANGUAGE cpp IMPORT_DIRS msgs/)
+  protobuf_generate(TARGET msgs_grpc_IMPORT_DIRS LANGUAGE cpp IMPORT_DIRS msgs/ PROTOC_EXE ${Protobuf_PROTOC_EXECUTABLE})
   protobuf_generate(TARGET msgs_grpc_IMPORT_DIRS LANGUAGE grpc IMPORT_DIRS msgs/ GENERATE_EXTENSIONS .grpc.pb.h .grpc.pb.cc PLUGIN "protoc-gen-grpc=${gRPC_CPP_PLUGIN}")
   add_executable(test_generate_grpc_IMPORT_DIRS main-generate-grpc.cxx)
   target_link_libraries(test_generate_grpc_IMPORT_DIRS PRIVATE msgs_grpc_IMPORT_DIRS)

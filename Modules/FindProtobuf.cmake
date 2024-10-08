@@ -164,6 +164,7 @@ Example:
         [IMPORT_DIRS <dir>...]
         [GENERATE_EXTENSIONS <extension>...]
         [PROTOC_OPTIONS <option>...]
+        [PROTOC_EXE <executable>]
         [APPEND_PATH])
 
   ``APPEND_PATH``
@@ -223,6 +224,12 @@ Example:
 
     Additional arguments that are forwarded to protoc.
 
+  ``PROTOC_EXE <executable>``
+    .. versionadded:: 3.32
+
+    Command name, path, or CMake executable used to generate protobuf bindings.
+    If omitted, ``protobuf::protoc`` is used.
+
   Example::
 
     find_package(gRPC CONFIG REQUIRED)
@@ -243,7 +250,7 @@ cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 function(protobuf_generate)
   set(_options APPEND_PATH DESCRIPTORS)
-  set(_singleargs LANGUAGE OUT_VAR EXPORT_MACRO PROTOC_OUT_DIR PLUGIN PLUGIN_OPTIONS DEPENDENCIES)
+  set(_singleargs LANGUAGE OUT_VAR EXPORT_MACRO PROTOC_OUT_DIR PLUGIN PLUGIN_OPTIONS DEPENDENCIES PROTOC_EXE)
   if(COMMAND target_sources)
     list(APPEND _singleargs TARGET)
   endif()
@@ -312,10 +319,14 @@ function(protobuf_generate)
     return()
   endif()
 
-  if(NOT TARGET protobuf::protoc)
-    message(SEND_ERROR "protoc executable not found. "
-            "Please define the Protobuf_PROTOC_EXECUTABLE variable or ensure that protoc is in CMake's search path.")
-    return()
+  if(NOT protobuf_generate_PROTOC_EXE)
+    if(NOT TARGET protobuf::protoc)
+      message(SEND_ERROR "protoc executable not found. "
+        "Please define the Protobuf_PROTOC_EXECUTABLE variable, or pass PROTOC_EXE to protobuf_generate, or ensure that protoc is in CMake's search path.")
+      return()
+    endif()
+    # Default to using the CMake executable
+    set(protobuf_generate_PROTOC_EXE protobuf::protoc)
   endif()
 
   if(protobuf_generate_APPEND_PATH)
@@ -388,7 +399,7 @@ function(protobuf_generate)
 
     add_custom_command(
       OUTPUT ${_generated_srcs}
-      COMMAND protobuf::protoc
+      COMMAND ${protobuf_generate_PROTOC_EXE}
       ARGS ${protobuf_generate_PROTOC_OPTIONS} --${protobuf_generate_LANGUAGE}_out ${_plugin_options}:${protobuf_generate_PROTOC_OUT_DIR} ${_plugin} ${_dll_desc_out} ${_protobuf_include_path} ${_abs_file}
       DEPENDS ${_abs_file} protobuf::protoc ${protobuf_generate_DEPENDENCIES}
       COMMENT ${_comment}
