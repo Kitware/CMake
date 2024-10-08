@@ -43,12 +43,6 @@
 #include "cmValue.h"
 #include "cmake.h"
 
-#ifdef _WIN32
-#  include <windows.h>
-#else
-#  include <unistd.h>
-#endif
-
 cmCTestScriptHandler::cmCTestScriptHandler() = default;
 
 void cmCTestScriptHandler::Initialize()
@@ -228,6 +222,7 @@ void cmCTestScriptHandler::CreateCMake()
       }
     });
 
+  cmState* state = this->CMake->GetState();
   this->AddCTestCommand("ctest_build", cm::make_unique<cmCTestBuildCommand>());
   this->AddCTestCommand("ctest_configure",
                         cm::make_unique<cmCTestConfigureCommand>());
@@ -241,7 +236,7 @@ void cmCTestScriptHandler::CreateCMake()
                         cm::make_unique<cmCTestReadCustomFilesCommand>());
   this->AddCTestCommand("ctest_run_script",
                         cm::make_unique<cmCTestRunScriptCommand>());
-  this->AddCTestCommand("ctest_sleep", cm::make_unique<cmCTestSleepCommand>());
+  state->AddBuiltinCommand("ctest_sleep", cmCTestSleepCommand);
   this->AddCTestCommand("ctest_start", cm::make_unique<cmCTestStartCommand>());
   this->AddCTestCommand("ctest_submit",
                         cm::make_unique<cmCTestSubmitCommand>());
@@ -338,15 +333,6 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   }
 
   return 0;
-}
-
-void cmCTestScriptHandler::SleepInSeconds(unsigned int secondsToWait)
-{
-#if defined(_WIN32)
-  Sleep(1000 * secondsToWait);
-#else
-  sleep(secondsToWait);
-#endif
 }
 
 // run a specific script

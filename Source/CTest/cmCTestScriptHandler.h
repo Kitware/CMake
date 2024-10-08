@@ -53,7 +53,6 @@ public:
   /*
    * Some elapsed time handling functions
    */
-  static void SleepInSeconds(unsigned int secondsToWait);
   void UpdateElapsedTime();
 
   /**
