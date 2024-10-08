@@ -204,7 +204,7 @@ if(UNIX
   # The result must preserve the /symlink/ path.
   set(SetFoundResolved_EXPECTED "${CMAKE_CURRENT_SOURCE_DIR}/symlink/cmake")
   if(NOT "${SetFoundResolved_DIR}" STREQUAL "${SetFoundResolved_EXPECTED}")
-    message(SEND_ERROR "SetFoundResolved_DIR set by find_package() is set to \"${SetFoundResolved_DIR}\" (expected \"${SetFoundResolved_EXPECTED}\")")
+    message(SEND_ERROR "SetFoundResolved_DIR set by find_package() is set to\n  \"${SetFoundResolved_DIR}\"\nnot the expected\n  \"${SetFoundResolved_EXPECTED}\"")
   endif()
 
   # This part of the test only works if there are no symlinks in our path.
@@ -217,7 +217,7 @@ if(UNIX
     # ./symlink points back here so it should be gone when resolved.
     set(SetFoundResolved_EXPECTED "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
     if(NOT "${SetFoundResolved_DIR}" STREQUAL "${SetFoundResolved_EXPECTED}")
-      message(SEND_ERROR "SetFoundResolved_DIR set by find_package() is set to \"${SetFoundResolved_DIR}\" (expected \"${SetFoundResolved_EXPECTED}\")")
+      message(SEND_ERROR "SetFoundResolved_DIR set by find_package() is set to\n  \"${SetFoundResolved_DIR}\"\nnot the expected\n  \"${SetFoundResolved_EXPECTED}\"")
     endif()
   endif()
 
@@ -492,15 +492,15 @@ set(Relocatable_FIND_REQUIRED_BComp 1)
 include("${CMAKE_CURRENT_BINARY_DIR}/RelocatableConfig.cmake")
 
 if(NOT "${RELOC_INCLUDE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/include")
-  message(SEND_ERROR "RELOC_INCLUDE_DIR set by configure_package_config_file() is set to \"${RELOC_INCLUDE_DIR}\" (expected \"${CMAKE_CURRENT_BINARY_DIR}/include\")")
+  message(SEND_ERROR "RELOC_INCLUDE_DIR set by configure_package_config_file() is set to\n  \"${RELOC_INCLUDE_DIR}\"\nnot the expected\n  \"${CMAKE_CURRENT_BINARY_DIR}/include\"")
 endif()
 
 if(NOT "${RELOC_SHARE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/share/")
-  message(SEND_ERROR "RELOC_SHARE_DIR set by configure_package_config_file() is set to \"${RELOC_SHARE_DIR}\" (expected \"${CMAKE_CURRENT_BINARY_DIR}/share/\")")
+  message(SEND_ERROR "RELOC_SHARE_DIR set by configure_package_config_file() is set to\n  \"${RELOC_SHARE_DIR}\"\nnot the expected\n  \"${CMAKE_CURRENT_BINARY_DIR}/share/\"")
 endif()
 
 if(NOT "${RELOC_BUILD_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
-  message(SEND_ERROR "RELOC_BUILD_DIR set by configure_package_config_file() is set to \"${RELOC_BUILD_DIR}\" (expected \"${CMAKE_CURRENT_BINARY_DIR}\")")
+  message(SEND_ERROR "RELOC_BUILD_DIR set by configure_package_config_file() is set to\n  \"${RELOC_BUILD_DIR}\"\nnot the expected\n  \"${CMAKE_CURRENT_BINARY_DIR}\"")
 endif()
 
 if(NOT DEFINED Relocatable_FOUND)
@@ -527,15 +527,15 @@ set(Relocatable_FIND_REQUIRED_BComp 1)
 include("${CMAKE_CURRENT_BINARY_DIR}/RelocatableConfig.cmake")
 
 if(NOT "${RELOC_INCLUDE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/include")
-  message(SEND_ERROR "RELOC_INCLUDE_DIR set by configure_package_config_file() is set to \"${RELOC_INCLUDE_DIR}\" (expected \"${CMAKE_CURRENT_BINARY_DIR}/include\")")
+  message(SEND_ERROR "RELOC_INCLUDE_DIR set by configure_package_config_file() is set to\n  \"${RELOC_INCLUDE_DIR}\"\nnot the expected\n  \"${CMAKE_CURRENT_BINARY_DIR}/include\"")
 endif()
 
 if(NOT "${RELOC_SHARE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/share/")
-  message(SEND_ERROR "RELOC_SHARE_DIR set by configure_package_config_file() is set to \"${RELOC_SHARE_DIR}\" (expected \"${CMAKE_CURRENT_BINARY_DIR}/share/\")")
+  message(SEND_ERROR "RELOC_SHARE_DIR set by configure_package_config_file() is set to\n  \"${RELOC_SHARE_DIR}\"\nnot the expected\n  \"${CMAKE_CURRENT_BINARY_DIR}/share/\"")
 endif()
 
 if(NOT "${RELOC_BUILD_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
-  message(SEND_ERROR "RELOC_BUILD_DIR set by configure_package_config_file() is set to \"${RELOC_BUILD_DIR}\" (expected \"${CMAKE_CURRENT_BINARY_DIR}\")")
+  message(SEND_ERROR "RELOC_BUILD_DIR set by configure_package_config_file() is set to\n  \"${RELOC_BUILD_DIR}\"\nnot the expected\n  \"${CMAKE_CURRENT_BINARY_DIR}\"")
 endif()
 
 if(NOT DEFINED Relocatable_FOUND)
