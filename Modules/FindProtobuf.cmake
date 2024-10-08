@@ -292,6 +292,12 @@ function(protobuf_generate)
     return()
   endif()
 
+  if(NOT TARGET protobuf::protoc)
+    message(SEND_ERROR "protoc executable not found. "
+            "Please define the Protobuf_PROTOC_EXECUTABLE variable or ensure that protoc is in CMake's search path.")
+    return()
+  endif()
+
   if(protobuf_generate_APPEND_PATH)
     # Create an include path for each file specified
     foreach(_file ${protobuf_generate_PROTOS})
