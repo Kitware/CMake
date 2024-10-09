@@ -1,6 +1,8 @@
 cmake_pkg_config
 ----------------
 
+.. versionadded:: 3.31
+
 .. only:: html
 
    .. contents::
