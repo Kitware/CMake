@@ -713,7 +713,7 @@ bool cmFileCopier::InstallDirectory(const std::string& source,
   if (!source.empty()) {
     dir.Load(source);
   }
-  unsigned long numFiles = static_cast<unsigned long>(dir.GetNumberOfFiles());
+  unsigned long numFiles = dir.GetNumberOfFiles();
   for (unsigned long fileNum = 0; fileNum < numFiles; ++fileNum) {
     if (!(strcmp(dir.GetFile(fileNum), ".") == 0 ||
           strcmp(dir.GetFile(fileNum), "..") == 0)) {

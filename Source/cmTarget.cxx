@@ -250,7 +250,7 @@ struct UsageRequirementProperty
 
   void CopyFromEntries(cmBTStringRange entries)
   {
-    return cm::append(this->Entries, entries);
+    cm::append(this->Entries, entries);
   }
 
   enum class Action
@@ -354,6 +354,8 @@ struct TargetProperty
   }
 
   cm::static_string_view const Name;
+  // Explicit initialization is needed for AppleClang in Xcode 8 and below
+  // NOLINTNEXTLINE(readability-redundant-member-init)
   cm::optional<cm::static_string_view> const Default = {};
   InitCondition const InitConditional = InitCondition::Always;
   Repetition const Repeat = Repetition::Once;
@@ -2047,10 +2049,13 @@ struct ReadOnlyProperty
 {
   ReadOnlyProperty(ReadOnlyCondition cond)
     : Condition{ cond }
-    , Policy{} {};
+  {
+  }
   ReadOnlyProperty(ReadOnlyCondition cond, cmPolicies::PolicyID id)
     : Condition{ cond }
-    , Policy{ id } {};
+    , Policy{ id }
+  {
+  }
 
   ReadOnlyCondition Condition;
   cm::optional<cmPolicies::PolicyID> Policy;

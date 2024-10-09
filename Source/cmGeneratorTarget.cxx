@@ -2516,8 +2516,8 @@ void cmGeneratorTarget::AddCUDAArchitectureFlags(cmBuildStep compileOrLink,
     return;
   }
 
-  return this->AddCUDAArchitectureFlagsImpl(compileOrLink, config, "CUDA",
-                                            std::move(arch), flags);
+  this->AddCUDAArchitectureFlagsImpl(compileOrLink, config, "CUDA",
+                                     std::move(arch), flags);
 }
 
 void cmGeneratorTarget::AddCUDAArchitectureFlagsImpl(cmBuildStep compileOrLink,
@@ -2695,8 +2695,9 @@ void cmGeneratorTarget::AddHIPArchitectureFlags(cmBuildStep compileOrLink,
   }
 
   if (this->Makefile->GetSafeDefinition("CMAKE_HIP_PLATFORM") == "nvidia") {
-    return this->AddCUDAArchitectureFlagsImpl(compileOrLink, config, "HIP",
-                                              std::move(arch), flags);
+    this->AddCUDAArchitectureFlagsImpl(compileOrLink, config, "HIP",
+                                       std::move(arch), flags);
+    return;
   }
 
   cmList options(arch);

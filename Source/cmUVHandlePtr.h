@@ -158,10 +158,10 @@ public:
 };
 
 template <typename T>
-inline uv_handle_ptr_base_<T>::uv_handle_ptr_base_(
+uv_handle_ptr_base_<T>::uv_handle_ptr_base_(
   uv_handle_ptr_base_<T>&&) noexcept = default;
 template <typename T>
-inline uv_handle_ptr_base_<T>& uv_handle_ptr_base_<T>::operator=(
+uv_handle_ptr_base_<T>& uv_handle_ptr_base_<T>::operator=(
   uv_handle_ptr_base_<T>&&) noexcept = default;
 
 /**

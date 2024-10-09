@@ -1135,11 +1135,11 @@ public:
 
   // Non-members
   // ===========
-  friend inline bool operator==(const cmList& lhs, const cmList& rhs) noexcept
+  friend bool operator==(const cmList& lhs, const cmList& rhs) noexcept
   {
     return lhs.Values == rhs.Values;
   }
-  friend inline bool operator!=(const cmList& lhs, const cmList& rhs) noexcept
+  friend bool operator!=(const cmList& lhs, const cmList& rhs) noexcept
   {
     return lhs.Values != rhs.Values;
   }

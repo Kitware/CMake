@@ -189,7 +189,7 @@ QCMakeCacheModel::~QCMakeCacheModel() = default;
 
 static uint qHash(const QCMakeProperty& p)
 {
-  return static_cast<uint>(qHash(p.Key));
+  return qHash(p.Key);
 }
 
 void QCMakeCacheModel::setShowNewProperties(bool f)
@@ -242,7 +242,7 @@ void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
   bool b = this->blockSignals(true);
 
   this->clear();
-  this->NewPropertyCount = static_cast<int>(newProps.size());
+  this->NewPropertyCount = newProps.size();
 
   if (View == FlatView) {
     QCMakePropertyList newP = newProps.values();

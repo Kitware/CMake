@@ -13,8 +13,6 @@
 
 const std::string cmLinkItem::DEFAULT = "DEFAULT";
 
-cmLinkItem::cmLinkItem() = default;
-
 cmLinkItem::cmLinkItem(std::string n, bool c, cmListFileBacktrace bt,
                        std::string feature)
   : String(std::move(n))
@@ -71,11 +69,6 @@ bool operator==(cmLinkItem const& l, cmLinkItem const& r)
 std::ostream& operator<<(std::ostream& os, cmLinkItem const& item)
 {
   return os << item.AsStr();
-}
-
-cmLinkImplItem::cmLinkImplItem()
-  : cmLinkItem()
-{
 }
 
 cmLinkImplItem::cmLinkImplItem(cmLinkItem item, bool checkCMP0027)

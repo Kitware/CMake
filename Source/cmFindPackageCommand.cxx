@@ -164,8 +164,7 @@ class cmCaseInsensitiveDirectoryListGenerator
 {
 public:
   cmCaseInsensitiveDirectoryListGenerator(cm::string_view name)
-    : DirectoryLister{}
-    , DirName{ name }
+    : DirName{ name }
   {
   }
 
@@ -209,7 +208,6 @@ class cmDirectoryListGenerator
 public:
   cmDirectoryListGenerator(std::vector<std::string> const& names)
     : Names{ names }
-    , Matches{}
     , Current{ this->Matches.cbegin() }
   {
   }
@@ -332,8 +330,6 @@ class cmFileListGeneratorGlob
 public:
   cmFileListGeneratorGlob(cm::string_view pattern)
     : Pattern(pattern)
-    , Files{}
-    , Current{}
   {
   }
 

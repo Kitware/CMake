@@ -72,11 +72,11 @@ public:
 
   static std::string StripEmptyListElements(const std::string& input);
 
-  static inline bool StartsWithGeneratorExpression(const std::string& input)
+  static bool StartsWithGeneratorExpression(const std::string& input)
   {
     return input.length() >= 2 && input[0] == '$' && input[1] == '<';
   }
-  static inline bool StartsWithGeneratorExpression(const char* input)
+  static bool StartsWithGeneratorExpression(const char* input)
   {
     return input && input[0] == '$' && input[1] == '<';
   }

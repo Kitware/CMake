@@ -17,7 +17,7 @@ struct cmDocumentationEntry
   }
 #endif
 
-  std::string Name = {};
-  std::string Brief = {};
+  std::string Name;
+  std::string Brief;
   char CustomNamePrefix = ' ';
 };

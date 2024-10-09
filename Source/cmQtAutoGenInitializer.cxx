@@ -360,11 +360,11 @@ void cmQtAutoGenInitializer::AddAutogenExecutableToDependencies(
   if (genVars.ExecutableTarget) {
     dependencies.push_back(genVars.ExecutableTarget->Target->GetName());
   } else if (this->MultiConfig && this->UseBetterGraph) {
-    cm::string_view const& configGenexWithCommandConfig =
+    cm::string_view const configGenexWithCommandConfig =
       "$<COMMAND_CONFIG:$<$<CONFIG:";
-    cm::string_view const& configGenex = "$<$<CONFIG:";
-    cm::string_view const& configGenexEnd = ">";
-    cm::string_view const& configGenexEndWithCommandConfig = ">>";
+    cm::string_view const configGenex = "$<$<CONFIG:";
+    cm::string_view const configGenexEnd = ">";
+    cm::string_view const configGenexEndWithCommandConfig = ">>";
     auto genexBegin =
       this->CrossConfig ? configGenexWithCommandConfig : configGenex;
     auto genexEnd =
