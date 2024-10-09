@@ -37,6 +37,15 @@ cmExperimental::FeatureData LookupTable[] = {
     {},
     cmExperimental::TryCompileCondition::Always,
     false },
+  // CxxImportStd
+  { "CxxImportStd",
+    "0e5b6991-d74f-4b3d-a41c-cf096e0b2508",
+    "CMAKE_EXPERIMENTAL_CXX_IMPORT_STD",
+    "CMake's support for `import std;` in C++23 and newer is experimental. It "
+    "is meant only for experimentation and feedback to CMake developers.",
+    {},
+    cmExperimental::TryCompileCondition::Always,
+    false },
 };
 static_assert(sizeof(LookupTable) / sizeof(LookupTable[0]) ==
                 static_cast<size_t>(cmExperimental::Feature::Sentinel),
@@ -52,6 +61,20 @@ cmExperimental::FeatureData& DataForFeature(cmExperimental::Feature f)
 const cmExperimental::FeatureData& cmExperimental::DataForFeature(Feature f)
 {
   return ::DataForFeature(f);
+}
+
+cm::optional<cmExperimental::Feature> cmExperimental::FeatureByName(
+  std::string const& name)
+{
+  size_t idx = 0;
+  for (auto const& feature : LookupTable) {
+    if (feature.Name == name) {
+      return static_cast<Feature>(idx);
+    }
+    ++idx;
+  }
+
+  return {};
 }
 
 bool cmExperimental::HasSupportEnabled(cmMakefile const& mf, Feature f)

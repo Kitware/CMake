@@ -1,0 +1,4 @@
+CMake Error at CMP0165-NEW\.cmake:[0-9]+ \(enable_language\):
+  project\(\) must be called prior to this enable_language\(\) call\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

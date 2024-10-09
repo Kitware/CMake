@@ -33,6 +33,7 @@
 #  define LIBSHARED_DEPRECATED_NO_EXPORT LIBSHARED_NO_EXPORT LIBSHARED_DEPRECATED
 #endif
 
+/* NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if) */
 #if 0 /* DEFINE_NO_DEPRECATED */
 #  ifndef LIBSHARED_NO_DEPRECATED
 #    define LIBSHARED_NO_DEPRECATED

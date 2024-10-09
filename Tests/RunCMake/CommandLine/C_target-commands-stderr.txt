@@ -1,0 +1,44 @@
+^CMake Error at [^
+]*C_target-commands_initial-cache\.cmake:[0-9]+ \(target_sources\):
+  Cannot specify sources for target "DoesNotExist" which is not built by this
+  project\.
++
+CMake Error at [^
+]*C_target-commands_initial-cache\.cmake:[0-9]+ \(target_compile_definitions\):
+  Cannot specify compile definitions for target "DoesNotExist" which is not
+  built by this project\.
++
+CMake Error at [^
+]*C_target-commands_initial-cache\.cmake:[0-9]+ \(target_compile_features\):
+  Cannot specify compile features for target "DoesNotExist" which is not
+  built by this project\.
++
+CMake Error at [^
+]*C_target-commands_initial-cache\.cmake:[0-9]+ \(target_compile_options\):
+  Cannot specify compile options for target "DoesNotExist" which is not built
+  by this project\.
++
+CMake Error at [^
+]*C_target-commands_initial-cache\.cmake:[0-9]+ \(target_include_directories\):
+  Cannot specify include directories for target "DoesNotExist" which is not
+  built by this project\.
++
+CMake Error at [^
+]*C_target-commands_initial-cache\.cmake:[0-9]+ \(target_precompile_headers\):
+  Cannot specify precompile headers for target "DoesNotExist" which is not
+  built by this project\.
++
+CMake Error at [^
+]*C_target-commands_initial-cache\.cmake:[0-9]+ \(target_link_directories\):
+  Cannot specify link directories for target "DoesNotExist" which is not
+  built by this project\.
++
+CMake Error at [^
+]*C_target-commands_initial-cache\.cmake:[0-9]+ \(target_link_options\):
+  Cannot specify link options for target "DoesNotExist" which is not built by
+  this project\.
++
+CMake Error at [^
+]*C_target-commands_initial-cache\.cmake:[0-9]+ \(target_link_libraries\):
+  Cannot specify link libraries for target "DoesNotExist" which is not built
+  by this project\.$

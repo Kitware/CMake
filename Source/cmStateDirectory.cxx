@@ -451,7 +451,7 @@ cmValue cmStateDirectory::GetProperty(const std::string& prop,
 
 bool cmStateDirectory::GetPropertyAsBool(const std::string& prop) const
 {
-  return cmIsOn(this->GetProperty(prop));
+  return this->GetProperty(prop).IsOn();
 }
 
 std::vector<std::string> cmStateDirectory::GetPropertyKeys() const

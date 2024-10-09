@@ -145,6 +145,10 @@ protected:
                                  ImportPropertyMap& properties);
   void PopulateCompatibleInterfaceProperties(cmGeneratorTarget const* target,
                                              ImportPropertyMap& properties);
+  void PopulateCustomTransitiveInterfaceProperties(
+    cmGeneratorTarget const* target,
+    cmGeneratorExpression::PreprocessContext preprocessRule,
+    ImportPropertyMap& properties);
   virtual void GenerateInterfaceProperties(
     cmGeneratorTarget const* target, std::ostream& os,
     const ImportPropertyMap& properties);

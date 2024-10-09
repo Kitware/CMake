@@ -1,10 +1,5 @@
 include(RunCMake)
 
-if (RunCMake_GENERATOR MATCHES "Visual Studio 9 2008")
-  run_cmake(UnsupportedLinkerType)
-  return()
-endif()
-
 run_cmake(InvalidLinkerType1)
 run_cmake(InvalidLinkerType2)
 
@@ -22,8 +17,9 @@ macro(run_cmake_and_build test)
     -DCMake_TEST_Swift=${CMake_TEST_Swift})
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)
   set(RunCMake_TEST_NO_CLEAN 1)
+  set(RunCMake_TEST_OUTPUT_MERGE 1)
   run_cmake_command(${test}-build ${CMAKE_COMMAND} --build . --config Release --verbose ${ARGN})
-
+  unset(RunCMake_TEST_OUTPUT_MERGE)
   unset(RunCMake_TEST_BINARY_DIR)
   unset(RunCMake_TEST_NO_CLEAN)
 endmacro()

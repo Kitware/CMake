@@ -1,3 +1,4 @@
 list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "cmake.texi:[0-9]+: warning: .definfoenclose is obsolete"
+  "cmake.texi:[0-9]+: warning: @ref should not appear on @item line"
   )

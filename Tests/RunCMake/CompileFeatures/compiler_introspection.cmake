@@ -40,6 +40,6 @@ set(${lang}${standard}_EXT_FLAG ${CMAKE_${lang}${standard}_EXTENSION_COMPILE_OPT
   endforeach()
 endmacro()
 
-info(C 90 99 11 17 23)
-info(CXX 98 11 14 17 20 23)
+info(C 90 99 11 17 23 26)
+info(CXX 98 11 14 17 20 23 26)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/info.cmake" "${info}")

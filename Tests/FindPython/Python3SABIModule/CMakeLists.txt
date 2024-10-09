@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.15)
 
 project(TestPython3SABIModule LANGUAGES C)
 
@@ -52,4 +52,4 @@ endif()
 
 add_test (NAME python3_spam3
           COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:spam3>"
-          "${Python3_EXECUTABLE}" -c "import spam3; spam3.system(\"cd\")")
+          "${Python3_INTERPRETER}" -c "import spam3; spam3.system(\"cd\")")

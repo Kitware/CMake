@@ -685,6 +685,11 @@ Json::Value CodemodelConfig::DumpTargets()
       continue;
     }
 
+    // Ignore targets starting with `__cmake_` as they are internal.
+    if (cmHasLiteralPrefix(gt->GetName(), "__cmake_")) {
+      continue;
+    }
+
     targets.append(this->DumpTarget(gt, targets.size()));
   }
 
@@ -1379,14 +1384,11 @@ CompileData Target::BuildCompileData(cmSourceFile* sf)
   }
 
   // Add precompile headers compile options.
-  std::vector<std::string> architectures =
-    this->GT->GetAppleArchs(this->Config, fd.Language);
-  if (architectures.empty()) {
-    architectures.emplace_back();
-  }
+  std::vector<std::string> pchArchs =
+    this->GT->GetPchArchs(this->Config, fd.Language);
 
   std::unordered_map<std::string, std::string> pchSources;
-  for (const std::string& arch : architectures) {
+  for (const std::string& arch : pchArchs) {
     const std::string pchSource =
       this->GT->GetPchSource(this->Config, fd.Language, arch);
     if (!pchSource.empty()) {

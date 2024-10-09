@@ -33,6 +33,9 @@ $SDLDIR is an environment variable that would correspond to the
 ./configure --prefix=$SDLDIR used in building SDL.
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 if(NOT SDL_MIXER_INCLUDE_DIR AND SDLMIXER_INCLUDE_DIR)
   set(SDL_MIXER_INCLUDE_DIR ${SDLMIXER_INCLUDE_DIR} CACHE PATH "directory cache
 entry initialized from old variable name")
@@ -95,3 +98,5 @@ set(SDLMIXER_INCLUDE_DIR ${SDL_MIXER_INCLUDE_DIRS})
 set(SDLMIXER_FOUND ${SDL_MIXER_FOUND})
 
 mark_as_advanced(SDL_MIXER_LIBRARY SDL_MIXER_INCLUDE_DIR)
+
+cmake_policy(POP)

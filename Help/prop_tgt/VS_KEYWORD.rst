@@ -1,10 +1,9 @@
 VS_KEYWORD
 ----------
 
-Visual Studio project keyword for VS 9 (2008) and older.
-
-Can be set to change the visual studio keyword, for example Qt
-integration works better if this is set to Qt4VSv1.0.
+Removed.  This once specified the Visual Studio project keyword
+for the :generator:`Visual Studio 9 2008` generator, and older,
+but all of those generators have been removed.
 
 Use the :prop_tgt:`VS_GLOBAL_KEYWORD` target property to set the
 keyword for Visual Studio 12 (2013) and newer.

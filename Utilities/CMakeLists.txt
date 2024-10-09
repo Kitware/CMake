@@ -13,7 +13,7 @@ else()
   add_subdirectory(Sphinx)
 endif()
 
-if(WIX_CUSTOM_ACTION_ENABLED)
+if(CMake_BUILD_WIX_CUSTOM_ACTION)
   add_subdirectory(Release/WiX)
 endif()
 

@@ -8,6 +8,7 @@
 #include <sstream>
 
 #include <cm/iomanip>
+#include <cm/optional>
 #include <cmext/algorithm>
 
 #include <cm3p/curl/curl.h>
@@ -22,7 +23,6 @@
 #include "cmCurl.h"
 #include "cmDuration.h"
 #include "cmGeneratedFileStream.h"
-#include "cmList.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -140,13 +140,14 @@ void cmCTestSubmitHandler::Initialize()
 
 int cmCTestSubmitHandler::ProcessCommandLineArguments(
   const std::string& currentArg, size_t& idx,
-  const std::vector<std::string>& allArgs)
+  const std::vector<std::string>& allArgs, bool& validArg)
 {
   if (cmHasLiteralPrefix(currentArg, "--http-header") &&
       idx < allArgs.size() - 1) {
     ++idx;
     this->HttpHeaders.push_back(allArgs[idx]);
     this->CommandLineHttpHeaders.push_back(allArgs[idx]);
+    validArg = true;
   }
   return 1;
 }
@@ -170,32 +171,35 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
     headers = ::curl_slist_append(headers, h.c_str());
   }
 
+  cmCurlInitOnce();
   /* In windows, this will init the winsock stuff */
   ::curl_global_init(CURL_GLOBAL_ALL);
-  std::string curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
-  cmList args{ curlopt };
-  bool verifyPeerOff = false;
-  bool verifyHostOff = false;
-  for (std::string const& arg : args) {
-    if (arg == "CURLOPT_SSL_VERIFYPEER_OFF") {
-      verifyPeerOff = true;
-    }
-    if (arg == "CURLOPT_SSL_VERIFYHOST_OFF") {
-      verifyHostOff = true;
-    }
-  }
+  cmCTestCurlOpts curlOpts(this->CTest);
   for (std::string const& file : files) {
     /* get a curl handle */
-    curl = curl_easy_init();
+    curl = cm_curl_easy_init();
     if (curl) {
       cmCurlSetCAInfo(curl);
-      if (verifyPeerOff) {
-        cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                           "  Set CURLOPT_SSL_VERIFYPEER to off\n",
-                           this->Quiet);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0);
+      if (curlOpts.TLSVersionOpt) {
+        cm::optional<std::string> tlsVersionStr =
+          cmCurlPrintTLSVersion(*curlOpts.TLSVersionOpt);
+        cmCTestOptionalLog(
+          this->CTest, HANDLER_VERBOSE_OUTPUT,
+          "  Set CURLOPT_SSLVERSION to "
+            << (tlsVersionStr ? *tlsVersionStr : "unknown value") << "\n",
+          this->Quiet);
+        curl_easy_setopt(curl, CURLOPT_SSLVERSION, *curlOpts.TLSVersionOpt);
       }
-      if (verifyHostOff) {
+      if (curlOpts.TLSVerifyOpt) {
+        cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                           "  Set CURLOPT_SSL_VERIFYPEER to "
+                             << (*curlOpts.TLSVerifyOpt ? "on" : "off")
+                             << "\n",
+                           this->Quiet);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER,
+                         *curlOpts.TLSVerifyOpt ? 1 : 0);
+      }
+      if (curlOpts.VerifyHostOff) {
         cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                            "  Set CURLOPT_SSL_VERIFYHOST to off\n",
                            this->Quiet);
@@ -295,7 +299,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
 
       upload_as += "&MD5=";
 
-      if (cmIsOn(this->GetOption("InternalTest"))) {
+      if (this->GetOption("InternalTest").IsOn()) {
         upload_as += "ffffffffffffffffffffffffffffffff";
       } else {
         cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
@@ -518,9 +522,6 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   }
   cmCTestCurl curl(this->CTest);
   curl.SetQuiet(this->Quiet);
-  std::string curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
-  cmList args{ curlopt };
-  curl.SetCurlOptions(args);
   auto submitInactivityTimeout = this->GetSubmitInactivityTimeout();
   if (submitInactivityTimeout != 0) {
     curl.SetTimeOutSeconds(submitInactivityTimeout);
@@ -540,7 +541,7 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
     fields = url.substr(pos + 1);
     url.erase(pos);
   }
-  bool internalTest = cmIsOn(this->GetOption("InternalTest"));
+  bool internalTest = this->GetOption("InternalTest").IsOn();
 
   // Get RETRY_COUNT and RETRY_DELAY values if they were set.
   std::string retryDelayString = *this->GetOption("RetryDelay");

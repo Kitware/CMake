@@ -1,11 +1,35 @@
 Ninja
 -----
 
-Generates ``build.ninja`` files.
+Generates a ``build.ninja`` file into the build tree.
 
-A ``build.ninja`` file is generated into the build tree.  Use the ninja
-program to build the project through the ``all`` target and install the
-project through the ``install`` (or ``install/strip``) target.
+Builtin Targets
+^^^^^^^^^^^^^^^
+
+``all``
+
+  Depends on all targets required by the project, except those with
+  :prop_tgt:`EXCLUDE_FROM_ALL` set to true.
+
+``install``
+
+  Runs the install step.
+
+``install/strip``
+
+  .. versionadded:: 3.7
+
+    Runs the install followed by a ``CMAKE_STRIP`` command, if any.
+
+    The ``CMAKE_STRIP`` variable will contain the platform's ``strip`` utility, which
+    removes symbols information from generated binaries.
+
+``install/parallel``
+
+  .. versionadded:: 3.30
+
+    Created only if the :prop_gbl:`INSTALL_PARALLEL` global property is ``ON``.
+    Runs the install step for each subdirectory independently and in parallel.
 
 For each subdirectory ``sub/dir`` of the project, additional targets
 are generated:
@@ -25,11 +49,9 @@ are generated:
 ``sub/dir/install/strip``
 
   .. versionadded:: 3.7
+
     Runs the install step in the subdirectory followed by a ``CMAKE_STRIP`` command,
     if any.
-
-    The ``CMAKE_STRIP`` variable will contain the platform's ``strip`` utility, which
-    removes symbols information from generated binaries.
 
 ``sub/dir/test``
 

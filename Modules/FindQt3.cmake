@@ -34,6 +34,9 @@ Also defined, but not for general use are:
    library. This is only required by Qt3 on Windows.
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 # These are around for backwards compatibility
 # they will be set
 #  QT_WRAP_CPP, set true if QT_MOC_EXECUTABLE is found
@@ -47,6 +50,7 @@ if(QT4_FOUND)
     if(NOT Qt3_FIND_QUIETLY)
       message( STATUS    "Qt3 and Qt4 cannot be used together in one project.")
     endif()
+    cmake_policy(POP)
     return()
   endif()
 endif()
@@ -304,3 +308,5 @@ mark_as_advanced(
   QT_WRAP_CPP
   QT_WRAP_UI
   )
+
+cmake_policy(POP)

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15)
 
 project(TestNumPy LANGUAGES C)
 
@@ -12,7 +12,7 @@ if(CMake_TEST_FindPython2_NumPy)
 
   add_test (NAME python2_arraytest
     COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:arraytest2>"
-    "${Python2_EXECUTABLE}" -c "import numpy; import arraytest2; arraytest2.vecsq(numpy.array([1, 2, 3]));")
+    "${Python2_INTERPRETER}" -c "import numpy; import arraytest2; arraytest2.vecsq(numpy.array([1, 2, 3]));")
 
 endif()
 
@@ -26,6 +26,6 @@ if(CMake_TEST_FindPython3_NumPy)
 
   add_test (NAME python3_arraytest
     COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:arraytest3>"
-    "${Python3_EXECUTABLE}" -c "import numpy; import arraytest3; arraytest3.vecsq(numpy.array([1, 2, 3]));")
+    "${Python3_INTERPRETER}" -c "import numpy; import arraytest3; arraytest3.vecsq(numpy.array([1, 2, 3]));")
 
 endif()

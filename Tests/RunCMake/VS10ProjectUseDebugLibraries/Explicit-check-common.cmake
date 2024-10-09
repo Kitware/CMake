@@ -1,0 +1,10 @@
+include(${CMAKE_CURRENT_LIST_DIR}/check-common.cmake)
+
+UseDebugLibraries_check(empty "" "")
+UseDebugLibraries_check(emptyCLR "" "")
+UseDebugLibraries_check(emptyUtil "" "")
+UseDebugLibraries_check(genex "true" "false")
+UseDebugLibraries_check(genexCLR "true" "false")
+UseDebugLibraries_check(genexUtil "true" "false")
+UseDebugLibraries_check(ALL_BUILD "false" "false")
+UseDebugLibraries_check(ZERO_CHECK "false" "false")

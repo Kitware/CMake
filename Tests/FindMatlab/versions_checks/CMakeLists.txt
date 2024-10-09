@@ -40,6 +40,9 @@ if(NOT release_name STREQUAL "dummy")
   message(FATAL_ERROR "version 14.9 does not give release dummy : '${release_name}' != dummy")
 endif()
 
+# matlab_get_release_name_from_version does not describe what it does with release_name
+# if the version requested does not exists, so make sure that release_name it is empty
+set(release_name "")
 matlab_get_release_name_from_version("14.10" release_name)
 if(NOT release_name STREQUAL "")
   message(FATAL_ERROR "version 14.10 does not give empty release: '${release_name}' != ''")

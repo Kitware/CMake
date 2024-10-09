@@ -10,6 +10,26 @@ install(TARGETS hello
   LIBRARY DESTINATION .
   BUNDLE DESTINATION .)
 
+# Component that is a reserved name on Windows.
+# See https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file
+install(
+  DIRECTORY .
+  DESTINATION txt
+  COMPONENT CON
+  FILES_MATCHING PATTERN *.txt)
+# Component name that is similar to a reserved name on Windows.
+install(
+  DIRECTORY .
+  DESTINATION txt
+  COMPONENT Console
+  FILES_MATCHING PATTERN *.txt)
+# Component name that is strongly discouraged on Windows.
+install(
+  DIRECTORY .
+  DESTINATION txt
+  COMPONENT EndsWithDot.
+  FILES_MATCHING PATTERN *.txt)
+
 set(CPACK_NSIS_MUI_HEADERIMAGE "${PROJECT_SOURCE_DIR}\\\\header-image.bmp")
 set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}\\\\header-icon.bmp")
 set(CPACK_NSIS_MUI_ICON "${PROJECT_SOURCE_DIR}\\\\install.ico")

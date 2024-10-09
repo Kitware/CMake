@@ -760,7 +760,9 @@ bool cmCTest::UpdateCTestConfiguration()
   }
   if (!this->GetCTestConfiguration("BuildDirectory").empty()) {
     this->Impl->BinaryDir = this->GetCTestConfiguration("BuildDirectory");
-    cmSystemTools::ChangeDirectory(this->Impl->BinaryDir);
+    if (this->Impl->TestDir.empty()) {
+      cmSystemTools::ChangeDirectory(this->Impl->BinaryDir);
+    }
   }
   this->Impl->TimeOut =
     std::chrono::seconds(atoi(this->GetCTestConfiguration("TimeOut").c_str()));
@@ -1890,6 +1892,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
                                          std::string& errormsg)
 {
   std::string arg = args[i];
+  cm::string_view noTestsPrefix = "--no-tests=";
   if (this->CheckArgument(arg, "-F"_s)) {
     this->Impl->Failover = true;
   } else if (this->CheckArgument(arg, "-j"_s, "--parallel")) {
@@ -2151,8 +2154,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     this->SetOutputJUnitFileName(std::string(args[i]));
   }
 
-  cm::string_view noTestsPrefix = "--no-tests=";
-  if (cmHasPrefix(arg, noTestsPrefix)) {
+  else if (cmHasPrefix(arg, noTestsPrefix)) {
     cm::string_view noTestsMode =
       cm::string_view(arg).substr(noTestsPrefix.length());
     if (noTestsMode == "error") {
@@ -2260,6 +2262,8 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
   else if (this->CheckArgument(arg, "--rerun-failed"_s)) {
     this->GetTestHandler()->SetPersistentOption("RerunFailed", "true");
     this->GetMemCheckHandler()->SetPersistentOption("RerunFailed", "true");
+  } else {
+    return false;
   }
   return true;
 }
@@ -2309,7 +2313,7 @@ bool cmCTest::ColoredOutputSupportedByConsole()
 }
 
 // handle the -S -SR and -SP arguments
-void cmCTest::HandleScriptArguments(size_t& i, std::vector<std::string>& args,
+bool cmCTest::HandleScriptArguments(size_t& i, std::vector<std::string>& args,
                                     bool& SRArgumentSpecified)
 {
   std::string arg = args[i];
@@ -2324,8 +2328,8 @@ void cmCTest::HandleScriptArguments(size_t& i, std::vector<std::string>& args,
     }
   }
 
-  if (this->CheckArgument(arg, "-SR"_s, "--script-run") &&
-      i < args.size() - 1) {
+  else if (this->CheckArgument(arg, "-SR"_s, "--script-run") &&
+           i < args.size() - 1) {
     SRArgumentSpecified = true;
     this->Impl->RunConfigurationScript = true;
     i++;
@@ -2333,7 +2337,8 @@ void cmCTest::HandleScriptArguments(size_t& i, std::vector<std::string>& args,
     ch->AddConfigurationScript(args[i], true);
   }
 
-  if (this->CheckArgument(arg, "-S"_s, "--script") && i < args.size() - 1) {
+  else if (this->CheckArgument(arg, "-S"_s, "--script") &&
+           i < args.size() - 1) {
     this->Impl->RunConfigurationScript = true;
     i++;
     cmCTestScriptHandler* ch = this->GetScriptHandler();
@@ -2341,7 +2346,10 @@ void cmCTest::HandleScriptArguments(size_t& i, std::vector<std::string>& args,
     if (!SRArgumentSpecified) {
       ch->AddConfigurationScript(args[i], true);
     }
+  } else {
+    return false;
   }
+  return true;
 }
 
 bool cmCTest::AddVariableDefinition(const std::string& arg)
@@ -2734,16 +2742,18 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
   for (size_t i = 1; i < args.size(); ++i) {
     // handle the simple commandline arguments
     std::string errormsg;
-    if (!this->HandleCommandLineArguments(i, args, errormsg)) {
+    bool validArg = this->HandleCommandLineArguments(i, args, errormsg);
+    if (!validArg && !errormsg.empty()) {
       cmSystemTools::Error(errormsg);
       return 1;
     }
+    std::string arg = args[i];
 
     // handle the script arguments -S -SR -SP
-    this->HandleScriptArguments(i, args, SRArgumentSpecified);
+    validArg =
+      validArg || this->HandleScriptArguments(i, args, SRArgumentSpecified);
 
     // --dashboard: handle a request for a dashboard
-    std::string arg = args[i];
     if (this->CheckArgument(arg, "-D"_s, "--dashboard") &&
         i < args.size() - 1) {
       this->Impl->ProduceXML = true;
@@ -2757,6 +2767,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
           executeTests = false;
         }
       }
+      validArg = true;
     }
 
     // If it's not exactly -D, but it starts with -D, then try to parse out
@@ -2767,16 +2778,17 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
     if (arg != "-D" && cmHasLiteralPrefix(arg, "-D")) {
       std::string input = arg.substr(2);
       this->AddVariableDefinition(input);
+      validArg = true;
     }
 
     // --test-action: calls SetTest(<stage>, /*report=*/ false) to enable
     // the corresponding stage
-    if (!this->HandleTestActionArgument(ctestExec, i, args)) {
+    if (!this->HandleTestActionArgument(ctestExec, i, args, validArg)) {
       executeTests = false;
     }
 
     // --test-model: what type of test model
-    if (!this->HandleTestModelArgument(ctestExec, i, args)) {
+    if (!this->HandleTestModelArgument(ctestExec, i, args, validArg)) {
       executeTests = false;
     }
 
@@ -2788,29 +2800,39 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
       if (!this->SubmitExtraFiles(args[i])) {
         return 0;
       }
+      validArg = true;
     }
 
     // --build-and-test options
     if (this->CheckArgument(arg, "--build-and-test"_s) &&
         i < args.size() - 1) {
       cmakeAndTest = true;
+      validArg = true;
     }
 
     // --schedule-random
     if (this->CheckArgument(arg, "--schedule-random"_s)) {
       this->Impl->ScheduleType = "Random";
+      validArg = true;
     }
 
     // pass the argument to all the handlers as well, but it may no longer be
     // set to what it was originally so I'm not sure this is working as
     // intended
     for (auto& handler : this->Impl->GetTestingHandlers()) {
-      if (!handler->ProcessCommandLineArguments(arg, i, args)) {
+      if (!handler->ProcessCommandLineArguments(arg, i, args, validArg)) {
         cmCTestLog(
           this, ERROR_MESSAGE,
           "Problem parsing command line arguments within a handler\n");
         return 0;
       }
+    }
+
+    if (!validArg && cmHasLiteralPrefix(arg, "-") &&
+        !cmHasLiteralPrefix(arg, "--preset")) {
+      cmSystemTools::Error(cmStrCat("Unknown argument: ", arg));
+      cmSystemTools::Error("Run 'ctest --help' for all supported options.");
+      return 1;
     }
   } // the close of the for argument loop
 
@@ -2877,12 +2899,14 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
 }
 
 bool cmCTest::HandleTestActionArgument(const char* ctestExec, size_t& i,
-                                       const std::vector<std::string>& args)
+                                       const std::vector<std::string>& args,
+                                       bool& validArg)
 {
   bool success = true;
   std::string const& arg = args[i];
   if (this->CheckArgument(arg, "-T"_s, "--test-action") &&
       (i < args.size() - 1)) {
+    validArg = true;
     this->Impl->ProduceXML = true;
     i++;
     if (!this->SetTest(args[i], false)) {
@@ -2909,12 +2933,14 @@ bool cmCTest::HandleTestActionArgument(const char* ctestExec, size_t& i,
 }
 
 bool cmCTest::HandleTestModelArgument(const char* ctestExec, size_t& i,
-                                      const std::vector<std::string>& args)
+                                      const std::vector<std::string>& args,
+                                      bool& validArg)
 {
   bool success = true;
   std::string const& arg = args[i];
   if (this->CheckArgument(arg, "-M"_s, "--test-model") &&
       (i < args.size() - 1)) {
+    validArg = true;
     i++;
     std::string const& str = args[i];
     if (cmSystemTools::LowerCase(str) == "nightly"_s) {

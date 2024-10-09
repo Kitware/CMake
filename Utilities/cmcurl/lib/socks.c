@@ -341,7 +341,7 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
 
   case CONNECT_RESOLVING:
     /* check if we have the name resolved by now */
-    dns = Curl_fetch_addr(data, sx->hostname, (int)conn->port);
+    dns = Curl_fetch_addr(data, sx->hostname, conn->primary.remote_port);
 
     if(dns) {
 #ifdef CURLRES_ASYNCH
@@ -838,7 +838,7 @@ CONNECT_RESOLVED:
     struct Curl_addrinfo *hp = NULL;
     if(dns)
       hp = dns->addr;
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     if(data->set.ipver != CURL_IPRESOLVE_WHATEVER) {
       int wanted_family = data->set.ipver == CURL_IPRESOLVE_V4 ?
         AF_INET : AF_INET6;
@@ -872,7 +872,7 @@ CONNECT_RESOLVED:
       infof(data, "SOCKS5 connect to %s:%d (locally resolved)", dest,
             sx->remote_port);
     }
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     else if(hp->ai_family == AF_INET6) {
       int i;
       struct sockaddr_in6 *saddr_in6;
@@ -909,7 +909,7 @@ CONNECT_RESOLVE_REMOTE:
          IPv6 == 4,
          IPv4 == 1 */
       unsigned char ip4[4];
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
       if(conn->bits.ipv6_ip) {
         char ip6[16];
         if(1 != Curl_inet_pton(AF_INET6, sx->hostname, ip6))
@@ -1175,7 +1175,7 @@ static CURLcode socks_proxy_cf_connect(struct Curl_cfilter *cf,
   result = connect_SOCKS(cf, sx, data);
   if(!result && sx->state == CONNECT_DONE) {
     cf->connected = TRUE;
-    Curl_verboseconnect(data, conn);
+    Curl_verboseconnect(data, conn, cf->sockindex);
     socks_proxy_cf_free(cf);
   }
 
@@ -1244,7 +1244,7 @@ static void socks_cf_get_host(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_socks_proxy = {
   "SOCKS-PROXYY",
-  CF_TYPE_IP_CONNECT,
+  CF_TYPE_IP_CONNECT|CF_TYPE_PROXY,
   0,
   socks_proxy_cf_destroy,
   socks_proxy_cf_connect,

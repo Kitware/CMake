@@ -1,0 +1,2 @@
+CMake Error: Unknown argument: --not-a-valid-ctest-argument
+CMake Error: Run 'ctest --help' for all supported options.

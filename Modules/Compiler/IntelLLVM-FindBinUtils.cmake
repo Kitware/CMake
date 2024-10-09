@@ -19,8 +19,11 @@ get_filename_component(__intel_llvm_hint_1 "${CMAKE_${_CMAKE_PROCESSING_LANGUAGE
 get_filename_component(__intel_llvm_hint_1 "${__intel_llvm_hint_1}/../bin-llvm" REALPATH)
 
 get_filename_component(__intel_llvm_hint_2 "${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER}" DIRECTORY)
+get_filename_component(__intel_llvm_hint_2 "${__intel_llvm_hint_2}/compiler" REALPATH)
 
-set(__intel_llvm_hints ${__intel_llvm_hint_1} ${__intel_llvm_hint_2})
+get_filename_component(__intel_llvm_hint_3 "${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER}" DIRECTORY)
+
+set(__intel_llvm_hints ${__intel_llvm_hint_1} ${__intel_llvm_hint_2} ${__intel_llvm_hint_3})
 
 # http://manpages.ubuntu.com/manpages/precise/en/man1/llvm-ar.1.html
 find_program(CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_AR NAMES

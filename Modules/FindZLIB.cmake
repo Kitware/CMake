@@ -84,6 +84,9 @@ module where to look.
 
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 if(ZLIB_FIND_COMPONENTS AND NOT ZLIB_FIND_QUIETLY)
   message(AUTHOR_WARNING
     "ZLIB does not provide any COMPONENTS.  Calling\n"
@@ -232,3 +235,5 @@ if(ZLIB_FOUND)
       endif()
     endif()
 endif()
+
+cmake_policy(POP)

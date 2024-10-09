@@ -17,7 +17,6 @@
 class cmake;
 class cmCompiledGeneratorExpression;
 class cmGeneratorTarget;
-struct cmGeneratorExpressionContext;
 struct cmGeneratorExpressionDAGChecker;
 struct cmGeneratorExpressionEvaluator;
 
@@ -151,10 +150,6 @@ public:
                               std::map<std::string, std::string>& mapping);
 
 private:
-  const std::string& EvaluateWithContext(
-    cmGeneratorExpressionContext& context,
-    cmGeneratorExpressionDAGChecker* dagChecker) const;
-
   cmCompiledGeneratorExpression(cmake& cmakeInstance,
                                 cmListFileBacktrace backtrace,
                                 std::string input);

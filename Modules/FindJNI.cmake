@@ -343,7 +343,9 @@ foreach(dir IN LISTS JAVA_AWT_LIBRARY_DIRECTORIES)
   list(APPEND JAVA_JVM_LIBRARY_DIRECTORIES
     "${dir}"
     "${dir}/client"
+    "${dir}/minimal"
     "${dir}/server"
+    "${dir}/zero"
     # IBM SDK, Java Technology Edition, specific paths
     "${dir}/j9vm"
     "${dir}/default"
@@ -389,8 +391,10 @@ if(APPLE)
     execute_process(
       COMMAND xcodebuild -version
       OUTPUT_VARIABLE _FindJNI_XCODEBUILD_VERSION
+      ERROR_VARIABLE _FindJNI_XCODEBUILD_VERSION
+      RESULT_VARIABLE _FindJNI_XCODEBUILD_RESULT
       )
-    if(_FindJNI_XCODEBUILD_VERSION MATCHES "Xcode ([0-9]+(\\.[0-9]+)*)")
+    if(_FindJNI_XCODEBUILD_RESULT EQUAL 0 AND _FindJNI_XCODEBUILD_VERSION MATCHES "Xcode ([0-9]+(\\.[0-9]+)*)")
       set(_FindJNI_XCODE_VERSION "${CMAKE_MATCH_1}")
     else()
       set(_FindJNI_XCODE_VERSION "")

@@ -70,13 +70,6 @@ const std::string& cmCompiledGeneratorExpression::Evaluate(
     currentTarget ? currentTarget : headTarget, this->EvaluateForBuildsystem,
     this->Backtrace, language);
 
-  return this->EvaluateWithContext(context, dagChecker);
-}
-
-const std::string& cmCompiledGeneratorExpression::EvaluateWithContext(
-  cmGeneratorExpressionContext& context,
-  cmGeneratorExpressionDAGChecker* dagChecker) const
-{
   if (!this->NeedsEvaluation) {
     return this->Input;
   }
@@ -432,7 +425,7 @@ const std::string& cmGeneratorExpressionInterpreter::Evaluate(
   cmGeneratorExpressionDAGChecker dagChecker(
     this->HeadTarget,
     property == "COMPILE_FLAGS" ? "COMPILE_OPTIONS" : property, nullptr,
-    nullptr);
+    nullptr, this->LocalGenerator, this->Config);
 
   return this->CompiledGeneratorExpression->Evaluate(
     this->LocalGenerator, this->Config, this->HeadTarget, &dagChecker, nullptr,

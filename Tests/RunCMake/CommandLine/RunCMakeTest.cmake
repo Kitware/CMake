@@ -393,16 +393,10 @@ function(run_EnvironmentGenerator)
       # Envvar shouldn't affect existing build tree
       run_cmake_command(Envgen-platform-existing ${CMAKE_COMMAND} -E chdir ..
         ${CMAKE_COMMAND} --build Envgen-build)
-      if(RunCMake_GENERATOR MATCHES "^Visual Studio 9 ")
-        set(RunCMake-stderr-file "Envgen-platform-invalid-stderr-vs9.txt")
-      endif()
       run_cmake_command(Envgen-platform-invalid ${CMAKE_COMMAND} ${source_dir})
       unset(RunCMake-stderr-file)
       # Command line -G implies -A""
       run_cmake_command(Envgen-G-implicit-platform ${CMAKE_COMMAND} -G "${RunCMake_GENERATOR}" ${source_dir})
-      if(RunCMake_GENERATOR MATCHES "^Visual Studio 9 ")
-        set(RunCMake-stderr-file "Envgen-A-platform-stderr-vs9.txt")
-      endif()
       run_cmake_command(Envgen-A-platform ${CMAKE_COMMAND} -A "fromcli" ${source_dir})
       unset(RunCMake-stderr-file)
       unset(ENV{CMAKE_GENERATOR_PLATFORM})
@@ -903,6 +897,8 @@ run_cmake_command(P_working-dir ${CMAKE_COMMAND} -DEXPECTED_WORKING_DIR=${RunCMa
 file(COPY ${RunCMake_SOURCE_DIR}/C_basic_initial-cache.txt DESTINATION ${RunCMake_BINARY_DIR})
 run_cmake_with_options(C_basic -C ../C_basic_initial-cache.txt)
 run_cmake_with_options(C_basic_fullpath -C ${RunCMake_BINARY_DIR}/C_basic_initial-cache.txt)
+file(COPY ${RunCMake_SOURCE_DIR}/C_target-commands_initial-cache.cmake DESTINATION ${RunCMake_BINARY_DIR})
+run_cmake_command(C_target-commands ${CMAKE_COMMAND} -S ${RunCMake_SOURCE_DIR} -DRunCMake_TEST=C_target-commands -C ../C_target-commands_initial-cache.cmake)
 
 set(RunCMake_TEST_OPTIONS
   "-DFOO=-DBAR:BOOL=BAZ")
@@ -1123,13 +1119,6 @@ set(ProfilingTestOutput ${RunCMake_TEST_BINARY_DIR}/output.json)
 set(RunCMake_TEST_OPTIONS --profiling-format=google-trace --profiling-output=${ProfilingTestOutput})
 run_cmake(ProfilingTest)
 unset(RunCMake_TEST_OPTIONS)
-
-if(RunCMake_GENERATOR MATCHES "^Visual Studio 9 2008")
-  run_cmake_with_options(DeprecateVS9-WARN-ON -DCMAKE_WARN_VS9=ON)
-  unset(ENV{CMAKE_WARN_VS9})
-  run_cmake(DeprecateVS9-WARN-ON)
-  run_cmake_with_options(DeprecateVS9-WARN-OFF -DCMAKE_WARN_VS9=OFF)
-endif()
 
 if(RunCMake_GENERATOR MATCHES "^Visual Studio 12 2013")
   run_cmake_with_options(DeprecateVS12-WARN-ON -DCMAKE_WARN_VS12=ON)

@@ -88,8 +88,10 @@ struct StandardLevelComputer
 
     cmPolicies::PolicyStatus const cmp0128{ makefile->GetPolicyStatus(
       cmPolicies::CMP0128) };
-    bool const defaultExt{ cmIsOn(*makefile->GetDefinition(
-      cmStrCat("CMAKE_", this->Language, "_EXTENSIONS_DEFAULT"))) };
+    bool const defaultExt{ makefile
+                             ->GetDefinition(cmStrCat("CMAKE_", this->Language,
+                                                      "_EXTENSIONS_DEFAULT"))
+                             .IsOn() };
     bool ext = true;
 
     if (cmp0128 == cmPolicies::NEW) {
@@ -97,7 +99,7 @@ struct StandardLevelComputer
     }
 
     if (cmValue extPropValue = target->GetLanguageExtensions(this->Language)) {
-      ext = cmIsOn(*extPropValue);
+      ext = extPropValue.IsOn();
     }
 
     std::string const type{ ext ? "EXTENSION" : "STANDARD" };
@@ -252,8 +254,10 @@ struct StandardLevelComputer
 
     cmPolicies::PolicyStatus const cmp0128{ makefile->GetPolicyStatus(
       cmPolicies::CMP0128) };
-    bool const defaultExt{ cmIsOn(*makefile->GetDefinition(
-      cmStrCat("CMAKE_", this->Language, "_EXTENSIONS_DEFAULT"))) };
+    bool const defaultExt{ makefile
+                             ->GetDefinition(cmStrCat("CMAKE_", this->Language,
+                                                      "_EXTENSIONS_DEFAULT"))
+                             .IsOn() };
     bool ext = true;
 
     if (cmp0128 == cmPolicies::NEW) {
@@ -261,7 +265,7 @@ struct StandardLevelComputer
     }
 
     if (cmValue extPropValue = target->GetLanguageExtensions(this->Language)) {
-      ext = cmIsOn(*extPropValue);
+      ext = extPropValue.IsOn();
     }
 
     std::string const type{ ext ? "EXTENSION" : "STANDARD" };
@@ -535,6 +539,21 @@ std::string cmStandardLevelResolver::GetEffectiveStandard(
   }
 
   return mapping->second.GetEffectiveStandard(this->Makefile, target, config);
+}
+
+std::string cmStandardLevelResolver::GetLevelString(
+  std::string const& lang, cmStandardLevel const& level) const
+{
+  auto mapping = StandardComputerMapping.find(lang);
+  if (mapping == StandardComputerMapping.end()) {
+    return {};
+  }
+
+  if (mapping->second.LevelsAsStrings.size() <= level.Index()) {
+    return {};
+  }
+
+  return mapping->second.LevelsAsStrings[level.Index()];
 }
 
 bool cmStandardLevelResolver::AddRequiredTargetFeature(

@@ -57,10 +57,6 @@ function(verify lang src)
       # VS 2005 and above default to multi-threaded.
       target_compile_definitions(empty-${lang} PRIVATE VERIFY_MT)
     endif()
-    if(CMAKE_GENERATOR MATCHES "Visual Studio ([^9]|9[0-9])")
-      # VS 2010 and above have a different default runtime library for projects than 'cl'.
-      target_compile_definitions(empty-${lang} PRIVATE VERIFY_DLL)
-    endif()
   endif()
 endfunction()
 

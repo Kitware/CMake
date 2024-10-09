@@ -72,6 +72,11 @@
 # endif
 #endif
 
+/* Compatibility */
+#if defined(ENABLE_IPV6)
+#  define USE_IPV6 1
+#endif
+
 /*
  * Include configuration script results or hand-crafted
  * configuration file for platforms which lack config tool.
@@ -270,6 +275,13 @@
 
 #include <curl/system.h>
 
+/* Helper macro to expand and concatenate two macros.
+ * Direct macros concatenation does not work because macros
+ * are not expanded before direct concatenation.
+ */
+#define CURL_CONC_MACROS_(A,B) A ## B
+#define CURL_CONC_MACROS(A,B) CURL_CONC_MACROS_(A,B)
+
 /* curl uses its own printf() function internally. It understands the GNU
  * format. Use this format, so that is matches the GNU format attribute we
  * use with the mingw compiler, allowing it to verify them at compile-time.
@@ -283,7 +295,8 @@
 
 /* based on logic in "curl/mprintf.h" */
 
-#if (defined(__GNUC__) || defined(__clang__)) &&                        \
+#if (defined(__GNUC__) || defined(__clang__) ||                         \
+  defined(__IAR_SYSTEMS_ICC__)) &&                                      \
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
   !defined(CURL_NO_FMT_CHECKS)
 #if defined(__MINGW32__) && !defined(__clang__)
@@ -306,7 +319,7 @@
 #include <TargetConditionals.h>
 #define USE_RESOLVE_ON_IPS 1
 #  if TARGET_OS_MAC && !(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE) && \
-     defined(ENABLE_IPV6)
+     defined(USE_IPV6)
 #    define CURL_MACOS_CALL_COPYPROXIES 1
 #  endif
 #endif
@@ -412,11 +425,9 @@
 #  define LSEEK_ERROR                (__int64)-1
 #  define open                       curlx_win32_open
 #  define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
-#  define access(fname,mode)         curlx_win32_access(fname, mode)
    int curlx_win32_open(const char *filename, int oflag, ...);
    int curlx_win32_stat(const char *path, struct_stat *buffer);
    FILE *curlx_win32_fopen(const char *filename, const char *mode);
-   int curlx_win32_access(const char *path, int mode);
 #endif
 
 /*
@@ -435,11 +446,9 @@
 #    define struct_stat                struct _stat
 #    define open                       curlx_win32_open
 #    define fopen(fname,mode)          curlx_win32_fopen(fname, mode)
-#    define access(fname,mode)         curlx_win32_access(fname, mode)
      int curlx_win32_stat(const char *path, struct_stat *buffer);
      int curlx_win32_open(const char *filename, int oflag, ...);
      FILE *curlx_win32_fopen(const char *filename, const char *mode);
-     int curlx_win32_access(const char *path, int mode);
 #  endif
 #  define LSEEK_ERROR                (long)-1
 #endif
@@ -509,6 +518,20 @@
 #  define CURL_OFF_T_MAX CURL_OFF_T_C(0x7FFFFFFFFFFFFFFF)
 #endif
 #define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - CURL_OFF_T_C(1))
+
+#if (SIZEOF_CURL_OFF_T != 8)
+#  error "curl_off_t must be exactly 64 bits"
+#else
+  typedef unsigned CURL_TYPEOF_CURL_OFF_T curl_uint64_t;
+  typedef CURL_TYPEOF_CURL_OFF_T  curl_int64_t;
+#  ifndef CURL_SUFFIX_CURL_OFF_TU
+#    error "CURL_SUFFIX_CURL_OFF_TU must be defined"
+#  endif
+#  define CURL_UINT64_SUFFIX  CURL_SUFFIX_CURL_OFF_TU
+#  define CURL_UINT64_C(val)  CURL_CONC_MACROS(val,CURL_UINT64_SUFFIX)
+# define CURL_PRId64  CURL_FORMAT_CURL_OFF_T
+# define CURL_PRIu64  CURL_FORMAT_CURL_OFF_TU
+#endif
 
 #if (SIZEOF_TIME_T == 4)
 #  ifdef HAVE_TIME_T_UNSIGNED
@@ -614,9 +637,9 @@
  * Mutually exclusive CURLRES_* definitions.
  */
 
-#if defined(ENABLE_IPV6) && defined(HAVE_GETADDRINFO)
+#if defined(USE_IPV6) && defined(HAVE_GETADDRINFO)
 #  define CURLRES_IPV6
-#elif defined(ENABLE_IPV6) && (defined(_WIN32) || defined(__CYGWIN__))
+#elif defined(USE_IPV6) && (defined(_WIN32) || defined(__CYGWIN__))
 /* assume on Windows that IPv6 without getaddrinfo is a broken build */
 #  error "Unexpected build: IPv6 is enabled but getaddrinfo was not found."
 #else
@@ -638,13 +661,14 @@
 
 /* ---------------------------------------------------------------- */
 
-#if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H) && !defined(USE_WIN32_IDN)
+#if defined(HAVE_LIBIDN2) && defined(HAVE_IDN2_H) && \
+  !defined(USE_WIN32_IDN) && !defined(USE_APPLE_IDN)
 /* The lib and header are present */
 #define USE_LIBIDN2
 #endif
 
-#if defined(USE_LIBIDN2) && defined(USE_WIN32_IDN)
-#error "Both libidn2 and WinIDN are enabled, choose one."
+#if defined(USE_LIBIDN2) && (defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN))
+#error "libidn2 cannot be enabled with WinIDN or AppleIDN, choose one."
 #endif
 
 #define LIBIDN_REQUIRED_VERSION "0.4.1"
@@ -698,6 +722,13 @@
   ((__GNUC__ == 2) && defined(__GNUC_MINOR__) && (__GNUC_MINOR__ >= 7)))
 #  define UNUSED_PARAM __attribute__((__unused__))
 #  define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
+#elif defined(__IAR_SYSTEMS_ICC__)
+#  define UNUSED_PARAM __attribute__((__unused__))
+#  if (__VER__ >= 9040001)
+#    define WARN_UNUSED_RESULT __attribute__((warn_unused_result))
+#  else
+#    define WARN_UNUSED_RESULT
+#  endif
 #else
 #  define UNUSED_PARAM /* NOTHING */
 #  define WARN_UNUSED_RESULT
@@ -706,7 +737,8 @@
 /* noreturn attribute */
 
 #if !defined(CURL_NORETURN)
-#if (defined(__GNUC__) && (__GNUC__ >= 3)) || defined(__clang__)
+#if (defined(__GNUC__) && (__GNUC__ >= 3)) || defined(__clang__) || \
+  defined(__IAR_SYSTEMS_ICC__)
 #  define CURL_NORETURN  __attribute__((__noreturn__))
 #elif defined(_MSC_VER) && (_MSC_VER >= 1200)
 #  define CURL_NORETURN  __declspec(noreturn)
@@ -849,7 +881,6 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #error "Multi-SSL combined with QUIC is not supported"
 #endif
 
-#define ENABLE_QUIC
 #define USE_HTTP3
 #endif
 
@@ -878,6 +909,28 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
    replacements (yet) so tell the compiler to not warn for them. */
 #ifdef USE_OPENSSL
 #define OPENSSL_SUPPRESS_DEPRECATED
+#endif
+
+#if defined(inline)
+  /* 'inline' is defined as macro and assumed to be correct */
+  /* No need for 'inline' replacement */
+#elif defined(__cplusplus)
+  /* The code is compiled with C++ compiler.
+     C++ always supports 'inline'. */
+  /* No need for 'inline' replacement */
+#elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901
+  /* C99 (and later) supports 'inline' keyword */
+  /* No need for 'inline' replacement */
+#elif defined(__GNUC__) && __GNUC__ >= 3
+  /* GCC supports '__inline__' as an extension */
+#  define inline __inline__
+#elif defined(_MSC_VER) && _MSC_VER >= 1400
+  /* MSC supports '__inline' from VS 2005 (or even earlier) */
+#  define inline __inline
+#else
+  /* Probably 'inline' is not supported by compiler.
+     Define to the empty string to be on the safe side. */
+#  define inline /* empty */
 #endif
 
 #endif /* HEADER_CURL_SETUP_H */

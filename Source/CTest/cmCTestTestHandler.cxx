@@ -522,8 +522,8 @@ bool cmCTestTestHandler::ProcessOptions()
 {
   // Update internal data structure from generic one
   this->SetTestsToRunInformation(this->GetOption("TestsToRunInformation"));
-  this->SetUseUnion(cmIsOn(this->GetOption("UseUnion")));
-  if (cmIsOn(this->GetOption("ScheduleRandom"))) {
+  this->SetUseUnion(this->GetOption("UseUnion").IsOn());
+  if (this->GetOption("ScheduleRandom").IsOn()) {
     this->CTest->SetScheduleType("Random");
   }
   if (cmValue repeat = this->GetOption("Repeat")) {
@@ -609,7 +609,7 @@ bool cmCTestTestHandler::ProcessOptions()
   if (val) {
     this->ExcludeTestListFile = val;
   }
-  this->SetRerunFailed(cmIsOn(this->GetOption("RerunFailed")));
+  this->SetRerunFailed(this->GetOption("RerunFailed").IsOn());
 
   return true;
 }
@@ -934,7 +934,6 @@ bool cmCTestTestHandler::ComputeTestList()
   // Now create a final list of tests to run
   int cnt = 0;
   inREcnt = 0;
-  std::string last_directory;
   ListOfTests finalList;
   for (cmCTestTestProperties& tp : this->TestList) {
     cnt++;
@@ -1423,7 +1422,9 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
     properties[p.Index] = &p;
   }
   parallel->SetResourceSpecFile(this->ResourceSpecFile);
-  parallel->SetTests(std::move(tests), std::move(properties));
+  if (!parallel->SetTests(std::move(tests), std::move(properties))) {
+    return false;
+  }
   parallel->SetPassFailVectors(&passed, &failed);
   this->TestResults.clear();
   parallel->SetTestResults(&this->TestResults);
@@ -2448,6 +2449,8 @@ bool cmCTestTestHandler::SetTestsProperties(
                 rt.TimeoutRegularExpressions.emplace_back(cr, cr);
               }
             }
+          } else {
+            rt.CustomProperties[key] = val;
           }
         }
       }

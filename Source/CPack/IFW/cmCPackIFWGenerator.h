@@ -67,6 +67,8 @@ protected:
    */
   const char* GetOutputExtension() override;
 
+  std::string GetComponentInstallSuffix(
+    const std::string& componentName) override;
   std::string GetComponentInstallDirNameSuffix(
     const std::string& componentName) override;
 

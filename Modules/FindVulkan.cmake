@@ -221,6 +221,7 @@ environment.
 
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 # Provide compatibility with a common invalid component request that
 # was silently ignored prior to CMake 3.24.

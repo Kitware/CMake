@@ -7,7 +7,6 @@ file Copyright.txt or https://cmake.org/licensing for details. */
 #include <cctype>
 #include <cstdlib>
 #include <ostream>
-#include <stack>
 #include <utility>
 
 #include "cmsys/RegularExpression.hxx"
@@ -25,17 +24,12 @@ cmCPackInnoSetupGenerator::~cmCPackInnoSetupGenerator() = default;
 
 bool cmCPackInnoSetupGenerator::CanGenerate()
 {
-  // Inno Setup is only available for Windows
-#ifdef _WIN32
   return true;
-#else
-  return false;
-#endif
 }
 
 int cmCPackInnoSetupGenerator::InitializeInternal()
 {
-  if (cmIsOn(GetOption("CPACK_INCLUDE_TOPLEVEL_DIRECTORY"))) {
+  if (GetOption("CPACK_INCLUDE_TOPLEVEL_DIRECTORY").IsOn()) {
     cmCPackLogger(cmCPackLog::LOG_WARNING,
                   "Inno Setup Generator cannot work with "
                   "CPACK_INCLUDE_TOPLEVEL_DIRECTORY set. "
@@ -64,7 +58,8 @@ int cmCPackInnoSetupGenerator::InitializeInternal()
     return 0;
   }
 
-  const std::string isccCmd = cmStrCat(QuotePath(isccPath), "/?");
+  const std::string isccCmd =
+    cmStrCat(QuotePath(isccPath, PathType::Native), "/?");
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Test Inno Setup version: " << isccCmd << std::endl);
   std::string output;
@@ -613,7 +608,6 @@ bool cmCPackInnoSetupGenerator::ProcessComponents()
 
   // Components
   std::vector<cmCPackComponent*> downloadedComponents;
-  std::stack<cmCPackComponentGroup*> groups;
   for (auto& i : Components) {
     cmCPackInnoSetupKeyValuePairs params;
     cmCPackComponent* component = &i.second;
@@ -871,8 +865,8 @@ bool cmCPackInnoSetupGenerator::Compile()
   }
 
   const std::string& isccCmd =
-    cmStrCat(QuotePath(GetOption("CPACK_INSTALLER_PROGRAM")), ' ',
-             cmJoin(isccArgs, " "), ' ', QuotePath(isScriptFile));
+    cmStrCat(QuotePath(GetOption("CPACK_INSTALLER_PROGRAM"), PathType::Native),
+             ' ', cmJoin(isccArgs, " "), ' ', QuotePath(isScriptFile));
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << isccCmd << std::endl);
 
@@ -940,7 +934,7 @@ bool cmCPackInnoSetupGenerator::BuildDownloadedComponentArchive(
   // Build the list of files to go into this archive
   const std::string& zipListFileName =
     cmStrCat(GetOption("CPACK_TEMPORARY_DIRECTORY"), "/winZip.filelist");
-  const bool needQuotesInFile = cmIsOn(GetOption("CPACK_ZIP_NEED_QUOTES"));
+  const bool needQuotesInFile = GetOption("CPACK_ZIP_NEED_QUOTES").IsOn();
   { // the scope is needed for cmGeneratedFileStream
     cmGeneratedFileStream out(zipListFileName);
     for (const std::string& i : component->Files) {
@@ -1138,8 +1132,16 @@ std::string cmCPackInnoSetupGenerator::Quote(const std::string& string)
   return cmStrCat('"', nString, '"');
 }
 
-std::string cmCPackInnoSetupGenerator::QuotePath(const std::string& path)
+std::string cmCPackInnoSetupGenerator::QuotePath(const std::string& path,
+                                                 PathType type)
 {
+#ifdef _WIN32
+  static_cast<void>(type);
+#else
+  if (type == PathType::Native) {
+    return Quote(cmSystemTools::ConvertToUnixOutputPath(path));
+  }
+#endif
   return Quote(cmSystemTools::ConvertToWindowsOutputPath(path));
 }
 

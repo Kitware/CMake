@@ -478,27 +478,30 @@ The following variables are for advanced uses of CPack:
   .. versionadded:: 3.25
 
   Specify the ``readelf`` executable path used by CPack.
-  The default value will be ``CMAKE_READELF`` when set.  Otherwise,
-  the default value will be empty and CPack will use :command:`find_program`
-  to determine the ``readelf`` path when needed.
+  The default value will be taken from the ``CMAKE_READELF`` variable, if set,
+  which may be populated by an internal CMake module.  If ``CMAKE_READELF``
+  is not set, CPack will use :command:`find_program` to determine the
+  ``readelf`` path when needed.
 
 .. variable:: CPACK_OBJCOPY_EXECUTABLE
 
   .. versionadded:: 3.25
 
   Specify the ``objcopy`` executable path used by CPack.
-  The default value will be ``CMAKE_OBJCOPY`` when set.  Otherwise,
-  the default value will be empty and CPack will use :command:`find_program`
-  to determine the ``objcopy`` path when needed.
+  The default value will be taken from the ``CMAKE_OBJCOPY`` variable, if set,
+  which may be populated by an internal CMake module.  If ``CMAKE_OBJCOPY``
+  is not set, CPack will use :command:`find_program` to determine the
+  ``objcopy`` path when needed.
 
 .. variable:: CPACK_OBJDUMP_EXECUTABLE
 
   .. versionadded:: 3.25
 
   Specify the ``objdump`` executable path used by CPack.
-  The default value will be ``CMAKE_OBJDUMP`` when set.  Otherwise,
-  the default value will be empty and CPack will use :command:`find_program`
-  to determine the ``objdump`` path when needed.
+  The default value will be taken from the ``CMAKE_OBJDUMP`` variable, if set,
+  which may be populated by an internal CMake module.  If ``CMAKE_OBJDUMP``
+  is not set, CPack will use :command:`find_program` to determine the
+  ``objdump`` path when needed.
 
 #]=======================================================================]
 

@@ -210,8 +210,8 @@ endmacro()
 
 # TODO: Install this macro separately?
 macro(_check_c_compiler_attribute _ATTRIBUTE _RESULT)
-  check_source_compiles(C "${_ATTRIBUTE} int somefunc() { return 0; }
-    int main() { return somefunc();}" ${_RESULT}
+  check_source_compiles(C "${_ATTRIBUTE} int somefunc(void) { return 0; }
+    int main(void) { return somefunc();}" ${_RESULT}
   )
 endmacro()
 

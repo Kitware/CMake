@@ -41,10 +41,10 @@ run_cmake_command(StderrNoexist ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/Stder
 run_cmake_command(StdoutStderrNoexist ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/StderrNoexist.cmake)
 run_cmake_command(InOutErrDirectory ${CMAKE_COMMAND} -DPRINT_STDIN_EXE=${PRINT_STDIN_EXE} -P ${RunCMake_SOURCE_DIR}/InOutErrDirectory.cmake)
 
-if(UNIX AND Python_EXECUTABLE)
-  run_cmake_command(AnyCommandAbnormalExit ${CMAKE_COMMAND} -DPython_EXECUTABLE=${Python_EXECUTABLE} -P ${RunCMake_SOURCE_DIR}/AnyCommandAbnormalExit.cmake)
-  run_cmake_command(LastCommandAbnormalExit-1 ${CMAKE_COMMAND} -DPython_EXECUTABLE=${Python_EXECUTABLE} -P ${RunCMake_SOURCE_DIR}/LastCommandAbnormalExit-1.cmake)
-  run_cmake_command(LastCommandAbnormalExit-2 ${CMAKE_COMMAND} -DPython_EXECUTABLE=${Python_EXECUTABLE} -P ${RunCMake_SOURCE_DIR}/LastCommandAbnormalExit-2.cmake)
+if(EXIT_CRASH_EXE)
+  run_cmake_command(AnyCommandAbnormalExit ${CMAKE_COMMAND} -DEXIT_CRASH_EXE=${EXIT_CRASH_EXE} -P ${RunCMake_SOURCE_DIR}/AnyCommandAbnormalExit.cmake)
+  run_cmake_command(LastCommandAbnormalExit-1 ${CMAKE_COMMAND} -DEXIT_CRASH_EXE=${EXIT_CRASH_EXE} -P ${RunCMake_SOURCE_DIR}/LastCommandAbnormalExit-1.cmake)
+  run_cmake_command(LastCommandAbnormalExit-2 ${CMAKE_COMMAND} -DEXIT_CRASH_EXE=${EXIT_CRASH_EXE} -P ${RunCMake_SOURCE_DIR}/LastCommandAbnormalExit-2.cmake)
 endif()
 
 if(WIN32 OR CYGWIN)

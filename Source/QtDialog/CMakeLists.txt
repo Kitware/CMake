@@ -48,6 +48,11 @@ if(WIN32)
   endif()
 endif()
 
+if(MSVC)
+  # QTBUG-118993: Qt uses deprecated stdext::checked_array_iterator
+  add_compile_definitions(_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
+endif()
+
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt${INSTALLED_QT_VERSION}Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
 if(CMake_QT_STATIC_QXcbIntegrationPlugin_LIBRARIES)

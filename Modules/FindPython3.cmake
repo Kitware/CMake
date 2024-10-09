@@ -78,9 +78,25 @@ This module defines the following :ref:`Imported Targets <Imported Targets>`:
   :prop_gbl:`CMAKE_ROLE` is ``PROJECT``.
 
 ``Python3::Interpreter``
-  Python 3 interpreter. Target defined if component ``Interpreter`` is found.
+  Python 3 interpreter. This target is defined only if the ``Interpreter``
+  component is found.
+``Python3::InterpreterDebug``
+  .. versionadded:: 3.30
+
+  Python 3 debug interpreter. This target is defined only if the
+  ``Interpreter`` component is found and the ``Python3_EXECUTABLE_DEBUG``
+  variable is defined. The target is only defined on the ``Windows`` platform.
+
+``Python3::InterpreterMultiConfig``
+  .. versionadded:: 3.30
+
+  Python 3 interpreter. The release or debug version of the interpreter will be
+  used, based on the context (platform, configuration).
+  This target is defined only if the ``Interpreter`` component is found
+
 ``Python3::Compiler``
-  Python 3 compiler. Target defined if component ``Compiler`` is found.
+  Python 3 compiler. This target is defined only if the ``Compiler`` component
+  is found.
 
 ``Python3::Module``
   .. versionadded:: 3.15
@@ -115,6 +131,20 @@ This module will set the following variables in your project
   System has the Python 3 interpreter.
 ``Python3_EXECUTABLE``
   Path to the Python 3 interpreter.
+``Python3_EXECUTABLE_DEBUG``
+  .. versionadded:: 3.30
+
+  Path to the debug Python 3 interpreter. It is only defined on ``Windows``
+  platform.
+
+``Python3_INTERPRETER``
+  .. versionadded:: 3.30
+
+  Path to the Python 3 interpreter, defined as a
+  :manual:`generator expression <cmake-generator-expressions(7)>` selecting
+  the ``Python3_EXECUTABLE`` or ``Python3_EXECUTABLE_DEBUG`` variable based on
+  the context (platform, configuration).
+
 ``Python3_INTERPRETER_ID``
   A short string unique to the interpreter. Possible values include:
     * Python
@@ -196,6 +226,17 @@ This module will set the following variables in your project
 
   The Python 3 include directories.
 
+``Python3_DEFINITIONS``
+  .. versionadded:: 3.30.3
+
+  The Python 3 preprocessor definitions.
+
+``Python3_DEBUG_POSTFIX``
+  .. versionadded.. 3.30
+
+  Postfix of debug python module. This variable can be used to define the
+  :prop_tgt:`DEBUG_POSTFIX` target property.
+
 ``Python3_LINK_OPTIONS``
   .. versionadded:: 3.19
 
@@ -272,42 +313,54 @@ Hints
   This variable defines which ABIs, as defined in :pep:`3149`, should be
   searched.
 
-  .. note::
+  The ``Python3_FIND_ABI`` variable is a 4-tuple specifying, in that order,
+  ``pydebug`` (``d``), ``pymalloc`` (``m``), ``unicode`` (``u``) and
+  ``gil_disabled`` (``t``) flags.
 
-    If ``Python3_FIND_ABI`` is not defined, any ABI will be searched.
+  .. versionadded:: 3.30
+    A fourth element, specifying the ``gil_disabled`` flag (i.e. free
+    threaded python), is added and is optional. If not specified, the value is
+    ``OFF``.
 
-  The ``Python3_FIND_ABI`` variable is a 3-tuple specifying, in that order,
-  ``pydebug`` (``d``), ``pymalloc`` (``m``) and ``unicode`` (``u``) flags.
   Each element can be set to one of the following:
 
   * ``ON``: Corresponding flag is selected.
   * ``OFF``: Corresponding flag is not selected.
   * ``ANY``: The two possibilities (``ON`` and ``OFF``) will be searched.
 
-  From this 3-tuple, various ABIs will be searched starting from the most
-  specialized to the most general. Moreover, ``debug`` versions will be
-  searched **after** ``non-debug`` ones.
+  .. note::
+
+    If ``Python3_FIND_ABI`` is not defined, any ABI, excluding the
+    ``gil_disabled`` flag, will be searched.
+
+  From this 4-tuple, various ABIs will be searched starting from the most
+  specialized to the most general. Moreover, when ``ANY`` is specified for
+  ``pydebug`` and ``gil_disabled``, ``debug`` and ``free threaded`` versions
+  will be searched **after** ``non-debug`` and ``non-gil-disabled`` ones.
 
   For example, if we have::
 
-    set (Python3_FIND_ABI "ON" "ANY" "ANY")
+    set (Python3_FIND_ABI "ON" "ANY" "ANY" "ON")
 
   The following flags combinations will be appended, in that order, to the
-  artifact names: ``dmu``, ``dm``, ``du``, and ``d``.
+  artifact names: ``tdmu``, ``tdm``, ``tdu``, and ``td``.
 
   And to search any possible ABIs::
 
-    set (Python3_FIND_ABI "ANY" "ANY" "ANY")
+    set (Python3_FIND_ABI "ANY" "ANY" "ANY" "ANY")
 
   The following combinations, in that order, will be used: ``mu``, ``m``,
-  ``u``, ``<empty>``, ``dmu``, ``dm``, ``du`` and ``d``.
+  ``u``, ``<empty>``, ``dmu``, ``dm``, ``du``, ``d``, ``tmu``, ``tm``, ``tu``,
+  ``t``, ``tdmu``, ``tdm``, ``tdu``, and ``td``.
 
   .. note::
 
-    This hint is useful only on ``POSIX`` systems. So, on ``Windows`` systems,
-    when ``Python3_FIND_ABI`` is defined, ``Python`` distributions from
-    `python.org <https://www.python.org/>`_ will be found only if value for
-    each flag is ``OFF`` or ``ANY``.
+    This hint is useful only on ``POSIX`` systems except for the
+    ``gil_disabled`` flag. So, on ``Windows`` systems,
+    when ``Python_FIND_ABI`` is defined, ``Python`` distributions from
+    `python.org <https://www.python.org/>`_ will be found only if the value for
+    each flag is ``OFF`` or ``ANY`` except for the fourth one
+    (``gil_disabled``).
 
 ``Python3_FIND_STRATEGY``
   .. versionadded:: 3.15
@@ -535,6 +588,10 @@ If the library type is not specified, ``MODULE`` is assumed.
 
   When option ``WITH_SOABI`` is also specified,  the module suffix will include
   the ``Python3_SOSABI`` value, if any.
+
+.. versionadded:: 3.30
+  For ``MODULE`` type, the :prop_tgt:`DEBUG_POSTFIX` target property is
+  initialized with the value of ``Python3_DEBUG_POSTFIX`` variable if defined.
 #]=======================================================================]
 
 

@@ -225,22 +225,45 @@ URL
   Provides an arbitrary list of HTTP headers for the download operation.
   This can be useful for accessing content in systems like AWS, etc.
 
+``TLS_VERSION <min>``
+  .. versionadded:: 3.30
+
+  Specify minimum TLS version for ``https://`` URLs.  If this option is
+  not provided, the value of the :variable:`CMAKE_TLS_VERSION` variable
+  or the :envvar:`CMAKE_TLS_VERSION` environment variable will be used
+  instead (see :command:`file(DOWNLOAD)`).
+
+  This option also applies to ``git clone`` invocations, although the
+  default behavior is different.  If none of the ``TLS_VERSION`` option,
+  :variable:`CMAKE_TLS_VERSION` variable, or :envvar:`CMAKE_TLS_VERSION`
+  environment variable is specified, the behavior will be determined by
+  git's default or a ``http.sslVersion`` git config option the user may
+  have set at a global level.
+
 ``TLS_VERIFY <bool>``
   Specifies whether certificate verification should be performed for
-  https URLs. If this option is not provided, the default behavior is
-  determined by the :variable:`CMAKE_TLS_VERIFY` variable (see
-  :command:`file(DOWNLOAD)`). If that is also not set, certificate
-  verification will not be performed. In situations where ``URL_HASH``
-  cannot be provided, this option can be an alternative verification
-  measure.
+  ``https://`` URLs.  If this option is not provided, the value of the
+  :variable:`CMAKE_TLS_VERIFY` variable or the :envvar:`CMAKE_TLS_VERIFY`
+  environment variable will be used instead (see :command:`file(DOWNLOAD)`).
+  If neither of those is set, certificate verification will not be performed.
+  In situations where ``URL_HASH`` cannot be provided, this option can
+  be an alternative verification measure.
+
+  This option also applies to ``git clone`` invocations, although the
+  default behavior is different.  If none of the ``TLS_VERIFY`` option,
+  :variable:`CMAKE_TLS_VERIFY` variable, or :envvar:`CMAKE_TLS_VERIFY`
+  environment variable is specified, the behavior will be determined by
+  git's default (true) or a ``http.sslVerify`` git config option the
+  user may have set at a global level.
 
   .. versionchanged:: 3.6
-    This option also applies to ``git clone`` invocations, although the
-    default behavior is different.  If ``TLS_VERIFY`` is not given and
-    :variable:`CMAKE_TLS_VERIFY` is not set, the behavior will be
-    determined by git's defaults.  Normally, the ``sslVerify`` git
-    config setting defaults to true, but the user may have overridden
-    this at a global level.
+
+    Previously this option did not apply to ``git clone`` invocations.
+
+  .. versionchanged:: 3.30
+
+    Previously the :envvar:`CMAKE_TLS_VERIFY` environment variable
+    was not checked.
 
 ``TLS_CAINFO <file>``
   Specify a custom certificate authority file to use if ``TLS_VERIFY``
@@ -1273,441 +1296,11 @@ cmake_policy(PUSH)
 cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
 cmake_policy(SET CMP0057 NEW) # if() supports IN_LIST
 
-macro(_ep_get_hash_algos out_var)
-  set(${out_var}
-    MD5
-    SHA1
-    SHA224
-    SHA256
-    SHA384
-    SHA512
-    SHA3_224
-    SHA3_256
-    SHA3_384
-    SHA3_512
-  )
-endmacro()
-
-macro(_ep_get_hash_regex out_var)
-  _ep_get_hash_algos(${out_var})
-  list(JOIN ${out_var} "|" ${out_var})
-  set(${out_var} "^(${${out_var}})=([0-9A-Fa-f]+)$")
-endmacro()
-
-function(_ep_parse_arguments
-  f
-  keywords
-  name
-  ns
-  args
-)
-  # Transfer the arguments to this function into target properties for the
-  # new custom target we just added so that we can set up all the build steps
-  # correctly based on target properties.
-  #
-  # Because some keywords can be repeated, we can't use cmake_parse_arguments().
-  # Instead, we loop through ARGN and consider the namespace starting with an
-  # upper-case letter followed by at least two more upper-case letters,
-  # numbers or underscores to be keywords.
-
-  set(key)
-
-  foreach(arg IN LISTS args)
-    set(is_value 1)
-
-    if(arg MATCHES "^[A-Z][A-Z0-9_][A-Z0-9_]+$" AND
-        NOT (("x${arg}x" STREQUAL "x${key}x") AND
-             ("x${key}x" STREQUAL "xCOMMANDx")) AND
-        NOT arg MATCHES "^(TRUE|FALSE)$")
-      if(arg IN_LIST keywords)
-        set(is_value 0)
-      endif()
-    endif()
-
-    if(is_value)
-      if(key)
-        # Value
-        if(NOT arg STREQUAL "")
-          set_property(TARGET ${name} APPEND PROPERTY ${ns}${key} "${arg}")
-        else()
-          get_property(have_key TARGET ${name} PROPERTY ${ns}${key} SET)
-          if(have_key)
-            get_property(value TARGET ${name} PROPERTY ${ns}${key})
-            set_property(TARGET ${name} PROPERTY ${ns}${key} "${value};${arg}")
-          else()
-            set_property(TARGET ${name} PROPERTY ${ns}${key} "${arg}")
-          endif()
-        endif()
-      else()
-        # Missing Keyword
-        message(AUTHOR_WARNING
-          "value '${arg}' with no previous keyword in ${f}"
-        )
-      endif()
-    else()
-      set(key "${arg}")
-    endif()
-  endforeach()
-endfunction()
-
-
 define_property(DIRECTORY PROPERTY "EP_BASE" INHERITED)
 define_property(DIRECTORY PROPERTY "EP_PREFIX" INHERITED)
 define_property(DIRECTORY PROPERTY "EP_STEP_TARGETS" INHERITED)
 define_property(DIRECTORY PROPERTY "EP_INDEPENDENT_STEP_TARGETS" INHERITED)
 define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED)
-
-function(_ep_write_gitclone_script
-  script_filename
-  source_dir
-  git_EXECUTABLE
-  git_repository
-  git_tag
-  git_remote_name
-  init_submodules
-  git_submodules_recurse
-  git_submodules
-  git_shallow
-  git_progress
-  git_config
-  src_name
-  work_dir
-  gitclone_infofile
-  gitclone_stampfile
-  tls_verify
-)
-
-  if(NOT GIT_VERSION_STRING VERSION_LESS 1.8.5)
-    # Use `git checkout <tree-ish> --` to avoid ambiguity with a local path.
-    set(git_checkout_explicit-- "--")
-  else()
-    # Use `git checkout <branch>` even though this risks ambiguity with a
-    # local path.  Unfortunately we cannot use `git checkout <tree-ish> --`
-    # because that will not search for remote branch names, a common use case.
-    set(git_checkout_explicit-- "")
-  endif()
-  if("${git_tag}" STREQUAL "")
-    message(FATAL_ERROR "Tag for git checkout should not be empty.")
-  endif()
-
-  set(git_submodules_config_options "")
-
-  if(GIT_VERSION_STRING VERSION_LESS 2.20 OR
-     2.21 VERSION_LESS_EQUAL GIT_VERSION_STRING)
-    set(git_clone_options "--no-checkout")
-  else()
-    set(git_clone_options)
-  endif()
-  if(git_shallow)
-    if(NOT GIT_VERSION_STRING VERSION_LESS 1.7.10)
-      list(APPEND git_clone_options "--depth 1 --no-single-branch")
-    else()
-      list(APPEND git_clone_options "--depth 1")
-    endif()
-  endif()
-  if(git_progress)
-    list(APPEND git_clone_options --progress)
-  endif()
-  foreach(config IN LISTS git_config)
-    list(APPEND git_clone_options --config \"${config}\")
-  endforeach()
-  if(NOT ${git_remote_name} STREQUAL "origin")
-    list(APPEND git_clone_options --origin \"${git_remote_name}\")
-  endif()
-  if(NOT "x${tls_verify}" STREQUAL "x")
-    # The clone config option is sticky, it will apply to all subsequent git
-    # update operations. The submodules config option is not sticky, because
-    # git doesn't provide any way to do that. Thus, we will have to pass the
-    # same config option in the update step too for submodules, but not for
-    # the main git repo.
-    if(tls_verify)
-      # Default git behavior is "true", but the user might have changed the
-      # global default to "false". Since TLS_VERIFY was given, ensure we honor
-      # the specified setting regardless of what the global default might be.
-      list(APPEND git_clone_options -c http.sslVerify=true)
-      set(git_submodules_config_options -c http.sslVerify=true)
-    else()
-      list(APPEND git_clone_options -c http.sslVerify=false)
-      set(git_submodules_config_options -c http.sslVerify=false)
-    endif()
-  endif()
-
-  string (REPLACE ";" " " git_clone_options "${git_clone_options}")
-
-  configure_file(
-    ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/gitclone.cmake.in
-    ${script_filename}
-    @ONLY
-  )
-endfunction()
-
-function(_ep_write_hgclone_script
-  script_filename
-  source_dir
-  hg_EXECUTABLE
-  hg_repository
-  hg_tag
-  src_name
-  work_dir
-  hgclone_infofile
-  hgclone_stampfile
-)
-
-  if("${hg_tag}" STREQUAL "")
-    message(FATAL_ERROR "Tag for hg checkout should not be empty.")
-  endif()
-
-  configure_file(
-    ${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/hgclone.cmake.in
-    ${script_filename}
-    @ONLY
-  )
-endfunction()
-
-
-function(_ep_write_gitupdate_script
-  script_filename
-  git_EXECUTABLE
-  git_tag
-  git_remote_name
-  init_submodules
-  git_submodules_recurse
-  git_submodules
-  git_repository
-  work_dir
-  git_update_strategy
-  tls_verify
-)
-
-  if("${git_tag}" STREQUAL "")
-    message(FATAL_ERROR "Tag for git checkout should not be empty.")
-  endif()
-  set(git_stash_save_options --quiet)
-  if(GIT_VERSION_STRING VERSION_GREATER_EQUAL 1.7.7)
-    # This avoids stashing files covered by .gitignore
-    list(APPEND git_stash_save_options --include-untracked)
-  elseif(GIT_VERSION_STRING VERSION_GREATER_EQUAL 1.7.6)
-    # Untracked files, but also ignored files, so potentially slower
-    list(APPEND git_stash_save_options --all)
-  endif()
-
-  set(git_submodules_config_options "")
-  if(NOT "x${tls_verify}" STREQUAL "x")
-    # The submodules config option is not sticky, git doesn't provide any way
-    # to do that. We have to pass this config option for the update step too.
-    # We don't need to set it for the non-submodule update because it gets
-    # recorded as part of the clone operation in a sticky manner.
-    if(tls_verify)
-      # Default git behavior is "true", but the user might have changed the
-      # global default to "false". Since TLS_VERIFY was given, ensure we honor
-      # the specified setting regardless of what the global default might be.
-      set(git_submodules_config_options -c http.sslVerify=true)
-    else()
-      set(git_submodules_config_options -c http.sslVerify=false)
-    endif()
-  endif()
-
-  configure_file(
-      "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/gitupdate.cmake.in"
-      "${script_filename}"
-      @ONLY
-  )
-endfunction()
-
-function(_ep_write_downloadfile_script
-  script_filename
-  REMOTE
-  LOCAL
-  timeout
-  inactivity_timeout
-  no_progress
-  hash
-  tls_verify
-  tls_cainfo
-  userpwd
-  http_headers
-  netrc
-  netrc_file
-)
-  if("x${REMOTE}" STREQUAL "x")
-    message(FATAL_ERROR "REMOTE can't be empty")
-  endif()
-  if("x${LOCAL}" STREQUAL "x")
-    message(FATAL_ERROR "LOCAL can't be empty")
-  endif()
-
-  # REMOTE could contain special characters that parse as separate arguments.
-  # Things like parentheses are legitimate characters in a URL, but would be
-  # seen as the start of a new unquoted argument by the cmake language parser.
-  # Avoid those special cases by preparing quoted strings for direct inclusion
-  # in the foreach() call that iterates over the set of URLs in REMOTE.
-  set(REMOTE "[====[${REMOTE}]====]")
-  string(REPLACE ";" "]====] [====[" REMOTE "${REMOTE}")
-
-  if(timeout)
-    set(TIMEOUT_ARGS TIMEOUT ${timeout})
-    set(TIMEOUT_MSG "${timeout} seconds")
-  else()
-    set(TIMEOUT_ARGS "# no TIMEOUT")
-    set(TIMEOUT_MSG "none")
-  endif()
-  if(inactivity_timeout)
-    set(INACTIVITY_TIMEOUT_ARGS INACTIVITY_TIMEOUT ${inactivity_timeout})
-    set(INACTIVITY_TIMEOUT_MSG "${inactivity_timeout} seconds")
-  else()
-    set(INACTIVITY_TIMEOUT_ARGS "# no INACTIVITY_TIMEOUT")
-    set(INACTIVITY_TIMEOUT_MSG "none")
-  endif()
-
-  if(no_progress)
-    set(SHOW_PROGRESS "")
-  else()
-    set(SHOW_PROGRESS "SHOW_PROGRESS")
-  endif()
-
-  _ep_get_hash_regex(_ep_hash_regex)
-  if("${hash}" MATCHES "${_ep_hash_regex}")
-    set(ALGO "${CMAKE_MATCH_1}")
-    string(TOLOWER "${CMAKE_MATCH_2}" EXPECT_VALUE)
-  else()
-    set(ALGO "")
-    set(EXPECT_VALUE "")
-  endif()
-
-  set(TLS_VERIFY_CODE "")
-  set(TLS_CAINFO_CODE "")
-  set(NETRC_CODE "")
-  set(NETRC_FILE_CODE "")
-
-  # check for curl globals in the project
-  if(DEFINED CMAKE_TLS_VERIFY)
-    set(TLS_VERIFY_CODE "set(CMAKE_TLS_VERIFY ${CMAKE_TLS_VERIFY})")
-  endif()
-  if(DEFINED CMAKE_TLS_CAINFO)
-    set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${CMAKE_TLS_CAINFO}\")")
-  endif()
-  if(DEFINED CMAKE_NETRC)
-    set(NETRC_CODE "set(CMAKE_NETRC \"${CMAKE_NETRC}\")")
-  endif()
-  if(DEFINED CMAKE_NETRC_FILE)
-    set(NETRC_FILE_CODE "set(CMAKE_NETRC_FILE \"${CMAKE_NETRC_FILE}\")")
-  endif()
-
-  # now check for curl locals so that the local values
-  # will override the globals
-
-  # check for tls_verify argument
-  string(LENGTH "${tls_verify}" tls_verify_len)
-  if(tls_verify_len GREATER 0)
-    set(TLS_VERIFY_CODE "set(CMAKE_TLS_VERIFY ${tls_verify})")
-  endif()
-  # check for tls_cainfo argument
-  string(LENGTH "${tls_cainfo}" tls_cainfo_len)
-  if(tls_cainfo_len GREATER 0)
-    set(TLS_CAINFO_CODE "set(CMAKE_TLS_CAINFO \"${tls_cainfo}\")")
-  endif()
-  # check for netrc argument
-  string(LENGTH "${netrc}" netrc_len)
-  if(netrc_len GREATER 0)
-    set(NETRC_CODE "set(CMAKE_NETRC \"${netrc}\")")
-  endif()
-  # check for netrc_file argument
-  string(LENGTH "${netrc_file}" netrc_file_len)
-  if(netrc_file_len GREATER 0)
-    set(NETRC_FILE_CODE "set(CMAKE_NETRC_FILE \"${netrc_file}\")")
-  endif()
-
-  if(userpwd STREQUAL ":")
-    set(USERPWD_ARGS)
-  else()
-    set(USERPWD_ARGS USERPWD "${userpwd}")
-  endif()
-
-  set(HTTP_HEADERS_ARGS "")
-  if(NOT http_headers STREQUAL "")
-    foreach(header IN LISTS http_headers)
-      string(PREPEND HTTP_HEADERS_ARGS
-        "HTTPHEADER \"${header}\"\n        "
-      )
-    endforeach()
-  endif()
-
-  # Used variables:
-  # * TLS_VERIFY_CODE
-  # * TLS_CAINFO_CODE
-  # * ALGO
-  # * EXPECT_VALUE
-  # * REMOTE
-  # * LOCAL
-  # * SHOW_PROGRESS
-  # * TIMEOUT_ARGS
-  # * TIMEOUT_MSG
-  # * USERPWD_ARGS
-  # * HTTP_HEADERS_ARGS
-  configure_file(
-    "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/download.cmake.in"
-    "${script_filename}"
-    @ONLY
-  )
-endfunction()
-
-function(_ep_write_verifyfile_script
-  script_filename
-  LOCAL
-  hash
-)
-  _ep_get_hash_regex(_ep_hash_regex)
-  if("${hash}" MATCHES "${_ep_hash_regex}")
-    set(ALGO "${CMAKE_MATCH_1}")
-    string(TOLOWER "${CMAKE_MATCH_2}" EXPECT_VALUE)
-  else()
-    set(ALGO "")
-    set(EXPECT_VALUE "")
-  endif()
-
-  # Used variables:
-  # * ALGO
-  # * EXPECT_VALUE
-  # * LOCAL
-  configure_file(
-    "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/verify.cmake.in"
-    "${script_filename}"
-    @ONLY
-  )
-endfunction()
-
-
-function(_ep_write_extractfile_script
-  script_filename
-  name
-  filename
-  directory options
-)
-  set(args "")
-
-  if(filename MATCHES
-     "(\\.|=)(7z|tar\\.bz2|tar\\.gz|tar\\.xz|tbz2|tgz|txz|zip)$")
-    set(args xfz)
-  endif()
-
-  if(filename MATCHES "(\\.|=)tar$")
-    set(args xf)
-  endif()
-
-  if(args STREQUAL "")
-    message(FATAL_ERROR
-      "Do not know how to extract '${filename}' -- known types are: "
-      ".7z, .tar, .tar.bz2, .tar.gz, .tar.xz, .tbz2, .tgz, .txz and .zip"
-    )
-  endif()
-
-  configure_file(
-    "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/extractfile.cmake.in"
-    "${script_filename}"
-    @ONLY
-  )
-endfunction()
-
 
 function(_ep_set_directories name)
   get_property(prefix TARGET ${name} PROPERTY _EP_PREFIX)
@@ -1761,6 +1354,7 @@ function(_ep_set_directories name)
     endif()
     file(TO_CMAKE_PATH "${${var}_dir}" ${var}_dir)
     set_property(TARGET ${name} PROPERTY _EP_${VAR}_DIR "${${var}_dir}")
+    set(_EP_${VAR}_DIR "${${var}_dir}" PARENT_SCOPE)
   endforeach()
 
   # Special case for default log directory based on stamp directory.
@@ -1773,10 +1367,12 @@ function(_ep_set_directories name)
   endif()
   file(TO_CMAKE_PATH "${log_dir}" log_dir)
   set_property(TARGET ${name} PROPERTY _EP_LOG_DIR "${log_dir}")
+  set(_EP_LOG_DIR "${log_dir}" PARENT_SCOPE)
 
   get_property(source_subdir TARGET ${name} PROPERTY _EP_SOURCE_SUBDIR)
   if(NOT source_subdir)
     set_property(TARGET ${name} PROPERTY _EP_SOURCE_SUBDIR "")
+    set(_EP_SOURCE_SUBDIR "" PARENT_SCOPE)
   elseif(IS_ABSOLUTE "${source_subdir}")
     message(FATAL_ERROR
       "External project ${name} has non-relative SOURCE_SUBDIR!"
@@ -1786,6 +1382,7 @@ function(_ep_set_directories name)
     # behaves as expected.
     file(TO_CMAKE_PATH "${source_subdir}" source_subdir)
     set_property(TARGET ${name} PROPERTY _EP_SOURCE_SUBDIR "/${source_subdir}")
+    set(_EP_SOURCE_SUBDIR "/${source_subdir}" PARENT_SCOPE)
   endif()
   if(build_in_source)
     get_property(source_dir TARGET ${name} PROPERTY _EP_SOURCE_DIR)
@@ -1793,10 +1390,12 @@ function(_ep_set_directories name)
       set_property(TARGET ${name} PROPERTY
         _EP_BINARY_DIR "${source_dir}/${source_subdir}"
       )
+      set(_EP_BINARY_DIR "${source_dir}/${source_subdir}" PARENT_SCOPE)
     else()
       set_property(TARGET ${name} PROPERTY
         _EP_BINARY_DIR "${source_dir}"
       )
+      set(_EP_BINARY_DIR "${source_dir}" PARENT_SCOPE)
     endif()
   endif()
 
@@ -2055,6 +1654,7 @@ function(_ep_get_build_command
   set(${cmd_var} "${cmd}" PARENT_SCOPE)
 endfunction()
 
+
 function(_ep_write_log_script
   name
   step
@@ -2217,6 +1817,7 @@ endif()
   set(command ${CMAKE_COMMAND} ${make} ${config} -P ${script})
   set(${cmd_var} "${command}" PARENT_SCOPE)
 endfunction()
+
 
 # On multi-config generators, provide a placeholder for a per-config subdir.
 # On single-config generators, this is empty.
@@ -2413,6 +2014,10 @@ function(ExternalProject_Add_StepTargets name)
 endfunction()
 
 
+# While this function is referenced in shared_internal_commands.cmake in a few
+# places, all of those code paths will only be reached by calling one of the
+# functions defined in this file. Keep it here, since it is part of the public
+# interface of ExternalProject.
 function(ExternalProject_Add_Step name step)
   get_property(cmp0114 TARGET ${name} PROPERTY _EP_CMP0114)
   _ep_get_complete_stampfile(${name} complete_stamp_file)
@@ -2802,908 +2407,6 @@ function(_ep_add_mkdir_command name)
 endfunction()
 
 
-function(_ep_is_dir_empty dir empty_var)
-  file(GLOB gr "${dir}/*")
-  if("${gr}" STREQUAL "")
-    set(${empty_var} 1 PARENT_SCOPE)
-  else()
-    set(${empty_var} 0 PARENT_SCOPE)
-  endif()
-endfunction()
-
-function(_ep_get_git_submodules_recurse git_submodules_recurse)
-  # Checks for GIT_SUBMODULES_RECURSE property. Default is ON, which sets
-  # git_submodules_recurse output variable to "--recursive". Otherwise, the
-  # output variable is set to an empty value "".
-  get_property(git_submodules_recurse_set
-    TARGET ${name}
-    PROPERTY _EP_GIT_SUBMODULES_RECURSE
-    SET
-  )
-  if(NOT git_submodules_recurse_set)
-    set(recurseFlag "--recursive")
-  else()
-    get_property(git_submodules_recurse_value
-      TARGET ${name}
-      PROPERTY _EP_GIT_SUBMODULES_RECURSE
-    )
-    if(git_submodules_recurse_value)
-      set(recurseFlag "--recursive")
-    else()
-      set(recurseFlag "")
-    endif()
-  endif()
-  set(${git_submodules_recurse} "${recurseFlag}" PARENT_SCOPE)
-
-  # The git submodule update '--recursive' flag requires git >= v1.6.5
-  if(recurseFlag AND GIT_VERSION_STRING VERSION_LESS 1.6.5)
-    message(FATAL_ERROR
-      "git version 1.6.5 or later required for --recursive flag with "
-      "'git submodule ...': GIT_VERSION_STRING='${GIT_VERSION_STRING}'"
-    )
-  endif()
-endfunction()
-
-
-function(_ep_add_download_command name)
-  ExternalProject_Get_Property(${name}
-    source_dir
-    stamp_dir
-    download_dir
-    tmp_dir
-  )
-
-  get_property(cmd_set TARGET ${name} PROPERTY _EP_DOWNLOAD_COMMAND SET)
-  get_property(cmd TARGET ${name} PROPERTY _EP_DOWNLOAD_COMMAND)
-  get_property(cvs_repository TARGET ${name} PROPERTY _EP_CVS_REPOSITORY)
-  get_property(svn_repository TARGET ${name} PROPERTY _EP_SVN_REPOSITORY)
-  get_property(git_repository TARGET ${name} PROPERTY _EP_GIT_REPOSITORY)
-  get_property(hg_repository  TARGET ${name} PROPERTY _EP_HG_REPOSITORY )
-  get_property(url TARGET ${name} PROPERTY _EP_URL)
-  get_property(fname TARGET ${name} PROPERTY _EP_DOWNLOAD_NAME)
-
-  # TODO: Perhaps file:// should be copied to download dir before extraction.
-  string(REGEX REPLACE "file://" "" url "${url}")
-
-  set(depends)
-  set(comment)
-  set(work_dir)
-  set(extra_repo_info)
-
-  if(cmd_set)
-    set(work_dir ${download_dir})
-    set(method custom)
-  elseif(cvs_repository)
-    set(method cvs)
-    find_package(CVS QUIET)
-    if(NOT CVS_EXECUTABLE)
-      message(FATAL_ERROR "error: could not find cvs for checkout of ${name}")
-    endif()
-
-    get_target_property(cvs_module ${name} _EP_CVS_MODULE)
-    if(NOT cvs_module)
-      message(FATAL_ERROR "error: no CVS_MODULE")
-    endif()
-
-    get_property(cvs_tag TARGET ${name} PROPERTY _EP_CVS_TAG)
-    get_filename_component(src_name "${source_dir}" NAME)
-    get_filename_component(work_dir "${source_dir}" PATH)
-    set(comment "Performing download step (CVS checkout) for '${name}'")
-    set(cmd
-      ${CVS_EXECUTABLE}
-      -d ${cvs_repository}
-      -q
-      co ${cvs_tag}
-      -d ${src_name}
-      ${cvs_module}
-    )
-
-  elseif(svn_repository)
-    set(method svn)
-    find_package(Subversion QUIET)
-    if(NOT Subversion_SVN_EXECUTABLE)
-      message(FATAL_ERROR "error: could not find svn for checkout of ${name}")
-    endif()
-
-    get_property(svn_revision TARGET ${name} PROPERTY _EP_SVN_REVISION)
-    get_property(svn_username TARGET ${name} PROPERTY _EP_SVN_USERNAME)
-    get_property(svn_password TARGET ${name} PROPERTY _EP_SVN_PASSWORD)
-    get_property(svn_trust_cert TARGET ${name} PROPERTY _EP_SVN_TRUST_CERT)
-    get_property(uses_terminal
-      TARGET ${name}
-      PROPERTY _EP_USES_TERMINAL_DOWNLOAD
-    )
-    # The --trust-server-cert option requires --non-interactive
-    if(uses_terminal AND NOT svn_trust_cert)
-      set(svn_interactive_args "")
-    else()
-      set(svn_interactive_args "--non-interactive")
-    endif()
-
-    get_filename_component(src_name "${source_dir}" NAME)
-    get_filename_component(work_dir "${source_dir}" PATH)
-    set(comment "Performing download step (SVN checkout) for '${name}'")
-    set(svn_user_pw_args "")
-    if(DEFINED svn_username)
-      set(svn_user_pw_args ${svn_user_pw_args} "--username=${svn_username}")
-    endif()
-    if(DEFINED svn_password)
-      set(svn_user_pw_args ${svn_user_pw_args} "--password=${svn_password}")
-    endif()
-    if(svn_trust_cert)
-      set(svn_trust_cert_args --trust-server-cert)
-    endif()
-    set(cmd
-      ${Subversion_SVN_EXECUTABLE}
-      co
-      ${svn_repository}
-      ${svn_revision}
-      ${svn_interactive_args}
-      ${svn_trust_cert_args}
-      ${svn_user_pw_args}
-      ${src_name}
-    )
-
-  elseif(git_repository)
-    set(method git)
-    # FetchContent gives us these directly, so don't try to recompute them
-    if(NOT GIT_EXECUTABLE OR NOT GIT_VERSION_STRING)
-      unset(CMAKE_MODULE_PATH) # Use CMake builtin find module
-      find_package(Git QUIET)
-      if(NOT GIT_EXECUTABLE)
-        message(FATAL_ERROR "error: could not find git for clone of ${name}")
-      endif()
-    endif()
-
-    _ep_get_git_submodules_recurse(git_submodules_recurse)
-
-    get_property(git_tag TARGET ${name} PROPERTY _EP_GIT_TAG)
-    if(NOT git_tag)
-      set(git_tag "master")
-    endif()
-
-    set(git_init_submodules TRUE)
-    get_property(git_submodules_set
-      TARGET ${name}
-      PROPERTY _EP_GIT_SUBMODULES SET
-    )
-    if(git_submodules_set)
-      get_property(git_submodules TARGET ${name} PROPERTY _EP_GIT_SUBMODULES)
-      if(git_submodules  STREQUAL "" AND _EP_CMP0097 STREQUAL "NEW")
-        set(git_init_submodules FALSE)
-      endif()
-    endif()
-
-    get_property(git_remote_name TARGET ${name} PROPERTY _EP_GIT_REMOTE_NAME)
-    if(NOT git_remote_name)
-      set(git_remote_name "origin")
-    endif()
-
-    get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
-    if("x${tls_verify}" STREQUAL "x" AND DEFINED CMAKE_TLS_VERIFY)
-      set(tls_verify "${CMAKE_TLS_VERIFY}")
-    endif()
-    get_property(git_shallow TARGET ${name} PROPERTY _EP_GIT_SHALLOW)
-    get_property(git_progress TARGET ${name} PROPERTY _EP_GIT_PROGRESS)
-    get_property(git_config TARGET ${name} PROPERTY _EP_GIT_CONFIG)
-
-    # If git supports it, make checkouts quiet when checking out a git hash.
-    # This avoids the very noisy detached head message.
-    if(GIT_VERSION_STRING VERSION_GREATER_EQUAL 1.7.7)
-      list(PREPEND git_config advice.detachedHead=false)
-    endif()
-
-    # The command doesn't expose any details, so we need to record additional
-    # information in the RepositoryInfo.txt file. For the download step, only
-    # the things specifically affecting the clone operation should be recorded.
-    # If the repo changes, the clone script should be run again.
-    # But if only the tag changes, avoid running the clone script again.
-    # Let the 'always' running update step checkout the new tag.
-    #
-    set(extra_repo_info
-"repository=${git_repository}
-remote=${git_remote_name}
-init_submodules=${git_init_submodules}
-recurse_submodules=${git_submodules_recurse}
-submodules=${git_submodules}
-CMP0097=${_EP_CMP0097}
-")
-    get_filename_component(src_name "${source_dir}" NAME)
-    get_filename_component(work_dir "${source_dir}" PATH)
-
-    # Since git clone doesn't succeed if the non-empty source_dir exists,
-    # create a cmake script to invoke as download command.
-    # The script will delete the source directory and then call git clone.
-    #
-    _ep_write_gitclone_script(
-      ${tmp_dir}/${name}-gitclone.cmake
-      ${source_dir}
-      ${GIT_EXECUTABLE}
-      ${git_repository}
-      ${git_tag}
-      ${git_remote_name}
-      ${git_init_submodules}
-      "${git_submodules_recurse}"
-      "${git_submodules}"
-      "${git_shallow}"
-      "${git_progress}"
-      "${git_config}"
-      ${src_name}
-      ${work_dir}
-      ${stamp_dir}/${name}-gitinfo.txt
-      ${stamp_dir}/${name}-gitclone-lastrun.txt
-      "${tls_verify}"
-    )
-    set(comment "Performing download step (git clone) for '${name}'")
-    set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitclone.cmake)
-
-  elseif(hg_repository)
-    set(method hg)
-    find_package(Hg QUIET)
-    if(NOT HG_EXECUTABLE)
-      message(FATAL_ERROR "error: could not find hg for clone of ${name}")
-    endif()
-
-    get_property(hg_tag TARGET ${name} PROPERTY _EP_HG_TAG)
-    if(NOT hg_tag)
-      set(hg_tag "tip")
-    endif()
-
-    # The command doesn't expose any details, so we need to record additional
-    # information in the RepositoryInfo.txt file. For the download step, only
-    # the things specifically affecting the clone operation should be recorded.
-    # If the repo changes, the clone script should be run again.
-    # But if only the tag changes, avoid running the clone script again.
-    # Let the 'always' running update step checkout the new tag.
-    #
-    set(extra_repo_info "repository=${hg_repository}")
-    get_filename_component(src_name "${source_dir}" NAME)
-    get_filename_component(work_dir "${source_dir}" PATH)
-
-    # Since hg clone doesn't succeed if the non-empty source_dir exists,
-    # create a cmake script to invoke as download command.
-    # The script will delete the source directory and then call hg clone.
-    #
-    _ep_write_hgclone_script(
-      ${tmp_dir}/${name}-hgclone.cmake
-      ${source_dir}
-      ${HG_EXECUTABLE}
-      ${hg_repository}
-      ${hg_tag}
-      ${src_name}
-      ${work_dir}
-      ${stamp_dir}/${name}-hginfo.txt
-      ${stamp_dir}/${name}-hgclone-lastrun.txt
-    )
-    set(comment "Performing download step (hg clone) for '${name}'")
-    set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-hgclone.cmake)
-
-  elseif(url)
-    set(method url)
-    get_filename_component(work_dir "${source_dir}" PATH)
-    get_property(hash TARGET ${name} PROPERTY _EP_URL_HASH)
-    _ep_get_hash_regex(_ep_hash_regex)
-    if(hash AND NOT "${hash}" MATCHES "${_ep_hash_regex}")
-      _ep_get_hash_algos(_ep_hash_algos)
-      list(JOIN _ep_hash_algos "|" _ep_hash_algos)
-      message(FATAL_ERROR
-        "URL_HASH is set to\n"
-        "  ${hash}\n"
-        "but must be ALGO=value where ALGO is\n"
-        "  ${_ep_hash_algos}\n"
-        "and value is a hex string."
-      )
-    endif()
-    get_property(md5 TARGET ${name} PROPERTY _EP_URL_MD5)
-    if(md5 AND NOT "MD5=${md5}" MATCHES "${_ep_hash_regex}")
-      message(FATAL_ERROR
-        "URL_MD5 is set to\n"
-        "  ${md5}\n"
-        "but must be a hex string."
-      )
-    endif()
-    if(md5 AND NOT hash)
-      set(hash "MD5=${md5}")
-    endif()
-    set(extra_repo_info
-"url(s)=${url}
-hash=${hash}
-")
-
-    list(LENGTH url url_list_length)
-    if(NOT "${url_list_length}" STREQUAL "1")
-      foreach(entry IN LISTS url)
-        if(NOT "${entry}" MATCHES "^[a-z]+://")
-          message(FATAL_ERROR
-            "At least one entry of URL is a path (invalid in a list)"
-          )
-        endif()
-      endforeach()
-      if("x${fname}" STREQUAL "x")
-        list(GET url 0 fname)
-      endif()
-    endif()
-
-    if(IS_DIRECTORY "${url}")
-      get_filename_component(abs_dir "${url}" ABSOLUTE)
-      set(comment "Performing download step (DIR copy) for '${name}'")
-      set(cmd
-        ${CMAKE_COMMAND} -E rm -rf ${source_dir}
-        COMMAND ${CMAKE_COMMAND} -E copy_directory ${abs_dir} ${source_dir}
-      )
-    else()
-      get_property(no_extract
-        TARGET "${name}"
-        PROPERTY _EP_DOWNLOAD_NO_EXTRACT
-      )
-      string(APPEND extra_repo_info "no_extract=${no_extract}\n")
-      if("${url}" MATCHES "^[a-z]+://")
-        # TODO: Should download and extraction be different steps?
-        if("x${fname}" STREQUAL "x")
-          set(fname "${url}")
-        endif()
-        set(ext_regex [[7z|tar|tar\.bz2|tar\.gz|tar\.xz|tbz2|tgz|txz|zip]])
-        if("${fname}" MATCHES "([^/\\?#]+(\\.|=)(${ext_regex}))([/?#].*)?$")
-          set(fname "${CMAKE_MATCH_1}")
-        elseif(no_extract)
-          get_filename_component(fname "${fname}" NAME)
-        else()
-          # Fall back to a default file name.  The actual file name does not
-          # matter because it is used only internally and our extraction tool
-          # inspects the file content directly.  If it turns out the wrong URL
-          # was given that will be revealed during the build which is an easier
-          # place for users to diagnose than an error here anyway.
-          set(fname "archive.tar")
-        endif()
-        string(REPLACE ";" "-" fname "${fname}")
-        set(file ${download_dir}/${fname})
-        get_property(timeout TARGET ${name} PROPERTY _EP_TIMEOUT)
-        get_property(inactivity_timeout
-          TARGET ${name}
-          PROPERTY _EP_INACTIVITY_TIMEOUT
-        )
-        get_property(no_progress
-          TARGET ${name}
-          PROPERTY _EP_DOWNLOAD_NO_PROGRESS
-        )
-        get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
-        get_property(tls_cainfo TARGET ${name} PROPERTY _EP_TLS_CAINFO)
-        get_property(netrc TARGET ${name} PROPERTY _EP_NETRC)
-        get_property(netrc_file TARGET ${name} PROPERTY _EP_NETRC_FILE)
-        get_property(http_username TARGET ${name} PROPERTY _EP_HTTP_USERNAME)
-        get_property(http_password TARGET ${name} PROPERTY _EP_HTTP_PASSWORD)
-        get_property(http_headers TARGET ${name} PROPERTY _EP_HTTP_HEADER)
-        set(download_script "${stamp_dir}/download-${name}.cmake")
-        _ep_write_downloadfile_script(
-          "${download_script}"
-          "${url}"
-          "${file}"
-          "${timeout}"
-          "${inactivity_timeout}"
-          "${no_progress}"
-          "${hash}"
-          "${tls_verify}"
-          "${tls_cainfo}"
-          "${http_username}:${http_password}"
-          "${http_headers}"
-          "${netrc}"
-          "${netrc_file}"
-        )
-        set(cmd
-          ${CMAKE_COMMAND} -P "${download_script}"
-          COMMAND
-        )
-        if (no_extract)
-          set(steps "download and verify")
-        else ()
-          set(steps "download, verify and extract")
-        endif ()
-        set(comment "Performing download step (${steps}) for '${name}'")
-        # already verified by 'download_script'
-        file(WRITE "${stamp_dir}/verify-${name}.cmake" "")
-
-        # Rather than adding everything to the RepositoryInfo.txt file, it is
-        # more robust to just depend on the download script. That way, we will
-        # re-download if any aspect of the download changes.
-        list(APPEND depends "${download_script}")
-      else()
-        set(file "${url}")
-        if (no_extract)
-          set(steps "verify")
-        else ()
-          set(steps "verify and extract")
-        endif ()
-        set(comment "Performing download step (${steps}) for '${name}'")
-        _ep_write_verifyfile_script(
-          "${stamp_dir}/verify-${name}.cmake"
-          "${file}"
-          "${hash}"
-        )
-      endif()
-      list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/verify-${name}.cmake)
-      get_target_property(extract_timestamp ${name}
-        _EP_DOWNLOAD_EXTRACT_TIMESTAMP
-      )
-      if(no_extract)
-        if(NOT extract_timestamp STREQUAL "extract_timestamp-NOTFOUND")
-          message(FATAL_ERROR
-            "Cannot specify DOWNLOAD_EXTRACT_TIMESTAMP when using "
-            "DOWNLOAD_NO_EXTRACT TRUE"
-          )
-        endif()
-        set_property(TARGET ${name} PROPERTY _EP_DOWNLOADED_FILE ${file})
-      else()
-        if(extract_timestamp STREQUAL "extract_timestamp-NOTFOUND")
-          # Default depends on policy CMP0135
-          if(_EP_CMP0135 STREQUAL "")
-            message(AUTHOR_WARNING
-              "The DOWNLOAD_EXTRACT_TIMESTAMP option was not given and policy "
-              "CMP0135 is not set. The policy's OLD behavior will be used. "
-              "When using a URL download, the timestamps of extracted files "
-              "should preferably be that of the time of extraction, otherwise "
-              "code that depends on the extracted contents might not be "
-              "rebuilt if the URL changes. The OLD behavior preserves the "
-              "timestamps from the archive instead, but this is usually not "
-              "what you want. Update your project to the NEW behavior or "
-              "specify the DOWNLOAD_EXTRACT_TIMESTAMP option with a value of "
-              "true to avoid this robustness issue."
-            )
-            set(extract_timestamp TRUE)
-          elseif(_EP_CMP0135 STREQUAL "NEW")
-            set(extract_timestamp FALSE)
-          else()
-            set(extract_timestamp TRUE)
-          endif()
-        endif()
-        if(extract_timestamp)
-          set(options "")
-        else()
-          set(options "--touch")
-        endif()
-        _ep_write_extractfile_script(
-          "${stamp_dir}/extract-${name}.cmake"
-          "${name}"
-          "${file}"
-          "${source_dir}"
-          "${options}"
-        )
-        list(APPEND cmd
-          COMMAND ${CMAKE_COMMAND} -P ${stamp_dir}/extract-${name}.cmake
-        )
-      endif ()
-    endif()
-  else()
-    set(method source_dir)
-    _ep_is_dir_empty("${source_dir}" empty)
-    if(${empty})
-      message(FATAL_ERROR
-        "No download info given for '${name}' and its source directory:\n"
-        " ${source_dir}\n"
-        "is not an existing non-empty directory.  Please specify one of:\n"
-        " * SOURCE_DIR with an existing non-empty directory\n"
-        " * DOWNLOAD_COMMAND\n"
-        " * URL\n"
-        " * GIT_REPOSITORY\n"
-        " * SVN_REPOSITORY\n"
-        " * HG_REPOSITORY\n"
-        " * CVS_REPOSITORY and CVS_MODULE"
-      )
-    endif()
-  endif()
-
-  # We use configure_file() to write the repo_info_file so that the file's
-  # timestamp is not updated if we don't change the contents
-
-  set(repo_info_file ${stamp_dir}/${name}-${method}info.txt)
-  list(APPEND depends ${repo_info_file})
-  configure_file(
-    "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/RepositoryInfo.txt.in"
-    "${repo_info_file}"
-    @ONLY
-  )
-
-  get_property(log
-    TARGET ${name}
-    PROPERTY _EP_LOG_DOWNLOAD
-  )
-  if(log)
-    set(log LOG 1)
-  else()
-    set(log "")
-  endif()
-
-  get_property(uses_terminal
-    TARGET ${name}
-    PROPERTY _EP_USES_TERMINAL_DOWNLOAD
-  )
-  if(uses_terminal)
-    set(uses_terminal USES_TERMINAL 1)
-  else()
-    set(uses_terminal "")
-  endif()
-
-  set(__cmdQuoted)
-  foreach(__item IN LISTS cmd)
-    string(APPEND __cmdQuoted " [==[${__item}]==]")
-  endforeach()
-  cmake_language(EVAL CODE "
-    ExternalProject_Add_Step(\${name} download
-      INDEPENDENT TRUE
-      COMMENT \${comment}
-      COMMAND ${__cmdQuoted}
-      WORKING_DIRECTORY \${work_dir}
-      DEPENDS \${depends}
-      DEPENDEES mkdir
-      ${log}
-      ${uses_terminal}
-    )"
-  )
-endfunction()
-
-function(_ep_get_update_disconnected var name)
-  get_property(update_disconnected_set
-    TARGET ${name}
-    PROPERTY _EP_UPDATE_DISCONNECTED
-    SET
-  )
-  if(update_disconnected_set)
-    get_property(update_disconnected
-      TARGET ${name}
-      PROPERTY _EP_UPDATE_DISCONNECTED
-    )
-  else()
-    get_property(update_disconnected
-      DIRECTORY
-      PROPERTY EP_UPDATE_DISCONNECTED
-    )
-  endif()
-  set(${var} "${update_disconnected}" PARENT_SCOPE)
-endfunction()
-
-function(_ep_add_update_command name)
-  ExternalProject_Get_Property(${name} source_dir stamp_dir tmp_dir)
-
-  get_property(cmd_set TARGET ${name} PROPERTY _EP_UPDATE_COMMAND SET)
-  get_property(cmd TARGET ${name} PROPERTY _EP_UPDATE_COMMAND)
-  get_property(cvs_repository TARGET ${name} PROPERTY _EP_CVS_REPOSITORY)
-  get_property(svn_repository TARGET ${name} PROPERTY _EP_SVN_REPOSITORY)
-  get_property(git_repository TARGET ${name} PROPERTY _EP_GIT_REPOSITORY)
-  get_property(hg_repository  TARGET ${name} PROPERTY _EP_HG_REPOSITORY )
-
-  _ep_get_update_disconnected(update_disconnected ${name})
-
-  set(work_dir)
-  set(comment)
-  set(always)
-  set(file_deps)
-
-  if(cmd_set)
-    set(work_dir ${source_dir})
-    if(NOT "x${cmd}" STREQUAL "x")
-      set(always 1)
-    endif()
-  elseif(cvs_repository)
-    if(NOT CVS_EXECUTABLE)
-      message(FATAL_ERROR "error: could not find cvs for update of ${name}")
-    endif()
-    set(work_dir ${source_dir})
-    set(comment "Performing update step (CVS update) for '${name}'")
-    get_property(cvs_tag TARGET ${name} PROPERTY _EP_CVS_TAG)
-    set(cmd ${CVS_EXECUTABLE} -d ${cvs_repository} -q up -dP ${cvs_tag})
-    set(always 1)
-  elseif(svn_repository)
-    if(NOT Subversion_SVN_EXECUTABLE)
-      message(FATAL_ERROR "error: could not find svn for update of ${name}")
-    endif()
-    set(work_dir ${source_dir})
-    set(comment "Performing update step (SVN update) for '${name}'")
-    get_property(svn_revision TARGET ${name} PROPERTY _EP_SVN_REVISION)
-    get_property(svn_username TARGET ${name} PROPERTY _EP_SVN_USERNAME)
-    get_property(svn_password TARGET ${name} PROPERTY _EP_SVN_PASSWORD)
-    get_property(svn_trust_cert TARGET ${name} PROPERTY _EP_SVN_TRUST_CERT)
-    get_property(uses_terminal TARGET ${name} PROPERTY _EP_USES_TERMINAL_UPDATE)
-    # The --trust-server-cert option requires --non-interactive
-    if(uses_terminal AND NOT svn_trust_cert)
-      set(svn_interactive_args "")
-    else()
-      set(svn_interactive_args "--non-interactive")
-    endif()
-    set(svn_user_pw_args "")
-    if(DEFINED svn_username)
-      set(svn_user_pw_args ${svn_user_pw_args} "--username=${svn_username}")
-    endif()
-    if(DEFINED svn_password)
-      set(svn_user_pw_args ${svn_user_pw_args} "--password=${svn_password}")
-    endif()
-    if(svn_trust_cert)
-      set(svn_trust_cert_args --trust-server-cert)
-    endif()
-    set(cmd
-      ${Subversion_SVN_EXECUTABLE}
-      up
-      ${svn_revision}
-      ${svn_interactive_args}
-      ${svn_trust_cert_args}
-      ${svn_user_pw_args}
-    )
-    set(always 1)
-  elseif(git_repository)
-    # FetchContent gives us these directly, so don't try to recompute them
-    if(NOT GIT_EXECUTABLE OR NOT GIT_VERSION_STRING)
-      unset(CMAKE_MODULE_PATH) # Use CMake builtin find module
-      find_package(Git QUIET)
-      if(NOT GIT_EXECUTABLE)
-        message(FATAL_ERROR "error: could not find git for fetch of ${name}")
-      endif()
-    endif()
-    set(work_dir ${source_dir})
-    set(comment "Performing update step for '${name}'")
-    set(comment_disconnected "Performing disconnected update step for '${name}'")
-
-    get_property(git_tag
-      TARGET ${name}
-      PROPERTY _EP_GIT_TAG
-    )
-    if(NOT git_tag)
-      set(git_tag "master")
-    endif()
-
-    get_property(git_remote_name
-      TARGET ${name}
-      PROPERTY _EP_GIT_REMOTE_NAME
-    )
-    if(NOT git_remote_name)
-      set(git_remote_name "origin")
-    endif()
-
-    set(git_init_submodules TRUE)
-    get_property(git_submodules_set
-      TARGET ${name}
-      PROPERTY _EP_GIT_SUBMODULES
-      SET
-    )
-    if(git_submodules_set)
-      get_property(git_submodules
-        TARGET ${name}
-        PROPERTY _EP_GIT_SUBMODULES
-      )
-      if(git_submodules  STREQUAL "" AND _EP_CMP0097 STREQUAL "NEW")
-        set(git_init_submodules FALSE)
-      endif()
-    endif()
-
-    get_property(git_update_strategy
-      TARGET ${name}
-      PROPERTY _EP_GIT_REMOTE_UPDATE_STRATEGY
-    )
-    if(NOT git_update_strategy)
-      set(git_update_strategy "${CMAKE_EP_GIT_REMOTE_UPDATE_STRATEGY}")
-    endif()
-    if(NOT git_update_strategy)
-      set(git_update_strategy REBASE)
-    endif()
-    set(strategies CHECKOUT REBASE REBASE_CHECKOUT)
-    if(NOT git_update_strategy IN_LIST strategies)
-      message(FATAL_ERROR
-        "'${git_update_strategy}' is not one of the supported strategies: "
-        "${strategies}"
-      )
-    endif()
-
-    _ep_get_git_submodules_recurse(git_submodules_recurse)
-
-    get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
-    if("x${tls_verify}" STREQUAL "x" AND DEFINED CMAKE_TLS_VERIFY)
-      set(tls_verify "${CMAKE_TLS_VERIFY}")
-    endif()
-
-    set(update_script "${tmp_dir}/${name}-gitupdate.cmake")
-    list(APPEND file_deps ${update_script})
-    _ep_write_gitupdate_script(
-      "${update_script}"
-      "${GIT_EXECUTABLE}"
-      "${git_tag}"
-      "${git_remote_name}"
-      "${git_init_submodules}"
-      "${git_submodules_recurse}"
-      "${git_submodules}"
-      "${git_repository}"
-      "${work_dir}"
-      "${git_update_strategy}"
-      "${tls_verify}"
-    )
-    set(cmd              ${CMAKE_COMMAND} -Dcan_fetch=YES -P ${update_script})
-    set(cmd_disconnected ${CMAKE_COMMAND} -Dcan_fetch=NO  -P ${update_script})
-    set(always 1)
-  elseif(hg_repository)
-    if(NOT HG_EXECUTABLE)
-      message(FATAL_ERROR "error: could not find hg for pull of ${name}")
-    endif()
-    set(work_dir ${source_dir})
-    set(comment "Performing update step (hg pull) for '${name}'")
-    set(comment_disconnected "Performing disconnected update step for '${name}'")
-
-    get_property(hg_tag
-      TARGET ${name}
-      PROPERTY _EP_HG_TAG
-    )
-    if(NOT hg_tag)
-      set(hg_tag "tip")
-    endif()
-
-    if("${HG_VERSION_STRING}" STREQUAL "2.1")
-      set(notesAnchor
-        "#A2.1.1:_revert_pull_return_code_change.2C_compile_issue_on_OS_X"
-      )
-      message(WARNING
-"Mercurial 2.1 does not distinguish an empty pull from a failed pull:
- http://mercurial.selenic.com/wiki/UpgradeNotes${notesAnchor}
- http://thread.gmane.org/gmane.comp.version-control.mercurial.devel/47656
-Update to Mercurial >= 2.1.1.
-")
-    endif()
-
-    set(cmd
-      ${HG_EXECUTABLE} pull
-      COMMAND ${HG_EXECUTABLE} update ${hg_tag}
-    )
-    set(cmd_disconnected ${HG_EXECUTABLE} update ${hg_tag})
-    set(always 1)
-  endif()
-
-  # We use configure_file() to write the update_info_file so that the file's
-  # timestamp is not updated if we don't change the contents
-  if(NOT DEFINED cmd_disconnected)
-    set(cmd_disconnected "${cmd}")
-  endif()
-  set(update_info_file ${stamp_dir}/${name}-update-info.txt)
-  list(APPEND file_deps ${update_info_file})
-  configure_file(
-    "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/UpdateInfo.txt.in"
-    "${update_info_file}"
-    @ONLY
-  )
-
-  get_property(log
-    TARGET ${name}
-    PROPERTY _EP_LOG_UPDATE
-  )
-  if(log)
-    set(log LOG 1)
-  else()
-    set(log "")
-  endif()
-
-  get_property(uses_terminal
-    TARGET ${name}
-    PROPERTY _EP_USES_TERMINAL_UPDATE
-  )
-  if(uses_terminal)
-    set(uses_terminal USES_TERMINAL 1)
-  else()
-    set(uses_terminal "")
-  endif()
-
-  set(__cmdQuoted)
-  foreach(__item IN LISTS cmd)
-    string(APPEND __cmdQuoted " [==[${__item}]==]")
-  endforeach()
-  cmake_language(EVAL CODE "
-    ExternalProject_Add_Step(${name} update
-      INDEPENDENT TRUE
-      COMMENT \${comment}
-      COMMAND ${__cmdQuoted}
-      ALWAYS \${always}
-      EXCLUDE_FROM_MAIN \${update_disconnected}
-      WORKING_DIRECTORY \${work_dir}
-      DEPENDEES download
-      DEPENDS \${file_deps}
-      ${log}
-      ${uses_terminal}
-    )"
-  )
-  if(update_disconnected)
-    if(NOT DEFINED comment_disconnected)
-      set(comment_disconnected "${comment}")
-    endif()
-    set(__cmdQuoted)
-    foreach(__item IN LISTS cmd_disconnected)
-      string(APPEND __cmdQuoted " [==[${__item}]==]")
-    endforeach()
-
-    cmake_language(EVAL CODE "
-      ExternalProject_Add_Step(${name} update_disconnected
-        INDEPENDENT TRUE
-        COMMENT \${comment_disconnected}
-        COMMAND ${__cmdQuoted}
-        WORKING_DIRECTORY \${work_dir}
-        DEPENDEES download
-        DEPENDS \${file_deps}
-        ${log}
-        ${uses_terminal}
-      )"
-    )
-  endif()
-
-endfunction()
-
-
-function(_ep_add_patch_command name)
-  ExternalProject_Get_Property(${name} source_dir stamp_dir)
-
-  get_property(cmd_set TARGET ${name} PROPERTY _EP_PATCH_COMMAND SET)
-  get_property(cmd TARGET ${name} PROPERTY _EP_PATCH_COMMAND)
-
-  set(work_dir)
-
-  if(cmd_set)
-    set(work_dir ${source_dir})
-  endif()
-
-  # We use configure_file() to write the patch_info_file so that the file's
-  # timestamp is not updated if we don't change the contents
-  set(patch_info_file ${stamp_dir}/${name}-patch-info.txt)
-  configure_file(
-    "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/ExternalProject/PatchInfo.txt.in"
-    "${patch_info_file}"
-    @ONLY
-  )
-
-  get_property(log
-    TARGET ${name}
-    PROPERTY _EP_LOG_PATCH
-  )
-  if(log)
-    set(log LOG 1)
-  else()
-    set(log "")
-  endif()
-
-  get_property(uses_terminal
-    TARGET ${name}
-    PROPERTY _EP_USES_TERMINAL_PATCH
-  )
-  if(uses_terminal)
-    set(uses_terminal USES_TERMINAL 1)
-  else()
-    set(uses_terminal "")
-  endif()
-
-  _ep_get_update_disconnected(update_disconnected ${name})
-
-  set(__cmdQuoted)
-  foreach(__item IN LISTS cmd)
-    string(APPEND __cmdQuoted " [==[${__item}]==]")
-  endforeach()
-  cmake_language(EVAL CODE "
-    ExternalProject_Add_Step(${name} patch
-      INDEPENDENT TRUE
-      COMMAND ${__cmdQuoted}
-      WORKING_DIRECTORY \${work_dir}
-      EXCLUDE_FROM_MAIN \${update_disconnected}
-      DEPENDEES update
-      DEPENDS \${patch_info_file}
-      ${log}
-      ${uses_terminal}
-    )"
-  )
-
-  if(update_disconnected)
-    cmake_language(EVAL CODE "
-      ExternalProject_Add_Step(${name} patch_disconnected
-        INDEPENDENT TRUE
-        COMMAND ${__cmdQuoted}
-        WORKING_DIRECTORY \${work_dir}
-        DEPENDEES update_disconnected
-        DEPENDS \${patch_info_file}
-        ${log}
-        ${uses_terminal}
-      )"
-    )
-  endif()
-
-endfunction()
-
 function(_ep_get_file_deps var name)
   set(file_deps)
 
@@ -3730,6 +2433,7 @@ function(_ep_get_file_deps var name)
 
   set("${var}" "${file_deps}" PARENT_SCOPE)
 endfunction()
+
 
 function(_ep_extract_configure_command var name)
   get_property(cmd_set
@@ -3885,6 +2589,7 @@ function(_ep_extract_configure_command var name)
 
   set("${var}" "${cmd}" PARENT_SCOPE)
 endfunction()
+
 
 # TODO: Make sure external projects use the proper compiler
 function(_ep_add_configure_command name)
@@ -4254,143 +2959,7 @@ function(ExternalProject_Add name)
     _EP_CMP0114 "${cmp0114}"
   )
 
-  set(keywords
-    #
-    # Directory options
-    #
-    PREFIX
-    TMP_DIR
-    STAMP_DIR
-    LOG_DIR
-    DOWNLOAD_DIR
-    SOURCE_DIR
-    BINARY_DIR
-    INSTALL_DIR
-    #
-    # Download step options
-    #
-    DOWNLOAD_COMMAND
-    #
-    URL
-    URL_HASH
-    URL_MD5
-    DOWNLOAD_NAME
-    DOWNLOAD_EXTRACT_TIMESTAMP
-    DOWNLOAD_NO_EXTRACT
-    DOWNLOAD_NO_PROGRESS
-    TIMEOUT
-    INACTIVITY_TIMEOUT
-    HTTP_USERNAME
-    HTTP_PASSWORD
-    HTTP_HEADER
-    TLS_VERIFY     # Also used for git clone operations
-    TLS_CAINFO
-    NETRC
-    NETRC_FILE
-    #
-    GIT_REPOSITORY
-    GIT_TAG
-    GIT_REMOTE_NAME
-    GIT_SUBMODULES
-    GIT_SUBMODULES_RECURSE
-    GIT_SHALLOW
-    GIT_PROGRESS
-    GIT_CONFIG
-    GIT_REMOTE_UPDATE_STRATEGY
-    #
-    SVN_REPOSITORY
-    SVN_REVISION
-    SVN_USERNAME
-    SVN_PASSWORD
-    SVN_TRUST_CERT
-    #
-    HG_REPOSITORY
-    HG_TAG
-    #
-    CVS_REPOSITORY
-    CVS_MODULE
-    CVS_TAG
-    #
-    # Update step options
-    #
-    UPDATE_COMMAND
-    UPDATE_DISCONNECTED
-    #
-    # Patch step options
-    #
-    PATCH_COMMAND
-    #
-    # Configure step options
-    #
-    CONFIGURE_COMMAND
-    CMAKE_COMMAND
-    CMAKE_GENERATOR
-    CMAKE_GENERATOR_PLATFORM
-    CMAKE_GENERATOR_TOOLSET
-    CMAKE_GENERATOR_INSTANCE
-    CMAKE_ARGS
-    CMAKE_CACHE_ARGS
-    CMAKE_CACHE_DEFAULT_ARGS
-    SOURCE_SUBDIR
-    CONFIGURE_HANDLED_BY_BUILD
-    #
-    # Build step options
-    #
-    BUILD_COMMAND
-    BUILD_IN_SOURCE
-    BUILD_ALWAYS
-    BUILD_BYPRODUCTS
-    BUILD_JOB_SERVER_AWARE
-    #
-    # Install step options
-    #
-    INSTALL_COMMAND
-    INSTALL_BYPRODUCTS
-    #
-    # Test step options
-    #
-    TEST_COMMAND
-    TEST_BEFORE_INSTALL
-    TEST_AFTER_INSTALL
-    TEST_EXCLUDE_FROM_MAIN
-    #
-    # Logging options
-    #
-    LOG_DOWNLOAD
-    LOG_UPDATE
-    LOG_PATCH
-    LOG_CONFIGURE
-    LOG_BUILD
-    LOG_INSTALL
-    LOG_TEST
-    LOG_MERGED_STDOUTERR
-    LOG_OUTPUT_ON_FAILURE
-    #
-    # Terminal access options
-    #
-    USES_TERMINAL_DOWNLOAD
-    USES_TERMINAL_UPDATE
-    USES_TERMINAL_PATCH
-    USES_TERMINAL_CONFIGURE
-    USES_TERMINAL_BUILD
-    USES_TERMINAL_INSTALL
-    USES_TERMINAL_TEST
-    #
-    # Target options
-    #
-    DEPENDS
-    EXCLUDE_FROM_ALL
-    STEP_TARGETS
-    INDEPENDENT_STEP_TARGETS
-    #
-    # Miscellaneous options
-    #
-    LIST_SEPARATOR
-    #
-    # Internal options (undocumented)
-    #
-    EXTERNALPROJECT_INTERNAL_ARGUMENT_SEPARATOR
-  )
+  _ep_get_add_keywords(keywords)
   _ep_parse_arguments(
     ExternalProject_Add
     "${keywords}"
@@ -4420,6 +2989,7 @@ function(ExternalProject_Add name)
     get_filename_component(work_dir "${source_dir}" PATH)
     _ep_resolve_git_remote(resolved_git_repository "${repo}" "${cmp0150}" "${work_dir}")
     set_property(TARGET ${name} PROPERTY _EP_GIT_REPOSITORY ${resolved_git_repository})
+    set(_EP_GIT_REPOSITORY "${resolved_git_repository}")
   endif()
 
   # The 'complete' step depends on all other steps and creates a

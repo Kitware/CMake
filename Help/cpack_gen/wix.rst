@@ -1,16 +1,122 @@
 CPack WIX Generator
 -------------------
 
-CPack WIX generator specific options
+Use the `WiX Toolset`_ to produce a Windows Installer ``.msi`` database.
+
+.. _`WiX Toolset`: https://wixtoolset.org/
 
 .. versionadded:: 3.7
-  Support :variable:`CPACK_COMPONENT_<compName>_DISABLED` variable.
+  The :variable:`CPACK_COMPONENT_<compName>_DISABLED` variable is now
+  supported.
+
+WiX Toolsets
+^^^^^^^^^^^^
+
+CPack selects one of the following variants of the WiX Toolset
+based on the :variable:`CPACK_WIX_VERSION` variable:
+
+* `WiX .NET Tools`_
+* `WiX Toolset v3`_
+
+WiX .NET Tools
+""""""""""""""
+
+Packaging is performed using the following tools:
+
+``wix build``
+  Build WiX source files directly into a Windows Installer ``.msi`` database.
+
+  Invocations may be customized using tool-specific variables:
+
+  * :variable:`CPACK_WIX_BUILD_EXTENSIONS <CPACK_WIX_<TOOL>_EXTENSIONS>`
+  * :variable:`CPACK_WIX_BUILD_EXTRA_FLAGS <CPACK_WIX_<TOOL>_EXTRA_FLAGS>`
+
+WiX extensions must be named with the form ``WixToolset.<Name>.wixext``.
+
+CPack expects the ``wix`` .NET tool to be available for command-line use
+with any required WiX extensions already installed.  Be sure the ``wix``
+version is compatible with :variable:`CPACK_WIX_VERSION`, and that WiX
+extension versions match the ``wix`` tool version.  For example:
+
+1. Install the ``wix`` command-line tool using ``dotnet``.
+
+  To install ``wix`` globally for the current user:
+
+  .. code-block:: bat
+
+    dotnet tool install --global wix --version 4.0.4
+
+  This places ``wix.exe`` in ``%USERPROFILE%\.dotnet\tools`` and adds
+  the directory to the current user's ``PATH`` environment variable.
+
+  Or, to install ``wix`` in a specific path, e.g., in ``c:\WiX``:
+
+  .. code-block:: bat
+
+    dotnet tool install --tool-path c:\WiX wix --version 4.0.4
+
+  This places ``wix.exe`` in ``c:\WiX``, but does *not* add it to the
+  current user's ``PATH`` environment variable.  The ``WIX`` environment
+  variable may be set to tell CPack where to find the tool,
+  e.g., ``set WIX=c:\WiX``.
+
+2. Add the WiX ``UI`` extension, needed by CPack's default WiX template:
+
+  .. code-block:: bat
+
+    wix extension add --global WixToolset.UI.wixext/4.0.4
+
+  Extensions added globally are stored in ``%USERPROFILE%\.wix``, or if the
+  ``WIX_EXTENSIONS`` environment variable is set, in ``%WIX_EXTENSIONS%\.wix``.
+
+WiX Toolset v3
+""""""""""""""
+
+Packaging is performed using the following tools:
+
+``candle``
+  Compiles WiX source files into ``.wixobj`` files.
+
+  Invocations may be customized using tool-specific variables:
+
+  * :variable:`CPACK_WIX_CANDLE_EXTENSIONS <CPACK_WIX_<TOOL>_EXTENSIONS>`
+  * :variable:`CPACK_WIX_CANDLE_EXTRA_FLAGS <CPACK_WIX_<TOOL>_EXTRA_FLAGS>`
+
+``light``
+  Links ``.wixobj`` files into a Windows Installer ``.msi`` database.
+
+  Invocations may be customized using tool-specific variables:
+
+  * :variable:`CPACK_WIX_LIGHT_EXTENSIONS <CPACK_WIX_<TOOL>_EXTENSIONS>`
+  * :variable:`CPACK_WIX_LIGHT_EXTRA_FLAGS <CPACK_WIX_<TOOL>_EXTRA_FLAGS>`
+
+CPack invokes both tools as needed.  Intermediate ``.wixobj`` files
+are considered implementation details.
+
+WiX extensions must be named with the form ``Wix<Name>Extension``.
+
+CPack expects the above tools to be available for command-line
+use via the ``PATH``.  Or, if the ``WIX`` environment variable is set,
+CPack looks for the tools in ``%WIX%`` and ``%WIX%\bin``.
 
 Variables specific to CPack WIX generator
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The following variables are specific to the installers built on
 Windows using WiX.
+
+.. variable:: CPACK_WIX_VERSION
+
+ .. versionadded:: 3.30
+
+ Specify the version of WiX Toolset for which the configuration
+ is written.  The value must be one of
+
+ ``4``
+   Package using `WiX .NET Tools`_.
+
+ ``3``
+   Package using `WiX Toolset v3`_.  This is the default.
 
 .. variable:: CPACK_WIX_UPGRADE_GUID
 
@@ -68,8 +174,13 @@ Windows using WiX.
 
 .. variable:: CPACK_WIX_UI_REF
 
- This variable allows you to override the Id of the ``<UIRef>`` element
- in the WiX template.
+ Specify the WiX ``UI`` extension's dialog set:
+
+ * With `WiX .NET Tools`_, this is the Id of the
+   ``<ui:WixUI>`` element in the default WiX template.
+
+ * With `WiX Toolset v3`_, this is the Id of the
+   ``<UIRef>`` element in the default WiX template.
 
  The default is ``WixUI_InstallDir`` in case no CPack components have
  been defined and ``WixUI_FeatureTree`` otherwise.
@@ -107,7 +218,7 @@ Windows using WiX.
 
  Language(s) of the installer
 
- Languages are compiled into the WixUI extension library.  To use them,
+ Languages are compiled into the Wix ``UI`` extension library.  To use them,
  simply provide the name of the culture.  If you specify more than one
  culture identifier in a comma or semicolon delimited list, the first one
  that is found will be used.  You can find a list of supported languages at:
@@ -196,38 +307,34 @@ Windows using WiX.
 
  Extra WiX source files
 
- This variable provides an optional list of extra WiX source files (.wxs)
- that should be compiled and linked.  The full path to source files is
- required.
+ This variable provides an optional list of extra WiX source files (``.wxs``)
+ that should be compiled and linked.  The paths must be absolute.
 
 .. variable:: CPACK_WIX_EXTRA_OBJECTS
 
- Extra WiX object files or libraries
+ Extra WiX object files or libraries to use with `WiX Toolset v3`_.
 
- This variable provides an optional list of extra WiX object (.wixobj)
- and/or WiX library (.wixlib) files.  The full path to objects and libraries
- is required.
+ This variable provides an optional list of extra WiX object (``.wixobj``)
+ and/or WiX library (``.wixlib``) files.  The paths must be absolute.
 
 .. variable:: CPACK_WIX_EXTENSIONS
 
- This variable provides a list of additional extensions for the WiX
- tools light and candle.
+ Specify a list of additional extensions for WiX tools.
+ See `WiX Toolsets`_ for extension naming patterns.
 
 .. variable:: CPACK_WIX_<TOOL>_EXTENSIONS
 
- This is the tool specific version of CPACK_WIX_EXTENSIONS.
- ``<TOOL>`` can be either LIGHT or CANDLE.
+ Specify a list of additional extensions for a specific WiX tool.
+ See `WiX Toolsets`_ for possible ``<TOOL>`` names.
 
 .. variable:: CPACK_WIX_<TOOL>_EXTRA_FLAGS
 
- This list variable allows you to pass additional
- flags to the WiX tool ``<TOOL>``.
+ Specify a list of additional command-line flags for a specific WiX tool.
+ See `WiX Toolsets`_ for possible ``<TOOL>`` names.
 
  Use it at your own risk.
  Future versions of CPack may generate flags which may be in conflict
  with your own flags.
-
- ``<TOOL>`` can be either LIGHT or CANDLE.
 
 .. variable:: CPACK_WIX_CMAKE_PACKAGE_REGISTRY
 
@@ -326,9 +433,9 @@ Windows using WiX.
 
  .. versionadded:: 3.23
 
- If this variable is set then the inclusion of WixUIExtensions is skipped,
- i.e. the ``-ext "WixUIExtension"`` command line is not included during
- the execution of the WiX light tool.
+ If this variable is set to true, the default inclusion of the WiX ``UI``
+ extension is skipped, i.e., the ``-ext WixUIExtension`` or
+ ``-ext WixToolset.UI.wixext`` flag is not passed to WiX tools.
 
 .. variable:: CPACK_WIX_ARCHITECTURE
 
@@ -351,13 +458,18 @@ Windows using WiX.
    administrative privileges.  Start menu entries created by the
    installer are visible to all users.
 
+   This is the default if :variable:`CPACK_WIX_VERSION` is set to any
+   value other than ``3``.
+
  ``perUser``
    Not yet supported. This is reserved for future use.
 
  ``NONE``
    Create an installer without any ``InstallScope`` attribute.
 
-   This is the default to preserve compatibility with CPack 3.28 and older.
+   If :variable:`CPACK_WIX_VERSION` is not set, or is set to ``3``, this
+   value is the default to preserve compatibility with 3.28 and lower.
+   Otherwise, this value is not supported.
 
    .. deprecated:: 3.29
 

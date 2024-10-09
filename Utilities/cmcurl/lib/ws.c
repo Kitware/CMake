@@ -114,23 +114,23 @@ static void ws_dec_info(struct ws_decoder *dec, struct Curl_easy *data,
   case 0:
     break;
   case 1:
-    infof(data, "WS-DEC: %s [%s%s]", msg,
-          ws_frame_name_of_op(dec->head[0]),
-          (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL");
+    CURL_TRC_WRITE(data, "websocket, decoded %s [%s%s]", msg,
+                   ws_frame_name_of_op(dec->head[0]),
+                   (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL");
     break;
   default:
     if(dec->head_len < dec->head_total) {
-      infof(data, "WS-DEC: %s [%s%s](%d/%d)", msg,
-            ws_frame_name_of_op(dec->head[0]),
-            (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL",
-            dec->head_len, dec->head_total);
+      CURL_TRC_WRITE(data, "websocket, decoded %s [%s%s](%d/%d)", msg,
+                     ws_frame_name_of_op(dec->head[0]),
+                     (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL",
+                     dec->head_len, dec->head_total);
     }
     else {
-      infof(data, "WS-DEC: %s [%s%s payload=%" CURL_FORMAT_CURL_OFF_T
-                  "/%" CURL_FORMAT_CURL_OFF_T "]",
-            msg, ws_frame_name_of_op(dec->head[0]),
-            (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL",
-            dec->payload_offset, dec->payload_len);
+      CURL_TRC_WRITE(data, "websocket, decoded %s [%s%s payload=%"
+                     CURL_FORMAT_CURL_OFF_T "/%" CURL_FORMAT_CURL_OFF_T "]",
+                     msg, ws_frame_name_of_op(dec->head[0]),
+                     (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL",
+                     dec->payload_offset, dec->payload_len);
     }
     break;
   }
@@ -277,9 +277,8 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
     Curl_bufq_skip(inraw, (size_t)nwritten);
     dec->payload_offset += (curl_off_t)nwritten;
     remain = dec->payload_len - dec->payload_offset;
-    /* infof(data, "WS-DEC: passed  %zd bytes payload, %"
-             CURL_FORMAT_CURL_OFF_T " remain",
-             nwritten, remain); */
+    CURL_TRC_WRITE(data, "websocket, passed %zd bytes payload, %"
+                   CURL_FORMAT_CURL_OFF_T " remain", nwritten, remain);
   }
 
   return remain? CURLE_AGAIN : CURLE_OK;
@@ -363,7 +362,7 @@ struct ws_cw_ctx {
 static CURLcode ws_cw_init(struct Curl_easy *data,
                            struct Curl_cwriter *writer)
 {
-  struct ws_cw_ctx *ctx = (struct ws_cw_ctx *)writer;
+  struct ws_cw_ctx *ctx = writer->ctx;
   (void)data;
   Curl_bufq_init2(&ctx->buf, WS_CHUNK_SIZE, 1, BUFQ_OPT_SOFT_LIMIT);
   return CURLE_OK;
@@ -371,7 +370,7 @@ static CURLcode ws_cw_init(struct Curl_easy *data,
 
 static void ws_cw_close(struct Curl_easy *data, struct Curl_cwriter *writer)
 {
-  struct ws_cw_ctx *ctx = (struct ws_cw_ctx *)writer;
+  struct ws_cw_ctx *ctx = writer->ctx;
   (void) data;
   Curl_bufq_free(&ctx->buf);
 }
@@ -423,7 +422,7 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
                             struct Curl_cwriter *writer, int type,
                             const char *buf, size_t nbytes)
 {
-  struct ws_cw_ctx *ctx = (struct ws_cw_ctx *)writer;
+  struct ws_cw_ctx *ctx = writer->ctx;
   struct websocket *ws;
   CURLcode result;
 
@@ -454,10 +453,12 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
     pass_ctx.cw_type = type;
     result = ws_dec_pass(&ws->dec, data, &ctx->buf,
                          ws_cw_dec_next, &pass_ctx);
-    if(result == CURLE_AGAIN)
+    if(result == CURLE_AGAIN) {
       /* insufficient amount of data, keep it for later.
        * we pretend to have written all since we have a copy */
+      CURL_TRC_WRITE(data, "websocket, buffered incomplete frame head");
       return CURLE_OK;
+    }
     else if(result) {
       infof(data, "WS: decode error %d", (int)result);
       return result;
@@ -717,8 +718,10 @@ CURLcode Curl_ws_request(struct Curl_easy *data, REQTYPE *req)
   if(result)
     return result;
   DEBUGASSERT(randlen < sizeof(keyval));
-  if(randlen >= sizeof(keyval))
+  if(randlen >= sizeof(keyval)) {
+    free(randstr);
     return CURLE_FAILED_INIT;
+  }
   strcpy(keyval, randstr);
   free(randstr);
   for(i = 0; !result && (i < sizeof(heads)/sizeof(heads[0])); i++) {
@@ -754,13 +757,26 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
   DEBUGASSERT(data->conn);
   ws = data->conn->proto.ws;
   if(!ws) {
+    size_t chunk_size = WS_CHUNK_SIZE;
     ws = calloc(1, sizeof(*ws));
     if(!ws)
       return CURLE_OUT_OF_MEMORY;
     data->conn->proto.ws = ws;
-    Curl_bufq_init2(&ws->recvbuf, WS_CHUNK_SIZE, WS_CHUNK_COUNT,
+#ifdef DEBUGBUILD
+    {
+      char *p = getenv("CURL_WS_CHUNK_SIZE");
+      if(p) {
+        long l = strtol(p, NULL, 10);
+        if(l > 0 && l <= (1*1024*1024)) {
+          chunk_size = (size_t)l;
+        }
+      }
+    }
+#endif
+    DEBUGF(infof(data, "WS, using chunk size %zu", chunk_size));
+    Curl_bufq_init2(&ws->recvbuf, chunk_size, WS_CHUNK_COUNT,
                     BUFQ_OPT_SOFT_LIMIT);
-    Curl_bufq_init2(&ws->sendbuf, WS_CHUNK_SIZE, WS_CHUNK_COUNT,
+    Curl_bufq_init2(&ws->sendbuf, chunk_size, WS_CHUNK_COUNT,
                     BUFQ_OPT_SOFT_LIMIT);
     ws_dec_init(&ws->dec);
     ws_enc_init(&ws->enc);
@@ -834,7 +850,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
 
 struct ws_collect {
   struct Curl_easy *data;
-  void *buffer;
+  unsigned char *buffer;
   size_t buflen;
   size_t bufidx;
   int frame_age;
@@ -886,7 +902,7 @@ static ssize_t ws_client_collect(const unsigned char *buf, size_t buflen,
       return -1;
     }
     *err = CURLE_OK;
-    memcpy(ctx->buffer, buf, nwritten);
+    memcpy(ctx->buffer + ctx->bufidx, buf, nwritten);
     ctx->bufidx += nwritten;
   }
   return nwritten;
@@ -936,10 +952,6 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
 
   *nread = 0;
   *metap = NULL;
-  /* get a download buffer */
-  result = Curl_preconnect(data);
-  if(result)
-    return result;
 
   memset(&ctx, 0, sizeof(ctx));
   ctx.data = data;
@@ -1001,14 +1013,17 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
   if(!Curl_bufq_is_empty(&ws->sendbuf)) {
     CURLcode result;
     const unsigned char *out;
-    size_t outlen;
-    ssize_t n;
+    size_t outlen, n;
 
     while(Curl_bufq_peek(&ws->sendbuf, &out, &outlen)) {
       if(data->set.connect_only)
         result = Curl_senddata(data, out, outlen, &n);
-      else
-        result = Curl_write(data, data->conn->writesockfd, out, outlen, &n);
+      else {
+        result = Curl_xfer_send(data, out, outlen, &n);
+        if(!result && !n && outlen)
+          result = CURLE_AGAIN;
+      }
+
       if(result) {
         if(result == CURLE_AGAIN) {
           if(!complete) {
@@ -1027,8 +1042,8 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
         }
       }
       else {
-        infof(data, "WS: flushed %zu bytes", (size_t)n);
-        Curl_bufq_skip(&ws->sendbuf, (size_t)n);
+        infof(data, "WS: flushed %zu bytes", n);
+        Curl_bufq_skip(&ws->sendbuf, n);
       }
     }
   }
@@ -1041,8 +1056,8 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
                                   unsigned int flags)
 {
   struct websocket *ws;
-  ssize_t nwritten, n;
-  size_t space;
+  ssize_t n;
+  size_t nwritten, space;
   CURLcode result;
 
   *sent = 0;
@@ -1073,15 +1088,14 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
     /* raw mode sends exactly what was requested, and this is from within
        the write callback */
     if(Curl_is_in_callback(data)) {
-      result = Curl_write(data, data->conn->writesockfd, buffer, buflen,
-                          &nwritten);
+      result = Curl_xfer_send(data, buffer, buflen, &nwritten);
     }
     else
       result = Curl_senddata(data, buffer, buflen, &nwritten);
 
     infof(data, "WS: wanted to send %zu bytes, sent %zu bytes",
           buflen, nwritten);
-    *sent = (nwritten >= 0)? (size_t)nwritten : 0;
+    *sent = nwritten;
     return result;
   }
 
@@ -1091,7 +1105,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
     return result;
 
   /* TODO: the current design does not allow partial writes, afaict.
-   * It is not clear who the application is supposed to react. */
+   * It is not clear how the application is supposed to react. */
   space = Curl_bufq_space(&ws->sendbuf);
   DEBUGF(infof(data, "curl_ws_send(len=%zu), sendbuf len=%zu space %zu",
                buflen, Curl_bufq_len(&ws->sendbuf), space));
@@ -1148,11 +1162,6 @@ static CURLcode ws_setup_conn(struct Curl_easy *data,
 }
 
 
-void Curl_ws_done(struct Curl_easy *data)
-{
-  (void)data;
-}
-
 static CURLcode ws_disconnect(struct Curl_easy *data,
                               struct connectdata *conn,
                               bool dead_connection)
@@ -1188,6 +1197,7 @@ const struct Curl_handler Curl_handler_ws = {
   ZERO_NULL,                            /* perform_getsock */
   ws_disconnect,                        /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
+  Curl_http_write_resp_hd,              /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTP,                            /* defport */
@@ -1213,6 +1223,7 @@ const struct Curl_handler Curl_handler_wss = {
   ZERO_NULL,                            /* perform_getsock */
   ws_disconnect,                        /* disconnect */
   Curl_http_write_resp,                 /* write_resp */
+  Curl_http_write_resp_hd,              /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_HTTPS,                           /* defport */

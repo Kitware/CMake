@@ -44,6 +44,9 @@ The following cache variables may also be set:
   the Xalan library
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 # Written by Roger Leigh <rleigh@codelibre.net>
 
 function(_XalanC_GET_VERSION  version_hdr)
@@ -153,3 +156,5 @@ if(XalanC_FOUND)
     set_target_properties(XalanC::XalanC PROPERTIES INTERFACE_LINK_LIBRARIES XercesC::XercesC)
   endif()
 endif()
+
+cmake_policy(POP)

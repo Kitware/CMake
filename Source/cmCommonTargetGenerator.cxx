@@ -295,7 +295,7 @@ std::string cmCommonTargetGenerator::GetAIXExports(std::string const&)
   if (this->GeneratorTarget->IsAIX()) {
     if (cmValue exportAll =
           this->GeneratorTarget->GetProperty("AIX_EXPORT_ALL_SYMBOLS")) {
-      if (cmIsOff(*exportAll)) {
+      if (exportAll.IsOff()) {
         aixExports = "-n";
       }
     }
@@ -500,8 +500,9 @@ std::string cmCommonTargetGenerator::GetLinkerLauncher(
   std::string propName = lang + "_LINKER_LAUNCHER";
   cmValue launcherProp = this->GeneratorTarget->GetProperty(propName);
   if (cmNonempty(launcherProp)) {
-    cmGeneratorExpressionDAGChecker dagChecker(this->GeneratorTarget, propName,
-                                               nullptr, nullptr);
+    cmGeneratorExpressionDAGChecker dagChecker(
+      this->GeneratorTarget, propName, nullptr, nullptr,
+      this->LocalCommonGenerator, config);
     std::string evaluatedLinklauncher = cmGeneratorExpression::Evaluate(
       *launcherProp, this->LocalCommonGenerator, config, this->GeneratorTarget,
       &dagChecker, this->GeneratorTarget, lang);

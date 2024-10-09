@@ -22,6 +22,8 @@ add_executable(CompileOptions main.cpp)
 macro(get_compiler_test_genex lst lang)
   list(APPEND ${lst} -DTEST_${lang}_COMPILER_VERSION="$<${lang}_COMPILER_VERSION>")
   list(APPEND ${lst} -DTEST_${lang}_COMPILER_VERSION_EQUALITY=$<${lang}_COMPILER_VERSION:${CMAKE_${lang}_COMPILER_VERSION}>)
+  list(APPEND ${lst} -DTEST_${lang}_COMPILER_FRONTEND_VARIANT="$<${lang}_COMPILER_FRONTEND_VARIANT>")
+  list(APPEND ${lst} -DTEST_${lang}_COMPILER_FRONTEND_VARIANT_EQUALITY=$<${lang}_COMPILER_FRONTEND_VARIANT:${CMAKE_${lang}_COMPILER_FRONTEND_VARIANT}>)
 endmacro()
 
 get_compiler_test_genex(c_tests C)
@@ -74,10 +76,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|LCC|AppleClang|MSVC)$")
   endif()
   set_property(TARGET CompileOptions APPEND PROPERTY COMPILE_OPTIONS "-DFLAG_B=2" "-DFLAG_C=2" "-DFLAG_D=1")
   set_property(TARGET testlib APPEND PROPERTY INTERFACE_COMPILE_OPTIONS "-DFLAG_D=2")
-  if(NOT CMAKE_GENERATOR MATCHES "^Visual Studio 9")
-    set_property(TARGET testlib APPEND PROPERTY INTERFACE_COMPILE_OPTIONS "-DFLAG_E=1")
-    set_property(SOURCE main.cpp PROPERTY COMPILE_OPTIONS "-DFLAG_E=2")
-  endif()
+  set_property(TARGET testlib APPEND PROPERTY INTERFACE_COMPILE_OPTIONS "-DFLAG_E=1")
+  set_property(SOURCE main.cpp PROPERTY COMPILE_OPTIONS "-DFLAG_E=2")
 endif()
 
 target_link_libraries(CompileOptions testlib)
@@ -93,6 +93,8 @@ target_compile_definitions(CompileOptions
   PRIVATE
     "EXPECTED_C_COMPILER_VERSION=\"${CMAKE_C_COMPILER_VERSION}\""
     "EXPECTED_CXX_COMPILER_VERSION=\"${CMAKE_CXX_COMPILER_VERSION}\""
+    "EXPECTED_C_COMPILER_FRONTEND_VARIANT=\"${CMAKE_C_COMPILER_FRONTEND_VARIANT}\""
+    "EXPECTED_CXX_COMPILER_FRONTEND_VARIANT=\"${CMAKE_CXX_COMPILER_FRONTEND_VARIANT}\""
 )
 
 if(TEST_FORTRAN)
@@ -101,5 +103,6 @@ if(TEST_FORTRAN)
     PRIVATE
       "TEST_FORTRAN"
       "EXPECTED_Fortran_COMPILER_VERSION=\"${CMAKE_Fortran_COMPILER_VERSION}\""
+      "EXPECTED_Fortran_COMPILER_FRONTEND_VARIANT=\"${CMAKE_Fortran_COMPILER_FRONTEND_VARIANT}\""
   )
 endif()

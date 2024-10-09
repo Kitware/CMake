@@ -512,7 +512,7 @@ private:
   static bool ColoredOutputSupportedByConsole();
 
   /** handle the -S -SP and -SR arguments */
-  void HandleScriptArguments(size_t& i, std::vector<std::string>& args,
+  bool HandleScriptArguments(size_t& i, std::vector<std::string>& args,
                              bool& SRArgumentSpecified);
 
   /** Reread the configuration file */
@@ -531,11 +531,13 @@ private:
 
   /** Handle the --test-action command line argument */
   bool HandleTestActionArgument(const char* ctestExec, size_t& i,
-                                const std::vector<std::string>& args);
+                                const std::vector<std::string>& args,
+                                bool& validArg);
 
   /** Handle the --test-model command line argument */
   bool HandleTestModelArgument(const char* ctestExec, size_t& i,
-                               const std::vector<std::string>& args);
+                               const std::vector<std::string>& args,
+                               bool& validArg);
 
   int RunCMakeAndTest(std::string* output);
   int ExecuteTests();

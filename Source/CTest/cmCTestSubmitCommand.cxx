@@ -55,6 +55,50 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
       this->Makefile, "DropLocation", "CTEST_DROP_LOCATION", this->Quiet);
   }
 
+  if (!this->CTest->SetCTestConfigurationFromCMakeVariable(
+        this->Makefile, "TLSVersion", "CTEST_TLS_VERSION", this->Quiet)) {
+    if (cmValue tlsVersionVar =
+          this->Makefile->GetDefinition("CMAKE_TLS_VERSION")) {
+      cmCTestOptionalLog(
+        this->CTest, HANDLER_VERBOSE_OUTPUT,
+        "SetCTestConfiguration from CMAKE_TLS_VERSION:TLSVersion:"
+          << *tlsVersionVar << std::endl,
+        this->Quiet);
+      this->CTest->SetCTestConfiguration("TLSVersion", *tlsVersionVar,
+                                         this->Quiet);
+    } else if (cm::optional<std::string> tlsVersionEnv =
+                 cmSystemTools::GetEnvVar("CMAKE_TLS_VERSION")) {
+      cmCTestOptionalLog(
+        this->CTest, HANDLER_VERBOSE_OUTPUT,
+        "SetCTestConfiguration from ENV{CMAKE_TLS_VERSION}:TLSVersion:"
+          << *tlsVersionEnv << std::endl,
+        this->Quiet);
+      this->CTest->SetCTestConfiguration("TLSVersion", *tlsVersionEnv,
+                                         this->Quiet);
+    }
+  }
+  if (!this->CTest->SetCTestConfigurationFromCMakeVariable(
+        this->Makefile, "TLSVerify", "CTEST_TLS_VERIFY", this->Quiet)) {
+    if (cmValue tlsVerifyVar =
+          this->Makefile->GetDefinition("CMAKE_TLS_VERIFY")) {
+      cmCTestOptionalLog(
+        this->CTest, HANDLER_VERBOSE_OUTPUT,
+        "SetCTestConfiguration from CMAKE_TLS_VERIFY:TLSVerify:"
+          << *tlsVerifyVar << std::endl,
+        this->Quiet);
+      this->CTest->SetCTestConfiguration("TLSVerify", *tlsVerifyVar,
+                                         this->Quiet);
+    } else if (cm::optional<std::string> tlsVerifyEnv =
+                 cmSystemTools::GetEnvVar("CMAKE_TLS_VERIFY")) {
+      cmCTestOptionalLog(
+        this->CTest, HANDLER_VERBOSE_OUTPUT,
+        "SetCTestConfiguration from ENV{CMAKE_TLS_VERIFY}:TLSVerify:"
+          << *tlsVerifyEnv << std::endl,
+        this->Quiet);
+      this->CTest->SetCTestConfiguration("TLSVerify", *tlsVerifyEnv,
+                                         this->Quiet);
+    }
+  }
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "CurlOptions", "CTEST_CURL_OPTIONS", this->Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(

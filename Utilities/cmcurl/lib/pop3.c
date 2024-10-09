@@ -112,7 +112,7 @@ static CURLcode pop3_get_message(struct Curl_easy *data, struct bufref *out);
  */
 
 const struct Curl_handler Curl_handler_pop3 = {
-  "POP3",                           /* scheme */
+  "pop3",                           /* scheme */
   pop3_setup_connection,            /* setup_connection */
   pop3_do,                          /* do_it */
   pop3_done,                        /* done */
@@ -126,6 +126,7 @@ const struct Curl_handler Curl_handler_pop3 = {
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* write_resp */
+  ZERO_NULL,                        /* write_resp_hd */
   ZERO_NULL,                        /* connection_check */
   ZERO_NULL,                        /* attach connection */
   PORT_POP3,                        /* defport */
@@ -141,7 +142,7 @@ const struct Curl_handler Curl_handler_pop3 = {
  */
 
 const struct Curl_handler Curl_handler_pop3s = {
-  "POP3S",                          /* scheme */
+  "pop3s",                          /* scheme */
   pop3_setup_connection,            /* setup_connection */
   pop3_do,                          /* do_it */
   pop3_done,                        /* done */
@@ -155,6 +156,7 @@ const struct Curl_handler Curl_handler_pop3s = {
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
   ZERO_NULL,                        /* write_resp */
+  ZERO_NULL,                        /* write_resp_hd */
   ZERO_NULL,                        /* connection_check */
   ZERO_NULL,                        /* attach connection */
   PORT_POP3S,                       /* defport */
@@ -934,7 +936,7 @@ static CURLcode pop3_state_command_resp(struct Curl_easy *data,
 
   if(pop3->transfer == PPTRANSFER_BODY) {
     /* POP3 download */
-    Curl_setup_transfer(data, FIRSTSOCKET, -1, FALSE, -1);
+    Curl_xfer_setup(data, FIRSTSOCKET, -1, FALSE, -1);
 
     if(pp->overflow) {
       /* The recv buffer contains data that is actually body content so send
@@ -970,7 +972,6 @@ static CURLcode pop3_statemachine(struct Curl_easy *data,
                                   struct connectdata *conn)
 {
   CURLcode result = CURLE_OK;
-  curl_socket_t sock = conn->sock[FIRSTSOCKET];
   int pop3code;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
   struct pingpong *pp = &pop3c->pp;
@@ -987,7 +988,7 @@ static CURLcode pop3_statemachine(struct Curl_easy *data,
 
  do {
     /* Read the response from the server */
-   result = Curl_pp_readresp(data, sock, pp, &pop3code, &nread);
+   result = Curl_pp_readresp(data, FIRSTSOCKET, pp, &pop3code, &nread);
    if(result)
      return result;
 
@@ -1451,7 +1452,7 @@ static CURLcode pop3_parse_custom_request(struct Curl_easy *data)
  * This function scans the body after the end-of-body and writes everything
  * until the end is found.
  */
-CURLcode Curl_pop3_write(struct Curl_easy *data, char *str, size_t nread)
+CURLcode Curl_pop3_write(struct Curl_easy *data, const char *str, size_t nread)
 {
   /* This code could be made into a special function in the handler struct */
   CURLcode result = CURLE_OK;

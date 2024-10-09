@@ -1,3 +1,5 @@
+cmake_policy(SET CMP0169 OLD)
+
 include(FetchContent)
 
 # First confirm properties are empty even before declare

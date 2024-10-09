@@ -1,0 +1,5 @@
+^CMake Error at TARGET_SUPPORTS_SHARED_LIBS_CMP0164_NEW.cmake:[0-9]+ \(add_library\):
+  ADD_LIBRARY called with SHARED option but the target platform does not
+  support dynamic linking.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)$

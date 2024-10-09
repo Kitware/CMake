@@ -84,8 +84,8 @@ The options are:
   .. versionadded:: 3.20
     Arguments to ``BYPRODUCTS`` may use a restricted set of
     :manual:`generator expressions <cmake-generator-expressions(7)>`.
-    :ref:`Target-dependent expressions <Target-Dependent Queries>` are not
-    permitted.
+    :ref:`Target-dependent expressions <Target-Dependent Expressions>`
+    are not permitted.
 
   .. versionchanged:: 3.28
     In targets using :ref:`file sets`, custom command byproducts are now
@@ -269,16 +269,22 @@ The options are:
   source tree is mentioned as an absolute source file path elsewhere
   in the current directory.
 
+  The output file path may not contain ``<`` or ``>`` characters.
+
   .. versionadded:: 3.20
     Arguments to ``OUTPUT`` may use a restricted set of
     :manual:`generator expressions <cmake-generator-expressions(7)>`.
-    :ref:`Target-dependent expressions <Target-Dependent Queries>` are not
-    permitted.
+    :ref:`Target-dependent expressions <Target-Dependent Expressions>`
+    are not permitted.
 
   .. versionchanged:: 3.28
     In targets using :ref:`file sets`, custom command outputs are now
     considered private unless they are listed in a non-private file set.
     See policy :policy:`CMP0154`.
+
+  .. versionchanged:: 3.30
+    The output file path may now use ``#`` characters, except
+    when using the :generator:`Borland Makefiles` generator.
 
 ``USES_TERMINAL``
   .. versionadded:: 3.2

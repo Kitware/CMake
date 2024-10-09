@@ -59,7 +59,7 @@
 #include "memdebug.h"
 
 
-#ifdef ENABLE_QUIC
+#ifdef USE_HTTP3
 
 #ifdef O_BINARY
 #define QLOGMODE O_WRONLY|O_CREAT|O_BINARY
@@ -370,12 +370,10 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
         goto out;
       }
       if(!cf->connected && SOCKERRNO == ECONNREFUSED) {
-        const char *r_ip = NULL;
-        int r_port = 0;
-        Curl_cf_socket_peek(cf->next, data, NULL, NULL,
-                            &r_ip, &r_port, NULL, NULL);
+        struct ip_quadruple ip;
+        Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
         failf(data, "QUIC: connection to %s port %u refused",
-              r_ip, r_port);
+              ip.remote_ip, ip.remote_port);
         result = CURLE_COULDNT_CONNECT;
         goto out;
       }
@@ -440,12 +438,10 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
         goto out;
       }
       if(!cf->connected && SOCKERRNO == ECONNREFUSED) {
-        const char *r_ip = NULL;
-        int r_port = 0;
-        Curl_cf_socket_peek(cf->next, data, NULL, NULL,
-                            &r_ip, &r_port, NULL, NULL);
+        struct ip_quadruple ip;
+        Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
         failf(data, "QUIC: connection to %s port %u refused",
-              r_ip, r_port);
+              ip.remote_ip, ip.remote_port);
         result = CURLE_COULDNT_CONNECT;
         goto out;
       }
@@ -500,12 +496,10 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
         goto out;
       }
       if(!cf->connected && SOCKERRNO == ECONNREFUSED) {
-        const char *r_ip = NULL;
-        int r_port = 0;
-        Curl_cf_socket_peek(cf->next, data, NULL, NULL,
-                            &r_ip, &r_port, NULL, NULL);
+        struct ip_quadruple ip;
+        Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
         failf(data, "QUIC: connection to %s port %u refused",
-              r_ip, r_port);
+              ip.remote_ip, ip.remote_port);
         result = CURLE_COULDNT_CONNECT;
         goto out;
       }
@@ -669,7 +663,7 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-#else /* ENABLE_QUIC */
+#else /* USE_HTTP3 */
 
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,
                              const struct connectdata *conn)
@@ -680,4 +674,4 @@ CURLcode Curl_conn_may_http3(struct Curl_easy *data,
   return CURLE_NOT_BUILT_IN;
 }
 
-#endif /* !ENABLE_QUIC */
+#endif /* !USE_HTTP3 */

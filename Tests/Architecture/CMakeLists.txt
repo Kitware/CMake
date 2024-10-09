@@ -1,30 +1,21 @@
 cmake_minimum_required(VERSION 3.5)
 project(Architecture C)
 
-function(test_for_xcode4 result_var)
-  set(${result_var} 0 PARENT_SCOPE)
-  if(APPLE)
-    execute_process(COMMAND xcodebuild -version
-      OUTPUT_VARIABLE ov RESULT_VARIABLE rv
-      )
-    if("${rv}" STREQUAL "0" AND ov MATCHES "^Xcode ([0-9]+)\\.")
-      if(NOT CMAKE_MATCH_1 VERSION_LESS 4)
-        set(${result_var} 1 PARENT_SCOPE)
-      endif()
-    endif()
-  endif()
-endfunction()
-
-test_for_xcode4(is_xcode4)
-
-set(arch0 i386)
-set(arch1 ppc)
-
-if(is_xcode4)
-  # Xcode 4, use modern architectures as defaults
-  # Arch 'ppc' no longer works: tools no longer available starting with Xcode 4
+if (CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 12)
+  # Since Xcode 12 we have two architectures again: arm64 and x86_64.
+  set(arch0 x86_64)
+  set(arch1 arm64)
+elseif(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 10)
+  # Xcode 10 / 11 do not have two supported architectures for the host.
+  message(STATUS "Skip test x86_64 only")
+  return()
+elseif(CMake_TEST_XCODE_VERSION VERSION_GREATER_EQUAL 4)
+  # Xcode 4 no longer supports ppc, but does support x86_64.
   set(arch0 i386)
   set(arch1 x86_64)
+else()
+  set(arch0 i386)
+  set(arch1 ppc)
 endif()
 
 add_library(foo foo.c)
@@ -43,7 +34,6 @@ if(CMAKE_OSX_ARCHITECTURES)
   endif()
 endif()
 
-message("is_xcode4='${is_xcode4}'")
 message("archs='${archs}'")
 message("arch0='${arch0}'")
 message("arch1='${arch1}'")

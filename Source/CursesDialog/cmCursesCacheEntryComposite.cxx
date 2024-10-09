@@ -54,7 +54,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
   switch (state->GetCacheEntryType(key)) {
     case cmStateEnums::BOOL: {
       auto bw = cm::make_unique<cmCursesBoolWidget>(this->EntryWidth, 1, 1, 1);
-      bw->SetValueAsBool(cmIsOn(*value));
+      bw->SetValueAsBool(value.IsOn());
       this->Entry = std::move(bw);
       break;
     }

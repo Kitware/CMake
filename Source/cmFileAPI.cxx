@@ -830,7 +830,7 @@ Json::Value cmFileAPI::BuildCache(Object const& object)
 
 // The "cmakeFiles" object kind.
 
-static unsigned int const CMakeFilesV1Minor = 0;
+static unsigned int const CMakeFilesV1Minor = 1;
 
 void cmFileAPI::BuildClientRequestCMakeFiles(
   ClientRequest& r, std::vector<RequestVersion> const& versions)

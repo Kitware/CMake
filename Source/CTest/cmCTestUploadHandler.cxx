@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestUploadHandler.h"
 
+#include <chrono>
 #include <ostream>
 #include <string>
 
@@ -54,6 +55,7 @@ int cmCTestUploadHandler::ProcessHandler()
                 std::string("ctest-") + cmVersion::GetCMakeVersion());
   this->CTest->AddSiteProperties(xml);
   xml.StartElement("Upload");
+  xml.Element("Time", std::chrono::system_clock::now());
 
   for (std::string const& file : this->Files) {
     cmCTestOptionalLog(this->CTest, OUTPUT,

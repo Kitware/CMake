@@ -1,0 +1,4 @@
+^CMake Error at UPLOAD-TLS_VERSION-missing\.cmake:[0-9]+ \(file\):
+  file UPLOAD missing value for TLS_VERSION\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

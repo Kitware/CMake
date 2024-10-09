@@ -56,6 +56,9 @@ Obsolete variables
   where to find the JPEG library.
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 find_path(JPEG_INCLUDE_DIR jpeglib.h)
 
 set(jpeg_names ${JPEG_NAMES} jpeg jpeg-static libjpeg libjpeg-static)
@@ -140,3 +143,5 @@ if(JPEG_FOUND)
 endif()
 
 mark_as_advanced(JPEG_LIBRARY JPEG_INCLUDE_DIR)
+
+cmake_policy(POP)

@@ -1,11 +1,5 @@
-
-set(langs C CXX)
-if(NOT CMAKE_GENERATOR STREQUAL "Ninja")
-  list(APPEND langs Fortran)
-endif()
-
-foreach(lang IN LISTS langs)
-  if(CMAKE_${lang}_COMPILER)
+foreach(lang IN ITEMS C CXX Fortran)
+  if(CMake_TEST_FindOpenACC_${lang})
     add_test(NAME FindOpenACC.Test${lang} COMMAND
       ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
       --build-and-test

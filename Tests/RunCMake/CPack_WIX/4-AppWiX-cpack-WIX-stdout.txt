@@ -1,0 +1,11 @@
+CPack: Create package using WIX
+CPack: Install projects
+CPack: - Install project: CPackWiXGenerator \[Release\]
+CPack: -   Install component: applications
+CPack: -   Install component: applications2
+CPack: -   Install component: extras
+CPack: -   Install component: headers
+CPack: -   Install component: libraries
+CPack: Create package
+CPack: - package: [^
+]*/Tests/RunCMake/CPack_WIX/4-AppWiX-build/MyLib-1\.0\.0-(win64|windows-arm64)\.msi generated\.

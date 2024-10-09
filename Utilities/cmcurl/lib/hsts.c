@@ -107,11 +107,6 @@ void Curl_hsts_cleanup(struct hsts **hp)
   }
 }
 
-static struct stsentry *hsts_entry(void)
-{
-  return calloc(1, sizeof(struct stsentry));
-}
-
 static CURLcode hsts_create(struct hsts *h,
                             const char *hostname,
                             bool subdomains,
@@ -127,7 +122,7 @@ static CURLcode hsts_create(struct hsts *h,
     --hlen;
   if(hlen) {
     char *duphost;
-    struct stsentry *sts = hsts_entry();
+    struct stsentry *sts = calloc(1, sizeof(struct stsentry));
     if(!sts)
       return CURLE_OUT_OF_MEMORY;
 
@@ -140,7 +135,7 @@ static CURLcode hsts_create(struct hsts *h,
     sts->host = duphost;
     sts->expires = expires;
     sts->includeSubDomains = subdomains;
-    Curl_llist_insert_next(&h->list, h->list.tail, sts, &sts->node);
+    Curl_llist_append(&h->list, sts, &sts->node);
   }
   return CURLE_OK;
 }
@@ -511,7 +506,6 @@ static CURLcode hsts_pull(struct Curl_easy *data, struct hsts *h)
 static CURLcode hsts_load(struct hsts *h, const char *file)
 {
   CURLcode result = CURLE_OK;
-  char *line = NULL;
   FILE *fp;
 
   /* we need a private copy of the file name so that the hsts cache file
@@ -523,28 +517,25 @@ static CURLcode hsts_load(struct hsts *h, const char *file)
 
   fp = fopen(file, FOPEN_READTEXT);
   if(fp) {
-    line = malloc(MAX_HSTS_LINE);
-    if(!line)
-      goto fail;
-    while(Curl_get_line(line, MAX_HSTS_LINE, fp)) {
-      char *lineptr = line;
+    struct dynbuf buf;
+    Curl_dyn_init(&buf, MAX_HSTS_LINE);
+    while(Curl_get_line(&buf, fp)) {
+      char *lineptr = Curl_dyn_ptr(&buf);
       while(*lineptr && ISBLANK(*lineptr))
         lineptr++;
-      if(*lineptr == '#')
-        /* skip commented lines */
+      /*
+       * Skip empty or commented lines, since we know the line will have a
+       * trailing newline from Curl_get_line we can treat length 1 as empty.
+       */
+      if((*lineptr == '#') || strlen(lineptr) <= 1)
         continue;
 
       hsts_add(h, lineptr);
     }
-    free(line); /* free the line buffer */
+    Curl_dyn_free(&buf); /* free the line buffer */
     fclose(fp);
   }
   return result;
-
-fail:
-  Curl_safefree(h->filename);
-  fclose(fp);
-  return CURLE_OUT_OF_MEMORY;
 }
 
 /*

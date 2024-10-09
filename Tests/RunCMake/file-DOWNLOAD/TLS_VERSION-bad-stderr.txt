@@ -1,0 +1,14 @@
+^CMake Error at TLS_VERSION-bad\.cmake:[0-9]+ \(file\):
+  file DOWNLOAD given unknown TLS/SSL version bad-env
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at TLS_VERSION-bad\.cmake:[0-9]+ \(file\):
+  file DOWNLOAD given unknown TLS/SSL version bad-var
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at TLS_VERSION-bad\.cmake:[0-9]+ \(file\):
+  file DOWNLOAD given unknown TLS/SSL version bad-arg
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

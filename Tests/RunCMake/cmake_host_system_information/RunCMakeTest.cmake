@@ -16,7 +16,7 @@ run_cmake(Debian6)
 
 run_cmake(UserFallbackScript)
 
-if(RunCMake_GENERATOR MATCHES "^Visual Studio " AND NOT RunCMake_GENERATOR STREQUAL "Visual Studio 9 2008")
+if(RunCMake_GENERATOR MATCHES "Visual Studio")
   run_cmake(VsMSBuild)
 else()
   run_cmake(VsMSBuildMissing)

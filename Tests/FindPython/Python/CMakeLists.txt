@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15)
 
 project(TestPython LANGUAGES C)
 
@@ -32,7 +32,7 @@ if (Python_REQUESTED_VERSION)
 
   add_test (NAME python_spam${Python_REQUESTED_VERSION}
             COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:spam${Python_REQUESTED_VERSION}>"
-            "${Python_EXECUTABLE}" -c "import spam${Python_REQUESTED_VERSION}; spam${Python_REQUESTED_VERSION}.system(\"cd\")")
+            "${Python_INTERPRETER}" -c "import spam${Python_REQUESTED_VERSION}; spam${Python_REQUESTED_VERSION}.system(\"cd\")")
 else()
   add_test(NAME findpython_script
            COMMAND "${CMAKE_COMMAND}" -DPYTHON_PACKAGE_NAME=Python

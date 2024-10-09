@@ -55,6 +55,9 @@ The following variables are provided for backward compatibility:
     Superseded by ``BZIP2_VERSION``.
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 set(_BZIP2_PATHS PATHS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\GnuWin32\\Bzip2;InstallPath]"
   )
@@ -120,3 +123,5 @@ if (BZIP2_FOUND)
 endif ()
 
 mark_as_advanced(BZIP2_INCLUDE_DIR)
+
+cmake_policy(POP)

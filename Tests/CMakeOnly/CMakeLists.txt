@@ -54,7 +54,7 @@ if(CMAKE_Fortran_COMPILER)
   add_CMakeOnly_test(CompilerIdFortran)
   set_property(TEST CMakeOnly.CompilerIdFortran APPEND PROPERTY LABELS "Fortran")
 endif()
-if(CMAKE_GENERATOR MATCHES "Visual Studio ([^9]|9[0-9])")
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
   add_CMakeOnly_test(CompilerIdCSharp)
 endif()
 

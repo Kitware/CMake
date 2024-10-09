@@ -1071,7 +1071,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   DEBUGASSERT(backend);
   DEBUGF(infof(data,
                "schannel: SSL/TLS connection with %s port %d (step 1/3)",
-               connssl->peer.hostname, connssl->port));
+               connssl->peer.hostname, connssl->peer.port));
 
   if(curlx_verify_windows_version(5, 1, 0, PLATFORM_WINNT,
                                   VERSION_LESS_THAN_EQUAL)) {
@@ -1129,7 +1129,8 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* check for an existing reusable credential handle */
   if(ssl_config->primary.sessionid) {
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, (void **)&old_cred, NULL)) {
+    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
+                              (void **)&old_cred, NULL)) {
       backend->cred = old_cred;
       DEBUGF(infof(data, "schannel: reusing existing credential handle"));
 
@@ -1159,7 +1160,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
   /* Warn if SNI is disabled due to use of an IP address */
-  if(connssl->peer.is_ip_address) {
+  if(connssl->peer.type != CURL_SSL_PEER_DNS) {
     infof(data, "schannel: using IP address, SNI is not supported by OS.");
   }
 
@@ -1335,7 +1336,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   DEBUGF(infof(data,
                "schannel: SSL/TLS connection with %s port %d (step 2/3)",
-               connssl->peer.hostname, connssl->port));
+               connssl->peer.hostname, connssl->peer.port));
 
   if(!backend->cred || !backend->ctxt)
     return CURLE_SSL_CONNECT_ERROR;
@@ -1569,9 +1570,13 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     DEBUGF(infof(data, "schannel: SSL/TLS handshake complete"));
   }
 
+#ifndef CURL_DISABLE_PROXY
   pubkey_ptr = Curl_ssl_cf_is_proxy(cf)?
     data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]:
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+#else
+  pubkey_ptr = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
+#endif
   if(pubkey_ptr) {
     result = schannel_pkp_pin_peer_pubkey(cf, data, pubkey_ptr);
     if(result) {
@@ -1670,6 +1675,28 @@ add_cert_to_certinfo(const CERT_CONTEXT *ccert_context, bool reverse_order,
   return args->result == CURLE_OK;
 }
 
+static void schannel_session_free(void *sessionid, size_t idsize)
+{
+  /* this is expected to be called under sessionid lock */
+  struct Curl_schannel_cred *cred = sessionid;
+
+  (void)idsize;
+  if(cred) {
+    cred->refcount--;
+    if(cred->refcount == 0) {
+      s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
+      curlx_unicodefree(cred->sni_hostname);
+#ifdef HAS_CLIENT_CERT_PATH
+      if(cred->client_cert_store) {
+        CertCloseStore(cred->client_cert_store, 0);
+        cred->client_cert_store = NULL;
+      }
+#endif
+      Curl_safefree(cred);
+    }
+  }
+}
+
 static CURLcode
 schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
@@ -1689,7 +1716,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   DEBUGF(infof(data,
                "schannel: SSL/TLS connection with %s port %d (step 3/3)",
-               connssl->peer.hostname, connssl->port));
+               connssl->peer.hostname, connssl->peer.port));
 
   if(!backend->cred)
     return CURLE_SSL_CONNECT_ERROR;
@@ -1747,11 +1774,11 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* save the current session data for possible reuse */
   if(ssl_config->primary.sessionid) {
     bool incache;
-    bool added = FALSE;
     struct Curl_schannel_cred *old_cred = NULL;
 
     Curl_ssl_sessionid_lock(data);
-    incache = !(Curl_ssl_getsessionid(cf, data, (void **)&old_cred, NULL));
+    incache = !(Curl_ssl_getsessionid(cf, data, &connssl->peer,
+                                      (void **)&old_cred, NULL));
     if(incache) {
       if(old_cred != backend->cred) {
         DEBUGF(infof(data,
@@ -1762,19 +1789,14 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
       }
     }
     if(!incache) {
-      result = Curl_ssl_addsessionid(cf, data, backend->cred,
+      /* Up ref count since call takes ownership */
+      backend->cred->refcount++;
+      result = Curl_ssl_addsessionid(cf, data, &connssl->peer, backend->cred,
                                      sizeof(struct Curl_schannel_cred),
-                                     &added);
+                                     schannel_session_free);
       if(result) {
         Curl_ssl_sessionid_unlock(data);
-        failf(data, "schannel: failed to store credential handle");
         return result;
-      }
-      else if(added) {
-        /* this cred session is now also referenced by sessionid cache */
-        backend->cred->refcount++;
-        DEBUGF(infof(data,
-                     "schannel: stored credential handle in session cache"));
       }
     }
     Curl_ssl_sessionid_unlock(data);
@@ -2133,7 +2155,6 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     infof(data, "schannel: server indicated shutdown in a prior call");
     goto cleanup;
   }
-
   /* It's debatable what to return when !len. Regardless we can't return
      immediately because there may be data to decrypt (in the case we want to
      decrypt all encrypted cached data) so handle !len later in cleanup.
@@ -2317,10 +2338,10 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
         /* In Windows 2000 SEC_I_CONTEXT_EXPIRED (close_notify) is not
            returned so we have to work around that in cleanup. */
         backend->recv_sspi_close_notify = true;
-        if(!backend->recv_connection_closed) {
+        if(!backend->recv_connection_closed)
           backend->recv_connection_closed = true;
-          infof(data, "schannel: server closed the connection");
-        }
+        infof(data,
+              "schannel: server close notification received (close_notify)");
         goto cleanup;
       }
     }
@@ -2443,30 +2464,12 @@ static bool schannel_data_pending(struct Curl_cfilter *cf,
 
   if(backend->ctxt) /* SSL/TLS is in use */
     return (backend->decdata_offset > 0 ||
-            (backend->encdata_offset > 0 && !backend->encdata_is_incomplete));
+            (backend->encdata_offset > 0 && !backend->encdata_is_incomplete) ||
+            backend->recv_connection_closed ||
+            backend->recv_sspi_close_notify ||
+            backend->recv_unrecoverable_err);
   else
     return FALSE;
-}
-
-static void schannel_session_free(void *ptr)
-{
-  /* this is expected to be called under sessionid lock */
-  struct Curl_schannel_cred *cred = ptr;
-
-  if(cred) {
-    cred->refcount--;
-    if(cred->refcount == 0) {
-      s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
-      curlx_unicodefree(cred->sni_hostname);
-#ifdef HAS_CLIENT_CERT_PATH
-      if(cred->client_cert_store) {
-        CertCloseStore(cred->client_cert_store, 0);
-        cred->client_cert_store = NULL;
-      }
-#endif
-      Curl_safefree(cred);
-    }
-  }
 }
 
 /* shut down the SSL connection and clean up related memory.
@@ -2487,7 +2490,7 @@ static int schannel_shutdown(struct Curl_cfilter *cf,
 
   if(backend->ctxt) {
     infof(data, "schannel: shutting down SSL/TLS connection with %s port %d",
-          connssl->peer.hostname, connssl->port);
+          connssl->peer.hostname, connssl->peer.port);
   }
 
   if(backend->cred && backend->ctxt) {
@@ -2552,7 +2555,7 @@ static int schannel_shutdown(struct Curl_cfilter *cf,
   /* free SSPI Schannel API credential handle */
   if(backend->cred) {
     Curl_ssl_sessionid_lock(data);
-    schannel_session_free(backend->cred);
+    schannel_session_free(backend->cred, 0);
     Curl_ssl_sessionid_unlock(data);
     backend->cred = NULL;
   }
@@ -2747,7 +2750,7 @@ HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
                                                const struct Curl_easy *data)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
+  struct Curl_multi *multi = data->multi;
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_multi_ssl_backend_data *mbackend;
   const struct ssl_general_config *cfg = &data->set.general_ssl;
@@ -2816,7 +2819,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
                                          HCERTSTORE cert_store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct Curl_multi *multi = data->multi_easy ? data->multi_easy : data->multi;
+  struct Curl_multi *multi = data->multi;
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
   struct schannel_multi_ssl_backend_data *mbackend;
   unsigned char *CAinfo_blob_digest = NULL;
@@ -2915,7 +2918,6 @@ const struct Curl_ssl Curl_ssl_schannel = {
   schannel_get_internals,            /* get_internals */
   schannel_close,                    /* close_one */
   Curl_none_close_all,               /* close_all */
-  schannel_session_free,             /* session_free */
   Curl_none_set_engine,              /* set_engine */
   Curl_none_set_engine_default,      /* set_engine_default */
   Curl_none_engines_list,            /* engines_list */

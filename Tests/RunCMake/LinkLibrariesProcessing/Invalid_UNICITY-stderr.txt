@@ -1,7 +1,0 @@
-CMake Error at Invalid_UNICITY.cmake:[0-9]+ \(add_executable\):
-  Erroneous option\(s\) for 'CMAKE_C_LINK_LIBRARIES_PROCESSING':
-
-    UNICITY=WRONG
-
-Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)

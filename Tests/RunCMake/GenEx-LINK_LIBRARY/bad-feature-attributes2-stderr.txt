@@ -1,0 +1,4 @@
+CMake Error:
+  Erroneous option\(s\) for 'CMAKE_LINK_LIBRARY_feature_ATTRIBUTES':
+
+    BAD_ATTRIBUTE=XXX

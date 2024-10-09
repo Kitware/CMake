@@ -225,10 +225,8 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
                                   versionToolsetRegex.match(2));
         // Hard-code special cases for toolset versions whose first
         // three digits do not match their toolset name.
-        if (platformToolset == "v143"_s && versionToolset == "v144"_s &&
-            // VS 17.10 toolset v143 version 14.40.
-            (this->GeneratorToolsetVersion == "14.40"_s ||
-             cmHasLiteralPrefix(this->GeneratorToolsetVersion, "14.40."))) {
+        // The v143 toolset reserves versions 14.30 through 14.49.
+        if (platformToolset == "v143"_s && versionToolset == "v144"_s) {
           versionToolset = "v143";
         }
       } else {
@@ -518,7 +516,7 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
 
   this->DefaultPlatformToolset = this->SelectWindowsCEToolset();
 
-  if (this->GetVersion() == cmGlobalVisualStudioGenerator::VSVersion::VS12) {
+  if (this->Version == cmGlobalVisualStudioGenerator::VSVersion::VS12) {
     // VS 12 .NET CF defaults to .NET framework 3.9 for Windows CE.
     this->DefaultTargetFrameworkVersion = "v3.9";
     this->DefaultTargetFrameworkIdentifier = "WindowsEmbeddedCompact";
@@ -1275,12 +1273,6 @@ std::string cmGlobalVisualStudio10Generator::Encoding()
 const char* cmGlobalVisualStudio10Generator::GetToolsVersion() const
 {
   switch (this->Version) {
-    case cmGlobalVisualStudioGenerator::VSVersion::VS9:
-      return "4.0";
-
-      // in Visual Studio 2013 they detached the MSBuild tools version
-      // from the .Net Framework version and instead made it have it's own
-      // version number
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
       return "12.0";
     case cmGlobalVisualStudioGenerator::VSVersion::VS14:

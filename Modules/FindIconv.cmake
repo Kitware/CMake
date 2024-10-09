@@ -75,6 +75,9 @@ The following cache variables may also be set:
 
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
 if(CMAKE_C_COMPILER_LOADED)
   include(${CMAKE_CURRENT_LIST_DIR}/CheckCSourceCompiles.cmake)
@@ -101,7 +104,7 @@ if(NOT DEFINED Iconv_IS_BUILT_IN)
       "
       #include <stddef.h>
       #include <iconv.h>
-      int main() {
+      int main(void) {
         char *a, *b;
         size_t i, j;
         iconv_t ic;
@@ -180,3 +183,5 @@ if(Iconv_FOUND)
     set_property(TARGET Iconv::Iconv PROPERTY INTERFACE_LINK_LIBRARIES "${Iconv_LIBRARIES}")
   endif()
 endif()
+
+cmake_policy(POP)

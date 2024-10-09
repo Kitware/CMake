@@ -1,0 +1,9 @@
+CMake Error at NonValidTarget-CXX_COMPILER_FRONTEND_VARIANT.cmake:1 \(add_custom_command\):
+  Error evaluating generator expression:
+
+    \$<CXX_COMPILER_FRONTEND_VARIANT>
+
+  \$<CXX_COMPILER_FRONTEND_VARIANT> may only be used with binary targets.  It
+  may not be used with add_custom_command or add_custom_target.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)

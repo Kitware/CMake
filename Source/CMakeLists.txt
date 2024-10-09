@@ -285,6 +285,14 @@ add_library(
   cmGeneratorExpression.h
   cmGeneratorTarget.cxx
   cmGeneratorTarget.h
+  cmGeneratorTarget_CompatibleInterface.cxx
+  cmGeneratorTarget_IncludeDirectories.cxx
+  cmGeneratorTarget_Link.cxx
+  cmGeneratorTarget_LinkDirectories.cxx
+  cmGeneratorTarget_Options.cxx
+  cmGeneratorTarget_Sources.cxx
+  cmGeneratorTarget_TargetPropertyEntry.cxx
+  cmGeneratorTarget_TransitiveProperty.cxx
   cmLinkItemGraphVisitor.cxx
   cmLinkItemGraphVisitor.h
   cmGetPipes.cxx
@@ -437,6 +445,8 @@ add_library(
   cmTargetPropertyComputer.cxx
   cmTargetPropertyComputer.h
   cmTargetExport.h
+  cmTargetTraceDependencies.cxx
+  cmTargetTraceDependencies.h
   cmTest.cxx
   cmTest.h
   cmTestGenerator.cxx
@@ -547,6 +557,8 @@ add_library(
   cmFLTKWrapUICommand.h
   cmFileCommand.cxx
   cmFileCommand.h
+  cmFileCommand_ReadMacho.cxx
+  cmFileCommand_ReadMacho.h
   cmFindBase.cxx
   cmFindBase.h
   cmFindCommon.cxx
@@ -886,8 +898,6 @@ if(WIN32)
         cmGlobalVisualStudio7Generator.h
         cmGlobalVisualStudio8Generator.cxx
         cmGlobalVisualStudio8Generator.h
-        cmGlobalVisualStudio9Generator.cxx
-        cmGlobalVisualStudio9Generator.h
         cmVisualStudioGeneratorOptions.h
         cmVisualStudioGeneratorOptions.cxx
         cmVsProjectType.h

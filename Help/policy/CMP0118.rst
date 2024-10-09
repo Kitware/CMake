@@ -3,25 +3,36 @@ CMP0118
 
 .. versionadded:: 3.20
 
-The :prop_sf:`GENERATED` source file property is now visible in all directories.
+:prop_sf:`GENERATED` sources may be used across directories without manual marking.
+
+In CMake 3.19 and below, the :prop_sf:`GENERATED` source file property,
+like other source file properties, was scoped in every directory separately.
+If a source file was generated in one directory, projects had to manually
+set the ``GENERATED`` property in another directory in order to use the file.
 
 Whether or not a source file is generated is an all-or-nothing global
-property of the source.  Consequently, the associated ``GENERATED``
-property is now visible from any directory scope, not only from the scope
-for which it was set.
-
+property of the source: a source is either generated or it is not.
+CMake 3.20 and above prefer to allow source files generated in one directory
+to be used in other directories without manually marking them as ``GENERATED``.
 Additionally, the ``GENERATED`` property may now be set only to boolean
-values, and may not be turned off once turned on.
+values, and may not be turned off once turned on.  This policy provides
+compatibility for projects that have not been updated for this behavior.
 
-The ``OLD`` behavior of this policy is to only allow ``GENERATED`` to be
-visible from the directory scope for which it was set.  The ``NEW``
-behavior on the other hand allows it to be visible from any scope.
+The ``OLD`` behavior of this policy is to allow generated files to be used
+only in directories in which their ``GENERATED`` property has been turned on.
+The ``NEW`` behavior of this policy is to allow generated files to be used
+in other directories without explicitly turning on the ``GENERATED`` property
+for those directories.
+
+.. versionadded:: 3.30
+
+  Policy :policy:`CMP0163` additionally makes the :prop_sf:`GENERATED` source
+  file property visible to :command:`get_property` and
+  :command:`get_source_file_property` calls in other directories.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.20
 .. |WARNS_OR_DOES_NOT_WARN| replace::
-   does *not* warn with regard to visibility of the ``GENERATED``
-   property, but does warn about setting the ``GENERATED`` property
-   to a non-boolean value,
+   warns about setting the ``GENERATED`` property to a non-boolean value
 .. include:: STANDARD_ADVICE.txt
 
 .. include:: DEPRECATED.txt

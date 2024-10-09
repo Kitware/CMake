@@ -46,6 +46,9 @@ endif()
 #     -target <triple>
 #     -gcc-toolchain <ndk>/toolchains/<triple-or-arch>-<gcc-version>
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 # Glob available toolchains in the NDK, restricted by any version request.
 if(CMAKE_ANDROID_NDK_TOOLCHAIN_VERSION STREQUAL "clang")
   set(_ANDROID_TOOL_PATTERNS "*-clang" "*-clang[0-9].[0-9]")
@@ -269,3 +272,5 @@ unset(_ANDROID_TOOL_PREFIX)
 unset(_ANDROID_TOOL_CLANG_NAME)
 unset(_ANDROID_TOOL_CLANG_VERS)
 unset(_ANDROID_TOOL_LLVM_NAME)
+
+cmake_policy(POP)

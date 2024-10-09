@@ -405,8 +405,7 @@ int cmCPackFreeBSDGenerator::PackageFiles()
     return 0;
   }
 
-  const std::string output_dir =
-    cmSystemTools::CollapseFullPath("../", toplevel);
+  const std::string output_dir = cmSystemTools::GetFilenamePath(toplevel);
   PkgCreate package(output_dir, toplevel, manifestname);
   if (package.isValid()) {
     if (!package.Create()) {

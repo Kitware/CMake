@@ -1,3 +1,3 @@
 import main
 
-public func importing() -> Int  { main.exported() + 1 }
+public func importing() -> Int  { return main.exported() + 1 }

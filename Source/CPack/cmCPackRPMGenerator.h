@@ -61,7 +61,11 @@ protected:
    */
   int PackageComponentsAllInOne(const std::string& compInstDirName);
   const char* GetOutputExtension() override { return ".rpm"; }
+  std::string GetSanitizedDirOrFileName(const std::string& name,
+                                        bool isFullName = true) const override;
   bool SupportsComponentInstallation() const override;
+  std::string GetComponentInstallSuffix(
+    const std::string& componentName) override;
   std::string GetComponentInstallDirNameSuffix(
     const std::string& componentName) override;
 

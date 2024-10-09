@@ -5,7 +5,7 @@
 ### Release
 
 .linux_prep_source:
-    image: "fedora:39"
+    image: "fedora:40"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -45,7 +45,7 @@
 ### Debian
 
 .debian12:
-    image: "kitware/cmake:ci-debian12-x86_64-2023-07-27"
+    image: "kitware/cmake:ci-debian12-x86_64-2024-03-04"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -68,45 +68,53 @@
 
 ### Fedora
 
-.fedora39:
-    image: "kitware/cmake:ci-fedora39-x86_64-2023-11-16"
+.fedora40:
+    image: "kitware/cmake:ci-fedora40-x86_64-2024-04-24"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci/long file name for testing purposes"
         CMAKE_ARCH: x86_64
 
+# FIXME(#25932): Our HIP tests do not fully work in CI with Fedora 40.
+.fedora39_hip:
+    image: "kitware/cmake:ci-fedora39-hip-x86_64-2024-04-24"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        CMAKE_ARCH: x86_64
+
 #### Lint builds
 
-.fedora39_tidy:
-    extends: .fedora39
+.fedora40_tidy:
+    extends: .fedora40
 
     variables:
-        CMAKE_CONFIGURATION: fedora39_tidy
+        CMAKE_CONFIGURATION: fedora40_tidy
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora39_clang_analyzer:
-    extends: .fedora39
+.fedora40_clang_analyzer:
+    extends: .fedora40
 
     variables:
-        CMAKE_CONFIGURATION: fedora39_clang_analyzer
+        CMAKE_CONFIGURATION: fedora40_clang_analyzer
         CMAKE_CI_BUILD_TYPE: Debug
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora39_sphinx:
-    extends: .fedora39
+.fedora40_sphinx:
+    extends: .fedora40
 
     variables:
-        CMAKE_CONFIGURATION: fedora39_sphinx
+        CMAKE_CONFIGURATION: fedora40_sphinx
         CTEST_NO_WARNINGS_ALLOWED: 1
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora39_sphinx_package:
-    extends: .fedora39
+.fedora40_sphinx_package:
+    extends: .fedora40
 
     variables:
-        CMAKE_CONFIGURATION: fedora39_sphinx_package
+        CMAKE_CONFIGURATION: fedora40_sphinx_package
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
 
 #### Build and test
@@ -162,43 +170,43 @@
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora39_extdeps:
-    extends: .fedora39
+.fedora40_extdeps:
+    extends: .fedora40
 
     variables:
-        CMAKE_CONFIGURATION: fedora39_extdeps
+        CMAKE_CONFIGURATION: fedora40_extdeps
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora39_ninja:
-    extends: .fedora39
+.fedora40_ninja:
+    extends: .fedora40
 
     variables:
-        CMAKE_CONFIGURATION: fedora39_ninja
+        CMAKE_CONFIGURATION: fedora40_ninja
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora39_ninja_multi:
-    extends: .fedora39
+.fedora40_ninja_multi:
+    extends: .fedora40
 
     variables:
-        CMAKE_CONFIGURATION: fedora39_ninja_multi
+        CMAKE_CONFIGURATION: fedora40_ninja_multi
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
-.fedora39_makefiles:
-    extends: .fedora39
+.fedora40_makefiles:
+    extends: .fedora40
 
     variables:
-        CMAKE_CONFIGURATION: fedora39_makefiles
+        CMAKE_CONFIGURATION: fedora40_makefiles
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
 
-.fedora39_makefiles_symlinked:
-    extends: .fedora39
+.fedora40_makefiles_symlinked:
+    extends: .fedora40
 
     variables:
-        CMAKE_CONFIGURATION: fedora39_makefiles_symlinked
+        CMAKE_CONFIGURATION: fedora40_makefiles_symlinked
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
         CMAKE_CI_IN_SYMLINK_TREE: 1
@@ -219,24 +227,24 @@
     variables:
         CMAKE_CONFIGURATION: debian12_ninja_clang
 
-.fedora39_makefiles_clang:
-    extends: .fedora39
+.fedora40_makefiles_clang:
+    extends: .fedora40
 
     variables:
-        CMAKE_CONFIGURATION: fedora39_makefiles_clang
+        CMAKE_CONFIGURATION: fedora40_makefiles_clang
         CMAKE_GENERATOR: "Unix Makefiles"
 
-.fedora39_ninja_clang:
-    extends: .fedora39
+.fedora40_ninja_clang:
+    extends: .fedora40
 
     variables:
-        CMAKE_CONFIGURATION: fedora39_ninja_clang
+        CMAKE_CONFIGURATION: fedora40_ninja_clang
 
-.fedora39_ninja_multi_clang:
-    extends: .fedora39
+.fedora40_ninja_multi_clang:
+    extends: .fedora40
 
     variables:
-        CMAKE_CONFIGURATION: fedora39_ninja_multi_clang
+        CMAKE_CONFIGURATION: fedora40_ninja_multi_clang
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
 ### Sanitizers
@@ -252,13 +260,13 @@
         CTEST_MEMORYCHECK_TYPE: AddressSanitizer
         CTEST_MEMORYCHECK_SANITIZER_OPTIONS: ""
 
-.fedora39_asan:
+.fedora40_asan:
     extends:
-        - .fedora39
+        - .fedora40
         - .fedora_asan_addon
 
     variables:
-        CMAKE_CONFIGURATION: fedora39_asan
+        CMAKE_CONFIGURATION: fedora40_asan
 
 ### Intel Compiler
 
@@ -367,6 +375,24 @@
         CMAKE_CONFIGURATION: cuda11.8_splayed_nvidia
         CTEST_NO_WARNINGS_ALLOWED: 1
 
+.cuda12.2:
+    extends: .cuda
+    image: "kitware/cmake:ci-cuda12.2-x86_64-2024-04-05"
+    variables:
+        CMAKE_ARCH: x86_64
+
+.cuda12.2_nvidia:
+    extends: .cuda12.2
+    variables:
+        CMAKE_CONFIGURATION: cuda12.2_nvidia
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
+.cuda12.2_clang:
+    extends: .cuda12.2
+    variables:
+        CMAKE_CONFIGURATION: cuda12.2_clang
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
 ### HIP builds
 
 .hip5.5:
@@ -392,7 +418,7 @@
         CTEST_LABELS: "HIP"
 
 .fedora39_hip_radeon:
-    extends: .fedora39
+    extends: .fedora39_hip
 
     variables:
         CMAKE_CONFIGURATION: fedora39_hip_radeon
@@ -404,30 +430,6 @@
     variables:
         CMAKE_CONFIGURATION: hip5.5_nvidia
         CTEST_LABELS: "HIP"
-
-### C++ modules
-
-.gcc_cxx_modules_x86_64:
-    image: "kitware/cmake:ci-gcc_cxx_modules-x86_64-2023-09-21"
-
-    variables:
-        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
-        CMAKE_ARCH: x86_64
-        CC: "/opt/gcc-p1689/bin/gcc"
-        CXX: "/opt/gcc-p1689/bin/g++"
-
-.gcc_cxx_modules_ninja:
-    extends: .gcc_cxx_modules_x86_64
-
-    variables:
-        CMAKE_CONFIGURATION: linux_gcc_cxx_modules_ninja
-
-.gcc_cxx_modules_ninja_multi:
-    extends: .gcc_cxx_modules_x86_64
-
-    variables:
-        CMAKE_CONFIGURATION: linux_gcc_cxx_modules_ninja_multi
-        CMAKE_GENERATOR: "Ninja Multi-Config"
 
 ### Debian 10 legacy packages
 
@@ -493,12 +495,8 @@
 
 .before_script_linux: &before_script_linux
     - source .gitlab/ci/env.sh
-    - .gitlab/ci/cmake.sh
-    - export PATH=$PWD/.gitlab/cmake/bin:$PATH
-    - .gitlab/ci/ninja.sh
-    - export PATH=$PWD/.gitlab:$PATH
-    - cmake --version
-    - ninja --version
+    - source .gitlab/ci/cmake-env.sh
+    - source .gitlab/ci/ninja-env.sh
 
 .cmake_prep_source_linux:
     stage: prep
@@ -508,8 +506,8 @@
         - dnf install --setopt=install_weak_deps=False -y git-core
         - v="$(.gitlab/ci/cmake_version.sh)"
         - mkdir -p build/
-        - git archive --format=tgz "--prefix=cmake-$v/" -o "build/cmake-$v.tar.gz" HEAD
-        - git -c core.autocrlf=true -c core.eol=crlf archive --format=zip --prefix="cmake-$v/" -o "build/cmake-$v.zip" HEAD
+        - git archive --format=tgz --prefix="cmake-$v/" -o "build/cmake-$v.tar.gz" HEAD
+        - git archive --format=zip --prefix="cmake-$v/" -o "build/cmake-$v.zip" HEAD
 
     interruptible: true
 
@@ -525,7 +523,7 @@
 
 .cmake_codespell_linux:
     stage: build
-    extends: .fedora39
+    extends: .fedora40
     script:
         - .gitlab/ci/codespell.sh
     interruptible: true
@@ -573,8 +571,7 @@
         - mkdir -p build/
         - cp Utilities/Release/linux/$CMAKE_ARCH/cache.txt build/CMakeCache.txt
         # Make sccache available.
-        - .gitlab/ci/sccache.sh
-        - export PATH=$PWD/.gitlab:$PATH
+        - source .gitlab/ci/sccache-env.sh
         # Append sccache settings to the cache.
         - echo "CMAKE_C_COMPILER_LAUNCHER:STRING=sccache" >> build/CMakeCache.txt
         - echo "CMAKE_CXX_COMPILER_LAUNCHER:STRING=sccache" >> build/CMakeCache.txt
@@ -669,7 +666,7 @@
 .cmake_org_help:
     stage: build
     extends:
-        - .fedora39
+        - .fedora40
         - .linux_x86_64_tags
         - .cmake_org_help_artifacts
     script:

@@ -1,9 +1,3 @@
-CMake Error at BadOutput.cmake:2 \(add_custom_command\):
-  OUTPUT containing a "#" is not allowed.
-Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
-
-
 CMake Error at BadOutput.cmake:3 \(add_custom_command\):
   OUTPUT containing a "<" is not allowed.
 Call Stack \(most recent call first\):
@@ -17,7 +11,7 @@ Call Stack \(most recent call first\):
 
 (
 CMake Error at BadOutput.cmake:5 \(add_custom_command\):
-  OUTPUT containing a "#" is not allowed.
+  OUTPUT containing a ">" is not allowed.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 

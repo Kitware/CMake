@@ -70,8 +70,8 @@ if(NOT CMAKE_OBJC_COMPILER_WORKS)
 endif()
 
 # Try to identify the compiler features
-include(${CMAKE_ROOT}/Modules/CMakeDetermineCompileFeatures.cmake)
-CMAKE_DETERMINE_COMPILE_FEATURES(OBJC)
+include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerSupport.cmake)
+CMAKE_DETERMINE_COMPILER_SUPPORT(OBJC)
 
 # Re-configure to save learned information.
 configure_file(

@@ -78,6 +78,9 @@ The root object recognizes the following fields:
   ``8``
     .. versionadded:: 3.28
 
+  ``9``
+    .. versionadded:: 3.30
+
 ``cmakeMinimumRequired``
   An optional object representing the minimum version of CMake needed to
   build this project. This object consists of the following fields:
@@ -146,7 +149,10 @@ guaranteed to be provided by the project. ``CMakeUserPresets.json`` may
 include files from anywhere.
 
 Starting from version ``7``, the ``include`` field supports
-`macro expansion`_, but only ``$penv{}`` macro expansion.
+`macro expansion`_, but only ``$penv{}`` macro expansion. Starting from version
+``9``, other macro expansions are also available, except for ``$env{}`` and
+preset-specific macros, i.e., those derived from the fields inside a preset's
+definition like ``presetName``.
 
 Configure Preset
 ^^^^^^^^^^^^^^^^
@@ -1212,10 +1218,14 @@ Recognized macros include:
 ``${presetName}``
   Name specified in the preset's ``name`` field.
 
+  This is a preset-specific macro.
+
 ``${generator}``
   Generator specified in the preset's ``generator`` field. For build and
   test presets, this will evaluate to the generator specified by
   ``configurePreset``.
+
+  This is a preset-specific macro.
 
 ``${hostSystemName}``
   The name of the host operating system. Contains the same value as

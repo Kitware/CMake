@@ -54,6 +54,7 @@ Libs: -L\${libdir}
   run_cmake(FindPkgConfig_GET_VARIABLE_DEFINE_VARIABLES)
   run_cmake(FindPkgConfig_GET_VARIABLE_PREFIX_PATH)
   run_cmake(FindPkgConfig_GET_VARIABLE_PKGCONFIG_PATH)
+  run_cmake(FindPkgConfig_GET_VARIABLE_MULTIPLE_VALUES)
   run_cmake(FindPkgConfig_cache_variables)
   run_cmake(FindPkgConfig_IMPORTED_TARGET)
   run_cmake(FindPkgConfig_VERSION_OPERATORS)

@@ -70,9 +70,12 @@ If set, will the correct target accelerator flag set to the <target> will
 be returned with OpenACC_<lang>_FLAGS.
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 set(OpenACC_C_CXX_TEST_SOURCE
 "
-int main(){
+int main(void){
 #ifdef _OPENACC
   return 0;
 #else
@@ -102,7 +105,7 @@ const char accver_str[] = { 'I', 'N', 'F', 'O', ':', 'O', 'p', 'e', 'n', 'A',
                             ('0' + ((_OPENACC/10)%10)),
                             ('0' + ((_OPENACC/1)%10)),
                             ']', '\\0' };
-int main()
+int main(void)
 {
   puts(accver_str);
   return 0;
@@ -306,3 +309,5 @@ unset(OpenACC_C_CXX_TEST_SOURCE)
 unset(OpenACC_Fortran_TEST_SOURCE)
 unset(OpenACC_C_CXX_CHECK_VERSION_SOURCE)
 unset(OpenACC_Fortran_CHECK_VERSION_SOURCE)
+
+cmake_policy(POP)

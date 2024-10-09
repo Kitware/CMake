@@ -1,0 +1,8 @@
+^Could not read/parse resource spec file [^
+]*/Tests/RunCMake/CTestResourceAllocation/noexist\.json:[ ]
+File not found: [^
+]*/Tests/RunCMake/CTestResourceAllocation/noexist.json
+Errors while running CTest
+Output from these tests are in: [^
+]*/Tests/RunCMake/CTestResourceAllocation/invalid-build/Testing/Temporary/LastTest\.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely\.$

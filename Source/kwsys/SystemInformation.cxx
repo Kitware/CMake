@@ -22,10 +22,10 @@
 // Consider using these on Win32/Win64 for some of them:
 //
 // IsProcessorFeaturePresent
-// http://msdn.microsoft.com/en-us/library/ms724482(VS.85).aspx
+// https://msdn.microsoft.com/en-us/library/ms724482(VS.85).aspx
 //
 // GetProcessMemoryInfo
-// http://msdn.microsoft.com/en-us/library/ms683219(VS.85).aspx
+// https://msdn.microsoft.com/en-us/library/ms683219(VS.85).aspx
 
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(SystemInformation.hxx)
@@ -4265,7 +4265,7 @@ bool SystemInformationImplementation::QueryCygwinMemory()
 {
 #ifdef __CYGWIN__
   // _SC_PAGE_SIZE does return the mmap() granularity on Cygwin,
-  // see http://cygwin.com/ml/cygwin/2006-06/msg00350.html
+  // see https://sourceware.org/legacy-ml/cygwin/2006-06/msg00350.html
   // Therefore just use 4096 as the page size of Windows.
   long m = sysconf(_SC_PHYS_PAGES);
   if (m < 0) {
@@ -4646,7 +4646,7 @@ bool SystemInformationImplementation::ParseSysCtl()
     err = sysctlbyname("hw.machine", &tempBuff, &len, nullptr, 0);
     if (err == 0) {
       std::string machineBuf(tempBuff);
-      if (machineBuf.find_first_of("Power") != std::string::npos) {
+      if (machineBuf.find("Power") != std::string::npos) {
         this->ChipID.Vendor = "IBM";
 
         err = kw_sysctlbyname_int32("hw.cputype", &tempInt32);
@@ -4660,10 +4660,15 @@ bool SystemInformationImplementation::ParseSysCtl()
         }
 
         this->FindManufacturer();
-      } else if (machineBuf.find_first_of("arm64") != std::string::npos) {
+      } else if (machineBuf.find("arm64") != std::string::npos) {
         this->ChipID.Vendor = "Apple";
 
         this->FindManufacturer();
+
+        err = kw_sysctlbyname_int32("hw.optional.floatingpoint", &tempInt32);
+        if (err == 0) {
+          this->Features.HasFPU = static_cast<bool>(tempInt32);
+        }
       }
     }
   } else {
@@ -4890,7 +4895,7 @@ std::string SystemInformationImplementation::ParseValueFromKStat(
   args.reserve(3 + args_string.size());
   args.push_back("kstat");
   args.push_back("-p");
-  for (auto& i : args_string) {
+  for (const auto& i : args_string) {
     args.push_back(i.c_str());
   }
   args.push_back(nullptr);

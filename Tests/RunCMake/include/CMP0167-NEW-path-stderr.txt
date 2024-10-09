@@ -1,0 +1,6 @@
+^CMake Error at [^
+]*/Modules/FindBoost.cmake:[0-9]+ \(message\):
+  The FindBoost module has been removed by policy CMP0167\.
+Call Stack \(most recent call first\):
+  CMP0167-NEW-path\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)$

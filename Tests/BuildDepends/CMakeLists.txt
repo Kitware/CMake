@@ -12,6 +12,15 @@ project(BuildDepends)
 # project is built.
 set(CMAKE_SUPPRESS_REGENERATION 1)
 
+if(CMAKE_GENERATOR MATCHES "Visual Studio" AND CMAKE_VS_PLATFORM_TOOLSET MATCHES "^(v90|v100|v110|v120|v140)$")
+  # These toolsets update 'link_depends_no_shared_lib.lib' during rebuild in Release mode.
+  set(config Debug)
+else()
+  # Some toolsets update 'link_depends_no_shared_lib.pdb' during rebuild in Debug mode.
+  set(config Release)
+endif()
+set(CMAKE_TRY_COMPILE_CONFIGURATION "${config}")
+
 # Xcode needs some help with the fancy dependencies in this test.
 if(XCODE AND XCODE_VERSION VERSION_LESS 5)
   set(HELP_XCODE 1)
@@ -42,9 +51,13 @@ list(APPEND _cmake_options "-DTEST_LINK_DEPENDS=${TEST_LINK_DEPENDS}")
 
 list(APPEND _cmake_options "-DCMAKE_FORCE_DEPFILES=1")
 
-if(NOT CMAKE_GENERATOR MATCHES "Visual Studio ([^9]|9[0-9])")
+if(NOT CMAKE_GENERATOR MATCHES "Visual Studio")
   set(TEST_MULTI3 1)
   list(APPEND _cmake_options "-DTEST_MULTI3=1")
+endif()
+
+if (APPLE)
+  list(APPEND _cmake_options "-DCMake_TEST_XCODE_VERSION=${CMake_TEST_XCODE_VERSION}")
 endif()
 
 file(MAKE_DIRECTORY ${BuildDepends_BINARY_DIR}/Project)
@@ -113,10 +126,10 @@ endif()
 # find and save the ninjadep executable
 set(ninjadep ${BuildDepends_BINARY_DIR}/Project/ninjadep${CMAKE_EXECUTABLE_SUFFIX})
 if(EXISTS
-    "${BuildDepends_BINARY_DIR}/Project/Debug/ninjadep${CMAKE_EXECUTABLE_SUFFIX}" )
-  message("found debug")
+    "${BuildDepends_BINARY_DIR}/Project/${config}/ninjadep${CMAKE_EXECUTABLE_SUFFIX}" )
+  message("found ${config}/ninjadep${CMAKE_EXECUTABLE_SUFFIX}")
   set(ninjadep
-    "${BuildDepends_BINARY_DIR}/Project/Debug/ninjadep${CMAKE_EXECUTABLE_SUFFIX}")
+    "${BuildDepends_BINARY_DIR}/Project/${config}/ninjadep${CMAKE_EXECUTABLE_SUFFIX}")
 endif()
 message("Running ${ninjadep}  ")
 execute_process(COMMAND ${ninjadep} OUTPUT_VARIABLE out RESULT_VARIABLE runResult)
@@ -132,17 +145,17 @@ endif()
 
 set(bar ${BuildDepends_BINARY_DIR}/Project/bar${CMAKE_EXECUTABLE_SUFFIX})
 if(EXISTS
-    "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}" )
-  message("found debug")
+    "${BuildDepends_BINARY_DIR}/Project/${config}/bar${CMAKE_EXECUTABLE_SUFFIX}" )
+  message("found ${config}/bar${CMAKE_EXECUTABLE_SUFFIX}")
   set(bar
-    "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}")
+    "${BuildDepends_BINARY_DIR}/Project/${config}/bar${CMAKE_EXECUTABLE_SUFFIX}")
 endif()
 set(zot ${BuildDepends_BINARY_DIR}/Project/zot${CMAKE_EXECUTABLE_SUFFIX})
 if(EXISTS
-    "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}" )
-  message("found debug")
+    "${BuildDepends_BINARY_DIR}/Project/${config}/zot${CMAKE_EXECUTABLE_SUFFIX}" )
+  message("found ${config}/zot${CMAKE_EXECUTABLE_SUFFIX}")
   set(zot
-    "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}")
+    "${BuildDepends_BINARY_DIR}/Project/${config}/zot${CMAKE_EXECUTABLE_SUFFIX}")
 endif()
 
 message("Running ${bar}  ")
@@ -301,12 +314,12 @@ if(NOT RESULT)
   message(SEND_ERROR "Could not build test project (2)!")
 endif()
 if(EXISTS
-    "${BuildDepends_BINARY_DIR}/Project/Debug/bar${CMAKE_EXECUTABLE_SUFFIX}" )
-  message("found debug")
+    "${BuildDepends_BINARY_DIR}/Project/${config}/bar${CMAKE_EXECUTABLE_SUFFIX}" )
+  message("found ${config}/bar${CMAKE_EXECUTABLE_SUFFIX}")
 endif()
 if(EXISTS
-    "${BuildDepends_BINARY_DIR}/Project/Debug/zot${CMAKE_EXECUTABLE_SUFFIX}" )
-  message("found debug")
+    "${BuildDepends_BINARY_DIR}/Project/${config}/zot${CMAKE_EXECUTABLE_SUFFIX}" )
+  message("found ${config}/zot${CMAKE_EXECUTABLE_SUFFIX}")
 endif()
 
 message("Running ${ninjadep}  ")

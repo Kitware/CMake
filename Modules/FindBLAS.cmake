@@ -164,6 +164,11 @@ BLAS/LAPACK Vendors
 
   Intel MKL v10+ 64 bit, single dynamic library
 
+``libblastrampoline``
+  .. versionadded:: 3.30
+
+  A BLAS/LAPACK demuxing library using PLT trampolines
+
 ``NVHPC``
   .. versionadded:: 3.21
 
@@ -1350,6 +1355,31 @@ if(BLA_VENDOR STREQUAL "NVHPC" OR BLA_VENDOR STREQUAL "All")
   endif()
 
   unset(_blas_nvhpc_lib)
+endif()
+
+# libblastrampoline? (https://github.com/JuliaLinearAlgebra/libblastrampoline/tree/main)
+if(BLA_VENDOR STREQUAL "libblastrampoline" OR BLA_VENDOR STREQUAL "All")
+  set(_blas_libblastrampoline_lib "blastrampoline")
+
+  if(WIN32)
+    # Windows appends the version number to the library
+    string(APPEND _blas_libblastrampoline_lib "-5")
+  endif()
+
+  if(NOT BLAS_LIBRARIES)
+    check_blas_libraries(
+      BLAS_LIBRARIES
+      BLAS
+      sgemm
+      ""
+      "${_blas_libblastrampoline_lib}"
+      ""
+      ""
+      ""
+      )
+  endif()
+
+  unset(_blas_libblastrampoline_lib)
 endif()
 
 # Generic BLAS library?

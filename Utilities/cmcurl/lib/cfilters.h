@@ -160,6 +160,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_SOCKET             3  /* -          curl_socket_t */
 #define CF_QUERY_TIMER_CONNECT      4  /* -          struct curltime */
 #define CF_QUERY_TIMER_APPCONNECT   5  /* -          struct curltime */
+#define CF_QUERY_STREAM_ERROR       6  /* error code - */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will
@@ -178,10 +179,12 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
  *                     connection, etc.
  * CF_TYPE_SSL:        provide SSL/TLS
  * CF_TYPE_MULTIPLEX:  provides multiplexing of easy handles
+ * CF_TYPE_PROXY       provides proxying
  */
 #define CF_TYPE_IP_CONNECT  (1 << 0)
 #define CF_TYPE_SSL         (1 << 1)
 #define CF_TYPE_MULTIPLEX   (1 << 2)
+#define CF_TYPE_PROXY       (1 << 3)
 
 /* A connection filter type, e.g. specific implementation. */
 struct Curl_cftype {
@@ -402,11 +405,11 @@ void Curl_conn_adjust_pollset(struct Curl_easy *data,
 /**
  * Receive data through the filter chain at `sockindex` for connection
  * `data->conn`. Copy at most `len` bytes into `buf`. Return the
- * actuel number of bytes copied or a negative value on error.
+ * actual number of bytes copied or a negative value on error.
  * The error code is placed into `*code`.
  */
-ssize_t Curl_conn_recv(struct Curl_easy *data, int sockindex, char *buf,
-                       size_t len, CURLcode *code);
+ssize_t Curl_cf_recv(struct Curl_easy *data, int sockindex, char *buf,
+                     size_t len, CURLcode *code);
 
 /**
  * Send `len` bytes of data from `buf` through the filter chain `sockindex`
@@ -414,8 +417,8 @@ ssize_t Curl_conn_recv(struct Curl_easy *data, int sockindex, char *buf,
  * or a negative value on error.
  * The error code is placed into `*code`.
  */
-ssize_t Curl_conn_send(struct Curl_easy *data, int sockindex,
-                       const void *buf, size_t len, CURLcode *code);
+ssize_t Curl_cf_send(struct Curl_easy *data, int sockindex,
+                     const void *buf, size_t len, CURLcode *code);
 
 /**
  * The easy handle `data` is being attached to `conn`. This does
@@ -449,7 +452,7 @@ CURLcode Curl_conn_ev_data_idle(struct Curl_easy *data);
 
 /**
  * Notify connection filters that the transfer represented by `data`
- * is donw with sending data (e.g. has uploaded everything).
+ * is done with sending data (e.g. has uploaded everything).
  */
 void Curl_conn_ev_data_done_send(struct Curl_easy *data);
 
@@ -495,6 +498,36 @@ void Curl_conn_get_host(struct Curl_easy *data, int sockindex,
 size_t Curl_conn_get_max_concurrent(struct Curl_easy *data,
                                     struct connectdata *conn,
                                     int sockindex);
+
+/**
+ * Get the underlying error code for a transfer stream or 0 if not known.
+ */
+int Curl_conn_get_stream_error(struct Curl_easy *data,
+                               struct connectdata *conn,
+                               int sockindex);
+
+/**
+ * Get the index of the given socket in the connection's sockets.
+ * Useful in calling `Curl_conn_send()/Curl_conn_recv()` with the
+ * correct socket index.
+ */
+int Curl_conn_sockindex(struct Curl_easy *data, curl_socket_t sockfd);
+
+/*
+ * Receive data on the connection, using FIRSTSOCKET/SECONDARYSOCKET.
+ * Will return CURLE_AGAIN iff blocked on receiving.
+ */
+CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
+                        char *buf, size_t buffersize,
+                        ssize_t *pnread);
+
+/*
+ * Send data on the connection, using FIRSTSOCKET/SECONDARYSOCKET.
+ * Will return CURLE_AGAIN iff blocked on sending.
+ */
+CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
+                        const void *buf, size_t blen,
+                        size_t *pnwritten);
 
 
 void Curl_pollset_reset(struct Curl_easy *data,

@@ -1,2 +1,4 @@
 ^GENERATED_RESOURCE_SPEC_FILE must be an absolute path
-No tests were found!!!$
+CMake Error at [^
+]*/Tests/RunCMake/CTestResourceAllocation/dynamic-resource-relative-path-ctest-s/test\.cmake:[0-9]+ \(message\):
+  Tests did not pass$

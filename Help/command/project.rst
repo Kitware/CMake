@@ -33,9 +33,38 @@ Also sets the variables:
 
   Boolean value indicating whether the project is top-level.
 
-Further variables are set by the optional arguments described in the following.
-If any of these arguments is not used, then the corresponding variables are
+Further variables are set by the optional arguments described in `Options`_
+further below. Where an option is not given, its corresponding variable is
 set to the empty string.
+
+Note that variables of the form ``<name>_SOURCE_DIR`` and ``<name>_BINARY_DIR``
+may also be set by other commands before ``project()`` is called (see the
+:command:`FetchContent_MakeAvailable` command for one example).
+Projects should not rely on ``<PROJECT-NAME>_SOURCE_DIR`` or
+``<PROJECT-NAME>_BINARY_DIR`` holding a particular value outside of the scope
+of the call to ``project()`` or one of its child scopes.
+
+.. versionchanged:: 3.30.3
+  ``<PROJECT-NAME>_SOURCE_DIR``, ``<PROJECT-NAME>_BINARY_DIR``, and
+  ``<PROJECT-NAME>_IS_TOP_LEVEL`` are always set as non-cache variables by
+  ``project(<PROJECT-NAME> ...)``.
+
+.. versionchanged:: 3.30.4
+  The variables ``<PROJECT-NAME>_SOURCE_DIR``, ``<PROJECT-NAME>_BINARY_DIR``,
+  and ``<PROJECT-NAME>_IS_TOP_LEVEL`` are only set as non-cache variables if
+  they are already set as cache or non-cache variables when
+  ``project(<PROJECT-NAME> ...)`` is called.
+  Note that this logic is flawed, as it can result in different behavior
+  between the first and subsequent runs because cache variables won't exist
+  on the first run, but they will on subsequent runs.
+
+.. versionchanged:: 3.30.5
+  The variables ``<PROJECT-NAME>_SOURCE_DIR``, ``<PROJECT-NAME>_BINARY_DIR``,
+  and ``<PROJECT-NAME>_IS_TOP_LEVEL`` are only set as non-cache variables if
+  they are already set as non-cache variables when
+  ``project(<PROJECT-NAME> ...)`` is called.
+  Unlike the flawed behavior of 3.30.4, non-cache variables will not be set
+  if only cache variables of the same name are set.
 
 Options
 ^^^^^^^

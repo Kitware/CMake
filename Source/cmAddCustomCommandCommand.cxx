@@ -357,13 +357,18 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
     cc->SetDepends(depends);
     cc->SetImplicitDepends(implicit_depends);
     mf.AddCustomCommandToOutput(std::move(cc));
-  } else if (!byproducts.empty()) {
-    status.SetError("BYPRODUCTS may not be specified with SOURCE signatures");
-    return false;
-  } else if (uses_terminal) {
-    status.SetError("USES_TERMINAL may not be used with SOURCE signatures");
-    return false;
   } else {
+    if (!byproducts.empty()) {
+      status.SetError(
+        "BYPRODUCTS may not be specified with SOURCE signatures");
+      return false;
+    }
+
+    if (uses_terminal) {
+      status.SetError("USES_TERMINAL may not be used with SOURCE signatures");
+      return false;
+    }
+
     bool issueMessage = true;
     std::ostringstream e;
     MessageType messageType = MessageType::AUTHOR_WARNING;

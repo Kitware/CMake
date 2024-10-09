@@ -12,8 +12,8 @@
 
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorTarget.h"
+#include "cmLocalCommonGenerator.h"
 #include "cmLocalGenerator.h"
-#include "cmMakefile.h"
 #include "cmStateDirectory.h"
 #include "cmStateSnapshot.h"
 #include "cmStateTypes.h"
@@ -38,8 +38,8 @@ cmGlobalCommonGenerator::ComputeDirectoryTargets() const
       lg->GetStateSnapshot().GetDirectory().GetCurrentBinary();
     DirectoryTarget& dirTarget = dirTargets[currentBinaryDir];
     dirTarget.LG = lg.get();
-    const std::vector<std::string>& configs =
-      lg->GetMakefile()->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
+    std::vector<std::string> const& configs =
+      static_cast<cmLocalCommonGenerator const*>(lg.get())->GetConfigNames();
 
     // The directory-level rule should depend on the target-level rules
     // for all targets in the directory.

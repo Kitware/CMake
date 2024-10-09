@@ -47,6 +47,11 @@ below for the meaning of other options.
   :ref:`configure-log try_compile event <try_compile configure-log event>`
   if the ``NO_LOG`` option is not specified.
 
+.. versionadded:: 3.30
+  If the :prop_gbl:`PROPAGATE_TOP_LEVEL_INCLUDES_TO_TRY_COMPILE` global
+  property is set to true, :variable:`CMAKE_PROJECT_TOP_LEVEL_INCLUDES` is
+  propagated into the project's build configuration.
+
 This command supports an alternate signature for CMake older than 3.25.
 The signature above is recommended for clarity.
 
@@ -156,8 +161,9 @@ The options for the above signatures are:
   Specify flags of the form :option:`-DVAR:TYPE=VALUE <cmake -D>` to be passed
   to the :manual:`cmake(1)` command-line used to drive the test build.
   The above example shows how values for variables
-  ``INCLUDE_DIRECTORIES``, ``LINK_DIRECTORIES``, and ``LINK_LIBRARIES``
-  are used.
+  ``COMPILE_DEFINITIONS``, ``INCLUDE_DIRECTORIES``, ``LINK_DIRECTORIES``,
+  ``LINK_LIBRARIES``, and ``LINK_OPTIONS`` are used. Compiler options
+  can be passed in like `CMAKE_FLAGS -DCOMPILE_DEFINITIONS=-Werror`.
 
 ``COMPILE_DEFINITIONS <defs>...``
   Specify ``-Ddefinition`` arguments to pass to :command:`add_definitions`
@@ -386,6 +392,12 @@ configuration:
   If :policy:`CMP0141` is set to ``NEW``, one can use
   :variable:`CMAKE_MSVC_DEBUG_INFORMATION_FORMAT` to specify the MSVC debug
   information format.
+
+.. versionadded:: 3.30
+  If the :prop_gbl:`PROPAGATE_TOP_LEVEL_INCLUDES_TO_TRY_COMPILE` global
+  property is set to true, :variable:`CMAKE_PROJECT_TOP_LEVEL_INCLUDES` is
+  propagated into the test project's build configuration when using the
+  :ref:`whole-project signature <Try Compiling Whole Projects>`.
 
 See Also
 ^^^^^^^^

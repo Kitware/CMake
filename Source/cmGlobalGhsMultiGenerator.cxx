@@ -124,7 +124,7 @@ bool cmGlobalGhsMultiGenerator::SetGeneratorPlatform(std::string const& p,
 {
   /* set primary target */
   cmValue t = mf->GetDefinition("GHS_PRIMARY_TARGET");
-  if (cmIsOff(t)) {
+  if (t.IsOff()) {
     /* Use the value from `-A` or use `arm` */
     std::string arch = "arm";
     if (!cmIsOff(p)) {
@@ -297,18 +297,18 @@ void cmGlobalGhsMultiGenerator::WriteTopLevelProject(std::ostream& fout,
   // Specify BSP option if supplied by user
   // -- not all platforms require this entry in the project file
   cmValue bspName = root->GetMakefile()->GetDefinition("GHS_BSP_NAME");
-  if (!cmIsOff(bspName)) {
+  if (!bspName.IsOff()) {
     fout << "    -bsp " << *bspName << '\n';
   }
 
   // Specify OS DIR if supplied by user
   // -- not all platforms require this entry in the project file
   cmValue osDir = root->GetMakefile()->GetDefinition("GHS_OS_DIR");
-  if (!cmIsOff(osDir)) {
+  if (!osDir.IsOff()) {
     cmValue osDirOption =
       root->GetMakefile()->GetDefinition("GHS_OS_DIR_OPTION");
     fout << "    ";
-    if (cmIsOff(osDirOption)) {
+    if (osDirOption.IsOff()) {
       fout << "";
     } else {
       fout << *osDirOption;

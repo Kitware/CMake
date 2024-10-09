@@ -1356,6 +1356,75 @@ bool SystemTools::DeleteRegistryValue(const std::string&, KeyWOW64)
 }
 #endif
 
+#ifdef _WIN32
+SystemTools::WindowsFileId::WindowsFileId(unsigned long volumeSerialNumber,
+                                          unsigned long fileIndexHigh,
+                                          unsigned long fileIndexLow)
+  : m_volumeSerialNumber(volumeSerialNumber)
+  , m_fileIndexHigh(fileIndexHigh)
+  , m_fileIndexLow(fileIndexLow)
+{
+}
+
+bool SystemTools::WindowsFileId::operator==(const WindowsFileId& o) const
+{
+  return (m_volumeSerialNumber == o.m_volumeSerialNumber &&
+          m_fileIndexHigh == o.m_fileIndexHigh &&
+          m_fileIndexLow == o.m_fileIndexLow);
+}
+
+bool SystemTools::WindowsFileId::operator!=(const WindowsFileId& o) const
+{
+  return !(*this == o);
+}
+#else
+SystemTools::UnixFileId::UnixFileId(dev_t volumeSerialNumber,
+                                    ino_t fileSerialNumber, off_t fileSize)
+  : m_volumeSerialNumber(volumeSerialNumber)
+  , m_fileSerialNumber(fileSerialNumber)
+  , m_fileSize(fileSize)
+{
+}
+
+bool SystemTools::UnixFileId::operator==(const UnixFileId& o) const
+{
+  return (m_volumeSerialNumber == o.m_volumeSerialNumber &&
+          m_fileSerialNumber == o.m_fileSerialNumber &&
+          m_fileSize == o.m_fileSize);
+}
+
+bool SystemTools::UnixFileId::operator!=(const UnixFileId& o) const
+{
+  return !(*this == o);
+}
+#endif
+
+bool SystemTools::GetFileId(const std::string& file, FileId& id)
+{
+#ifdef _WIN32
+  HANDLE hFile =
+    CreateFileW(Encoding::ToWide(file).c_str(), GENERIC_READ, FILE_SHARE_READ,
+                nullptr, OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, nullptr);
+  if (hFile != INVALID_HANDLE_VALUE) {
+    BY_HANDLE_FILE_INFORMATION fiBuf;
+    GetFileInformationByHandle(hFile, &fiBuf);
+    CloseHandle(hFile);
+    id = FileId(fiBuf.dwVolumeSerialNumber, fiBuf.nFileIndexHigh,
+                fiBuf.nFileIndexLow);
+    return true;
+  } else {
+    return false;
+  }
+#else
+  struct stat fileStat;
+  if (stat(file.c_str(), &fileStat) == 0) {
+    id = FileId(fileStat.st_dev, fileStat.st_ino, fileStat.st_size);
+    return true;
+  }
+  return false;
+#endif
+}
+
 bool SystemTools::SameFile(const std::string& file1, const std::string& file2)
 {
 #ifdef _WIN32
@@ -2867,9 +2936,8 @@ std::string SystemToolsStatic::FindName(
   path.reserve(path.size() + userPaths.size());
   path.insert(path.end(), userPaths.begin(), userPaths.end());
   // now look for the file
-  std::string tryPath;
   for (std::string const& p : path) {
-    tryPath = p;
+    std::string tryPath = p;
     if (tryPath.empty() || tryPath.back() != '/') {
       tryPath += '/';
     }
@@ -2938,8 +3006,6 @@ std::string SystemTools::FindProgram(const std::string& name,
                                      const std::vector<std::string>& userPaths,
                                      bool no_system_path)
 {
-  std::string tryPath;
-
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
   std::vector<std::string> extensions;
   // check to see if the name already has a .xxx at
@@ -2951,7 +3017,7 @@ std::string SystemTools::FindProgram(const std::string& name,
 
     // first try with extensions if the os supports them
     for (std::string const& ext : extensions) {
-      tryPath = name;
+      std::string tryPath = name;
       tryPath += ext;
       if (SystemTools::FileIsExecutable(tryPath)) {
         return SystemTools::CollapseFullPath(tryPath);
@@ -2988,7 +3054,7 @@ std::string SystemTools::FindProgram(const std::string& name,
 #if defined(_WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
     // first try with extensions
     for (std::string const& ext : extensions) {
-      tryPath = p;
+      std::string tryPath = p;
       tryPath += name;
       tryPath += ext;
       if (SystemTools::FileIsExecutable(tryPath)) {
@@ -2997,7 +3063,7 @@ std::string SystemTools::FindProgram(const std::string& name,
     }
 #endif
     // now try it without them
-    tryPath = p;
+    std::string tryPath = p;
     tryPath += name;
     if (SystemTools::FileIsExecutable(tryPath)) {
       return SystemTools::CollapseFullPath(tryPath);
@@ -3152,16 +3218,13 @@ bool SystemTools::FileIsDirectory(const std::string& inName)
 #if defined(_WIN32)
   DWORD attr =
     GetFileAttributesW(Encoding::ToWindowsExtendedPath(name).c_str());
-  if (attr != INVALID_FILE_ATTRIBUTES) {
-    return (attr & FILE_ATTRIBUTE_DIRECTORY) != 0;
+  return (attr != INVALID_FILE_ATTRIBUTES) &&
+    (attr & FILE_ATTRIBUTE_DIRECTORY);
 #else
   struct stat fs;
-  if (stat(name, &fs) == 0) {
-    return S_ISDIR(fs.st_mode);
+
+  return (stat(name, &fs) == 0) && S_ISDIR(fs.st_mode);
 #endif
-  } else {
-    return false;
-  }
 }
 
 bool SystemTools::FileIsExecutable(const std::string& inName)
@@ -3226,11 +3289,7 @@ bool SystemTools::FileIsSymlink(const std::string& name)
   return FileIsSymlinkWithAttr(path, GetFileAttributesW(path.c_str()));
 #else
   struct stat fs;
-  if (lstat(name.c_str(), &fs) == 0) {
-    return S_ISLNK(fs.st_mode);
-  } else {
-    return false;
-  }
+  return (lstat(name.c_str(), &fs) == 0) && S_ISLNK(fs.st_mode);
 #endif
 }
 
@@ -3248,11 +3307,7 @@ bool SystemTools::FileIsFIFO(const std::string& name)
   return type == FILE_TYPE_PIPE;
 #else
   struct stat fs;
-  if (lstat(name.c_str(), &fs) == 0) {
-    return S_ISFIFO(fs.st_mode);
-  } else {
-    return false;
-  }
+  return (lstat(name.c_str(), &fs) == 0) && S_ISFIFO(fs.st_mode);
 #endif
 }
 
@@ -4889,7 +4944,7 @@ SystemToolsManager::~SystemToolsManager()
 
 #if defined(__VMS)
 // On VMS we configure the run time C library to be more UNIX like.
-// http://h71000.www7.hp.com/doc/732final/5763/5763pro_004.html
+// https://h71000.www7.hp.com/doc/732final/5763/5763pro_004.html
 extern "C" int decc$feature_get_index(char* name);
 extern "C" int decc$feature_set_value(int index, int mode, int value);
 static int SetVMSFeature(char* name, int value)

@@ -1,0 +1,2 @@
+-- Could NOT find BeforeProject \(missing: SOME_VAR\)[ ]*
+Hint: The project\(\) command has not yet been called\.  It sets up system-specific search paths\.

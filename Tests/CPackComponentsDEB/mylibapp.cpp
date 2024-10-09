@@ -1,19 +1,28 @@
-#ifndef SHLIBDEPS_PRIVATE
+#if defined SHLIBDEPS_OTHER
 
-#  include "mylib.h"
+#  include "subdir/myotherlib.h"
 
 int main()
 {
-  mylib_function();
+  myotherlib_function();
 }
 
-#else
+#elif defined SHLIBDEPS_PRIVATE
 
 #  include "shlibdeps-with-private-lib/myprivatelib.h"
 
 int main()
 {
   myprivatelib_function();
+}
+
+#else
+
+#  include "mylib.h"
+
+int main()
+{
+  mylib_function();
 }
 
 #endif

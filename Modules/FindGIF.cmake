@@ -46,6 +46,9 @@ Hints
 ``./configure --prefix=$GIF_DIR``.
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 # Created by Eric Wing.
 # Modifications by Alexander Neundorf, Ben Campbell
 
@@ -126,3 +129,5 @@ if(GIF_FOUND)
 endif()
 
 mark_as_advanced(GIF_INCLUDE_DIR GIF_LIBRARY)
+
+cmake_policy(POP)

@@ -160,6 +160,8 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
                                     properties);
 
     this->PopulateCompatibleInterfaceProperties(gt, properties);
+    this->PopulateCustomTransitiveInterfaceProperties(
+      gt, cmGeneratorExpression::InstallInterface, properties);
 
     this->GenerateInterfaceProperties(gt, os, properties);
 

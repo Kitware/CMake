@@ -8,7 +8,6 @@
 #include "cmStateTypes.h"
 #include "cmTarget.h"
 #include "cmValue.h"
-#include "cmake.h"
 
 cmTargetPropCommandBase::cmTargetPropCommandBase(cmExecutionStatus& status)
   : Makefile(&status.GetMakefile())
@@ -35,9 +34,7 @@ bool cmTargetPropCommandBase::HandleArguments(
     return false;
   }
   // Lookup the target for which property-values are specified.
-  this->Target =
-    this->Makefile->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(
-      args[0]);
+  this->Target = this->Makefile->GetGlobalGenerator()->FindTarget(args[0]);
   if (!this->Target) {
     this->Target = this->Makefile->FindTargetToUse(args[0]);
   }

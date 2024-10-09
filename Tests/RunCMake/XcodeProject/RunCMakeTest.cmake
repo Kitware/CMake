@@ -9,6 +9,8 @@ function(RunClean)
 endfunction()
 RunClean()
 
+run_cmake_with_options(ArchsStandard "-DCMAKE_OSX_ARCHITECTURES=$(ARCHS_STANDARD)")
+
 run_cmake(ExplicitCMakeLists)
 run_cmake(ImplicitCMakeLists)
 run_cmake(InterfaceLibSources)

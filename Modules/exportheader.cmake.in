@@ -33,6 +33,7 @@
 #  define @DEPRECATED_MACRO_NAME@_NO_EXPORT @NO_EXPORT_MACRO_NAME@ @DEPRECATED_MACRO_NAME@
 #endif
 
+/* NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if) */
 #if @DEFINE_NO_DEPRECATED@ /* DEFINE_NO_DEPRECATED */
 #  ifndef @NO_DEPRECATED_MACRO_NAME@
 #    define @NO_DEPRECATED_MACRO_NAME@

@@ -27,9 +27,7 @@ Presets
 Languages
 ---------
 
-* The :manual:`Compile Features <cmake-compile-features(7)>` functionality
-  is now aware of C++26, and defines a ``cxx_std_26`` meta-feature.
-  C++26 compiler modes may also be specified via the :prop_tgt:`CXX_STANDARD`,
+* C++26 compiler modes may now be specified via the :prop_tgt:`CXX_STANDARD`,
   :prop_tgt:`CUDA_STANDARD`, :prop_tgt:`HIP_STANDARD`,
   or :prop_tgt:`OBJCXX_STANDARD` target properties.
 

@@ -1,0 +1,17 @@
+include(RunCMake)
+
+function(install_test test parallel install_target check_script)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-install)
+  set(RunCMake_TEST_OPTIONS -DINSTALL_PARALLEL=${parallel})
+  if (NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
+    list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
+  endif()
+  run_cmake(install)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(${test}-install ${CMAKE_COMMAND} --build . --config Debug -t ${install_target})
+  set(RunCMake_TEST_COMMAND_WORKING_DIRECTORY ${RunCMake_SOURCE_DIR})
+  run_cmake_command(verify-parallel ${CMAKE_COMMAND} -P ${check_script} ${RunCMake_TEST_BINARY_DIR}/.ninja_log)
+endfunction()
+
+install_test(parallel 1 install/parallel check-parallel.cmake)
+install_test(no-parallel 0 install check-single.cmake)

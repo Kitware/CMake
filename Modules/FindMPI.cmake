@@ -265,6 +265,7 @@ Additionally, the following variables are deprecated:
 
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package(PkgConfig QUIET)
@@ -282,6 +283,9 @@ set(_MPI_Fortran_GENERIC_COMPILER_NAMES    mpif95   mpif95_r  mpf95   mpf95_r
 set(_MPI_Fujitsu_C_COMPILER_NAMES        mpifccpx mpifcc)
 set(_MPI_Fujitsu_CXX_COMPILER_NAMES      mpiFCCpx mpiFCC)
 set(_MPI_Fujitsu_Fortran_COMPILER_NAMES  mpifrtpx mpifrt)
+set(_MPI_FujitsuClang_C_COMPILER_NAMES            mpifccpx mpifcc)
+set(_MPI_FujitsuClang_CXX_COMPILER_NAMES          mpiFCCpx mpiFCC)
+set(_MPI_FujitsuClang_Fortran_COMPILER_NAMES      mpifrtpx mpifrt)
 
 # GNU compiler names
 set(_MPI_GNU_C_COMPILER_NAMES              mpigcc mpgcc mpigcc_r mpgcc_r)

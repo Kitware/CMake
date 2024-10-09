@@ -234,7 +234,7 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
                 "   - packaging component: " << component->Name << std::endl);
   // Add the files of this component to the archive
   std::string localToplevel(this->GetOption("CPACK_TEMPORARY_DIRECTORY"));
-  localToplevel += "/" + component->Name;
+  localToplevel += "/" + this->GetSanitizedDirOrFileName(component->Name);
   // Change to local toplevel
   cmWorkingDirectory workdir(localToplevel);
   if (workdir.Failed()) {
@@ -357,11 +357,7 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
             << comp.second.Name
             << "> does not belong to any group, package it separately."
             << std::endl);
-        std::string localToplevel(
-          this->GetOption("CPACK_TEMPORARY_DIRECTORY"));
         std::string packageFileName = std::string(this->toplevel);
-
-        localToplevel += "/" + comp.first;
         packageFileName +=
           "/" + this->GetArchiveComponentFileName(comp.first, false);
 
@@ -379,10 +375,7 @@ int cmCPackArchiveGenerator::PackageComponents(bool ignoreGroup)
   // We build 1 package per component
   else {
     for (auto& comp : this->Components) {
-      std::string localToplevel(this->GetOption("CPACK_TEMPORARY_DIRECTORY"));
       std::string packageFileName = std::string(this->toplevel);
-
-      localToplevel += "/" + comp.first;
       packageFileName +=
         "/" + this->GetArchiveComponentFileName(comp.first, false);
 

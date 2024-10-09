@@ -1,0 +1,15 @@
+^Could not read/parse resource spec file [^
+]*/Tests/RunCMake/CTestResourceAllocation/invalid\.json:[ ]
+JSON Parse Error: [^
+]*/Tests/RunCMake/CTestResourceAllocation/invalid\.json:
+\* Line 1, Column 1
+  Syntax error: value, object or array expected\.
+(\* Line 1, Column 2
+  Extra non-whitespace after JSON value\.
+|\* Line 1, Column 1
+  A valid JSON document must be either an array or an object value\.
+)
+Errors while running CTest
+Output from these tests are in: [^
+]*/Tests/RunCMake/CTestResourceAllocation/invalid-build/Testing/Temporary/LastTest\.log
+Use "--rerun-failed --output-on-failure" to re-run the failed cases verbosely\.$
