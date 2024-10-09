@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.8)
+cmake_minimum_required(VERSION 3.29)
 
 include("${CMAKE_CURRENT_LIST_DIR}/gitlab_ci.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/env_$ENV{CMAKE_CONFIGURATION}.cmake" OPTIONAL)

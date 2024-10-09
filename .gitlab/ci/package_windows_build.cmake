@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.29)
 include(build/ci_package_info.cmake)
 
 set(build "${CMAKE_CURRENT_BINARY_DIR}/build")
