@@ -1628,6 +1628,13 @@ std::vector<std::string> cmSystemTools::SplitEnvPath(std::string const& value)
   return paths;
 }
 
+std::string cmSystemTools::ToNormalizedPathOnDisk(std::string p)
+{
+  p = cmSystemTools::CollapseFullPath(p);
+  cmSystemTools::ConvertToUnixSlashes(p);
+  return p;
+}
+
 #ifndef CMAKE_BOOTSTRAP
 bool cmSystemTools::UnsetEnv(const char* value)
 {

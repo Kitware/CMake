@@ -401,6 +401,8 @@ public:
   static cm::optional<std::string> GetEnvVar(std::string const& var);
   static std::vector<std::string> SplitEnvPath(std::string const& value);
 
+  static std::string ToNormalizedPathOnDisk(std::string p);
+
 #ifndef CMAKE_BOOTSTRAP
   /** Remove an environment variable */
   static bool UnsetEnv(const char* value);
