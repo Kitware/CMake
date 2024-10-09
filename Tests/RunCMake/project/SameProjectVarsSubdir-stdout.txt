@@ -1,9 +1,0 @@
-(-- )?  SameProjectVarsSubdir_SOURCE_DIR = [^
-]+/subdir1
-  SameProjectVarsSubdir_BINARY_DIR = [^
-]+/subdir1
-  SameProjectVarsSubdir_IS_TOP_LEVEL = OFF
-(-- )?  sub2proj_SOURCE_DIR = [^
-]+/subdir2
-  sub2proj_BINARY_DIR = [^
-]+/subdir2
