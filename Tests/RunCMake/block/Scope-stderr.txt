@@ -1,4 +1,4 @@
-^CMake Deprecation Warning at CMP0139-OLD\.cmake:[0-9]+ \(cmake_policy\):
+^CMake Deprecation Warning at Scope\.cmake:[0-9]+ \(cmake_policy\):
   The OLD behavior for policy CMP0139 will be removed from a future version
   of CMake\.
 
@@ -7,13 +7,4 @@
   specific short-term circumstances\.  Projects should be ported to the NEW
   behavior and not rely on setting a policy to OLD\.
 Call Stack \(most recent call first\):
-  CMakeLists\.txt:[0-9]+ \(include\)
-+
-CMake Error at CMP0139-OLD.cmake:[0-9]+ \(if\):
-  if given arguments:
-
-    "/path1" "PATH_EQUAL" "/path2"
-
-  Unknown arguments specified
-Call Stack \(most recent call first\):
-  CMakeLists.txt:[0-9]+ \(include\)$
+  CMakeLists\.txt:[0-9]+ \(include\)$
