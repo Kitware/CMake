@@ -3434,8 +3434,7 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
   } else if (this->IsArchivedAIXSharedLibrary()) {
     targetNames.SharedObject =
       cmStrCat(components.prefix, targetNames.Base, ".so");
-    targetNames.Real =
-      cmStrCat(components.prefix, targetNames.Base, components.suffix);
+    targetNames.Real = targetNames.Output;
   } else {
     // The library's soname.
     targetNames.SharedObject = this->ComputeVersionedName(
