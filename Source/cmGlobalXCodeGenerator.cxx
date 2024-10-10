@@ -1371,6 +1371,11 @@ struct cmCompareTargets
     if (b == "ALL_BUILD"_s) {
       return false;
     }
+    std::string a_low = cmSystemTools::LowerCase(l->GetTarget()->GetName());
+    std::string b_low = cmSystemTools::LowerCase(r->GetTarget()->GetName());
+    if (a_low != b_low) {
+      return a_low < b_low;
+    }
     return a < b;
   }
 };
