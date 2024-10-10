@@ -1309,7 +1309,8 @@ bool cmGeneratorTarget::HasSOName(const std::string& config) const
   // and then only when the platform supports an soname flag.
   return ((this->GetType() == cmStateEnums::SHARED_LIBRARY) &&
           !this->GetPropertyAsBool("NO_SONAME") &&
-          this->Makefile->GetSONameFlag(this->GetLinkerLanguage(config)));
+          (this->Makefile->GetSONameFlag(this->GetLinkerLanguage(config)) ||
+           this->IsArchivedAIXSharedLibrary()));
 }
 
 bool cmGeneratorTarget::NeedRelinkBeforeInstall(
@@ -3398,7 +3399,7 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
   cmValue soversion = this->GetProperty("SOVERSION");
   if (!this->HasSOName(config) ||
       this->Makefile->IsOn("CMAKE_PLATFORM_NO_VERSIONED_SONAME") ||
-      this->IsFrameworkOnApple() || this->IsArchivedAIXSharedLibrary()) {
+      this->IsFrameworkOnApple()) {
     // Versioning is supported only for shared libraries and modules,
     // and then only when the platform supports an soname flag.
     version = nullptr;
@@ -3434,6 +3435,10 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
   } else if (this->IsArchivedAIXSharedLibrary()) {
     targetNames.SharedObject =
       cmStrCat(components.prefix, targetNames.Base, ".so");
+    if (soversion) {
+      targetNames.SharedObject += ".";
+      targetNames.SharedObject += *soversion;
+    }
     targetNames.Real = targetNames.Output;
   } else {
     // The library's soname.
