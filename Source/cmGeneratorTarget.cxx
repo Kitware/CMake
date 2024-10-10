@@ -3438,14 +3438,14 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
       cmStrCat(components.prefix, targetNames.Base, components.suffix);
   } else {
     // The library's soname.
-    this->ComputeVersionedName(targetNames.SharedObject, components.prefix,
-                               targetNames.Base, components.suffix,
-                               targetNames.Output, soversion);
+    targetNames.SharedObject = this->ComputeVersionedName(
+      components.prefix, targetNames.Base, components.suffix,
+      targetNames.Output, soversion);
 
     // The library's real name on disk.
-    this->ComputeVersionedName(targetNames.Real, components.prefix,
-                               targetNames.Base, components.suffix,
-                               targetNames.Output, version);
+    targetNames.Real = this->ComputeVersionedName(
+      components.prefix, targetNames.Base, components.suffix,
+      targetNames.Output, version);
   }
 
   // The import library names.
@@ -3468,14 +3468,13 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
       targetNames.ImportLibrary = targetNames.ImportOutput;
     } else {
       // The import library's soname.
-      this->ComputeVersionedName(
-        targetNames.ImportLibrary, importComponents.prefix,
-        importComponents.base, importComponents.suffix,
-        targetNames.ImportOutput, soversion);
+      targetNames.ImportLibrary = this->ComputeVersionedName(
+        importComponents.prefix, importComponents.base,
+        importComponents.suffix, targetNames.ImportOutput, soversion);
 
       // The import library's real name on disk.
-      this->ComputeVersionedName(
-        targetNames.ImportReal, importComponents.prefix, importComponents.base,
+      targetNames.ImportReal = this->ComputeVersionedName(
+        importComponents.prefix, importComponents.base,
         importComponents.suffix, targetNames.ImportOutput, version);
     }
   }
@@ -4155,16 +4154,19 @@ std::string cmGeneratorTarget::GetFrameworkVersion() const
   return "A";
 }
 
-void cmGeneratorTarget::ComputeVersionedName(
-  std::string& vName, std::string const& prefix, std::string const& base,
-  std::string const& suffix, std::string const& name, cmValue version) const
+std::string cmGeneratorTarget::ComputeVersionedName(std::string const& prefix,
+                                                    std::string const& base,
+                                                    std::string const& suffix,
+                                                    std::string const& name,
+                                                    cmValue version) const
 {
-  vName = this->IsApple() ? (prefix + base) : name;
+  std::string vName = this->IsApple() ? (prefix + base) : name;
   if (version) {
     vName += ".";
     vName += *version;
   }
   vName += this->IsApple() ? suffix : std::string();
+  return vName;
 }
 
 std::vector<std::string> cmGeneratorTarget::GetPropertyKeys() const

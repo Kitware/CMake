@@ -1182,9 +1182,11 @@ private:
   // Returns ARCHIVE, LIBRARY, or RUNTIME based on platform and type.
   const char* GetOutputTargetType(cmStateEnums::ArtifactType artifact) const;
 
-  void ComputeVersionedName(std::string& vName, std::string const& prefix,
-                            std::string const& base, std::string const& suffix,
-                            std::string const& name, cmValue version) const;
+  std::string ComputeVersionedName(std::string const& prefix,
+                                   std::string const& base,
+                                   std::string const& suffix,
+                                   std::string const& name,
+                                   cmValue version) const;
 
   mutable std::map<std::string, CustomTransitiveProperties>
     CustomTransitiveBuildPropertiesMap;
