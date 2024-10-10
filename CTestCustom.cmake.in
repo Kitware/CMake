@@ -12,11 +12,12 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "warning: \\(Long double usage is reported only once for each file"
   "warning: To disable this warning use"
   "could not be inlined"
-  "libcmexpat.*has no symbols"
-  "libcmcurl.*has no symbols"
+  "libcm(curl|expat).*has no symbols"
+  "cm(curl|expat).build/[^ ]*.o has no symbols"
   "not sorted slower link editing will result"
   "stl_deque.h:479"
   "Utilities.cmzlib."
+  "Utilities.cmzstd."
   "Utilities.cmbzip2."
   "Source.CTest.Curl"
   "Source.CursesDialog.form"
@@ -85,6 +86,7 @@ list(APPEND CTEST_CUSTOM_WARNING_EXCEPTION
   "[0-9]+ Warning\\(s\\) detected" # SunPro
 
   # Ignore false positive on `cm::optional` usage from GCC
+  "cmFileCommand.cxx:[0-9]*:[0-9]*: warning: '\\*\\(\\(void\\*\\)& tls_verify \\+2\\)' may be used uninitialized in this function \\[-Wmaybe-uninitialized\\]"
   "cmGlobalNinjaGenerator.cxx:[0-9]*:[0-9]*: warning: '.*cm::optional<CxxModuleMapFormat>::_mem\\)\\)' may be used uninitialized \\[-Wmaybe-uninitialized\\]"
   "cmGlobalNinjaGenerator.cxx:[0-9]*:[0-9]*: note: '.*cm::optional<CxxModuleMapFormat>::_mem\\)\\)' was declared here"
   "cmGlobalNinjaGenerator.cxx:[0-9]*:[0-9]*: warning: '\\*\\(\\(void\\*\\)& modmap_fmt \\+4\\)' may be used uninitialized in this function \\[-Wmaybe-uninitialized\\]"

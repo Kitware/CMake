@@ -134,7 +134,7 @@ function(run_GoogleTestLauncher DISCOVERY_MODE)
     ${CMAKE_CTEST_COMMAND}
     -C Debug
     -V
-    --no-label-sumary
+    --no-label-summary
   )
 endfunction()
 
@@ -197,7 +197,7 @@ function(run_GoogleTest_discovery_timeout DISCOVERY_MODE)
     ${CMAKE_CTEST_COMMAND}
     -C Debug
     -R discovery_timeout_test
-    --no-label-sumary
+    --no-label-summary
   )
 endfunction()
 
@@ -362,10 +362,7 @@ foreach(DISCOVERY_MODE POST_BUILD PRE_TEST)
   run_GoogleTestXML(${DISCOVERY_MODE})
   message("Testing ${DISCOVERY_MODE} discovery mode via DISCOVERY_MODE option...")
   run_GoogleTest_discovery_timeout(${DISCOVERY_MODE})
-  if(# VS 9 does not rebuild if POST_BUILD command changes.
-      NOT "${DISCOVERY_MODE};${RunCMake_GENERATOR}" MATCHES "^POST_BUILD;Visual Studio 9")
-    run_GoogleTest_discovery_arg_change(${DISCOVERY_MODE})
-  endif()
+  run_GoogleTest_discovery_arg_change(${DISCOVERY_MODE})
   run_GoogleTest_discovery_test_list(${DISCOVERY_MODE})
   run_GoogleTest_discovery_test_list_scoped(${DISCOVERY_MODE})
   run_GoogleTest_discovery_flush_script(${DISCOVERY_MODE})

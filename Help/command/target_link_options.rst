@@ -32,7 +32,7 @@ If ``BEFORE`` is specified, the content will be prepended to the property
 instead of being appended.
 
 The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to
-specify the :ref:`scope <Target Usage Requirements>` of the following arguments.
+specify the :ref:`scope <Target Command Scope>` of the following arguments.
 ``PRIVATE`` and ``PUBLIC`` items will populate the :prop_tgt:`LINK_OPTIONS`
 property of ``<target>``.  ``PUBLIC`` and ``INTERFACE`` items will populate the
 :prop_tgt:`INTERFACE_LINK_OPTIONS` property of ``<target>``.

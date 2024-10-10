@@ -81,10 +81,30 @@ gtest_add_tests(test_gtest3 "" AUTO)
 if(NOT TEST GoogleTest.Foo)
   message(FATAL_ERROR "Test case GoogleTest.Foo not defined")
 endif()
+# Check if test has property DEF_SOURCE_LINE
+get_test_property(GoogleTest.Foo DEF_SOURCE_LINE testSourceLineFoo)
+if(NOT testSourceLineFoo)
+  message(FATAL_ERROR "Test GoogleTest.Foo should have DEF_SOURCE_LINE property")
+endif()
+# If check property ends with correct value
+string(FIND "${testSourceLineFoo}" "main3.cxx:3" testSourceLineFooFound)
+if(${testSourceLineFooFound} EQUAL -1)
+  message(FATAL_ERROR "Test GoogleTest.Foo should have DEF_SOURCE_LINE property with value main3.cxx:3")
+endif()
+
 if(NOT TEST GoogleTest.Bar)
   message(FATAL_ERROR "Test case GoogleTest.Bar not defined")
 endif()
-
+# Check if test has property DEF_SOURCE_LINE
+get_test_property(GoogleTest.Bar DEF_SOURCE_LINE testSourceLineBar)
+if(NOT testSourceLineBar)
+  message(FATAL_ERROR "Test GoogleTest.Bar should have DEF_SOURCE_LINE property")
+endif()
+# If check property ends with correct value
+string(FIND "${testSourceLineBar}" "main3.cxx:8" testSourceLineBarFound)
+if(${testSourceLineBarFound} EQUAL -1)
+  message(FATAL_ERROR "Test GoogleTest.Bar should have DEF_SOURCE_LINE property with value main3.cxx:8")
+endif()
 
 # Non-keyword form, explicitly specified sources. Allows a non-target to be
 # given for the executable.

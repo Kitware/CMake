@@ -1,3 +1,4 @@
+message(STATUS "FETCHCONTENT_SOURCE_DIR_WITHPROJECT = ${FETCHCONTENT_SOURCE_DIR_WITHPROJECT}")
 include(FetchContent)
 
 FetchContent_Declare(

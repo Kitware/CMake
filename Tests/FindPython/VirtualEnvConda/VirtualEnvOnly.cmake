@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.15)
 
 #
 # Virtual environment is defined for python3

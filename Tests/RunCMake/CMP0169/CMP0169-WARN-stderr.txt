@@ -1,0 +1,11 @@
+CMake Warning \(dev\) at .*/Modules/FetchContent\.cmake:[0-9]+ \(message\):
+  Calling FetchContent_Populate\(t2\) is deprecated, call
+  FetchContent_MakeAvailable\(t2\) instead\.  Policy CMP0169 can be set to OLD
+  to allow FetchContent_Populate\(t2\) to be called directly for now, but the
+  ability to call it with declared details will be removed completely in a
+  future version\.
+Call Stack \(most recent call first\):
+  CMP0169\.cmake:[0-9]+ \(FetchContent_Populate\)
+  CMP0169-WARN\.cmake:[0-9]+ \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
+This warning is for project developers\.  Use -Wno-dev to suppress it\.

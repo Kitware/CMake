@@ -70,11 +70,10 @@ enum class IncludeRuntimeInterface
   No
 };
 
-void AddInterfaceEntries(cmGeneratorTarget const* headTarget,
-                         std::string const& config, std::string const& prop,
-                         std::string const& lang,
-                         cmGeneratorExpressionDAGChecker* dagChecker,
-                         EvaluatedTargetPropertyEntries& entries,
-                         IncludeRuntimeInterface searchRuntime,
-                         cmGeneratorTarget::LinkInterfaceFor interfaceFor =
-                           cmGeneratorTarget::LinkInterfaceFor::Usage);
+void AddInterfaceEntries(
+  cmGeneratorTarget const* headTarget, std::string const& config,
+  std::string const& prop, std::string const& lang,
+  cmGeneratorExpressionDAGChecker* dagChecker,
+  EvaluatedTargetPropertyEntries& entries,
+  IncludeRuntimeInterface searchRuntime,
+  cmGeneratorTarget::UseTo usage = cmGeneratorTarget::UseTo::Compile);

@@ -7,6 +7,8 @@
 #include <iosfwd>
 #include <string>
 
+#include <cm/optional>
+
 #include "cmGlobalVisualStudioGenerator.h"
 #include "cmIDEFlagTable.h"
 #include "cmIDEOptions.h"
@@ -66,7 +68,8 @@ public:
 
   void FixManifestUACFlags();
 
-  bool IsDebug() const;
+  bool UsingDebugInfo() const;
+  cm::optional<bool> UsingDebugRuntime() const;
   bool IsWinRt() const;
   bool IsManaged() const;
   // Write options to output.
@@ -86,7 +89,6 @@ protected:
 
 private:
   cmLocalVisualStudioGenerator* LocalGenerator;
-  cmGlobalVisualStudioGenerator::VSVersion Version;
 
   std::string Configuration;
   Tool CurrentTool;

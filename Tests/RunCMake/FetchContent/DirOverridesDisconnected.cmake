@@ -1,3 +1,5 @@
+cmake_policy(SET CMP0169 OLD)
+
 include(FetchContent)
 
 # Test using saved details. We are re-using a SOURCE_DIR from a previous test

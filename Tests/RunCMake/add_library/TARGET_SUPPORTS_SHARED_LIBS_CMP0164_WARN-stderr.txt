@@ -1,0 +1,7 @@
+^CMake Warning \(dev\) at TARGET_SUPPORTS_SHARED_LIBS_CMP0164_WARN.cmake:[0-9]+ \(add_library\):
+  ADD_LIBRARY called with SHARED option but the target platform does not
+  support dynamic linking.  Building a STATIC library instead.  This may lead
+  to problems.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.$

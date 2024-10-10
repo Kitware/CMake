@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+    <metadata>
+        <!-- Required elements-->
+        <id>GeneratorTest</id>
+        <version>1.2.3</version>
+        <description><![CDATA[A NuGet package for testing CMake's CPack NuGet generator]]></description>
+        <authors><![CDATA[ACME Inc]]></authors>
+
+        <!-- Optional elements -->
+        
+        <owners><![CDATA[ACME Inc]]></owners>
+        <projectUrl><![CDATA[https://www.example.com]]></projectUrl>
+        
+        <license type="expression"><![CDATA[MIT]]></license>
+        
+        
+        
+        
+        <summary><![CDATA[A test NuGet package]]></summary>
+        
+        
+        
+        
+        <repository type="git" url="https://github.com/example/nugetlib.git" />
+        <dependencies>
+            <group>
+                <dependency id="Baz" version="9.8.6" />
+            </group>
+            <group targetFramework=".NETFramework4">
+                <dependency id="Foo" version="1.23" />
+                <dependency id="Bar" version="4.3.2" />
+            </group>
+            <group targetFramework="net6.0" />
+        </dependencies>
+    </metadata>
+    
+</package>

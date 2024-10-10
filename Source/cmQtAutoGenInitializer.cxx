@@ -122,7 +122,7 @@ bool StaticLibraryCycle(cmGeneratorTarget const* targetOrigin,
       // Collect all static_library dependencies from the test target
       cmLinkImplementationLibraries const* libs =
         testTarget->GetLinkImplementationLibraries(
-          config, cmGeneratorTarget::LinkInterfaceFor::Link);
+          config, cmGeneratorTarget::UseTo::Link);
       if (libs) {
         for (cmLinkItem const& item : libs->Libraries) {
           cmGeneratorTarget const* depTarget = item.Target;
@@ -601,7 +601,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 
     if (this->Moc.Enabled) {
       // Path prefix
-      if (cmIsOn(this->GenTarget->GetProperty("AUTOMOC_PATH_PREFIX"))) {
+      if (this->GenTarget->GetProperty("AUTOMOC_PATH_PREFIX").IsOn()) {
         this->Moc.PathPrefix = true;
       }
 
@@ -657,7 +657,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     auto const& value =
       this->GenTarget->GetProperty("AUTOGEN_USE_SYSTEM_INCLUDE");
     if (value.IsSet()) {
-      if (cmIsOn(value)) {
+      if (value.IsOn()) {
         this->GenTarget->AddSystemIncludeDirectory(this->Dir.IncludeGenExp,
                                                    "CXX");
       } else {
@@ -1461,7 +1461,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       for (std::string const& config : this->ConfigsList) {
         cmLinkImplementationLibraries const* libs =
           this->GenTarget->GetLinkImplementationLibraries(
-            config, cmGeneratorTarget::LinkInterfaceFor::Link);
+            config, cmGeneratorTarget::UseTo::Link);
         if (libs) {
           for (cmLinkItem const& item : libs->Libraries) {
             cmGeneratorTarget const* libTarget = item.Target;
@@ -1918,13 +1918,14 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
     info.SetBool("MOC_RELAXED_MODE", this->Moc.RelaxedMode);
     info.SetBool("MOC_PATH_PREFIX", this->Moc.PathPrefix);
 
-    cmGeneratorExpressionDAGChecker dagChecker(
-      this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr, nullptr);
     EvaluatedTargetPropertyEntries InterfaceAutoMocMacroNamesEntries;
 
     if (this->MultiConfig) {
       for (auto const& cfg : this->ConfigsList) {
         if (!cfg.empty()) {
+          cmGeneratorExpressionDAGChecker dagChecker(
+            this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr, nullptr,
+            this->LocalGen, cfg);
           AddInterfaceEntries(this->GenTarget, cfg,
                               "INTERFACE_AUTOMOC_MACRO_NAMES", "CXX",
                               &dagChecker, InterfaceAutoMocMacroNamesEntries,
@@ -1932,6 +1933,9 @@ bool cmQtAutoGenInitializer::SetupWriteAutogenInfo()
         }
       }
     } else {
+      cmGeneratorExpressionDAGChecker dagChecker(
+        this->GenTarget, "AUTOMOC_MACRO_NAMES", nullptr, nullptr,
+        this->LocalGen, this->ConfigDefault);
       AddInterfaceEntries(this->GenTarget, this->ConfigDefault,
                           "INTERFACE_AUTOMOC_MACRO_NAMES", "CXX", &dagChecker,
                           InterfaceAutoMocMacroNamesEntries,

@@ -36,6 +36,17 @@ with the contents like the following::
  #endif
 
 And then reference that generated header file in actual source.
+
+Imported Targets
+^^^^^^^^^^^^^^^^
+
+.. versionadded:: 3.30
+
+This module defines the following :prop_tgt:`IMPORTED` targets:
+
+``Backtrace::Backtrace``
+  An interface library providing usage requirements for the found components.
+
 #]=======================================================================]
 
 include(CMakePushCheckState)
@@ -89,3 +100,14 @@ set(Backtrace_HEADER "${_Backtrace_HEADER_TRY}" CACHE STRING "Header providing b
 
 find_package_handle_standard_args(Backtrace FOUND_VAR Backtrace_FOUND REQUIRED_VARS ${_Backtrace_STD_ARGS})
 mark_as_advanced(Backtrace_HEADER Backtrace_INCLUDE_DIR Backtrace_LIBRARY)
+
+if(Backtrace_FOUND AND NOT TARGET Backtrace::Backtrace)
+  if(Backtrace_LIBRARY)
+    add_library(Backtrace::Backtrace UNKNOWN IMPORTED)
+    set_property(TARGET Backtrace::Backtrace PROPERTY IMPORTED_LOCATION "${Backtrace_LIBRARY}")
+  else()
+    add_library(Backtrace::Backtrace INTERFACE IMPORTED)
+    target_link_libraries(Backtrace::Backtrace INTERFACE ${Backtrace_LIBRARIES})
+  endif()
+  target_include_directories(Backtrace::Backtrace INTERFACE ${Backtrace_INCLUDE_DIRS})
+endif()

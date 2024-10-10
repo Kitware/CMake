@@ -110,6 +110,9 @@ This needed to change because "proper" SDL convention is #include
 because not all systems place things in SDL/ (see FreeBSD).
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 find_path(SDL_INCLUDE_DIR SDL.h
   HINTS
     ENV SDLDIR
@@ -235,3 +238,5 @@ if(SDL_FOUND)
       INTERFACE_LINK_LIBRARIES "${SDL_LIBRARY}")
   endif()
 endif()
+
+cmake_policy(POP)

@@ -218,6 +218,9 @@ Example:
         GENERATE_EXTENSIONS .grpc.pb.h .grpc.pb.cc)
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 function(protobuf_generate)
   set(_options APPEND_PATH DESCRIPTORS)
   set(_singleargs LANGUAGE OUT_VAR EXPORT_MACRO PROTOC_OUT_DIR PLUGIN PLUGIN_OPTIONS DEPENDENCIES)
@@ -782,3 +785,5 @@ foreach(Camel
     string(TOUPPER ${Camel} UPPER)
     set(${UPPER} ${${Camel}})
 endforeach()
+
+cmake_policy(POP)

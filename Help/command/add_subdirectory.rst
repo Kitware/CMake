@@ -20,19 +20,10 @@ typical usage).  The ``CMakeLists.txt`` file in the specified source
 directory will be processed immediately by CMake before processing in
 the current input file continues beyond this command.
 
-If the ``EXCLUDE_FROM_ALL`` argument is provided then targets in the
-subdirectory will not be included in the ``ALL`` target of the parent
-directory by default, and will be excluded from IDE project files.
-Users must explicitly build targets in the subdirectory.  This is
-meant for use when the subdirectory contains a separate part of the
-project that is useful but not necessary, such as a set of examples.
-Typically the subdirectory should contain its own :command:`project`
-command invocation so that a full build system will be generated in the
-subdirectory (such as a Visual Studio IDE solution file).  Note that
-inter-target dependencies supersede this exclusion.  If a target built by
-the parent project depends on a target in the subdirectory, the dependee
-target will be included in the parent project build system to satisfy
-the dependency.
+If the ``EXCLUDE_FROM_ALL`` argument is provided then the
+:prop_dir:`EXCLUDE_FROM_ALL` property will be set on the added directory.
+This will exclude the directory from a default build. See the directory
+property :prop_dir:`EXCLUDE_FROM_ALL` for full details.
 
 .. versionadded:: 3.25
   If the ``SYSTEM`` argument is provided, the :prop_dir:`SYSTEM` directory

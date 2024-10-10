@@ -119,7 +119,8 @@ do.
 The more modern approach is to behave as much like
 :ref:`config file packages <Config File Packages>` files as possible, by
 providing :ref:`imported target <Imported targets>`.  This has the advantage
-of propagating :ref:`Target Usage Requirements` to consumers.
+of propagating :ref:`usage requirements <Target Usage Requirements>`
+to consumers.
 
 In either case (or even when providing both variables and imported
 targets), find modules should provide backwards compatibility with old

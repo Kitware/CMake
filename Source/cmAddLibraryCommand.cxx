@@ -11,6 +11,7 @@
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmValue.h"
 
@@ -26,7 +27,7 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
   // Library type defaults to value of BUILD_SHARED_LIBS, if it exists,
   // otherwise it defaults to static library.
   cmStateEnums::TargetType type = cmStateEnums::SHARED_LIBRARY;
-  if (cmIsOff(mf.GetDefinition("BUILD_SHARED_LIBS"))) {
+  if (mf.GetDefinition("BUILD_SHARED_LIBS").IsOff()) {
     type = cmStateEnums::STATIC_LIBRARY;
   }
   bool excludeFromAll = false;
@@ -226,14 +227,35 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
   if ((type == cmStateEnums::SHARED_LIBRARY ||
        type == cmStateEnums::MODULE_LIBRARY) &&
       !mf.GetState()->GetGlobalPropertyAsBool("TARGET_SUPPORTS_SHARED_LIBS")) {
-    mf.IssueMessage(
-      MessageType::AUTHOR_WARNING,
-      cmStrCat(
-        "ADD_LIBRARY called with ",
-        (type == cmStateEnums::SHARED_LIBRARY ? "SHARED" : "MODULE"),
-        " option but the target platform does not support dynamic linking. ",
-        "Building a STATIC library instead. This may lead to problems."));
-    type = cmStateEnums::STATIC_LIBRARY;
+    switch (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0164)) {
+      case cmPolicies::WARN:
+        mf.IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat(
+            "ADD_LIBRARY called with ",
+            (type == cmStateEnums::SHARED_LIBRARY ? "SHARED" : "MODULE"),
+            " option but the target platform does not support dynamic "
+            "linking. ",
+            "Building a STATIC library instead. This may lead to problems."));
+        CM_FALLTHROUGH;
+      case cmPolicies::OLD:
+        type = cmStateEnums::STATIC_LIBRARY;
+        break;
+      case cmPolicies::NEW:
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        mf.IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat(
+            "ADD_LIBRARY called with ",
+            (type == cmStateEnums::SHARED_LIBRARY ? "SHARED" : "MODULE"),
+            " option but the target platform does not support dynamic "
+            "linking."));
+        cmSystemTools::SetFatalErrorOccurred();
+        return false;
+      default:
+        break;
+    }
   }
 
   // Handle imported target creation.

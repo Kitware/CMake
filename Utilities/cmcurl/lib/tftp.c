@@ -168,7 +168,7 @@ static CURLcode tftp_translate_code(tftp_error_t error);
  */
 
 const struct Curl_handler Curl_handler_tftp = {
-  "TFTP",                               /* scheme */
+  "tftp",                               /* scheme */
   tftp_setup_connection,                /* setup_connection */
   tftp_do,                              /* do_it */
   tftp_done,                            /* done */
@@ -182,6 +182,7 @@ const struct Curl_handler Curl_handler_tftp = {
   ZERO_NULL,                            /* perform_getsock */
   tftp_disconnect,                      /* disconnect */
   ZERO_NULL,                            /* write_resp */
+  ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
   PORT_TFTP,                            /* defport */
@@ -452,8 +453,6 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
     if(data->state.upload) {
       /* If we are uploading, send an WRQ */
       setpacketevent(&state->spacket, TFTP_EVENT_WRQ);
-      state->data->req.upload_fromhere =
-        (char *)state->spacket.data + 4;
       if(data->state.infilesize != -1)
         Curl_pgrsSetUploadSize(data, data->state.infilesize);
     }
@@ -708,6 +707,8 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
   struct SingleRequest *k = &data->req;
   size_t cb; /* Bytes currently read */
   char buffer[STRERROR_LEN];
+  char *bufptr;
+  bool eos;
 
   switch(event) {
 
@@ -771,13 +772,14 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
      * data block.
      * */
     state->sbytes = 0;
-    state->data->req.upload_fromhere = (char *)state->spacket.data + 4;
+    bufptr = (char *)state->spacket.data + 4;
     do {
-      result = Curl_fillreadbuffer(data, state->blksize - state->sbytes, &cb);
+      result = Curl_client_read(data, bufptr, state->blksize - state->sbytes,
+                                &cb, &eos);
       if(result)
         return result;
       state->sbytes += (int)cb;
-      state->data->req.upload_fromhere += cb;
+      bufptr += cb;
     } while(state->sbytes < state->blksize && cb);
 
     sbytes = sendto(state->sockfd, (void *) state->spacket.data,
@@ -1202,7 +1204,7 @@ static timediff_t tftp_state_timeout(struct Curl_easy *data,
     state->state = TFTP_STATE_FIN;
     return 0;
   }
-  time(&current);
+  current = time(NULL);
   if(current > state->rx_time + state->retry_time) {
     if(event)
       *event = TFTP_EVENT_TIMEOUT;
@@ -1240,7 +1242,7 @@ static CURLcode tftp_multi_statemach(struct Curl_easy *data, bool *done)
     *done = (state->state == TFTP_STATE_FIN) ? TRUE : FALSE;
     if(*done)
       /* Tell curl we're done */
-      Curl_setup_transfer(data, -1, -1, FALSE, -1);
+      Curl_xfer_setup(data, -1, -1, FALSE, -1);
   }
   else {
     /* no timeouts to handle, check our socket */
@@ -1263,7 +1265,7 @@ static CURLcode tftp_multi_statemach(struct Curl_easy *data, bool *done)
       *done = (state->state == TFTP_STATE_FIN) ? TRUE : FALSE;
       if(*done)
         /* Tell curl we're done */
-        Curl_setup_transfer(data, -1, -1, FALSE, -1);
+        Curl_xfer_setup(data, -1, -1, FALSE, -1);
     }
     /* if rc == 0, then select() timed out */
   }

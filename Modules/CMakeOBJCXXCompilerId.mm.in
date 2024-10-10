@@ -23,22 +23,27 @@ char const* qnxnto = "INFO" ":" "qnxnto[]";
 @CMAKE_OBJCXX_COMPILER_ID_PLATFORM_CONTENT@
 @CMAKE_OBJCXX_COMPILER_ID_ERROR_FOR_TEST@
 
-#if defined(_MSC_VER) && defined(_MSVC_LANG)
-#define CXX_STD _MSVC_LANG
-#else
+#define CXX_STD_98 199711L
+#define CXX_STD_11 201103L
+#define CXX_STD_14 201402L
+#define CXX_STD_17 201703L
+#define CXX_STD_20 202002L
+#define CXX_STD_23 202302L
+
 #define CXX_STD __cplusplus
-#endif
 
 const char* info_language_standard_default = "INFO" ":" "standard_default["
-#if CXX_STD > 202002L
+#if CXX_STD > CXX_STD_23
+  "26"
+#elif CXX_STD > CXX_STD_20
   "23"
-#elfif CXX_STD > 201703L
+#elif CXX_STD > CXX_STD_17
   "20"
-#elif CXX_STD >= 201703L
+#elif CXX_STD > CXX_STD_14
   "17"
-#elif CXX_STD >= 201402L
+#elif CXX_STD > CXX_STD_11
   "14"
-#elif CXX_STD >= 201103L
+#elif CXX_STD >= CXX_STD_11
   "11"
 #else
   "98"

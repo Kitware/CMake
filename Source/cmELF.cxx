@@ -212,7 +212,8 @@ public:
   // Return the number of sections as specified by the ELF header.
   unsigned int GetNumberOfSections() const override
   {
-    return static_cast<unsigned int>(this->ELFHeader.e_shnum);
+    return static_cast<unsigned int>(this->ELFHeader.e_shnum +
+                                     this->SectionHeaders[0].sh_size);
   }
 
   // Get the file position of a dynamic section entry.
@@ -367,7 +368,7 @@ private:
     return !this->Stream->fail();
   }
 
-  bool LoadSectionHeader(ELF_Half i)
+  bool LoadSectionHeader(unsigned int i)
   {
     // Read the section header from the file.
     this->Stream->seekg(this->ELFHeader.e_shoff +
@@ -378,7 +379,7 @@ private:
 
     // Identify some important sections.
     if (this->SectionHeaders[i].sh_type == SHT_DYNAMIC) {
-      this->DynamicSectionIndex = i;
+      this->DynamicSectionIndex = static_cast<int>(i);
     }
     return true;
   }
@@ -444,8 +445,11 @@ cmELFInternalImpl<Types>::cmELFInternalImpl(cmELF* external,
   this->Machine = this->ELFHeader.e_machine;
 
   // Load the section headers.
-  this->SectionHeaders.resize(this->ELFHeader.e_shnum);
-  for (ELF_Half i = 0; i < this->ELFHeader.e_shnum; ++i) {
+  this->SectionHeaders.resize(
+    this->ELFHeader.e_shnum == 0 ? 1 : this->ELFHeader.e_shnum);
+  this->LoadSectionHeader(0);
+  this->SectionHeaders.resize(this->GetNumberOfSections());
+  for (unsigned int i = 1; i < this->GetNumberOfSections(); ++i) {
     if (!this->LoadSectionHeader(i)) {
       this->SetErrorMessage("Failed to load section headers.");
       return;
@@ -617,7 +621,19 @@ cmELF::StringEntry const* cmELFInternalImpl<Types>::GetDynamicSectionString(
 
       // Make sure the whole value was read.
       if (!(*this->Stream)) {
-        this->SetErrorMessage("Dynamic section specifies unreadable RPATH.");
+        if (tag == cmELF::TagRPath) {
+          this->SetErrorMessage(
+            "Dynamic section specifies unreadable DT_RPATH");
+        } else if (tag == cmELF::TagRunPath) {
+          this->SetErrorMessage(
+            "Dynamic section specifies unreadable DT_RUNPATH");
+        } else if (tag == cmELF::TagMipsRldMapRel) {
+          this->SetErrorMessage(
+            "Dynamic section specifies unreadable DT_MIPS_RLD_MAP_REL");
+        } else {
+          this->SetErrorMessage("Dynamic section specifies unreadable value"
+                                " for unexpected attribute");
+        }
         se.Value = "";
         return nullptr;
       }

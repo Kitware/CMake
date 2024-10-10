@@ -12,7 +12,7 @@ if(NOT EXISTS "@LOCAL@")
 endif()
 
 if("@ALGO@" STREQUAL "")
-  message(WARNING "File will not be verified since no URL_HASH specified")
+  message(WARNING "File cannot be verified since no URL_HASH specified")
   return()
 endif()
 
@@ -20,7 +20,7 @@ if("@EXPECT_VALUE@" STREQUAL "")
   message(FATAL_ERROR "EXPECT_VALUE can't be empty")
 endif()
 
-message(STATUS "verifying file...
+message(VERBOSE "verifying file...
      file='@LOCAL@'")
 
 file("@ALGO@" "@LOCAL@" actual_value)
@@ -34,4 +34,4 @@ does not match expected value
 ")
 endif()
 
-message(STATUS "verifying file... done")
+message(VERBOSE "verifying file... done")

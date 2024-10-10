@@ -124,6 +124,24 @@
         "include": { "$ref": "#/definitions/include" }
       },
       "additionalProperties": false
+    },
+    {
+      "properties": {
+        "$schema": { "$ref": "#/definitions/$schema" },
+        "version": {
+          "const": 9,
+          "description": "A required integer representing the version of the JSON schema."
+        },
+        "cmakeMinimumRequired": { "$ref": "#/definitions/cmakeMinimumRequired" },
+        "vendor": { "$ref": "#/definitions/vendor" },
+        "configurePresets": { "$ref": "#/definitions/configurePresetsV7" },
+        "buildPresets": { "$ref": "#/definitions/buildPresetsV4" },
+        "testPresets": { "$ref": "#/definitions/testPresetsV6" },
+        "packagePresets": { "$ref": "#/definitions/packagePresetsV6" },
+        "workflowPresets": { "$ref": "#/definitions/workflowPresetsV6" },
+        "include": { "$ref": "#/definitions/include" }
+      },
+      "additionalProperties": false
     }
   ],
   "required": [

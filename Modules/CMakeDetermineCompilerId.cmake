@@ -312,6 +312,29 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     endif ()
   endif ()
 
+  set(CMAKE_${lang}_STANDARD_LIBRARY "")
+  if ("x${lang}" STREQUAL "xCXX" AND
+      EXISTS "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${lang}-DetectStdlib.h" AND
+      "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xClang" AND
+      "x${CMAKE_${lang}_COMPILER_FRONTEND_VARIANT}" STREQUAL "xGNU")
+    # See #20851 for a proper abstraction for this.
+    execute_process(
+      COMMAND "${CMAKE_${lang}_COMPILER}"
+        ${CMAKE_${lang}_COMPILER_ID_ARG1}
+        ${CMAKE_CXX_COMPILER_ID_FLAGS_LIST}
+        -E
+        -x c++-header
+        "${CMAKE_CURRENT_FUNCTION_LIST_DIR}/${lang}-DetectStdlib.h"
+        -o - # Write to stdout.
+      OUTPUT_VARIABLE _lang_stdlib_out
+      ERROR_VARIABLE _lang_stdlib_err
+      RESULT_VARIABLE _lang_stdlib_res
+      ERROR_STRIP_TRAILING_WHITESPACE)
+    if (_lang_stdlib_res EQUAL 0)
+      string(REGEX REPLACE ".*CMAKE-STDLIB-DETECT: (.+)\n.*" "\\1" "CMAKE_${lang}_STANDARD_LIBRARY" "${_lang_stdlib_out}")
+    endif ()
+  endif ()
+
   # Display the final identification result.
   if(CMAKE_${lang}_COMPILER_ID)
     if(CMAKE_${lang}_COMPILER_VERSION)
@@ -355,6 +378,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   set(CMAKE_${lang}_COMPILER_PRODUCED_OUTPUT "${COMPILER_${lang}_PRODUCED_OUTPUT}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_PRODUCED_FILES "${COMPILER_${lang}_PRODUCED_FILES}" PARENT_SCOPE)
   set(CMAKE_${lang}_COMPILER_CLANG_RESOURCE_DIR "${CMAKE_${lang}_COMPILER_CLANG_RESOURCE_DIR}" PARENT_SCOPE)
+  set(CMAKE_${lang}_STANDARD_LIBRARY "${CMAKE_${lang}_STANDARD_LIBRARY}" PARENT_SCOPE)
 endfunction()
 
 include(CMakeCompilerIdDetection)
@@ -919,9 +943,12 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
     set(SIMULATE_VERSION)
     set(CMAKE_${lang}_COMPILER_ID_STRING_REGEX ".?I.?N.?F.?O.?:.?[A-Za-z0-9_]+\\[[^]]*\\]")
     foreach(encoding "" "ENCODING;UTF-16LE" "ENCODING;UTF-16BE")
+      cmake_policy(PUSH)
+      cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
       file(STRINGS "${file}" CMAKE_${lang}_COMPILER_ID_STRINGS
         LIMIT_COUNT 38 ${encoding}
         REGEX "${CMAKE_${lang}_COMPILER_ID_STRING_REGEX}")
+      cmake_policy(POP)
       if(NOT CMAKE_${lang}_COMPILER_ID_STRINGS STREQUAL "")
         break()
       endif()

@@ -225,7 +225,7 @@ bool DebGenerator::generateDataTar() const
       // XXX/application/usr/bin/myprogram with GEN_WDIR=XXX/application
       // should not add XXX/application
       orderedFiles.insert(currentPath);
-      currentPath = cmSystemTools::CollapseFullPath("..", currentPath);
+      currentPath = cmSystemTools::GetFilenamePath(currentPath);
     }
   }
 
@@ -527,7 +527,7 @@ cmCPackDebGenerator::~cmCPackDebGenerator() = default;
 int cmCPackDebGenerator::InitializeInternal()
 {
   this->SetOptionIfNotSet("CPACK_PACKAGING_INSTALL_PREFIX", "/usr");
-  if (cmIsOff(this->GetOption("CPACK_SET_DESTDIR"))) {
+  if (this->GetOption("CPACK_SET_DESTDIR").IsOff()) {
     this->SetOption("CPACK_SET_DESTDIR", "I_ON");
   }
   return this->Superclass::InitializeInternal();
@@ -536,6 +536,11 @@ int cmCPackDebGenerator::InitializeInternal()
 int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
                                         std::string const& packageName)
 {
+  // Determine the sanitized packaging directory-name that can be used on the
+  // file-system.
+  std::string sanitizedPkgDirName =
+    this->GetSanitizedDirOrFileName(packageName);
+
   // Begin the archive for this pack
   std::string localToplevel(initialTopLevel);
   std::string packageFileName(
@@ -543,7 +548,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
   std::string outputFileName(*this->GetOption("CPACK_PACKAGE_FILE_NAME") +
                              "-" + packageName + this->GetOutputExtension());
 
-  localToplevel += "/" + packageName;
+  localToplevel += "/" + sanitizedPkgDirName;
   /* replace the TEMP DIRECTORY with the component one */
   this->SetOption("CPACK_TEMPORARY_DIRECTORY", localToplevel);
   packageFileName += "/" + outputFileName;
@@ -554,7 +559,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string const& initialTopLevel,
   // Tell CPackDeb.cmake the name of the component GROUP.
   this->SetOption("CPACK_DEB_PACKAGE_COMPONENT", packageName);
   // Tell CPackDeb.cmake the path where the component is.
-  std::string component_path = cmStrCat('/', packageName);
+  std::string component_path = cmStrCat('/', sanitizedPkgDirName);
   this->SetOption("CPACK_DEB_PACKAGE_COMPONENT_PART_PATH", component_path);
   if (!this->ReadListFile("Internal/CPack/CPackDeb.cmake")) {
     cmCPackLogger(cmCPackLog::LOG_ERROR,
@@ -894,7 +899,7 @@ bool cmCPackDebGenerator::SupportsComponentInstallation() const
   return this->IsOn("CPACK_DEB_COMPONENT_INSTALL");
 }
 
-std::string cmCPackDebGenerator::GetComponentInstallDirNameSuffix(
+std::string cmCPackDebGenerator::GetComponentInstallSuffix(
   const std::string& componentName)
 {
   if (this->componentPackageMethod == ONE_PACKAGE_PER_COMPONENT) {
@@ -912,4 +917,11 @@ std::string cmCPackDebGenerator::GetComponentInstallDirNameSuffix(
     return *this->GetOption(groupVar);
   }
   return componentName;
+}
+
+std::string cmCPackDebGenerator::GetComponentInstallDirNameSuffix(
+  const std::string& componentName)
+{
+  return this->GetSanitizedDirOrFileName(
+    this->GetComponentInstallSuffix(componentName));
 }

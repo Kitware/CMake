@@ -1151,6 +1151,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     vars.emplace("CMAKE_WATCOM_RUNTIME_LIBRARY"_s);
     vars.emplace("CMAKE_MSVC_DEBUG_INFORMATION_FORMAT"_s);
     vars.emplace("CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS"_s);
+    vars.emplace("CMAKE_VS_USE_DEBUG_LIBRARIES"_s);
 
     if (cmValue varListStr = this->Makefile->GetDefinition(
           kCMAKE_TRY_COMPILE_PLATFORM_VARIABLES)) {
@@ -1236,6 +1237,17 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
         arguments.CMakeFlags.emplace_back(std::move(flag));
         cmakeVariables.emplace(var, *val);
       }
+    }
+  }
+
+  if (!this->SrcFileSignature &&
+      this->Makefile->GetState()->GetGlobalPropertyAsBool(
+        "PROPAGATE_TOP_LEVEL_INCLUDES_TO_TRY_COMPILE")) {
+    const std::string var = "CMAKE_PROJECT_TOP_LEVEL_INCLUDES";
+    if (cmValue val = this->Makefile->GetDefinition(var)) {
+      std::string flag = cmStrCat("-D", var, "=\'", *val, '\'');
+      arguments.CMakeFlags.emplace_back(std::move(flag));
+      cmakeVariables.emplace(var, *val);
     }
   }
 

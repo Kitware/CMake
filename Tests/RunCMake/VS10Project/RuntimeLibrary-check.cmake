@@ -9,7 +9,7 @@ macro(RuntimeLibrary_check tgt rtl_expect)
 
   file(STRINGS "${vcProjectFile}" lines)
   foreach(line IN LISTS lines)
-    if(line MATCHES "^ *<RuntimeLibrary>([^<>]+)</RuntimeLibrary>")
+    if(line MATCHES "^ *<RuntimeLibrary>([^<>]*)</RuntimeLibrary>")
       set(rtl_actual "${CMAKE_MATCH_1}")
       if(NOT "${rtl_actual}" STREQUAL "${rtl_expect}")
         set(RunCMake_TEST_FAILED "Project file ${tgt}.vcxproj has RuntimeLibrary '${rtl_actual}', not '${rtl_expect}'.")

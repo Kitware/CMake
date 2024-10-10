@@ -16,3 +16,15 @@ run_cmake_command(TextSet ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/TextSet.cma
 run_cmake_command(TextSetEmpty ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/TextSetEmpty.cmake)
 
 run_cmake_command(TextRemove ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/TextRemove.cmake)
+
+# Test install RPATH for ELF files with more than 65536 sections.
+# This is supported only by certain platforms/toolchains, so run
+# this case only if explicitly enabled.
+if(CMake_TEST_ELF_LARGE)
+  block()
+    set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/LargeELF-build)
+    run_cmake_with_options(LargeELF -DCMAKE_INSTALL_PREFIX=${RunCMake_TEST_BINARY_DIR}/root)
+    set(RunCMake_TEST_NO_CLEAN 1)
+    run_cmake_command(LargeELF-build ${CMAKE_COMMAND} --build . --target install)
+  endblock()
+endif()

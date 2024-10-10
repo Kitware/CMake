@@ -2522,7 +2522,7 @@ void cmMakefile::ExpandVariablesCMP0019()
 
 bool cmMakefile::IsOn(const std::string& name) const
 {
-  return cmIsOn(this->GetDefinition(name));
+  return this->GetDefinition(name).IsOn();
 }
 
 bool cmMakefile::IsSet(const std::string& name) const
@@ -3906,8 +3906,8 @@ void cmMakefile::DisplayStatus(const std::string& message, float s) const
 #endif
 }
 
-std::string cmMakefile::GetModulesFile(const std::string& filename,
-                                       bool& system, bool debug,
+std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
+                                       bool debug,
                                        std::string& debugBuffer) const
 {
   std::string result;
@@ -4025,7 +4025,7 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
     // Replace #cmakedefine instances.
     if (this->cmDefineRegex.find(line)) {
       cmValue def = this->GetDefinition(this->cmDefineRegex.match(2));
-      if (!cmIsOff(def)) {
+      if (!def.IsOff()) {
         const std::string indentation = this->cmDefineRegex.match(1);
         cmSystemTools::ReplaceString(line,
                                      cmStrCat("#", indentation, "cmakedefine"),
@@ -4043,7 +4043,7 @@ void cmMakefile::ConfigureString(const std::string& input, std::string& output,
                                    cmStrCat("#", indentation, "cmakedefine01"),
                                    cmStrCat("#", indentation, "define"));
       output += line;
-      if (!cmIsOff(def)) {
+      if (!def.IsOff()) {
         output += " 1";
       } else {
         output += " 0";
@@ -4218,7 +4218,7 @@ cmValue cmMakefile::GetProperty(const std::string& prop, bool chain) const
 
 bool cmMakefile::GetPropertyAsBool(const std::string& prop) const
 {
-  return cmIsOn(this->GetProperty(prop));
+  return this->GetProperty(prop).IsOn();
 }
 
 std::vector<std::string> cmMakefile::GetPropertyKeys() const
@@ -4625,7 +4625,7 @@ bool cmMakefile::PolicyOptionalWarningEnabled(std::string const& var) const
 {
   // Check for an explicit CMAKE_POLICY_WARNING_CMP<NNNN> setting.
   if (cmValue val = this->GetDefinition(var)) {
-    return cmIsOn(val);
+    return val.IsOn();
   }
   // Enable optional policy warnings with --debug-output, --trace,
   // or --trace-expand.
@@ -4657,13 +4657,14 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
   }
 
   // Deprecate old policies.
-  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0126 &&
+  if (status == cmPolicies::OLD && id <= cmPolicies::CMP0128 &&
       !(this->GetCMakeInstance()->GetIsInTryCompile() &&
         (
           // Policies set by cmCoreTryCompile::TryCompileCode.
           id == cmPolicies::CMP0065 || id == cmPolicies::CMP0083 ||
           id == cmPolicies::CMP0091 || id == cmPolicies::CMP0104 ||
-          id == cmPolicies::CMP0123 || id == cmPolicies::CMP0126)) &&
+          id == cmPolicies::CMP0123 || id == cmPolicies::CMP0126 ||
+          id == cmPolicies::CMP0128)) &&
       (!this->IsSet("CMAKE_WARN_DEPRECATED") ||
        this->IsOn("CMAKE_WARN_DEPRECATED"))) {
     this->IssueMessage(MessageType::DEPRECATION_WARNING,

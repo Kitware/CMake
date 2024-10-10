@@ -101,6 +101,9 @@ This module defines the following output variables:
   target_link_libraries(foo ${OPENSCENEGRAPH_LIBRARIES})
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 #
 # Naming convention:
 #  Local variables of the form _osg_foo
@@ -230,3 +233,5 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenSceneGraph
 unset(_osg_component_founds)
 
 set(OPENSCENEGRAPH_INCLUDE_DIRS ${OPENSCENEGRAPH_INCLUDE_DIR})
+
+cmake_policy(POP)

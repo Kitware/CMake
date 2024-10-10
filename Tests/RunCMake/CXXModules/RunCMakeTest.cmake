@@ -83,6 +83,27 @@ foreach (fileset_type IN LISTS fileset_types)
   run_cmake("NotCXXSource${fileset_type}")
 endforeach ()
 
+if ("cxx_std_23" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+  run_cmake(CXXImportStdConfig)
+  run_cmake(CXXImportStdHeadTarget)
+  run_cmake(CXXImportStdLinkLanguage)
+  run_cmake(CXXImportStdInvalidGenex)
+endif ()
+
+if ("cxx_std_23" IN_LIST CMAKE_CXX_COMPILE_FEATURES AND
+    NOT have_cxx23_import_std)
+  run_cmake(NoCXX23TargetUnset)
+  run_cmake(NoCXX23TargetNotRequired)
+  run_cmake(NoCXX23TargetRequired)
+endif ()
+
+if ("cxx_std_26" IN_LIST CMAKE_CXX_COMPILE_FEATURES AND
+    NOT have_cxx26_import_std)
+  run_cmake(NoCXX26TargetUnset)
+  run_cmake(NoCXX26TargetNotRequired)
+  run_cmake(NoCXX26TargetRequired)
+endif ()
+
 run_cmake(InstallBMI)
 run_cmake(InstallBMIGenericArgs)
 run_cmake(InstallBMIIgnore)
@@ -176,6 +197,7 @@ endfunction ()
 # - `partitions`: module partitions are supported
 # - `internal_partitions`: internal module partitions are supported
 # - `bmionly`: the compiler supports BMI-only builds
+# - `import_std23`: the compiler supports `import std` for C++23
 #
 # Generator-based:
 # - `compile_commands`: the generator supports `compile_commands.json`
@@ -222,6 +244,31 @@ if ("named" IN_LIST CMake_TEST_MODULE_COMPILATION)
   run_cxx_module_test(same-src-name)
   run_cxx_module_test(scan_properties)
   run_cxx_module_test(target-objects)
+
+  if ("cxx_std_23" IN_LIST CMAKE_CXX_COMPILE_FEATURES AND
+      "import_std23" IN_LIST CMake_TEST_MODULE_COMPILATION)
+    run_cxx_module_test(import-std)
+    set(RunCMake_CXXModules_NO_TEST 1)
+    run_cxx_module_test(import-std-no-std-property)
+    unset(RunCMake_CXXModules_NO_TEST)
+    run_cxx_module_test(import-std-export-no-std-build)
+    set(RunCMake_CXXModules_INSTALL 1)
+    run_cxx_module_test(import-std-export-no-std-install)
+    unset(RunCMake_CXXModules_INSTALL)
+
+    if ("collation" IN_LIST CMake_TEST_MODULE_COMPILATION)
+      run_cxx_module_test(import-std-not-in-export-build)
+      run_cxx_module_test(import-std-transitive import-std-transitive-not-in-export-build "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/import-std-not-in-export-build-build")
+
+      set(RunCMake_CXXModules_INSTALL 1)
+      run_cxx_module_test(import-std-not-in-export-install)
+      unset(RunCMake_CXXModules_INSTALL)
+      run_cxx_module_test(import-std-transitive import-std-transitive-not-in-export-install "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/import-std-not-in-export-install-install")
+
+      run_cxx_module_test(import-std-transitive import-std-transitive-export-no-std-build "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/import-std-export-no-std-build-build" -DEXPORT_NO_STD=1)
+      run_cxx_module_test(import-std-transitive import-std-transitive-export-no-std-install "-DCMAKE_PREFIX_PATH=${RunCMake_BINARY_DIR}/examples/import-std-export-no-std-install-install" -DEXPORT_NO_STD=1)
+    endif ()
+  endif ()
 endif ()
 
 # Tests which require compile commands support.

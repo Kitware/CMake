@@ -52,7 +52,7 @@
 
   This code implements the MD5 Algorithm defined in RFC 1321, whose
   text is available at
-        http://www.ietf.org/rfc/rfc1321.txt
+        https://www.ietf.org/rfc/rfc1321.txt
   The code is derived from the text of the RFC, including the test suite
   (section A.5) but excluding the rest of Appendix A.  It does not include
   any code or documentation that is identified in the RFC as being

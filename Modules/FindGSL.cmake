@@ -59,6 +59,9 @@ help this module find the correct files::
 
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 #=============================================================================
@@ -229,3 +232,5 @@ if( GSL_FOUND AND NOT TARGET GSL::gsl )
       INTERFACE_LINK_LIBRARIES          GSL::gslcblas )
   endif()
 endif()
+
+cmake_policy(POP)

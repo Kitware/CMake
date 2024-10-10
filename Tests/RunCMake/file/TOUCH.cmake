@@ -12,5 +12,6 @@ if(NOT EXISTS "${file}")
 endif()
 file(REMOVE "${file}")
 
+# Empty arguments used to be an error, but this is valid since CMake 3.30
 file(TOUCH)
 file(TOUCH_NOCREATE)

@@ -109,8 +109,6 @@ bool cmGlobalVisualStudioGenerator::GetBuildAsX() const
 const char* cmGlobalVisualStudioGenerator::GetIDEVersion() const
 {
   switch (this->Version) {
-    case cmGlobalVisualStudioGenerator::VSVersion::VS9:
-      return "9.0";
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
       return "12.0";
     case cmGlobalVisualStudioGenerator::VSVersion::VS14:
@@ -132,10 +130,6 @@ void cmGlobalVisualStudioGenerator::WriteSLNHeader(std::ostream& fout)
   fout << '\n';
 
   switch (this->Version) {
-    case cmGlobalVisualStudioGenerator::VSVersion::VS9:
-      fout << "Microsoft Visual Studio Solution File, Format Version 10.00\n";
-      fout << "# Visual Studio 2008\n";
-      break;
     case cmGlobalVisualStudioGenerator::VSVersion::VS12:
       fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
       if (this->ExpressEdition) {
@@ -496,7 +490,7 @@ bool cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
   // Visual Studio generators know how to lookup their build tool
   // directly instead of needing a helper module to do it, so we
   // do not actually need to put CMAKE_MAKE_PROGRAM into the cache.
-  if (cmIsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM"))) {
+  if (mf->GetDefinition("CMAKE_MAKE_PROGRAM").IsOff()) {
     mf->AddDefinition("CMAKE_MAKE_PROGRAM", this->GetVSMakeProgram());
   }
   return true;

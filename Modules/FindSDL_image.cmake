@@ -33,6 +33,9 @@ $SDLDIR is an environment variable that would correspond to the
 ./configure --prefix=$SDLDIR used in building SDL.
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 if(NOT SDL_IMAGE_INCLUDE_DIR AND SDLIMAGE_INCLUDE_DIR)
   set(SDL_IMAGE_INCLUDE_DIR ${SDLIMAGE_INCLUDE_DIR} CACHE PATH "directory cache
 entry initialized from old variable name")
@@ -95,3 +98,5 @@ set(SDLIMAGE_INCLUDE_DIR ${SDL_IMAGE_INCLUDE_DIRS})
 set(SDLIMAGE_FOUND ${SDL_IMAGE_FOUND})
 
 mark_as_advanced(SDL_IMAGE_LIBRARY SDL_IMAGE_INCLUDE_DIR)
+
+cmake_policy(POP)

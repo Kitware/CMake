@@ -47,6 +47,9 @@ The user may set the environment variable ``FREETYPE_DIR`` to the root
 directory of a Freetype installation.
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 # Created by Eric Wing.
 # Modifications by Alexander Neundorf.
 # This file has been renamed to "FindFreetype.cmake" instead of the correct
@@ -202,3 +205,5 @@ if(Freetype_FOUND)
     endif()
   endif()
 endif()
+
+cmake_policy(POP)

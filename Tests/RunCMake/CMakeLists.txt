@@ -173,6 +173,10 @@ add_RunCMake_test(CMP0153)
 add_RunCMake_test(CMP0156 -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
                           -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION})
 add_RunCMake_test(CMP0160)
+add_RunCMake_test(CMP0163)
+add_RunCMake_test(CMP0165)
+add_RunCMake_test(CMP0169)
+add_RunCMake_test(CMP0170)
 
 # The test for Policy 65 requires the use of the
 # CMAKE_SHARED_LIBRARY_LINK_CXX_FLAGS variable, which both the VS and Xcode
@@ -250,6 +254,7 @@ if(CMAKE_GENERATOR MATCHES "Ninja")
   add_RunCMake_test(NinjaPrivateDeps
     -DCMAKE_C_OUTPUT_EXTENSION=${CMAKE_C_OUTPUT_EXTENSION}
     -DRunCMake_GENERATOR_IS_MULTI_CONFIG=${_isMultiConfig})
+  add_RunCMake_test(InstallParallel)
 endif()
 add_RunCMake_test(CTest)
 
@@ -438,6 +443,16 @@ add_RunCMake_test(GoogleTest # Note: does not actually depend on Google Test
   )
 add_RunCMake_test(Graphviz)
 add_RunCMake_test(Languages)
+
+add_RunCMake_test(LanguageStandards
+  -DCMake_NO_C_STANDARD=${CMake_NO_C_STANDARD}
+  -DCMake_NO_CXX_STANDARD=${CMake_NO_CXX_STANDARD}
+  -DCMake_TEST_CUDA=${CMake_TEST_CUDA}
+  -DCMake_TEST_HIP=${CMake_TEST_HIP}
+  -DCMake_TEST_OBJC=${CMake_TEST_OBJC}
+)
+set_property(TEST RunCMake.LanguageStandards APPEND PROPERTY LABELS "CUDA" "HIP")
+
 add_RunCMake_test(LinkItemValidation)
 add_RunCMake_test(LinkStatic)
 if(CMAKE_CXX_COMPILER_ID MATCHES "^(Cray|PGI|NVHPC|XL|XLClang|IBMClang|Fujitsu|FujitsuClang)$")
@@ -504,10 +519,15 @@ set_property(TEST RunCMake.add_subdirectory APPEND PROPERTY LABELS "Fortran")
 add_RunCMake_test(add_test -DPSEUDO_EMULATOR=$<TARGET_FILE:pseudo_emulator>)
 add_RunCMake_test(build_command)
 add_executable(exit_code exit_code.c)
+if(NOT CMAKE_C_COMPILER_ID MATCHES "OrangeC|Watcom"
+    AND NOT CMAKE_C_FLAGS MATCHES "-fsanitize=")
+  add_executable(exit_crash exit_crash.c)
+  set(EXIT_CRASH_EXE $<TARGET_FILE:exit_crash>)
+endif()
 set(execute_process_ARGS
   -DEXIT_CODE_EXE=$<TARGET_FILE:exit_code>
+  -DEXIT_CRASH_EXE=${EXIT_CRASH_EXE}
   -DPRINT_STDIN_EXE=$<TARGET_FILE:print_stdin>
-  -DPython_EXECUTABLE=${Python_EXECUTABLE}
   -DCYGWIN=${CYGWIN}
   )
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
@@ -557,13 +577,18 @@ add_RunCMake_test(file-CHMOD -DMSYS=${MSYS})
 foreach(var
     CMake_TEST_NO_NETWORK
     CMake_TEST_TLS_VERIFY_URL
+    CMake_TEST_TLS_VERIFY_URL_BAD
+    CMake_TEST_TLS_VERSION
     )
   if(DEFINED ${var})
     list(APPEND file-DOWNLOAD_ARGS -D${var}=${${var}})
   endif()
 endforeach()
 add_RunCMake_test(file-DOWNLOAD)
-add_RunCMake_test(file-RPATH -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME})
+add_RunCMake_test(file-RPATH
+  -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME}
+  -DCMake_TEST_ELF_LARGE=${CMake_TEST_ELF_LARGE}
+)
 add_RunCMake_test(file-STRINGS)
 add_RunCMake_test(find_file -DMINGW=${MINGW})
 add_RunCMake_test(find_library -DMINGW=${MINGW} -DCYGWIN=${CYGWIN} -DMSYS=${MSYS} -DMSVC=${MSVC})
@@ -724,23 +749,19 @@ endif()
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
   add_RunCMake_test(CMAKE_MSVCIDE_RUN_PATH)
   add_RunCMake_test(include_external_msproject -DVS_PLATFORM_NAME=${CMAKE_VS_PLATFORM_NAME})
-  if("${CMAKE_GENERATOR}" MATCHES "Visual Studio (9|10)" AND NOT CMAKE_VS_DEVENV_COMMAND)
-    set(NO_USE_FOLDERS 1)
-  endif()
-  add_RunCMake_test(VSSolution -DNO_USE_FOLDERS=${NO_USE_FOLDERS})
-endif()
-
-if("${CMAKE_GENERATOR}" MATCHES "Visual Studio ([^9]|9[0-9])")
+  add_RunCMake_test(VSSolution)
   add_RunCMake_test(VS10Project
     -DCMAKE_C_COMPILER_ID=${CMAKE_C_COMPILER_ID}
     -DCMAKE_C_COMPILER_VERSION=${CMAKE_C_COMPILER_VERSION}
     )
+  add_RunCMake_test(VS10ProjectUseDebugLibraries)
   if( vs12 AND wince )
     add_RunCMake_test( VS10ProjectWinCE "-DRunCMake_GENERATOR_PLATFORM=${wince_sdk}")
   endif()
 endif()
 
-if(CMAKE_GENERATOR MATCHES "^Visual Studio (1[6-9]|[2-9][0-9])")
+if(CMAKE_GENERATOR MATCHES "^Visual Studio (1[6-9]|[2-9][0-9])"
+    AND NOT CMAKE_GENERATOR_TOOLSET MATCHES "^(v80|v90|v100|v110|v120)$")
   add_RunCMake_test(VsDotnetSdk)
   add_RunCMake_test(VsNugetPackageRestore)
 endif()
@@ -1034,6 +1055,7 @@ set(cpack_tests
   DEB.DEB_PACKAGE_VERSION_BACK_COMPATIBILITY
   DEB.DEB_DESCRIPTION
   DEB.PROJECT_META
+  DEB.COMPONENT_WITH_SPECIAL_CHARS
 
   RPM.AUTO_SUFFIXES
   RPM.CUSTOM_BINARY_SPEC_FILE
@@ -1056,6 +1078,7 @@ set(cpack_tests
   RPM.SYMLINKS
   RPM.USER_FILELIST
   RPM.PROJECT_META
+  RPM.COMPONENT_WITH_SPECIAL_CHARS
 
   7Z
   TBZ2
@@ -1084,11 +1107,22 @@ if(CMAKE_SYSTEM_PROCESSOR STREQUAL "e2k" AND NOT DEFINED CMake_TEST_E2K_BROKEN_L
       DEB.CUSTOM_NAMES
       DEB.DEB_PACKAGE_VERSION_BACK_COMPATIBILITY
       DEB.PROJECT_META DEB.DEPENDENCIES
+      DEB.EXTRA
+      DEB.GENERATE_SHLIBS_LDCONFIG
+      DEB.LONG_FILENAMES
+      DEB.MD5SUMS
+      DEB.EMPTY_DIR
+      DEB.DEFAULT_PERMISSIONS
+      DEB.VERSION
+      DEB.TIMESTAMPS
       RPM.PARTIALLY_RELOCATABLE_WARNING
       RPM.PER_COMPONENT_FIELDS
       RPM.USER_FILELIST
       RPM.DIST
       RPM.AUTO_SUFFIXES
+      7Z
+      TXZ
+      TBZ2
       TGZ
       ZIP
       STGZ
@@ -1099,6 +1133,18 @@ if(CMAKE_SYSTEM_PROCESSOR STREQUAL "e2k" AND NOT DEFINED CMake_TEST_E2K_BROKEN_L
 endif()
 
 add_RunCMake_test_group(CPack "${cpack_tests}")
+
+if(CMake_TEST_CPACK_WIX3 OR CMake_TEST_CPACK_WIX4)
+  add_RunCMake_test(CPack_WIX
+    -DCMake_TEST_CPACK_WIX3=${CMake_TEST_CPACK_WIX3}
+    -DCMake_TEST_CPACK_WIX4=${CMake_TEST_CPACK_WIX4}
+    )
+endif()
+
+if(CMake_TEST_CPACK_NUGET)
+  add_RunCMake_test(CPack_NuGet)
+endif()
+
 # add a test to make sure symbols are exported from a shared library
 # for MSVC compilers CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS property is used
 add_RunCMake_test(AutoExportDll
@@ -1129,7 +1175,7 @@ if(CMake_TEST_ANDROID_NDK OR CMake_TEST_ANDROID_STANDALONE_TOOLCHAIN)
   set_property(TEST RunCMake.Android PROPERTY TIMEOUT ${CMake_TEST_ANDROID_TIMEOUT})
 endif()
 
-if(${CMAKE_GENERATOR} MATCHES "Visual Studio ([^9]|9[0-9])")
+if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
   add_RunCMake_test(CSharpCustomCommand)
   if(NOT CMAKE_VS_PLATFORM_NAME STREQUAL "ARM64")
     add_RunCMake_test(CSharpReferenceImport)

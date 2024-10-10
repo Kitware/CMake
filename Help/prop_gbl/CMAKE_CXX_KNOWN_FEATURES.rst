@@ -47,7 +47,7 @@ but it does not necessarily imply complete conformance to that standard.
   Compiler mode is at least C++ 23.
 
 ``cxx_std_26``
-  .. versionadded:: 3.25
+  .. versionadded:: 3.30
 
   Compiler mode is at least C++ 26.
 

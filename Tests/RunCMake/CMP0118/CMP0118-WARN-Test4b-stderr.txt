@@ -1,6 +1,6 @@
 ^CMake Warning \(dev\) at CMP0118-Common-Test4b\.cmake:[0-9]+ \(set_property\):
-  Policy CMP0118 is not set: The GENERATED source file property is now
-  visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
+  Policy CMP0118 is not set: GENERATED sources may be used across directories
+  without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
   warning\.
 
@@ -18,8 +18,8 @@ Generated_with_full_path1\.txt: # 2b # GENERATED = `0`
 Generated_with_full_path1\.txt: # 3a # GENERATED = `0`
 Generated_with_full_path1\.txt: # 3b # GENERATED = `0`
 CMake Warning \(dev\) at CMP0118-Common-Test4b\.cmake:[0-9]+ \(set_property\):
-  Policy CMP0118 is not set: The GENERATED source file property is now
-  visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
+  Policy CMP0118 is not set: GENERATED sources may be used across directories
+  without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
   warning\.
 
@@ -37,8 +37,8 @@ Generated_with_full_path2\.txt: # 2b # GENERATED = `0`
 Generated_with_full_path2\.txt: # 3a # GENERATED = `0`
 Generated_with_full_path2\.txt: # 3b # GENERATED = `0`
 CMake Warning \(dev\) at CMP0118-Common-Test4b\.cmake:[0-9]+ \(set_property\):
-  Policy CMP0118 is not set: The GENERATED source file property is now
-  visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
+  Policy CMP0118 is not set: GENERATED sources may be used across directories
+  without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
   warning\.
 
@@ -56,8 +56,8 @@ Generated_with_full_path3\.txt: # 2b # GENERATED = `0`
 Generated_with_full_path3\.txt: # 3a # GENERATED = `0`
 Generated_with_full_path3\.txt: # 3b # GENERATED = `0`
 CMake Warning \(dev\) at CMP0118-Common-Test4b\.cmake:[0-9]+ \(set_property\):
-  Policy CMP0118 is not set: The GENERATED source file property is now
-  visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
+  Policy CMP0118 is not set: GENERATED sources may be used across directories
+  without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
   warning\.
 
@@ -75,8 +75,8 @@ Generated_with_relative_path1\.txt: # 2b # GENERATED = `0`
 Generated_with_relative_path1\.txt: # 3a # GENERATED = `0`
 Generated_with_relative_path1\.txt: # 3b # GENERATED = `0`
 CMake Warning \(dev\) at CMP0118-Common-Test4b\.cmake:[0-9]+ \(set_property\):
-  Policy CMP0118 is not set: The GENERATED source file property is now
-  visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
+  Policy CMP0118 is not set: GENERATED sources may be used across directories
+  without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
   warning\.
 
@@ -94,8 +94,8 @@ Generated_with_relative_path2\.txt: # 2b # GENERATED = `0`
 Generated_with_relative_path2\.txt: # 3a # GENERATED = `0`
 Generated_with_relative_path2\.txt: # 3b # GENERATED = `0`
 CMake Warning \(dev\) at CMP0118-Common-Test4b\.cmake:[0-9]+ \(set_property\):
-  Policy CMP0118 is not set: The GENERATED source file property is now
-  visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
+  Policy CMP0118 is not set: GENERATED sources may be used across directories
+  without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
   warning\.
 
@@ -113,8 +113,8 @@ Generated_with_relative_path3\.txt: # 2b # GENERATED = `0`
 Generated_with_relative_path3\.txt: # 3a # GENERATED = `0`
 Generated_with_relative_path3\.txt: # 3b # GENERATED = `0`
 CMake Warning \(dev\) at CMP0118-Common-Test4b\.cmake:[0-9]+ \(set_property\):
-  Policy CMP0118 is not set: The GENERATED source file property is now
-  visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
+  Policy CMP0118 is not set: GENERATED sources may be used across directories
+  without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
   warning\.
 
@@ -132,8 +132,8 @@ Generated_with_full_source_path1\.txt: # 2b # GENERATED = `0`
 Generated_with_full_source_path1\.txt: # 3a # GENERATED = `0`
 Generated_with_full_source_path1\.txt: # 3b # GENERATED = `0`
 CMake Warning \(dev\) at CMP0118-Common-Test4b\.cmake:[0-9]+ \(set_property\):
-  Policy CMP0118 is not set: The GENERATED source file property is now
-  visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
+  Policy CMP0118 is not set: GENERATED sources may be used across directories
+  without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
   warning\.
 
@@ -151,8 +151,8 @@ Generated_with_full_source_path2\.txt: # 2b # GENERATED = `0`
 Generated_with_full_source_path2\.txt: # 3a # GENERATED = `0`
 Generated_with_full_source_path2\.txt: # 3b # GENERATED = `0`
 CMake Warning \(dev\) at CMP0118-Common-Test4b\.cmake:[0-9]+ \(set_property\):
-  Policy CMP0118 is not set: The GENERATED source file property is now
-  visible in all directories\.  Run "cmake --help-policy CMP0118" for policy
+  Policy CMP0118 is not set: GENERATED sources may be used across directories
+  without manual marking\.  Run "cmake --help-policy CMP0118" for policy
   details\.  Use the cmake_policy command to set the policy and suppress this
   warning\.
 

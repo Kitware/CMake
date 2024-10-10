@@ -27,6 +27,7 @@ target_sources(custom6 PRIVATE
 )
 
 
+# Note: Currently, `file(GENERATE)` does not set the `GENERATED` property!
 file(GENERATE
   OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/Generated_source1.txt"
   CONTENT "int func();\nint main(){ return func(); }"

@@ -29,9 +29,9 @@ public:
   int ProcessHandler() override;
 
   //! Set all the build and test arguments
-  int ProcessCommandLineArguments(
-    const std::string& currentArg, size_t& idx,
-    const std::vector<std::string>& allArgs) override;
+  int ProcessCommandLineArguments(const std::string& currentArg, size_t& idx,
+                                  const std::vector<std::string>& allArgs,
+                                  bool& validArg) override;
 
   /*
    * Get the output variable

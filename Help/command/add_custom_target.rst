@@ -60,8 +60,8 @@ The options are:
   .. versionadded:: 3.20
     Arguments to ``BYPRODUCTS`` may use a restricted set of
     :manual:`generator expressions <cmake-generator-expressions(7)>`.
-    :ref:`Target-dependent expressions <Target-Dependent Queries>` are not
-    permitted.
+    :ref:`Target-dependent expressions <Target-Dependent Expressions>`
+    are not permitted.
 
   .. versionchanged:: 3.28
     In custom targets using :ref:`file sets`, byproducts are now

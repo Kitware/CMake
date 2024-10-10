@@ -15,7 +15,7 @@ named ``<target>`` must have been created by a command such as
 :ref:`ALIAS target <Alias Targets>`.
 
 The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to
-specify the :ref:`scope <Target Usage Requirements>` of the following arguments.
+specify the :ref:`scope <Target Command Scope>` of the following arguments.
 ``PRIVATE`` and ``PUBLIC`` items will populate the :prop_tgt:`COMPILE_DEFINITIONS`
 property of ``<target>``. ``PUBLIC`` and ``INTERFACE`` items will populate the
 :prop_tgt:`INTERFACE_COMPILE_DEFINITIONS` property of ``<target>``.

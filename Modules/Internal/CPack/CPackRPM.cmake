@@ -711,7 +711,7 @@ function(cpack_rpm_debugsymbol_check INSTALL_FILES WORKING_DIR)
       endif()
 
       get_file_permissions("${WORKING_DIR}/${F}" permissions_)
-      if(NOT "USER_EXECUTE" IN_LIST permissions_ AND
+      if(NOT "OWNER_EXECUTE" IN_LIST permissions_ AND
          NOT "GROUP_EXECUTE" IN_LIST permissions_ AND
          NOT "WORLD_EXECUTE" IN_LIST permissions_)
         if(CPACK_RPM_INSTALL_WITH_EXEC)
@@ -916,7 +916,7 @@ function(cpack_rpm_generate_package)
       CPACK_RPM_MAIN_COMPONENT_UPPER)
 
     if(NOT CPACK_RPM_MAIN_COMPONENT_UPPER STREQUAL CPACK_RPM_PACKAGE_COMPONENT_UPPER)
-      string(APPEND CPACK_RPM_PACKAGE_NAME "-${CPACK_RPM_PACKAGE_COMPONENT}")
+      string(APPEND CPACK_RPM_PACKAGE_NAME "-${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}")
 
       cpack_rpm_variable_fallback("CPACK_RPM_PACKAGE_NAME"
         "CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_NAME"

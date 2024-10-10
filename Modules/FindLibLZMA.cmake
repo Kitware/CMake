@@ -58,6 +58,9 @@ The following variables are provided for backward compatibility:
 
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 find_path(LIBLZMA_INCLUDE_DIR lzma.h )
 if(NOT LIBLZMA_LIBRARY)
   find_library(LIBLZMA_LIBRARY_RELEASE NAMES lzma liblzma NAMES_PER_DIR PATH_SUFFIXES lib)
@@ -140,3 +143,5 @@ if (LIBLZMA_FOUND)
         endif()
     endif()
 endif ()
+
+cmake_policy(POP)

@@ -2429,33 +2429,6 @@ void cmSystemTools::EnsureStdPipes()
 }
 #endif
 
-void cmSystemTools::DoNotInheritStdPipes()
-{
-#ifdef _WIN32
-  // Check to see if we are attached to a console
-  // if so, then do not stop the inherited pipes
-  // or stdout and stderr will not show up in dos
-  // shell windows
-  CONSOLE_SCREEN_BUFFER_INFO hOutInfo;
-  HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-  if (GetConsoleScreenBufferInfo(hOut, &hOutInfo)) {
-    return;
-  }
-  {
-    HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);
-    DuplicateHandle(GetCurrentProcess(), out, GetCurrentProcess(), &out, 0,
-                    FALSE, DUPLICATE_SAME_ACCESS | DUPLICATE_CLOSE_SOURCE);
-    SetStdHandle(STD_OUTPUT_HANDLE, out);
-  }
-  {
-    HANDLE out = GetStdHandle(STD_ERROR_HANDLE);
-    DuplicateHandle(GetCurrentProcess(), out, GetCurrentProcess(), &out, 0,
-                    FALSE, DUPLICATE_SAME_ACCESS | DUPLICATE_CLOSE_SOURCE);
-    SetStdHandle(STD_ERROR_HANDLE, out);
-  }
-#endif
-}
-
 #ifdef _WIN32
 #  ifndef CRYPT_SILENT
 #    define CRYPT_SILENT 0x40 /* Not defined by VS 6 version of header.  */

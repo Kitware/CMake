@@ -37,6 +37,9 @@ This module sets the following
   ``TRUE`` if the ``tracelog()`` API is available in the system's LTTng-UST
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 find_path(LTTNGUST_INCLUDE_DIRS NAMES lttng/tracepoint.h)
 find_library(LTTNGUST_LIBRARIES NAMES lttng-ust)
 
@@ -100,3 +103,5 @@ find_package_handle_standard_args(LTTngUST FOUND_VAR LTTNGUST_FOUND
                                                 LTTNGUST_INCLUDE_DIRS
                                   VERSION_VAR LTTNGUST_VERSION_STRING)
 mark_as_advanced(LTTNGUST_LIBRARIES LTTNGUST_INCLUDE_DIRS)
+
+cmake_policy(POP)

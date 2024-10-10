@@ -1,4 +1,4 @@
-CMake Warning \(dev\) at .*/Modules/ExternalProject.cmake:[0-9]+ \(message\):
+CMake Warning \(dev\) at .*/Modules/ExternalProject/shared_internal_commands\.cmake:[0-9]+ \(message\):
   The DOWNLOAD_EXTRACT_TIMESTAMP option was not given and policy CMP0135 is
   not set\.  The policy's OLD behavior will be used\.  When using a URL
   download, the timestamps of extracted files should preferably be that of
@@ -9,7 +9,7 @@ CMake Warning \(dev\) at .*/Modules/ExternalProject.cmake:[0-9]+ \(message\):
   DOWNLOAD_EXTRACT_TIMESTAMP option with a value of true to avoid this
   robustness issue\.
 .*
-CMake Warning \(dev\) at .*/Modules/FetchContent.cmake:[0-9]+ \(message\):
+CMake Warning \(dev\) at .*/Modules/FetchContent\.cmake:[0-9]+ \(message\):
   The DOWNLOAD_EXTRACT_TIMESTAMP option was not given and policy CMP0135 is
   not set\.  The policy's OLD behavior will be used\.  When using a URL
   download, the timestamps of extracted files should preferably be that of

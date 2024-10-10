@@ -1,1 +1,7 @@
--- (60;"SSL peer certificate or SSH remote key was not OK"|35;"SSL connect error")
+-- def-0: 0;"No error"
+-- env-0: 0;"No error"
+-- env-1: (60;"SSL peer certificate or SSH remote key was not OK"|35;"SSL connect error")
+-- var-0: 0;"No error"
+-- var-1: (60;"SSL peer certificate or SSH remote key was not OK"|35;"SSL connect error")
+-- opt-0: 0;"No error"
+-- opt-1: (60;"SSL peer certificate or SSH remote key was not OK"|35;"SSL connect error")

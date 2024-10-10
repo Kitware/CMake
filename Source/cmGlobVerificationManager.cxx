@@ -7,6 +7,7 @@
 #include "cmsys/FStream.hxx"
 
 #include "cmGeneratedFileStream.h"
+#include "cmGlobCacheEntry.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h"
 #include "cmMessenger.h"
@@ -145,19 +146,18 @@ void cmGlobVerificationManager::CacheEntryKey::PrintGlobCommand(
 }
 
 void cmGlobVerificationManager::AddCacheEntry(
-  const bool recurse, const bool listDirectories, const bool followSymlinks,
-  const std::string& relative, const std::string& expression,
-  const std::vector<std::string>& files, const std::string& variable,
+  const cmGlobCacheEntry& entry, const std::string& variable,
   const cmListFileBacktrace& backtrace, cmMessenger* messenger)
 {
-  CacheEntryKey key = CacheEntryKey(recurse, listDirectories, followSymlinks,
-                                    relative, expression);
+  CacheEntryKey key =
+    CacheEntryKey(entry.Recurse, entry.ListDirectories, entry.FollowSymlinks,
+                  entry.Relative, entry.Expression);
   CacheEntryValue& value = this->Cache[key];
   if (!value.Initialized) {
-    value.Files = files;
+    value.Files = entry.Files;
     value.Initialized = true;
     value.Backtraces.emplace_back(variable, backtrace);
-  } else if (value.Initialized && value.Files != files) {
+  } else if (value.Initialized && value.Files != entry.Files) {
     std::ostringstream message;
     message << std::boolalpha;
     message << "The glob expression\n ";
@@ -174,6 +174,21 @@ void cmGlobVerificationManager::AddCacheEntry(
   } else {
     value.Backtraces.emplace_back(variable, backtrace);
   }
+}
+
+std::vector<cmGlobCacheEntry> cmGlobVerificationManager::GetCacheEntries()
+  const
+{
+  std::vector<cmGlobCacheEntry> entries;
+  for (auto const& i : this->Cache) {
+    CacheEntryKey k = std::get<0>(i);
+    CacheEntryValue v = std::get<1>(i);
+    if (v.Initialized) {
+      entries.emplace_back(k.Recurse, k.ListDirectories, k.FollowSymlinks,
+                           k.Relative, k.Expression, v.Files);
+    }
+  }
+  return entries;
 }
 
 void cmGlobVerificationManager::Reset()

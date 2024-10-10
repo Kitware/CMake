@@ -261,17 +261,13 @@ CURLcode Curl_close(struct Curl_easy **datap)
     free(data->state.range);
 
   /* freed here just in case DONE wasn't called */
-  Curl_free_request_state(data);
+  Curl_req_free(&data->req, data);
 
   /* Close down all open SSL info and sessions */
   Curl_ssl_close_all(data);
   Curl_safefree(data->state.first_host);
   Curl_safefree(data->state.scratch);
   Curl_ssl_free_certinfo(data);
-
-  /* Cleanup possible redirect junk */
-  free(data->req.newurl);
-  data->req.newurl = NULL;
 
   if(data->state.referer_alloc) {
     Curl_safefree(data->state.referer);
@@ -280,14 +276,14 @@ CURLcode Curl_close(struct Curl_easy **datap)
   data->state.referer = NULL;
 
   up_free(data);
-  Curl_safefree(data->state.buffer);
   Curl_dyn_free(&data->state.headerb);
-  Curl_safefree(data->state.ulbuf);
   Curl_flush_cookies(data, TRUE);
+#ifndef CURL_DISABLE_ALTSVC
   Curl_altsvc_save(data, data->asi, data->set.str[STRING_ALTSVC]);
   Curl_altsvc_cleanup(&data->asi);
-  Curl_hsts_save(data, data->hsts, data->set.str[STRING_HSTS]);
+#endif
 #ifndef CURL_DISABLE_HSTS
+  Curl_hsts_save(data, data->hsts, data->set.str[STRING_HSTS]);
   if(!data->share || !data->share->hsts)
     Curl_hsts_cleanup(&data->hsts);
   curl_slist_free_all(data->state.hstslist); /* clean up list */
@@ -311,7 +307,9 @@ CURLcode Curl_close(struct Curl_easy **datap)
     Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
   }
 
+#ifndef CURL_DISABLE_PROXY
   Curl_safefree(data->state.aptr.proxyuserpwd);
+#endif
   Curl_safefree(data->state.aptr.uagent);
   Curl_safefree(data->state.aptr.userpwd);
   Curl_safefree(data->state.aptr.accept_encoding);
@@ -319,23 +317,20 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_safefree(data->state.aptr.rangeline);
   Curl_safefree(data->state.aptr.ref);
   Curl_safefree(data->state.aptr.host);
+#ifndef CURL_DISABLE_COOKIES
   Curl_safefree(data->state.aptr.cookiehost);
+#endif
+#ifndef CURL_DISABLE_RTSP
   Curl_safefree(data->state.aptr.rtsp_transport);
+#endif
   Curl_safefree(data->state.aptr.user);
   Curl_safefree(data->state.aptr.passwd);
+#ifndef CURL_DISABLE_PROXY
   Curl_safefree(data->state.aptr.proxyuser);
   Curl_safefree(data->state.aptr.proxypasswd);
-
-#ifndef CURL_DISABLE_DOH
-  if(data->req.doh) {
-    Curl_dyn_free(&data->req.doh->probe[0].serverdoh);
-    Curl_dyn_free(&data->req.doh->probe[1].serverdoh);
-    curl_slist_free_all(data->req.doh->headers);
-    Curl_safefree(data->req.doh);
-  }
 #endif
 
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_FORM_API)
   Curl_mime_cleanpart(data->state.formp);
   Curl_safefree(data->state.formp);
 #endif
@@ -368,7 +363,6 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->fread_func_set = (curl_read_callback)fread;
   set->is_fread_set = 0;
 
-  set->seek_func = ZERO_NULL;
   set->seek_client = ZERO_NULL;
 
   set->filesize = -1;        /* we don't know the size */
@@ -445,20 +439,22 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
     result = Curl_setstropt(&set->str[STRING_SSL_CAFILE], CURL_CA_BUNDLE);
     if(result)
       return result;
-
+#ifndef CURL_DISABLE_PROXY
     result = Curl_setstropt(&set->str[STRING_SSL_CAFILE_PROXY],
                             CURL_CA_BUNDLE);
     if(result)
       return result;
 #endif
+#endif
 #if defined(CURL_CA_PATH)
     result = Curl_setstropt(&set->str[STRING_SSL_CAPATH], CURL_CA_PATH);
     if(result)
       return result;
-
+#ifndef CURL_DISABLE_PROXY
     result = Curl_setstropt(&set->str[STRING_SSL_CAPATH_PROXY], CURL_CA_PATH);
     if(result)
       return result;
+#endif
 #endif
   }
 
@@ -520,9 +516,12 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
   data->magic = CURLEASY_MAGIC_NUMBER;
 
+  Curl_req_init(&data->req);
+
   result = Curl_resolver_init(data, &data->state.async.resolver);
   if(result) {
     DEBUGF(fprintf(stderr, "Error: resolver_init failed\n"));
+    Curl_req_free(&data->req, data);
     free(data);
     return result;
   }
@@ -546,6 +545,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
     Curl_resolver_cleanup(data->state.async.resolver);
     Curl_dyn_free(&data->state.headerb);
     Curl_freeset(data);
+    Curl_req_free(&data->req, data);
     free(data);
     data = NULL;
   }
@@ -774,16 +774,16 @@ static bool conn_maxage(struct Curl_easy *data,
 }
 
 /*
- * This function checks if the given connection is dead and extracts it from
+ * This function checks if the given connection is dead and prunes it from
  * the connection cache if so.
  *
  * When this is called as a Curl_conncache_foreach() callback, the connection
  * cache lock is held!
  *
- * Returns TRUE if the connection was dead and extracted.
+ * Returns TRUE if the connection was dead and pruned.
  */
-static bool extract_if_dead(struct connectdata *conn,
-                            struct Curl_easy *data)
+static bool prune_if_dead(struct connectdata *conn,
+                          struct Curl_easy *data)
 {
   if(!CONN_INUSE(conn)) {
     /* The check for a dead socket makes sense only if the connection isn't in
@@ -810,7 +810,7 @@ static bool extract_if_dead(struct connectdata *conn,
 
     }
     else {
-      bool input_pending;
+      bool input_pending = FALSE;
 
       Curl_attach_connection(data, conn);
       dead = !Curl_conn_is_alive(data, conn, &input_pending);
@@ -829,6 +829,7 @@ static bool extract_if_dead(struct connectdata *conn,
     }
 
     if(dead) {
+      /* remove connection from cache */
       infof(data, "Connection %" CURL_FORMAT_CURL_OFF_T " seems to be dead",
             conn->connection_id);
       Curl_conncache_remove_conn(data, conn, FALSE);
@@ -838,22 +839,17 @@ static bool extract_if_dead(struct connectdata *conn,
   return FALSE;
 }
 
-struct prunedead {
-  struct Curl_easy *data;
-  struct connectdata *extracted;
-};
-
 /*
- * Wrapper to use extract_if_dead() function in Curl_conncache_foreach()
+ * Wrapper to use prune_if_dead() function in Curl_conncache_foreach()
  *
  */
-static int call_extract_if_dead(struct Curl_easy *data,
-                                struct connectdata *conn, void *param)
+static int call_prune_if_dead(struct Curl_easy *data,
+                              struct connectdata *conn, void *param)
 {
-  struct prunedead *p = (struct prunedead *)param;
-  if(extract_if_dead(conn, data)) {
-    /* stop the iteration here, pass back the connection that was extracted */
-    p->extracted = conn;
+  struct connectdata **pruned = (struct connectdata **)param;
+  if(prune_if_dead(conn, data)) {
+    /* stop the iteration here, pass back the connection that was pruned */
+    *pruned = conn;
     return 1;
   }
   return 0; /* continue iteration */
@@ -877,18 +873,15 @@ static void prune_dead_connections(struct Curl_easy *data)
   CONNCACHE_UNLOCK(data);
 
   if(elapsed >= 1000L) {
-    struct prunedead prune;
-    prune.data = data;
-    prune.extracted = NULL;
-    while(Curl_conncache_foreach(data, data->state.conn_cache, &prune,
-                                 call_extract_if_dead)) {
+    struct connectdata *pruned = NULL;
+    while(Curl_conncache_foreach(data, data->state.conn_cache, &pruned,
+                                 call_prune_if_dead)) {
       /* unlocked */
 
-      /* remove connection from cache */
-      Curl_conncache_remove_conn(data, prune.extracted, TRUE);
+      /* connection previously removed from cache in prune_if_dead() */
 
       /* disconnect it */
-      Curl_disconnect(data, prune.extracted, TRUE);
+      Curl_disconnect(data, pruned, TRUE);
     }
     CONNCACHE_LOCK(data);
     data->state.conn_cache->last_cleanup = now;
@@ -932,13 +925,12 @@ ConnectionExists(struct Curl_easy *data,
   struct Curl_llist_element *curr;
 
 #ifdef USE_NTLM
-  bool wantNTLMhttp = ((data->state.authhost.want &
-                        (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+  bool wantNTLMhttp = ((data->state.authhost.want & CURLAUTH_NTLM) &&
                        (needle->handler->protocol & PROTO_FAMILY_HTTP));
 #ifndef CURL_DISABLE_PROXY
   bool wantProxyNTLMhttp = (needle->bits.proxy_user_passwd &&
                             ((data->state.authproxy.want &
-                              (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+                              CURLAUTH_NTLM) &&
                              (needle->handler->protocol & PROTO_FAMILY_HTTP)));
 #else
   bool wantProxyNTLMhttp = FALSE;
@@ -1009,9 +1001,9 @@ ConnectionExists(struct Curl_easy *data,
 
     if(!canmultiplex) {
       if(Curl_resolver_asynch() &&
-         /* primary_ip[0] is NUL only if the resolving of the name hasn't
+         /* remote_ip[0] is NUL only if the resolving of the name hasn't
             completed yet and until then we don't reuse this connection */
-         !check->primary_ip[0])
+         !check->primary.remote_ip[0])
         continue;
     }
 
@@ -1300,7 +1292,7 @@ ConnectionExists(struct Curl_easy *data,
       /* When not multiplexed, we have a match here! */
       infof(data, "Multiplexed connection found");
     }
-    else if(extract_if_dead(check, data)) {
+    else if(prune_if_dead(check, data)) {
       /* disconnect it */
       Curl_disconnect(data, check, TRUE);
       continue;
@@ -1334,11 +1326,15 @@ ConnectionExists(struct Curl_easy *data,
  */
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 void Curl_verboseconnect(struct Curl_easy *data,
-                         struct connectdata *conn)
+                         struct connectdata *conn, int sockindex)
 {
-  if(data->set.verbose)
+  if(data->set.verbose && sockindex == SECONDARYSOCKET)
+    infof(data, "Connected 2nd connection to %s port %u",
+          conn->secondary.remote_ip, conn->secondary.remote_port);
+  else
     infof(data, "Connected to %s (%s) port %u",
-          CURL_CONN_HOST_DISPNAME(conn), conn->primary_ip, conn->port);
+          CURL_CONN_HOST_DISPNAME(conn), conn->primary.remote_ip,
+          conn->primary.remote_port);
 }
 #endif
 
@@ -1358,7 +1354,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->sockfd = CURL_SOCKET_BAD;
   conn->writesockfd = CURL_SOCKET_BAD;
   conn->connection_id = -1;    /* no ID */
-  conn->port = -1; /* unknown at this point */
+  conn->primary.remote_port = -1; /* unknown at this point */
   conn->remote_port = -1; /* unknown at this point */
 
   /* Default protocol-independent behavior doesn't support persistent
@@ -1405,12 +1401,6 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->ip_version = data->set.ipver;
   conn->connect_only = data->set.connect_only;
   conn->transport = TRNSPRT_TCP; /* most of them are TCP streams */
-
-#if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM) && \
-    defined(NTLM_WB_ENABLED)
-  conn->ntlm.ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
-  conn->proxyntlm.ntlm_auth_hlpr_socket = CURL_SOCKET_BAD;
-#endif
 
   /* Initialize the easy handle list */
   Curl_llist_init(&conn->easyq, NULL);
@@ -1713,7 +1703,7 @@ CURLcode Curl_uc_to_curlcode(CURLUcode uc)
   }
 }
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
 /*
  * If the URL was set with an IPv6 numerical address with a zone id part, set
  * the scope_id based on that!
@@ -1971,14 +1961,14 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   }
   else {
     unsigned long port = strtoul(data->state.up.port, NULL, 10);
-    conn->port = conn->remote_port =
+    conn->primary.remote_port = conn->remote_port =
       (data->set.use_port && data->state.allow_port) ?
       data->set.use_port : curlx_ultous(port);
   }
 
   (void)curl_url_get(uh, CURLUPART_QUERY, &data->state.up.query, 0);
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   if(data->set.scope_id)
     /* Override any scope that was set above.  */
     conn->scope_id = data->set.scope_id;
@@ -2047,30 +2037,12 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
     p = conn->handler;              /* May have changed. */
   }
 
-  if(conn->port < 0)
+  if(conn->primary.remote_port < 0)
     /* we check for -1 here since if proxy was detected already, this
        was very likely already set to the proxy port */
-    conn->port = p->defport;
+    conn->primary.remote_port = p->defport;
 
   return CURLE_OK;
-}
-
-/*
- * Curl_free_request_state() should free temp data that was allocated in the
- * Curl_easy for this single request.
- */
-
-void Curl_free_request_state(struct Curl_easy *data)
-{
-  Curl_safefree(data->req.p.http);
-  Curl_safefree(data->req.newurl);
-#ifndef CURL_DISABLE_DOH
-  if(data->req.doh) {
-    Curl_close(&data->req.doh->probe[0].easy);
-    Curl_close(&data->req.doh->probe[1].easy);
-  }
-#endif
-  Curl_client_cleanup(data);
 }
 
 
@@ -2104,19 +2076,13 @@ static char *detect_proxy(struct Curl_easy *data,
    * For compatibility, the all-uppercase versions of these variables are
    * checked if the lowercase versions don't exist.
    */
-  char proxy_env[128];
-  const char *protop = conn->handler->scheme;
+  char proxy_env[20];
   char *envp = proxy_env;
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)data;
 #endif
 
-  /* Now, build <protocol>_proxy and check for such a one to use */
-  while(*protop)
-    *envp++ = Curl_raw_tolower(*protop++);
-
-  /* append _proxy */
-  strcpy(envp, "_proxy");
+  msnprintf(proxy_env, sizeof(proxy_env), "%s_proxy", conn->handler->scheme);
 
   /* read the protocol proxy: */
   proxy = curl_getenv(proxy_env);
@@ -2139,7 +2105,6 @@ static char *detect_proxy(struct Curl_easy *data,
     proxy = curl_getenv(proxy_env);
   }
 
-  envp = proxy_env;
   if(!proxy) {
 #ifdef USE_WEBSOCKETS
     /* websocket proxy fallbacks */
@@ -2314,8 +2279,9 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   }
   if(port >= 0) {
     proxyinfo->port = port;
-    if(conn->port < 0 || sockstype || !conn->socks_proxy.host.rawalloc)
-      conn->port = port;
+    if(conn->primary.remote_port < 0 || sockstype ||
+       !conn->socks_proxy.host.rawalloc)
+      conn->primary.remote_port = port;
   }
 
   /* now, clone the proxy host name */
@@ -2386,17 +2352,16 @@ static CURLcode parse_proxy_auth(struct Curl_easy *data,
     data->state.aptr.proxyuser : "";
   const char *proxypasswd = data->state.aptr.proxypasswd ?
     data->state.aptr.proxypasswd : "";
-  CURLcode result = Curl_urldecode(proxyuser, 0, &conn->http_proxy.user, NULL,
-                                   REJECT_ZERO);
-  if(!result)
-    result = Curl_setstropt(&data->state.aptr.proxyuser,
-                            conn->http_proxy.user);
-  if(!result)
-    result = Curl_urldecode(proxypasswd, 0, &conn->http_proxy.passwd,
-                            NULL, REJECT_ZERO);
-  if(!result)
-    result = Curl_setstropt(&data->state.aptr.proxypasswd,
-                            conn->http_proxy.passwd);
+  CURLcode result = CURLE_OUT_OF_MEMORY;
+
+  conn->http_proxy.user = strdup(proxyuser);
+  if(conn->http_proxy.user) {
+    conn->http_proxy.passwd = strdup(proxypasswd);
+    if(conn->http_proxy.passwd)
+      result = CURLE_OK;
+    else
+      Curl_safefree(conn->http_proxy.user);
+  }
   return result;
 }
 
@@ -2596,14 +2561,15 @@ out:
  *
  * Parameters:
  *
- * login    [in]     - The login string.
- * len      [in]     - The length of the login string.
- * userp    [in/out] - The address where a pointer to newly allocated memory
+ * login    [in]     - login string.
+ * len      [in]     - length of the login string.
+ * userp    [in/out] - address where a pointer to newly allocated memory
  *                     holding the user will be stored upon completion.
- * passwdp  [in/out] - The address where a pointer to newly allocated memory
+ * passwdp  [in/out] - address where a pointer to newly allocated memory
  *                     holding the password will be stored upon completion.
- * optionsp [in/out] - The address where a pointer to newly allocated memory
- *                     holding the options will be stored upon completion.
+ * optionsp [in/out] - OPTIONAL address where a pointer to newly allocated
+ *                     memory holding the options will be stored upon
+ *                     completion.
  *
  * Returns CURLE_OK on success.
  */
@@ -2611,19 +2577,19 @@ CURLcode Curl_parse_login_details(const char *login, const size_t len,
                                   char **userp, char **passwdp,
                                   char **optionsp)
 {
-  CURLcode result = CURLE_OK;
   char *ubuf = NULL;
   char *pbuf = NULL;
-  char *obuf = NULL;
   const char *psep = NULL;
   const char *osep = NULL;
   size_t ulen;
   size_t plen;
   size_t olen;
 
+  DEBUGASSERT(userp);
+  DEBUGASSERT(passwdp);
+
   /* Attempt to find the password separator */
-  if(passwdp)
-    psep = memchr(login, ':', len);
+  psep = memchr(login, ':', len);
 
   /* Attempt to find the options separator */
   if(optionsp)
@@ -2635,64 +2601,40 @@ CURLcode Curl_parse_login_details(const char *login, const size_t len,
           (osep ? (size_t)(osep - login) : len));
   plen = (psep ?
           (osep && osep > psep ? (size_t)(osep - psep) :
-                                 (size_t)(login + len - psep)) - 1 : 0);
+           (size_t)(login + len - psep)) - 1 : 0);
   olen = (osep ?
           (psep && psep > osep ? (size_t)(psep - osep) :
-                                 (size_t)(login + len - osep)) - 1 : 0);
+           (size_t)(login + len - osep)) - 1 : 0);
 
-  /* Allocate the user portion buffer, which can be zero length */
-  if(userp) {
-    ubuf = malloc(ulen + 1);
-    if(!ubuf)
-      result = CURLE_OUT_OF_MEMORY;
-  }
+  /* Clone the user portion buffer, which can be zero length */
+  ubuf = Curl_memdup0(login, ulen);
+  if(!ubuf)
+    goto error;
 
-  /* Allocate the password portion buffer */
-  if(!result && passwdp && psep) {
-    pbuf = malloc(plen + 1);
-    if(!pbuf) {
-      free(ubuf);
-      result = CURLE_OUT_OF_MEMORY;
-    }
+  /* Clone the password portion buffer */
+  if(psep) {
+    pbuf = Curl_memdup0(&psep[1], plen);
+    if(!pbuf)
+      goto error;
   }
 
   /* Allocate the options portion buffer */
-  if(!result && optionsp && olen) {
-    obuf = malloc(olen + 1);
-    if(!obuf) {
-      free(pbuf);
-      free(ubuf);
-      result = CURLE_OUT_OF_MEMORY;
+  if(optionsp) {
+    char *obuf = NULL;
+    if(olen) {
+      obuf = Curl_memdup0(&osep[1], olen);
+      if(!obuf)
+        goto error;
     }
+    *optionsp = obuf;
   }
-
-  if(!result) {
-    /* Store the user portion if necessary */
-    if(ubuf) {
-      memcpy(ubuf, login, ulen);
-      ubuf[ulen] = '\0';
-      Curl_safefree(*userp);
-      *userp = ubuf;
-    }
-
-    /* Store the password portion if necessary */
-    if(pbuf) {
-      memcpy(pbuf, psep + 1, plen);
-      pbuf[plen] = '\0';
-      Curl_safefree(*passwdp);
-      *passwdp = pbuf;
-    }
-
-    /* Store the options portion if necessary */
-    if(obuf) {
-      memcpy(obuf, osep + 1, olen);
-      obuf[olen] = '\0';
-      Curl_safefree(*optionsp);
-      *optionsp = obuf;
-    }
-  }
-
-  return result;
+  *userp = ubuf;
+  *passwdp = pbuf;
+  return CURLE_OK;
+error:
+  free(ubuf);
+  free(pbuf);
+  return CURLE_OUT_OF_MEMORY;
 }
 
 /*************************************************************
@@ -2903,7 +2845,7 @@ static CURLcode parse_connect_to_host_port(struct Curl_easy *data,
 
   /* detect and extract RFC6874-style IPv6-addresses */
   if(*hostptr == '[') {
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     char *ptr = ++hostptr; /* advance beyond the initial bracket */
     while(*ptr && (ISXDIGIT(*ptr) || (*ptr == ':') || (*ptr == '.')))
       ptr++;
@@ -3101,7 +3043,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
 #ifdef USE_HTTP2
                                    | ALPN_h2
 #endif
-#ifdef ENABLE_QUIC
+#ifdef USE_HTTP3
                                    | ALPN_h3
 #endif
       ) & data->asi->flags;
@@ -3213,8 +3155,8 @@ static CURLcode resolve_proxy(struct Curl_easy *data,
   if(!conn->hostname_resolve)
     return CURLE_OUT_OF_MEMORY;
 
-  rc = Curl_resolv_timeout(data, conn->hostname_resolve, (int)conn->port,
-                           &hostaddr, timeout_ms);
+  rc = Curl_resolv_timeout(data, conn->hostname_resolve,
+                           conn->primary.remote_port, &hostaddr, timeout_ms);
   conn->dns_entry = hostaddr;
   if(rc == CURLRESOLV_PENDING)
     *async = TRUE;
@@ -3244,7 +3186,7 @@ static CURLcode resolve_host(struct Curl_easy *data,
 
   /* If not connecting via a proxy, extract the port from the URL, if it is
    * there, thus overriding any defaults that might have been set above. */
-  conn->port = conn->bits.conn_to_port ? conn->conn_to_port :
+  conn->primary.remote_port = conn->bits.conn_to_port ? conn->conn_to_port :
     conn->remote_port;
 
   /* Resolve target host right on */
@@ -3252,8 +3194,8 @@ static CURLcode resolve_host(struct Curl_easy *data,
   if(!conn->hostname_resolve)
     return CURLE_OUT_OF_MEMORY;
 
-  rc = Curl_resolv_timeout(data, conn->hostname_resolve, (int)conn->port,
-                           &hostaddr, timeout_ms);
+  rc = Curl_resolv_timeout(data, conn->hostname_resolve,
+                           conn->primary.remote_port, &hostaddr, timeout_ms);
   conn->dns_entry = hostaddr;
   if(rc == CURLRESOLV_PENDING)
     *async = TRUE;
@@ -3590,7 +3532,7 @@ static CURLcode create_conn(struct Curl_easy *data,
     /* this is supposed to be the connect function so we better at least check
        that the file is present here! */
     DEBUGASSERT(conn->handler->connect_it);
-    Curl_persistconninfo(data, conn, NULL, -1);
+    Curl_persistconninfo(data, conn, NULL);
     result = conn->handler->connect_it(data, &done);
 
     /* Setup a "faked" transfer that'll do nothing */
@@ -3610,7 +3552,7 @@ static CURLcode create_conn(struct Curl_easy *data,
         (void)conn->handler->done(data, result, FALSE);
         goto out;
       }
-      Curl_setup_transfer(data, -1, -1, FALSE, -1);
+      Curl_xfer_setup(data, -1, -1, FALSE, -1);
     }
 
     /* since we skip do_init() */
@@ -3621,10 +3563,10 @@ static CURLcode create_conn(struct Curl_easy *data,
 #endif
 
   /* Setup filter for network connections */
-  conn->recv[FIRSTSOCKET] = Curl_conn_recv;
-  conn->send[FIRSTSOCKET] = Curl_conn_send;
-  conn->recv[SECONDARYSOCKET] = Curl_conn_recv;
-  conn->send[SECONDARYSOCKET] = Curl_conn_send;
+  conn->recv[FIRSTSOCKET] = Curl_cf_recv;
+  conn->send[FIRSTSOCKET] = Curl_cf_send;
+  conn->recv[SECONDARYSOCKET] = Curl_cf_recv;
+  conn->send[SECONDARYSOCKET] = Curl_cf_send;
   conn->bits.tcp_fastopen = data->set.tcp_fastopen;
 
   /* Complete the easy's SSL configuration for connection cache matching */
@@ -3761,14 +3703,14 @@ static CURLcode create_conn(struct Curl_easy *data,
     /* If NTLM is requested in a part of this connection, make sure we don't
        assume the state is fine as this is a fresh connection and NTLM is
        connection based. */
-    if((data->state.authhost.picked & (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+    if((data->state.authhost.picked & CURLAUTH_NTLM) &&
        data->state.authhost.done) {
       infof(data, "NTLM picked AND auth done set, clear picked");
       data->state.authhost.picked = CURLAUTH_NONE;
       data->state.authhost.done = FALSE;
     }
 
-    if((data->state.authproxy.picked & (CURLAUTH_NTLM | CURLAUTH_NTLM_WB)) &&
+    if((data->state.authproxy.picked & CURLAUTH_NTLM) &&
        data->state.authproxy.done) {
       infof(data, "NTLM-proxy picked AND auth done set, clear picked");
       data->state.authproxy.picked = CURLAUTH_NONE;
@@ -3788,13 +3730,6 @@ static CURLcode create_conn(struct Curl_easy *data,
     goto out;
 
   /* Continue connectdata initialization here. */
-
-  /*
-   * Inherit the proper values from the urldata struct AFTER we have arranged
-   * the persistent connection stuff
-   */
-  conn->seek_func = data->set.seek_func;
-  conn->seek_client = data->set.seek_client;
 
   /*************************************************************
    * Resolve the address of the server or proxy
@@ -3849,6 +3784,9 @@ CURLcode Curl_setup_conn(struct Curl_easy *data,
   if(!conn->bits.reuse)
     result = Curl_conn_setup(data, conn, FIRSTSOCKET, conn->dns_entry,
                              CURL_CF_SSL_DEFAULT);
+  if(!result)
+    result = Curl_headers_init(data);
+
   /* not sure we need this flag to be passed around any more */
   *protocol_done = FALSE;
   return result;
@@ -3863,11 +3801,8 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
   *asyncp = FALSE; /* assume synchronous resolves by default */
 
-  /* init the single-transfer specific data */
-  Curl_free_request_state(data);
-  memset(&data->req, 0, sizeof(struct SingleRequest));
-  data->req.size = data->req.maxdownload = -1;
-  data->req.no_body = data->set.opt_no_body;
+  /* Set the request to virgin state based on transfer settings */
+  Curl_req_hard_reset(&data->req, data);
 
   /* call the stuff that needs to be called */
   result = create_conn(data, &conn, asyncp);
@@ -3910,12 +3845,8 @@ CURLcode Curl_connect(struct Curl_easy *data,
 
 CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
 {
-  struct SingleRequest *k = &data->req;
-
   /* if this is a pushed stream, we need this: */
-  CURLcode result = Curl_preconnect(data);
-  if(result)
-    return result;
+  CURLcode result;
 
   if(conn) {
     conn->bits.do_more = FALSE; /* by default there's no curl_do_more() to
@@ -3927,23 +3858,18 @@ CURLcode Curl_init_do(struct Curl_easy *data, struct connectdata *conn)
   }
 
   data->state.done = FALSE; /* *_done() is not called yet */
-  data->state.expect100header = FALSE;
 
   if(data->req.no_body)
     /* in HTTP lingo, no body means using the HEAD request... */
     data->state.httpreq = HTTPREQ_HEAD;
 
-  k->start = Curl_now(); /* start time */
-  k->header = TRUE; /* assume header */
-  k->bytecount = 0;
-  k->ignorebody = FALSE;
-
-  Curl_client_cleanup(data);
-  Curl_speedinit(data);
-  Curl_pgrsSetUploadCounter(data, 0);
-  Curl_pgrsSetDownloadCounter(data, 0);
-
-  return CURLE_OK;
+  result = Curl_req_start(&data->req, data);
+  if(!result) {
+    Curl_speedinit(data);
+    Curl_pgrsSetUploadCounter(data, 0);
+    Curl_pgrsSetDownloadCounter(data, 0);
+  }
+  return result;
 }
 
 #if defined(USE_HTTP2) || defined(USE_HTTP3)

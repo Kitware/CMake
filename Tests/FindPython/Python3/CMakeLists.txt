@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.15)
 
 project(TestPython3 LANGUAGES C)
 
@@ -39,7 +39,7 @@ target_compile_definitions (spam3 PRIVATE PYTHON3)
 
 add_test (NAME python3_spam3
           COMMAND "${CMAKE_COMMAND}" -E env "PYTHONPATH=$<TARGET_FILE_DIR:spam3>"
-          "${Python3_EXECUTABLE}" -c "import spam3; spam3.system(\"cd\")")
+          "${Python3_INTERPRETER}" -c "import spam3; spam3.system(\"cd\")")
 
 add_test(NAME findpython3_script
          COMMAND "${CMAKE_COMMAND}" -DPYTHON_PACKAGE_NAME=Python3
@@ -72,6 +72,11 @@ else()
   list (APPEND Python3_VALID_ABI "OFF")
 endif()
 if (abi MATCHES "u")
+  list (APPEND Python3_VALID_ABI "ON")
+else()
+  list (APPEND Python3_VALID_ABI "OFF")
+endif()
+if (abi MATCHES "t")
   list (APPEND Python3_VALID_ABI "ON")
 else()
   list (APPEND Python3_VALID_ABI "OFF")

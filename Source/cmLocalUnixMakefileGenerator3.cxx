@@ -898,7 +898,7 @@ void cmLocalUnixMakefileGenerator3::AppendRuleDepend(
   // Add a dependency on the rule file itself unless an option to skip
   // it is specifically enabled by the user or project.
   cmValue nodep = this->Makefile->GetDefinition("CMAKE_SKIP_RULE_DEPENDENCY");
-  if (cmIsOff(nodep)) {
+  if (nodep.IsOff()) {
     depends.emplace_back(ruleFileName);
   }
 }
@@ -1532,7 +1532,7 @@ bool cmLocalUnixMakefileGenerator3::ScanDependencies(
   if (haveDirectoryInfo) {
     // Test whether we need to force Unix paths.
     if (cmValue force = mf->GetDefinition("CMAKE_FORCE_UNIX_PATHS")) {
-      if (!cmIsOff(force)) {
+      if (!force.IsOff()) {
         cmSystemTools::SetForceUnixPaths(true);
       }
     }
@@ -1784,7 +1784,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
   depends.clear();
   cmValue noall =
     this->Makefile->GetDefinition("CMAKE_SKIP_INSTALL_ALL_DEPENDENCY");
-  if (cmIsOff(noall)) {
+  if (noall.IsOff()) {
     // Drive the build before installing.
     depends.emplace_back("all");
   } else if (regenerate) {

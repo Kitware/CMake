@@ -548,8 +548,8 @@ static void yynoreturn yy_fatal_error ( const char* msg , yyscan_t yyscanner );
 	yyg->yy_hold_char = *yy_cp; \
 	*yy_cp = '\0'; \
 	yyg->yy_c_buf_p = yy_cp;
-#define YY_NUM_RULES 12
-#define YY_END_OF_BUFFER 13
+#define YY_NUM_RULES 13
+#define YY_END_OF_BUFFER 14
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -557,11 +557,12 @@ struct yy_trans_info
 	flex_int32_t yy_verify;
 	flex_int32_t yy_nxt;
 	};
-static const flex_int16_t yy_accept[31] =
+static const flex_int16_t yy_accept[32] =
     {   0,
-        0,    0,   13,   11,    9,    6,   11,   10,   11,   11,
-       11,    9,    0,    6,   10,    1,    8,    7,    0,    0,
-        5,    0,    3,    2,    0,    8,    0,    4,    0,    0
+        0,    0,   14,   12,   10,    7,   12,   11,   12,   12,
+       12,   10,    0,    7,   11,    1,    9,    8,    0,    0,
+        6,    0,    4,    2,    3,    0,    9,    0,    5,    0,
+        0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -601,40 +602,40 @@ static const YY_CHAR yy_meta[11] =
         1,    2,    1,    1,    2,    1,    1,    1,    1,    3
     } ;
 
-static const flex_int16_t yy_base[33] =
+static const flex_int16_t yy_base[34] =
     {   0,
-        0,    0,   36,   46,   25,   46,   31,   27,   18,    9,
+        0,    0,   39,   46,   26,   46,   32,   28,   25,    9,
        17,   15,   25,   46,   17,   46,    0,   46,   15,   27,
-       46,   14,   46,   46,   27,   46,   13,   46,   33,   46,
-       42,   13
+       46,   14,   46,   46,   46,   27,   46,   13,   46,   33,
+       46,   42,   13
     } ;
 
-static const flex_int16_t yy_def[33] =
+static const flex_int16_t yy_def[34] =
     {   0,
-       30,    1,   30,   30,   31,   30,   30,   30,   30,   30,
-       30,   31,   30,   30,   30,   30,   32,   30,   30,   30,
-       30,   30,   30,   30,   30,   30,   30,   30,   30,    0,
-       30,   30
+       31,    1,   31,   31,   32,   31,   31,   31,   31,   31,
+       31,   32,   31,   31,   31,   31,   33,   31,   31,   31,
+       31,   31,   31,   31,   31,   31,   31,   31,   31,   31,
+        0,   31,   31
     } ;
 
 static const flex_int16_t yy_nxt[57] =
     {   0,
         4,    5,    6,    7,    5,    8,    4,    9,   10,   11,
-       17,   18,   19,   17,   17,   26,   21,   18,   20,   21,
-       22,   23,   15,   24,   13,   16,   25,   21,   22,   26,
-       27,   28,   15,   14,   13,   30,   29,   23,   30,   30,
-       30,   30,   25,   12,   12,    3,   30,   30,   30,   30,
-       30,   30,   30,   30,   30,   30
+       17,   18,   19,   17,   17,   27,   21,   18,   20,   21,
+       22,   23,   15,   24,   13,   25,   26,   21,   22,   27,
+       28,   29,   16,   15,   14,   13,   30,   23,   31,   31,
+       31,   31,   26,   12,   12,    3,   31,   31,   31,   31,
+       31,   31,   31,   31,   31,   31
     } ;
 
 static const flex_int16_t yy_chk[57] =
     {   0,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-       10,   10,   10,   10,   32,   27,   22,   19,   10,   11,
-       11,   11,   15,   11,   12,    9,   11,   13,   13,   20,
-       20,   25,    8,    7,    5,    3,   25,   29,    0,    0,
-        0,    0,   29,   31,   31,   30,   30,   30,   30,   30,
-       30,   30,   30,   30,   30,   30
+       10,   10,   10,   10,   33,   28,   22,   19,   10,   11,
+       11,   11,   15,   11,   12,   11,   11,   13,   13,   20,
+       20,   26,    9,    8,    7,    5,   26,   30,    3,    0,
+        0,    0,   30,   32,   32,   31,   31,   31,   31,   31,
+       31,   31,   31,   31,   31,   31
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -930,7 +931,7 @@ yy_match:
 			while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
-				if ( yy_current_state >= 31 )
+				if ( yy_current_state >= 32 )
 					yy_c = yy_meta[yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
@@ -977,6 +978,13 @@ YY_RULE_SETUP
 case 3:
 YY_RULE_SETUP
 {
+                         // Unescape the colon.
+                         yyextra->addToCurrentPath(":");
+                       }
+	YY_BREAK
+case 4:
+YY_RULE_SETUP
+{
                          // 2N+1 backslashes plus space -> N backslashes plus space.
                          size_t c = (strlen(yytext) - 1) / 2;
                          std::string s(c, '\\');
@@ -984,7 +992,7 @@ YY_RULE_SETUP
                          yyextra->addToCurrentPath(s.c_str());
                        }
 	YY_BREAK
-case 4:
+case 5:
 YY_RULE_SETUP
 {
                          // 2N backslashes plus space -> 2N backslashes, end of filename.
@@ -993,24 +1001,24 @@ YY_RULE_SETUP
                          yyextra->newDependency();
                        }
 	YY_BREAK
-case 5:
-/* rule 5 can match eol */
+case 6:
+/* rule 6 can match eol */
 YY_RULE_SETUP
 {
                          // A line continuation ends the current file name.
                          yyextra->newRuleOrDependency();
                        }
 	YY_BREAK
-case 6:
-/* rule 6 can match eol */
+case 7:
+/* rule 7 can match eol */
 YY_RULE_SETUP
 {
                          // A newline ends the current file name and the current rule.
                          yyextra->newEntry();
                        }
 	YY_BREAK
-case 7:
-/* rule 7 can match eol */
+case 8:
+/* rule 8 can match eol */
 YY_RULE_SETUP
 {
                          // A colon ends the rules
@@ -1019,8 +1027,8 @@ YY_RULE_SETUP
                          yyextra->newEntry();
                        }
 	YY_BREAK
-case 8:
-/* rule 8 can match eol */
+case 9:
+/* rule 9 can match eol */
 YY_RULE_SETUP
 {
                          // A colon followed by space or line continuation ends the rules
@@ -1028,28 +1036,28 @@ YY_RULE_SETUP
                          yyextra->newDependency();
                        }
 	YY_BREAK
-case 9:
+case 10:
 YY_RULE_SETUP
 {
                          // Rules and dependencies are separated by blocks of whitespace.
                          yyextra->newRuleOrDependency();
                        }
 	YY_BREAK
-case 10:
+case 11:
 YY_RULE_SETUP
 {
                          // Got a span of plain text.
                          yyextra->addToCurrentPath(yytext);
                        }
 	YY_BREAK
-case 11:
+case 12:
 YY_RULE_SETUP
 {
                          // Got an otherwise unmatched character.
                          yyextra->addToCurrentPath(yytext);
                        }
 	YY_BREAK
-case 12:
+case 13:
 YY_RULE_SETUP
 ECHO;
 	YY_BREAK
@@ -1351,7 +1359,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 31 )
+			if ( yy_current_state >= 32 )
 				yy_c = yy_meta[yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
@@ -1380,11 +1388,11 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 	while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
-		if ( yy_current_state >= 31 )
+		if ( yy_current_state >= 32 )
 			yy_c = yy_meta[yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
-	yy_is_jam = (yy_current_state == 30);
+	yy_is_jam = (yy_current_state == 31);
 
 	(void)yyg;
 	return yy_is_jam ? 0 : yy_current_state;

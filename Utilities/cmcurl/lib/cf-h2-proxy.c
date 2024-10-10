@@ -38,6 +38,7 @@
 #include "http2.h"
 #include "http_proxy.h"
 #include "multiif.h"
+#include "sendf.h"
 #include "cf-h2-proxy.h"
 
 /* The last 3 #include files should be in this order */
@@ -956,6 +957,9 @@ static CURLcode submit_CONNECT(struct Curl_cfilter *cf,
   result = Curl_http_proxy_create_CONNECT(&req, cf, data, 2);
   if(result)
     goto out;
+  result = Curl_creader_set_null(data);
+  if(result)
+    goto out;
 
   infof(data, "Establish HTTP/2 proxy tunnel to %s", req->authority);
 
@@ -1125,7 +1129,12 @@ static CURLcode cf_h2_proxy_connect(struct Curl_cfilter *cf,
 
 out:
   *done = (result == CURLE_OK) && (ts->state == H2_TUNNEL_ESTABLISHED);
-  cf->connected = *done;
+  if(*done) {
+    cf->connected = TRUE;
+    /* The real request will follow the CONNECT, reset request partially */
+    Curl_req_soft_reset(&data->req, data);
+    Curl_client_reset(data);
+  }
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -1523,7 +1532,7 @@ static bool cf_h2_proxy_is_alive(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_h2_proxy = {
   "H2-PROXY",
-  CF_TYPE_IP_CONNECT,
+  CF_TYPE_IP_CONNECT|CF_TYPE_PROXY,
   CURL_LOG_LVL_NONE,
   cf_h2_proxy_destroy,
   cf_h2_proxy_connect,

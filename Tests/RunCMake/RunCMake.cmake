@@ -217,6 +217,7 @@ function(run_cmake test)
     "|[^\n]*offset in archive not a multiple of 8"
     "|[^\n]*from Time Machine by path"
     "|[^\n]*Bullseye Testing Technology"
+    ${RunCMake_TEST_EXTRA_IGNORE_LINE_REGEX}
     ")[^\n]*\n)+"
     )
   if(RunCMake_IGNORE_POLICY_VERSION_DEPRECATION)
@@ -247,6 +248,7 @@ function(run_cmake test)
     endif()
   endforeach()
   unset(RunCMake_TEST_FAILED)
+  unset(RunCMake_TEST_FAILURE_MESSAGE)
   if(RunCMake-check-file AND EXISTS ${top_src}/${RunCMake-check-file})
     include(${top_src}/${RunCMake-check-file})
   else()
@@ -277,6 +279,9 @@ function(run_cmake test)
         string(APPEND msg "Actual ${o}:\n${actual_${o}}\n")
       endif()
     endforeach()
+    if(RunCMake_TEST_FAILURE_MESSAGE)
+      string(APPEND msg "${RunCMake_TEST_FAILURE_MESSAGE}")
+    endif()
     message(SEND_ERROR "${test}${RunCMake_TEST_VARIANT_DESCRIPTION} - FAILED:\n${msg}")
   else()
     message(STATUS "${test}${RunCMake_TEST_VARIANT_DESCRIPTION} - PASSED")

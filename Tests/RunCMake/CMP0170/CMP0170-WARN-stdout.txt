@@ -1,0 +1,3 @@
+-- Starting population
+-- Configuring done \([0-9]+\.[0-9]s\)
+-- Generating done \([0-9]+\.[0-9]s\)

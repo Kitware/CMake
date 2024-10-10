@@ -1,0 +1,4 @@
+SetCTestConfiguration from CMAKE_TLS_VERIFY:TLSVerify:ON
+SetCTestConfiguration:TLSVerify:ON
+.*
+  Set CURLOPT_SSL_VERIFYPEER to on

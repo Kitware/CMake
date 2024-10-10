@@ -4,11 +4,13 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cm3p/json/value.h>
 
 #include "cmFileAPI.h"
+#include "cmGlobCacheEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -29,6 +31,8 @@ class CMakeFiles
   Json::Value DumpPaths();
   Json::Value DumpInputs();
   Json::Value DumpInput(std::string const& file);
+  Json::Value DumpGlobsDependent();
+  Json::Value DumpGlobDependent(cmGlobCacheEntry const& entry);
 
 public:
   CMakeFiles(cmFileAPI& fileAPI, unsigned long version);
@@ -51,6 +55,10 @@ Json::Value CMakeFiles::Dump()
   Json::Value cmakeFiles = Json::objectValue;
   cmakeFiles["paths"] = this->DumpPaths();
   cmakeFiles["inputs"] = this->DumpInputs();
+  Json::Value globsDependent = this->DumpGlobsDependent();
+  if (!globsDependent.empty()) {
+    cmakeFiles["globsDependent"] = std::move(globsDependent);
+  }
   return cmakeFiles;
 }
 
@@ -105,6 +113,40 @@ Json::Value CMakeFiles::DumpInput(std::string const& file)
   input["path"] = path;
 
   return input;
+}
+
+Json::Value CMakeFiles::DumpGlobsDependent()
+{
+  Json::Value globsDependent = Json::arrayValue;
+  for (cmGlobCacheEntry const& entry :
+       this->FileAPI.GetCMakeInstance()->GetGlobCacheEntries()) {
+    globsDependent.append(this->DumpGlobDependent(entry));
+  }
+  return globsDependent;
+}
+
+Json::Value CMakeFiles::DumpGlobDependent(cmGlobCacheEntry const& entry)
+{
+  Json::Value globDependent = Json::objectValue;
+  globDependent["expression"] = entry.Expression;
+  if (entry.Recurse) {
+    globDependent["recurse"] = true;
+  }
+  if (entry.ListDirectories) {
+    globDependent["listDirectories"] = true;
+  }
+  if (entry.FollowSymlinks) {
+    globDependent["followSymlinks"] = true;
+  }
+  if (!entry.Relative.empty()) {
+    globDependent["relative"] = entry.Relative;
+  }
+  Json::Value paths = Json::arrayValue;
+  for (std::string const& file : entry.Files) {
+    paths.append(file);
+  }
+  globDependent["paths"] = std::move(paths);
+  return globDependent;
 }
 }
 

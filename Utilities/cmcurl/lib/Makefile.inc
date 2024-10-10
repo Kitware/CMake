@@ -44,6 +44,7 @@ LIB_VAUTH_HFILES =      \
 
 LIB_VTLS_CFILES =           \
   vtls/bearssl.c            \
+  vtls/cipher_suite.c       \
   vtls/gtls.c               \
   vtls/hostcheck.c          \
   vtls/keylog.c             \
@@ -60,6 +61,7 @@ LIB_VTLS_CFILES =           \
 
 LIB_VTLS_HFILES =           \
   vtls/bearssl.h            \
+  vtls/cipher_suite.h       \
   vtls/gtls.h               \
   vtls/hostcheck.h          \
   vtls/keylog.h             \
@@ -129,15 +131,17 @@ LIB_CFILES =         \
   curl_memrchr.c     \
   curl_multibyte.c   \
   curl_ntlm_core.c   \
-  curl_ntlm_wb.c     \
   curl_path.c        \
   curl_range.c       \
   curl_rtmp.c        \
   curl_sasl.c        \
+  curl_sha512_256.c  \
   curl_sspi.c        \
   curl_threads.c     \
   curl_trc.c         \
+  cw-out.c           \
   dict.c             \
+  dllmain.c          \
   doh.c              \
   dynbuf.c           \
   dynhds.c           \
@@ -199,6 +203,7 @@ LIB_CFILES =         \
   psl.c              \
   rand.c             \
   rename.c           \
+  request.c          \
   rtsp.c             \
   select.c           \
   sendf.c            \
@@ -268,7 +273,6 @@ LIB_HFILES =         \
   curl_memrchr.h     \
   curl_multibyte.h   \
   curl_ntlm_core.h   \
-  curl_ntlm_wb.h     \
   curl_path.h        \
   curl_printf.h      \
   curl_range.h       \
@@ -277,10 +281,12 @@ LIB_HFILES =         \
   curl_setup.h       \
   curl_setup_once.h  \
   curl_sha256.h      \
+  curl_sha512_256.h  \
   curl_sspi.h        \
   curl_threads.h     \
   curl_trc.h         \
   curlx.h            \
+  cw-out.h           \
   dict.h             \
   doh.h              \
   dynbuf.h           \
@@ -333,6 +339,7 @@ LIB_HFILES =         \
   psl.h              \
   rand.h             \
   rename.h           \
+  request.h          \
   rtsp.h             \
   select.h           \
   sendf.h            \

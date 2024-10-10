@@ -2,6 +2,11 @@ include(CMakeParseArguments)
 
 find_package(Qt5Test REQUIRED)
 
+if(MSVC)
+  # QTBUG-118993: Qt uses deprecated stdext::checked_array_iterator
+  add_compile_definitions(_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING)
+endif()
+
 include_directories(
   ${CMake_SOURCE_DIR}/Source
   ${CMake_SOURCE_DIR}/Source/QtDialog

@@ -41,6 +41,9 @@ The following cache variables may also be set:
   the directory containing the Cups headers
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 find_path(CUPS_INCLUDE_DIR cups/cups.h )
 
 find_library(CUPS_LIBRARIES NAMES cups )
@@ -98,3 +101,5 @@ if (CUPS_FOUND)
             INTERFACE_INCLUDE_DIRECTORIES "${CUPS_INCLUDE_DIR}")
     endif ()
 endif ()
+
+cmake_policy(POP)

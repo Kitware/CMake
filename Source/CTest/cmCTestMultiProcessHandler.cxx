@@ -90,7 +90,7 @@ cmCTestMultiProcessHandler::cmCTestMultiProcessHandler(
 cmCTestMultiProcessHandler::~cmCTestMultiProcessHandler() = default;
 
 // Set the tests
-void cmCTestMultiProcessHandler::SetTests(TestMap tests,
+bool cmCTestMultiProcessHandler::SetTests(TestMap tests,
                                           PropertiesMap properties)
 {
   this->PendingTests = std::move(tests);
@@ -102,10 +102,11 @@ void cmCTestMultiProcessHandler::SetTests(TestMap tests,
     this->HasInvalidGeneratedResourceSpec =
       !this->CheckGeneratedResourceSpec();
     if (this->HasCycles || this->HasInvalidGeneratedResourceSpec) {
-      return;
+      return false;
     }
     this->CreateTestCostList();
   }
+  return true;
 }
 
 // Set the max number of tests that can be run at the same time.
@@ -1214,6 +1215,11 @@ static Json::Value DumpCTestProperties(
   if (!testProperties.Directory.empty()) {
     properties.append(
       DumpCTestProperty("WORKING_DIRECTORY", testProperties.Directory));
+  }
+  if (!testProperties.CustomProperties.empty()) {
+    for (auto const& it : testProperties.CustomProperties) {
+      properties.append(DumpCTestProperty(it.first, it.second));
+    }
   }
   return properties;
 }

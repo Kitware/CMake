@@ -1,0 +1,36 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+    <Fragment>
+        <!-- Hold the "CMAKE_IN_PATH" checkbox value in a public property to propagate to the InstallExecuteSequence. -->
+        <Property Id="CMAKE_IN_PATH" Value="Init" />
+
+        <!-- Always initialize the checkbox value so it cannot be directly overridden from the command line.  -->
+        <SetProperty Action="Set_CMAKE_IN_PATH_Init"       Id="CMAKE_IN_PATH" After="AppSearch"                    Sequence="first" Value="1" />
+
+        <!-- Read the "CMAKE_IN_PATH" checkbox value from the registry, if it was stored previously.
+             Properties using RegistrySearch cannot be private, so use a private-looking public name. -->
+        <Property Id="_CMAKE_IN_PATH_REG">
+            <RegistrySearch Id="CMAKE_IN_PATH_RegistrySearch_HKLM" Root="HKLM" Key="Software\Kitware\CMake" Name="InstallInPATH" Type="raw" />
+        </Property>
+
+        <!-- Override the default "CMAKE_IN_PATH" checkbox with a value read from the registry, if any.  -->
+        <SetProperty Action="Set_CMAKE_IN_PATH_REG_0"      Id="CMAKE_IN_PATH" After="Set_CMAKE_IN_PATH_Init"       Sequence="first" Value="{}" Condition="_CMAKE_IN_PATH_REG = &quot;#0&quot;" />
+        <SetProperty Action="Set_CMAKE_IN_PATH_REG_1"      Id="CMAKE_IN_PATH" After="Set_CMAKE_IN_PATH_REG_0"      Sequence="first" Value="1"  Condition="_CMAKE_IN_PATH_REG = &quot;#1&quot;" />
+
+        <!-- Override the default "CMAKE_IN_PATH" checkbox with a value specified on the command line, if any.  -->
+        <SetProperty Action="Set_CMAKE_IN_PATH_CMD_0"      Id="CMAKE_IN_PATH" After="Set_CMAKE_IN_PATH_REG_1"      Sequence="first" Value="{}" Condition="ADD_CMAKE_TO_PATH = &quot;0&quot;" />
+        <SetProperty Action="Set_CMAKE_IN_PATH_CMD_1"      Id="CMAKE_IN_PATH" After="Set_CMAKE_IN_PATH_CMD_0"      Sequence="first" Value="1"  Condition="ADD_CMAKE_TO_PATH = &quot;1&quot;" />
+        <!-- Support legacy values too.  -->
+        <SetProperty Action="Set_CMAKE_IN_PATH_CMD_None"   Id="CMAKE_IN_PATH" After="Set_CMAKE_IN_PATH_CMD_1"      Sequence="first" Value="{}" Condition="ADD_CMAKE_TO_PATH = &quot;None&quot;" />
+        <SetProperty Action="Set_CMAKE_IN_PATH_CMD_System" Id="CMAKE_IN_PATH" After="Set_CMAKE_IN_PATH_CMD_None"   Sequence="first" Value="1"  Condition="ADD_CMAKE_TO_PATH = &quot;System&quot; AND ALLUSERS" />
+        <!-- Per-user installation is not implemented, but reserve the old value for future use.  -->
+        <SetProperty Action="Set_CMAKE_IN_PATH_CMD_User"   Id="CMAKE_IN_PATH" After="Set_CMAKE_IN_PATH_CMD_System" Sequence="first" Value="1"  Condition="ADD_CMAKE_TO_PATH = &quot;User&quot; AND NOT ALLUSERS" />
+
+        <StandardDirectory Id="TARGETDIR">
+            <!-- Save the "CMAKE_IN_PATH" checkbox value persistently in the registry.  -->
+            <Component Id="CMakeRegistry_InstallInPATH">
+                <!-- Use a leading "0" so the value parses as an integer even when the property is unset.  -->
+                <RegistryValue Root="HKLM" Key="Software\Kitware\CMake" Name="InstallInPATH" Type="integer" Value="0[CMAKE_IN_PATH]" />
+            </Component>
+        </StandardDirectory>
+    </Fragment>
+</Wix>

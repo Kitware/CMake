@@ -162,102 +162,284 @@ or :command:`file(GENERATE)` by using ``$<TARGET_OBJECTS:objlib>``.
 Build Specification and Usage Requirements
 ==========================================
 
-The :command:`target_include_directories`, :command:`target_compile_definitions`
-and :command:`target_compile_options` commands specify the build specifications
-and the usage requirements of binary targets.  The commands populate the
-:prop_tgt:`INCLUDE_DIRECTORIES`, :prop_tgt:`COMPILE_DEFINITIONS` and
-:prop_tgt:`COMPILE_OPTIONS` target properties respectively, and/or the
-:prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`, :prop_tgt:`INTERFACE_COMPILE_DEFINITIONS`
-and :prop_tgt:`INTERFACE_COMPILE_OPTIONS` target properties.
+Targets build according to their own
+`build specification <Target Build Specification_>`_ in combination with
+`usage requirements <Target Usage Requirements_>`_ propagated from their
+link dependencies.  Both may be specified using target-specific
+`commands <Target Commands_>`_.
 
-Each of the commands has a ``PRIVATE``, ``PUBLIC`` and ``INTERFACE`` mode.  The
-``PRIVATE`` mode populates only the non-``INTERFACE_`` variant of the target
-property and the ``INTERFACE`` mode populates only the ``INTERFACE_`` variants.
-The ``PUBLIC`` mode populates both variants of the respective target property.
-Each command may be invoked with multiple uses of each keyword:
+For example:
 
 .. code-block:: cmake
 
-  target_compile_definitions(archive
-    PRIVATE BUILDING_WITH_LZMA
-    INTERFACE USING_ARCHIVE_LIB
-  )
+  add_library(archive SHARED archive.cpp zip.cpp)
+
+  if (LZMA_FOUND)
+    # Add a source implementing support for lzma.
+    target_sources(archive PRIVATE lzma.cpp)
+
+    # Compile the 'archive' library sources with '-DBUILDING_WITH_LZMA'.
+    target_compile_definitions(archive PRIVATE BUILDING_WITH_LZMA)
+  endif()
+
+  target_compile_definitions(archive INTERFACE USING_ARCHIVE_LIB)
+
+  add_executable(consumer consumer.cpp)
+
+  # Link 'consumer' to 'archive'.  This also consumes its usage requirements,
+  # so 'consumer.cpp' is compiled with '-DUSING_ARCHIVE_LIB'.
+  target_link_libraries(consumer archive)
+
+
+Target Commands
+---------------
+
+Target-specific commands populate the
+`build specification <Target Build Specification_>`_ of `Binary Targets`_ and
+`usage requirements <Target Usage Requirements_>`_ of `Binary Targets`_,
+`Interface Libraries`_, and `Imported Targets`_.
+
+.. _`Target Command Scope`:
+
+Invocations must specify scope keywords, each affecting the visibility
+of arguments following it.  The scopes are:
+
+``PUBLIC``
+  Populates both properties for `building <Target Build Specification_>`_
+  and properties for `using <Target Usage Requirements_>`_ a target.
+
+``PRIVATE``
+  Populates only properties for `building <Target Build Specification_>`_
+  a target.
+
+``INTERFACE``
+  Populates only properties for `using <Target Usage Requirements_>`_
+  a target.
+
+The commands are:
+
+:command:`target_compile_definitions`
+  Populates the :prop_tgt:`COMPILE_DEFINITIONS` build specification and
+  :prop_tgt:`INTERFACE_COMPILE_DEFINITIONS` usage requirement properties.
+
+  For example, the call
+
+  .. code-block:: cmake
+
+    target_compile_definitions(archive
+      PRIVATE   BUILDING_WITH_LZMA
+      INTERFACE USING_ARCHIVE_LIB
+    )
+
+  appends ``BUILDING_WITH_LZMA`` to the target's ``COMPILE_DEFINITIONS``
+  property and appends ``USING_ARCHIVE_LIB`` to the target's
+  ``INTERFACE_COMPILE_DEFINITIONS`` property.
+
+:command:`target_compile_options`
+  Populates the :prop_tgt:`COMPILE_OPTIONS` build specification and
+  :prop_tgt:`INTERFACE_COMPILE_OPTIONS` usage requirement properties.
+
+:command:`target_compile_features`
+  .. versionadded:: 3.1
+
+  Populates the :prop_tgt:`COMPILE_FEATURES` build specification and
+  :prop_tgt:`INTERFACE_COMPILE_FEATURES` usage requirement properties.
+
+:command:`target_include_directories`
+  Populates the :prop_tgt:`INCLUDE_DIRECTORIES` build specification
+  and :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` usage requirement
+  properties.  With the ``SYSTEM`` option, it also populates the
+  :prop_tgt:`INTERFACE_SYSTEM_INCLUDE_DIRECTORIES` usage requirement.
+
+  For convenience, the :variable:`CMAKE_INCLUDE_CURRENT_DIR` variable
+  may be enabled to add the source directory and corresponding build
+  directory as ``INCLUDE_DIRECTORIES`` on all targets.  Similarly,
+  the :variable:`CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE` variable may
+  be enabled to add them as ``INTERFACE_INCLUDE_DIRECTORIES`` on all
+  targets.
+
+:command:`target_sources`
+  .. versionadded:: 3.1
+
+  Populates the :prop_tgt:`SOURCES` build specification and
+  :prop_tgt:`INTERFACE_SOURCES` usage requirement properties.
+
+  It also supports specifying :ref:`File Sets`, which can add C++ module
+  sources and headers not listed in the ``SOURCES`` and ``INTERFACE_SOURCES``
+  properties.  File sets may also populate the :prop_tgt:`INCLUDE_DIRECTORIES`
+  build specification and :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` usage
+  requirement properties with the include directories containing the headers.
+
+:command:`target_precompile_headers`
+  .. versionadded:: 3.16
+
+  Populates the :prop_tgt:`PRECOMPILE_HEADERS` build specification and
+  :prop_tgt:`INTERFACE_PRECOMPILE_HEADERS` usage requirement properties.
+
+:command:`target_link_libraries`
+  Populates the :prop_tgt:`LINK_LIBRARIES` build specification
+  and :prop_tgt:`INTERFACE_LINK_LIBRARIES` usage requirement properties.
+
+  This is the primary mechanism by which link dependencies and their
+  `usage requirements <Target Usage Requirements_>`_ are transitively
+  propagated to affect compilation and linking of a target.
+
+:command:`target_link_directories`
+  .. versionadded:: 3.13
+
+  Populates the :prop_tgt:`LINK_DIRECTORIES` build specification and
+  :prop_tgt:`INTERFACE_LINK_DIRECTORIES` usage requirement properties.
+
+:command:`target_link_options`
+  .. versionadded:: 3.13
+
+  Populates the :prop_tgt:`LINK_OPTIONS` build specification and
+  :prop_tgt:`INTERFACE_LINK_OPTIONS` usage requirement properties.
+
+.. _`Target Build Specification`:
+
+Target Build Specification
+--------------------------
+
+The build specification of `Binary Targets`_ is represented by target
+properties.  For each of the following `compile <Target Compile Properties_>`_
+and `link <Target Link Properties_>`_ properties, compilation and linking
+of the target is affected both by its own value and by the corresponding
+`usage requirement <Target Usage Requirements_>`_ property, named with
+an ``INTERFACE_`` prefix, collected from the transitive closure of link
+dependencies.
+
+.. _`Target Compile Properties`:
+
+Target Compile Properties
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These represent the `build specification <Target Build Specification_>`_
+for compiling a target.
+
+:prop_tgt:`COMPILE_DEFINITIONS`
+  List of compile definitions for compiling sources in the target.
+  These are passed to the compiler with ``-D`` flags, or equivalent,
+  in an unspecified order.
+
+  The :prop_tgt:`DEFINE_SYMBOL` target property is also used
+  as a compile definition as a special convenience case for
+  ``SHARED`` and ``MODULE`` library targets.
+
+:prop_tgt:`COMPILE_OPTIONS`
+  List of compile options for compiling sources in the target.
+  These are passed to the compiler as flags, in the order of appearance.
+
+  Compile options are automatically escaped for the shell.
+
+  Some compile options are best specified via dedicated settings,
+  such as the :prop_tgt:`POSITION_INDEPENDENT_CODE` target property.
+
+:prop_tgt:`COMPILE_FEATURES`
+  .. versionadded:: 3.1
+
+  List of :manual:`compile features <cmake-compile-features(7)>` needed
+  for compiling sources in the target.  Typically these ensure the
+  target's sources are compiled using a sufficient language standard level.
+
+:prop_tgt:`INCLUDE_DIRECTORIES`
+  List of include directories for compiling sources in the target.
+  These are passed to the compiler with ``-I`` or ``-isystem`` flags,
+  or equivalent, in the order of appearance.
+
+  For convenience, the :variable:`CMAKE_INCLUDE_CURRENT_DIR` variable
+  may be enabled to add the source directory and corresponding build
+  directory as ``INCLUDE_DIRECTORIES`` on all targets.
+
+:prop_tgt:`SOURCES`
+  List of source files associated with the target.  This includes sources
+  specified when the target was created by the :command:`add_executable`,
+  :command:`add_library`, or :command:`add_custom_target` command.
+  It also includes sources added by the :command:`target_sources` command,
+  but does not include :ref:`File Sets`.
+
+:prop_tgt:`PRECOMPILE_HEADERS`
+  .. versionadded:: 3.16
+
+  List of header files to precompile and include when compiling
+  sources in the target.
+
+:prop_tgt:`AUTOMOC_MACRO_NAMES`
+  .. versionadded:: 3.10
+
+  List of macro names used by :prop_tgt:`AUTOMOC` to determine if a
+  C++ source in the target needs to be processed by ``moc``.
+
+:prop_tgt:`AUTOUIC_OPTIONS`
+  .. versionadded:: 3.0
+
+  List of options used by :prop_tgt:`AUTOUIC` when invoking ``uic``
+  for the target.
+
+.. _`Target Link Properties`:
+
+Target Link Properties
+^^^^^^^^^^^^^^^^^^^^^^
+
+These represent the `build specification <Target Build Specification_>`_
+for linking a target.
+
+:prop_tgt:`LINK_LIBRARIES`
+  List of link libraries for linking the target, if it is an executable,
+  shared library, or module library.  Entries for `Normal Libraries`_ are
+  passed to the linker either via paths to their link artifacts, or
+  with ``-l`` flags or equivalent.  Entries for `Object Libraries`_ are
+  passed to the linker via paths to their object files.
+
+  Additionally, for compiling and linking the target itself,
+  `usage requirements <Target Usage Requirements_>`_ are propagated from
+  ``LINK_LIBRARIES`` entries naming `Normal Libraries`_,
+  `Interface Libraries`_, `Object Libraries`_, and `Imported Targets`_,
+  collected over the transitive closure of their
+  :prop_tgt:`INTERFACE_LINK_LIBRARIES` properties.
+
+:prop_tgt:`LINK_DIRECTORIES`
+  .. versionadded:: 3.13
+
+  List of link directories for linking the target, if it is an executable,
+  shared library, or module library.  The directories are passed to the
+  linker with ``-L`` flags, or equivalent.
+
+:prop_tgt:`LINK_OPTIONS`
+  .. versionadded:: 3.13
+
+  List of link options for linking the target, if it is an executable,
+  shared library, or module library.  The options are passed to the
+  linker as flags, in the order of appearance.
+
+  Link options are automatically escaped for the shell.
+
+:prop_tgt:`LINK_DEPENDS`
+  List of files on which linking the target depends, if it is an executable,
+  shared library, or module library.  For example, linker scripts specified
+  via :prop_tgt:`LINK_OPTIONS` may be listed here such that changing them
+  causes binaries to be linked again.
+
+.. _`Target Usage Requirements`:
+
+Target Usage Requirements
+-------------------------
+
+The *usage requirements* of a target are settings that propagate to consumers,
+which link to the target via :command:`target_link_libraries`, in order to
+correctly compile and link with it.  They are represented by transitive
+`compile <Transitive Compile Properties_>`_ and
+`link <Transitive Link Properties_>`_ properties.
 
 Note that usage requirements are not designed as a way to make downstreams
-use particular :prop_tgt:`COMPILE_OPTIONS` or
-:prop_tgt:`COMPILE_DEFINITIONS` etc for convenience only.  The contents of
-the properties must be **requirements**, not merely recommendations or
-convenience.
+use particular :prop_tgt:`COMPILE_OPTIONS`, :prop_tgt:`COMPILE_DEFINITIONS`,
+etc. for convenience only.  The contents of the properties must be
+**requirements**, not merely recommendations.
 
 See the :ref:`Creating Relocatable Packages` section of the
 :manual:`cmake-packages(7)` manual for discussion of additional care
 that must be taken when specifying usage requirements while creating
 packages for redistribution.
-
-Target Properties
------------------
-
-The contents of the :prop_tgt:`INCLUDE_DIRECTORIES`,
-:prop_tgt:`COMPILE_DEFINITIONS` and :prop_tgt:`COMPILE_OPTIONS` target
-properties are used appropriately when compiling the source files of a
-binary target.
-
-Entries in the :prop_tgt:`INCLUDE_DIRECTORIES` are added to the compile line
-with ``-I`` or ``-isystem`` prefixes and in the order of appearance in the
-property value.
-
-Entries in the :prop_tgt:`COMPILE_DEFINITIONS` are prefixed with ``-D`` or
-``/D`` and added to the compile line in an unspecified order.  The
-:prop_tgt:`DEFINE_SYMBOL` target property is also added as a compile
-definition as a special convenience case for ``SHARED`` and ``MODULE``
-library targets.
-
-Entries in the :prop_tgt:`COMPILE_OPTIONS` are escaped for the shell and added
-in the order of appearance in the property value.  Several compile options have
-special separate handling, such as :prop_tgt:`POSITION_INDEPENDENT_CODE`.
-
-The contents of the :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`,
-:prop_tgt:`INTERFACE_COMPILE_DEFINITIONS` and
-:prop_tgt:`INTERFACE_COMPILE_OPTIONS` target properties are
-*Usage Requirements* -- they specify content which consumers
-must use to correctly compile and link with the target they appear on.
-For any binary target, the contents of each ``INTERFACE_`` property on
-each target specified in a :command:`target_link_libraries` command is
-consumed:
-
-.. code-block:: cmake
-
-  set(srcs archive.cpp zip.cpp)
-  if (LZMA_FOUND)
-    list(APPEND srcs lzma.cpp)
-  endif()
-  add_library(archive SHARED ${srcs})
-  if (LZMA_FOUND)
-    # The archive library sources are compiled with -DBUILDING_WITH_LZMA
-    target_compile_definitions(archive PRIVATE BUILDING_WITH_LZMA)
-  endif()
-  target_compile_definitions(archive INTERFACE USING_ARCHIVE_LIB)
-
-  add_executable(consumer)
-  # Link consumer to archive and consume its usage requirements. The consumer
-  # executable sources are compiled with -DUSING_ARCHIVE_LIB.
-  target_link_libraries(consumer archive)
-
-Because it is common to require that the source directory and corresponding
-build directory are added to the :prop_tgt:`INCLUDE_DIRECTORIES`, the
-:variable:`CMAKE_INCLUDE_CURRENT_DIR` variable can be enabled to conveniently
-add the corresponding directories to the :prop_tgt:`INCLUDE_DIRECTORIES` of
-all targets.  The variable :variable:`CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE`
-can be enabled to add the corresponding directories to the
-:prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` of all targets.  This makes use of
-targets in multiple different directories convenient through use of the
-:command:`target_link_libraries` command.
-
-
-.. _`Target Usage Requirements`:
-
-Transitive Usage Requirements
------------------------------
 
 The usage requirements of a target can transitively propagate to the dependents.
 The :command:`target_link_libraries` command has ``PRIVATE``,
@@ -328,6 +510,156 @@ be specified in the order ``lib3`` ``lib1`` ``lib2``:
 Note that care must be taken when specifying usage requirements for targets
 which will be exported for installation using the :command:`install(EXPORT)`
 command.  See :ref:`Creating Packages` for more.
+
+.. _`Transitive Compile Properties`:
+
+Transitive Compile Properties
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These represent `usage requirements <Target Usage Requirements_>`_ for
+compiling consumers.
+
+:prop_tgt:`INTERFACE_COMPILE_DEFINITIONS`
+  List of compile definitions for compiling sources in the target's consumers.
+  Typically these are used by the target's header files.
+
+:prop_tgt:`INTERFACE_COMPILE_OPTIONS`
+  List of compile options for compiling sources in the target's consumers.
+
+:prop_tgt:`INTERFACE_COMPILE_FEATURES`
+  .. versionadded:: 3.1
+
+  List of :manual:`compile features <cmake-compile-features(7)>` needed
+  for compiling sources in the target's consumers.  Typically these
+  ensure the target's header files are processed when compiling consumers
+  using a sufficient language standard level.
+
+:prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`
+  List of include directories for compiling sources in the target's consumers.
+  Typically these are the locations of the target's header files.
+
+:prop_tgt:`INTERFACE_SYSTEM_INCLUDE_DIRECTORIES`
+  List of directories that, when specified as include directories, e.g., by
+  :prop_tgt:`INCLUDE_DIRECTORIES` or :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`,
+  should be treated as "system" include directories when compiling sources
+  in the target's consumers.
+
+:prop_tgt:`INTERFACE_SOURCES`
+  List of source files to associate with the target's consumers.
+
+:prop_tgt:`INTERFACE_PRECOMPILE_HEADERS`
+  .. versionadded:: 3.16
+
+  List of header files to precompile and include when compiling
+  sources in the target's consumers.
+
+:prop_tgt:`INTERFACE_AUTOMOC_MACRO_NAMES`
+  .. versionadded:: 3.27
+
+  List of macro names used by :prop_tgt:`AUTOMOC` to determine if a
+  C++ source in the target's consumers needs to be processed by ``moc``.
+
+:prop_tgt:`INTERFACE_AUTOUIC_OPTIONS`
+  .. versionadded:: 3.0
+
+  List of options used by :prop_tgt:`AUTOUIC` when invoking ``uic``
+  for the target's consumers.
+
+.. _`Transitive Link Properties`:
+
+Transitive Link Properties
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+These represent `usage requirements <Target Usage Requirements_>`_ for
+linking consumers.
+
+:prop_tgt:`INTERFACE_LINK_LIBRARIES`
+  List of link libraries for linking the target's consumers, for
+  those that are executables, shared libraries, or module libraries.
+  These are the transitive dependencies of the target.
+
+  Additionally, for compiling and linking the target's consumers,
+  `usage requirements <Target Usage Requirements_>`_ are collected from
+  the transitive closure of ``INTERFACE_LINK_LIBRARIES`` entries naming
+  `Normal Libraries`_, `Interface Libraries`_, `Object Libraries`_,
+  and `Imported Targets`_,
+
+:prop_tgt:`INTERFACE_LINK_DIRECTORIES`
+  .. versionadded:: 3.13
+
+  List of link directories for linking the target's consumers, for
+  those that are executables, shared libraries, or module libraries.
+
+:prop_tgt:`INTERFACE_LINK_OPTIONS`
+  .. versionadded:: 3.13
+
+  List of link options for linking the target's consumers, for
+  those that are executables, shared libraries, or module libraries.
+
+:prop_tgt:`INTERFACE_LINK_DEPENDS`
+  .. versionadded:: 3.13
+
+  List of files on which linking the target's consumers depends, for
+  those that are executables, shared libraries, or module libraries.
+
+.. _`Custom Transitive Properties`:
+
+Custom Transitive Properties
+----------------------------
+
+.. versionadded:: 3.30
+
+The :genex:`TARGET_PROPERTY` generator expression evaluates the above
+`build specification <Target Build Specification_>`_ and
+`usage requirement <Target Usage Requirements_>`_ properties
+as builtin transitive properties.  It also supports custom transitive
+properties defined by the :prop_tgt:`TRANSITIVE_COMPILE_PROPERTIES`
+and :prop_tgt:`TRANSITIVE_LINK_PROPERTIES` properties on the target
+and its link dependencies.
+
+For example:
+
+.. code-block:: cmake
+
+  add_library(example INTERFACE)
+  set_target_properties(example PROPERTIES
+    TRANSITIVE_COMPILE_PROPERTIES "CUSTOM_C"
+    TRANSITIVE_LINK_PROPERTIES    "CUSTOM_L"
+
+    INTERFACE_CUSTOM_C "EXAMPLE_CUSTOM_C"
+    INTERFACE_CUSTOM_L "EXAMPLE_CUSTOM_L"
+    )
+
+  add_library(mylib STATIC mylib.c)
+  target_link_libraries(mylib PRIVATE example)
+  set_target_properties(mylib PROPERTIES
+    CUSTOM_C           "MYLIB_PRIVATE_CUSTOM_C"
+    CUSTOM_L           "MYLIB_PRIVATE_CUSTOM_L"
+    INTERFACE_CUSTOM_C "MYLIB_IFACE_CUSTOM_C"
+    INTERFACE_CUSTOM_L "MYLIB_IFACE_CUSTOM_L"
+    )
+
+  add_executable(myexe myexe.c)
+  target_link_libraries(myexe PRIVATE mylib)
+  set_target_properties(myexe PROPERTIES
+    CUSTOM_C "MYEXE_CUSTOM_C"
+    CUSTOM_L "MYEXE_CUSTOM_L"
+    )
+
+  add_custom_target(print ALL VERBATIM
+    COMMAND ${CMAKE_COMMAND} -E echo
+      # Prints "MYLIB_PRIVATE_CUSTOM_C;EXAMPLE_CUSTOM_C"
+      "$<TARGET_PROPERTY:mylib,CUSTOM_C>"
+
+      # Prints "MYLIB_PRIVATE_CUSTOM_L;EXAMPLE_CUSTOM_L"
+      "$<TARGET_PROPERTY:mylib,CUSTOM_L>"
+
+      # Prints "MYEXE_CUSTOM_C"
+      "$<TARGET_PROPERTY:myexe,CUSTOM_C>"
+
+      # Prints "MYEXE_CUSTOM_L;MYLIB_IFACE_CUSTOM_L;EXAMPLE_CUSTOM_L"
+      "$<TARGET_PROPERTY:myexe,CUSTOM_L>"
+    )
 
 .. _`Compatible Interface Properties`:
 

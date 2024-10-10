@@ -132,7 +132,7 @@ bool CommandLineArguments::GetMatchedArguments(
 
   // Does the argument match to any we know about?
   for (it = this->Internals->Callbacks.begin();
-       it != this->Internals->Callbacks.end(); it++) {
+       it != this->Internals->Callbacks.end(); ++it) {
     const CommandLineArguments::Internal::String& parg = it->first;
     CommandLineArgumentsCallbackStructure* cs = &it->second;
     if (cs->ArgumentType == CommandLineArguments::NO_ARGUMENT ||
@@ -467,7 +467,7 @@ void CommandLineArguments::GenerateHelp()
   MapArgs mp;
   MapArgs::iterator mpit, smpit;
   for (it = this->Internals->Callbacks.begin();
-       it != this->Internals->Callbacks.end(); it++) {
+       it != this->Internals->Callbacks.end(); ++it) {
     CommandLineArgumentsCallbackStructure* cs = &(it->second);
     mpit = mp.find(cs->Help);
     if (mpit != mp.end()) {
@@ -478,14 +478,14 @@ void CommandLineArguments::GenerateHelp()
     }
   }
   for (it = this->Internals->Callbacks.begin();
-       it != this->Internals->Callbacks.end(); it++) {
+       it != this->Internals->Callbacks.end(); ++it) {
     CommandLineArgumentsCallbackStructure* cs = &(it->second);
     mpit = mp.find(cs->Help);
     if (mpit != mp.end()) {
       mpit->second.insert(it->first);
       smpit = mp.find(it->first);
       CommandLineArguments::Internal::SetOfStrings::iterator sit;
-      for (sit = smpit->second.begin(); sit != smpit->second.end(); sit++) {
+      for (sit = smpit->second.begin(); sit != smpit->second.end(); ++sit) {
         mpit->second.insert(*sit);
       }
       mp.erase(smpit);
@@ -496,9 +496,9 @@ void CommandLineArguments::GenerateHelp()
 
   // Find the length of the longest string
   CommandLineArguments::Internal::String::size_type maxlen = 0;
-  for (mpit = mp.begin(); mpit != mp.end(); mpit++) {
+  for (mpit = mp.begin(); mpit != mp.end(); ++mpit) {
     CommandLineArguments::Internal::SetOfStrings::iterator sit;
-    for (sit = mpit->second.begin(); sit != mpit->second.end(); sit++) {
+    for (sit = mpit->second.begin(); sit != mpit->second.end(); ++sit) {
       CommandLineArguments::Internal::String::size_type clen = sit->size();
       switch (this->Internals->Callbacks[*sit].ArgumentType) {
         case CommandLineArguments::NO_ARGUMENT:
@@ -524,9 +524,9 @@ void CommandLineArguments::GenerateHelp()
   maxlen += 4; // For the space before and after the option
 
   // Print help for each option
-  for (mpit = mp.begin(); mpit != mp.end(); mpit++) {
+  for (mpit = mp.begin(); mpit != mp.end(); ++mpit) {
     CommandLineArguments::Internal::SetOfStrings::iterator sit;
-    for (sit = mpit->second.begin(); sit != mpit->second.end(); sit++) {
+    for (sit = mpit->second.begin(); sit != mpit->second.end(); ++sit) {
       str << std::endl;
       std::string argument = *sit;
       switch (this->Internals->Callbacks[*sit].ArgumentType) {

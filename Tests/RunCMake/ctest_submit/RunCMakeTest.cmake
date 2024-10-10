@@ -2,9 +2,13 @@ include(RunCTest)
 
 # Default case parameters.
 set(CASE_DROP_METHOD "http")
-set(CASE_DROP_SITE "-no-site-")
+set(CASE_DROP_SITE "badhostname.invalid")
 set(CASE_CTEST_SUBMIT_ARGS "")
+set(CASE_TEST_PREFIX_CODE "")
 
+# Do not use any proxy for lookup of an invalid site.
+# DNS failure by proxy looks different than DNS failure without proxy.
+set(ENV{no_proxy} "$ENV{no_proxy},badhostname.invalid")
 
 function(run_ctest_submit CASE_NAME)
   set(CASE_CTEST_SUBMIT_ARGS "${ARGN}")
@@ -51,3 +55,30 @@ endfunction()
 
 run_ctest_submit_FailDrop(http)
 run_ctest_submit_FailDrop(https)
+block()
+  set(CASE_DROP_METHOD "https")
+  set(CASE_TEST_PREFIX_CODE "set(CTEST_TLS_VERSION 1.1)")
+  run_ctest(FailDrop-TLSVersion-1.1 -VV)
+  set(CASE_TEST_PREFIX_CODE "set(CMAKE_TLS_VERSION 1.1)") # Test fallback to CMake variable.
+  run_ctest(FailDrop-TLSVersion-1.1-cmake -VV)
+  set(ENV{CMAKE_TLS_VERSION} 1.1) # Test fallback to env variable.
+  set(CASE_TEST_PREFIX_CODE "")
+  run_ctest(FailDrop-TLSVersion-1.1-env -VV)
+  unset(ENV{CMAKE_TLS_VERSION})
+  set(CASE_TEST_PREFIX_CODE "set(CTEST_TLS_VERIFY ON)")
+  run_ctest(FailDrop-TLSVerify-ON -VV)
+  set(CASE_TEST_PREFIX_CODE "set(CMAKE_TLS_VERIFY ON)") # Test fallback to CMake variable.
+  run_ctest(FailDrop-TLSVerify-ON-cmake -VV)
+  set(ENV{CMAKE_TLS_VERIFY} ON) # Test fallback to env variable.
+  set(CASE_TEST_PREFIX_CODE "")
+  run_ctest(FailDrop-TLSVerify-ON-env -VV)
+  unset(ENV{CMAKE_TLS_VERIFY})
+  set(CASE_TEST_PREFIX_CODE "set(CTEST_TLS_VERIFY OFF)")
+  run_ctest(FailDrop-TLSVerify-OFF -VV)
+  set(CASE_TEST_PREFIX_CODE "set(CMAKE_TLS_VERIFY OFF)") # Test fallback to CMake variable.
+  run_ctest(FailDrop-TLSVerify-OFF-cmake -VV)
+  set(ENV{CMAKE_TLS_VERIFY} OFF) # Test fallback to env variable.
+  set(CASE_TEST_PREFIX_CODE "")
+  run_ctest(FailDrop-TLSVerify-OFF-env -VV)
+  unset(ENV{CMAKE_TLS_VERIFY})
+endblock()

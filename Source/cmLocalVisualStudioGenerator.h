@@ -31,6 +31,8 @@ public:
   cmLocalVisualStudioGenerator(cmGlobalGenerator* gg, cmMakefile* mf);
   ~cmLocalVisualStudioGenerator() override;
 
+  virtual bool IsVFProj() const = 0;
+
   std::string ConstructScript(cmCustomCommandGenerator const& ccg,
                               const std::string& newline = "\n");
   std::string FinishConstructScript(VsProjectType projectType,

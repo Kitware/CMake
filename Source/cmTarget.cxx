@@ -404,6 +404,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "VS_DEBUGGER_COMMAND_ARGUMENTS"_s, IC::ExecutableTarget },
   { "VS_DEBUGGER_ENVIRONMENT"_s, IC::ExecutableTarget },
   { "VS_DEBUGGER_WORKING_DIRECTORY"_s, IC::ExecutableTarget },
+  { "VS_USE_DEBUG_LIBRARIES"_s, IC::NonImportedTarget },
   // ---- OpenWatcom
   { "WATCOM_RUNTIME_LIBRARY"_s, IC::CanCompileSources },
   // -- Language
@@ -411,6 +412,7 @@ TargetProperty const StaticTargetProperties[] = {
   COMMON_LANGUAGE_PROPERTIES(C),
   // ---- C++
   COMMON_LANGUAGE_PROPERTIES(CXX),
+  { "CXX_MODULE_STD"_s, IC::CanCompileSources },
   // ---- CSharp
   { "DOTNET_SDK"_s, IC::NonImportedTarget },
   { "DOTNET_TARGET_FRAMEWORK"_s, IC::TargetWithCommands },
@@ -1841,6 +1843,7 @@ void cmTarget::CopyImportedCxxModulesProperties(cmTarget const* tgt)
     "CXX_STANDARD_REQUIRED",
     "CXX_EXTENSIONS",
     "CXX_VISIBILITY_PRESET",
+    "CXX_MODULE_STD",
 
     // Static analysis
     "CXX_CLANG_TIDY",
@@ -2150,7 +2153,7 @@ void cmTarget::SetProperty(const std::string& prop, cmValue value)
   }
 
   if (prop == propIMPORTED_GLOBAL) {
-    if (!cmIsOn(value)) {
+    if (!value.IsOn()) {
       std::ostringstream e;
       e << "IMPORTED_GLOBAL property can't be set to FALSE on targets (\""
         << this->impl->Name << "\")\n";
@@ -2844,7 +2847,7 @@ std::string const& cmTarget::GetSafeProperty(std::string const& prop) const
 
 bool cmTarget::GetPropertyAsBool(const std::string& prop) const
 {
-  return cmIsOn(this->GetProperty(prop));
+  return this->GetProperty(prop).IsOn();
 }
 
 cmPropertyMap const& cmTarget::GetProperties() const

@@ -55,7 +55,6 @@ int cmCPackIFWGenerator::PackageFiles()
 std::vector<std::string> cmCPackIFWGenerator::BuildRepogenCommand()
 {
   std::vector<std::string> ifwCmd;
-  std::string ifwArg;
 
   ifwCmd.emplace_back(this->RepoGen);
 
@@ -104,7 +103,7 @@ std::vector<std::string> cmCPackIFWGenerator::BuildRepogenCommand()
   if (!this->OnlineOnly && !this->DownloadedPackages.empty()) {
     ifwCmd.emplace_back("-i");
     auto it = this->DownloadedPackages.begin();
-    ifwArg = (*it)->Name;
+    std::string ifwArg = (*it)->Name;
     ++it;
     while (it != this->DownloadedPackages.end()) {
       ifwArg += "," + (*it)->Name;
@@ -417,10 +416,10 @@ int cmCPackIFWGenerator::InitializeInternal()
   }
 
   if (cmValue ifwDownloadAll = this->GetOption("CPACK_IFW_DOWNLOAD_ALL")) {
-    this->OnlineOnly = cmIsOn(ifwDownloadAll);
+    this->OnlineOnly = ifwDownloadAll.IsOn();
   } else if (cmValue cpackDownloadAll =
                this->GetOption("CPACK_DOWNLOAD_ALL")) {
-    this->OnlineOnly = cmIsOn(cpackDownloadAll);
+    this->OnlineOnly = cpackDownloadAll.IsOn();
   } else {
     this->OnlineOnly = false;
   }
@@ -462,7 +461,7 @@ int cmCPackIFWGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-std::string cmCPackIFWGenerator::GetComponentInstallDirNameSuffix(
+std::string cmCPackIFWGenerator::GetComponentInstallSuffix(
   const std::string& componentName)
 {
   const std::string prefix = "packages/";
@@ -474,6 +473,22 @@ std::string cmCPackIFWGenerator::GetComponentInstallDirNameSuffix(
 
   return prefix +
     this->GetComponentPackageName(&this->Components[componentName]) + suffix;
+}
+
+std::string cmCPackIFWGenerator::GetComponentInstallDirNameSuffix(
+  const std::string& componentName)
+{
+  const std::string prefix = "packages/";
+  const std::string suffix = "/data";
+
+  if (this->componentPackageMethod == this->ONE_PACKAGE) {
+    return cmStrCat(prefix, this->GetRootPackageName(), suffix);
+  }
+
+  return prefix +
+    this->GetSanitizedDirOrFileName(
+      this->GetComponentPackageName(&this->Components[componentName])) +
+    suffix;
 }
 
 cmCPackComponent* cmCPackIFWGenerator::GetComponent(

@@ -1,6 +1,6 @@
 file(GLOB test_xml_file "${RunCMake_TEST_BINARY_DIR}/Testing/*/Test.xml")
 if(test_xml_file)
-  file(READ "${test_xml_file}" test_xml LIMIT 4096)
+  file(READ "${test_xml_file}" test_xml LIMIT 8192)
   if("${test_xml}" MATCHES [[(<Test Status="passed">.*</Test>).*(<Test Status="failed">.*</Test>)]])
     set(test_passed "${CMAKE_MATCH_1}")
     set(test_failed "${CMAKE_MATCH_2}")

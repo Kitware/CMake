@@ -111,6 +111,9 @@ The following variables may be set to control search behavior:
   locations.  Useful on multi-lib systems.
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 macro(_OpenSSL_test_and_find_dependencies ssl_library crypto_library)
   unset(_OpenSSL_extra_static_deps)
   if(UNIX AND
@@ -796,3 +799,5 @@ unset(_OpenSSL_extra_static_deps)
 unset(_OpenSSL_has_dependency_dl)
 unset(_OpenSSL_has_dependency_threads)
 unset(_OpenSSL_has_dependency_zlib)
+
+cmake_policy(POP)

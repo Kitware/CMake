@@ -24,10 +24,10 @@ platform-specific library name will be automatically selected.
 This module reports information about the ICU installation in
 several variables.  General variables::
 
-  ICU_VERSION - ICU release version
   ICU_FOUND - true if the main programs and libraries were found
-  ICU_LIBRARIES - component libraries to be linked
   ICU_INCLUDE_DIRS - the directories containing the ICU headers
+  ICU_LIBRARIES - component libraries to be linked
+  ICU_VERSION - ICU release version
 
 Imported targets::
 
@@ -83,12 +83,10 @@ The following cache variables may also be set::
   In most cases none of the above variables will require setting,
   unless multiple ICU versions are available and a specific version
   is required.
-
-Other variables one may set to control this module are::
-
-  ICU_DEBUG - Set to ON to enable debug output from FindICU.
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 # Written by Roger Leigh <rleigh@codelibre.net>
 
 set(icu_programs
@@ -179,7 +177,6 @@ function(_ICU_FIND)
 
   # Find all ICU libraries
   list(APPEND icu_library_suffixes "${_lib64}" "lib")
-  set(ICU_REQUIRED_LIBS_FOUND ON)
   set(static_prefix )
   # static icu libraries compiled with MSVC have the prefix 's'
   if(MSVC)
@@ -190,8 +187,9 @@ function(_ICU_FIND)
     set(component_cache "ICU_${component_upcase}_LIBRARY")
     set(component_cache_release "${component_cache}_RELEASE")
     set(component_cache_debug "${component_cache}_DEBUG")
-    set(component_found "ICU_${component_upcase}_FOUND")
+    set(component_found "ICU_${component}_FOUND")
     set(component_found_compat "${component_upcase}_FOUND")
+    set(component_found_compat2 "ICU_${component_upcase}_FOUND")
     set(component_libnames "icu${component}")
     set(component_debug_libnames "icu${component}d")
 
@@ -254,27 +252,17 @@ function(_ICU_FIND)
     if(${component_cache})
       set("${component_found}" ON)
       set("${component_found_compat}" ON)
+      set("${component_found_compat2}" ON)
       list(APPEND ICU_LIBRARY "${${component_cache}}")
-      if (ICU_FIND_REQUIRED_${component})
-        list(APPEND ICU_LIBS_FOUND "${component} (required): ${${component_cache}}")
-      else()
-        list(APPEND ICU_LIBS_FOUND "${component} (optional): ${${component_cache}}")
-      endif()
-    else()
-      if (ICU_FIND_REQUIRED_${component})
-        set(ICU_REQUIRED_LIBS_FOUND OFF)
-        list(APPEND ICU_LIBS_NOTFOUND "${component} (required)")
-      else()
-        list(APPEND ICU_LIBS_NOTFOUND "${component} (optional)")
-      endif()
     endif()
     mark_as_advanced("${component_found}")
     mark_as_advanced("${component_found_compat}")
+    mark_as_advanced("${component_found_compat2}")
     set("${component_cache}" "${${component_cache}}" PARENT_SCOPE)
     set("${component_found}" "${${component_found}}" PARENT_SCOPE)
     set("${component_found_compat}" "${${component_found_compat}}" PARENT_SCOPE)
+    set("${component_found_compat2}" "${${component_found_compat2}}" PARENT_SCOPE)
   endforeach()
-  set(_ICU_REQUIRED_LIBS_FOUND "${ICU_REQUIRED_LIBS_FOUND}" PARENT_SCOPE)
   set(ICU_LIBRARY "${ICU_LIBRARY}" PARENT_SCOPE)
 
   # Find all ICU data files
@@ -303,43 +291,21 @@ function(_ICU_FIND)
     mark_as_advanced("${cache_var}")
     set("${data_var}" "${${cache_var}}" PARENT_SCOPE)
   endforeach()
-
-  if(NOT ICU_FIND_QUIETLY)
-    if(ICU_LIBS_FOUND)
-      message(STATUS "Found the following ICU libraries:")
-      foreach(found ${ICU_LIBS_FOUND})
-        message(STATUS "  ${found}")
-      endforeach()
-    endif()
-    if(ICU_LIBS_NOTFOUND)
-      message(STATUS "The following ICU libraries were not found:")
-      foreach(notfound ${ICU_LIBS_NOTFOUND})
-        message(STATUS "  ${notfound}")
-      endforeach()
-    endif()
-  endif()
-
-  if(ICU_DEBUG)
-    message(STATUS "--------FindICU.cmake search debug--------")
-    message(STATUS "ICU binary path search order: ${icu_roots}")
-    message(STATUS "ICU include path search order: ${icu_roots}")
-    message(STATUS "ICU library path search order: ${icu_roots}")
-    message(STATUS "----------------")
-  endif()
 endfunction()
 
 _ICU_FIND()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(ICU
-                                  FOUND_VAR ICU_FOUND
-                                  REQUIRED_VARS ICU_INCLUDE_DIR
-                                                ICU_LIBRARY
-                                                _ICU_REQUIRED_LIBS_FOUND
-                                  VERSION_VAR ICU_VERSION
-                                  FAIL_MESSAGE "Failed to find all ICU components")
-
-unset(_ICU_REQUIRED_LIBS_FOUND)
+find_package_handle_standard_args(ICU
+  REQUIRED_VARS
+    ICU_INCLUDE_DIR
+    ICU_LIBRARY
+  VERSION_VAR
+    ICU_VERSION
+  HANDLE_COMPONENTS
+  FAIL_MESSAGE
+    "Failed to find all ICU components"
+)
 
 if(ICU_FOUND)
   set(ICU_INCLUDE_DIRS "${ICU_INCLUDE_DIR}")
@@ -393,45 +359,5 @@ if(ICU_FOUND)
   endforeach()
 endif()
 
-if(ICU_DEBUG)
-  message(STATUS "--------FindICU.cmake results debug--------")
-  message(STATUS "ICU found: ${ICU_FOUND}")
-  message(STATUS "ICU_VERSION number: ${ICU_VERSION}")
-  message(STATUS "ICU_ROOT directory: ${ICU_ROOT}")
-  message(STATUS "ICU_INCLUDE_DIR directory: ${ICU_INCLUDE_DIR}")
-  message(STATUS "ICU_LIBRARIES: ${ICU_LIBRARIES}")
-
-  foreach(program IN LISTS icu_programs)
-    string(TOUPPER "${program}" program_upcase)
-    set(program_lib "ICU_${program_upcase}_EXECUTABLE")
-    message(STATUS "${program} program: ${program_lib}=${${program_lib}}")
-    unset(program_upcase)
-    unset(program_lib)
-  endforeach()
-
-  foreach(data IN LISTS icu_data)
-    string(TOUPPER "${data}" data_upcase)
-    string(REPLACE "." "_" data_upcase "${data_upcase}")
-    set(data_lib "ICU_${data_upcase}")
-    message(STATUS "${data} data: ${data_lib}=${${data_lib}}")
-    unset(data_upcase)
-    unset(data_lib)
-  endforeach()
-
-  foreach(component IN LISTS ICU_FIND_COMPONENTS)
-    string(TOUPPER "${component}" component_upcase)
-    set(component_lib "ICU_${component_upcase}_LIBRARIES")
-    set(component_found "ICU_${component_upcase}_FOUND")
-    set(component_found_compat "${component_upcase}_FOUND")
-    message(STATUS "${component} library found: ${component_found}=${${component_found}}")
-    message(STATUS "${component} library found (compat name): ${component_found_compat}=${${component_found_compat}}")
-    message(STATUS "${component} library: ${component_lib}=${${component_lib}}")
-    unset(component_upcase)
-    unset(component_lib)
-    unset(component_found)
-    unset(component_found_compat)
-  endforeach()
-  message(STATUS "----------------")
-endif()
-
 unset(icu_programs)
+cmake_policy(POP)

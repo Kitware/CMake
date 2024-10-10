@@ -122,6 +122,8 @@ struct thread_data {
 
 #define CARES_TIMEOUT_PER_ATTEMPT 2000
 
+static int ares_ver = 0;
+
 /*
  * Curl_resolver_global_init() - the generic low-level asynchronous name
  * resolve API.  Called from curl_global_init() to initialize global resolver
@@ -134,6 +136,7 @@ int Curl_resolver_global_init(void)
     return CURLE_FAILED_INIT;
   }
 #endif
+  ares_version(&ares_ver);
   return CURLE_OK;
 }
 
@@ -173,16 +176,8 @@ CURLcode Curl_resolver_init(struct Curl_easy *easy, void **resolver)
   int status;
   struct ares_options options;
   int optmask = ARES_OPT_SOCK_STATE_CB;
-  static int ares_ver = 0;
   options.sock_state_cb = sock_state_cb;
   options.sock_state_cb_data = easy;
-  if(ares_ver == 0)
-    ares_version(&ares_ver);
-
-  if(ares_ver < 0x011400) { /* c-ares included similar change since 1.20.0 */
-    options.timeout = CARES_TIMEOUT_PER_ATTEMPT;
-    optmask |= ARES_OPT_TIMEOUTMS;
-  }
 
   /*
      if c ares < 1.20.0: curl set timeout to CARES_TIMEOUT_PER_ATTEMPT (2s)
@@ -193,6 +188,11 @@ CURLcode Curl_resolver_init(struct Curl_easy *easy, void **resolver)
      if c-ares >= 1.24.0, user can set the timeout via /etc/resolv.conf to
      overwrite c-ares' timeout.
   */
+  DEBUGASSERT(ares_ver);
+  if(ares_ver < 0x011400) {
+    options.timeout = CARES_TIMEOUT_PER_ATTEMPT;
+    optmask |= ARES_OPT_TIMEOUTMS;
+  }
 
   status = ares_init_options((ares_channel*)resolver, &options, optmask);
   if(status != ARES_SUCCESS) {
@@ -539,7 +539,7 @@ static void compound_results(struct thread_data *res,
   if(!ai)
     return;
 
-#ifdef ENABLE_IPV6 /* CURLRES_IPV6 */
+#ifdef USE_IPV6 /* CURLRES_IPV6 */
   if(res->temp_ai && res->temp_ai->ai_family == PF_INET6) {
     /* We have results already, put the new IPv6 entries at the head of the
        list. */
@@ -684,7 +684,7 @@ static struct Curl_addrinfo *ares2addr(struct ares_addrinfo_node *node)
     /* settle family-specific sockaddr structure size.  */
     if(ai->ai_family == AF_INET)
       ss_size = sizeof(struct sockaddr_in);
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
     else if(ai->ai_family == AF_INET6)
       ss_size = sizeof(struct sockaddr_in6);
 #endif
@@ -850,7 +850,7 @@ CURLcode Curl_set_dns_servers(struct Curl_easy *data,
   /* If server is NULL or empty, this would purge all DNS servers
    * from ares library, which will cause any and all queries to fail.
    * So, just return OK if none are configured and don't actually make
-   * any changes to c-ares.  This lets c-ares use it's defaults, which
+   * any changes to c-ares.  This lets c-ares use its defaults, which
    * it gets from the OS (for instance from /etc/resolv.conf on Linux).
    */
   if(!(servers && servers[0]))
@@ -932,7 +932,7 @@ CURLcode Curl_set_dns_local_ip4(struct Curl_easy *data,
 CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
                                 const char *local_ip6)
 {
-#if defined(HAVE_CARES_SET_LOCAL) && defined(ENABLE_IPV6)
+#if defined(HAVE_CARES_SET_LOCAL) && defined(USE_IPV6)
   unsigned char a6[INET6_ADDRSTRLEN];
 
   if((!local_ip6) || (local_ip6[0] == 0)) {

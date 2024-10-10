@@ -47,6 +47,9 @@ The following cache variables may also be set:
   Debug and Release variants are found separately.
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 # Written by Roger Leigh <rleigh@codelibre.net>
 
 function(_XercesC_GET_VERSION  version_hdr)
@@ -149,3 +152,5 @@ if(XercesC_FOUND)
     endif()
   endif()
 endif()
+
+cmake_policy(POP)

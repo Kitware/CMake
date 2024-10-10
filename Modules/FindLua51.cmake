@@ -26,6 +26,9 @@ This is because, the lua location is not standardized and may exist in
 locations other than lua/
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 find_path(LUA_INCLUDE_DIR lua.h
   HINTS
     ENV LUA_DIR
@@ -73,3 +76,5 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua51
                                   VERSION_VAR LUA_VERSION_STRING)
 
 mark_as_advanced(LUA_INCLUDE_DIR LUA_LIBRARIES LUA_LIBRARY LUA_MATH_LIBRARY)
+
+cmake_policy(POP)

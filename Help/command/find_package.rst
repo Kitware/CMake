@@ -21,6 +21,30 @@ Find a package (usually provided by something external to the project),
 and load its package-specific details.  Calls to this command can also
 be intercepted by :ref:`dependency providers <dependency_providers>`.
 
+Typical Usage
+^^^^^^^^^^^^^
+
+Most calls to ``find_package()`` typically have the following form:
+
+.. parsed-literal::
+
+  find_package(<PackageName> [<version>] [REQUIRED] [COMPONENTS <components>...])
+
+The ``<PackageName>`` is the only mandatory argument.  The ``<version>`` is
+often omitted, and ``REQUIRED`` should be given if the project cannot be
+configured successfully without the package.  Some more complicated packages
+support components which can be selected with the ``COMPONENTS`` keyword, but
+most packages don't have that level of complexity.
+
+The above is a reduced form of the `basic signature`_.  Where possible,
+projects should find packages using this form.  This reduces complexity and
+maximizes the ways in which the package can be found or provided.
+
+Understanding the `basic signature`_ should be enough for general usage of
+``find_package()``.  Project maintainers who intend to provide a config
+package should understand the bigger picture, as explained in
+:ref:`Full Signature` and all subsequent sections on this page.
+
 Search Modes
 ^^^^^^^^^^^^
 
@@ -85,12 +109,6 @@ to true to reverse the priority and direct CMake to search using Config mode
 first before falling back to Module mode.  The basic signature can also be
 forced to use only Module mode with a ``MODULE`` keyword.  If the
 `full signature`_ is used, the command only searches in Config mode.
-
-Where possible, user code should generally look for packages using the
-`basic signature`_, since that allows the package to be found with any mode.
-Project maintainers wishing to provide a config package should understand
-the bigger picture, as explained in :ref:`Full Signature` and all subsequent
-sections on this page.
 
 .. _`basic signature`:
 

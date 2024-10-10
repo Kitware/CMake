@@ -1,6 +1,8 @@
 INTERFACE_AUTOUIC_OPTIONS
 -------------------------
 
+.. versionadded:: 3.0
+
 List of interface options to pass to uic.
 
 Targets may populate this property to publish the options

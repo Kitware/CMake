@@ -94,6 +94,10 @@ void QCMake::setSourceDirectory(const QString& _dir)
     emit this->sourceDirChanged(this->SourceDirectory);
     this->loadPresets();
     this->setPreset(QString{});
+    if (!cmSystemTools::FileIsFullPath(
+          this->MaybeRelativeBinaryDirectory.toStdString())) {
+      this->setBinaryDirectory(this->MaybeRelativeBinaryDirectory);
+    }
   }
 }
 
@@ -101,9 +105,23 @@ void QCMake::setBinaryDirectory(const QString& _dir)
 {
   QString dir = QString::fromStdString(
     cmSystemTools::GetActualCaseForPath(_dir.toStdString()));
-  if (this->BinaryDirectory != dir) {
-    this->BinaryDirectory = QDir::fromNativeSeparators(dir);
-    emit this->binaryDirChanged(this->BinaryDirectory);
+
+  QString absDir = dir;
+
+  if (!cmSystemTools::FileIsFullPath(absDir.toStdString())) {
+    if (!this->SourceDirectory.isEmpty()) {
+      if (!this->SourceDirectory.endsWith("/")) {
+        absDir = "/" + absDir;
+      }
+      absDir = this->SourceDirectory + absDir;
+    }
+  }
+
+  if (this->BinaryDirectory != absDir ||
+      this->MaybeRelativeBinaryDirectory != dir) {
+    this->MaybeRelativeBinaryDirectory = QDir::fromNativeSeparators(dir);
+    this->BinaryDirectory = QDir::fromNativeSeparators(absDir);
+    emit this->binaryDirChanged(this->MaybeRelativeBinaryDirectory);
     cmState* state = this->CMakeInstance->GetState();
     this->setGenerator(QString());
     this->setToolset(QString());
@@ -238,10 +256,16 @@ void QCMake::configure()
 #ifdef Q_OS_WIN
     UINT lastErrorMode = SetErrorMode(0);
 #endif
+    // Apply the same transformations that the command-line invocation does
+    auto sanitizePath = [](QString const& value) -> std::string {
+      std::string path = cmSystemTools::CollapseFullPath(value.toStdString());
+      cmSystemTools::ConvertToUnixSlashes(path);
+      return path;
+    };
 
-    this->CMakeInstance->SetHomeDirectory(this->SourceDirectory.toStdString());
+    this->CMakeInstance->SetHomeDirectory(sanitizePath(this->SourceDirectory));
     this->CMakeInstance->SetHomeOutputDirectory(
-      this->BinaryDirectory.toStdString());
+      sanitizePath(this->BinaryDirectory));
     this->CMakeInstance->SetGlobalGenerator(
       this->CMakeInstance->CreateGlobalGenerator(
         this->Generator.toStdString()));
@@ -592,6 +616,11 @@ void QCMake::loadPresets()
 QString QCMake::binaryDirectory() const
 {
   return this->BinaryDirectory;
+}
+
+QString QCMake::relativeBinaryDirectory() const
+{
+  return this->MaybeRelativeBinaryDirectory;
 }
 
 QString QCMake::sourceDirectory() const

@@ -20,15 +20,31 @@ mark_as_advanced(CMAKE_CTEST_COMMAND)
 # Use CTest
 # configure files
 
-if(CTEST_NEW_FORMAT)
-  configure_file(
-    ${CMAKE_ROOT}/Modules/DartConfiguration.tcl.in
-    ${PROJECT_BINARY_DIR}/CTestConfiguration.ini )
-else()
-  configure_file(
-    ${CMAKE_ROOT}/Modules/DartConfiguration.tcl.in
-    ${PROJECT_BINARY_DIR}/DartConfiguration.tcl )
-endif()
+block()
+  if(NOT DEFINED CTEST_TLS_VERSION)
+    if(DEFINED CMAKE_TLS_VERSION)
+      set(CTEST_TLS_VERSION "${CMAKE_TLS_VERSION}")
+    elseif(DEFINED ENV{CMAKE_TLS_VERSION})
+      set(CTEST_TLS_VERSION "$ENV{CMAKE_TLS_VERSION}")
+    endif()
+  endif()
+  if(NOT DEFINED CTEST_TLS_VERIFY)
+    if(DEFINED CMAKE_TLS_VERIFY)
+      set(CTEST_TLS_VERIFY "${CMAKE_TLS_VERIFY}")
+    elseif(DEFINED ENV{CMAKE_TLS_VERIFY})
+      set(CTEST_TLS_VERIFY "$ENV{CMAKE_TLS_VERIFY}")
+    endif()
+  endif()
+  if(CTEST_NEW_FORMAT)
+    configure_file(
+      ${CMAKE_ROOT}/Modules/DartConfiguration.tcl.in
+      ${PROJECT_BINARY_DIR}/CTestConfiguration.ini )
+  else()
+    configure_file(
+      ${CMAKE_ROOT}/Modules/DartConfiguration.tcl.in
+      ${PROJECT_BINARY_DIR}/DartConfiguration.tcl )
+  endif()
+endblock()
 
 #
 # Section 3:

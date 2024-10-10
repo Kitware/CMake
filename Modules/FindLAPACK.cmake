@@ -742,6 +742,14 @@ if(NOT LAPACK_NOT_FOUND_MESSAGE)
     unset(_lapack_nvhpc_flags)
   endif()
 
+  # libblastrampoline? (https://github.com/JuliaLinearAlgebra/libblastrampoline/tree/main)
+  if(NOT LAPACK_LIBRARIES
+      AND (BLA_VENDOR STREQUAL "libblastrampoline" OR BLA_VENDOR STREQUAL "All"))
+    if(BLAS_LIBRARIES MATCHES "blastrampoline.+")
+      set(LAPACK_LIBRARIES ${BLAS_LIBRARIES})
+    endif()
+  endif()
+
   # Generic LAPACK library?
   if(NOT LAPACK_LIBRARIES
       AND (BLA_VENDOR STREQUAL "Generic"

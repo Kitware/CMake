@@ -49,6 +49,12 @@ protected:
   inline bool SupportsComponentInstallation() const override { return true; }
 
 private:
+  enum class PathType
+  {
+    Windows,
+    Native,
+  };
+
   bool ProcessSetupSection();
   bool ProcessFiles();
   bool ProcessComponents();
@@ -92,7 +98,8 @@ private:
    * Paths are converted into the format used by Windows before.
    */
   std::string Quote(const std::string& string);
-  std::string QuotePath(const std::string& path);
+  std::string QuotePath(const std::string& path,
+                        PathType type = PathType::Windows);
 
   /**
    * This function replaces the following 5 characters with their %-encoding:

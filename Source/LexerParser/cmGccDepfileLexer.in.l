@@ -27,6 +27,10 @@ NEWLINE \r?\n
                          // Unescape the hash.
                          yyextra->addToCurrentPath("#");
                        }
+\\:                    {
+                         // Unescape the colon.
+                         yyextra->addToCurrentPath(":");
+                       }
 (\\\\)*\\[ ]           {
                          // 2N+1 backslashes plus space -> N backslashes plus space.
                          size_t c = (strlen(yytext) - 1) / 2;

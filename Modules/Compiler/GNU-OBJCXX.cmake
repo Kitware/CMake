@@ -1,5 +1,6 @@
 include(Compiler/GNU)
 __compiler_gnu(OBJCXX)
+__compiler_gnu_cxx_standards(OBJCXX)
 
 if((NOT DEFINED CMAKE_DEPENDS_USE_COMPILER OR CMAKE_DEPENDS_USE_COMPILER)
     AND CMAKE_GENERATOR MATCHES "Makefiles|WMake"

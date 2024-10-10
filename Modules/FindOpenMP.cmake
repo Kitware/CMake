@@ -16,8 +16,22 @@ flag to support OpenMP.
 .. versionadded:: 3.5
   Clang support.
 
-Variables
-^^^^^^^^^
+Input Variables
+^^^^^^^^^^^^^^^
+
+The following variables may be set to influence this module's behavior:
+
+``OpenMP_RUNTIME_MSVC``
+  .. versionadded:: 3.30
+
+  Specify the `OpenMP Runtime <msvc-openmp_>`_ when compiling with MSVC.
+  If set to a non-empty value, such as ``experimental`` or ``llvm``, it
+  will be passed as the value of the ``-openmp:`` flag.
+
+.. _`msvc-openmp`: https://learn.microsoft.com/en-us/cpp/build/reference/openmp-enable-openmp-2-0-support
+
+Result Variables
+^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.10
   The module exposes the components ``C``, ``CXX``, and ``Fortran``.
@@ -96,6 +110,7 @@ cmake_policy(PUSH)
 cmake_policy(SET CMP0012 NEW) # if() recognizes numbers and booleans
 cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 function(_OPENMP_FLAG_CANDIDATES LANG)
   if(NOT OpenMP_${LANG}_FLAG)
@@ -120,7 +135,11 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
     else()
       set(OMP_FLAG_IntelLLVM "-fiopenmp")
     endif()
-    set(OMP_FLAG_MSVC "-openmp")
+    if(OpenMP_RUNTIME_MSVC)
+      set(OMP_FLAG_MSVC "-openmp:${OpenMP_RUNTIME_MSVC}")
+    else()
+      set(OMP_FLAG_MSVC "-openmp")
+    endif()
     set(OMP_FLAG_PathScale "-openmp")
     set(OMP_FLAG_NAG "-openmp")
     set(OMP_FLAG_Absoft "-openmp")

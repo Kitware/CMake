@@ -2,6 +2,8 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCryptoHash.h"
 
+#include <cassert>
+
 #include <cm/memory>
 
 #include <cm3p/kwiml/int.h>
@@ -78,6 +80,37 @@ std::unique_ptr<cmCryptoHash> cmCryptoHash::New(cm::string_view algo)
     return cm::make_unique<cmCryptoHash>(AlgoSHA3_512);
   }
   return std::unique_ptr<cmCryptoHash>(nullptr);
+}
+
+std::string cmCryptoHash::GetHashAlgoName() const
+{
+#ifndef CMAKE_USE_SYSTEM_LIBRHASH
+  static_assert(RHASH_HASH_COUNT == 10, "Update switch statement!");
+#endif
+  switch (this->Id) {
+    case RHASH_MD5:
+      return "MD5";
+    case RHASH_SHA1:
+      return "SHA1";
+    case RHASH_SHA224:
+      return "SHA224";
+    case RHASH_SHA256:
+      return "SHA256";
+    case RHASH_SHA384:
+      return "SHA384";
+    case RHASH_SHA512:
+      return "SHA512";
+    case RHASH_SHA3_224:
+      return "SHA3_224";
+    case RHASH_SHA3_256:
+      return "SHA3_256";
+    case RHASH_SHA3_384:
+      return "SHA3_384";
+    case RHASH_SHA3_512:
+      return "SHA3_512";
+  }
+  assert(false);
+  return "UNKNOWN";
 }
 
 bool cmCryptoHash::IntFromHexDigit(char input, char& output)

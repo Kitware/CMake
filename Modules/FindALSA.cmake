@@ -43,6 +43,9 @@ The following cache variables may also be set:
   the absolute path of the asound library
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 find_path(ALSA_INCLUDE_DIR NAMES alsa/asoundlib.h
           DOC "The ALSA (asound) include directory"
 )
@@ -74,3 +77,5 @@ if(ALSA_FOUND)
 endif()
 
 mark_as_advanced(ALSA_INCLUDE_DIR ALSA_LIBRARY)
+
+cmake_policy(POP)

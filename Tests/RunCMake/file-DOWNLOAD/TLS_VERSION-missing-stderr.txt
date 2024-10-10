@@ -1,0 +1,4 @@
+^CMake Error at TLS_VERSION-missing\.cmake:[0-9]+ \(file\):
+  file DOWNLOAD missing value for TLS_VERSION\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

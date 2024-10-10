@@ -40,6 +40,7 @@ else()
                                              "LINKER:--no-whole-archive")
 endif()
 set(CMAKE_LINK_LIBRARY_USING_WHOLE_ARCHIVE_SUPPORTED TRUE)
+set(CMAKE_LINK_LIBRARY_WHOLE_ARCHIVE_ATTRIBUTES LIBRARY_TYPE=STATIC DEDUPLICATION=YES OVERRIDE=DEFAULT)
 
 
 macro(__cygwin_compiler_gnu lang)

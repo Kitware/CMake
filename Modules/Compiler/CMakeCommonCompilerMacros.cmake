@@ -105,6 +105,9 @@ endmacro()
 # Define to allow compile features to be automatically determined
 macro(cmake_record_cxx_compile_features)
   set(_result 0)
+  if(_result EQUAL 0 AND DEFINED CMAKE_CXX26_STANDARD_COMPILE_OPTION)
+    _has_compiler_features_cxx(26)
+  endif()
   if(_result EQUAL 0 AND DEFINED CMAKE_CXX23_STANDARD_COMPILE_OPTION)
     _has_compiler_features_cxx(23)
   endif()
@@ -142,6 +145,9 @@ endmacro()
 
 macro(cmake_record_cuda_compile_features)
   set(_result 0)
+  if(_result EQUAL 0 AND DEFINED CMAKE_CUDA26_STANDARD_COMPILE_OPTION)
+    _has_compiler_features_cuda(26)
+  endif()
   if(_result EQUAL 0 AND DEFINED CMAKE_CUDA23_STANDARD_COMPILE_OPTION)
     _has_compiler_features_cuda(23)
   endif()
@@ -179,6 +185,9 @@ endmacro()
 
 macro(cmake_record_hip_compile_features)
   set(_result 0)
+  if(_result EQUAL 0 AND DEFINED CMAKE_HIP26_STANDARD_COMPILE_OPTION)
+    _has_compiler_features_hip(26)
+  endif()
   if(_result EQUAL 0 AND DEFINED CMAKE_HIP23_STANDARD_COMPILE_OPTION)
     _has_compiler_features_hip(23)
   endif()
@@ -192,3 +201,67 @@ macro(cmake_record_hip_compile_features)
   _has_compiler_features_hip(11)
   _has_compiler_features_hip(98)
 endmacro()
+
+function(cmake_create_cxx_import_std std variable)
+  set(_cmake_supported_import_std_features
+    # Compilers support `import std` in C++20 as an extension. Skip
+    # for now.
+    # 20
+    23
+    26)
+  list(FIND _cmake_supported_import_std_features "${std}" _cmake_supported_import_std_idx)
+  if (_cmake_supported_import_std_idx EQUAL "-1")
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Unsupported C++ standard: C++${std}\")\n"
+      PARENT_SCOPE)
+    return ()
+  endif ()
+  # If the target exists, skip. A toolchain file may have provided it.
+  if (TARGET "__CMAKE::CXX${std}")
+    return ()
+  endif ()
+  # The generator must support imported C++ modules.
+  if (NOT CMAKE_GENERATOR MATCHES "Ninja")
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Unsupported generator: ${CMAKE_GENERATOR}\")\n"
+      PARENT_SCOPE)
+    return ()
+  endif ()
+  # Check if the compiler understands how to `import std;`.
+  include("${CMAKE_ROOT}/Modules/Compiler/${CMAKE_CXX_COMPILER_ID}-CXX-CXXImportStd.cmake" OPTIONAL RESULT_VARIABLE _cmake_import_std_res)
+  if (NOT _cmake_import_std_res)
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Toolchain does not support discovering `import std` support\")\n"
+      PARENT_SCOPE)
+    return ()
+  endif ()
+  if (NOT COMMAND _cmake_cxx_import_std)
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Toolchain does not provide `import std` discovery command\")\n"
+      PARENT_SCOPE)
+    return ()
+  endif ()
+
+  # Check the experimental flag. Check it here to avoid triggering warnings in
+  # situations that don't support the feature anyways.
+  set(_cmake_supported_import_std_experimental "")
+  cmake_language(GET_EXPERIMENTAL_FEATURE_ENABLED
+    "CxxImportStd"
+    _cmake_supported_import_std_experimental)
+  if (NOT _cmake_supported_import_std_experimental)
+    set("${variable}"
+      "set(CMAKE_CXX${std}_COMPILER_IMPORT_STD_NOT_FOUND_MESSAGE \"Experimental `import std` support not enabled when detecting toolchain; it must be set before `CXX` is enabled (usually a `project()` call)\")\n"
+      PARENT_SCOPE)
+    return ()
+  endif ()
+
+  _cmake_cxx_import_std("${std}" target_definition)
+  string(CONCAT guarded_target_definition
+    "if (NOT TARGET \"__CMAKE::CXX${std}\")\n"
+    "${target_definition}"
+    "endif ()\n"
+    "if (TARGET \"__CMAKE::CXX${std}\")\n"
+    "  list(APPEND CMAKE_CXX_COMPILER_IMPORT_STD \"${std}\")\n"
+    "endif ()\n")
+  set("${variable}" "${guarded_target_definition}" PARENT_SCOPE)
+endfunction()

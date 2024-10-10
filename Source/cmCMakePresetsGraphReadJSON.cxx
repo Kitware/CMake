@@ -35,10 +35,12 @@ using ArchToolsetStrategy = cmCMakePresetsGraph::ArchToolsetStrategy;
 using JSONHelperBuilder = cmJSONHelperBuilder;
 using ExpandMacroResult = cmCMakePresetsGraphInternal::ExpandMacroResult;
 using MacroExpander = cmCMakePresetsGraphInternal::MacroExpander;
+using MacroExpanderVector = cmCMakePresetsGraphInternal::MacroExpanderVector;
+using cmCMakePresetsGraphInternal::BaseMacroExpander;
 using cmCMakePresetsGraphInternal::ExpandMacros;
 
 constexpr int MIN_VERSION = 1;
-constexpr int MAX_VERSION = 8;
+constexpr int MAX_VERSION = 9;
 
 struct CMakeVersion
 {
@@ -297,6 +299,29 @@ auto const RootPresetsHelper =
                           false)
     .Bind<std::nullptr_t>("$schema"_s, nullptr,
                           cmCMakePresetsGraphInternal::SchemaHelper(), false);
+
+class EnvironmentMacroExpander : public MacroExpander
+{
+public:
+  ExpandMacroResult operator()(const std::string& macroNamespace,
+                               const std::string& macroName,
+                               std::string& macroOut,
+                               int /*version*/) const override
+  {
+    if (macroNamespace == "penv") {
+      if (macroName.empty()) {
+        return ExpandMacroResult::Error;
+      }
+      if (cm::optional<std::string> value =
+            cmSystemTools::GetEnvVar(macroName)) {
+        macroOut += *value;
+      }
+      return ExpandMacroResult::Ok;
+    }
+
+    return ExpandMacroResult::Ignore;
+  }
+};
 }
 
 namespace cmCMakePresetsGraphInternal {
@@ -706,26 +731,13 @@ bool cmCMakePresetsGraph::ReadJSONFile(const std::string& filename,
     return true;
   };
 
-  std::vector<MacroExpander> macroExpanders;
+  MacroExpanderVector macroExpanders{};
 
-  MacroExpander environmentMacroExpander =
-    [](const std::string& macroNamespace, const std::string& macroName,
-       std::string& expanded, int /*version*/) -> ExpandMacroResult {
-    if (macroNamespace == "penv") {
-      if (macroName.empty()) {
-        return ExpandMacroResult::Error;
-      }
-      if (cm::optional<std::string> value =
-            cmSystemTools::GetEnvVar(macroName)) {
-        expanded += *value;
-      }
-      return ExpandMacroResult::Ok;
-    }
-
-    return ExpandMacroResult::Ignore;
-  };
-
-  macroExpanders.push_back(environmentMacroExpander);
+  if (v >= 9) {
+    macroExpanders.push_back(
+      cm::make_unique<BaseMacroExpander>(*this, filename));
+  }
+  macroExpanders.push_back(cm::make_unique<EnvironmentMacroExpander>());
 
   for (Json::ArrayIndex i = 0; i < presets.Include.size(); ++i) {
     auto include = presets.Include[i];

@@ -1,0 +1,6 @@
+(-- )?Before find_dependency: PACKAGE_PREFIX_DIR = .*/Tests/RunCMake/CMakePackage/NestedConfigFile-build/install_pkg_b
+(-- )?Hello from pkg_a
+(-- )?Leaving pkg_a-config\.cmake with PACKAGE_PREFIX_DIR = .*/Tests/RunCMake/CMakePackage/NestedConfigFile-build/install_pkg_a
+(-- )?After find_dependency:  PACKAGE_PREFIX_DIR = .*/Tests/RunCMake/CMakePackage/NestedConfigFile-build/install_pkg_b
+(-- )?Hello from pkg_b
+(-- )?Leaving pkg_b-config\.cmake with PACKAGE_PREFIX_DIR = .*/Tests/RunCMake/CMakePackage/NestedConfigFile-build/install_pkg_b

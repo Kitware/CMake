@@ -10,6 +10,8 @@ set(CMAKE_C99_EXTENSION_COMPILE_OPTION "--iso=99" " ")
 set(CMAKE_C11_STANDARD_COMPILE_OPTION "--iso=11" "--strict")
 set(CMAKE_C11_EXTENSION_COMPILE_OPTION "--iso=11" " ")
 
+set(CMAKE_C_STANDARD_LATEST 11)
+
 if(CMAKE_C_COMPILER_ARCHITECTURE_ID STREQUAL "TriCore")
   if(CMAKE_TASKING_TOOLSET STREQUAL "SmartCode")
     __compiler_check_default_language_standard(C 10.1 11)

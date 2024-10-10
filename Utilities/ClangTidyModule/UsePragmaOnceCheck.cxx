@@ -55,10 +55,10 @@ public:
     , FID(FID)
   {
     SourceManager& SM = this->PP->getSourceManager();
-    const FileEntry* Entry = SM.getFileEntryForID(FID);
+    OptionalFileEntryRef Entry = SM.getFileEntryRefForID(FID);
     assert(Entry && "Invalid FileID given");
 
-    Lexer MyLexer(FID, SM.getMemoryBufferForFileOrFake(Entry), SM,
+    Lexer MyLexer(FID, SM.getMemoryBufferForFileOrFake(*Entry), SM,
                   this->PP->getLangOpts());
     Token Tok;
 
@@ -157,9 +157,10 @@ public:
     // guards.
     SourceManager& SM = this->PP->getSourceManager();
     if (Reason == EnterFile && FileType == SrcMgr::C_User) {
-      if (const FileEntry* FE = SM.getFileEntryForID(SM.getFileID(Loc))) {
+      if (OptionalFileEntryRef FE =
+            SM.getFileEntryRefForID(SM.getFileID(Loc))) {
         std::string FileName = cleanPath(FE->getName());
-        this->Files[FileName] = FE;
+        this->Files.try_emplace(FileName, *FE);
       }
     }
   }
@@ -205,9 +206,9 @@ public:
         continue;
       }
 
-      const FileEntry* FE =
-        SM.getFileEntryForID(SM.getFileID(MI->getDefinitionLoc()));
-      std::string FileName = cleanPath(FE->getName());
+      FileEntryRef FE =
+        *SM.getFileEntryRefForID(SM.getFileID(MI->getDefinitionLoc()));
+      std::string FileName = cleanPath(FE.getName());
       this->Files.erase(FileName);
 
       // Look up Locations for this guard.
@@ -290,7 +291,7 @@ private:
   }
 
   std::vector<std::pair<Token, const MacroInfo*>> Macros;
-  llvm::StringMap<const FileEntry*> Files;
+  llvm::StringMap<FileEntryRef> Files;
   std::map<const IdentifierInfo*, std::pair<SourceLocation, SourceLocation>>
     Ifndefs;
   std::map<SourceLocation, SourceLocation> EndIfs;

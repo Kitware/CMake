@@ -53,7 +53,14 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     __TestCompiler_setTryCompileTargetType()
 
     # Avoid failing ABI detection on warnings.
-    string(REGEX REPLACE "(^| )-Werror([= ][^-][^ ]*)?( |$)" " " CMAKE_${lang}_FLAGS "${CMAKE_${lang}_FLAGS}")
+    if(CMAKE_TRY_COMPILE_CONFIGURATION)
+      string(TOUPPER "${CMAKE_TRY_COMPILE_CONFIGURATION}" _tc_config)
+    else()
+      set(_tc_config "DEBUG")
+    endif()
+    foreach(v CMAKE_${lang}_FLAGS CMAKE_${lang}_FLAGS_${_tc_config})
+      string(REGEX REPLACE "(^| )-Werror([= ][^-][^ ]*)?( |$)" " " ${v} "${${v}}")
+    endforeach()
 
     # Save the current LC_ALL, LC_MESSAGES, and LANG environment variables
     # and set them to "C" that way GCC's "search starts here" text is in
@@ -92,7 +99,45 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     # Load the resulting information strings.
     if(CMAKE_${lang}_ABI_COMPILED)
       message(CHECK_PASS "done")
+      if(CMAKE_HOST_APPLE AND CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND NOT CMAKE_OSX_ARCHITECTURES MATCHES "\\$")
+        file(READ_MACHO "${BIN}" ARCHITECTURES archs CAPTURE_ERROR macho_error) # undocumented file() subcommand
+        if (NOT macho_error)
+          # sort and prune the list of found architectures
+          set(arch_list_sorted ${archs})
+          list(SORT arch_list_sorted)
+          list(REMOVE_DUPLICATES arch_list_sorted)
+          # sort and prune the list of requested architectures
+          set(requested_arch_list ${CMAKE_OSX_ARCHITECTURES})
+          list(SORT requested_arch_list)
+          list(REMOVE_DUPLICATES requested_arch_list)
+          message(CONFIGURE_LOG
+            "Effective list of requested architectures (possibly empty)  : \"${requested_arch_list}\"\n"
+            "Effective list of architectures found in the ABI info binary: \"${arch_list_sorted}\"\n")
+          # If all generated architectures were known to READ_MACHO (i.e. libmacho):
+          # Compare requested and found:
+          # - if no architecture(s) were requested explicitly, just check if READ_MACHO returned
+          #   an architecture for the ABI info binary.
+          # - otherwise, check if the requested and found lists are equal
+          if(arch_list_sorted MATCHES "unknown")
+            # Rare but not impossible: a host with a toolchain capable of generating binaries with
+            # architectures that the system libmacho is too old to know. Report the found archs as
+            # usual, warn about the unknowns and skip the comparison with CMAKE_OSX_ARCHITECTURES.
+            message(WARNING "The ${lang} compiler generates universal binaries with at least 1 architecture not known to the host")
+          elseif(requested_arch_list AND arch_list_sorted
+              AND NOT "${requested_arch_list}" STREQUAL "${arch_list_sorted}")
+            # inform the user of the mismatch but show the raw input and output lists
+            message(FATAL_ERROR
+              "The ${lang} compiler targets architectures:\n"
+              "  \"${archs}\"\n"
+              "but CMAKE_OSX_ARCHITECTURES is\n"
+              "  \"${CMAKE_OSX_ARCHITECTURES}\"\n")
+          endif()
+        endif()
+      endif()
+      cmake_policy(PUSH)
+      cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
       file(STRINGS "${BIN}" ABI_STRINGS LIMIT_COUNT 32 REGEX "INFO:[A-Za-z0-9_]+\\[[^]]*\\]")
+      cmake_policy(POP)
       set(ABI_SIZEOF_DPTR "NOTFOUND")
       set(ABI_BYTE_ORDER "NOTFOUND")
       set(ABI_NAME "NOTFOUND")

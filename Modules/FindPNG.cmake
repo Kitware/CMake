@@ -48,6 +48,9 @@ Since PNG depends on the ZLib compression library, none of the above
 will be defined unless ZLib can be found.
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 # Default install location on windows when installing from included cmake build
 # From FindZLIB.cmake
 set(_PNG_x86 "(x86)")
@@ -177,3 +180,5 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(PNG
                                   REQUIRED_VARS PNG_LIBRARY PNG_PNG_INCLUDE_DIR
                                   VERSION_VAR PNG_VERSION_STRING)
+
+cmake_policy(POP)

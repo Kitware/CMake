@@ -20,6 +20,8 @@ set(CMAKE_CXX14_STANDARD_COMPILE_OPTION "-std=c++14")
 set(CMAKE_CXX14_EXTENSION_COMPILE_OPTION "-std=c++14")
 set(CMAKE_CXX14_STANDARD__HAS_FULL_SUPPORT ON)
 
+set(CMAKE_CXX_STANDARD_LATEST 14)
+
 __compiler_orangec(CXX)
 #- 6.38 is the earliest version which version info is available in the preprocessor
 __compiler_check_default_language_standard(CXX 6.38 14)

@@ -52,6 +52,8 @@
 #include "hsts.h"
 #include "tftp.h"
 #include "strdup.h"
+#include "escape.h"
+
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -109,45 +111,32 @@ CURLcode Curl_setblobopt(struct curl_blob **blobp,
 
 static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
 {
-  CURLcode result = CURLE_OK;
   char *user = NULL;
   char *passwd = NULL;
+
+  DEBUGASSERT(userp);
+  DEBUGASSERT(passwdp);
 
   /* Parse the login details if specified. It not then we treat NULL as a hint
      to clear the existing data */
   if(option) {
     size_t len = strlen(option);
+    CURLcode result;
     if(len > CURL_MAX_INPUT_LENGTH)
       return CURLE_BAD_FUNCTION_ARGUMENT;
 
-    result = Curl_parse_login_details(option, len,
-                                      (userp ? &user : NULL),
-                                      (passwdp ? &passwd : NULL),
-                                      NULL);
+    result = Curl_parse_login_details(option, len, &user, &passwd, NULL);
+    if(result)
+      return result;
   }
 
-  if(!result) {
-    /* Store the username part of option if required */
-    if(userp) {
-      if(!user && option && option[0] == ':') {
-        /* Allocate an empty string instead of returning NULL as user name */
-        user = strdup("");
-        if(!user)
-          result = CURLE_OUT_OF_MEMORY;
-      }
+  free(*userp);
+  *userp = user;
 
-      Curl_safefree(*userp);
-      *userp = user;
-    }
+  free(*passwdp);
+  *passwdp = passwd;
 
-    /* Store the password part of option if required */
-    if(passwdp) {
-      Curl_safefree(*passwdp);
-      *passwdp = passwd;
-    }
-  }
-
-  return result;
+  return CURLE_OK;
 }
 
 #define C_SSLVERSION_VALUE(x) (x & 0xffff)
@@ -155,6 +144,12 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
 
 static CURLcode protocol2num(const char *str, curl_prot_t *val)
 {
+  /*
+   * We are asked to cherry-pick protocols, so play it safe and disallow all
+   * protocols to start with, and re-add the wanted ones back in.
+   */
+  *val = 0;
+
   if(!str)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
@@ -162,8 +157,6 @@ static CURLcode protocol2num(const char *str, curl_prot_t *val)
     *val = ~(curl_prot_t) 0;
     return CURLE_OK;
   }
-
-  *val = 0;
 
   do {
     const char *token = str;
@@ -514,11 +507,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
            data.
         */
         char *p = Curl_memdup0(argptr, (size_t)data->set.postfieldsize);
-        (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
         if(!p)
           result = CURLE_OUT_OF_MEMORY;
-        else
+        else {
+          free(data->set.str[STRING_COPYPOSTFIELDS]);
           data->set.str[STRING_COPYPOSTFIELDS] = p;
+        }
       }
     }
 
@@ -532,7 +526,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     data->set.postfields = va_arg(param, void *);
     /* Release old copied data. */
-    (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
+    Curl_safefree(data->set.str[STRING_COPYPOSTFIELDS]);
     data->set.method = HTTPREQ_POST;
     break;
 
@@ -548,7 +542,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     if(data->set.postfieldsize < bigsize &&
        data->set.postfields == data->set.str[STRING_COPYPOSTFIELDS]) {
       /* Previous CURLOPT_COPYPOSTFIELDS is no longer valid. */
-      (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
+      Curl_safefree(data->set.str[STRING_COPYPOSTFIELDS]);
       data->set.postfields = NULL;
     }
 
@@ -567,7 +561,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     if(data->set.postfieldsize < bigsize &&
        data->set.postfields == data->set.str[STRING_COPYPOSTFIELDS]) {
       /* Previous CURLOPT_COPYPOSTFIELDS is no longer valid. */
-      (void) Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], NULL);
+      Curl_safefree(data->set.str[STRING_COPYPOSTFIELDS]);
       data->set.postfields = NULL;
     }
 
@@ -785,22 +779,20 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * Set cookie file name to dump all cookies to when we're done.
      */
-  {
-    struct CookieInfo *newcookies;
     result = Curl_setstropt(&data->set.str[STRING_COOKIEJAR],
                             va_arg(param, char *));
-
-    /*
-     * Activate the cookie parser. This may or may not already
-     * have been made.
-     */
-    newcookies = Curl_cookie_init(data, NULL, data->cookies,
-                                  data->set.cookiesession);
-    if(!newcookies)
-      result = CURLE_OUT_OF_MEMORY;
-    data->cookies = newcookies;
-  }
-  break;
+    if(!result) {
+      /*
+       * Activate the cookie parser. This may or may not already
+       * have been made.
+       */
+      struct CookieInfo *newcookies =
+        Curl_cookie_init(data, NULL, data->cookies, data->set.cookiesession);
+      if(!newcookies)
+        result = CURLE_OUT_OF_MEMORY;
+      data->cookies = newcookies;
+    }
+    break;
 
   case CURLOPT_COOKIESESSION:
     /*
@@ -909,7 +901,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       /* accepted */
       break;
 #endif
-#ifdef ENABLE_QUIC
+#ifdef USE_HTTP3
     case CURL_HTTP_VERSION_3:
     case CURL_HTTP_VERSION_3ONLY:
       /* accepted */
@@ -1018,9 +1010,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /* switch off bits we can't support */
 #ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM;    /* no NTLM support */
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
-#elif !defined(NTLM_WB_ENABLED)
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
 #endif
 #ifndef USE_SPNEGO
     auth &= ~CURLAUTH_NEGOTIATE; /* no Negotiate (SPNEGO) auth without
@@ -1099,9 +1088,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /* switch off bits we can't support */
 #ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM;    /* no NTLM support */
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
-#elif !defined(NTLM_WB_ENABLED)
-    auth &= ~CURLAUTH_NTLM_WB; /* no NTLM_WB support */
 #endif
 #ifndef USE_SPNEGO
     auth &= ~CURLAUTH_NEGOTIATE; /* no Negotiate (SPNEGO) auth without
@@ -1314,6 +1300,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.ftpsslauth = (unsigned char)(curl_ftpauth)arg;
     break;
+#ifdef HAVE_GSSAPI
   case CURLOPT_KRBLEVEL:
     /*
      * A string that defines the kerberos security level.
@@ -1322,6 +1309,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
                             va_arg(param, char *));
     data->set.krb = !!(data->set.str[STRING_KRB_LEVEL]);
     break;
+#endif
 #endif
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
   case CURLOPT_FTP_CREATE_MISSING_DIRS:
@@ -1589,13 +1577,24 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 
 #ifndef CURL_DISABLE_PROXY
-  case CURLOPT_PROXYUSERPWD:
+  case CURLOPT_PROXYUSERPWD: {
     /*
      * user:password needed to use the proxy
      */
-    result = setstropt_userpwd(va_arg(param, char *),
-                               &data->set.str[STRING_PROXYUSERNAME],
-                               &data->set.str[STRING_PROXYPASSWORD]);
+    char *u = NULL;
+    char *p = NULL;
+    result = setstropt_userpwd(va_arg(param, char *), &u, &p);
+
+    /* URL decode the components */
+    if(!result && u)
+      result = Curl_urldecode(u, 0, &data->set.str[STRING_PROXYUSERNAME], NULL,
+                              REJECT_ZERO);
+    if(!result && p)
+      result = Curl_urldecode(p, 0, &data->set.str[STRING_PROXYPASSWORD], NULL,
+                              REJECT_ZERO);
+    free(u);
+    free(p);
+  }
     break;
   case CURLOPT_PROXYUSERNAME:
     /*
@@ -1847,7 +1846,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * flag to set engine as default.
      */
-    Curl_setstropt(&data->set.str[STRING_SSL_ENGINE], NULL);
+    Curl_safefree(data->set.str[STRING_SSL_ENGINE]);
     result = Curl_ssl_set_engine_default(data);
     break;
   case CURLOPT_CRLF:
@@ -2210,9 +2209,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      * The application kindly asks for a differently sized receive buffer.
      * If it seems reasonable, we'll use it.
      */
-    if(data->state.buffer)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-
     arg = va_arg(param, long);
 
     if(arg > READBUFFER_MAX)
@@ -2238,7 +2234,6 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       arg = UPLOADBUFFER_MIN;
 
     data->set.upload_buffer_size = (unsigned int)arg;
-    Curl_safefree(data->state.ulbuf); /* force a realloc next opportunity */
     break;
 
   case CURLOPT_NOSIGNAL:
@@ -2315,7 +2310,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
         Curl_hsts_cleanup(&data->hsts);
         data->hsts = data->share->hsts;
       }
-#endif   /* CURL_DISABLE_HTTP */
+#endif
 #ifdef USE_SSL
       if(data->share->sslsession) {
         data->set.general_ssl.max_ssl_sessions = data->share->max_ssl_sessions;
@@ -2625,7 +2620,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 #endif
 
-#ifdef ENABLE_IPV6
+#ifdef USE_IPV6
   case CURLOPT_ADDRESS_SCOPE:
     /*
      * Use this scope id when using IPv6
@@ -2657,22 +2652,18 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 
   case CURLOPT_PROTOCOLS_STR: {
-    curl_prot_t prot;
     argptr = va_arg(param, char *);
-    result = protocol2num(argptr, &prot);
+    result = protocol2num(argptr, &data->set.allowed_protocols);
     if(result)
       return result;
-    data->set.allowed_protocols = prot;
     break;
   }
 
   case CURLOPT_REDIR_PROTOCOLS_STR: {
-    curl_prot_t prot;
     argptr = va_arg(param, char *);
-    result = protocol2num(argptr, &prot);
+    result = protocol2num(argptr, &data->set.redir_protocols);
     if(result)
       return result;
-    data->set.redir_protocols = prot;
     break;
   }
 
@@ -2867,13 +2858,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #endif
   case CURLOPT_TLSAUTH_TYPE:
     argptr = va_arg(param, char *);
-    if(argptr && !strncasecompare(argptr, "SRP", strlen("SRP")))
+    if(argptr && !strcasecompare(argptr, "SRP"))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
 #ifndef CURL_DISABLE_PROXY
   case CURLOPT_PROXY_TLSAUTH_TYPE:
     argptr = va_arg(param, char *);
-    if(argptr || !strncasecompare(argptr, "SRP", strlen("SRP")))
+    if(argptr && !strcasecompare(argptr, "SRP"))
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
 #endif
@@ -3134,6 +3125,49 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     arg = va_arg(param, long);
     raw = (arg & CURLWS_RAW_MODE);
     data->set.ws_raw_mode = raw;
+    break;
+  }
+#endif
+#ifdef USE_ECH
+  case CURLOPT_ECH: {
+    size_t plen = 0;
+
+    argptr = va_arg(param, char *);
+    if(!argptr) {
+      data->set.tls_ech = CURLECH_DISABLE;
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      return result;
+    }
+    plen = strlen(argptr);
+    if(plen > CURL_MAX_INPUT_LENGTH) {
+      data->set.tls_ech = CURLECH_DISABLE;
+      result = CURLE_BAD_FUNCTION_ARGUMENT;
+      return result;
+    }
+    /* set tls_ech flag value, preserving CLA_CFG bit */
+    if(plen == 5 && !strcmp(argptr, "false"))
+      data->set.tls_ech = CURLECH_DISABLE
+                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(plen == 6 && !strcmp(argptr, "grease"))
+      data->set.tls_ech = CURLECH_GREASE
+                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(plen == 4 && !strcmp(argptr, "true"))
+      data->set.tls_ech = CURLECH_ENABLE
+                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(plen == 4 && !strcmp(argptr, "hard"))
+      data->set.tls_ech = CURLECH_HARD
+                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(plen > 5 && !strncmp(argptr, "ecl:", 4)) {
+      result = Curl_setstropt(&data->set.str[STRING_ECH_CONFIG], argptr + 4);
+      if(result)
+        return result;
+      data->set.tls_ech |= CURLECH_CLA_CFG;
+    }
+    else if(plen > 4 && !strncmp(argptr, "pn:", 3)) {
+      result = Curl_setstropt(&data->set.str[STRING_ECH_PUBLIC], argptr + 3);
+      if(result)
+        return result;
+    }
     break;
   }
 #endif

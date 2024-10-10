@@ -26,7 +26,7 @@ cmFindCommon::PathLabel cmFindCommon::PathLabel::CMakeEnvironment(
   "CMAKE_ENVIRONMENT");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::Hints("HINTS");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::SystemEnvironment(
-  "SYSTM_ENVIRONMENT");
+  "SYSTEM_ENVIRONMENT");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::CMakeSystem("CMAKE_SYSTEM");
 cmFindCommon::PathLabel cmFindCommon::PathLabel::Guess("GUESS");
 
@@ -207,7 +207,7 @@ void cmFindCommon::SelectDefaultSearchModes()
   for (auto const& path : search_paths) {
     cmValue def = this->Makefile->GetDefinition(path.second);
     if (def) {
-      path.first = !cmIsOn(*def);
+      path.first = !def.IsOn();
     }
   }
 }

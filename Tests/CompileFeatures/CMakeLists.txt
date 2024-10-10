@@ -6,6 +6,31 @@ project(CompileFeatures)
 
 set(ext_C c)
 set(ext_CXX cpp)
+set(std_C 90 99 11 17 23)
+set(std_CXX 98 11 14 17 20 23 26)
+
+if(CMake_TEST_CUDA)
+  enable_language(CUDA)
+  set(ext_CUDA cu)
+  set(std_CUDA 03 11 14 17 20 23 26)
+endif()
+
+if(CMake_TEST_HIP)
+  enable_language(HIP)
+  set(ext_HIP hip)
+  set(std_HIP 98 11 14 17 20 23 26)
+endif()
+
+foreach(lang C CXX CUDA HIP)
+  foreach(std IN LISTS std_${lang})
+    string(TOLOWER "${lang}_std_${std}" feature)
+    if("${std}" IN_LIST CMake_TEST_${lang}_STANDARDS
+        OR CMAKE_${lang}${std}_STANDARD_COMPILE_OPTION)
+      add_library(test_${feature} OBJECT ${feature}.${ext_${lang}})
+      target_compile_features(test_${feature} PRIVATE ${feature})
+    endif()
+  endforeach()
+endforeach()
 
 macro(run_test feature lang)
   if (${feature} IN_LIST CMAKE_${lang}_COMPILE_FEATURES)
@@ -273,6 +298,7 @@ if (CMAKE_CXX_COMPILE_FEATURES)
     if (std_flag_idx EQUAL -1)
       add_executable(default_dialect default_dialect.cpp)
       target_compile_definitions(default_dialect PRIVATE
+        DEFAULT_CXX26=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},26>
         DEFAULT_CXX23=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},23>
         DEFAULT_CXX20=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},20>
         DEFAULT_CXX17=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},17>
@@ -282,6 +308,22 @@ if (CMAKE_CXX_COMPILE_FEATURES)
       )
     endif()
   endif()
+endif ()
+
+if (CMake_TEST_CUDA
+    AND CMAKE_CUDA_COMPILE_FEATURES
+    AND CMAKE_CUDA_STANDARD_DEFAULT
+    AND NOT CMAKE_CUDA_FLAGS MATCHES "-std=")
+  add_executable(default_dialect_cuda default_dialect.cu)
+  target_compile_definitions(default_dialect_cuda PRIVATE
+    DEFAULT_CXX26=$<EQUAL:${CMAKE_CUDA_STANDARD_DEFAULT},26>
+    DEFAULT_CXX23=$<EQUAL:${CMAKE_CUDA_STANDARD_DEFAULT},23>
+    DEFAULT_CXX20=$<EQUAL:${CMAKE_CUDA_STANDARD_DEFAULT},20>
+    DEFAULT_CXX17=$<EQUAL:${CMAKE_CUDA_STANDARD_DEFAULT},17>
+    DEFAULT_CXX14=$<EQUAL:${CMAKE_CUDA_STANDARD_DEFAULT},14>
+    DEFAULT_CXX11=$<EQUAL:${CMAKE_CUDA_STANDARD_DEFAULT},11>
+    DEFAULT_CXX98=$<EQUAL:${CMAKE_CUDA_STANDARD_DEFAULT},03>
+  )
 endif ()
 
 # always add a target "CompileFeatures"

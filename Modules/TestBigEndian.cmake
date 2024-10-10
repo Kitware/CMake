@@ -91,11 +91,16 @@ macro(__TEST_BIG_ENDIAN_LEGACY_IMPL VARIABLE)
 
       if(HAVE_${VARIABLE})
 
+        cmake_policy(PUSH)
+        cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
         file(STRINGS "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/TestEndianess.bin"
             CMAKE_TEST_ENDIANESS_STRINGS_LE LIMIT_COUNT 1 REGEX "THIS IS LITTLE ENDIAN")
 
         file(STRINGS "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/TestEndianess.bin"
             CMAKE_TEST_ENDIANESS_STRINGS_BE LIMIT_COUNT 1 REGEX "THIS IS BIG ENDIAN")
+
+        cmake_policy(POP)
 
         # on mac, if there are universal binaries built both will be true
         # return the result depending on the machine on which cmake runs

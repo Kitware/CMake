@@ -156,8 +156,8 @@ void cmLinkLineDeviceComputer::ComputeLinkLibraries(
       linkLib.Value += " ";
 
       const cmLinkImplementation* linkImpl =
-        cli.GetTarget()->GetLinkImplementation(
-          cli.GetConfig(), cmGeneratorTarget::LinkInterfaceFor::Link);
+        cli.GetTarget()->GetLinkImplementation(cli.GetConfig(),
+                                               cmGeneratorTarget::UseTo::Link);
 
       for (const cmLinkImplItem& iter : linkImpl->Libraries) {
         if (iter.Target != nullptr &&
@@ -204,7 +204,7 @@ bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
         target.GetProperty("CUDA_RESOLVE_DEVICE_SYMBOLS")) {
     // If CUDA_RESOLVE_DEVICE_SYMBOLS has been explicitly set we need
     // to honor the value no matter what it is.
-    return cmIsOn(*resolveDeviceSymbols);
+    return resolveDeviceSymbols.IsOn();
   }
 
   // Determine if we have any dependencies that require
@@ -213,7 +213,7 @@ bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
     target.GetLinkClosure(config);
 
   if (cm::contains(closure->Languages, "CUDA")) {
-    if (cmIsOn(target.GetProperty("CUDA_SEPARABLE_COMPILATION"))) {
+    if (target.GetProperty("CUDA_SEPARABLE_COMPILATION").IsOn()) {
       bool doDeviceLinking = false;
       switch (target.GetType()) {
         case cmStateEnums::SHARED_LIBRARY:

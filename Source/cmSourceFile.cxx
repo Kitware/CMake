@@ -123,7 +123,8 @@ bool cmSourceFile::FindFullPath(std::string* error,
 {
   // If the file is generated compute the location without checking on disk.
   // Note: We also check for a locally set GENERATED property, because
-  //       it might have been set before policy CMP0118 was set to NEW.
+  //       it might have been set before policy CMP0118 (or CMP0163) was set
+  //       to NEW.
   if (this->GetIsGenerated(CheckScope::GlobalAndLocal)) {
     // The file is either already a full path or is relative to the
     // build directory for the target.
@@ -146,9 +147,12 @@ bool cmSourceFile::FindFullPath(std::string* error,
   std::vector<std::string> exts =
     makefile->GetCMakeInstance()->GetAllExtensions();
   auto cmp0115 = makefile->GetPolicyStatus(cmPolicies::CMP0115);
+  auto cmp0163 = makefile->GetPolicyStatus(cmPolicies::CMP0163);
   auto cmp0118 = makefile->GetPolicyStatus(cmPolicies::CMP0118);
+  bool const cmp0163new =
+    cmp0163 != cmPolicies::OLD && cmp0163 != cmPolicies::WARN;
   bool const cmp0118new =
-    cmp0118 != cmPolicies::OLD && cmp0118 != cmPolicies::WARN;
+    cmp0163new || (cmp0118 != cmPolicies::OLD && cmp0118 != cmPolicies::WARN);
 
   // Tries to find the file in a given directory
   auto findInDir = [this, &exts, &lPath, cmp0115, cmp0115Warning, cmp0118new,
@@ -156,6 +160,7 @@ bool cmSourceFile::FindFullPath(std::string* error,
     // Compute full path
     std::string const fullPath = cmSystemTools::CollapseFullPath(lPath, dir);
     // Try full path
+    // Is this file globally marked as generated? Then mark so locally.
     if (cmp0118new &&
         makefile->GetGlobalGenerator()->IsGeneratedFile(fullPath)) {
       this->IsGenerated = true;
@@ -172,6 +177,7 @@ bool cmSourceFile::FindFullPath(std::string* error,
       for (std::string const& ext : exts) {
         if (!ext.empty()) {
           std::string extPath = cmStrCat(fullPath, '.', ext);
+          // Is this file globally marked as generated? Then mark so locally.
           if (cmp0118new &&
               makefile->GetGlobalGenerator()->IsGeneratedFile(extPath)) {
             this->IsGenerated = true;
@@ -357,14 +363,19 @@ cmValue cmSourceFile::GetPropertyForUser(const std::string& prop)
 
   // Special handling for GENERATED property.
   if (prop == propGENERATED) {
-    // We need to check policy CMP0118 in order to determine if we need to
-    // possibly consider the value of a locally set GENERATED property, too.
-    auto policyStatus =
+    // We need to check policy CMP0163 and CMP0118 in order to determine if we
+    // need to possibly consider the value of a locally set GENERATED property,
+    // too.
+    auto cmp0163 =
+      this->Location.GetMakefile()->GetPolicyStatus(cmPolicies::CMP0163);
+    auto cmp0118 =
       this->Location.GetMakefile()->GetPolicyStatus(cmPolicies::CMP0118);
-    if (this->GetIsGenerated(
-          (policyStatus == cmPolicies::WARN || policyStatus == cmPolicies::OLD)
-            ? CheckScope::GlobalAndLocal
-            : CheckScope::Global)) {
+    bool const cmp0163new =
+      cmp0163 != cmPolicies::OLD && cmp0163 != cmPolicies::WARN;
+    bool const cmp0118new = cmp0163new ||
+      (cmp0118 != cmPolicies::OLD && cmp0118 != cmPolicies::WARN);
+    if (this->GetIsGenerated((!cmp0118new) ? CheckScope::GlobalAndLocal
+                                           : CheckScope::Global)) {
       return cmValue(propTRUE);
     }
     return cmValue(propFALSE);
@@ -442,7 +453,7 @@ const std::string& cmSourceFile::GetSafeProperty(const std::string& prop) const
 
 bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const
 {
-  return cmIsOn(this->GetProperty(prop));
+  return this->GetProperty(prop).IsOn();
 }
 
 void cmSourceFile::MarkAsGenerated()

@@ -350,8 +350,24 @@ void CMakeSetupDialog::initialize()
   if (!this->SourceDirectory->text().isEmpty() &&
       !this->DeferredPreset.isNull()) {
     this->onSourceDirectoryChanged(this->SourceDirectory->text());
+    if (!this->BinaryDirectory->lineEdit()->text().isEmpty()) {
+      this->onBinaryDirectoryChanged(
+        this->BinaryDirectory->lineEdit()->text());
+    }
   } else if (!this->SourceDirectory->text().isEmpty() ||
              !this->BinaryDirectory->lineEdit()->text().isEmpty()) {
+    if (this->SourceDirectory->text().isEmpty() &&
+        !cmSystemTools::FileIsFullPath(
+          this->BinaryDirectory->lineEdit()->text().toStdString())) {
+      // If the binary directory is relative, load the previous source path
+      // from the config
+      QSettings settings;
+      settings.beginGroup("Settings/StartPath");
+      QString srcDir = settings.value(QString("WhereSource")).toString();
+      this->SourceDirectory->blockSignals(true);
+      this->SourceDirectory->setText(srcDir);
+      this->SourceDirectory->blockSignals(false);
+    }
     this->onSourceDirectoryChanged(this->SourceDirectory->text());
     this->onBinaryDirectoryChanged(this->BinaryDirectory->lineEdit()->text());
   } else {
@@ -411,8 +427,13 @@ bool CMakeSetupDialog::prepareConfigure()
     }
   }
 
-  // remember path
-  this->addBinaryPath(dir.absolutePath());
+  // remember paths
+  this->addBinaryPath(
+    this->CMakeThread->cmakeInstance()->relativeBinaryDirectory());
+  QSettings settings;
+  settings.beginGroup("Settings/StartPath");
+  settings.setValue("WhereSource",
+                    this->CMakeThread->cmakeInstance()->sourceDirectory());
 
   return true;
 }
@@ -742,8 +763,15 @@ void CMakeSetupDialog::showPresetLoadError(const QString& dir,
 
 void CMakeSetupDialog::doBinaryBrowse()
 {
+  QString abs_path = this->BinaryDirectory->currentText();
+  if (!cmSystemTools::FileIsFullPath(abs_path.toStdString())) {
+    if (!this->SourceDirectory->text().endsWith("/")) {
+      abs_path = "/" + abs_path;
+    }
+    abs_path = this->SourceDirectory->text() + abs_path;
+  }
   QString dir = QFileDialog::getExistingDirectory(
-    this, tr("Enter Path to Build"), this->BinaryDirectory->currentText(),
+    this, tr("Enter Path to Build"), abs_path,
     QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
   if (!dir.isEmpty() && dir != this->BinaryDirectory->currentText()) {
     this->setBinaryDirectory(dir);

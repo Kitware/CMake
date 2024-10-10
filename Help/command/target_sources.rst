@@ -22,7 +22,7 @@ The named ``<target>`` must have been created by a command such as
   ``<target>`` can be a custom target.
 
 The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to
-specify the :ref:`scope <Target Usage Requirements>` of the source file paths
+specify the :ref:`scope <Target Command Scope>` of the source file paths
 (``<items>``) that follow them.  ``PRIVATE`` and ``PUBLIC`` items will
 populate the :prop_tgt:`SOURCES` property of ``<target>``, which are used when
 building the target itself. ``PUBLIC`` and ``INTERFACE`` items will populate the

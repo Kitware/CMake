@@ -152,6 +152,8 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
         gte, cmGeneratorExpression::BuildInterface, properties);
     }
     this->PopulateCompatibleInterfaceProperties(gte, properties);
+    this->PopulateCustomTransitiveInterfaceProperties(
+      gte, cmGeneratorExpression::BuildInterface, properties);
 
     this->GenerateInterfaceProperties(gte, os, properties);
 

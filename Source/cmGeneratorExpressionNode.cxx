@@ -487,7 +487,8 @@ protected:
     if (context->HeadTarget) {
       cmGeneratorExpressionDAGChecker dagChecker(
         context->Backtrace, context->HeadTarget,
-        genexOperator + ":" + expression, content, dagCheckerParent);
+        genexOperator + ":" + expression, content, dagCheckerParent,
+        context->LG, context->Config);
       switch (dagChecker.Check()) {
         case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
         case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE: {
@@ -547,6 +548,7 @@ static const struct TargetGenexEvalNode : public GenexEvaluator
       return expression;
     }
 
+    // Replace the surrounding context with the named target.
     cmGeneratorExpressionContext targetContext(
       context->LG, context->Config, context->Quiet, target, target,
       context->EvaluateForBuildsystem, context->Backtrace, context->Language);
@@ -1859,6 +1861,7 @@ struct CharacterNode : public cmGeneratorExpressionNode
 static const CharacterNode<'>'> angle_rNode;
 static const CharacterNode<','> commaNode;
 static const CharacterNode<';'> semicolonNode;
+static const CharacterNode<'"'> quoteNode;
 
 struct CompilerIdNode : public cmGeneratorExpressionNode
 {
@@ -2009,6 +2012,76 @@ static const CompilerVersionNode cCompilerVersionNode("C"),
   objcCompilerVersionNode("OBJC"), objcxxCompilerVersionNode("OBJCXX"),
   fortranCompilerVersionNode("Fortran"), ispcCompilerVersionNode("ISPC"),
   hipCompilerVersionNode("HIP");
+
+struct CompilerFrontendVariantNode : public cmGeneratorExpressionNode
+{
+  CompilerFrontendVariantNode(const char* compilerLang)
+    : CompilerLanguage(compilerLang)
+  {
+  }
+
+  int NumExpectedParameters() const override { return ZeroOrMoreParameters; }
+
+  std::string Evaluate(
+    const std::vector<std::string>& parameters,
+    cmGeneratorExpressionContext* context,
+    const GeneratorExpressionContent* content,
+    cmGeneratorExpressionDAGChecker* dagChecker) const override
+  {
+    if (!context->HeadTarget) {
+      std::ostringstream e;
+      e << "$<" << this->CompilerLanguage
+        << "_COMPILER_FRONTEND_VARIANT> may only be used with binary targets. "
+           " It may not be used with add_custom_command or add_custom_target.";
+      reportError(context, content->GetOriginalExpression(), e.str());
+      return {};
+    }
+    return this->EvaluateWithLanguage(parameters, context, content, dagChecker,
+                                      this->CompilerLanguage);
+  }
+
+  std::string EvaluateWithLanguage(const std::vector<std::string>& parameters,
+                                   cmGeneratorExpressionContext* context,
+                                   const GeneratorExpressionContent* content,
+                                   cmGeneratorExpressionDAGChecker* /*unused*/,
+                                   const std::string& lang) const
+  {
+    std::string const& compilerFrontendVariant =
+      context->LG->GetMakefile()->GetSafeDefinition(
+        "CMAKE_" + lang + "_COMPILER_FRONTEND_VARIANT");
+    if (parameters.empty()) {
+      return compilerFrontendVariant;
+    }
+    if (compilerFrontendVariant.empty()) {
+      return parameters.front().empty() ? "1" : "0";
+    }
+    static cmsys::RegularExpression compilerFrontendVariantValidator(
+      "^[A-Za-z0-9_]*$");
+
+    for (auto const& param : parameters) {
+      if (!compilerFrontendVariantValidator.find(param)) {
+        reportError(context, content->GetOriginalExpression(),
+                    "Expression syntax not recognized.");
+        return {};
+      }
+      if (strcmp(param.c_str(), compilerFrontendVariant.c_str()) == 0) {
+        return "1";
+      }
+    }
+    return "0";
+  }
+
+  const char* const CompilerLanguage;
+};
+
+static const CompilerFrontendVariantNode cCompilerFrontendVariantNode("C"),
+  cxxCompilerFrontendVariantNode("CXX"),
+  cudaCompilerFrontendVariantNode("CUDA"),
+  objcCompilerFrontendVariantNode("OBJC"),
+  objcxxCompilerFrontendVariantNode("OBJCXX"),
+  fortranCompilerFrontendVariantNode("Fortran"),
+  hipCompilerFrontendVariantNode("HIP"),
+  ispcCompilerFrontendVariantNode("ISPC");
 
 struct PlatformIdNode : public cmGeneratorExpressionNode
 {
@@ -2698,12 +2771,12 @@ static const struct DeviceLinkNode : public cmGeneratorExpressionNode
 static std::string getLinkedTargetsContent(
   cmGeneratorTarget const* target, std::string const& prop,
   cmGeneratorExpressionContext* context,
-  cmGeneratorExpressionDAGChecker* dagChecker)
+  cmGeneratorExpressionDAGChecker* dagChecker, cmGeneratorTarget::UseTo usage)
 {
   std::string result;
   if (cmLinkImplementationLibraries const* impl =
         target->GetLinkImplementationLibraries(
-          context->Config, cmGeneratorTarget::LinkInterfaceFor::Usage)) {
+          context->Config, cmGeneratorTarget::UseTo::Compile)) {
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target) {
         // Pretend $<TARGET_PROPERTY:lib.Target,prop> appeared in our
@@ -2713,8 +2786,8 @@ static std::string getLinkedTargetsContent(
           target->GetLocalGenerator(), context->Config, context->Quiet, target,
           target, context->EvaluateForBuildsystem, lib.Backtrace,
           context->Language);
-        std::string libResult =
-          lib.Target->EvaluateInterfaceProperty(prop, &libContext, dagChecker);
+        std::string libResult = lib.Target->EvaluateInterfaceProperty(
+          prop, &libContext, dagChecker, usage);
         if (!libResult.empty()) {
           if (result.empty()) {
             result = std::move(libResult);
@@ -2870,37 +2943,31 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       return target->GetLinkerLanguage(context->Config);
     }
 
+    bool const evaluatingLinkLibraries =
+      dagCheckerParent && dagCheckerParent->EvaluatingLinkLibraries();
+
     std::string interfacePropertyName;
     bool isInterfaceProperty = false;
+    cmGeneratorTarget::UseTo usage = cmGeneratorTarget::UseTo::Compile;
 
-#define POPULATE_INTERFACE_PROPERTY_NAME(prop)                                \
-  if (propertyName == #prop) {                                                \
-    interfacePropertyName = "INTERFACE_" #prop;                               \
-  } else if (propertyName == "INTERFACE_" #prop) {                            \
-    interfacePropertyName = "INTERFACE_" #prop;                               \
-    isInterfaceProperty = true;                                               \
-  } else
-
-    CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(POPULATE_INTERFACE_PROPERTY_NAME)
-    // Note that the above macro terminates with an else
-    /* else */ if (cmHasLiteralPrefix(propertyName, "COMPILE_DEFINITIONS_")) {
-      cmPolicies::PolicyStatus polSt =
-        context->LG->GetPolicyStatus(cmPolicies::CMP0043);
-      if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {
-        interfacePropertyName = "INTERFACE_COMPILE_DEFINITIONS";
-      }
+    if (cm::optional<cmGeneratorTarget::TransitiveProperty> transitiveProp =
+          target->IsTransitiveProperty(propertyName, context->LG,
+                                       context->Config,
+                                       evaluatingLinkLibraries)) {
+      interfacePropertyName = std::string(transitiveProp->InterfaceName);
+      isInterfaceProperty = transitiveProp->InterfaceName == propertyName;
+      usage = transitiveProp->Usage;
     }
-#undef POPULATE_INTERFACE_PROPERTY_NAME
-
-    bool evaluatingLinkLibraries = false;
 
     if (dagCheckerParent) {
+      // This $<TARGET_PROPERTY:...> node has been reached while evaluating
+      // another target property value.  Check that the outermost evaluation
+      // expects such nested evaluations.
       if (dagCheckerParent->EvaluatingGenexExpression() ||
           dagCheckerParent->EvaluatingPICExpression() ||
           dagCheckerParent->EvaluatingLinkerLauncher()) {
         // No check required.
-      } else if (dagCheckerParent->EvaluatingLinkLibraries()) {
-        evaluatingLinkLibraries = true;
+      } else if (evaluatingLinkLibraries) {
         if (!interfacePropertyName.empty()) {
           reportError(
             context, content->GetOriginalExpression(),
@@ -2910,21 +2977,19 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           return std::string();
         }
       } else {
-#define ASSERT_TRANSITIVE_PROPERTY_METHOD(METHOD) dagCheckerParent->METHOD() ||
-        assert(CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
-          ASSERT_TRANSITIVE_PROPERTY_METHOD) false); // NOLINT(clang-tidy)
-#undef ASSERT_TRANSITIVE_PROPERTY_METHOD
+        assert(dagCheckerParent->EvaluatingTransitiveProperty());
       }
     }
 
     if (isInterfaceProperty) {
       return cmGeneratorExpression::StripEmptyListElements(
         target->EvaluateInterfaceProperty(propertyName, context,
-                                          dagCheckerParent));
+                                          dagCheckerParent, usage));
     }
 
     cmGeneratorExpressionDAGChecker dagChecker(
-      context->Backtrace, target, propertyName, content, dagCheckerParent);
+      context->Backtrace, target, propertyName, content, dagCheckerParent,
+      context->LG, context->Config);
 
     switch (dagChecker.Check()) {
       case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
@@ -2949,8 +3014,20 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       return std::string();
     }
 
-    if (!haveProp && !target->IsImported() &&
-        target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+    // Properties named by COMPATIBLE_INTERFACE_ properties combine over
+    // the transitive link closure as a single order-independent value.
+    // Imported targets do not themselves have a defined value for these
+    // properties, but they can contribute to the value of a non-imported
+    // dependent.
+    //
+    // For COMPATIBLE_INTERFACE_{BOOL,STRING}:
+    // * If set on this target, use the value directly.  It is checked
+    //   elsewhere for consistency over the transitive link closure.
+    // * If not set on this target, compute the value from the closure.
+    //
+    // For COMPATIBLE_INTERFACE_NUMBER_{MAX,MIN} we always compute the value
+    // from this target and the transitive link closure to get the max or min.
+    if (!haveProp && !target->IsImported()) {
       if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
                                                        context->Config)) {
         context->HadContextSensitiveCondition = true;
@@ -2967,6 +3044,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                                           context->Config);
         return propContent ? propContent : "";
       }
+    }
+    if (!evaluatingLinkLibraries && !target->IsImported()) {
       if (target->IsLinkInterfaceDependentNumberMinProperty(propertyName,
                                                             context->Config)) {
         context->HadContextSensitiveCondition = true;
@@ -2985,32 +3064,14 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
     }
 
-    if (!target->IsImported() && dagCheckerParent &&
-        !dagCheckerParent->EvaluatingLinkLibraries()) {
-      if (target->IsLinkInterfaceDependentNumberMinProperty(propertyName,
-                                                            context->Config)) {
-        context->HadContextSensitiveCondition = true;
-        const char* propContent =
-          target->GetLinkInterfaceDependentNumberMinProperty(propertyName,
-                                                             context->Config);
-        return propContent ? propContent : "";
-      }
-      if (target->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
-                                                            context->Config)) {
-        context->HadContextSensitiveCondition = true;
-        const char* propContent =
-          target->GetLinkInterfaceDependentNumberMaxProperty(propertyName,
-                                                             context->Config);
-        return propContent ? propContent : "";
-      }
-    }
-
+    // Some properties, such as usage requirements, combine over the
+    // transitive link closure as an ordered list.
     if (!interfacePropertyName.empty()) {
       result = cmGeneratorExpression::StripEmptyListElements(
         this->EvaluateDependentExpression(result, context->LG, context, target,
                                           &dagChecker, target));
       std::string linkedTargetsContent = getLinkedTargetsContent(
-        target, interfacePropertyName, context, &dagChecker);
+        target, interfacePropertyName, context, &dagChecker, usage);
       if (!linkedTargetsContent.empty()) {
         result += (result.empty() ? "" : ";") + linkedTargetsContent;
       }
@@ -4458,6 +4519,14 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "OBJCXX_COMPILER_VERSION", &objcxxCompilerVersionNode },
     { "Fortran_COMPILER_VERSION", &fortranCompilerVersionNode },
     { "HIP_COMPILER_VERSION", &hipCompilerVersionNode },
+    { "C_COMPILER_FRONTEND_VARIANT", &cCompilerFrontendVariantNode },
+    { "CXX_COMPILER_FRONTEND_VARIANT", &cxxCompilerFrontendVariantNode },
+    { "CUDA_COMPILER_FRONTEND_VARIANT", &cudaCompilerFrontendVariantNode },
+    { "OBJC_COMPILER_FRONTEND_VARIANT", &objcCompilerFrontendVariantNode },
+    { "OBJCXX_COMPILER_FRONTEND_VARIANT", &objcxxCompilerFrontendVariantNode },
+    { "Fortran_COMPILER_FRONTEND_VARIANT",
+      &fortranCompilerFrontendVariantNode },
+    { "HIP_COMPILER_FRONTEND_VARIANT", &hipCompilerFrontendVariantNode },
     { "PLATFORM_ID", &platformIdNode },
     { "COMPILE_FEATURES", &compileFeaturesNode },
     { "CONFIGURATION", &configurationNode },
@@ -4529,6 +4598,7 @@ const cmGeneratorExpressionNode* cmGeneratorExpressionNode::GetNode(
     { "ANGLE-R", &angle_rNode },
     { "COMMA", &commaNode },
     { "SEMICOLON", &semicolonNode },
+    { "QUOTE", &quoteNode },
     { "TARGET_PROPERTY", &targetPropertyNode },
     { "TARGET_NAME", &targetNameNode },
     { "TARGET_OBJECTS", &targetObjectsNode },

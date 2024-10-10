@@ -49,16 +49,6 @@
 #endif
 
 /*
- * Non-ANSI integer extensions
- */
-
-#if (defined(_WIN32_WCE)) || \
-    (defined(__MINGW32__)) || \
-    (defined(_MSC_VER) && (_MSC_VER >= 900) && (_INTEGRAL_MAX_BITS >= 64))
-#  define MP_HAVE_INT_EXTENSIONS
-#endif
-
-/*
  * Max integer data types that mprintf.c is capable
  */
 
@@ -87,7 +77,7 @@ static const char upper_digits[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 #define OUTCHAR(x)                                      \
   do {                                                  \
-    if(!stream(x, userp))                               \
+    if(!stream((unsigned char)x, userp))                \
       done++;                                           \
     else                                                \
       return done; /* return on failure */              \
@@ -253,7 +243,7 @@ static int parsefmt(const char *format,
       struct va_input *iptr;
       bool loopit = TRUE;
       fmt++;
-      outlen = fmt - start - 1;
+      outlen = (size_t)(fmt - start - 1);
       if(*fmt == '%') {
         /* this means a %% that should be output only as %. Create an output
            segment. */
@@ -271,7 +261,8 @@ static int parsefmt(const char *format,
         continue; /* while */
       }
 
-      flags = width = precision = 0;
+      flags = 0;
+      width = precision = 0;
 
       if(use_dollar != DOLLAR_NOPE) {
         param = dollarstring(fmt, &fmt);
@@ -301,7 +292,7 @@ static int parsefmt(const char *format,
           break;
         case '-':
           flags |= FLAGS_LEFT;
-          flags &= ~FLAGS_PAD_NIL;
+          flags &= ~(unsigned int)FLAGS_PAD_NIL;
           break;
         case '#':
           flags |= FLAGS_ALT;
@@ -349,8 +340,9 @@ static int parsefmt(const char *format,
         case 'h':
           flags |= FLAGS_SHORT;
           break;
-#if defined(MP_HAVE_INT_EXTENSIONS)
+#if defined(_WIN32) || defined(_WIN32_WCE)
         case 'I':
+          /* Non-ANSI integer extensions I32 I64 */
           if((fmt[0] == '3') && (fmt[1] == '2')) {
             flags |= FLAGS_LONG;
             fmt += 2;
@@ -367,7 +359,7 @@ static int parsefmt(const char *format,
 #endif
           }
           break;
-#endif
+#endif /* _WIN32 || _WIN32_WCE */
         case 'l':
           if(flags & FLAGS_LONG)
             flags |= FLAGS_LONGLONG;
@@ -558,7 +550,7 @@ static int parsefmt(const char *format,
       optr = &out[ocount++];
       if(ocount > MAX_SEGMENTS)
         return PFMT_MANYSEGS;
-      optr->input = param;
+      optr->input = (unsigned int)param;
       optr->flags = flags;
       optr->width = width;
       optr->precision = precision;
@@ -571,7 +563,7 @@ static int parsefmt(const char *format,
   }
 
   /* is there a trailing piece */
-  outlen = fmt - start;
+  outlen = (size_t)(fmt - start);
   if(outlen) {
     optr = &out[ocount++];
     if(ocount > MAX_SEGMENTS)
@@ -651,7 +643,7 @@ static int parsefmt(const char *format,
  * On success, the input array describes the type of all arguments and their
  * values.
  *
- * The function then iterates over the output sengments and outputs them one
+ * The function then iterates over the output segments and outputs them one
  * by one until done. Using the appropriate input arguments (if any).
  *
  * All output is sent to the 'stream()' callback, one byte at a time.
@@ -697,7 +689,7 @@ static int formatf(
     mp_intmax_t signed_num; /* Used to convert negative in positive.  */
     char *w;
     size_t outlen = optr->outlen;
-    int flags = optr->flags;
+    unsigned int flags = optr->flags;
 
     if(outlen) {
       char *str = optr->start;
@@ -719,7 +711,7 @@ static int formatf(
         else
           width = -width;
         flags |= FLAGS_LEFT;
-        flags &= ~FLAGS_PAD_NIL;
+        flags &= ~(unsigned int)FLAGS_PAD_NIL;
       }
     }
     else
@@ -876,7 +868,7 @@ number:
           str = nilstr;
           len = sizeof(nilstr) - 1;
           /* Disable quotes around (nil) */
-          flags &= (~FLAGS_ALT);
+          flags &= ~(unsigned int)FLAGS_ALT;
         }
         else {
           str = "";
@@ -895,13 +887,13 @@ number:
       if(flags & FLAGS_ALT)
         OUTCHAR('"');
 
-      if(!(flags&FLAGS_LEFT))
+      if(!(flags & FLAGS_LEFT))
         while(width-- > 0)
           OUTCHAR(' ');
 
       for(; len && *str; len--)
         OUTCHAR(*str++);
-      if(flags&FLAGS_LEFT)
+      if(flags & FLAGS_LEFT)
         while(width-- > 0)
           OUTCHAR(' ');
 
@@ -961,12 +953,13 @@ number:
       *fptr = 0;
 
       if(width >= 0) {
+        size_t dlen;
         if(width >= (int)sizeof(work))
           width = sizeof(work)-1;
         /* RECURSIVE USAGE */
-        len = curl_msnprintf(fptr, left, "%d", width);
-        fptr += len;
-        left -= len;
+        dlen = (size_t)curl_msnprintf(fptr, left, "%d", width);
+        fptr += dlen;
+        left -= dlen;
       }
       if(prec >= 0) {
         /* for each digit in the integer part, we can have one less
@@ -974,7 +967,7 @@ number:
         size_t maxprec = sizeof(work) - 2;
         double val = iptr->val.dnum;
         if(width > 0 && prec <= width)
-          maxprec -= width;
+          maxprec -= (size_t)width;
         while(val >= 10.0) {
           val /= 10;
           maxprec--;
@@ -1048,7 +1041,7 @@ static int addbyter(unsigned char outc, void *f)
   struct nsprintf *infop = f;
   if(infop->length < infop->max) {
     /* only do this if we haven't reached max length yet */
-    *infop->buffer++ = outc; /* store */
+    *infop->buffer++ = (char)outc; /* store */
     infop->length++; /* we are now one byte larger */
     return 0;     /* fputc() returns like this on success */
   }
@@ -1148,7 +1141,7 @@ char *curl_maprintf(const char *format, ...)
 static int storebuffer(unsigned char outc, void *f)
 {
   char **buffer = f;
-  **buffer = outc;
+  **buffer = (char)outc;
   (*buffer)++;
   return 0;
 }
@@ -1169,9 +1162,7 @@ static int fputc_wrapper(unsigned char outc, void *f)
   int out = outc;
   FILE *s = f;
   int rc = fputc(out, s);
-  if(rc == out)
-    return 0;
-  return 1;
+  return rc == EOF;
 }
 
 int curl_mprintf(const char *format, ...)

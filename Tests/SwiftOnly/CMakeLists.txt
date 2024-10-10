@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.3)
+cmake_minimum_required(VERSION 3.5)
 if(POLICY CMP0126)
   cmake_policy(SET CMP0126 NEW)
 endif()
@@ -28,6 +28,10 @@ endif()
 add_subdirectory(SubA)
 add_subdirectory(SubB)
 
+add_subdirectory(SubC)
+add_subdirectory(SubD)
+add_subdirectory(SubE)
+
 set(CMAKE_Swift_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/swift)
 
 add_executable(SwiftOnly main.swift)
@@ -43,6 +47,17 @@ add_library(N N.swift)
 target_link_libraries(N PUBLIC
   M)
 
+# FIXME(#25989): The Xcode generator doesn't respect CMAKE_Swift_MODULE_DIRECTORY.
+if(NOT CMAKE_GENERATOR STREQUAL "Xcode")
+  add_custom_command(TARGET M
+    POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E compare_files
+    "${CMAKE_Swift_MODULE_DIRECTORY}/M.swiftmodule"
+    "${CMAKE_Swift_MODULE_DIRECTORY}/M.swiftmodule"
+    COMMENT "check that .swiftmodule files are generated in CMAKE_Swift_MODULE_DIRECTORY"
+    VERBATIM)
+endif()
+
 if(NOT XCODE_VERSION OR XCODE_VERSION VERSION_GREATER_EQUAL 9.0)
   # TODO: Add a wholemodule object-library test once that is working
   add_library(O OBJECT O.swift L.swift)
@@ -57,16 +72,7 @@ add_dependencies(P SwiftOnly)
 add_library(SwiftIface INTERFACE)
 target_link_libraries(SwiftOnly PRIVATE SwiftIface)
 
-# @_alwaysEmitIntoClient ensures that the function body is inserted into the
-# swiftmodule instead of as a symbol in the binary itself. I'm doing this to
-# avoid having to link the executable. There are some flags required in order to
-# link an executable into a library that I didn't see CMake emitting for Swift
-# on macOS. AEIC is the easiest workaround that still tests this functionality.
-# Unfortunately, AEIC was only added recently (~Swift 5.2), so we need to check
-# that it is available before using it.
-if(CMAKE_Swift_COMPILER_VERSION VERSION_GREATER_EQUAL 5.2)
-  add_subdirectory("SwiftPlugin")
-endif()
+add_subdirectory("SwiftPlugin")
 
 function(test_cmp0157_default mode)
   if(POLICY CMP0157)

@@ -118,7 +118,6 @@ int posix(const char* jobserver, char* message)
 {
   int read_fd;
   int write_fd;
-  const char* path;
 
   // First try to parse as "R,W" file descriptors
   if (sscanf(jobserver, "%d,%d", &read_fd, &write_fd) == 2) {
@@ -127,7 +126,7 @@ int posix(const char* jobserver, char* message)
 
   // Then try to parse as "fifo:PATH"
   if (strncmp(jobserver, "fifo:", 5) == 0) {
-    path = jobserver + 5;
+    const char* path = jobserver + 5;
     read_fd = open(path, O_RDONLY);
     write_fd = open(path, O_WRONLY);
     return test_fd(read_fd, write_fd, message);

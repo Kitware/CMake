@@ -63,6 +63,9 @@ The following cache variables may also be set:
 
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 find_package(PkgConfig QUIET)
 if (PkgConfig_FOUND)
   pkg_check_modules(PC_OpenSP QUIET opensp)
@@ -158,3 +161,5 @@ set_package_properties(OpenSP PROPERTIES
   URL "http://openjade.sourceforge.net/doc/index.htm"
   DESCRIPTION "An SGML System Conforming to International Standard ISO 8879"
   )
+
+cmake_policy(POP)

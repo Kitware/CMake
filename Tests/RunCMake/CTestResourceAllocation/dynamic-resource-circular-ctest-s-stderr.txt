@@ -1,3 +1,5 @@
 ^Error: a cycle exists in the test dependency graph for the test "GenerateSpecFile"\.
-Please fix the cycle and run ctest again.
-No tests were found!!!$
+Please fix the cycle and run ctest again\.
+CMake Error at [^
+]*/Tests/RunCMake/CTestResourceAllocation/dynamic-resource-circular-ctest-s/test\.cmake:[0-9]+ \(message\):
+  Tests did not pass$

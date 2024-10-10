@@ -98,8 +98,8 @@ if(NOT CMAKE_GENERATOR MATCHES "(Borland|NMake) Makefiles")
   # NMake and Borland seem to have no way to encode a single '^'.
   string(APPEND special_chars "^")
 endif()
-if(NOT CMAKE_GENERATOR MATCHES "Visual Studio 9 2008|Watcom WMake")
-  # The vcproj format separates values with ','.
+if(NOT CMAKE_GENERATOR MATCHES "Watcom WMake")
+  # The wmake format does not support ','.
   string(APPEND special_chars ",")
 endif()
 if(NOT WIN32 AND NOT CYGWIN)

@@ -16,16 +16,27 @@ char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";
 @CMAKE_HIP_COMPILER_ID_PLATFORM_CONTENT@
 @CMAKE_HIP_COMPILER_ID_ERROR_FOR_TEST@
 
+#define CXX_STD_98 199711L
+#define CXX_STD_11 201103L
+#define CXX_STD_14 201402L
+#define CXX_STD_17 201703L
+#define CXX_STD_20 202002L
+#define CXX_STD_23 202302L
+
+#define CXX_STD __cplusplus
+
 const char* info_language_standard_default = "INFO" ":" "standard_default["
-#if __cplusplus > 202002L
+#if CXX_STD > CXX_STD_23
+  "26"
+#elif CXX_STD > CXX_STD_20
   "23"
-#elif __cplusplus > 201703L
+#elif CXX_STD > CXX_STD_17
   "20"
-#elif __cplusplus >= 201703L
+#elif CXX_STD > CXX_STD_14
   "17"
-#elif __cplusplus >= 201402L
+#elif CXX_STD > CXX_STD_11
   "14"
-#elif __cplusplus >= 201103L
+#elif CXX_STD >= CXX_STD_11
   "11"
 #else
   "98"

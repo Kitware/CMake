@@ -1,6 +1,6 @@
 #include <pthread.h>
 
-void* start_routine(void* args)
+static void* start_routine(void* args)
 {
   return args;
 }

@@ -328,6 +328,16 @@ foreach(vis Pub Priv Iface)
   endif()
 endforeach()
 
+# Create executables to verify custom transitive properties.
+add_executable(imp_testLib10 imp_testLib10.c)
+target_link_libraries(imp_testLib10 PRIVATE exp_testLib10)
+add_executable(imp_testLib10b imp_testLib10.c)
+target_link_libraries(imp_testLib10b PRIVATE bld_testLib10)
+add_executable(imp_testLib11 imp_testLib11.c)
+target_link_libraries(imp_testLib11 PRIVATE exp_testLib11)
+add_executable(imp_testLib11b imp_testLib11.c)
+target_link_libraries(imp_testLib11b PRIVATE bld_testLib11)
+
 #-----------------------------------------------------------------------------
 # Test that handling imported targets, including transitive dependencies,
 # works in CheckFunctionExists (...and hopefully all other try_compile() checks

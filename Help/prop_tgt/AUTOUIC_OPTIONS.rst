@@ -1,6 +1,8 @@
 AUTOUIC_OPTIONS
 ---------------
 
+.. versionadded:: 3.0
+
 Additional options for ``uic`` when using :prop_tgt:`AUTOUIC`
 
 This property holds additional command line options which will be used when

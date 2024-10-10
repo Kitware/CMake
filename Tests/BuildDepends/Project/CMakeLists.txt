@@ -1,19 +1,7 @@
 cmake_minimum_required(VERSION 2.6)
 project(testRebuild)
 
-if(APPLE)
-  set(CMake_TEST_XCODE_VERSION 0)
-  if(XCODE_VERSION)
-    set(CMake_TEST_XCODE_VERSION "${XCODE_VERSION}")
-  else()
-    execute_process(
-      COMMAND xcodebuild -version
-      OUTPUT_VARIABLE _version ERROR_VARIABLE _version_err
-      )
-    if(_version MATCHES "^Xcode ([0-9]+(\\.[0-9]+)*)")
-      set(CMake_TEST_XCODE_VERSION "${CMAKE_MATCH_1}")
-    endif()
-  endif()
+if(APPLE AND CMake_TEST_XCODE_VERSION)
   # only use multi-arch if the sysroot exists on this machine
   # Ninja needs -M which could not be used with multiple -arch flags
   if(EXISTS "${CMAKE_OSX_SYSROOT}" AND NOT "${CMAKE_GENERATOR}" MATCHES "Ninja")

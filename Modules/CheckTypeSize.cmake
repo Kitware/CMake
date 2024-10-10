@@ -92,6 +92,7 @@ include_guard(GLOBAL)
 
 block(SCOPE_FOR POLICIES)
 cmake_policy(SET CMP0054 NEW)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 #-----------------------------------------------------------------------------
 # Helper function.  DO NOT CALL DIRECTLY.

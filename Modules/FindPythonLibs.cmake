@@ -48,6 +48,9 @@ get the currently active Python version by default with a consistent version
 of PYTHON_LIBRARIES.
 #]=======================================================================]
 
+cmake_policy(PUSH)
+cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
+
 cmake_policy(GET CMP0148 _FindPythonLibs_CMP0148)
 if(_FindPythonLibs_CMP0148 STREQUAL "NEW")
   message(FATAL_ERROR "The FindPythonLibs module has been removed by policy CMP0148.")
@@ -55,6 +58,7 @@ endif()
 
 if(_FindPythonLibs_testing)
   set(_FindPythonLibs_included TRUE)
+  cmake_policy(POP)
   return()
 endif()
 
@@ -410,3 +414,5 @@ extern \"C\" {
   execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different "${_filenameTmp}" "${_filename}" OUTPUT_QUIET ERROR_QUIET)
 
 endfunction()
+
+cmake_policy(POP)

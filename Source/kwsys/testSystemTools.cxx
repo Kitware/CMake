@@ -1148,12 +1148,12 @@ static bool CheckCopyFileIfDifferent()
 static bool CheckURLParsing()
 {
   bool ret = true;
-  std::string url = "http://user:pw@hostname:42/full/url.com";
+  std::string url = "https://user:pw@hostname:42/full/url.com";
 
   std::string protocol, username, password, hostname, dataport, database;
   kwsys::SystemTools::ParseURL(url, protocol, username, password, hostname,
                                dataport, database);
-  if (protocol != "http" || username != "user" || password != "pw" ||
+  if (protocol != "https" || username != "user" || password != "pw" ||
       hostname != "hostname" || dataport != "42" ||
       database != "full/url.com") {
     std::cerr << "Incorrect URL parsing" << std::endl;

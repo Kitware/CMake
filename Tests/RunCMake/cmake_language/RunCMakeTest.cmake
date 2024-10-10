@@ -156,3 +156,11 @@ run_cmake_command(
     -DCMAKE_MESSAGE_LOG_LEVEL=TRACE
     -P ${RunCMake_SOURCE_DIR}/get_message_log_level.cmake
   )
+
+run_cmake(Experimental/CxxImportStd-set)
+run_cmake(Experimental/CxxImportStd-unset)
+run_cmake(Experimental/ExportPackageDependencies-set)
+run_cmake(Experimental/ExportPackageDependencies-unset)
+run_cmake(Experimental/WindowsKernelModeDriver-set)
+run_cmake(Experimental/WindowsKernelModeDriver-unset)
+run_cmake(Experimental/Unknown)

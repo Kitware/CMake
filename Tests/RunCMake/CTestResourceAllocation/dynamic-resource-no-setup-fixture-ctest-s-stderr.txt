@@ -1,2 +1,4 @@
 ^Test that defines GENERATED_RESOURCE_SPEC_FILE must have exactly one FIXTURES_SETUP
-No tests were found!!!$
+CMake Error at [^
+]*/Tests/RunCMake/CTestResourceAllocation/dynamic-resource-no-setup-fixture-ctest-s/test\.cmake:[0-9]+ \(message\):
+  Tests did not pass$

@@ -24,6 +24,7 @@ cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator(cmake* cm)
   this->ToolSupportsColor = true;
   this->UseLinkScript = false;
   cm->GetState()->SetWindowsShell(true);
+  cm->GetState()->SetBorlandMake(true);
   this->IncludeDirective = "!include";
   this->DefineWindowsNULL = true;
   this->PassMakeflags = true;

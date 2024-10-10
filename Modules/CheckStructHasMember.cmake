@@ -66,7 +66,7 @@ macro (CHECK_STRUCT_HAS_MEMBER _STRUCT _MEMBER _HEADER _RESULT)
 
   set(_CHECK_STRUCT_MEMBER_SOURCE_CODE "
 ${_INCLUDE_FILES}
-int main()
+int main(void)
 {
   (void)sizeof(((${_STRUCT} *)0)->${_MEMBER});
   return 0;

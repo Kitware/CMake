@@ -8,4 +8,6 @@ set(CMAKE_C90_STANDARD__HAS_FULL_SUPPORT ON)
 
 set(CMAKE_C99_STANDARD__HAS_FULL_SUPPORT ON)
 
+set(CMAKE_C_STANDARD_LATEST 99)
+
 __compiler_check_default_language_standard(C 8.0.0.0 99)

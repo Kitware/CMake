@@ -26,8 +26,7 @@ endif()
 if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|Darwin|Windows|AIX|SunOS)$|BSD"
     AND NOT CMAKE_C_COMPILER_ID MATCHES "^(Borland|Embarcadero|OpenWatcom|OrangeC|Watcom)$"
     AND NOT (CMAKE_C_COMPILER_ID MATCHES "^(Intel|IntelLLVM)$" AND CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    AND NOT CMAKE_C_COMPILER_LINKER MATCHES "Visual Studio 9\\.0"
-    AND NOT RunCMake_GENERATOR MATCHES "Visual Studio 9 "
+    AND NOT CMAKE_C_COMPILER_LINKER MATCHES "Microsoft Visual Studio 9\\.0/VC/bin"
     )
   if(NOT CMAKE_C_COMPILER_LINKER OR NOT CMAKE_C_COMPILER_LINKER_ID OR NOT CMAKE_C_COMPILER_LINKER_VERSION)
     message(SEND_ERROR "C compiler's linker not identified:\n"
