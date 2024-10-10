@@ -1362,6 +1362,9 @@ struct cmCompareTargets
   {
     std::string const& a = l->GetTarget()->GetName();
     std::string const& b = r->GetTarget()->GetName();
+    if (a == b) {
+      return false;
+    }
     if (a == "ALL_BUILD"_s) {
       return true;
     }
