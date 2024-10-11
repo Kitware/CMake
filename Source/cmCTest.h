@@ -305,7 +305,7 @@ public:
    * environment variables are restored to their previous values.
    */
   bool RunTest(const std::vector<std::string>& args, std::string* output,
-               int* retVal, std::ostream* logfile, cmDuration testTimeOut,
+               int* retVal, cmDuration testTimeOut,
                std::vector<std::string>* environment,
                Encoding encoding = cmProcessOutput::Auto);
 

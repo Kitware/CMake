@@ -346,8 +346,8 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     }
   }
 
-  bool runTestRes = this->CTest->RunTest(testCommand, &outs, &retval, nullptr,
-                                         remainingTime, nullptr);
+  bool runTestRes =
+    this->CTest->RunTest(testCommand, &outs, &retval, remainingTime, nullptr);
 
   if (!runTestRes || retval != 0) {
     out << "Test command failed: " << testCommand[0] << "\n";

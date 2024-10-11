@@ -1186,8 +1186,7 @@ bool cmCTest::RunMakeCommand(const std::string& command, std::string& output,
 }
 
 bool cmCTest::RunTest(const std::vector<std::string>& argv,
-                      std::string* output, int* retVal, std::ostream* log,
-                      cmDuration testTimeOut,
+                      std::string* output, int* retVal, cmDuration testTimeOut,
                       std::vector<std::string>* environment, Encoding encoding)
 {
   bool modifyEnv = (environment && !environment->empty());
@@ -1238,9 +1237,6 @@ bool cmCTest::RunTest(const std::vector<std::string>& argv,
       }
       args.emplace_back(i);
     }
-    if (log) {
-      *log << "* Run internal CTest" << std::endl;
-    }
 
     std::unique_ptr<cmSystemTools::SaveRestoreEnvironment> saveEnv;
     if (modifyEnv) {
@@ -1251,9 +1247,6 @@ bool cmCTest::RunTest(const std::vector<std::string>& argv,
     *retVal = inst.Run(args, output);
     if (output) {
       *output += oss.str();
-    }
-    if (log && output) {
-      *log << *output;
     }
     if (output) {
       cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
@@ -1286,26 +1279,19 @@ bool cmCTest::RunTest(const std::vector<std::string>& argv,
   uv_pipe_open(outputStream, chain.OutputStream());
   auto outputHandle = cmUVStreamRead(
     outputStream,
-    [this, &processOutput, &output, &tempOutput,
-     &log](std::vector<char> data) {
+    [this, &processOutput, &output, &tempOutput](std::vector<char> data) {
       std::string strdata;
       processOutput.DecodeText(data.data(), data.size(), strdata);
       if (output) {
         cm::append(tempOutput, data.data(), data.data() + data.size());
       }
       cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, strdata);
-      if (log) {
-        log->write(strdata.c_str(), strdata.size());
-      }
     },
-    [this, &processOutput, &log]() {
+    [this, &processOutput]() {
       std::string strdata;
       processOutput.DecodeText(std::string(), strdata);
       if (!strdata.empty()) {
         cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, strdata);
-        if (log) {
-          log->write(strdata.c_str(), strdata.size());
-        }
       }
     });
 
