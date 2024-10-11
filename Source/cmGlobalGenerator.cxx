@@ -2333,10 +2333,10 @@ int cmGlobalGenerator::Build(
                                          outputflag, timeout)) {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
       cmSystemTools::Error(
-        cmStrCat("Generator: execution of make failed. Make command was: ",
+        cmStrCat("Generator: build tool execution failed, command was: ",
                  makeCommandStr));
       ostr << *outputPtr
-           << "\nGenerator: execution of make failed. Make command was: "
+           << "\nGenerator: build tool execution failed, command was: "
            << outputMakeCommandStr << std::endl;
 
       return 1;
