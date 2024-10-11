@@ -380,8 +380,7 @@ public:
   };
 
   /** Add log to the output */
-  void Log(LogType logType, const char* file, int line, const char* msg,
-           bool suppress = false);
+  void Log(LogType logType, const char* msg, bool suppress = false);
 
   /** Color values */
   enum class Color
@@ -550,14 +549,12 @@ private:
   do {                                                                        \
     std::ostringstream cmCTestLog_msg;                                        \
     cmCTestLog_msg << msg;                                                    \
-    (ctSelf)->Log(cmCTest::logType, __FILE__, __LINE__,                       \
-                  cmCTestLog_msg.str().c_str());                              \
+    (ctSelf)->Log(cmCTest::logType, cmCTestLog_msg.str().c_str());            \
   } while (false)
 
 #define cmCTestOptionalLog(ctSelf, logType, msg, suppress)                    \
   do {                                                                        \
     std::ostringstream cmCTestLog_msg;                                        \
     cmCTestLog_msg << msg;                                                    \
-    (ctSelf)->Log(cmCTest::logType, __FILE__, __LINE__,                       \
-                  cmCTestLog_msg.str().c_str(), suppress);                    \
+    (ctSelf)->Log(cmCTest::logType, cmCTestLog_msg.str().c_str(), suppress);  \
   } while (false)

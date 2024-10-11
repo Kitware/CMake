@@ -206,7 +206,6 @@ struct cmCTest::Private
   bool SuppressUpdatingCTestConfiguration = false;
 
   bool Debug = false;
-  bool ShowLineNumbers = false;
   bool Quiet = false;
 
   std::string BuildID;
@@ -1995,7 +1994,6 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
 
   else if (this->CheckArgument(arg, "--debug"_s)) {
     this->Impl->Debug = true;
-    this->Impl->ShowLineNumbers = true;
   } else if ((this->CheckArgument(arg, "--group"_s) ||
               // This is an undocumented / deprecated option.
               // "Track" has been renamed to "Group".
@@ -2004,7 +2002,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     i++;
     this->Impl->SpecificGroup = args[i];
   } else if (this->CheckArgument(arg, "--show-line-numbers"_s)) {
-    this->Impl->ShowLineNumbers = true;
+    // Silently ignore this never-documented and now-removed option.
   } else if (this->CheckArgument(arg, "--no-label-summary"_s)) {
     this->Impl->LabelSummary = false;
   } else if (this->CheckArgument(arg, "--no-subproject-summary"_s)) {
@@ -2471,8 +2469,6 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
     }
 
     this->Impl->Debug = expandedPreset->Output->Debug.value_or(false);
-    this->Impl->ShowLineNumbers =
-      expandedPreset->Output->Debug.value_or(false);
     this->Impl->OutputTestOutputOnTestFailure =
       expandedPreset->Output->OutputOnFailure.value_or(false);
     this->Impl->Quiet = expandedPreset->Output->Quiet.value_or(false);
@@ -3651,15 +3647,7 @@ static const char* cmCTestStringLogType[] = { "DEBUG",
                                               "WARNING",
                                               "ERROR_MESSAGE" };
 
-#define cmCTestLogOutputFileLine(stream)                                      \
-  do {                                                                        \
-    if (this->Impl->ShowLineNumbers) {                                        \
-      (stream) << std::endl << file << ":" << line << " ";                    \
-    }                                                                         \
-  } while (false)
-
-void cmCTest::Log(LogType logType, const char* file, int line, const char* msg,
-                  bool suppress)
+void cmCTest::Log(LogType logType, const char* msg, bool suppress)
 {
   if (!msg || !*msg) {
     return;
@@ -3681,7 +3669,6 @@ void cmCTest::Log(LogType logType, const char* file, int line, const char* msg,
       display = false;
     }
     if (display) {
-      cmCTestLogOutputFileLine(*this->Impl->OutputLogFile);
       if (this->Impl->OutputLogFileLastTag &&
           logType != *this->Impl->OutputLogFileLastTag) {
         *this->Impl->OutputLogFile << "[" << cmCTestStringLogType[logType]
@@ -3701,7 +3688,6 @@ void cmCTest::Log(LogType logType, const char* file, int line, const char* msg,
 
     if (logType == HANDLER_TEST_PROGRESS_OUTPUT) {
       if (this->Impl->TestProgressOutput) {
-        cmCTestLogOutputFileLine(out);
         if (this->Impl->FlushTestProgressLine) {
           printf("\r");
           this->Impl->FlushTestProgressLine = false;
@@ -3729,7 +3715,6 @@ void cmCTest::Log(LogType logType, const char* file, int line, const char* msg,
     switch (logType) {
       case DEBUG:
         if (this->Impl->Debug) {
-          cmCTestLogOutputFileLine(out);
           out << msg;
           out.flush();
         }
@@ -3737,31 +3722,26 @@ void cmCTest::Log(LogType logType, const char* file, int line, const char* msg,
       case OUTPUT:
       case HANDLER_OUTPUT:
         if (this->Impl->Debug || this->Impl->Verbose) {
-          cmCTestLogOutputFileLine(out);
           out << msg;
           out.flush();
         }
         break;
       case HANDLER_VERBOSE_OUTPUT:
         if (this->Impl->Debug || this->Impl->ExtraVerbose) {
-          cmCTestLogOutputFileLine(out);
           out << msg;
           out.flush();
         }
         break;
       case WARNING:
-        cmCTestLogOutputFileLine(err);
         err << msg;
         err.flush();
         break;
       case ERROR_MESSAGE:
-        cmCTestLogOutputFileLine(err);
         err << msg;
         err.flush();
         cmSystemTools::SetErrorOccurred();
         break;
       default:
-        cmCTestLogOutputFileLine(out);
         out << msg;
         out.flush();
     }
