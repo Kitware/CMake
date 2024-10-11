@@ -3715,35 +3715,29 @@ void cmCTest::Log(LogType logType, const char* msg, bool suppress)
     switch (logType) {
       case DEBUG:
         if (this->Impl->Debug) {
-          out << msg;
-          out.flush();
+          out << msg << std::flush;
         }
         break;
       case OUTPUT:
       case HANDLER_OUTPUT:
         if (this->Impl->Debug || this->Impl->Verbose) {
-          out << msg;
-          out.flush();
+          out << msg << std::flush;
         }
         break;
       case HANDLER_VERBOSE_OUTPUT:
         if (this->Impl->Debug || this->Impl->ExtraVerbose) {
-          out << msg;
-          out.flush();
+          out << msg << std::flush;
         }
         break;
       case WARNING:
-        err << msg;
-        err.flush();
+        err << msg << std::flush;
         break;
       case ERROR_MESSAGE:
-        err << msg;
-        err.flush();
+        err << msg << std::flush;
         cmSystemTools::SetErrorOccurred();
         break;
       default:
-        out << msg;
-        out.flush();
+        out << msg << std::flush;
     }
   }
 }
