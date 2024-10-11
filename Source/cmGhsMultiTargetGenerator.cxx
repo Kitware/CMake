@@ -15,6 +15,7 @@
 #include "cmCustomCommand.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGhsMultiGenerator.h"
 #include "cmLinkLineComputer.h" // IWYU pragma: keep

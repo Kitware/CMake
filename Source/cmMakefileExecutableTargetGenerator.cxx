@@ -12,6 +12,7 @@
 #include <cmext/algorithm>
 
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLinkLineComputer.h"
@@ -233,7 +234,7 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
     }
 
     auto rulePlaceholderExpander =
-      this->LocalGenerator->CreateRulePlaceholderExpander();
+      this->LocalGenerator->CreateRulePlaceholderExpander(cmBuildStep::Link);
 
     // Expand placeholders in the commands.
     rulePlaceholderExpander->SetTargetImpLib(targetOutput);
@@ -603,7 +604,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     }
 
     auto rulePlaceholderExpander =
-      this->LocalGenerator->CreateRulePlaceholderExpander();
+      this->LocalGenerator->CreateRulePlaceholderExpander(cmBuildStep::Link);
 
     // Expand placeholders in the commands.
     rulePlaceholderExpander->SetTargetImpLib(targetOutPathImport);

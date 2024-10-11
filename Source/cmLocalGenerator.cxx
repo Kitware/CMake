@@ -208,10 +208,10 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
 }
 
 std::unique_ptr<cmRulePlaceholderExpander>
-cmLocalGenerator::CreateRulePlaceholderExpander() const
+cmLocalGenerator::CreateRulePlaceholderExpander(cmBuildStep buildStep) const
 {
   return cm::make_unique<cmRulePlaceholderExpander>(
-    this->Compilers, this->VariableMappings, this->CompilerSysroot,
+    buildStep, this->Compilers, this->VariableMappings, this->CompilerSysroot,
     this->LinkerSysroot);
 }
 

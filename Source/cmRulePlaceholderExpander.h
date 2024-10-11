@@ -8,6 +8,7 @@
 #include <map>
 #include <string>
 
+#include "cmGeneratorOptions.h"
 #include "cmPlaceholderExpander.h"
 
 class cmOutputConverter;
@@ -16,7 +17,7 @@ class cmRulePlaceholderExpander : public cmPlaceholderExpander
 {
 public:
   cmRulePlaceholderExpander(
-    std::map<std::string, std::string> compilers,
+    cmBuildStep buildStep, std::map<std::string, std::string> compilers,
     std::map<std::string, std::string> variableMappings,
     std::string compilerSysroot, std::string linkerSysroot);
 
@@ -84,6 +85,7 @@ private:
 
   std::string TargetImpLib;
 
+  cmBuildStep BuildStep = cmBuildStep::Compile;
   std::map<std::string, std::string> Compilers;
   std::map<std::string, std::string> VariableMappings;
   std::string CompilerSysroot;

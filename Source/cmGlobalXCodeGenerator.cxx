@@ -27,6 +27,7 @@
 #include "cmCustomCommandTypes.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGeneratorFactory.h"
 #include "cmLinkItem.h"

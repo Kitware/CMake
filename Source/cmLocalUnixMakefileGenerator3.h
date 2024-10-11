@@ -12,8 +12,8 @@
 #include <vector>
 
 #include "cmDepends.h"
+#include "cmGeneratorOptions.h"
 #include "cmLocalCommonGenerator.h"
-#include "cmLocalGenerator.h"
 
 class cmCustomCommand;
 class cmCustomCommandGenerator;

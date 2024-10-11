@@ -29,6 +29,7 @@
 #include "cmFileSet.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalCommonGenerator.h"
 #include "cmGlobalNinjaGenerator.h"

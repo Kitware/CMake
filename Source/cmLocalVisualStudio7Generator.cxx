@@ -25,6 +25,7 @@
 #include "cmCustomCommandLines.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalVisualStudio7Generator.h"

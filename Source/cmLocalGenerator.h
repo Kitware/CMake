@@ -19,6 +19,7 @@
 #include <cm3p/kwiml/int.h>
 
 #include "cmCustomCommandTypes.h"
+#include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h" // IWYU pragma: keep
@@ -45,36 +46,6 @@ class cmake;
 
 template <typename Iter>
 class cmRange;
-
-/** Flag if byproducts shall also be considered.  */
-enum class cmSourceOutputKind
-{
-  OutputOnly,
-  OutputOrByproduct
-};
-
-/** What scanner to use for dependencies lookup.  */
-enum class cmDependencyScannerKind
-{
-  CMake,
-  Compiler
-};
-
-/** What to compute language flags for */
-enum class cmBuildStep
-{
-  Compile,
-  Link
-};
-
-/** What compilation mode the swift files are in */
-enum class cmSwiftCompileMode
-{
-  Wholemodule,
-  Incremental,
-  Singlefile,
-  Unknown,
-};
 
 /** Target and source file which have a specific output.  */
 struct cmSourcesWithOutput
@@ -147,7 +118,8 @@ public:
   }
 
   virtual std::unique_ptr<cmRulePlaceholderExpander>
-  CreateRulePlaceholderExpander() const;
+  CreateRulePlaceholderExpander(
+    cmBuildStep buildStep = cmBuildStep::Compile) const;
 
   std::string GetLinkLibsCMP0065(std::string const& linkLanguage,
                                  cmGeneratorTarget& tgt) const;

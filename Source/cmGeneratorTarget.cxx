@@ -30,6 +30,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
+#include "cmGeneratorOptions.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
 #include "cmLocalGenerator.h"
