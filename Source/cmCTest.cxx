@@ -1706,7 +1706,7 @@ bool cmCTest::SubmitExtraFiles(const std::string& cfiles)
 
 // for a -D argument convert the next argument into
 // the proper list of dashboard steps via SetTest
-bool cmCTest::AddTestsForDashboardType(std::string& targ)
+bool cmCTest::AddTestsForDashboardType(std::string const& targ)
 {
   if (targ == "Experimental") {
     this->SetTestModel(cmCTest::EXPERIMENTAL);
@@ -1829,7 +1829,7 @@ bool cmCTest::AddTestsForDashboardType(std::string& targ)
   return true;
 }
 
-void cmCTest::ErrorMessageUnknownDashDValue(std::string& val)
+void cmCTest::ErrorMessageUnknownDashDValue(std::string const& val)
 {
   cmCTestLog(this, ERROR_MESSAGE,
              "CTest -D called with incorrect option: " << val << '\n');

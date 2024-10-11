@@ -481,10 +481,10 @@ private:
   int Initialize(const std::string& binary_dir, cmCTestStartCommand* command);
 
   /** parse the option after -D and convert it into the appropriate steps */
-  bool AddTestsForDashboardType(std::string& targ);
+  bool AddTestsForDashboardType(std::string const& targ);
 
   /** read as "emit an error message for an unknown -D value" */
-  void ErrorMessageUnknownDashDValue(std::string& val);
+  void ErrorMessageUnknownDashDValue(std::string const& val);
 
   /** add a variable definition from a command line -D value */
   bool AddVariableDefinition(const std::string& arg);
