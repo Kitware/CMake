@@ -367,9 +367,9 @@ public:
   void SetConfigType(const std::string& ct);
 
   /** Various log types */
-  enum
+  enum LogType
   {
-    DEBUG = 0,
+    DEBUG,
     OUTPUT,
     HANDLER_OUTPUT,
     HANDLER_PROGRESS_OUTPUT,
@@ -377,11 +377,10 @@ public:
     HANDLER_VERBOSE_OUTPUT,
     WARNING,
     ERROR_MESSAGE,
-    OTHER
   };
 
   /** Add log to the output */
-  void Log(int logType, const char* file, int line, const char* msg,
+  void Log(LogType logType, const char* file, int line, const char* msg,
            bool suppress = false);
 
   /** Color values */

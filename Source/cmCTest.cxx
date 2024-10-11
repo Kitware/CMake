@@ -216,7 +216,7 @@ struct cmCTest::Private
   int SubmitIndex = 0;
 
   std::unique_ptr<cmGeneratedFileStream> OutputLogFile;
-  int OutputLogFileLastTag = -1;
+  cm::optional<cmCTest::LogType> OutputLogFileLastTag;
 
   bool OutputTestOutputOnTestFailure = false;
   bool OutputColorCode = cmCTest::ColoredOutputSupportedByConsole();
@@ -3649,8 +3649,7 @@ static const char* cmCTestStringLogType[] = { "DEBUG",
                                               "HANDLER_TEST_PROGRESS_OUTPUT",
                                               "HANDLER_VERBOSE_OUTPUT",
                                               "WARNING",
-                                              "ERROR_MESSAGE",
-                                              nullptr };
+                                              "ERROR_MESSAGE" };
 
 #define cmCTestLogOutputFileLine(stream)                                      \
   do {                                                                        \
@@ -3659,7 +3658,7 @@ static const char* cmCTestStringLogType[] = { "DEBUG",
     }                                                                         \
   } while (false)
 
-void cmCTest::Log(int logType, const char* file, int line, const char* msg,
+void cmCTest::Log(LogType logType, const char* file, int line, const char* msg,
                   bool suppress)
 {
   if (!msg || !*msg) {
@@ -3683,17 +3682,14 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg,
     }
     if (display) {
       cmCTestLogOutputFileLine(*this->Impl->OutputLogFile);
-      if (logType != this->Impl->OutputLogFileLastTag) {
-        *this->Impl->OutputLogFile << "[";
-        if (logType >= OTHER || logType < 0) {
-          *this->Impl->OutputLogFile << "OTHER";
-        } else {
-          *this->Impl->OutputLogFile << cmCTestStringLogType[logType];
-        }
-        *this->Impl->OutputLogFile << "] " << std::endl;
+      if (this->Impl->OutputLogFileLastTag &&
+          logType != *this->Impl->OutputLogFileLastTag) {
+        *this->Impl->OutputLogFile << "[" << cmCTestStringLogType[logType]
+                                   << "] " << std::endl;
       }
       *this->Impl->OutputLogFile << msg << std::flush;
-      if (logType != this->Impl->OutputLogFileLastTag) {
+      if (this->Impl->OutputLogFileLastTag &&
+          logType != *this->Impl->OutputLogFileLastTag) {
         *this->Impl->OutputLogFile << std::endl;
         this->Impl->OutputLogFileLastTag = logType;
       }
