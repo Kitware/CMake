@@ -3647,9 +3647,9 @@ static const char* cmCTestStringLogType[] = { "DEBUG",
                                               "WARNING",
                                               "ERROR_MESSAGE" };
 
-void cmCTest::Log(LogType logType, const char* msg, bool suppress)
+void cmCTest::Log(LogType logType, std::string msg, bool suppress)
 {
-  if (!msg || !*msg) {
+  if (msg.empty()) {
     return;
   }
   if (suppress && logType != cmCTest::ERROR_MESSAGE) {
@@ -3694,15 +3694,12 @@ void cmCTest::Log(LogType logType, const char* msg, bool suppress)
           out.flush();
         }
 
-        std::string msg_str{ msg };
-        auto const lineBreakIt = msg_str.find('\n');
-        if (lineBreakIt != std::string::npos) {
+        if (msg.find('\n') != std::string::npos) {
           this->Impl->FlushTestProgressLine = true;
-          msg_str.erase(std::remove(msg_str.begin(), msg_str.end(), '\n'),
-                        msg_str.end());
+          msg.erase(std::remove(msg.begin(), msg.end(), '\n'), msg.end());
         }
 
-        out << msg_str;
+        out << msg;
 #ifndef _WIN32
         printf("\x1B[K"); // move caret to end
 #endif
