@@ -1,9 +1,4 @@
 cmake_minimum_required(VERSION 3.12)
-set(CTEST_RUN_CURRENT_SCRIPT 0)
-
-set(CTEST_SOURCE_DIRECTORY "@RunCMake_SOURCE_DIR@")
-set(CTEST_BINARY_DIRECTORY "@RunCMake_BINARY_DIR@")
-set(CTEST_COMMAND "${CMAKE_CTEST_COMMAND}")
 
 if(TEST_NAME STREQUAL "ctest_read_custom_files")
   set(x 2)
