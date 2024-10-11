@@ -9,7 +9,7 @@ if(NOT aix_sla)
   message(FATAL_ERROR "AIX_SHARED_LIBRARY_ARCHIVE not initialized on SHARED library")
 endif()
 add_custom_command(TARGET sla POST_BUILD VERBATIM
-  COMMAND ${CMAKE_COMMAND} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -Dsla=$<TARGET_FILE:sla> -P${CMAKE_CURRENT_SOURCE_DIR}/sla-check.cmake
+  COMMAND ${CMAKE_COMMAND} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -Dsla=$<TARGET_FILE:sla> -Dname=sla -Dsoversion= -P${CMAKE_CURRENT_SOURCE_DIR}/sla-check.cmake
   )
 
 add_executable(UseSLA use_sla.c)
@@ -25,8 +25,10 @@ get_property(aix_sla_versioned TARGET sla_versioned PROPERTY AIX_SHARED_LIBRARY_
 if(NOT aix_sla_versioned)
   message(FATAL_ERROR "AIX_SHARED_LIBRARY_ARCHIVE not initialized on SHARED library")
 endif()
-
 set_target_properties(sla_versioned PROPERTIES OUTPUT_NAME "sla_versioned" VERSION 3 SOVERSION 2)
+add_custom_command(TARGET sla_versioned POST_BUILD VERBATIM
+  COMMAND ${CMAKE_COMMAND} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -Dsla=$<TARGET_FILE:sla_versioned> -Dname=sla_versioned -Dsoversion=2 -P${CMAKE_CURRENT_SOURCE_DIR}/sla-check.cmake
+  )
 
 add_executable(UseSLA_versioned use_sla.c)
 get_property(aix_sla_versioned TARGET UseSLA_versioned PROPERTY AIX_SHARED_LIBRARY_ARCHIVE)

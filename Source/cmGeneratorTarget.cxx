@@ -1309,7 +1309,8 @@ bool cmGeneratorTarget::HasSOName(const std::string& config) const
   // and then only when the platform supports an soname flag.
   return ((this->GetType() == cmStateEnums::SHARED_LIBRARY) &&
           !this->GetPropertyAsBool("NO_SONAME") &&
-          this->Makefile->GetSONameFlag(this->GetLinkerLanguage(config)));
+          (this->Makefile->GetSONameFlag(this->GetLinkerLanguage(config)) ||
+           this->IsArchivedAIXSharedLibrary()));
 }
 
 bool cmGeneratorTarget::NeedRelinkBeforeInstall(
@@ -3398,7 +3399,7 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
   cmValue soversion = this->GetProperty("SOVERSION");
   if (!this->HasSOName(config) ||
       this->Makefile->IsOn("CMAKE_PLATFORM_NO_VERSIONED_SONAME") ||
-      this->IsFrameworkOnApple() || this->IsArchivedAIXSharedLibrary()) {
+      this->IsFrameworkOnApple()) {
     // Versioning is supported only for shared libraries and modules,
     // and then only when the platform supports an soname flag.
     version = nullptr;
@@ -3434,18 +3435,21 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
   } else if (this->IsArchivedAIXSharedLibrary()) {
     targetNames.SharedObject =
       cmStrCat(components.prefix, targetNames.Base, ".so");
-    targetNames.Real =
-      cmStrCat(components.prefix, targetNames.Base, components.suffix);
+    if (soversion) {
+      targetNames.SharedObject += ".";
+      targetNames.SharedObject += *soversion;
+    }
+    targetNames.Real = targetNames.Output;
   } else {
     // The library's soname.
-    this->ComputeVersionedName(targetNames.SharedObject, components.prefix,
-                               targetNames.Base, components.suffix,
-                               targetNames.Output, soversion);
+    targetNames.SharedObject = this->ComputeVersionedName(
+      components.prefix, targetNames.Base, components.suffix,
+      targetNames.Output, soversion);
 
     // The library's real name on disk.
-    this->ComputeVersionedName(targetNames.Real, components.prefix,
-                               targetNames.Base, components.suffix,
-                               targetNames.Output, version);
+    targetNames.Real = this->ComputeVersionedName(
+      components.prefix, targetNames.Base, components.suffix,
+      targetNames.Output, version);
   }
 
   // The import library names.
@@ -3468,14 +3472,13 @@ cmGeneratorTarget::Names cmGeneratorTarget::GetLibraryNames(
       targetNames.ImportLibrary = targetNames.ImportOutput;
     } else {
       // The import library's soname.
-      this->ComputeVersionedName(
-        targetNames.ImportLibrary, importComponents.prefix,
-        importComponents.base, importComponents.suffix,
-        targetNames.ImportOutput, soversion);
+      targetNames.ImportLibrary = this->ComputeVersionedName(
+        importComponents.prefix, importComponents.base,
+        importComponents.suffix, targetNames.ImportOutput, soversion);
 
       // The import library's real name on disk.
-      this->ComputeVersionedName(
-        targetNames.ImportReal, importComponents.prefix, importComponents.base,
+      targetNames.ImportReal = this->ComputeVersionedName(
+        importComponents.prefix, importComponents.base,
         importComponents.suffix, targetNames.ImportOutput, version);
     }
   }
@@ -4155,16 +4158,19 @@ std::string cmGeneratorTarget::GetFrameworkVersion() const
   return "A";
 }
 
-void cmGeneratorTarget::ComputeVersionedName(
-  std::string& vName, std::string const& prefix, std::string const& base,
-  std::string const& suffix, std::string const& name, cmValue version) const
+std::string cmGeneratorTarget::ComputeVersionedName(std::string const& prefix,
+                                                    std::string const& base,
+                                                    std::string const& suffix,
+                                                    std::string const& name,
+                                                    cmValue version) const
 {
-  vName = this->IsApple() ? (prefix + base) : name;
+  std::string vName = this->IsApple() ? (prefix + base) : name;
   if (version) {
     vName += ".";
     vName += *version;
   }
   vName += this->IsApple() ? suffix : std::string();
+  return vName;
 }
 
 std::vector<std::string> cmGeneratorTarget::GetPropertyKeys() const
