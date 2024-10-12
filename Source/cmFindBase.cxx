@@ -338,7 +338,6 @@ namespace {
 struct entry_to_remove
 {
   entry_to_remove(std::string const& name, cmMakefile* makefile)
-    : value()
   {
     if (cmValue to_skip = makefile->GetDefinition(
           cmStrCat("_CMAKE_SYSTEM_PREFIX_PATH_", name, "_PREFIX_COUNT"))) {

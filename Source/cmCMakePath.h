@@ -617,19 +617,18 @@ public:
 
   // Non-members
   // ===========
-  friend inline bool operator==(const cmCMakePath& lhs,
-                                const cmCMakePath& rhs) noexcept
+  friend bool operator==(const cmCMakePath& lhs,
+                         const cmCMakePath& rhs) noexcept
   {
     return lhs.Compare(rhs) == 0;
   }
-  friend inline bool operator!=(const cmCMakePath& lhs,
-                                const cmCMakePath& rhs) noexcept
+  friend bool operator!=(const cmCMakePath& lhs,
+                         const cmCMakePath& rhs) noexcept
   {
     return lhs.Compare(rhs) != 0;
   }
 
-  friend inline cmCMakePath operator/(const cmCMakePath& lhs,
-                                      const cmCMakePath& rhs)
+  friend cmCMakePath operator/(const cmCMakePath& lhs, const cmCMakePath& rhs)
   {
     cmCMakePath result(lhs);
     result /= rhs;

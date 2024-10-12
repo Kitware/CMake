@@ -509,7 +509,7 @@ unsigned long cmELFInternalImpl<Types>::GetDynamicEntryPosition(int j)
     return 0;
   }
   ELF_Shdr const& sec = this->SectionHeaders[this->DynamicSectionIndex];
-  return static_cast<unsigned long>(sec.sh_offset + sec.sh_entsize * j);
+  return sec.sh_offset + sec.sh_entsize * static_cast<unsigned long>(j);
 }
 
 template <class Types>

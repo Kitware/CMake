@@ -83,7 +83,7 @@ int QCMakePresetItemModel::rowCount(const QModelIndex& parent) const
   if (this->m_presets.empty()) {
     return 1;
   }
-  return static_cast<int>(this->m_presets.size() + 2);
+  return this->m_presets.size() + 2;
 }
 
 int QCMakePresetItemModel::columnCount(const QModelIndex& parent) const
@@ -144,5 +144,5 @@ int QCMakePresetItemModel::presetNameToRow(const QString& name) const
     index++;
   }
 
-  return static_cast<int>(this->m_presets.size() + 1);
+  return this->m_presets.size() + 1;
 }

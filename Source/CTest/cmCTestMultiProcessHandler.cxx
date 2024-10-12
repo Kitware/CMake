@@ -501,7 +501,7 @@ void cmCTestMultiProcessHandler::UnlockResources(int index)
 
 inline size_t cmCTestMultiProcessHandler::GetProcessorsUsed(int test)
 {
-  size_t processors = static_cast<int>(this->Properties[test]->Processors);
+  size_t processors = this->Properties[test]->Processors;
   size_t const parallelLevel = this->GetParallelLevel();
   // If processors setting is set higher than the -j
   // setting, we default to using all of the process slots.

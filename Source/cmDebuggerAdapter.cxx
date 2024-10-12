@@ -70,7 +70,7 @@ public:
   {
   }
 
-  inline void Notify()
+  void Notify()
   {
     std::unique_lock<std::mutex> lock(Mutex);
     Count++;
@@ -78,7 +78,7 @@ public:
     Cv.notify_one();
   }
 
-  inline void Wait()
+  void Wait()
   {
     std::unique_lock<std::mutex> lock(Mutex);
     while (Count == 0) {

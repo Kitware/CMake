@@ -168,7 +168,7 @@ static int CCONV cmIsOn(void* arg, const char* name)
 static int CCONV cmCommandExists(void* arg, const char* name)
 {
   cmMakefile* mf = static_cast<cmMakefile*>(arg);
-  return static_cast<int>(mf->GetState()->GetCommand(name) ? 1 : 0);
+  return mf->GetState()->GetCommand(name) ? 1 : 0;
 }
 
 static void CCONV cmAddDefineFlag(void* arg, const char* definition)

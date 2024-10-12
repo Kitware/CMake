@@ -133,7 +133,7 @@ cmSystemTools::OutputCallback s_StdoutCallback;
 #  if defined(_WIN32)
 extern __declspec(dllimport) char** environ;
 #  else
-extern char** environ;
+extern char** environ; // NOLINT(readability-redundant-declaration)
 #  endif
 #endif
 

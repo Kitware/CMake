@@ -7,7 +7,6 @@ bugprone-*,\
 -bugprone-implicit-widening-of-multiplication-result,\
 -bugprone-inc-dec-in-conditions,\
 -bugprone-macro-parentheses,\
--bugprone-misplaced-widening-cast,\
 -bugprone-multi-level-implicit-pointer-conversion,\
 -bugprone-narrowing-conversions,\
 -bugprone-switch-missing-default-case,\
@@ -36,11 +35,8 @@ modernize-*,\
 performance-*,\
 -performance-avoid-endl,\
 -performance-enum-size,\
--performance-inefficient-vector-operation,\
--performance-noexcept-swap,\
 readability-*,\
 -readability-avoid-nested-conditional-operator,\
--readability-avoid-return-with-void-value,\
 -readability-avoid-unconditional-preprocessor-if,\
 -readability-convert-member-functions-to-static,\
 -readability-function-cognitive-complexity,\
@@ -52,11 +48,6 @@ readability-*,\
 -readability-magic-numbers,\
 -readability-make-member-function-const,\
 -readability-named-parameter,\
--readability-redundant-casting,\
--readability-redundant-declaration,\
--readability-redundant-inline-specifier,\
--readability-redundant-member-init,\
--readability-reference-to-constructed-temporary,\
 -readability-simplify-boolean-expr,\
 -readability-static-accessed-through-instance,\
 -readability-suspicious-call-argument,\
