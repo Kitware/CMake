@@ -206,7 +206,6 @@ struct cmCTest::Private
   bool SuppressUpdatingCTestConfiguration = false;
 
   bool Debug = false;
-  bool ShowLineNumbers = false;
   bool Quiet = false;
 
   std::string BuildID;
@@ -216,7 +215,7 @@ struct cmCTest::Private
   int SubmitIndex = 0;
 
   std::unique_ptr<cmGeneratedFileStream> OutputLogFile;
-  int OutputLogFileLastTag = -1;
+  cm::optional<cmCTest::LogType> OutputLogFileLastTag;
 
   bool OutputTestOutputOnTestFailure = false;
   bool OutputColorCode = cmCTest::ColoredOutputSupportedByConsole();
@@ -1186,8 +1185,7 @@ bool cmCTest::RunMakeCommand(const std::string& command, std::string& output,
 }
 
 bool cmCTest::RunTest(const std::vector<std::string>& argv,
-                      std::string* output, int* retVal, std::ostream* log,
-                      cmDuration testTimeOut,
+                      std::string* output, int* retVal, cmDuration testTimeOut,
                       std::vector<std::string>* environment, Encoding encoding)
 {
   bool modifyEnv = (environment && !environment->empty());
@@ -1238,9 +1236,6 @@ bool cmCTest::RunTest(const std::vector<std::string>& argv,
       }
       args.emplace_back(i);
     }
-    if (log) {
-      *log << "* Run internal CTest" << std::endl;
-    }
 
     std::unique_ptr<cmSystemTools::SaveRestoreEnvironment> saveEnv;
     if (modifyEnv) {
@@ -1251,9 +1246,6 @@ bool cmCTest::RunTest(const std::vector<std::string>& argv,
     *retVal = inst.Run(args, output);
     if (output) {
       *output += oss.str();
-    }
-    if (log && output) {
-      *log << *output;
     }
     if (output) {
       cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
@@ -1286,26 +1278,19 @@ bool cmCTest::RunTest(const std::vector<std::string>& argv,
   uv_pipe_open(outputStream, chain.OutputStream());
   auto outputHandle = cmUVStreamRead(
     outputStream,
-    [this, &processOutput, &output, &tempOutput,
-     &log](std::vector<char> data) {
+    [this, &processOutput, &output, &tempOutput](std::vector<char> data) {
       std::string strdata;
       processOutput.DecodeText(data.data(), data.size(), strdata);
       if (output) {
         cm::append(tempOutput, data.data(), data.data() + data.size());
       }
       cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, strdata);
-      if (log) {
-        log->write(strdata.c_str(), strdata.size());
-      }
     },
-    [this, &processOutput, &log]() {
+    [this, &processOutput]() {
       std::string strdata;
       processOutput.DecodeText(std::string(), strdata);
       if (!strdata.empty()) {
         cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, strdata);
-        if (log) {
-          log->write(strdata.c_str(), strdata.size());
-        }
       }
     });
 
@@ -2009,7 +1994,6 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
 
   else if (this->CheckArgument(arg, "--debug"_s)) {
     this->Impl->Debug = true;
-    this->Impl->ShowLineNumbers = true;
   } else if ((this->CheckArgument(arg, "--group"_s) ||
               // This is an undocumented / deprecated option.
               // "Track" has been renamed to "Group".
@@ -2018,7 +2002,7 @@ bool cmCTest::HandleCommandLineArguments(size_t& i,
     i++;
     this->Impl->SpecificGroup = args[i];
   } else if (this->CheckArgument(arg, "--show-line-numbers"_s)) {
-    this->Impl->ShowLineNumbers = true;
+    // Silently ignore this never-documented and now-removed option.
   } else if (this->CheckArgument(arg, "--no-label-summary"_s)) {
     this->Impl->LabelSummary = false;
   } else if (this->CheckArgument(arg, "--no-subproject-summary"_s)) {
@@ -2485,8 +2469,6 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
     }
 
     this->Impl->Debug = expandedPreset->Output->Debug.value_or(false);
-    this->Impl->ShowLineNumbers =
-      expandedPreset->Output->Debug.value_or(false);
     this->Impl->OutputTestOutputOnTestFailure =
       expandedPreset->Output->OutputOnFailure.value_or(false);
     this->Impl->Quiet = expandedPreset->Output->Quiet.value_or(false);
@@ -3663,20 +3645,11 @@ static const char* cmCTestStringLogType[] = { "DEBUG",
                                               "HANDLER_TEST_PROGRESS_OUTPUT",
                                               "HANDLER_VERBOSE_OUTPUT",
                                               "WARNING",
-                                              "ERROR_MESSAGE",
-                                              nullptr };
+                                              "ERROR_MESSAGE" };
 
-#define cmCTestLogOutputFileLine(stream)                                      \
-  do {                                                                        \
-    if (this->Impl->ShowLineNumbers) {                                        \
-      (stream) << std::endl << file << ":" << line << " ";                    \
-    }                                                                         \
-  } while (false)
-
-void cmCTest::Log(int logType, const char* file, int line, const char* msg,
-                  bool suppress)
+void cmCTest::Log(LogType logType, std::string msg, bool suppress)
 {
-  if (!msg || !*msg) {
+  if (msg.empty()) {
     return;
   }
   if (suppress && logType != cmCTest::ERROR_MESSAGE) {
@@ -3696,18 +3669,14 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg,
       display = false;
     }
     if (display) {
-      cmCTestLogOutputFileLine(*this->Impl->OutputLogFile);
-      if (logType != this->Impl->OutputLogFileLastTag) {
-        *this->Impl->OutputLogFile << "[";
-        if (logType >= OTHER || logType < 0) {
-          *this->Impl->OutputLogFile << "OTHER";
-        } else {
-          *this->Impl->OutputLogFile << cmCTestStringLogType[logType];
-        }
-        *this->Impl->OutputLogFile << "] " << std::endl;
+      if (this->Impl->OutputLogFileLastTag &&
+          logType != *this->Impl->OutputLogFileLastTag) {
+        *this->Impl->OutputLogFile << "[" << cmCTestStringLogType[logType]
+                                   << "] " << std::endl;
       }
       *this->Impl->OutputLogFile << msg << std::flush;
-      if (logType != this->Impl->OutputLogFileLastTag) {
+      if (this->Impl->OutputLogFileLastTag &&
+          logType != *this->Impl->OutputLogFileLastTag) {
         *this->Impl->OutputLogFile << std::endl;
         this->Impl->OutputLogFileLastTag = logType;
       }
@@ -3719,22 +3688,18 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg,
 
     if (logType == HANDLER_TEST_PROGRESS_OUTPUT) {
       if (this->Impl->TestProgressOutput) {
-        cmCTestLogOutputFileLine(out);
         if (this->Impl->FlushTestProgressLine) {
           printf("\r");
           this->Impl->FlushTestProgressLine = false;
           out.flush();
         }
 
-        std::string msg_str{ msg };
-        auto const lineBreakIt = msg_str.find('\n');
-        if (lineBreakIt != std::string::npos) {
+        if (msg.find('\n') != std::string::npos) {
           this->Impl->FlushTestProgressLine = true;
-          msg_str.erase(std::remove(msg_str.begin(), msg_str.end(), '\n'),
-                        msg_str.end());
+          msg.erase(std::remove(msg.begin(), msg.end(), '\n'), msg.end());
         }
 
-        out << msg_str;
+        out << msg;
 #ifndef _WIN32
         printf("\x1B[K"); // move caret to end
 #endif
@@ -3747,41 +3712,29 @@ void cmCTest::Log(int logType, const char* file, int line, const char* msg,
     switch (logType) {
       case DEBUG:
         if (this->Impl->Debug) {
-          cmCTestLogOutputFileLine(out);
-          out << msg;
-          out.flush();
+          out << msg << std::flush;
         }
         break;
       case OUTPUT:
       case HANDLER_OUTPUT:
         if (this->Impl->Debug || this->Impl->Verbose) {
-          cmCTestLogOutputFileLine(out);
-          out << msg;
-          out.flush();
+          out << msg << std::flush;
         }
         break;
       case HANDLER_VERBOSE_OUTPUT:
         if (this->Impl->Debug || this->Impl->ExtraVerbose) {
-          cmCTestLogOutputFileLine(out);
-          out << msg;
-          out.flush();
+          out << msg << std::flush;
         }
         break;
       case WARNING:
-        cmCTestLogOutputFileLine(err);
-        err << msg;
-        err.flush();
+        err << msg << std::flush;
         break;
       case ERROR_MESSAGE:
-        cmCTestLogOutputFileLine(err);
-        err << msg;
-        err.flush();
+        err << msg << std::flush;
         cmSystemTools::SetErrorOccurred();
         break;
       default:
-        cmCTestLogOutputFileLine(out);
-        out << msg;
-        out.flush();
+        out << msg << std::flush;
     }
   }
 }
