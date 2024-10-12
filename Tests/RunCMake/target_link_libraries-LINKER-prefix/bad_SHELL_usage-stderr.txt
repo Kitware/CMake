@@ -1,0 +1,4 @@
+CMake Error at bad_SHELL_usage.cmake:[0-9]+ \(add_library\):
+  'SHELL:' prefix is not supported as part of 'LINKER:' arguments.
+Call Stack \(most recent call first\):
+  CMakeLists.txt:[0-9]+ \(include\)

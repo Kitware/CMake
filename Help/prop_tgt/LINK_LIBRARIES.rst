@@ -33,3 +33,5 @@ See the :variable:`CMAKE_LINK_LIBRARIES_STRATEGY` variable and
 corresponding :prop_tgt:`LINK_LIBRARIES_STRATEGY` target property
 for details on how CMake orders direct link dependencies on linker
 command lines.
+
+.. include:: ../command/LINK_LIBRARIES_LINKER.txt
