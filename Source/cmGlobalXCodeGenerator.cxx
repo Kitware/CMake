@@ -1362,11 +1362,19 @@ struct cmCompareTargets
   {
     std::string const& a = l->GetTarget()->GetName();
     std::string const& b = r->GetTarget()->GetName();
+    if (a == b) {
+      return false;
+    }
     if (a == "ALL_BUILD"_s) {
       return true;
     }
     if (b == "ALL_BUILD"_s) {
       return false;
+    }
+    std::string a_low = cmSystemTools::LowerCase(l->GetTarget()->GetName());
+    std::string b_low = cmSystemTools::LowerCase(r->GetTarget()->GetName());
+    if (a_low != b_low) {
+      return a_low < b_low;
     }
     return a < b;
   }
