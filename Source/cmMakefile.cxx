@@ -486,10 +486,6 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
     return result;
   }
 
-  if (this->ExecuteCommandCallback) {
-    this->ExecuteCommandCallback();
-  }
-
   // Place this call on the call stack.
   cmMakefileCall stack_manager(this, lff, std::move(deferId), status);
   static_cast<void>(stack_manager);
@@ -543,6 +539,10 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
       result = false;
       cmSystemTools::SetFatalErrorOccurred();
     }
+  }
+
+  if (this->ExecuteCommandCallback) {
+    this->ExecuteCommandCallback();
   }
 
   return result;

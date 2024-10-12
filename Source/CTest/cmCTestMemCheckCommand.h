@@ -30,7 +30,6 @@ public:
   {
     auto ni = cm::make_unique<cmCTestMemCheckCommand>();
     ni->CTest = this->CTest;
-    ni->CTestScriptHandler = this->CTestScriptHandler;
     return std::unique_ptr<cmCommand>(std::move(ni));
   }
 

@@ -5,7 +5,6 @@
 #include "cmCommand.h"
 
 class cmCTest;
-class cmCTestScriptHandler;
 
 /** \class cmCTestCommand
  * \brief A superclass for all commands added to the CTestScriptHandler
@@ -17,12 +16,5 @@ class cmCTestScriptHandler;
 class cmCTestCommand : public cmCommand
 {
 public:
-  cmCTestCommand()
-  {
-    this->CTest = nullptr;
-    this->CTestScriptHandler = nullptr;
-  }
-
-  cmCTest* CTest;
-  cmCTestScriptHandler* CTestScriptHandler;
+  cmCTest* CTest = nullptr;
 };

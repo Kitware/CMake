@@ -9,8 +9,6 @@
 #include <string>
 #include <vector>
 
-#include "cmsys/Status.hxx"
-
 #include "cmCTestGenericHandler.h"
 #include "cmDuration.h"
 
@@ -46,14 +44,8 @@ public:
                         int* returnValue);
 
   /*
-   * Empty Binary Directory
-   */
-  static bool EmptyBinaryDirectory(const std::string& dir, std::string& err);
-
-  /*
    * Some elapsed time handling functions
    */
-  static void SleepInSeconds(unsigned int secondsToWait);
   void UpdateElapsedTime();
 
   /**
@@ -83,10 +75,6 @@ private:
   // Add ctest command
   void AddCTestCommand(std::string const& name,
                        std::unique_ptr<cmCTestCommand> command);
-
-  // Try to remove the binary directory once
-  static cmsys::Status TryToRemoveBinaryDirectoryOnce(
-    const std::string& directoryPath);
 
   std::vector<std::string> ConfigurationScripts;
   std::vector<bool> ScriptProcessScope;
