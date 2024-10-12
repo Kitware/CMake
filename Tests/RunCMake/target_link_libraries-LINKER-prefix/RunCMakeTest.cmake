@@ -33,5 +33,19 @@ if (RunCMake_GENERATOR MATCHES "Makefiles|Ninja|Xcode|Visual Studio"
     run_cmake_target(LINKER_expansion2-CMP0181-${policy} EXE_LINKER_FLAGS exe_linker_flags --verbose)
     run_cmake_target(LINKER_expansion2-CMP0181-${policy} SHARED_LINKER_FLAGS shared_linker_flags --verbose)
     run_cmake_target(LINKER_expansion2-CMP0181-${policy} MODULE_LINKER_FLAGS module_linker_flags --verbose)
+
+
+    if (NOT (RunCMake_GENERATOR MATCHES "Visual Studio" OR CMAKE_C_COMPILER_ID MATCHES "Borland|Embarcadero"))
+      # Visual Studio generator and Borland, Embarcadero compilers do not use these variables
+      set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/LINKER_expansion3-CMP0181-${policy}-build)
+      run_cmake_with_options(LINKER_expansion3 -DCMP0181=${policy})
+
+      run_cmake_target(LINKER_expansion3-CMP0181-${policy} C_EXE_CREATE_LINK_FLAGS c_exe_create_link_flags --verbose)
+      if (NOT (CMAKE_C_COMPILER_ID STREQUAL "MSVC" OR CMAKE_C_COMPILER_FRONTEND_VARIANT STREQUAL "MSVC"))
+         # MSVC compiler does not use these variables
+        run_cmake_target(LINKER_expansion3-CMP0181-${policy} C_SHARED_CREATE_LINK_FLAGS c_shared_create_link_flags --verbose)
+        run_cmake_target(LINKER_expansion3-CMP0181-${policy} C_MODULE_CREATE_LINK_FLAGS c_module_create_link_flags --verbose)
+      endif()
+    endif()
   endforeach()
 endif()

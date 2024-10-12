@@ -214,6 +214,56 @@ cmLocalGenerator::CreateRulePlaceholderExpander(cmBuildStep buildStep) const
     buildStep, this->Compilers, this->VariableMappings, this->CompilerSysroot,
     this->LinkerSysroot);
 }
+std::unique_ptr<cmRulePlaceholderExpander>
+cmLocalGenerator::CreateRulePlaceholderExpander(
+  cmBuildStep buildStep, cmGeneratorTarget const* target,
+  std::string const& language)
+{
+  auto targetType = target->GetType();
+  if (buildStep == cmBuildStep::Link &&
+      (targetType == cmStateEnums::EXECUTABLE ||
+       targetType == cmStateEnums::SHARED_LIBRARY ||
+       targetType == cmStateEnums::MODULE_LIBRARY)) {
+    auto mappings = this->VariableMappings;
+    auto updateMapping = [buildStep, target, &language, &mappings,
+                          this](std::string const& variable) {
+      auto search = this->VariableMappings.find(variable);
+      if (search != this->VariableMappings.end()) {
+        std::string finalFlags;
+        this->AppendFlags(finalFlags, search->second, variable, target,
+                          buildStep, language);
+        mappings[variable] = std::move(finalFlags);
+      }
+    };
+
+    switch (targetType) {
+      // FALLTHROUGH is used because, depending of the compiler and/or
+      // platform, the wrong variable is used. For example
+      // CMAKE_SHARED_LIBRARY_CREATE_<LANG>_FLAGS is used to generate a module,
+      // and the variable CMAKE_SHARED_MODULE_CREATE_<LANG>_FLAGS is ignored.
+      case cmStateEnums::MODULE_LIBRARY:
+        updateMapping(
+          cmStrCat("CMAKE_SHARED_MODULE_CREATE_", language, "_FLAGS"));
+        CM_FALLTHROUGH;
+      case cmStateEnums::SHARED_LIBRARY:
+        updateMapping(
+          cmStrCat("CMAKE_SHARED_LIBRARY_CREATE_", language, "_FLAGS"));
+        CM_FALLTHROUGH;
+      case cmStateEnums::EXECUTABLE:
+        updateMapping(cmStrCat("CMAKE_", language, "_LINK_FLAGS"));
+        break;
+      default:
+        // no action needed
+        ;
+    }
+
+    return cm::make_unique<cmRulePlaceholderExpander>(
+      buildStep, this->Compilers, std::move(mappings), this->CompilerSysroot,
+      this->LinkerSysroot);
+  }
+
+  return this->CreateRulePlaceholderExpander(buildStep);
+}
 
 cmLocalGenerator::~cmLocalGenerator() = default;
 

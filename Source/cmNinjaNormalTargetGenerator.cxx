@@ -352,7 +352,8 @@ void cmNinjaNormalTargetGenerator::WriteNvidiaDeviceLinkRule(
 
     auto rulePlaceholderExpander =
       this->GetLocalGenerator()->CreateRulePlaceholderExpander(
-        cmBuildStep::Link);
+        cmBuildStep::Link, this->GetGeneratorTarget(),
+        this->TargetLinkLanguage(config));
 
     // Rule for linking library/executable.
     std::vector<std::string> linkCmds = this->ComputeDeviceLinkCmd();
@@ -416,7 +417,8 @@ void cmNinjaNormalTargetGenerator::WriteDeviceLinkRules(
     "CMAKE_CUDA_DEVICE_LINK_COMPILE");
   auto rulePlaceholderExpander =
     this->GetLocalGenerator()->CreateRulePlaceholderExpander(
-      cmBuildStep::Link);
+      cmBuildStep::Link, this->GetGeneratorTarget(),
+      this->TargetLinkLanguage(config));
   rulePlaceholderExpander->ExpandRuleVariables(this->GetLocalGenerator(),
                                                compileCmd, vars);
 
@@ -570,7 +572,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkRule(bool useResponseFile,
 
     auto rulePlaceholderExpander =
       this->GetLocalGenerator()->CreateRulePlaceholderExpander(
-        cmBuildStep::Link);
+        cmBuildStep::Link, this->GetGeneratorTarget(),
+        this->TargetLinkLanguage(config));
 
     // Rule for linking library/executable.
     std::vector<std::string> linkCmds = this->ComputeLinkCmd(config);

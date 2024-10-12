@@ -1708,8 +1708,8 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
   vars.Flags = flags.c_str();
 
   std::string compileCmd = this->GetLinkRule("CMAKE_CUDA_DEVICE_LINK_COMPILE");
-  auto rulePlaceholderExpander =
-    localGen->CreateRulePlaceholderExpander(cmBuildStep::Link);
+  auto rulePlaceholderExpander = localGen->CreateRulePlaceholderExpander(
+    cmBuildStep::Link, this->GetGeneratorTarget(), "CUDA");
   rulePlaceholderExpander->ExpandRuleVariables(localGen, compileCmd, vars);
 
   commands.emplace_back(compileCmd);
