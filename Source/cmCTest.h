@@ -492,10 +492,6 @@ private:
   /** set command line arguments read from a test preset */
   bool SetArgsFromPreset(const std::string& presetName, bool listPresets);
 
-  /** parse and process most common command line arguments */
-  bool HandleCommandLineArguments(size_t& i, std::vector<std::string>& args,
-                                  std::string& errormsg);
-
 #if !defined(_WIN32)
   /** returns true iff the console supports progress output */
   static bool ConsoleIsNotDumb();
@@ -506,10 +502,6 @@ private:
 
   /** returns true iff the console supports colored output */
   static bool ColoredOutputSupportedByConsole();
-
-  /** handle the -S -SP and -SR arguments */
-  bool HandleScriptArguments(size_t& i, std::vector<std::string>& args,
-                             bool& SRArgumentSpecified);
 
   /** Reread the configuration file */
   bool UpdateCTestConfiguration();
@@ -524,16 +516,6 @@ private:
 
   /** Output errors from a test */
   void OutputTestErrors(std::vector<char> const& process_output);
-
-  /** Handle the --test-action command line argument */
-  bool HandleTestActionArgument(const char* ctestExec, size_t& i,
-                                const std::vector<std::string>& args,
-                                bool& validArg);
-
-  /** Handle the --test-model command line argument */
-  bool HandleTestModelArgument(const char* ctestExec, size_t& i,
-                               const std::vector<std::string>& args,
-                               bool& validArg);
 
   int RunCMakeAndTest(std::string* output);
   int ExecuteTests();

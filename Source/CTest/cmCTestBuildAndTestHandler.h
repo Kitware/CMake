@@ -4,7 +4,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cstddef>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -27,11 +26,6 @@ public:
    * The main entry point for this class
    */
   int ProcessHandler() override;
-
-  //! Set all the build and test arguments
-  int ProcessCommandLineArguments(const std::string& currentArg, size_t& idx,
-                                  const std::vector<std::string>& allArgs,
-                                  bool& validArg) override;
 
   /*
    * Get the output variable
@@ -68,4 +62,6 @@ protected:
   std::vector<std::string> BuildTargets;
   bool BuildNoCMake = false;
   cmDuration Timeout = cmDuration::zero();
+
+  friend class cmCTest;
 };

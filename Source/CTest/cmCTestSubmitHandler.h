@@ -4,7 +4,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cstddef>
 #include <iosfwd>
 #include <set>
 #include <string>
@@ -34,11 +33,6 @@ public:
 
   void Initialize() override;
 
-  //! Set all the submit arguments
-  int ProcessCommandLineArguments(const std::string& currentArg, size_t& idx,
-                                  const std::vector<std::string>& allArgs,
-                                  bool& validArg) override;
-
   /** Specify a set of parts (by name) to submit.  */
   void SelectParts(std::set<cmCTest::Part> const& parts);
 
@@ -47,6 +41,12 @@ public:
 
   // handle the cdash file upload protocol
   int HandleCDashUploadFile(std::string const& file, std::string const& type);
+
+  void AddCommandLineHttpHeader(std::string const& h)
+  {
+    this->HttpHeaders.push_back(h);
+    this->CommandLineHttpHeaders.push_back(h);
+  }
 
   void SetHttpHeaders(std::vector<std::string> const& v)
   {

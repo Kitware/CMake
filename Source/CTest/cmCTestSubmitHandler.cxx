@@ -139,20 +139,6 @@ void cmCTestSubmitHandler::Initialize()
   this->Files.clear();
 }
 
-int cmCTestSubmitHandler::ProcessCommandLineArguments(
-  const std::string& currentArg, size_t& idx,
-  const std::vector<std::string>& allArgs, bool& validArg)
-{
-  if (cmHasLiteralPrefix(currentArg, "--http-header") &&
-      idx < allArgs.size() - 1) {
-    ++idx;
-    this->HttpHeaders.push_back(allArgs[idx]);
-    this->CommandLineHttpHeaders.push_back(allArgs[idx]);
-    validArg = true;
-  }
-  return 1;
-}
-
 bool cmCTestSubmitHandler::SubmitUsingHTTP(
   const std::string& localprefix, const std::vector<std::string>& files,
   const std::string& remoteprefix, const std::string& url)
