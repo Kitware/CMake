@@ -20,13 +20,7 @@
 
 struct cmMessageMetadata;
 
-cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
-{
-  this->BuildTwoConfig = false;
-  this->BuildNoClean = false;
-  this->BuildNoCMake = false;
-  this->Timeout = cmDuration::zero();
-}
+cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler() = default;
 
 void cmCTestBuildAndTestHandler::Initialize()
 {
