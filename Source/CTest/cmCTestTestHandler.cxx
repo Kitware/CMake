@@ -380,6 +380,33 @@ void cmCTestTestHandler::PopulateCustomVectors(cmMakefile* mf)
   }
 }
 
+void cmCTestTestHandler::SetCMakeVariables(cmMakefile& mf)
+{
+  mf.AddDefinition("CTEST_CUSTOM_PRE_TEST",
+                   cmList(this->CustomPreTest).to_string());
+  mf.AddDefinition("CTEST_CUSTOM_POST_TEST",
+                   cmList(this->CustomPostTest).to_string());
+  mf.AddDefinition("CTEST_CUSTOM_TESTS_IGNORE",
+                   cmList(this->CustomTestsIgnore).to_string());
+  mf.AddDefinition("CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE",
+                   std::to_string(this->CustomMaximumPassedTestOutputSize));
+  mf.AddDefinition("CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE",
+                   std::to_string(this->CustomMaximumFailedTestOutputSize));
+  mf.AddDefinition("CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION",
+                   [this]() -> cm::string_view {
+                     switch (this->TestOutputTruncation) {
+                       case cmCTestTypes::TruncationMode::Tail:
+                         return "tail"_s;
+                       case cmCTestTypes::TruncationMode::Middle:
+                         return "middle"_s;
+                       case cmCTestTypes::TruncationMode::Head:
+                         return "head"_s;
+                       default:
+                         return ""_s;
+                     }
+                   }());
+}
+
 int cmCTestTestHandler::PreProcessHandler()
 {
   if (!this->ExecuteCommands(this->CustomPreTest)) {

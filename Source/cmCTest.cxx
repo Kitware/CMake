@@ -54,10 +54,12 @@
 #include "cmCTestUpdateHandler.h"
 #include "cmCTestUploadHandler.h"
 #include "cmDynamicLoader.h"
+#include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
 #include "cmJSONState.h"
 #include "cmList.h"
+#include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmProcessOutput.h"
 #include "cmState.h"
@@ -942,56 +944,101 @@ int cmCTest::ProcessSteps()
 {
   int res = 0;
   bool notest = true;
-  int update_count = 0;
 
   for (Part p = PartStart; notest && p != PartCount;
        p = static_cast<Part>(p + 1)) {
     notest = !this->Impl->Parts[p];
   }
+
+  if (notest) {
+    if (this->GetTestHandler()->ProcessHandler() < 0) {
+      cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest\n");
+      if (!this->Impl->OutputTestOutputOnTestFailure) {
+        const std::string lastTestLog =
+          this->GetBinaryDir() + "/Testing/Temporary/LastTest.log";
+        cmCTestLog(this, ERROR_MESSAGE,
+                   "Output from these tests are in: " << lastTestLog << '\n');
+        cmCTestLog(this, ERROR_MESSAGE,
+                   "Use \"--rerun-failed --output-on-failure\" to re-run the "
+                   "failed cases verbosely.\n");
+      }
+      return cmCTest::TEST_ERRORS;
+    }
+    return 0;
+  }
+
+  cmCTestScriptHandler script;
+  script.SetCTestInstance(this);
+  script.CreateCMake();
+  cmMakefile& mf = *script.GetMakefile();
+  this->SetCMakeVariables(mf);
+  std::vector<cmListFileArgument> args{
+    cmListFileArgument("RETURN_VALUE", cmListFileArgument::Unquoted, 0),
+    cmListFileArgument("return_value", cmListFileArgument::Unquoted, 0),
+  };
+
   if (this->Impl->Parts[PartUpdate] &&
       (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
-    cmCTestUpdateHandler* uphandler = this->GetUpdateHandler();
-    uphandler->SetPersistentOption(
-      "SourceDirectory", this->GetCTestConfiguration("SourceDirectory"));
-    update_count = uphandler->ProcessHandler();
-    if (update_count < 0) {
+    auto const func = cmListFileFunction("ctest_update", 0, 0, args);
+    auto status = cmExecutionStatus(mf);
+    if (!mf.ExecuteCommand(func, status)) {
       res |= cmCTest::UPDATE_ERRORS;
     }
   }
-  if (this->Impl->TestModel == cmCTest::CONTINUOUS && !update_count) {
+  if (this->Impl->TestModel == cmCTest::CONTINUOUS &&
+      mf.GetDefinition("return_value").IsOff()) {
     return 0;
   }
   if (this->Impl->Parts[PartConfigure] &&
       (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
-    if (this->GetConfigureHandler()->ProcessHandler() < 0) {
+    auto const func = cmListFileFunction("ctest_configure", 0, 0, args);
+    auto status = cmExecutionStatus(mf);
+    if (!mf.ExecuteCommand(func, status) ||
+        std::stoi(mf.GetDefinition("return_value")) < 0) {
       res |= cmCTest::CONFIGURE_ERRORS;
     }
   }
   if (this->Impl->Parts[PartBuild] &&
       (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     this->UpdateCTestConfiguration();
-    if (this->GetBuildHandler()->ProcessHandler() < 0) {
+    this->SetCMakeVariables(mf);
+    auto const func = cmListFileFunction("ctest_build", 0, 0, args);
+    auto status = cmExecutionStatus(mf);
+    if (!mf.ExecuteCommand(func, status) ||
+        std::stoi(mf.GetDefinition("return_value")) < 0) {
       res |= cmCTest::BUILD_ERRORS;
     }
   }
   if ((this->Impl->Parts[PartTest] || notest) &&
       (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     this->UpdateCTestConfiguration();
-    if (this->GetTestHandler()->ProcessHandler() < 0) {
+    this->SetCMakeVariables(mf);
+    auto const func = cmListFileFunction("ctest_test", 0, 0, args);
+    auto status = cmExecutionStatus(mf);
+    if (!mf.ExecuteCommand(func, status) ||
+        std::stoi(mf.GetDefinition("return_value")) < 0) {
       res |= cmCTest::TEST_ERRORS;
     }
   }
   if (this->Impl->Parts[PartCoverage] &&
       (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     this->UpdateCTestConfiguration();
-    if (this->GetCoverageHandler()->ProcessHandler() < 0) {
+    this->SetCMakeVariables(mf);
+    auto const func = cmListFileFunction("ctest_coverage", 0, 0, args);
+    auto status = cmExecutionStatus(mf);
+    if (!mf.ExecuteCommand(func, status) ||
+        std::stoi(mf.GetDefinition("return_value")) < 0) {
       res |= cmCTest::COVERAGE_ERRORS;
     }
   }
   if (this->Impl->Parts[PartMemCheck] &&
       (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     this->UpdateCTestConfiguration();
-    if (this->GetMemCheckHandler()->ProcessHandler() < 0) {
+    this->SetCMakeVariables(mf);
+    auto const func = cmListFileFunction("ctest_memcheck", 0, 0, args);
+    auto status = cmExecutionStatus(mf);
+    if (!mf.ExecuteCommand(func, status) ||
+        std::stoi(mf.GetDefinition("return_value")) < 0) {
       res |= cmCTest::MEMORY_ERRORS;
     }
   }
@@ -1022,22 +1069,24 @@ int cmCTest::ProcessSteps()
   }
   if (this->Impl->Parts[PartSubmit]) {
     this->UpdateCTestConfiguration();
-    if (this->GetSubmitHandler()->ProcessHandler() < 0) {
+    this->SetCMakeVariables(mf);
+
+    std::string count = this->GetCTestConfiguration("CTestSubmitRetryCount");
+    std::string delay = this->GetCTestConfiguration("CTestSubmitRetryDelay");
+    auto const func = cmListFileFunction(
+      "ctest_submit", 0, 0,
+      {
+        cmListFileArgument("RETRY_COUNT", cmListFileArgument::Unquoted, 0),
+        cmListFileArgument(count, cmListFileArgument::Quoted, 0),
+        cmListFileArgument("RETRY_DELAY", cmListFileArgument::Unquoted, 0),
+        cmListFileArgument(delay, cmListFileArgument::Quoted, 0),
+        cmListFileArgument("RETURN_VALUE", cmListFileArgument::Unquoted, 0),
+        cmListFileArgument("return_value", cmListFileArgument::Unquoted, 0),
+      });
+    auto status = cmExecutionStatus(mf);
+    if (!mf.ExecuteCommand(func, status) ||
+        std::stoi(mf.GetDefinition("return_value")) < 0) {
       res |= cmCTest::SUBMIT_ERRORS;
-    }
-  }
-  if (res != 0) {
-    cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest" << std::endl);
-    if (!this->Impl->OutputTestOutputOnTestFailure) {
-      const std::string lastTestLog =
-        this->GetBinaryDir() + "/Testing/Temporary/LastTest.log";
-      cmCTestLog(this, ERROR_MESSAGE,
-                 "Output from these tests are in: " << lastTestLog
-                                                    << std::endl);
-      cmCTestLog(this, ERROR_MESSAGE,
-                 "Use \"--rerun-failed --output-on-failure\" to re-run the "
-                 "failed cases verbosely."
-                   << std::endl);
     }
   }
   return res;
@@ -3500,6 +3549,81 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(
                      suppress);
   this->SetCTestConfiguration(dconfig, *ctvar, suppress);
   return true;
+}
+
+void cmCTest::SetCMakeVariables(cmMakefile& mf)
+{
+  auto set = [&](char const* cmake_var, char const* ctest_opt) {
+    std::string val = this->GetCTestConfiguration(ctest_opt);
+    if (!val.empty()) {
+      cmCTestOptionalLog(
+        this, HANDLER_VERBOSE_OUTPUT,
+        "SetCMakeVariable:" << cmake_var << ":" << val << std::endl, false);
+      mf.AddDefinition(cmake_var, val);
+    }
+  };
+
+  set("CTEST_SITE", "Site");
+  set("CTEST_BUILD_NAME", "BuildName");
+  set("CTEST_NIGHTLY_START_TIME", "NightlyStartTime");
+  set("CTEST_SOURCE_DIRECTORY", "SourceDirectory");
+  set("CTEST_BINARY_DIRECTORY", "BuildDirectory");
+
+  // CTest Update Step
+  set("CTEST_UPDATE_COMMAND", "UpdateCommand");
+  set("CTEST_UPDATE_OPTIONS", "UpdateOptions");
+  set("CTEST_CVS_COMMAND", "CVSCommand");
+  set("CTEST_CVS_UPDATE_OPTIONS", "CVSUpdateOptions");
+  set("CTEST_SVN_COMMAND", "SVNCommand");
+  set("CTEST_SVN_UPDATE_OPTIONS", "SVNUpdateOptions");
+  set("CTEST_SVN_OPTIONS", "SVNOptions");
+  set("CTEST_BZR_COMMAND", "BZRCommand");
+  set("CTEST_BZR_UPDATE_OPTIONS", "BZRUpdateOptions");
+  set("CTEST_GIT_COMMAND", "GITCommand");
+  set("CTEST_GIT_UPDATE_OPTIONS", "GITUpdateOptions");
+  set("CTEST_GIT_INIT_SUBMODULES", "GITInitSubmodules");
+  set("CTEST_GIT_UPDATE_CUSTOM", "GITUpdateCustom");
+  set("CTEST_UPDATE_VERSION_ONLY", "UpdateVersionOnly");
+  set("CTEST_UPDATE_VERSION_OVERRIDE", "UpdateVersionOverride");
+  set("CTEST_HG_COMMAND", "HGCommand");
+  set("CTEST_HG_UPDATE_OPTIONS", "HGUpdateOptions");
+  set("CTEST_P4_COMMAND", "P4Command");
+  set("CTEST_P4_UPDATE_OPTIONS", "P4UpdateOptions");
+  set("CTEST_P4_CLIENT", "P4Client");
+  set("CTEST_P4_OPTIONS", "P4Options");
+
+  // CTest Configure Step
+  set("CTEST_CONFIGURE_COMMAND", "ConfigureCommand");
+  set("CTEST_LABELS_FOR_SUBPROJECTS", "LabelsForSubprojects");
+
+  // CTest Build Step
+  set("CTEST_BUILD_COMMAND", "MakeCommand");
+  set("CTEST_USE_LAUNCHERS", "UseLaunchers");
+
+  // CTest Coverage Step
+  set("CTEST_COVERAGE_COMMAND", "CoverageCommand");
+  set("CTEST_COVERAGE_EXTRA_FLAGS", "CoverageExtraFlags");
+
+  // CTest MemCheck Step
+  set("CTEST_MEMORYCHECK_TYPE", "MemoryCheckType");
+  set("CTEST_MEMORYCHECK_SANITIZER_OPTIONS", "MemoryCheckSanitizerOptions");
+  set("CTEST_MEMORYCHECK_COMMAND", "MemoryCheckCommand");
+  set("CTEST_MEMORYCHECK_COMMAND_OPTIONS", "MemoryCheckCommandOptions");
+  set("CTEST_MEMORYCHECK_SUPPRESSIONS_FILE", "MemoryCheckSuppressionFile");
+
+  // CTest Submit Step
+  set("CTEST_SUBMIT_URL", "SubmitURL");
+  set("CTEST_DROP_METHOD", "DropMethod");
+  set("CTEST_DROP_SITE_USER", "DropSiteUser");
+  set("CTEST_DROP_SITE_PASSWORD", "DropSitePassword");
+  set("CTEST_DROP_SITE", "DropSite");
+  set("CTEST_DROP_LOCATION", "DropLocation");
+  set("CTEST_TLS_VERIFY", "TLSVerify");
+  set("CTEST_TLS_VERSION", "TLSVersion");
+  set("CTEST_CURL_OPTIONS", "CurlOptions");
+  set("CTEST_SUBMIT_INACTIVITY_TIMEOUT", "SubmitInactivityTimeout");
+
+  this->GetTestHandler()->SetCMakeVariables(mf);
 }
 
 bool cmCTest::RunCommand(std::vector<std::string> const& args,
