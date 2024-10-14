@@ -1,6 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmCTestBuildAndTestHandler.h"
+#include "cmCTestBuildAndTest.h"
 
 #include <chrono>
 #include <cstring>
@@ -19,19 +19,17 @@
 
 struct cmMessageMetadata;
 
-cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler() = default;
-
-void cmCTestBuildAndTestHandler::Initialize()
+cmCTestBuildAndTest::cmCTestBuildAndTest(cmCTest* ctest)
+  : CTest(ctest)
 {
-  this->BuildTargets.clear();
-  this->Superclass::Initialize();
 }
 
-const char* cmCTestBuildAndTestHandler::GetOutput()
+const char* cmCTestBuildAndTest::GetOutput()
 {
   return this->Output.c_str();
 }
-int cmCTestBuildAndTestHandler::ProcessHandler()
+
+int cmCTestBuildAndTest::Run()
 {
   this->Output.clear();
   cmSystemTools::ResetErrorOccurredFlag();
@@ -40,9 +38,8 @@ int cmCTestBuildAndTestHandler::ProcessHandler()
   return retv;
 }
 
-int cmCTestBuildAndTestHandler::RunCMake(std::ostringstream& out,
-                                         std::string& cmakeOutString,
-                                         cmake* cm)
+int cmCTestBuildAndTest::RunCMake(std::ostringstream& out,
+                                  std::string& cmakeOutString, cmake* cm)
 {
   std::vector<std::string> args;
   args.push_back(cmSystemTools::GetCMakeCommand());
@@ -134,7 +131,7 @@ public:
     const cmCTestBuildAndTestCaptureRAII&) = delete;
 };
 
-int cmCTestBuildAndTestHandler::RunCMakeAndTest()
+int cmCTestBuildAndTest::RunCMakeAndTest()
 {
   // if the generator and make program are not specified then it is an error
   if (this->BuildGenerator.empty()) {

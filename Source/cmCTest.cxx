@@ -41,7 +41,7 @@
 #endif
 
 #include "cmCMakePresetsGraph.h"
-#include "cmCTestBuildAndTestHandler.h"
+#include "cmCTestBuildAndTest.h"
 #include "cmCTestBuildHandler.h"
 #include "cmCTestConfigureHandler.h"
 #include "cmCTestCoverageHandler.h"
@@ -83,6 +83,11 @@
 
 struct cmCTest::Private
 {
+  Private(cmCTest* ctest)
+    : BuildAndTest(ctest)
+  {
+  }
+
   /** Representation of one part.  */
   struct PartInfo
   {
@@ -123,7 +128,7 @@ struct cmCTest::Private
 
   // these are helper classes
   cmCTestBuildHandler BuildHandler;
-  cmCTestBuildAndTestHandler BuildAndTestHandler;
+  cmCTestBuildAndTest BuildAndTest;
   cmCTestCoverageHandler CoverageHandler;
   cmCTestScriptHandler ScriptHandler;
   cmCTestTestHandler TestHandler;
@@ -135,17 +140,16 @@ struct cmCTest::Private
 
   std::vector<cmCTestGenericHandler*> GetTestingHandlers()
   {
-    return { &this->BuildHandler,     &this->BuildAndTestHandler,
-             &this->CoverageHandler,  &this->ScriptHandler,
-             &this->TestHandler,      &this->UpdateHandler,
-             &this->ConfigureHandler, &this->MemCheckHandler,
-             &this->SubmitHandler,    &this->UploadHandler };
+    return { &this->BuildHandler,    &this->CoverageHandler,
+             &this->ScriptHandler,   &this->TestHandler,
+             &this->UpdateHandler,   &this->ConfigureHandler,
+             &this->MemCheckHandler, &this->SubmitHandler,
+             &this->UploadHandler };
   }
 
   std::map<std::string, cmCTestGenericHandler*> GetNamedTestingHandlers()
   {
     return { { "build", &this->BuildHandler },
-             { "buildtest", &this->BuildAndTestHandler },
              { "coverage", &this->CoverageHandler },
              { "script", &this->ScriptHandler },
              { "test", &this->TestHandler },
@@ -342,7 +346,7 @@ std::string cmCTest::DecodeURL(const std::string& in)
 }
 
 cmCTest::cmCTest()
-  : Impl(new Private)
+  : Impl(cm::make_unique<Private>(this))
 {
   std::string envValue;
   if (cmSystemTools::GetEnv("CTEST_OUTPUT_ON_FAILURE", envValue)) {
@@ -894,11 +898,6 @@ bool cmCTest::CTestFileExists(const std::string& filename)
 cmCTestBuildHandler* cmCTest::GetBuildHandler()
 {
   return &this->Impl->BuildHandler;
-}
-
-cmCTestBuildAndTestHandler* cmCTest::GetBuildAndTestHandler()
-{
-  return &this->Impl->BuildAndTestHandler;
 }
 
 cmCTestCoverageHandler* cmCTest::GetCoverageHandler()
@@ -2564,91 +2563,87 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
                        this->SetTest("Submit");
                        return this->SubmitExtraFiles(extra);
                      } },
-    CommandArgument{ "--build-and-test",
-                     "--build-and-test must have source and binary dir",
-                     CommandArgument::Values::Two,
-                     [this, &cmakeAndTest](std::string const& dirs) -> bool {
-                       cmakeAndTest = true;
-                       cmList dirList{ dirs };
-                       if (dirList.size() != 2) {
-                         return false;
-                       }
-                       this->Impl->BuildAndTestHandler.SourceDir =
-                         cmSystemTools::CollapseFullPath(dirList[0]);
-                       this->Impl->BuildAndTestHandler.BinaryDir =
-                         cmSystemTools::CollapseFullPath(dirList[1]);
-                       cmSystemTools::MakeDirectory(
-                         this->Impl->BuildAndTestHandler.BinaryDir);
-                       return true;
-                     } },
     CommandArgument{
-      "--build-target", CommandArgument::Values::One,
-      [this](std::string const& t) -> bool {
-        this->Impl->BuildAndTestHandler.BuildTargets.emplace_back(t);
+      "--build-and-test", "--build-and-test must have source and binary dir",
+      CommandArgument::Values::Two,
+      [this, &cmakeAndTest](std::string const& dirs) -> bool {
+        cmakeAndTest = true;
+        cmList dirList{ dirs };
+        if (dirList.size() != 2) {
+          return false;
+        }
+        this->Impl->BuildAndTest.SourceDir =
+          cmSystemTools::CollapseFullPath(dirList[0]);
+        this->Impl->BuildAndTest.BinaryDir =
+          cmSystemTools::CollapseFullPath(dirList[1]);
+        cmSystemTools::MakeDirectory(this->Impl->BuildAndTest.BinaryDir);
         return true;
       } },
+    CommandArgument{ "--build-target", CommandArgument::Values::One,
+                     [this](std::string const& t) -> bool {
+                       this->Impl->BuildAndTest.BuildTargets.emplace_back(t);
+                       return true;
+                     } },
     CommandArgument{ "--build-noclean", CommandArgument::Values::Zero,
                      [this](std::string const&) -> bool {
-                       this->Impl->BuildAndTestHandler.BuildNoClean = true;
+                       this->Impl->BuildAndTest.BuildNoClean = true;
                        return true;
                      } },
     CommandArgument{ "--build-nocmake", CommandArgument::Values::Zero,
                      [this](std::string const&) -> bool {
-                       this->Impl->BuildAndTestHandler.BuildNoCMake = true;
+                       this->Impl->BuildAndTest.BuildNoCMake = true;
                        return true;
                      } },
     CommandArgument{ "--build-two-config", CommandArgument::Values::Zero,
                      [this](std::string const&) -> bool {
-                       this->Impl->BuildAndTestHandler.BuildTwoConfig = true;
+                       this->Impl->BuildAndTest.BuildTwoConfig = true;
                        return true;
                      } },
     CommandArgument{ "--build-run-dir", CommandArgument::Values::One,
                      [this](std::string const& dir) -> bool {
-                       this->Impl->BuildAndTestHandler.BuildRunDir = dir;
+                       this->Impl->BuildAndTest.BuildRunDir = dir;
                        return true;
                      } },
     CommandArgument{ "--build-exe-dir", CommandArgument::Values::One,
                      [this](std::string const& dir) -> bool {
-                       this->Impl->BuildAndTestHandler.ExecutableDirectory =
-                         dir;
+                       this->Impl->BuildAndTest.ExecutableDirectory = dir;
                        return true;
                      } },
     CommandArgument{ "--test-timeout", CommandArgument::Values::One,
                      [this](std::string const& t) -> bool {
-                       this->Impl->BuildAndTestHandler.Timeout =
+                       this->Impl->BuildAndTest.Timeout =
                          cmDuration(atof(t.c_str()));
                        return true;
                      } },
     CommandArgument{ "--build-generator", CommandArgument::Values::One,
                      [this](std::string const& g) -> bool {
-                       this->Impl->BuildAndTestHandler.BuildGenerator = g;
+                       this->Impl->BuildAndTest.BuildGenerator = g;
                        return true;
                      } },
-    CommandArgument{
-      "--build-generator-platform", CommandArgument::Values::One,
-      [this](std::string const& p) -> bool {
-        this->Impl->BuildAndTestHandler.BuildGeneratorPlatform = p;
-        return true;
-      } },
+    CommandArgument{ "--build-generator-platform",
+                     CommandArgument::Values::One,
+                     [this](std::string const& p) -> bool {
+                       this->Impl->BuildAndTest.BuildGeneratorPlatform = p;
+                       return true;
+                     } },
     CommandArgument{ "--build-generator-toolset", CommandArgument::Values::One,
                      [this](std::string const& t) -> bool {
-                       this->Impl->BuildAndTestHandler.BuildGeneratorToolset =
-                         t;
+                       this->Impl->BuildAndTest.BuildGeneratorToolset = t;
                        return true;
                      } },
     CommandArgument{ "--build-project", CommandArgument::Values::One,
                      [this](std::string const& p) -> bool {
-                       this->Impl->BuildAndTestHandler.BuildProject = p;
+                       this->Impl->BuildAndTest.BuildProject = p;
                        return true;
                      } },
     CommandArgument{ "--build-makeprogram", CommandArgument::Values::One,
                      [this](std::string const& p) -> bool {
-                       this->Impl->BuildAndTestHandler.BuildMakeProgram = p;
+                       this->Impl->BuildAndTest.BuildMakeProgram = p;
                        return true;
                      } },
     CommandArgument{ "--build-config-sample", CommandArgument::Values::One,
                      [this](std::string const& s) -> bool {
-                       this->Impl->BuildAndTestHandler.ConfigSample = s;
+                       this->Impl->BuildAndTest.ConfigSample = s;
                        return true;
                      } },
     CommandArgument{ "-SP", CommandArgument::Values::One, dashSP },
@@ -3028,16 +3023,16 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
       while (i + 1 < args.size() && args[i + 1] != "--build-target"_s &&
              args[i + 1] != "--test-command"_s) {
         ++i;
-        this->Impl->BuildAndTestHandler.BuildOptions.emplace_back(args[i]);
+        this->Impl->BuildAndTest.BuildOptions.emplace_back(args[i]);
       }
     }
     if (!matched && arg == "--test-command"_s && i + 1 < args.size()) {
       matched = true;
       ++i;
-      this->Impl->BuildAndTestHandler.TestCommand = args[i];
+      this->Impl->BuildAndTest.TestCommand = args[i];
       while (i + 1 < args.size()) {
         ++i;
-        this->Impl->BuildAndTestHandler.TestCommandArgs.emplace_back(args[i]);
+        this->Impl->BuildAndTest.TestCommandArgs.emplace_back(args[i]);
       }
     }
     if (!matched && cmHasLiteralPrefix(arg, "-") &&
@@ -3174,9 +3169,8 @@ int cmCTest::ExecuteTests()
 int cmCTest::RunCMakeAndTest(std::string* output)
 {
   this->Impl->Verbose = true;
-  cmCTestBuildAndTestHandler* handler = this->GetBuildAndTestHandler();
-  int retv = handler->ProcessHandler();
-  *output = handler->GetOutput();
+  int retv = this->Impl->BuildAndTest.Run();
+  *output = this->Impl->BuildAndTest.GetOutput();
 #ifndef CMAKE_BOOTSTRAP
   cmDynamicLoader::FlushCache();
 #endif
