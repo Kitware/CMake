@@ -757,10 +757,6 @@ extends:
             Contents: '*.nupkg'
             TargetFolder: $(OutputParentPath)/package
             OverWrite: true
-        - task: CmdLine@2
-          displayName: Set APIScan environment
-          inputs:
-            script: setx AzureServicesAuthConnectionString runAs=App;AppId=$(ApiScanClientId) /m
         - task: securedevelopmentteam.vss-secure-development-tools.build-task-apiscan.APIScan@2
           displayName: 'Run APIScan - x64 x86'
           inputs:
@@ -769,6 +765,8 @@ extends:
             softwareVersionNum: '$(CMakeVersion)'
             symbolsFolder: '$(SymbolsDirectory)'
             isLargeApp: false
+          env:
+            AzureServicesAuthConnectionString: RunAs=App;AppId=$(ApiScanClientId)
         - task: CmdLine@2
           displayName: Clear APIScan environment
           inputs:
