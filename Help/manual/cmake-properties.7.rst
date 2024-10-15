@@ -415,6 +415,7 @@ Properties on Targets
    /prop_tgt/UNITY_BUILD_CODE_AFTER_INCLUDE
    /prop_tgt/UNITY_BUILD_CODE_BEFORE_INCLUDE
    /prop_tgt/UNITY_BUILD_MODE
+   /prop_tgt/UNITY_BUILD_RELOCATABLE
    /prop_tgt/UNITY_BUILD_UNIQUE_ID
    /prop_tgt/VERIFY_INTERFACE_HEADER_SETS
    /prop_tgt/VERSION

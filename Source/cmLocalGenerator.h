@@ -699,28 +699,37 @@ private:
     {
     }
   };
+  /** Whether to insert relative or absolute paths into unity files */
+  enum class UnityPathMode
+  {
+    Absolute,
+    Relative
+  };
 
   UnitySource WriteUnitySource(
     cmGeneratorTarget* target, std::vector<std::string> const& configs,
     cmRange<std::vector<UnityBatchedSource>::const_iterator> sources,
-    cmValue beforeInclude, cmValue afterInclude, std::string filename) const;
+    cmValue beforeInclude, cmValue afterInclude, std::string filename,
+    std::string const& unityFileDirectory, UnityPathMode pathMode) const;
   void WriteUnitySourceInclude(std::ostream& unity_file,
                                cm::optional<std::string> const& cond,
                                std::string const& sf_full_path,
                                cmValue beforeInclude, cmValue afterInclude,
-                               cmValue uniqueIdName) const;
+                               cmValue uniqueIdName, UnityPathMode pathMode,
+                               std::string const& unityFileDirectory) const;
   std::vector<UnitySource> AddUnityFilesModeAuto(
     cmGeneratorTarget* target, std::string const& lang,
     std::vector<std::string> const& configs,
     std::vector<UnityBatchedSource> const& filtered_sources,
     cmValue beforeInclude, cmValue afterInclude,
-    std::string const& filename_base, size_t batchSize);
+    std::string const& filename_base, UnityPathMode pathMode,
+    size_t batchSize);
   std::vector<UnitySource> AddUnityFilesModeGroup(
     cmGeneratorTarget* target, std::string const& lang,
     std::vector<std::string> const& configs,
     std::vector<UnityBatchedSource> const& filtered_sources,
     cmValue beforeInclude, cmValue afterInclude,
-    std::string const& filename_base);
+    std::string const& filename_base, UnityPathMode pathMode);
 };
 
 namespace detail {

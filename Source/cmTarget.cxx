@@ -553,6 +553,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "UNITY_BUILD_UNIQUE_ID"_s, IC::CanCompileSources },
   { "UNITY_BUILD_BATCH_SIZE"_s, "8"_s, IC::CanCompileSources },
   { "UNITY_BUILD_MODE"_s, "BATCH"_s, IC::CanCompileSources },
+  { "UNITY_BUILD_RELOCATABLE"_s, IC::CanCompileSources },
   { "OPTIMIZE_DEPENDENCIES"_s, IC::CanCompileSources },
   { "VERIFY_INTERFACE_HEADER_SETS"_s },
   // -- Android
