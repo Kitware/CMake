@@ -2,7 +2,10 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #pragma once
 
+#include <cctype>
+
 #include <cm/optional>
+#include <cm/string_view>
 
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -126,7 +129,7 @@ struct cmCommandLineArgument
       if (input.size() == this->Name.size()) {
         auto nextValueIndex = index + 1;
         if (nextValueIndex >= allArgs.size() ||
-            allArgs[nextValueIndex][0] == '-') {
+            IsFlag(allArgs[nextValueIndex])) {
           if (this->Type == Values::ZeroOrOne) {
             parseState =
               this->StoreCall(std::string{}, std::forward<CallState>(state)...)
@@ -153,8 +156,8 @@ struct cmCommandLineArgument
       }
     } else if (this->Type == Values::Two) {
       if (input.size() == this->Name.size()) {
-        if (index + 2 >= allArgs.size() || allArgs[index + 1][0] == '-' ||
-            allArgs[index + 2][0] == '-') {
+        if (index + 2 >= allArgs.size() || IsFlag(allArgs[index + 1]) ||
+            IsFlag(allArgs[index + 2])) {
           parseState = ParseMode::ValueError;
         } else {
           index += 2;
@@ -169,12 +172,12 @@ struct cmCommandLineArgument
       if (input.size() == this->Name.size()) {
         auto nextValueIndex = index + 1;
         if (nextValueIndex >= allArgs.size() ||
-            allArgs[nextValueIndex][0] == '-') {
+            IsFlag(allArgs[nextValueIndex])) {
           parseState = ParseMode::ValueError;
         } else {
           std::string buffer = allArgs[nextValueIndex++];
           while (nextValueIndex < allArgs.size() &&
-                 allArgs[nextValueIndex][0] != '-') {
+                 !IsFlag(allArgs[nextValueIndex])) {
             buffer = cmStrCat(buffer, ";", allArgs[nextValueIndex++]);
           }
           parseState =
@@ -280,5 +283,11 @@ private:
       possible_value.remove_prefix(1);
     }
     return std::string(possible_value);
+  }
+
+  static bool IsFlag(cm::string_view arg)
+  {
+    return !arg.empty() && arg[0] == '-' &&
+      !(arg.size() >= 2 && std::isdigit(arg[1]));
   }
 };

@@ -4,7 +4,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cstddef>
 #include <map>
 #include <string>
 #include <vector>
@@ -42,16 +41,6 @@ public:
    * Return < 0 if error.
    */
   virtual int ProcessHandler() = 0;
-
-  /**
-   * Process command line arguments that are applicable for the handler
-   */
-  virtual int ProcessCommandLineArguments(
-    const std::string& /*currentArg*/, size_t& /*idx*/,
-    const std::vector<std::string>& /*allArgs*/, bool& /*valid*/)
-  {
-    return 1;
-  }
 
   /**
    * Initialize handler

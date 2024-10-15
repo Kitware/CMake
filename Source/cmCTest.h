@@ -486,20 +486,16 @@ private:
   int Initialize(const std::string& binary_dir, cmCTestStartCommand* command);
 
   /** parse the option after -D and convert it into the appropriate steps */
-  bool AddTestsForDashboardType(std::string& targ);
+  bool AddTestsForDashboardType(std::string const& targ);
 
   /** read as "emit an error message for an unknown -D value" */
-  void ErrorMessageUnknownDashDValue(std::string& val);
+  void ErrorMessageUnknownDashDValue(std::string const& val);
 
   /** add a variable definition from a command line -D value */
   bool AddVariableDefinition(const std::string& arg);
 
   /** set command line arguments read from a test preset */
   bool SetArgsFromPreset(const std::string& presetName, bool listPresets);
-
-  /** parse and process most common command line arguments */
-  bool HandleCommandLineArguments(size_t& i, std::vector<std::string>& args,
-                                  std::string& errormsg);
 
 #if !defined(_WIN32)
   /** returns true iff the console supports progress output */
@@ -511,10 +507,6 @@ private:
 
   /** returns true iff the console supports colored output */
   static bool ColoredOutputSupportedByConsole();
-
-  /** handle the -S -SP and -SR arguments */
-  bool HandleScriptArguments(size_t& i, std::vector<std::string>& args,
-                             bool& SRArgumentSpecified);
 
   /** Reread the configuration file */
   bool UpdateCTestConfiguration();
@@ -529,16 +521,6 @@ private:
 
   /** Output errors from a test */
   void OutputTestErrors(std::vector<char> const& process_output);
-
-  /** Handle the --test-action command line argument */
-  bool HandleTestActionArgument(const char* ctestExec, size_t& i,
-                                const std::vector<std::string>& args,
-                                bool& validArg);
-
-  /** Handle the --test-model command line argument */
-  bool HandleTestModelArgument(const char* ctestExec, size_t& i,
-                               const std::vector<std::string>& args,
-                               bool& validArg);
 
   int RunCMakeAndTest(std::string* output);
   int ExecuteTests();

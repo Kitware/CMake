@@ -3,7 +3,6 @@
 #include "cmCTestBuildAndTestHandler.h"
 
 #include <chrono>
-#include <cstdlib>
 #include <cstring>
 #include <ratio>
 
@@ -20,13 +19,7 @@
 
 struct cmMessageMetadata;
 
-cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
-{
-  this->BuildTwoConfig = false;
-  this->BuildNoClean = false;
-  this->BuildNoCMake = false;
-  this->Timeout = cmDuration::zero();
-}
+cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler() = default;
 
 void cmCTestBuildAndTestHandler::Initialize()
 {
@@ -361,93 +354,4 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     cmCTestLog(this->CTest, OUTPUT, out.str() << std::endl);
   }
   return retval;
-}
-
-int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
-  const std::string& currentArg, size_t& idx,
-  const std::vector<std::string>& allArgs, bool& validArg)
-{
-  bool buildAndTestArg = true;
-  // --build-and-test options
-  if (cmHasLiteralPrefix(currentArg, "--build-and-test") &&
-      idx < allArgs.size() - 1) {
-    if (idx + 2 < allArgs.size()) {
-      idx++;
-      this->SourceDir = allArgs[idx];
-      idx++;
-      this->BinaryDir = allArgs[idx];
-      // dir must exist before CollapseFullPath is called
-      cmSystemTools::MakeDirectory(this->BinaryDir);
-      this->BinaryDir = cmSystemTools::CollapseFullPath(this->BinaryDir);
-      this->SourceDir = cmSystemTools::CollapseFullPath(this->SourceDir);
-    } else {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "--build-and-test must have source and binary dir"
-                   << std::endl);
-      return 0;
-    }
-  } else if (cmHasLiteralPrefix(currentArg, "--build-target") &&
-             idx < allArgs.size() - 1) {
-    idx++;
-    this->BuildTargets.push_back(allArgs[idx]);
-  } else if (cmHasLiteralPrefix(currentArg, "--build-nocmake")) {
-    this->BuildNoCMake = true;
-  } else if (cmHasLiteralPrefix(currentArg, "--build-run-dir") &&
-             idx < allArgs.size() - 1) {
-    idx++;
-    this->BuildRunDir = allArgs[idx];
-  } else if (cmHasLiteralPrefix(currentArg, "--build-two-config")) {
-    this->BuildTwoConfig = true;
-  } else if (cmHasLiteralPrefix(currentArg, "--build-exe-dir") &&
-             idx < allArgs.size() - 1) {
-    idx++;
-    this->ExecutableDirectory = allArgs[idx];
-  } else if (cmHasLiteralPrefix(currentArg, "--test-timeout") &&
-             idx < allArgs.size() - 1) {
-    idx++;
-    this->Timeout = cmDuration(atof(allArgs[idx].c_str()));
-  } else if (currentArg == "--build-generator" && idx < allArgs.size() - 1) {
-    idx++;
-    this->BuildGenerator = allArgs[idx];
-  } else if (currentArg == "--build-generator-platform" &&
-             idx < allArgs.size() - 1) {
-    idx++;
-    this->BuildGeneratorPlatform = allArgs[idx];
-  } else if (currentArg == "--build-generator-toolset" &&
-             idx < allArgs.size() - 1) {
-    idx++;
-    this->BuildGeneratorToolset = allArgs[idx];
-  } else if (cmHasLiteralPrefix(currentArg, "--build-project") &&
-             idx < allArgs.size() - 1) {
-    idx++;
-    this->BuildProject = allArgs[idx];
-  } else if (cmHasLiteralPrefix(currentArg, "--build-makeprogram") &&
-             idx < allArgs.size() - 1) {
-    idx++;
-    this->BuildMakeProgram = allArgs[idx];
-  } else if (cmHasLiteralPrefix(currentArg, "--build-config-sample") &&
-             idx < allArgs.size() - 1) {
-    idx++;
-    this->ConfigSample = allArgs[idx];
-  } else if (cmHasLiteralPrefix(currentArg, "--build-noclean")) {
-    this->BuildNoClean = true;
-  } else if (cmHasLiteralPrefix(currentArg, "--build-options")) {
-    while (idx + 1 < allArgs.size() && allArgs[idx + 1] != "--build-target" &&
-           allArgs[idx + 1] != "--test-command") {
-      ++idx;
-      this->BuildOptions.push_back(allArgs[idx]);
-    }
-  } else if (cmHasLiteralPrefix(currentArg, "--test-command") &&
-             idx < allArgs.size() - 1) {
-    ++idx;
-    this->TestCommand = allArgs[idx];
-    while (idx + 1 < allArgs.size()) {
-      ++idx;
-      this->TestCommandArgs.push_back(allArgs[idx]);
-    }
-  } else {
-    buildAndTestArg = false;
-  }
-  validArg = validArg || buildAndTestArg;
-  return 1;
 }

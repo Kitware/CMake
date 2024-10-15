@@ -4,7 +4,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <cstddef>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -28,11 +27,6 @@ public:
    */
   int ProcessHandler() override;
 
-  //! Set all the build and test arguments
-  int ProcessCommandLineArguments(const std::string& currentArg, size_t& idx,
-                                  const std::vector<std::string>& allArgs,
-                                  bool& validArg) override;
-
   /*
    * Get the output variable
    */
@@ -54,18 +48,20 @@ protected:
   std::string BuildGeneratorPlatform;
   std::string BuildGeneratorToolset;
   std::vector<std::string> BuildOptions;
-  bool BuildTwoConfig;
+  bool BuildTwoConfig = false;
   std::string BuildMakeProgram;
   std::string ConfigSample;
   std::string SourceDir;
   std::string BinaryDir;
   std::string BuildProject;
   std::string TestCommand;
-  bool BuildNoClean;
+  bool BuildNoClean = false;
   std::string BuildRunDir;
   std::string ExecutableDirectory;
   std::vector<std::string> TestCommandArgs;
   std::vector<std::string> BuildTargets;
-  bool BuildNoCMake;
-  cmDuration Timeout;
+  bool BuildNoCMake = false;
+  cmDuration Timeout = cmDuration::zero();
+
+  friend class cmCTest;
 };
