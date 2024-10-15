@@ -59,6 +59,9 @@ Commands
 * The :command:`file(ARCHIVE_CREATE)` command gained a ``WORKING_DIRECTORY``
   option to specify a working directory for the archiving process.
 
+* The :command:`file(MAKE_DIRECTORY)` command gained a ``RESULT`` option
+  to capture failure in a result variable.
+
 * The :command:`install(FILES)` and :command:`install(DIRECTORY)` commands'
   ``TYPE`` argument gained support for a ``LIBEXEC`` type.
 
