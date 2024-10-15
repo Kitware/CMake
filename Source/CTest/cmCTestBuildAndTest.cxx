@@ -305,7 +305,7 @@ int cmCTestBuildAndTest::RunCMakeAndTest()
   }
 
   bool runTestRes =
-    this->CTest->RunTest(testCommand, &outs, &retval, remainingTime, nullptr);
+    this->CTest->RunTest(testCommand, &outs, &retval, remainingTime);
 
   if (!runTestRes || retval != 0) {
     out << "Test command failed: " << testCommand[0] << "\n";

@@ -1233,36 +1233,14 @@ bool cmCTest::RunMakeCommand(const std::string& command, std::string& output,
   return true;
 }
 
-bool cmCTest::RunTest(const std::vector<std::string>& argv,
-                      std::string* output, int* retVal, cmDuration testTimeOut,
-                      std::vector<std::string>* environment, Encoding encoding)
+bool cmCTest::RunTest(std::vector<std::string> const& argv,
+                      std::string* output, int* retVal, cmDuration testTimeOut)
 {
-  bool modifyEnv = (environment && !environment->empty());
-
-  // determine how much time we have
-  cmDuration timeout = this->GetRemainingTimeAllowed();
-  if (timeout != cmCTest::MaxDuration()) {
-    timeout -= std::chrono::minutes(2);
-  }
-  if (this->Impl->TimeOut > cmDuration::zero() &&
-      this->Impl->TimeOut < timeout) {
-    timeout = this->Impl->TimeOut;
-  }
-  if (testTimeOut > cmDuration::zero() &&
-      testTimeOut < this->GetRemainingTimeAllowed()) {
+  cmDuration timeout = cmCTest::MaxDuration();
+  if (testTimeOut > cmDuration::zero()) {
     timeout = testTimeOut;
   }
 
-  // always have at least 1 second if we got to here
-  if (timeout <= cmDuration::zero()) {
-    timeout = std::chrono::seconds(1);
-  }
-  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-             "Test timeout computed to be: "
-               << (timeout == cmCTest::MaxDuration()
-                     ? std::string("infinite")
-                     : std::to_string(cmDurationTo<unsigned int>(timeout)))
-               << "\n");
   if (cmSystemTools::SameFile(argv[0], cmSystemTools::GetCTestCommand()) &&
       !this->Impl->ForceNewCTestProcess) {
     cmCTest inst;
@@ -1286,21 +1264,9 @@ bool cmCTest::RunTest(const std::vector<std::string>& argv,
       args.emplace_back(i);
     }
 
-    std::unique_ptr<cmSystemTools::SaveRestoreEnvironment> saveEnv;
-    if (modifyEnv) {
-      saveEnv = cm::make_unique<cmSystemTools::SaveRestoreEnvironment>();
-      cmSystemTools::AppendEnv(*environment);
-    }
-
     *retVal = inst.Run(args, output);
     if (output) {
       *output += oss.str();
-    }
-    if (output) {
-      cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-                 "Internal cmCTest object used to run test." << std::endl
-                                                             << *output
-                                                             << std::endl);
     }
 
     return true;
@@ -1310,46 +1276,28 @@ bool cmCTest::RunTest(const std::vector<std::string>& argv,
     output->clear();
   }
 
-  std::unique_ptr<cmSystemTools::SaveRestoreEnvironment> saveEnv;
-  if (modifyEnv) {
-    saveEnv = cm::make_unique<cmSystemTools::SaveRestoreEnvironment>();
-    cmSystemTools::AppendEnv(*environment);
-  }
-
   cmUVProcessChainBuilder builder;
   builder.AddCommand(argv).SetMergedBuiltinStreams();
-  cmCTestLog(this, DEBUG, "Command is: " << argv[0] << std::endl);
   auto chain = builder.Start();
 
-  cmProcessOutput processOutput(encoding);
+  cmProcessOutput processOutput(cmProcessOutput::Auto);
   cm::uv_pipe_ptr outputStream;
   outputStream.init(chain.GetLoop(), 0);
   uv_pipe_open(outputStream, chain.OutputStream());
   auto outputHandle = cmUVStreamRead(
     outputStream,
-    [this, &processOutput, &output, &tempOutput](std::vector<char> data) {
-      std::string strdata;
-      processOutput.DecodeText(data.data(), data.size(), strdata);
+    [&output, &tempOutput](std::vector<char> data) {
       if (output) {
         cm::append(tempOutput, data.data(), data.data() + data.size());
       }
-      cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, strdata);
     },
-    [this, &processOutput]() {
-      std::string strdata;
-      processOutput.DecodeText(std::string(), strdata);
-      if (!strdata.empty()) {
-        cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, strdata);
-      }
-    });
+    []() {});
 
   bool complete = chain.Wait(static_cast<uint64_t>(timeout.count() * 1000.0));
   processOutput.DecodeText(tempOutput, tempOutput);
   if (output && tempOutput.begin() != tempOutput.end()) {
     output->append(tempOutput.data(), tempOutput.size());
   }
-  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-             "-- Process completed" << std::endl);
 
   bool result = false;
 
@@ -1359,30 +1307,22 @@ bool cmCTest::RunTest(const std::vector<std::string>& argv,
     switch (exception.first) {
       case cmUVProcessChain::ExceptionCode::None:
         *retVal = static_cast<int>(status.ExitStatus);
-        if (*retVal != 0 && this->Impl->OutputTestOutputOnTestFailure) {
-          this->OutputTestErrors(tempOutput);
-        }
         result = true;
         break;
       case cmUVProcessChain::ExceptionCode::Spawn: {
-        std::string outerr =
-          cmStrCat("\n*** ERROR executing: ", exception.second);
         if (output) {
+          std::string outerr =
+            cmStrCat("\n*** ERROR executing: ", exception.second);
           *output += outerr;
         }
-        cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, outerr << std::endl);
       } break;
       default: {
-        if (this->Impl->OutputTestOutputOnTestFailure) {
-          this->OutputTestErrors(tempOutput);
-        }
         *retVal = status.TermSignal;
-        std::string outerr =
-          cmStrCat("\n*** Exception executing: ", exception.second);
         if (output) {
+          std::string outerr =
+            cmStrCat("\n*** Exception executing: ", exception.second);
           *output += outerr;
         }
-        cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, outerr << std::endl);
       } break;
     }
   }
@@ -4004,15 +3944,6 @@ cmDuration cmCTest::GetRemainingTimeAllowed()
 cmDuration cmCTest::MaxDuration()
 {
   return cmDuration(1.0e7);
-}
-
-void cmCTest::OutputTestErrors(std::vector<char> const& process_output)
-{
-  std::string test_outputs("\n*** Test Failed:\n");
-  if (!process_output.empty()) {
-    test_outputs.append(process_output.data(), process_output.size());
-  }
-  cmCTestLog(this, HANDLER_OUTPUT, test_outputs << std::endl);
 }
 
 bool cmCTest::CompressString(std::string& str)

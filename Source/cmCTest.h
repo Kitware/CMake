@@ -298,15 +298,10 @@ public:
   void SetProduceXML(bool v);
 
   /**
-   * Run command specialized for tests. Returns process status and retVal is
-   * return value or exception. If environment is non-null, it is used to set
-   * environment variables prior to running the test. After running the test,
-   * environment variables are restored to their previous values.
+   * In --build-and-test, run the --test-command.
    */
-  bool RunTest(const std::vector<std::string>& args, std::string* output,
-               int* retVal, cmDuration testTimeOut,
-               std::vector<std::string>* environment,
-               Encoding encoding = cmProcessOutput::Auto);
+  bool RunTest(std::vector<std::string> const& args, std::string* output,
+               int* retVal, cmDuration testTimeOut);
 
   /**
    * Get the handler object
@@ -516,9 +511,6 @@ private:
   /** Check if the argument is the one specified */
   static bool CheckArgument(const std::string& arg, cm::string_view varg1,
                             const char* varg2 = nullptr);
-
-  /** Output errors from a test */
-  void OutputTestErrors(std::vector<char> const& process_output);
 
   int RunCMakeAndTest(std::string* output);
   int ExecuteTests();
