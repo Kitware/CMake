@@ -305,6 +305,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFortranFlagTable[] = {
   { "Optimization", "O1", "min space", "optimizeMinSpace", 0 },
   { "Optimization", "O3", "full optimize", "optimizeFull", 0 },
   { "GlobalOptimizations", "Og", "global optimize", "true", 0 },
+  { "InterproceduralOptimizations", "Qipo",
+    "Interprocedural optimization across multiple files", "ipoMultiFile", 0 },
   { "InlineFunctionExpansion", "Ob0", "", "expandDisable", 0 },
   { "InlineFunctionExpansion", "Ob1", "", "expandOnlyInline", 0 },
   { "FavorSizeOrSpeed", "Os", "", "favorSize", 0 },
@@ -690,7 +692,13 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(
     this->AddCompileOptions(flags, target, langForClCompile, configName);
 
     // Check IPO related warning/error.
-    target->IsIPOEnabled(linkLanguage, configName);
+    if (target->IsIPOEnabled(linkLanguage, configName)) {
+      if (this->FortranProject) {
+        this->AppendCompileOptions(flags,
+                                   this->Makefile->GetSafeDefinition(
+                                     "CMAKE_Fortran_COMPILE_OPTIONS_IPO"));
+      }
+    }
   }
 
   if (this->FortranProject) {
