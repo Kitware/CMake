@@ -1226,68 +1226,6 @@ bool cmCTest::RunMakeCommand(const std::string& command, std::string& output,
   return true;
 }
 
-bool cmCTest::RunTest(std::vector<std::string> const& argv,
-                      std::string* output, int* retVal, cmDuration timeout)
-{
-  std::vector<char> tempOutput;
-  if (output) {
-    output->clear();
-  }
-
-  cmUVProcessChainBuilder builder;
-  builder.AddCommand(argv).SetMergedBuiltinStreams();
-  auto chain = builder.Start();
-
-  cmProcessOutput processOutput(cmProcessOutput::Auto);
-  cm::uv_pipe_ptr outputStream;
-  outputStream.init(chain.GetLoop(), 0);
-  uv_pipe_open(outputStream, chain.OutputStream());
-  auto outputHandle = cmUVStreamRead(
-    outputStream,
-    [&output, &tempOutput](std::vector<char> data) {
-      if (output) {
-        cm::append(tempOutput, data.data(), data.data() + data.size());
-      }
-    },
-    []() {});
-
-  bool complete = chain.Wait(static_cast<uint64_t>(timeout.count() * 1000.0));
-  processOutput.DecodeText(tempOutput, tempOutput);
-  if (output && tempOutput.begin() != tempOutput.end()) {
-    output->append(tempOutput.data(), tempOutput.size());
-  }
-
-  bool result = false;
-
-  if (complete) {
-    auto const& status = chain.GetStatus(0);
-    auto exception = status.GetException();
-    switch (exception.first) {
-      case cmUVProcessChain::ExceptionCode::None:
-        *retVal = static_cast<int>(status.ExitStatus);
-        result = true;
-        break;
-      case cmUVProcessChain::ExceptionCode::Spawn: {
-        if (output) {
-          std::string outerr =
-            cmStrCat("\n*** ERROR executing: ", exception.second);
-          *output += outerr;
-        }
-      } break;
-      default: {
-        *retVal = status.TermSignal;
-        if (output) {
-          std::string outerr =
-            cmStrCat("\n*** Exception executing: ", exception.second);
-          *output += outerr;
-        }
-      } break;
-    }
-  }
-
-  return result;
-}
-
 std::string cmCTest::SafeBuildIdField(const std::string& value)
 {
   std::string safevalue(value);

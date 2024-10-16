@@ -298,12 +298,6 @@ public:
   void SetProduceXML(bool v);
 
   /**
-   * In --build-and-test, run the --test-command.
-   */
-  bool RunTest(std::vector<std::string> const& args, std::string* output,
-               int* retVal, cmDuration timeout);
-
-  /**
    * Get the handler object
    */
   cmCTestBuildHandler* GetBuildHandler();

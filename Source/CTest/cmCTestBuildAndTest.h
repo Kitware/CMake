@@ -37,6 +37,8 @@ private:
 
   int RunCMake(std::ostringstream& out, std::string& cmakeOutString,
                cmake* cm);
+  bool RunTest(std::vector<std::string> const& args, std::string* output,
+               int* retVal, cmDuration timeout);
 
   std::string Output;
 
