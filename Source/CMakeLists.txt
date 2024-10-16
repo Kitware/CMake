@@ -1071,7 +1071,7 @@ add_library(
   cmCTest.cxx
   CTest/cmProcess.cxx
   CTest/cmCTestBinPacker.cxx
-  CTest/cmCTestBuildAndTestHandler.cxx
+  CTest/cmCTestBuildAndTest.cxx
   CTest/cmCTestBuildCommand.cxx
   CTest/cmCTestBuildHandler.cxx
   CTest/cmCTestConfigureCommand.cxx

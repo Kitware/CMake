@@ -19,7 +19,6 @@
 #include "cmProcessOutput.h"
 
 class cmCTestBuildHandler;
-class cmCTestBuildAndTestHandler;
 class cmCTestCoverageHandler;
 class cmCTestScriptHandler;
 class cmCTestTestHandler;
@@ -313,7 +312,6 @@ public:
    * Get the handler object
    */
   cmCTestBuildHandler* GetBuildHandler();
-  cmCTestBuildAndTestHandler* GetBuildAndTestHandler();
   cmCTestCoverageHandler* GetCoverageHandler();
   cmCTestScriptHandler* GetScriptHandler();
   cmCTestTestHandler* GetTestHandler();

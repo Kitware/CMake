@@ -1,6 +1,6 @@
 /* Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
    file Copyright.txt or https://cmake.org/licensing for details.  */
-#include "cmCTestBuildAndTestHandler.h"
+#include "cmCTestBuildAndTest.h"
 
 #include <chrono>
 #include <cstring>
@@ -19,32 +19,27 @@
 
 struct cmMessageMetadata;
 
-cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler() = default;
-
-void cmCTestBuildAndTestHandler::Initialize()
+cmCTestBuildAndTest::cmCTestBuildAndTest(cmCTest* ctest)
+  : CTest(ctest)
 {
-  this->BuildTargets.clear();
-  this->Superclass::Initialize();
 }
 
-const char* cmCTestBuildAndTestHandler::GetOutput()
+const char* cmCTestBuildAndTest::GetOutput()
 {
   return this->Output.c_str();
 }
-int cmCTestBuildAndTestHandler::ProcessHandler()
+
+int cmCTestBuildAndTest::Run()
 {
   this->Output.clear();
-  std::string output;
   cmSystemTools::ResetErrorOccurredFlag();
-  int retv = this->RunCMakeAndTest(&this->Output);
+  int retv = this->RunCMakeAndTest();
   cmSystemTools::ResetErrorOccurredFlag();
   return retv;
 }
 
-int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
-                                         std::ostringstream& out,
-                                         std::string& cmakeOutString,
-                                         cmake* cm)
+int cmCTestBuildAndTest::RunCMake(std::ostringstream& out,
+                                  std::string& cmakeOutString, cmake* cm)
 {
   std::vector<std::string> args;
   args.push_back(cmSystemTools::GetCMakeCommand());
@@ -79,11 +74,7 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
   if (cm->Run(args) != 0) {
     out << "Error: cmake execution failed\n";
     out << cmakeOutString << "\n";
-    if (outstring) {
-      *outstring = out.str();
-    } else {
-      cmCTestLog(this->CTest, ERROR_MESSAGE, out.str() << std::endl);
-    }
+    this->Output = out.str();
     return 1;
   }
   // do another config?
@@ -91,11 +82,7 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
     if (cm->Run(args) != 0) {
       out << "Error: cmake execution failed\n";
       out << cmakeOutString << "\n";
-      if (outstring) {
-        *outstring = out.str();
-      } else {
-        cmCTestLog(this->CTest, ERROR_MESSAGE, out.str() << std::endl);
-      }
+      this->Output = out.str();
       return 1;
     }
   }
@@ -144,15 +131,13 @@ public:
     const cmCTestBuildAndTestCaptureRAII&) = delete;
 };
 
-int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
+int cmCTestBuildAndTest::RunCMakeAndTest()
 {
   // if the generator and make program are not specified then it is an error
   if (this->BuildGenerator.empty()) {
-    if (outstring) {
-      *outstring = "--build-and-test requires that the generator "
+    this->Output = "--build-and-test requires that the generator "
                    "be provided using the --build-generator "
                    "command line option.\n";
-    }
     return 1;
   }
 
@@ -193,11 +178,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   if (workdir.Failed()) {
     auto msg = "Failed to change working directory to " + this->BinaryDir +
       " : " + std::strerror(workdir.GetLastResult()) + "\n";
-    if (outstring) {
-      *outstring = msg;
-    } else {
-      cmCTestLog(this->CTest, ERROR_MESSAGE, msg);
-    }
+    this->Output = msg;
     return 1;
   }
 
@@ -216,7 +197,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     cm.LoadCache(this->BinaryDir);
   } else {
     // do the cmake step, no timeout here since it is not a sub process
-    if (this->RunCMake(outstring, out, cmakeOutString, &cm)) {
+    if (this->RunCMake(out, cmakeOutString, &cm)) {
       return 1;
     }
   }
@@ -231,9 +212,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
       remainingTime =
         this->Timeout - (std::chrono::steady_clock::now() - clock_start);
       if (remainingTime <= std::chrono::seconds(0)) {
-        if (outstring) {
-          *outstring = "--build-and-test timeout exceeded. ";
-        }
+        this->Output = "--build-and-test timeout exceeded. ";
         return 1;
       }
     }
@@ -253,15 +232,11 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
       buildOptions, false, remainingTime);
     // if the build failed then return
     if (retVal) {
-      if (outstring) {
-        *outstring = out.str();
-      }
+      this->Output = out.str();
       return 1;
     }
   }
-  if (outstring) {
-    *outstring = out.str();
-  }
+  this->Output = out.str();
 
   // if no test was specified then we are done
   if (this->TestCommand.empty()) {
@@ -291,11 +266,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     for (std::string const& fail : failed) {
       out << fail << "\n";
     }
-    if (outstring) {
-      *outstring = out.str();
-    } else {
-      cmCTestLog(this->CTest, ERROR_MESSAGE, out.str());
-    }
+    this->Output = out.str();
     return 1;
   }
 
@@ -312,11 +283,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     if (!workdir.SetDirectory(this->BuildRunDir)) {
       out << "Failed to change working directory : "
           << std::strerror(workdir.GetLastResult()) << "\n";
-      if (outstring) {
-        *outstring = out.str();
-      } else {
-        cmCTestLog(this->CTest, ERROR_MESSAGE, out.str());
-      }
+      this->Output = out.str();
       return 1;
     }
   }
@@ -332,9 +299,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     remainingTime =
       this->Timeout - (std::chrono::steady_clock::now() - clock_start);
     if (remainingTime <= std::chrono::seconds(0)) {
-      if (outstring) {
-        *outstring = "--build-and-test timeout exceeded. ";
-      }
+      this->Output = "--build-and-test timeout exceeded. ";
       return 1;
     }
   }
@@ -348,10 +313,6 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   }
 
   out << outs << "\n";
-  if (outstring) {
-    *outstring = out.str();
-  } else {
-    cmCTestLog(this->CTest, OUTPUT, out.str() << std::endl);
-  }
+  this->Output = out.str();
   return retval;
 }
