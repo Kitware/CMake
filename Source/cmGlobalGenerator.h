@@ -253,7 +253,7 @@ public:
             std::vector<std::string> const& targetNames, std::ostream& ostr,
             const std::string& makeProgram, const std::string& config,
             const cmBuildOptions& buildOptions, bool verbose,
-            cmDuration timeout, cmSystemTools::OutputOption outputflag,
+            cmDuration timeout, cmSystemTools::OutputOption outputMode,
             std::vector<std::string> const& nativeOptions =
               std::vector<std::string>());
 

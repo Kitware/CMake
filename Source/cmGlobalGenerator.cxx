@@ -2243,7 +2243,7 @@ int cmGlobalGenerator::Build(
   const std::string& projectName, const std::vector<std::string>& targets,
   std::ostream& ostr, const std::string& makeCommandCSTR,
   const std::string& config, const cmBuildOptions& buildOptions, bool verbose,
-  cmDuration timeout, cmSystemTools::OutputOption outputflag,
+  cmDuration timeout, cmSystemTools::OutputOption outputMode,
   std::vector<std::string> const& nativeOptions)
 {
   bool hideconsole = cmSystemTools::GetRunCommandHideConsole();
@@ -2276,9 +2276,9 @@ int cmGlobalGenerator::Build(
     buildOptions, nativeOptions);
 
   // Workaround to convince some commands to produce output.
-  if (outputflag == cmSystemTools::OUTPUT_PASSTHROUGH &&
+  if (outputMode == cmSystemTools::OUTPUT_PASSTHROUGH &&
       makeCommand.back().RequiresOutputForward) {
-    outputflag = cmSystemTools::OUTPUT_FORWARD;
+    outputMode = cmSystemTools::OUTPUT_FORWARD;
   }
 
   // should we do a clean first?
@@ -2298,7 +2298,7 @@ int cmGlobalGenerator::Build(
     }
     if (!cmSystemTools::RunSingleCommand(cleanCommand.front().PrimaryCommand,
                                          outputPtr, outputPtr, &retVal,
-                                         nullptr, outputflag, timeout)) {
+                                         nullptr, outputMode, timeout)) {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
       cmSystemTools::Error("Generator: execution of make clean failed.");
       ostr << *outputPtr << "\nGenerator: execution of make clean failed."
@@ -2330,7 +2330,7 @@ int cmGlobalGenerator::Build(
     ostr << outputMakeCommandStr << std::endl;
     if (!cmSystemTools::RunSingleCommand(command->PrimaryCommand, outputPtr,
                                          outputPtr, &retVal, nullptr,
-                                         outputflag, timeout)) {
+                                         outputMode, timeout)) {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
       cmSystemTools::Error(
         cmStrCat("Generator: build tool execution failed, command was: ",
