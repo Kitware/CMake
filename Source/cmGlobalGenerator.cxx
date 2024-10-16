@@ -2268,8 +2268,9 @@ int cmGlobalGenerator::Build(
 
   int retVal = 0;
   cmSystemTools::SetRunCommandHideConsole(true);
-  std::string outputBuffer;
-  std::string* outputPtr = &outputBuffer;
+
+  // Capture build command output when outputMode == OUTPUT_NONE.
+  std::string outputBuf;
 
   std::vector<GeneratedMakeCommand> makeCommand = this->GenerateBuildCommand(
     makeCommandCSTR, projectName, bindir, targets, realConfig, jobs, verbose,
@@ -2297,16 +2298,16 @@ int cmGlobalGenerator::Build(
       return 1;
     }
     if (!cmSystemTools::RunSingleCommand(cleanCommand.front().PrimaryCommand,
-                                         outputPtr, outputPtr, &retVal,
+                                         &outputBuf, &outputBuf, &retVal,
                                          nullptr, outputMode, timeout)) {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
       cmSystemTools::Error("Generator: execution of make clean failed.");
-      ostr << *outputPtr << "\nGenerator: execution of make clean failed."
+      ostr << outputBuf << "\nGenerator: execution of make clean failed."
            << std::endl;
 
       return 1;
     }
-    ostr << *outputPtr;
+    ostr << outputBuf;
   }
 
   // now build
@@ -2328,22 +2329,22 @@ int cmGlobalGenerator::Build(
     }
 
     ostr << outputMakeCommandStr << std::endl;
-    if (!cmSystemTools::RunSingleCommand(command->PrimaryCommand, outputPtr,
-                                         outputPtr, &retVal, nullptr,
+    if (!cmSystemTools::RunSingleCommand(command->PrimaryCommand, &outputBuf,
+                                         &outputBuf, &retVal, nullptr,
                                          outputMode, timeout)) {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
       cmSystemTools::Error(
         cmStrCat("Generator: build tool execution failed, command was: ",
                  makeCommandStr));
-      ostr << *outputPtr
+      ostr << outputBuf
            << "\nGenerator: build tool execution failed, command was: "
            << outputMakeCommandStr << std::endl;
 
       return 1;
     }
-    ostr << *outputPtr << std::flush;
+    ostr << outputBuf << std::flush;
     if (needBuildOutput) {
-      buildOutput += *outputPtr;
+      buildOutput += outputBuf;
     }
   }
   ostr << std::endl;
