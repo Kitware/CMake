@@ -121,8 +121,6 @@ struct cmCTest::Private
 
   bool FlushTestProgressLine = false;
 
-  bool RunConfigurationScript = false;
-
   // these are helper classes
   cmCTestBuildHandler BuildHandler;
   cmCTestBuildAndTest BuildAndTest;
@@ -2126,6 +2124,7 @@ int cmCTest::Run(std::vector<std::string> const& args)
   bool cmakeAndTest = false;
   bool executeTests = true;
   bool SRArgumentSpecified = false;
+  std::vector<std::pair<std::string, bool>> runScripts;
 
   // copy the command line
   cm::append(this->Impl->InitialCommandLineArguments, args);
@@ -2230,30 +2229,24 @@ int cmCTest::Run(std::vector<std::string> const& args)
     return true;
   };
   auto const dashSP =
-    [this, &SRArgumentSpecified](std::string const& script) -> bool {
-    this->Impl->RunConfigurationScript = true;
-    cmCTestScriptHandler* ch = this->GetScriptHandler();
+    [&runScripts, &SRArgumentSpecified](std::string const& script) -> bool {
     // -SR is an internal argument, -SP should be ignored when it is passed
     if (!SRArgumentSpecified) {
-      ch->AddConfigurationScript(script, false);
+      runScripts.emplace_back(script, false);
     }
     return true;
   };
   auto const dashSR =
-    [this, &SRArgumentSpecified](std::string const& script) -> bool {
+    [&runScripts, &SRArgumentSpecified](std::string const& script) -> bool {
     SRArgumentSpecified = true;
-    this->Impl->RunConfigurationScript = true;
-    cmCTestScriptHandler* ch = this->GetScriptHandler();
-    ch->AddConfigurationScript(script, true);
+    runScripts.emplace_back(script, true);
     return true;
   };
   auto const dash_S =
-    [this, &SRArgumentSpecified](std::string const& script) -> bool {
-    this->Impl->RunConfigurationScript = true;
-    cmCTestScriptHandler* ch = this->GetScriptHandler();
+    [&runScripts, &SRArgumentSpecified](std::string const& script) -> bool {
     // -SR is an internal argument, -S should be ignored when it is passed
     if (!SRArgumentSpecified) {
-      ch->AddConfigurationScript(script, true);
+      runScripts.emplace_back(script, true);
     }
     return true;
   };
@@ -2934,6 +2927,10 @@ int cmCTest::Run(std::vector<std::string> const& args)
     return this->RunCMakeAndTest();
   }
 
+  if (!runScripts.empty()) {
+    return this->RunScripts(runScripts);
+  }
+
   if (executeTests) {
     return this->ExecuteTests();
   }
@@ -2941,60 +2938,71 @@ int cmCTest::Run(std::vector<std::string> const& args)
   return 1;
 }
 
+int cmCTest::RunScripts(
+  std::vector<std::pair<std::string, bool>> const& scripts)
+{
+  if (this->Impl->ExtraVerbose) {
+    cmCTestLog(this, OUTPUT, "* Extra verbosity turned on" << std::endl);
+  }
+
+  for (auto& handler : this->Impl->GetTestingHandlers()) {
+    handler->SetVerbose(this->Impl->ExtraVerbose);
+    handler->SetSubmitIndex(this->Impl->SubmitIndex);
+  }
+
+  cmCTestScriptHandler* ch = this->GetScriptHandler();
+  ch->SetVerbose(this->Impl->Verbose);
+  for (auto const& script : scripts) {
+    ch->AddConfigurationScript(script.first, script.second);
+  }
+
+  int res = ch->ProcessHandler();
+  if (res != 0) {
+    cmCTestLog(this, DEBUG,
+               "running script failing returning: " << res << std::endl);
+  }
+
+  return res;
+}
+
 int cmCTest::ExecuteTests()
 {
   int res;
-  // call process directory
-  if (this->Impl->RunConfigurationScript) {
-    if (this->Impl->ExtraVerbose) {
-      cmCTestLog(this, OUTPUT, "* Extra verbosity turned on" << std::endl);
-    }
-    for (auto& handler : this->Impl->GetTestingHandlers()) {
-      handler->SetVerbose(this->Impl->ExtraVerbose);
-      handler->SetSubmitIndex(this->Impl->SubmitIndex);
-    }
-    this->GetScriptHandler()->SetVerbose(this->Impl->Verbose);
-    res = this->GetScriptHandler()->ProcessHandler();
-    if (res != 0) {
-      cmCTestLog(this, DEBUG,
-                 "running script failing returning: " << res << std::endl);
-    }
 
-  } else {
-    // What is this?  -V seems to be the same as -VV,
-    // and Verbose is always on in this case
-    this->Impl->ExtraVerbose = this->Impl->Verbose;
-    this->Impl->Verbose = true;
-    for (auto& handler : this->Impl->GetTestingHandlers()) {
-      handler->SetVerbose(this->Impl->Verbose);
-      handler->SetSubmitIndex(this->Impl->SubmitIndex);
-    }
+  // What is this?  -V seems to be the same as -VV,
+  // and Verbose is always on in this case
+  this->Impl->ExtraVerbose = this->Impl->Verbose;
+  this->Impl->Verbose = true;
+  for (auto& handler : this->Impl->GetTestingHandlers()) {
+    handler->SetVerbose(this->Impl->Verbose);
+    handler->SetSubmitIndex(this->Impl->SubmitIndex);
+  }
 
-    const std::string currDir = cmSystemTools::GetCurrentWorkingDirectory();
-    std::string workDir = currDir;
-    if (!this->Impl->TestDir.empty()) {
-      workDir = cmSystemTools::CollapseFullPath(this->Impl->TestDir);
-    }
+  const std::string currDir = cmSystemTools::GetCurrentWorkingDirectory();
+  std::string workDir = currDir;
+  if (!this->Impl->TestDir.empty()) {
+    workDir = cmSystemTools::CollapseFullPath(this->Impl->TestDir);
+  }
 
-    if (currDir != workDir) {
-      if (!this->TryToChangeDirectory(workDir)) {
-        return 1;
-      }
-    }
-
-    if (!this->Initialize(workDir, nullptr)) {
-      res = 12;
-      cmCTestLog(this, ERROR_MESSAGE,
-                 "Problem initializing the dashboard." << std::endl);
-    } else {
-      res = this->ProcessSteps();
-    }
-    this->Finalize();
-
-    if (currDir != workDir) {
-      cmSystemTools::ChangeDirectory(currDir);
+  if (currDir != workDir) {
+    if (!this->TryToChangeDirectory(workDir)) {
+      return 1;
     }
   }
+
+  if (!this->Initialize(workDir, nullptr)) {
+    res = 12;
+    cmCTestLog(this, ERROR_MESSAGE,
+               "Problem initializing the dashboard." << std::endl);
+  } else {
+    res = this->ProcessSteps();
+  }
+  this->Finalize();
+
+  if (currDir != workDir) {
+    cmSystemTools::ChangeDirectory(currDir);
+  }
+
   if (res != 0) {
     cmCTestLog(this, DEBUG,
                "Running a test(s) failed returning : " << res << std::endl);

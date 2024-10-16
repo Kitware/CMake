@@ -10,6 +10,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cm/optional>
@@ -504,6 +505,7 @@ private:
                             const char* varg2 = nullptr);
 
   int RunCMakeAndTest();
+  int RunScripts(std::vector<std::pair<std::string, bool>> const& scripts);
   int ExecuteTests();
 
   /** return true iff change directory was successful */
