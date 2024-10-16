@@ -930,31 +930,34 @@ cmCTestUploadHandler* cmCTest::GetUploadHandler()
 
 int cmCTest::ProcessSteps()
 {
+  this->Impl->ExtraVerbose = this->Impl->Verbose;
+  this->Impl->Verbose = true;
+  this->Impl->ProduceXML = true;
+
+  for (auto& handler : this->Impl->GetTestingHandlers()) {
+    handler->SetVerbose(this->Impl->Verbose);
+    handler->SetSubmitIndex(this->Impl->SubmitIndex);
+  }
+
+  const std::string currDir = cmSystemTools::GetCurrentWorkingDirectory();
+  std::string workDir = currDir;
+  if (!this->Impl->TestDir.empty()) {
+    workDir = cmSystemTools::CollapseFullPath(this->Impl->TestDir);
+  }
+
+  cmWorkingDirectory changeDir(workDir);
+  if (changeDir.Failed()) {
+    cmCTestLog(this, ERROR_MESSAGE, changeDir.GetError() << std::endl);
+    return 1;
+  }
+
+  if (!this->Initialize(workDir, nullptr)) {
+    cmCTestLog(this, ERROR_MESSAGE,
+               "Problem initializing the dashboard." << std::endl);
+    return 12;
+  }
+
   int res = 0;
-  bool notest = true;
-
-  for (Part p = PartStart; notest && p != PartCount;
-       p = static_cast<Part>(p + 1)) {
-    notest = !this->Impl->Parts[p];
-  }
-
-  if (notest) {
-    if (this->GetTestHandler()->ProcessHandler() < 0) {
-      cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest\n");
-      if (!this->Impl->OutputTestOutputOnTestFailure) {
-        const std::string lastTestLog =
-          this->GetBinaryDir() + "/Testing/Temporary/LastTest.log";
-        cmCTestLog(this, ERROR_MESSAGE,
-                   "Output from these tests are in: " << lastTestLog << '\n');
-        cmCTestLog(this, ERROR_MESSAGE,
-                   "Use \"--rerun-failed --output-on-failure\" to re-run the "
-                   "failed cases verbosely.\n");
-      }
-      return cmCTest::TEST_ERRORS;
-    }
-    return 0;
-  }
-
   cmCTestScriptHandler script;
   script.SetCTestInstance(this);
   script.CreateCMake();
@@ -997,7 +1000,7 @@ int cmCTest::ProcessSteps()
       res |= cmCTest::BUILD_ERRORS;
     }
   }
-  if ((this->Impl->Parts[PartTest] || notest) &&
+  if (this->Impl->Parts[PartTest] &&
       (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
     this->UpdateCTestConfiguration();
     this->SetCMakeVariables(mf);
@@ -1030,22 +1033,20 @@ int cmCTest::ProcessSteps()
       res |= cmCTest::MEMORY_ERRORS;
     }
   }
-  if (!notest) {
-    std::string notes_dir = this->Impl->BinaryDir + "/Testing/Notes";
-    if (cmSystemTools::FileIsDirectory(notes_dir)) {
-      cmsys::Directory d;
-      d.Load(notes_dir);
-      unsigned long kk;
-      for (kk = 0; kk < d.GetNumberOfFiles(); kk++) {
-        const char* file = d.GetFile(kk);
-        std::string fullname = notes_dir + "/" + file;
-        if (cmSystemTools::FileExists(fullname, true)) {
-          if (!this->Impl->NotesFiles.empty()) {
-            this->Impl->NotesFiles += ";";
-          }
-          this->Impl->NotesFiles += fullname;
-          this->Impl->Parts[PartNotes].Enable();
+  std::string notes_dir = this->Impl->BinaryDir + "/Testing/Notes";
+  if (cmSystemTools::FileIsDirectory(notes_dir)) {
+    cmsys::Directory d;
+    d.Load(notes_dir);
+    unsigned long kk;
+    for (kk = 0; kk < d.GetNumberOfFiles(); kk++) {
+      const char* file = d.GetFile(kk);
+      std::string fullname = notes_dir + "/" + file;
+      if (cmSystemTools::FileExists(fullname, true)) {
+        if (!this->Impl->NotesFiles.empty()) {
+          this->Impl->NotesFiles += ";";
         }
+        this->Impl->NotesFiles += fullname;
+        this->Impl->Parts[PartNotes].Enable();
       }
     }
   }
@@ -2096,7 +2097,7 @@ int cmCTest::Run(std::vector<std::string> const& args)
 {
   const char* ctestExec = "ctest";
   bool cmakeAndTest = false;
-  bool executeTests = true;
+  bool processSteps = false;
   bool SRArgumentSpecified = false;
   std::vector<std::pair<std::string, bool>> runScripts;
 
@@ -2140,25 +2141,22 @@ int cmCTest::Run(std::vector<std::string> const& args)
     }
   }
 
-  auto const dashD = [this, &executeTests](std::string const& targ) -> bool {
-    this->Impl->ProduceXML = true;
+  auto const dashD = [this, &processSteps](std::string const& targ) -> bool {
     // AddTestsForDashboard parses the dashboard type and converts it
     // into the separate stages
     if (this->AddTestsForDashboardType(targ)) {
+      processSteps = true;
       return true;
     }
     if (this->AddVariableDefinition(targ)) {
       return true;
     }
     this->ErrorMessageUnknownDashDValue(targ);
-    executeTests = false;
     return false;
   };
-  auto const dashT = [this, &executeTests,
+  auto const dashT = [this, &processSteps,
                       ctestExec](std::string const& action) -> bool {
-    this->Impl->ProduceXML = true;
     if (!this->SetTest(action, false)) {
-      executeTests = false;
       cmCTestLog(this, ERROR_MESSAGE,
                  "CTest -T called with incorrect option: " << action << '\n');
       /* clang-format off */
@@ -2177,9 +2175,10 @@ int cmCTest::Run(std::vector<std::string> const& args)
       /* clang-format on */
       return false;
     }
+    processSteps = true;
     return true;
   };
-  auto const dashM = [this, &executeTests,
+  auto const dashM = [this, &processSteps,
                       ctestExec](std::string const& model) -> bool {
     if (cmSystemTools::LowerCase(model) == "nightly"_s) {
       this->SetTestModel(cmCTest::NIGHTLY);
@@ -2188,7 +2187,6 @@ int cmCTest::Run(std::vector<std::string> const& args)
     } else if (cmSystemTools::LowerCase(model) == "experimental"_s) {
       this->SetTestModel(cmCTest::EXPERIMENTAL);
     } else {
-      executeTests = false;
       cmCTestLog(this, ERROR_MESSAGE,
                  "CTest -M called with incorrect option: " << model << '\n');
       /* clang-format off */
@@ -2200,6 +2198,7 @@ int cmCTest::Run(std::vector<std::string> const& args)
       /* clang-format on */
       return false;
     }
+    processSteps = true;
     return true;
   };
   auto const dashSP =
@@ -2271,8 +2270,8 @@ int cmCTest::Run(std::vector<std::string> const& args)
     this->Impl->MaxTestNameWidth = atoi(width.c_str());
     return true;
   };
-  auto const dashA = [this](std::string const& notes) -> bool {
-    this->Impl->ProduceXML = true;
+  auto const dashA = [this, &processSteps](std::string const& notes) -> bool {
+    processSteps = true;
     this->SetTest("Notes");
     this->SetNotesFiles(notes);
     return true;
@@ -2361,8 +2360,8 @@ int cmCTest::Run(std::vector<std::string> const& args)
     CommandArgument{ "-M", CommandArgument::Values::One, dashM },
     CommandArgument{ "--test-model", CommandArgument::Values::One, dashM },
     CommandArgument{ "--extra-submit", CommandArgument::Values::One,
-                     [this](std::string const& extra) -> bool {
-                       this->Impl->ProduceXML = true;
+                     [this, &processSteps](std::string const& extra) -> bool {
+                       processSteps = true;
                        this->SetTest("Submit");
                        return this->SubmitExtraFiles(extra);
                      } },
@@ -2901,15 +2900,17 @@ int cmCTest::Run(std::vector<std::string> const& args)
     return this->RunCMakeAndTest();
   }
 
+  // -S, -SP, and/or -SP was specified
   if (!runScripts.empty()) {
     return this->RunScripts(runScripts);
   }
 
-  if (executeTests) {
-    return this->ExecuteTests();
+  // -D, -T, and/or -M was specified
+  if (processSteps) {
+    return this->ProcessSteps();
   }
 
-  return 1;
+  return this->ExecuteTests();
 }
 
 int cmCTest::RunScripts(
@@ -2941,16 +2942,8 @@ int cmCTest::RunScripts(
 
 int cmCTest::ExecuteTests()
 {
-  int res;
-
-  // What is this?  -V seems to be the same as -VV,
-  // and Verbose is always on in this case
   this->Impl->ExtraVerbose = this->Impl->Verbose;
   this->Impl->Verbose = true;
-  for (auto& handler : this->Impl->GetTestingHandlers()) {
-    handler->SetVerbose(this->Impl->Verbose);
-    handler->SetSubmitIndex(this->Impl->SubmitIndex);
-  }
 
   const std::string currDir = cmSystemTools::GetCurrentWorkingDirectory();
   std::string workDir = currDir;
@@ -2965,18 +2958,27 @@ int cmCTest::ExecuteTests()
   }
 
   if (!this->Initialize(workDir, nullptr)) {
-    res = 12;
     cmCTestLog(this, ERROR_MESSAGE,
                "Problem initializing the dashboard." << std::endl);
-  } else {
-    res = this->ProcessSteps();
+    return 12;
   }
 
-  if (res != 0) {
-    cmCTestLog(this, DEBUG,
-               "Running a test(s) failed returning : " << res << std::endl);
+  this->GetTestHandler()->SetVerbose(this->Impl->Verbose);
+  if (this->GetTestHandler()->ProcessHandler() < 0) {
+    cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest\n");
+    if (!this->Impl->OutputTestOutputOnTestFailure) {
+      const std::string lastTestLog =
+        this->GetBinaryDir() + "/Testing/Temporary/LastTest.log";
+      cmCTestLog(this, ERROR_MESSAGE,
+                 "Output from these tests are in: " << lastTestLog << '\n');
+      cmCTestLog(this, ERROR_MESSAGE,
+                 "Use \"--rerun-failed --output-on-failure\" to re-run the "
+                 "failed cases verbosely.\n");
+    }
+    return cmCTest::TEST_ERRORS;
   }
-  return res;
+
+  return 0;
 }
 
 int cmCTest::RunCMakeAndTest()
