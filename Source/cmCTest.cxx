@@ -3004,9 +3004,7 @@ int cmCTest::ExecuteTests()
 
 int cmCTest::RunCMakeAndTest()
 {
-  int retv = this->Impl->BuildAndTest.Run();
-  std::cout << this->Impl->BuildAndTest.GetOutput();
-  return retv;
+  return this->Impl->BuildAndTest.Run();
 }
 
 void cmCTest::SetNotesFiles(const std::string& notes)

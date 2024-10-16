@@ -4,7 +4,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <sstream>
 #include <string>
 #include <vector>
 
@@ -25,22 +24,14 @@ public:
    */
   int Run();
 
-  /*
-   * Get the output variable
-   */
-  const char* GetOutput();
-
   cmCTestBuildAndTest(cmCTest* ctest);
 
 private:
   cmCTest* CTest;
 
-  int RunCMake(std::ostringstream& out, std::string& cmakeOutString,
-               cmake* cm);
+  int RunCMake(cmake* cm);
   bool RunTest(std::vector<std::string> const& args, std::string* output,
                int* retVal, cmDuration timeout);
-
-  std::string Output;
 
   std::string BuildGenerator;
   std::string BuildGeneratorPlatform;
