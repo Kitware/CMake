@@ -342,6 +342,9 @@ void cmUVProcessChain::InternalData::SpawnProcess(
   !defined(CMAKE_USE_SYSTEM_LIBUV)
   options.flags |= UV_PROCESS_WINDOWS_FILE_PATH_EXACT_NAME;
 #endif
+#if UV_VERSION_MAJOR > 1 || !defined(CMAKE_USE_SYSTEM_LIBUV)
+  options.flags |= UV_PROCESS_WINDOWS_USE_PARENT_ERROR_MODE;
+#endif
   if (!this->Builder->WorkingDirectory.empty()) {
     options.cwd = this->Builder->WorkingDirectory.c_str();
   }
