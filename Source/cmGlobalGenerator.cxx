@@ -2212,9 +2212,9 @@ int cmGlobalGenerator::TryCompile(int jobs, const std::string& srcdir,
   cmBuildOptions defaultBuildOptions(false, fast, PackageResolveMode::Disable);
 
   std::stringstream ostr;
-  auto ret =
-    this->Build(jobs, srcdir, bindir, projectName, newTarget, ostr, "", config,
-                defaultBuildOptions, true, this->TryCompileTimeout);
+  auto ret = this->Build(jobs, srcdir, bindir, projectName, newTarget, ostr,
+                         "", config, defaultBuildOptions, true,
+                         this->TryCompileTimeout, cmSystemTools::OUTPUT_NONE);
   output = ostr.str();
   return ret;
 }

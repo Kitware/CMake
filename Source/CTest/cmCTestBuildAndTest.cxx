@@ -293,7 +293,7 @@ int cmCTestBuildAndTest::Run()
     int retVal = cm.GetGlobalGenerator()->Build(
       cmake::NO_BUILD_PARALLEL_LEVEL, this->SourceDir, this->BinaryDir,
       this->BuildProject, { tar }, out, this->BuildMakeProgram, config,
-      buildOptions, false, remainingTime);
+      buildOptions, false, remainingTime, cmSystemTools::OUTPUT_NONE);
     // if the build failed then return
     if (retVal) {
       this->Output = out.str();

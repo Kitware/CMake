@@ -248,15 +248,14 @@ public:
    * empty then all is assumed. clean indicates if a "make clean" should be
    * done first.
    */
-  int Build(
-    int jobs, const std::string& srcdir, const std::string& bindir,
-    const std::string& projectName,
-    std::vector<std::string> const& targetNames, std::ostream& ostr,
-    const std::string& makeProgram, const std::string& config,
-    const cmBuildOptions& buildOptions, bool verbose, cmDuration timeout,
-    cmSystemTools::OutputOption outputflag = cmSystemTools::OUTPUT_NONE,
-    std::vector<std::string> const& nativeOptions =
-      std::vector<std::string>());
+  int Build(int jobs, const std::string& srcdir, const std::string& bindir,
+            const std::string& projectName,
+            std::vector<std::string> const& targetNames, std::ostream& ostr,
+            const std::string& makeProgram, const std::string& config,
+            const cmBuildOptions& buildOptions, bool verbose,
+            cmDuration timeout, cmSystemTools::OutputOption outputflag,
+            std::vector<std::string> const& nativeOptions =
+              std::vector<std::string>());
 
   /**
    * Open a generated IDE project given the following information.
