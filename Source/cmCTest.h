@@ -73,24 +73,9 @@ public:
    * Initialize and finalize testing
    */
   bool InitializeFromCommand(cmCTestStartCommand* command);
-  void Finalize();
 
   /**
    * Process the dashboard client steps.
-   *
-   * Steps are enabled using SetTest()
-   *
-   * The execution of the steps (or #Part) should look like this:
-   *
-   * /code
-   * ctest foo;
-   * foo.Initialize();
-   * // Set some things on foo
-   * foo.ProcessSteps();
-   * foo.Finalize();
-   * /endcode
-   *
-   * \sa Initialize(), Finalize(), Part, PartInfo, SetTest()
    */
   int ProcessSteps();
 

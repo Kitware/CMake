@@ -822,10 +822,6 @@ bool cmCTest::SetTest(const std::string& ttype, bool report)
   return false;
 }
 
-void cmCTest::Finalize()
-{
-}
-
 bool cmCTest::OpenOutputFile(const std::string& path, const std::string& name,
                              cmGeneratedFileStream& stream, bool compress)
 {
@@ -2997,7 +2993,6 @@ int cmCTest::ExecuteTests()
   } else {
     res = this->ProcessSteps();
   }
-  this->Finalize();
 
   if (currDir != workDir) {
     cmSystemTools::ChangeDirectory(currDir);
