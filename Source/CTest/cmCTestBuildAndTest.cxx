@@ -29,15 +29,6 @@ const char* cmCTestBuildAndTest::GetOutput()
   return this->Output.c_str();
 }
 
-int cmCTestBuildAndTest::Run()
-{
-  this->Output.clear();
-  cmSystemTools::ResetErrorOccurredFlag();
-  int retv = this->RunCMakeAndTest();
-  cmSystemTools::ResetErrorOccurredFlag();
-  return retv;
-}
-
 int cmCTestBuildAndTest::RunCMake(std::ostringstream& out,
                                   std::string& cmakeOutString, cmake* cm)
 {
@@ -131,7 +122,7 @@ public:
     const cmCTestBuildAndTestCaptureRAII&) = delete;
 };
 
-int cmCTestBuildAndTest::RunCMakeAndTest()
+int cmCTestBuildAndTest::Run()
 {
   // if the generator and make program are not specified then it is an error
   if (this->BuildGenerator.empty()) {

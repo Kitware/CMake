@@ -54,7 +54,6 @@
 #include "cmCTestUpdateHandler.h"
 #include "cmCTestUploadHandler.h"
 #include "cmCommandLineArgument.h"
-#include "cmDynamicLoader.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
@@ -121,8 +120,6 @@ struct cmCTest::Private
   bool Failover = false;
 
   bool FlushTestProgressLine = false;
-
-  bool ForceNewCTestProcess = false;
 
   bool RunConfigurationScript = false;
 
@@ -205,10 +202,6 @@ struct cmCTest::Private
 
   bool CompressXMLFiles = false;
   bool CompressTestOutput = true;
-
-  // By default we write output to the process output streams.
-  std::ostream* StreamOut = &std::cout;
-  std::ostream* StreamErr = &std::cerr;
 
   bool SuppressUpdatingCTestConfiguration = false;
 
@@ -1234,43 +1227,8 @@ bool cmCTest::RunMakeCommand(const std::string& command, std::string& output,
 }
 
 bool cmCTest::RunTest(std::vector<std::string> const& argv,
-                      std::string* output, int* retVal, cmDuration testTimeOut)
+                      std::string* output, int* retVal, cmDuration timeout)
 {
-  cmDuration timeout = cmCTest::MaxDuration();
-  if (testTimeOut > cmDuration::zero()) {
-    timeout = testTimeOut;
-  }
-
-  if (cmSystemTools::SameFile(argv[0], cmSystemTools::GetCTestCommand()) &&
-      !this->Impl->ForceNewCTestProcess) {
-    cmCTest inst;
-    inst.Impl->ConfigType = this->Impl->ConfigType;
-    inst.Impl->TimeOut = timeout;
-
-    // Capture output of the child ctest.
-    std::ostringstream oss;
-    inst.SetStreams(&oss, &oss);
-
-    std::vector<std::string> args;
-    for (auto const& i : argv) {
-      // make sure we pass the timeout in for any build and test
-      // invocations. Since --build-generator is required this is a
-      // good place to check for it, and to add the arguments in
-      if (i == "--build-generator" && timeout != cmCTest::MaxDuration() &&
-          timeout > cmDuration::zero()) {
-        args.emplace_back("--test-timeout");
-        args.push_back(std::to_string(cmDurationTo<unsigned int>(timeout)));
-      }
-      args.emplace_back(i);
-    }
-
-    *retVal = inst.Run(args, output);
-    if (output) {
-      *output += oss.str();
-    }
-
-    return true;
-  }
   std::vector<char> tempOutput;
   if (output) {
     output->clear();
@@ -2224,7 +2182,7 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
 }
 
 // the main entry point of ctest, called from main
-int cmCTest::Run(std::vector<std::string>& args, std::string* output)
+int cmCTest::Run(std::vector<std::string> const& args)
 {
   const char* ctestExec = "ctest";
   bool cmakeAndTest = false;
@@ -2829,8 +2787,8 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
                      } },
     CommandArgument{ "--force-new-ctest-process",
                      CommandArgument::Values::Zero,
-                     [this](std::string const&) -> bool {
-                       this->Impl->ForceNewCTestProcess = true;
+                     [](std::string const&) -> bool {
+                       // Silently ignore now-removed option.
                        return true;
                      } },
     CommandArgument{ "-W", CommandArgument::Values::One, dashW },
@@ -3035,7 +2993,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
   // now what should cmake do? if --build-and-test was specified then
   // we run the build and test handler and return
   if (cmakeAndTest) {
-    return this->RunCMakeAndTest(output);
+    return this->RunCMakeAndTest();
   }
 
   if (executeTests) {
@@ -3106,18 +3064,10 @@ int cmCTest::ExecuteTests()
   return res;
 }
 
-int cmCTest::RunCMakeAndTest(std::string* output)
+int cmCTest::RunCMakeAndTest()
 {
-  this->Impl->Verbose = true;
   int retv = this->Impl->BuildAndTest.Run();
-  *output = this->Impl->BuildAndTest.GetOutput();
-#ifndef CMAKE_BOOTSTRAP
-  cmDynamicLoader::FlushCache();
-#endif
-  if (retv != 0) {
-    cmCTestLog(this, DEBUG,
-               "build and test failing returning: " << retv << std::endl);
-  }
+  std::cout << this->Impl->BuildAndTest.GetOutput();
   return retv;
 }
 
@@ -3504,12 +3454,6 @@ bool cmCTest::GetExtraVerbose() const
   return this->Impl->ExtraVerbose;
 }
 
-void cmCTest::SetStreams(std::ostream* out, std::ostream* err)
-{
-  this->Impl->StreamOut = out;
-  this->Impl->StreamErr = err;
-}
-
 bool cmCTest::GetLabelSummary() const
 {
   return this->Impl->LabelSummary;
@@ -3871,15 +3815,12 @@ void cmCTest::Log(LogType logType, std::string msg, bool suppress)
     }
   }
   if (!this->Impl->Quiet) {
-    std::ostream& out = *this->Impl->StreamOut;
-    std::ostream& err = *this->Impl->StreamErr;
-
     if (logType == HANDLER_TEST_PROGRESS_OUTPUT) {
       if (this->Impl->TestProgressOutput) {
         if (this->Impl->FlushTestProgressLine) {
           printf("\r");
           this->Impl->FlushTestProgressLine = false;
-          out.flush();
+          std::cout.flush();
         }
 
         if (msg.find('\n') != std::string::npos) {
@@ -3887,11 +3828,11 @@ void cmCTest::Log(LogType logType, std::string msg, bool suppress)
           msg.erase(std::remove(msg.begin(), msg.end(), '\n'), msg.end());
         }
 
-        out << msg;
+        std::cout << msg;
 #ifndef _WIN32
         printf("\x1B[K"); // move caret to end
 #endif
-        out.flush();
+        std::cout.flush();
         return;
       }
       logType = HANDLER_OUTPUT;
@@ -3900,29 +3841,29 @@ void cmCTest::Log(LogType logType, std::string msg, bool suppress)
     switch (logType) {
       case DEBUG:
         if (this->Impl->Debug) {
-          out << msg << std::flush;
+          std::cout << msg << std::flush;
         }
         break;
       case OUTPUT:
       case HANDLER_OUTPUT:
         if (this->Impl->Debug || this->Impl->Verbose) {
-          out << msg << std::flush;
+          std::cout << msg << std::flush;
         }
         break;
       case HANDLER_VERBOSE_OUTPUT:
         if (this->Impl->Debug || this->Impl->ExtraVerbose) {
-          out << msg << std::flush;
+          std::cout << msg << std::flush;
         }
         break;
       case WARNING:
-        err << msg << std::flush;
+        std::cerr << msg << std::flush;
         break;
       case ERROR_MESSAGE:
-        err << msg << std::flush;
+        std::cerr << msg << std::flush;
         cmSystemTools::SetErrorOccurred();
         break;
       default:
-        out << msg << std::flush;
+        std::cout << msg << std::flush;
     }
   }
 }

@@ -66,7 +66,7 @@ public:
   Part GetPartFromName(const std::string& name);
 
   /** Process Command line arguments */
-  int Run(std::vector<std::string>&, std::string* output = nullptr);
+  int Run(std::vector<std::string> const& args);
 
   /**
    * Initialize and finalize testing
@@ -301,7 +301,7 @@ public:
    * In --build-and-test, run the --test-command.
    */
   bool RunTest(std::vector<std::string> const& args, std::string* output,
-               int* retVal, cmDuration testTimeOut);
+               int* retVal, cmDuration timeout);
 
   /**
    * Get the handler object
@@ -421,9 +421,6 @@ public:
   bool GetVerbose() const;
   bool GetExtraVerbose() const;
 
-  /** Direct process output to given streams.  */
-  void SetStreams(std::ostream* out, std::ostream* err);
-
   void AddSiteProperties(cmXMLWriter& xml);
 
   bool GetLabelSummary() const;
@@ -512,7 +509,7 @@ private:
   static bool CheckArgument(const std::string& arg, cm::string_view varg1,
                             const char* varg2 = nullptr);
 
-  int RunCMakeAndTest(std::string* output);
+  int RunCMakeAndTest();
   int ExecuteTests();
 
   /** return true iff change directory was successful */

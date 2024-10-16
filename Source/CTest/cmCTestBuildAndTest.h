@@ -35,8 +35,6 @@ public:
 private:
   cmCTest* CTest;
 
-  //! Run CMake and build a test and then run it as a single test.
-  int RunCMakeAndTest();
   int RunCMake(std::ostringstream& out, std::string& cmakeOutString,
                cmake* cm);
 

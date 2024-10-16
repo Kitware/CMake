@@ -2978,7 +2978,6 @@ void cmGlobalGenerator::AddGlobalTarget_Test(
   }
   cmCustomCommandLine singleLine;
   singleLine.push_back(cmSystemTools::GetCTestCommand());
-  singleLine.push_back("--force-new-ctest-process");
   cmList args(mf->GetDefinition("CMAKE_CTEST_ARGUMENTS"));
   for (auto const& arg : args) {
     singleLine.push_back(arg);

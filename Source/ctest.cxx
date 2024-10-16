@@ -147,8 +147,6 @@ const cmDocumentationEntry cmDocumentationOptions[] = {
   { "--overwrite", "Overwrite CTest configuration option." },
   { "--extra-submit <file>[;<file>]", "Submit extra files to the dashboard." },
   { "--http-header <header>", "Append HTTP header when submitting" },
-  { "--force-new-ctest-process",
-    "Run child CTest instances as new processes" },
   { "--schedule-random", "Use a random order for scheduling tests" },
   { "--submit-index",
     "Submit individual dashboard tests with specific index" },
@@ -228,9 +226,5 @@ int main(int argc, char const* const* argv)
     args.emplace_back(argv[i]);
   }
   // run ctest
-  std::string output;
-  int res = inst.Run(args, &output);
-  cmCTestLog(&inst, OUTPUT, output);
-
-  return res;
+  return inst.Run(args);
 }

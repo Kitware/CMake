@@ -11,7 +11,6 @@ if(GTK2_GTK_FOUND)
     --build-target gtk-all-libs
     --build-project gtk
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Components/gtk"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -25,7 +24,6 @@ if(GTK2_GTKMM_FOUND)
     --build-target gtkmm-all-libs
     --build-project gtkmm
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Components/gtkmm"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -40,7 +38,6 @@ if(TARGET GTK2::glib)
     ${build_generator_args}
     --build-project glib
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/glib"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -53,7 +50,6 @@ if(TARGET GTK2::gobject)
     ${build_generator_args}
     --build-project gobject
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/gobject"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -66,7 +62,6 @@ if(TARGET GTK2::gio)
     ${build_generator_args}
     --build-project gio
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/gio"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -79,7 +74,6 @@ if(TARGET GTK2::gmodule)
     ${build_generator_args}
     --build-project gmodule
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/gmodule"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -92,7 +86,6 @@ if(TARGET GTK2::gthread)
     ${build_generator_args}
     --build-project gthread
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/gthread"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -105,7 +98,6 @@ if(TARGET GTK2::atk)
     ${build_generator_args}
     --build-project atk
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/atk"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -118,7 +110,6 @@ if(TARGET GTK2::gdk_pixbuf)
     ${build_generator_args}
     --build-project gdk_pixbuf
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/gdk_pixbuf"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -131,7 +122,6 @@ if(TARGET GTK2::cairo)
     ${build_generator_args}
     --build-project cairo
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/cairo"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -144,7 +134,6 @@ if(TARGET GTK2::pango)
     ${build_generator_args}
     --build-project pango
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/pango"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -157,7 +146,6 @@ if(TARGET GTK2::pangocairo)
     ${build_generator_args}
     --build-project pangocairo
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/pangocairo"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -170,7 +158,6 @@ if(TARGET GTK2::pangoxft)
     ${build_generator_args}
     --build-project pangoxft
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/pangoxft"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -183,7 +170,6 @@ if(TARGET GTK2::pangoft2)
     ${build_generator_args}
     --build-project pangoft2
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/pangoft2"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -196,7 +182,6 @@ if(TARGET GTK2::gdk)
     ${build_generator_args}
     --build-project gdk
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/gdk"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -209,7 +194,6 @@ if(TARGET GTK2::gtk)
     ${build_generator_args}
     --build-project gtk
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/gtk"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -222,7 +206,6 @@ if(TARGET GTK2::sigc++)
      ${build_generator_args}
     --build-project sigc++
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/sigc++"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -235,7 +218,6 @@ if(TARGET GTK2::glibmm)
      ${build_generator_args}
     --build-project glibmm
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/glibmm"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -248,7 +230,6 @@ if(TARGET GTK2::giomm)
      ${build_generator_args}
     --build-project giomm
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/giomm"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -261,7 +242,6 @@ if(TARGET GTK2::atkmm)
      ${build_generator_args}
     --build-project atkmm
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/atkmm"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -274,7 +254,6 @@ if(TARGET GTK2::cairomm)
      ${build_generator_args}
     --build-project cairomm
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/cairomm"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -287,7 +266,6 @@ if(TARGET GTK2::pangomm)
      ${build_generator_args}
     --build-project pangomm
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/pangomm"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -300,7 +278,6 @@ if(TARGET GTK2::gdkmm)
      ${build_generator_args}
     --build-project gdkmm
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/GTK2Targets/gdkmm"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()
@@ -314,7 +291,6 @@ if(TARGET GTK2::gtkmm)
     --build-target gtkmm-target
     --build-project gtkmm
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/FindGTK2/GTK2Targets/gtkmm"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
 endif()

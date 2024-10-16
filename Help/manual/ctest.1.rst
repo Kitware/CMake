@@ -421,11 +421,8 @@ Run Tests
 
 .. option:: --force-new-ctest-process
 
- Run child CTest instances as new processes.
-
- By default CTest will run child CTest instances within the same
- process.  If this behavior is not desired, this argument will
- enforce new processes for child CTest processes.
+ Ignored.  This option once disabled a now-removed optimization
+ for tests running ``ctest`` itself.
 
 .. option:: --schedule-random
 
