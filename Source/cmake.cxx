@@ -7,7 +7,6 @@
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <initializer_list>
 #include <iomanip>
 #include <iostream>
@@ -3548,8 +3547,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
       // file to it, so we wouldn't expect to get here unless the default
       // permissions are questionable or some other process has deleted the
       // directory
-      std::cerr << "Failed to change to directory " << destPath << " : "
-                << std::strerror(workdir.GetLastResult()) << '\n';
+      std::cerr << workdir.GetError() << '\n';
       return 1;
     }
     std::vector<std::string> args2;

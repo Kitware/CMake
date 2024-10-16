@@ -73,6 +73,7 @@
 #include "cmValue.h"
 #include "cmVersion.h"
 #include "cmVersionConfig.h"
+#include "cmWorkingDirectory.h"
 #include "cmXMLWriter.h"
 #include "cmake.h"
 
@@ -1480,31 +1481,14 @@ int cmCTest::GenerateDoneFile()
   return 0;
 }
 
-bool cmCTest::TryToChangeDirectory(std::string const& dir)
-{
-  cmCTestLog(this, OUTPUT,
-             "Internal ctest changing into directory: " << dir << std::endl);
-  cmsys::Status status = cmSystemTools::ChangeDirectory(dir);
-  if (!status) {
-    auto msg = "Failed to change working directory to \"" + dir +
-      "\" : " + status.GetString() + "\n";
-    cmCTestLog(this, ERROR_MESSAGE, msg);
-    return false;
-  }
-  return true;
-}
-
 std::string cmCTest::Base64GzipEncodeFile(std::string const& file)
 {
-  const std::string currDir = cmSystemTools::GetCurrentWorkingDirectory();
-  std::string parentDir = cmSystemTools::GetParentDirectory(file);
-
   // Temporarily change to the file's directory so the tar gets created
   // with a flat directory structure.
-  if (currDir != parentDir) {
-    if (!this->TryToChangeDirectory(parentDir)) {
-      return "";
-    }
+  cmWorkingDirectory workdir(cmSystemTools::GetParentDirectory(file));
+  if (workdir.Failed()) {
+    cmCTestLog(this, ERROR_MESSAGE, workdir.GetError() << std::endl);
+    return "";
   }
 
   std::string tarFile = file + "_temp.tar.gz";
@@ -1521,12 +1505,6 @@ std::string cmCTest::Base64GzipEncodeFile(std::string const& file)
   }
   std::string base64 = this->Base64EncodeFile(tarFile);
   cmSystemTools::RemoveFile(tarFile);
-
-  // Change back to the directory we started in.
-  if (currDir != parentDir) {
-    cmSystemTools::ChangeDirectory(currDir);
-  }
-
   return base64;
 }
 
@@ -2980,10 +2958,10 @@ int cmCTest::ExecuteTests()
     workDir = cmSystemTools::CollapseFullPath(this->Impl->TestDir);
   }
 
-  if (currDir != workDir) {
-    if (!this->TryToChangeDirectory(workDir)) {
-      return 1;
-    }
+  cmWorkingDirectory changeDir(workDir);
+  if (changeDir.Failed()) {
+    cmCTestLog(this, ERROR_MESSAGE, changeDir.GetError() << std::endl);
+    return 1;
   }
 
   if (!this->Initialize(workDir, nullptr)) {
@@ -2992,10 +2970,6 @@ int cmCTest::ExecuteTests()
                "Problem initializing the dashboard." << std::endl);
   } else {
     res = this->ProcessSteps();
-  }
-
-  if (currDir != workDir) {
-    cmSystemTools::ChangeDirectory(currDir);
   }
 
   if (res != 0) {

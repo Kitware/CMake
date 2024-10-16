@@ -8,7 +8,6 @@
 #include <cstddef> // IWYU pragma: keep
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <ctime>
 #include <functional>
 #include <iomanip>
@@ -97,8 +96,7 @@ bool ReadSubdirectory(std::string fname, cmExecutionStatus& status)
   {
     cmWorkingDirectory workdir(fname);
     if (workdir.Failed()) {
-      status.SetError("Failed to change directory to " + fname + " : " +
-                      std::strerror(workdir.GetLastResult()));
+      status.SetError(workdir.GetError());
       return false;
     }
     const char* testFilename;

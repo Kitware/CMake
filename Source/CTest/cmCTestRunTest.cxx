@@ -7,7 +7,6 @@
 #include <cstddef> // IWYU pragma: keep
 #include <cstdint>
 #include <cstdio>
-#include <cstring>
 #include <iomanip>
 #include <ratio>
 #include <sstream>
@@ -398,10 +397,7 @@ bool cmCTestRunTest::StartAgain(std::unique_ptr<cmCTestRunTest> runner,
   // change to tests directory
   cmWorkingDirectory workdir(testRun->TestProperties->Directory);
   if (workdir.Failed()) {
-    testRun->StartFailure(testRun->TotalNumberOfTests,
-                          "Failed to change working directory to " +
-                            testRun->TestProperties->Directory + " : " +
-                            std::strerror(workdir.GetLastResult()),
+    testRun->StartFailure(testRun->TotalNumberOfTests, workdir.GetError(),
                           "Failed to change working directory");
     return true;
   }

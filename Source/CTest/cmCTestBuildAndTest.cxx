@@ -4,7 +4,6 @@
 
 #include <chrono>
 #include <cstdint>
-#include <cstring>
 #include <iostream>
 #include <ratio>
 #include <utility>
@@ -210,8 +209,7 @@ int cmCTestBuildAndTest::Run()
   }
   cmWorkingDirectory workdir(this->BinaryDir);
   if (workdir.Failed()) {
-    std::cout << "Failed to change working directory to " << this->BinaryDir
-              << " : " << std::strerror(workdir.GetLastResult()) << '\n';
+    std::cout << workdir.GetError() << '\n';
     return 1;
   }
 
@@ -311,8 +309,7 @@ int cmCTestBuildAndTest::Run()
   if (!this->BuildRunDir.empty()) {
     std::cout << "Run test in directory: " << this->BuildRunDir << "\n";
     if (!workdir.SetDirectory(this->BuildRunDir)) {
-      std::cout << "Failed to change working directory : "
-                << std::strerror(workdir.GetLastResult()) << "\n";
+      std::cout << workdir.GetError() << '\n';
       return 1;
     }
   }

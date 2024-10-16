@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCPackArchiveGenerator.h"
 
-#include <cstring>
 #include <map>
 #include <ostream>
 #include <unordered_map>
@@ -238,10 +237,7 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(
   // Change to local toplevel
   cmWorkingDirectory workdir(localToplevel);
   if (workdir.Failed()) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Failed to change working directory to "
-                    << localToplevel << " : "
-                    << std::strerror(workdir.GetLastResult()) << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR, workdir.GetError() << std::endl);
     return 0;
   }
   std::string filePrefix;
@@ -448,10 +444,7 @@ int cmCPackArchiveGenerator::PackageFiles()
   DECLARE_AND_OPEN_ARCHIVE(packageFileNames[0], archive);
   cmWorkingDirectory workdir(this->toplevel);
   if (workdir.Failed()) {
-    cmCPackLogger(cmCPackLog::LOG_ERROR,
-                  "Failed to change working directory to "
-                    << this->toplevel << " : "
-                    << std::strerror(workdir.GetLastResult()) << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_ERROR, workdir.GetError() << std::endl);
     return 0;
   }
   for (std::string const& file : this->files) {

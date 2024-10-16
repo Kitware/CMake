@@ -493,9 +493,6 @@ private:
   int RunScripts(std::vector<std::pair<std::string, bool>> const& scripts);
   int ExecuteTests();
 
-  /** return true iff change directory was successful */
-  bool TryToChangeDirectory(std::string const& dir);
-
   struct Private;
   std::unique_ptr<Private> Impl;
 };

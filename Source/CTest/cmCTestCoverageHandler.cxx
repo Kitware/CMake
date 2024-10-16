@@ -6,7 +6,6 @@
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <iomanip>
 #include <iterator>
 #include <memory>
@@ -1325,10 +1324,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
     std::string fileDir = cmSystemTools::GetFilenamePath(f);
     cmWorkingDirectory workdir(fileDir);
     if (workdir.Failed()) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Unable to change working directory to "
-                   << fileDir << " : "
-                   << std::strerror(workdir.GetLastResult()) << std::endl);
+      cmCTestLog(this->CTest, ERROR_MESSAGE, workdir.GetError() << std::endl);
       cont->Error++;
       continue;
     }
@@ -1550,9 +1546,7 @@ bool cmCTestCoverageHandler::FindLCovFiles(std::vector<std::string>& files)
   std::string buildDir = this->CTest->GetCTestConfiguration("BuildDirectory");
   cmWorkingDirectory workdir(buildDir);
   if (workdir.Failed()) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Unable to change working directory to " << buildDir
-                                                        << std::endl);
+    cmCTestLog(this->CTest, ERROR_MESSAGE, workdir.GetError() << std::endl);
     return false;
   }
 

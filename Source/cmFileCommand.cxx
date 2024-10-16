@@ -3852,8 +3852,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
 
     cmWorkingDirectory workdir(destDir);
     if (workdir.Failed()) {
-      status.SetError(
-        cmStrCat("failed to change working directory to: ", destDir));
+      status.SetError(workdir.GetError());
       cmSystemTools::SetFatalErrorOccurred();
       return false;
     }
