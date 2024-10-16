@@ -9,8 +9,6 @@
 #include <ratio>
 #include <utility>
 
-#include <cmext/algorithm>
-
 #include <cm3p/uv.h>
 
 #include "cmBuildOptions.h"
@@ -86,14 +84,8 @@ int cmCTestBuildAndTest::RunCMake(cmake* cm)
 }
 
 bool cmCTestBuildAndTest::RunTest(std::vector<std::string> const& argv,
-                                  std::string* output, int* retVal,
-                                  cmDuration timeout)
+                                  int* retVal, cmDuration timeout)
 {
-  std::vector<char> tempOutput;
-  if (output) {
-    output->clear();
-  }
-
   cmUVProcessChainBuilder builder;
   builder.AddCommand(argv).SetMergedBuiltinStreams();
   auto chain = builder.Start();
@@ -104,18 +96,14 @@ bool cmCTestBuildAndTest::RunTest(std::vector<std::string> const& argv,
   uv_pipe_open(outputStream, chain.OutputStream());
   auto outputHandle = cmUVStreamRead(
     outputStream,
-    [&output, &tempOutput](std::vector<char> data) {
-      if (output) {
-        cm::append(tempOutput, data.data(), data.data() + data.size());
-      }
+    [&processOutput](std::vector<char> data) {
+      std::string decoded;
+      processOutput.DecodeText(data.data(), data.size(), decoded);
+      std::cout << decoded << std::flush;
     },
     []() {});
 
   bool complete = chain.Wait(static_cast<uint64_t>(timeout.count() * 1000.0));
-  processOutput.DecodeText(tempOutput, tempOutput);
-  if (output && tempOutput.begin() != tempOutput.end()) {
-    output->append(tempOutput.data(), tempOutput.size());
-  }
 
   bool result = false;
 
@@ -128,19 +116,11 @@ bool cmCTestBuildAndTest::RunTest(std::vector<std::string> const& argv,
         result = true;
         break;
       case cmUVProcessChain::ExceptionCode::Spawn: {
-        if (output) {
-          std::string outerr =
-            cmStrCat("\n*** ERROR executing: ", exception.second);
-          *output += outerr;
-        }
+        std::cout << "\n*** ERROR executing: " << exception.second;
       } break;
       default: {
         *retVal = status.TermSignal;
-        if (output) {
-          std::string outerr =
-            cmStrCat("\n*** Exception executing: ", exception.second);
-          *output += outerr;
-        }
+        std::cout << "\n*** Exception executing: " << exception.second;
       } break;
     }
   }
@@ -353,14 +333,12 @@ int cmCTestBuildAndTest::Run()
     }
   }
 
-  std::string outs;
-  bool runTestRes = this->RunTest(testCommand, &outs, &retval, remainingTime);
+  bool runTestRes = this->RunTest(testCommand, &retval, remainingTime);
 
   if (!runTestRes || retval != 0) {
-    std::cout << "Test command failed: " << testCommand[0] << "\n";
+    std::cout << "\nTest command failed: " << testCommand[0] << "\n";
     retval = 1;
   }
 
-  std::cout << outs << "\n";
   return retval;
 }

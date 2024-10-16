@@ -30,8 +30,8 @@ private:
   cmCTest* CTest;
 
   int RunCMake(cmake* cm);
-  bool RunTest(std::vector<std::string> const& args, std::string* output,
-               int* retVal, cmDuration timeout);
+  bool RunTest(std::vector<std::string> const& args, int* retVal,
+               cmDuration timeout);
 
   std::string BuildGenerator;
   std::string BuildGeneratorPlatform;
