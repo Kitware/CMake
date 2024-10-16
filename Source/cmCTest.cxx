@@ -2311,10 +2311,10 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
       success = this->SetArgsFromPreset("", listPresets);
     } else {
       if (cmHasLiteralPrefix(*it, "--preset=")) {
-        auto presetName = it->substr(9);
+        auto const& presetName = it->substr(9);
         success = this->SetArgsFromPreset(presetName, listPresets);
       } else if (++it != args.end()) {
-        auto presetName = *it;
+        auto const& presetName = *it;
         success = this->SetArgsFromPreset(presetName, listPresets);
       } else {
         cmSystemTools::Error("'--preset' requires an argument");
