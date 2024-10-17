@@ -106,7 +106,7 @@ std::string cmFindPathCommand::FindHeaderInFramework(
   globIt.FindFiles(glob);
   std::vector<std::string> files = globIt.GetFiles();
   if (!files.empty()) {
-    std::string fheader = cmSystemTools::CollapseFullPath(files[0]);
+    std::string fheader = cmSystemTools::ToNormalizedPathOnDisk(files[0]);
     debug.FoundAt(fheader);
     if (this->IncludeFileInPath) {
       return fheader;

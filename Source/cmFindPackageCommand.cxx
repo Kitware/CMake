@@ -2118,9 +2118,9 @@ void cmFindPackageCommand::FillPrefixesSystemEnvironment()
   // Use the system search path to generate prefixes.
   // Relative paths are interpreted with respect to the current
   // working directory.
-  std::vector<std::string> tmp;
-  cmSystemTools::GetPath(tmp);
-  for (std::string const& i : tmp) {
+  std::vector<std::string> envPATH =
+    cmSystemTools::GetEnvPathNormalized("PATH");
+  for (std::string const& i : envPATH) {
     // If the path is a PREFIX/bin case then add its parent instead.
     if ((cmHasLiteralSuffix(i, "/bin")) || (cmHasLiteralSuffix(i, "/sbin"))) {
       paths.AddPath(cmSystemTools::GetFilenamePath(i));

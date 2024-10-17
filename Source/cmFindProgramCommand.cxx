@@ -89,6 +89,8 @@ struct cmFindProgramHelper
                          std::string testPath =
                            cmSystemTools::CollapseFullPath(testNameExt, path);
                          if (this->FileIsExecutable(testPath)) {
+                           testPath =
+                             cmSystemTools::ToNormalizedPathOnDisk(testPath);
                            if (this->FindBase->Validate(testPath)) {
                              this->BestPath = testPath;
                              this->DebugSearches.FoundAt(testPath);
