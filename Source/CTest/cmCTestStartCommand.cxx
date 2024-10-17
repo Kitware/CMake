@@ -9,6 +9,7 @@
 #include "cmCTestVC.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
@@ -154,7 +155,49 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   this->CTest->SetTestModel(model);
   this->CTest->SetProduceXML(true);
 
-  return this->CTest->InitializeFromCommand(this);
+  std::string fname;
+
+  std::string src_dir_fname = cmStrCat(sourceDir, "/CTestConfig.cmake");
+  cmSystemTools::ConvertToUnixSlashes(src_dir_fname);
+
+  std::string bld_dir_fname = cmStrCat(binaryDir, "/CTestConfig.cmake");
+  cmSystemTools::ConvertToUnixSlashes(bld_dir_fname);
+
+  if (cmSystemTools::FileExists(bld_dir_fname)) {
+    fname = bld_dir_fname;
+  } else if (cmSystemTools::FileExists(src_dir_fname)) {
+    fname = src_dir_fname;
+  }
+
+  if (!fname.empty()) {
+    cmCTestOptionalLog(this->CTest, OUTPUT,
+                       "   Reading ctest configuration file: " << fname
+                                                               << std::endl,
+                       this->Quiet);
+    bool readit = this->Makefile->ReadDependentFile(fname);
+    if (!readit) {
+      std::string m = cmStrCat("Could not find include file: ", fname);
+      this->SetError(m);
+      return false;
+    }
+  }
+
+  this->CTest->SetCTestConfigurationFromCMakeVariable(
+    this->Makefile, "NightlyStartTime", "CTEST_NIGHTLY_START_TIME",
+    this->Quiet);
+  this->CTest->SetCTestConfigurationFromCMakeVariable(
+    this->Makefile, "Site", "CTEST_SITE", this->Quiet);
+  this->CTest->SetCTestConfigurationFromCMakeVariable(
+    this->Makefile, "BuildName", "CTEST_BUILD_NAME", this->Quiet);
+
+  if (!this->CTest->Initialize(bld_dir, this)) {
+    return false;
+  }
+  cmCTestOptionalLog(this->CTest, OUTPUT,
+                     "   Use " << this->CTest->GetTestModelString() << " tag: "
+                               << this->CTest->GetCurrentTag() << std::endl,
+                     this->Quiet);
+  return true;
 }
 
 bool cmCTestStartCommand::InitialCheckout(std::ostream& ofs,

@@ -70,9 +70,12 @@ public:
   int Run(std::vector<std::string> const& args);
 
   /**
-   * Initialize and finalize testing
+   * Initialize a dashboard run in the given build tree.  The "command"
+   * argument is non-NULL when running from a command-driven (ctest_start)
+   * dashboard script, and NULL when running from the CTest command
+   * line.
    */
-  bool InitializeFromCommand(cmCTestStartCommand* command);
+  int Initialize(const std::string& binary_dir, cmCTestStartCommand* command);
 
   /**
    * Process the dashboard client steps.
@@ -444,16 +447,6 @@ private:
   int GenerateNotesFile(const std::string& files);
 
   void BlockTestErrorDiagnostics();
-
-  /**
-   * Initialize a dashboard run in the given build tree.  The "command"
-   * argument is non-NULL when running from a command-driven (ctest_start)
-   * dashboard script, and NULL when running from the CTest command
-   * line.  Note that a declarative dashboard script does not actually
-   * call this method because it sets CTEST_COMMAND to drive a build
-   * through the ctest command line.
-   */
-  int Initialize(const std::string& binary_dir, cmCTestStartCommand* command);
 
   /** parse the option after -D and convert it into the appropriate steps */
   bool AddTestsForDashboardType(std::string const& targ);

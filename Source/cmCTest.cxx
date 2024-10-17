@@ -420,8 +420,12 @@ int cmCTest::Initialize(const std::string& binary_dir,
                         cmCTestStartCommand* command)
 {
   bool quiet = false;
-  if (command && command->ShouldBeQuiet()) {
-    quiet = true;
+  if (command) {
+    this->Impl->BuildID = "";
+    for (Part p = PartStart; p != PartCount; p = static_cast<Part>(p + 1)) {
+      this->Impl->Parts[p].SubmitFiles.clear();
+    }
+    quiet = command->ShouldBeQuiet();
   }
 
   cmCTestOptionalLog(this, DEBUG, "Here: " << __LINE__ << std::endl, quiet);
@@ -642,61 +646,6 @@ int cmCTest::Initialize(const std::string& binary_dir,
   }
 
   return 1;
-}
-
-bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
-{
-  std::string src_dir = this->GetCTestConfiguration("SourceDirectory");
-  std::string bld_dir = this->GetCTestConfiguration("BuildDirectory");
-  this->Impl->BuildID = "";
-  for (Part p = PartStart; p != PartCount; p = static_cast<Part>(p + 1)) {
-    this->Impl->Parts[p].SubmitFiles.clear();
-  }
-
-  cmMakefile* mf = command->GetMakefile();
-  std::string fname;
-
-  std::string src_dir_fname = cmStrCat(src_dir, "/CTestConfig.cmake");
-  cmSystemTools::ConvertToUnixSlashes(src_dir_fname);
-
-  std::string bld_dir_fname = cmStrCat(bld_dir, "/CTestConfig.cmake");
-  cmSystemTools::ConvertToUnixSlashes(bld_dir_fname);
-
-  if (cmSystemTools::FileExists(bld_dir_fname)) {
-    fname = bld_dir_fname;
-  } else if (cmSystemTools::FileExists(src_dir_fname)) {
-    fname = src_dir_fname;
-  }
-
-  if (!fname.empty()) {
-    cmCTestOptionalLog(this, OUTPUT,
-                       "   Reading ctest configuration file: " << fname
-                                                               << std::endl,
-                       command->ShouldBeQuiet());
-    bool readit = mf->ReadDependentFile(fname);
-    if (!readit) {
-      std::string m = cmStrCat("Could not find include file: ", fname);
-      command->SetError(m);
-      return false;
-    }
-  }
-
-  this->SetCTestConfigurationFromCMakeVariable(mf, "NightlyStartTime",
-                                               "CTEST_NIGHTLY_START_TIME",
-                                               command->ShouldBeQuiet());
-  this->SetCTestConfigurationFromCMakeVariable(mf, "Site", "CTEST_SITE",
-                                               command->ShouldBeQuiet());
-  this->SetCTestConfigurationFromCMakeVariable(
-    mf, "BuildName", "CTEST_BUILD_NAME", command->ShouldBeQuiet());
-
-  if (!this->Initialize(bld_dir, command)) {
-    return false;
-  }
-  cmCTestOptionalLog(this, OUTPUT,
-                     "   Use " << this->GetTestModelString() << " tag: "
-                               << this->GetCurrentTag() << std::endl,
-                     command->ShouldBeQuiet());
-  return true;
 }
 
 bool cmCTest::UpdateCTestConfiguration()
