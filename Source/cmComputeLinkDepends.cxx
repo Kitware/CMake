@@ -33,7 +33,6 @@
 #include "cmState.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
-#include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmValue.h"
 #include "cmake.h"
@@ -477,7 +476,6 @@ public:
           this->Target->GetPolicyStatusCMP0179() == cmPolicies::NEW) {
         // keep the first occurrence of the static libraries
         std::set<size_t> emitted{ this->Emitted };
-        std::set<std::string> importedEmitted;
         for (auto index : libEntries) {
           LinkEntry const& entry = this->Entries[index];
           if (!entry.Target ||
@@ -485,20 +483,7 @@ public:
             entries.emplace_back(index);
             continue;
           }
-          if (this->IncludeEntry(entry)) {
-            entries.emplace_back(index);
-            continue;
-          }
-          if (entry.Target->IsImported()) {
-            if (emitted.insert(index).second &&
-                importedEmitted
-                  .insert(cmSystemTools::GetRealPath(entry.Item.Value))
-                  .second) {
-              entries.emplace_back(index);
-            }
-            continue;
-          }
-          if (emitted.insert(index).second) {
+          if (this->IncludeEntry(entry) || emitted.insert(index).second) {
             entries.emplace_back(index);
           }
         }
@@ -604,22 +589,7 @@ private:
   {
     for (auto index : libEntries) {
       LinkEntry const& entry = this->Entries[index];
-      if (this->IncludeEntry(entry)) {
-        this->FinalEntries.emplace_back(entry);
-        continue;
-      }
-      if (entry.Target && entry.Target->IsImported()) {
-        // Different imported targets can point to the same library so check
-        // also library paths
-        if (this->Emitted.insert(index).second &&
-            this->ImportedEmitted
-              .insert(cmSystemTools::GetRealPath(entry.Item.Value))
-              .second) {
-          this->FinalEntries.emplace_back(entry);
-        }
-        continue;
-      }
-      if (this->Emitted.insert(index).second) {
+      if (this->IncludeEntry(entry) || this->Emitted.insert(index).second) {
         this->FinalEntries.emplace_back(entry);
       }
     }
@@ -632,7 +602,6 @@ private:
   EntryVector& Entries;
   EntryVector& FinalEntries;
   std::set<size_t> Emitted;
-  std::set<std::string> ImportedEmitted;
   const std::map<size_t, std::vector<size_t>>* Groups = nullptr;
 };
 }

@@ -34,6 +34,6 @@ run_cmake_and_build(CMP0156-NEW-Imported)
 
 if (CMAKE_C_COMPILER_ID STREQUAL "AppleClang"
     AND CMAKE_C_COMPILER_VERSION GREATER_EQUAL "15.0")
-  # special case for Apple: with CMP0156=OLD, linker will warning on duplicate libraries
+  # special case for Apple: FIXME(#26284): linker will warning on duplicate libraries
   run_cmake_and_build(CMP0156-NEW-AppleClang-Imported)
 endif()
