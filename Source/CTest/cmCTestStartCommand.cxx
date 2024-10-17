@@ -194,7 +194,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
   cmCTestOptionalLog(this->CTest, OUTPUT,
-                     "   Use " << this->CTest->GetTestModelString() << " tag: "
+                     "   Use " << this->CTest->GetTestGroupString() << " tag: "
                                << this->CTest->GetCurrentTag() << std::endl,
                      this->Quiet);
   return true;

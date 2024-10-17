@@ -195,7 +195,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   xml.Element("BuildName", buildname);
   xml.Element("BuildStamp",
               this->CTest->GetCurrentTag() + "-" +
-                this->CTest->GetTestModelString());
+                this->CTest->GetTestGroupString());
   xml.Element("StartDateTime", start_time);
   xml.Element("StartTime", start_time_time);
   xml.Element("UpdateCommand", vc->GetUpdateCommandLine());

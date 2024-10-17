@@ -136,7 +136,8 @@ public:
   void SetTestModel(int mode);
   int GetTestModel() const;
 
-  std::string GetTestModelString();
+  std::string GetTestModelString() const;
+  std::string GetTestGroupString() const;
   static int GetTestModelFromString(const std::string& str);
   static std::string CleanString(const std::string& str,
                                  std::string::size_type spos = 0);

@@ -49,7 +49,7 @@ int cmCTestUploadHandler::ProcessHandler()
   xml.Attribute("BuildName", buildname);
   xml.Attribute("BuildStamp",
                 this->CTest->GetCurrentTag() + "-" +
-                  this->CTest->GetTestModelString());
+                  this->CTest->GetTestGroupString());
   xml.Attribute("Name", this->CTest->GetCTestConfiguration("Site"));
   xml.Attribute("Generator",
                 std::string("ctest-") + cmVersion::GetCMakeVersion());

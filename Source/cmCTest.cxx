@@ -498,7 +498,7 @@ bool cmCTest::CreateNewTag(bool quiet)
   }
 
   cmCTestOptionalLog(this, DEBUG,
-                     "TestModel: " << this->GetTestModelString() << std::endl,
+                     "TestModel: " << this->GetTestGroupString() << std::endl,
                      quiet);
   cmCTestOptionalLog(
     this, DEBUG, "TestModel: " << this->Impl->TestModel << std::endl, quiet);
@@ -524,18 +524,8 @@ bool cmCTest::CreateNewTag(bool quiet)
 
   cmsys::ofstream ofs(tagfile.c_str());
   ofs << this->Impl->CurrentTag << std::endl;
+  ofs << this->GetTestGroupString() << std::endl;
   ofs << this->GetTestModelString() << std::endl;
-  switch (this->Impl->TestModel) {
-    case cmCTest::EXPERIMENTAL:
-      ofs << "Experimental" << std::endl;
-      break;
-    case cmCTest::NIGHTLY:
-      ofs << "Nightly" << std::endl;
-      break;
-    case cmCTest::CONTINUOUS:
-      ofs << "Continuous" << std::endl;
-      break;
-  }
 
   return true;
 }
@@ -603,7 +593,7 @@ bool cmCTest::ReadExistingTag(bool quiet)
 
   cmCTestOptionalLog(this, OUTPUT,
                      "  Use existing tag: " << tag << " - "
-                                            << this->GetTestModelString()
+                                            << this->GetTestGroupString()
                                             << std::endl,
                      quiet);
 
@@ -1018,11 +1008,8 @@ int cmCTest::ProcessSteps()
   return res;
 }
 
-std::string cmCTest::GetTestModelString()
+std::string cmCTest::GetTestModelString() const
 {
-  if (!this->Impl->SpecificGroup.empty()) {
-    return this->Impl->SpecificGroup;
-  }
   switch (this->Impl->TestModel) {
     case cmCTest::NIGHTLY:
       return "Nightly";
@@ -1030,6 +1017,14 @@ std::string cmCTest::GetTestModelString()
       return "Continuous";
   }
   return "Experimental";
+}
+
+std::string cmCTest::GetTestGroupString() const
+{
+  if (!this->Impl->SpecificGroup.empty()) {
+    return this->Impl->SpecificGroup;
+  }
+  return this->GetTestModelString();
 }
 
 int cmCTest::GetTestModelFromString(const std::string& str)
@@ -1208,7 +1203,7 @@ void cmCTest::StartXML(cmXMLWriter& xml, bool append)
   std::string buildname =
     cmCTest::SafeBuildIdField(this->GetCTestConfiguration("BuildName"));
   std::string stamp = cmCTest::SafeBuildIdField(this->Impl->CurrentTag + "-" +
-                                                this->GetTestModelString());
+                                                this->GetTestGroupString());
   std::string site =
     cmCTest::SafeBuildIdField(this->GetCTestConfiguration("Site"));
 
@@ -1334,7 +1329,7 @@ int cmCTest::GenerateCTestNotesOutput(cmXMLWriter& xml,
   xml.StartElement("Site");
   xml.Attribute("BuildName", buildname);
   xml.Attribute("BuildStamp",
-                this->Impl->CurrentTag + "-" + this->GetTestModelString());
+                this->Impl->CurrentTag + "-" + this->GetTestGroupString());
   xml.Attribute("Name", this->GetCTestConfiguration("Site"));
   xml.Attribute("Generator",
                 std::string("ctest-") + cmVersion::GetCMakeVersion());

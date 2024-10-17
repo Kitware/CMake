@@ -261,7 +261,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
         upload_as += "&stamp=";
         upload_as += ctest_curl.Escape(this->CTest->GetCurrentTag());
         upload_as += "-";
-        upload_as += ctest_curl.Escape(this->CTest->GetTestModelString());
+        upload_as += ctest_curl.Escape(this->CTest->GetTestGroupString());
         cmCTestScriptHandler* ch = this->CTest->GetScriptHandler();
         cmake* cm = ch->GetCMake();
         if (cm) {
@@ -570,18 +570,18 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   auto timeNow =
     std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
   str << "stamp=" << curl.Escape(this->CTest->GetCurrentTag()) << "-"
-      << curl.Escape(this->CTest->GetTestModelString()) << "&"
-      << "model=" << curl.Escape(this->CTest->GetTestModelString()) << "&"
+      << curl.Escape(this->CTest->GetTestGroupString()) << "&"
+      << "model=" << curl.Escape(this->CTest->GetTestGroupString()) << "&"
       << "build="
       << curl.Escape(this->CTest->GetCTestConfiguration("BuildName")) << "&"
       << "site=" << curl.Escape(this->CTest->GetCTestConfiguration("Site"))
       << "&"
-      << "group=" << curl.Escape(this->CTest->GetTestModelString())
+      << "group=" << curl.Escape(this->CTest->GetTestGroupString())
       << "&"
       // For now, we send both "track" and "group" to CDash in case we're
       // submitting to an older instance that still expects the prior
       // terminology.
-      << "track=" << curl.Escape(this->CTest->GetTestModelString()) << "&"
+      << "track=" << curl.Escape(this->CTest->GetTestGroupString()) << "&"
       << "starttime=" << timeNow << "&"
       << "endtime=" << timeNow << "&"
       << "datafilesmd5[0]=" << md5sum << "&"
@@ -892,7 +892,7 @@ std::string cmCTestSubmitHandler::GetSubmitResultsPrefix()
     cmCTest::SafeBuildIdField(this->CTest->GetCTestConfiguration("BuildName"));
   std::string name = this->CTest->GetCTestConfiguration("Site") + "___" +
     buildname + "___" + this->CTest->GetCurrentTag() + "-" +
-    this->CTest->GetTestModelString() + "___XML___";
+    this->CTest->GetTestGroupString() + "___XML___";
   return name;
 }
 
