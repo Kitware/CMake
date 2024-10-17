@@ -5,6 +5,7 @@
 #include "cmCTestScriptHandler.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
+#include "cmSystemTools.h"
 
 bool cmCTestRunScriptCommand::InitialPass(std::vector<std::string> const& args,
                                           cmExecutionStatus& status)
@@ -36,7 +37,8 @@ bool cmCTestRunScriptCommand::InitialPass(std::vector<std::string> const& args,
       ++i;
     } else {
       int ret;
-      cmCTestScriptHandler::RunScript(this->CTest, this->Makefile, args[i],
+      cmCTestScriptHandler::RunScript(this->CTest, this->Makefile,
+                                      cmSystemTools::CollapseFullPath(args[i]),
                                       !np, &ret);
       this->Makefile->AddDefinition(returnVariable, std::to_string(ret));
     }

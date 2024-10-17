@@ -818,7 +818,7 @@ int cmCTest::ProcessSteps()
   const std::string currDir = cmSystemTools::GetCurrentWorkingDirectory();
   std::string workDir = currDir;
   if (!this->Impl->TestDir.empty()) {
-    workDir = cmSystemTools::CollapseFullPath(this->Impl->TestDir);
+    workDir = cmSystemTools::ToNormalizedPathOnDisk(this->Impl->TestDir);
   }
 
   cmWorkingDirectory changeDir(workDir);
@@ -2104,21 +2104,24 @@ int cmCTest::Run(std::vector<std::string> const& args)
     [&runScripts, &SRArgumentSpecified](std::string const& script) -> bool {
     // -SR is an internal argument, -SP should be ignored when it is passed
     if (!SRArgumentSpecified) {
-      runScripts.emplace_back(script, false);
+      runScripts.emplace_back(cmSystemTools::ToNormalizedPathOnDisk(script),
+                              false);
     }
     return true;
   };
   auto const dashSR =
     [&runScripts, &SRArgumentSpecified](std::string const& script) -> bool {
     SRArgumentSpecified = true;
-    runScripts.emplace_back(script, true);
+    runScripts.emplace_back(cmSystemTools::ToNormalizedPathOnDisk(script),
+                            true);
     return true;
   };
   auto const dash_S =
     [&runScripts, &SRArgumentSpecified](std::string const& script) -> bool {
     // -SR is an internal argument, -S should be ignored when it is passed
     if (!SRArgumentSpecified) {
-      runScripts.emplace_back(script, true);
+      runScripts.emplace_back(cmSystemTools::ToNormalizedPathOnDisk(script),
+                              true);
     }
     return true;
   };
@@ -2274,9 +2277,9 @@ int cmCTest::Run(std::vector<std::string> const& args)
           return false;
         }
         this->Impl->BuildAndTest.SourceDir =
-          cmSystemTools::CollapseFullPath(dirList[0]);
+          cmSystemTools::ToNormalizedPathOnDisk(dirList[0]);
         this->Impl->BuildAndTest.BinaryDir =
-          cmSystemTools::CollapseFullPath(dirList[1]);
+          cmSystemTools::ToNormalizedPathOnDisk(dirList[1]);
         cmSystemTools::MakeDirectory(this->Impl->BuildAndTest.BinaryDir);
         return true;
       } },
@@ -2847,7 +2850,7 @@ int cmCTest::ExecuteTests()
   const std::string currDir = cmSystemTools::GetCurrentWorkingDirectory();
   std::string workDir = currDir;
   if (!this->Impl->TestDir.empty()) {
-    workDir = cmSystemTools::CollapseFullPath(this->Impl->TestDir);
+    workDir = cmSystemTools::ToNormalizedPathOnDisk(this->Impl->TestDir);
   }
 
   cmWorkingDirectory changeDir(workDir);
@@ -3039,10 +3042,9 @@ void cmCTest::PopulateCustomInteger(cmMakefile* mf, const std::string& def,
 
 std::string cmCTest::GetShortPathToFile(const std::string& cfname)
 {
-  const std::string& sourceDir = cmSystemTools::CollapseFullPath(
-    this->GetCTestConfiguration("SourceDirectory"));
-  const std::string& buildDir = cmSystemTools::CollapseFullPath(
-    this->GetCTestConfiguration("BuildDirectory"));
+  const std::string& sourceDir =
+    this->GetCTestConfiguration("SourceDirectory");
+  const std::string& buildDir = this->GetCTestConfiguration("BuildDirectory");
   std::string fname = cmSystemTools::CollapseFullPath(cfname);
 
   // Find relative paths to both directories

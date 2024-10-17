@@ -146,7 +146,7 @@ std::string cmCTestGIT::FindTopDir()
       !cdup.empty()) {
     top_dir += "/";
     top_dir += cdup;
-    top_dir = cmSystemTools::CollapseFullPath(top_dir);
+    top_dir = cmSystemTools::ToNormalizedPathOnDisk(top_dir);
   }
   return top_dir;
 }
