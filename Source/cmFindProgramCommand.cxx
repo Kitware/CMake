@@ -88,17 +88,18 @@ struct cmFindProgramHelper
                          std::string testNameExt = cmStrCat(name, ext);
                          std::string testPath =
                            cmSystemTools::CollapseFullPath(testNameExt, path);
-                         bool exists = this->FileIsValid(testPath);
-                         exists ? this->DebugSearches.FoundAt(testPath)
-                                : this->DebugSearches.FailedAt(testPath);
-                         if (exists) {
-                           this->BestPath = testPath;
-                           return true;
+                         if (this->FileIsExecutable(testPath)) {
+                           if (this->FindBase->Validate(testPath)) {
+                             this->BestPath = testPath;
+                             this->DebugSearches.FoundAt(testPath);
+                             return true;
+                           }
                          }
+                         this->DebugSearches.FailedAt(testPath);
                          return false;
                        });
   }
-  bool FileIsValid(std::string const& file) const
+  bool FileIsExecutable(std::string const& file) const
   {
     if (!this->FileIsExecutableCMP0109(file)) {
       return false;
@@ -114,7 +115,7 @@ struct cmFindProgramHelper
       }
     }
 #endif
-    return this->FindBase->Validate(file);
+    return true;
   }
   bool FileIsExecutableCMP0109(std::string const& file) const
   {

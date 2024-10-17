@@ -422,18 +422,15 @@ bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
   if (name.TryRaw) {
     std::string testPath = cmStrCat(path, name.Raw);
 
-    const bool exists = cmSystemTools::FileExists(testPath, true);
-    if (!exists) {
-      this->DebugLibraryFailed(name.Raw, path);
-    } else {
+    if (cmSystemTools::FileExists(testPath, true)) {
       testPath = cmSystemTools::CollapseFullPath(testPath);
       if (this->Validate(testPath)) {
         this->DebugLibraryFound(name.Raw, path);
         this->BestPath = testPath;
         return true;
       }
-      this->DebugLibraryFailed(name.Raw, path);
     }
+    this->DebugLibraryFailed(name.Raw, path);
   }
 
   // No library file has yet been found.
