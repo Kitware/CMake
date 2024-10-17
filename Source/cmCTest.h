@@ -78,6 +78,11 @@ public:
   int Initialize(const std::string& binary_dir, cmCTestStartCommand* command);
 
   /**
+   * Initialize ctest for executing tests.
+   */
+  void InitializeTesting(const std::string& binary_dir);
+
+  /**
    * Process the dashboard client steps.
    */
   int ProcessSteps();
