@@ -69,13 +69,8 @@ public:
   /** Process Command line arguments */
   int Run(std::vector<std::string> const& args);
 
-  /**
-   * Initialize a dashboard run in the given build tree.  The "command"
-   * argument is non-NULL when running from a command-driven (ctest_start)
-   * dashboard script, and NULL when running from the CTest command
-   * line.
-   */
-  bool Initialize(const std::string& binary_dir, cmCTestStartCommand* command);
+  /** Initialize a dashboard run in the given build tree. */
+  bool Initialize(const std::string& binary_dir, cmCTestStartCommand& command);
 
   bool CreateNewTag(bool quiet);
   bool ReadExistingTag(bool quiet);

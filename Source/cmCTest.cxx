@@ -417,15 +417,13 @@ cmCTest::Part cmCTest::GetPartFromName(const std::string& name)
 }
 
 bool cmCTest::Initialize(const std::string& binary_dir,
-                         cmCTestStartCommand* command)
+                         cmCTestStartCommand& command)
 {
-  bool quiet = false;
-  if (command) {
-    this->Impl->BuildID = "";
-    for (Part p = PartStart; p != PartCount; p = static_cast<Part>(p + 1)) {
-      this->Impl->Parts[p].SubmitFiles.clear();
-    }
-    quiet = command->ShouldBeQuiet();
+  bool const quiet = command.ShouldBeQuiet();
+
+  this->Impl->BuildID = "";
+  for (Part p = PartStart; p != PartCount; p = static_cast<Part>(p + 1)) {
+    this->Impl->Parts[p].SubmitFiles.clear();
   }
 
   cmCTestOptionalLog(this, DEBUG, "Here: " << __LINE__ << std::endl, quiet);
@@ -462,26 +460,13 @@ bool cmCTest::Initialize(const std::string& binary_dir,
     return 0;
   }
 
-  cmake cm(cmake::RoleScript, cmState::CTest);
-  cm.SetHomeDirectory("");
-  cm.SetHomeOutputDirectory("");
-  cm.GetCurrentSnapshot().SetDefaultDefinitions();
-  cmGlobalGenerator gg(&cm);
-  cmMakefile mf(&gg, cm.GetCurrentSnapshot());
-  this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, &mf);
+  cmMakefile* mf = command.GetMakefile();
+  this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, mf);
 
-  if (command) {
-    if (command->ShouldCreateNewTag()) {
-      return this->CreateNewTag(quiet);
-    }
-    return this->ReadExistingTag(quiet);
-  }
-
-  if (this->Impl->Parts[PartStart]) {
+  if (command.ShouldCreateNewTag()) {
     return this->CreateNewTag(quiet);
   }
-
-  return this->ReadExistingTag(true) || this->CreateNewTag(quiet);
+  return this->ReadExistingTag(quiet);
 }
 
 bool cmCTest::CreateNewTag(bool quiet)
@@ -878,22 +863,40 @@ int cmCTest::ProcessSteps()
     return 1;
   }
 
-  if (!this->Initialize(workDir, nullptr)) {
-    cmCTestLog(this, ERROR_MESSAGE,
-               "Problem initializing the dashboard." << std::endl);
-    return 12;
-  }
+  this->Impl->BinaryDir = workDir;
+  cmSystemTools::ConvertToUnixSlashes(this->Impl->BinaryDir);
+  this->UpdateCTestConfiguration();
+  this->BlockTestErrorDiagnostics();
 
   int res = 0;
   cmCTestScriptHandler script;
   script.SetCTestInstance(this);
   script.CreateCMake();
   cmMakefile& mf = *script.GetMakefile();
+  this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, &mf);
   this->SetCMakeVariables(mf);
   std::vector<cmListFileArgument> args{
     cmListFileArgument("RETURN_VALUE", cmListFileArgument::Unquoted, 0),
     cmListFileArgument("return_value", cmListFileArgument::Unquoted, 0),
   };
+
+  if (this->Impl->Parts[PartStart]) {
+    auto const func = cmListFileFunction(
+      "ctest_start", 0, 0,
+      {
+        { this->GetTestModelString(), cmListFileArgument::Unquoted, 0 },
+        { "GROUP", cmListFileArgument::Unquoted, 0 },
+        { this->GetTestGroupString(), cmListFileArgument::Unquoted, 0 },
+      });
+    auto status = cmExecutionStatus(mf);
+    if (!mf.ExecuteCommand(func, status)) {
+      return 12;
+    }
+  } else if (!this->ReadExistingTag(true) && !this->CreateNewTag(false)) {
+    cmCTestLog(this, ERROR_MESSAGE,
+               "Problem initializing the dashboard." << std::endl);
+    return 12;
+  }
 
   if (this->Impl->Parts[PartUpdate] &&
       (this->GetRemainingTimeAllowed() > std::chrono::minutes(2))) {
