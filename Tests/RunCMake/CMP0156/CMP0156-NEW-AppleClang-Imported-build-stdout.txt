@@ -1,3 +1,3 @@
-ld: warning: ignoring duplicate libraries: '[^']*liblib1\.a', '[^']*liblib2\.a'
+ld: warning: ignoring duplicate libraries: '[^']*liblib1\.a'
 ld: fatal warning\(s\) induced error \(-fatal_warnings\)
 (cc|clang): error: linker command failed with exit code 1 \(use -v to see invocation\)
