@@ -75,7 +75,10 @@ public:
    * dashboard script, and NULL when running from the CTest command
    * line.
    */
-  int Initialize(const std::string& binary_dir, cmCTestStartCommand* command);
+  bool Initialize(const std::string& binary_dir, cmCTestStartCommand* command);
+
+  bool CreateNewTag(bool quiet);
+  bool ReadExistingTag(bool quiet);
 
   /**
    * Initialize ctest for executing tests.

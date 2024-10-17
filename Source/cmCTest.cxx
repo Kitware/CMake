@@ -416,8 +416,8 @@ cmCTest::Part cmCTest::GetPartFromName(const std::string& name)
   return PartCount;
 }
 
-int cmCTest::Initialize(const std::string& binary_dir,
-                        cmCTestStartCommand* command)
+bool cmCTest::Initialize(const std::string& binary_dir,
+                         cmCTestStartCommand* command)
 {
   bool quiet = false;
   if (command) {
@@ -470,170 +470,145 @@ int cmCTest::Initialize(const std::string& binary_dir,
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());
   this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, &mf);
 
-  // Verify "Testing" directory exists:
-  //
-  std::string testingDir = this->Impl->BinaryDir + "/Testing";
-  if (cmSystemTools::FileExists(testingDir)) {
-    if (!cmSystemTools::FileIsDirectory(testingDir)) {
-      cmCTestLog(this, ERROR_MESSAGE,
-                 "File " << testingDir
-                         << " is in the place of the testing directory"
-                         << std::endl);
-      return 0;
-    }
-  } else {
-    if (!cmSystemTools::MakeDirectory(testingDir)) {
-      cmCTestLog(this, ERROR_MESSAGE,
-                 "Cannot create directory " << testingDir << std::endl);
-      return 0;
-    }
-  }
-
-  // Create new "TAG" file or read existing one:
-  //
-  bool createNewTag = true;
   if (command) {
-    createNewTag = command->ShouldCreateNewTag();
+    if (command->ShouldCreateNewTag()) {
+      return this->CreateNewTag(quiet);
+    }
+    return this->ReadExistingTag(quiet);
   }
 
-  std::string tagfile = testingDir + "/TAG";
-  cmsys::ifstream tfin(tagfile.c_str());
-  std::string tag;
+  if (this->Impl->Parts[PartStart]) {
+    return this->CreateNewTag(quiet);
+  }
 
-  if (createNewTag) {
+  return this->ReadExistingTag(true) || this->CreateNewTag(quiet);
+}
+
+bool cmCTest::CreateNewTag(bool quiet)
+{
+  std::string const testingDir = this->Impl->BinaryDir + "/Testing";
+  std::string const tagfile = testingDir + "/TAG";
+
+  auto const result = cmSystemTools::MakeDirectory(testingDir);
+  if (!result.IsSuccess()) {
+    cmCTestLog(this, ERROR_MESSAGE,
+               "Cannot create directory \""
+                 << testingDir << "\": " << result.GetString() << std::endl);
+    return false;
+  }
+
+  cmCTestOptionalLog(this, DEBUG,
+                     "TestModel: " << this->GetTestModelString() << std::endl,
+                     quiet);
+  cmCTestOptionalLog(
+    this, DEBUG, "TestModel: " << this->Impl->TestModel << std::endl, quiet);
+
+  struct tm* lctime = [this]() -> tm* {
+    if (this->Impl->TestModel == cmCTest::NIGHTLY) {
+      return this->GetNightlyTime(
+        this->GetCTestConfiguration("NightlyStartTime"),
+        this->Impl->TomorrowTag);
+    }
     time_t tctime = time(nullptr);
     if (this->Impl->TomorrowTag) {
       tctime += (24 * 60 * 60);
     }
-    struct tm* lctime = gmtime(&tctime);
-    if (tfin && cmSystemTools::GetLineFromStream(tfin, tag)) {
-      int year = 0;
-      int mon = 0;
-      int day = 0;
-      int hour = 0;
-      int min = 0;
-      sscanf(tag.c_str(), "%04d%02d%02d-%02d%02d", &year, &mon, &day, &hour,
-             &min);
-      if (year != lctime->tm_year + 1900 || mon != lctime->tm_mon + 1 ||
-          day != lctime->tm_mday) {
-        tag.clear();
-      }
-      std::string group;
-      if (cmSystemTools::GetLineFromStream(tfin, group) &&
-          !this->Impl->Parts[PartStart] && !command) {
-        this->Impl->SpecificGroup = group;
-      }
-      std::string model;
-      if (cmSystemTools::GetLineFromStream(tfin, model) &&
-          !this->Impl->Parts[PartStart] && !command) {
-        this->Impl->TestModel = GetTestModelFromString(model);
-      }
-      tfin.close();
-    }
-    if (tag.empty() || command || this->Impl->Parts[PartStart]) {
-      cmCTestOptionalLog(
-        this, DEBUG, "TestModel: " << this->GetTestModelString() << std::endl,
-        quiet);
-      cmCTestOptionalLog(this, DEBUG,
-                         "TestModel: " << this->Impl->TestModel << std::endl,
-                         quiet);
-      if (this->Impl->TestModel == cmCTest::NIGHTLY) {
-        lctime =
-          this->GetNightlyTime(this->GetCTestConfiguration("NightlyStartTime"),
-                               this->Impl->TomorrowTag);
-      }
-      char datestring[100];
-      snprintf(datestring, sizeof(datestring), "%04d%02d%02d-%02d%02d",
-               lctime->tm_year + 1900, lctime->tm_mon + 1, lctime->tm_mday,
-               lctime->tm_hour, lctime->tm_min);
-      tag = datestring;
-      cmsys::ofstream ofs(tagfile.c_str());
-      if (ofs) {
-        ofs << tag << std::endl;
-        ofs << this->GetTestModelString() << std::endl;
-        switch (this->Impl->TestModel) {
-          case cmCTest::EXPERIMENTAL:
-            ofs << "Experimental" << std::endl;
-            break;
-          case cmCTest::NIGHTLY:
-            ofs << "Nightly" << std::endl;
-            break;
-          case cmCTest::CONTINUOUS:
-            ofs << "Continuous" << std::endl;
-            break;
-        }
-      }
-      ofs.close();
-      if (!command) {
-        cmCTestOptionalLog(this, OUTPUT,
-                           "Create new tag: " << tag << " - "
-                                              << this->GetTestModelString()
-                                              << std::endl,
-                           quiet);
-      }
-    }
-  } else {
-    std::string group;
-    std::string modelStr;
-    int model = cmCTest::UNKNOWN;
+    return gmtime(&tctime);
+  }();
 
-    if (tfin) {
-      cmSystemTools::GetLineFromStream(tfin, tag);
-      cmSystemTools::GetLineFromStream(tfin, group);
-      if (cmSystemTools::GetLineFromStream(tfin, modelStr)) {
-        model = GetTestModelFromString(modelStr);
-      }
-      tfin.close();
-    }
+  char datestring[100];
+  snprintf(datestring, sizeof(datestring), "%04d%02d%02d-%02d%02d",
+           lctime->tm_year + 1900, lctime->tm_mon + 1, lctime->tm_mday,
+           lctime->tm_hour, lctime->tm_min);
+  this->Impl->CurrentTag = datestring;
 
-    if (tag.empty()) {
+  cmsys::ofstream ofs(tagfile.c_str());
+  ofs << this->Impl->CurrentTag << std::endl;
+  ofs << this->GetTestModelString() << std::endl;
+  switch (this->Impl->TestModel) {
+    case cmCTest::EXPERIMENTAL:
+      ofs << "Experimental" << std::endl;
+      break;
+    case cmCTest::NIGHTLY:
+      ofs << "Nightly" << std::endl;
+      break;
+    case cmCTest::CONTINUOUS:
+      ofs << "Continuous" << std::endl;
+      break;
+  }
+
+  return true;
+}
+
+bool cmCTest::ReadExistingTag(bool quiet)
+{
+  std::string const testingDir = this->Impl->BinaryDir + "/Testing";
+  std::string const tagfile = testingDir + "/TAG";
+
+  std::string tag;
+  std::string group;
+  std::string modelStr;
+  int model = cmCTest::UNKNOWN;
+
+  cmsys::ifstream tfin(tagfile.c_str());
+  if (tfin) {
+    cmSystemTools::GetLineFromStream(tfin, tag);
+    cmSystemTools::GetLineFromStream(tfin, group);
+    if (cmSystemTools::GetLineFromStream(tfin, modelStr)) {
+      model = GetTestModelFromString(modelStr);
+    }
+    tfin.close();
+  }
+
+  if (tag.empty()) {
+    if (!quiet) {
       cmCTestLog(this, ERROR_MESSAGE,
                  "Cannot read existing TAG file in " << testingDir
                                                      << std::endl);
-      return 0;
+    }
+    return false;
+  }
+
+  if (this->Impl->TestModel == cmCTest::UNKNOWN) {
+    if (model == cmCTest::UNKNOWN) {
+      cmCTestLog(this, ERROR_MESSAGE,
+                 "TAG file does not contain model and "
+                 "no model specified in start command"
+                   << std::endl);
+      return false;
     }
 
-    if (this->Impl->TestModel == cmCTest::UNKNOWN) {
-      if (model == cmCTest::UNKNOWN) {
-        cmCTestLog(this, ERROR_MESSAGE,
-                   "TAG file does not contain model and "
-                   "no model specified in start command"
-                     << std::endl);
-        return 0;
-      }
+    this->SetTestModel(model);
+  }
 
-      this->SetTestModel(model);
-    }
-
-    if (model != this->Impl->TestModel && model != cmCTest::UNKNOWN &&
-        this->Impl->TestModel != cmCTest::UNKNOWN) {
-      cmCTestOptionalLog(this, WARNING,
-                         "Model given in TAG does not match "
-                         "model given in ctest_start()"
-                           << std::endl,
-                         quiet);
-    }
-
-    if (!this->Impl->SpecificGroup.empty() &&
-        group != this->Impl->SpecificGroup) {
-      cmCTestOptionalLog(this, WARNING,
-                         "Group given in TAG does not match "
-                         "group given in ctest_start()"
-                           << std::endl,
-                         quiet);
-    } else {
-      this->Impl->SpecificGroup = group;
-    }
-
-    cmCTestOptionalLog(this, OUTPUT,
-                       "  Use existing tag: " << tag << " - "
-                                              << this->GetTestModelString()
-                                              << std::endl,
+  if (model != this->Impl->TestModel && model != cmCTest::UNKNOWN &&
+      this->Impl->TestModel != cmCTest::UNKNOWN) {
+    cmCTestOptionalLog(this, WARNING,
+                       "Model given in TAG does not match "
+                       "model given in ctest_start()"
+                         << std::endl,
                        quiet);
   }
 
+  if (!this->Impl->SpecificGroup.empty() &&
+      group != this->Impl->SpecificGroup) {
+    cmCTestOptionalLog(this, WARNING,
+                       "Group given in TAG does not match "
+                       "group given in ctest_start()"
+                         << std::endl,
+                       quiet);
+  } else {
+    this->Impl->SpecificGroup = group;
+  }
+
+  cmCTestOptionalLog(this, OUTPUT,
+                     "  Use existing tag: " << tag << " - "
+                                            << this->GetTestModelString()
+                                            << std::endl,
+                     quiet);
+
   this->Impl->CurrentTag = tag;
-  return 1;
+  return true;
 }
 
 void cmCTest::InitializeTesting(const std::string& binary_dir)
