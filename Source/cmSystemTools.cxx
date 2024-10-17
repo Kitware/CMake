@@ -1635,9 +1635,15 @@ std::vector<std::string> cmSystemTools::SplitEnvPath(cm::string_view in)
     }
     paths.emplace_back(in.substr(b, e - b));
   }
-  for (std::string& p : paths) {
-    SystemTools::ConvertToUnixSlashes(p);
-  }
+  return paths;
+}
+
+std::vector<std::string> cmSystemTools::SplitEnvPathNormalized(
+  cm::string_view in)
+{
+  std::vector<std::string> paths = cmSystemTools::SplitEnvPath(in);
+  std::transform(paths.begin(), paths.end(), paths.begin(),
+                 cmSystemTools::ToNormalizedPathOnDisk);
   return paths;
 }
 

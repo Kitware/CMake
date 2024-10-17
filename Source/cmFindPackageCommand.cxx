@@ -1961,11 +1961,13 @@ void cmFindPackageCommand::PushFindPackageRootPathStack()
     cmExpandList(*rootDEF, rootPaths);
   }
   if (rootEnv) {
-    std::vector<std::string> p = cmSystemTools::SplitEnvPath(*rootEnv);
+    std::vector<std::string> p =
+      cmSystemTools::SplitEnvPathNormalized(*rootEnv);
     std::move(p.begin(), p.end(), std::back_inserter(rootPaths));
   }
   if (rootENV) {
-    std::vector<std::string> p = cmSystemTools::SplitEnvPath(*rootENV);
+    std::vector<std::string> p =
+      cmSystemTools::SplitEnvPathNormalized(*rootENV);
     std::move(p.begin(), p.end(), std::back_inserter(rootPaths));
   }
 }
