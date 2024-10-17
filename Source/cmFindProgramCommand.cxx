@@ -81,8 +81,6 @@ struct cmFindProgramHelper
   {
     return std::any_of(this->Names.begin(), this->Names.end(),
                        [this, &path](std::string const& n) -> bool {
-                         // Only perform search relative to current directory
-                         // if the file name contains a directory separator.
                          return this->CheckDirectoryForName(path, n);
                        });
   }
