@@ -28,7 +28,6 @@ class cmCTestConfigureHandler;
 class cmCTestMemCheckHandler;
 class cmCTestSubmitHandler;
 class cmCTestUploadHandler;
-class cmCTestStartCommand;
 class cmGeneratedFileStream;
 class cmMakefile;
 class cmXMLWriter;
@@ -70,7 +69,7 @@ public:
   int Run(std::vector<std::string> const& args);
 
   /** Initialize a dashboard run in the given build tree. */
-  bool Initialize(const std::string& binary_dir, cmCTestStartCommand& command);
+  void Initialize(std::string const& binary_dir);
 
   bool CreateNewTag(bool quiet);
   bool ReadExistingTag(bool quiet);
@@ -442,6 +441,9 @@ public:
   void GenerateSubprojectsOutput(cmXMLWriter& xml);
   std::vector<std::string> GetLabelsForSubprojects();
 
+  /** Reread the configuration file */
+  bool UpdateCTestConfiguration();
+
 private:
   void SetPersistentOptionIfNotEmpty(const std::string& value,
                                      const std::string& optionName);
@@ -474,9 +476,6 @@ private:
 
   /** returns true iff the console supports colored output */
   static bool ColoredOutputSupportedByConsole();
-
-  /** Reread the configuration file */
-  bool UpdateCTestConfiguration();
 
   /** Create note from files. */
   int GenerateCTestNotesOutput(cmXMLWriter& xml,

@@ -48,7 +48,6 @@
 #include "cmCTestGenericHandler.h"
 #include "cmCTestMemCheckHandler.h"
 #include "cmCTestScriptHandler.h"
-#include "cmCTestStartCommand.h"
 #include "cmCTestSubmitHandler.h"
 #include "cmCTestTestHandler.h"
 #include "cmCTestUpdateHandler.h"
@@ -416,17 +415,13 @@ cmCTest::Part cmCTest::GetPartFromName(const std::string& name)
   return PartCount;
 }
 
-bool cmCTest::Initialize(const std::string& binary_dir,
-                         cmCTestStartCommand& command)
+void cmCTest::Initialize(std::string const& binary_dir)
 {
-  bool const quiet = command.ShouldBeQuiet();
-
   this->Impl->BuildID = "";
   for (Part p = PartStart; p != PartCount; p = static_cast<Part>(p + 1)) {
     this->Impl->Parts[p].SubmitFiles.clear();
   }
 
-  cmCTestOptionalLog(this, DEBUG, "Here: " << __LINE__ << std::endl, quiet);
   if (!this->Impl->InteractiveDebugMode) {
     this->BlockTestErrorDiagnostics();
   } else {
@@ -435,38 +430,6 @@ bool cmCTest::Initialize(const std::string& binary_dir,
 
   this->Impl->BinaryDir = binary_dir;
   cmSystemTools::ConvertToUnixSlashes(this->Impl->BinaryDir);
-
-  this->UpdateCTestConfiguration();
-
-  cmCTestOptionalLog(this, DEBUG, "Here: " << __LINE__ << std::endl, quiet);
-  cmCTestOptionalLog(this, OUTPUT,
-                     "   Site: " << this->GetCTestConfiguration("Site")
-                                 << std::endl
-                                 << "   Build name: "
-                                 << cmCTest::SafeBuildIdField(
-                                      this->GetCTestConfiguration("BuildName"))
-                                 << std::endl,
-                     quiet);
-  cmCTestOptionalLog(this, DEBUG, "Produce XML is on" << std::endl, quiet);
-  if (this->Impl->TestModel == cmCTest::NIGHTLY &&
-      this->GetCTestConfiguration("NightlyStartTime").empty()) {
-    cmCTestOptionalLog(
-      this, WARNING,
-      "WARNING: No nightly start time found please set in CTestConfig.cmake"
-      " or DartConfig.cmake"
-        << std::endl,
-      quiet);
-    cmCTestOptionalLog(this, DEBUG, "Here: " << __LINE__ << std::endl, quiet);
-    return 0;
-  }
-
-  cmMakefile* mf = command.GetMakefile();
-  this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, mf);
-
-  if (command.ShouldCreateNewTag()) {
-    return this->CreateNewTag(quiet);
-  }
-  return this->ReadExistingTag(quiet);
 }
 
 bool cmCTest::CreateNewTag(bool quiet)

@@ -15,12 +15,6 @@
 
 class cmExecutionStatus;
 
-cmCTestStartCommand::cmCTestStartCommand()
-{
-  this->CreateNewTag = true;
-  this->Quiet = false;
-}
-
 bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
                                       cmExecutionStatus& /*unused*/)
 {
@@ -30,6 +24,8 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   size_t cnt = 0;
+  bool append = false;
+  bool quiet = false;
   const char* smodel = nullptr;
   cmValue src_dir;
   cmValue bld_dir;
@@ -48,10 +44,10 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
       cnt++;
     } else if (args[cnt] == "APPEND") {
       cnt++;
-      this->CreateNewTag = false;
+      append = true;
     } else if (args[cnt] == "QUIET") {
       cnt++;
-      this->Quiet = true;
+      quiet = true;
     } else if (!smodel) {
       smodel = args[cnt].c_str();
       cnt++;
@@ -83,7 +79,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
                    "as an argument or set CTEST_BINARY_DIRECTORY");
     return false;
   }
-  if (!smodel && this->CreateNewTag) {
+  if (!smodel && !append) {
     this->SetError("no test model specified and APPEND not specified. Specify "
                    "either a test model or the APPEND argument");
     return false;
@@ -96,9 +92,8 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
 
   std::string sourceDir = cmSystemTools::CollapseFullPath(*src_dir);
   std::string binaryDir = cmSystemTools::CollapseFullPath(*bld_dir);
-  this->CTest->SetCTestConfiguration("SourceDirectory", sourceDir,
-                                     this->Quiet);
-  this->CTest->SetCTestConfiguration("BuildDirectory", binaryDir, this->Quiet);
+  this->CTest->SetCTestConfiguration("SourceDirectory", sourceDir, quiet);
+  this->CTest->SetCTestConfiguration("BuildDirectory", binaryDir, quiet);
 
   if (smodel) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
@@ -106,7 +101,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
                          << smodel << std::endl
                          << "   Source directory: " << *src_dir << std::endl
                          << "   Build directory: " << *bld_dir << std::endl,
-                       this->Quiet);
+                       quiet);
   } else {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "Run dashboard with "
@@ -114,12 +109,12 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
                          << std::endl
                          << "   Source directory: " << *src_dir << std::endl
                          << "   Build directory: " << *bld_dir << std::endl,
-                       this->Quiet);
+                       quiet);
   }
   const char* group = this->CTest->GetSpecificGroup();
   if (group) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                       "   Group: " << group << std::endl, this->Quiet);
+                       "   Group: " << group << std::endl, quiet);
   }
 
   // Log startup actions.
@@ -170,10 +165,9 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   if (!fname.empty()) {
-    cmCTestOptionalLog(this->CTest, OUTPUT,
-                       "   Reading ctest configuration file: " << fname
-                                                               << std::endl,
-                       this->Quiet);
+    cmCTestOptionalLog(
+      this->CTest, OUTPUT,
+      "   Reading ctest configuration file: " << fname << std::endl, quiet);
     bool readit = this->Makefile->ReadDependentFile(fname);
     if (!readit) {
       std::string m = cmStrCat("Could not find include file: ", fname);
@@ -183,20 +177,51 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "NightlyStartTime", "CTEST_NIGHTLY_START_TIME",
-    this->Quiet);
+    this->Makefile, "NightlyStartTime", "CTEST_NIGHTLY_START_TIME", quiet);
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile, "Site",
+                                                      "CTEST_SITE", quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "Site", "CTEST_SITE", this->Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "BuildName", "CTEST_BUILD_NAME", this->Quiet);
+    this->Makefile, "BuildName", "CTEST_BUILD_NAME", quiet);
 
-  if (!this->CTest->Initialize(bld_dir, *this)) {
+  this->CTest->Initialize(bld_dir);
+  this->CTest->UpdateCTestConfiguration();
+
+  cmCTestOptionalLog(
+    this->CTest, OUTPUT,
+    "   Site: " << this->CTest->GetCTestConfiguration("Site") << std::endl
+                << "   Build name: "
+                << cmCTest::SafeBuildIdField(
+                     this->CTest->GetCTestConfiguration("BuildName"))
+                << std::endl,
+    quiet);
+
+  if (this->CTest->GetTestModel() == cmCTest::NIGHTLY &&
+      this->CTest->GetCTestConfiguration("NightlyStartTime").empty()) {
+    cmCTestOptionalLog(
+      this->CTest, WARNING,
+      "WARNING: No nightly start time found please set in CTestConfig.cmake"
+      " or DartConfig.cmake"
+        << std::endl,
+      quiet);
     return false;
   }
+
+  this->CTest->ReadCustomConfigurationFileTree(bld_dir, this->Makefile);
+
+  if (append) {
+    if (!this->CTest->ReadExistingTag(quiet)) {
+      return false;
+    }
+  } else {
+    if (!this->CTest->CreateNewTag(quiet)) {
+      return false;
+    }
+  }
+
   cmCTestOptionalLog(this->CTest, OUTPUT,
                      "   Use " << this->CTest->GetTestGroupString() << " tag: "
                                << this->CTest->GetCurrentTag() << std::endl,
-                     this->Quiet);
+                     quiet);
   return true;
 }
 
