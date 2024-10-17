@@ -388,7 +388,7 @@ public:
   /**
    * Read the custom configuration files and apply them to the current ctest
    */
-  int ReadCustomConfigurationFileTree(const std::string& dir, cmMakefile* mf);
+  void ReadCustomConfigurationFileTree(const std::string& dir, cmMakefile* mf);
 
   std::vector<std::string>& GetInitialCommandLineArguments();
 

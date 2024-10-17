@@ -472,12 +472,7 @@ int cmCTest::Initialize(const std::string& binary_dir,
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cmGlobalGenerator gg(&cm);
   cmMakefile mf(&gg, cm.GetCurrentSnapshot());
-  if (!this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, &mf)) {
-    cmCTestOptionalLog(
-      this, DEBUG, "Cannot find custom configuration file tree" << std::endl,
-      quiet);
-    return 0;
-  }
+  this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, &mf);
 
   if (this->Impl->ProduceXML) {
     // Verify "Testing" directory exists:
@@ -3003,8 +2998,8 @@ void cmCTest::SetScheduleType(std::string const& type)
   this->Impl->ScheduleType = type;
 }
 
-int cmCTest::ReadCustomConfigurationFileTree(const std::string& dir,
-                                             cmMakefile* mf)
+void cmCTest::ReadCustomConfigurationFileTree(const std::string& dir,
+                                              cmMakefile* mf)
 {
   bool found = false;
   cmCTestLog(this, DEBUG,
@@ -3060,8 +3055,6 @@ int cmCTest::ReadCustomConfigurationFileTree(const std::string& dir,
       handler.second->PopulateCustomVectors(mf);
     }
   }
-
-  return 1;
 }
 
 void cmCTest::PopulateCustomVector(cmMakefile* mf, const std::string& def,
