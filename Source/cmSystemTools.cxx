@@ -20,6 +20,8 @@
 
 #include "cmSystemTools.h"
 
+#include <iterator>
+
 #include <cm/optional>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -1610,6 +1612,17 @@ cm::optional<std::string> cmSystemTools::GetEnvVar(std::string const& var)
     if (cmSystemTools::GetEnv(var, value)) {
       result = std::move(value);
     }
+  }
+  return result;
+}
+
+std::vector<std::string> cmSystemTools::GetEnvPathNormalized(
+  std::string const& var)
+{
+  std::vector<std::string> result;
+  if (cm::optional<std::string> env = cmSystemTools::GetEnvVar(var)) {
+    std::vector<std::string> p = cmSystemTools::SplitEnvPathNormalized(*env);
+    std::move(p.begin(), p.end(), std::back_inserter(result));
   }
   return result;
 }
