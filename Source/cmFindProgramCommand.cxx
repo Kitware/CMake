@@ -48,12 +48,6 @@ struct cmFindProgramHelper
   // Current names under consideration.
   std::vector<std::string> Names;
 
-  // Current name with extension under consideration.
-  std::string TestNameExt;
-
-  // Current full path under consideration.
-  std::string TestPath;
-
   // Debug state
   cmFindBaseDebugState DebugSearches;
   cmMakefile* Makefile;
@@ -91,14 +85,14 @@ struct cmFindProgramHelper
                          if (!ext.empty() && cmHasSuffix(name, ext)) {
                            return false;
                          }
-                         this->TestNameExt = cmStrCat(name, ext);
-                         this->TestPath = cmSystemTools::CollapseFullPath(
-                           this->TestNameExt, path);
-                         bool exists = this->FileIsValid(this->TestPath);
-                         exists ? this->DebugSearches.FoundAt(this->TestPath)
-                                : this->DebugSearches.FailedAt(this->TestPath);
+                         std::string testNameExt = cmStrCat(name, ext);
+                         std::string testPath =
+                           cmSystemTools::CollapseFullPath(testNameExt, path);
+                         bool exists = this->FileIsValid(testPath);
+                         exists ? this->DebugSearches.FoundAt(testPath)
+                                : this->DebugSearches.FailedAt(testPath);
                          if (exists) {
-                           this->BestPath = this->TestPath;
+                           this->BestPath = testPath;
                            return true;
                          }
                          return false;

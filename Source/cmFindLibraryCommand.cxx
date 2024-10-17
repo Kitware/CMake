@@ -220,9 +220,6 @@ struct cmFindLibraryHelper
   };
   std::vector<Name> Names;
 
-  // Current full path under consideration.
-  std::string TestPath;
-
   void RegexFromLiteral(std::string& out, std::string const& in);
   void RegexFromList(std::string& out, cmList const& in);
   size_type GetPrefixIndex(std::string const& prefix)
@@ -423,13 +420,13 @@ bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
   // one cannot tell just from the library name whether it is a static
   // library or an import library).
   if (name.TryRaw) {
-    this->TestPath = cmStrCat(path, name.Raw);
+    std::string testPath = cmStrCat(path, name.Raw);
 
-    const bool exists = cmSystemTools::FileExists(this->TestPath, true);
+    const bool exists = cmSystemTools::FileExists(testPath, true);
     if (!exists) {
       this->DebugLibraryFailed(name.Raw, path);
     } else {
-      auto testPath = cmSystemTools::CollapseFullPath(this->TestPath);
+      testPath = cmSystemTools::CollapseFullPath(testPath);
       if (this->Validate(testPath)) {
         this->DebugLibraryFound(name.Raw, path);
         this->BestPath = testPath;
@@ -456,10 +453,10 @@ bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
     std::string const& testName = origName;
 #endif
     if (name.Regex.find(testName)) {
-      this->TestPath = cmStrCat(path, origName);
+      std::string testPath = cmStrCat(path, origName);
       // Make sure the path is readable and is not a directory.
-      if (cmSystemTools::FileExists(this->TestPath, true)) {
-        if (!this->Validate(cmSystemTools::CollapseFullPath(this->TestPath))) {
+      if (cmSystemTools::FileExists(testPath, true)) {
+        if (!this->Validate(cmSystemTools::CollapseFullPath(testPath))) {
           continue;
         }
 
@@ -480,7 +477,7 @@ bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
             (prefix == bestPrefix && suffix == bestSuffix &&
              (major > bestMajor ||
               (major == bestMajor && minor > bestMinor)))) {
-          this->BestPath = this->TestPath;
+          this->BestPath = testPath;
           bestPrefix = prefix;
           bestSuffix = suffix;
           bestMajor = major;
