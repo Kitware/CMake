@@ -172,8 +172,8 @@ int main(int argc, char** argv)
         }
       }
 
-      sourceDirectory = cmSystemTools::CollapseFullPath(path.toStdString());
-      cmSystemTools::ConvertToUnixSlashes(sourceDirectory);
+      sourceDirectory =
+        cmSystemTools::ToNormalizedPathOnDisk(path.toStdString());
     } else if (arg.startsWith("-B")) {
       QString path = arg.mid(2);
       if (path.isEmpty()) {
@@ -189,8 +189,8 @@ int main(int argc, char** argv)
         }
       }
 
-      binaryDirectory = cmSystemTools::CollapseFullPath(path.toStdString());
-      cmSystemTools::ConvertToUnixSlashes(binaryDirectory);
+      binaryDirectory =
+        cmSystemTools::ToNormalizedPathOnDisk(path.toStdString());
     } else if (arg.startsWith("--preset=")) {
       QString preset = arg.mid(cmStrLen("--preset="));
       if (preset.isEmpty()) {
@@ -223,7 +223,7 @@ int main(int argc, char** argv)
   } else {
     if (args.count() == 2) {
       std::string filePath =
-        cmSystemTools::CollapseFullPath(args[1].toStdString());
+        cmSystemTools::ToNormalizedPathOnDisk(args[1].toStdString());
 
       // check if argument is a directory containing CMakeCache.txt
       std::string buildFilePath = cmStrCat(filePath, "/CMakeCache.txt");
@@ -243,7 +243,7 @@ int main(int argc, char** argv)
       } else if (cmSystemTools::FileExists(srcFilePath.c_str())) {
         dialog.setSourceDirectory(QString::fromStdString(filePath));
         dialog.setBinaryDirectory(
-          QString::fromStdString(cmSystemTools::CollapseFullPath(".")));
+          QString::fromStdString(cmSystemTools::GetCurrentWorkingDirectory()));
       }
     }
   }
