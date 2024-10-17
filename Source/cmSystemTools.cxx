@@ -2778,7 +2778,7 @@ cm::optional<std::string> cmSystemTools::GetCMakeConfigDirectory()
 
 std::string cmSystemTools::GetCurrentWorkingDirectory()
 {
-  return cmSystemTools::CollapseFullPath(
+  return cmSystemTools::ToNormalizedPathOnDisk(
     cmsys::SystemTools::GetCurrentWorkingDirectory());
 }
 
