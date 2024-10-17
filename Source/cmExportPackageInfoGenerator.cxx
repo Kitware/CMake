@@ -106,10 +106,10 @@ Json::Value cmExportPackageInfoGenerator::GeneratePackageInfo() const
 
   if (!this->PackageVersion.empty()) {
     package["version"] = this->PackageVersion;
-    if (!this->PackageVersion.empty()) {
+    if (!this->PackageVersionCompat.empty()) {
       package["compat_version"] = this->PackageVersionCompat;
     }
-    if (!this->PackageVersion.empty()) {
+    if (!this->PackageVersionSchema.empty()) {
       package["version_schema"] = this->PackageVersionSchema;
     }
   }
