@@ -3,17 +3,27 @@
 #include "cmCTestBuildAndTest.h"
 
 #include <chrono>
+#include <cstdint>
 #include <cstring>
 #include <ratio>
+#include <utility>
+
+#include <cmext/algorithm>
+
+#include <cm3p/uv.h>
 
 #include "cmBuildOptions.h"
 #include "cmCTest.h"
 #include "cmCTestTestHandler.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
+#include "cmProcessOutput.h"
 #include "cmState.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
+#include "cmUVHandlePtr.h"
+#include "cmUVProcessChain.h"
+#include "cmUVStream.h"
 #include "cmWorkingDirectory.h"
 #include "cmake.h"
 
@@ -27,15 +37,6 @@ cmCTestBuildAndTest::cmCTestBuildAndTest(cmCTest* ctest)
 const char* cmCTestBuildAndTest::GetOutput()
 {
   return this->Output.c_str();
-}
-
-int cmCTestBuildAndTest::Run()
-{
-  this->Output.clear();
-  cmSystemTools::ResetErrorOccurredFlag();
-  int retv = this->RunCMakeAndTest();
-  cmSystemTools::ResetErrorOccurredFlag();
-  return retv;
 }
 
 int cmCTestBuildAndTest::RunCMake(std::ostringstream& out,
@@ -92,6 +93,69 @@ int cmCTestBuildAndTest::RunCMake(std::ostringstream& out,
   return 0;
 }
 
+bool cmCTestBuildAndTest::RunTest(std::vector<std::string> const& argv,
+                                  std::string* output, int* retVal,
+                                  cmDuration timeout)
+{
+  std::vector<char> tempOutput;
+  if (output) {
+    output->clear();
+  }
+
+  cmUVProcessChainBuilder builder;
+  builder.AddCommand(argv).SetMergedBuiltinStreams();
+  auto chain = builder.Start();
+
+  cmProcessOutput processOutput(cmProcessOutput::Auto);
+  cm::uv_pipe_ptr outputStream;
+  outputStream.init(chain.GetLoop(), 0);
+  uv_pipe_open(outputStream, chain.OutputStream());
+  auto outputHandle = cmUVStreamRead(
+    outputStream,
+    [&output, &tempOutput](std::vector<char> data) {
+      if (output) {
+        cm::append(tempOutput, data.data(), data.data() + data.size());
+      }
+    },
+    []() {});
+
+  bool complete = chain.Wait(static_cast<uint64_t>(timeout.count() * 1000.0));
+  processOutput.DecodeText(tempOutput, tempOutput);
+  if (output && tempOutput.begin() != tempOutput.end()) {
+    output->append(tempOutput.data(), tempOutput.size());
+  }
+
+  bool result = false;
+
+  if (complete) {
+    auto const& status = chain.GetStatus(0);
+    auto exception = status.GetException();
+    switch (exception.first) {
+      case cmUVProcessChain::ExceptionCode::None:
+        *retVal = static_cast<int>(status.ExitStatus);
+        result = true;
+        break;
+      case cmUVProcessChain::ExceptionCode::Spawn: {
+        if (output) {
+          std::string outerr =
+            cmStrCat("\n*** ERROR executing: ", exception.second);
+          *output += outerr;
+        }
+      } break;
+      default: {
+        *retVal = status.TermSignal;
+        if (output) {
+          std::string outerr =
+            cmStrCat("\n*** Exception executing: ", exception.second);
+          *output += outerr;
+        }
+      } break;
+    }
+  }
+
+  return result;
+}
+
 class cmCTestBuildAndTestCaptureRAII
 {
   cmake& CM;
@@ -131,7 +195,7 @@ public:
     const cmCTestBuildAndTestCaptureRAII&) = delete;
 };
 
-int cmCTestBuildAndTest::RunCMakeAndTest()
+int cmCTestBuildAndTest::Run()
 {
   // if the generator and make program are not specified then it is an error
   if (this->BuildGenerator.empty()) {
@@ -304,8 +368,7 @@ int cmCTestBuildAndTest::RunCMakeAndTest()
     }
   }
 
-  bool runTestRes =
-    this->CTest->RunTest(testCommand, &outs, &retval, remainingTime, nullptr);
+  bool runTestRes = this->RunTest(testCommand, &outs, &retval, remainingTime);
 
   if (!runTestRes || retval != 0) {
     out << "Test command failed: " << testCommand[0] << "\n";

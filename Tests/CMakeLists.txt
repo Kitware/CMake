@@ -663,7 +663,6 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project ExternalDataTest
     --build-noclean
-    --force-new-ctest-process
     --build-options
       -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES}
     --test-command ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE} -V
@@ -1383,7 +1382,6 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project EnvironmentProj
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Environment"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Environment")
@@ -1422,7 +1420,6 @@ if(BUILD_TESTING)
       ${build_generator_args}
       --build-project Qt4Targets
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4Targets"
-      --force-new-ctest-process
       --build-options
         -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
       --test-command ${CMAKE_CTEST_COMMAND} -V
@@ -1437,7 +1434,6 @@ if(BUILD_TESTING)
         ${build_generator_args}
         --build-project Qt4And5Automoc
         --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4And5AutomocForward"
-        --force-new-ctest-process
         --test-command ${CMAKE_CTEST_COMMAND} -V
         )
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4And5AutomocForward")
@@ -1448,7 +1444,6 @@ if(BUILD_TESTING)
         ${build_generator_args}
         --build-project Qt4And5Automoc
         --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4And5AutomocReverse"
-        --force-new-ctest-process
         --build-options -DQT_REVERSE_FIND_ORDER=1
         --test-command ${CMAKE_CTEST_COMMAND} -V
         )
@@ -1645,7 +1640,6 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project ExternalProjectTest
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/ExternalProject"
-    --force-new-ctest-process
     --build-options ${ExternalProject_BUILD_OPTIONS}
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
@@ -1662,7 +1656,6 @@ if(BUILD_TESTING)
     "${CMake_BINARY_DIR}/Tests/ExternalProjectSubdir"
     ${build_generator_args}
     --build-project ExternalProjectSubdir
-    --force-new-ctest-process
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectSubdir")
 
@@ -1673,7 +1666,6 @@ if(BUILD_TESTING)
     "${CMake_BINARY_DIR}/Tests/ExternalProjectSourceSubdir"
     ${build_generator_args}
     --build-project ExternalProjectSourceSubdir
-    --force-new-ctest-process
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectSourceSubdir")
 
@@ -1684,7 +1676,6 @@ if(BUILD_TESTING)
     "${CMake_BINARY_DIR}/Tests/ExternalProjectSourceSubdirNotCMake"
     ${build_generator_args}
     --build-project ExternalProjectSourceSubdirNotCMake
-    --force-new-ctest-process
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectSourceSubdirNotCMake")
 
@@ -1695,7 +1686,6 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project ExternalProjectLocalTest
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/ExternalProjectLocal"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectLocal")
@@ -1710,7 +1700,6 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project ExternalProjectUpdateTest
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate")
@@ -1766,7 +1755,6 @@ if(BUILD_TESTING)
         ${build_generator_args}
         --build-project superpro
         --build-exe-dir "${CMake_BINARY_DIR}/Tests/InstallMode-${_mode}"
-        --force-new-ctest-process
         --build-options
           ${_maybe_BUILD_OPTIONS}
           "-DCMAKE_INSTALL_PREFIX:PATH=${CMake_BINARY_DIR}/Tests/InstallMode-${_mode}/install"
@@ -2363,7 +2351,6 @@ if(BUILD_TESTING)
         --build-generator "Green Hills MULTI"
         --build-project test
         --build-config $<CONFIGURATION>
-        --force-new-ctest-process
         --build-options ${ghs_target_arch} ${ghs_toolset_name} ${ghs_toolset_root} ${ghs_target_platform}
           ${ghs_os_root} ${ghs_os_dir} ${ghs_bsp_name} ${_ghs_build_opts} ${_ghs_toolset_extra}
           ${_ghs_test_command}
@@ -2577,7 +2564,6 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project TestsWorkingDirectoryProj
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/TestsWorkingDirectory"
-    --force-new-ctest-process
     --test-command ${CMAKE_CTEST_COMMAND} -V -C \${CTEST_CONFIGURATION_TYPE}
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestsWorkingDirectory")
@@ -3032,7 +3018,6 @@ if(BUILD_TESTING)
   )
 
   if(NOT BORLAND)
-    set(CTestLimitDashJ_CTEST_OPTIONS --force-new-ctest-process)
     add_test_macro(CTestLimitDashJ ${CMAKE_CTEST_COMMAND} -j 4
       --output-on-failure -C "\${CTestTest_CONFIG}")
   endif()

@@ -54,7 +54,6 @@
 #include "cmCTestUpdateHandler.h"
 #include "cmCTestUploadHandler.h"
 #include "cmCommandLineArgument.h"
-#include "cmDynamicLoader.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
@@ -121,8 +120,6 @@ struct cmCTest::Private
   bool Failover = false;
 
   bool FlushTestProgressLine = false;
-
-  bool ForceNewCTestProcess = false;
 
   bool RunConfigurationScript = false;
 
@@ -205,10 +202,6 @@ struct cmCTest::Private
 
   bool CompressXMLFiles = false;
   bool CompressTestOutput = true;
-
-  // By default we write output to the process output streams.
-  std::ostream* StreamOut = &std::cout;
-  std::ostream* StreamErr = &std::cerr;
 
   bool SuppressUpdatingCTestConfiguration = false;
 
@@ -1233,163 +1226,6 @@ bool cmCTest::RunMakeCommand(const std::string& command, std::string& output,
   return true;
 }
 
-bool cmCTest::RunTest(const std::vector<std::string>& argv,
-                      std::string* output, int* retVal, cmDuration testTimeOut,
-                      std::vector<std::string>* environment, Encoding encoding)
-{
-  bool modifyEnv = (environment && !environment->empty());
-
-  // determine how much time we have
-  cmDuration timeout = this->GetRemainingTimeAllowed();
-  if (timeout != cmCTest::MaxDuration()) {
-    timeout -= std::chrono::minutes(2);
-  }
-  if (this->Impl->TimeOut > cmDuration::zero() &&
-      this->Impl->TimeOut < timeout) {
-    timeout = this->Impl->TimeOut;
-  }
-  if (testTimeOut > cmDuration::zero() &&
-      testTimeOut < this->GetRemainingTimeAllowed()) {
-    timeout = testTimeOut;
-  }
-
-  // always have at least 1 second if we got to here
-  if (timeout <= cmDuration::zero()) {
-    timeout = std::chrono::seconds(1);
-  }
-  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-             "Test timeout computed to be: "
-               << (timeout == cmCTest::MaxDuration()
-                     ? std::string("infinite")
-                     : std::to_string(cmDurationTo<unsigned int>(timeout)))
-               << "\n");
-  if (cmSystemTools::SameFile(argv[0], cmSystemTools::GetCTestCommand()) &&
-      !this->Impl->ForceNewCTestProcess) {
-    cmCTest inst;
-    inst.Impl->ConfigType = this->Impl->ConfigType;
-    inst.Impl->TimeOut = timeout;
-
-    // Capture output of the child ctest.
-    std::ostringstream oss;
-    inst.SetStreams(&oss, &oss);
-
-    std::vector<std::string> args;
-    for (auto const& i : argv) {
-      // make sure we pass the timeout in for any build and test
-      // invocations. Since --build-generator is required this is a
-      // good place to check for it, and to add the arguments in
-      if (i == "--build-generator" && timeout != cmCTest::MaxDuration() &&
-          timeout > cmDuration::zero()) {
-        args.emplace_back("--test-timeout");
-        args.push_back(std::to_string(cmDurationTo<unsigned int>(timeout)));
-      }
-      args.emplace_back(i);
-    }
-
-    std::unique_ptr<cmSystemTools::SaveRestoreEnvironment> saveEnv;
-    if (modifyEnv) {
-      saveEnv = cm::make_unique<cmSystemTools::SaveRestoreEnvironment>();
-      cmSystemTools::AppendEnv(*environment);
-    }
-
-    *retVal = inst.Run(args, output);
-    if (output) {
-      *output += oss.str();
-    }
-    if (output) {
-      cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-                 "Internal cmCTest object used to run test." << std::endl
-                                                             << *output
-                                                             << std::endl);
-    }
-
-    return true;
-  }
-  std::vector<char> tempOutput;
-  if (output) {
-    output->clear();
-  }
-
-  std::unique_ptr<cmSystemTools::SaveRestoreEnvironment> saveEnv;
-  if (modifyEnv) {
-    saveEnv = cm::make_unique<cmSystemTools::SaveRestoreEnvironment>();
-    cmSystemTools::AppendEnv(*environment);
-  }
-
-  cmUVProcessChainBuilder builder;
-  builder.AddCommand(argv).SetMergedBuiltinStreams();
-  cmCTestLog(this, DEBUG, "Command is: " << argv[0] << std::endl);
-  auto chain = builder.Start();
-
-  cmProcessOutput processOutput(encoding);
-  cm::uv_pipe_ptr outputStream;
-  outputStream.init(chain.GetLoop(), 0);
-  uv_pipe_open(outputStream, chain.OutputStream());
-  auto outputHandle = cmUVStreamRead(
-    outputStream,
-    [this, &processOutput, &output, &tempOutput](std::vector<char> data) {
-      std::string strdata;
-      processOutput.DecodeText(data.data(), data.size(), strdata);
-      if (output) {
-        cm::append(tempOutput, data.data(), data.data() + data.size());
-      }
-      cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, strdata);
-    },
-    [this, &processOutput]() {
-      std::string strdata;
-      processOutput.DecodeText(std::string(), strdata);
-      if (!strdata.empty()) {
-        cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, strdata);
-      }
-    });
-
-  bool complete = chain.Wait(static_cast<uint64_t>(timeout.count() * 1000.0));
-  processOutput.DecodeText(tempOutput, tempOutput);
-  if (output && tempOutput.begin() != tempOutput.end()) {
-    output->append(tempOutput.data(), tempOutput.size());
-  }
-  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-             "-- Process completed" << std::endl);
-
-  bool result = false;
-
-  if (complete) {
-    auto const& status = chain.GetStatus(0);
-    auto exception = status.GetException();
-    switch (exception.first) {
-      case cmUVProcessChain::ExceptionCode::None:
-        *retVal = static_cast<int>(status.ExitStatus);
-        if (*retVal != 0 && this->Impl->OutputTestOutputOnTestFailure) {
-          this->OutputTestErrors(tempOutput);
-        }
-        result = true;
-        break;
-      case cmUVProcessChain::ExceptionCode::Spawn: {
-        std::string outerr =
-          cmStrCat("\n*** ERROR executing: ", exception.second);
-        if (output) {
-          *output += outerr;
-        }
-        cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, outerr << std::endl);
-      } break;
-      default: {
-        if (this->Impl->OutputTestOutputOnTestFailure) {
-          this->OutputTestErrors(tempOutput);
-        }
-        *retVal = status.TermSignal;
-        std::string outerr =
-          cmStrCat("\n*** Exception executing: ", exception.second);
-        if (output) {
-          *output += outerr;
-        }
-        cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, outerr << std::endl);
-      } break;
-    }
-  }
-
-  return result;
-}
-
 std::string cmCTest::SafeBuildIdField(const std::string& value)
 {
   std::string safevalue(value);
@@ -2284,7 +2120,7 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
 }
 
 // the main entry point of ctest, called from main
-int cmCTest::Run(std::vector<std::string>& args, std::string* output)
+int cmCTest::Run(std::vector<std::string> const& args)
 {
   const char* ctestExec = "ctest";
   bool cmakeAndTest = false;
@@ -2311,10 +2147,10 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
       success = this->SetArgsFromPreset("", listPresets);
     } else {
       if (cmHasLiteralPrefix(*it, "--preset=")) {
-        auto presetName = it->substr(9);
+        auto const& presetName = it->substr(9);
         success = this->SetArgsFromPreset(presetName, listPresets);
       } else if (++it != args.end()) {
-        auto presetName = *it;
+        auto const& presetName = *it;
         success = this->SetArgsFromPreset(presetName, listPresets);
       } else {
         cmSystemTools::Error("'--preset' requires an argument");
@@ -2889,8 +2725,8 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
                      } },
     CommandArgument{ "--force-new-ctest-process",
                      CommandArgument::Values::Zero,
-                     [this](std::string const&) -> bool {
-                       this->Impl->ForceNewCTestProcess = true;
+                     [](std::string const&) -> bool {
+                       // Silently ignore now-removed option.
                        return true;
                      } },
     CommandArgument{ "-W", CommandArgument::Values::One, dashW },
@@ -3095,7 +2931,7 @@ int cmCTest::Run(std::vector<std::string>& args, std::string* output)
   // now what should cmake do? if --build-and-test was specified then
   // we run the build and test handler and return
   if (cmakeAndTest) {
-    return this->RunCMakeAndTest(output);
+    return this->RunCMakeAndTest();
   }
 
   if (executeTests) {
@@ -3166,18 +3002,10 @@ int cmCTest::ExecuteTests()
   return res;
 }
 
-int cmCTest::RunCMakeAndTest(std::string* output)
+int cmCTest::RunCMakeAndTest()
 {
-  this->Impl->Verbose = true;
   int retv = this->Impl->BuildAndTest.Run();
-  *output = this->Impl->BuildAndTest.GetOutput();
-#ifndef CMAKE_BOOTSTRAP
-  cmDynamicLoader::FlushCache();
-#endif
-  if (retv != 0) {
-    cmCTestLog(this, DEBUG,
-               "build and test failing returning: " << retv << std::endl);
-  }
+  std::cout << this->Impl->BuildAndTest.GetOutput();
   return retv;
 }
 
@@ -3564,12 +3392,6 @@ bool cmCTest::GetExtraVerbose() const
   return this->Impl->ExtraVerbose;
 }
 
-void cmCTest::SetStreams(std::ostream* out, std::ostream* err)
-{
-  this->Impl->StreamOut = out;
-  this->Impl->StreamErr = err;
-}
-
 bool cmCTest::GetLabelSummary() const
 {
   return this->Impl->LabelSummary;
@@ -3931,15 +3753,12 @@ void cmCTest::Log(LogType logType, std::string msg, bool suppress)
     }
   }
   if (!this->Impl->Quiet) {
-    std::ostream& out = *this->Impl->StreamOut;
-    std::ostream& err = *this->Impl->StreamErr;
-
     if (logType == HANDLER_TEST_PROGRESS_OUTPUT) {
       if (this->Impl->TestProgressOutput) {
         if (this->Impl->FlushTestProgressLine) {
           printf("\r");
           this->Impl->FlushTestProgressLine = false;
-          out.flush();
+          std::cout.flush();
         }
 
         if (msg.find('\n') != std::string::npos) {
@@ -3947,11 +3766,11 @@ void cmCTest::Log(LogType logType, std::string msg, bool suppress)
           msg.erase(std::remove(msg.begin(), msg.end(), '\n'), msg.end());
         }
 
-        out << msg;
+        std::cout << msg;
 #ifndef _WIN32
         printf("\x1B[K"); // move caret to end
 #endif
-        out.flush();
+        std::cout.flush();
         return;
       }
       logType = HANDLER_OUTPUT;
@@ -3960,29 +3779,29 @@ void cmCTest::Log(LogType logType, std::string msg, bool suppress)
     switch (logType) {
       case DEBUG:
         if (this->Impl->Debug) {
-          out << msg << std::flush;
+          std::cout << msg << std::flush;
         }
         break;
       case OUTPUT:
       case HANDLER_OUTPUT:
         if (this->Impl->Debug || this->Impl->Verbose) {
-          out << msg << std::flush;
+          std::cout << msg << std::flush;
         }
         break;
       case HANDLER_VERBOSE_OUTPUT:
         if (this->Impl->Debug || this->Impl->ExtraVerbose) {
-          out << msg << std::flush;
+          std::cout << msg << std::flush;
         }
         break;
       case WARNING:
-        err << msg << std::flush;
+        std::cerr << msg << std::flush;
         break;
       case ERROR_MESSAGE:
-        err << msg << std::flush;
+        std::cerr << msg << std::flush;
         cmSystemTools::SetErrorOccurred();
         break;
       default:
-        out << msg << std::flush;
+        std::cout << msg << std::flush;
     }
   }
 }
@@ -4004,15 +3823,6 @@ cmDuration cmCTest::GetRemainingTimeAllowed()
 cmDuration cmCTest::MaxDuration()
 {
   return cmDuration(1.0e7);
-}
-
-void cmCTest::OutputTestErrors(std::vector<char> const& process_output)
-{
-  std::string test_outputs("\n*** Test Failed:\n");
-  if (!process_output.empty()) {
-    test_outputs.append(process_output.data(), process_output.size());
-  }
-  cmCTestLog(this, HANDLER_OUTPUT, test_outputs << std::endl);
 }
 
 bool cmCTest::CompressString(std::string& str)
