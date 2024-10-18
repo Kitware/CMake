@@ -5,10 +5,9 @@
 #include <chrono>
 #include <cstdint>
 #include <cstring>
+#include <iostream>
 #include <ratio>
 #include <utility>
-
-#include <cmext/algorithm>
 
 #include <cm3p/uv.h>
 
@@ -34,13 +33,7 @@ cmCTestBuildAndTest::cmCTestBuildAndTest(cmCTest* ctest)
 {
 }
 
-const char* cmCTestBuildAndTest::GetOutput()
-{
-  return this->Output.c_str();
-}
-
-int cmCTestBuildAndTest::RunCMake(std::ostringstream& out,
-                                  std::string& cmakeOutString, cmake* cm)
+int cmCTestBuildAndTest::RunCMake(cmake* cm)
 {
   std::vector<std::string> args;
   args.push_back(cmSystemTools::GetCMakeCommand());
@@ -72,36 +65,27 @@ int cmCTestBuildAndTest::RunCMake(std::ostringstream& out,
   for (std::string const& opt : this->BuildOptions) {
     args.push_back(opt);
   }
+  std::cout << "======== CMake output     ======\n";
   if (cm->Run(args) != 0) {
-    out << "Error: cmake execution failed\n";
-    out << cmakeOutString << "\n";
-    this->Output = out.str();
+    std::cout << "======== End CMake output ======\n";
+    std::cout << "Error: cmake execution failed\n";
     return 1;
   }
   // do another config?
   if (this->BuildTwoConfig) {
     if (cm->Run(args) != 0) {
-      out << "Error: cmake execution failed\n";
-      out << cmakeOutString << "\n";
-      this->Output = out.str();
+      std::cout << "======== End CMake output ======\n";
+      std::cout << "Error: cmake execution failed\n";
       return 1;
     }
   }
-  out << "======== CMake output     ======\n";
-  out << cmakeOutString;
-  out << "======== End CMake output ======\n";
+  std::cout << "======== End CMake output ======\n";
   return 0;
 }
 
 bool cmCTestBuildAndTest::RunTest(std::vector<std::string> const& argv,
-                                  std::string* output, int* retVal,
-                                  cmDuration timeout)
+                                  int* retVal, cmDuration timeout)
 {
-  std::vector<char> tempOutput;
-  if (output) {
-    output->clear();
-  }
-
   cmUVProcessChainBuilder builder;
   builder.AddCommand(argv).SetMergedBuiltinStreams();
   auto chain = builder.Start();
@@ -112,18 +96,14 @@ bool cmCTestBuildAndTest::RunTest(std::vector<std::string> const& argv,
   uv_pipe_open(outputStream, chain.OutputStream());
   auto outputHandle = cmUVStreamRead(
     outputStream,
-    [&output, &tempOutput](std::vector<char> data) {
-      if (output) {
-        cm::append(tempOutput, data.data(), data.data() + data.size());
-      }
+    [&processOutput](std::vector<char> data) {
+      std::string decoded;
+      processOutput.DecodeText(data.data(), data.size(), decoded);
+      std::cout << decoded << std::flush;
     },
     []() {});
 
   bool complete = chain.Wait(static_cast<uint64_t>(timeout.count() * 1000.0));
-  processOutput.DecodeText(tempOutput, tempOutput);
-  if (output && tempOutput.begin() != tempOutput.end()) {
-    output->append(tempOutput.data(), tempOutput.size());
-  }
 
   bool result = false;
 
@@ -136,19 +116,11 @@ bool cmCTestBuildAndTest::RunTest(std::vector<std::string> const& argv,
         result = true;
         break;
       case cmUVProcessChain::ExceptionCode::Spawn: {
-        if (output) {
-          std::string outerr =
-            cmStrCat("\n*** ERROR executing: ", exception.second);
-          *output += outerr;
-        }
+        std::cout << "\n*** ERROR executing: " << exception.second;
       } break;
       default: {
         *retVal = status.TermSignal;
-        if (output) {
-          std::string outerr =
-            cmStrCat("\n*** Exception executing: ", exception.second);
-          *output += outerr;
-        }
+        std::cout << "\n*** Exception executing: " << exception.second;
       } break;
     }
   }
@@ -161,22 +133,22 @@ class cmCTestBuildAndTestCaptureRAII
   cmake& CM;
 
 public:
-  cmCTestBuildAndTestCaptureRAII(cmake& cm, std::string& s)
+  cmCTestBuildAndTestCaptureRAII(cmake& cm)
     : CM(cm)
   {
     cmSystemTools::SetMessageCallback(
-      [&s](const std::string& msg, const cmMessageMetadata& /* unused */) {
-        s += msg;
-        s += "\n";
+      [](const std::string& msg, const cmMessageMetadata& /* unused */) {
+        std::cout << msg << std::endl;
       });
 
-    cmSystemTools::SetStdoutCallback([&s](std::string const& m) { s += m; });
-    cmSystemTools::SetStderrCallback([&s](std::string const& m) { s += m; });
+    cmSystemTools::SetStdoutCallback(
+      [](std::string const& m) { std::cout << m << std::flush; });
+    cmSystemTools::SetStderrCallback(
+      [](std::string const& m) { std::cout << m << std::flush; });
 
-    this->CM.SetProgressCallback([&s](const std::string& msg, float prog) {
+    this->CM.SetProgressCallback([](const std::string& msg, float prog) {
       if (prog < 0) {
-        s += msg;
-        s += "\n";
+        std::cout << msg << std::endl;
       }
     });
   }
@@ -199,19 +171,17 @@ int cmCTestBuildAndTest::Run()
 {
   // if the generator and make program are not specified then it is an error
   if (this->BuildGenerator.empty()) {
-    this->Output = "--build-and-test requires that the generator "
-                   "be provided using the --build-generator "
-                   "command line option.\n";
+    std::cout << "--build-and-test requires that the generator "
+                 "be provided using the --build-generator "
+                 "command line option.\n";
     return 1;
   }
 
   cmake cm(cmake::RoleProject, cmState::Project);
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
-  std::string cmakeOutString;
-  cmCTestBuildAndTestCaptureRAII captureRAII(cm, cmakeOutString);
+  cmCTestBuildAndTestCaptureRAII captureRAII(cm);
   static_cast<void>(captureRAII);
-  std::ostringstream out;
 
   if (this->CTest->GetConfigType().empty() && !this->ConfigSample.empty()) {
     // use the config sample to set the ConfigType
@@ -224,8 +194,8 @@ int cmCTestBuildAndTest::Run()
     if (!fullPath.empty() && !resultingConfig.empty()) {
       this->CTest->SetConfigType(resultingConfig);
     }
-    out << "Using config sample with results: " << fullPath << " and "
-        << resultingConfig << std::endl;
+    std::cout << "Using config sample with results: " << fullPath << " and "
+              << resultingConfig << std::endl;
   }
 
   // we need to honor the timeout specified, the timeout include cmake, build
@@ -233,16 +203,15 @@ int cmCTestBuildAndTest::Run()
   auto clock_start = std::chrono::steady_clock::now();
 
   // make sure the binary dir is there
-  out << "Internal cmake changing into directory: " << this->BinaryDir
-      << std::endl;
+  std::cout << "Internal cmake changing into directory: " << this->BinaryDir
+            << std::endl;
   if (!cmSystemTools::FileIsDirectory(this->BinaryDir)) {
     cmSystemTools::MakeDirectory(this->BinaryDir);
   }
   cmWorkingDirectory workdir(this->BinaryDir);
   if (workdir.Failed()) {
-    auto msg = "Failed to change working directory to " + this->BinaryDir +
-      " : " + std::strerror(workdir.GetLastResult()) + "\n";
-    this->Output = msg;
+    std::cout << "Failed to change working directory to " << this->BinaryDir
+              << " : " << std::strerror(workdir.GetLastResult()) << '\n';
     return 1;
   }
 
@@ -261,7 +230,7 @@ int cmCTestBuildAndTest::Run()
     cm.LoadCache(this->BinaryDir);
   } else {
     // do the cmake step, no timeout here since it is not a sub process
-    if (this->RunCMake(out, cmakeOutString, &cm)) {
+    if (this->RunCMake(&cm)) {
       return 1;
     }
   }
@@ -276,7 +245,7 @@ int cmCTestBuildAndTest::Run()
       remainingTime =
         this->Timeout - (std::chrono::steady_clock::now() - clock_start);
       if (remainingTime <= std::chrono::seconds(0)) {
-        this->Output = "--build-and-test timeout exceeded. ";
+        std::cout << "--build-and-test timeout exceeded. ";
         return 1;
       }
     }
@@ -292,15 +261,13 @@ int cmCTestBuildAndTest::Run()
                                 PackageResolveMode::Disable);
     int retVal = cm.GetGlobalGenerator()->Build(
       cmake::NO_BUILD_PARALLEL_LEVEL, this->SourceDir, this->BinaryDir,
-      this->BuildProject, { tar }, out, this->BuildMakeProgram, config,
-      buildOptions, false, remainingTime);
+      this->BuildProject, { tar }, std::cout, this->BuildMakeProgram, config,
+      buildOptions, false, remainingTime, cmSystemTools::OUTPUT_PASSTHROUGH);
     // if the build failed then return
     if (retVal) {
-      this->Output = out.str();
       return 1;
     }
   }
-  this->Output = out.str();
 
   // if no test was specified then we are done
   if (this->TestCommand.empty()) {
@@ -323,14 +290,14 @@ int cmCTestBuildAndTest::Run()
     this->CTest, this->TestCommand, resultingConfig, extraPaths, failed);
 
   if (!cmSystemTools::FileExists(fullPath)) {
-    out << "Could not find path to executable, perhaps it was not built: "
-        << this->TestCommand << "\n";
-    out << "tried to find it in these places:\n";
-    out << fullPath << "\n";
+    std::cout
+      << "Could not find path to executable, perhaps it was not built: "
+      << this->TestCommand << "\n"
+      << "tried to find it in these places:\n"
+      << fullPath << "\n";
     for (std::string const& fail : failed) {
-      out << fail << "\n";
+      std::cout << fail << "\n";
     }
-    this->Output = out.str();
     return 1;
   }
 
@@ -339,23 +306,21 @@ int cmCTestBuildAndTest::Run()
   for (std::string const& testCommandArg : this->TestCommandArgs) {
     testCommand.push_back(testCommandArg);
   }
-  std::string outs;
   int retval = 0;
   // run the test from the this->BuildRunDir if set
   if (!this->BuildRunDir.empty()) {
-    out << "Run test in directory: " << this->BuildRunDir << "\n";
+    std::cout << "Run test in directory: " << this->BuildRunDir << "\n";
     if (!workdir.SetDirectory(this->BuildRunDir)) {
-      out << "Failed to change working directory : "
-          << std::strerror(workdir.GetLastResult()) << "\n";
-      this->Output = out.str();
+      std::cout << "Failed to change working directory : "
+                << std::strerror(workdir.GetLastResult()) << "\n";
       return 1;
     }
   }
-  out << "Running test command: \"" << fullPath << "\"";
+  std::cout << "Running test command: \"" << fullPath << "\"";
   for (std::string const& testCommandArg : this->TestCommandArgs) {
-    out << " \"" << testCommandArg << "\"";
+    std::cout << " \"" << testCommandArg << "\"";
   }
-  out << "\n";
+  std::cout << "\n";
 
   // how much time is remaining
   cmDuration remainingTime = std::chrono::seconds(0);
@@ -363,19 +328,17 @@ int cmCTestBuildAndTest::Run()
     remainingTime =
       this->Timeout - (std::chrono::steady_clock::now() - clock_start);
     if (remainingTime <= std::chrono::seconds(0)) {
-      this->Output = "--build-and-test timeout exceeded. ";
+      std::cout << "--build-and-test timeout exceeded. ";
       return 1;
     }
   }
 
-  bool runTestRes = this->RunTest(testCommand, &outs, &retval, remainingTime);
+  bool runTestRes = this->RunTest(testCommand, &retval, remainingTime);
 
   if (!runTestRes || retval != 0) {
-    out << "Test command failed: " << testCommand[0] << "\n";
+    std::cout << "\nTest command failed: " << testCommand[0] << "\n";
     retval = 1;
   }
 
-  out << outs << "\n";
-  this->Output = out.str();
   return retval;
 }

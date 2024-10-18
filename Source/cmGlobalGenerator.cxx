@@ -2212,9 +2212,9 @@ int cmGlobalGenerator::TryCompile(int jobs, const std::string& srcdir,
   cmBuildOptions defaultBuildOptions(false, fast, PackageResolveMode::Disable);
 
   std::stringstream ostr;
-  auto ret =
-    this->Build(jobs, srcdir, bindir, projectName, newTarget, ostr, "", config,
-                defaultBuildOptions, true, this->TryCompileTimeout);
+  auto ret = this->Build(jobs, srcdir, bindir, projectName, newTarget, ostr,
+                         "", config, defaultBuildOptions, true,
+                         this->TryCompileTimeout, cmSystemTools::OUTPUT_NONE);
   output = ostr.str();
   return ret;
 }
@@ -2243,7 +2243,7 @@ int cmGlobalGenerator::Build(
   const std::string& projectName, const std::vector<std::string>& targets,
   std::ostream& ostr, const std::string& makeCommandCSTR,
   const std::string& config, const cmBuildOptions& buildOptions, bool verbose,
-  cmDuration timeout, cmSystemTools::OutputOption outputflag,
+  cmDuration timeout, cmSystemTools::OutputOption outputMode,
   std::vector<std::string> const& nativeOptions)
 {
   bool hideconsole = cmSystemTools::GetRunCommandHideConsole();
@@ -2268,17 +2268,18 @@ int cmGlobalGenerator::Build(
 
   int retVal = 0;
   cmSystemTools::SetRunCommandHideConsole(true);
-  std::string outputBuffer;
-  std::string* outputPtr = &outputBuffer;
+
+  // Capture build command output when outputMode == OUTPUT_NONE.
+  std::string outputBuf;
 
   std::vector<GeneratedMakeCommand> makeCommand = this->GenerateBuildCommand(
     makeCommandCSTR, projectName, bindir, targets, realConfig, jobs, verbose,
     buildOptions, nativeOptions);
 
   // Workaround to convince some commands to produce output.
-  if (outputflag == cmSystemTools::OUTPUT_PASSTHROUGH &&
+  if (outputMode == cmSystemTools::OUTPUT_PASSTHROUGH &&
       makeCommand.back().RequiresOutputForward) {
-    outputflag = cmSystemTools::OUTPUT_FORWARD;
+    outputMode = cmSystemTools::OUTPUT_FORWARD;
   }
 
   // should we do a clean first?
@@ -2297,16 +2298,16 @@ int cmGlobalGenerator::Build(
       return 1;
     }
     if (!cmSystemTools::RunSingleCommand(cleanCommand.front().PrimaryCommand,
-                                         outputPtr, outputPtr, &retVal,
-                                         nullptr, outputflag, timeout)) {
+                                         &outputBuf, &outputBuf, &retVal,
+                                         nullptr, outputMode, timeout)) {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
       cmSystemTools::Error("Generator: execution of make clean failed.");
-      ostr << *outputPtr << "\nGenerator: execution of make clean failed."
+      ostr << outputBuf << "\nGenerator: execution of make clean failed."
            << std::endl;
 
       return 1;
     }
-    ostr << *outputPtr;
+    ostr << outputBuf;
   }
 
   // now build
@@ -2328,22 +2329,22 @@ int cmGlobalGenerator::Build(
     }
 
     ostr << outputMakeCommandStr << std::endl;
-    if (!cmSystemTools::RunSingleCommand(command->PrimaryCommand, outputPtr,
-                                         outputPtr, &retVal, nullptr,
-                                         outputflag, timeout)) {
+    if (!cmSystemTools::RunSingleCommand(command->PrimaryCommand, &outputBuf,
+                                         &outputBuf, &retVal, nullptr,
+                                         outputMode, timeout)) {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
       cmSystemTools::Error(
         cmStrCat("Generator: build tool execution failed, command was: ",
                  makeCommandStr));
-      ostr << *outputPtr
+      ostr << outputBuf
            << "\nGenerator: build tool execution failed, command was: "
            << outputMakeCommandStr << std::endl;
 
       return 1;
     }
-    ostr << *outputPtr << std::flush;
+    ostr << outputBuf << std::flush;
     if (needBuildOutput) {
-      buildOutput += *outputPtr;
+      buildOutput += outputBuf;
     }
   }
   ostr << std::endl;
