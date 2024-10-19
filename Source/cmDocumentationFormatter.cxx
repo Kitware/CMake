@@ -126,6 +126,8 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os,
   const std::ptrdiff_t width = this->TextWidth - this->TextIndent;
   std::ptrdiff_t column = 0;
 
+  const auto padding = std::string(this->TextIndent, ' ');
+
   // Loop until the end of the text.
   for (const char *l = text.c_str(), *r = skipToSpace(text.c_str()); *l;
        l = skipSpaces(r), r = skipToSpace(l)) {
@@ -141,7 +143,7 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os,
         } else if (!firstLine && this->TextIndent) {
           // First word on line.  Print indentation unless this is the
           // first line.
-          os << std::string(this->TextIndent, ' ');
+          os << padding;
         }
 
         // Print the word.
@@ -164,7 +166,7 @@ void cmDocumentationFormatter::PrintColumn(std::ostream& os,
       os << '\n';
       firstLine = false;
       if (r > l) {
-        os << std::string(this->TextIndent, ' ');
+        os << padding;
         os.write(l, r - l);
         column = r - l;
         newSentence = (*(r - 1) == '.');
