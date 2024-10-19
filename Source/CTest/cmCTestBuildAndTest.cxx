@@ -33,7 +33,7 @@ cmCTestBuildAndTest::cmCTestBuildAndTest(cmCTest* ctest)
 {
 }
 
-int cmCTestBuildAndTest::RunCMake(cmake* cm)
+bool cmCTestBuildAndTest::RunCMake(cmake* cm)
 {
   std::vector<std::string> args;
   args.push_back(cmSystemTools::GetCMakeCommand());
@@ -69,18 +69,18 @@ int cmCTestBuildAndTest::RunCMake(cmake* cm)
   if (cm->Run(args) != 0) {
     std::cout << "======== End CMake output ======\n";
     std::cout << "Error: cmake execution failed\n";
-    return 1;
+    return false;
   }
   // do another config?
   if (this->BuildTwoConfig) {
     if (cm->Run(args) != 0) {
       std::cout << "======== End CMake output ======\n";
       std::cout << "Error: cmake execution failed\n";
-      return 1;
+      return false;
     }
   }
   std::cout << "======== End CMake output ======\n";
-  return 0;
+  return true;
 }
 
 bool cmCTestBuildAndTest::RunTest(std::vector<std::string> const& argv,
@@ -230,7 +230,7 @@ int cmCTestBuildAndTest::Run()
     cm.LoadCache(this->BinaryDir);
   } else {
     // do the cmake step, no timeout here since it is not a sub process
-    if (this->RunCMake(&cm)) {
+    if (!this->RunCMake(&cm)) {
       return 1;
     }
   }

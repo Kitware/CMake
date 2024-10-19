@@ -29,7 +29,7 @@ public:
 private:
   cmCTest* CTest;
 
-  int RunCMake(cmake* cm);
+  bool RunCMake(cmake* cm);
   bool RunTest(std::vector<std::string> const& args, int* retVal,
                cmDuration timeout);
 
