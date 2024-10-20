@@ -1497,12 +1497,14 @@ bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const
 
   // This generator does not support duplicate custom targets.
   std::ostringstream e;
+  // clang-format off
   e << "This project has enabled the ALLOW_DUPLICATE_CUSTOM_TARGETS "
-    << "global property.  "
-    << "The \"" << this->GetName() << "\" generator does not support "
-    << "duplicate custom targets.  "
-    << "Consider using a Makefiles generator or fix the project to not "
-    << "use duplicate target names.";
+       "global property.  "
+       "The \"" << this->GetName() << "\" generator does not support "
+       "duplicate custom targets.  "
+       "Consider using a Makefiles generator or fix the project to not "
+       "use duplicate target names.";
+  // clang-format on
   cmSystemTools::Error(e.str());
   return false;
 }
@@ -1771,11 +1773,12 @@ void cmGlobalGenerator::Generate()
 
   if (!this->CMP0042WarnTargets.empty()) {
     std::ostringstream w;
-    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0042) << "\n";
-    w << "MACOSX_RPATH is not specified for"
+    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0042)
+      << "\n"
+         "MACOSX_RPATH is not specified for"
          " the following targets:\n";
     for (std::string const& t : this->CMP0042WarnTargets) {
-      w << " " << t << "\n";
+      w << ' ' << t << '\n';
     }
     this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING,
                                            w.str());
@@ -1792,7 +1795,7 @@ void cmGlobalGenerator::Generate()
       ;
     /* clang-format on */
     for (std::string const& t : this->CMP0068WarnTargets) {
-      w << " " << t << "\n";
+      w << ' ' << t << '\n';
     }
     this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING,
                                            w.str());
@@ -2805,7 +2808,7 @@ static bool RaiseCMP0037Message(cmake* cm, cmTarget* tgt,
   bool issueMessage = false;
   switch (tgt->GetPolicyStatusCMP0037()) {
     case cmPolicies::WARN:
-      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0037) << "\n";
+      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0037) << '\n';
       issueMessage = true;
       CM_FALLTHROUGH;
     case cmPolicies::OLD:
@@ -2819,7 +2822,7 @@ static bool RaiseCMP0037Message(cmake* cm, cmTarget* tgt,
   }
   if (issueMessage) {
     e << "The target name \"" << targetNameAsWritten << "\" is reserved "
-      << reason << ".";
+      << reason << '.';
     if (messageType == MessageType::AUTHOR_WARNING) {
       e << "  It may result in undefined behavior.";
     }
@@ -3013,7 +3016,7 @@ void cmGlobalGenerator::ReserveGlobalTargetCodegen()
   bool issueMessage = false;
   switch (policyStatus) {
     case cmPolicies::WARN:
-      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0171) << "\n";
+      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0171) << '\n';
       issueMessage = true;
       CM_FALLTHROUGH;
     case cmPolicies::OLD:
@@ -3120,8 +3123,8 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
       std::set<std::string>* componentsSet = &this->InstallComponents;
       std::ostringstream ostr;
       if (!componentsSet->empty()) {
-        ostr << "Available install components are: ";
-        ostr << cmWrap('"', *componentsSet, '"', " ");
+        ostr << "Available install components are: "
+             << cmWrap('"', *componentsSet, '"', " ");
       } else {
         ostr << "Only default component available";
       }
@@ -3736,7 +3739,7 @@ void cmGlobalGenerator::WriteRuleHashes(std::string const& pfile)
     fout << "# Hashes of file build rules.\n";
     for (auto const& rh : this->RuleHashes) {
       fout.write(rh.second.Data, 32);
-      fout << " " << rh.first << "\n";
+      fout << ' ' << rh.first << '\n';
     }
   }
 }
@@ -3754,7 +3757,7 @@ void cmGlobalGenerator::WriteSummary()
         continue;
       }
       this->WriteSummary(tgt.get());
-      fout << tgt->GetSupportDirectory() << "\n";
+      fout << tgt->GetSupportDirectory() << '\n';
     }
   }
 }
@@ -3792,7 +3795,7 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
       if (!labels.empty()) {
         fout << "# Target labels\n";
         for (std::string const& l : labels) {
-          fout << " " << l << "\n";
+          fout << ' ' << l << '\n';
           lj_target_labels.append(l);
         }
       }
@@ -3815,12 +3818,12 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     }
 
     for (auto const& li : directoryLabelsList) {
-      fout << " " << li << "\n";
+      fout << ' ' << li << '\n';
       lj_target_labels.append(li);
     }
 
     for (auto const& li : cmakeDirectoryLabelsList) {
-      fout << " " << li << "\n";
+      fout << ' ' << li << '\n';
       lj_target_labels.append(li);
     }
 
@@ -3837,13 +3840,13 @@ void cmGlobalGenerator::WriteSummary(cmGeneratorTarget* target)
     for (cmSourceFile* sf : cmMakeRange(sources.cbegin(), sourcesEnd)) {
       Json::Value& lj_source = lj_sources.append(Json::objectValue);
       std::string const& sfp = sf->ResolveFullPath();
-      fout << sfp << "\n";
+      fout << sfp << '\n';
       lj_source["file"] = sfp;
       if (cmValue svalue = sf->GetProperty("LABELS")) {
         Json::Value& lj_source_labels = lj_source["labels"] = Json::arrayValue;
         labels.assign(*svalue);
         for (auto const& label : labels) {
-          fout << " " << label << "\n";
+          fout << ' ' << label << '\n';
           lj_source_labels.append(label);
         }
       }
