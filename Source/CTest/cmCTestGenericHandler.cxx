@@ -8,27 +8,20 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-cmCTestGenericHandler::cmCTestGenericHandler()
+cmCTestGenericHandler::cmCTestGenericHandler(cmCTest* ctest)
+  : CTest(ctest)
 {
   this->HandlerVerbose = cmSystemTools::OUTPUT_NONE;
-  this->CTest = nullptr;
   this->SubmitIndex = 0;
   this->AppendXML = false;
   this->Quiet = false;
-  this->TestLoad = 0;
-}
-
-cmCTestGenericHandler::~cmCTestGenericHandler() = default;
-
-void cmCTestGenericHandler::Initialize(cmCTest* ctest)
-{
-  this->CTest = ctest;
-  this->AppendXML = false;
   this->TestLoad = 0;
 
   this->SetVerbose(ctest->GetExtraVerbose());
   this->SetSubmitIndex(ctest->GetSubmitIndex());
 }
+
+cmCTestGenericHandler::~cmCTestGenericHandler() = default;
 
 bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
                                               const char* name,

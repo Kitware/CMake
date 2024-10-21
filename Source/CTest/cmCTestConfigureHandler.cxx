@@ -11,11 +11,9 @@
 #include "cmGeneratedFileStream.h"
 #include "cmXMLWriter.h"
 
-cmCTestConfigureHandler::cmCTestConfigureHandler() = default;
-
-void cmCTestConfigureHandler::Initialize(cmCTest* ctest)
+cmCTestConfigureHandler::cmCTestConfigureHandler(cmCTest* ctest)
+  : Superclass(ctest)
 {
-  this->Superclass::Initialize(ctest);
 }
 
 // clearly it would be nice if this were broken up into a few smaller

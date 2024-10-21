@@ -274,7 +274,9 @@ inline int GetNextRealNumber(std::string const& in, double& val,
 
 } // namespace
 
-cmCTestTestHandler::cmCTestTestHandler()
+cmCTestTestHandler::cmCTestTestHandler(cmCTest* ctest)
+  : Superclass(ctest)
+  , TestOptions(ctest->GetTestOptions())
 {
   this->UseIncludeRegExpFlag = false;
   this->UseExcludeRegExpFlag = false;
@@ -302,36 +304,8 @@ cmCTestTestHandler::cmCTestTestHandler()
 
   // Capture content from <CTestLabel>...</CTestLabel>
   this->CustomLabelRegex.compile("<CTestLabel>(.*)</CTestLabel>");
-}
-
-void cmCTestTestHandler::Initialize(cmCTest* ctest)
-{
-  this->Superclass::Initialize(ctest);
-  this->TestOptions = ctest->GetTestOptions();
 
   this->ElapsedTestingTime = cmDuration();
-
-  this->TestResults.clear();
-
-  this->CustomTestsIgnore.clear();
-  this->StartTest.clear();
-  this->EndTest.clear();
-
-  this->CustomPreTest.clear();
-  this->CustomPostTest.clear();
-
-  this->TestsToRun.clear();
-
-  this->UseIncludeRegExpFlag = false;
-  this->UseExcludeRegExpFlag = false;
-  this->UseExcludeRegExpFirst = false;
-  this->IncludeLabelRegularExpressions.clear();
-  this->ExcludeLabelRegularExpressions.clear();
-  this->TestsToRunByName.reset();
-  this->TestsToExcludeByName.reset();
-
-  this->TestsToRunString.clear();
-  this->TestList.clear();
 }
 
 void cmCTestTestHandler::PopulateCustomVectors(cmMakefile* mf)

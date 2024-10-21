@@ -8,7 +8,7 @@
 #include <cm/vector>
 #include <cmext/string_view>
 
-#include "cmCTest.h"
+#include "cmCTestGenericHandler.h"
 #include "cmCTestUploadHandler.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -35,12 +35,12 @@ void cmCTestUploadCommand::CheckArguments()
   });
 }
 
-cmCTestGenericHandler* cmCTestUploadCommand::InitializeHandler()
+std::unique_ptr<cmCTestGenericHandler>
+cmCTestUploadCommand::InitializeHandler()
 {
-  cmCTestUploadHandler* handler = this->CTest->GetUploadHandler();
-  handler->Initialize(this->CTest);
+  auto handler = cm::make_unique<cmCTestUploadHandler>(this->CTest);
   handler->SetFiles(
     std::set<std::string>(this->Files.begin(), this->Files.end()));
   handler->SetQuiet(this->Quiet);
-  return handler;
+  return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
 }

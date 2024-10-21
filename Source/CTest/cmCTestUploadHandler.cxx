@@ -11,12 +11,9 @@
 #include "cmVersion.h"
 #include "cmXMLWriter.h"
 
-cmCTestUploadHandler::cmCTestUploadHandler() = default;
-
-void cmCTestUploadHandler::Initialize(cmCTest* ctest)
+cmCTestUploadHandler::cmCTestUploadHandler(cmCTest* ctest)
+  : Superclass(ctest)
 {
-  this->Superclass::Initialize(ctest);
-  this->Files.clear();
 }
 
 void cmCTestUploadHandler::SetFiles(std::set<std::string> const& files)

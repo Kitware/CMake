@@ -91,7 +91,7 @@ public:
   //! pass the -I argument down
   void SetTestsToRunInformation(std::string const& in);
 
-  cmCTestTestHandler();
+  cmCTestTestHandler(cmCTest* ctest);
 
   /*
    * Add the test to the list of tests to be executed
@@ -107,8 +107,6 @@ public:
    * Set directory properties
    */
   bool SetDirectoryProperties(const std::vector<std::string>& args);
-
-  void Initialize(cmCTest* ctest) override;
 
   struct cmCTestTestResourceRequirement
   {

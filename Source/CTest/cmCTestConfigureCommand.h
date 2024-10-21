@@ -39,7 +39,7 @@ public:
 
 protected:
   void BindArguments() override;
-  cmCTestGenericHandler* InitializeHandler() override;
+  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
 
   std::string Options;
 };

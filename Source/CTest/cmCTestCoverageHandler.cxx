@@ -40,17 +40,9 @@ class cmMakefile;
 
 #define SAFEDIV(x, y) (((y) != 0) ? ((x) / (y)) : (0))
 
-cmCTestCoverageHandler::cmCTestCoverageHandler() = default;
-
-void cmCTestCoverageHandler::Initialize(cmCTest* ctest)
+cmCTestCoverageHandler::cmCTestCoverageHandler(cmCTest* ctest)
+  : Superclass(ctest)
 {
-  this->Superclass::Initialize(ctest);
-  this->CustomCoverageExclude.clear();
-  this->SourceLabels.clear();
-  this->TargetDirs.clear();
-  this->LabelIdMap.clear();
-  this->Labels.clear();
-  this->LabelFilter.clear();
 }
 
 void cmCTestCoverageHandler::CleanCoverageLogFiles(std::ostream& log)

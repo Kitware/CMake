@@ -37,14 +37,9 @@ public:
    */
   int ProcessHandler() override;
 
-  cmCTestBuildHandler();
+  cmCTestBuildHandler(cmCTest* ctest);
 
   void PopulateCustomVectors(cmMakefile* mf) override;
-
-  /**
-   * Initialize handler
-   */
-  void Initialize(cmCTest* ctest) override;
 
   int GetTotalErrors() const { return this->TotalErrors; }
   int GetTotalWarnings() const { return this->TotalWarnings; }

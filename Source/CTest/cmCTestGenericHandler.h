@@ -42,11 +42,6 @@ public:
   virtual int ProcessHandler() = 0;
 
   /**
-   * Initialize handler
-   */
-  virtual void Initialize(cmCTest* ctest);
-
-  /**
    * Get the CTest instance
    */
   cmCTest* GetCTestInstance() { return this->CTest; }
@@ -54,7 +49,7 @@ public:
   /**
    * Construct handler
    */
-  cmCTestGenericHandler();
+  cmCTestGenericHandler(cmCTest* ctest);
   virtual ~cmCTestGenericHandler();
 
   using t_StringToString = std::map<std::string, std::string>;

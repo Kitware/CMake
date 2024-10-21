@@ -116,11 +116,10 @@ static size_t cmCTestSubmitHandlerCurlDebugCallback(CURL* /*unused*/,
   return 0;
 }
 
-cmCTestSubmitHandler::cmCTestSubmitHandler() = default;
-
-void cmCTestSubmitHandler::Initialize(cmCTest* ctest)
+cmCTestSubmitHandler::cmCTestSubmitHandler(cmCTest* ctest)
+  : Superclass(ctest)
+  , HttpHeaders(ctest->GetCommandLineHttpHeaders())
 {
-  this->Superclass::Initialize(ctest);
   // We submit all available parts by default.
   for (cmCTest::Part p = cmCTest::PartStart; p != cmCTest::PartCount;
        p = static_cast<cmCTest::Part>(p + 1)) {
@@ -128,12 +127,8 @@ void cmCTestSubmitHandler::Initialize(cmCTest* ctest)
   }
   this->HasWarnings = false;
   this->HasErrors = false;
-  this->HTTPProxy.clear();
   this->HTTPProxyType = 0;
-  this->HTTPProxyAuth.clear();
   this->LogFile = nullptr;
-  this->Files.clear();
-  this->HttpHeaders = ctest->GetCommandLineHttpHeaders();
 }
 
 bool cmCTestSubmitHandler::SubmitUsingHTTP(

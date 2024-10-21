@@ -42,7 +42,7 @@ public:
 
 protected:
   void BindArguments() override;
-  cmCTestGenericHandler* InitializeHandler() override;
+  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
 
   cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Labels;
 };

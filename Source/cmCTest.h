@@ -20,14 +20,6 @@
 #include "cmProcessOutput.h"
 
 class cmake;
-class cmCTestBuildHandler;
-class cmCTestCoverageHandler;
-class cmCTestTestHandler;
-class cmCTestUpdateHandler;
-class cmCTestConfigureHandler;
-class cmCTestMemCheckHandler;
-class cmCTestSubmitHandler;
-class cmCTestUploadHandler;
 class cmGeneratedFileStream;
 class cmMakefile;
 class cmValue;
@@ -288,18 +280,6 @@ public:
   /** Are we producing XML */
   bool GetProduceXML();
   void SetProduceXML(bool v);
-
-  /**
-   * Get the handler object
-   */
-  cmCTestBuildHandler* GetBuildHandler();
-  cmCTestCoverageHandler* GetCoverageHandler();
-  cmCTestTestHandler* GetTestHandler();
-  cmCTestUpdateHandler* GetUpdateHandler();
-  cmCTestConfigureHandler* GetConfigureHandler();
-  cmCTestMemCheckHandler* GetMemCheckHandler();
-  cmCTestSubmitHandler* GetSubmitHandler();
-  cmCTestUploadHandler* GetUploadHandler();
 
   /**
    * Set the CTest variable from CMake variable

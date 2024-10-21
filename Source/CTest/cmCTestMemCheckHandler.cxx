@@ -118,25 +118,14 @@ public:
 #define BOUNDS_CHECKER_MARKER                                                 \
   "******######*****Begin BOUNDS CHECKER XML******######******"
 
-cmCTestMemCheckHandler::cmCTestMemCheckHandler()
+cmCTestMemCheckHandler::cmCTestMemCheckHandler(cmCTest* ctest)
+  : Superclass(ctest)
 {
   this->MemCheck = true;
   this->TestOptions.OutputSizePassed = 0;
   this->TestOptions.OutputSizeFailed = 0;
   this->LogWithPID = false;
-}
-
-void cmCTestMemCheckHandler::Initialize(cmCTest* ctest)
-{
-  this->Superclass::Initialize(ctest);
-  this->LogWithPID = false;
-  this->TestOptions.OutputSizePassed = 0;
-  this->TestOptions.OutputSizeFailed = 0;
-  this->MemoryTester.clear();
-  this->MemoryTesterDynamicOptions.clear();
-  this->MemoryTesterOptions.clear();
   this->MemoryTesterStyle = UNKNOWN;
-  this->MemoryTesterOutputFile.clear();
   this->DefectCount = 0;
 }
 

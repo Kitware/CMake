@@ -42,8 +42,8 @@ public:
 
 protected:
   void BindArguments() override;
-  virtual cmCTestTestHandler* InitializeActualHandler();
-  cmCTestGenericHandler* InitializeHandler() override;
+  virtual std::unique_ptr<cmCTestTestHandler> InitializeActualHandler();
+  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
 
   std::string Start;
   std::string End;

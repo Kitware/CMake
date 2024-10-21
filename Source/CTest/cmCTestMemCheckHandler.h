@@ -26,9 +26,7 @@ public:
 
   void PopulateCustomVectors(cmMakefile* mf) override;
 
-  cmCTestMemCheckHandler();
-
-  void Initialize(cmCTest* ctest) override;
+  cmCTestMemCheckHandler(cmCTest* ctest);
 
   int GetDefectCount() const;
 

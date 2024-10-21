@@ -35,12 +35,9 @@ static const char* cmCTestUpdateHandlerUpdateToString(int type)
   return cmCTestUpdateHandlerUpdateStrings[type];
 }
 
-cmCTestUpdateHandler::cmCTestUpdateHandler() = default;
-
-void cmCTestUpdateHandler::Initialize(cmCTest* ctest)
+cmCTestUpdateHandler::cmCTestUpdateHandler(cmCTest* ctest)
+  : Superclass(ctest)
 {
-  this->Superclass::Initialize(ctest);
-  this->UpdateCommand.clear();
   this->UpdateType = e_CVS;
 }
 

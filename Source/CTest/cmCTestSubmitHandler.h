@@ -23,15 +23,13 @@ class cmCTestSubmitHandler : public cmCTestGenericHandler
 public:
   using Superclass = cmCTestGenericHandler;
 
-  cmCTestSubmitHandler();
+  cmCTestSubmitHandler(cmCTest* ctest);
   ~cmCTestSubmitHandler() override { this->LogFile = nullptr; }
 
   /*
    * The main entry point for this class
    */
   int ProcessHandler() override;
-
-  void Initialize(cmCTest* ctest) override;
 
   /** Specify a set of parts (by name) to submit.  */
   void SelectParts(std::set<cmCTest::Part> const& parts);

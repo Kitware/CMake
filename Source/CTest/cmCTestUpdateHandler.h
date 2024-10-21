@@ -26,7 +26,7 @@ public:
    */
   int ProcessHandler() override;
 
-  cmCTestUpdateHandler();
+  cmCTestUpdateHandler(cmCTest* ctest);
 
   enum
   {
@@ -39,11 +39,6 @@ public:
     e_P4,
     e_LAST
   };
-
-  /**
-   * Initialize handler
-   */
-  void Initialize(cmCTest* ctest) override;
 
 private:
   // Some structures needed for update
