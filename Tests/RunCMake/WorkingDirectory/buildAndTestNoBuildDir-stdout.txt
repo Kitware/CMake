@@ -1,1 +1,1 @@
-Failed to change working directory to .*[/\\]buildAndTestNoBuildDir[/\\]CMakeLists.txt :
+Failed to change working directory to ".*[/\\]buildAndTestNoBuildDir[/\\]CMakeLists.txt": (Not a directory|Invalid argument)

@@ -3722,10 +3722,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   // use the cmake object instead of calling cmake
   cmWorkingDirectory workdir(bindir);
   if (workdir.Failed()) {
-    this->IssueMessage(MessageType::FATAL_ERROR,
-                       cmStrCat("Failed to set working directory to ", bindir,
-                                " : ",
-                                std::strerror(workdir.GetLastResult())));
+    this->IssueMessage(MessageType::FATAL_ERROR, workdir.GetError());
     cmSystemTools::SetFatalErrorOccurred();
     this->IsSourceFileTryCompile = false;
     return 1;

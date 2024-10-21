@@ -8,7 +8,6 @@
 #include <cmath>
 #include <cstddef> // IWYU pragma: keep
 #include <cstdlib>
-#include <cstring>
 #include <iomanip>
 #include <iostream>
 #include <list>
@@ -279,9 +278,7 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   cmWorkingDirectory workdir(this->Properties[test]->Directory);
   if (workdir.Failed()) {
     cmCTestRunTest::StartFailure(std::move(testRun), this->Total,
-                                 "Failed to change working directory to " +
-                                   this->Properties[test]->Directory + " : " +
-                                   std::strerror(workdir.GetLastResult()),
+                                 workdir.GetError(),
                                  "Failed to change working directory");
     return;
   }

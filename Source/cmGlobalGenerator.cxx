@@ -2255,8 +2255,7 @@ int cmGlobalGenerator::Build(
   ostr << "Change Dir: '" << bindir << '\'' << std::endl;
   if (workdir.Failed()) {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);
-    std::string err = cmStrCat("Failed to change directory: ",
-                               std::strerror(workdir.GetLastResult()));
+    std::string const& err = workdir.GetError();
     cmSystemTools::Error(err);
     ostr << err << std::endl;
     return 1;

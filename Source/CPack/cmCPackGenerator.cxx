@@ -3,7 +3,6 @@
 #include "cmCPackGenerator.h"
 
 #include <algorithm>
-#include <cstring>
 #include <memory>
 #include <utility>
 
@@ -434,10 +433,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
         cmWorkingDirectory workdir(goToDir);
         if (workdir.Failed()) {
           cmCPackLogger(cmCPackLog::LOG_ERROR,
-                        "Failed to change working directory to "
-                          << goToDir << " : "
-                          << std::strerror(workdir.GetLastResult())
-                          << std::endl);
+                        workdir.GetError() << std::endl);
           return 0;
         }
         for (auto const& symlinked : symlinkedFiles) {

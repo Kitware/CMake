@@ -10,6 +10,7 @@
 #include <memory>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <cm/optional>
@@ -27,7 +28,6 @@ class cmCTestConfigureHandler;
 class cmCTestMemCheckHandler;
 class cmCTestSubmitHandler;
 class cmCTestUploadHandler;
-class cmCTestStartCommand;
 class cmGeneratedFileStream;
 class cmMakefile;
 class cmXMLWriter;
@@ -68,28 +68,19 @@ public:
   /** Process Command line arguments */
   int Run(std::vector<std::string> const& args);
 
+  /** Initialize a dashboard run in the given build tree. */
+  void Initialize(std::string const& binary_dir);
+
+  bool CreateNewTag(bool quiet);
+  bool ReadExistingTag(bool quiet);
+
   /**
-   * Initialize and finalize testing
+   * Initialize ctest for executing tests.
    */
-  bool InitializeFromCommand(cmCTestStartCommand* command);
-  void Finalize();
+  void InitializeTesting(const std::string& binary_dir);
 
   /**
    * Process the dashboard client steps.
-   *
-   * Steps are enabled using SetTest()
-   *
-   * The execution of the steps (or #Part) should look like this:
-   *
-   * /code
-   * ctest foo;
-   * foo.Initialize();
-   * // Set some things on foo
-   * foo.ProcessSteps();
-   * foo.Finalize();
-   * /endcode
-   *
-   * \sa Initialize(), Finalize(), Part, PartInfo, SetTest()
    */
   int ProcessSteps();
 
@@ -139,7 +130,8 @@ public:
   void SetTestModel(int mode);
   int GetTestModel() const;
 
-  std::string GetTestModelString();
+  std::string GetTestModelString() const;
+  std::string GetTestGroupString() const;
   static int GetTestModelFromString(const std::string& str);
   static std::string CleanString(const std::string& str,
                                  std::string::size_type spos = 0);
@@ -399,7 +391,7 @@ public:
   /**
    * Read the custom configuration files and apply them to the current ctest
    */
-  int ReadCustomConfigurationFileTree(const std::string& dir, cmMakefile* mf);
+  void ReadCustomConfigurationFileTree(const std::string& dir, cmMakefile* mf);
 
   std::vector<std::string>& GetInitialCommandLineArguments();
 
@@ -449,6 +441,9 @@ public:
   void GenerateSubprojectsOutput(cmXMLWriter& xml);
   std::vector<std::string> GetLabelsForSubprojects();
 
+  /** Reread the configuration file */
+  bool UpdateCTestConfiguration();
+
 private:
   void SetPersistentOptionIfNotEmpty(const std::string& value,
                                      const std::string& optionName);
@@ -458,16 +453,6 @@ private:
   int GenerateNotesFile(const std::string& files);
 
   void BlockTestErrorDiagnostics();
-
-  /**
-   * Initialize a dashboard run in the given build tree.  The "command"
-   * argument is non-NULL when running from a command-driven (ctest_start)
-   * dashboard script, and NULL when running from the CTest command
-   * line.  Note that a declarative dashboard script does not actually
-   * call this method because it sets CTEST_COMMAND to drive a build
-   * through the ctest command line.
-   */
-  int Initialize(const std::string& binary_dir, cmCTestStartCommand* command);
 
   /** parse the option after -D and convert it into the appropriate steps */
   bool AddTestsForDashboardType(std::string const& targ);
@@ -492,9 +477,6 @@ private:
   /** returns true iff the console supports colored output */
   static bool ColoredOutputSupportedByConsole();
 
-  /** Reread the configuration file */
-  bool UpdateCTestConfiguration();
-
   /** Create note from files. */
   int GenerateCTestNotesOutput(cmXMLWriter& xml,
                                std::vector<std::string> const& files);
@@ -504,10 +486,8 @@ private:
                             const char* varg2 = nullptr);
 
   int RunCMakeAndTest();
+  int RunScripts(std::vector<std::pair<std::string, bool>> const& scripts);
   int ExecuteTests();
-
-  /** return true iff change directory was successful */
-  bool TryToChangeDirectory(std::string const& dir);
 
   struct Private;
   std::unique_ptr<Private> Impl;

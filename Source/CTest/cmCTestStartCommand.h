@@ -24,8 +24,6 @@ class cmExecutionStatus;
 class cmCTestStartCommand : public cmCTestCommand
 {
 public:
-  cmCTestStartCommand();
-
   /**
    * This is a virtual constructor for the command.
    */
@@ -33,8 +31,6 @@ public:
   {
     auto ni = cm::make_unique<cmCTestStartCommand>();
     ni->CTest = this->CTest;
-    ni->CreateNewTag = this->CreateNewTag;
-    ni->Quiet = this->Quiet;
     return std::unique_ptr<cmCommand>(std::move(ni));
   }
 
@@ -45,18 +41,6 @@ public:
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) override;
 
-  /**
-   * Will this invocation of ctest_start create a new TAG file?
-   */
-  bool ShouldCreateNewTag() { return this->CreateNewTag; }
-
-  /**
-   * Should this invocation of ctest_start output non-error messages?
-   */
-  bool ShouldBeQuiet() { return this->Quiet; }
-
 private:
   bool InitialCheckout(std::ostream& ofs, std::string const& sourceDir);
-  bool CreateNewTag;
-  bool Quiet;
 };
