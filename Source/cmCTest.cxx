@@ -143,19 +143,6 @@ struct cmCTest::Private
              &this->UploadHandler };
   }
 
-  std::map<std::string, cmCTestGenericHandler*> GetNamedTestingHandlers()
-  {
-    return { { "build", &this->BuildHandler },
-             { "coverage", &this->CoverageHandler },
-             { "script", &this->ScriptHandler },
-             { "test", &this->TestHandler },
-             { "update", &this->UpdateHandler },
-             { "configure", &this->ConfigureHandler },
-             { "memcheck", &this->MemCheckHandler },
-             { "submit", &this->SubmitHandler },
-             { "upload", &this->UploadHandler } };
-  }
-
   bool ShowOnly = false;
   bool OutputAsJson = false;
   int OutputAsJsonVersion = 1;
@@ -2856,6 +2843,7 @@ int cmCTest::ExecuteTests()
     cmGlobalGenerator gg(&cm);
     cmMakefile mf(&gg, cm.GetCurrentSnapshot());
     this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, &mf);
+    this->GetTestHandler()->PopulateCustomVectors(&mf);
   }
 
   this->GetTestHandler()->SetVerbose(this->Impl->Verbose);
@@ -2999,16 +2987,6 @@ void cmCTest::ReadCustomConfigurationFileTree(const std::string& dir,
       }
     }
     found = true;
-  }
-
-  if (found) {
-    for (auto& handler : this->Impl->GetNamedTestingHandlers()) {
-      cmCTestLog(this, DEBUG,
-                 "* Read custom CTest configuration vectors for handler: "
-                   << handler.first << " (" << handler.second << ")"
-                   << std::endl);
-      handler.second->PopulateCustomVectors(mf);
-    }
   }
 }
 
