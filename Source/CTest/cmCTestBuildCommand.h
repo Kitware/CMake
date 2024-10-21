@@ -5,16 +5,13 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
-#include <vector>
 
 #include <cm/memory>
 
 #include "cmCTestHandlerCommand.h"
 
 class cmCommand;
-class cmCTestBuildHandler;
 class cmCTestGenericHandler;
-class cmExecutionStatus;
 class cmGlobalGenerator;
 
 /** \class cmCTestBuild
@@ -37,13 +34,10 @@ public:
    */
   std::string GetName() const override { return "ctest_build"; }
 
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
   std::unique_ptr<cmGlobalGenerator> GlobalGenerator;
 
 protected:
-  cmCTestBuildHandler* Handler;
+  void ProcessAdditionalValues(cmCTestGenericHandler* handler) override;
   void BindArguments() override;
   cmCTestGenericHandler* InitializeHandler() override;
 

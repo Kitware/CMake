@@ -45,8 +45,8 @@ public:
    */
   void Initialize() override;
 
-  int GetTotalErrors() { return this->TotalErrors; }
-  int GetTotalWarnings() { return this->TotalWarnings; }
+  int GetTotalErrors() const { return this->TotalErrors; }
+  int GetTotalWarnings() const { return this->TotalWarnings; }
 
 private:
   std::string GetMakeCommand();
