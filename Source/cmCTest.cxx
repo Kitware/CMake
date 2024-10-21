@@ -550,31 +550,6 @@ bool cmCTest::ReadExistingTag(bool quiet)
   return true;
 }
 
-void cmCTest::InitializeTesting(const std::string& binary_dir)
-{
-  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
-  if (!this->Impl->InteractiveDebugMode) {
-    this->BlockTestErrorDiagnostics();
-  } else {
-    cmSystemTools::PutEnv("CTEST_INTERACTIVE_DEBUG_MODE=1");
-  }
-
-  this->Impl->BinaryDir = binary_dir;
-  cmSystemTools::ConvertToUnixSlashes(this->Impl->BinaryDir);
-
-  this->UpdateCTestConfiguration();
-
-  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
-
-  cmake cm(cmake::RoleScript, cmState::CTest);
-  cm.SetHomeDirectory("");
-  cm.SetHomeOutputDirectory("");
-  cm.GetCurrentSnapshot().SetDefaultDefinitions();
-  cmGlobalGenerator gg(&cm);
-  cmMakefile mf(&gg, cm.GetCurrentSnapshot());
-  this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, &mf);
-}
-
 bool cmCTest::UpdateCTestConfiguration()
 {
   if (this->Impl->SuppressUpdatingCTestConfiguration) {
@@ -2859,7 +2834,30 @@ int cmCTest::ExecuteTests()
     return 1;
   }
 
-  this->InitializeTesting(workDir);
+  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
+  if (!this->Impl->InteractiveDebugMode) {
+    this->BlockTestErrorDiagnostics();
+  } else {
+    cmSystemTools::PutEnv("CTEST_INTERACTIVE_DEBUG_MODE=1");
+  }
+
+  this->Impl->BinaryDir = workDir;
+  cmSystemTools::ConvertToUnixSlashes(this->Impl->BinaryDir);
+
+  this->UpdateCTestConfiguration();
+
+  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
+
+  {
+    cmake cm(cmake::RoleScript, cmState::CTest);
+    cm.SetHomeDirectory("");
+    cm.SetHomeOutputDirectory("");
+    cm.GetCurrentSnapshot().SetDefaultDefinitions();
+    cmGlobalGenerator gg(&cm);
+    cmMakefile mf(&gg, cm.GetCurrentSnapshot());
+    this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, &mf);
+  }
+
   this->GetTestHandler()->SetVerbose(this->Impl->Verbose);
   if (this->GetTestHandler()->ProcessHandler() < 0) {
     cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest\n");
