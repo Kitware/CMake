@@ -164,15 +164,16 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     handler->SetHttpHeaders(this->HttpHeaders);
   }
 
-  handler->SetOption("RetryDelay", this->RetryDelay);
-  handler->SetOption("RetryCount", this->RetryCount);
-  handler->SetOption("InternalTest", this->InternalTest ? "ON" : "OFF");
+  handler->RetryDelay = this->RetryDelay;
+  handler->RetryCount = this->RetryCount;
+  handler->InternalTest = this->InternalTest;
 
   handler->SetQuiet(this->Quiet);
 
   if (this->CDashUpload) {
-    handler->SetOption("CDashUploadFile", this->CDashUploadFile);
-    handler->SetOption("CDashUploadType", this->CDashUploadType);
+    handler->CDashUpload = true;
+    handler->CDashUploadFile = this->CDashUploadFile;
+    handler->CDashUploadType = this->CDashUploadType;
   }
   return handler;
 }
