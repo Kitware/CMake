@@ -208,6 +208,7 @@ int main(int argc, char const* const* argv)
     CommandArgument{ "--list-presets", CommandArgument::Values::Zero,
                      CommandArgument::setToTrue(listPresets) },
     CommandArgument{ "-D", CommandArgument::Values::One,
+                     CommandArgument::RequiresSeparator::No,
                      [&log, &definitions](const std::string& arg, cmake*,
                                           cmMakefile*) -> bool {
                        std::string value = arg;
