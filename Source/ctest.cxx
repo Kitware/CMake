@@ -15,7 +15,6 @@
 #include "cmSystemTools.h"
 
 #include "CTest/cmCTestLaunch.h"
-#include "CTest/cmCTestScriptHandler.h"
 
 namespace {
 const cmDocumentationEntry cmDocumentationName = {
@@ -183,11 +182,8 @@ int main(int argc, char const* const* argv)
     return cmCTestLaunch::Main(argc, argv);
   }
 
-  cmCTest inst;
-
   if (cmSystemTools::GetCurrentWorkingDirectory().empty()) {
-    cmCTestLog(&inst, ERROR_MESSAGE,
-               "Current working directory cannot be established.\n");
+    std::cerr << "Current working directory cannot be established.\n";
     return 1;
   }
 
@@ -198,18 +194,13 @@ int main(int argc, char const* const* argv)
       !(cmSystemTools::FileExists("CTestTestfile.cmake") ||
         cmSystemTools::FileExists("DartTestfile.txt"))) {
     if (argc == 1) {
-      cmCTestLog(&inst, ERROR_MESSAGE,
-                 "*********************************\n"
-                 "No test configuration file found!\n"
-                 "*********************************\n");
+      std::cerr << "*********************************\n"
+                   "No test configuration file found!\n"
+                   "*********************************\n";
     }
     cmDocumentation doc;
     doc.addCTestStandardDocSections();
     if (doc.CheckOptions(argc, argv)) {
-      // Construct and print requested documentation.
-      cmCTestScriptHandler* ch = inst.GetScriptHandler();
-      ch->CreateCMake();
-
       doc.SetShowGenerators(false);
       doc.SetName("ctest");
       doc.SetSection("Name", cmDocumentationName);
@@ -220,11 +211,8 @@ int main(int argc, char const* const* argv)
   }
 
   // copy the args to a vector
-  std::vector<std::string> args;
-  args.reserve(argc);
-  for (int i = 0; i < argc; ++i) {
-    args.emplace_back(argv[i]);
-  }
+  auto args = std::vector<std::string>(argv, argv + argc);
+
   // run ctest
-  return inst.Run(args);
+  return cmCTest{}.Run(args);
 }
