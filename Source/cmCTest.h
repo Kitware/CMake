@@ -448,11 +448,6 @@ public:
   cmCTestTestOptions const& GetTestOptions() const;
 
 private:
-  void SetPersistentOptionIfNotEmpty(const std::string& value,
-                                     const std::string& optionName);
-  void AddPersistentMultiOptionIfNotEmpty(const std::string& value,
-                                          const std::string& optionName);
-
   int GenerateNotesFile(const std::string& files);
 
   void BlockTestErrorDiagnostics();

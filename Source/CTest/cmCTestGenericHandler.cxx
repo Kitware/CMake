@@ -3,7 +3,6 @@
 #include "cmCTestGenericHandler.h"
 
 #include <sstream>
-#include <utility>
 
 #include "cmCTest.h"
 #include "cmStringAlgorithms.h"
@@ -21,97 +20,14 @@ cmCTestGenericHandler::cmCTestGenericHandler()
 
 cmCTestGenericHandler::~cmCTestGenericHandler() = default;
 
-namespace {
-/* Modify the given `map`, setting key `op` to `value` if `value`
- * is non-null, otherwise removing key `op` (if it exists).
- */
-void SetMapValue(cmCTestGenericHandler::t_StringToString& map,
-                 const std::string& op, const std::string& value)
-{
-  map[op] = value;
-}
-void SetMapValue(cmCTestGenericHandler::t_StringToString& map,
-                 const std::string& op, cmValue value)
-{
-  if (!value) {
-    map.erase(op);
-    return;
-  }
-
-  map[op] = *value;
-}
-}
-
-void cmCTestGenericHandler::SetOption(const std::string& op,
-                                      const std::string& value)
-{
-  SetMapValue(this->Options, op, value);
-}
-void cmCTestGenericHandler::SetOption(const std::string& op, cmValue value)
-{
-  SetMapValue(this->Options, op, value);
-}
-
-void cmCTestGenericHandler::SetPersistentOption(const std::string& op,
-                                                const std::string& value)
-{
-  this->SetOption(op, value);
-  SetMapValue(this->PersistentOptions, op, value);
-}
-void cmCTestGenericHandler::SetPersistentOption(const std::string& op,
-                                                cmValue value)
-{
-  this->SetOption(op, value);
-  SetMapValue(this->PersistentOptions, op, value);
-}
-
-void cmCTestGenericHandler::AddMultiOption(const std::string& op,
-                                           const std::string& value)
-{
-  if (!value.empty()) {
-    this->MultiOptions[op].emplace_back(value);
-  }
-}
-
-void cmCTestGenericHandler::AddPersistentMultiOption(const std::string& op,
-                                                     const std::string& value)
-{
-  if (!value.empty()) {
-    this->MultiOptions[op].emplace_back(value);
-    this->PersistentMultiOptions[op].emplace_back(value);
-  }
-}
-
 void cmCTestGenericHandler::Initialize(cmCTest* ctest)
 {
   this->CTest = ctest;
   this->AppendXML = false;
   this->TestLoad = 0;
-  this->Options = this->PersistentOptions;
-  this->MultiOptions = this->PersistentMultiOptions;
 
   this->SetVerbose(ctest->GetExtraVerbose());
   this->SetSubmitIndex(ctest->GetSubmitIndex());
-}
-
-cmValue cmCTestGenericHandler::GetOption(const std::string& op)
-{
-  auto remit = this->Options.find(op);
-  if (remit == this->Options.end()) {
-    return nullptr;
-  }
-  return cmValue(remit->second);
-}
-
-std::vector<std::string> cmCTestGenericHandler::GetMultiOption(
-  const std::string& optionName) const
-{
-  // Avoid inserting a key, which MultiOptions[op] would do.
-  auto remit = this->MultiOptions.find(optionName);
-  if (remit == this->MultiOptions.end()) {
-    return {};
-  }
-  return remit->second;
 }
 
 bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,

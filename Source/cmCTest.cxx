@@ -1620,24 +1620,6 @@ bool cmCTest::AddVariableDefinition(const std::string& arg)
   return false;
 }
 
-void cmCTest::SetPersistentOptionIfNotEmpty(const std::string& value,
-                                            const std::string& optionName)
-{
-  if (!value.empty()) {
-    this->GetTestHandler()->SetPersistentOption(optionName, value);
-    this->GetMemCheckHandler()->SetPersistentOption(optionName, value);
-  }
-}
-
-void cmCTest::AddPersistentMultiOptionIfNotEmpty(const std::string& value,
-                                                 const std::string& optionName)
-{
-  if (!value.empty()) {
-    this->GetTestHandler()->AddPersistentMultiOption(optionName, value);
-    this->GetMemCheckHandler()->AddPersistentMultiOption(optionName, value);
-  }
-}
-
 bool cmCTest::SetArgsFromPreset(const std::string& presetName,
                                 bool listPresets)
 {
@@ -3365,8 +3347,6 @@ void cmCTest::SetCMakeVariables(cmMakefile& mf)
   set("CTEST_TLS_VERSION", "TLSVersion");
   set("CTEST_CURL_OPTIONS", "CurlOptions");
   set("CTEST_SUBMIT_INACTIVITY_TIMEOUT", "SubmitInactivityTimeout");
-
-  this->GetTestHandler()->SetCMakeVariables(mf);
 }
 
 bool cmCTest::RunCommand(std::vector<std::string> const& args,

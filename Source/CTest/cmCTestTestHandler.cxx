@@ -359,16 +359,6 @@ void cmCTestTestHandler::PopulateCustomVectors(cmMakefile* mf)
   }
 }
 
-void cmCTestTestHandler::SetCMakeVariables(cmMakefile& mf)
-{
-  mf.AddDefinition("CTEST_CUSTOM_PRE_TEST",
-                   cmList(this->CustomPreTest).to_string());
-  mf.AddDefinition("CTEST_CUSTOM_POST_TEST",
-                   cmList(this->CustomPostTest).to_string());
-  mf.AddDefinition("CTEST_CUSTOM_TESTS_IGNORE",
-                   cmList(this->CustomTestsIgnore).to_string());
-}
-
 int cmCTestTestHandler::PreProcessHandler()
 {
   if (!this->ExecuteCommands(this->CustomPreTest)) {
