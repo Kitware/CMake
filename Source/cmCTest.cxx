@@ -3096,6 +3096,11 @@ int cmCTest::GetSubmitIndex() const
   return this->Impl->SubmitIndex;
 }
 
+bool cmCTest::GetInteractiveDebugMode() const
+{
+  return this->Impl->InteractiveDebugMode;
+}
+
 bool cmCTest::GetLabelSummary() const
 {
   return this->Impl->LabelSummary;

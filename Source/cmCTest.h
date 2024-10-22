@@ -389,6 +389,8 @@ public:
 
   void AddSiteProperties(cmXMLWriter& xml, cmake* cm);
 
+  bool GetInteractiveDebugMode() const;
+
   bool GetLabelSummary() const;
   bool GetSubprojectSummary() const;
 

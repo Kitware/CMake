@@ -353,18 +353,32 @@ Run Tests
  This allows the user to widen the output to avoid clipping the test
  name which can be very annoying.
 
-.. option:: --interactive-debug-mode [0|1]
+.. option:: --interactive-debug-mode <0|1>
 
- Set the interactive mode to ``0`` or ``1``.
+ Disable (``0``) or enable (``1``) interactive debug mode.
 
  This option causes CTest to run tests in either an interactive mode
  or a non-interactive mode.  In dashboard mode (``Experimental``, ``Nightly``,
  ``Continuous``), the default is non-interactive.  In non-interactive mode,
  the environment variable :envvar:`DASHBOARD_TEST_FROM_CTEST` is set.
 
- Prior to CMake 3.11, interactive mode on Windows allowed system debug
- popup windows to appear.  Now, due to CTest's use of ``libuv`` to launch
- test processes, all system debug popup windows are always blocked.
+ Interactive Mode allows Windows Error Reporting (WER) to show debug popup
+ windows and to create core dumps.  To enable core dumps in tests,
+ use interactive mode, and follow the Windows documentation
+ on `Collecting User-Mode Dumps`_.
+
+ .. versionchanged:: 3.32
+   Windows Error Reporting (WER) is enabled in interactive mode, so
+   test processes may show debug popup windows and create core dumps.
+   This was made possible by updates to ``libuv``.
+
+ .. versionchanged:: 3.11
+   Windows Error Reporting (WER) is disabled in both interactive and
+   non-interactive modes, so test processes do not show popup windows
+   or create core dumps.  This is due to launching test processes with
+   ``libuv``.
+
+.. _`Collecting User-Mode Dumps`: https://learn.microsoft.com/en-us/windows/win32/wer/collecting-user-mode-dumps
 
 .. option:: --no-label-summary
 
