@@ -1614,14 +1614,27 @@ cm::optional<std::string> cmSystemTools::GetEnvVar(std::string const& var)
   return result;
 }
 
-std::vector<std::string> cmSystemTools::SplitEnvPath(std::string const& value)
+std::vector<std::string> cmSystemTools::SplitEnvPath(cm::string_view in)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   static cm::string_view sep = ";"_s;
 #else
   static cm::string_view sep = ":"_s;
 #endif
-  std::vector<std::string> paths = cmTokenize(value, sep);
+  std::vector<std::string> paths;
+  cm::string_view::size_type e = 0;
+  for (;;) {
+    cm::string_view::size_type b = in.find_first_not_of(sep, e);
+    if (b == cm::string_view::npos) {
+      break;
+    }
+    e = in.find_first_of(sep, b);
+    if (e == cm::string_view::npos) {
+      paths.emplace_back(in.substr(b));
+      break;
+    }
+    paths.emplace_back(in.substr(b, e - b));
+  }
   for (std::string& p : paths) {
     SystemTools::ConvertToUnixSlashes(p);
   }
