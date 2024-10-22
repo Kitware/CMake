@@ -42,7 +42,7 @@ cmCTestBuildCommand::~cmCTestBuildCommand() = default;
 cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
 {
   cmCTestBuildHandler* handler = this->CTest->GetBuildHandler();
-  handler->Initialize();
+  handler->Initialize(this->CTest);
 
   cmValue ctestBuildCommand =
     this->Makefile->GetDefinition("CTEST_BUILD_COMMAND");

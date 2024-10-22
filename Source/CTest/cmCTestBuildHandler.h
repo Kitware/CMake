@@ -20,6 +20,7 @@
 class cmMakefile;
 class cmStringReplaceHelper;
 class cmXMLWriter;
+class cmCTest;
 
 /** \class cmCTestBuildHandler
  * \brief A class that handles ctest -S invocations
@@ -43,7 +44,7 @@ public:
   /**
    * Initialize handler
    */
-  void Initialize() override;
+  void Initialize(cmCTest* ctest) override;
 
   int GetTotalErrors() const { return this->TotalErrors; }
   int GetTotalWarnings() const { return this->TotalWarnings; }

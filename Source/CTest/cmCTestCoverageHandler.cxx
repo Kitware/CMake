@@ -42,9 +42,9 @@ class cmMakefile;
 
 cmCTestCoverageHandler::cmCTestCoverageHandler() = default;
 
-void cmCTestCoverageHandler::Initialize()
+void cmCTestCoverageHandler::Initialize(cmCTest* ctest)
 {
-  this->Superclass::Initialize();
+  this->Superclass::Initialize(ctest);
   this->CustomCoverageExclude.clear();
   this->SourceLabels.clear();
   this->TargetDirs.clear();

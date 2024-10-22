@@ -11,6 +11,7 @@
 
 class cmMakefile;
 class cmXMLWriter;
+class cmCTest;
 
 /** \class cmCTestMemCheckHandler
  * \brief A class that handles ctest -S invocations
@@ -27,7 +28,7 @@ public:
 
   cmCTestMemCheckHandler();
 
-  void Initialize() override;
+  void Initialize(cmCTest* ctest) override;
 
   int GetDefectCount() const;
 

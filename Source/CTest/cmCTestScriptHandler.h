@@ -60,7 +60,7 @@ public:
   const cmCTestScriptHandler& operator=(const cmCTestScriptHandler&) = delete;
   ~cmCTestScriptHandler() override;
 
-  void Initialize() override;
+  void Initialize(cmCTest* ctest) override;
 
   void CreateCMake();
   cmake* GetCMake() { return this->CMake.get(); }

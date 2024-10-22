@@ -126,9 +126,9 @@ cmCTestMemCheckHandler::cmCTestMemCheckHandler()
   this->LogWithPID = false;
 }
 
-void cmCTestMemCheckHandler::Initialize()
+void cmCTestMemCheckHandler::Initialize(cmCTest* ctest)
 {
-  this->Superclass::Initialize();
+  this->Superclass::Initialize(ctest);
   this->LogWithPID = false;
   this->CustomMaximumPassedTestOutputSize = 0;
   this->CustomMaximumFailedTestOutputSize = 0;

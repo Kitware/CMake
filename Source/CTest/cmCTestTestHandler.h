@@ -107,7 +107,7 @@ public:
    */
   bool SetDirectoryProperties(const std::vector<std::string>& args);
 
-  void Initialize() override;
+  void Initialize(cmCTest* ctest) override;
 
   struct cmCTestTestResourceRequirement
   {

@@ -74,7 +74,7 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
     this->Makefile, "P4Options", "CTEST_P4_OPTIONS", this->Quiet);
 
   cmCTestUpdateHandler* handler = this->CTest->GetUpdateHandler();
-  handler->Initialize();
+  handler->Initialize(this->CTest);
   if (source_dir.empty()) {
     this->SetError("source directory not specified. Please use SOURCE tag");
     return nullptr;

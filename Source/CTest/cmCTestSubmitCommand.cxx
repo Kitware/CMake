@@ -122,7 +122,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
   }
 
   cmCTestSubmitHandler* handler = this->CTest->GetSubmitHandler();
-  handler->Initialize();
+  handler->Initialize(this->CTest);
 
   // If no FILES or PARTS given, *all* PARTS are submitted by default.
   //

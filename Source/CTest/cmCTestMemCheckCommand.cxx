@@ -17,7 +17,7 @@ void cmCTestMemCheckCommand::BindArguments()
 cmCTestTestHandler* cmCTestMemCheckCommand::InitializeActualHandler()
 {
   cmCTestMemCheckHandler* handler = this->CTest->GetMemCheckHandler();
-  handler->Initialize();
+  handler->Initialize(this->CTest);
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "MemoryCheckType", "CTEST_MEMORYCHECK_TYPE", this->Quiet);

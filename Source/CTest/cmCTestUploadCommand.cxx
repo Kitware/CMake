@@ -38,7 +38,7 @@ void cmCTestUploadCommand::CheckArguments()
 cmCTestGenericHandler* cmCTestUploadCommand::InitializeHandler()
 {
   cmCTestUploadHandler* handler = this->CTest->GetUploadHandler();
-  handler->Initialize();
+  handler->Initialize(this->CTest);
   handler->SetFiles(
     std::set<std::string>(this->Files.begin(), this->Files.end()));
   handler->SetQuiet(this->Quiet);

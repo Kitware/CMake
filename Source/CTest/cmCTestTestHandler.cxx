@@ -313,9 +313,9 @@ cmCTestTestHandler::cmCTestTestHandler()
   this->CustomLabelRegex.compile("<CTestLabel>(.*)</CTestLabel>");
 }
 
-void cmCTestTestHandler::Initialize()
+void cmCTestTestHandler::Initialize(cmCTest* ctest)
 {
-  this->Superclass::Initialize();
+  this->Superclass::Initialize(ctest);
 
   this->ElapsedTestingTime = cmDuration();
 

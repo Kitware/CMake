@@ -355,10 +355,6 @@ cmCTest::cmCTest()
       ->PartMap[cmSystemTools::LowerCase(this->Impl->Parts[p].GetName())] = p;
   }
 
-  for (auto& handler : this->Impl->GetTestingHandlers()) {
-    handler->SetCTestInstance(this);
-  }
-
   // Make sure we can capture the build tool output.
   cmSystemTools::EnableVSConsoleOutput();
 }
@@ -796,7 +792,7 @@ int cmCTest::ProcessSteps()
 
   int res = 0;
   cmCTestScriptHandler script;
-  script.SetCTestInstance(this);
+  script.Initialize(this);
   script.CreateCMake();
   cmMakefile& mf = *script.GetMakefile();
   this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, &mf);
@@ -2790,6 +2786,7 @@ int cmCTest::RunScripts(
   }
 
   cmCTestScriptHandler* ch = this->GetScriptHandler();
+  ch->Initialize(this);
   ch->SetVerbose(this->Impl->Verbose);
   for (auto const& script : scripts) {
     ch->AddConfigurationScript(script.first, script.second);
@@ -2834,6 +2831,8 @@ int cmCTest::ExecuteTests()
   this->UpdateCTestConfiguration();
 
   cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
+
+  this->GetTestHandler()->Initialize(this);
 
   {
     cmake cm(cmake::RoleScript, cmState::CTest);

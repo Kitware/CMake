@@ -189,9 +189,9 @@ cmCTestBuildHandler::cmCTestBuildHandler()
   this->UseCTestLaunch = false;
 }
 
-void cmCTestBuildHandler::Initialize()
+void cmCTestBuildHandler::Initialize(cmCTest* ctest)
 {
-  this->Superclass::Initialize();
+  this->Superclass::Initialize(ctest);
   this->StartBuild.clear();
   this->EndBuild.clear();
   this->CustomErrorMatches.clear();

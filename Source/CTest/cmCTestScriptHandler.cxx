@@ -42,9 +42,9 @@
 
 cmCTestScriptHandler::cmCTestScriptHandler() = default;
 
-void cmCTestScriptHandler::Initialize()
+void cmCTestScriptHandler::Initialize(cmCTest* ctest)
 {
-  this->Superclass::Initialize();
+  this->Superclass::Initialize(ctest);
 
   // what time in seconds did this script start running
   this->ScriptStartTime = std::chrono::steady_clock::time_point();
@@ -362,7 +362,7 @@ bool cmCTestScriptHandler::RunScript(cmCTest* ctest, cmMakefile* mf,
                                      int* returnValue)
 {
   auto sh = cm::make_unique<cmCTestScriptHandler>();
-  sh->SetCTestInstance(ctest);
+  sh->Initialize(ctest);
   sh->ParentMakefile = mf;
   sh->AddConfigurationScript(sname, InProcess);
   int res = sh->ProcessHandler();

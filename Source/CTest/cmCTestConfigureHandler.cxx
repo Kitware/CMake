@@ -13,9 +13,9 @@
 
 cmCTestConfigureHandler::cmCTestConfigureHandler() = default;
 
-void cmCTestConfigureHandler::Initialize()
+void cmCTestConfigureHandler::Initialize(cmCTest* ctest)
 {
-  this->Superclass::Initialize();
+  this->Superclass::Initialize(ctest);
 }
 
 // clearly it would be nice if this were broken up into a few smaller

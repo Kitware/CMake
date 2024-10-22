@@ -10,6 +10,8 @@
 
 #include "cmCTestGenericHandler.h"
 
+class cmCTest;
+
 /** \class cmCTestUpdateHandler
  * \brief A class that handles ctest -S invocations
  *
@@ -41,7 +43,7 @@ public:
   /**
    * Initialize handler
    */
-  void Initialize() override;
+  void Initialize(cmCTest* ctest) override;
 
 private:
   // Some structures needed for update
