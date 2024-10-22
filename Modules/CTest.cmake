@@ -16,9 +16,14 @@ enable testing with CTest and dashboard submissions to CDash:
   ...
   include(CTest)
 
-The module automatically creates a ``BUILD_TESTING`` option that selects
-whether to enable testing support (``ON`` by default).  After including
-the module, use code like:
+The module automatically creates the following variables:
+
+:variable:`BUILD_TESTING`
+
+  Option selecting whether ``include(CTest)`` calls :command:`enable_testing`.
+  The option is ``ON`` by default when created by the module.
+
+After including the module, use code like:
 
 .. code-block:: cmake
 

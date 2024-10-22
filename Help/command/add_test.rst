@@ -16,7 +16,7 @@ if necessary.  See policy :policy:`CMP0110`.
 
 CMake only generates tests if the :command:`enable_testing` command has been
 invoked.  The :module:`CTest` module invokes ``enable_testing`` automatically
-unless ``BUILD_TESTING`` is set to ``OFF``.
+unless :variable:`BUILD_TESTING` is set to ``OFF``.
 
 Tests added with the ``add_test(NAME)`` signature support using
 :manual:`generator expressions <cmake-generator-expressions(7)>`
