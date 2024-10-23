@@ -113,6 +113,7 @@ bool cmGetFilenameComponentCommand(std::vector<std::string> const& args,
       // Resolve symlinks if possible
       result = cmSystemTools::GetRealPath(result);
     }
+    result = cmSystemTools::GetActualCaseForPath(result);
   } else {
     std::string err = "unknown component " + args[2];
     status.SetError(err);

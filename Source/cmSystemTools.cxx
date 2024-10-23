@@ -1664,6 +1664,9 @@ std::string cmSystemTools::ToNormalizedPathOnDisk(std::string p)
 {
   p = cmSystemTools::CollapseFullPath(p);
   cmSystemTools::ConvertToUnixSlashes(p);
+#ifdef _WIN32
+  p = cmSystemTools::GetActualCaseForPathCached(p);
+#endif
   return p;
 }
 
