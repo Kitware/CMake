@@ -206,8 +206,10 @@ private:
 class cmDirectoryListGenerator
 {
 public:
-  cmDirectoryListGenerator(std::vector<std::string> const& names)
+  cmDirectoryListGenerator(std::vector<std::string> const& names,
+                           bool exactMatch)
     : Names{ names }
+    , ExactMatch{ exactMatch }
     , Current{ this->Matches.cbegin() }
   {
   }
@@ -231,20 +233,28 @@ public:
       // `isDirentryToIgnore(i)` condition to check.
       for (auto i = 0ul; i < directoryLister.GetNumberOfFiles(); ++i) {
         const char* const fname = directoryLister.GetFile(i);
-        if (isDirentryToIgnore(fname)) {
+        // Skip entries to ignore or that aren't directories.
+        if (isDirentryToIgnore(fname) || !directoryLister.FileIsDirectory(i)) {
           continue;
         }
 
-        for (const auto& n : this->Names.get()) {
-          // NOTE Customization point for `cmMacProjectDirectoryListGenerator`
-          const auto name = this->TransformNameBeforeCmp(n);
-          // Skip entries that don't match and non-directories.
-          // ATTENTION BTW, original code also didn't check if it's a symlink
-          // to a directory!
-          const auto equal =
-            (cmsysString_strncasecmp(fname, name.c_str(), name.length()) == 0);
-          if (equal && directoryLister.FileIsDirectory(i)) {
-            this->Matches.emplace_back(fname);
+        if (!this->ExactMatch && this->Names.get().empty()) {
+          this->Matches.emplace_back(fname);
+        } else {
+          for (const auto& n : this->Names.get()) {
+            // NOTE Customization point for
+            // `cmMacProjectDirectoryListGenerator`
+            const auto name = this->TransformNameBeforeCmp(n);
+            // Skip entries that don't match.
+            const auto equal =
+              ((this->ExactMatch
+                  ? cmsysString_strcasecmp(fname, name.c_str())
+                  : cmsysString_strncasecmp(fname, name.c_str(),
+                                            name.length())) == 0);
+            if (equal) {
+              this->Matches.emplace_back(fname);
+              break;
+            }
           }
         }
       }
@@ -273,6 +283,7 @@ protected:
   virtual std::string TransformNameBeforeCmp(std::string same) { return same; }
 
   std::reference_wrapper<const std::vector<std::string>> Names;
+  bool const ExactMatch;
   std::vector<std::string> Matches;
   std::vector<std::string>::const_iterator Current;
 };
@@ -282,8 +293,9 @@ class cmProjectDirectoryListGenerator : public cmDirectoryListGenerator
 public:
   cmProjectDirectoryListGenerator(std::vector<std::string> const& names,
                                   cmFindPackageCommand::SortOrderType so,
-                                  cmFindPackageCommand::SortDirectionType sd)
-    : cmDirectoryListGenerator{ names }
+                                  cmFindPackageCommand::SortDirectionType sd,
+                                  bool exactMatch)
+    : cmDirectoryListGenerator{ names, exactMatch }
     , SortOrder{ so }
     , SortDirection{ sd }
   {
@@ -310,7 +322,7 @@ class cmMacProjectDirectoryListGenerator : public cmDirectoryListGenerator
 public:
   cmMacProjectDirectoryListGenerator(const std::vector<std::string>& names,
                                      cm::string_view ext)
-    : cmDirectoryListGenerator{ names }
+    : cmDirectoryListGenerator{ names, true }
     , Extension{ ext }
   {
   }
@@ -2666,7 +2678,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   auto iCMakeGen = cmCaseInsensitiveDirectoryListGenerator{ "cmake"_s };
   auto firstPkgDirGen =
     cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
-                                     this->SortDirection };
+                                     this->SortDirection, false };
 
   // PREFIX/(cmake|CMake)/ (useful on windows or in build trees)
   if (TryGeneratedPaths(searchFn, prefix, iCMakeGen)) {
@@ -2685,7 +2697,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
 
   auto secondPkgDirGen =
     cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
-                                     this->SortDirection };
+                                     this->SortDirection, false };
 
   // PREFIX/(Foo|foo|FOO).*/(cmake|CMake)/(Foo|foo|FOO).*/
   if (TryGeneratedPaths(searchFn, prefix, firstPkgDirGen, iCMakeGen,
