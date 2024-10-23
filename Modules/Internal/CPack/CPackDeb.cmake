@@ -238,7 +238,7 @@ function(cpack_deb_prepare_package_vars)
     endforeach()
 
     # Only dynamically linked ELF files are included
-    # Extract only file name infront of ":"
+    # Extract only file name in front of ":"
     foreach(_FILE IN LISTS CPACK_DEB_INSTALL_FILES)
       if(_FILE MATCHES "ELF.*dynamically linked")
         string(REGEX MATCH "(^.*):" _FILE_NAME "${_FILE}")

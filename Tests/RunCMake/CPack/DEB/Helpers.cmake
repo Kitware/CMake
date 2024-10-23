@@ -101,7 +101,7 @@ function(getMissingShlibsErrorExtra FILE RESULT_VAR)
         string(APPEND error_extra "; readelf \"\n")
 
         # Only dynamically linked ELF files are included
-        # Extract only file name infront of ":"
+        # Extract only file name in front of ":"
         foreach(_FILE IN LISTS deb_install_files)
           if(_FILE MATCHES "ELF.*shared object")
             string(REGEX MATCH "(^.*):" _FILE_NAME "${_FILE}")
