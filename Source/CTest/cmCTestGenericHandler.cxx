@@ -89,6 +89,9 @@ void cmCTestGenericHandler::Initialize(cmCTest* ctest)
   this->TestLoad = 0;
   this->Options = this->PersistentOptions;
   this->MultiOptions = this->PersistentMultiOptions;
+
+  this->SetVerbose(ctest->GetExtraVerbose());
+  this->SetSubmitIndex(ctest->GetSubmitIndex());
 }
 
 cmValue cmCTestGenericHandler::GetOption(const std::string& op)

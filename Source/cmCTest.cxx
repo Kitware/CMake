@@ -45,7 +45,6 @@
 #include "cmCTestBuildHandler.h"
 #include "cmCTestConfigureHandler.h"
 #include "cmCTestCoverageHandler.h"
-#include "cmCTestGenericHandler.h"
 #include "cmCTestMemCheckHandler.h"
 #include "cmCTestScriptHandler.h"
 #include "cmCTestSubmitHandler.h"
@@ -133,15 +132,6 @@ struct cmCTest::Private
   cmCTestMemCheckHandler MemCheckHandler;
   cmCTestSubmitHandler SubmitHandler;
   cmCTestUploadHandler UploadHandler;
-
-  std::vector<cmCTestGenericHandler*> GetTestingHandlers()
-  {
-    return { &this->BuildHandler,    &this->CoverageHandler,
-             &this->ScriptHandler,   &this->TestHandler,
-             &this->UpdateHandler,   &this->ConfigureHandler,
-             &this->MemCheckHandler, &this->SubmitHandler,
-             &this->UploadHandler };
-  }
 
   bool ShowOnly = false;
   bool OutputAsJson = false;
@@ -771,11 +761,6 @@ int cmCTest::ProcessSteps()
   this->Impl->ExtraVerbose = this->Impl->Verbose;
   this->Impl->Verbose = true;
   this->Impl->ProduceXML = true;
-
-  for (auto& handler : this->Impl->GetTestingHandlers()) {
-    handler->SetVerbose(this->Impl->Verbose);
-    handler->SetSubmitIndex(this->Impl->SubmitIndex);
-  }
 
   const std::string currDir = cmSystemTools::GetCurrentWorkingDirectory();
   std::string workDir = currDir;
@@ -2785,11 +2770,6 @@ int cmCTest::RunScripts(
     cmCTestLog(this, OUTPUT, "* Extra verbosity turned on" << std::endl);
   }
 
-  for (auto& handler : this->Impl->GetTestingHandlers()) {
-    handler->SetVerbose(this->Impl->ExtraVerbose);
-    handler->SetSubmitIndex(this->Impl->SubmitIndex);
-  }
-
   cmCTestScriptHandler* ch = this->GetScriptHandler();
   ch->Initialize(this);
   ch->SetVerbose(this->Impl->Verbose);
@@ -3232,6 +3212,11 @@ bool cmCTest::GetVerbose() const
 bool cmCTest::GetExtraVerbose() const
 {
   return this->Impl->ExtraVerbose;
+}
+
+int cmCTest::GetSubmitIndex() const
+{
+  return this->Impl->SubmitIndex;
 }
 
 bool cmCTest::GetLabelSummary() const

@@ -405,6 +405,7 @@ public:
 
   bool GetVerbose() const;
   bool GetExtraVerbose() const;
+  int GetSubmitIndex() const;
 
   void AddSiteProperties(cmXMLWriter& xml);
 
