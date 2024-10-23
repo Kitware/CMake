@@ -50,7 +50,7 @@ int cmCTestUploadHandler::ProcessHandler()
   xml.Attribute("Name", this->CTest->GetCTestConfiguration("Site"));
   xml.Attribute("Generator",
                 std::string("ctest-") + cmVersion::GetCMakeVersion());
-  this->CTest->AddSiteProperties(xml);
+  this->CTest->AddSiteProperties(xml, this->CMake);
   xml.StartElement("Upload");
   xml.Element("Time", std::chrono::system_clock::now());
 

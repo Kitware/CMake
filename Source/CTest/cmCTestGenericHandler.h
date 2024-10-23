@@ -12,6 +12,7 @@
 
 class cmGeneratedFileStream;
 class cmMakefile;
+class cmake;
 
 /** \class cmCTestGenericHandler
  * \brief A superclass of all CTest Handlers
@@ -67,6 +68,8 @@ public:
   void SetTestLoad(unsigned long load) { this->TestLoad = load; }
   unsigned long GetTestLoad() const { return this->TestLoad; }
 
+  void SetCMakeInstance(cmake* cm) { this->CMake = cm; }
+
 protected:
   bool StartResultingXML(cmCTest::Part part, const char* name,
                          cmGeneratedFileStream& xofs);
@@ -78,6 +81,7 @@ protected:
   cmSystemTools::OutputOption HandlerVerbose;
   cmCTest* CTest;
   t_StringToString LogFileNames;
+  cmake* CMake = nullptr;
 
   int SubmitIndex;
 };

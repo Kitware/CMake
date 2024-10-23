@@ -40,18 +40,9 @@
 #include "cmUVProcessChain.h"
 #include "cmake.h"
 
-cmCTestScriptHandler::cmCTestScriptHandler() = default;
-
-void cmCTestScriptHandler::Initialize(cmCTest* ctest)
+cmCTestScriptHandler::cmCTestScriptHandler(cmCTest* ctest)
+  : CTest(ctest)
 {
-  this->Superclass::Initialize(ctest);
-
-  this->Makefile.reset();
-  this->ParentMakefile = nullptr;
-
-  this->GlobalGenerator.reset();
-
-  this->CMake.reset();
 }
 
 cmCTestScriptHandler::~cmCTestScriptHandler() = default;
@@ -355,8 +346,7 @@ bool cmCTestScriptHandler::RunScript(cmCTest* ctest, cmMakefile* mf,
                                      const std::string& sname, bool InProcess,
                                      int* returnValue)
 {
-  auto sh = cm::make_unique<cmCTestScriptHandler>();
-  sh->Initialize(ctest);
+  auto sh = cm::make_unique<cmCTestScriptHandler>(ctest);
   sh->ParentMakefile = mf;
   sh->AddConfigurationScript(sname, InProcess);
   int res = sh->ProcessHandler();

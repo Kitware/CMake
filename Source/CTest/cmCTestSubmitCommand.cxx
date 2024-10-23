@@ -108,7 +108,8 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     this->Makefile->GetDefinition("CTEST_NOTES_FILES");
   if (notesFilesVariable) {
     cmList notesFiles{ *notesFilesVariable };
-    this->CTest->GenerateNotesFile(notesFiles);
+    this->CTest->GenerateNotesFile(this->Makefile->GetCMakeInstance(),
+                                   notesFiles);
   }
 
   cmValue extraFilesVariable =

@@ -1417,7 +1417,7 @@ void cmCTestTestHandler::GenerateCTestXML(cmXMLWriter& xml)
     return;
   }
 
-  this->CTest->StartXML(xml, this->AppendXML);
+  this->CTest->StartXML(xml, this->CMake, this->AppendXML);
   this->CTest->GenerateSubprojectsOutput(xml);
   xml.StartElement("Testing");
   xml.Element("StartDateTime", this->StartTest);

@@ -19,7 +19,6 @@
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestCurl.h"
-#include "cmCTestScriptHandler.h"
 #include "cmCryptoHash.h"
 #include "cmCurl.h"
 #include "cmDuration.h"
@@ -259,9 +258,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
         upload_as += ctest_curl.Escape(this->CTest->GetCurrentTag());
         upload_as += "-";
         upload_as += ctest_curl.Escape(this->CTest->GetTestGroupString());
-        cmCTestScriptHandler* ch = this->CTest->GetScriptHandler();
-        cmake* cm = ch->GetCMake();
-        if (cm) {
+        if (cmake* cm = this->CMake) {
           cmValue subproject = cm->GetState()->GetGlobalProperty("SubProject");
           if (subproject) {
             upload_as += "&subproject=";
@@ -556,9 +553,8 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   //    has already been uploaded
   // TODO I added support for subproject. You would need to add
   // a "&subproject=subprojectname" to the first POST.
-  cmCTestScriptHandler* ch = this->CTest->GetScriptHandler();
-  cmake* cm = ch->GetCMake();
-  cmValue subproject = cm->GetState()->GetGlobalProperty("SubProject");
+  cmValue subproject =
+    this->CMake->GetState()->GetGlobalProperty("SubProject");
   // TODO: Encode values for a URL instead of trusting caller.
   std::ostringstream str;
   if (subproject) {

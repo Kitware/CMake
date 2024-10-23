@@ -202,6 +202,7 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
 
   // reread time limit, as the variable may have been modified.
   this->CTest->SetTimeLimit(this->Makefile->GetDefinition("CTEST_TIME_LIMIT"));
+  handler->SetCMakeInstance(this->Makefile->GetCMakeInstance());
 
   int res = handler->ProcessHandler();
   if (!this->ReturnValue.empty()) {

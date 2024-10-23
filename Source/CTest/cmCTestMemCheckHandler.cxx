@@ -311,7 +311,7 @@ void cmCTestMemCheckHandler::GenerateCTestXML(cmXMLWriter& xml)
   if (!this->CTest->GetProduceXML()) {
     return;
   }
-  this->CTest->StartXML(xml, this->AppendXML);
+  this->CTest->StartXML(xml, this->CMake, this->AppendXML);
   this->CTest->GenerateSubprojectsOutput(xml);
   xml.StartElement("DynamicAnalysis");
   switch (this->MemoryTesterStyle) {

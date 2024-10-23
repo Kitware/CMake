@@ -71,7 +71,7 @@ int cmCTestConfigureHandler::ProcessHandler()
 
     if (os) {
       cmXMLWriter xml(os);
-      this->CTest->StartXML(xml, this->AppendXML);
+      this->CTest->StartXML(xml, this->CMake, this->AppendXML);
       this->CTest->GenerateSubprojectsOutput(xml);
       xml.StartElement("Configure");
       xml.Element("StartDateTime", start_time);
