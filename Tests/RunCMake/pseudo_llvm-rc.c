@@ -9,6 +9,8 @@ int main(int argc, char* argv[])
 {
   FILE* source;
   FILE* target;
+  char buffer[500];
+  size_t n;
   int i;
   for (i = 1; i < argc; ++i) {
     if (strcmp(argv[i], "-bad") == 0) {
@@ -22,13 +24,13 @@ int main(int argc, char* argv[])
     return 1;
   }
   target = fopen(argv[argc - 2], "wb");
-  if (target != NULL) {
-    char buffer[500];
-    size_t n = fread(buffer, 1, sizeof(buffer), source);
-    fwrite(buffer, 1, n, target);
+  if (target == NULL) {
     fclose(source);
-    fclose(target);
-    return 0;
+    return 1;
   }
-  return 1;
+  n = fread(buffer, 1, sizeof(buffer), source);
+  fwrite(buffer, 1, n, target);
+  fclose(source);
+  fclose(target);
+  return 0;
 }
