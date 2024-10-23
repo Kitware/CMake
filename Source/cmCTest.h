@@ -30,6 +30,7 @@ class cmCTestSubmitHandler;
 class cmCTestUploadHandler;
 class cmGeneratedFileStream;
 class cmMakefile;
+class cmValue;
 class cmXMLWriter;
 
 /** \class cmCTest
@@ -166,12 +167,15 @@ public:
   /** base64 encode a file */
   std::string Base64EncodeFile(std::string const& file);
 
+  void SetTimeLimit(cmValue val);
+  cmDuration GetElapsedTime() const;
+
   /**
    * Return the time remaining that the script is allowed to run in
    * seconds if the user has set the variable CTEST_TIME_LIMIT. If that has
    * not been set it returns a very large duration.
    */
-  cmDuration GetRemainingTimeAllowed();
+  cmDuration GetRemainingTimeAllowed() const;
 
   static cmDuration MaxDuration();
 

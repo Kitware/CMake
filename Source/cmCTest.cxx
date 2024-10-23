@@ -180,6 +180,10 @@ struct cmCTest::Private
 
   cmDuration GlobalTimeout = cmDuration::zero();
 
+  std::chrono::steady_clock::time_point StartTime =
+    std::chrono::steady_clock::now();
+  cmDuration TimeLimit = cmCTest::MaxDuration();
+
   int MaxTestNameWidth = 30;
 
   cm::optional<size_t> ParallelLevel = 1;
@@ -838,6 +842,7 @@ int cmCTest::ProcessSteps()
   script.CreateCMake();
   cmMakefile& mf = *script.GetMakefile();
   this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, &mf);
+  this->SetTimeLimit(mf.GetDefinition("CTEST_TIME_LIMIT"));
   this->SetCMakeVariables(mf);
   std::vector<cmListFileArgument> args{
     cmListFileArgument("RETURN_VALUE", cmListFileArgument::Unquoted, 0),
@@ -3690,9 +3695,21 @@ std::string cmCTest::GetColorCode(Color color) const
   return "";
 }
 
-cmDuration cmCTest::GetRemainingTimeAllowed()
+void cmCTest::SetTimeLimit(cmValue val)
 {
-  return this->GetScriptHandler()->GetRemainingTimeAllowed();
+  this->Impl->TimeLimit =
+    val ? cmDuration(atof(val->c_str())) : cmCTest::MaxDuration();
+}
+
+cmDuration cmCTest::GetElapsedTime() const
+{
+  return std::chrono::duration_cast<cmDuration>(
+    std::chrono::steady_clock::now() - this->Impl->StartTime);
+}
+
+cmDuration cmCTest::GetRemainingTimeAllowed() const
+{
+  return this->Impl->TimeLimit - this->GetElapsedTime();
 }
 
 cmDuration cmCTest::MaxDuration()
