@@ -57,8 +57,11 @@ private:
 
   // The VCS command to update the working tree.
   std::string UpdateCommand;
+  std::string SourceDirectory;
   int UpdateType;
 
   int DetectVCS(const std::string& dir);
   bool SelectVCS();
+
+  friend class cmCTestUpdateCommand;
 };
