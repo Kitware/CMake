@@ -601,7 +601,7 @@ int do_build(int ac, char const* const* av)
         }
       }
       if (!matched && i == 0) {
-        dir = cmSystemTools::CollapseFullPath(arg);
+        dir = cmSystemTools::ToNormalizedPathOnDisk(arg);
         matched = true;
         parsed = true;
       }
@@ -873,7 +873,7 @@ int do_install(int ac, char const* const* av)
   };
 
   if (ac >= 3) {
-    dir = cmSystemTools::CollapseFullPath(av[2]);
+    dir = cmSystemTools::ToNormalizedPathOnDisk(av[2]);
 
     std::vector<std::string> inputArgs;
     inputArgs.reserve(ac - 3);
@@ -1098,7 +1098,7 @@ int do_open(int ac, char const* const* av)
   for (int i = 2; i < ac; ++i) {
     switch (doing) {
       case DoingDir:
-        dir = cmSystemTools::CollapseFullPath(av[i]);
+        dir = cmSystemTools::ToNormalizedPathOnDisk(av[i]);
         doing = DoingNone;
         break;
       default:

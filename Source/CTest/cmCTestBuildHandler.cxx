@@ -580,9 +580,6 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(cmXMLWriter& xml)
   int numErrorsAllowed = this->MaxErrors;
   int numWarningsAllowed = this->MaxWarnings;
   std::string srcdir = this->CTest->GetCTestConfiguration("SourceDirectory");
-  // make sure the source dir is in the correct case on windows
-  // via a call to collapse full path.
-  srcdir = cmStrCat(cmSystemTools::CollapseFullPath(srcdir), '/');
   for (it = ew.begin();
        it != ew.end() && (numErrorsAllowed || numWarningsAllowed); it++) {
     cmCTestBuildErrorWarning* cm = &(*it);
@@ -613,8 +610,9 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(cmXMLWriter& xml)
             }
           } else {
             // make sure it is a full path with the correct case
-            cm->SourceFile = cmSystemTools::CollapseFullPath(cm->SourceFile);
-            cmSystemTools::ReplaceString(cm->SourceFile, srcdir.c_str(), "");
+            cm->SourceFile =
+              cmSystemTools::ToNormalizedPathOnDisk(cm->SourceFile);
+            cmSystemTools::ReplaceString(cm->SourceFile, srcdir, "");
           }
           cm->LineNumber = atoi(re->match(rit.LineIndex).c_str());
           break;

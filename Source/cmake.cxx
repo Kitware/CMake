@@ -689,7 +689,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         cmSystemTools::Stdout("loading initial cache file " + value + "\n");
         // Resolve script path specified on command line
         // relative to $PWD.
-        auto path = cmSystemTools::CollapseFullPath(value);
+        auto path = cmSystemTools::ToNormalizedPathOnDisk(value);
         state->ReadListFile(args, path);
         return true;
       } },
@@ -778,10 +778,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
     snapshot.SetDefaultDefinitions();
     cmMakefile mf(gg, snapshot);
     if (this->GetWorkingMode() != NORMAL_MODE) {
-      std::string file(cmSystemTools::CollapseFullPath(path));
-      cmSystemTools::ConvertToUnixSlashes(file);
-      mf.SetScriptModeFile(file);
-
+      mf.SetScriptModeFile(cmSystemTools::ToNormalizedPathOnDisk(path));
       mf.SetArgcArgv(args);
     }
     if (!cmSystemTools::FileExists(path, true)) {
@@ -955,10 +952,8 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       cmSystemTools::Error("No source directory specified for -S");
       return false;
     }
-    std::string path = cmSystemTools::CollapseFullPath(value);
-    cmSystemTools::ConvertToUnixSlashes(path);
-
-    state->SetHomeDirectoryViaCommandLine(path);
+    state->SetHomeDirectoryViaCommandLine(
+      cmSystemTools::ToNormalizedPathOnDisk(value));
     return true;
   };
 
@@ -967,9 +962,8 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       cmSystemTools::Error("No build directory specified for -B");
       return false;
     }
-    std::string path = cmSystemTools::CollapseFullPath(value);
-    cmSystemTools::ConvertToUnixSlashes(path);
-    state->SetHomeOutputDirectory(path);
+    state->SetHomeOutputDirectory(
+      cmSystemTools::ToNormalizedPathOnDisk(value));
     haveBArg = true;
     return true;
   };
@@ -1073,7 +1067,8 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     CommandArgument{ "--graphviz", "No file specified for --graphviz",
                      CommandArgument::Values::One,
                      [](std::string const& value, cmake* state) -> bool {
-                       state->SetGraphVizFile(value);
+                       state->SetGraphVizFile(
+                         cmSystemTools::ToNormalizedPathOnDisk(value));
                        return true;
                      } },
 
@@ -1277,23 +1272,22 @@ void cmake::SetArgs(const std::vector<std::string>& args)
                        return false;
 #endif
                      } },
-    CommandArgument{
-      "--debugger-dap-log", "No file specified for --debugger-dap-log",
-      CommandArgument::Values::One,
-      [](std::string const& value, cmake* state) -> bool {
+    CommandArgument{ "--debugger-dap-log",
+                     "No file specified for --debugger-dap-log",
+                     CommandArgument::Values::One,
+                     [](std::string const& value, cmake* state) -> bool {
 #ifdef CMake_ENABLE_DEBUGGER
-        std::string path = cmSystemTools::CollapseFullPath(value);
-        cmSystemTools::ConvertToUnixSlashes(path);
-        state->DebuggerDapLogFile = path;
-        return true;
+                       state->DebuggerDapLogFile =
+                         cmSystemTools::ToNormalizedPathOnDisk(value);
+                       return true;
 #else
-        static_cast<void>(value);
-        static_cast<void>(state);
-        cmSystemTools::Error(
-          "CMake was not built with support for --debugger-dap-log");
-        return false;
+                       static_cast<void>(value);
+                       static_cast<void>(state);
+                       cmSystemTools::Error("CMake was not built with support "
+                                            "for --debugger-dap-log");
+                       return false;
 #endif
-      } },
+                     } },
   };
 
 #if defined(CMAKE_HAVE_VS_GENERATORS)
@@ -1315,9 +1309,8 @@ void cmake::SetArgs(const std::vector<std::string>& args)
   arguments.emplace_back(
     "--profiling-output", "No path specified for --profiling-output",
     CommandArgument::Values::One,
-    [&](std::string const& value, cmake*) -> bool {
-      profilingOutput = cmSystemTools::CollapseFullPath(value);
-      cmSystemTools::ConvertToUnixSlashes(profilingOutput);
+    [&profilingOutput](std::string const& value, cmake*) -> bool {
+      profilingOutput = cmSystemTools::ToNormalizedPathOnDisk(value);
       return true;
     });
   arguments.emplace_back("--preset", "No preset specified for --preset",
@@ -1587,7 +1580,8 @@ void cmake::SetArgs(const std::vector<std::string>& args)
 
     if (!expandedPreset->GraphVizFile.empty()) {
       if (this->GraphVizFile.empty()) {
-        this->SetGraphVizFile(expandedPreset->GraphVizFile);
+        this->SetGraphVizFile(
+          cmSystemTools::CollapseFullPath(expandedPreset->GraphVizFile));
       }
     }
 
@@ -1778,8 +1772,7 @@ bool cmake::SetDirectoriesFromFile(const std::string& arg)
   bool is_source_dir = false;
   bool is_empty_directory = false;
   if (cmSystemTools::FileIsDirectory(arg)) {
-    std::string path = cmSystemTools::CollapseFullPath(arg);
-    cmSystemTools::ConvertToUnixSlashes(path);
+    std::string path = cmSystemTools::ToNormalizedPathOnDisk(arg);
     std::string cacheFile = cmStrCat(path, "/CMakeCache.txt");
     std::string listFile = cmStrCat(path, "/CMakeLists.txt");
 
@@ -1794,7 +1787,7 @@ bool cmake::SetDirectoriesFromFile(const std::string& arg)
       is_source_dir = true;
     }
   } else if (cmSystemTools::FileExists(arg)) {
-    std::string fullPath = cmSystemTools::CollapseFullPath(arg);
+    std::string fullPath = cmSystemTools::ToNormalizedPathOnDisk(arg);
     std::string name = cmSystemTools::GetFilenameName(fullPath);
     name = cmSystemTools::LowerCase(name);
     if (name == "cmakecache.txt"_s) {
@@ -1845,14 +1838,13 @@ bool cmake::SetDirectoriesFromFile(const std::string& arg)
     if (is_source_dir) {
       this->SetHomeDirectoryViaCommandLine(listPath);
       if (no_build_tree) {
-        std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-        this->SetHomeOutputDirectory(cwd);
+        this->SetHomeOutputDirectory(
+          cmSystemTools::GetCurrentWorkingDirectory());
       }
     } else if (no_source_tree && no_build_tree) {
       this->SetHomeDirectory(listPath);
-
-      std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-      this->SetHomeOutputDirectory(cwd);
+      this->SetHomeOutputDirectory(
+        cmSystemTools::GetCurrentWorkingDirectory());
     } else if (no_build_tree) {
       this->SetHomeOutputDirectory(listPath);
     }
@@ -1860,18 +1852,16 @@ bool cmake::SetDirectoriesFromFile(const std::string& arg)
     if (no_source_tree) {
       // We didn't find a CMakeLists.txt and it wasn't specified
       // with -S. Assume it is the path to the source tree
-      std::string full = cmSystemTools::CollapseFullPath(arg);
-      this->SetHomeDirectory(full);
+      this->SetHomeDirectory(cmSystemTools::ToNormalizedPathOnDisk(arg));
     }
     if (no_build_tree && !no_source_tree && is_empty_directory) {
       // passed `-S <path> <build_dir> when build_dir is an empty directory
-      std::string full = cmSystemTools::CollapseFullPath(arg);
-      this->SetHomeOutputDirectory(full);
+      this->SetHomeOutputDirectory(cmSystemTools::ToNormalizedPathOnDisk(arg));
     } else if (no_build_tree) {
       // We didn't find a CMakeCache.txt and it wasn't specified
       // with -B. Assume the current working directory as the build tree.
-      std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-      this->SetHomeOutputDirectory(cwd);
+      this->SetHomeOutputDirectory(
+        cmSystemTools::GetCurrentWorkingDirectory());
       used_provided_path = false;
     }
   }

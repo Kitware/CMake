@@ -399,7 +399,12 @@ public:
                                      std::string const& in);
 
   static cm::optional<std::string> GetEnvVar(std::string const& var);
-  static std::vector<std::string> SplitEnvPath(std::string const& value);
+  static std::vector<std::string> GetEnvPathNormalized(std::string const& var);
+
+  static std::vector<std::string> SplitEnvPath(cm::string_view in);
+  static std::vector<std::string> SplitEnvPathNormalized(cm::string_view in);
+
+  static std::string ToNormalizedPathOnDisk(std::string p);
 
 #ifndef CMAKE_BOOTSTRAP
   /** Remove an environment variable */

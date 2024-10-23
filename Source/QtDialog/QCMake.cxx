@@ -258,9 +258,7 @@ void QCMake::configure()
 #endif
     // Apply the same transformations that the command-line invocation does
     auto sanitizePath = [](QString const& value) -> std::string {
-      std::string path = cmSystemTools::CollapseFullPath(value.toStdString());
-      cmSystemTools::ConvertToUnixSlashes(path);
-      return path;
+      return cmSystemTools::ToNormalizedPathOnDisk(value.toStdString());
     };
 
     this->CMakeInstance->SetHomeDirectory(sanitizePath(this->SourceDirectory));

@@ -1347,10 +1347,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 
       // Create a local generator configured for the directory in
       // which dependencies will be scanned.
-      homeDir = cmSystemTools::CollapseFullPath(homeDir);
-      startDir = cmSystemTools::CollapseFullPath(startDir);
-      homeOutDir = cmSystemTools::CollapseFullPath(homeOutDir);
-      startOutDir = cmSystemTools::CollapseFullPath(startOutDir);
+      homeDir = cmSystemTools::ToNormalizedPathOnDisk(homeDir);
+      startDir = cmSystemTools::ToNormalizedPathOnDisk(startDir);
+      homeOutDir = cmSystemTools::ToNormalizedPathOnDisk(homeOutDir);
+      startOutDir = cmSystemTools::ToNormalizedPathOnDisk(startOutDir);
       cm.SetHomeDirectory(homeDir);
       cm.SetHomeOutputDirectory(homeOutDir);
       cm.GetCurrentSnapshot().SetDefaultDefinitions();
@@ -1643,10 +1643,10 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
       std::string startDir;
       std::string homeOutDir;
       std::string startOutDir;
-      homeDir = cmSystemTools::CollapseFullPath(args[4]);
-      startDir = cmSystemTools::CollapseFullPath(args[5]);
-      homeOutDir = cmSystemTools::CollapseFullPath(args[6]);
-      startOutDir = cmSystemTools::CollapseFullPath(args[7]);
+      homeDir = cmSystemTools::ToNormalizedPathOnDisk(args[4]);
+      startDir = cmSystemTools::ToNormalizedPathOnDisk(args[5]);
+      homeOutDir = cmSystemTools::ToNormalizedPathOnDisk(args[6]);
+      startOutDir = cmSystemTools::ToNormalizedPathOnDisk(args[7]);
       cm.SetHomeDirectory(homeDir);
       cm.SetHomeOutputDirectory(homeOutDir);
       cm.GetCurrentSnapshot().SetDefaultDefinitions();
@@ -2413,7 +2413,7 @@ int cmVSLink::LinkIncremental()
 
   // Create a resource file referencing the manifest.
   std::string absManifestFile =
-    cmSystemTools::CollapseFullPath(this->ManifestFile);
+    cmSystemTools::ToNormalizedPathOnDisk(this->ManifestFile);
   if (this->Verbose) {
     std::cout << "Create " << this->ManifestFileRC << '\n';
   }

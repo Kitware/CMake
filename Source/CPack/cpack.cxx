@@ -406,7 +406,7 @@ int main(int argc, char const* const* argv)
 
   bool cpackConfigFileSpecified = true;
   if (!cpackConfigFile.empty()) {
-    cpackConfigFile = cmSystemTools::CollapseFullPath(cpackConfigFile);
+    cpackConfigFile = cmSystemTools::ToNormalizedPathOnDisk(cpackConfigFile);
   } else {
     cpackConfigFile = cmStrCat(cmSystemTools::GetCurrentWorkingDirectory(),
                                "/CPackConfig.cmake");
@@ -480,7 +480,7 @@ int main(int argc, char const* const* argv)
     if (!cpackProjectDirectory.empty()) {
       // The value has been set on the command line.  Ensure it is absolute.
       cpackProjectDirectory =
-        cmSystemTools::CollapseFullPath(cpackProjectDirectory);
+        cmSystemTools::ToNormalizedPathOnDisk(cpackProjectDirectory);
     } else {
       // The value has not been set on the command line.  Check config file.
       if (cmValue pd = globalMF.GetDefinition("CPACK_PACKAGE_DIRECTORY")) {

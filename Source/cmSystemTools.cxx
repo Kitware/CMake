@@ -20,6 +20,8 @@
 
 #include "cmSystemTools.h"
 
+#include <iterator>
+
 #include <cm/optional>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -1614,18 +1616,55 @@ cm::optional<std::string> cmSystemTools::GetEnvVar(std::string const& var)
   return result;
 }
 
-std::vector<std::string> cmSystemTools::SplitEnvPath(std::string const& value)
+std::vector<std::string> cmSystemTools::GetEnvPathNormalized(
+  std::string const& var)
+{
+  std::vector<std::string> result;
+  if (cm::optional<std::string> env = cmSystemTools::GetEnvVar(var)) {
+    std::vector<std::string> p = cmSystemTools::SplitEnvPathNormalized(*env);
+    std::move(p.begin(), p.end(), std::back_inserter(result));
+  }
+  return result;
+}
+
+std::vector<std::string> cmSystemTools::SplitEnvPath(cm::string_view in)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   static cm::string_view sep = ";"_s;
 #else
   static cm::string_view sep = ":"_s;
 #endif
-  std::vector<std::string> paths = cmTokenize(value, sep);
-  for (std::string& p : paths) {
-    SystemTools::ConvertToUnixSlashes(p);
+  std::vector<std::string> paths;
+  cm::string_view::size_type e = 0;
+  for (;;) {
+    cm::string_view::size_type b = in.find_first_not_of(sep, e);
+    if (b == cm::string_view::npos) {
+      break;
+    }
+    e = in.find_first_of(sep, b);
+    if (e == cm::string_view::npos) {
+      paths.emplace_back(in.substr(b));
+      break;
+    }
+    paths.emplace_back(in.substr(b, e - b));
   }
   return paths;
+}
+
+std::vector<std::string> cmSystemTools::SplitEnvPathNormalized(
+  cm::string_view in)
+{
+  std::vector<std::string> paths = cmSystemTools::SplitEnvPath(in);
+  std::transform(paths.begin(), paths.end(), paths.begin(),
+                 cmSystemTools::ToNormalizedPathOnDisk);
+  return paths;
+}
+
+std::string cmSystemTools::ToNormalizedPathOnDisk(std::string p)
+{
+  p = cmSystemTools::CollapseFullPath(p);
+  cmSystemTools::ConvertToUnixSlashes(p);
+  return p;
 }
 
 #ifndef CMAKE_BOOTSTRAP
@@ -2739,7 +2778,7 @@ cm::optional<std::string> cmSystemTools::GetCMakeConfigDirectory()
 
 std::string cmSystemTools::GetCurrentWorkingDirectory()
 {
-  return cmSystemTools::CollapseFullPath(
+  return cmSystemTools::ToNormalizedPathOnDisk(
     cmsys::SystemTools::GetCurrentWorkingDirectory());
 }
 

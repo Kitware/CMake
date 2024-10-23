@@ -2380,7 +2380,7 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
     dep = cmStrCat(this->GetCurrentBinaryDirectory(), '/', inName);
   }
 
-  dep = cmSystemTools::CollapseFullPath(dep, this->GetBinaryDirectory());
+  dep = cmSystemTools::CollapseFullPath(dep);
 
   return true;
 }

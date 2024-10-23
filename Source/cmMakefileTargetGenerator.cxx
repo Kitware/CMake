@@ -683,9 +683,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   // The object file should be checked for dependency integrity.
   std::string objFullPath =
     cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/', obj);
-  objFullPath = cmSystemTools::CollapseFullPath(objFullPath);
-  std::string const srcFullPath =
-    cmSystemTools::CollapseFullPath(source.GetFullPath());
+  std::string const srcFullPath = source.GetFullPath();
   this->LocalGenerator->AddImplicitDepends(this->GeneratorTarget, lang,
                                            objFullPath, srcFullPath, scanner);
 
@@ -1560,8 +1558,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
               cmOutputConverter::SHELL)
          << " "
          << this->LocalGenerator->ConvertToOutputFormat(
-              cmSystemTools::CollapseFullPath(this->InfoFileNameFull),
-              cmOutputConverter::SHELL);
+              this->InfoFileNameFull, cmOutputConverter::SHELL);
   if (this->LocalGenerator->GetColorMakefile()) {
     depCmd << " \"--color=$(COLOR)\"";
   }

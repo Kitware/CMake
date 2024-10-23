@@ -2088,7 +2088,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, cmValue value,
       cmList files(value);
       for (auto& file : files) {
         if (!cmIsOff(file)) {
-          file = cmSystemTools::CollapseFullPath(file);
+          file = cmSystemTools::ToNormalizedPathOnDisk(file);
         }
       }
       nvalue = files.to_string();

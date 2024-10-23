@@ -439,7 +439,6 @@ bool cmQtAutoGenerator::Run(cm::string_view infoFile, cm::string_view config,
 
   // Info file
   this->InfoFile_ = std::string(infoFile);
-  cmSystemTools::CollapseFullPath(this->InfoFile_);
   this->InfoDir_ = cmSystemTools::GetFilenamePath(this->InfoFile_);
 
   // Load info file time
