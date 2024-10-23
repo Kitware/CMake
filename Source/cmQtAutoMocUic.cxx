@@ -7,7 +7,6 @@
 #include <cstddef>
 #include <limits>
 #include <map>
-#include <mutex>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -561,7 +560,6 @@ public:
   std::string AbsoluteIncludePath(cm::string_view relativePath) const;
   template <class JOBTYPE>
   void CreateParseJobs(SourceFileMapT const& sourceMap);
-  std::string CollapseFullPathTS(std::string const& path) const;
 
 private:
   // -- Abstract processing interface
@@ -595,8 +593,6 @@ private:
   // -- Worker thread pool
   std::atomic<bool> JobError_{ false };
   cmWorkerPool WorkerPool_;
-  // -- Concurrent processing
-  mutable std::mutex CMakeLibMutex_;
 };
 
 cmQtAutoMocUicT::IncludeKeyT::IncludeKeyT(std::string const& key,
@@ -1494,8 +1490,9 @@ bool cmQtAutoMocUicT::JobEvalCacheMocT::FindIncludedHeader(
                      &headerHandle](std::string const& basePath) -> bool {
     bool found = false;
     for (std::string const& ext : this->BaseConst().HeaderExtensions) {
-      std::string const testPath =
-        this->Gen()->CollapseFullPathTS(cmStrCat(basePath, '.', ext));
+      std::string const testPath = cmSystemTools::CollapseFullPath(
+        cmStrCat(basePath, '.', ext),
+        this->Gen()->ProjectDirs().CurrentSource);
       cmFileTime fileTime;
       if (!fileTime.Load(testPath)) {
         // File not found
@@ -1682,7 +1679,8 @@ bool cmQtAutoMocUicT::JobEvalCacheUicT::FindIncludedUi(
   this->SearchLocations.clear();
 
   auto findUi = [this](std::string const& testPath) -> bool {
-    std::string const fullPath = this->Gen()->CollapseFullPathTS(testPath);
+    std::string const fullPath = cmSystemTools::CollapseFullPath(
+      testPath, this->Gen()->ProjectDirs().CurrentSource);
     cmFileTime fileTime;
     if (!fileTime.Load(fullPath)) {
       this->SearchLocations.emplace_back(cmQtAutoGen::ParentDir(fullPath));
@@ -2885,17 +2883,6 @@ void cmQtAutoMocUicT::CreateParseJobs(SourceFileMapT const& sourceMap)
   }
 }
 
-/** Concurrently callable implementation of cmSystemTools::CollapseFullPath */
-std::string cmQtAutoMocUicT::CollapseFullPathTS(std::string const& path) const
-{
-  std::lock_guard<std::mutex> guard(this->CMakeLibMutex_);
-#if defined(__NVCOMPILER) || defined(__LCC__)
-  static_cast<void>(guard); // convince compiler var is used
-#endif
-  return cmSystemTools::CollapseFullPath(path,
-                                         this->ProjectDirs().CurrentSource);
-}
-
 void cmQtAutoMocUicT::InitJobs()
 {
   // Add moc_predefs.h job
@@ -3130,10 +3117,6 @@ bool cmQtAutoMocUicT::CreateDirectories()
 std::vector<std::string> cmQtAutoMocUicT::dependenciesFromDepFile(
   const char* filePath)
 {
-  std::lock_guard<std::mutex> guard(this->CMakeLibMutex_);
-#if defined(__NVCOMPILER) || defined(__LCC__)
-  static_cast<void>(guard); // convince compiler var is used
-#endif
   auto const content = cmReadGccDepfile(filePath);
   if (!content || content->empty()) {
     return {};
