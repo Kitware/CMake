@@ -2273,7 +2273,10 @@ void cmNinjaTargetGenerator::ExportObjectCompileCommand(
   }
 
   compileObjectVars.Source = escapedSourceFileName.c_str();
-  compileObjectVars.Object = objectFileName.c_str();
+  std::string escapedObjectFileName =
+    this->LocalGenerator->ConvertToOutputFormat(objectFileName,
+                                                cmOutputConverter::SHELL);
+  compileObjectVars.Object = escapedObjectFileName.c_str();
   compileObjectVars.ObjectDir = objectDir.c_str();
   compileObjectVars.ObjectFileDir = objectFileDir.c_str();
   compileObjectVars.Flags = fullFlags.c_str();
