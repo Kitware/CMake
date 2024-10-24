@@ -25,4 +25,10 @@ int64_t cmDebuggerStackFrame::GetLine() const noexcept
   return this->Function.Line();
 }
 
+std::vector<cmListFileArgument> const& cmDebuggerStackFrame::GetArguments()
+  const noexcept
+{
+  return this->Function.Arguments();
+}
+
 } // namespace cmDebugger

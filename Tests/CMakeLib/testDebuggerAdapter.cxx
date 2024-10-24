@@ -132,6 +132,7 @@ bool runTest(std::function<bool(dap::Session&)> onThreadExitedEvent)
   ASSERT_TRUE(initializeResponse.response.supportsExceptionInfoRequest);
   ASSERT_TRUE(
     initializeResponse.response.exceptionBreakpointFilters.has_value());
+  ASSERT_TRUE(initializeResponse.response.supportsValueFormattingOptions);
 
   dap::LaunchRequest launchRequest;
   auto launchResponse = client->send(launchRequest).get();
