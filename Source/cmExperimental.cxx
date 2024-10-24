@@ -30,7 +30,7 @@ cmExperimental::FeatureData LookupTable[] = {
     false },
   // WindowsKernelModeDriver
   { "WindowsKernelModeDriver",
-    "7f524e81-99c7-48f3-a35d-278bae54282c",
+    "fac18f65-504e-4dbb-b068-f356bb1f2ddb",
     "CMAKE_EXPERIMENTAL_WINDOWS_KERNEL_MODE_DRIVER",
     "CMake's Windows kernel-mode driver support is experimental. It is meant "
     "only for experimentation and feedback to CMake developers.",

@@ -41,27 +41,22 @@ macro(__windows_kernel_mode lang)
 
     set(_KMDF_PLATFORM "$ENV{Platform}")
 
-    if(NOT DEFINED CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES)
-      set(CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES
+    list(APPEND CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES
         $ENV{WindowsSdkDir}/Include/${_WINDOWS_SDK_VERSION}/km
         $ENV{WindowsSdkDir}/Include/${_WINDOWS_SDK_VERSION}/km/crt
         $ENV{WindowsSdkDir}/Include/${_WINDOWS_SDK_VERSION}/shared
         $ENV{WindowsSdkDir}/Include/wdf/kmdf/${CMAKE_WINDOWS_KMDF_VERSION}
         $ENV{VCToolsInstallDir}/include
         )
-    endif()
 
-    if(NOT DEFINED CMAKE_RC_STANDARD_INCLUDE_DIRECTORIES)
-      set(CMAKE_RC_STANDARD_INCLUDE_DIRECTORIES
+    list(APPEND CMAKE_RC_STANDARD_INCLUDE_DIRECTORIES
         ${CMAKE_${lang}_STANDARD_INCLUDE_DIRECTORIES}
         )
-    endif()
+    list(REMOVE_DUPLICATES CMAKE_RC_STANDARD_INCLUDE_DIRECTORIES)
 
-    if(NOT DEFINED CMAKE_${lang}_STANDARD_LINK_DIRECTORIES)
-      set(CMAKE_${lang}_STANDARD_LINK_DIRECTORIES
+    list(APPEND CMAKE_${lang}_STANDARD_LINK_DIRECTORIES
         $ENV{WindowsSdkDir}/Lib/${_WINDOWS_SDK_VERSION}/km/${_KMDF_PLATFORM}
         )
-    endif()
 
     unset(_KMDF_ERROR_EPILOGUE)
     unset(_KMDF_PLATFORM)
