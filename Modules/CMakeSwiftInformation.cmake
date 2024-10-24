@@ -172,4 +172,6 @@ else()
   endif()
 endif()
 
+set(CMAKE_Swift_USE_LINKER_INFORMATION TRUE)
+
 set(CMAKE_Swift_INFORMATION_LOADED 1)

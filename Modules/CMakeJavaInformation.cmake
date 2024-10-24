@@ -47,3 +47,5 @@ if(WIN32 AND NOT CYGWIN)
 else()
   set(CMAKE_INCLUDE_FLAG_SEP_Java ":")
 endif()
+
+set(CMAKE_Java_USE_LINKER_INFORMATION FALSE)
