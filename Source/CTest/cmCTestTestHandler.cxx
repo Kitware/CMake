@@ -286,9 +286,6 @@ cmCTestTestHandler::cmCTestTestHandler()
 
   this->LogFile = nullptr;
 
-  // Support for JUnit XML output.
-  this->JUnitXMLFileName = "";
-
   // Regular expressions to scan test output for custom measurements.
 
   // Capture the whole section of test output from the first opening
@@ -332,8 +329,6 @@ void cmCTestTestHandler::Initialize(cmCTest* ctest)
   this->UseExcludeRegExpFirst = false;
   this->IncludeLabelRegularExpressions.clear();
   this->ExcludeLabelRegularExpressions.clear();
-  this->TestListFile.clear();
-  this->ExcludeTestListFile.clear();
   this->TestsToRunByName.reset();
   this->TestsToExcludeByName.reset();
 
@@ -577,18 +572,6 @@ bool cmCTestTestHandler::ProcessOptions()
   }
   if (!this->TestOptions.ExcludeRegularExpression.empty()) {
     this->UseExcludeRegExp();
-  }
-  cmValue val = this->GetOption("ResourceSpecFile");
-  if (val) {
-    this->ResourceSpecFile = *val;
-  }
-  val = this->GetOption("TestListFile");
-  if (val) {
-    this->TestListFile = val;
-  }
-  val = this->GetOption("ExcludeTestListFile");
-  if (val) {
-    this->ExcludeTestListFile = val;
   }
   this->SetRerunFailed(this->GetOption("RerunFailed").IsOn());
 
@@ -1414,7 +1397,7 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
     tests[p.Index].Depends = depends;
     properties[p.Index] = &p;
   }
-  parallel->SetResourceSpecFile(this->ResourceSpecFile);
+  parallel->SetResourceSpecFile(this->TestOptions.ResourceSpecFile);
   if (!parallel->SetTests(std::move(tests), std::move(properties))) {
     return false;
   }
@@ -1849,19 +1832,20 @@ bool cmCTestTestHandler::GetListOfTests()
     return false;
   }
   cmValue specFile = mf.GetDefinition("CTEST_RESOURCE_SPEC_FILE");
-  if (this->ResourceSpecFile.empty() && specFile) {
-    this->ResourceSpecFile = *specFile;
+  if (this->TestOptions.ResourceSpecFile.empty() && specFile) {
+    this->TestOptions.ResourceSpecFile = *specFile;
   }
 
-  if (!this->TestListFile.empty()) {
-    this->TestsToRunByName = this->ReadTestListFile(this->TestListFile);
+  if (!this->TestOptions.TestListFile.empty()) {
+    this->TestsToRunByName =
+      this->ReadTestListFile(this->TestOptions.TestListFile);
     if (!this->TestsToRunByName) {
       return false;
     }
   }
-  if (!this->ExcludeTestListFile.empty()) {
+  if (!this->TestOptions.ExcludeTestListFile.empty()) {
     this->TestsToExcludeByName =
-      this->ReadTestListFile(this->ExcludeTestListFile);
+      this->ReadTestListFile(this->TestOptions.ExcludeTestListFile);
     if (!this->TestsToExcludeByName) {
       return false;
     }
@@ -2548,22 +2532,22 @@ bool cmCTestTestHandler::cmCTestTestResourceRequirement::operator!=(
 
 void cmCTestTestHandler::SetJUnitXMLFileName(const std::string& filename)
 {
-  this->JUnitXMLFileName = filename;
+  this->TestOptions.JUnitXMLFileName = filename;
 }
 
 bool cmCTestTestHandler::WriteJUnitXML()
 {
-  if (this->JUnitXMLFileName.empty()) {
+  if (this->TestOptions.JUnitXMLFileName.empty()) {
     return true;
   }
 
   // Open new XML file for writing.
   cmGeneratedFileStream xmlfile;
   xmlfile.SetTempExt("tmp");
-  xmlfile.Open(this->JUnitXMLFileName);
+  xmlfile.Open(this->TestOptions.JUnitXMLFileName);
   if (!xmlfile) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Problem opening file: " << this->JUnitXMLFileName
+               "Problem opening file: " << this->TestOptions.JUnitXMLFileName
                                         << std::endl);
     return false;
   }

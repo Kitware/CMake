@@ -84,10 +84,10 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   }
 
   if (!this->ExcludeTestsFromFile.empty()) {
-    handler->SetOption("ExcludeTestListFile", this->ExcludeTestsFromFile);
+    handler->TestOptions.ExcludeTestListFile = this->ExcludeTestsFromFile;
   }
   if (!this->IncludeTestsFromFile.empty()) {
-    handler->SetOption("TestListFile", this->IncludeTestsFromFile);
+    handler->TestOptions.TestListFile = this->IncludeTestsFromFile;
   }
 
   if (!this->ExcludeFixture.empty()) {
@@ -115,7 +115,7 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
     handler->SetOption("ScheduleRandom", this->ScheduleRandom);
   }
   if (!this->ResourceSpecFile.empty()) {
-    handler->SetOption("ResourceSpecFile", this->ResourceSpecFile);
+    handler->TestOptions.ResourceSpecFile = this->ResourceSpecFile;
   }
   if (!this->StopTime.empty()) {
     this->CTest->SetStopTime(this->StopTime);

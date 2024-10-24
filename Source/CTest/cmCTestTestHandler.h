@@ -45,6 +45,11 @@ struct cmCTestTestOptions
   std::string ExcludeFixtureRegularExpression;
   std::string ExcludeFixtureSetupRegularExpression;
   std::string ExcludeFixtureCleanupRegularExpression;
+
+  std::string TestListFile;
+  std::string ExcludeTestListFile;
+  std::string ResourceSpecFile;
+  std::string JUnitXMLFileName;
 };
 
 /** \class cmCTestTestHandler
@@ -365,12 +370,8 @@ private:
   std::vector<cmsys::RegularExpression> ExcludeLabelRegularExpressions;
   cmsys::RegularExpression IncludeTestsRegularExpression;
   cmsys::RegularExpression ExcludeTestsRegularExpression;
-  std::string TestListFile;
-  std::string ExcludeTestListFile;
   cm::optional<std::set<std::string>> TestsToRunByName;
   cm::optional<std::set<std::string>> TestsToExcludeByName;
-
-  std::string ResourceSpecFile;
 
   void RecordCustomTestMeasurements(cmXMLWriter& xml, std::string content);
   void CheckLabelFilter(cmCTestTestProperties& it);
@@ -391,8 +392,6 @@ private:
   cmCTest::Repeat RepeatMode = cmCTest::Repeat::Never;
   int RepeatCount = 1;
   bool RerunFailed;
-
-  std::string JUnitXMLFileName;
 
   friend class cmCTestTestCommand;
 };

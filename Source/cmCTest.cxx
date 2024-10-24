@@ -1856,8 +1856,8 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
       this->Impl->ParallelLevelSetInCli = true;
     }
 
-    this->SetPersistentOptionIfNotEmpty(
-      expandedPreset->Execution->ResourceSpecFile, "ResourceSpecFile");
+    this->Impl->TestOptions.ResourceSpecFile =
+      expandedPreset->Execution->ResourceSpecFile;
 
     if (expandedPreset->Execution->TestLoad) {
       auto testLoad = *expandedPreset->Execution->TestLoad;
@@ -2600,25 +2600,17 @@ int cmCTest::Run(std::vector<std::string> const& args)
                      dashFC },
     CommandArgument{ "--resource-spec-file", CommandArgument::Values::One,
                      [this](std::string const& file) -> bool {
-                       this->Impl->TestHandler.SetPersistentOption(
-                         "ResourceSpecFile", file);
-                       this->Impl->MemCheckHandler.SetPersistentOption(
-                         "ResourceSpecFile", file);
+                       this->Impl->TestOptions.ResourceSpecFile = file;
                        return true;
                      } },
-    CommandArgument{
-      "--tests-from-file", CommandArgument::Values::One,
-      [this](std::string const& file) -> bool {
-        this->Impl->TestHandler.SetPersistentOption("TestListFile", file);
-        this->Impl->MemCheckHandler.SetPersistentOption("TestListFile", file);
-        return true;
-      } },
+    CommandArgument{ "--tests-from-file", CommandArgument::Values::One,
+                     [this](std::string const& file) -> bool {
+                       this->Impl->TestOptions.TestListFile = file;
+                       return true;
+                     } },
     CommandArgument{ "--exclude-from-file", CommandArgument::Values::One,
                      [this](std::string const& file) -> bool {
-                       this->Impl->TestHandler.SetPersistentOption(
-                         "ExcludeTestListFile", file);
-                       this->Impl->MemCheckHandler.SetPersistentOption(
-                         "ExcludeTestListFile", file);
+                       this->Impl->TestOptions.ExcludeTestListFile = file;
                        return true;
                      } },
     CommandArgument{ "--schedule-random", CommandArgument::Values::Zero,
@@ -3511,7 +3503,7 @@ void cmCTest::SetOutputLogFileName(const std::string& name)
 
 void cmCTest::SetOutputJUnitFileName(const std::string& name)
 {
-  this->Impl->TestHandler.SetJUnitXMLFileName(name);
+  this->Impl->TestOptions.JUnitXMLFileName = name;
   // Turn test output compression off.
   // This makes it easier to include test output in the resulting
   // JUnit XML report.
