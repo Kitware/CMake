@@ -6,6 +6,7 @@
 #include <algorithm>
 
 #include <cm3p/cppdap/protocol.h>
+#include <cm3p/cppdap/types.h>
 
 #include "cmDebuggerThread.h"
 
@@ -30,18 +31,19 @@ void cmDebuggerThreadManager::EndThread(
 }
 
 cm::optional<dap::StackTraceResponse>
-cmDebuggerThreadManager::GetThreadStackTraceResponse(int64_t id)
+cmDebuggerThreadManager::GetThreadStackTraceResponse(
+  const dap::StackTraceRequest& request)
 {
   auto it = find_if(Threads.begin(), Threads.end(),
                     [&](const std::shared_ptr<cmDebuggerThread>& t) {
-                      return t->GetId() == id;
+                      return t->GetId() == request.threadId;
                     });
 
   if (it == Threads.end()) {
     return {};
   }
 
-  return GetStackTraceResponse(*it);
+  return GetStackTraceResponse(*it, request.format);
 }
 
 } // namespace cmDebugger

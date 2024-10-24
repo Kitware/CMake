@@ -17,6 +17,7 @@ class cmDebuggerThread;
 }
 
 namespace dap {
+struct StackTraceRequest;
 struct StackTraceResponse;
 }
 
@@ -32,7 +33,7 @@ public:
   std::shared_ptr<cmDebuggerThread> StartThread(std::string const& name);
   void EndThread(std::shared_ptr<cmDebuggerThread> const& thread);
   cm::optional<dap::StackTraceResponse> GetThreadStackTraceResponse(
-    std::int64_t id);
+    const dap::StackTraceRequest& request);
 };
 
 } // namespace cmDebugger
