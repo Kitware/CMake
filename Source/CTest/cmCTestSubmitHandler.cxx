@@ -133,6 +133,7 @@ void cmCTestSubmitHandler::Initialize(cmCTest* ctest)
   this->HTTPProxyAuth.clear();
   this->LogFile = nullptr;
   this->Files.clear();
+  this->HttpHeaders = ctest->GetCommandLineHttpHeaders();
 }
 
 bool cmCTestSubmitHandler::SubmitUsingHTTP(

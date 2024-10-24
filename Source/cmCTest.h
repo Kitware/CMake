@@ -445,6 +445,7 @@ public:
   bool UpdateCTestConfiguration();
 
   cmCTestTestOptions const& GetTestOptions() const;
+  std::vector<std::string> GetCommandLineHttpHeaders() const;
 
 private:
   int GenerateNotesFile(cmake* cm, const std::string& files);

@@ -42,20 +42,9 @@ public:
   // handle the cdash file upload protocol
   int HandleCDashUploadFile(std::string const& file, std::string const& type);
 
-  void AddCommandLineHttpHeader(std::string const& h)
-  {
-    this->HttpHeaders.push_back(h);
-    this->CommandLineHttpHeaders.push_back(h);
-  }
-
   void SetHttpHeaders(std::vector<std::string> const& v)
   {
-    if (this->CommandLineHttpHeaders.empty()) {
-      this->HttpHeaders = v;
-    } else {
-      this->HttpHeaders = this->CommandLineHttpHeaders;
-      this->HttpHeaders.insert(this->HttpHeaders.end(), v.begin(), v.end());
-    }
+    this->HttpHeaders.insert(this->HttpHeaders.end(), v.begin(), v.end());
   }
 
 private:
@@ -86,7 +75,6 @@ private:
   bool HasWarnings;
   bool HasErrors;
   std::set<std::string> Files;
-  std::vector<std::string> CommandLineHttpHeaders;
   std::vector<std::string> HttpHeaders;
 
   bool CDashUpload = false;
