@@ -372,6 +372,7 @@ public:
    * This does nothing on non-Windows systems but return the path.
    */
   static std::string GetActualCaseForPath(const std::string& path);
+  static std::string GetActualCaseForPathCached(const std::string& path);
 
   /**
    * Given the path to a program executable, get the directory part of
