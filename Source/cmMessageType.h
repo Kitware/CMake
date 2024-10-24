@@ -6,6 +6,7 @@
 
 enum class MessageType
 {
+  UNDEFINED,
   AUTHOR_WARNING,
   AUTHOR_ERROR,
   FATAL_ERROR,
@@ -31,4 +32,13 @@ enum class LogLevel
   LOG_DEBUG,
   LOG_TRACE
 };
+
+enum class CheckType
+{
+  UNDEFINED,
+  CHECK_START,
+  CHECK_PASS,
+  CHECK_FAIL
+};
+
 }

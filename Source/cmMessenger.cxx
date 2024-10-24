@@ -102,11 +102,10 @@ void displayMessage(MessageType t, std::ostringstream& msg)
       t == MessageType::DEPRECATION_ERROR || t == MessageType::AUTHOR_ERROR) {
     cmSystemTools::SetErrorOccurred();
     md.title = "Error";
-    cmSystemTools::Message(msg.str(), md);
   } else {
     md.title = "Warning";
-    cmSystemTools::Message(msg.str(), md);
   }
+  cmSystemTools::Message(msg.str(), md);
 }
 
 void PrintCallStack(std::ostream& out, cmListFileBacktrace bt,

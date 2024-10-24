@@ -66,15 +66,15 @@ bool cmCTestBuildAndTest::RunCMake(cmake* cm)
   }
   std::cout << "======== CMake output     ======\n";
   if (cm->Run(args) != 0) {
-    std::cout << "======== End CMake output ======\n";
-    std::cout << "Error: cmake execution failed\n";
+    std::cout << "======== End CMake output ======\n"
+                 "Error: cmake execution failed\n";
     return false;
   }
   // do another config?
   if (this->BuildTwoConfig) {
     if (cm->Run(args) != 0) {
-      std::cout << "======== End CMake output ======\n";
-      std::cout << "Error: cmake execution failed\n";
+      std::cout << "======== End CMake output ======\n"
+                   "Error: cmake execution failed\n";
       return false;
     }
   }
@@ -292,9 +292,9 @@ int cmCTestBuildAndTest::Run()
       << "Could not find path to executable, perhaps it was not built: "
       << this->TestCommand << "\n"
       << "tried to find it in these places:\n"
-      << fullPath << "\n";
+      << fullPath << '\n';
     for (std::string const& fail : failed) {
-      std::cout << fail << "\n";
+      std::cout << fail << '\n';
     }
     return 1;
   }
@@ -307,17 +307,17 @@ int cmCTestBuildAndTest::Run()
   int retval = 0;
   // run the test from the this->BuildRunDir if set
   if (!this->BuildRunDir.empty()) {
-    std::cout << "Run test in directory: " << this->BuildRunDir << "\n";
+    std::cout << "Run test in directory: " << this->BuildRunDir << '\n';
     if (!workdir.SetDirectory(this->BuildRunDir)) {
       std::cout << workdir.GetError() << '\n';
       return 1;
     }
   }
-  std::cout << "Running test command: \"" << fullPath << "\"";
+  std::cout << "Running test command: \"" << fullPath << '"';
   for (std::string const& testCommandArg : this->TestCommandArgs) {
-    std::cout << " \"" << testCommandArg << "\"";
+    std::cout << " \"" << testCommandArg << '"';
   }
-  std::cout << "\n";
+  std::cout << '\n';
 
   // how much time is remaining
   cmDuration remainingTime = std::chrono::seconds(0);
@@ -333,7 +333,7 @@ int cmCTestBuildAndTest::Run()
   bool runTestRes = this->RunTest(testCommand, &retval, remainingTime);
 
   if (!runTestRes || retval != 0) {
-    std::cout << "\nTest command failed: " << testCommand[0] << "\n";
+    std::cout << "\nTest command failed: " << testCommand[0] << '\n';
     retval = 1;
   }
 
