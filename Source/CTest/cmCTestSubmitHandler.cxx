@@ -125,10 +125,6 @@ cmCTestSubmitHandler::cmCTestSubmitHandler(cmCTest* ctest)
        p = static_cast<cmCTest::Part>(p + 1)) {
     this->SubmitPart[p] = true;
   }
-  this->HasWarnings = false;
-  this->HasErrors = false;
-  this->HTTPProxyType = 0;
-  this->LogFile = nullptr;
 }
 
 bool cmCTestSubmitHandler::SubmitUsingHTTP(

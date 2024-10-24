@@ -11,12 +11,6 @@
 cmCTestGenericHandler::cmCTestGenericHandler(cmCTest* ctest)
   : CTest(ctest)
 {
-  this->HandlerVerbose = cmSystemTools::OUTPUT_NONE;
-  this->SubmitIndex = 0;
-  this->AppendXML = false;
-  this->Quiet = false;
-  this->TestLoad = 0;
-
   this->SetVerbose(ctest->GetExtraVerbose());
   this->SetSubmitIndex(ctest->GetSubmitIndex());
 }

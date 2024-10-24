@@ -278,14 +278,6 @@ cmCTestTestHandler::cmCTestTestHandler(cmCTest* ctest)
   : Superclass(ctest)
   , TestOptions(ctest->GetTestOptions())
 {
-  this->UseIncludeRegExpFlag = false;
-  this->UseExcludeRegExpFlag = false;
-  this->UseExcludeRegExpFirst = false;
-
-  this->MemCheck = false;
-
-  this->LogFile = nullptr;
-
   // Regular expressions to scan test output for custom measurements.
 
   // Capture the whole section of test output from the first opening
@@ -304,8 +296,6 @@ cmCTestTestHandler::cmCTestTestHandler(cmCTest* ctest)
 
   // Capture content from <CTestLabel>...</CTestLabel>
   this->CustomLabelRegex.compile("<CTestLabel>(.*)</CTestLabel>");
-
-  this->ElapsedTestingTime = cmDuration();
 }
 
 void cmCTestTestHandler::PopulateCustomVectors(cmMakefile* mf)

@@ -38,7 +38,6 @@ static const char* cmCTestUpdateHandlerUpdateToString(int type)
 cmCTestUpdateHandler::cmCTestUpdateHandler(cmCTest* ctest)
   : Superclass(ctest)
 {
-  this->UpdateType = e_CVS;
 }
 
 int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)

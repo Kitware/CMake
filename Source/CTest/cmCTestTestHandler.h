@@ -271,7 +271,7 @@ protected:
   std::string EndTest;
   std::chrono::system_clock::time_point StartTestTime;
   std::chrono::system_clock::time_point EndTestTime;
-  bool MemCheck;
+  bool MemCheck = false;
   int MaxIndex;
 
 public:
@@ -348,9 +348,9 @@ private:
 
   std::vector<int> TestsToRun;
 
-  bool UseIncludeRegExpFlag;
-  bool UseExcludeRegExpFlag;
-  bool UseExcludeRegExpFirst;
+  bool UseIncludeRegExpFlag = false;
+  bool UseExcludeRegExpFlag = false;
+  bool UseExcludeRegExpFirst = false;
   std::vector<cmsys::RegularExpression> IncludeLabelRegularExpressions;
   std::vector<cmsys::RegularExpression> ExcludeLabelRegularExpressions;
   cmsys::RegularExpression IncludeTestsRegularExpression;
@@ -373,7 +373,7 @@ private:
   cmsys::RegularExpression CustomCompletionStatusRegex;
   cmsys::RegularExpression CustomLabelRegex;
 
-  std::ostream* LogFile;
+  std::ostream* LogFile = nullptr;
 
   cmCTest::Repeat RepeatMode = cmCTest::Repeat::Never;
   int RepeatCount = 1;

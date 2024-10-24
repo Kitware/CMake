@@ -124,9 +124,6 @@ cmCTestMemCheckHandler::cmCTestMemCheckHandler(cmCTest* ctest)
   this->MemCheck = true;
   this->TestOptions.OutputSizePassed = 0;
   this->TestOptions.OutputSizeFailed = 0;
-  this->LogWithPID = false;
-  this->MemoryTesterStyle = UNKNOWN;
-  this->DefectCount = 0;
 }
 
 int cmCTestMemCheckHandler::PreProcessHandler()

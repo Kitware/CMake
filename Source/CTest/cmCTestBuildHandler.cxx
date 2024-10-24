@@ -178,27 +178,8 @@ static cmCTestBuildCompileErrorWarningRex cmCTestWarningErrorFileLine[] = {
 
 cmCTestBuildHandler::cmCTestBuildHandler(cmCTest* ctest)
   : Superclass(ctest)
+  , LastErrorOrWarning(this->ErrorsAndWarnings.end())
 {
-  this->MaxPreContext = 10;
-  this->MaxPostContext = 10;
-
-  this->MaxErrors = 50;
-  this->MaxWarnings = 50;
-
-  this->LastErrorOrWarning = this->ErrorsAndWarnings.end();
-
-  this->UseCTestLaunch = false;
-
-  this->BuildOutputLogSize = 0;
-  this->OutputLineCounter = 0;
-  this->PostContextCount = 0;
-
-  this->TotalErrors = 0;
-  this->TotalWarnings = 0;
-  this->LastTickChar = 0;
-
-  this->ErrorQuotaReached = false;
-  this->WarningQuotaReached = false;
 }
 
 void cmCTestBuildHandler::PopulateCustomVectors(cmMakefile* mf)

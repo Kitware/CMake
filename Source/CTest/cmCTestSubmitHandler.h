@@ -66,12 +66,12 @@ private:
   class ResponseParser;
 
   std::string HTTPProxy;
-  int HTTPProxyType;
+  int HTTPProxyType = 0;
   std::string HTTPProxyAuth;
-  std::ostream* LogFile;
+  std::ostream* LogFile = nullptr;
   bool SubmitPart[cmCTest::PartCount];
-  bool HasWarnings;
-  bool HasErrors;
+  bool HasWarnings = false;
+  bool HasErrors = false;
   std::set<std::string> Files;
   std::vector<std::string> HttpHeaders;
 

@@ -70,13 +70,13 @@ protected:
                          cmGeneratedFileStream& xofs);
   bool StartLogFile(const char* name, cmGeneratedFileStream& xofs);
 
-  bool AppendXML;
-  bool Quiet;
-  unsigned long TestLoad;
-  cmSystemTools::OutputOption HandlerVerbose;
+  bool AppendXML = false;
+  bool Quiet = false;
+  unsigned long TestLoad = 0;
+  cmSystemTools::OutputOption HandlerVerbose = cmSystemTools::OUTPUT_NONE;
   cmCTest* CTest;
   t_StringToString LogFileNames;
   cmake* CMake = nullptr;
 
-  int SubmitIndex;
+  int SubmitIndex = 0;
 };
