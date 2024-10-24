@@ -571,6 +571,14 @@ endif()
 set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
 unset(SortLib_VERSION)
 
+
+set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+FIND_PACKAGE(SortLib 4.0 CONFIG)
+IF (NOT "${SortLib_VERSION}" STREQUAL "4.0.0")
+  message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER gave up too soon! ${SortLib_VERSION}")
+endif()
+unset(SortLib_VERSION)
+
 unset(CMAKE_FIND_PACKAGE_SORT_ORDER)
 unset(CMAKE_FIND_PACKAGE_SORT_DIRECTION)
 set(CMAKE_PREFIX_PATH )
