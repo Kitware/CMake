@@ -257,7 +257,7 @@ const LinkLibraryFeatureAttributeSet& GetLinkLibraryFeatureAttributes(
         if (processingOption.match(1) == "LIBRARY_TYPE") {
           featureAttributes.LibraryTypes.clear();
           for (auto const& value :
-               cmTokenize(processingOption.match(2), ","_s)) {
+               cmTokenize(processingOption.match(2), ',')) {
             if (value == "STATIC") {
               featureAttributes.LibraryTypes.emplace(
                 cmStateEnums::STATIC_LIBRARY);
@@ -292,7 +292,8 @@ const LinkLibraryFeatureAttributeSet& GetLinkLibraryFeatureAttributes(
           }
         } else if (processingOption.match(1) == "OVERRIDE") {
           featureAttributes.Override.clear();
-          auto values = cmTokenize(processingOption.match(2), ","_s);
+          std::vector<std::string> values =
+            cmTokenize(processingOption.match(2), ',');
           featureAttributes.Override.insert(values.begin(), values.end());
         }
       } else {
@@ -668,13 +669,14 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
       *linkLibraryOverride, target->GetLocalGenerator(), config, target, &dag,
       target, linkLanguage);
 
-    auto overrideList = cmTokenize(overrideValue, ","_s);
+    std::vector<std::string> overrideList =
+      cmTokenize(overrideValue, ',', cmTokenizerMode::New);
     if (overrideList.size() >= 2) {
       auto const& feature = overrideList.front();
-      for_each(overrideList.cbegin() + 1, overrideList.cend(),
-               [this, &feature](std::string const& item) {
-                 this->LinkLibraryOverride.emplace(item, feature);
-               });
+      std::for_each(overrideList.cbegin() + 1, overrideList.cend(),
+                    [this, &feature](std::string const& item) {
+                      this->LinkLibraryOverride.emplace(item, feature);
+                    });
     }
   }
 }

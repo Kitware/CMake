@@ -24,7 +24,7 @@ using cmStringRange = cmRange<std::vector<std::string>::const_iterator>;
 
 /** Returns length of a literal string.  */
 template <size_t N>
-constexpr size_t cmStrLen(const char (&/*str*/)[N])
+constexpr size_t cmStrLen(const char (&)[N])
 {
   return N - 1;
 }
@@ -91,12 +91,12 @@ std::string cmJoinStrings(Range const& rng, cm::string_view separator,
   }
 
   std::string result;
-  result.reserve(
-    std::accumulate(std::begin(rng), std::end(rng),
-                    initial.size() + (rng.size() - 1) * separator.size(),
-                    [](std::size_t sum, const std::string& item) {
-                      return sum + item.size();
-                    }));
+  result.reserve(std::accumulate(
+    std::begin(rng), std::end(rng),
+    initial.size() + (rng.size() - 1) * separator.size(),
+    [](std::size_t sum, typename Range::value_type const& item) {
+      return sum + item.size();
+    }));
   result.append(std::begin(initial), std::end(initial));
 
   auto begin = std::begin(rng);
@@ -122,8 +122,81 @@ std::string cmJoin(std::vector<std::string> const& rng,
 std::string cmJoin(cmStringRange const& rng, cm::string_view separator,
                    cm::string_view initial = {});
 
-/** Extract tokens that are separated by any of the characters in @a sep.  */
-std::vector<std::string> cmTokenize(cm::string_view str, cm::string_view sep);
+enum class cmTokenizerMode
+{
+  /// A backward-compatible behavior when in the case of no
+  /// tokens have found in an input text it'll return one empty
+  /// token in the result container (vector).
+  Legacy,
+  /// The new behavior is to return an empty vector.
+  New
+};
+
+/**
+ * \brief A generic version of a tokenizer.
+ *
+ * Extract tokens from the input string separated by any
+ * of the characters in `sep` and assign them to the
+ * given output iterator.
+ *
+ * The `mode` parameter defines the behavior in the case when
+ * no tokens have found in the input text.
+ *
+ */
+template <typename StringT, typename OutIt, typename Sep = char>
+void cmTokenize(OutIt outIt, cm::string_view str, Sep sep,
+                cmTokenizerMode mode)
+{
+  auto hasTokens = false;
+  // clang-format off
+  for (auto start = str.find_first_not_of(sep)
+    , end = str.find_first_of(sep, start)
+    ; start != cm::string_view::npos
+    ; start = str.find_first_not_of(sep, end)
+    , end = str.find_first_of(sep, start)
+    , hasTokens = true
+    ) {
+    *outIt++ = StringT{ str.substr(start, end - start) };
+  }
+  // clang-format on
+  if (!hasTokens && mode == cmTokenizerMode::Legacy) {
+    *outIt = {};
+  }
+}
+
+/**
+ * \brief Extract tokens that are separated by any of the
+ * characters in `sep`.
+ *
+ * Backward compatible signature.
+ *
+ * \return A vector of strings.
+ */
+template <typename Sep = char>
+std::vector<std::string> cmTokenize(
+  cm::string_view str, Sep sep, cmTokenizerMode mode = cmTokenizerMode::Legacy)
+{
+  using StringType = std::string;
+  std::vector<StringType> tokens;
+  cmTokenize<StringType>(std::back_inserter(tokens), str, sep, mode);
+  return tokens;
+}
+
+/**
+ * \brief Extract tokens that are separated by any of the
+ * characters in `sep`.
+ *
+ * \return A vector of string views.
+ */
+template <typename Sep = char>
+std::vector<cm::string_view> cmTokenizedView(
+  cm::string_view str, Sep sep, cmTokenizerMode mode = cmTokenizerMode::Legacy)
+{
+  using StringType = cm::string_view;
+  std::vector<StringType> tokens;
+  cmTokenize<StringType>(std::back_inserter(tokens), str, sep, mode);
+  return tokens;
+}
 
 /** Concatenate string pieces into a single string.  */
 std::string cmCatViews(

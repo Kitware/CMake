@@ -1131,7 +1131,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       "--debug-find-pkg", "Provide a package argument for --debug-find-pkg",
       CommandArgument::Values::One, CommandArgument::RequiresSeparator::Yes,
       [](std::string const& value, cmake* state) -> bool {
-        std::vector<std::string> find_pkgs(cmTokenize(value, ","));
+        std::vector<std::string> find_pkgs(cmTokenize(value, ','));
         std::cout << "Running with debug output on for the 'find' commands "
                      "for package(s)";
         for (auto const& v : find_pkgs) {
@@ -1145,7 +1145,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       "--debug-find-var", CommandArgument::Values::One,
       CommandArgument::RequiresSeparator::Yes,
       [](std::string const& value, cmake* state) -> bool {
-        std::vector<std::string> find_vars(cmTokenize(value, ","));
+        std::vector<std::string> find_vars(cmTokenize(value, ','));
         std::cout << "Running with debug output on for the variable(s)";
         for (auto const& v : find_vars) {
           std::cout << ' ' << v;

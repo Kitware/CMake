@@ -980,7 +980,7 @@ bool cmCPackInnoSetupGenerator::BuildDownloadedComponentArchive(
                   "Problem running certutil command: " << hashCmd
                                                        << std::endl);
   }
-  *hash = cmTrimWhitespace(cmTokenize(hashOutput, "\n").at(1));
+  *hash = cmTrimWhitespace(cmTokenizedView(hashOutput, '\n').at(1));
 
   if (hash->length() != 64) {
     cmCPackLogger(cmCPackLog::LOG_WARNING,
