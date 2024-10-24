@@ -276,8 +276,6 @@ inline int GetNextRealNumber(std::string const& in, double& val,
 
 cmCTestTestHandler::cmCTestTestHandler()
 {
-  this->UseUnion = false;
-
   this->UseIncludeRegExpFlag = false;
   this->UseExcludeRegExpFlag = false;
   this->UseExcludeRegExpFirst = false;
@@ -333,7 +331,6 @@ void cmCTestTestHandler::Initialize(cmCTest* ctest)
   this->TestsToExcludeByName.reset();
 
   this->TestsToRunString.clear();
-  this->UseUnion = false;
   this->TestList.clear();
 }
 
@@ -514,11 +511,10 @@ bool cmCTestTestHandler::ProcessOptions()
 {
   // Update internal data structure from generic one
   this->SetTestsToRunInformation(this->TestOptions.TestsToRunInformation);
-  this->SetUseUnion(this->GetOption("UseUnion").IsOn());
-  if (this->GetOption("ScheduleRandom").IsOn()) {
+  if (this->TestOptions.ScheduleRandom) {
     this->CTest->SetScheduleType("Random");
   }
-  if (cmValue repeat = this->GetOption("Repeat")) {
+  if (auto repeat = this->Repeat) {
     cmsys::RegularExpression repeatRegex(
       "^(UNTIL_FAIL|UNTIL_PASS|AFTER_TIMEOUT):([0-9]+)$");
     if (repeatRegex.find(*repeat)) {
@@ -542,8 +538,8 @@ bool cmCTestTestHandler::ProcessOptions()
       return false;
     }
   }
-  if (cmValue parallelLevel = this->GetOption("ParallelLevel")) {
-    if (parallelLevel.IsEmpty()) {
+  if (auto parallelLevel = this->ParallelLevel) {
+    if (parallelLevel->empty()) {
       // An empty value tells ctest to choose a default.
       this->CTest->SetParallelLevel(cm::nullopt);
     } else {
@@ -559,7 +555,7 @@ bool cmCTestTestHandler::ProcessOptions()
     }
   }
 
-  if (this->GetOption("StopOnFailure")) {
+  if (this->TestOptions.StopOnFailure) {
     this->CTest->SetStopOnFailure(true);
   }
 
@@ -573,8 +569,6 @@ bool cmCTestTestHandler::ProcessOptions()
   if (!this->TestOptions.ExcludeRegularExpression.empty()) {
     this->UseExcludeRegExp();
   }
-  this->SetRerunFailed(this->GetOption("RerunFailed").IsOn());
-
   return true;
 }
 
@@ -886,7 +880,7 @@ bool cmCTestTestHandler::ComputeTestList()
     return false;
   }
 
-  if (this->RerunFailed) {
+  if (this->TestOptions.RerunFailed) {
     return this->ComputeTestListForRerunFailed();
   }
 
@@ -900,7 +894,7 @@ bool cmCTestTestHandler::ComputeTestList()
     }
   }
   // expand the test list based on the union flag
-  if (this->UseUnion) {
+  if (this->TestOptions.UseUnion) {
     this->ExpandTestsToRunInformation(static_cast<int>(tmsize));
   } else {
     this->ExpandTestsToRunInformation(inREcnt);
@@ -915,7 +909,7 @@ bool cmCTestTestHandler::ComputeTestList()
       inREcnt++;
     }
 
-    if (this->UseUnion) {
+    if (this->TestOptions.UseUnion) {
       // if it is not in the list and not in the regexp then skip
       if ((!this->TestsToRun.empty() &&
            !cm::contains(this->TestsToRun, cnt)) &&

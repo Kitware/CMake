@@ -30,6 +30,11 @@ class cmXMLWriter;
 
 struct cmCTestTestOptions
 {
+  bool RerunFailed = false;
+  bool ScheduleRandom = false;
+  bool StopOnFailure = false;
+  bool UseUnion = false;
+
   int OutputSizePassed = 1 * 1024;
   int OutputSizeFailed = 300 * 1024;
   cmCTestTypes::TruncationMode OutputTruncation =
@@ -69,19 +74,6 @@ public:
    * The main entry point for this class
    */
   int ProcessHandler() override;
-
-  /**
-   * When both -R and -I are used should the resulting test list be the
-   * intersection or the union of the lists. By default it is the
-   * intersection.
-   */
-  void SetUseUnion(bool val) { this->UseUnion = val; }
-
-  /**
-   * Set whether or not CTest should only execute the tests that failed
-   * on the previous run.  By default this is false.
-   */
-  void SetRerunFailed(bool val) { this->RerunFailed = val; }
 
   /**
    * This method is called when reading CTest custom file
@@ -372,6 +364,8 @@ private:
   cmsys::RegularExpression ExcludeTestsRegularExpression;
   cm::optional<std::set<std::string>> TestsToRunByName;
   cm::optional<std::set<std::string>> TestsToExcludeByName;
+  cm::optional<std::string> ParallelLevel;
+  cm::optional<std::string> Repeat;
 
   void RecordCustomTestMeasurements(cmXMLWriter& xml, std::string content);
   void CheckLabelFilter(cmCTestTestProperties& it);
@@ -379,7 +373,6 @@ private:
   void CheckLabelFilterInclude(cmCTestTestProperties& it);
 
   std::string TestsToRunString;
-  bool UseUnion;
   ListOfTests TestList;
   size_t TotalNumberOfTests;
   cmsys::RegularExpression AllTestMeasurementsRegex;
@@ -391,7 +384,6 @@ private:
 
   cmCTest::Repeat RepeatMode = cmCTest::Repeat::Never;
   int RepeatCount = 1;
-  bool RerunFailed;
 
   friend class cmCTestTestCommand;
 };

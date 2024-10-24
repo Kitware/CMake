@@ -103,16 +103,16 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
       this->ExcludeFixtureCleanup;
   }
   if (this->StopOnFailure) {
-    handler->SetOption("StopOnFailure", "ON");
+    handler->TestOptions.StopOnFailure = true;
   }
   if (this->ParallelLevel) {
-    handler->SetOption("ParallelLevel", *this->ParallelLevel);
+    handler->ParallelLevel = *this->ParallelLevel;
   }
   if (!this->Repeat.empty()) {
-    handler->SetOption("Repeat", this->Repeat);
+    handler->Repeat = this->Repeat;
   }
   if (!this->ScheduleRandom.empty()) {
-    handler->SetOption("ScheduleRandom", this->ScheduleRandom);
+    handler->TestOptions.ScheduleRandom = cmValue(this->ScheduleRandom).IsOn();
   }
   if (!this->ResourceSpecFile.empty()) {
     handler->TestOptions.ResourceSpecFile = this->ResourceSpecFile;
