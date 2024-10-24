@@ -16,7 +16,6 @@
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
-#include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/String.h"
 
@@ -337,47 +336,18 @@ private:
   const cm::string_view Extension;
 };
 
-class cmFileListGeneratorGlob
+class cmAnyDirectoryListGenerator : public cmProjectDirectoryListGenerator
 {
 public:
-  cmFileListGeneratorGlob(cm::string_view pattern)
-    : Pattern(pattern)
+  cmAnyDirectoryListGenerator(cmFindPackageCommand::SortOrderType so,
+                              cmFindPackageCommand::SortDirectionType sd)
+    : cmProjectDirectoryListGenerator(this->EmptyNamesList, so, sd, false)
   {
-  }
-
-  std::string GetNextCandidate(const std::string& parent)
-  {
-    if (this->Files.empty()) {
-      // Glob the set of matching files.
-      std::string expr = cmStrCat(parent, this->Pattern);
-      cmsys::Glob g;
-      if (!g.FindFiles(expr)) {
-        return {};
-      }
-      this->Files = g.GetFiles();
-      this->Current = this->Files.cbegin();
-    }
-
-    // Skip non-directories
-    for (; this->Current != this->Files.cend() &&
-         !cmSystemTools::FileIsDirectory(*this->Current);
-         ++this->Current) {
-    }
-
-    return (this->Current != this->Files.cend()) ? *this->Current++
-                                                 : std::string{};
-  }
-
-  void Reset()
-  {
-    this->Files.clear();
-    this->Current = this->Files.cbegin();
   }
 
 private:
-  cm::string_view Pattern;
-  std::vector<std::string> Files;
-  std::vector<std::string>::const_iterator Current;
+  // NOTE `cmDirectoryListGenerator` needs to hold a reference to this
+  std::vector<std::string> EmptyNamesList;
 };
 
 #if defined(__LCC__)
@@ -2776,7 +2746,8 @@ bool cmFindPackageCommand::SearchFrameworkPrefix(std::string const& prefix_in)
     cmMacProjectDirectoryListGenerator{ this->Names, ".framework"_s };
   auto rGen = cmAppendPathSegmentGenerator{ "Resources"_s };
   auto vGen = cmAppendPathSegmentGenerator{ "Versions"_s };
-  auto grGen = cmFileListGeneratorGlob{ "/*/Resources"_s };
+  auto anyGen =
+    cmAnyDirectoryListGenerator{ this->SortOrder, this->SortDirection };
 
   // <prefix>/Foo.framework/Resources/
   if (TryGeneratedPaths(searchFn, prefix, fwGen, rGen)) {
@@ -2789,12 +2760,13 @@ bool cmFindPackageCommand::SearchFrameworkPrefix(std::string const& prefix_in)
   }
 
   // <prefix>/Foo.framework/Versions/*/Resources/
-  if (TryGeneratedPaths(searchFn, prefix, fwGen, vGen, grGen)) {
+  if (TryGeneratedPaths(searchFn, prefix, fwGen, vGen, anyGen, rGen)) {
     return true;
   }
 
   // <prefix>/Foo.framework/Versions/*/Resources/CMake/
-  return TryGeneratedPaths(searchFn, prefix, fwGen, vGen, grGen, iCMakeGen);
+  return TryGeneratedPaths(searchFn, prefix, fwGen, vGen, anyGen, rGen,
+                           iCMakeGen);
 }
 
 bool cmFindPackageCommand::SearchAppBundlePrefix(std::string const& prefix_in)
