@@ -481,6 +481,13 @@
         - docker
         - linux-x86_64
 
+.linux_x86_64_v3_tags:
+    tags:
+        - cmake
+        - build
+        - docker
+        - linux-x86_64-v3
+
 .linux_x86_64_tags_x11:
     tags:
         - cmake

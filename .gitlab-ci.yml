@@ -288,7 +288,7 @@ t:fedora40-makefiles:
     extends:
         - .fedora40_makefiles
         - .cmake_test_linux_release
-        - .linux_x86_64_tags
+        - .linux_x86_64_v3_tags
         - .run_dependent
         - .needs_centos7_x86_64
 
@@ -296,7 +296,7 @@ t:fedora40-makefiles-nospace:
     extends:
         - .fedora40_makefiles
         - .cmake_test_linux_release
-        - .linux_x86_64_tags
+        - .linux_x86_64_v3_tags
         - .cmake_junit_artifacts
         - .run_dependent
         - .needs_centos7_x86_64
