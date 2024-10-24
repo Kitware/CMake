@@ -4,7 +4,9 @@ LINK_LIBRARIES_STRATEGY
 .. versionadded:: 3.31
 
 Specify a strategy for ordering a target's direct link dependencies
-on linker command lines.
+on linker command lines.  This property is initialized by the value of the
+:variable:`CMAKE_LINK_LIBRARIES_STRATEGY` variable if it is set when a
+target is created.
 
 CMake generates a target's link line using its :ref:`Target Link Properties`.
 In particular, the :prop_tgt:`LINK_LIBRARIES` target property records the
@@ -44,7 +46,11 @@ The supported strategies are:
   In the above example, this strategy computes a link line for ``main``
   by starting with its original entries ``A B C``, and then appends
   another ``A`` to satisfy the dependencies of ``B`` and ``C`` on ``A``.
-  The final order is ``A B C A``.
+  The final order produced by this strategy is ``A B C A``.
+
+  Note that additional filtering for `Toolchain-Specific Behavior`_
+  may de-duplicate ``A`` on the actual linker invocation in the
+  generated build system, resulting in either ``A B C`` or ``B C A``.
 
 ``REORDER``
   Entries of :prop_tgt:`LINK_LIBRARIES` may be reordered, de-duplicated,
@@ -55,14 +61,24 @@ The supported strategies are:
   In the above example, this strategy computes a link line for ``main``
   by re-ordering its original entries ``A B C`` to satisfy the
   dependencies of ``B`` and ``C`` on ``A``.
-  The final order is ``B C A``.
+  The final order produced by this strategy is ``B C A``.
 
-.. note::
+Toolchain-Specific Behavior
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  Regardless of the strategy used, the actual linker invocation for
-  some platforms may de-duplicate entries based on linker capabilities.
-  See policies :policy:`CMP0156` and :policy:`CMP0179`.
+Regardless of the strategy used, the actual linker invocation for
+some platforms may de-duplicate entries based on linker capabilities.
+See policy :policy:`CMP0156`.
 
-This property is initialized by the value of the
-:variable:`CMAKE_LINK_LIBRARIES_STRATEGY` variable if it is set when a
-target is created.
+For example, if the ``PRESERVE_ORDER`` strategy produces ``A B C A``,
+the actual link line may de-duplicate ``A`` as follows:
+
+* If ``A`` is a static library and the linker re-scans automatically,
+  the first occurrence is kept, resulting in ``A B C``.
+  See policy :policy:`CMP0179`
+
+* If ``A`` is a shared library on Windows, the first
+  occurrence is kept, resulting in ``A B C``.
+
+* If ``A`` is a shared library on macOS or UNIX platforms, the last
+  occurrence is kept, resulting in ``B C A``.
