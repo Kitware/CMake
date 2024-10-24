@@ -1793,10 +1793,12 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
 
   if (expandedPreset->Filter) {
     if (expandedPreset->Filter->Include) {
-      this->SetPersistentOptionIfNotEmpty(
-        expandedPreset->Filter->Include->Name, "IncludeRegularExpression");
-      this->AddPersistentMultiOptionIfNotEmpty(
-        expandedPreset->Filter->Include->Label, "LabelRegularExpression");
+      this->Impl->TestOptions.IncludeRegularExpression =
+        expandedPreset->Filter->Include->Name;
+      if (!expandedPreset->Filter->Include->Label.empty()) {
+        this->Impl->TestOptions.LabelRegularExpression.push_back(
+          expandedPreset->Filter->Include->Label);
+      }
 
       if (expandedPreset->Filter->Include->Index) {
         if (expandedPreset->Filter->Include->Index->IndexFile.empty()) {
@@ -1810,12 +1812,10 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
           indexOptions +=
             cmJoin(expandedPreset->Filter->Include->Index->SpecificTests, ",");
 
-          this->SetPersistentOptionIfNotEmpty(indexOptions,
-                                              "TestsToRunInformation");
+          this->Impl->TestOptions.TestsToRunInformation = indexOptions;
         } else {
-          this->SetPersistentOptionIfNotEmpty(
-            expandedPreset->Filter->Include->Index->IndexFile,
-            "TestsToRunInformation");
+          this->Impl->TestOptions.TestsToRunInformation =
+            expandedPreset->Filter->Include->Index->IndexFile;
         }
       }
 
@@ -1826,22 +1826,20 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
     }
 
     if (expandedPreset->Filter->Exclude) {
-      this->SetPersistentOptionIfNotEmpty(
-        expandedPreset->Filter->Exclude->Name, "ExcludeRegularExpression");
-      this->AddPersistentMultiOptionIfNotEmpty(
-        expandedPreset->Filter->Exclude->Label,
-        "ExcludeLabelRegularExpression");
+      this->Impl->TestOptions.ExcludeRegularExpression =
+        expandedPreset->Filter->Exclude->Name;
+      if (!expandedPreset->Filter->Exclude->Label.empty()) {
+        this->Impl->TestOptions.ExcludeLabelRegularExpression.push_back(
+          expandedPreset->Filter->Exclude->Label);
+      }
 
       if (expandedPreset->Filter->Exclude->Fixtures) {
-        this->SetPersistentOptionIfNotEmpty(
-          expandedPreset->Filter->Exclude->Fixtures->Any,
-          "ExcludeFixtureRegularExpression");
-        this->SetPersistentOptionIfNotEmpty(
-          expandedPreset->Filter->Exclude->Fixtures->Setup,
-          "ExcludeFixtureSetupRegularExpression");
-        this->SetPersistentOptionIfNotEmpty(
-          expandedPreset->Filter->Exclude->Fixtures->Cleanup,
-          "ExcludeFixtureCleanupRegularExpression");
+        this->Impl->TestOptions.ExcludeFixtureRegularExpression =
+          expandedPreset->Filter->Exclude->Fixtures->Any;
+        this->Impl->TestOptions.ExcludeFixtureSetupRegularExpression =
+          expandedPreset->Filter->Exclude->Fixtures->Setup;
+        this->Impl->TestOptions.ExcludeFixtureCleanupRegularExpression =
+          expandedPreset->Filter->Exclude->Fixtures->Cleanup;
       }
     }
   }
@@ -2130,10 +2128,7 @@ int cmCTest::Run(std::vector<std::string> const& args)
     return true;
   };
   auto const dashI = [this](std::string const& tests) -> bool {
-    this->Impl->TestHandler.SetPersistentOption("TestsToRunInformation",
-                                                tests);
-    this->Impl->MemCheckHandler.SetPersistentOption("TestsToRunInformation",
-                                                    tests);
+    this->Impl->TestOptions.TestsToRunInformation = tests;
     return true;
   };
   auto const dashU = [this](std::string const&) -> bool {
@@ -2142,52 +2137,31 @@ int cmCTest::Run(std::vector<std::string> const& args)
     return true;
   };
   auto const dashR = [this](std::string const& expr) -> bool {
-    this->Impl->TestHandler.SetPersistentOption("IncludeRegularExpression",
-                                                expr);
-    this->Impl->MemCheckHandler.SetPersistentOption("IncludeRegularExpression",
-                                                    expr);
+    this->Impl->TestOptions.IncludeRegularExpression = expr;
     return true;
   };
   auto const dashE = [this](std::string const& expr) -> bool {
-    this->Impl->TestHandler.SetPersistentOption("ExcludeRegularExpression",
-                                                expr);
-    this->Impl->MemCheckHandler.SetPersistentOption("ExcludeRegularExpression",
-                                                    expr);
+    this->Impl->TestOptions.ExcludeRegularExpression = expr;
     return true;
   };
   auto const dashL = [this](std::string const& expr) -> bool {
-    this->Impl->TestHandler.AddPersistentMultiOption("LabelRegularExpression",
-                                                     expr);
-    this->Impl->MemCheckHandler.AddPersistentMultiOption(
-      "LabelRegularExpression", expr);
+    this->Impl->TestOptions.LabelRegularExpression.push_back(expr);
     return true;
   };
   auto const dashLE = [this](std::string const& expr) -> bool {
-    this->Impl->TestHandler.AddPersistentMultiOption(
-      "ExcludeLabelRegularExpression", expr);
-    this->Impl->MemCheckHandler.AddPersistentMultiOption(
-      "ExcludeLabelRegularExpression", expr);
+    this->Impl->TestOptions.ExcludeLabelRegularExpression.push_back(expr);
     return true;
   };
   auto const dashFA = [this](std::string const& expr) -> bool {
-    this->Impl->TestHandler.SetPersistentOption(
-      "ExcludeFixtureRegularExpression", expr);
-    this->Impl->MemCheckHandler.SetPersistentOption(
-      "ExcludeFixtureRegularExpression", expr);
+    this->Impl->TestOptions.ExcludeFixtureRegularExpression = expr;
     return true;
   };
   auto const dashFS = [this](std::string const& expr) -> bool {
-    this->Impl->TestHandler.SetPersistentOption(
-      "ExcludeFixtureSetupRegularExpression", expr);
-    this->Impl->MemCheckHandler.SetPersistentOption(
-      "ExcludeFixtureSetupRegularExpression", expr);
+    this->Impl->TestOptions.ExcludeFixtureSetupRegularExpression = expr;
     return true;
   };
   auto const dashFC = [this](std::string const& expr) -> bool {
-    this->Impl->TestHandler.SetPersistentOption(
-      "ExcludeFixtureCleanupRegularExpression", expr);
-    this->Impl->MemCheckHandler.SetPersistentOption(
-      "ExcludeFixtureCleanupRegularExpression", expr);
+    this->Impl->TestOptions.ExcludeFixtureCleanupRegularExpression = expr;
     return true;
   };
 

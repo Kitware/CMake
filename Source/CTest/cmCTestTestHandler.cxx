@@ -332,11 +332,6 @@ void cmCTestTestHandler::Initialize(cmCTest* ctest)
   this->UseExcludeRegExpFirst = false;
   this->IncludeLabelRegularExpressions.clear();
   this->ExcludeLabelRegularExpressions.clear();
-  this->IncludeRegExp.clear();
-  this->ExcludeRegExp.clear();
-  this->ExcludeFixtureRegExp.clear();
-  this->ExcludeFixtureSetupRegExp.clear();
-  this->ExcludeFixtureCleanupRegExp.clear();
   this->TestListFile.clear();
   this->ExcludeTestListFile.clear();
   this->TestsToRunByName.reset();
@@ -523,7 +518,7 @@ static bool BuildLabelRE(const std::vector<std::string>& parts,
 bool cmCTestTestHandler::ProcessOptions()
 {
   // Update internal data structure from generic one
-  this->SetTestsToRunInformation(this->GetOption("TestsToRunInformation"));
+  this->SetTestsToRunInformation(this->TestOptions.TestsToRunInformation);
   this->SetUseUnion(this->GetOption("UseUnion").IsOn());
   if (this->GetOption("ScheduleRandom").IsOn()) {
     this->CTest->SetScheduleType("Random");
@@ -573,33 +568,17 @@ bool cmCTestTestHandler::ProcessOptions()
     this->CTest->SetStopOnFailure(true);
   }
 
-  BuildLabelRE(this->GetMultiOption("LabelRegularExpression"),
+  BuildLabelRE(this->TestOptions.LabelRegularExpression,
                this->IncludeLabelRegularExpressions);
-  BuildLabelRE(this->GetMultiOption("ExcludeLabelRegularExpression"),
+  BuildLabelRE(this->TestOptions.ExcludeLabelRegularExpression,
                this->ExcludeLabelRegularExpressions);
-  cmValue val = this->GetOption("IncludeRegularExpression");
-  if (val) {
+  if (!this->TestOptions.IncludeRegularExpression.empty()) {
     this->UseIncludeRegExp();
-    this->SetIncludeRegExp(*val);
   }
-  val = this->GetOption("ExcludeRegularExpression");
-  if (val) {
+  if (!this->TestOptions.ExcludeRegularExpression.empty()) {
     this->UseExcludeRegExp();
-    this->SetExcludeRegExp(*val);
   }
-  val = this->GetOption("ExcludeFixtureRegularExpression");
-  if (val) {
-    this->ExcludeFixtureRegExp = *val;
-  }
-  val = this->GetOption("ExcludeFixtureSetupRegularExpression");
-  if (val) {
-    this->ExcludeFixtureSetupRegExp = *val;
-  }
-  val = this->GetOption("ExcludeFixtureCleanupRegularExpression");
-  if (val) {
-    this->ExcludeFixtureCleanupRegExp = *val;
-  }
-  val = this->GetOption("ResourceSpecFile");
+  cmValue val = this->GetOption("ResourceSpecFile");
   if (val) {
     this->ResourceSpecFile = *val;
   }
@@ -1036,22 +1015,24 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
                      this->Quiet);
 
   // Prepare regular expression evaluators
-  std::string setupRegExp(this->ExcludeFixtureRegExp);
-  std::string cleanupRegExp(this->ExcludeFixtureRegExp);
-  if (!this->ExcludeFixtureSetupRegExp.empty()) {
+  std::string setupRegExp(this->TestOptions.ExcludeFixtureRegularExpression);
+  std::string cleanupRegExp(this->TestOptions.ExcludeFixtureRegularExpression);
+  if (!this->TestOptions.ExcludeFixtureSetupRegularExpression.empty()) {
     if (setupRegExp.empty()) {
-      setupRegExp = this->ExcludeFixtureSetupRegExp;
+      setupRegExp = this->TestOptions.ExcludeFixtureSetupRegularExpression;
     } else {
-      setupRegExp.append("(" + setupRegExp + ")|(" +
-                         this->ExcludeFixtureSetupRegExp + ")");
+      setupRegExp.append(
+        "(" + setupRegExp + ")|(" +
+        this->TestOptions.ExcludeFixtureSetupRegularExpression + ")");
     }
   }
-  if (!this->ExcludeFixtureCleanupRegExp.empty()) {
+  if (!this->TestOptions.ExcludeFixtureCleanupRegularExpression.empty()) {
     if (cleanupRegExp.empty()) {
-      cleanupRegExp = this->ExcludeFixtureCleanupRegExp;
+      cleanupRegExp = this->TestOptions.ExcludeFixtureCleanupRegularExpression;
     } else {
-      cleanupRegExp.append("(" + cleanupRegExp + ")|(" +
-                           this->ExcludeFixtureCleanupRegExp + ")");
+      cleanupRegExp.append(
+        "(" + cleanupRegExp + ")|(" +
+        this->TestOptions.ExcludeFixtureCleanupRegularExpression + ")");
     }
   }
   cmsys::RegularExpression excludeSetupRegex(setupRegExp);
@@ -1812,11 +1793,13 @@ bool cmCTestTestHandler::ParseResourceGroupsProperty(
 
 bool cmCTestTestHandler::GetListOfTests()
 {
-  if (!this->IncludeRegExp.empty()) {
-    this->IncludeTestsRegularExpression.compile(this->IncludeRegExp);
+  if (!this->TestOptions.IncludeRegularExpression.empty()) {
+    this->IncludeTestsRegularExpression.compile(
+      this->TestOptions.IncludeRegularExpression);
   }
-  if (!this->ExcludeRegExp.empty()) {
-    this->ExcludeTestsRegularExpression.compile(this->ExcludeRegExp);
+  if (!this->TestOptions.ExcludeRegularExpression.empty()) {
+    this->ExcludeTestsRegularExpression.compile(
+      this->TestOptions.ExcludeRegularExpression);
   }
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Constructing a list of tests" << std::endl, this->Quiet);
@@ -2155,27 +2138,14 @@ void cmCTestTestHandler::RecordCustomTestMeasurements(cmXMLWriter& xml,
   }
 }
 
-void cmCTestTestHandler::SetIncludeRegExp(const std::string& arg)
+void cmCTestTestHandler::SetTestsToRunInformation(std::string const& in)
 {
-  this->IncludeRegExp = arg;
-}
-
-void cmCTestTestHandler::SetExcludeRegExp(const std::string& arg)
-{
-  this->ExcludeRegExp = arg;
-}
-
-void cmCTestTestHandler::SetTestsToRunInformation(cmValue in)
-{
-  if (!in) {
-    return;
-  }
-  this->TestsToRunString = *in;
+  this->TestsToRunString = in;
   // if the argument is a file, then read it and use the contents as the
   // string
-  if (cmSystemTools::FileExists(*in)) {
-    cmsys::ifstream fin(in->c_str());
-    unsigned long filelen = cmSystemTools::FileLength(*in);
+  if (cmSystemTools::FileExists(in)) {
+    cmsys::ifstream fin(in.c_str());
+    unsigned long filelen = cmSystemTools::FileLength(in);
     auto buff = cm::make_unique<char[]>(filelen + 1);
     fin.getline(buff.get(), filelen);
     buff[fin.gcount()] = 0;

@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <ratio>
 #include <sstream>
+#include <vector>
 
 #include <cmext/string_view>
 
@@ -65,22 +66,21 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
 
   cmCTestTestHandler* handler = this->InitializeActualHandler();
   if (!this->Start.empty() || !this->End.empty() || !this->Stride.empty()) {
-    handler->SetOption(
-      "TestsToRunInformation",
-      cmStrCat(this->Start, ',', this->End, ',', this->Stride));
+    handler->TestOptions.TestsToRunInformation =
+      cmStrCat(this->Start, ',', this->End, ',', this->Stride);
   }
   if (!this->Exclude.empty()) {
-    handler->SetOption("ExcludeRegularExpression", this->Exclude);
+    handler->TestOptions.ExcludeRegularExpression = this->Exclude;
   }
   if (!this->Include.empty()) {
-    handler->SetOption("IncludeRegularExpression", this->Include);
+    handler->TestOptions.IncludeRegularExpression = this->Include;
   }
   if (!this->ExcludeLabel.empty()) {
-    handler->AddMultiOption("ExcludeLabelRegularExpression",
-                            this->ExcludeLabel);
+    handler->TestOptions.ExcludeLabelRegularExpression.push_back(
+      this->ExcludeLabel);
   }
   if (!this->IncludeLabel.empty()) {
-    handler->AddMultiOption("LabelRegularExpression", this->IncludeLabel);
+    handler->TestOptions.LabelRegularExpression.push_back(this->IncludeLabel);
   }
 
   if (!this->ExcludeTestsFromFile.empty()) {
@@ -91,16 +91,16 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   }
 
   if (!this->ExcludeFixture.empty()) {
-    handler->SetOption("ExcludeFixtureRegularExpression",
-                       this->ExcludeFixture);
+    handler->TestOptions.ExcludeFixtureRegularExpression =
+      this->ExcludeFixture;
   }
   if (!this->ExcludeFixtureSetup.empty()) {
-    handler->SetOption("ExcludeFixtureSetupRegularExpression",
-                       this->ExcludeFixtureSetup);
+    handler->TestOptions.ExcludeFixtureSetupRegularExpression =
+      this->ExcludeFixtureSetup;
   }
   if (!this->ExcludeFixtureCleanup.empty()) {
-    handler->SetOption("ExcludeFixtureCleanupRegularExpression",
-                       this->ExcludeFixtureCleanup);
+    handler->TestOptions.ExcludeFixtureCleanupRegularExpression =
+      this->ExcludeFixtureCleanup;
   }
   if (this->StopOnFailure) {
     handler->SetOption("StopOnFailure", "ON");

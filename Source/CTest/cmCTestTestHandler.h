@@ -24,7 +24,6 @@
 #include "cmCTestTypes.h" // IWYU pragma: keep
 #include "cmDuration.h"
 #include "cmListFileCache.h"
-#include "cmValue.h"
 
 class cmMakefile;
 class cmXMLWriter;
@@ -35,6 +34,17 @@ struct cmCTestTestOptions
   int OutputSizeFailed = 300 * 1024;
   cmCTestTypes::TruncationMode OutputTruncation =
     cmCTestTypes::TruncationMode::Tail;
+
+  std::string TestsToRunInformation;
+  std::string IncludeRegularExpression;
+  std::string ExcludeRegularExpression;
+
+  std::vector<std::string> LabelRegularExpression;
+  std::vector<std::string> ExcludeLabelRegularExpression;
+
+  std::string ExcludeFixtureRegularExpression;
+  std::string ExcludeFixtureSetupRegularExpression;
+  std::string ExcludeFixtureCleanupRegularExpression;
 };
 
 /** \class cmCTestTestHandler
@@ -77,14 +87,12 @@ public:
   /// them on
   void UseIncludeRegExp();
   void UseExcludeRegExp();
-  void SetIncludeRegExp(const std::string&);
-  void SetExcludeRegExp(const std::string&);
 
   void SetMaxIndex(int n) { this->MaxIndex = n; }
   int GetMaxIndex() { return this->MaxIndex; }
 
   //! pass the -I argument down
-  void SetTestsToRunInformation(cmValue);
+  void SetTestsToRunInformation(std::string const& in);
 
   cmCTestTestHandler();
 
@@ -353,11 +361,6 @@ private:
   bool UseIncludeRegExpFlag;
   bool UseExcludeRegExpFlag;
   bool UseExcludeRegExpFirst;
-  std::string IncludeRegExp;
-  std::string ExcludeRegExp;
-  std::string ExcludeFixtureRegExp;
-  std::string ExcludeFixtureSetupRegExp;
-  std::string ExcludeFixtureCleanupRegExp;
   std::vector<cmsys::RegularExpression> IncludeLabelRegularExpressions;
   std::vector<cmsys::RegularExpression> ExcludeLabelRegularExpressions;
   cmsys::RegularExpression IncludeTestsRegularExpression;
