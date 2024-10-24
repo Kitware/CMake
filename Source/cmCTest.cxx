@@ -49,6 +49,7 @@
 #include "cmCTestScriptHandler.h"
 #include "cmCTestSubmitHandler.h"
 #include "cmCTestTestHandler.h"
+#include "cmCTestTypes.h"
 #include "cmCTestUpdateHandler.h"
 #include "cmCTestUploadHandler.h"
 #include "cmCommandLineArgument.h"
@@ -204,6 +205,8 @@ struct cmCTest::Private
 
   cmCTest::NoTests NoTestsMode = cmCTest::NoTests::Legacy;
   bool NoTestsModeSetInCli = false;
+
+  cmCTestTestOptions TestOptions;
 };
 
 struct tm* cmCTest::GetNightlyTime(std::string const& str, bool tomorrowtag)
@@ -1769,17 +1772,17 @@ bool cmCTest::SetArgsFromPreset(const std::string& presetName,
       expandedPreset->Output->SubprojectSummary.value_or(true);
 
     if (expandedPreset->Output->MaxPassedTestOutputSize) {
-      this->Impl->TestHandler.SetTestOutputSizePassed(
-        *expandedPreset->Output->MaxPassedTestOutputSize);
+      this->Impl->TestOptions.OutputSizePassed =
+        *expandedPreset->Output->MaxPassedTestOutputSize;
     }
 
     if (expandedPreset->Output->MaxFailedTestOutputSize) {
-      this->Impl->TestHandler.SetTestOutputSizeFailed(
-        *expandedPreset->Output->MaxFailedTestOutputSize);
+      this->Impl->TestOptions.OutputSizeFailed =
+        *expandedPreset->Output->MaxFailedTestOutputSize;
     }
 
     if (expandedPreset->Output->TestOutputTruncation) {
-      this->Impl->TestHandler.TestOutputTruncation =
+      this->Impl->TestOptions.OutputTruncation =
         *expandedPreset->Output->TestOutputTruncation;
     }
 
@@ -2473,8 +2476,8 @@ int cmCTest::Run(std::vector<std::string> const& args)
                      [this](std::string const& sz) -> bool {
                        long outputSize;
                        if (cmStrToLong(sz, &outputSize)) {
-                         this->Impl->TestHandler.SetTestOutputSizePassed(
-                           static_cast<int>(outputSize));
+                         this->Impl->TestOptions.OutputSizePassed =
+                           static_cast<int>(outputSize);
                        } else {
                          cmCTestLog(
                            this, WARNING,
@@ -2487,8 +2490,8 @@ int cmCTest::Run(std::vector<std::string> const& args)
                      [this](std::string const& sz) -> bool {
                        long outputSize;
                        if (cmStrToLong(sz, &outputSize)) {
-                         this->Impl->TestHandler.SetTestOutputSizeFailed(
-                           static_cast<int>(outputSize));
+                         this->Impl->TestOptions.OutputSizeFailed =
+                           static_cast<int>(outputSize);
                        } else {
                          cmCTestLog(
                            this, WARNING,
@@ -2500,7 +2503,8 @@ int cmCTest::Run(std::vector<std::string> const& args)
     CommandArgument{
       "--test-output-truncation", CommandArgument::Values::One,
       [this](std::string const& mode) -> bool {
-        if (!this->Impl->TestHandler.SetTestOutputTruncation(mode)) {
+        if (!SetTruncationMode(this->Impl->TestOptions.OutputTruncation,
+                               mode)) {
           cmSystemTools::Error(
             cmStrCat("Invalid value for '--test-output-truncation': ", mode));
           return false;
@@ -3262,6 +3266,11 @@ void cmCTest::SetBuildID(const std::string& id)
 std::string cmCTest::GetBuildID() const
 {
   return this->Impl->BuildID;
+}
+
+cmCTestTestOptions const& cmCTest::GetTestOptions() const
+{
+  return this->Impl->TestOptions;
 }
 
 void cmCTest::AddSubmitFile(Part part, const std::string& name)

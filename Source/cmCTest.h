@@ -32,6 +32,7 @@ class cmGeneratedFileStream;
 class cmMakefile;
 class cmValue;
 class cmXMLWriter;
+struct cmCTestTestOptions;
 
 /** \class cmCTest
  * \brief Represents a ctest invocation.
@@ -443,6 +444,8 @@ public:
 
   /** Reread the configuration file */
   bool UpdateCTestConfiguration();
+
+  cmCTestTestOptions const& GetTestOptions() const;
 
 private:
   void SetPersistentOptionIfNotEmpty(const std::string& value,

@@ -282,10 +282,6 @@ cmCTestTestHandler::cmCTestTestHandler()
   this->UseExcludeRegExpFlag = false;
   this->UseExcludeRegExpFirst = false;
 
-  this->CustomMaximumPassedTestOutputSize = 1 * 1024;
-  this->CustomMaximumFailedTestOutputSize = 300 * 1024;
-  this->TestOutputTruncation = cmCTestTypes::TruncationMode::Tail;
-
   this->MemCheck = false;
 
   this->LogFile = nullptr;
@@ -316,6 +312,7 @@ cmCTestTestHandler::cmCTestTestHandler()
 void cmCTestTestHandler::Initialize(cmCTest* ctest)
 {
   this->Superclass::Initialize(ctest);
+  this->TestOptions = ctest->GetTestOptions();
 
   this->ElapsedTestingTime = cmDuration();
 
@@ -327,9 +324,6 @@ void cmCTestTestHandler::Initialize(cmCTest* ctest)
 
   this->CustomPreTest.clear();
   this->CustomPostTest.clear();
-  this->CustomMaximumPassedTestOutputSize = 1 * 1024;
-  this->CustomMaximumFailedTestOutputSize = 300 * 1024;
-  this->TestOutputTruncation = cmCTestTypes::TruncationMode::Tail;
 
   this->TestsToRun.clear();
 
@@ -363,14 +357,14 @@ void cmCTestTestHandler::PopulateCustomVectors(cmMakefile* mf)
                                     this->CustomTestsIgnore);
   this->CTest->PopulateCustomInteger(
     mf, "CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE",
-    this->CustomMaximumPassedTestOutputSize);
+    this->TestOptions.OutputSizePassed);
   this->CTest->PopulateCustomInteger(
     mf, "CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE",
-    this->CustomMaximumFailedTestOutputSize);
+    this->TestOptions.OutputSizeFailed);
 
   cmValue dval = mf->GetDefinition("CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION");
   if (dval) {
-    if (!this->SetTestOutputTruncation(*dval)) {
+    if (!SetTruncationMode(this->TestOptions.OutputTruncation, *dval)) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "Invalid value for CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION: "
                    << *dval << std::endl);
@@ -386,23 +380,6 @@ void cmCTestTestHandler::SetCMakeVariables(cmMakefile& mf)
                    cmList(this->CustomPostTest).to_string());
   mf.AddDefinition("CTEST_CUSTOM_TESTS_IGNORE",
                    cmList(this->CustomTestsIgnore).to_string());
-  mf.AddDefinition("CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE",
-                   std::to_string(this->CustomMaximumPassedTestOutputSize));
-  mf.AddDefinition("CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE",
-                   std::to_string(this->CustomMaximumFailedTestOutputSize));
-  mf.AddDefinition("CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION",
-                   [this]() -> cm::string_view {
-                     switch (this->TestOutputTruncation) {
-                       case cmCTestTypes::TruncationMode::Tail:
-                         return "tail"_s;
-                       case cmCTestTypes::TruncationMode::Middle:
-                         return "middle"_s;
-                       case cmCTestTypes::TruncationMode::Head:
-                         return "head"_s;
-                       default:
-                         return ""_s;
-                     }
-                   }());
 }
 
 int cmCTestTestHandler::PreProcessHandler()
@@ -2186,20 +2163,6 @@ void cmCTestTestHandler::SetIncludeRegExp(const std::string& arg)
 void cmCTestTestHandler::SetExcludeRegExp(const std::string& arg)
 {
   this->ExcludeRegExp = arg;
-}
-
-bool cmCTestTestHandler::SetTestOutputTruncation(const std::string& mode)
-{
-  if (mode == "tail") {
-    this->TestOutputTruncation = cmCTestTypes::TruncationMode::Tail;
-  } else if (mode == "middle") {
-    this->TestOutputTruncation = cmCTestTypes::TruncationMode::Middle;
-  } else if (mode == "head") {
-    this->TestOutputTruncation = cmCTestTypes::TruncationMode::Head;
-  } else {
-    return false;
-  }
-  return true;
 }
 
 void cmCTestTestHandler::SetTestsToRunInformation(cmValue in)

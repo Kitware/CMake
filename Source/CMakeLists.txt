@@ -1109,6 +1109,7 @@ add_library(
   CTest/cmCTestTestCommand.cxx
   CTest/cmCTestTestHandler.cxx
   CTest/cmCTestTestMeasurementXMLParser.cxx
+  CTest/cmCTestTypes.cxx
   CTest/cmCTestUpdateCommand.cxx
   CTest/cmCTestUpdateHandler.cxx
   CTest/cmCTestUploadCommand.cxx

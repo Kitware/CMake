@@ -29,6 +29,14 @@
 class cmMakefile;
 class cmXMLWriter;
 
+struct cmCTestTestOptions
+{
+  int OutputSizePassed = 1 * 1024;
+  int OutputSizeFailed = 300 * 1024;
+  cmCTestTypes::TruncationMode OutputTruncation =
+    cmCTestTypes::TruncationMode::Tail;
+};
+
 /** \class cmCTestTestHandler
  * \brief A class that handles ctest -S invocations
  *
@@ -74,18 +82,6 @@ public:
 
   void SetMaxIndex(int n) { this->MaxIndex = n; }
   int GetMaxIndex() { return this->MaxIndex; }
-
-  void SetTestOutputSizePassed(int n)
-  {
-    this->CustomMaximumPassedTestOutputSize = n;
-  }
-  void SetTestOutputSizeFailed(int n)
-  {
-    this->CustomMaximumFailedTestOutputSize = n;
-  }
-
-  //! Set test output truncation mode. Return false if unknown mode.
-  bool SetTestOutputTruncation(const std::string& mode);
 
   //! pass the -I argument down
   void SetTestsToRunInformation(cmValue);
@@ -265,6 +261,8 @@ protected:
   void CleanTestOutput(std::string& output, size_t length,
                        cmCTestTypes::TruncationMode truncate);
 
+  cmCTestTestOptions TestOptions;
+
   cmDuration ElapsedTestingTime;
 
   using TestResultsVector = std::vector<cmCTestTestResult>;
@@ -276,9 +274,6 @@ protected:
   std::chrono::system_clock::time_point StartTestTime;
   std::chrono::system_clock::time_point EndTestTime;
   bool MemCheck;
-  int CustomMaximumPassedTestOutputSize;
-  int CustomMaximumFailedTestOutputSize;
-  cmCTestTypes::TruncationMode TestOutputTruncation;
   int MaxIndex;
 
 public:
@@ -395,4 +390,6 @@ private:
   bool RerunFailed;
 
   std::string JUnitXMLFileName;
+
+  friend class cmCTestTestCommand;
 };
