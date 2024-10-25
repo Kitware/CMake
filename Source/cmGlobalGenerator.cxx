@@ -963,18 +963,24 @@ void cmGlobalGenerator::EnableLanguage(
       } // end if in try compile
     }   // end need test language
 
-    // load linker configuration
-    std::string langLinkerLoadedVar =
-      cmStrCat("CMAKE_", lang, "_LINKER_INFORMATION_LOADED");
-    if (!mf->GetDefinition(langLinkerLoadedVar)) {
-      fpath = cmStrCat("Internal/CMake", lang, "LinkerInformation.cmake");
-      std::string informationFile = mf->GetModulesFile(fpath);
-      if (informationFile.empty()) {
-        cmSystemTools::Error(
-          cmStrCat("Could not find cmake module file: ", fpath));
-      } else if (!mf->ReadListFile(informationFile)) {
-        cmSystemTools::Error(
-          cmStrCat("Could not process cmake module file: ", informationFile));
+    // load linker configuration,  if required
+    if (mf->GetDefinition(cmStrCat("CMAKE_", lang, "_USE_LINKER_INFORMATION"))
+          .IsOn()) {
+      std::string langLinkerLoadedVar =
+        cmStrCat("CMAKE_", lang, "_LINKER_INFORMATION_LOADED");
+      if (!mf->GetDefinition(langLinkerLoadedVar)) {
+        fpath = cmStrCat("CMake", lang, "LinkerInformation.cmake");
+        std::string informationFile = mf->GetModulesFile(fpath);
+        if (informationFile.empty()) {
+          informationFile = mf->GetModulesFile(cmStrCat("Internal/", fpath));
+        }
+        if (informationFile.empty()) {
+          cmSystemTools::Error(
+            cmStrCat("Could not find cmake module file: ", fpath));
+        } else if (!mf->ReadListFile(informationFile)) {
+          cmSystemTools::Error(cmStrCat(
+            "Could not process cmake module file: ", informationFile));
+        }
       }
     }
 
