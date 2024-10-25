@@ -175,6 +175,7 @@ Variables that Change Behavior
    :maxdepth: 1
 
    /variable/BUILD_SHARED_LIBS
+   /variable/BUILD_TESTING
    /variable/CMAKE_ABSOLUTE_DESTINATION_FILES
    /variable/CMAKE_ADD_CUSTOM_COMMAND_DEPENDS_EXPLICIT_ONLY
    /variable/CMAKE_APPBUNDLE_PATH
