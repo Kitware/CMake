@@ -507,13 +507,12 @@ Paths are searched in the order described above.  The first viable package
 configuration file found is used, even if a newer version of the package
 resides later in the list of search paths.
 
-For search paths which contain ``<name>*``, the order among matching paths
-is unspecified unless the :variable:`CMAKE_FIND_PACKAGE_SORT_ORDER` variable
-is set.  This variable, along with the
-:variable:`CMAKE_FIND_PACKAGE_SORT_DIRECTION` variable, determines the order
-in which CMake considers paths that match a single search path containing
-``<name>*``.  For example, if the file system contains the package
-configuration files
+For search paths which contain glob expressions (``*``), the order in which
+directories matching the glob are searched is unspecified unless the
+:variable:`CMAKE_FIND_PACKAGE_SORT_ORDER` variable is set.  This variable,
+along with the :variable:`CMAKE_FIND_PACKAGE_SORT_DIRECTION` variable,
+determines the order in which CMake considers glob matches.  For example, if
+the file system contains the package configuration files
 
 ::
 
@@ -542,6 +541,14 @@ before calling ``find_package``.
 .. versionadded:: 3.16
    Added the ``CMAKE_FIND_USE_<CATEGORY>`` variables to globally disable
    various search locations.
+
+.. versionchanged:: 3.32
+   The variables :variable:`CMAKE_FIND_PACKAGE_SORT_ORDER` and
+   :variable:`CMAKE_FIND_PACKAGE_SORT_DIRECTION` now also control the order
+   in which ``find_package`` searches directories matching the glob expression
+   in the search paths ``<prefix>/<name>.framework/Versions/*/Resources/``
+   and ``<prefix>/<name>.framework/Versions/*/Resources/CMake``.  In previous
+   versions of CMake, this order was unspecified.
 
 .. include:: FIND_XXX_ROOT.txt
 .. include:: FIND_XXX_ORDER.txt

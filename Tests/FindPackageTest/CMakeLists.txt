@@ -550,10 +550,10 @@ endif()
 ############################################################################
 ##Test FIND_PACKAGE using sorting
 set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-SET(CMAKE_FIND_PACKAGE_SORT_ORDER NAME)
-SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION ASC)
 
 set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+SET(CMAKE_FIND_PACKAGE_SORT_ORDER NAME)
+SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION ASC)
 FIND_PACKAGE(SortLib CONFIG)
 IF (NOT "${SortLib_VERSION}" STREQUAL "3.1.1")
   message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER Name Asc! ${SortLib_VERSION}")
@@ -578,6 +578,28 @@ IF (NOT "${SortLib_VERSION}" STREQUAL "4.0.0")
   message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER gave up too soon! ${SortLib_VERSION}")
 endif()
 unset(SortLib_VERSION)
+
+
+set(SortFramework_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+SET(CMAKE_FIND_PACKAGE_SORT_ORDER NAME)
+SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION ASC)
+FIND_PACKAGE(SortFramework CONFIG)
+IF (NOT "${SortFramework_VERSION}" STREQUAL "3.1.1")
+  message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER Framework Name Asc! ${SortFramework_VERSION}")
+endif()
+set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+unset(SortFramework_VERSION)
+
+
+set(SortFramework_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+SET(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
+SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
+FIND_PACKAGE(SortFramework CONFIG)
+IF (NOT "${SortFramework_VERSION}" STREQUAL "3.10.1")
+  message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER Framework Natural! Dec ${SortFramework_VERSION}")
+endif()
+set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+unset(SortFramework_VERSION)
 
 unset(CMAKE_FIND_PACKAGE_SORT_ORDER)
 unset(CMAKE_FIND_PACKAGE_SORT_DIRECTION)
