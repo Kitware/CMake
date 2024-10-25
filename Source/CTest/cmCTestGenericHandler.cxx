@@ -82,8 +82,9 @@ void cmCTestGenericHandler::AddPersistentMultiOption(const std::string& op,
   }
 }
 
-void cmCTestGenericHandler::Initialize()
+void cmCTestGenericHandler::Initialize(cmCTest* ctest)
 {
+  this->CTest = ctest;
   this->AppendXML = false;
   this->TestLoad = 0;
   this->Options = this->PersistentOptions;

@@ -31,7 +31,7 @@ public:
    */
   int ProcessHandler() override;
 
-  void Initialize() override;
+  void Initialize(cmCTest* ctest) override;
 
   /** Specify a set of parts (by name) to submit.  */
   void SelectParts(std::set<cmCTest::Part> const& parts);

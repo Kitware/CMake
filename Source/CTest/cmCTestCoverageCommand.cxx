@@ -25,7 +25,7 @@ cmCTestGenericHandler* cmCTestCoverageCommand::InitializeHandler()
     this->Makefile, "CoverageExtraFlags", "CTEST_COVERAGE_EXTRA_FLAGS",
     this->Quiet);
   cmCTestCoverageHandler* handler = this->CTest->GetCoverageHandler();
-  handler->Initialize();
+  handler->Initialize(this->CTest);
 
   // If a LABELS option was given, select only files with the labels.
   if (this->Labels) {

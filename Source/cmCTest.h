@@ -75,11 +75,6 @@ public:
   bool ReadExistingTag(bool quiet);
 
   /**
-   * Initialize ctest for executing tests.
-   */
-  void InitializeTesting(const std::string& binary_dir);
-
-  /**
    * Process the dashboard client steps.
    */
   int ProcessSteps();

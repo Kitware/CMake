@@ -223,10 +223,6 @@ bool cmCTestHandlerCommand::InitialPass(std::vector<std::string> const& args,
   return true;
 }
 
-void cmCTestHandlerCommand::ProcessAdditionalValues(cmCTestGenericHandler*)
-{
-}
-
 void cmCTestHandlerCommand::BindArguments()
 {
   this->BindParsedKeywords(this->ParsedKeywords);

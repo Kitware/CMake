@@ -40,7 +40,7 @@ public:
 protected:
   virtual cmCTestGenericHandler* InitializeHandler() = 0;
 
-  virtual void ProcessAdditionalValues(cmCTestGenericHandler* handler);
+  virtual void ProcessAdditionalValues(cmCTestGenericHandler* /*handler*/) {}
 
   // Command argument handling.
   virtual void BindArguments();
@@ -55,8 +55,3 @@ protected:
   std::string Source;
   std::string SubmitIndex;
 };
-
-#define CTEST_COMMAND_APPEND_OPTION_DOCS                                      \
-  "The APPEND option marks results for append to those previously "           \
-  "submitted to a dashboard server since the last ctest_start.  "             \
-  "Append semantics are defined by the dashboard server in use."

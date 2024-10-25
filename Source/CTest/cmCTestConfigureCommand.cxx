@@ -150,7 +150,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
   }
 
   cmCTestConfigureHandler* handler = this->CTest->GetConfigureHandler();
-  handler->Initialize();
+  handler->Initialize(this->CTest);
   handler->SetQuiet(this->Quiet);
   return handler;
 }

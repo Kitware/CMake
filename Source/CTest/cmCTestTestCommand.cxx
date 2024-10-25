@@ -162,6 +162,6 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
 cmCTestTestHandler* cmCTestTestCommand::InitializeActualHandler()
 {
   cmCTestTestHandler* handler = this->CTest->GetTestHandler();
-  handler->Initialize();
+  handler->Initialize(this->CTest);
   return handler;
 }

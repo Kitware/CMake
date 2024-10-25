@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <initializer_list>
 #include <iostream>
 #include <map>
 #include <ratio>
@@ -31,7 +32,6 @@
 #include "cmsys/Base64.h"
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
-#include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/SystemInformation.hxx"
 #if defined(_WIN32)
@@ -141,19 +141,6 @@ struct cmCTest::Private
              &this->UpdateHandler,   &this->ConfigureHandler,
              &this->MemCheckHandler, &this->SubmitHandler,
              &this->UploadHandler };
-  }
-
-  std::map<std::string, cmCTestGenericHandler*> GetNamedTestingHandlers()
-  {
-    return { { "build", &this->BuildHandler },
-             { "coverage", &this->CoverageHandler },
-             { "script", &this->ScriptHandler },
-             { "test", &this->TestHandler },
-             { "update", &this->UpdateHandler },
-             { "configure", &this->ConfigureHandler },
-             { "memcheck", &this->MemCheckHandler },
-             { "submit", &this->SubmitHandler },
-             { "upload", &this->UploadHandler } };
   }
 
   bool ShowOnly = false;
@@ -368,10 +355,6 @@ cmCTest::cmCTest()
       ->PartMap[cmSystemTools::LowerCase(this->Impl->Parts[p].GetName())] = p;
   }
 
-  for (auto& handler : this->Impl->GetTestingHandlers()) {
-    handler->SetCTestInstance(this);
-  }
-
   // Make sure we can capture the build tool output.
   cmSystemTools::EnableVSConsoleOutput();
 }
@@ -548,31 +531,6 @@ bool cmCTest::ReadExistingTag(bool quiet)
 
   this->Impl->CurrentTag = tag;
   return true;
-}
-
-void cmCTest::InitializeTesting(const std::string& binary_dir)
-{
-  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
-  if (!this->Impl->InteractiveDebugMode) {
-    this->BlockTestErrorDiagnostics();
-  } else {
-    cmSystemTools::PutEnv("CTEST_INTERACTIVE_DEBUG_MODE=1");
-  }
-
-  this->Impl->BinaryDir = binary_dir;
-  cmSystemTools::ConvertToUnixSlashes(this->Impl->BinaryDir);
-
-  this->UpdateCTestConfiguration();
-
-  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
-
-  cmake cm(cmake::RoleScript, cmState::CTest);
-  cm.SetHomeDirectory("");
-  cm.SetHomeOutputDirectory("");
-  cm.GetCurrentSnapshot().SetDefaultDefinitions();
-  cmGlobalGenerator gg(&cm);
-  cmMakefile mf(&gg, cm.GetCurrentSnapshot());
-  this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, &mf);
 }
 
 bool cmCTest::UpdateCTestConfiguration()
@@ -834,7 +792,7 @@ int cmCTest::ProcessSteps()
 
   int res = 0;
   cmCTestScriptHandler script;
-  script.SetCTestInstance(this);
+  script.Initialize(this);
   script.CreateCMake();
   cmMakefile& mf = *script.GetMakefile();
   this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, &mf);
@@ -2828,6 +2786,7 @@ int cmCTest::RunScripts(
   }
 
   cmCTestScriptHandler* ch = this->GetScriptHandler();
+  ch->Initialize(this);
   ch->SetVerbose(this->Impl->Verbose);
   for (auto const& script : scripts) {
     ch->AddConfigurationScript(script.first, script.second);
@@ -2859,7 +2818,33 @@ int cmCTest::ExecuteTests()
     return 1;
   }
 
-  this->InitializeTesting(workDir);
+  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
+  if (!this->Impl->InteractiveDebugMode) {
+    this->BlockTestErrorDiagnostics();
+  } else {
+    cmSystemTools::PutEnv("CTEST_INTERACTIVE_DEBUG_MODE=1");
+  }
+
+  this->Impl->BinaryDir = workDir;
+  cmSystemTools::ConvertToUnixSlashes(this->Impl->BinaryDir);
+
+  this->UpdateCTestConfiguration();
+
+  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
+
+  this->GetTestHandler()->Initialize(this);
+
+  {
+    cmake cm(cmake::RoleScript, cmState::CTest);
+    cm.SetHomeDirectory("");
+    cm.SetHomeOutputDirectory("");
+    cm.GetCurrentSnapshot().SetDefaultDefinitions();
+    cmGlobalGenerator gg(&cm);
+    cmMakefile mf(&gg, cm.GetCurrentSnapshot());
+    this->ReadCustomConfigurationFileTree(this->Impl->BinaryDir, &mf);
+    this->GetTestHandler()->PopulateCustomVectors(&mf);
+  }
+
   this->GetTestHandler()->SetVerbose(this->Impl->Verbose);
   if (this->GetTestHandler()->ProcessHandler() < 0) {
     cmCTestLog(this, ERROR_MESSAGE, "Errors while running CTest\n");
@@ -2958,14 +2943,22 @@ void cmCTest::SetScheduleType(std::string const& type)
 void cmCTest::ReadCustomConfigurationFileTree(const std::string& dir,
                                               cmMakefile* mf)
 {
-  bool found = false;
   cmCTestLog(this, DEBUG,
              "* Read custom CTest configuration directory: " << dir
                                                              << std::endl);
 
-  std::string fname = cmStrCat(dir, "/CTestCustom.cmake");
-  cmCTestLog(this, DEBUG, "* Check for file: " << fname << std::endl);
-  if (cmSystemTools::FileExists(fname)) {
+  auto const fname = [this, &dir]() -> std::string {
+    for (char const* ext : { ".cmake", ".ctest" }) {
+      std::string path = cmStrCat(dir, "/CTestCustom", ext);
+      cmCTestLog(this, DEBUG, "* Check for file: " << path << std::endl);
+      if (cmSystemTools::FileExists(path)) {
+        return path;
+      }
+    }
+    return "";
+  }();
+
+  if (!fname.empty()) {
     cmCTestLog(this, DEBUG,
                "* Read custom CTest configuration file: " << fname
                                                           << std::endl);
@@ -2977,39 +2970,8 @@ void cmCTest::ReadCustomConfigurationFileTree(const std::string& dir,
                  "Problem reading custom configuration: " << fname
                                                           << std::endl);
     }
-    found = true;
     if (erroroc) {
       cmSystemTools::SetErrorOccurred();
-    }
-  }
-
-  std::string rexpr = cmStrCat(dir, "/CTestCustom.ctest");
-  cmCTestLog(this, DEBUG, "* Check for file: " << rexpr << std::endl);
-  if (!found && cmSystemTools::FileExists(rexpr)) {
-    cmsys::Glob gl;
-    gl.RecurseOn();
-    gl.FindFiles(rexpr);
-    std::vector<std::string>& files = gl.GetFiles();
-    for (const std::string& file : files) {
-      cmCTestLog(this, DEBUG,
-                 "* Read custom CTest configuration file: " << file
-                                                            << std::endl);
-      if (!mf->ReadListFile(file) || cmSystemTools::GetErrorOccurredFlag()) {
-        cmCTestLog(this, ERROR_MESSAGE,
-                   "Problem reading custom configuration: " << file
-                                                            << std::endl);
-      }
-    }
-    found = true;
-  }
-
-  if (found) {
-    for (auto& handler : this->Impl->GetNamedTestingHandlers()) {
-      cmCTestLog(this, DEBUG,
-                 "* Read custom CTest configuration vectors for handler: "
-                   << handler.first << " (" << handler.second << ")"
-                   << std::endl);
-      handler.second->PopulateCustomVectors(mf);
     }
   }
 }

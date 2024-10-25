@@ -38,9 +38,9 @@ static const char* cmCTestUpdateHandlerUpdateToString(int type)
 
 cmCTestUpdateHandler::cmCTestUpdateHandler() = default;
 
-void cmCTestUpdateHandler::Initialize()
+void cmCTestUpdateHandler::Initialize(cmCTest* ctest)
 {
-  this->Superclass::Initialize();
+  this->Superclass::Initialize(ctest);
   this->UpdateCommand.clear();
   this->UpdateType = e_CVS;
 }

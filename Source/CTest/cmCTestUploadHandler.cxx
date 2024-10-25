@@ -11,14 +11,11 @@
 #include "cmVersion.h"
 #include "cmXMLWriter.h"
 
-cmCTestUploadHandler::cmCTestUploadHandler()
-{
-  this->Initialize();
-}
+cmCTestUploadHandler::cmCTestUploadHandler() = default;
 
-void cmCTestUploadHandler::Initialize()
+void cmCTestUploadHandler::Initialize(cmCTest* ctest)
 {
-  this->Superclass::Initialize();
+  this->Superclass::Initialize(ctest);
   this->Files.clear();
 }
 

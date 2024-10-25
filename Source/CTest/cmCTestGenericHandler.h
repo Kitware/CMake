@@ -45,12 +45,11 @@ public:
   /**
    * Initialize handler
    */
-  virtual void Initialize();
+  virtual void Initialize(cmCTest* ctest);
 
   /**
-   * Set the CTest instance
+   * Get the CTest instance
    */
-  void SetCTestInstance(cmCTest* ctest) { this->CTest = ctest; }
   cmCTest* GetCTestInstance() { return this->CTest; }
 
   /**
