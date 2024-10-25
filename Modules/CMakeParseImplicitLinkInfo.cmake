@@ -49,20 +49,21 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
   set(multiValueArgs )
   cmake_parse_arguments(EXTRA_PARSE "${keywordArgs}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-  set(is_lfortran 0)
+  set(is_lfortran_less_0_40 0)
   set(is_msvc 0)
   if(EXTRA_PARSE_LANGUAGE)
     if("x${CMAKE_${EXTRA_PARSE_LANGUAGE}_COMPILER_ID}" STREQUAL "xMSVC" OR
         "x${CMAKE_${EXTRA_PARSE_LANGUAGE}_SIMULATE_ID}" STREQUAL "xMSVC")
       set(is_msvc 1)
-    elseif("x${CMAKE_${EXTRA_PARSE_LANGUAGE}_COMPILER_ID}" STREQUAL "xLFortran")
-      set(is_lfortran 1)
+    elseif("x${CMAKE_${EXTRA_PARSE_LANGUAGE}_COMPILER_ID}" STREQUAL "xLFortran"
+        AND CMAKE_${EXTRA_PARSE_LANGUAGE}_COMPILER_VERSION VERSION_LESS "0.40")
+      set(is_lfortran_less_0_40 1)
     endif()
   endif()
   # Parse implicit linker arguments.
   set(linker "ld[0-9]*(\\.[a-z]+)?")
-  if(is_lfortran)
-    # FIXME(lfortran): No way to pass -v to clang/gcc driver.
+  if(is_lfortran_less_0_40)
+    # lfortran < 0.40 has no way to pass -v to clang/gcc driver.
     string(APPEND linker "|clang|gcc")
   endif()
   if(is_msvc)
@@ -85,8 +86,8 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
   set(linker_exclude_regex "collect2 version |^[A-Za-z0-9_]+=|/ldfe ")
   set(linker_tool_regex "^[ \t]*(->|\")?[ \t]*(([^\"]*[/\\])?(${linker}))(\"|,| |$)")
   set(linker_tool_exclude_regex "cuda-fake-ld|-fuse-ld=|^ExecuteExternalTool ")
-  if(is_lfortran)
-    # FIXME(lfortran): No way to pass -v to clang/gcc driver.
+  if(is_lfortran_less_0_40)
+    # lfortran < 0.40 has no way to pass -v to clang/gcc driver.
     string(APPEND linker_tool_exclude_regex "|^clang |^gcc ")
   endif()
   set(linker_tool "NOTFOUND")
