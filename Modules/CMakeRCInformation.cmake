@@ -46,5 +46,7 @@ if(NOT CMAKE_RC_COMPILE_OBJECT)
     "<CMAKE_RC_COMPILER> <DEFINES> <INCLUDES> <FLAGS> /fo <OBJECT> <SOURCE>")
 endif()
 
+set(CMAKE_RC_USE_LINKER_INFORMATION FALSE)
+
 # set this variable so we can avoid loading this more than once.
 set(CMAKE_RC_INFORMATION_LOADED 1)
