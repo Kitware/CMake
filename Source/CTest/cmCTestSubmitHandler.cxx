@@ -283,7 +283,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
 
       upload_as += "&MD5=";
 
-      if (this->GetOption("InternalTest").IsOn()) {
+      if (this->InternalTest) {
         upload_as += "ffffffffffffffffffffffffffffffff";
       } else {
         cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
@@ -365,8 +365,8 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
       bool successful_submission = response_code == 200;
 
       if (!successful_submission || this->HasErrors) {
-        std::string retryDelay = *this->GetOption("RetryDelay");
-        std::string retryCount = *this->GetOption("RetryCount");
+        std::string retryDelay = this->RetryDelay;
+        std::string retryCount = this->RetryCount;
 
         auto delay = cmDuration(
           retryDelay.empty()
@@ -525,11 +525,11 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
     fields = url.substr(pos + 1);
     url.erase(pos);
   }
-  bool internalTest = this->GetOption("InternalTest").IsOn();
+  bool internalTest = this->InternalTest;
 
   // Get RETRY_COUNT and RETRY_DELAY values if they were set.
-  std::string retryDelayString = *this->GetOption("RetryDelay");
-  std::string retryCountString = *this->GetOption("RetryCount");
+  std::string retryDelayString = this->RetryDelay;
+  std::string retryCountString = this->RetryCount;
   auto retryDelay = std::chrono::seconds(0);
   if (!retryDelayString.empty()) {
     unsigned long retryDelayValue = 0;
@@ -718,10 +718,9 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
 
 int cmCTestSubmitHandler::ProcessHandler()
 {
-  cmValue cdashUploadFile = this->GetOption("CDashUploadFile");
-  cmValue cdashUploadType = this->GetOption("CDashUploadType");
-  if (cdashUploadFile && cdashUploadType) {
-    return this->HandleCDashUploadFile(*cdashUploadFile, *cdashUploadType);
+  if (this->CDashUpload) {
+    return this->HandleCDashUploadFile(this->CDashUploadFile,
+                                       this->CDashUploadType);
   }
 
   const std::string& buildDirectory =

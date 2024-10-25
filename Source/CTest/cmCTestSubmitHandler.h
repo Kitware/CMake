@@ -88,4 +88,14 @@ private:
   std::set<std::string> Files;
   std::vector<std::string> CommandLineHttpHeaders;
   std::vector<std::string> HttpHeaders;
+
+  bool CDashUpload = false;
+  bool InternalTest = false;
+
+  std::string CDashUploadFile;
+  std::string CDashUploadType;
+  std::string RetryCount;
+  std::string RetryDelay;
+
+  friend class cmCTestSubmitCommand;
 };
