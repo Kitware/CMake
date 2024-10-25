@@ -1420,6 +1420,7 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
     std::string oldPolicyPath =
       cmSystemTools::CollapseFullPath(input, *arguments.BaseDirectory);
     oldPolicyPath = cmSystemTools::GetRealPath(oldPolicyPath);
+    oldPolicyPath = cmSystemTools::GetActualCaseForPath(oldPolicyPath);
     if (warnAbout152) {
       computeNewPath(input, realPath);
       if (oldPolicyPath != realPath) {

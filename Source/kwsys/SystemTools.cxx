@@ -3647,7 +3647,6 @@ std::string CollapseFullPathImpl(std::string const& in_path,
   SystemTools::CheckTranslationPath(newPath);
 #endif
 #ifdef _WIN32
-  newPath = SystemToolsStatics->GetActualCaseForPathCached(newPath);
   SystemTools::ConvertToUnixSlashes(newPath);
 #endif
   // Return the reconstructed path.
@@ -3757,6 +3756,15 @@ std::string SystemTools::GetActualCaseForPath(const std::string& p)
 {
 #ifdef _WIN32
   return SystemToolsStatic::GetCasePathName(p, false);
+#else
+  return p;
+#endif
+}
+
+std::string SystemTools::GetActualCaseForPathCached(const std::string& p)
+{
+#ifdef _WIN32
+  return SystemToolsStatic::GetActualCaseForPathCached(p);
 #else
   return p;
 #endif
