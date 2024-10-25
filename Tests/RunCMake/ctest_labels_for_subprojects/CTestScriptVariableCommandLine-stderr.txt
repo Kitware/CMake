@@ -1,2 +1,2 @@
 Unable to find executable:.*MyThirdPartyDependency/src(/[^/
-]+)?/thirdparty
+]+)?/third_party

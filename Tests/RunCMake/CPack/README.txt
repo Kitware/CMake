@@ -173,7 +173,7 @@ This phase is executed if '<test_name>/VerifyResult.cmake' script exists.
 VerifyResult.cmake script also automatically prints out standard output and
 standard error from CPack execution phase that is compared with
 '<test_name>/<generator_name>-stdout.txt' regular expression and
-'<test_name>/<generator_name>-stderr.txt' regular expresson respectively.
+'<test_name>/<generator_name>-stderr.txt' regular expression respectively.
 NOTE: For subtests generator name can also be suffixed with subtest name and/or
       packaging type (MONOLITHIC, COMPONENT, GROUP) and in such cases the
       preferences of which file will be used are as follows:
