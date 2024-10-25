@@ -2,6 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestScriptHandler.h"
 
+#include <chrono>
 #include <cstdlib>
 #include <map>
 #include <ratio>
@@ -37,7 +38,6 @@
 #include "cmSystemTools.h"
 #include "cmUVHandlePtr.h"
 #include "cmUVProcessChain.h"
-#include "cmValue.h"
 #include "cmake.h"
 
 cmCTestScriptHandler::cmCTestScriptHandler() = default;
@@ -45,9 +45,6 @@ cmCTestScriptHandler::cmCTestScriptHandler() = default;
 void cmCTestScriptHandler::Initialize(cmCTest* ctest)
 {
   this->Superclass::Initialize(ctest);
-
-  // what time in seconds did this script start running
-  this->ScriptStartTime = std::chrono::steady_clock::time_point();
 
   this->Makefile.reset();
   this->ParentMakefile = nullptr;
@@ -87,8 +84,7 @@ void cmCTestScriptHandler::UpdateElapsedTime()
 {
   if (this->Makefile) {
     // set the current elapsed time
-    auto itime = cmDurationTo<unsigned int>(std::chrono::steady_clock::now() -
-                                            this->ScriptStartTime);
+    auto itime = cmDurationTo<unsigned int>(this->CTest->GetElapsedTime());
     auto timeString = std::to_string(itime);
     this->Makefile->AddDefinition("CTEST_ELAPSED_TIME", timeString);
   }
@@ -341,8 +337,6 @@ int cmCTestScriptHandler::RunConfigurationScript(
 
   int result;
 
-  this->ScriptStartTime = std::chrono::steady_clock::now();
-
   // read in the script
   if (pscope) {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
@@ -370,23 +364,4 @@ bool cmCTestScriptHandler::RunScript(cmCTest* ctest, cmMakefile* mf,
     *returnValue = res;
   }
   return true;
-}
-
-cmDuration cmCTestScriptHandler::GetRemainingTimeAllowed()
-{
-  if (!this->Makefile) {
-    return cmCTest::MaxDuration();
-  }
-
-  cmValue timelimitS = this->Makefile->GetDefinition("CTEST_TIME_LIMIT");
-
-  if (!timelimitS) {
-    return cmCTest::MaxDuration();
-  }
-
-  auto timelimit = cmDuration(atof(timelimitS->c_str()));
-
-  auto duration = std::chrono::duration_cast<cmDuration>(
-    std::chrono::steady_clock::now() - this->ScriptStartTime);
-  return (timelimit - duration);
 }

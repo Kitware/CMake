@@ -4,13 +4,11 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <chrono>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "cmCTestGenericHandler.h"
-#include "cmDuration.h"
 
 class cmCTest;
 class cmCTestCommand;
@@ -48,13 +46,6 @@ public:
    */
   void UpdateElapsedTime();
 
-  /**
-   * Return the time remaianing that the script is allowed to run in
-   * seconds if the user has set the variable CTEST_TIME_LIMIT. If that has
-   * not been set it returns a very large value.
-   */
-  cmDuration GetRemainingTimeAllowed();
-
   cmCTestScriptHandler();
   cmCTestScriptHandler(const cmCTestScriptHandler&) = delete;
   const cmCTestScriptHandler& operator=(const cmCTestScriptHandler&) = delete;
@@ -79,10 +70,6 @@ private:
 
   std::vector<std::string> ConfigurationScripts;
   std::vector<bool> ScriptProcessScope;
-
-  // what time in seconds did this script start running
-  std::chrono::steady_clock::time_point ScriptStartTime =
-    std::chrono::steady_clock::time_point();
 
   std::unique_ptr<cmMakefile> Makefile;
   cmMakefile* ParentMakefile = nullptr;
