@@ -29,33 +29,35 @@ void cmCTestMemCheckCommand::BindArguments()
 std::unique_ptr<cmCTestTestHandler>
 cmCTestMemCheckCommand::InitializeActualHandler()
 {
+  auto const& args = *this;
   auto handler = cm::make_unique<cmCTestMemCheckHandler>(this->CTest);
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "MemoryCheckType", "CTEST_MEMORYCHECK_TYPE", this->Quiet);
+    this->Makefile, "MemoryCheckType", "CTEST_MEMORYCHECK_TYPE", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "MemoryCheckSanitizerOptions",
-    "CTEST_MEMORYCHECK_SANITIZER_OPTIONS", this->Quiet);
+    "CTEST_MEMORYCHECK_SANITIZER_OPTIONS", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "MemoryCheckCommand", "CTEST_MEMORYCHECK_COMMAND",
-    this->Quiet);
+    args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "MemoryCheckCommandOptions",
-    "CTEST_MEMORYCHECK_COMMAND_OPTIONS", this->Quiet);
+    "CTEST_MEMORYCHECK_COMMAND_OPTIONS", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "MemoryCheckSuppressionFile",
-    "CTEST_MEMORYCHECK_SUPPRESSIONS_FILE", this->Quiet);
+    "CTEST_MEMORYCHECK_SUPPRESSIONS_FILE", args.Quiet);
 
-  handler->SetQuiet(this->Quiet);
+  handler->SetQuiet(args.Quiet);
   return std::unique_ptr<cmCTestTestHandler>(std::move(handler));
 }
 
 void cmCTestMemCheckCommand::ProcessAdditionalValues(
   cmCTestGenericHandler* handler)
 {
-  if (!this->DefectCount.empty()) {
+  auto const& args = *this;
+  if (!args.DefectCount.empty()) {
     this->Makefile->AddDefinition(
-      this->DefectCount,
+      args.DefectCount,
       std::to_string(
         static_cast<cmCTestMemCheckHandler*>(handler)->GetDefectCount()));
   }

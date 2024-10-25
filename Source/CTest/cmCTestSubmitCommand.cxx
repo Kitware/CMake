@@ -33,75 +33,76 @@ std::unique_ptr<cmCommand> cmCTestSubmitCommand::Clone()
 std::unique_ptr<cmCTestGenericHandler>
 cmCTestSubmitCommand::InitializeHandler()
 {
-  cmValue submitURL = !this->SubmitURL.empty()
-    ? cmValue(this->SubmitURL)
+  auto const& args = *this;
+  cmValue submitURL = !args.SubmitURL.empty()
+    ? cmValue(args.SubmitURL)
     : this->Makefile->GetDefinition("CTEST_SUBMIT_URL");
 
   if (submitURL) {
-    this->CTest->SetCTestConfiguration("SubmitURL", *submitURL, this->Quiet);
+    this->CTest->SetCTestConfiguration("SubmitURL", *submitURL, args.Quiet);
   } else {
     this->CTest->SetCTestConfigurationFromCMakeVariable(
-      this->Makefile, "DropMethod", "CTEST_DROP_METHOD", this->Quiet);
+      this->Makefile, "DropMethod", "CTEST_DROP_METHOD", args.Quiet);
     this->CTest->SetCTestConfigurationFromCMakeVariable(
-      this->Makefile, "DropSiteUser", "CTEST_DROP_SITE_USER", this->Quiet);
+      this->Makefile, "DropSiteUser", "CTEST_DROP_SITE_USER", args.Quiet);
     this->CTest->SetCTestConfigurationFromCMakeVariable(
       this->Makefile, "DropSitePassword", "CTEST_DROP_SITE_PASSWORD",
-      this->Quiet);
+      args.Quiet);
     this->CTest->SetCTestConfigurationFromCMakeVariable(
-      this->Makefile, "DropSite", "CTEST_DROP_SITE", this->Quiet);
+      this->Makefile, "DropSite", "CTEST_DROP_SITE", args.Quiet);
     this->CTest->SetCTestConfigurationFromCMakeVariable(
-      this->Makefile, "DropLocation", "CTEST_DROP_LOCATION", this->Quiet);
+      this->Makefile, "DropLocation", "CTEST_DROP_LOCATION", args.Quiet);
   }
 
   if (!this->CTest->SetCTestConfigurationFromCMakeVariable(
-        this->Makefile, "TLSVersion", "CTEST_TLS_VERSION", this->Quiet)) {
+        this->Makefile, "TLSVersion", "CTEST_TLS_VERSION", args.Quiet)) {
     if (cmValue tlsVersionVar =
           this->Makefile->GetDefinition("CMAKE_TLS_VERSION")) {
       cmCTestOptionalLog(
         this->CTest, HANDLER_VERBOSE_OUTPUT,
         "SetCTestConfiguration from CMAKE_TLS_VERSION:TLSVersion:"
           << *tlsVersionVar << std::endl,
-        this->Quiet);
+        args.Quiet);
       this->CTest->SetCTestConfiguration("TLSVersion", *tlsVersionVar,
-                                         this->Quiet);
+                                         args.Quiet);
     } else if (cm::optional<std::string> tlsVersionEnv =
                  cmSystemTools::GetEnvVar("CMAKE_TLS_VERSION")) {
       cmCTestOptionalLog(
         this->CTest, HANDLER_VERBOSE_OUTPUT,
         "SetCTestConfiguration from ENV{CMAKE_TLS_VERSION}:TLSVersion:"
           << *tlsVersionEnv << std::endl,
-        this->Quiet);
+        args.Quiet);
       this->CTest->SetCTestConfiguration("TLSVersion", *tlsVersionEnv,
-                                         this->Quiet);
+                                         args.Quiet);
     }
   }
   if (!this->CTest->SetCTestConfigurationFromCMakeVariable(
-        this->Makefile, "TLSVerify", "CTEST_TLS_VERIFY", this->Quiet)) {
+        this->Makefile, "TLSVerify", "CTEST_TLS_VERIFY", args.Quiet)) {
     if (cmValue tlsVerifyVar =
           this->Makefile->GetDefinition("CMAKE_TLS_VERIFY")) {
       cmCTestOptionalLog(
         this->CTest, HANDLER_VERBOSE_OUTPUT,
         "SetCTestConfiguration from CMAKE_TLS_VERIFY:TLSVerify:"
           << *tlsVerifyVar << std::endl,
-        this->Quiet);
+        args.Quiet);
       this->CTest->SetCTestConfiguration("TLSVerify", *tlsVerifyVar,
-                                         this->Quiet);
+                                         args.Quiet);
     } else if (cm::optional<std::string> tlsVerifyEnv =
                  cmSystemTools::GetEnvVar("CMAKE_TLS_VERIFY")) {
       cmCTestOptionalLog(
         this->CTest, HANDLER_VERBOSE_OUTPUT,
         "SetCTestConfiguration from ENV{CMAKE_TLS_VERIFY}:TLSVerify:"
           << *tlsVerifyEnv << std::endl,
-        this->Quiet);
+        args.Quiet);
       this->CTest->SetCTestConfiguration("TLSVerify", *tlsVerifyEnv,
-                                         this->Quiet);
+                                         args.Quiet);
     }
   }
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "CurlOptions", "CTEST_CURL_OPTIONS", this->Quiet);
+    this->Makefile, "CurlOptions", "CTEST_CURL_OPTIONS", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "SubmitInactivityTimeout",
-    "CTEST_SUBMIT_INACTIVITY_TIMEOUT", this->Quiet);
+    "CTEST_SUBMIT_INACTIVITY_TIMEOUT", args.Quiet);
 
   cmValue notesFilesVariable =
     this->Makefile->GetDefinition("CTEST_NOTES_FILES");
@@ -128,7 +129,7 @@ cmCTestSubmitCommand::InitializeHandler()
   // If FILES are given, but not PARTS, only the FILES are submitted
   // and *no* PARTS are submitted.
   //  (This is why we select the empty "noParts" set in the
-  //   if(this->Files) block below...)
+  //   if(args.Files) block below...)
   //
   // If PARTS are given, only the selected PARTS are submitted.
   //
@@ -137,7 +138,7 @@ cmCTestSubmitCommand::InitializeHandler()
 
   // If given explicit FILES to submit, pass them to the handler.
   //
-  if (this->Files) {
+  if (args.Files) {
     // Intentionally select *no* PARTS. (Pass an empty set.) If PARTS
     // were also explicitly mentioned, they will be selected below...
     // But FILES with no PARTS mentioned should just submit the FILES
@@ -145,34 +146,34 @@ cmCTestSubmitCommand::InitializeHandler()
     //
     handler->SelectParts(std::set<cmCTest::Part>());
     handler->SelectFiles(
-      std::set<std::string>(this->Files->begin(), this->Files->end()));
+      std::set<std::string>(args.Files->begin(), args.Files->end()));
   }
 
   // If a PARTS option was given, select only the named parts for submission.
   //
-  if (this->Parts) {
+  if (args.Parts) {
     auto parts =
-      cmMakeRange(*(this->Parts)).transform([this](std::string const& arg) {
+      cmMakeRange(*(args.Parts)).transform([this](std::string const& arg) {
         return this->CTest->GetPartFromName(arg);
       });
     handler->SelectParts(std::set<cmCTest::Part>(parts.begin(), parts.end()));
   }
 
   // Pass along any HTTPHEADER to the handler if this option was given.
-  if (!this->HttpHeaders.empty()) {
-    handler->SetHttpHeaders(this->HttpHeaders);
+  if (!args.HttpHeaders.empty()) {
+    handler->SetHttpHeaders(args.HttpHeaders);
   }
 
-  handler->RetryDelay = this->RetryDelay;
-  handler->RetryCount = this->RetryCount;
-  handler->InternalTest = this->InternalTest;
+  handler->RetryDelay = args.RetryDelay;
+  handler->RetryCount = args.RetryCount;
+  handler->InternalTest = args.InternalTest;
 
-  handler->SetQuiet(this->Quiet);
+  handler->SetQuiet(args.Quiet);
 
   if (this->CDashUpload) {
     handler->CDashUpload = true;
-    handler->CDashUploadFile = this->CDashUploadFile;
-    handler->CDashUploadType = this->CDashUploadType;
+    handler->CDashUploadFile = args.CDashUploadFile;
+    handler->CDashUploadType = args.CDashUploadType;
   }
   return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
 }
@@ -210,8 +211,9 @@ void cmCTestSubmitCommand::BindArguments()
 
 void cmCTestSubmitCommand::CheckArguments()
 {
-  if (this->Parts) {
-    cm::erase_if(*(this->Parts), [this](std::string const& arg) -> bool {
+  auto& args = *this;
+  if (args.Parts) {
+    cm::erase_if(*(args.Parts), [this](std::string const& arg) -> bool {
       cmCTest::Part p = this->CTest->GetPartFromName(arg);
       if (p == cmCTest::PartCount) {
         std::ostringstream e;
@@ -223,8 +225,8 @@ void cmCTestSubmitCommand::CheckArguments()
     });
   }
 
-  if (this->Files) {
-    cm::erase_if(*(this->Files), [this](std::string const& arg) -> bool {
+  if (args.Files) {
+    cm::erase_if(*(args.Files), [this](std::string const& arg) -> bool {
       if (!cmSystemTools::FileExists(arg)) {
         std::ostringstream e;
         e << "File \"" << arg << "\" does not exist. Cannot submit "
@@ -239,7 +241,8 @@ void cmCTestSubmitCommand::CheckArguments()
 
 void cmCTestSubmitCommand::ProcessAdditionalValues(cmCTestGenericHandler*)
 {
-  if (!this->BuildID.empty()) {
-    this->Makefile->AddDefinition(this->BuildID, this->CTest->GetBuildID());
+  auto const& args = *this;
+  if (!args.BuildID.empty()) {
+    this->Makefile->AddDefinition(args.BuildID, this->CTest->GetBuildID());
   }
 }

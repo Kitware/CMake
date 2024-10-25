@@ -33,7 +33,8 @@ void cmCTestUploadCommand::BindArguments()
 
 void cmCTestUploadCommand::CheckArguments()
 {
-  cm::erase_if(this->Files, [this](std::string const& arg) -> bool {
+  auto& args = *this;
+  cm::erase_if(args.Files, [this](std::string const& arg) -> bool {
     if (!cmSystemTools::FileExists(arg)) {
       std::ostringstream e;
       e << "File \"" << arg << "\" does not exist. Cannot submit "
@@ -48,9 +49,10 @@ void cmCTestUploadCommand::CheckArguments()
 std::unique_ptr<cmCTestGenericHandler>
 cmCTestUploadCommand::InitializeHandler()
 {
+  auto const& args = *this;
   auto handler = cm::make_unique<cmCTestUploadHandler>(this->CTest);
   handler->SetFiles(
-    std::set<std::string>(this->Files.begin(), this->Files.end()));
-  handler->SetQuiet(this->Quiet);
+    std::set<std::string>(args.Files.begin(), args.Files.end()));
+  handler->SetQuiet(args.Quiet);
   return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
 }

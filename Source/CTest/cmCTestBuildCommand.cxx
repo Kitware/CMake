@@ -41,13 +41,14 @@ void cmCTestBuildCommand::BindArguments()
 
 std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler()
 {
+  auto const& args = *this;
   auto handler = cm::make_unique<cmCTestBuildHandler>(this->CTest);
 
   cmValue ctestBuildCommand =
     this->Makefile->GetDefinition("CTEST_BUILD_COMMAND");
   if (cmNonempty(ctestBuildCommand)) {
     this->CTest->SetCTestConfiguration("MakeCommand", *ctestBuildCommand,
-                                       this->Quiet);
+                                       args.Quiet);
   } else {
     cmValue cmakeGeneratorName =
       this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR");
@@ -59,16 +60,16 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler()
     //
     cmValue ctestBuildConfiguration =
       this->Makefile->GetDefinition("CTEST_BUILD_CONFIGURATION");
-    std::string cmakeBuildConfiguration = cmNonempty(this->Configuration)
-      ? this->Configuration
+    std::string cmakeBuildConfiguration = cmNonempty(args.Configuration)
+      ? args.Configuration
       : cmNonempty(ctestBuildConfiguration) ? *ctestBuildConfiguration
                                             : this->CTest->GetConfigType();
 
-    const std::string& cmakeBuildAdditionalFlags = cmNonempty(this->Flags)
-      ? this->Flags
+    const std::string& cmakeBuildAdditionalFlags = cmNonempty(args.Flags)
+      ? args.Flags
       : this->Makefile->GetSafeDefinition("CTEST_BUILD_FLAGS");
-    const std::string& cmakeBuildTarget = cmNonempty(this->Target)
-      ? this->Target
+    const std::string& cmakeBuildTarget = cmNonempty(args.Target)
+      ? args.Target
       : this->Makefile->GetSafeDefinition("CTEST_BUILD_TARGET");
 
     if (cmNonempty(cmakeGeneratorName)) {
@@ -92,13 +93,13 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler()
 
       std::string dir = this->CTest->GetCTestConfiguration("BuildDirectory");
       std::string buildCommand = globalGenerator->GenerateCMakeBuildCommand(
-        cmakeBuildTarget, cmakeBuildConfiguration, this->ParallelLevel,
+        cmakeBuildTarget, cmakeBuildConfiguration, args.ParallelLevel,
         cmakeBuildAdditionalFlags, this->Makefile->IgnoreErrorsCMP0061());
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                          "SetMakeCommand:" << buildCommand << "\n",
-                         this->Quiet);
+                         args.Quiet);
       this->CTest->SetCTestConfiguration("MakeCommand", buildCommand,
-                                         this->Quiet);
+                                         args.Quiet);
     } else {
       std::ostringstream ostr;
       /* clang-format off */
@@ -115,29 +116,30 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler()
   if (cmValue useLaunchers =
         this->Makefile->GetDefinition("CTEST_USE_LAUNCHERS")) {
     this->CTest->SetCTestConfiguration("UseLaunchers", *useLaunchers,
-                                       this->Quiet);
+                                       args.Quiet);
   }
 
   if (cmValue labelsForSubprojects =
         this->Makefile->GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
     this->CTest->SetCTestConfiguration("LabelsForSubprojects",
-                                       *labelsForSubprojects, this->Quiet);
+                                       *labelsForSubprojects, args.Quiet);
   }
 
-  handler->SetQuiet(this->Quiet);
+  handler->SetQuiet(args.Quiet);
   return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
 }
 
 void cmCTestBuildCommand::ProcessAdditionalValues(
   cmCTestGenericHandler* generic)
 {
+  auto const& args = *this;
   auto const* handler = static_cast<cmCTestBuildHandler*>(generic);
-  if (!this->NumberErrors.empty()) {
-    this->Makefile->AddDefinition(this->NumberErrors,
+  if (!args.NumberErrors.empty()) {
+    this->Makefile->AddDefinition(args.NumberErrors,
                                   std::to_string(handler->GetTotalErrors()));
   }
-  if (!this->NumberWarnings.empty()) {
-    this->Makefile->AddDefinition(this->NumberWarnings,
+  if (!args.NumberWarnings.empty()) {
+    this->Makefile->AddDefinition(args.NumberWarnings,
                                   std::to_string(handler->GetTotalWarnings()));
   }
 }

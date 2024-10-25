@@ -38,10 +38,11 @@ void cmCTestConfigureCommand::BindArguments()
 std::unique_ptr<cmCTestGenericHandler>
 cmCTestConfigureCommand::InitializeHandler()
 {
+  auto const& args = *this;
   cmList options;
 
-  if (!this->Options.empty()) {
-    options.assign(this->Options);
+  if (!args.Options.empty()) {
+    options.assign(args.Options);
   }
 
   if (this->CTest->GetCTestConfiguration("BuildDirectory").empty()) {
@@ -57,7 +58,7 @@ cmCTestConfigureCommand::InitializeHandler()
 
   if (cmNonempty(ctestConfigureCommand)) {
     this->CTest->SetCTestConfiguration("ConfigureCommand",
-                                       *ctestConfigureCommand, this->Quiet);
+                                       *ctestConfigureCommand, args.Quiet);
   } else {
     cmValue cmakeGeneratorName =
       this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR");
@@ -145,7 +146,7 @@ cmCTestConfigureCommand::InitializeHandler()
       cmakeConfigureCommand += "\"";
 
       this->CTest->SetCTestConfiguration("ConfigureCommand",
-                                         cmakeConfigureCommand, this->Quiet);
+                                         cmakeConfigureCommand, args.Quiet);
     } else {
       this->SetError(
         "Configure command is not specified. If this is a "
@@ -158,10 +159,10 @@ cmCTestConfigureCommand::InitializeHandler()
   if (cmValue labelsForSubprojects =
         this->Makefile->GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
     this->CTest->SetCTestConfiguration("LabelsForSubprojects",
-                                       *labelsForSubprojects, this->Quiet);
+                                       *labelsForSubprojects, args.Quiet);
   }
 
   auto handler = cm::make_unique<cmCTestConfigureHandler>(this->CTest);
-  handler->SetQuiet(this->Quiet);
+  handler->SetQuiet(args.Quiet);
   return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
 }

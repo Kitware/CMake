@@ -29,19 +29,20 @@ void cmCTestCoverageCommand::BindArguments()
 std::unique_ptr<cmCTestGenericHandler>
 cmCTestCoverageCommand::InitializeHandler()
 {
+  auto const& args = *this;
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "CoverageCommand", "CTEST_COVERAGE_COMMAND", this->Quiet);
+    this->Makefile, "CoverageCommand", "CTEST_COVERAGE_COMMAND", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "CoverageExtraFlags", "CTEST_COVERAGE_EXTRA_FLAGS",
-    this->Quiet);
+    args.Quiet);
   auto handler = cm::make_unique<cmCTestCoverageHandler>(this->CTest);
 
   // If a LABELS option was given, select only files with the labels.
-  if (this->Labels) {
+  if (args.Labels) {
     handler->SetLabelFilter(
-      std::set<std::string>(this->Labels->begin(), this->Labels->end()));
+      std::set<std::string>(args.Labels->begin(), args.Labels->end()));
   }
 
-  handler->SetQuiet(this->Quiet);
+  handler->SetQuiet(args.Quiet);
   return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
 }

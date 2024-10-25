@@ -55,6 +55,7 @@ void cmCTestTestCommand::BindArguments()
 
 std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler()
 {
+  auto& args = *this;
   cmValue ctestTimeout = this->Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
 
   cmDuration timeout;
@@ -71,65 +72,64 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler()
 
   cmValue resourceSpecFile =
     this->Makefile->GetDefinition("CTEST_RESOURCE_SPEC_FILE");
-  if (this->ResourceSpecFile.empty() && resourceSpecFile) {
-    this->ResourceSpecFile = *resourceSpecFile;
+  if (args.ResourceSpecFile.empty() && resourceSpecFile) {
+    args.ResourceSpecFile = *resourceSpecFile;
   }
 
   auto handler = this->InitializeActualHandler();
-  if (!this->Start.empty() || !this->End.empty() || !this->Stride.empty()) {
+  if (!args.Start.empty() || !args.End.empty() || !args.Stride.empty()) {
     handler->TestOptions.TestsToRunInformation =
-      cmStrCat(this->Start, ',', this->End, ',', this->Stride);
+      cmStrCat(args.Start, ',', args.End, ',', args.Stride);
   }
-  if (!this->Exclude.empty()) {
-    handler->TestOptions.ExcludeRegularExpression = this->Exclude;
+  if (!args.Exclude.empty()) {
+    handler->TestOptions.ExcludeRegularExpression = args.Exclude;
   }
-  if (!this->Include.empty()) {
-    handler->TestOptions.IncludeRegularExpression = this->Include;
+  if (!args.Include.empty()) {
+    handler->TestOptions.IncludeRegularExpression = args.Include;
   }
-  if (!this->ExcludeLabel.empty()) {
+  if (!args.ExcludeLabel.empty()) {
     handler->TestOptions.ExcludeLabelRegularExpression.push_back(
-      this->ExcludeLabel);
+      args.ExcludeLabel);
   }
-  if (!this->IncludeLabel.empty()) {
-    handler->TestOptions.LabelRegularExpression.push_back(this->IncludeLabel);
-  }
-
-  if (!this->ExcludeTestsFromFile.empty()) {
-    handler->TestOptions.ExcludeTestListFile = this->ExcludeTestsFromFile;
-  }
-  if (!this->IncludeTestsFromFile.empty()) {
-    handler->TestOptions.TestListFile = this->IncludeTestsFromFile;
+  if (!args.IncludeLabel.empty()) {
+    handler->TestOptions.LabelRegularExpression.push_back(args.IncludeLabel);
   }
 
-  if (!this->ExcludeFixture.empty()) {
-    handler->TestOptions.ExcludeFixtureRegularExpression =
-      this->ExcludeFixture;
+  if (!args.ExcludeTestsFromFile.empty()) {
+    handler->TestOptions.ExcludeTestListFile = args.ExcludeTestsFromFile;
   }
-  if (!this->ExcludeFixtureSetup.empty()) {
+  if (!args.IncludeTestsFromFile.empty()) {
+    handler->TestOptions.TestListFile = args.IncludeTestsFromFile;
+  }
+
+  if (!args.ExcludeFixture.empty()) {
+    handler->TestOptions.ExcludeFixtureRegularExpression = args.ExcludeFixture;
+  }
+  if (!args.ExcludeFixtureSetup.empty()) {
     handler->TestOptions.ExcludeFixtureSetupRegularExpression =
-      this->ExcludeFixtureSetup;
+      args.ExcludeFixtureSetup;
   }
-  if (!this->ExcludeFixtureCleanup.empty()) {
+  if (!args.ExcludeFixtureCleanup.empty()) {
     handler->TestOptions.ExcludeFixtureCleanupRegularExpression =
-      this->ExcludeFixtureCleanup;
+      args.ExcludeFixtureCleanup;
   }
-  if (this->StopOnFailure) {
+  if (args.StopOnFailure) {
     handler->TestOptions.StopOnFailure = true;
   }
-  if (this->ParallelLevel) {
-    handler->ParallelLevel = *this->ParallelLevel;
+  if (args.ParallelLevel) {
+    handler->ParallelLevel = *args.ParallelLevel;
   }
-  if (!this->Repeat.empty()) {
-    handler->Repeat = this->Repeat;
+  if (!args.Repeat.empty()) {
+    handler->Repeat = args.Repeat;
   }
-  if (!this->ScheduleRandom.empty()) {
-    handler->TestOptions.ScheduleRandom = cmValue(this->ScheduleRandom).IsOn();
+  if (!args.ScheduleRandom.empty()) {
+    handler->TestOptions.ScheduleRandom = cmValue(args.ScheduleRandom).IsOn();
   }
-  if (!this->ResourceSpecFile.empty()) {
-    handler->TestOptions.ResourceSpecFile = this->ResourceSpecFile;
+  if (!args.ResourceSpecFile.empty()) {
+    handler->TestOptions.ResourceSpecFile = args.ResourceSpecFile;
   }
-  if (!this->StopTime.empty()) {
-    this->CTest->SetStopTime(this->StopTime);
+  if (!args.StopTime.empty()) {
+    this->CTest->SetStopTime(args.StopTime);
   }
 
   // Test load is determined by: TEST_LOAD argument,
@@ -137,11 +137,11 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler()
   // command line argument... in that order.
   unsigned long testLoad;
   cmValue ctestTestLoad = this->Makefile->GetDefinition("CTEST_TEST_LOAD");
-  if (!this->TestLoad.empty()) {
-    if (!cmStrToULong(this->TestLoad, &testLoad)) {
+  if (!args.TestLoad.empty()) {
+    if (!cmStrToULong(args.TestLoad, &testLoad)) {
       testLoad = 0;
       cmCTestLog(this->CTest, WARNING,
-                 "Invalid value for 'TEST_LOAD' : " << this->TestLoad
+                 "Invalid value for 'TEST_LOAD' : " << args.TestLoad
                                                     << std::endl);
     }
   } else if (cmNonempty(ctestTestLoad)) {
@@ -159,14 +159,14 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler()
   if (cmValue labelsForSubprojects =
         this->Makefile->GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
     this->CTest->SetCTestConfiguration("LabelsForSubprojects",
-                                       *labelsForSubprojects, this->Quiet);
+                                       *labelsForSubprojects, args.Quiet);
   }
 
-  if (!this->OutputJUnit.empty()) {
-    handler->SetJUnitXMLFileName(this->OutputJUnit);
+  if (!args.OutputJUnit.empty()) {
+    handler->SetJUnitXMLFileName(args.OutputJUnit);
   }
 
-  handler->SetQuiet(this->Quiet);
+  handler->SetQuiet(args.Quiet);
   return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
 }
 
