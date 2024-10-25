@@ -44,8 +44,8 @@ function(run_strategy case exe)
   endforeach()
 endfunction()
 
-run_strategy(Basic-PRESERVE_ORDER "main")
-run_strategy(Basic-REORDER "main")
+run_strategy(Basic-REORDER_MINIMALLY "main")
+run_strategy(Basic-REORDER_FREELY "main")
 
-run_cmake(Duplicate-PRESERVE_ORDER)
-run_cmake(Duplicate-REORDER)
+run_cmake(Duplicate-REORDER_MINIMALLY)
+run_cmake(Duplicate-REORDER_FREELY)

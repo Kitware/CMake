@@ -29,8 +29,8 @@ class cmake;
 
 enum class LinkLibrariesStrategy
 {
-  PRESERVE_ORDER,
-  REORDER,
+  REORDER_MINIMALLY,
+  REORDER_FREELY,
 };
 
 /** \class cmComputeLinkDepends
