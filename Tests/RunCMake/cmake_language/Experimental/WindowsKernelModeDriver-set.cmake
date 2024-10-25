@@ -1,5 +1,5 @@
 set(CMAKE_EXPERIMENTAL_WINDOWS_KERNEL_MODE_DRIVER
-  "7f524e81-99c7-48f3-a35d-278bae54282c")
+  "fac18f65-504e-4dbb-b068-f356bb1f2ddb")
 
 cmake_language(GET_EXPERIMENTAL_FEATURE_ENABLED
   "WindowsKernelModeDriver"
