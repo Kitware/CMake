@@ -5,6 +5,7 @@
 #include <sstream>
 #include <utility>
 
+#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmCTest.h"
@@ -76,32 +77,25 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler()
       if (cmakeBuildConfiguration.empty()) {
         cmakeBuildConfiguration = "Release";
       }
-      if (this->GlobalGenerator) {
-        if (this->GlobalGenerator->GetName() != *cmakeGeneratorName) {
-          this->GlobalGenerator.reset();
-        }
-      }
-      if (!this->GlobalGenerator) {
-        this->GlobalGenerator =
-          this->Makefile->GetCMakeInstance()->CreateGlobalGenerator(
-            *cmakeGeneratorName);
-        if (!this->GlobalGenerator) {
-          std::string e = cmStrCat("could not create generator named \"",
-                                   *cmakeGeneratorName, '"');
-          this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
-          cmSystemTools::SetFatalErrorOccurred();
-          return nullptr;
-        }
+
+      auto globalGenerator =
+        this->Makefile->GetCMakeInstance()->CreateGlobalGenerator(
+          *cmakeGeneratorName);
+      if (!globalGenerator) {
+        std::string e = cmStrCat("could not create generator named \"",
+                                 *cmakeGeneratorName, '"');
+        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
+        cmSystemTools::SetFatalErrorOccurred();
+        return nullptr;
       }
       if (cmakeBuildConfiguration.empty()) {
         cmakeBuildConfiguration = "Debug";
       }
 
       std::string dir = this->CTest->GetCTestConfiguration("BuildDirectory");
-      std::string buildCommand =
-        this->GlobalGenerator->GenerateCMakeBuildCommand(
-          cmakeBuildTarget, cmakeBuildConfiguration, this->ParallelLevel,
-          cmakeBuildAdditionalFlags, this->Makefile->IgnoreErrorsCMP0061());
+      std::string buildCommand = globalGenerator->GenerateCMakeBuildCommand(
+        cmakeBuildTarget, cmakeBuildConfiguration, this->ParallelLevel,
+        cmakeBuildAdditionalFlags, this->Makefile->IgnoreErrorsCMP0061());
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                          "SetMakeCommand:" << buildCommand << "\n",
                          this->Quiet);

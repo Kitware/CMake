@@ -4,15 +4,13 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <string>
-
-#include <cm/memory>
 
 #include "cmCTestHandlerCommand.h"
 
 class cmCommand;
 class cmCTestGenericHandler;
-class cmGlobalGenerator;
 
 /** \class cmCTestBuild
  * \brief Run a ctest script
@@ -33,8 +31,6 @@ public:
    * The name of the command as specified in CMakeList.txt.
    */
   std::string GetName() const override { return "ctest_build"; }
-
-  std::unique_ptr<cmGlobalGenerator> GlobalGenerator;
 
 protected:
   void ProcessAdditionalValues(cmCTestGenericHandler* handler) override;
