@@ -4,15 +4,25 @@
 
 #include <set>
 #include <sstream>
+#include <utility>
 
+#include <cm/memory>
 #include <cm/vector>
 #include <cmext/string_view>
 
 #include "cmCTestGenericHandler.h"
 #include "cmCTestUploadHandler.h"
+#include "cmCommand.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSystemTools.h"
+
+std::unique_ptr<cmCommand> cmCTestUploadCommand::Clone()
+{
+  auto ni = cm::make_unique<cmCTestUploadCommand>();
+  ni->CTest = this->CTest;
+  return std::unique_ptr<cmCommand>(std::move(ni));
+}
 
 void cmCTestUploadCommand::BindArguments()
 {

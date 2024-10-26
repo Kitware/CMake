@@ -9,34 +9,16 @@
 
 #include "cmCTestHandlerCommand.h"
 
-class cmCommand;
 class cmCTestGenericHandler;
+class cmCommand;
 
-/** \class cmCTestBuild
- * \brief Run a ctest script
- *
- * cmCTestBuildCommand defineds the command to build the project.
- */
 class cmCTestBuildCommand : public cmCTestHandlerCommand
 {
 public:
-  ~cmCTestBuildCommand() override;
-
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override;
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const override { return "ctest_build"; }
+  using cmCTestHandlerCommand::cmCTestHandlerCommand;
 
 protected:
-  void ProcessAdditionalValues(cmCTestGenericHandler* handler) override;
   void BindArguments() override;
-  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
-
   std::string NumberErrors;
   std::string NumberWarnings;
   std::string Target;
@@ -44,4 +26,13 @@ protected:
   std::string Flags;
   std::string ProjectName;
   std::string ParallelLevel;
+
+private:
+  std::unique_ptr<cmCommand> Clone() override;
+
+  std::string GetName() const override { return "ctest_build"; }
+
+  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
+
+  void ProcessAdditionalValues(cmCTestGenericHandler* handler) override;
 };

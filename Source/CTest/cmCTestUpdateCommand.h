@@ -4,39 +4,23 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <string>
-#include <utility>
-
-#include <cm/memory>
 
 #include "cmCTestHandlerCommand.h"
-#include "cmCommand.h"
 
 class cmCTestGenericHandler;
+class cmCommand;
 
-/** \class cmCTestUpdate
- * \brief Run a ctest script
- *
- * cmCTestUpdateCommand defineds the command to updates the repository.
- */
 class cmCTestUpdateCommand : public cmCTestHandlerCommand
 {
 public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    auto ni = cm::make_unique<cmCTestUpdateCommand>();
-    ni->CTest = this->CTest;
-    return std::unique_ptr<cmCommand>(std::move(ni));
-  }
+  using cmCTestHandlerCommand::cmCTestHandlerCommand;
 
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
+private:
+  std::unique_ptr<cmCommand> Clone() override;
+
   std::string GetName() const override { return "ctest_update"; }
 
-protected:
   std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
 };

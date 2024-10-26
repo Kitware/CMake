@@ -13,34 +13,17 @@
 #include "cmArgumentParserTypes.h"
 #include "cmCTestHandlerCommand.h"
 
-class cmCommand;
-class cmCTestGenericHandler;
 class cmExecutionStatus;
+class cmCTestGenericHandler;
+class cmCommand;
 
-/** \class cmCTestSubmit
- * \brief Run a ctest script
- *
- * cmCTestSubmitCommand defineds the command to submit the test results for
- * the project.
- */
 class cmCTestSubmitCommand : public cmCTestHandlerCommand
 {
 public:
-  std::unique_ptr<cmCommand> Clone() override;
-
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const override { return "ctest_submit"; }
+  using cmCTestHandlerCommand::cmCTestHandlerCommand;
 
 protected:
   void BindArguments() override;
-  void CheckArguments() override;
-  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
-
   bool CDashUpload = false;
   bool InternalTest = false;
 
@@ -54,4 +37,18 @@ protected:
   cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Files;
   ArgumentParser::MaybeEmpty<std::vector<std::string>> HttpHeaders;
   cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Parts;
+
+private:
+  std::unique_ptr<cmCommand> Clone() override;
+
+  std::string GetName() const override { return "ctest_submit"; }
+
+  void CheckArguments() override;
+
+  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
+
+  void ProcessAdditionalValues(cmCTestGenericHandler* handler) override;
+
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) override;
 };

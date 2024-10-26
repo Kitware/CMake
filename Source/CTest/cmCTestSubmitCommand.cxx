@@ -23,9 +23,6 @@
 
 class cmExecutionStatus;
 
-/**
- * This is a virtual constructor for the command.
- */
 std::unique_ptr<cmCommand> cmCTestSubmitCommand::Clone()
 {
   auto ni = cm::make_unique<cmCTestSubmitCommand>();
@@ -185,13 +182,7 @@ bool cmCTestSubmitCommand::InitialPass(std::vector<std::string> const& args,
 {
   this->CDashUpload = !args.empty() && args[0] == "CDASH_UPLOAD";
 
-  bool ret = this->cmCTestHandlerCommand::InitialPass(args, status);
-
-  if (!this->BuildID.empty()) {
-    this->Makefile->AddDefinition(this->BuildID, this->CTest->GetBuildID());
-  }
-
-  return ret;
+  return this->cmCTestHandlerCommand::InitialPass(args, status);
 }
 
 void cmCTestSubmitCommand::BindArguments()
@@ -243,5 +234,12 @@ void cmCTestSubmitCommand::CheckArguments()
       }
       return false;
     });
+  }
+}
+
+void cmCTestSubmitCommand::ProcessAdditionalValues(cmCTestGenericHandler*)
+{
+  if (!this->BuildID.empty()) {
+    this->Makefile->AddDefinition(this->BuildID, this->CTest->GetBuildID());
   }
 }

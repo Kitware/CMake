@@ -4,41 +4,30 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <string>
-#include <utility>
-
-#include <cm/memory>
 
 #include "cmCTestTestCommand.h"
-#include "cmCommand.h"
 
 class cmCTestGenericHandler;
 class cmCTestTestHandler;
+class cmCommand;
 
-/** \class cmCTestMemCheck
- * \brief Run a ctest script
- *
- * cmCTestMemCheckCommand defineds the command to test the project.
- */
 class cmCTestMemCheckCommand : public cmCTestTestCommand
 {
 public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    auto ni = cm::make_unique<cmCTestMemCheckCommand>();
-    ni->CTest = this->CTest;
-    return std::unique_ptr<cmCommand>(std::move(ni));
-  }
+  using cmCTestTestCommand::cmCTestTestCommand;
 
 protected:
   void BindArguments() override;
+  std::string DefectCount;
+
+private:
+  std::unique_ptr<cmCommand> Clone() override;
+
+  std::string GetName() const override { return "ctest_memcheck"; }
 
   std::unique_ptr<cmCTestTestHandler> InitializeActualHandler() override;
 
   void ProcessAdditionalValues(cmCTestGenericHandler* handler) override;
-
-  std::string DefectCount;
 };

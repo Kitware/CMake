@@ -4,13 +4,16 @@
 
 #include <cstring>
 #include <sstream>
+#include <utility>
 #include <vector>
 
+#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmCTest.h"
 #include "cmCTestConfigureHandler.h"
 #include "cmCTestGenericHandler.h"
+#include "cmCommand.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
 #include "cmMakefile.h"
@@ -18,6 +21,13 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 #include "cmake.h"
+
+std::unique_ptr<cmCommand> cmCTestConfigureCommand::Clone()
+{
+  auto ni = cm::make_unique<cmCTestConfigureCommand>();
+  ni->CTest = this->CTest;
+  return std::unique_ptr<cmCommand>(std::move(ni));
+}
 
 void cmCTestConfigureCommand::BindArguments()
 {

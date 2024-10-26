@@ -2,11 +2,23 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestUpdateCommand.h"
 
+#include <utility>
+
+#include <cm/memory>
+
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCTestUpdateHandler.h"
+#include "cmCommand.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
+
+std::unique_ptr<cmCommand> cmCTestUpdateCommand::Clone()
+{
+  auto ni = cm::make_unique<cmCTestUpdateCommand>();
+  ni->CTest = this->CTest;
+  return std::unique_ptr<cmCommand>(std::move(ni));
+}
 
 std::unique_ptr<cmCTestGenericHandler>
 cmCTestUpdateCommand::InitializeHandler()

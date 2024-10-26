@@ -6,17 +6,27 @@
 #include <cstdlib>
 #include <ratio>
 #include <sstream>
+#include <utility>
 #include <vector>
 
+#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCTestTestHandler.h"
+#include "cmCommand.h"
 #include "cmDuration.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmValue.h"
+
+std::unique_ptr<cmCommand> cmCTestTestCommand::Clone()
+{
+  auto ni = cm::make_unique<cmCTestTestCommand>();
+  ni->CTest = this->CTest;
+  return std::unique_ptr<cmCommand>(std::move(ni));
+}
 
 void cmCTestTestCommand::BindArguments()
 {

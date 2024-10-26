@@ -4,42 +4,27 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <string>
-#include <utility>
-
-#include <cm/memory>
 
 #include "cmCTestHandlerCommand.h"
-#include "cmCommand.h"
 
 class cmCTestGenericHandler;
+class cmCommand;
 
-/** \class cmCTestConfigure
- * \brief Run a ctest script
- *
- * cmCTestConfigureCommand defineds the command to configures the project.
- */
 class cmCTestConfigureCommand : public cmCTestHandlerCommand
 {
 public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    auto ni = cm::make_unique<cmCTestConfigureCommand>();
-    ni->CTest = this->CTest;
-    return std::unique_ptr<cmCommand>(std::move(ni));
-  }
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const override { return "ctest_configure"; }
+  using cmCTestHandlerCommand::cmCTestHandlerCommand;
 
 protected:
   void BindArguments() override;
-  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
-
   std::string Options;
+
+private:
+  std::unique_ptr<cmCommand> Clone() override;
+
+  std::string GetName() const override { return "ctest_configure"; }
+
+  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
 };

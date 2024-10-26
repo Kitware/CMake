@@ -4,46 +4,31 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <string>
-#include <utility>
 #include <vector>
-
-#include <cm/memory>
 
 #include "cmArgumentParserTypes.h"
 #include "cmCTestHandlerCommand.h"
-#include "cmCommand.h"
 
 class cmCTestGenericHandler;
+class cmCommand;
 
-/** \class cmCTestUpload
- * \brief Run a ctest script
- *
- * cmCTestUploadCommand defines the command to upload result files for
- * the project.
- */
 class cmCTestUploadCommand : public cmCTestHandlerCommand
 {
 public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    auto ni = cm::make_unique<cmCTestUploadCommand>();
-    ni->CTest = this->CTest;
-    return std::unique_ptr<cmCommand>(std::move(ni));
-  }
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const override { return "ctest_upload"; }
+  using cmCTestHandlerCommand::cmCTestHandlerCommand;
 
 protected:
   void BindArguments() override;
-  void CheckArguments() override;
-  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
-
   ArgumentParser::MaybeEmpty<std::vector<std::string>> Files;
+
+private:
+  std::unique_ptr<cmCommand> Clone() override;
+
+  std::string GetName() const override { return "ctest_upload"; }
+
+  void CheckArguments() override;
+
+  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
 };

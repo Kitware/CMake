@@ -242,3 +242,13 @@ void cmCTestHandlerCommand::BindArguments()
 void cmCTestHandlerCommand::CheckArguments()
 {
 }
+
+std::unique_ptr<cmCTestGenericHandler>
+cmCTestHandlerCommand::InitializeHandler()
+{
+  return nullptr;
+};
+
+void cmCTestHandlerCommand::ProcessAdditionalValues(cmCTestGenericHandler*)
+{
+}

@@ -2,12 +2,23 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestMemCheckCommand.h"
 
+#include <utility>
+
+#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmCTest.h"
 #include "cmCTestMemCheckHandler.h"
 #include "cmCTestTestHandler.h"
+#include "cmCommand.h"
 #include "cmMakefile.h"
+
+std::unique_ptr<cmCommand> cmCTestMemCheckCommand::Clone()
+{
+  auto ni = cm::make_unique<cmCTestMemCheckCommand>();
+  ni->CTest = this->CTest;
+  return std::unique_ptr<cmCommand>(std::move(ni));
+}
 
 void cmCTestMemCheckCommand::BindArguments()
 {

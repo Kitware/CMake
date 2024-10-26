@@ -16,37 +16,15 @@
 class cmCTestGenericHandler;
 class cmExecutionStatus;
 
-/** \class cmCTestHandler
- * \brief Run a ctest script
- *
- * cmCTestHandlerCommand defineds the command to test the project.
- */
 class cmCTestHandlerCommand
   : public cmCTestCommand
   , public cmArgumentParser<void>
 {
 public:
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  virtual std::string GetName() const = 0;
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
+  using cmCTestCommand::cmCTestCommand;
 
 protected:
-  virtual std::unique_ptr<cmCTestGenericHandler> InitializeHandler() = 0;
-
-  virtual void ProcessAdditionalValues(cmCTestGenericHandler* /*handler*/) {}
-
-  // Command argument handling.
   virtual void BindArguments();
-  virtual void CheckArguments();
-
   std::vector<cm::string_view> ParsedKeywords;
   bool Append = false;
   bool Quiet = false;
@@ -55,4 +33,17 @@ protected:
   std::string Build;
   std::string Source;
   std::string SubmitIndex;
+
+protected:
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) override;
+
+private:
+  virtual std::string GetName() const = 0;
+
+  virtual void CheckArguments();
+
+  virtual std::unique_ptr<cmCTestGenericHandler> InitializeHandler();
+
+  virtual void ProcessAdditionalValues(cmCTestGenericHandler*);
 };

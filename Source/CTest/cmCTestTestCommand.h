@@ -4,47 +4,25 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <string>
-#include <utility>
 
-#include <cm/memory>
 #include <cm/optional>
 
 #include "cmArgumentParserTypes.h"
 #include "cmCTestHandlerCommand.h"
-#include "cmCommand.h"
 
 class cmCTestGenericHandler;
 class cmCTestTestHandler;
+class cmCommand;
 
-/** \class cmCTestTest
- * \brief Run a ctest script
- *
- * cmCTestTestCommand defineds the command to test the project.
- */
 class cmCTestTestCommand : public cmCTestHandlerCommand
 {
 public:
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    auto ni = cm::make_unique<cmCTestTestCommand>();
-    ni->CTest = this->CTest;
-    return std::unique_ptr<cmCommand>(std::move(ni));
-  }
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const override { return "ctest_test"; }
+  using cmCTestHandlerCommand::cmCTestHandlerCommand;
 
 protected:
   void BindArguments() override;
-  virtual std::unique_ptr<cmCTestTestHandler> InitializeActualHandler();
-  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
-
   std::string Start;
   std::string End;
   std::string Stride;
@@ -65,4 +43,13 @@ protected:
   std::string ResourceSpecFile;
   std::string OutputJUnit;
   bool StopOnFailure = false;
+
+private:
+  std::unique_ptr<cmCommand> Clone() override;
+
+  std::string GetName() const override { return "ctest_test"; }
+
+  virtual std::unique_ptr<cmCTestTestHandler> InitializeActualHandler();
+
+  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
 };

@@ -3,12 +3,22 @@
 #include "cmCTestCoverageCommand.h"
 
 #include <set>
+#include <utility>
 
+#include <cm/memory>
 #include <cmext/string_view>
 
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
 #include "cmCTestGenericHandler.h"
+#include "cmCommand.h"
+
+std::unique_ptr<cmCommand> cmCTestCoverageCommand::Clone()
+{
+  auto ni = cm::make_unique<cmCTestCoverageCommand>();
+  ni->CTest = this->CTest;
+  return std::unique_ptr<cmCommand>(std::move(ni));
+}
 
 void cmCTestCoverageCommand::BindArguments()
 {

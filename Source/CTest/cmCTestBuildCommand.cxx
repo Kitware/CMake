@@ -39,8 +39,6 @@ void cmCTestBuildCommand::BindArguments()
   this->Bind("PARALLEL_LEVEL"_s, this->ParallelLevel);
 }
 
-cmCTestBuildCommand::~cmCTestBuildCommand() = default;
-
 std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler()
 {
   auto handler = cm::make_unique<cmCTestBuildHandler>(this->CTest);
