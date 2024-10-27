@@ -25,7 +25,7 @@ public:
   using cmCTestCommand::cmCTestCommand;
 
 protected:
-  struct BasicArguments
+  struct BasicArguments : ArgumentParser::ParseResult
   {
     std::string CaptureCMakeError;
     std::vector<cm::string_view> ParsedKeywords;

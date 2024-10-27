@@ -80,6 +80,10 @@ bool cmCTestHandlerCommand::InvokeImpl(
   }
 
   bool success = [&]() -> bool {
+    if (args.MaybeReportError(status.GetMakefile())) {
+      return true;
+    }
+
     std::sort(args.ParsedKeywords.begin(), args.ParsedKeywords.end());
     auto const it = std::adjacent_find(args.ParsedKeywords.begin(),
                                        args.ParsedKeywords.end());

@@ -484,10 +484,6 @@ void cmCTestSubmitHandler::ParseResponse(
 int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
                                                 std::string const& typeString)
 {
-  if (file.empty()) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Upload file not specified\n");
-    return -1;
-  }
   if (!cmSystemTools::FileExists(file)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Upload file not found: '" << file << "'\n");
