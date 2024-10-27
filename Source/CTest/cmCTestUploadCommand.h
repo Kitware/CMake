@@ -4,7 +4,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <memory>
 #include <string>
 #include <vector>
 
@@ -12,7 +11,6 @@
 #include "cmCTestHandlerCommand.h"
 
 class cmExecutionStatus;
-class cmCTestGenericHandler;
 
 class cmCTestUploadCommand : public cmCTestHandlerCommand
 {
@@ -20,19 +18,16 @@ public:
   using cmCTestHandlerCommand::cmCTestHandlerCommand;
 
 protected:
-  struct UploadArguments : HandlerArguments
+  struct UploadArguments : BasicArguments
   {
     ArgumentParser::MaybeEmpty<std::vector<std::string>> Files;
+    bool Quiet = false;
   };
 
 private:
   std::string GetName() const override { return "ctest_upload"; }
 
-  void CheckArguments(HandlerArguments& arguments,
-                      cmExecutionStatus& status) const override;
-
-  std::unique_ptr<cmCTestGenericHandler> InitializeHandler(
-    HandlerArguments& arguments, cmExecutionStatus& status) const override;
+  bool ExecuteUpload(UploadArguments& args, cmExecutionStatus& status) const;
 
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) const override;

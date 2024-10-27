@@ -2,19 +2,16 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmCTestUploadCommand.h"
 
+#include <algorithm>
 #include <chrono>
-#include <set>
 #include <sstream>
 #include <string>
-#include <utility>
 
-#include <cm/memory>
 #include <cm/vector>
 #include <cmext/string_view>
 
 #include "cmArgumentParser.h"
 #include "cmCTest.h"
-#include "cmCTestGenericHandler.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
@@ -23,30 +20,15 @@
 #include "cmVersion.h"
 #include "cmXMLWriter.h"
 
-class cmCTestUploadHandler : public cmCTestGenericHandler
-{
-public:
-  using Superclass = cmCTestGenericHandler;
-
-  cmCTestUploadHandler(cmCTest* ctest);
-
-  /*
-   * The main entry point for this class
-   */
-  int ProcessHandler() override;
-
-  /** Specify a set of files to submit.  */
-  void SetFiles(std::set<std::string> const& files);
-
-private:
-  std::set<std::string> Files;
-};
-
-void cmCTestUploadCommand::CheckArguments(HandlerArguments& arguments,
-                                          cmExecutionStatus& status) const
+bool cmCTestUploadCommand::ExecuteUpload(UploadArguments& args,
+                                         cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
-  auto& args = static_cast<UploadArguments&>(arguments);
+
+  std::sort(args.Files.begin(), args.Files.end());
+  args.Files.erase(std::unique(args.Files.begin(), args.Files.end()),
+                   args.Files.end());
+
   cm::erase_if(args.Files, [&mf](std::string const& arg) -> bool {
     if (!cmSystemTools::FileExists(arg)) {
       std::ostringstream e;
@@ -57,40 +39,16 @@ void cmCTestUploadCommand::CheckArguments(HandlerArguments& arguments,
     }
     return false;
   });
-}
 
-std::unique_ptr<cmCTestGenericHandler> cmCTestUploadCommand::InitializeHandler(
-  HandlerArguments& arguments, cmExecutionStatus&) const
-{
-  auto const& args = static_cast<UploadArguments&>(arguments);
-  auto handler = cm::make_unique<cmCTestUploadHandler>(this->CTest);
-  handler->SetFiles(
-    std::set<std::string>(args.Files.begin(), args.Files.end()));
-  handler->SetQuiet(args.Quiet);
-  return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
-}
-
-cmCTestUploadHandler::cmCTestUploadHandler(cmCTest* ctest)
-  : Superclass(ctest)
-{
-}
-
-void cmCTestUploadHandler::SetFiles(std::set<std::string> const& files)
-{
-  this->Files = files;
-}
-
-int cmCTestUploadHandler::ProcessHandler()
-{
   cmGeneratedFileStream ofs;
   if (!this->CTest->OpenOutputFile(this->CTest->GetCurrentTag(), "Upload.xml",
                                    ofs)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot open Upload.xml file" << std::endl);
-    return -1;
+    return false;
   }
   std::string buildname =
-    cmCTest::SafeBuildIdField(this->CTest->GetCTestConfiguration("BuildName"));
+    cmCTest::SafeBuildIdField(mf.GetSafeDefinition("CTEST_BUILD_NAME"));
 
   cmXMLWriter xml(ofs);
   xml.StartDocument();
@@ -103,16 +61,16 @@ int cmCTestUploadHandler::ProcessHandler()
   xml.Attribute("BuildStamp",
                 this->CTest->GetCurrentTag() + "-" +
                   this->CTest->GetTestGroupString());
-  xml.Attribute("Name", this->CTest->GetCTestConfiguration("Site"));
+  xml.Attribute("Name", mf.GetSafeDefinition("CTEST_SITE"));
   xml.Attribute("Generator",
                 std::string("ctest-") + cmVersion::GetCMakeVersion());
-  this->CTest->AddSiteProperties(xml, this->CMake);
+  this->CTest->AddSiteProperties(xml, mf.GetCMakeInstance());
   xml.StartElement("Upload");
   xml.Element("Time", std::chrono::system_clock::now());
 
-  for (std::string const& file : this->Files) {
+  for (std::string const& file : args.Files) {
     cmCTestOptionalLog(this->CTest, OUTPUT,
-                       "\tUpload file: " << file << std::endl, this->Quiet);
+                       "\tUpload file: " << file << std::endl, args.Quiet);
     xml.StartElement("File");
     xml.Attribute("filename", file);
     xml.StartElement("Content");
@@ -124,18 +82,18 @@ int cmCTestUploadHandler::ProcessHandler()
   xml.EndElement(); // Upload
   xml.EndElement(); // Site
   xml.EndDocument();
-  return 0;
+  return true;
 }
 
 bool cmCTestUploadCommand::InitialPass(std::vector<std::string> const& args,
                                        cmExecutionStatus& status) const
 {
   static auto const parser =
-    cmArgumentParser<UploadArguments>{ MakeHandlerParser<UploadArguments>() }
+    cmArgumentParser<UploadArguments>{ MakeBasicParser<UploadArguments>() }
       .Bind("FILES"_s, &UploadArguments::Files)
       .Bind("QUIET"_s, &UploadArguments::Quiet);
 
   return this->Invoke(parser, args, status, [&](UploadArguments& a) {
-    return this->ExecuteHandlerCommand(a, status);
+    return this->ExecuteUpload(a, status);
   });
 }
