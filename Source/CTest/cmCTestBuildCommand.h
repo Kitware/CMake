@@ -6,9 +6,11 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "cmCTestHandlerCommand.h"
 
+class cmExecutionStatus;
 class cmCTestGenericHandler;
 class cmCommand;
 
@@ -18,21 +20,28 @@ public:
   using cmCTestHandlerCommand::cmCTestHandlerCommand;
 
 protected:
-  void BindArguments() override;
-  std::string NumberErrors;
-  std::string NumberWarnings;
-  std::string Target;
-  std::string Configuration;
-  std::string Flags;
-  std::string ProjectName;
-  std::string ParallelLevel;
+  struct BuildArguments : HandlerArguments
+  {
+    std::string NumberErrors;
+    std::string NumberWarnings;
+    std::string Target;
+    std::string Configuration;
+    std::string Flags;
+    std::string ProjectName;
+    std::string ParallelLevel;
+  };
 
 private:
   std::unique_ptr<cmCommand> Clone() override;
 
   std::string GetName() const override { return "ctest_build"; }
 
-  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
+  std::unique_ptr<cmCTestGenericHandler> InitializeHandler(
+    HandlerArguments& arguments) override;
 
-  void ProcessAdditionalValues(cmCTestGenericHandler* handler) override;
+  void ProcessAdditionalValues(cmCTestGenericHandler* handler,
+                               HandlerArguments const& arguments) override;
+
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) override;
 };

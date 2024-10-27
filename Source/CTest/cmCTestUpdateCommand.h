@@ -6,9 +6,11 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "cmCTestHandlerCommand.h"
 
+class cmExecutionStatus;
 class cmCTestGenericHandler;
 class cmCommand;
 
@@ -22,5 +24,9 @@ private:
 
   std::string GetName() const override { return "ctest_update"; }
 
-  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
+  std::unique_ptr<cmCTestGenericHandler> InitializeHandler(
+    HandlerArguments& args) override;
+
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) override;
 };

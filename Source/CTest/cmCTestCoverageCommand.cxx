@@ -8,6 +8,7 @@
 #include <cm/memory>
 #include <cmext/string_view>
 
+#include "cmArgumentParser.h"
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
 #include "cmCTestGenericHandler.h"
@@ -20,16 +21,10 @@ std::unique_ptr<cmCommand> cmCTestCoverageCommand::Clone()
   return std::unique_ptr<cmCommand>(std::move(ni));
 }
 
-void cmCTestCoverageCommand::BindArguments()
-{
-  this->cmCTestHandlerCommand::BindArguments();
-  this->Bind("LABELS"_s, this->Labels);
-}
-
 std::unique_ptr<cmCTestGenericHandler>
-cmCTestCoverageCommand::InitializeHandler()
+cmCTestCoverageCommand::InitializeHandler(HandlerArguments& arguments)
 {
-  auto const& args = *this;
+  auto& args = static_cast<CoverageArguments&>(arguments);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "CoverageCommand", "CTEST_COVERAGE_COMMAND", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
@@ -45,4 +40,17 @@ cmCTestCoverageCommand::InitializeHandler()
 
   handler->SetQuiet(args.Quiet);
   return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
+}
+
+bool cmCTestCoverageCommand::InitialPass(std::vector<std::string> const& args,
+                                         cmExecutionStatus& status)
+{
+  using Args = CoverageArguments;
+  static auto const parser =
+    cmArgumentParser<Args>{ MakeHandlerParser<Args>() } //
+      .Bind("LABELS"_s, &CoverageArguments::Labels);
+
+  std::vector<std::string> unparsedArguments;
+  CoverageArguments arguments = parser.Parse(args, &unparsedArguments);
+  return this->ExecuteHandlerCommand(arguments, unparsedArguments, status);
 }

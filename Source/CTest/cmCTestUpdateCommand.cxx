@@ -6,6 +6,7 @@
 
 #include <cm/memory>
 
+#include "cmArgumentParser.h"
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCTestUpdateHandler.h"
@@ -20,10 +21,9 @@ std::unique_ptr<cmCommand> cmCTestUpdateCommand::Clone()
   return std::unique_ptr<cmCommand>(std::move(ni));
 }
 
-std::unique_ptr<cmCTestGenericHandler>
-cmCTestUpdateCommand::InitializeHandler()
+std::unique_ptr<cmCTestGenericHandler> cmCTestUpdateCommand::InitializeHandler(
+  HandlerArguments& args)
 {
-  auto const& args = *this;
   if (!args.Source.empty()) {
     this->CTest->SetCTestConfiguration(
       "SourceDirectory", cmSystemTools::CollapseFullPath(args.Source),
@@ -96,4 +96,14 @@ cmCTestUpdateCommand::InitializeHandler()
   handler->SourceDirectory = source_dir;
   handler->SetQuiet(args.Quiet);
   return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
+}
+
+bool cmCTestUpdateCommand::InitialPass(std::vector<std::string> const& args,
+                                       cmExecutionStatus& status)
+{
+  static auto const parser = MakeHandlerParser<HandlerArguments>();
+
+  std::vector<std::string> unparsedArguments;
+  HandlerArguments arguments = parser.Parse(args, &unparsedArguments);
+  return this->ExecuteHandlerCommand(arguments, unparsedArguments, status);
 }

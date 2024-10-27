@@ -13,6 +13,7 @@
 #include "cmArgumentParserTypes.h" // IWYU pragma: keep
 #include "cmCTestHandlerCommand.h"
 
+class cmExecutionStatus;
 class cmCTestGenericHandler;
 class cmCommand;
 
@@ -22,13 +23,19 @@ public:
   using cmCTestHandlerCommand::cmCTestHandlerCommand;
 
 protected:
-  void BindArguments() override;
-  cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Labels;
+  struct CoverageArguments : HandlerArguments
+  {
+    cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Labels;
+  };
 
 private:
   std::unique_ptr<cmCommand> Clone() override;
 
   std::string GetName() const override { return "ctest_coverage"; }
 
-  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
+  std::unique_ptr<cmCTestGenericHandler> InitializeHandler(
+    HandlerArguments& arguments) override;
+
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) override;
 };

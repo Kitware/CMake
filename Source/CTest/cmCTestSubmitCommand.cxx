@@ -10,6 +10,7 @@
 #include <cm/vector>
 #include <cmext/string_view>
 
+#include "cmArgumentParser.h"
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCTestSubmitHandler.h"
@@ -30,10 +31,10 @@ std::unique_ptr<cmCommand> cmCTestSubmitCommand::Clone()
   return std::unique_ptr<cmCommand>(std::move(ni));
 }
 
-std::unique_ptr<cmCTestGenericHandler>
-cmCTestSubmitCommand::InitializeHandler()
+std::unique_ptr<cmCTestGenericHandler> cmCTestSubmitCommand::InitializeHandler(
+  HandlerArguments& arguments)
 {
-  auto const& args = *this;
+  auto const& args = static_cast<SubmitArguments&>(arguments);
   cmValue submitURL = !args.SubmitURL.empty()
     ? cmValue(args.SubmitURL)
     : this->Makefile->GetDefinition("CTEST_SUBMIT_URL");
@@ -170,7 +171,7 @@ cmCTestSubmitCommand::InitializeHandler()
 
   handler->SetQuiet(args.Quiet);
 
-  if (this->CDashUpload) {
+  if (args.CDashUpload) {
     handler->CDashUpload = true;
     handler->CDashUploadFile = args.CDashUploadFile;
     handler->CDashUploadType = args.CDashUploadType;
@@ -181,37 +182,40 @@ cmCTestSubmitCommand::InitializeHandler()
 bool cmCTestSubmitCommand::InitialPass(std::vector<std::string> const& args,
                                        cmExecutionStatus& status)
 {
-  this->CDashUpload = !args.empty() && args[0] == "CDASH_UPLOAD";
-
-  return this->cmCTestHandlerCommand::InitialPass(args, status);
-}
-
-void cmCTestSubmitCommand::BindArguments()
-{
-  if (this->CDashUpload) {
-    // Arguments specific to the CDASH_UPLOAD signature.
-    this->Bind("CDASH_UPLOAD", this->CDashUploadFile);
-    this->Bind("CDASH_UPLOAD_TYPE", this->CDashUploadType);
-  } else {
-    // Arguments that cannot be used with CDASH_UPLOAD.
-    this->Bind("PARTS"_s, this->Parts);
-    this->Bind("FILES"_s, this->Files);
-  }
   // Arguments used by both modes.
-  this->Bind("BUILD_ID"_s, this->BuildID);
-  this->Bind("HTTPHEADER"_s, this->HttpHeaders);
-  this->Bind("RETRY_COUNT"_s, this->RetryCount);
-  this->Bind("RETRY_DELAY"_s, this->RetryDelay);
-  this->Bind("SUBMIT_URL"_s, this->SubmitURL);
-  this->Bind("INTERNAL_TEST_CHECKSUM", this->InternalTest);
+  static auto const parserBase =
+    cmArgumentParser<SubmitArguments>{ MakeHandlerParser<SubmitArguments>() }
+      .Bind("BUILD_ID"_s, &SubmitArguments::BuildID)
+      .Bind("HTTPHEADER"_s, &SubmitArguments::HttpHeaders)
+      .Bind("RETRY_COUNT"_s, &SubmitArguments::RetryCount)
+      .Bind("RETRY_DELAY"_s, &SubmitArguments::RetryDelay)
+      .Bind("SUBMIT_URL"_s, &SubmitArguments::SubmitURL)
+      .Bind("INTERNAL_TEST_CHECKSUM"_s, &SubmitArguments::InternalTest);
 
-  // Look for other arguments.
-  this->cmCTestHandlerCommand::BindArguments();
+  // Arguments specific to the CDASH_UPLOAD signature.
+  static auto const uploadParser =
+    cmArgumentParser<SubmitArguments>{ parserBase }
+      .Bind("CDASH_UPLOAD"_s, &SubmitArguments::CDashUploadFile)
+      .Bind("CDASH_UPLOAD_TYPE"_s, &SubmitArguments::CDashUploadType);
+
+  // Arguments that cannot be used with CDASH_UPLOAD.
+  static auto const partsParser =
+    cmArgumentParser<SubmitArguments>{ parserBase }
+      .Bind("PARTS"_s, &SubmitArguments::Parts)
+      .Bind("FILES"_s, &SubmitArguments::Files);
+
+  bool const cdashUpload = !args.empty() && args[0] == "CDASH_UPLOAD";
+  auto const& parser = cdashUpload ? uploadParser : partsParser;
+
+  std::vector<std::string> unparsedArguments;
+  SubmitArguments arguments = parser.Parse(args, &unparsedArguments);
+  arguments.CDashUpload = cdashUpload;
+  return this->ExecuteHandlerCommand(arguments, unparsedArguments, status);
 }
 
-void cmCTestSubmitCommand::CheckArguments()
+void cmCTestSubmitCommand::CheckArguments(HandlerArguments& arguments)
 {
-  auto& args = *this;
+  auto& args = static_cast<SubmitArguments&>(arguments);
   if (args.Parts) {
     cm::erase_if(*(args.Parts), [this](std::string const& arg) -> bool {
       cmCTest::Part p = this->CTest->GetPartFromName(arg);
@@ -239,9 +243,10 @@ void cmCTestSubmitCommand::CheckArguments()
   }
 }
 
-void cmCTestSubmitCommand::ProcessAdditionalValues(cmCTestGenericHandler*)
+void cmCTestSubmitCommand::ProcessAdditionalValues(
+  cmCTestGenericHandler*, HandlerArguments const& arguments)
 {
-  auto const& args = *this;
+  auto const& args = static_cast<SubmitArguments const&>(arguments);
   if (!args.BuildID.empty()) {
     this->Makefile->AddDefinition(args.BuildID, this->CTest->GetBuildID());
   }

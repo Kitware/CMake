@@ -7,6 +7,7 @@
 #include <cm/memory>
 #include <cmext/string_view>
 
+#include "cmArgumentParser.h"
 #include "cmCTest.h"
 #include "cmCTestMemCheckHandler.h"
 #include "cmCTestTestHandler.h"
@@ -20,16 +21,9 @@ std::unique_ptr<cmCommand> cmCTestMemCheckCommand::Clone()
   return std::unique_ptr<cmCommand>(std::move(ni));
 }
 
-void cmCTestMemCheckCommand::BindArguments()
-{
-  this->cmCTestTestCommand::BindArguments();
-  this->Bind("DEFECT_COUNT"_s, this->DefectCount);
-}
-
 std::unique_ptr<cmCTestTestHandler>
-cmCTestMemCheckCommand::InitializeActualHandler()
+cmCTestMemCheckCommand::InitializeActualHandler(HandlerArguments& args)
 {
-  auto const& args = *this;
   auto handler = cm::make_unique<cmCTestMemCheckHandler>(this->CTest);
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(
@@ -52,13 +46,25 @@ cmCTestMemCheckCommand::InitializeActualHandler()
 }
 
 void cmCTestMemCheckCommand::ProcessAdditionalValues(
-  cmCTestGenericHandler* handler)
+  cmCTestGenericHandler* handler, HandlerArguments const& arguments)
 {
-  auto const& args = *this;
+  auto const& args = static_cast<MemCheckArguments const&>(arguments);
   if (!args.DefectCount.empty()) {
     this->Makefile->AddDefinition(
       args.DefectCount,
       std::to_string(
         static_cast<cmCTestMemCheckHandler*>(handler)->GetDefectCount()));
   }
+}
+
+bool cmCTestMemCheckCommand::InitialPass(std::vector<std::string> const& args,
+                                         cmExecutionStatus& status)
+{
+  static auto const parser =
+    cmArgumentParser<MemCheckArguments>{ MakeTestParser<MemCheckArguments>() }
+      .Bind("DEFECT_COUNT"_s, &MemCheckArguments::DefectCount);
+
+  std::vector<std::string> unparsedArguments;
+  MemCheckArguments arguments = parser.Parse(args, &unparsedArguments);
+  return this->ExecuteHandlerCommand(arguments, unparsedArguments, status);
 }

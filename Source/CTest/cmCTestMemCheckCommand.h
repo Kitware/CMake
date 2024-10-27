@@ -6,9 +6,11 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "cmCTestTestCommand.h"
 
+class cmExecutionStatus;
 class cmCTestGenericHandler;
 class cmCTestTestHandler;
 class cmCommand;
@@ -19,15 +21,22 @@ public:
   using cmCTestTestCommand::cmCTestTestCommand;
 
 protected:
-  void BindArguments() override;
-  std::string DefectCount;
+  struct MemCheckArguments : TestArguments
+  {
+    std::string DefectCount;
+  };
 
 private:
   std::unique_ptr<cmCommand> Clone() override;
 
   std::string GetName() const override { return "ctest_memcheck"; }
 
-  std::unique_ptr<cmCTestTestHandler> InitializeActualHandler() override;
+  std::unique_ptr<cmCTestTestHandler> InitializeActualHandler(
+    HandlerArguments& arguments) override;
 
-  void ProcessAdditionalValues(cmCTestGenericHandler* handler) override;
+  void ProcessAdditionalValues(cmCTestGenericHandler* handler,
+                               HandlerArguments const& arguments) override;
+
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) override;
 };

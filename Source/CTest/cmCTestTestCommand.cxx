@@ -10,7 +10,6 @@
 #include <vector>
 
 #include <cm/memory>
-#include <cmext/string_view>
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
@@ -21,6 +20,8 @@
 #include "cmStringAlgorithms.h"
 #include "cmValue.h"
 
+class cmExecutionStatus;
+
 std::unique_ptr<cmCommand> cmCTestTestCommand::Clone()
 {
   auto ni = cm::make_unique<cmCTestTestCommand>();
@@ -28,34 +29,10 @@ std::unique_ptr<cmCommand> cmCTestTestCommand::Clone()
   return std::unique_ptr<cmCommand>(std::move(ni));
 }
 
-void cmCTestTestCommand::BindArguments()
+std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler(
+  HandlerArguments& arguments)
 {
-  this->cmCTestHandlerCommand::BindArguments();
-  this->Bind("START"_s, this->Start);
-  this->Bind("END"_s, this->End);
-  this->Bind("STRIDE"_s, this->Stride);
-  this->Bind("EXCLUDE"_s, this->Exclude);
-  this->Bind("INCLUDE"_s, this->Include);
-  this->Bind("EXCLUDE_LABEL"_s, this->ExcludeLabel);
-  this->Bind("INCLUDE_LABEL"_s, this->IncludeLabel);
-  this->Bind("EXCLUDE_FROM_FILE"_s, this->ExcludeTestsFromFile);
-  this->Bind("INCLUDE_FROM_FILE"_s, this->IncludeTestsFromFile);
-  this->Bind("EXCLUDE_FIXTURE"_s, this->ExcludeFixture);
-  this->Bind("EXCLUDE_FIXTURE_SETUP"_s, this->ExcludeFixtureSetup);
-  this->Bind("EXCLUDE_FIXTURE_CLEANUP"_s, this->ExcludeFixtureCleanup);
-  this->Bind("PARALLEL_LEVEL"_s, this->ParallelLevel);
-  this->Bind("REPEAT"_s, this->Repeat);
-  this->Bind("SCHEDULE_RANDOM"_s, this->ScheduleRandom);
-  this->Bind("STOP_TIME"_s, this->StopTime);
-  this->Bind("TEST_LOAD"_s, this->TestLoad);
-  this->Bind("RESOURCE_SPEC_FILE"_s, this->ResourceSpecFile);
-  this->Bind("STOP_ON_FAILURE"_s, this->StopOnFailure);
-  this->Bind("OUTPUT_JUNIT"_s, this->OutputJUnit);
-}
-
-std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler()
-{
-  auto& args = *this;
+  auto& args = static_cast<TestArguments&>(arguments);
   cmValue ctestTimeout = this->Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
 
   cmDuration timeout;
@@ -76,7 +53,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler()
     args.ResourceSpecFile = *resourceSpecFile;
   }
 
-  auto handler = this->InitializeActualHandler();
+  auto handler = this->InitializeActualHandler(args);
   if (!args.Start.empty() || !args.End.empty() || !args.Stride.empty()) {
     handler->TestOptions.TestsToRunInformation =
       cmStrCat(args.Start, ',', args.End, ',', args.Stride);
@@ -171,7 +148,17 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler()
 }
 
 std::unique_ptr<cmCTestTestHandler>
-cmCTestTestCommand::InitializeActualHandler()
+cmCTestTestCommand::InitializeActualHandler(HandlerArguments&)
 {
   return cm::make_unique<cmCTestTestHandler>(this->CTest);
+}
+
+bool cmCTestTestCommand::InitialPass(std::vector<std::string> const& args,
+                                     cmExecutionStatus& status)
+{
+  static auto const parser = MakeTestParser<TestArguments>();
+
+  std::vector<std::string> unparsedArguments;
+  TestArguments arguments = parser.Parse(args, &unparsedArguments);
+  return this->ExecuteHandlerCommand(arguments, unparsedArguments, status);
 }

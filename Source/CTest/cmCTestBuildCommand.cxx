@@ -8,6 +8,7 @@
 #include <cm/memory>
 #include <cmext/string_view>
 
+#include "cmArgumentParser.h"
 #include "cmCTest.h"
 #include "cmCTestBuildHandler.h"
 #include "cmCTestGenericHandler.h"
@@ -20,6 +21,8 @@
 #include "cmValue.h"
 #include "cmake.h"
 
+class cmExecutionStatus;
+
 std::unique_ptr<cmCommand> cmCTestBuildCommand::Clone()
 {
   auto ni = cm::make_unique<cmCTestBuildCommand>();
@@ -27,21 +30,28 @@ std::unique_ptr<cmCommand> cmCTestBuildCommand::Clone()
   return std::unique_ptr<cmCommand>(std::move(ni));
 }
 
-void cmCTestBuildCommand::BindArguments()
+bool cmCTestBuildCommand::InitialPass(std::vector<std::string> const& args,
+                                      cmExecutionStatus& status)
 {
-  this->cmCTestHandlerCommand::BindArguments();
-  this->Bind("NUMBER_ERRORS"_s, this->NumberErrors);
-  this->Bind("NUMBER_WARNINGS"_s, this->NumberWarnings);
-  this->Bind("TARGET"_s, this->Target);
-  this->Bind("CONFIGURATION"_s, this->Configuration);
-  this->Bind("FLAGS"_s, this->Flags);
-  this->Bind("PROJECT_NAME"_s, this->ProjectName);
-  this->Bind("PARALLEL_LEVEL"_s, this->ParallelLevel);
+  static auto const parser =
+    cmArgumentParser<BuildArguments>{ MakeHandlerParser<BuildArguments>() }
+      .Bind("NUMBER_ERRORS"_s, &BuildArguments::NumberErrors)
+      .Bind("NUMBER_WARNINGS"_s, &BuildArguments::NumberWarnings)
+      .Bind("TARGET"_s, &BuildArguments::Target)
+      .Bind("CONFIGURATION"_s, &BuildArguments::Configuration)
+      .Bind("FLAGS"_s, &BuildArguments::Flags)
+      .Bind("PROJECT_NAME"_s, &BuildArguments::ProjectName)
+      .Bind("PARALLEL_LEVEL"_s, &BuildArguments::ParallelLevel);
+
+  std::vector<std::string> unparsedArguments;
+  BuildArguments arguments = parser.Parse(args, &unparsedArguments);
+  return this->ExecuteHandlerCommand(arguments, unparsedArguments, status);
 }
 
-std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler()
+std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
+  HandlerArguments& arguments)
 {
-  auto const& args = *this;
+  auto const& args = static_cast<BuildArguments&>(arguments);
   auto handler = cm::make_unique<cmCTestBuildHandler>(this->CTest);
 
   cmValue ctestBuildCommand =
@@ -130,9 +140,9 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler()
 }
 
 void cmCTestBuildCommand::ProcessAdditionalValues(
-  cmCTestGenericHandler* generic)
+  cmCTestGenericHandler* generic, HandlerArguments const& arguments)
 {
-  auto const& args = *this;
+  auto const& args = static_cast<BuildArguments const&>(arguments);
   auto const* handler = static_cast<cmCTestBuildHandler*>(generic);
   if (!args.NumberErrors.empty()) {
     this->Makefile->AddDefinition(args.NumberErrors,

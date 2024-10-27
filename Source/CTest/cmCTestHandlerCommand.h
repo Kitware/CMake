@@ -9,41 +9,59 @@
 #include <vector>
 
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmArgumentParser.h"
 #include "cmCTestCommand.h"
 
-class cmCTestGenericHandler;
 class cmExecutionStatus;
+class cmCTestGenericHandler;
 
-class cmCTestHandlerCommand
-  : public cmCTestCommand
-  , public cmArgumentParser<void>
+class cmCTestHandlerCommand : public cmCTestCommand
 {
 public:
   using cmCTestCommand::cmCTestCommand;
 
 protected:
-  virtual void BindArguments();
-  std::vector<cm::string_view> ParsedKeywords;
-  bool Append = false;
-  bool Quiet = false;
-  std::string CaptureCMakeError;
-  std::string ReturnValue;
-  std::string Build;
-  std::string Source;
-  std::string SubmitIndex;
+  struct HandlerArguments
+  {
+    std::vector<cm::string_view> ParsedKeywords;
+    bool Append = false;
+    bool Quiet = false;
+    std::string CaptureCMakeError;
+    std::string ReturnValue;
+    std::string Build;
+    std::string Source;
+    std::string SubmitIndex;
+  };
+
+  template <typename Args>
+  static auto MakeHandlerParser() -> cmArgumentParser<Args>
+  {
+    return cmArgumentParser<Args>{}
+      .BindParsedKeywords(&HandlerArguments::ParsedKeywords)
+      .Bind("APPEND"_s, &HandlerArguments::Append)
+      .Bind("QUIET"_s, &HandlerArguments::Quiet)
+      .Bind("CAPTURE_CMAKE_ERROR"_s, &HandlerArguments::CaptureCMakeError)
+      .Bind("RETURN_VALUE"_s, &HandlerArguments::ReturnValue)
+      .Bind("SOURCE"_s, &HandlerArguments::Source)
+      .Bind("BUILD"_s, &HandlerArguments::Build)
+      .Bind("SUBMIT_INDEX"_s, &HandlerArguments::SubmitIndex);
+  }
 
 protected:
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
+  bool ExecuteHandlerCommand(HandlerArguments& args,
+                             std::vector<std::string> const& unparsedArguments,
+                             cmExecutionStatus& status);
 
 private:
   virtual std::string GetName() const = 0;
 
-  virtual void CheckArguments();
+  virtual void CheckArguments(HandlerArguments& arguments);
 
-  virtual std::unique_ptr<cmCTestGenericHandler> InitializeHandler();
+  virtual std::unique_ptr<cmCTestGenericHandler> InitializeHandler(
+    HandlerArguments& arguments);
 
-  virtual void ProcessAdditionalValues(cmCTestGenericHandler*);
+  virtual void ProcessAdditionalValues(cmCTestGenericHandler*,
+                                       HandlerArguments const& arguments);
 };

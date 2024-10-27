@@ -10,6 +10,7 @@
 #include <cm/memory>
 #include <cmext/string_view>
 
+#include "cmArgumentParser.h"
 #include "cmCTest.h"
 #include "cmCTestConfigureHandler.h"
 #include "cmCTestGenericHandler.h"
@@ -29,16 +30,10 @@ std::unique_ptr<cmCommand> cmCTestConfigureCommand::Clone()
   return std::unique_ptr<cmCommand>(std::move(ni));
 }
 
-void cmCTestConfigureCommand::BindArguments()
-{
-  this->cmCTestHandlerCommand::BindArguments();
-  this->Bind("OPTIONS"_s, this->Options);
-}
-
 std::unique_ptr<cmCTestGenericHandler>
-cmCTestConfigureCommand::InitializeHandler()
+cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments)
 {
-  auto const& args = *this;
+  auto const& args = static_cast<ConfigureArguments&>(arguments);
   cmList options;
 
   if (!args.Options.empty()) {
@@ -165,4 +160,17 @@ cmCTestConfigureCommand::InitializeHandler()
   auto handler = cm::make_unique<cmCTestConfigureHandler>(this->CTest);
   handler->SetQuiet(args.Quiet);
   return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
+}
+
+bool cmCTestConfigureCommand::InitialPass(std::vector<std::string> const& args,
+                                          cmExecutionStatus& status)
+{
+  using Args = ConfigureArguments;
+  static auto const parser =
+    cmArgumentParser<Args>{ MakeHandlerParser<Args>() } //
+      .Bind("OPTIONS"_s, &ConfigureArguments::Options);
+
+  std::vector<std::string> unparsedArguments;
+  ConfigureArguments arguments = parser.Parse(args, &unparsedArguments);
+  return this->ExecuteHandlerCommand(arguments, unparsedArguments, status);
 }

@@ -11,6 +11,7 @@
 #include "cmArgumentParserTypes.h"
 #include "cmCTestHandlerCommand.h"
 
+class cmExecutionStatus;
 class cmCTestGenericHandler;
 class cmCommand;
 
@@ -20,15 +21,21 @@ public:
   using cmCTestHandlerCommand::cmCTestHandlerCommand;
 
 protected:
-  void BindArguments() override;
-  ArgumentParser::MaybeEmpty<std::vector<std::string>> Files;
+  struct UploadArguments : HandlerArguments
+  {
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> Files;
+  };
 
 private:
   std::unique_ptr<cmCommand> Clone() override;
 
   std::string GetName() const override { return "ctest_upload"; }
 
-  void CheckArguments() override;
+  void CheckArguments(HandlerArguments& arguments) override;
 
-  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
+  std::unique_ptr<cmCTestGenericHandler> InitializeHandler(
+    HandlerArguments& arguments) override;
+
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) override;
 };

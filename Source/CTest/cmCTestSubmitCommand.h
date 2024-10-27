@@ -23,31 +23,35 @@ public:
   using cmCTestHandlerCommand::cmCTestHandlerCommand;
 
 protected:
-  void BindArguments() override;
-  bool CDashUpload = false;
-  bool InternalTest = false;
+  struct SubmitArguments : HandlerArguments
+  {
+    bool CDashUpload = false;
+    bool InternalTest = false;
 
-  std::string BuildID;
-  std::string CDashUploadFile;
-  std::string CDashUploadType;
-  std::string RetryCount;
-  std::string RetryDelay;
-  std::string SubmitURL;
+    std::string BuildID;
+    std::string CDashUploadFile;
+    std::string CDashUploadType;
+    std::string RetryCount;
+    std::string RetryDelay;
+    std::string SubmitURL;
 
-  cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Files;
-  ArgumentParser::MaybeEmpty<std::vector<std::string>> HttpHeaders;
-  cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Parts;
+    cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Files;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> HttpHeaders;
+    cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Parts;
+  };
 
 private:
   std::unique_ptr<cmCommand> Clone() override;
 
   std::string GetName() const override { return "ctest_submit"; }
 
-  void CheckArguments() override;
+  void CheckArguments(HandlerArguments& arguments) override;
 
-  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
+  std::unique_ptr<cmCTestGenericHandler> InitializeHandler(
+    HandlerArguments& arguments) override;
 
-  void ProcessAdditionalValues(cmCTestGenericHandler* handler) override;
+  void ProcessAdditionalValues(cmCTestGenericHandler* handler,
+                               HandlerArguments const& arguments) override;
 
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) override;

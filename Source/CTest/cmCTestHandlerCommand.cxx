@@ -7,7 +7,6 @@
 #include <sstream>
 
 #include <cm/string_view>
-#include <cmext/string_view>
 
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
@@ -71,19 +70,15 @@ private:
 };
 }
 
-bool cmCTestHandlerCommand::InitialPass(
-  std::vector<std::string> const& arguments, cmExecutionStatus& status)
+bool cmCTestHandlerCommand::ExecuteHandlerCommand(
+  HandlerArguments& args, std::vector<std::string> const& unparsedArguments,
+  cmExecutionStatus& status)
 {
-  auto& args = *this;
   // save error state and restore it if needed
   SaveRestoreErrorState errorState;
-  // Allocate space for argument values.
-  this->BindArguments();
 
   // Process input arguments.
-  std::vector<std::string> unparsedArguments;
-  this->Parse(arguments, &unparsedArguments);
-  this->CheckArguments();
+  this->CheckArguments(args);
 
   std::sort(args.ParsedKeywords.begin(), args.ParsedKeywords.end());
   auto it =
@@ -165,7 +160,7 @@ bool cmCTestHandlerCommand::InitialPass(
   }
 
   cmCTestLog(this->CTest, DEBUG, "Initialize handler" << std::endl);
-  auto handler = this->InitializeHandler();
+  auto handler = this->InitializeHandler(args);
   if (!handler) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot instantiate test handler " << this->GetName()
@@ -209,7 +204,7 @@ bool cmCTestHandlerCommand::InitialPass(
   if (!args.ReturnValue.empty()) {
     this->Makefile->AddDefinition(args.ReturnValue, std::to_string(res));
   }
-  this->ProcessAdditionalValues(handler.get());
+  this->ProcessAdditionalValues(handler.get(), args);
   // log the error message if there was an error
   if (captureCMakeError) {
     const char* returnString = "0";
@@ -228,28 +223,17 @@ bool cmCTestHandlerCommand::InitialPass(
   return true;
 }
 
-void cmCTestHandlerCommand::BindArguments()
-{
-  this->BindParsedKeywords(this->ParsedKeywords);
-  this->Bind("APPEND"_s, this->Append);
-  this->Bind("QUIET"_s, this->Quiet);
-  this->Bind("RETURN_VALUE"_s, this->ReturnValue);
-  this->Bind("CAPTURE_CMAKE_ERROR"_s, this->CaptureCMakeError);
-  this->Bind("SOURCE"_s, this->Source);
-  this->Bind("BUILD"_s, this->Build);
-  this->Bind("SUBMIT_INDEX"_s, this->SubmitIndex);
-}
-
-void cmCTestHandlerCommand::CheckArguments()
+void cmCTestHandlerCommand::CheckArguments(HandlerArguments&)
 {
 }
 
 std::unique_ptr<cmCTestGenericHandler>
-cmCTestHandlerCommand::InitializeHandler()
+cmCTestHandlerCommand::InitializeHandler(HandlerArguments&)
 {
   return nullptr;
 };
 
-void cmCTestHandlerCommand::ProcessAdditionalValues(cmCTestGenericHandler*)
+void cmCTestHandlerCommand::ProcessAdditionalValues(cmCTestGenericHandler*,
+                                                    HandlerArguments const&)
 {
 }

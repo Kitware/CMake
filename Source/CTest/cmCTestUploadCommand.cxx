@@ -10,12 +10,15 @@
 #include <cm/vector>
 #include <cmext/string_view>
 
+#include "cmArgumentParser.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCTestUploadHandler.h"
 #include "cmCommand.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSystemTools.h"
+
+class cmExecutionStatus;
 
 std::unique_ptr<cmCommand> cmCTestUploadCommand::Clone()
 {
@@ -24,16 +27,9 @@ std::unique_ptr<cmCommand> cmCTestUploadCommand::Clone()
   return std::unique_ptr<cmCommand>(std::move(ni));
 }
 
-void cmCTestUploadCommand::BindArguments()
+void cmCTestUploadCommand::CheckArguments(HandlerArguments& arguments)
 {
-  this->Bind("FILES"_s, this->Files);
-  this->Bind("QUIET"_s, this->Quiet);
-  this->Bind("CAPTURE_CMAKE_ERROR"_s, this->CaptureCMakeError);
-}
-
-void cmCTestUploadCommand::CheckArguments()
-{
-  auto& args = *this;
+  auto& args = static_cast<UploadArguments&>(arguments);
   cm::erase_if(args.Files, [this](std::string const& arg) -> bool {
     if (!cmSystemTools::FileExists(arg)) {
       std::ostringstream e;
@@ -46,13 +42,26 @@ void cmCTestUploadCommand::CheckArguments()
   });
 }
 
-std::unique_ptr<cmCTestGenericHandler>
-cmCTestUploadCommand::InitializeHandler()
+std::unique_ptr<cmCTestGenericHandler> cmCTestUploadCommand::InitializeHandler(
+  HandlerArguments& arguments)
 {
-  auto const& args = *this;
+  auto const& args = static_cast<UploadArguments&>(arguments);
   auto handler = cm::make_unique<cmCTestUploadHandler>(this->CTest);
   handler->SetFiles(
     std::set<std::string>(args.Files.begin(), args.Files.end()));
   handler->SetQuiet(args.Quiet);
   return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
+}
+
+bool cmCTestUploadCommand::InitialPass(std::vector<std::string> const& args,
+                                       cmExecutionStatus& status)
+{
+  static auto const parser =
+    cmArgumentParser<UploadArguments>{ MakeHandlerParser<UploadArguments>() }
+      .Bind("FILES"_s, &UploadArguments::Files)
+      .Bind("QUIET"_s, &UploadArguments::Quiet);
+
+  std::vector<std::string> unparsedArguments;
+  UploadArguments arguments = parser.Parse(args, &unparsedArguments);
+  return this->ExecuteHandlerCommand(arguments, unparsedArguments, status);
 }
