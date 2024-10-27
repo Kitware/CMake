@@ -28,6 +28,7 @@ class BT;
 struct cmVisualStudioFolder
 {
   std::set<std::string> Projects;
+  std::set<std::string> SolutionItems;
 };
 
 /** \class cmGlobalVisualStudio7Generator
@@ -185,6 +186,11 @@ protected:
 
   virtual void WriteFolders(std::ostream& fout);
   virtual void WriteFoldersContent(std::ostream& fout);
+
+  virtual void AddSolutionItems(cmLocalGenerator* root) = 0;
+  virtual void WriteFolderSolutionItems(
+    std::ostream& fout, const cmVisualStudioFolder& folder) = 0;
+
   std::map<std::string, cmVisualStudioFolder> VisualStudioFolders;
 
   // Set during OutputSLNFile with the name of the current project.

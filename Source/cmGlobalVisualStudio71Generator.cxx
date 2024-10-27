@@ -48,9 +48,10 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(
   std::ostringstream targetsSlnString;
   this->WriteTargetsToSolution(targetsSlnString, root, orderedProjectTargets);
 
+  this->AddSolutionItems(root);
+
   // Generate folder specification.
-  bool useFolderProperty = this->UseFolderProperty();
-  if (useFolderProperty) {
+  if (!this->VisualStudioFolders.empty()) {
     this->WriteFolders(fout);
   }
 
@@ -67,7 +68,7 @@ void cmGlobalVisualStudio71Generator::WriteSLNFile(
   this->WriteTargetConfigurations(fout, configs, orderedProjectTargets);
   fout << "\tEndGlobalSection\n";
 
-  if (useFolderProperty) {
+  if (!this->VisualStudioFolders.empty()) {
     // Write out project folders
     fout << "\tGlobalSection(NestedProjects) = preSolution\n";
     this->WriteFoldersContent(fout);

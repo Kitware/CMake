@@ -541,3 +541,56 @@ std::string cmGlobalVisualStudio14Generator::GetWindows10SDKVersion(
   // Return an empty string
   return std::string();
 }
+
+void cmGlobalVisualStudio14Generator::AddSolutionItems(cmLocalGenerator* root)
+{
+  cmValue n = root->GetMakefile()->GetProperty("VS_SOLUTION_ITEMS");
+  if (cmNonempty(n)) {
+    cmMakefile* makefile = root->GetMakefile();
+
+    std::vector<cmSourceGroup> sourceGroups = makefile->GetSourceGroups();
+
+    cmVisualStudioFolder* defaultFolder = nullptr;
+
+    std::vector<std::string> pathComponents = {
+      makefile->GetCurrentSourceDirectory(),
+      "",
+      "",
+    };
+
+    for (const std::string& relativePath : cmList(n)) {
+      pathComponents[2] = relativePath;
+      std::string fullPath = cmSystemTools::JoinPath(pathComponents);
+
+      cmSourceGroup* sg = makefile->FindSourceGroup(fullPath, sourceGroups);
+
+      cmVisualStudioFolder* folder = nullptr;
+      if (!sg->GetFullName().empty()) {
+        std::string folderPath = sg->GetFullName();
+        // Source groups use '\' while solution folders use '/'.
+        cmSystemTools::ReplaceString(folderPath, "\\", "/");
+        folder = this->CreateSolutionFolders(folderPath);
+      } else {
+        // Lazily initialize the default solution items folder.
+        if (defaultFolder == nullptr) {
+          defaultFolder = this->CreateSolutionFolders("Solution Items");
+        }
+        folder = defaultFolder;
+      }
+
+      folder->SolutionItems.insert(fullPath);
+    }
+  }
+}
+
+void cmGlobalVisualStudio14Generator::WriteFolderSolutionItems(
+  std::ostream& fout, const cmVisualStudioFolder& folder)
+{
+  fout << "\tProjectSection(SolutionItems) = preProject\n";
+
+  for (const std::string& item : folder.SolutionItems) {
+    fout << "\t\t" << item << " = " << item << "\n";
+  }
+
+  fout << "\tEndProjectSection\n";
+}

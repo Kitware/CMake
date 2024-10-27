@@ -481,7 +481,13 @@ void cmGlobalVisualStudio7Generator::WriteFolders(std::ostream& fout)
     std::string nameOnly = cmSystemTools::GetFilenameName(fullName);
 
     fout << "Project(\"{" << guidProjectTypeFolder << "}\") = \"" << nameOnly
-         << "\", \"" << fullName << "\", \"{" << guid << "}\"\nEndProject\n";
+         << "\", \"" << fullName << "\", \"{" << guid << "}\"\n";
+
+    if (!iter.second.SolutionItems.empty()) {
+      this->WriteFolderSolutionItems(fout, iter.second);
+    }
+
+    fout << "EndProject\n";
   }
 }
 
