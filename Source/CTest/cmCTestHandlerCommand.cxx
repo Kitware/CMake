@@ -12,7 +12,6 @@
 #include "cmCTestGenericHandler.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
@@ -70,51 +69,54 @@ private:
 };
 }
 
-bool cmCTestHandlerCommand::ExecuteHandlerCommand(
-  HandlerArguments& args, std::vector<std::string> const& unparsedArguments,
-  cmExecutionStatus& status)
+bool cmCTestHandlerCommand::InvokeImpl(
+  BasicArguments& args, std::vector<std::string> const& unparsed,
+  cmExecutionStatus& status, std::function<bool()> handler)
 {
   // save error state and restore it if needed
   SaveRestoreErrorState errorState;
-
-  // Process input arguments.
-  this->CheckArguments(args);
-
-  std::sort(args.ParsedKeywords.begin(), args.ParsedKeywords.end());
-  auto it =
-    std::adjacent_find(args.ParsedKeywords.begin(), args.ParsedKeywords.end());
-  if (it != args.ParsedKeywords.end()) {
-    this->Makefile->IssueMessage(
-      MessageType::FATAL_ERROR,
-      cmStrCat("Called with more than one value for ", *it));
-  }
-
-  bool const foundBadArgument = !unparsedArguments.empty();
-  if (foundBadArgument) {
-    this->SetError(cmStrCat("called with unknown argument \"",
-                            unparsedArguments.front(), "\"."));
-  }
-  bool const captureCMakeError = !args.CaptureCMakeError.empty();
-  // now that arguments are parsed check to see if there is a
-  // CAPTURE_CMAKE_ERROR specified let the errorState object know.
-  if (captureCMakeError) {
+  if (!args.CaptureCMakeError.empty()) {
     errorState.CaptureCMakeError();
   }
-  // if we found a bad argument then exit before running command
-  if (foundBadArgument) {
-    // store the cmake error
-    if (captureCMakeError) {
-      this->Makefile->AddDefinition(args.CaptureCMakeError, "-1");
-      std::string const err = this->GetName() + " " + status.GetError();
-      if (!cmSystemTools::FindLastString(err.c_str(), "unknown error.")) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE, err << " error from command\n");
-      }
-      // return success because failure is recorded in CAPTURE_CMAKE_ERROR
-      return true;
+
+  bool success = [&]() -> bool {
+    std::sort(args.ParsedKeywords.begin(), args.ParsedKeywords.end());
+    auto const it = std::adjacent_find(args.ParsedKeywords.begin(),
+                                       args.ParsedKeywords.end());
+    if (it != args.ParsedKeywords.end()) {
+      status.SetError(cmStrCat("called with more than one value for ", *it));
+      return false;
     }
-    // return failure because of bad argument
-    return false;
+
+    if (!unparsed.empty()) {
+      status.SetError(
+        cmStrCat("called with unknown argument \"", unparsed.front(), "\"."));
+      return false;
+    }
+
+    return handler();
+  }();
+
+  if (args.CaptureCMakeError.empty()) {
+    return success;
   }
+
+  if (!success) {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               this->GetName() << ' ' << status.GetError() << '\n');
+  }
+
+  cmMakefile& mf = status.GetMakefile();
+  success = success && !cmSystemTools::GetErrorOccurredFlag();
+  mf.AddDefinition(args.CaptureCMakeError, success ? "0" : "-1");
+  return true;
+}
+
+bool cmCTestHandlerCommand::ExecuteHandlerCommand(
+  HandlerArguments& args, cmExecutionStatus& /*status*/)
+{
+  // Process input arguments.
+  this->CheckArguments(args);
 
   // Set the config type of this ctest to the current value of the
   // CTEST_CONFIGURATION_TYPE script variable if it is defined.
@@ -165,14 +167,6 @@ bool cmCTestHandlerCommand::ExecuteHandlerCommand(
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot instantiate test handler " << this->GetName()
                                                   << std::endl);
-    if (captureCMakeError) {
-      this->Makefile->AddDefinition(args.CaptureCMakeError, "-1");
-      std::string const& err = status.GetError();
-      if (!cmSystemTools::FindLastString(err.c_str(), "unknown error.")) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE, err << " error from command\n");
-      }
-      return true;
-    }
     return false;
   }
 
@@ -186,13 +180,6 @@ bool cmCTestHandlerCommand::ExecuteHandlerCommand(
     this->CTest->GetCTestConfiguration("BuildDirectory"));
   if (workdir.Failed()) {
     this->SetError(workdir.GetError());
-    if (captureCMakeError) {
-      this->Makefile->AddDefinition(args.CaptureCMakeError, "-1");
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 this->GetName() << " " << status.GetError() << "\n");
-      // return success because failure is recorded in CAPTURE_CMAKE_ERROR
-      return true;
-    }
     return false;
   }
 
@@ -205,21 +192,6 @@ bool cmCTestHandlerCommand::ExecuteHandlerCommand(
     this->Makefile->AddDefinition(args.ReturnValue, std::to_string(res));
   }
   this->ProcessAdditionalValues(handler.get(), args);
-  // log the error message if there was an error
-  if (captureCMakeError) {
-    const char* returnString = "0";
-    if (cmSystemTools::GetErrorOccurredFlag()) {
-      returnString = "-1";
-      std::string const& err = status.GetError();
-      // print out the error if it is not "unknown error" which means
-      // there was no message
-      if (!cmSystemTools::FindLastString(err.c_str(), "unknown error.")) {
-        cmCTestLog(this->CTest, ERROR_MESSAGE, err);
-      }
-    }
-    // store the captured cmake error state 0 or -1
-    this->Makefile->AddDefinition(args.CaptureCMakeError, returnString);
-  }
   return true;
 }
 

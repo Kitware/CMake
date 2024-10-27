@@ -207,10 +207,10 @@ bool cmCTestSubmitCommand::InitialPass(std::vector<std::string> const& args,
   bool const cdashUpload = !args.empty() && args[0] == "CDASH_UPLOAD";
   auto const& parser = cdashUpload ? uploadParser : partsParser;
 
-  std::vector<std::string> unparsedArguments;
-  SubmitArguments arguments = parser.Parse(args, &unparsedArguments);
-  arguments.CDashUpload = cdashUpload;
-  return this->ExecuteHandlerCommand(arguments, unparsedArguments, status);
+  return this->Invoke(parser, args, status, [&](SubmitArguments& a) -> bool {
+    a.CDashUpload = cdashUpload;
+    return this->ExecuteHandlerCommand(a, status);
+  });
 }
 
 void cmCTestSubmitCommand::CheckArguments(HandlerArguments& arguments)

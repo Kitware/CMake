@@ -6,7 +6,6 @@
 
 #include <cm/memory>
 
-#include "cmArgumentParser.h"
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCTestUpdateHandler.h"
@@ -103,7 +102,7 @@ bool cmCTestUpdateCommand::InitialPass(std::vector<std::string> const& args,
 {
   static auto const parser = MakeHandlerParser<HandlerArguments>();
 
-  std::vector<std::string> unparsedArguments;
-  HandlerArguments arguments = parser.Parse(args, &unparsedArguments);
-  return this->ExecuteHandlerCommand(arguments, unparsedArguments, status);
+  return this->Invoke(parser, args, status, [&](HandlerArguments& a) {
+    return this->ExecuteHandlerCommand(a, status);
+  });
 }

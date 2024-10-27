@@ -170,7 +170,7 @@ bool cmCTestConfigureCommand::InitialPass(std::vector<std::string> const& args,
     cmArgumentParser<Args>{ MakeHandlerParser<Args>() } //
       .Bind("OPTIONS"_s, &ConfigureArguments::Options);
 
-  std::vector<std::string> unparsedArguments;
-  ConfigureArguments arguments = parser.Parse(args, &unparsedArguments);
-  return this->ExecuteHandlerCommand(arguments, unparsedArguments, status);
+  return this->Invoke(parser, args, status, [&](ConfigureArguments& a) {
+    return this->ExecuteHandlerCommand(a, status);
+  });
 }

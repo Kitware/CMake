@@ -50,7 +50,7 @@ bool cmCTestCoverageCommand::InitialPass(std::vector<std::string> const& args,
     cmArgumentParser<Args>{ MakeHandlerParser<Args>() } //
       .Bind("LABELS"_s, &CoverageArguments::Labels);
 
-  std::vector<std::string> unparsedArguments;
-  CoverageArguments arguments = parser.Parse(args, &unparsedArguments);
-  return this->ExecuteHandlerCommand(arguments, unparsedArguments, status);
+  return this->Invoke(parser, args, status, [&](CoverageArguments& a) {
+    return this->ExecuteHandlerCommand(a, status);
+  });
 }

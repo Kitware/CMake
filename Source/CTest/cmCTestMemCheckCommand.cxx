@@ -64,7 +64,7 @@ bool cmCTestMemCheckCommand::InitialPass(std::vector<std::string> const& args,
     cmArgumentParser<MemCheckArguments>{ MakeTestParser<MemCheckArguments>() }
       .Bind("DEFECT_COUNT"_s, &MemCheckArguments::DefectCount);
 
-  std::vector<std::string> unparsedArguments;
-  MemCheckArguments arguments = parser.Parse(args, &unparsedArguments);
-  return this->ExecuteHandlerCommand(arguments, unparsedArguments, status);
+  return this->Invoke(parser, args, status, [&](MemCheckArguments& a) {
+    return this->ExecuteHandlerCommand(a, status);
+  });
 }

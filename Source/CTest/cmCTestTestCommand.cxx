@@ -158,7 +158,7 @@ bool cmCTestTestCommand::InitialPass(std::vector<std::string> const& args,
 {
   static auto const parser = MakeTestParser<TestArguments>();
 
-  std::vector<std::string> unparsedArguments;
-  TestArguments arguments = parser.Parse(args, &unparsedArguments);
-  return this->ExecuteHandlerCommand(arguments, unparsedArguments, status);
+  return this->Invoke(parser, args, status, [&](TestArguments& a) {
+    return this->ExecuteHandlerCommand(a, status);
+  });
 }

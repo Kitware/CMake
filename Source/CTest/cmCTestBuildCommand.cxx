@@ -43,9 +43,9 @@ bool cmCTestBuildCommand::InitialPass(std::vector<std::string> const& args,
       .Bind("PROJECT_NAME"_s, &BuildArguments::ProjectName)
       .Bind("PARALLEL_LEVEL"_s, &BuildArguments::ParallelLevel);
 
-  std::vector<std::string> unparsedArguments;
-  BuildArguments arguments = parser.Parse(args, &unparsedArguments);
-  return this->ExecuteHandlerCommand(arguments, unparsedArguments, status);
+  return this->Invoke(parser, args, status, [&](BuildArguments& a) {
+    return this->ExecuteHandlerCommand(a, status);
+  });
 }
 
 std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(

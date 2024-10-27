@@ -61,7 +61,7 @@ bool cmCTestUploadCommand::InitialPass(std::vector<std::string> const& args,
       .Bind("FILES"_s, &UploadArguments::Files)
       .Bind("QUIET"_s, &UploadArguments::Quiet);
 
-  std::vector<std::string> unparsedArguments;
-  UploadArguments arguments = parser.Parse(args, &unparsedArguments);
-  return this->ExecuteHandlerCommand(arguments, unparsedArguments, status);
+  return this->Invoke(parser, args, status, [&](UploadArguments& a) {
+    return this->ExecuteHandlerCommand(a, status);
+  });
 }
