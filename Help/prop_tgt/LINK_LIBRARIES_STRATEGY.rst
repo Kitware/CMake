@@ -15,7 +15,8 @@ target's direct link dependencies, typically populated by calls to
 propagated from those entries of :prop_tgt:`LINK_LIBRARIES` that name
 library targets by following the transitive closure of their
 :prop_tgt:`INTERFACE_LINK_LIBRARIES` properties.  CMake supports multiple
-strategies for passing direct and indirect link dependencies to the linker.
+strategies for nominally ordering direct and indirect link dependencies,
+which are then filtered for `Toolchain-Specific Behavior`_.
 
 Consider this example for the strategies below:
 
@@ -31,7 +32,7 @@ Consider this example for the strategies below:
 
 The supported strategies are:
 
-``PRESERVE_ORDER``
+``REORDER_MINIMALLY``
   Entries of :prop_tgt:`LINK_LIBRARIES` always appear first and in their
   original order.  Indirect link dependencies not satisfied by the
   original entries may be reordered and de-duplicated with respect to
@@ -46,13 +47,13 @@ The supported strategies are:
   In the above example, this strategy computes a link line for ``main``
   by starting with its original entries ``A B C``, and then appends
   another ``A`` to satisfy the dependencies of ``B`` and ``C`` on ``A``.
-  The final order produced by this strategy is ``A B C A``.
+  The nominal order produced by this strategy is ``A B C A``.
 
   Note that additional filtering for `Toolchain-Specific Behavior`_
   may de-duplicate ``A`` on the actual linker invocation in the
   generated build system, resulting in either ``A B C`` or ``B C A``.
 
-``REORDER``
+``REORDER_FREELY``
   Entries of :prop_tgt:`LINK_LIBRARIES` may be reordered, de-duplicated,
   and intermixed with indirect link dependencies.  This may result in
   more efficient link lines, but does not give projects any control of
@@ -61,16 +62,18 @@ The supported strategies are:
   In the above example, this strategy computes a link line for ``main``
   by re-ordering its original entries ``A B C`` to satisfy the
   dependencies of ``B`` and ``C`` on ``A``.
-  The final order produced by this strategy is ``B C A``.
+  The nominal order produced by this strategy is ``B C A``.
 
 Toolchain-Specific Behavior
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Regardless of the strategy used, the actual linker invocation for
-some platforms may de-duplicate entries based on linker capabilities.
+After one of the above strategies produces a nominal order among
+direct and indirect link dependencies, the actual linker invocation
+in the generated build system may de-duplicate entries based on
+platform-specific requirements and linker capabilities.
 See policy :policy:`CMP0156`.
 
-For example, if the ``PRESERVE_ORDER`` strategy produces ``A B C A``,
+For example, if the ``REORDER_MINIMALLY`` strategy produces ``A B C A``,
 the actual link line may de-duplicate ``A`` as follows:
 
 * If ``A`` is a static library and the linker re-scans automatically,

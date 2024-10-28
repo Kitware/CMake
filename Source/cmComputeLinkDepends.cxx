@@ -1521,14 +1521,14 @@ void cmComputeLinkDepends::OrderLinkEntries()
 
   // Start with the original link line.
   switch (this->Strategy) {
-    case LinkLibrariesStrategy::PRESERVE_ORDER: {
+    case LinkLibrariesStrategy::REORDER_MINIMALLY: {
       // Emit the direct dependencies in their original order.
       // This gives projects control over ordering.
       for (size_t originalEntry : this->OriginalEntries) {
         this->VisitEntry(originalEntry);
       }
     } break;
-    case LinkLibrariesStrategy::REORDER: {
+    case LinkLibrariesStrategy::REORDER_FREELY: {
       // Schedule the direct dependencies for emission in topo order.
       // This may produce more efficient link lines.
       for (size_t originalEntry : this->OriginalEntries) {
