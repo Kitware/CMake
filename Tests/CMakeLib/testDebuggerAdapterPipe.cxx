@@ -20,9 +20,10 @@
 #include "cmVersionConfig.h"
 
 #ifdef _WIN32
+#  include "cmsys/SystemTools.hxx"
+
 #  include "cmCryptoHash.h"
 #  include "cmDebuggerWindowsPipeConnection.h"
-#  include "cmSystemTools.h"
 #else
 #  include "cmDebuggerPosixPipeConnection.h"
 #endif
@@ -69,7 +70,7 @@ bool testProtocolWithPipes()
 #ifdef _WIN32
   std::string namedPipe = R"(\\.\pipe\LOCAL\CMakeDebuggerPipe2_)" +
     cmCryptoHash(cmCryptoHash::AlgoSHA256)
-      .HashString(cmSystemTools::GetCurrentWorkingDirectory());
+      .HashString(cmsys::SystemTools::GetCurrentWorkingDirectory());
 #else
   std::string namedPipe = "CMakeDebuggerPipe2";
 #endif

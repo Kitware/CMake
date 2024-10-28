@@ -243,7 +243,7 @@ int main(int argc, char** argv)
       } else if (cmSystemTools::FileExists(srcFilePath.c_str())) {
         dialog.setSourceDirectory(QString::fromStdString(filePath));
         dialog.setBinaryDirectory(
-          QString::fromStdString(cmSystemTools::GetCurrentWorkingDirectory()));
+          QString::fromStdString(cmSystemTools::GetLogicalWorkingDirectory()));
       }
     }
   }

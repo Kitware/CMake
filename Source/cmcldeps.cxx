@@ -24,6 +24,7 @@
 #include <windows.h>
 
 #include "cmsys/Encoding.hxx"
+#include "cmsys/SystemTools.hxx"
 
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -151,7 +152,7 @@ static void outputDepFile(const std::string& dfile, const std::string& objfile,
   // FIXME should this be fatal or not? delete obj? delete d?
   if (!out)
     return;
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  std::string cwd = cmsys::SystemTools::GetCurrentWorkingDirectory();
   replaceAll(cwd, "/", "\\");
   cwd += "\\";
 

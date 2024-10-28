@@ -534,8 +534,11 @@ public:
   static cm::optional<std::string> GetSystemConfigDirectory();
   static cm::optional<std::string> GetCMakeConfigDirectory();
 
-  /** Get the CWD mapped through the KWSys translation map.  */
-  static std::string GetCurrentWorkingDirectory();
+  static std::string const& GetLogicalWorkingDirectory();
+
+  /** The logical working directory may contain symlinks but must not
+      contain any '../' path components.  */
+  static cmsys::Status SetLogicalWorkingDirectory(std::string const& lwd);
 
   /** Echo a message in color using KWSys's Terminal cprintf.  */
   static void MakefileColorEcho(int color, const char* message, bool newLine,

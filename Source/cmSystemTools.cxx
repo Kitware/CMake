@@ -1916,12 +1916,12 @@ bool cmSystemTools::CreateTar(const std::string& outFileName,
                               std::string const& format, int compressionLevel)
 {
 #if !defined(CMAKE_BOOTSTRAP)
-  cmWorkingDirectory workdir(cmSystemTools::GetCurrentWorkingDirectory());
+  cmWorkingDirectory workdir(cmSystemTools::GetLogicalWorkingDirectory());
   if (!workingDirectory.empty()) {
     workdir.SetDirectory(workingDirectory);
   }
 
-  const std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  const std::string cwd = cmSystemTools::GetLogicalWorkingDirectory();
   cmsys::ofstream fout(outFileName.c_str(), std::ios::out | std::ios::binary);
   if (!fout) {
     std::string e = cmStrCat("Cannot open output file \"", outFileName,
@@ -2555,6 +2555,24 @@ unsigned int cmSystemTools::RandomSeed()
 #endif
 }
 
+namespace {
+std::string InitLogicalWorkingDirectory()
+{
+  std::string cwd = cmsys::SystemTools::GetCurrentWorkingDirectory();
+  std::string pwd;
+  if (cmSystemTools::GetEnv("PWD", pwd)) {
+    std::string const pwd_real = cmSystemTools::GetRealPath(pwd);
+    if (pwd_real == cwd) {
+      cwd = std::move(pwd);
+    }
+  }
+  return cwd;
+}
+
+std::string cmSystemToolsLogicalWorkingDirectory =
+  InitLogicalWorkingDirectory();
+}
+
 static std::string cmSystemToolsCMakeCommand;
 static std::string cmSystemToolsCTestCommand;
 static std::string cmSystemToolsCPackCommand;
@@ -2779,10 +2797,18 @@ cm::optional<std::string> cmSystemTools::GetCMakeConfigDirectory()
   return config;
 }
 
-std::string cmSystemTools::GetCurrentWorkingDirectory()
+std::string const& cmSystemTools::GetLogicalWorkingDirectory()
 {
-  return cmSystemTools::ToNormalizedPathOnDisk(
-    cmsys::SystemTools::GetCurrentWorkingDirectory());
+  return cmSystemToolsLogicalWorkingDirectory;
+}
+
+cmsys::Status cmSystemTools::SetLogicalWorkingDirectory(std::string const& lwd)
+{
+  cmsys::Status status = cmSystemTools::ChangeDirectory(lwd);
+  if (status) {
+    cmSystemToolsLogicalWorkingDirectory = lwd;
+  }
+  return status;
 }
 
 void cmSystemTools::MakefileColorEcho(int color, const char* message,

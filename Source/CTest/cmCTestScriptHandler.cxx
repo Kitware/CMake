@@ -188,7 +188,7 @@ void cmCTestScriptHandler::CreateCMake()
     cm::make_unique<cmGlobalGenerator>(this->CMake.get());
 
   cmStateSnapshot snapshot = this->CMake->GetCurrentSnapshot();
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  std::string cwd = cmSystemTools::GetLogicalWorkingDirectory();
   snapshot.GetDirectory().SetCurrentSource(cwd);
   snapshot.GetDirectory().SetCurrentBinary(cwd);
   this->Makefile =

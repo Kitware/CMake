@@ -113,7 +113,7 @@ int main(int argc, char const* const* argv)
   log.SetOutputPrefix("CPack: ");
   log.SetVerbosePrefix("CPack Verbose: ");
 
-  if (cmSystemTools::GetCurrentWorkingDirectory().empty()) {
+  if (cmSystemTools::GetLogicalWorkingDirectory().empty()) {
     cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
                 "Current working directory cannot be established.\n");
     return 1;
@@ -255,7 +255,7 @@ int main(int argc, char const* const* argv)
 
   // Set up presets
   if (!preset.empty() || listPresets) {
-    const auto workingDirectory = cmSystemTools::GetCurrentWorkingDirectory();
+    const auto workingDirectory = cmSystemTools::GetLogicalWorkingDirectory();
 
     auto const presetGeneratorsPresent =
       [&generators](const cmCMakePresetsGraph::PackagePreset& p) {
@@ -350,7 +350,8 @@ int main(int argc, char const* const* argv)
       return 1;
     }
 
-    cmSystemTools::ChangeDirectory(expandedConfigurePreset->BinaryDir);
+    cmSystemTools::SetLogicalWorkingDirectory(
+      expandedConfigurePreset->BinaryDir);
 
     auto presetEnvironment = expandedPreset->Environment;
     for (auto const& var : presetEnvironment) {
@@ -408,7 +409,7 @@ int main(int argc, char const* const* argv)
   if (!cpackConfigFile.empty()) {
     cpackConfigFile = cmSystemTools::ToNormalizedPathOnDisk(cpackConfigFile);
   } else {
-    cpackConfigFile = cmStrCat(cmSystemTools::GetCurrentWorkingDirectory(),
+    cpackConfigFile = cmStrCat(cmSystemTools::GetLogicalWorkingDirectory(),
                                "/CPackConfig.cmake");
     cpackConfigFileSpecified = false;
   }
@@ -488,7 +489,7 @@ int main(int argc, char const* const* argv)
         cpackProjectDirectory = cmSystemTools::CollapseFullPath(*pd);
       } else {
         // Default to the current working directory.
-        cpackProjectDirectory = cmSystemTools::GetCurrentWorkingDirectory();
+        cpackProjectDirectory = cmSystemTools::GetLogicalWorkingDirectory();
       }
     }
     globalMF.AddDefinition("CPACK_PACKAGE_DIRECTORY", cpackProjectDirectory);

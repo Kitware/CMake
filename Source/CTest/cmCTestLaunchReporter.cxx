@@ -25,7 +25,7 @@ cmCTestLaunchReporter::cmCTestLaunchReporter()
   this->Passthru = true;
   this->Status.Finished = true;
   this->ExitCode = 1;
-  this->CWD = cmSystemTools::GetCurrentWorkingDirectory();
+  this->CWD = cmSystemTools::GetLogicalWorkingDirectory();
 
   this->ComputeFileNames();
 
