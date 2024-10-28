@@ -5,7 +5,7 @@
 ### Release
 
 .linux_prep_source:
-    image: "fedora:40"
+    image: "fedora:41"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
@@ -68,8 +68,8 @@
 
 ### Fedora
 
-.fedora40:
-    image: "kitware/cmake:ci-fedora40-x86_64-2024-07-23"
+.fedora41:
+    image: "kitware/cmake:ci-fedora41-x86_64-2024-10-23"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci/long file name for testing purposes"
@@ -85,36 +85,36 @@
 
 #### Lint builds
 
-.fedora40_tidy:
-    extends: .fedora40
+.fedora41_tidy:
+    extends: .fedora41
 
     variables:
-        CMAKE_CONFIGURATION: fedora40_tidy
+        CMAKE_CONFIGURATION: fedora41_tidy
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora40_clang_analyzer:
-    extends: .fedora40
+.fedora41_clang_analyzer:
+    extends: .fedora41
 
     variables:
-        CMAKE_CONFIGURATION: fedora40_clang_analyzer
+        CMAKE_CONFIGURATION: fedora41_clang_analyzer
         CMAKE_CI_BUILD_TYPE: Debug
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora40_sphinx:
-    extends: .fedora40
+.fedora41_sphinx:
+    extends: .fedora41
 
     variables:
-        CMAKE_CONFIGURATION: fedora40_sphinx
+        CMAKE_CONFIGURATION: fedora41_sphinx
         CTEST_NO_WARNINGS_ALLOWED: 1
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
         CMAKE_CI_NO_INSTALL: 1
 
-.fedora40_sphinx_package:
-    extends: .fedora40
+.fedora41_sphinx_package:
+    extends: .fedora41
 
     variables:
-        CMAKE_CONFIGURATION: fedora40_sphinx_package
+        CMAKE_CONFIGURATION: fedora41_sphinx_package
         CTEST_SOURCE_SUBDIRECTORY: "Utilities/Sphinx"
 
 #### Build and test
@@ -170,43 +170,43 @@
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora40_extdeps:
-    extends: .fedora40
+.fedora41_extdeps:
+    extends: .fedora41
 
     variables:
-        CMAKE_CONFIGURATION: fedora40_extdeps
+        CMAKE_CONFIGURATION: fedora41_extdeps
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora40_ninja:
-    extends: .fedora40
+.fedora41_ninja:
+    extends: .fedora41
 
     variables:
-        CMAKE_CONFIGURATION: fedora40_ninja
+        CMAKE_CONFIGURATION: fedora41_ninja
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.fedora40_ninja_multi:
-    extends: .fedora40
+.fedora41_ninja_multi:
+    extends: .fedora41
 
     variables:
-        CMAKE_CONFIGURATION: fedora40_ninja_multi
+        CMAKE_CONFIGURATION: fedora41_ninja_multi
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
-.fedora40_makefiles:
-    extends: .fedora40
+.fedora41_makefiles:
+    extends: .fedora41
 
     variables:
-        CMAKE_CONFIGURATION: fedora40_makefiles
+        CMAKE_CONFIGURATION: fedora41_makefiles
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
 
-.fedora40_makefiles_symlinked:
-    extends: .fedora40
+.fedora41_makefiles_symlinked:
+    extends: .fedora41
 
     variables:
-        CMAKE_CONFIGURATION: fedora40_makefiles_symlinked
+        CMAKE_CONFIGURATION: fedora41_makefiles_symlinked
         CTEST_NO_WARNINGS_ALLOWED: 1
         CMAKE_GENERATOR: "Unix Makefiles"
         CMAKE_CI_IN_SYMLINK_TREE: 1
@@ -227,43 +227,43 @@
     variables:
         CMAKE_CONFIGURATION: debian12_ninja_clang
 
-.fedora40_makefiles_clang:
-    extends: .fedora40
+.fedora41_makefiles_clang:
+    extends: .fedora41
 
     variables:
-        CMAKE_CONFIGURATION: fedora40_makefiles_clang
+        CMAKE_CONFIGURATION: fedora41_makefiles_clang
         CMAKE_GENERATOR: "Unix Makefiles"
 
-.fedora40_makefiles_lfortran:
-    extends: .fedora40
+.fedora41_makefiles_lfortran:
+    extends: .fedora41
 
     variables:
         # FIXME(lfortran): -rpath flags with spaces not forwarded
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
-        CMAKE_CONFIGURATION: fedora40_makefiles_lfortran
+        CMAKE_CONFIGURATION: fedora41_makefiles_lfortran
         CMAKE_GENERATOR: "Unix Makefiles"
         CTEST_LABELS: "Fortran"
 
-.fedora40_ninja_lfortran:
-    extends: .fedora40
+.fedora41_ninja_lfortran:
+    extends: .fedora41
 
     variables:
         # FIXME(lfortran): -rpath flags with spaces not forwarded
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
-        CMAKE_CONFIGURATION: fedora40_ninja_lfortran
+        CMAKE_CONFIGURATION: fedora41_ninja_lfortran
         CTEST_LABELS: "Fortran"
 
-.fedora40_ninja_clang:
-    extends: .fedora40
+.fedora41_ninja_clang:
+    extends: .fedora41
 
     variables:
-        CMAKE_CONFIGURATION: fedora40_ninja_clang
+        CMAKE_CONFIGURATION: fedora41_ninja_clang
 
-.fedora40_ninja_multi_clang:
-    extends: .fedora40
+.fedora41_ninja_multi_clang:
+    extends: .fedora41
 
     variables:
-        CMAKE_CONFIGURATION: fedora40_ninja_multi_clang
+        CMAKE_CONFIGURATION: fedora41_ninja_multi_clang
         CMAKE_GENERATOR: "Ninja Multi-Config"
 
 ### Sanitizers
@@ -279,13 +279,13 @@
         CTEST_MEMORYCHECK_TYPE: AddressSanitizer
         CTEST_MEMORYCHECK_SANITIZER_OPTIONS: ""
 
-.fedora40_asan:
+.fedora41_asan:
     extends:
-        - .fedora40
+        - .fedora41
         - .fedora_asan_addon
 
     variables:
-        CMAKE_CONFIGURATION: fedora40_asan
+        CMAKE_CONFIGURATION: fedora41_asan
 
 ### Intel Compiler
 
@@ -481,6 +481,13 @@
         - docker
         - linux-x86_64
 
+.linux_x86_64_v3_tags:
+    tags:
+        - cmake
+        - build
+        - docker
+        - linux-x86_64-v3
+
 .linux_x86_64_tags_x11:
     tags:
         - cmake
@@ -548,7 +555,7 @@
 
 .cmake_codespell_linux:
     stage: build
-    extends: .fedora40
+    extends: .fedora41
     script:
         - .gitlab/ci/codespell.sh
     interruptible: true
@@ -691,7 +698,7 @@
 .cmake_org_help:
     stage: build
     extends:
-        - .fedora40
+        - .fedora41
         - .linux_x86_64_tags
         - .cmake_org_help_artifacts
     script:
@@ -705,5 +712,3 @@
           -DCMake_SPHINX_CMAKE_ORG_OUTDATED=$CMAKE_CI_SPHINX_OUTDATED
           -DCMake_VERSION_NO_GIT=$CMAKE_CI_VERSION_NO_GIT
         - ninja
-        # FIXME(#25175): non-main index entries are scored too high.
-        - sed -i '/search for explicit entries in index directives/,/^$/d' html/_static/searchtools.js

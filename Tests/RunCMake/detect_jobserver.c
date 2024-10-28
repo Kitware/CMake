@@ -162,6 +162,7 @@ int main(int argc, char** argv)
 
   jobserver = jobserver_auth(message);
   if (jobserver == NULL) {
+    fclose(fp);
     fprintf(stderr, "%s\n", message);
     return 1;
   }
@@ -171,6 +172,7 @@ int main(int argc, char** argv)
 #else
   result = posix(jobserver, message);
 #endif
+  fclose(fp);
   free(jobserver);
   message[MAX_MESSAGE_LENGTH] = '\0';
 

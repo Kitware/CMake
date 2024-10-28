@@ -208,7 +208,10 @@ if (RunCMake_GENERATOR MATCHES "Make|Ninja")
   run_BuildDepends(LinkDependsCheck)
   include("${RunCMake_BINARY_DIR}/LinkDependsCheck-build/LinkDependsUseLinker.cmake")
   if ((NOT DEFINED CMAKE_LINK_DEPENDS_USE_LINKER OR CMAKE_LINK_DEPENDS_USE_LINKER)
-      AND CMAKE_C_LINK_DEPENDS_USE_LINKER)
+    AND CMAKE_C_LINK_DEPENDS_USE_LINKER
+    # FIXME(#26401): GNU binutils 2.43 broke dependency-file generation.
+    AND NOT (CMAKE_C_COMPILER_LINKER_ID STREQUAL "GNU" AND CMAKE_C_COMPILER_LINKER_VERSION VERSION_GREATER_EQUAL "2.43")
+    )
     run_BuildDepends(LinkDependsExternalLibrary)
     unset(run_BuildDepends_skip_step_2)
     run_BuildDepends(LinkDepends -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES})

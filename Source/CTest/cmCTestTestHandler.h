@@ -65,7 +65,7 @@ public:
    */
   void PopulateCustomVectors(cmMakefile* mf) override;
 
-  //! Control the use of the regular expresisons, call these methods to turn
+  //! Control the use of the regular expressions, call these methods to turn
   /// them on
   void UseIncludeRegExp();
   void UseExcludeRegExp();

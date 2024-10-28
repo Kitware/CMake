@@ -15,7 +15,9 @@ git clone "https://github.com/include-what-you-use/include-what-you-use.git"
 cd include-what-you-use
 readonly llvm_full_version="$( clang --version | head -n1 | cut -d' ' -f3 )"
 readonly llvm_version="$( echo "$llvm_full_version" | cut -d. -f-1 )"
-git checkout "clang_$llvm_version"
+#FIXME(IWYU): Create clang_19 branch.
+#git checkout "clang_$llvm_version"
+git checkout d2d092919f2774b5463e236e1ee9d56fb46ceb60 # 2024-10-05
 git apply <<EOF
 diff --git a/iwyu_driver.cc b/iwyu_driver.cc
 index dd4b046..cfd568a 100644

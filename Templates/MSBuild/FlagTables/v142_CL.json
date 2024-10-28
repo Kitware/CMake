@@ -1090,7 +1090,7 @@
   {
     "name": "GenerateModuleDependencies",
     "switch": "sourceDependencies:directives",
-    "comment": "Generate Module Dependenices File",
+    "comment": "Generate Module Dependencies File",
     "value": "true",
     "flags": [
       "Continue"

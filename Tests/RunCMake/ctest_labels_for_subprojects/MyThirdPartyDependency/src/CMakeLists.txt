@@ -3,8 +3,8 @@ project(MyThirdPartyDependency)
 
 include(CTest)
 
-add_executable(thirdparty thirdparty.c)
-add_test(NAME thirdparty COMMAND thirdparty)
+add_executable(third_party third_party.c)
+add_test(NAME third_party COMMAND third_party)
 
-set_property(TARGET thirdparty PROPERTY LABELS NotASubproject)
-set_property(TEST thirdparty PROPERTY LABELS NotASubproject)
+set_property(TARGET third_party PROPERTY LABELS NotASubproject)
+set_property(TEST third_party PROPERTY LABELS NotASubproject)
