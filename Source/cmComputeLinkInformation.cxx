@@ -568,12 +568,12 @@ bool cmComputeLinkInformation::Compute()
     return false;
   }
 
-  LinkLibrariesStrategy strategy = LinkLibrariesStrategy::PRESERVE_ORDER;
+  LinkLibrariesStrategy strategy = LinkLibrariesStrategy::REORDER_MINIMALLY;
   if (cmValue s = this->Target->GetProperty("LINK_LIBRARIES_STRATEGY")) {
-    if (*s == "PRESERVE_ORDER"_s) {
-      strategy = LinkLibrariesStrategy::PRESERVE_ORDER;
-    } else if (*s == "REORDER"_s) {
-      strategy = LinkLibrariesStrategy::REORDER;
+    if (*s == "REORDER_MINIMALLY"_s) {
+      strategy = LinkLibrariesStrategy::REORDER_MINIMALLY;
+    } else if (*s == "REORDER_FREELY"_s) {
+      strategy = LinkLibrariesStrategy::REORDER_FREELY;
     } else {
       this->CMakeInstance->IssueMessage(
         MessageType::FATAL_ERROR,
