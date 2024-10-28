@@ -40,10 +40,9 @@ inline int runTests(std::initializer_list<std::function<bool()>> const& tests,
         break;
       }
     }
-    std::cout << '.';
   }
-  if (!result) {
-    std::cout << " Passed\n";
+  if (result == 0) {
+    std::cout << "Passed\n";
   }
   return result;
 }
