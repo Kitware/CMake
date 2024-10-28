@@ -122,6 +122,9 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
 #else
   static_cast<void>(affinity);
 #endif
+#if UV_VERSION_MAJOR > 1 || !defined(CMAKE_USE_SYSTEM_LIBUV)
+  options.flags = UV_PROCESS_WINDOWS_USE_PARENT_ERROR_MODE;
+#endif
 
   status =
     uv_read_start(pipe_reader, &cmProcess::OnAllocateCB, &cmProcess::OnReadCB);

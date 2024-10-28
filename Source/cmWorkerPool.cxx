@@ -250,6 +250,9 @@ bool cmUVReadOnlyProcess::start(uv_loop_t* uv_loop,
     this->UVOptions_.args = const_cast<char**>(this->CommandPtr_.data());
     this->UVOptions_.cwd = this->Setup_.WorkingDirectory.c_str();
     this->UVOptions_.flags = UV_PROCESS_WINDOWS_HIDE;
+#if UV_VERSION_MAJOR > 1 || !defined(CMAKE_USE_SYSTEM_LIBUV)
+    this->UVOptions_.flags |= UV_PROCESS_WINDOWS_USE_PARENT_ERROR_MODE;
+#endif
     this->UVOptions_.stdio_count =
       static_cast<int>(this->UVOptionsStdIO_.size());
     this->UVOptions_.stdio = this->UVOptionsStdIO_.data();
