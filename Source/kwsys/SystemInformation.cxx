@@ -3405,8 +3405,9 @@ bool SystemInformationImplementation::RetrieveInformationFromCpuInfoFile()
   }
 
   size_t fileSize = 0;
-  while (!feof(fd)) {
-    buffer += static_cast<char>(fgetc(fd));
+  int fc;
+  while ((fc = fgetc(fd)) != EOF) {
+    buffer += static_cast<char>(fc);
     fileSize++;
   }
   fclose(fd);

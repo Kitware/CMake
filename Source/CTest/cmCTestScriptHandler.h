@@ -67,7 +67,7 @@ public:
   void AddConfigurationScript(const std::string&, bool pscope);
 
   /**
-   * Run a dashboard using a specified confiuration script
+   * Run a dashboard using a specified configuration script
    */
   int ProcessHandler() override;
 

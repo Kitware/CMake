@@ -2,6 +2,7 @@
 Checks: "-*,\
 bugprone-*,\
 -bugprone-assignment-in-if-condition,\
+-bugprone-crtp-constructor-accessibility,\
 -bugprone-easily-swappable-parameters,\
 -bugprone-empty-catch,\
 -bugprone-implicit-widening-of-multiplication-result,\
@@ -10,19 +11,23 @@ bugprone-*,\
 -bugprone-misplaced-widening-cast,\
 -bugprone-multi-level-implicit-pointer-conversion,\
 -bugprone-narrowing-conversions,\
+-bugprone-return-const-ref-from-parameter,\
+-bugprone-suspicious-stringview-data-usage,\
 -bugprone-switch-missing-default-case,\
 -bugprone-too-small-loop-variable,\
 -bugprone-unchecked-optional-access,\
 -bugprone-unused-local-non-trivial-variable,\
 -bugprone-unused-return-value,\
+-bugprone-use-after-move,\
 misc-*,\
 -misc-confusable-identifiers,\
 -misc-const-correctness,\
 -misc-include-cleaner,\
--misc-no-recursion,\
 -misc-non-private-member-variables-in-classes,\
+-misc-no-recursion,\
 -misc-static-assert,\
 -misc-use-anonymous-namespace,\
+-misc-use-internal-linkage,\
 modernize-*,\
 -modernize-avoid-c-arrays,\
 -modernize-macro-to-enum,\
@@ -36,13 +41,14 @@ modernize-*,\
 performance-*,\
 -performance-avoid-endl,\
 -performance-enum-size,\
--performance-inefficient-vector-operation,\
--performance-noexcept-swap,\
+-performance-unnecessary-copy-initialization,\
+-performance-unnecessary-value-param,\
 readability-*,\
 -readability-avoid-nested-conditional-operator,\
 -readability-avoid-return-with-void-value,\
 -readability-avoid-unconditional-preprocessor-if,\
 -readability-convert-member-functions-to-static,\
+-readability-enum-initial-value,\
 -readability-function-cognitive-complexity,\
 -readability-function-size,\
 -readability-identifier-length,\
@@ -51,6 +57,7 @@ readability-*,\
 -readability-inconsistent-declaration-parameter-name,\
 -readability-magic-numbers,\
 -readability-make-member-function-const,\
+-readability-math-missing-parentheses,\
 -readability-named-parameter,\
 -readability-redundant-casting,\
 -readability-redundant-declaration,\
@@ -61,6 +68,7 @@ readability-*,\
 -readability-static-accessed-through-instance,\
 -readability-suspicious-call-argument,\
 -readability-uppercase-literal-suffix,\
+-readability-use-std-min-max,\
 cmake-*,\
 -cmake-ostringstream-use-cmstrcat,\
 -cmake-string-concatenation-use-cmstrcat,\

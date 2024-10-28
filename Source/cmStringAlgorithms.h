@@ -146,7 +146,7 @@ public:
   {
   }
   cmAlphaNum(const char* str)
-    : View_(str)
+    : View_(str ? cm::string_view(str) : cm::string_view())
   {
   }
   cmAlphaNum(char ch)

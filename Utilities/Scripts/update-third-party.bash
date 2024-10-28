@@ -25,7 +25,7 @@
 #   ownership
 #       A git author name/email for the commits.
 #   subtree
-#       The location of the thirdparty package within the main source
+#       The location of the third-party package within the main source
 #       tree.
 #   repo
 #       The git repository to use as upstream.
