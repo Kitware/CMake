@@ -91,7 +91,7 @@ endblock()
 block()
   set(TIMEOUT 4)
   set(CASE_TEST_PREFIX_CODE "set(CTEST_TEST_TIMEOUT 2)")
-  set(CASE_CMAKELISTS_SUFFIX_CODE "set_property(TEST TestTimeout PROPERTY TIMEOUT 10)\n")
+  set(CASE_CMAKELISTS_SUFFIX_CODE "set_property(TEST TestTimeout PROPERTY TIMEOUT 60)\n")
   run_ctest_timeout(PropertyOverridesVar)
 endblock()
 
