@@ -253,3 +253,7 @@ Other Changes
   :variable:`<PROJECT-NAME>_SOURCE_DIR`, :variable:`<PROJECT-NAME>_BINARY_DIR`,
   and :variable:`<PROJECT-NAME>_IS_TOP_LEVEL` as both normal variables and
   cache entries.  See policy :policy:`CMP0180`.
+
+* The :command:`cmake_parse_arguments(PARSE_ARGV)` command now defines a
+  variable for an empty string after a single-value keyword. See policy
+  :policy:`CMP0174`.
