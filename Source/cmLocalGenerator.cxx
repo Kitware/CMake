@@ -1604,17 +1604,19 @@ void cmLocalGenerator::GetTargetFlags(
         }
       }
 
-      std::string exeFlags;
-      if (target->IsWin32Executable(config)) {
-        exeFlags += this->Makefile->GetSafeDefinition(
-          cmStrCat("CMAKE_", linkLanguage, "_CREATE_WIN32_EXE"));
-        exeFlags += " ";
-      } else {
-        exeFlags += this->Makefile->GetSafeDefinition(
-          cmStrCat("CMAKE_", linkLanguage, "_CREATE_CONSOLE_EXE"));
-        exeFlags += " ";
+      {
+        auto exeType = cmStrCat(
+          "CMAKE_", linkLanguage, "_CREATE_",
+          (target->IsWin32Executable(config) ? "WIN32" : "CONSOLE"), "_EXE");
+        std::string exeFlags;
+        this->AppendFlags(exeFlags, this->Makefile->GetDefinition(exeType),
+                          exeType, target, cmBuildStep::Link, linkLanguage);
+        if (!exeFlags.empty()) {
+          linkFlags.emplace_back(std::move(exeFlags));
+        }
       }
 
+      std::string exeFlags;
       if (target->IsExecutableWithExports()) {
         exeFlags += this->Makefile->GetSafeDefinition(
           cmStrCat("CMAKE_EXE_EXPORTS_", linkLanguage, "_FLAG"));

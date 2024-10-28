@@ -46,6 +46,14 @@ if (RunCMake_GENERATOR MATCHES "Makefiles|Ninja|Xcode|Visual Studio"
         run_cmake_target(LINKER_expansion3-CMP0181-${policy} C_SHARED_CREATE_LINK_FLAGS c_shared_create_link_flags --verbose)
         run_cmake_target(LINKER_expansion3-CMP0181-${policy} C_MODULE_CREATE_LINK_FLAGS c_module_create_link_flags --verbose)
       endif()
+
+      if (CMAKE_SYSTEM_NAME MATCHES "Windows")
+        set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/LINKER_expansion4-CMP0181-${policy}-build)
+        run_cmake_with_options(LINKER_expansion4 -DCMP0181=${policy})
+
+        run_cmake_target(LINKER_expansion4-CMP0181-${policy} C_CREATE_WIN32_EXE c_create_win32_exe --verbose)
+        run_cmake_target(LINKER_expansion4-CMP0181-${policy} C_CREATE_CONSOLE_EXE c_create_console_exe --verbose)
+      endif()
     endif()
   endforeach()
 endif()

@@ -375,17 +375,17 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     linkFlags, "CMAKE_EXE_LINKER_FLAGS", this->GeneratorTarget,
     cmBuildStep::Link, linkLanguage, this->GetConfigName());
 
-  if (this->GeneratorTarget->IsWin32Executable(
-        this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"))) {
+  {
+    auto exeType =
+      cmStrCat("CMAKE_", linkLanguage, "_CREATE_",
+               (this->GeneratorTarget->IsWin32Executable(
+                  this->Makefile->GetDefinition("CMAKE_BUILD_TYPE"))
+                  ? "WIN32"
+                  : "CONSOLE"),
+               "_EXE");
     this->LocalGenerator->AppendFlags(
-      linkFlags,
-      this->Makefile->GetSafeDefinition(
-        cmStrCat("CMAKE_", linkLanguage, "_CREATE_WIN32_EXE")));
-  } else {
-    this->LocalGenerator->AppendFlags(
-      linkFlags,
-      this->Makefile->GetSafeDefinition(
-        cmStrCat("CMAKE_", linkLanguage, "_CREATE_CONSOLE_EXE")));
+      linkFlags, this->Makefile->GetDefinition(exeType), exeType,
+      this->GeneratorTarget, cmBuildStep::Link, linkLanguage);
   }
 
   // Add symbol export flags if necessary.
