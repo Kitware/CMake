@@ -11,9 +11,9 @@ shared object ``.so`` files for consistency with other UNIX platforms.
 Alternatively, set this property to a true value to create a shared
 library archive instead, as is AIX convention.
 
-When a shared library is archived the shared object in the archive
-does not record any version information from :prop_tgt:`VERSION` or
-:prop_tgt`SOVERSION` target properties.
+The shared object name in the archive encodes version information from
+the :prop_tgt:`SOVERSION` target property, if set, and otherwise from
+the :prop_tgt:`VERSION` target property, if set.
 
 This property defaults to :variable:`CMAKE_AIX_SHARED_LIBRARY_ARCHIVE`
 if that variable is set when a ``SHARED`` library target is created
