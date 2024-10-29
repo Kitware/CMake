@@ -666,14 +666,14 @@ int kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
   if (dir && dir[0]) {
     wchar_t* wdir = kwsysEncoding_DupToWide(dir);
     /* We must convert the working directory to a full path.  */
-    DWORD length = GetFullPathNameW(wdir, 0, 0, 0);
+    DWORD length = GetFullPathNameW(wdir, 0, NULL, NULL);
     if (length > 0) {
       wchar_t* work_dir = malloc(length * sizeof(wchar_t));
       if (!work_dir) {
         free(wdir);
         return 0;
       }
-      if (!GetFullPathNameW(wdir, length, work_dir, 0)) {
+      if (!GetFullPathNameW(wdir, length, work_dir, NULL)) {
         free(work_dir);
         free(wdir);
         return 0;
