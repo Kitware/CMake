@@ -6,7 +6,6 @@
 #include <set>
 #include <utility>
 
-#include <cm/optional>
 #include <cm/string_view>
 
 #include "cmArgumentParser.h"
@@ -43,7 +42,7 @@ std::string JoinList(std::vector<std::string> const& arg, bool escape)
 }
 
 using options_map = std::map<std::string, bool>;
-using single_map = std::map<std::string, cm::optional<std::string>>;
+using single_map = std::map<std::string, std::string>;
 using multi_map =
   std::map<std::string, ArgumentParser::NonEmpty<std::vector<std::string>>>;
 using options_set = std::set<cm::string_view>;
@@ -76,7 +75,7 @@ struct UserArgumentParser : public cmArgumentParser<void>
 static void PassParsedArguments(
   const std::string& prefix, cmMakefile& makefile, const options_map& options,
   const single_map& singleValArgs, const multi_map& multiValArgs,
-  const std::vector<std::string>& unparsed,
+  const std::vector<std::string>& unparsed, const options_set& keywordsSeen,
   const options_set& keywordsMissingValues, bool parseFromArgV)
 {
   for (auto const& iter : options) {
@@ -87,29 +86,26 @@ static void PassParsedArguments(
   const cmPolicies::PolicyStatus cmp0174 =
     makefile.GetPolicyStatus(cmPolicies::CMP0174);
   for (auto const& iter : singleValArgs) {
-    if (iter.second.has_value()) {
-      // So far, we only know that the keyword was given, not whether a value
-      // was provided after the keyword
-      if (keywordsMissingValues.find(iter.first) ==
-          keywordsMissingValues.end()) {
-        // A (possibly empty) value was given
-        if (cmp0174 == cmPolicies::NEW || !iter.second->empty()) {
-          makefile.AddDefinition(cmStrCat(prefix, iter.first), *iter.second);
-          continue;
-        }
-        if (cmp0174 == cmPolicies::WARN) {
-          makefile.IssueMessage(
-            MessageType::AUTHOR_WARNING,
-            cmStrCat("An empty string was given as the value after the ",
-                     iter.first,
-                     " keyword. Policy CMP0174 is not set, so "
-                     "cmake_parse_arguments() will unset the ",
-                     prefix, iter.first,
-                     " variable rather than setting it to an empty string."));
-        }
+    if (keywordsSeen.find(iter.first) == keywordsSeen.end()) {
+      makefile.RemoveDefinition(cmStrCat(prefix, iter.first));
+    } else if ((parseFromArgV && cmp0174 == cmPolicies::NEW) ||
+               !iter.second.empty()) {
+      makefile.AddDefinition(cmStrCat(prefix, iter.first), iter.second);
+    } else {
+      // The OLD policy behavior doesn't define a variable for an empty or
+      // missing value, and we can't differentiate between those two cases.
+      if (parseFromArgV && (cmp0174 == cmPolicies::WARN)) {
+        makefile.IssueMessage(
+          MessageType::AUTHOR_WARNING,
+          cmStrCat("The ", iter.first,
+                   " keyword was followed by an empty string or no value at "
+                   "all. Policy CMP0174 is not set, so "
+                   "cmake_parse_arguments() will unset the ",
+                   prefix, iter.first,
+                   " variable rather than setting it to an empty string."));
       }
+      makefile.RemoveDefinition(cmStrCat(prefix, iter.first));
     }
-    makefile.RemoveDefinition(prefix + iter.first);
   }
 
   for (auto const& iter : multiValArgs) {
@@ -237,6 +233,14 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
     }
   }
 
+  std::vector<cm::string_view> keywordsSeen;
+  parser.BindParsedKeywords(keywordsSeen);
+
+  // For single-value keywords, only the last instance matters, since it
+  // determines the value stored. But if a keyword is repeated, it will be
+  // added to this vector if _any_ instance is missing a value. If one of the
+  // earlier instances is missing a value but the last one isn't, its presence
+  // in this vector will be misleading.
   std::vector<cm::string_view> keywordsMissingValues;
   parser.BindKeywordsMissingValue(keywordsMissingValues);
 
@@ -244,7 +248,7 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
 
   PassParsedArguments(
     prefix, status.GetMakefile(), options, singleValArgs, multiValArgs,
-    unparsed,
+    unparsed, options_set(keywordsSeen.begin(), keywordsSeen.end()),
     options_set(keywordsMissingValues.begin(), keywordsMissingValues.end()),
     parseFromArgV);
 
