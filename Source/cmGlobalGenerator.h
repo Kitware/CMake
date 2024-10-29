@@ -675,6 +675,8 @@ public:
   bool CheckCMP0171() const;
 
   void AddInstallScript(std::string const& file);
+  void AddTestFile(std::string const& file);
+  void AddCMakeFilesToRebuild(std::vector<std::string>& files) const;
 
 protected:
   // for a project collect all its targets by following depend
@@ -916,6 +918,7 @@ private:
     RuntimeDependencySetsByName;
 
   std::vector<std::string> InstallScripts;
+  std::vector<std::string> TestFiles;
 
 #if !defined(CMAKE_BOOTSTRAP)
   // Pool of file locks

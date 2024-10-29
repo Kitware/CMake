@@ -366,6 +366,7 @@ void cmLocalGenerator::GenerateTestFiles()
   std::string file =
     cmStrCat(this->StateSnapshot.GetDirectory().GetCurrentBinary(),
              "/CTestTestfile.cmake");
+  this->GlobalGenerator->AddTestFile(file);
 
   cmGeneratedFileStream fout(file);
 
