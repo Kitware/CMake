@@ -368,7 +368,6 @@ void cmLocalGenerator::GenerateTestFiles()
              "/CTestTestfile.cmake");
 
   cmGeneratedFileStream fout(file);
-  fout.SetCopyIfDifferent(true);
 
   fout << "# CMake generated Testfile for \n"
           "# Source directory: "
@@ -552,7 +551,6 @@ void cmLocalGenerator::GenerateInstallRules()
   file += "/cmake_install.cmake";
   this->GetGlobalGenerator()->AddInstallScript(file);
   cmGeneratedFileStream fout(file);
-  fout.SetCopyIfDifferent(true);
 
   // Write the header.
   /* clang-format off */
