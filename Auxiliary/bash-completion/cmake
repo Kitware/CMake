@@ -201,6 +201,24 @@ _cmake()
             COMPREPLY=( $( compgen -W "$presets" -- "$quoted" ) )
             return
             ;;
+        --workflow)
+            local quoted
+            printf -v quoted %q "$cur"
+            # Options allowed right after `--workflow`
+            local workflow_options='--preset --list-presets --fresh'
+
+            if [[ "$cur" == -* ]]; then
+                COMPREPLY=( $( compgen -W "$workflow_options" -- "$quoted" ) )
+            else
+                local presets=$( cmake --list-presets=workflow 2>/dev/null |
+                    grep -o "^  \".*\"" | sed \
+                    -e "s/^  //g" \
+                    -e "s/\"//g" \
+                    -e 's/ /\\\\ /g' )
+                COMPREPLY=( $( compgen -W "$presets $workflow_options" -- "$quoted" ) )
+            fi
+            return
+            ;;
     esac
 
     if  ($is_old_completion || $is_init_completion); then
