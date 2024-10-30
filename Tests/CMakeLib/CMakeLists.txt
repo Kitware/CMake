@@ -23,6 +23,7 @@ set(CMakeLib_TESTS
   testRST.cxx
   testRange.cxx
   testOptional.cxx
+  testPathResolver.cxx
   testString.cxx
   testStringAlgorithms.cxx
   testSystemTools.cxx

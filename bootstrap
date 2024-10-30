@@ -459,6 +459,7 @@ CMAKE_CXX_SOURCES="\
   cmOutputConverter \
   cmParseArgumentsCommand \
   cmPathLabel \
+  cmPathResolver \
   cmPolicies \
   cmProcessOutput \
   cmProjectCommand \
