@@ -31,6 +31,7 @@
 #include "cmDuration.h"
 #include "cmELF.h"
 #include "cmMessageMetadata.h"
+#include "cmPathResolver.h"
 #include "cmProcessOutput.h"
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
@@ -127,6 +128,97 @@ cmSystemTools::InterruptCallback s_InterruptCallback;
 cmSystemTools::MessageCallback s_MessageCallback;
 cmSystemTools::OutputCallback s_StderrCallback;
 cmSystemTools::OutputCallback s_StdoutCallback;
+
+#ifdef _WIN32
+std::string GetDosDriveWorkingDirectory(char letter)
+{
+  // The Windows command processor tracks a per-drive working
+  // directory for compatibility with MS-DOS by using special
+  // environment variables named "=C:".
+  // https://web.archive.org/web/20100522040616/
+  // https://blogs.msdn.com/oldnewthing/archive/2010/05/06/10008132.aspx
+  return cmSystemTools::GetEnvVar(cmStrCat('=', letter, ':'))
+    .value_or(std::string());
+}
+
+cmsys::Status ReadNameOnDisk(std::string const& path, std::string& name)
+{
+  std::wstring wp = cmsys::Encoding::ToWide(path);
+  HANDLE h = CreateFileW(
+    wp.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING,
+    FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS, nullptr);
+  if (h == INVALID_HANDLE_VALUE) {
+    return cmsys::Status::Windows_GetLastError();
+  }
+
+  WCHAR local_fni[((sizeof(FILE_NAME_INFO) - 1) / sizeof(WCHAR)) + 1024];
+  size_t fni_size = sizeof(local_fni);
+  auto* fni = reinterpret_cast<FILE_NAME_INFO*>(local_fni);
+  if (!GetFileInformationByHandleEx(h, FileNameInfo, fni, fni_size)) {
+    DWORD e = GetLastError();
+    if (e != ERROR_MORE_DATA) {
+      CloseHandle(h);
+      return cmsys::Status::Windows(e);
+    }
+    fni_size = fni->FileNameLength;
+    fni = static_cast<FILE_NAME_INFO*>(malloc(fni_size));
+    if (!fni) {
+      e = ERROR_NOT_ENOUGH_MEMORY;
+      CloseHandle(h);
+      return cmsys::Status::Windows(e);
+    }
+    if (!GetFileInformationByHandleEx(h, FileNameInfo, fni, fni_size)) {
+      e = GetLastError();
+      free(fni);
+      CloseHandle(h);
+      return cmsys::Status::Windows(e);
+    }
+  }
+
+  std::wstring wn{ fni->FileName, fni->FileNameLength / sizeof(WCHAR) };
+  std::string nn = cmsys::Encoding::ToNarrow(wn);
+  std::string::size_type last_slash = nn.find_last_of("/\\");
+  if (last_slash != std::string::npos) {
+    name = nn.substr(last_slash + 1);
+  }
+  if (fni != reinterpret_cast<FILE_NAME_INFO*>(local_fni)) {
+    free(fni);
+  }
+  CloseHandle(h);
+  return cmsys::Status::Success();
+}
+#endif
+
+class RealSystem : public cm::PathResolver::System
+{
+public:
+  ~RealSystem() override = default;
+  cmsys::Status ReadSymlink(std::string const& path,
+                            std::string& link) override
+  {
+    return cmSystemTools::ReadSymlink(path, link);
+  }
+  bool PathExists(std::string const& path) override
+  {
+    return cmSystemTools::PathExists(path);
+  }
+  std::string GetWorkingDirectory() override
+  {
+    return cmSystemTools::GetLogicalWorkingDirectory();
+  }
+#ifdef _WIN32
+  std::string GetWorkingDirectoryOnDrive(char letter) override
+  {
+    return GetDosDriveWorkingDirectory(letter);
+  }
+  cmsys::Status ReadName(std::string const& path, std::string& name) override
+  {
+    return ReadNameOnDisk(path, name);
+  }
+#endif
+};
+
+RealSystem RealOS;
 
 } // namespace
 
@@ -1662,11 +1754,10 @@ std::vector<std::string> cmSystemTools::SplitEnvPathNormalized(
 
 std::string cmSystemTools::ToNormalizedPathOnDisk(std::string p)
 {
-  p = cmSystemTools::CollapseFullPath(p);
-  cmSystemTools::ConvertToUnixSlashes(p);
-#ifdef _WIN32
-  p = cmSystemTools::GetActualCaseForPathCached(p);
-#endif
+  using namespace cm::PathResolver;
+  // IWYU pragma: no_forward_declare cm::PathResolver::Policies::LogicalPath
+  static const Resolver<Policies::LogicalPath> resolver(RealOS);
+  resolver.Resolve(std::move(p), p);
   return p;
 }
 
