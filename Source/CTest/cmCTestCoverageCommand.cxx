@@ -14,6 +14,8 @@
 #include "cmCTestGenericHandler.h"
 #include "cmCommand.h"
 
+class cmMakefile;
+
 std::unique_ptr<cmCommand> cmCTestCoverageCommand::Clone()
 {
   auto ni = cm::make_unique<cmCTestCoverageCommand>();
@@ -24,12 +26,12 @@ std::unique_ptr<cmCommand> cmCTestCoverageCommand::Clone()
 std::unique_ptr<cmCTestGenericHandler>
 cmCTestCoverageCommand::InitializeHandler(HandlerArguments& arguments)
 {
+  cmMakefile& mf = *this->Makefile;
   auto& args = static_cast<CoverageArguments&>(arguments);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "CoverageCommand", "CTEST_COVERAGE_COMMAND", args.Quiet);
+    &mf, "CoverageCommand", "CTEST_COVERAGE_COMMAND", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "CoverageExtraFlags", "CTEST_COVERAGE_EXTRA_FLAGS",
-    args.Quiet);
+    &mf, "CoverageExtraFlags", "CTEST_COVERAGE_EXTRA_FLAGS", args.Quiet);
   auto handler = cm::make_unique<cmCTestCoverageHandler>(this->CTest);
 
   // If a LABELS option was given, select only files with the labels.

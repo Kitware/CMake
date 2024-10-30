@@ -29,13 +29,14 @@ std::unique_ptr<cmCommand> cmCTestUploadCommand::Clone()
 
 void cmCTestUploadCommand::CheckArguments(HandlerArguments& arguments)
 {
+  cmMakefile& mf = *this->Makefile;
   auto& args = static_cast<UploadArguments&>(arguments);
-  cm::erase_if(args.Files, [this](std::string const& arg) -> bool {
+  cm::erase_if(args.Files, [&mf](std::string const& arg) -> bool {
     if (!cmSystemTools::FileExists(arg)) {
       std::ostringstream e;
       e << "File \"" << arg << "\" does not exist. Cannot submit "
         << "a non-existent file.";
-      this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+      mf.IssueMessage(MessageType::FATAL_ERROR, e.str());
       return true;
     }
     return false;

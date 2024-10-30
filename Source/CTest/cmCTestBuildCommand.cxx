@@ -51,17 +51,16 @@ bool cmCTestBuildCommand::InitialPass(std::vector<std::string> const& args,
 std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
   HandlerArguments& arguments)
 {
+  cmMakefile& mf = *this->Makefile;
   auto const& args = static_cast<BuildArguments&>(arguments);
   auto handler = cm::make_unique<cmCTestBuildHandler>(this->CTest);
 
-  cmValue ctestBuildCommand =
-    this->Makefile->GetDefinition("CTEST_BUILD_COMMAND");
+  cmValue ctestBuildCommand = mf.GetDefinition("CTEST_BUILD_COMMAND");
   if (cmNonempty(ctestBuildCommand)) {
     this->CTest->SetCTestConfiguration("MakeCommand", *ctestBuildCommand,
                                        args.Quiet);
   } else {
-    cmValue cmakeGeneratorName =
-      this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR");
+    cmValue cmakeGeneratorName = mf.GetDefinition("CTEST_CMAKE_GENERATOR");
 
     // Build configuration is determined by: CONFIGURATION argument,
     // or CTEST_BUILD_CONFIGURATION script variable, or
@@ -69,7 +68,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
     // line argument... in that order.
     //
     cmValue ctestBuildConfiguration =
-      this->Makefile->GetDefinition("CTEST_BUILD_CONFIGURATION");
+      mf.GetDefinition("CTEST_BUILD_CONFIGURATION");
     std::string cmakeBuildConfiguration = cmNonempty(args.Configuration)
       ? args.Configuration
       : cmNonempty(ctestBuildConfiguration) ? *ctestBuildConfiguration
@@ -77,10 +76,10 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
 
     const std::string& cmakeBuildAdditionalFlags = cmNonempty(args.Flags)
       ? args.Flags
-      : this->Makefile->GetSafeDefinition("CTEST_BUILD_FLAGS");
+      : mf.GetSafeDefinition("CTEST_BUILD_FLAGS");
     const std::string& cmakeBuildTarget = cmNonempty(args.Target)
       ? args.Target
-      : this->Makefile->GetSafeDefinition("CTEST_BUILD_TARGET");
+      : mf.GetSafeDefinition("CTEST_BUILD_TARGET");
 
     if (cmNonempty(cmakeGeneratorName)) {
       if (cmakeBuildConfiguration.empty()) {
@@ -88,12 +87,11 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
       }
 
       auto globalGenerator =
-        this->Makefile->GetCMakeInstance()->CreateGlobalGenerator(
-          *cmakeGeneratorName);
+        mf.GetCMakeInstance()->CreateGlobalGenerator(*cmakeGeneratorName);
       if (!globalGenerator) {
         std::string e = cmStrCat("could not create generator named \"",
                                  *cmakeGeneratorName, '"');
-        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e);
+        mf.IssueMessage(MessageType::FATAL_ERROR, e);
         cmSystemTools::SetFatalErrorOccurred();
         return nullptr;
       }
@@ -104,7 +102,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
       std::string dir = this->CTest->GetCTestConfiguration("BuildDirectory");
       std::string buildCommand = globalGenerator->GenerateCMakeBuildCommand(
         cmakeBuildTarget, cmakeBuildConfiguration, args.ParallelLevel,
-        cmakeBuildAdditionalFlags, this->Makefile->IgnoreErrorsCMP0061());
+        cmakeBuildAdditionalFlags, mf.IgnoreErrorsCMP0061());
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                          "SetMakeCommand:" << buildCommand << "\n",
                          args.Quiet);
@@ -123,14 +121,13 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
     }
   }
 
-  if (cmValue useLaunchers =
-        this->Makefile->GetDefinition("CTEST_USE_LAUNCHERS")) {
+  if (cmValue useLaunchers = mf.GetDefinition("CTEST_USE_LAUNCHERS")) {
     this->CTest->SetCTestConfiguration("UseLaunchers", *useLaunchers,
                                        args.Quiet);
   }
 
   if (cmValue labelsForSubprojects =
-        this->Makefile->GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
+        mf.GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
     this->CTest->SetCTestConfiguration("LabelsForSubprojects",
                                        *labelsForSubprojects, args.Quiet);
   }
@@ -142,14 +139,15 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
 void cmCTestBuildCommand::ProcessAdditionalValues(
   cmCTestGenericHandler* generic, HandlerArguments const& arguments)
 {
+  cmMakefile& mf = *this->Makefile;
   auto const& args = static_cast<BuildArguments const&>(arguments);
   auto const* handler = static_cast<cmCTestBuildHandler*>(generic);
   if (!args.NumberErrors.empty()) {
-    this->Makefile->AddDefinition(args.NumberErrors,
-                                  std::to_string(handler->GetTotalErrors()));
+    mf.AddDefinition(args.NumberErrors,
+                     std::to_string(handler->GetTotalErrors()));
   }
   if (!args.NumberWarnings.empty()) {
-    this->Makefile->AddDefinition(args.NumberWarnings,
-                                  std::to_string(handler->GetTotalWarnings()));
+    mf.AddDefinition(args.NumberWarnings,
+                     std::to_string(handler->GetTotalWarnings()));
   }
 }

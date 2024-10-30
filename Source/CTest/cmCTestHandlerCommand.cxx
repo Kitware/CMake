@@ -116,9 +116,11 @@ bool cmCTestHandlerCommand::InvokeImpl(
   return true;
 }
 
-bool cmCTestHandlerCommand::ExecuteHandlerCommand(
-  HandlerArguments& args, cmExecutionStatus& /*status*/)
+bool cmCTestHandlerCommand::ExecuteHandlerCommand(HandlerArguments& args,
+                                                  cmExecutionStatus& status)
 {
+  cmMakefile& mf = status.GetMakefile();
+
   // Process input arguments.
   this->CheckArguments(args);
 
@@ -126,8 +128,7 @@ bool cmCTestHandlerCommand::ExecuteHandlerCommand(
   // CTEST_CONFIGURATION_TYPE script variable if it is defined.
   // The current script value trumps the -C argument on the command
   // line.
-  cmValue ctestConfigType =
-    this->Makefile->GetDefinition("CTEST_CONFIGURATION_TYPE");
+  cmValue ctestConfigType = mf.GetDefinition("CTEST_CONFIGURATION_TYPE");
   if (ctestConfigType) {
     this->CTest->SetConfigType(*ctestConfigType);
   }
@@ -137,8 +138,7 @@ bool cmCTestHandlerCommand::ExecuteHandlerCommand(
       "BuildDirectory", cmSystemTools::CollapseFullPath(args.Build),
       args.Quiet);
   } else {
-    std::string const& bdir =
-      this->Makefile->GetSafeDefinition("CTEST_BINARY_DIRECTORY");
+    std::string const& bdir = mf.GetSafeDefinition("CTEST_BINARY_DIRECTORY");
     if (!bdir.empty()) {
       this->CTest->SetCTestConfiguration(
         "BuildDirectory", cmSystemTools::CollapseFullPath(bdir), args.Quiet);
@@ -157,11 +157,11 @@ bool cmCTestHandlerCommand::ExecuteHandlerCommand(
     this->CTest->SetCTestConfiguration(
       "SourceDirectory",
       cmSystemTools::CollapseFullPath(
-        this->Makefile->GetSafeDefinition("CTEST_SOURCE_DIRECTORY")),
+        mf.GetSafeDefinition("CTEST_SOURCE_DIRECTORY")),
       args.Quiet);
   }
 
-  if (cmValue changeId = this->Makefile->GetDefinition("CTEST_CHANGE_ID")) {
+  if (cmValue changeId = mf.GetDefinition("CTEST_CHANGE_ID")) {
     this->CTest->SetCTestConfiguration("ChangeId", *changeId, args.Quiet);
   }
 
@@ -176,7 +176,7 @@ bool cmCTestHandlerCommand::ExecuteHandlerCommand(
 
   handler->SetAppendXML(args.Append);
 
-  handler->PopulateCustomVectors(this->Makefile);
+  handler->PopulateCustomVectors(&mf);
   if (!args.SubmitIndex.empty()) {
     handler->SetSubmitIndex(atoi(args.SubmitIndex.c_str()));
   }
@@ -188,12 +188,12 @@ bool cmCTestHandlerCommand::ExecuteHandlerCommand(
   }
 
   // reread time limit, as the variable may have been modified.
-  this->CTest->SetTimeLimit(this->Makefile->GetDefinition("CTEST_TIME_LIMIT"));
-  handler->SetCMakeInstance(this->Makefile->GetCMakeInstance());
+  this->CTest->SetTimeLimit(mf.GetDefinition("CTEST_TIME_LIMIT"));
+  handler->SetCMakeInstance(mf.GetCMakeInstance());
 
   int res = handler->ProcessHandler();
   if (!args.ReturnValue.empty()) {
-    this->Makefile->AddDefinition(args.ReturnValue, std::to_string(res));
+    mf.AddDefinition(args.ReturnValue, std::to_string(res));
   }
   this->ProcessAdditionalValues(handler.get(), args);
   return true;

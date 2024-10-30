@@ -23,6 +23,7 @@ std::unique_ptr<cmCommand> cmCTestUpdateCommand::Clone()
 std::unique_ptr<cmCTestGenericHandler> cmCTestUpdateCommand::InitializeHandler(
   HandlerArguments& args)
 {
+  cmMakefile& mf = *this->Makefile;
   if (!args.Source.empty()) {
     this->CTest->SetCTestConfiguration(
       "SourceDirectory", cmSystemTools::CollapseFullPath(args.Source),
@@ -31,61 +32,54 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestUpdateCommand::InitializeHandler(
     this->CTest->SetCTestConfiguration(
       "SourceDirectory",
       cmSystemTools::CollapseFullPath(
-        this->Makefile->GetSafeDefinition("CTEST_SOURCE_DIRECTORY")),
+        mf.GetSafeDefinition("CTEST_SOURCE_DIRECTORY")),
       args.Quiet);
   }
   std::string source_dir =
     this->CTest->GetCTestConfiguration("SourceDirectory");
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "UpdateCommand", "CTEST_UPDATE_COMMAND", args.Quiet);
+    &mf, "UpdateCommand", "CTEST_UPDATE_COMMAND", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "UpdateOptions", "CTEST_UPDATE_OPTIONS", args.Quiet);
+    &mf, "UpdateOptions", "CTEST_UPDATE_OPTIONS", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "CVSCommand", "CTEST_CVS_COMMAND", args.Quiet);
+    &mf, "CVSCommand", "CTEST_CVS_COMMAND", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "CVSUpdateOptions", "CTEST_CVS_UPDATE_OPTIONS",
-    args.Quiet);
+    &mf, "CVSUpdateOptions", "CTEST_CVS_UPDATE_OPTIONS", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "SVNCommand", "CTEST_SVN_COMMAND", args.Quiet);
+    &mf, "SVNCommand", "CTEST_SVN_COMMAND", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "SVNUpdateOptions", "CTEST_SVN_UPDATE_OPTIONS",
-    args.Quiet);
+    &mf, "SVNUpdateOptions", "CTEST_SVN_UPDATE_OPTIONS", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "SVNOptions", "CTEST_SVN_OPTIONS", args.Quiet);
+    &mf, "SVNOptions", "CTEST_SVN_OPTIONS", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "BZRCommand", "CTEST_BZR_COMMAND", args.Quiet);
+    &mf, "BZRCommand", "CTEST_BZR_COMMAND", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "BZRUpdateOptions", "CTEST_BZR_UPDATE_OPTIONS",
-    args.Quiet);
+    &mf, "BZRUpdateOptions", "CTEST_BZR_UPDATE_OPTIONS", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "GITCommand", "CTEST_GIT_COMMAND", args.Quiet);
+    &mf, "GITCommand", "CTEST_GIT_COMMAND", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "GITUpdateOptions", "CTEST_GIT_UPDATE_OPTIONS",
-    args.Quiet);
+    &mf, "GITUpdateOptions", "CTEST_GIT_UPDATE_OPTIONS", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "GITInitSubmodules", "CTEST_GIT_INIT_SUBMODULES",
-    args.Quiet);
+    &mf, "GITInitSubmodules", "CTEST_GIT_INIT_SUBMODULES", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "GITUpdateCustom", "CTEST_GIT_UPDATE_CUSTOM", args.Quiet);
+    &mf, "GITUpdateCustom", "CTEST_GIT_UPDATE_CUSTOM", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "UpdateVersionOnly", "CTEST_UPDATE_VERSION_ONLY",
-    args.Quiet);
+    &mf, "UpdateVersionOnly", "CTEST_UPDATE_VERSION_ONLY", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "UpdateVersionOverride", "CTEST_UPDATE_VERSION_OVERRIDE",
-    args.Quiet);
+    &mf, "UpdateVersionOverride", "CTEST_UPDATE_VERSION_OVERRIDE", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "HGCommand", "CTEST_HG_COMMAND", args.Quiet);
+    &mf, "HGCommand", "CTEST_HG_COMMAND", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "HGUpdateOptions", "CTEST_HG_UPDATE_OPTIONS", args.Quiet);
+    &mf, "HGUpdateOptions", "CTEST_HG_UPDATE_OPTIONS", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "P4Command", "CTEST_P4_COMMAND", args.Quiet);
+    &mf, "P4Command", "CTEST_P4_COMMAND", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "P4UpdateOptions", "CTEST_P4_UPDATE_OPTIONS", args.Quiet);
+    &mf, "P4UpdateOptions", "CTEST_P4_UPDATE_OPTIONS", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "P4Client", "CTEST_P4_CLIENT", args.Quiet);
+    &mf, "P4Client", "CTEST_P4_CLIENT", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "P4Options", "CTEST_P4_OPTIONS", args.Quiet);
+    &mf, "P4Options", "CTEST_P4_OPTIONS", args.Quiet);
 
   auto handler = cm::make_unique<cmCTestUpdateHandler>(this->CTest);
   if (source_dir.empty()) {

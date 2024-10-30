@@ -33,6 +33,7 @@ std::unique_ptr<cmCommand> cmCTestConfigureCommand::Clone()
 std::unique_ptr<cmCTestGenericHandler>
 cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments)
 {
+  cmMakefile& mf = *this->Makefile;
   auto const& args = static_cast<ConfigureArguments&>(arguments);
   cmList options;
 
@@ -48,15 +49,13 @@ cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments)
     return nullptr;
   }
 
-  cmValue ctestConfigureCommand =
-    this->Makefile->GetDefinition("CTEST_CONFIGURE_COMMAND");
+  cmValue ctestConfigureCommand = mf.GetDefinition("CTEST_CONFIGURE_COMMAND");
 
   if (cmNonempty(ctestConfigureCommand)) {
     this->CTest->SetCTestConfiguration("ConfigureCommand",
                                        *ctestConfigureCommand, args.Quiet);
   } else {
-    cmValue cmakeGeneratorName =
-      this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR");
+    cmValue cmakeGeneratorName = mf.GetDefinition("CTEST_CMAKE_GENERATOR");
     if (cmNonempty(cmakeGeneratorName)) {
       const std::string& source_dir =
         this->CTest->GetCTestConfiguration("SourceDirectory");
@@ -79,8 +78,8 @@ cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments)
       bool multiConfig = false;
       bool cmakeBuildTypeInOptions = false;
 
-      auto gg = this->Makefile->GetCMakeInstance()->CreateGlobalGenerator(
-        *cmakeGeneratorName);
+      auto gg =
+        mf.GetCMakeInstance()->CreateGlobalGenerator(*cmakeGeneratorName);
       if (gg) {
         multiConfig = gg->IsMultiConfig();
         gg.reset();
@@ -107,7 +106,7 @@ cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments)
         cmakeConfigureCommand += "\"";
       }
 
-      if (this->Makefile->IsOn("CTEST_USE_LAUNCHERS")) {
+      if (mf.IsOn("CTEST_USE_LAUNCHERS")) {
         cmakeConfigureCommand += " \"-DCTEST_USE_LAUNCHERS:BOOL=TRUE\"";
       }
 
@@ -116,7 +115,7 @@ cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments)
       cmakeConfigureCommand += "\"";
 
       cmValue cmakeGeneratorPlatform =
-        this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR_PLATFORM");
+        mf.GetDefinition("CTEST_CMAKE_GENERATOR_PLATFORM");
       if (cmNonempty(cmakeGeneratorPlatform)) {
         cmakeConfigureCommand += " \"-A";
         cmakeConfigureCommand += *cmakeGeneratorPlatform;
@@ -124,7 +123,7 @@ cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments)
       }
 
       cmValue cmakeGeneratorToolset =
-        this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR_TOOLSET");
+        mf.GetDefinition("CTEST_CMAKE_GENERATOR_TOOLSET");
       if (cmNonempty(cmakeGeneratorToolset)) {
         cmakeConfigureCommand += " \"-T";
         cmakeConfigureCommand += *cmakeGeneratorToolset;
@@ -152,7 +151,7 @@ cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments)
   }
 
   if (cmValue labelsForSubprojects =
-        this->Makefile->GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
+        mf.GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
     this->CTest->SetCTestConfiguration("LabelsForSubprojects",
                                        *labelsForSubprojects, args.Quiet);
   }

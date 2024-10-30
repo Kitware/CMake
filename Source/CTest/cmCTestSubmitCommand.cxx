@@ -34,31 +34,30 @@ std::unique_ptr<cmCommand> cmCTestSubmitCommand::Clone()
 std::unique_ptr<cmCTestGenericHandler> cmCTestSubmitCommand::InitializeHandler(
   HandlerArguments& arguments)
 {
+  cmMakefile& mf = *this->Makefile;
   auto const& args = static_cast<SubmitArguments&>(arguments);
   cmValue submitURL = !args.SubmitURL.empty()
     ? cmValue(args.SubmitURL)
-    : this->Makefile->GetDefinition("CTEST_SUBMIT_URL");
+    : mf.GetDefinition("CTEST_SUBMIT_URL");
 
   if (submitURL) {
     this->CTest->SetCTestConfiguration("SubmitURL", *submitURL, args.Quiet);
   } else {
     this->CTest->SetCTestConfigurationFromCMakeVariable(
-      this->Makefile, "DropMethod", "CTEST_DROP_METHOD", args.Quiet);
+      &mf, "DropMethod", "CTEST_DROP_METHOD", args.Quiet);
     this->CTest->SetCTestConfigurationFromCMakeVariable(
-      this->Makefile, "DropSiteUser", "CTEST_DROP_SITE_USER", args.Quiet);
+      &mf, "DropSiteUser", "CTEST_DROP_SITE_USER", args.Quiet);
     this->CTest->SetCTestConfigurationFromCMakeVariable(
-      this->Makefile, "DropSitePassword", "CTEST_DROP_SITE_PASSWORD",
-      args.Quiet);
+      &mf, "DropSitePassword", "CTEST_DROP_SITE_PASSWORD", args.Quiet);
     this->CTest->SetCTestConfigurationFromCMakeVariable(
-      this->Makefile, "DropSite", "CTEST_DROP_SITE", args.Quiet);
+      &mf, "DropSite", "CTEST_DROP_SITE", args.Quiet);
     this->CTest->SetCTestConfigurationFromCMakeVariable(
-      this->Makefile, "DropLocation", "CTEST_DROP_LOCATION", args.Quiet);
+      &mf, "DropLocation", "CTEST_DROP_LOCATION", args.Quiet);
   }
 
   if (!this->CTest->SetCTestConfigurationFromCMakeVariable(
-        this->Makefile, "TLSVersion", "CTEST_TLS_VERSION", args.Quiet)) {
-    if (cmValue tlsVersionVar =
-          this->Makefile->GetDefinition("CMAKE_TLS_VERSION")) {
+        &mf, "TLSVersion", "CTEST_TLS_VERSION", args.Quiet)) {
+    if (cmValue tlsVersionVar = mf.GetDefinition("CMAKE_TLS_VERSION")) {
       cmCTestOptionalLog(
         this->CTest, HANDLER_VERBOSE_OUTPUT,
         "SetCTestConfiguration from CMAKE_TLS_VERSION:TLSVersion:"
@@ -78,9 +77,8 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestSubmitCommand::InitializeHandler(
     }
   }
   if (!this->CTest->SetCTestConfigurationFromCMakeVariable(
-        this->Makefile, "TLSVerify", "CTEST_TLS_VERIFY", args.Quiet)) {
-    if (cmValue tlsVerifyVar =
-          this->Makefile->GetDefinition("CMAKE_TLS_VERIFY")) {
+        &mf, "TLSVerify", "CTEST_TLS_VERIFY", args.Quiet)) {
+    if (cmValue tlsVerifyVar = mf.GetDefinition("CMAKE_TLS_VERIFY")) {
       cmCTestOptionalLog(
         this->CTest, HANDLER_VERBOSE_OUTPUT,
         "SetCTestConfiguration from CMAKE_TLS_VERIFY:TLSVerify:"
@@ -100,21 +98,18 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestSubmitCommand::InitializeHandler(
     }
   }
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "CurlOptions", "CTEST_CURL_OPTIONS", args.Quiet);
+    &mf, "CurlOptions", "CTEST_CURL_OPTIONS", args.Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "SubmitInactivityTimeout",
-    "CTEST_SUBMIT_INACTIVITY_TIMEOUT", args.Quiet);
+    &mf, "SubmitInactivityTimeout", "CTEST_SUBMIT_INACTIVITY_TIMEOUT",
+    args.Quiet);
 
-  cmValue notesFilesVariable =
-    this->Makefile->GetDefinition("CTEST_NOTES_FILES");
+  cmValue notesFilesVariable = mf.GetDefinition("CTEST_NOTES_FILES");
   if (notesFilesVariable) {
     cmList notesFiles{ *notesFilesVariable };
-    this->CTest->GenerateNotesFile(this->Makefile->GetCMakeInstance(),
-                                   notesFiles);
+    this->CTest->GenerateNotesFile(mf.GetCMakeInstance(), notesFiles);
   }
 
-  cmValue extraFilesVariable =
-    this->Makefile->GetDefinition("CTEST_EXTRA_SUBMIT_FILES");
+  cmValue extraFilesVariable = mf.GetDefinition("CTEST_EXTRA_SUBMIT_FILES");
   if (extraFilesVariable) {
     cmList extraFiles{ *extraFilesVariable };
     if (!this->CTest->SubmitExtraFiles(extraFiles)) {
@@ -215,14 +210,15 @@ bool cmCTestSubmitCommand::InitialPass(std::vector<std::string> const& args,
 
 void cmCTestSubmitCommand::CheckArguments(HandlerArguments& arguments)
 {
+  cmMakefile& mf = *this->Makefile;
   auto& args = static_cast<SubmitArguments&>(arguments);
   if (args.Parts) {
-    cm::erase_if(*(args.Parts), [this](std::string const& arg) -> bool {
+    cm::erase_if(*(args.Parts), [this, &mf](std::string const& arg) -> bool {
       cmCTest::Part p = this->CTest->GetPartFromName(arg);
       if (p == cmCTest::PartCount) {
         std::ostringstream e;
         e << "Part name \"" << arg << "\" is invalid.";
-        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+        mf.IssueMessage(MessageType::FATAL_ERROR, e.str());
         return true;
       }
       return false;
@@ -230,12 +226,12 @@ void cmCTestSubmitCommand::CheckArguments(HandlerArguments& arguments)
   }
 
   if (args.Files) {
-    cm::erase_if(*(args.Files), [this](std::string const& arg) -> bool {
+    cm::erase_if(*(args.Files), [&mf](std::string const& arg) -> bool {
       if (!cmSystemTools::FileExists(arg)) {
         std::ostringstream e;
         e << "File \"" << arg << "\" does not exist. Cannot submit "
           << "a non-existent file.";
-        this->Makefile->IssueMessage(MessageType::FATAL_ERROR, e.str());
+        mf.IssueMessage(MessageType::FATAL_ERROR, e.str());
         return true;
       }
       return false;
@@ -246,8 +242,9 @@ void cmCTestSubmitCommand::CheckArguments(HandlerArguments& arguments)
 void cmCTestSubmitCommand::ProcessAdditionalValues(
   cmCTestGenericHandler*, HandlerArguments const& arguments)
 {
+  cmMakefile& mf = *this->Makefile;
   auto const& args = static_cast<SubmitArguments const&>(arguments);
   if (!args.BuildID.empty()) {
-    this->Makefile->AddDefinition(args.BuildID, this->CTest->GetBuildID());
+    mf.AddDefinition(args.BuildID, this->CTest->GetBuildID());
   }
 }
