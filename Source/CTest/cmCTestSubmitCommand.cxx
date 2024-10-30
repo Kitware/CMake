@@ -14,7 +14,6 @@
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCTestSubmitHandler.h"
-#include "cmCommand.h"
 #include "cmExecutionStatus.h"
 #include "cmList.h"
 #include "cmMakefile.h"
@@ -22,13 +21,6 @@
 #include "cmRange.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
-
-std::unique_ptr<cmCommand> cmCTestSubmitCommand::Clone()
-{
-  auto ni = cm::make_unique<cmCTestSubmitCommand>();
-  ni->CTest = this->CTest;
-  return std::unique_ptr<cmCommand>(std::move(ni));
-}
 
 std::unique_ptr<cmCTestGenericHandler> cmCTestSubmitCommand::InitializeHandler(
   HandlerArguments& arguments, cmExecutionStatus& status) const
@@ -174,7 +166,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestSubmitCommand::InitializeHandler(
 }
 
 bool cmCTestSubmitCommand::InitialPass(std::vector<std::string> const& args,
-                                       cmExecutionStatus& status)
+                                       cmExecutionStatus& status) const
 {
   // Arguments used by both modes.
   static auto const parserBase =

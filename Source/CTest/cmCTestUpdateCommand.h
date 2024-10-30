@@ -12,7 +12,6 @@
 
 class cmExecutionStatus;
 class cmCTestGenericHandler;
-class cmCommand;
 
 class cmCTestUpdateCommand : public cmCTestHandlerCommand
 {
@@ -20,13 +19,11 @@ public:
   using cmCTestHandlerCommand::cmCTestHandlerCommand;
 
 private:
-  std::unique_ptr<cmCommand> Clone() override;
-
   std::string GetName() const override { return "ctest_update"; }
 
   std::unique_ptr<cmCTestGenericHandler> InitializeHandler(
     HandlerArguments& args, cmExecutionStatus& status) const override;
 
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
+                   cmExecutionStatus& status) const override;
 };

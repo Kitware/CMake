@@ -1076,6 +1076,7 @@ add_library(
   CTest/cmCTestBuildAndTest.cxx
   CTest/cmCTestBuildCommand.cxx
   CTest/cmCTestBuildHandler.cxx
+  CTest/cmCTestCommand.cxx
   CTest/cmCTestConfigureCommand.cxx
   CTest/cmCTestConfigureHandler.cxx
   CTest/cmCTestCoverageCommand.cxx

@@ -14,7 +14,6 @@
 #include "cmCTest.h"
 #include "cmCTestConfigureHandler.h"
 #include "cmCTestGenericHandler.h"
-#include "cmCommand.h"
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
@@ -23,13 +22,6 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 #include "cmake.h"
-
-std::unique_ptr<cmCommand> cmCTestConfigureCommand::Clone()
-{
-  auto ni = cm::make_unique<cmCTestConfigureCommand>();
-  ni->CTest = this->CTest;
-  return std::unique_ptr<cmCommand>(std::move(ni));
-}
 
 std::unique_ptr<cmCTestGenericHandler>
 cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments,
@@ -164,7 +156,7 @@ cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments,
 }
 
 bool cmCTestConfigureCommand::InitialPass(std::vector<std::string> const& args,
-                                          cmExecutionStatus& status)
+                                          cmExecutionStatus& status) const
 {
   using Args = ConfigureArguments;
   static auto const parser =

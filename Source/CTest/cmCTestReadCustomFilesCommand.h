@@ -5,13 +5,9 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <string>
-#include <utility>
 #include <vector>
 
-#include <cm/memory>
-
 #include "cmCTestCommand.h"
-#include "cmCommand.h"
 
 class cmExecutionStatus;
 
@@ -24,22 +20,12 @@ class cmExecutionStatus;
 class cmCTestReadCustomFilesCommand : public cmCTestCommand
 {
 public:
-  cmCTestReadCustomFilesCommand() {}
-
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    auto ni = cm::make_unique<cmCTestReadCustomFilesCommand>();
-    ni->CTest = this->CTest;
-    return std::unique_ptr<cmCommand>(std::move(ni));
-  }
+  using cmCTestCommand::cmCTestCommand;
 
   /**
    * This is called when the command is first encountered in
    * the CMakeLists.txt file.
    */
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
+                   cmExecutionStatus& status) const override;
 };

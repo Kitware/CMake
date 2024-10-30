@@ -12,7 +12,6 @@
 #include "cmCTest.h"
 #include "cmCTestBuildHandler.h"
 #include "cmCTestGenericHandler.h"
-#include "cmCommand.h"
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -22,15 +21,8 @@
 #include "cmValue.h"
 #include "cmake.h"
 
-std::unique_ptr<cmCommand> cmCTestBuildCommand::Clone()
-{
-  auto ni = cm::make_unique<cmCTestBuildCommand>();
-  ni->CTest = this->CTest;
-  return std::unique_ptr<cmCommand>(std::move(ni));
-}
-
 bool cmCTestBuildCommand::InitialPass(std::vector<std::string> const& args,
-                                      cmExecutionStatus& status)
+                                      cmExecutionStatus& status) const
 {
   static auto const parser =
     cmArgumentParser<BuildArguments>{ MakeHandlerParser<BuildArguments>() }

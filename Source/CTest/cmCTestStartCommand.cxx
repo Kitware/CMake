@@ -15,7 +15,7 @@
 #include "cmValue.h"
 
 bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
-                                      cmExecutionStatus& status)
+                                      cmExecutionStatus& status) const
 {
   if (args.empty()) {
     status.SetError("called with incorrect number of arguments");
@@ -226,7 +226,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
 
 bool cmCTestStartCommand::InitialCheckout(std::ostream& ofs,
                                           std::string const& sourceDir,
-                                          cmExecutionStatus& status)
+                                          cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
   // Use the user-provided command to create the source tree.

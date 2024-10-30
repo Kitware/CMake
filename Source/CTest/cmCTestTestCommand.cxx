@@ -14,19 +14,11 @@
 #include "cmCTest.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCTestTestHandler.h"
-#include "cmCommand.h"
 #include "cmDuration.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmValue.h"
-
-std::unique_ptr<cmCommand> cmCTestTestCommand::Clone()
-{
-  auto ni = cm::make_unique<cmCTestTestCommand>();
-  ni->CTest = this->CTest;
-  return std::unique_ptr<cmCommand>(std::move(ni));
-}
 
 std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler(
   HandlerArguments& arguments, cmExecutionStatus& status) const
@@ -154,7 +146,7 @@ cmCTestTestCommand::InitializeActualHandler(HandlerArguments&,
 }
 
 bool cmCTestTestCommand::InitialPass(std::vector<std::string> const& args,
-                                     cmExecutionStatus& status)
+                                     cmExecutionStatus& status) const
 {
   static auto const parser = MakeTestParser<TestArguments>();
 

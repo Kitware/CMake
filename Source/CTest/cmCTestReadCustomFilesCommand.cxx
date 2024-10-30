@@ -8,7 +8,7 @@
 class cmMakefile;
 
 bool cmCTestReadCustomFilesCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus& status)
+  std::vector<std::string> const& args, cmExecutionStatus& status) const
 {
   if (args.empty()) {
     status.SetError("called with incorrect number of arguments");

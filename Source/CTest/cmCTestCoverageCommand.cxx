@@ -12,17 +12,9 @@
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
 #include "cmCTestGenericHandler.h"
-#include "cmCommand.h"
 #include "cmExecutionStatus.h"
 
 class cmMakefile;
-
-std::unique_ptr<cmCommand> cmCTestCoverageCommand::Clone()
-{
-  auto ni = cm::make_unique<cmCTestCoverageCommand>();
-  ni->CTest = this->CTest;
-  return std::unique_ptr<cmCommand>(std::move(ni));
-}
 
 std::unique_ptr<cmCTestGenericHandler>
 cmCTestCoverageCommand::InitializeHandler(HandlerArguments& arguments,
@@ -47,7 +39,7 @@ cmCTestCoverageCommand::InitializeHandler(HandlerArguments& arguments,
 }
 
 bool cmCTestCoverageCommand::InitialPass(std::vector<std::string> const& args,
-                                         cmExecutionStatus& status)
+                                         cmExecutionStatus& status) const
 {
   using Args = CoverageArguments;
   static auto const parser =

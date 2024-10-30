@@ -13,7 +13,6 @@
 class cmExecutionStatus;
 class cmCTestGenericHandler;
 class cmCTestTestHandler;
-class cmCommand;
 
 class cmCTestMemCheckCommand : public cmCTestTestCommand
 {
@@ -27,8 +26,6 @@ protected:
   };
 
 private:
-  std::unique_ptr<cmCommand> Clone() override;
-
   std::string GetName() const override { return "ctest_memcheck"; }
 
   std::unique_ptr<cmCTestTestHandler> InitializeActualHandler(
@@ -39,5 +36,5 @@ private:
                                cmExecutionStatus& status) const override;
 
   bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
+                   cmExecutionStatus& status) const override;
 };

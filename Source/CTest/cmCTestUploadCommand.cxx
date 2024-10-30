@@ -13,18 +13,10 @@
 #include "cmArgumentParser.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCTestUploadHandler.h"
-#include "cmCommand.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSystemTools.h"
-
-std::unique_ptr<cmCommand> cmCTestUploadCommand::Clone()
-{
-  auto ni = cm::make_unique<cmCTestUploadCommand>();
-  ni->CTest = this->CTest;
-  return std::unique_ptr<cmCommand>(std::move(ni));
-}
 
 void cmCTestUploadCommand::CheckArguments(HandlerArguments& arguments,
                                           cmExecutionStatus& status) const
@@ -55,7 +47,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestUploadCommand::InitializeHandler(
 }
 
 bool cmCTestUploadCommand::InitialPass(std::vector<std::string> const& args,
-                                       cmExecutionStatus& status)
+                                       cmExecutionStatus& status) const
 {
   static auto const parser =
     cmArgumentParser<UploadArguments>{ MakeHandlerParser<UploadArguments>() }

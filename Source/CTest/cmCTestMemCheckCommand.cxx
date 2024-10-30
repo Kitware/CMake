@@ -11,16 +11,8 @@
 #include "cmCTest.h"
 #include "cmCTestMemCheckHandler.h"
 #include "cmCTestTestHandler.h"
-#include "cmCommand.h"
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
-
-std::unique_ptr<cmCommand> cmCTestMemCheckCommand::Clone()
-{
-  auto ni = cm::make_unique<cmCTestMemCheckCommand>();
-  ni->CTest = this->CTest;
-  return std::unique_ptr<cmCommand>(std::move(ni));
-}
 
 std::unique_ptr<cmCTestTestHandler>
 cmCTestMemCheckCommand::InitializeActualHandler(
@@ -62,7 +54,7 @@ void cmCTestMemCheckCommand::ProcessAdditionalValues(
 }
 
 bool cmCTestMemCheckCommand::InitialPass(std::vector<std::string> const& args,
-                                         cmExecutionStatus& status)
+                                         cmExecutionStatus& status) const
 {
   static auto const parser =
     cmArgumentParser<MemCheckArguments>{ MakeTestParser<MemCheckArguments>() }

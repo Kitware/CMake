@@ -8,7 +8,7 @@
 #include "cmSystemTools.h"
 
 bool cmCTestRunScriptCommand::InitialPass(std::vector<std::string> const& args,
-                                          cmExecutionStatus& status)
+                                          cmExecutionStatus& status) const
 {
   if (args.empty()) {
     status.SetError("called with incorrect number of arguments");
