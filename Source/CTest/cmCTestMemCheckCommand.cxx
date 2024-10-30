@@ -23,8 +23,8 @@ std::unique_ptr<cmCommand> cmCTestMemCheckCommand::Clone()
 }
 
 std::unique_ptr<cmCTestTestHandler>
-cmCTestMemCheckCommand::InitializeActualHandler(HandlerArguments& args,
-                                                cmExecutionStatus& status)
+cmCTestMemCheckCommand::InitializeActualHandler(
+  HandlerArguments& args, cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
   auto handler = cm::make_unique<cmCTestMemCheckHandler>(this->CTest);
@@ -49,7 +49,7 @@ cmCTestMemCheckCommand::InitializeActualHandler(HandlerArguments& args,
 
 void cmCTestMemCheckCommand::ProcessAdditionalValues(
   cmCTestGenericHandler* handler, HandlerArguments const& arguments,
-  cmExecutionStatus& status)
+  cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
   auto const& args = static_cast<MemCheckArguments const&>(arguments);

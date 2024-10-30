@@ -31,7 +31,7 @@ std::unique_ptr<cmCommand> cmCTestSubmitCommand::Clone()
 }
 
 std::unique_ptr<cmCTestGenericHandler> cmCTestSubmitCommand::InitializeHandler(
-  HandlerArguments& arguments, cmExecutionStatus& status)
+  HandlerArguments& arguments, cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
   auto const& args = static_cast<SubmitArguments&>(arguments);
@@ -208,7 +208,7 @@ bool cmCTestSubmitCommand::InitialPass(std::vector<std::string> const& args,
 }
 
 void cmCTestSubmitCommand::CheckArguments(HandlerArguments& arguments,
-                                          cmExecutionStatus& status)
+                                          cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
   auto& args = static_cast<SubmitArguments&>(arguments);
@@ -241,7 +241,7 @@ void cmCTestSubmitCommand::CheckArguments(HandlerArguments& arguments,
 
 void cmCTestSubmitCommand::ProcessAdditionalValues(
   cmCTestGenericHandler*, HandlerArguments const& arguments,
-  cmExecutionStatus& status)
+  cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
   auto const& args = static_cast<SubmitArguments const&>(arguments);

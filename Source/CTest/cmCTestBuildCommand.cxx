@@ -48,7 +48,7 @@ bool cmCTestBuildCommand::InitialPass(std::vector<std::string> const& args,
 }
 
 std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
-  HandlerArguments& arguments, cmExecutionStatus& status)
+  HandlerArguments& arguments, cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
   auto const& args = static_cast<BuildArguments&>(arguments);
@@ -137,7 +137,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
 
 void cmCTestBuildCommand::ProcessAdditionalValues(
   cmCTestGenericHandler* generic, HandlerArguments const& arguments,
-  cmExecutionStatus& status)
+  cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
   auto const& args = static_cast<BuildArguments const&>(arguments);

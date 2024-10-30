@@ -22,7 +22,7 @@ std::unique_ptr<cmCommand> cmCTestUpdateCommand::Clone()
 }
 
 std::unique_ptr<cmCTestGenericHandler> cmCTestUpdateCommand::InitializeHandler(
-  HandlerArguments& args, cmExecutionStatus& status)
+  HandlerArguments& args, cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
   if (!args.Source.empty()) {

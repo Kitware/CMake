@@ -27,7 +27,7 @@ std::unique_ptr<cmCommand> cmCTestUploadCommand::Clone()
 }
 
 void cmCTestUploadCommand::CheckArguments(HandlerArguments& arguments,
-                                          cmExecutionStatus& status)
+                                          cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
   auto& args = static_cast<UploadArguments&>(arguments);
@@ -44,7 +44,7 @@ void cmCTestUploadCommand::CheckArguments(HandlerArguments& arguments,
 }
 
 std::unique_ptr<cmCTestGenericHandler> cmCTestUploadCommand::InitializeHandler(
-  HandlerArguments& arguments, cmExecutionStatus&)
+  HandlerArguments& arguments, cmExecutionStatus&) const
 {
   auto const& args = static_cast<UploadArguments&>(arguments);
   auto handler = cm::make_unique<cmCTestUploadHandler>(this->CTest);

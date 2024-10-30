@@ -67,7 +67,7 @@ protected:
   template <typename Args, typename Handler>
   bool Invoke(cmArgumentParser<Args> const& parser,
               std::vector<std::string> const& arguments,
-              cmExecutionStatus& status, Handler handler)
+              cmExecutionStatus& status, Handler handler) const
   {
     std::vector<std::string> unparsed;
     Args args = parser.Parse(arguments, &unparsed);
@@ -76,22 +76,23 @@ protected:
   };
 
   bool ExecuteHandlerCommand(HandlerArguments& args,
-                             cmExecutionStatus& status);
+                             cmExecutionStatus& status) const;
 
 private:
   bool InvokeImpl(BasicArguments& args,
                   std::vector<std::string> const& unparsed,
-                  cmExecutionStatus& status, std::function<bool()> handler);
+                  cmExecutionStatus& status,
+                  std::function<bool()> handler) const;
 
   virtual std::string GetName() const = 0;
 
   virtual void CheckArguments(HandlerArguments& arguments,
-                              cmExecutionStatus& status);
+                              cmExecutionStatus& status) const;
 
   virtual std::unique_ptr<cmCTestGenericHandler> InitializeHandler(
-    HandlerArguments& arguments, cmExecutionStatus& status);
+    HandlerArguments& arguments, cmExecutionStatus& status) const;
 
   virtual void ProcessAdditionalValues(cmCTestGenericHandler*,
                                        HandlerArguments const& arguments,
-                                       cmExecutionStatus& status);
+                                       cmExecutionStatus& status) const;
 };

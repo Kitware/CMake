@@ -29,7 +29,7 @@ std::unique_ptr<cmCommand> cmCTestTestCommand::Clone()
 }
 
 std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler(
-  HandlerArguments& arguments, cmExecutionStatus& status)
+  HandlerArguments& arguments, cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
   auto& args = static_cast<TestArguments&>(arguments);
@@ -148,7 +148,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler(
 
 std::unique_ptr<cmCTestTestHandler>
 cmCTestTestCommand::InitializeActualHandler(HandlerArguments&,
-                                            cmExecutionStatus&)
+                                            cmExecutionStatus&) const
 {
   return cm::make_unique<cmCTestTestHandler>(this->CTest);
 }

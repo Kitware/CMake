@@ -71,7 +71,7 @@ private:
 
 bool cmCTestHandlerCommand::InvokeImpl(
   BasicArguments& args, std::vector<std::string> const& unparsed,
-  cmExecutionStatus& status, std::function<bool()> handler)
+  cmExecutionStatus& status, std::function<bool()> handler) const
 {
   // save error state and restore it if needed
   SaveRestoreErrorState errorState;
@@ -116,8 +116,8 @@ bool cmCTestHandlerCommand::InvokeImpl(
   return true;
 }
 
-bool cmCTestHandlerCommand::ExecuteHandlerCommand(HandlerArguments& args,
-                                                  cmExecutionStatus& status)
+bool cmCTestHandlerCommand::ExecuteHandlerCommand(
+  HandlerArguments& args, cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
 
@@ -200,18 +200,19 @@ bool cmCTestHandlerCommand::ExecuteHandlerCommand(HandlerArguments& args,
 }
 
 void cmCTestHandlerCommand::CheckArguments(HandlerArguments&,
-                                           cmExecutionStatus&)
+                                           cmExecutionStatus&) const
 {
 }
 
 std::unique_ptr<cmCTestGenericHandler>
-cmCTestHandlerCommand::InitializeHandler(HandlerArguments&, cmExecutionStatus&)
+cmCTestHandlerCommand::InitializeHandler(HandlerArguments&,
+                                         cmExecutionStatus&) const
 {
   return nullptr;
 };
 
 void cmCTestHandlerCommand::ProcessAdditionalValues(cmCTestGenericHandler*,
                                                     HandlerArguments const&,
-                                                    cmExecutionStatus&)
+                                                    cmExecutionStatus&) const
 {
 }

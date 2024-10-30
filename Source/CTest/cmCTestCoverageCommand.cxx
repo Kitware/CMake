@@ -26,7 +26,7 @@ std::unique_ptr<cmCommand> cmCTestCoverageCommand::Clone()
 
 std::unique_ptr<cmCTestGenericHandler>
 cmCTestCoverageCommand::InitializeHandler(HandlerArguments& arguments,
-                                          cmExecutionStatus& status)
+                                          cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
   auto& args = static_cast<CoverageArguments&>(arguments);

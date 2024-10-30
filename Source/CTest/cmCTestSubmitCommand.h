@@ -46,14 +46,14 @@ private:
   std::string GetName() const override { return "ctest_submit"; }
 
   void CheckArguments(HandlerArguments& arguments,
-                      cmExecutionStatus& status) override;
+                      cmExecutionStatus& status) const override;
 
   std::unique_ptr<cmCTestGenericHandler> InitializeHandler(
-    HandlerArguments& arguments, cmExecutionStatus& status) override;
+    HandlerArguments& arguments, cmExecutionStatus& status) const override;
 
   void ProcessAdditionalValues(cmCTestGenericHandler* handler,
                                HandlerArguments const& arguments,
-                               cmExecutionStatus& status) override;
+                               cmExecutionStatus& status) const override;
 
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) override;

@@ -33,7 +33,7 @@ std::unique_ptr<cmCommand> cmCTestConfigureCommand::Clone()
 
 std::unique_ptr<cmCTestGenericHandler>
 cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments,
-                                           cmExecutionStatus& status)
+                                           cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
   auto const& args = static_cast<ConfigureArguments&>(arguments);
