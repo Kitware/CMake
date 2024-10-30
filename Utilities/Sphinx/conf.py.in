@@ -91,7 +91,7 @@ html_favicon = '@conf_path@/static/cmake-favicon.ico'
 linkcheck_ignore = [
     r'about:',
     r'https://gitlab\.kitware\.com/cmake/community/-/wikis/doc/cpack',
-    r'https://www.intel.com/',
+    r'https://www\.intel\.com/',
 ]
 
 linkcheck_allowed_redirects = {
