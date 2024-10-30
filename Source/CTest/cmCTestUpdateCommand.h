@@ -25,7 +25,7 @@ private:
   std::string GetName() const override { return "ctest_update"; }
 
   std::unique_ptr<cmCTestGenericHandler> InitializeHandler(
-    HandlerArguments& args) override;
+    HandlerArguments& args, cmExecutionStatus& status) override;
 
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) override;

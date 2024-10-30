@@ -14,11 +14,10 @@
 #include "cmCTestGenericHandler.h"
 #include "cmCTestUploadHandler.h"
 #include "cmCommand.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmSystemTools.h"
-
-class cmExecutionStatus;
 
 std::unique_ptr<cmCommand> cmCTestUploadCommand::Clone()
 {
@@ -27,9 +26,10 @@ std::unique_ptr<cmCommand> cmCTestUploadCommand::Clone()
   return std::unique_ptr<cmCommand>(std::move(ni));
 }
 
-void cmCTestUploadCommand::CheckArguments(HandlerArguments& arguments)
+void cmCTestUploadCommand::CheckArguments(HandlerArguments& arguments,
+                                          cmExecutionStatus& status)
 {
-  cmMakefile& mf = *this->Makefile;
+  cmMakefile& mf = status.GetMakefile();
   auto& args = static_cast<UploadArguments&>(arguments);
   cm::erase_if(args.Files, [&mf](std::string const& arg) -> bool {
     if (!cmSystemTools::FileExists(arg)) {
@@ -44,7 +44,7 @@ void cmCTestUploadCommand::CheckArguments(HandlerArguments& arguments)
 }
 
 std::unique_ptr<cmCTestGenericHandler> cmCTestUploadCommand::InitializeHandler(
-  HandlerArguments& arguments)
+  HandlerArguments& arguments, cmExecutionStatus&)
 {
   auto const& args = static_cast<UploadArguments&>(arguments);
   auto handler = cm::make_unique<cmCTestUploadHandler>(this->CTest);

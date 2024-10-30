@@ -12,6 +12,7 @@
 #include "cmCTestMemCheckHandler.h"
 #include "cmCTestTestHandler.h"
 #include "cmCommand.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 
 std::unique_ptr<cmCommand> cmCTestMemCheckCommand::Clone()
@@ -22,9 +23,10 @@ std::unique_ptr<cmCommand> cmCTestMemCheckCommand::Clone()
 }
 
 std::unique_ptr<cmCTestTestHandler>
-cmCTestMemCheckCommand::InitializeActualHandler(HandlerArguments& args)
+cmCTestMemCheckCommand::InitializeActualHandler(HandlerArguments& args,
+                                                cmExecutionStatus& status)
 {
-  cmMakefile& mf = *this->Makefile;
+  cmMakefile& mf = status.GetMakefile();
   auto handler = cm::make_unique<cmCTestMemCheckHandler>(this->CTest);
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(
@@ -46,9 +48,10 @@ cmCTestMemCheckCommand::InitializeActualHandler(HandlerArguments& args)
 }
 
 void cmCTestMemCheckCommand::ProcessAdditionalValues(
-  cmCTestGenericHandler* handler, HandlerArguments const& arguments)
+  cmCTestGenericHandler* handler, HandlerArguments const& arguments,
+  cmExecutionStatus& status)
 {
-  cmMakefile& mf = *this->Makefile;
+  cmMakefile& mf = status.GetMakefile();
   auto const& args = static_cast<MemCheckArguments const&>(arguments);
   if (!args.DefectCount.empty()) {
     mf.AddDefinition(

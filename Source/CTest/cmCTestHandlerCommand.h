@@ -85,11 +85,13 @@ private:
 
   virtual std::string GetName() const = 0;
 
-  virtual void CheckArguments(HandlerArguments& arguments);
+  virtual void CheckArguments(HandlerArguments& arguments,
+                              cmExecutionStatus& status);
 
   virtual std::unique_ptr<cmCTestGenericHandler> InitializeHandler(
-    HandlerArguments& arguments);
+    HandlerArguments& arguments, cmExecutionStatus& status);
 
   virtual void ProcessAdditionalValues(cmCTestGenericHandler*,
-                                       HandlerArguments const& arguments);
+                                       HandlerArguments const& arguments,
+                                       cmExecutionStatus& status);
 };

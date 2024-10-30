@@ -34,7 +34,7 @@ private:
   std::string GetName() const override { return "ctest_coverage"; }
 
   std::unique_ptr<cmCTestGenericHandler> InitializeHandler(
-    HandlerArguments& arguments) override;
+    HandlerArguments& arguments, cmExecutionStatus& status) override;
 
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) override;

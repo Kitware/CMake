@@ -15,6 +15,7 @@ bool cmCTestRunScriptCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
 
+  cmMakefile& mf = status.GetMakefile();
   bool np = false;
   unsigned int i = 0;
   if (args[i] == "NEW_PROCESS") {
@@ -37,10 +38,9 @@ bool cmCTestRunScriptCommand::InitialPass(std::vector<std::string> const& args,
       ++i;
     } else {
       int ret;
-      cmCTestScriptHandler::RunScript(this->CTest, this->Makefile,
-                                      cmSystemTools::CollapseFullPath(args[i]),
-                                      !np, &ret);
-      this->Makefile->AddDefinition(returnVariable, std::to_string(ret));
+      cmCTestScriptHandler::RunScript(
+        this->CTest, &mf, cmSystemTools::CollapseFullPath(args[i]), !np, &ret);
+      mf.AddDefinition(returnVariable, std::to_string(ret));
     }
   }
   return true;

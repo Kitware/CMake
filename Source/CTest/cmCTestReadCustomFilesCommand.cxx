@@ -3,19 +3,21 @@
 #include "cmCTestReadCustomFilesCommand.h"
 
 #include "cmCTest.h"
+#include "cmExecutionStatus.h"
 
-class cmExecutionStatus;
+class cmMakefile;
 
 bool cmCTestReadCustomFilesCommand::InitialPass(
-  std::vector<std::string> const& args, cmExecutionStatus& /*unused*/)
+  std::vector<std::string> const& args, cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
+  cmMakefile& mf = status.GetMakefile();
   for (std::string const& arg : args) {
-    this->CTest->ReadCustomConfigurationFileTree(arg, this->Makefile);
+    this->CTest->ReadCustomConfigurationFileTree(arg, &mf);
   }
 
   return true;

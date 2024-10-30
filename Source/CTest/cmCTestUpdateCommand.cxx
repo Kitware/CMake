@@ -10,6 +10,7 @@
 #include "cmCTestGenericHandler.h"
 #include "cmCTestUpdateHandler.h"
 #include "cmCommand.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 
@@ -21,9 +22,9 @@ std::unique_ptr<cmCommand> cmCTestUpdateCommand::Clone()
 }
 
 std::unique_ptr<cmCTestGenericHandler> cmCTestUpdateCommand::InitializeHandler(
-  HandlerArguments& args)
+  HandlerArguments& args, cmExecutionStatus& status)
 {
-  cmMakefile& mf = *this->Makefile;
+  cmMakefile& mf = status.GetMakefile();
   if (!args.Source.empty()) {
     this->CTest->SetCTestConfiguration(
       "SourceDirectory", cmSystemTools::CollapseFullPath(args.Source),
@@ -83,7 +84,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestUpdateCommand::InitializeHandler(
 
   auto handler = cm::make_unique<cmCTestUpdateHandler>(this->CTest);
   if (source_dir.empty()) {
-    this->SetError("source directory not specified. Please use SOURCE tag");
+    status.SetError("source directory not specified. Please use SOURCE tag");
     return nullptr;
   }
   handler->SourceDirectory = source_dir;

@@ -7,19 +7,18 @@
 
 #include "cmCTest.h"
 #include "cmCTestVC.h"
+#include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
-class cmExecutionStatus;
-
 bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
-                                      cmExecutionStatus& /*unused*/)
+                                      cmExecutionStatus& status)
 {
   if (args.empty()) {
-    this->SetError("called with incorrect number of arguments");
+    status.SetError("called with incorrect number of arguments");
     return false;
   }
 
@@ -37,7 +36,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
           args[cnt] == "QUIET") {
         std::ostringstream e;
         e << args[cnt - 1] << " argument missing group name";
-        this->SetError(e.str());
+        status.SetError(e.str());
         return false;
       }
       this->CTest->SetSpecificGroup(args[cnt].c_str());
@@ -58,30 +57,33 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
       bld_dir = cmValue(args[cnt]);
       cnt++;
     } else {
-      this->SetError("Too many arguments");
+      status.SetError("Too many arguments");
       return false;
     }
   }
 
+  cmMakefile& mf = status.GetMakefile();
+
   if (!src_dir) {
-    src_dir = this->Makefile->GetDefinition("CTEST_SOURCE_DIRECTORY");
+    src_dir = mf.GetDefinition("CTEST_SOURCE_DIRECTORY");
   }
   if (!bld_dir) {
-    bld_dir = this->Makefile->GetDefinition("CTEST_BINARY_DIRECTORY");
+    bld_dir = mf.GetDefinition("CTEST_BINARY_DIRECTORY");
   }
   if (!src_dir) {
-    this->SetError("source directory not specified. Specify source directory "
-                   "as an argument or set CTEST_SOURCE_DIRECTORY");
+    status.SetError("source directory not specified. Specify source directory "
+                    "as an argument or set CTEST_SOURCE_DIRECTORY");
     return false;
   }
   if (!bld_dir) {
-    this->SetError("binary directory not specified. Specify binary directory "
-                   "as an argument or set CTEST_BINARY_DIRECTORY");
+    status.SetError("binary directory not specified. Specify binary directory "
+                    "as an argument or set CTEST_BINARY_DIRECTORY");
     return false;
   }
   if (!smodel && !append) {
-    this->SetError("no test model specified and APPEND not specified. Specify "
-                   "either a test model or the APPEND argument");
+    status.SetError(
+      "no test model specified and APPEND not specified. Specify "
+      "either a test model or the APPEND argument");
     return false;
   }
 
@@ -124,7 +126,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   }
 
   // Make sure the source directory exists.
-  if (!this->InitialCheckout(ofs, sourceDir)) {
+  if (!this->InitialCheckout(ofs, sourceDir, status)) {
     return false;
   }
   if (!cmSystemTools::FileIsDirectory(sourceDir)) {
@@ -133,7 +135,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
       << "  " << sourceDir << "\n"
       << "which is not an existing directory.  "
       << "Set CTEST_CHECKOUT_COMMAND to a command line to create it.";
-    this->SetError(e.str());
+    status.SetError(e.str());
     return false;
   }
 
@@ -165,20 +167,20 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
     cmCTestOptionalLog(
       this->CTest, OUTPUT,
       "   Reading ctest configuration file: " << fname << std::endl, quiet);
-    bool readit = this->Makefile->ReadDependentFile(fname);
+    bool readit = mf.ReadDependentFile(fname);
     if (!readit) {
       std::string m = cmStrCat("Could not find include file: ", fname);
-      this->SetError(m);
+      status.SetError(m);
       return false;
     }
   }
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "NightlyStartTime", "CTEST_NIGHTLY_START_TIME", quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile, "Site",
+    &mf, "NightlyStartTime", "CTEST_NIGHTLY_START_TIME", quiet);
+  this->CTest->SetCTestConfigurationFromCMakeVariable(&mf, "Site",
                                                       "CTEST_SITE", quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
-    this->Makefile, "BuildName", "CTEST_BUILD_NAME", quiet);
+    &mf, "BuildName", "CTEST_BUILD_NAME", quiet);
 
   this->CTest->Initialize(bld_dir);
   this->CTest->UpdateCTestConfiguration();
@@ -203,7 +205,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
 
-  this->CTest->ReadCustomConfigurationFileTree(bld_dir, this->Makefile);
+  this->CTest->ReadCustomConfigurationFileTree(bld_dir, &mf);
 
   if (append) {
     if (!this->CTest->ReadExistingTag(quiet)) {
@@ -223,14 +225,14 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
 }
 
 bool cmCTestStartCommand::InitialCheckout(std::ostream& ofs,
-                                          std::string const& sourceDir)
+                                          std::string const& sourceDir,
+                                          cmExecutionStatus& status)
 {
+  cmMakefile& mf = status.GetMakefile();
   // Use the user-provided command to create the source tree.
-  cmValue initialCheckoutCommand =
-    this->Makefile->GetDefinition("CTEST_CHECKOUT_COMMAND");
+  cmValue initialCheckoutCommand = mf.GetDefinition("CTEST_CHECKOUT_COMMAND");
   if (!initialCheckoutCommand) {
-    initialCheckoutCommand =
-      this->Makefile->GetDefinition("CTEST_CVS_CHECKOUT");
+    initialCheckoutCommand = mf.GetDefinition("CTEST_CVS_CHECKOUT");
   }
   if (initialCheckoutCommand) {
     // Use a generic VC object to run and log the command.

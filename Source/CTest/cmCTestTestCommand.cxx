@@ -16,11 +16,10 @@
 #include "cmCTestTestHandler.h"
 #include "cmCommand.h"
 #include "cmDuration.h"
+#include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmValue.h"
-
-class cmExecutionStatus;
 
 std::unique_ptr<cmCommand> cmCTestTestCommand::Clone()
 {
@@ -30,9 +29,9 @@ std::unique_ptr<cmCommand> cmCTestTestCommand::Clone()
 }
 
 std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler(
-  HandlerArguments& arguments)
+  HandlerArguments& arguments, cmExecutionStatus& status)
 {
-  cmMakefile& mf = *this->Makefile;
+  cmMakefile& mf = status.GetMakefile();
   auto& args = static_cast<TestArguments&>(arguments);
   cmValue ctestTimeout = mf.GetDefinition("CTEST_TEST_TIMEOUT");
 
@@ -53,7 +52,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler(
     args.ResourceSpecFile = *resourceSpecFile;
   }
 
-  auto handler = this->InitializeActualHandler(args);
+  auto handler = this->InitializeActualHandler(args, status);
   if (!args.Start.empty() || !args.End.empty() || !args.Stride.empty()) {
     handler->TestOptions.TestsToRunInformation =
       cmStrCat(args.Start, ',', args.End, ',', args.Stride);
@@ -148,7 +147,8 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler(
 }
 
 std::unique_ptr<cmCTestTestHandler>
-cmCTestTestCommand::InitializeActualHandler(HandlerArguments&)
+cmCTestTestCommand::InitializeActualHandler(HandlerArguments&,
+                                            cmExecutionStatus&)
 {
   return cm::make_unique<cmCTestTestHandler>(this->CTest);
 }

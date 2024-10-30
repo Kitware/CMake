@@ -42,5 +42,6 @@ public:
                    cmExecutionStatus& status) override;
 
 private:
-  bool InitialCheckout(std::ostream& ofs, std::string const& sourceDir);
+  bool InitialCheckout(std::ostream& ofs, std::string const& sourceDir,
+                       cmExecutionStatus& status);
 };

@@ -15,14 +15,13 @@
 #include "cmCTestGenericHandler.h"
 #include "cmCTestSubmitHandler.h"
 #include "cmCommand.h"
+#include "cmExecutionStatus.h"
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmRange.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
-
-class cmExecutionStatus;
 
 std::unique_ptr<cmCommand> cmCTestSubmitCommand::Clone()
 {
@@ -32,9 +31,9 @@ std::unique_ptr<cmCommand> cmCTestSubmitCommand::Clone()
 }
 
 std::unique_ptr<cmCTestGenericHandler> cmCTestSubmitCommand::InitializeHandler(
-  HandlerArguments& arguments)
+  HandlerArguments& arguments, cmExecutionStatus& status)
 {
-  cmMakefile& mf = *this->Makefile;
+  cmMakefile& mf = status.GetMakefile();
   auto const& args = static_cast<SubmitArguments&>(arguments);
   cmValue submitURL = !args.SubmitURL.empty()
     ? cmValue(args.SubmitURL)
@@ -113,7 +112,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestSubmitCommand::InitializeHandler(
   if (extraFilesVariable) {
     cmList extraFiles{ *extraFilesVariable };
     if (!this->CTest->SubmitExtraFiles(extraFiles)) {
-      this->SetError("problem submitting extra files.");
+      status.SetError("problem submitting extra files.");
       return nullptr;
     }
   }
@@ -208,9 +207,10 @@ bool cmCTestSubmitCommand::InitialPass(std::vector<std::string> const& args,
   });
 }
 
-void cmCTestSubmitCommand::CheckArguments(HandlerArguments& arguments)
+void cmCTestSubmitCommand::CheckArguments(HandlerArguments& arguments,
+                                          cmExecutionStatus& status)
 {
-  cmMakefile& mf = *this->Makefile;
+  cmMakefile& mf = status.GetMakefile();
   auto& args = static_cast<SubmitArguments&>(arguments);
   if (args.Parts) {
     cm::erase_if(*(args.Parts), [this, &mf](std::string const& arg) -> bool {
@@ -240,9 +240,10 @@ void cmCTestSubmitCommand::CheckArguments(HandlerArguments& arguments)
 }
 
 void cmCTestSubmitCommand::ProcessAdditionalValues(
-  cmCTestGenericHandler*, HandlerArguments const& arguments)
+  cmCTestGenericHandler*, HandlerArguments const& arguments,
+  cmExecutionStatus& status)
 {
-  cmMakefile& mf = *this->Makefile;
+  cmMakefile& mf = status.GetMakefile();
   auto const& args = static_cast<SubmitArguments const&>(arguments);
   if (!args.BuildID.empty()) {
     mf.AddDefinition(args.BuildID, this->CTest->GetBuildID());

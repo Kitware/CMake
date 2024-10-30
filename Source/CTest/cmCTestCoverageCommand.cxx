@@ -13,6 +13,7 @@
 #include "cmCTestCoverageHandler.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCommand.h"
+#include "cmExecutionStatus.h"
 
 class cmMakefile;
 
@@ -24,9 +25,10 @@ std::unique_ptr<cmCommand> cmCTestCoverageCommand::Clone()
 }
 
 std::unique_ptr<cmCTestGenericHandler>
-cmCTestCoverageCommand::InitializeHandler(HandlerArguments& arguments)
+cmCTestCoverageCommand::InitializeHandler(HandlerArguments& arguments,
+                                          cmExecutionStatus& status)
 {
-  cmMakefile& mf = *this->Makefile;
+  cmMakefile& mf = status.GetMakefile();
   auto& args = static_cast<CoverageArguments&>(arguments);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     &mf, "CoverageCommand", "CTEST_COVERAGE_COMMAND", args.Quiet);

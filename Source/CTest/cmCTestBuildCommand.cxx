@@ -13,6 +13,7 @@
 #include "cmCTestBuildHandler.h"
 #include "cmCTestGenericHandler.h"
 #include "cmCommand.h"
+#include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -20,8 +21,6 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 #include "cmake.h"
-
-class cmExecutionStatus;
 
 std::unique_ptr<cmCommand> cmCTestBuildCommand::Clone()
 {
@@ -49,9 +48,9 @@ bool cmCTestBuildCommand::InitialPass(std::vector<std::string> const& args,
 }
 
 std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
-  HandlerArguments& arguments)
+  HandlerArguments& arguments, cmExecutionStatus& status)
 {
-  cmMakefile& mf = *this->Makefile;
+  cmMakefile& mf = status.GetMakefile();
   auto const& args = static_cast<BuildArguments&>(arguments);
   auto handler = cm::make_unique<cmCTestBuildHandler>(this->CTest);
 
@@ -116,7 +115,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
         "is set. Otherwise, set CTEST_BUILD_COMMAND to build the project "
         "with a custom command line.";
       /* clang-format on */
-      this->SetError(ostr.str());
+      status.SetError(ostr.str());
       return nullptr;
     }
   }
@@ -137,9 +136,10 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
 }
 
 void cmCTestBuildCommand::ProcessAdditionalValues(
-  cmCTestGenericHandler* generic, HandlerArguments const& arguments)
+  cmCTestGenericHandler* generic, HandlerArguments const& arguments,
+  cmExecutionStatus& status)
 {
-  cmMakefile& mf = *this->Makefile;
+  cmMakefile& mf = status.GetMakefile();
   auto const& args = static_cast<BuildArguments const&>(arguments);
   auto const* handler = static_cast<cmCTestBuildHandler*>(generic);
   if (!args.NumberErrors.empty()) {

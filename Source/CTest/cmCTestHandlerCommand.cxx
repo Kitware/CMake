@@ -122,7 +122,7 @@ bool cmCTestHandlerCommand::ExecuteHandlerCommand(HandlerArguments& args,
   cmMakefile& mf = status.GetMakefile();
 
   // Process input arguments.
-  this->CheckArguments(args);
+  this->CheckArguments(args, status);
 
   // Set the config type of this ctest to the current value of the
   // CTEST_CONFIGURATION_TYPE script variable if it is defined.
@@ -166,7 +166,7 @@ bool cmCTestHandlerCommand::ExecuteHandlerCommand(HandlerArguments& args,
   }
 
   cmCTestLog(this->CTest, DEBUG, "Initialize handler" << std::endl);
-  auto handler = this->InitializeHandler(args);
+  auto handler = this->InitializeHandler(args, status);
   if (!handler) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot instantiate test handler " << this->GetName()
@@ -183,7 +183,7 @@ bool cmCTestHandlerCommand::ExecuteHandlerCommand(HandlerArguments& args,
   cmWorkingDirectory workdir(
     this->CTest->GetCTestConfiguration("BuildDirectory"));
   if (workdir.Failed()) {
-    this->SetError(workdir.GetError());
+    status.SetError(workdir.GetError());
     return false;
   }
 
@@ -195,21 +195,23 @@ bool cmCTestHandlerCommand::ExecuteHandlerCommand(HandlerArguments& args,
   if (!args.ReturnValue.empty()) {
     mf.AddDefinition(args.ReturnValue, std::to_string(res));
   }
-  this->ProcessAdditionalValues(handler.get(), args);
+  this->ProcessAdditionalValues(handler.get(), args, status);
   return true;
 }
 
-void cmCTestHandlerCommand::CheckArguments(HandlerArguments&)
+void cmCTestHandlerCommand::CheckArguments(HandlerArguments&,
+                                           cmExecutionStatus&)
 {
 }
 
 std::unique_ptr<cmCTestGenericHandler>
-cmCTestHandlerCommand::InitializeHandler(HandlerArguments&)
+cmCTestHandlerCommand::InitializeHandler(HandlerArguments&, cmExecutionStatus&)
 {
   return nullptr;
 };
 
 void cmCTestHandlerCommand::ProcessAdditionalValues(cmCTestGenericHandler*,
-                                                    HandlerArguments const&)
+                                                    HandlerArguments const&,
+                                                    cmExecutionStatus&)
 {
 }
