@@ -313,11 +313,19 @@ Each entry is meant for installation trees following Windows (``W``), UNIX
 ==================================================================== ==========
  Entry                                                               Convention
 ==================================================================== ==========
+ ``<prefix>/<name>/cps/`` [#p2]_                                        W
+ ``<prefix>/<name>/*/cps/`` [#p2]_                                      W
+ ``<prefix>/cps/<name>/`` [#p2]_                                        W
+ ``<prefix>/cps/<name>/*/`` [#p2]_                                      W
+ ``<prefix>/cps/`` [#p2]_                                               W
  ``<prefix>/``                                                          W
  ``<prefix>/(cmake|CMake)/``                                            W
  ``<prefix>/<name>*/``                                                  W
  ``<prefix>/<name>*/(cmake|CMake)/``                                    W
- ``<prefix>/<name>*/(cmake|CMake)/<name>*/`` [#]_                       W
+ ``<prefix>/<name>*/(cmake|CMake)/<name>*/`` [#p1]_                     W
+ ``<prefix>/(lib/<arch>|lib*|share)/cps/<name>/`` [#p2]_                U
+ ``<prefix>/(lib/<arch>|lib*|share)/cps/<name>/*/`` [#p2]_              U
+ ``<prefix>/(lib/<arch>|lib*|share)/cps/`` [#p2]_                       U
  ``<prefix>/(lib/<arch>|lib*|share)/cmake/<name>*/``                    U
  ``<prefix>/(lib/<arch>|lib*|share)/<name>*/``                          U
  ``<prefix>/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/``            U
@@ -326,22 +334,34 @@ Each entry is meant for installation trees following Windows (``W``), UNIX
  ``<prefix>/<name>*/(lib/<arch>|lib*|share)/<name>*/(cmake|CMake)/``    W/U
 ==================================================================== ==========
 
-.. [#] .. versionadded:: 3.25
+.. [#p1] .. versionadded:: 3.25
+
+.. [#p2] .. versionadded:: 3.32
 
 On systems supporting macOS :prop_tgt:`FRAMEWORK` and :prop_tgt:`BUNDLE`, the
 following directories are searched for Frameworks or Application Bundles
 containing a configuration file:
 
-=========================================================== ==========
- Entry                                                      Convention
-=========================================================== ==========
- ``<prefix>/<name>.framework/Resources/``                      A
- ``<prefix>/<name>.framework/Resources/CMake/``                A
- ``<prefix>/<name>.framework/Versions/*/Resources/``           A
- ``<prefix>/<name>.framework/Versions/*/Resources/CMake/``     A
- ``<prefix>/<name>.app/Contents/Resources/``                   A
- ``<prefix>/<name>.app/Contents/Resources/CMake/``             A
-=========================================================== ==========
+=============================================================== ==========
+ Entry                                                          Convention
+=============================================================== ==========
+ ``<prefix>/<name>.framework/Versions/*/Resources/CPS/`` [#p3]_    A
+ ``<prefix>/<name>.framework/Resources/CPS/`` [#p3]_               A
+ ``<prefix>/<name>.framework/Resources/``                          A
+ ``<prefix>/<name>.framework/Resources/CMake/``                    A
+ ``<prefix>/<name>.framework/Versions/*/Resources/``               A
+ ``<prefix>/<name>.framework/Versions/*/Resources/CMake/``         A
+ ``<prefix>/<name>.app/Contents/Resources/CPS/`` [#p3]_            A
+ ``<prefix>/<name>.app/Contents/Resources/``                       A
+ ``<prefix>/<name>.app/Contents/Resources/CMake/``                 A
+=============================================================== ==========
+
+.. [#p3] .. versionadded:: 3.32
+
+When searching the above paths, ``find_package`` will only look for ``.cps``
+files in search paths which contain ``/cps/``, and will only look for
+``.cmake`` files otherwise.  (This only applies to the paths as specified and
+does not consider the contents of ``<prefix>`` or ``<name>``.)
 
 In all cases the ``<name>`` is treated as case-insensitive and corresponds
 to any of the names specified (``<PackageName>`` or names given by ``NAMES``).
@@ -394,6 +414,12 @@ are still searched on all platforms.  Directories marked with (``A``) are
 intended for installations on Apple platforms.  The
 :variable:`CMAKE_FIND_FRAMEWORK` and :variable:`CMAKE_FIND_APPBUNDLE`
 variables determine the order of preference.
+
+.. warning::
+
+  Setting :variable:`CMAKE_FIND_FRAMEWORK` or :variable:`CMAKE_FIND_APPBUNDLE`
+  to values other than ``FIRST`` (the default) will cause CMake searching for
+  CPS files in an order that is different from the order specified by CPS.
 
 The set of installation prefixes is constructed using the following
 steps.  If ``NO_DEFAULT_PATH`` is specified all ``NO_*`` options are
