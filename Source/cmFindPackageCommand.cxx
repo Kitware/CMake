@@ -12,6 +12,7 @@
 #include <utility>
 
 #include <cm/optional>
+#include <cmext/algorithm>
 #include <cmext/string_view>
 
 #include "cmsys/Directory.hxx"
@@ -2422,8 +2423,12 @@ bool cmFindPackageCommand::CheckDirectory(std::string const& dir)
 {
   assert(!dir.empty() && dir.back() == '/');
 
-  // Look for the file in this directory.
   std::string const d = dir.substr(0, dir.size() - 1);
+  if (cm::contains(this->IgnoredPaths, d)) {
+    return false;
+  }
+
+  // Look for the file in this directory.
   if (this->FindConfigFile(d, this->FileFound)) {
     // Remove duplicate slashes.
     cmSystemTools::ConvertToUnixSlashes(this->FileFound);
@@ -2435,10 +2440,6 @@ bool cmFindPackageCommand::CheckDirectory(std::string const& dir)
 bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
                                           std::string& file)
 {
-  if (this->IgnoredPaths.count(dir)) {
-    return false;
-  }
-
   for (std::string const& c : this->Configs) {
     file = cmStrCat(dir, '/', c);
     if (this->DebugMode) {
