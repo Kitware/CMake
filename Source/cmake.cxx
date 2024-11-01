@@ -2362,7 +2362,6 @@ int cmake::Configure()
 int cmake::ActualConfigure()
 {
   // Construct right now our path conversion table before it's too late:
-  this->UpdateConversionPathTable();
   this->CleanupCommandsAndMacros();
 
   cmSystemTools::RemoveADirectory(this->GetHomeOutputDirectory() +
@@ -3201,31 +3200,6 @@ void cmake::PrintGeneratorList()
   std::cerr << '\n';
   doc.PrintDocumentation(cmDocumentation::ListGenerators, std::cerr);
 #endif
-}
-
-void cmake::UpdateConversionPathTable()
-{
-  // Update the path conversion table with any specified file:
-  cmValue tablepath =
-    this->State->GetInitializedCacheValue("CMAKE_PATH_TRANSLATION_FILE");
-
-  if (tablepath) {
-    cmsys::ifstream table(tablepath->c_str());
-    if (!table) {
-      cmSystemTools::Error("CMAKE_PATH_TRANSLATION_FILE set to " + *tablepath +
-                           ". CMake can not open file.");
-      cmSystemTools::ReportLastSystemError("CMake can not open file.");
-    } else {
-      std::string a;
-      std::string b;
-      while (!table.eof()) {
-        // two entries per line
-        table >> a;
-        table >> b;
-        cmSystemTools::AddTranslationPath(a, b);
-      }
-    }
-  }
 }
 
 int cmake::CheckBuildSystem()

@@ -805,8 +805,6 @@ private:
 
   std::unique_ptr<cmGlobalGenerator> GlobalGenerator;
 
-  void UpdateConversionPathTable();
-
   //! Print a list of valid generators to stderr.
   void PrintGeneratorList();
 
