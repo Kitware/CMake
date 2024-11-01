@@ -54,6 +54,7 @@ Check sizeof a type
   ``LANGUAGE <language>``
     Use the ``<language>`` compiler to perform the check.
     Acceptable values are ``C`` and ``CXX``.
+    If not specified, it defaults to ``C``.
 
 Despite the name of the macro you may use it to check the size of more
 complex expressions, too.  To check e.g.  for the size of a struct
