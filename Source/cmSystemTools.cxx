@@ -22,6 +22,10 @@
 
 #include <iterator>
 
+#ifdef _WIN32
+#  include <unordered_map>
+#endif
+
 #include <cm/optional>
 #include <cmext/algorithm>
 #include <cmext/string_view>
@@ -211,9 +215,28 @@ public:
   {
     return GetDosDriveWorkingDirectory(letter);
   }
+
+  struct NameOnDisk
+  {
+    cmsys::Status Status;
+    std::string Name;
+  };
+  using NameOnDiskMap = std::unordered_map<std::string, NameOnDisk>;
+  NameOnDiskMap CachedNameOnDisk;
+
   cmsys::Status ReadName(std::string const& path, std::string& name) override
   {
-    return ReadNameOnDisk(path, name);
+    // Cache results to avoid repeated filesystem access.
+    // We assume any files created by our own process keep their case.
+    // Index the cache by lower-case paths to make it case-insensitive.
+    std::string path_lower = cmSystemTools::LowerCase(path);
+    auto i = this->CachedNameOnDisk.find(path_lower);
+    if (i == this->CachedNameOnDisk.end()) {
+      i = this->CachedNameOnDisk.emplace(path_lower, NameOnDisk()).first;
+      i->second.Status = ReadNameOnDisk(path, i->second.Name);
+    }
+    name = i->second.Name;
+    return i->second.Status;
   }
 #endif
 };
