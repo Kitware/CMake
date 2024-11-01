@@ -18,12 +18,10 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <utility>
 
 #include <cm/memory>
 
 #include "cmCPluginAPI.h"
-#include "cmCommand.h"
 #include "cmDynamicLoader.h"
 #include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
@@ -124,40 +122,32 @@ struct LoadedCommandImpl : cmLoadedCommandInfo
 };
 
 // a class for loadabple commands
-class cmLoadedCommand : public cmCommand
+class cmLoadedCommand
 {
 public:
-  cmLoadedCommand() = default;
   explicit cmLoadedCommand(CM_INIT_FUNCTION init)
     : Impl(std::make_shared<LoadedCommandImpl>(init))
   {
   }
 
-  /**
-   * This is a virtual constructor for the command.
-   */
-  std::unique_ptr<cmCommand> Clone() override
-  {
-    auto newC = cm::make_unique<cmLoadedCommand>();
-    // we must copy when we clone
-    newC->Impl = this->Impl;
-    return std::unique_ptr<cmCommand>(std::move(newC));
-  }
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus&) override;
+  bool operator()(std::vector<cmListFileArgument> const& args,
+                  cmExecutionStatus& status) const;
 
 private:
   std::shared_ptr<LoadedCommandImpl> Impl;
 };
 
-bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
-                                  cmExecutionStatus&)
+bool cmLoadedCommand::operator()(
+  std::vector<cmListFileArgument> const& arguments,
+  cmExecutionStatus& status) const
 {
+  cmMakefile& mf = status.GetMakefile();
+
+  std::vector<std::string> args;
+  if (!mf.ExpandArguments(arguments, args)) {
+    return true;
+  }
+
   if (!this->Impl->InitialPass) {
     return true;
   }
@@ -177,13 +167,13 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
   for (i = 0; i < argc; ++i) {
     argv[i] = strdup(args[i].c_str());
   }
-  int result = this->Impl->DoInitialPass(this->Makefile, argc, argv);
+  int result = this->Impl->DoInitialPass(&mf, argc, argv);
   cmFreeArguments(argc, argv);
 
   if (result) {
     if (this->Impl->FinalPass) {
       auto impl = this->Impl;
-      this->Makefile->AddGeneratorAction(
+      mf.AddGeneratorAction(
         [impl](cmLocalGenerator& lg, const cmListFileBacktrace&) {
           impl->DoFinalPass(lg.GetMakefile());
         });
@@ -193,7 +183,7 @@ bool cmLoadedCommand::InitialPass(std::vector<std::string> const& args,
 
   /* Initial Pass must have failed so set the error string */
   if (this->Impl->Error) {
-    this->SetError(this->Impl->Error);
+    status.SetError(this->Impl->Error);
   }
   return false;
 }
@@ -270,9 +260,8 @@ bool cmLoadCommandCommand(std::vector<std::string> const& args,
   if (initFunction) {
     return status.GetMakefile().GetState()->AddScriptedCommand(
       args[0],
-      BT<cmState::Command>(
-        cmLegacyCommandWrapper(cm::make_unique<cmLoadedCommand>(initFunction)),
-        status.GetMakefile().GetBacktrace()),
+      BT<cmState::Command>(cmLoadedCommand(initFunction),
+                           status.GetMakefile().GetBacktrace()),
       status.GetMakefile());
   }
   status.SetError("Attempt to load command failed. "
