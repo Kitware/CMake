@@ -26,7 +26,7 @@ public:
    */
   int ProcessHandler() override;
 
-  cmCTestUpdateHandler();
+  cmCTestUpdateHandler(cmCTest* ctest);
 
   enum
   {
@@ -39,11 +39,6 @@ public:
     e_P4,
     e_LAST
   };
-
-  /**
-   * Initialize handler
-   */
-  void Initialize(cmCTest* ctest) override;
 
 private:
   // Some structures needed for update
@@ -60,7 +55,7 @@ private:
   // The VCS command to update the working tree.
   std::string UpdateCommand;
   std::string SourceDirectory;
-  int UpdateType;
+  int UpdateType = e_CVS;
 
   int DetectVCS(const std::string& dir);
   bool SelectVCS();

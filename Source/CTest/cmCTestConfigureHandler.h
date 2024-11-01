@@ -22,7 +22,5 @@ public:
    */
   int ProcessHandler() override;
 
-  cmCTestConfigureHandler();
-
-  void Initialize(cmCTest* ctest) override;
+  cmCTestConfigureHandler(cmCTest* ctest);
 };

@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -38,7 +39,7 @@ public:
                    cmExecutionStatus& status) override;
 
 protected:
-  virtual cmCTestGenericHandler* InitializeHandler() = 0;
+  virtual std::unique_ptr<cmCTestGenericHandler> InitializeHandler() = 0;
 
   virtual void ProcessAdditionalValues(cmCTestGenericHandler* /*handler*/) {}
 

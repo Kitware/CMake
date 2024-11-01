@@ -36,7 +36,7 @@ public:
 protected:
   void BindArguments() override;
 
-  cmCTestTestHandler* InitializeActualHandler() override;
+  std::unique_ptr<cmCTestTestHandler> InitializeActualHandler() override;
 
   void ProcessAdditionalValues(cmCTestGenericHandler* handler) override;
 

@@ -45,9 +45,7 @@ public:
    */
   int ProcessHandler() override;
 
-  cmCTestCoverageHandler();
-
-  void Initialize(cmCTest* ctest) override;
+  cmCTestCoverageHandler(cmCTest* ctest);
 
   /**
    * This method is called when reading CTest custom file

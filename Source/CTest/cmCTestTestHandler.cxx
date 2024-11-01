@@ -274,25 +274,10 @@ inline int GetNextRealNumber(std::string const& in, double& val,
 
 } // namespace
 
-cmCTestTestHandler::cmCTestTestHandler()
+cmCTestTestHandler::cmCTestTestHandler(cmCTest* ctest)
+  : Superclass(ctest)
+  , TestOptions(ctest->GetTestOptions())
 {
-  this->UseUnion = false;
-
-  this->UseIncludeRegExpFlag = false;
-  this->UseExcludeRegExpFlag = false;
-  this->UseExcludeRegExpFirst = false;
-
-  this->CustomMaximumPassedTestOutputSize = 1 * 1024;
-  this->CustomMaximumFailedTestOutputSize = 300 * 1024;
-  this->TestOutputTruncation = cmCTestTypes::TruncationMode::Tail;
-
-  this->MemCheck = false;
-
-  this->LogFile = nullptr;
-
-  // Support for JUnit XML output.
-  this->JUnitXMLFileName = "";
-
   // Regular expressions to scan test output for custom measurements.
 
   // Capture the whole section of test output from the first opening
@@ -313,46 +298,6 @@ cmCTestTestHandler::cmCTestTestHandler()
   this->CustomLabelRegex.compile("<CTestLabel>(.*)</CTestLabel>");
 }
 
-void cmCTestTestHandler::Initialize(cmCTest* ctest)
-{
-  this->Superclass::Initialize(ctest);
-
-  this->ElapsedTestingTime = cmDuration();
-
-  this->TestResults.clear();
-
-  this->CustomTestsIgnore.clear();
-  this->StartTest.clear();
-  this->EndTest.clear();
-
-  this->CustomPreTest.clear();
-  this->CustomPostTest.clear();
-  this->CustomMaximumPassedTestOutputSize = 1 * 1024;
-  this->CustomMaximumFailedTestOutputSize = 300 * 1024;
-  this->TestOutputTruncation = cmCTestTypes::TruncationMode::Tail;
-
-  this->TestsToRun.clear();
-
-  this->UseIncludeRegExpFlag = false;
-  this->UseExcludeRegExpFlag = false;
-  this->UseExcludeRegExpFirst = false;
-  this->IncludeLabelRegularExpressions.clear();
-  this->ExcludeLabelRegularExpressions.clear();
-  this->IncludeRegExp.clear();
-  this->ExcludeRegExp.clear();
-  this->ExcludeFixtureRegExp.clear();
-  this->ExcludeFixtureSetupRegExp.clear();
-  this->ExcludeFixtureCleanupRegExp.clear();
-  this->TestListFile.clear();
-  this->ExcludeTestListFile.clear();
-  this->TestsToRunByName.reset();
-  this->TestsToExcludeByName.reset();
-
-  this->TestsToRunString.clear();
-  this->UseUnion = false;
-  this->TestList.clear();
-}
-
 void cmCTestTestHandler::PopulateCustomVectors(cmMakefile* mf)
 {
   this->CTest->PopulateCustomVector(mf, "CTEST_CUSTOM_PRE_TEST",
@@ -363,46 +308,19 @@ void cmCTestTestHandler::PopulateCustomVectors(cmMakefile* mf)
                                     this->CustomTestsIgnore);
   this->CTest->PopulateCustomInteger(
     mf, "CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE",
-    this->CustomMaximumPassedTestOutputSize);
+    this->TestOptions.OutputSizePassed);
   this->CTest->PopulateCustomInteger(
     mf, "CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE",
-    this->CustomMaximumFailedTestOutputSize);
+    this->TestOptions.OutputSizeFailed);
 
   cmValue dval = mf->GetDefinition("CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION");
   if (dval) {
-    if (!this->SetTestOutputTruncation(*dval)) {
+    if (!SetTruncationMode(this->TestOptions.OutputTruncation, *dval)) {
       cmCTestLog(this->CTest, ERROR_MESSAGE,
                  "Invalid value for CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION: "
                    << *dval << std::endl);
     }
   }
-}
-
-void cmCTestTestHandler::SetCMakeVariables(cmMakefile& mf)
-{
-  mf.AddDefinition("CTEST_CUSTOM_PRE_TEST",
-                   cmList(this->CustomPreTest).to_string());
-  mf.AddDefinition("CTEST_CUSTOM_POST_TEST",
-                   cmList(this->CustomPostTest).to_string());
-  mf.AddDefinition("CTEST_CUSTOM_TESTS_IGNORE",
-                   cmList(this->CustomTestsIgnore).to_string());
-  mf.AddDefinition("CTEST_CUSTOM_MAXIMUM_PASSED_TEST_OUTPUT_SIZE",
-                   std::to_string(this->CustomMaximumPassedTestOutputSize));
-  mf.AddDefinition("CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE",
-                   std::to_string(this->CustomMaximumFailedTestOutputSize));
-  mf.AddDefinition("CTEST_CUSTOM_TEST_OUTPUT_TRUNCATION",
-                   [this]() -> cm::string_view {
-                     switch (this->TestOutputTruncation) {
-                       case cmCTestTypes::TruncationMode::Tail:
-                         return "tail"_s;
-                       case cmCTestTypes::TruncationMode::Middle:
-                         return "middle"_s;
-                       case cmCTestTypes::TruncationMode::Head:
-                         return "head"_s;
-                       default:
-                         return ""_s;
-                     }
-                   }());
 }
 
 int cmCTestTestHandler::PreProcessHandler()
@@ -546,12 +464,11 @@ static bool BuildLabelRE(const std::vector<std::string>& parts,
 bool cmCTestTestHandler::ProcessOptions()
 {
   // Update internal data structure from generic one
-  this->SetTestsToRunInformation(this->GetOption("TestsToRunInformation"));
-  this->SetUseUnion(this->GetOption("UseUnion").IsOn());
-  if (this->GetOption("ScheduleRandom").IsOn()) {
+  this->SetTestsToRunInformation(this->TestOptions.TestsToRunInformation);
+  if (this->TestOptions.ScheduleRandom) {
     this->CTest->SetScheduleType("Random");
   }
-  if (cmValue repeat = this->GetOption("Repeat")) {
+  if (auto repeat = this->Repeat) {
     cmsys::RegularExpression repeatRegex(
       "^(UNTIL_FAIL|UNTIL_PASS|AFTER_TIMEOUT):([0-9]+)$");
     if (repeatRegex.find(*repeat)) {
@@ -575,8 +492,8 @@ bool cmCTestTestHandler::ProcessOptions()
       return false;
     }
   }
-  if (cmValue parallelLevel = this->GetOption("ParallelLevel")) {
-    if (parallelLevel.IsEmpty()) {
+  if (auto parallelLevel = this->ParallelLevel) {
+    if (parallelLevel->empty()) {
       // An empty value tells ctest to choose a default.
       this->CTest->SetParallelLevel(cm::nullopt);
     } else {
@@ -592,50 +509,20 @@ bool cmCTestTestHandler::ProcessOptions()
     }
   }
 
-  if (this->GetOption("StopOnFailure")) {
+  if (this->TestOptions.StopOnFailure) {
     this->CTest->SetStopOnFailure(true);
   }
 
-  BuildLabelRE(this->GetMultiOption("LabelRegularExpression"),
+  BuildLabelRE(this->TestOptions.LabelRegularExpression,
                this->IncludeLabelRegularExpressions);
-  BuildLabelRE(this->GetMultiOption("ExcludeLabelRegularExpression"),
+  BuildLabelRE(this->TestOptions.ExcludeLabelRegularExpression,
                this->ExcludeLabelRegularExpressions);
-  cmValue val = this->GetOption("IncludeRegularExpression");
-  if (val) {
+  if (!this->TestOptions.IncludeRegularExpression.empty()) {
     this->UseIncludeRegExp();
-    this->SetIncludeRegExp(*val);
   }
-  val = this->GetOption("ExcludeRegularExpression");
-  if (val) {
+  if (!this->TestOptions.ExcludeRegularExpression.empty()) {
     this->UseExcludeRegExp();
-    this->SetExcludeRegExp(*val);
   }
-  val = this->GetOption("ExcludeFixtureRegularExpression");
-  if (val) {
-    this->ExcludeFixtureRegExp = *val;
-  }
-  val = this->GetOption("ExcludeFixtureSetupRegularExpression");
-  if (val) {
-    this->ExcludeFixtureSetupRegExp = *val;
-  }
-  val = this->GetOption("ExcludeFixtureCleanupRegularExpression");
-  if (val) {
-    this->ExcludeFixtureCleanupRegExp = *val;
-  }
-  val = this->GetOption("ResourceSpecFile");
-  if (val) {
-    this->ResourceSpecFile = *val;
-  }
-  val = this->GetOption("TestListFile");
-  if (val) {
-    this->TestListFile = val;
-  }
-  val = this->GetOption("ExcludeTestListFile");
-  if (val) {
-    this->ExcludeTestListFile = val;
-  }
-  this->SetRerunFailed(this->GetOption("RerunFailed").IsOn());
-
   return true;
 }
 
@@ -947,7 +834,7 @@ bool cmCTestTestHandler::ComputeTestList()
     return false;
   }
 
-  if (this->RerunFailed) {
+  if (this->TestOptions.RerunFailed) {
     return this->ComputeTestListForRerunFailed();
   }
 
@@ -961,7 +848,7 @@ bool cmCTestTestHandler::ComputeTestList()
     }
   }
   // expand the test list based on the union flag
-  if (this->UseUnion) {
+  if (this->TestOptions.UseUnion) {
     this->ExpandTestsToRunInformation(static_cast<int>(tmsize));
   } else {
     this->ExpandTestsToRunInformation(inREcnt);
@@ -976,7 +863,7 @@ bool cmCTestTestHandler::ComputeTestList()
       inREcnt++;
     }
 
-    if (this->UseUnion) {
+    if (this->TestOptions.UseUnion) {
       // if it is not in the list and not in the regexp then skip
       if ((!this->TestsToRun.empty() &&
            !cm::contains(this->TestsToRun, cnt)) &&
@@ -1059,22 +946,24 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
                      this->Quiet);
 
   // Prepare regular expression evaluators
-  std::string setupRegExp(this->ExcludeFixtureRegExp);
-  std::string cleanupRegExp(this->ExcludeFixtureRegExp);
-  if (!this->ExcludeFixtureSetupRegExp.empty()) {
+  std::string setupRegExp(this->TestOptions.ExcludeFixtureRegularExpression);
+  std::string cleanupRegExp(this->TestOptions.ExcludeFixtureRegularExpression);
+  if (!this->TestOptions.ExcludeFixtureSetupRegularExpression.empty()) {
     if (setupRegExp.empty()) {
-      setupRegExp = this->ExcludeFixtureSetupRegExp;
+      setupRegExp = this->TestOptions.ExcludeFixtureSetupRegularExpression;
     } else {
-      setupRegExp.append("(" + setupRegExp + ")|(" +
-                         this->ExcludeFixtureSetupRegExp + ")");
+      setupRegExp.append(
+        "(" + setupRegExp + ")|(" +
+        this->TestOptions.ExcludeFixtureSetupRegularExpression + ")");
     }
   }
-  if (!this->ExcludeFixtureCleanupRegExp.empty()) {
+  if (!this->TestOptions.ExcludeFixtureCleanupRegularExpression.empty()) {
     if (cleanupRegExp.empty()) {
-      cleanupRegExp = this->ExcludeFixtureCleanupRegExp;
+      cleanupRegExp = this->TestOptions.ExcludeFixtureCleanupRegularExpression;
     } else {
-      cleanupRegExp.append("(" + cleanupRegExp + ")|(" +
-                           this->ExcludeFixtureCleanupRegExp + ")");
+      cleanupRegExp.append(
+        "(" + cleanupRegExp + ")|(" +
+        this->TestOptions.ExcludeFixtureCleanupRegularExpression + ")");
     }
   }
   cmsys::RegularExpression excludeSetupRegex(setupRegExp);
@@ -1456,7 +1345,7 @@ bool cmCTestTestHandler::ProcessDirectory(std::vector<std::string>& passed,
     tests[p.Index].Depends = depends;
     properties[p.Index] = &p;
   }
-  parallel->SetResourceSpecFile(this->ResourceSpecFile);
+  parallel->SetResourceSpecFile(this->TestOptions.ResourceSpecFile);
   if (!parallel->SetTests(std::move(tests), std::move(properties))) {
     return false;
   }
@@ -1492,7 +1381,7 @@ void cmCTestTestHandler::GenerateCTestXML(cmXMLWriter& xml)
     return;
   }
 
-  this->CTest->StartXML(xml, this->AppendXML);
+  this->CTest->StartXML(xml, this->CMake, this->AppendXML);
   this->CTest->GenerateSubprojectsOutput(xml);
   xml.StartElement("Testing");
   xml.Element("StartDateTime", this->StartTest);
@@ -1835,11 +1724,13 @@ bool cmCTestTestHandler::ParseResourceGroupsProperty(
 
 bool cmCTestTestHandler::GetListOfTests()
 {
-  if (!this->IncludeRegExp.empty()) {
-    this->IncludeTestsRegularExpression.compile(this->IncludeRegExp);
+  if (!this->TestOptions.IncludeRegularExpression.empty()) {
+    this->IncludeTestsRegularExpression.compile(
+      this->TestOptions.IncludeRegularExpression);
   }
-  if (!this->ExcludeRegExp.empty()) {
-    this->ExcludeTestsRegularExpression.compile(this->ExcludeRegExp);
+  if (!this->TestOptions.ExcludeRegularExpression.empty()) {
+    this->ExcludeTestsRegularExpression.compile(
+      this->TestOptions.ExcludeRegularExpression);
   }
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Constructing a list of tests" << std::endl, this->Quiet);
@@ -1889,19 +1780,20 @@ bool cmCTestTestHandler::GetListOfTests()
     return false;
   }
   cmValue specFile = mf.GetDefinition("CTEST_RESOURCE_SPEC_FILE");
-  if (this->ResourceSpecFile.empty() && specFile) {
-    this->ResourceSpecFile = *specFile;
+  if (this->TestOptions.ResourceSpecFile.empty() && specFile) {
+    this->TestOptions.ResourceSpecFile = *specFile;
   }
 
-  if (!this->TestListFile.empty()) {
-    this->TestsToRunByName = this->ReadTestListFile(this->TestListFile);
+  if (!this->TestOptions.TestListFile.empty()) {
+    this->TestsToRunByName =
+      this->ReadTestListFile(this->TestOptions.TestListFile);
     if (!this->TestsToRunByName) {
       return false;
     }
   }
-  if (!this->ExcludeTestListFile.empty()) {
+  if (!this->TestOptions.ExcludeTestListFile.empty()) {
     this->TestsToExcludeByName =
-      this->ReadTestListFile(this->ExcludeTestListFile);
+      this->ReadTestListFile(this->TestOptions.ExcludeTestListFile);
     if (!this->TestsToExcludeByName) {
       return false;
     }
@@ -2178,41 +2070,14 @@ void cmCTestTestHandler::RecordCustomTestMeasurements(cmXMLWriter& xml,
   }
 }
 
-void cmCTestTestHandler::SetIncludeRegExp(const std::string& arg)
+void cmCTestTestHandler::SetTestsToRunInformation(std::string const& in)
 {
-  this->IncludeRegExp = arg;
-}
-
-void cmCTestTestHandler::SetExcludeRegExp(const std::string& arg)
-{
-  this->ExcludeRegExp = arg;
-}
-
-bool cmCTestTestHandler::SetTestOutputTruncation(const std::string& mode)
-{
-  if (mode == "tail") {
-    this->TestOutputTruncation = cmCTestTypes::TruncationMode::Tail;
-  } else if (mode == "middle") {
-    this->TestOutputTruncation = cmCTestTypes::TruncationMode::Middle;
-  } else if (mode == "head") {
-    this->TestOutputTruncation = cmCTestTypes::TruncationMode::Head;
-  } else {
-    return false;
-  }
-  return true;
-}
-
-void cmCTestTestHandler::SetTestsToRunInformation(cmValue in)
-{
-  if (!in) {
-    return;
-  }
-  this->TestsToRunString = *in;
+  this->TestsToRunString = in;
   // if the argument is a file, then read it and use the contents as the
   // string
-  if (cmSystemTools::FileExists(*in)) {
-    cmsys::ifstream fin(in->c_str());
-    unsigned long filelen = cmSystemTools::FileLength(*in);
+  if (cmSystemTools::FileExists(in)) {
+    cmsys::ifstream fin(in.c_str());
+    unsigned long filelen = cmSystemTools::FileLength(in);
     auto buff = cm::make_unique<char[]>(filelen + 1);
     fin.getline(buff.get(), filelen);
     buff[fin.gcount()] = 0;
@@ -2615,22 +2480,22 @@ bool cmCTestTestHandler::cmCTestTestResourceRequirement::operator!=(
 
 void cmCTestTestHandler::SetJUnitXMLFileName(const std::string& filename)
 {
-  this->JUnitXMLFileName = filename;
+  this->TestOptions.JUnitXMLFileName = filename;
 }
 
 bool cmCTestTestHandler::WriteJUnitXML()
 {
-  if (this->JUnitXMLFileName.empty()) {
+  if (this->TestOptions.JUnitXMLFileName.empty()) {
     return true;
   }
 
   // Open new XML file for writing.
   cmGeneratedFileStream xmlfile;
   xmlfile.SetTempExt("tmp");
-  xmlfile.Open(this->JUnitXMLFileName);
+  xmlfile.Open(this->TestOptions.JUnitXMLFileName);
   if (!xmlfile) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Problem opening file: " << this->JUnitXMLFileName
+               "Problem opening file: " << this->TestOptions.JUnitXMLFileName
                                         << std::endl);
     return false;
   }

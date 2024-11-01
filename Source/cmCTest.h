@@ -19,19 +19,12 @@
 #include "cmDuration.h"
 #include "cmProcessOutput.h"
 
-class cmCTestBuildHandler;
-class cmCTestCoverageHandler;
-class cmCTestScriptHandler;
-class cmCTestTestHandler;
-class cmCTestUpdateHandler;
-class cmCTestConfigureHandler;
-class cmCTestMemCheckHandler;
-class cmCTestSubmitHandler;
-class cmCTestUploadHandler;
+class cmake;
 class cmGeneratedFileStream;
 class cmMakefile;
 class cmValue;
 class cmXMLWriter;
+struct cmCTestTestOptions;
 
 /** \class cmCTest
  * \brief Represents a ctest invocation.
@@ -236,7 +229,7 @@ public:
   static std::string SafeBuildIdField(const std::string& value);
 
   /** Start CTest XML output file */
-  void StartXML(cmXMLWriter& xml, bool append);
+  void StartXML(cmXMLWriter& xml, cmake* cm, bool append);
 
   /** End CTest XML output file */
   void EndXML(cmXMLWriter& xml);
@@ -289,19 +282,6 @@ public:
   void SetProduceXML(bool v);
 
   /**
-   * Get the handler object
-   */
-  cmCTestBuildHandler* GetBuildHandler();
-  cmCTestCoverageHandler* GetCoverageHandler();
-  cmCTestScriptHandler* GetScriptHandler();
-  cmCTestTestHandler* GetTestHandler();
-  cmCTestUpdateHandler* GetUpdateHandler();
-  cmCTestConfigureHandler* GetConfigureHandler();
-  cmCTestMemCheckHandler* GetMemCheckHandler();
-  cmCTestSubmitHandler* GetSubmitHandler();
-  cmCTestUploadHandler* GetUploadHandler();
-
-  /**
    * Set the CTest variable from CMake variable
    */
   bool SetCTestConfigurationFromCMakeVariable(cmMakefile* mf,
@@ -331,7 +311,7 @@ public:
   void AddCTestConfigurationOverwrite(const std::string& encstr);
 
   /** Create XML file that contains all the notes specified */
-  int GenerateNotesFile(std::vector<std::string> const& files);
+  int GenerateNotesFile(cmake* cm, std::vector<std::string> const& files);
 
   /** Create XML file to indicate that build is complete */
   int GenerateDoneFile();
@@ -405,8 +385,9 @@ public:
 
   bool GetVerbose() const;
   bool GetExtraVerbose() const;
+  int GetSubmitIndex() const;
 
-  void AddSiteProperties(cmXMLWriter& xml);
+  void AddSiteProperties(cmXMLWriter& xml, cmake* cm);
 
   bool GetLabelSummary() const;
   bool GetSubprojectSummary() const;
@@ -443,13 +424,11 @@ public:
   /** Reread the configuration file */
   bool UpdateCTestConfiguration();
 
-private:
-  void SetPersistentOptionIfNotEmpty(const std::string& value,
-                                     const std::string& optionName);
-  void AddPersistentMultiOptionIfNotEmpty(const std::string& value,
-                                          const std::string& optionName);
+  cmCTestTestOptions const& GetTestOptions() const;
+  std::vector<std::string> GetCommandLineHttpHeaders() const;
 
-  int GenerateNotesFile(const std::string& files);
+private:
+  int GenerateNotesFile(cmake* cm, const std::string& files);
 
   void BlockTestErrorDiagnostics();
 
@@ -477,7 +456,7 @@ private:
   static bool ColoredOutputSupportedByConsole();
 
   /** Create note from files. */
-  int GenerateCTestNotesOutput(cmXMLWriter& xml,
+  int GenerateCTestNotesOutput(cmXMLWriter& xml, cmake* cm,
                                std::vector<std::string> const& files);
 
   /** Check if the argument is the one specified */

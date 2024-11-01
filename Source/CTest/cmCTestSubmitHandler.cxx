@@ -19,7 +19,6 @@
 #include "cmAlgorithms.h"
 #include "cmCTest.h"
 #include "cmCTestCurl.h"
-#include "cmCTestScriptHandler.h"
 #include "cmCryptoHash.h"
 #include "cmCurl.h"
 #include "cmDuration.h"
@@ -117,23 +116,15 @@ static size_t cmCTestSubmitHandlerCurlDebugCallback(CURL* /*unused*/,
   return 0;
 }
 
-cmCTestSubmitHandler::cmCTestSubmitHandler() = default;
-
-void cmCTestSubmitHandler::Initialize(cmCTest* ctest)
+cmCTestSubmitHandler::cmCTestSubmitHandler(cmCTest* ctest)
+  : Superclass(ctest)
+  , HttpHeaders(ctest->GetCommandLineHttpHeaders())
 {
-  this->Superclass::Initialize(ctest);
   // We submit all available parts by default.
   for (cmCTest::Part p = cmCTest::PartStart; p != cmCTest::PartCount;
        p = static_cast<cmCTest::Part>(p + 1)) {
     this->SubmitPart[p] = true;
   }
-  this->HasWarnings = false;
-  this->HasErrors = false;
-  this->HTTPProxy.clear();
-  this->HTTPProxyType = 0;
-  this->HTTPProxyAuth.clear();
-  this->LogFile = nullptr;
-  this->Files.clear();
 }
 
 bool cmCTestSubmitHandler::SubmitUsingHTTP(
@@ -259,9 +250,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(
         upload_as += ctest_curl.Escape(this->CTest->GetCurrentTag());
         upload_as += "-";
         upload_as += ctest_curl.Escape(this->CTest->GetTestGroupString());
-        cmCTestScriptHandler* ch = this->CTest->GetScriptHandler();
-        cmake* cm = ch->GetCMake();
-        if (cm) {
+        if (cmake* cm = this->CMake) {
           cmValue subproject = cm->GetState()->GetGlobalProperty("SubProject");
           if (subproject) {
             upload_as += "&subproject=";
@@ -556,9 +545,8 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   //    has already been uploaded
   // TODO I added support for subproject. You would need to add
   // a "&subproject=subprojectname" to the first POST.
-  cmCTestScriptHandler* ch = this->CTest->GetScriptHandler();
-  cmake* cm = ch->GetCMake();
-  cmValue subproject = cm->GetState()->GetGlobalProperty("SubProject");
+  cmValue subproject =
+    this->CMake->GetState()->GetGlobalProperty("SubProject");
   // TODO: Encode values for a URL instead of trusting caller.
   std::ostringstream str;
   if (subproject) {

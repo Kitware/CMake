@@ -39,7 +39,7 @@ public:
 protected:
   void BindArguments() override;
   void CheckArguments() override;
-  cmCTestGenericHandler* InitializeHandler() override;
+  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
 
   bool CDashUpload = false;
   bool InternalTest = false;

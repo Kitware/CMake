@@ -296,11 +296,11 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
   if (!this->TestHandler->MemCheck && started) {
     this->TestHandler->CleanTestOutput(
       this->ProcessOutput,
-      static_cast<size_t>(
-        this->TestResult.Status == cmCTestTestHandler::COMPLETED
-          ? this->TestHandler->CustomMaximumPassedTestOutputSize
-          : this->TestHandler->CustomMaximumFailedTestOutputSize),
-      this->TestHandler->TestOutputTruncation);
+      static_cast<size_t>(this->TestResult.Status ==
+                              cmCTestTestHandler::COMPLETED
+                            ? this->TestHandler->TestOptions.OutputSizePassed
+                            : this->TestHandler->TestOptions.OutputSizeFailed),
+      this->TestHandler->TestOptions.OutputTruncation);
   }
   this->TestResult.Reason = reason;
   if (this->TestHandler->LogFile) {

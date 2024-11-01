@@ -3,11 +3,13 @@
 #include "cmCTestUpdateCommand.h"
 
 #include "cmCTest.h"
+#include "cmCTestGenericHandler.h"
 #include "cmCTestUpdateHandler.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 
-cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
+std::unique_ptr<cmCTestGenericHandler>
+cmCTestUpdateCommand::InitializeHandler()
 {
   if (!this->Source.empty()) {
     this->CTest->SetCTestConfiguration(
@@ -73,13 +75,12 @@ cmCTestGenericHandler* cmCTestUpdateCommand::InitializeHandler()
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "P4Options", "CTEST_P4_OPTIONS", this->Quiet);
 
-  cmCTestUpdateHandler* handler = this->CTest->GetUpdateHandler();
-  handler->Initialize(this->CTest);
+  auto handler = cm::make_unique<cmCTestUpdateHandler>(this->CTest);
   if (source_dir.empty()) {
     this->SetError("source directory not specified. Please use SOURCE tag");
     return nullptr;
   }
   handler->SourceDirectory = source_dir;
   handler->SetQuiet(this->Quiet);
-  return handler;
+  return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
 }

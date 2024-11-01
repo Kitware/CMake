@@ -8,8 +8,7 @@
 
 #include "cmCTest.h"
 #include "cmCTestCoverageHandler.h"
-
-class cmCTestGenericHandler;
+#include "cmCTestGenericHandler.h"
 
 void cmCTestCoverageCommand::BindArguments()
 {
@@ -17,15 +16,15 @@ void cmCTestCoverageCommand::BindArguments()
   this->Bind("LABELS"_s, this->Labels);
 }
 
-cmCTestGenericHandler* cmCTestCoverageCommand::InitializeHandler()
+std::unique_ptr<cmCTestGenericHandler>
+cmCTestCoverageCommand::InitializeHandler()
 {
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "CoverageCommand", "CTEST_COVERAGE_COMMAND", this->Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(
     this->Makefile, "CoverageExtraFlags", "CTEST_COVERAGE_EXTRA_FLAGS",
     this->Quiet);
-  cmCTestCoverageHandler* handler = this->CTest->GetCoverageHandler();
-  handler->Initialize(this->CTest);
+  auto handler = cm::make_unique<cmCTestCoverageHandler>(this->CTest);
 
   // If a LABELS option was given, select only files with the labels.
   if (this->Labels) {
@@ -34,5 +33,5 @@ cmCTestGenericHandler* cmCTestCoverageCommand::InitializeHandler()
   }
 
   handler->SetQuiet(this->Quiet);
-  return handler;
+  return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
 }

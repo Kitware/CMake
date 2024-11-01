@@ -6,10 +6,12 @@
 #include <cstdlib>
 #include <ratio>
 #include <sstream>
+#include <vector>
 
 #include <cmext/string_view>
 
 #include "cmCTest.h"
+#include "cmCTestGenericHandler.h"
 #include "cmCTestTestHandler.h"
 #include "cmDuration.h"
 #include "cmMakefile.h"
@@ -41,7 +43,7 @@ void cmCTestTestCommand::BindArguments()
   this->Bind("OUTPUT_JUNIT"_s, this->OutputJUnit);
 }
 
-cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
+std::unique_ptr<cmCTestGenericHandler> cmCTestTestCommand::InitializeHandler()
 {
   cmValue ctestTimeout = this->Makefile->GetDefinition("CTEST_TEST_TIMEOUT");
 
@@ -63,59 +65,58 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
     this->ResourceSpecFile = *resourceSpecFile;
   }
 
-  cmCTestTestHandler* handler = this->InitializeActualHandler();
+  auto handler = this->InitializeActualHandler();
   if (!this->Start.empty() || !this->End.empty() || !this->Stride.empty()) {
-    handler->SetOption(
-      "TestsToRunInformation",
-      cmStrCat(this->Start, ',', this->End, ',', this->Stride));
+    handler->TestOptions.TestsToRunInformation =
+      cmStrCat(this->Start, ',', this->End, ',', this->Stride);
   }
   if (!this->Exclude.empty()) {
-    handler->SetOption("ExcludeRegularExpression", this->Exclude);
+    handler->TestOptions.ExcludeRegularExpression = this->Exclude;
   }
   if (!this->Include.empty()) {
-    handler->SetOption("IncludeRegularExpression", this->Include);
+    handler->TestOptions.IncludeRegularExpression = this->Include;
   }
   if (!this->ExcludeLabel.empty()) {
-    handler->AddMultiOption("ExcludeLabelRegularExpression",
-                            this->ExcludeLabel);
+    handler->TestOptions.ExcludeLabelRegularExpression.push_back(
+      this->ExcludeLabel);
   }
   if (!this->IncludeLabel.empty()) {
-    handler->AddMultiOption("LabelRegularExpression", this->IncludeLabel);
+    handler->TestOptions.LabelRegularExpression.push_back(this->IncludeLabel);
   }
 
   if (!this->ExcludeTestsFromFile.empty()) {
-    handler->SetOption("ExcludeTestListFile", this->ExcludeTestsFromFile);
+    handler->TestOptions.ExcludeTestListFile = this->ExcludeTestsFromFile;
   }
   if (!this->IncludeTestsFromFile.empty()) {
-    handler->SetOption("TestListFile", this->IncludeTestsFromFile);
+    handler->TestOptions.TestListFile = this->IncludeTestsFromFile;
   }
 
   if (!this->ExcludeFixture.empty()) {
-    handler->SetOption("ExcludeFixtureRegularExpression",
-                       this->ExcludeFixture);
+    handler->TestOptions.ExcludeFixtureRegularExpression =
+      this->ExcludeFixture;
   }
   if (!this->ExcludeFixtureSetup.empty()) {
-    handler->SetOption("ExcludeFixtureSetupRegularExpression",
-                       this->ExcludeFixtureSetup);
+    handler->TestOptions.ExcludeFixtureSetupRegularExpression =
+      this->ExcludeFixtureSetup;
   }
   if (!this->ExcludeFixtureCleanup.empty()) {
-    handler->SetOption("ExcludeFixtureCleanupRegularExpression",
-                       this->ExcludeFixtureCleanup);
+    handler->TestOptions.ExcludeFixtureCleanupRegularExpression =
+      this->ExcludeFixtureCleanup;
   }
   if (this->StopOnFailure) {
-    handler->SetOption("StopOnFailure", "ON");
+    handler->TestOptions.StopOnFailure = true;
   }
   if (this->ParallelLevel) {
-    handler->SetOption("ParallelLevel", *this->ParallelLevel);
+    handler->ParallelLevel = *this->ParallelLevel;
   }
   if (!this->Repeat.empty()) {
-    handler->SetOption("Repeat", this->Repeat);
+    handler->Repeat = this->Repeat;
   }
   if (!this->ScheduleRandom.empty()) {
-    handler->SetOption("ScheduleRandom", this->ScheduleRandom);
+    handler->TestOptions.ScheduleRandom = cmValue(this->ScheduleRandom).IsOn();
   }
   if (!this->ResourceSpecFile.empty()) {
-    handler->SetOption("ResourceSpecFile", this->ResourceSpecFile);
+    handler->TestOptions.ResourceSpecFile = this->ResourceSpecFile;
   }
   if (!this->StopTime.empty()) {
     this->CTest->SetStopTime(this->StopTime);
@@ -156,12 +157,11 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   }
 
   handler->SetQuiet(this->Quiet);
-  return handler;
+  return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
 }
 
-cmCTestTestHandler* cmCTestTestCommand::InitializeActualHandler()
+std::unique_ptr<cmCTestTestHandler>
+cmCTestTestCommand::InitializeActualHandler()
 {
-  cmCTestTestHandler* handler = this->CTest->GetTestHandler();
-  handler->Initialize(this->CTest);
-  return handler;
+  return cm::make_unique<cmCTestTestHandler>(this->CTest);
 }

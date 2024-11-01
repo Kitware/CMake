@@ -11,6 +11,7 @@
 #include <cmext/string_view>
 
 #include "cmCTest.h"
+#include "cmCTestGenericHandler.h"
 #include "cmCTestSubmitHandler.h"
 #include "cmCommand.h"
 #include "cmList.h"
@@ -32,7 +33,8 @@ std::unique_ptr<cmCommand> cmCTestSubmitCommand::Clone()
   return std::unique_ptr<cmCommand>(std::move(ni));
 }
 
-cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
+std::unique_ptr<cmCTestGenericHandler>
+cmCTestSubmitCommand::InitializeHandler()
 {
   cmValue submitURL = !this->SubmitURL.empty()
     ? cmValue(this->SubmitURL)
@@ -108,7 +110,8 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     this->Makefile->GetDefinition("CTEST_NOTES_FILES");
   if (notesFilesVariable) {
     cmList notesFiles{ *notesFilesVariable };
-    this->CTest->GenerateNotesFile(notesFiles);
+    this->CTest->GenerateNotesFile(this->Makefile->GetCMakeInstance(),
+                                   notesFiles);
   }
 
   cmValue extraFilesVariable =
@@ -121,8 +124,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     }
   }
 
-  cmCTestSubmitHandler* handler = this->CTest->GetSubmitHandler();
-  handler->Initialize(this->CTest);
+  auto handler = cm::make_unique<cmCTestSubmitHandler>(this->CTest);
 
   // If no FILES or PARTS given, *all* PARTS are submitted by default.
   //
@@ -175,7 +177,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     handler->CDashUploadFile = this->CDashUploadFile;
     handler->CDashUploadType = this->CDashUploadType;
   }
-  return handler;
+  return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
 }
 
 bool cmCTestSubmitCommand::InitialPass(std::vector<std::string> const& args,

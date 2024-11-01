@@ -5,12 +5,18 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <cm/string_view>
+
 namespace cmCTestTypes {
 
+// Test output truncation mode
 enum class TruncationMode
-{ // Test output truncation mode
+{
   Tail,
   Middle,
   Head
 };
-}
+
+bool SetTruncationMode(TruncationMode& mode, cm::string_view str);
+
+} // namespace cmCTestTypes

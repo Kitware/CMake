@@ -37,14 +37,9 @@ public:
    */
   int ProcessHandler() override;
 
-  cmCTestBuildHandler();
+  cmCTestBuildHandler(cmCTest* ctest);
 
   void PopulateCustomVectors(cmMakefile* mf) override;
-
-  /**
-   * Initialize handler
-   */
-  void Initialize(cmCTest* ctest) override;
 
   int GetTotalErrors() const { return this->TotalErrors; }
   int GetTotalWarnings() const { return this->TotalWarnings; }
@@ -121,34 +116,34 @@ private:
 
   t_BuildProcessingQueueType BuildProcessingQueue;
   t_BuildProcessingQueueType BuildProcessingErrorQueue;
-  size_t BuildOutputLogSize;
+  size_t BuildOutputLogSize = 0;
   std::vector<char> CurrentProcessingLine;
 
   std::string SimplifySourceDir;
   std::string SimplifyBuildDir;
-  size_t OutputLineCounter;
+  size_t OutputLineCounter = 0;
   using t_ErrorsAndWarningsVector = std::vector<cmCTestBuildErrorWarning>;
   t_ErrorsAndWarningsVector ErrorsAndWarnings;
   t_ErrorsAndWarningsVector::iterator LastErrorOrWarning;
-  size_t PostContextCount;
-  size_t MaxPreContext;
-  size_t MaxPostContext;
+  size_t PostContextCount = 0;
+  size_t MaxPreContext = 10;
+  size_t MaxPostContext = 10;
   std::deque<std::string> PreContext;
 
-  int TotalErrors;
-  int TotalWarnings;
-  char LastTickChar;
+  int TotalErrors = 0;
+  int TotalWarnings = 0;
+  char LastTickChar = '\0';
 
-  bool ErrorQuotaReached;
-  bool WarningQuotaReached;
+  bool ErrorQuotaReached = false;
+  bool WarningQuotaReached = false;
 
-  int MaxErrors;
-  int MaxWarnings;
+  int MaxErrors = 50;
+  int MaxWarnings = 50;
 
   // Used to remove ANSI color codes before checking for errors and warnings.
   cmStringReplaceHelper* ColorRemover;
 
-  bool UseCTestLaunch;
+  bool UseCTestLaunch = false;
   std::string CTestLaunchDir;
   class LaunchHelper;
 

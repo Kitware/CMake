@@ -38,5 +38,5 @@ public:
   std::string GetName() const override { return "ctest_update"; }
 
 protected:
-  cmCTestGenericHandler* InitializeHandler() override;
+  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
 };

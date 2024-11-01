@@ -8,8 +8,6 @@
 #include <string>
 #include <vector>
 
-#include "cmCTestGenericHandler.h"
-
 class cmCTest;
 class cmCTestCommand;
 class cmGlobalGenerator;
@@ -19,11 +17,9 @@ class cmake;
 /** \class cmCTestScriptHandler
  * \brief A class that handles ctest -S invocations
  */
-class cmCTestScriptHandler : public cmCTestGenericHandler
+class cmCTestScriptHandler
 {
 public:
-  using Superclass = cmCTestGenericHandler;
-
   /**
    * Add a script to run, and if is should run in the current process
    */
@@ -32,7 +28,7 @@ public:
   /**
    * Run a dashboard using a specified configuration script
    */
-  int ProcessHandler() override;
+  int ProcessHandler();
 
   /*
    * Run a script
@@ -46,12 +42,10 @@ public:
    */
   void UpdateElapsedTime();
 
-  cmCTestScriptHandler();
+  cmCTestScriptHandler(cmCTest* ctest);
   cmCTestScriptHandler(const cmCTestScriptHandler&) = delete;
   const cmCTestScriptHandler& operator=(const cmCTestScriptHandler&) = delete;
-  ~cmCTestScriptHandler() override;
-
-  void Initialize(cmCTest* ctest) override;
+  ~cmCTestScriptHandler();
 
   void CreateCMake();
   cmake* GetCMake() { return this->CMake.get(); }
@@ -68,6 +62,7 @@ private:
   void AddCTestCommand(std::string const& name,
                        std::unique_ptr<cmCTestCommand> command);
 
+  cmCTest* CTest = nullptr;
   std::vector<std::string> ConfigurationScripts;
   std::vector<bool> ScriptProcessScope;
 

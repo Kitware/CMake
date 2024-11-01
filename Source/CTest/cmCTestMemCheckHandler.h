@@ -26,9 +26,7 @@ public:
 
   void PopulateCustomVectors(cmMakefile* mf) override;
 
-  cmCTestMemCheckHandler();
-
-  void Initialize(cmCTest* ctest) override;
+  cmCTestMemCheckHandler(cmCTest* ctest);
 
   int GetDefectCount() const;
 
@@ -101,15 +99,15 @@ private:
   std::string MemoryTester;
   std::vector<std::string> MemoryTesterDynamicOptions;
   std::vector<std::string> MemoryTesterOptions;
-  int MemoryTesterStyle;
+  int MemoryTesterStyle = UNKNOWN;
   std::string MemoryTesterOutputFile;
   std::string MemoryTesterEnvironmentVariable;
   // these are used to store the types of errors that can show up
   std::vector<std::string> ResultStrings;
   std::vector<std::string> ResultStringsLong;
   std::vector<int> GlobalResults;
-  bool LogWithPID; // does log file add pid
-  int DefectCount;
+  bool LogWithPID = false; // does log file add pid
+  int DefectCount = 0;
 
   std::vector<int>::size_type FindOrAddWarning(const std::string& warning);
   // initialize the ResultStrings and ResultStringsLong for

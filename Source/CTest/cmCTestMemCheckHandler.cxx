@@ -118,26 +118,12 @@ public:
 #define BOUNDS_CHECKER_MARKER                                                 \
   "******######*****Begin BOUNDS CHECKER XML******######******"
 
-cmCTestMemCheckHandler::cmCTestMemCheckHandler()
+cmCTestMemCheckHandler::cmCTestMemCheckHandler(cmCTest* ctest)
+  : Superclass(ctest)
 {
   this->MemCheck = true;
-  this->CustomMaximumPassedTestOutputSize = 0;
-  this->CustomMaximumFailedTestOutputSize = 0;
-  this->LogWithPID = false;
-}
-
-void cmCTestMemCheckHandler::Initialize(cmCTest* ctest)
-{
-  this->Superclass::Initialize(ctest);
-  this->LogWithPID = false;
-  this->CustomMaximumPassedTestOutputSize = 0;
-  this->CustomMaximumFailedTestOutputSize = 0;
-  this->MemoryTester.clear();
-  this->MemoryTesterDynamicOptions.clear();
-  this->MemoryTesterOptions.clear();
-  this->MemoryTesterStyle = UNKNOWN;
-  this->MemoryTesterOutputFile.clear();
-  this->DefectCount = 0;
+  this->TestOptions.OutputSizePassed = 0;
+  this->TestOptions.OutputSizeFailed = 0;
 }
 
 int cmCTestMemCheckHandler::PreProcessHandler()
@@ -311,7 +297,7 @@ void cmCTestMemCheckHandler::GenerateCTestXML(cmXMLWriter& xml)
   if (!this->CTest->GetProduceXML()) {
     return;
   }
-  this->CTest->StartXML(xml, this->AppendXML);
+  this->CTest->StartXML(xml, this->CMake, this->AppendXML);
   this->CTest->GenerateSubprojectsOutput(xml);
   xml.StartElement("DynamicAnalysis");
   switch (this->MemoryTesterStyle) {
@@ -371,9 +357,8 @@ void cmCTestMemCheckHandler::GenerateCTestXML(cmXMLWriter& xml)
       continue;
     }
     this->CleanTestOutput(
-      memcheckstr,
-      static_cast<size_t>(this->CustomMaximumFailedTestOutputSize),
-      this->TestOutputTruncation);
+      memcheckstr, static_cast<size_t>(this->TestOptions.OutputSizeFailed),
+      this->TestOptions.OutputTruncation);
     this->WriteTestResultHeader(xml, result);
     xml.StartElement("Results");
     int memoryErrors = 0;
@@ -929,7 +914,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
   cmsys::SystemTools::Split(str, lines);
   bool unlimitedOutput = false;
   if (str.find("CTEST_FULL_OUTPUT") != std::string::npos ||
-      this->CustomMaximumFailedTestOutputSize == 0) {
+      this->TestOptions.OutputSizeFailed == 0) {
     unlimitedOutput = true;
   }
 
@@ -1029,7 +1014,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
     ostr << lines[i] << std::endl;
     if (!unlimitedOutput &&
         totalOutputSize >
-          static_cast<size_t>(this->CustomMaximumFailedTestOutputSize)) {
+          static_cast<size_t>(this->TestOptions.OutputSizeFailed)) {
       ostr << "....\n";
       ostr << "Test Output for this test has been truncated see testing"
               " machine logs for full output,\n";
@@ -1143,7 +1128,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckCudaOutput(
   cmsys::SystemTools::Split(str, lines);
   bool unlimitedOutput = false;
   if (str.find("CTEST_FULL_OUTPUT") != std::string::npos ||
-      this->CustomMaximumFailedTestOutputSize == 0) {
+      this->TestOptions.OutputSizeFailed == 0) {
     unlimitedOutput = true;
   }
 
@@ -1243,7 +1228,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckCudaOutput(
     ostr << lines[i] << std::endl;
     if (!unlimitedOutput &&
         totalOutputSize >
-          static_cast<size_t>(this->CustomMaximumFailedTestOutputSize)) {
+          static_cast<size_t>(this->TestOptions.OutputSizeFailed)) {
       ostr << "....\n";
       ostr << "Test Output for this test has been truncated see testing"
               " machine logs for full output,\n";

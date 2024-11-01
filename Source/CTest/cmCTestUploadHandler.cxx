@@ -11,12 +11,9 @@
 #include "cmVersion.h"
 #include "cmXMLWriter.h"
 
-cmCTestUploadHandler::cmCTestUploadHandler() = default;
-
-void cmCTestUploadHandler::Initialize(cmCTest* ctest)
+cmCTestUploadHandler::cmCTestUploadHandler(cmCTest* ctest)
+  : Superclass(ctest)
 {
-  this->Superclass::Initialize(ctest);
-  this->Files.clear();
 }
 
 void cmCTestUploadHandler::SetFiles(std::set<std::string> const& files)
@@ -50,7 +47,7 @@ int cmCTestUploadHandler::ProcessHandler()
   xml.Attribute("Name", this->CTest->GetCTestConfiguration("Site"));
   xml.Attribute("Generator",
                 std::string("ctest-") + cmVersion::GetCMakeVersion());
-  this->CTest->AddSiteProperties(xml);
+  this->CTest->AddSiteProperties(xml, this->CMake);
   xml.StartElement("Upload");
   xml.Element("Time", std::chrono::system_clock::now());
 

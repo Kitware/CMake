@@ -9,6 +9,7 @@
 
 #include "cmCTest.h"
 #include "cmCTestBuildHandler.h"
+#include "cmCTestGenericHandler.h"
 #include "cmCommand.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -39,10 +40,9 @@ void cmCTestBuildCommand::BindArguments()
 
 cmCTestBuildCommand::~cmCTestBuildCommand() = default;
 
-cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
+std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler()
 {
-  cmCTestBuildHandler* handler = this->CTest->GetBuildHandler();
-  handler->Initialize(this->CTest);
+  auto handler = cm::make_unique<cmCTestBuildHandler>(this->CTest);
 
   cmValue ctestBuildCommand =
     this->Makefile->GetDefinition("CTEST_BUILD_COMMAND");
@@ -133,7 +133,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
   }
 
   handler->SetQuiet(this->Quiet);
-  return handler;
+  return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
 }
 
 void cmCTestBuildCommand::ProcessAdditionalValues(
