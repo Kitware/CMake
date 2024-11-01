@@ -23,6 +23,11 @@ class cmDebuggerVariables;
 class cmDebuggerVariablesManager;
 }
 
+namespace dap {
+template <typename T>
+class optional;
+}
+
 namespace cmDebugger {
 
 class cmDebuggerThread
@@ -53,7 +58,8 @@ public:
   dap::VariablesResponse GetVariablesResponse(
     dap::VariablesRequest const& request);
   friend dap::StackTraceResponse GetStackTraceResponse(
-    std::shared_ptr<cmDebuggerThread> const& thread);
+    std::shared_ptr<cmDebuggerThread> const& thread,
+    dap::optional<dap::StackFrameFormat> format);
 };
 
 } // namespace cmDebugger
