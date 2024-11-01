@@ -7,8 +7,10 @@
 #include <atomic>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 class cmListFileFunction;
+struct cmListFileArgument;
 class cmMakefile;
 
 namespace cmDebugger {
@@ -32,6 +34,7 @@ public:
   {
     return this->Function;
   }
+  std::vector<cmListFileArgument> const& GetArguments() const noexcept;
 };
 
 } // namespace cmDebugger
