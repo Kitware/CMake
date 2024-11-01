@@ -3392,6 +3392,14 @@ Status SystemTools::ReadSymlink(std::string const& newName,
   }
   std::wstring substituteName(substituteNameData, substituteNameLength);
   origName = Encoding::ToNarrow(substituteName);
+  // Symbolic links to absolute paths may use a NT Object Path prefix.
+  // If the path begins with "\??\UNC\", replace it with "\\".
+  // Otherwise, if the path begins with "\??\", remove the prefix.
+  if (origName.compare(0, 8, "\\??\\UNC\\") == 0) {
+    origName.erase(1, 6);
+  } else if (origName.compare(0, 4, "\\??\\") == 0) {
+    origName.erase(0, 4);
+  }
 #else
   char buf[KWSYS_SYSTEMTOOLS_MAXPATH + 1];
   int count = static_cast<int>(
