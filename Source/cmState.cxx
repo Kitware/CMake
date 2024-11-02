@@ -13,7 +13,6 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmCacheManager.h"
-#include "cmCommand.h"
 #include "cmDefinitions.h"
 #include "cmExecutionStatus.h"
 #include "cmGlobCacheEntry.h"
@@ -395,12 +394,6 @@ bool cmState::GetIsGeneratorMultiConfig() const
 void cmState::SetIsGeneratorMultiConfig(bool b)
 {
   this->IsGeneratorMultiConfig = b;
-}
-
-void cmState::AddBuiltinCommand(std::string const& name,
-                                std::unique_ptr<cmCommand> command)
-{
-  this->AddBuiltinCommand(name, cmLegacyCommandWrapper(std::move(command)));
 }
 
 void cmState::AddBuiltinCommand(std::string const& name, Command command)
