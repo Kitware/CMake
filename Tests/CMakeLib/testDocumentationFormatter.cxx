@@ -85,8 +85,10 @@ bool testPrintFormattedIndent2()
 {
   const TestCases testCases = {
     { "", "" },
-    { "\n\n", "  \n\n\n\n" },
-    { "\n  \n\n", "  \n\n    \n\n  \n\n" },
+    // BEGIN NOTE Empty lines are not indented.
+    { "\n\n", "\n\n\n\n" },
+    { "\n  \n\n", "\n\n    \n\n\n\n" },
+    // END NOTE
     { "One line no EOL text", "  One line no EOL text\n" },
     { "Short text. Two sentences.", "  Short text.  Two sentences.\n" },
     { "Short text\non\nmultiple\nlines\n",
