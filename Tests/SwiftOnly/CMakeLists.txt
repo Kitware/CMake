@@ -32,6 +32,8 @@ add_subdirectory(SubC)
 add_subdirectory(SubD)
 add_subdirectory(SubE)
 
+add_subdirectory("Sub Space")
+
 set(CMAKE_Swift_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/swift)
 
 add_executable(SwiftOnly main.swift)

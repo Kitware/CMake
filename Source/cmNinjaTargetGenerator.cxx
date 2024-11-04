@@ -1289,11 +1289,9 @@ void cmNinjaTargetGenerator::GenerateSwiftOutputFileMap(
     if (cmValue name = target->GetProperty("Swift_DEPENDENCIES_FILE")) {
       return *name;
     }
-    return this->GetLocalGenerator()->ConvertToOutputFormat(
-      this->ConvertToNinjaPath(cmStrCat(target->GetSupportDirectory(), '/',
-                                        config, '/', target->GetName(),
-                                        ".swiftdeps")),
-      cmOutputConverter::SHELL);
+    return this->ConvertToNinjaPath(cmStrCat(target->GetSupportDirectory(),
+                                             '/', config, '/',
+                                             target->GetName(), ".swiftdeps"));
   }();
 
   std::string mapFilePath =
@@ -1311,7 +1309,7 @@ void cmNinjaTargetGenerator::GenerateSwiftOutputFileMap(
 
   // Add flag
   this->LocalGenerator->AppendFlags(flags, "-output-file-map");
-  this->LocalGenerator->AppendFlagEscape(
+  this->LocalGenerator->AppendFlags(
     flags,
     this->GetLocalGenerator()->ConvertToOutputFormat(
       ConvertToNinjaPath(mapFilePath), cmOutputConverter::SHELL));
@@ -2014,7 +2012,10 @@ void cmNinjaTargetGenerator::WriteSwiftObjectBuildStatement(
     std::string const emitModuleFlag = "-emit-module";
     std::string const modulePathFlag = "-emit-module-path";
     this->LocalGenerator->AppendFlags(
-      vars["FLAGS"], { emitModuleFlag, modulePathFlag, moduleFilepath });
+      vars["FLAGS"],
+      { emitModuleFlag, modulePathFlag,
+        this->LocalGenerator->ConvertToOutputFormat(
+          moduleFilepath, cmOutputConverter::SHELL) });
     objBuild.Outputs.push_back(moduleFilepath);
   }
   this->LocalGenerator->AppendFlags(vars["FLAGS"],
