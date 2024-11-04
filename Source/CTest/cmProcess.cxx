@@ -106,6 +106,11 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
   options.stdio_count = 3; // in, out and err
   options.exit_cb = &cmProcess::OnExitCB;
   options.stdio = stdio;
+#if UV_VERSION_MAJOR > 1 || !defined(CMAKE_USE_SYSTEM_LIBUV)
+  if (!this->Runner->GetCTest()->GetInteractiveDebugMode()) {
+    options.flags = UV_PROCESS_WINDOWS_USE_PARENT_ERROR_MODE;
+  }
+#endif
 #if !defined(CMAKE_USE_SYSTEM_LIBUV)
   std::vector<char> cpumask;
   if (affinity && !affinity->empty()) {
@@ -121,9 +126,6 @@ bool cmProcess::StartProcess(uv_loop_t& loop, std::vector<size_t>* affinity)
   }
 #else
   static_cast<void>(affinity);
-#endif
-#if UV_VERSION_MAJOR > 1 || !defined(CMAKE_USE_SYSTEM_LIBUV)
-  options.flags = UV_PROCESS_WINDOWS_USE_PARENT_ERROR_MODE;
 #endif
 
   status =
