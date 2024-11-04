@@ -610,6 +610,8 @@ public:
       resolve subst drives too.  */
   static std::string GetRealPathResolvingWindowsSubst(
     const std::string& path, std::string* errorMessage = nullptr);
+  static std::string GetRealPath(const std::string& path,
+                                 std::string* errorMessage = nullptr);
 
   /** Perform one-time initialization of libuv.  */
   static void InitializeLibUV();

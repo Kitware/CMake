@@ -1409,8 +1409,7 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
       auto basePath = cmCMakePath{ *arguments.BaseDirectory };
       path = basePath.Append(path);
     }
-    result = cmSystemTools::GetActualCaseForPath(
-      cmSystemTools::GetRealPath(path.String()));
+    result = cmSystemTools::GetRealPath(path.String());
   };
 
   std::string realPath;
@@ -1420,7 +1419,6 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
     std::string oldPolicyPath =
       cmSystemTools::CollapseFullPath(input, *arguments.BaseDirectory);
     oldPolicyPath = cmSystemTools::GetRealPath(oldPolicyPath);
-    oldPolicyPath = cmSystemTools::GetActualCaseForPath(oldPolicyPath);
     if (warnAbout152) {
       computeNewPath(input, realPath);
       if (oldPolicyPath != realPath) {

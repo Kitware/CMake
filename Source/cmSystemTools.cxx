@@ -1138,6 +1138,29 @@ std::string cmSystemTools::GetRealPathResolvingWindowsSubst(
 #endif
 }
 
+std::string cmSystemTools::GetRealPath(const std::string& path,
+                                       std::string* errorMessage)
+{
+#ifdef _WIN32
+  std::string resolved_path;
+  using namespace cm::PathResolver;
+  // IWYU pragma: no_forward_declare cm::PathResolver::Policies::RealPath
+  static const Resolver<Policies::RealPath> resolver(RealOS);
+  cmsys::Status status = resolver.Resolve(path, resolved_path);
+  if (!status) {
+    if (errorMessage) {
+      *errorMessage = status.GetString();
+      resolved_path.clear();
+    } else {
+      resolved_path = path;
+    }
+  }
+  return resolved_path;
+#else
+  return cmsys::SystemTools::GetRealPath(path, errorMessage);
+#endif
+}
+
 void cmSystemTools::InitializeLibUV()
 {
 #if defined(_WIN32)
@@ -2703,8 +2726,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   wchar_t modulepath[_MAX_PATH];
   ::GetModuleFileNameW(nullptr, modulepath, sizeof(modulepath));
   std::string path = cmsys::Encoding::ToNarrow(modulepath);
-  std::string realPath =
-    cmSystemTools::GetRealPathResolvingWindowsSubst(path, nullptr);
+  std::string realPath = cmSystemTools::GetRealPath(path, nullptr);
   if (realPath.empty()) {
     realPath = path;
   }
