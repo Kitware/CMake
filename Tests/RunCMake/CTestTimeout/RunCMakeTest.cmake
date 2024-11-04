@@ -34,7 +34,7 @@ else()
     target_compile_definitions(TestTimeout PRIVATE SIGNAL)
     set_tests_properties(TestTimeout PROPERTIES
       TIMEOUT_SIGNAL_NAME SIGUSR1
-      TIMEOUT_SIGNAL_GRACE_PERIOD 1.2
+      TIMEOUT_SIGNAL_GRACE_PERIOD 32.1
       )
 ]])
   run_ctest_timeout(Signal)
