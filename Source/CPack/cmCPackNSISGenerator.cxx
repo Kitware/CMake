@@ -130,23 +130,20 @@ int cmCPackNSISGenerator::PackageFiles()
   if (this->IsSet("CPACK_NSIS_MUI_ICON") ||
       this->IsSet("CPACK_NSIS_MUI_UNIICON")) {
     std::string installerIconCode;
-    if (this->IsSet("CPACK_NSIS_MUI_ICON")) {
-      installerIconCode += cmStrCat(
-        "!define MUI_ICON \"", this->GetOption("CPACK_NSIS_MUI_ICON"), "\"\n");
+    if (cmValue icon = this->GetOptionIfSet("CPACK_NSIS_MUI_ICON")) {
+      installerIconCode += cmStrCat("!define MUI_ICON \"", *icon, "\"\n");
     }
-    if (this->IsSet("CPACK_NSIS_MUI_UNIICON")) {
-      installerIconCode +=
-        cmStrCat("!define MUI_UNICON \"",
-                 this->GetOption("CPACK_NSIS_MUI_UNIICON"), "\"\n");
+    if (cmValue icon = this->GetOptionIfSet("CPACK_NSIS_MUI_UNIICON")) {
+      installerIconCode += cmStrCat("!define MUI_UNICON \"", *icon, "\"\n");
     }
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_ICON_CODE",
                             installerIconCode.c_str());
   }
   std::string installerHeaderImage;
-  if (this->IsSet("CPACK_NSIS_MUI_HEADERIMAGE")) {
-    installerHeaderImage = *this->GetOption("CPACK_NSIS_MUI_HEADERIMAGE");
-  } else if (this->IsSet("CPACK_PACKAGE_ICON")) {
-    installerHeaderImage = *this->GetOption("CPACK_PACKAGE_ICON");
+  if (cmValue img = this->GetOptionIfSet("CPACK_NSIS_MUI_HEADERIMAGE")) {
+    installerHeaderImage = *img;
+  } else if (cmValue icon = this->GetOptionIfSet("CPACK_PACKAGE_ICON")) {
+    installerHeaderImage = *icon;
   }
   if (!installerHeaderImage.empty()) {
     std::string installerIconCode = cmStrCat(
@@ -155,35 +152,33 @@ int cmCPackNSISGenerator::PackageFiles()
                             installerIconCode);
   }
 
-  if (this->IsSet("CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP")) {
-    std::string installerBitmapCode = cmStrCat(
-      "!define MUI_WELCOMEFINISHPAGE_BITMAP \"",
-      this->GetOption("CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP"), "\"\n");
+  if (cmValue v =
+        this->GetOptionIfSet("CPACK_NSIS_MUI_WELCOMEFINISHPAGE_BITMAP")) {
+    std::string installerBitmapCode =
+      cmStrCat("!define MUI_WELCOMEFINISHPAGE_BITMAP \"", *v, "\"\n");
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_WELCOMEFINISH_CODE",
                             installerBitmapCode);
   }
 
-  if (this->IsSet("CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP")) {
-    std::string installerBitmapCode = cmStrCat(
-      "!define MUI_UNWELCOMEFINISHPAGE_BITMAP \"",
-      this->GetOption("CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP"), "\"\n");
+  if (cmValue v =
+        this->GetOptionIfSet("CPACK_NSIS_MUI_UNWELCOMEFINISHPAGE_BITMAP")) {
+    std::string installerBitmapCode =
+      cmStrCat("!define MUI_UNWELCOMEFINISHPAGE_BITMAP \"", *v, "\"\n");
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_UNWELCOMEFINISH_CODE",
                             installerBitmapCode);
   }
 
-  if (this->IsSet("CPACK_NSIS_MUI_FINISHPAGE_RUN")) {
-    std::string installerRunCode =
-      cmStrCat("!define MUI_FINISHPAGE_RUN \"$INSTDIR\\",
-               this->GetOption("CPACK_NSIS_EXECUTABLES_DIRECTORY"), '\\',
-               this->GetOption("CPACK_NSIS_MUI_FINISHPAGE_RUN"), "\"\n");
+  if (cmValue v = this->GetOptionIfSet("CPACK_NSIS_MUI_FINISHPAGE_RUN")) {
+    std::string installerRunCode = cmStrCat(
+      "!define MUI_FINISHPAGE_RUN \"$INSTDIR\\",
+      this->GetOption("CPACK_NSIS_EXECUTABLES_DIRECTORY"), '\\', *v, "\"\n");
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_MUI_FINISHPAGE_RUN_CODE",
                             installerRunCode);
   }
 
-  if (this->IsSet("CPACK_NSIS_WELCOME_TITLE")) {
+  if (cmValue v = this->GetOptionIfSet("CPACK_NSIS_WELCOME_TITLE")) {
     std::string welcomeTitleCode =
-      cmStrCat("!define MUI_WELCOMEPAGE_TITLE \"",
-               this->GetOption("CPACK_NSIS_WELCOME_TITLE"), "\"");
+      cmStrCat("!define MUI_WELCOMEPAGE_TITLE \"", *v, "\"");
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_WELCOME_TITLE_CODE",
                             welcomeTitleCode);
   }
@@ -193,10 +188,9 @@ int cmCPackNSISGenerator::PackageFiles()
                             "!define MUI_WELCOMEPAGE_TITLE_3LINES");
   }
 
-  if (this->IsSet("CPACK_NSIS_FINISH_TITLE")) {
+  if (cmValue v = this->GetOptionIfSet("CPACK_NSIS_FINISH_TITLE")) {
     std::string finishTitleCode =
-      cmStrCat("!define MUI_FINISHPAGE_TITLE \"",
-               this->GetOption("CPACK_NSIS_FINISH_TITLE"), "\"");
+      cmStrCat("!define MUI_FINISHPAGE_TITLE \"", *v, "\"");
     this->SetOptionIfNotSet("CPACK_NSIS_INSTALLER_FINISH_TITLE_CODE",
                             finishTitleCode);
   }
@@ -211,28 +205,28 @@ int cmCPackNSISGenerator::PackageFiles()
                             "ManifestDPIAware true");
   }
 
-  if (this->IsSet("CPACK_NSIS_BRANDING_TEXT")) {
+  if (cmValue brandingText =
+        this->GetOptionIfSet("CPACK_NSIS_BRANDING_TEXT")) {
     // Default position to LEFT
     std::string brandingTextPosition = "LEFT";
-    if (this->IsSet("CPACK_NSIS_BRANDING_TEXT_TRIM_POSITION")) {
-      std::string wantedPosition =
-        this->GetOption("CPACK_NSIS_BRANDING_TEXT_TRIM_POSITION");
-      if (!wantedPosition.empty()) {
+    if (cmValue wantedPosition =
+          this->GetOptionIfSet("CPACK_NSIS_BRANDING_TEXT_TRIM_POSITION")) {
+      if (!wantedPosition->empty()) {
         const std::set<std::string> possiblePositions{ "CENTER", "LEFT",
                                                        "RIGHT" };
-        if (possiblePositions.find(wantedPosition) ==
+        if (possiblePositions.find(*wantedPosition) ==
             possiblePositions.end()) {
           cmCPackLogger(cmCPackLog::LOG_ERROR,
                         "Unsupported branding text trim position "
-                          << wantedPosition << std::endl);
+                          << *wantedPosition << std::endl);
           return false;
         }
-        brandingTextPosition = wantedPosition;
+        brandingTextPosition = *wantedPosition;
       }
     }
     std::string brandingTextCode =
       cmStrCat("BrandingText /TRIM", brandingTextPosition, " \"",
-               this->GetOption("CPACK_NSIS_BRANDING_TEXT"), "\"\n");
+               *brandingText, "\"\n");
     this->SetOptionIfNotSet("CPACK_NSIS_BRANDING_TEXT_CODE", brandingTextCode);
   }
 

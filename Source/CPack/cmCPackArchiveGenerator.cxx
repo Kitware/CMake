@@ -191,15 +191,16 @@ std::string cmCPackArchiveGenerator::GetArchiveComponentFileName(
   std::string componentUpper(cmSystemTools::UpperCase(component));
   std::string packageFileName;
 
-  if (this->IsSet("CPACK_ARCHIVE_" + componentUpper + "_FILE_NAME")) {
+  if (cmValue v = this->GetOptionIfSet("CPACK_ARCHIVE_" + componentUpper +
+                                       "_FILE_NAME")) {
+    packageFileName += *v;
+  } else if ((v = this->GetOptionIfSet("CPACK_ARCHIVE_FILE_NAME"))) {
     packageFileName +=
-      *this->GetOption("CPACK_ARCHIVE_" + componentUpper + "_FILE_NAME");
-  } else if (this->IsSet("CPACK_ARCHIVE_FILE_NAME")) {
-    packageFileName += this->GetComponentPackageFileName(
-      *this->GetOption("CPACK_ARCHIVE_FILE_NAME"), component, isGroupName);
+      this->GetComponentPackageFileName(*v, component, isGroupName);
   } else {
-    packageFileName += this->GetComponentPackageFileName(
-      *this->GetOption("CPACK_PACKAGE_FILE_NAME"), component, isGroupName);
+    v = this->GetOption("CPACK_PACKAGE_FILE_NAME");
+    packageFileName +=
+      this->GetComponentPackageFileName(*v, component, isGroupName);
   }
 
   packageFileName += this->GetOutputExtension();
@@ -394,10 +395,11 @@ int cmCPackArchiveGenerator::PackageComponentsAllInOne()
   this->packageFileNames.emplace_back(this->toplevel);
   this->packageFileNames[0] += "/";
 
-  if (this->IsSet("CPACK_ARCHIVE_FILE_NAME")) {
-    this->packageFileNames[0] += *this->GetOption("CPACK_ARCHIVE_FILE_NAME");
+  if (cmValue v = this->GetOptionIfSet("CPACK_ARCHIVE_FILE_NAME")) {
+    this->packageFileNames[0] += *v;
   } else {
-    this->packageFileNames[0] += *this->GetOption("CPACK_PACKAGE_FILE_NAME");
+    v = this->GetOption("CPACK_PACKAGE_FILE_NAME");
+    this->packageFileNames[0] += *v;
   }
 
   this->packageFileNames[0] += this->GetOutputExtension();
@@ -481,10 +483,10 @@ int cmCPackArchiveGenerator::GetThreadCount() const
   int threads = 1;
 
   // CPACK_ARCHIVE_THREADS overrides CPACK_THREADS
-  if (this->IsSet("CPACK_ARCHIVE_THREADS")) {
-    threads = std::stoi(*this->GetOption("CPACK_ARCHIVE_THREADS"));
-  } else if (this->IsSet("CPACK_THREADS")) {
-    threads = std::stoi(*this->GetOption("CPACK_THREADS"));
+  if (cmValue v = this->GetOptionIfSet("CPACK_ARCHIVE_THREADS")) {
+    threads = std::stoi(*v);
+  } else if (cmValue v2 = this->GetOptionIfSet("CPACK_THREADS")) {
+    threads = std::stoi(*v2);
   }
 
   return threads;

@@ -60,10 +60,8 @@ int cmCPackProductBuildGenerator::PackageFiles()
 
   std::string resDir = cmStrCat(packageDirFileName, "/Contents");
 
-  if (this->IsSet("CPACK_PRODUCTBUILD_RESOURCES_DIR")) {
-    std::string userResDir =
-      this->GetOption("CPACK_PRODUCTBUILD_RESOURCES_DIR");
-
+  if (cmValue v = this->GetOptionIfSet("CPACK_PRODUCTBUILD_RESOURCES_DIR")) {
+    std::string userResDir = *v;
     if (!cmSystemTools::CopyADirectory(userResDir, resDir)) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Problem copying the resource files" << std::endl);

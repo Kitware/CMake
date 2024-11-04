@@ -1318,6 +1318,15 @@ bool cmCPackGenerator::IsSet(const std::string& name) const
   return this->MakefileMap->IsSet(name);
 }
 
+cmValue cmCPackGenerator::GetOptionIfSet(const std::string& name) const
+{
+  cmValue ret = this->MakefileMap->GetDefinition(name);
+  if (!ret || ret->empty() || cmIsNOTFOUND(*ret)) {
+    return {};
+  }
+  return ret;
+}
+
 bool cmCPackGenerator::IsOn(const std::string& name) const
 {
   return this->GetOption(name).IsOn();

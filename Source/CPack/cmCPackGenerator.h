@@ -103,6 +103,7 @@ public:
   cmValue GetOption(const std::string& op) const;
   std::vector<std::string> GetOptions() const;
   bool IsSet(const std::string& name) const;
+  cmValue GetOptionIfSet(const std::string& name) const;
   bool IsOn(const std::string& name) const;
   bool IsSetToOff(const std::string& op) const;
   bool IsSetToEmpty(const std::string& op) const;
