@@ -1101,43 +1101,6 @@ std::string cmSystemTools::GetComspec()
 
 #endif
 
-std::string cmSystemTools::GetRealPathResolvingWindowsSubst(
-  const std::string& path, std::string* errorMessage)
-{
-#ifdef _WIN32
-  // uv_fs_realpath uses Windows Vista API so fallback to kwsys if not found
-  std::string resolved_path;
-  uv_fs_t req;
-  int err = uv_fs_realpath(nullptr, &req, path.c_str(), nullptr);
-  if (!err) {
-    resolved_path = std::string((char*)req.ptr);
-    cmSystemTools::ConvertToUnixSlashes(resolved_path);
-    // Normalize to upper-case drive letter as GetActualCaseForPath does.
-    if (resolved_path.size() > 1 && resolved_path[1] == ':') {
-      resolved_path[0] = toupper(resolved_path[0]);
-    }
-  } else if (err == UV_ENOSYS) {
-    resolved_path = cmsys::SystemTools::GetRealPath(path, errorMessage);
-  } else if (errorMessage) {
-    LPSTR message = nullptr;
-    DWORD size = FormatMessageA(
-      FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-        FORMAT_MESSAGE_IGNORE_INSERTS,
-      nullptr, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&message,
-      0, nullptr);
-    *errorMessage = std::string(message, size);
-    LocalFree(message);
-
-    resolved_path = "";
-  } else {
-    resolved_path = path;
-  }
-  return resolved_path;
-#else
-  return cmsys::SystemTools::GetRealPath(path, errorMessage);
-#endif
-}
-
 std::string cmSystemTools::GetRealPath(const std::string& path,
                                        std::string* errorMessage)
 {
