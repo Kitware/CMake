@@ -985,25 +985,6 @@ public:
    */
   static int GetTerminalWidth();
 
-#if @KWSYS_NAMESPACE@_SYSTEMTOOLS_USE_TRANSLATION_MAP
-  /**
-   * Add an entry in the path translation table.
-   */
-  static void AddTranslationPath(const std::string& dir,
-                                 const std::string& refdir);
-
-  /**
-   * If dir is different after CollapseFullPath is called,
-   * Then insert it into the path translation table
-   */
-  static void AddKeepPath(const std::string& dir);
-
-  /**
-   * Update path by going through the Path Translation table;
-   */
-  static void CheckTranslationPath(std::string& path);
-#endif
-
   /**
    * Delay the execution for a specified amount of time specified
    * in milliseconds
@@ -1053,14 +1034,7 @@ public:
   static std::string DecodeURL(const std::string& url);
 
 private:
-  /**
-   * Allocate the stl map that serve as the Path Translation table.
-   */
   static void ClassInitialize();
-
-  /**
-   * Deallocate the stl map that serve as the Path Translation table.
-   */
   static void ClassFinalize();
 
   /**
