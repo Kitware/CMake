@@ -133,7 +133,7 @@ int cmInstallScriptHandler::install(unsigned int j)
 InstallScript::InstallScript(const std::vector<std::string>& cmd)
 {
   this->name = cmSystemTools::RelativePath(
-    cmSystemTools::GetCurrentWorkingDirectory(), cmd.back());
+    cmSystemTools::GetLogicalWorkingDirectory(), cmd.back());
   this->command = cmd;
 }
 

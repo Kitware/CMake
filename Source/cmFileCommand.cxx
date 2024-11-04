@@ -3847,7 +3847,7 @@ bool HandleArchiveExtractCommand(std::vector<std::string> const& args,
 
       if (!cmSystemTools::FileIsFullPath(inFile)) {
         inFile =
-          cmStrCat(cmSystemTools::GetCurrentWorkingDirectory(), "/", inFile);
+          cmStrCat(cmSystemTools::GetLogicalWorkingDirectory(), "/", inFile);
       }
     }
 

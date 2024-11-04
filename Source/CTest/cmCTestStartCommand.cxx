@@ -85,9 +85,6 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
     return false;
   }
 
-  cmSystemTools::AddKeepPath(*src_dir);
-  cmSystemTools::AddKeepPath(*bld_dir);
-
   this->CTest->EmptyCTestConfiguration();
 
   std::string sourceDir = cmSystemTools::CollapseFullPath(*src_dir);

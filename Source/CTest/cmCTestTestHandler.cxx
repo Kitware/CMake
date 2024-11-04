@@ -128,7 +128,7 @@ bool cmCTestSubdirCommand(std::vector<std::string> const& args,
     status.SetError("called with incorrect number of arguments");
     return false;
   }
-  std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+  std::string cwd = cmSystemTools::GetLogicalWorkingDirectory();
   for (std::string const& arg : args) {
     std::string fname;
 
@@ -154,7 +154,7 @@ bool cmCTestAddSubdirectoryCommand(std::vector<std::string> const& args,
   }
 
   std::string fname =
-    cmStrCat(cmSystemTools::GetCurrentWorkingDirectory(), '/', args[0]);
+    cmStrCat(cmSystemTools::GetLogicalWorkingDirectory(), '/', args[0]);
 
   return ReadSubdirectory(std::move(fname), status);
 }
@@ -354,7 +354,7 @@ int cmCTestTestHandler::ProcessHandler()
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                      (this->MemCheck ? "Memory check" : "Test")
                        << " project "
-                       << cmSystemTools::GetCurrentWorkingDirectory()
+                       << cmSystemTools::GetLogicalWorkingDirectory()
                        << std::endl,
                      this->Quiet);
   if (!this->PreProcessHandler()) {
@@ -2385,7 +2385,7 @@ bool cmCTestTestHandler::SetDirectoryProperties(
     }
     std::string const& val = *it;
     for (cmCTestTestProperties& rt : this->TestList) {
-      std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+      std::string cwd = cmSystemTools::GetLogicalWorkingDirectory();
       if (cwd == rt.Directory) {
         if (key == "LABELS"_s) {
           cmList DirectoryLabels{ val };
@@ -2449,7 +2449,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   cmCTestTestProperties test;
   test.Name = testname;
   test.Args = args;
-  test.Directory = cmSystemTools::GetCurrentWorkingDirectory();
+  test.Directory = cmSystemTools::GetLogicalWorkingDirectory();
   cmCTestOptionalLog(this->CTest, DEBUG,
                      "Set test directory: " << test.Directory << std::endl,
                      this->Quiet);

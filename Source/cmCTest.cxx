@@ -574,7 +574,7 @@ bool cmCTest::UpdateCTestConfiguration()
   if (!this->GetCTestConfiguration("BuildDirectory").empty()) {
     this->Impl->BinaryDir = this->GetCTestConfiguration("BuildDirectory");
     if (this->Impl->TestDir.empty()) {
-      cmSystemTools::ChangeDirectory(this->Impl->BinaryDir);
+      cmSystemTools::SetLogicalWorkingDirectory(this->Impl->BinaryDir);
     }
   }
   this->Impl->TimeOut =
@@ -705,7 +705,7 @@ int cmCTest::ProcessSteps()
   this->Impl->Verbose = true;
   this->Impl->ProduceXML = true;
 
-  const std::string currDir = cmSystemTools::GetCurrentWorkingDirectory();
+  const std::string currDir = cmSystemTools::GetLogicalWorkingDirectory();
   std::string workDir = currDir;
   if (!this->Impl->TestDir.empty()) {
     workDir = cmSystemTools::ToNormalizedPathOnDisk(this->Impl->TestDir);
@@ -1555,7 +1555,7 @@ bool cmCTest::AddVariableDefinition(const std::string& arg)
 bool cmCTest::SetArgsFromPreset(const std::string& presetName,
                                 bool listPresets)
 {
-  const auto workingDirectory = cmSystemTools::GetCurrentWorkingDirectory();
+  const auto workingDirectory = cmSystemTools::GetLogicalWorkingDirectory();
 
   cmCMakePresetsGraph settingsFile;
   auto result = settingsFile.ReadProjectPresets(workingDirectory);
@@ -2668,7 +2668,7 @@ int cmCTest::ExecuteTests()
   this->Impl->ExtraVerbose = this->Impl->Verbose;
   this->Impl->Verbose = true;
 
-  const std::string currDir = cmSystemTools::GetCurrentWorkingDirectory();
+  const std::string currDir = cmSystemTools::GetLogicalWorkingDirectory();
   std::string workDir = currDir;
   if (!this->Impl->TestDir.empty()) {
     workDir = cmSystemTools::ToNormalizedPathOnDisk(this->Impl->TestDir);

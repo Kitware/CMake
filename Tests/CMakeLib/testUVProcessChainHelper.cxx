@@ -7,7 +7,7 @@
 #include <string>
 #include <thread>
 
-#include "cmSystemTools.h"
+#include "cmsys/SystemTools.hxx"
 
 #ifdef _WIN32
 #  include <windows.h>
@@ -73,7 +73,7 @@ int main(int argc, char** argv)
 #endif
   }
   if (command == "pwd") {
-    std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
+    std::string cwd = cmsys::SystemTools::GetCurrentWorkingDirectory();
     std::cout << cwd << std::flush;
     return 0;
   }

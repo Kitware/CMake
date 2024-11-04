@@ -7,7 +7,7 @@
 
 cmWorkingDirectory::cmWorkingDirectory(std::string const& newdir)
 {
-  this->OldDir = cmSystemTools::GetCurrentWorkingDirectory();
+  this->OldDir = cmSystemTools::GetLogicalWorkingDirectory();
   this->SetDirectory(newdir);
 }
 
@@ -18,7 +18,7 @@ cmWorkingDirectory::~cmWorkingDirectory()
 
 bool cmWorkingDirectory::SetDirectory(std::string const& newdir)
 {
-  cmsys::Status status = cmSystemTools::ChangeDirectory(newdir);
+  cmsys::Status status = cmSystemTools::SetLogicalWorkingDirectory(newdir);
   if (status) {
     this->Error.clear();
     return true;

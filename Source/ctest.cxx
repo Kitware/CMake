@@ -182,7 +182,7 @@ int main(int argc, char const* const* argv)
     return cmCTestLaunch::Main(argc, argv);
   }
 
-  if (cmSystemTools::GetCurrentWorkingDirectory().empty()) {
+  if (cmSystemTools::GetLogicalWorkingDirectory().empty()) {
     std::cerr << "Current working directory cannot be established.\n";
     return 1;
   }

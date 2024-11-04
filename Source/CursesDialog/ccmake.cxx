@@ -101,7 +101,7 @@ int main(int argc, char const* const* argv)
     }
   }
 
-  std::string cacheDir = cmSystemTools::GetCurrentWorkingDirectory();
+  std::string cacheDir = cmSystemTools::GetLogicalWorkingDirectory();
   for (i = 1; i < args.size(); ++i) {
     std::string const& arg = args[i];
     if (cmHasPrefix(arg, "-B")) {
