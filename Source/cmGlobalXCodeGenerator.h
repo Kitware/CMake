@@ -304,6 +304,7 @@ private:
   std::string LookupFlags(const std::string& varNamePrefix,
                           const std::string& varNameLang,
                           const std::string& varNameSuffix,
+                          cmGeneratorTarget const* gt,
                           const std::string& default_flags);
 
   class Factory;

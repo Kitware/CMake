@@ -12,6 +12,7 @@
 #include <cmext/algorithm>
 
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLinkLineComputer.h"
@@ -177,7 +178,8 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   std::string extraFlags;
   this->GetTargetLinkFlags(extraFlags, linkLanguage);
   this->LocalGenerator->AddConfigVariableFlags(
-    extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->GetConfigName());
+    extraFlags, "CMAKE_SHARED_LINKER_FLAGS", this->GeneratorTarget,
+    cmBuildStep::Link, linkLanguage, this->GetConfigName());
 
   std::unique_ptr<cmLinkLineComputer> linkLineComputer =
     this->CreateLinkLineComputer(
@@ -212,7 +214,8 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
   std::string extraFlags;
   this->GetTargetLinkFlags(extraFlags, linkLanguage);
   this->LocalGenerator->AddConfigVariableFlags(
-    extraFlags, "CMAKE_MODULE_LINKER_FLAGS", this->GetConfigName());
+    extraFlags, "CMAKE_MODULE_LINKER_FLAGS", this->GeneratorTarget,
+    cmBuildStep::Link, linkLanguage, this->GetConfigName());
 
   std::unique_ptr<cmLinkLineComputer> linkLineComputer =
     this->CreateLinkLineComputer(
@@ -239,7 +242,8 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
   std::string extraFlags;
   this->GetTargetLinkFlags(extraFlags, linkLanguage);
   this->LocalGenerator->AddConfigVariableFlags(
-    extraFlags, "CMAKE_MACOSX_FRAMEWORK_LINKER_FLAGS", this->GetConfigName());
+    extraFlags, "CMAKE_MACOSX_FRAMEWORK_LINKER_FLAGS", this->GeneratorTarget,
+    cmBuildStep::Link, linkLanguage, this->GetConfigName());
 
   this->WriteLibraryRules(linkRuleVar, extraFlags, relink);
 }
@@ -382,7 +386,8 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
     }
 
     auto rulePlaceholderExpander =
-      this->LocalGenerator->CreateRulePlaceholderExpander();
+      this->LocalGenerator->CreateRulePlaceholderExpander(
+        cmBuildStep::Link, this->GeneratorTarget, linkLanguage);
 
     // Construct the main link rule and expand placeholders.
     rulePlaceholderExpander->SetTargetImpLib(targetOutput);
@@ -707,7 +712,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
 
   // Expand the rule variables.
   auto rulePlaceholderExpander =
-    this->LocalGenerator->CreateRulePlaceholderExpander();
+    this->LocalGenerator->CreateRulePlaceholderExpander(
+      cmBuildStep::Link, this->GeneratorTarget, linkLanguage);
   bool useWatcomQuote =
     this->Makefile->IsOn(linkRuleVar + "_USE_WATCOM_QUOTE");
   cmList real_link_commands;

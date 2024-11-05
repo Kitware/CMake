@@ -336,6 +336,10 @@ Other Behavior Settings
 The current settings of :policy:`CMP0065` and :policy:`CMP0083` are propagated
 through to the generated test project.
 
+.. versionadded:: 3.32
+  The current setting of :policy:`CMP0181` policy is propagated through to the
+  generated test project.
+
 Set variable :variable:`CMAKE_TRY_COMPILE_CONFIGURATION` to choose a build
 configuration:
 

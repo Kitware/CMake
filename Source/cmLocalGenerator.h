@@ -19,6 +19,7 @@
 #include <cm3p/kwiml/int.h>
 
 #include "cmCustomCommandTypes.h"
+#include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmListFileCache.h"
 #include "cmMessageType.h" // IWYU pragma: keep
@@ -45,36 +46,6 @@ class cmake;
 
 template <typename Iter>
 class cmRange;
-
-/** Flag if byproducts shall also be considered.  */
-enum class cmSourceOutputKind
-{
-  OutputOnly,
-  OutputOrByproduct
-};
-
-/** What scanner to use for dependencies lookup.  */
-enum class cmDependencyScannerKind
-{
-  CMake,
-  Compiler
-};
-
-/** What to compute language flags for */
-enum class cmBuildStep
-{
-  Compile,
-  Link
-};
-
-/** What compilation mode the swift files are in */
-enum class cmSwiftCompileMode
-{
-  Wholemodule,
-  Incremental,
-  Singlefile,
-  Unknown,
-};
 
 /** Target and source file which have a specific output.  */
 struct cmSourcesWithOutput
@@ -147,7 +118,12 @@ public:
   }
 
   virtual std::unique_ptr<cmRulePlaceholderExpander>
-  CreateRulePlaceholderExpander() const;
+  CreateRulePlaceholderExpander(
+    cmBuildStep buildStep = cmBuildStep::Compile) const;
+  virtual std::unique_ptr<cmRulePlaceholderExpander>
+  CreateRulePlaceholderExpander(cmBuildStep buildStep,
+                                cmGeneratorTarget const* target,
+                                std::string const& language);
 
   std::string GetLinkLibsCMP0065(std::string const& linkLanguage,
                                  cmGeneratorTarget& tgt) const;
@@ -174,6 +150,12 @@ public:
                                 const std::string& lang);
   void AddConfigVariableFlags(std::string& flags, const std::string& var,
                               const std::string& config);
+  // Handle prefixes processing (like LINKER:)
+  void AddConfigVariableFlags(std::string& flags, const std::string& var,
+                              cmGeneratorTarget const* target,
+                              cmBuildStep compileOrLink,
+                              const std::string& lang,
+                              const std::string& config);
   void AddColorDiagnosticsFlags(std::string& flags, const std::string& lang);
   //! Append flags to a string.
   virtual void AppendFlags(std::string& flags,
@@ -182,6 +164,13 @@ public:
                            const std::vector<BT<std::string>>& newFlags) const;
   virtual void AppendFlagEscape(std::string& flags,
                                 const std::string& rawFlag) const;
+  /**
+   * Append flags after parsing, prefixes processing (like LINKER:) and
+   * escaping
+   */
+  void AppendFlags(std::string& flags, std::string const& newFlags,
+                   const std::string& name, const cmGeneratorTarget* target,
+                   cmBuildStep compileOrLink, const std::string& lang);
   void AddISPCDependencies(cmGeneratorTarget* target);
   void AddPchDependencies(cmGeneratorTarget* target);
   void AddUnityBuild(cmGeneratorTarget* target);

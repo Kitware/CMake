@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "cmGeneratorOptions.h"
 #include "cmLocalCommonGenerator.h"
 #include "cmNinjaTypes.h"
 #include "cmOutputConverter.h"
@@ -42,8 +43,11 @@ public:
 
   void Generate() override;
 
-  std::unique_ptr<cmRulePlaceholderExpander> CreateRulePlaceholderExpander()
-    const override;
+  std::unique_ptr<cmRulePlaceholderExpander> CreateRulePlaceholderExpander(
+    cmBuildStep buildStep = cmBuildStep::Compile) const override;
+  std::unique_ptr<cmRulePlaceholderExpander> CreateRulePlaceholderExpander(
+    cmBuildStep buildStep, cmGeneratorTarget const* target,
+    std::string const& language) override;
 
   std::string GetTargetDirectory(
     cmGeneratorTarget const* target) const override;

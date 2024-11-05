@@ -9,10 +9,11 @@
 #include "cmSystemTools.h"
 
 cmRulePlaceholderExpander::cmRulePlaceholderExpander(
-  std::map<std::string, std::string> compilers,
+  cmBuildStep buildStep, std::map<std::string, std::string> compilers,
   std::map<std::string, std::string> variableMappings,
   std::string compilerSysroot, std::string linkerSysroot)
-  : Compilers(std::move(compilers))
+  : BuildStep(buildStep)
+  , Compilers(std::move(compilers))
   , VariableMappings(std::move(variableMappings))
   , CompilerSysroot(std::move(compilerSysroot))
   , LinkerSysroot(std::move(linkerSysroot))
@@ -320,9 +321,8 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
     }
     std::string sysroot;
     // Some platforms may use separate sysroots for compiling and linking.
-    // If we detect link flags, then we pass the link sysroot instead.
-    // FIXME: Use a more robust way to detect link line expansion.
-    if (this->ReplaceValues->LinkFlags) {
+    // When the build step is link, pass the link sysroot instead.
+    if (this->BuildStep == cmBuildStep::Link) {
       sysroot = this->LinkerSysroot;
     } else {
       sysroot = this->CompilerSysroot;

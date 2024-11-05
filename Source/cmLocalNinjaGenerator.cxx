@@ -50,9 +50,20 @@ cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
 // Virtual public methods.
 
 std::unique_ptr<cmRulePlaceholderExpander>
-cmLocalNinjaGenerator::CreateRulePlaceholderExpander() const
+cmLocalNinjaGenerator::CreateRulePlaceholderExpander(
+  cmBuildStep buildStep) const
 {
-  auto ret = this->cmLocalGenerator::CreateRulePlaceholderExpander();
+  auto ret = this->cmLocalGenerator::CreateRulePlaceholderExpander(buildStep);
+  ret->SetTargetImpLib("$TARGET_IMPLIB");
+  return std::unique_ptr<cmRulePlaceholderExpander>(std::move(ret));
+}
+std::unique_ptr<cmRulePlaceholderExpander>
+cmLocalNinjaGenerator::CreateRulePlaceholderExpander(
+  cmBuildStep buildStep, cmGeneratorTarget const* target,
+  std::string const& language)
+{
+  auto ret = this->cmLocalGenerator::CreateRulePlaceholderExpander(
+    buildStep, target, language);
   ret->SetTargetImpLib("$TARGET_IMPLIB");
   return std::unique_ptr<cmRulePlaceholderExpander>(std::move(ret));
 }

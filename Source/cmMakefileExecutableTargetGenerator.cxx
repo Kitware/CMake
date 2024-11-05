@@ -12,6 +12,7 @@
 #include <cmext/algorithm>
 
 #include "cmGeneratedFileStream.h"
+#include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmLinkLineComputer.h"
@@ -233,7 +234,8 @@ void cmMakefileExecutableTargetGenerator::WriteNvidiaDeviceExecutableRule(
     }
 
     auto rulePlaceholderExpander =
-      this->LocalGenerator->CreateRulePlaceholderExpander();
+      this->LocalGenerator->CreateRulePlaceholderExpander(
+        cmBuildStep::Link, this->GeneratorTarget, linkLanguage);
 
     // Expand placeholders in the commands.
     rulePlaceholderExpander->SetTargetImpLib(targetOutput);
@@ -370,19 +372,20 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Add flags to create an executable.
   this->LocalGenerator->AddConfigVariableFlags(
-    linkFlags, "CMAKE_EXE_LINKER_FLAGS", this->GetConfigName());
+    linkFlags, "CMAKE_EXE_LINKER_FLAGS", this->GeneratorTarget,
+    cmBuildStep::Link, linkLanguage, this->GetConfigName());
 
-  if (this->GeneratorTarget->IsWin32Executable(
-        this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"))) {
+  {
+    auto exeType =
+      cmStrCat("CMAKE_", linkLanguage, "_CREATE_",
+               (this->GeneratorTarget->IsWin32Executable(
+                  this->Makefile->GetDefinition("CMAKE_BUILD_TYPE"))
+                  ? "WIN32"
+                  : "CONSOLE"),
+               "_EXE");
     this->LocalGenerator->AppendFlags(
-      linkFlags,
-      this->Makefile->GetSafeDefinition(
-        cmStrCat("CMAKE_", linkLanguage, "_CREATE_WIN32_EXE")));
-  } else {
-    this->LocalGenerator->AppendFlags(
-      linkFlags,
-      this->Makefile->GetSafeDefinition(
-        cmStrCat("CMAKE_", linkLanguage, "_CREATE_CONSOLE_EXE")));
+      linkFlags, this->Makefile->GetDefinition(exeType), exeType,
+      this->GeneratorTarget, cmBuildStep::Link, linkLanguage);
   }
 
   // Add symbol export flags if necessary.
@@ -602,7 +605,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     }
 
     auto rulePlaceholderExpander =
-      this->LocalGenerator->CreateRulePlaceholderExpander();
+      this->LocalGenerator->CreateRulePlaceholderExpander(
+        cmBuildStep::Link, this->GeneratorTarget, linkLanguage);
 
     // Expand placeholders in the commands.
     rulePlaceholderExpander->SetTargetImpLib(targetOutPathImport);

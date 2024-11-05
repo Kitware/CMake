@@ -27,6 +27,7 @@
 #include "cmCustomCommandTypes.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGeneratorFactory.h"
 #include "cmLinkItem.h"
@@ -2538,7 +2539,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   }
   if (!extraLinkOptionsVar.empty()) {
     this->CurrentLocalGenerator->AddConfigVariableFlags(
-      extraLinkOptions, extraLinkOptionsVar, configName);
+      extraLinkOptions, extraLinkOptionsVar, gtgt, cmBuildStep::Link, llang,
+      configName);
   }
 
   if (gtgt->GetType() == cmStateEnums::OBJECT_LIBRARY ||
@@ -2693,7 +2695,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
         // in many ways as an application bundle, as far as
         // link flags go
         std::string createFlags = this->LookupFlags(
-          "CMAKE_SHARED_MODULE_CREATE_", llang, "_FLAGS", "-bundle");
+          "CMAKE_SHARED_MODULE_CREATE_", llang, "_FLAGS", gtgt, "-bundle");
         if (!createFlags.empty()) {
           extraLinkOptions += ' ';
           extraLinkOptions += createFlags;
@@ -2719,7 +2721,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
                                     this->CreateString("NO"));
         // Add the flags to create an executable.
         std::string createFlags =
-          this->LookupFlags("CMAKE_", llang, "_LINK_FLAGS", "");
+          this->LookupFlags("CMAKE_", llang, "_LINK_FLAGS", gtgt, "");
         if (!createFlags.empty()) {
           extraLinkOptions += ' ';
           extraLinkOptions += createFlags;
@@ -2748,8 +2750,9 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
                                     this->CreateString(plist));
       } else {
         // Add the flags to create a shared library.
-        std::string createFlags = this->LookupFlags(
-          "CMAKE_SHARED_LIBRARY_CREATE_", llang, "_FLAGS", "-dynamiclib");
+        std::string createFlags =
+          this->LookupFlags("CMAKE_SHARED_LIBRARY_CREATE_", llang, "_FLAGS",
+                            gtgt, "-dynamiclib");
         if (!createFlags.empty()) {
           extraLinkOptions += ' ';
           extraLinkOptions += createFlags;
@@ -2769,7 +2772,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
     case cmStateEnums::EXECUTABLE: {
       // Add the flags to create an executable.
       std::string createFlags =
-        this->LookupFlags("CMAKE_", llang, "_LINK_FLAGS", "");
+        this->LookupFlags("CMAKE_", llang, "_LINK_FLAGS", gtgt, "");
       if (!createFlags.empty()) {
         extraLinkOptions += ' ';
         extraLinkOptions += createFlags;
@@ -5207,13 +5210,17 @@ void cmGlobalXCodeGenerator::AppendDirectoryForConfig(
 
 std::string cmGlobalXCodeGenerator::LookupFlags(
   const std::string& varNamePrefix, const std::string& varNameLang,
-  const std::string& varNameSuffix, const std::string& default_flags)
+  const std::string& varNameSuffix, cmGeneratorTarget const* gt,
+  const std::string& default_flags)
 {
   if (!varNameLang.empty()) {
     std::string varName = cmStrCat(varNamePrefix, varNameLang, varNameSuffix);
     if (cmValue varValue = this->CurrentMakefile->GetDefinition(varName)) {
       if (!varValue->empty()) {
-        return *varValue;
+        std::string flags;
+        this->CurrentLocalGenerator->AppendFlags(
+          flags, *varValue, varName, gt, cmBuildStep::Link, varNameLang);
+        return flags;
       }
     }
   }

@@ -30,6 +30,7 @@
 #include "cmFileSet.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorExpression.h"
+#include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalVisualStudio10Generator.h"
@@ -4426,12 +4427,9 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     linkType = "EXE";
   }
   std::string flags;
-  std::string linkFlagVarBase = cmStrCat("CMAKE_", linkType, "_LINKER_FLAGS");
-  flags += ' ';
-  flags += this->Makefile->GetRequiredDefinition(linkFlagVarBase);
-  std::string linkFlagVar = cmStrCat(linkFlagVarBase, '_', CONFIG);
-  flags += ' ';
-  flags += this->Makefile->GetRequiredDefinition(linkFlagVar);
+  this->LocalGenerator->AddConfigVariableFlags(
+    flags, cmStrCat("CMAKE_", linkType, "_LINKER_FLAGS"),
+    this->GeneratorTarget, cmBuildStep::Link, linkLanguage, config);
   cmValue targetLinkFlags = this->GeneratorTarget->GetProperty("LINK_FLAGS");
   if (targetLinkFlags) {
     flags += ' ';
