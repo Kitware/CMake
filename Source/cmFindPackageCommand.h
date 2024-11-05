@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <functional>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <utility>
@@ -17,6 +18,7 @@
 #include <cm3p/kwiml/int.h>
 
 #include "cmFindCommon.h"
+#include "cmPackageInfoReader.h"
 #include "cmPolicies.h"
 
 // IWYU insists we should forward-declare instead of including <functional>,
@@ -282,6 +284,8 @@ private:
     }
   };
   std::vector<ConfigFileInfo> ConsideredConfigs;
+
+  std::unique_ptr<cmPackageInfoReader> CpsReader;
 
   friend struct std::hash<ConfigFileInfo>;
 };

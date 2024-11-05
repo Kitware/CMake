@@ -1503,7 +1503,12 @@ bool cmFindPackageCommand::HandlePackageMode(
     this->StoreVersionFound();
 
     // Parse the configuration file.
-    if (this->ReadListFile(this->FileFound, DoPolicyScope)) {
+    if (this->CpsReader) {
+      // FIXME TODO
+
+      // The package has been found.
+      found = true;
+    } else if (this->ReadListFile(this->FileFound, DoPolicyScope)) {
       // The package has been found.
       found = true;
 
@@ -2487,27 +2492,63 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
   bool haveResult = false;
   std::string version = "unknown";
 
-  // Get the filename without the .cmake extension.
+  // Get the file extension.
   std::string::size_type pos = config_file.rfind('.');
-  std::string version_file_base = config_file.substr(0, pos);
+  std::string ext = cmSystemTools::LowerCase(config_file.substr(pos));
 
-  // Look for foo-config-version.cmake
-  std::string version_file = cmStrCat(version_file_base, "-version.cmake");
-  if (!haveResult && cmSystemTools::FileExists(version_file, true)) {
-    result = this->CheckVersionFile(version_file, version);
-    haveResult = true;
-  }
+  if (ext == ".cps"_s) {
+    std::unique_ptr<cmPackageInfoReader> reader =
+      cmPackageInfoReader::Read(config_file);
+    if (reader && reader->GetName() == this->Name) {
+      cm::optional<std::string> cpsVersion = reader->GetVersion();
+      if (cpsVersion) {
+        // TODO: Implement version check for CPS
+        this->VersionFound = (version = std::move(*cpsVersion));
 
-  // Look for fooConfigVersion.cmake
-  version_file = cmStrCat(version_file_base, "Version.cmake");
-  if (!haveResult && cmSystemTools::FileExists(version_file, true)) {
-    result = this->CheckVersionFile(version_file, version);
-    haveResult = true;
-  }
+        std::vector<unsigned> const& versionParts = reader->ParseVersion();
+        this->VersionFoundCount = static_cast<unsigned>(versionParts.size());
+        switch (this->VersionFoundCount) {
+          case 4:
+            this->VersionFoundTweak = versionParts[3];
+            CM_FALLTHROUGH;
+          case 3:
+            this->VersionFoundPatch = versionParts[2];
+            CM_FALLTHROUGH;
+          case 2:
+            this->VersionFoundMinor = versionParts[1];
+            CM_FALLTHROUGH;
+          case 1:
+            this->VersionFoundMajor = versionParts[0];
+            CM_FALLTHROUGH;
+          default:
+            break;
+        }
+      }
+      this->CpsReader = std::move(reader);
+      result = true;
+    }
+  } else {
+    // Get the filename without the .cmake extension.
+    std::string version_file_base = config_file.substr(0, pos);
 
-  // If no version was requested a versionless package is acceptable.
-  if (!haveResult && this->Version.empty()) {
-    result = true;
+    // Look for foo-config-version.cmake
+    std::string version_file = cmStrCat(version_file_base, "-version.cmake");
+    if (!haveResult && cmSystemTools::FileExists(version_file, true)) {
+      result = this->CheckVersionFile(version_file, version);
+      haveResult = true;
+    }
+
+    // Look for fooConfigVersion.cmake
+    version_file = cmStrCat(version_file_base, "Version.cmake");
+    if (!haveResult && cmSystemTools::FileExists(version_file, true)) {
+      result = this->CheckVersionFile(version_file, version);
+      haveResult = true;
+    }
+
+    // If no version was requested a versionless package is acceptable.
+    if (!haveResult && this->Version.empty()) {
+      result = true;
+    }
   }
 
   ConfigFileInfo configFileInfo;
