@@ -131,7 +131,7 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   this->PushLoopBlockBarrier();
 
   // By default the check is not done.  It is enabled by
-  // cmListFileCache in the top level if necessary.
+  // cmMakefile::Configure in the top level if necessary.
   this->CheckCMP0000 = false;
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -986,24 +986,9 @@ void cmMakefile::EnforceDirectoryLevelRules() const
                "support older CMake versions for this project.  "
                "For more information run "
                "\"cmake --help-policy CMP0000\".");
-    switch (this->GetPolicyStatus(cmPolicies::CMP0000)) {
-      case cmPolicies::WARN:
-        // Warn because the user did not provide a minimum required
-        // version.
-        this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING, e,
-                                               this->Backtrace);
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        // OLD behavior is to use policy version 2.4 set in
-        // cmListFileCache.
-        break;
-      case cmPolicies::NEW:
-        // NEW behavior is to issue an error.
-        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e,
-                                               this->Backtrace);
-        cmSystemTools::SetFatalErrorOccurred();
-        break;
-    }
+    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e,
+                                           this->Backtrace);
+    cmSystemTools::SetFatalErrorOccurred();
   }
 }
 

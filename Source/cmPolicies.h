@@ -15,8 +15,7 @@ class cmMakefile;
 
 #define CM_FOR_EACH_POLICY_TABLE(POLICY, SELECT)                              \
   SELECT(POLICY, CMP0000,                                                     \
-         "A minimum required CMake version must be specified.", 2, 6, 0,      \
-         WARN)                                                                \
+         "A minimum required CMake version must be specified.", 2, 6, 0, NEW) \
   SELECT(POLICY, CMP0001,                                                     \
          "CMAKE_BACKWARDS_COMPATIBILITY should no longer be used.", 2, 6, 0,  \
          WARN)                                                                \

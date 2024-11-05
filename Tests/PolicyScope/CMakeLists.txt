@@ -1,5 +1,5 @@
+cmake_minimum_required(VERSION 3.30)
 project(PolicyScope C)
-# No cmake_minimum_required(VERSION), it's in FindFoo.
 
 #-----------------------------------------------------------------------------
 # Helper function to report results.
