@@ -1101,36 +1101,22 @@ std::string cmSystemTools::GetComspec()
 
 #endif
 
-std::string cmSystemTools::GetRealPathResolvingWindowsSubst(
-  const std::string& path, std::string* errorMessage)
+std::string cmSystemTools::GetRealPath(const std::string& path,
+                                       std::string* errorMessage)
 {
 #ifdef _WIN32
-  // uv_fs_realpath uses Windows Vista API so fallback to kwsys if not found
   std::string resolved_path;
-  uv_fs_t req;
-  int err = uv_fs_realpath(nullptr, &req, path.c_str(), nullptr);
-  if (!err) {
-    resolved_path = std::string((char*)req.ptr);
-    cmSystemTools::ConvertToUnixSlashes(resolved_path);
-    // Normalize to upper-case drive letter as GetActualCaseForPath does.
-    if (resolved_path.size() > 1 && resolved_path[1] == ':') {
-      resolved_path[0] = toupper(resolved_path[0]);
+  using namespace cm::PathResolver;
+  // IWYU pragma: no_forward_declare cm::PathResolver::Policies::RealPath
+  static const Resolver<Policies::RealPath> resolver(RealOS);
+  cmsys::Status status = resolver.Resolve(path, resolved_path);
+  if (!status) {
+    if (errorMessage) {
+      *errorMessage = status.GetString();
+      resolved_path.clear();
+    } else {
+      resolved_path = path;
     }
-  } else if (err == UV_ENOSYS) {
-    resolved_path = cmsys::SystemTools::GetRealPath(path, errorMessage);
-  } else if (errorMessage) {
-    LPSTR message = nullptr;
-    DWORD size = FormatMessageA(
-      FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM |
-        FORMAT_MESSAGE_IGNORE_INSERTS,
-      nullptr, err, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&message,
-      0, nullptr);
-    *errorMessage = std::string(message, size);
-    LocalFree(message);
-
-    resolved_path = "";
-  } else {
-    resolved_path = path;
   }
   return resolved_path;
 #else
@@ -2703,8 +2689,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   wchar_t modulepath[_MAX_PATH];
   ::GetModuleFileNameW(nullptr, modulepath, sizeof(modulepath));
   std::string path = cmsys::Encoding::ToNarrow(modulepath);
-  std::string realPath =
-    cmSystemTools::GetRealPathResolvingWindowsSubst(path, nullptr);
+  std::string realPath = cmSystemTools::GetRealPath(path, nullptr);
   if (realPath.empty()) {
     realPath = path;
   }
