@@ -101,13 +101,12 @@ int cmCPackDragNDropGenerator::InitializeInternal()
   }
   this->SetOptionIfNotSet("CPACK_COMMAND_REZ", rez_path);
 
-  if (this->IsSet("CPACK_DMG_SLA_DIR")) {
-    slaDirectory = this->GetOption("CPACK_DMG_SLA_DIR");
+  if (cmValue v = this->GetOptionIfSet("CPACK_DMG_SLA_DIR")) {
+    slaDirectory = *v;
     if (!slaDirectory.empty() &&
         this->IsOn("CPACK_DMG_SLA_USE_RESOURCE_FILE_LICENSE") &&
-        this->IsSet("CPACK_RESOURCE_FILE_LICENSE")) {
-      std::string license_file =
-        this->GetOption("CPACK_RESOURCE_FILE_LICENSE");
+        (v = this->GetOptionIfSet("CPACK_RESOURCE_FILE_LICENSE"))) {
+      std::string license_file = *v;
       if (!license_file.empty() &&
           (license_file.find("CPack.GenericLicense.txt") ==
            std::string::npos)) {
@@ -119,7 +118,8 @@ int cmCPackDragNDropGenerator::InitializeInternal()
         singleLicense = true;
       }
     }
-    if (!this->IsSet("CPACK_DMG_SLA_LANGUAGES")) {
+    cmValue lang = this->GetOptionIfSet("CPACK_DMG_SLA_LANGUAGES");
+    if (!lang) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "CPACK_DMG_SLA_DIR set but no languages defined "
                     "(set CPACK_DMG_SLA_LANGUAGES)"
@@ -132,7 +132,7 @@ int cmCPackDragNDropGenerator::InitializeInternal()
       return 0;
     }
 
-    cmList languages{ this->GetOption("CPACK_DMG_SLA_LANGUAGES") };
+    cmList languages{ *lang };
     if (languages.empty()) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "CPACK_DMG_SLA_LANGUAGES set but empty" << std::endl);
@@ -742,8 +742,8 @@ std::string cmCPackDragNDropGenerator::GetComponentInstallSuffix(
 
   std::string componentFileName = cmStrCat(
     "CPACK_DMG_", cmSystemTools::UpperCase(componentName), "_FILE_NAME");
-  if (this->IsSet(componentFileName)) {
-    return this->GetOption(componentFileName);
+  if (cmValue v = this->GetOptionIfSet(componentFileName)) {
+    return *v;
   }
   return GetComponentPackageFileName(package_file_name, componentName, false);
 }

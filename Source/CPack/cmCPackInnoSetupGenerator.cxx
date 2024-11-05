@@ -97,9 +97,8 @@ int cmCPackInnoSetupGenerator::InitializeInternal()
 int cmCPackInnoSetupGenerator::PackageFiles()
 {
   // Includes
-  if (IsSet("CPACK_INNOSETUP_EXTRA_SCRIPTS")) {
-    const cmList extraScripts(GetOption("CPACK_INNOSETUP_EXTRA_SCRIPTS"));
-
+  if (cmValue v = GetOptionIfSet("CPACK_INNOSETUP_EXTRA_SCRIPTS")) {
+    const cmList extraScripts(*v);
     for (const std::string& i : extraScripts) {
       includeDirectives.emplace_back(cmStrCat(
         "#include ", QuotePath(cmSystemTools::CollapseFullPath(i, toplevel))));
@@ -133,9 +132,8 @@ int cmCPackInnoSetupGenerator::PackageFiles()
   }
 
   // [Code] section
-  if (IsSet("CPACK_INNOSETUP_CODE_FILES")) {
-    const cmList codeFiles(GetOption("CPACK_INNOSETUP_CODE_FILES"));
-
+  if (cmValue v = GetOptionIfSet("CPACK_INNOSETUP_CODE_FILES")) {
+    const cmList codeFiles(*v);
     for (const std::string& i : codeFiles) {
       codeIncludes.emplace_back(cmStrCat(
         "#include ", QuotePath(cmSystemTools::CollapseFullPath(i, toplevel))));
@@ -168,26 +166,26 @@ bool cmCPackInnoSetupGenerator::ProcessSetupSection()
   }
   setupDirectives["AppPublisher"] = GetOption("CPACK_PACKAGE_VENDOR");
 
-  if (IsSet("CPACK_PACKAGE_HOMEPAGE_URL")) {
-    setupDirectives["AppPublisherURL"] =
-      GetOption("CPACK_PACKAGE_HOMEPAGE_URL");
-    setupDirectives["AppSupportURL"] = GetOption("CPACK_PACKAGE_HOMEPAGE_URL");
-    setupDirectives["AppUpdatesURL"] = GetOption("CPACK_PACKAGE_HOMEPAGE_URL");
+  if (cmValue v = GetOptionIfSet("CPACK_PACKAGE_HOMEPAGE_URL")) {
+    setupDirectives["AppPublisherURL"] = *v;
+    setupDirectives["AppSupportURL"] = *v;
+    setupDirectives["AppUpdatesURL"] = *v;
   }
 
   SetOptionIfNotSet("CPACK_INNOSETUP_IGNORE_LICENSE_PAGE", "OFF");
-  if (IsSet("CPACK_RESOURCE_FILE_LICENSE") &&
-      !GetOption("CPACK_INNOSETUP_IGNORE_LICENSE_PAGE").IsOn()) {
-    setupDirectives["LicenseFile"] = cmSystemTools::ConvertToWindowsOutputPath(
-      GetOption("CPACK_RESOURCE_FILE_LICENSE"));
+  if (!GetOption("CPACK_INNOSETUP_IGNORE_LICENSE_PAGE").IsOn()) {
+    if (cmValue v = GetOptionIfSet("CPACK_RESOURCE_FILE_LICENSE")) {
+      setupDirectives["LicenseFile"] =
+        cmSystemTools::ConvertToWindowsOutputPath(*v);
+    }
   }
 
   SetOptionIfNotSet("CPACK_INNOSETUP_IGNORE_README_PAGE", "ON");
-  if (IsSet("CPACK_RESOURCE_FILE_README") &&
-      !GetOption("CPACK_INNOSETUP_IGNORE_README_PAGE").IsOn()) {
-    setupDirectives["InfoBeforeFile"] =
-      cmSystemTools::ConvertToWindowsOutputPath(
-        GetOption("CPACK_RESOURCE_FILE_README"));
+  if (!GetOption("CPACK_INNOSETUP_IGNORE_README_PAGE").IsOn()) {
+    if (cmValue v = GetOptionIfSet("CPACK_RESOURCE_FILE_README")) {
+      setupDirectives["InfoBeforeFile"] =
+        cmSystemTools::ConvertToWindowsOutputPath(*v);
+    }
   }
 
   SetOptionIfNotSet("CPACK_INNOSETUP_USE_MODERN_WIZARD", "OFF");
@@ -201,16 +199,14 @@ bool cmCPackInnoSetupGenerator::ProcessSetupSection()
     setupDirectives["SetupIconFile"] = "compiler:SetupClassicIcon.ico";
   }
 
-  if (IsSet("CPACK_INNOSETUP_ICON_FILE")) {
+  if (cmValue v = GetOptionIfSet("CPACK_INNOSETUP_ICON_FILE")) {
     setupDirectives["SetupIconFile"] =
-      cmSystemTools::ConvertToWindowsOutputPath(
-        GetOption("CPACK_INNOSETUP_ICON_FILE"));
+      cmSystemTools::ConvertToWindowsOutputPath(*v);
   }
 
-  if (IsSet("CPACK_PACKAGE_ICON")) {
+  if (cmValue v = GetOptionIfSet("CPACK_PACKAGE_ICON")) {
     setupDirectives["WizardSmallImageFile"] =
-      cmSystemTools::ConvertToWindowsOutputPath(
-        GetOption("CPACK_PACKAGE_ICON"));
+      cmSystemTools::ConvertToWindowsOutputPath(*v);
   }
 
   if (!RequireOption("CPACK_PACKAGE_INSTALL_DIRECTORY")) {
@@ -238,8 +234,8 @@ bool cmCPackInnoSetupGenerator::ProcessSetupSection()
     toplevelProgramFolder = false;
   }
 
-  if (IsSet("CPACK_INNOSETUP_PASSWORD")) {
-    setupDirectives["Password"] = GetOption("CPACK_INNOSETUP_PASSWORD");
+  if (cmValue v = GetOptionIfSet("CPACK_INNOSETUP_PASSWORD")) {
+    setupDirectives["Password"] = *v;
     setupDirectives["Encryption"] = "yes";
   }
 
@@ -306,9 +302,9 @@ bool cmCPackInnoSetupGenerator::ProcessSetupSection()
 bool cmCPackInnoSetupGenerator::ProcessFiles()
 {
   std::map<std::string, std::string> customFileInstructions;
-  if (IsSet("CPACK_INNOSETUP_CUSTOM_INSTALL_INSTRUCTIONS")) {
-    const cmList instructions(
-      GetOption("CPACK_INNOSETUP_CUSTOM_INSTALL_INSTRUCTIONS"));
+  if (cmValue v =
+        GetOptionIfSet("CPACK_INNOSETUP_CUSTOM_INSTALL_INSTRUCTIONS")) {
+    const cmList instructions(*v);
     if (instructions.size() % 2 != 0) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "CPACK_INNOSETUP_CUSTOM_INSTALL_INSTRUCTIONS should "
@@ -328,8 +324,8 @@ bool cmCPackInnoSetupGenerator::ProcessFiles()
     toplevelProgramFolder ? "{autoprograms}\\" : "{group}\\";
 
   std::map<std::string, std::string> icons;
-  if (IsSet("CPACK_PACKAGE_EXECUTABLES")) {
-    const cmList executables(GetOption("CPACK_PACKAGE_EXECUTABLES"));
+  if (cmValue v = GetOptionIfSet("CPACK_PACKAGE_EXECUTABLES")) {
+    const cmList executables(*v);
     if (executables.size() % 2 != 0) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "CPACK_PACKAGE_EXECUTABLES should should contain pairs of "
@@ -345,13 +341,13 @@ bool cmCPackInnoSetupGenerator::ProcessFiles()
   }
 
   std::vector<std::string> desktopIcons;
-  if (IsSet("CPACK_CREATE_DESKTOP_LINKS")) {
-    cmExpandList(GetOption("CPACK_CREATE_DESKTOP_LINKS"), desktopIcons);
+  if (cmValue v = GetOptionIfSet("CPACK_CREATE_DESKTOP_LINKS")) {
+    cmExpandList(*v, desktopIcons);
   }
 
   std::vector<std::string> runExecutables;
-  if (IsSet("CPACK_INNOSETUP_RUN_EXECUTABLES")) {
-    cmExpandList(GetOption("CPACK_INNOSETUP_RUN_EXECUTABLES"), runExecutables);
+  if (cmValue v = GetOptionIfSet("CPACK_INNOSETUP_RUN_EXECUTABLES")) {
+    cmExpandList(*v, runExecutables);
   }
 
   for (const std::string& i : files) {
@@ -507,8 +503,8 @@ bool cmCPackInnoSetupGenerator::ProcessFiles()
   static cmsys::RegularExpression urlRegex(
     "^(mailto:|(ftps?|https?|news)://).*$");
 
-  if (IsSet("CPACK_INNOSETUP_MENU_LINKS")) {
-    const cmList menuIcons(GetOption("CPACK_INNOSETUP_MENU_LINKS"));
+  if (cmValue v = GetOptionIfSet("CPACK_INNOSETUP_MENU_LINKS")) {
+    const cmList menuIcons(*v);
     if (menuIcons.size() % 2 != 0) {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "CPACK_INNOSETUP_MENU_LINKS should "
@@ -784,8 +780,7 @@ bool cmCPackInnoSetupGenerator::ConfigureISScript()
   const std::string& defaultMessage =
     "; CPack didn't find any entries for this section";
 
-  if (IsSet("CPACK_CREATE_DESKTOP_LINKS") &&
-      !GetOption("CPACK_CREATE_DESKTOP_LINKS").Get()->empty()) {
+  if (!IsSetToEmpty("CPACK_CREATE_DESKTOP_LINKS")) {
     cmCPackInnoSetupKeyValuePairs tasks;
     tasks["Name"] = "\"desktopicon\"";
     tasks["Description"] = "\"{cm:CreateDesktopIcon}\"";
@@ -858,9 +853,8 @@ bool cmCPackInnoSetupGenerator::Compile()
     }
   }
 
-  if (IsSet("CPACK_INNOSETUP_EXECUTABLE_ARGUMENTS")) {
-    const cmList args(GetOption("CPACK_INNOSETUP_EXECUTABLE_ARGUMENTS"));
-
+  if (cmValue v = GetOptionIfSet("CPACK_INNOSETUP_EXECUTABLE_ARGUMENTS")) {
+    const cmList args(*v);
     isccArgs.insert(isccArgs.end(), args.begin(), args.end());
   }
 
