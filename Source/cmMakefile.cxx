@@ -4629,10 +4629,9 @@ bool cmMakefile::SetPolicy(const char* id, cmPolicies::PolicyStatus status)
 bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
                            cmPolicies::PolicyStatus status)
 {
-  // A REQUIRED_ALWAYS policy may be set only to NEW.
-  if (status != cmPolicies::NEW &&
-      cmPolicies::GetPolicyStatus(id) == cmPolicies::REQUIRED_ALWAYS) {
-    std::string msg = cmPolicies::GetRequiredAlwaysPolicyError(id);
+  // A removed policy may be set only to NEW.
+  if (cmPolicies::IsRemoved(id) && status != cmPolicies::NEW) {
+    std::string msg = cmPolicies::GetRemovedPolicyError(id);
     this->IssueMessage(MessageType::FATAL_ERROR, msg);
     return false;
   }

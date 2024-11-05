@@ -57,6 +57,10 @@ static bool stringToId(const char* input, cmPolicies::PolicyID& pid)
 #define CM_FOR_EACH_POLICY_ID_DOC(POLICY)                                     \
   CM_FOR_EACH_POLICY_TABLE(POLICY, CM_SELECT_ID_DOC)
 
+#define CM_SELECT_ID_STATUS(F, A1, A2, A3, A4, A5, A6) F(A1, A6)
+#define CM_FOR_EACH_POLICY_ID_STATUS(POLICY)                                  \
+  CM_FOR_EACH_POLICY_TABLE(POLICY, CM_SELECT_ID_STATUS)
+
 static const char* idToString(cmPolicies::PolicyID id)
 {
   switch (id) {
@@ -117,6 +121,23 @@ static const char* idToShortDescription(cmPolicies::PolicyID id)
       return nullptr;
   }
   return nullptr;
+}
+
+namespace {
+cmPolicies::PolicyStatus idToStatus(cmPolicies::PolicyID id)
+{
+  switch (id) {
+#define POLICY_CASE(ID, STATUS)                                               \
+  case cmPolicies::ID:                                                        \
+    return cmPolicies::STATUS;
+    // NOLINTNEXTLINE(bugprone-branch-clone)
+    CM_FOR_EACH_POLICY_ID_STATUS(POLICY_CASE)
+#undef POLICY_CASE
+    case cmPolicies::CMPCOUNT:
+      break;
+  }
+  return cmPolicies::WARN;
+}
 }
 
 static void DiagnoseAncientPolicies(
@@ -284,7 +305,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf, unsigned int majorVer,
   for (PolicyID pid = cmPolicies::CMP0000; pid != cmPolicies::CMPCOUNT;
        pid = static_cast<PolicyID>(pid + 1)) {
     if (isPolicyNewerThan(pid, majorVer, minorVer, patchVer)) {
-      if (cmPolicies::GetPolicyStatus(pid) == cmPolicies::REQUIRED_ALWAYS) {
+      if (cmPolicies::IsRemoved(pid)) {
         ancientPolicies.push_back(pid);
       } else {
         cmPolicies::PolicyStatus status = cmPolicies::WARN;
@@ -377,14 +398,12 @@ std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
     "Run \"cmake --help-command cmake_policy\" for more information.");
 }
 
-//! Get the default status for a policy
-cmPolicies::PolicyStatus cmPolicies::GetPolicyStatus(
-  cmPolicies::PolicyID /*unused*/)
+bool cmPolicies::IsRemoved(cmPolicies::PolicyID id)
 {
-  return cmPolicies::WARN;
+  return idToStatus(id) == cmPolicies::NEW;
 }
 
-std::string cmPolicies::GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id)
+std::string cmPolicies::GetRemovedPolicyError(cmPolicies::PolicyID id)
 {
   std::string pid = idToString(id);
   return cmStrCat(

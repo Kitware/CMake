@@ -9,6 +9,10 @@
 
 class cmMakefile;
 
+// Each policy has a short description, the version of CMake in which
+// it was introduced, and its default status.  The status is WARN for
+// existing policies and NEW for removed policies.
+
 #define CM_FOR_EACH_POLICY_TABLE(POLICY, SELECT)                              \
   SELECT(POLICY, CMP0000,                                                     \
          "A minimum required CMake version must be specified.", 2, 6, 0,      \
@@ -634,8 +638,8 @@ public:
   //! convert a string policy ID into a number
   static bool GetPolicyID(const char* id, /* out */ cmPolicies::PolicyID& pid);
 
-  //! Get the default status for a policy
-  static cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id);
+  //! Return whether a policy has been removed.
+  static bool IsRemoved(cmPolicies::PolicyID id);
 
   enum class WarnCompat
   {
@@ -660,7 +664,7 @@ public:
   static std::string GetRequiredPolicyError(cmPolicies::PolicyID id);
 
   //! return an error string for when a required policy is unspecified
-  static std::string GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id);
+  static std::string GetRemovedPolicyError(cmPolicies::PolicyID id);
 
   /** Represent a set of policy values.  */
   struct PolicyMap
