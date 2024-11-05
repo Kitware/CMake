@@ -259,7 +259,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
     cmMakeSingleCommandLine({ cmSystemTools::GetCMakeCommand(), argS, argB,
                               "--check-stamp-file", stampName });
 
-  if (cm->GetIgnoreWarningAsError()) {
+  if (cm->GetIgnoreCompileWarningAsError()) {
     commandLines[0].emplace_back("--compile-no-warning-as-error");
   }
   std::string comment = cmStrCat("Building Custom Rule ", makefileIn);

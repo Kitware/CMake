@@ -781,7 +781,7 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
                  << ConvertToMakefilePath(cmSystemTools::GetCMakeCommand())
                  << " -S" << ConvertToMakefilePath(root->GetSourceDirectory())
                  << " -B" << ConvertToMakefilePath(root->GetBinaryDirectory())
-                 << (cm->GetIgnoreWarningAsError()
+                 << (cm->GetIgnoreCompileWarningAsError()
                        ? " --compile-no-warning-as-error"
                        : "")
                  << '\n';
