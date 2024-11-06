@@ -4396,17 +4396,6 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
         "\" because an imported target with the same name already exists.");
       return false;
     }
-    // target names must be globally unique
-    switch (this->GetPolicyStatus(cmPolicies::CMP0002)) {
-      case cmPolicies::WARN:
-        this->IssueMessage(MessageType::AUTHOR_WARNING,
-                           cmPolicies::GetPolicyWarning(cmPolicies::CMP0002));
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        return true;
-      case cmPolicies::NEW:
-        break;
-    }
 
     // The conflict is with a non-imported target.
     // Allow this if the user has requested support.
