@@ -1958,6 +1958,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
       this->CMakeCmd(), " --regenerate-during-build",
       cm->GetIgnoreCompileWarningAsError() ? " --compile-no-warning-as-error"
                                            : "",
+      cm->GetIgnoreLinkWarningAsError() ? " --link-no-warning-as-error" : "",
       " -S",
       lg->ConvertToOutputFormat(lg->GetSourceDirectory(),
                                 cmOutputConverter::SHELL),

@@ -71,7 +71,7 @@ const cmDocumentationEntry cmDocumentationUsageNote = {
   "Run 'cmake --help' for more information."
 };
 
-const cmDocumentationEntry cmDocumentationOptions[34] = {
+const cmDocumentationEntry cmDocumentationOptions[35] = {
   { "--preset <preset>,--preset=<preset>", "Specify a configure preset." },
   { "--list-presets[=<type>]", "List available presets." },
   { "--workflow [<options>]", "Run a workflow preset." },
@@ -123,6 +123,9 @@ const cmDocumentationEntry cmDocumentationOptions[34] = {
   { "--compile-no-warning-as-error",
     "Ignore COMPILE_WARNING_AS_ERROR property and "
     "CMAKE_COMPILE_WARNING_AS_ERROR variable." },
+  { "--link-no-warning-as-error",
+    "Ignore LINK_WARNING_AS_ERROR property and "
+    "CMAKE_LINK_WARNING_AS_ERROR variable." },
   { "--profiling-format=<fmt>",
     "Output data for profiling CMake scripts. Supported formats: "
     "google-trace" },

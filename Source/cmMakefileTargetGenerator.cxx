@@ -158,6 +158,8 @@ void cmMakefileTargetGenerator::GetTargetLinkFlags(
     flags, this->GeneratorTarget, this->GetConfigName(), linkLanguage);
   this->LocalGenerator->AppendPositionIndependentLinkerFlags(
     flags, this->GeneratorTarget, this->GetConfigName(), linkLanguage);
+  this->LocalGenerator->AppendWarningAsErrorLinkerFlags(
+    flags, this->GeneratorTarget, linkLanguage);
   this->LocalGenerator->AppendDependencyInfoLinkerFlags(
     flags, this->GeneratorTarget, this->GetConfigName(), linkLanguage);
 }

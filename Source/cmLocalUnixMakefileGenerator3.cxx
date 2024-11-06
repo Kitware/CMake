@@ -831,6 +831,7 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsBottom(
       "$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) ",
       cm->GetIgnoreCompileWarningAsError() ? "--compile-no-warning-as-error "
                                            : "",
+      cm->GetIgnoreLinkWarningAsError() ? "--link-no-warning-as-error " : "",
       "--check-build-system ",
       this->ConvertToOutputFormat(cmakefileName, cmOutputConverter::SHELL),
       " 0");
@@ -1834,6 +1835,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
         "$(CMAKE_COMMAND) -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) ",
         cm->GetIgnoreCompileWarningAsError() ? "--compile-no-warning-as-error "
                                              : "",
+        cm->GetIgnoreLinkWarningAsError() ? "--link-no-warning-as-error " : "",
         "--check-build-system ",
         this->ConvertToOutputFormat(cmakefileName, cmOutputConverter::SHELL),
         " 1");

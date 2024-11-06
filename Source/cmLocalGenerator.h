@@ -185,6 +185,9 @@ public:
                                             cmGeneratorTarget* target,
                                             const std::string& config,
                                             const std::string& lang);
+  void AppendWarningAsErrorLinkerFlags(std::string& flags,
+                                       cmGeneratorTarget* target,
+                                       const std::string& lang);
   void AppendDependencyInfoLinkerFlags(std::string& flags,
                                        cmGeneratorTarget* target,
                                        const std::string& config,

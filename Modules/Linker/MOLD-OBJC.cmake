@@ -1,6 +1,6 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-include(Linker/GNU)
+include(Linker/MOLD)
 
-__linker_gnu(OBJC)
+__linker_mold(OBJC)

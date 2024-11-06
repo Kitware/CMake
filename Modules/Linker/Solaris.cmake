@@ -6,4 +6,6 @@
 include_guard()
 
 macro(__linker_solaris lang)
+  # Linker warning as error
+  set(CMAKE_${lang}_LINK_OPTIONS_WARNING_AS_ERROR "LINKER:-z,fatal-warnings")
 endmacro()

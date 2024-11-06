@@ -4448,6 +4448,9 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
   // LINK_OPTIONS are escaped.
   this->LocalGenerator->AppendCompileOptions(flags, opts);
 
+  this->LocalGenerator->AppendWarningAsErrorLinkerFlags(
+    flags, this->GeneratorTarget, linkLanguage);
+
   cmComputeLinkInformation* pcli =
     this->GeneratorTarget->GetLinkInformation(config);
   if (!pcli) {

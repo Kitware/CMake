@@ -262,6 +262,9 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   if (cm->GetIgnoreCompileWarningAsError()) {
     commandLines[0].emplace_back("--compile-no-warning-as-error");
   }
+  if (cm->GetIgnoreLinkWarningAsError()) {
+    commandLines[0].emplace_back("--link-no-warning-as-error");
+  }
   std::string comment = cmStrCat("Building Custom Rule ", makefileIn);
   auto cc = cm::make_unique<cmCustomCommand>();
   cc->SetOutputs(stampName);
@@ -1006,6 +1009,9 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(
                          target->GetLinkerLanguage(configName));
   // LINK_OPTIONS are escaped.
   this->AppendCompileOptions(extraLinkOptions, opts);
+
+  this->AppendWarningAsErrorLinkerFlags(extraLinkOptions, target,
+                                        linkLanguage);
 
   Options linkOptions(this, Options::Linker);
   if (this->FortranProject) {

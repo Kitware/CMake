@@ -550,6 +550,14 @@ public:
   {
     this->IgnoreCompileWarningAsError = b;
   }
+  bool GetIgnoreLinkWarningAsError() const
+  {
+    return this->IgnoreLinkWarningAsError;
+  }
+  void SetIgnoreLinkWarningAsError(bool b)
+  {
+    this->IgnoreLinkWarningAsError = b;
+  }
 
   void MarkCliAsUsed(const std::string& variable);
 
@@ -760,6 +768,7 @@ private:
   bool WarnUnusedCli = true;
   bool CheckSystemVars = false;
   bool IgnoreCompileWarningAsError = false;
+  bool IgnoreLinkWarningAsError = false;
   std::map<std::string, bool> UsedCliVariables;
   std::string CMakeEditCommand;
   std::string CXXEnvironment;

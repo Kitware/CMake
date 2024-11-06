@@ -3069,6 +3069,9 @@ void cmGlobalGenerator::AddGlobalTarget_EditCache(
     if (this->GetCMakeInstance()->GetIgnoreCompileWarningAsError()) {
       singleLine.push_back("--compile-no-warning-as-error");
     }
+    if (this->GetCMakeInstance()->GetIgnoreLinkWarningAsError()) {
+      singleLine.push_back("--link-no-warning-as-error");
+    }
     singleLine.push_back("-S$(CMAKE_SOURCE_DIR)");
     singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
     gti.Message = "Running CMake cache editor...";
@@ -3104,6 +3107,9 @@ void cmGlobalGenerator::AddGlobalTarget_RebuildCache(
   singleLine.push_back("--regenerate-during-build");
   if (this->GetCMakeInstance()->GetIgnoreCompileWarningAsError()) {
     singleLine.push_back("--compile-no-warning-as-error");
+  }
+  if (this->GetCMakeInstance()->GetIgnoreLinkWarningAsError()) {
+    singleLine.push_back("--link-no-warning-as-error");
   }
   singleLine.push_back("-S$(CMAKE_SOURCE_DIR)");
   singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
