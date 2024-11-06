@@ -584,6 +584,7 @@ Properties on Source Files
    /prop_sf/UNITY_GROUP
    /prop_sf/VS_COPY_TO_OUT_DIR
    /prop_sf/VS_CSHARP_tagname
+   /prop_sf/VS_CUSTOM_COMMAND_DISABLE_PARALLEL_BUILD
    /prop_sf/VS_DEPLOYMENT_CONTENT
    /prop_sf/VS_DEPLOYMENT_LOCATION
    /prop_sf/VS_INCLUDE_IN_VSIX
