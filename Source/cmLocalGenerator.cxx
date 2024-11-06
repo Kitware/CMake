@@ -58,7 +58,6 @@
 #include "cmTarget.h"
 #include "cmTestGenerator.h"
 #include "cmValue.h"
-#include "cmVersion.h"
 #include "cmake.h"
 
 #if defined(__HAIKU__)
@@ -102,8 +101,6 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg, cmMakefile* makefile)
   this->AliasTargets = makefile->GetAliasTargets();
 
   this->EmitUniversalBinaryFlags = true;
-  this->BackwardsCompatibility = 0;
-  this->BackwardsCompatibilityFinal = false;
 
   this->ComputeObjectMaxPath();
 
@@ -4327,15 +4324,12 @@ std::string cmLocalGenerator::GetObjectFileNameWithoutTarget(
   bool keptSourceExtension = true;
   if (!source.GetPropertyAsBool("KEEP_EXTENSION")) {
     // Decide whether this language wants to replace the source
-    // extension with the object extension.  For CMake 2.4
-    // compatibility do this by default.
-    bool replaceExt = this->NeedBackwardsCompatibility_2_4();
-    if (!replaceExt) {
-      std::string lang = source.GetLanguage();
-      if (!lang.empty()) {
-        replaceExt = this->Makefile->IsOn(
-          cmStrCat("CMAKE_", lang, "_OUTPUT_EXTENSION_REPLACE"));
-      }
+    // extension with the object extension.
+    bool replaceExt = false;
+    std::string lang = source.GetLanguage();
+    if (!lang.empty()) {
+      replaceExt = this->Makefile->IsOn(
+        cmStrCat("CMAKE_", lang, "_OUTPUT_EXTENSION_REPLACE"));
     }
 
     // Remove the source extension if it is to be replaced.
@@ -4398,58 +4392,6 @@ std::string cmLocalGenerator::GetTargetDirectory(
   cmSystemTools::Error("GetTargetDirectory"
                        " called on cmLocalGenerator");
   return "";
-}
-
-KWIML_INT_uint64_t cmLocalGenerator::GetBackwardsCompatibility()
-{
-  // The computed version may change until the project is fully
-  // configured.
-  if (!this->BackwardsCompatibilityFinal) {
-    unsigned int major = 0;
-    unsigned int minor = 0;
-    unsigned int patch = 0;
-    if (cmValue value =
-          this->Makefile->GetDefinition("CMAKE_BACKWARDS_COMPATIBILITY")) {
-      switch (sscanf(value->c_str(), "%u.%u.%u", &major, &minor, &patch)) {
-        case 2:
-          patch = 0;
-          break;
-        case 1:
-          minor = 0;
-          patch = 0;
-          break;
-        default:
-          break;
-      }
-    }
-    this->BackwardsCompatibility = CMake_VERSION_ENCODE(major, minor, patch);
-    this->BackwardsCompatibilityFinal = true;
-  }
-
-  return this->BackwardsCompatibility;
-}
-
-bool cmLocalGenerator::NeedBackwardsCompatibility_2_4()
-{
-  // Check the policy to decide whether to pay attention to this
-  // variable.
-  switch (this->GetPolicyStatus(cmPolicies::CMP0001)) {
-    case cmPolicies::WARN:
-      // WARN is just OLD without warning because user code does not
-      // always affect whether this check is done.
-      CM_FALLTHROUGH;
-    case cmPolicies::OLD:
-      // Old behavior is to check the variable.
-      break;
-    case cmPolicies::NEW:
-      // New behavior is to ignore the variable.
-      return false;
-  }
-
-  // Compatibility is needed if CMAKE_BACKWARDS_COMPATIBILITY is set
-  // equal to or lower than the given version.
-  KWIML_INT_uint64_t actual_compat = this->GetBackwardsCompatibility();
-  return (actual_compat && actual_compat <= CMake_VERSION_ENCODE(2, 4, 255));
 }
 
 cmPolicies::PolicyStatus cmLocalGenerator::GetPolicyStatus(

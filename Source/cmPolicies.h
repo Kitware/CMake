@@ -18,7 +18,7 @@ class cmMakefile;
          "A minimum required CMake version must be specified.", 2, 6, 0, NEW) \
   SELECT(POLICY, CMP0001,                                                     \
          "CMAKE_BACKWARDS_COMPATIBILITY should no longer be used.", 2, 6, 0,  \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(POLICY, CMP0002, "Logical target names must be globally unique.", 2, \
          6, 0, WARN)                                                          \
   SELECT(                                                                     \

@@ -5,10 +5,7 @@
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
 #include "cmPolicies.h"
-#include "cmState.h"
-#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
-#include "cmValue.h"
 
 namespace {
 bool HandleSetMode(std::vector<std::string> const& args,
@@ -87,20 +84,6 @@ bool HandleSetMode(std::vector<std::string> const& args,
   if (!status.GetMakefile().SetPolicy(args[1].c_str(), policyStatus)) {
     status.SetError("SET failed to set policy.");
     return false;
-  }
-  if (args[1] == "CMP0001" &&
-      (policyStatus == cmPolicies::WARN || policyStatus == cmPolicies::OLD)) {
-    if (!(status.GetMakefile().GetState()->GetInitializedCacheValue(
-          "CMAKE_BACKWARDS_COMPATIBILITY"))) {
-      // Set it to 2.4 because that is the last version where the
-      // variable had meaning.
-      status.GetMakefile().AddCacheDefinition(
-        "CMAKE_BACKWARDS_COMPATIBILITY", "2.4",
-        "For backwards compatibility, what version of CMake "
-        "commands and "
-        "syntax should this version of CMake try to support.",
-        cmStateEnums::STRING);
-    }
   }
   return true;
 }
