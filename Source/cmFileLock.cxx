@@ -14,6 +14,9 @@ cmFileLock::cmFileLock(cmFileLock&& other) noexcept
   this->File = other.File;
   other.File = (decltype(other.File))-1;
   this->Filename = std::move(other.Filename);
+#if defined(_WIN32)
+  this->Overlapped = std::move(other.Overlapped);
+#endif
 }
 
 cmFileLock::~cmFileLock()
@@ -30,6 +33,9 @@ cmFileLock& cmFileLock::operator=(cmFileLock&& other) noexcept
   this->File = other.File;
   other.File = (decltype(other.File))-1;
   this->Filename = std::move(other.Filename);
+#if defined(_WIN32)
+  this->Overlapped = std::move(other.Overlapped);
+#endif
 
   return *this;
 }
