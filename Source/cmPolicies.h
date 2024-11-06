@@ -657,9 +657,6 @@ public:
   static std::string GetPolicyDeprecatedWarning(cmPolicies::PolicyID id);
 
   //! return an error string for when a required policy is unspecified
-  static std::string GetRequiredPolicyError(cmPolicies::PolicyID id);
-
-  //! return an error string for when a required policy is unspecified
   static std::string GetRemovedPolicyError(cmPolicies::PolicyID id);
 
   /** Represent a set of policy values.  */

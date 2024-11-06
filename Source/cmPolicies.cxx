@@ -376,28 +376,6 @@ std::string cmPolicies::GetPolicyDeprecatedWarning(cmPolicies::PolicyID id)
     "to the NEW behavior and not rely on setting a policy to OLD.");
 }
 
-//! return an error string for when a required policy is unspecified
-std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
-{
-  return cmStrCat(
-    "Policy ", idToString(id),
-    " is not set to NEW: ", idToShortDescription(id),
-    "  "
-    "Run \"cmake --help-policy ",
-    idToString(id),
-    "\" for policy details.  "
-    "CMake now requires this policy to be set to NEW by the project.  "
-    "The policy may be set explicitly using the code\n"
-    "  cmake_policy(SET ",
-    idToString(id),
-    " NEW)\n"
-    "or by upgrading all policies with the code\n"
-    "  cmake_policy(VERSION ",
-    idToVersion(id),
-    ") # or later\n"
-    "Run \"cmake --help-command cmake_policy\" for more information.");
-}
-
 bool cmPolicies::IsRemoved(cmPolicies::PolicyID id)
 {
   return idToStatus(id) == cmPolicies::NEW;
