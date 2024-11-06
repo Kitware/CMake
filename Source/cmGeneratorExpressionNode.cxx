@@ -3395,7 +3395,7 @@ static cmPolicies::PolicyID policyForString(const char* policy_id)
 #undef RETURN_POLICY_ID
 
   assert(false && "Unreachable code. Not a valid policy");
-  return cmPolicies::CMP0002;
+  return cmPolicies::CMPCOUNT;
 }
 
 static const struct TargetPolicyNode : public cmGeneratorExpressionNode
