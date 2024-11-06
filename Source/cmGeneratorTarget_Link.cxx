@@ -459,8 +459,6 @@ bool cmGeneratorTarget::VerifyLinkItemColons(LinkItemRole role,
     } break;
     case cmPolicies::OLD:
       return true;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::NEW:
       // Issue the fatal message.
       break;
@@ -1330,8 +1328,6 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         case cmPolicies::WARN:
         case cmPolicies::OLD:
           break;
-        case cmPolicies::REQUIRED_IF_USED:
-        case cmPolicies::REQUIRED_ALWAYS:
         case cmPolicies::NEW:
           dagChecker.SetTransitivePropertiesOnlyCMP0131();
           break;
@@ -1390,8 +1386,6 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
             case cmPolicies::OLD:
               noMessage = true;
               break;
-            case cmPolicies::REQUIRED_IF_USED:
-            case cmPolicies::REQUIRED_ALWAYS:
             case cmPolicies::NEW:
               // Issue the fatal message.
               break;

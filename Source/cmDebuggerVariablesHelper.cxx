@@ -39,8 +39,6 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::Create(
     { cmPolicies::PolicyStatus::OLD, "OLD" },
     { cmPolicies::PolicyStatus::WARN, "WARN" },
     { cmPolicies::PolicyStatus::NEW, "NEW" },
-    { cmPolicies::PolicyStatus::REQUIRED_IF_USED, "REQUIRED_IF_USED" },
-    { cmPolicies::PolicyStatus::REQUIRED_ALWAYS, "REQUIRED_ALWAYS" }
   };
 
   return std::make_shared<cmDebuggerVariables>(

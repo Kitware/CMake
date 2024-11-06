@@ -364,8 +364,6 @@ void cmComputeTargetDepends::AddTargetDepend(size_t depender_index,
       case cmPolicies::OLD:
         break;
       case cmPolicies::NEW:
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
         issueMessage = true;
         messageType = MessageType::FATAL_ERROR;
         break;

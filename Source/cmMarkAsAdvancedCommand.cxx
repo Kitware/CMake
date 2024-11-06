@@ -54,8 +54,6 @@ bool cmMarkAsAdvancedCommand(std::vector<std::string> const& args,
         oldBehavior = true;
         break;
       case cmPolicies::NEW:
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
         if (!state->GetCacheEntryValue(variable)) {
           ignoreVariable = true;
         }

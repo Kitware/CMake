@@ -253,8 +253,6 @@ std::string cmGeneratorExpressionEvaluationFile::FixRelativePath(
       // which ends up being used relative to the working dir.
       resultPath = relativePath;
       break;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::NEW:
       // NEW behavior is to interpret the relative path with respect
       // to the current source or binary directory.

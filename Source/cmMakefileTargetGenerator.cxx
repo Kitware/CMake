@@ -75,8 +75,6 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
       this->CMP0113New = false;
       break;
     case cmPolicies::NEW:
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
       this->CMP0113New = true;
       break;
   }

@@ -610,8 +610,6 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
       case cmPolicies::OLD:
         issueMessage = false;
         break;
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::NEW:
         messageType = MessageType::FATAL_ERROR;
         break;

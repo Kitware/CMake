@@ -373,40 +373,19 @@ public:
       case cmPolicies::OLD:
         // rely on default initialization of the class
         break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        makefile->GetCMakeInstance()->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0156),
-          target->GetBacktrace());
-        CM_FALLTHROUGH;
       case cmPolicies::NEW: {
         // Policy 0179 applies only when policy 0156 is new
-        switch (target->GetPolicyStatusCMP0179()) {
-          case cmPolicies::WARN:
-            if (!makefile->GetCMakeInstance()->GetIsInTryCompile() &&
-                makefile->PolicyOptionalWarningEnabled(
-                  "CMAKE_POLICY_WARNING_CMP0179")) {
-              makefile->GetCMakeInstance()->IssueMessage(
-                MessageType::AUTHOR_WARNING,
-                cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0179),
-                         "\nSince the policy is not set, static libraries "
-                         "de-duplication will keep the last occurrence of the "
-                         "static libraries."),
-                target->GetBacktrace());
-            }
-            CM_FALLTHROUGH;
-          case cmPolicies::OLD:
-            break;
-          case cmPolicies::REQUIRED_IF_USED:
-          case cmPolicies::REQUIRED_ALWAYS:
-            makefile->GetCMakeInstance()->IssueMessage(
-              MessageType::FATAL_ERROR,
-              cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0179),
-              target->GetBacktrace());
-            CM_FALLTHROUGH;
-          case cmPolicies::NEW:
-            break;
+        if (target->GetPolicyStatusCMP0179() == cmPolicies::WARN &&
+            !makefile->GetCMakeInstance()->GetIsInTryCompile() &&
+            makefile->PolicyOptionalWarningEnabled(
+              "CMAKE_POLICY_WARNING_CMP0179")) {
+          makefile->GetCMakeInstance()->IssueMessage(
+            MessageType::AUTHOR_WARNING,
+            cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0179),
+                     "\nSince the policy is not set, static libraries "
+                     "de-duplication will keep the last occurrence of the "
+                     "static libraries."),
+            target->GetBacktrace());
         }
 
         if (auto libProcessing = makefile->GetDefinition(cmStrCat(

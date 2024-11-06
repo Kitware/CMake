@@ -333,8 +333,6 @@ static const struct InListNode : public cmGeneratorExpressionNode
           return "0";
         }
         break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
       case cmPolicies::NEW:
         values.assign(parameters[1], cmList::EmptyElements::Yes);
         break;
@@ -1931,8 +1929,6 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
           case cmPolicies::OLD:
             return "1";
           case cmPolicies::NEW:
-          case cmPolicies::REQUIRED_ALWAYS:
-          case cmPolicies::REQUIRED_IF_USED:
             break;
         }
       }
@@ -3431,8 +3427,6 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
               MessageType::AUTHOR_WARNING,
               cmPolicies::GetPolicyWarning(policyForString(policy)));
             CM_FALLTHROUGH;
-          case cmPolicies::REQUIRED_IF_USED:
-          case cmPolicies::REQUIRED_ALWAYS:
           case cmPolicies::OLD:
             return "0";
           case cmPolicies::NEW:
@@ -3527,8 +3521,6 @@ struct TargetFilesystemArtifactDependencyCMP0112
       case cmPolicies::OLD:
         context->DependTargets.insert(target);
         break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
       case cmPolicies::NEW:
         break;
     }

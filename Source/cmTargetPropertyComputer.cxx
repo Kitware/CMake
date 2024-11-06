@@ -22,8 +22,6 @@ bool cmTargetPropertyComputer::HandleLocationPropertyPolicy(
       CM_FALLTHROUGH;
     case cmPolicies::OLD:
       break;
-    case cmPolicies::REQUIRED_ALWAYS:
-    case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::NEW:
       modal = "may";
       messageType = MessageType::FATAL_ERROR;

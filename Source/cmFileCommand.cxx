@@ -409,8 +409,6 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
       }
       have_regex = true;
       switch (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0159)) {
-        case cmPolicies::REQUIRED_IF_USED:
-        case cmPolicies::REQUIRED_ALWAYS:
         case cmPolicies::NEW:
           // store_regex = true
           break;
@@ -685,8 +683,6 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
     status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0009);
   if (recurse) {
     switch (policyStatus) {
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
       case cmPolicies::NEW:
         g.RecurseThroughSymlinksOff();
         break;
@@ -839,8 +835,6 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
   }
 
   switch (policyStatus) {
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::NEW:
       // Correct behavior, yay!
       break;
@@ -1389,8 +1383,6 @@ bool HandleRealPathCommand(std::vector<std::string> const& args,
   cmPolicies::PolicyStatus policyStatus =
     status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0152);
   switch (policyStatus) {
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::NEW:
       break;
     case cmPolicies::WARN:

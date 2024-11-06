@@ -363,8 +363,6 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
             this, config, language, &dagChecker, *entry));
         } break;
         case cmPolicies::NEW:
-        case cmPolicies::REQUIRED_ALWAYS:
-        case cmPolicies::REQUIRED_IF_USED:
           break;
       }
     }

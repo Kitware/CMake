@@ -38,8 +38,6 @@ bool cmOptionCommand(std::vector<std::string> const& args,
       case cmPolicies::OLD:
         // OLD behavior does not warn.
         break;
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::NEW: {
         // See if a local variable with this name already exists.
         // If so we ignore the option command.

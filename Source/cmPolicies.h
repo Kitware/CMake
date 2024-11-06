@@ -614,10 +614,6 @@ public:
     OLD,  ///< Use old behavior
     WARN, ///< Use old behavior but issue a warning
     NEW,  ///< Use new behavior
-    /// Issue an error if user doesn't set policy status to NEW and hits the
-    /// check
-    REQUIRED_IF_USED,
-    REQUIRED_ALWAYS ///< Issue an error unless user sets policy status to NEW.
   };
 
   /// Policy identifiers

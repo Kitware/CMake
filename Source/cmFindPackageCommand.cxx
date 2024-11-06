@@ -1388,8 +1388,6 @@ bool cmFindPackageCommand::FindModule(bool& found)
           }
           case cmPolicies::OLD:
             break;
-          case cmPolicies::REQUIRED_IF_USED:
-          case cmPolicies::REQUIRED_ALWAYS:
           case cmPolicies::NEW:
             return true;
         }
@@ -1890,12 +1888,6 @@ void cmFindPackageCommand::PushFindPackageRootPathStack()
     case cmPolicies::OLD:
       // OLD behavior is to ignore the <PackageName>_ROOT variables.
       return;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
-      this->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0074));
-      return;
     case cmPolicies::NEW: {
       // NEW behavior is to honor the <PackageName>_ROOT variables.
     } break;
@@ -1926,12 +1918,6 @@ void cmFindPackageCommand::PushFindPackageRootPathStack()
       rootDEF = nullptr;
       rootENV = cm::nullopt;
       break;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
-      this->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0144));
-      return;
     case cmPolicies::NEW: {
       // NEW behavior is to honor the <PACKAGENAME>_ROOT variables.
     } break;

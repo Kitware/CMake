@@ -769,12 +769,6 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       case cmPolicies::OLD:
         // OLD behavior is to do nothing.
         break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        this->Makefile->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0066));
-        CM_FALLTHROUGH;
       case cmPolicies::NEW: {
         // NEW behavior is to pass config-specific compiler flags.
         std::string const cfg = !tcConfig.empty()
@@ -810,12 +804,6 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       case cmPolicies::OLD:
         // OLD behavior is to do nothing.
         break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        this->Makefile->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0056));
-        CM_FALLTHROUGH;
       case cmPolicies::NEW:
         // NEW behavior is to pass linker flags.
         {
@@ -997,12 +985,6 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
         case cmPolicies::OLD:
           // OLD behavior is to not honor the language standard variables.
           honorStandard = false;
-          break;
-        case cmPolicies::REQUIRED_IF_USED:
-        case cmPolicies::REQUIRED_ALWAYS:
-          this->Makefile->IssueMessage(
-            MessageType::FATAL_ERROR,
-            cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0067));
           break;
         case cmPolicies::NEW:
           // NEW behavior is to honor the language standard variables.

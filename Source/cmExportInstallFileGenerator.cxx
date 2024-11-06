@@ -439,8 +439,6 @@ bool cmExportInstallFileGenerator::CheckInterfaceDirs(
             break;
           case cmPolicies::OLD:
             continue;
-          case cmPolicies::REQUIRED_IF_USED:
-          case cmPolicies::REQUIRED_ALWAYS:
           case cmPolicies::NEW:
             hadFatalError = true;
             break; // Issue fatal message.
@@ -492,8 +490,6 @@ bool cmExportInstallFileGenerator::CheckInterfaceDirs(
             case cmPolicies::OLD:
               shouldContinue = true;
               break;
-            case cmPolicies::REQUIRED_ALWAYS:
-            case cmPolicies::REQUIRED_IF_USED:
             case cmPolicies::NEW:
               break;
           }

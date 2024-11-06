@@ -60,8 +60,6 @@ bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
         break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
       case cmPolicies::NEW:
         issueMessage = true;
         messageType = MessageType::FATAL_ERROR;

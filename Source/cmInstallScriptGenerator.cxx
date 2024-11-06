@@ -43,8 +43,6 @@ bool cmInstallScriptGenerator::Compute(cmLocalGenerator* lg)
       case cmPolicies::OLD:
         break;
       case cmPolicies::NEW:
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
         this->AllowGenex = true;
         break;
     }

@@ -433,8 +433,6 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     case cmPolicies::OLD:
       // Ignore GENERATED files
       break;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::NEW:
       // Process GENERATED files
       this->CMP0071Accept = true;
@@ -450,8 +448,6 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
     case cmPolicies::OLD:
       // Ignore .hh files
       break;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::NEW:
       // Process .hh file
       this->CMP0100Accept = true;
@@ -669,8 +665,6 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
         case cmPolicies::OLD:
           addBefore = true;
           break;
-        case cmPolicies::REQUIRED_IF_USED:
-        case cmPolicies::REQUIRED_ALWAYS:
         case cmPolicies::NEW:
           this->GenTarget->AddSystemIncludeDirectory(this->Dir.IncludeGenExp,
                                                      "CXX");

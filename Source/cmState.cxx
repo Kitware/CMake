@@ -464,8 +464,6 @@ void cmState::AddDisallowedCommand(std::string const& name,
           CM_FALLTHROUGH;
         case cmPolicies::OLD:
           break;
-        case cmPolicies::REQUIRED_IF_USED:
-        case cmPolicies::REQUIRED_ALWAYS:
         case cmPolicies::NEW:
           mf.IssueMessage(MessageType::FATAL_ERROR, message);
           return true;

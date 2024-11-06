@@ -48,13 +48,6 @@ bool GetIndexArg(const std::string& arg, int* idx, cmMakefile& mf)
         break;
       case cmPolicies::NEW:
         return false;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        std::string msg =
-          cmStrCat(cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0121),
-                   " Invalid list index \"", arg, "\".");
-        mf.IssueMessage(MessageType::FATAL_ERROR, msg);
-        break;
     }
   }
 
@@ -118,12 +111,6 @@ cm::optional<cmList> GetList(const std::string& var,
       return list;
     case cmPolicies::NEW:
       return list;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
-      makefile.IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0007));
-      return {};
   }
   return list;
 }
