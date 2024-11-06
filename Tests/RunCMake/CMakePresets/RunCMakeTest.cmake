@@ -76,11 +76,16 @@ function(run_cmake_presets name)
     set(_preset)
   endif()
 
+  set(_make_program)
+  if(RunCMake_MAKE_PROGRAM)
+    set(_make_program -DCMAKE_MAKE_PROGRAM=${RunCMake_MAKE_PROGRAM})
+  endif()
+
   set(RunCMake_TEST_COMMAND ${CMAKE_COMMAND}
     ${_source_args}
     -DRunCMake_TEST=${name}
     -DRunCMake_GENERATOR=${RunCMake_GENERATOR}
-    -DCMAKE_MAKE_PROGRAM=${RunCMake_MAKE_PROGRAM}
+    ${_make_program}
     ${_unused_cli}
     ${_preset}
     ${ARGN}
