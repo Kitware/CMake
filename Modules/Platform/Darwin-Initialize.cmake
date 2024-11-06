@@ -302,25 +302,19 @@ endfunction()
 
 _apple_resolve_multi_arch_sysroots()
 
-# Transform CMAKE_OSX_SYSROOT to absolute path
-set(_CMAKE_OSX_SYSROOT_PATH "")
-if(CMAKE_OSX_SYSROOT)
-  if("x${CMAKE_OSX_SYSROOT}" MATCHES "/")
-    # This is a path to the SDK.  Make sure it exists.
-    if(NOT IS_DIRECTORY "${CMAKE_OSX_SYSROOT}")
-      message(WARNING "Ignoring CMAKE_OSX_SYSROOT value:\n ${CMAKE_OSX_SYSROOT}\n"
-        "because the directory does not exist.")
-      set(CMAKE_OSX_SYSROOT "")
-    endif()
-    set(_CMAKE_OSX_SYSROOT_PATH "${CMAKE_OSX_SYSROOT}")
-  else()
-    _apple_resolve_sdk_path(${CMAKE_OSX_SYSROOT} _sdk_path)
-    if(IS_DIRECTORY "${_sdk_path}")
-      set(_CMAKE_OSX_SYSROOT_PATH "${_sdk_path}")
-      # For non-Xcode generators use the path.
-      if(NOT "${CMAKE_GENERATOR}" MATCHES "Xcode")
-        set(CMAKE_OSX_SYSROOT "${_CMAKE_OSX_SYSROOT_PATH}")
-      endif()
-    endif()
+if(CMAKE_OSX_SYSROOT MATCHES "/")
+  # This is a path to a SDK.  Make sure it exists.
+  if(NOT IS_DIRECTORY "${CMAKE_OSX_SYSROOT}")
+    message(WARNING "Ignoring CMAKE_OSX_SYSROOT value:\n ${CMAKE_OSX_SYSROOT}\n"
+      "because the directory does not exist.")
+    set(CMAKE_OSX_SYSROOT "")
+  endif()
+  set(_CMAKE_OSX_SYSROOT_PATH "${CMAKE_OSX_SYSROOT}")
+elseif(CMAKE_OSX_SYSROOT)
+  # This is the name of a SDK.  Transform it to a path.
+  _apple_resolve_sdk_path("${CMAKE_OSX_SYSROOT}" _CMAKE_OSX_SYSROOT_PATH)
+  # Use the path for non-Xcode generators.
+  if(IS_DIRECTORY "${_CMAKE_OSX_SYSROOT_PATH}" AND NOT CMAKE_GENERATOR MATCHES "Xcode")
+    set(CMAKE_OSX_SYSROOT "${_CMAKE_OSX_SYSROOT_PATH}")
   endif()
 endif()
