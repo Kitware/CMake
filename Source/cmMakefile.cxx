@@ -601,9 +601,7 @@ public:
 private:
   cmMakefile* Makefile;
   bool NoPolicyScope;
-  bool CheckCMP0011 = false;
   bool ReportError = true;
-  void EnforceCMP0011();
 };
 
 cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
@@ -621,84 +619,21 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
     this->Makefile->GetState()->CreateIncludeFileSnapshot(
       this->Makefile->StateSnapshot, filenametoread);
   if (!this->NoPolicyScope) {
-    // Check CMP0011 to determine the policy scope type.
-    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0011)) {
-      case cmPolicies::WARN:
-        // We need to push a scope to detect whether the script sets
-        // any policies that would affect the includer and therefore
-        // requires a warning.  We use a weak scope to simulate OLD
-        // behavior by allowing policy changes to affect the includer.
-        this->Makefile->PushPolicy(true);
-        this->CheckCMP0011 = true;
-        break;
-      case cmPolicies::OLD:
-        // OLD behavior is to not push a scope at all.
-        this->NoPolicyScope = true;
-        break;
-      case cmPolicies::NEW:
-        // NEW behavior is to push a (strong) scope.
-        this->Makefile->PushPolicy();
-        break;
-    }
+    this->Makefile->PushPolicy();
   }
 }
 
 cmMakefile::IncludeScope::~IncludeScope()
 {
   if (!this->NoPolicyScope) {
-    // If we need to enforce policy CMP0011 then the top entry is the
-    // one we pushed above.  If the entry is empty, then the included
-    // script did not set any policies that might affect the includer so
-    // we do not need to enforce the policy.
-    if (this->CheckCMP0011 &&
-        !this->Makefile->StateSnapshot.HasDefinedPolicyCMP0011()) {
-      this->CheckCMP0011 = false;
-    }
-
     // Pop the scope we pushed for the script.
     this->Makefile->PopPolicy();
-
-    // We enforce the policy after the script's policy stack entry has
-    // been removed.
-    if (this->CheckCMP0011) {
-      this->EnforceCMP0011();
-    }
   }
   this->Makefile->PopSnapshot(this->ReportError);
 
   this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
 
   this->Makefile->Backtrace = this->Makefile->Backtrace.Pop();
-}
-
-void cmMakefile::IncludeScope::EnforceCMP0011()
-{
-  // We check the setting of this policy again because the included
-  // script might actually set this policy for its includer.
-  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0011)) {
-    case cmPolicies::WARN:
-      // Warn because the user did not set this policy.
-      {
-        auto e = cmStrCat(
-          cmPolicies::GetPolicyWarning(cmPolicies::CMP0011),
-          "\n"
-          "The included script\n"
-          "  ",
-          this->Makefile->GetBacktrace().Top().FilePath,
-          "\n"
-          "affects policy settings.  "
-          "CMake is implying the NO_POLICY_SCOPE option for compatibility, "
-          "so the effects are applied to the including context.");
-        this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, e);
-      }
-      break;
-    case cmPolicies::OLD:
-    case cmPolicies::NEW:
-      // The script set this policy.  We assume the purpose of the
-      // script is to initialize policies for its includer, and since
-      // the policy is now set for later scripts, we do not warn.
-      break;
-  }
 }
 
 bool cmMakefile::ReadDependentFile(const std::string& filename,

@@ -47,7 +47,7 @@ class cmMakefile;
          3, NEW)                                                              \
   SELECT(POLICY, CMP0011,                                                     \
          "Included scripts do automatic cmake_policy PUSH and POP.", 2, 6, 3, \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(POLICY, CMP0012, "if() recognizes numbers and boolean constants.",   \
          2, 8, 0, WARN)                                                       \
   SELECT(POLICY, CMP0013, "Duplicate binary directories are not allowed.", 2, \

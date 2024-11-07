@@ -200,11 +200,6 @@ cmPolicies::PolicyStatus cmStateSnapshot::GetPolicy(cmPolicies::PolicyID id,
   return status;
 }
 
-bool cmStateSnapshot::HasDefinedPolicyCMP0011()
-{
-  return !this->Position->Policies->IsEmpty();
-}
-
 cmValue cmStateSnapshot::GetDefinition(std::string const& name) const
 {
   assert(this->Position->Vars.IsValid());

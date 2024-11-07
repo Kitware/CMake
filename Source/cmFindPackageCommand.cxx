@@ -2789,8 +2789,8 @@ bool cmFindPackageCommand::CheckVersionFile(std::string const& version_file,
                                   this->VersionRangeMax);
   }
 
-  // Load the version check file.  Pass NoPolicyScope because we do
-  // our own policy push/pop independent of CMP0011.
+  // Load the version check file.
+  // Pass NoPolicyScope because we do our own policy push/pop.
   bool suitable = false;
   if (this->ReadListFile(version_file, NoPolicyScope)) {
     // Check the output variables.
