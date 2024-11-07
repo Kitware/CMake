@@ -4,55 +4,95 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <functional>
 #include <memory>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include <cm/string_view>
+#include <cmext/string_view>
 
 #include "cmArgumentParser.h"
 #include "cmCTestCommand.h"
 
-class cmCTestGenericHandler;
 class cmExecutionStatus;
+class cmCTestGenericHandler;
 
-/** \class cmCTestHandler
- * \brief Run a ctest script
- *
- * cmCTestHandlerCommand defineds the command to test the project.
- */
-class cmCTestHandlerCommand
-  : public cmCTestCommand
-  , public cmArgumentParser<void>
+class cmCTestHandlerCommand : public cmCTestCommand
 {
 public:
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  virtual std::string GetName() const = 0;
-
-  /**
-   * This is called when the command is first encountered in
-   * the CMakeLists.txt file.
-   */
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
+  using cmCTestCommand::cmCTestCommand;
 
 protected:
-  virtual std::unique_ptr<cmCTestGenericHandler> InitializeHandler() = 0;
+  struct BasicArguments : ArgumentParser::ParseResult
+  {
+    std::string CaptureCMakeError;
+    std::vector<cm::string_view> ParsedKeywords;
+  };
 
-  virtual void ProcessAdditionalValues(cmCTestGenericHandler* /*handler*/) {}
+  template <typename Args>
+  static auto MakeBasicParser() -> cmArgumentParser<Args>
+  {
+    static_assert(std::is_base_of<BasicArguments, Args>::value, "");
+    return cmArgumentParser<Args>{}
+      .Bind("CAPTURE_CMAKE_ERROR"_s, &BasicArguments::CaptureCMakeError)
+      .BindParsedKeywords(&BasicArguments::ParsedKeywords);
+  }
 
-  // Command argument handling.
-  virtual void BindArguments();
-  virtual void CheckArguments();
+  struct HandlerArguments : BasicArguments
+  {
+    bool Append = false;
+    bool Quiet = false;
+    std::string ReturnValue;
+    std::string Build;
+    std::string Source;
+    std::string SubmitIndex;
+  };
 
-  std::vector<cm::string_view> ParsedKeywords;
-  bool Append = false;
-  bool Quiet = false;
-  std::string CaptureCMakeError;
-  std::string ReturnValue;
-  std::string Build;
-  std::string Source;
-  std::string SubmitIndex;
+  template <typename Args>
+  static auto MakeHandlerParser() -> cmArgumentParser<Args>
+  {
+    static_assert(std::is_base_of<HandlerArguments, Args>::value, "");
+    return cmArgumentParser<Args>{ MakeBasicParser<Args>() }
+      .Bind("APPEND"_s, &HandlerArguments::Append)
+      .Bind("QUIET"_s, &HandlerArguments::Quiet)
+      .Bind("RETURN_VALUE"_s, &HandlerArguments::ReturnValue)
+      .Bind("SOURCE"_s, &HandlerArguments::Source)
+      .Bind("BUILD"_s, &HandlerArguments::Build)
+      .Bind("SUBMIT_INDEX"_s, &HandlerArguments::SubmitIndex);
+  }
+
+protected:
+  template <typename Args, typename Handler>
+  bool Invoke(cmArgumentParser<Args> const& parser,
+              std::vector<std::string> const& arguments,
+              cmExecutionStatus& status, Handler handler) const
+  {
+    std::vector<std::string> unparsed;
+    Args args = parser.Parse(arguments, &unparsed);
+    return this->InvokeImpl(args, unparsed, status,
+                            [&]() -> bool { return handler(args); });
+  };
+
+  bool ExecuteHandlerCommand(HandlerArguments& args,
+                             cmExecutionStatus& status) const;
+
+private:
+  bool InvokeImpl(BasicArguments& args,
+                  std::vector<std::string> const& unparsed,
+                  cmExecutionStatus& status,
+                  std::function<bool()> handler) const;
+
+  virtual std::string GetName() const = 0;
+
+  virtual void CheckArguments(HandlerArguments& arguments,
+                              cmExecutionStatus& status) const;
+
+  virtual std::unique_ptr<cmCTestGenericHandler> InitializeHandler(
+    HandlerArguments& arguments, cmExecutionStatus& status) const;
+
+  virtual void ProcessAdditionalValues(cmCTestGenericHandler*,
+                                       HandlerArguments const& arguments,
+                                       cmExecutionStatus& status) const;
 };

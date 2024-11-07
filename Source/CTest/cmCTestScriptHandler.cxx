@@ -15,7 +15,6 @@
 
 #include "cmCTest.h"
 #include "cmCTestBuildCommand.h"
-#include "cmCTestCommand.h"
 #include "cmCTestConfigureCommand.h"
 #include "cmCTestCoverageCommand.h"
 #include "cmCTestEmptyBinaryDirectoryCommand.h"
@@ -28,7 +27,6 @@
 #include "cmCTestTestCommand.h"
 #include "cmCTestUpdateCommand.h"
 #include "cmCTestUploadCommand.h"
-#include "cmCommand.h"
 #include "cmDuration.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
@@ -79,13 +77,6 @@ void cmCTestScriptHandler::UpdateElapsedTime()
     auto timeString = std::to_string(itime);
     this->Makefile->AddDefinition("CTEST_ELAPSED_TIME", timeString);
   }
-}
-
-void cmCTestScriptHandler::AddCTestCommand(
-  std::string const& name, std::unique_ptr<cmCTestCommand> command)
-{
-  command->CTest = this->CTest;
-  this->CMake->GetState()->AddBuiltinCommand(name, std::move(command));
 }
 
 int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
@@ -206,28 +197,25 @@ void cmCTestScriptHandler::CreateCMake()
     });
 
   cmState* state = this->CMake->GetState();
-  this->AddCTestCommand("ctest_build", cm::make_unique<cmCTestBuildCommand>());
-  this->AddCTestCommand("ctest_configure",
-                        cm::make_unique<cmCTestConfigureCommand>());
-  this->AddCTestCommand("ctest_coverage",
-                        cm::make_unique<cmCTestCoverageCommand>());
+  state->AddBuiltinCommand("ctest_build", cmCTestBuildCommand(this->CTest));
+  state->AddBuiltinCommand("ctest_configure",
+                           cmCTestConfigureCommand(this->CTest));
+  state->AddBuiltinCommand("ctest_coverage",
+                           cmCTestCoverageCommand(this->CTest));
   state->AddBuiltinCommand("ctest_empty_binary_directory",
                            cmCTestEmptyBinaryDirectoryCommand);
-  this->AddCTestCommand("ctest_memcheck",
-                        cm::make_unique<cmCTestMemCheckCommand>());
-  this->AddCTestCommand("ctest_read_custom_files",
-                        cm::make_unique<cmCTestReadCustomFilesCommand>());
-  this->AddCTestCommand("ctest_run_script",
-                        cm::make_unique<cmCTestRunScriptCommand>());
+  state->AddBuiltinCommand("ctest_memcheck",
+                           cmCTestMemCheckCommand(this->CTest));
+  state->AddBuiltinCommand("ctest_read_custom_files",
+                           cmCTestReadCustomFilesCommand(this->CTest));
+  state->AddBuiltinCommand("ctest_run_script",
+                           cmCTestRunScriptCommand(this->CTest));
   state->AddBuiltinCommand("ctest_sleep", cmCTestSleepCommand);
-  this->AddCTestCommand("ctest_start", cm::make_unique<cmCTestStartCommand>());
-  this->AddCTestCommand("ctest_submit",
-                        cm::make_unique<cmCTestSubmitCommand>());
-  this->AddCTestCommand("ctest_test", cm::make_unique<cmCTestTestCommand>());
-  this->AddCTestCommand("ctest_update",
-                        cm::make_unique<cmCTestUpdateCommand>());
-  this->AddCTestCommand("ctest_upload",
-                        cm::make_unique<cmCTestUploadCommand>());
+  state->AddBuiltinCommand("ctest_start", cmCTestStartCommand(this->CTest));
+  state->AddBuiltinCommand("ctest_submit", cmCTestSubmitCommand(this->CTest));
+  state->AddBuiltinCommand("ctest_test", cmCTestTestCommand(this->CTest));
+  state->AddBuiltinCommand("ctest_update", cmCTestUpdateCommand(this->CTest));
+  state->AddBuiltinCommand("ctest_upload", cmCTestUploadCommand(this->CTest));
 }
 
 // this sets up some variables for the script to use, creates the required

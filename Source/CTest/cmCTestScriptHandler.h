@@ -9,7 +9,6 @@
 #include <vector>
 
 class cmCTest;
-class cmCTestCommand;
 class cmGlobalGenerator;
 class cmMakefile;
 class cmake;
@@ -57,10 +56,6 @@ private:
   int ExecuteScript(const std::string& total_script_arg);
 
   int RunConfigurationScript(const std::string& script, bool pscope);
-
-  // Add ctest command
-  void AddCTestCommand(std::string const& name,
-                       std::unique_ptr<cmCTestCommand> command);
 
   cmCTest* CTest = nullptr;
   std::vector<std::string> ConfigurationScripts;

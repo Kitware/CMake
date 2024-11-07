@@ -315,7 +315,6 @@ CMAKE_CXX_SOURCES="\
   cmCMakePolicyCommand \
   cmCPackPropertiesGenerator \
   cmCacheManager \
-  cmCommand \
   cmCommandArgumentParserHelper \
   cmCommands \
   cmCommonTargetGenerator \

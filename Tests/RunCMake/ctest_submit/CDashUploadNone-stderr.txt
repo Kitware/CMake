@@ -1,1 +1,4 @@
-Upload file not specified
+^CMake Error at .*Tests/RunCMake/ctest_submit/CDashUploadNone/test.cmake:[0-9]+ \(ctest_submit\):
+  Error after keyword "CDASH_UPLOAD":
+
+    missing required value

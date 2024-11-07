@@ -510,8 +510,6 @@ add_library(
   cmake.cxx
   cmake.h
 
-  cmCommand.cxx
-  cmCommand.h
   cmCommands.cxx
   cmCommands.h
   cmAddCompileDefinitionsCommand.cxx
@@ -1076,6 +1074,7 @@ add_library(
   CTest/cmCTestBuildAndTest.cxx
   CTest/cmCTestBuildCommand.cxx
   CTest/cmCTestBuildHandler.cxx
+  CTest/cmCTestCommand.cxx
   CTest/cmCTestConfigureCommand.cxx
   CTest/cmCTestConfigureHandler.cxx
   CTest/cmCTestCoverageCommand.cxx
@@ -1115,7 +1114,6 @@ add_library(
   CTest/cmCTestUpdateCommand.cxx
   CTest/cmCTestUpdateHandler.cxx
   CTest/cmCTestUploadCommand.cxx
-  CTest/cmCTestUploadHandler.cxx
 
   CTest/cmCTestVC.cxx
   CTest/cmCTestVC.h

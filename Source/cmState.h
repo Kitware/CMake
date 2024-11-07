@@ -27,7 +27,6 @@
 #include "cmValue.h"
 
 class cmCacheManager;
-class cmCommand;
 class cmGlobVerificationManager;
 class cmMakefile;
 class cmStateSnapshot;
@@ -177,8 +176,6 @@ public:
   // Returns a command from its name, or nullptr
   Command GetCommandByExactName(std::string const& name) const;
 
-  void AddBuiltinCommand(std::string const& name,
-                         std::unique_ptr<cmCommand> command);
   void AddBuiltinCommand(std::string const& name, Command command);
   void AddBuiltinCommand(std::string const& name, BuiltinCommand command);
   void AddFlowControlCommand(std::string const& name, Command command);

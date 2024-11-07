@@ -13,45 +13,45 @@
 #include "cmArgumentParserTypes.h"
 #include "cmCTestHandlerCommand.h"
 
-class cmCommand;
-class cmCTestGenericHandler;
 class cmExecutionStatus;
+class cmCTestGenericHandler;
 
-/** \class cmCTestSubmit
- * \brief Run a ctest script
- *
- * cmCTestSubmitCommand defineds the command to submit the test results for
- * the project.
- */
 class cmCTestSubmitCommand : public cmCTestHandlerCommand
 {
 public:
-  std::unique_ptr<cmCommand> Clone() override;
-
-  bool InitialPass(std::vector<std::string> const& args,
-                   cmExecutionStatus& status) override;
-
-  /**
-   * The name of the command as specified in CMakeList.txt.
-   */
-  std::string GetName() const override { return "ctest_submit"; }
+  using cmCTestHandlerCommand::cmCTestHandlerCommand;
 
 protected:
-  void BindArguments() override;
-  void CheckArguments() override;
-  std::unique_ptr<cmCTestGenericHandler> InitializeHandler() override;
+  struct SubmitArguments : HandlerArguments
+  {
+    bool CDashUpload = false;
+    bool InternalTest = false;
 
-  bool CDashUpload = false;
-  bool InternalTest = false;
+    std::string BuildID;
+    std::string CDashUploadFile;
+    std::string CDashUploadType;
+    std::string RetryCount;
+    std::string RetryDelay;
+    std::string SubmitURL;
 
-  std::string BuildID;
-  std::string CDashUploadFile;
-  std::string CDashUploadType;
-  std::string RetryCount;
-  std::string RetryDelay;
-  std::string SubmitURL;
+    cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Files;
+    ArgumentParser::MaybeEmpty<std::vector<std::string>> HttpHeaders;
+    cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Parts;
+  };
 
-  cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Files;
-  ArgumentParser::MaybeEmpty<std::vector<std::string>> HttpHeaders;
-  cm::optional<ArgumentParser::MaybeEmpty<std::vector<std::string>>> Parts;
+private:
+  std::string GetName() const override { return "ctest_submit"; }
+
+  void CheckArguments(HandlerArguments& arguments,
+                      cmExecutionStatus& status) const override;
+
+  std::unique_ptr<cmCTestGenericHandler> InitializeHandler(
+    HandlerArguments& arguments, cmExecutionStatus& status) const override;
+
+  void ProcessAdditionalValues(cmCTestGenericHandler* handler,
+                               HandlerArguments const& arguments,
+                               cmExecutionStatus& status) const override;
+
+  bool InitialPass(std::vector<std::string> const& args,
+                   cmExecutionStatus& status) const override;
 };

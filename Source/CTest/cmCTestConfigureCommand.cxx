@@ -4,13 +4,17 @@
 
 #include <cstring>
 #include <sstream>
+#include <utility>
 #include <vector>
 
+#include <cm/memory>
 #include <cmext/string_view>
 
+#include "cmArgumentParser.h"
 #include "cmCTest.h"
 #include "cmCTestConfigureHandler.h"
 #include "cmCTestGenericHandler.h"
+#include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
 #include "cmMakefile.h"
@@ -19,43 +23,38 @@
 #include "cmValue.h"
 #include "cmake.h"
 
-void cmCTestConfigureCommand::BindArguments()
-{
-  this->cmCTestHandlerCommand::BindArguments();
-  this->Bind("OPTIONS"_s, this->Options);
-}
-
 std::unique_ptr<cmCTestGenericHandler>
-cmCTestConfigureCommand::InitializeHandler()
+cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments,
+                                           cmExecutionStatus& status) const
 {
+  cmMakefile& mf = status.GetMakefile();
+  auto const& args = static_cast<ConfigureArguments&>(arguments);
   cmList options;
 
-  if (!this->Options.empty()) {
-    options.assign(this->Options);
+  if (!args.Options.empty()) {
+    options.assign(args.Options);
   }
 
   if (this->CTest->GetCTestConfiguration("BuildDirectory").empty()) {
-    this->SetError(
+    status.SetError(
       "Build directory not specified. Either use BUILD "
       "argument to CTEST_CONFIGURE command or set CTEST_BINARY_DIRECTORY "
       "variable");
     return nullptr;
   }
 
-  cmValue ctestConfigureCommand =
-    this->Makefile->GetDefinition("CTEST_CONFIGURE_COMMAND");
+  cmValue ctestConfigureCommand = mf.GetDefinition("CTEST_CONFIGURE_COMMAND");
 
   if (cmNonempty(ctestConfigureCommand)) {
     this->CTest->SetCTestConfiguration("ConfigureCommand",
-                                       *ctestConfigureCommand, this->Quiet);
+                                       *ctestConfigureCommand, args.Quiet);
   } else {
-    cmValue cmakeGeneratorName =
-      this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR");
+    cmValue cmakeGeneratorName = mf.GetDefinition("CTEST_CMAKE_GENERATOR");
     if (cmNonempty(cmakeGeneratorName)) {
       const std::string& source_dir =
         this->CTest->GetCTestConfiguration("SourceDirectory");
       if (source_dir.empty()) {
-        this->SetError(
+        status.SetError(
           "Source directory not specified. Either use SOURCE "
           "argument to CTEST_CONFIGURE command or set CTEST_SOURCE_DIRECTORY "
           "variable");
@@ -66,15 +65,15 @@ cmCTestConfigureCommand::InitializeHandler()
       if (!cmSystemTools::FileExists(cmakelists_file)) {
         std::ostringstream e;
         e << "CMakeLists.txt file does not exist [" << cmakelists_file << "]";
-        this->SetError(e.str());
+        status.SetError(e.str());
         return nullptr;
       }
 
       bool multiConfig = false;
       bool cmakeBuildTypeInOptions = false;
 
-      auto gg = this->Makefile->GetCMakeInstance()->CreateGlobalGenerator(
-        *cmakeGeneratorName);
+      auto gg =
+        mf.GetCMakeInstance()->CreateGlobalGenerator(*cmakeGeneratorName);
       if (gg) {
         multiConfig = gg->IsMultiConfig();
         gg.reset();
@@ -101,7 +100,7 @@ cmCTestConfigureCommand::InitializeHandler()
         cmakeConfigureCommand += "\"";
       }
 
-      if (this->Makefile->IsOn("CTEST_USE_LAUNCHERS")) {
+      if (mf.IsOn("CTEST_USE_LAUNCHERS")) {
         cmakeConfigureCommand += " \"-DCTEST_USE_LAUNCHERS:BOOL=TRUE\"";
       }
 
@@ -110,7 +109,7 @@ cmCTestConfigureCommand::InitializeHandler()
       cmakeConfigureCommand += "\"";
 
       cmValue cmakeGeneratorPlatform =
-        this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR_PLATFORM");
+        mf.GetDefinition("CTEST_CMAKE_GENERATOR_PLATFORM");
       if (cmNonempty(cmakeGeneratorPlatform)) {
         cmakeConfigureCommand += " \"-A";
         cmakeConfigureCommand += *cmakeGeneratorPlatform;
@@ -118,7 +117,7 @@ cmCTestConfigureCommand::InitializeHandler()
       }
 
       cmValue cmakeGeneratorToolset =
-        this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR_TOOLSET");
+        mf.GetDefinition("CTEST_CMAKE_GENERATOR_TOOLSET");
       if (cmNonempty(cmakeGeneratorToolset)) {
         cmakeConfigureCommand += " \"-T";
         cmakeConfigureCommand += *cmakeGeneratorToolset;
@@ -135,9 +134,9 @@ cmCTestConfigureCommand::InitializeHandler()
       cmakeConfigureCommand += "\"";
 
       this->CTest->SetCTestConfiguration("ConfigureCommand",
-                                         cmakeConfigureCommand, this->Quiet);
+                                         cmakeConfigureCommand, args.Quiet);
     } else {
-      this->SetError(
+      status.SetError(
         "Configure command is not specified. If this is a "
         "\"built with CMake\" project, set CTEST_CMAKE_GENERATOR. If not, "
         "set CTEST_CONFIGURE_COMMAND.");
@@ -146,12 +145,25 @@ cmCTestConfigureCommand::InitializeHandler()
   }
 
   if (cmValue labelsForSubprojects =
-        this->Makefile->GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
+        mf.GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
     this->CTest->SetCTestConfiguration("LabelsForSubprojects",
-                                       *labelsForSubprojects, this->Quiet);
+                                       *labelsForSubprojects, args.Quiet);
   }
 
   auto handler = cm::make_unique<cmCTestConfigureHandler>(this->CTest);
-  handler->SetQuiet(this->Quiet);
+  handler->SetQuiet(args.Quiet);
   return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
+}
+
+bool cmCTestConfigureCommand::InitialPass(std::vector<std::string> const& args,
+                                          cmExecutionStatus& status) const
+{
+  using Args = ConfigureArguments;
+  static auto const parser =
+    cmArgumentParser<Args>{ MakeHandlerParser<Args>() } //
+      .Bind("OPTIONS"_s, &ConfigureArguments::Options);
+
+  return this->Invoke(parser, args, status, [&](ConfigureArguments& a) {
+    return this->ExecuteHandlerCommand(a, status);
+  });
 }
