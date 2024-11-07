@@ -677,28 +677,14 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
   i++;
   cmsys::Glob g;
   g.SetRecurse(recurse);
-
-  bool explicitFollowSymlinks = false;
-  cmPolicies::PolicyStatus policyStatus =
-    status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0009);
   if (recurse) {
-    switch (policyStatus) {
-      case cmPolicies::NEW:
-        g.RecurseThroughSymlinksOff();
-        break;
-      case cmPolicies::WARN:
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        g.RecurseThroughSymlinksOn();
-        break;
-    }
+    g.RecurseThroughSymlinksOff();
   }
 
   cmake* cm = status.GetMakefile().GetCMakeInstance();
   std::vector<std::string> files;
   bool configureDepends = false;
   bool warnConfigureLate = false;
-  bool warnFollowedSymlinks = false;
   const cmake::WorkingMode workingMode = cm->GetWorkingMode();
   while (i != args.end()) {
     if (*i == "LIST_DIRECTORIES") {
@@ -722,7 +708,6 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
     } else if (*i == "FOLLOW_SYMLINKS") {
       ++i; // skip FOLLOW_SYMLINKS
       if (recurse) {
-        explicitFollowSymlinks = true;
         g.RecurseThroughSymlinksOn();
         if (i == args.end()) {
           status.SetError(
@@ -805,11 +790,6 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
         }
       }
 
-      if (recurse && !explicitFollowSymlinks &&
-          g.GetFollowedSymlinkCount() != 0) {
-        warnFollowedSymlinks = true;
-      }
-
       std::vector<std::string>& foundFiles = g.GetFiles();
       cm::append(files, foundFiles);
 
@@ -832,24 +812,6 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
       }
       ++i;
     }
-  }
-
-  switch (policyStatus) {
-    case cmPolicies::NEW:
-      // Correct behavior, yay!
-      break;
-    case cmPolicies::OLD:
-    // Probably not really the expected behavior, but the author explicitly
-    // asked for the old behavior... no warning.
-    case cmPolicies::WARN:
-      // Possibly unexpected old behavior *and* we actually traversed
-      // symlinks without being explicitly asked to: warn the author.
-      if (warnFollowedSymlinks) {
-        status.GetMakefile().IssueMessage(
-          MessageType::AUTHOR_WARNING,
-          cmPolicies::GetPolicyWarning(cmPolicies::CMP0009));
-      }
-      break;
   }
 
   std::sort(files.begin(), files.end());

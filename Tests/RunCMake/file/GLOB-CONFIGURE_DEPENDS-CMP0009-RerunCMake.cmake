@@ -1,4 +1,3 @@
-cmake_policy(SET CMP0009 NEW)
 message(STATUS "Running CMake on GLOB-CONFIGURE_DEPENDS-CMP0009-RerunCMake")
 file(GLOB_RECURSE
   CONTENT_LIST
