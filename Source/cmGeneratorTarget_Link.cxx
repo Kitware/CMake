@@ -1449,8 +1449,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
   std::vector<std::string> debugConfigs =
     this->Makefile->GetCMakeInstance()->GetDebugConfigs();
 
-  cmTargetLinkLibraryType linkType =
-    CMP0003_ComputeLinkType(config, debugConfigs);
+  cmTargetLinkLibraryType linkType = ComputeLinkType(config, debugConfigs);
   cmTarget::LinkLibraryVectorType const& oldllibs =
     this->Target->GetOriginalLinkLibraries();
 
