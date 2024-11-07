@@ -30,7 +30,7 @@ class cmMakefile;
          6, 0, NEW)                                                           \
   SELECT(POLICY, CMP0005,                                                     \
          "Preprocessor definition values are now escaped automatically.", 2,  \
-         6, 0, WARN)                                                          \
+         6, 0, NEW)                                                           \
   SELECT(POLICY, CMP0006,                                                     \
          "Installing MACOSX_BUNDLE targets requires a BUNDLE DESTINATION.",   \
          2, 6, 0, WARN)                                                       \

@@ -1523,27 +1523,6 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
     return false;
   }
 
-  // Definitions with non-trivial values require a policy check.
-  static cmsys::RegularExpression trivial(
-    "^[-/]D[A-Za-z_][A-Za-z0-9_]*(=[A-Za-z0-9_.]+)?$");
-  if (!trivial.find(def)) {
-    // This definition has a non-trivial value.
-    switch (this->GetPolicyStatus(cmPolicies::CMP0005)) {
-      case cmPolicies::WARN:
-        this->IssueMessage(MessageType::AUTHOR_WARNING,
-                           cmPolicies::GetPolicyWarning(cmPolicies::CMP0005));
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        // OLD behavior is to not escape the value.  We should not
-        // convert the definition to use the property.
-        return false;
-      case cmPolicies::NEW:
-        // NEW behavior is to escape the value.  Proceed to convert it
-        // to an entry in the property.
-        break;
-    }
-  }
-
   // Get the definition part after the flag.
   const char* define = def.c_str() + 2;
 
