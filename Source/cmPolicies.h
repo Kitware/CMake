@@ -44,7 +44,7 @@ class cmMakefile;
          "FILE GLOB_RECURSE calls should not follow symlinks by default.", 2, \
          6, 2, NEW)                                                           \
   SELECT(POLICY, CMP0010, "Bad variable reference syntax is an error.", 2, 6, \
-         3, WARN)                                                             \
+         3, NEW)                                                              \
   SELECT(POLICY, CMP0011,                                                     \
          "Included scripts do automatic cmake_policy PUSH and POP.", 2, 6, 3, \
          WARN)                                                                \

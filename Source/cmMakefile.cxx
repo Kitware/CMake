@@ -2880,30 +2880,7 @@ MessageType cmMakefile::ExpandVariablesInStringOld(
       error += cmStrCat("at\n  ", filename, ':', line, '\n');
     }
     error += cmStrCat("when parsing string\n  ", source, '\n', emsg);
-
-    // If the parser failed ("res" is false) then this is a real
-    // argument parsing error, so the policy applies.  Otherwise the
-    // parser reported an error message without failing because the
-    // helper implementation is unhappy, which has always reported an
-    // error.
     mtype = MessageType::FATAL_ERROR;
-    if (!res) {
-      // This is a real argument parsing error.  Use policy CMP0010 to
-      // decide whether it is an error.
-      switch (this->GetPolicyStatus(cmPolicies::CMP0010)) {
-        case cmPolicies::WARN:
-          error +=
-            cmStrCat('\n', cmPolicies::GetPolicyWarning(cmPolicies::CMP0010));
-          CM_FALLTHROUGH;
-        case cmPolicies::OLD:
-          // OLD behavior is to just warn and continue.
-          mtype = MessageType::AUTHOR_WARNING;
-          break;
-        case cmPolicies::NEW:
-          // NEW behavior is to report the error.
-          break;
-      }
-    }
     errorstr = std::move(error);
   }
   return mtype;
@@ -3236,9 +3213,6 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
 
   // Check for open variable references yet.
   if (!error && !openstack.empty()) {
-    // There's an open variable reference waiting.  Policy CMP0010 flags
-    // whether this is an error or not.  The new parser now enforces
-    // CMP0010 as well.
     errorstr += "There is an unterminated variable reference.";
     error = true;
   }
