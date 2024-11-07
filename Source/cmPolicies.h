@@ -27,7 +27,7 @@ class cmMakefile;
     2, 6, 0, NEW)                                                             \
   SELECT(POLICY, CMP0004,                                                     \
          "Libraries linked may not have leading or trailing whitespace.", 2,  \
-         6, 0, WARN)                                                          \
+         6, 0, NEW)                                                           \
   SELECT(POLICY, CMP0005,                                                     \
          "Preprocessor definition values are now escaped automatically.", 2,  \
          6, 0, WARN)                                                          \
