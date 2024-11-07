@@ -7,7 +7,6 @@ run_cmake(EmptyInsert-1)
 
 run_cmake(NoArguments)
 run_cmake(InvalidSubcommand)
-run_cmake(GET-CMP0007-WARN)
 
 run_cmake(FILTER-REGEX-InvalidRegex)
 run_cmake(GET-InvalidIndex)

@@ -35,7 +35,7 @@ class cmMakefile;
          "Installing MACOSX_BUNDLE targets requires a BUNDLE DESTINATION.",   \
          2, 6, 0, NEW)                                                        \
   SELECT(POLICY, CMP0007, "list command no longer ignores empty elements.",   \
-         2, 6, 0, WARN)                                                       \
+         2, 6, 0, NEW)                                                        \
   SELECT(                                                                     \
     POLICY, CMP0008,                                                          \
     "Libraries linked by full-path must have a valid library file name.", 2,  \
