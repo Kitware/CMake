@@ -2387,13 +2387,9 @@ cmSourceGroup* cmMakefile::GetOrCreateSourceGroup(
 
 cmSourceGroup* cmMakefile::GetOrCreateSourceGroup(const std::string& name)
 {
-  std::string delimiters;
-  if (cmValue p = this->GetDefinition("SOURCE_GROUP_DELIMITER")) {
-    delimiters = *p;
-  } else {
-    delimiters = "/\\";
-  }
-  return this->GetOrCreateSourceGroup(cmTokenize(name, delimiters));
+  auto p = this->GetDefinition("SOURCE_GROUP_DELIMITER");
+  return this->GetOrCreateSourceGroup(
+    cmTokenize(name, p ? cm::string_view(*p) : R"(\/)"_s));
 }
 
 /**

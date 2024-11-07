@@ -355,12 +355,13 @@ bool cmGlobalXCodeGenerator::SetGeneratorToolset(std::string const& ts,
 bool cmGlobalXCodeGenerator::ParseGeneratorToolset(std::string const& ts,
                                                    cmMakefile* mf)
 {
-  std::vector<std::string> const fields = cmTokenize(ts, ",");
-  auto fi = fields.cbegin();
-  if (fi == fields.cend()) {
+  std::vector<std::string> const fields =
+    cmTokenize(ts, ',', cmTokenizerMode::New);
+  if (fields.empty()) {
     return true;
   }
 
+  auto fi = fields.cbegin();
   // The first field may be the Xcode GCC_VERSION.
   if (fi->find('=') == fi->npos) {
     this->GeneratorToolset = *fi;
@@ -4457,7 +4458,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateOrGetPBXGroup(
   if (it != this->TargetGroup.end()) {
     tgroup = it->second;
   } else {
-    std::vector<std::string> tgt_folders = cmTokenize(target, "/");
+    std::vector<std::string> const tgt_folders = cmTokenize(target, '/');
     std::string curr_tgt_folder;
     for (std::vector<std::string>::size_type i = 0; i < tgt_folders.size();
          i++) {
@@ -4490,7 +4491,7 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateOrGetPBXGroup(
   // It's a recursive folder structure, let's find the real parent group
   if (sg->GetFullName() != sg->GetName()) {
     std::string curr_folder = cmStrCat(target, '/');
-    for (auto const& folder : cmTokenize(sg->GetFullName(), "\\")) {
+    for (auto const& folder : cmTokenize(sg->GetFullName(), '\\')) {
       curr_folder += folder;
       auto const i_folder = this->GroupNameMap.find(curr_folder);
       // Create new folder

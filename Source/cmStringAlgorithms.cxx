@@ -55,30 +55,6 @@ std::string cmEscapeQuotes(cm::string_view str)
   return result;
 }
 
-std::vector<std::string> cmTokenize(cm::string_view str, cm::string_view sep)
-{
-  std::vector<std::string> tokens;
-  cm::string_view::size_type tokend = 0;
-
-  do {
-    cm::string_view::size_type tokstart = str.find_first_not_of(sep, tokend);
-    if (tokstart == cm::string_view::npos) {
-      break; // no more tokens
-    }
-    tokend = str.find_first_of(sep, tokstart);
-    if (tokend == cm::string_view::npos) {
-      tokens.emplace_back(str.substr(tokstart));
-    } else {
-      tokens.emplace_back(str.substr(tokstart, tokend - tokstart));
-    }
-  } while (tokend != cm::string_view::npos);
-
-  if (tokens.empty()) {
-    tokens.emplace_back();
-  }
-  return tokens;
-}
-
 namespace {
 template <std::size_t N, typename T>
 inline void MakeDigits(cm::string_view& view, char (&digits)[N],

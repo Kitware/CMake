@@ -565,11 +565,11 @@ std::vector<BT<std::string>>& cmGeneratorTarget::ResolveLinkerWrapper(
       cmSystemTools::ParseUnixCommandLine(
         value.c_str() + LINKER_SHELL.length(), linkerOptions);
     } else {
-      linkerOptions = cmTokenize(value.substr(LINKER.length()), ",");
+      linkerOptions =
+        cmTokenize(value.substr(LINKER.length()), ',', cmTokenizerMode::New);
     }
 
-    if (linkerOptions.empty() ||
-        (linkerOptions.size() == 1 && linkerOptions.front().empty())) {
+    if (linkerOptions.empty()) {
       continue;
     }
 

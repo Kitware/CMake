@@ -584,12 +584,13 @@ bool cmGlobalVisualStudioVersionedGenerator::ParseGeneratorInstance(
   this->GeneratorInstance.clear();
   this->GeneratorInstanceVersion.clear();
 
-  std::vector<std::string> const fields = cmTokenize(is, ",");
-  auto fi = fields.begin();
-  if (fi == fields.end()) {
+  std::vector<std::string> const fields =
+    cmTokenize(is, ',', cmTokenizerMode::New);
+  if (fields.empty()) {
     return true;
   }
 
+  auto fi = fields.begin();
   // The first field may be the VS instance.
   if (fi->find('=') == fi->npos) {
     this->GeneratorInstance = *fi;

@@ -29,11 +29,6 @@ const std::string kFilesOptionName = "FILES";
 const std::string kRegexOptionName = "REGULAR_EXPRESSION";
 const std::string kSourceGroupOptionName = "<sg_name>";
 
-std::vector<std::string> tokenizePath(const std::string& path)
-{
-  return cmTokenize(path, "\\/");
-}
-
 std::set<std::string> getSourceGroupFilesPaths(
   const std::string& root, const std::vector<std::string>& files)
 {
@@ -95,31 +90,28 @@ bool addFilesToItsSourceGroups(const std::string& root,
   cmSourceGroup* sg;
 
   for (std::string const& sgFilesPath : sgFilesPaths) {
+    std::vector<std::string> tokenizedPath = cmTokenize(
+      prefix.empty() ? sgFilesPath : cmStrCat(prefix, '/', sgFilesPath),
+      R"(\/)", cmTokenizerMode::New);
 
-    std::vector<std::string> tokenizedPath;
-    if (!prefix.empty()) {
-      tokenizedPath = tokenizePath(cmStrCat(prefix, '/', sgFilesPath));
-    } else {
-      tokenizedPath = tokenizePath(sgFilesPath);
+    if (tokenizedPath.empty()) {
+      continue;
+    }
+    tokenizedPath.pop_back();
+
+    if (tokenizedPath.empty()) {
+      tokenizedPath.emplace_back();
     }
 
-    if (!tokenizedPath.empty()) {
-      tokenizedPath.pop_back();
+    sg = makefile.GetOrCreateSourceGroup(tokenizedPath);
 
-      if (tokenizedPath.empty()) {
-        tokenizedPath.emplace_back();
-      }
-
-      sg = makefile.GetOrCreateSourceGroup(tokenizedPath);
-
-      if (!sg) {
-        errorMsg = "Could not create source group for file: " + sgFilesPath;
-        return false;
-      }
-      const std::string fullPath =
-        cmSystemTools::CollapseFullPath(sgFilesPath, root);
-      sg->AddGroupFile(fullPath);
+    if (!sg) {
+      errorMsg = "Could not create source group for file: " + sgFilesPath;
+      return false;
     }
+    const std::string fullPath =
+      cmSystemTools::CollapseFullPath(sgFilesPath, root);
+    sg->AddGroupFile(fullPath);
   }
 
   return true;
