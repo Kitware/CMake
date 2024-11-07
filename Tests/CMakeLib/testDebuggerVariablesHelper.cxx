@@ -74,9 +74,9 @@ static bool testCreateFromPolicyMap()
     std::make_shared<cmDebugger::cmDebuggerVariablesManager>();
 
   cmPolicies::PolicyMap policyMap;
-  policyMap.Set(cmPolicies::CMP0000, cmPolicies::NEW);
-  policyMap.Set(cmPolicies::CMP0003, cmPolicies::WARN);
-  policyMap.Set(cmPolicies::CMP0005, cmPolicies::OLD);
+  policyMap.Set(cmPolicies::CMP0178, cmPolicies::NEW);
+  policyMap.Set(cmPolicies::CMP0179, cmPolicies::WARN);
+  policyMap.Set(cmPolicies::CMP0180, cmPolicies::OLD);
   auto vars = cmDebugger::cmDebuggerVariablesHelper::Create(
     variablesManager, "Locals", true, policyMap);
 
@@ -84,9 +84,9 @@ static bool testCreateFromPolicyMap()
     variablesManager->HandleVariablesRequest(
       CreateVariablesRequest(vars->GetId()));
   ASSERT_TRUE(variables.size() == 3);
-  ASSERT_VARIABLE(variables[0], "CMP0000", "NEW", "string");
-  ASSERT_VARIABLE(variables[1], "CMP0003", "WARN", "string");
-  ASSERT_VARIABLE(variables[2], "CMP0005", "OLD", "string");
+  ASSERT_VARIABLE(variables[0], "CMP0178", "NEW", "string");
+  ASSERT_VARIABLE(variables[1], "CMP0179", "WARN", "string");
+  ASSERT_VARIABLE(variables[2], "CMP0180", "OLD", "string");
 
   return true;
 }
