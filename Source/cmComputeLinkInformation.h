@@ -4,7 +4,6 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <iosfwd>
 #include <map>
 #include <memory>
 #include <set>
@@ -210,7 +209,7 @@ private:
   void AddTargetItem(LinkEntry const& entry);
   void AddFullItem(LinkEntry const& entry);
   bool CheckImplicitDirItem(LinkEntry const& entry);
-  void AddUserItem(LinkEntry const& entry, bool pathNotKnown);
+  void AddUserItem(LinkEntry const& entry);
   void AddFrameworkItem(LinkEntry const& entry);
   void AddXcFrameworkItem(LinkEntry const& entry);
   void DropDirectoryItem(BT<std::string> const& item);
@@ -227,8 +226,6 @@ private:
 
   // Linker search path computation.
   std::unique_ptr<cmOrderDirectories> OrderLinkerSearchPath;
-  bool FinishLinkerSearchDirectories();
-  void PrintLinkPolicyDiagnosis(std::ostream&);
 
   void AddExternalObjectTargets();
 
@@ -243,17 +240,12 @@ private:
   // Additional paths configured by the runtime linker
   std::vector<std::string> RuntimeLinkDirs;
 
-  // Linker search path compatibility mode.
-  std::set<std::string> OldLinkDirMask;
-  std::vector<std::string> OldLinkDirItems;
-  std::vector<std::string> OldUserFlagItems;
   std::set<std::string> CMP0060WarnItems;
   // Dependent library path computation.
   std::unique_ptr<cmOrderDirectories> OrderDependentRPath;
   // Runtime path computation.
   std::unique_ptr<cmOrderDirectories> OrderRuntimeSearchPath;
 
-  bool OldLinkDirMode;
   bool IsOpenBSD;
   bool LinkDependsNoShared;
   bool RuntimeUseChrpath;

@@ -671,11 +671,6 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
 
 cmComputeLinkDepends::~cmComputeLinkDepends() = default;
 
-void cmComputeLinkDepends::SetOldLinkDirMode(bool b)
-{
-  this->OldLinkDirMode = b;
-}
-
 std::vector<cmComputeLinkDepends::LinkEntry> const&
 cmComputeLinkDepends::Compute()
 {
@@ -884,11 +879,6 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry qe)
 
       // Handle dependent shared libraries.
       this->FollowSharedDeps(depender_index, iface);
-
-      // Support for CMP0003.
-      for (cmLinkItem const& oi : iface->WrongConfigLibraries) {
-        this->CheckWrongConfigItem(oi);
-      }
     }
   } else {
     // Follow the old-style dependency list.
@@ -999,9 +989,6 @@ void cmComputeLinkDepends::AddVarLinkEntries(
       // If the library is meant for this link type then use it.
       if (llt == GENERAL_LibraryType || llt == this->LinkType) {
         actual_libs.emplace_back(this->ResolveLinkItem(depender_index, d));
-      } else if (this->OldLinkDirMode) {
-        cmLinkItem item = this->ResolveLinkItem(depender_index, d);
-        this->CheckWrongConfigItem(item);
       }
 
       // Reset the link type until another explicit type is given.
@@ -1027,9 +1014,6 @@ void cmComputeLinkDepends::AddDirectLinkEntries()
     if (runtimeEntries != impl->LanguageRuntimeLibraries.end()) {
       this->AddLinkEntries(cm::nullopt, runtimeEntries->second);
     }
-  }
-  for (cmLinkItem const& wi : impl->WrongConfigLibraries) {
-    this->CheckWrongConfigItem(wi);
   }
 }
 
@@ -1735,18 +1719,4 @@ void cmComputeLinkDepends::DisplayFinalEntries()
     DisplayLinkEntry(count, entry);
   }
   fprintf(stderr, "\n");
-}
-
-void cmComputeLinkDepends::CheckWrongConfigItem(cmLinkItem const& item)
-{
-  if (!this->OldLinkDirMode) {
-    return;
-  }
-
-  // For CMake 2.4 bug-compatibility we need to consider the output
-  // directories of targets linked in another configuration as link
-  // directories.
-  if (item.Target && !item.Target->IsImported()) {
-    this->OldWrongConfigItems.insert(item.Target);
-  }
 }

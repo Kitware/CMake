@@ -676,7 +676,7 @@ cmLinkInterface const* cmGeneratorTarget::GetLinkInterface(
   if (!iface.AllDone) {
     iface.AllDone = true;
     if (iface.Exists) {
-      this->ComputeLinkInterface(config, iface, head, secondPass);
+      this->ComputeLinkInterface(config, iface, secondPass);
       this->ComputeLinkInterfaceRuntimeLibraries(config, iface);
     }
   }
@@ -684,9 +684,9 @@ cmLinkInterface const* cmGeneratorTarget::GetLinkInterface(
   return iface.Exists ? &iface : nullptr;
 }
 
-void cmGeneratorTarget::ComputeLinkInterface(
-  const std::string& config, cmOptionalLinkInterface& iface,
-  cmGeneratorTarget const* headTarget, bool secondPass) const
+void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
+                                             cmOptionalLinkInterface& iface,
+                                             bool secondPass) const
 {
   if (iface.Explicit) {
     if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
@@ -721,11 +721,7 @@ void cmGeneratorTarget::ComputeLinkInterface(
   } else if (this->GetPolicyStatusCMP0022() == cmPolicies::WARN ||
              this->GetPolicyStatusCMP0022() == cmPolicies::OLD) {
     // The link implementation is the default link interface.
-    cmLinkImplementationLibraries const* impl =
-      this->GetLinkImplementationLibrariesInternal(config, headTarget,
-                                                   UseTo::Link);
     iface.ImplementationIsInterface = true;
-    iface.WrongConfigLibraries = impl->WrongConfigLibraries;
   }
 
   if (this->LinkLanguagePropagatesToDependents()) {
@@ -1459,9 +1455,6 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       if (name == this->GetName() || name.empty()) {
         continue;
       }
-      // Support OLD behavior for CMP0003.
-      impl.WrongConfigLibraries.push_back(
-        this->ResolveLinkItem(BT<std::string>(name), linkFeature));
     }
   }
 }

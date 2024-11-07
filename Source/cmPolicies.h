@@ -24,7 +24,7 @@ class cmMakefile;
   SELECT(                                                                     \
     POLICY, CMP0003,                                                          \
     "Libraries linked via full path no longer produce linker search paths.",  \
-    2, 6, 0, WARN)                                                            \
+    2, 6, 0, NEW)                                                             \
   SELECT(POLICY, CMP0004,                                                     \
          "Libraries linked may not have leading or trailing whitespace.", 2,  \
          6, 0, WARN)                                                          \

@@ -12,16 +12,6 @@ string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO " -DCOMPLEX_NDEBUG")
 string(APPEND CMAKE_C_FLAGS_MINSIZEREL " -DCOMPLEX_NDEBUG")
 string(APPEND CMAKE_CXX_FLAGS_MINSIZEREL " -DCOMPLEX_NDEBUG")
 
-# Try setting a new policy.  The IF test is for coverage.
-if(POLICY CMP0003)
-  cmake_policy(SET CMP0003 NEW)
-
-  cmake_policy(GET CMP0003 P3)
-  if(NOT "${P3}" STREQUAL "NEW")
-    message(FATAL_ERROR "cmake_policy(GET) did not report NEW!")
-  endif()
-endif()
-
 # It is not recommended to set a policy to OLD, but this test
 # covers the OLD behavior of some policies.
 foreach(p
