@@ -382,6 +382,7 @@ public:
   virtual void AddRebuildManifestOutputs(cmNinjaDeps& outputs) const
   {
     outputs.push_back(this->NinjaOutputPath(NINJA_BUILD_FILE));
+    this->AddCMakeFilesToRebuild(outputs);
   }
 
   int GetRuleCmdLength(const std::string& name)

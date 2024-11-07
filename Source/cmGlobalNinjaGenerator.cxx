@@ -3293,6 +3293,7 @@ void cmGlobalNinjaMultiGenerator::AddRebuildManifestOutputs(
   if (!this->DefaultFileConfig.empty()) {
     outputs.push_back(this->NinjaOutputPath(NINJA_BUILD_FILE));
   }
+  this->AddCMakeFilesToRebuild(outputs);
 }
 
 void cmGlobalNinjaMultiGenerator::GetQtAutoGenConfigs(

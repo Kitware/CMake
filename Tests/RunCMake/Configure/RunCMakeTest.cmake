@@ -37,6 +37,15 @@ block()
     set(RunCMake_TEST_OUTPUT_MERGE 0)
     run_cmake_command(RerunCMake-build4 ${CMAKE_COMMAND} --build .)
   endif()
+  if(RunCMake_GENERATOR MATCHES "^Ninja")
+    file(REMOVE "${error}")
+    run_cmake(RerunCMake)
+    execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 1) # handle 1s resolution
+    # remove cmake_install.cmake to trigger rerun
+    file(REMOVE "${RunCMake_TEST_BINARY_DIR}/cmake_install.cmake")
+    file(WRITE "${input}" "5")
+    run_cmake_command(RerunCMake-build5 ${CMAKE_COMMAND} --build .)
+  endif()
 endblock()
 
 block()

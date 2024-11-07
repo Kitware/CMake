@@ -4023,3 +4023,16 @@ void cmGlobalGenerator::AddInstallScript(std::string const& file)
 {
   this->InstallScripts.push_back(file);
 }
+
+void cmGlobalGenerator::AddTestFile(std::string const& file)
+{
+  this->TestFiles.push_back(file);
+}
+
+void cmGlobalGenerator::AddCMakeFilesToRebuild(
+  std::vector<std::string>& files) const
+{
+  files.insert(files.end(), this->InstallScripts.begin(),
+               this->InstallScripts.end());
+  files.insert(files.end(), this->TestFiles.begin(), this->TestFiles.end());
+}
