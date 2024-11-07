@@ -12,6 +12,7 @@
 #include "cmCTestGlobalVC.h"
 
 class cmCTest;
+class cmMakefile;
 
 /** \class cmCTestP4
  * \brief Interaction with the Perforce command-line tool
@@ -21,7 +22,7 @@ class cmCTestP4 : public cmCTestGlobalVC
 {
 public:
   /** Construct with a CTest instance and update log stream.  */
-  cmCTestP4(cmCTest* ctest, std::ostream& log);
+  cmCTestP4(cmCTest* ctest, cmMakefile* mf, std::ostream& log);
 
   ~cmCTestP4() override;
 

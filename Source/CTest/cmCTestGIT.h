@@ -10,6 +10,7 @@
 #include "cmCTestGlobalVC.h"
 
 class cmCTest;
+class cmMakefile;
 
 /** \class cmCTestGIT
  * \brief Interaction with git command-line tool
@@ -19,7 +20,7 @@ class cmCTestGIT : public cmCTestGlobalVC
 {
 public:
   /** Construct with a CTest instance and update log stream.  */
-  cmCTestGIT(cmCTest* ctest, std::ostream& log);
+  cmCTestGIT(cmCTest* ctest, cmMakefile* mf, std::ostream& log);
 
   ~cmCTestGIT() override;
 

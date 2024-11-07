@@ -13,6 +13,7 @@
 #include "cmCTestVC.h"
 
 class cmCTest;
+class cmMakefile;
 class cmXMLWriter;
 
 /** \class cmCTestGlobalVC
@@ -23,7 +24,7 @@ class cmCTestGlobalVC : public cmCTestVC
 {
 public:
   /** Construct with a CTest instance and update log stream.  */
-  cmCTestGlobalVC(cmCTest* ctest, std::ostream& log);
+  cmCTestGlobalVC(cmCTest* ctest, cmMakefile* mf, std::ostream& log);
 
   ~cmCTestGlobalVC() override;
 

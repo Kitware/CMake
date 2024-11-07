@@ -5,17 +5,17 @@
 #include <chrono>
 #include <sstream>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <cm/memory>
+#include <cmext/string_view>
 
+#include "cmArgumentParser.h"
 #include "cmCLocaleEnvironmentScope.h"
 #include "cmCTest.h"
 #include "cmCTestBZR.h"
 #include "cmCTestCVS.h"
 #include "cmCTestGIT.h"
-#include "cmCTestGenericHandler.h"
 #include "cmCTestHG.h"
 #include "cmCTestP4.h"
 #include "cmCTestSVN.h"
@@ -28,379 +28,213 @@
 #include "cmVersion.h"
 #include "cmXMLWriter.h"
 
-/** \class cmCTestUpdateHandler
- * \brief A class that handles ctest -S invocations
- *
- */
-class cmCTestUpdateHandler : public cmCTestGenericHandler
+namespace {
+
+enum
 {
-public:
-  using Superclass = cmCTestGenericHandler;
-
-  /*
-   * The main entry point for this class
-   */
-  int ProcessHandler() override;
-
-  cmCTestUpdateHandler(cmCTest* ctest);
-
-  enum
-  {
-    e_UNKNOWN = 0,
-    e_CVS,
-    e_SVN,
-    e_BZR,
-    e_GIT,
-    e_HG,
-    e_P4,
-    e_LAST
-  };
-
-private:
-  // Some structures needed for update
-  struct StringPair : public std::pair<std::string, std::string>
-  {
-  };
-  struct UpdateFiles : public std::vector<StringPair>
-  {
-  };
-
-  // Determine the type of version control
-  int DetermineType(const char* cmd, const char* type);
-
-  // The VCS command to update the working tree.
-  std::string UpdateCommand;
-  std::string SourceDirectory;
-  int UpdateType = e_CVS;
-
-  int DetectVCS(const std::string& dir);
-  bool SelectVCS();
-
-  friend class cmCTestUpdateCommand;
+  e_UNKNOWN = 0,
+  e_CVS,
+  e_SVN,
+  e_BZR,
+  e_GIT,
+  e_HG,
+  e_P4,
+  e_LAST
 };
 
-static const char* cmCTestUpdateHandlerUpdateStrings[] = {
-  "Unknown", "CVS", "SVN", "BZR", "GIT", "HG", "P4"
-};
-
-static const char* cmCTestUpdateHandlerUpdateToString(int type)
+char const* TypeToString(int type)
 {
-  if (type < cmCTestUpdateHandler::e_UNKNOWN ||
-      type >= cmCTestUpdateHandler::e_LAST) {
-    return cmCTestUpdateHandlerUpdateStrings[cmCTestUpdateHandler::e_UNKNOWN];
+  // clang-format off
+  switch (type) {
+    case e_CVS: return "CVS";
+    case e_SVN: return "SVN";
+    case e_BZR: return "BZR";
+    case e_GIT: return "GIT";
+    case e_HG:  return "HG";
+    case e_P4:  return "P4";
+    default:    return "Unknown";
   }
-  return cmCTestUpdateHandlerUpdateStrings[type];
+  // clang-format on
 }
 
-cmCTestUpdateHandler::cmCTestUpdateHandler(cmCTest* ctest)
-  : Superclass(ctest)
+char const* TypeToCommandKey(int type)
 {
+  // clang-format off
+  switch (type) {
+    case e_CVS: return "CTEST_CVS_COMMAND";
+    case e_SVN: return "CTEST_SVN_COMMAND";
+    case e_BZR: return "CTEST_BZR_COMMAND";
+    case e_GIT: return "CTEST_GIT_COMMAND";
+    case e_HG:  return "CTEST_HG_COMMAND";
+    case e_P4:  return "CTEST_P4_COMMAND";
+    default:    return nullptr;
+  }
+  // clang-format on
 }
 
-int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
+int DetermineType(std::string const& cmd)
 {
-  cmCTestOptionalLog(this->CTest, DEBUG,
-                     "Determine update type from command: "
-                       << cmd << " and type: " << type << std::endl,
-                     this->Quiet);
-  if (type && *type) {
-    cmCTestOptionalLog(this->CTest, DEBUG,
-                       "Type specified: " << type << std::endl, this->Quiet);
-    std::string stype = cmSystemTools::LowerCase(type);
-    if (stype.find("cvs") != std::string::npos) {
-      return cmCTestUpdateHandler::e_CVS;
-    }
-    if (stype.find("svn") != std::string::npos) {
-      return cmCTestUpdateHandler::e_SVN;
-    }
-    if (stype.find("bzr") != std::string::npos) {
-      return cmCTestUpdateHandler::e_BZR;
-    }
-    if (stype.find("git") != std::string::npos) {
-      return cmCTestUpdateHandler::e_GIT;
-    }
-    if (stype.find("hg") != std::string::npos) {
-      return cmCTestUpdateHandler::e_HG;
-    }
-    if (stype.find("p4") != std::string::npos) {
-      return cmCTestUpdateHandler::e_P4;
-    }
-  } else {
-    cmCTestOptionalLog(
-      this->CTest, DEBUG,
-      "Type not specified, check command: " << cmd << std::endl, this->Quiet);
-    std::string stype = cmSystemTools::LowerCase(cmd);
-    if (stype.find("cvs") != std::string::npos) {
-      return cmCTestUpdateHandler::e_CVS;
-    }
-    if (stype.find("svn") != std::string::npos) {
-      return cmCTestUpdateHandler::e_SVN;
-    }
-    if (stype.find("bzr") != std::string::npos) {
-      return cmCTestUpdateHandler::e_BZR;
-    }
-    if (stype.find("git") != std::string::npos) {
-      return cmCTestUpdateHandler::e_GIT;
-    }
-    if (stype.find("hg") != std::string::npos) {
-      return cmCTestUpdateHandler::e_HG;
-    }
-    if (stype.find("p4") != std::string::npos) {
-      return cmCTestUpdateHandler::e_P4;
-    }
+  std::string stype = cmSystemTools::LowerCase(cmd);
+  if (stype.find("cvs") != std::string::npos) {
+    return e_CVS;
   }
-  return cmCTestUpdateHandler::e_UNKNOWN;
+  if (stype.find("svn") != std::string::npos) {
+    return e_SVN;
+  }
+  if (stype.find("bzr") != std::string::npos) {
+    return e_BZR;
+  }
+  if (stype.find("git") != std::string::npos) {
+    return e_GIT;
+  }
+  if (stype.find("hg") != std::string::npos) {
+    return e_HG;
+  }
+  if (stype.find("p4") != std::string::npos) {
+    return e_P4;
+  }
+  return e_UNKNOWN;
 }
 
-int cmCTestUpdateHandler::DetectVCS(const std::string& dir)
+int DetectVCS(std::string const& dir)
 {
-  std::string sourceDirectory = dir;
-  cmCTestOptionalLog(this->CTest, DEBUG,
-                     "Check directory: " << sourceDirectory << std::endl,
-                     this->Quiet);
-  sourceDirectory += "/.svn";
-  if (cmSystemTools::FileExists(sourceDirectory)) {
-    return cmCTestUpdateHandler::e_SVN;
+  if (cmSystemTools::FileExists(cmStrCat(dir, "/CVS"))) {
+    return e_CVS;
   }
-  sourceDirectory = cmStrCat(dir, "/CVS");
-  if (cmSystemTools::FileExists(sourceDirectory)) {
-    return cmCTestUpdateHandler::e_CVS;
+  if (cmSystemTools::FileExists(cmStrCat(dir, "/.svn"))) {
+    return e_SVN;
   }
-  sourceDirectory = cmStrCat(dir, "/.bzr");
-  if (cmSystemTools::FileExists(sourceDirectory)) {
-    return cmCTestUpdateHandler::e_BZR;
+  if (cmSystemTools::FileExists(cmStrCat(dir, "/.bzr"))) {
+    return e_BZR;
   }
-  sourceDirectory = cmStrCat(dir, "/.git");
-  if (cmSystemTools::FileExists(sourceDirectory)) {
-    return cmCTestUpdateHandler::e_GIT;
+  if (cmSystemTools::FileExists(cmStrCat(dir, "/.git"))) {
+    return e_GIT;
   }
-  sourceDirectory = cmStrCat(dir, "/.hg");
-  if (cmSystemTools::FileExists(sourceDirectory)) {
-    return cmCTestUpdateHandler::e_HG;
+  if (cmSystemTools::FileExists(cmStrCat(dir, "/.hg"))) {
+    return e_HG;
   }
-  sourceDirectory = cmStrCat(dir, "/.p4");
-  if (cmSystemTools::FileExists(sourceDirectory)) {
-    return cmCTestUpdateHandler::e_P4;
+  if (cmSystemTools::FileExists(cmStrCat(dir, "/.p4"))) {
+    return e_P4;
   }
-  sourceDirectory = cmStrCat(dir, "/.p4config");
-  if (cmSystemTools::FileExists(sourceDirectory)) {
-    return cmCTestUpdateHandler::e_P4;
+  if (cmSystemTools::FileExists(cmStrCat(dir, "/.p4config"))) {
+    return e_P4;
   }
-  return cmCTestUpdateHandler::e_UNKNOWN;
+  return e_UNKNOWN;
 }
 
-bool cmCTestUpdateHandler::SelectVCS()
+std::unique_ptr<cmCTestVC> MakeVC(int type, cmCTest* ctest, cmMakefile* mf,
+                                  std::ostream& os)
 {
-  // Get update command
-  this->UpdateCommand = this->CTest->GetCTestConfiguration("UpdateCommand");
+  // clang-format off
+  switch (type) {
+    case e_CVS: return cm::make_unique<cmCTestCVS>(ctest, mf, os);
+    case e_SVN: return cm::make_unique<cmCTestSVN>(ctest, mf, os);
+    case e_BZR: return cm::make_unique<cmCTestBZR>(ctest, mf, os);
+    case e_GIT: return cm::make_unique<cmCTestGIT>(ctest, mf, os);
+    case e_HG:  return cm::make_unique<cmCTestHG> (ctest, mf, os);
+    case e_P4:  return cm::make_unique<cmCTestP4> (ctest, mf, os);
+    default:    return cm::make_unique<cmCTestVC> (ctest, mf, os);
+  }
+  // clang-format on
+}
+
+} // namespace
+
+bool cmCTestUpdateCommand::ExecuteUpdate(UpdateArguments& args,
+                                         cmExecutionStatus& status) const
+{
+  cmMakefile& mf = status.GetMakefile();
+
+  std::string const& source_dir = !args.Source.empty()
+    ? args.Source
+    : mf.GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
+  if (source_dir.empty()) {
+    status.SetError("called with no source directory specified. "
+                    "Use SOURCE argument or set CTEST_SOURCE_DIRECTORY.");
+    return false;
+  }
+
+  std::string const currentTag = this->CTest->GetCurrentTag();
+  if (currentTag.empty()) {
+    status.SetError("called with no current tag.");
+    return false;
+  }
 
   // Detect the VCS managing the source tree.
-  this->UpdateType = this->DetectVCS(this->SourceDirectory);
-  if (this->UpdateType == e_UNKNOWN) {
-    // The source tree does not have a recognized VCS.  Check the
-    // configuration value or command name.
-    this->UpdateType = this->DetermineType(
-      this->UpdateCommand.c_str(),
-      this->CTest->GetCTestConfiguration("UpdateType").c_str());
+  int updateType = DetectVCS(source_dir);
+
+  // Get update command
+  std::string updateCommand = mf.GetSafeDefinition("CTEST_UPDATE_COMMAND");
+
+  if (updateType == e_UNKNOWN && !updateCommand.empty()) {
+    updateType = DetermineType(updateCommand);
+  }
+  if (updateType == e_UNKNOWN) {
+    updateType = DetermineType(mf.GetSafeDefinition("CTEST_UPDATE_TYPE"));
   }
 
   // If no update command was specified, lookup one for this VCS tool.
-  if (this->UpdateCommand.empty()) {
-    const char* key = nullptr;
-    switch (this->UpdateType) {
-      case e_CVS:
-        key = "CVSCommand";
-        break;
-      case e_SVN:
-        key = "SVNCommand";
-        break;
-      case e_BZR:
-        key = "BZRCommand";
-        break;
-      case e_GIT:
-        key = "GITCommand";
-        break;
-      case e_HG:
-        key = "HGCommand";
-        break;
-      case e_P4:
-        key = "P4Command";
-        break;
-      default:
-        break;
-    }
+  if (updateCommand.empty()) {
+    const char* key = TypeToCommandKey(updateType);
     if (key) {
-      this->UpdateCommand = this->CTest->GetCTestConfiguration(key);
+      updateCommand = mf.GetSafeDefinition(key);
     }
-    if (this->UpdateCommand.empty()) {
+
+    if (updateCommand.empty()) {
       std::ostringstream e;
-      e << "Cannot find UpdateCommand ";
+      e << "called with no update command specified. "
+           "Please set CTEST_UPDATE_COMMAND";
       if (key) {
-        e << "or " << key;
+        e << " or " << key;
       }
-      e << " configuration key.";
-      cmCTestLog(this->CTest, ERROR_MESSAGE, e.str() << std::endl);
+      e << '.';
+      status.SetError(e.str());
       return false;
     }
   }
 
-  return true;
-}
-
-std::unique_ptr<cmCTestGenericHandler> cmCTestUpdateCommand::InitializeHandler(
-  HandlerArguments& args, cmExecutionStatus& status) const
-{
-  cmMakefile& mf = status.GetMakefile();
-  if (!args.Source.empty()) {
-    this->CTest->SetCTestConfiguration(
-      "SourceDirectory", cmSystemTools::CollapseFullPath(args.Source),
-      args.Quiet);
-  } else {
-    this->CTest->SetCTestConfiguration(
-      "SourceDirectory",
-      cmSystemTools::CollapseFullPath(
-        mf.GetSafeDefinition("CTEST_SOURCE_DIRECTORY")),
-      args.Quiet);
+  cmGeneratedFileStream ofs;
+  if (!this->CTest->GetShowOnly()) {
+    std::string logFile = cmStrCat("LastUpdate_", currentTag, ".log");
+    if (!this->CTest->OpenOutputFile("Temporary", logFile, ofs)) {
+      status.SetError(cmStrCat("cannot create log file: ", logFile));
+      return false;
+    }
   }
-  std::string source_dir =
-    this->CTest->GetCTestConfiguration("SourceDirectory");
 
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "UpdateCommand", "CTEST_UPDATE_COMMAND", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "UpdateOptions", "CTEST_UPDATE_OPTIONS", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "CVSCommand", "CTEST_CVS_COMMAND", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "CVSUpdateOptions", "CTEST_CVS_UPDATE_OPTIONS", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "SVNCommand", "CTEST_SVN_COMMAND", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "SVNUpdateOptions", "CTEST_SVN_UPDATE_OPTIONS", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "SVNOptions", "CTEST_SVN_OPTIONS", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "BZRCommand", "CTEST_BZR_COMMAND", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "BZRUpdateOptions", "CTEST_BZR_UPDATE_OPTIONS", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "GITCommand", "CTEST_GIT_COMMAND", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "GITUpdateOptions", "CTEST_GIT_UPDATE_OPTIONS", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "GITInitSubmodules", "CTEST_GIT_INIT_SUBMODULES", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "GITUpdateCustom", "CTEST_GIT_UPDATE_CUSTOM", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "UpdateVersionOnly", "CTEST_UPDATE_VERSION_ONLY", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "UpdateVersionOverride", "CTEST_UPDATE_VERSION_OVERRIDE", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "HGCommand", "CTEST_HG_COMMAND", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "HGUpdateOptions", "CTEST_HG_UPDATE_OPTIONS", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "P4Command", "CTEST_P4_COMMAND", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "P4UpdateOptions", "CTEST_P4_UPDATE_OPTIONS", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "P4Client", "CTEST_P4_CLIENT", args.Quiet);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    &mf, "P4Options", "CTEST_P4_OPTIONS", args.Quiet);
-
-  auto handler = cm::make_unique<cmCTestUpdateHandler>(this->CTest);
-  if (source_dir.empty()) {
-    status.SetError("source directory not specified. Please use SOURCE tag");
-    return nullptr;
+  cmGeneratedFileStream os;
+  if (!this->CTest->OpenOutputFile(currentTag, "Update.xml", os, true)) {
+    status.SetError("cannot create resulting XML file: Update.xml");
+    return false;
   }
-  handler->SourceDirectory = source_dir;
-  handler->SetQuiet(args.Quiet);
-  return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
-}
 
-// clearly it would be nice if this were broken up into a few smaller
-// functions and commented...
-int cmCTestUpdateHandler::ProcessHandler()
-{
+  this->CTest->AddSubmitFile(cmCTest::PartUpdate, "Update.xml");
+
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+                     "   Updating " << TypeToString(updateType)
+                                    << " repository: " << source_dir << '\n',
+                     args.Quiet);
+
   // Make sure VCS tool messages are in English so we can parse them.
   cmCLocaleEnvironmentScope fixLocale;
   static_cast<void>(fixLocale);
 
-  // Get source dir
-  if (this->SourceDirectory.empty()) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Cannot find SourceDirectory  key in the DartConfiguration.tcl"
-                 << std::endl);
-    return -1;
-  }
-
-  cmGeneratedFileStream ofs;
-  if (!this->CTest->GetShowOnly()) {
-    this->StartLogFile("Update", ofs);
-  }
-
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                     "   Updating the repository: " << this->SourceDirectory
-                                                    << std::endl,
-                     this->Quiet);
-
-  if (!this->SelectVCS()) {
-    return -1;
-  }
-
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                     "   Use "
-                       << cmCTestUpdateHandlerUpdateToString(this->UpdateType)
-                       << " repository type" << std::endl;
-                     , this->Quiet);
-
   // Create an object to interact with the VCS tool.
-  std::unique_ptr<cmCTestVC> vc;
-  switch (this->UpdateType) {
-    case e_CVS:
-      vc = cm::make_unique<cmCTestCVS>(this->CTest, ofs);
-      break;
-    case e_SVN:
-      vc = cm::make_unique<cmCTestSVN>(this->CTest, ofs);
-      break;
-    case e_BZR:
-      vc = cm::make_unique<cmCTestBZR>(this->CTest, ofs);
-      break;
-    case e_GIT:
-      vc = cm::make_unique<cmCTestGIT>(this->CTest, ofs);
-      break;
-    case e_HG:
-      vc = cm::make_unique<cmCTestHG>(this->CTest, ofs);
-      break;
-    case e_P4:
-      vc = cm::make_unique<cmCTestP4>(this->CTest, ofs);
-      break;
-    default:
-      vc = cm::make_unique<cmCTestVC>(this->CTest, ofs);
-      break;
-  }
-  vc->SetCommandLineTool(this->UpdateCommand);
-  vc->SetSourceDirectory(this->SourceDirectory);
+  std::unique_ptr<cmCTestVC> vc = MakeVC(updateType, this->CTest, &mf, ofs);
+
+  vc->SetCommandLineTool(updateCommand);
+  vc->SetSourceDirectory(source_dir);
 
   // Cleanup the working tree.
   vc->Cleanup();
 
-  //
-  // Now update repository and remember what files were updated
-  //
-  cmGeneratedFileStream os;
-  if (!this->StartResultingXML(cmCTest::PartUpdate, "Update", os)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Cannot open log file" << std::endl);
-    return -1;
-  }
   std::string start_time = this->CTest->CurrentTime();
   auto start_time_time = std::chrono::system_clock::now();
   auto elapsed_time_start = std::chrono::steady_clock::now();
 
   bool updated = vc->Update();
   std::string buildname =
-    cmCTest::SafeBuildIdField(this->CTest->GetCTestConfiguration("BuildName"));
+    cmCTest::SafeBuildIdField(mf.GetSafeDefinition("CTEST_BUILD_NAME"));
 
   cmXMLWriter xml(os);
   xml.StartDocument();
@@ -408,7 +242,7 @@ int cmCTestUpdateHandler::ProcessHandler()
   xml.Attribute("mode", "Client");
   xml.Attribute("Generator",
                 std::string("ctest-") + cmVersion::GetCMakeVersion());
-  xml.Element("Site", this->CTest->GetCTestConfiguration("Site"));
+  xml.Element("Site", mf.GetSafeDefinition("CTEST_SITE"));
   xml.Element("BuildName", buildname);
   xml.Element("BuildStamp",
               this->CTest->GetCurrentTag() + "-" +
@@ -416,9 +250,9 @@ int cmCTestUpdateHandler::ProcessHandler()
   xml.Element("StartDateTime", start_time);
   xml.Element("StartTime", start_time_time);
   xml.Element("UpdateCommand", vc->GetUpdateCommandLine());
-  xml.Element("UpdateType",
-              cmCTestUpdateHandlerUpdateToString(this->UpdateType));
-  std::string changeId = this->CTest->GetCTestConfiguration("ChangeId");
+  xml.Element("UpdateType", TypeToString(updateType));
+
+  std::string changeId = mf.GetSafeDefinition("CTEST_CHANGE_ID");
   if (!changeId.empty()) {
     xml.Element("ChangeId", changeId);
   }
@@ -430,22 +264,22 @@ int cmCTestUpdateHandler::ProcessHandler()
   if (numUpdated) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "   Found " << numUpdated << " updated files\n",
-                       this->Quiet);
+                       args.Quiet);
   }
   if (int numModified = vc->GetPathCount(cmCTestVC::PathModified)) {
     cmCTestOptionalLog(
       this->CTest, HANDLER_OUTPUT,
-      "   Found " << numModified << " locally modified files\n", this->Quiet);
+      "   Found " << numModified << " locally modified files\n", args.Quiet);
     localModifications += numModified;
   }
   if (int numConflicting = vc->GetPathCount(cmCTestVC::PathConflicting)) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "   Found " << numConflicting << " conflicting files\n",
-                       this->Quiet);
+                       args.Quiet);
     localModifications += numConflicting;
   }
 
-  cmCTestOptionalLog(this->CTest, DEBUG, "End" << std::endl, this->Quiet);
+  cmCTestOptionalLog(this->CTest, DEBUG, "End" << std::endl, args.Quiet);
   std::string end_time = this->CTest->CurrentTime();
   xml.Element("EndDateTime", end_time);
   xml.Element("EndTime", std::chrono::system_clock::now());
@@ -472,15 +306,25 @@ int cmCTestUpdateHandler::ProcessHandler()
   xml.EndElement(); // UpdateReturnStatus
   xml.EndElement(); // Update
   xml.EndDocument();
-  return updated && loadedMods ? numUpdated : -1;
+
+  if (!args.ReturnValue.empty()) {
+    mf.AddDefinition(args.ReturnValue,
+                     std::to_string(updated && loadedMods ? numUpdated : -1));
+  }
+
+  return true;
 }
 
 bool cmCTestUpdateCommand::InitialPass(std::vector<std::string> const& args,
                                        cmExecutionStatus& status) const
 {
-  static auto const parser = MakeHandlerParser<HandlerArguments>();
+  static auto const parser =
+    cmArgumentParser<UpdateArguments>{ MakeBasicParser<UpdateArguments>() }
+      .Bind("SOURCE"_s, &UpdateArguments::Source)
+      .Bind("RETURN_VALUE"_s, &UpdateArguments::ReturnValue)
+      .Bind("QUIET"_s, &UpdateArguments::Quiet);
 
-  return this->Invoke(parser, args, status, [&](HandlerArguments& a) {
-    return this->ExecuteHandlerCommand(a, status);
+  return this->Invoke(parser, args, status, [&](UpdateArguments& a) {
+    return this->ExecuteUpdate(a, status);
   });
 }

@@ -8,13 +8,14 @@
 #include <vector>
 
 #include "cmCTest.h"
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmUVProcessChain.h"
-#include "cmValue.h"
 #include "cmXMLWriter.h"
 
-cmCTestVC::cmCTestVC(cmCTest* ct, std::ostream& log)
+cmCTestVC::cmCTestVC(cmCTest* ct, cmMakefile* mf, std::ostream& log)
   : CTest(ct)
+  , Makefile(mf)
   , Log(log)
 {
   this->PathCount[PathUpdated] = 0;
@@ -113,7 +114,7 @@ std::string cmCTestVC::GetNightlyTime()
 {
   // Get the nightly start time corresponding to the current dau.
   struct tm* t = this->CTest->GetNightlyTime(
-    this->CTest->GetCTestConfiguration("NightlyStartTime"),
+    this->Makefile->GetSafeDefinition("CTEST_NIGHTLY_START_TIME"),
     this->CTest->GetTomorrowTag());
   char current_time[1024];
   snprintf(current_time, sizeof(current_time), "%04d-%02d-%02d %02d:%02d:%02d",
@@ -140,7 +141,7 @@ bool cmCTestVC::Update()
 
   // Use the explicitly specified version.
   std::string versionOverride =
-    this->CTest->GetCTestConfiguration("UpdateVersionOverride");
+    this->Makefile->GetSafeDefinition("CTEST_UPDATE_VERSION_OVERRIDE");
   if (!versionOverride.empty()) {
     this->SetNewRevision(versionOverride);
     return true;
@@ -148,7 +149,7 @@ bool cmCTestVC::Update()
 
   // if update version only is on then do not actually update,
   // just note the current version and finish
-  if (!cmIsOn(this->CTest->GetCTestConfiguration("UpdateVersionOnly"))) {
+  if (!this->Makefile->IsOn("CTEST_UPDATE_VERSION_ONLY")) {
     result = this->NoteOldRevision() && result;
     this->Log << "--- Begin Update ---\n";
     result = this->UpdateImpl() && result;

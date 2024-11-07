@@ -13,6 +13,7 @@
 
 #include "cmCTest.h"
 #include "cmCTestVC.h"
+#include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
@@ -23,8 +24,8 @@ struct cmCTestSVN::Revision : public cmCTestVC::Revision
   cmCTestSVN::SVNInfo* SVNInfo;
 };
 
-cmCTestSVN::cmCTestSVN(cmCTest* ct, std::ostream& log)
-  : cmCTestGlobalVC(ct, log)
+cmCTestSVN::cmCTestSVN(cmCTest* ct, cmMakefile* mf, std::ostream& log)
+  : cmCTestGlobalVC(ct, mf, log)
 {
   this->PriorRev = this->Unknown;
 }
@@ -240,9 +241,9 @@ private:
 bool cmCTestSVN::UpdateImpl()
 {
   // Get user-specified update options.
-  std::string opts = this->CTest->GetCTestConfiguration("UpdateOptions");
+  std::string opts = this->Makefile->GetSafeDefinition("CTEST_UPDATE_OPTIONS");
   if (opts.empty()) {
-    opts = this->CTest->GetCTestConfiguration("SVNUpdateOptions");
+    opts = this->Makefile->GetSafeDefinition("CTEST_SVN_UPDATE_OPTIONS");
   }
   std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
 
@@ -272,7 +273,8 @@ bool cmCTestSVN::RunSVNCommand(std::vector<std::string> const& parameters,
   cm::append(args, parameters);
   args.emplace_back("--non-interactive");
 
-  std::string userOptions = this->CTest->GetCTestConfiguration("SVNOptions");
+  std::string userOptions =
+    this->Makefile->GetSafeDefinition("CTEST_SVN_OPTIONS");
 
   std::vector<std::string> parsedUserOptions =
     cmSystemTools::ParseArguments(userOptions);

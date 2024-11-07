@@ -236,7 +236,7 @@ bool cmCTestStartCommand::InitialCheckout(std::ostream& ofs,
   }
   if (initialCheckoutCommand) {
     // Use a generic VC object to run and log the command.
-    cmCTestVC vc(this->CTest, ofs);
+    cmCTestVC vc(this->CTest, &mf, ofs);
     vc.SetSourceDirectory(sourceDir);
     if (!vc.InitialCheckout(*initialCheckoutCommand)) {
       return false;

@@ -13,6 +13,7 @@
 
 class cmCTest;
 class cmXMLWriter;
+class cmMakefile;
 
 /** \class cmCTestVC
  * \brief Base class for version control system handlers
@@ -22,7 +23,7 @@ class cmCTestVC : public cmProcessTools
 {
 public:
   /** Construct with a CTest instance and update log stream.  */
-  cmCTestVC(cmCTest* ctest, std::ostream& log);
+  cmCTestVC(cmCTest* ctest, cmMakefile* mf, std::ostream& log);
 
   virtual ~cmCTestVC();
 
@@ -128,6 +129,7 @@ protected:
 
   // Instance of cmCTest running the script.
   cmCTest* CTest;
+  cmMakefile* Makefile;
 
   // A stream to which we write log information.
   std::ostream& Log;

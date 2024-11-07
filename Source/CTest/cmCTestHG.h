@@ -10,6 +10,7 @@
 #include "cmCTestGlobalVC.h"
 
 class cmCTest;
+class cmMakefile;
 
 /** \class cmCTestHG
  * \brief Interaction with Mercurial command-line tool
@@ -19,7 +20,7 @@ class cmCTestHG : public cmCTestGlobalVC
 {
 public:
   /** Construct with a CTest instance and update log stream.  */
-  cmCTestHG(cmCTest* ctest, std::ostream& log);
+  cmCTestHG(cmCTest* ctest, cmMakefile* mf, std::ostream& log);
 
   ~cmCTestHG() override;
 
