@@ -215,7 +215,6 @@ private:
   void DropDirectoryItem(BT<std::string> const& item);
   bool CheckSharedLibNoSOName(LinkEntry const& entry);
   void AddSharedLibNoSOName(LinkEntry const& entry);
-  void HandleBadFullItem(LinkEntry const& entry, std::string const& file);
 
   // Framework info.
   void ComputeFrameworkInfo();

@@ -39,7 +39,7 @@ class cmMakefile;
   SELECT(                                                                     \
     POLICY, CMP0008,                                                          \
     "Libraries linked by full-path must have a valid library file name.", 2,  \
-    6, 1, WARN)                                                               \
+    6, 1, NEW)                                                                \
   SELECT(POLICY, CMP0009,                                                     \
          "FILE GLOB_RECURSE calls should not follow symlinks by default.", 2, \
          6, 2, WARN)                                                          \

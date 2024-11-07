@@ -1711,19 +1711,6 @@ void cmComputeLinkInformation::AddFullItem(LinkEntry const& entry)
     return;
   }
 
-  // Full path libraries should specify a valid library file name.
-  // See documentation of CMP0008.
-  std::string generator = this->GlobalGenerator->GetName();
-  if (this->Target->GetPolicyStatusCMP0008() != cmPolicies::NEW &&
-      (generator.find("Visual Studio") != std::string::npos ||
-       generator.find("Xcode") != std::string::npos)) {
-    std::string file = cmSystemTools::GetFilenameName(item.Value);
-    if (!this->ExtractAnyLibraryName.find(file)) {
-      this->HandleBadFullItem(entry, file);
-      return;
-    }
-  }
-
   // This is called to handle a link item that is a full path.
   // If the target is not a static library make sure the link type is
   // shared.  This is because dynamic-mode linking can handle both
@@ -2086,51 +2073,6 @@ void cmComputeLinkInformation::AddSharedLibNoSOName(LinkEntry const& entry)
 
   // Make sure the link directory ordering will find the library.
   this->OrderLinkerSearchPath->AddLinkLibrary(entry.Item.Value);
-}
-
-void cmComputeLinkInformation::HandleBadFullItem(LinkEntry const& entry,
-                                                 std::string const& file)
-{
-  std::string const& item = entry.Item.Value;
-  // Do not depend on things that do not exist.
-  auto i = std::find(this->Depends.begin(), this->Depends.end(), item);
-  if (i != this->Depends.end()) {
-    this->Depends.erase(i);
-  }
-
-  // Tell the linker to search for the item and provide the proper
-  // path for it.
-  LinkEntry fileEntry{ entry };
-  fileEntry.Item = file;
-  this->AddUserItem(fileEntry);
-  this->OrderLinkerSearchPath->AddLinkLibrary(item);
-
-  // Produce any needed message.
-  switch (this->Target->GetPolicyStatusCMP0008()) {
-    case cmPolicies::WARN: {
-      // Print the warning at most once for this item.
-      std::string wid = cmStrCat("CMP0008-WARNING-GIVEN-", item);
-      if (!this->CMakeInstance->GetState()->GetGlobalPropertyAsBool(wid)) {
-        this->CMakeInstance->GetState()->SetGlobalProperty(wid, "1");
-        std::ostringstream w;
-        /* clang-format off */
-        w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0008) << "\n"
-             "Target \"" << this->Target->GetName() << "\" links to item\n"
-             "  " << item << "\n"
-             "which is a full-path but not a valid library file name.";
-        /* clang-format on */
-        this->CMakeInstance->IssueMessage(MessageType::AUTHOR_WARNING, w.str(),
-                                          this->Target->GetBacktrace());
-      }
-    }
-      CM_FALLTHROUGH;
-    case cmPolicies::OLD: // NOLINT(bugprone-branch-clone)
-      // OLD behavior does not warn.
-      break;
-    case cmPolicies::NEW:
-      // NEW behavior will not get here.
-      break;
-  }
 }
 
 void cmComputeLinkInformation::LoadImplicitLinkInfo()
