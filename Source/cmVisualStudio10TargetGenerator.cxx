@@ -1871,7 +1871,9 @@ void cmVisualStudio10TargetGenerator::WriteCustomRule(
       BuildInParallel buildInParallel = BuildInParallel::No;
       if (command.GetCMP0147Status() == cmPolicies::NEW &&
           !command.GetUsesTerminal() &&
-          !(command.HasMainDependency() && source->GetIsGenerated())) {
+          !(command.HasMainDependency() && source->GetIsGenerated()) &&
+          !source->GetPropertyAsBool(
+            "VS_CUSTOM_COMMAND_DISABLE_PARALLEL_BUILD")) {
         buildInParallel = BuildInParallel::Yes;
       }
       this->WriteCustomRuleCpp(*spe2, c, script, additional_inputs.str(),
