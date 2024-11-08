@@ -2689,12 +2689,9 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   (void)argv0; // ignore this on windows
   wchar_t modulepath[_MAX_PATH];
   ::GetModuleFileNameW(nullptr, modulepath, sizeof(modulepath));
-  std::string path = cmsys::Encoding::ToNarrow(modulepath);
-  std::string realPath = cmSystemTools::GetRealPath(path, nullptr);
-  if (realPath.empty()) {
-    realPath = path;
-  }
-  exe_dir = cmSystemTools::GetFilenamePath(realPath);
+  std::string exe = cmsys::Encoding::ToNarrow(modulepath);
+  exe = cmSystemTools::GetRealPath(exe);
+  exe_dir = cmSystemTools::GetFilenamePath(exe);
 #elif defined(__APPLE__)
   (void)argv0; // ignore this on OS X
 #  define CM_EXE_PATH_LOCAL_SIZE 16384
@@ -2738,7 +2735,6 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
     // ???
   }
 #endif
-  exe_dir = cmSystemTools::GetActualCaseForPath(exe_dir);
   cmSystemToolsCMakeCommand =
     cmStrCat(exe_dir, "/cmake", cmSystemTools::GetExecutableExtension());
 #ifdef CMAKE_BOOTSTRAP
