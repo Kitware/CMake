@@ -2736,13 +2736,11 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
 #else
   std::string errorMsg;
   std::string exe;
-  if (cmSystemTools::FindProgramPath(argv0, exe, errorMsg)) {
-    // remove symlinks
-    exe = cmSystemTools::GetRealPath(exe);
-    exe_dir = cmSystemTools::GetFilenamePath(exe);
-  } else {
+  if (!cmSystemTools::FindProgramPath(argv0, exe, errorMsg)) {
     // ???
   }
+  exe = cmSystemTools::GetRealPath(exe);
+  exe_dir = cmSystemTools::GetFilenamePath(exe);
 #endif
   cmSystemToolsCMakeCommand =
     cmStrCat(exe_dir, "/cmake", cmSystemTools::GetExecutableExtension());
