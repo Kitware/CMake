@@ -2691,16 +2691,14 @@ bool IsCMakeAppBundleExe(std::string const& exe)
 
 void cmSystemTools::FindCMakeResources(const char* argv0)
 {
-  std::string exe_dir;
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  (void)argv0; // ignore this on windows
+  static_cast<void>(argv0);
   wchar_t modulepath[_MAX_PATH];
   ::GetModuleFileNameW(nullptr, modulepath, sizeof(modulepath));
   std::string exe = cmsys::Encoding::ToNarrow(modulepath);
   exe = cmSystemTools::GetRealPath(exe);
-  exe_dir = cmSystemTools::GetFilenamePath(exe);
 #elif defined(__APPLE__)
-  (void)argv0; // ignore this on OS X
+  static_cast<void>(argv0);
 #  define CM_EXE_PATH_LOCAL_SIZE 16384
   char exe_path_local[CM_EXE_PATH_LOCAL_SIZE];
 #  if defined(MAC_OS_X_VERSION_10_3) && !defined(MAC_OS_X_VERSION_10_4)
@@ -2732,7 +2730,6 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
       exe = cmStrCat(dir, "/cmake-gui");
     }
   }
-  exe_dir = cmSystemTools::GetFilenamePath(exe);
 #else
   std::string errorMsg;
   std::string exe;
@@ -2740,36 +2737,10 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
     // ???
   }
   exe = cmSystemTools::GetRealPath(exe);
-  exe_dir = cmSystemTools::GetFilenamePath(exe);
 #endif
-  cmSystemToolsCMakeCommand =
-    cmStrCat(exe_dir, "/cmake", cmSystemTools::GetExecutableExtension());
-#ifdef CMAKE_BOOTSTRAP
-  // The bootstrap cmake does not provide the other tools,
-  // so use the directory where they are about to be built.
-  exe_dir = CMAKE_BOOTSTRAP_BINARY_DIR "/bin";
-#endif
-  cmSystemToolsCTestCommand =
-    cmStrCat(exe_dir, "/ctest", cmSystemTools::GetExecutableExtension());
-  cmSystemToolsCPackCommand =
-    cmStrCat(exe_dir, "/cpack", cmSystemTools::GetExecutableExtension());
-  cmSystemToolsCMakeGUICommand =
-    cmStrCat(exe_dir, "/cmake-gui", cmSystemTools::GetExecutableExtension());
-  if (!cmSystemTools::FileExists(cmSystemToolsCMakeGUICommand)) {
-    cmSystemToolsCMakeGUICommand.clear();
-  }
-  cmSystemToolsCMakeCursesCommand =
-    cmStrCat(exe_dir, "/ccmake", cmSystemTools::GetExecutableExtension());
-  if (!cmSystemTools::FileExists(cmSystemToolsCMakeCursesCommand)) {
-    cmSystemToolsCMakeCursesCommand.clear();
-  }
-  cmSystemToolsCMClDepsCommand =
-    cmStrCat(exe_dir, "/cmcldeps", cmSystemTools::GetExecutableExtension());
-  if (!cmSystemTools::FileExists(cmSystemToolsCMClDepsCommand)) {
-    cmSystemToolsCMClDepsCommand.clear();
-  }
-
 #ifndef CMAKE_BOOTSTRAP
+  // Find resources relative to our own executable.
+  std::string exe_dir = cmSystemTools::GetFilenamePath(exe);
   // Install tree has
   // - "<prefix><CMAKE_BIN_DIR>/cmake"
   // - "<prefix><CMAKE_DATA_DIR>"
@@ -2810,10 +2781,35 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
       cmSystemToolsHTMLDoc = cmStrCat(dir, "/Utilities/Sphinx/html");
     }
   }
+  cmSystemToolsCMakeCommand =
+    cmStrCat(exe_dir, "/cmake", cmSystemTools::GetExecutableExtension());
 #else
-  // Bootstrap build knows its source.
+  // The bootstrap cmake knows its resource locations.
   cmSystemToolsCMakeRoot = CMAKE_BOOTSTRAP_SOURCE_DIR;
+  cmSystemToolsCMakeCommand = exe;
+  // The bootstrap cmake does not provide the other tools,
+  // so use the directory where they are about to be built.
+  std::string exe_dir = CMAKE_BOOTSTRAP_BINARY_DIR "/bin";
 #endif
+  cmSystemToolsCTestCommand =
+    cmStrCat(exe_dir, "/ctest", cmSystemTools::GetExecutableExtension());
+  cmSystemToolsCPackCommand =
+    cmStrCat(exe_dir, "/cpack", cmSystemTools::GetExecutableExtension());
+  cmSystemToolsCMakeGUICommand =
+    cmStrCat(exe_dir, "/cmake-gui", cmSystemTools::GetExecutableExtension());
+  if (!cmSystemTools::FileExists(cmSystemToolsCMakeGUICommand)) {
+    cmSystemToolsCMakeGUICommand.clear();
+  }
+  cmSystemToolsCMakeCursesCommand =
+    cmStrCat(exe_dir, "/ccmake", cmSystemTools::GetExecutableExtension());
+  if (!cmSystemTools::FileExists(cmSystemToolsCMakeCursesCommand)) {
+    cmSystemToolsCMakeCursesCommand.clear();
+  }
+  cmSystemToolsCMClDepsCommand =
+    cmStrCat(exe_dir, "/cmcldeps", cmSystemTools::GetExecutableExtension());
+  if (!cmSystemTools::FileExists(cmSystemToolsCMClDepsCommand)) {
+    cmSystemToolsCMClDepsCommand.clear();
+  }
 }
 
 std::string const& cmSystemTools::GetCMakeCommand()
