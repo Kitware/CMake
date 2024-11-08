@@ -5,177 +5,144 @@
 #include <algorithm> // IWYU pragma: keep
 #include <cassert>
 #include <iomanip>
+#include <iterator>
 #include <ostream>
 #include <string>
 #include <vector>
 
+#include <cm/string_view>
+#include <cmext/string_view>
+
 #include "cmDocumentationEntry.h"
 #include "cmDocumentationSection.h"
+#include "cmStringAlgorithms.h"
 
 namespace {
-const char* skipSpaces(const char* ptr)
-{
-  assert(ptr);
-  for (; *ptr == ' '; ++ptr) {
-    ;
-  }
-  return ptr;
-}
-const char* skipToSpace(const char* ptr)
-{
-  assert(ptr);
-  for (; *ptr && (*ptr != '\n') && (*ptr != ' '); ++ptr) {
-    ;
-  }
-  return ptr;
-}
-}
+const auto EOL = "\n"_s;
+const auto SPACE = " "_s;
+const auto TWO_SPACES = "  "_s;
+const auto MAX_WIDTH_PADDING =
+  std::string(cmDocumentationFormatter::TEXT_WIDTH, ' ');
 
-void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
-                                              std::string const& text) const
+void FormatLine(std::back_insert_iterator<std::vector<cm::string_view>> outIt,
+                const cm::string_view text, const cm::string_view padding)
 {
-  if (text.empty()) {
+  auto tokens = cmTokenizedView(text, ' ', cmTokenizerMode::New);
+  if (tokens.empty()) {
     return;
   }
 
-  struct Buffer
-  {
-    // clang-format off
-    using PrinterFn = void (cmDocumentationFormatter::*)(
-        std::ostream&, std::string const&
-      ) const;
-    // clang-format on
-    std::string collected;
-    const PrinterFn printer;
-  };
-  // const auto NORMAL_IDX = 0u;
-  const auto PREFORMATTED_IDX = 1u;
-  const auto HANDLERS_SIZE = 2u;
-  Buffer buffers[HANDLERS_SIZE] = {
-    { {}, &cmDocumentationFormatter::PrintParagraph },
-    { {}, &cmDocumentationFormatter::PrintPreformatted }
-  };
-
-  const auto padding = std::string(this->TextIndent, ' ');
-
-  for (std::size_t pos = 0u, eol = 0u; pos < text.size(); pos = eol) {
-    const auto current_idx = std::size_t(text[pos] == ' ');
-    // size_t(!bool(current_idx))
-    const auto other_idx = current_idx ^ 1u;
-
-    // Flush the other buffer if anything has been collected
-    if (!buffers[other_idx].collected.empty()) {
-      // NOTE Whatever the other index is, the current buffered
-      // string expected to be empty.
-      assert(buffers[current_idx].collected.empty());
-
-      (this->*buffers[other_idx].printer)(os, buffers[other_idx].collected);
-      buffers[other_idx].collected.clear();
-    }
-
-    // ATTENTION The previous implementation had called `PrintParagraph()`
-    // **for every processed (char by char) input line**.
-    // The method unconditionally append the `\n' character after the
-    // printed text. To keep the backward-compatible behavior it's needed to
-    // add the '\n' character to the previously collected line...
-    if (!buffers[current_idx].collected.empty() &&
-        current_idx != PREFORMATTED_IDX) {
-      buffers[current_idx].collected += '\n';
-    }
-
-    // Lookup EOL
-    eol = text.find('\n', pos);
-    if (current_idx == PREFORMATTED_IDX) {
-      buffers[current_idx].collected.append(padding);
-    }
-    buffers[current_idx].collected.append(
-      text, pos, eol == std::string::npos ? eol : ++eol - pos);
+  // Push padding in front of a first line
+  if (!padding.empty()) {
+    outIt = padding;
   }
 
-  for (auto& buf : buffers) {
-    if (!buf.collected.empty()) {
-      (this->*buf.printer)(os, buf.collected);
-    }
-  }
-}
+  auto currentWidth = padding.size();
+  auto newSentence = false;
 
-void cmDocumentationFormatter::PrintPreformatted(std::ostream& os,
-                                                 std::string const& text) const
-{
-  os << text << '\n';
-}
-
-void cmDocumentationFormatter::PrintParagraph(std::ostream& os,
-                                              std::string const& text) const
-{
-  if (this->TextIndent) {
-    os << std::string(this->TextIndent, ' ');
-  }
-  this->PrintColumn(os, text);
-  os << '\n';
-}
-
-void cmDocumentationFormatter::PrintColumn(std::ostream& os,
-                                           std::string const& text) const
-{
-  // Print text arranged in an indented column of fixed width.
-  bool newSentence = false;
-  bool firstLine = true;
-
-  assert(this->TextIndent < this->TextWidth);
-  const std::ptrdiff_t width = this->TextWidth - this->TextIndent;
-  std::ptrdiff_t column = 0;
-
-  const auto padding = std::string(this->TextIndent, ' ');
-
-  // Loop until the end of the text.
-  for (const char *l = text.c_str(), *r = skipToSpace(text.c_str()); *l;
-       l = skipSpaces(r), r = skipToSpace(l)) {
-    // Does it fit on this line?
-    if (r - l < width - column - std::ptrdiff_t(newSentence)) {
-      // Word fits on this line.
-      if (r > l) {
-        if (column) {
-          // Not first word on line.  Separate from the previous word
-          // by a space, or two if this is a new sentence.
-          os << &("  "[std::size_t(!newSentence)]);
-          column += 1u + std::ptrdiff_t(newSentence);
-        } else if (!firstLine && this->TextIndent) {
-          // First word on line.  Print indentation unless this is the
-          // first line.
-          os << padding;
-        }
-
-        // Print the word.
-        os.write(l, r - l);
-        newSentence = (*(r - 1) == '.');
+  for (auto token : tokens) {
+    // It's no need to add a space if this is a very first
+    // word on a line.
+    const auto needSpace = currentWidth > padding.size();
+    // Evaluate the size of a current token + possibly spaces before it.
+    const auto tokenWithSpaceSize = token.size() + std::size_t(needSpace) +
+      std::size_t(needSpace && newSentence);
+    // Check if a current word fits on a line.
+    // Also, take in account:
+    //  - extra space if not a first word on a line
+    //  - extra space if last token ends w/ a period
+    if (currentWidth + tokenWithSpaceSize <=
+        cmDocumentationFormatter::TEXT_WIDTH) {
+      // If not a first word on a line...
+      if (needSpace) {
+        // ... add a space after the last token +
+        // possibly one more space if the last token
+        // ends with a period (means, end of a sentence).
+        outIt = newSentence ? TWO_SPACES : SPACE;
       }
-
-      if (*r == '\n') {
-        // Text provided a newline.  Start a new line.
-        os << '\n';
-        ++r;
-        column = 0;
-        firstLine = false;
-      } else {
-        // No provided newline.  Continue this line.
-        column += r - l;
-      }
+      outIt = token;
+      currentWidth += tokenWithSpaceSize;
     } else {
-      // Word does not fit on this line.  Start a new line.
-      os << '\n';
-      firstLine = false;
-      if (r > l) {
-        os << padding;
-        os.write(l, r - l);
-        column = r - l;
-        newSentence = (*(r - 1) == '.');
-      } else {
-        column = 0;
+      // Start a new line!
+      outIt = EOL;
+      if (!padding.empty()) {
+        outIt = padding;
       }
+      outIt = token;
+      currentWidth = padding.size() + token.size();
     }
-    // Move to beginning of next word.  Skip over whitespace.
+
+    // Start a new sentence if the current word ends with period
+    newSentence = token.back() == '.';
   }
+  // Always add EOL at the end of formatted text
+  outIt = EOL;
+}
+} // anonymous namespace
+
+std::string cmDocumentationFormatter::Format(std::string text) const
+{
+  // Exit early on empty text
+  if (text.empty()) {
+    return {};
+  }
+
+  assert(this->TextIndent < this->TEXT_WIDTH);
+
+  const auto padding =
+    cm::string_view(MAX_WIDTH_PADDING.c_str(), this->TextIndent);
+
+  std::vector<cm::string_view> tokens;
+  auto outIt = std::back_inserter(tokens);
+  auto prevWasPreFormatted = false;
+
+  // NOTE Can't use `cmTokenizedView()` cuz every sequential EOL does matter
+  // (and `cmTokenizedView()` will squeeze 'em)
+  for ( // clang-format off
+      std::string::size_type start = 0
+    , end = text.find('\n')
+    ; start < text.size()
+    ; start = end + ((end != std::string::npos) ? 1 : 0)
+    , end = text.find('\n', start)
+    ) // clang-format on
+  {
+    const auto isLastLine = end == std::string::npos;
+    const auto line = isLastLine
+      ? cm::string_view{ text.c_str() + start }
+      : cm::string_view{ text.c_str() + start, end - start };
+
+    if (!line.empty() && line.front() == ' ') {
+      // Preformatted lines go as is w/ a leading padding
+      if (!padding.empty()) {
+        outIt = padding;
+      }
+      outIt = line;
+      prevWasPreFormatted = true;
+    } else {
+      // Separate a normal paragraph from a pre-formatted
+      // w/ an extra EOL
+      if (prevWasPreFormatted) {
+        outIt = EOL;
+      }
+      if (line.empty()) {
+        if (!isLastLine) {
+          outIt = EOL;
+        }
+      } else {
+        FormatLine(outIt, line, padding);
+      }
+      prevWasPreFormatted = false;
+    }
+    if (!isLastLine) {
+      outIt = EOL;
+    }
+  }
+
+  if (prevWasPreFormatted) {
+    outIt = EOL;
+  }
+
+  return cmJoinStrings(tokens, {}, {});
 }
 
 void cmDocumentationFormatter::PrintSection(
@@ -204,13 +171,10 @@ void cmDocumentationFormatter::PrintSection(
       if (entry.Name.size() > NAME_SIZE) {
         os << '\n' << std::setw(int(this->TextIndent - PREFIX_SIZE)) << ' ';
       }
-      os << "= ";
-      this->PrintColumn(os, entry.Brief);
-      os << '\n';
+      os << "= " << this->Format(entry.Brief).substr(this->TextIndent);
     } else {
-      os << '\n';
       this->TextIndent = 0u;
-      this->PrintFormatted(os, entry.Brief);
+      os << '\n' << this->Format(entry.Brief);
     }
   }
 
