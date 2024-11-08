@@ -2680,6 +2680,13 @@ std::string cmSystemToolsCMakeGUICommand;
 std::string cmSystemToolsCMClDepsCommand;
 std::string cmSystemToolsCMakeRoot;
 std::string cmSystemToolsHTMLDoc;
+
+#if defined(__APPLE__)
+bool IsCMakeAppBundleExe(std::string const& exe)
+{
+  return cmHasLiteralSuffix(cmSystemTools::LowerCase(exe), "/macos/cmake");
+}
+#endif
 }
 
 void cmSystemTools::FindCMakeResources(const char* argv0)
@@ -2707,23 +2714,25 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
     exe_path = static_cast<char*>(malloc(exe_path_size));
     _NSGetExecutablePath(exe_path, &exe_path_size);
   }
-  exe_dir =
-    cmSystemTools::GetFilenamePath(cmSystemTools::GetRealPath(exe_path));
+  std::string exe = exe_path;
   if (exe_path != exe_path_local) {
     free(exe_path);
   }
-  if (cmSystemTools::GetFilenameName(exe_dir) == "MacOS") {
+  exe = cmSystemTools::GetRealPath(exe);
+  if (IsCMakeAppBundleExe(exe)) {
     // The executable is inside an application bundle.
-    // Look for ..<CMAKE_BIN_DIR> (install tree) and then fall back to
-    // ../../../bin (build tree).
-    exe_dir = cmSystemTools::GetFilenamePath(exe_dir);
-    if (cmSystemTools::FileExists(exe_dir + CMAKE_BIN_DIR "/cmake")) {
-      exe_dir += CMAKE_BIN_DIR;
-    } else {
-      exe_dir = cmSystemTools::GetFilenamePath(exe_dir);
-      exe_dir = cmSystemTools::GetFilenamePath(exe_dir);
+    // The install tree has "..<CMAKE_BIN_DIR>/cmake-gui".
+    // The build tree has '../../../cmake-gui".
+    std::string dir = cmSystemTools::GetFilenamePath(exe);
+    dir = cmSystemTools::GetFilenamePath(dir);
+    exe = cmStrCat(dir, CMAKE_BIN_DIR "/cmake-gui");
+    if (!cmSystemTools::PathExists(exe)) {
+      dir = cmSystemTools::GetFilenamePath(dir);
+      dir = cmSystemTools::GetFilenamePath(dir);
+      exe = cmStrCat(dir, "/cmake-gui");
     }
   }
+  exe_dir = cmSystemTools::GetFilenamePath(exe);
 #else
   std::string errorMsg;
   std::string exe;
