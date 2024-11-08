@@ -80,50 +80,8 @@ elseif(CMAKE_SYSTEM_NAME STREQUAL visionOS)
   set(_CMAKE_OSX_SYSROOT_DEFAULT "xros")
 elseif(CMAKE_SYSTEM_NAME STREQUAL watchOS)
   set(_CMAKE_OSX_SYSROOT_DEFAULT "watchos")
-elseif("${CMAKE_GENERATOR}" MATCHES Xcode
-       OR CMAKE_OSX_DEPLOYMENT_TARGET
-       OR CMAKE_OSX_ARCHITECTURES MATCHES "[^;]"
-       OR NOT EXISTS "/usr/include/sys/types.h")
-  # Find installed SDKs in either Xcode-4.3+ or pre-4.3 SDKs directory.
-  set(_CMAKE_OSX_SDKS_DIR "")
-  if(OSX_DEVELOPER_ROOT)
-    foreach(_d Platforms/MacOSX.platform/Developer/SDKs SDKs)
-      file(GLOB _CMAKE_OSX_SDKS ${OSX_DEVELOPER_ROOT}/${_d}/*)
-      if(_CMAKE_OSX_SDKS)
-        set(_CMAKE_OSX_SDKS_DIR ${OSX_DEVELOPER_ROOT}/${_d})
-        break()
-      endif()
-    endforeach()
-  endif()
-
-  if(_CMAKE_OSX_SDKS_DIR)
-    # Find the latest SDK as recommended by Apple (Technical Q&A QA1806)
-    set(_CMAKE_OSX_LATEST_SDK_VERSION "0.0")
-    file(GLOB _CMAKE_OSX_SDKS RELATIVE "${_CMAKE_OSX_SDKS_DIR}" "${_CMAKE_OSX_SDKS_DIR}/MacOSX*.sdk")
-    foreach(_SDK ${_CMAKE_OSX_SDKS})
-      if(IS_DIRECTORY "${_CMAKE_OSX_SDKS_DIR}/${_SDK}"
-         AND _SDK MATCHES "MacOSX([0-9]+\\.[0-9]+)[^/]*\\.sdk"
-         AND CMAKE_MATCH_1 VERSION_GREATER ${_CMAKE_OSX_LATEST_SDK_VERSION})
-        set(_CMAKE_OSX_LATEST_SDK_VERSION "${CMAKE_MATCH_1}")
-      endif()
-    endforeach()
-
-    if(NOT _CMAKE_OSX_LATEST_SDK_VERSION STREQUAL "0.0")
-      set(_CMAKE_OSX_SYSROOT_DEFAULT "${_CMAKE_OSX_SDKS_DIR}/MacOSX${_CMAKE_OSX_LATEST_SDK_VERSION}.sdk")
-    else()
-      message(WARNING "Could not find any valid SDKs in ${_CMAKE_OSX_SDKS_DIR}")
-    endif()
-
-    if(NOT CMAKE_CROSSCOMPILING AND NOT CMAKE_OSX_DEPLOYMENT_TARGET
-       AND (_CURRENT_OSX_VERSION VERSION_LESS _CMAKE_OSX_LATEST_SDK_VERSION
-            OR _CMAKE_OSX_LATEST_SDK_VERSION STREQUAL "0.0"))
-      set(CMAKE_OSX_DEPLOYMENT_TARGET ${_CURRENT_OSX_VERSION} CACHE STRING
-        "Minimum OS X version to target for deployment (at runtime); newer APIs weak linked. Set to empty string for default value." FORCE)
-    endif()
-  else()
-    # Assume developer files are in root (such as Xcode 4.5 command-line tools).
-    set(_CMAKE_OSX_SYSROOT_DEFAULT "")
-  endif()
+else()
+  set(_CMAKE_OSX_SYSROOT_DEFAULT "")
 endif()
 
 # Set cache variable - end user may change this during ccmake or cmake-gui configure.
@@ -244,7 +202,7 @@ function(_apple_resolve_multi_arch_sysroots)
     return() # Only apply to multi-arch
   endif()
 
-  if(CMAKE_OSX_SYSROOT STREQUAL "macosx")
+  if(NOT CMAKE_OSX_SYSROOT OR CMAKE_OSX_SYSROOT STREQUAL "macosx")
     # macOS doesn't have a simulator sdk / sysroot, so there is no need to handle per-sdk arches.
     return()
   endif()
@@ -256,7 +214,7 @@ function(_apple_resolve_multi_arch_sysroots)
     return()
   endif()
 
-  string(REPLACE "os" "simulator" _simulator_sdk ${CMAKE_OSX_SYSROOT})
+  string(REPLACE "os" "simulator" _simulator_sdk "${CMAKE_OSX_SYSROOT}")
   set(_sdks "${CMAKE_OSX_SYSROOT};${_simulator_sdk}")
   foreach(sdk ${_sdks})
     _apple_resolve_sdk_path(${sdk} _sdk_path)
@@ -302,25 +260,36 @@ endfunction()
 
 _apple_resolve_multi_arch_sysroots()
 
-# Transform CMAKE_OSX_SYSROOT to absolute path
-set(_CMAKE_OSX_SYSROOT_PATH "")
-if(CMAKE_OSX_SYSROOT)
-  if("x${CMAKE_OSX_SYSROOT}" MATCHES "/")
-    # This is a path to the SDK.  Make sure it exists.
-    if(NOT IS_DIRECTORY "${CMAKE_OSX_SYSROOT}")
-      message(WARNING "Ignoring CMAKE_OSX_SYSROOT value:\n ${CMAKE_OSX_SYSROOT}\n"
-        "because the directory does not exist.")
-      set(CMAKE_OSX_SYSROOT "")
-    endif()
-    set(_CMAKE_OSX_SYSROOT_PATH "${CMAKE_OSX_SYSROOT}")
-  else()
-    _apple_resolve_sdk_path(${CMAKE_OSX_SYSROOT} _sdk_path)
-    if(IS_DIRECTORY "${_sdk_path}")
-      set(_CMAKE_OSX_SYSROOT_PATH "${_sdk_path}")
-      # For non-Xcode generators use the path.
-      if(NOT "${CMAKE_GENERATOR}" MATCHES "Xcode")
-        set(CMAKE_OSX_SYSROOT "${_CMAKE_OSX_SYSROOT_PATH}")
-      endif()
-    endif()
+if(CMAKE_OSX_SYSROOT MATCHES "/")
+  # This is a path to a SDK.  Make sure it exists.
+  if(NOT IS_DIRECTORY "${CMAKE_OSX_SYSROOT}")
+    message(WARNING "Ignoring CMAKE_OSX_SYSROOT value:\n ${CMAKE_OSX_SYSROOT}\n"
+      "because the directory does not exist.")
+    set(CMAKE_OSX_SYSROOT "")
   endif()
+  set(_CMAKE_OSX_SYSROOT_PATH "${CMAKE_OSX_SYSROOT}")
+elseif(CMAKE_OSX_SYSROOT)
+  # This is the name of a SDK.  Transform it to a path.
+  _apple_resolve_sdk_path("${CMAKE_OSX_SYSROOT}" _CMAKE_OSX_SYSROOT_PATH)
+  # Use the path for non-Xcode generators.
+  if(IS_DIRECTORY "${_CMAKE_OSX_SYSROOT_PATH}" AND NOT CMAKE_GENERATOR MATCHES "Xcode")
+    set(CMAKE_OSX_SYSROOT "${_CMAKE_OSX_SYSROOT_PATH}")
+  endif()
+endif()
+if(NOT CMAKE_OSX_SYSROOT)
+  # Without any explicit SDK we rely on the toolchain default,
+  # which we assume to be what wrappers like /usr/bin/cc use.
+  if(CMAKE_GENERATOR STREQUAL "Xcode")
+    set(_sdk_macosx --sdk macosx)
+  else()
+    set(_sdk_macosx)
+  endif()
+  execute_process(
+    COMMAND xcrun ${_sdk_macosx} --show-sdk-path
+    OUTPUT_VARIABLE _CMAKE_OSX_SYSROOT_PATH
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_VARIABLE _stderr
+    RESULT_VARIABLE _result
+  )
+  unset(_sdk_macosx)
 endif()
