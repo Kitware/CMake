@@ -2687,9 +2687,8 @@ bool IsCMakeAppBundleExe(std::string const& exe)
   return cmHasLiteralSuffix(cmSystemTools::LowerCase(exe), "/macos/cmake");
 }
 #endif
-}
 
-void cmSystemTools::FindCMakeResources(const char* argv0)
+std::string FindOwnExecutable(const char* argv0)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   static_cast<void>(argv0);
@@ -2738,10 +2737,12 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   }
   exe = cmSystemTools::GetRealPath(exe);
 #endif
+  return exe;
+}
+
 #ifndef CMAKE_BOOTSTRAP
-  // Find resources relative to our own executable.
-  std::string exe_dir = cmSystemTools::GetFilenamePath(exe);
-  bool found = false;
+bool FindCMakeResourcesInInstallTree(std::string const& exe_dir)
+{
   // Install tree has
   // - "<prefix><CMAKE_BIN_DIR>/cmake"
   // - "<prefix><CMAKE_DATA_DIR>"
@@ -2759,34 +2760,49 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
             cmStrCat(prefix, CMAKE_DOC_DIR "/html/index.html"))) {
         cmSystemToolsHTMLDoc = cmStrCat(prefix, CMAKE_DOC_DIR "/html");
       }
-      found = true;
+      return true;
     }
   }
+  return false;
+}
 
-  if (!found) {
-    // Build tree has "<build>/bin[/<config>]/cmake" and
-    // "<build>/CMakeFiles/CMakeSourceDir.txt".
-    std::string dir = cmSystemTools::GetFilenamePath(exe_dir);
-    std::string src_dir_txt = cmStrCat(dir, "/CMakeFiles/CMakeSourceDir.txt");
-    cmsys::ifstream fin(src_dir_txt.c_str());
-    std::string src_dir;
-    if (fin && cmSystemTools::GetLineFromStream(fin, src_dir) &&
+void FindCMakeResourcesInBuildTree(std::string const& exe_dir)
+{
+  // Build tree has "<build>/bin[/<config>]/cmake" and
+  // "<build>/CMakeFiles/CMakeSourceDir.txt".
+  std::string dir = cmSystemTools::GetFilenamePath(exe_dir);
+  std::string src_dir_txt = cmStrCat(dir, "/CMakeFiles/CMakeSourceDir.txt");
+  cmsys::ifstream fin(src_dir_txt.c_str());
+  std::string src_dir;
+  if (fin && cmSystemTools::GetLineFromStream(fin, src_dir) &&
+      cmSystemTools::FileIsDirectory(src_dir)) {
+    cmSystemToolsCMakeRoot = src_dir;
+  } else {
+    dir = cmSystemTools::GetFilenamePath(dir);
+    src_dir_txt = cmStrCat(dir, "/CMakeFiles/CMakeSourceDir.txt");
+    cmsys::ifstream fin2(src_dir_txt.c_str());
+    if (fin2 && cmSystemTools::GetLineFromStream(fin2, src_dir) &&
         cmSystemTools::FileIsDirectory(src_dir)) {
       cmSystemToolsCMakeRoot = src_dir;
-    } else {
-      dir = cmSystemTools::GetFilenamePath(dir);
-      src_dir_txt = cmStrCat(dir, "/CMakeFiles/CMakeSourceDir.txt");
-      cmsys::ifstream fin2(src_dir_txt.c_str());
-      if (fin2 && cmSystemTools::GetLineFromStream(fin2, src_dir) &&
-          cmSystemTools::FileIsDirectory(src_dir)) {
-        cmSystemToolsCMakeRoot = src_dir;
-      }
     }
-    if (!cmSystemToolsCMakeRoot.empty() && cmSystemToolsHTMLDoc.empty() &&
-        cmSystemTools::FileExists(
-          cmStrCat(dir, "/Utilities/Sphinx/html/index.html"))) {
-      cmSystemToolsHTMLDoc = cmStrCat(dir, "/Utilities/Sphinx/html");
-    }
+  }
+  if (!cmSystemToolsCMakeRoot.empty() && cmSystemToolsHTMLDoc.empty() &&
+      cmSystemTools::FileExists(
+        cmStrCat(dir, "/Utilities/Sphinx/html/index.html"))) {
+    cmSystemToolsHTMLDoc = cmStrCat(dir, "/Utilities/Sphinx/html");
+  }
+}
+#endif
+}
+
+void cmSystemTools::FindCMakeResources(const char* argv0)
+{
+  std::string exe = FindOwnExecutable(argv0);
+#ifndef CMAKE_BOOTSTRAP
+  // Find resources relative to our own executable.
+  std::string exe_dir = cmSystemTools::GetFilenamePath(exe);
+  if (!FindCMakeResourcesInInstallTree(exe_dir)) {
+    FindCMakeResourcesInBuildTree(exe_dir);
   }
   cmSystemToolsCMakeCommand =
     cmStrCat(exe_dir, "/cmake", cmSystemTools::GetExecutableExtension());
