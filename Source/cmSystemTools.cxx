@@ -2741,6 +2741,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
 #ifndef CMAKE_BOOTSTRAP
   // Find resources relative to our own executable.
   std::string exe_dir = cmSystemTools::GetFilenamePath(exe);
+  bool found = false;
   // Install tree has
   // - "<prefix><CMAKE_BIN_DIR>/cmake"
   // - "<prefix><CMAKE_DATA_DIR>"
@@ -2748,15 +2749,21 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   if (cmHasLiteralSuffix(exe_dir, CMAKE_BIN_DIR)) {
     std::string const prefix =
       exe_dir.substr(0, exe_dir.size() - cmStrLen(CMAKE_BIN_DIR));
+    // Set cmSystemToolsCMakeRoot set to the location expected in an
+    // install tree, even if it does not exist, so that
+    // cmake::AddCMakePaths can print the location in its error message.
     cmSystemToolsCMakeRoot = cmStrCat(prefix, CMAKE_DATA_DIR);
     if (cmSystemTools::FileExists(
-          cmStrCat(prefix, CMAKE_DOC_DIR "/html/index.html"))) {
-      cmSystemToolsHTMLDoc = cmStrCat(prefix, CMAKE_DOC_DIR "/html");
+          cmStrCat(cmSystemToolsCMakeRoot, "/Modules/CMake.cmake"))) {
+      if (cmSystemTools::FileExists(
+            cmStrCat(prefix, CMAKE_DOC_DIR "/html/index.html"))) {
+        cmSystemToolsHTMLDoc = cmStrCat(prefix, CMAKE_DOC_DIR "/html");
+      }
+      found = true;
     }
   }
-  if (cmSystemToolsCMakeRoot.empty() ||
-      !cmSystemTools::FileExists(
-        cmStrCat(cmSystemToolsCMakeRoot, "/Modules/CMake.cmake"))) {
+
+  if (!found) {
     // Build tree has "<build>/bin[/<config>]/cmake" and
     // "<build>/CMakeFiles/CMakeSourceDir.txt".
     std::string dir = cmSystemTools::GetFilenamePath(exe_dir);
