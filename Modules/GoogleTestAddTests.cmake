@@ -214,16 +214,15 @@ function(gtest_discover_tests_impl)
         endif()
         string(APPEND script ")\n")
 
+        set(maybe_disabled "")
         if(suite MATCHES "^DISABLED_" OR test MATCHES "^DISABLED_")
-          add_command(set_tests_properties
-            "${guarded_testname}"
-            PROPERTIES DISABLED TRUE
-          )
+          set(maybe_disabled DISABLED TRUE)
         endif()
 
         add_command(set_tests_properties
           "${guarded_testname}"
           PROPERTIES
+          ${maybe_disabled}
           WORKING_DIRECTORY "${arg_TEST_WORKING_DIR}"
           SKIP_REGULAR_EXPRESSION "\\[  SKIPPED \\]"
           ${arg_TEST_PROPERTIES}
