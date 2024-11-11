@@ -7,6 +7,7 @@
 #include <string>
 
 #if defined(_WIN32)
+#  include <memory>
 using HANDLE = void*;
 #endif
 
@@ -54,6 +55,7 @@ private:
 
 #if defined(_WIN32)
   HANDLE File = (HANDLE)-1;
+  std::unique_ptr<struct _OVERLAPPED> Overlapped;
   int LockFile(int flags);
 #else
   int File = -1;
