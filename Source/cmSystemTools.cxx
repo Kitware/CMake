@@ -2695,7 +2695,6 @@ std::string FindOwnExecutable(const char* argv0)
   wchar_t modulepath[_MAX_PATH];
   ::GetModuleFileNameW(nullptr, modulepath, sizeof(modulepath));
   std::string exe = cmsys::Encoding::ToNarrow(modulepath);
-  exe = cmSystemTools::GetRealPath(exe);
 #elif defined(__APPLE__)
   static_cast<void>(argv0);
 #  define CM_EXE_PATH_LOCAL_SIZE 16384
@@ -2715,7 +2714,6 @@ std::string FindOwnExecutable(const char* argv0)
   if (exe_path != exe_path_local) {
     free(exe_path);
   }
-  exe = cmSystemTools::GetRealPath(exe);
   if (IsCMakeAppBundleExe(exe)) {
     // The executable is inside an application bundle.
     // The install tree has "..<CMAKE_BIN_DIR>/cmake-gui".
@@ -2735,12 +2733,34 @@ std::string FindOwnExecutable(const char* argv0)
   if (!cmSystemTools::FindProgramPath(argv0, exe, errorMsg)) {
     // ???
   }
-  exe = cmSystemTools::GetRealPath(exe);
 #endif
+  exe = cmSystemTools::ToNormalizedPathOnDisk(std::move(exe));
   return exe;
 }
 
 #ifndef CMAKE_BOOTSTRAP
+bool ResolveSymlinkToOwnExecutable(std::string& exe, std::string& exe_dir)
+{
+  std::string linked_exe;
+  if (!cmSystemTools::ReadSymlink(exe, linked_exe)) {
+    return false;
+  }
+#  if defined(__APPLE__)
+  // Ignore "cmake-gui -> ../MacOS/CMake".
+  if (IsCMakeAppBundleExe(linked_exe)) {
+    return false;
+  }
+#  endif
+  if (cmSystemTools::FileIsFullPath(linked_exe)) {
+    exe = std::move(linked_exe);
+  } else {
+    exe = cmStrCat(exe_dir, '/', std::move(linked_exe));
+  }
+  exe = cmSystemTools::ToNormalizedPathOnDisk(std::move(exe));
+  exe_dir = cmSystemTools::GetFilenamePath(exe);
+  return true;
+}
+
 bool FindCMakeResourcesInInstallTree(std::string const& exe_dir)
 {
   // Install tree has
@@ -2808,7 +2828,11 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
 #else
   // Find resources relative to our own executable.
   std::string exe_dir = cmSystemTools::GetFilenamePath(exe);
-  if (!FindCMakeResourcesInInstallTree(exe_dir)) {
+  bool found = false;
+  do {
+    found = FindCMakeResourcesInInstallTree(exe_dir);
+  } while (!found && ResolveSymlinkToOwnExecutable(exe, exe_dir));
+  if (!found) {
     FindCMakeResourcesInBuildTree(exe_dir);
   }
   cmSystemToolsCMakeCommand =
