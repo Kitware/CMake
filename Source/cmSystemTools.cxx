@@ -2798,7 +2798,14 @@ void FindCMakeResourcesInBuildTree(std::string const& exe_dir)
 void cmSystemTools::FindCMakeResources(const char* argv0)
 {
   std::string exe = FindOwnExecutable(argv0);
-#ifndef CMAKE_BOOTSTRAP
+#ifdef CMAKE_BOOTSTRAP
+  // The bootstrap cmake knows its resource locations.
+  cmSystemToolsCMakeRoot = CMAKE_BOOTSTRAP_SOURCE_DIR;
+  cmSystemToolsCMakeCommand = exe;
+  // The bootstrap cmake does not provide the other tools,
+  // so use the directory where they are about to be built.
+  std::string exe_dir = CMAKE_BOOTSTRAP_BINARY_DIR "/bin";
+#else
   // Find resources relative to our own executable.
   std::string exe_dir = cmSystemTools::GetFilenamePath(exe);
   if (!FindCMakeResourcesInInstallTree(exe_dir)) {
@@ -2806,13 +2813,6 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   }
   cmSystemToolsCMakeCommand =
     cmStrCat(exe_dir, "/cmake", cmSystemTools::GetExecutableExtension());
-#else
-  // The bootstrap cmake knows its resource locations.
-  cmSystemToolsCMakeRoot = CMAKE_BOOTSTRAP_SOURCE_DIR;
-  cmSystemToolsCMakeCommand = exe;
-  // The bootstrap cmake does not provide the other tools,
-  // so use the directory where they are about to be built.
-  std::string exe_dir = CMAKE_BOOTSTRAP_BINARY_DIR "/bin";
 #endif
   cmSystemToolsCTestCommand =
     cmStrCat(exe_dir, "/ctest", cmSystemTools::GetExecutableExtension());
