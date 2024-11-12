@@ -31,7 +31,7 @@ endif()
 
 # We specify the platform linker information in the system file.
 if (NOT _INCLUDED_FILE)
-  include(Platform/Linker/${CMAKE_SYSTEM_NAME}-OBJCXX OPTIONAL)
+  include(Platform/Linker/${CMAKE_EFFECTIVE_SYSTEM_NAME}-OBJCXX OPTIONAL)
 endif ()
 
 _cmake_common_linker_platform_flags(OBJCXX)
