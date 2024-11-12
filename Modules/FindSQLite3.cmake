@@ -36,7 +36,9 @@ cmake_policy(PUSH)
 cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 find_package(PkgConfig QUIET)
-pkg_check_modules(PC_SQLite3 QUIET sqlite3)
+if(PKG_CONFIG_FOUND)
+  pkg_check_modules(PC_SQLite3 QUIET sqlite3)
+endif()
 
 # Look for the necessary header
 find_path(SQLite3_INCLUDE_DIR NAMES sqlite3.h
