@@ -11,7 +11,7 @@ set(CMake_TEST_FindOpenACC_CXX "ON" CACHE BOOL "")
 set(CMake_TEST_FindOpenACC_Fortran "OFF" CACHE BOOL "") # flang-new fails producing LLVM IR
 set(CMake_TEST_FindOpenMP_C "ON" CACHE BOOL "")
 set(CMake_TEST_FindOpenMP_CXX "ON" CACHE BOOL "")
-set(CMake_TEST_FindOpenMP_Fortran "OFF" CACHE BOOL "") # https://bugzilla.redhat.com/show_bug.cgi?id=2321571
+set(CMake_TEST_FindOpenMP_Fortran "ON" CACHE BOOL "")
 set(CMake_TEST_FindOpenMP "ON" CACHE BOOL "")
 
 include("${CMAKE_CURRENT_LIST_DIR}/configure_external_test.cmake")
