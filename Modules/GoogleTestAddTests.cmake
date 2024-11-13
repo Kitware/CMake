@@ -4,23 +4,6 @@
 cmake_minimum_required(VERSION 3.30)
 cmake_policy(SET CMP0174 NEW)   # TODO: Remove this when we can update the above to 3.31
 
-# Overwrite possibly existing ${arg_CTEST_FILE} with empty file
-set(flush_tests_MODE WRITE)
-
-# Flushes script to ${arg_CTEST_FILE}
-macro(flush_script)
-  file(${flush_tests_MODE} "${arg_CTEST_FILE}" "${script}")
-  set(flush_tests_MODE APPEND PARENT_SCOPE)
-
-  set(script "")
-endmacro()
-
-# Flushes tests_buffer to tests
-macro(flush_tests_buffer)
-  list(APPEND tests "${tests_buffer}")
-  set(tests_buffer "")
-endmacro()
-
 function(add_command name test_name)
   set(args "")
   foreach(arg ${ARGN})
@@ -31,10 +14,6 @@ function(add_command name test_name)
     endif()
   endforeach()
   string(APPEND script "${name}(${test_name} ${args})\n")
-  string(LENGTH "${script}" script_len)
-  if(${script_len} GREATER "50000")
-    flush_script()
-  endif()
   set(script "${script}" PARENT_SCOPE)
 endfunction()
 
@@ -97,7 +76,12 @@ function(gtest_discover_tests_impl)
   set(script)
   set(suite)
   set(tests)
-  set(tests_buffer)
+  set(tests_buffer "")
+
+  # If a file at ${arg_CTEST_FILE} already exists, we overwrite it.
+  # For performance reasons, we write to this file in chunks, and this variable
+  # is updated to APPEND after the first write.
+  set(file_write_mode WRITE)
 
   if(arg_TEST_FILTER)
     set(filter "--gtest_filter=${arg_TEST_FILTER}")
@@ -229,25 +213,16 @@ function(gtest_discover_tests_impl)
           string(APPEND script " [==[${extra_args}]==]")
         endif()
         string(APPEND script ")\n")
-        string(LENGTH "${script}" script_len)
-        if(${script_len} GREATER "50000")
-          # flush_script() expects to set variables in the parent scope, so we
-          # need to create one since we actually want the changes in our scope
-          block(SCOPE_FOR VARIABLES)
-            flush_script()
-          endblock()
-        endif()
 
+        set(maybe_disabled "")
         if(suite MATCHES "^DISABLED_" OR test MATCHES "^DISABLED_")
-          add_command(set_tests_properties
-            "${guarded_testname}"
-            PROPERTIES DISABLED TRUE
-          )
+          set(maybe_disabled DISABLED TRUE)
         endif()
 
         add_command(set_tests_properties
           "${guarded_testname}"
           PROPERTIES
+          ${maybe_disabled}
           WORKING_DIRECTORY "${arg_TEST_WORKING_DIR}"
           SKIP_REGULAR_EXPRESSION "\\[  SKIPPED \\]"
           ${arg_TEST_PROPERTIES}
@@ -260,22 +235,39 @@ function(gtest_discover_tests_impl)
           string(REPLACE [[;]] [[\\;]] testname "${testname}")
           list(APPEND tests_buffer "${testname}")
           list(LENGTH tests_buffer tests_buffer_length)
-          if(${tests_buffer_length} GREATER "250")
-            flush_tests_buffer()
+          if(tests_buffer_length GREATER "250")
+            # Chunk updates to the final "tests" variable, keeping the
+            # "tests_buffer" variable that we append each test to relatively
+            # small. This mitigates worsening performance impacts for the
+            # corner case of having many thousands of tests.
+            list(APPEND tests "${tests_buffer}")
+            set(tests_buffer "")
           endif()
         endif()
       endif()
+
+      # If we've built up a sizable script so far, write it out as a chunk now
+      # so we don't accumulate a massive string to write at the end
+      string(LENGTH "${script}" script_len)
+      if(${script_len} GREATER "50000")
+        file(${file_write_mode} "${arg_CTEST_FILE}" "${script}")
+        set(file_write_mode APPEND)
+        set(script "")
+      endif()
+
     endif()
   endforeach()
 
+  if(NOT tests_buffer STREQUAL "")
+    list(APPEND tests "${tests_buffer}")
+  endif()
 
   # Create a list of all discovered tests, which users may use to e.g. set
   # properties on the tests
-  flush_tests_buffer()
   add_command(set "" ${arg_TEST_LIST} "${tests}")
 
-  # Write CTest script
-  flush_script()
+  # Write remaining content to the CTest script
+  file(${file_write_mode} "${arg_CTEST_FILE}" "${script}")
 
 endfunction()
 
