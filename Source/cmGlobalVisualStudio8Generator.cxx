@@ -325,8 +325,11 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     cmCustomCommandLines commandLines = cmMakeSingleCommandLine(
       { cmSystemTools::GetCMakeCommand(), argS, argB, "--check-stamp-list",
         stampList, "--vs-solution-file", sln });
-    if (cm->GetIgnoreWarningAsError()) {
+    if (cm->GetIgnoreCompileWarningAsError()) {
       commandLines[0].emplace_back("--compile-no-warning-as-error");
+    }
+    if (cm->GetIgnoreLinkWarningAsError()) {
+      commandLines[0].emplace_back("--link-no-warning-as-error");
     }
 
     // Add the rule.  Note that we cannot use the CMakeLists.txt

@@ -466,6 +466,7 @@ TargetProperty const StaticTargetProperties[] = {
 
   // Linking properties
   { "LINKER_TYPE"_s, IC::CanCompileSources },
+  { "LINK_WARNING_AS_ERROR"_s, IC::CanCompileSources },
   { "ENABLE_EXPORTS"_s, IC::TargetWithSymbolExports },
   { "LINK_LIBRARIES_ONLY_TARGETS"_s, IC::NormalNonImportedTarget },
   { "LINK_LIBRARIES_STRATEGY"_s, IC::NormalNonImportedTarget },

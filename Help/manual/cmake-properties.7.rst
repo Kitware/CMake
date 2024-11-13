@@ -342,6 +342,7 @@ Properties on Targets
    /prop_tgt/LINK_OPTIONS
    /prop_tgt/LINK_SEARCH_END_STATIC
    /prop_tgt/LINK_SEARCH_START_STATIC
+   /prop_tgt/LINK_WARNING_AS_ERROR
    /prop_tgt/LINK_WHAT_YOU_USE
    /prop_tgt/LINKER_LANGUAGE
    /prop_tgt/LINKER_TYPE

@@ -1241,7 +1241,15 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       [](std::string const&, cmake* state) -> bool {
         std::cout << "Ignoring COMPILE_WARNING_AS_ERROR target property and "
                      "CMAKE_COMPILE_WARNING_AS_ERROR variable.\n";
-        state->SetIgnoreWarningAsError(true);
+        state->SetIgnoreCompileWarningAsError(true);
+        return true;
+      } },
+    CommandArgument{
+      "--link-no-warning-as-error", CommandArgument::Values::Zero,
+      [](std::string const&, cmake* state) -> bool {
+        std::cout << "Ignoring LINK_WARNING_AS_ERROR target property and "
+                     "CMAKE_LINK_WARNING_AS_ERROR variable.\n";
+        state->SetIgnoreLinkWarningAsError(true);
         return true;
       } },
     CommandArgument{ "--debugger", CommandArgument::Values::Zero,

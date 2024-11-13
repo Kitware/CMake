@@ -65,10 +65,14 @@ function(__linker_gnu lang)
     set(CMAKE_${lang}_LINK_DEPENDS_USE_LINKER FALSE)
   endif()
 
+  # Linker warning as error
+  set(CMAKE_${lang}_LINK_OPTIONS_WARNING_AS_ERROR "LINKER:--fatal-warnings")
+
   return(PROPAGATE CMAKE_${lang}_LINKER_DEPFILE_FLAGS
     CMAKE_${lang}_LINKER_DEPFILE_FORMAT
     CMAKE_${lang}_LINKER_DEPFILE_SUPPORTED
-    CMAKE_${lang}_LINK_DEPENDS_USE_LINKER)
+    CMAKE_${lang}_LINK_DEPENDS_USE_LINKER
+    CMAKE_${lang}_LINK_OPTIONS_WARNING_AS_ERROR)
 endfunction()
 
 endblock()

@@ -1100,7 +1100,7 @@ void cmLocalGenerator::AddCompileOptions(std::vector<BT<std::string>>& flags,
   }
 
   // Add Warning as errors flags
-  if (!this->GetCMakeInstance()->GetIgnoreWarningAsError()) {
+  if (!this->GetCMakeInstance()->GetIgnoreCompileWarningAsError()) {
     const cmValue wError = target->GetProperty("COMPILE_WARNING_AS_ERROR");
     const cmValue wErrorOpts = this->Makefile->GetDefinition(
       cmStrCat("CMAKE_", lang, "_COMPILE_OPTIONS_WARNING_AS_ERROR"));
@@ -1675,6 +1675,7 @@ void cmLocalGenerator::GetTargetFlags(
   this->AppendLinkerTypeFlags(extraLinkFlags, target, config, linkLanguage);
   this->AppendPositionIndependentLinkerFlags(extraLinkFlags, target, config,
                                              linkLanguage);
+  this->AppendWarningAsErrorLinkerFlags(extraLinkFlags, target, linkLanguage);
   this->AppendIPOLinkerFlags(extraLinkFlags, target, config, linkLanguage);
   this->AppendDependencyInfoLinkerFlags(extraLinkFlags, target, config,
                                         linkLanguage);
@@ -3606,6 +3607,34 @@ void cmLocalGenerator::AppendPositionIndependentLinkerFlags(
   cmList flagsList{ pieFlags };
   for (const auto& flag : flagsList) {
     this->AppendFlagEscape(flags, flag);
+  }
+}
+
+void cmLocalGenerator::AppendWarningAsErrorLinkerFlags(
+  std::string& flags, cmGeneratorTarget* target, const std::string& lang)
+{
+  if (this->GetCMakeInstance()->GetIgnoreLinkWarningAsError()) {
+    return;
+  }
+
+  switch (target->GetType()) {
+    case cmStateEnums::EXECUTABLE:
+    case cmStateEnums::SHARED_LIBRARY:
+    case cmStateEnums::MODULE_LIBRARY:
+      break;
+    default:
+      return;
+  }
+
+  const auto wError = target->GetProperty("LINK_WARNING_AS_ERROR");
+  const auto wErrorOpts = this->Makefile->GetDefinition(
+    cmStrCat("CMAKE_", lang, "_LINK_OPTIONS_WARNING_AS_ERROR"));
+  if (wError.IsOn() && wErrorOpts.IsSet()) {
+    auto items = cmExpandListWithBacktrace(wErrorOpts, target->GetBacktrace());
+    target->ResolveLinkerWrapper(items, lang);
+    for (const auto& item : items) {
+      this->AppendFlagEscape(flags, item.Value);
+    }
   }
 }
 

@@ -777,14 +777,14 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
   }
 
   makefileStream << ConvertToMakefilePath(checkCache) << ": $(TARGETS)\n";
-  makefileStream << '\t'
-                 << ConvertToMakefilePath(cmSystemTools::GetCMakeCommand())
-                 << " -S" << ConvertToMakefilePath(root->GetSourceDirectory())
-                 << " -B" << ConvertToMakefilePath(root->GetBinaryDirectory())
-                 << (cm->GetIgnoreWarningAsError()
-                       ? " --compile-no-warning-as-error"
-                       : "")
-                 << '\n';
+  makefileStream
+    << '\t' << ConvertToMakefilePath(cmSystemTools::GetCMakeCommand()) << " -S"
+    << ConvertToMakefilePath(root->GetSourceDirectory()) << " -B"
+    << ConvertToMakefilePath(root->GetBinaryDirectory())
+    << (cm->GetIgnoreCompileWarningAsError() ? " --compile-no-warning-as-error"
+                                             : "")
+    << (cm->GetIgnoreLinkWarningAsError() ? " --link-no-warning-as-error" : "")
+    << '\n';
 }
 
 static bool objectIdLessThan(const std::unique_ptr<cmXCodeObject>& l,
@@ -2551,6 +2551,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
   } else {
     this->CurrentLocalGenerator->AppendLinkerTypeFlags(extraLinkOptions, gtgt,
                                                        configName, llang);
+    this->CurrentLocalGenerator->AppendWarningAsErrorLinkerFlags(
+      extraLinkOptions, gtgt, llang);
 
     cmValue targetLinkFlags = gtgt->GetProperty("LINK_FLAGS");
     if (targetLinkFlags) {

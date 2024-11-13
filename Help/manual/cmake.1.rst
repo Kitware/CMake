@@ -513,6 +513,14 @@ Options
  :variable:`CMAKE_COMPILE_WARNING_AS_ERROR`, preventing warnings from being
  treated as errors on compile.
 
+.. option:: --link-no-warning-as-error
+
+ .. versionadded:: 3.32
+
+ Ignore target property :prop_tgt:`LINK_WARNING_AS_ERROR` and variable
+ :variable:`CMAKE_LINK_WARNING_AS_ERROR`, preventing warnings from being
+ treated as errors on link.
+
 .. option:: --profiling-output=<path>
 
  .. versionadded:: 3.18

@@ -3066,8 +3066,11 @@ void cmGlobalGenerator::AddGlobalTarget_EditCache(
   std::string edit_cmd = this->GetEditCacheCommand();
   if (!edit_cmd.empty()) {
     singleLine.push_back(std::move(edit_cmd));
-    if (this->GetCMakeInstance()->GetIgnoreWarningAsError()) {
+    if (this->GetCMakeInstance()->GetIgnoreCompileWarningAsError()) {
       singleLine.push_back("--compile-no-warning-as-error");
+    }
+    if (this->GetCMakeInstance()->GetIgnoreLinkWarningAsError()) {
+      singleLine.push_back("--link-no-warning-as-error");
     }
     singleLine.push_back("-S$(CMAKE_SOURCE_DIR)");
     singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
@@ -3102,8 +3105,11 @@ void cmGlobalGenerator::AddGlobalTarget_RebuildCache(
   cmCustomCommandLine singleLine;
   singleLine.push_back(cmSystemTools::GetCMakeCommand());
   singleLine.push_back("--regenerate-during-build");
-  if (this->GetCMakeInstance()->GetIgnoreWarningAsError()) {
+  if (this->GetCMakeInstance()->GetIgnoreCompileWarningAsError()) {
     singleLine.push_back("--compile-no-warning-as-error");
+  }
+  if (this->GetCMakeInstance()->GetIgnoreLinkWarningAsError()) {
+    singleLine.push_back("--link-no-warning-as-error");
   }
   singleLine.push_back("-S$(CMAKE_SOURCE_DIR)");
   singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
