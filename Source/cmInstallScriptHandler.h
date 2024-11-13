@@ -16,9 +16,11 @@ class cmInstallScriptHandler
 {
 public:
   cmInstallScriptHandler() = default;
-  cmInstallScriptHandler(std::string, std::string, std::vector<std::string>&);
-  bool isParallel();
-  int install(unsigned int j);
+  cmInstallScriptHandler(std::string, std::string, std::string,
+                         std::vector<std::string>&);
+  bool IsParallel();
+  int Install(unsigned int j);
+  std::vector<std::vector<std::string>> GetCommands() const;
   class InstallScript
   {
   public:
@@ -38,6 +40,8 @@ public:
 private:
   std::vector<std::vector<std::string>> commands;
   std::vector<std::string> directories;
+  std::vector<std::string> configs;
   std::string binaryDir;
   std::string component;
+  bool parallel;
 };

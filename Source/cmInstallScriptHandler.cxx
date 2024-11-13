@@ -33,41 +33,76 @@ using InstallScript = cmInstallScriptHandler::InstallScript;
 
 cmInstallScriptHandler::cmInstallScriptHandler(std::string _binaryDir,
                                                std::string _component,
+                                               std::string _config,
                                                std::vector<std::string>& args)
   : binaryDir(std::move(_binaryDir))
   , component(std::move(_component))
 {
   const std::string& file =
     cmStrCat(this->binaryDir, "/CMakeFiles/InstallScripts.json");
+  this->parallel = false;
+
+  auto addScript = [this, &args](std::string script,
+                                 std::string config) -> void {
+    this->commands.push_back(args);
+    if (!config.empty()) {
+      this->commands.back().insert(
+        this->commands.back().end() - 1,
+        cmStrCat("-DCMAKE_INSTALL_CONFIG_NAME=", config));
+    }
+    this->commands.back().emplace_back(script);
+    this->directories.push_back(cmSystemTools::GetFilenamePath(script));
+  };
+
+  int compare = 1;
   if (cmSystemTools::FileExists(file)) {
-    int compare;
     cmSystemTools::FileTimeCompare(
       cmStrCat(this->binaryDir, "/CMakeFiles/cmake.check_cache"), file,
       &compare);
-    if (compare < 1) {
+  }
+  if (compare < 1) {
+    Json::CharReaderBuilder rbuilder;
+    auto JsonReader =
+      std::unique_ptr<Json::CharReader>(rbuilder.newCharReader());
+    std::vector<char> content;
+    Json::Value value;
+    cmJSONState state(file, &value);
+    this->parallel = value["Parallel"].asBool();
+    if (this->parallel) {
       args.insert(args.end() - 1, "-DCMAKE_INSTALL_LOCAL_ONLY=1");
-      Json::CharReaderBuilder rbuilder;
-      auto JsonReader =
-        std::unique_ptr<Json::CharReader>(rbuilder.newCharReader());
-      std::vector<char> content;
-      Json::Value value;
-      cmJSONState state(file, &value);
-      for (auto const& script : value["InstallScripts"]) {
-        this->commands.push_back(args);
-        this->commands.back().emplace_back(script.asCString());
-        this->directories.push_back(
-          cmSystemTools::GetFilenamePath(script.asCString()));
+    }
+    if (_config.empty() && value.isMember("Configs")) {
+      for (auto const& config : value["Configs"]) {
+        this->configs.push_back(config.asCString());
+      }
+    } else {
+      this->configs.push_back(_config);
+    }
+    for (auto const& script : value["InstallScripts"]) {
+      for (auto const& config : configs) {
+        addScript(script.asCString(), config);
+      }
+      if (!this->parallel) {
+        break;
       }
     }
+  } else {
+    addScript(cmStrCat(this->binaryDir, "/cmake_install.cmake"), _config);
   }
 }
 
-bool cmInstallScriptHandler::isParallel()
+bool cmInstallScriptHandler::IsParallel()
 {
-  return !this->commands.empty();
+  return this->parallel;
 }
 
-int cmInstallScriptHandler::install(unsigned int j)
+std::vector<std::vector<std::string>> cmInstallScriptHandler::GetCommands()
+  const
+{
+  return this->commands;
+}
+
+int cmInstallScriptHandler::Install(unsigned int j)
 {
   cm::uv_loop_ptr loop;
   loop.init();

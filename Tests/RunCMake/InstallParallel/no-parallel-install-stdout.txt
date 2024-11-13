@@ -1,5 +1,3 @@
-\-\- Install configuration:[^
-]*
 \-\- Installing:[^
 ]*
 \-\- Installing:[^
