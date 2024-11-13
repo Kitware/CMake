@@ -1,0 +1,34 @@
+set(expected_number_of_tests 12)
+
+# Check the flushing of the test names buffer
+list(LENGTH flush_script_test_TESTS num_test_names)
+if(NOT num_test_names EQUAL expected_number_of_tests)
+  message(FATAL_ERROR
+    "Test name list has wrong number of test names:\n"
+    "  Expected: ${expected_number_of_tests}\n"
+    "  Actual:   ${num_test_names}"
+  )
+endif()
+
+# Check the flushing of the script content variable.
+# Note that flushing errors would repeat a test name, so such errors are not
+# uncovered by checking the name buffer flushing above.
+
+# PRE_TEST can have a config-specific tests file, POST_BUILD never does
+set(tests_file "@CMAKE_CURRENT_BINARY_DIR@/flush_script_test[1]_tests-Debug.cmake")
+if(NOT EXISTS "${tests_file}")
+  set(tests_file "@CMAKE_CURRENT_BINARY_DIR@/flush_script_test[1]_tests.cmake")
+endif()
+if(NOT EXISTS "${tests_file}")
+  message(FATAL_ERROR "Tests file is missing")
+endif()
+
+file(STRINGS "${tests_file}" add_test_lines REGEX "^add_test" ENCODING UTF-8)
+list(LENGTH add_test_lines num_add_test_lines)
+if(NOT num_add_test_lines EQUAL expected_number_of_tests)
+  message(FATAL_ERROR
+    "Test script has wrong number of add_test() calls:\n"
+    "  Expected: ${expected_number_of_tests}\n"
+    "  Actual:   ${num_add_test_lines}"
+  )
+endif()

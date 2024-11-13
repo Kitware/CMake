@@ -10,5 +10,11 @@ xcode_sign_adhoc(flush_script_test)
 gtest_discover_tests(
   flush_script_test
 )
+
+configure_file(GoogleTest-discovery-flush-script-check-list.cmake.in
+  check-test-lists.cmake
+  @ONLY
+)
 set_property(DIRECTORY APPEND PROPERTY TEST_INCLUDE_FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/GoogleTest-discovery-flush-script-check-list.cmake)
+  ${CMAKE_CURRENT_BINARY_DIR}/check-test-lists.cmake
+)
