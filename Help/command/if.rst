@@ -390,11 +390,13 @@ Path Comparisons
 
   .. versionadded:: 3.24
 
-  Compares the two paths component-by-component.  Only if every component of
-  both paths match will the two paths compare equal.  Multiple path separators
-  are effectively collapsed into a single separator, but note that backslashes
-  are not converted to forward slashes.  No other
-  :ref:`path normalization <Normalization>` is performed.
+  Lexicographically compares two CMake paths component-by-component without
+  accessing the filesystem. Only if every component of both paths match will
+  the two paths compare equal.  Multiple path separators are effectively
+  collapsed into a single separator, but note that backslashes are not
+  converted to forward slashes.
+  No other :ref:`path normalization <Normalization>` is performed.
+  Trailing slashes are preserved, thus ``/a/b`` and ``/a/b/`` are not equal.
 
   Component-wise comparison is superior to string-based comparison due to the
   handling of multiple path separators.  In the following example, the
