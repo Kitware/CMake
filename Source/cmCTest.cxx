@@ -3237,6 +3237,7 @@ void cmCTest::SetCMakeVariables(cmMakefile& mf)
   // CTest Update Step
   set("CTEST_UPDATE_COMMAND", "UpdateCommand");
   set("CTEST_UPDATE_OPTIONS", "UpdateOptions");
+  set("CTEST_UPDATE_TYPE", "UpdateType");
   set("CTEST_CVS_COMMAND", "CVSCommand");
   set("CTEST_CVS_UPDATE_OPTIONS", "CVSUpdateOptions");
   set("CTEST_SVN_COMMAND", "SVNCommand");
@@ -3253,6 +3254,7 @@ void cmCTest::SetCMakeVariables(cmMakefile& mf)
   set("CTEST_HG_COMMAND", "HGCommand");
   set("CTEST_HG_UPDATE_OPTIONS", "HGUpdateOptions");
   set("CTEST_P4_COMMAND", "P4Command");
+  set("CTEST_P4_UPDATE_CUSTOM", "P4UpdateCustom");
   set("CTEST_P4_UPDATE_OPTIONS", "P4UpdateOptions");
   set("CTEST_P4_CLIENT", "P4Client");
   set("CTEST_P4_OPTIONS", "P4Options");

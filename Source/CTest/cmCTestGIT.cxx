@@ -15,11 +15,11 @@
 #include "cmCTest.h"
 #include "cmCTestVC.h"
 #include "cmList.h"
+#include "cmMakefile.h"
 #include "cmProcessOutput.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmUVProcessChain.h"
-#include "cmValue.h"
 
 static unsigned int cmCTestGITVersion(unsigned int epic, unsigned int major,
                                       unsigned int minor, unsigned int fix)
@@ -28,8 +28,8 @@ static unsigned int cmCTestGITVersion(unsigned int epic, unsigned int major,
   return epic * 10000000 + major * 100000 + minor * 1000 + fix;
 }
 
-cmCTestGIT::cmCTestGIT(cmCTest* ct, std::ostream& log)
-  : cmCTestGlobalVC(ct, log)
+cmCTestGIT::cmCTestGIT(cmCTest* ct, cmMakefile* mf, std::ostream& log)
+  : cmCTestGlobalVC(ct, mf, log)
 {
   this->PriorRev = this->Unknown;
   this->CurrentGitVersion = 0;
@@ -161,9 +161,9 @@ bool cmCTestGIT::UpdateByFetchAndReset()
   git_fetch.emplace_back("fetch");
 
   // Add user-specified update options.
-  std::string opts = this->CTest->GetCTestConfiguration("UpdateOptions");
+  std::string opts = this->Makefile->GetSafeDefinition("CTEST_UPDATE_OPTIONS");
   if (opts.empty()) {
-    opts = this->CTest->GetCTestConfiguration("GITUpdateOptions");
+    opts = this->Makefile->GetSafeDefinition("CTEST_GIT_UPDATE_OPTIONS");
   }
   std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
   cm::append(git_fetch, args);
@@ -222,7 +222,8 @@ bool cmCTestGIT::UpdateByCustom(std::string const& custom)
 
 bool cmCTestGIT::UpdateInternal()
 {
-  std::string custom = this->CTest->GetCTestConfiguration("GITUpdateCustom");
+  std::string custom =
+    this->Makefile->GetSafeDefinition("CTEST_GIT_UPDATE_CUSTOM");
   if (!custom.empty()) {
     return this->UpdateByCustom(custom);
   }
@@ -265,9 +266,7 @@ bool cmCTestGIT::UpdateImpl()
 
   bool ret;
 
-  std::string init_submodules =
-    this->CTest->GetCTestConfiguration("GITInitSubmodules");
-  if (cmIsOn(init_submodules)) {
+  if (this->Makefile->IsOn("CTEST_GIT_INIT_SUBMODULES")) {
     std::vector<std::string> git_submodule_init = { git, "submodule", "init" };
     ret = this->RunChild(git_submodule_init, &submodule_out, &submodule_err,
                          top_dir);

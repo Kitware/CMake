@@ -11,12 +11,13 @@
 #include "cmsys/RegularExpression.hxx"
 
 #include "cmCTest.h"
+#include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
-cmCTestCVS::cmCTestCVS(cmCTest* ct, std::ostream& log)
-  : cmCTestVC(ct, log)
+cmCTestCVS::cmCTestCVS(cmCTest* ct, cmMakefile* mf, std::ostream& log)
+  : cmCTestVC(ct, mf, log)
 {
 }
 
@@ -75,9 +76,9 @@ private:
 bool cmCTestCVS::UpdateImpl()
 {
   // Get user-specified update options.
-  std::string opts = this->CTest->GetCTestConfiguration("UpdateOptions");
+  std::string opts = this->Makefile->GetSafeDefinition("CTEST_UPDATE_OPTIONS");
   if (opts.empty()) {
-    opts = this->CTest->GetCTestConfiguration("CVSUpdateOptions");
+    opts = this->Makefile->GetSafeDefinition("CTEST_CVS_UPDATE_OPTIONS");
     if (opts.empty()) {
       opts = "-dP";
     }

@@ -11,11 +11,12 @@
 
 #include "cmCTest.h"
 #include "cmCTestVC.h"
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 
-cmCTestHG::cmCTestHG(cmCTest* ct, std::ostream& log)
-  : cmCTestGlobalVC(ct, log)
+cmCTestHG::cmCTestHG(cmCTest* ct, cmMakefile* mf, std::ostream& log)
+  : cmCTestGlobalVC(ct, mf, log)
 {
   this->PriorRev = this->Unknown;
 }
@@ -142,9 +143,9 @@ bool cmCTestHG::UpdateImpl()
   hg_update.emplace_back("-v");
 
   // Add user-specified update options.
-  std::string opts = this->CTest->GetCTestConfiguration("UpdateOptions");
+  std::string opts = this->Makefile->GetSafeDefinition("CTEST_UPDATE_OPTIONS");
   if (opts.empty()) {
-    opts = this->CTest->GetCTestConfiguration("HGUpdateOptions");
+    opts = this->Makefile->GetSafeDefinition("CTEST_HG_UPDATE_OPTIONS");
   }
   std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
   cm::append(hg_update, args);

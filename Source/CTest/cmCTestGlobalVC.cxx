@@ -9,8 +9,9 @@
 #include "cmSystemTools.h"
 #include "cmXMLWriter.h"
 
-cmCTestGlobalVC::cmCTestGlobalVC(cmCTest* ct, std::ostream& log)
-  : cmCTestVC(ct, log)
+cmCTestGlobalVC::cmCTestGlobalVC(cmCTest* ct, cmMakefile* mf,
+                                 std::ostream& log)
+  : cmCTestVC(ct, mf, log)
 {
   this->PriorRev = this->Unknown;
 }

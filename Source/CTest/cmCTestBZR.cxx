@@ -16,6 +16,7 @@
 
 #include "cmCTest.h"
 #include "cmCTestVC.h"
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
 
@@ -70,8 +71,8 @@ static int cmBZRXMLParserUnknownEncodingHandler(void* /*unused*/,
   return 0;
 }
 
-cmCTestBZR::cmCTestBZR(cmCTest* ct, std::ostream& log)
-  : cmCTestGlobalVC(ct, log)
+cmCTestBZR::cmCTestBZR(cmCTest* ct, cmMakefile* mf, std::ostream& log)
+  : cmCTestGlobalVC(ct, mf, log)
 {
   this->PriorRev = this->Unknown;
   // Even though it is specified in the documentation, with bzr 1.13
@@ -363,9 +364,9 @@ private:
 bool cmCTestBZR::UpdateImpl()
 {
   // Get user-specified update options.
-  std::string opts = this->CTest->GetCTestConfiguration("UpdateOptions");
+  std::string opts = this->Makefile->GetSafeDefinition("CTEST_UPDATE_OPTIONS");
   if (opts.empty()) {
-    opts = this->CTest->GetCTestConfiguration("BZRUpdateOptions");
+    opts = this->Makefile->GetSafeDefinition("CTEST_BZR_UPDATE_OPTIONS");
   }
   std::vector<std::string> args = cmSystemTools::ParseArguments(opts);
 

@@ -10,6 +10,7 @@
 #include "cmCTestGlobalVC.h"
 
 class cmCTest;
+class cmMakefile;
 
 /** \class cmCTestBZR
  * \brief Interaction with bzr command-line tool
@@ -19,7 +20,7 @@ class cmCTestBZR : public cmCTestGlobalVC
 {
 public:
   /** Construct with a CTest instance and update log stream.  */
-  cmCTestBZR(cmCTest* ctest, std::ostream& log);
+  cmCTestBZR(cmCTest* ctest, cmMakefile* mf, std::ostream& log);
 
   ~cmCTestBZR() override;
 
