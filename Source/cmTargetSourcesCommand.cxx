@@ -165,12 +165,6 @@ std::vector<std::string> TargetSourcesImpl::ConvertToAbsoluteContent(
       case cmPolicies::OLD:
         issueMessage = false;
         break;
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
-        this->Makefile->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0076));
-        break;
       case cmPolicies::NEW: {
         issueMessage = false;
         useAbsoluteContent = true;

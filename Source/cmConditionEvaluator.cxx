@@ -453,14 +453,6 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
         return oldResult;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS: {
-        errorString = "An argument named \"" + newArg.GetValue() +
-          "\" appears in a conditional statement.  " +
-          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0012);
-        status = MessageType::FATAL_ERROR;
-        break;
-      }
       case cmPolicies::NEW:
         break;
     }

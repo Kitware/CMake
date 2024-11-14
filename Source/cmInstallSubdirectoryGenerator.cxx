@@ -63,9 +63,7 @@ void cmInstallSubdirectoryGenerator::GenerateScript(std::ostream& os)
         // OLD behavior is handled in cmLocalGenerator::GenerateInstallRules()
         break;
 
-      case cmPolicies::NEW:
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS: {
+      case cmPolicies::NEW: {
         Indent indent;
         std::string odir = this->BinaryDirectory;
         cmSystemTools::ConvertToUnixSlashes(odir);

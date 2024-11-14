@@ -242,8 +242,6 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
         type = cmStateEnums::STATIC_LIBRARY;
         break;
       case cmPolicies::NEW:
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
         mf.IssueMessage(
           MessageType::FATAL_ERROR,
           cmStrCat(

@@ -29,13 +29,6 @@ bool cmReturnCommand(std::vector<std::string> const& args,
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
         return true;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        status.GetMakefile().IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmStrCat('\n', cmPolicies::GetPolicyWarning(cmPolicies::CMP0140)));
-        cmSystemTools::SetFatalErrorOccurred();
-        return false;
       default:
         break;
     }

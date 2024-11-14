@@ -754,8 +754,6 @@ void cmLocalGenerator::GenerateInstallRules()
       }
     } break;
 
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::NEW:
       // NEW behavior is handled in
       // cmInstallSubdirectoryGenerator::GenerateScript()
@@ -1997,12 +1995,6 @@ std::string cmLocalGenerator::GetLinkLibsCMP0065(
         add_shlib_flags =
           !(tgt.IsAIX() && tgt.GetPropertyAsBool("ENABLE_EXPORTS"));
         break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        this->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0065));
-        CM_FALLTHROUGH;
       case cmPolicies::NEW:
         // NEW behavior is to only add the flags if ENABLE_EXPORTS is on,
         // except on AIX where we compute symbol exports.
@@ -2605,8 +2597,6 @@ bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
         }
         case cmPolicies::OLD:
           return true;
-        case cmPolicies::REQUIRED_IF_USED:
-        case cmPolicies::REQUIRED_ALWAYS:
         case cmPolicies::NEW:
           return false;
       }
@@ -2740,13 +2730,6 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
     case cmPolicies::OLD:
       this->AppendFlags(flags, newFlags);
       break;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
-      this->Makefile->GetCMakeInstance()->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0181),
-        target->GetBacktrace());
-      CM_FALLTHROUGH;
     case cmPolicies::NEW:
       if (compileOrLink == cmBuildStep::Link) {
         std::vector<std::string> options;
@@ -4422,12 +4405,6 @@ bool cmLocalGenerator::NeedBackwardsCompatibility_2_4()
       break;
     case cmPolicies::NEW:
       // New behavior is to ignore the variable.
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
-      // This will never be the case because the only way to require
-      // the setting is to require the user to specify version policy
-      // 2.6 or higher.  Once we add that requirement then this whole
-      // method can be removed anyway.
       return false;
   }
 

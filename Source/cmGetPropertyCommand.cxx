@@ -380,8 +380,6 @@ bool HandleDirectoryMode(cmExecutionStatus& status, const std::string& name,
         return StoreResult(infoType, status.GetMakefile(), variable,
                            mf->GetDefineFlagsCMP0059());
       case cmPolicies::NEW:
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
         break;
     }
   }

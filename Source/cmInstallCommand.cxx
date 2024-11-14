@@ -105,7 +105,7 @@ public:
   bool MakeFilesFullPath(const char* modeName, const std::string& basePath,
                          const std::vector<std::string>& relFiles,
                          std::vector<std::string>& absFiles);
-  bool CheckCMP0006(bool& failure) const;
+  bool CheckCMP0006() const;
 
   std::string GetDestination(const cmInstallCommandArguments* args,
                              const std::string& varName,
@@ -1018,14 +1018,11 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
             bundleGenerator = CreateInstallTargetGenerator(
               target, bundleArgs, false, helper.Makefile->GetBacktrace());
           } else if (!runtimeArgs.GetDestination().empty()) {
-            bool failure = false;
-            if (helper.CheckCMP0006(failure)) {
+            if (helper.CheckCMP0006()) {
               // For CMake 2.4 compatibility fallback to the RUNTIME
               // properties.
               bundleGenerator = CreateInstallTargetGenerator(
                 target, runtimeArgs, false, helper.Makefile->GetBacktrace());
-            } else if (failure) {
-              return false;
             }
           }
           if (!bundleGenerator) {
@@ -1625,8 +1622,6 @@ bool HandleFilesMode(std::vector<std::string> const& args,
           CM_FALLTHROUGH;
         case cmPolicies::OLD:
           break;
-        case cmPolicies::REQUIRED_IF_USED:
-        case cmPolicies::REQUIRED_ALWAYS:
         case cmPolicies::NEW:
           modal = "may";
           messageType = MessageType::FATAL_ERROR;
@@ -1880,13 +1875,6 @@ bool HandleDirectoryMode(std::vector<std::string> const& args,
         case cmPolicies::OLD:
           destination = args[i];
           break;
-        case cmPolicies::REQUIRED_ALWAYS:
-        case cmPolicies::REQUIRED_IF_USED:
-          // We should never get here, only OLD, WARN, and NEW are used
-          status.GetMakefile().IssueMessage(
-            MessageType::FATAL_ERROR,
-            cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0177));
-          return false;
       }
       doing = DoingNone;
     } else if (doing == DoingType) {
@@ -2494,7 +2482,7 @@ bool Helper::MakeFilesFullPath(const char* modeName,
   return true;
 }
 
-bool Helper::CheckCMP0006(bool& failure) const
+bool Helper::CheckCMP0006() const
 {
   switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0006)) {
     case cmPolicies::WARN:
@@ -2507,13 +2495,6 @@ bool Helper::CheckCMP0006(bool& failure) const
       return true;
     case cmPolicies::NEW:
       // NEW behavior is to disallow compatibility
-      break;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
-      failure = true;
-      this->Makefile->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0006));
       break;
   }
   return false;

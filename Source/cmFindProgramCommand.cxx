@@ -125,8 +125,6 @@ struct cmFindProgramHelper
       case cmPolicies::OLD:
         return cmSystemTools::FileExists(file, true);
       case cmPolicies::NEW:
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
         return cmSystemTools::FileIsExecutable(file);
       default:
         break;

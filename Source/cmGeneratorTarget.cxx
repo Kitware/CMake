@@ -2474,8 +2474,6 @@ void cmGeneratorTarget::AddExplicitLanguageFlags(std::string& flags,
     case cmPolicies::OLD:
       // The OLD behavior is to not add explicit language flags.
       return;
-    case cmPolicies::REQUIRED_ALWAYS:
-    case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::NEW:
       // The NEW behavior is to add explicit language flags.
       break;
@@ -4760,15 +4758,6 @@ std::string cmGeneratorTarget::CheckCMP0004(std::string const& item) const
         cm->IssueMessage(MessageType::FATAL_ERROR, e.str(),
                          this->GetBacktrace());
       } break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS: {
-        std::ostringstream e;
-        e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0004) << "\n"
-          << "Target \"" << this->GetName() << "\" links to item \"" << item
-          << "\" which has leading or trailing whitespace.";
-        cm->IssueMessage(MessageType::FATAL_ERROR, e.str(),
-                         this->GetBacktrace());
-      } break;
     }
   }
   return lib;
@@ -5927,8 +5916,6 @@ cmGeneratorTarget::CxxModuleSupport cmGeneratorTarget::NeedCxxDyndep(
       // The OLD behavior is to not scan the source.
       policyAnswer = CxxModuleSupport::Disabled;
       break;
-    case cmPolicies::REQUIRED_ALWAYS:
-    case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::NEW:
       // The NEW behavior is to scan the source if the compiler supports
       // scanning and the generator supports it.

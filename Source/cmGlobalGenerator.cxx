@@ -1057,12 +1057,6 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
         // OLD behavior is to convert AppleClang to Clang.
         mf->AddDefinition(compilerIdVar, "Clang");
         break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        mf->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0025));
-        break;
       case cmPolicies::NEW:
         // NEW behavior is to keep AppleClang.
         break;
@@ -1093,12 +1087,6 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
           mf->AddDefinition("CMAKE_COMPILER_IS_GNUCXX", "1");
         }
         break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        mf->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0047));
-        CM_FALLTHROUGH;
       case cmPolicies::NEW:
         // NEW behavior is to keep QCC.
         break;
@@ -1123,12 +1111,6 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
       case cmPolicies::OLD:
         // OLD behavior is to convert XLClang to XL.
         mf->AddDefinition(compilerIdVar, "XL");
-        break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        mf->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0089));
         break;
       case cmPolicies::NEW:
         // NEW behavior is to keep AppleClang.
@@ -1172,12 +1154,6 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
           mf->RemoveDefinition(emulated);
         }
         break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        mf->IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0129));
-        CM_FALLTHROUGH;
       case cmPolicies::NEW:
         // NEW behavior is to keep LCC.
         break;
@@ -2820,8 +2796,6 @@ static bool RaiseCMP0037Message(cmake* cm, cmTarget* tgt,
     case cmPolicies::OLD:
       break;
     case cmPolicies::NEW:
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
       issueMessage = true;
       messageType = MessageType::FATAL_ERROR;
       break;
@@ -3028,8 +3002,6 @@ void cmGlobalGenerator::ReserveGlobalTargetCodegen()
     case cmPolicies::OLD:
       break;
     case cmPolicies::NEW:
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
       issueMessage = true;
       messageType = MessageType::FATAL_ERROR;
       break;

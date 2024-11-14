@@ -100,8 +100,6 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
           }
           case cmPolicies::OLD:
             break;
-          case cmPolicies::REQUIRED_IF_USED:
-          case cmPolicies::REQUIRED_ALWAYS:
           case cmPolicies::NEW:
             mfile = "";
             break;
@@ -130,8 +128,6 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
         break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
       case cmPolicies::NEW:
         modal = "may";
         messageType = MessageType::FATAL_ERROR;

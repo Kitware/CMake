@@ -1060,8 +1060,6 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
         case cmPolicies::WARN:
         case cmPolicies::OLD:
           break;
-        case cmPolicies::REQUIRED_ALWAYS:
-        case cmPolicies::REQUIRED_IF_USED:
         case cmPolicies::NEW:
           usePrivateGeneratedSources = true;
           break;

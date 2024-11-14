@@ -120,8 +120,6 @@ cmValue cmTargetPropertyComputer::GetSources<cmTarget>(cmTarget const* tgt,
             CM_FALLTHROUGH;
           case cmPolicies::OLD:
             break;
-          case cmPolicies::REQUIRED_ALWAYS:
-          case cmPolicies::REQUIRED_IF_USED:
           case cmPolicies::NEW:
             addContent = true;
             break;
@@ -1416,8 +1414,6 @@ std::string cmTargetInternals::ProcessSourceItemCMP0049(
       case cmPolicies::OLD:
         noMessage = true;
         break;
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::NEW:
         messageType = MessageType::FATAL_ERROR;
     }
@@ -2106,8 +2102,6 @@ struct ReadOnlyProperty
         case cmPolicies::OLD:
           readOnly = false;
           break;
-        case cmPolicies::REQUIRED_ALWAYS:
-        case cmPolicies::REQUIRED_IF_USED:
         case cmPolicies::NEW:
           context->IssueMessage(MessageType::FATAL_ERROR,
                                 this->message(prop, target));

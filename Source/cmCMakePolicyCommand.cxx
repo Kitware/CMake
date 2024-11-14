@@ -4,7 +4,6 @@
 
 #include "cmExecutionStatus.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -147,19 +146,6 @@ bool HandleGetMode(std::vector<std::string> const& args,
       // Report that the policy is set to NEW.
       status.GetMakefile().AddDefinition(var, "NEW");
       break;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
-      // The policy is required to be set before anything needs it.
-      {
-        status.GetMakefile().IssueMessage(
-          MessageType::FATAL_ERROR,
-          cmStrCat(
-            cmPolicies::GetRequiredPolicyError(pid), "\n",
-            "The call to cmake_policy(GET ", id,
-            " ...) at which this "
-            "error appears requests the policy, and this version of CMake ",
-            "requires that the policy be set to NEW before it is checked."));
-      }
   }
 
   return true;

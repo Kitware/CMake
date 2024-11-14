@@ -67,11 +67,6 @@ static void AddLinkDir(cmMakefile& mf, std::string const& dir,
       case cmPolicies::OLD:
         // OLD behavior does not convert
         break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0015);
-        mf.IssueMessage(MessageType::FATAL_ERROR, e.str());
-        CM_FALLTHROUGH;
       case cmPolicies::NEW:
         // NEW behavior converts
         convertToAbsolute = true;

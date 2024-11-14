@@ -405,8 +405,6 @@ static bool HandlePackage(std::vector<std::string> const& args,
         return true;
       }
       break;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::NEW:
       // Default is to not export, but can be enabled.
       if (!mf.IsOn("CMAKE_EXPORT_PACKAGE_REGISTRY")) {

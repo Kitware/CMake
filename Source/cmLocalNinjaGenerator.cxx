@@ -730,8 +730,6 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
             CM_FALLTHROUGH;
           case cmPolicies::OLD:
             break;
-          case cmPolicies::REQUIRED_IF_USED:
-          case cmPolicies::REQUIRED_ALWAYS:
           case cmPolicies::NEW:
             depfile = ccg.GetInternalDepfile();
             break;
@@ -833,8 +831,6 @@ cmLocalNinjaGenerator::MakeCustomCommandGenerators(
       CM_FALLTHROUGH;
     case cmPolicies::OLD:
       break;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::NEW:
       transformDepfile = true;
       break;

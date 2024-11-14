@@ -90,8 +90,6 @@ bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
                     status.GetMakefile().GetDefineFlagsCMP0059());
         return true;
       case cmPolicies::NEW:
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
         break;
     }
   }

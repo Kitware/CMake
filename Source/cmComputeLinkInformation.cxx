@@ -1850,8 +1850,6 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(LinkEntry const& entry)
       CM_FALLTHROUGH;
     case cmPolicies::OLD:
       break;
-    case cmPolicies::REQUIRED_ALWAYS:
-    case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::NEW:
       return false;
   }
@@ -2205,18 +2203,6 @@ void cmComputeLinkInformation::HandleBadFullItem(LinkEntry const& entry,
     case cmPolicies::NEW:
       // NEW behavior will not get here.
       break;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS: {
-      std::ostringstream e;
-      /* clang-format off */
-      e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0008) << "\n"
-             "Target \"" << this->Target->GetName() << "\" links to item\n"
-             "  " << item << "\n"
-             "which is a full-path but not a valid library file name.";
-      /* clang-format on */
-      this->CMakeInstance->IssueMessage(MessageType::FATAL_ERROR, e.str(),
-                                        this->Target->GetBacktrace());
-    } break;
   }
 }
 
@@ -2248,15 +2234,6 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
     case cmPolicies::NEW:
       // Should never happen due to assignment of OldLinkDirMode
       return true;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS: {
-      std::ostringstream e;
-      e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0003) << '\n';
-      this->PrintLinkPolicyDiagnosis(e);
-      this->CMakeInstance->IssueMessage(MessageType::FATAL_ERROR, e.str(),
-                                        this->Target->GetBacktrace());
-      return false;
-    }
   }
 
   // Add the link directories for full path items.

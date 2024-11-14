@@ -66,12 +66,6 @@ cmInstallCommandArguments::cmInstallCommandArguments(
         return ArgumentParser::Continue::Yes;
       };
       break;
-    case cmPolicies::REQUIRED_ALWAYS:
-    case cmPolicies::REQUIRED_IF_USED:
-      // We should never get here, only OLD, WARN, and NEW are used
-      makefile.IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0177));
   }
 
   this->Bind("DESTINATION"_s, normalizeDest);

@@ -126,8 +126,6 @@ bool cmWhileFunctionBlocker::Replay(std::vector<cmListFileFunction> functions,
       case cmPolicies::OLD:
         // OLD behavior is to silently ignore the error.
         break;
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::NEW:
         // NEW behavior is to enforce the error.
         enforceError = true;

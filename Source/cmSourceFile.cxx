@@ -226,8 +226,6 @@ bool cmSourceFile::FindFullPath(std::string* error,
         err = cmStrCat(err, " .", ext);
       }
       break;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::NEW:
       break;
   }

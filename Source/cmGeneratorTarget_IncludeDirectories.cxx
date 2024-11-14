@@ -164,8 +164,6 @@ void processIncludeDirectories(cmGeneratorTarget const* tgt,
             case cmPolicies::OLD:
               messageType = MessageType::AUTHOR_WARNING;
               break;
-            case cmPolicies::REQUIRED_ALWAYS:
-            case cmPolicies::REQUIRED_IF_USED:
             case cmPolicies::NEW:
               break;
           }
@@ -204,8 +202,6 @@ void processIncludeDirectories(cmGeneratorTarget const* tgt,
             case cmPolicies::OLD:
               noMessage = true;
               break;
-            case cmPolicies::REQUIRED_IF_USED:
-            case cmPolicies::REQUIRED_ALWAYS:
             case cmPolicies::NEW:
               // Issue the fatal message.
               break;

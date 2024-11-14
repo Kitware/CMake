@@ -49,8 +49,6 @@ bool needToQuoteTestName(const cmMakefile& mf, const std::string& name)
     case cmPolicies::OLD:
       // OLD behavior is to not quote the test's name.
       return false;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
     case cmPolicies::NEW:
     default:
       // NEW behavior is to quote the test's name.

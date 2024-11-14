@@ -115,10 +115,6 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
         case cmPolicies::OLD: // OLD behavior does not warn.
           t = MessageType::MESSAGE;
           break;
-        case cmPolicies::REQUIRED_IF_USED:
-        case cmPolicies::REQUIRED_ALWAYS:
-          e << '\n' << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0016);
-          break;
         case cmPolicies::NEW: // NEW behavior prints the error.
           break;
       }
@@ -150,8 +146,6 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
         break;
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::NEW:
         modal = "must";
         messageType = MessageType::FATAL_ERROR;
@@ -408,8 +402,6 @@ TLL::TLL(cmMakefile& mf, cmTarget* target)
       case cmPolicies::OLD:
         this->RejectRemoteLinking = true;
         break;
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::NEW:
         this->EncodeRemoteReference = true;
         break;
@@ -461,8 +453,6 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
         CM_FALLTHROUGH;
       case cmPolicies::OLD:
         break;
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::NEW:
         modal = "must";
         messageType = MessageType::FATAL_ERROR;
