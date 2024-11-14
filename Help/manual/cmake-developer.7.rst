@@ -417,18 +417,18 @@ information from the ``Foo.pc`` file.
 
 Now we need to find the libraries and include files; we use the
 information from ``pkg-config`` to provide hints to CMake about where to
-look.
+look before checking other default paths.
 
 .. code-block:: cmake
 
   find_path(Foo_INCLUDE_DIR
     NAMES foo.h
-    PATHS ${PC_Foo_INCLUDE_DIRS}
+    HINTS ${PC_Foo_INCLUDE_DIRS}
     PATH_SUFFIXES Foo
   )
   find_library(Foo_LIBRARY
     NAMES foo
-    PATHS ${PC_Foo_LIBRARY_DIRS}
+    HINTS ${PC_Foo_LIBRARY_DIRS}
   )
 
 Alternatively, if the library is available with multiple configurations, you can
@@ -439,11 +439,11 @@ use :module:`SelectLibraryConfigurations` to automatically set the
 
   find_library(Foo_LIBRARY_RELEASE
     NAMES foo
-    PATHS ${PC_Foo_LIBRARY_DIRS}/Release
+    HINTS ${PC_Foo_LIBRARY_DIRS}/Release
   )
   find_library(Foo_LIBRARY_DEBUG
     NAMES foo
-    PATHS ${PC_Foo_LIBRARY_DIRS}/Debug
+    HINTS ${PC_Foo_LIBRARY_DIRS}/Debug
   )
 
   include(SelectLibraryConfigurations)
