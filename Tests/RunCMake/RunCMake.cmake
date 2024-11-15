@@ -227,8 +227,9 @@ function(run_cmake test)
   Compatibility with CMake < 3\.10 will be removed from a future version of
   CMake.
 
-  Update the VERSION argument <min> value or use a \.\.\.<max> suffix to tell
-  CMake that the project does not need compatibility with older versions\.
+  Update the VERSION argument <min> value\.  Or, use the <min>\.\.\.<max> syntax
+  to tell CMake that the project requires at least <min> but has been updated
+  to work with policies introduced by <max> or earlier\.
 +
 ]] "" actual_stderr "${actual_stderr}")
   endif()
