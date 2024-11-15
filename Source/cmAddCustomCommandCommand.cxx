@@ -155,6 +155,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
     keyPRE_BUILD,
     keyPRE_LINK,
     keyTARGET,
+    keyUSES_TERMINAL,
     keyVERBATIM,
     keyWORKING_DIRECTORY
   };
