@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.10)
 project(LibName)
 # this is a test to make sure that relative path
 # LIBRARY_OUTPUT_PATH and EXECUTABLE_OUTPUT_PATH work
