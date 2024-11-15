@@ -3,6 +3,7 @@ Visual Studio 12 2013
 
 Removed.  This once generated Visual Studio 12 2013 project files, but
 the generator has been removed since CMake 3.31.  It is still possible
-to build with VS 12 2013 tools using the :generator:`Visual Studio 14 2015`
-(or above) generator with :variable:`CMAKE_GENERATOR_TOOLSET` set to ``v120``,
+to build with the VS 12 2013 toolset by also installing VS 2015 (or above)
+and using the :generator:`Visual Studio 14 2015` (or above) generator with
+:variable:`CMAKE_GENERATOR_TOOLSET` set to ``v120``,
 or by using the :generator:`NMake Makefiles` generator.
