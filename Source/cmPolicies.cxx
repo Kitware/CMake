@@ -286,6 +286,10 @@ bool IsFromLegacyInstallEXPORT(cmMakefile* mf, unsigned int majorVer,
     cmSystemTools::Strucmp(mf->GetBacktrace().Top().Name.c_str(),
                            "cmake_policy") == 0;
 }
+#define ADVICE_UPDATE_VERSION_ARGUMENT                                        \
+  "Update the VERSION argument <min> value.  Or, use the <min>...<max> "      \
+  "syntax to tell CMake that the project requires at least <min> but has "    \
+  "been updated to work with policies introduced by <max> or earlier."
 }
 
 bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf, unsigned int majorVer,
@@ -302,10 +306,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf, unsigned int majorVer,
     mf->IssueMessage(
       MessageType::DEPRECATION_WARNING,
       "Compatibility with CMake < 3.10 will be removed from "
-      "a future version of CMake.\n"
-      "Update the VERSION argument <min> value.  Or, use the <min>...<max> "
-      "syntax to tell CMake that the project requires at least <min> but has "
-      "been updated to work with policies introduced by <max> or earlier.");
+      "a future version of CMake.\n" ADVICE_UPDATE_VERSION_ARGUMENT);
   }
 
   // now loop over all the policies and set them as appropriate
