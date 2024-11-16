@@ -24,14 +24,15 @@ add_custom_command(TARGET main
   #OUTPUT   # Other checks will fail before the CMP0175 check
   #OUTPUTS  # Special case, not a documented keyword (used for deprecated form)
   #SOURCE   # Old signature, special handling makes it hard to check
-  #USES_TERMINAL
 )
 add_custom_command(TARGET main
   POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E true
   # Has to be tested separately due to separate check for clash with DEPFILE
   IMPLICIT_DEPENDS valueDoesNotMatterHere
-  # Has to be tested separately due to separate check for clash with JOB_POOL
+  # Has to be tested separately due to separate check for clash with JOB_POOL.
+  # This one is supported, but was erroneously rejected in the 3.31.0 release.
+  # We keep this here to verify the fix for that regression.
   USES_TERMINAL NO
 )
 

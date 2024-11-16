@@ -24,8 +24,8 @@ following as errors that previously went unreported:
   ``POST_BUILD`` to be given.  Previously, if none were given, ``POST_BUILD``
   was assumed, or if multiple keywords were given, the last one was used.
 * The ``TARGET`` form does not accept ``DEPENDS``, ``DEPENDS_EXPLICIT_ONLY``,
-  ``DEPFILE``, ``IMPLICIT_DEPENDS``, ``MAIN_DEPENDENCY``, ``JOB_POOL``,
-  ``JOB_SERVER_AWARE``, or ``USES_TERMINAL`` keywords.
+  ``DEPFILE``, ``IMPLICIT_DEPENDS``, ``MAIN_DEPENDENCY``, ``JOB_POOL``, or
+  ``JOB_SERVER_AWARE`` keywords.
 * The ``TARGET`` form now requires at least one ``COMMAND`` to be given.
 * If a keyword expects a value to be given after it, but no value is provided,
   that was previously treated as though the keyword was not given at all.

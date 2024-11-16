@@ -13,7 +13,7 @@ This warning is for project developers\.  Use -Wno-dev to suppress it\.
 
 CMake Warning \(dev\) at CMP0175\.cmake:[0-9]+ \(add_custom_command\):
   The following keywords are not supported when using
-  add_custom_command\(TARGET\): IMPLICIT_DEPENDS, USES_TERMINAL\.
+  add_custom_command\(TARGET\): IMPLICIT_DEPENDS\.
 
   Policy CMP0175 is not set: add_custom_command\(\) rejects invalid arguments\.
   Run "cmake --help-policy CMP0175" for policy details\.  Use the cmake_policy

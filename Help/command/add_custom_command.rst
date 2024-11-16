@@ -599,7 +599,8 @@ target is already built, the command will not execute.
                      [WORKING_DIRECTORY dir]
                      [COMMENT comment]
                      [VERBATIM]
-                     [COMMAND_EXPAND_LISTS])
+                     [COMMAND_EXPAND_LISTS]
+                     [USES_TERMINAL])
 
 This defines a new command that will be associated with building the
 specified ``<target>``.  The ``<target>`` must be defined in the current
