@@ -69,7 +69,7 @@ class cmMakefile;
          "Ignore CMAKE_SHARED_LIBRARY_<Lang>_FLAGS variable.", 2, 8, 9, NEW)  \
   SELECT(POLICY, CMP0019,                                                     \
          "Do not re-expand variables in include and link information.", 2, 8, \
-         11, WARN)                                                            \
+         11, NEW)                                                             \
   SELECT(POLICY, CMP0020,                                                     \
          "Automatically link Qt executables to qtmain target on Windows.", 2, \
          8, 11, WARN)                                                         \

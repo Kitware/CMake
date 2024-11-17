@@ -1,6 +1,9 @@
 CMP0019
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 Do not re-expand variables in include and link information.
 
 CMake 2.8.10 and lower re-evaluated values given to the
@@ -16,7 +19,5 @@ strict compatibility.  The ``NEW`` behavior for this policy is to leave
 the values untouched.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.8.11
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

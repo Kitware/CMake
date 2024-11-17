@@ -1007,9 +1007,6 @@ void cmMakefile::GeneratorAction::operator()(cmLocalGenerator& lg,
 
 void cmMakefile::DoGenerate(cmLocalGenerator& lg)
 {
-  // do all the variable expansions here
-  this->ExpandVariablesCMP0019();
-
   // give all the commands a chance to do something
   // after the file has been parsed before generation
   for (auto& action : this->GeneratorActions) {
@@ -2302,94 +2299,6 @@ cmSourceGroup* cmMakefile::FindSourceGroup(
   return groups.data();
 }
 #endif
-
-static bool mightExpandVariablesCMP0019(const char* s)
-{
-  return s && *s && strstr(s, "${") && strchr(s, '}');
-}
-
-void cmMakefile::ExpandVariablesCMP0019()
-{
-  // Drop this ancient compatibility behavior with a policy.
-  cmPolicies::PolicyStatus pol = this->GetPolicyStatus(cmPolicies::CMP0019);
-  if (pol != cmPolicies::OLD && pol != cmPolicies::WARN) {
-    return;
-  }
-
-  std::string e;
-
-  cmValue includeDirs = this->GetProperty("INCLUDE_DIRECTORIES");
-  if (includeDirs && mightExpandVariablesCMP0019(includeDirs->c_str())) {
-    std::string dirs = *includeDirs;
-    this->ExpandVariablesInString(dirs, true, true);
-    if (pol == cmPolicies::WARN && dirs != *includeDirs) {
-      e = cmStrCat("Evaluated directory INCLUDE_DIRECTORIES\n  ", *includeDirs,
-                   "\nas\n  ", dirs, '\n');
-    }
-    this->SetProperty("INCLUDE_DIRECTORIES", dirs);
-  }
-
-  // Also for each target's INCLUDE_DIRECTORIES property:
-  for (auto& target : this->Targets) {
-    cmTarget& t = target.second;
-    if (t.GetType() == cmStateEnums::INTERFACE_LIBRARY ||
-        t.GetType() == cmStateEnums::GLOBAL_TARGET) {
-      continue;
-    }
-    includeDirs = t.GetProperty("INCLUDE_DIRECTORIES");
-    if (includeDirs && mightExpandVariablesCMP0019(includeDirs->c_str())) {
-      std::string dirs = *includeDirs;
-      this->ExpandVariablesInString(dirs, true, true);
-      if (pol == cmPolicies::WARN && dirs != *includeDirs) {
-        e += cmStrCat("Evaluated target ", t.GetName(),
-                      " INCLUDE_DIRECTORIES\n  ", *includeDirs, "\nas\n  ",
-                      dirs, '\n');
-      }
-      t.SetProperty("INCLUDE_DIRECTORIES", dirs);
-    }
-  }
-
-  if (cmValue linkDirsProp = this->GetProperty("LINK_DIRECTORIES")) {
-    if (mightExpandVariablesCMP0019(linkDirsProp->c_str())) {
-      std::string d = *linkDirsProp;
-      const std::string orig = d;
-      this->ExpandVariablesInString(d, true, true);
-      if (pol == cmPolicies::WARN && d != orig) {
-        e += cmStrCat("Evaluated link directories\n  ", orig, "\nas\n  ", d,
-                      '\n');
-      }
-    }
-  }
-
-  if (cmValue linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
-    cmList linkLibs{ *linkLibsProp };
-
-    for (auto l = linkLibs.begin(); l != linkLibs.end(); ++l) {
-      std::string libName = *l;
-      if (libName == "optimized"_s || libName == "debug"_s) {
-        ++l;
-        libName = *l;
-      }
-      if (mightExpandVariablesCMP0019(libName.c_str())) {
-        const std::string orig = libName;
-        this->ExpandVariablesInString(libName, true, true);
-        if (pol == cmPolicies::WARN && libName != orig) {
-          e += cmStrCat("Evaluated link library\n  ", orig, "\nas\n  ",
-                        libName, '\n');
-        }
-      }
-    }
-  }
-
-  if (!e.empty()) {
-    auto m = cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0019),
-                      "\n"
-                      "The following variable evaluations were encountered:\n",
-                      e);
-    this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING, m,
-                                           this->Backtrace);
-  }
-}
 
 bool cmMakefile::IsOn(const std::string& name) const
 {
