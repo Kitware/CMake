@@ -49,7 +49,7 @@ class cmMakefile;
          "Included scripts do automatic cmake_policy PUSH and POP.", 2, 6, 3, \
          NEW)                                                                 \
   SELECT(POLICY, CMP0012, "if() recognizes numbers and boolean constants.",   \
-         2, 8, 0, WARN)                                                       \
+         2, 8, 0, NEW)                                                        \
   SELECT(POLICY, CMP0013, "Duplicate binary directories are not allowed.", 2, \
          8, 0, WARN)                                                          \
   SELECT(POLICY, CMP0014, "Input directories must have CMakeLists.txt.", 2,   \
