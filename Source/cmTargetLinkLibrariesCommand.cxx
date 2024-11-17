@@ -95,42 +95,11 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
     }
   }
   if (!target) {
-    MessageType t = MessageType::FATAL_ERROR; // fail by default
-    std::ostringstream e;
-    e << "Cannot specify link libraries for target \"" << args[0]
-      << "\" which is not built by this project.";
-    // The bad target is the only argument. Check how policy CMP0016 is set,
-    // and accept, warn or fail respectively:
-    if (args.size() < 2) {
-      switch (mf.GetPolicyStatus(cmPolicies::CMP0016)) {
-        case cmPolicies::WARN:
-          t = MessageType::AUTHOR_WARNING;
-          // Print the warning.
-          e << "\n"
-               "CMake does not support this but it used to work accidentally "
-               "and is being allowed for compatibility."
-               "\n"
-            << cmPolicies::GetPolicyWarning(cmPolicies::CMP0016);
-          break;
-        case cmPolicies::OLD: // OLD behavior does not warn.
-          t = MessageType::MESSAGE;
-          break;
-        case cmPolicies::NEW: // NEW behavior prints the error.
-          break;
-      }
-    }
-    // Now actually print the message.
-    switch (t) {
-      case MessageType::AUTHOR_WARNING:
-        mf.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
-        break;
-      case MessageType::FATAL_ERROR:
-        mf.IssueMessage(MessageType::FATAL_ERROR, e.str());
-        cmSystemTools::SetFatalErrorOccurred();
-        break;
-      default:
-        break;
-    }
+    mf.IssueMessage(MessageType::FATAL_ERROR,
+                    cmStrCat("Cannot specify link libraries for target \"",
+                             args[0],
+                             "\" which is not built by this project."));
+    cmSystemTools::SetFatalErrorOccurred();
     return true;
   }
 

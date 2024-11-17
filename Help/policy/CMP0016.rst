@@ -1,6 +1,9 @@
 CMP0016
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 :command:`target_link_libraries` reports error if its only argument
 is not a target.
 
@@ -10,7 +13,5 @@ wasn't a valid target.  In CMake 2.8.3 and above it reports an error
 in this case.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.8.3
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

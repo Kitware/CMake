@@ -60,7 +60,7 @@ class cmMakefile;
   SELECT(POLICY, CMP0016,                                                     \
          "target_link_libraries() reports error if its only argument "        \
          "is not a target.",                                                  \
-         2, 8, 3, WARN)                                                       \
+         2, 8, 3, NEW)                                                        \
   SELECT(POLICY, CMP0017,                                                     \
          "Prefer files from the CMake module directory when including from "  \
          "there.",                                                            \
