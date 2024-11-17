@@ -72,7 +72,7 @@ class cmMakefile;
          11, NEW)                                                             \
   SELECT(POLICY, CMP0020,                                                     \
          "Automatically link Qt executables to qtmain target on Windows.", 2, \
-         8, 11, WARN)                                                         \
+         8, 11, NEW)                                                          \
   SELECT(                                                                     \
     POLICY, CMP0021,                                                          \
     "Fatal error on relative paths in INCLUDE_DIRECTORIES target property.",  \
