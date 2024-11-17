@@ -1811,29 +1811,10 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
   std::string currentStartFile =
     this->GetCMakeInstance()->GetCMakeListFile(currentStart);
   if (!cmSystemTools::FileExists(currentStartFile, true)) {
-    // The file is missing.  Check policy CMP0014.
-    auto e = cmStrCat("The source directory\n  ", currentStart,
-                      "\n"
-                      "does not contain a CMakeLists.txt file.");
-    /* clang-format on */
-    switch (this->GetPolicyStatus(cmPolicies::CMP0014)) {
-      case cmPolicies::WARN:
-        // Print the warning.
-        e += cmStrCat("\n"
-                      "CMake does not support this case but it used "
-                      "to work accidentally and is being allowed for "
-                      "compatibility.\n",
-                      cmPolicies::GetPolicyWarning(cmPolicies::CMP0014));
-        this->IssueMessage(MessageType::AUTHOR_WARNING, e);
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        // OLD behavior does not warn.
-        break;
-      case cmPolicies::NEW:
-        // NEW behavior prints the error.
-        this->IssueMessage(MessageType::FATAL_ERROR, e);
-        break;
-    }
+    this->IssueMessage(MessageType::FATAL_ERROR,
+                       cmStrCat("The source directory\n  ", currentStart,
+                                "\n"
+                                "does not contain a CMakeLists.txt file."));
     return;
   }
   // finally configure the subdir
