@@ -56,7 +56,7 @@ class cmMakefile;
          8, 0, NEW)                                                           \
   SELECT(POLICY, CMP0015,                                                     \
          "link_directories() treats paths relative to the source dir.", 2, 8, \
-         1, WARN)                                                             \
+         1, NEW)                                                              \
   SELECT(POLICY, CMP0016,                                                     \
          "target_link_libraries() reports error if its only argument "        \
          "is not a target.",                                                  \

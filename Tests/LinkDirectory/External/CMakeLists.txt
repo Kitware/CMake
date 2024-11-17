@@ -20,13 +20,7 @@ add_executable(myexe3 myexe.c)
 set_property(TARGET myexe3 PROPERTY OUTPUT_NAME LinkDirectory3)
 target_link_libraries(myexe3 PRIVATE mylibs)
 
-
-# Test CMP0015 OLD behavior: -L../lib
-cmake_policy(SET CMP0015 OLD)
 link_directories(../lib${cfg_dir})
-
-# Test CMP0015 NEW behavior: -L${CMAKE_CURRENT_SOURCE_DIR}/lib
-cmake_policy(SET CMP0015 NEW)
 link_directories(lib${cfg_dir})
 
 add_executable(myexe myexe.c)
