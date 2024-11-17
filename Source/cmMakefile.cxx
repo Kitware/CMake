@@ -3737,16 +3737,6 @@ std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
 {
   std::string result;
 
-  // We search the module always in CMAKE_ROOT and in CMAKE_MODULE_PATH,
-  // and then decide based on the policy setting which one to return.
-  // See CMP0017 for more details.
-  // The specific problem was that KDE 4.5.0 installs a
-  // FindPackageHandleStandardArgs.cmake which doesn't have the new features
-  // of FPHSA.cmake introduced in CMake 2.8.3 yet, and by setting
-  // CMAKE_MODULE_PATH also e.g. FindZLIB.cmake from cmake included
-  // FPHSA.cmake from kdelibs and not from CMake, and tried to use the
-  // new features, which were not there in the version from kdelibs, and so
-  // failed ("
   std::string moduleInCMakeRoot;
   std::string moduleInCMakeModulePath;
 
@@ -3795,25 +3785,8 @@ std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
     cmValue currentFile = this->GetDefinition("CMAKE_CURRENT_LIST_FILE");
     std::string mods = cmStrCat(cmSystemTools::GetCMakeRoot(), "/Modules/");
     if (currentFile && cmSystemTools::IsSubDirectory(*currentFile, mods)) {
-      switch (this->GetPolicyStatus(cmPolicies::CMP0017)) {
-        case cmPolicies::WARN: {
-          auto e = cmStrCat(
-            "File ", *currentFile, " includes ", moduleInCMakeModulePath,
-            " (found via CMAKE_MODULE_PATH) which shadows ", moduleInCMakeRoot,
-            ". This may cause errors later on .\n",
-            cmPolicies::GetPolicyWarning(cmPolicies::CMP0017));
-          this->IssueMessage(MessageType::AUTHOR_WARNING, e);
-          CM_FALLTHROUGH;
-        }
-        case cmPolicies::OLD:
-          system = false;
-          result = moduleInCMakeModulePath;
-          break;
-        case cmPolicies::NEW:
-          system = true;
-          result = moduleInCMakeRoot;
-          break;
-      }
+      system = true;
+      result = moduleInCMakeRoot;
     }
   }
 

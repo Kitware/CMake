@@ -64,7 +64,7 @@ class cmMakefile;
   SELECT(POLICY, CMP0017,                                                     \
          "Prefer files from the CMake module directory when including from "  \
          "there.",                                                            \
-         2, 8, 4, WARN)                                                       \
+         2, 8, 4, NEW)                                                        \
   SELECT(POLICY, CMP0018,                                                     \
          "Ignore CMAKE_SHARED_LIBRARY_<Lang>_FLAGS variable.", 2, 8, 9, WARN) \
   SELECT(POLICY, CMP0019,                                                     \

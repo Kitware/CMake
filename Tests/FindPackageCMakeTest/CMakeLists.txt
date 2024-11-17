@@ -12,11 +12,6 @@ set(CMAKE_FIND_USE_INSTALL_PREFIX OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
-# Look for a package which uses FindPackageHandleStandardArgs.cmake with the
-# new (as of cmake 2.8.3) syntax. This works only if CMP0017 is set to NEW,
-# because otherwise FindPackageHandleStandardArgs.cmake from the current
-# directory is included (via CMAKE_MODULE_PATH).
-cmake_policy(SET CMP0017 NEW)
 find_package(ZLIB QUIET)
 
 # Look for a package that has a find module and may be found.
