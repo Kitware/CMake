@@ -591,8 +591,6 @@ public:
 
   virtual bool SupportsLinkerDependencyFile() const { return false; }
 
-  std::string GetSharedLibFlagsForLanguage(std::string const& lang) const;
-
   /** Generate an <output>.rule file path for a given command output.  */
   virtual std::string GenerateRuleFile(std::string const& output) const;
 
@@ -826,7 +824,6 @@ private:
   std::map<std::string, std::string> LanguageToOutputExtension;
   std::map<std::string, std::string> ExtensionToLanguage;
   std::map<std::string, int> LanguageToLinkerPreference;
-  std::map<std::string, std::string> LanguageToOriginalSharedLibFlags;
 
 #if !defined(CMAKE_BOOTSTRAP)
   std::unique_ptr<Json::StreamWriter> JsonWriter;

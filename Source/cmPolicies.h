@@ -66,7 +66,7 @@ class cmMakefile;
          "there.",                                                            \
          2, 8, 4, NEW)                                                        \
   SELECT(POLICY, CMP0018,                                                     \
-         "Ignore CMAKE_SHARED_LIBRARY_<Lang>_FLAGS variable.", 2, 8, 9, WARN) \
+         "Ignore CMAKE_SHARED_LIBRARY_<Lang>_FLAGS variable.", 2, 8, 9, NEW)  \
   SELECT(POLICY, CMP0019,                                                     \
          "Do not re-expand variables in include and link information.", 2, 8, \
          11, WARN)                                                            \
