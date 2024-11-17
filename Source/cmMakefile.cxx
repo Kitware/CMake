@@ -3774,20 +3774,22 @@ std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
   // Normally, prefer the files found in CMAKE_MODULE_PATH. Only when the file
   // from which we are being called is located itself in CMAKE_ROOT, then
   // prefer results from CMAKE_ROOT depending on the policy setting.
-  system = false;
-  result = moduleInCMakeModulePath;
-  if (result.empty()) {
-    system = true;
-    result = moduleInCMakeRoot;
-  }
-
   if (!moduleInCMakeModulePath.empty() && !moduleInCMakeRoot.empty()) {
     cmValue currentFile = this->GetDefinition("CMAKE_CURRENT_LIST_FILE");
     std::string mods = cmStrCat(cmSystemTools::GetCMakeRoot(), "/Modules/");
     if (currentFile && cmSystemTools::IsSubDirectory(*currentFile, mods)) {
       system = true;
       result = moduleInCMakeRoot;
+    } else {
+      system = false;
+      result = moduleInCMakeModulePath;
     }
+  } else if (!moduleInCMakeModulePath.empty()) {
+    system = false;
+    result = moduleInCMakeModulePath;
+  } else {
+    system = true;
+    result = moduleInCMakeRoot;
   }
 
   return result;
