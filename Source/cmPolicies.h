@@ -51,7 +51,7 @@ class cmMakefile;
   SELECT(POLICY, CMP0012, "if() recognizes numbers and boolean constants.",   \
          2, 8, 0, NEW)                                                        \
   SELECT(POLICY, CMP0013, "Duplicate binary directories are not allowed.", 2, \
-         8, 0, WARN)                                                          \
+         8, 0, NEW)                                                           \
   SELECT(POLICY, CMP0014, "Input directories must have CMakeLists.txt.", 2,   \
          8, 0, WARN)                                                          \
   SELECT(POLICY, CMP0015,                                                     \

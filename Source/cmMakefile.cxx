@@ -4341,45 +4341,17 @@ bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
   if (gg->BinaryDirectoryIsNew(binPath)) {
     return true;
   }
-  std::string e;
-  switch (this->GetPolicyStatus(cmPolicies::CMP0013)) {
-    case cmPolicies::WARN:
-      // Print the warning.
-      e = cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0013),
-                   "\n"
-                   "The binary directory\n"
-                   "  ",
-                   binPath,
-                   "\n"
-                   "is already used to build a source directory.  "
-                   "This command uses it to build source directory\n"
-                   "  ",
-                   srcPath,
-                   "\n"
-                   "which can generate conflicting build files.  "
-                   "CMake does not support this use case but it used "
-                   "to work accidentally and is being allowed for "
-                   "compatibility.");
-      this->IssueMessage(MessageType::AUTHOR_WARNING, e);
-      CM_FALLTHROUGH;
-    case cmPolicies::OLD:
-      // OLD behavior does not warn.
-      return true;
-    case cmPolicies::NEW:
-      // NEW behavior prints the error.
-      e += cmStrCat("The binary directory\n"
-                    "  ",
-                    binPath,
-                    "\n"
-                    "is already used to build a source directory.  "
-                    "It cannot be used to build source directory\n"
-                    "  ",
-                    srcPath,
-                    "\n"
-                    "Specify a unique binary directory name.");
-      this->IssueMessage(MessageType::FATAL_ERROR, e);
-      break;
-  }
+  this->IssueMessage(MessageType::FATAL_ERROR,
+                     cmStrCat("The binary directory\n"
+                              "  ",
+                              binPath,
+                              "\n"
+                              "is already used to build a source directory.  "
+                              "It cannot be used to build source directory\n"
+                              "  ",
+                              srcPath,
+                              "\n"
+                              "Specify a unique binary directory name."));
 
   return false;
 }
