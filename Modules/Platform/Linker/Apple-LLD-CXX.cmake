@@ -2,3 +2,5 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 include(Platform/Linker/Apple-AppleClang-CXX)
+
+set(CMAKE_CXX_PLATFORM_LINKER_ID LLD)

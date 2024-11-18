@@ -2,3 +2,5 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 include(Platform/Linker/Linux-GNU-Fortran)
+
+set(CMAKE_Fortran_PLATFORM_LINKER_ID GNUgold)

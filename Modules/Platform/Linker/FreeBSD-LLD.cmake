@@ -12,5 +12,6 @@ include(Platform/Linker/FreeBSD-GNU)
 macro(__freebsd_linker_lld lang)
   __freebsd_linker_gnu(${lang})
 
+  set(CMAKE_${lang}_PLATFORM_LINKER_ID LLD)
   set(CMAKE_${lang}_LINK_LIBRARIES_PROCESSING ORDER=REVERSE DEDUPLICATION=ALL)
 endmacro()

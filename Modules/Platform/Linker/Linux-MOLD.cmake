@@ -12,5 +12,7 @@ include(Platform/Linker/Linux-GNU)
 macro(__linux_linker_mold lang)
   __linux_linker_gnu(${lang})
 
+
+  set(CMAKE_C_PLATFORM_LINKER_ID MOLD)
   set(CMAKE_${lang}_LINK_LIBRARIES_PROCESSING ORDER=REVERSE DEDUPLICATION=ALL)
 endmacro()

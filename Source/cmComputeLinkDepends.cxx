@@ -449,6 +449,15 @@ public:
                        "_LINK_LIBRARIES_PROCESSING':\n", errorMessage),
               target->GetBacktrace());
           }
+          // For some environments, deduplication should be activated only if
+          // both policies CMP0156 and CMP0179 are NEW
+          if (makefile->GetDefinition(cmStrCat(
+                "CMAKE_", linkLanguage, "_PLATFORM_LINKER_ID")) == "LLD"_s &&
+              makefile->GetDefinition("CMAKE_EXECUTABLE_FORMAT") == "ELF"_s &&
+              target->GetPolicyStatusCMP0179() != cmPolicies::NEW &&
+              this->Deduplication == All) {
+            this->Deduplication = Shared;
+          }
         }
       }
     }
