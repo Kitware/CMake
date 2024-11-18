@@ -76,7 +76,7 @@ class cmMakefile;
   SELECT(                                                                     \
     POLICY, CMP0021,                                                          \
     "Fatal error on relative paths in INCLUDE_DIRECTORIES target property.",  \
-    2, 8, 12, WARN)                                                           \
+    2, 8, 12, NEW)                                                            \
   SELECT(POLICY, CMP0022,                                                     \
          "INTERFACE_LINK_LIBRARIES defines the link interface.", 2, 8, 12,    \
          WARN)                                                                \

@@ -185,7 +185,6 @@ void processIncludeDirectories(cmGeneratorTarget const* tgt,
 
       if (!cmSystemTools::FileIsFullPath(entryInclude)) {
         std::ostringstream e;
-        bool noMessage = false;
         MessageType messageType = MessageType::FATAL_ERROR;
         if (!targetName.empty()) {
           /* clang-format off */
@@ -194,27 +193,13 @@ void processIncludeDirectories(cmGeneratorTarget const* tgt,
             "  \"" << entryInclude << "\"";
           /* clang-format on */
         } else {
-          switch (tgt->GetPolicyStatusCMP0021()) {
-            case cmPolicies::WARN: {
-              e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0021) << "\n";
-              messageType = MessageType::AUTHOR_WARNING;
-            } break;
-            case cmPolicies::OLD:
-              noMessage = true;
-              break;
-            case cmPolicies::NEW:
-              // Issue the fatal message.
-              break;
-          }
           e << "Found relative path while evaluating include directories of "
                "\""
             << tgt->GetName() << "\":\n  \"" << entryInclude << "\"\n";
         }
-        if (!noMessage) {
-          tgt->GetLocalGenerator()->IssueMessage(messageType, e.str());
-          if (messageType == MessageType::FATAL_ERROR) {
-            return;
-          }
+        tgt->GetLocalGenerator()->IssueMessage(messageType, e.str());
+        if (messageType == MessageType::FATAL_ERROR) {
+          return;
         }
       }
 
