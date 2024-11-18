@@ -1,6 +1,9 @@
 CMP0022
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 :prop_tgt:`INTERFACE_LINK_LIBRARIES` defines the link interface.
 
 CMake 2.8.11 constructed the 'link interface' of a target from
@@ -33,7 +36,5 @@ property for in-build targets, and ignore the old properties matching
 ``(IMPORTED_)?LINK_INTERFACE_LIBRARIES(_<CONFIG>)?``.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.8.12
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

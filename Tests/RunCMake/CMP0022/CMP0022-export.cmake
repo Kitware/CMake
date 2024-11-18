@@ -1,8 +1,6 @@
 
 enable_language(CXX)
 
-cmake_policy(SET CMP0022 NEW)
-
 add_library(cmp0022NEW SHARED empty_vs6_1.cpp)
 add_library(testLib SHARED empty_vs6_2.cpp)
 

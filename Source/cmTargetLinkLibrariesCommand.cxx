@@ -25,8 +25,6 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
-#include "cmValue.h"
-#include "cmake.h"
 
 namespace {
 
@@ -327,21 +325,6 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
     cmSystemTools::SetFatalErrorOccurred();
   }
 
-  const cmPolicies::PolicyStatus policy22Status =
-    target->GetPolicyStatusCMP0022();
-
-  // If any of the LINK_ options were given, make sure the
-  // LINK_INTERFACE_LIBRARIES target property exists.
-  // Use of any of the new keywords implies awareness of
-  // this property. And if no libraries are named, it should
-  // result in an empty link interface.
-  if ((policy22Status == cmPolicies::OLD ||
-       policy22Status == cmPolicies::WARN) &&
-      currentProcessingState != ProcessingLinkLibraries &&
-      !target->GetProperty("LINK_INTERFACE_LIBRARIES")) {
-    target->SetProperty("LINK_INTERFACE_LIBRARIES", "");
-  }
-
   return true;
 }
 
@@ -528,54 +511,6 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
   // property of the target on the LHS shall be populated.)
   this->AppendProperty("INTERFACE_LINK_LIBRARIES",
                        this->Target->GetDebugGeneratorExpressions(lib, llt));
-
-  // Stop processing if called without any keyword.
-  if (currentProcessingState == ProcessingLinkLibraries) {
-    return true;
-  }
-  // Stop processing if policy CMP0022 is set to NEW.
-  const cmPolicies::PolicyStatus policy22Status =
-    this->Target->GetPolicyStatusCMP0022();
-  if (policy22Status != cmPolicies::OLD &&
-      policy22Status != cmPolicies::WARN) {
-    return true;
-  }
-  // Stop processing if called with an INTERFACE library on the LHS.
-  if (this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
-    return true;
-  }
-
-  // Handle (additional) backward-compatibility case where the command was
-  // called with PUBLIC / INTERFACE / LINK_PUBLIC / LINK_INTERFACE_LIBRARIES.
-  // (The policy CMP0022 is not set to NEW.)
-  {
-    // Get the list of configurations considered to be DEBUG.
-    std::vector<std::string> debugConfigs =
-      this->Makefile.GetCMakeInstance()->GetDebugConfigs();
-    std::string prop;
-
-    // Include this library in the link interface for the target.
-    if (llt == DEBUG_LibraryType || llt == GENERAL_LibraryType) {
-      // Put in the DEBUG configuration interfaces.
-      for (std::string const& dc : debugConfigs) {
-        prop = cmStrCat("LINK_INTERFACE_LIBRARIES_", dc);
-        this->AppendProperty(prop, lib);
-      }
-    }
-    if (llt == OPTIMIZED_LibraryType || llt == GENERAL_LibraryType) {
-      // Put in the non-DEBUG configuration interfaces.
-      this->AppendProperty("LINK_INTERFACE_LIBRARIES", lib);
-
-      // Make sure the DEBUG configuration interfaces exist so that the
-      // general one will not be used as a fall-back.
-      for (std::string const& dc : debugConfigs) {
-        prop = cmStrCat("LINK_INTERFACE_LIBRARIES_", dc);
-        if (!this->Target->GetProperty(prop)) {
-          this->Target->SetProperty(prop, "");
-        }
-      }
-    }
-  }
   return true;
 }
 

@@ -79,7 +79,7 @@ class cmMakefile;
     2, 8, 12, NEW)                                                            \
   SELECT(POLICY, CMP0022,                                                     \
          "INTERFACE_LINK_LIBRARIES defines the link interface.", 2, 8, 12,    \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(                                                                     \
     POLICY, CMP0023,                                                          \
     "Plain and keyword target_link_libraries signatures cannot be mixed.", 2, \

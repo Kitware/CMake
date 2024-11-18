@@ -22,7 +22,6 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
-#include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -130,11 +129,7 @@ void cmExportCMakeConfigGenerator::SetImportLinkInterface(
     return;
   }
 
-  bool const newCMP0022Behavior =
-    target->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
-    target->GetPolicyStatusCMP0022() != cmPolicies::OLD;
-
-  if (newCMP0022Behavior && !this->ExportOld) {
+  if (!this->ExportOld) {
     cmLocalGenerator* lg = target->GetLocalGenerator();
     std::ostringstream e;
     e << "Target \"" << target->GetName()

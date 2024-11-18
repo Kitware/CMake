@@ -999,14 +999,6 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
   // Record current policies for later use.
   this->impl->Makefile->RecordPolicies(this->impl->PolicyMap);
 
-  if (this->impl->TargetType == cmStateEnums::INTERFACE_LIBRARY) {
-    // This policy is checked in a few conditions. The properties relevant
-    // to the policy are always ignored for cmStateEnums::INTERFACE_LIBRARY
-    // targets,
-    // so ensure that the conditions don't lead to nonsense.
-    this->impl->PolicyMap.Set(cmPolicies::CMP0022, cmPolicies::NEW);
-  }
-
   std::set<TargetProperty::InitCondition> metConditions;
   metConditions.insert(TargetProperty::InitCondition::Always);
   if (this->CanCompileSources()) {

@@ -12,7 +12,6 @@
 #include "cmGeneratorTarget.h"
 #include "cmInstallExportGenerator.h"
 #include "cmInstallTargetGenerator.h"
-#include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
@@ -58,13 +57,8 @@ bool cmExportInstallAndroidMKGenerator::GenerateMainFile(std::ostream& os)
       return false;
     }
 
-    bool const newCMP0022Behavior =
-      gt->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
-      gt->GetPolicyStatusCMP0022() != cmPolicies::OLD;
-    if (newCMP0022Behavior) {
-      this->PopulateInterfaceLinkLibrariesProperty(
-        gt, cmGeneratorExpression::InstallInterface, properties);
-    }
+    this->PopulateInterfaceLinkLibrariesProperty(
+      gt, cmGeneratorExpression::InstallInterface, properties);
 
     this->GenerateInterfaceProperties(gt, os, properties);
   }

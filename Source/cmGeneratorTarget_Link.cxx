@@ -718,10 +718,6 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
         }
       }
     }
-  } else if (this->GetPolicyStatusCMP0022() == cmPolicies::WARN ||
-             this->GetPolicyStatusCMP0022() == cmPolicies::OLD) {
-    // The link implementation is the default link interface.
-    iface.ImplementationIsInterface = true;
   }
 
   if (this->LinkLanguagePropagatesToDependents()) {
@@ -804,62 +800,10 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
 
   // An explicit list of interface libraries may be set for shared
   // libraries and executables that export symbols.
-  bool haveExplicitLibraries = false;
-  cmValue explicitLibrariesCMP0022OLD;
-  std::string linkIfacePropCMP0022OLD;
-  bool const cmp0022NEW = (this->GetPolicyStatusCMP0022() != cmPolicies::OLD &&
-                           this->GetPolicyStatusCMP0022() != cmPolicies::WARN);
-  if (cmp0022NEW) {
-    // CMP0022 NEW behavior is to use INTERFACE_LINK_LIBRARIES.
-    haveExplicitLibraries = !this->Target->GetLinkInterfaceEntries().empty() ||
-      !this->Target->GetLinkInterfaceDirectEntries().empty() ||
-      !this->Target->GetLinkInterfaceDirectExcludeEntries().empty();
-  } else {
-    // CMP0022 OLD behavior is to use LINK_INTERFACE_LIBRARIES if set on a
-    // shared lib or executable.
-    if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
-        this->IsExecutableWithExports()) {
-      // Lookup the per-configuration property.
-      linkIfacePropCMP0022OLD = cmStrCat("LINK_INTERFACE_LIBRARIES", suffix);
-      explicitLibrariesCMP0022OLD = this->GetProperty(linkIfacePropCMP0022OLD);
-
-      // If not set, try the generic property.
-      if (!explicitLibrariesCMP0022OLD) {
-        linkIfacePropCMP0022OLD = "LINK_INTERFACE_LIBRARIES";
-        explicitLibrariesCMP0022OLD =
-          this->GetProperty(linkIfacePropCMP0022OLD);
-      }
-    }
-
-    if (explicitLibrariesCMP0022OLD &&
-        this->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
-        !this->PolicyWarnedCMP0022) {
-      // Compare the explicitly set old link interface properties to the
-      // preferred new link interface property one and warn if different.
-      cmValue newExplicitLibraries =
-        this->GetProperty("INTERFACE_LINK_LIBRARIES");
-      if (newExplicitLibraries &&
-          (*newExplicitLibraries != *explicitLibrariesCMP0022OLD)) {
-        std::ostringstream w;
-        /* clang-format off */
-        w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0022) << "\n"
-          "Target \"" << this->GetName() << "\" has an "
-          "INTERFACE_LINK_LIBRARIES property which differs from its " <<
-          linkIfacePropCMP0022OLD << " properties."
-          "\n"
-          "INTERFACE_LINK_LIBRARIES:\n"
-          "  " << *newExplicitLibraries << "\n" <<
-          linkIfacePropCMP0022OLD << ":\n"
-          "  " << *explicitLibrariesCMP0022OLD << "\n";
-        /* clang-format on */
-        this->LocalGenerator->IssueMessage(MessageType::AUTHOR_WARNING,
-                                           w.str());
-        this->PolicyWarnedCMP0022 = true;
-      }
-    }
-
-    haveExplicitLibraries = static_cast<bool>(explicitLibrariesCMP0022OLD);
-  }
+  bool const haveExplicitLibraries =
+    !this->Target->GetLinkInterfaceEntries().empty() ||
+    !this->Target->GetLinkInterfaceDirectEntries().empty() ||
+    !this->Target->GetLinkInterfaceDirectExcludeEntries().empty();
 
   // There is no implicit link interface for executables or modules
   // so if none was explicitly set then there is no link interface.
@@ -869,85 +813,21 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     return;
   }
   iface.Exists = true;
+  iface.Explicit = true;
 
-  // If CMP0022 is NEW then the plain tll signature sets the
-  // INTERFACE_LINK_LIBRARIES property.  Even if the project
-  // clears it, the link interface is still explicit.
-  iface.Explicit = cmp0022NEW || explicitLibrariesCMP0022OLD;
-
-  if (cmp0022NEW) {
-    // The interface libraries are specified by INTERFACE_LINK_LIBRARIES.
-    // Use its special representation directly to get backtraces.
-    this->ExpandLinkItems(
-      kINTERFACE_LINK_LIBRARIES, this->Target->GetLinkInterfaceEntries(),
-      config, headTarget, usage, LinkInterfaceField::Libraries, iface);
-    this->ExpandLinkItems(kINTERFACE_LINK_LIBRARIES_DIRECT,
-                          this->Target->GetLinkInterfaceDirectEntries(),
-                          config, headTarget, usage,
-                          LinkInterfaceField::HeadInclude, iface);
-    this->ExpandLinkItems(kINTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE,
-                          this->Target->GetLinkInterfaceDirectExcludeEntries(),
-                          config, headTarget, usage,
-                          LinkInterfaceField::HeadExclude, iface);
-  } else if (explicitLibrariesCMP0022OLD) {
-    // The interface libraries have been explicitly set in pre-CMP0022 style.
-    std::vector<BT<std::string>> entries;
-    entries.emplace_back(*explicitLibrariesCMP0022OLD);
-    this->ExpandLinkItems(linkIfacePropCMP0022OLD, cmMakeRange(entries),
-                          config, headTarget, usage,
-                          LinkInterfaceField::Libraries, iface);
-  }
-
-  // If the link interface is explicit, do not fall back to the link impl.
-  if (iface.Explicit) {
-    return;
-  }
-
-  // The link implementation is the default link interface.
-  if (cmLinkImplementationLibraries const* impl =
-        this->GetLinkImplementationLibrariesInternal(config, headTarget,
-                                                     usage)) {
-    iface.Libraries.insert(iface.Libraries.end(), impl->Libraries.begin(),
-                           impl->Libraries.end());
-    if (this->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
-        !this->PolicyWarnedCMP0022 && usage == UseTo::Link) {
-      // Compare the link implementation fallback link interface to the
-      // preferred new link interface property and warn if different.
-      cmLinkInterface ifaceNew;
-      this->ExpandLinkItems(
-        kINTERFACE_LINK_LIBRARIES, this->Target->GetLinkInterfaceEntries(),
-        config, headTarget, usage, LinkInterfaceField::Libraries, ifaceNew);
-      if (ifaceNew.Libraries != iface.Libraries) {
-        std::string oldLibraries = cmJoin(impl->Libraries, ";");
-        std::string newLibraries = cmJoin(ifaceNew.Libraries, ";");
-        if (oldLibraries.empty()) {
-          oldLibraries = "(empty)";
-        }
-        if (newLibraries.empty()) {
-          newLibraries = "(empty)";
-        }
-
-        std::ostringstream w;
-        /* clang-format off */
-        w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0022) << "\n"
-          "Target \"" << this->GetName() << "\" has an "
-          "INTERFACE_LINK_LIBRARIES property.  "
-          "This should be preferred as the source of the link interface "
-          "for this library but because CMP0022 is not set CMake is "
-          "ignoring the property and using the link implementation "
-          "as the link interface instead."
-          "\n"
-          "INTERFACE_LINK_LIBRARIES:\n"
-          "  " << newLibraries << "\n"
-          "Link implementation:\n"
-          "  " << oldLibraries << "\n";
-        /* clang-format on */
-        this->LocalGenerator->IssueMessage(MessageType::AUTHOR_WARNING,
-                                           w.str());
-        this->PolicyWarnedCMP0022 = true;
-      }
-    }
-  }
+  // The interface libraries are specified by INTERFACE_LINK_LIBRARIES.
+  // Use its special representation directly to get backtraces.
+  this->ExpandLinkItems(
+    kINTERFACE_LINK_LIBRARIES, this->Target->GetLinkInterfaceEntries(), config,
+    headTarget, usage, LinkInterfaceField::Libraries, iface);
+  this->ExpandLinkItems(kINTERFACE_LINK_LIBRARIES_DIRECT,
+                        this->Target->GetLinkInterfaceDirectEntries(), config,
+                        headTarget, usage, LinkInterfaceField::HeadInclude,
+                        iface);
+  this->ExpandLinkItems(kINTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE,
+                        this->Target->GetLinkInterfaceDirectExcludeEntries(),
+                        config, headTarget, usage,
+                        LinkInterfaceField::HeadExclude, iface);
 }
 
 namespace {
@@ -1218,9 +1098,7 @@ public:
 
 void TransitiveLinkImpl::Follow(cmGeneratorTarget const* target)
 {
-  if (!target || !this->Followed.insert(target).second ||
-      target->GetPolicyStatusCMP0022() == cmPolicies::OLD ||
-      target->GetPolicyStatusCMP0022() == cmPolicies::WARN) {
+  if (!target || !this->Followed.insert(target).second) {
     return;
   }
 

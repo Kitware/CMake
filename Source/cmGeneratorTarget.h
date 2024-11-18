@@ -1394,7 +1394,6 @@ private:
   mutable OutputNameMapType OutputNameMap;
   mutable std::set<cmLinkItem> UtilityItems;
   cmPolicies::PolicyMap PolicyMap;
-  mutable bool PolicyWarnedCMP0022 = false;
   mutable bool PolicyReportedCMP0069 = false;
   mutable bool DebugIncludesDone = false;
   mutable bool DebugCompileOptionsDone = false;

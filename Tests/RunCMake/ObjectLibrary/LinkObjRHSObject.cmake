@@ -1,5 +1,3 @@
-cmake_policy(SET CMP0022 NEW)
-
 enable_language(C)
 
 add_library(AnObjLib OBJECT a.c)

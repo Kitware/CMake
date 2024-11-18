@@ -1,8 +1,6 @@
 
 enable_language(CXX)
 
-cmake_policy(SET CMP0022 NEW)
-
 add_library(foo STATIC empty_vs6_1.cpp)
 add_library(bar STATIC empty_vs6_2.cpp)
 add_library(bat STATIC empty_vs6_3.cpp)
