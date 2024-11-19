@@ -3,7 +3,7 @@ CMAKE_COLOR_DIAGNOSTICS
 
 .. versionadded:: 3.24
 
-Enable color diagnostics throughout.
+Enable color diagnostics throughout the generated build system.
 
 This variable uses three states: ``ON``, ``OFF`` and not defined.
 
@@ -35,3 +35,6 @@ When ``OFF``:
 If the :envvar:`CMAKE_COLOR_DIAGNOSTICS` environment variable is set, its
 value is used.  Otherwise, ``CMAKE_COLOR_DIAGNOSTICS`` is not defined by
 default.
+
+See the :envvar:`CLICOLOR` and :envvar:`CLICOLOR_FORCE` environment
+variables to control color output from CMake command-line tools.

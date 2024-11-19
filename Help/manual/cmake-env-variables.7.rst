@@ -20,6 +20,8 @@ Environment Variables that Change Behavior
 .. toctree::
    :maxdepth: 1
 
+   /envvar/CLICOLOR
+   /envvar/CLICOLOR_FORCE
    /envvar/CMAKE_APPBUNDLE_PATH
    /envvar/CMAKE_FRAMEWORK_PATH
    /envvar/CMAKE_INCLUDE_PATH
