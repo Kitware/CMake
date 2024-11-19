@@ -5012,7 +5012,7 @@ bool cmGeneratorTarget::DiscoverSyntheticTargets(cmSyntheticTargetCache& cache,
   std::vector<std::string> allConfigs =
     this->Makefile->GetGeneratorConfigs(cmMakefile::IncludeEmptyConfig);
   cmOptionalLinkImplementation impl;
-  this->ComputeLinkImplementationLibraries(config, impl, this, UseTo::Link);
+  this->ComputeLinkImplementationLibraries(config, impl, UseTo::Link);
 
   cmCxxModuleUsageEffects usage(this);
 

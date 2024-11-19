@@ -382,16 +382,8 @@ void cmGeneratorTarget::CheckLinkLibraries() const
   }
 
   // Check link the implementation for each generated configuration.
-  for (auto const& hmp : this->LinkImplMap) {
-    HeadToLinkImplementationMap const& hm = hmp.second;
-    // There could be several entries used when computing the pre-CMP0022
-    // default link interface.  Check only the entry for our own link impl.
-    auto const hmi = hm.find(this);
-    if (hmi == hm.end() || !hmi->second.LibrariesDone ||
-        !hmi->second.CheckLinkLibraries) {
-      continue;
-    }
-    for (cmLinkImplItem const& item : hmi->second.Libraries) {
+  for (auto const& impl : this->LinkImplMap) {
+    for (cmLinkImplItem const& item : impl.second.Libraries) {
       if (!this->VerifyLinkItemColons(LinkItemRole::Implementation, item)) {
         return;
       }
@@ -996,18 +988,18 @@ const cmLinkImplementation* cmGeneratorTarget::GetLinkImplementation(
     return nullptr;
   }
 
-  HeadToLinkImplementationMap& hm =
+  cmOptionalLinkImplementation& impl =
     (usage == UseTo::Compile
-       ? this->GetHeadToLinkImplementationUsageRequirementsMap(config)
-       : this->GetHeadToLinkImplementationMap(config));
-  cmOptionalLinkImplementation& impl = hm[this];
+       ? this
+           ->LinkImplUsageRequirementsOnlyMap[cmSystemTools::UpperCase(config)]
+       : this->LinkImplMap[cmSystemTools::UpperCase(config)]);
   if (secondPass) {
     impl = cmOptionalLinkImplementation();
   }
   MaybeEnableCheckLinkLibraries(impl);
   if (!impl.LibrariesDone) {
     impl.LibrariesDone = true;
-    this->ComputeLinkImplementationLibraries(config, impl, this, usage);
+    this->ComputeLinkImplementationLibraries(config, impl, usage);
   }
   if (!impl.LanguagesDone) {
     impl.LanguagesDone = true;
@@ -1017,31 +1009,9 @@ const cmLinkImplementation* cmGeneratorTarget::GetLinkImplementation(
   return &impl;
 }
 
-cmGeneratorTarget::HeadToLinkImplementationMap&
-cmGeneratorTarget::GetHeadToLinkImplementationMap(
-  std::string const& config) const
-{
-  return this->LinkImplMap[cmSystemTools::UpperCase(config)];
-}
-
-cmGeneratorTarget::HeadToLinkImplementationMap&
-cmGeneratorTarget::GetHeadToLinkImplementationUsageRequirementsMap(
-  std::string const& config) const
-{
-  return this
-    ->LinkImplUsageRequirementsOnlyMap[cmSystemTools::UpperCase(config)];
-}
-
 cmLinkImplementationLibraries const*
 cmGeneratorTarget::GetLinkImplementationLibraries(const std::string& config,
                                                   UseTo usage) const
-{
-  return this->GetLinkImplementationLibrariesInternal(config, this, usage);
-}
-
-cmLinkImplementationLibraries const*
-cmGeneratorTarget::GetLinkImplementationLibrariesInternal(
-  const std::string& config, cmGeneratorTarget const* head, UseTo usage) const
 {
   // There is no link implementation for targets that cannot compile sources.
   if (!this->CanCompileSources()) {
@@ -1049,22 +1019,15 @@ cmGeneratorTarget::GetLinkImplementationLibrariesInternal(
   }
 
   // Populate the link implementation libraries for this configuration.
-  HeadToLinkImplementationMap& hm =
+  cmOptionalLinkImplementation& impl =
     (usage == UseTo::Compile
-       ? this->GetHeadToLinkImplementationUsageRequirementsMap(config)
-       : this->GetHeadToLinkImplementationMap(config));
-
-  // If the link implementation does not depend on the head target
-  // then reuse the one from the head we computed first.
-  if (!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition) {
-    head = hm.begin()->first;
-  }
-
-  cmOptionalLinkImplementation& impl = hm[head];
+       ? this
+           ->LinkImplUsageRequirementsOnlyMap[cmSystemTools::UpperCase(config)]
+       : this->LinkImplMap[cmSystemTools::UpperCase(config)]);
   MaybeEnableCheckLinkLibraries(impl);
   if (!impl.LibrariesDone) {
     impl.LibrariesDone = true;
-    this->ComputeLinkImplementationLibraries(config, impl, head, usage);
+    this->ComputeLinkImplementationLibraries(config, impl, usage);
   }
   return &impl;
 }
@@ -1177,7 +1140,7 @@ void ComputeLinkImplTransitive(cmGeneratorTarget const* self,
 
 void cmGeneratorTarget::ComputeLinkImplementationLibraries(
   const std::string& config, cmOptionalLinkImplementation& impl,
-  cmGeneratorTarget const* head, UseTo usage) const
+  UseTo usage) const
 {
   cmLocalGenerator const* lg = this->LocalGenerator;
   cmMakefile const* mf = lg->GetMakefile();
@@ -1207,7 +1170,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       ge.Parse(entry.Value);
     cge->SetEvaluateForBuildsystem(true);
     std::string const& evaluated =
-      cge->Evaluate(this->LocalGenerator, config, head, &dagChecker, nullptr,
+      cge->Evaluate(this->LocalGenerator, config, this, &dagChecker, nullptr,
                     this->LinkerLanguage);
     bool const checkCMP0027 = evaluated != entry.Value;
     cmList llibs(evaluated);
@@ -1309,9 +1272,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
   }
 
   // Update the list of direct link dependencies from usage requirements.
-  if (head == this) {
-    ComputeLinkImplTransitive(this, config, usage, impl);
-  }
+  ComputeLinkImplTransitive(this, config, usage, impl);
 
   // Get the list of configurations considered to be DEBUG.
   std::vector<std::string> debugConfigs =
