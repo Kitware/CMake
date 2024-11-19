@@ -6,6 +6,7 @@
 include_guard()
 
 macro(__apple_linker_appleclang lang)
+  set(CMAKE_${lang}_PLATFORM_LINKER_ID AppleClang)
   set(CMAKE_${lang}_LINK_LIBRARIES_PROCESSING ORDER=REVERSE DEDUPLICATION=ALL)
 
   # Features for LINK_LIBRARY generator expression

@@ -17,6 +17,7 @@ if(MSVC_VERSION GREATER "1900")
 endif()
 
 macro(__windows_linker_msvc lang)
+  set(CMAKE_${lang}_PLATFORM_LINKER_ID MSVC)
   set(CMAKE_${lang}_LINK_LIBRARIES_PROCESSING ORDER=FORWARD DEDUPLICATION=ALL)
 
   # Features for LINK_LIBRARY generator expression
