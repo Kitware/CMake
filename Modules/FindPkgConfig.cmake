@@ -730,7 +730,7 @@ endmacro()
 
   When the ``QUIET`` argument is given, no status messages will be printed.
 
-  .. versionadded:: 3.1
+  .. versionadded:: 3.3
     The :variable:`CMAKE_PREFIX_PATH`,
     :variable:`CMAKE_FRAMEWORK_PATH`, and :variable:`CMAKE_APPBUNDLE_PATH` cache
     and environment variables will be added to the ``pkg-config`` search path.
@@ -740,14 +740,14 @@ endmacro()
     The :variable:`PKG_CONFIG_USE_CMAKE_PREFIX_PATH` variable set to ``FALSE``
     disables this behavior globally.
 
-    .. This didn't actually work until 3.3.
+    .. This was actually added in 3.1, but didn't work until 3.3.
 
-  .. versionadded:: 3.6
+  .. versionadded:: 3.7
     The ``IMPORTED_TARGET`` argument will create an imported target named
     ``PkgConfig::<prefix>`` that can be passed directly as an argument to
     :command:`target_link_libraries`.
 
-    .. This didn't actually work until 3.7.
+    .. This was actually added in 3.6, but didn't work until 3.7.
 
   .. versionadded:: 3.13
     The ``GLOBAL`` argument will make the
