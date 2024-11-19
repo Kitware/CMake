@@ -17,7 +17,6 @@
 #include "cmFindPackageStack.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
-#include "cmLinkItem.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
@@ -28,6 +27,8 @@
 #include "cmTarget.h"
 #include "cmValue.h"
 #include "cmVersion.h"
+
+struct cmLinkInterface;
 
 static std::string cmExportFileGeneratorEscape(std::string const& str)
 {
@@ -107,14 +108,6 @@ void cmExportCMakeConfigGenerator::SetImportLinkInterface(
   // Add the transitive link dependencies for this configuration.
   cmLinkInterface const* iface = target->GetLinkInterface(config, target);
   if (!iface) {
-    return;
-  }
-
-  if (iface->ImplementationIsInterface) {
-    // Policy CMP0022 must not be NEW.
-    this->SetImportLinkProperty(
-      suffix, target, "IMPORTED_LINK_INTERFACE_LIBRARIES", iface->Libraries,
-      properties, ImportLinkPropertyTargetNames::Yes);
     return;
   }
 

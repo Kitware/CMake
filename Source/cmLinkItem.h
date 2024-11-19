@@ -104,8 +104,6 @@ struct cmLinkInterface : public cmLinkInterfaceLibraries
   // or more static libraries.
   unsigned int Multiplicity = 0;
 
-  bool ImplementationIsInterface = false;
-
   // Whether the list depends on a link language genex.
   bool HadLinkLanguageSensitiveCondition = false;
 };
@@ -115,7 +113,6 @@ struct cmOptionalLinkInterface : public cmLinkInterface
   bool LibrariesDone = false;
   bool AllDone = false;
   bool Exists = false;
-  bool Explicit = false;
   bool CheckLinkLibraries = false;
 };
 

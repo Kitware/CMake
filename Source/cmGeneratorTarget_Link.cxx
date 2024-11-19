@@ -680,32 +680,30 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
                                              cmOptionalLinkInterface& iface,
                                              bool secondPass) const
 {
-  if (iface.Explicit) {
-    if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
-        this->GetType() == cmStateEnums::STATIC_LIBRARY ||
-        this->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
-      // Shared libraries may have runtime implementation dependencies
-      // on other shared libraries that are not in the interface.
-      std::set<cmLinkItem> emitted;
-      for (cmLinkItem const& lib : iface.Libraries) {
-        emitted.insert(lib);
-      }
-      if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
-        cmLinkImplementation const* impl =
-          this->GetLinkImplementation(config, UseTo::Link, secondPass);
-        for (cmLinkImplItem const& lib : impl->Libraries) {
-          if (emitted.insert(lib).second) {
-            if (lib.Target) {
-              // This is a runtime dependency on another shared library.
-              if (lib.Target->GetType() == cmStateEnums::SHARED_LIBRARY) {
-                iface.SharedDeps.push_back(lib);
-              }
-            } else {
-              // TODO: Recognize shared library file names.  Perhaps this
-              // should be moved to cmComputeLinkInformation, but that
-              // creates a chicken-and-egg problem since this list is needed
-              // for its construction.
+  if (this->GetType() == cmStateEnums::SHARED_LIBRARY ||
+      this->GetType() == cmStateEnums::STATIC_LIBRARY ||
+      this->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
+    // Shared libraries may have runtime implementation dependencies
+    // on other shared libraries that are not in the interface.
+    std::set<cmLinkItem> emitted;
+    for (cmLinkItem const& lib : iface.Libraries) {
+      emitted.insert(lib);
+    }
+    if (this->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
+      cmLinkImplementation const* impl =
+        this->GetLinkImplementation(config, UseTo::Link, secondPass);
+      for (cmLinkImplItem const& lib : impl->Libraries) {
+        if (emitted.insert(lib).second) {
+          if (lib.Target) {
+            // This is a runtime dependency on another shared library.
+            if (lib.Target->GetType() == cmStateEnums::SHARED_LIBRARY) {
+              iface.SharedDeps.push_back(lib);
             }
+          } else {
+            // TODO: Recognize shared library file names.  Perhaps this
+            // should be moved to cmComputeLinkInformation, but that
+            // creates a chicken-and-egg problem since this list is needed
+            // for its construction.
           }
         }
       }
@@ -805,7 +803,6 @@ void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
     return;
   }
   iface.Exists = true;
-  iface.Explicit = true;
 
   // The interface libraries are specified by INTERFACE_LINK_LIBRARIES.
   // Use its special representation directly to get backtraces.
