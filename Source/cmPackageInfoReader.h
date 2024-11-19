@@ -4,6 +4,7 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
+#include <map>
 #include <memory>
 #include <string>
 #include <vector>
@@ -12,7 +13,9 @@
 
 #include <cm3p/json/value.h>
 
-// class cmExecutionStatus;
+class cmExecutionStatus;
+class cmMakefile;
+class cmTarget;
 
 /** \class cmPackageInfoReader
  * \brief Read and parse CPS files.
@@ -24,7 +27,8 @@
 class cmPackageInfoReader
 {
 public:
-  static std::unique_ptr<cmPackageInfoReader> Read(std::string const& path);
+  static std::unique_ptr<cmPackageInfoReader> Read(
+    std::string const& path, cmPackageInfoReader const* parent = nullptr);
 
   std::string GetName() const;
   cm::optional<std::string> GetVersion() const;
@@ -34,9 +38,20 @@ public:
   /// version is specified.
   std::vector<unsigned> ParseVersion() const;
 
+  /// Create targets for components specified in the CPS file.
+  bool ImportTargets(cmMakefile* makefile, cmExecutionStatus& status);
+
+  /// Add configuration-specific properties for targets.
+  bool ImportTargetConfigurations(cmMakefile* makefile,
+                                  cmExecutionStatus& status) const;
+
 private:
   cmPackageInfoReader() = default;
 
   std::string Path;
   Json::Value Data;
+  std::string Prefix;
+
+  std::map<std::string, cmTarget*> ComponentTargets;
+  std::vector<std::string> DefaultConfigurations;
 };

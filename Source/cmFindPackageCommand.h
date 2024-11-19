@@ -137,6 +137,9 @@ private:
     DoPolicyScope
   };
   bool ReadListFile(const std::string& f, PolicyScopeRule psr);
+  bool ImportTargetConfigurations(std::string const& base,
+                                  cmPackageInfoReader* parent);
+  bool ImportAppendices(std::string const& base);
   void StoreVersionFound();
   void SetConfigDirCacheVariable(const std::string& value);
 
