@@ -56,6 +56,24 @@ When activated, this experimental feature provides the following:
 * The experimental ``install(PACKAGE_INFO)`` command is available to export
   package information in the |CPS|_ format.
 
+Find/Import |CPS| Packages
+==========================
+
+In order to activate support for this experimental feature, set
+
+* variable ``CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES`` to
+* value ``e82e467b-f997-4464-8ace-b00808fff261``.
+
+This UUID may change in future versions of CMake.  Be sure to use the value
+documented here by the source tree of the version of CMake with which you are
+experimenting.
+
+When activated, this experimental feature provides the following:
+
+* The :command:`find_package` command will also search for packages which are
+  described using |CPS|_. Refer to the :command:`find_package` documentation
+  for details.
+
 C++ ``import std`` support
 ==========================
 

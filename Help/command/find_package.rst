@@ -41,8 +41,8 @@ projects should find packages using this form.  This reduces complexity and
 maximizes the ways in which the package can be found or provided.
 
 Understanding the `basic signature`_ should be enough for general usage of
-``find_package()``.  Project maintainers who intend to provide a config
-package should understand the bigger picture, as explained in
+``find_package()``.  Project maintainers who intend to provide a package
+configuration file should understand the bigger picture, as explained in
 :ref:`Full Signature` and all subsequent sections on this page.
 
 Search Modes
@@ -77,6 +77,24 @@ The command has a few modes by which it searches for packages:
   ``<PackageName>ConfigVersion.cmake`` if version details were specified
   (see :ref:`version selection` for an explanation of how these separate
   version files are used).
+
+  .. note::
+
+    If the experimental ``CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES`` is enabled,
+    files named ``<PackageName>.cps`` and ``<lowercasePackageName>.cps`` are
+    also considered.  These files provide package information according to the
+    |CPS|_ (CPS), which is more portable than CMake script.  Aside from any
+    explicitly noted exceptions, any references to "config files", "config
+    mode", "package configuration files", and so forth refer equally to both
+    CPS and CMake-script files.  However, some features of ``find_package``
+    are not supported at this time when a CPS file is found.  In particular,
+    no attempt to validate whether a candidate ``.cps`` file matches
+    ``VERSION`` or ``COMPONENTS`` requirements is performed at this time.
+    (We expect to implement these features in the near future.)
+
+    Search is implemented in a manner that will tend to prefer |CPS| files
+    over CMake-script config files in most cases.  Specifying ``CONFIGS``
+    suppresses consideration of CPS files.
 
   In config mode, the command can be given a list of names to search for
   as package names.  The locations where CMake searches for the config and
@@ -150,14 +168,27 @@ Additional optional components may be listed after
 can still be considered found, as long as all required components are
 satisfied.
 
+.. TODO Once CPS honors COMPONENTS, note that OPTIONAL_COMPONENTS will cause
+   CMake to attempt to locate dependencies for optional components.  Also note
+   that CMake will *not* load any appendices that don't include COMPONENTS or
+   OPTIONAL_COMPONENTS.  (That isn't the case now, but will be when we don't
+   just ignore COMPONENTS.)  The following paragraph will also need changes.
+
 The set of available components and their meaning are defined by the
-target package.  Formally, it is up to the target package how to
-interpret the component information given to it, but it should follow
-the expectations stated above.  For calls where no components are specified,
-there is no single expected behavior and target packages should clearly
-define what occurs in such cases.  Common arrangements include assuming it
-should find all components, no components or some well-defined subset of the
-available components.
+target package.  For CMake-script package configuration files, it is formally
+up to the target package how to interpret the component information given to
+it, but it should follow the expectations stated above.  For calls where no
+components are specified, there is no single expected behavior and target
+packages should clearly define what occurs in such cases.  Common arrangements
+include assuming it should find all components, no components or some
+well-defined subset of the available components.
+
+.. note::
+
+  If the experimental ``CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES`` is enabled,
+  CMake currently imports all available components if the located package
+  configuration file is a |CPS| file.  At this time, ``COMPONENTS`` and
+  ``OPTIONAL_COMPONENTS`` have no effect when considering a CPS file.
 
 .. versionadded:: 3.24
   The ``REGISTRY_VIEW`` keyword specifies which registry views should be
@@ -268,23 +299,29 @@ Once found, any :ref:`version constraint <version selection>` is checked,
 and if satisfied, the configuration file is read and processed by CMake.
 Since the file is provided by the package it already knows the
 location of package contents.  The full path to the configuration file
-is stored in the cmake variable ``<PackageName>_CONFIG``.
+is stored in the CMake variable ``<PackageName>_CONFIG``.
+
+.. note::
+
+  If the experimental ``CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES`` is enabled,
+  files named ``<PackageName>.cps`` and ``<lowercasePackageName>.cps`` are
+  also considered, unless ``CONFIGS`` is given.
 
 All configuration files which have been considered by CMake while
 searching for the package with an appropriate version are stored in the
 ``<PackageName>_CONSIDERED_CONFIGS`` variable, and the associated versions
 in the ``<PackageName>_CONSIDERED_VERSIONS`` variable.
 
-If the package configuration file cannot be found CMake will generate
+If the package configuration file cannot be found, CMake will generate
 an error describing the problem unless the ``QUIET`` argument is
-specified.  If ``REQUIRED`` is specified and the package is not found a
+specified.  If ``REQUIRED`` is specified and the package is not found, a
 fatal error is generated and the configure step stops executing.  If
 ``<PackageName>_DIR`` has been set to a directory not containing a
-configuration file CMake will ignore it and search from scratch.
+configuration file, CMake will ignore it and search from scratch.
 
-Package maintainers providing CMake package configuration files are
-encouraged to name and install them such that the :ref:`search procedure`
-outlined below will find them without requiring use of additional options.
+Package maintainers providing package configuration files are encouraged to
+name and install them such that the :ref:`search procedure` outlined below
+will find them without requiring use of additional options.
 
 .. _`search procedure`:
 
@@ -418,8 +455,9 @@ variables determine the order of preference.
 .. warning::
 
   Setting :variable:`CMAKE_FIND_FRAMEWORK` or :variable:`CMAKE_FIND_APPBUNDLE`
-  to values other than ``FIRST`` (the default) will cause CMake searching for
-  CPS files in an order that is different from the order specified by CPS.
+  to values other than ``FIRST`` (the default) will cause CMake to search for
+  |CPS| files in an order that is different from the order set forth in the
+  specification.
 
 The set of installation prefixes is constructed using the following
 steps.  If ``NO_DEFAULT_PATH`` is specified all ``NO_*`` options are
@@ -457,7 +495,7 @@ enabled.
    This can be skipped if ``NO_PACKAGE_ROOT_PATH`` is passed or by setting
    the :variable:`CMAKE_FIND_USE_PACKAGE_ROOT_PATH` to ``FALSE``.
 
-2. Search paths specified in cmake-specific cache variables.  These
+2. Search paths specified in CMake-specific cache variables.  These
    are intended to be used on the command line with a :option:`-DVAR=VALUE <cmake -D>`.
    The values are interpreted as :ref:`semicolon-separated lists <CMake Language Lists>`.
    This can be skipped if ``NO_CMAKE_PATH`` is passed or by setting the
@@ -467,7 +505,7 @@ enabled.
    * :variable:`CMAKE_FRAMEWORK_PATH`
    * :variable:`CMAKE_APPBUNDLE_PATH`
 
-3. Search paths specified in cmake-specific environment variables.
+3. Search paths specified in CMake-specific environment variables.
    These are intended to be set in the user's shell configuration,
    and therefore use the host's native path separator
    (``;`` on Windows and ``:`` on UNIX).
@@ -501,7 +539,7 @@ enabled.
    See the :manual:`cmake-packages(7)` manual for details on the user
    package registry.
 
-7. Search cmake variables defined in the Platform files for the
+7. Search CMake variables defined in the Platform files for the
    current system. The searching of :variable:`CMAKE_INSTALL_PREFIX` and
    :variable:`CMAKE_STAGING_PREFIX` can be
    skipped if ``NO_CMAKE_INSTALL_PREFIX`` is passed or by setting the
@@ -612,12 +650,17 @@ Config Mode Version Selection
 
 When the ``[version]`` argument is given, Config mode will only find a
 version of the package that claims compatibility with the requested
-version (see :ref:`format specification <FIND_PACKAGE_VERSION_FORMAT>`). If the
-``EXACT`` option is given, only a version of the package claiming an exact match
-of the requested version may be found.  CMake does not establish any
-convention for the meaning of version numbers.  Package version
-numbers are checked by "version" files provided by the packages themselves
-or by :module:`FetchContent`.  For a candidate package configuration file
+version (see :ref:`format specification <FIND_PACKAGE_VERSION_FORMAT>`).  If
+the ``EXACT`` option is given, only a version of the package claiming an exact
+match of the requested version may be found.  CMake does not establish any
+convention for the meaning of version numbers.
+
+CMake-script
+""""""""""""
+
+For CMake-script package configuration files, package version numbers are
+checked by "version" files provided by the packages themselves or by
+:module:`FetchContent`.  For a candidate package configuration file
 ``<config-file>.cmake`` the corresponding version file is located next
 to it and named either ``<config-file>-version.cmake`` or
 ``<config-file>Version.cmake``.  If no such version file is available
@@ -723,12 +766,32 @@ is acceptable the following variables are set:
 
 and the corresponding package configuration file is loaded.
 
+|CPS|
+"""""
+
+For |CPS| package configuration files, no version checking is performed at
+this time.  However, packages using the ``simple`` version schema will set
+the following variables:
+
+``<PackageName>_VERSION``
+  Full provided version string
+``<PackageName>_VERSION_MAJOR``
+  Major version if provided, else 0
+``<PackageName>_VERSION_MINOR``
+  Minor version if provided, else 0
+``<PackageName>_VERSION_PATCH``
+  Patch version if provided, else 0
+``<PackageName>_VERSION_TWEAK``
+  Tweak version if provided, else 0
+``<PackageName>_VERSION_COUNT``
+  Number of version components, non-negative
+
 Package File Interface Variables
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When loading a find module or package configuration file ``find_package``
-defines variables to provide information about the call arguments (and
-restores their original state before returning):
+When loading a find module or CMake-script package configuration file,
+``find_package`` defines variables to provide information about the call
+arguments (and restores their original state before returning):
 
 ``CMAKE_FIND_PACKAGE_NAME``
   The ``<PackageName>`` which is searched for
@@ -812,3 +875,6 @@ configuration file to handle components in a way that makes sense
 for the package.  The package configuration file may set
 ``<PackageName>_FOUND`` to false to tell ``find_package`` that component
 requirements are not satisfied.
+
+.. _CPS: https://cps-org.github.io/cps/
+.. |CPS| replace:: Common Package Specification
