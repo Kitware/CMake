@@ -1,7 +1,5 @@
 enable_language(CXX)
 
-cmake_policy(SET CMP0023 NEW)
-
 add_library(somelib empty.cpp)
 
 # This test ensures that some internal mechanisms of cmGeneratorExpression

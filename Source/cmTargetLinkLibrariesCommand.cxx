@@ -396,41 +396,22 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
   if (!this->Target->PushTLLCommandTrace(
         sig, this->Makefile.GetBacktrace().Top())) {
     std::ostringstream e;
-    const char* modal = nullptr;
-    MessageType messageType = MessageType::AUTHOR_WARNING;
-    switch (this->Makefile.GetPolicyStatus(cmPolicies::CMP0023)) {
-      case cmPolicies::WARN:
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0023) << '\n';
-        modal = "should";
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        break;
-      case cmPolicies::NEW:
-        modal = "must";
-        messageType = MessageType::FATAL_ERROR;
-        break;
-    }
-
-    if (modal) {
-      // If the sig is a keyword form and there is a conflict, the existing
-      // form must be the plain form.
-      const char* existingSig =
-        (sig == cmTarget::KeywordTLLSignature ? "plain" : "keyword");
-      e << "The " << existingSig
-        << " signature for target_link_libraries has "
-           "already been used with the target \""
-        << this->Target->GetName()
-        << "\".  All uses of target_link_libraries with a target " << modal
-        << " be either all-keyword or all-plain.\n";
-      this->Target->GetTllSignatureTraces(e,
-                                          sig == cmTarget::KeywordTLLSignature
-                                            ? cmTarget::PlainTLLSignature
-                                            : cmTarget::KeywordTLLSignature);
-      this->Makefile.IssueMessage(messageType, e.str());
-      if (messageType == MessageType::FATAL_ERROR) {
-        return false;
-      }
-    }
+    // If the sig is a keyword form and there is a conflict, the existing
+    // form must be the plain form.
+    const char* existingSig =
+      (sig == cmTarget::KeywordTLLSignature ? "plain" : "keyword");
+    e << "The " << existingSig
+      << " signature for target_link_libraries has "
+         "already been used with the target \""
+      << this->Target->GetName()
+      << "\".  All uses of target_link_libraries with a target must "
+      << " be either all-keyword or all-plain.\n";
+    this->Target->GetTllSignatureTraces(e,
+                                        sig == cmTarget::KeywordTLLSignature
+                                          ? cmTarget::PlainTLLSignature
+                                          : cmTarget::KeywordTLLSignature);
+    this->Makefile.IssueMessage(MessageType::FATAL_ERROR, e.str());
+    return false;
   }
 
   // Handle normal case where the command was called with another keyword than
