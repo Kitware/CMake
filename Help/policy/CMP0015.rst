@@ -1,7 +1,7 @@
 CMP0015
 -------
 
- :command:`link_directories` treats paths relative to the source dir.
+:command:`link_directories` treats paths relative to the source dir.
 
 In CMake 2.8.0 and lower the :command:`link_directories` command passed
 relative paths unchanged to the linker.  In CMake 2.8.1 and above the
