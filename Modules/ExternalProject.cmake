@@ -749,6 +749,14 @@ step. This can be overridden with custom install commands if required.
   install step's own underlying call to :command:`add_custom_command`, which
   has additional documentation.
 
+``INSTALL_JOB_SERVER_AWARE <bool>``
+  .. versionadded:: 3.32
+
+  Specifies that the install step is aware of the GNU Make job server.
+  See the :command:`add_custom_command` documentation of its
+  ``JOB_SERVER_AWARE`` option for details.  This option is relevant
+  only when an explicit ``INSTALL_COMMAND`` is specified.
+
 .. note::
   If the :envvar:`CMAKE_INSTALL_MODE` environment variable is set when the
   main project is built, it will only have an effect if the following
@@ -2819,6 +2827,16 @@ function(_ep_add_install_command name)
     PROPERTY _EP_INSTALL_BYPRODUCTS
   )
 
+  get_property(install_job_server_aware
+    TARGET ${name}
+    PROPERTY _EP_INSTALL_JOB_SERVER_AWARE
+  )
+  if(install_job_server_aware)
+    set(maybe_JOB_SERVER_AWARE "JOB_SERVER_AWARE 1")
+  else()
+    set(maybe_JOB_SERVER_AWARE "")
+  endif()
+
   set(__cmdQuoted)
   foreach(__item IN LISTS cmd)
     string(APPEND __cmdQuoted " [==[${__item}]==]")
@@ -2831,6 +2849,7 @@ function(_ep_add_install_command name)
       WORKING_DIRECTORY \${binary_dir}
       DEPENDEES build
       ALWAYS \${always}
+      ${maybe_JOB_SERVER_AWARE}
       ${log}
       ${uses_terminal}
     )"
