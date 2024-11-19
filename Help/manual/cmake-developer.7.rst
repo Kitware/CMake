@@ -216,7 +216,11 @@ for any macros, functions and imported targets defined by the Find module.
   variable for use by client code. This should not be a cache entry.
 
 ``Xxx_ROOT_DIR``
-  Where to find the base directory of the module.
+  The base directory of the installation of ``Xxx`` that can be optionally set
+  by the find module if ``Xxx`` is found. This is useful for large packages
+  where many files need to be referenced relative to a common base (or root)
+  directory. Not to be confused with the ``Xxx_ROOT`` hint variable set from the
+  outside for the find module to know where to look for the ``Xxx``.
 
 ``Xxx_VERSION_VV``
   Variables of this form specify whether the ``Xxx`` module being provided
