@@ -9,6 +9,7 @@ block(SCOPE_FOR POLICIES)
 cmake_policy(SET CMP0054 NEW)
 
 macro(__windows_linker_lld lang)
+  set(CMAKE_${lang}_PLATFORM_LINKER_ID LLD)
   # Features for LINK_LIBRARY generator expression
   if(CMAKE_${lang}_COMPILER_LINKER_FRONTEND_VARIANT STREQUAL "GNU")
     include(Platform/Linker/Windows-GNU)

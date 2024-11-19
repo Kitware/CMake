@@ -6,5 +6,6 @@
 include_guard()
 
 macro(__aix_linker_aix lang)
+  set(CMAKE_${lang}_PLATFORM_LINKER_ID AIX)
   set(CMAKE_${lang}_LINK_LIBRARIES_PROCESSING ORDER=REVERSE DEDUPLICATION=ALL)
 endmacro()

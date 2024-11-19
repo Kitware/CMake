@@ -2,3 +2,5 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 include(Platform/Linker/Apple-AppleClang-C)
+
+set(CMAKE_C_PLATFORM_LINKER_ID MOLD)

@@ -2,3 +2,5 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 include(Platform/Linker/Linux-GNU-CUDA)
+
+set(CMAKE_CUDA_PLATFORM_LINKER_ID GNUgold)

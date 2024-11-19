@@ -2,3 +2,5 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 include(Platform/Linker/Linux-GNU-HIP)
+
+set(CMAKE_HIP_PLATFORM_LINKER_ID GNUgold)

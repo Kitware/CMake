@@ -9,6 +9,7 @@ block(SCOPE_FOR POLICIES)
 cmake_policy(SET CMP0054 NEW)
 
 macro(__sunos_linker_solaris lang)
+  set(CMAKE_${lang}_PLATFORM_LINKER_ID Solaris)
   # Features for LINK_LIBRARY generator expression
   ## WHOLE_ARCHIVE: Force loading all members of an archive
   if (CMAKE_SYSTEM_VERSION VERSION_GREATER "5.10")
