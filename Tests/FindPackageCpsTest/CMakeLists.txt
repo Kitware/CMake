@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.31)
 project(FindPackageCpsTest)
 
+set(CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES "e82e467b-f997-4464-8ace-b00808fff261")
+
 # Protect tests from running inside the default install prefix.
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/NotDefaultPrefix")
 

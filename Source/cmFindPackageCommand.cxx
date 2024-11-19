@@ -23,6 +23,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmDependencyProvider.h"
+#include "cmExperimental.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
@@ -829,7 +830,9 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   // Check and eliminate search modes not allowed by the args provided
   this->UseFindModules = configArgs.empty();
   this->UseConfigFiles = moduleArgs.empty();
-  if (this->UseConfigFiles && true /* FIXME check experimental flag */) {
+  if (this->UseConfigFiles &&
+      cmExperimental::HasSupportEnabled(
+        *this->Makefile, cmExperimental::Feature::ImportPackageInfo)) {
     this->UseCpsFiles = this->Configs.empty();
   } else {
     this->UseCpsFiles = false;
