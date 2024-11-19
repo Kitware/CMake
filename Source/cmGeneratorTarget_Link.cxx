@@ -685,13 +685,6 @@ cmLinkInterface const* cmGeneratorTarget::GetLinkInterface(
 
 void cmGeneratorTarget::ComputeLinkInterface(
   const std::string& config, cmOptionalLinkInterface& iface,
-  cmGeneratorTarget const* headTarget) const
-{
-  this->ComputeLinkInterface(config, iface, headTarget, false);
-}
-
-void cmGeneratorTarget::ComputeLinkInterface(
-  const std::string& config, cmOptionalLinkInterface& iface,
   cmGeneratorTarget const* headTarget, bool secondPass) const
 {
   if (iface.Explicit) {
