@@ -1,1 +1,1 @@
-cmake_policy(VERSION 2.6.4)
+cmake_policy(VERSION 2.8.11)
