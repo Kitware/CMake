@@ -1,5 +1,5 @@
 cmake_policy(VERSION 2.8.11)
-project(CMP0022-WARN)
+enable_language(CXX)
 
 add_library(foo SHARED empty_vs6_1.cpp)
 add_library(bar SHARED empty_vs6_2.cpp)

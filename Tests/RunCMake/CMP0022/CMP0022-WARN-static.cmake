@@ -1,5 +1,5 @@
 
-project(CMP0022-WARN)
+enable_language(CXX)
 
 add_library(foo STATIC empty_vs6_1.cpp)
 add_library(bar STATIC empty_vs6_2.cpp)
