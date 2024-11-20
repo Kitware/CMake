@@ -375,6 +375,40 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
   }
 }
 
+cmVisualStudioFolder* cmGlobalVisualStudio7Generator::CreateSolutionFolders(
+  const std::string& path)
+{
+  if (path.empty()) {
+    return nullptr;
+  }
+
+  std::vector<std::string> tokens =
+    cmSystemTools::SplitString(path, '/', false);
+
+  std::string cumulativePath;
+
+  for (std::string const& iter : tokens) {
+    if (iter.empty()) {
+      continue;
+    }
+
+    if (cumulativePath.empty()) {
+      cumulativePath = cmStrCat("CMAKE_FOLDER_GUID_", iter);
+    } else {
+      this->VisualStudioFolders[cumulativePath].Projects.insert(
+        cmStrCat(cumulativePath, '/', iter));
+
+      cumulativePath = cmStrCat(cumulativePath, '/', iter);
+    }
+  }
+
+  if (cumulativePath.empty()) {
+    return nullptr;
+  }
+
+  return &this->VisualStudioFolders[cumulativePath];
+}
+
 void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
   std::ostream& fout, cmLocalGenerator* root,
   OrderedTargetDependSet const& projectTargets)
@@ -421,31 +455,11 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
     // Create "solution folder" information from FOLDER target property
     //
     if (written && this->UseFolderProperty()) {
-      const std::string targetFolder = target->GetEffectiveFolderName();
-      if (!targetFolder.empty()) {
-        std::vector<std::string> tokens =
-          cmSystemTools::SplitString(targetFolder, '/', false);
+      cmVisualStudioFolder* folder =
+        this->CreateSolutionFolders(target->GetEffectiveFolderName());
 
-        std::string cumulativePath;
-
-        for (std::string const& iter : tokens) {
-          if (iter.empty()) {
-            continue;
-          }
-
-          if (cumulativePath.empty()) {
-            cumulativePath = cmStrCat("CMAKE_FOLDER_GUID_", iter);
-          } else {
-            VisualStudioFolders[cumulativePath].insert(
-              cmStrCat(cumulativePath, '/', iter));
-
-            cumulativePath = cmStrCat(cumulativePath, '/', iter);
-          }
-        }
-
-        if (!cumulativePath.empty()) {
-          VisualStudioFolders[cumulativePath].insert(target->GetName());
-        }
+      if (folder != nullptr) {
+        folder->Projects.insert(target->GetName());
       }
     }
   }
@@ -477,7 +491,7 @@ void cmGlobalVisualStudio7Generator::WriteFoldersContent(std::ostream& fout)
     std::string key(iter.first);
     std::string guidParent(this->GetGUID(key));
 
-    for (std::string const& it : iter.second) {
+    for (std::string const& it : iter.second.Projects) {
       std::string const& value(it);
       std::string guid(this->GetGUID(value));
 
