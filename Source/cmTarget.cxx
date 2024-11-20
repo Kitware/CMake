@@ -1307,8 +1307,25 @@ bool cmTarget::IsFrameworkOnApple() const
 
 bool cmTarget::IsArchivedAIXSharedLibrary() const
 {
-  return (this->GetType() == cmStateEnums::SHARED_LIBRARY && this->IsAIX() &&
-          this->GetPropertyAsBool("AIX_SHARED_LIBRARY_ARCHIVE"));
+  if (this->GetType() == cmStateEnums::SHARED_LIBRARY && this->IsAIX()) {
+    cmValue value = this->GetProperty("AIX_SHARED_LIBRARY_ARCHIVE");
+    if (!value.IsEmpty()) {
+      return value.IsOn();
+    }
+    if (this->IsImported()) {
+      return false;
+    }
+    switch (this->GetPolicyStatusCMP0182()) {
+      case cmPolicies::WARN:
+      case cmPolicies::OLD:
+        // The OLD behavior's default is to disable shared library archives.
+        break;
+      case cmPolicies::NEW:
+        // The NEW behavior's default is to enable shared library archives.
+        return true;
+    }
+  }
+  return false;
 }
 
 bool cmTarget::IsAppBundleOnApple() const

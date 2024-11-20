@@ -42,3 +42,24 @@ get_property(aix_sla TARGET imported PROPERTY AIX_SHARED_LIBRARY_ARCHIVE)
 if(aix_sla)
   message(FATAL_ERROR "AIX_SHARED_LIBRARY_ARCHIVE initialized on imported target")
 endif()
+
+unset(CMAKE_AIX_SHARED_LIBRARY_ARCHIVE)
+cmake_policy(SET CMP0182 NEW)
+
+add_library(sla_CMP0182 SHARED sla.c)
+get_property(aix_sla_CMP0182 TARGET sla_CMP0182 PROPERTY AIX_SHARED_LIBRARY_ARCHIVE)
+if(aix_sla_CMP0182)
+  message(FATAL_ERROR "AIX_SHARED_LIBRARY_ARCHIVE initialized without CMAKE_AIX_SHARED_LIBRARY_ARCHIVE")
+endif()
+add_custom_command(TARGET sla_CMP0182 POST_BUILD VERBATIM
+  COMMAND ${CMAKE_COMMAND} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -Dsla=$<TARGET_FILE:sla_CMP0182> -Dname=sla_CMP0182 -Dsoversion= -P${CMAKE_CURRENT_SOURCE_DIR}/sla-check.cmake
+  )
+
+add_executable(UseSLA_CMP0182 use_sla.c)
+target_link_libraries(UseSLA_CMP0182 PRIVATE sla_CMP0182)
+
+add_library(nosla_CMP0182 SHARED sla.c)
+set_property(TARGET nosla_CMP0182 PROPERTY AIX_SHARED_LIBRARY_ARCHIVE OFF)
+add_custom_command(TARGET nosla_CMP0182 POST_BUILD VERBATIM
+  COMMAND ${CMAKE_COMMAND} -DCMAKE_SYSTEM_NAME=${CMAKE_SYSTEM_NAME} -Dnosla=$<TARGET_FILE:nosla_CMP0182> -Dname=nosla_CMP0182 -P${CMAKE_CURRENT_SOURCE_DIR}/nosla-check.cmake
+  )

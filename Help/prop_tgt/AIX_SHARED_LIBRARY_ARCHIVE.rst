@@ -22,5 +22,13 @@ is created by :command:`add_library`.  Imported targets must explicitly
 enable :prop_tgt:`!AIX_SHARED_LIBRARY_ARCHIVE` if they import an AIX
 shared library archive.
 
-For a non-imported target, if this property is not set, the
-default is *disabled*.
+.. versionchanged:: 3.32
+
+  For a non-imported target, if this property is not set, the
+  default is *enabled*.  See policy :policy:`CMP0182`.
+
+  In CMake 3.31, policy :policy:`CMP0182` did not exist,
+  so the default was *disabled*.
+
+  In CMake 3.30 and lower, :prop_tgt:`!AIX_SHARED_LIBRARY_ARCHIVE`
+  did not exist, so the default was *disabled*.
