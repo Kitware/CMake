@@ -291,14 +291,14 @@ void cmLocalGenerator::ComputeObjectMaxPath()
         std::ostringstream w;
         w << "CMAKE_OBJECT_PATH_MAX is set to " << pmax
           << ", which is less than the minimum of 128.  "
-          << "The value will be ignored.";
+             "The value will be ignored.";
         this->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
       }
     } else {
       std::ostringstream w;
       w << "CMAKE_OBJECT_PATH_MAX is set to \"" << *plen
         << "\", which fails to parse as a positive integer.  "
-        << "The value will be ignored.";
+           "The value will be ignored.";
       this->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
     }
   }
@@ -4429,10 +4429,10 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
       std::ostringstream e;
       /* clang-format off */
       e << "WARNING: Function-style preprocessor definitions may not be "
-        << "passed on the compiler command line because many compilers "
-        << "do not support it.\n"
-        << "CMake is dropping a preprocessor definition: " << define << "\n"
-        << "Consider defining the macro in a (configured) header file.\n";
+           "passed on the compiler command line because many compilers "
+           "do not support it.\n"
+           "CMake is dropping a preprocessor definition: " << define << "\n"
+           "Consider defining the macro in a (configured) header file.\n";
       /* clang-format on */
       cmSystemTools::Message(e.str());
       return false;
@@ -4444,10 +4444,10 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
     std::ostringstream e;
     /* clang-format off */
     e << "WARNING: Preprocessor definitions containing '#' may not be "
-      << "passed on the compiler command line because many compilers "
-      << "do not support it.\n"
-      << "CMake is dropping a preprocessor definition: " << define << "\n"
-      << "Consider defining the macro in a (configured) header file.\n";
+         "passed on the compiler command line because many compilers "
+         "do not support it.\n"
+         "CMake is dropping a preprocessor definition: " << define << "\n"
+         "Consider defining the macro in a (configured) header file.\n";
     /* clang-format on */
     cmSystemTools::Message(e.str());
     return false;

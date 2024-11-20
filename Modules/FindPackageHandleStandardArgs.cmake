@@ -531,7 +531,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
       endif()
     endforeach()
     set(COMPONENT_MSG "${FOUND_COMPONENTS_MSG} ${MISSING_COMPONENTS_MSG}")
-    string(APPEND DETAILS "[c${COMPONENT_MSG}]")
+    string(APPEND DETAILS "[${COMPONENT_MSG}]")
   endif()
 
   # version handling:
