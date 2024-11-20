@@ -470,6 +470,19 @@ run_cmake_command(OutputPathPrefix-clean-ninja "${RunCMake_MAKE_PROGRAM}" -f Out
 unset(RunCMake_TEST_NO_CLEAN)
 unset(RunCMake_TEST_BINARY_DIR)
 
+# cmake --install test
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/cmake--install-build)
+  run_cmake_with_options(cmake--install
+    -DCMAKE_INSTALL_PREFIX=${RunCMake_TEST_BINARY_DIR}/install
+    -DCMAKE_CROSS_CONFIGS=all
+    -DCMAKE_DEFAULT_CONFIGS=Debug\\\\;Release
+    )
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(cmake--install-build ${CMAKE_COMMAND} --build .)
+  run_cmake_command(cmake--install-install ${CMAKE_COMMAND} --install .)
+endblock()
+
 # CudaSimple uses separable compilation, which is currently only supported on NVCC.
 if(CMake_TEST_CUDA)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CudaSimple-build)

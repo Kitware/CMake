@@ -1796,15 +1796,21 @@ void cmGlobalGenerator::WriteJsonContent(const std::string& path,
 
 void cmGlobalGenerator::WriteInstallJson() const
 {
-  if (this->GetCMakeInstance()->GetState()->GetGlobalPropertyAsBool(
-        "INSTALL_PARALLEL")) {
-    Json::Value index(Json::objectValue);
-    index["InstallScripts"] = Json::arrayValue;
-    for (const auto& file : this->InstallScripts) {
-      index["InstallScripts"].append(file);
-    }
-    this->WriteJsonContent("CMakeFiles/InstallScripts.json", index);
+  Json::Value index(Json::objectValue);
+  index["InstallScripts"] = Json::arrayValue;
+  for (const auto& file : this->InstallScripts) {
+    index["InstallScripts"].append(file);
   }
+  index["Parallel"] =
+    this->GetCMakeInstance()->GetState()->GetGlobalPropertyAsBool(
+      "INSTALL_PARALLEL");
+  if (this->SupportsDefaultConfigs()) {
+    index["Configs"] = Json::arrayValue;
+    for (auto const& config : this->GetDefaultConfigs()) {
+      index["Configs"].append(config);
+    }
+  }
+  this->WriteJsonContent("CMakeFiles/InstallScripts.json", index);
 }
 #endif
 

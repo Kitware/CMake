@@ -2933,7 +2933,7 @@ int cmake::Generate()
   this->SaveCache(this->GetHomeOutputDirectory());
 
 #if !defined(CMAKE_BOOTSTRAP)
-  this->GetGlobalGenerator()->WriteInstallJson();
+  this->GlobalGenerator->WriteInstallJson();
   this->FileAPI->WriteReplies();
 #endif
 

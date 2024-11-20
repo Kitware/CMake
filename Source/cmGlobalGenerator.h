@@ -678,6 +678,12 @@ public:
   void AddTestFile(std::string const& file);
   void AddCMakeFilesToRebuild(std::vector<std::string>& files) const;
 
+  virtual const std::set<std::string>& GetDefaultConfigs() const
+  {
+    static std::set<std::string> configs;
+    return configs;
+  }
+
 protected:
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
