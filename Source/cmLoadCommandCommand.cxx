@@ -38,6 +38,12 @@
 #  include <malloc.h> /* for malloc/free on QNX */
 #endif
 
+#if defined(__clang__) && defined(__has_warning)
+#  if __has_warning("-Wcast-function-type-strict")
+#    pragma clang diagnostic ignored "-Wcast-function-type-strict"
+#  endif
+#endif
+
 namespace {
 
 const char* LastName = nullptr;
