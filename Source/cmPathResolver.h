@@ -64,7 +64,9 @@ public:
   /** Get the process's working directory on a Windows drive letter.
       This is a legacy DOS concept supported by 'cmd' shells.  */
   virtual std::string GetWorkingDirectoryOnDrive(char drive_letter) = 0;
+#endif
 
+#if defined(_WIN32) || defined(__APPLE__)
   /** Read the on-disk spelling of the last component of a file path.  */
   virtual cmsys::Status ReadName(std::string const& path,
                                  std::string& name) = 0;
