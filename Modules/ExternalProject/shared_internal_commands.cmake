@@ -1934,6 +1934,7 @@ macro(_ep_get_add_keywords out_var)
     #
     INSTALL_COMMAND
     INSTALL_BYPRODUCTS
+    INSTALL_JOB_SERVER_AWARE
     #
     # Test step options
     #

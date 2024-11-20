@@ -12,5 +12,6 @@ function(check target regex)
 endfunction()
 
 check("/CMakeFiles/Foo.dir/build.make" [[\+cd (/d )?"?.*"? && "?.*"? --build "?.*"?]])
+check("/CMakeFiles/Foo.dir/build.make" [[\+cd (/d )?"?.*"? && "?.*"? --install "?.*"?]])
 check("/CMakeFiles/Foo.dir/build.make" [[\+cd (/d )?"?.*"? && "?.*"? -E touch "?.*"?]])
 check("/CMakeFiles/Foo.dir/build.make" [[\+"?.*"? -E true]])
