@@ -7,7 +7,6 @@
 #include <unordered_map>
 #include <utility>
 
-#include <cm/string_view>
 #include <cmext/string_view>
 
 #include <cm3p/json/reader.h>
@@ -21,7 +20,6 @@
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -194,14 +192,6 @@ std::string NormalizeTargetName(std::string const& name,
   return name;
 }
 
-std::string ResolvePrefix(cm::string_view str, cm::string_view prefix)
-{
-  if (cmHasPrefix(str, "@prefix@"_s)) {
-    return cmStrCat(prefix, str.substr(8));
-  }
-  return std::string{ str };
-}
-
 void AppendProperty(cmMakefile* makefile, cmTarget* target,
                     cm::string_view property, cm::string_view configuration,
                     std::string const& value)
@@ -215,24 +205,6 @@ void AppendProperty(cmMakefile* makefile, cmTarget* target,
   }
 
   target->AppendProperty(fullprop, value, makefile->GetBacktrace());
-}
-
-void SetOptionalProperty(cmMakefile* /*makefile*/, cmTarget* target,
-                         cm::string_view property,
-                         cm::string_view configuration,
-                         Json::Value const& value, std::string const& prefix)
-{
-  if (!value.isNull()) {
-    std::string fullprop;
-    if (configuration.empty()) {
-      fullprop = cmStrCat("IMPORTED_"_s, property);
-    } else {
-      fullprop = cmStrCat("IMPORTED_"_s, property, '_',
-                          cmSystemTools::UpperCase(configuration));
-    }
-
-    target->SetProperty(fullprop, ResolvePrefix(value.asString(), prefix));
-  }
 }
 
 void AddCompileFeature(cmMakefile* makefile, cmTarget* target,
@@ -270,93 +242,6 @@ void AddLinkFeature(cmMakefile* makefile, cmTarget* target,
     AppendProperty(makefile, target, "LINK_LIBRARIES"_s, configuration,
                    "Threads::Threads");
   }
-}
-
-void SetTargetProperties(cmMakefile* makefile, cmTarget* target,
-                         Json::Value const& data, std::string const& package,
-                         std::string const& prefix,
-                         cm::string_view configuration)
-{
-  // Add compile and link features.
-  for (std::string const& def : ReadList(data, "compile_features")) {
-    AddCompileFeature(makefile, target, configuration, def);
-  }
-
-  for (std::string const& def : ReadList(data, "link_features")) {
-    AddLinkFeature(makefile, target, configuration, def);
-  }
-
-  // Add compile definitions.
-  for (std::string const& def : ReadList(data, "definitions")) {
-    AppendProperty(makefile, target, "COMPILE_DEFINITIONS"_s, configuration,
-                   def);
-  }
-
-  // Add include directories.
-  for (std::string const& inc : ReadList(data, "includes")) {
-    AppendProperty(makefile, target, "INCLUDE_DIRECTORIES"_s, configuration,
-                   ResolvePrefix(inc, prefix));
-  }
-
-  // Add link name/location(s).
-  SetOptionalProperty(makefile, target, "LOCATION"_s, configuration,
-                      data["location"], prefix);
-
-  SetOptionalProperty(makefile, target, "IMPLIB"_s, configuration,
-                      data["link_location"], prefix);
-
-  SetOptionalProperty(makefile, target, "SONAME"_s, configuration,
-                      data["link_name"], prefix);
-
-  // Add link languages.
-  for (std::string const& lang : ReadList(data, "link_languages")) {
-    auto const li = Languages.find(cmSystemTools::LowerCase(lang));
-    if (li != Languages.end()) {
-      AppendProperty(makefile, target, "LINK_LANGUAGES"_s, configuration,
-                     li->second);
-    }
-  }
-
-  // Add transitive dependencies.
-  for (std::string const& dep : ReadList(data, "requires")) {
-    AppendProperty(makefile, target, "LINK_LIBRARIES"_s, configuration,
-                   NormalizeTargetName(dep, package));
-  }
-
-  for (std::string const& dep : ReadList(data, "link_requires")) {
-    std::string const& lib =
-      cmStrCat("$<LINK_ONLY:"_s, NormalizeTargetName(dep, package), '>');
-    AppendProperty(makefile, target, "LINK_LIBRARIES"_s, configuration, lib);
-  }
-}
-
-cmTarget* AddLibraryComponent(cmMakefile* makefile,
-                              cmStateEnums::TargetType type,
-                              std::string const& name, Json::Value const& data,
-                              std::vector<std::string> const& configurations,
-                              std::string const& package,
-                              std::string const& prefix,
-                              cm::string_view configuration)
-{
-  // Create the imported target.
-  cmTarget* const target = makefile->AddImportedTarget(name, type, false);
-
-  // Set target properties.
-  SetTargetProperties(makefile, target, data, package, prefix, configuration);
-  if (configuration.empty()) {
-    Json::Value const& cfgData = data["configurations"];
-    for (auto ci = cfgData.begin(), ce = cfgData.end(); ci != ce; ++ci) {
-      SetTargetProperties(makefile, target, *ci, package, prefix, IterKey(ci));
-    }
-  }
-
-  // Set default configurations.
-  if (!configurations.empty()) {
-    target->SetProperty("IMPORTED_CONFIGURATIONS",
-                        cmJoin(configurations, ";"_s));
-  }
-
-  return target;
 }
 
 } // namespace
@@ -457,6 +342,116 @@ std::vector<unsigned> cmPackageInfoReader::ParseVersion() const
   return result;
 }
 
+std::string cmPackageInfoReader::ResolvePath(std::string path) const
+{
+  cmSystemTools::ConvertToUnixSlashes(path);
+  if (cmHasPrefix(path, "@prefix@"_s)) {
+    return cmStrCat(this->Prefix, path.substr(8));
+  }
+  if (!cmSystemTools::FileIsFullPath(path)) {
+    return cmStrCat(cmSystemTools::GetFilenamePath(this->Path), '/', path);
+  }
+  return path;
+}
+
+void cmPackageInfoReader::SetOptionalProperty(cmTarget* target,
+                                              cm::string_view property,
+                                              cm::string_view configuration,
+                                              Json::Value const& value) const
+{
+  if (!value.isNull()) {
+    std::string fullprop;
+    if (configuration.empty()) {
+      fullprop = cmStrCat("IMPORTED_"_s, property);
+    } else {
+      fullprop = cmStrCat("IMPORTED_"_s, property, '_',
+                          cmSystemTools::UpperCase(configuration));
+    }
+
+    target->SetProperty(fullprop, this->ResolvePath(value.asString()));
+  }
+}
+
+void cmPackageInfoReader::SetTargetProperties(
+  cmMakefile* makefile, cmTarget* target, Json::Value const& data,
+  std::string const& package, cm::string_view configuration) const
+{
+  // Add compile and link features.
+  for (std::string const& def : ReadList(data, "compile_features")) {
+    AddCompileFeature(makefile, target, configuration, def);
+  }
+
+  for (std::string const& def : ReadList(data, "link_features")) {
+    AddLinkFeature(makefile, target, configuration, def);
+  }
+
+  // Add compile definitions.
+  for (std::string const& def : ReadList(data, "definitions")) {
+    AppendProperty(makefile, target, "COMPILE_DEFINITIONS"_s, configuration,
+                   def);
+  }
+
+  // Add include directories.
+  for (std::string inc : ReadList(data, "includes")) {
+    AppendProperty(makefile, target, "INCLUDE_DIRECTORIES"_s, configuration,
+                   this->ResolvePath(std::move(inc)));
+  }
+
+  // Add link name/location(s).
+  this->SetOptionalProperty(target, "LOCATION"_s, configuration,
+                            data["location"]);
+
+  this->SetOptionalProperty(target, "IMPLIB"_s, configuration,
+                            data["link_location"]);
+
+  this->SetOptionalProperty(target, "SONAME"_s, configuration,
+                            data["link_name"]);
+
+  // Add link languages.
+  for (std::string const& lang : ReadList(data, "link_languages")) {
+    auto const li = Languages.find(cmSystemTools::LowerCase(lang));
+    if (li != Languages.end()) {
+      AppendProperty(makefile, target, "LINK_LANGUAGES"_s, configuration,
+                     li->second);
+    }
+  }
+
+  // Add transitive dependencies.
+  for (std::string const& dep : ReadList(data, "requires")) {
+    AppendProperty(makefile, target, "LINK_LIBRARIES"_s, configuration,
+                   NormalizeTargetName(dep, package));
+  }
+
+  for (std::string const& dep : ReadList(data, "link_requires")) {
+    std::string const& lib =
+      cmStrCat("$<LINK_ONLY:"_s, NormalizeTargetName(dep, package), '>');
+    AppendProperty(makefile, target, "LINK_LIBRARIES"_s, configuration, lib);
+  }
+}
+
+cmTarget* cmPackageInfoReader::AddLibraryComponent(
+  cmMakefile* makefile, cmStateEnums::TargetType type, std::string const& name,
+  Json::Value const& data, std::string const& package) const
+{
+  // Create the imported target.
+  cmTarget* const target = makefile->AddImportedTarget(name, type, false);
+
+  // Set target properties.
+  this->SetTargetProperties(makefile, target, data, package, {});
+  auto const& cfgData = data["configurations"];
+  for (auto ci = cfgData.begin(), ce = cfgData.end(); ci != ce; ++ci) {
+    this->SetTargetProperties(makefile, target, *ci, package, IterKey(ci));
+  }
+
+  // Set default configurations.
+  if (!this->DefaultConfigurations.empty()) {
+    target->SetProperty("IMPORTED_CONFIGURATIONS",
+                        cmJoin(this->DefaultConfigurations, ";"_s));
+  }
+
+  return target;
+}
+
 bool cmPackageInfoReader::ImportTargets(cmMakefile* makefile,
                                         cmExecutionStatus& status)
 {
@@ -484,21 +479,17 @@ bool cmPackageInfoReader::ImportTargets(cmMakefile* makefile,
     if (type == "symbolic"_s) {
       // TODO
     } else if (type == "dylib"_s) {
-      target = AddLibraryComponent(makefile, cmStateEnums::SHARED_LIBRARY,
-                                   fullName, *ci, this->DefaultConfigurations,
-                                   package, this->Prefix, {});
+      target = this->AddLibraryComponent(
+        makefile, cmStateEnums::SHARED_LIBRARY, fullName, *ci, package);
     } else if (type == "module"_s) {
-      target = AddLibraryComponent(makefile, cmStateEnums::MODULE_LIBRARY,
-                                   fullName, *ci, this->DefaultConfigurations,
-                                   package, this->Prefix, {});
+      target = this->AddLibraryComponent(
+        makefile, cmStateEnums::MODULE_LIBRARY, fullName, *ci, package);
     } else if (type == "archive"_s) {
-      target = AddLibraryComponent(makefile, cmStateEnums::STATIC_LIBRARY,
-                                   fullName, *ci, this->DefaultConfigurations,
-                                   package, this->Prefix, {});
+      target = this->AddLibraryComponent(
+        makefile, cmStateEnums::STATIC_LIBRARY, fullName, *ci, package);
     } else if (type == "interface"_s) {
-      target = AddLibraryComponent(makefile, cmStateEnums::INTERFACE_LIBRARY,
-                                   fullName, *ci, this->DefaultConfigurations,
-                                   package, this->Prefix, {});
+      target = this->AddLibraryComponent(
+        makefile, cmStateEnums::INTERFACE_LIBRARY, fullName, *ci, package);
     } else {
       makefile->IssueMessage(MessageType::WARNING,
                              cmStrCat("component "_s, fullName,
@@ -557,8 +548,8 @@ bool cmPackageInfoReader::ImportTargetConfigurations(
     }
 
     // Read supplemental data for component.
-    SetTargetProperties(makefile, ti->second, *ci, package, this->Prefix,
-                        configuration);
+    this->SetTargetProperties(makefile, ti->second, *ci, package,
+                              configuration);
   }
 
   return true;

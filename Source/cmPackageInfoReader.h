@@ -10,8 +10,11 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cm/string_view>
 
 #include <cm3p/json/value.h>
+
+#include "cmStateTypes.h"
 
 class cmExecutionStatus;
 class cmMakefile;
@@ -47,6 +50,21 @@ public:
 
 private:
   cmPackageInfoReader() = default;
+
+  cmTarget* AddLibraryComponent(cmMakefile* makefile,
+                                cmStateEnums::TargetType type,
+                                std::string const& name,
+                                Json::Value const& data,
+                                std::string const& package) const;
+
+  void SetTargetProperties(cmMakefile* makefile, cmTarget* target,
+                           Json::Value const& data, std::string const& package,
+                           cm::string_view configuration) const;
+  void SetOptionalProperty(cmTarget* target, cm::string_view property,
+                           cm::string_view configuration,
+                           Json::Value const& value) const;
+
+  std::string ResolvePath(std::string path) const;
 
   std::string Path;
   Json::Value Data;
