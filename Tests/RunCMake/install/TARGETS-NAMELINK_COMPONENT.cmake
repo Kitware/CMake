@@ -1,5 +1,7 @@
 enable_language(C)
 
+set(CMAKE_AIX_SHARED_LIBRARY_ARCHIVE 0)
+
 macro(add_versioned_library NAME)
   add_library(${NAME} SHARED obj1.c)
   set_target_properties(${NAME} PROPERTIES

@@ -1,5 +1,7 @@
 enable_language(C)
 
+set(CMAKE_AIX_SHARED_LIBRARY_ARCHIVE 0)
+
 add_executable(test1 main.c)
 set_property(TARGET test1 PROPERTY OUTPUT_NAME test1out)
 set_property(TARGET test1 PROPERTY RELEASE_OUTPUT_NAME test1rel)

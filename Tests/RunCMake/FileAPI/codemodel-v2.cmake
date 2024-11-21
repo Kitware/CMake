@@ -1,5 +1,7 @@
 enable_language(C)
 
+set(CMAKE_AIX_SHARED_LIBRARY_ARCHIVE 0)
+
 include("${CMAKE_CURRENT_LIST_DIR}/include_test.cmake")
 
 add_library(c_lib empty.c)

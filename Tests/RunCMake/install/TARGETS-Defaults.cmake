@@ -1,5 +1,7 @@
 enable_language(C)
 
+set(CMAKE_AIX_SHARED_LIBRARY_ARCHIVE 0)
+
 add_executable(exe main.c)
 add_library(lib1 SHARED obj1.c)
 set_property(TARGET lib1 PROPERTY PUBLIC_HEADER ${CMAKE_CURRENT_SOURCE_DIR}/obj3.h)
