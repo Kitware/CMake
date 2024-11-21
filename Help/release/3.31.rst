@@ -257,3 +257,15 @@ Other Changes
 * The :command:`cmake_parse_arguments(PARSE_ARGV)` command now defines a
   variable for an empty string after a single-value keyword. See policy
   :policy:`CMP0174`.
+
+Updates
+=======
+
+Changes made since CMake 3.31.0 include the following.
+
+3.31.1
+------
+
+* This version made no changes to documented features or interfaces.
+  Some implementation updates were made to support ecosystem changes
+  and/or fix regressions.
