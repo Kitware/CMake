@@ -4,7 +4,7 @@
 #  define EXPORT
 #endif
 
-EXPORT int testSharedLibArchiveAIX(void)
+EXPORT int testSharedObjectAIX(void)
 {
   return 0;
 }

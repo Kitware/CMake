@@ -107,11 +107,13 @@ void cmInstallImportedRuntimeArtifactsGenerator::GenerateScriptForConfig(
         }
       } else {
         std::vector<std::string> files{ location };
-        auto soName = this->Target->GetSOName(config);
-        auto soNameFile =
-          cmStrCat(this->Target->GetDirectory(config), '/', soName);
-        if (!soName.empty() && soNameFile != location) {
-          files.push_back(soNameFile);
+        if (!this->Target->IsArchivedAIXSharedLibrary()) {
+          auto soName = this->Target->GetSOName(config);
+          auto soNameFile =
+            cmStrCat(this->Target->GetDirectory(config), '/', soName);
+          if (!soName.empty() && soNameFile != location) {
+            files.push_back(soNameFile);
+          }
         }
         this->AddInstallRule(os, this->GetDestination(config),
                              cmInstallType_SHARED_LIBRARY, files,
