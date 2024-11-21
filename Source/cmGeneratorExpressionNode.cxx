@@ -3592,6 +3592,12 @@ struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
                     "SHARED libraries.");
       return std::string();
     }
+    if (target->IsArchivedAIXSharedLibrary()) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_SONAME_FILE is not allowed for "
+                    "AIX_SHARED_LIBRARY_ARCHIVE libraries.");
+      return std::string();
+    }
     std::string result = cmStrCat(target->GetDirectory(context->Config), '/',
                                   target->GetSOName(context->Config));
     return result;
@@ -3616,6 +3622,12 @@ struct TargetFilesystemArtifactResultCreator<ArtifactSonameImportTag>
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_SONAME_IMPORT_FILE is allowed only for "
                     "SHARED libraries.");
+      return std::string();
+    }
+    if (target->IsArchivedAIXSharedLibrary()) {
+      ::reportError(context, content->GetOriginalExpression(),
+                    "TARGET_SONAME_IMPORT_FILE is not allowed for "
+                    "AIX_SHARED_LIBRARY_ARCHIVE libraries.");
       return std::string();
     }
 
