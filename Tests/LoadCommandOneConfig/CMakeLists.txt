@@ -56,4 +56,3 @@ endif ()
 if (TEST_DEF AND SOME_CACHE_VARIABLE AND TEST_EXEC)
   add_definitions(-DCMAKE_IS_FUN)
 endif ()
-

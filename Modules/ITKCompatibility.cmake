@@ -4,4 +4,3 @@
 
 # work around an old bug in ITK prior to version 3.0
 set(TIFF_RIGHT_VERSION 1)
-

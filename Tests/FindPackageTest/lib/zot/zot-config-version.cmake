@@ -7,4 +7,3 @@ if("${PACKAGE_FIND_VERSION_MAJOR}" EQUAL 3)
     set(PACKAGE_VERSION_EXACT 1)
   endif()
 endif()
-

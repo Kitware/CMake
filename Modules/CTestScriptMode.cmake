@@ -17,4 +17,3 @@ include(CMakeDetermineSystem)
 # Also load the system specific file, which sets up e.g. the search paths.
 # This makes the FIND_XXX() calls work much better
 include(CMakeSystemSpecificInformation)
-

@@ -287,4 +287,3 @@ if(Q_WS_MAC)
 
   set(QT_QTCORE_LIB_DEPENDENCIES ${QT_QTCORE_LIB_DEPENDENCIES} "-framework ApplicationServices")
 endif()
-

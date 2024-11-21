@@ -29,7 +29,3 @@ if(NOT DEFINED CMAKE_STD_NAMESPACE)
        "Does the compiler support std::.")
   endif ()
 endif()
-
-
-
-

@@ -16,4 +16,3 @@ target_link_libraries(case1d case1c)
 
 add_executable(hello main.c)
 target_link_libraries(hello case1c case1b case1d case1c)
-

@@ -10,5 +10,3 @@ else()
 endif()
 
 include(Platform/UnixPaths)
-
-

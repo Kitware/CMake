@@ -19,4 +19,3 @@ string(REGEX REPLACE "tr2i18n\\(\"\", \"\"\\)" "QString::null" _uic_CONTENTS "${
 
 file(WRITE ${KDE_UIC_CPP_FILE} "#include <kdialog.h>\n#include <klocale.h>\n\n")
 file(APPEND ${KDE_UIC_CPP_FILE} "${_uic_CONTENTS}")
-

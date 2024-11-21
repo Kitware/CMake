@@ -29,7 +29,3 @@ if(NOT DEFINED CMAKE_HAS_ANSI_STRING_STREAM)
        "Does the compiler support sstream")
   endif ()
 endif()
-
-
-
-

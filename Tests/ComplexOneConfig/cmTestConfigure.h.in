@@ -77,4 +77,3 @@
 
 // test parenthesis in conditionals
 #cmakedefine CONDITIONAL_PARENTHESES
-
