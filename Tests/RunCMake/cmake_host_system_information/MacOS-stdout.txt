@@ -1,0 +1,1 @@
+-- os_name='(macOS|Mac OS X)'
