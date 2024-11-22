@@ -1011,31 +1011,6 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
   std::string compilerIdVar = cmStrCat("CMAKE_", lang, "_COMPILER_ID");
   std::string const compilerId = mf->GetSafeDefinition(compilerIdVar);
 
-  if (compilerId == "AppleClang") {
-    switch (mf->GetPolicyStatus(cmPolicies::CMP0025)) {
-      case cmPolicies::WARN:
-        if (!this->CMakeInstance->GetIsInTryCompile() &&
-            mf->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0025")) {
-          std::ostringstream w;
-          /* clang-format off */
-          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0025) << "\n"
-            "Converting " << lang <<
-            R"( compiler id "AppleClang" to "Clang" for compatibility.)"
-            ;
-          /* clang-format on */
-          mf->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
-        }
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        // OLD behavior is to convert AppleClang to Clang.
-        mf->AddDefinition(compilerIdVar, "Clang");
-        break;
-      case cmPolicies::NEW:
-        // NEW behavior is to keep AppleClang.
-        break;
-    }
-  }
-
   if (compilerId == "QCC") {
     switch (mf->GetPolicyStatus(cmPolicies::CMP0047)) {
       case cmPolicies::WARN:

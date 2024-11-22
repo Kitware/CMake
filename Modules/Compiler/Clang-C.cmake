@@ -1,11 +1,6 @@
 include(Compiler/Clang)
 __compiler_clang(C)
 
-cmake_policy(GET CMP0025 appleClangPolicy)
-if(APPLE AND NOT appleClangPolicy STREQUAL NEW)
-  return()
-endif()
-
 if("x${CMAKE_C_COMPILER_FRONTEND_VARIANT}" STREQUAL "xMSVC")
   set(CMAKE_C_COMPILE_OPTIONS_EXPLICIT_LANGUAGE -TC)
   set(CMAKE_C_CLANG_TIDY_DRIVER_MODE "cl")

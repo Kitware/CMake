@@ -86,7 +86,7 @@ class cmMakefile;
     8, 12, NEW)                                                               \
   SELECT(POLICY, CMP0024, "Disallow include export result.", 3, 0, 0, NEW)    \
   SELECT(POLICY, CMP0025, "Compiler id for Apple Clang is now AppleClang.",   \
-         3, 0, 0, WARN)                                                       \
+         3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0026, "Disallow use of the LOCATION target property.", 3, \
          0, 0, WARN)                                                          \
   SELECT(POLICY, CMP0027,                                                     \
