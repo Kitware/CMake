@@ -95,7 +95,7 @@ class cmMakefile;
          3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0028,                                                     \
          "Double colon in target name means ALIAS or IMPORTED target.", 3, 0, \
-         0, WARN)                                                             \
+         0, NEW)                                                              \
   SELECT(POLICY, CMP0029, "The subdir_depends command should not be called.", \
          3, 0, 0, WARN)                                                       \
   SELECT(POLICY, CMP0030,                                                     \

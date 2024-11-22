@@ -443,20 +443,7 @@ bool cmGeneratorTarget::VerifyLinkItemColons(LinkItemRole role,
       item.AsStr().find("::") == std::string::npos) {
     return true;
   }
-  MessageType messageType = MessageType::FATAL_ERROR;
   std::string e;
-  switch (this->GetLocalGenerator()->GetPolicyStatus(cmPolicies::CMP0028)) {
-    case cmPolicies::WARN: {
-      e = cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0028), "\n");
-      messageType = MessageType::AUTHOR_WARNING;
-    } break;
-    case cmPolicies::OLD:
-      return true;
-    case cmPolicies::NEW:
-      // Issue the fatal message.
-      break;
-  }
-
   if (role == LinkItemRole::Implementation) {
     e = cmStrCat(e, "Target \"", this->GetName(), "\" links to");
   } else {
@@ -470,8 +457,8 @@ bool cmGeneratorTarget::VerifyLinkItemColons(LinkItemRole role,
   if (backtrace.Empty()) {
     backtrace = this->GetBacktrace();
   }
-  this->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(messageType, e,
-                                                              backtrace);
+  this->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
+    MessageType::FATAL_ERROR, e, backtrace);
   return false;
 }
 
