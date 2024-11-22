@@ -51,8 +51,7 @@ class cmLinkImplItem : public cmLinkItem
 {
 public:
   cmLinkImplItem() = default;
-  cmLinkImplItem(cmLinkItem item, bool checkCMP0027);
-  bool CheckCMP0027 = false;
+  cmLinkImplItem(cmLinkItem item);
 };
 
 /** The link implementation specifies the direct library

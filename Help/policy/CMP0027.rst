@@ -1,6 +1,9 @@
 CMP0027
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 Conditionally linked imported targets with missing include directories.
 
 CMake 2.8.11 introduced introduced the concept of
@@ -21,7 +24,5 @@ the :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` of a generator-expression
 conditionally linked ``IMPORTED`` target does not exist.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.0
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

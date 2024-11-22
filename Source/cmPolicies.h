@@ -92,7 +92,7 @@ class cmMakefile;
   SELECT(POLICY, CMP0027,                                                     \
          "Conditionally linked imported targets with missing include "        \
          "directories.",                                                      \
-         3, 0, 0, WARN)                                                       \
+         3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0028,                                                     \
          "Double colon in target name means ALIAS or IMPORTED target.", 3, 0, \
          0, WARN)                                                             \

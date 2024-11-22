@@ -71,9 +71,8 @@ std::ostream& operator<<(std::ostream& os, cmLinkItem const& item)
   return os << item.AsStr();
 }
 
-cmLinkImplItem::cmLinkImplItem(cmLinkItem item, bool checkCMP0027)
+cmLinkImplItem::cmLinkImplItem(cmLinkItem item)
   : cmLinkItem(std::move(item))
-  , CheckCMP0027(checkCMP0027)
 {
 }
 

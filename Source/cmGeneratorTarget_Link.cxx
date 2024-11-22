@@ -829,7 +829,7 @@ template <>
 inline cmLinkImplItem constructItem(cmGeneratorTarget* target,
                                     cmListFileBacktrace const& bt)
 {
-  return cmLinkImplItem(cmLinkItem(target, false, bt), false);
+  return cmLinkImplItem(cmLinkItem(target, false, bt));
 }
 
 template <>
@@ -1080,7 +1080,7 @@ void TransitiveLinkImpl::Follow(cmGeneratorTarget const* target)
 
     // Add the item itself, but at most once.
     if (this->Emitted.insert(item).second) {
-      this->Impl.Libraries.emplace_back(item, /* checkCMP0027= */ false);
+      this->Impl.Libraries.emplace_back(item);
     }
   }
 
@@ -1169,7 +1169,6 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     std::string const& evaluated =
       cge->Evaluate(this->LocalGenerator, config, this, &dagChecker, nullptr,
                     this->LinkerLanguage);
-    bool const checkCMP0027 = evaluated != entry.Value;
     cmList llibs(evaluated);
     if (cge->GetHadHeadSensitiveCondition()) {
       impl.HadHeadSensitiveCondition = true;
@@ -1239,7 +1238,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         if (depsForTarget != synthTargetsForConfig.end()) {
           for (auto const* depForTarget : depsForTarget->second) {
             cmLinkItem synthItem(depForTarget, item.Cross, item.Backtrace);
-            impl.Libraries.emplace_back(std::move(synthItem), false);
+            impl.Libraries.emplace_back(std::move(synthItem));
           }
         }
       } else {
@@ -1256,7 +1255,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         }
       }
 
-      impl.Libraries.emplace_back(std::move(item), checkCMP0027);
+      impl.Libraries.emplace_back(std::move(item));
     }
 
     std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();
