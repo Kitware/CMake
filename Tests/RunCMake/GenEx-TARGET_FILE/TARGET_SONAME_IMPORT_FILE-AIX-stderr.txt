@@ -1,0 +1,9 @@
+^CMake Error at TARGET_SONAME_IMPORT_FILE-AIX\.cmake:[0-9]+ \(add_custom_target\):
+  Error evaluating generator expression:
+
+    \$<TARGET_SONAME_IMPORT_FILE:sla>
+
+  TARGET_SONAME_IMPORT_FILE is not allowed for AIX_SHARED_LIBRARY_ARCHIVE
+  libraries\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
