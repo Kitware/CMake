@@ -243,4 +243,3 @@ macro(ECOS_ADD_EXECUTABLE _exe_NAME )
     COMMAND ${ECOS_ARCH_PREFIX}objdump -S -x -d -C ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.elf >> ${CMAKE_CURRENT_BINARY_DIR}/${_exe_NAME}.lst )
 
 endmacro()
-

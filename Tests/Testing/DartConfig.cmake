@@ -21,4 +21,3 @@ set (TRIGGER_SITE "")
 # set (SMTP_MAILHOST "")
 # set (CONTINUOUS_MONITOR_LIST "")
 # set (CONTINUOUS_BASE_URL "")
-

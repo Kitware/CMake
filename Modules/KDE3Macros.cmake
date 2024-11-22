@@ -399,5 +399,3 @@ macro(KDE3_ADD_EXECUTABLE _target_NAME )
 #    endif ()
 
 endmacro()
-
-

@@ -43,4 +43,3 @@ include(Platform/WindowsPaths)
 #set(CMAKE_START_TEMP_FILE "")
 #set(CMAKE_END_TEMP_FILE "")
 #set(CMAKE_VERBOSE_MAKEFILE 1)
-

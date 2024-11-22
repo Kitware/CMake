@@ -30,8 +30,3 @@ if(NOT DEFINED CMAKE_ANSI_FOR_SCOPE)
       "Does the compiler support ansi for scope.")
   endif ()
 endif()
-
-
-
-
-

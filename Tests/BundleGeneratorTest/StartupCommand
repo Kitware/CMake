@@ -9,4 +9,3 @@ echo "RESOURCES: $RESOURCES"
 export DYLD_LIBRARY_PATH=$RESOURCES/lib
 
 exec "$RESOURCES/bin/Executable"
-

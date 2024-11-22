@@ -9,4 +9,3 @@ add_library( SixA SixASrc.c )
 
 add_library( SixB SixBSrc.c )
 target_link_libraries( SixB Four )
-
