@@ -84,7 +84,7 @@ class cmMakefile;
     POLICY, CMP0023,                                                          \
     "Plain and keyword target_link_libraries signatures cannot be mixed.", 2, \
     8, 12, NEW)                                                               \
-  SELECT(POLICY, CMP0024, "Disallow include export result.", 3, 0, 0, WARN)   \
+  SELECT(POLICY, CMP0024, "Disallow include export result.", 3, 0, 0, NEW)    \
   SELECT(POLICY, CMP0025, "Compiler id for Apple Clang is now AppleClang.",   \
          3, 0, 0, WARN)                                                       \
   SELECT(POLICY, CMP0026, "Disallow use of the LOCATION target property.", 3, \

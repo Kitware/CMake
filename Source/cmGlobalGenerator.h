@@ -621,7 +621,6 @@ public:
   void AddBuildExportSet(cmExportBuildFileGenerator* gen);
   void AddBuildExportExportSet(cmExportBuildFileGenerator* gen);
   bool IsExportedTargetsFile(const std::string& filename) const;
-  bool GenerateImportFile(const std::string& file);
   cmExportBuildFileGenerator* GetExportedTargetsFile(
     const std::string& filename) const;
   void AddCMP0042WarnTarget(const std::string& target);
@@ -640,10 +639,7 @@ public:
   cmFileLockPool& GetFileLockPool() { return this->FileLockPool; }
 #endif
 
-  bool GetConfigureDoneCMP0026() const
-  {
-    return this->ConfigureDoneCMP0026AndCMP0024;
-  }
+  bool GetConfigureDoneCMP0026() const { return this->ConfigureDoneCMP0026; }
 
   std::string MakeSilentFlag;
 
@@ -945,6 +941,6 @@ protected:
   bool ForceUnixPaths;
   bool ToolSupportsColor;
   bool InstallTargetEnabled;
-  bool ConfigureDoneCMP0026AndCMP0024;
+  bool ConfigureDoneCMP0026;
   bool AllowGlobalTargetCodegen;
 };

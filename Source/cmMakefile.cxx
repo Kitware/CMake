@@ -952,20 +952,6 @@ cmMakefile::GetExportBuildFileGenerators() const
   return this->ExportBuildFileGenerators;
 }
 
-void cmMakefile::RemoveExportBuildFileGeneratorCMP0024(
-  cmExportBuildFileGenerator* gen)
-{
-  auto it =
-    std::find_if(this->ExportBuildFileGenerators.begin(),
-                 this->ExportBuildFileGenerators.end(),
-                 [gen](std::unique_ptr<cmExportBuildFileGenerator> const& p) {
-                   return p.get() == gen;
-                 });
-  if (it != this->ExportBuildFileGenerators.end()) {
-    this->ExportBuildFileGenerators.erase(it);
-  }
-}
-
 void cmMakefile::AddExportBuildFileGenerator(
   std::unique_ptr<cmExportBuildFileGenerator> gen)
 {

@@ -239,7 +239,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
     // LOCATION property or to export() a file to be include()d.  However
     // there is no cmGeneratorTarget at configure-time, so search the SOURCES
     // for TARGET_OBJECTS instead for backwards compatibility with OLD
-    // behavior of CMP0024 and CMP0026 only.
+    // behavior of CMP0026 only.
 
     cmBTStringRange sourceEntries = this->Target->GetSourceEntries();
     for (auto const& entry : sourceEntries) {

@@ -1034,7 +1034,6 @@ public:
 
   std::vector<std::unique_ptr<cmExportBuildFileGenerator>> const&
   GetExportBuildFileGenerators() const;
-  void RemoveExportBuildFileGeneratorCMP0024(cmExportBuildFileGenerator* gen);
   void AddExportBuildFileGenerator(
     std::unique_ptr<cmExportBuildFileGenerator> gen);
 

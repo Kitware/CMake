@@ -129,7 +129,7 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   this->CurrentConfigureMakefile = nullptr;
   this->TryCompileOuterMakefile = nullptr;
 
-  this->ConfigureDoneCMP0026AndCMP0024 = false;
+  this->ConfigureDoneCMP0026 = false;
   this->FirstTimeProgress = 0.0f;
 
   cm->GetState()->SetIsGeneratorMultiConfig(false);
@@ -313,24 +313,6 @@ void cmGlobalGenerator::AddBuildExportExportSet(
 {
   this->BuildExportExportSets[gen->GetMainExportFileName()] = gen;
   this->AddBuildExportSet(gen);
-}
-
-bool cmGlobalGenerator::GenerateImportFile(const std::string& file)
-{
-  auto const it = this->BuildExportSets.find(file);
-  if (it != this->BuildExportSets.end()) {
-    bool result = it->second->GenerateImportFile();
-
-    if (!this->ConfigureDoneCMP0026AndCMP0024) {
-      for (const auto& m : this->Makefiles) {
-        m->RemoveExportBuildFileGeneratorCMP0024(it->second);
-      }
-    }
-
-    this->BuildExportSets.erase(it);
-    return result;
-  }
-  return false;
 }
 
 void cmGlobalGenerator::ForceLinkerLanguages()
@@ -1383,11 +1365,11 @@ void cmGlobalGenerator::Configure()
   }
 
   // now do it
-  this->ConfigureDoneCMP0026AndCMP0024 = false;
+  this->ConfigureDoneCMP0026 = false;
   dirMf->Configure();
   dirMf->EnforceDirectoryLevelRules();
 
-  this->ConfigureDoneCMP0026AndCMP0024 = true;
+  this->ConfigureDoneCMP0026 = true;
 
   // Put a copy of each global target in every directory.
   {
