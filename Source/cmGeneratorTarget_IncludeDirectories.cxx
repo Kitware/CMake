@@ -247,9 +247,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   bool debugIncludes = !this->DebugIncludesDone &&
     cm::contains(debugProperties, "INCLUDE_DIRECTORIES");
 
-  if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
-    this->DebugIncludesDone = true;
-  }
+  this->DebugIncludesDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
     this, config, lang, &dagChecker, this->IncludeDirectoriesEntries);

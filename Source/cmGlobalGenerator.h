@@ -639,8 +639,6 @@ public:
   cmFileLockPool& GetFileLockPool() { return this->FileLockPool; }
 #endif
 
-  bool GetConfigureDoneCMP0026() const { return this->ConfigureDoneCMP0026; }
-
   std::string MakeSilentFlag;
 
   size_t RecursionDepth = 0;
@@ -941,6 +939,5 @@ protected:
   bool ForceUnixPaths;
   bool ToolSupportsColor;
   bool InstallTargetEnabled;
-  bool ConfigureDoneCMP0026;
   bool AllowGlobalTargetCodegen;
 };

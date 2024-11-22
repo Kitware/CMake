@@ -23,7 +23,6 @@
 #include "cmFileSet.h"
 #include "cmFindPackageStack.h"
 #include "cmGeneratorExpression.h"
-#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -46,41 +45,12 @@
 #include "cmake.h"
 
 template <>
-const std::string& cmTargetPropertyComputer::ComputeLocationForBuild<cmTarget>(
-  cmTarget const* tgt)
-{
-  static std::string loc;
-  if (tgt->IsImported()) {
-    loc = tgt->ImportedGetFullPath("", cmStateEnums::RuntimeBinaryArtifact);
-    return loc;
-  }
-
-  cmGlobalGenerator* gg = tgt->GetGlobalGenerator();
-  if (!gg->GetConfigureDoneCMP0026()) {
-    gg->CreateGenerationObjects();
-  }
-  cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
-  loc = gt->GetLocationForBuild();
-  return loc;
-}
-
-template <>
-const std::string& cmTargetPropertyComputer::ComputeLocation<cmTarget>(
+const std::string& cmTargetPropertyComputer::ImportedLocation<cmTarget>(
   cmTarget const* tgt, const std::string& config)
 {
   static std::string loc;
-  if (tgt->IsImported()) {
-    loc =
-      tgt->ImportedGetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
-    return loc;
-  }
-
-  cmGlobalGenerator* gg = tgt->GetGlobalGenerator();
-  if (!gg->GetConfigureDoneCMP0026()) {
-    gg->CreateGenerationObjects();
-  }
-  cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
-  loc = gt->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
+  assert(tgt->IsImported());
+  loc = tgt->ImportedGetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
   return loc;
 }
 

@@ -489,7 +489,7 @@ public:
 
   bool IsDotNetSdkTarget() const;
 
-  void GetObjectLibrariesCMP0026(
+  void GetObjectLibrariesInSources(
     std::vector<cmGeneratorTarget*>& objlibs) const;
 
   std::string GetFullNameImported(const std::string& config,

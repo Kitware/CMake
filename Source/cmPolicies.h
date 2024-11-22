@@ -88,7 +88,7 @@ class cmMakefile;
   SELECT(POLICY, CMP0025, "Compiler id for Apple Clang is now AppleClang.",   \
          3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0026, "Disallow use of the LOCATION target property.", 3, \
-         0, 0, WARN)                                                          \
+         0, 0, NEW)                                                           \
   SELECT(POLICY, CMP0027,                                                     \
          "Conditionally linked imported targets with missing include "        \
          "directories.",                                                      \

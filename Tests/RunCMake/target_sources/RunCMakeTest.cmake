@@ -6,7 +6,6 @@ endif()
 
 run_cmake(EmptyKeywordArgs)
 run_cmake(OriginDebug)
-run_cmake(CMP0026-LOCATION)
 run_cmake(CMP0076-OLD)
 run_cmake(CMP0076-WARN)
 run_cmake(MissingSource)

@@ -33,14 +33,12 @@ public:
   }
 
 private:
-  static bool HandleLocationPropertyPolicy(std::string const& tgtName,
-                                           cmMakefile const& mf);
+  static void IssueLocationPropertyError(std::string const& tgtName,
+                                         cmMakefile const& mf);
 
   template <typename Target>
-  static const std::string& ComputeLocationForBuild(Target const* tgt);
-  template <typename Target>
-  static const std::string& ComputeLocation(Target const* tgt,
-                                            std::string const& config);
+  static const std::string& ImportedLocation(Target const* tgt,
+                                             std::string const& config);
 
   template <typename Target>
   static cmValue GetLocation(Target const* tgt, std::string const& prop,
@@ -56,21 +54,21 @@ private:
         tgt->GetType() == cmStateEnums::UNKNOWN_LIBRARY) {
       static const std::string propLOCATION = "LOCATION";
       if (prop == propLOCATION) {
-        if (!tgt->IsImported() &&
-            !HandleLocationPropertyPolicy(tgt->GetName(), mf)) {
+        if (!tgt->IsImported()) {
+          IssueLocationPropertyError(tgt->GetName(), mf);
           return nullptr;
         }
-        return cmValue(ComputeLocationForBuild(tgt));
+        return cmValue(ImportedLocation(tgt, std::string()));
       }
 
       // Support "LOCATION_<CONFIG>".
       if (cmHasLiteralPrefix(prop, "LOCATION_")) {
-        if (!tgt->IsImported() &&
-            !HandleLocationPropertyPolicy(tgt->GetName(), mf)) {
+        if (!tgt->IsImported()) {
+          IssueLocationPropertyError(tgt->GetName(), mf);
           return nullptr;
         }
         std::string configName = prop.substr(9);
-        return cmValue(ComputeLocation(tgt, configName));
+        return cmValue(ImportedLocation(tgt, configName));
       }
 
       // Support "<CONFIG>_LOCATION".
@@ -78,11 +76,11 @@ private:
           !cmHasLiteralPrefix(prop, "XCODE_ATTRIBUTE_")) {
         std::string configName(prop.c_str(), prop.size() - 9);
         if (configName != "IMPORTED") {
-          if (!tgt->IsImported() &&
-              !HandleLocationPropertyPolicy(tgt->GetName(), mf)) {
+          if (!tgt->IsImported()) {
+            IssueLocationPropertyError(tgt->GetName(), mf);
             return nullptr;
           }
-          return cmValue(ComputeLocation(tgt, configName));
+          return cmValue(ImportedLocation(tgt, configName));
         }
       }
     }

@@ -129,7 +129,6 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   this->CurrentConfigureMakefile = nullptr;
   this->TryCompileOuterMakefile = nullptr;
 
-  this->ConfigureDoneCMP0026 = false;
   this->FirstTimeProgress = 0.0f;
 
   cm->GetState()->SetIsGeneratorMultiConfig(false);
@@ -1340,11 +1339,8 @@ void cmGlobalGenerator::Configure()
   }
 
   // now do it
-  this->ConfigureDoneCMP0026 = false;
   dirMf->Configure();
   dirMf->EnforceDirectoryLevelRules();
-
-  this->ConfigureDoneCMP0026 = true;
 
   // Put a copy of each global target in every directory.
   {
@@ -1371,7 +1367,7 @@ void cmGlobalGenerator::CreateGenerationObjects(TargetTypes targetTypes)
 {
   this->CreateLocalGenerators();
   // Commit side effects only if we are actually generating
-  if (this->GetConfigureDoneCMP0026()) {
+  if (targetTypes == TargetTypes::AllTargets) {
     this->CheckTargetProperties();
   }
   this->CreateGeneratorTargets(targetTypes);

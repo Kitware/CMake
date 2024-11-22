@@ -37,7 +37,6 @@
 #include "cmSourceFileLocation.h"
 #include "cmSourceGroup.h"
 #include "cmStateTypes.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmValue.h"
@@ -234,35 +233,12 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
 {
   std::vector<BT<std::string>> files;
 
-  if (!this->LocalGenerator->GetGlobalGenerator()->GetConfigureDoneCMP0026()) {
-    // At configure-time, this method can be called as part of getting the
-    // LOCATION property or to export() a file to be include()d.  However
-    // there is no cmGeneratorTarget at configure-time, so search the SOURCES
-    // for TARGET_OBJECTS instead for backwards compatibility with OLD
-    // behavior of CMP0026 only.
-
-    cmBTStringRange sourceEntries = this->Target->GetSourceEntries();
-    for (auto const& entry : sourceEntries) {
-      cmList items{ entry.Value };
-      for (auto const& item : items) {
-        if (cmHasLiteralPrefix(item, "$<TARGET_OBJECTS:") &&
-            item.back() == '>') {
-          continue;
-        }
-        files.emplace_back(item);
-      }
-    }
-    return files;
-  }
-
   cmList debugProperties{ this->Makefile->GetDefinition(
     "CMAKE_DEBUG_TARGET_PROPERTIES") };
   bool debugSources =
     !this->DebugSourcesDone && cm::contains(debugProperties, "SOURCES");
 
-  if (this->LocalGenerator->GetGlobalGenerator()->GetConfigureDoneCMP0026()) {
-    this->DebugSourcesDone = true;
-  }
+  this->DebugSourcesDone = true;
 
   cmGeneratorExpressionDAGChecker dagChecker(this, "SOURCES", nullptr, nullptr,
                                              this->LocalGenerator, config);
@@ -326,24 +302,6 @@ std::vector<BT<cmSourceFile*>> cmGeneratorTarget::GetSourceFiles(
   std::string const& config) const
 {
   std::vector<BT<cmSourceFile*>> files;
-  if (!this->GlobalGenerator->GetConfigureDoneCMP0026()) {
-    // Since we are still configuring not all sources may exist yet,
-    // so we need to avoid full source classification because that
-    // requires the absolute paths to all sources to be determined.
-    // Since this is only for compatibility with old policies that
-    // projects should not depend on anymore, just compute the files
-    // without memoizing them.
-    std::vector<BT<std::string>> srcs = this->GetSourceFilePaths(config);
-    std::set<cmSourceFile*> emitted;
-    for (BT<std::string> const& s : srcs) {
-      cmSourceFile* sf = this->Makefile->GetOrCreateSource(s.Value);
-      if (emitted.insert(sf).second) {
-        files.emplace_back(sf, s.Backtrace);
-      }
-    }
-    return files;
-  }
-
   KindedSources const& kinded = this->GetKindedSources(config);
   files.reserve(kinded.Sources.size());
   for (SourceAndKind const& si : kinded.Sources) {

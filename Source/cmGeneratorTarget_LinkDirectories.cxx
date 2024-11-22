@@ -15,7 +15,6 @@
 
 #include "cmEvaluatedTargetProperty.h"
 #include "cmGeneratorExpressionDAGChecker.h"
-#include "cmGlobalGenerator.h"
 #include "cmLinkItem.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -131,9 +130,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkDirectories(
   bool debugDirectories = !this->DebugLinkDirectoriesDone &&
     cm::contains(debugProperties, "LINK_DIRECTORIES");
 
-  if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
-    this->DebugLinkDirectoriesDone = true;
-  }
+  this->DebugLinkDirectoriesDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
     this, config, language, &dagChecker, this->LinkDirectoriesEntries);
