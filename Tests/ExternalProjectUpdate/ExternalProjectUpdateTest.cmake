@@ -189,16 +189,16 @@ endif()
 file(REMOVE_RECURSE ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals)
 
 if(do_git_tests)
-  check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 1 REBASE)
-  check_a_tag(tag1          d1970730310fe8bc07e73f15dc570071f9f9654a 1 0 REBASE)
+  check_a_tag(origin/master b5f0fc2d442b72dd29e655c329af0062e1f8d129 1 1 REBASE)
+  check_a_tag(tag1          4209914b424925d6f1b558d79454d60967d4b0f3 1 0 REBASE)
   # With the Git UPDATE_COMMAND performance patch, this will not require a
   # 'git fetch'
-  check_a_tag(tag1          d1970730310fe8bc07e73f15dc570071f9f9654a 0 0 REBASE)
-  check_a_tag(tag2          5842b503ba4113976d9bb28d57b5aee1ad2736b7 1 0 REBASE)
-  check_a_tag(d19707303     d1970730310fe8bc07e73f15dc570071f9f9654a 0 0 REBASE)
-  check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 1 REBASE)
+  check_a_tag(tag1          4209914b424925d6f1b558d79454d60967d4b0f3 0 0 REBASE)
+  check_a_tag(tag2          ae72641040f1c9512f152d08afb6909f0498f958 1 0 REBASE)
+  check_a_tag(4209914b42    4209914b424925d6f1b558d79454d60967d4b0f3 0 0 REBASE)
+  check_a_tag(origin/master b5f0fc2d442b72dd29e655c329af0062e1f8d129 1 1 REBASE)
   # This is a remote symbolic ref, so it will always trigger a 'git fetch'
-  check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 1 REBASE)
+  check_a_tag(origin/master b5f0fc2d442b72dd29e655c329af0062e1f8d129 1 1 REBASE)
 
   foreach(strategy IN ITEMS CHECKOUT REBASE_CHECKOUT)
     # Move local master back, then apply a change that will cause a conflict
@@ -232,7 +232,7 @@ if(do_git_tests)
       message(FATAL_ERROR "Could not commit conflicting change.")
     endif()
     # This should discard our commit but leave behind an annotated tag
-    check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 1 ${strategy})
+    check_a_tag(origin/master b5f0fc2d442b72dd29e655c329af0062e1f8d129 1 1 ${strategy})
   endforeach()
 
   # This file matches a .gitignore rule that the last commit defines. We can't
@@ -242,7 +242,7 @@ if(do_git_tests)
   # doesn't choke on it.
   set(ignoredFile ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals/Source/TutorialStep1-GIT/ignored_item)
   file(TOUCH ${ignoredFile})
-  check_a_tag(origin/master b5752a26ae448410926b35c275af3c192a53722e 1 1 REBASE)
+  check_a_tag(origin/master b5f0fc2d442b72dd29e655c329af0062e1f8d129 1 1 REBASE)
   if(NOT EXISTS ${ignoredFile})
     message(FATAL_ERROR "Ignored file is missing")
   endif()

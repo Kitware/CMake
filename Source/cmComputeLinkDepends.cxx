@@ -610,7 +610,7 @@ cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
   , DebugMode(this->Makefile->IsOn("CMAKE_LINK_DEPENDS_DEBUG_MODE") ||
               this->Target->GetProperty("LINK_DEPENDS_DEBUG_MODE").IsOn())
   , LinkLanguage(linkLanguage)
-  , LinkType(CMP0003_ComputeLinkType(
+  , LinkType(ComputeLinkType(
       this->Config, this->Makefile->GetCMakeInstance()->GetDebugConfigs()))
   , Strategy(strategy)
 

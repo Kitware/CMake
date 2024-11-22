@@ -1,5 +1,5 @@
 
-project(CMP0022-NOWARN-static-NEW)
+enable_language(CXX)
 
 cmake_policy(SET CMP0022 NEW)
 

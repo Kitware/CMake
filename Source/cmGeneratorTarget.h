@@ -264,9 +264,6 @@ public:
 
   cmLinkInterface const* GetLinkInterface(
     const std::string& config, const cmGeneratorTarget* headTarget) const;
-  void ComputeLinkInterface(const std::string& config,
-                            cmOptionalLinkInterface& iface,
-                            const cmGeneratorTarget* head) const;
 
   enum class UseTo
   {

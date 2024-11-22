@@ -685,13 +685,6 @@ cmLinkInterface const* cmGeneratorTarget::GetLinkInterface(
 
 void cmGeneratorTarget::ComputeLinkInterface(
   const std::string& config, cmOptionalLinkInterface& iface,
-  cmGeneratorTarget const* headTarget) const
-{
-  this->ComputeLinkInterface(config, iface, headTarget, false);
-}
-
-void cmGeneratorTarget::ComputeLinkInterface(
-  const std::string& config, cmOptionalLinkInterface& iface,
   cmGeneratorTarget const* headTarget, bool secondPass) const
 {
   if (iface.Explicit) {
@@ -1449,8 +1442,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
   std::vector<std::string> debugConfigs =
     this->Makefile->GetCMakeInstance()->GetDebugConfigs();
 
-  cmTargetLinkLibraryType linkType =
-    CMP0003_ComputeLinkType(config, debugConfigs);
+  cmTargetLinkLibraryType linkType = ComputeLinkType(config, debugConfigs);
   cmTarget::LinkLibraryVectorType const& oldllibs =
     this->Target->GetOriginalLinkLibraries();
 

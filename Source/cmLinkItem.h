@@ -153,7 +153,7 @@ struct cmOptionalLinkImplementation : public cmLinkImplementation
 };
 
 /** Compute the link type to use for the given configuration.  */
-inline cmTargetLinkLibraryType CMP0003_ComputeLinkType(
+inline cmTargetLinkLibraryType ComputeLinkType(
   const std::string& config, std::vector<std::string> const& debugConfigs)
 {
   // No configuration is always optimized.

@@ -1,7 +1,7 @@
 # Using 2.8 will trigger a deprecation warning.  In this case it's explicitly
 # intentional since the tests checks various policy implementations prior to
 # 3.10
-cmake_minimum_required(VERSION 2.8.10) # old enough to not set CMP0022
+cmake_minimum_required(VERSION 2.8.11) # old enough to not set CMP0022
 
 if(POLICY CMP0129)
   cmake_policy(SET CMP0129 NEW)
@@ -151,7 +151,7 @@ add_subdirectory(SubDirB)
 target_link_libraries(SubDirB TopDirImported)
 add_subdirectory(SubDirC)
 target_link_libraries(SubDirC PRIVATE SubDirC2)
-target_link_libraries(TopDir SubDirC)
+target_link_libraries(TopDir PRIVATE SubDirC)
 add_library(TopDirImported IMPORTED INTERFACE)
 target_compile_definitions(TopDirImported INTERFACE DEF_TopDirImported)
 cmake_policy(POP)

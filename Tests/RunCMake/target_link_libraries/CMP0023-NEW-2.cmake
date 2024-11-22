@@ -1,5 +1,5 @@
 
-project(CMP0022-WARN)
+enable_language(CXX)
 
 cmake_policy(SET CMP0023 NEW)
 
