@@ -5,6 +5,8 @@ if(POLICY CMP0129)
 endif()
 project(Export C CXX)
 
+set(CMAKE_AIX_SHARED_LIBRARY_ARCHIVE 1)
+
 find_package(Foo REQUIRED CONFIG NO_DEFAULT_PATH)
 
 # Pretend that RelWithDebInfo should link to debug libraries to test
@@ -482,8 +484,8 @@ add_library(testMod1 MODULE empty.cpp)
 add_library(testMod2 MODULE empty.cpp)
 set_property(TARGET testMod2 PROPERTY BUNDLE 1)
 
-add_library(testSharedLibArchiveAIX SHARED testSharedLibArchiveAIX.c)
-set_property(TARGET testSharedLibArchiveAIX PROPERTY AIX_SHARED_LIBRARY_ARCHIVE 1)
+add_library(testSharedObjectAIX SHARED testSharedObjectAIX.c)
+set_property(TARGET testSharedObjectAIX PROPERTY AIX_SHARED_LIBRARY_ARCHIVE 0)
 
 install(TARGETS testLibRequired
         EXPORT RequiredExp DESTINATION lib
@@ -625,7 +627,7 @@ install(
   systemlib
   testInterfaceIncludeUser
   testInterfaceIncludeUser2
-  testSharedLibArchiveAIX
+  testSharedObjectAIX
   EXPORT exp
   RUNTIME DESTINATION $<1:bin>$<0:/wrong>
   LIBRARY DESTINATION $<1:lib>$<0:/wrong> NAMELINK_SKIP
@@ -703,7 +705,7 @@ export(TARGETS testExe2 testLib4 testLib5 testLib6 testLib7 testExe3 testExe4 te
   testExeWithPluginHelper testExePluginHelperObj
   testMod1 testMod2
   testLibPerConfigDest
-  testSharedLibArchiveAIX
+  testSharedObjectAIX
   NAMESPACE bld_
   APPEND FILE ExportBuildTree.cmake
   )
