@@ -4759,7 +4759,7 @@ std::string SystemInformationImplementation::ExtractValueFromSysCtl(
 std::string SystemInformationImplementation::RunProcess(
   std::vector<const char*> args)
 {
-  std::string buffer;
+  std::string out;
 
   // Run the application
   kwsysProcess* gp = kwsysProcess_New();
@@ -4778,7 +4778,10 @@ std::string SystemInformationImplementation::RunProcess(
           (pipe == kwsysProcess_Pipe_STDOUT ||
            pipe == kwsysProcess_Pipe_STDERR))) // wait for 1s
   {
-    buffer.append(data, length);
+    // Keep stdout, ignore stderr.
+    if (pipe == kwsysProcess_Pipe_STDOUT) {
+      out.append(data, length);
+    }
   }
   kwsysProcess_WaitForExit(gp, nullptr);
 
@@ -4808,7 +4811,7 @@ std::string SystemInformationImplementation::RunProcess(
   if (result) {
     std::cerr << "Error " << args[0] << " returned :" << result << "\n";
   }
-  return buffer;
+  return out;
 }
 
 std::string SystemInformationImplementation::ParseValueFromKStat(
