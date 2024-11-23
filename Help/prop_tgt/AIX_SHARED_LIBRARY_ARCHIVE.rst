@@ -16,5 +16,7 @@ the :prop_tgt:`SOVERSION` target property, if set, and otherwise from
 the :prop_tgt:`VERSION` target property, if set.
 
 This property defaults to :variable:`CMAKE_AIX_SHARED_LIBRARY_ARCHIVE`
-if that variable is set when a ``SHARED`` library target is created
-by :command:`add_library`.
+if that variable is set when a non-imported ``SHARED`` library target
+is created by :command:`add_library`.  Imported targets must explicitly
+enable :prop_tgt:`!AIX_SHARED_LIBRARY_ARCHIVE` if they import an AIX
+shared library archive.

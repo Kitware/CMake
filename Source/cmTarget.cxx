@@ -1089,6 +1089,11 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
       }
     }
 
+    // Imported targets must set AIX_SHARED_LIBRARY_ARCHIVE explicitly.
+    if (this->IsImported() && property == "AIX_SHARED_LIBRARY_ARCHIVE"_s) {
+      return;
+    }
+
     // Replace everything after "CMAKE_"
     defKey.replace(defKey.begin() + 6, defKey.end(), property);
     if (cmValue value = mf->GetDefinition(defKey)) {

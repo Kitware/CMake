@@ -334,6 +334,12 @@ void cmExportCMakeConfigGenerator::GenerateImportTargetCode(
     os << "set_property(TARGET " << targetName << " PROPERTY BUNDLE 1)\n";
   }
 
+  // Mark the imported library if it is an AIX shared library archive.
+  if (target->IsArchivedAIXSharedLibrary()) {
+    os << "set_property(TARGET " << targetName
+       << " PROPERTY AIX_SHARED_LIBRARY_ARCHIVE 1)\n";
+  }
+
   // generate DEPRECATION
   if (target->IsDeprecated()) {
     os << "set_property(TARGET " << targetName << " PROPERTY DEPRECATION "
