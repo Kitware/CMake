@@ -97,6 +97,7 @@ Properties on Directories
    /prop_dir/VARIABLES
    /prop_dir/VS_GLOBAL_SECTION_POST_section
    /prop_dir/VS_GLOBAL_SECTION_PRE_section
+   /prop_dir/VS_SOLUTION_ITEMS
    /prop_dir/VS_STARTUP_PROJECT
 
 .. _`Target Properties`:
