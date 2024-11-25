@@ -1,3 +1,5 @@
+import sys
+
 from show_only_json_check import *
 
 def check_kind(k):
@@ -71,6 +73,30 @@ def check_reqfiles_property(p):
     assert p["name"] == "REQUIRED_FILES"
     assert len(p["value"]) == 1
     assert p["value"][0] == "RequiredFileDoesNotExist"
+
+def check_timeout_property(p):
+    assert is_dict(p)
+    assert sorted(p.keys()) == ["name", "value"]
+    assert is_string(p["name"])
+    assert is_float(p["value"])
+    assert p["name"] == "TIMEOUT"
+    assert p["value"] == 1234.5
+
+def check_timeout_signal_name_property(p):
+    assert is_dict(p)
+    assert sorted(p.keys()) == ["name", "value"]
+    assert is_string(p["name"])
+    assert is_string(p["value"])
+    assert p["name"] == "TIMEOUT_SIGNAL_NAME"
+    assert p["value"] == "SIGINT"
+
+def check_timeout_signal_grace_property(p):
+    assert is_dict(p)
+    assert sorted(p.keys()) == ["name", "value"]
+    assert is_string(p["name"])
+    assert is_float(p["value"])
+    assert p["name"] == "TIMEOUT_SIGNAL_GRACE_PERIOD"
+    assert p["value"] == 2.1
 
 def check_willfail_property(p):
     assert is_dict(p)
@@ -155,12 +181,24 @@ def check_defined_properties(p_list):
 
 def check_properties(p):
     assert is_list(p)
-    assert len(p) == 6
-    check_resource_groups_property(p[0])
-    check_reqfiles_property(p[1])
-    check_willfail_property(p[2])
-    check_workingdir_property(p[3])
-    check_defined_properties(p[4:5])
+    if sys.platform in ("win32"):
+      assert len(p) == 7
+      check_resource_groups_property(p[0])
+      check_reqfiles_property(p[1])
+      check_timeout_property(p[2])
+      check_willfail_property(p[3])
+      check_workingdir_property(p[4])
+      check_defined_properties(p[5:6])
+    else:
+      assert len(p) == 9
+      check_resource_groups_property(p[0])
+      check_reqfiles_property(p[1])
+      check_timeout_property(p[2])
+      check_timeout_signal_name_property(p[3])
+      check_timeout_signal_grace_property(p[4])
+      check_willfail_property(p[5])
+      check_workingdir_property(p[6])
+      check_defined_properties(p[7:8])
 
 def check_tests(t):
     assert is_list(t)
