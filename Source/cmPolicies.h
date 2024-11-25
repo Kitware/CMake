@@ -548,7 +548,9 @@ class cmMakefile;
          31, 0, WARN)                                                         \
   SELECT(POLICY, CMP0181,                                                     \
          "Link command-line fragment variables are parsed and re-quoted.", 3, \
-         32, 0, WARN)
+         32, 0, WARN)                                                         \
+  SELECT(POLICY, CMP0182,                                                     \
+         "Create shared library archives by default on AIX.", 3, 32, 0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \
@@ -594,7 +596,8 @@ class cmMakefile;
   F(CMP0160)                                                                  \
   F(CMP0162)                                                                  \
   F(CMP0179)                                                                  \
-  F(CMP0181)
+  F(CMP0181)                                                                  \
+  F(CMP0182)
 
 #define CM_FOR_EACH_CUSTOM_COMMAND_POLICY(F)                                  \
   F(CMP0116)                                                                  \

@@ -1,5 +1,7 @@
 enable_language(C)
 
+set(CMAKE_AIX_SHARED_LIBRARY_ARCHIVE 0)
+
 add_library (func SHARED func.c)
 
 set (binary_dir "${CMAKE_BINARY_DIR}")

@@ -89,7 +89,7 @@
     "backtrace": [
         {
             "file": "^codemodel-v2\\.cmake$",
-            "line": 17,
+            "line": 19,
             "command": "add_library",
             "hasParent": true
         },
