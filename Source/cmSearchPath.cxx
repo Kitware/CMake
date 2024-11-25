@@ -25,15 +25,11 @@ cmSearchPath::~cmSearchPath() = default;
 
 void cmSearchPath::ExtractWithout(const std::set<std::string>& ignorePaths,
                                   const std::set<std::string>& ignorePrefixes,
-                                  std::vector<std::string>& outPaths,
-                                  bool clear) const
+                                  std::vector<std::string>& outPaths) const
 {
-  if (clear) {
-    outPaths.clear();
-  }
   for (auto const& path : this->Paths) {
-    if (ignorePaths.count(path.Path) == 0 &&
-        ignorePrefixes.count(path.Prefix) == 0) {
+    if (ignorePaths.find(path.Path) == ignorePaths.end() &&
+        ignorePrefixes.find(path.Prefix) == ignorePrefixes.end()) {
       outPaths.push_back(path.Path);
     }
   }
@@ -144,16 +140,16 @@ void cmSearchPath::AddSuffixes(const std::vector<std::string>& suffixes)
     // path on windows and cause huge delays.
     std::string p = inPath.Path;
     if (!p.empty() && p.back() != '/') {
-      p += "/";
+      p += '/';
     }
 
     // Combine with all the suffixes
     for (std::string const& suffix : suffixes) {
-      this->Paths.push_back(PathWithPrefix{ p + suffix, inPath.Prefix });
+      this->Paths.emplace_back(PathWithPrefix{ p + suffix, inPath.Prefix });
     }
 
     // And now the original w/o any suffix
-    this->Paths.push_back(std::move(inPath));
+    this->Paths.emplace_back(std::move(inPath));
   }
 }
 

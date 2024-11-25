@@ -45,8 +45,7 @@ public:
 
   void ExtractWithout(const std::set<std::string>& ignorePaths,
                       const std::set<std::string>& ignorePrefixes,
-                      std::vector<std::string>& outPaths,
-                      bool clear = false) const;
+                      std::vector<std::string>& outPaths) const;
 
   void AddPath(const std::string& path);
   void AddUserPath(const std::string& path);
