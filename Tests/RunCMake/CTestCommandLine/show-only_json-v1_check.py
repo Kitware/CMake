@@ -57,7 +57,7 @@ def check_command(c):
     assert is_list(c)
     assert len(c) == 3
     assert is_string(c[0])
-    check_re(c[0], "/cmake(\.exe)?$")
+    check_re(c[0], r"/cmake(\.exe)?$")
     assert is_string(c[1])
     assert c[1] == "-E"
     assert is_string(c[2])
