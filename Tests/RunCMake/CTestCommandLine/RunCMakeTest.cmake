@@ -469,6 +469,7 @@ function(run_ShowOnly)
   file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
     add_test(ShowOnly \"${CMAKE_COMMAND}\" -E echo)
     set_tests_properties(ShowOnly PROPERTIES
+      GENERATED_RESOURCE_SPEC_FILE \"/Path/Does/Not/Exist\"
       RESOURCE_GROUPS \"2,threads:2,gpus:4;gpus:2,threads:4\"
       REQUIRED_FILES RequiredFileDoesNotExist
       _BACKTRACE_TRIPLES \"file1;1;add_test;file0;;\"

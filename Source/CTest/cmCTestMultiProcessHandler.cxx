@@ -1156,6 +1156,11 @@ static Json::Value DumpCTestProperties(
     properties.append(DumpCTestProperty(
       "FIXTURES_SETUP", DumpToJsonArray(testProperties.FixturesSetup)));
   }
+  if (!testProperties.GeneratedResourceSpecFile.empty()) {
+    properties.append(
+      DumpCTestProperty("GENERATED_RESOURCE_SPEC_FILE",
+                        testProperties.GeneratedResourceSpecFile));
+  }
   if (!testProperties.Labels.empty()) {
     properties.append(
       DumpCTestProperty("LABELS", DumpToJsonArray(testProperties.Labels)));
