@@ -668,8 +668,6 @@ add_library(
   cmListCommand.h
   cmLoadCacheCommand.cxx
   cmLoadCacheCommand.h
-  cmLoadCommandCommand.cxx
-  cmLoadCommandCommand.h
   cmMacroCommand.cxx
   cmMacroCommand.h
   cmMakeDirectoryCommand.cxx
@@ -1380,8 +1378,6 @@ foreach(_tool IN LISTS _tools)
   CMake_OPTIONAL_COMPONENT(${_tool})
   install(TARGETS ${_tool} DESTINATION ${CMAKE_BIN_DIR} ${COMPONENT})
 endforeach()
-
-install(FILES cmCPluginAPI.h DESTINATION ${CMAKE_DATA_DIR}/include)
 
 # Unset temporary variables
 unset(_tools)
