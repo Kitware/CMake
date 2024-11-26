@@ -893,17 +893,6 @@ int main()
   TestDir("make_dir");
 
   // ----------------------------------------------------------------------
-  // Test OUTPUT_REQUIRED_FILES
-  // The files required by 'complex' have been output to a file.
-  // The contents of this file is not tested (absolute paths).
-  //
-  // WARNING: if you run 'complex' manually, this *will* fail, because
-  // the file was removed the last time 'complex' was run, and it is
-  // only created during a build.
-
-  TestAndRemoveFile("Executable/Temp/complex-required.txt");
-
-  // ----------------------------------------------------------------------
   // Test FIND_LIBRARY
 
 #ifndef FIND_DUMMY_LIB

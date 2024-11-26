@@ -133,15 +133,6 @@ endif()
 add_custom_target(notInAllCustom)
 add_dependencies(notInAllCustom notInAllExe)
 
-#
-# Output the files required by 'complex' to a file.
-#
-# This test has been moved to the 'required' subdir so that it
-# has no side-effects on the current Makefile (duplicated source file
-# due to source list expansion done twice).
-#
-add_subdirectory(Temp)
-
 if(CMAKE_COMPILER_IS_GNUCXX AND CMAKE_INCLUDE_SYSTEM_FLAG_CXX
    AND NOT XCODE) # XCODE is excluded due to #15687
   add_executable(testSystemDir testSystemDir.cxx)

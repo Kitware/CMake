@@ -104,7 +104,7 @@ class cmMakefile;
          3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0032,                                                     \
          "The output_required_files command should not be called.", 3, 0, 0,  \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(POLICY, CMP0033,                                                     \
          "The export_library_dependencies command should not be called.", 3,  \
          0, 0, WARN)                                                          \

@@ -681,8 +681,6 @@ add_library(
   cmMessageMetadata.h
   cmOptionCommand.cxx
   cmOptionCommand.h
-  cmOutputRequiredFilesCommand.cxx
-  cmOutputRequiredFilesCommand.h
   cmParseArgumentsCommand.cxx
   cmParseArgumentsCommand.h
   cmPathLabel.cxx

@@ -104,7 +104,6 @@
 #  include "cmInstallProgramsCommand.h"
 #  include "cmLinkLibrariesCommand.h"
 #  include "cmLoadCacheCommand.h"
-#  include "cmOutputRequiredFilesCommand.h"
 #  include "cmQTWrapCPPCommand.h"
 #  include "cmQTWrapUICommand.h"
 #  include "cmRemoveCommand.h"
@@ -308,9 +307,9 @@ void GetProjectCommands(cmState* state)
     "see CMP0033.");
   state->AddRemovedCommand(
     "load_command", "The load_command command has been removed; see CMP0031.");
-  state->AddDisallowedCommand(
-    "output_required_files", cmOutputRequiredFilesCommand, cmPolicies::CMP0032,
-    "The output_required_files command should not be called; see CMP0032.");
+  state->AddRemovedCommand(
+    "output_required_files",
+    "The output_required_files command has been removed; see CMP0032.");
   state->AddRemovedCommand(
     "subdir_depends",
     "The subdir_depends command has been removed; see CMP0029.");
