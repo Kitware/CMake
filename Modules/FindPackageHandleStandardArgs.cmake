@@ -297,8 +297,8 @@ function(FIND_PACKAGE_CHECK_VERSION version result)
   if(NOT FPCV_NO_AUTHOR_WARNING_VERSION_RANGE
       AND ${package}_FIND_VERSION_RANGE AND NOT FPCV_HANDLE_VERSION_RANGE)
     message(AUTHOR_WARNING
-      "`find_package()` specify a version range but the option "
-      "HANDLE_VERSION_RANGE` is not passed to `find_package_check_version()`. "
+      "find_package() specify a version range but the option "
+      "HANDLE_VERSION_RANGE` is not passed to find_package_check_version(). "
       "Only the lower endpoint of the range will be used.")
   endif()
 
@@ -389,7 +389,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
     list(FIND ARGN "NAME_MISMATCHED" name_mismatched_idx)
     if(NOT name_mismatched_idx EQUAL "-1")
       message(FATAL_ERROR
-        "The `NAME_MISMATCHED` argument may only be specified by the argument or "
+        "The NAME_MISMATCHED argument may only be specified by the argument or "
         "the variable, not both.")
     endif()
 
@@ -434,16 +434,16 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
       AND NOT FPHSA_NAME_MISMATCHED
       AND NOT _NAME STREQUAL CMAKE_FIND_PACKAGE_NAME)
     message(AUTHOR_WARNING
-      "The package name passed to `find_package_handle_standard_args` "
+      "The package name passed to find_package_handle_standard_args() "
       "(${_NAME}) does not match the name of the calling package "
       "(${CMAKE_FIND_PACKAGE_NAME}). This can lead to problems in calling "
-      "code that expects `find_package` result variables (e.g., `_FOUND`) "
+      "code that expects find_package() result variables (e.g., `_FOUND`) "
       "to follow a certain pattern.")
   endif()
 
   if(${_NAME}_FIND_VERSION_RANGE AND NOT FPHSA_HANDLE_VERSION_RANGE)
     message(AUTHOR_WARNING
-      "`find_package()` specify a version range but the module ${_NAME} does "
+      "find_package() specify a version range but the module ${_NAME} does "
       "not support this capability. Only the lower endpoint of the range "
       "will be used.")
   endif()
