@@ -604,14 +604,14 @@ bool QueryWindowsRegistry(Range args, cmExecutionStatus& status,
        (arguments.ValueNames || arguments.SubKeys)) ||
       (arguments.ValueName.empty() && arguments.ValueNames &&
        arguments.SubKeys)) {
-    status.SetError("given mutually exclusive sub-options \"VALUE\", "
-                    "\"VALUE_NAMES\" or \"SUBKEYS\".");
+    status.SetError("given mutually exclusive sub-options VALUE, "
+                    "VALUE_NAMES or SUBKEYS.");
     return false;
   }
 
   if (!arguments.View.empty() && !cmWindowsRegistry::ToView(arguments.View)) {
     status.SetError(
-      cmStrCat("given invalid value for \"VIEW\": ", arguments.View, '.'));
+      cmStrCat("given invalid value for VIEW: ", arguments.View, '.'));
     return false;
   }
 

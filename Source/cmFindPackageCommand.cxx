@@ -754,7 +754,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       doing = DoingNone;
     } else if (args[i] == "REGISTRY_VIEW") {
       if (++i == args.size()) {
-        this->SetError("missing required argument for \"REGISTRY_VIEW\"");
+        this->SetError("missing required argument for REGISTRY_VIEW");
         return false;
       }
       auto view = cmWindowsRegistry::ToView(args[i]);
@@ -763,7 +763,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         this->RegistryViewDefined = true;
       } else {
         this->SetError(
-          cmStrCat("given invalid value for \"REGISTRY_VIEW\": ", args[i]));
+          cmStrCat("given invalid value for REGISTRY_VIEW: ", args[i]));
         return false;
       }
     } else if (this->CheckCommonArgument(args[i])) {
