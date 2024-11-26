@@ -109,7 +109,7 @@ class cmMakefile;
          "The export_library_dependencies command should not be called.", 3,  \
          0, 0, NEW)                                                           \
   SELECT(POLICY, CMP0034, "The utility_source command should not be called.", \
-         3, 0, 0, WARN)                                                       \
+         3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0035,                                                     \
          "The variable_requires command should not be called.", 3, 0, 0,      \
          WARN)                                                                \

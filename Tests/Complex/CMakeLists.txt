@@ -22,7 +22,6 @@ message("message")
 # It is not recommended to set a policy to OLD, but this test
 # covers the OLD behavior of some policies.
 foreach(p
-    CMP0034
     CMP0043
     CMP0050
     )

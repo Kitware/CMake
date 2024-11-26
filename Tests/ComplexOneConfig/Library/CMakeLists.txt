@@ -1,11 +1,6 @@
 remove_definitions(-DCMAKE_IS_REALLY_FUN)
 
-#
-# Small utility used to create file
-# UTILITY_SOURCE is used for coverage and for getting the exact name
-# of the executable.
-#
-utility_source(CREATE_FILE_EXE create_file "." create_file.cxx)
+set(CREATE_FILE_EXE create_file CACHE INTERNAL "") # make globally visible
 add_executable(create_file create_file.cxx)
 set_target_properties(create_file PROPERTIES RUNTIME_OUTPUT_DIRECTORY ".")
 
