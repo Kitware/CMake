@@ -351,7 +351,7 @@ if(BUILD_TESTING)
 
   # add a bunch of standard build-and-test style tests
   ADD_TEST_MACRO(CommandLineTest CommandLineTest)
-  ADD_TEST_MACRO(FindPackageTest FindPackageTest)
+  ADD_TEST_MACRO(FindPackageCMakeTest FindPackageCMakeTest)
   ADD_TEST_MACRO(StringFileTest StringFileTest)
   ADD_TEST_MACRO(TryCompile TryCompile)
   ADD_TEST_MACRO(SystemInformation SystemInformation)

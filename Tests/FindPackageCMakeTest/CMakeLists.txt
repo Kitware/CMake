@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(FindPackageTest)
+project(FindPackageCMakeTest)
 
 # Protect tests from running inside the default install prefix.
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/NotDefaultPrefix")
@@ -22,7 +22,7 @@ find_package(NotAPackage QUIET)
 # Look for a package that has an advanced find module.
 find_package(Boost QUIET)
 
-add_executable(FindPackageTest FindPackageTest.cxx)
+add_executable(FindPackageCMakeTest FindPackageTest.cxx)
 
 # test behavior of cmFindBase wrt. the CMAKE_PREFIX_PATH variable
 # foo.h should be found in ${CMAKE_CURRENT_SOURCE_DIR}/include:
@@ -67,9 +67,9 @@ endif()
 set(CMakeTestSystemPackage "")
 if(WIN32 AND NOT CYGWIN)
   # Try writing a value to the system package registry.
-  set(_data "${FindPackageTest_SOURCE_DIR}/SystemPackage")
+  set(_data "${FindPackageCMakeTest_SOURCE_DIR}/SystemPackage")
   set(_key "HKLM\\Software\\Kitware\\CMake\\Packages\\CMakeTestSystemPackage")
-  set(_file "${FindPackageTest_BINARY_DIR}/CMakeTestSystemPackage.data")
+  set(_file "${FindPackageCMakeTest_BINARY_DIR}/CMakeTestSystemPackage.data")
   file(WRITE ${_file} "${_data}\n")
   execute_process(
     COMMAND ${CMAKE_COMMAND} -E md5sum ${_file}
@@ -383,8 +383,8 @@ string(APPEND version ".${v}")
 
 message(STATUS "Preparing export(PACKAGE) test project")
 try_compile(EXPORTER_COMPILED
-  ${FindPackageTest_BINARY_DIR}/Exporter-build
-  ${FindPackageTest_SOURCE_DIR}/Exporter
+  ${FindPackageCMakeTest_BINARY_DIR}/Exporter-build
+  ${FindPackageCMakeTest_SOURCE_DIR}/Exporter
   CMakeTestExportPackage dummy
   CMAKE_FLAGS "-UCMAKE_EXPORT_NO_PACKAGE_REGISTRY"
     "-DCMAKE_POLICY_DEFAULT_CMP0090:STRING=OLD"
@@ -434,15 +434,15 @@ unset(CMAKE_FIND_USE_PACKAGE_REGISTRY)
 unset(CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY)
 
 message(STATUS "Remove export(PACKAGE) test project")
-file(REMOVE_RECURSE ${FindPackageTest_BINARY_DIR}/Exporter-build)
+file(REMOVE_RECURSE ${FindPackageCMakeTest_BINARY_DIR}/Exporter-build)
 set(CMakeTestExportPackage_DIR "" CACHE FILEPATH
   "Wipe out find results for testing." FORCE)
 find_package(CMakeTestExportPackage QUIET) # Should clean the user package cache
 #
 message(STATUS "Preparing export(PACKAGE) test project with CMAKE_EXPORT_NO_PACKAGE_REGISTRY=TRUE")
 try_compile(EXPORTER_COMPILED
-  ${FindPackageTest_BINARY_DIR}/Exporter-build
-  ${FindPackageTest_SOURCE_DIR}/Exporter
+  ${FindPackageCMakeTest_BINARY_DIR}/Exporter-build
+  ${FindPackageCMakeTest_SOURCE_DIR}/Exporter
   CMakeTestExportPackage dummy
   CMAKE_FLAGS "-DCMAKE_EXPORT_NO_PACKAGE_REGISTRY:BOOL=TRUE"
     -Dversion=${version}
@@ -454,12 +454,12 @@ if(CMakeTestExportPackage_FOUND)
 endif()
 
 message(STATUS "Remove export(PACKAGE) test project")
-file(REMOVE_RECURSE ${FindPackageTest_BINARY_DIR}/Exporter-build)
+file(REMOVE_RECURSE ${FindPackageCMakeTest_BINARY_DIR}/Exporter-build)
 
 message(STATUS "Preparing export(PACKAGE) test project with POLICY CMP0090=NEW")
 try_compile(EXPORTER_COMPILED
-  ${FindPackageTest_BINARY_DIR}/Exporter-build
-  ${FindPackageTest_SOURCE_DIR}/Exporter
+  ${FindPackageCMakeTest_BINARY_DIR}/Exporter-build
+  ${FindPackageCMakeTest_SOURCE_DIR}/Exporter
   CMakeTestExportPackage dummy
   CMAKE_FLAGS
    "-DCMAKE_POLICY_DEFAULT_CMP0090:STRING=NEW"
