@@ -1483,16 +1483,6 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       }
     }
 
-    // For the Ninja, Makefile and Qt >= 5.15, add custom commands that create
-    // XXX_autogen/timestamp files. Those custom commands have a depfile
-    // assigned that is generated from the depfiles that were created by moc.
-    //
-    // The XXX_autogen targets merely wrap the XXX_autogen/timestamp custom
-    // commands.
-    // The dependency tree would then look like
-    // the original dependencies of '_autogen' target <-'/timestamp' file
-    // <- '_autogen' target
-
     cmTarget* timestampTarget = nullptr;
     std::vector<std::string> dependencies(
       this->AutogenTarget.DependFiles.begin(),
@@ -1500,6 +1490,40 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
     if (useDepfile) {
       // Create a custom command that generates a timestamp file and
       // has a depfile assigned. The depfile is created by JobDepFilesMergeT.
+      //
+      // Also create an additional '_autogen_timestamp_deps' that the custom
+      // command will depend on. It will have no sources or commands to
+      // execute, but it will have dependencies that would originally be
+      // assigned to the pre-Qt 5.15 'autogen' target. These dependencies will
+      // serve as a list of order-only dependencies for the custom command,
+      // without forcing the custom command to re-execute.
+      //
+      // The dependency tree would then look like
+      // '_autogen_timestamp_deps (order-only)' <- '/timestamp' file <-
+      // '_autogen' target.
+      const auto timestampTargetName =
+        cmStrCat(this->GenTarget->GetName(), "_autogen_timestamp_deps");
+
+      auto cc = cm::make_unique<cmCustomCommand>();
+      cc->SetWorkingDirectory(this->Dir.Work.c_str());
+      cc->SetDepends(dependencies);
+      cc->SetEscapeOldStyle(false);
+      timestampTarget = this->LocalGen->AddUtilityCommand(timestampTargetName,
+                                                          true, std::move(cc));
+
+      this->LocalGen->AddGeneratorTarget(
+        cm::make_unique<cmGeneratorTarget>(timestampTarget, this->LocalGen));
+
+      // Set FOLDER property on the timestamp target, so it appears in the
+      // appropriate folder in an IDE or in the file api.
+      if (!this->TargetsFolder.empty()) {
+        timestampTarget->SetProperty("FOLDER", this->TargetsFolder);
+      }
+
+      // Make '/timestamp' file depend on '_autogen_timestamp_deps' and on the
+      // moc and uic executables (whichever are enabled).
+      dependencies.clear();
+      dependencies.push_back(timestampTargetName);
 
       AddAutogenExecutableToDependencies(this->Moc, dependencies);
       AddAutogenExecutableToDependencies(this->Uic, dependencies);
@@ -1544,7 +1568,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
           { cmSystemTools::GetCMakeCommand(), "-E", "touch", outputFile }));
         this->AddGeneratedSource(outputFile, this->Moc);
       }
-      auto cc = cm::make_unique<cmCustomCommand>();
+      cc = cm::make_unique<cmCustomCommand>();
       cc->SetOutputs(outputFile);
       cc->SetByproducts(timestampByproducts);
       cc->SetDepends(dependencies);
