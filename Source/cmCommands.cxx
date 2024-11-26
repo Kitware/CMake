@@ -93,7 +93,6 @@
 #  include "cmAddCompileOptionsCommand.h"
 #  include "cmAddLinkOptionsCommand.h"
 #  include "cmAuxSourceDirectoryCommand.h"
-#  include "cmBuildNameCommand.h"
 #  include "cmCMakeHostSystemInformationCommand.h"
 #  include "cmCMakePkgConfigCommand.h"
 #  include "cmExportCommand.h"
@@ -209,9 +208,8 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("variable_watch", cmVariableWatchCommand);
   state->AddBuiltinCommand("write_file", cmWriteFileCommand);
 
-  state->AddDisallowedCommand(
-    "build_name", cmBuildNameCommand, cmPolicies::CMP0036,
-    "The build_name command should not be called; see CMP0036.");
+  state->AddRemovedCommand(
+    "build_name", "The build_name command has been removed; see CMP0036.");
   state->AddRemovedCommand(
     "use_mangled_mesa",
     "The use_mangled_mesa command has been removed; see CMP0030.");

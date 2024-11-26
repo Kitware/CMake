@@ -113,7 +113,7 @@ class cmMakefile;
   SELECT(POLICY, CMP0035,                                                     \
          "The variable_requires command should not be called.", 3, 0, 0, NEW) \
   SELECT(POLICY, CMP0036, "The build_name command should not be called.", 3,  \
-         0, 0, WARN)                                                          \
+         0, 0, NEW)                                                           \
   SELECT(POLICY, CMP0037,                                                     \
          "Target names should not be reserved and should match a validity "   \
          "pattern.",                                                          \
