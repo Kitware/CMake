@@ -406,7 +406,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
     cmake_parse_arguments(FPHSA "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${_FIRST_ARG} ${ARGN})
 
     if(FPHSA_UNPARSED_ARGUMENTS)
-      message(FATAL_ERROR "Unknown keywords given to FIND_PACKAGE_HANDLE_STANDARD_ARGS(): \"${FPHSA_UNPARSED_ARGUMENTS}\"")
+      message(FATAL_ERROR "Unknown keywords given to find_package_handle_standard_args(): \"${FPHSA_UNPARSED_ARGUMENTS}\"")
     endif()
 
     if(NOT FPHSA_FAIL_MESSAGE)
@@ -422,7 +422,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
     endif()
 
     if(NOT FPHSA_REQUIRED_VARS AND NOT FPHSA_HANDLE_COMPONENTS)
-      message(FATAL_ERROR "No REQUIRED_VARS specified for FIND_PACKAGE_HANDLE_STANDARD_ARGS()")
+      message(FATAL_ERROR "No REQUIRED_VARS specified for find_package_handle_standard_args()")
     endif()
   endif()
 
