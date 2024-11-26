@@ -588,8 +588,6 @@ add_library(
   cmExperimental.h
   cmExportCommand.cxx
   cmExportCommand.h
-  cmExportLibraryDependenciesCommand.cxx
-  cmExportLibraryDependenciesCommand.h
   cmFLTKWrapUICommand.cxx
   cmFLTKWrapUICommand.h
   cmFileCommand.cxx

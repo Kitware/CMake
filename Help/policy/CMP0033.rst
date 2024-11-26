@@ -1,6 +1,9 @@
 CMP0033
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 The :command:`export_library_dependencies` command should not be called.
 
 This command was added in January 2003 to export ``<tgt>_LIB_DEPENDS``
@@ -11,6 +14,4 @@ The functionality has been superseded by the :command:`export` and
 :command:`install(EXPORT)` commands.
 
 .. |disallowed_version| replace:: 3.0
-.. include:: DISALLOWED_COMMAND.txt
-
-.. include:: DEPRECATED.txt
+.. include:: REMOVED_COMMAND.txt

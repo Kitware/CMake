@@ -97,7 +97,6 @@
 #  include "cmCMakeHostSystemInformationCommand.h"
 #  include "cmCMakePkgConfigCommand.h"
 #  include "cmExportCommand.h"
-#  include "cmExportLibraryDependenciesCommand.h"
 #  include "cmFLTKWrapUICommand.h"
 #  include "cmFileAPICommand.h"
 #  include "cmIncludeExternalMSProjectCommand.h"
@@ -300,11 +299,9 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("cmake_file_api", cmFileAPICommand);
   state->AddBuiltinCommand("cmake_instrumentation", cmInstrumentationCommand);
 
-  state->AddDisallowedCommand(
-    "export_library_dependencies", cmExportLibraryDependenciesCommand,
-    cmPolicies::CMP0033,
-    "The export_library_dependencies command should not be called; "
-    "see CMP0033.");
+  state->AddRemovedCommand(
+    "export_library_dependencies",
+    "The export_library_dependencies command has been removed; see CMP0033.");
   state->AddRemovedCommand(
     "load_command", "The load_command command has been removed; see CMP0031.");
   state->AddRemovedCommand(

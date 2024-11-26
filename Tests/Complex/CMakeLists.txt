@@ -22,7 +22,6 @@ message("message")
 # It is not recommended to set a policy to OLD, but this test
 # covers the OLD behavior of some policies.
 foreach(p
-    CMP0033
     CMP0034
     CMP0043
     CMP0050
@@ -437,5 +436,3 @@ endif()
 #
 add_subdirectory(Library)
 add_subdirectory(Executable)
-export_library_dependencies(${Complex_BINARY_DIR}/ComplexLibraryDepends.cmake)
-include(${Complex_BINARY_DIR}/ComplexLibraryDepends.cmake OPTIONAL)
