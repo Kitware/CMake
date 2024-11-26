@@ -109,7 +109,6 @@
 #  include "cmRemoveDefinitionsCommand.h"
 #  include "cmSourceGroupCommand.h"
 #  include "cmTargetLinkDirectoriesCommand.h"
-#  include "cmVariableRequiresCommand.h"
 #  include "cmVariableWatchCommand.h"
 #  include "cmWriteFileCommand.h"
 #endif
@@ -312,9 +311,9 @@ void GetProjectCommands(cmState* state)
   state->AddRemovedCommand(
     "utility_source",
     "The utility_source command has been removed; see CMP0034.");
-  state->AddDisallowedCommand(
-    "variable_requires", cmVariableRequiresCommand, cmPolicies::CMP0035,
-    "The variable_requires command should not be called; see CMP0035.");
+  state->AddRemovedCommand(
+    "variable_requires",
+    "The variable_requires command has been removed; see CMP0035.");
 #endif
 }
 

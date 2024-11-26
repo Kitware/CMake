@@ -7,6 +7,7 @@ foreach(p
     CMP0032
     CMP0033
     CMP0034
+    CMP0035
     )
   run_cmake(${p}-NEW)
 endforeach()
@@ -14,7 +15,6 @@ endforeach()
 return()
 
 foreach(p
-    CMP0035
     CMP0036
     )
   run_cmake(${p}-WARN)

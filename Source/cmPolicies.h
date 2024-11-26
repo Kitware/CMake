@@ -111,8 +111,7 @@ class cmMakefile;
   SELECT(POLICY, CMP0034, "The utility_source command should not be called.", \
          3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0035,                                                     \
-         "The variable_requires command should not be called.", 3, 0, 0,      \
-         WARN)                                                                \
+         "The variable_requires command should not be called.", 3, 0, 0, NEW) \
   SELECT(POLICY, CMP0036, "The build_name command should not be called.", 3,  \
          0, 0, WARN)                                                          \
   SELECT(POLICY, CMP0037,                                                     \

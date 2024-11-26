@@ -752,8 +752,6 @@ add_library(
   cmTryRunCommand.h
   cmUnsetCommand.cxx
   cmUnsetCommand.h
-  cmVariableRequiresCommand.cxx
-  cmVariableRequiresCommand.h
   cmVariableWatchCommand.cxx
   cmVariableWatchCommand.h
   cmWhileCommand.cxx

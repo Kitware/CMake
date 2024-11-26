@@ -243,7 +243,7 @@ int main()
 #endif
 
   // ----------------------------------------------------------------------
-  // Test SET, VARIABLE_REQUIRES
+  // Test SET
 
 #ifdef SHOULD_NOT_BE_DEFINED
   cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED is defined.");
@@ -267,13 +267,6 @@ int main()
   cmFailed("cmakedefine is broken, ONE_VAR_AND_INDENTED is not defined.");
 #else
   cmPassed("ONE_VAR_AND_INDENTED is defined.");
-#endif
-
-#ifndef ONE_VAR_IS_DEFINED
-  cmFailed("cmakedefine, SET or VARIABLE_REQUIRES is broken, "
-           "ONE_VAR_IS_DEFINED is not defined.");
-#else
-  cmPassed("ONE_VAR_IS_DEFINED is defined.");
 #endif
 
 #ifdef ZERO_VAR
