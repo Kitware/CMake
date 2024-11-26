@@ -120,6 +120,8 @@ function (check_pie_supported)
   foreach(lang IN LISTS CHECK_PIE_LANGUAGES)
     if(_CMAKE_${lang}_PIE_MAY_BE_SUPPORTED_BY_LINKER)
       if(NOT DEFINED CMAKE_${lang}_LINK_PIE_SUPPORTED)
+        # ensure PIE compile flags are also used
+        list(JOIN CMAKE_${lang}_COMPILE_OPTIONS_PIE " " CMAKE_REQUIRED_FLAGS)
         cmake_check_linker_flag(${lang}
                                 "${CMAKE_${lang}_LINK_OPTIONS_PIE}"
                                 CMAKE_${lang}_LINK_PIE_SUPPORTED
@@ -127,6 +129,7 @@ function (check_pie_supported)
         if (NOT CMAKE_${lang}_LINK_PIE_SUPPORTED)
           string (APPEND outputs "PIE (${lang}): ${output}\n")
         endif()
+        unset(CMAKE_REQUIRED_FLAGS)
       endif()
 
       if(NOT DEFINED CMAKE_${lang}_LINK_NO_PIE_SUPPORTED)
