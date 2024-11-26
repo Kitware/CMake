@@ -127,6 +127,12 @@ public:
   /** Return true if building for WindowsStore */
   bool TargetsWindowsStore() const { return this->SystemIsWindowsStore; }
 
+  /** Return true if building for WindowsKernelModeDriver */
+  bool TargetsWindowsKernelModeDriver() const
+  {
+    return this->SystemIsWindowsKernelModeDriver;
+  }
+
   /** Return true if building for Android */
   bool TargetsAndroid() const { return this->SystemIsAndroid; }
 
@@ -188,6 +194,7 @@ protected:
   virtual bool InitializeWindowsCE(cmMakefile* mf);
   virtual bool InitializeWindowsPhone(cmMakefile* mf);
   virtual bool InitializeWindowsStore(cmMakefile* mf);
+  virtual bool InitializeWindowsKernelModeDriver(cmMakefile* mf);
   virtual bool InitializeTegraAndroid(cmMakefile* mf);
   virtual bool InitializeAndroid(cmMakefile* mf);
 
@@ -249,6 +256,7 @@ protected:
   bool SystemIsWindowsCE = false;
   bool SystemIsWindowsPhone = false;
   bool SystemIsWindowsStore = false;
+  bool SystemIsWindowsKernelModeDriver = false;
   bool SystemIsAndroid = false;
   bool MSBuildCommandInitialized = false;
 

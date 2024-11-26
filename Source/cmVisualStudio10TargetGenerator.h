@@ -74,6 +74,7 @@ private:
                                              std::string const& config);
   void WriteMSToolConfigurationValuesCommon(Elem& e1,
                                             std::string const& config);
+  void WriteMSDriverConfigurationValues(Elem& e1, std::string const& config);
   void WriteHeaderSource(Elem& e1, cmSourceFile const* sf,
                          ConfigToSettings const& toolSettings);
   void WriteExtraSource(Elem& e1, cmSourceFile const* sf,
@@ -246,6 +247,7 @@ private:
   bool Managed = false;
   bool NsightTegra = false;
   bool Android = false;
+  bool WindowsKernelMode = false;
   bool HaveCustomCommandDepfile = false;
   std::map<std::string, bool> ScanSourceForModuleDependencies;
   unsigned int NsightTegraVersion[4];
