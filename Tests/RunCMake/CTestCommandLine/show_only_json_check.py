@@ -14,6 +14,9 @@ def is_list(x):
 def is_int(x):
     return isinstance(x, int) or isinstance(x, long)
 
+def is_float(x):
+    return isinstance(x, float)
+
 def is_string(x):
     return isinstance(x, str) or isinstance(x, unicode)
 

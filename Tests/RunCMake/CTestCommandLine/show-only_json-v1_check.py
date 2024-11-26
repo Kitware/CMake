@@ -1,3 +1,5 @@
+import sys
+
 from show_only_json_check import *
 
 def check_kind(k):
@@ -57,11 +59,19 @@ def check_command(c):
     assert is_list(c)
     assert len(c) == 3
     assert is_string(c[0])
-    check_re(c[0], "/cmake(\.exe)?$")
+    check_re(c[0], r"/cmake(\.exe)?$")
     assert is_string(c[1])
     assert c[1] == "-E"
     assert is_string(c[2])
     assert c[2] == "echo"
+
+def check_generated_resource_spec_file_property(p):
+    assert is_dict(p)
+    assert sorted(p.keys()) == ["name", "value"]
+    assert is_string(p["name"])
+    assert is_string(p["value"])
+    assert p["name"] == "GENERATED_RESOURCE_SPEC_FILE"
+    assert p["value"] == "/Path/Does/Not/Exist"
 
 def check_reqfiles_property(p):
     assert is_dict(p)
@@ -71,6 +81,30 @@ def check_reqfiles_property(p):
     assert p["name"] == "REQUIRED_FILES"
     assert len(p["value"]) == 1
     assert p["value"][0] == "RequiredFileDoesNotExist"
+
+def check_timeout_property(p):
+    assert is_dict(p)
+    assert sorted(p.keys()) == ["name", "value"]
+    assert is_string(p["name"])
+    assert is_float(p["value"])
+    assert p["name"] == "TIMEOUT"
+    assert p["value"] == 1234.5
+
+def check_timeout_signal_name_property(p):
+    assert is_dict(p)
+    assert sorted(p.keys()) == ["name", "value"]
+    assert is_string(p["name"])
+    assert is_string(p["value"])
+    assert p["name"] == "TIMEOUT_SIGNAL_NAME"
+    assert p["value"] == "SIGINT"
+
+def check_timeout_signal_grace_property(p):
+    assert is_dict(p)
+    assert sorted(p.keys()) == ["name", "value"]
+    assert is_string(p["name"])
+    assert is_float(p["value"])
+    assert p["name"] == "TIMEOUT_SIGNAL_GRACE_PERIOD"
+    assert p["value"] == 2.1
 
 def check_willfail_property(p):
     assert is_dict(p)
@@ -155,12 +189,26 @@ def check_defined_properties(p_list):
 
 def check_properties(p):
     assert is_list(p)
-    assert len(p) == 6
-    check_resource_groups_property(p[0])
-    check_reqfiles_property(p[1])
-    check_willfail_property(p[2])
-    check_workingdir_property(p[3])
-    check_defined_properties(p[4:5])
+    if sys.platform in ("win32"):
+      assert len(p) == 8
+      check_generated_resource_spec_file_property(p[0])
+      check_resource_groups_property(p[1])
+      check_reqfiles_property(p[2])
+      check_timeout_property(p[3])
+      check_willfail_property(p[4])
+      check_workingdir_property(p[5])
+      check_defined_properties(p[6:7])
+    else:
+      assert len(p) == 10
+      check_generated_resource_spec_file_property(p[0])
+      check_resource_groups_property(p[1])
+      check_reqfiles_property(p[2])
+      check_timeout_property(p[3])
+      check_timeout_signal_name_property(p[4])
+      check_timeout_signal_grace_property(p[5])
+      check_willfail_property(p[6])
+      check_workingdir_property(p[7])
+      check_defined_properties(p[8:9])
 
 def check_tests(t):
     assert is_list(t)
