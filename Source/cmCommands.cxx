@@ -112,7 +112,6 @@
 #  include "cmRemoveDefinitionsCommand.h"
 #  include "cmSourceGroupCommand.h"
 #  include "cmTargetLinkDirectoriesCommand.h"
-#  include "cmUseMangledMesaCommand.h"
 #  include "cmUtilitySourceCommand.h"
 #  include "cmVariableRequiresCommand.h"
 #  include "cmVariableWatchCommand.h"
@@ -218,9 +217,9 @@ void GetScriptingCommands(cmState* state)
   state->AddDisallowedCommand(
     "build_name", cmBuildNameCommand, cmPolicies::CMP0036,
     "The build_name command should not be called; see CMP0036.");
-  state->AddDisallowedCommand(
-    "use_mangled_mesa", cmUseMangledMesaCommand, cmPolicies::CMP0030,
-    "The use_mangled_mesa command should not be called; see CMP0030.");
+  state->AddRemovedCommand(
+    "use_mangled_mesa",
+    "The use_mangled_mesa command has been removed; see CMP0030.");
   state->AddDisallowedCommand("exec_program", cmExecProgramCommand,
                               cmPolicies::CMP0153,
                               "The exec_program command should not be called; "

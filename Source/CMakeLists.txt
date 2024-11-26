@@ -758,8 +758,6 @@ add_library(
   cmTryRunCommand.h
   cmUnsetCommand.cxx
   cmUnsetCommand.h
-  cmUseMangledMesaCommand.cxx
-  cmUseMangledMesaCommand.h
   cmUtilitySourceCommand.cxx
   cmUtilitySourceCommand.h
   cmVariableRequiresCommand.cxx

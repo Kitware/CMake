@@ -96,15 +96,3 @@ fltk_wrap_ui (wrapFLTK fltk2.fl)
 add_executable(wrapFLTK wrapFLTK.cxx ${wrapFLTK_FLTK_UI_SRCS})
 target_link_libraries(wrapFLTK wraplibFLTK)
 add_dependencies(wrapFLTK fakefluid)
-
-#
-# Mangled Mesa
-#
-configure_file(
-  ${Wrapping_SOURCE_DIR}/dummy
-  ${Wrapping_BINARY_DIR}/gl.h
-  COPYONLY)
-block(SCOPE_FOR POLICIES)
-cmake_policy(VERSION 2.8.12) # old enough to not set CMP0030
-use_mangled_mesa (${Wrapping_BINARY_DIR} ${Wrapping_BINARY_DIR}/mangled_mesa)
-endblock()

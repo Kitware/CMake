@@ -2,6 +2,7 @@ include(RunCMake)
 
 foreach(p
     CMP0029
+    CMP0030
     )
   run_cmake(${p}-NEW)
 endforeach()
@@ -9,7 +10,6 @@ endforeach()
 return()
 
 foreach(p
-    CMP0030
     CMP0031
     CMP0032
     CMP0033
