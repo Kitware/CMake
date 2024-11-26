@@ -1,8 +1,14 @@
 include(RunCMake)
-set(RunCMake_IGNORE_POLICY_VERSION_DEPRECATION ON)
 
 foreach(p
     CMP0029
+    )
+  run_cmake(${p}-NEW)
+endforeach()
+
+return()
+
+foreach(p
     CMP0030
     CMP0031
     CMP0032

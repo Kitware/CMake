@@ -111,7 +111,6 @@
 #  include "cmRemoveCommand.h"
 #  include "cmRemoveDefinitionsCommand.h"
 #  include "cmSourceGroupCommand.h"
-#  include "cmSubdirDependsCommand.h"
 #  include "cmTargetLinkDirectoriesCommand.h"
 #  include "cmUseMangledMesaCommand.h"
 #  include "cmUtilitySourceCommand.h"
@@ -315,9 +314,9 @@ void GetProjectCommands(cmState* state)
   state->AddDisallowedCommand(
     "output_required_files", cmOutputRequiredFilesCommand, cmPolicies::CMP0032,
     "The output_required_files command should not be called; see CMP0032.");
-  state->AddDisallowedCommand(
-    "subdir_depends", cmSubdirDependsCommand, cmPolicies::CMP0029,
-    "The subdir_depends command should not be called; see CMP0029.");
+  state->AddRemovedCommand(
+    "subdir_depends",
+    "The subdir_depends command has been removed; see CMP0029.");
   state->AddDisallowedCommand(
     "utility_source", cmUtilitySourceCommand, cmPolicies::CMP0034,
     "The utility_source command should not be called; see CMP0034.");

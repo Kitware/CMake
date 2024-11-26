@@ -730,8 +730,6 @@ add_library(
   cmSubcommandTable.h
   cmSubdirCommand.cxx
   cmSubdirCommand.h
-  cmSubdirDependsCommand.cxx
-  cmSubdirDependsCommand.h
   cmTargetCompileDefinitionsCommand.cxx
   cmTargetCompileDefinitionsCommand.h
   cmTargetCompileFeaturesCommand.cxx
