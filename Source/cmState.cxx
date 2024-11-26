@@ -472,6 +472,18 @@ void cmState::AddDisallowedCommand(std::string const& name,
     });
 }
 
+void cmState::AddRemovedCommand(std::string const& name,
+                                std::string const& message)
+{
+  this->AddBuiltinCommand(name,
+                          [message](std::vector<cmListFileArgument> const&,
+                                    cmExecutionStatus& status) -> bool {
+                            status.GetMakefile().IssueMessage(
+                              MessageType::FATAL_ERROR, message);
+                            return true;
+                          });
+}
+
 void cmState::AddUnexpectedCommand(std::string const& name, const char* error)
 {
   this->AddBuiltinCommand(
