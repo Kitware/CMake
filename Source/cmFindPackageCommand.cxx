@@ -206,12 +206,14 @@ private:
 class cmDirectoryListGenerator
 {
 public:
-  cmDirectoryListGenerator(std::vector<std::string> const& names,
+  cmDirectoryListGenerator(std::vector<std::string> const* names,
                            bool exactMatch)
     : Names{ names }
     , ExactMatch{ exactMatch }
     , Current{ this->Matches.cbegin() }
   {
+    assert(names || !exactMatch);
+    assert(!names || !names->empty());
   }
   virtual ~cmDirectoryListGenerator() = default;
 
@@ -238,10 +240,10 @@ public:
           continue;
         }
 
-        if (!this->ExactMatch && this->Names.get().empty()) {
+        if (!this->Names) {
           this->Matches.emplace_back(fname);
         } else {
-          for (const auto& n : this->Names.get()) {
+          for (const auto& n : *this->Names) {
             // NOTE Customization point for
             // `cmMacProjectDirectoryListGenerator`
             const auto name = this->TransformNameBeforeCmp(n);
@@ -282,7 +284,7 @@ protected:
   virtual void OnMatchesLoaded() {}
   virtual std::string TransformNameBeforeCmp(std::string same) { return same; }
 
-  std::reference_wrapper<const std::vector<std::string>> Names;
+  std::vector<std::string> const* Names;
   bool const ExactMatch;
   std::vector<std::string> Matches;
   std::vector<std::string>::const_iterator Current;
@@ -291,7 +293,7 @@ protected:
 class cmProjectDirectoryListGenerator : public cmDirectoryListGenerator
 {
 public:
-  cmProjectDirectoryListGenerator(std::vector<std::string> const& names,
+  cmProjectDirectoryListGenerator(std::vector<std::string> const* names,
                                   cmFindPackageCommand::SortOrderType so,
                                   cmFindPackageCommand::SortDirectionType sd,
                                   bool exactMatch)
@@ -320,7 +322,7 @@ private:
 class cmMacProjectDirectoryListGenerator : public cmDirectoryListGenerator
 {
 public:
-  cmMacProjectDirectoryListGenerator(const std::vector<std::string>& names,
+  cmMacProjectDirectoryListGenerator(std::vector<std::string> const* names,
                                      cm::string_view ext)
     : cmDirectoryListGenerator{ names, true }
     , Extension{ ext }
@@ -342,13 +344,9 @@ class cmAnyDirectoryListGenerator : public cmProjectDirectoryListGenerator
 public:
   cmAnyDirectoryListGenerator(cmFindPackageCommand::SortOrderType so,
                               cmFindPackageCommand::SortDirectionType sd)
-    : cmProjectDirectoryListGenerator(this->EmptyNamesList, so, sd, false)
+    : cmProjectDirectoryListGenerator(nullptr, so, sd, false)
   {
   }
-
-private:
-  // NOTE `cmDirectoryListGenerator` needs to hold a reference to this
-  std::vector<std::string> EmptyNamesList;
 };
 
 #if defined(__LCC__)
@@ -2634,7 +2632,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
 
   auto iCMakeGen = cmCaseInsensitiveDirectoryListGenerator{ "cmake"_s };
   auto firstPkgDirGen =
-    cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
+    cmProjectDirectoryListGenerator{ &this->Names, this->SortOrder,
                                      this->SortDirection, false };
 
   // PREFIX/(cmake|CMake)/ (useful on windows or in build trees)
@@ -2653,7 +2651,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   }
 
   auto secondPkgDirGen =
-    cmProjectDirectoryListGenerator{ this->Names, this->SortOrder,
+    cmProjectDirectoryListGenerator{ &this->Names, this->SortOrder,
                                      this->SortDirection, false };
 
   // PREFIX/(Foo|foo|FOO).*/(cmake|CMake)/(Foo|foo|FOO).*/
@@ -2730,7 +2728,7 @@ bool cmFindPackageCommand::SearchFrameworkPrefix(std::string const& prefix_in)
 
   auto iCMakeGen = cmCaseInsensitiveDirectoryListGenerator{ "cmake"_s };
   auto fwGen =
-    cmMacProjectDirectoryListGenerator{ this->Names, ".framework"_s };
+    cmMacProjectDirectoryListGenerator{ &this->Names, ".framework"_s };
   auto rGen = cmAppendPathSegmentGenerator{ "Resources"_s };
   auto vGen = cmAppendPathSegmentGenerator{ "Versions"_s };
   auto anyGen =
@@ -2768,7 +2766,7 @@ bool cmFindPackageCommand::SearchAppBundlePrefix(std::string const& prefix_in)
     return this->SearchDirectory(fullPath);
   };
 
-  auto appGen = cmMacProjectDirectoryListGenerator{ this->Names, ".app"_s };
+  auto appGen = cmMacProjectDirectoryListGenerator{ &this->Names, ".app"_s };
   auto crGen = cmAppendPathSegmentGenerator{ "Contents/Resources"_s };
 
   // <prefix>/Foo.app/Contents/Resources
