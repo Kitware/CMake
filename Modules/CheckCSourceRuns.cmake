@@ -19,9 +19,9 @@ subsequently be run.
   function.
 
   The result is stored in the internal cache variable specified by
-  ``<resultVar>``. Success of build and run is indicated by boolean ``true``.
-  Failure to build or run is indicated by boolean ``false`` such as an empty
-  string or an error message.
+  ``<resultVar>``. If the code builds and runs with exit code ``0``, success is
+  indicated by boolean ``true``. Failure to build or run is indicated by boolean
+  ``false``, such as an empty string or an error message.
 
   See also :command:`check_source_runs` for a more general command syntax.
 

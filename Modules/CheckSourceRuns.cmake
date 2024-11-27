@@ -23,9 +23,9 @@ subsequently be run.
   a ``main()`` function, or in Fortran a ``program``.
 
   The result is stored in the internal cache variable specified by
-  ``<resultVar>``. Success of build and run is indicated by boolean ``true``.
-  Failure to build or run is indicated by boolean ``false`` such as an empty
-  string or an error message.
+  ``<resultVar>``. If the code builds and runs with exit code ``0``, success is
+  indicated by boolean ``true``. Failure to build or run is indicated by boolean
+  ``false``, such as an empty string or an error message.
 
   By default, the test source file will be given a file extension that matches
   the requested language. The ``SRC_EXT`` option can be used to override this
