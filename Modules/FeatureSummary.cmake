@@ -627,6 +627,10 @@ endfunction()
   .. versionchanged:: 3.8
     ``<enabled>`` can be a list of conditions.
 
+  .. versionchanged:: 3.32
+    Full :ref:`Condition Syntax` is now supported for ``<enabled>``.
+    See policy :policy:`CMP0183`.
+
   Example for setting the info for a feature:
 
   .. code-block:: cmake
@@ -635,15 +639,29 @@ endfunction()
      add_feature_info(Foo WITH_FOO "The Foo feature provides very cool stuff.")
 #]=======================================================================]
 function(ADD_FEATURE_INFO _name _depends _desc)
+  cmake_policy(GET CMP0183 _CDO_CMP0183
+    PARENT_SCOPE # undocumented, do not use outside of CMake
+  )
   set(_enabled 1)
-  foreach(_d ${_depends})
-    string(REGEX REPLACE " +" ";" _d "${_d}")
-    if(${_d})
-    else()
-      set(_enabled 0)
-      break()
-    endif()
-  endforeach()
+  if("x${_CDO_CMP0183}x" STREQUAL "xNEWx")
+    foreach(_d ${_depends})
+      cmake_language(EVAL CODE "
+        if(${_d})
+        else()
+          set(_enabled 0)
+        endif()"
+      )
+    endforeach()
+  else()
+    foreach(_d ${_depends})
+      string(REGEX REPLACE " +" ";" _d "${_d}")
+      if(${_d})
+      else()
+        set(_enabled 0)
+        break()
+      endif()
+    endforeach()
+  endif()
   if (${_enabled})
     set_property(GLOBAL APPEND PROPERTY ENABLED_FEATURES "${_name}")
   else ()
@@ -651,6 +669,12 @@ function(ADD_FEATURE_INFO _name _depends _desc)
   endif ()
 
   set_property(GLOBAL PROPERTY _CMAKE_${_name}_DESCRIPTION "${_desc}" )
+
+  if("x${_CDO_CMP0183}x" STREQUAL "xx" AND "x${_depends}x" MATCHES "[^A-Za-z0-9_.; ]")
+    cmake_policy(GET_WARNING CMP0183 _CDO_CMP0183_WARNING)
+    message(AUTHOR_WARNING "${_CDO_CMP0183_WARNING}")
+  endif()
+  unset(_CDO_CMP0183)
 endfunction()
 
 
