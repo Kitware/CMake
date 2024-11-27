@@ -203,10 +203,10 @@ Example for the usage:
 
   find_package_check_version(1.2.3 result HANDLE_VERSION_RANGE
     RESULT_MESSAGE_VARIABLE reason)
-  if (result)
-    message (STATUS "${reason}")
+  if(result)
+    message(STATUS "${reason}")
   else()
-    message (FATAL_ERROR "${reason}")
+    message(FATAL_ERROR "${reason}")
   endif()
 #]=======================================================================]
 
@@ -215,27 +215,27 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageMessage.cmake)
 
 cmake_policy(PUSH)
 # numbers and boolean constants
-cmake_policy (SET CMP0012 NEW)
+cmake_policy(SET CMP0012 NEW)
 # IN_LIST operator
-cmake_policy (SET CMP0057 NEW)
+cmake_policy(SET CMP0057 NEW)
 
 
 # internal helper macro
 macro(_FPHSA_FAILURE_MESSAGE _msg)
-  set (__msg "${_msg}")
-  if (FPHSA_REASON_FAILURE_MESSAGE)
+  set(__msg "${_msg}")
+  if(FPHSA_REASON_FAILURE_MESSAGE)
     string(APPEND __msg "\n    Reason given by package: ${FPHSA_REASON_FAILURE_MESSAGE}\n")
   elseif(NOT DEFINED PROJECT_NAME)
     string(APPEND __msg "\n"
       "Hint: The project() command has not yet been called.  It sets up system-specific search paths.")
   endif()
-  if (${_NAME}_FIND_REQUIRED)
+  if(${_NAME}_FIND_REQUIRED)
     message(FATAL_ERROR "${__msg}")
-  else ()
-    if (NOT ${_NAME}_FIND_QUIETLY)
+  else()
+    if(NOT ${_NAME}_FIND_QUIETLY)
       message(STATUS "${__msg}")
-    endif ()
-  endif ()
+    endif()
+  endif()
 endmacro()
 
 
@@ -249,15 +249,11 @@ macro(_FPHSA_HANDLE_FAILURE_CONFIG_MODE)
     # List them all in the error message:
     if(${_NAME}_CONSIDERED_CONFIGS)
       set(configsText "")
-      list(LENGTH ${_NAME}_CONSIDERED_CONFIGS configsCount)
-      math(EXPR configsCount "${configsCount} - 1")
-      foreach(currentConfigIndex RANGE ${configsCount})
-        list(GET ${_NAME}_CONSIDERED_CONFIGS ${currentConfigIndex} filename)
-        list(GET ${_NAME}_CONSIDERED_VERSIONS ${currentConfigIndex} version)
+      foreach(filename version IN ZIP_LISTS ${_NAME}_CONSIDERED_CONFIGS ${_NAME}_CONSIDERED_VERSIONS)
         string(APPEND configsText "\n    ${filename} (version ${version})")
       endforeach()
-      if (${_NAME}_NOT_FOUND_MESSAGE)
-        if (FPHSA_REASON_FAILURE_MESSAGE)
+      if(${_NAME}_NOT_FOUND_MESSAGE)
+        if(FPHSA_REASON_FAILURE_MESSAGE)
           string(PREPEND FPHSA_REASON_FAILURE_MESSAGE "${${_NAME}_NOT_FOUND_MESSAGE}\n    ")
         else()
           set(FPHSA_REASON_FAILURE_MESSAGE "${${_NAME}_NOT_FOUND_MESSAGE}")
@@ -276,101 +272,100 @@ endmacro()
 
 
 function(FIND_PACKAGE_CHECK_VERSION version result)
-  cmake_parse_arguments (PARSE_ARGV 2 FPCV "HANDLE_VERSION_RANGE;NO_AUTHOR_WARNING_VERSION_RANGE" "RESULT_MESSAGE_VARIABLE" "")
+  cmake_parse_arguments(PARSE_ARGV 2 FPCV "HANDLE_VERSION_RANGE;NO_AUTHOR_WARNING_VERSION_RANGE" "RESULT_MESSAGE_VARIABLE" "")
 
-  if (FPCV_UNPARSED_ARGUMENTS)
-    message (FATAL_ERROR "find_package_check_version(): ${FPCV_UNPARSED_ARGUMENTS}: unexpected arguments")
+  if(FPCV_UNPARSED_ARGUMENTS)
+    message(FATAL_ERROR "find_package_check_version(): ${FPCV_UNPARSED_ARGUMENTS}: unexpected arguments")
   endif()
-  if ("RESULT_MESSAGE_VARIABLE" IN_LIST FPCV_KEYWORDS_MISSING_VALUES)
-    message (FATAL_ERROR "find_package_check_version(): RESULT_MESSAGE_VARIABLE expects an argument")
+  if("RESULT_MESSAGE_VARIABLE" IN_LIST FPCV_KEYWORDS_MISSING_VALUES)
+    message(FATAL_ERROR "find_package_check_version(): RESULT_MESSAGE_VARIABLE expects an argument")
   endif()
 
-  set (${result} FALSE PARENT_SCOPE)
-  if (FPCV_RESULT_MESSAGE_VARIABLE)
+  set(${result} FALSE PARENT_SCOPE)
+  if(FPCV_RESULT_MESSAGE_VARIABLE)
     unset (${FPCV_RESULT_MESSAGE_VARIABLE} PARENT_SCOPE)
   endif()
 
-  if (_CMAKE_FPHSA_PACKAGE_NAME)
-    set (package "${_CMAKE_FPHSA_PACKAGE_NAME}")
-  elseif (CMAKE_FIND_PACKAGE_NAME)
-    set (package "${CMAKE_FIND_PACKAGE_NAME}")
+  if(_CMAKE_FPHSA_PACKAGE_NAME)
+    set(package "${_CMAKE_FPHSA_PACKAGE_NAME}")
+  elseif(CMAKE_FIND_PACKAGE_NAME)
+    set(package "${CMAKE_FIND_PACKAGE_NAME}")
   else()
-    message (FATAL_ERROR "find_package_check_version(): Cannot be used outside a 'Find Module'")
+    message(FATAL_ERROR "find_package_check_version(): Cannot be used outside a 'Find Module'")
   endif()
 
-  if (NOT FPCV_NO_AUTHOR_WARNING_VERSION_RANGE
+  if(NOT FPCV_NO_AUTHOR_WARNING_VERSION_RANGE
       AND ${package}_FIND_VERSION_RANGE AND NOT FPCV_HANDLE_VERSION_RANGE)
     message(AUTHOR_WARNING
-      "`find_package()` specify a version range but the option "
-      "HANDLE_VERSION_RANGE` is not passed to `find_package_check_version()`. "
+      "find_package() specify a version range but the option "
+      "HANDLE_VERSION_RANGE` is not passed to find_package_check_version(). "
       "Only the lower endpoint of the range will be used.")
   endif()
 
-
-  set (version_ok FALSE)
+  set(version_ok FALSE)
   unset (version_msg)
 
-  if (FPCV_HANDLE_VERSION_RANGE AND ${package}_FIND_VERSION_RANGE)
-    if ((${package}_FIND_VERSION_RANGE_MIN STREQUAL "INCLUDE"
+  if(FPCV_HANDLE_VERSION_RANGE AND ${package}_FIND_VERSION_RANGE)
+    if((${package}_FIND_VERSION_RANGE_MIN STREQUAL "INCLUDE"
           AND version VERSION_GREATER_EQUAL ${package}_FIND_VERSION_MIN)
         AND ((${package}_FIND_VERSION_RANGE_MAX STREQUAL "INCLUDE"
             AND version VERSION_LESS_EQUAL ${package}_FIND_VERSION_MAX)
           OR (${package}_FIND_VERSION_RANGE_MAX STREQUAL "EXCLUDE"
             AND version VERSION_LESS ${package}_FIND_VERSION_MAX)))
-      set (version_ok TRUE)
+      set(version_ok TRUE)
       set(version_msg "(found suitable version \"${version}\", required range is \"${${package}_FIND_VERSION_RANGE}\")")
     else()
       set(version_msg "Found unsuitable version \"${version}\", required range is \"${${package}_FIND_VERSION_RANGE}\"")
     endif()
-  elseif (DEFINED ${package}_FIND_VERSION)
+  elseif(DEFINED ${package}_FIND_VERSION)
     if(${package}_FIND_VERSION_EXACT)       # exact version required
       # count the dots in the version string
       string(REGEX REPLACE "[^.]" "" version_dots "${version}")
       # add one dot because there is one dot more than there are components
       string(LENGTH "${version_dots}." version_dots)
-      if (version_dots GREATER ${package}_FIND_VERSION_COUNT)
+      if(version_dots GREATER ${package}_FIND_VERSION_COUNT)
         # Because of the C++ implementation of find_package() ${package}_FIND_VERSION_COUNT
         # is at most 4 here. Therefore a simple lookup table is used.
-        if (${package}_FIND_VERSION_COUNT EQUAL 1)
+        if(${package}_FIND_VERSION_COUNT EQUAL 1)
           set(version_regex "[^.]*")
-        elseif (${package}_FIND_VERSION_COUNT EQUAL 2)
+        elseif(${package}_FIND_VERSION_COUNT EQUAL 2)
           set(version_regex "[^.]*\\.[^.]*")
-        elseif (${package}_FIND_VERSION_COUNT EQUAL 3)
+        elseif(${package}_FIND_VERSION_COUNT EQUAL 3)
           set(version_regex "[^.]*\\.[^.]*\\.[^.]*")
         else()
           set(version_regex "[^.]*\\.[^.]*\\.[^.]*\\.[^.]*")
         endif()
         string(REGEX REPLACE "^(${version_regex})\\..*" "\\1" version_head "${version}")
-        if (NOT ${package}_FIND_VERSION VERSION_EQUAL version_head)
+        if(NOT ${package}_FIND_VERSION VERSION_EQUAL version_head)
           set(version_msg "Found unsuitable version \"${version}\", but required is exact version \"${${package}_FIND_VERSION}\"")
-        else ()
+        else()
           set(version_ok TRUE)
           set(version_msg "(found suitable exact version \"${version}\")")
-        endif ()
-      else ()
-        if (NOT ${package}_FIND_VERSION VERSION_EQUAL version)
+        endif()
+      else()
+        if(NOT ${package}_FIND_VERSION VERSION_EQUAL version)
           set(version_msg "Found unsuitable version \"${version}\", but required is exact version \"${${package}_FIND_VERSION}\"")
-        else ()
+        else()
           set(version_ok TRUE)
           set(version_msg "(found suitable exact version \"${version}\")")
-        endif ()
-      endif ()
+        endif()
+      endif()
     else()     # minimum version
-      if (${package}_FIND_VERSION VERSION_GREATER version)
+      if(${package}_FIND_VERSION VERSION_GREATER version)
         set(version_msg "Found unsuitable version \"${version}\", but required is at least \"${${package}_FIND_VERSION}\"")
       else()
         set(version_ok TRUE)
         set(version_msg "(found suitable version \"${version}\", minimum required is \"${${package}_FIND_VERSION}\")")
       endif()
     endif()
-  else ()
+  else()
     set(version_ok TRUE)
     set(version_msg "(found version \"${version}\")")
   endif()
 
-  set (${result} ${version_ok} PARENT_SCOPE)
-  if (FPCV_RESULT_MESSAGE_VARIABLE)
-    set (${FPCV_RESULT_MESSAGE_VARIABLE} "${version_msg}" PARENT_SCOPE)
+  set(${result} ${version_ok} PARENT_SCOPE)
+  if(FPCV_RESULT_MESSAGE_VARIABLE)
+    set(${FPCV_RESULT_MESSAGE_VARIABLE} "${version_msg}" PARENT_SCOPE)
   endif()
 endfunction()
 
@@ -387,21 +382,21 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   list(FIND _KEYWORDS_FOR_EXTENDED_MODE "${_FIRST_ARG}" INDEX)
 
   unset(FPHSA_NAME_MISMATCHED_override)
-  if (DEFINED FPHSA_NAME_MISMATCHED)
+  if(DEFINED FPHSA_NAME_MISMATCHED)
     # If the variable NAME_MISMATCHED variable is set, error if it is passed as
     # an argument. The former is for old signatures, the latter is for new
     # signatures.
     list(FIND ARGN "NAME_MISMATCHED" name_mismatched_idx)
-    if (NOT name_mismatched_idx EQUAL "-1")
+    if(NOT name_mismatched_idx EQUAL "-1")
       message(FATAL_ERROR
-        "The `NAME_MISMATCHED` argument may only be specified by the argument or "
+        "The NAME_MISMATCHED argument may only be specified by the argument or "
         "the variable, not both.")
-    endif ()
+    endif()
 
     # But use the variable if it is not an argument to avoid forcing minimum
     # CMake version bumps for calling modules.
     set(FPHSA_NAME_MISMATCHED_override "${FPHSA_NAME_MISMATCHED}")
-  endif ()
+  endif()
 
   if(${INDEX} EQUAL -1)
     set(FPHSA_FAIL_MESSAGE ${_FIRST_ARG})
@@ -411,7 +406,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
     cmake_parse_arguments(FPHSA "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${_FIRST_ARG} ${ARGN})
 
     if(FPHSA_UNPARSED_ARGUMENTS)
-      message(FATAL_ERROR "Unknown keywords given to FIND_PACKAGE_HANDLE_STANDARD_ARGS(): \"${FPHSA_UNPARSED_ARGUMENTS}\"")
+      message(FATAL_ERROR "Unknown keywords given to find_package_handle_standard_args(): \"${FPHSA_UNPARSED_ARGUMENTS}\"")
     endif()
 
     if(NOT FPHSA_FAIL_MESSAGE)
@@ -427,28 +422,28 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
     endif()
 
     if(NOT FPHSA_REQUIRED_VARS AND NOT FPHSA_HANDLE_COMPONENTS)
-      message(FATAL_ERROR "No REQUIRED_VARS specified for FIND_PACKAGE_HANDLE_STANDARD_ARGS()")
+      message(FATAL_ERROR "No REQUIRED_VARS specified for find_package_handle_standard_args()")
     endif()
   endif()
 
-  if (DEFINED FPHSA_NAME_MISMATCHED_override)
+  if(DEFINED FPHSA_NAME_MISMATCHED_override)
     set(FPHSA_NAME_MISMATCHED "${FPHSA_NAME_MISMATCHED_override}")
-  endif ()
+  endif()
 
-  if (DEFINED CMAKE_FIND_PACKAGE_NAME
+  if(DEFINED CMAKE_FIND_PACKAGE_NAME
       AND NOT FPHSA_NAME_MISMATCHED
       AND NOT _NAME STREQUAL CMAKE_FIND_PACKAGE_NAME)
     message(AUTHOR_WARNING
-      "The package name passed to `find_package_handle_standard_args` "
+      "The package name passed to find_package_handle_standard_args() "
       "(${_NAME}) does not match the name of the calling package "
       "(${CMAKE_FIND_PACKAGE_NAME}). This can lead to problems in calling "
-      "code that expects `find_package` result variables (e.g., `_FOUND`) "
+      "code that expects find_package() result variables (e.g., `_FOUND`) "
       "to follow a certain pattern.")
-  endif ()
+  endif()
 
-  if (${_NAME}_FIND_VERSION_RANGE AND NOT FPHSA_HANDLE_VERSION_RANGE)
+  if(${_NAME}_FIND_VERSION_RANGE AND NOT FPHSA_HANDLE_VERSION_RANGE)
     message(AUTHOR_WARNING
-      "`find_package()` specify a version range but the module ${_NAME} does "
+      "find_package() specify a version range but the module ${_NAME} does "
       "not support this capability. Only the lower endpoint of the range "
       "will be used.")
   endif()
@@ -462,7 +457,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
     set(FPHSA_FAIL_MESSAGE "Could NOT find ${_NAME}")
   endif()
 
-  if (FPHSA_REQUIRED_VARS)
+  if(FPHSA_REQUIRED_VARS)
     list(GET FPHSA_REQUIRED_VARS 0 _FIRST_REQUIRED_VAR)
   endif()
 
@@ -539,17 +534,17 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   set(VERSION_OK TRUE)
 
   # check that the version variable is not empty to avoid emitting a misleading
-  # message (i.e. `Found unsuitable version ""`)
-  if (DEFINED ${_NAME}_FIND_VERSION)
+  # message(i.e. `Found unsuitable version ""`)
+  if(DEFINED ${_NAME}_FIND_VERSION)
     if(DEFINED ${FPHSA_VERSION_VAR})
       if(NOT "${${FPHSA_VERSION_VAR}}" STREQUAL "")
         set(_FOUND_VERSION ${${FPHSA_VERSION_VAR}})
-        if (FPHSA_HANDLE_VERSION_RANGE)
-          set (FPCV_HANDLE_VERSION_RANGE HANDLE_VERSION_RANGE)
+        if(FPHSA_HANDLE_VERSION_RANGE)
+          set(FPCV_HANDLE_VERSION_RANGE HANDLE_VERSION_RANGE)
         else()
           set(FPCV_HANDLE_VERSION_RANGE NO_AUTHOR_WARNING_VERSION_RANGE)
         endif()
-        find_package_check_version ("${_FOUND_VERSION}" VERSION_OK RESULT_MESSAGE_VARIABLE VERSION_MSG
+        find_package_check_version("${_FOUND_VERSION}" VERSION_OK RESULT_MESSAGE_VARIABLE VERSION_MSG
           ${FPCV_HANDLE_VERSION_RANGE})
       else()
         set(VERSION_OK FALSE)
@@ -559,18 +554,18 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
       # if the package was not found, but a version was given, add that to the output:
       if(${_NAME}_FIND_VERSION_EXACT)
         set(VERSION_MSG "(Required is exact version \"${${_NAME}_FIND_VERSION}\")")
-      elseif (FPHSA_HANDLE_VERSION_RANGE AND ${_NAME}_FIND_VERSION_RANGE)
+      elseif(FPHSA_HANDLE_VERSION_RANGE AND ${_NAME}_FIND_VERSION_RANGE)
         set(VERSION_MSG "(Required is version range \"${${_NAME}_FIND_VERSION_RANGE}\")")
       else()
         set(VERSION_MSG "(Required is at least version \"${${_NAME}_FIND_VERSION}\")")
       endif()
     endif()
-  else ()
+  else()
     # Check with DEFINED as the found version may be 0.
     if(DEFINED ${FPHSA_VERSION_VAR})
       set(VERSION_MSG "(found version \"${${FPHSA_VERSION_VAR}}\")")
     endif()
-  endif ()
+  endif()
 
   if(VERSION_OK)
     string(APPEND DETAILS "[v${${FPHSA_VERSION_VAR}}(${${_NAME}_FIND_VERSION})]")
@@ -580,23 +575,23 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
 
 
   # print the result:
-  if (${_NAME}_FOUND)
+  if(${_NAME}_FOUND)
     FIND_PACKAGE_MESSAGE(${_NAME} "Found ${_NAME}: ${${_FIRST_REQUIRED_VAR}} ${VERSION_MSG} ${COMPONENT_MSG}" "${DETAILS}")
-  else ()
+  else()
 
     if(FPHSA_CONFIG_MODE)
       _FPHSA_HANDLE_FAILURE_CONFIG_MODE()
     else()
       if(NOT VERSION_OK)
         set(RESULT_MSG)
-        if (_FIRST_REQUIRED_VAR)
-          string (APPEND RESULT_MSG "found ${${_FIRST_REQUIRED_VAR}}")
+        if(_FIRST_REQUIRED_VAR)
+          string(APPEND RESULT_MSG "found ${${_FIRST_REQUIRED_VAR}}")
         endif()
-        if (COMPONENT_MSG)
-          if (RESULT_MSG)
-            string (APPEND RESULT_MSG ", ")
+        if(COMPONENT_MSG)
+          if(RESULT_MSG)
+            string(APPEND RESULT_MSG ", ")
           endif()
-          string (APPEND RESULT_MSG "${FOUND_COMPONENTS_MSG}")
+          string(APPEND RESULT_MSG "${FOUND_COMPONENTS_MSG}")
         endif()
         _FPHSA_FAILURE_MESSAGE("${FPHSA_FAIL_MESSAGE}: ${VERSION_MSG} (${RESULT_MSG})")
       else()
@@ -604,7 +599,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
       endif()
     endif()
 
-  endif ()
+  endif()
 
   set(${_NAME}_FOUND ${${_NAME}_FOUND} PARENT_SCOPE)
   set(${_NAME_UPPER}_FOUND ${${_NAME}_FOUND} PARENT_SCOPE)
