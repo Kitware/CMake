@@ -875,10 +875,10 @@ private:
 
   void ClearGeneratorMembers();
 
-  bool CheckCMP0037(std::string const& targetName,
-                    std::string const& reason) const;
-  bool CheckCMP0037Prefix(std::string const& targetPrefix,
-                          std::string const& reason) const;
+  bool CheckReservedTargetName(std::string const& targetName,
+                               std::string const& reason) const;
+  bool CheckReservedTargetNamePrefix(std::string const& targetPrefix,
+                                     std::string const& reason) const;
 
   void IndexMakefile(cmMakefile* mf);
   void IndexLocalGenerator(cmLocalGenerator* lg);

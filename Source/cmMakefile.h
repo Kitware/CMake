@@ -994,8 +994,7 @@ public:
   /** Set whether or not to report a CMP0000 violation.  */
   void SetCheckCMP0000(bool b) { this->CheckCMP0000 = b; }
 
-  bool CheckCMP0037(std::string const& targetName,
-                    cmStateEnums::TargetType targetType) const;
+  void IssueInvalidTargetNameError(std::string const& targetName) const;
 
   cmBTStringRange GetIncludeDirectoriesEntries() const;
   cmBTStringRange GetCompileOptionsEntries() const;

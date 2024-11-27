@@ -2726,58 +2726,38 @@ cmGlobalGenerator::SplitFrameworkPath(const std::string& path,
   return cm::nullopt;
 }
 
-static bool RaiseCMP0037Message(cmake* cm, cmTarget* tgt,
-                                std::string const& targetNameAsWritten,
-                                std::string const& reason)
+namespace {
+void IssueReservedTargetNameError(cmake* cm, cmTarget* tgt,
+                                  std::string const& targetNameAsWritten,
+                                  std::string const& reason)
 {
-  MessageType messageType = MessageType::AUTHOR_WARNING;
-  std::ostringstream e;
-  bool issueMessage = false;
-  switch (tgt->GetPolicyStatusCMP0037()) {
-    case cmPolicies::WARN:
-      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0037) << '\n';
-      issueMessage = true;
-      CM_FALLTHROUGH;
-    case cmPolicies::OLD:
-      break;
-    case cmPolicies::NEW:
-      issueMessage = true;
-      messageType = MessageType::FATAL_ERROR;
-      break;
-  }
-  if (issueMessage) {
-    e << "The target name \"" << targetNameAsWritten << "\" is reserved "
-      << reason << '.';
-    if (messageType == MessageType::AUTHOR_WARNING) {
-      e << "  It may result in undefined behavior.";
-    }
-    cm->IssueMessage(messageType, e.str(), tgt->GetBacktrace());
-    if (messageType == MessageType::FATAL_ERROR) {
-      return false;
-    }
-  }
-  return true;
+  cm->IssueMessage(MessageType::FATAL_ERROR,
+                   cmStrCat("The target name \"", targetNameAsWritten,
+                            "\" is reserved ", reason, '.'),
+                   tgt->GetBacktrace());
+}
 }
 
-bool cmGlobalGenerator::CheckCMP0037(std::string const& targetName,
-                                     std::string const& reason) const
+bool cmGlobalGenerator::CheckReservedTargetName(
+  std::string const& targetName, std::string const& reason) const
 {
   cmTarget* tgt = this->FindTarget(targetName);
   if (!tgt) {
     return true;
   }
-  return RaiseCMP0037Message(this->GetCMakeInstance(), tgt, targetName,
-                             reason);
+  IssueReservedTargetNameError(this->GetCMakeInstance(), tgt, targetName,
+                               reason);
+  return false;
 }
 
-bool cmGlobalGenerator::CheckCMP0037Prefix(std::string const& targetPrefix,
-                                           std::string const& reason) const
+bool cmGlobalGenerator::CheckReservedTargetNamePrefix(
+  std::string const& targetPrefix, std::string const& reason) const
 {
   bool ret = true;
   for (auto const& tgtPair : this->TargetSearchIndex) {
-    if (cmHasPrefix(tgtPair.first, targetPrefix) &&
-        !RaiseCMP0037Message(this->GetCMakeInstance(), tgtPair.second,
-                             tgtPair.first, reason)) {
+    if (cmHasPrefix(tgtPair.first, targetPrefix)) {
+      IssueReservedTargetNameError(this->GetCMakeInstance(), tgtPair.second,
+                                   tgtPair.first, reason);
       ret = false;
     }
   }
@@ -2807,7 +2787,8 @@ void cmGlobalGenerator::AddGlobalTarget_Package(
 
   static const auto reservedTargets = { "package", "PACKAGE" };
   for (auto const& target : reservedTargets) {
-    if (!this->CheckCMP0037(target, "when CPack packaging is enabled")) {
+    if (!this->CheckReservedTargetName(target,
+                                       "when CPack packaging is enabled")) {
       return;
     }
   }
@@ -2856,8 +2837,8 @@ void cmGlobalGenerator::AddGlobalTarget_PackageSource(
 
   static const auto reservedTargets = { "package_source" };
   for (auto const& target : reservedTargets) {
-    if (!this->CheckCMP0037(target,
-                            "when CPack source packaging is enabled")) {
+    if (!this->CheckReservedTargetName(
+          target, "when CPack source packaging is enabled")) {
       return;
     }
   }
@@ -2886,7 +2867,8 @@ void cmGlobalGenerator::AddGlobalTarget_Test(
 
   static const auto reservedTargets = { "test", "RUN_TESTS" };
   for (auto const& target : reservedTargets) {
-    if (!this->CheckCMP0037(target, "when CTest testing is enabled")) {
+    if (!this->CheckReservedTargetName(target,
+                                       "when CTest testing is enabled")) {
       return;
     }
   }
@@ -3245,14 +3227,14 @@ bool cmGlobalGenerator::AddBuildDatabaseTargets()
 
   static const auto reservedTargets = { "cmake_build_database" };
   for (auto const& target : reservedTargets) {
-    if (!this->CheckCMP0037(target,
-                            "when exporting build databases are enabled")) {
+    if (!this->CheckReservedTargetName(
+          target, "when exporting build databases are enabled")) {
       return false;
     }
   }
   static const auto reservedPrefixes = { "cmake_build_database-" };
   for (auto const& prefix : reservedPrefixes) {
-    if (!this->CheckCMP0037Prefix(
+    if (!this->CheckReservedTargetNamePrefix(
           prefix, "when exporting build databases are enabled")) {
       return false;
     }

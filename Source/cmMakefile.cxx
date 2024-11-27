@@ -195,39 +195,15 @@ Message::LogLevel cmMakefile::GetCurrentLogLevel() const
   return result;
 }
 
-bool cmMakefile::CheckCMP0037(std::string const& targetName,
-                              cmStateEnums::TargetType targetType) const
+void cmMakefile::IssueInvalidTargetNameError(
+  std::string const& targetName) const
 {
-  MessageType messageType = MessageType::AUTHOR_WARNING;
-  std::string e;
-  bool issueMessage = false;
-  switch (this->GetPolicyStatus(cmPolicies::CMP0037)) {
-    case cmPolicies::WARN:
-      if (targetType != cmStateEnums::INTERFACE_LIBRARY) {
-        e = cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0037), '\n');
-        issueMessage = true;
-      }
-      CM_FALLTHROUGH;
-    case cmPolicies::OLD:
-      break;
-    case cmPolicies::NEW:
-      issueMessage = true;
-      messageType = MessageType::FATAL_ERROR;
-      break;
-  }
-  if (issueMessage) {
-    e +=
-      cmStrCat("The target name \"", targetName,
-               "\" is reserved or not valid for certain "
-               "CMake features, such as generator expressions, and may result "
-               "in undefined behavior.");
-    this->IssueMessage(messageType, e);
-
-    if (messageType == MessageType::FATAL_ERROR) {
-      return false;
-    }
-  }
-  return true;
+  this->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("The target name \"", targetName,
+             "\" is reserved or not valid for certain "
+             "CMake features, such as generator expressions, and may result "
+             "in undefined behavior."));
 }
 
 void cmMakefile::MaybeWarnCMP0074(std::string const& rootVar, cmValue rootDef,

@@ -150,7 +150,8 @@ bool cmAddLibraryCommand(std::vector<std::string> const& args,
   if (nameOk && !importTarget && !isAlias) {
     nameOk = libName.find(':') == std::string::npos;
   }
-  if (!nameOk && !mf.CheckCMP0037(libName, type)) {
+  if (!nameOk) {
+    mf.IssueInvalidTargetNameError(libName);
     return false;
   }
 

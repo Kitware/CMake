@@ -1,15 +1,20 @@
-CMake Error at invalid_name.cmake:2 \(add_library\):
-  add_library Invalid name for INTERFACE library target: if\$ace
+^CMake Error at invalid_name\.cmake:1 \(add_library\):
+  The target name "if\$ace" is reserved or not valid for certain CMake
+  features, such as generator expressions, and may result in undefined
+  behavior\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Error at invalid_name.cmake:4 \(add_library\):
-  add_library Invalid name for INTERFACE library target: iface::target
+CMake Error at invalid_name\.cmake:2 \(add_library\):
+  The target name "iface::target" is reserved or not valid for certain CMake
+  features, such as generator expressions, and may result in undefined
+  behavior\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)
 +
-CMake Error at invalid_name.cmake:6 \(add_library\):
-  add_library Invalid name for IMPORTED INTERFACE library target:
-  if\$target_imported
+CMake Error at invalid_name\.cmake:3 \(add_library\):
+  The target name "if\$target_imported" is reserved or not valid for certain
+  CMake features, such as generator expressions, and may result in undefined
+  behavior\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)$

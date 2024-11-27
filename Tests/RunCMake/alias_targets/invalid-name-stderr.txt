@@ -1,4 +1,6 @@
-CMake Error at invalid-name.cmake:6 \(add_library\):
-  add_library Invalid name for ALIAS: invalid\$name
+^CMake Error at invalid-name\.cmake:3 \(add_library\):
+  The target name "invalid\$name" is reserved or not valid for certain CMake
+  features, such as generator expressions, and may result in undefined
+  behavior\.
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists\.txt:[0-9]+ \(include\)$

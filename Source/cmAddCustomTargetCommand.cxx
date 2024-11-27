@@ -13,7 +13,6 @@
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -163,23 +162,11 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
     }
   }
 
-  std::string::size_type pos = targetName.find_first_of("#<>");
-  if (pos != std::string::npos) {
-    status.SetError(cmStrCat("called with target name containing a \"",
-                             targetName[pos],
-                             "\".  This character is not allowed."));
-    return false;
-  }
-
-  // Some requirements on custom target names already exist
-  // and have been checked at this point.
-  // The following restrictions overlap but depend on policy CMP0037.
   bool nameOk = cmGeneratorExpression::IsValidTargetName(targetName) &&
-    !cmGlobalGenerator::IsReservedTarget(targetName);
-  if (nameOk) {
-    nameOk = targetName.find(':') == std::string::npos;
-  }
-  if (!nameOk && !mf.CheckCMP0037(targetName, cmStateEnums::UTILITY)) {
+    !cmGlobalGenerator::IsReservedTarget(targetName) &&
+    targetName.find(':') == std::string::npos;
+  if (!nameOk) {
+    mf.IssueInvalidTargetNameError(targetName);
     return false;
   }
 

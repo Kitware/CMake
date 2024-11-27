@@ -64,7 +64,8 @@ bool cmAddExecutableCommand(std::vector<std::string> const& args,
   if (nameOk && !importTarget && !isAlias) {
     nameOk = exename.find(':') == std::string::npos;
   }
-  if (!nameOk && !mf.CheckCMP0037(exename, cmStateEnums::EXECUTABLE)) {
+  if (!nameOk) {
+    mf.IssueInvalidTargetNameError(exename);
     return false;
   }
 
