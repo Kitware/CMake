@@ -1189,30 +1189,11 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       }
       if (name == this->GetName() || name.empty()) {
         if (name == this->GetName()) {
-          bool noMessage = false;
-          MessageType messageType = MessageType::FATAL_ERROR;
-          std::ostringstream e;
-          switch (this->GetPolicyStatusCMP0038()) {
-            case cmPolicies::WARN: {
-              e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0038) << "\n";
-              messageType = MessageType::AUTHOR_WARNING;
-            } break;
-            case cmPolicies::OLD:
-              noMessage = true;
-              break;
-            case cmPolicies::NEW:
-              // Issue the fatal message.
-              break;
-          }
-
-          if (!noMessage) {
-            e << "Target \"" << this->GetName() << "\" links to itself.";
-            this->LocalGenerator->GetCMakeInstance()->IssueMessage(
-              messageType, e.str(), this->GetBacktrace());
-            if (messageType == MessageType::FATAL_ERROR) {
-              return;
-            }
-          }
+          this->LocalGenerator->GetCMakeInstance()->IssueMessage(
+            MessageType::FATAL_ERROR,
+            cmStrCat("Target \"", this->GetName(), "\" links to itself."),
+            this->GetBacktrace());
+          return;
         }
         continue;
       }

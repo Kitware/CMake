@@ -119,7 +119,7 @@ class cmMakefile;
          "pattern.",                                                          \
          3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0038, "Targets may not link directly to themselves.", 3,  \
-         0, 0, WARN)                                                          \
+         0, 0, NEW)                                                           \
   SELECT(POLICY, CMP0039, "Utility targets may not have link dependencies.",  \
          3, 0, 0, WARN)                                                       \
   SELECT(POLICY, CMP0040,                                                     \
