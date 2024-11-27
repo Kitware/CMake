@@ -103,29 +103,12 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
 
   // Having a UTILITY library on the LHS is a bug.
   if (target->GetType() == cmStateEnums::UTILITY) {
-    std::ostringstream e;
-    const char* modal = nullptr;
-    MessageType messageType = MessageType::AUTHOR_WARNING;
-    switch (mf.GetPolicyStatus(cmPolicies::CMP0039)) {
-      case cmPolicies::WARN:
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0039) << '\n';
-        modal = "should";
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        break;
-      case cmPolicies::NEW:
-        modal = "must";
-        messageType = MessageType::FATAL_ERROR;
-        break;
-    }
-    if (modal) {
-      e << "Utility target \"" << target->GetName() << "\" " << modal
-        << " not be used as the target of a target_link_libraries call.";
-      mf.IssueMessage(messageType, e.str());
-      if (messageType == MessageType::FATAL_ERROR) {
-        return false;
-      }
-    }
+    mf.IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(
+        "Utility target \"", target->GetName(),
+        "\" must not be used as the target of a target_link_libraries call."));
+    return false;
   }
 
   // But we might not have any libs after variable expansion.
