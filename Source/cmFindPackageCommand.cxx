@@ -754,7 +754,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       doing = DoingNone;
     } else if (args[i] == "REGISTRY_VIEW") {
       if (++i == args.size()) {
-        this->SetError("missing required argument for \"REGISTRY_VIEW\"");
+        this->SetError("missing required argument for REGISTRY_VIEW");
         return false;
       }
       auto view = cmWindowsRegistry::ToView(args[i]);
@@ -763,7 +763,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         this->RegistryViewDefined = true;
       } else {
         this->SetError(
-          cmStrCat("given invalid value for \"REGISTRY_VIEW\": ", args[i]));
+          cmStrCat("given invalid value for REGISTRY_VIEW: ", args[i]));
         return false;
       }
     } else if (this->CheckCommonArgument(args[i])) {
@@ -830,7 +830,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     this->SetError(
       cmStrCat("called with components that are both required and "
                "optional:\n",
-               cmWrap("  ", doubledComponents, "", "\n"), "\n"));
+               cmWrap("  ", doubledComponents, "", "\n"), '\n'));
     return false;
   }
 
@@ -1366,7 +1366,7 @@ bool cmFindPackageCommand::FindModule(bool& found)
       debugBuffer = cmStrCat(debugBuffer, "The file was not found.\n");
     } else {
       debugBuffer =
-        cmStrCat(debugBuffer, "The file was found at\n  ", mfile, "\n");
+        cmStrCat(debugBuffer, "The file was found at\n  ", mfile, '\n');
     }
     this->DebugBuffer = cmStrCat(this->DebugBuffer, debugBuffer);
   }
@@ -1381,7 +1381,7 @@ bool cmFindPackageCommand::FindModule(bool& found)
           case cmPolicies::WARN: {
             this->Makefile->IssueMessage(
               MessageType::AUTHOR_WARNING,
-              cmStrCat(cmPolicies::GetPolicyWarning(it->second), "\n"));
+              cmStrCat(cmPolicies::GetPolicyWarning(it->second), '\n'));
             CM_FALLTHROUGH;
           }
           case cmPolicies::OLD:
@@ -1522,12 +1522,13 @@ bool cmFindPackageCommand::HandlePackageMode(
       std::ostringstream e;
       std::ostringstream aw;
       if (configFileSetFOUNDFalse) {
-        /* clang-format off */
         e << "Found package configuration file:\n"
-          "  " << this->FileFound << "\n"
-          "but it set " << foundVar << " to FALSE so package \"" <<
-          this->Name << "\" is considered to be NOT FOUND.";
-        /* clang-format on */
+             "  "
+          << this->FileFound
+          << "\n"
+             "but it set "
+          << foundVar << " to FALSE so package \"" << this->Name
+          << "\" is considered to be NOT FOUND.";
         if (!notFoundMessage.empty()) {
           e << " Reason given by package: \n" << notFoundMessage << "\n";
         }
@@ -1540,7 +1541,7 @@ bool cmFindPackageCommand::HandlePackageMode(
           << "\" that "
           << (this->VersionExact ? "exactly matches" : "is compatible with")
           << " requested version "
-          << (this->VersionRange.empty() ? "" : "range ") << "\""
+          << (this->VersionRange.empty() ? "" : "range ") << '"'
           << this->VersionComplete
           << "\".\n"
              "The following configuration files were considered but not "
@@ -1548,7 +1549,7 @@ bool cmFindPackageCommand::HandlePackageMode(
 
         for (ConfigFileInfo const& info :
              cmMakeRange(this->ConsideredConfigs.cbegin(), duplicate_end)) {
-          e << "  " << info.filename << ", version: " << info.version << "\n";
+          e << "  " << info.filename << ", version: " << info.version << '\n';
         }
       } else {
         std::string requestedVersionString;
@@ -1576,15 +1577,12 @@ bool cmFindPackageCommand::HandlePackageMode(
             e << "Could not find a package configuration file provided by \""
               << this->Name << "\"" << requestedVersionString
               << " with any of the following names:\n"
-              << cmWrap("  ", this->Configs, "", "\n") << "\n";
+              << cmWrap("  ", this->Configs, "", "\n") << '\n';
           }
 
           e << "Add the installation prefix of \"" << this->Name
-            << "\" to "
-               "CMAKE_PREFIX_PATH or set \""
-            << this->Variable
-            << "\" to a "
-               "directory containing one of the above files. "
+            << "\" to CMAKE_PREFIX_PATH or set \"" << this->Variable
+            << "\" to a directory containing one of the above files. "
                "If \""
             << this->Name
             << "\" provides a separate development "
@@ -1710,7 +1708,7 @@ bool cmFindPackageCommand::FindConfig()
   if (this->DebugMode) {
     if (found) {
       this->DebugBuffer = cmStrCat(
-        this->DebugBuffer, "The file was found at\n  ", this->FileFound, "\n");
+        this->DebugBuffer, "The file was found at\n  ", this->FileFound, '\n');
     } else {
       this->DebugBuffer =
         cmStrCat(this->DebugBuffer, "The file was not found.\n");
@@ -2427,7 +2425,7 @@ bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
   for (std::string const& c : this->Configs) {
     file = cmStrCat(dir, '/', c);
     if (this->DebugMode) {
-      this->DebugBuffer = cmStrCat(this->DebugBuffer, "  ", file, "\n");
+      this->DebugBuffer = cmStrCat(this->DebugBuffer, "  ", file, '\n');
     }
     if (cmSystemTools::FileExists(file, true) && this->CheckVersion(file)) {
       // Allow resolving symlinks when the config file is found through a link

@@ -133,7 +133,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       newStyle = true;
     } else if (args[j] == "REGISTRY_VIEW") {
       if (++j == args.size()) {
-        this->SetError("missing required argument for \"REGISTRY_VIEW\"");
+        this->SetError("missing required argument for REGISTRY_VIEW");
         return false;
       }
       auto view = cmWindowsRegistry::ToView(args[j]);
@@ -141,18 +141,18 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
         this->RegistryView = *view;
       } else {
         this->SetError(
-          cmStrCat("given invalid value for \"REGISTRY_VIEW\": ", args[j]));
+          cmStrCat("given invalid value for REGISTRY_VIEW: ", args[j]));
         return false;
       }
     } else if (args[j] == "VALIDATOR") {
       if (++j == args.size()) {
-        this->SetError("missing required argument for \"VALIDATOR\"");
+        this->SetError("missing required argument for VALIDATOR");
         return false;
       }
       auto command = this->Makefile->GetState()->GetCommand(args[j]);
       if (!command) {
         this->SetError(cmStrCat(
-          "command specified for \"VALIDATOR\" is undefined: ", args[j], '.'));
+          "command specified for VALIDATOR is undefined: ", args[j], '.'));
         return false;
       }
       // ensure a macro is not specified as validator
@@ -164,7 +164,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
                                                        item.c_str()) == 0;
                        }) != macros.end()) {
         this->SetError(cmStrCat(
-          "command specified for \"VALIDATOR\" is not a function: ", args[j],
+          "command specified for VALIDATOR is not a function: ", args[j],
           '.'));
         return false;
       }
