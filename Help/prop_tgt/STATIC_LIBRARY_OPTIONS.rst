@@ -22,3 +22,5 @@ for more on defining buildsystem properties.
   property.
 
 .. include:: ../command/OPTIONS_SHELL.txt
+
+.. include:: ../prop_tgt/STATIC_LIBRARY_OPTIONS_ARCHIVER.txt
