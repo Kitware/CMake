@@ -150,6 +150,7 @@ function(_OPENMP_FLAG_CANDIDATES LANG)
     set(OMP_FLAG_NVHPC "-mp")
     set(OMP_FLAG_PGI "-mp")
     set(OMP_FLAG_Flang "-fopenmp")
+    set(OMP_FLAG_LLVMFlang "-fopenmp")
     set(OMP_FLAG_SunPro "-xopenmp")
     set(OMP_FLAG_XL "-qsmp=omp")
     # Cray compiler activate OpenMP with -h omp, which is enabled by default.
@@ -359,6 +360,43 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
         )
         if(NOT OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG})
           find_path(OpenMP_${LANG}_INCLUDE_DIR omp.h)
+          mark_as_advanced(OpenMP_${LANG}_INCLUDE_DIR)
+          set(OpenMP_${LANG}_INCLUDE_DIR "${OpenMP_${LANG}_INCLUDE_DIR}" PARENT_SCOPE)
+          if(OpenMP_${LANG}_INCLUDE_DIR)
+            try_compile( OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG}
+              SOURCE_FROM_VAR "${_OPENMP_TEST_SRC_NAME}" _OPENMP_TEST_SRC_CONTENT
+              LOG_DESCRIPTION "Trying ${LANG} OpenMP compiler with '${OpenMP_libomp_LIBRARY}' and '${OpenMP_${LANG}_INCLUDE_DIR}'"
+              CMAKE_FLAGS "-DINCLUDE_DIRECTORIES:STRING=${OpenMP_${LANG}_INCLUDE_DIR}"
+              COMPILE_DEFINITIONS ${OPENMP_FLAG}
+              LINK_LIBRARIES ${OpenMP_libomp_LIBRARY}
+            )
+          endif()
+        endif()
+        if(OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG})
+          set("${OPENMP_FLAG_VAR}" "${OPENMP_FLAG}" PARENT_SCOPE)
+          set("${OPENMP_LIB_NAMES_VAR}" "libomp" PARENT_SCOPE)
+          break()
+        endif()
+      endif()
+    elseif(CMAKE_${LANG}_COMPILER_ID STREQUAL "LLVMFlang" AND WIN32)
+      find_library(OpenMP_libomp_LIBRARY
+        NAMES omp
+        HINTS ${CMAKE_${LANG}_IMPLICIT_LINK_DIRECTORIES}
+      )
+      mark_as_advanced(OpenMP_libomp_LIBRARY)
+
+      if(OpenMP_libomp_LIBRARY)
+        # Try without specifying include directory first. We only want to
+        # explicitly add a search path if the header can't be found on the
+        # default header search path already.
+        try_compile( OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG}
+          SOURCE_FROM_VAR "${_OPENMP_TEST_SRC_NAME}" _OPENMP_TEST_SRC_CONTENT
+          LOG_DESCRIPTION "Trying ${LANG} OpenMP compiler with '${OpenMP_libomp_LIBRARY}'"
+          COMPILE_DEFINITIONS ${OPENMP_FLAG}
+          LINK_LIBRARIES ${OpenMP_libomp_LIBRARY}
+        )
+        if(NOT OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG})
+          find_path(OpenMP_${LANG}_INCLUDE_DIR omplib.mod)
           mark_as_advanced(OpenMP_${LANG}_INCLUDE_DIR)
           set(OpenMP_${LANG}_INCLUDE_DIR "${OpenMP_${LANG}_INCLUDE_DIR}" PARENT_SCOPE)
           if(OpenMP_${LANG}_INCLUDE_DIR)
