@@ -132,7 +132,7 @@ class cmMakefile;
   SELECT(POLICY, CMP0042, "MACOSX_RPATH is enabled by default.", 3, 0, 0,     \
          NEW)                                                                 \
   SELECT(POLICY, CMP0043, "Ignore COMPILE_DEFINITIONS_<Config> properties.",  \
-         3, 0, 0, WARN)                                                       \
+         3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0044,                                                     \
          "Case sensitive <LANG>_COMPILER_ID generator expressions.", 3, 0, 0, \
          WARN)                                                                \

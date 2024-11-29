@@ -209,10 +209,8 @@ target_link_libraries(imp_ExePlugin1b PRIVATE bld_testExeWithPluginHelper testEx
 
 # Export/CMakeLists.txt pretends the RelWithDebInfo (as well as Debug)
 # configuration should link to debug libs.
-foreach(c DEBUG RELWITHDEBINFO)
-  set_property(TARGET imp_testExe1 PROPERTY COMPILE_DEFINITIONS_${c} EXE_DBG)
-  set_property(TARGET imp_testExe1b PROPERTY COMPILE_DEFINITIONS_${c} EXE_DBG)
-endforeach()
+target_compile_definitions(imp_testExe1  PRIVATE "$<$<CONFIG:Debug,RelWithDebInfo>:EXE_DBG>")
+target_compile_definitions(imp_testExe1b PRIVATE "$<$<CONFIG:Debug,RelWithDebInfo>:EXE_DBG>")
 
 #-----------------------------------------------------------------------------
 include(${CMAKE_INSTALL_PREFIX}/lib/expAbs/expAbs.cmake)

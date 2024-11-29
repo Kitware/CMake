@@ -4,8 +4,6 @@
 #include "cmGeneratorTarget.h"
 /* clang-format on */
 
-#include "cmConfigure.h"
-
 #include <algorithm>
 #include <iterator>
 #include <map>
@@ -335,31 +333,6 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
 
   AddInterfaceEntries(this, config, "INTERFACE_COMPILE_DEFINITIONS", language,
                       &dagChecker, entries, IncludeRuntimeInterface::Yes);
-
-  if (!config.empty()) {
-    std::string configPropName =
-      "COMPILE_DEFINITIONS_" + cmSystemTools::UpperCase(config);
-    cmValue configProp = this->GetProperty(configPropName);
-    if (configProp) {
-      switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0043)) {
-        case cmPolicies::WARN: {
-          this->LocalGenerator->IssueMessage(
-            MessageType::AUTHOR_WARNING,
-            cmPolicies::GetPolicyWarning(cmPolicies::CMP0043));
-          CM_FALLTHROUGH;
-        }
-        case cmPolicies::OLD: {
-          std::unique_ptr<TargetPropertyEntry> entry =
-            TargetPropertyEntry::Create(
-              *this->LocalGenerator->GetCMakeInstance(), *configProp);
-          entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
-            this, config, language, &dagChecker, *entry));
-        } break;
-        case cmPolicies::NEW:
-          break;
-      }
-    }
-  }
 
   processOptions(this, entries, list, uniqueOptions, debugDefines,
                  "compile definitions", OptionsParse::None);

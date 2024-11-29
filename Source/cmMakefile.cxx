@@ -1435,21 +1435,6 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
     this->SetProperty(prop, parent->GetProperty(prop));
   }
 
-  // compile definitions property and per-config versions
-  cmPolicies::PolicyStatus polSt = this->GetPolicyStatus(cmPolicies::CMP0043);
-  if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {
-    this->SetProperty("COMPILE_DEFINITIONS",
-                      parent->GetProperty("COMPILE_DEFINITIONS"));
-    std::vector<std::string> configs =
-      this->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
-    for (std::string const& config : configs) {
-      std::string defPropName =
-        cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(config));
-      cmValue prop = parent->GetProperty(defPropName);
-      this->SetProperty(defPropName, prop);
-    }
-  }
-
   // labels
   this->SetProperty("LABELS", parent->GetProperty("LABELS"));
 

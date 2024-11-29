@@ -62,10 +62,6 @@ void cmPassed(const char* Message, const char* m2 = "")
 #  error This is a problem. Looks like ADD_DEFINITIONS and REMOVE_DEFINITIONS does not work
 #endif
 
-#if defined(COMPLEX_NDEBUG) && !defined(CMAKE_IS_FUN_IN_RELEASE_MODE)
-#  error Per-configuration directory-level definition not inherited.
-#endif
-
 // ======================================================================
 
 void TestAndRemoveFile(const char* filename)

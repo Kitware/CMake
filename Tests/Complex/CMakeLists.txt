@@ -22,7 +22,6 @@ message("message")
 # It is not recommended to set a policy to OLD, but this test
 # covers the OLD behavior of some policies.
 foreach(p
-    CMP0043
     CMP0050
     )
   if(POLICY ${p})
@@ -101,18 +100,6 @@ endif()
 
 add_definitions(-DCMAKE_IS_FUN)
 add_definitions(-DCMAKE_IS_REALLY_FUN)
-set_property(DIRECTORY
-  PROPERTY COMPILE_DEFINITIONS_RELEASE
-  CMAKE_IS_FUN_IN_RELEASE_MODE
-  )
-set_property(DIRECTORY
-  PROPERTY COMPILE_DEFINITIONS_RELWITHDEBINFO
-  CMAKE_IS_FUN_IN_RELEASE_MODE
-  )
-set_property(DIRECTORY
-  PROPERTY COMPILE_DEFINITIONS_MINSIZEREL
-  CMAKE_IS_FUN_IN_RELEASE_MODE
-  )
 
 set(TEST_SEP "a b c")
 separate_arguments(TEST_SEP)

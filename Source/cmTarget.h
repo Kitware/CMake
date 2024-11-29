@@ -5,7 +5,6 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
-#include <map>
 #include <memory>
 #include <set>
 #include <string>
@@ -260,9 +259,7 @@ public:
   void InsertPrecompileHeader(BT<std::string> const& entry);
 
   void AppendBuildInterfaceIncludes();
-  void FinalizeTargetConfiguration(
-    const cmBTStringRange& noConfigCompileDefinitions,
-    cm::optional<std::map<std::string, cmValue>>& perConfigCompileDefinitions);
+  void FinalizeTargetConfiguration(const cmBTStringRange& compileDefinitions);
 
   std::string GetDebugGeneratorExpressions(const std::string& value,
                                            cmTargetLinkLibraryType llt) const;

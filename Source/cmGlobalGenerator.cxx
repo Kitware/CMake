@@ -1938,14 +1938,11 @@ void cmGlobalGenerator::FinalizeTargetConfiguration()
 
   // Construct per-target generator information.
   for (const auto& mf : this->Makefiles) {
-    const cmBTStringRange noConfigCompileDefinitions =
+    const cmBTStringRange compileDefinitions =
       mf->GetCompileDefinitionsEntries();
-    cm::optional<std::map<std::string, cmValue>> perConfigCompileDefinitions;
-
     for (auto& target : mf->GetTargets()) {
       cmTarget* t = &target.second;
-      t->FinalizeTargetConfiguration(noConfigCompileDefinitions,
-                                     perConfigCompileDefinitions);
+      t->FinalizeTargetConfiguration(compileDefinitions);
     }
 
     // The standard include directories for each language
