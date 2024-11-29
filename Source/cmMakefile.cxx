@@ -1066,38 +1066,20 @@ cmTarget* cmMakefile::GetCustomCommandTarget(
   // Find the target to which to add the custom command.
   auto ti = this->Targets.find(realTarget);
   if (ti == this->Targets.end()) {
-    MessageType messageType = MessageType::AUTHOR_WARNING;
-    bool issueMessage = false;
     std::string e;
-    switch (this->GetPolicyStatus(cmPolicies::CMP0040)) {
-      case cmPolicies::WARN:
-        e = cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0040), '\n');
-        issueMessage = true;
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        break;
-      case cmPolicies::NEW:
-        issueMessage = true;
-        messageType = MessageType::FATAL_ERROR;
-        break;
-    }
-
-    if (issueMessage) {
-      if (cmTarget const* t = this->FindTargetToUse(target)) {
-        if (t->IsImported()) {
-          e += cmStrCat("TARGET '", target,
-                        "' is IMPORTED and does not build here.");
-        } else {
-          e += cmStrCat("TARGET '", target,
-                        "' was not created in this directory.");
-        }
+    if (cmTarget const* t = this->FindTargetToUse(target)) {
+      if (t->IsImported()) {
+        e += cmStrCat("TARGET '", target,
+                      "' is IMPORTED and does not build here.");
       } else {
-        e += cmStrCat("No TARGET '", target,
-                      "' has been created in this directory.");
+        e +=
+          cmStrCat("TARGET '", target, "' was not created in this directory.");
       }
-      this->GetCMakeInstance()->IssueMessage(messageType, e, lfbt);
+    } else {
+      e += cmStrCat("No TARGET '", target,
+                    "' has been created in this directory.");
     }
-
+    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e, lfbt);
     return nullptr;
   }
 
