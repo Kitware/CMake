@@ -468,12 +468,10 @@ class cmFindPackageCommand::SetRestoreFindDefinitions
   cmFindPackageCommand& Command;
 
 public:
-  SetRestoreFindDefinitions(
-    cmFindPackageCommand& command, const std::string& components,
-    const std::vector<std::pair<std::string, const char*>>& componentVarDefs)
+  SetRestoreFindDefinitions(cmFindPackageCommand& command)
     : Command(command)
   {
-    Command.SetModuleVariables(components, componentVarDefs);
+    Command.SetModuleVariables();
   }
   ~SetRestoreFindDefinitions() { Command.RestoreFindDefinitions(); }
 };
@@ -651,11 +649,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
 
   // Record options.
   this->Name = args[0];
-  std::string components;
-  const char* components_sep = "";
-  std::set<std::string> requiredComponents;
-  std::set<std::string> optionalComponents;
-  std::vector<std::pair<std::string, const char*>> componentVarDefs;
+  cm::string_view componentsSep = ""_s;
   bool bypassProvider = false;
 
   // Always search directly in a generated path.
@@ -769,21 +763,16 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
                (doing == DoingOptionalComponents)) {
       // Set a variable telling the find script whether this component
       // is required.
-      const char* isRequired = "1";
       if (doing == DoingOptionalComponents) {
-        isRequired = "0";
-        optionalComponents.insert(args[i]);
+        this->OptionalComponents.insert(args[i]);
       } else {
-        requiredComponents.insert(args[i]);
+        this->RequiredComponents.insert(args[i]);
       }
 
-      componentVarDefs.emplace_back(this->Name + "_FIND_REQUIRED_" + args[i],
-                                    isRequired);
-
       // Append to the list of required components.
-      components += components_sep;
-      components += args[i];
-      components_sep = ";";
+      this->Components += componentsSep;
+      this->Components += args[i];
+      componentsSep = ";"_s;
     } else if (doing == DoingNames) {
       this->Names.push_back(args[i]);
     } else if (doing == DoingPaths) {
@@ -819,9 +808,10 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   }
 
   std::vector<std::string> doubledComponents;
-  std::set_intersection(requiredComponents.begin(), requiredComponents.end(),
-                        optionalComponents.begin(), optionalComponents.end(),
-                        std::back_inserter(doubledComponents));
+  std::set_intersection(
+    this->RequiredComponents.begin(), this->RequiredComponents.end(),
+    this->OptionalComponents.begin(), this->OptionalComponents.end(),
+    std::back_inserter(doubledComponents));
   if (!doubledComponents.empty()) {
     this->SetError(
       cmStrCat("called with components that are both required and "
@@ -856,7 +846,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       "Ignoring EXACT since no version is requested.");
   }
 
-  if (this->VersionComplete.empty() || components.empty()) {
+  if (this->VersionComplete.empty() || this->Components.empty()) {
     // Check whether we are recursing inside "Find<name>.cmake" within
     // another find_package(<name>) call.
     std::string const mod = cmStrCat(this->Name, "_FIND_MODULE");
@@ -871,9 +861,12 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
         std::string const exact = cmStrCat(this->Name, "_FIND_VERSION_EXACT");
         this->VersionExact = this->Makefile->IsOn(exact);
       }
-      if (components.empty()) {
+      if (this->Components.empty()) {
         std::string const components_var = this->Name + "_FIND_COMPONENTS";
-        components = this->Makefile->GetSafeDefinition(components_var);
+        this->Components = this->Makefile->GetSafeDefinition(components_var);
+        for (auto const& component : cmList{ this->Components }) {
+          this->RequiredComponents.insert(component);
+        }
       }
     }
   }
@@ -924,6 +917,12 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
       this->VersionMaxPatch, this->VersionMaxTweak);
   }
 
+  return this->FindPackage(bypassProvider ? std::vector<std::string>{} : args);
+}
+
+bool cmFindPackageCommand::FindPackage(
+  std::vector<std::string> const& argsForProvider)
+{
   const std::string makePackageRequiredVar =
     cmStrCat("CMAKE_REQUIRE_FIND_PACKAGE_", this->Name);
   const bool makePackageRequiredSet =
@@ -997,7 +996,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   cmState* const state = this->Makefile->GetState();
   cmState::Command const providerCommand = state->GetDependencyProviderCommand(
     cmDependencyProvider::Method::FindPackage);
-  if (bypassProvider) {
+  if (argsForProvider.empty()) {
     if (this->DebugMode && providerCommand) {
       this->DebugMessage(
         "BYPASS_PROVIDER given, skipping dependency provider");
@@ -1008,11 +1007,11 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
                                   state->GetDependencyProvider()->GetCommand(),
                                   "()"));
     }
-    std::vector<cmListFileArgument> listFileArgs(args.size() + 1);
+    std::vector<cmListFileArgument> listFileArgs(argsForProvider.size() + 1);
     listFileArgs[0] =
       cmListFileArgument("FIND_PACKAGE", cmListFileArgument::Unquoted, 0);
-    std::transform(args.begin(), args.end(), listFileArgs.begin() + 1,
-                   [](const std::string& arg) {
+    std::transform(argsForProvider.begin(), argsForProvider.end(),
+                   listFileArgs.begin() + 1, [](const std::string& arg) {
                      return cmListFileArgument(arg,
                                                cmListFileArgument::Bracket, 0);
                    });
@@ -1043,11 +1042,10 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     }
   }
 
-  // RAII objects to ensure we leave this function with consistent state
+  // RAII objects to ensure we leave this function with consistent state.
   FlushDebugBufferOnExit flushDebugBufferOnExit(*this);
   PushPopRootPathStack pushPopRootPathStack(*this);
-  SetRestoreFindDefinitions setRestoreFindDefinitions(*this, components,
-                                                      componentVarDefs);
+  SetRestoreFindDefinitions setRestoreFindDefinitions(*this);
   cmMakefile::FindPackageStackRAII findPackageStackRAII(this->Makefile,
                                                         this->Name);
 
@@ -1247,17 +1245,20 @@ void cmFindPackageCommand::SetVersionVariables(
   addDefinition(prefix + "_COUNT", buf);
 }
 
-void cmFindPackageCommand::SetModuleVariables(
-  const std::string& components,
-  const std::vector<std::pair<std::string, const char*>>& componentVarDefs)
+void cmFindPackageCommand::SetModuleVariables()
 {
   this->AddFindDefinition("CMAKE_FIND_PACKAGE_NAME", this->Name);
 
-  // Store the list of components and associated variable definitions
+  // Store the list of components and associated variable definitions.
   std::string components_var = this->Name + "_FIND_COMPONENTS";
-  this->AddFindDefinition(components_var, components);
-  for (const auto& varDef : componentVarDefs) {
-    this->AddFindDefinition(varDef.first, varDef.second);
+  this->AddFindDefinition(components_var, this->Components);
+  for (auto const& component : this->OptionalComponents) {
+    this->AddFindDefinition(
+      cmStrCat(this->Name, "_FIND_REQUIRED_"_s, component), "0"_s);
+  }
+  for (auto const& component : this->RequiredComponents) {
+    this->AddFindDefinition(
+      cmStrCat(this->Name, "_FIND_REQUIRED_"_s, component), "1"_s);
   }
 
   if (this->Quiet) {
