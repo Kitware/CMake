@@ -1403,11 +1403,6 @@ cmExportBuildFileGenerator* cmGlobalGenerator::GetExportedTargetsFile(
   return it == this->BuildExportSets.end() ? nullptr : it->second;
 }
 
-void cmGlobalGenerator::AddCMP0042WarnTarget(const std::string& target)
-{
-  this->CMP0042WarnTargets.insert(target);
-}
-
 void cmGlobalGenerator::AddCMP0068WarnTarget(const std::string& target)
 {
   this->CMP0068WarnTargets.insert(target);
@@ -1490,8 +1485,6 @@ bool cmGlobalGenerator::Compute()
   // Start with an empty vector:
   this->FilesReplacedDuringGenerate.clear();
 
-  // clear targets to issue warning CMP0042 for
-  this->CMP0042WarnTargets.clear();
   // clear targets to issue warning CMP0068 for
   this->CMP0068WarnTargets.clear();
 
@@ -1696,19 +1689,6 @@ void cmGlobalGenerator::Generate()
 
   // Perform validation checks on memoized link structures.
   this->CheckTargetLinkLibraries();
-
-  if (!this->CMP0042WarnTargets.empty()) {
-    std::ostringstream w;
-    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0042)
-      << "\n"
-         "MACOSX_RPATH is not specified for"
-         " the following targets:\n";
-    for (std::string const& t : this->CMP0042WarnTargets) {
-      w << ' ' << t << '\n';
-    }
-    this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING,
-                                           w.str());
-  }
 
   if (!this->CMP0068WarnTargets.empty()) {
     std::ostringstream w;

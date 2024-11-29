@@ -623,7 +623,6 @@ public:
   bool IsExportedTargetsFile(const std::string& filename) const;
   cmExportBuildFileGenerator* GetExportedTargetsFile(
     const std::string& filename) const;
-  void AddCMP0042WarnTarget(const std::string& target);
   void AddCMP0068WarnTarget(const std::string& target);
 
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
@@ -900,8 +899,6 @@ private:
   // Set of binary directories on disk.
   std::set<std::string> BinaryDirectories;
 
-  // track targets to issue CMP0042 warning for.
-  std::set<std::string> CMP0042WarnTargets;
   // track targets to issue CMP0068 warning for.
   std::set<std::string> CMP0068WarnTargets;
 

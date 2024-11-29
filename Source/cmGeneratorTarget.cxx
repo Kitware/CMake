@@ -1540,14 +1540,7 @@ bool cmGeneratorTarget::MacOSXRpathInstallNameDirDefault() const
     return this->GetPropertyAsBool("MACOSX_RPATH");
   }
 
-  cmPolicies::PolicyStatus cmp0042 = this->GetPolicyStatusCMP0042();
-
-  if (cmp0042 == cmPolicies::WARN) {
-    this->LocalGenerator->GetGlobalGenerator()->AddCMP0042WarnTarget(
-      this->GetName());
-  }
-
-  return cmp0042 == cmPolicies::NEW;
+  return true;
 }
 
 bool cmGeneratorTarget::MacOSXUseInstallNameDir() const
