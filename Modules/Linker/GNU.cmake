@@ -11,7 +11,7 @@ cmake_policy(SET CMP0140 NEW)
 
 function(__linker_gnu lang)
   # define flags for linker depfile generation
-  set(CMAKE_${lang}_LINKER_DEPFILE_FLAGS "LINKER:--dependency-file,<DEP_FILE>")
+  set(CMAKE_${lang}_LINKER_DEPFILE_FLAGS "LINKER:--dependency-file=<DEP_FILE>")
   set(CMAKE_${lang}_LINKER_DEPFILE_FORMAT gcc)
 
   if(NOT CMAKE_EXECUTABLE_FORMAT STREQUAL "ELF")
