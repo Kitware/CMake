@@ -6,6 +6,7 @@ if (DEFINED with_qt_version)
     -Dwith_qt_version=${with_qt_version}
     "-DQt${with_qt_version}_DIR:PATH=${Qt${with_qt_version}_DIR}"
     "-DCMAKE_PREFIX_PATH:STRING=${CMAKE_PREFIX_PATH}"
+    "-DCMAKE_AUTOGEN_BETTER_GRAPH_MULTI_CONFIG=ON"
   )
   if (QtCore_VERSION VERSION_GREATER_EQUAL 5.15.0)
     macro(set_test_variables_for_unwanted_builds)
