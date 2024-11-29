@@ -960,20 +960,20 @@ on the consumer:
   target_compile_definitions(lib1 INTERFACE
     $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>:LIB1_WITH_EXE>
     $<$<STREQUAL:$<TARGET_PROPERTY:TYPE>,SHARED_LIBRARY>:LIB1_WITH_SHARED_LIB>
-    $<$<TARGET_POLICY:CMP0041>:CONSUMER_CMP0041_NEW>
+    $<$<TARGET_POLICY:CMP0182>:CONSUMER_CMP0182_NEW>
   )
 
   add_executable(exe1 exe1.cpp)
   target_link_libraries(exe1 lib1)
 
-  cmake_policy(SET CMP0041 NEW)
+  cmake_policy(SET CMP0182 NEW)
 
   add_library(shared_lib shared_lib.cpp)
   target_link_libraries(shared_lib lib1)
 
 The ``exe1`` executable will be compiled with ``-DLIB1_WITH_EXE``, while the
 ``shared_lib`` shared library will be compiled with ``-DLIB1_WITH_SHARED_LIB``
-and ``-DCONSUMER_CMP0041_NEW``, because policy :policy:`CMP0041` is
+and ``-DCONSUMER_CMP0182_NEW``, because policy :policy:`CMP0182` is
 ``NEW`` at the point where the ``shared_lib`` target is created.
 
 The ``BUILD_INTERFACE`` expression wraps requirements which are only used when
