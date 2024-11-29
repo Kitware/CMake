@@ -128,7 +128,7 @@ class cmMakefile;
          3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0041,                                                     \
          "Error on relative include with generator expression.", 3, 0, 0,     \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(POLICY, CMP0042, "MACOSX_RPATH is enabled by default.", 3, 0, 0,     \
          WARN)                                                                \
   SELECT(POLICY, CMP0043, "Ignore COMPILE_DEFINITIONS_<Config> properties.",  \
