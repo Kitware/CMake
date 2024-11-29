@@ -549,14 +549,10 @@ void cmFindPackageCommand::AppendSearchPathGroups()
                  PathLabel::SystemRegistry);
 
   // Create the new path objects
-  this->LabeledPaths.insert(
-    std::make_pair(PathLabel::PackageRedirect, cmSearchPath(this)));
-  this->LabeledPaths.insert(
-    std::make_pair(PathLabel::UserRegistry, cmSearchPath(this)));
-  this->LabeledPaths.insert(
-    std::make_pair(PathLabel::Builds, cmSearchPath(this)));
-  this->LabeledPaths.insert(
-    std::make_pair(PathLabel::SystemRegistry, cmSearchPath(this)));
+  this->LabeledPaths.emplace(PathLabel::PackageRedirect, cmSearchPath{ this });
+  this->LabeledPaths.emplace(PathLabel::UserRegistry, cmSearchPath{ this });
+  this->LabeledPaths.emplace(PathLabel::Builds, cmSearchPath{ this });
+  this->LabeledPaths.emplace(PathLabel::SystemRegistry, cmSearchPath{ this });
 }
 
 bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
