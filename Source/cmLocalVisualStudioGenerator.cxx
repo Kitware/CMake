@@ -18,6 +18,7 @@
 #include "cmOutputConverter.h"
 #include "cmSourceFile.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
@@ -136,12 +137,12 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
   std::string newline;
 
   // Line to check for error between commands.
-  std::string check_error = newline_text;
+  std::string check_error;
   if (useLocal) {
-    check_error += "if %errorlevel% neq 0 goto :cmEnd";
+    check_error = cmStrCat(newline_text, "if %errorlevel% neq 0 goto :cmEnd");
   } else {
-    check_error += "if errorlevel 1 goto ";
-    check_error += this->GetReportErrorLabel();
+    check_error = cmStrCat(newline_text, "if errorlevel 1 goto ",
+                           this->GetReportErrorLabel());
   }
 
   // Store the script in a string.
@@ -149,26 +150,22 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
 
   // Open a local context.
   if (useLocal) {
-    script += newline;
+    script = cmStrCat(newline, "setlocal");
     newline = newline_text;
-    script += "setlocal";
   }
 
   if (!workingDirectory.empty()) {
     // Change the working directory.
-    script += newline;
+    script = cmStrCat(script, newline, "cd ",
+                      this->ConvertToOutputFormat(workingDirectory, SHELL),
+                      check_error);
     newline = newline_text;
-    script += "cd ";
-    script += this->ConvertToOutputFormat(workingDirectory, SHELL);
-    script += check_error;
 
     // Change the working drive.
     if (workingDirectory.size() > 1 && workingDirectory[1] == ':') {
-      script += newline;
+      script = cmStrCat(script, newline, workingDirectory[0],
+                        workingDirectory[1], check_error);
       newline = newline_text;
-      script += workingDirectory[0];
-      script += workingDirectory[1];
-      script += check_error;
     }
   }
 
@@ -178,11 +175,8 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
     cmValue extraPath =
       this->Makefile->GetDefinition("CMAKE_MSVCIDE_RUN_PATH");
     if (extraPath) {
-      script += newline;
+      script = cmStrCat(script, newline, "set PATH=", *extraPath, ";%PATH%");
       newline = newline_text;
-      script += "set PATH=";
-      script += *extraPath;
-      script += ";%PATH%";
     }
   }
 
@@ -227,19 +221,23 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
 
   // Close the local context.
   if (useLocal) {
-    script += newline;
-    script += ":cmEnd";
-    script += newline;
-    script += "endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone";
-    script += newline;
-    script += ":cmErrorLevel";
-    script += newline;
-    script += "exit /b %1";
-    script += newline;
-    script += ":cmDone";
-    script += newline;
-    script += "if %errorlevel% neq 0 goto ";
-    script += this->GetReportErrorLabel();
+    // clang-format off
+    script = cmStrCat(
+        script
+      , newline
+      , ":cmEnd"
+      , newline
+      , "endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone"
+      , newline
+      , ":cmErrorLevel"
+      , newline
+      , "exit /b %1"
+      , newline
+      , ":cmDone"
+      , newline
+      , "if %errorlevel% neq 0 goto ", this->GetReportErrorLabel()
+      );
+    // clang-format on
   }
 
   return script;

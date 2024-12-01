@@ -468,8 +468,9 @@ bool cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
   if (mf->GetDefinition("CMAKE_MAKE_PROGRAM").IsOff()) {
     std::ostringstream err;
     err << "CMake was unable to find a build program corresponding to \""
-        << this->GetName() << "\".  CMAKE_MAKE_PROGRAM is not set.  You "
-        << "probably need to select a different build tool.";
+        << this->GetName()
+        << "\".  CMAKE_MAKE_PROGRAM is not set.  You "
+           "probably need to select a different build tool.";
     cmSystemTools::Error(err.str());
     cmSystemTools::SetFatalErrorOccurred();
     return false;
@@ -872,11 +873,7 @@ void cmGlobalGenerator::EnableLanguage(
     std::ostringstream noCompiler;
     cmValue compilerFile = mf->GetDefinition(compilerName);
     if (!cmNonempty(compilerFile) || cmIsNOTFOUND(*compilerFile)) {
-      /* clang-format off */
-      noCompiler <<
-        "No " << compilerName << " could be found.\n"
-        ;
-      /* clang-format on */
+      noCompiler << "No " << compilerName << " could be found.\n";
     } else if ((lang != "RC") && (lang != "ASM_MARMASM") &&
                (lang != "ASM_MASM")) {
       if (!cmSystemTools::FileIsFullPath(*compilerFile)) {
@@ -2368,32 +2365,24 @@ std::string cmGlobalGenerator::GenerateCMakeBuildCommand(
   makeCommand =
     cmStrCat(cmSystemTools::ConvertToOutputPath(makeCommand), " --build .");
   if (!config.empty()) {
-    makeCommand += " --config \"";
-    makeCommand += config;
-    makeCommand += "\"";
+    makeCommand = cmStrCat(makeCommand, " --config \"", config, '"');
   }
   if (!parallel.empty()) {
-    makeCommand += " --parallel \"";
-    makeCommand += parallel;
-    makeCommand += "\"";
+    makeCommand = cmStrCat(makeCommand, " --parallel \"", parallel, '"');
   }
   if (!target.empty()) {
-    makeCommand += " --target \"";
-    makeCommand += target;
-    makeCommand += "\"";
+    makeCommand = cmStrCat(makeCommand, " --target \"", target, '"');
   }
   const char* sep = " -- ";
   if (ignoreErrors) {
     const char* iflag = this->GetBuildIgnoreErrorsFlag();
     if (iflag && *iflag) {
-      makeCommand += sep;
-      makeCommand += iflag;
+      makeCommand = cmStrCat(makeCommand, sep, iflag);
       sep = " ";
     }
   }
   if (!native.empty()) {
-    makeCommand += sep;
-    makeCommand += native;
+    makeCommand = cmStrCat(makeCommand, sep, native);
   }
   return makeCommand;
 }

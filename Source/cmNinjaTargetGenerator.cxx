@@ -1273,7 +1273,7 @@ void cmNinjaTargetGenerator::WriteObjectBuildStatements(
                                            build);
   }
 
-  this->GetImplFileStream(fileConfig) << "\n";
+  this->GetImplFileStream(fileConfig) << '\n';
 }
 
 void cmNinjaTargetGenerator::GenerateSwiftOutputFileMap(
