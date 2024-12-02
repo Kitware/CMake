@@ -120,13 +120,6 @@ if(NOT DEFINED Ruby_FIND_VERSION_MAJOR)
   set(Ruby_FIND_VERSION_PATCH 0)
 endif()
 
-if(_Ruby_DEBUG_OUTPUT)
-  message("Ruby_FIND_VERSION=${Ruby_FIND_VERSION}")
-  message("Ruby_FIND_VERSION_MAJOR=${Ruby_FIND_VERSION_MAJOR}")
-  message("Ruby_FIND_VERSION_MINOR=${Ruby_FIND_VERSION_MINOR}")
-  message("Ruby_FIND_VERSION_PATCH=${Ruby_FIND_VERSION_PATCH}")
-endif()
-
 set(Ruby_FIND_VERSION_SHORT_NODOT "${Ruby_FIND_VERSION_MAJOR}${Ruby_FIND_VERSION_MINOR}")
 
 # Set name of possible executables, ignoring the minor
@@ -136,21 +129,12 @@ set(Ruby_FIND_VERSION_SHORT_NODOT "${Ruby_FIND_VERSION_MAJOR}${Ruby_FIND_VERSION
 # 3     => from ruby34 to ruby30 included
 # empty => from ruby34 to ruby18 included
 if(NOT Ruby_FIND_VERSION_EXACT)
-
   foreach(_ruby_version RANGE 34 18 -1)
     string(SUBSTRING "${_ruby_version}" 0 1 _ruby_major_version)
     string(SUBSTRING "${_ruby_version}" 1 1 _ruby_minor_version)
-
-    if(NOT "${_ruby_major_version}${_ruby_minor_version}" VERSION_LESS ${Ruby_FIND_VERSION_SHORT_NODOT})
-      # Append both rubyX.Y and rubyXY (eg: ruby2.7 ruby27)
-      list(APPEND _Ruby_POSSIBLE_EXECUTABLE_NAMES ruby${_ruby_major_version}.${_ruby_minor_version} ruby${_ruby_major_version}${_ruby_minor_version})
-    else()
-      break()
-    endif()
-
+    # Append both rubyX.Y and rubyXY (eg: ruby2.7 ruby27)
+    list(APPEND _Ruby_POSSIBLE_EXECUTABLE_NAMES ruby${_ruby_major_version}.${_ruby_minor_version} ruby${_ruby_major_version}${_ruby_minor_version})
   endforeach()
-
-  list(REMOVE_DUPLICATES _Ruby_POSSIBLE_EXECUTABLE_NAMES)
 endif()
 
 # virtual environments handling (eg RVM)
@@ -170,15 +154,7 @@ if (DEFINED ENV{MY_RUBY_HOME})
     set (_Ruby_FIND_VIRTUALENV FIRST)
   endif()
 else()
-  if (DEFINED Ruby_FIND_VIRTUALENV)
-    message("Environment variable MY_RUBY_HOME isn't set, defaulting back to Ruby_FIND_VIRTUALENV=STANDARD")
-  endif()
   set (_Ruby_FIND_VIRTUALENV STANDARD)
-endif()
-
-if(_Ruby_DEBUG_OUTPUT)
-  message("_Ruby_POSSIBLE_EXECUTABLE_NAMES=${_Ruby_POSSIBLE_EXECUTABLE_NAMES}")
-  message("_Ruby_FIND_VIRTUALENV=${_Ruby_FIND_VIRTUALENV}")
 endif()
 
 function (_RUBY_VALIDATE_INTERPRETER)
@@ -217,7 +193,20 @@ function (_RUBY_VALIDATE_INTERPRETER)
     set_property (CACHE Ruby_EXECUTABLE PROPERTY VALUE "Ruby_EXECUTABLE-NOTFOUND")
     return()
   endif()
+endfunction()
 
+function(_RUBY_CONFIG_VAR RBVAR OUTVAR)
+  execute_process(COMMAND ${Ruby_EXECUTABLE} -r rbconfig -e "print RbConfig::CONFIG['${RBVAR}']"
+    RESULT_VARIABLE _Ruby_SUCCESS
+    OUTPUT_VARIABLE _Ruby_OUTPUT
+    ERROR_QUIET)
+  if(_Ruby_SUCCESS OR _Ruby_OUTPUT STREQUAL "")
+    execute_process(COMMAND ${Ruby_EXECUTABLE} -r rbconfig -e "print Config::CONFIG['${RBVAR}']"
+      RESULT_VARIABLE _Ruby_SUCCESS
+      OUTPUT_VARIABLE _Ruby_OUTPUT
+      ERROR_QUIET)
+  endif()
+  set(${OUTVAR} "${_Ruby_OUTPUT}" PARENT_SCOPE)
 endfunction()
 
 while(1)
@@ -256,40 +245,12 @@ while(1)
                 NAMES ${_Ruby_POSSIBLE_EXECUTABLE_NAMES}
                 NAMES_PER_DIR)
   _RUBY_VALIDATE_INTERPRETER (${Ruby_FIND_VERSION})
-  if (Ruby_EXECUTABLE)
-    break()
-  else()
-    # Remove first entry from names list.
-    LIST(REMOVE_AT _Ruby_POSSIBLE_EXECUTABLE_NAMES 0)
 
-    # If the list is now empty, abort.
-    if (NOT _Ruby_POSSIBLE_EXECUTABLE_NAMES)
-      break()
-    else()
-      # Otherwise, continue with the remaining list. Make sure that we clear
-      # the cached variable.
-      unset(Ruby_EXECUTABLE CACHE)
-    endif()
-  endif()
-
+  # We have either found Ruby or not so break out of the loop
+  break()
 endwhile()
 
 if(Ruby_EXECUTABLE AND NOT Ruby_VERSION_MAJOR)
-  function(_RUBY_CONFIG_VAR RBVAR OUTVAR)
-    execute_process(COMMAND ${Ruby_EXECUTABLE} -r rbconfig -e "print RbConfig::CONFIG['${RBVAR}']"
-      RESULT_VARIABLE _Ruby_SUCCESS
-      OUTPUT_VARIABLE _Ruby_OUTPUT
-      ERROR_QUIET)
-    if(_Ruby_SUCCESS OR _Ruby_OUTPUT STREQUAL "")
-      execute_process(COMMAND ${Ruby_EXECUTABLE} -r rbconfig -e "print Config::CONFIG['${RBVAR}']"
-        RESULT_VARIABLE _Ruby_SUCCESS
-        OUTPUT_VARIABLE _Ruby_OUTPUT
-        ERROR_QUIET)
-    endif()
-    set(${OUTVAR} "${_Ruby_OUTPUT}" PARENT_SCOPE)
-  endfunction()
-
-
   # query the ruby version
   _RUBY_CONFIG_VAR("MAJOR" Ruby_VERSION_MAJOR)
   _RUBY_CONFIG_VAR("MINOR" Ruby_VERSION_MINOR)
@@ -300,7 +261,7 @@ if(Ruby_EXECUTABLE AND NOT Ruby_VERSION_MAJOR)
   _RUBY_CONFIG_VAR("arch" Ruby_ARCH)
   _RUBY_CONFIG_VAR("rubyhdrdir" Ruby_HDR_DIR)
   _RUBY_CONFIG_VAR("rubyarchhdrdir" Ruby_ARCHHDR_DIR)
-  _RUBY_CONFIG_VAR("libdir" Ruby_POSSIBLE_LIB_DIR)
+  _RUBY_CONFIG_VAR("libdir" _Ruby_POSSIBLE_LIB_DIR)
   _RUBY_CONFIG_VAR("rubylibdir" Ruby_RUBY_LIB_DIR)
 
   # site_ruby
@@ -323,7 +284,7 @@ if(Ruby_EXECUTABLE AND NOT Ruby_VERSION_MAJOR)
   set(Ruby_ARCH_DIR         ${Ruby_ARCH_DIR}         CACHE PATH "The Ruby arch dir" FORCE)
   set(Ruby_HDR_DIR          ${Ruby_HDR_DIR}          CACHE PATH "The Ruby header dir (1.9+)" FORCE)
   set(Ruby_ARCHHDR_DIR      ${Ruby_ARCHHDR_DIR}      CACHE PATH "The Ruby arch header dir (2.0+)" FORCE)
-  set(Ruby_POSSIBLE_LIB_DIR ${Ruby_POSSIBLE_LIB_DIR} CACHE PATH "The Ruby lib dir" FORCE)
+  set(_Ruby_POSSIBLE_LIB_DIR ${_Ruby_POSSIBLE_LIB_DIR} CACHE PATH "The Ruby lib dir" FORCE)
   set(Ruby_RUBY_LIB_DIR     ${Ruby_RUBY_LIB_DIR}     CACHE PATH "The Ruby ruby-lib dir" FORCE)
   set(Ruby_SITEARCH_DIR     ${Ruby_SITEARCH_DIR}     CACHE PATH "The Ruby site arch dir" FORCE)
   set(Ruby_SITELIB_DIR      ${Ruby_SITELIB_DIR}      CACHE PATH "The Ruby site lib dir" FORCE)
@@ -336,7 +297,7 @@ if(Ruby_EXECUTABLE AND NOT Ruby_VERSION_MAJOR)
     Ruby_ARCH
     Ruby_HDR_DIR
     Ruby_ARCHHDR_DIR
-    Ruby_POSSIBLE_LIB_DIR
+    _Ruby_POSSIBLE_LIB_DIR
     Ruby_RUBY_LIB_DIR
     Ruby_SITEARCH_DIR
     Ruby_SITELIB_DIR
@@ -371,7 +332,6 @@ if(Ruby_EXECUTABLE AND NOT Ruby_VERSION_MAJOR)
     set(Ruby_VERSION_MAJOR 3)
     string(REGEX_REPLACE ${Ruby_EXECUTABLE} "ruby3\\.?([0-1])" "\\1" Ruby_VERSION_MINOR)
   endif()
-
 endif()
 
 if(Ruby_VERSION_MAJOR)
@@ -438,7 +398,7 @@ if(WIN32)
   endforeach()
 endif()
 
-find_library(Ruby_LIBRARY NAMES ${_Ruby_POSSIBLE_LIB_NAMES} HINTS ${Ruby_POSSIBLE_LIB_DIR} )
+find_library(Ruby_LIBRARY NAMES ${_Ruby_POSSIBLE_LIB_NAMES} HINTS ${_Ruby_POSSIBLE_LIB_DIR} )
 
 set(_Ruby_REQUIRED_VARS Ruby_EXECUTABLE Ruby_INCLUDE_DIR Ruby_LIBRARY)
 if(_Ruby_VERSION_SHORT_NODOT GREATER 18)
@@ -448,16 +408,16 @@ endif()
 if(_Ruby_DEBUG_OUTPUT)
   message(STATUS "--------FindRuby.cmake debug------------")
   message(STATUS "_Ruby_POSSIBLE_EXECUTABLE_NAMES: ${_Ruby_POSSIBLE_EXECUTABLE_NAMES}")
+  message(STATUS "_Ruby_POSSIBLE_LIB_DIR: ${_Ruby_POSSIBLE_LIB_DIR}")
   message(STATUS "_Ruby_POSSIBLE_LIB_NAMES: ${_Ruby_POSSIBLE_LIB_NAMES}")
-  message(STATUS "Ruby_ARCH_DIR: ${Ruby_ARCH_DIR}")
-  message(STATUS "Ruby_HDR_DIR: ${Ruby_HDR_DIR}")
-  message(STATUS "Ruby_POSSIBLE_LIB_DIR: ${Ruby_POSSIBLE_LIB_DIR}")
-  message(STATUS "Found Ruby_VERSION: \"${Ruby_VERSION}\" , short: \"${_Ruby_VERSION_SHORT}\", nodot: \"${_Ruby_VERSION_SHORT_NODOT}\"")
-  message(STATUS "_Ruby_REQUIRED_VARS: ${_Ruby_REQUIRED_VARS}")
+  message(STATUS "_Ruby_FIND_VIRTUALENV=${_Ruby_FIND_VIRTUALENV}")
+  message(STATUS "Found Ruby_VERSION: \"${Ruby_VERSION}\"")
   message(STATUS "Ruby_EXECUTABLE: ${Ruby_EXECUTABLE}")
   message(STATUS "Ruby_LIBRARY: ${Ruby_LIBRARY}")
   message(STATUS "Ruby_INCLUDE_DIR: ${Ruby_INCLUDE_DIR}")
   message(STATUS "Ruby_CONFIG_INCLUDE_DIR: ${Ruby_CONFIG_INCLUDE_DIR}")
+  message(STATUS "Ruby_HDR_DIR: ${Ruby_HDR_DIR}")
+  message(STATUS "Ruby_ARCH_DIR: ${Ruby_ARCH_DIR}")
   message(STATUS "--------------------")
 endif()
 
@@ -477,7 +437,7 @@ mark_as_advanced(
   )
 
 # Set some variables for compatibility with previous version of this file (no need to provide a CamelCase version of that...)
-set(RUBY_POSSIBLE_LIB_PATH ${Ruby_POSSIBLE_LIB_DIR})
+set(RUBY_POSSIBLE_LIB_PATH ${_Ruby_POSSIBLE_LIB_DIR})
 set(RUBY_RUBY_LIB_PATH ${Ruby_RUBY_LIB_DIR})
 set(RUBY_INCLUDE_PATH ${Ruby_INCLUDE_DIRS})
 
@@ -496,7 +456,6 @@ foreach(Camel
     Ruby_ARCH
     Ruby_HDR_DIR
     Ruby_ARCHHDR_DIR
-    Ruby_POSSIBLE_LIB_DIR
     Ruby_RUBY_LIB_DIR
     Ruby_SITEARCH_DIR
     Ruby_SITELIB_DIR
