@@ -396,7 +396,7 @@ Control Impl<Policy>::ResolveComponent(Root root,
     }
   }
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__)
   bool exists = false;
   if (Policy::ActualCase == Options::ActualCase::Yes) {
     std::string name;
@@ -418,7 +418,7 @@ Control Impl<Policy>::ResolveComponent(Root root,
 #endif
 
   if (Policy::Existence == Options::Existence::Required
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__)
       && !exists
 #endif
   ) {
@@ -486,7 +486,7 @@ cmsys::Status Impl<Policy>::Resolve(std::string in, std::string& out)
 namespace Policies {
 struct NaivePath
 {
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__)
   static constexpr Options::ActualCase ActualCase = Options::ActualCase::No;
 #endif
   static constexpr Options::Symlinks Symlinks = Options::Symlinks::None;
@@ -494,7 +494,7 @@ struct NaivePath
 };
 struct RealPath
 {
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__)
   static constexpr Options::ActualCase ActualCase = Options::ActualCase::Yes;
 #endif
   static constexpr Options::Symlinks Symlinks = Options::Symlinks::Eager;
@@ -502,7 +502,7 @@ struct RealPath
 };
 struct LogicalPath
 {
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__)
   static constexpr Options::ActualCase ActualCase = Options::ActualCase::Yes;
 #endif
   static constexpr Options::Symlinks Symlinks = Options::Symlinks::Lazy;

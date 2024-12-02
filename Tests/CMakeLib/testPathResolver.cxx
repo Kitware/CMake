@@ -8,13 +8,15 @@
 #include <string>
 #include <utility>
 
+#ifdef _WIN32
+#  include <cctype>
+#endif
+
 #include <cmsys/Status.hxx>
 
 #include "cmPathResolver.h"
 
-#ifdef _WIN32
-#  include <cctype>
-
+#if defined(_WIN32) || defined(__APPLE__)
 #  include "cmSystemTools.h"
 #endif
 
@@ -46,7 +48,7 @@ public:
 
   static std::string AdjustCase(std::string const& path)
   {
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__APPLE__)
     return cmSystemTools::LowerCase(path);
 #else
     return path;
@@ -95,7 +97,9 @@ public:
     }
     return result;
   }
+#endif
 
+#if defined(_WIN32) || defined(__APPLE__)
   cmsys::Status ReadName(std::string const& path, std::string& name) override
   {
     auto i = this->Paths.find(AdjustCase(path));
@@ -241,6 +245,47 @@ bool posixSymlink()
 
   return true;
 }
+
+#ifdef __APPLE__
+bool macosActualCase()
+{
+  std::cout << "macosActualCase()\n";
+  MockSystem os;
+  os.SetPaths({
+    { "/", { {}, {} } },
+    { "/mixed", { "MiXeD", {} } },
+    { "/mixed/link-mixed", { "LiNk-MiXeD", "mixed" } },
+    { "/mixed/mixed", { "MiXeD", {} } },
+    { "/mixed/link-c-mixed", { "LiNk-C-MiXeD", "/mIxEd" } },
+    { "/upper", { "UPPER", {} } },
+    { "/upper/link-upper", { "LINK-UPPER", "upper" } },
+    { "/upper/upper", { "UPPER", {} } },
+    { "/upper/link-c-upper", { "LINK-C-UPPER", "/upper" } },
+  });
+
+  {
+    Resolver<Policies::LogicalPath> const r(os);
+    EXPECT_RESOLVE("/mIxEd/MiSsInG", "/MiXeD/MiSsInG");
+    EXPECT_RESOLVE("/mIxEd/link-MiXeD", "/MiXeD/LiNk-MiXeD");
+    EXPECT_RESOLVE("/mIxEd/link-c-MiXeD", "/MiXeD/LiNk-C-MiXeD");
+    EXPECT_RESOLVE("/upper/mIsSiNg", "/UPPER/mIsSiNg");
+    EXPECT_RESOLVE("/upper/link-upper", "/UPPER/LINK-UPPER");
+    EXPECT_RESOLVE("/upper/link-c-upper", "/UPPER/LINK-C-UPPER");
+  }
+
+  {
+    Resolver<Policies::RealPath> const r(os);
+    EXPECT_ENOENT("/mIxEd/MiSsInG", "/MiXeD/MiSsInG");
+    EXPECT_RESOLVE("/mIxEd/link-MiXeD", "/MiXeD/MiXeD");
+    EXPECT_RESOLVE("/mIxEd/link-c-MiXeD", "/MiXeD");
+    EXPECT_ENOENT("/upper/mIsSiNg", "/UPPER/mIsSiNg");
+    EXPECT_RESOLVE("/upper/link-upper", "/UPPER/UPPER");
+    EXPECT_RESOLVE("/upper/link-c-upper", "/UPPER");
+  }
+
+  return true;
+}
+#endif
 
 #ifdef _WIN32
 bool windowsRoot()
@@ -464,6 +509,9 @@ int testPathResolver(int /*unused*/, char* /*unused*/[])
     posixAbsolutePath,
     posixWorkingDirectory,
     posixSymlink,
+#ifdef __APPLE__
+    macosActualCase,
+#endif
 #ifdef _WIN32
     windowsRoot,
     windowsAbsolutePath,
