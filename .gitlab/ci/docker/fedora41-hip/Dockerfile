@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-ARG BASE_IMAGE=fedora:39
+ARG BASE_IMAGE=fedora:41
 
 FROM ${BASE_IMAGE} AS dnf-cache
 # Populate DNF cache w/ the fresh metadata and prefetch packages.
@@ -20,7 +20,7 @@ LABEL maintainer="Brad King <brad.king@kitware.com>"
 
 RUN --mount=type=bind,source=install_deps.sh,target=/root/install_deps.sh \
     --mount=type=bind,source=deps_packages.lst,target=/root/deps_packages.lst \
-    --mount=type=cache,from=dnf-cache,source=/var/cache/dnf,target=/var/cache/dnf,sharing=private \
+    --mount=type=cache,from=dnf-cache,source=/var/lib/dnf,target=/var/lib/dnf,sharing=private \
     --mount=type=cache,target=/var/cache/pip \
     --mount=type=tmpfs,target=/var/log \
     --mount=type=tmpfs,target=/tmp \
