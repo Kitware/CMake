@@ -299,9 +299,6 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
          &this->NsightTegraVersion[0], &this->NsightTegraVersion[1],
          &this->NsightTegraVersion[2], &this->NsightTegraVersion[3]);
   this->MSTools = !this->NsightTegra && !this->Android;
-  this->Managed = false;
-  this->TargetCompileAsWinRT = false;
-  this->IsMissingFiles = false;
   this->DefaultArtifactDir =
     cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
              this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget));

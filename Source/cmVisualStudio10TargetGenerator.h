@@ -234,7 +234,7 @@ private:
   std::string LangForClCompile;
 
   VsProjectType ProjectType;
-  bool InSourceBuild;
+  bool InSourceBuild = false;
   std::vector<std::string> Configurations;
   std::vector<TargetsFileAndConfigs> TargetsFileAndConfigsVec;
   cmGeneratorTarget* const GeneratorTarget;
@@ -242,14 +242,14 @@ private:
   std::string const Platform;
   std::string const Name;
   std::string const GUID;
-  bool MSTools;
-  bool Managed;
-  bool NsightTegra;
-  bool Android;
+  bool MSTools = false;
+  bool Managed = false;
+  bool NsightTegra = false;
+  bool Android = false;
   bool HaveCustomCommandDepfile = false;
   std::map<std::string, bool> ScanSourceForModuleDependencies;
   unsigned int NsightTegraVersion[4];
-  bool TargetCompileAsWinRT;
+  bool TargetCompileAsWinRT = false;
   std::set<std::string> IPOEnabledConfigurations;
   std::set<std::string> ASanEnabledConfigurations;
   std::set<std::string> FuzzerEnabledConfigurations;
@@ -257,7 +257,7 @@ private:
   cmGlobalVisualStudio10Generator* const GlobalGenerator;
   cmLocalVisualStudio10Generator* const LocalGenerator;
   std::set<std::string> CSharpCustomCommandNames;
-  bool IsMissingFiles;
+  bool IsMissingFiles = false;
   std::vector<std::string> AddedFiles;
   std::string DefaultArtifactDir;
   bool AddedDefaultCertificate = false;
