@@ -3464,14 +3464,15 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
     endif()
 
     # finalize library version information
-    _python_get_version (SABI_LIBRARY PREFIX _${_PYTHON_PREFIX}_)
     # ABI library does not have the full version information
-    if (${_PYTHON_PREFIX}_Interpreter_FOUND OR _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
-      # update from interpreter or library
+    if (${_PYTHON_PREFIX}_Interpreter_FOUND AND NOT _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+      # update from interpreter
       set (_${_PYTHON_PREFIX}_VERSION ${${_PYTHON_PREFIX}_VERSION})
       set (_${_PYTHON_PREFIX}_VERSION_MAJOR ${${_PYTHON_PREFIX}_VERSION_MAJOR})
       set (_${_PYTHON_PREFIX}_VERSION_MINOR ${${_PYTHON_PREFIX}_VERSION_MINOR})
       set (_${_PYTHON_PREFIX}_VERSION_PATCH ${${_PYTHON_PREFIX}_VERSION_PATCH})
+    elseif(NOT _${_PYTHON_PREFIX}_LIBRARY_RELEASE)
+      _python_get_version (SABI_LIBRARY PREFIX _${_PYTHON_PREFIX}_)
     endif()
 
     set (${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE "${_${_PYTHON_PREFIX}_SABI_LIBRARY_RELEASE}")
