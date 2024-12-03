@@ -1626,8 +1626,6 @@ void cmLocalGenerator::GetTargetFlags(
   this->AppendPositionIndependentLinkerFlags(extraLinkFlags, target, config,
                                              linkLanguage);
   this->AppendIPOLinkerFlags(extraLinkFlags, target, config, linkLanguage);
-  this->AppendDependencyInfoLinkerFlags(extraLinkFlags, target, config,
-                                        linkLanguage);
   this->AppendModuleDefinitionFlag(extraLinkFlags, target, linkLineComputer,
                                    config);
 
