@@ -4122,7 +4122,7 @@ bool SystemTools::FileHasSignature(const char* filename, const char* signature,
 
   bool res = false;
   size_t signature_len = strlen(signature);
-  char* buffer = new char[signature_len];
+  char* buffer = new char[signature_len+1];
 
   if (fread(buffer, 1, signature_len, fp) == signature_len) {
     res = (!strncmp(buffer, signature, signature_len) ? true : false);
