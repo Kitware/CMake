@@ -6011,15 +6011,27 @@ std::string cmGeneratorTarget::GetSwiftModuleFileName() const
 std::string cmGeneratorTarget::GetSwiftModuleDirectory(
   std::string const& config) const
 {
-  std::string moduleDirectory =
-    this->GetPropertyOrDefault("Swift_MODULE_DIRECTORY", "");
+  // This is like the *_OUTPUT_DIRECTORY properties except that we don't have a
+  // separate per-configuration target property.
+  //
+  // The property expands generator expressions. Multi-config generators append
+  // a per-configuration subdirectory to the specified directory unless a
+  // generator expression is used.
+  bool appendConfigDir = true;
+  std::string moduleDirectory;
 
+  if (cmValue value = this->GetProperty("Swift_MODULE_DIRECTORY")) {
+    moduleDirectory = cmGeneratorExpression::Evaluate(
+      *value, this->LocalGenerator, config, this);
+    appendConfigDir = *value == moduleDirectory;
+  }
   if (moduleDirectory.empty()) {
     moduleDirectory = this->LocalGenerator->GetCurrentBinaryDirectory();
+  }
+  if (appendConfigDir) {
     this->LocalGenerator->GetGlobalGenerator()->AppendDirectoryForConfig(
       "/", config, "", moduleDirectory);
   }
-
   return moduleDirectory;
 }
 

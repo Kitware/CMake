@@ -1,13 +1,20 @@
 .*swiftc(.exe)? [^
-]* -parse-as-library -static -emit-module [^
+]* -parse-as-library -static[^
+]* -emit-module -emit-module-path (Debug\\|Release\\)?StaticLibrary.swiftmodule[^
 ]* -module-name StaticLibrary [^
 ]*
 .*swiftc(.exe)? [^
-]* -parse-as-library -emit-module [^
+]* -parse-as-library[^
+]* -emit-module -emit-module-path (debug|release)\\modules\\DynamicLibrary.swiftmodule[^
 ]* -module-name DynamicLibrary [^
 ]*
 .*swiftc(.exe)? [^
 ]* -emit-library [^
-]* -Xlinker -implib:DynamicLibrary.lib +-o ([A-Za-z]+/)?DynamicLibrary.dll [^
+]* -Xlinker -implib:(Debug\\|Release\\)?DynamicLibrary.lib +-o ([A-Za-z]+/)?(Debug\\|Release\\)?DynamicLibrary.dll [^
+]*
+.*swiftc(.exe)? [^
+]* -parse-as-library[^
+]* -emit-module -emit-module-path Modules\\(Debug\\|Release\\)?DynamicLibrary2.swiftmodule[^
+]* -module-name DynamicLibrary2 [^
 ]*
 .*swiftc(.exe)? -j [0-9]+ -num-threads [0-9]+ -c  -module-name Executable

@@ -1,1 +1,1 @@
-.*-implib:lib\\L.lib
+.*-implib:lib\\(Debug\\|Release\\)?L.lib
