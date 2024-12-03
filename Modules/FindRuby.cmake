@@ -5,22 +5,17 @@
 FindRuby
 --------
 
-Find Ruby
-
-This module finds if Ruby is installed and determines where the
-include files and libraries are.  Ruby 1.8 through 3.3 are
-supported.
+This module determines if Ruby is installed and finds the locations of its
+include files and libraries. Ruby 1.8 through 3.4 are supported.
 
 The minimum required version of Ruby can be specified using the
 standard syntax, e.g.
 
 .. code-block:: cmake
 
-  find_package(Ruby 2.5.1 EXACT REQUIRED)
+  find_package(Ruby 3.2.6 EXACT REQUIRED)
   # OR
-  find_package(Ruby 2.4)
-
-It also determines what the name of the library is.
+  find_package(Ruby 3.2)
 
 Virtual environments such as RVM are handled as well, by passing
 the argument ``Ruby_FIND_VIRTUALENV``
@@ -40,7 +35,7 @@ This module will set the following variables in your project:
   .. versionadded:: 3.18
     libraries needed to use ruby from C.
 ``Ruby_VERSION``
-  the version of ruby which was found, e.g. "1.8.7"
+  the version of ruby which was found, e.g. "3.2.6"
 ``Ruby_VERSION_MAJOR``
   Ruby major version.
 ``Ruby_VERSION_MINOR``
@@ -136,13 +131,13 @@ set(Ruby_FIND_VERSION_SHORT_NODOT "${Ruby_FIND_VERSION_MAJOR}${Ruby_FIND_VERSION
 
 # Set name of possible executables, ignoring the minor
 # Eg:
-# 2.1.1 => from ruby33 to ruby21 included
-# 2.1   => from ruby33 to ruby21 included
-# 2     => from ruby33 to ruby20 included
-# empty => from ruby33 to ruby18 included
+# 3.2.6 => from ruby34 to ruby32 included
+# 3.2   => from ruby34 to ruby32 included
+# 3     => from ruby34 to ruby30 included
+# empty => from ruby34 to ruby18 included
 if(NOT Ruby_FIND_VERSION_EXACT)
 
-  foreach(_ruby_version RANGE 33 18 -1)
+  foreach(_ruby_version RANGE 34 18 -1)
     string(SUBSTRING "${_ruby_version}" 0 1 _ruby_major_version)
     string(SUBSTRING "${_ruby_version}" 1 1 _ruby_minor_version)
 
