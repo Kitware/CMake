@@ -551,8 +551,9 @@ std::vector<BT<std::string>>& cmGeneratorTarget::ResolveLinkerWrapper(
   const std::string SHELL{ "SHELL:" };
   const std::string LINKER_SHELL = LINKER + SHELL;
 
-  for (auto entry = result.begin(); entry != result.end(); ++entry) {
+  for (auto entry = result.begin(); entry != result.end();) {
     if (entry->Value.compare(0, LINKER.length(), LINKER) != 0) {
+      ++entry;
       continue;
     }
 
@@ -594,10 +595,10 @@ std::vector<BT<std::string>>& cmGeneratorTarget::ResolveLinkerWrapper(
     if (joinItems) {
       result.insert(
         entry, cmJoin(cmMakeRange(options.begin(), options.end()), " "_s));
-      entry = std::next(result.begin(), index);
+      entry = std::next(result.begin(), index + 1);
     } else {
       result.insert(entry, options.begin(), options.end());
-      entry = std::next(result.begin(), index + options.size() - 1);
+      entry = std::next(result.begin(), index + options.size());
     }
   }
   return result;
