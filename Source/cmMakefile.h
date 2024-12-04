@@ -1054,6 +1054,9 @@ public:
   public:
     FindPackageStackRAII(cmMakefile* mf, std::string const& pkg);
     ~FindPackageStackRAII();
+
+    FindPackageStackRAII(FindPackageStackRAII const&) = delete;
+    FindPackageStackRAII& operator=(FindPackageStackRAII const&) = delete;
   };
 
   class DebugFindPkgRAII
@@ -1064,6 +1067,9 @@ public:
   public:
     DebugFindPkgRAII(cmMakefile* mf, std::string const& pkg);
     ~DebugFindPkgRAII();
+
+    DebugFindPkgRAII(DebugFindPkgRAII const&) = delete;
+    DebugFindPkgRAII& operator=(DebugFindPkgRAII const&) = delete;
   };
 
   bool GetDebugFindPkgMode() const;
