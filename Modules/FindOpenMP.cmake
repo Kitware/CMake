@@ -396,7 +396,7 @@ function(_OPENMP_GET_FLAGS LANG FLAG_MODE OPENMP_FLAG_VAR OPENMP_LIB_NAMES_VAR)
           LINK_LIBRARIES ${OpenMP_libomp_LIBRARY}
         )
         if(NOT OpenMP_COMPILE_RESULT_${FLAG_MODE}_${OPENMP_PLAIN_FLAG})
-          find_path(OpenMP_${LANG}_INCLUDE_DIR omplib.mod)
+          find_path(OpenMP_${LANG}_INCLUDE_DIR omp_lib.mod)
           mark_as_advanced(OpenMP_${LANG}_INCLUDE_DIR)
           set(OpenMP_${LANG}_INCLUDE_DIR "${OpenMP_${LANG}_INCLUDE_DIR}" PARENT_SCOPE)
           if(OpenMP_${LANG}_INCLUDE_DIR)
