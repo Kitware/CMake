@@ -137,24 +137,13 @@ if(NOT Ruby_FIND_VERSION_EXACT)
   endforeach()
 endif()
 
-# virtual environments handling (eg RVM)
-if (DEFINED ENV{MY_RUBY_HOME})
-  if(_Ruby_DEBUG_OUTPUT)
-    message("My ruby home is defined: $ENV{MY_RUBY_HOME}")
-  endif()
-
-  if (DEFINED Ruby_FIND_VIRTUALENV)
-    if (NOT Ruby_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY|STANDARD)$")
-      message (AUTHOR_WARNING "FindRuby: ${Ruby_FIND_VIRTUALENV}: invalid value for 'Ruby_FIND_VIRTUALENV'. 'FIRST', 'ONLY' or 'STANDARD' expected. 'FIRST' will be used instead.")
-      set (_Ruby_FIND_VIRTUALENV "FIRST")
-    else()
-      set (_Ruby_FIND_VIRTUALENV ${Ruby_FIND_VIRTUALENV})
-    endif()
-  else()
-    set (_Ruby_FIND_VIRTUALENV FIRST)
-  endif()
-else()
-  set (_Ruby_FIND_VIRTUALENV STANDARD)
+# Virtual environment handling
+if (DEFINED Ruby_FIND_VIRTUALENV AND NOT Ruby_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY|STANDARD)$")
+  message (AUTHOR_WARNING "FindRuby: ${Ruby_FIND_VIRTUALENV}: invalid value for 'Ruby_FIND_VIRTUALENV'. 'FIRST', 'ONLY' or 'STANDARD' expected. 'FIRST' will be used instead.")
+  set (Ruby_FIND_VIRTUALENV "FIRST")
+elseif (NOT DEFINED Ruby_FIND_VIRTUALENV)
+  # Default is to search for virtual environments first
+  set (Ruby_FIND_VIRTUALENV "FIRST")
 endif()
 
 function (_RUBY_VALIDATE_INTERPRETER)
@@ -209,46 +198,53 @@ function(_RUBY_CONFIG_VAR RBVAR OUTVAR)
   set(${OUTVAR} "${_Ruby_OUTPUT}" PARENT_SCOPE)
 endfunction()
 
-while(1)
-  # Virtual environments handling
-  if(_Ruby_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
-    if(_Ruby_DEBUG_OUTPUT)
-      message("Inside Matches")
-    endif()
-    find_program (Ruby_EXECUTABLE
-                  NAMES ${_Ruby_POSSIBLE_EXECUTABLE_NAMES}
-                  NAMES_PER_DIR
-                  PATHS ENV MY_RUBY_HOME
-                  PATH_SUFFIXES bin Scripts
-                  NO_CMAKE_PATH
-                  NO_CMAKE_ENVIRONMENT_PATH
-                  NO_SYSTEM_ENVIRONMENT_PATH
-                  NO_CMAKE_SYSTEM_PATH)
-
-    if(_Ruby_DEBUG_OUTPUT)
-      message("Ruby_EXECUTABLE=${Ruby_EXECUTABLE}")
-    endif()
-
-    _RUBY_VALIDATE_INTERPRETER (${Ruby_FIND_VERSION}})
-    if(Ruby_EXECUTABLE)
-      break()
-    endif()
-    if(NOT _Ruby_FIND_VIRTUALENV STREQUAL "ONLY")
-      break()
-    endif()
-  elseif(_Ruby_DEBUG_OUTPUT)
-    message("_Ruby_FIND_VIRTUALENV doesn't match: ${_Ruby_FIND_VIRTUALENV}")
+####  Check RMV virtual environment ###
+function (_RUBY_CHECK_RVM)
+  if (NOT DEFINED ENV{MY_RUBY_HOME})
+    return()
   endif()
 
-  # try using standard paths
+  find_program (Ruby_EXECUTABLE
+                NAMES ${_Ruby_POSSIBLE_EXECUTABLE_NAMES}
+                NAMES_PER_DIR
+                PATHS ENV MY_RUBY_HOME
+                PATH_SUFFIXES bin Scripts
+                NO_CMAKE_PATH
+                NO_CMAKE_ENVIRONMENT_PATH
+                NO_SYSTEM_ENVIRONMENT_PATH
+                NO_CMAKE_SYSTEM_PATH)
+
+  _RUBY_VALIDATE_INTERPRETER (${Ruby_FIND_VERSION}})
+
+  if(Ruby_EXECUTABLE)
+    set(Ruby_ENV "RVM" CACHE INTERNAL "Ruby environment")
+  endif()
+endfunction()
+
+####  Check system installed Ruby ###
+function (_RUBY_CHECK_SYSTEM)
   find_program (Ruby_EXECUTABLE
                 NAMES ${_Ruby_POSSIBLE_EXECUTABLE_NAMES}
                 NAMES_PER_DIR)
+
   _RUBY_VALIDATE_INTERPRETER (${Ruby_FIND_VERSION})
 
-  # We have either found Ruby or not so break out of the loop
-  break()
-endwhile()
+  if(Ruby_EXECUTABLE)
+    set(Ruby_ENV "Standard" CACHE INTERNAL "Ruby environment")
+  endif()
+endfunction()
+
+# Find Ruby! First check virtual environments
+if(Ruby_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
+  if(NOT Ruby_EXECUTABLE)
+    _RUBY_CHECK_RVM()
+  endif()
+endif()
+
+# If we did not find a virtual environment then look for a system installed Ruby
+if(NOT ${Ruby_FIND_VIRTUALENV} STREQUAL "ONLY" AND NOT Ruby_EXECUTABLE)
+  _RUBY_CHECK_SYSTEM()
+endif()
 
 if(Ruby_EXECUTABLE AND NOT Ruby_VERSION_MAJOR)
   # query the ruby version
@@ -410,7 +406,8 @@ if(_Ruby_DEBUG_OUTPUT)
   message(STATUS "_Ruby_POSSIBLE_EXECUTABLE_NAMES: ${_Ruby_POSSIBLE_EXECUTABLE_NAMES}")
   message(STATUS "_Ruby_POSSIBLE_LIB_DIR: ${_Ruby_POSSIBLE_LIB_DIR}")
   message(STATUS "_Ruby_POSSIBLE_LIB_NAMES: ${_Ruby_POSSIBLE_LIB_NAMES}")
-  message(STATUS "_Ruby_FIND_VIRTUALENV=${_Ruby_FIND_VIRTUALENV}")
+  message(STATUS "Ruby_FIND_VIRTUALENV=${Ruby_FIND_VIRTUALENV}")
+  message(STATUS "Ruby_ENV: ${Ruby_ENV}")
   message(STATUS "Found Ruby_VERSION: \"${Ruby_VERSION}\"")
   message(STATUS "Ruby_EXECUTABLE: ${Ruby_EXECUTABLE}")
   message(STATUS "Ruby_LIBRARY: ${Ruby_LIBRARY}")
