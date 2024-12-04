@@ -1361,6 +1361,7 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
 			if ( yy_current_state >= 32 )
+				printf("%s\n", yy_c );
 				/*if (yy_c < 0 || yy_c >= YY_META_LENGTH) {
 					YY_FATAL_ERROR( "attempted to access an out of bounds location in yy_meta array" );
 				}*/
