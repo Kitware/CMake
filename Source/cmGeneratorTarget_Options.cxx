@@ -548,8 +548,9 @@ std::vector<BT<std::string>>& cmGeneratorTarget::ResolvePrefixWrapper(
   const std::string SHELL{ "SHELL:" };
   const std::string PREFIX_SHELL = cmStrCat(PREFIX, SHELL);
 
-  for (auto entry = result.begin(); entry != result.end(); ++entry) {
+  for (auto entry = result.begin(); entry != result.end();) {
     if (entry->Value.compare(0, PREFIX.length(), PREFIX) != 0) {
+      ++entry;
       continue;
     }
 
@@ -594,10 +595,10 @@ std::vector<BT<std::string>>& cmGeneratorTarget::ResolvePrefixWrapper(
         entry,
         cmJoin(cmMakeRange(processedOptions.begin(), processedOptions.end()),
                " "_s));
-      entry = std::next(result.begin(), index);
+      entry = std::next(result.begin(), index + 1);
     } else {
       result.insert(entry, processedOptions.begin(), processedOptions.end());
-      entry = std::next(result.begin(), index + processedOptions.size() - 1);
+      entry = std::next(result.begin(), index + processedOptions.size());
     }
   }
   return result;
