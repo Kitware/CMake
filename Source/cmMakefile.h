@@ -1072,6 +1072,25 @@ public:
     DebugFindPkgRAII& operator=(DebugFindPkgRAII const&) = delete;
   };
 
+  class CallRAII
+  {
+  public:
+    CallRAII(cmMakefile* mf, std::string const& file,
+             cmExecutionStatus& status);
+    ~CallRAII();
+
+    CallRAII(CallRAII const&) = delete;
+    CallRAII& operator=(CallRAII const&) = delete;
+
+  protected:
+    CallRAII(cmMakefile* mf, cmListFileContext const& lfc,
+             cmExecutionStatus& status);
+
+    cmMakefile* Detach();
+
+    cmMakefile* Makefile;
+  };
+
   bool GetDebugFindPkgMode() const;
 
   void MaybeWarnCMP0074(std::string const& rootVar, cmValue rootDef,
@@ -1201,8 +1220,10 @@ private:
   std::vector<std::unique_ptr<cmGeneratorExpressionEvaluationFile>>
     EvaluationFiles;
 
+  class CallScope;
+  friend class CallScope;
+
   std::vector<cmExecutionStatus*> ExecutionStatusStack;
-  friend class cmMakefileCall;
   friend class cmParseFileScope;
 
   std::vector<std::unique_ptr<cmTarget>> ImportedTargetsOwned;
