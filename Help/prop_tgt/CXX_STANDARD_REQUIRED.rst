@@ -18,3 +18,5 @@ compile features and a list of supported compilers.
 This property is initialized by the value of
 the :variable:`CMAKE_CXX_STANDARD_REQUIRED` variable if it is set when a
 target is created.
+
+Alternatively, see :ref:`Requiring Language Standards`.
