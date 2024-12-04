@@ -29,6 +29,8 @@ if(NOT CTEST_CONFIGURATION_TYPE)
 endif()
 
 # Isolate tests from user configuration in the environment.
+unset(ENV{CLICOLOR})
+unset(ENV{CLICOLOR_FORCE})
 unset(ENV{CMAKE_GENERATOR})
 unset(ENV{CMAKE_GENERATOR_INSTANCE})
 unset(ENV{CMAKE_GENERATOR_PLATFORM})
