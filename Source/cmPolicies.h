@@ -135,7 +135,7 @@ class cmMakefile;
          3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0044,                                                     \
          "Case sensitive <LANG>_COMPILER_ID generator expressions.", 3, 0, 0, \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(POLICY, CMP0045,                                                     \
          "Error on non-existent target in get_target_property.", 3, 0, 0,     \
          WARN)                                                                \

@@ -438,11 +438,7 @@ add_test(echo-old-style echo "\$<CONFIGURATION>")
 set_property(TEST echo-old-style PROPERTY
     PASS_REGULAR_EXPRESSION "^\\$<CONFIGURATION>\n$")
 
-add_subdirectory(CMP0044 ${CMAKE_BINARY_DIR}/CMP0044-WARN)
-set(CMP0044_TYPE NEW)
-add_subdirectory(CMP0044 ${CMAKE_BINARY_DIR}/CMP0044-NEW)
-set(CMP0044_TYPE OLD)
-add_subdirectory(CMP0044 ${CMAKE_BINARY_DIR}/CMP0044-OLD)
+add_subdirectory(CMP0044)
 
 if(NOT CMAKE_GENERATOR STREQUAL Xcode OR NOT CMAKE_OSX_ARCHITECTURES MATCHES "[;$]")
   add_library(objlib OBJECT objlib1.c objlib2.c)
@@ -504,5 +500,3 @@ if(NOT CMAKE_GENERATOR STREQUAL Xcode OR NOT CMAKE_OSX_ARCHITECTURES MATCHES "[;
     DEPENDS execobjs
   )
 endif()
-
-cmake_policy(VERSION 2.8.12) # old enough to not set CMP0044
