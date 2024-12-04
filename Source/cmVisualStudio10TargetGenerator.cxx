@@ -282,6 +282,7 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
     this->Makefile->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
   this->NsightTegra = gg->IsNsightTegra();
   this->Android = gg->TargetsAndroid();
+  this->WindowsKernelMode = gg->TargetsWindowsKernelModeDriver();
   auto scanProp = target->GetProperty("CXX_SCAN_FOR_MODULES");
   for (auto const& config : this->Configurations) {
     if (scanProp.IsSet()) {
@@ -299,9 +300,6 @@ cmVisualStudio10TargetGenerator::cmVisualStudio10TargetGenerator(
          &this->NsightTegraVersion[0], &this->NsightTegraVersion[1],
          &this->NsightTegraVersion[2], &this->NsightTegraVersion[3]);
   this->MSTools = !this->NsightTegra && !this->Android;
-  this->Managed = false;
-  this->TargetCompileAsWinRT = false;
-  this->IsMissingFiles = false;
   this->DefaultArtifactDir =
     cmStrCat(this->LocalGenerator->GetCurrentBinaryDirectory(), '/',
              this->LocalGenerator->GetTargetDirectory(this->GeneratorTarget));
@@ -1437,7 +1435,11 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues(Elem& e0)
         switch (this->GeneratorTarget->GetType()) {
           case cmStateEnums::SHARED_LIBRARY:
           case cmStateEnums::MODULE_LIBRARY:
-            configType = "DynamicLibrary";
+            if (this->WindowsKernelMode) {
+              configType = "Driver";
+            } else {
+              configType = "DynamicLibrary";
+            }
             break;
           case cmStateEnums::OBJECT_LIBRARY:
           case cmStateEnums::STATIC_LIBRARY:
@@ -1481,6 +1483,10 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues(Elem& e0)
       this->WriteNsightTegraConfigurationValues(e1, c);
     } else if (this->Android) {
       this->WriteAndroidConfigurationValues(e1, c);
+    }
+
+    if (this->WindowsKernelMode) {
+      this->WriteMSDriverConfigurationValues(e1, c);
     }
   }
 }
@@ -1606,6 +1612,14 @@ void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesManaged(
 
   OptionsHelper oh(o, e1);
   oh.OutputFlagMap();
+}
+
+void cmVisualStudio10TargetGenerator::WriteMSDriverConfigurationValues(
+  Elem& e1, std::string const&)
+{
+  // FIXME: Introduce a way for project code to control these.
+  e1.Element("DriverType", "KMDF");
+  e1.Element("DriverTargetPlatform", "Universal");
 }
 
 void cmVisualStudio10TargetGenerator::WriteMSToolConfigurationValuesCommon(
@@ -3217,9 +3231,13 @@ void cmVisualStudio10TargetGenerator::OutputLinkIncremental(
   if (!this->MSTools) {
     return;
   }
+  if (this->WindowsKernelMode) {
+    return;
+  }
   if (this->ProjectType == VsProjectType::csproj) {
     return;
   }
+
   // static libraries and things greater than modules do not need
   // to set this option
   if (this->GeneratorTarget->GetType() == cmStateEnums::STATIC_LIBRARY ||
@@ -3687,6 +3705,10 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   e2.Element("ScanSourceForModuleDependencies",
              this->ScanSourceForModuleDependencies[configName] ? "true"
                                                                : "false");
+  if (this->WindowsKernelMode) {
+    e2.Element("WppEnabled", "true");
+    e2.Element("WppRecorderEnabled", "true");
+  }
 }
 
 bool cmVisualStudio10TargetGenerator::ComputeRcOptions()
@@ -4821,6 +4843,10 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups(Elem& e0)
       this->WriteMarmasmOptions(e1, c);
       this->WriteMasmOptions(e1, c);
       this->WriteNasmOptions(e1, c);
+    }
+
+    if (this->WindowsKernelMode) {
+      Elem(e1, "DriverSign").Element("FileDigestAlgorithm", "sha256");
     }
     //    output midl flags       <Midl></Midl>
     this->WriteMidlOptions(e1, c);
