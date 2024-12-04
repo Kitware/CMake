@@ -596,7 +596,8 @@ static const YY_CHAR yy_ec[256] =
         1,    1,    1,    1,    1
     } ;
 
-static const YY_CHAR yy_meta[12] =
+#define YY_META_LENGTH 12
+static const YY_CHAR yy_meta[YY_META_LENGTH] =
     {   0,
         1,    2,    3,    4,    3,    4,    4,    4,    3,    5,
         3
@@ -1398,9 +1399,13 @@ static int yy_get_next_buffer (yyscan_t yyscanner)
 			}
 		while ( yy_chk[yy_base[yy_current_state] + yy_c] != yy_current_state )
 			{
-			yy_current_state = (int) yy_def[yy_current_state];
-			if ( yy_current_state >= 30 )
-				yy_c = yy_meta[yy_c];
+				yy_current_state = (int) yy_def[yy_current_state];
+				if ( yy_current_state >= 30 ) {
+					if (yy_c < 0 || yy_c >= YY_META_LENGTH) {
+						YY_FATAL_ERROR( "attempted to access an out of bounds location in yy_meta array" );
+					}
+					yy_c = yy_meta[yy_c];
+				}
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + yy_c];
 		}

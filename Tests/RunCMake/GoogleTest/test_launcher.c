@@ -52,7 +52,7 @@ static int launch(int argc, const char* argv[])
   printf("launching: %s\n", cmd);
 #endif
   fflush(stdout);
-  return system(cmd);
+  return system(cmd); // CodeQL [SM01921] False Positive: CodeQL wrongly detected that we don't escape the command line arguments. They are escaped by the snprintf calls above (see line 34).
 }
 
 int main(int argc, const char* argv[])
