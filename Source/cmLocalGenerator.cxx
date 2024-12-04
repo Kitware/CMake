@@ -1675,8 +1675,6 @@ void cmLocalGenerator::GetTargetFlags(
                                              linkLanguage);
   this->AppendWarningAsErrorLinkerFlags(extraLinkFlags, target, linkLanguage);
   this->AppendIPOLinkerFlags(extraLinkFlags, target, config, linkLanguage);
-  this->AppendDependencyInfoLinkerFlags(extraLinkFlags, target, config,
-                                        linkLanguage);
   this->AppendModuleDefinitionFlag(extraLinkFlags, target, linkLineComputer,
                                    config);
 
