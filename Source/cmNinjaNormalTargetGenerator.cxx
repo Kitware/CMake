@@ -1277,6 +1277,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement(
                           vars["LINK_LIBRARIES"], vars["FLAGS"],
                           vars["LINK_FLAGS"], frameworkPath, linkPath, gt);
 
+  localGen.AppendDependencyInfoLinkerFlags(vars["LINK_FLAGS"], gt, config,
+                                           this->TargetLinkLanguage(config));
+
   // Add OS X version flags, if any.
   if (this->GeneratorTarget->GetType() == cmStateEnums::SHARED_LIBRARY ||
       this->GeneratorTarget->GetType() == cmStateEnums::MODULE_LIBRARY) {
