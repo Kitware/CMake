@@ -138,7 +138,7 @@ class cmMakefile;
          NEW)                                                                 \
   SELECT(POLICY, CMP0045,                                                     \
          "Error on non-existent target in get_target_property.", 3, 0, 0,     \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(POLICY, CMP0046,                                                     \
          "Error on non-existent dependency in add_dependencies.", 3, 0, 0,    \
          WARN)                                                                \

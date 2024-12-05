@@ -2,13 +2,11 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmGetTargetPropertyCommand.h"
 
-#include <sstream>
-
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmPolicies.h"
+#include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 #include "cmValue.h"
 
@@ -50,29 +48,11 @@ bool cmGetTargetPropertyCommand(std::vector<std::string> const& args,
       }
     }
   } else {
-    bool issueMessage = false;
-    std::ostringstream e;
-    MessageType messageType = MessageType::AUTHOR_WARNING;
-    switch (mf.GetPolicyStatus(cmPolicies::CMP0045)) {
-      case cmPolicies::WARN:
-        issueMessage = true;
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0045) << "\n";
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        break;
-      case cmPolicies::NEW:
-        issueMessage = true;
-        messageType = MessageType::FATAL_ERROR;
-        break;
-    }
-    if (issueMessage) {
-      e << "get_target_property() called with non-existent target \""
-        << targetName << "\".";
-      mf.IssueMessage(messageType, e.str());
-      if (messageType == MessageType::FATAL_ERROR) {
-        return false;
-      }
-    }
+    mf.IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("get_target_property() called with non-existent target \"",
+               targetName, "\"."));
+    return false;
   }
   if (prop_exists) {
     mf.AddDefinition(var, prop);
