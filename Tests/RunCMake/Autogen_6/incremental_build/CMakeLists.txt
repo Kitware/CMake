@@ -8,16 +8,10 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
 add_executable(example
-    src/mainwindow.ui
-    src/widget1.ui
-    src/widget2.ui
-    src/mainwindow.h
-    src/widget1.h
-    src/widget2.h
-    src/main.cpp
-    src/mainwindow.cpp
-    src/widget1.cpp
-    src/widget2.cpp
+    main.cpp
+    ui/widget.cpp
+    ui/widget.h
+    ui/widget.ui
 )
 
 target_link_libraries(example PRIVATE Qt${with_qt_version}::Widgets
