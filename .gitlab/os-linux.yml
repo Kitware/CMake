@@ -71,12 +71,12 @@
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci/long file name for testing purposes"
         CMAKE_ARCH: x86_64
 
-# FIXME(#25932): Our HIP tests do not fully work in CI with Fedora 40.
-.fedora39_hip:
-    image: "kitware/cmake:ci-fedora39-hip-x86_64-2024-04-24"
+.fedora41_hip:
+    image: "kitware/cmake:ci-fedora41-hip-x86_64-2024-12-02"
 
     variables:
-        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        # FIXME(rocclr): device modules fail loading from binaries in paths with spaces
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake-ci"
         CMAKE_ARCH: x86_64
 
 #### Lint builds
@@ -438,11 +438,11 @@
         CMAKE_CONFIGURATION: debian12_hip_radeon
         CTEST_LABELS: "HIP"
 
-.fedora39_hip_radeon:
-    extends: .fedora39_hip
+.fedora41_hip_radeon:
+    extends: .fedora41_hip
 
     variables:
-        CMAKE_CONFIGURATION: fedora39_hip_radeon
+        CMAKE_CONFIGURATION: fedora41_hip_radeon
         CTEST_LABELS: "HIP"
 
 .hip5.5_nvidia:
