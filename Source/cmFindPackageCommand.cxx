@@ -424,11 +424,12 @@ bool TryGeneratedPaths(CallbackFn&& filesCollector,
 
 // Parse the version number and store the results that were
 // successfully parsed.
-int parseVersion(const std::string& version, unsigned int& major,
-                 unsigned int& minor, unsigned int& patch, unsigned int& tweak)
+unsigned int parseVersion(std::string const& version, unsigned int& major,
+                          unsigned int& minor, unsigned int& patch,
+                          unsigned int& tweak)
 {
-  return std::sscanf(version.c_str(), "%u.%u.%u.%u", &major, &minor, &patch,
-                     &tweak);
+  return static_cast<unsigned int>(std::sscanf(
+    version.c_str(), "%u.%u.%u.%u", &major, &minor, &patch, &tweak));
 }
 
 } // anonymous namespace
