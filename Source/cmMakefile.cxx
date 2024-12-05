@@ -1694,13 +1694,9 @@ void cmMakefile::Configure()
         "CMake is pretending there is a \"project(Project)\" command on "
         "the first line.",
         this->Backtrace);
-      cmListFileFunction project{ "project",
-                                  0,
-                                  0,
-                                  { { "Project", cmListFileArgument::Unquoted,
-                                      0 },
-                                    { "__CMAKE_INJECTED_PROJECT_COMMAND__",
-                                      cmListFileArgument::Unquoted, 0 } } };
+      cmListFileFunction project{
+        "project", 0, 0, { { "Project", cmListFileArgument::Unquoted, 0 } }
+      };
       listFile.Functions.insert(listFile.Functions.begin(), project);
     }
   }

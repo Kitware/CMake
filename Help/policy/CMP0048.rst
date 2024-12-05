@@ -1,6 +1,9 @@
 CMP0048
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 The :command:`project` command manages ``VERSION`` variables.
 
 CMake version 3.0 introduced the ``VERSION`` option of the :command:`project`
@@ -17,7 +20,5 @@ The ``NEW`` behavior for this policy is to set ``VERSION`` as documented by the
 :command:`project` command.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.0
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt
