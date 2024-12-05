@@ -127,7 +127,7 @@ int main(int argc, char* argv[])
 #ifdef COMPILER_VERSION_MAJOR
   require += info_version[argc];
 #endif
-#ifdef COMPILER_VERSION_INTERNAL
+#if defined(COMPILER_VERSION_INTERNAL) || defined(COMPILER_VERSION_INTERNAL_STR)
   require += info_version_internal[argc];
 #endif
 #ifdef SIMULATE_ID
