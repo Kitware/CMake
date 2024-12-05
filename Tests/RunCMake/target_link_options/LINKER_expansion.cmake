@@ -26,6 +26,7 @@ endfunction()
 # Use LINKER alone
 add_test_library(linker)
 target_link_options(linker PRIVATE "LINKER:-foo,bar")
+target_link_options(linker PRIVATE "LINKER:") # empty
 
 # Use LINKER with SHELL
 add_test_library(linker_shell)
