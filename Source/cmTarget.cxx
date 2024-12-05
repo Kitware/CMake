@@ -682,8 +682,6 @@ public:
   bool CheckImportedLibName(std::string const& prop,
                             std::string const& value) const;
 
-  std::string ProcessSourceItemCMP0049(const std::string& s) const;
-
   template <typename ValueType>
   void AddDirectoryToFileSet(cmTarget* self, std::string const& fileSetName,
                              ValueType value, cm::string_view fileSetType,
@@ -1368,60 +1366,13 @@ void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
 void cmTarget::AddSources(std::vector<std::string> const& srcs)
 {
   std::vector<std::string> srcFiles;
-  for (auto filename : srcs) {
+  for (std::string const& filename : srcs) {
     if (!cmGeneratorExpression::StartsWithGeneratorExpression(filename)) {
-      if (!filename.empty()) {
-        filename = this->impl->ProcessSourceItemCMP0049(filename);
-        if (filename.empty()) {
-          return;
-        }
-      }
       this->impl->Makefile->GetOrCreateSource(filename);
     }
     srcFiles.emplace_back(filename);
   }
   this->AddTracedSources(srcFiles);
-}
-
-std::string cmTargetInternals::ProcessSourceItemCMP0049(
-  const std::string& s) const
-{
-  std::string src = s;
-
-  // For backwards compatibility replace variables in source names.
-  // This should eventually be removed.
-  this->Makefile->ExpandVariablesInString(src);
-  if (src != s) {
-    std::ostringstream e;
-    bool noMessage = false;
-    MessageType messageType = MessageType::AUTHOR_WARNING;
-    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0049)) {
-      case cmPolicies::WARN:
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0049) << "\n";
-        break;
-      case cmPolicies::OLD:
-        noMessage = true;
-        break;
-      case cmPolicies::NEW:
-        messageType = MessageType::FATAL_ERROR;
-    }
-    if (!noMessage) {
-      e << "Legacy variable expansion in source file \"" << s
-        << "\" expanded to \"" << src << "\" in target \"" << this->Name
-        << "\".  This behavior will be removed in a "
-           "future version of CMake.";
-      this->Makefile->IssueMessage(messageType, e.str());
-      if (messageType == MessageType::FATAL_ERROR) {
-        return "";
-      }
-    }
-  }
-  return src;
-}
-
-std::string cmTarget::GetSourceCMP0049(const std::string& s)
-{
-  return this->impl->ProcessSourceItemCMP0049(s);
 }
 
 struct CreateLocation

@@ -113,7 +113,6 @@ public:
   //! Add sources to the target.
   void AddSources(std::vector<std::string> const& srcs);
   void AddTracedSources(std::vector<std::string> const& srcs);
-  std::string GetSourceCMP0049(const std::string& src);
   cmSourceFile* AddSource(const std::string& src, bool before = false);
 
   //! how we identify a library, by name and type
