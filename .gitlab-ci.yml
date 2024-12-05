@@ -219,9 +219,9 @@ t:debian12-hip-radeon:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:fedora39-hip-radeon:
+t:fedora41-hip-radeon:
     extends:
-        - .fedora39_hip_radeon
+        - .fedora41_hip_radeon
         - .cmake_test_linux_release
         - .linux_x86_64_tags_radeon
         - .run_dependent
