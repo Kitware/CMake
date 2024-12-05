@@ -149,7 +149,7 @@ class cmMakefile;
   SELECT(POLICY, CMP0049,                                                     \
          "Do not expand variables in target source entries.", 3, 0, 0, NEW)   \
   SELECT(POLICY, CMP0050, "Disallow add_custom_command SOURCE signatures.",   \
-         3, 0, 0, WARN)                                                       \
+         3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0051, "List TARGET_OBJECTS in SOURCES target property.",  \
          3, 1, 0, WARN)                                                       \
   SELECT(POLICY, CMP0052,                                                     \

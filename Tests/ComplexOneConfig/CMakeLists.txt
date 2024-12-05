@@ -12,16 +12,6 @@ string(APPEND CMAKE_CXX_FLAGS_RELWITHDEBINFO " -DCOMPLEX_NDEBUG")
 string(APPEND CMAKE_C_FLAGS_MINSIZEREL " -DCOMPLEX_NDEBUG")
 string(APPEND CMAKE_CXX_FLAGS_MINSIZEREL " -DCOMPLEX_NDEBUG")
 
-# It is not recommended to set a policy to OLD, but this test
-# covers the OLD behavior of some policies.
-foreach(p
-    CMP0050
-    )
-  if(POLICY ${p})
-    cmake_policy(SET ${p} OLD)
-  endif()
-endforeach()
-
 # Test building without per-rule echo lines in Makefiles.
 set_property(GLOBAL PROPERTY RULE_MESSAGES OFF)
 

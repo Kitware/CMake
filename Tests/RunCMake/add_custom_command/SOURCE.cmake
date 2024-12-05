@@ -1,6 +1,3 @@
-
-cmake_policy(SET CMP0050 NEW)
-
 add_library(empty empty.cpp)
 add_custom_command(
   TARGET empty

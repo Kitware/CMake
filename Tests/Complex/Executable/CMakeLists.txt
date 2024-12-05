@@ -110,14 +110,14 @@ set_source_files_properties(complex
 )
 set_target_properties(complex PROPERTIES COMPILE_FLAGS "-DCOMPLEX_TARGET_FLAG")
 add_custom_command(
-  TARGET complex
-  SOURCE ${Complex_SOURCE_DIR}/cmTestGeneratedHeader.h.in
+  MAIN_DEPENDENCY ${Complex_SOURCE_DIR}/cmTestGeneratedHeader.h.in
   COMMAND ${CMAKE_COMMAND}
   ARGS -E copy ${Complex_SOURCE_DIR}/cmTestGeneratedHeader.h.in
                ${Complex_BINARY_DIR}/cmTestGeneratedHeader.h
-  OUTPUTS ${Complex_BINARY_DIR}/cmTestGeneratedHeader.h
+  OUTPUT ${Complex_BINARY_DIR}/cmTestGeneratedHeader.h
   DEPENDS ${CMAKE_COMMAND}
 )
+target_sources(complex PRIVATE ${Complex_BINARY_DIR}/cmTestGeneratedHeader.h)
 
 # Test creating an executable that is not built by default.
 add_executable(notInAllExe EXCLUDE_FROM_ALL notInAllExe.cxx)

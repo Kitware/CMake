@@ -235,12 +235,6 @@ public:
   void AddCustomCommandToOutput(
     std::unique_ptr<cmCustomCommand> cc,
     const CommandSourceCallback& callback = nullptr, bool replace = false);
-  void AddCustomCommandOldStyle(const std::string& target,
-                                const std::vector<std::string>& outputs,
-                                const std::vector<std::string>& depends,
-                                const std::string& source,
-                                const cmCustomCommandLines& commandLines,
-                                const char* comment);
   void AppendCustomCommandToOutput(
     const std::string& output, const std::vector<std::string>& depends,
     const cmImplicitDependsList& implicit_depends,
