@@ -143,7 +143,7 @@ class cmMakefile;
          "Error on non-existent dependency in add_dependencies.", 3, 0, 0,    \
          NEW)                                                                 \
   SELECT(POLICY, CMP0047, "Use QCC compiler id for the qcc drivers on QNX.",  \
-         3, 0, 0, WARN)                                                       \
+         3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0048, "project() command manages VERSION variables.", 3,  \
          0, 0, WARN)                                                          \
   SELECT(POLICY, CMP0049,                                                     \

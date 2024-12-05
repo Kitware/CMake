@@ -8,8 +8,8 @@ only for the policies that do not warn by default:
 
 * ``CMAKE_POLICY_WARNING_CMP0025`` controlled the warning for
   policy :policy:`CMP0025` in CMake versions before 4.0.
-* ``CMAKE_POLICY_WARNING_CMP0047`` controls the warning for
-  policy :policy:`CMP0047`.
+* ``CMAKE_POLICY_WARNING_CMP0047`` controlled the warning for
+  policy :policy:`CMP0047` in CMake versions before 4.0.
 * ``CMAKE_POLICY_WARNING_CMP0056`` controls the warning for
   policy :policy:`CMP0056`.
 * ``CMAKE_POLICY_WARNING_CMP0060`` controls the warning for

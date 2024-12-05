@@ -1010,36 +1010,6 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
   std::string compilerIdVar = cmStrCat("CMAKE_", lang, "_COMPILER_ID");
   std::string const compilerId = mf->GetSafeDefinition(compilerIdVar);
 
-  if (compilerId == "QCC") {
-    switch (mf->GetPolicyStatus(cmPolicies::CMP0047)) {
-      case cmPolicies::WARN:
-        if (!this->CMakeInstance->GetIsInTryCompile() &&
-            mf->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0047")) {
-          std::ostringstream w;
-          /* clang-format off */
-          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0047) << "\n"
-            "Converting " << lang <<
-            R"( compiler id "QCC" to "GNU" for compatibility.)"
-            ;
-          /* clang-format on */
-          mf->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
-        }
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        // OLD behavior is to convert QCC to GNU.
-        mf->AddDefinition(compilerIdVar, "GNU");
-        if (lang == "C") {
-          mf->AddDefinition("CMAKE_COMPILER_IS_GNUCC", "1");
-        } else if (lang == "CXX") {
-          mf->AddDefinition("CMAKE_COMPILER_IS_GNUCXX", "1");
-        }
-        break;
-      case cmPolicies::NEW:
-        // NEW behavior is to keep QCC.
-        break;
-    }
-  }
-
   if (compilerId == "XLClang") {
     switch (mf->GetPolicyStatus(cmPolicies::CMP0089)) {
       case cmPolicies::WARN:

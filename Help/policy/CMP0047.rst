@@ -1,6 +1,9 @@
 CMP0047
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 Use ``QCC`` compiler id for the qcc drivers on QNX.
 
 CMake 3.0 and above recognize that the QNX qcc compiler driver is
@@ -20,11 +23,9 @@ for the qcc and QCC compiler drivers. The ``NEW`` behavior for this policy
 is to use the ``QCC`` compiler id for those drivers.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.0
-.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn by default
-.. include:: STANDARD_ADVICE.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: did *not* warn by default
+.. include:: REMOVED_EPILOGUE.txt
 
 See documentation of the
 :variable:`CMAKE_POLICY_WARNING_CMP0047 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
-variable to control the warning.
-
-.. include:: DEPRECATED.txt
+variable to control the warning in CMake versions before 4.0.
