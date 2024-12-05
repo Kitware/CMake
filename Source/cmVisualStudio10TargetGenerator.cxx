@@ -3167,8 +3167,9 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
     }
 
     if (ttype <= cmStateEnums::UTILITY) {
-      if (cmValue workingDir = this->GeneratorTarget->GetProperty(
-            "VS_DEBUGGER_WORKING_DIRECTORY")) {
+      if (cmValue workingDir =
+            this->GlobalGenerator->GetDebuggerWorkingDirectory(
+              this->GeneratorTarget)) {
         std::string genWorkingDir = cmGeneratorExpression::Evaluate(
           *workingDir, this->LocalGenerator, config);
         e1.WritePlatformConfigTag("LocalDebuggerWorkingDirectory", cond,
