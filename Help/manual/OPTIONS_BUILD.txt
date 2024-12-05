@@ -119,6 +119,25 @@
  Specify the installation directory, used by the
  :variable:`CMAKE_INSTALL_PREFIX` variable. Must be an absolute path.
 
+.. option:: --project-file <project-file-name>
+
+ .. versionadded:: 3.32
+
+ Specify an alternate project file name.
+
+ This determines the top-level file processed by CMake when configuring a
+ project, and the file processed by :command:`add_subdirectory`.
+
+ By default, this is ``CMakeLists.txt``. If set to anything else,
+ ``CMakeLists.txt`` will be used as a fallback whenever the specified file
+ cannot be found within a project subdirectory.
+
+ .. note::
+
+  This feature is intended for temporary use by developers during an incremental
+  transition and not for publication of a final product. CMake will always emit
+  a warning when the project file is anything other than ``CMakeLists.txt``.
+
 .. option:: -Wno-dev
 
  Suppress developer warnings.

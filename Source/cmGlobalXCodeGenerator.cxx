@@ -1068,9 +1068,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::CreateXCodeSourceFile(
 void cmGlobalXCodeGenerator::AddXCodeProjBuildRule(
   cmGeneratorTarget* target, std::vector<cmSourceFile*>& sources) const
 {
-  std::string listfile =
-    cmStrCat(target->GetLocalGenerator()->GetCurrentSourceDirectory(),
-             "/CMakeLists.txt");
+  std::string listfile = this->GetCMakeInstance()->GetCMakeListFile(
+    target->GetLocalGenerator()->GetCurrentSourceDirectory());
   cmSourceFile* srcCMakeLists = target->Makefile->GetOrCreateSource(
     listfile, false, cmSourceFileLocationKind::Known);
   if (!cm::contains(sources, srcCMakeLists)) {
@@ -4400,9 +4399,8 @@ bool cmGlobalXCodeGenerator::CreateGroups(
 
       // Add CMakeLists.txt file for user convenience.
       {
-        std::string listfile =
-          cmStrCat(gtgt->GetLocalGenerator()->GetCurrentSourceDirectory(),
-                   "/CMakeLists.txt");
+        std::string listfile = this->GetCMakeInstance()->GetCMakeListFile(
+          gtgt->GetLocalGenerator()->GetCurrentSourceDirectory());
         cmSourceFile* sf = gtgt->Makefile->GetOrCreateSource(
           listfile, false, cmSourceFileLocationKind::Known);
         addSourceToGroup(sf->ResolveFullPath());

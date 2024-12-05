@@ -1,0 +1,3 @@
+\-\- Processing: CMakeLists.txt
+\-\- Processing: subdir-1/CMakeLists.txt
+\-\- Processing: subdir-2/CMakeLists.txt

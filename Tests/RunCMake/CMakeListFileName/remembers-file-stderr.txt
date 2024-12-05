@@ -1,0 +1,4 @@
+CMake Warning:
+  This project has been configured with a project file other than
+  CMakeLists.txt.  This feature is intended for temporary use during
+  development and not for publication of a final product.

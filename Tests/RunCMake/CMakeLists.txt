@@ -1258,6 +1258,8 @@ add_RunCMake_test(CMakePresetsWorkflow
 add_RunCMake_test(VerifyHeaderSets)
 add_RunCMake_test(set_tests_properties)
 
+add_RunCMake_test(CMakeListFileName)
+
 if(CMAKE_GENERATOR MATCHES "Make|Ninja")
   add_RunCMake_test(Codegen)
   add_RunCMake_test(TransformDepfile)

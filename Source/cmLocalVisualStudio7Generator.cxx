@@ -229,8 +229,8 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
     return nullptr;
   }
 
-  std::string makefileIn =
-    cmStrCat(this->GetCurrentSourceDirectory(), "/CMakeLists.txt");
+  std::string makefileIn = this->GetCMakeInstance()->GetCMakeListFile(
+    this->GetCurrentSourceDirectory());
   if (cmSourceFile* file = this->Makefile->GetSource(makefileIn)) {
     if (file->GetCustomCommand()) {
       return file;

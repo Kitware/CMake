@@ -664,6 +664,9 @@ public:
 
   bool GetRegenerateDuringBuild() const { return this->RegenerateDuringBuild; }
 
+  void SetCMakeListName(const std::string& name);
+  std::string GetCMakeListFile(const std::string& dir) const;
+
 #if !defined(CMAKE_BOOTSTRAP)
   cmMakefileProfilingData& GetProfilingOutput();
   bool IsProfilingEnabled() const;
@@ -788,6 +791,7 @@ private:
   bool DebugTryCompile = false;
   bool FreshCache = false;
   bool RegenerateDuringBuild = false;
+  std::string CMakeListName;
   std::unique_ptr<cmFileTimeCache> FileTimeCache;
   std::string GraphVizFile;
   InstalledFilesMap InstalledFiles;
@@ -857,7 +861,7 @@ public:
   void SetScriptModeExitCode(int code) { ScriptModeExitCode = code; }
   int GetScriptModeExitCode() const { return ScriptModeExitCode.value_or(-1); }
 
-  static cmDocumentationEntry CMAKE_STANDARD_OPTIONS_TABLE[18];
+  static cmDocumentationEntry CMAKE_STANDARD_OPTIONS_TABLE[19];
 };
 
 #define FOR_EACH_C90_FEATURE(F) F(c_function_prototypes)
