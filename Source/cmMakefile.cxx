@@ -29,7 +29,6 @@
 #include "cmsys/FStream.hxx"
 #include "cmsys/RegularExpression.hxx"
 
-#include "cmCommandArgumentParserHelper.h"
 #include "cmCustomCommand.h"
 #include "cmCustomCommandLines.h"
 #include "cmCustomCommandTypes.h"
@@ -108,8 +107,6 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
 
   this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
 
-  this->SuppressSideEffects = false;
-
   // Setup the default include complaint regular expression (match nothing).
   this->ComplainFileRegularExpression = "^$";
 
@@ -117,7 +114,6 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
 
   this->cmDefineRegex.compile("#([ \t]*)cmakedefine[ \t]+([A-Za-z_0-9]*)");
   this->cmDefine01Regex.compile("#([ \t]*)cmakedefine01[ \t]+([A-Za-z_0-9]*)");
-  this->cmAtVarRegex.compile("(@[A-Za-z_0-9/.+-]+@)");
   this->cmNamedCurly.compile("^[A-Za-z0-9/_.+-]+{");
 
   this->StateSnapshot =
@@ -2354,7 +2350,7 @@ cmValue cmMakefile::GetDefinition(const std::string& name) const
   }
 #ifndef CMAKE_BOOTSTRAP
   cmVariableWatch* vv = this->GetVariableWatch();
-  if (vv && !this->SuppressSideEffects) {
+  if (vv) {
     bool const watch_function_executed =
       vv->VariableAccessed(name,
                            def ? cmVariableWatch::VARIABLE_READ_ACCESS
@@ -2398,11 +2394,6 @@ const std::string& cmMakefile::ExpandVariablesInString(
   std::string& source, bool escapeQuotes, bool noEscapes, bool atOnly,
   const char* filename, long line, bool removeEmpty, bool replaceAt) const
 {
-  bool compareResults = false;
-  MessageType mtype = MessageType::LOG;
-  std::string errorstr;
-  std::string original;
-
   // Sanity check the @ONLY mode.
   if (atOnly && (!noEscapes || !removeEmpty)) {
     // This case should never be called.  At-only is for
@@ -2413,161 +2404,18 @@ const std::string& cmMakefile::ExpandVariablesInString(
     return source;
   }
 
-  // Variables used in the WARN case.
-  std::string newResult;
-  std::string newErrorstr;
-  MessageType newError = MessageType::LOG;
-
-  switch (this->GetPolicyStatus(cmPolicies::CMP0053)) {
-    case cmPolicies::WARN: {
-      // Save the original string for the warning.
-      original = source;
-      newResult = source;
-      compareResults = true;
-      // Suppress variable watches to avoid calling hooks twice. Suppress new
-      // dereferences since the OLD behavior is still what is actually used.
-      this->SuppressSideEffects = true;
-      newError = this->ExpandVariablesInStringNew(
-        newErrorstr, newResult, escapeQuotes, noEscapes, atOnly, filename,
-        line, replaceAt);
-      this->SuppressSideEffects = false;
-      CM_FALLTHROUGH;
-    }
-    case cmPolicies::OLD:
-      mtype = this->ExpandVariablesInStringOld(errorstr, source, escapeQuotes,
-                                               noEscapes, atOnly, filename,
-                                               line, removeEmpty, true);
-      break;
-    // Messaging here would be *very* verbose.
-    case cmPolicies::NEW:
-      mtype = this->ExpandVariablesInStringNew(errorstr, source, escapeQuotes,
-                                               noEscapes, atOnly, filename,
-                                               line, replaceAt);
-      break;
-  }
-
-  // If it's an error in either case, just report the error...
+  std::string errorstr;
+  MessageType mtype = this->ExpandVariablesInStringImpl(
+    errorstr, source, escapeQuotes, noEscapes, atOnly, filename, line,
+    replaceAt);
   if (mtype != MessageType::LOG) {
     if (mtype == MessageType::FATAL_ERROR) {
       cmSystemTools::SetFatalErrorOccurred();
     }
     this->IssueMessage(mtype, errorstr);
   }
-  // ...otherwise, see if there's a difference that needs to be warned about.
-  else if (compareResults && (newResult != source || newError != mtype)) {
-    auto msg =
-      cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0053), '\n');
-
-    std::string msg_input = original;
-    cmSystemTools::ReplaceString(msg_input, "\n", "\n  ");
-
-    std::string msg_old = source;
-    cmSystemTools::ReplaceString(msg_old, "\n", "\n  ");
-
-    msg += cmStrCat("For input:\n  '", msg_input, "'\n",
-                    "the old evaluation rules produce:\n  '", msg_old, "'\n");
-
-    if (newError == mtype) {
-      std::string msg_new = newResult;
-      cmSystemTools::ReplaceString(msg_new, "\n", "\n  ");
-      msg +=
-        cmStrCat("but the new evaluation rules produce:\n  '", msg_new, "'\n");
-    } else {
-      std::string msg_err = newErrorstr;
-      cmSystemTools::ReplaceString(msg_err, "\n", "\n  ");
-      msg += cmStrCat("but the new evaluation rules produce an error:\n  ",
-                      msg_err, '\n');
-    }
-
-    msg +=
-      "Using the old result for compatibility since the policy is not set.";
-
-    this->IssueMessage(MessageType::AUTHOR_WARNING, msg);
-  }
 
   return source;
-}
-
-MessageType cmMakefile::ExpandVariablesInStringOld(
-  std::string& errorstr, std::string& source, bool escapeQuotes,
-  bool noEscapes, bool atOnly, const char* filename, long line,
-  bool removeEmpty, bool replaceAt) const
-{
-  // Fast path strings without any special characters.
-  if (source.find_first_of("$@\\") == std::string::npos) {
-    return MessageType::LOG;
-  }
-
-  // Special-case the @ONLY mode.
-  if (atOnly) {
-    // Store an original copy of the input.
-    std::string input = source;
-
-    // Start with empty output.
-    source.clear();
-
-    // Look for one @VAR@ at a time.
-    const char* in = input.c_str();
-    while (this->cmAtVarRegex.find(in)) {
-      // Get the range of the string to replace.
-      const char* first = in + this->cmAtVarRegex.start();
-      const char* last = in + this->cmAtVarRegex.end();
-
-      // Store the unchanged part of the string now.
-      source.append(in, first - in);
-
-      // Lookup the definition of VAR.
-      std::string var(first + 1, last - first - 2);
-      if (cmValue val = this->GetDefinition(var)) {
-        // Store the value in the output escaping as requested.
-        if (escapeQuotes) {
-          source.append(cmEscapeQuotes(*val));
-        } else {
-          source.append(*val);
-        }
-      }
-
-      // Continue looking for @VAR@ further along the string.
-      in = last;
-    }
-
-    // Append the rest of the unchanged part of the string.
-    source.append(in);
-
-    return MessageType::LOG;
-  }
-
-  // This method replaces ${VAR} and @VAR@ where VAR is looked up
-  // with GetDefinition(), if not found in the map, nothing is expanded.
-  // It also supports the $ENV{VAR} syntax where VAR is looked up in
-  // the current environment variables.
-
-  cmCommandArgumentParserHelper parser;
-  parser.SetMakefile(this);
-  parser.SetLineFile(line, filename);
-  parser.SetEscapeQuotes(escapeQuotes);
-  parser.SetNoEscapeMode(noEscapes);
-  parser.SetReplaceAtSyntax(replaceAt);
-  parser.SetRemoveEmpty(removeEmpty);
-  int res = parser.ParseString(source, 0);
-  const char* emsg = parser.GetError();
-  MessageType mtype = MessageType::LOG;
-  if (res && !emsg[0]) {
-    source = parser.GetResult();
-  } else {
-    // Construct the main error message.
-    std::string error = "Syntax error in cmake code ";
-    if (filename && line > 0) {
-      // This filename and line number may be more specific than the
-      // command context because one command invocation can have
-      // arguments on multiple lines.
-      error += cmStrCat("at\n  ", filename, ':', line, '\n');
-    }
-    error += cmStrCat("when parsing string\n  ", source, '\n', emsg);
-    mtype = MessageType::FATAL_ERROR;
-    errorstr = std::move(error);
-  }
-  return mtype;
 }
 
 enum t_domain
@@ -2680,7 +2528,7 @@ cm::optional<std::string> cmMakefile::DeferGetCall(std::string const& id) const
   return call;
 }
 
-MessageType cmMakefile::ExpandVariablesInStringNew(
+MessageType cmMakefile::ExpandVariablesInStringImpl(
   std::string& errorstr, std::string& source, bool escapeQuotes,
   bool noEscapes, bool atOnly, const char* filename, long line,
   bool replaceAt) const
@@ -2743,7 +2591,7 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
             } else {
               varresult = *value;
             }
-          } else if (!this->SuppressSideEffects) {
+          } else {
             this->MaybeWarnUninitialized(lookup, filename);
           }
           result.replace(var.loc, result.size() - var.loc, varresult);
@@ -2859,7 +2707,7 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
               cmValue def = this->GetDefinition(variable);
               if (def) {
                 varresult = *def;
-              } else if (!this->SuppressSideEffects) {
+              } else {
                 this->MaybeWarnUninitialized(variable, filename);
               }
             }

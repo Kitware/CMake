@@ -158,7 +158,7 @@ class cmMakefile;
          3, 1, 0, NEW)                                                        \
   SELECT(POLICY, CMP0053,                                                     \
          "Simplify variable reference and escape sequence evaluation.", 3, 1, \
-         0, WARN)                                                             \
+         0, NEW)                                                              \
   SELECT(                                                                     \
     POLICY, CMP0054,                                                          \
     "Only interpret if() arguments as variables or keywords when unquoted.",  \

@@ -1197,7 +1197,6 @@ private:
 
   mutable cmsys::RegularExpression cmDefineRegex;
   mutable cmsys::RegularExpression cmDefine01Regex;
-  mutable cmsys::RegularExpression cmAtVarRegex;
   mutable cmsys::RegularExpression cmNamedCurly;
 
   std::vector<cmMakefile*> UnConfiguredDirectories;
@@ -1239,19 +1238,11 @@ private:
   class BuildsystemFileScope;
   friend class BuildsystemFileScope;
 
-  // CMP0053 == old
-  MessageType ExpandVariablesInStringOld(std::string& errorstr,
-                                         std::string& source,
-                                         bool escapeQuotes, bool noEscapes,
-                                         bool atOnly, const char* filename,
-                                         long line, bool removeEmpty,
-                                         bool replaceAt) const;
-  // CMP0053 == new
-  MessageType ExpandVariablesInStringNew(std::string& errorstr,
-                                         std::string& source,
-                                         bool escapeQuotes, bool noEscapes,
-                                         bool atOnly, const char* filename,
-                                         long line, bool replaceAt) const;
+  MessageType ExpandVariablesInStringImpl(std::string& errorstr,
+                                          std::string& source,
+                                          bool escapeQuotes, bool noEscapes,
+                                          bool atOnly, const char* filename,
+                                          long line, bool replaceAt) const;
 
   bool ValidateCustomCommand(const cmCustomCommandLines& commandLines) const;
 
@@ -1270,6 +1261,5 @@ private:
   std::set<std::string> WarnedCMP0074;
   std::set<std::string> WarnedCMP0144;
   bool IsSourceFileTryCompile;
-  mutable bool SuppressSideEffects;
   ImportedTargetScope CurrentImportedTargetScope = ImportedTargetScope::Local;
 };

@@ -1,12 +1,4 @@
 ^CMake Error at NameWithEscapedSpaces.cmake:1 \(message\):
-  Syntax error in cmake code at
-
-    .*/Tests/RunCMake/Syntax/NameWithEscapedSpaces.cmake:1
-
-  when parsing string
-
-    \${var\\ with\\ escaped\\ space}
-
-  syntax error, unexpected cal_SYMBOL, expecting } \(6\)
+  message called with incorrect number of arguments
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)$
+  CMakeLists.txt:3 \(include\)

@@ -7,7 +7,6 @@
 # CMAKE_<lang>_COMPILER_LINKER_VERSION
 
 cmake_policy(PUSH)
-cmake_policy(SET CMP0053 NEW)
 cmake_policy(SET CMP0054 NEW)
 
 function(cmake_determine_linker_id lang linker)

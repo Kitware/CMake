@@ -2,7 +2,6 @@
 # file Copyright.txt or https://cmake.org/licensing for details.
 
 cmake_policy(PUSH)
-cmake_policy(SET CMP0053 NEW)
 cmake_policy(SET CMP0054 NEW)
 
 # Function parse implicit linker options.
