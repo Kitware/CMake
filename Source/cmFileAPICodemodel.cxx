@@ -508,6 +508,8 @@ class Target
   Json::Value DumpLauncher(const char* name, const char* type);
   Json::Value DumpLaunchers();
 
+  Json::Value DumpDebugger();
+
 public:
   Target(cmGeneratorTarget* gt, std::string const& config);
   Json::Value Dump();
@@ -1272,6 +1274,11 @@ Json::Value Target::Dump()
   }
 
   target["backtraceGraph"] = this->Backtraces.Dump();
+
+  Json::Value debugger = this->DumpDebugger();
+  if (!debugger.isNull()) {
+    target["debugger"] = std::move(debugger);
+  }
 
   return target;
 }
@@ -2132,6 +2139,19 @@ Json::Value Target::DumpLaunchers()
   }
   return launchers;
 }
+}
+
+Json::Value Target::DumpDebugger()
+{
+  Json::Value debuggerInformation;
+  if (cmValue debuggerWorkingDirectory =
+        this->GT->GetGlobalGenerator()->GetDebuggerWorkingDirectory(
+          this->GT)) {
+    debuggerInformation = Json::objectValue;
+    debuggerInformation["workingDirectory"] = *debuggerWorkingDirectory;
+  }
+
+  return debuggerInformation;
 }
 
 Json::Value cmFileAPICodemodelDump(cmFileAPI& fileAPI, unsigned long version)

@@ -5,7 +5,7 @@
           [
               {
                   "file": "^cxx/CMakeLists\\.txt$",
-                  "line": 29,
+                  "line": 31,
                   "command": "target_compile_features",
                   "hasParent": true
               },
@@ -19,7 +19,7 @@
           [
               {
                   "file": "^cxx/CMakeLists\\.txt$",
-                  "line": 30,
+                  "line": 32,
                   "command": "target_compile_features",
                   "hasParent": true
               },

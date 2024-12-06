@@ -12,7 +12,7 @@ def read_codemodel_json_data(filename):
 def check_objects(o, g):
     assert is_list(o)
     assert len(o) == 1
-    check_index_object(o[0], "codemodel", 2, 7, check_object_codemodel(g))
+    check_index_object(o[0], "codemodel", 2, 8, check_object_codemodel(g))
 
 def check_backtrace(t, b, backtrace):
     btg = t["backtraceGraph"]
@@ -428,6 +428,14 @@ def check_target(c):
                                 check_exception=lambda a, e: "launchers: %s" % a,
                                 missing_exception=lambda e: "launchers: %s" % e,
                                 extra_exception=lambda a: "launchers: %s" % a)
+
+        if "debugger" in expected:
+            if expected["debugger"] is not None:
+                expected_keys.append("debugger")
+                assert is_dict(obj["debugger"])
+                debugger_keys = ["workingDirectory"]
+                assert sorted(obj["debugger"].keys()) == sorted(debugger_keys)
+                assert matches(obj["debugger"]["workingDirectory"], expected["debugger"]["workingDirectory"])
 
         if expected["link"] is not None:
             expected_keys.append("link")
@@ -956,6 +964,8 @@ def gen_check_targets(c, g, inSource):
                 for d in e["dependencies"]:
                     if matches(d["id"], "^\\^ZERO_CHECK::@"):
                         d["id"] = "^ZERO_CHECK::@6890427a1f51a3e7e1df$"
+            if e["name"] == "cxx_exe":
+                e["debugger"]["workingDirectory"] = "^/test/debugger/workingDirectoryVS$"
 
     elif g["name"] == "Xcode":
         if ';' in os.environ.get("CMAKE_OSX_ARCHITECTURES", ""):
