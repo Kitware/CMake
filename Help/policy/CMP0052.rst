@@ -1,6 +1,9 @@
 CMP0052
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 .. versionadded:: 3.1
 
 Reject source and build dirs in installed
@@ -22,7 +25,5 @@ directory.  The ``NEW`` behavior for this
 policy is to issue an error if such a directory is used.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.1
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

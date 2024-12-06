@@ -19,7 +19,6 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -456,43 +455,11 @@ bool cmExportInstallFileGenerator::CheckInterfaceDirs(
     bool inSource = isSubDirectory(li, topSourceDir);
     if (isSubDirectory(li, installDir)) {
       // The include directory is inside the install tree.  If the
-      // install tree is not inside the source tree or build tree then
+      // install tree is inside the source tree or build tree then do not
       // fall through to the checks below that the include directory is not
       // also inside the source tree or build tree.
-      bool shouldContinue =
-        (!inBinary || isSubDirectory(installDir, topBinaryDir)) &&
-        (!inSource || isSubDirectory(installDir, topSourceDir));
-
-      if (prop == "INTERFACE_INCLUDE_DIRECTORIES") {
-        if (!shouldContinue) {
-          switch (target->GetPolicyStatusCMP0052()) {
-            case cmPolicies::WARN: {
-              std::ostringstream s;
-              s << cmPolicies::GetPolicyWarning(cmPolicies::CMP0052) << "\n";
-              s << "Directory:\n    \"" << li
-                << "\"\nin "
-                   "INTERFACE_INCLUDE_DIRECTORIES of target \""
-                << target->GetName()
-                << "\" is a subdirectory of the install "
-                   "directory:\n    \""
-                << installDir
-                << "\"\nhowever it is also "
-                   "a subdirectory of the "
-                << (inBinary ? "build" : "source") << " tree:\n    \""
-                << (inBinary ? topBinaryDir : topSourceDir) << "\"\n";
-              target->GetLocalGenerator()->IssueMessage(
-                MessageType::AUTHOR_WARNING, s.str());
-              CM_FALLTHROUGH;
-            }
-            case cmPolicies::OLD:
-              shouldContinue = true;
-              break;
-            case cmPolicies::NEW:
-              break;
-          }
-        }
-      }
-      if (shouldContinue) {
+      if ((!inBinary || isSubDirectory(installDir, topBinaryDir)) &&
+          (!inSource || isSubDirectory(installDir, topSourceDir))) {
         continue;
       }
     }

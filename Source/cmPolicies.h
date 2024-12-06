@@ -155,7 +155,7 @@ class cmMakefile;
   SELECT(POLICY, CMP0052,                                                     \
          "Reject source and build dirs in installed "                         \
          "INTERFACE_INCLUDE_DIRECTORIES.",                                    \
-         3, 1, 0, WARN)                                                       \
+         3, 1, 0, NEW)                                                        \
   SELECT(POLICY, CMP0053,                                                     \
          "Simplify variable reference and escape sequence evaluation.", 3, 1, \
          0, WARN)                                                             \
