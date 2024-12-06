@@ -20,6 +20,40 @@ format only a subset of files, such as those that are locally modified.
 .. _`.clang-format`: ../../.clang-format
 .. _`Utilities/Scripts/clang-format.bash`: ../../Utilities/Scripts/clang-format.bash
 
+C++ Code Conventions
+====================
+
+We loosely follow a few coding conventions:
+
+* Name class members using ``CamelCase``.
+
+* Reference class members using ``this->Member``.
+
+* Use east ``const`` style, e.g., ``int const`` instead of ``const int``.
+  Exceptions:
+
+  * C strings: ``const char*``
+  * Global constants: ``static const ...``
+
+* Declare variables using a locally-specified type:
+
+  .. code-block:: c++
+
+    T x = f();
+
+  Use ``auto`` only if the real type explicitly appears in the initializer:
+
+  .. code-block:: c++
+
+    auto y = cm::make_unique<T>();
+    auto z = []() -> T {...}();
+
+  Exceptions:
+
+  * Iterators: ``auto i = myMap.find(myKey);``
+
+  * Lambdas: ``auto f = []() {...};``
+
 C++ Subset Permitted
 ====================
 
