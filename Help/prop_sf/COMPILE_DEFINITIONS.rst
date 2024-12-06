@@ -28,5 +28,5 @@ does not support per-config per-source settings, so expressions
 that depend on the build configuration are not allowed with that
 generator.
 
-Generator expressions should be preferred instead of setting the alternative per-configuration
-property.
+Prefer using generator expressions in :prop_sf:`!COMPILE_DEFINITIONS` over the
+deprecated :prop_sf:`COMPILE_DEFINITIONS_<CONFIG>` property.
