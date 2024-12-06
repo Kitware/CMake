@@ -55,8 +55,7 @@ const std::string& cmTargetPropertyComputer::ImportedLocation<cmTarget>(
 }
 
 template <>
-cmValue cmTargetPropertyComputer::GetSources<cmTarget>(cmTarget const* tgt,
-                                                       cmMakefile const& mf)
+cmValue cmTargetPropertyComputer::GetSources<cmTarget>(cmTarget const* tgt)
 {
   cmBTStringRange entries = tgt->GetSourceEntries();
   if (entries.empty()) {
@@ -68,48 +67,9 @@ cmValue cmTargetPropertyComputer::GetSources<cmTarget>(cmTarget const* tgt,
   for (auto const& entry : entries) {
     cmList files{ entry.Value };
     for (std::string const& file : files) {
-      if (cmHasLiteralPrefix(file, "$<TARGET_OBJECTS:") &&
-          file.back() == '>') {
-        std::string objLibName = file.substr(17, file.size() - 18);
-
-        if (cmGeneratorExpression::Find(objLibName) != std::string::npos) {
-          ss << sep;
-          sep = ";";
-          ss << file;
-          continue;
-        }
-
-        bool addContent = false;
-        bool noMessage = true;
-        std::ostringstream e;
-        MessageType messageType = MessageType::AUTHOR_WARNING;
-        switch (mf.GetPolicyStatus(cmPolicies::CMP0051)) {
-          case cmPolicies::WARN:
-            e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0051) << "\n";
-            noMessage = false;
-            CM_FALLTHROUGH;
-          case cmPolicies::OLD:
-            break;
-          case cmPolicies::NEW:
-            addContent = true;
-            break;
-        }
-        if (!noMessage) {
-          e << "Target \"" << tgt->GetName()
-            << "\" contains $<TARGET_OBJECTS> generator expression in its "
-               "sources list.  This content was not previously part of the "
-               "SOURCES property when that property was read at configure "
-               "time.  Code reading that property needs to be adapted to "
-               "ignore the generator expression using the string(GENEX_STRIP) "
-               "command.";
-          mf.IssueMessage(messageType, e.str());
-        }
-        if (addContent) {
-          ss << sep;
-          sep = ";";
-          ss << file;
-        }
-      } else if (cmGeneratorExpression::Find(file) == std::string::npos) {
+      if ((cmHasLiteralPrefix(file, "$<TARGET_OBJECTS:") &&
+           file.back() == '>') ||
+          cmGeneratorExpression::Find(file) == std::string::npos) {
         ss << sep;
         sep = ";";
         ss << file;

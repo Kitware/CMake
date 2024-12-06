@@ -151,7 +151,7 @@ class cmMakefile;
   SELECT(POLICY, CMP0050, "Disallow add_custom_command SOURCE signatures.",   \
          3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0051, "List TARGET_OBJECTS in SOURCES target property.",  \
-         3, 1, 0, WARN)                                                       \
+         3, 1, 0, NEW)                                                        \
   SELECT(POLICY, CMP0052,                                                     \
          "Reject source and build dirs in installed "                         \
          "INTERFACE_INCLUDE_DIRECTORIES.",                                    \
