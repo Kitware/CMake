@@ -5,6 +5,7 @@ import re
 
 if sys.version_info[0] >= 3:
     unicode = str
+    long = int
 
 def is_bool(x, val=None):
     return isinstance(x, bool) and (val is None or x == val)

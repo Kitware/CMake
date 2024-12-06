@@ -24,7 +24,7 @@ def check_backtrace(t, b, backtrace):
 
         if expected["line"] is not None:
             expected_keys.append("line")
-            assert is_int(node["line"], expected["line"])
+            assert is_int(node["line"], expected["line"]), repr(node["line"]) + " != " + repr(expected["line"])
 
         if expected["command"] is not None:
             expected_keys.append("command")
