@@ -116,6 +116,7 @@ void PrintCallStack(std::ostream& out, cmListFileBacktrace bt,
   if (bt.Empty()) {
     return;
   }
+  std::string lastFilePath = bt.Top().FilePath;
   bt = bt.Pop();
   if (bt.Empty()) {
     return;
@@ -125,15 +126,19 @@ void PrintCallStack(std::ostream& out, cmListFileBacktrace bt,
   for (; !bt.Empty(); bt = bt.Pop()) {
     cmListFileContext lfc = bt.Top();
     if (lfc.Name.empty() &&
-        lfc.Line != cmListFileContext::DeferPlaceholderLine) {
-      // Skip this whole-file scope.  When we get here we already will
-      // have printed a more-specific context within the file.
+        lfc.Line != cmListFileContext::DeferPlaceholderLine &&
+        lfc.FilePath == lastFilePath) {
+      // An entry with no function name is frequently preceded (in the stack)
+      // by a more specific entry.  When this happens (as verified by the
+      // preceding entry referencing the same file path), skip the less
+      // specific entry, as we have already printed the more specific one.
       continue;
     }
     if (first) {
       first = false;
       out << "Call Stack (most recent call first):\n";
     }
+    lastFilePath = lfc.FilePath;
     if (topSource) {
       lfc.FilePath = cmSystemTools::RelativeIfUnder(*topSource, lfc.FilePath);
     }
