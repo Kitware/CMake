@@ -636,7 +636,36 @@ endfunction()
   .. code-block:: cmake
 
      option(WITH_FOO "Help for foo" ON)
-     add_feature_info(Foo WITH_FOO "The Foo feature provides very cool stuff.")
+     add_feature_info(Foo WITH_FOO "this feature provides very cool stuff")
+
+  Example for setting feature info based on a list of conditions:
+
+  .. code-block:: cmake
+
+    option(WITH_FOO "Help for foo" ON)
+    option(WITH_BAR "Help for bar" OFF)
+    add_feature_info(
+      FooBar
+      "WITH_FOO;NOT WITH_BAR"
+      "this feature is enabled when WITH_FOO is ON and WITH_BAR turned OFF"
+    )
+
+  Example for setting feature info depending on a full condition syntax:
+
+  Unlike semicolon-separated list of conditions, this enables using entire
+  condition syntax as being the ``if`` clause argument, such as grouping
+  conditions with parens and similar.
+
+  .. code-block:: cmake
+
+    option(WITH_FOO "Help for foo" ON)
+    option(WITH_BAR "Help for bar" ON)
+    option(WITH_BAZ "Help for baz" OFF)
+    add_feature_info(
+      FooBarBaz
+      "WITH_FOO AND (WITH_BAR OR WITH_BAZ)"
+      "this feature is enabled when the entire condition is true"
+    )
 #]=======================================================================]
 function(ADD_FEATURE_INFO _name _depends _desc)
   cmake_policy(GET CMP0183 _CDO_CMP0183
