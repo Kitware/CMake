@@ -3354,6 +3354,14 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
                                             langForClCompile, configName);
   }
+  bool const isCXXwithC = [this, &configName]() -> bool {
+    if (this->LangForClCompile != "CXX"_s) {
+      return false;
+    }
+    std::set<std::string> languages;
+    this->GeneratorTarget->GetLanguages(languages, configName);
+    return languages.find("C") != languages.end();
+  }();
 
   // Put the IPO enabled configurations into a set.
   if (this->GeneratorTarget->IsIPOEnabled(linkLanguage, configName)) {
@@ -3504,21 +3512,17 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   }
 
   // Add C-specific flags expressible in a ClCompile meant for C++.
-  if (langForClCompile == "CXX"_s) {
-    std::set<std::string> languages;
-    this->GeneratorTarget->GetLanguages(languages, configName);
-    if (languages.count("C")) {
-      std::string flagsC;
-      this->LocalGenerator->AddLanguageFlags(
-        flagsC, this->GeneratorTarget, cmBuildStep::Compile, "C", configName);
-      this->LocalGenerator->AddCompileOptions(flagsC, this->GeneratorTarget,
-                                              "C", configName);
-      Options optC(this->LocalGenerator, Options::Compiler,
-                   gg->GetClFlagTable());
-      optC.Parse(flagsC);
-      if (const char* stdC = optC.GetFlag("LanguageStandard_C")) {
-        clOptions.AddFlag("LanguageStandard_C", stdC);
-      }
+  if (isCXXwithC) {
+    std::string flagsC;
+    this->LocalGenerator->AddLanguageFlags(
+      flagsC, this->GeneratorTarget, cmBuildStep::Compile, "C", configName);
+    this->LocalGenerator->AddCompileOptions(flagsC, this->GeneratorTarget, "C",
+                                            configName);
+    Options optC(this->LocalGenerator, Options::Compiler,
+                 gg->GetClFlagTable());
+    optC.Parse(flagsC);
+    if (const char* stdC = optC.GetFlag("LanguageStandard_C")) {
+      clOptions.AddFlag("LanguageStandard_C", stdC);
     }
   }
 
