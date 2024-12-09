@@ -400,20 +400,59 @@ void cmMakefile::PrintCommandTrace(cmListFileFunction const& lff,
   }
 }
 
+cmMakefile::CallRAII::CallRAII(cmMakefile* mf, std::string const& file,
+                               cmExecutionStatus& status)
+  : CallRAII(mf, cmListFileContext::FromListFilePath(file), status)
+{
+}
+
+cmMakefile::CallRAII::CallRAII(cmMakefile* mf, const cmListFileContext& lfc,
+                               cmExecutionStatus& status)
+  : Makefile{ mf }
+{
+  this->Makefile->Backtrace = this->Makefile->Backtrace.Push(lfc);
+  ++this->Makefile->RecursionDepth;
+  this->Makefile->ExecutionStatusStack.push_back(&status);
+}
+
+cmMakefile::CallRAII::~CallRAII()
+{
+  if (this->Makefile) {
+    this->Detach();
+  }
+}
+
+cmMakefile* cmMakefile::CallRAII::Detach()
+{
+  assert(this->Makefile);
+
+  this->Makefile->ExecutionStatusStack.pop_back();
+  --this->Makefile->RecursionDepth;
+  this->Makefile->Backtrace = this->Makefile->Backtrace.Pop();
+
+  auto* const mf = this->Makefile;
+  this->Makefile = nullptr;
+  return mf;
+}
+
 // Helper class to make sure the call stack is valid.
-class cmMakefileCall
+class cmMakefile::CallScope : public CallRAII
 {
 public:
-  cmMakefileCall(cmMakefile* mf, cmListFileFunction const& lff,
-                 cm::optional<std::string> deferId, cmExecutionStatus& status)
-    : Makefile(mf)
+  CallScope(cmMakefile* mf, cmListFileFunction const& lff,
+            cm::optional<std::string> deferId, cmExecutionStatus& status)
+    : CallScope{ mf, lff,
+                 cmListFileContext::FromListFileFunction(
+                   lff, mf->StateSnapshot.GetExecutionListFile(),
+                   std::move(deferId)),
+                 status }
   {
-    cmListFileContext const& lfc = cmListFileContext::FromListFileFunction(
-      lff, this->Makefile->StateSnapshot.GetExecutionListFile(),
-      std::move(deferId));
-    this->Makefile->Backtrace = this->Makefile->Backtrace.Push(lfc);
-    ++this->Makefile->RecursionDepth;
-    this->Makefile->ExecutionStatusStack.push_back(&status);
+  }
+
+  CallScope(cmMakefile* mf, cmListFileFunction const& lff,
+            cmListFileContext const& lfc, cmExecutionStatus& status)
+    : CallRAII{ mf, lfc, status }
+  {
 #if !defined(CMAKE_BOOTSTRAP)
     this->ProfilingDataRAII =
       this->Makefile->GetCMakeInstance()->CreateProfilingEntry(
@@ -440,28 +479,25 @@ public:
 #endif
   }
 
-  ~cmMakefileCall()
+  ~CallScope()
   {
 #if !defined(CMAKE_BOOTSTRAP)
     this->ProfilingDataRAII.reset();
 #endif
-    this->Makefile->ExecutionStatusStack.pop_back();
-    --this->Makefile->RecursionDepth;
-    this->Makefile->Backtrace = this->Makefile->Backtrace.Pop();
+    auto* const mf = this->Detach();
 #ifdef CMake_ENABLE_DEBUGGER
-    if (this->Makefile->GetCMakeInstance()->GetDebugAdapter()) {
-      this->Makefile->GetCMakeInstance()
-        ->GetDebugAdapter()
-        ->OnEndFunctionCall();
+    if (mf->GetCMakeInstance()->GetDebugAdapter()) {
+      mf->GetCMakeInstance()->GetDebugAdapter()->OnEndFunctionCall();
     }
+#else
+    static_cast<void>(mf);
 #endif
   }
 
-  cmMakefileCall(const cmMakefileCall&) = delete;
-  cmMakefileCall& operator=(const cmMakefileCall&) = delete;
+  CallScope(const CallScope&) = delete;
+  CallScope& operator=(const CallScope&) = delete;
 
 private:
-  cmMakefile* Makefile;
 #if !defined(CMAKE_BOOTSTRAP)
   cm::optional<cmMakefileProfilingData::RAII> ProfilingDataRAII;
 #endif
@@ -485,7 +521,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   }
 
   // Place this call on the call stack.
-  cmMakefileCall stack_manager(this, lff, std::move(deferId), status);
+  CallScope stack_manager(this, lff, std::move(deferId), status);
   static_cast<void>(stack_manager);
 
   // Check for maximum recursion depth.

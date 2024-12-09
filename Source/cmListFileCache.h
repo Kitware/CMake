@@ -138,10 +138,10 @@ public:
 
   static cmListFileContext FromListFilePath(std::string const& filePath)
   {
-    // We are entering a file-level scope but have not yet reached
-    // any specific line or command invocation within it.  This context
-    // is useful to print when it is at the top but otherwise can be
-    // skipped during call stack printing.
+    // We are entering a file-level scope but have not yet reached any specific
+    // line or command invocation within it.  This context is useful to print
+    // when it is at the top, but otherwise can be skipped during call stack
+    // printing if preceded by a more specific entry.
     cmListFileContext lfc;
     lfc.FilePath = filePath;
     return lfc;
