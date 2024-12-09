@@ -9,7 +9,6 @@
 #include <map>
 #include <set>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <cm/string_view>
@@ -83,6 +82,11 @@ private:
     static PathLabel SystemRegistry;
   };
 
+  // Try to find a package, assuming most state has already been set up. This
+  // is used for recursive dependency solving, particularly when importing
+  // packages via CPS. Bypasses providers if argsForProvider is empty.
+  bool FindPackage(std::vector<std::string> const& argsForProvider);
+
   bool FindPackageUsingModuleMode();
   bool FindPackageUsingConfigMode();
 
@@ -98,9 +102,7 @@ private:
     const std::string& prefix, const std::string& version, unsigned int count,
     unsigned int major, unsigned int minor, unsigned int patch,
     unsigned int tweak);
-  void SetModuleVariables(
-    const std::string& components,
-    const std::vector<std::pair<std::string, const char*>>& componentVarDefs);
+  void SetModuleVariables();
   bool FindModule(bool& found);
   void AddFindDefinition(const std::string& var, cm::string_view value);
   void RestoreFindDefinitions();
@@ -216,6 +218,9 @@ private:
   std::vector<std::string> Configs;
   std::set<std::string> IgnoredPaths;
   std::set<std::string> IgnoredPrefixPaths;
+  std::string Components;
+  std::set<std::string> RequiredComponents;
+  std::set<std::string> OptionalComponents;
   std::string DebugBuffer;
 
   class FlushDebugBufferOnExit;
