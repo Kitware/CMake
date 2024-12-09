@@ -45,6 +45,18 @@ foreach(dependency ${externalFramework} ${externalDylib})
 endforeach()
 unset(RunCMake_TEST_OPTIONS)
 
+block()
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/EmbedFrameworksFlagsOffAndOn-build)
+  run_cmake(EmbedFrameworksFlagsOffAndOn)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  run_cmake_command(EmbedFrameworksFlagsOffAndOn-build
+    ${CMAKE_COMMAND} --build .
+                     --config Debug
+                     --target app1
+                     --target app2
+  )
+endblock()
+
 function(TestAppExtension platform)
   set(testName EmbedAppExtensions-${platform})
   if(NOT platform STREQUAL "macOS")

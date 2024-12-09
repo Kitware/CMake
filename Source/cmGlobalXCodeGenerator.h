@@ -372,7 +372,6 @@ private:
   std::map<std::string, cmXCodeObject*> TargetGroup;
   std::map<std::string, cmXCodeObject*> FileRefs;
   std::map<std::string, cmXCodeObject*> ExternalLibRefs;
-  std::map<std::string, cmXCodeObject*> EmbeddedLibRefs;
   std::map<cmGeneratorTarget const*, cmXCodeObject*> XCodeObjectMap;
   std::map<cmXCodeObject*, cmXCodeObject*> FileRefToBuildFileMap;
   std::map<cmXCodeObject*, cmXCodeObject*> FileRefToEmbedBuildFileMap;
