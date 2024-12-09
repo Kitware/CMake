@@ -65,9 +65,6 @@ may be set prior to including the module to adjust behavior:
   Support for installing Intel compiler runtimes.
 #]=======================================================================]
 
-cmake_policy(PUSH)
-cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
-
 set(_IRSL_HAVE_Intel FALSE)
 set(_IRSL_HAVE_MSVC FALSE)
 foreach(LANG IN ITEMS C CXX Fortran)
@@ -806,5 +803,3 @@ if(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
       )
   endif()
 endif()
-
-cmake_policy(POP)

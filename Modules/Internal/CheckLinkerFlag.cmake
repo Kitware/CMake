@@ -6,9 +6,6 @@ include(Internal/CheckFlagCommonConfig)
 include(Internal/CheckSourceCompiles)
 include(CMakeCheckCompilerFlagCommonPatterns)
 
-block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
-
 function(CMAKE_CHECK_LINKER_FLAG _lang _flag _var)
   # link step supports less languages than the compiler
   # so do a first check about the requested language
@@ -48,5 +45,3 @@ function(CMAKE_CHECK_LINKER_FLAG _lang _flag _var)
 
   cmake_check_flag_common_finish()
 endfunction()
-
-endblock()

@@ -4,7 +4,6 @@
 include_guard(GLOBAL)
 
 block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
 cmake_policy(SET CMP0057 NEW) # if() supports IN_LIST
 
 function(CMAKE_CHECK_SOURCE_COMPILES _lang _source _var)

@@ -8,10 +8,6 @@
 
 include_guard(GLOBAL)
 
-block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
-cmake_policy(SET CMP0057 NEW) # if() supports IN_LIST
-
 macro(CMAKE_CHECK_FLAG_COMMON_INIT _FUNC _LANG _SRC _PATTERNS)
   if("${_LANG}" STREQUAL "C")
     set(${_SRC} "int main(void) { return 0; }")
@@ -75,5 +71,3 @@ macro(CMAKE_CHECK_FLAG_COMMON_FINISH)
     set(ENV{${v}} ${_CMAKE_CHECK_FLAG_COMMON_CONFIG_locale_vars_saved_${v}})
   endforeach()
 endmacro()
-
-endblock()

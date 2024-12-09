@@ -150,7 +150,6 @@ get_filename_component(__check_type_size_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
 include_guard(GLOBAL)
 
 block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 #-----------------------------------------------------------------------------

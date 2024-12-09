@@ -5,9 +5,6 @@
 # This module is shared by multiple languages; use include blocker.
 include_guard()
 
-block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW)
-
 macro(__sunos_linker_solaris lang)
   set(CMAKE_${lang}_PLATFORM_LINKER_ID Solaris)
   # Features for LINK_LIBRARY generator expression
@@ -24,5 +21,3 @@ macro(__sunos_linker_solaris lang)
   set(CMAKE_${lang}_LINK_LIBRARY_USING_WHOLE_ARCHIVE_SUPPORTED TRUE)
   set(CMAKE_${lang}_LINK_LIBRARY_WHOLE_ARCHIVE_ATTRIBUTES LIBRARY_TYPE=STATIC DEDUPLICATION=YES OVERRIDE=DEFAULT)
 endmacro()
-
-endblock()

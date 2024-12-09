@@ -3,13 +3,8 @@
 
 include(Platform/Linker/BSD-Linker-Initialize)
 
-block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW)
-
 if(_CMAKE_SYSTEM_LINKER_TYPE STREQUAL "GNU")
   include(Platform/Linker/FreeBSD-GNU-C)
 else()
   include(Platform/Linker/FreeBSD-LLD-C)
 endif()
-
-endblock()

@@ -162,7 +162,7 @@ class cmMakefile;
   SELECT(                                                                     \
     POLICY, CMP0054,                                                          \
     "Only interpret if() arguments as variables or keywords when unquoted.",  \
-    3, 1, 0, WARN)                                                            \
+    3, 1, 0, NEW)                                                             \
   SELECT(POLICY, CMP0055, "Strict checking for break() command.", 3, 2, 0,    \
          WARN)                                                                \
   SELECT(POLICY, CMP0056,                                                     \

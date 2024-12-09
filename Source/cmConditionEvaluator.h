@@ -31,7 +31,6 @@ public:
 private:
   class cmArgumentList;
 
-  // Filter the given variable definition based on policy CMP0054.
   cmValue GetDefinitionIfUnquoted(
     const cmExpandedCommandArgument& argument) const;
 
@@ -67,7 +66,6 @@ private:
 
   cmMakefile& Makefile;
   cmListFileBacktrace Backtrace;
-  cmPolicies::PolicyStatus Policy54Status;
   cmPolicies::PolicyStatus Policy57Status;
   cmPolicies::PolicyStatus Policy64Status;
   cmPolicies::PolicyStatus Policy139Status;

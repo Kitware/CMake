@@ -25,7 +25,6 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
-#include "cmake.h"
 
 namespace {
 auto const keyAND = "AND"_s;
@@ -219,7 +218,6 @@ cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
                                            cmListFileBacktrace bt)
   : Makefile(makefile)
   , Backtrace(std::move(bt))
-  , Policy54Status(makefile.GetPolicyStatus(cmPolicies::CMP0054))
   , Policy57Status(makefile.GetPolicyStatus(cmPolicies::CMP0057))
   , Policy64Status(makefile.GetPolicyStatus(cmPolicies::CMP0064))
   , Policy139Status(makefile.GetPolicyStatus(cmPolicies::CMP0139))
@@ -298,32 +296,11 @@ bool cmConditionEvaluator::IsTrue(
 cmValue cmConditionEvaluator::GetDefinitionIfUnquoted(
   cmExpandedCommandArgument const& argument) const
 {
-  if ((this->Policy54Status != cmPolicies::WARN &&
-       this->Policy54Status != cmPolicies::OLD) &&
-      argument.WasQuoted()) {
+  if (argument.WasQuoted()) {
     return nullptr;
   }
 
-  cmValue def = this->Makefile.GetDefinition(argument.GetValue());
-
-  if (def && argument.WasQuoted() &&
-      this->Policy54Status == cmPolicies::WARN) {
-    if (!this->Makefile.HasCMP0054AlreadyBeenReported(this->Backtrace.Top())) {
-      std::ostringstream e;
-      // clang-format off
-      e << (cmPolicies::GetPolicyWarning(cmPolicies::CMP0054))
-        << "\n"
-           "Quoted variables like \"" << argument.GetValue() << "\" "
-           "will no longer be dereferenced when the policy is set to NEW.  "
-           "Since the policy is not set the OLD behavior will be used.";
-      // clang-format on
-
-      this->Makefile.GetCMakeInstance()->IssueMessage(
-        MessageType::AUTHOR_WARNING, e.str(), this->Backtrace);
-    }
-  }
-
-  return def;
+  return this->Makefile.GetDefinition(argument.GetValue());
 }
 
 //=========================================================================
@@ -344,33 +321,11 @@ bool cmConditionEvaluator::IsKeyword(
   cm::static_string_view keyword,
   const cmExpandedCommandArgument& argument) const
 {
-  if ((this->Policy54Status != cmPolicies::WARN &&
-       this->Policy54Status != cmPolicies::OLD) &&
-      argument.WasQuoted()) {
+  if (argument.WasQuoted()) {
     return false;
   }
 
-  const auto isKeyword = argument.GetValue() == keyword;
-
-  if (isKeyword && argument.WasQuoted() &&
-      this->Policy54Status == cmPolicies::WARN) {
-    if (!this->Makefile.HasCMP0054AlreadyBeenReported(this->Backtrace.Top())) {
-      std::ostringstream e;
-      // clang-format off
-      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0054)
-        << "\n"
-           "Quoted keywords like \"" << argument.GetValue() << "\" "
-           "will no longer be interpreted as keywords "
-           "when the policy is set to NEW.  "
-           "Since the policy is not set the OLD behavior will be used.";
-      // clang-format on
-
-      this->Makefile.GetCMakeInstance()->IssueMessage(
-        MessageType::AUTHOR_WARNING, e.str(), this->Backtrace);
-    }
-  }
-
-  return isKeyword;
+  return argument.GetValue() == keyword;
 }
 
 //=========================================================================

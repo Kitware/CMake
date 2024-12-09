@@ -1,6 +1,9 @@
 CMP0054
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 .. versionadded:: 3.1
 
 Only interpret :command:`if` arguments as variables or keywords when unquoted.
@@ -47,7 +50,5 @@ further dereferenced:
   if("E" STREQUAL "")
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.1
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

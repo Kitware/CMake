@@ -417,12 +417,6 @@ public:
     cmMakefile* Makefile;
   };
 
-  /**
-   * Determine if the given context, name pair has already been reported
-   * in context of CMP0054.
-   */
-  bool HasCMP0054AlreadyBeenReported(const cmListFileContext& context) const;
-
   bool IgnoreErrorsCMP0061() const;
 
   std::string const& GetHomeDirectory() const;
@@ -1102,8 +1096,6 @@ public:
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(cmTarget& target);
-
-  mutable std::set<cmListFileContext> CMP0054ReportedIds;
 
   // libraries, classes, and executables
   mutable cmTargetMap Targets;

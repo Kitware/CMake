@@ -4103,12 +4103,6 @@ cmMakefile::VariablePushPop::~VariablePushPop()
   this->Makefile->PopSnapshot();
 }
 
-bool cmMakefile::HasCMP0054AlreadyBeenReported(
-  cmListFileContext const& context) const
-{
-  return !this->CMP0054ReportedIds.insert(context).second;
-}
-
 void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm) const
 {
   /* Record the setting of every policy.  */

@@ -59,9 +59,6 @@ For example:
 
 include_guard(GLOBAL)
 
-block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
-
 macro(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
   if(CMAKE_C_COMPILER_LOADED)
     __CHECK_SYMBOL_EXISTS_FILTER_FLAGS(C)
@@ -185,5 +182,3 @@ int main(int argc, char** argv)
     unset(_CSE_SOURCE)
   endif()
 endmacro()
-
-endblock()

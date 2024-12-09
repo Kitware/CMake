@@ -6,7 +6,6 @@
 include_guard()
 
 block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW)
 cmake_policy(SET CMP0140 NEW)
 
 function(__linker_gnu lang)

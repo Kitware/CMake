@@ -1301,7 +1301,6 @@ The custom step could then be triggered from the main build like so::
 include(${CMAKE_CURRENT_LIST_DIR}/ExternalProject/shared_internal_commands.cmake)
 
 cmake_policy(PUSH)
-cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
 cmake_policy(SET CMP0057 NEW) # if() supports IN_LIST
 
 define_property(DIRECTORY PROPERTY "EP_BASE" INHERITED)
