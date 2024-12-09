@@ -3480,6 +3480,20 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     }
   }
 
+  if (isCXXwithC) {
+    // Modules/Compiler/Clang.cmake has a special case for clang-cl versions
+    // that do not have a -std:c++23 flag to pass the standard through to the
+    // underlying clang directly.  Unfortunately that flag applies to all
+    // sources in a single .vcxproj file, so if we have C sources too then we
+    // cannot use it.  Map it back to -std::c++latest, even though that might
+    // end up enabling C++26 or later, so it does not apply to C sources.
+    static const std::string kClangStdCxx23 = "-clang:-std=c++23";
+    std::string::size_type p = flags.find(kClangStdCxx23);
+    if (p != std::string::npos) {
+      flags.replace(p, kClangStdCxx23.size(), "-std:c++latest");
+    }
+  }
+
   clOptions.Parse(flags);
   clOptions.Parse(defineFlags);
   std::vector<std::string> targetDefines;

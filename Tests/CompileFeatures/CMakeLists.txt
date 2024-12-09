@@ -32,6 +32,12 @@ foreach(lang C CXX CUDA HIP)
   endforeach()
 endforeach()
 
+if(("23" IN_LIST CMake_TEST_CXX_STANDARDS OR CMAKE_CXX23_STANDARD_COMPILE_OPTION)
+  AND ("11" IN_LIST CMake_TEST_C_STANDARDS OR CMAKE_C11_STANDARD_COMPILE_OPTION))
+  add_library(test_cxx_std_23_with_c_std_11 OBJECT cxx_std_23.cpp c_std_11.c)
+  target_compile_features(test_cxx_std_23_with_c_std_11 PRIVATE cxx_std_23 c_std_11)
+endif()
+
 macro(run_test feature lang)
   if (${feature} IN_LIST CMAKE_${lang}_COMPILE_FEATURES)
     add_library(test_${feature} OBJECT ${feature}.${ext_${lang}})
