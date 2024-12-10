@@ -168,8 +168,7 @@ class cmMakefile;
   SELECT(POLICY, CMP0056,                                                     \
          "Honor link flags in try_compile() source-file signature.", 3, 2, 0, \
          NEW)                                                                 \
-  SELECT(POLICY, CMP0057, "Support new IN_LIST if() operator.", 3, 3, 0,      \
-         WARN)                                                                \
+  SELECT(POLICY, CMP0057, "Support new IN_LIST if() operator.", 3, 3, 0, NEW) \
   SELECT(POLICY, CMP0058,                                                     \
          "Ninja requires custom command byproducts to be explicit.", 3, 3, 0, \
          WARN)                                                                \

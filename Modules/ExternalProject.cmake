@@ -1300,9 +1300,6 @@ The custom step could then be triggered from the main build like so::
 
 include(${CMAKE_CURRENT_LIST_DIR}/ExternalProject/shared_internal_commands.cmake)
 
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW) # if() supports IN_LIST
-
 define_property(DIRECTORY PROPERTY "EP_BASE" INHERITED)
 define_property(DIRECTORY PROPERTY "EP_PREFIX" INHERITED)
 define_property(DIRECTORY PROPERTY "EP_STEP_TARGETS" INHERITED)
@@ -3088,5 +3085,3 @@ function(ExternalProject_Add name)
   #
   _ep_add_test_command(${name})
 endfunction()
-
-cmake_policy(POP)

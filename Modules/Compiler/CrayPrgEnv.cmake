@@ -7,9 +7,6 @@ set(__cmake_craype_crayprgenv 1)
 # CrayPrgEnv: loaded when compiling through the Cray compiler wrapper.
 # The compiler wrapper can run on a front-end node or a compute node.
 
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW)  # if IN_LIST
-
 # One-time setup of the craype environment.  First, check the wrapper config.
 # The wrapper's selection of a compiler (gcc, clang, intel, etc.) and
 # default include/library paths is selected using the "module" command.
@@ -132,5 +129,3 @@ macro(__CrayPrgEnv_setup lang)
   endif()
 
 endmacro()
-
-cmake_policy(POP)

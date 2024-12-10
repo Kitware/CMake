@@ -20,9 +20,6 @@
 
 # on UNIX, cygwin and mingw
 
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
-
 # Resolve full path of CMAKE_TOOL from user-defined name and SEARCH_PATH.
 function(__resolve_tool_path CMAKE_TOOL SEARCH_PATH DOCSTRING)
 
@@ -274,5 +271,3 @@ if("x${CMAKE_${_CMAKE_PROCESSING_LANGUAGE}_COMPILER_ID}" MATCHES "^xIAR$")
   set(CMAKE_IAR_LINKER "${CMAKE_LINKER}" CACHE FILEPATH "The IAR ILINK linker")
   mark_as_advanced(CMAKE_IAR_LINKER CMAKE_IAR_AR)
 endif()
-
-cmake_policy(POP)

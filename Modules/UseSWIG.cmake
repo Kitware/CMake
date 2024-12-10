@@ -394,8 +394,6 @@ Deprecated Commands
 #]=======================================================================]
 
 cmake_policy(PUSH)
-# IN_LIST operator
-cmake_policy (SET CMP0057 NEW)
 # Ninja generator normalizes custom command depfile paths
 cmake_policy (SET CMP0116 NEW)
 

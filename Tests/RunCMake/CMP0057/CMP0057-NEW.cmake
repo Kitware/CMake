@@ -1,5 +1,3 @@
-cmake_policy(SET CMP0057 NEW)
-
 set(MY_NON_EXISTENT_LIST)
 
 set(MY_EMPTY_LIST "")

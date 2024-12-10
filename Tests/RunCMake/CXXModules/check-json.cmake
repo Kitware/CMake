@@ -1,6 +1,3 @@
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW)
-
 function (json_placeholders in out)
   string(REPLACE "<CONFIG>" "${CXXModules_config}" in "${in}")
   string(TOLOWER "${CXXModules_config}" config_lower)
@@ -228,5 +225,3 @@ function (check_json actual expect)
 
   set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
 endfunction ()
-
-cmake_policy(POP)

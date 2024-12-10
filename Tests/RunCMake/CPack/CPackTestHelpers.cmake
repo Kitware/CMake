@@ -1,5 +1,3 @@
-cmake_policy(SET CMP0057 NEW)
-
 function(run_cpack_test_common_ TEST_NAME types build SUBTEST_SUFFIX source PACKAGING_TYPE package_target)
   if(TEST_TYPE IN_LIST types)
     string(REGEX MATCH "^[^.]*" GENERATOR_TYPE "${TEST_TYPE}")

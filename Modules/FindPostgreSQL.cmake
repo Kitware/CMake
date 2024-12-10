@@ -92,7 +92,6 @@ is set regardless of the presence of the ``Server`` component in find_package ca
 # ----------------------------------------------------------------------------
 
 cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
 cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 set(PostgreSQL_INCLUDE_PATH_DESCRIPTION "top-level directory containing the PostgreSQL include directories. E.g /usr/local/include/PostgreSQL/8.4 or C:/Program Files/PostgreSQL/8.4/include")

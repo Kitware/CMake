@@ -3,9 +3,6 @@
 
 include_guard(GLOBAL)
 
-block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0057 NEW) # if() supports IN_LIST
-
 function(CMAKE_CHECK_SOURCE_COMPILES _lang _source _var)
   if(NOT DEFINED "${_var}")
     set(_lang_filename "src")
@@ -138,5 +135,3 @@ function(CMAKE_CHECK_SOURCE_COMPILES _lang _source _var)
     endif()
   endif()
 endfunction()
-
-endblock()

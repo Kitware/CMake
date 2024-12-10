@@ -111,7 +111,6 @@ to know what include directories are needed.
 #]=======================================================================]
 
 cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
 cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
 function(_OPENMP_FLAG_CANDIDATES LANG)
