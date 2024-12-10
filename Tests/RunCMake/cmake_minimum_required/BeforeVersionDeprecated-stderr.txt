@@ -1,4 +1,4 @@
-^CMake Deprecation Warning at Before3_10\.cmake:1 \(cmake_minimum_required\):
+^CMake Deprecation Warning at BeforeVersionDeprecated\.cmake:1 \(cmake_minimum_required\):
   Compatibility with CMake < 3\.10 will be removed from a future version of
   CMake\.
 
@@ -8,7 +8,7 @@
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 +
-CMake Deprecation Warning at Before3_10\.cmake:2 \(cmake_policy\):
+CMake Deprecation Warning at BeforeVersionDeprecated\.cmake:2 \(cmake_policy\):
   Compatibility with CMake < 3\.10 will be removed from a future version of
   CMake\.
 
@@ -18,7 +18,7 @@ CMake Deprecation Warning at Before3_10\.cmake:2 \(cmake_policy\):
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 +
-CMake Deprecation Warning at Before3_10\.cmake:6 \(cmake_policy\):
+CMake Deprecation Warning at BeforeVersionDeprecated\.cmake:6 \(cmake_policy\):
   Compatibility with CMake < 3\.10 will be removed from a future version of
   CMake\.
 
