@@ -1661,6 +1661,13 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
           }
         }
 
+        for (DirectoryTarget::Dir const& d : dt.Children) {
+          if (!d.ExcludeFromAll) {
+            build.ExplicitDeps.emplace_back(this->BuildAlias(
+              this->ConvertToNinjaPath(cmStrCat(d.Path, "/codegen")), config));
+          }
+        }
+
         // Write target
         this->WriteBuild(this->EnableCrossConfigBuild() &&
                              this->CrossConfigs.count(config)
