@@ -1,6 +1,9 @@
 CMP0058
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 .. versionadded:: 3.3
 
 Ninja requires custom command byproducts to be explicit.
@@ -104,12 +107,10 @@ rules for unknown dependencies in the build tree.  The ``NEW``
 behavior for this policy is to not generate these and instead
 require projects to specify custom command ``BYPRODUCTS`` explicitly.
 
-.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.3
-.. |WARNS_OR_DOES_NOT_WARN| replace::
-   warns when it sees unknown dependencies in out-of-source build trees
-.. include:: STANDARD_ADVICE.txt
-
 The policy setting must be in scope at the end of the top-level
 ``CMakeLists.txt`` file of the project and has global effect.
 
-.. include:: DEPRECATED.txt
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.3
+.. |WARNED_OR_DID_NOT_WARN| replace::
+   warned when it saw unknown dependencies in out-of-source build trees
+.. include:: REMOVED_EPILOGUE.txt

@@ -23,7 +23,6 @@
 #include "cmGlobalCommonGenerator.h"
 #include "cmGlobalGeneratorFactory.h"
 #include "cmNinjaTypes.h"
-#include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
 #include "cmTransformDepfile.h"
 
@@ -531,7 +530,6 @@ private:
 
   void WriteTargetAliases(std::ostream& os);
   void WriteFolderTargets(std::ostream& os);
-  void WriteUnknownExplicitDependencies(std::ostream& os);
 
   void WriteBuiltinTargets(std::ostream& os);
   void WriteTargetDefault(std::ostream& os);
@@ -565,18 +563,6 @@ private:
 
   /// The set of custom command outputs we have seen.
   std::set<std::string> CustomCommandOutputs;
-
-  /// Whether we are collecting known build outputs and needed
-  /// dependencies to determine unknown dependencies.
-  bool ComputingUnknownDependencies = false;
-  cmPolicies::PolicyStatus PolicyCMP0058 = cmPolicies::WARN;
-
-  /// The combined explicit dependencies of custom build commands
-  std::set<std::string> CombinedCustomCommandExplicitDependencies;
-
-  /// When combined with CombinedCustomCommandExplicitDependencies it allows
-  /// us to detect the set of explicit dependencies that have
-  std::set<std::string> CombinedBuildOutputs;
 
   /// The mapping from source file to assumed dependencies.
   std::map<std::string, std::set<std::string>> AssumedSourceDependencies;

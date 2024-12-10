@@ -171,7 +171,7 @@ class cmMakefile;
   SELECT(POLICY, CMP0057, "Support new IN_LIST if() operator.", 3, 3, 0, NEW) \
   SELECT(POLICY, CMP0058,                                                     \
          "Ninja requires custom command byproducts to be explicit.", 3, 3, 0, \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(POLICY, CMP0059,                                                     \
          "Do not treat DEFINITIONS as a built-in directory property.", 3, 3,  \
          0, WARN)                                                             \
