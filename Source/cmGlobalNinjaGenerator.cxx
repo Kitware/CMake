@@ -1637,7 +1637,7 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
       // Setup target
       build.Comment = cmStrCat("Folder: ", currentBinaryDir);
       build.Outputs.emplace_back();
-      std::string const buildDirAllTarget =
+      std::string const buildDirCodegenTarget =
         this->ConvertToNinjaPath(cmStrCat(currentBinaryDir, "/codegen"));
       for (auto const& config : configs) {
         build.ExplicitDeps.clear();
@@ -1660,7 +1660,8 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
           }
         }
 
-        build.Outputs.front() = this->BuildAlias(buildDirAllTarget, config);
+        build.Outputs.front() =
+          this->BuildAlias(buildDirCodegenTarget, config);
         // Write target
         this->WriteBuild(this->EnableCrossConfigBuild() &&
                              this->CrossConfigs.count(config)
@@ -1672,8 +1673,9 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
       // Add shortcut target
       if (this->IsMultiConfig()) {
         for (auto const& config : configs) {
-          build.ExplicitDeps = { this->BuildAlias(buildDirAllTarget, config) };
-          build.Outputs.front() = buildDirAllTarget;
+          build.ExplicitDeps = { this->BuildAlias(buildDirCodegenTarget,
+                                                  config) };
+          build.Outputs.front() = buildDirCodegenTarget;
           this->WriteBuild(*this->GetConfigFileStream(config), build);
         }
 
@@ -1681,9 +1683,9 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
           build.ExplicitDeps.clear();
           for (auto const& config : this->DefaultConfigs) {
             build.ExplicitDeps.push_back(
-              this->BuildAlias(buildDirAllTarget, config));
+              this->BuildAlias(buildDirCodegenTarget, config));
           }
-          build.Outputs.front() = buildDirAllTarget;
+          build.Outputs.front() = buildDirCodegenTarget;
           this->WriteBuild(*this->GetDefaultFileStream(), build);
         }
       }
@@ -1693,9 +1695,10 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
         build.ExplicitDeps.clear();
         for (auto const& config : this->CrossConfigs) {
           build.ExplicitDeps.push_back(
-            this->BuildAlias(buildDirAllTarget, config));
+            this->BuildAlias(buildDirCodegenTarget, config));
         }
-        build.Outputs.front() = this->BuildAlias(buildDirAllTarget, "codegen");
+        build.Outputs.front() =
+          this->BuildAlias(buildDirCodegenTarget, "codegen");
         this->WriteBuild(os, build);
       }
     }
