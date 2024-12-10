@@ -786,36 +786,14 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
         }
       } break;
     }
-    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0056)) {
-      case cmPolicies::WARN:
-        if (this->Makefile->PolicyOptionalWarningEnabled(
-              "CMAKE_POLICY_WARNING_CMP0056")) {
-          std::ostringstream w;
-          /* clang-format off */
-          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0056) << "\n"
-            "For compatibility with older versions of CMake, try_compile "
-            "is not honoring caller link flags (e.g. CMAKE_EXE_LINKER_FLAGS) "
-            "in the test project."
-            ;
-          /* clang-format on */
-          this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
-        }
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        // OLD behavior is to do nothing.
-        break;
-      case cmPolicies::NEW:
-        // NEW behavior is to pass linker flags.
-        {
-          cmValue exeLinkFlags =
-            this->Makefile->GetDefinition("CMAKE_EXE_LINKER_FLAGS");
-          fprintf(fout, "set(CMAKE_EXE_LINKER_FLAGS %s)\n",
-                  cmOutputConverter::EscapeForCMake(*exeLinkFlags).c_str());
-          if (exeLinkFlags) {
-            cmakeVariables.emplace("CMAKE_EXE_LINKER_FLAGS", *exeLinkFlags);
-          }
-        }
-        break;
+    {
+      cmValue exeLinkFlags =
+        this->Makefile->GetDefinition("CMAKE_EXE_LINKER_FLAGS");
+      fprintf(fout, "set(CMAKE_EXE_LINKER_FLAGS %s)\n",
+              cmOutputConverter::EscapeForCMake(*exeLinkFlags).c_str());
+      if (exeLinkFlags) {
+        cmakeVariables.emplace("CMAKE_EXE_LINKER_FLAGS", *exeLinkFlags);
+      }
     }
     fprintf(fout,
             "set(CMAKE_EXE_LINKER_FLAGS \"${CMAKE_EXE_LINKER_FLAGS}"

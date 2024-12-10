@@ -320,14 +320,13 @@ Other Behavior Settings
 
   * :variable:`CMAKE_CUDA_RUNTIME_LIBRARY`
   * :variable:`CMAKE_ENABLE_EXPORTS`
+  * :variable:`CMAKE_EXE_LINKER_FLAGS`, unless using CMake versions
+    prior to 4.0 without policy :policy:`CMP0056` set to ``NEW``
   * :variable:`CMAKE_LINK_SEARCH_START_STATIC`
   * :variable:`CMAKE_LINK_SEARCH_END_STATIC`
   * :variable:`CMAKE_MSVC_RUNTIME_LIBRARY`
   * :variable:`CMAKE_POSITION_INDEPENDENT_CODE`
   * :variable:`CMAKE_WATCOM_RUNTIME_LIBRARY`
-
-  If :policy:`CMP0056` is set to ``NEW``, then
-  :variable:`CMAKE_EXE_LINKER_FLAGS` is passed in as well.
 
 .. versionchanged:: 3.14
   If :policy:`CMP0083` is set to ``NEW``, then in order to obtain correct

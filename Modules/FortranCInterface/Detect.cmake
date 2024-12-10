@@ -36,13 +36,7 @@ else()
   set(_FortranCInterface_OSX_ARCH "")
 endif()
 
-cmake_policy(GET CMP0056 _FortranCInterface_CMP0056)
-if(_FortranCInterface_CMP0056 STREQUAL "NEW")
-  set(_FortranCInterface_EXE_LINKER_FLAGS "-DCMAKE_EXE_LINKER_FLAGS:STRING=${CMAKE_EXE_LINKER_FLAGS}")
-else()
-  set(_FortranCInterface_EXE_LINKER_FLAGS "")
-endif()
-unset(_FortranCInterface_CMP0056)
+set(_FortranCInterface_EXE_LINKER_FLAGS "-DCMAKE_EXE_LINKER_FLAGS:STRING=${CMAKE_EXE_LINKER_FLAGS}")
 
 # Build a sample project which reports symbols.
 set(CMAKE_TRY_COMPILE_CONFIGURATION Release)
