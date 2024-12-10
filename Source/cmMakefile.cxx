@@ -1600,7 +1600,7 @@ void cmMakefile::Configure()
         this->SetCheckCMP0000(true);
 
         // Implicitly set the version for the user.
-        cmPolicies::ApplyPolicyVersion(this, 3, 0, 0,
+        cmPolicies::ApplyPolicyVersion(this, 3, 1, 0,
                                        cmPolicies::WarnCompat::Off);
       }
     }
