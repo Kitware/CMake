@@ -34,7 +34,8 @@ add_subdirectory(SubE)
 
 add_subdirectory("Sub Space")
 
-set(CMAKE_Swift_MODULE_DIRECTORY ${CMAKE_BINARY_DIR}/swift)
+set(CMAKE_Swift_MODULE_DIRECTORY
+  "${CMAKE_BINARY_DIR}/modules/$<IF:$<CONFIG:Debug>,debug/,release/>swift")
 
 add_executable(SwiftOnly main.swift)
 target_compile_definitions(SwiftOnly PRIVATE SWIFTONLY)

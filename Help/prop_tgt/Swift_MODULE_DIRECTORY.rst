@@ -11,14 +11,14 @@ placed in the build directory corresponding to the target's source directory.
 If the variable :variable:`CMAKE_Swift_MODULE_DIRECTORY` is set when a target is
 created its value is used to initialize this property.
 
+.. versionadded:: 3.32
+
+  The property value may use
+  :manual:`generator expressions <cmake-generator-expressions(7)>`.
+  Multi-configuration generators (:generator:`Ninja Multi-Config`) append a
+  per-configuration subdirectory to the specified directory unless a generator
+  expression is used.
+
 .. warning::
 
-  This property does not currently provide a way to express per-config
-  module directories, so use with multi-config generators is problematic:
-
-  * The :generator:`Xcode` generator does not implement the property at all.
-
-  * The :generator:`Ninja Multi-Config` generator implements this property,
-    but module files generated for different build configurations have the
-    same path, which can lead to subtle problems when building more than
-    one configuration.
+  The :generator:`Xcode` generator ignores this property.
