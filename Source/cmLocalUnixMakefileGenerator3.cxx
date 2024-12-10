@@ -1762,6 +1762,8 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
       depends.emplace_back("cmake_check_build_system");
     }
     commands.push_back(this->GetRecursiveMakeCall(mf2Dir, recursiveTarget));
+    this->CreateCDCommand(commands, this->GetBinaryDirectory(),
+                          this->GetCurrentBinaryDirectory());
     AppendEcho(commands, "Finished generating code",
                cmLocalUnixMakefileGenerator3::EchoColor::EchoGenerate);
     this->WriteMakeRule(ruleFileStream, "The main codegen target", "codegen",
