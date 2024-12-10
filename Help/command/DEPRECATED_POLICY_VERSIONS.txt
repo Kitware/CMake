@@ -1,9 +1,9 @@
 .. versionchanged:: 4.0
 
-  Compatibility with versions of CMake older than 3.1 is removed.
+  Compatibility with versions of CMake older than 3.2 is removed.
   Calls to :command:`cmake_minimum_required(VERSION)` or
   :command:`cmake_policy(VERSION)` that do not specify at least
-  3.1 as their policy version (optionally via ``...<max>``)
+  3.2 as their policy version (optionally via ``...<max>``)
   will produce an error in CMake 4.0 and above.
 
 .. versionchanged:: 3.31
