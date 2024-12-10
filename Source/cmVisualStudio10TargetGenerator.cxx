@@ -3375,6 +3375,14 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     this->LocalGenerator->AddCompileOptions(flags, this->GeneratorTarget,
                                             langForClCompile, configName);
   }
+  bool const isCXXwithC = [this, &configName]() -> bool {
+    if (this->LangForClCompile != "CXX"_s) {
+      return false;
+    }
+    std::set<std::string> languages;
+    this->GeneratorTarget->GetLanguages(languages, configName);
+    return languages.find("C") != languages.end();
+  }();
 
   // Put the IPO enabled configurations into a set.
   if (this->GeneratorTarget->IsIPOEnabled(linkLanguage, configName)) {
@@ -3493,6 +3501,20 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
     }
   }
 
+  if (isCXXwithC) {
+    // Modules/Compiler/Clang.cmake has a special case for clang-cl versions
+    // that do not have a -std:c++23 flag to pass the standard through to the
+    // underlying clang directly.  Unfortunately that flag applies to all
+    // sources in a single .vcxproj file, so if we have C sources too then we
+    // cannot use it.  Map it back to -std::c++latest, even though that might
+    // end up enabling C++26 or later, so it does not apply to C sources.
+    static const std::string kClangStdCxx23 = "-clang:-std=c++23";
+    std::string::size_type p = flags.find(kClangStdCxx23);
+    if (p != std::string::npos) {
+      flags.replace(p, kClangStdCxx23.size(), "-std:c++latest");
+    }
+  }
+
   clOptions.Parse(flags);
   clOptions.Parse(defineFlags);
   std::vector<std::string> targetDefines;
@@ -3525,21 +3547,17 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   }
 
   // Add C-specific flags expressible in a ClCompile meant for C++.
-  if (langForClCompile == "CXX"_s) {
-    std::set<std::string> languages;
-    this->GeneratorTarget->GetLanguages(languages, configName);
-    if (languages.count("C")) {
-      std::string flagsC;
-      this->LocalGenerator->AddLanguageFlags(
-        flagsC, this->GeneratorTarget, cmBuildStep::Compile, "C", configName);
-      this->LocalGenerator->AddCompileOptions(flagsC, this->GeneratorTarget,
-                                              "C", configName);
-      Options optC(this->LocalGenerator, Options::Compiler,
-                   gg->GetClFlagTable());
-      optC.Parse(flagsC);
-      if (const char* stdC = optC.GetFlag("LanguageStandard_C")) {
-        clOptions.AddFlag("LanguageStandard_C", stdC);
-      }
+  if (isCXXwithC) {
+    std::string flagsC;
+    this->LocalGenerator->AddLanguageFlags(
+      flagsC, this->GeneratorTarget, cmBuildStep::Compile, "C", configName);
+    this->LocalGenerator->AddCompileOptions(flagsC, this->GeneratorTarget, "C",
+                                            configName);
+    Options optC(this->LocalGenerator, Options::Compiler,
+                 gg->GetClFlagTable());
+    optC.Parse(flagsC);
+    if (const char* stdC = optC.GetFlag("LanguageStandard_C")) {
+      clOptions.AddFlag("LanguageStandard_C", stdC);
     }
   }
 
