@@ -1631,8 +1631,7 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
       std::string const& currentBinaryDir = it.first;
       DirectoryTarget const& dt = it.second;
       std::vector<std::string> configs =
-        dt.LG->GetMakefile()->GetGeneratorConfigs(
-          cmMakefile::IncludeEmptyConfig);
+        static_cast<cmLocalNinjaGenerator const*>(dt.LG)->GetConfigNames();
 
       // Setup target
       build.Comment = cmStrCat("Folder: ", currentBinaryDir);
