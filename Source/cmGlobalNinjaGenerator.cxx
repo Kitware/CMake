@@ -1641,11 +1641,13 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
         this->ConvertToNinjaPath(cmStrCat(currentBinaryDir, "/codegen"));
       for (auto const& config : configs) {
         build.ExplicitDeps.clear();
+        build.Outputs.front() =
+          this->BuildAlias(buildDirCodegenTarget, config);
+
         for (DirectoryTarget::Target const& t : dt.Targets) {
           if (this->IsExcludedFromAllInConfig(t, config)) {
             continue;
           }
-
           std::vector<cmSourceFile const*> customCommandSources;
           t.GT->GetCustomCommands(customCommandSources, config);
           for (cmSourceFile const* sf : customCommandSources) {
@@ -1660,8 +1662,6 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
           }
         }
 
-        build.Outputs.front() =
-          this->BuildAlias(buildDirCodegenTarget, config);
         // Write target
         this->WriteBuild(this->EnableCrossConfigBuild() &&
                              this->CrossConfigs.count(config)
