@@ -20,20 +20,16 @@ format only a subset of files, such as those that are locally modified.
 .. _`.clang-format`: ../../.clang-format
 .. _`Utilities/Scripts/clang-format.bash`: ../../Utilities/Scripts/clang-format.bash
 
-C++ Code Conventions
-====================
+In addition, we have a few coding conventions that we prefer for new code to
+follow (which are not enforced by other tooling):
 
-We loosely follow a few coding conventions:
+* Name local variables using ``camelCase``.
 
-* Name class members using ``CamelCase``.
+* Name class members and free functions using ``PascalCase``.
 
 * Reference class members using ``this->Member``.
 
 * Use east ``const`` style, e.g., ``int const`` instead of ``const int``.
-  Exceptions:
-
-  * C strings: ``const char*``
-  * Global constants: ``static const ...``
 
 * Declare variables using a locally-specified type:
 
