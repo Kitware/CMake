@@ -4,6 +4,12 @@ project(FindPackageCMakeTest)
 # Protect tests from running inside the default install prefix.
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/NotDefaultPrefix")
 
+# Disable built-in search paths.
+set(CMAKE_FIND_USE_PACKAGE_ROOT_PATH OFF)
+set(CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH OFF)
+set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH OFF)
+set(CMAKE_FIND_USE_INSTALL_PREFIX OFF)
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Look for a package which uses FindPackageHandleStandardArgs.cmake with the
@@ -229,9 +235,11 @@ endif()
 # Test <PackageName>_DIR environment variable.
 # We erase the main prefix path to ensure the env var is used.
 set(CMAKE_PREFIX_PATH)
+set(CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH ON)
 set(ENV{EnvA_DIR} "${CMAKE_CURRENT_SOURCE_DIR}/lib/zot-3.1")
 find_package(EnvA 3.1 EXACT QUIET NAMES zot) # Should Work
 find_package(EnvB 3.1 EXACT QUIET NAMES zot) # Should Fail
+set(CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH OFF)
 
 # Test system package registry if available.
 if(CMakeTestSystemPackage)
