@@ -1635,7 +1635,6 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
           cmMakefile::IncludeEmptyConfig);
 
       // Setup target
-      cmNinjaDeps configDeps;
       build.Comment = cmStrCat("Folder: ", currentBinaryDir);
       build.Outputs.emplace_back();
       std::string const buildDirAllTarget =
@@ -1716,7 +1715,6 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
       static_cast<cmLocalNinjaGenerator const*>(dt.LG)->GetConfigNames();
 
     // Setup target
-    cmNinjaDeps configDeps;
     build.Comment = cmStrCat("Folder: ", currentBinaryDir);
     build.Outputs.emplace_back();
     std::string const buildDirAllTarget =
@@ -1724,7 +1722,6 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
     for (auto const& config : configs) {
       build.ExplicitDeps.clear();
       build.Outputs.front() = this->BuildAlias(buildDirAllTarget, config);
-      configDeps.emplace_back(build.Outputs.front());
       for (DirectoryTarget::Target const& t : dt.Targets) {
         if (!this->IsExcludedFromAllInConfig(t, config)) {
           this->AppendTargetOutputs(t.GT, build.ExplicitDeps, config,
