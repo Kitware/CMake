@@ -13,6 +13,48 @@ function(check_property property matcher)
   endif()
 endfunction()
 
+function(check_property_count property matcher expected_count)
+  set(schema "${RunCMake_TEST_BINARY_DIR}/XcodeSchemaProperty.xcodeproj/xcshareddata/xcschemes/${property}.xcscheme")
+  file(STRINGS ${schema} actual-${property}
+       REGEX "${matcher}")
+  if(NOT actual-${property})
+    string(APPEND RunCMake_TEST_FAILED
+      "Xcode schema property ${property}: Could not find\n"
+      "  ${matcher}\n"
+      "in schema\n"
+      "  ${schema}\n"
+    )
+    set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
+    return()
+  endif()
+  list(LENGTH actual-${property} match_count)
+  if(NOT ${expected_count} EQUAL ${match_count})
+    string(APPEND RunCMake_TEST_FAILED
+      "Xcode schema property ${property}: Expected ${expected_count} matches of\n"
+      "  ${matcher}\n"
+      "in schema\n"
+      "  ${schema}\n"
+      "but found ${match_count}.\n\n"
+    )
+    set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
+  endif()
+endfunction()
+
+function(check_no_property property matcher)
+  set(schema "${RunCMake_TEST_BINARY_DIR}/XcodeSchemaProperty.xcodeproj/xcshareddata/xcschemes/${property}.xcscheme")
+  file(STRINGS ${schema} actual-${property}
+       REGEX "${matcher}" LIMIT_COUNT 1)
+  if(actual-${property})
+    string(APPEND RunCMake_TEST_FAILED
+      "Xcode schema property ${property}: Found\n"
+      "  ${matcher}\n"
+      "which is not expected in schema\n"
+      "  ${schema}\n"
+    )
+    set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
+  endif()
+endfunction()
+
 function(expect_schema target)
   set(schema "${RunCMake_TEST_BINARY_DIR}/XcodeSchemaProperty.xcodeproj/xcshareddata/xcschemes/${target}.xcscheme")
   if(NOT EXISTS ${schema})
@@ -60,6 +102,9 @@ check_property("ENABLE_GPU_FRAME_CAPTURE_MODE_DISABLED_MIXED_CASE" "enableGPUFra
 check_property("ENABLE_GPU_FRAME_CAPTURE_MODE_METAL_MIXED_CASE" "enableGPUFrameCaptureMode=\"1\"")
 check_property("LAUNCH_MODE_AUTO" "launchStyle=\"0\"")
 check_property("LAUNCH_MODE_WAIT" "launchStyle=\"1\"")
+check_no_property("LLDB_INIT_FILE_EMPTY" "customLLDBInitFile")
+check_property_count("LLDB_INIT_FILE_EVAL" "customLLDBInitFile=\"${RunCMake_TEST_BINARY_DIR}/.lldbinit\"" 2)
+check_property_count("LLDB_INIT_FILE_FULL" "customLLDBInitFile=\"/full/path/to/.lldbinit\"" 2)
 
 check_property("EXECUTABLE" "myExecutable")
 check_property("ARGUMENTS" [=["--foo"]=])

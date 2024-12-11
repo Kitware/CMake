@@ -203,6 +203,7 @@ if (CMAKE_HOST_APPLE) # compile-guarded in CMake
       "XCODE_SCHEME_MALLOC_GUARD_EDGES"                 "ON"          "<SAME>"
       "XCODE_SCHEME_GUARD_MALLOC"                       "ON"          "<SAME>"
       "XCODE_SCHEME_LAUNCH_MODE"                        "ON"          "<SAME>"
+      "XCODE_SCHEME_LLDB_INIT_FILE"                     "ON"          "<SAME>"
       "XCODE_SCHEME_ZOMBIE_OBJECTS"                     "ON"          "<SAME>"
       "XCODE_SCHEME_MALLOC_STACK"                       "ON"          "<SAME>"
       "XCODE_SCHEME_DYNAMIC_LINKER_API_USAGE"           "ON"          "<SAME>"

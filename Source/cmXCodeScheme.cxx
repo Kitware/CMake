@@ -120,6 +120,7 @@ void cmXCodeScheme::WriteTestAction(cmXMLWriter& xout,
   xout.Attribute("selectedLauncherIdentifier",
                  "Xcode.DebuggerFoundation.Launcher.LLDB");
   xout.Attribute("shouldUseLaunchSchemeArgsEnv", "YES");
+  WriteCustomLLDBInitFile(xout, configuration);
 
   xout.StartElement("Testables");
   for (auto const* test : this->Tests) {
@@ -164,6 +165,7 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
     xout.Attribute("launchStyle", value);
   }
   WriteCustomWorkingDirectory(xout, configuration);
+  WriteCustomLLDBInitFile(xout, configuration);
 
   xout.Attribute("ignoresPersistentStateOnLaunch", "NO");
   WriteLaunchActionBooleanAttribute(xout, "debugDocumentVersioning",
@@ -478,6 +480,18 @@ void cmXCodeScheme::WriteCustomWorkingDirectory(
     auto customWorkingDirectory = cmGeneratorExpression::Evaluate(
       propertyValue, this->LocalGenerator, configuration);
     xout.Attribute("customWorkingDirectory", customWorkingDirectory);
+  }
+}
+
+void cmXCodeScheme::WriteCustomLLDBInitFile(cmXMLWriter& xout,
+                                            const std::string& configuration)
+{
+  std::string const& propertyValue =
+    this->Target->GetTarget()->GetSafeProperty("XCODE_SCHEME_LLDB_INIT_FILE");
+  if (!propertyValue.empty()) {
+    auto customLLDBInitFile = cmGeneratorExpression::Evaluate(
+      propertyValue, this->LocalGenerator, configuration);
+    xout.Attribute("customLLDBInitFile", customLLDBInitFile);
   }
 }
 

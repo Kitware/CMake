@@ -71,6 +71,9 @@ private:
   void WriteCustomWorkingDirectory(cmXMLWriter& xout,
                                    const std::string& configuration);
 
+  void WriteCustomLLDBInitFile(cmXMLWriter& xout,
+                               const std::string& configuration);
+
   std::string WriteVersionString();
   std::string FindConfiguration(const std::string& name);
 
