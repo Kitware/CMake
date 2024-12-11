@@ -33,7 +33,7 @@
 
 /* FIXME: Delete this once the warnings have been fixed. */
 #if !defined(CURL_WARN_SIGN_CONVERSION)
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #endif
 #endif
@@ -43,21 +43,24 @@
 #include <_mingw.h>
 #endif
 
-/* Workaround for Homebrew gcc 12.4.0, 13.3.0, 14.1.0 and newer (as of 14.1.0)
+/* Workaround for Homebrew gcc 12.4.0, 13.3.0, 14.1.0, 14.2.0 (initial build)
    that started advertising the `availability` attribute, which then gets used
-   by Apple SDK, but, in a way incompatible with gcc, resulting in a misc
-   errors inside SDK headers, e.g.:
+   by Apple SDK, but, in a way incompatible with gcc, resulting in misc errors
+   inside SDK headers, e.g.:
      error: attributes should be specified before the declarator in a function
             definition
      error: expected ',' or '}' before
    Followed by missing declarations.
-   Fix it by overriding the built-in feature-check macro used by the headers
-   to enable the problematic attributes. This makes the feature check fail. */
-#if defined(__APPLE__) &&                \
-  !defined(__clang__) &&                 \
-  defined(__GNUC__) && __GNUC__ >= 12 && \
+   Work it around by overriding the built-in feature-check macro used by the
+   headers to enable the problematic attributes. This makes the feature check
+   fail. Fixed in 14.2.0_1. Disable the workaround if the fix is detected. */
+#if defined(__APPLE__) && !defined(__clang__) && defined(__GNUC__) && \
   defined(__has_attribute)
-#define availability curl_pp_attribute_disabled
+#  if !defined(__has_feature)
+#    define availability curl_pp_attribute_disabled
+#  elif !__has_feature(attribute_availability)
+#    define availability curl_pp_attribute_disabled
+#  endif
 #endif
 
 #if defined(__APPLE__)
@@ -109,7 +112,7 @@
 #  include <winapifamily.h>
 #  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
      !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
-#    define CURL_WINDOWS_APP
+#    define CURL_WINDOWS_UWP
 #  endif
 # endif
 #endif
@@ -208,6 +211,11 @@
 /*  please, do it beyond the point further indicated in this file.  */
 /* ================================================================ */
 
+/* Give calloc a chance to be dragging in early, so we do not redefine */
+#if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
+#  include <pthread.h>
+#endif
+
 /*
  * Disable other protocols when http is the only one desired.
  */
@@ -280,6 +288,14 @@
 #  define CURL_DISABLE_HEADERS_API 1
 #  define CURL_DISABLE_HSTS 1
 #  define CURL_DISABLE_HTTP_AUTH 1
+#endif
+
+/*
+ * ECH requires HTTPSRR.
+ */
+
+#if defined(USE_ECH) && !defined(USE_HTTPSRR)
+#  define USE_HTTPSRR
 #endif
 
 /* ================================================================ */
@@ -447,6 +463,12 @@
 
 #ifndef STDC_HEADERS /* no standard C headers! */
 #include <curl/stdcheaders.h>
+#endif
+
+#ifdef _WIN32
+#define Curl_getpid() GetCurrentProcessId()
+#else
+#define Curl_getpid() getpid()
 #endif
 
 /*

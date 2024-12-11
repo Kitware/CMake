@@ -213,6 +213,11 @@ static CURLcode rtsp_done(struct Curl_easy *data,
        (data->conn->proto.rtspc.rtp_channel == -1)) {
       infof(data, "Got an RTP Receive with a CSeq of %ld", CSeq_recv);
     }
+    if(data->set.rtspreq == RTSPREQ_RECEIVE &&
+       data->req.eos_written) {
+      failf(data, "Server prematurely closed the RTSP connection.");
+      return CURLE_RECV_ERROR;
+    }
   }
 
   return httpStatus;
@@ -359,8 +364,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   /* Accept Headers for DESCRIBE requests */
   if(rtspreq == RTSPREQ_DESCRIBE) {
     /* Accept Header */
-    p_accept = Curl_checkheaders(data, STRCONST("Accept"))?
-      NULL:"Accept: application/sdp\r\n";
+    p_accept = Curl_checkheaders(data, STRCONST("Accept")) ?
+      NULL : "Accept: application/sdp\r\n";
 
     /* Accept-Encoding header */
     if(!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
@@ -615,7 +620,7 @@ static CURLcode rtp_write_body_junk(struct Curl_easy *data,
   in_body = (data->req.headerline && !rtspc->in_header) &&
             (data->req.size >= 0) &&
             (data->req.bytecount < data->req.size);
-  body_remain = in_body? (data->req.size - data->req.bytecount) : 0;
+  body_remain = in_body ? (data->req.size - data->req.bytecount) : 0;
   DEBUGASSERT(body_remain >= 0);
   if(body_remain) {
     if((curl_off_t)blen > body_remain)
@@ -858,7 +863,7 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
                data->req.size));
   if(!result && (is_eos || blen)) {
     result = Curl_client_write(data, CLIENTWRITE_BODY|
-                               (is_eos? CLIENTWRITE_EOS:0),
+                               (is_eos ? CLIENTWRITE_EOS : 0),
                                (char *)buf, blen);
   }
 
@@ -898,9 +903,9 @@ CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr, size_t len)
     user_ptr = data->set.out;
   }
 
-  Curl_set_in_callback(data, true);
+  Curl_set_in_callback(data, TRUE);
   wrote = writeit((char *)ptr, 1, len, user_ptr);
-  Curl_set_in_callback(data, false);
+  Curl_set_in_callback(data, FALSE);
 
   if(CURL_WRITEFUNC_PAUSE == wrote) {
     failf(data, "Cannot pause RTP");

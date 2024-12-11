@@ -26,6 +26,8 @@
 
 #include <curl/curl.h>
 
+struct Curl_easy;
+
 #include "formdata.h"
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_FORM_API)
 
@@ -282,8 +284,8 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       if(current_form->name)
         return_value = CURL_FORMADD_OPTION_TWICE;
       else {
-        char *name = array_state?
-          array_value:va_arg(params, char *);
+        char *name = array_state ?
+          array_value : va_arg(params, char *);
         if(name)
           current_form->name = name; /* store for the moment */
         else
@@ -295,7 +297,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         return_value = CURL_FORMADD_OPTION_TWICE;
       else
         current_form->namelength =
-          array_state?(size_t)array_value:(size_t)va_arg(params, long);
+          array_state ? (size_t)array_value : (size_t)va_arg(params, long);
       break;
 
       /*
@@ -309,7 +311,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         return_value = CURL_FORMADD_OPTION_TWICE;
       else {
         char *value =
-          array_state?array_value:va_arg(params, char *);
+          array_state ? array_value : va_arg(params, char *);
         if(value)
           current_form->value = value; /* store for the moment */
         else
@@ -318,13 +320,14 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       break;
     case CURLFORM_CONTENTSLENGTH:
       current_form->contentslength =
-        array_state?(size_t)array_value:(size_t)va_arg(params, long);
+        array_state ? (size_t)array_value : (size_t)va_arg(params, long);
       break;
 
     case CURLFORM_CONTENTLEN:
       current_form->flags |= CURL_HTTPPOST_LARGE;
       current_form->contentslength =
-        array_state?(curl_off_t)(size_t)array_value:va_arg(params, curl_off_t);
+        array_state ? (curl_off_t)(size_t)array_value :
+        va_arg(params, curl_off_t);
       break;
 
       /* Get contents from a given filename */
@@ -332,8 +335,8 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       if(current_form->flags & (HTTPPOST_PTRCONTENTS|HTTPPOST_READFILE))
         return_value = CURL_FORMADD_OPTION_TWICE;
       else {
-        const char *filename = array_state?
-          array_value:va_arg(params, char *);
+        const char *filename = array_state ?
+          array_value : va_arg(params, char *);
         if(filename) {
           current_form->value = strdup(filename);
           if(!current_form->value)
@@ -351,7 +354,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       /* We upload a file */
     case CURLFORM_FILE:
       {
-        const char *filename = array_state?array_value:
+        const char *filename = array_state ? array_value :
           va_arg(params, char *);
 
         if(current_form->value) {
@@ -401,7 +404,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         return_value = CURL_FORMADD_OPTION_TWICE;
       else {
         char *buffer =
-          array_state?array_value:va_arg(params, char *);
+          array_state ? array_value : va_arg(params, char *);
         if(buffer) {
           current_form->buffer = buffer; /* store for the moment */
           current_form->value = buffer; /* make it non-NULL to be accepted
@@ -417,7 +420,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         return_value = CURL_FORMADD_OPTION_TWICE;
       else
         current_form->bufferlength =
-          array_state?(size_t)array_value:(size_t)va_arg(params, long);
+          array_state ? (size_t)array_value : (size_t)va_arg(params, long);
       break;
 
     case CURLFORM_STREAM:
@@ -426,7 +429,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         return_value = CURL_FORMADD_OPTION_TWICE;
       else {
         char *userp =
-          array_state?array_value:va_arg(params, char *);
+          array_state ? array_value : va_arg(params, char *);
         if(userp) {
           current_form->userp = userp;
           current_form->value = userp; /* this is not strictly true but we
@@ -442,7 +445,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
     case CURLFORM_CONTENTTYPE:
       {
         const char *contenttype =
-          array_state?array_value:va_arg(params, char *);
+          array_state ? array_value : va_arg(params, char *);
         if(current_form->contenttype) {
           if(current_form->flags & HTTPPOST_FILENAME) {
             if(contenttype) {
@@ -485,8 +488,8 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       {
         /* this "cast increases required alignment of target type" but
            we consider it OK anyway */
-        struct curl_slist *list = array_state?
-          (struct curl_slist *)(void *)array_value:
+        struct curl_slist *list = array_state ?
+          (struct curl_slist *)(void *)array_value :
           va_arg(params, struct curl_slist *);
 
         if(current_form->contentheader)
@@ -499,7 +502,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
     case CURLFORM_FILENAME:
     case CURLFORM_BUFFER:
       {
-        const char *filename = array_state?array_value:
+        const char *filename = array_state ? array_value :
           va_arg(params, char *);
         if(current_form->showfilename)
           return_value = CURL_FORMADD_OPTION_TWICE;
@@ -569,7 +572,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       if(((form->flags & HTTPPOST_FILENAME) ||
           (form->flags & HTTPPOST_BUFFER)) &&
          !form->contenttype) {
-        char *f = (form->flags & HTTPPOST_BUFFER)?
+        char *f = (form->flags & HTTPPOST_BUFFER) ?
           form->showfilename : form->value;
         char const *type;
         type = Curl_mime_contenttype(f);
@@ -603,8 +606,8 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
            app passed in a bad combo, so we better check for that first. */
         if(form->name) {
           /* copy name (without strdup; possibly not null-terminated) */
-          form->name = Curl_memdup0(form->name, form->namelength?
-                                    form->namelength:
+          form->name = Curl_memdup0(form->name, form->namelength ?
+                                    form->namelength :
                                     strlen(form->name));
         }
         if(!form->name) {
@@ -790,7 +793,7 @@ static CURLcode setname(curl_mimepart *part, const char *name, size_t len)
 /* wrap call to fseeko so it matches the calling convention of callback */
 static int fseeko_wrapper(void *stream, curl_off_t offset, int whence)
 {
-#if defined(HAVE__FSEEKI64)
+#if defined(_WIN32) && defined(USE_WIN32_LARGE_FILES)
   return _fseeki64(stream, (__int64)offset, whence);
 #elif defined(HAVE_FSEEKO) && defined(HAVE_DECL_FSEEKO)
   return fseeko(stream, (off_t)offset, whence);
@@ -811,7 +814,7 @@ static int fseeko_wrapper(void *stream, curl_off_t offset, int whence)
  * a NULL pointer in the 'data' argument.
  */
 
-CURLcode Curl_getformdata(struct Curl_easy *data,
+CURLcode Curl_getformdata(CURL *data,
                           curl_mimepart *finalform,
                           struct curl_httppost *post,
                           curl_read_callback fread_func)
@@ -896,7 +899,8 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
         }
         else if(post->flags & HTTPPOST_BUFFER)
           result = curl_mime_data(part, post->buffer,
-                                  post->bufferlength? post->bufferlength: -1);
+                                  post->bufferlength ?
+                                  post->bufferlength : -1);
         else if(post->flags & HTTPPOST_CALLBACK) {
           /* the contents should be read with the callback and the size is set
              with the contentslength */

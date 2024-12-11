@@ -69,7 +69,7 @@ bool Curl_auth_is_digest_supported(void)
     Curl_pSecFn->FreeContextBuffer(SecurityPackage);
   }
 
-  return (status == SEC_E_OK ? TRUE : FALSE);
+  return (status == SEC_E_OK);
 }
 
 /*
@@ -329,7 +329,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
   /* We had an input token before so if there is another one now that means we
      provided bad credentials in the previous request or it is stale. */
   if(digest->input_token) {
-    bool stale = false;
+    bool stale = FALSE;
     const char *p = chlg;
 
     /* Check for the 'stale' directive */
@@ -345,7 +345,7 @@ CURLcode Curl_auth_decode_digest_http_message(const char *chlg,
 
       if(strcasecompare(value, "stale") &&
          strcasecompare(content, "true")) {
-        stale = true;
+        stale = TRUE;
         break;
       }
 

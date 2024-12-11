@@ -300,7 +300,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
 
   /* Error on too large filesize is handled below, after writing
    * the permitted bytes */
-  if(data->set.max_filesize) {
+  if(data->set.max_filesize && !data->req.ignorebody) {
     size_t wmax = get_max_body_write_len(data, data->set.max_filesize);
     if(nwrite > wmax) {
       nwrite = wmax;
@@ -398,7 +398,7 @@ CURLcode Curl_cwriter_create(struct Curl_cwriter **pwriter,
   result = cwt->do_init(data, writer);
 
 out:
-  *pwriter = result? NULL : writer;
+  *pwriter = result ? NULL : writer;
   if(result)
     free(writer);
   return result;
@@ -575,7 +575,7 @@ bool Curl_creader_def_needs_rewind(struct Curl_easy *data,
 curl_off_t Curl_creader_def_total_length(struct Curl_easy *data,
                                          struct Curl_creader *reader)
 {
-  return reader->next?
+  return reader->next ?
          reader->next->crt->total_length(data, reader->next) : -1;
 }
 
@@ -677,9 +677,9 @@ static CURLcode cr_in_read(struct Curl_easy *data,
   }
   nread = 0;
   if(ctx->read_cb && blen) {
-    Curl_set_in_callback(data, true);
+    Curl_set_in_callback(data, TRUE);
     nread = ctx->read_cb(buf, 1, blen, ctx->cb_user_data);
-    Curl_set_in_callback(data, false);
+    Curl_set_in_callback(data, FALSE);
     ctx->has_used_cb = TRUE;
   }
 
@@ -773,9 +773,9 @@ static CURLcode cr_in_resume_from(struct Curl_easy *data,
     return CURLE_READ_ERROR;
 
   if(data->set.seek_func) {
-    Curl_set_in_callback(data, true);
+    Curl_set_in_callback(data, TRUE);
     seekerr = data->set.seek_func(data->set.seek_client, offset, SEEK_SET);
-    Curl_set_in_callback(data, false);
+    Curl_set_in_callback(data, FALSE);
   }
 
   if(seekerr != CURL_SEEKFUNC_OK) {
@@ -794,10 +794,10 @@ static CURLcode cr_in_resume_from(struct Curl_easy *data,
         curlx_sotouz(offset - passed);
       size_t actuallyread;
 
-      Curl_set_in_callback(data, true);
+      Curl_set_in_callback(data, TRUE);
       actuallyread = ctx->read_cb(scratch, 1, readthisamountnow,
                                   ctx->cb_user_data);
-      Curl_set_in_callback(data, false);
+      Curl_set_in_callback(data, FALSE);
 
       passed += actuallyread;
       if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
@@ -835,9 +835,9 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
   if(data->set.seek_func) {
     int err;
 
-    Curl_set_in_callback(data, true);
+    Curl_set_in_callback(data, TRUE);
     err = (data->set.seek_func)(data->set.seek_client, 0, SEEK_SET);
-    Curl_set_in_callback(data, false);
+    Curl_set_in_callback(data, FALSE);
     CURL_TRC_READ(data, "cr_in, rewind via set.seek_func -> %d", err);
     if(err) {
       failf(data, "seek callback returned error %d", (int)err);
@@ -847,10 +847,10 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
   else if(data->set.ioctl_func) {
     curlioerr err;
 
-    Curl_set_in_callback(data, true);
+    Curl_set_in_callback(data, TRUE);
     err = (data->set.ioctl_func)(data, CURLIOCMD_RESTARTREAD,
                                  data->set.ioctl_client);
-    Curl_set_in_callback(data, false);
+    Curl_set_in_callback(data, FALSE);
     CURL_TRC_READ(data, "cr_in, rewind via set.ioctl_func -> %d", (int)err);
     if(err) {
       failf(data, "ioctl callback returned error %d", (int)err);
@@ -930,7 +930,7 @@ CURLcode Curl_creader_create(struct Curl_creader **preader,
   result = crt->do_init(data, reader);
 
 out:
-  *preader = result? NULL : reader;
+  *preader = result ? NULL : reader;
   if(result)
     free(reader);
   return result;
@@ -1014,7 +1014,7 @@ static CURLcode cr_lc_read(struct Curl_easy *data,
         ctx->prev_cr = (buf[i] == '\r');
         continue;
       }
-      ctx->prev_cr = false;
+      ctx->prev_cr = FALSE;
       /* on a soft limit bufq, we do not need to check length */
       result = Curl_bufq_cwrite(&ctx->buf, buf + start, i - start, &n);
       if(!result)
@@ -1376,7 +1376,7 @@ out:
 curl_off_t Curl_creader_total_length(struct Curl_easy *data)
 {
   struct Curl_creader *r = data->req.reader_stack;
-  return r? r->crt->total_length(data, r) : -1;
+  return r ? r->crt->total_length(data, r) : -1;
 }
 
 curl_off_t Curl_creader_client_length(struct Curl_easy *data)
@@ -1384,7 +1384,7 @@ curl_off_t Curl_creader_client_length(struct Curl_easy *data)
   struct Curl_creader *r = data->req.reader_stack;
   while(r && r->phase != CURL_CR_CLIENT)
     r = r->next;
-  return r? r->crt->total_length(data, r) : -1;
+  return r ? r->crt->total_length(data, r) : -1;
 }
 
 CURLcode Curl_creader_resume_from(struct Curl_easy *data, curl_off_t offset)
@@ -1392,7 +1392,7 @@ CURLcode Curl_creader_resume_from(struct Curl_easy *data, curl_off_t offset)
   struct Curl_creader *r = data->req.reader_stack;
   while(r && r->phase != CURL_CR_CLIENT)
     r = r->next;
-  return r? r->crt->resume_from(data, r, offset) : CURLE_READ_ERROR;
+  return r ? r->crt->resume_from(data, r, offset) : CURLE_READ_ERROR;
 }
 
 CURLcode Curl_creader_unpause(struct Curl_easy *data)

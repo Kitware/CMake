@@ -21,22 +21,24 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Find the mbedtls library
+# Find the mbedTLS library
 #
 # Input variables:
 #
-# MBEDTLS_INCLUDE_DIR   The mbedtls include directory
-# MBEDTLS_INCLUDE_DIRS  The mbedtls include directory (deprecated)
-# MBEDTLS_LIBRARY       Path to mbedtls library
-# MBEDX509_LIBRARY      Path to mbedx509 library
-# MBEDCRYPTO_LIBRARY    Path to mbedcrypto library
+# - `MBEDTLS_INCLUDE_DIR`:   The mbedTLS include directory.
+# - `MBEDTLS_LIBRARY`:       Path to `mbedtls` library.
+# - `MBEDX509_LIBRARY`:      Path to `mbedx509` library.
+# - `MBEDCRYPTO_LIBRARY`:    Path to `mbedcrypto` library.
 #
 # Result variables:
 #
-# MBEDTLS_FOUND         System has mbedtls
-# MBEDTLS_INCLUDE_DIRS  The mbedtls include directories
-# MBEDTLS_LIBRARIES     The mbedtls library names
-# MBEDTLS_VERSION       Version of mbedtls
+# - `MBEDTLS_FOUND`:         System has mbedTLS.
+# - `MBEDTLS_INCLUDE_DIRS`:  The mbedTLS include directories.
+# - `MBEDTLS_LIBRARIES`:     The mbedTLS library names.
+# - `MBEDTLS_LIBRARY_DIRS`:  The mbedTLS library directories.
+# - `MBEDTLS_PC_REQUIRES`:   The mbedTLS pkg-config packages.
+# - `MBEDTLS_CFLAGS`:        Required compiler flags.
+# - `MBEDTLS_VERSION`:       Version of mbedTLS.
 
 if(DEFINED MBEDTLS_INCLUDE_DIRS AND NOT DEFINED MBEDTLS_INCLUDE_DIR)
   message(WARNING "MBEDTLS_INCLUDE_DIRS is deprecated, use MBEDTLS_INCLUDE_DIR instead.")
@@ -44,68 +46,64 @@ if(DEFINED MBEDTLS_INCLUDE_DIRS AND NOT DEFINED MBEDTLS_INCLUDE_DIR)
   unset(MBEDTLS_INCLUDE_DIRS)
 endif()
 
-if(CURL_USE_PKGCONFIG)
+if(CURL_USE_PKGCONFIG AND
+   NOT DEFINED MBEDTLS_INCLUDE_DIR AND
+   NOT DEFINED MBEDTLS_LIBRARY AND
+   NOT DEFINED MBEDX509_LIBRARY AND
+   NOT DEFINED MBEDCRYPTO_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(PC_MBEDTLS "mbedtls")
+  pkg_check_modules(MBEDTLS "mbedtls")
+  pkg_check_modules(MBEDX509 "mbedx509")
+  pkg_check_modules(MBEDCRYPTO "mbedcrypto")
 endif()
 
-find_path(MBEDTLS_INCLUDE_DIR NAMES "mbedtls/ssl.h"
-  HINTS
-    ${PC_MBEDTLS_INCLUDEDIR}
-    ${PC_MBEDTLS_INCLUDE_DIRS}
-)
+if(MBEDTLS_FOUND AND MBEDX509_FOUND AND MBEDCRYPTO_FOUND)
+  list(APPEND MBEDTLS_LIBRARIES ${MBEDX509_LIBRARIES} ${MBEDCRYPTO_LIBRARIES})
+  list(REMOVE_DUPLICATES MBEDTLS_LIBRARIES)
+  set(MBEDTLS_PC_REQUIRES "mbedtls")
+  string(REPLACE ";" " " MBEDTLS_CFLAGS "${MBEDTLS_CFLAGS}")
+  message(STATUS "Found MbedTLS (via pkg-config): ${MBEDTLS_INCLUDE_DIRS} (found version \"${MBEDTLS_VERSION}\")")
+else()
+  find_path(MBEDTLS_INCLUDE_DIR NAMES "mbedtls/ssl.h")
+  find_library(MBEDTLS_LIBRARY NAMES "mbedtls" "libmbedtls")
+  find_library(MBEDX509_LIBRARY NAMES "mbedx509" "libmbedx509")
+  find_library(MBEDCRYPTO_LIBRARY NAMES "mbedcrypto" "libmbedcrypto")
 
-find_library(MBEDTLS_LIBRARY NAMES "mbedtls"
-  HINTS
-    ${PC_MBEDTLS_LIBDIR}
-    ${PC_MBEDTLS_LIBRARY_DIRS}
-)
-find_library(MBEDX509_LIBRARY NAMES "mbedx509"
-  HINTS
-    ${PC_MBEDTLS_LIBDIR}
-    ${PC_MBEDTLS_LIBRARY_DIRS}
-)
-find_library(MBEDCRYPTO_LIBRARY NAMES "mbedcrypto"
-  HINTS
-    ${PC_MBEDTLS_LIBDIR}
-    ${PC_MBEDTLS_LIBRARY_DIRS}
-)
-
-if(PC_MBEDTLS_VERSION)
-  set(MBEDTLS_VERSION ${PC_MBEDTLS_VERSION})
-elseif(MBEDTLS_INCLUDE_DIR)
-  if(EXISTS "${MBEDTLS_INCLUDE_DIR}/mbedtls/build_info.h")  # 3.x
-    set(_version_header "${MBEDTLS_INCLUDE_DIR}/mbedtls/build_info.h")
-  elseif(EXISTS "${MBEDTLS_INCLUDE_DIR}/mbedtls/version.h")  # 2.x
-    set(_version_header "${MBEDTLS_INCLUDE_DIR}/mbedtls/version.h")
-  else()
-    unset(_version_header)
+  unset(MBEDTLS_VERSION CACHE)
+  if(MBEDTLS_INCLUDE_DIR)
+    if(EXISTS "${MBEDTLS_INCLUDE_DIR}/mbedtls/build_info.h")  # 3.x
+      set(_version_header "${MBEDTLS_INCLUDE_DIR}/mbedtls/build_info.h")
+    elseif(EXISTS "${MBEDTLS_INCLUDE_DIR}/mbedtls/version.h")  # 2.x
+      set(_version_header "${MBEDTLS_INCLUDE_DIR}/mbedtls/version.h")
+    else()
+      unset(_version_header)
+    endif()
+    if(_version_header)
+      set(_version_regex "#[\t ]*define[\t ]+MBEDTLS_VERSION_STRING[\t ]+\"([0-9.]+)\"")
+      file(STRINGS "${_version_header}" _version_str REGEX "${_version_regex}")
+      string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
+      set(MBEDTLS_VERSION "${_version_str}")
+      unset(_version_regex)
+      unset(_version_str)
+      unset(_version_header)
+    endif()
   endif()
-  if(_version_header)
-    set(_version_regex "#[\t ]*define[\t ]+MBEDTLS_VERSION_STRING[\t ]+\"([0-9.]+)\"")
-    file(STRINGS "${_version_header}" _version_str REGEX "${_version_regex}")
-    string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
-    set(MBEDTLS_VERSION "${_version_str}")
-    unset(_version_regex)
-    unset(_version_str)
-    unset(_version_header)
+
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(MbedTLS
+    REQUIRED_VARS
+      MBEDTLS_INCLUDE_DIR
+      MBEDTLS_LIBRARY
+      MBEDX509_LIBRARY
+      MBEDCRYPTO_LIBRARY
+    VERSION_VAR
+      MBEDTLS_VERSION
+  )
+
+  if(MBEDTLS_FOUND)
+    set(MBEDTLS_INCLUDE_DIRS ${MBEDTLS_INCLUDE_DIR})
+    set(MBEDTLS_LIBRARIES    ${MBEDTLS_LIBRARY} ${MBEDX509_LIBRARY} ${MBEDCRYPTO_LIBRARY})
   endif()
+
+  mark_as_advanced(MBEDTLS_INCLUDE_DIR MBEDTLS_LIBRARY MBEDX509_LIBRARY MBEDCRYPTO_LIBRARY)
 endif()
-
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(MbedTLS
-  REQUIRED_VARS
-    MBEDTLS_INCLUDE_DIR
-    MBEDTLS_LIBRARY
-    MBEDX509_LIBRARY
-    MBEDCRYPTO_LIBRARY
-  VERSION_VAR
-    MBEDTLS_VERSION
-)
-
-if(MBEDTLS_FOUND)
-  set(MBEDTLS_INCLUDE_DIRS ${MBEDTLS_INCLUDE_DIR})
-  set(MBEDTLS_LIBRARIES    ${MBEDTLS_LIBRARY} ${MBEDX509_LIBRARY} ${MBEDCRYPTO_LIBRARY})
-endif()
-
-mark_as_advanced(MBEDTLS_INCLUDE_DIR MBEDTLS_LIBRARY MBEDX509_LIBRARY MBEDCRYPTO_LIBRARY)

@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-/* lib/curl_config.h.in. Generated somehow by cmake.  */
 
 /* Location of default ca bundle */
 #cmakedefine CURL_CA_BUNDLE "${CURL_CA_BUNDLE}"
@@ -56,7 +55,7 @@
 /* disables negotiate authentication */
 #cmakedefine CURL_DISABLE_NEGOTIATE_AUTH 1
 
-/* disables AWS-SIG4 */
+/* disables aws-sigv4 */
 #cmakedefine CURL_DISABLE_AWS 1
 
 /* disables DICT */
@@ -131,6 +130,9 @@
 /* disables proxies */
 #cmakedefine CURL_DISABLE_PROXY 1
 
+/* disables IPFS from the curl tool */
+#cmakedefine CURL_DISABLE_IPFS 1
+
 /* disables RTSP */
 #cmakedefine CURL_DISABLE_RTSP 1
 
@@ -146,6 +148,9 @@
 /* disables SMTP */
 #cmakedefine CURL_DISABLE_SMTP 1
 
+/* disabled WebSockets */
+#cmakedefine CURL_DISABLE_WEBSOCKETS 1
+
 /* disables use of socketpair for curl_multi_poll */
 #cmakedefine CURL_DISABLE_SOCKETPAIR 1
 
@@ -157,6 +162,12 @@
 
 /* disables verbose strings */
 #cmakedefine CURL_DISABLE_VERBOSE_STRINGS 1
+
+/* disables unsafe CA bundle search on Windows from the curl tool */
+#cmakedefine CURL_DISABLE_CA_SEARCH 1
+
+/* safe CA bundle search (within the curl tool directory) on Windows */
+#cmakedefine CURL_CA_SEARCH_SAFE 1
 
 /* to make a symbol visible */
 #cmakedefine CURL_EXTERN_SYMBOL ${CURL_EXTERN_SYMBOL}
@@ -208,6 +219,9 @@
 /* Define to 1 if you have the `closesocket' function. */
 #cmakedefine HAVE_CLOSESOCKET 1
 
+/* Define to 1 if you have the `CloseSocket' function. */
+#cmakedefine HAVE_CLOSESOCKET_CAMEL 1
+
 /* Define to 1 if you have the <dirent.h> header file. */
 #cmakedefine HAVE_DIRENT_H 1
 
@@ -231,9 +245,6 @@
 
 /* Define to 1 if you have the fseeko declaration. */
 #cmakedefine HAVE_DECL_FSEEKO 1
-
-/* Define to 1 if you have the _fseeki64 function. */
-#cmakedefine HAVE__FSEEKI64 1
 
 /* Define to 1 if you have the ftruncate function. */
 #cmakedefine HAVE_FTRUNCATE 1
@@ -307,9 +318,6 @@
 /* Define to 1 if you have the <gssapi/gssapi.h> header file. */
 #cmakedefine HAVE_GSSAPI_GSSAPI_H 1
 
-/* Define to 1 if you have the <gssapi/gssapi_krb5.h> header file. */
-#cmakedefine HAVE_GSSAPI_GSSAPI_KRB5_H 1
-
 /* if you have the GNU gssapi libraries */
 #cmakedefine HAVE_GSSGNU 1
 
@@ -352,9 +360,6 @@
 
 /* Define to 1 if you have the lber.h header file. */
 #cmakedefine HAVE_LBER_H 1
-
-/* Define to 1 if you have the ldap.h header file. */
-#cmakedefine HAVE_LDAP_H 1
 
 /* Use LDAPS implementation */
 #cmakedefine HAVE_LDAP_SSL 1
@@ -401,6 +406,9 @@
 /* Define to 1 if you have the <netinet/in.h> header file. */
 #cmakedefine HAVE_NETINET_IN_H 1
 
+/* Define to 1 if you have the <netinet/in6.h> header file. */
+#cmakedefine HAVE_NETINET_IN6_H 1
+
 /* Define to 1 if you have the <netinet/tcp.h> header file. */
 #cmakedefine HAVE_NETINET_TCP_H 1
 
@@ -422,8 +430,8 @@
 /* Define to 1 if you have the `eventfd' function. */
 #cmakedefine HAVE_EVENTFD 1
 
-/* If you have a fine poll */
-#cmakedefine HAVE_POLL_FINE 1
+/* If you have poll */
+#cmakedefine HAVE_POLL 1
 
 /* Define to 1 if you have the <poll.h> header file. */
 #cmakedefine HAVE_POLL_H 1
@@ -455,6 +463,9 @@
 /* Define to 1 if you have the sendmsg function. */
 #cmakedefine HAVE_SENDMSG 1
 
+/* Define to 1 if you have the sendmmsg function. */
+#cmakedefine HAVE_SENDMMSG 1
+
 /* Define to 1 if you have the 'fsetxattr' function. */
 #cmakedefine HAVE_FSETXATTR 1
 
@@ -469,6 +480,9 @@
 
 /* Define to 1 if you have the `setmode' function. */
 #cmakedefine HAVE_SETMODE 1
+
+/* Define to 1 if you have the `_setmode' function. */
+#cmakedefine HAVE__SETMODE 1
 
 /* Define to 1 if you have the `setrlimit' function. */
 #cmakedefine HAVE_SETRLIMIT 1
@@ -496,6 +510,9 @@
 
 /* Define to 1 if you have the `socket' function. */
 #cmakedefine HAVE_SOCKET 1
+
+/* Define to 1 if you have the <proto/bsdsocket.h> header file. */
+#cmakedefine HAVE_PROTO_BSDSOCKET_H 1
 
 /* Define to 1 if you have the socketpair function. */
 #cmakedefine HAVE_SOCKETPAIR 1
@@ -608,9 +625,6 @@
 /* Define this symbol if your OS supports changing the contents of argv */
 #cmakedefine HAVE_WRITABLE_ARGV 1
 
-/* Define to 1 if you need the lber.h header file even with ldap.h */
-#cmakedefine NEED_LBER_H 1
-
 /* Define to 1 if you need the malloc.h header file even with stdlib.h */
 #cmakedefine NEED_MALLOC_H 1
 
@@ -618,7 +632,7 @@
 #cmakedefine NEED_REENTRANT 1
 
 /* cpu-machine-OS */
-#cmakedefine OS ${OS}
+#cmakedefine CURL_OS ${CURL_OS}
 
 /* Name of package */
 #cmakedefine PACKAGE ${PACKAGE}
@@ -703,6 +717,9 @@ ${SIZEOF_TIME_T_CODE}
 
 /* if wolfSSL has the wolfSSL_DES_ecb_encrypt function. */
 #cmakedefine HAVE_WOLFSSL_DES_ECB_ENCRYPT 1
+
+/* if wolfSSL has the wolfSSL_BIO_new function. */
+#cmakedefine HAVE_WOLFSSL_BIO 1
 
 /* if wolfSSL has the wolfSSL_BIO_set_shutdown function. */
 #cmakedefine HAVE_WOLFSSL_FULL_BIO 1
@@ -809,9 +826,6 @@ ${SIZEOF_TIME_T_CODE}
 
 /* to enable Apple IDN */
 #cmakedefine USE_APPLE_IDN 1
-
-/* Define to 1 to enable websocket support. */
-#cmakedefine USE_WEBSOCKETS 1
 
 /* Define to 1 if OpenSSL has the SSL_CTX_set_srp_username function. */
 #cmakedefine HAVE_OPENSSL_SRP 1
