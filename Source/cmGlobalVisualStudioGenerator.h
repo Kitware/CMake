@@ -85,6 +85,8 @@ public:
    */
   virtual std::string GetUserMacrosRegKeyBase();
 
+  cmValue GetDebuggerWorkingDirectory(cmGeneratorTarget* gt) const override;
+
   enum MacroName
   {
     MacroReload,

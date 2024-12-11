@@ -506,6 +506,8 @@ public:
   // Default config to use for cmake --build
   virtual std::string GetDefaultBuildConfig() const { return "Debug"; }
 
+  virtual cmValue GetDebuggerWorkingDirectory(cmGeneratorTarget* gt) const;
+
   // Class to track a set of dependencies.
   using TargetDependSet = cmTargetDependSet;
 

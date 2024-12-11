@@ -155,6 +155,7 @@ syn keyword cmakeProperty contained
             \ C_STANDARD_REQUIRED
             \ DEBUG_CONFIGURATIONS
             \ DEBUG_POSTFIX
+            \ DEBUGGER_WORKING_DIRECTORY
             \ DEFINE_SYMBOL
             \ DEFINITIONS
             \ DEPENDS
@@ -1139,6 +1140,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_C_VISIBILITY_PRESET
             \ CMAKE_DEBUG_POSTFIX
             \ CMAKE_DEBUG_TARGET_PROPERTIES
+            \ CMAKE_DEBUGGER_WORKING_DIRECTORY
             \ CMAKE_DEFAULT_BUILD_TYPE
             \ CMAKE_DEFAULT_CONFIGS
             \ CMAKE_DEPENDS_IN_PROJECT_ONLY

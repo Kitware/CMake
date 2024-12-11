@@ -16,7 +16,7 @@
             "backtrace": [
                 {
                     "file": "^cxx/CMakeLists\\.txt$",
-                    "line": 13,
+                    "line": 15,
                     "command": "add_library",
                     "hasParent": true
                 },
@@ -52,7 +52,7 @@
     "backtrace": [
         {
             "file": "^cxx/CMakeLists\\.txt$",
-            "line": 13,
+            "line": 15,
             "command": "add_library",
             "hasParent": true
         },

@@ -16,7 +16,7 @@
             "backtrace": [
                 {
                     "file": "^cxx/CMakeLists\\.txt$",
-                    "line": 9,
+                    "line": 11,
                     "command": "add_library",
                     "hasParent": true
                 },
@@ -57,7 +57,7 @@
     "backtrace": [
         {
             "file": "^cxx/CMakeLists\\.txt$",
-            "line": 9,
+            "line": 11,
             "command": "add_library",
             "hasParent": true
         },
@@ -94,7 +94,7 @@
                 "backtrace": [
                     {
                         "file": "^codemodel-v2\\.cmake$",
-                        "line": 46,
+                        "line": 49,
                         "command": "install",
                         "hasParent": true
                     },
@@ -124,7 +124,7 @@
                 "backtrace": [
                     {
                         "file": "^codemodel-v2\\.cmake$",
-                        "line": 46,
+                        "line": 49,
                         "command": "install",
                         "hasParent": true
                     },
@@ -154,7 +154,7 @@
                 "backtrace": [
                     {
                         "file": "^codemodel-v2\\.cmake$",
-                        "line": 51,
+                        "line": 54,
                         "command": "install",
                         "hasParent": true
                     },
