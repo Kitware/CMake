@@ -8,7 +8,7 @@
 #  ifdef _WIN32
 #    define CM_HAVE_CPU_AFFINITY
 #    include <windows.h>
-#  elif defined(__linux__) || defined(__FreeBSD__)
+#  elif (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__)
 #    define CM_HAVE_CPU_AFFINITY
 #    include <pthread.h>
 #    include <sched.h>
