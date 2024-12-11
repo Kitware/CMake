@@ -132,6 +132,10 @@ public:
   const std::string& GetTarget() const;
   void SetTarget(const std::string& target);
 
+  /** Set/Get the custom command rolee */
+  const std::string& GetRole() const;
+  void SetRole(const std::string& role);
+
   /** Record if the custom command can be used for code generation. */
   bool GetCodegen() const { return Codegen; }
   void SetCodegen(bool b) { Codegen = b; }
@@ -148,6 +152,7 @@ private:
   std::string WorkingDirectory;
   std::string Depfile;
   std::string JobPool;
+  std::string Role;
   bool JobserverAware = false;
   bool HaveComment = false;
   bool EscapeAllowMakeVars = false;

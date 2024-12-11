@@ -1,0 +1,4 @@
+{
+  "version": 1,
+  "callbacks": ["@GET_HOOK@"]
+}

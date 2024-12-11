@@ -64,6 +64,7 @@ Reference Manuals
    /manual/cmake-file-api.7
    /manual/cmake-generator-expressions.7
    /manual/cmake-generators.7
+   /manual/cmake-instrumentation.7
    /manual/cmake-language.7
    /manual/cmake-modules.7
    /manual/cmake-packages.7

@@ -38,6 +38,8 @@ public:
   std::string OptionTargetType;
   std::string OptionBuildDir;
   std::string OptionFilterPrefix;
+  std::string OptionCommandType;
+  std::string OptionRole;
 
   // The real command line appearing after launcher arguments.
   std::string CWD;

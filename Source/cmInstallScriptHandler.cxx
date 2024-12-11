@@ -21,6 +21,7 @@
 
 #include "cmCryptoHash.h"
 #include "cmGeneratedFileStream.h"
+#include "cmInstrumentation.h"
 #include "cmJSONState.h"
 #include "cmProcessOutput.h"
 #include "cmStringAlgorithms.h"
@@ -102,13 +103,27 @@ std::vector<std::vector<std::string>> cmInstallScriptHandler::GetCommands()
   return this->commands;
 }
 
-int cmInstallScriptHandler::Install(unsigned int j)
+int cmInstallScriptHandler::Install(unsigned int j,
+                                    cmInstrumentation& instrumentation)
 {
   cm::uv_loop_ptr loop;
   loop.init();
   std::vector<InstallScript> scripts;
   scripts.reserve(this->commands.size());
-  for (auto const& cmd : this->commands) {
+
+  std::vector<std::string> instrument_arg;
+  if (instrumentation.HasQuery()) {
+    instrument_arg = { cmSystemTools::GetCTestCommand(),
+                       "--instrument",
+                       "--command-type",
+                       "install",
+                       "--build-dir",
+                       this->binaryDir,
+                       "--" };
+  }
+
+  for (auto& cmd : this->commands) {
+    cmd.insert(cmd.begin(), instrument_arg.begin(), instrument_arg.end());
     scripts.emplace_back(cmd);
   }
   std::size_t working = 0;

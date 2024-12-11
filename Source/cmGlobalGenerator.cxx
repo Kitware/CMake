@@ -3119,6 +3119,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
     gti.Message = "Install the project...";
     gti.UsesTerminal = true;
     gti.StdPipesUTF8 = true;
+    gti.Role = "install";
     cmCustomCommandLine singleLine;
     if (this->GetPreinstallTargetName()) {
       gti.Depends.emplace_back(this->GetPreinstallTargetName());
@@ -3157,6 +3158,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
     if (const char* install_local = this->GetInstallLocalTargetName()) {
       gti.Name = install_local;
       gti.Message = "Installing only the local directory...";
+      gti.Role = "install";
       gti.UsesTerminal =
         !this->GetCMakeInstance()->GetState()->GetGlobalPropertyAsBool(
           "INSTALL_PARALLEL");
@@ -3177,6 +3179,7 @@ void cmGlobalGenerator::AddGlobalTarget_Install(
       gti.Name = install_strip;
       gti.Message = "Installing the project stripped...";
       gti.UsesTerminal = true;
+      gti.Role = "install";
       gti.CommandLines.clear();
 
       cmCustomCommandLine stripCmdLine = singleLine;
@@ -3437,6 +3440,7 @@ void cmGlobalGenerator::CreateGlobalTarget(GlobalTargetInfo const& gti,
   cc.SetWorkingDirectory(gti.WorkingDir.c_str());
   cc.SetStdPipesUTF8(gti.StdPipesUTF8);
   cc.SetUsesTerminal(gti.UsesTerminal);
+  cc.SetRole(gti.Role);
   target.AddPostBuildCommand(std::move(cc));
   if (!gti.Message.empty()) {
     target.SetProperty("EchoString", gti.Message);

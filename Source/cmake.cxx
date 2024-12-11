@@ -81,6 +81,8 @@
 #  include "cmConfigureLog.h"
 #  include "cmFileAPI.h"
 #  include "cmGraphVizWriter.h"
+#  include "cmInstrumentation.h"
+#  include "cmInstrumentationQuery.h"
 #  include "cmVariableWatch.h"
 #endif
 
@@ -929,6 +931,7 @@ enum class ListPresets
 // Parse the args
 void cmake::SetArgs(const std::vector<std::string>& args)
 {
+  this->cmdArgs = args;
   bool haveToolset = false;
   bool havePlatform = false;
   bool haveBArg = false;
@@ -2604,9 +2607,28 @@ int cmake::ActualConfigure()
 
   // actually do the configure
   auto startTime = std::chrono::steady_clock::now();
+#if !defined(CMAKE_BOOTSTRAP)
+  cmInstrumentation instrumentation(this->State->GetBinaryDirectory(), true);
+  if (!instrumentation.errorMsg.empty()) {
+    cmSystemTools::Error(instrumentation.errorMsg);
+    return 1;
+  }
+  std::function<int()> doConfigure = [this]() -> int {
+    this->GlobalGenerator->Configure();
+    return 0;
+  };
+  int ret = instrumentation.InstrumentCommand(
+    "configure", this->cmdArgs, [doConfigure]() { return doConfigure(); },
+    cm::nullopt, cm::nullopt, true);
+  if (ret != 0) {
+    return ret;
+  }
+#else
   this->GlobalGenerator->Configure();
+#endif
   auto endTime = std::chrono::steady_clock::now();
 
+  // configure result
   if (this->GetWorkingMode() == cmake::NORMAL_MODE) {
     std::ostringstream msg;
     if (cmSystemTools::GetErrorOccurredFlag()) {
@@ -2650,6 +2672,7 @@ int cmake::ActualConfigure()
   }
 
   const auto& mf = this->GlobalGenerator->GetMakefiles()[0];
+
   if (mf->IsOn("CTEST_USE_LAUNCHERS") &&
       !this->State->GetGlobalProperty("RULE_LAUNCH_COMPILE")) {
     cmSystemTools::Error(
@@ -2658,6 +2681,37 @@ int cmake::ActualConfigure()
       "Did you forget to include(CTest) in the toplevel "
       "CMakeLists.txt ?");
   }
+  // Setup launchers for instrumentation
+#if !defined(CMAKE_BOOTSTRAP)
+  instrumentation.LoadQueries();
+  if (instrumentation.HasQuery()) {
+    std::string launcher;
+    if (mf->IsOn("CTEST_USE_LAUNCHERS")) {
+      launcher =
+        cmStrCat("\"", cmSystemTools::GetCTestCommand(), "\" --launch ");
+    } else {
+      launcher =
+        cmStrCat("\"", cmSystemTools::GetCTestCommand(), "\" --instrument ");
+    }
+    std::string common_args =
+      cmStrCat(" --target-name <TARGET_NAME> ", "--build-dir \"",
+               this->State->GetBinaryDirectory(), "\" ");
+    this->State->SetGlobalProperty(
+      "RULE_LAUNCH_COMPILE",
+      cmStrCat(
+        launcher, "--command-type compile", common_args,
+        "--output <OBJECT> --source <SOURCE> --language <LANGUAGE> -- "));
+    this->State->SetGlobalProperty(
+      "RULE_LAUNCH_LINK",
+      cmStrCat(launcher, "--command-type link", common_args,
+               "--output <TARGET> --target-type <TARGET_TYPE> ",
+               "--language <LANGUAGE> -- "));
+    this->State->SetGlobalProperty(
+      "RULE_LAUNCH_CUSTOM",
+      cmStrCat(launcher, "--command-type custom", common_args,
+               "--output \"<OUTPUT>\" --role <ROLE> -- "));
+  }
+#endif
 
   this->State->SaveVerificationScript(this->GetHomeOutputDirectory(),
                                       this->Messenger.get());
@@ -2945,15 +2999,29 @@ int cmake::Generate()
     return -1;
   }
 
+  auto startTime = std::chrono::steady_clock::now();
 #if !defined(CMAKE_BOOTSTRAP)
   auto profilingRAII = this->CreateProfilingEntry("project", "generate");
-#endif
+  cmInstrumentation instrumentation(this->State->GetBinaryDirectory());
+  std::function<int()> doGenerate = [this]() -> int {
+    if (!this->GlobalGenerator->Compute()) {
+      return -1;
+    }
+    this->GlobalGenerator->Generate();
+    return 0;
+  };
 
-  auto startTime = std::chrono::steady_clock::now();
+  int ret = instrumentation.InstrumentCommand(
+    "generate", this->cmdArgs, [doGenerate]() { return doGenerate(); });
+  if (ret != 0) {
+    return ret;
+  }
+#else
   if (!this->GlobalGenerator->Compute()) {
     return -1;
   }
   this->GlobalGenerator->Generate();
+#endif
   auto endTime = std::chrono::steady_clock::now();
   {
     auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(endTime -
@@ -2963,6 +3031,10 @@ int cmake::Generate()
         << ms.count() / 1000.0L << "s)";
     this->UpdateProgress(msg.str(), -1);
   }
+#if !defined(CMAKE_BOOTSTRAP)
+  instrumentation.CollectTimingData(
+    cmInstrumentationQuery::Hook::PostGenerate);
+#endif
   if (!this->GraphVizFile.empty()) {
     std::cout << "Generate graphviz: " << this->GraphVizFile << '\n';
     this->GenerateGraphViz(this->GraphVizFile);

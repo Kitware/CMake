@@ -1,0 +1,2 @@
+CMake Error at CMakeLists\.txt:37 \(cmake_instrumentation\):
+  cmake_instrumentation given a non-integer DATA_VERSION\.

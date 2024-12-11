@@ -154,6 +154,16 @@ void cmCustomCommand::SetUsesTerminal(bool b)
   this->UsesTerminal = b;
 }
 
+void cmCustomCommand::SetRole(const std::string& role)
+{
+  this->Role = role;
+}
+
+const std::string& cmCustomCommand::GetRole() const
+{
+  return this->Role;
+}
+
 bool cmCustomCommand::GetCommandExpandLists() const
 {
   return this->CommandExpandLists;

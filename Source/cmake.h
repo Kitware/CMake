@@ -754,6 +754,7 @@ protected:
   void GenerateGraphViz(const std::string& fileName) const;
 
 private:
+  std::vector<std::string> cmdArgs;
   std::string CMakeWorkingDirectory;
   ProgressCallbackType ProgressCallback;
   WorkingMode CurrentWorkingMode = NORMAL_MODE;

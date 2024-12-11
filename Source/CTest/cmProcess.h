@@ -66,6 +66,14 @@ public:
   void SetId(int id) { this->Id = id; }
   int64_t GetExitValue() const { return this->ExitValue; }
   cmDuration GetTotalTime() { return this->TotalTime; }
+  std::chrono::steady_clock::time_point GetStartTime()
+  {
+    return this->StartTime;
+  }
+  std::chrono::system_clock::time_point GetSystemStartTime()
+  {
+    return this->SystemStartTime;
+  }
 
   enum class Exception
   {
@@ -97,6 +105,7 @@ private:
   cm::optional<cmDuration> Timeout;
   TimeoutReason TimeoutReason_ = TimeoutReason::Normal;
   std::chrono::steady_clock::time_point StartTime;
+  std::chrono::system_clock::time_point SystemStartTime;
   cmDuration TotalTime;
   bool ReadHandleClosed = false;
   bool ProcessHandleClosed = false;

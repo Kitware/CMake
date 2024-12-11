@@ -28,6 +28,8 @@
 #include "cmDocumentationEntry.h"
 #include "cmGlobalGenerator.h"
 #include "cmInstallScriptHandler.h"
+#include "cmInstrumentation.h"
+#include "cmInstrumentationQuery.h"
 #include "cmList.h"
 #include "cmMakefile.h"
 #include "cmMessageMetadata.h"
@@ -703,11 +705,27 @@ int do_build(int ac, char const* const* av)
     cmakemainProgressCallback(msg, prog, &cm);
   });
 
+  cmInstrumentation instrumentation(dir);
+  if (!instrumentation.errorMsg.empty()) {
+    cmSystemTools::Error(instrumentation.errorMsg);
+    return 1;
+  }
   cmBuildOptions buildOptions(cleanFirst, false, resolveMode);
-
-  return cm.Build(jobs, std::move(dir), std::move(targets), std::move(config),
-                  std::move(nativeOptions), buildOptions, verbose, presetName,
-                  listPresets);
+  std::function<int()> doBuild = [&cm, &jobs, &dir, &targets, &config,
+                                  &nativeOptions, &buildOptions, &verbose,
+                                  &presetName, &listPresets]() {
+    return cm.Build(jobs, dir, std::move(targets), std::move(config),
+                    std::move(nativeOptions), buildOptions, verbose,
+                    presetName, listPresets);
+  };
+  instrumentation.CollectTimingData(
+    cmInstrumentationQuery::Hook::PreCMakeBuild);
+  std::vector<std::string> cmd;
+  cm::append(cmd, av, av + ac);
+  int ret = instrumentation.InstrumentCommand("cmakeBuild", cmd, doBuild);
+  instrumentation.CollectTimingData(
+    cmInstrumentationQuery::Hook::PostCMakeBuild);
+  return ret;
 #endif
 }
 
@@ -952,6 +970,7 @@ int do_install(int ac, char const* const* av)
 
   args.emplace_back("-P");
 
+  cmInstrumentation instrumentation(dir);
   auto handler = cmInstallScriptHandler(dir, component, config, args);
   int ret = 0;
   if (!jobs && handler.IsParallel()) {
@@ -966,27 +985,38 @@ int do_install(int ac, char const* const* av)
       }
     }
   }
-  if (handler.IsParallel()) {
-    ret = handler.Install(jobs);
-  } else {
-    for (auto const& cmd : handler.GetCommands()) {
-      cmake cm(cmake::RoleScript, cmState::Script);
-      cmSystemTools::SetMessageCallback(
-        [&cm](const std::string& msg, const cmMessageMetadata& md) {
-          cmakemainMessageCallback(msg, md, &cm);
-        });
-      cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
-        cmakemainProgressCallback(msg, prog, &cm);
-      });
-      cm.SetHomeDirectory("");
-      cm.SetHomeOutputDirectory("");
-      cm.SetDebugOutputOn(verbose);
-      cm.SetWorkingMode(cmake::SCRIPT_MODE);
-      ret = int(bool(cm.Run(cmd)));
-    }
-  }
 
-  return int(ret > 0);
+  std::function<int()> doInstall = [&handler, &verbose, &jobs,
+                                    &instrumentation]() -> int {
+    int ret_ = 0;
+    if (handler.IsParallel()) {
+      ret_ = handler.Install(jobs, instrumentation);
+    } else {
+      for (auto const& cmd : handler.GetCommands()) {
+        cmake cm(cmake::RoleScript, cmState::Script);
+        cmSystemTools::SetMessageCallback(
+          [&cm](const std::string& msg, const cmMessageMetadata& md) {
+            cmakemainMessageCallback(msg, md, &cm);
+          });
+        cm.SetProgressCallback([&cm](const std::string& msg, float prog) {
+          cmakemainProgressCallback(msg, prog, &cm);
+        });
+        cm.SetHomeDirectory("");
+        cm.SetHomeOutputDirectory("");
+        cm.SetDebugOutputOn(verbose);
+        cm.SetWorkingMode(cmake::SCRIPT_MODE);
+        ret_ = int(bool(cm.Run(cmd)));
+      }
+    }
+    return int(ret_ > 0);
+  };
+
+  std::vector<std::string> cmd;
+  cm::append(cmd, av, av + ac);
+  ret = instrumentation.InstrumentCommand(
+    "cmakeInstall", cmd, [doInstall]() { return doInstall(); });
+  instrumentation.CollectTimingData(cmInstrumentationQuery::Hook::PostInstall);
+  return ret;
 #endif
 }
 

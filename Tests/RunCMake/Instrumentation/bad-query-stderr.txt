@@ -1,0 +1,4 @@
+^CMake Error: +
+Error: @3,42: Not a valid query: "bad query"
+  "queries": \["staticSystemInformation", "bad query"\]
+                                         \^$

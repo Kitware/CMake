@@ -23,6 +23,7 @@ public:
     ImportPackageInfo,
     ExportPackageInfo,
     ExportBuildDatabase,
+    Instrumentation,
 
     Sentinel,
   };

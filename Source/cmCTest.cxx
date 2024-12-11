@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <ctime>
+#include <functional>
 #include <initializer_list>
 #include <iostream>
 #include <map>
@@ -50,6 +51,8 @@
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGlobalGenerator.h"
+#include "cmInstrumentation.h"
+#include "cmInstrumentationQuery.h"
 #include "cmJSONState.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -2623,23 +2626,32 @@ int cmCTest::Run(std::vector<std::string> const& args)
   }
 #endif
 
-  // now what should cmake do? if --build-and-test was specified then
-  // we run the build and test handler and return
-  if (cmakeAndTest) {
-    return this->RunCMakeAndTest();
-  }
+  cmInstrumentation instrumentation(
+    cmSystemTools::GetCurrentWorkingDirectory());
+  std::function<int()> doTest = [this, &cmakeAndTest, &runScripts,
+                                 &processSteps]() -> int {
+    // now what should cmake do? if --build-and-test was specified then
+    // we run the build and test handler and return
+    if (cmakeAndTest) {
+      return this->RunCMakeAndTest();
+    }
 
-  // -S, -SP, and/or -SP was specified
-  if (!runScripts.empty()) {
-    return this->RunScripts(runScripts);
-  }
+    // -S, -SP, and/or -SP was specified
+    if (!runScripts.empty()) {
+      return this->RunScripts(runScripts);
+    }
 
-  // -D, -T, and/or -M was specified
-  if (processSteps) {
-    return this->ProcessSteps();
-  }
+    // -D, -T, and/or -M was specified
+    if (processSteps) {
+      return this->ProcessSteps();
+    }
 
-  return this->ExecuteTests();
+    return this->ExecuteTests();
+  };
+  int ret = instrumentation.InstrumentCommand("ctest", args,
+                                              [doTest]() { return doTest(); });
+  instrumentation.CollectTimingData(cmInstrumentationQuery::Hook::PostTest);
+  return ret;
 }
 
 int cmCTest::RunScripts(

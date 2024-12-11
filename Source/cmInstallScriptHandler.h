@@ -12,6 +12,8 @@
 #include "cmUVProcessChain.h"
 #include "cmUVStream.h"
 
+class cmInstrumentation;
+
 class cmInstallScriptHandler
 {
 public:
@@ -19,7 +21,7 @@ public:
   cmInstallScriptHandler(std::string, std::string, std::string,
                          std::vector<std::string>&);
   bool IsParallel();
-  int Install(unsigned int j);
+  int Install(unsigned int j, cmInstrumentation& instrumentation);
   std::vector<std::vector<std::string>> GetCommands() const;
   class InstallScript
   {
