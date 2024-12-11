@@ -31,3 +31,7 @@ run_cmake("implicit-depends")
 run_cmake("implicit-depends-append-codegen")
 run_cmake("append-implicit-depends")
 run_cmake("no-output")
+
+# Top-level codegen depends on that of subdirectories.
+run_codegen(SubDir)
+run_codegen(SubDirExcludeFromAll)
