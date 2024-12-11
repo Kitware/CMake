@@ -3204,6 +3204,14 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions(
           e1.WritePlatformConfigTag("LocalDebuggerCommand", cond,
                                     genDebuggerCommand);
         }
+
+        if (cmValue commandArguments = this->GeneratorTarget->GetProperty(
+              "VS_DEBUGGER_COMMAND_ARGUMENTS")) {
+          std::string genCommandArguments = cmGeneratorExpression::Evaluate(
+            *commandArguments, this->LocalGenerator, config);
+          e1.WritePlatformConfigTag("LocalDebuggerCommandArguments", cond,
+                                    genCommandArguments);
+        }
       }
     }
   }
