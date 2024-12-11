@@ -4101,22 +4101,6 @@ void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm) const
   }
 }
 
-bool cmMakefile::IgnoreErrorsCMP0061() const
-{
-  bool ignoreErrors = true;
-  switch (this->GetPolicyStatus(cmPolicies::CMP0061)) {
-    case cmPolicies::WARN:
-      // No warning for this policy!
-      CM_FALLTHROUGH;
-    case cmPolicies::OLD:
-      break;
-    case cmPolicies::NEW:
-      ignoreErrors = false;
-      break;
-  }
-  return ignoreErrors;
-}
-
 cmMakefile::FunctionPushPop::FunctionPushPop(cmMakefile* mf,
                                              const std::string& fileName,
                                              cmPolicies::PolicyMap const& pm)

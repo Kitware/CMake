@@ -15,14 +15,14 @@ This is mainly intended for internal use by the :module:`CTest` module.
 
 Sets the given ``<variable>`` to a command-line string of the form::
 
- <cmake> --build . [--config <config>] [--parallel <parallel>] [--target <target>...] [-- -i]
+ <cmake> --build . [--config <config>] [--parallel <parallel>] [--target <target>...]
 
 where ``<cmake>`` is the location of the :manual:`cmake(1)` command-line
 tool, and ``<config>``, ``<parallel>`` and ``<target>`` are the values
 provided to the ``CONFIGURATION``, ``PARALLEL_LEVEL`` and ``TARGET``
-options, if any.  The trailing ``-- -i`` option is added for
-:ref:`Makefile Generators` if policy :policy:`CMP0061` is not set to
-``NEW``.
+options, if any.  In CMake versions prior to 4.0, a trailing ``-- -i``
+option was added for :ref:`Makefile Generators` if policy :policy:`CMP0061`
+was not set to ``NEW``.
 
 When invoked, this :option:`cmake --build` command line will launch the
 underlying build system tool.

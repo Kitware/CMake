@@ -1,6 +1,9 @@
 CMP0061
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 .. versionadded:: 3.3
 
 CTest does not by default tell ``make`` to ignore errors (``-i``).
@@ -22,7 +25,5 @@ calls in CTest.  The ``NEW`` behavior for this policy is to not
 add ``-i``.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.3
-.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: did *not* warn
+.. include:: REMOVED_EPILOGUE.txt

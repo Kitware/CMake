@@ -417,8 +417,6 @@ public:
     cmMakefile* Makefile;
   };
 
-  bool IgnoreErrorsCMP0061() const;
-
   std::string const& GetHomeDirectory() const;
   std::string const& GetHomeOutputDirectory() const;
 

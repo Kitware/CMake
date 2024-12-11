@@ -180,7 +180,7 @@ class cmMakefile;
          0, NEW)                                                              \
   SELECT(POLICY, CMP0061,                                                     \
          "CTest does not by default tell make to ignore errors (-i).", 3, 3,  \
-         0, WARN)                                                             \
+         0, NEW)                                                              \
   SELECT(POLICY, CMP0062, "Disallow install() of export() result.", 3, 3, 0,  \
          WARN)                                                                \
   SELECT(POLICY, CMP0063,                                                     \
