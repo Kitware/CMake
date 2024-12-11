@@ -72,6 +72,7 @@ set(scopes
   Private
   Public)
 set(target_types
+  Interface
   Static
   )
 foreach (fileset_type IN LISTS fileset_types)
