@@ -3499,6 +3499,12 @@ void cmGlobalGenerator::AppendDirectoryForConfig(const std::string& /*unused*/,
   // configuration.
 }
 
+cmValue cmGlobalGenerator::GetDebuggerWorkingDirectory(
+  cmGeneratorTarget* gt) const
+{
+  return gt->GetProperty("DEBUGGER_WORKING_DIRECTORY");
+}
+
 cmGlobalGenerator::TargetDependSet const&
 cmGlobalGenerator::GetTargetDirectDepends(cmGeneratorTarget const* target)
 {

@@ -373,6 +373,8 @@ struct TargetProperty
 
 TargetProperty const StaticTargetProperties[] = {
   /* clang-format off */
+  // -- Debugger Properties
+  { "DEBUGGER_WORKING_DIRECTORY"_s, IC::ExecutableTarget },
   // Compilation properties
   { "COMPILE_WARNING_AS_ERROR"_s, IC::CanCompileSources },
   { "INTERPROCEDURAL_OPTIMIZATION"_s, IC::CanCompileSources },

@@ -14,7 +14,7 @@
           "backtrace": [
             {
               "file": "^cxx/CMakeLists\\.txt$",
-              "line": 21,
+              "line": 23,
               "command": "target_precompile_headers",
               "hasParent": true
             },
@@ -33,7 +33,7 @@
           "backtrace": [
             {
               "file": "^cxx/CMakeLists\\.txt$",
-              "line": 17,
+              "line": 19,
               "command": "target_compile_options",
               "hasParent": true
             },
@@ -61,7 +61,7 @@
           "backtrace": [
             {
               "file": "^cxx/CMakeLists\\.txt$",
-              "line": 21,
+              "line": 23,
               "command": "target_precompile_headers",
               "hasParent": true
             },
@@ -80,7 +80,7 @@
           "backtrace": [
             {
               "file": "^cxx/CMakeLists\\.txt$",
-              "line": 17,
+              "line": 19,
               "command": "target_compile_options",
               "hasParent": true
             },

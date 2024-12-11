@@ -434,6 +434,7 @@ Variables that Control the Build
    /variable/CMAKE_CXX_MODULE_STD
    /variable/CMAKE_CXX_SCAN_FOR_MODULES
    /variable/CMAKE_DEBUG_POSTFIX
+   /variable/CMAKE_DEBUGGER_WORKING_DIRECTORY
    /variable/CMAKE_DEFAULT_BUILD_TYPE
    /variable/CMAKE_DEFAULT_CONFIGS
    /variable/CMAKE_DEPENDS_USE_COMPILER

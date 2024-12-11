@@ -52,7 +52,7 @@
                 "backtrace": [
                   {
                     "file": "^cxx/CMakeLists\\.txt$",
-                    "line": 21,
+                    "line": 23,
                     "command": "target_precompile_headers",
                     "hasParent": true
                   },
@@ -71,7 +71,7 @@
                     "backtrace": [
                         {
                             "file": "^cxx/CMakeLists\\.txt$",
-                            "line": 17,
+                            "line": 19,
                             "command": "target_compile_options",
                             "hasParent": true
                         },
@@ -122,7 +122,7 @@
                 "backtrace": [
                     {
                         "file": "^cxx/CMakeLists\\.txt$",
-                        "line": 38,
+                        "line": 40,
                         "command": "install",
                         "hasParent": true
                     },
@@ -139,7 +139,7 @@
                 "backtrace": [
                     {
                         "file": "^codemodel-v2\\.cmake$",
-                        "line": 45,
+                        "line": 46,
                         "command": "install",
                         "hasParent": true
                     },
@@ -175,7 +175,7 @@
                 "backtrace": [
                     {
                         "file": "^cxx/CMakeLists\\.txt$",
-                        "line": 18,
+                        "line": 20,
                         "command": "target_link_options",
                         "hasParent": true
                     },
@@ -193,7 +193,7 @@
                 "backtrace": [
                     {
                         "file": "^cxx/CMakeLists\\.txt$",
-                        "line": 19,
+                        "line": 21,
                         "command": "target_link_directories",
                         "hasParent": true
                     },
@@ -248,5 +248,8 @@
             "id": "^ZERO_CHECK::@a56b12a3f5c0529fb296$",
             "backtrace": null
         }
-    ]
+    ],
+    "debugger": {
+        "workingDirectory": "^/test/debugger/workingDirectory$"
+    }
 }
