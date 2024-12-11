@@ -1631,26 +1631,22 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
       std::string const& currentBinaryDir = it.first;
       DirectoryTarget const& dt = it.second;
       std::vector<std::string> configs =
-        dt.LG->GetMakefile()->GetGeneratorConfigs(
-          cmMakefile::IncludeEmptyConfig);
+        static_cast<cmLocalNinjaGenerator const*>(dt.LG)->GetConfigNames();
 
       // Setup target
-      cmNinjaDeps configDeps;
       build.Comment = cmStrCat("Folder: ", currentBinaryDir);
       build.Outputs.emplace_back();
-      std::string const buildDirAllTarget =
+      std::string const buildDirCodegenTarget =
         this->ConvertToNinjaPath(cmStrCat(currentBinaryDir, "/codegen"));
-
-      cmNinjaDeps& explicitDeps = build.ExplicitDeps;
-
       for (auto const& config : configs) {
-        explicitDeps.clear();
+        build.ExplicitDeps.clear();
+        build.Outputs.front() =
+          this->BuildAlias(buildDirCodegenTarget, config);
 
         for (DirectoryTarget::Target const& t : dt.Targets) {
           if (this->IsExcludedFromAllInConfig(t, config)) {
             continue;
           }
-
           std::vector<cmSourceFile const*> customCommandSources;
           t.GT->GetCustomCommands(customCommandSources, config);
           for (cmSourceFile const* sf : customCommandSources) {
@@ -1659,13 +1655,19 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
               auto const& outputs = cc->GetOutputs();
 
               std::transform(outputs.begin(), outputs.end(),
-                             std::back_inserter(explicitDeps),
+                             std::back_inserter(build.ExplicitDeps),
                              this->MapToNinjaPath());
             }
           }
         }
 
-        build.Outputs.front() = this->BuildAlias(buildDirAllTarget, config);
+        for (DirectoryTarget::Dir const& d : dt.Children) {
+          if (!d.ExcludeFromAll) {
+            build.ExplicitDeps.emplace_back(this->BuildAlias(
+              this->ConvertToNinjaPath(cmStrCat(d.Path, "/codegen")), config));
+          }
+        }
+
         // Write target
         this->WriteBuild(this->EnableCrossConfigBuild() &&
                              this->CrossConfigs.count(config)
@@ -1677,8 +1679,9 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
       // Add shortcut target
       if (this->IsMultiConfig()) {
         for (auto const& config : configs) {
-          build.ExplicitDeps = { this->BuildAlias(buildDirAllTarget, config) };
-          build.Outputs.front() = buildDirAllTarget;
+          build.ExplicitDeps = { this->BuildAlias(buildDirCodegenTarget,
+                                                  config) };
+          build.Outputs.front() = buildDirCodegenTarget;
           this->WriteBuild(*this->GetConfigFileStream(config), build);
         }
 
@@ -1686,9 +1689,9 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
           build.ExplicitDeps.clear();
           for (auto const& config : this->DefaultConfigs) {
             build.ExplicitDeps.push_back(
-              this->BuildAlias(buildDirAllTarget, config));
+              this->BuildAlias(buildDirCodegenTarget, config));
           }
-          build.Outputs.front() = buildDirAllTarget;
+          build.Outputs.front() = buildDirCodegenTarget;
           this->WriteBuild(*this->GetDefaultFileStream(), build);
         }
       }
@@ -1698,9 +1701,10 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
         build.ExplicitDeps.clear();
         for (auto const& config : this->CrossConfigs) {
           build.ExplicitDeps.push_back(
-            this->BuildAlias(buildDirAllTarget, config));
+            this->BuildAlias(buildDirCodegenTarget, config));
         }
-        build.Outputs.front() = this->BuildAlias(buildDirAllTarget, "codegen");
+        build.Outputs.front() =
+          this->BuildAlias(buildDirCodegenTarget, "codegen");
         this->WriteBuild(os, build);
       }
     }
@@ -1716,7 +1720,6 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
       static_cast<cmLocalNinjaGenerator const*>(dt.LG)->GetConfigNames();
 
     // Setup target
-    cmNinjaDeps configDeps;
     build.Comment = cmStrCat("Folder: ", currentBinaryDir);
     build.Outputs.emplace_back();
     std::string const buildDirAllTarget =
@@ -1724,7 +1727,6 @@ void cmGlobalNinjaGenerator::WriteFolderTargets(std::ostream& os)
     for (auto const& config : configs) {
       build.ExplicitDeps.clear();
       build.Outputs.front() = this->BuildAlias(buildDirAllTarget, config);
-      configDeps.emplace_back(build.Outputs.front());
       for (DirectoryTarget::Target const& t : dt.Targets) {
         if (!this->IsExcludedFromAllInConfig(t, config)) {
           this->AppendTargetOutputs(t.GT, build.ExplicitDeps, config,
