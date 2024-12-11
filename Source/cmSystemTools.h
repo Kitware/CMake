@@ -584,6 +584,15 @@ public:
   static std::string EncodeURL(std::string const& in,
                                bool escapeSlashes = true);
 
+  enum class DirCase
+  {
+    Sensitive,
+    Insensitive,
+  };
+
+  /** Returns nullopt when `dir` is not a valid directory */
+  static cm::optional<DirCase> GetDirCase(std::string const& dir);
+
 #ifdef _WIN32
   struct WindowsFileRetry
   {

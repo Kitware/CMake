@@ -118,6 +118,12 @@
 #  include <malloc.h> /* for malloc/free on QNX */
 #endif
 
+#ifdef __linux__
+#  include <linux/fs.h>
+
+#  include <sys/ioctl.h>
+#endif
+
 #if !defined(_WIN32) && !defined(__ANDROID__)
 #  include <sys/utsname.h>
 #endif
@@ -3939,6 +3945,38 @@ std::string cmSystemTools::EncodeURL(std::string const& in, bool escapeSlashes)
     out.append(hexCh);
   }
   return out;
+}
+
+cm::optional<cmSystemTools::DirCase> cmSystemTools::GetDirCase(
+  std::string const& dir)
+{
+  if (!cmSystemTools::FileIsDirectory(dir)) {
+    return cm::nullopt;
+  }
+#if defined(_WIN32) || defined(__APPLE__)
+  return DirCase::Insensitive;
+#elif defined(__linux__)
+  int fd = open(dir.c_str(), O_RDONLY);
+  if (fd == -1) {
+    // cannot open dir but it exists, assume dir is case sensitive.
+    return DirCase::Sensitive;
+  }
+  int attr = 0;
+  int ioctl_res = ioctl(fd, FS_IOC_GETFLAGS, &attr);
+  close(fd);
+
+  if (ioctl_res == -1) {
+    return DirCase::Sensitive;
+  }
+
+  // FS_CASEFOLD_FD from linux/fs.h, in Linux libc-dev 5.4+
+  // For compat with old libc-dev, define it here.
+  const int CMAKE_FS_CASEFOLD_FL = 0x40000000;
+  return (attr & CMAKE_FS_CASEFOLD_FL) != 0 ? DirCase::Insensitive
+                                            : DirCase::Sensitive;
+#else
+  return DirCase::Sensitive;
+#endif
 }
 
 cmsys::Status cmSystemTools::CreateSymlink(std::string const& origName,
