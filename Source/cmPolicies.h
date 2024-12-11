@@ -174,7 +174,7 @@ class cmMakefile;
          NEW)                                                                 \
   SELECT(POLICY, CMP0059,                                                     \
          "Do not treat DEFINITIONS as a built-in directory property.", 3, 3,  \
-         0, WARN)                                                             \
+         0, NEW)                                                              \
   SELECT(POLICY, CMP0060,                                                     \
          "Link libraries by full path even in implicit directories.", 3, 3,   \
          0, WARN)                                                             \

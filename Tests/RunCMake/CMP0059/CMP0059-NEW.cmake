@@ -1,6 +1,3 @@
-
-cmake_policy(SET CMP0059 NEW)
-
 add_definitions(-DSOME_DEF)
 
 get_property(defs DIRECTORY .

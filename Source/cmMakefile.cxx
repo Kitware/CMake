@@ -1245,9 +1245,6 @@ void cmMakefile::AddDefineFlag(std::string const& flag)
     return;
   }
 
-  // Update the string used for the old DEFINITIONS property.
-  s_AddDefineFlag(flag, this->DefineFlagsOrig);
-
   // If this is really a definition, update COMPILE_DEFINITIONS.
   if (this->ParseDefineFlag(flag, false)) {
     return;
@@ -1280,9 +1277,6 @@ void cmMakefile::RemoveDefineFlag(std::string const& flag)
   if (flag.empty()) {
     return;
   }
-
-  // Update the string used for the old DEFINITIONS property.
-  s_RemoveDefineFlag(flag, this->DefineFlagsOrig);
 
   // If this is really a definition, update COMPILE_DEFINITIONS.
   if (this->ParseDefineFlag(flag, true)) {
@@ -1357,7 +1351,6 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
 
   // define flags
   this->DefineFlags = parent->DefineFlags;
-  this->DefineFlagsOrig = parent->DefineFlagsOrig;
 
   // Include transform property.  There is no per-config version.
   {
@@ -3975,11 +3968,6 @@ void cmMakefile::StoreMatches(cmsys::RegularExpression& re)
 cmStateSnapshot cmMakefile::GetStateSnapshot() const
 {
   return this->StateSnapshot;
-}
-
-const char* cmMakefile::GetDefineFlagsCMP0059() const
-{
-  return this->DefineFlagsOrig.c_str();
 }
 
 cmPolicies::PolicyStatus cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id,

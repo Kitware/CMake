@@ -5,14 +5,10 @@
 #include "cmExecutionStatus.h"
 #include "cmGlobalGenerator.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
-#include "cmPolicies.h"
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
 namespace {
-void StoreResult(cmMakefile& makefile, std::string const& variable,
-                 const char* prop);
 void StoreResult(cmMakefile& makefile, std::string const& variable,
                  cmValue prop);
 }
@@ -78,31 +74,11 @@ bool cmGetDirectoryPropertyCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  if (*i == "DEFINITIONS") {
-    switch (status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0059)) {
-      case cmPolicies::WARN:
-        status.GetMakefile().IssueMessage(
-          MessageType::AUTHOR_WARNING,
-          cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        StoreResult(status.GetMakefile(), variable,
-                    status.GetMakefile().GetDefineFlagsCMP0059());
-        return true;
-      case cmPolicies::NEW:
-        break;
-    }
-  }
   StoreResult(status.GetMakefile(), variable, dir->GetProperty(*i));
   return true;
 }
 
 namespace {
-void StoreResult(cmMakefile& makefile, std::string const& variable,
-                 const char* prop)
-{
-  makefile.AddDefinition(variable, prop ? prop : "");
-}
 void StoreResult(cmMakefile& makefile, std::string const& variable,
                  cmValue prop)
 {

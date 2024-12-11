@@ -12,7 +12,6 @@
 #include "cmGlobalGenerator.h"
 #include "cmInstalledFile.h"
 #include "cmMakefile.h"
-#include "cmMessageType.h"
 #include "cmPolicies.h"
 #include "cmProperty.h"
 #include "cmPropertyDefinition.h"
@@ -367,20 +366,6 @@ bool HandleDirectoryMode(cmExecutionStatus& status, const std::string& name,
         "This could be because the directory argument was invalid or, "
         "it is valid but has not been processed yet.");
       return false;
-    }
-  }
-
-  if (propertyName == "DEFINITIONS") {
-    switch (mf->GetPolicyStatus(cmPolicies::CMP0059)) {
-      case cmPolicies::WARN:
-        mf->IssueMessage(MessageType::AUTHOR_WARNING,
-                         cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        return StoreResult(infoType, status.GetMakefile(), variable,
-                           mf->GetDefineFlagsCMP0059());
-      case cmPolicies::NEW:
-        break;
     }
   }
 
