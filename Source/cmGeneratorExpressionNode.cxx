@@ -982,6 +982,27 @@ static const struct PathNode : public cmGeneratorExpressionNode
             }
             return std::string{};
           } },
+        { "NATIVE_PATH"_s,
+          [](cmGeneratorExpressionContext* ctx,
+             const GeneratorExpressionContent* cnt,
+             Arguments& args) -> std::string {
+            bool normalize = args.front() == "NORMALIZE"_s;
+            if (normalize) {
+              args.advance(1);
+            }
+            if (CheckPathParametersEx(ctx, cnt,
+                                      normalize ? "NATIVE_PATH,NORMALIZE"_s
+                                                : "NATIVE_PATH"_s,
+                                      args.size(), 1)) {
+              return processList(
+                args.front(), [normalize](std::string& value) {
+                  auto path = cmCMakePath{ value };
+                  value = normalize ? path.Normal().NativeString()
+                                    : path.NativeString();
+                });
+            }
+            return std::string{};
+          } },
         { "APPEND"_s,
           [](cmGeneratorExpressionContext* ctx,
              const GeneratorExpressionContent* cnt,
