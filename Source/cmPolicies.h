@@ -177,7 +177,7 @@ class cmMakefile;
          0, NEW)                                                              \
   SELECT(POLICY, CMP0060,                                                     \
          "Link libraries by full path even in implicit directories.", 3, 3,   \
-         0, WARN)                                                             \
+         0, NEW)                                                              \
   SELECT(POLICY, CMP0061,                                                     \
          "CTest does not by default tell make to ignore errors (-i).", 3, 3,  \
          0, WARN)                                                             \

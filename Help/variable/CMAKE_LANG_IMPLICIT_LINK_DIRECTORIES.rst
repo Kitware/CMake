@@ -31,9 +31,9 @@ Some toolchains read implicit directories from an environment variable such as
 consistent when operating in a given build tree because CMake saves the value
 detected when first creating a build tree.
 
-If policy :policy:`CMP0060` is not set to ``NEW``, then when a library in one
-of these directories is given by full path to :command:`target_link_libraries`
-CMake will generate the ``-l<name>`` form on link lines for historical
-purposes.
+In CMake versions prior to 4.0, if policy :policy:`CMP0060` is not set
+to ``NEW``, then when a library in one of these directories is given by
+full path to :command:`target_link_libraries` CMake will generate the
+``-l<name>`` form on link lines for historical purposes.
 
 See also the :variable:`CMAKE_<LANG>_IMPLICIT_LINK_LIBRARIES` variable.

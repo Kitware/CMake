@@ -24,7 +24,6 @@
 #include "cmMessageType.h"
 #include "cmOrderDirectories.h"
 #include "cmPlaceholderExpander.h"
-#include "cmPolicies.h"
 #include "cmSourceFile.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
@@ -421,9 +420,6 @@ cmComputeLinkInformation::cmComputeLinkInformation(
     this->OrderDependentRPath->SetImplicitDirectories(this->ImplicitLinkDirs);
     this->OrderDependentRPath->AddLanguageDirectories(this->RuntimeLinkDirs);
   }
-
-  this->CMP0060Warn = this->Makefile->PolicyOptionalWarningEnabled(
-    "CMAKE_POLICY_WARNING_CMP0060");
 }
 
 cmComputeLinkInformation::~cmComputeLinkInformation() = default;
@@ -649,22 +645,6 @@ bool cmComputeLinkInformation::Compute()
 
   // Add implicit language runtime libraries and directories.
   this->AddImplicitLinkInfo();
-
-  if (!this->CMP0060WarnItems.empty()) {
-    std::ostringstream w;
-    /* clang-format off */
-    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0060) << "\n"
-      "Some library files are in directories implicitly searched by "
-      "the linker when invoked for " << this->LinkLanguage << ":\n"
-      " " << cmJoin(this->CMP0060WarnItems, "\n ") << "\n"
-      "For compatibility with older versions of CMake, the generated "
-      "link line will ask the linker to search for these by library "
-      "name."
-      ;
-    /* clang-format on */
-    this->CMakeInstance->IssueMessage(MessageType::AUTHOR_WARNING, w.str(),
-                                      this->Target->GetBacktrace());
-  }
 
   // Record targets referenced by $<TARGET_OBJECTS:...> sources.
   this->AddExternalObjectTargets();
@@ -1765,39 +1745,7 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(LinkEntry const& entry)
     return false;
   }
 
-  // Check the policy for whether we should use the approach below.
-  switch (this->Target->GetPolicyStatusCMP0060()) {
-    case cmPolicies::WARN:
-      if (this->CMP0060Warn) {
-        // Print the warning at most once for this item.
-        std::string const& wid =
-          cmStrCat("CMP0060-WARNING-GIVEN-", item.Value);
-        if (!this->CMakeInstance->GetPropertyAsBool(wid)) {
-          this->CMakeInstance->SetProperty(wid, "1");
-          this->CMP0060WarnItems.insert(item.Value);
-        }
-      }
-      CM_FALLTHROUGH;
-    case cmPolicies::OLD:
-      break;
-    case cmPolicies::NEW:
-      return false;
-  }
-
-  // Many system linkers support multiple architectures by
-  // automatically selecting the implicit linker search path for the
-  // current architecture.  If the library appears in an implicit link
-  // directory then just report the file name without the directory
-  // portion.  This will allow the system linker to locate the proper
-  // library for the architecture at link time.
-  LinkEntry fileEntry{ entry };
-  fileEntry.Item = file;
-  this->AddUserItem(fileEntry);
-
-  // Make sure the link directory ordering will find the library.
-  this->OrderLinkerSearchPath->AddLinkLibrary(item.Value);
-
-  return true;
+  return false;
 }
 
 void cmComputeLinkInformation::AddUserItem(LinkEntry const& entry)
