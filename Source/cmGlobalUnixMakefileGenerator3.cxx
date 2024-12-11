@@ -777,6 +777,10 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       makeTargetName = cmStrCat(localName, "/codegen");
       commands.push_back(
         lg.GetRecursiveMakeCall(makefileName, makeTargetName));
+      if (targetMessages) {
+        lg.AppendEcho(commands, "Finished codegen for target " + name,
+                      cmLocalUnixMakefileGenerator3::EchoNormal, &progress);
+      }
       this->AppendCodegenTargetDepends(depends, gtarget.get());
       rootLG.WriteMakeRule(ruleFileStream, "codegen rule for target.",
                            makeTargetName, depends, commands, true);
