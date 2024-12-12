@@ -151,9 +151,6 @@ curl_easy_strerror(CURLcode error)
   case CURLE_RANGE_ERROR:
     return "Requested range was not delivered by the server";
 
-  case CURLE_HTTP_POST_ERROR:
-    return "Internal problem setting up the POST";
-
   case CURLE_SSL_CONNECT_ERROR:
     return "SSL connect error";
 
@@ -168,9 +165,6 @@ curl_easy_strerror(CURLcode error)
 
   case CURLE_LDAP_SEARCH_FAILED:
     return "LDAP: search failed";
-
-  case CURLE_FUNCTION_NOT_FOUND:
-    return "A required function in the library was not found";
 
   case CURLE_ABORTED_BY_CALLBACK:
     return "Operation was aborted by an application callback";
@@ -330,7 +324,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_OBSOLETE24:
   case CURLE_OBSOLETE29:
   case CURLE_OBSOLETE32:
+  case CURLE_OBSOLETE34:
   case CURLE_OBSOLETE40:
+  case CURLE_OBSOLETE41:
   case CURLE_OBSOLETE44:
   case CURLE_OBSOLETE46:
   case CURLE_OBSOLETE50:
@@ -348,9 +344,9 @@ curl_easy_strerror(CURLcode error)
    * By using gcc -Wall -Werror, you cannot forget.
    *
    * A table would not have the same benefit. Most compilers will generate
-   * code very similar to a table in any case, so there is little performance
-   * gain from a table. Something is broken for the user's application,
-   * anyways, so does it matter how fast it _does not_ work?
+   * code similar to a table in any case, so there is little performance gain
+   * from a table. Something is broken for the user's application, anyways, so
+   * does it matter how fast it _does not_ work?
    *
    * The line number for the error will be near this comment, which is why it
    * is here, and not at the start of the switch.

@@ -504,7 +504,7 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
   }
 
   /* Create the digest */
-  ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
+  ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
@@ -1119,7 +1119,7 @@ static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done)
   }
 
   result = Curl_pp_statemach(data, &pop3c->pp, FALSE, FALSE);
-  *done = (pop3c->state == POP3_STOP) ? TRUE : FALSE;
+  *done = (pop3c->state == POP3_STOP);
 
   return result;
 }

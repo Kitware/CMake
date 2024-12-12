@@ -31,7 +31,7 @@
 #include "vtls.h"
 
 #if (defined(__MINGW32__) || defined(CERT_CHAIN_REVOCATION_CHECK_CHAIN)) \
-  && !defined(CURL_WINDOWS_APP)
+  && !defined(CURL_WINDOWS_UWP)
 #define HAS_MANUAL_VERIFY_API
 #endif
 
@@ -174,6 +174,17 @@ struct schannel_cert_share {
   HCERTSTORE cert_store;             /* cached certificate store or
                                         NULL if none */
   struct curltime time;              /* when the cached store was created */
+};
+
+/*
+* size of the structure: 20 bytes.
+*/
+struct num_ip_data {
+  DWORD size; /* 04 bytes */
+  union {
+    struct in_addr  ia;  /* 04 bytes */
+    struct in6_addr ia6; /* 16 bytes */
+  } bData;
 };
 
 HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
