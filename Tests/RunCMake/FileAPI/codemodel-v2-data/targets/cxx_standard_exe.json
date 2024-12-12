@@ -16,7 +16,7 @@
             "backtrace": [
                 {
                     "file": "^cxx/CMakeLists\\.txt$",
-                    "line": 23,
+                    "line": 25,
                     "command": "add_executable",
                     "hasParent": true
                 },
@@ -46,7 +46,7 @@
                     [
                         {
                             "file": "^cxx/CMakeLists\\.txt$",
-                            "line": 24,
+                            "line": 26,
                             "command": "set_property",
                             "hasParent": true
                         },
@@ -72,7 +72,7 @@
     "backtrace": [
         {
             "file": "^cxx/CMakeLists\\.txt$",
-            "line": 23,
+            "line": 25,
             "command": "add_executable",
             "hasParent": true
         },

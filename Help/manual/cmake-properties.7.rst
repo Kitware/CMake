@@ -202,6 +202,7 @@ Properties on Targets
    /prop_tgt/CXX_STANDARD
    /prop_tgt/CXX_STANDARD_REQUIRED
    /prop_tgt/DEBUG_POSTFIX
+   /prop_tgt/DEBUGGER_WORKING_DIRECTORY
    /prop_tgt/DEFINE_SYMBOL
    /prop_tgt/DEPLOYMENT_ADDITIONAL_FILES
    /prop_tgt/DEPLOYMENT_REMOTE_DIRECTORY

@@ -93,6 +93,16 @@ bool cmGlobalVisualStudioGenerator::InitializePlatform(cmMakefile*)
   return true;
 }
 
+cmValue cmGlobalVisualStudioGenerator::GetDebuggerWorkingDirectory(
+  cmGeneratorTarget* gt) const
+{
+  if (cmValue ret = gt->GetProperty("VS_DEBUGGER_WORKING_DIRECTORY")) {
+    return ret;
+  } else {
+    return cmGlobalGenerator::GetDebuggerWorkingDirectory(gt);
+  }
+}
+
 std::string const& cmGlobalVisualStudioGenerator::GetPlatformName() const
 {
   if (!this->GeneratorPlatform.empty()) {
