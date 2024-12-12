@@ -71,9 +71,15 @@ set(scopes
   Interface
   Private
   Public)
+set(target_types
+  Interface
+  Static
+  )
 foreach (fileset_type IN LISTS fileset_types)
   foreach (scope IN LISTS scopes)
-    run_cmake("FileSet${fileset_type}${scope}")
+    foreach (target_type IN LISTS target_types)
+      run_cmake("FileSet${fileset_type}${scope}On${target_type}")
+    endforeach ()
   endforeach ()
   run_cmake("FileSet${fileset_type}InterfaceImported")
 
