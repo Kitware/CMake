@@ -9,8 +9,7 @@ must be specified in other target properties:
 
 * :prop_tgt:`IMPORTED_LOCATION_<CONFIG>`, or
 * :prop_tgt:`IMPORTED_IMPLIB_<CONFIG>` (on DLL platforms, on AIX for
-  :ref:`Executables <Binary Executables>` or on Apple for
-  :ref:`Shared Libraries <Normal Libraries>`), or
+  :ref:`Executables` or on Apple for :ref:`Shared Libraries`), or
 * :prop_tgt:`IMPORTED_OBJECTS_<CONFIG>` (for :ref:`Object Libraries`), or
 * :prop_tgt:`IMPORTED_LIBNAME_<CONFIG>` (for :ref:`Interface Libraries`).
 
