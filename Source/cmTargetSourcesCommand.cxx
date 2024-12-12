@@ -259,6 +259,18 @@ bool TargetSourcesImpl::HandleOneFileSet(
       return false;
     }
 
+    if (cmFileSetVisibilityIsForSelf(visibility) &&
+        this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY &&
+        !this->Target->IsImported()) {
+      if (type == "CXX_MODULES"_s) {
+        this->SetError(R"(File set TYPE "CXX_MODULES" may not have "PUBLIC" )"
+                       R"(or "PRIVATE" visibility on INTERFACE libraries.)");
+        return false;
+      }
+    }
+
+    // FIXME(https://wg21.link/P3470): This condition can go
+    // away when interface-only module units are a thing.
     if (cmFileSetVisibilityIsForInterface(visibility) &&
         !cmFileSetVisibilityIsForSelf(visibility) &&
         !this->Target->IsImported()) {
