@@ -283,8 +283,10 @@ void cmLocalNinjaGenerator::WriteBuildFileTop()
 void cmLocalNinjaGenerator::WriteProjectHeader(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
-  os << "# Project: " << this->GetProjectName() << '\n'
-     << "# Configurations: " << cmJoin(this->GetConfigNames(), ", ") << '\n';
+  os << "# Project: " << this->GetProjectName()
+     << "\n"
+        "# Configurations: "
+     << cmJoin(this->GetConfigNames(), ", ") << '\n';
   cmGlobalNinjaGenerator::WriteDivider(os);
 }
 
@@ -360,7 +362,7 @@ void cmLocalNinjaGenerator::WriteNinjaFilesInclusionConfig(std::ostream& os)
   std::string const commonFilePath = ng->EncodePath(ninjaCommonFile);
   cmGlobalNinjaGenerator::WriteInclude(os, commonFilePath,
                                        "Include common file.");
-  os << "\n";
+  os << '\n';
 }
 
 void cmLocalNinjaGenerator::WriteNinjaFilesInclusionCommon(std::ostream& os)
@@ -373,7 +375,7 @@ void cmLocalNinjaGenerator::WriteNinjaFilesInclusionCommon(std::ostream& os)
   std::string const rulesFilePath = ng->EncodePath(ninjaRulesFile);
   cmGlobalNinjaGenerator::WriteInclude(os, rulesFilePath,
                                        "Include rules file.");
-  os << "\n";
+  os << '\n';
 }
 
 void cmLocalNinjaGenerator::WriteNinjaWorkDir(std::ostream& os)
@@ -391,8 +393,8 @@ void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << "# Write statements declared in CMakeLists.txt:\n"
-     << "# " << this->Makefile->GetSafeDefinition("CMAKE_CURRENT_LIST_FILE")
-     << '\n';
+        "# "
+     << this->Makefile->GetSafeDefinition("CMAKE_CURRENT_LIST_FILE") << '\n';
   if (this->IsRootMakefile()) {
     os << "# Which is the root file.\n";
   }

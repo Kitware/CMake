@@ -55,8 +55,9 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
     cmGeneratedFileStream depFileStream(
       dependFile, false, this->GlobalGenerator->GetMakefileEncoding());
     depFileStream << "# Empty custom commands generated dependencies file for "
-                  << this->GeneratorTarget->GetName() << ".\n"
-                  << "# This may be replaced when dependencies are built.\n";
+                  << this->GeneratorTarget->GetName()
+                  << ".\n"
+                     "# This may be replaced when dependencies are built.\n";
   }
 
   std::string dependTimestamp =
@@ -66,7 +67,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
     cmGeneratedFileStream depFileStream(
       dependTimestamp, false, this->GlobalGenerator->GetMakefileEncoding());
     depFileStream << "# CMAKE generated file: DO NOT EDIT!\n"
-                  << "# Timestamp file for custom commands dependencies "
+                     "# Timestamp file for custom commands dependencies "
                      "management for "
                   << this->GeneratorTarget->GetName() << ".\n";
   }
