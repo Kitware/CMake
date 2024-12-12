@@ -2410,8 +2410,6 @@ bool cmFindPackageCommand::CheckDirectory(std::string const& dir)
 
   // Look for the file in this directory.
   if (this->FindConfigFile(d, this->FileFound)) {
-    // Remove duplicate slashes.
-    cmSystemTools::ConvertToUnixSlashes(this->FileFound);
     return true;
   }
   return false;
@@ -2429,6 +2427,8 @@ bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
       // Allow resolving symlinks when the config file is found through a link
       if (this->UseRealPath) {
         file = cmSystemTools::GetRealPath(file);
+      } else {
+        file = cmSystemTools::ToNormalizedPathOnDisk(file);
       }
       return true;
     }
