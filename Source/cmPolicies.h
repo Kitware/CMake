@@ -182,7 +182,7 @@ class cmMakefile;
          "CTest does not by default tell make to ignore errors (-i).", 3, 3,  \
          0, NEW)                                                              \
   SELECT(POLICY, CMP0062, "Disallow install() of export() result.", 3, 3, 0,  \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(POLICY, CMP0063,                                                     \
          "Honor visibility properties for all target types.", 3, 3, 0, WARN)  \
   SELECT(POLICY, CMP0064, "Support new TEST if() operator.", 3, 4, 0, WARN)   \
