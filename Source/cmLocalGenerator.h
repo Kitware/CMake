@@ -585,7 +585,6 @@ protected:
   GeneratorTargetMap GeneratorTargetSearchIndex;
   GeneratorTargetVector GeneratorTargets;
 
-  std::set<cmGeneratorTarget const*> WarnCMP0063;
   GeneratorTargetMap ImportedGeneratorTargets;
   GeneratorTargetVector OwnedImportedGeneratorTargets;
   std::map<std::string, std::string> AliasTargets;

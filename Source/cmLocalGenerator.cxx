@@ -2426,8 +2426,7 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
 static void AddVisibilityCompileOption(std::string& flags,
                                        cmGeneratorTarget const* target,
                                        cmLocalGenerator* lg,
-                                       const std::string& lang,
-                                       std::string* warnCMP0063)
+                                       const std::string& lang)
 {
   std::string compileOption = "CMAKE_" + lang + "_COMPILE_OPTIONS_VISIBILITY";
   cmValue opt = lg->GetMakefile()->GetDefinition(compileOption);
@@ -2438,10 +2437,6 @@ static void AddVisibilityCompileOption(std::string& flags,
 
   cmValue prop = target->GetProperty(flagDefine);
   if (!prop) {
-    return;
-  }
-  if (warnCMP0063) {
-    *warnCMP0063 += "  " + flagDefine + "\n";
     return;
   }
   if ((*prop != "hidden") && (*prop != "default") && (*prop != "protected") &&
@@ -2461,7 +2456,6 @@ static void AddVisibilityCompileOption(std::string& flags,
 static void AddInlineVisibilityCompileOption(std::string& flags,
                                              cmGeneratorTarget const* target,
                                              cmLocalGenerator* lg,
-                                             std::string* warnCMP0063,
                                              const std::string& lang)
 {
   std::string compileOption =
@@ -2475,10 +2469,6 @@ static void AddInlineVisibilityCompileOption(std::string& flags,
   if (!prop) {
     return;
   }
-  if (warnCMP0063) {
-    *warnCMP0063 += "  VISIBILITY_INLINES_HIDDEN\n";
-    return;
-  }
   lg->AppendFlags(flags, *opt);
 }
 
@@ -2489,41 +2479,10 @@ void cmLocalGenerator::AddVisibilityPresetFlags(
     return;
   }
 
-  std::string warnCMP0063;
-  std::string* pWarnCMP0063 = nullptr;
-  if (target->GetType() != cmStateEnums::SHARED_LIBRARY &&
-      target->GetType() != cmStateEnums::MODULE_LIBRARY &&
-      !target->IsExecutableWithExports()) {
-    switch (target->GetPolicyStatusCMP0063()) {
-      case cmPolicies::OLD:
-        return;
-      case cmPolicies::WARN:
-        pWarnCMP0063 = &warnCMP0063;
-        break;
-      default:
-        break;
-    }
-  }
-
-  AddVisibilityCompileOption(flags, target, this, lang, pWarnCMP0063);
+  AddVisibilityCompileOption(flags, target, this, lang);
 
   if (lang == "CXX" || lang == "OBJCXX") {
-    AddInlineVisibilityCompileOption(flags, target, this, pWarnCMP0063, lang);
-  }
-
-  if (!warnCMP0063.empty() && this->WarnCMP0063.insert(target).second) {
-    std::ostringstream w;
-    /* clang-format off */
-    w <<
-      cmPolicies::GetPolicyWarning(cmPolicies::CMP0063) << "\n"
-      "Target \"" << target->GetName() << "\" of "
-      "type \"" << cmState::GetTargetTypeName(target->GetType()) << "\" "
-      "has the following visibility properties set for " << lang << ":\n" <<
-      warnCMP0063 <<
-      "For compatibility CMake is not honoring them for this target.";
-    /* clang-format on */
-    target->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
-      MessageType::AUTHOR_WARNING, w.str(), target->GetBacktrace());
+    AddInlineVisibilityCompileOption(flags, target, this, lang);
   }
 }
 

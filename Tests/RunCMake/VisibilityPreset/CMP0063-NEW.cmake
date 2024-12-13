@@ -1,4 +1,3 @@
-cmake_policy(SET CMP0063 NEW)
 enable_language(CXX)
 
 # Ensure CMake would warn even if toolchain does not really have these flags.
