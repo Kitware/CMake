@@ -1,1 +1,1 @@
-cmake_policy(VERSION 3.1)
+cmake_policy(VERSION 3.2)
