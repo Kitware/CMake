@@ -123,8 +123,8 @@ public:
                                 cmGeneratorTarget const* target,
                                 std::string const& language);
 
-  std::string GetLinkLibsCMP0065(std::string const& linkLanguage,
-                                 cmGeneratorTarget& tgt) const;
+  std::string GetExeExportFlags(std::string const& linkLanguage,
+                                cmGeneratorTarget& tgt) const;
 
   cmState* GetState() const;
   cmStateSnapshot GetStateSnapshot() const;

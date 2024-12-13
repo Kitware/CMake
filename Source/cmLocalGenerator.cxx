@@ -1629,10 +1629,10 @@ void cmLocalGenerator::GetTargetFlags(
         exeFlags += " ";
       }
 
-      std::string cmp0065Flags =
-        this->GetLinkLibsCMP0065(linkLanguage, *target);
-      if (!cmp0065Flags.empty()) {
-        exeFlags += cmp0065Flags;
+      std::string exeExportFlags =
+        this->GetExeExportFlags(linkLanguage, *target);
+      if (!exeExportFlags.empty()) {
+        exeFlags += exeExportFlags;
         exeFlags += " ";
       }
 
@@ -1959,46 +1959,18 @@ void cmLocalGenerator::OutputLinkLibraries(
   linkLineComputer->ComputeLinkLibraries(cli, stdLibString, linkLibraries);
 }
 
-std::string cmLocalGenerator::GetLinkLibsCMP0065(
+std::string cmLocalGenerator::GetExeExportFlags(
   std::string const& linkLanguage, cmGeneratorTarget& tgt) const
 {
   std::string linkFlags;
 
-  // Flags to link an executable to shared libraries.
+  // Flags to export symbols from an executable.
   if (tgt.GetType() == cmStateEnums::EXECUTABLE &&
       this->StateSnapshot.GetState()->GetGlobalPropertyAsBool(
         "TARGET_SUPPORTS_SHARED_LIBS")) {
-    bool add_shlib_flags = false;
-    switch (tgt.GetPolicyStatusCMP0065()) {
-      case cmPolicies::WARN:
-        if (!tgt.GetPropertyAsBool("ENABLE_EXPORTS") &&
-            this->Makefile->PolicyOptionalWarningEnabled(
-              "CMAKE_POLICY_WARNING_CMP0065")) {
-          std::ostringstream w;
-          /* clang-format off */
-            w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0065) << "\n"
-              "For compatibility with older versions of CMake, "
-              "additional flags may be added to export symbols on all "
-              "executables regardless of their ENABLE_EXPORTS property.";
-          /* clang-format on */
-          this->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
-        }
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        // OLD behavior is to always add the flags, except on AIX where
-        // we compute symbol exports if ENABLE_EXPORTS is on.
-        add_shlib_flags =
-          !(tgt.IsAIX() && tgt.GetPropertyAsBool("ENABLE_EXPORTS"));
-        break;
-      case cmPolicies::NEW:
-        // NEW behavior is to only add the flags if ENABLE_EXPORTS is on,
-        // except on AIX where we compute symbol exports.
-        add_shlib_flags =
-          !tgt.IsAIX() && tgt.GetPropertyAsBool("ENABLE_EXPORTS");
-        break;
-    }
-
-    if (add_shlib_flags) {
+    // Only add the flags if ENABLE_EXPORTS is on,
+    // except on AIX where we compute symbol exports.
+    if (!tgt.IsAIX() && tgt.GetPropertyAsBool("ENABLE_EXPORTS")) {
       linkFlags = this->Makefile->GetSafeDefinition(
         cmStrCat("CMAKE_SHARED_LIBRARY_LINK_", linkLanguage, "_FLAGS"));
     }

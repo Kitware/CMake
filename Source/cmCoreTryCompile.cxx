@@ -847,13 +847,6 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
       fprintf(fout, "\n");
     }
 
-    /* Set the appropriate policy information for ENABLE_EXPORTS */
-    fprintf(fout, "cmake_policy(SET CMP0065 %s)\n",
-            this->Makefile->GetPolicyStatus(cmPolicies::CMP0065) ==
-                cmPolicies::NEW
-              ? "NEW"
-              : "OLD");
-
     /* Set the appropriate policy information for PIE link flags */
     fprintf(fout, "cmake_policy(SET CMP0083 %s)\n",
             this->Makefile->GetPolicyStatus(cmPolicies::CMP0083) ==

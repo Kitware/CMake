@@ -189,7 +189,7 @@ class cmMakefile;
   SELECT(POLICY, CMP0065,                                                     \
          "Do not add flags to export symbols from executables without "       \
          "the ENABLE_EXPORTS target property.",                               \
-         3, 4, 0, WARN)                                                       \
+         3, 4, 0, NEW)                                                        \
   SELECT(POLICY, CMP0066,                                                     \
          "Honor per-config flags in try_compile() source-file signature.", 3, \
          7, 0, WARN)                                                          \

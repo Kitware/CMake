@@ -337,7 +337,7 @@ Other Behavior Settings
 Some policies are set automatically in the generated test project
 as needed to honor the state of the calling project:
 
-* :policy:`CMP0065`
+* :policy:`CMP0065` (in CMake versions prior to 4.0)
 * :policy:`CMP0083`
 * :policy:`CMP0091`
 * :policy:`CMP0104`

@@ -14,8 +14,8 @@ only for the policies that do not warn by default:
   policy :policy:`CMP0056` in CMake versions before 4.0.
 * ``CMAKE_POLICY_WARNING_CMP0060`` controlled the warning for
   policy :policy:`CMP0060` in CMake versions before 4.0.
-* ``CMAKE_POLICY_WARNING_CMP0065`` controls the warning for
-  policy :policy:`CMP0065`.
+* ``CMAKE_POLICY_WARNING_CMP0065`` controlled the warning for
+  policy :policy:`CMP0065` in CMake versions before 4.0.
 * ``CMAKE_POLICY_WARNING_CMP0066`` controls the warning for
   policy :policy:`CMP0066`.
 * ``CMAKE_POLICY_WARNING_CMP0067`` controls the warning for
