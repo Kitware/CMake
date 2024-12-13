@@ -72,7 +72,7 @@
   } while(0)
 
 
-/* A list of connections to the same destinationn. */
+/* A list of connections to the same destination. */
 struct cpool_bundle {
   struct Curl_llist conns; /* connections in the bundle */
   size_t dest_len; /* total length of destination, including NUL */
@@ -163,16 +163,16 @@ int Curl_cpool_init(struct cpool *cpool,
   cpool->idata = curl_easy_init();
   if(!cpool->idata)
     return 1; /* bad */
-  cpool->idata->state.internal = true;
+  cpool->idata->state.internal = TRUE;
   /* TODO: this is quirky. We need an internal handle for certain
    * operations, but we do not add it to the multi (if there is one).
    * But we give it the multi so that socket event operations can work.
    * Probably better to have an internal handle owned by the multi that
    * can be used for cpool operations. */
   cpool->idata->multi = multi;
- #ifdef DEBUGBUILD
+#ifdef DEBUGBUILD
   if(getenv("CURL_DEBUG"))
-    cpool->idata->set.verbose = true;
+    cpool->idata->set.verbose = TRUE;
 #endif
 
   cpool->disconnect_cb = disconnect_cb;
@@ -269,25 +269,10 @@ cpool_add_bundle(struct cpool *cpool, struct connectdata *conn)
 static void cpool_remove_bundle(struct cpool *cpool,
                                 struct cpool_bundle *bundle)
 {
-  struct Curl_hash_iterator iter;
-  struct Curl_hash_element *he;
-
   if(!cpool)
     return;
 
-  Curl_hash_start_iterate(&cpool->dest2bundle, &iter);
-
-  he = Curl_hash_next_element(&iter);
-  while(he) {
-    if(he->ptr == bundle) {
-      /* The bundle is destroyed by the hash destructor function,
-         free_bundle_hash_entry() */
-      Curl_hash_delete(&cpool->dest2bundle, he->key, he->key_len);
-      return;
-    }
-
-    he = Curl_hash_next_element(&iter);
-  }
+  Curl_hash_delete(&cpool->dest2bundle, bundle->dest, bundle->dest_len);
 }
 
 static struct connectdata *
@@ -329,6 +314,9 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
                    "limit of %zu", oldest_idle->connection_id,
                    Curl_llist_count(&bundle->conns), dest_limit));
       Curl_cpool_disconnect(data, oldest_idle, FALSE);
+
+      /* in case the bundle was destroyed in disconnect, look it up again */
+      bundle = cpool_find_bundle(cpool, conn);
     }
     if(bundle && (Curl_llist_count(&bundle->conns) >= dest_limit)) {
       result = CPOOL_LIMIT_DEST;
@@ -409,7 +397,7 @@ static void cpool_remove_conn(struct cpool *cpool,
       cpool->num_conn--;
     }
     else {
-      /* Not in  a bundle, already in the shutdown list? */
+      /* Not in a bundle, already in the shutdown list? */
       DEBUGASSERT(list == &cpool->shutdowns);
     }
   }
@@ -491,7 +479,7 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
                               struct connectdata *conn)
 {
   unsigned int maxconnects = !data->multi->maxconnects ?
-    data->multi->num_easy * 4: data->multi->maxconnects;
+    data->multi->num_easy * 4 : data->multi->maxconnects;
   struct connectdata *oldest_idle = NULL;
   struct cpool *cpool = cpool_get_instance(data);
   bool kept = TRUE;
@@ -820,7 +808,7 @@ void Curl_cpool_disconnect(struct Curl_easy *data,
   if(data->multi) {
     /* Add it to the multi's cpool for shutdown handling */
     infof(data, "%s connection #%" FMT_OFF_T,
-          aborted? "closing" : "shutting down", conn->connection_id);
+          aborted ? "closing" : "shutting down", conn->connection_id);
     cpool_discard_conn(&data->multi->cpool, data, conn, aborted);
   }
   else {
@@ -1180,7 +1168,7 @@ static void cpool_shutdown_all(struct cpool *cpool,
     timespent = Curl_timediff(Curl_now(), started);
     if(timespent >= (timediff_t)timeout_ms) {
       DEBUGF(infof(data, "cpool shutdown %s",
-                   (timeout_ms > 0)? "timeout" : "best effort done"));
+                   (timeout_ms > 0) ? "timeout" : "best effort done"));
       break;
     }
 

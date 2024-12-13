@@ -25,17 +25,17 @@
 #
 # Input variables:
 #
-# LIBIDN2_INCLUDE_DIR   The libidn2 include directory
-# LIBIDN2_LIBRARY       Path to libidn2 library
+# - `LIBIDN2_INCLUDE_DIR`:   The libidn2 include directory.
+# - `LIBIDN2_LIBRARY`:       Path to `libidn2` library.
 #
 # Result variables:
 #
-# LIBIDN2_FOUND         System has libidn2
-# LIBIDN2_INCLUDE_DIRS  The libidn2 include directories
-# LIBIDN2_LIBRARIES     The libidn2 library names
-# LIBIDN2_LIBRARY_DIRS  The libidn2 library directories
-# LIBIDN2_CFLAGS        Required compiler flags
-# LIBIDN2_VERSION       Version of libidn2
+# - `LIBIDN2_FOUND`:         System has libidn2.
+# - `LIBIDN2_INCLUDE_DIRS`:  The libidn2 include directories.
+# - `LIBIDN2_LIBRARIES`:     The libidn2 library names.
+# - `LIBIDN2_LIBRARY_DIRS`:  The libidn2 library directories.
+# - `LIBIDN2_CFLAGS`:        Required compiler flags.
+# - `LIBIDN2_VERSION`:       Version of libidn2.
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBIDN2_INCLUDE_DIR AND
@@ -51,6 +51,7 @@ else()
   find_path(LIBIDN2_INCLUDE_DIR NAMES "idn2.h")
   find_library(LIBIDN2_LIBRARY NAMES "idn2" "libidn2")
 
+  unset(LIBIDN2_VERSION CACHE)
   if(LIBIDN2_INCLUDE_DIR AND EXISTS "${LIBIDN2_INCLUDE_DIR}/idn2.h")
     set(_version_regex "#[\t ]*define[\t ]+IDN2_VERSION[\t ]+\"([^\"]*)\"")
     file(STRINGS "${LIBIDN2_INCLUDE_DIR}/idn2.h" _version_str REGEX "${_version_regex}")

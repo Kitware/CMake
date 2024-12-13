@@ -76,11 +76,11 @@ static void keylog_callback(const WOLFSSL *ssl, const char *line)
 }
 #endif
 
-static CURLcode Curl_wssl_init_ctx(struct curl_tls_ctx *ctx,
-                                   struct Curl_cfilter *cf,
-                                   struct Curl_easy *data,
-                                   Curl_vquic_tls_ctx_setup *cb_setup,
-                                   void *cb_user_data)
+static CURLcode wssl_init_ctx(struct curl_tls_ctx *ctx,
+                              struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              Curl_vquic_tls_ctx_setup *cb_setup,
+                              void *cb_user_data)
 {
   struct ssl_primary_config *conn_config;
   CURLcode result = CURLE_FAILED_INIT;
@@ -173,10 +173,10 @@ static CURLcode Curl_wssl_init_ctx(struct curl_tls_ctx *ctx,
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
-    Curl_set_in_callback(data, true);
+    Curl_set_in_callback(data, TRUE);
     result = (*data->set.ssl.fsslctx)(data, ctx->wssl.ctx,
                                       data->set.ssl.fsslctxp);
-    Curl_set_in_callback(data, false);
+    Curl_set_in_callback(data, FALSE);
     if(result) {
       failf(data, "error signaled by ssl ctx callback");
       goto out;
@@ -194,13 +194,15 @@ out:
 
 /** SSL callbacks ***/
 
-static CURLcode Curl_wssl_init_ssl(struct curl_tls_ctx *ctx,
-                                   struct Curl_easy *data,
-                                   struct ssl_peer *peer,
-                                   const char *alpn, size_t alpn_len,
-                                   void *user_data)
+static CURLcode wssl_init_ssl(struct curl_tls_ctx *ctx,
+                              struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              struct ssl_peer *peer,
+                              const char *alpn, size_t alpn_len,
+                              void *user_data)
 {
-  (void)data;
+  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+
   DEBUGASSERT(!ctx->wssl.handle);
   DEBUGASSERT(ctx->wssl.ctx);
   ctx->wssl.handle = wolfSSL_new(ctx->wssl.ctx);
@@ -216,6 +218,10 @@ static CURLcode Curl_wssl_init_ssl(struct curl_tls_ctx *ctx,
   if(peer->sni) {
     wolfSSL_UseSNI(ctx->wssl.handle, WOLFSSL_SNI_HOST_NAME,
                    peer->sni, (unsigned short)strlen(peer->sni));
+  }
+
+  if(ssl_config->primary.cache_session) {
+    (void)wssl_setup_session(cf, data, &ctx->wssl, peer);
   }
 
   return CURLE_OK;
@@ -240,14 +246,14 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
 #elif defined(USE_GNUTLS)
   (void)result;
   return Curl_gtls_ctx_init(&ctx->gtls, cf, data, peer,
-                            (const unsigned char *)alpn, alpn_len,
+                            (const unsigned char *)alpn, alpn_len, NULL,
                             cb_setup, cb_user_data, ssl_user_data);
 #elif defined(USE_WOLFSSL)
-  result = Curl_wssl_init_ctx(ctx, cf, data, cb_setup, cb_user_data);
+  result = wssl_init_ctx(ctx, cf, data, cb_setup, cb_user_data);
   if(result)
     return result;
 
-  return Curl_wssl_init_ssl(ctx, data, peer, alpn, alpn_len, ssl_user_data);
+  return wssl_init_ssl(ctx, cf, data, peer, alpn, alpn_len, ssl_user_data);
 #else
 #error "no TLS lib in used, should not happen"
   return CURLE_FAILED_INIT;

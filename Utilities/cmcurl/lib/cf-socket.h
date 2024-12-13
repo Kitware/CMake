@@ -52,7 +52,7 @@ struct Curl_sockaddr_ex {
     struct Curl_sockaddr_storage buff;
   } _sa_ex_u;
 };
-#define sa_addr _sa_ex_u.addr
+#define curl_sa_addr _sa_ex_u.addr
 
 /*
  * Parse interface option, and return the interface name and the host part.
@@ -147,12 +147,11 @@ CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
                                   curl_socket_t *s);
 
 /**
- * Replace the listen socket with the accept()ed one.
+ * Return TRUE iff the last filter at `sockindex` was set via
+ * Curl_conn_tcp_listen_set().
  */
-CURLcode Curl_conn_tcp_accepted_set(struct Curl_easy *data,
-                                    struct connectdata *conn,
-                                    int sockindex,
-                                    curl_socket_t *s);
+bool Curl_conn_is_tcp_listen(struct Curl_easy *data,
+                             int sockindex);
 
 /**
  * Peek at the socket and remote ip/port the socket filter is using.

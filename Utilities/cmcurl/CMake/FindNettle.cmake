@@ -25,17 +25,17 @@
 #
 # Input variables:
 #
-# NETTLE_INCLUDE_DIR   The nettle include directory
-# NETTLE_LIBRARY       Path to nettle library
+# - `NETTLE_INCLUDE_DIR`:   The nettle include directory.
+# - `NETTLE_LIBRARY`:       Path to `nettle` library.
 #
 # Result variables:
 #
-# NETTLE_FOUND         System has nettle
-# NETTLE_INCLUDE_DIRS  The nettle include directories
-# NETTLE_LIBRARIES     The nettle library names
-# NETTLE_LIBRARY_DIRS  The nettle library directories
-# NETTLE_CFLAGS        Required compiler flags
-# NETTLE_VERSION       Version of nettle
+# - `NETTLE_FOUND`:         System has nettle.
+# - `NETTLE_INCLUDE_DIRS`:  The nettle include directories.
+# - `NETTLE_LIBRARIES`:     The nettle library names.
+# - `NETTLE_LIBRARY_DIRS`:  The nettle library directories.
+# - `NETTLE_CFLAGS`:        Required compiler flags.
+# - `NETTLE_VERSION`:       Version of nettle.
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NETTLE_INCLUDE_DIR AND
@@ -51,6 +51,7 @@ else()
   find_path(NETTLE_INCLUDE_DIR NAMES "nettle/sha2.h")
   find_library(NETTLE_LIBRARY NAMES "nettle")
 
+  unset(NETTLE_VERSION CACHE)
   if(NETTLE_INCLUDE_DIR AND EXISTS "${NETTLE_INCLUDE_DIR}/nettle/version.h")
     set(_version_regex1 "#[\t ]*define[ \t]+NETTLE_VERSION_MAJOR[ \t]+([0-9]+).*")
     set(_version_regex2 "#[\t ]*define[ \t]+NETTLE_VERSION_MINOR[ \t]+([0-9]+).*")

@@ -39,6 +39,8 @@
 #include <wolfssh/wolfsftp.h>
 #endif
 
+#include "curl_path.h"
+
 /****************************************************************************
  * SSH unique setup
  ***************************************************************************/
@@ -109,6 +111,8 @@ typedef enum {
   SSH_LAST  /* never used */
 } sshstate;
 
+#define CURL_PATH_MAX 1024
+
 /* this struct is used in the HandleData struct which is part of the
    Curl_easy, which means this is used on a per-easy handle basis.
    Everything that is strictly related to a connection is banned from this
@@ -118,8 +122,8 @@ struct SSHPROTO {
 #ifdef USE_LIBSSH2
   struct dynbuf readdir_link;
   struct dynbuf readdir;
-  char *readdir_filename;
-  char *readdir_longentry;
+  char readdir_filename[CURL_PATH_MAX + 1];
+  char readdir_longentry[CURL_PATH_MAX + 1];
 
   LIBSSH2_SFTP_ATTRIBUTES quote_attrs; /* used by the SFTP_QUOTE state */
 
@@ -173,6 +177,10 @@ struct ssh_conn {
   sftp_dir sftp_dir;
 
   unsigned sftp_recv_state; /* 0 or 1 */
+#if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
+  sftp_aio sftp_aio;
+  unsigned sftp_send_state; /* 0 or 1 */
+#endif
   int sftp_file_index; /* for async read */
   sftp_attributes readdir_attrs; /* used by the SFTP readdir actions */
   sftp_attributes readdir_link_attrs; /* used by the SFTP readdir actions */

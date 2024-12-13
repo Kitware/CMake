@@ -299,7 +299,7 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
      (checkprefix("Proxy-authenticate:", header) &&
       (407 == k->httpcode))) {
 
-    bool proxy = (k->httpcode == 407) ? TRUE : FALSE;
+    bool proxy = (k->httpcode == 407);
     char *auth = Curl_copy_header_value(header);
     if(!auth)
       return CURLE_OUT_OF_MEMORY;
@@ -547,8 +547,8 @@ static CURLcode CONNECT_host(struct Curl_cfilter *cf,
   if(result)
     return result;
 
-  authority = aprintf("%s%s%s:%d", ipv6_ip?"[":"", hostname, ipv6_ip?"]":"",
-                      port);
+  authority = aprintf("%s%s%s:%d", ipv6_ip ? "[":"", hostname,
+                      ipv6_ip ? "]" : "", port);
   if(!authority)
     return CURLE_OUT_OF_MEMORY;
 

@@ -290,23 +290,14 @@ static void destroy_async_data(struct Curl_async *async)
 int Curl_resolver_getsock(struct Curl_easy *data,
                           curl_socket_t *socks)
 {
-  struct timeval maxtime;
+  struct timeval maxtime = { CURL_TIMEOUT_RESOLVE, 0 };
   struct timeval timebuf;
-  struct timeval *timeout;
-  long milli;
   int max = ares_getsock((ares_channel)data->state.async.resolver,
                          (ares_socket_t *)socks, MAX_SOCKSPEREASYHANDLE);
-
-  maxtime.tv_sec = CURL_TIMEOUT_RESOLVE;
-  maxtime.tv_usec = 0;
-
-  timeout = ares_timeout((ares_channel)data->state.async.resolver, &maxtime,
-                         &timebuf);
-  milli = (long)curlx_tvtoms(timeout);
-  if(milli == 0)
-    milli += 10;
+  struct timeval *timeout =
+    ares_timeout((ares_channel)data->state.async.resolver, &maxtime, &timebuf);
+  timediff_t milli = curlx_tvtoms(timeout);
   Curl_expire(data, milli, EXPIRE_ASYNC_NAME);
-
   return max;
 }
 
@@ -366,10 +357,10 @@ static int waitperform(struct Curl_easy *data, timediff_t timeout_ms)
     /* move through the descriptors and ask for processing on them */
     for(i = 0; i < num; i++)
       ares_process_fd((ares_channel)data->state.async.resolver,
-                      (pfd[i].revents & (POLLRDNORM|POLLIN))?
-                      pfd[i].fd:ARES_SOCKET_BAD,
-                      (pfd[i].revents & (POLLWRNORM|POLLOUT))?
-                      pfd[i].fd:ARES_SOCKET_BAD);
+                      (pfd[i].revents & (POLLRDNORM|POLLIN)) ?
+                      pfd[i].fd : ARES_SOCKET_BAD,
+                      (pfd[i].revents & (POLLWRNORM|POLLOUT)) ?
+                      pfd[i].fd : ARES_SOCKET_BAD);
   }
   return nfds;
 }
@@ -801,7 +792,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
       }
 #endif /* CURLRES_IPV6 */
       hints.ai_family = pf;
-      hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP)?
+      hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP) ?
         SOCK_STREAM : SOCK_DGRAM;
       /* Since the service is a numerical one, set the hint flags
        * accordingly to save a call to getservbyname in inside C-Ares

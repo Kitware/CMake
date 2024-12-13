@@ -71,13 +71,6 @@
 #  include <openssl/md5.h>
 #  include <openssl/ssl.h>
 #  include <openssl/rand.h>
-#else
-#  include <wolfssl/openssl/des.h>
-#  include <wolfssl/openssl/md5.h>
-#  include <wolfssl/openssl/ssl.h>
-#  include <wolfssl/openssl/rand.h>
-#endif
-
 #  if (defined(OPENSSL_VERSION_NUMBER) && \
        (OPENSSL_VERSION_NUMBER < 0x00907001L)) && !defined(USE_WOLFSSL)
 #    define DES_key_schedule des_key_schedule
@@ -95,6 +88,25 @@
 #    define DESKEYARG(x) *x
 #    define DESKEY(x) &x
 #  endif
+#else
+#  include <wolfssl/openssl/des.h>
+#  include <wolfssl/openssl/md5.h>
+#  include <wolfssl/openssl/ssl.h>
+#  include <wolfssl/openssl/rand.h>
+#  if defined(OPENSSL_COEXIST)
+#    define DES_key_schedule WOLFSSL_DES_key_schedule
+#    define DES_cblock WOLFSSL_DES_cblock
+#    define DES_set_odd_parity wolfSSL_DES_set_odd_parity
+#    define DES_set_key wolfSSL_DES_set_key
+#    define DES_set_key_unchecked wolfSSL_DES_set_key_unchecked
+#    define DES_ecb_encrypt wolfSSL_DES_ecb_encrypt
+#    define DESKEY(x) ((WOLFSSL_DES_key_schedule *)(x))
+#    define DESKEYARG(x) *x
+#  else
+#    define DESKEYARG(x) *x
+#    define DESKEY(x) &x
+#  endif
+#endif
 
 #elif defined(USE_GNUTLS)
 
@@ -483,7 +495,7 @@ static void time2filetime(struct ms_filetime *ft, time_t t)
      134774 days = 11644473600 seconds = 0x2B6109100 */
   r = ft->dwLowDateTime;
   ft->dwLowDateTime = (ft->dwLowDateTime + 0xB6109100U) & 0xFFFFFFFF;
-  ft->dwHighDateTime += ft->dwLowDateTime < r? 0x03: 0x02;
+  ft->dwHighDateTime += ft->dwLowDateTime < r ? 0x03 : 0x02;
 
   /* Convert to tenths of microseconds. */
   ft->dwHighDateTime *= 10000000;
@@ -528,7 +540,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
   ascii_uppercase_to_unicode_le(identity, user, userlen);
   ascii_to_unicode_le(identity + (userlen << 1), domain, domlen);
 
-  result = Curl_hmacit(Curl_HMAC_MD5, ntlmhash, 16, identity, identity_len,
+  result = Curl_hmacit(&Curl_HMAC_MD5, ntlmhash, 16, identity, identity_len,
                        ntlmv2hash);
   free(identity);
 
@@ -613,7 +625,7 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 
   /* Concatenate the Type 2 challenge with the BLOB and do HMAC MD5 */
   memcpy(ptr + 8, &ntlm->nonce[0], 8);
-  result = Curl_hmacit(Curl_HMAC_MD5, ntlmv2hash, HMAC_MD5_LENGTH, ptr + 8,
+  result = Curl_hmacit(&Curl_HMAC_MD5, ntlmv2hash, HMAC_MD5_LENGTH, ptr + 8,
                     NTLMv2_BLOB_LEN + 8, hmac_output);
   if(result) {
     free(ptr);
@@ -656,7 +668,7 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
   memcpy(&data[0], challenge_server, 8);
   memcpy(&data[8], challenge_client, 8);
 
-  result = Curl_hmacit(Curl_HMAC_MD5, ntlmv2hash, 16, &data[0], 16,
+  result = Curl_hmacit(&Curl_HMAC_MD5, ntlmv2hash, 16, &data[0], 16,
                        hmac_output);
   if(result)
     return result;

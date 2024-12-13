@@ -34,7 +34,6 @@
 #include "inet_ntop.h"
 #include "strdup.h"
 #include "idn.h"
-#include "curl_memrchr.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -182,7 +181,7 @@ static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
 
     if(urlchar_needs_escaping(*iptr)) {
       char out[3]={'%'};
-      out[1] = hexdigits[*iptr>>4];
+      out[1] = hexdigits[*iptr >> 4];
       out[2] = hexdigits[*iptr & 0xf];
       result = Curl_dyn_addn(o, out, 3);
     }
@@ -468,7 +467,7 @@ static CURLUcode parse_hostname_login(struct Curl_URL *u,
   ccode = Curl_parse_login_details(login, ptr - login - 1,
                                    &userp, &passwdp,
                                    (h && (h->flags & PROTOPT_URLOPTIONS)) ?
-                                   &optionsp:NULL);
+                                   &optionsp : NULL);
   if(ccode) {
     result = CURLUE_BAD_LOGIN;
     goto out;
@@ -611,19 +610,14 @@ static CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
     /* hostname is fine */
   }
 
-  /* Check the IPv6 address. */
+  /* Normalize the IPv6 address */
   {
     char dest[16]; /* fits a binary IPv6 address */
-    char norm[MAX_IPADR_LEN];
     hostname[hlen] = 0; /* end the address there */
     if(1 != Curl_inet_pton(AF_INET6, hostname, dest))
       return CURLUE_BAD_IPV6;
-
-    /* check if it can be done shorter */
-    if(Curl_inet_ntop(AF_INET6, dest, norm, sizeof(norm)) &&
-       (strlen(norm) < hlen)) {
-      strcpy(hostname, norm);
-      hlen = strlen(norm);
+    if(Curl_inet_ntop(AF_INET6, dest, hostname, hlen)) {
+      hlen = strlen(hostname); /* might be shorter now */
       hostname[hlen + 1] = 0;
     }
     hostname[hlen] = ']'; /* restore ending bracket */
@@ -1420,8 +1414,8 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
   const char *ptr;
   CURLUcode ifmissing = CURLUE_UNKNOWN_PART;
   char portbuf[7];
-  bool urldecode = (flags & CURLU_URLDECODE)?1:0;
-  bool urlencode = (flags & CURLU_URLENCODE)?1:0;
+  bool urldecode = (flags & CURLU_URLDECODE) ? 1 : 0;
+  bool urlencode = (flags & CURLU_URLENCODE) ? 1 : 0;
   bool punycode = FALSE;
   bool depunyfy = FALSE;
   bool plusdecode = FALSE;
@@ -1455,8 +1449,8 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
   case CURLUPART_HOST:
     ptr = u->host;
     ifmissing = CURLUE_NO_HOST;
-    punycode = (flags & CURLU_PUNYCODE)?1:0;
-    depunyfy = (flags & CURLU_PUNY2IDN)?1:0;
+    punycode = (flags & CURLU_PUNYCODE) ? 1 : 0;
+    depunyfy = (flags & CURLU_PUNY2IDN) ? 1 : 0;
     break;
   case CURLUPART_ZONEID:
     ptr = u->zoneid;
@@ -1515,8 +1509,8 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     bool show_query =
       (u->query && u->query[0]) ||
       (u->query_present && flags & CURLU_GET_EMPTY);
-    punycode = (flags & CURLU_PUNYCODE)?1:0;
-    depunyfy = (flags & CURLU_PUNY2IDN)?1:0;
+    punycode = (flags & CURLU_PUNYCODE) ? 1 : 0;
+    depunyfy = (flags & CURLU_PUNY2IDN) ? 1 : 0;
     if(u->scheme && strcasecompare("file", u->scheme)) {
       url = aprintf("file://%s%s%s",
                     u->path,
@@ -1618,7 +1612,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
                     show_query ? "?": "",
                     u->query ? u->query : "",
                     show_fragment ? "#": "",
-                    u->fragment? u->fragment : "");
+                    u->fragment ? u->fragment : "");
       free(allochost);
     }
     if(!url)
@@ -1709,7 +1703,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
                        const char *part, unsigned int flags)
 {
   char **storep = NULL;
-  bool urlencode = (flags & CURLU_URLENCODE)? 1 : 0;
+  bool urlencode = (flags & CURLU_URLENCODE) ? 1 : 0;
   bool plusencode = FALSE;
   bool urlskipslash = FALSE;
   bool leadingslash = FALSE;
@@ -1846,7 +1840,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     break;
   case CURLUPART_QUERY:
     plusencode = urlencode;
-    appendquery = (flags & CURLU_APPENDQUERY)?1:0;
+    appendquery = (flags & CURLU_APPENDQUERY) ? 1 : 0;
     equalsencode = appendquery;
     storep = &u->query;
     u->query_present = TRUE;
@@ -1928,7 +1922,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
         }
         else {
           char out[3]={'%'};
-          out[1] = hexdigits[*i>>4];
+          out[1] = hexdigits[*i >> 4];
           out[2] = hexdigits[*i & 0xf];
           result = Curl_dyn_addn(&enc, out, 3);
           if(result)

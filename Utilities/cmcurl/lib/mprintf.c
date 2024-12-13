@@ -101,27 +101,27 @@ typedef enum {
 
 /* conversion and display flags */
 enum {
-  FLAGS_SPACE      = 1<<0,
-  FLAGS_SHOWSIGN   = 1<<1,
-  FLAGS_LEFT       = 1<<2,
-  FLAGS_ALT        = 1<<3,
-  FLAGS_SHORT      = 1<<4,
-  FLAGS_LONG       = 1<<5,
-  FLAGS_LONGLONG   = 1<<6,
-  FLAGS_LONGDOUBLE = 1<<7,
-  FLAGS_PAD_NIL    = 1<<8,
-  FLAGS_UNSIGNED   = 1<<9,
-  FLAGS_OCTAL      = 1<<10,
-  FLAGS_HEX        = 1<<11,
-  FLAGS_UPPER      = 1<<12,
-  FLAGS_WIDTH      = 1<<13, /* '*' or '*<num>$' used */
-  FLAGS_WIDTHPARAM = 1<<14, /* width PARAMETER was specified */
-  FLAGS_PREC       = 1<<15, /* precision was specified */
-  FLAGS_PRECPARAM  = 1<<16, /* precision PARAMETER was specified */
-  FLAGS_CHAR       = 1<<17, /* %c story */
-  FLAGS_FLOATE     = 1<<18, /* %e or %E */
-  FLAGS_FLOATG     = 1<<19, /* %g or %G */
-  FLAGS_SUBSTR     = 1<<20  /* no input, only substring */
+  FLAGS_SPACE      = 1 << 0,
+  FLAGS_SHOWSIGN   = 1 << 1,
+  FLAGS_LEFT       = 1 << 2,
+  FLAGS_ALT        = 1 << 3,
+  FLAGS_SHORT      = 1 << 4,
+  FLAGS_LONG       = 1 << 5,
+  FLAGS_LONGLONG   = 1 << 6,
+  FLAGS_LONGDOUBLE = 1 << 7,
+  FLAGS_PAD_NIL    = 1 << 8,
+  FLAGS_UNSIGNED   = 1 << 9,
+  FLAGS_OCTAL      = 1 << 10,
+  FLAGS_HEX        = 1 << 11,
+  FLAGS_UPPER      = 1 << 12,
+  FLAGS_WIDTH      = 1 << 13, /* '*' or '*<num>$' used */
+  FLAGS_WIDTHPARAM = 1 << 14, /* width PARAMETER was specified */
+  FLAGS_PREC       = 1 << 15, /* precision was specified */
+  FLAGS_PRECPARAM  = 1 << 16, /* precision PARAMETER was specified */
+  FLAGS_CHAR       = 1 << 17, /* %c story */
+  FLAGS_FLOATE     = 1 << 18, /* %e or %E */
+  FLAGS_FLOATG     = 1 << 19, /* %g or %G */
+  FLAGS_SUBSTR     = 1 << 20  /* no input, only substring */
 };
 
 enum {
@@ -321,10 +321,10 @@ static int parsefmt(const char *format,
               fmt++;
             }
             while(ISDIGIT(*fmt)) {
-              if(precision > INT_MAX/10)
+              int n = *fmt - '0';
+              if(precision > (INT_MAX - n) / 10)
                 return PFMT_PREC;
-              precision *= 10;
-              precision += *fmt - '0';
+              precision = precision * 10 + n;
               fmt++;
             }
             if(is_neg)
@@ -397,10 +397,10 @@ static int parsefmt(const char *format,
           width = 0;
           fmt--;
           do {
-            if(width > INT_MAX/10)
+            int n = *fmt - '0';
+            if(width > (INT_MAX - n) / 10)
               return PFMT_WIDTH;
-            width *= 10;
-            width += *fmt - '0';
+            width = width * 10 + n;
             fmt++;
           } while(ISDIGIT(*fmt));
           break;
@@ -455,15 +455,30 @@ static int parsefmt(const char *format,
         flags |= FLAGS_UNSIGNED;
         break;
       case 'o':
-        type = FORMAT_INT;
-        flags |= FLAGS_OCTAL;
+        if(flags & FLAGS_LONGLONG)
+          type = FORMAT_LONGLONGU;
+        else if(flags & FLAGS_LONG)
+          type = FORMAT_LONGU;
+        else
+          type = FORMAT_INTU;
+        flags |= FLAGS_OCTAL|FLAGS_UNSIGNED;
         break;
       case 'x':
-        type = FORMAT_INTU;
+        if(flags & FLAGS_LONGLONG)
+          type = FORMAT_LONGLONGU;
+        else if(flags & FLAGS_LONG)
+          type = FORMAT_LONGU;
+        else
+          type = FORMAT_INTU;
         flags |= FLAGS_HEX|FLAGS_UNSIGNED;
         break;
       case 'X':
-        type = FORMAT_INTU;
+        if(flags & FLAGS_LONGLONG)
+          type = FORMAT_LONGLONGU;
+        else if(flags & FLAGS_LONG)
+          type = FORMAT_LONGU;
+        else
+          type = FORMAT_INTU;
         flags |= FLAGS_HEX|FLAGS_UPPER|FLAGS_UNSIGNED;
         break;
       case 'c':
@@ -668,7 +683,7 @@ static int formatf(
   char work[BUFFSIZE];
 
   /* 'workend' points to the final buffer byte position, but with an extra
-     byte as margin to avoid the (false?) warning Coverity gives us
+     byte as margin to avoid the (FALSE?) warning Coverity gives us
      otherwise */
   char *workend = &work[sizeof(work) - 2];
 
@@ -760,7 +775,7 @@ static int formatf(
       }
       else if(flags & FLAGS_HEX) {
         /* Hexadecimal unsigned integer */
-        digits = (flags & FLAGS_UPPER)? upper_digits : lower_digits;
+        digits = (flags & FLAGS_UPPER) ? upper_digits : lower_digits;
         base = 16;
         is_neg = FALSE;
       }
@@ -906,7 +921,7 @@ number:
       if(iptr->val.ptr) {
         /* If the pointer is not NULL, write it as a %#x spec.  */
         base = 16;
-        digits = (flags & FLAGS_UPPER)? upper_digits : lower_digits;
+        digits = (flags & FLAGS_UPPER) ? upper_digits : lower_digits;
         is_alt = TRUE;
         num = (size_t) iptr->val.ptr;
         is_neg = FALSE;
@@ -984,7 +999,7 @@ number:
         *fptr++ = 'l';
 
       if(flags & FLAGS_FLOATE)
-        *fptr++ = (char)((flags & FLAGS_UPPER) ? 'E':'e');
+        *fptr++ = (char)((flags & FLAGS_UPPER) ? 'E' : 'e');
       else if(flags & FLAGS_FLOATG)
         *fptr++ = (char)((flags & FLAGS_UPPER) ? 'G' : 'g');
       else

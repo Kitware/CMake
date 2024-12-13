@@ -79,7 +79,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
 {
   bool matched = FALSE;
 
-#if defined(CURL_WINDOWS_APP)
+#if defined(CURL_WINDOWS_UWP)
   /* We have no way to determine the Windows version from Windows apps,
      so let's assume we are running on the target Windows version. */
   const WORD fullVersion = MAKEWORD(minorVersion, majorVersion);
@@ -209,12 +209,12 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   typedef LONG (APIENTRY *RTLVERIFYVERSIONINFO_FN)
     (struct OUR_OSVERSIONINFOEXW *, ULONG, ULONGLONG);
   static RTLVERIFYVERSIONINFO_FN pRtlVerifyVersionInfo;
-  static bool onetime = true; /* safe because first call is during init */
+  static bool onetime = TRUE; /* safe because first call is during init */
 
   if(onetime) {
     pRtlVerifyVersionInfo = CURLX_FUNCTION_CAST(RTLVERIFYVERSIONINFO_FN,
       (GetProcAddress(GetModuleHandleA("ntdll"), "RtlVerifyVersionInfo")));
-    onetime = false;
+    onetime = FALSE;
   }
 
   switch(condition) {
