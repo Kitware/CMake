@@ -61,7 +61,7 @@ function(cmake_parse_implicit_link_info2 text log_var obj_regex)
     endif()
   endif()
   # Parse implicit linker arguments.
-  set(linker "ld[0-9]*(\\.[a-z]+)?")
+  set(linker "ld[0-9]*(|\\.[a-rt-z][a-z]*|\\.s[a-np-z][a-z]*|\\.so[a-z]+)")
   if(is_lfortran_less_0_40)
     # lfortran < 0.40 has no way to pass -v to clang/gcc driver.
     string(APPEND linker "|clang|gcc")
