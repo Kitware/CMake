@@ -3,7 +3,8 @@ CMAKE_LINK_WHAT_YOU_USE_CHECK
 
 .. versionadded:: 3.22
 
-Defines the command executed after the link step to check libraries usage.
+Command executed by :prop_tgt:`LINK_WHAT_YOU_USE` after the linker to
+check for unnecessarily-linked shared libraries.
 This check is currently only defined on ``ELF`` platforms with value
 ``ldd -u -r``.
 
