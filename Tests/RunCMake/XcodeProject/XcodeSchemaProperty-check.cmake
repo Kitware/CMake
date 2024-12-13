@@ -3,21 +3,34 @@ function(check_property property matcher)
   file(STRINGS ${schema} actual-${property}
        REGEX "${matcher}" LIMIT_COUNT 1)
   if(NOT actual-${property})
-    message(SEND_ERROR "Xcode schema property ${property}: Could not find ${matcher} in schema ${schema}")
+    string(APPEND RunCMake_TEST_FAILED
+      "Xcode schema property ${property}: Could not find\n"
+      "  ${matcher}\n"
+      "in schema\n"
+      "  ${schema}\n"
+    )
+    set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
   endif()
 endfunction()
 
 function(expect_schema target)
   set(schema "${RunCMake_TEST_BINARY_DIR}/XcodeSchemaProperty.xcodeproj/xcshareddata/xcschemes/${target}.xcscheme")
   if(NOT EXISTS ${schema})
-    message(SEND_ERROR "Missing schema for target ${target}")
+    string(APPEND RunCMake_TEST_FAILED
+      "Missing schema for target ${target}\n"
+    )
+    set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
   endif()
 endfunction()
 
 function(expect_no_schema target)
   set(schema "${RunCMake_TEST_BINARY_DIR}/XcodeSchemaProperty.xcodeproj/xcshareddata/xcschemes/${target}.xcscheme")
   if(EXISTS ${schema})
-    message(SEND_ERROR "Found unexpected schema ${schema}")
+    string(APPEND RunCMake_TEST_FAILED
+      "Found unexpected schema\n"
+      "  ${schema}\n"
+    )
+    set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
   endif()
 endfunction()
 
