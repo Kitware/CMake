@@ -59,8 +59,7 @@ QCMake::QCMake(QObject* p)
     [this] { return this->interruptCallback(); });
 
   std::vector<cmake::GeneratorInfo> generators;
-  this->CMakeInstance->GetRegisteredGenerators(
-    generators, /*includeNamesWithPlatform=*/false);
+  this->CMakeInstance->GetRegisteredGenerators(generators);
 
   for (cmake::GeneratorInfo const& gen : generators) {
     this->AvailableGenerators.push_back(gen);

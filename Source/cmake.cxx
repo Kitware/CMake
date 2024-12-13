@@ -1380,7 +1380,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     "-G", "No generator specified for -G", CommandArgument::Values::One,
     CommandArgument::RequiresSeparator::No,
     [&](std::string const& value, cmake* state) -> bool {
-      bool valid = state->CreateAndSetGlobalGenerator(value, true);
+      bool valid = state->CreateAndSetGlobalGenerator(value);
       badGeneratorName = !valid;
       return valid;
     });
@@ -1569,8 +1569,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
       this->SetHomeOutputDirectory(expandedPreset->BinaryDir);
     }
     if (!this->GlobalGenerator && !expandedPreset->Generator.empty()) {
-      if (!this->CreateAndSetGlobalGenerator(expandedPreset->Generator,
-                                             false)) {
+      if (!this->CreateAndSetGlobalGenerator(expandedPreset->Generator)) {
         return;
       }
     }
@@ -1940,15 +1939,11 @@ void cmake::AddDefaultExtraGenerators()
 #endif
 }
 
-void cmake::GetRegisteredGenerators(std::vector<GeneratorInfo>& generators,
-                                    bool includeNamesWithPlatform) const
+void cmake::GetRegisteredGenerators(
+  std::vector<GeneratorInfo>& generators) const
 {
   for (const auto& gen : this->Generators) {
     std::vector<std::string> names = gen->GetGeneratorNames();
-
-    if (includeNamesWithPlatform) {
-      cm::append(names, gen->GetGeneratorNamesWithPlatform());
-    }
 
     for (std::string const& name : names) {
       GeneratorInfo info;
@@ -2017,7 +2012,7 @@ createExtraGenerator(
 }
 
 std::unique_ptr<cmGlobalGenerator> cmake::CreateGlobalGenerator(
-  const std::string& gname, bool allowArch)
+  const std::string& gname)
 {
   std::pair<std::unique_ptr<cmExternalMakefileProjectGenerator>, std::string>
     extra = createExtraGenerator(this->ExtraGenerators, gname);
@@ -2027,7 +2022,7 @@ std::unique_ptr<cmGlobalGenerator> cmake::CreateGlobalGenerator(
 
   std::unique_ptr<cmGlobalGenerator> generator;
   for (const auto& g : this->Generators) {
-    generator = g->CreateGlobalGenerator(name, allowArch, this);
+    generator = g->CreateGlobalGenerator(name, this);
     if (generator) {
       break;
     }
@@ -2040,17 +2035,16 @@ std::unique_ptr<cmGlobalGenerator> cmake::CreateGlobalGenerator(
   return generator;
 }
 
-bool cmake::CreateAndSetGlobalGenerator(const std::string& name,
-                                        bool allowArch)
+bool cmake::CreateAndSetGlobalGenerator(const std::string& name)
 {
-  auto gen = this->CreateGlobalGenerator(name, allowArch);
+  auto gen = this->CreateGlobalGenerator(name);
   if (!gen) {
     std::string kdevError;
     std::string vsError;
     if (name.find("KDevelop3", 0) != std::string::npos) {
       kdevError = "\nThe KDevelop3 generator is not supported anymore.";
     }
-    if (!allowArch && cmHasLiteralPrefix(name, "Visual Studio ") &&
+    if (cmHasLiteralPrefix(name, "Visual Studio ") &&
         name.length() >= cmStrLen("Visual Studio xx xxxx ")) {
       vsError = "\nUsing platforms in Visual Studio generator names is not "
                 "supported in CMakePresets.json.";
@@ -2070,7 +2064,7 @@ bool cmake::CreateAndSetGlobalGenerator(const std::string& name,
 void cmake::PrintPresetList(const cmCMakePresetsGraph& graph) const
 {
   std::vector<GeneratorInfo> generators;
-  this->GetRegisteredGenerators(generators, false);
+  this->GetRegisteredGenerators(generators);
   auto filter =
     [&generators](const cmCMakePresetsGraph::ConfigurePreset& preset) -> bool {
     if (preset.Generator.empty()) {

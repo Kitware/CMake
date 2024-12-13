@@ -31,8 +31,7 @@ public:
   }
 
 protected:
-  cmGlobalVisualStudio11Generator(cmake* cm, const std::string& name,
-                                  std::string const& platformInGeneratorName);
+  cmGlobalVisualStudio11Generator(cmake* cm, const std::string& name);
 
   bool InitializeWindowsPhone(cmMakefile* mf) override;
   bool InitializeWindowsStore(cmMakefile* mf) override;

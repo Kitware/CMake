@@ -8,3 +8,7 @@ remove-old-compatibility
   CMake by using their ``VERSION`` arguments' ``<min>...<max>`` syntax.
   This requires only the ``<min>`` version of CMake, but when running a
   newer version, sets policies up to the ``<max>`` version.
+
+* The :generator:`Visual Studio 14 2015` and :generator:`Visual Studio 15 2017`
+  generators no longer support specifying a platform as part of the generator
+  name.  See :ref:`Visual Studio Platform Selection`.

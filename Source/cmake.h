@@ -246,10 +246,10 @@ public:
 
   //! Create a GlobalGenerator
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, bool allowArch = true);
+    const std::string& name);
 
   //! Create a GlobalGenerator and set it as our own
-  bool CreateAndSetGlobalGenerator(const std::string& name, bool allowArch);
+  bool CreateAndSetGlobalGenerator(const std::string& name);
 
 #ifndef CMAKE_BOOTSTRAP
   //! Print list of configure presets
@@ -274,8 +274,7 @@ public:
   void SetGlobalGenerator(std::unique_ptr<cmGlobalGenerator>);
 
   //! Get the names of the current registered generators
-  void GetRegisteredGenerators(std::vector<GeneratorInfo>& generators,
-                               bool includeNamesWithPlatform = true) const;
+  void GetRegisteredGenerators(std::vector<GeneratorInfo>& generators) const;
 
   //! Set the name of the selected generator-specific instance.
   void SetGeneratorInstance(std::string const& instance)

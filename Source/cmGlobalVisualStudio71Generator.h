@@ -25,8 +25,7 @@ class BT;
 class cmGlobalVisualStudio71Generator : public cmGlobalVisualStudio7Generator
 {
 public:
-  cmGlobalVisualStudio71Generator(cmake* cm,
-                                  const std::string& platformName = "");
+  cmGlobalVisualStudio71Generator(cmake* cm);
 
 protected:
   void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,

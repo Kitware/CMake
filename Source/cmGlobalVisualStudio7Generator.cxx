@@ -66,9 +66,8 @@ std::string GetSLNFile(cmLocalGenerator* root)
 }
 }
 
-cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
-  cmake* cm, std::string const& platformInGeneratorName)
-  : cmGlobalVisualStudioGenerator(cm, platformInGeneratorName)
+cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(cmake* cm)
+  : cmGlobalVisualStudioGenerator(cm)
 {
   this->DevEnvCommandInitialized = false;
   this->MarmasmEnabled = false;

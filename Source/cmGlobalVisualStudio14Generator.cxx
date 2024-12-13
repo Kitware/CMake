@@ -40,7 +40,7 @@ class cmGlobalVisualStudio14Generator::Factory
 {
 public:
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, bool allowArch, cmake* cm) const override
+    const std::string& name, cmake* cm) const override
   {
     std::string genName;
     const char* p = cmVS14GenName(name, genName);
@@ -49,18 +49,7 @@ public:
     }
     if (!*p) {
       return std::unique_ptr<cmGlobalGenerator>(
-        new cmGlobalVisualStudio14Generator(cm, genName, ""));
-    }
-    if (!allowArch || *p++ != ' ') {
-      return std::unique_ptr<cmGlobalGenerator>();
-    }
-    if (strcmp(p, "Win64") == 0) {
-      return std::unique_ptr<cmGlobalGenerator>(
-        new cmGlobalVisualStudio14Generator(cm, genName, "x64"));
-    }
-    if (strcmp(p, "ARM") == 0) {
-      return std::unique_ptr<cmGlobalGenerator>(
-        new cmGlobalVisualStudio14Generator(cm, genName, "ARM"));
+        new cmGlobalVisualStudio14Generator(cm, genName));
     }
     return std::unique_ptr<cmGlobalGenerator>();
   }
@@ -76,14 +65,6 @@ public:
   {
     std::vector<std::string> names;
     names.push_back(vs14generatorName);
-    return names;
-  }
-
-  std::vector<std::string> GetGeneratorNamesWithPlatform() const override
-  {
-    std::vector<std::string> names;
-    names.emplace_back(cmStrCat(vs14generatorName, " ARM"));
-    names.emplace_back(cmStrCat(vs14generatorName, " Win64"));
     return names;
   }
 
@@ -109,9 +90,8 @@ cmGlobalVisualStudio14Generator::NewFactory()
 }
 
 cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(
-  cmake* cm, const std::string& name,
-  std::string const& platformInGeneratorName)
-  : cmGlobalVisualStudio12Generator(cm, name, platformInGeneratorName)
+  cmake* cm, const std::string& name)
+  : cmGlobalVisualStudio12Generator(cm, name)
 {
   std::string vc14Express;
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(
