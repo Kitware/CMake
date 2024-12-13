@@ -684,7 +684,7 @@ foreach(c IN LISTS KWSYS_CLASSES)
 
   # Configure the header for this class.
   configure_file(${PROJECT_SOURCE_DIR}/${c}.hxx.in ${KWSYS_HEADER_DIR}/${c}.hxx
-                 @ONLY IMMEDIATE)
+                 @ONLY)
   set(KWSYS_CXX_SRCS ${KWSYS_CXX_SRCS} ${KWSYS_HEADER_DIR}/${c}.hxx)
 
   # Create an install target for the header.
@@ -699,7 +699,7 @@ endforeach()
 foreach(h IN LISTS KWSYS_H_FILES)
   # Configure the header into the given directory.
   configure_file(${PROJECT_SOURCE_DIR}/${h}.h.in ${KWSYS_HEADER_DIR}/${h}.h
-                 @ONLY IMMEDIATE)
+                 @ONLY)
   set(KWSYS_C_SRCS ${KWSYS_C_SRCS} ${KWSYS_HEADER_DIR}/${h}.h)
 
   # Create an install target for the header.
@@ -714,7 +714,7 @@ endforeach()
 foreach(h IN LISTS KWSYS_HXX_FILES)
   # Configure the header into the given directory.
   configure_file(${PROJECT_SOURCE_DIR}/${h}.hxx.in ${KWSYS_HEADER_DIR}/${h}.hxx
-                 @ONLY IMMEDIATE)
+                 @ONLY)
   set(KWSYS_CXX_SRCS ${KWSYS_CXX_SRCS} ${KWSYS_HEADER_DIR}/${h}.hxx)
 
   # Create an install target for the header.
