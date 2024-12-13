@@ -17,8 +17,7 @@ standard syntax, e.g.
   # OR
   find_package(Ruby 3.2)
 
-Virtual environments such as RVM are handled as well, by passing
-the argument ``Ruby_FIND_VIRTUALENV``
+Virtual environments, such as RVM or RBENV, are supported.
 
 Result Variables
 ^^^^^^^^^^^^^^^^
@@ -64,23 +63,26 @@ This module will set the following variables in your project:
 Hints
 ^^^^^
 
-.. versionadded:: 3.18
-
 ``Ruby_FIND_VIRTUALENV``
-  This variable defines the handling of virtual environments managed by
-  ``rvm``. It is meaningful only when a virtual environment
-  is active (i.e. the ``rvm`` script has been evaluated or at least the
-  ``MY_RUBY_HOME`` environment variable is set).
-  The ``Ruby_FIND_VIRTUALENV`` variable can be set to empty or
-  one of the following:
+  .. versionadded:: 3.18
 
-  * ``FIRST``: The virtual environment is used before any other standard
-    paths to look-up for the interpreter. This is the default.
-  * ``ONLY``: Only the virtual environment is used to look-up for the
-    interpreter.
-  * ``STANDARD``: The virtual environment is not used to look-up for the
-    interpreter (assuming it isn't still in the PATH...)
+  This variable defines the handling of virtual environments.
+  It can be left empty or be set to one of the following values:
 
+  * ``FIRST``: Virtual Ruby environments are searched for first,
+               then the system Ruby installation.
+               This is the default.
+  * ``ONLY``: Only virtual environments are searched
+  * ``STANDARD``: Only the system Ruby installation is searched.
+
+  Virtual environments may be provided by:
+
+  ``rvm``
+    Requires that the ``MY_RUBY_HOME`` environment environment is defined.
+
+  ``rbenv``
+    Requires that ``rbenv`` is installed in ``~/.rbenv/bin``
+    or that the ``RBENV_ROOT`` environment variable is defined.
 #]=======================================================================]
 
 # Backwards compatibility
@@ -202,6 +204,40 @@ function (_RUBY_CHECK_RVM)
   endif()
 endfunction()
 
+####  Check RBENV virtual environment ###
+function (_RUBY_CHECK_RBENV)
+  find_program (Ruby_RBENV_EXECUTABLE
+          NAMES rbenv
+          NAMES_PER_DIR
+          PATHS "$ENV{HOME}/.rbenv/bin/rbenv" ENV RBENV_ROOT
+          PATH_SUFFIXES bin Scripts
+          NO_CACHE
+          NO_CMAKE_PATH
+          NO_CMAKE_ENVIRONMENT_PATH
+          NO_CMAKE_SYSTEM_PATH)
+
+  execute_process (COMMAND "${Ruby_RBENV_EXECUTABLE}" "which" "ruby"
+                   RESULT_VARIABLE result
+                   OUTPUT_VARIABLE ruby_exe
+                   ERROR_QUIET
+                   OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(NOT result EQUAL 0)
+    return()
+  endif()
+  cmake_path(GET ruby_exe PARENT_PATH ruby_dir)
+
+  find_program (Ruby_EXECUTABLE
+                NAMES ruby
+                NAMES_PER_DIR
+                PATHS ${ruby_dir}
+                VALIDATOR _RUBY_VALIDATE_INTERPRETER
+                NO_DEFAULT_PATH)
+
+  if(Ruby_EXECUTABLE)
+    set(Ruby_ENV "RBENV" CACHE INTERNAL "Ruby environment")
+  endif()
+endfunction()
+
 ####  Check system installed Ruby ###
 function (_RUBY_CHECK_SYSTEM)
   find_program (Ruby_EXECUTABLE
@@ -216,7 +252,12 @@ endfunction()
 
 # Find Ruby
 if(NOT Ruby_EXECUTABLE AND Ruby_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
+  # First check for RVM virtual environments
   _RUBY_CHECK_RVM()
+  # Second check for RBENV virtual environments
+  if(NOT Ruby_EXECUTABLE)
+    _RUBY_CHECK_RBENV()
+  endif()
 endif()
 
 # Check for system installed Ruby

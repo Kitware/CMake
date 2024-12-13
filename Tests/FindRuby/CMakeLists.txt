@@ -41,6 +41,20 @@ if(CMake_TEST_FindRuby)
   set_tests_properties(FindRuby.FailExact PROPERTIES
     PASS_REGULAR_EXPRESSION "Could NOT find Ruby.*Required[ \n]+is[ \n]+exact[ \n]+version[ \n]+\"1\\.9\\.9\"")
 
+  # RBENV specific test
+  if(CMake_TEST_FindRuby_RBENV)
+    add_test(NAME FindRuby.Rbenv COMMAND
+      ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/FindRuby/Rbenv"
+      "${CMake_BINARY_DIR}/Tests/FindRuby/Rbenv"
+      ${build_generator_args}
+      --build-project TestRBENV
+      --build-options ${build_options}
+      --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+      )
+  endif()
+
   # RVM specific test
   if(CMake_TEST_FindRuby_RVM)
     add_test(NAME FindRuby.Rvm COMMAND
