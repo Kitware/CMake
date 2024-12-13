@@ -1,5 +1,5 @@
 ^CMake Error at BeforeVersionRemoved\.cmake:1 \(cmake_minimum_required\):
-  Compatibility with CMake < 3\.3 has been removed from CMake\.
+  Compatibility with CMake < 3\.5 has been removed from CMake\.
 
   Update the VERSION argument <min> value\.  Or, use the <min>\.\.\.<max> syntax
   to tell CMake that the project requires at least <min> but has been updated
