@@ -1437,7 +1437,7 @@ bool cmFindPackageCommand::HandlePackageMode(
       // The file location was cached.  Look for the correct file.
       std::string file;
       if (this->FindConfigFile(dir, file)) {
-        this->FileFound = file;
+        this->FileFound = std::move(file);
         fileFound = true;
       }
       def = this->Makefile->GetDefinition(this->Variable);
@@ -2409,9 +2409,9 @@ bool cmFindPackageCommand::CheckDirectory(std::string const& dir)
   }
 
   // Look for the file in this directory.
-  if (this->FindConfigFile(d, this->FileFound)) {
-    // Remove duplicate slashes.
-    cmSystemTools::ConvertToUnixSlashes(this->FileFound);
+  std::string file;
+  if (this->FindConfigFile(d, file)) {
+    this->FileFound = std::move(file);
     return true;
   }
   return false;
@@ -2429,6 +2429,8 @@ bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
       // Allow resolving symlinks when the config file is found through a link
       if (this->UseRealPath) {
         file = cmSystemTools::GetRealPath(file);
+      } else {
+        file = cmSystemTools::ToNormalizedPathOnDisk(file);
       }
       return true;
     }
