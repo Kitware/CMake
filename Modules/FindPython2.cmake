@@ -321,9 +321,9 @@ Hints
 
   .. note::
 
-    If the component ``Development`` is requested, it is **strongly**
-    recommended to also include the component ``Interpreter`` to get expected
-    result.
+    If the component ``Development`` is requested (or one of its
+    sub-components) and is not found or the wrong artifacts are returned,
+    including also the component ``Interpreter`` may be helpful.
 
 ``Python2_FIND_IMPLEMENTATIONS``
   .. versionadded:: 3.18

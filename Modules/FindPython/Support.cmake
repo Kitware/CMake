@@ -1727,7 +1727,22 @@ if (DEFINED ENV{VIRTUAL_ENV} OR DEFINED ENV{CONDA_PREFIX})
 else()
   set (_${_PYTHON_PREFIX}_FIND_VIRTUALENV STANDARD)
 endif()
-
+if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$" AND DEFINED ENV{VIRTUAL_ENV})
+  # retrieve root_dir of python installation
+  block(SCOPE_FOR VARIABLES PROPAGATE _${_PYTHON_PREFIX}_VIRTUALENV_ROOT_DIR)
+    if (IS_READABLE "$ENV{VIRTUAL_ENV}/pyvenv.cfg")
+      file(STRINGS "$ENV{VIRTUAL_ENV}/pyvenv.cfg" python_home REGEX "^home = .+")
+      if(python_home MATCHES "^home = (.+)$")
+        cmake_path(SET _${_PYTHON_PREFIX}_VIRTUALENV_ROOT_DIR "${CMAKE_MATCH_1}")
+        if (_${_PYTHON_PREFIX}_VIRTUALENV_ROOT_DIR MATCHES "bin$")
+          cmake_path(GET _${_PYTHON_PREFIX}_VIRTUALENV_ROOT_DIR PARENT_PATH _${_PYTHON_PREFIX}_VIRTUALENV_ROOT_DIR)
+        endif()
+      endif()
+    endif()
+  endblock()
+else()
+  unset(_${_PYTHON_PREFIX}_VIRTUALENV_ROOT_DIR)
+endif()
 
 # Python naming handling
 if (DEFINED ${_PYTHON_PREFIX}_FIND_UNVERSIONED_NAMES)
@@ -2821,7 +2836,7 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
       set (_${_PYTHON_PREFIX}_HINTS "${${_PYTHON_PREFIX}_ROOT_DIR}" ENV ${_PYTHON_PREFIX}_ROOT_DIR)
       unset (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS)
       if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
-        set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV ENV CONDA_PREFIX)
+        set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS "${_${_PYTHON_PREFIX}_VIRTUALENV_ROOT_DIR}" ENV VIRTUAL_ENV ENV CONDA_PREFIX)
       endif()
 
       if (_${_PYTHON_PREFIX}_FIND_STRATEGY STREQUAL "LOCATION")
@@ -2829,37 +2844,69 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
           # Framework Paths
         _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS VERSION ${_${_PYTHON_PREFIX}_FIND_VERSIONS})
 
-        # Apple frameworks handling
-        if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
+        while (TRUE)
+          # Virtual environments handling
+          if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
+            find_program (_${_PYTHON_PREFIX}_CONFIG
+                          NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
+                          NAMES_PER_DIR
+                          HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                          PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                          PATH_SUFFIXES bin
+                          NO_CMAKE_PATH
+                          NO_CMAKE_ENVIRONMENT_PATH
+                          NO_SYSTEM_ENVIRONMENT_PATH
+                          NO_CMAKE_SYSTEM_PATH)
+            if (_${_PYTHON_PREFIX}_CONFIG)
+              break()
+            endif()
+            if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV STREQUAL "ONLY")
+              break()
+            endif()
+          endif()
+
+          # Apple frameworks handling
+          if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
+            find_program (_${_PYTHON_PREFIX}_CONFIG
+                          NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
+                          NAMES_PER_DIR
+                          HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                          PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                          PATH_SUFFIXES bin
+                          NO_CMAKE_PATH
+                          NO_CMAKE_ENVIRONMENT_PATH
+                          NO_SYSTEM_ENVIRONMENT_PATH
+                          NO_CMAKE_SYSTEM_PATH)
+            if (_${_PYTHON_PREFIX}_CONFIG)
+              break()
+            endif()
+          endif()
+
           find_program (_${_PYTHON_PREFIX}_CONFIG
                         NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
                         NAMES_PER_DIR
                         HINTS ${_${_PYTHON_PREFIX}_HINTS}
                         PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
-                              ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
-                        PATH_SUFFIXES bin
-                        NO_CMAKE_PATH
-                        NO_CMAKE_ENVIRONMENT_PATH
-                        NO_SYSTEM_ENVIRONMENT_PATH
-                        NO_CMAKE_SYSTEM_PATH)
-        endif()
+                        PATH_SUFFIXES bin)
+          if (_${_PYTHON_PREFIX}_CONFIG)
+            break()
+          endif()
 
-        find_program (_${_PYTHON_PREFIX}_CONFIG
-                      NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
-                      NAMES_PER_DIR
-                      HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                      PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
-                      PATH_SUFFIXES bin)
+          # Apple frameworks handling
+          if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
+            find_program (_${_PYTHON_PREFIX}_CONFIG
+                          NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
+                          NAMES_PER_DIR
+                          PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                          PATH_SUFFIXES bin
+                          NO_DEFAULT_PATH)
+            if (_${_PYTHON_PREFIX}_CONFIG)
+              break()
+            endif()
+          endif()
 
-        # Apple frameworks handling
-        if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
-          find_program (_${_PYTHON_PREFIX}_CONFIG
-                        NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
-                        NAMES_PER_DIR
-                        PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
-                        PATH_SUFFIXES bin
-                        NO_DEFAULT_PATH)
-        endif()
+          break()
+        endwhile()
 
         _python_get_launcher (_${_PYTHON_PREFIX}_CONFIG_LAUNCHER CONFIG "${_${_PYTHON_PREFIX}_CONFIG}")
 
@@ -2919,37 +2966,69 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
           # Framework Paths
           _python_get_frameworks (_${_PYTHON_PREFIX}_FRAMEWORK_PATHS VERSION ${_${_PYTHON_PREFIX}_VERSION})
 
-          # Apple frameworks handling
-          if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
+          while (TRUE)
+            # Virtual environments handling
+            if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
+              find_program (_${_PYTHON_PREFIX}_CONFIG
+                            NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
+                            NAMES_PER_DIR
+                            HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                            PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
+                            PATH_SUFFIXES bin
+                            NO_CMAKE_PATH
+                            NO_CMAKE_ENVIRONMENT_PATH
+                            NO_SYSTEM_ENVIRONMENT_PATH
+                            NO_CMAKE_SYSTEM_PATH)
+              if (_${_PYTHON_PREFIX}_CONFIG)
+                break()
+              endif()
+              if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV STREQUAL "ONLY")
+                break()
+              endif()
+            endif()
+
+            # Apple frameworks handling
+            if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "FIRST")
+              find_program (_${_PYTHON_PREFIX}_CONFIG
+                            NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
+                            NAMES_PER_DIR
+                            HINTS ${_${_PYTHON_PREFIX}_HINTS}
+                            PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                            PATH_SUFFIXES bin
+                            NO_CMAKE_PATH
+                            NO_CMAKE_ENVIRONMENT_PATH
+                            NO_SYSTEM_ENVIRONMENT_PATH
+                            NO_CMAKE_SYSTEM_PATH)
+              if (_${_PYTHON_PREFIX}_CONFIG)
+                break()
+              endif()
+            endif()
+
             find_program (_${_PYTHON_PREFIX}_CONFIG
                           NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
                           NAMES_PER_DIR
                           HINTS ${_${_PYTHON_PREFIX}_HINTS}
                           PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
-                                ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
-                          PATH_SUFFIXES bin
-                          NO_CMAKE_PATH
-                          NO_CMAKE_ENVIRONMENT_PATH
-                          NO_SYSTEM_ENVIRONMENT_PATH
-                          NO_CMAKE_SYSTEM_PATH)
-          endif()
+                          PATH_SUFFIXES bin)
+            if (_${_PYTHON_PREFIX}_CONFIG)
+              break()
+            endif()
 
-          find_program (_${_PYTHON_PREFIX}_CONFIG
-                        NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
-                        NAMES_PER_DIR
-                        HINTS ${_${_PYTHON_PREFIX}_HINTS}
-                        PATHS ${_${_PYTHON_PREFIX}_VIRTUALENV_PATHS}
-                        PATH_SUFFIXES bin)
+            # Apple frameworks handling
+            if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
+              find_program (_${_PYTHON_PREFIX}_CONFIG
+                            NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
+                            NAMES_PER_DIR
+                            PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
+                            PATH_SUFFIXES bin
+                            NO_DEFAULT_PATH)
+              if (_${_PYTHON_PREFIX}_CONFIG)
+                break()
+              endif()
+            endif()
 
-          # Apple frameworks handling
-          if (CMAKE_HOST_APPLE AND _${_PYTHON_PREFIX}_FIND_FRAMEWORK STREQUAL "LAST")
-            find_program (_${_PYTHON_PREFIX}_CONFIG
-                          NAMES ${_${_PYTHON_PREFIX}_CONFIG_NAMES}
-                          NAMES_PER_DIR
-                          PATHS ${_${_PYTHON_PREFIX}_FRAMEWORK_PATHS}
-                          PATH_SUFFIXES bin
-                          NO_DEFAULT_PATH)
-          endif()
+            break()
+          endwhile()
 
           unset (_${_PYTHON_PREFIX}_CONFIG_NAMES)
 
@@ -3057,7 +3136,7 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
 
         unset (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS)
         if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
-          set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV ENV CONDA_PREFIX)
+          set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS "${_${_PYTHON_PREFIX}_VIRTUALENV_ROOT_DIR}" ENV VIRTUAL_ENV ENV CONDA_PREFIX)
         endif()
 
         if (_${_PYTHON_PREFIX}_FIND_STRATEGY STREQUAL "LOCATION")
@@ -3324,7 +3403,7 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
 
           unset (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS)
           if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
-            set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV ENV CONDA_PREFIX)
+            set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS "${_${_PYTHON_PREFIX}_VIRTUALENV_ROOT_DIR}" ENV VIRTUAL_ENV ENV CONDA_PREFIX)
           endif()
 
           if (_${_PYTHON_PREFIX}_FIND_STRATEGY STREQUAL "LOCATION")
@@ -3561,7 +3640,7 @@ if (("Development.Module" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS
       if (NOT _${_PYTHON_PREFIX}_INCLUDE_DIR)
         unset (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS)
         if (_${_PYTHON_PREFIX}_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
-          set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS ENV VIRTUAL_ENV ENV CONDA_PREFIX)
+          set (_${_PYTHON_PREFIX}_VIRTUALENV_PATHS "${_${_PYTHON_PREFIX}_VIRTUALENV_ROOT_DIR}" ENV VIRTUAL_ENV ENV CONDA_PREFIX)
         endif()
         unset (_${_PYTHON_PREFIX}_INCLUDE_HINTS)
 
