@@ -185,7 +185,7 @@ class cmMakefile;
          NEW)                                                                 \
   SELECT(POLICY, CMP0063,                                                     \
          "Honor visibility properties for all target types.", 3, 3, 0, NEW)   \
-  SELECT(POLICY, CMP0064, "Support new TEST if() operator.", 3, 4, 0, WARN)   \
+  SELECT(POLICY, CMP0064, "Support new TEST if() operator.", 3, 4, 0, NEW)    \
   SELECT(POLICY, CMP0065,                                                     \
          "Do not add flags to export symbols from executables without "       \
          "the ENABLE_EXPORTS target property.",                               \

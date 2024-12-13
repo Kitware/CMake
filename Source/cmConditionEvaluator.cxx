@@ -218,7 +218,6 @@ cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
                                            cmListFileBacktrace bt)
   : Makefile(makefile)
   , Backtrace(std::move(bt))
-  , Policy64Status(makefile.GetPolicyStatus(cmPolicies::CMP0064))
   , Policy139Status(makefile.GetPolicyStatus(cmPolicies::CMP0139))
 {
 }
@@ -426,26 +425,6 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
 {
   for (auto args = newArgs.make2ArgsIterator(); args.current != newArgs.end();
        args.advance(newArgs)) {
-
-    auto policyCheck = [&, this](const cmPolicies::PolicyID id,
-                                 const cmPolicies::PolicyStatus status,
-                                 const cm::static_string_view kw) {
-      if (status == cmPolicies::WARN && this->IsKeyword(kw, *args.current)) {
-        std::ostringstream e;
-        e << cmPolicies::GetPolicyWarning(id) << "\n"
-          << kw
-          << " will be interpreted as an operator "
-             "when the policy is set to NEW.  "
-             "Since the policy is not set the OLD behavior will be used.";
-
-        this->Makefile.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
-      }
-    };
-
-    // NOTE Checking policies for warnings are not require an access to the
-    // next arg. Check them first!
-    policyCheck(cmPolicies::CMP0064, this->Policy64Status, keyTEST);
-
     // NOTE Fail fast: All the predicates below require the next arg to be
     // valid
     if (args.next == newArgs.end()) {
@@ -533,10 +512,6 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
     }
     // does a test exist
     else if (this->IsKeyword(keyTEST, *args.current)) {
-      if (this->Policy64Status == cmPolicies::OLD ||
-          this->Policy64Status == cmPolicies::WARN) {
-        continue;
-      }
       newArgs.ReduceOneArg(
         static_cast<bool>(this->Makefile.GetTest(args.next->GetValue())),
         args);

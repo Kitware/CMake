@@ -66,6 +66,5 @@ private:
 
   cmMakefile& Makefile;
   cmListFileBacktrace Backtrace;
-  cmPolicies::PolicyStatus Policy64Status;
   cmPolicies::PolicyStatus Policy139Status;
 };
