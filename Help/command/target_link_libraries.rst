@@ -238,6 +238,8 @@ is not ``NEW``, they are also appended to the
 ``general`` (or without any keyword) are treated as if specified for both
 ``debug`` and ``optimized``.
 
+.. _`Linking Object Libraries`:
+
 Linking Object Libraries
 ^^^^^^^^^^^^^^^^^^^^^^^^
 

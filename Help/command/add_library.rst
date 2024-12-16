@@ -20,14 +20,17 @@ Normal Libraries
   The optional ``<type>`` specifies the type of library to be created:
 
   ``STATIC``
-    An archive of object files for use when linking other targets.
+    A :ref:`Static Library <Static Libraries>`:
+    an archive of object files for use when linking other targets.
 
   ``SHARED``
-    A dynamic library that may be linked by other targets and loaded
+    A :ref:`Shared Library <Shared Libraries>`:
+    a dynamic library that may be linked by other targets and loaded
     at runtime.
 
   ``MODULE``
-    A plugin that may not be linked by other targets, but may be
+    A :ref:`Module Library <Module Libraries>`:
+    a plugin that may not be linked by other targets, but may be
     dynamically loaded at runtime using dlopen-like functionality.
 
   If no ``<type>`` is given the default is ``STATIC`` or ``SHARED``

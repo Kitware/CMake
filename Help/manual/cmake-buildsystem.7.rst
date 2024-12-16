@@ -37,10 +37,13 @@ is defined as an executable formed by compiling and linking ``zipapp.cpp``.
 When linking the ``zipapp`` executable, the ``archive`` static library is
 linked in.
 
-.. _`Binary Executables`:
+.. _`Executables`:
 
-Binary Executables
-------------------
+Executables
+-----------
+
+Executables are binaries created by linking object files together,
+one of which contains a program entry point, e.g., ``main``.
 
 The :command:`add_executable` command defines an executable target:
 
@@ -48,56 +51,101 @@ The :command:`add_executable` command defines an executable target:
 
   add_executable(mytool mytool.cpp)
 
+CMake generates build rules to compile the source files into object
+files and link them into an executable.
+
+Link dependencies of executables may be specified using the
+:command:`target_link_libraries` command.  Linkers start with the
+object files compiled from the executable's own source files, and
+then resolve remaining symbol dependencies by searching linked libraries.
+
 Commands such as :command:`add_custom_command`, which generates rules to be
 run at build time can transparently use an :prop_tgt:`EXECUTABLE <TYPE>`
 target as a ``COMMAND`` executable.  The buildsystem rules will ensure that
 the executable is built before attempting to run the command.
 
-Binary Library Types
---------------------
+.. _`Static Libraries`:
 
-.. _`Normal Libraries`:
+Static Libraries
+----------------
 
-Normal Libraries
-^^^^^^^^^^^^^^^^
+Static libraries are archives of object files.  They are produced by an
+archiver, not a linker.  `Executables`_, `Shared Libraries`_, and
+`Module Libraries`_ may link to static libraries as dependencies.
+Linkers select subsets of object files from static libraries as needed
+to resolve symbols and link them into consuming binaries.  Each binary
+that links to a static library gets its own copy of the symbols, and
+the static library itself is not needed at runtime.
 
-By default, the :command:`add_library` command defines a ``STATIC`` library,
-unless a type is specified.  A type may be specified when using the command:
-
-.. code-block:: cmake
-
-  add_library(archive SHARED archive.cpp zip.cpp lzma.cpp)
+The :command:`add_library` command defines a static library target
+when called with the ``STATIC`` library type:
 
 .. code-block:: cmake
 
   add_library(archive STATIC archive.cpp zip.cpp lzma.cpp)
 
-The :variable:`BUILD_SHARED_LIBS` variable may be enabled to change the
-behavior of :command:`add_library` to build shared libraries by default.
-
-In the context of the buildsystem definition as a whole, it is largely
-irrelevant whether particular libraries are ``SHARED`` or ``STATIC`` --
-the commands, dependency specifications and other APIs work similarly
-regardless of the library type.  The ``MODULE`` library type is
-dissimilar in that it is generally not linked to -- it is not used in
-the right-hand-side of the :command:`target_link_libraries` command.
-It is a type which is loaded as a plugin using runtime techniques.
-If the library does not export any unmanaged symbols (e.g. Windows
-resource DLL, C++/CLI DLL), it is required that the library not be a
-``SHARED`` library because CMake expects ``SHARED`` libraries to export
-at least one symbol.
+or, when the :variable:`BUILD_SHARED_LIBS` variable is false, with no type:
 
 .. code-block:: cmake
 
-  add_library(archive MODULE 7z.cpp)
+  add_library(archive archive.cpp zip.cpp lzma.cpp)
+
+CMake generates build rules to compile the source files into object
+files and archive them into a static library.
+
+Link dependencies of static libraries may be specified using the
+:command:`target_link_libraries` command.  Since static libraries are
+archives rather than linked binaries, object files from their link
+dependencies are not included in the libraries themselves (except for
+`Object Libraries`_ specified as *direct* link dependencies).
+Instead, CMake records static libraries' link dependencies for
+transitive use when linking consuming binaries.
+
+.. _`Shared Libraries`:
+
+Shared Libraries
+----------------
+
+Shared libraries are binaries created by linking object files together.
+`Executables`_, other shared libraries, and `Module Libraries`_ may link
+to shared libraries as dependencies.  Linkers record references to shared
+libraries in consuming binaries.  At runtime, a dynamic loader searches
+for referenced shared libraries on disk and loads their symbols.
+
+The :command:`add_library` command defines a shared library target
+when called with the ``SHARED`` library type:
+
+.. code-block:: cmake
+
+  add_library(archive SHARED archive.cpp zip.cpp lzma.cpp)
+
+or, when the :variable:`BUILD_SHARED_LIBS` variable is true, with no type:
+
+.. code-block:: cmake
+
+  add_library(archive archive.cpp zip.cpp lzma.cpp)
+
+CMake generates build rules to compile the source files into object
+files and link them into a shared library.
+
+Link dependencies of shared libraries may be specified using the
+:command:`target_link_libraries` command.  Linkers start with the
+object files compiled from the shared library's own source files, and
+then resolve remaining symbol dependencies by searching linked libraries.
+
+.. note::
+
+  CMake expects shared libraries to export at least one symbol.  If a library
+  does not export any unmanaged symbols, e.g., a Windows resource DLL or
+  C++/CLI DLL, make it a `Module Library <Module Libraries>`_ instead.
 
 .. _`Apple Frameworks`:
 
 Apple Frameworks
-""""""""""""""""
+----------------
 
-A ``SHARED`` library may be marked with the :prop_tgt:`FRAMEWORK`
-target property to create an macOS or iOS Framework Bundle.
+`Shared Libraries`_ and `Static Libraries`_ may be marked with the
+:prop_tgt:`FRAMEWORK` target property to create a macOS or iOS Framework.
 A library with the ``FRAMEWORK`` target property should also set the
 :prop_tgt:`FRAMEWORK_VERSION` target property.  This property is typically
 set to the value of "A" by macOS conventions.
@@ -113,46 +161,80 @@ and it uniquely identifies the bundle.
     MACOSX_FRAMEWORK_IDENTIFIER org.cmake.MyFramework
   )
 
+.. _`Module Libraries`:
+
+Module Libraries
+----------------
+
+Module libraries are binaries created by linking object files together.
+Unlike `Shared Libraries`_, module libraries may not be linked by other
+binaries as dependencies -- do not name them in the right-hand side of
+the :command:`target_link_libraries` command.  Instead, module libraries
+are plugins that an application can dynamically load on-demand at runtime,
+e.g., by ``dlopen``.
+
+The :command:`add_library` command defines a module library target
+when called with the ``MODULE`` library type:
+
+.. code-block:: cmake
+
+  add_library(archivePlugin MODULE 7z.cpp)
+
+CMake generates build rules to compile the source files into object
+files and link them into a module library.
+
+Link dependencies of module libraries may be specified using the
+:command:`target_link_libraries` command.  Linkers start with the
+object files compiled from the module library's own source files, and
+then resolve remaining symbol dependencies by searching linked libraries.
+
 .. _`Object Libraries`:
 
 Object Libraries
-^^^^^^^^^^^^^^^^
+----------------
 
-The ``OBJECT`` library type defines a non-archival collection of object files
-resulting from compiling the given source files.  The object files collection
-may be used as source inputs to other targets by using the syntax
-:genex:`$<TARGET_OBJECTS:name>`.  This is a
-:manual:`generator expression <cmake-generator-expressions(7)>` that can be
-used to supply the ``OBJECT`` library content to other targets:
+Object libraries are collections of object files created by compiling
+source files without any archiving or linking.  The object files may be
+used when linking `Executables`_, `Shared Libraries`_, and
+`Module Libraries`_, or when archiving `Static Libraries`_.
 
-.. code-block:: cmake
-
-  add_library(archive OBJECT archive.cpp zip.cpp lzma.cpp)
-
-  add_library(archiveExtras STATIC $<TARGET_OBJECTS:archive> extras.cpp)
-
-  add_executable(test_exe $<TARGET_OBJECTS:archive> test.cpp)
-
-The link (or archiving) step of those other targets will use the object
-files collection in addition to those from their own sources.
-
-Alternatively, object libraries may be linked into other targets:
+The :command:`add_library` command defines an object library target
+when called with the ``OBJECT`` library type:
 
 .. code-block:: cmake
 
-  add_library(archive OBJECT archive.cpp zip.cpp lzma.cpp)
+  add_library(archiveObjs OBJECT archive.cpp zip.cpp lzma.cpp)
+
+CMake generates build rules to compile the source files into object files.
+
+Other targets may specify the object files as source inputs by using the
+:manual:`generator expression <cmake-generator-expressions(7)>` syntax
+:genex:`$<TARGET_OBJECTS:name>`:
+
+.. code-block:: cmake
+
+  add_library(archiveExtras STATIC $<TARGET_OBJECTS:archiveObjs> extras.cpp)
+
+  add_executable(test_exe $<TARGET_OBJECTS:archiveObjs> test.cpp)
+
+The consuming targets are linked (or archived) using object files
+both from their own sources and from the named object libraries.
+
+Alternatively, object libraries may be specified as link dependencies
+of other targets:
+
+.. code-block:: cmake
 
   add_library(archiveExtras STATIC extras.cpp)
-  target_link_libraries(archiveExtras PUBLIC archive)
+  target_link_libraries(archiveExtras PUBLIC archiveObjs)
 
   add_executable(test_exe test.cpp)
-  target_link_libraries(test_exe archive)
+  target_link_libraries(test_exe archiveObjs)
 
-The link (or archiving) step of those other targets will use the object
-files from ``OBJECT`` libraries that are *directly* linked.  Additionally,
-usage requirements of the ``OBJECT`` libraries will be honored when compiling
-sources in those other targets.  Furthermore, those usage requirements
-will propagate transitively to dependents of those other targets.
+The consuming targets are linked (or archived) using object files
+both from their own sources and from object libraries specified as
+*direct* link dependencies by :command:`target_link_libraries`.
+See :ref:`Linking Object Libraries`.
 
 Object libraries may not be used as the ``TARGET`` in a use of the
 :command:`add_custom_command(TARGET)` command signature.  However,
@@ -386,14 +468,15 @@ for linking a target.
 
 :prop_tgt:`LINK_LIBRARIES`
   List of link libraries for linking the target, if it is an executable,
-  shared library, or module library.  Entries for `Normal Libraries`_ are
-  passed to the linker either via paths to their link artifacts, or
-  with ``-l`` flags or equivalent.  Entries for `Object Libraries`_ are
-  passed to the linker via paths to their object files.
+  shared library, or module library.  Entries for `Static Libraries`_
+  and `Shared Libraries`_ are passed to the linker either via paths to
+  their link artifacts, or with ``-l`` flags or equivalent.  Entries for
+  `Object Libraries`_ are passed to the linker via paths to their object
+  files.
 
   Additionally, for compiling and linking the target itself,
   `usage requirements <Target Usage Requirements_>`_ are propagated from
-  ``LINK_LIBRARIES`` entries naming `Normal Libraries`_,
+  ``LINK_LIBRARIES`` entries naming `Static Libraries`_, `Shared Libraries`_,
   `Interface Libraries`_, `Object Libraries`_, and `Imported Targets`_,
   collected over the transitive closure of their
   :prop_tgt:`INTERFACE_LINK_LIBRARIES` properties.
@@ -581,8 +664,8 @@ linking consumers.
   Additionally, for compiling and linking the target's consumers,
   `usage requirements <Target Usage Requirements_>`_ are collected from
   the transitive closure of ``INTERFACE_LINK_LIBRARIES`` entries naming
-  `Normal Libraries`_, `Interface Libraries`_, `Object Libraries`_,
-  and `Imported Targets`_,
+  `Static Libraries`_, `Shared Libraries`_, `Interface Libraries`_,
+  `Object Libraries`_, and `Imported Targets`_,
 
 :prop_tgt:`INTERFACE_LINK_DIRECTORIES`
   .. versionadded:: 3.13
