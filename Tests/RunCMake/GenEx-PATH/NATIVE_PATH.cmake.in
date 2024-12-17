@@ -1,0 +1,48 @@
+
+include ("${RunCMake_SOURCE_DIR}/check_errors.cmake")
+unset (errors)
+
+cmake_path(SET test_path "/x/y/z/../../a/d")
+cmake_path(NATIVE_PATH test_path reference)
+set(output [=[$<PATH:NATIVE_PATH,/x/y/z/../../a/d>]=])
+if (NOT output STREQUAL reference)
+  list (APPEND errors "'${output}' instead of '${reference}'")
+endif()
+cmake_path(SET test_path "/x/y/z/../../a/d")
+cmake_path(NATIVE_PATH test_path NORMALIZE reference)
+set(output [=[$<PATH:NATIVE_PATH,NORMALIZE,/x/y/z/../../a/d>]=])
+if (NOT output STREQUAL reference)
+  list (APPEND errors "'${output}' instead of '${reference}'")
+endif()
+
+
+######################################
+## tests with list of paths
+######################################
+unset(reference)
+foreach(path IN ITEMS "/x/y/z/../../a/d" "/x/y/z/../../b/e")
+  cmake_path(SET test_path "${path}")
+  cmake_path(NATIVE_PATH test_path result)
+  list(APPEND reference "${result}")
+endforeach()
+
+set(output [=[$<PATH:NATIVE_PATH,/x/y/z/../../a/d;/x/y/z/../../b/e>]=])
+if (NOT output STREQUAL reference)
+  list (APPEND errors "'${output}' instead of '${reference}'")
+endif()
+
+unset(reference)
+foreach(path IN ITEMS "/x/y/z/../../a/d" "/x/y/z/../../b/e")
+  cmake_path(SET test_path "${path}")
+  cmake_path(NATIVE_PATH test_path NORMALIZE result)
+  list(APPEND reference "${result}")
+endforeach()
+set(output [=[$<PATH:NATIVE_PATH,NORMALIZE,/x/y/z/../../a/d;/x/y/z/../../b/e>]=])
+if (NOT output STREQUAL reference)
+  list (APPEND errors "'${output}' instead of '${reference}'")
+endif()
+
+
+
+
+check_errors("PATH:NATIVE_PATH" ${errors})

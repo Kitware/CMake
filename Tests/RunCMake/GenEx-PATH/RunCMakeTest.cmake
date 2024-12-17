@@ -16,7 +16,7 @@ foreach (subcommand IN ITEMS GET_ROOT_NAME GET_ROOT_DIRECTORY GET_ROOT_PATH GET_
                              GET_EXTENSION GET_STEM GET_RELATIVE_PART GET_PARENT_PATH
                              HAS_ROOT_NAME HAS_ROOT_DIRECTORY HAS_ROOT_PATH HAS_FILENAME
                              HAS_EXTENSION HAS_STEM HAS_RELATIVE_PART HAS_PARENT_PATH
-                             IS_ABSOLUTE IS_RELATIVE CMAKE_PATH REMOVE_FILENAME REMOVE_EXTENSION
+                             IS_ABSOLUTE IS_RELATIVE CMAKE_PATH NATIVE_PATH REMOVE_FILENAME REMOVE_EXTENSION
                              NORMAL_PATH)
   check_path_syntax (${subcommand} unexpected-arg "-DPATH_ARGUMENTS=${subcommand},ARG1,ARG2")
 endforeach()
@@ -27,7 +27,7 @@ foreach (subcommand IN ITEMS GET_EXTENSION GET_STEM REMOVE_EXTENSION)
   check_path_syntax ("${subcommand}[LAST_ONLY]" unexpected-arg "-DPATH_ARGUMENTS=${subcommand},LAST_ONLY,ARG1,ARG2")
   unset(RunCMake-stderr-file)
 endforeach()
-foreach (subcommand IN ITEMS CMAKE_PATH)
+foreach (subcommand IN ITEMS CMAKE_PATH NATIVE_PATH)
   check_path_syntax ("${subcommand}[NORMALIZE]" unexpected-arg "-DPATH_ARGUMENTS=${subcommand},NORMALIZE,ARG1,ARG2")
 endforeach()
 
@@ -57,6 +57,7 @@ endfunction()
 check_path_execution (GET_ITEM)
 check_path_execution (HAS_ITEM)
 check_path_execution (CMAKE_PATH)
+check_path_execution (NATIVE_PATH)
 check_path_execution (APPEND)
 check_path_execution (REMOVE_ITEM)
 check_path_execution (REPLACE_ITEM)
