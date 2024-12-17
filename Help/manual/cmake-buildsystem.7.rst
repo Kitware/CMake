@@ -137,7 +137,7 @@ then resolve remaining symbol dependencies by searching linked libraries.
 
   CMake expects shared libraries to export at least one symbol.  If a library
   does not export any unmanaged symbols, e.g., a Windows resource DLL or
-  C++/CLI DLL, make it a `Module Library <Module Libraries>`_ instead.
+  C++/CLI DLL, make it a `Module Library <Module Libraries_>`_ instead.
 
 .. _`Apple Frameworks`:
 
