@@ -164,7 +164,8 @@ Options:
 
  ``UTF8``
    Use the UTF-8 codepage.  Use of this name is discouraged in favor
-   of ``UTF-8`` to match the `UTF-8 RFC <https://www.ietf.org/rfc/rfc3629>`_
+   of ``UTF-8`` to match the
+   `UTF-8 RFC <https://datatracker.ietf.org/doc/html/rfc3629>`_
    naming convention.
 
 ``COMMAND_ERROR_IS_FATAL <ANY|LAST>``
