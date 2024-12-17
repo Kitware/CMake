@@ -92,10 +92,11 @@ Try Compiling Source Files
 
 .. versionadded:: 3.25
 
-Try building an executable or static library from one or more source files
-(which one is determined by the :variable:`CMAKE_TRY_COMPILE_TARGET_TYPE`
-variable). Build success returns ``TRUE`` and build failure returns ``FALSE``
-in ``<compileResultVar>``.
+Try building an executable or static library from one or more source files.
+The binary type is determined by variable
+:variable:`CMAKE_TRY_COMPILE_TARGET_TYPE`.
+Build success returns boolean ``true`` and build failure returns boolean
+``false`` in ``<compileResultVar>`` (cached unless ``NO_CACHE`` is specified).
 
 In this form, one or more source files must be provided. Additionally, one of
 ``SOURCES`` and/or ``SOURCE_FROM_*`` must precede other keywords.
@@ -211,9 +212,10 @@ The options for the above signatures are:
 ``NO_CACHE``
   .. versionadded:: 3.25
 
-  The result will be stored in a normal variable rather than a cache entry.
+  ``<compileResultVar>`` will be stored in a normal variable rather than a
+  cache entry.
 
-  The result variable is normally cached so that a simple pattern can be used
+  ``<compileResultVar>`` is normally cached so that a simple pattern can be used
   to avoid repeating the test on subsequent executions of CMake:
 
   .. code-block:: cmake
