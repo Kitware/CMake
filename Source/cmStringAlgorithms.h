@@ -43,6 +43,13 @@ private:
   std::string const Test_;
 };
 
+/**
+ * Test if two strings are identical, ignoring case.
+ *
+ * Note that this is not guaranteed to work correctly on non-ASCII strings.
+ */
+bool cmStrCaseEq(cm::string_view a, cm::string_view b);
+
 /** Returns true if the character @a ch is a whitespace character.  **/
 inline bool cmIsSpace(char ch)
 {

@@ -17,11 +17,13 @@
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
+#include "cmsys/Glob.hxx"
 #include "cmsys/RegularExpression.hxx"
 #include "cmsys/String.h"
 
 #include "cmAlgorithms.h"
 #include "cmDependencyProvider.h"
+#include "cmExperimental.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmMakefile.h"
@@ -56,6 +58,8 @@
 class cmExecutionStatus;
 
 namespace {
+
+using pdt = cmFindPackageCommand::PackageDescriptionType;
 
 template <template <typename> class Op>
 struct StrverscmpOp
@@ -379,14 +383,16 @@ void ResetGenerator(Generator&& generator, Generators&&... generators)
 
 template <typename CallbackFn>
 bool TryGeneratedPaths(CallbackFn&& filesCollector,
+                       cmFindPackageCommand::PackageDescriptionType type,
                        const std::string& fullPath)
 {
   assert(!fullPath.empty() && fullPath.back() != '/');
-  return std::forward<CallbackFn&&>(filesCollector)(fullPath + '/');
+  return std::forward<CallbackFn&&>(filesCollector)(fullPath + '/', type);
 }
 
 template <typename CallbackFn, typename Generator, typename... Rest>
 bool TryGeneratedPaths(CallbackFn&& filesCollector,
+                       cmFindPackageCommand::PackageDescriptionType type,
                        const std::string& startPath, Generator&& gen,
                        Rest&&... tail)
 {
@@ -394,8 +400,8 @@ bool TryGeneratedPaths(CallbackFn&& filesCollector,
   for (auto path = gen.GetNextCandidate(startPath); !path.empty();
        path = gen.GetNextCandidate(startPath)) {
     ResetGenerator(std::forward<Rest&&>(tail)...);
-    if (TryGeneratedPaths(std::forward<CallbackFn&&>(filesCollector), path,
-                          std::forward<Rest&&>(tail)...)) {
+    if (TryGeneratedPaths(std::forward<CallbackFn&&>(filesCollector), type,
+                          path, std::forward<Rest&&>(tail)...)) {
       return true;
     }
   }
@@ -791,7 +797,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
           "a path and with a \".cmake\" extension."));
         return false;
       }
-      this->Configs.push_back(args[i]);
+      this->Configs.emplace_back(args[i], pdt::CMake);
     } else if (!haveVersion && versionRegex.find(args[i])) {
       haveVersion = true;
       this->VersionComplete = args[i];
@@ -824,6 +830,13 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
   // Check and eliminate search modes not allowed by the args provided
   this->UseFindModules = configArgs.empty();
   this->UseConfigFiles = moduleArgs.empty();
+  if (this->UseConfigFiles &&
+      cmExperimental::HasSupportEnabled(
+        *this->Makefile, cmExperimental::Feature::ImportPackageInfo)) {
+    this->UseCpsFiles = this->Configs.empty();
+  } else {
+    this->UseCpsFiles = false;
+  }
   if (!this->UseFindModules && !this->UseConfigFiles) {
     std::ostringstream e;
     e << "given options exclusive to Module mode:\n";
@@ -1193,11 +1206,22 @@ bool cmFindPackageCommand::FindPackageUsingConfigMode()
   // Add the default configs.
   if (this->Configs.empty()) {
     for (std::string const& n : this->Names) {
-      std::string config = cmStrCat(n, "Config.cmake");
-      this->Configs.push_back(config);
+      std::string config;
+      if (this->UseCpsFiles) {
+        config = cmStrCat(n, ".cps");
+        this->Configs.emplace_back(std::move(config), pdt::Cps);
+
+        config = cmStrCat(cmSystemTools::LowerCase(n), ".cps");
+        if (config != this->Configs.front().Name) {
+          this->Configs.emplace_back(std::move(config), pdt::Cps);
+        }
+      }
+
+      config = cmStrCat(n, "Config.cmake");
+      this->Configs.emplace_back(std::move(config), pdt::CMake);
 
       config = cmStrCat(cmSystemTools::LowerCase(n), "-config.cmake");
-      this->Configs.push_back(std::move(config));
+      this->Configs.emplace_back(std::move(config), pdt::CMake);
     }
   }
 
@@ -1436,7 +1460,7 @@ bool cmFindPackageCommand::HandlePackageMode(
       }
       // The file location was cached.  Look for the correct file.
       std::string file;
-      if (this->FindConfigFile(dir, file)) {
+      if (this->FindConfigFile(dir, pdt::Any, file)) {
         this->FileFound = std::move(file);
         fileFound = true;
       }
@@ -1483,7 +1507,16 @@ bool cmFindPackageCommand::HandlePackageMode(
     this->StoreVersionFound();
 
     // Parse the configuration file.
-    if (this->ReadListFile(this->FileFound, DoPolicyScope)) {
+    if (this->CpsReader) {
+      // The package has been found.
+      found = true;
+
+      // Import targets.
+      cmPackageInfoReader* const reader = this->CpsReader.get();
+      result = reader->ImportTargets(this->Makefile, this->Status) &&
+        this->ImportTargetConfigurations(this->FileFound, reader) &&
+        this->ImportAppendices(this->FileFound);
+    } else if (this->ReadListFile(this->FileFound, DoPolicyScope)) {
       // The package has been found.
       found = true;
 
@@ -1569,13 +1602,16 @@ bool cmFindPackageCommand::HandlePackageMode(
 
           if (this->Configs.size() == 1) {
             e << "Could not find a package configuration file named \""
-              << this->Configs[0] << "\" provided by package \"" << this->Name
-              << "\"" << requestedVersionString << ".\n";
+              << this->Configs[0].Name << "\" provided by package \""
+              << this->Name << "\"" << requestedVersionString << ".\n";
           } else {
+            auto configs = cmMakeRange(this->Configs);
+            auto configNames =
+              configs.transform([](ConfigName const& cn) { return cn.Name; });
             e << "Could not find a package configuration file provided by \""
               << this->Name << "\"" << requestedVersionString
               << " with any of the following names:\n"
-              << cmWrap("  ", this->Configs, "", "\n") << '\n';
+              << cmWrap("  "_s, configNames, ""_s, "\n"_s) << '\n';
           }
 
           e << "Add the installation prefix of \"" << this->Name
@@ -1678,6 +1714,10 @@ bool cmFindPackageCommand::FindConfig()
                                  this->Name, "'s Config module:\n");
   }
 
+  if (!found && this->UseCpsFiles) {
+    found = this->FindEnvironmentConfig();
+  }
+
   // Search for frameworks.
   if (!found && (this->SearchFrameworkFirst || this->SearchFrameworkOnly)) {
     found = this->FindFrameworkConfig();
@@ -1766,6 +1806,16 @@ bool cmFindPackageCommand::FindAppBundleConfig()
                      });
 }
 
+bool cmFindPackageCommand::FindEnvironmentConfig()
+{
+  std::vector<std::string> const& prefixes =
+    cmSystemTools::GetEnvPathNormalized("CPS_PATH");
+  return std::any_of(prefixes.begin(), prefixes.end(),
+                     [this](std::string const& p) -> bool {
+                       return this->SearchEnvironmentPrefix(p);
+                     });
+}
+
 bool cmFindPackageCommand::ReadListFile(const std::string& f,
                                         const PolicyScopeRule psr)
 {
@@ -1781,6 +1831,62 @@ bool cmFindPackageCommand::ReadListFile(const std::string& f,
   std::string const e = cmStrCat("Error reading CMake code from \"", f, "\".");
   this->SetError(e);
   return false;
+}
+
+bool cmFindPackageCommand::ImportTargetConfigurations(
+  std::string const& base, cmPackageInfoReader* parent)
+{
+  // Find supplemental configuration files.
+  cmsys::Glob glob;
+  glob.RecurseOff();
+  if (glob.FindFiles(cmStrCat(cmSystemTools::GetFilenamePath(base), "/"_s,
+                              cmSystemTools::GetFilenameWithoutExtension(base),
+                              "@*.[Cc][Pp][Ss]"_s))) {
+
+    // Try to read supplemental data from each file found.
+    for (std::string const& extra : glob.GetFiles()) {
+      std::unique_ptr<cmPackageInfoReader> const& reader =
+        cmPackageInfoReader::Read(extra, parent);
+      if (reader && reader->GetName() == this->Name) {
+        if (!reader->ImportTargetConfigurations(this->Makefile,
+                                                this->Status)) {
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
+}
+
+bool cmFindPackageCommand::ImportAppendices(std::string const& base)
+{
+  // Find package appendices.
+  cmsys::Glob glob;
+  glob.RecurseOff();
+  if (glob.FindFiles(cmStrCat(cmSystemTools::GetFilenamePath(base), "/"_s,
+                              cmSystemTools::GetFilenameWithoutExtension(base),
+                              "[-:]*.[Cc][Pp][Ss]"_s))) {
+
+    // Try to read supplemental data from each appendix file found.
+    for (std::string const& extra : glob.GetFiles()) {
+      // This loop should not consider configuration-specific files.
+      if (extra.find('@') != std::string::npos) {
+        continue;
+      }
+
+      std::unique_ptr<cmPackageInfoReader> const& reader =
+        cmPackageInfoReader::Read(extra, this->CpsReader.get());
+      if (reader && reader->GetName() == this->Name) {
+        if (!reader->ImportTargets(this->Makefile, this->Status) ||
+            !this->ImportTargetConfigurations(extra, reader.get())) {
+          return false;
+        }
+      }
+    }
+  }
+
+  return true;
 }
 
 void cmFindPackageCommand::AppendToFoundProperty(const bool found)
@@ -2381,7 +2487,8 @@ void cmFindPackageCommand::FillPrefixesUserHints()
   }
 }
 
-bool cmFindPackageCommand::SearchDirectory(std::string const& dir)
+bool cmFindPackageCommand::SearchDirectory(std::string const& dir,
+                                           PackageDescriptionType type)
 {
   assert(!dir.empty() && dir.back() == '/');
 
@@ -2392,14 +2499,15 @@ bool cmFindPackageCommand::SearchDirectory(std::string const& dir)
       d += s;
       d += '/';
     }
-    if (this->CheckDirectory(d)) {
+    if (this->CheckDirectory(d, type)) {
       return true;
     }
   }
   return false;
 }
 
-bool cmFindPackageCommand::CheckDirectory(std::string const& dir)
+bool cmFindPackageCommand::CheckDirectory(std::string const& dir,
+                                          PackageDescriptionType type)
 {
   assert(!dir.empty() && dir.back() == '/');
 
@@ -2410,7 +2518,7 @@ bool cmFindPackageCommand::CheckDirectory(std::string const& dir)
 
   // Look for the file in this directory.
   std::string file;
-  if (this->FindConfigFile(d, file)) {
+  if (this->FindConfigFile(d, type, file)) {
     this->FileFound = std::move(file);
     return true;
   }
@@ -2418,10 +2526,14 @@ bool cmFindPackageCommand::CheckDirectory(std::string const& dir)
 }
 
 bool cmFindPackageCommand::FindConfigFile(std::string const& dir,
+                                          PackageDescriptionType type,
                                           std::string& file)
 {
-  for (std::string const& c : this->Configs) {
-    file = cmStrCat(dir, '/', c);
+  for (auto const& config : this->Configs) {
+    if (type != pdt::Any && config.Type != type) {
+      continue;
+    }
+    file = cmStrCat(dir, '/', config.Name);
     if (this->DebugMode) {
       this->DebugBuffer = cmStrCat(this->DebugBuffer, "  ", file, '\n');
     }
@@ -2444,27 +2556,63 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
   bool haveResult = false;
   std::string version = "unknown";
 
-  // Get the filename without the .cmake extension.
+  // Get the file extension.
   std::string::size_type pos = config_file.rfind('.');
-  std::string version_file_base = config_file.substr(0, pos);
+  std::string ext = cmSystemTools::LowerCase(config_file.substr(pos));
 
-  // Look for foo-config-version.cmake
-  std::string version_file = cmStrCat(version_file_base, "-version.cmake");
-  if (!haveResult && cmSystemTools::FileExists(version_file, true)) {
-    result = this->CheckVersionFile(version_file, version);
-    haveResult = true;
-  }
+  if (ext == ".cps"_s) {
+    std::unique_ptr<cmPackageInfoReader> reader =
+      cmPackageInfoReader::Read(config_file);
+    if (reader && reader->GetName() == this->Name) {
+      cm::optional<std::string> cpsVersion = reader->GetVersion();
+      if (cpsVersion) {
+        // TODO: Implement version check for CPS
+        this->VersionFound = (version = std::move(*cpsVersion));
 
-  // Look for fooConfigVersion.cmake
-  version_file = cmStrCat(version_file_base, "Version.cmake");
-  if (!haveResult && cmSystemTools::FileExists(version_file, true)) {
-    result = this->CheckVersionFile(version_file, version);
-    haveResult = true;
-  }
+        std::vector<unsigned> const& versionParts = reader->ParseVersion();
+        this->VersionFoundCount = static_cast<unsigned>(versionParts.size());
+        switch (this->VersionFoundCount) {
+          case 4:
+            this->VersionFoundTweak = versionParts[3];
+            CM_FALLTHROUGH;
+          case 3:
+            this->VersionFoundPatch = versionParts[2];
+            CM_FALLTHROUGH;
+          case 2:
+            this->VersionFoundMinor = versionParts[1];
+            CM_FALLTHROUGH;
+          case 1:
+            this->VersionFoundMajor = versionParts[0];
+            CM_FALLTHROUGH;
+          default:
+            break;
+        }
+      }
+      this->CpsReader = std::move(reader);
+      result = true;
+    }
+  } else {
+    // Get the filename without the .cmake extension.
+    std::string version_file_base = config_file.substr(0, pos);
 
-  // If no version was requested a versionless package is acceptable.
-  if (!haveResult && this->Version.empty()) {
-    result = true;
+    // Look for foo-config-version.cmake
+    std::string version_file = cmStrCat(version_file_base, "-version.cmake");
+    if (!haveResult && cmSystemTools::FileExists(version_file, true)) {
+      result = this->CheckVersionFile(version_file, version);
+      haveResult = true;
+    }
+
+    // Look for fooConfigVersion.cmake
+    version_file = cmStrCat(version_file_base, "Version.cmake");
+    if (!haveResult && cmSystemTools::FileExists(version_file, true)) {
+      result = this->CheckVersionFile(version_file, version);
+      haveResult = true;
+    }
+
+    // If no version was requested a versionless package is acceptable.
+    if (!haveResult && this->Version.empty()) {
+      result = true;
+    }
   }
 
   ConfigFileInfo configFileInfo;
@@ -2615,36 +2763,71 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     return false;
   }
 
-  // PREFIX/ (useful on windows or in build trees)
-  if (this->SearchDirectory(prefix_in)) {
-    return true;
-  }
-
   // Strip the trailing slash because the path generator is about to
   // add one.
   std::string const prefix = prefix_in.substr(0, prefix_in.size() - 1);
 
-  auto searchFn = [this](const std::string& fullPath) -> bool {
-    return this->SearchDirectory(fullPath);
+  auto searchFn = [this](const std::string& fullPath,
+                         PackageDescriptionType type) -> bool {
+    return this->SearchDirectory(fullPath, type);
   };
 
+  auto iCpsGen = cmCaseInsensitiveDirectoryListGenerator{ "cps"_s };
   auto iCMakeGen = cmCaseInsensitiveDirectoryListGenerator{ "cmake"_s };
-  auto firstPkgDirGen =
+  auto anyDirGen =
+    cmAnyDirectoryListGenerator{ this->SortOrder, this->SortDirection };
+  auto cpsPkgDirGen =
+    cmProjectDirectoryListGenerator{ &this->Names, this->SortOrder,
+                                     this->SortDirection, true };
+  auto cmakePkgDirGen =
     cmProjectDirectoryListGenerator{ &this->Names, this->SortOrder,
                                      this->SortDirection, false };
 
+  // PREFIX/(Foo|foo|FOO)/(cps|CPS)/
+  if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, cpsPkgDirGen, iCpsGen)) {
+    return true;
+  }
+
+  // PREFIX/(Foo|foo|FOO)/*/(cps|CPS)/
+  if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, cpsPkgDirGen, iCpsGen,
+                        anyDirGen)) {
+    return true;
+  }
+
+  // PREFIX/(cps|CPS)/(Foo|foo|FOO)/
+  if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, iCpsGen, cpsPkgDirGen)) {
+    return true;
+  }
+
+  // PREFIX/(cps|CPS)/(Foo|foo|FOO)/*/
+  if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, iCpsGen, cpsPkgDirGen,
+                        anyDirGen)) {
+    return true;
+  }
+
+  // PREFIX/(cps|CPS)/ (useful on windows or in build trees)
+  if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, iCpsGen)) {
+    return true;
+  }
+
+  // PREFIX/ (useful on windows or in build trees)
+  if (this->SearchDirectory(prefix_in, pdt::CMake)) {
+    return true;
+  }
+
   // PREFIX/(cmake|CMake)/ (useful on windows or in build trees)
-  if (TryGeneratedPaths(searchFn, prefix, iCMakeGen)) {
+  if (TryGeneratedPaths(searchFn, pdt::CMake, prefix, iCMakeGen)) {
     return true;
   }
 
   // PREFIX/(Foo|foo|FOO).*/
-  if (TryGeneratedPaths(searchFn, prefix, firstPkgDirGen)) {
+  if (TryGeneratedPaths(searchFn, pdt::CMake, prefix, cmakePkgDirGen)) {
     return true;
   }
 
   // PREFIX/(Foo|foo|FOO).*/(cmake|CMake)/
-  if (TryGeneratedPaths(searchFn, prefix, firstPkgDirGen, iCMakeGen)) {
+  if (TryGeneratedPaths(searchFn, pdt::CMake, prefix, cmakePkgDirGen,
+                        iCMakeGen)) {
     return true;
   }
 
@@ -2653,8 +2836,8 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
                                      this->SortDirection, false };
 
   // PREFIX/(Foo|foo|FOO).*/(cmake|CMake)/(Foo|foo|FOO).*/
-  if (TryGeneratedPaths(searchFn, prefix, firstPkgDirGen, iCMakeGen,
-                        secondPkgDirGen)) {
+  if (TryGeneratedPaths(searchFn, pdt::CMake, prefix, cmakePkgDirGen,
+                        iCMakeGen, secondPkgDirGen)) {
     return true;
   }
 
@@ -2677,39 +2860,60 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   common.emplace_back("lib"_s);
   common.emplace_back("share"_s);
 
-  auto cmnGen = cmEnumPathSegmentsGenerator{ common };
+  auto commonGen = cmEnumPathSegmentsGenerator{ common };
   auto cmakeGen = cmAppendPathSegmentGenerator{ "cmake"_s };
+  auto cpsGen = cmAppendPathSegmentGenerator{ "cps"_s };
+
+  // PREFIX/(lib/ARCH|lib*|share)/cps/(Foo|foo|FOO)/
+  if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, commonGen, cpsGen,
+                        cpsPkgDirGen)) {
+    return true;
+  }
+
+  // PREFIX/(lib/ARCH|lib*|share)/cps/(Foo|foo|FOO)/*/
+  if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, commonGen, cpsGen,
+                        cpsPkgDirGen, anyDirGen)) {
+    return true;
+  }
+
+  // PREFIX/(lib/ARCH|lib*|share)/cps/
+  if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, commonGen, cpsGen)) {
+    return true;
+  }
 
   // PREFIX/(lib/ARCH|lib*|share)/cmake/(Foo|foo|FOO).*/
-  if (TryGeneratedPaths(searchFn, prefix, cmnGen, cmakeGen, firstPkgDirGen)) {
+  if (TryGeneratedPaths(searchFn, pdt::CMake, prefix, commonGen, cmakeGen,
+                        cmakePkgDirGen)) {
     return true;
   }
 
   // PREFIX/(lib/ARCH|lib*|share)/(Foo|foo|FOO).*/
-  if (TryGeneratedPaths(searchFn, prefix, cmnGen, firstPkgDirGen)) {
+  if (TryGeneratedPaths(searchFn, pdt::CMake, prefix, commonGen,
+                        cmakePkgDirGen)) {
     return true;
   }
 
   // PREFIX/(lib/ARCH|lib*|share)/(Foo|foo|FOO).*/(cmake|CMake)/
-  if (TryGeneratedPaths(searchFn, prefix, cmnGen, firstPkgDirGen, iCMakeGen)) {
+  if (TryGeneratedPaths(searchFn, pdt::CMake, prefix, commonGen,
+                        cmakePkgDirGen, iCMakeGen)) {
     return true;
   }
 
   // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib*|share)/cmake/(Foo|foo|FOO).*/
-  if (TryGeneratedPaths(searchFn, prefix, firstPkgDirGen, cmnGen, cmakeGen,
-                        secondPkgDirGen)) {
+  if (TryGeneratedPaths(searchFn, pdt::CMake, prefix, cmakePkgDirGen,
+                        commonGen, cmakeGen, secondPkgDirGen)) {
     return true;
   }
 
   // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib*|share)/(Foo|foo|FOO).*/
-  if (TryGeneratedPaths(searchFn, prefix, firstPkgDirGen, cmnGen,
-                        secondPkgDirGen)) {
+  if (TryGeneratedPaths(searchFn, pdt::CMake, prefix, cmakePkgDirGen,
+                        commonGen, secondPkgDirGen)) {
     return true;
   }
 
   // PREFIX/(Foo|foo|FOO).*/(lib/ARCH|lib*|share)/(Foo|foo|FOO).*/(cmake|CMake)/
-  return TryGeneratedPaths(searchFn, prefix, firstPkgDirGen, cmnGen,
-                           secondPkgDirGen, iCMakeGen);
+  return TryGeneratedPaths(searchFn, pdt::CMake, prefix, cmakePkgDirGen,
+                           commonGen, secondPkgDirGen, iCMakeGen);
 }
 
 bool cmFindPackageCommand::SearchFrameworkPrefix(std::string const& prefix_in)
@@ -2720,11 +2924,13 @@ bool cmFindPackageCommand::SearchFrameworkPrefix(std::string const& prefix_in)
   // add one.
   std::string const prefix = prefix_in.substr(0, prefix_in.size() - 1);
 
-  auto searchFn = [this](const std::string& fullPath) -> bool {
-    return this->SearchDirectory(fullPath);
+  auto searchFn = [this](const std::string& fullPath,
+                         PackageDescriptionType type) -> bool {
+    return this->SearchDirectory(fullPath, type);
   };
 
   auto iCMakeGen = cmCaseInsensitiveDirectoryListGenerator{ "cmake"_s };
+  auto iCpsGen = cmCaseInsensitiveDirectoryListGenerator{ "cps"_s };
   auto fwGen =
     cmMacProjectDirectoryListGenerator{ &this->Names, ".framework"_s };
   auto rGen = cmAppendPathSegmentGenerator{ "Resources"_s };
@@ -2732,24 +2938,37 @@ bool cmFindPackageCommand::SearchFrameworkPrefix(std::string const& prefix_in)
   auto anyGen =
     cmAnyDirectoryListGenerator{ this->SortOrder, this->SortDirection };
 
+  // <prefix>/Foo.framework/Versions/*/Resources/CPS/
+  if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, fwGen, vGen, anyGen, rGen,
+                        iCpsGen)) {
+    return true;
+  }
+
+  // <prefix>/Foo.framework/Resources/CPS/
+  if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, fwGen, rGen, iCpsGen)) {
+    return true;
+  }
+
   // <prefix>/Foo.framework/Resources/
-  if (TryGeneratedPaths(searchFn, prefix, fwGen, rGen)) {
+  if (TryGeneratedPaths(searchFn, pdt::CMake, prefix, fwGen, rGen)) {
     return true;
   }
 
   // <prefix>/Foo.framework/Resources/CMake/
-  if (TryGeneratedPaths(searchFn, prefix, fwGen, rGen, iCMakeGen)) {
+  if (TryGeneratedPaths(searchFn, pdt::CMake, prefix, fwGen, rGen,
+                        iCMakeGen)) {
     return true;
   }
 
   // <prefix>/Foo.framework/Versions/*/Resources/
-  if (TryGeneratedPaths(searchFn, prefix, fwGen, vGen, anyGen, rGen)) {
+  if (TryGeneratedPaths(searchFn, pdt::CMake, prefix, fwGen, vGen, anyGen,
+                        rGen)) {
     return true;
   }
 
   // <prefix>/Foo.framework/Versions/*/Resources/CMake/
-  return TryGeneratedPaths(searchFn, prefix, fwGen, vGen, anyGen, rGen,
-                           iCMakeGen);
+  return TryGeneratedPaths(searchFn, pdt::CMake, prefix, fwGen, vGen, anyGen,
+                           rGen, iCMakeGen);
 }
 
 bool cmFindPackageCommand::SearchAppBundlePrefix(std::string const& prefix_in)
@@ -2760,22 +2979,62 @@ bool cmFindPackageCommand::SearchAppBundlePrefix(std::string const& prefix_in)
   // add one.
   std::string const prefix = prefix_in.substr(0, prefix_in.size() - 1);
 
-  auto searchFn = [this](const std::string& fullPath) -> bool {
-    return this->SearchDirectory(fullPath);
+  auto searchFn = [this](const std::string& fullPath,
+                         PackageDescriptionType type) -> bool {
+    return this->SearchDirectory(fullPath, type);
   };
 
   auto appGen = cmMacProjectDirectoryListGenerator{ &this->Names, ".app"_s };
   auto crGen = cmAppendPathSegmentGenerator{ "Contents/Resources"_s };
 
-  // <prefix>/Foo.app/Contents/Resources
-  if (TryGeneratedPaths(searchFn, prefix, appGen, crGen)) {
+  // <prefix>/Foo.app/Contents/Resources/CPS/
+  if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, appGen, crGen,
+                        cmCaseInsensitiveDirectoryListGenerator{ "cps"_s })) {
     return true;
   }
 
-  // <prefix>/Foo.app/Contents/Resources/CMake
+  // <prefix>/Foo.app/Contents/Resources/
+  if (TryGeneratedPaths(searchFn, pdt::CMake, prefix, appGen, crGen)) {
+    return true;
+  }
+
+  // <prefix>/Foo.app/Contents/Resources/CMake/
   return TryGeneratedPaths(
-    searchFn, prefix, appGen, crGen,
+    searchFn, pdt::CMake, prefix, appGen, crGen,
     cmCaseInsensitiveDirectoryListGenerator{ "cmake"_s });
+}
+
+bool cmFindPackageCommand::SearchEnvironmentPrefix(
+  std::string const& prefix_in)
+{
+  assert(!prefix_in.empty() && prefix_in.back() == '/');
+
+  // Skip this if the prefix does not exist.
+  if (!cmSystemTools::FileIsDirectory(prefix_in)) {
+    return false;
+  }
+
+  // Strip the trailing slash because the path generator is about to
+  // add one.
+  std::string const prefix = prefix_in.substr(0, prefix_in.size() - 1);
+
+  auto searchFn = [this](const std::string& fullPath,
+                         PackageDescriptionType type) -> bool {
+    return this->SearchDirectory(fullPath, type);
+  };
+
+  auto pkgDirGen =
+    cmProjectDirectoryListGenerator{ &this->Names, this->SortOrder,
+                                     this->SortDirection, true };
+
+  // <environment-path>/(Foo|foo|FOO)/cps/
+  if (TryGeneratedPaths(searchFn, pdt::Cps, prefix, pkgDirGen,
+                        cmAppendPathSegmentGenerator{ "cps"_s })) {
+    return true;
+  }
+
+  // <environment-path>/(Foo|foo|FOO)/
+  return TryGeneratedPaths(searchFn, pdt::Cps, prefix, pkgDirGen);
 }
 
 // TODO: Debug cmsys::Glob double slash problem.

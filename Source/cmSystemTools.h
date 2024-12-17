@@ -41,6 +41,26 @@ public:
   using Encoding = cmProcessOutput::Encoding;
 
   /**
+   * Return a lower case string
+   */
+  static std::string LowerCase(cm::string_view);
+  static std::string LowerCase(char const* s)
+  {
+    return LowerCase(cm::string_view{ s });
+  }
+  using cmsys::SystemTools::LowerCase;
+
+  /**
+   * Return an upper case string
+   */
+  static std::string UpperCase(cm::string_view);
+  static std::string UpperCase(char const* s)
+  {
+    return UpperCase(cm::string_view{ s });
+  }
+  using cmsys::SystemTools::UpperCase;
+
+  /**
    * Look for and replace registry values in a string
    */
   static void ExpandRegistryValues(std::string& source,

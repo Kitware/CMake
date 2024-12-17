@@ -1,0 +1,125 @@
+cmake_minimum_required(VERSION 3.31)
+project(FindPackageCpsTest)
+
+set(CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES "e82e467b-f997-4464-8ace-b00808fff261")
+
+# Protect tests from running inside the default install prefix.
+set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/NotDefaultPrefix")
+
+# Disable built-in search paths.
+set(CMAKE_FIND_USE_PACKAGE_ROOT_PATH OFF)
+set(CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH OFF)
+set(CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH OFF)
+set(CMAKE_FIND_USE_CMAKE_SYSTEM_PATH OFF)
+set(CMAKE_FIND_USE_INSTALL_PREFIX OFF)
+
+# Enable framework searching.
+set(CMAKE_FIND_FRAMEWORK FIRST)
+
+add_executable(FindPackageCpsTest FindPackageTest.cxx)
+
+###############################################################################
+# Test a basic package search.
+# It should NOT find the package's CMake package file.
+set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
+find_package(Sample CONFIG)
+if(NOT Sample_FOUND)
+  message(SEND_ERROR "Sample not found !")
+elseif(NOT Sample_VERSION STREQUAL "2.10.11")
+  message(SEND_ERROR "Sample wrong version ${Sample_VERSION} !")
+elseif(NOT Sample_VERSION_MAJOR EQUAL 2)
+  message(SEND_ERROR "Sample wrong major version ${Sample_VERSION_MAJOR} !")
+elseif(NOT Sample_VERSION_MINOR EQUAL 10)
+  message(SEND_ERROR "Sample wrong minor version ${Sample_VERSION_MINOR} !")
+elseif(NOT Sample_VERSION_PATCH EQUAL 11)
+  message(SEND_ERROR "Sample wrong patch version ${Sample_VERSION_PATCH} !")
+elseif(NOT Sample_VERSION_TWEAK EQUAL 0)
+  message(SEND_ERROR "Sample wrong tweak version ${Sample_VERSION_TWEAK} !")
+endif()
+
+set(CMAKE_PREFIX_PATH)
+
+###############################################################################
+# Test glob sorting.
+set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
+set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+set(CMAKE_FIND_PACKAGE_SORT_ORDER NAME)
+set(CMAKE_FIND_PACKAGE_SORT_DIRECTION ASC)
+find_package(SortLib CONFIG)
+if(NOT "${SortLib_VERSION}" STREQUAL "3.1.1")
+  message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER Name Asc! ${SortLib_VERSION}")
+endif()
+unset(SortLib_VERSION)
+
+set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+set(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
+set(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
+find_package(SortLib CONFIG)
+if(NOT "${SortLib_VERSION}" STREQUAL "3.10.1")
+  message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER Natural! Dec ${SortLib_VERSION}")
+endif()
+set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+unset(SortLib_VERSION)
+
+# TODO Add this test once CPS version checking is implemented.
+# set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+# FIND_PACKAGE(SortLib 4.0 CONFIG)
+# IF (NOT "${SortLib_VERSION}" STREQUAL "4.0.0")
+#   message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER gave up too soon! ${SortLib_VERSION}")
+# endif()
+# unset(SortLib_VERSION)
+
+set(SortFramework_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+set(CMAKE_FIND_PACKAGE_SORT_ORDER NAME)
+set(CMAKE_FIND_PACKAGE_SORT_DIRECTION ASC)
+find_package(SortFramework CONFIG)
+if(NOT "${SortFramework_VERSION}" STREQUAL "3.1.1")
+  message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER Framework Name Asc! ${SortFramework_VERSION}")
+endif()
+set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+unset(SortFramework_VERSION)
+
+set(SortFramework_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+set(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
+set(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
+find_package(SortFramework CONFIG)
+if(NOT "${SortFramework_VERSION}" STREQUAL "3.10.1")
+  message(SEND_ERROR "FIND_PACKAGE_SORT_ORDER Framework Natural! Dec ${SortFramework_VERSION}")
+endif()
+set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
+unset(SortFramework_VERSION)
+
+unset(CMAKE_FIND_PACKAGE_SORT_ORDER)
+unset(CMAKE_FIND_PACKAGE_SORT_DIRECTION)
+set(CMAKE_PREFIX_PATH)
+
+###############################################################################
+# Find a package that actually has some content.
+set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
+find_package(Foo CONFIG)
+if(NOT Foo_FOUND)
+  message(SEND_ERROR "Foo not found !")
+elseif(NOT TARGET Foo::PrefixTest)
+  message(SEND_ERROR "Foo::PrefixTest missing !")
+elseif(NOT TARGET Foo::RelativeTest)
+  message(SEND_ERROR "Foo::RelativeTest missing !")
+elseif(NOT TARGET Foo::Empty)
+  message(SEND_ERROR "Foo::Empty missing !")
+else()
+  get_property(pt_includes
+    TARGET Foo::PrefixTest PROPERTY INTERFACE_INCLUDE_DIRECTORIES_DEFAULT)
+  if(NOT "${CMAKE_CURRENT_SOURCE_DIR}/include" PATH_EQUAL "${pt_includes}")
+    message(SEND_ERROR "Foo::PrefixTest has wrong includes '${pt_includes}' !")
+  endif()
+  set(pt_includes)
+
+  get_property(rt_includes
+    TARGET Foo::RelativeTest PROPERTY INTERFACE_INCLUDE_DIRECTORIES_DEFAULT)
+  if(NOT "${CMAKE_CURRENT_SOURCE_DIR}/cps/../include" PATH_EQUAL "${rt_includes}")
+    message(SEND_ERROR "Foo::RelativeTest has wrong includes '${rt_includes}' !")
+  endif()
+  set(rt_includes)
+endif()

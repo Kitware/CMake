@@ -468,6 +468,7 @@ CMAKE_CXX_SOURCES="\
   cmGccDepfileLexerHelper \
   cmGccDepfileReader \
   cmReturnCommand \
+  cmPackageInfoReader \
   cmPlaceholderExpander \
   cmPlistParser \
   cmRulePlaceholderExpander \
