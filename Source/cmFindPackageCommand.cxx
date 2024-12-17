@@ -23,6 +23,7 @@
 
 #include "cmAlgorithms.h"
 #include "cmDependencyProvider.h"
+#include "cmExecutionStatus.h"
 #include "cmExperimental.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -54,8 +55,6 @@
 #    define KEY_WOW64_64KEY 0x0100
 #  endif
 #endif
-
-class cmExecutionStatus;
 
 namespace {
 
@@ -560,6 +559,41 @@ void cmFindPackageCommand::AppendSearchPathGroups()
   this->LabeledPaths.emplace(PathLabel::SystemRegistry, cmSearchPath{ this });
 }
 
+void cmFindPackageCommand::InheritOptions(cmFindPackageCommand* other)
+{
+  this->RequiredCMakeVersion = other->RequiredCMakeVersion;
+  this->LibraryArchitecture = other->LibraryArchitecture;
+  this->UseLib32Paths = other->UseLib32Paths;
+  this->UseLib64Paths = other->UseLib64Paths;
+  this->UseLibx32Paths = other->UseLibx32Paths;
+  this->NoUserRegistry = other->NoUserRegistry;
+  this->NoSystemRegistry = other->NoSystemRegistry;
+  this->UseRealPath = other->UseRealPath;
+  this->SortOrder = other->SortOrder;
+  this->SortDirection = other->SortDirection;
+
+  this->GlobalScope = other->GlobalScope;
+  this->RegistryView = other->RegistryView;
+  this->NoDefaultPath = other->NoDefaultPath;
+  this->NoPackageRootPath = other->NoPackageRootPath;
+  this->NoCMakePath = other->NoCMakePath;
+  this->NoCMakeEnvironmentPath = other->NoCMakeEnvironmentPath;
+  this->NoSystemEnvironmentPath = other->NoSystemEnvironmentPath;
+  this->NoCMakeSystemPath = other->NoCMakeSystemPath;
+  this->NoCMakeInstallPath = other->NoCMakeInstallPath;
+  this->FindRootPathMode = other->FindRootPathMode;
+
+  this->SearchFrameworkLast = other->SearchFrameworkLast;
+  this->SearchFrameworkFirst = other->SearchFrameworkFirst;
+  this->SearchFrameworkOnly = other->SearchFrameworkOnly;
+  this->SearchAppBundleLast = other->SearchAppBundleLast;
+  this->SearchAppBundleFirst = other->SearchAppBundleFirst;
+  this->SearchAppBundleOnly = other->SearchAppBundleOnly;
+  this->SearchPathSuffixes = other->SearchPathSuffixes;
+
+  this->Quiet = other->Quiet;
+}
+
 bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
 {
   if (args.empty()) {
@@ -645,7 +679,7 @@ bool cmFindPackageCommand::InitialPass(std::vector<std::string> const& args)
     this->SortDirection = (*sd == "ASC") ? Asc : Dec;
   }
 
-  // Find what search path locations have been enabled/disable
+  // Find what search path locations have been enabled/disable.
   this->SelectDefaultSearchModes();
 
   // Find the current root path mode.
@@ -1510,12 +1544,7 @@ bool cmFindPackageCommand::HandlePackageMode(
     if (this->CpsReader) {
       // The package has been found.
       found = true;
-
-      // Import targets.
-      cmPackageInfoReader* const reader = this->CpsReader.get();
-      result = reader->ImportTargets(this->Makefile, this->Status) &&
-        this->ImportTargetConfigurations(this->FileFound, reader) &&
-        this->ImportAppendices(this->FileFound);
+      result = this->ReadPackage();
     } else if (this->ReadListFile(this->FileFound, DoPolicyScope)) {
       // The package has been found.
       found = true;
@@ -1816,6 +1845,36 @@ bool cmFindPackageCommand::FindEnvironmentConfig()
                      });
 }
 
+cmFindPackageCommand::AppendixMap cmFindPackageCommand::FindAppendices(
+  std::string const& base) const
+{
+  AppendixMap appendices;
+
+  // Find package appendices.
+  cmsys::Glob glob;
+  glob.RecurseOff();
+  if (glob.FindFiles(cmStrCat(cmSystemTools::GetFilenamePath(base), "/"_s,
+                              cmSystemTools::GetFilenameWithoutExtension(base),
+                              "[-:]*.[Cc][Pp][Ss]"_s))) {
+    // Check glob results for valid appendices.
+    for (std::string const& extra : glob.GetFiles()) {
+      // Exclude configuration-specific files for now; we look at them later
+      // when we load their respective configuration-agnostic appendices.
+      if (extra.find('@') != std::string::npos) {
+        continue;
+      }
+
+      std::unique_ptr<cmPackageInfoReader> reader =
+        cmPackageInfoReader::Read(extra, this->CpsReader.get());
+      if (reader && reader->GetName() == this->Name) {
+        appendices.emplace(extra, std::move(reader));
+      }
+    }
+  }
+
+  return appendices;
+}
+
 bool cmFindPackageCommand::ReadListFile(const std::string& f,
                                         const PolicyScopeRule psr)
 {
@@ -1833,53 +1892,114 @@ bool cmFindPackageCommand::ReadListFile(const std::string& f,
   return false;
 }
 
-bool cmFindPackageCommand::ImportTargetConfigurations(
-  std::string const& base, cmPackageInfoReader* parent)
+bool cmFindPackageCommand::ReadPackage()
 {
-  // Find supplemental configuration files.
-  cmsys::Glob glob;
-  glob.RecurseOff();
-  if (glob.FindFiles(cmStrCat(cmSystemTools::GetFilenamePath(base), "/"_s,
-                              cmSystemTools::GetFilenameWithoutExtension(base),
-                              "@*.[Cc][Pp][Ss]"_s))) {
+  // Resolve any transitive dependencies.
+  if (!FindPackageDependencies(this->FileFound, *this->CpsReader,
+                               this->Required)) {
+    return false;
+  }
 
-    // Try to read supplemental data from each file found.
-    for (std::string const& extra : glob.GetFiles()) {
-      std::unique_ptr<cmPackageInfoReader> const& reader =
-        cmPackageInfoReader::Read(extra, parent);
-      if (reader && reader->GetName() == this->Name) {
-        if (!reader->ImportTargetConfigurations(this->Makefile,
-                                                this->Status)) {
-          return false;
-        }
+  cmMakefile::CallRAII scope{ this->Makefile, this->FileFound, this->Status };
+
+  // Locate appendices.
+  cmFindPackageCommand::AppendixMap appendices =
+    this->FindAppendices(this->FileFound);
+
+  auto iter = appendices.begin();
+  while (iter != appendices.end()) {
+    bool providesRequiredComponents = false; // TODO
+    bool required = providesRequiredComponents && this->Required;
+    if (!this->FindPackageDependencies(iter->first, *iter->second, required)) {
+      if (providesRequiredComponents) {
+        return false;
       }
+      iter = appendices.erase(iter);
+    } else {
+      ++iter;
+    }
+  }
+
+  // Import targets from root file.
+  if (!this->ImportPackageTargets(this->FileFound, *this->CpsReader)) {
+    return false;
+  }
+
+  // Import targets from appendices.
+  for (auto const& appendix : appendices) {
+    cmMakefile::CallRAII appendixScope{ this->Makefile, appendix.first,
+                                        this->Status };
+    if (!this->ImportPackageTargets(appendix.first, *appendix.second)) {
+      return false;
     }
   }
 
   return true;
 }
 
-bool cmFindPackageCommand::ImportAppendices(std::string const& base)
+bool cmFindPackageCommand::FindPackageDependencies(
+  std::string const& fileName, cmPackageInfoReader const& reader,
+  bool required)
 {
-  // Find package appendices.
+  // Get package requirements.
+  for (cmPackageRequirement const& dep : reader.GetRequirements()) {
+    cmExecutionStatus status{ *this->Makefile };
+    cmMakefile::CallRAII scope{ this->Makefile, fileName, status };
+
+    // For each requirement, set up a nested instance to find it.
+    cmFindPackageCommand fp{ status };
+    fp.InheritOptions(this);
+
+    fp.Name = dep.Name;
+    fp.Required = required;
+    fp.UseFindModules = false;
+    fp.UseCpsFiles = true;
+
+    fp.Version = dep.Version;
+    fp.VersionComplete = dep.Version;
+    fp.VersionCount =
+      parseVersion(fp.Version, fp.VersionMajor, fp.VersionMinor,
+                   fp.VersionPatch, fp.VersionTweak);
+
+    fp.Components = cmJoin(cmMakeRange(dep.Components), ";"_s);
+    fp.RequiredComponents =
+      std::set<std::string>{ dep.Components.begin(), dep.Components.end() };
+
+    // TODO set hints
+
+    // Try to find the requirement; fail if we can't.
+    if (!fp.FindPackage() || fp.FileFound.empty()) {
+      return false;
+    }
+  }
+
+  // All requirements (if any) were found.
+  return true;
+}
+
+bool cmFindPackageCommand::ImportPackageTargets(std::string const& fileName,
+                                                cmPackageInfoReader& reader)
+{
+  // Import base file.
+  if (!reader.ImportTargets(this->Makefile, this->Status)) {
+    return false;
+  }
+
+  // Find supplemental configuration files.
   cmsys::Glob glob;
   glob.RecurseOff();
-  if (glob.FindFiles(cmStrCat(cmSystemTools::GetFilenamePath(base), "/"_s,
-                              cmSystemTools::GetFilenameWithoutExtension(base),
-                              "[-:]*.[Cc][Pp][Ss]"_s))) {
+  if (glob.FindFiles(
+        cmStrCat(cmSystemTools::GetFilenamePath(fileName), "/"_s,
+                 cmSystemTools::GetFilenameWithoutExtension(fileName),
+                 "@*.[Cc][Pp][Ss]"_s))) {
 
-    // Try to read supplemental data from each appendix file found.
+    // Try to read supplemental data from each file found.
     for (std::string const& extra : glob.GetFiles()) {
-      // This loop should not consider configuration-specific files.
-      if (extra.find('@') != std::string::npos) {
-        continue;
-      }
-
-      std::unique_ptr<cmPackageInfoReader> const& reader =
-        cmPackageInfoReader::Read(extra, this->CpsReader.get());
-      if (reader && reader->GetName() == this->Name) {
-        if (!reader->ImportTargets(this->Makefile, this->Status) ||
-            !this->ImportTargetConfigurations(extra, reader.get())) {
+      std::unique_ptr<cmPackageInfoReader> configReader =
+        cmPackageInfoReader::Read(extra, &reader);
+      if (configReader && configReader->GetName() == this->Name) {
+        if (!configReader->ImportTargetConfigurations(this->Makefile,
+                                                      this->Status)) {
           return false;
         }
       }
