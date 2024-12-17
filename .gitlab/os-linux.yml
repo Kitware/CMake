@@ -549,6 +549,13 @@
 
     interruptible: true
 
+.cmake_version_update_linux:
+    stage: build
+    extends: .fedora41
+    script:
+        - .gitlab/ci/cmake_version_update.sh
+    interruptible: false # The job internally fetches and retries.
+
 .cmake_codespell_linux:
     stage: build
     extends: .fedora41

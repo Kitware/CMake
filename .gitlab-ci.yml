@@ -72,6 +72,12 @@ u:source-package:
     needs:
         - p:source-package
 
+b:version-update:
+    extends:
+        - .cmake_version_update_linux
+        - .linux_x86_64_tags
+        - .run_version_update
+
 # Documentation builds
 
 b:cmake.org-help:
