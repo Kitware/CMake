@@ -212,6 +212,9 @@ Deprecated and Removed Features
 Other Changes
 =============
 
+* :manual:`ctest(1)` now rejects unknown command-line arguments with an error.
+  Previously they were silently ignored.
+
 * The precompiled Windows ``.msi`` installers provided on
   `cmake.org <https://cmake.org/download/>`_, when performing a fresh
   installation, now modify the system-wide ``PATH`` by default.
