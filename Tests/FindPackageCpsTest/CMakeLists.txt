@@ -137,3 +137,27 @@ else()
   add_library(defs-test STATIC defs-test-c.c defs-test-cxx.cxx)
   target_link_libraries(defs-test defs::defs)
 endif()
+
+###############################################################################
+# Test importing of (language-specific) include paths.
+
+include(CheckIncludeFile)
+include(CheckIncludeFileCXX)
+
+find_package(includes CONFIG REQUIRED)
+
+set(CMAKE_REQUIRED_LIBRARIES includes::default)
+check_include_file(cmincludetest/global.h C_GLOBAL_H)
+check_include_file(cmincludetest/cxxonly.h C_CXXONLY_H)
+check_include_file_cxx(cmincludetest/cxxonly.h CXX_CXXONLY_H)
+set(CMAKE_REQUIRED_LIBRARIES)
+
+if(NOT C_GLOBAL_H)
+  message(SEND_ERROR "cmincludetest/global.h not found !")
+endif()
+if(NOT CXX_CXXONLY_H)
+  message(SEND_ERROR "cmincludetest/cxxonly.h not found in C++ mode !")
+endif()
+if(C_CXXONLY_H)
+  message(SEND_ERROR "cmincludetest/cxxonly.h unexpectedly found in C mode ?!")
+endif()

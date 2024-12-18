@@ -180,11 +180,10 @@ cm::string_view IterKey(Json::Value::const_iterator const& iter)
 }
 
 // Get list-of-strings value from object.
-std::vector<std::string> ReadList(Json::Value const& data, char const* key)
+std::vector<std::string> ReadList(Json::Value const& arr)
 {
   std::vector<std::string> result;
 
-  Json::Value const& arr = data[key];
   if (arr.isArray()) {
     for (Json::Value const& val : arr) {
       if (val.isString()) {
@@ -194,6 +193,11 @@ std::vector<std::string> ReadList(Json::Value const& data, char const* key)
   }
 
   return result;
+}
+
+std::vector<std::string> ReadList(Json::Value const& data, char const* key)
+{
+  return ReadList(data[key]);
 }
 
 std::string NormalizeTargetName(std::string const& name,
@@ -224,6 +228,47 @@ void AppendProperty(cmMakefile* makefile, cmTarget* target,
   }
 
   target->AppendProperty(fullprop, value, makefile->GetBacktrace());
+}
+
+template <typename Transform>
+void AppendLanguageProperties(cmMakefile* makefile, cmTarget* target,
+                              cm::string_view property,
+                              cm::string_view configuration,
+                              Json::Value const& data, char const* key,
+                              Transform transform)
+{
+  Json::Value const& value = data[key];
+  if (value.isArray()) {
+    for (std::string v : ReadList(value)) {
+      AppendProperty(makefile, target, property, configuration,
+                     transform(std::move(v)));
+    }
+  } else if (value.isObject()) {
+    for (auto vi = value.begin(), ve = value.end(); vi != ve; ++vi) {
+      cm::string_view const originalLang = IterKey(vi);
+      cm::string_view const lang = MapLanguage(originalLang);
+      if (lang.empty()) {
+        makefile->IssueMessage(MessageType::WARNING,
+                               cmStrCat("ignoring unknown language "_s,
+                                        originalLang, " in "_s, key, " for "_s,
+                                        target->GetName()));
+        continue;
+      }
+
+      if (lang == "*"_s) {
+        for (std::string v : ReadList(*vi)) {
+          AppendProperty(makefile, target, property, configuration,
+                         transform(std::move(v)));
+        }
+      } else {
+        for (std::string v : ReadList(*vi)) {
+          v = cmStrCat("$<$<COMPILE_LANGUAGE:"_s, lang, ">:"_s,
+                       transform(std::move(v)), '>');
+          AppendProperty(makefile, target, property, configuration, v);
+        }
+      }
+    }
+  }
 }
 
 void AddCompileFeature(cmMakefile* makefile, cmTarget* target,
@@ -483,10 +528,11 @@ void cmPackageInfoReader::SetTargetProperties(
   AddDefinitions(makefile, target, configuration, definitionsMap);
 
   // Add include directories.
-  for (std::string inc : ReadList(data, "includes")) {
-    AppendProperty(makefile, target, "INCLUDE_DIRECTORIES"_s, configuration,
-                   this->ResolvePath(std::move(inc)));
-  }
+  AppendLanguageProperties(makefile, target, "INCLUDE_DIRECTORIES"_s,
+                           configuration, data, "includes",
+                           [this](std::string p) -> std::string {
+                             return this->ResolvePath(std::move(p));
+                           });
 
   // Add link name/location(s).
   this->SetOptionalProperty(target, "LOCATION"_s, configuration,
