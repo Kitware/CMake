@@ -6,6 +6,9 @@ set(CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES "e82e467b-f997-4464-8ace-b00808fff261")
 # Protect tests from running inside the default install prefix.
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/NotDefaultPrefix")
 
+# Use the test directory to Look for packages.
+set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+
 # Disable built-in search paths.
 set(CMAKE_FIND_USE_PACKAGE_ROOT_PATH OFF)
 set(CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH OFF)
@@ -21,7 +24,6 @@ add_executable(FindPackageCpsTest FindPackageTest.cxx)
 ###############################################################################
 # Test a basic package search.
 # It should NOT find the package's CMake package file.
-set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 find_package(Sample CONFIG)
 if(NOT Sample_FOUND)
@@ -38,11 +40,8 @@ elseif(NOT Sample_VERSION_TWEAK EQUAL 0)
   message(SEND_ERROR "Sample wrong tweak version ${Sample_VERSION_TWEAK} !")
 endif()
 
-set(CMAKE_PREFIX_PATH)
-
 ###############################################################################
 # Test glob sorting.
-set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(SortLib_DIR "" CACHE FILEPATH "Wipe out find results for testing." FORCE)
 set(CMAKE_FIND_PACKAGE_SORT_ORDER NAME)
@@ -93,11 +92,9 @@ unset(SortFramework_VERSION)
 
 unset(CMAKE_FIND_PACKAGE_SORT_ORDER)
 unset(CMAKE_FIND_PACKAGE_SORT_DIRECTION)
-set(CMAKE_PREFIX_PATH)
 
 ###############################################################################
 # Find a package that actually has some content.
-set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 find_package(Foo CONFIG)
 if(NOT Foo_FOUND)
@@ -122,4 +119,21 @@ else()
     message(SEND_ERROR "Foo::RelativeTest has wrong includes '${rt_includes}' !")
   endif()
   set(rt_includes)
+endif()
+
+###############################################################################
+# Test importing of compile definitions.
+
+find_package(defs CONFIG REQUIRED)
+
+if(CMAKE_GENERATOR STREQUAL "Xcode" OR CMAKE_GENERATOR MATCHES "Visual Studio")
+  # VS/Xcode generators cannot use different definitions within the same
+  # target, so we must split the test into one target per language.
+  add_library(defs-test-c STATIC defs-test-c.c)
+  add_library(defs-test-cxx STATIC defs-test-cxx.cxx)
+  target_link_libraries(defs-test-c defs::defs)
+  target_link_libraries(defs-test-cxx defs::defs)
+else()
+  add_library(defs-test STATIC defs-test-c.c defs-test-cxx.cxx)
+  target_link_libraries(defs-test defs::defs)
 endif()
