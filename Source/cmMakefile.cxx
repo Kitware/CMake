@@ -1711,8 +1711,8 @@ public:
     : Makefile(mf)
   {
     std::string currentStart =
-      cmStrCat(this->Makefile->StateSnapshot.GetDirectory().GetCurrentSource(),
-               "/CMakeLists.txt");
+      this->Makefile->GetCMakeInstance()->GetCMakeListFile(
+        this->Makefile->StateSnapshot.GetDirectory().GetCurrentSource());
     this->Makefile->StateSnapshot.SetListFile(currentStart);
     this->Makefile->StateSnapshot =
       this->Makefile->StateSnapshot.GetState()->CreatePolicyScopeSnapshot(
@@ -1755,8 +1755,8 @@ private:
 
 void cmMakefile::Configure()
 {
-  std::string currentStart = cmStrCat(
-    this->StateSnapshot.GetDirectory().GetCurrentSource(), "/CMakeLists.txt");
+  std::string currentStart = this->GetCMakeInstance()->GetCMakeListFile(
+    this->StateSnapshot.GetDirectory().GetCurrentSource());
 
   // Add the bottom of all backtraces within this directory.
   // We will never pop this scope because it should be available
@@ -1909,8 +1909,8 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
     cmSystemTools::Message(msg);
   }
 
-  std::string const currentStartFile =
-    cmStrCat(currentStart, "/CMakeLists.txt");
+  std::string currentStartFile =
+    this->GetCMakeInstance()->GetCMakeListFile(currentStart);
   if (!cmSystemTools::FileExists(currentStartFile, true)) {
     // The file is missing.  Check policy CMP0014.
     auto e = cmStrCat("The source directory\n  ", currentStart,

@@ -259,7 +259,7 @@ bool cmakeCheckStampList(const std::string& stampList)
 
 } // namespace
 
-cmDocumentationEntry cmake::CMAKE_STANDARD_OPTIONS_TABLE[18] = {
+cmDocumentationEntry cmake::CMAKE_STANDARD_OPTIONS_TABLE[19] = {
   { "-S <path-to-source>", "Explicitly specify a source directory." },
   { "-B <path-to-build>", "Explicitly specify a build directory." },
   { "-C <initial-cache>", "Pre-load a script to populate the cache." },
@@ -271,6 +271,8 @@ cmDocumentationEntry cmake::CMAKE_STANDARD_OPTIONS_TABLE[18] = {
   { "--toolchain <file>", "Specify toolchain file [CMAKE_TOOLCHAIN_FILE]." },
   { "--install-prefix <directory>",
     "Specify install directory [CMAKE_INSTALL_PREFIX]." },
+  { "--project-file <project-file-name>",
+    "Specify an alternate project file name." },
   { "-Wdev", "Enable developer warnings." },
   { "-Wno-dev", "Suppress developer warnings." },
   { "-Werror=dev", "Make developer warnings errors." },
@@ -930,6 +932,7 @@ void cmake::SetArgs(const std::vector<std::string>& args)
   bool haveToolset = false;
   bool havePlatform = false;
   bool haveBArg = false;
+  bool haveCMLName = false;
   std::string possibleUnknownArg;
   std::string extraProvidedPath;
 #if !defined(CMAKE_BOOTSTRAP)
@@ -985,6 +988,17 @@ void cmake::SetArgs(const std::vector<std::string>& args)
     }
     state->SetGeneratorToolset(value);
     haveToolset = true;
+    return true;
+  };
+
+  auto CMakeListsFileLambda = [&](std::string const& value,
+                                  cmake* state) -> bool {
+    if (haveCMLName) {
+      cmSystemTools::Error("Multiple --project-file options not allowed");
+      return false;
+    }
+    state->SetCMakeListName(value);
+    haveCMLName = true;
     return true;
   };
 
@@ -1120,6 +1134,9 @@ void cmake::SetArgs(const std::vector<std::string>& args)
                        state->SetShowLogContext(true);
                        return true;
                      } },
+    CommandArgument{ "--project-file",
+                     "No filename specified for --project-file",
+                     CommandArgument::Values::One, CMakeListsFileLambda },
     CommandArgument{
       "--debug-find", CommandArgument::Values::Zero,
       [](std::string const&, cmake* state) -> bool {
@@ -1773,8 +1790,9 @@ void cmake::SetTraceRedirect(cmake* other)
 
 bool cmake::SetDirectoriesFromFile(const std::string& arg)
 {
-  // Check if the argument refers to a CMakeCache.txt or
-  // CMakeLists.txt file.
+  // Check if the argument refers to a CMakeCache.txt or CMakeLists.txt file.
+  // Do not check for the custom project filename CMAKE_LIST_FILE_NAME, as it
+  // cannot be determined until after reading the CMakeCache.txt
   std::string listPath;
   std::string cachePath;
   bool is_source_dir = false;
@@ -1782,7 +1800,7 @@ bool cmake::SetDirectoriesFromFile(const std::string& arg)
   if (cmSystemTools::FileIsDirectory(arg)) {
     std::string path = cmSystemTools::ToNormalizedPathOnDisk(arg);
     std::string cacheFile = cmStrCat(path, "/CMakeCache.txt");
-    std::string listFile = cmStrCat(path, "/CMakeLists.txt");
+    std::string listFile = this->GetCMakeListFile(path);
 
     is_empty_directory = true;
     if (cmSystemTools::FileExists(cacheFile)) {
@@ -2177,12 +2195,13 @@ void cmake::SetGlobalGenerator(std::unique_ptr<cmGlobalGenerator> gg)
 int cmake::DoPreConfigureChecks()
 {
   // Make sure the Source directory contains a CMakeLists.txt file.
-  std::string srcList = cmStrCat(this->GetHomeDirectory(), "/CMakeLists.txt");
+  std::string srcList =
+    cmStrCat(this->GetHomeDirectory(), "/", this->CMakeListName);
   if (!cmSystemTools::FileExists(srcList)) {
     std::ostringstream err;
     if (cmSystemTools::FileIsDirectory(this->GetHomeDirectory())) {
       err << "The source directory \"" << this->GetHomeDirectory()
-          << "\" does not appear to contain CMakeLists.txt.\n";
+          << "\" does not appear to contain " << this->CMakeListName << ".\n";
     } else if (cmSystemTools::FileExists(this->GetHomeDirectory())) {
       err << "The source directory \"" << this->GetHomeDirectory()
           << "\" is a file, not a directory.\n";
@@ -2200,7 +2219,7 @@ int cmake::DoPreConfigureChecks()
   if (this->State->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY")) {
     std::string cacheStart =
       cmStrCat(*this->State->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY"),
-               "/CMakeLists.txt");
+               "/", this->CMakeListName);
     if (!cmSystemTools::SameFile(cacheStart, srcList)) {
       std::string message =
         cmStrCat("The source \"", srcList, "\" does not match the source \"",
@@ -2374,6 +2393,33 @@ int cmake::ActualConfigure()
 
   cmSystemTools::RemoveADirectory(this->GetHomeOutputDirectory() +
                                   "/CMakeFiles/CMakeScratch");
+
+  std::string cmlNameCache =
+    this->State->GetInitializedCacheValue("CMAKE_LIST_FILE_NAME");
+  if (!cmlNameCache.empty() && !this->CMakeListName.empty() &&
+      cmlNameCache != this->CMakeListName) {
+    std::string message =
+      cmStrCat("CMakeLists filename : \"", this->CMakeListName,
+               "\"\nDoes not match the previous: \"", cmlNameCache,
+               "\"\nEither remove the CMakeCache.txt file and CMakeFiles "
+               "directory or choose a different binary directory.");
+    cmSystemTools::Error(message);
+    return -2;
+  }
+  if (this->CMakeListName.empty()) {
+    this->CMakeListName =
+      cmlNameCache.empty() ? "CMakeLists.txt" : cmlNameCache;
+  }
+  if (this->CMakeListName != "CMakeLists.txt") {
+    this->IssueMessage(
+      MessageType::WARNING,
+      "This project has been configured with a project file other than "
+      "CMakeLists.txt. This feature is intended for temporary use during "
+      "development and not for publication of a final product.");
+  }
+  this->AddCacheEntry("CMAKE_LIST_FILE_NAME", this->CMakeListName,
+                      "Name of CMakeLists files to read",
+                      cmStateEnums::INTERNAL);
 
   int res = this->DoPreConfigureChecks();
   if (res < 0) {
@@ -4228,6 +4274,21 @@ bool cmake::GetDebugFindOutput(std::string const& var) const
 bool cmake::GetDebugFindPkgOutput(std::string const& pkg) const
 {
   return this->DebugFindPkgs.count(pkg);
+}
+
+void cmake::SetCMakeListName(const std::string& name)
+{
+  this->CMakeListName = name;
+}
+
+std::string cmake::GetCMakeListFile(const std::string& dir) const
+{
+  std::string listFile = cmStrCat(dir, '/', this->CMakeListName);
+  if (this->CMakeListName.empty() ||
+      !cmSystemTools::FileExists(listFile, true)) {
+    return cmStrCat(dir, "/CMakeLists.txt");
+  }
+  return listFile;
 }
 
 #if !defined(CMAKE_BOOTSTRAP)
