@@ -5,8 +5,10 @@
   :prop_tgt:`LINK_LIBRARY_OVERRIDE_<LIBRARY>` target properties.
 
 ``WHOLE_ARCHIVE``
-  Force inclusion of all members of a static library.  This feature is only
-  supported for the following platforms, with limitations as noted:
+  Force inclusion of all members of a static library when linked as a
+  dependency of consuming :ref:`Executables`, :ref:`Shared Libraries`,
+  and :ref:`Module Libraries`.  This feature is only supported for the
+  following platforms, with limitations as noted:
 
   * Linux.
   * All BSD variants.
@@ -20,6 +22,14 @@
     be greater than 1900.
   * Cygwin.
   * MSYS.
+
+  .. note::
+
+    Since :ref:`Static Libraries` are archives and not linked binaries,
+    CMake records their link dependencies for transitive use when linking
+    consuming binaries.  Therefore ``WHOLE_ARCHIVE`` does not cause a
+    static library's objects to be included in other static libraries.
+    Use :ref:`Object Libraries` for that.
 
 ``FRAMEWORK``
   This option tells the linker to search for the specified framework using
