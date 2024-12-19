@@ -40,13 +40,14 @@ Try Compiling and Running Source Files
 .. versionadded:: 3.25
 
 Try building an executable from one or more source files.  Build success
-returns ``TRUE`` and build failure returns ``FALSE`` in ``<compileResultVar>``.
-If the build succeeds, this runs the executable and stores the exit code in
-``<runResultVar>``.  If the executable was built, but failed to run, then
-``<runResultVar>`` will be set to ``FAILED_TO_RUN``.  See command
-:command:`try_compile` for documentation of options common to both commands,
-and for information on how the test project is constructed to build the source
-file.
+returns boolean ``true`` and build failure returns boolean ``false`` in
+``<compileResultVar>`` (cached unless ``NO_CACHE`` is specified).
+If the build succeeds, this runs the executable and stores the exit code
+in ``<runResultVar>`` (cached unless ``NO_CACHE`` is specified).
+If the executable was built, but failed to run, then ``<runResultVar>``
+will be set to ``FAILED_TO_RUN``.  See command :command:`try_compile` for
+documentation of options common to both commands, and for information on
+how the test project is constructed to build the source file.
 
 One or more source files must be provided. Additionally, one of ``SOURCES``
 and/or ``SOURCE_FROM_*`` must precede other keywords.
