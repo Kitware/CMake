@@ -249,9 +249,9 @@ void AppendLanguageProperties(cmMakefile* makefile, cmTarget* target,
       cm::string_view const lang = MapLanguage(originalLang);
       if (lang.empty()) {
         makefile->IssueMessage(MessageType::WARNING,
-                               cmStrCat("ignoring unknown language "_s,
-                                        originalLang, " in "_s, key, " for "_s,
-                                        target->GetName()));
+                               cmStrCat(R"(ignoring unknown language ")"_s,
+                                        originalLang, R"(" in )"_s, key,
+                                        " for "_s, target->GetName()));
         continue;
       }
 
@@ -514,10 +514,10 @@ void cmPackageInfoReader::SetTargetProperties(
     cm::string_view const originalLang = IterKey(ldi);
     cm::string_view const lang = MapLanguage(originalLang);
     if (lang.empty()) {
-      makefile->IssueMessage(MessageType::WARNING,
-                             cmStrCat("ignoring unknown language "_s,
-                                      originalLang, " in definitions for "_s,
-                                      target->GetName()));
+      makefile->IssueMessage(
+        MessageType::WARNING,
+        cmStrCat(R"(ignoring unknown language ")"_s, originalLang,
+                 R"(" in definitions for )"_s, target->GetName()));
       continue;
     }
 
@@ -629,9 +629,9 @@ bool cmPackageInfoReader::ImportTargets(cmMakefile* makefile,
         makefile, cmStateEnums::INTERFACE_LIBRARY, fullName, *ci, package);
     } else {
       makefile->IssueMessage(MessageType::WARNING,
-                             cmStrCat("component "_s, fullName,
-                                      " has unknown type "_s, type,
-                                      " and was not imported"_s));
+                             cmStrCat(R"(component ")"_s, fullName,
+                                      R"(" has unknown type ")"_s, type,
+                                      R"(" and was not imported)"_s));
     }
 
     if (target) {
