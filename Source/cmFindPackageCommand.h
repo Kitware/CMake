@@ -173,9 +173,9 @@ private:
   bool CheckVersionFile(std::string const& version_file,
                         std::string& result_version);
   bool SearchPrefix(std::string const& prefix);
-  bool SearchFrameworkPrefix(std::string const& prefix_in);
-  bool SearchAppBundlePrefix(std::string const& prefix_in);
-  bool SearchEnvironmentPrefix(std::string const& prefix_in);
+  bool SearchFrameworkPrefix(std::string const& prefix);
+  bool SearchAppBundlePrefix(std::string const& prefix);
+  bool SearchEnvironmentPrefix(std::string const& prefix);
 
   struct OriginalDef
   {

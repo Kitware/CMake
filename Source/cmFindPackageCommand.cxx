@@ -130,7 +130,7 @@ public:
       return {};
     }
     this->NeedReset = true;
-    return cmStrCat(parent, '/', this->DirName);
+    return cmStrCat(parent, this->DirName, '/');
   }
 
   void Reset() { this->NeedReset = false; }
@@ -152,7 +152,7 @@ public:
   std::string GetNextCandidate(const std::string& parent)
   {
     if (this->Current != this->Names.get().cend()) {
-      return cmStrCat(parent, '/', *this->Current++);
+      return cmStrCat(parent, *this->Current++, '/');
     }
     return {};
   }
@@ -189,7 +189,7 @@ public:
         continue;
       }
       if (cmsysString_strcasecmp(fname, this->DirName.data()) == 0) {
-        auto candidate = cmStrCat(parent, '/', fname);
+        auto candidate = cmStrCat(parent, fname, '/');
         if (cmSystemTools::FileIsDirectory(candidate)) {
           return candidate;
         }
@@ -271,7 +271,7 @@ public:
     }
 
     if (this->Current != this->Matches.cend()) {
-      auto candidate = cmStrCat(parent, '/', *this->Current++);
+      auto candidate = cmStrCat(parent, *this->Current++, '/');
       return candidate;
     }
 
@@ -386,8 +386,8 @@ bool TryGeneratedPaths(CallbackFn&& filesCollector,
                        cmFindPackageCommand::PackageDescriptionType type,
                        const std::string& fullPath)
 {
-  assert(!fullPath.empty() && fullPath.back() != '/');
-  return std::forward<CallbackFn&&>(filesCollector)(fullPath + '/', type);
+  assert(!fullPath.empty() && fullPath.back() == '/');
+  return std::forward<CallbackFn&&>(filesCollector)(fullPath, type);
 }
 
 template <typename CallbackFn, typename Generator, typename... Rest>
@@ -2744,17 +2744,17 @@ void cmFindPackageCommand::StoreVersionFound()
   }
 }
 
-bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
+bool cmFindPackageCommand::SearchPrefix(std::string const& prefix)
 {
-  assert(!prefix_in.empty() && prefix_in.back() == '/');
+  assert(!prefix.empty() && prefix.back() == '/');
 
   // Skip this if the prefix does not exist.
-  if (!cmSystemTools::FileIsDirectory(prefix_in)) {
+  if (!cmSystemTools::FileIsDirectory(prefix)) {
     return false;
   }
 
   // Skip this if it's in ignored paths.
-  std::string prefixWithoutSlash = prefix_in;
+  std::string prefixWithoutSlash = prefix;
   if (prefixWithoutSlash != "/" && prefixWithoutSlash.back() == '/') {
     prefixWithoutSlash.erase(prefixWithoutSlash.length() - 1);
   }
@@ -2762,10 +2762,6 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
       this->IgnoredPrefixPaths.count(prefixWithoutSlash)) {
     return false;
   }
-
-  // Strip the trailing slash because the path generator is about to
-  // add one.
-  std::string const prefix = prefix_in.substr(0, prefix_in.size() - 1);
 
   auto searchFn = [this](const std::string& fullPath,
                          PackageDescriptionType type) -> bool {
@@ -2811,7 +2807,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
   }
 
   // PREFIX/ (useful on windows or in build trees)
-  if (this->SearchDirectory(prefix_in, pdt::CMake)) {
+  if (this->SearchDirectory(prefix, pdt::CMake)) {
     return true;
   }
 
@@ -2916,13 +2912,9 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
                            commonGen, secondPkgDirGen, iCMakeGen);
 }
 
-bool cmFindPackageCommand::SearchFrameworkPrefix(std::string const& prefix_in)
+bool cmFindPackageCommand::SearchFrameworkPrefix(std::string const& prefix)
 {
-  assert(!prefix_in.empty() && prefix_in.back() == '/');
-
-  // Strip the trailing slash because the path generator is about to
-  // add one.
-  std::string const prefix = prefix_in.substr(0, prefix_in.size() - 1);
+  assert(!prefix.empty() && prefix.back() == '/');
 
   auto searchFn = [this](const std::string& fullPath,
                          PackageDescriptionType type) -> bool {
@@ -2971,13 +2963,9 @@ bool cmFindPackageCommand::SearchFrameworkPrefix(std::string const& prefix_in)
                            rGen, iCMakeGen);
 }
 
-bool cmFindPackageCommand::SearchAppBundlePrefix(std::string const& prefix_in)
+bool cmFindPackageCommand::SearchAppBundlePrefix(std::string const& prefix)
 {
-  assert(!prefix_in.empty() && prefix_in.back() == '/');
-
-  // Strip the trailing slash because the path generator is about to
-  // add one.
-  std::string const prefix = prefix_in.substr(0, prefix_in.size() - 1);
+  assert(!prefix.empty() && prefix.back() == '/');
 
   auto searchFn = [this](const std::string& fullPath,
                          PackageDescriptionType type) -> bool {
@@ -3004,19 +2992,14 @@ bool cmFindPackageCommand::SearchAppBundlePrefix(std::string const& prefix_in)
     cmCaseInsensitiveDirectoryListGenerator{ "cmake"_s });
 }
 
-bool cmFindPackageCommand::SearchEnvironmentPrefix(
-  std::string const& prefix_in)
+bool cmFindPackageCommand::SearchEnvironmentPrefix(std::string const& prefix)
 {
-  assert(!prefix_in.empty() && prefix_in.back() == '/');
+  assert(!prefix.empty() && prefix.back() == '/');
 
   // Skip this if the prefix does not exist.
-  if (!cmSystemTools::FileIsDirectory(prefix_in)) {
+  if (!cmSystemTools::FileIsDirectory(prefix)) {
     return false;
   }
-
-  // Strip the trailing slash because the path generator is about to
-  // add one.
-  std::string const prefix = prefix_in.substr(0, prefix_in.size() - 1);
 
   auto searchFn = [this](const std::string& fullPath,
                          PackageDescriptionType type) -> bool {

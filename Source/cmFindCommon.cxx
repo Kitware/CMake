@@ -248,19 +248,19 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths,
   // Construct the list of path roots with no trailing slashes.
   cmList roots;
   debugRoot("CMAKE_FIND_ROOT_PATH", rootPath);
-  if (rootPath) {
+  if (cmNonempty(rootPath)) {
     roots.assign(*rootPath);
   }
   debugRoot("CMAKE_SYSROOT_COMPILE", sysrootCompile);
-  if (sysrootCompile) {
+  if (cmNonempty(sysrootCompile)) {
     roots.emplace_back(*sysrootCompile);
   }
   debugRoot("CMAKE_SYSROOT_LINK", sysrootLink);
-  if (sysrootLink) {
+  if (cmNonempty(sysrootLink)) {
     roots.emplace_back(*sysrootLink);
   }
   debugRoot("CMAKE_SYSROOT", sysroot);
-  if (sysroot) {
+  if (cmNonempty(sysroot)) {
     roots.emplace_back(*sysroot);
   }
   for (auto& r : roots) {
