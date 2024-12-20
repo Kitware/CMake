@@ -247,10 +247,9 @@ void cmExportInstallFileGenerator::HandleMissingTarget(
   cmGeneratorTarget* dependee)
 {
   auto const& exportInfo = this->FindExportInfo(dependee);
-  auto const& exportFiles = exportInfo.first;
 
-  if (exportFiles.size() == 1) {
-    std::string missingTarget = exportInfo.second;
+  if (exportInfo.Files.size() == 1) {
+    std::string missingTarget = exportInfo.Namespace;
 
     missingTarget += dependee->GetExportName();
     link_libs += missingTarget;
@@ -258,7 +257,7 @@ void cmExportInstallFileGenerator::HandleMissingTarget(
   } else {
     // All exported targets should be known here and should be unique.
     // This is probably user-error.
-    this->ComplainAboutMissingTarget(depender, dependee, exportFiles);
+    this->ComplainAboutMissingTarget(depender, dependee, exportInfo.Files);
   }
 }
 

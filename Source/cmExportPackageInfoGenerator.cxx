@@ -266,8 +266,8 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
 
   // Target belongs to another export from this build.
   auto const& exportInfo = this->FindExportInfo(linkedTarget);
-  if (exportInfo.first.size() == 1) {
-    auto const& linkNamespace = exportInfo.second;
+  if (exportInfo.Files.size() == 1) {
+    auto const& linkNamespace = exportInfo.Namespace;
     if (!cmHasSuffix(linkNamespace, "::")) {
       target->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,

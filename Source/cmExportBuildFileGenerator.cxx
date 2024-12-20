@@ -139,10 +139,9 @@ void cmExportBuildFileGenerator::HandleMissingTarget(
   // The target is not in the export.
   if (!this->AppendMode) {
     auto const& exportInfo = this->FindExportInfo(dependee);
-    auto const& exportFiles = exportInfo.first;
 
-    if (exportFiles.size() == 1) {
-      std::string missingTarget = exportInfo.second;
+    if (exportInfo.Files.size() == 1) {
+      std::string missingTarget = exportInfo.Namespace;
 
       missingTarget += dependee->GetExportName();
       link_libs += missingTarget;
@@ -151,7 +150,7 @@ void cmExportBuildFileGenerator::HandleMissingTarget(
     }
     // We are not appending, so all exported targets should be
     // known here.  This is probably user-error.
-    this->ComplainAboutMissingTarget(depender, dependee, exportFiles);
+    this->ComplainAboutMissingTarget(depender, dependee, exportInfo.Files);
   }
   // Assume the target will be exported by another command.
   // Append it with the export namespace.
