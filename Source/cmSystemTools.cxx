@@ -1186,6 +1186,76 @@ std::string cmSystemTools::GetComspec()
 
 #endif
 
+// File changes involve removing SETUID/SETGID bits when a file is modified.
+// This behavior is consistent across most Unix-like operating systems.
+class FileModeGuard
+{
+public:
+  FileModeGuard(const std::string& file_path, std::string* emsg);
+  bool Restore(std::string* emsg);
+  bool HasErrors() const;
+
+private:
+#ifndef _WIN32
+  mode_t mode_;
+#endif
+  std::string filepath_;
+};
+
+FileModeGuard::FileModeGuard(const std::string& file_path, std::string* emsg)
+{
+#ifndef _WIN32
+  struct stat file_stat;
+  if (stat(file_path.c_str(), &file_stat) != 0) {
+    if (emsg) {
+      *emsg = cmStrCat("Cannot get file stat: ", strerror(errno));
+    }
+    return;
+  }
+
+  mode_ = file_stat.st_mode;
+#else
+  static_cast<void>(emsg);
+#endif
+  filepath_ = file_path;
+}
+
+bool FileModeGuard::Restore(std::string* emsg)
+{
+  assert(filepath_.empty() == false);
+
+#ifndef _WIN32
+  struct stat file_stat;
+  if (stat(filepath_.c_str(), &file_stat) != 0) {
+    if (emsg) {
+      *emsg = cmStrCat("Cannot get file stat: ", strerror(errno));
+    }
+    return false;
+  }
+
+  // Nothing changed; everything is in the expected state
+  if (file_stat.st_mode == mode_) {
+    return true;
+  }
+
+  if (chmod(filepath_.c_str(), mode_) != 0) {
+    if (emsg) {
+      *emsg = cmStrCat("Cannot restore the file mode: ", strerror(errno));
+    }
+    return false;
+  }
+#else
+  static_cast<void>(emsg);
+#endif
+
+  return true;
+}
+
+bool FileModeGuard::HasErrors() const
+{
+  return filepath_.empty();
+}
+
 std::string cmSystemTools::GetRealPath(const std::string& path,
                                        std::string* errorMessage)
 {
@@ -3256,6 +3326,11 @@ cm::optional<bool> AdjustRPathELF(std::string const& file,
     return cmSystemTools::RemoveRPath(file, emsg, changed);
   }
 
+  FileModeGuard file_mode_guard(file, emsg);
+  if (file_mode_guard.HasErrors()) {
+    return false;
+  }
+
   {
     // Open the file for update.
     cmsys::ofstream f(file.c_str(),
@@ -3293,6 +3368,10 @@ cm::optional<bool> AdjustRPathELF(std::string const& file,
         return false;
       }
     }
+  }
+
+  if (!file_mode_guard.Restore(emsg)) {
+    return false;
   }
 
   // Everything was updated successfully.
@@ -3788,6 +3867,11 @@ static cm::optional<bool> RemoveRPathELF(std::string const& file,
     bytesBegin = elf.GetDynamicEntryPosition(0);
   }
 
+  FileModeGuard file_mode_guard(file, emsg);
+  if (file_mode_guard.HasErrors()) {
+    return false;
+  }
+
   // Open the file for update.
   cmsys::ofstream f(file.c_str(),
                     std::ios::in | std::ios::out | std::ios::binary);
@@ -3831,6 +3915,13 @@ static cm::optional<bool> RemoveRPathELF(std::string const& file,
     }
   }
 
+  // Close the handle to allow further operations on the file
+  f.close();
+
+  if (!file_mode_guard.Restore(emsg)) {
+    return false;
+  }
+
   // Everything was updated successfully.
   if (removed) {
     *removed = true;
@@ -3849,15 +3940,28 @@ static cm::optional<bool> RemoveRPathXCOFF(std::string const& file,
   (void)emsg;
   return cm::nullopt; // Cannot handle XCOFF files.
 #else
-  cmXCOFF xcoff(file.c_str(), cmXCOFF::Mode::ReadWrite);
-  if (!xcoff) {
-    return cm::nullopt; // Not a valid XCOFF file.
+  bool rm = false;
+
+  FileModeGuard file_mode_guard(file, emsg);
+  if (file_mode_guard.HasErrors()) {
+    return false;
   }
-  bool rm = xcoff.RemoveLibPath();
-  if (!xcoff) {
-    if (emsg) {
-      *emsg = xcoff.GetErrorMessage();
+
+  {
+    cmXCOFF xcoff(file.c_str(), cmXCOFF::Mode::ReadWrite);
+    if (!xcoff) {
+      return cm::nullopt; // Not a valid XCOFF file.
     }
+    rm = xcoff.RemoveLibPath();
+    if (!xcoff) {
+      if (emsg) {
+        *emsg = xcoff.GetErrorMessage();
+      }
+      return false;
+    }
+  }
+
+  if (!file_mode_guard.Restore(emsg)) {
     return false;
   }
 
