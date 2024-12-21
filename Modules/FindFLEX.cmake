@@ -217,7 +217,8 @@ if(FLEX_EXECUTABLE)
         VERBATIM
         DEPENDS ${_flex_INPUT}
         COMMENT "[FLEX][${Name}] Building scanner with ${_flex_EXE_NAME_WE} ${FLEX_VERSION}"
-        WORKING_DIRECTORY ${_flex_WORKING_DIR})
+        WORKING_DIRECTORY ${_flex_WORKING_DIR}
+        COMMAND_EXPAND_LISTS)
 
       set(FLEX_${Name}_DEFINED TRUE)
       set(FLEX_${Name}_OUTPUTS ${_flex_TARGET_OUTPUTS})
