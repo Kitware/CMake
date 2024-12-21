@@ -7,19 +7,14 @@ CheckVariableExists
 
 Check if the variable exists.
 
-.. command:: CHECK_VARIABLE_EXISTS
+.. command:: check_variable_exists
 
   .. code-block:: cmake
 
-    CHECK_VARIABLE_EXISTS(VAR VARIABLE)
+    check_variable_exists(<var> <variable>)
 
-
-  ::
-
-    VAR      - the name of the variable
-    VARIABLE - variable to store the result
-               Will be created as an internal cache variable.
-
+  Check if the variable ``<var>`` exists and store the result in an internal
+  cache variable ``<variable>``.
 
   This macro is only for ``C`` variables.
 
