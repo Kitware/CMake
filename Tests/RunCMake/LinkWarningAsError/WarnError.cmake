@@ -1,6 +1,17 @@
 
-if(NOT CMAKE_C_LINK_OPTIONS_WARNING_AS_ERROR)
-  set(linker_WarnError "UNDEFINED")
+set(linkWarning "${link_warning_as_error}")
+if (DEFINED CMAKE_LINK_WARNING_AS_ERROR)
+  set(linkWarning "${CMAKE_LINK_WARNING_AS_ERROR}")
+endif()
+if (linkWarning STREQUAL "ON")
+  set (linkWarning DRIVER LINKER)
+endif()
+
+if((linkWarning STREQUAL "DRIVER;LINKER" AND NOT CMAKE_C_COMPILE_OPTIONS_WARNING_AS_ERROR
+      AND NOT CMAKE_C_LINK_OPTIONS_WARNING_AS_ERROR)
+    OR (linkWarning STREQUAL "DRIVER" AND NOT CMAKE_C_COMPILE_OPTIONS_WARNING_AS_ERROR)
+    OR (linkWarning STREQUAL "LINKER" AND NOT CMAKE_C_LINK_OPTIONS_WARNING_AS_ERROR))
+  set(WarnErrorFlags "UNDEFINED")
 else()
   set(cfg_dir)
   get_property(_isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
@@ -26,8 +37,15 @@ else()
 
   add_dependencies(main dump)
 
-
   # generate reference for WARNING_AS_ERROR flag
+  unset(compiler_WarnError)
+  unset(linker_WarnError)
+  unset(WarnErrorFlags)
+  ## DRIVER
+  if (CMAKE_C_LINK_MODE STREQUAL "DRIVER")
+    list(JOIN CMAKE_C_COMPILE_OPTIONS_WARNING_AS_ERROR " " compiler_WarnError)
+  endif()
+  ## LINKER
   string(REPLACE "LINKER:" "" linker_WarnError "${CMAKE_C_LINK_OPTIONS_WARNING_AS_ERROR}")
   if (CMAKE_C_LINKER_WRAPPER_FLAG)
     set(linker_flag ${CMAKE_C_LINKER_WRAPPER_FLAG})
@@ -50,5 +68,36 @@ else()
   else()
     string(REPLACE "," " " linker_WarnError "${linker_WarnError}")
   endif()
+
+  # Add regex [^-] to avoid matching of MSVC compiler flag -WX-
+  if(linkWarning STREQUAL "DRIVER;LINKER")
+    set(WarnErrorFlags "${compiler_WarnError}")
+    if (WarnErrorFlags)
+      string(APPEND WarnErrorFlags " ${linker_WarnError}[^-]")
+    else()
+      set(WarnErrorFlags "${linker_WarnError}[^-]")
+    endif()
+  elseif(linkWarning STREQUAL "DRIVER")
+    set(WarnErrorFlags "${compiler_WarnError}[^-]")
+  elseif(linkWarning STREQUAL "LINKER")
+    set(WarnErrorFlags "${linker_WarnError}[^-]")
+  else()
+    # OFF value
+    if(compiler_WarnError AND linker_WarnError)
+        set(WarnErrorFlags "(${compiler_WarnError}[^-]|${linker_WarnError}[^-])+")
+    elseif(compiler_WarnError)
+      set(WarnErrorFlags "${compiler_WarnError}[^-]")
+    elseif(linker_WarnError)
+      set(WarnErrorFlags "${linker_WarnError}[^-]")
+    endif()
+    if(NOT WarnErrorFlags)
+      set(WarnErrorFlags "UNDEFINED")
+    endif()
+  endif()
 endif()
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/WARNING_AS_ERROR.txt" "${linker_WarnError}")
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
+  # replace '-' with '/' for options
+  string(REGEX REPLACE "-([A-Z]+)" "[-/]\\1" WarnErrorFlags "${WarnErrorFlags}")
+endif()
+
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/WARNING_AS_ERROR.txt" "${WarnErrorFlags}")

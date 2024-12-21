@@ -508,10 +508,11 @@ add_RunCMake_test(ToolchainFile)
 add_RunCMake_test(find_dependency)
 add_RunCMake_test(CompileDefinitions)
 add_RunCMake_test(CompileWarningAsError -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
-if(CMAKE_C_COMPILER_ID MATCHES "AppleClang|MSVC"
+if((CMAKE_C_COMPILER_ID MATCHES "AppleClang|MSVC"
     OR (CMAKE_SYSTEM_NAME MATCHES "Linux|Windows" AND CMAKE_C_COMPILER_ID MATCHES "Clang|GNU")
     OR (CMAKE_SYSTEM_NAME STREQUAL "SunOS" AND CMAKE_C_COMPILER_ID STREQUAL "SunPro")
     OR (CMAKE_SYSTEM_NAME STREQUAL "AIX" AND CMAKE_C_COMPILER_ID STREQUAL "XL"))
+  AND CMAKE_C_COMPILER_LINKER_ID)
   add_RunCMake_test(LinkWarningAsError)
 endif()
 set_property(TEST RunCMake.CompileWarningAsError APPEND PROPERTY LABELS "CUDA")
