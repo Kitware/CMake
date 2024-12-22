@@ -230,7 +230,7 @@ This module will set the following variables in your project
   The Python preprocessor definitions.
 
 ``Python_DEBUG_POSTFIX``
-  .. versionadded.. 3.30
+  .. versionadded:: 3.30
 
   Postfix of debug python module. This variable can be used to define the
   :prop_tgt:`DEBUG_POSTFIX` target property.
