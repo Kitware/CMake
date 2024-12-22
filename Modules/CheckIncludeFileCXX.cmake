@@ -7,11 +7,11 @@ CheckIncludeFileCXX
 
 Provides a macro to check if a header file can be included in ``CXX``.
 
-.. command:: CHECK_INCLUDE_FILE_CXX
+.. command:: check_include_file_cxx
 
   .. code-block:: cmake
 
-    CHECK_INCLUDE_FILE_CXX(<include> <variable> [<flags>])
+    check_include_file_cxx(<include> <variable> [<flags>])
 
   Check if the given ``<include>`` file may be included in a ``CXX``
   source file and store the result in an internal cache entry named
