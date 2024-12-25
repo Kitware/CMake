@@ -1165,7 +1165,11 @@ function(matlab_add_mex)
     else()
       # If neither C or CXX is enabled, warn because we cannot add the source.
       # TODO: add support for fortran mex files
-      message(WARNING "[MATLAB] matlab_add_mex requires that at least C or CXX are enabled languages")
+      if(DEFINED FORTRANMEX)
+        message("[MATLAB] matlab_add_mex now build fortran mex files")
+      else()
+        message(WARNING "[MATLAB] matlab_add_mex requires that at least C or CXX are enabled languages or set(FORTRANMEX ON)")
+      endif()
     endif()
   endif()
 
@@ -1247,10 +1251,17 @@ function(matlab_add_mex)
 
     if (MSVC)
 
-      string(APPEND _link_flags " /EXPORT:mexFunction")
-      if(NOT Matlab_VERSION_STRING VERSION_LESS "9.1") # For 9.1 (R2016b) and newer, export version
-        string(APPEND _link_flags " /EXPORT:mexfilerequiredapiversion")
-      endif()
+    if(DEFINED FORTRANMEX)
+    string(APPEND _link_flags " /EXPORT:MEXFUNCTION")
+    if(NOT Matlab_VERSION_STRING VERSION_LESS "9.1") # For 9.1 (R2016b) and newer, export version
+    string(APPEND _link_flags " /EXPORT:MEXFILEREQUIREDAPIVERSION")
+    endif()
+  else()
+    string(APPEND _link_flags " /EXPORT:mexFunction")
+    if(NOT Matlab_VERSION_STRING VERSION_LESS "9.1") # For 9.1 (R2016b) and newer, export version
+    string(APPEND _link_flags " /EXPORT:mexfilerequiredapiversion")
+    endif()
+  endif()
 
       set_property(TARGET ${${prefix}_NAME} APPEND PROPERTY LINK_FLAGS ${_link_flags})
 
