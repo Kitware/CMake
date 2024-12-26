@@ -135,7 +135,8 @@ protected:
   struct ExportInfo
   {
     std::vector<std::string> Files;
-    std::string Namespace;
+    std::set<std::string> Sets;
+    std::set<std::string> Namespaces;
   };
 
   /** Find the set of export files and the unique namespace (if any) for a

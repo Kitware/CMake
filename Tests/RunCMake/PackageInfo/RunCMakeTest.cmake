@@ -21,6 +21,8 @@ run_cmake(ReferencesNonExportedTarget)
 run_cmake(ReferencesWronglyExportedTarget)
 run_cmake(ReferencesWronglyImportedTarget)
 run_cmake(ReferencesWronglyNamespacedTarget)
+run_cmake(DependsMultipleDifferentNamespace)
+run_cmake(DependsMultipleDifferentSets)
 
 # Test functionality
 run_cmake(Appendix)
@@ -31,3 +33,4 @@ run_cmake(MinimalVersion)
 run_cmake(LowerCaseFile)
 run_cmake(Requirements)
 run_cmake(TargetTypes)
+run_cmake(DependsMultiple)

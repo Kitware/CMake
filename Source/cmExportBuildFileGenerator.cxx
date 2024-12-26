@@ -140,8 +140,8 @@ void cmExportBuildFileGenerator::HandleMissingTarget(
   if (!this->AppendMode) {
     auto const& exportInfo = this->FindExportInfo(dependee);
 
-    if (exportInfo.Files.size() == 1) {
-      std::string missingTarget = exportInfo.Namespace;
+    if (exportInfo.Namespaces.size() == 1 && exportInfo.Sets.size() == 1) {
+      std::string missingTarget = *exportInfo.Namespaces.begin();
 
       missingTarget += dependee->GetExportName();
       link_libs += missingTarget;
@@ -150,7 +150,7 @@ void cmExportBuildFileGenerator::HandleMissingTarget(
     }
     // We are not appending, so all exported targets should be
     // known here.  This is probably user-error.
-    this->ComplainAboutMissingTarget(depender, dependee, exportInfo.Files);
+    this->ComplainAboutMissingTarget(depender, dependee, exportInfo);
   }
   // Assume the target will be exported by another command.
   // Append it with the export namespace.
@@ -178,42 +178,51 @@ cmExportFileGenerator::ExportInfo cmExportBuildFileGenerator::FindExportInfo(
   cmGeneratorTarget const* target) const
 {
   std::vector<std::string> exportFiles;
-  std::string ns;
+  std::set<std::string> exportSets;
+  std::set<std::string> namespaces;
 
   auto const& name = target->GetName();
-  auto& exportSets =
+  auto& allExportSets =
     target->GetLocalGenerator()->GetGlobalGenerator()->GetBuildExportSets();
 
-  for (auto const& exp : exportSets) {
+  for (auto const& exp : allExportSets) {
     auto const& exportSet = exp.second;
     std::vector<TargetExport> targets;
     exportSet->GetTargets(targets);
     if (std::any_of(
           targets.begin(), targets.end(),
           [&name](TargetExport const& te) { return te.Name == name; })) {
+      exportSets.insert(exp.first);
       exportFiles.push_back(exp.first);
-      ns = exportSet->GetNamespace();
+      namespaces.insert(exportSet->GetNamespace());
     }
   }
 
-  return { exportFiles, exportFiles.size() == 1 ? ns : std::string{} };
+  return { exportFiles, exportSets, namespaces };
 }
 
 void cmExportBuildFileGenerator::ComplainAboutMissingTarget(
   cmGeneratorTarget const* depender, cmGeneratorTarget const* dependee,
-  std::vector<std::string> const& exportFiles) const
+  ExportInfo const& exportInfo) const
 {
   std::ostringstream e;
   e << "export called with target \"" << depender->GetName()
     << "\" which requires target \"" << dependee->GetName() << "\" ";
-  if (exportFiles.empty()) {
+  if (exportInfo.Sets.empty()) {
     e << "that is not in any export set.";
   } else {
-    e << "that is not in this export set, but in multiple other export sets: "
-      << cmJoin(exportFiles, ", ") << ".\n";
-    e << "An exported target cannot depend upon another target which is "
-         "exported multiple times. Consider consolidating the exports of the "
-         "\""
+    if (exportInfo.Sets.size() == 1) {
+      e << "that is not in this export set, but in another export set which "
+           "is "
+           "exported multiple times with different namespaces: ";
+    } else {
+      e << "that is not in this export set, but in multiple other export "
+           "sets: ";
+    }
+    e << cmJoin(exportInfo.Files, ", ") << ".\n"
+      << "An exported target cannot depend upon another target which is "
+         "exported in more than one export set or with more than one "
+         "namespace. Consider consolidating the exports of the \""
       << dependee->GetName() << "\" target to a single export.";
   }
 
