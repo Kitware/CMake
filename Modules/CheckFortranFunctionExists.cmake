@@ -7,11 +7,11 @@ CheckFortranFunctionExists
 
 Check if a Fortran function exists.
 
-.. command:: CHECK_FORTRAN_FUNCTION_EXISTS
+.. command:: check_fortran_function_exists
 
   .. code-block:: cmake
 
-    CHECK_FORTRAN_FUNCTION_EXISTS(<function> <result>)
+    check_fortran_function_exists(<function> <result>)
 
   where
 
