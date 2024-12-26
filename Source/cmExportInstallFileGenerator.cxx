@@ -25,6 +25,7 @@
 #include "cmTarget.h"
 #include "cmTargetExport.h"
 #include "cmValue.h"
+#include "cmake.h"
 
 cmExportInstallFileGenerator::cmExportInstallFileGenerator(
   cmInstallExportGenerator* iegen)
@@ -327,7 +328,9 @@ void cmExportInstallFileGenerator::ComplainAboutDuplicateTarget(
 void cmExportInstallFileGenerator::ReportError(
   std::string const& errorMessage) const
 {
-  cmSystemTools::Error(errorMessage);
+  this->IEGen->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
+    MessageType::FATAL_ERROR, errorMessage,
+    this->IEGen->GetLocalGenerator()->GetMakefile()->GetBacktrace());
 }
 
 std::string cmExportInstallFileGenerator::InstallNameDir(
