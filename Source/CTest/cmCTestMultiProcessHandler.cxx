@@ -723,7 +723,7 @@ void cmCTestMultiProcessHandler::StartNextTestsOnTimer()
   // Wait between 1 and 5 seconds before trying again.
   unsigned int const milliseconds = this->FakeLoadForTesting
     ? 10
-    : (cmSystemTools::RandomSeed() % 5 + 1) * 1000;
+    : (cmSystemTools::RandomNumber() % 5 + 1) * 1000;
   this->StartNextTestsOnTimer_.start(
     [](uv_timer_t* timer) {
       uv_timer_stop(timer);

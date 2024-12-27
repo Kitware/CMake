@@ -211,7 +211,7 @@ bool cmakeCheckStampFile(const std::string& stampName)
   // The build system is up to date.  The stamp file has been removed
   // by the VS IDE due to a "rebuild" request.  Restore it atomically.
   std::ostringstream stampTempStream;
-  stampTempStream << stampName << ".tmp" << cmSystemTools::RandomSeed();
+  stampTempStream << stampName << ".tmp" << cmSystemTools::RandomNumber();
   std::string stampTemp = stampTempStream.str();
   {
     // TODO: Teach cmGeneratedFileStream to use a random temp file (with

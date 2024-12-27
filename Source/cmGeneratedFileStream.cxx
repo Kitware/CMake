@@ -139,7 +139,7 @@ void cmGeneratedFileStreamBase::Open(std::string const& name)
   } else {
     char buf[64];
     snprintf(buf, sizeof(buf), "tmp%05x",
-             cmSystemTools::RandomSeed() & 0xFFFFF);
+             cmSystemTools::RandomNumber() & 0xFFFFF);
     this->TempName += buf;
   }
 

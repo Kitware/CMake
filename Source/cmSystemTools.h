@@ -540,8 +540,9 @@ public:
 
   static void EnsureStdPipes();
 
-  /** Random seed generation.  */
+  /** Random number generation.  */
   static unsigned int RandomSeed();
+  static unsigned int RandomNumber();
 
   /** Find the directory containing CMake executables.  */
   static void FindCMakeResources(const char* argv0);
