@@ -7,21 +7,25 @@ CheckStructHasMember
 
 Check if the given struct or class has the specified member variable
 
-.. command:: CHECK_STRUCT_HAS_MEMBER
+.. command:: check_struct_has_member
 
   .. code-block:: cmake
 
-    CHECK_STRUCT_HAS_MEMBER(<struct> <member> <header> <variable>
+    check_struct_has_member(<struct> <member> <headers> <variable>
                             [LANGUAGE <language>])
 
-  ::
+  Check that the struct or class ``<struct>`` has the specified ``<member>``
+  after including the given header(s) ``<headers>`` where the prototype should
+  be declared. Specify the list of header files in one argument as a
+  semicolon-separated list. The result is stored in an internal cache variable
+  ``<variable>``.
 
-    <struct> - the name of the struct or class you are interested in
-    <member> - the member which existence you want to check
-    <header> - the header(s) where the prototype should be declared
-    <variable> - variable to store the result
-    <language> - the compiler to use (C or CXX)
+  The options are:
 
+  ``LANGUAGE <language>``
+    Use the ``<language>`` compiler to perform the check.
+    Acceptable values are ``C`` and ``CXX``.
+    If not specified, it defaults to ``C``.
 
 The following variables may be set before calling this macro to modify
 the way the check is run:
@@ -40,12 +44,14 @@ the way the check is run:
 
 .. include:: /module/CMAKE_REQUIRED_QUIET.txt
 
-
-Example:
+Example
+^^^^^^^
 
 .. code-block:: cmake
 
-  CHECK_STRUCT_HAS_MEMBER("struct timeval" tv_sec sys/select.h
+  include(CheckStructHasMember)
+
+  check_struct_has_member("struct timeval" tv_sec sys/select.h
                           HAVE_TIMEVAL_TV_SEC LANGUAGE C)
 #]=======================================================================]
 
