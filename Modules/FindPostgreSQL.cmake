@@ -274,7 +274,6 @@ find_package_handle_standard_args(PostgreSQL
                                   REQUIRED_VARS PostgreSQL_LIBRARY PostgreSQL_INCLUDE_DIR
                                   HANDLE_COMPONENTS
                                   VERSION_VAR PostgreSQL_VERSION_STRING)
-set(PostgreSQL_FOUND  ${POSTGRESQL_FOUND})
 
 function(__postgresql_import_library _target _var _config)
   if(_config)

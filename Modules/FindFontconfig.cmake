@@ -80,8 +80,6 @@ endif ()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Fontconfig
-  FOUND_VAR
-    Fontconfig_FOUND
   REQUIRED_VARS
     Fontconfig_LIBRARY
     Fontconfig_INCLUDE_DIR

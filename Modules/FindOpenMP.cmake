@@ -709,8 +709,6 @@ find_package_handle_standard_args(OpenMP
     VERSION_VAR ${_OpenMP_MIN_VERSION}
     HANDLE_COMPONENTS)
 
-set(OPENMP_FOUND ${OpenMP_FOUND})
-
 if(CMAKE_Fortran_COMPILER_LOADED AND OpenMP_Fortran_FOUND)
   if(NOT DEFINED OpenMP_Fortran_HAVE_OMPLIB_MODULE)
     set(OpenMP_Fortran_HAVE_OMPLIB_MODULE FALSE CACHE BOOL INTERNAL "")

@@ -98,7 +98,7 @@ endif()
 set(Backtrace_LIBRARIES ${Backtrace_LIBRARY})
 set(Backtrace_HEADER "${_Backtrace_HEADER_TRY}" CACHE STRING "Header providing backtrace(3) facility")
 
-find_package_handle_standard_args(Backtrace FOUND_VAR Backtrace_FOUND REQUIRED_VARS ${_Backtrace_STD_ARGS})
+find_package_handle_standard_args(Backtrace REQUIRED_VARS ${_Backtrace_STD_ARGS})
 mark_as_advanced(Backtrace_HEADER Backtrace_INCLUDE_DIR Backtrace_LIBRARY)
 
 if(Backtrace_FOUND AND NOT TARGET Backtrace::Backtrace)

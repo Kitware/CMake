@@ -60,8 +60,6 @@ find_library(Libinput_LIBRARY
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Libinput
-  FOUND_VAR
-    Libinput_FOUND
   REQUIRED_VARS
     Libinput_LIBRARY
     Libinput_INCLUDE_DIR
