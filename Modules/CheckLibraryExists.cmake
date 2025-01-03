@@ -7,18 +7,16 @@ CheckLibraryExists
 
 Check once if the function exists in system or specified library.
 
-.. command:: CHECK_LIBRARY_EXISTS
+.. command:: check_library_exists
 
   .. code-block:: cmake
 
-    CHECK_LIBRARY_EXISTS(LIBRARY FUNCTION LOCATION VARIABLE)
+    check_library_exists(<library> <function> <location> <variable>)
 
-  ::
-
-    LIBRARY  - the name of the library you are looking for
-    FUNCTION - the name of the function
-    LOCATION - location where the library should be found
-    VARIABLE - internal cache variable to store the result
+  Check that the library ``<library>`` exists in the given location
+  ``<location>`` and has the specified ``<function>``. The result is stored in
+  an internal cache variable ``<variable>``. If ``<location>`` is empty string,
+  default directories are searched.
 
 Prefer using :module:`CheckSymbolExists` or :module:`CheckSourceCompiles`
 instead of this module for more robust detection if a function is available in
@@ -39,6 +37,42 @@ the way the check is run:
 
 .. include:: /module/CMAKE_REQUIRED_QUIET.txt
 
+Examples
+^^^^^^^^
+
+This module can be useful for performing so-called sanity checks to verify that
+the specified library provides the expected functionality and is indeed the
+correct one being located.
+
+For example, to check if the ``curl`` library exists in the default paths and
+has the ``curl_easy_perform`` function:
+
+.. code-block:: cmake
+
+  include(CheckLibraryExists)
+  check_library_exists(curl curl_easy_perform "" HAVE_LIBRARY_CURL)
+
+To check if library exists in specific non-standard location and has a specified
+function:
+
+.. code-block:: cmake
+
+  include(CheckLibraryExists)
+  check_library_exists(curl curl_easy_perform "/opt/curl/lib" HAVE_LIBRARY_CURL)
+
+Also :ref:`IMPORTED library <add_library imported libraries>` (for example,
+from the ``find_package()`` call) can be used:
+
+.. code-block:: cmake
+
+  find_package(CURL)
+
+  # ...
+
+  if(TARGET CURL::libcurl)
+    include(CheckLibraryExists)
+    check_library_exists(CURL::libcurl curl_easy_perform "" HAVE_LIBRARY_CURL)
+  endif()
 #]=======================================================================]
 
 include_guard(GLOBAL)
