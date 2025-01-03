@@ -532,7 +532,8 @@ function (_PYTHON_GET_CONFIG_VAR _PYTHON_PGCV_VALUE NAME)
     endif()
   endif()
 
-  if (_${_PYTHON_PREFIX}_EXECUTABLE AND NOT CMAKE_CROSSCOMPILING)
+  if ("Interpreter" IN_LIST ${_PYTHON_PREFIX}_FIND_COMPONENTS AND _${_PYTHON_PREFIX}_EXECUTABLE
+      AND NOT CMAKE_CROSSCOMPILING)
     if (NAME STREQUAL "PREFIX")
       execute_process (COMMAND ${_${_PYTHON_PREFIX}_INTERPRETER_LAUNCHER} "${_${_PYTHON_PREFIX}_EXECUTABLE}" -c "import sys\ntry:\n   import sysconfig\n   sys.stdout.write(';'.join([sysconfig.get_config_var('base') or '', sysconfig.get_config_var('installed_base') or '']))\nexcept Exception:\n   from distutils import sysconfig\n   sys.stdout.write(';'.join([sysconfig.PREFIX,sysconfig.EXEC_PREFIX,sysconfig.BASE_EXEC_PREFIX]))"
                        RESULT_VARIABLE _result
