@@ -1,12 +1,12 @@
 {
-	"callbacks" :
-	[
-		"\"@CMAKE_COMMAND@\" -E echo callback1"
-	],
-	"hooks" :
-	[
-		"postGenerate"
-	],
-	"queries" : [],
+  "callbacks" :
+  [
+    "\"@CMAKE_COMMAND@\" -E echo callback1"
+  ],
+  "hooks" :
+  [
+    "postGenerate"
+  ],
+  "queries" : [],
   "version" : 1
 }

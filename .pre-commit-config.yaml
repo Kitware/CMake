@@ -72,3 +72,9 @@ repos:
               )
       - id: mixed-line-ending
       - id: trailing-whitespace
+
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 3.0.0
+    hooks:
+      - id: git-check
+        pass_filenames: false
