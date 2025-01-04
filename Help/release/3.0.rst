@@ -364,8 +364,8 @@ Deprecated and Removed Features
 * The builtin documentation formatters that supported command-line
   options such as ``--help-man`` and ``--help-html`` have been removed
   in favor of the above-mentioned new documentation system.  These and
-  other command-line options that used to generate man- and html-
-  formatted pages no longer work.  The :manual:`cmake(1)`
+  other command-line options that used to generate man- and
+  html- formatted pages no longer work.  The :manual:`cmake(1)`
   ``--help-custom-modules`` option now produces a warning at runtime
   and generates a minimal document that reports the limitation.
 

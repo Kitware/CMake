@@ -1124,8 +1124,8 @@ fields:
 
 ``steps``
   A required array of objects describing the steps of the workflow. The first
-  step must be a configure preset, and all subsequent steps must be non-
-  configure presets whose ``configurePreset`` field matches the starting
+  step must be a configure preset, and all subsequent steps must be
+  non-configure presets whose ``configurePreset`` field matches the starting
   configure preset. Each object may contain the following fields:
 
   ``type``
