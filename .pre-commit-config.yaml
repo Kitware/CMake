@@ -91,3 +91,12 @@ repos:
     hooks:
       - id: codespell
         stages: [commit-msg, pre-commit]
+
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.29.4
+    hooks:
+      - id: typos
+        # NOTE Override hook's default args to prevent automatic
+        # fixing of found typos. Let the dev decide what to fix!
+        args: ['--force-exclude']
+        stages: [commit-msg, pre-commit]
