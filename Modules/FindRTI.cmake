@@ -42,6 +42,7 @@ endmacro()
 
 set(RTI_DEFINITIONS "-DRTI_USES_STD_FSTREAM")
 
+# noqa: spellcheck off
 # Detect the CERTI installation, http://www.cert.fr/CERTI
 # Detect the MAK Technologies RTI installation, http://www.mak.com/products/rti.php
 # note: the following list is ordered to find the most recent version first
@@ -55,6 +56,7 @@ set(RTI_POSSIBLE_DIRS
 set(RTI_OLD_FIND_LIBRARY_PREFIXES "${CMAKE_FIND_LIBRARY_PREFIXES}")
 # The MAK RTI has the "lib" prefix even on Windows.
 set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
+# noqa: spellcheck on
 
 find_library(RTI_LIBRARY
   NAMES RTI RTI-NG

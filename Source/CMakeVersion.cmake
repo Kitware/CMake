@@ -52,9 +52,11 @@ if(NOT CMake_VERSION_NO_GIT)
     set(git_subject "${CMAKE_MATCH_2}")
 
     # If this is not the exact commit of a release, add dev info.
+    # noqa: spellcheck off
     if(NOT "${git_subject}" MATCHES "^[Cc][Mm]ake ${CMake_VERSION}$")
       string(APPEND CMake_VERSION "-g${git_hash}")
     endif()
+    # noqa: spellcheck on
 
     # If this is a work tree, check whether it is dirty.
     if(COMMAND _git)

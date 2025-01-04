@@ -8,6 +8,7 @@ builtin = clear,rare,en-GB_to_en-US
 # Skip paths matching fnmatch glob patterns.
 skip =
   .git,
+  .typos.toml,
   build,
   Copyright.txt,
   CTestCustom.cmake.in,
@@ -20,6 +21,7 @@ skip =
   Utilities/cm*,
   *.pfx,
 
+# noqa: spellcheck off
 ignore-words-list =
   aci,
   ags,
@@ -56,3 +58,4 @@ ignore-words-list =
   varn,
   vas,
   wee,
+# noqa: spellcheck on

@@ -585,6 +585,7 @@
     extends: .fedora41
     script:
         - .gitlab/ci/codespell.bash
+        - .gitlab/ci/typos.bash
     interruptible: true
 
 .cmake_build_linux:

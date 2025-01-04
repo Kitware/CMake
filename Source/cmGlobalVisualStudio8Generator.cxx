@@ -518,8 +518,9 @@ static cmVS7FlagTable cmVS8ExtraFlagTable[] = {
   // Exception handling mode.  If no entries match, it will be FALSE.
   { "ExceptionHandling", "GX", "enable c++ exceptions", "1", 0 },
   { "ExceptionHandling", "EHsc", "enable c++ exceptions", "1", 0 },
+  // noqa: spellcheck off
   { "ExceptionHandling", "EHa", "enable SEH exceptions", "2", 0 },
-
+  // noqa: spellcheck on
   { "EnablePREfast", "analyze", "", "true", 0 },
   { "EnablePREfast", "analyze-", "", "false", 0 },
 

@@ -34,7 +34,7 @@
 #include "cmXMLWriter.h"
 
 static const char* cmCTestErrorMatches[] = {
-  "^[Bb]us [Ee]rror",
+  "^[Bb]us [Ee]rror", // noqa: spellcheck disable-line
   "^[Ss]egmentation [Vv]iolation",
   "^[Ss]egmentation [Ff]ault",
   ":.*[Pp]ermission [Dd]enied",

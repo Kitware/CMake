@@ -626,7 +626,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   xml.StartElement("storageModule");
   xml.Attribute("moduleId", "org.eclipse.cdt.core.settings");
 
-  xml.StartElement("cconfiguration");
+  xml.StartElement("cconfiguration"); // noqa: spellcheck disable-line
   xml.Attribute("id", "org.eclipse.cdt.core.default.config.1");
 
   // Configuration settings...
@@ -1018,7 +1018,9 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
 
   cmExtraEclipseCDT4Generator::AppendStorageScanners(xml, *mf);
 
+  // noqa: spellcheck off
   xml.EndElement(); // cconfiguration
+  // noqa: spellcheck on
   xml.EndElement(); // storageModule
 
   xml.StartElement("storageModule");

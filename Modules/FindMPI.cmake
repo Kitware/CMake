@@ -618,11 +618,13 @@ function (_MPI_interrogate_compiler LANG)
     # At this point, we obtained some output from a compiler wrapper that works.
     # We'll now try to parse it into variables with meaning to us.
     if(LANG STREQUAL "Fortran")
+      # noqa: spellcheck off
       # If MPICH (and derivates) didn't recognize the Fortran compiler include flag during configuration,
       # they'll return a set of three commands, consisting out of a symlink command for mpif.h,
       # the actual compiler command and deletion of the created symlink.
       # Especially with M(VA)PICH-1, this appears to happen erroneously, and therefore we should translate
       # this output into an additional include directory and then drop it from the output.
+      # noqa: spellcheck on
       if(MPI_COMPILE_CMDLINE MATCHES "^ln -s ([^\" ]+|\"[^\"]+\") mpif.h")
         get_filename_component(MPI_INCLUDE_DIRS_WORK "${CMAKE_MATCH_1}" DIRECTORY)
         string(REGEX REPLACE "^ln -s ([^\" ]+|\"[^\"]+\") mpif.h\n" "" MPI_COMPILE_CMDLINE "${MPI_COMPILE_CMDLINE}")
@@ -955,6 +957,7 @@ function(_MPI_guess_settings LANG)
         # Should a user be employing PGI or have built its own set and provided it via cache variables, the
         # splitting routine would have located the module files.
 
+        # noqa: spellcheck off
         # For C and C++, we're done here (MSMPI does not ship the MPI-2 C++ bindings) - however, for Fortran
         # we need some extra library to glue Fortran support together:
         # MSMPI ships 2-4 Fortran libraries, each for different Fortran compiler behaviors. The library names
@@ -964,6 +967,7 @@ function(_MPI_guess_settings LANG)
         # The second difference is the last but one letter, if it's an e(nd), the length of a string argument is
         # passed by the Fortran compiler after all other arguments on the parameter list, if it's an m(ixed),
         # it's passed immediately after the string address.
+        # noqa: spellcheck on
 
         # To summarize:
         #   - msmpifec: CHARACTER length passed after the parameter list and using cdecl calling convention

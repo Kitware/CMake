@@ -389,7 +389,9 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] = {
   { "FloatingPointModel", "fp:strict", "Use strict floating point model", "1",
     0 },
   { "FloatingPointModel", "fp:fast", "Use fast floating point model", "2", 0 },
+  // noqa: spellcheck off
   { "FavorSizeOrSpeed", "Ot", "Favor fast code", "1", 0 },
+  // noqa: spellcheck on
   { "FavorSizeOrSpeed", "Os", "Favor small code", "2", 0 },
   { "CompileAs", "TC", "Compile as c code", "1", 0 },
   { "CompileAs", "TP", "Compile as c++ code", "2", 0 },

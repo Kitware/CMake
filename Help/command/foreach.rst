@@ -105,6 +105,8 @@ iteration variables as follows:
 - if any of the lists are shorter, the corresponding iteration
   variable is not defined for the current iteration.
 
+.. noqa: spellcheck off
+
 .. code-block:: cmake
 
   list(APPEND English one two three four)
@@ -128,6 +130,8 @@ yields::
   -- en=two, ba=dua
   -- en=three, ba=tiga
   -- en=four, ba=
+
+.. noqa: spellcheck on
 
 See Also
 ^^^^^^^^
