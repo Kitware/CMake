@@ -100,3 +100,32 @@ repos:
         # fixing of found typos. Let the dev decide what to fix!
         args: ['--force-exclude']
         stages: [commit-msg, pre-commit]
+
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    # ATTENTION CMake's `clang-format` is version 18.
+    # DO NOT UPDATE THIS VERSION unless officially supported
+    # `clang-format` get bumped.
+    rev: v18.1.8
+    hooks:
+      - id: clang-format
+        types_or: [c, c++, cuda]
+        exclude_types: [objective-c++]
+        # The following exclude list based on the output of:
+        #  $ git ls-files | git check-attr --stdin format.clang-format | grep ...
+        # and
+        #  $ find -name .gitattributes -exec grep -Hn clang-format {} +
+        exclude: >-
+            (?x)(
+                Source/LexerParser
+              | Tests/(
+                    CSharpLinkFromCxx/UsefulManagedCppClass.*
+                  | CompileFeatures/cxx_right_angle_brackets\.cpp
+                  | PositionIndependentTargets/pic_test\.h
+                  | RunCMake/(
+                        CommandLine/cmake_depends/test_UTF-16LE\.h
+                      | CXXModules/examples/circular/circular-[ab]\.cppm
+                      | GenerateExportHeader/reference
+                      )
+                  | VSWinStorePhone/Direct3DApp1/Direct3DApp1\.cpp
+                  )
+              )
