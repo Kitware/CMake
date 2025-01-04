@@ -33,3 +33,4 @@ repos:
     hooks:
       - id: check-case-conflict
       - id: mixed-line-ending
+      - id: trailing-whitespace
