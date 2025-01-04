@@ -78,3 +78,10 @@ repos:
     hooks:
       - id: git-check
         pass_filenames: false
+
+  - repo: https://github.com/sphinx-contrib/sphinx-lint
+    rev: v1.0.0
+    hooks:
+      - id: sphinx-lint
+        # NOTE Looks like `bad-dedent` gives too many false-positives.
+        args: ['--disable', 'bad-dedent']
