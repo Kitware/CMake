@@ -1,0 +1,34 @@
+# Read the docs here: https://pre-commit.com
+# List of some available hooks: https://pre-commit.com/hooks.html
+#
+# Install `pre-commit`:
+#
+#   $ pip install pre-commit
+#
+# Install hooks to your clone:
+#   $ pre-commit install
+#
+
+default_stages: [pre-commit]
+default_install_hook_types: [pre-commit]
+fail_fast: false
+# NOTE Exclude third-party sources and some files globally.
+# See `Utilities/Scripts/update-*.bash` scripts and
+# https://pre-commit.com/#regular-expressions
+exclude: >-
+    (?x)Auxiliary/vim
+      | Licenses/.*\.txt$
+      | Source/(CursesDialog/form|kwsys)
+      | Utilities/(cm.*|GitSetup|KWIML)
+      | .*\.patch$
+
+repos:
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-case-conflict
