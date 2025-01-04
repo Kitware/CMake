@@ -32,3 +32,4 @@ repos:
     rev: v5.0.0
     hooks:
       - id: check-case-conflict
+      - id: mixed-line-ending
