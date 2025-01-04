@@ -32,6 +32,13 @@ repos:
     rev: v5.0.0
     hooks:
       - id: check-case-conflict
+      - id: check-json
+        # NOTE Some tests have intentionally broken JSONs.
+        exclude: >-
+            (?x)Tests/(
+                CMakeLib/testCTestResourceSpec_data/spec13
+              | RunCMake/CTestResourceAllocation/invalid
+              )\.json
       - id: check-yaml
       - id: mixed-line-ending
       - id: trailing-whitespace
