@@ -523,6 +523,21 @@ if(CMake_TEST_FindPython2 OR CMake_TEST_FindPython3)
                APPEND PROPERTY LABELS Python2 Python3)
 endif()
 
+if(CMake_TEST_FindPython2 AND CMake_TEST_FindPython3)
+  add_test(NAME FindPython.ArtifactsPrefix COMMAND
+    ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/FindPython/ArtifactsPrefix"
+    "${CMake_BINARY_DIR}/Tests/FindPython/ArtifactsPrefix"
+    ${build_generator_args}
+    --build-project TestArtifactsPrefix
+    --build-options ${build_options}
+    --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
+    )
+
+  set_property(TEST FindPython.ArtifactsPrefix
+               APPEND PROPERTY LABELS Python2 Python3)
+endif()
 
 if(CMake_TEST_FindPython2_SABIModule)
   add_test(NAME FindPython.Python2.Development.SABIModule COMMAND
