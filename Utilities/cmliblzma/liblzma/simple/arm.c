@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: 0BSD
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 /// \file       arm.c
@@ -5,9 +7,6 @@
 ///
 //  Authors:    Igor Pavlov
 //              Lasse Collin
-//
-//  This file has been put into the public domain.
-//  You can do whatever you want with this file.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -53,6 +52,7 @@ arm_coder_init(lzma_next_coder *next, const lzma_allocator *allocator,
 }
 
 
+#ifdef HAVE_ENCODER_ARM
 extern lzma_ret
 lzma_simple_arm_encoder_init(lzma_next_coder *next,
 		const lzma_allocator *allocator,
@@ -60,8 +60,10 @@ lzma_simple_arm_encoder_init(lzma_next_coder *next,
 {
 	return arm_coder_init(next, allocator, filters, true);
 }
+#endif
 
 
+#ifdef HAVE_DECODER_ARM
 extern lzma_ret
 lzma_simple_arm_decoder_init(lzma_next_coder *next,
 		const lzma_allocator *allocator,
@@ -69,3 +71,4 @@ lzma_simple_arm_decoder_init(lzma_next_coder *next,
 {
 	return arm_coder_init(next, allocator, filters, false);
 }
+#endif

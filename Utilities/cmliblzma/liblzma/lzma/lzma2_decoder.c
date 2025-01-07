@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: 0BSD
+
 ///////////////////////////////////////////////////////////////////////////////
 //
 /// \file       lzma2_decoder.c
@@ -5,9 +7,6 @@
 ///
 //  Authors:    Igor Pavlov
 //              Lasse Collin
-//
-//  This file has been put into the public domain.
-//  You can do whatever you want with this file.
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -139,7 +138,7 @@ lzma2_decode(void *coder_ptr, lzma_dict *restrict dict,
 		coder->uncompressed_size += in[(*in_pos)++] + 1U;
 		coder->sequence = SEQ_COMPRESSED_0;
 		coder->lzma.set_uncompressed(coder->lzma.coder,
-				coder->uncompressed_size);
+				coder->uncompressed_size, false);
 		break;
 
 	case SEQ_COMPRESSED_0:
@@ -226,7 +225,8 @@ lzma2_decoder_end(void *coder_ptr, const lzma_allocator *allocator)
 
 static lzma_ret
 lzma2_decoder_init(lzma_lz_decoder *lz, const lzma_allocator *allocator,
-		const void *opt, lzma_lz_options *lz_options)
+		lzma_vli id lzma_attribute((__unused__)), const void *opt,
+		lzma_lz_options *lz_options)
 {
 	lzma_lzma2_coder *coder = lz->coder;
 	if (coder == NULL) {
