@@ -37,7 +37,7 @@ Synopsis
 
   `Filesystem`_
     file({`GLOB`_ | `GLOB_RECURSE`_} <out-var> [...] <globbing-expr>...)
-    file(`MAKE_DIRECTORY`_ <directories>...)
+    file(`MAKE_DIRECTORY`_ <directories>... [...])
     file({`REMOVE`_ | `REMOVE_RECURSE`_ } <files>...)
     file(`RENAME`_ <oldname> <newname> [...])
     file(`COPY_FILE`_ <oldname> <newname> [...])
