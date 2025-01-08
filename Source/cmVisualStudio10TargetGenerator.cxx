@@ -1013,6 +1013,7 @@ void cmVisualStudio10TargetGenerator::WriteSdkStyleProjectFile(
   this->WriteXamlFilesGroup(e0);
   this->WriteDotNetReferences(e0);
   this->WritePackageReferences(e0);
+  this->WriteImports(e0);
   this->WriteProjectReferences(e0);
 }
 
