@@ -951,6 +951,9 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule(
   if (!this->GlobalSettingIsOn("CMAKE_SUPPRESS_REGENERATION")) {
     lg->AppendEcho(commands, "... depend");
   }
+  if (this->CheckCMP0171()) {
+    lg->AppendEcho(commands, "... codegen");
+  }
 
   // Keep track of targets already listed.
   std::set<std::string> emittedTargets;
