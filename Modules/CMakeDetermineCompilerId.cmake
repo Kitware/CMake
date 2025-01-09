@@ -858,7 +858,9 @@ ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
       string(APPEND _CMAKE_${lang}_COMPILER_ID_LOG "${MSG}")
     endif()
 
-    string(APPEND _CMAKE_DETERMINE_COMPILER_ID_BUILD_MSG "${MSG}")
+    # Display in reverse order so that attempts with user flags
+    # won't be lost due to console limits / scrollback
+    string(PREPEND _CMAKE_DETERMINE_COMPILER_ID_BUILD_MSG "${MSG}")
 
     # Some languages may know the correct/desired set of flags and want to fail right away if they don't work.
     # This is currently only used by CUDA.
