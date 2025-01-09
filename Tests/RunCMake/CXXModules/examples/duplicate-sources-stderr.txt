@@ -1,0 +1,8 @@
+CMake Warning \(dev\) in CMakeLists.txt:
+  Target "duplicate_sources" has source file
+
+    [^
+]*/Tests/RunCMake/CXXModules/examples/duplicate-sources/duplicate.cxx
+
+  in a "FILE_SET TYPE CXX_MODULES" multiple times.
+This warning is for project developers.  Use -Wno-dev to suppress it.
