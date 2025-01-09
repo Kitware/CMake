@@ -330,7 +330,27 @@ if(BISON_EXECUTABLE)
       endif()
       unset(_BISON_CMP0088)
 
+      # Bison cannot create output directories. Create any missing determined
+      # directories where the files will be generated if they don't exist yet.
+      set(_BisonMakeDirectoryCommand "")
+      foreach(output IN LISTS BISON_TARGET_outputs)
+        cmake_path(GET output PARENT_PATH dir)
+        if(dir)
+          list(APPEND _BisonMakeDirectoryCommand ${dir})
+        endif()
+        unset(dir)
+      endforeach()
+      if(_BisonMakeDirectoryCommand)
+        list(REMOVE_DUPLICATES _BisonMakeDirectoryCommand)
+        list(
+          PREPEND
+          _BisonMakeDirectoryCommand
+          COMMAND ${CMAKE_COMMAND} -E make_directory
+        )
+      endif()
+
       add_custom_command(OUTPUT ${BISON_TARGET_outputs}
+        ${_BisonMakeDirectoryCommand}
         COMMAND ${BISON_EXECUTABLE} ${BISON_TARGET_cmdopt} -o ${BisonOutput} ${_BisonInput}
         VERBATIM
         DEPENDS ${_BisonInput}
@@ -350,7 +370,7 @@ if(BISON_EXECUTABLE)
       set(BISON_${Name}_OUTPUT_HEADER "${BISON_TARGET_output_header}")
 
       unset(_BisonInput)
-
+      unset(_BisonMakeDirectoryCommand)
     endif()
   endmacro()
   #

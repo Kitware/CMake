@@ -268,8 +268,28 @@ if(FLEX_EXECUTABLE)
         list(APPEND _flex_EXE_OPTS --header-file=${_flex_OUTPUT_HEADER_ABS})
       endif()
 
+      # Flex cannot create output directories. Create any missing determined
+      # directories where the files will be generated if they don't exist yet.
+      set(_flex_MAKE_DIRECTORY_COMMAND "")
+      foreach(output IN LISTS _flex_TARGET_OUTPUTS)
+        cmake_path(GET output PARENT_PATH dir)
+        if(dir)
+          list(APPEND _flex_MAKE_DIRECTORY_COMMAND ${dir})
+        endif()
+        unset(dir)
+      endforeach()
+      if(_flex_MAKE_DIRECTORY_COMMAND)
+        list(REMOVE_DUPLICATES _flex_MAKE_DIRECTORY_COMMAND)
+        list(
+          PREPEND
+          _flex_MAKE_DIRECTORY_COMMAND
+          COMMAND ${CMAKE_COMMAND} -E make_directory
+        )
+      endif()
+
       get_filename_component(_flex_EXE_NAME_WE "${FLEX_EXECUTABLE}" NAME_WE)
       add_custom_command(OUTPUT ${_flex_TARGET_OUTPUTS}
+        ${_flex_MAKE_DIRECTORY_COMMAND}
         COMMAND ${FLEX_EXECUTABLE} ${_flex_EXE_OPTS} -o${_flex_OUTPUT} ${_flex_INPUT}
         VERBATIM
         DEPENDS ${_flex_INPUT}
@@ -287,12 +307,12 @@ if(FLEX_EXECUTABLE)
       unset(_flex_EXE_NAME_WE)
       unset(_flex_EXE_OPTS)
       unset(_flex_INPUT)
+      unset(_flex_MAKE_DIRECTORY_COMMAND)
       unset(_flex_OUTPUT)
       unset(_flex_OUTPUT_HEADER)
       unset(_flex_OUTPUT_HEADER_ABS)
       unset(_flex_TARGET_OUTPUTS)
       unset(_flex_WORKING_DIR)
-
     endif()
   endmacro()
   #============================================================
