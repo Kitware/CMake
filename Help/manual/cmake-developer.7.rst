@@ -470,7 +470,6 @@ rest of the work for us
 
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(Foo
-    FOUND_VAR Foo_FOUND
     REQUIRED_VARS
       Foo_LIBRARY
       Foo_INCLUDE_DIR

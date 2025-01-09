@@ -165,5 +165,4 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Subversion REQUIRED_VARS Subversion_SVN_EXECUT
                                              VERSION_VAR Subversion_VERSION_SVN )
 
 # for compatibility
-set(Subversion_FOUND ${SUBVERSION_FOUND})
 set(Subversion_SVN_FOUND ${SUBVERSION_FOUND})

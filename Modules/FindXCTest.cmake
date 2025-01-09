@@ -103,7 +103,6 @@ endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(XCTest
-  FOUND_VAR XCTest_FOUND
   REQUIRED_VARS XCTest_LIBRARY XCTest_INCLUDE_DIR XCTest_EXECUTABLE)
 
 if(XCTest_FOUND)

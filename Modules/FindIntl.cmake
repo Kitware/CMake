@@ -162,7 +162,6 @@ endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Intl
-                                  FOUND_VAR Intl_FOUND
                                   REQUIRED_VARS ${_Intl_REQUIRED_VARS}
                                   VERSION_VAR Intl_VERSION
                                   FAIL_MESSAGE "Failed to find Gettext libintl")

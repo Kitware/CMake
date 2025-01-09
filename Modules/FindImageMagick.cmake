@@ -327,8 +327,6 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(ImageMagick
                                   REQUIRED_VARS ${ImageMagick_REQUIRED_VARS}
                                   VERSION_VAR ImageMagick_VERSION_STRING
   )
-# Maintain consistency with all other variables.
-set(ImageMagick_FOUND ${IMAGEMAGICK_FOUND})
 
 #---------------------------------------------------------------------
 # DEPRECATED: Setting variables for backward compatibility.

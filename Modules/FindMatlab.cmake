@@ -2079,7 +2079,6 @@ set(Matlab_VERSION ${Matlab_VERSION_STRING})
 
 find_package_handle_standard_args(
   Matlab
-  FOUND_VAR Matlab_FOUND
   REQUIRED_VARS ${_matlab_required_variables}
   VERSION_VAR Matlab_VERSION
   HANDLE_VERSION_RANGE

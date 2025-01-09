@@ -98,7 +98,7 @@ if(LTTNGUST_INCLUDE_DIRS AND LTTNGUST_LIBRARIES)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-find_package_handle_standard_args(LTTngUST FOUND_VAR LTTNGUST_FOUND
+find_package_handle_standard_args(LTTngUST
                                   REQUIRED_VARS LTTNGUST_LIBRARIES
                                                 LTTNGUST_INCLUDE_DIRS
                                   VERSION_VAR LTTNGUST_VERSION_STRING)

@@ -122,7 +122,6 @@ endif ()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(OpenSP
-  FOUND_VAR OpenSP_FOUND
   REQUIRED_VARS OpenSP_LIBRARY OpenSP_INCLUDE_DIR
   VERSION_VAR OpenSP_VERSION
   )
