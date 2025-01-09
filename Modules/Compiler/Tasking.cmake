@@ -28,7 +28,7 @@ macro(__compiler_tasking lang)
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Wl" " ")
   set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "-f ")
   set(CMAKE_DEPFILE_FLAGS_${lang} "--dep-file=<DEP_FILE>")
-  set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "--warning-as-errors")
+  set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "--warnings-as-errors")
 
   string(APPEND CMAKE_${lang}_FLAGS_INIT " ")
   string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -O0 -g")
