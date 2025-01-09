@@ -226,7 +226,7 @@ macro(_FPHSA_FAILURE_MESSAGE _msg)
   set(__msg "${_msg}")
   if(FPHSA_REASON_FAILURE_MESSAGE)
     string(APPEND __msg "\n    Reason given by package: ${FPHSA_REASON_FAILURE_MESSAGE}\n")
-  elseif(NOT DEFINED PROJECT_NAME)
+  elseif(NOT DEFINED PROJECT_NAME AND NOT CMAKE_SCRIPT_MODE_FILE)
     string(APPEND __msg "\n"
       "Hint: The project() command has not yet been called.  It sets up system-specific search paths.")
   endif()
