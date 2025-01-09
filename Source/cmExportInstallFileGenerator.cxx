@@ -25,6 +25,7 @@
 #include "cmTarget.h"
 #include "cmTargetExport.h"
 #include "cmValue.h"
+#include "cmake.h"
 
 cmExportInstallFileGenerator::cmExportInstallFileGenerator(
   cmInstallExportGenerator* iegen)
@@ -247,10 +248,9 @@ void cmExportInstallFileGenerator::HandleMissingTarget(
   cmGeneratorTarget* dependee)
 {
   auto const& exportInfo = this->FindExportInfo(dependee);
-  auto const& exportFiles = exportInfo.first;
 
-  if (exportFiles.size() == 1) {
-    std::string missingTarget = exportInfo.second;
+  if (exportInfo.Namespaces.size() == 1 && exportInfo.Sets.size() == 1) {
+    std::string missingTarget = *exportInfo.Namespaces.begin();
 
     missingTarget += dependee->GetExportName();
     link_libs += missingTarget;
@@ -258,7 +258,7 @@ void cmExportInstallFileGenerator::HandleMissingTarget(
   } else {
     // All exported targets should be known here and should be unique.
     // This is probably user-error.
-    this->ComplainAboutMissingTarget(depender, dependee, exportFiles);
+    this->ComplainAboutMissingTarget(depender, dependee, exportInfo);
   }
 }
 
@@ -266,13 +266,14 @@ cmExportFileGenerator::ExportInfo cmExportInstallFileGenerator::FindExportInfo(
   cmGeneratorTarget const* target) const
 {
   std::vector<std::string> exportFiles;
-  std::string ns;
+  std::set<std::string> exportSets;
+  std::set<std::string> namespaces;
 
   auto const& name = target->GetName();
-  auto& exportSets =
+  auto& allExportSets =
     target->GetLocalGenerator()->GetGlobalGenerator()->GetExportSets();
 
-  for (auto const& exp : exportSets) {
+  for (auto const& exp : allExportSets) {
     auto const& exportSet = exp.second;
     auto const& targets = exportSet.GetTargetExports();
 
@@ -280,35 +281,43 @@ cmExportFileGenerator::ExportInfo cmExportInstallFileGenerator::FindExportInfo(
                     [&name](std::unique_ptr<cmTargetExport> const& te) {
                       return te->TargetName == name;
                     })) {
+      exportSets.insert(exp.first);
       std::vector<cmInstallExportGenerator const*> const* installs =
         exportSet.GetInstallations();
       for (cmInstallExportGenerator const* install : *installs) {
         exportFiles.push_back(install->GetDestinationFile());
-        ns = install->GetNamespace();
+        namespaces.insert(install->GetNamespace());
       }
     }
   }
-
-  return { exportFiles, exportFiles.size() == 1 ? ns : std::string{} };
+  return { exportFiles, exportSets, namespaces };
 }
 
 void cmExportInstallFileGenerator::ComplainAboutMissingTarget(
   cmGeneratorTarget const* depender, cmGeneratorTarget const* dependee,
-  std::vector<std::string> const& exportFiles) const
+  ExportInfo const& exportInfo) const
 {
   std::ostringstream e;
   e << "install(" << this->IEGen->InstallSubcommand() << " \""
     << this->GetExportName() << "\" ...) "
     << "includes target \"" << depender->GetName()
     << "\" which requires target \"" << dependee->GetName() << "\" ";
-  if (exportFiles.empty()) {
+  if (exportInfo.Sets.empty()) {
     e << "that is not in any export set.";
   } else {
-    e << "that is not in this export set, but in multiple other export sets: "
-      << cmJoin(exportFiles, ", ") << ".\n";
-    e << "An exported target cannot depend upon another target which is "
-         "exported multiple times. Consider consolidating the exports of the "
-         "\""
+    if (exportInfo.Sets.size() == 1) {
+      e << "that is not in this export set, but in another export set which "
+           "is "
+           "exported multiple times with different namespaces: ";
+    } else {
+      e << "that is not in this export set, but in multiple other export "
+           "sets: ";
+    }
+    e << cmJoin(exportInfo.Files, ", ") << ".\n"
+      << "An exported target cannot depend upon another target which is "
+         "exported in more than one export set or with more than one "
+         "namespace. "
+         "Consider consolidating the exports of the \""
       << dependee->GetName() << "\" target to a single export.";
   }
   this->ReportError(e.str());
@@ -328,7 +337,9 @@ void cmExportInstallFileGenerator::ComplainAboutDuplicateTarget(
 void cmExportInstallFileGenerator::ReportError(
   std::string const& errorMessage) const
 {
-  cmSystemTools::Error(errorMessage);
+  this->IEGen->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
+    MessageType::FATAL_ERROR, errorMessage,
+    this->IEGen->GetLocalGenerator()->GetMakefile()->GetBacktrace());
 }
 
 std::string cmExportInstallFileGenerator::InstallNameDir(

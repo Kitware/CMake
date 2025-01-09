@@ -264,10 +264,10 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
     return true;
   }
 
-  // Target belongs to another export from this build.
+  // Target belongs to multiple namespaces or multiple export sets.
   auto const& exportInfo = this->FindExportInfo(linkedTarget);
-  if (exportInfo.first.size() == 1) {
-    auto const& linkNamespace = exportInfo.second;
+  if (exportInfo.Namespaces.size() == 1 && exportInfo.Sets.size() == 1) {
+    auto const& linkNamespace = *exportInfo.Namespaces.begin();
     if (!cmHasSuffix(linkNamespace, "::")) {
       target->Makefile->IssueMessage(
         MessageType::FATAL_ERROR,
@@ -293,7 +293,7 @@ bool cmExportPackageInfoGenerator::NoteLinkedTarget(
   }
 
   // cmExportFileGenerator::HandleMissingTarget should have complained about
-  // this already. (In fact, we probably shouldn't ever get here.)
+  // this already.
   return false;
 }
 

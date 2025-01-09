@@ -1,0 +1,19 @@
+CMake Error in CMakeLists.txt:
+  install\(EXPORT "bar" ...\) includes target "bar" which requires target "foo"
+  that is not in this export set, but in another export set which is exported
+  multiple times with different namespaces: cmake/foo.cmake, cps/foo.cps.
+
+  An exported target cannot depend upon another target which is exported in
+  more than one export set or with more than one namespace.  Consider
+  consolidating the exports of the "foo" target to a single export.
+
+
+CMake Error in CMakeLists.txt:
+  install\(PACKAGE_INFO "bar" ...\) includes target "bar" which requires target
+  "foo" that is not in this export set, but in another export set which is
+  exported multiple times with different namespaces: cmake/foo.cmake,
+  cps/foo.cps.
+
+  An exported target cannot depend upon another target which is exported in
+  more than one export set or with more than one namespace.  Consider
+  consolidating the exports of the "foo" target to a single export.

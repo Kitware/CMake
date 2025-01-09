@@ -47,7 +47,7 @@ protected:
 
   ExportInfo FindExportInfo(cmGeneratorTarget const* /*target*/) const override
   {
-    return { {}, {} };
+    return { {}, {}, {} };
   }
 
   void PopulateProperties(cmGeneratorTarget const* target,

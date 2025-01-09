@@ -79,9 +79,9 @@ protected:
                            cmGeneratorTarget const* depender,
                            cmGeneratorTarget* dependee) override;
 
-  void ComplainAboutMissingTarget(
-    cmGeneratorTarget const* depender, cmGeneratorTarget const* dependee,
-    std::vector<std::string> const& exportFiles) const;
+  void ComplainAboutMissingTarget(cmGeneratorTarget const* depender,
+                                  cmGeneratorTarget const* dependee,
+                                  ExportInfo const& exportInfo) const;
 
   void ComplainAboutDuplicateTarget(
     std::string const& targetName) const override;

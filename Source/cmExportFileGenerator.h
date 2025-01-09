@@ -8,7 +8,6 @@
 #include <map>
 #include <set>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <cm/string_view>
@@ -133,7 +132,12 @@ protected:
 
   virtual void ReportError(std::string const& errorMessage) const = 0;
 
-  using ExportInfo = std::pair<std::vector<std::string>, std::string>;
+  struct ExportInfo
+  {
+    std::vector<std::string> Files;
+    std::set<std::string> Sets;
+    std::set<std::string> Namespaces;
+  };
 
   /** Find the set of export files and the unique namespace (if any) for a
    *  target. */

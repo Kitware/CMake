@@ -4,9 +4,10 @@ CMake Error in CMakeLists.txt:
   .*/Tests/RunCMake/export/DependOnDoubleExport-build/exportset.cmake,.*
   .*/Tests/RunCMake/export/DependOnDoubleExport-build/manual.cmake.
 +
-  An exported target cannot depend upon another target which is exported
-  multiple times.  Consider consolidating the exports of the "doubleexported"
-  target to a single export.
+  An exported target cannot depend upon another target which is exported in
+  more than one export set or with more than one namespace.  Consider
+  consolidating the exports of the "doubleexported" target to a single
+  export.
 
 
 CMake Generate step failed.  Build files cannot be regenerated correctly.
