@@ -30,6 +30,8 @@ macro(__compiler_tasking lang)
   set(CMAKE_DEPFILE_FLAGS_${lang} "--dep-file=<DEP_FILE>")
   set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "--warning-as-errors")
 
+  set(CMAKE_${lang}_LINK_MODE DRIVER)
+
   string(APPEND CMAKE_${lang}_FLAGS_INIT " ")
   string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -O0 -g")
   string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -O2 -t4 -DNDEBUG")

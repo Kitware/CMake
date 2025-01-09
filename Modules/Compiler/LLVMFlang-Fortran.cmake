@@ -18,8 +18,12 @@ set(CMAKE_Fortran_COMPILE_OPTIONS_TARGET "--target=")
 set(CMAKE_Fortran_LINKER_WRAPPER_FLAG "-Wl,")
 set(CMAKE_Fortran_LINKER_WRAPPER_FLAG_SEP ",")
 
-if(NOT "x${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "xMSVC")
+if("x${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "xMSVC")
+  set(CMAKE_Fortran_LINK_MODE LINKER)
+else()
   set(CMAKE_Fortran_VERBOSE_FLAG "-v")
+
+  set(CMAKE_Fortran_LINK_MODE DRIVER)
 
   string(APPEND CMAKE_Fortran_FLAGS_DEBUG_INIT " -O0 -g")
   string(APPEND CMAKE_Fortran_FLAGS_RELWITHDEBINFO_INIT " -O2 -g")

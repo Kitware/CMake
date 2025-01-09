@@ -18,6 +18,8 @@ if(CMAKE_HOST_WIN32)
     else()
       set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-Werror-all")
     endif()
+
+    set(CMAKE_${lang}_LINK_MODE LINKER)
   endmacro()
 else()
   # GNU-like
@@ -57,5 +59,7 @@ else()
       # COMPILE_WARNING_AS_ERROR
       set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-Werror-all")
     endif()
+
+    set(CMAKE_${lang}_LINK_MODE DRIVER)
   endmacro()
 endif()

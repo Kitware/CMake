@@ -23,6 +23,8 @@ macro(__compiler_ticlang lang)
 
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Xlinker" " ")
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP)
+
+  set(CMAKE_${lang}_LINK_MODE DRIVER)
 endmacro()
 
 set(CMAKE_EXECUTABLE_SUFFIX ".out")

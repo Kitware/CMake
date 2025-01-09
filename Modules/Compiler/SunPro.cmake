@@ -11,4 +11,6 @@ include(Compiler/CMakeCommonCompilerMacros)
 
 macro(__compiler_sunpro lang)
   set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-errwarn=%all")
+
+  set(CMAKE_${lang}_LINK_MODE DRIVER)
 endmacro()

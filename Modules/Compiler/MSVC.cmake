@@ -22,4 +22,6 @@ macro(__compiler_msvc lang)
     set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-external:I")
     set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang}_WARNING "-external:W0 ")
   endif ()
+
+  set(CMAKE_${lang}_LINK_MODE LINKER)
 endmacro()

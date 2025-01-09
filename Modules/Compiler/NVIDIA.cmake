@@ -155,6 +155,12 @@ macro(__compiler_nvidia_cuda_flags lang)
     set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP)
   endif()
 
+  if (CMAKE_${lang}_SIMULATE_ID STREQUAL "MSVC")
+    set(CMAKE_${lang}_LINK_MODE LINKER)
+  else()
+    set(CMAKE_${lang}_LINK_MODE DRIVER)
+  endif()
+
   set(CMAKE_${lang}_RUNTIME_LIBRARY_LINK_OPTIONS_STATIC  "cudadevrt;cudart_static")
   set(CMAKE_${lang}_RUNTIME_LIBRARY_LINK_OPTIONS_SHARED  "cudadevrt;cudart")
   set(CMAKE_${lang}_RUNTIME_LIBRARY_LINK_OPTIONS_NONE    "")

@@ -21,6 +21,8 @@ macro(__compiler_iar_common lang)
     string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -Oh -DNDEBUG")
     string(APPEND CMAKE_${lang}_FLAGS_MINSIZEREL_INIT " -Ohz -DNDEBUG")
     string(APPEND CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT " -Oh -r -DNDEBUG")
+
+    set(CMAKE_${lang}_LINK_MODE LINKER)
   endif()
 
   set(CMAKE_${lang}_OUTPUT_EXTENSION_REPLACE 1)

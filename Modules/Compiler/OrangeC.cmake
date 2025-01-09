@@ -12,6 +12,8 @@ macro(__compiler_orangec lang)
   set(CMAKE_${lang}_DEPFILE_FORMAT gcc)
   set(CMAKE_${lang}_DEPENDS_USE_COMPILER TRUE)
 
+  set(CMAKE_${lang}_LINK_MODE DRIVER)
+
   string(APPEND CMAKE_${lang}_FLAGS_INIT " ")
   string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -g")
   string(APPEND CMAKE_${lang}_FLAGS_RELEASE_INIT " -O2 -DNDEBUG")

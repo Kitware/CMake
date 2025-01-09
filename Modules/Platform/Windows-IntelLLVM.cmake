@@ -12,6 +12,8 @@ if(CMAKE_GENERATOR MATCHES "Visual Studio")
   # MSBuild invokes the "link" tool directly.
   set(_IntelLLVM_LINKER_WRAPPER_FLAG "")
   set(_IntelLLVM_LINKER_WRAPPER_FLAG_SEP "")
+
+  set(CMAKE_${lang}_LINK_MODE LINKER)
 else()
   # Our rules below drive linking through the compiler front-end.
   # Wrap flags meant for the linker.
