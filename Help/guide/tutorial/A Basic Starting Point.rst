@@ -319,6 +319,7 @@ Files to Edit
 
 * ``CMakeLists.txt``
 * ``tutorial.cxx``
+* ``TutorialConfig.h.in``
 
 Getting Started
 ---------------
