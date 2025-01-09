@@ -1516,7 +1516,7 @@ Configuration settings include:
 
   * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE_PASSWORD`
   * :module:`CTest` module variable: ``DROP_SITE_PASSWORD`` if set,
-    else ``CTEST_DROP_SITE_PASWORD``
+    else ``CTEST_DROP_SITE_PASSWORD``
 
 ``DropSiteUser``
   Legacy option.  When ``SubmitURL`` is not set, it is constructed from

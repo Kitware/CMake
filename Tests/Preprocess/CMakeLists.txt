@@ -232,7 +232,7 @@ set(TARGET_PATH "${Preprocess_SOURCE_DIR}/target_def.h")
 foreach(c "" "_DEBUG" "_RELEASE" "_RELWITHDEBINFO" "_MINSIZEREL")
   set(FLAVOR "${c}")
   # Treat RelWithDebInfo and MinSizeRel as Release to avoid having
-  # an exponentional matrix of inclusions and exclusions of defines
+  # an exponential matrix of inclusions and exclusions of defines
   if("${c}" STREQUAL "_RELWITHDEBINFO" OR "${c}" STREQUAL "_MINSIZEREL")
     set(FLAVOR "_RELEASE")
   endif()

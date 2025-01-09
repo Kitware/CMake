@@ -14,7 +14,7 @@
 # Xcode_60 - Apple LLVM version 6.0 (clang-600.0.51) (based on LLVM 3.5svn)
 # Xcode_61 - Apple LLVM version 6.0 (clang-600.0.56) (based on LLVM 3.5svn)
 
-# There is some non-correspondance. __has_feature(cxx_user_literals) is
+# There is some non-correspondence. __has_feature(cxx_user_literals) is
 # false for AppleClang 4.0 and 4.1, although it is reported as
 # supported in the reference link for Clang 3.1.  The compiler does not pass
 # the CompileFeatures/cxx_user_literals.cpp test.

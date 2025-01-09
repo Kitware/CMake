@@ -60,7 +60,7 @@
 
             # CTest/CDash information.
             - ${CMAKE_CI_BUILD_DIR}/Testing/
-            - ${CMAKE_CI_BUILD_DIR}/DartConfiguation.tcl
+            - ${CMAKE_CI_BUILD_DIR}/DartConfiguration.tcl
             - ${CMAKE_CI_BUILD_DIR}/CTestCustom.cmake
             - ${CMAKE_CI_BUILD_DIR}/cdash-build-id
         reports:

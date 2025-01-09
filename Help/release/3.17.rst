@@ -145,7 +145,7 @@ Properties
 
 * Target properties :prop_tgt:`MACHO_COMPATIBILITY_VERSION` and
   :prop_tgt:`MACHO_CURRENT_VERSION` were added to set the
-  ``compatibility_version`` and ``curent_version``, respectively,
+  ``compatibility_version`` and ``current_version``, respectively,
   for Mach-O binaries.  For backwards compatibility, if these properties
   are not set, :prop_tgt:`SOVERSION` and :prop_tgt:`VERSION`
   are used respectively as fallbacks.

@@ -107,13 +107,13 @@ bool cmCPackIFWRepository::ConfigureFromOptions()
   return this->IsValid();
 }
 
-/** \class cmCPackeIFWUpdatesPatcher
+/** \class cmCPackIFWUpdatesPatcher
  * \brief Helper class that parses and patch Updates.xml file (QtIFW)
  */
-class cmCPackeIFWUpdatesPatcher : public cmXMLParser
+class cmCPackIFWUpdatesPatcher : public cmXMLParser
 {
 public:
-  cmCPackeIFWUpdatesPatcher(cmCPackIFWRepository* r, cmXMLWriter& x)
+  cmCPackIFWUpdatesPatcher(cmCPackIFWRepository* r, cmXMLWriter& x)
     : repository(r)
     , xout(x)
   {
@@ -188,7 +188,7 @@ bool cmCPackIFWRepository::PatchUpdatesXml()
 
   // Patch
   {
-    cmCPackeIFWUpdatesPatcher patcher(this, xout);
+    cmCPackIFWUpdatesPatcher patcher(this, xout);
     patcher.ParseFile(updatesXml.data());
   }
 

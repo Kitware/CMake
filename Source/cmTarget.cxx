@@ -2137,8 +2137,8 @@ struct ReadOnlyProperty
   }
 };
 
-bool IsSetableProperty(cmMakefile* context, cmTarget* target,
-                       const std::string& prop)
+bool IsSettableProperty(cmMakefile* context, cmTarget* target,
+                        const std::string& prop)
 {
   using ROC = ReadOnlyCondition;
   static std::unordered_map<std::string, ReadOnlyProperty> const readOnlyProps{
@@ -2171,7 +2171,7 @@ bool IsSetableProperty(cmMakefile* context, cmTarget* target,
 
 void cmTarget::SetProperty(const std::string& prop, cmValue value)
 {
-  if (!IsSetableProperty(this->impl->Makefile, this, prop)) {
+  if (!IsSettableProperty(this->impl->Makefile, this, prop)) {
     return;
   }
 
@@ -2316,7 +2316,7 @@ void cmTarget::AppendProperty(const std::string& prop,
                               cm::optional<cmListFileBacktrace> const& bt,
                               bool asString)
 {
-  if (!IsSetableProperty(this->impl->Makefile, this, prop)) {
+  if (!IsSettableProperty(this->impl->Makefile, this, prop)) {
     return;
   }
   if (prop == "IMPORTED_GLOBAL") {
@@ -3474,9 +3474,9 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config, cmValue& loc,
     if (cmValue iconfigs = this->GetProperty("IMPORTED_CONFIGURATIONS")) {
       availableConfigs.assign(*iconfigs);
     }
-    for (auto aci = availableConfigs.begin();
-         !loc && !imp && aci != availableConfigs.end(); ++aci) {
-      suffix = cmStrCat('_', cmSystemTools::UpperCase(*aci));
+    for (auto it = availableConfigs.begin();
+         !loc && !imp && it != availableConfigs.end(); ++it) {
+      suffix = cmStrCat('_', cmSystemTools::UpperCase(*it));
       std::string locProp = cmStrCat(locPropBase, suffix);
       loc = this->GetProperty(locProp);
       if (allowImp) {

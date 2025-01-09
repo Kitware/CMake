@@ -21,7 +21,7 @@ struct BuildsystemDirectoryStateType;
 struct PolicyStackEntry;
 } // namespace cmStateDetail
 
-static const std::string cmPropertySentinal = std::string();
+static const std::string cmPropertySentinel = std::string();
 
 struct cmStateDetail::SnapshotDataType
 {

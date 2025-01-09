@@ -455,19 +455,19 @@ bool cmWorkerPoolWorker::RunProcess(cmWorkerPool::ProcessResultT& result,
 
 void cmWorkerPoolWorker::UVProcessStart(uv_async_t* handle)
 {
-  auto* wrk = reinterpret_cast<cmWorkerPoolWorker*>(handle->data);
+  auto* worker = reinterpret_cast<cmWorkerPoolWorker*>(handle->data);
   bool startFailed = false;
   {
-    auto& Proc = wrk->Proc_;
+    auto& Proc = worker->Proc_;
     std::lock_guard<std::mutex> lock(Proc.Mutex);
     if (Proc.ROP && !Proc.ROP->IsStarted()) {
-      startFailed =
-        !Proc.ROP->start(handle->loop, [wrk] { wrk->UVProcessFinished(); });
+      startFailed = !Proc.ROP->start(
+        handle->loop, [worker] { worker->UVProcessFinished(); });
     }
   }
   // Clean up if starting of the process failed
   if (startFailed) {
-    wrk->UVProcessFinished();
+    worker->UVProcessFinished();
   }
 }
 
@@ -735,8 +735,8 @@ bool cmWorkerPool::JobT::RunProcess(ProcessResultT& result,
                                     std::string const& workingDirectory)
 {
   // Get worker by index
-  auto* wrk = this->Pool_->Int_->Workers.at(this->WorkerIndex_).get();
-  return wrk->RunProcess(result, command, workingDirectory);
+  auto* worker = this->Pool_->Int_->Workers.at(this->WorkerIndex_).get();
+  return worker->RunProcess(result, command, workingDirectory);
 }
 
 cmWorkerPool::cmWorkerPool()

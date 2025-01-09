@@ -2125,12 +2125,12 @@ std::string cmGlobalXCodeGenerator::ExtractFlag(const char* flag,
                                                 std::string& flags)
 {
   std::string retFlag;
-  std::string::size_type lastOccurancePos = flags.rfind(flag);
+  std::string::size_type lastOccurrencePos = flags.rfind(flag);
   bool saved = false;
-  while (lastOccurancePos != std::string::npos) {
-    // increment pos, we use lastOccurancePos to reduce search space on next
+  while (lastOccurrencePos != std::string::npos) {
+    // increment pos, we use lastOccurrencePos to reduce search space on next
     // inc
-    std::string::size_type pos = lastOccurancePos;
+    std::string::size_type pos = lastOccurrencePos;
     if (pos == 0 || flags[pos - 1] == ' ') {
       while (pos < flags.size() && flags[pos] != ' ') {
         if (!saved) {
@@ -2141,10 +2141,10 @@ std::string cmGlobalXCodeGenerator::ExtractFlag(const char* flag,
       }
       saved = true;
     }
-    // decrement lastOccurancePos while making sure we don't loop around
+    // decrement lastOccurrencePos while making sure we don't loop around
     // and become a very large positive number since size_type is unsigned
-    lastOccurancePos = lastOccurancePos == 0 ? 0 : lastOccurancePos - 1;
-    lastOccurancePos = flags.rfind(flag, lastOccurancePos);
+    lastOccurrencePos = lastOccurrencePos == 0 ? 0 : lastOccurrencePos - 1;
+    lastOccurrencePos = flags.rfind(flag, lastOccurrencePos);
   }
   return retFlag;
 }

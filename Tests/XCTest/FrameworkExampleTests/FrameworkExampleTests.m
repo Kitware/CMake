@@ -8,9 +8,9 @@
 
 @implementation FrameworkExampleTests
 
-- (void)testFourtyTwo {
+- (void)testFortyTwo {
     // This is an example of a functional test case.
-    XCTAssertEqual(42, FourtyTwo());
+    XCTAssertEqual(42, FortyTwo());
 }
 
 @end

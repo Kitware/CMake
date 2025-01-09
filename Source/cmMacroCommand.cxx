@@ -66,9 +66,9 @@ bool cmMacroHelperCommand::operator()(
   // set the value of argc
   std::string argcDef = std::to_string(expandedArgs.size());
 
-  auto eit = expandedArgs.begin() + (this->Args.size() - 1);
+  auto expIt = expandedArgs.begin() + (this->Args.size() - 1);
   std::string expandedArgn =
-    cmList::to_string(cmMakeRange(eit, expandedArgs.end()));
+    cmList::to_string(cmMakeRange(expIt, expandedArgs.end()));
   std::string expandedArgv = cmList::to_string(expandedArgs);
   std::vector<std::string> variables;
   variables.reserve(this->Args.size() - 1);

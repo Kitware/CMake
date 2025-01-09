@@ -203,11 +203,12 @@ bool cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
   languages.insert(impl->Languages.cbegin(), impl->Languages.cend());
 
   // Add interface languages from linked targets.
-  // cmTargetCollectLinkLanguages cll(this, config, languages, this,
+  // cmTargetCollectLinkLanguages linkLangs(this, config, languages, this,
   // secondPass);
-  cmTargetCollectLinkLanguages cll(this, config, languages, this, secondPass);
+  cmTargetCollectLinkLanguages linkLangs(this, config, languages, this,
+                                         secondPass);
   for (cmLinkImplItem const& lib : impl->Libraries) {
-    cll.Visit(lib);
+    linkLangs.Visit(lib);
   }
 
   // Store the transitive closure of languages.
@@ -236,7 +237,7 @@ bool cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
   }
 
   return impl->HadLinkLanguageSensitiveCondition ||
-    cll.GetHadLinkLanguageSensitiveCondition();
+    linkLangs.GetHadLinkLanguageSensitiveCondition();
 }
 
 void cmGeneratorTarget::ComputeLinkClosure(const std::string& config,

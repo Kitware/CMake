@@ -1671,8 +1671,8 @@ cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION \"${cmake_version}\
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP_SOURCE_DIR \"${CMAKE_BOOTSTRAP_SOURCE_DIR}\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP_BINARY_DIR \"${CMAKE_BOOTSTRAP_BINARY_DIR}\""
 cmake_report cmConfigure.h${_tmp} "#define CMake_DEFAULT_RECURSION_LIMIT 400"
-cmake_report cmConfigure.h${_tmp} "#define CMAKE_BIN_DIR \"/bootstrap-not-insalled\""
-cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"/bootstrap-not-insalled\""
+cmake_report cmConfigure.h${_tmp} "#define CMAKE_BIN_DIR \"/bootstrap-not-installed\""
+cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"/bootstrap-not-installed\""
 cmake_report cmConfigure.h${_tmp} "#define CM_FALLTHROUGH"
 
 if test "${cmake_bootstrap_generator}" = "Ninja"; then

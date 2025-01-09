@@ -296,7 +296,7 @@ cmQtAutoGen::RccLister::RccLister() = default;
 
 cmQtAutoGen::RccLister::RccLister(std::string rccExecutable,
                                   std::vector<std::string> listOptions)
-  : RccExcutable_(std::move(rccExecutable))
+  : RccExecutable_(std::move(rccExecutable))
   , ListOptions_(std::move(listOptions))
 {
 }
@@ -319,8 +319,8 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
   // contains non-ASCII characters.
   std::string const fileDir = cmSystemTools::GetFilenamePath(qrcFile);
 
-  if (!this->RccExcutable_.empty() &&
-      cmSystemTools::FileExists(this->RccExcutable_, true) &&
+  if (!this->RccExecutable_.empty() &&
+      cmSystemTools::FileExists(this->RccExecutable_, true) &&
       !this->ListOptions_.empty()) {
 
     bool result = false;
@@ -329,7 +329,7 @@ bool cmQtAutoGen::RccLister::list(std::string const& qrcFile,
     std::string rccStdErr;
     {
       std::vector<std::string> cmd;
-      cmd.emplace_back(this->RccExcutable_);
+      cmd.emplace_back(this->RccExecutable_);
       cm::append(cmd, this->ListOptions_);
       cmd.emplace_back(cmSystemTools::GetFilenameName(qrcFile));
 

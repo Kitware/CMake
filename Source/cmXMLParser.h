@@ -33,7 +33,7 @@ public:
   /**
    * When parsing fragments of XML or streaming XML, use the following
    * three methods.  InitializeParser method initialize parser but does
-   * not perform any actual parsing.  ParseChunk parses framgent of
+   * not perform any actual parsing.  ParseChunk parses fragment of
    * XML. This has to match to what was already parsed. CleanupParser
    * finishes parsing. If there were errors, CleanupParser will report
    * them.

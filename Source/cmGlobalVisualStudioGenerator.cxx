@@ -412,7 +412,7 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(
   // VS <= 7.1 has two behaviors that affect solution dependencies.
   //
   // (1) Solution-level dependencies between a linkable target and a
-  // library cause that library to be linked.  We use an intermedite
+  // library cause that library to be linked.  We use an intermediate
   // empty utility target to express the dependency.  (VS 8 and above
   // provide a project file "LinkLibraryDependencies" setting to
   // choose whether to activate this behavior.  We disable it except

@@ -1957,15 +1957,15 @@ std::vector<std::string> cmSystemTools::GetEnvironmentVariables()
 
 void cmSystemTools::AppendEnv(std::vector<std::string> const& env)
 {
-  for (std::string const& eit : env) {
-    cmSystemTools::PutEnv(eit);
+  for (std::string const& var : env) {
+    cmSystemTools::PutEnv(var);
   }
 }
 
 void cmSystemTools::EnvDiff::AppendEnv(std::vector<std::string> const& env)
 {
-  for (std::string const& eit : env) {
-    this->PutEnv(eit);
+  for (std::string const& var : env) {
+    this->PutEnv(var);
   }
 }
 
@@ -2500,7 +2500,7 @@ bool extract_tar(const std::string& outFileName,
     }
   }
 
-  bool error_occured = false;
+  bool error_occurred = false;
   if (matching) {
     const char* p;
     int ar;
@@ -2509,9 +2509,9 @@ bool extract_tar(const std::string& outFileName,
            ARCHIVE_OK) {
       cmSystemTools::Error("tar: " + std::string(p) +
                            ": Not found in archive");
-      error_occured = true;
+      error_occurred = true;
     }
-    if (error_occured) {
+    if (error_occurred) {
       return false;
     }
     if (ar == ARCHIVE_FATAL) {

@@ -84,7 +84,7 @@ if(HG_EXECUTABLE)
       OUTPUT_VARIABLE ${prefix}_WC_DATA
       OUTPUT_STRIP_TRAILING_WHITESPACE)
     if(NOT ${hg_id_result} EQUAL 0)
-      message(SEND_ERROR "Command \"${HG_EXECUTBALE} id -n\" in directory ${dir} failed with output:\n${hg_id_error}")
+      message(SEND_ERROR "Command \"${HG_EXECUTABLE} id -n\" in directory ${dir} failed with output:\n${hg_id_error}")
     endif()
 
     string(REGEX REPLACE "([0-9a-f]+)\\+? [0-9]+\\+?" "\\1" ${prefix}_WC_CHANGESET ${${prefix}_WC_DATA})

@@ -1026,7 +1026,7 @@ doxygen_add_docs() for target ${targetName}")
         "CMakeCache.txt"
     )
 
-    # Now bring in Doxgen's defaults for those things the project has not
+    # Now bring in Doxygen's defaults for those things the project has not
     # already set and we have not provided above
     include("${CMAKE_BINARY_DIR}/CMakeDoxygenDefaults.cmake" OPTIONAL)
 

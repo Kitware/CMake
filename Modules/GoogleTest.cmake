@@ -435,8 +435,8 @@ function(gtest_add_tests)
     foreach(line_str IN LISTS content_lines)
       MATH(EXPR line "${line}+1")
       # Check if the current line is the start of a test definition
-      string(REGEX MATCH "[ \t]*${gtest_test_type_regex}[ \t]*[\\(]*" accumlate_start_hit "${line_str}")
-      if(accumlate_start_hit)
+      string(REGEX MATCH "[ \t]*${gtest_test_type_regex}[ \t]*[\\(]*" accumulate_start_hit "${line_str}")
+      if(accumulate_start_hit)
         set(accumulate_line "${line}")
       endif()
       # Append the current line to the accumulated string

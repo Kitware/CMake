@@ -318,7 +318,7 @@ Add the following trailing lines in the merge request description::
   Fast-forward: true
   Backport-ff: release:HEAD~1^2
 
-This configures the ``Do: merge`` action to fast-foward the ``master``
+This configures the ``Do: merge`` action to fast-forward the ``master``
 and ``release`` branches to the respective commits created above.
 
 Further steps may proceed after this has been merged.

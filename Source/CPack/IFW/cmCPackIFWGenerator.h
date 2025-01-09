@@ -145,7 +145,7 @@ private:
   std::vector<std::string> BuildRepogenCommand();
   int RunRepogen(const std::string& ifwTmpFile);
 
-  std::vector<std::string> BuildBinaryCreatorCommmand();
+  std::vector<std::string> BuildBinaryCreatorCommand();
   int RunBinaryCreator(const std::string& ifwTmpFile);
 
   std::string RepoGen;
