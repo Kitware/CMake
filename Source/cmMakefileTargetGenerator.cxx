@@ -1498,11 +1498,11 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
     << this->GeneratorTarget->GetFortranModuleDirectory(working_dir)
     << "\")\n";
 
-  if (this->GeneratorTarget->IsFortranBuildingInstrinsicModules()) {
+  if (this->GeneratorTarget->IsFortranBuildingIntrinsicModules()) {
     *this->InfoFileStream
       << "\n"
       << "# Fortran compiler is building intrinsic modules.\n"
-      << "set(CMAKE_Fortran_TARGET_BUILDING_INSTRINSIC_MODULES ON) \n";
+      << "set(CMAKE_Fortran_TARGET_BUILDING_INTRINSIC_MODULES ON) \n";
   }
   /* clang-format on */
 
