@@ -38,7 +38,7 @@ if(WIN32 AND NOT CYGWIN)
 endif()
 
 if(CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran")
-  add_compile_options("$<$<COMPILE_LANGUAGE:Fortran>:--implicit-interface>")
+  add_compile_options("$<$<COMPILE_LANGUAGE:Fortran>:--implicit-interface;--generate-object-code>")
 endif()
 
 add_library(hello STATIC hello.f)

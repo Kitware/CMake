@@ -26,7 +26,7 @@ target_link_libraries(sunq sunquad)
 endfunction()
 
 if(CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran")
-  add_compile_options(--implicit-interface)
+  add_compile_options(--implicit-interface --generate-object-code)
 endif()
 
 # check for the fortran c interface mangling
