@@ -1,12 +1,13 @@
+/* SPDX-License-Identifier: 0BSD */
+
 /*
  * Author: Lasse Collin
- *
- * This file has been put into the public domain.
- * You can do whatever you want with this file.
  */
 
 #include <winresrc.h>
-#include "config.h"
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
 #define LZMA_H_INTERNAL
 #define LZMA_H_INTERNAL_RC
 #include "lzma/version.h"
@@ -21,14 +22,15 @@
 #define MY_PRODUCT     PACKAGE_NAME " <" PACKAGE_URL ">"
 
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+
 VS_VERSION_INFO VERSIONINFO
-  FILEVERSION MY_VERSION
-  PRODUCTVERSION MY_VERSION
-  FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
-  FILEFLAGS 0
-  FILEOS VOS_NT_WINDOWS32
-  FILETYPE MY_TYPE
-  FILESUBTYPE 0x0L
+FILEVERSION MY_VERSION
+PRODUCTVERSION MY_VERSION
+FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+FILEFLAGS 0
+FILEOS VOS_NT_WINDOWS32
+FILETYPE MY_TYPE
+FILESUBTYPE 0x0L
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
@@ -48,3 +50,8 @@ BEGIN
         VALUE "Translation", 0x409, 1200
     END
 END
+
+/* Omit the manifest on Cygwin and MSYS2 (both define __CYGWIN__). */
+#if MY_TYPE == VFT_APP && !defined(__CYGWIN__)
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST "w32_application.manifest"
+#endif

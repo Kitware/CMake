@@ -176,6 +176,11 @@ endif()
 
 ADD_LIBRARY(cmliblzma STATIC ${LZMA_SRCS})
 
+# Disable inline assembly in a case where it does not compile.
+if(CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND CMAKE_C_FLAGS MATCHES "-ftrapv")
+  set_property(SOURCE liblzma/lzma/lzma_decoder.c PROPERTY COMPILE_DEFINITIONS LZMA_RANGE_DECODER_CONFIG=0)
+endif()
+
 IF(CMAKE_C_COMPILER_ID STREQUAL "XL")
   # Disable the XL compiler optimizer because it causes crashes
   # and other bad behavior in liblzma code.
