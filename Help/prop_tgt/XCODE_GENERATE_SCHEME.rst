@@ -45,5 +45,6 @@ The following target properties will be applied on the
 - :prop_tgt:`XCODE_SCHEME_EXECUTABLE`
 - :prop_tgt:`XCODE_SCHEME_LAUNCH_CONFIGURATION`
 - :prop_tgt:`XCODE_SCHEME_LAUNCH_MODE`
+- :prop_tgt:`XCODE_SCHEME_TEST_CONFIGURATION`
 - :prop_tgt:`XCODE_SCHEME_LLDB_INIT_FILE`
 - :prop_tgt:`XCODE_SCHEME_WORKING_DIRECTORY`

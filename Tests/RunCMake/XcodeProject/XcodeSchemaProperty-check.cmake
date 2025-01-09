@@ -1,8 +1,8 @@
 function(check_property property matcher)
   set(schema "${RunCMake_TEST_BINARY_DIR}/XcodeSchemaProperty.xcodeproj/xcshareddata/xcschemes/${property}.xcscheme")
-  file(STRINGS ${schema} actual-${property}
-       REGEX "${matcher}" LIMIT_COUNT 1)
-  if(NOT actual-${property})
+  file(READ ${schema} schema-content-${property})
+  string(REGEX MATCHALL "${matcher}" matched-${property} ${schema-content-${property}})
+  if(NOT matched-${property})
     string(APPEND RunCMake_TEST_FAILED
       "Xcode schema property ${property}: Could not find\n"
       "  ${matcher}\n"
@@ -102,6 +102,12 @@ check_property("ENABLE_GPU_FRAME_CAPTURE_MODE_DISABLED_MIXED_CASE" "enableGPUFra
 check_property("ENABLE_GPU_FRAME_CAPTURE_MODE_METAL_MIXED_CASE" "enableGPUFrameCaptureMode=\"1\"")
 check_property("LAUNCH_MODE_AUTO" "launchStyle=\"0\"")
 check_property("LAUNCH_MODE_WAIT" "launchStyle=\"1\"")
+check_property("LAUNCH_CONFIGURATION_EMPTY" "<LaunchAction.*buildConfiguration=\"Debug\".*</LaunchAction>")
+check_property("LAUNCH_CONFIGURATION_DEBUG" "<LaunchAction.*buildConfiguration=\"Debug\".*</LaunchAction>")
+check_property("LAUNCH_CONFIGURATION_RELEASE" "<LaunchAction.*buildConfiguration=\"Release\".*</LaunchAction>")
+check_property("TEST_CONFIGURATION_EMPTY" "<TestAction.*buildConfiguration=\"Debug\".*</TestAction>")
+check_property("TEST_CONFIGURATION_DEBUG" "<TestAction.*buildConfiguration=\"Debug\".*</TestAction>")
+check_property("TEST_CONFIGURATION_RELEASE" "<TestAction.*buildConfiguration=\"Release\".*</TestAction>")
 check_no_property("LLDB_INIT_FILE_EMPTY" "customLLDBInitFile")
 check_property_count("LLDB_INIT_FILE_EVAL" "customLLDBInitFile=\"${RunCMake_TEST_BINARY_DIR}/.lldbinit\"" 2)
 check_property_count("LLDB_INIT_FILE_FULL" "customLLDBInitFile=\"/full/path/to/.lldbinit\"" 2)
