@@ -977,23 +977,11 @@ public:
                             const std::string& report,
                             const std::string& compatibilityType) const;
 
-  /** Configures TransitiveClosureOptimization. Re-evaluation of a
-      transitive property will only be optimized within a subgraph. */
-  enum class TransitiveClosure
-  {
-    Inherit,  // node is in the same subgraph as its' parent
-    Subgraph, // the current node spans a new subgraph
-  };
-
   class TargetPropertyEntry;
 
   std::string EvaluateInterfaceProperty(
     std::string const& prop, cmGeneratorExpressionContext* context,
     cmGeneratorExpressionDAGChecker* dagCheckerParent, UseTo usage) const;
-  std::string EvaluateInterfaceProperty(
-    std::string const& prop, cmGeneratorExpressionContext* context,
-    cmGeneratorExpressionDAGChecker* dagCheckerParent, UseTo usage,
-    TransitiveClosure closure) const;
 
   struct TransitiveProperty
   {
