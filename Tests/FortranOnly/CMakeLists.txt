@@ -8,7 +8,7 @@ if("${CMAKE_Fortran_COMPILER_ID};${CMAKE_Fortran_SIMULATE_ID}" MATCHES "^Intel(L
 endif()
 
 if(CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran")
-  add_compile_options(--implicit-interface)
+  add_compile_options(--implicit-interface --generate-object-code)
 endif()
 
 # create a library with hello and world functions

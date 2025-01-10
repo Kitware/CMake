@@ -101,7 +101,7 @@ target_link_libraries(symbols PUBLIC myfort)
 set_property(TARGET symbols PROPERTY POSITION_INDEPENDENT_CODE 1)
 
 if(CMAKE_Fortran_COMPILER_ID STREQUAL "LFortran")
-  add_compile_options(--implicit-interface)
+  add_compile_options(--implicit-interface --generate-object-code)
 endif()
 
 # Require symbols through Fortran.
