@@ -18,6 +18,14 @@
 #  define _DARWIN_C_SOURCE
 #endif
 
+#ifndef __has_feature
+#  define __has_feature(x) 0
+#endif
+
+#if !defined(__clang__) || __has_feature(cxx_thread_local)
+#  define CM_HAVE_THREAD_LOCAL
+#endif
+
 #include "cmSystemTools.h"
 
 #include <iterator>
@@ -79,9 +87,14 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <random>
 #include <sstream>
 #include <utility>
 #include <vector>
+
+#ifndef CM_HAVE_THREAD_LOCAL
+#  include <mutex>
+#endif
 
 #include <fcntl.h>
 
@@ -2808,6 +2821,18 @@ unsigned int cmSystemTools::RandomSeed()
   // in the slow-changing high-order bits of tv_sec.
   return tv_sec ^ (tv_usec << 21) ^ pid;
 #endif
+}
+
+unsigned int cmSystemTools::RandomNumber()
+{
+#ifndef CM_HAVE_THREAD_LOCAL
+  static std::mutex gen_mutex;
+  std::lock_guard<std::mutex> gen_mutex_lock(gen_mutex);
+#else
+  thread_local
+#endif
+  static std::mt19937 gen{ cmSystemTools::RandomSeed() };
+  return static_cast<unsigned int>(gen());
 }
 
 namespace {

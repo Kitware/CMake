@@ -359,7 +359,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
        of the same executable name (some filesystems fail on that).  */
     char targetNameBuf[64];
     snprintf(targetNameBuf, sizeof(targetNameBuf), "cmTC_%05x",
-             cmSystemTools::RandomSeed() & 0xFFFFF);
+             cmSystemTools::RandomNumber() & 0xFFFFF);
     targetName = targetNameBuf;
   }
 
