@@ -560,7 +560,10 @@ void cmGlobalVisualStudio14Generator::AddSolutionItems(cmLocalGenerator* root)
 
     for (const std::string& relativePath : cmList(n)) {
       pathComponents[2] = relativePath;
-      std::string fullPath = cmSystemTools::JoinPath(pathComponents);
+
+      std::string fullPath = cmSystemTools::FileIsFullPath(relativePath)
+        ? relativePath
+        : cmSystemTools::JoinPath(pathComponents);
 
       cmSourceGroup* sg = makefile->FindSourceGroup(fullPath, sourceGroups);
 
