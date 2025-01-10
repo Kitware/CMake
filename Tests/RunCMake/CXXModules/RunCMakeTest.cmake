@@ -321,6 +321,7 @@ endif ()
 
 # Tests which require collation work.
 if ("collation" IN_LIST CMake_TEST_MODULE_COMPILATION)
+  run_cxx_module_test(duplicate-sources)
   run_cxx_module_test(public-req-private)
   set(RunCMake_CXXModules_NO_TEST 1)
   run_cxx_module_test(req-private-other-target)

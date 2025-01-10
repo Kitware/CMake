@@ -127,11 +127,23 @@ TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
       }
     }
 
+    // Detect duplicate sources.
+    std::set<std::string> visited_sources;
+
     for (auto const& files_per_dir : files_per_dirs) {
       for (auto const& file : files_per_dir.second) {
         auto const full_file = cmSystemTools::CollapseFullPath(file);
         auto lookup = sf_map.find(full_file);
         if (lookup == sf_map.end()) {
+          if (visited_sources.count(full_file)) {
+            // Duplicate source; raise an author warning.
+            gt->Makefile->IssueMessage(
+              MessageType::AUTHOR_WARNING,
+              cmStrCat(
+                "Target \"", tgt->GetName(), "\" has source file\n  ", file,
+                "\nin a \"FILE_SET TYPE CXX_MODULES\" multiple times."));
+            continue;
+          }
           gt->Makefile->IssueMessage(
             MessageType::FATAL_ERROR,
             cmStrCat("Target \"", tgt->GetName(), "\" has source file\n  ",
@@ -140,6 +152,7 @@ TdiSourceInfo CollationInformationSources(cmGeneratorTarget const* gt,
                      "scheduled for compilation."));
           continue;
         }
+        visited_sources.insert(full_file);
 
         auto const* sf = lookup->second.first;
         CompileType const ct = lookup->second.second;
