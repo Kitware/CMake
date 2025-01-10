@@ -49,6 +49,25 @@ std::unordered_map<std::string, std::string> Languages = {
   // clang-format on
 };
 
+enum LanguageGlobOption
+{
+  DisallowGlob,
+  AllowGlob,
+};
+
+cm::string_view MapLanguage(cm::string_view lang,
+                            LanguageGlobOption glob = AllowGlob)
+{
+  if (glob == AllowGlob && lang == "*"_s) {
+    return "*"_s;
+  }
+  auto const li = Languages.find(cmSystemTools::LowerCase(lang));
+  if (li != Languages.end()) {
+    return li->second;
+  }
+  return {};
+}
+
 std::string GetRealPath(std::string const& path)
 {
   return cmSystemTools::GetRealPath(path);
@@ -161,11 +180,10 @@ cm::string_view IterKey(Json::Value::const_iterator const& iter)
 }
 
 // Get list-of-strings value from object.
-std::vector<std::string> ReadList(Json::Value const& data, char const* key)
+std::vector<std::string> ReadList(Json::Value const& arr)
 {
   std::vector<std::string> result;
 
-  Json::Value const& arr = data[key];
   if (arr.isArray()) {
     for (Json::Value const& val : arr) {
       if (val.isString()) {
@@ -175,6 +193,11 @@ std::vector<std::string> ReadList(Json::Value const& data, char const* key)
   }
 
   return result;
+}
+
+std::vector<std::string> ReadList(Json::Value const& data, char const* key)
+{
+  return ReadList(data[key]);
 }
 
 std::string NormalizeTargetName(std::string const& name,
@@ -205,6 +228,47 @@ void AppendProperty(cmMakefile* makefile, cmTarget* target,
   }
 
   target->AppendProperty(fullprop, value, makefile->GetBacktrace());
+}
+
+template <typename Transform>
+void AppendLanguageProperties(cmMakefile* makefile, cmTarget* target,
+                              cm::string_view property,
+                              cm::string_view configuration,
+                              Json::Value const& data, char const* key,
+                              Transform transform)
+{
+  Json::Value const& value = data[key];
+  if (value.isArray()) {
+    for (std::string v : ReadList(value)) {
+      AppendProperty(makefile, target, property, configuration,
+                     transform(std::move(v)));
+    }
+  } else if (value.isObject()) {
+    for (auto vi = value.begin(), ve = value.end(); vi != ve; ++vi) {
+      cm::string_view const originalLang = IterKey(vi);
+      cm::string_view const lang = MapLanguage(originalLang);
+      if (lang.empty()) {
+        makefile->IssueMessage(MessageType::WARNING,
+                               cmStrCat(R"(ignoring unknown language ")"_s,
+                                        originalLang, R"(" in )"_s, key,
+                                        " for "_s, target->GetName()));
+        continue;
+      }
+
+      if (lang == "*"_s) {
+        for (std::string v : ReadList(*vi)) {
+          AppendProperty(makefile, target, property, configuration,
+                         transform(std::move(v)));
+        }
+      } else {
+        for (std::string v : ReadList(*vi)) {
+          v = cmStrCat("$<$<COMPILE_LANGUAGE:"_s, lang, ">:"_s,
+                       transform(std::move(v)), '>');
+          AppendProperty(makefile, target, property, configuration, v);
+        }
+      }
+    }
+  }
 }
 
 void AddCompileFeature(cmMakefile* makefile, cmTarget* target,
@@ -241,6 +305,64 @@ void AddLinkFeature(cmMakefile* makefile, cmTarget* target,
   if (cmStrCaseEq(value, "thread"_s)) {
     AppendProperty(makefile, target, "LINK_LIBRARIES"_s, configuration,
                    "Threads::Threads");
+  }
+}
+
+std::string BuildDefinition(std::string const& name, Json::Value const& value)
+{
+  if (!value.isNull() && value.isConvertibleTo(Json::stringValue)) {
+    return cmStrCat(name, '=', value.asString());
+  }
+  return name;
+}
+
+void AddDefinition(cmMakefile* makefile, cmTarget* target,
+                   cm::string_view configuration,
+                   std::string const& definition)
+{
+  AppendProperty(makefile, target, "COMPILE_DEFINITIONS"_s, configuration,
+                 definition);
+}
+
+using DefinitionLanguageMap = std::map<cm::string_view, Json::Value>;
+using DefinitionsMap = std::map<std::string, DefinitionLanguageMap>;
+
+void AddDefinitions(cmMakefile* makefile, cmTarget* target,
+                    cm::string_view configuration,
+                    DefinitionsMap const& definitions)
+{
+  for (auto const& di : definitions) {
+    auto const& g = di.second.find("*"_s);
+    if (g != di.second.end()) {
+      std::string const& def = BuildDefinition(di.first, g->second);
+      if (di.second.size() == 1) {
+        // Only the non-language-specific definition exists.
+        AddDefinition(makefile, target, configuration, def);
+        continue;
+      }
+
+      // Create a genex to apply this definition to all languages except
+      // those that override it.
+      std::vector<cm::string_view> excludedLanguages;
+      for (auto const& li : di.second) {
+        if (li.first != "*"_s) {
+          excludedLanguages.emplace_back(li.first);
+        }
+      }
+      AddDefinition(makefile, target, configuration,
+                    cmStrCat("$<$<NOT:$<COMPILE_LANGUAGE:"_s,
+                             cmJoin(excludedLanguages, ","_s), ">>:"_s, def,
+                             '>'));
+    }
+
+    // Add language-specific definitions.
+    for (auto const& li : di.second) {
+      if (li.first != "*"_s) {
+        AddDefinition(makefile, target, configuration,
+                      cmStrCat("$<$<COMPILE_LANGUAGE:"_s, li.first, ">:"_s,
+                               BuildDefinition(di.first, li.second), '>'));
+      }
+    }
   }
 }
 
@@ -386,16 +508,31 @@ void cmPackageInfoReader::SetTargetProperties(
   }
 
   // Add compile definitions.
-  for (std::string const& def : ReadList(data, "definitions")) {
-    AppendProperty(makefile, target, "COMPILE_DEFINITIONS"_s, configuration,
-                   def);
+  Json::Value const& defs = data["definitions"];
+  DefinitionsMap definitionsMap;
+  for (auto ldi = defs.begin(), lde = defs.end(); ldi != lde; ++ldi) {
+    cm::string_view const originalLang = IterKey(ldi);
+    cm::string_view const lang = MapLanguage(originalLang);
+    if (lang.empty()) {
+      makefile->IssueMessage(
+        MessageType::WARNING,
+        cmStrCat(R"(ignoring unknown language ")"_s, originalLang,
+                 R"(" in definitions for )"_s, target->GetName()));
+      continue;
+    }
+
+    for (auto di = ldi->begin(), de = ldi->end(); di != de; ++di) {
+      definitionsMap[di.name()].emplace(lang, *di);
+    }
   }
+  AddDefinitions(makefile, target, configuration, definitionsMap);
 
   // Add include directories.
-  for (std::string inc : ReadList(data, "includes")) {
-    AppendProperty(makefile, target, "INCLUDE_DIRECTORIES"_s, configuration,
-                   this->ResolvePath(std::move(inc)));
-  }
+  AppendLanguageProperties(makefile, target, "INCLUDE_DIRECTORIES"_s,
+                           configuration, data, "includes",
+                           [this](std::string p) -> std::string {
+                             return this->ResolvePath(std::move(p));
+                           });
 
   // Add link name/location(s).
   this->SetOptionalProperty(target, "LOCATION"_s, configuration,
@@ -408,11 +545,11 @@ void cmPackageInfoReader::SetTargetProperties(
                             data["link_name"]);
 
   // Add link languages.
-  for (std::string const& lang : ReadList(data, "link_languages")) {
-    auto const li = Languages.find(cmSystemTools::LowerCase(lang));
-    if (li != Languages.end()) {
+  for (std::string const& originalLang : ReadList(data, "link_languages")) {
+    cm::string_view const lang = MapLanguage(originalLang, DisallowGlob);
+    if (!lang.empty()) {
       AppendProperty(makefile, target, "LINK_LANGUAGES"_s, configuration,
-                     li->second);
+                     std::string{ lang });
     }
   }
 
@@ -492,9 +629,9 @@ bool cmPackageInfoReader::ImportTargets(cmMakefile* makefile,
         makefile, cmStateEnums::INTERFACE_LIBRARY, fullName, *ci, package);
     } else {
       makefile->IssueMessage(MessageType::WARNING,
-                             cmStrCat("component "_s, fullName,
-                                      " has unknown type "_s, type,
-                                      " and was not imported"_s));
+                             cmStrCat(R"(component ")"_s, fullName,
+                                      R"(" has unknown type ")"_s, type,
+                                      R"(" and was not imported)"_s));
     }
 
     if (target) {
