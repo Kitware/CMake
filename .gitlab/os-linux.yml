@@ -452,6 +452,30 @@
         CMAKE_CONFIGURATION: hip5.5_nvidia
         CTEST_LABELS: "HIP"
 
+### C++ modules
+
+.gcc_cxx_modules_x86_64:
+    image: "kitware/cmake:ci-gcc_cxx_modules-x86_64-2024-12-23"
+
+    variables:
+        GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci"
+        CMAKE_ARCH: x86_64
+        CC: "/opt/gcc-importstd/bin/gcc"
+        CXX: "/opt/gcc-importstd/bin/g++"
+
+.gcc_cxx_modules_ninja:
+    extends: .gcc_cxx_modules_x86_64
+
+    variables:
+        CMAKE_CONFIGURATION: linux_gcc_cxx_modules_ninja
+
+.gcc_cxx_modules_ninja_multi:
+    extends: .gcc_cxx_modules_x86_64
+
+    variables:
+        CMAKE_CONFIGURATION: linux_gcc_cxx_modules_ninja_multi
+        CMAKE_GENERATOR: "Ninja Multi-Config"
+
 ### Debian 10 legacy packages
 
 .debian10:

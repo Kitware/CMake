@@ -438,6 +438,26 @@ t:hip5.5-radeon:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
+t:linux-gcc-cxx-modules-ninja:
+    extends:
+        - .gcc_cxx_modules_ninja
+        - .cmake_test_linux_release
+        - .linux_x86_64_tags
+        - .run_dependent
+        - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
+t:linux-gcc-cxx-modules-ninja-multi:
+    extends:
+        - .gcc_cxx_modules_ninja_multi
+        - .cmake_test_linux_release
+        - .linux_x86_64_tags
+        - .run_dependent
+        - .needs_centos7_x86_64
+    variables:
+        CMAKE_CI_JOB_NIGHTLY: "true"
+
 t:debian10-legacy:
     extends:
         - .debian10_legacy
