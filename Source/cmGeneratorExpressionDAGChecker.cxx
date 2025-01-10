@@ -24,7 +24,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   std::string const& contextConfig)
   : cmGeneratorExpressionDAGChecker(cmListFileBacktrace(), target,
                                     std::move(property), content, parent,
-                                    contextLG, contextConfig, INHERIT)
+                                    contextLG, contextConfig)
 {
 }
 
@@ -33,20 +33,8 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   std::string property, const GeneratorExpressionContent* content,
   cmGeneratorExpressionDAGChecker* parent, cmLocalGenerator const* contextLG,
   std::string const& contextConfig)
-  : cmGeneratorExpressionDAGChecker(std::move(backtrace), target,
-                                    std::move(property), content, parent,
-                                    contextLG, contextConfig, INHERIT)
-{
-}
-
-cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
-  cmListFileBacktrace backtrace, cmGeneratorTarget const* target,
-  std::string property, const GeneratorExpressionContent* content,
-  cmGeneratorExpressionDAGChecker* parent, cmLocalGenerator const* contextLG,
-  std::string const& contextConfig, TransitiveClosure closure)
   : Parent(parent)
   , Top(parent ? parent->Top : this)
-  , Closure((closure == SUBGRAPH || !parent) ? this : parent->Closure)
   , Target(target)
   , Property(std::move(property))
   , Content(content)
@@ -65,16 +53,16 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
   this->CheckResult = this->CheckGraph();
 
   if (this->CheckResult == DAG && this->EvaluatingTransitiveProperty()) {
-    const auto* transitiveClosure = this->Closure;
-    auto it = transitiveClosure->Seen.find(this->Target);
-    if (it != transitiveClosure->Seen.end()) {
+    const auto* top = this->Top;
+    auto it = top->Seen.find(this->Target);
+    if (it != top->Seen.end()) {
       const std::set<std::string>& propSet = it->second;
       if (propSet.find(this->Property) != propSet.end()) {
         this->CheckResult = ALREADY_SEEN;
         return;
       }
     }
-    transitiveClosure->Seen[this->Target].insert(this->Property);
+    top->Seen[this->Target].insert(this->Property);
   }
 }
 

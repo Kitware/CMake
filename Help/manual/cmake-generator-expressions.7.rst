@@ -1887,14 +1887,6 @@ These expressions look up the values of
     rather than the directory of the consuming target for which the
     expression is being evaluated.
 
-  .. versionchanged:: 3.31
-    Generator expressions for transitive interface properties, such as
-    ``$<TARGET_PROPERTY:target,INTERFACE_*>``, now correctly handle
-    repeated evaluations within nested generator expressions.
-    Previously, these repeated evaluations returned empty values due
-    to an optimization for transitive closures.
-    This change ensures consistent evaluation for non-union operations.
-
 .. genex:: $<TARGET_PROPERTY:prop>
   :target: TARGET_PROPERTY:prop
 
