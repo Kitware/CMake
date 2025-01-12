@@ -20,3 +20,8 @@ values:
 
 ``CPACK``
   Running in CPack.
+
+See Also
+^^^^^^^^
+
+* The :variable:`CMAKE_SCRIPT_MODE_FILE` variable.
