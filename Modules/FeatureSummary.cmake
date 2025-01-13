@@ -10,73 +10,84 @@ FeatureSummary
 Functions for generating a summary of enabled/disabled features.
 
 These functions can be used to generate a summary of enabled and disabled
-packages and/or feature for a build tree such as::
+packages and/or features for a build tree such as::
+
+    -- The following features have been enabled:
+
+     * Example, usage example
 
     -- The following OPTIONAL packages have been found:
-    LibXml2 (required version >= 2.4), XML processing lib, <http://xmlsoft.org>
-       * Enables HTML-import in MyWordProcessor
-       * Enables odt-export in MyWordProcessor
-    PNG, A PNG image library., <http://www.libpng.org/pub/png/>
-       * Enables saving screenshots
+
+     * LibXml2 (required version >= 2.4), XML library, <http://xmlsoft.org>
+       Enables HTML-import in MyWordProcessor
+       Enables odt-export in MyWordProcessor
+     * PNG, image library, <http://www.libpng.org/pub/png/>
+       Enables saving screenshots
+
     -- The following OPTIONAL packages have not been found:
-    Lua51, The Lua scripting language., <https://www.lua.org>
-       * Enables macros in MyWordProcessor
-    Foo, Foo provides cool stuff.
+
+     * Lua, the Lua scripting language, <https://www.lua.org>
+       Enables macros in MyWordProcessor
+     * OpenGL, Open Graphics Library
 
 Global Properties
 ^^^^^^^^^^^^^^^^^
 
 .. variable:: FeatureSummary_PKG_TYPES
 
-The global property :variable:`FeatureSummary_PKG_TYPES` defines the type of
-packages used by `FeatureSummary`.
+  .. versionadded:: 3.8
 
-The order in this list is important, the first package type in the list is the
-least important, the last is the most important. the of a package can only be
-changed to higher types.
+  This global property defines a
+  :ref:`semicolon-separated list <CMake Language Lists>` of package types used
+  by the ``FeatureSummary`` module.
 
-The default package types are , ``RUNTIME``, ``OPTIONAL``, ``RECOMMENDED`` and
-``REQUIRED``, and their importance is
-``RUNTIME < OPTIONAL < RECOMMENDED < REQUIRED``.
+  The order in this list is important, the first package type in the list has
+  the lowest importance, while the last has the highest importance.  The type of
+  a package can only be changed to a type with higher importance.
 
+  The default package types are ``RUNTIME``, ``OPTIONAL``, ``RECOMMENDED`` and
+  ``REQUIRED``, with their importance ranked as
+  ``RUNTIME < OPTIONAL < RECOMMENDED < REQUIRED``.
 
 .. variable:: FeatureSummary_REQUIRED_PKG_TYPES
 
-The global property :variable:`FeatureSummary_REQUIRED_PKG_TYPES` defines which
-package types are required.
+  .. versionadded:: 3.8
 
-If one or more package in this categories has not been found, CMake will abort
-when calling :command:`feature_summary` with the
-'FATAL_ON_MISSING_REQUIRED_PACKAGES' option enabled.
+  This global property defines a
+  :ref:`semicolon-separated list <CMake Language Lists>` of package types that
+  are considered required.
 
-The default value for this global property is ``REQUIRED``.
+  If one or more packages in these categories are not found, CMake will abort
+  when the :command:`feature_summary()` command is called with the
+  ``FATAL_ON_MISSING_REQUIRED_PACKAGES`` option enabled.
 
+  The default value for this global property is ``REQUIRED``.
 
 .. variable:: FeatureSummary_DEFAULT_PKG_TYPE
 
-The global property :variable:`FeatureSummary_DEFAULT_PKG_TYPE` defines which
-package type is the default one.
-When calling :command:`feature_summary`, if the user did not set the package type
-explicitly, the package will be assigned to this category.
+  .. versionadded:: 3.8
 
-This value must be one of the types defined in the
-:variable:`FeatureSummary_PKG_TYPES` global property unless the package type
-is set for all the packages.
+  This global property defines the default package type.
 
-The default value for this global property is ``OPTIONAL``.
+  When the :command:`feature_summary()` command is called, and the user has not
+  explicitly set a type of some package, its type will be set to this value.
 
+  This value must be one of the types defined in the
+  :variable:`FeatureSummary_PKG_TYPES` global property.
+
+  The default value for this global property is ``OPTIONAL``.
 
 .. variable:: FeatureSummary_<TYPE>_DESCRIPTION
 
-.. versionadded:: 3.9
+  .. versionadded:: 3.9
 
-The global property :variable:`FeatureSummary_<TYPE>_DESCRIPTION` can be defined
-for each type to replace the type name with the specified string whenever the
-package type is used in an output string.
+  This global property can be defined for each package ``<TYPE>`` to a string
+  that will be used in the output titles of the
+  :command:`feature_summary()` command.  For example::
 
-If not set, the string "``<TYPE>`` packages" is used.
+      The following <FeatureSummary_<TYPE>_DESCRIPTION> have been found:
 
-
+  If not set, default string ``<TYPE> packages`` is used.
 #]=======================================================================]
 
 get_property(_fsPkgTypeIsSet GLOBAL PROPERTY FeatureSummary_PKG_TYPES SET)
@@ -201,90 +212,112 @@ endfunction()
 #[=======================================================================[.rst:
 .. command:: feature_summary
 
-  ::
+  .. code-block:: cmake
 
-    feature_summary( [FILENAME <file>]
-                     [APPEND]
-                     [VAR <variable_name>]
-                     [INCLUDE_QUIET_PACKAGES]
-                     [FATAL_ON_MISSING_REQUIRED_PACKAGES]
-                     [DESCRIPTION "<description>" | DEFAULT_DESCRIPTION]
-                     [QUIET_ON_EMPTY]
-                     WHAT (ALL
-                          | PACKAGES_FOUND | PACKAGES_NOT_FOUND
-                          | <TYPE>_PACKAGES_FOUND | <TYPE>_PACKAGES_NOT_FOUND
-                          | ENABLED_FEATURES | DISABLED_FEATURES)
+    feature_summary([FILENAME <file>]
+                    [APPEND]
+                    [VAR <variable_name>]
+                    [INCLUDE_QUIET_PACKAGES]
+                    [FATAL_ON_MISSING_REQUIRED_PACKAGES]
+                    [DESCRIPTION <description> | DEFAULT_DESCRIPTION]
+                    [QUIET_ON_EMPTY]
+                    WHAT (ALL
+                         | PACKAGES_FOUND | PACKAGES_NOT_FOUND
+                         | <TYPE>_PACKAGES_FOUND | <TYPE>_PACKAGES_NOT_FOUND
+                         | ENABLED_FEATURES | DISABLED_FEATURES)
                    )
 
-  The ``feature_summary()`` macro can be used to print information about
-  enabled or disabled packages or features of a project.  By default,
+  This function can be used to print information about
+  enabled or disabled packages and features of a project.  By default,
   only the names of the features/packages will be printed and their
-  required version when one was specified.  Use ``set_package_properties()``
-  to add more useful information, like e.g.  a download URL for the
-  respective package or their purpose in the project.
+  required version when one was specified.  Use
+  :command:`set_package_properties()` to add more useful information, like e.g.
+  a homepage URL for the respective package or their purpose in the project.
 
-  The ``WHAT`` option is the only mandatory option.  Here you specify what
-  information will be printed:
+  The options are:
 
-  ``ALL``
-   print everything
-  ``ENABLED_FEATURES``
-   the list of all features which are enabled
-  ``DISABLED_FEATURES``
-   the list of all features which are disabled
-  ``PACKAGES_FOUND``
-   the list of all packages which have been found
-  ``PACKAGES_NOT_FOUND``
-   the list of all packages which have not been found
+  ``WHAT``
+    This is the only mandatory option.  It specifies what information will be
+    printed:
 
-  For each package type ``<TYPE>`` defined by the
-  :variable:`FeatureSummary_PKG_TYPES` global property, the following
-  information can also be used:
+    ``ALL``
+      Print everything.
+    ``ENABLED_FEATURES``
+      The list of all features which are enabled.
+    ``DISABLED_FEATURES``
+      The list of all features which are disabled.
+    ``PACKAGES_FOUND``
+      The list of all packages which have been found.
+    ``PACKAGES_NOT_FOUND``
+      The list of all packages which have not been found.
 
-  ``<TYPE>_PACKAGES_FOUND``
-   only those packages which have been found which have the type <TYPE>
-  ``<TYPE>_PACKAGES_NOT_FOUND``
-   only those packages which have not been found which have the type <TYPE>
+    For each package type ``<TYPE>`` defined by the
+    :variable:`FeatureSummary_PKG_TYPES` global property, the following
+    information can also be used:
 
-  .. versionchanged:: 3.1
-    With the exception of the ``ALL`` value, these values can be combined
-    in order to customize the output. For example:
+    ``<TYPE>_PACKAGES_FOUND``
+      The list of only packages of type ``<TYPE>`` which have been found.
+    ``<TYPE>_PACKAGES_NOT_FOUND``
+      The list of only packages of type ``<TYPE>`` which have not been found.
+
+    .. versionchanged:: 3.1
+      The ``WHAT`` option is now a multi-value keyword, so that these values can
+      be combined, with the exception of the ``ALL`` value, in order to
+      customize the output.  For example:
 
     .. code-block:: cmake
 
       feature_summary(WHAT ENABLED_FEATURES DISABLED_FEATURES)
 
-  If a ``FILENAME`` is given, the information is printed into this file.  If
-  ``APPEND`` is used, it is appended to this file, otherwise the file is
-  overwritten if it already existed.  If the VAR option is used, the
-  information is "printed" into the specified variable.  If ``FILENAME`` is
-  not used, the information is printed to the terminal.  Using the
-  ``DESCRIPTION`` option a description or headline can be set which will be
-  printed above the actual content.  If only one type of
-  package was requested, no title is printed, unless it is explicitly set using
-  either ``DESCRIPTION`` to use a custom string, or ``DEFAULT_DESCRIPTION`` to
-  use a default title for the requested type.
-  If ``INCLUDE_QUIET_PACKAGES`` is given, packages which have been searched with
-  ``find_package(... QUIET)`` will also be listed. By default they are skipped.
-  If ``FATAL_ON_MISSING_REQUIRED_PACKAGES`` is given, CMake will abort if a
-  package which is marked as one of the package types listed in the
-  :variable:`FeatureSummary_REQUIRED_PKG_TYPES` global property has not been
-  found.
-  The default value for the :variable:`FeatureSummary_REQUIRED_PKG_TYPES` global
-  property is ``REQUIRED``.
+  ``FILENAME <file>``
+    If this option is given, the information is printed into this file instead
+    of the terminal.  Relative ``<file>`` path is interpreted as being relative
+    to the current source directory (i.e. :variable:`CMAKE_CURRENT_SOURCE_DIR`).
 
-  .. versionadded:: 3.9
-    The ``DEFAULT_DESCRIPTION`` option.
+  ``APPEND``
+    If this option is given, the output is appended to the ``<file>`` provided
+    by the ``FILENAME`` option, otherwise the file is overwritten if it already
+    exists.
+
+  ``VAR <variable_name>``
+    If this option is given, the information is stored into the specified
+    variable ``<variable_name>`` instead of the terminal.
+
+  ``DESCRIPTION <description>``
+    A description or headline which will be printed above the actual content.
+    Without this option, if only one package type was requested, no title is
+    printed, unless a custom string is explicitly set using this option or
+    ``DEFAULT_DESCRIPTION`` option is used that outputs a default title for the
+    requested type.
+
+  ``DEFAULT_DESCRIPTION``
+    .. versionadded:: 3.9
+
+    The default description or headline to be printed above the content as
+    opposed to the customizable ``DESCRIPTION <description>``.
+
+  ``INCLUDE_QUIET_PACKAGES``
+    If this option is given, packages which have been searched with
+    :command:`find_package(... QUIET)` will also be listed.  By default they are
+    skipped.
+
+  ``FATAL_ON_MISSING_REQUIRED_PACKAGES``
+    If this option is given, CMake will abort with fatal error if a package
+    which is marked as one of the package types listed in the
+    :variable:`FeatureSummary_REQUIRED_PKG_TYPES` global property has not been
+    found.
 
   The :variable:`FeatureSummary_DEFAULT_PKG_TYPE` global property can be
   modified to change the default package type assigned when not explicitly
   assigned by the user.
 
-  .. versionadded:: 3.8
-    If the ``QUIET_ON_EMPTY`` option is used, if only one type of package was
-    requested, and no packages belonging to that category were found, then no
-    output (including the ``DESCRIPTION``) is printed or added to the ``VAR``
-    variable.
+  ``QUIET_ON_EMPTY``
+    .. versionadded:: 3.8
+
+    If this option is given, when only one package type was requested, and no
+    packages belonging to that category were found, then no output (including
+    the ``DESCRIPTION``) is printed nor added to the ``FILENAME``, or the
+    ``VAR`` variable.
 
   Example 1, append everything to a file:
 
@@ -295,32 +328,32 @@ endfunction()
                    FILENAME ${CMAKE_BINARY_DIR}/all.log APPEND)
 
   Example 2, print the enabled features into the variable
-  enabledFeaturesText, including QUIET packages:
+  ``enabledFeaturesText``, including the ``QUIET`` packages:
 
   .. code-block:: cmake
 
-   include(FeatureSummary)
-   feature_summary(WHAT ENABLED_FEATURES
+    include(FeatureSummary)
+    feature_summary(WHAT ENABLED_FEATURES
                    INCLUDE_QUIET_PACKAGES
                    DESCRIPTION "Enabled Features:"
                    VAR enabledFeaturesText)
-   message(STATUS "${enabledFeaturesText}")
+    message(STATUS "${enabledFeaturesText}")
 
-  Example 3, change default package types and print only the categories that
-  are not empty:
+  Example 3, add custom package type and print only the categories that are not
+  empty:
 
   .. code-block:: cmake
 
-   include(FeatureSummary)
-   set_property(GLOBAL APPEND PROPERTY FeatureSummary_PKG_TYPES BUILD)
-   find_package(FOO)
-   set_package_properties(FOO PROPERTIES TYPE BUILD)
-   feature_summary(WHAT BUILD_PACKAGES_FOUND
-                   Description "Build tools found:"
-                   QUIET_ON_EMPTY)
-   feature_summary(WHAT BUILD_PACKAGES_NOT_FOUND
-                   Description "Build tools not found:"
-                   QUIET_ON_EMPTY)
+    include(FeatureSummary)
+    set_property(GLOBAL APPEND PROPERTY FeatureSummary_PKG_TYPES BUILD)
+    find_package(FOO)
+    set_package_properties(FOO PROPERTIES TYPE BUILD)
+    feature_summary(WHAT BUILD_PACKAGES_FOUND
+                    DESCRIPTION "Build tools found:"
+                    QUIET_ON_EMPTY)
+    feature_summary(WHAT BUILD_PACKAGES_NOT_FOUND
+                    DESCRIPTION "Build tools not found:"
+                    QUIET_ON_EMPTY)
 
 #]=======================================================================]
 
@@ -471,28 +504,32 @@ endfunction()
 #[=======================================================================[.rst:
 .. command:: set_package_properties
 
-  ::
+  .. code-block:: cmake
 
     set_package_properties(<name> PROPERTIES
-                           [ URL <url> ]
-                           [ DESCRIPTION <description> ]
-                           [ TYPE (RUNTIME|OPTIONAL|RECOMMENDED|REQUIRED) ]
-                           [ PURPOSE <purpose> ]
+                           [URL <url>]
+                           [DESCRIPTION <description>]
+                           [TYPE (RUNTIME|OPTIONAL|RECOMMENDED|REQUIRED)]
+                           [PURPOSE <purpose>]
                           )
 
-  Use this macro to set up information about the named package, which
-  can then be displayed via FEATURE_SUMMARY().  This can be done either
-  directly in the Find-module or in the project which uses the module
-  after the find_package() call.  The features for which information can
-  be set are added automatically by the find_package() command.
+  Use this function to configure and provide information about the package named
+  ``<name>``, which can then be displayed using the
+  :command:`feature_summary()` command.  This can be performed either directly
+  within the corresponding :ref:`Find module <Find Modules>` or in the project
+  that uses the module after invoking the :command:`find_package()` call.  The
+  features for which information can be set are determined automatically after
+  the :command:`find_package()` command.
 
   ``URL <url>``
     This should be the homepage of the package, or something similar.
-    Ideally this is set already directly in the Find-module.
+    Ideally this is set already directly in the
+    :ref:`Find module <Find Modules>`.
 
   ``DESCRIPTION <description>``
     A short description what that package is, at most one sentence.
-    Ideally this is set already directly in the Find-module.
+    Ideally this is set already directly in the
+    :ref:`Find module <Find Modules>`.
 
   ``TYPE <type>``
     What type of dependency has the using project on that package.
@@ -502,36 +539,38 @@ endfunction()
     the package is not present, but the functionality of the resulting
     binaries will be severely limited.  If a ``REQUIRED`` package is not
     available at buildtime, the project may not even build.  This can be
-    combined with the ``FATAL_ON_MISSING_REQUIRED_PACKAGES`` argument for
-    ``feature_summary()``.  Last, a ``RUNTIME`` package is a package which is
-    actually not used at all during the build, but which is required for
-    actually running the resulting binaries.  So if such a package is
+    combined with the
+    :command:`feature_summary(FATAL_ON_MISSING_REQUIRED_PACKAGES)` command
+    option.  Last, a ``RUNTIME`` package is a package which is actually not used
+    at all during the build, but which is required for actually running the
+    resulting binaries.  So if such a package is
     missing, the project can still be built, but it may not work later on.
     If ``set_package_properties()`` is called multiple times for the same
     package with different TYPEs, the ``TYPE`` is only changed to higher
     TYPEs (``RUNTIME < OPTIONAL < RECOMMENDED < REQUIRED``), lower TYPEs are
     ignored.  The ``TYPE`` property is project-specific, so it cannot be set
-    by the Find-module, but must be set in the project.
-    Type accepted can be changed by setting the
+    by the :ref:`Find module <Find Modules>`, but must be set in the project.
+    The accepted types can be changed by setting the
     :variable:`FeatureSummary_PKG_TYPES` global property.
 
   ``PURPOSE <purpose>``
     This describes which features this package enables in the
-    project, i.e.  it tells the user what functionality he gets in the
-    resulting binaries.  If set_package_properties() is called multiple
-    times for a package, all PURPOSE properties are appended to a list of
-    purposes of the package in the project.  As the TYPE property, also
-    the PURPOSE property is project-specific, so it cannot be set by the
-    Find-module, but must be set in the project.
+    project, i.e.  it tells the user what functionality they get in the
+    resulting binaries.  If ``set_package_properties()`` is called multiple
+    times for a package, all ``PURPOSE`` properties are appended to a list of
+    purposes of the package in the project.  As the ``TYPE`` property, also
+    the ``PURPOSE`` property is project-specific, so it cannot be set by the
+    :ref:`Find module <Find Modules>`, but must be set in the project.
 
   Example for setting the info for a package:
 
   .. code-block:: cmake
 
+    include(FeatureSummary)
     find_package(LibXml2)
     set_package_properties(LibXml2 PROPERTIES
-                           DESCRIPTION "A XML processing library."
-                           URL "http://xmlsoft.org/")
+                           DESCRIPTION "XML library"
+                           URL "http://xmlsoft.org")
     # or
     set_package_properties(LibXml2 PROPERTIES
                            TYPE RECOMMENDED
@@ -615,15 +654,15 @@ endfunction()
 #[=======================================================================[.rst:
 .. command:: add_feature_info
 
-  ::
+  .. code-block:: cmake
 
     add_feature_info(<name> <enabled> <description>)
 
-  Use this macro to add information about a feature with the given ``<name>``.
-  ``<enabled>`` contains whether this feature is enabled or not. It can be a
-  variable or a list of conditions.
+  Use this function to add information about a feature identified with a given
+  ``<name>``.  The ``<enabled>`` contains whether this feature is enabled or
+  not.  It can be a variable or a list of conditions.
   ``<description>`` is a text describing the feature.  The information can
-  be displayed using ``feature_summary()`` for ``ENABLED_FEATURES`` and
+  be displayed using :command:`feature_summary()` for ``ENABLED_FEATURES`` and
   ``DISABLED_FEATURES`` respectively.
 
   .. versionchanged:: 3.8
@@ -637,8 +676,10 @@ endfunction()
 
   .. code-block:: cmake
 
-     option(WITH_FOO "Help for foo" ON)
-     add_feature_info(Foo WITH_FOO "this feature provides very cool stuff")
+    include(FeatureSummary)
+
+    option(WITH_FOO "Help for foo" ON)
+    add_feature_info(Foo WITH_FOO "this feature provides very cool stuff")
 
   Example for setting feature info based on a list of conditions:
 
@@ -712,23 +753,29 @@ endfunction()
 # The stuff below is only kept for compatibility
 
 #[=======================================================================[.rst:
-Legacy Macros
-^^^^^^^^^^^^^
+Deprecated Functions
+^^^^^^^^^^^^^^^^^^^^
 
-The following macros are provided for compatibility with previous
-CMake versions:
+The following legacy and deprecated functions are provided for backward
+compatibility with previous CMake versions:
 
 .. command:: set_package_info
 
-  ::
+  .. deprecated:: 3.8
+
+  .. code-block:: cmake
 
     set_package_info(<name> <description> [ <url> [<purpose>] ])
 
-  Use this macro to set up information about the named package, which
-  can then be displayed via ``feature_summary()``.  This can be done either
-  directly in the Find-module or in the project which uses the module
-  after the :command:`find_package` call.  The features for which information
-  can be set are added automatically by the ``find_package()`` command.
+  Set up information about the package ``<name>``, which can then be displayed
+  via :command:`feature_summary()`.  This can be done either directly in the
+  :ref:`Find module <Find Modules>` or in the project which uses the
+  ``FeatureSummary`` module after the :command:`find_package()` call.  The
+  features for which information can be set are added automatically by the
+  ``find_package()`` command.
+
+  This function is deprecated.  Use the :command:`set_package_properties()`, and
+  :command:`add_feature_info()` functions instead.
 #]=======================================================================]
 function(SET_PACKAGE_INFO _name _desc)
   message(DEPRECATION "SET_PACKAGE_INFO is deprecated. Use SET_PACKAGE_PROPERTIES instead.")
@@ -752,13 +799,17 @@ endfunction()
 #[=======================================================================[.rst:
 .. command:: set_feature_info
 
-  ::
+  .. deprecated:: 3.8
+
+  .. code-block:: cmake
 
     set_feature_info(<name> <description> [<url>])
 
-  Does the same as::
+  Does the same as:
 
-    set_package_info(<name> <description> <url>)
+  .. code-block:: cmake
+
+    set_package_info(<name> <description> [<url>])
 #]=======================================================================]
 function(SET_FEATURE_INFO)
   message(DEPRECATION "SET_FEATURE_INFO is deprecated. Use ADD_FEATURE_INFO instead.")
@@ -768,11 +819,13 @@ endfunction()
 #[=======================================================================[.rst:
 .. command:: print_enabled_features
 
-  ::
+  .. deprecated:: 3.8
+
+  .. code-block:: cmake
 
     print_enabled_features()
 
-  Does the same as
+  Does the same as:
 
   .. code-block:: cmake
 
@@ -787,11 +840,13 @@ endfunction()
 #[=======================================================================[.rst:
 .. command:: print_disabled_features
 
-  ::
+  .. deprecated:: 3.8
+
+  .. code-block:: cmake
 
     print_disabled_features()
 
-  Does the same as
+  Does the same as:
 
   .. code-block:: cmake
 
