@@ -195,7 +195,7 @@ syn keyword cmakeProperty contained
             \ FOLDER
             \ FRAMEWORK
             \ FRAMEWORK_VERSION
-            \ Fortran_BUILDING_INSTRINSIC_MODULES
+            \ Fortran_BUILDING_INTRINSIC_MODULES
             \ Fortran_FORMAT
             \ Fortran_MODULE_DIRECTORY
             \ Fortran_PREPROCESS
