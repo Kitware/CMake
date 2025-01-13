@@ -2,7 +2,8 @@
   "version": 6,
   "configurePresets": [
     {
-      "name": "default"
+      "name": "default",
+      "generator": "@RunCMake_GENERATOR@"
     }
   ],
   "packagePresets": [
