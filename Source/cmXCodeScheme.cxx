@@ -74,8 +74,13 @@ void cmXCodeScheme::WriteXCodeXCScheme(std::ostream& fout,
   std::string launchConfiguration =
     !propDftCfg.IsEmpty() ? *propDftCfg : "Debug";
 
+  cmValue propTstCfg =
+    Target->GetTarget()->GetProperty("XCODE_SCHEME_TEST_CONFIGURATION");
+  std::string testConfiguration =
+    !propTstCfg.IsEmpty() ? *propTstCfg : "Debug";
+
   WriteBuildAction(xout, container);
-  WriteTestAction(xout, FindConfiguration("Debug"), container);
+  WriteTestAction(xout, FindConfiguration(testConfiguration), container);
   WriteLaunchAction(xout, FindConfiguration(launchConfiguration), container);
   WriteProfileAction(xout, FindConfiguration("Release"), container);
   WriteAnalyzeAction(xout, FindConfiguration("Debug"));

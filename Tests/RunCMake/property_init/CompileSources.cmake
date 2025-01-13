@@ -194,6 +194,7 @@ if (CMAKE_HOST_APPLE) # compile-guarded in CMake
       "XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER"      "ON"          "<SAME>"
       "XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER_STOP" "ON"          "<SAME>"
       "XCODE_SCHEME_LAUNCH_CONFIGURATION"               "ON"          "<SAME>"
+      "XCODE_SCHEME_TEST_CONFIGURATION"                 "ON"          "<SAME>"
       "XCODE_SCHEME_ENABLE_GPU_API_VALIDATION"          "ON"          "<SAME>"
       "XCODE_SCHEME_ENABLE_GPU_SHADER_VALIDATION"       "ON"          "<SAME>"
       "XCODE_SCHEME_WORKING_DIRECTORY"                  "ON"          "<SAME>"
