@@ -3009,9 +3009,19 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   // Find resources relative to our own executable.
   std::string exe_dir = cmSystemTools::GetFilenamePath(exe);
   bool found = false;
+  // When running through a symlink to our own executable,
+  // preserve symlinks in directory components if possible.
   do {
     found = FindCMakeResourcesInInstallTree(exe_dir);
   } while (!found && ResolveSymlinkToOwnExecutable(exe, exe_dir));
+  // If we have not yet found the resources, the above loop will
+  // have left 'exe' referring to a real file, not a symlink, so
+  // all our binaries should exist under 'exe_dir'.  However, the
+  // resources may be discoverable only in the real path.
+  if (!found) {
+    found =
+      FindCMakeResourcesInInstallTree(cmSystemTools::GetRealPath(exe_dir));
+  }
   if (!found) {
     FindCMakeResourcesInBuildTree(exe_dir);
   }
