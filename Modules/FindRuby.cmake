@@ -196,7 +196,7 @@ function(_RUBY_CONFIG_VAR RBVAR OUTVAR)
   set(${OUTVAR} "${_Ruby_OUTPUT}" PARENT_SCOPE)
 endfunction()
 
-####  Check RMV virtual environment ###
+####  Check RVM virtual environment ###
 function (_RUBY_CHECK_RVM)
   if (NOT DEFINED ENV{MY_RUBY_HOME})
     return()
@@ -232,15 +232,13 @@ function (_RUBY_CHECK_SYSTEM)
   endif()
 endfunction()
 
-# Find Ruby! First check virtual environments
-if(Ruby_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
-  if(NOT Ruby_EXECUTABLE)
-    _RUBY_CHECK_RVM()
-  endif()
+# Find Ruby
+if(NOT Ruby_EXECUTABLE AND Ruby_FIND_VIRTUALENV MATCHES "^(FIRST|ONLY)$")
+  _RUBY_CHECK_RVM()
 endif()
 
-# If we did not find a virtual environment then look for a system installed Ruby
-if(NOT ${Ruby_FIND_VIRTUALENV} STREQUAL "ONLY" AND NOT Ruby_EXECUTABLE)
+# Check for system installed Ruby
+if(NOT Ruby_EXECUTABLE AND NOT Ruby_FIND_VIRTUALENV STREQUAL "ONLY")
   _RUBY_CHECK_SYSTEM()
 endif()
 
@@ -361,7 +359,6 @@ if( Ruby_FIND_VERSION VERSION_GREATER_EQUAL "1.9"  OR  Ruby_VERSION VERSION_GREA
 
   set(Ruby_INCLUDE_DIRS ${Ruby_INCLUDE_DIRS} ${Ruby_CONFIG_INCLUDE_DIR} )
 endif()
-
 
 # Determine the list of possible names for the ruby library
 set(_Ruby_POSSIBLE_LIB_NAMES ruby ruby-static ruby${_Ruby_VERSION_SHORT} ruby${_Ruby_VERSION_SHORT_NODOT} ruby${_Ruby_NODOT_VERSION} ruby-${_Ruby_VERSION_SHORT} ruby-${Ruby_VERSION})
