@@ -174,11 +174,11 @@ Options:
   The option following ``COMMAND_ERROR_IS_FATAL`` determines the behavior when
   an error is encountered:
 
-    ``ANY``
+  ``ANY``
     If any of the commands in the list of commands fail, the
     ``execute_process()`` command halts with an error.
 
-    ``LAST``
+  ``LAST``
     If the last command in the list of commands fails, the
-    ``execute_process()`` command halts with an error.  Commands earlier in the
-    list will not cause a fatal error.
+    ``execute_process()`` command halts with an error.
+    Commands earlier in the list will not cause a fatal error.
