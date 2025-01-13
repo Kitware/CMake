@@ -440,6 +440,31 @@ can be controlled with the following variable:
   * If set to ``FALSE`` or undefined: Enable multiple version/component
     requirements.
 
+``Python2_ARTIFACTS_PREFIX``
+  .. versionadded:: 3.32
+
+  Define a custom prefix which will be used for the definition of all the
+  result variables, targets, and commands. By using this variable, this module
+  supports multiple calls in the same directory with different
+  version/component requirements.
+  For example, in case of cross-compilation, development components are needed
+  but the native python interpreter can also be required:
+
+  .. code-block:: cmake
+
+    find_package(Python2 COMPONENTS Development)
+
+    set(Python2_ARTIFACTS_PREFIX "_HOST")
+    find_package(Python2 COMPONENTS Interpreter)
+
+    # Here Python2_HOST_EXECUTABLE and Python2_HOST::Interpreter artifacts are defined
+
+  .. note::
+
+    For consistency with standard behavior of modules, the various standard
+    ``_FOUND`` variables (i.e. without the custom prefix) are also defined by
+    each call to the :command:`find_package` command.
+
 Commands
 ^^^^^^^^
 
@@ -460,16 +485,23 @@ If library type is not specified, ``MODULE`` is assumed.
 #]=======================================================================]
 
 
-set (_PYTHON_PREFIX Python2)
+set (_PYTHON_BASE Python2)
+if(${_PYTHON_BASE}_ARTIFACTS_PREFIX)
+  set(_PYTHON_PREFIX "${_PYTHON_BASE}${${_PYTHON_BASE}_ARTIFACTS_PREFIX}")
+else()
+  set(_PYTHON_PREFIX "${_PYTHON_BASE}")
+endif()
 
-set (_Python2_REQUIRED_VERSION_MAJOR 2)
+set (_${_PYTHON_PREFIX}_REQUIRED_VERSION_MAJOR 2)
 
 include (${CMAKE_CURRENT_LIST_DIR}/FindPython/Support.cmake)
 
-if (COMMAND __Python2_add_library)
-  macro (Python2_add_library)
-    __Python2_add_library (Python2 ${ARGV})
-  endmacro()
+if (COMMAND __${_PYTHON_PREFIX}_add_library AND NOT COMMAND ${_PYTHON_PREFIX}_add_library)
+  cmake_language(EVAL CODE
+    "macro (${_PYTHON_PREFIX}_add_library)
+       __${_PYTHON_PREFIX}_add_library (${_PYTHON_PREFIX} \${ARGV})
+     endmacro()")
 endif()
 
+unset (_PYTHON_BASE)
 unset (_PYTHON_PREFIX)
