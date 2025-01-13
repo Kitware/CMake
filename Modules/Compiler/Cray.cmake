@@ -14,4 +14,6 @@ macro(__compiler_cray lang)
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC -h PIC)
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIE -h PIC)
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "-h PIC")
+
+  set(CMAKE_${lang}_LINK_MODE DRIVER)
 endmacro()

@@ -27,6 +27,8 @@ macro(__compiler_fujitsu lang)
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Wl,")
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP ",")
 
+  set(CMAKE_${lang}_LINK_MODE DRIVER)
+
   # IPO flag
   set(_CMAKE_${lang}_IPO_SUPPORTED_BY_CMAKE YES)
   if ("${lang}" STREQUAL "Fortran")

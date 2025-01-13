@@ -22,6 +22,8 @@ macro(__compiler_intel_llvm_common lang)
   set(CMAKE_${lang}_ARCHIVE_CREATE_IPO "\"${CMAKE_${lang}_COMPILER_AR}\" qc <TARGET> <LINK_FLAGS> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_APPEND_IPO "\"${CMAKE_${lang}_COMPILER_AR}\" q <TARGET> <LINK_FLAGS> <OBJECTS>")
   set(CMAKE_${lang}_ARCHIVE_FINISH_IPO "\"${CMAKE_${lang}_COMPILER_RANLIB}\" <TARGET>")
+
+  set(CMAKE_${lang}_LINK_MODE DRIVER)
 endmacro()
 
 if(CMAKE_HOST_WIN32)
@@ -72,6 +74,8 @@ else()
 
     set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Wl,")
     set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP ",")
+
+    set(CMAKE_${lang}_LINK_MODE DRIVER)
 
     # distcc does not transform -o to -MT when invoking the preprocessor
     # internally, as it ought to.  Work around this bug by setting -MT here

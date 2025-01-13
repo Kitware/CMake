@@ -30,6 +30,8 @@ macro(__compiler_armcc lang)
   set(CMAKE_${lang}_OUTPUT_EXTENSION_REPLACE 1)
   set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "--via=")
 
+  set(CMAKE_${lang}_LINK_MODE LINKER)
+
   set(CMAKE_${lang}_LINK_EXECUTABLE      "<CMAKE_LINKER> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <LINK_LIBRARIES> <OBJECTS> -o <TARGET> --list <TARGET_BASE>.map")
   set(CMAKE_${lang}_CREATE_STATIC_LIBRARY  "<CMAKE_AR> --create -cr <TARGET> <LINK_FLAGS> <OBJECTS>")
 

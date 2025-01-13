@@ -6,6 +6,8 @@ set(CMAKE_CXX_CREATE_PREPROCESSED_SOURCE "<CMAKE_CXX_COMPILER> <DEFINES> <INCLUD
 set(CMAKE_CXX_LINKER_WRAPPER_FLAG "-Wl,")
 set(CMAKE_CXX_LINKER_WRAPPER_FLAG_SEP ",")
 
+set(CMAKE_CXX_LINK_MODE DRIVER)
+
 # HP aCC since version 3.80 supports the flag +hpxstd98 to get ANSI C++98
 # template support. It is known that version 6.25 doesn't need that flag.
 # Current assumption: the flag is needed for every version from 3.80 to 4

@@ -12,3 +12,5 @@ set(CMAKE_Fortran_PREPROCESS_SOURCE "<CMAKE_Fortran_COMPILER> --cpp <DEFINES> <I
 set(CMAKE_Fortran_COMPILE_OBJECT "<CMAKE_Fortran_COMPILER> --cpp-infer <DEFINES> <INCLUDES> <FLAGS> -c <SOURCE> -o <OBJECT>")
 set(CMAKE_SHARED_LIBRARY_CREATE_Fortran_FLAGS "--shared")
 set(CMAKE_SHARED_LIBRARY_LINK_Fortran_FLAGS "-Wl,-export-dynamic")
+
+set(CMAKE_Fortran_LINK_MODE DRIVER)

@@ -18,4 +18,6 @@ macro(__compiler_sco lang)
 
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Wl,")
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP ",")
+
+  set(CMAKE_${lang}_LINK_MODE DRIVER)
 endmacro()

@@ -12,6 +12,8 @@ macro(__compiler_pathscale lang)
   # Feature flags.
   set(CMAKE_${lang}_VERBOSE_FLAG "-v")
 
+  set(CMAKE_${lang}_LINK_MODE DRIVER)
+
   # Initial configuration flags.
   string(APPEND CMAKE_${lang}_FLAGS_INIT " ")
   string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -g -O0")
