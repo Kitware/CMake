@@ -120,8 +120,6 @@ if(NOT DEFINED Ruby_FIND_VERSION_MAJOR)
   set(Ruby_FIND_VERSION_PATCH 0)
 endif()
 
-set(Ruby_FIND_VERSION_SHORT_NODOT "${Ruby_FIND_VERSION_MAJOR}${Ruby_FIND_VERSION_MINOR}")
-
 # Set name of possible executables, ignoring the minor
 # Eg:
 # 3.2.6 => from ruby34 to ruby32 included
