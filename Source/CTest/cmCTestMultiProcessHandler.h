@@ -13,6 +13,7 @@
 #include <vector>
 
 #include <cm/optional>
+#include <cm/string_view>
 
 #include "cmCTest.h"
 #include "cmCTestResourceAllocator.h"
@@ -110,7 +111,7 @@ protected:
   void UpdateCostData();
   void ReadCostData();
   // Return index of a test based on its name
-  int SearchByName(std::string const& name);
+  int SearchByName(cm::string_view name);
 
   void CreateTestCostList();
 
