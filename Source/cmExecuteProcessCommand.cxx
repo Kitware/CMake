@@ -177,12 +177,25 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
     }
   }
 
-  if (!arguments.CommandErrorIsFatal.empty()) {
-    if (arguments.CommandErrorIsFatal != "ANY"_s &&
-        arguments.CommandErrorIsFatal != "LAST"_s) {
-      status.SetError("COMMAND_ERROR_IS_FATAL option can be ANY or LAST");
+  std::string commandErrorIsFatal = arguments.CommandErrorIsFatal;
+  if (commandErrorIsFatal.empty() && arguments.ResultVariable.empty() &&
+      arguments.ResultsVariable.empty()) {
+    commandErrorIsFatal = status.GetMakefile().GetSafeDefinition(
+      "CMAKE_EXECUTE_PROCESS_COMMAND_ERROR_IS_FATAL");
+  }
+
+  if (!commandErrorIsFatal.empty() && commandErrorIsFatal != "ANY"_s &&
+      commandErrorIsFatal != "LAST"_s && commandErrorIsFatal != "NONE"_s) {
+    if (!arguments.CommandErrorIsFatal.empty()) {
+      status.SetError(
+        "COMMAND_ERROR_IS_FATAL option can be ANY, LAST or NONE");
       return false;
     }
+    status.SetError(cmStrCat(
+      "Using CMAKE_EXECUTE_PROCESS_COMMAND_ERROR_IS_FATAL with invalid value "
+      "\"",
+      commandErrorIsFatal, "\". This variable can be ANY, LAST or NONE"));
+    return false;
   }
   // Create a process instance.
   cmUVProcessChainBuilder builder;
@@ -479,7 +492,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
                     exception.second);
   };
 
-  if (arguments.CommandErrorIsFatal == "ANY"_s) {
+  if (commandErrorIsFatal == "ANY"_s) {
     bool ret = true;
     if (timedOut) {
       status.SetError("Process terminated due to timeout");
@@ -510,7 +523,7 @@ bool cmExecuteProcessCommand(std::vector<std::string> const& args,
     }
   }
 
-  if (arguments.CommandErrorIsFatal == "LAST"_s) {
+  if (commandErrorIsFatal == "LAST"_s) {
     bool ret = true;
     if (timedOut) {
       status.SetError("Process terminated due to timeout");
