@@ -1824,7 +1824,10 @@ void cmGlobalGenerator::WriteInstallJson() const
     for (const auto& file : this->InstallScripts) {
       index["InstallScripts"].append(file);
     }
-    this->WriteJsonContent("CMakeFiles/InstallScripts.json", index);
+    this->WriteJsonContent(
+      cmStrCat(this->CMakeInstance->GetHomeOutputDirectory(),
+               "/CMakeFiles/InstallScripts.json"),
+      index);
   }
 }
 #endif
