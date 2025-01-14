@@ -60,6 +60,7 @@ public:
   bool IsSynthetic() const;
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
+  bool IsForeign() const;
   bool CanCompileSources() const;
   bool HasKnownRuntimeArtifactLocation(std::string const& config) const;
   const std::string& GetLocation(const std::string& config) const;

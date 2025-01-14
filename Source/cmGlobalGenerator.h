@@ -25,6 +25,7 @@
 #include "cmExportSet.h"
 #include "cmLocalGenerator.h"
 #include "cmStateSnapshot.h"
+#include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -380,7 +381,9 @@ public:
 
   //! Find a target by name by searching the local generators.
   cmTarget* FindTarget(const std::string& name,
-                       bool excludeAliases = false) const;
+                       cmStateEnums::TargetDomainSet domains = {
+                         cmStateEnums::TargetDomain::NATIVE,
+                         cmStateEnums::TargetDomain::ALIAS }) const;
 
   cmGeneratorTarget* FindGeneratorTarget(const std::string& name) const;
 
@@ -783,7 +786,8 @@ protected:
 
   std::map<std::string, std::string> AliasTargets;
 
-  cmTarget* FindTargetImpl(std::string const& name) const;
+  cmTarget* FindTargetImpl(std::string const& name,
+                           cmStateEnums::TargetDomainSet domains) const;
 
   cmGeneratorTarget* FindGeneratorTargetImpl(std::string const& name) const;
 

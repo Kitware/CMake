@@ -260,6 +260,9 @@ public:
   cmTarget* AddImportedTarget(const std::string& name,
                               cmStateEnums::TargetType type, bool global);
 
+  cmTarget* AddForeignTarget(const std::string& origin,
+                             const std::string& name);
+
   std::pair<cmTarget&, bool> CreateNewTarget(
     const std::string& name, cmStateEnums::TargetType type,
     cmTarget::PerConfig perConfig = cmTarget::PerConfig::Yes,
@@ -493,7 +496,9 @@ public:
   /** Find a target to use in place of the given name.  The target
       returned may be imported or built within the project.  */
   cmTarget* FindTargetToUse(const std::string& name,
-                            bool excludeAliases = false) const;
+                            cmStateEnums::TargetDomainSet domains = {
+                              cmStateEnums::TargetDomain::NATIVE,
+                              cmStateEnums::TargetDomain::ALIAS }) const;
   bool IsAlias(const std::string& name) const;
 
   std::map<std::string, std::string> GetAliasTargets() const

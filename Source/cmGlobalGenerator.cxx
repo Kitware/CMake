@@ -1929,7 +1929,8 @@ bool cmGlobalGenerator::AddHeaderSetVerification()
   }
 
   cmTarget* allVerifyTarget = this->Makefiles.front()->FindTargetToUse(
-    "all_verify_interface_header_sets", true);
+    "all_verify_interface_header_sets",
+    { cmStateEnums::TargetDomain::NATIVE });
   if (allVerifyTarget) {
     this->LocalGenerators.front()->AddGeneratorTarget(
       cm::make_unique<cmGeneratorTarget>(allVerifyTarget,
@@ -2671,11 +2672,18 @@ void cmGlobalGenerator::IndexLocalGenerator(cmLocalGenerator* lg)
   this->LocalGeneratorSearchIndex[id.String] = lg;
 }
 
-cmTarget* cmGlobalGenerator::FindTargetImpl(std::string const& name) const
+cmTarget* cmGlobalGenerator::FindTargetImpl(
+  std::string const& name, cmStateEnums::TargetDomainSet domains) const
 {
+  bool const useForeign =
+    domains.contains(cmStateEnums::TargetDomain::FOREIGN);
+  bool const useNative = domains.contains(cmStateEnums::TargetDomain::NATIVE);
+
   auto const it = this->TargetSearchIndex.find(name);
   if (it != this->TargetSearchIndex.end()) {
-    return it->second;
+    if (it->second->IsForeign() ? useForeign : useNative) {
+      return it->second;
+    }
   }
   return nullptr;
 }
@@ -2690,16 +2698,16 @@ cmGeneratorTarget* cmGlobalGenerator::FindGeneratorTargetImpl(
   return nullptr;
 }
 
-cmTarget* cmGlobalGenerator::FindTarget(const std::string& name,
-                                        bool excludeAliases) const
+cmTarget* cmGlobalGenerator::FindTarget(
+  const std::string& name, cmStateEnums::TargetDomainSet domains) const
 {
-  if (!excludeAliases) {
+  if (domains.contains(cmStateEnums::TargetDomain::ALIAS)) {
     auto const ai = this->AliasTargets.find(name);
     if (ai != this->AliasTargets.end()) {
-      return this->FindTargetImpl(ai->second);
+      return this->FindTargetImpl(ai->second, domains);
     }
   }
-  return this->FindTargetImpl(name);
+  return this->FindTargetImpl(name, domains);
 }
 
 cmGeneratorTarget* cmGlobalGenerator::FindGeneratorTarget(
