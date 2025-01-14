@@ -92,10 +92,12 @@ private:
     static PathLabel SystemRegistry;
   };
 
+  void InheritOptions(cmFindPackageCommand* other);
+
   // Try to find a package, assuming most state has already been set up. This
   // is used for recursive dependency solving, particularly when importing
   // packages via CPS. Bypasses providers if argsForProvider is empty.
-  bool FindPackage(std::vector<std::string> const& argsForProvider);
+  bool FindPackage(std::vector<std::string> const& argsForProvider = {});
 
   bool FindPackageUsingModuleMode();
   bool FindPackageUsingConfigMode();
@@ -137,9 +139,17 @@ private:
     DoPolicyScope
   };
   bool ReadListFile(const std::string& f, PolicyScopeRule psr);
-  bool ImportTargetConfigurations(std::string const& base,
-                                  cmPackageInfoReader* parent);
-  bool ImportAppendices(std::string const& base);
+  bool ReadPackage();
+
+  using AppendixMap =
+    std::map<std::string, std::unique_ptr<cmPackageInfoReader>>;
+  AppendixMap FindAppendices(std::string const& base) const;
+  bool FindPackageDependencies(std::string const& fileName,
+                               cmPackageInfoReader const& reader,
+                               bool required);
+
+  bool ImportPackageTargets(std::string const& fileName,
+                            cmPackageInfoReader& reader);
   void StoreVersionFound();
   void SetConfigDirCacheVariable(const std::string& value);
 

@@ -20,6 +20,14 @@ class cmExecutionStatus;
 class cmMakefile;
 class cmTarget;
 
+struct cmPackageRequirement
+{
+  std::string Name;
+  std::string Version;
+  std::vector<std::string> Components;
+  std::vector<std::string> Hints;
+};
+
 /** \class cmPackageInfoReader
  * \brief Read and parse CPS files.
  *
@@ -40,6 +48,8 @@ public:
   /// a numeric tuple.  Returns an empty vector for other schemes or if no
   /// version is specified.
   std::vector<unsigned> ParseVersion() const;
+
+  std::vector<cmPackageRequirement> GetRequirements() const;
 
   /// Create targets for components specified in the CPS file.
   bool ImportTargets(cmMakefile* makefile, cmExecutionStatus& status);

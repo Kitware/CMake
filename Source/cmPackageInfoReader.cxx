@@ -464,6 +464,23 @@ std::vector<unsigned> cmPackageInfoReader::ParseVersion() const
   return result;
 }
 
+std::vector<cmPackageRequirement> cmPackageInfoReader::GetRequirements() const
+{
+  std::vector<cmPackageRequirement> requirements;
+
+  auto const& requirementObjects = this->Data["requires"];
+
+  for (auto ri = requirementObjects.begin(), re = requirementObjects.end();
+       ri != re; ++ri) {
+    cmPackageRequirement r{ ri.name(), (*ri)["version"].asString(),
+                            ReadList(*ri, "components"),
+                            ReadList(*ri, "hints") };
+    requirements.emplace_back(std::move(r));
+  }
+
+  return requirements;
+}
+
 std::string cmPackageInfoReader::ResolvePath(std::string path) const
 {
   cmSystemTools::ConvertToUnixSlashes(path);
