@@ -176,7 +176,7 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
   // specification if the keyword is encountered as the first argument.
   ProcessingState currentProcessingState = ProcessingLinkLibraries;
 
-  // Accumulate consectuive non-keyword arguments into one entry in
+  // Accumulate consecutive non-keyword arguments into one entry in
   // order to handle unquoted generator expressions containing ';'.
   std::size_t genexNesting = 0;
   cm::optional<std::string> currentEntry;

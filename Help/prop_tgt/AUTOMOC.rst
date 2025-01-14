@@ -28,9 +28,9 @@ At configuration time, a list of header files that should be scanned by
   target's sources, CMake searches for
 
   - a regular header with the same base name
-    (``<source_base>.<header_extention>``) and
+    (``<source_base>.<header_extension>``) and
   - a private header with the same base name and a ``_p`` suffix
-    (``<source_base>_p.<header_extention>``)
+    (``<source_base>_p.<header_extension>``)
 
   and adds these to the scan list.
 

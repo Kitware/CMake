@@ -88,7 +88,7 @@ function(get_sanitized_dirname dirname outvar)
   #       defined in the C++ function `CPackGenerator::GetSanitizedDirOrFileName`!
   set(prohibited_chars_pattern "[<]|[>]|[\"]|[/]|[\\]|[|]|[?]|[*]|[`]")
   if("${dirname}" MATCHES "${prohibited_chars_pattern}")
-    string(MD5 santized_dirname "${dirname}")
+    string(MD5 sanitized_dirname "${dirname}")
     set(${outvar} "${sanitized_dirname}" PARENT_SCOPE)
   else()
     set(${outvar} "${dirname}" PARENT_SCOPE)

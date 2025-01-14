@@ -168,7 +168,7 @@ Deprecated and Removed Features
 
 * The :generator:`Xcode` generator was fixed to escape backslashes in
   strings consistently with other generators.  Projects that previously
-  worked around the inconsistecy with an extra level of backslashes
+  worked around the inconsistency with an extra level of backslashes
   conditioned on the Xcode generator must be updated to remove the
   workaround for CMake 3.5 and greater.
 

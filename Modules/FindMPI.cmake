@@ -439,25 +439,25 @@ function (_MPI_interrogate_compiler LANG)
   # It's possible to have a per-compiler configuration in these MPI implementations and
   # a particular MPICH derivate might check compiler interoperability.
   # Intel MPI in particular does this with I_MPI_CHECK_COMPILER.
-  file(TO_NATIVE_PATH "${CMAKE_${LANG}_COMPILER}" _MPI_UNDERLAYING_COMPILER)
+  file(TO_NATIVE_PATH "${CMAKE_${LANG}_COMPILER}" _MPI_UNDERLYING_COMPILER)
   # On Windows, the Intel MPI batch scripts can only work with filenames - Full paths will break them.
   # Due to the lack of other MPICH-based wrappers for Visual C++, we may treat this as default.
   if(MSVC)
-    get_filename_component(_MPI_UNDERLAYING_COMPILER "${_MPI_UNDERLAYING_COMPILER}" NAME)
+    get_filename_component(_MPI_UNDERLYING_COMPILER "${_MPI_UNDERLYING_COMPILER}" NAME)
   endif()
   if(LANG STREQUAL "C")
-    _MPI_env_set_ifnot(I_MPI_CC _MPI_UNDERLAYING_COMPILER)
-    _MPI_env_set_ifnot(MPICH_CC _MPI_UNDERLAYING_COMPILER)
+    _MPI_env_set_ifnot(I_MPI_CC _MPI_UNDERLYING_COMPILER)
+    _MPI_env_set_ifnot(MPICH_CC _MPI_UNDERLYING_COMPILER)
   elseif(LANG STREQUAL "CXX")
-    _MPI_env_set_ifnot(I_MPI_CXX _MPI_UNDERLAYING_COMPILER)
-    _MPI_env_set_ifnot(MPICH_CXX _MPI_UNDERLAYING_COMPILER)
+    _MPI_env_set_ifnot(I_MPI_CXX _MPI_UNDERLYING_COMPILER)
+    _MPI_env_set_ifnot(MPICH_CXX _MPI_UNDERLYING_COMPILER)
   elseif(LANG STREQUAL "Fortran")
-    _MPI_env_set_ifnot(I_MPI_FC _MPI_UNDERLAYING_COMPILER)
-    _MPI_env_set_ifnot(MPICH_FC _MPI_UNDERLAYING_COMPILER)
-    _MPI_env_set_ifnot(I_MPI_F77 _MPI_UNDERLAYING_COMPILER)
-    _MPI_env_set_ifnot(MPICH_F77 _MPI_UNDERLAYING_COMPILER)
-    _MPI_env_set_ifnot(I_MPI_F90 _MPI_UNDERLAYING_COMPILER)
-    _MPI_env_set_ifnot(MPICH_F90 _MPI_UNDERLAYING_COMPILER)
+    _MPI_env_set_ifnot(I_MPI_FC _MPI_UNDERLYING_COMPILER)
+    _MPI_env_set_ifnot(MPICH_FC _MPI_UNDERLYING_COMPILER)
+    _MPI_env_set_ifnot(I_MPI_F77 _MPI_UNDERLYING_COMPILER)
+    _MPI_env_set_ifnot(MPICH_F77 _MPI_UNDERLYING_COMPILER)
+    _MPI_env_set_ifnot(I_MPI_F90 _MPI_UNDERLYING_COMPILER)
+    _MPI_env_set_ifnot(MPICH_F90 _MPI_UNDERLYING_COMPILER)
   endif()
 
   # Set these two variables for Intel MPI:
@@ -1313,7 +1313,7 @@ macro(_MPI_check_lang_works LANG SUPPRESS_ERRORS)
           set(MPI_${LANG}_HAVE_${mpimethod} FALSE)
         endif()
       endforeach()
-      # MPI-1 versions had no MPI_INTGER_KIND defined, so we need to try without it.
+      # MPI-1 versions had no MPI_INTEGER_KIND defined, so we need to try without it.
       # However, MPI-1 also did not define the Fortran 90 and 08 modules, so we only try the F77 header.
       unset(MPI_Fortran_INTEGER_LINE)
       if(NOT MPI_${LANG}_WORKS)

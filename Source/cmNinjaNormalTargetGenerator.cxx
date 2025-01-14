@@ -779,7 +779,7 @@ std::vector<std::string> cmNinjaNormalTargetGenerator::ComputeLinkCmd(
       // file modification time.  If the archive and at least one contained
       // object file were created within the same second this will make look
       // the archive older than the object file. On subsequent ninja runs this
-      // leads to re-achiving and updating dependent targets.
+      // leads to re-archiving and updating dependent targets.
       // As a work-around we touch the archive after ranlib (see #19222).
       {
         std::string cmakeCommand =

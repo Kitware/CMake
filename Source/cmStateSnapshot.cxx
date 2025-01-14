@@ -271,7 +271,7 @@ void InitializeContentFromParent(T& parentContent, T& thisContent,
 
   auto parentRbegin = cm::make_reverse_iterator(parentEnd);
   auto parentRend = parentContent.rend();
-  parentRbegin = std::find(parentRbegin, parentRend, cmPropertySentinal);
+  parentRbegin = std::find(parentRbegin, parentRend, cmPropertySentinel);
   auto parentIt = parentRbegin.base();
 
   thisContent = std::vector<BT<std::string>>(parentIt, parentEnd);

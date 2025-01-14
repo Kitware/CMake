@@ -110,12 +110,12 @@ Resource.h
     Microsoft Visual C++ reads and updates this file.
 
 mfc1.manifest
-	Application manifest files are used by Windows XP to describe an applications
-	dependency on specific versions of Side-by-Side assemblies. The loader uses this
-	information to load the appropriate assembly from the assembly cache or private
-	from the application. The Application manifest  maybe included for redistribution
-	as an external .manifest file that is installed in the same folder as the application
-	executable or it may be included in the executable in the form of a resource.
+    Application manifest files are used by Windows XP to describe an applications
+    dependency on specific versions of Side-by-Side assemblies. The loader uses this
+    information to load the appropriate assembly from the assembly cache or private
+    from the application. The Application manifest  maybe included for redistribution
+    as an external .manifest file that is installed in the same folder as the application
+    executable or it may be included in the executable in the form of a resource.
 /////////////////////////////////////////////////////////////////////////////
 
 Other notes:

@@ -161,7 +161,7 @@ int cmCPackIFWGenerator::RunRepogen(const std::string& ifwTmpFile)
   return 1;
 }
 
-std::vector<std::string> cmCPackIFWGenerator::BuildBinaryCreatorCommmand()
+std::vector<std::string> cmCPackIFWGenerator::BuildBinaryCreatorCommand()
 {
   std::vector<std::string> ifwCmd;
   std::string ifwArg;
@@ -276,7 +276,7 @@ std::vector<std::string> cmCPackIFWGenerator::BuildBinaryCreatorCommmand()
 
 int cmCPackIFWGenerator::RunBinaryCreator(const std::string& ifwTmpFile)
 {
-  std::vector<std::string> ifwCmd = this->BuildBinaryCreatorCommmand();
+  std::vector<std::string> ifwCmd = this->BuildBinaryCreatorCommand();
   cmCPackIFWLogger(VERBOSE,
                    "Execute: " << cmSystemTools::PrintSingleCommand(ifwCmd)
                                << std::endl);

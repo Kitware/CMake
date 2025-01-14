@@ -43,7 +43,7 @@ public:
 
   // All types as defined by enum ValueType
   static const ValueTypeSet AllTypes;
-  // same as AllTYpes but without type REG_MULTI_SZ
+  // same as AllTypes but without type REG_MULTI_SZ
   static const ValueTypeSet SimpleTypes;
 
   cmWindowsRegistry(cmMakefile&,

@@ -2007,7 +2007,7 @@ macro(CUDA_ADD_LIBRARY cuda_target)
     ${_cmake_options} ${_cuda_shared_flag}
     OPTIONS ${_options} )
 
-  # Compute the file name of the intermedate link file used for separable
+  # Compute the file name of the intermediate link file used for separable
   # compilation.
   CUDA_COMPUTE_SEPARABLE_COMPILATION_OBJECT_FILE_NAME(link_file ${cuda_target} "${${cuda_target}_SEPARABLE_COMPILATION_OBJECTS}")
 
@@ -2057,7 +2057,7 @@ macro(CUDA_ADD_EXECUTABLE cuda_target)
   # Create custom commands and targets for each file.
   CUDA_WRAP_SRCS( ${cuda_target} OBJ _generated_files ${_sources} OPTIONS ${_options} )
 
-  # Compute the file name of the intermedate link file used for separable
+  # Compute the file name of the intermediate link file used for separable
   # compilation.
   CUDA_COMPUTE_SEPARABLE_COMPILATION_OBJECT_FILE_NAME(link_file ${cuda_target} "${${cuda_target}_SEPARABLE_COMPILATION_OBJECTS}")
 

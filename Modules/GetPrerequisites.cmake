@@ -662,7 +662,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   # Check for a script by extension (.bat,.sh,...) or if the file starts with "#!" (shebang)
   file(READ ${target} file_contents LIMIT 5)
   if(target MATCHES "\\.(bat|c?sh|bash|ksh|cmd)$" OR file_contents MATCHES "^#!")
-    message(STATUS "GetPrequisites(${target}) : ignoring script file")
+    message(STATUS "GetPrerequisites(${target}) : ignoring script file")
     # Clear var
     set(${prerequisites_var} "" PARENT_SCOPE)
     return()
@@ -832,7 +832,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
       string(SUBSTRING "${gp_cmd_ov}" 0 ${gp_delayload_pos} gp_cmd_ov_no_delayload_deps)
       string(SUBSTRING "${gp_cmd_ov}" ${gp_delayload_pos} -1 gp_cmd_ov_delayload_deps)
       if (verbose)
-        message(STATUS "GetPrequisites(${target}) : ignoring the following delay load dependencies :\n ${gp_cmd_ov_delayload_deps}")
+        message(STATUS "GetPrerequisites(${target}) : ignoring the following delay load dependencies :\n ${gp_cmd_ov_delayload_deps}")
       endif()
       set(gp_cmd_ov ${gp_cmd_ov_no_delayload_deps})
     endif()

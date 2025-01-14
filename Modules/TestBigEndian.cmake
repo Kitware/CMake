@@ -77,55 +77,59 @@ macro(__TEST_BIG_ENDIAN_LEGACY_IMPL VARIABLE)
     endif()
 
     if(_test_language STREQUAL "CXX")
-      set(_test_file TestEndianess.cpp)
+      set(_test_file TestEndianness.cpp)
     else()
-      set(_test_file TestEndianess.c)
+      set(_test_file TestEndianness.c)
     endif()
 
-    file(READ "${CMAKE_ROOT}/Modules/TestEndianess.c.in" TEST_ENDIANESS_FILE_CONTENT)
-    string(CONFIGURE "${TEST_ENDIANESS_FILE_CONTENT}" TEST_ENDIANESS_FILE_CONTENT @ONLY)
+    file(READ "${CMAKE_ROOT}/Modules/TestEndianness.c.in" TEST_ENDIANNESS_FILE_CONTENT)
+    string(CONFIGURE "${TEST_ENDIANNESS_FILE_CONTENT}" TEST_ENDIANNESS_FILE_CONTENT @ONLY)
 
      try_compile(HAVE_${VARIABLE}
-      SOURCE_FROM_VAR "${_test_file}" TEST_ENDIANESS_FILE_CONTENT
-      COPY_FILE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/TestEndianess.bin" )
+      SOURCE_FROM_VAR "${_test_file}" TEST_ENDIANNESS_FILE_CONTENT
+      COPY_FILE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/TestEndianness.bin" )
 
       if(HAVE_${VARIABLE})
 
         cmake_policy(PUSH)
         cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
-        file(STRINGS "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/TestEndianess.bin"
-            CMAKE_TEST_ENDIANESS_STRINGS_LE LIMIT_COUNT 1 REGEX "THIS IS LITTLE ENDIAN")
+        file(STRINGS "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/TestEndianness.bin"
+            CMAKE_TEST_ENDIANNESS_STRINGS_LE LIMIT_COUNT 1 REGEX "THIS IS LITTLE ENDIAN")
 
-        file(STRINGS "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/TestEndianess.bin"
-            CMAKE_TEST_ENDIANESS_STRINGS_BE LIMIT_COUNT 1 REGEX "THIS IS BIG ENDIAN")
+        file(STRINGS "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/TestEndianness.bin"
+            CMAKE_TEST_ENDIANNESS_STRINGS_BE LIMIT_COUNT 1 REGEX "THIS IS BIG ENDIAN")
 
         cmake_policy(POP)
 
         # on mac, if there are universal binaries built both will be true
         # return the result depending on the machine on which cmake runs
-        if(CMAKE_TEST_ENDIANESS_STRINGS_BE  AND  CMAKE_TEST_ENDIANESS_STRINGS_LE)
+        if(CMAKE_TEST_ENDIANNESS_STRINGS_BE  AND  CMAKE_TEST_ENDIANNESS_STRINGS_LE)
           if(CMAKE_SYSTEM_PROCESSOR MATCHES powerpc)
-            set(CMAKE_TEST_ENDIANESS_STRINGS_BE TRUE)
-            set(CMAKE_TEST_ENDIANESS_STRINGS_LE FALSE)
+            set(CMAKE_TEST_ENDIANNESS_STRINGS_BE TRUE)
+            set(CMAKE_TEST_ENDIANNESS_STRINGS_LE FALSE)
           else()
-            set(CMAKE_TEST_ENDIANESS_STRINGS_BE FALSE)
-            set(CMAKE_TEST_ENDIANESS_STRINGS_LE TRUE)
+            set(CMAKE_TEST_ENDIANNESS_STRINGS_BE FALSE)
+            set(CMAKE_TEST_ENDIANNESS_STRINGS_LE TRUE)
           endif()
-          message(STATUS "TEST_BIG_ENDIAN found different results, consider setting CMAKE_OSX_ARCHITECTURES or CMAKE_TRY_COMPILE_OSX_ARCHITECTURES to one or no architecture !")
+          message(
+            STATUS
+            "TEST_BIG_ENDIAN found different results, consider setting CMAKE_OSX_ARCHITECTURES or "
+            "CMAKE_TRY_COMPILE_OSX_ARCHITECTURES to one or no architecture !"
+          )
         endif()
 
-        if(CMAKE_TEST_ENDIANESS_STRINGS_LE)
+        if(CMAKE_TEST_ENDIANNESS_STRINGS_LE)
           set(${VARIABLE} 0 CACHE INTERNAL "Result of TEST_BIG_ENDIAN" FORCE)
           message(CHECK_PASS "little endian")
         endif()
 
-        if(CMAKE_TEST_ENDIANESS_STRINGS_BE)
+        if(CMAKE_TEST_ENDIANNESS_STRINGS_BE)
           set(${VARIABLE} 1 CACHE INTERNAL "Result of TEST_BIG_ENDIAN" FORCE)
           message(CHECK_PASS "big endian")
         endif()
 
-        if(NOT CMAKE_TEST_ENDIANESS_STRINGS_BE  AND  NOT CMAKE_TEST_ENDIANESS_STRINGS_LE)
+        if(NOT CMAKE_TEST_ENDIANNESS_STRINGS_BE  AND  NOT CMAKE_TEST_ENDIANNESS_STRINGS_LE)
           message(CHECK_FAIL "TEST_BIG_ENDIAN found no result!")
           message(SEND_ERROR "TEST_BIG_ENDIAN found no result!")
         endif()

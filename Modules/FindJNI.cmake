@@ -91,7 +91,7 @@ The following cache variables are also available to set or use:
 ``JAVA_INCLUDE_PATH``
   The include path to ``jni.h``.
 ``JAVA_INCLUDE_PATH2``
-  The include path to machine-dependant headers ``jni_md.h`` and ``jniport.h``.
+  The include path to machine-dependent headers ``jni_md.h`` and ``jniport.h``.
   The variable is defined only if ``jni.h`` depends on one of these headers. In
   contrast, Android NDK ``jni.h`` can be typically used standalone.
 ``JAVA_AWT_INCLUDE_PATH``

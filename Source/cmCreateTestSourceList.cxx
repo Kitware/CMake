@@ -22,7 +22,7 @@ bool cmCreateTestSourceList(std::vector<std::string> const& args,
   std::string extraInclude;
   std::string function;
   std::vector<std::string> tests;
-  // extract extra include and function ot
+  // extract extra include and function
   for (; i != args.end(); i++) {
     if (*i == "EXTRA_INCLUDE") {
       ++i;

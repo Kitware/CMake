@@ -182,9 +182,9 @@ if(_CMAKE_OSX_SYSROOT_PATH)
     # Xcode 5 OSX
     ${_CMAKE_OSX_SYSROOT_PATH}/../../../../../Library/Frameworks
     )
-    get_filename_component(_abolute_path "${_path}" ABSOLUTE)
-    if(EXISTS "${_abolute_path}")
-      list(APPEND CMAKE_SYSTEM_FRAMEWORK_PATH "${_abolute_path}")
+    get_filename_component(_absolute_path "${_path}" ABSOLUTE)
+    if(EXISTS "${_absolute_path}")
+      list(APPEND CMAKE_SYSTEM_FRAMEWORK_PATH "${_absolute_path}")
       break()
     endif()
   endforeach()
@@ -205,7 +205,7 @@ list(APPEND CMAKE_SYSTEM_FRAMEWORK_PATH
   /Network/Library/Frameworks
   /System/Library/Frameworks)
 
-# Warn about known system mis-configuration case.
+# Warn about known system misconfiguration case.
 if(CMAKE_OSX_SYSROOT)
   get_property(_IN_TC GLOBAL PROPERTY IN_TRY_COMPILE)
   if(NOT _IN_TC AND

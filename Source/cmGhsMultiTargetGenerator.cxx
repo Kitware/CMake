@@ -63,7 +63,7 @@ void cmGhsMultiTargetGenerator::Generate()
       this->TargetNameReal =
         this->GeneratorTarget->GetExecutableNames(this->ConfigName).Real;
       if (this->cmGhsMultiTargetGenerator::DetermineIfIntegrityApp()) {
-        this->TagType = GhsMultiGpj::INTERGRITY_APPLICATION;
+        this->TagType = GhsMultiGpj::INTEGRITY_APPLICATION;
       } else {
         this->TagType = GhsMultiGpj::PROGRAM;
       }
@@ -287,7 +287,7 @@ void cmGhsMultiTargetGenerator::WriteIncludes(std::ostream& fout,
 void cmGhsMultiTargetGenerator::WriteTargetLinkLine(std::ostream& fout,
                                                     std::string const& config)
 {
-  if (this->TagType == GhsMultiGpj::INTERGRITY_APPLICATION) {
+  if (this->TagType == GhsMultiGpj::INTEGRITY_APPLICATION) {
     return;
   }
 

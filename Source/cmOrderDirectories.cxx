@@ -268,7 +268,7 @@ void cmOrderDirectories::AddRuntimeLibrary(std::string const& fullPath,
                                            const char* soname)
 {
   // Add the runtime library at most once.
-  if (this->EmmittedConstraintSOName.insert(fullPath).second) {
+  if (this->EmittedConstraintSOName.insert(fullPath).second) {
     // Implicit link directories need special handling.
     if (!this->ImplicitDirectories.empty()) {
       std::string dir = cmSystemTools::GetFilenamePath(fullPath);
@@ -309,7 +309,7 @@ void cmOrderDirectories::AddLinkLibrary(std::string const& fullPath)
   assert(!this->LinkExtensions.empty());
 
   // Add the link library at most once.
-  if (this->EmmittedConstraintLibrary.insert(fullPath).second) {
+  if (this->EmittedConstraintLibrary.insert(fullPath).second) {
     // Implicit link directories need special handling.
     if (!this->ImplicitDirectories.empty()) {
       std::string dir = cmSystemTools::GetFilenamePath(fullPath);

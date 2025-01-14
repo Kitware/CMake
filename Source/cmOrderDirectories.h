@@ -54,8 +54,8 @@ private:
   cmsys::RegularExpression RemoveLibraryExtension;
   std::vector<std::string> LinkExtensions;
   std::set<std::string> ImplicitDirectories;
-  std::set<std::string> EmmittedConstraintSOName;
-  std::set<std::string> EmmittedConstraintLibrary;
+  std::set<std::string> EmittedConstraintSOName;
+  std::set<std::string> EmittedConstraintLibrary;
   std::vector<std::string> OriginalDirectories;
   std::map<std::string, int> DirectoryIndex;
   std::vector<int> DirectoryVisited;

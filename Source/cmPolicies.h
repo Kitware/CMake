@@ -272,7 +272,7 @@ class cmMakefile;
   SELECT(POLICY, CMP0093, "FindBoost reports Boost_VERSION in x.y.z format.", \
          3, 15, 0, WARN)                                                      \
   SELECT(POLICY, CMP0094,                                                     \
-         "FindPython3,  FindPython2 and FindPyton use "                       \
+         "FindPython3,  FindPython2 and FindPython use "                      \
          "LOCATION for lookup strategy.",                                     \
          3, 15, 0, WARN)                                                      \
   SELECT(POLICY, CMP0095,                                                     \

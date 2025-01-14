@@ -1,1 +1,1 @@
-int FourtyTwo();
+int FortyTwo();

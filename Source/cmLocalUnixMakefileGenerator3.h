@@ -208,7 +208,7 @@ protected:
   void WriteDependLanguageInfo(std::ostream& cmakefileStream,
                                cmGeneratorTarget* tgt);
 
-  // this converts a file name that is relative to the StartOuputDirectory
+  // this converts a file name that is relative to the StartOutputDirectory
   // into a full path
   std::string ConvertToFullPath(const std::string& localPath);
 

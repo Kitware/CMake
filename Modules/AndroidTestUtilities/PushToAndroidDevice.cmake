@@ -109,38 +109,38 @@ function(android_push_test_files_to_device)
   #----------------------------------------------------------------------------
   set(oneValueArgs FILES_DEST LIBS_DEST DEV_TEST_DIR DEV_OBJ_STORE)
   set(multiValueArgs FILES LIBS)
-  cmake_parse_arguments(_ptd "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(_arg "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
   # Setup of object store and test dir.
-  check_device_file_exists(${_ptd_DEV_OBJ_STORE} dev_obj_store_exists)
+  check_device_file_exists(${_arg_DEV_OBJ_STORE} dev_obj_store_exists)
   if(NOT dev_obj_store_exists)
-    execute_adb_command(shell mkdir -p ${_ptd_DEV_OBJ_STORE})
+    execute_adb_command(shell mkdir -p ${_arg_DEV_OBJ_STORE})
   endif()
-  check_device_file_exists(${_ptd_DEV_TEST_DIR} test_dir_exists)
+  check_device_file_exists(${_arg_DEV_TEST_DIR} test_dir_exists)
   if(test_dir_exists)
     # This is protected in the SetupProjectTests module.
-    execute_adb_command(shell rm -r ${_ptd_DEV_TEST_DIR})
+    execute_adb_command(shell rm -r ${_arg_DEV_TEST_DIR})
   endif()
-  execute_adb_command(shell mkdir -p ${_ptd_DEV_TEST_DIR})
+  execute_adb_command(shell mkdir -p ${_arg_DEV_TEST_DIR})
 
   # Looping over the various types of test data possible.
   foreach(TYPE ${multiValueArgs})
-    if(_ptd_${TYPE})
+    if(_arg_${TYPE})
 
       # determine if the data type destination has been explicitly specified.
-      if(_ptd_${TYPE}_DEST)
-        set(dest ${_ptd_${TYPE}_DEST})
+      if(_arg_${TYPE}_DEST)
+        set(dest ${_arg_${TYPE}_DEST})
       else()
         if(${TYPE} STREQUAL LIBS)
-          set(dest ${_ptd_DEV_TEST_DIR}/lib)
+          set(dest ${_arg_DEV_TEST_DIR}/lib)
         else()
-          set(dest ${_ptd_DEV_TEST_DIR})
+          set(dest ${_arg_DEV_TEST_DIR})
         endif()
       endif()
       execute_adb_command(shell mkdir -p ${dest})
 
       # Loop over the files passed in
-      foreach(relative_path ${_ptd_${TYPE}})
+      foreach(relative_path ${_arg_${TYPE}})
         # The absolute path can be through the source directory or the build directory.
         # If the file/dir exists in the build directory that version is chosen.
         set_absolute_path(${relative_path} absolute_path)
@@ -154,9 +154,9 @@ function(android_push_test_files_to_device)
           execute_adb_command(shell mkdir -p ${on_dev_dir})
           if(IS_SYMLINK ${absolute_path})
             get_filename_component(real_data_origin ${absolute_path} REALPATH)
-            push_and_link(${real_data_origin} ${_ptd_DEV_OBJ_STORE} ${cur_dest})
+            push_and_link(${real_data_origin} ${_arg_DEV_OBJ_STORE} ${cur_dest})
           else()
-            push_and_link(${absolute_path} ${_ptd_DEV_OBJ_STORE} ${cur_dest})
+            push_and_link(${absolute_path} ${_arg_DEV_OBJ_STORE} ${cur_dest})
           endif()
         else() # LIBS
           execute_adb_command(push ${absolute_path} ${dest})

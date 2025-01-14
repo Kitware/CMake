@@ -480,14 +480,14 @@ cmComputeLinkInformation::GetDirectoriesWithBacktraces()
 {
   std::vector<BT<std::string>> directoriesWithBacktraces;
 
-  std::vector<BT<std::string>> targetLinkDirectores =
+  std::vector<BT<std::string>> targetLinkDirectories =
     this->Target->GetLinkDirectories(this->Config, this->LinkLanguage);
 
   const std::vector<std::string>& orderedDirectories = this->GetDirectories();
   for (const std::string& dir : orderedDirectories) {
-    auto result =
-      std::find(targetLinkDirectores.begin(), targetLinkDirectores.end(), dir);
-    if (result != targetLinkDirectores.end()) {
+    auto result = std::find(targetLinkDirectories.begin(),
+                            targetLinkDirectories.end(), dir);
+    if (result != targetLinkDirectories.end()) {
       directoriesWithBacktraces.emplace_back(std::move(*result));
     } else {
       directoriesWithBacktraces.emplace_back(dir);

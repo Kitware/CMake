@@ -120,7 +120,7 @@ int cmCPackCygwinSourceGenerator::PackageFiles()
   files.clear();
   // a source release in cygwin should have the build script used
   // to build the package, the patch file that is different from the
-  // regular upstream version of the sources, and a bziped tar file
+  // regular upstream version of the sources, and a bzipped tar file
   // of the original sources
   files.push_back(buildScript);
   files.push_back(patchFile);

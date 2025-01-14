@@ -16,7 +16,7 @@ const char* GhsMultiGpj::GetGpjTag(Types gpjType)
 {
   char const* tag;
   switch (gpjType) {
-    case INTERGRITY_APPLICATION:
+    case INTEGRITY_APPLICATION:
     case LIBRARY:
     case PROJECT:
     case PROGRAM:

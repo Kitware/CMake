@@ -11,7 +11,7 @@ class GhsMultiGpj
 public:
   enum Types
   {
-    INTERGRITY_APPLICATION,
+    INTEGRITY_APPLICATION,
     LIBRARY,
     PROJECT,
     PROGRAM,

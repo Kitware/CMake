@@ -10,6 +10,9 @@
 # Do not perform whitespace checks.  Do not format.
 [attr]generated  whitespace=-tab-in-indent,-indent-with-non-tab -format.clang-format
 
+# Custom attribute to mark files as TABs indented.
+[attr]tab-indent whitespace=-tab-in-indent
+
 bootstrap        eol=lf
 configure        eol=lf
 *.[1-9]          eol=lf
@@ -21,6 +24,24 @@ configure        eol=lf
 *.bat.in         eol=crlf
 *.sln            eol=crlf
 *.vcproj         eol=crlf
+
+Makefile         tab-indent
+Makefile.in      tab-indent
+NSIS.template.in tab-indent
+coverage.xml.in  tab-indent
+*.F              tab-indent
+*.f              tab-indent
+*.pbxproj.in     tab-indent
+*.plist.in       tab-indent
+*.plist          tab-indent
+*.sln            tab-indent
+*.s              tab-indent
+*.vcproj         tab-indent
+*.vcproj.in      tab-indent
+*.vfproj.in      tab-indent
+*.xib            tab-indent
+*.make           tab-indent
+.hooks-config    tab-indent
 
 *.pfx            -text
 *.png            -text

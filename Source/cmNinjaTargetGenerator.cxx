@@ -754,9 +754,9 @@ void cmNinjaTargetGenerator::WriteCompileRule(const std::string& lang,
       } else {
         scanRuleName = this->LanguagePreprocessAndScanRule(lang, config);
         ppFileName = "$out";
-        std::string const& ppCommmand = mf->GetRequiredDefinition(
+        std::string const& ppCommand = mf->GetRequiredDefinition(
           cmStrCat("CMAKE_", lang, "_PREPROCESS_SOURCE"));
-        scanCommands.assign(ppCommmand);
+        scanCommands.assign(ppCommand);
         for (auto& i : scanCommands) {
           i = cmStrCat(launcher, i);
         }

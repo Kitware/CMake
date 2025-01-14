@@ -385,7 +385,7 @@ public:
                     std::set<std::string> const& source,
                     std::size_t basePrefixLength);
     void MocMacro();
-    void MocDependecies();
+    void MocDependencies();
     void MocIncludes();
     void UicIncludes();
 
@@ -1083,7 +1083,7 @@ void cmQtAutoMocUicT::JobParseT::MocMacro()
   }
 }
 
-void cmQtAutoMocUicT::JobParseT::MocDependecies()
+void cmQtAutoMocUicT::JobParseT::MocDependencies()
 {
   if (this->MocConst().DependFilters.empty() ||
       this->MocConst().CanOutputDependencies) {
@@ -1187,7 +1187,7 @@ void cmQtAutoMocUicT::JobParseHeaderT::Process()
   // Moc parsing
   if (this->FileHandle->Moc) {
     this->MocMacro();
-    this->MocDependecies();
+    this->MocDependencies();
   }
   // Uic parsing
   if (this->FileHandle->Uic) {
@@ -1203,7 +1203,7 @@ void cmQtAutoMocUicT::JobParseSourceT::Process()
   // Moc parsing
   if (this->FileHandle->Moc) {
     this->MocMacro();
-    this->MocDependecies();
+    this->MocDependencies();
     this->MocIncludes();
   }
   // Uic parsing
