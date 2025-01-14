@@ -58,6 +58,8 @@ if(CMAKE_HOST_WIN32)
     )
 endif()
 
+mark_as_advanced(Patch_EXECUTABLE)
+
 if(Patch_EXECUTABLE AND NOT TARGET Patch::patch)
   add_executable(Patch::patch IMPORTED)
   set_property(TARGET Patch::patch PROPERTY IMPORTED_LOCATION ${Patch_EXECUTABLE})
