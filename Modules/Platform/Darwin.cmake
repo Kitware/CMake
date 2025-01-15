@@ -248,10 +248,26 @@ unset(_apps_paths)
 
 include(Platform/UnixPaths)
 
-if(CMAKE_SYSTEM_NAME STREQUAL "Darwin" AND CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
-  list(PREPEND CMAKE_SYSTEM_PREFIX_PATH
-    /opt/homebrew # Brew on Apple Silicon
-    )
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  execute_process(
+    COMMAND brew --prefix
+    OUTPUT_VARIABLE _cmake_homebrew_prefix
+    RESULT_VARIABLE _brew_result
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  if (_brew_result EQUAL 0 AND IS_DIRECTORY "${_cmake_homebrew_prefix}")
+    list(PREPEND CMAKE_SYSTEM_PREFIX_PATH "${_cmake_homebrew_prefix}")
+  elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "arm64")
+    list(PREPEND CMAKE_SYSTEM_PREFIX_PATH
+      /opt/homebrew # Brew on Apple Silicon
+      )
+  else()
+    list(PREPEND CMAKE_SYSTEM_PREFIX_PATH
+      /usr/local # Brew on Intel
+      )
+  endif()
+  unset(_cmake_homebrew_prefix)
+  unset(_brew_result)
 endif()
 
 if(_CMAKE_OSX_SYSROOT_PATH)
