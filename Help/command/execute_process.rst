@@ -24,7 +24,7 @@ Execute one or more child processes.
                   [ENCODING <name>]
                   [ECHO_OUTPUT_VARIABLE]
                   [ECHO_ERROR_VARIABLE]
-                  [COMMAND_ERROR_IS_FATAL <ANY|LAST>])
+                  [COMMAND_ERROR_IS_FATAL <ANY|LAST|NONE>])
 
 Runs the given sequence of one or more commands.
 
@@ -168,17 +168,32 @@ Options:
    `UTF-8 RFC <https://datatracker.ietf.org/doc/html/rfc3629>`_
    naming convention.
 
-``COMMAND_ERROR_IS_FATAL <ANY|LAST>``
+``COMMAND_ERROR_IS_FATAL <ANY|LAST|NONE>``
   .. versionadded:: 3.19
 
   The option following ``COMMAND_ERROR_IS_FATAL`` determines the behavior when
   an error is encountered:
 
-    ``ANY``
+  ``ANY``
     If any of the commands in the list of commands fail, the
     ``execute_process()`` command halts with an error.
 
-    ``LAST``
+  ``LAST``
     If the last command in the list of commands fails, the
-    ``execute_process()`` command halts with an error.  Commands earlier in the
-    list will not cause a fatal error.
+    ``execute_process()`` command halts with an error.
+    Commands earlier in the list will not cause a fatal error.
+
+
+  ``NONE``
+    .. versionadded:: 3.32
+
+    Regardless of any of the commands failing, the ``execute_process()``
+    command will not halt with an error.
+
+  .. versionadded:: 3.32
+
+    If not provided, the
+    :variable:`CMAKE_EXECUTE_PROCESS_COMMAND_ERROR_IS_FATAL` variable
+    is checked.  If the variable is not set, the default is ``NONE``.
+    If ``RESULT_VARIABLE`` or ``RESULTS_VARIABLE`` is supplied,
+    :variable:`CMAKE_EXECUTE_PROCESS_COMMAND_ERROR_IS_FATAL` is ignored.
