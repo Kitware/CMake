@@ -1,3 +1,6 @@
-cmake_minimum_required(VERSION 3.1...3.25)
+cmake_minimum_required(VERSION 3.25)
+if(RunCMake_TEST MATCHES "^CMP0140")
+  cmake_minimum_required(VERSION 3.24)
+endif()
 project(${RunCMake_TEST} NONE)
 include(${RunCMake_TEST}.cmake)

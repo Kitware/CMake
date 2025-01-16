@@ -335,8 +335,21 @@ Other Behavior Settings
   :module:`CheckPIESupported` module must be called before using the
   ``try_compile`` command.
 
-The current settings of :policy:`CMP0065` and :policy:`CMP0083` are propagated
-through to the generated test project.
+Some policies are set automatically in the generated test project
+as needed to honor the state of the calling project:
+
+* :policy:`CMP0065`
+* :policy:`CMP0083`
+* :policy:`CMP0091`
+* :policy:`CMP0104`
+* :policy:`CMP0123`
+* :policy:`CMP0126`
+* :policy:`CMP0128`
+* :policy:`CMP0136`
+* :policy:`CMP0141`
+* :policy:`CMP0155`
+* :policy:`CMP0157`
+* :policy:`CMP0181`
 
 .. versionadded:: 3.32
   The current setting of :policy:`CMP0181` policy is propagated through to the
