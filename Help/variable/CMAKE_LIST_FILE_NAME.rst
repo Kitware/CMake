@@ -1,7 +1,7 @@
 CMAKE_LIST_FILE_NAME
 --------------------
 
- .. versionadded:: 3.32
+ .. versionadded:: 4.0
 
 The name of the CMake project files. This determines the top-level file
 processed when CMake is configured, and the file processed by

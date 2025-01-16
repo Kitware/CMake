@@ -1,7 +1,7 @@
 Handling Archiver Driver Differences
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. versionadded:: 3.32
+.. versionadded:: 4.0
 
 To pass options to the archiver tool, each compiler driver has its own syntax.
 The ``ARCHIVER:`` prefix and ``,`` separator can be used to specify, in a portable

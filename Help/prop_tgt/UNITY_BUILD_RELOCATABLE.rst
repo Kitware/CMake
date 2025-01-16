@@ -1,7 +1,7 @@
 UNITY_BUILD_RELOCATABLE
 -----------------------
 
-.. versionadded:: 3.32
+.. versionadded:: 4.0
 
 By default, the unity file generated when :prop_tgt:`UNITY_BUILD` is enabled
 uses absolute paths to reference the original source files. This causes the

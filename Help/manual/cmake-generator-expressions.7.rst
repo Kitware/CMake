@@ -797,7 +797,7 @@ in cmake-style format.
 
 .. genex:: $<PATH:NATIVE_PATH[,NORMALIZE],path...>
 
-  .. versionadded:: 3.32
+  .. versionadded:: 4.0
 
   Returns ``path`` converted into a native format with platform-specific
   slashes (``\`` on Windows hosts and ``/`` elsewhere).

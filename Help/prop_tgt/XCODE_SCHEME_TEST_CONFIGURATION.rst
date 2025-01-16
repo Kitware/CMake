@@ -1,7 +1,7 @@
 XCODE_SCHEME_TEST_CONFIGURATION
 -------------------------------
 
-.. versionadded:: 3.32
+.. versionadded:: 4.0
 
 Set the build configuration to test the target.
 

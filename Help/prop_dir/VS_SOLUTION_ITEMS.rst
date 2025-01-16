@@ -1,7 +1,7 @@
 VS_SOLUTION_ITEMS
 -----------------
 
-.. versionadded:: 3.32
+.. versionadded:: 4.0
 
 Specify solution level items included in the generated Visual Studio solution.
 

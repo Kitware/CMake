@@ -1,7 +1,7 @@
 CMAKE_<LANG>_ARCHIVER_WRAPPER_FLAG
 ----------------------------------
 
-.. versionadded:: 3.32
+.. versionadded:: 4.0
 
 Defines the syntax of compiler driver option to pass options to the archiver
 tool. It will be used to translate the ``ARCHIVER:`` prefix in the static

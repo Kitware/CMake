@@ -1,7 +1,7 @@
 CMAKE_LINK_WARNING_AS_ERROR
 ---------------------------
 
-.. versionadded:: 3.32
+.. versionadded:: 4.0
 
 Specify whether to treat warnings on link as errors.
 

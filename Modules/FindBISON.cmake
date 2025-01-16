@@ -47,13 +47,13 @@ the token list.
 The options are:
 
 ``OPTIONS <options>...``
-  .. versionadded:: 3.32
+  .. versionadded:: 4.0
 
   A :ref:`semicolon-separated list <CMake Language Lists>` of options added to
   the ``bison`` command line.
 
 ``COMPILE_FLAGS <string>``
-  .. deprecated:: 3.32
+  .. deprecated:: 4.0
 
   Space-separated bison options added to the ``bison`` command line.
   A :ref:`;-list <CMake Language Lists>` will not work.
@@ -96,12 +96,12 @@ The macro defines the following variables:
   report.
 
 ``BISON_<Name>_OPTIONS``
-  .. versionadded:: 3.32
+  .. versionadded:: 4.0
 
   Options used in the ``bison`` command line.
 
 ``BISON_<Name>_COMPILE_FLAGS``
-  .. deprecated:: 3.32
+  .. deprecated:: 4.0
 
   Options used in the ``bison`` command line. This variable is deprecated in
   favor of ``BISON_<Name>_OPTIONS`` variable.

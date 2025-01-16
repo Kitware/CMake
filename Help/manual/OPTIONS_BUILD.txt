@@ -121,7 +121,7 @@
 
 .. option:: --project-file <project-file-name>
 
- .. versionadded:: 3.32
+ .. versionadded:: 4.0
 
  Specify an alternate project file name.
 

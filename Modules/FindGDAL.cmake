@@ -7,7 +7,7 @@ FindGDAL
 
 Find Geospatial Data Abstraction Library (GDAL).
 
-.. deprecated:: 3.32
+.. deprecated:: 4.0
   GDAL 3.5 and above provide a ``GDALConfig.cmake`` package configuration file.
   Call ``find_package(GDAL CONFIG)`` to find it directly and avoid using this
   find module.  For further details, see `GDAL's documentation on CMake

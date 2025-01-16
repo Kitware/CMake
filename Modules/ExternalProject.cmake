@@ -750,7 +750,7 @@ step. This can be overridden with custom install commands if required.
   has additional documentation.
 
 ``INSTALL_JOB_SERVER_AWARE <bool>``
-  .. versionadded:: 3.32
+  .. versionadded:: 4.0
 
   Specifies that the install step is aware of the GNU Make job server.
   See the :command:`add_custom_command` documentation of its

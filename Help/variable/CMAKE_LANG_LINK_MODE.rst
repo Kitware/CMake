@@ -1,7 +1,7 @@
 CMAKE_<LANG>_LINK_MODE
 ----------------------
 
-.. versionadded:: 3.32
+.. versionadded:: 4.0
 
 Defines how the link step is done. The possible values are:
 

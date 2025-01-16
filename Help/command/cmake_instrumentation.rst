@@ -1,7 +1,7 @@
 cmake_instrumentation
 ---------------------
 
-.. versionadded:: 3.32
+.. versionadded:: 4.0
 
 Enables interacting with the
 :manual:`CMake Instrumentation API <cmake-instrumentation(7)>`.

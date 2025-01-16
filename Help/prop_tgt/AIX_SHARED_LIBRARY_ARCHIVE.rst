@@ -22,7 +22,7 @@ is created by :command:`add_library`.  Imported targets must explicitly
 enable :prop_tgt:`!AIX_SHARED_LIBRARY_ARCHIVE` if they import an AIX
 shared library archive.
 
-.. versionchanged:: 3.32
+.. versionchanged:: 4.0
 
   For a non-imported target, if this property is not set, the
   default is *enabled*.  See policy :policy:`CMP0182`.

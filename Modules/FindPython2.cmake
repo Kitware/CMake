@@ -441,7 +441,7 @@ can be controlled with the following variable:
     requirements.
 
 ``Python2_ARTIFACTS_PREFIX``
-  .. versionadded:: 3.32
+  .. versionadded:: 4.0
 
   Define a custom prefix which will be used for the definition of all the
   result variables, targets, and commands. By using this variable, this module

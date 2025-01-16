@@ -1,7 +1,7 @@
 DEBUGGER_WORKING_DIRECTORY
 --------------------------
 
-.. versionadded:: 3.32
+.. versionadded:: 4.0
 
 Sets the local debugger working directory for C++ targets.
 The property value may use
