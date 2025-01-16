@@ -75,6 +75,15 @@ cmExperimental::FeatureData LookupTable[] = {
     {},
     cmExperimental::TryCompileCondition::Never,
     false },
+  // Instrumentation
+  { "Instrumentation",
+    "a37d1069-1972-4901-b9c9-f194aaf2b6e0",
+    "CMAKE_EXPERIMENTAL_INSTRUMENTATION",
+    "CMake's support for collecting instrumentation data is experimental. It "
+    "is meant only for experimentation and feedback to CMake developers.",
+    {},
+    cmExperimental::TryCompileCondition::Never,
+    false },
 };
 static_assert(sizeof(LookupTable) / sizeof(LookupTable[0]) ==
                 static_cast<size_t>(cmExperimental::Feature::Sentinel),

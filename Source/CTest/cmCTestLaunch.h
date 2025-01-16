@@ -20,16 +20,23 @@ class RegularExpression;
  */
 class cmCTestLaunch
 {
+
 public:
+  enum class Op
+  {
+    Normal,
+    Instrument,
+  };
+
   /** Entry point from ctest executable main().  */
-  static int Main(int argc, const char* const argv[]);
+  static int Main(int argc, const char* const argv[], Op operation);
 
   cmCTestLaunch(const cmCTestLaunch&) = delete;
   cmCTestLaunch& operator=(const cmCTestLaunch&) = delete;
 
 private:
   // Initialize the launcher from its command line.
-  cmCTestLaunch(int argc, const char* const* argv);
+  cmCTestLaunch(int argc, const char* const* argv, Op operation);
   ~cmCTestLaunch();
 
   // Run the real command.
@@ -65,4 +72,7 @@ private:
 
   // Configuration
   void LoadConfig();
+
+  // Mode
+  Op Operation;
 };

@@ -2306,6 +2306,7 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
   vars.CMTargetName = this->GetName().c_str();
   vars.CMTargetType = cmState::GetTargetTypeName(this->GetType()).c_str();
   vars.Language = lang.c_str();
+
   auto const sfPath = this->LocalGenerator->ConvertToOutputFormat(
     sf->GetFullPath(), cmOutputConverter::SHELL);
 

@@ -34,6 +34,7 @@ cmCTestRunTest::cmCTestRunTest(cmCTestMultiProcessHandler& multiHandler,
   , CTest(MultiTestHandler.CTest)
   , TestHandler(MultiTestHandler.TestHandler)
   , TestProperties(MultiTestHandler.Properties[Index])
+  , Instrumentation(cmSystemTools::GetLogicalWorkingDirectory())
 {
 }
 
@@ -663,6 +664,9 @@ bool cmCTestRunTest::StartTest(size_t completed, size_t total)
     return false;
   }
   this->StartTime = this->CTest->CurrentTime();
+  if (this->Instrumentation.HasQuery()) {
+    this->Instrumentation.GetPreTestStats();
+  }
 
   return this->ForkProcess();
 }
@@ -1012,6 +1016,12 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
 
 void cmCTestRunTest::FinalizeTest(bool started)
 {
+  if (this->Instrumentation.HasQuery()) {
+    this->Instrumentation.InstrumentTest(
+      this->TestProperties->Name, this->ActualCommand, this->Arguments,
+      this->TestProcess->GetExitValue(), this->TestProcess->GetStartTime(),
+      this->TestProcess->GetSystemStartTime());
+  }
   this->MultiTestHandler.FinishTestProcess(this->TestProcess->GetRunner(),
                                            started);
 }

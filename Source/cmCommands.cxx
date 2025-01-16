@@ -52,6 +52,7 @@
 #include "cmInstallCommand.h"
 #include "cmInstallFilesCommand.h"
 #include "cmInstallTargetsCommand.h"
+#include "cmInstrumentationCommand.h"
 #include "cmLinkDirectoriesCommand.h"
 #include "cmListCommand.h"
 #include "cmMacroCommand.h"
@@ -301,6 +302,7 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("remove_definitions", cmRemoveDefinitionsCommand);
   state->AddBuiltinCommand("source_group", cmSourceGroupCommand);
   state->AddBuiltinCommand("cmake_file_api", cmFileAPICommand);
+  state->AddBuiltinCommand("cmake_instrumentation", cmInstrumentationCommand);
 
   state->AddDisallowedCommand(
     "export_library_dependencies", cmExportLibraryDependenciesCommand,

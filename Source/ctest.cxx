@@ -12,6 +12,8 @@
 #include "cmConsoleBuf.h"
 #include "cmDocumentation.h"
 #include "cmDocumentationEntry.h"
+#include "cmInstrumentation.h"
+#include "cmInstrumentationQuery.h"
 #include "cmSystemTools.h"
 
 #include "CTest/cmCTestLaunch.h"
@@ -179,7 +181,18 @@ int main(int argc, char const* const* argv)
 
   // Dispatch 'ctest --launch' mode directly.
   if (argc >= 2 && strcmp(argv[1], "--launch") == 0) {
-    return cmCTestLaunch::Main(argc, argv);
+    return cmCTestLaunch::Main(argc, argv, cmCTestLaunch::Op::Normal);
+  }
+
+  // Dispatch 'ctest --instrument' mode directly.
+  if (argc >= 2 && strcmp(argv[1], "--instrument") == 0) {
+    return cmCTestLaunch::Main(argc, argv, cmCTestLaunch::Op::Instrument);
+  }
+
+  // Dispatch 'ctest --collect-instrumentation' mode directly.
+  if (argc == 3 && strcmp(argv[1], "--collect-instrumentation") == 0) {
+    return cmInstrumentation(argv[2]).CollectTimingData(
+      cmInstrumentationQuery::Hook::Manual);
   }
 
   if (cmSystemTools::GetLogicalWorkingDirectory().empty()) {

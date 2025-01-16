@@ -996,15 +996,19 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
           cmState::GetTargetTypeName(target->GetType()).c_str();
         std::string output;
         const std::vector<std::string>& outputs = ccg.GetOutputs();
-        if (!outputs.empty()) {
-          output = outputs[0];
-          if (workingDir.empty()) {
-            output = this->MaybeRelativeToCurBinDir(output);
+        for (size_t i = 0; i < outputs.size(); ++i) {
+          output = cmStrCat(output,
+                            this->ConvertToOutputFormat(
+                              ccg.GetWorkingDirectory().empty()
+                                ? this->MaybeRelativeToCurBinDir(outputs[i])
+                                : outputs[i],
+                              cmOutputConverter::SHELL));
+          if (i != outputs.size() - 1) {
+            output = cmStrCat(output, ",");
           }
-          output =
-            this->ConvertToOutputFormat(output, cmOutputConverter::SHELL);
         }
         vars.Output = output.c_str();
+        vars.Role = ccg.GetCC().GetRole().c_str();
 
         launcher = val;
         rulePlaceholderExpander->ExpandRuleVariables(this, launcher, vars);

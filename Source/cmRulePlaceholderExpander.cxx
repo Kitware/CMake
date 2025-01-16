@@ -270,6 +270,12 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
     return this->OutputConverter->ConvertToOutputFormat(
       cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
   }
+  if (variable == "ROLE") {
+    if (this->ReplaceValues->Role) {
+      return this->ReplaceValues->Role;
+    }
+    return "";
+  }
 
   auto compIt = this->Compilers.find(variable);
 

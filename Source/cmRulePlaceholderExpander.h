@@ -73,6 +73,7 @@ public:
     const char* Fatbinary = nullptr;
     const char* RegisterFile = nullptr;
     const char* Launcher = nullptr;
+    const char* Role = nullptr;
   };
 
   // Expand rule variables in CMake of the type found in language rules

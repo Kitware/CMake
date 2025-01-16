@@ -89,6 +89,7 @@ These commands are available only in CMake projects.
    /command/aux_source_directory
    /command/build_command
    /command/cmake_file_api
+   /command/cmake_instrumentation
    /command/create_test_sourcelist
    /command/define_property
    /command/enable_language

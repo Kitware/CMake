@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "hooks": ["postGenerate", "postCMakeBuild", "postTest"],
+  "callbacks": ["@GET_HOOK@"]
+}

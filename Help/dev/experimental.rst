@@ -119,3 +119,17 @@ When activated, this experimental feature provides the following:
 
 * Targets with the property set to a true value will have their C++ build
   information exported to the build database.
+
+Instrumentation
+===============
+
+In order to activate support for the :command:`cmake_instrumentation` command,
+set
+
+* variable ``CMAKE_EXPERIMENTAL_INSTRUMENTATION`` to
+* value ``a37d1069-1972-4901-b9c9-f194aaf2b6e0``.
+
+To enable instrumentation at the user-level, files should be blaced under
+either
+``<CMAKE_CONFIG_DIR>/instrumentation-a37d1069-1972-4901-b9c9-f194aaf2b6e0`` or
+``<CMAKE_BINARY_DIR>/.cmake/instrumentation-a37d1069-1972-4901-b9c9-f194aaf2b6e0``.

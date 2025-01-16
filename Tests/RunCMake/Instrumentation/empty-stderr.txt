@@ -1,0 +1,4 @@
+^CMake Error: +
+Error: @1,1: Missing required field "version" in root object
+{
+\^$

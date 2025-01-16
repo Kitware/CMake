@@ -745,6 +745,7 @@ protected:
     bool UsesTerminal = false;
     cmTarget::PerConfig PerConfig = cmTarget::PerConfig::Yes;
     bool StdPipesUTF8 = false;
+    std::string Role;
   };
 
   void CreateDefaultGlobalTargets(std::vector<GlobalTargetInfo>& targets);
