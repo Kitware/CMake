@@ -298,15 +298,20 @@ public:
                    symbol.find("$entry_thunk") == std::string::npos &&
                    symbol.find("$iexit_thunk") == std::string::npos &&
                    symbol.find("$exit_thunk") == std::string::npos)) {
-                if (!pSymbolTable->Type && (SectChar & IMAGE_SCN_MEM_WRITE)) {
-                  // Read only (i.e. constants) must be excluded
+                if ((!pSymbolTable->Type &&
+                     // Read only (i.e. constants) must be excluded
+                     (SectChar & IMAGE_SCN_MEM_WRITE)) ||
+                    (this->SymbolArch == Arch::ARM64EC &&
+                     // vftable symbols are DATA on ARM64EC
+                     symbol.compare(0, 4, vftablePrefix) == 0)) {
                   this->DataSymbols.insert(symbol);
-                } else {
-                  if (pSymbolTable->Type || !(SectChar & IMAGE_SCN_MEM_READ) ||
-                      (SectChar & IMAGE_SCN_MEM_EXECUTE) ||
-                      (symbol.compare(0, 4, vftablePrefix) == 0)) {
-                    this->Symbols.insert(symbol);
-                  }
+                } else if (pSymbolTable->Type ||
+                           !(SectChar & IMAGE_SCN_MEM_READ) ||
+                           (SectChar & IMAGE_SCN_MEM_EXECUTE) ||
+                           (this->SymbolArch != Arch::ARM64EC &&
+                            // vftable symbols fail if marked as DATA
+                            symbol.compare(0, 4, vftablePrefix) == 0)) {
+                  this->Symbols.insert(symbol);
                 }
               }
             }
