@@ -4,4 +4,4 @@ Warning: Environment variable CMAKE_GENERATOR_TOOLSET will be ignored, because C
 CMake Error: No generator specified for -G
 
 Generators.*
-\* (Unix Makefiles|Visual Studio).*
+\* (Unix Makefiles|NMake Makefiles|Visual Studio).*

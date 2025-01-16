@@ -1,2 +1,2 @@
 Generators.*
-\* (Unix Makefiles|Visual Studio).*
+\* (Unix Makefiles|NMake Makefiles|Visual Studio).*

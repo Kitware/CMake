@@ -12,6 +12,9 @@
 #include <thread>
 #include <vector>
 
+#include <cm/string_view>
+#include <cmext/string_view>
+
 #include <cm3p/cppdap/io.h>
 
 #include "cmsys/RegularExpression.hxx"
@@ -60,22 +63,20 @@ static void sendCommands(std::shared_ptr<dap::ReaderWriter> const& debugger,
  */
 int runTest(int argc, char* argv[])
 {
-  if (argc < 3) {
+  if (argc < 4) {
     std::cout << "Usage:\n";
-    std::cout << "\t(project mode) TestDebuggerNamedPipe <CMakePath> "
-                 "<SourceFolder> <OutputFolder>\n";
-    std::cout << "\t(script mode) TestDebuggerNamedPipe <CMakePath> "
+    std::cout << "\t(project mode) TestDebuggerNamedPipe <CMakePath> -S "
+                 "<SourceFolder> -B <OutputFolder> ...\n";
+    std::cout << "\t(script mode) TestDebuggerNamedPipe <CMakePath> -P "
                  "<ScriptPath>\n";
     return 1;
   }
 
-  bool scriptMode = argc == 3;
-
 #ifdef _WIN32
   std::string namedPipe = R"(\\.\pipe\LOCAL\CMakeDebuggerPipe_)" +
-    cmCryptoHash(cmCryptoHash::AlgoSHA256)
-      .HashString(scriptMode ? argv[2] : argv[3]);
+    cmCryptoHash(cmCryptoHash::AlgoSHA256).HashString(argv[2]);
 #else
+  bool const scriptMode = argv[2] == "-P"_s;
   std::string namedPipe =
     std::string("CMakeDebuggerPipe") + (scriptMode ? "Script" : "Project");
 #endif
@@ -85,16 +86,7 @@ int runTest(int argc, char* argv[])
   cmakeCommand.emplace_back("--debugger");
   cmakeCommand.emplace_back("--debugger-pipe");
   cmakeCommand.emplace_back(namedPipe);
-
-  if (scriptMode) {
-    cmakeCommand.emplace_back("-P");
-    cmakeCommand.emplace_back(argv[2]);
-  } else {
-    cmakeCommand.emplace_back("-S");
-    cmakeCommand.emplace_back(argv[2]);
-    cmakeCommand.emplace_back("-B");
-    cmakeCommand.emplace_back(argv[3]);
-  }
+  cmakeCommand.insert(cmakeCommand.end(), argv + 2, argv + argc);
 
   // Capture debugger response stream.
   std::stringstream debuggerResponseStream;
