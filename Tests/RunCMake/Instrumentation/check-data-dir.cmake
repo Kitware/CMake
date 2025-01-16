@@ -8,6 +8,8 @@ endif()
 
 set(FOUND_SNIPPETS "")
 foreach(snippet ${snippets})
+  get_filename_component(filename ${snippet} NAME)
+
   read_json(${snippet} contents)
 
   # Verify snippet file is valid
@@ -19,7 +21,7 @@ foreach(snippet ${snippets})
   endif()
 
   # Verify target
-  string(JSON target ERROR_VARIABLE noTarget GET ${contents} target)
+  string(JSON target ERROR_VARIABLE noTarget GET "${contents}" target)
   if (NOT target MATCHES NOTFOUND)
     set(targets "main;lib;customTarget;TARGET_NAME")
     if (NOT ${target} IN_LIST targets)
@@ -28,16 +30,16 @@ foreach(snippet ${snippets})
   endif()
 
   # Verify output
-  string(JSON result GET ${contents} result)
+  string(JSON result GET "${contents}" result)
   if (NOT ${result} EQUAL 0)
     snippet_error(${snippet} "Compile command had non-0 result")
   endif()
 
   # Verify contents of compile-* Snippets
-  if (snippet MATCHES ^compile-)
-    string(JSON target GET ${contents} target)
-    string(JSON source GET ${contents} source)
-    string(JSON language GET ${contents} language)
+  if (filename MATCHES ^compile-)
+    string(JSON target GET "${contents}" target)
+    string(JSON source GET "${contents}" source)
+    string(JSON language GET "${contents}" language)
     if (NOT language MATCHES "C\\+\\+")
       snippet_error(${snippet} "Expected C++ compile language")
     endif()
@@ -47,9 +49,9 @@ foreach(snippet ${snippets})
   endif()
 
   # Verify contents of link-* Snippets
-  if (snippet MATCHES ^link-)
-    string(JSON target GET ${contents} target)
-    string(JSON targetType GET ${contents} targetType)
+  if (filename MATCHES ^link-)
+    string(JSON target GET "${contents}" target)
+    string(JSON targetType GET "${contents}" targetType)
     if (target MATCHES main)
       if (NOT targetType MATCHES "EXECUTABLE")
         snippet_error(${snippet} "Expected EXECUTABLE, target type was ${targetType}")
@@ -63,17 +65,17 @@ foreach(snippet ${snippets})
   endif()
 
   # Verify contents of custom-* Snippets
-  if (snippet MATCHES ^custom-)
-    string(JSON outputs GET ${contents} outputs)
+  if (filename MATCHES ^custom-)
+    string(JSON outputs GET "${contents}" outputs)
     if (NOT output1 MATCHES "output1" OR NOT output2 MATCHES "output2")
       snippet_error(${snippet} "Custom command missing outputs")
     endif()
   endif()
 
   # Verify contents of test-* Snippets
-  if (snippet MATCHES ^test-)
-    string(JSON testName GET ${contents} testName)
-    if (NOT testName EQUAL "test")
+  if (filename MATCHES ^test-)
+    string(JSON testName GET "${contents}" testName)
+    if (NOT testName STREQUAL "test")
       snippet_error(${snippet} "Unexpected testName: ${testName}")
     endif()
   endif()
