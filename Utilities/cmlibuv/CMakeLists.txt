@@ -165,6 +165,7 @@ if(CMAKE_SYSTEM_NAME MATCHES "CYGWIN" OR CMAKE_SYSTEM_NAME MATCHES "MSYS")
     include/uv/posix.h
     )
   list(APPEND uv_defines
+    _GNU_SOURCE
     )
   list(APPEND uv_sources
     src/unix/cygwin.c
