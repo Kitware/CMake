@@ -8,5 +8,5 @@ include_guard()
 
 macro(__linker_msvc lang)
   # Linker warning as error
-  set(CMAKE_${lang}_LINK_OPTIONS_WARNING_AS_ERROR "LINKER:/WX")
+  set(CMAKE_${lang}_LINK_OPTIONS_WARNING_AS_ERROR "LINKER:-WX")
 endmacro()
