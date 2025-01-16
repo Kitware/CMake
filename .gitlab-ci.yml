@@ -306,7 +306,7 @@ t:fedora41-makefiles-nospace:
         CMAKE_CI_BUILD_NAME: fedora41_makefiles_nospace
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:nvhpc22.11-ninja:
+t:nvhpc24.9-ninja:
     extends:
         - .nvhpc_ninja
         - .cmake_test_linux_release
