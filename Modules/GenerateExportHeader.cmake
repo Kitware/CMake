@@ -5,18 +5,21 @@
 GenerateExportHeader
 --------------------
 
-Function for generation of export macros for libraries
-
-This module provides the function ``GENERATE_EXPORT_HEADER()``.
+This module provides the ``generate_export_header()`` function to generate
+export macros for libraries.
 
 .. versionadded:: 3.12
   Added support for C projects.  Previous versions supported C++ project only.
 
-The ``GENERATE_EXPORT_HEADER`` function can be used to generate a file
-suitable for preprocessor inclusion which contains EXPORT macros to be
-used in library classes::
+.. command:: generate_export_header
 
-   GENERATE_EXPORT_HEADER( LIBRARY_TARGET
+  The ``generate_export_header()`` function can be used to generate a file
+  suitable for preprocessor inclusion which contains EXPORT macros to be
+  used in library classes:
+
+  .. code-block:: cmake
+
+    generate_export_header(LIBRARY_TARGET
              [BASE_NAME <base_name>]
              [EXPORT_MACRO_NAME <export_macro_name>]
              [EXPORT_FILE_NAME <export_file_name>]
@@ -28,7 +31,7 @@ used in library classes::
              [DEFINE_NO_DEPRECATED]
              [PREFIX_NAME <prefix_name>]
              [CUSTOM_CONTENT_FROM_VARIABLE <variable>]
-   )
+    )
 
 The target properties :prop_tgt:`CXX_VISIBILITY_PRESET <<LANG>_VISIBILITY_PRESET>`
 and :prop_tgt:`VISIBILITY_INLINES_HIDDEN` can be used to add the appropriate
@@ -37,7 +40,7 @@ and the convenience variables
 :variable:`CMAKE_CXX_VISIBILITY_PRESET <CMAKE_<LANG>_VISIBILITY_PRESET>` and
 :variable:`CMAKE_VISIBILITY_INLINES_HIDDEN`.
 
-By default ``GENERATE_EXPORT_HEADER()`` generates macro names in a file
+By default ``generate_export_header()`` generates macro names in a file
 name determined by the name of the library.  This means that in the
 simplest case, users of ``GenerateExportHeader`` will be equivalent to:
 
@@ -181,19 +184,22 @@ Generates the macros ``VTK_SOMELIB_EXPORT`` etc.
 .. versionadded:: 3.11
   Added the ``INCLUDE_GUARD_NAME`` option.
 
-::
+.. command:: add_compiler_export_flags
 
-   ADD_COMPILER_EXPORT_FLAGS( [<output_variable>] )
+  .. code-block:: cmake
 
-.. deprecated:: 3.0
-  Set the target properties
-  :prop_tgt:`CXX_VISIBILITY_PRESET <<LANG>_VISIBILITY_PRESET>` and
-  :prop_tgt:`VISIBILITY_INLINES_HIDDEN` instead.
+    add_compiler_export_flags([<output_variable>])
 
-The ``ADD_COMPILER_EXPORT_FLAGS`` function adds ``-fvisibility=hidden`` to
+  .. deprecated:: 3.0
+
+    Set the target properties
+    :prop_tgt:`CXX_VISIBILITY_PRESET <<LANG>_VISIBILITY_PRESET>` and
+    :prop_tgt:`VISIBILITY_INLINES_HIDDEN` instead.
+
+The ``add_compiler_export_flags()`` function adds ``-fvisibility=hidden`` to
 :variable:`CMAKE_CXX_FLAGS <CMAKE_<LANG>_FLAGS>` if supported, and is a no-op
 on Windows which does not need extra compiler flags for exporting support.
-You may optionally pass a single argument to ``ADD_COMPILER_EXPORT_FLAGS``
+You may optionally pass a single argument to ``add_compiler_export_flags()``
 that will be populated with the ``CXX_FLAGS`` required to enable visibility
 support for the compiler/architecture in use.
 #]=======================================================================]
@@ -343,7 +349,7 @@ macro(_DO_GENERATE_EXPORT_HEADER TARGET_LIBRARY)
     "${_GEH_PREFIX_NAME}${BASE_NAME_UPPER}_NO_DEPRECATED")
 
   if(_GEH_UNPARSED_ARGUMENTS)
-    message(FATAL_ERROR "Unknown keywords given to GENERATE_EXPORT_HEADER(): \"${_GEH_UNPARSED_ARGUMENTS}\"")
+    message(FATAL_ERROR "Unknown keywords given to generate_export_header(): \"${_GEH_UNPARSED_ARGUMENTS}\"")
   endif()
 
   if(_GEH_EXPORT_MACRO_NAME)

@@ -161,7 +161,7 @@ Modules
 
 * A :module:`FindIconv` module was added to locate iconv support.
 
-* The :module:`GenerateExportHeader` module ``GENERATE_EXPORT_HEADER`` command
+* The :module:`GenerateExportHeader` module ``generate_export_header`` command
   gained an ``INCLUDE_GUARD_NAME`` option to change the name of the include
   guard symbol written to the generated export header.
   Additionally, it now adds a comment after the closing ``#endif`` on the
