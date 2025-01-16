@@ -2445,16 +2445,25 @@ SystemTools::CopyStatus SystemTools::CopyFileContentBlockwise(
 }
 
 /**
- * Clone the source file to the destination file
+ * Attempt to copy source file to the destination file using
+ * operating system mechanisms.
  *
- * If available, the Linux FICLONE ioctl is used to create a check
- * copy-on-write clone of the source file.
+ * If available, copy-on-write/clone will be used.
+ * On Linux, the FICLONE ioctl is used to create a clone of the source file.
+ * On macOS, the copyfile() call is used to make a clone of the file, and
+ * it will fall back to a regular copy if that's not possible.
  *
- * The method returns false for the following cases:
- * - The code has not been compiled on Linux or the ioctl was unknown
- * - The source and destination is on different file systems
- * - The underlying filesystem does not support file cloning
- * - An unspecified error occurred
+ * This function will follow symlinks (ie copy the file being
+ * pointed-to, not the symlink itself), and the resultant
+ * file will be owned by the uid of this process. It will overwrite
+ * an existing destination file.
+ *
+ * Examples of why this method may fail -
+ * - We're running on an OS for which this method is not implemented.
+ * - The underlying OS won't do a copy for us, and -
+ *   - The source and destination are on different file systems
+ *     thus a clone is not possible.
+ *   - The underlying filesystem does not support file cloning.
  */
 SystemTools::CopyStatus SystemTools::CloneFileContent(
   std::string const& source, std::string const& destination)
@@ -2493,12 +2502,26 @@ SystemTools::CopyStatus SystemTools::CloneFileContent(
 
   // NOTE: we cannot use `clonefile` as the {a,c,m}time for the file needs to
   // be updated by `copy_file_if_different` and `copy_file`.
-  // These flags are meant to be COPYFILE_METADATA | COPYFILE_CLONE, but CLONE
-  // forces COPYFILE_NOFOLLOW_SRC and that violates the invariant that this
-  // should result in a file.
+  //
+  // COPYFILE_CLONE forces COPYFILE_NOFOLLOW_SRC and that violates the
+  // invariant that this should result in a file. We used to manually specify
+  // COPYFILE_EXCL | COPYFILE_STAT | COPYFILE_XATTR | COPYFILE_DATA here, but
+  // what the copyfile() manpage does not tell you is that COPYFILE_DATA
+  // appears to disable cloning all together. Instead, explicitly reject
+  // copying symlinks here.
+  //
+  // COPYFILE_CLONE implies a few flags, including COPYFILE_EXCL.
+  // We add COPYFILE_UNLINK to be consistent with the Linux implementation
+  // above, as well as CopyFileContentBlockwise(). This will remove the
+  // destination file before cloning, allowing this call to complete
+  // if the destination file already exists.
+  //
+  if (SystemTools::FileIsSymlink(source)) {
+    return CopyStatus{ Status::POSIX(ENOSYS), CopyStatus::NoPath };
+  }
+
   if (copyfile(source.c_str(), destination.c_str(), nullptr,
-               COPYFILE_METADATA | COPYFILE_EXCL | COPYFILE_STAT |
-                 COPYFILE_XATTR | COPYFILE_DATA) < 0) {
+               COPYFILE_METADATA | COPYFILE_CLONE | COPYFILE_UNLINK) < 0) {
     return CopyStatus{ Status::POSIX_errno(), CopyStatus::NoPath };
   }
 #  if KWSYS_CXX_HAS_UTIMENSAT
