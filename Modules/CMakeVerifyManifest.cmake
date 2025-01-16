@@ -5,25 +5,32 @@
 CMakeVerifyManifest
 -------------------
 
+Use this script to verify that embedded manifests and side-by-side
+manifests for a project match.
 
+This script first recursively globs ``*.manifest`` files from
+the current directory and creates a list of allowed version.
+Additional versions can be passed by setting ``allow_versions``
+from the invocation command.
+Next, the script globs ``*.exe`` and ``*.dll`` files.  Each
+``.exe`` and ``.dll`` file is scanned for embedded manifests and
+the versions of CRT are checked to be in the list of allowed
+version.
 
-CMakeVerifyManifest.cmake
+Example
+^^^^^^^
 
-This script is used to verify that embedded manifests and side by side
-manifests for a project match.  To run this script, cd to a directory
-and run the script with cmake -P.  On the command line you can pass in
-versions that are OK even if not found in the .manifest files.  For
-example, cmake -Dallow_versions=8.0.50608.0
--PCmakeVerifyManifest.cmake could be used to allow an embedded manifest
-of 8.0.50608.0 to be used in a project even if that version was not
-found in the .manifest file.
+To run this script, navigate to a directory and run the script
+with ``cmake -P``.
+
+::
+
+  cmake -Dallow_versions=8.0.50608.0 -PCMakeVerifyManifest.cmake
+
+This call allows an embedded manifest of 8.0.50608.0 to be used
+in a project, even if that version was not found in a
+``.manifest`` file.
 #]=======================================================================]
-
-# This script first recursively globs *.manifest files from
-# the current directory.  Then globs *.exe and *.dll.  Each
-# .exe and .dll is scanned for embedded manifests and the versions
-# of CRT are compared to those found in the .manifest files
-# from the first glob.
 
 # crt_version:
 # function to extract the CRT version from a file
