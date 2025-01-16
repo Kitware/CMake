@@ -425,6 +425,9 @@ int cmInstrumentation::InstrumentCommand(
   }
   if (arrayOptions.has_value()) {
     for (auto const& item : arrayOptions.value()) {
+      if (item.first == "targetLabels" && command_type != "link") {
+        continue;
+      }
       root[item.first] = Json::arrayValue;
       std::stringstream ss(item.second);
       std::string element;

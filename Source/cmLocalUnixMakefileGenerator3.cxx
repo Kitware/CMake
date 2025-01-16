@@ -994,6 +994,7 @@ void cmLocalUnixMakefileGenerator3::AppendCustomCommand(
         vars.CMTargetName = target->GetName().c_str();
         vars.CMTargetType =
           cmState::GetTargetTypeName(target->GetType()).c_str();
+        vars.CMTargetLabels = target->GetTargetLabelsString().c_str();
         std::string output;
         const std::vector<std::string>& outputs = ccg.GetOutputs();
         for (size_t i = 0; i < outputs.size(); ++i) {

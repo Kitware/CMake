@@ -402,6 +402,8 @@ public:
   cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator const* GlobalGenerator;
 
+  std::string targetLabelsString;
+
   struct ModuleDefinitionInfo
   {
     std::string DefFile;
@@ -513,6 +515,8 @@ public:
 
   std::vector<std::string> GetAppleArchs(std::string const& config,
                                          cm::optional<std::string> lang) const;
+
+  const std::string& GetTargetLabelsString();
 
   // The classification of the flag.
   enum class FlagClassification

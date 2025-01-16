@@ -2703,9 +2703,10 @@ int cmake::ActualConfigure()
         "--output <OBJECT> --source <SOURCE> --language <LANGUAGE> -- "));
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_LINK",
-      cmStrCat(launcher, "--command-type link", common_args,
-               "--output <TARGET> --target-type <TARGET_TYPE> ",
-               "--language <LANGUAGE> -- "));
+      cmStrCat(
+        launcher, "--command-type link", common_args,
+        "--output <TARGET> --target-type <TARGET_TYPE> ",
+        "--language <LANGUAGE> --target-labels \"<TARGET_LABELS>\" -- "));
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_CUSTOM",
       cmStrCat(launcher, "--command-type custom", common_args,
