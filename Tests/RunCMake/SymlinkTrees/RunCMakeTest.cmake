@@ -116,7 +116,7 @@ run_symlink_test(none-src_in_bin "binary/source" "binary" "source" "..")
 #   .../common_real/binary
 #   .../common -> common_real
 file(REMOVE_RECURSE "${RunCMake_BINARY_DIR}/common_real")
-file(REMOVE "${RunCMake_BINARY_DIR}/common")
+file(REMOVE_RECURSE "${RunCMake_BINARY_DIR}/common")
 file(MAKE_DIRECTORY "${RunCMake_BINARY_DIR}/common_real/source")
 file(MAKE_DIRECTORY "${RunCMake_BINARY_DIR}/common_real/binary")
 file(CREATE_LINK "common_real" "${RunCMake_BINARY_DIR}/common" SYMBOLIC)
@@ -136,11 +136,21 @@ run_symlink_test(common-bin_in_src "source" "source/binary" ".." "binary")
 
 # Create the following structure:
 #
+#   .../common/real/source/binary
+#   .../common/link -> common/real
+file(REMOVE_RECURSE "${RunCMake_BINARY_DIR}/common")
+file(MAKE_DIRECTORY "${RunCMake_BINARY_DIR}/common/real/source/binary")
+file(CREATE_LINK "${RunCMake_BINARY_DIR}/common/real" "${RunCMake_BINARY_DIR}/common/link" SYMBOLIC)
+# Test that configure with -Bcommon/real/source/binary from within common/link has real CMAKE_BINARY_DIR
+run_symlink_test(common-use_real_build_from_-B "link/source" "real/source/binary" "../../../link/source" "../../real/source/binary")
+
+# Create the following structure:
+#
 #   .../common_real/binary
 #   .../common_real/binary/source
 #   .../common -> common_real
 file(REMOVE_RECURSE "${RunCMake_BINARY_DIR}/common_real")
-file(REMOVE "${RunCMake_BINARY_DIR}/common")
+file(REMOVE_RECURSE "${RunCMake_BINARY_DIR}/common")
 file(MAKE_DIRECTORY "${RunCMake_BINARY_DIR}/common_real/binary")
 file(MAKE_DIRECTORY "${RunCMake_BINARY_DIR}/common_real/binary/source")
 file(CREATE_LINK "common_real" "${RunCMake_BINARY_DIR}/common" SYMBOLIC)
