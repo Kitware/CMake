@@ -296,8 +296,8 @@ Example:
       "beforeCPULoadAverage" : 2.3500000000000001,
       "beforeHostMemoryUsed" : 6635832.0
     },
-    "timeStart" : 31997009,
-    "timeStop" : 31997056
+    "timeStart" : 1737053448177,
+    "duration" : 31
   }
 
 v1 Index File
