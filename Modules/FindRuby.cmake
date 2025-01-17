@@ -246,7 +246,7 @@ if(NOT ${Ruby_FIND_VIRTUALENV} STREQUAL "ONLY" AND NOT Ruby_EXECUTABLE)
   _RUBY_CHECK_SYSTEM()
 endif()
 
-if(Ruby_EXECUTABLE AND NOT Ruby_VERSION_MAJOR)
+if(Ruby_EXECUTABLE AND NOT Ruby_EXECUTABLE STREQUAL "${_Ruby_EXECUTABLE_LAST_QUERIED}")
   # query the ruby version
   _RUBY_CONFIG_VAR("MAJOR" Ruby_VERSION_MAJOR)
   _RUBY_CONFIG_VAR("MINOR" Ruby_VERSION_MINOR)
@@ -274,6 +274,7 @@ if(Ruby_EXECUTABLE AND NOT Ruby_VERSION_MAJOR)
   endif()
 
   # save the results in the cache so we don't have to run ruby the next time again
+  set(_Ruby_EXECUTABLE_LAST_QUERIED "${Ruby_EXECUTABLE}" CACHE INTERNAL "The ruby executable last queried for version and path info")
   set(Ruby_VERSION_MAJOR    ${Ruby_VERSION_MAJOR}    CACHE PATH "The Ruby major version" FORCE)
   set(Ruby_VERSION_MINOR    ${Ruby_VERSION_MINOR}    CACHE PATH "The Ruby minor version" FORCE)
   set(Ruby_VERSION_PATCH    ${Ruby_VERSION_PATCH}    CACHE PATH "The Ruby patch version" FORCE)
