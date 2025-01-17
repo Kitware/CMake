@@ -547,13 +547,12 @@ class cmMakefile;
          "project() always sets <PROJECT-NAME>_* as normal variables.", 3,    \
          31, 0, WARN)                                                         \
   SELECT(POLICY, CMP0181,                                                     \
-         "Link command-line fragment variables are parsed and re-quoted.", 3, \
-         32, 0, WARN)                                                         \
+         "Link command-line fragment variables are parsed and re-quoted.", 4, \
+         0, 0, WARN)                                                          \
   SELECT(POLICY, CMP0182,                                                     \
-         "Create shared library archives by default on AIX.", 3, 32, 0, WARN) \
+         "Create shared library archives by default on AIX.", 4, 0, 0, WARN)  \
   SELECT(POLICY, CMP0183,                                                     \
-         "add_feature_info() supports full Condition Syntax.", 3, 32, 0,      \
-         WARN)
+         "add_feature_info() supports full Condition Syntax.", 4, 0, 0, WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)
 #define CM_FOR_EACH_POLICY_ID(POLICY)                                         \

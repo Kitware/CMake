@@ -185,12 +185,12 @@ Options:
 
 
   ``NONE``
-    .. versionadded:: 3.32
+    .. versionadded:: 4.0
 
     Regardless of any of the commands failing, the ``execute_process()``
     command will not halt with an error.
 
-  .. versionadded:: 3.32
+  .. versionadded:: 4.0
 
     If not provided, the
     :variable:`CMAKE_EXECUTE_PROCESS_COMMAND_ERROR_IS_FATAL` variable

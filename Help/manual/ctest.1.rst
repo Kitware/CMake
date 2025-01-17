@@ -367,7 +367,7 @@ Run Tests
  use interactive mode, and follow the Windows documentation
  on `Collecting User-Mode Dumps`_.
 
- .. versionchanged:: 3.32
+ .. versionchanged:: 4.0
    Windows Error Reporting (WER) is enabled in interactive mode, so
    test processes may show debug popup windows and create core dumps.
    This was made possible by updates to ``libuv``.

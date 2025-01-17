@@ -351,7 +351,7 @@ as needed to honor the state of the calling project:
 * :policy:`CMP0157`
 * :policy:`CMP0181`
 
-.. versionadded:: 3.32
+.. versionadded:: 4.0
   The current setting of :policy:`CMP0181` policy is propagated through to the
   generated test project.
 

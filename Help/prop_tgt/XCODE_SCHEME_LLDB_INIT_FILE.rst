@@ -1,7 +1,7 @@
 XCODE_SCHEME_LLDB_INIT_FILE
 ---------------------------
 
-.. versionadded:: 3.32
+.. versionadded:: 4.0
 
 Property value for ``LLDB Init File`` in the Info section of the
 generated Xcode scheme. In case the value contains generator

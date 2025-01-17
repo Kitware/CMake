@@ -225,7 +225,7 @@ Example:
     Additional arguments that are forwarded to protoc.
 
   ``PROTOC_EXE <executable>``
-    .. versionadded:: 3.32
+    .. versionadded:: 4.0
 
     Command name, path, or CMake executable used to generate protobuf bindings.
     If omitted, ``protobuf::protoc`` is used.

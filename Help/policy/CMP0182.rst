@@ -1,7 +1,7 @@
 CMP0182
 -------
 
-.. versionadded:: 3.32
+.. versionadded:: 4.0
 
 Create shared library archives by default on AIX.
 
@@ -14,7 +14,7 @@ file is placed inside an archive ``.a`` file.  However, the behavior
 was disabled by default for compatibility with existing projects that
 do not set :prop_tgt:`AIX_SHARED_LIBRARY_ARCHIVE`.
 
-CMake 3.32 and above prefer, when :prop_tgt:`AIX_SHARED_LIBRARY_ARCHIVE`
+CMake 4.0 and above prefer, when :prop_tgt:`AIX_SHARED_LIBRARY_ARCHIVE`
 is not set, to enable creation of shared library archives by default
 because it is the preferred convention on AIX.  This policy provides
 compatibility for projects that have not been updated.
@@ -24,7 +24,7 @@ archives when :prop_tgt:`AIX_SHARED_LIBRARY_ARCHIVE` is not set.
 The ``NEW`` behavior for this policy is to enable shared library
 archives when :prop_tgt:`AIX_SHARED_LIBRARY_ARCHIVE` is not set.
 
-.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.32
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.0
 .. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn
 .. include:: STANDARD_ADVICE.txt
 

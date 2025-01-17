@@ -51,8 +51,8 @@ The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
 functions.
 
-Policies Introduced by CMake 3.32
-=================================
+Policies Introduced by CMake 4.0
+================================
 
 .. toctree::
    :maxdepth: 1

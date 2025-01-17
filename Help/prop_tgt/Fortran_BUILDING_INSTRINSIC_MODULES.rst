@@ -1,7 +1,7 @@
 Fortran_BUILDING_INSTRINSIC_MODULES
 -----------------------------------
 
-.. deprecated:: 3.32
+.. deprecated:: 4.0
 
   Please use the :prop_tgt:`Fortran_BUILDING_INTRINSIC_MODULES` instead.
 

@@ -1,14 +1,14 @@
 CMP0183
 -------
 
-.. versionadded:: 3.32
+.. versionadded:: 4.0
 
 :command:`add_feature_info` supports full :ref:`Condition Syntax`.
 
 The ``<enabled>`` parameter accepts a :ref:`semicolon-separated list <CMake
 Language Lists>` of conditions.  CMake 3.31 and lower evaluate each
 ``condition`` as ``if(${condition})``, which does not properly handle
-conditions with nested paren groups.  CMake 3.32 and above instead prefer
+conditions with nested paren groups.  CMake 4.0 and above instead prefer
 to evaluate each ``condition`` as ``if(<condition>)``, where ``<condition>``
 is re-parsed as if literally written in a call to :command:`if`.  This
 allows expressions like::
@@ -26,7 +26,7 @@ to be re-written as::
 Policy ``CMP0183`` provides compatibility for projects that have not
 been updated to expect the new behavior.
 
-.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.32
+.. |INTRODUCED_IN_CMAKE_VERSION| replace:: 4.0
 .. |WARNS_OR_DOES_NOT_WARN| replace:: warns
 .. include:: STANDARD_ADVICE.txt
 

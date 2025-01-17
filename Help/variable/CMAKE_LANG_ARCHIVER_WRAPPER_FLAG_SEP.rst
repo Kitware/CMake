@@ -1,7 +1,7 @@
 CMAKE_<LANG>_ARCHIVER_WRAPPER_FLAG_SEP
 --------------------------------------
 
-.. versionadded:: 3.32
+.. versionadded:: 4.0
 
 This variable is used with :variable:`CMAKE_<LANG>_ARCHIVER_WRAPPER_FLAG`
 variable to format ``ARCHIVER:`` prefix in the static library options

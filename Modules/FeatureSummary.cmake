@@ -668,7 +668,7 @@ endfunction()
   .. versionchanged:: 3.8
     ``<enabled>`` can be a list of conditions.
 
-  .. versionchanged:: 3.32
+  .. versionchanged:: 4.0
     Full :ref:`Condition Syntax` is now supported for ``<enabled>``.
     See policy :policy:`CMP0183`.
 

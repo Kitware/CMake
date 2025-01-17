@@ -3,7 +3,7 @@
 cmake-instrumentation(7)
 ************************
 
-.. versionadded:: 3.32
+.. versionadded:: 4.0
 
 .. only:: html
 

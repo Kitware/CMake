@@ -47,13 +47,13 @@ custom command.
 The options are:
 
 ``OPTIONS <options>...``
-  .. versionadded:: 3.32
+  .. versionadded:: 4.0
 
   A :ref:`semicolon-separated list <CMake Language Lists>` of flex options added
   to the ``flex`` command line.
 
 ``COMPILE_FLAGS <string>``
-  .. deprecated:: 3.32
+  .. deprecated:: 4.0
 
   Space-separated flex options added to the ``flex`` command line.
   A :ref:`;-list <CMake Language Lists>` will not work.
@@ -84,7 +84,7 @@ The macro defines the following variables:
   The header flex output, if any.
 
 ``FLEX_<Name>_OPTIONS``
-  .. versionadded:: 3.32
+  .. versionadded:: 4.0
 
   Options used in the ``flex`` command line.
 

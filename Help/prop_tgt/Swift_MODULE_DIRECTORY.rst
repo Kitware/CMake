@@ -11,7 +11,7 @@ placed in the build directory corresponding to the target's source directory.
 If the variable :variable:`CMAKE_Swift_MODULE_DIRECTORY` is set when a target is
 created its value is used to initialize this property.
 
-.. versionadded:: 3.32
+.. versionadded:: 4.0
 
   The property value may use
   :manual:`generator expressions <cmake-generator-expressions(7)>`.

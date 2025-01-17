@@ -373,7 +373,7 @@ Each entry is meant for installation trees following Windows (``W``), UNIX
 
 .. [#p1] .. versionadded:: 3.25
 
-.. [#p2] .. versionadded:: 3.32
+.. [#p2] .. versionadded:: 4.0
 
 On systems supporting macOS :prop_tgt:`FRAMEWORK` and :prop_tgt:`BUNDLE`, the
 following directories are searched for Frameworks or Application Bundles
@@ -393,7 +393,7 @@ containing a configuration file:
  ``<prefix>/<name>.app/Contents/Resources/CMake/``                 A
 =============================================================== ==========
 
-.. [#p3] .. versionadded:: 3.32
+.. [#p3] .. versionadded:: 4.0
 
 When searching the above paths, ``find_package`` will only look for ``.cps``
 files in search paths which contain ``/cps/``, and will only look for
@@ -611,7 +611,7 @@ before calling ``find_package``.
    Added the ``CMAKE_FIND_USE_<CATEGORY>`` variables to globally disable
    various search locations.
 
-.. versionchanged:: 3.32
+.. versionchanged:: 4.0
    The variables :variable:`CMAKE_FIND_PACKAGE_SORT_ORDER` and
    :variable:`CMAKE_FIND_PACKAGE_SORT_DIRECTION` now also control the order
    in which ``find_package`` searches directories matching the glob expression

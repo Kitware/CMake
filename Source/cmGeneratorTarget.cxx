@@ -4046,7 +4046,7 @@ std::string cmGeneratorTarget::GetFortranModuleDirectory(
 
 bool cmGeneratorTarget::IsFortranBuildingIntrinsicModules() const
 {
-  // ATTENTION Before 3.32 the property name was misspelled.
+  // ATTENTION Before 4.0 the property name was misspelled.
   // Check the correct name first and than the old name.
   if (cmValue prop = this->GetProperty("Fortran_BUILDING_INTRINSIC_MODULES")) {
     return prop.IsOn();

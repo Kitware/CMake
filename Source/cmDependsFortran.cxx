@@ -166,7 +166,7 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
     mod_dir = this->LocalGenerator->GetCurrentBinaryDirectory();
   }
 
-  // ATTENTION Before 3.32 the property name was misspelled.
+  // ATTENTION Before 4.0 the property name was misspelled.
   // Check the correct name first and than the old name.
   bool building_intrinsics =
     !mf->GetSafeDefinition("CMAKE_Fortran_TARGET_BUILDING_INTRINSIC_MODULES")

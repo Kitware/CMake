@@ -19,7 +19,7 @@ The following :prop_tgt:`IMPORTED` targets are also defined:
 ``Patch::patch``
   The command-line executable.
 
-  .. versionchanged:: 3.32
+  .. versionchanged:: 4.0
     Imported target is defined only when :prop_gbl:`CMAKE_ROLE` is ``PROJECT``.
 
 Example usage:
