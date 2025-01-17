@@ -13,7 +13,7 @@ property.
 
 .. command:: check_ipo_supported
 
-  ::
+  .. code-block:: cmake
 
     check_ipo_supported([RESULT <result>] [OUTPUT <output>]
                         [LANGUAGES <lang>...])
@@ -28,13 +28,29 @@ property.
     Set ``<output>`` variable with details about any error.
   ``LANGUAGES <lang>...``
     Specify languages whose compilers to check.
-    Languages ``C``, ``CXX``, and ``Fortran`` are supported.
 
-It makes no sense to use this module when :policy:`CMP0069` is set to ``OLD`` so
-module will return error in this case. See policy :policy:`CMP0069` for details.
+    The following languages are supported:
+
+    * ``C``
+
+    * ``CXX``
+
+    * ``CUDA``
+
+      .. versionadded:: 3.25
+
+    * ``Fortran``
+
+    If this option is not given, the default languages are picked from
+    the current :prop_gbl:`ENABLED_LANGUAGES` global property.
+
+.. note::
+
+  To use ``check_ipo_supported()``, policy :policy:`CMP0069` must be set to
+  ``NEW``; otherwise, a fatal error will occur.
 
 .. versionadded:: 3.13
-  Add support for Visual Studio generators.
+  Support for Visual Studio generators.
 
 .. versionadded:: 3.24
   The check uses the caller's :variable:`CMAKE_<LANG>_FLAGS`
