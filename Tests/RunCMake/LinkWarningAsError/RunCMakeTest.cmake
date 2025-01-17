@@ -1,5 +1,7 @@
 include(RunCMake)
 
+run_cmake(BadValue)
+
 function(run_link_warn test)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)
   set(RunCMake_TEST_OUTPUT_MERGE 1)
@@ -14,6 +16,8 @@ endfunction()
 
 run_link_warn(WarnErrorOn1)
 run_link_warn(WarnErrorOn2)
+run_link_warn(WarnErrorOn3)
+run_link_warn(WarnErrorOn4)
 run_link_warn(WarnErrorOff1)
 run_link_warn(WarnErrorOff2)
 run_link_warn(WarnErrorOnIgnore "--link-no-warning-as-error")

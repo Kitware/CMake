@@ -3608,14 +3608,54 @@ void cmLocalGenerator::AppendWarningAsErrorLinkerFlags(
   }
 
   const auto wError = target->GetProperty("LINK_WARNING_AS_ERROR");
-  const auto wErrorOpts = this->Makefile->GetDefinition(
-    cmStrCat("CMAKE_", lang, "_LINK_OPTIONS_WARNING_AS_ERROR"));
-  if (wError.IsOn() && wErrorOpts.IsSet()) {
-    auto items = cmExpandListWithBacktrace(wErrorOpts, target->GetBacktrace());
-    target->ResolveLinkerWrapper(items, lang);
-    for (const auto& item : items) {
-      this->AppendFlagEscape(flags, item.Value);
+  if (wError.IsOff()) {
+    return;
+  }
+  cmList wErrorOptions;
+  if (wError.IsOn()) {
+    wErrorOptions = { "DRIVER", "LINKER" };
+  } else {
+    wErrorOptions = wError;
+    std::sort(wErrorOptions.begin(), wErrorOptions.end());
+    wErrorOptions.erase(
+      std::unique(wErrorOptions.begin(), wErrorOptions.end()),
+      wErrorOptions.end());
+  }
+
+  auto linkModeIsDriver =
+    this->Makefile->GetDefinition(cmStrCat("CMAKE_", lang, "_LINK_MODE")) ==
+    "DRIVER"_s;
+  std::string errorMessage;
+  for (const auto& option : wErrorOptions) {
+    if (option != "DRIVER"_s && option != "LINKER"_s) {
+      errorMessage += cmStrCat("  ", option, '\n');
+      continue;
     }
+
+    if (option == "DRIVER"_s && !linkModeIsDriver) {
+      continue;
+    }
+
+    const auto wErrorOpts = this->Makefile->GetDefinition(cmStrCat(
+      "CMAKE_", lang, '_', (option == "DRIVER"_s ? "COMPILE" : "LINK"),
+      "_OPTIONS_WARNING_AS_ERROR"));
+    if (wErrorOpts.IsSet()) {
+      auto items =
+        cmExpandListWithBacktrace(wErrorOpts, target->GetBacktrace());
+      if (option == "LINKER"_s) {
+        target->ResolveLinkerWrapper(items, lang);
+      }
+      for (const auto& item : items) {
+        this->AppendFlagEscape(flags, item.Value);
+      }
+    }
+  }
+  if (!errorMessage.empty()) {
+    this->Makefile->GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat(
+        "Erroneous value(s) for 'LINK_WARNING_AS_ERROR' property of target '",
+        target->GetName(), "':\n", errorMessage));
   }
 }
 
