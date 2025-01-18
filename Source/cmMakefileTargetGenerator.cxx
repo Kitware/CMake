@@ -931,6 +931,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(
   vars.CMTargetName = this->GeneratorTarget->GetName().c_str();
   vars.CMTargetType =
     cmState::GetTargetTypeName(this->GeneratorTarget->GetType()).c_str();
+  vars.CMTargetLabels = this->GeneratorTarget->GetTargetLabelsString().c_str();
   vars.Language = lang.c_str();
   vars.Target = targetOutPathReal.c_str();
   vars.TargetPDB = targetOutPathPDB.c_str();
@@ -1694,7 +1695,7 @@ void cmMakefileTargetGenerator::WriteDeviceLinkRule(
   vars.CMTargetName = this->GetGeneratorTarget()->GetName().c_str();
   vars.CMTargetType =
     cmState::GetTargetTypeName(this->GetGeneratorTarget()->GetType()).c_str();
-
+  vars.CMTargetLabels = this->GeneratorTarget->GetTargetLabelsString().c_str();
   vars.Language = "CUDA";
   vars.Object = output.c_str();
   vars.Fatbinary = fatbinaryOutput.c_str();

@@ -34,6 +34,7 @@ public:
   std::string OptionOutput;
   std::string OptionSource;
   std::string OptionLanguage;
+  std::string OptionTargetLabels;
   std::string OptionTargetName;
   std::string OptionTargetType;
   std::string OptionBuildDir;

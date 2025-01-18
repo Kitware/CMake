@@ -62,6 +62,7 @@ bool cmCTestLaunch::ParseArguments(int argc, const char* const* argv)
     DoingOutput,
     DoingSource,
     DoingLanguage,
+    DoingTargetLabels,
     DoingTargetName,
     DoingTargetType,
     DoingCommandType,
@@ -84,6 +85,8 @@ bool cmCTestLaunch::ParseArguments(int argc, const char* const* argv)
       doing = DoingSource;
     } else if (strcmp(arg, "--language") == 0) {
       doing = DoingLanguage;
+    } else if (strcmp(arg, "--target-labels") == 0) {
+      doing = DoingTargetLabels;
     } else if (strcmp(arg, "--target-name") == 0) {
       doing = DoingTargetName;
     } else if (strcmp(arg, "--target-type") == 0) {
@@ -105,6 +108,9 @@ bool cmCTestLaunch::ParseArguments(int argc, const char* const* argv)
       if (this->Reporter.OptionLanguage == "CXX") {
         this->Reporter.OptionLanguage = "C++";
       }
+      doing = DoingNone;
+    } else if (doing == DoingTargetLabels) {
+      this->Reporter.OptionTargetLabels = arg;
       doing = DoingNone;
     } else if (doing == DoingTargetName) {
       this->Reporter.OptionTargetName = arg;
@@ -257,6 +263,7 @@ int cmCTestLaunch::Run()
   options["role"] = this->Reporter.OptionRole;
   std::map<std::string, std::string> arrayOptions;
   arrayOptions["outputs"] = this->Reporter.OptionOutput;
+  arrayOptions["targetLabels"] = this->Reporter.OptionTargetLabels;
   instrumenter.InstrumentCommand(
     this->Reporter.OptionCommandType, this->RealArgV,
     [this]() -> int {

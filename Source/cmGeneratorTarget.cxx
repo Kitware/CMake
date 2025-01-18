@@ -2041,6 +2041,14 @@ std::vector<std::string> cmGeneratorTarget::GetAppleArchs(
   return std::move(archList.data());
 }
 
+const std::string& cmGeneratorTarget::GetTargetLabelsString()
+{
+  this->targetLabelsString = this->GetSafeProperty("LABELS");
+  std::replace(this->targetLabelsString.begin(),
+               this->targetLabelsString.end(), ';', ',');
+  return this->targetLabelsString;
+}
+
 namespace {
 
 bool IsSupportedClassifiedFlagsLanguage(std::string const& lang)
@@ -2305,6 +2313,7 @@ cmGeneratorTarget::GetClassifiedFlagsForSource(cmSourceFile const* sf,
   cmRulePlaceholderExpander::RuleVariables vars;
   vars.CMTargetName = this->GetName().c_str();
   vars.CMTargetType = cmState::GetTargetTypeName(this->GetType()).c_str();
+  vars.CMTargetLabels = this->GetTargetLabelsString().c_str();
   vars.Language = lang.c_str();
 
   auto const sfPath = this->LocalGenerator->ConvertToOutputFormat(

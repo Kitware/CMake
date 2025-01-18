@@ -232,6 +232,10 @@ and contain the following data:
     The :prop_tgt:`TYPE` of the target. Only included when ``role`` is
     ``link``.
 
+  ``targetLabels``
+    The :prop_tgt:`LABELS` of the target. Only included when ``role`` is
+    ``link``.
+
   ``timeStart``
     Time at which the command started, expressed as the number of milliseconds
     since the system epoch.
@@ -296,8 +300,8 @@ Example:
       "beforeCPULoadAverage" : 2.3500000000000001,
       "beforeHostMemoryUsed" : 6635832.0
     },
-    "timeStart" : 31997009,
-    "timeStop" : 31997056
+    "timeStart" : 1737053448177,
+    "duration" : 31
   }
 
 v1 Index File

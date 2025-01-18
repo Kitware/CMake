@@ -781,6 +781,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
     vars.CMTargetName = this->GeneratorTarget->GetName().c_str();
     vars.CMTargetType =
       cmState::GetTargetTypeName(this->GeneratorTarget->GetType()).c_str();
+    vars.CMTargetLabels =
+      this->GeneratorTarget->GetTargetLabelsString().c_str();
     vars.Language = linkLanguage.c_str();
     vars.Linker = linker.c_str();
     vars.AIXExports = aixExports.c_str();
