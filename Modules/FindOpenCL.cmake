@@ -46,7 +46,7 @@ function(_FIND_OPENCL_VERSION)
   include(CMakePushCheckState)
   set(CMAKE_REQUIRED_QUIET ${OpenCL_FIND_QUIETLY})
 
-  CMAKE_PUSH_CHECK_STATE()
+  cmake_push_check_state()
   foreach(VERSION "3_0" "2_2" "2_1" "2_0" "1_2" "1_1" "1_0")
     set(CMAKE_REQUIRED_INCLUDES "${OpenCL_INCLUDE_DIR}")
 
@@ -73,7 +73,7 @@ function(_FIND_OPENCL_VERSION)
       break()
     endif()
   endforeach()
-  CMAKE_POP_CHECK_STATE()
+  cmake_pop_check_state()
 endfunction()
 
 find_path(OpenCL_INCLUDE_DIR

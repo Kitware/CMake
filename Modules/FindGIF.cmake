@@ -79,7 +79,7 @@ find_library(GIF_LIBRARY
 if(GIF_INCLUDE_DIR)
   include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
   include(${CMAKE_CURRENT_LIST_DIR}/CheckStructHasMember.cmake)
-  CMAKE_PUSH_CHECK_STATE()
+  cmake_push_check_state()
   set(CMAKE_REQUIRED_QUIET ${GIF_FIND_QUIETLY})
   set(CMAKE_REQUIRED_INCLUDES "${GIF_INCLUDE_DIR}")
 
@@ -105,7 +105,7 @@ if(GIF_INCLUDE_DIR)
   unset(_GIF_MIN)
   unset(_GIF_REL)
   unset(_GIF_DEFS)
-  CMAKE_POP_CHECK_STATE()
+  cmake_pop_check_state()
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
