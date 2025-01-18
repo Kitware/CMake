@@ -39,7 +39,7 @@ if(CMake_TEST_FindRuby)
     --test-command ${CMAKE_CTEST_COMMAND} -V -C $<CONFIGURATION>
     )
   set_tests_properties(FindRuby.FailExact PROPERTIES
-    PASS_REGULAR_EXPRESSION "Could NOT find Ruby: Found unsuitable version \".*\", but required is.*exact version \"[0-9]+\\.[0-9]+\\.[0-9]+\" \\(found .*\\)")
+    PASS_REGULAR_EXPRESSION "Could NOT find Ruby.*Required[ \n]+is[ \n]+exact[ \n]+version[ \n]+\"1\\.9\\.9\"")
 
   # RVM specific test
   if(CMake_TEST_FindRuby_RVM)
