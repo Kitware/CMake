@@ -21,6 +21,13 @@ struct Maybe<std::string> : public std::string
 
 template <typename T>
 struct MaybeEmpty;
+#  if defined(__LCC__) && (__EDG_VERSION__ >= 603)
+template <>
+struct MaybeEmpty<std::vector<std::string>> : public std::vector<std::string>
+{
+  using std::vector<std::string>::vector;
+};
+#  endif
 template <typename T>
 struct MaybeEmpty<std::vector<T>> : public std::vector<T>
 {

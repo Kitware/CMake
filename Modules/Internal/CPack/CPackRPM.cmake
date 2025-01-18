@@ -1088,7 +1088,17 @@ function(cpack_rpm_generate_package)
   execute_process(
     COMMAND "${RPMBUILD_EXECUTABLE}" --querytags
     OUTPUT_VARIABLE RPMBUILD_TAG_LIST
+    RESULT_VARIABLE RPMBUILD_QUERYTAGS_SUCCESS
+    ERROR_QUIET
     OUTPUT_STRIP_TRAILING_WHITESPACE)
+  # In some versions of RPM, rpmbuild does not understand --querytags parameter,
+  # but rpm does.
+  if(NOT RPMBUILD_QUERYTAGS_SUCCESS EQUAL 0)
+    execute_process(
+      COMMAND "${RPM_EXECUTABLE}" --querytags
+      OUTPUT_VARIABLE RPMBUILD_TAG_LIST
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+  endif()
   string(REPLACE "\n" ";" RPMBUILD_TAG_LIST "${RPMBUILD_TAG_LIST}")
 
   # In some versions of RPM, weak dependency tags are present in the --querytags
