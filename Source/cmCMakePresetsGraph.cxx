@@ -1090,7 +1090,6 @@ bool cmCMakePresetsGraph::ReadProjectPresetsInternal(bool allowNoFiles)
   }
 
   bool result = ComputePresetInheritance(this->ConfigurePresets, *this) &&
-    ComputePresetInheritance(this->ConfigurePresets, *this) &&
     ComputePresetInheritance(this->BuildPresets, *this) &&
     ComputePresetInheritance(this->TestPresets, *this) &&
     ComputePresetInheritance(this->PackagePresets, *this) &&
