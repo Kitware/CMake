@@ -215,8 +215,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageMessage.cmake)
 
 
 cmake_policy(PUSH)
-# numbers and boolean constants
-cmake_policy(SET CMP0012 NEW)
 # IN_LIST operator
 cmake_policy(SET CMP0057 NEW)
 

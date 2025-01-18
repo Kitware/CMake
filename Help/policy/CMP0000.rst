@@ -1,6 +1,9 @@
 CMP0000
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 A minimum required CMake version must be specified.
 
 CMake requires that projects specify the version of CMake to which
@@ -26,7 +29,5 @@ behavior was to silently ignore the missing invocation.  The ``NEW``
 behavior is to issue an error instead of a warning.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.6.0
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

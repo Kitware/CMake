@@ -1,6 +1,9 @@
 CMP0013
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 Duplicate binary directories are not allowed.
 
 CMake 2.6.3 and below silently permitted add_subdirectory() calls to
@@ -15,7 +18,5 @@ behavior for this policy is to disallow duplicate binary directories
 with an error.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.8.0
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

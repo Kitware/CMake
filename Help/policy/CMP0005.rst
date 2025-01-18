@@ -1,6 +1,9 @@
 CMP0005
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 Preprocessor definition values are now escaped automatically.
 
 This policy determines whether or not CMake should generate escaped
@@ -20,7 +23,5 @@ See documentation of the ``COMPILE_DEFINITIONS`` target property for
 limitations of the escaping implementation.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.6.0
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

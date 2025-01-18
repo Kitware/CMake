@@ -1,6 +1,9 @@
 CMP0002
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 Logical target names must be globally unique.
 
 Targets names created with :command:`add_executable`, :command:`add_library`, or
@@ -22,7 +25,5 @@ must simply have globally unique names (unless one uses the global
 property :prop_gbl:`ALLOW_DUPLICATE_CUSTOM_TARGETS` with a Makefiles generator).
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.6.0
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

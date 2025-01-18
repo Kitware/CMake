@@ -195,9 +195,6 @@ if(FortranCInterface_SOURCE_DIR)
   return()
 endif()
 
-cmake_policy(PUSH)
-cmake_policy(SET CMP0007 NEW)
-
 #-----------------------------------------------------------------------------
 # Verify that C and Fortran are available.
 foreach(lang C Fortran)
@@ -402,6 +399,3 @@ function(FortranCInterface_VERIFY)
       "The output was:\n  ${_output}")
   endif()
 endfunction()
-
-# Restore including context policies.
-cmake_policy(POP)

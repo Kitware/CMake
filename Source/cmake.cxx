@@ -2650,27 +2650,6 @@ int cmake::ActualConfigure()
   // if the project did not define one of the entries below, add them now
   // so users can edit the values in the cache:
 
-  // We used to always present LIBRARY_OUTPUT_PATH and
-  // EXECUTABLE_OUTPUT_PATH.  They are now documented as old-style and
-  // should no longer be used.  Therefore we present them only if the
-  // project requires compatibility with CMake 2.4.  We detect this
-  // here by looking for the old CMAKE_BACKWARDS_COMPATIBILITY
-  // variable created when CMP0001 is not set to NEW.
-  if (this->State->GetInitializedCacheValue("CMAKE_BACKWARDS_COMPATIBILITY")) {
-    if (!this->State->GetInitializedCacheValue("LIBRARY_OUTPUT_PATH")) {
-      this->AddCacheEntry(
-        "LIBRARY_OUTPUT_PATH", "",
-        "Single output directory for building all libraries.",
-        cmStateEnums::PATH);
-    }
-    if (!this->State->GetInitializedCacheValue("EXECUTABLE_OUTPUT_PATH")) {
-      this->AddCacheEntry(
-        "EXECUTABLE_OUTPUT_PATH", "",
-        "Single output directory for building all executables.",
-        cmStateEnums::PATH);
-    }
-  }
-
   const auto& mf = this->GlobalGenerator->GetMakefiles()[0];
 
   if (mf->IsOn("CTEST_USE_LAUNCHERS") &&

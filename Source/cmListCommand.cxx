@@ -89,29 +89,6 @@ cm::optional<cmList> GetList(const std::string& var,
   if (!cm::contains(*list, std::string())) {
     return list;
   }
-  // if we have empty elements we need to check policy CMP0007
-  switch (makefile.GetPolicyStatus(cmPolicies::CMP0007)) {
-    case cmPolicies::WARN: {
-      // Default is to warn and use old behavior
-      // OLD behavior is to allow compatibility, so recall
-      // ExpandListArgument without the true which will remove
-      // empty values
-      list->assign(listString);
-      std::string warn =
-        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0007),
-                 " List has value = [", listString, "].");
-      makefile.IssueMessage(MessageType::AUTHOR_WARNING, warn);
-      return list;
-    }
-    case cmPolicies::OLD:
-      // OLD behavior is to allow compatibility, so recall
-      // ExpandListArgument without the true which will remove
-      // empty values
-      list->assign(listString);
-      return list;
-    case cmPolicies::NEW:
-      return list;
-  }
   return list;
 }
 

@@ -131,7 +131,7 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   this->PushLoopBlockBarrier();
 
   // By default the check is not done.  It is enabled by
-  // cmListFileCache in the top level if necessary.
+  // cmMakefile::Configure in the top level if necessary.
   this->CheckCMP0000 = false;
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -601,9 +601,7 @@ public:
 private:
   cmMakefile* Makefile;
   bool NoPolicyScope;
-  bool CheckCMP0011 = false;
   bool ReportError = true;
-  void EnforceCMP0011();
 };
 
 cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
@@ -621,84 +619,21 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
     this->Makefile->GetState()->CreateIncludeFileSnapshot(
       this->Makefile->StateSnapshot, filenametoread);
   if (!this->NoPolicyScope) {
-    // Check CMP0011 to determine the policy scope type.
-    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0011)) {
-      case cmPolicies::WARN:
-        // We need to push a scope to detect whether the script sets
-        // any policies that would affect the includer and therefore
-        // requires a warning.  We use a weak scope to simulate OLD
-        // behavior by allowing policy changes to affect the includer.
-        this->Makefile->PushPolicy(true);
-        this->CheckCMP0011 = true;
-        break;
-      case cmPolicies::OLD:
-        // OLD behavior is to not push a scope at all.
-        this->NoPolicyScope = true;
-        break;
-      case cmPolicies::NEW:
-        // NEW behavior is to push a (strong) scope.
-        this->Makefile->PushPolicy();
-        break;
-    }
+    this->Makefile->PushPolicy();
   }
 }
 
 cmMakefile::IncludeScope::~IncludeScope()
 {
   if (!this->NoPolicyScope) {
-    // If we need to enforce policy CMP0011 then the top entry is the
-    // one we pushed above.  If the entry is empty, then the included
-    // script did not set any policies that might affect the includer so
-    // we do not need to enforce the policy.
-    if (this->CheckCMP0011 &&
-        !this->Makefile->StateSnapshot.HasDefinedPolicyCMP0011()) {
-      this->CheckCMP0011 = false;
-    }
-
     // Pop the scope we pushed for the script.
     this->Makefile->PopPolicy();
-
-    // We enforce the policy after the script's policy stack entry has
-    // been removed.
-    if (this->CheckCMP0011) {
-      this->EnforceCMP0011();
-    }
   }
   this->Makefile->PopSnapshot(this->ReportError);
 
   this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
 
   this->Makefile->Backtrace = this->Makefile->Backtrace.Pop();
-}
-
-void cmMakefile::IncludeScope::EnforceCMP0011()
-{
-  // We check the setting of this policy again because the included
-  // script might actually set this policy for its includer.
-  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0011)) {
-    case cmPolicies::WARN:
-      // Warn because the user did not set this policy.
-      {
-        auto e = cmStrCat(
-          cmPolicies::GetPolicyWarning(cmPolicies::CMP0011),
-          "\n"
-          "The included script\n"
-          "  ",
-          this->Makefile->GetBacktrace().Top().FilePath,
-          "\n"
-          "affects policy settings.  "
-          "CMake is implying the NO_POLICY_SCOPE option for compatibility, "
-          "so the effects are applied to the including context.");
-        this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, e);
-      }
-      break;
-    case cmPolicies::OLD:
-    case cmPolicies::NEW:
-      // The script set this policy.  We assume the purpose of the
-      // script is to initialize policies for its includer, and since
-      // the policy is now set for later scripts, we do not warn.
-      break;
-  }
 }
 
 bool cmMakefile::ReadDependentFile(const std::string& filename,
@@ -986,24 +921,9 @@ void cmMakefile::EnforceDirectoryLevelRules() const
                "support older CMake versions for this project.  "
                "For more information run "
                "\"cmake --help-policy CMP0000\".");
-    switch (this->GetPolicyStatus(cmPolicies::CMP0000)) {
-      case cmPolicies::WARN:
-        // Warn because the user did not provide a minimum required
-        // version.
-        this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING, e,
-                                               this->Backtrace);
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        // OLD behavior is to use policy version 2.4 set in
-        // cmListFileCache.
-        break;
-      case cmPolicies::NEW:
-        // NEW behavior is to issue an error.
-        this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e,
-                                               this->Backtrace);
-        cmSystemTools::SetFatalErrorOccurred();
-        break;
-    }
+    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e,
+                                           this->Backtrace);
+    cmSystemTools::SetFatalErrorOccurred();
   }
 }
 
@@ -1538,27 +1458,6 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
     return false;
   }
 
-  // Definitions with non-trivial values require a policy check.
-  static cmsys::RegularExpression trivial(
-    "^[-/]D[A-Za-z_][A-Za-z0-9_]*(=[A-Za-z0-9_.]+)?$");
-  if (!trivial.find(def)) {
-    // This definition has a non-trivial value.
-    switch (this->GetPolicyStatus(cmPolicies::CMP0005)) {
-      case cmPolicies::WARN:
-        this->IssueMessage(MessageType::AUTHOR_WARNING,
-                           cmPolicies::GetPolicyWarning(cmPolicies::CMP0005));
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        // OLD behavior is to not escape the value.  We should not
-        // convert the definition to use the property.
-        return false;
-      case cmPolicies::NEW:
-        // NEW behavior is to escape the value.  Proceed to convert it
-        // to an entry in the property.
-        break;
-    }
-  }
-
   // Get the definition part after the flag.
   const char* define = def.c_str() + 2;
 
@@ -1845,7 +1744,7 @@ void cmMakefile::Configure()
         this->SetCheckCMP0000(true);
 
         // Implicitly set the version for the user.
-        cmPolicies::ApplyPolicyVersion(this, 2, 4, 0,
+        cmPolicies::ApplyPolicyVersion(this, 2, 8, 0,
                                        cmPolicies::WarnCompat::Off);
       }
     }
@@ -1912,29 +1811,10 @@ void cmMakefile::ConfigureSubDirectory(cmMakefile* mf)
   std::string currentStartFile =
     this->GetCMakeInstance()->GetCMakeListFile(currentStart);
   if (!cmSystemTools::FileExists(currentStartFile, true)) {
-    // The file is missing.  Check policy CMP0014.
-    auto e = cmStrCat("The source directory\n  ", currentStart,
-                      "\n"
-                      "does not contain a CMakeLists.txt file.");
-    /* clang-format on */
-    switch (this->GetPolicyStatus(cmPolicies::CMP0014)) {
-      case cmPolicies::WARN:
-        // Print the warning.
-        e += cmStrCat("\n"
-                      "CMake does not support this case but it used "
-                      "to work accidentally and is being allowed for "
-                      "compatibility.\n",
-                      cmPolicies::GetPolicyWarning(cmPolicies::CMP0014));
-        this->IssueMessage(MessageType::AUTHOR_WARNING, e);
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        // OLD behavior does not warn.
-        break;
-      case cmPolicies::NEW:
-        // NEW behavior prints the error.
-        this->IssueMessage(MessageType::FATAL_ERROR, e);
-        break;
-    }
+    this->IssueMessage(MessageType::FATAL_ERROR,
+                       cmStrCat("The source directory\n  ", currentStart,
+                                "\n"
+                                "does not contain a CMakeLists.txt file."));
     return;
   }
   // finally configure the subdir
@@ -2916,30 +2796,7 @@ MessageType cmMakefile::ExpandVariablesInStringOld(
       error += cmStrCat("at\n  ", filename, ':', line, '\n');
     }
     error += cmStrCat("when parsing string\n  ", source, '\n', emsg);
-
-    // If the parser failed ("res" is false) then this is a real
-    // argument parsing error, so the policy applies.  Otherwise the
-    // parser reported an error message without failing because the
-    // helper implementation is unhappy, which has always reported an
-    // error.
     mtype = MessageType::FATAL_ERROR;
-    if (!res) {
-      // This is a real argument parsing error.  Use policy CMP0010 to
-      // decide whether it is an error.
-      switch (this->GetPolicyStatus(cmPolicies::CMP0010)) {
-        case cmPolicies::WARN:
-          error +=
-            cmStrCat('\n', cmPolicies::GetPolicyWarning(cmPolicies::CMP0010));
-          CM_FALLTHROUGH;
-        case cmPolicies::OLD:
-          // OLD behavior is to just warn and continue.
-          mtype = MessageType::AUTHOR_WARNING;
-          break;
-        case cmPolicies::NEW:
-          // NEW behavior is to report the error.
-          break;
-      }
-    }
     errorstr = std::move(error);
   }
   return mtype;
@@ -3272,9 +3129,6 @@ MessageType cmMakefile::ExpandVariablesInStringNew(
 
   // Check for open variable references yet.
   if (!error && !openstack.empty()) {
-    // There's an open variable reference waiting.  Policy CMP0010 flags
-    // whether this is an error or not.  The new parser now enforces
-    // CMP0010 as well.
     errorstr += "There is an unterminated variable reference.";
     error = true;
   }
@@ -4411,17 +4265,6 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
         "\" because an imported target with the same name already exists.");
       return false;
     }
-    // target names must be globally unique
-    switch (this->GetPolicyStatus(cmPolicies::CMP0002)) {
-      case cmPolicies::WARN:
-        this->IssueMessage(MessageType::AUTHOR_WARNING,
-                           cmPolicies::GetPolicyWarning(cmPolicies::CMP0002));
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        return true;
-      case cmPolicies::NEW:
-        break;
-    }
 
     // The conflict is with a non-imported target.
     // Allow this if the user has requested support.
@@ -4479,45 +4322,17 @@ bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
   if (gg->BinaryDirectoryIsNew(binPath)) {
     return true;
   }
-  std::string e;
-  switch (this->GetPolicyStatus(cmPolicies::CMP0013)) {
-    case cmPolicies::WARN:
-      // Print the warning.
-      e = cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0013),
-                   "\n"
-                   "The binary directory\n"
-                   "  ",
-                   binPath,
-                   "\n"
-                   "is already used to build a source directory.  "
-                   "This command uses it to build source directory\n"
-                   "  ",
-                   srcPath,
-                   "\n"
-                   "which can generate conflicting build files.  "
-                   "CMake does not support this use case but it used "
-                   "to work accidentally and is being allowed for "
-                   "compatibility.");
-      this->IssueMessage(MessageType::AUTHOR_WARNING, e);
-      CM_FALLTHROUGH;
-    case cmPolicies::OLD:
-      // OLD behavior does not warn.
-      return true;
-    case cmPolicies::NEW:
-      // NEW behavior prints the error.
-      e += cmStrCat("The binary directory\n"
-                    "  ",
-                    binPath,
-                    "\n"
-                    "is already used to build a source directory.  "
-                    "It cannot be used to build source directory\n"
-                    "  ",
-                    srcPath,
-                    "\n"
-                    "Specify a unique binary directory name.");
-      this->IssueMessage(MessageType::FATAL_ERROR, e);
-      break;
-  }
+  this->IssueMessage(MessageType::FATAL_ERROR,
+                     cmStrCat("The binary directory\n"
+                              "  ",
+                              binPath,
+                              "\n"
+                              "is already used to build a source directory.  "
+                              "It cannot be used to build source directory\n"
+                              "  ",
+                              srcPath,
+                              "\n"
+                              "Specify a unique binary directory name."));
 
   return false;
 }

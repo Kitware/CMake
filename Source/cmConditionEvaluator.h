@@ -42,14 +42,6 @@ private:
 
   bool GetBooleanValue(cmExpandedCommandArgument& arg) const;
 
-  bool GetBooleanValueOld(cmExpandedCommandArgument const& arg,
-                          bool one) const;
-
-  bool GetBooleanValueWithAutoDereference(cmExpandedCommandArgument& newArg,
-                                          std::string& errorString,
-                                          MessageType& status,
-                                          bool oneArg = false) const;
-
   template <int N>
   int matchKeysImpl(const cmExpandedCommandArgument&);
 
@@ -75,7 +67,6 @@ private:
 
   cmMakefile& Makefile;
   cmListFileBacktrace Backtrace;
-  cmPolicies::PolicyStatus Policy12Status;
   cmPolicies::PolicyStatus Policy54Status;
   cmPolicies::PolicyStatus Policy57Status;
   cmPolicies::PolicyStatus Policy64Status;

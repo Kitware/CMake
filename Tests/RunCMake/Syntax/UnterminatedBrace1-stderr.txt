@@ -1,4 +1,4 @@
-CMake Warning \(dev\) at UnterminatedBrace1.cmake:2 \(set\):
+CMake Error at UnterminatedBrace1.cmake:2 \(set\):
   Syntax error in cmake code at
 
     .*/Tests/RunCMake/Syntax/UnterminatedBrace1.cmake:2
@@ -7,7 +7,6 @@ CMake Warning \(dev\) at UnterminatedBrace1.cmake:2 \(set\):
 
     \${
 
-  syntax error, unexpected end of file, expecting } \(3\)
+  There is an unterminated variable reference.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.

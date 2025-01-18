@@ -65,10 +65,6 @@ struct cmLinkImplementationLibraries
   // Object files linked directly in this configuration.
   std::vector<cmLinkItem> Objects;
 
-  // Libraries linked directly in other configurations.
-  // Needed only for OLD behavior of CMP0003.
-  std::vector<cmLinkItem> WrongConfigLibraries;
-
   // Whether the list depends on a genex referencing the configuration.
   bool HadContextSensitiveCondition = false;
 };
@@ -107,10 +103,6 @@ struct cmLinkInterface : public cmLinkInterfaceLibraries
   // Number of repetitions of a strongly connected component of two
   // or more static libraries.
   unsigned int Multiplicity = 0;
-
-  // Libraries listed for other configurations.
-  // Needed only for OLD behavior of CMP0003.
-  std::vector<cmLinkItem> WrongConfigLibraries;
 
   bool ImplementationIsInterface = false;
 

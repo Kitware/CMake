@@ -85,12 +85,6 @@ public:
   using EntryVector = std::vector<LinkEntry>;
   EntryVector const& Compute();
 
-  void SetOldLinkDirMode(bool b);
-  std::set<cmGeneratorTarget const*> const& GetOldWrongConfigItems() const
-  {
-    return this->OldWrongConfigItems;
-  }
-
 private:
   // Context information.
   cmGeneratorTarget const* Target = nullptr;
@@ -212,12 +206,9 @@ private:
 
   // Record of the original link line.
   std::vector<size_t> OriginalEntries;
-  std::set<cmGeneratorTarget const*> OldWrongConfigItems;
-  void CheckWrongConfigItem(cmLinkItem const& item);
 
   // Record of explicitly linked object files.
   std::vector<size_t> ObjectEntries;
 
   size_t ComponentOrderId;
-  bool OldLinkDirMode = false;
 };

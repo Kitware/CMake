@@ -1238,7 +1238,6 @@ private:
                                           bool secondPass) const;
   void ComputeLinkInterface(const std::string& config,
                             cmOptionalLinkInterface& iface,
-                            const cmGeneratorTarget* head,
                             bool secondPass) const;
   cmLinkImplementation const* GetLinkImplementation(const std::string& config,
                                                     UseTo usage,

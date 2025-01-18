@@ -623,8 +623,6 @@ If the library type is not specified, ``MODULE`` is assumed.
 
 
 cmake_policy(PUSH)
-# numbers and boolean constants
-cmake_policy (SET CMP0012 NEW)
 # foreach loop variable scope
 cmake_policy (SET CMP0124 NEW)
 

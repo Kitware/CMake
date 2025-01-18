@@ -1,11 +1,14 @@
 CMP0001
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 ``CMAKE_BACKWARDS_COMPATIBILITY`` should no longer be used.
 
 The behavior is to check ``CMAKE_BACKWARDS_COMPATIBILITY`` and present
 it to the user.  The ``NEW`` behavior is to ignore
-CMAKE_BACKWARDS_COMPATIBILITY completely.
+``CMAKE_BACKWARDS_COMPATIBILITY`` completely.
 
 In CMake 2.4 and below the variable ``CMAKE_BACKWARDS_COMPATIBILITY`` was
 used to request compatibility with earlier versions of CMake.  In
@@ -15,7 +18,5 @@ and the :command:`cmake_policy` command.  However, CMake must still check
 below.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.6.0
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

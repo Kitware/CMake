@@ -16,8 +16,6 @@
 
 #include <cm/optional>
 
-#include <cm3p/kwiml/int.h>
-
 #include "cmCustomCommandTypes.h"
 #include "cmGeneratorOptions.h"
 #include "cmGeneratorTarget.h"
@@ -433,23 +431,6 @@ public:
   virtual std::string GetTargetDirectory(
     cmGeneratorTarget const* target) const;
 
-  /**
-   * Get the level of backwards compatibility requested by the project
-   * in this directory.  This is the value of the CMake variable
-   * CMAKE_BACKWARDS_COMPATIBILITY whose format is
-   * "major.minor[.patch]".  The returned integer is encoded as
-   *
-   *   CMake_VERSION_ENCODE(major, minor, patch)
-   *
-   * and is monotonically increasing with the CMake version.
-   */
-  KWIML_INT_uint64_t GetBackwardsCompatibility();
-
-  /**
-   * Test whether compatibility is set to a given version or lower.
-   */
-  bool NeedBackwardsCompatibility_2_4();
-
   cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id) const;
 
   cmake* GetCMakeInstance() const;
@@ -616,9 +597,6 @@ protected:
   std::unordered_map<std::string, std::string> AppleArchSysroots;
 
   bool EmitUniversalBinaryFlags;
-
-  KWIML_INT_uint64_t BackwardsCompatibility;
-  bool BackwardsCompatibilityFinal;
 
 private:
   /**

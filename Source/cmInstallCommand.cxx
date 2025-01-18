@@ -105,7 +105,6 @@ public:
   bool MakeFilesFullPath(const char* modeName, const std::string& basePath,
                          const std::vector<std::string>& relFiles,
                          std::vector<std::string>& absFiles);
-  bool CheckCMP0006() const;
 
   std::string GetDestination(const cmInstallCommandArguments* args,
                              const std::string& varName,
@@ -1017,13 +1016,6 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
           if (!bundleArgs.GetDestination().empty()) {
             bundleGenerator = CreateInstallTargetGenerator(
               target, bundleArgs, false, helper.Makefile->GetBacktrace());
-          } else if (!runtimeArgs.GetDestination().empty()) {
-            if (helper.CheckCMP0006()) {
-              // For CMake 2.4 compatibility fallback to the RUNTIME
-              // properties.
-              bundleGenerator = CreateInstallTargetGenerator(
-                target, runtimeArgs, false, helper.Makefile->GetBacktrace());
-            }
           }
           if (!bundleGenerator) {
             status.SetError(cmStrCat("TARGETS given no BUNDLE DESTINATION for "
@@ -2480,24 +2472,6 @@ bool Helper::MakeFilesFullPath(const char* modeName,
     absFiles.push_back(std::move(file));
   }
   return true;
-}
-
-bool Helper::CheckCMP0006() const
-{
-  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0006)) {
-    case cmPolicies::WARN:
-      this->Makefile->IssueMessage(
-        MessageType::AUTHOR_WARNING,
-        cmPolicies::GetPolicyWarning(cmPolicies::CMP0006));
-      CM_FALLTHROUGH;
-    case cmPolicies::OLD:
-      // OLD behavior is to allow compatibility
-      return true;
-    case cmPolicies::NEW:
-      // NEW behavior is to disallow compatibility
-      break;
-  }
-  return false;
 }
 
 std::string Helper::GetDestination(const cmInstallCommandArguments* args,
