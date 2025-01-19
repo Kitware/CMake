@@ -5,32 +5,41 @@
 CheckPrototypeDefinition
 ------------------------
 
-Check if the prototype we expect is correct.
+Check if a ``C`` function has the expected prototype.
 
 .. command:: check_prototype_definition
 
   .. code-block:: cmake
 
-    check_prototype_definition(FUNCTION PROTOTYPE RETURN HEADER VARIABLE)
+    check_prototype_definition(<function> <prototype> <return> <headers> <variable>)
 
-  ::
+  ``<function>``
+    The name of the function whose prototype is being checked.
+  ``<prototype>``
+    The expected prototype of the function, provided as a string.
+  ``<return>``
+    The return value of the function.  This will be used as a return value in
+    the function definition body of the generated test program to verify that
+    the function's return type matches the expected type.
+  ``<headers>``
+    A :ref:`semicolon-separated list <CMake Language Lists>` of header file
+    names required for checking the function prototype.
+  ``<variable>``
+    The name of the variable to store the check result.  This variable will be
+    created as an internal cache variable.
 
-    FUNCTION - The name of the function (used to check if prototype exists)
-    PROTOTYPE- The prototype to check.
-    RETURN - The return value of the function.
-    HEADER - The header files required.
-    VARIABLE - The variable to store the result.
-               Will be created as an internal cache variable.
+  This command generates a test program and verifies that it builds without
+  errors.  The generated test program includes specified ``<headers>``, defines
+  a function with given literal ``<prototype>`` and ``<return>`` value and
+  then uses the specified ``<function>``.  The simplified test program can be
+  illustrated as:
 
-  Example:
+  .. code-block:: c
 
-  .. code-block:: cmake
-
-    check_prototype_definition(getpwent_r
-     "struct passwd *getpwent_r(struct passwd *src, char *buf, int buflen)"
-     "NULL"
-     "unistd.h;pwd.h"
-     SOLARIS_GETPWENT_R)
+    #include <headers>
+    // ...
+    <prototype> { return <return>; }
+    int main(...) { ...<function>()... }
 
 The following variables may be set before calling this function to modify
 the way the check is run:
@@ -49,6 +58,23 @@ the way the check is run:
 
 .. include:: /module/CMAKE_REQUIRED_QUIET.txt
 
+Examples
+^^^^^^^^
+
+Checking if the ``getpwent_r()`` function on Solaris/illumos systems has the
+expected prototype:
+
+.. code-block:: cmake
+
+  include(CheckPrototypeDefinition)
+
+  check_prototype_definition(
+    getpwent_r
+    "struct passwd *getpwent_r(struct passwd *src, char *buf, int buflen)"
+    "NULL"
+    "unistd.h;pwd.h"
+    HAVE_SOLARIS_GETPWENT_R
+  )
 #]=======================================================================]
 
 #
