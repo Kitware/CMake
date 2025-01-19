@@ -141,7 +141,7 @@ public:
                                   cmGeneratorTarget const* target,
                                   const std::string& lang,
                                   const std::string& config);
-  void AddCMP0018Flags(std::string& flags, cmGeneratorTarget const* target,
+  void AddFeatureFlags(std::string& flags, cmGeneratorTarget const* target,
                        std::string const& lang, const std::string& config);
   void AddVisibilityPresetFlags(std::string& flags,
                                 cmGeneratorTarget const* target,
@@ -629,9 +629,6 @@ private:
                                OutputRole role, cmListFileBacktrace const& bt,
                                cmCommandOrigin origin);
 
-  void AddSharedFlags(std::string& flags, const std::string& lang,
-                      bool shared);
-  bool GetShouldUseOldFlags(bool shared, const std::string& lang) const;
   void AddPositionIndependentFlags(std::string& flags, std::string const& l,
                                    int targetType);
 

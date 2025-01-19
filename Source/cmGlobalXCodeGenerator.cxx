@@ -2421,8 +2421,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmGeneratorTarget* gtgt,
       this->CurrentLocalGenerator->AppendFeatureOptions(flags, lang, "IPO");
     }
 
-    // Add shared-library flags if needed.
-    this->CurrentLocalGenerator->AddCMP0018Flags(flags, gtgt, lang,
+    this->CurrentLocalGenerator->AddFeatureFlags(flags, gtgt, lang,
                                                  configName);
 
     this->CurrentLocalGenerator->AddVisibilityPresetFlags(flags, gtgt, lang);

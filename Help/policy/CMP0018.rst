@@ -1,6 +1,9 @@
 CMP0018
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 Ignore ``CMAKE_SHARED_LIBRARY_<Lang>_FLAGS`` variable.
 
 CMake 2.8.8 and lower compiled sources in ``SHARED`` and ``MODULE`` libraries
@@ -28,7 +31,5 @@ The ``NEW`` behavior for this policy is to ignore
 honor the :prop_tgt:`POSITION_INDEPENDENT_CODE` target property.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.8.9
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

@@ -1,6 +1,9 @@
 CMP0015
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 :command:`link_directories` treats paths relative to the source dir.
 
 In CMake 2.8.0 and lower the :command:`link_directories` command passed
@@ -13,7 +16,5 @@ this policy is to use relative paths verbatim in the linker command.  The
 paths by appending the relative path to ``CMAKE_CURRENT_SOURCE_DIR``.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.8.1
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

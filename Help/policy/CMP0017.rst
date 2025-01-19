@@ -1,6 +1,9 @@
 CMP0017
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 Prefer files from the CMake module directory when including from there.
 
 Starting with CMake 2.8.4, if a cmake-module shipped with CMake (i.e.
@@ -15,7 +18,5 @@ behavior is to always prefer files from CMAKE_MODULE_PATH over files
 from the CMake modules directory.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 2.8.4
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

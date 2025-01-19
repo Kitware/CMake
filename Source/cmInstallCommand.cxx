@@ -2156,23 +2156,6 @@ bool HandleExportMode(std::vector<std::string> const& args,
 
   cmExportSet& exportSet =
     helper.Makefile->GetGlobalGenerator()->GetExportSets()[exp];
-  if (exportOld) {
-    for (auto const& te : exportSet.GetTargetExports()) {
-      cmTarget* tgt =
-        helper.Makefile->GetGlobalGenerator()->FindTarget(te->TargetName);
-      const bool newCMP0022Behavior =
-        (tgt && tgt->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
-         tgt->GetPolicyStatusCMP0022() != cmPolicies::OLD);
-
-      if (!newCMP0022Behavior) {
-        status.SetError(cmStrCat(
-          "INSTALL(EXPORT) given keyword \""
-          "EXPORT_LINK_INTERFACE_LIBRARIES\", but target \"",
-          te->TargetName, "\" does not have policy CMP0022 set to NEW."));
-        return false;
-      }
-    }
-  }
 
   cmInstallGenerator::MessageLevel message =
     cmInstallGenerator::SelectMessageLevel(helper.Makefile);

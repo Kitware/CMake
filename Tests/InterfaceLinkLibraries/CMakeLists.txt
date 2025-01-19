@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
 
-cmake_policy(SET CMP0022 NEW)
-
 project(InterfaceLinkLibraries)
 
 add_library(foo_shared SHARED foo_vs6_1.cpp)

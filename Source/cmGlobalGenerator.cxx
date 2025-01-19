@@ -981,12 +981,6 @@ void cmGlobalGenerator::EnableLanguage(
       }
     }
 
-    // Store the shared library flags so that we can satisfy CMP0018
-    std::string sharedLibFlagsVar =
-      cmStrCat("CMAKE_SHARED_LIBRARY_", lang, "_FLAGS");
-    this->LanguageToOriginalSharedLibFlags[lang] =
-      mf->GetSafeDefinition(sharedLibFlagsVar);
-
     // Translate compiler ids for compatibility.
     this->CheckCompilerIdCompatibility(mf, lang);
   } // end for each language
@@ -3473,16 +3467,6 @@ std::string cmGlobalGenerator::GenerateRuleFile(
 bool cmGlobalGenerator::ShouldStripResourcePath(cmMakefile* mf) const
 {
   return mf->PlatformIsAppleEmbedded();
-}
-
-std::string cmGlobalGenerator::GetSharedLibFlagsForLanguage(
-  std::string const& l) const
-{
-  auto const it = this->LanguageToOriginalSharedLibFlags.find(l);
-  if (it != this->LanguageToOriginalSharedLibFlags.end()) {
-    return it->second;
-  }
-  return "";
 }
 
 void cmGlobalGenerator::AppendDirectoryForConfig(const std::string& /*unused*/,

@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 
 project(Qt4Targets)
 
-cmake_policy(SET CMP0020 NEW)
-
 find_package(Qt4 REQUIRED)
 
 set(CMAKE_AUTOMOC ON)

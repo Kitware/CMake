@@ -1007,9 +1007,6 @@ void cmMakefile::GeneratorAction::operator()(cmLocalGenerator& lg,
 
 void cmMakefile::DoGenerate(cmLocalGenerator& lg)
 {
-  // do all the variable expansions here
-  this->ExpandVariablesCMP0019();
-
   // give all the commands a chance to do something
   // after the file has been parsed before generation
   for (auto& action : this->GeneratorActions) {
@@ -1744,7 +1741,7 @@ void cmMakefile::Configure()
         this->SetCheckCMP0000(true);
 
         // Implicitly set the version for the user.
-        cmPolicies::ApplyPolicyVersion(this, 2, 8, 0,
+        cmPolicies::ApplyPolicyVersion(this, 2, 8, 12,
                                        cmPolicies::WarnCompat::Off);
       }
     }
@@ -2302,94 +2299,6 @@ cmSourceGroup* cmMakefile::FindSourceGroup(
   return groups.data();
 }
 #endif
-
-static bool mightExpandVariablesCMP0019(const char* s)
-{
-  return s && *s && strstr(s, "${") && strchr(s, '}');
-}
-
-void cmMakefile::ExpandVariablesCMP0019()
-{
-  // Drop this ancient compatibility behavior with a policy.
-  cmPolicies::PolicyStatus pol = this->GetPolicyStatus(cmPolicies::CMP0019);
-  if (pol != cmPolicies::OLD && pol != cmPolicies::WARN) {
-    return;
-  }
-
-  std::string e;
-
-  cmValue includeDirs = this->GetProperty("INCLUDE_DIRECTORIES");
-  if (includeDirs && mightExpandVariablesCMP0019(includeDirs->c_str())) {
-    std::string dirs = *includeDirs;
-    this->ExpandVariablesInString(dirs, true, true);
-    if (pol == cmPolicies::WARN && dirs != *includeDirs) {
-      e = cmStrCat("Evaluated directory INCLUDE_DIRECTORIES\n  ", *includeDirs,
-                   "\nas\n  ", dirs, '\n');
-    }
-    this->SetProperty("INCLUDE_DIRECTORIES", dirs);
-  }
-
-  // Also for each target's INCLUDE_DIRECTORIES property:
-  for (auto& target : this->Targets) {
-    cmTarget& t = target.second;
-    if (t.GetType() == cmStateEnums::INTERFACE_LIBRARY ||
-        t.GetType() == cmStateEnums::GLOBAL_TARGET) {
-      continue;
-    }
-    includeDirs = t.GetProperty("INCLUDE_DIRECTORIES");
-    if (includeDirs && mightExpandVariablesCMP0019(includeDirs->c_str())) {
-      std::string dirs = *includeDirs;
-      this->ExpandVariablesInString(dirs, true, true);
-      if (pol == cmPolicies::WARN && dirs != *includeDirs) {
-        e += cmStrCat("Evaluated target ", t.GetName(),
-                      " INCLUDE_DIRECTORIES\n  ", *includeDirs, "\nas\n  ",
-                      dirs, '\n');
-      }
-      t.SetProperty("INCLUDE_DIRECTORIES", dirs);
-    }
-  }
-
-  if (cmValue linkDirsProp = this->GetProperty("LINK_DIRECTORIES")) {
-    if (mightExpandVariablesCMP0019(linkDirsProp->c_str())) {
-      std::string d = *linkDirsProp;
-      const std::string orig = d;
-      this->ExpandVariablesInString(d, true, true);
-      if (pol == cmPolicies::WARN && d != orig) {
-        e += cmStrCat("Evaluated link directories\n  ", orig, "\nas\n  ", d,
-                      '\n');
-      }
-    }
-  }
-
-  if (cmValue linkLibsProp = this->GetProperty("LINK_LIBRARIES")) {
-    cmList linkLibs{ *linkLibsProp };
-
-    for (auto l = linkLibs.begin(); l != linkLibs.end(); ++l) {
-      std::string libName = *l;
-      if (libName == "optimized"_s || libName == "debug"_s) {
-        ++l;
-        libName = *l;
-      }
-      if (mightExpandVariablesCMP0019(libName.c_str())) {
-        const std::string orig = libName;
-        this->ExpandVariablesInString(libName, true, true);
-        if (pol == cmPolicies::WARN && libName != orig) {
-          e += cmStrCat("Evaluated link library\n  ", orig, "\nas\n  ",
-                        libName, '\n');
-        }
-      }
-    }
-  }
-
-  if (!e.empty()) {
-    auto m = cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0019),
-                      "\n"
-                      "The following variable evaluations were encountered:\n",
-                      e);
-    this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING, m,
-                                           this->Backtrace);
-  }
-}
 
 bool cmMakefile::IsOn(const std::string& name) const
 {
@@ -3737,16 +3646,6 @@ std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
 {
   std::string result;
 
-  // We search the module always in CMAKE_ROOT and in CMAKE_MODULE_PATH,
-  // and then decide based on the policy setting which one to return.
-  // See CMP0017 for more details.
-  // The specific problem was that KDE 4.5.0 installs a
-  // FindPackageHandleStandardArgs.cmake which doesn't have the new features
-  // of FPHSA.cmake introduced in CMake 2.8.3 yet, and by setting
-  // CMAKE_MODULE_PATH also e.g. FindZLIB.cmake from cmake included
-  // FPHSA.cmake from kdelibs and not from CMake, and tried to use the
-  // new features, which were not there in the version from kdelibs, and so
-  // failed ("
   std::string moduleInCMakeRoot;
   std::string moduleInCMakeModulePath;
 
@@ -3784,37 +3683,22 @@ std::string cmMakefile::GetModulesFile(cm::string_view filename, bool& system,
   // Normally, prefer the files found in CMAKE_MODULE_PATH. Only when the file
   // from which we are being called is located itself in CMAKE_ROOT, then
   // prefer results from CMAKE_ROOT depending on the policy setting.
-  system = false;
-  result = moduleInCMakeModulePath;
-  if (result.empty()) {
-    system = true;
-    result = moduleInCMakeRoot;
-  }
-
   if (!moduleInCMakeModulePath.empty() && !moduleInCMakeRoot.empty()) {
     cmValue currentFile = this->GetDefinition("CMAKE_CURRENT_LIST_FILE");
     std::string mods = cmStrCat(cmSystemTools::GetCMakeRoot(), "/Modules/");
     if (currentFile && cmSystemTools::IsSubDirectory(*currentFile, mods)) {
-      switch (this->GetPolicyStatus(cmPolicies::CMP0017)) {
-        case cmPolicies::WARN: {
-          auto e = cmStrCat(
-            "File ", *currentFile, " includes ", moduleInCMakeModulePath,
-            " (found via CMAKE_MODULE_PATH) which shadows ", moduleInCMakeRoot,
-            ". This may cause errors later on .\n",
-            cmPolicies::GetPolicyWarning(cmPolicies::CMP0017));
-          this->IssueMessage(MessageType::AUTHOR_WARNING, e);
-          CM_FALLTHROUGH;
-        }
-        case cmPolicies::OLD:
-          system = false;
-          result = moduleInCMakeModulePath;
-          break;
-        case cmPolicies::NEW:
-          system = true;
-          result = moduleInCMakeRoot;
-          break;
-      }
+      system = true;
+      result = moduleInCMakeRoot;
+    } else {
+      system = false;
+      result = moduleInCMakeModulePath;
     }
+  } else if (!moduleInCMakeModulePath.empty()) {
+    system = false;
+    result = moduleInCMakeModulePath;
+  } else {
+    system = true;
+    result = moduleInCMakeRoot;
   }
 
   return result;

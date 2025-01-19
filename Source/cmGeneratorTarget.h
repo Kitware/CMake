@@ -449,7 +449,6 @@ public:
 
   void ComputeLinkImplementationLibraries(const std::string& config,
                                           cmOptionalLinkImplementation& impl,
-                                          const cmGeneratorTarget* head,
                                           UseTo usage) const;
 
   struct TargetOrString
@@ -1360,22 +1359,10 @@ private:
   void GetSourceFilesWithoutObjectLibraries(std::vector<cmSourceFile*>& files,
                                             const std::string& config) const;
 
-  struct HeadToLinkImplementationMap
-    : public std::map<cmGeneratorTarget const*, cmOptionalLinkImplementation>
-  {
-  };
-  using LinkImplMapType = std::map<std::string, HeadToLinkImplementationMap>;
+  using LinkImplMapType = std::map<std::string, cmOptionalLinkImplementation>;
   mutable LinkImplMapType LinkImplMap;
   mutable LinkImplMapType LinkImplUsageRequirementsOnlyMap;
 
-  HeadToLinkImplementationMap& GetHeadToLinkImplementationMap(
-    std::string const& config) const;
-  HeadToLinkImplementationMap& GetHeadToLinkImplementationUsageRequirementsMap(
-    std::string const& config) const;
-
-  cmLinkImplementationLibraries const* GetLinkImplementationLibrariesInternal(
-    const std::string& config, const cmGeneratorTarget* head,
-    UseTo usage) const;
   bool ComputeOutputDir(const std::string& config,
                         cmStateEnums::ArtifactType artifact,
                         std::string& out) const;
@@ -1394,7 +1381,6 @@ private:
   mutable OutputNameMapType OutputNameMap;
   mutable std::set<cmLinkItem> UtilityItems;
   cmPolicies::PolicyMap PolicyMap;
-  mutable bool PolicyWarnedCMP0022 = false;
   mutable bool PolicyReportedCMP0069 = false;
   mutable bool DebugIncludesDone = false;
   mutable bool DebugCompileOptionsDone = false;

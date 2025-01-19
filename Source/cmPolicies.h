@@ -56,34 +56,34 @@ class cmMakefile;
          8, 0, NEW)                                                           \
   SELECT(POLICY, CMP0015,                                                     \
          "link_directories() treats paths relative to the source dir.", 2, 8, \
-         1, WARN)                                                             \
+         1, NEW)                                                              \
   SELECT(POLICY, CMP0016,                                                     \
          "target_link_libraries() reports error if its only argument "        \
          "is not a target.",                                                  \
-         2, 8, 3, WARN)                                                       \
+         2, 8, 3, NEW)                                                        \
   SELECT(POLICY, CMP0017,                                                     \
          "Prefer files from the CMake module directory when including from "  \
          "there.",                                                            \
-         2, 8, 4, WARN)                                                       \
+         2, 8, 4, NEW)                                                        \
   SELECT(POLICY, CMP0018,                                                     \
-         "Ignore CMAKE_SHARED_LIBRARY_<Lang>_FLAGS variable.", 2, 8, 9, WARN) \
+         "Ignore CMAKE_SHARED_LIBRARY_<Lang>_FLAGS variable.", 2, 8, 9, NEW)  \
   SELECT(POLICY, CMP0019,                                                     \
          "Do not re-expand variables in include and link information.", 2, 8, \
-         11, WARN)                                                            \
+         11, NEW)                                                             \
   SELECT(POLICY, CMP0020,                                                     \
          "Automatically link Qt executables to qtmain target on Windows.", 2, \
-         8, 11, WARN)                                                         \
+         8, 11, NEW)                                                          \
   SELECT(                                                                     \
     POLICY, CMP0021,                                                          \
     "Fatal error on relative paths in INCLUDE_DIRECTORIES target property.",  \
-    2, 8, 12, WARN)                                                           \
+    2, 8, 12, NEW)                                                            \
   SELECT(POLICY, CMP0022,                                                     \
          "INTERFACE_LINK_LIBRARIES defines the link interface.", 2, 8, 12,    \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(                                                                     \
     POLICY, CMP0023,                                                          \
     "Plain and keyword target_link_libraries signatures cannot be mixed.", 2, \
-    8, 12, WARN)                                                              \
+    8, 12, NEW)                                                               \
   SELECT(POLICY, CMP0024, "Disallow include export result.", 3, 0, 0, WARN)   \
   SELECT(POLICY, CMP0025, "Compiler id for Apple Clang is now AppleClang.",   \
          3, 0, 0, WARN)                                                       \

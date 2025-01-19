@@ -1080,23 +1080,21 @@ if (QT_QMAKE_EXECUTABLE AND
     set(_isExe $<STREQUAL:$<TARGET_PROPERTY:TYPE>,EXECUTABLE>)
     set(_isWin32 $<BOOL:$<TARGET_PROPERTY:WIN32_EXECUTABLE>>)
     set(_isNotExcluded $<NOT:$<BOOL:$<TARGET_PROPERTY:QT4_NO_LINK_QTMAIN>>>)
-    set(_isPolicyNEW $<TARGET_POLICY:CMP0020>)
     get_target_property(_configs Qt4::QtCore IMPORTED_CONFIGURATIONS)
     set_property(TARGET Qt4::QtCore APPEND PROPERTY
         INTERFACE_LINK_LIBRARIES
-          $<$<AND:${_isExe},${_isWin32},${_isNotExcluded},${_isPolicyNEW}>:Qt4::qtmain>
+          $<$<AND:${_isExe},${_isWin32},${_isNotExcluded}>:Qt4::qtmain>
     )
     foreach(_config ${_configs})
       set_property(TARGET Qt4::QtCore APPEND PROPERTY
         IMPORTED_LINK_INTERFACE_LIBRARIES_${_config}
-          $<$<AND:${_isExe},${_isWin32},${_isNotExcluded},${_isPolicyNEW}>:Qt4::qtmain>
+          $<$<AND:${_isExe},${_isWin32},${_isNotExcluded}>:Qt4::qtmain>
       )
     endforeach()
     unset(_configs)
     unset(_isExe)
     unset(_isWin32)
     unset(_isNotExcluded)
-    unset(_isPolicyNEW)
   endif()
 
   #######################################

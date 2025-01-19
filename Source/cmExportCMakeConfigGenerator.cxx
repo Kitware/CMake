@@ -17,18 +17,18 @@
 #include "cmFindPackageStack.h"
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
-#include "cmLinkItem.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 #include "cmOutputConverter.h"
-#include "cmPolicies.h"
 #include "cmStateTypes.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmValue.h"
 #include "cmVersion.h"
+
+struct cmLinkInterface;
 
 static std::string cmExportFileGeneratorEscape(std::string const& str)
 {
@@ -111,14 +111,6 @@ void cmExportCMakeConfigGenerator::SetImportLinkInterface(
     return;
   }
 
-  if (iface->ImplementationIsInterface) {
-    // Policy CMP0022 must not be NEW.
-    this->SetImportLinkProperty(
-      suffix, target, "IMPORTED_LINK_INTERFACE_LIBRARIES", iface->Libraries,
-      properties, ImportLinkPropertyTargetNames::Yes);
-    return;
-  }
-
   cmValue propContent;
 
   if (cmValue prop_suffixed =
@@ -130,11 +122,7 @@ void cmExportCMakeConfigGenerator::SetImportLinkInterface(
     return;
   }
 
-  bool const newCMP0022Behavior =
-    target->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
-    target->GetPolicyStatusCMP0022() != cmPolicies::OLD;
-
-  if (newCMP0022Behavior && !this->ExportOld) {
+  if (!this->ExportOld) {
     cmLocalGenerator* lg = target->GetLocalGenerator();
     std::ostringstream e;
     e << "Target \"" << target->GetName()

@@ -25,8 +25,6 @@
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetLinkLibraryType.h"
-#include "cmValue.h"
-#include "cmake.h"
 
 namespace {
 
@@ -95,42 +93,11 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
     }
   }
   if (!target) {
-    MessageType t = MessageType::FATAL_ERROR; // fail by default
-    std::ostringstream e;
-    e << "Cannot specify link libraries for target \"" << args[0]
-      << "\" which is not built by this project.";
-    // The bad target is the only argument. Check how policy CMP0016 is set,
-    // and accept, warn or fail respectively:
-    if (args.size() < 2) {
-      switch (mf.GetPolicyStatus(cmPolicies::CMP0016)) {
-        case cmPolicies::WARN:
-          t = MessageType::AUTHOR_WARNING;
-          // Print the warning.
-          e << "\n"
-               "CMake does not support this but it used to work accidentally "
-               "and is being allowed for compatibility."
-               "\n"
-            << cmPolicies::GetPolicyWarning(cmPolicies::CMP0016);
-          break;
-        case cmPolicies::OLD: // OLD behavior does not warn.
-          t = MessageType::MESSAGE;
-          break;
-        case cmPolicies::NEW: // NEW behavior prints the error.
-          break;
-      }
-    }
-    // Now actually print the message.
-    switch (t) {
-      case MessageType::AUTHOR_WARNING:
-        mf.IssueMessage(MessageType::AUTHOR_WARNING, e.str());
-        break;
-      case MessageType::FATAL_ERROR:
-        mf.IssueMessage(MessageType::FATAL_ERROR, e.str());
-        cmSystemTools::SetFatalErrorOccurred();
-        break;
-      default:
-        break;
-    }
+    mf.IssueMessage(MessageType::FATAL_ERROR,
+                    cmStrCat("Cannot specify link libraries for target \"",
+                             args[0],
+                             "\" which is not built by this project."));
+    cmSystemTools::SetFatalErrorOccurred();
     return true;
   }
 
@@ -358,21 +325,6 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
     cmSystemTools::SetFatalErrorOccurred();
   }
 
-  const cmPolicies::PolicyStatus policy22Status =
-    target->GetPolicyStatusCMP0022();
-
-  // If any of the LINK_ options were given, make sure the
-  // LINK_INTERFACE_LIBRARIES target property exists.
-  // Use of any of the new keywords implies awareness of
-  // this property. And if no libraries are named, it should
-  // result in an empty link interface.
-  if ((policy22Status == cmPolicies::OLD ||
-       policy22Status == cmPolicies::WARN) &&
-      currentProcessingState != ProcessingLinkLibraries &&
-      !target->GetProperty("LINK_INTERFACE_LIBRARIES")) {
-    target->SetProperty("LINK_INTERFACE_LIBRARIES", "");
-  }
-
   return true;
 }
 
@@ -444,41 +396,22 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
   if (!this->Target->PushTLLCommandTrace(
         sig, this->Makefile.GetBacktrace().Top())) {
     std::ostringstream e;
-    const char* modal = nullptr;
-    MessageType messageType = MessageType::AUTHOR_WARNING;
-    switch (this->Makefile.GetPolicyStatus(cmPolicies::CMP0023)) {
-      case cmPolicies::WARN:
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0023) << '\n';
-        modal = "should";
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        break;
-      case cmPolicies::NEW:
-        modal = "must";
-        messageType = MessageType::FATAL_ERROR;
-        break;
-    }
-
-    if (modal) {
-      // If the sig is a keyword form and there is a conflict, the existing
-      // form must be the plain form.
-      const char* existingSig =
-        (sig == cmTarget::KeywordTLLSignature ? "plain" : "keyword");
-      e << "The " << existingSig
-        << " signature for target_link_libraries has "
-           "already been used with the target \""
-        << this->Target->GetName()
-        << "\".  All uses of target_link_libraries with a target " << modal
-        << " be either all-keyword or all-plain.\n";
-      this->Target->GetTllSignatureTraces(e,
-                                          sig == cmTarget::KeywordTLLSignature
-                                            ? cmTarget::PlainTLLSignature
-                                            : cmTarget::KeywordTLLSignature);
-      this->Makefile.IssueMessage(messageType, e.str());
-      if (messageType == MessageType::FATAL_ERROR) {
-        return false;
-      }
-    }
+    // If the sig is a keyword form and there is a conflict, the existing
+    // form must be the plain form.
+    const char* existingSig =
+      (sig == cmTarget::KeywordTLLSignature ? "plain" : "keyword");
+    e << "The " << existingSig
+      << " signature for target_link_libraries has "
+         "already been used with the target \""
+      << this->Target->GetName()
+      << "\".  All uses of target_link_libraries with a target must "
+      << " be either all-keyword or all-plain.\n";
+    this->Target->GetTllSignatureTraces(e,
+                                        sig == cmTarget::KeywordTLLSignature
+                                          ? cmTarget::PlainTLLSignature
+                                          : cmTarget::KeywordTLLSignature);
+    this->Makefile.IssueMessage(MessageType::FATAL_ERROR, e.str());
+    return false;
   }
 
   // Handle normal case where the command was called with another keyword than
@@ -559,54 +492,6 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
   // property of the target on the LHS shall be populated.)
   this->AppendProperty("INTERFACE_LINK_LIBRARIES",
                        this->Target->GetDebugGeneratorExpressions(lib, llt));
-
-  // Stop processing if called without any keyword.
-  if (currentProcessingState == ProcessingLinkLibraries) {
-    return true;
-  }
-  // Stop processing if policy CMP0022 is set to NEW.
-  const cmPolicies::PolicyStatus policy22Status =
-    this->Target->GetPolicyStatusCMP0022();
-  if (policy22Status != cmPolicies::OLD &&
-      policy22Status != cmPolicies::WARN) {
-    return true;
-  }
-  // Stop processing if called with an INTERFACE library on the LHS.
-  if (this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY) {
-    return true;
-  }
-
-  // Handle (additional) backward-compatibility case where the command was
-  // called with PUBLIC / INTERFACE / LINK_PUBLIC / LINK_INTERFACE_LIBRARIES.
-  // (The policy CMP0022 is not set to NEW.)
-  {
-    // Get the list of configurations considered to be DEBUG.
-    std::vector<std::string> debugConfigs =
-      this->Makefile.GetCMakeInstance()->GetDebugConfigs();
-    std::string prop;
-
-    // Include this library in the link interface for the target.
-    if (llt == DEBUG_LibraryType || llt == GENERAL_LibraryType) {
-      // Put in the DEBUG configuration interfaces.
-      for (std::string const& dc : debugConfigs) {
-        prop = cmStrCat("LINK_INTERFACE_LIBRARIES_", dc);
-        this->AppendProperty(prop, lib);
-      }
-    }
-    if (llt == OPTIMIZED_LibraryType || llt == GENERAL_LibraryType) {
-      // Put in the non-DEBUG configuration interfaces.
-      this->AppendProperty("LINK_INTERFACE_LIBRARIES", lib);
-
-      // Make sure the DEBUG configuration interfaces exist so that the
-      // general one will not be used as a fall-back.
-      for (std::string const& dc : debugConfigs) {
-        prop = cmStrCat("LINK_INTERFACE_LIBRARIES_", dc);
-        if (!this->Target->GetProperty(prop)) {
-          this->Target->SetProperty(prop, "");
-        }
-      }
-    }
-  }
   return true;
 }
 

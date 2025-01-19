@@ -1749,7 +1749,7 @@ std::vector<BT<std::string>> cmLocalGenerator::GetTargetCompileFlags(
     }
   }
 
-  this->AddCMP0018Flags(compileFlags, target, lang, config);
+  this->AddFeatureFlags(compileFlags, target, lang, config);
   this->AddVisibilityPresetFlags(compileFlags, target, lang);
   this->AddColorDiagnosticsFlags(compileFlags, lang);
   this->AppendFlags(compileFlags, mf->GetDefineFlags());
@@ -2423,19 +2423,6 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
   return true;
 }
 
-void cmLocalGenerator::AddSharedFlags(std::string& flags,
-                                      const std::string& lang, bool shared)
-{
-  std::string flagsVar;
-
-  // Add flags for dealing with shared libraries for this language.
-  if (shared) {
-    this->AppendFlags(flags,
-                      this->Makefile->GetSafeDefinition(
-                        cmStrCat("CMAKE_SHARED_LIBRARY_", lang, "_FLAGS")));
-  }
-}
-
 static void AddVisibilityCompileOption(std::string& flags,
                                        cmGeneratorTarget const* target,
                                        cmLocalGenerator* lg,
@@ -2540,7 +2527,7 @@ void cmLocalGenerator::AddVisibilityPresetFlags(
   }
 }
 
-void cmLocalGenerator::AddCMP0018Flags(std::string& flags,
+void cmLocalGenerator::AddFeatureFlags(std::string& flags,
                                        cmGeneratorTarget const* target,
                                        std::string const& lang,
                                        const std::string& config)
@@ -2550,54 +2537,13 @@ void cmLocalGenerator::AddCMP0018Flags(std::string& flags,
   bool shared = ((targetType == cmStateEnums::SHARED_LIBRARY) ||
                  (targetType == cmStateEnums::MODULE_LIBRARY));
 
-  if (this->GetShouldUseOldFlags(shared, lang)) {
-    this->AddSharedFlags(flags, lang, shared);
-  } else {
-    if (target->GetLinkInterfaceDependentBoolProperty(
-          "POSITION_INDEPENDENT_CODE", config)) {
-      this->AddPositionIndependentFlags(flags, lang, targetType);
-    }
-    if (shared) {
-      this->AppendFeatureOptions(flags, lang, "DLL");
-    }
+  if (target->GetLinkInterfaceDependentBoolProperty(
+        "POSITION_INDEPENDENT_CODE", config)) {
+    this->AddPositionIndependentFlags(flags, lang, targetType);
   }
-}
-
-bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
-                                            const std::string& lang) const
-{
-  std::string originalFlags =
-    this->GlobalGenerator->GetSharedLibFlagsForLanguage(lang);
   if (shared) {
-    std::string flagsVar = cmStrCat("CMAKE_SHARED_LIBRARY_", lang, "_FLAGS");
-    std::string const& flags = this->Makefile->GetSafeDefinition(flagsVar);
-
-    if (flags != originalFlags) {
-      switch (this->GetPolicyStatus(cmPolicies::CMP0018)) {
-        case cmPolicies::WARN: {
-          std::ostringstream e;
-          e << "Variable " << flagsVar
-            << " has been modified. CMake "
-               "will ignore the POSITION_INDEPENDENT_CODE target property "
-               "for "
-               "shared libraries and will use the "
-            << flagsVar
-            << " variable "
-               "instead.  This may cause errors if the original content of "
-            << flagsVar << " was removed.\n"
-            << cmPolicies::GetPolicyWarning(cmPolicies::CMP0018);
-
-          this->IssueMessage(MessageType::AUTHOR_WARNING, e.str());
-          CM_FALLTHROUGH;
-        }
-        case cmPolicies::OLD:
-          return true;
-        case cmPolicies::NEW:
-          return false;
-      }
-    }
+    this->AppendFeatureOptions(flags, lang, "DLL");
   }
-  return false;
 }
 
 void cmLocalGenerator::AddPositionIndependentFlags(std::string& flags,
