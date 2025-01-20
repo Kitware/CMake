@@ -40,5 +40,35 @@ repos:
               | RunCMake/CTestResourceAllocation/invalid
               )\.json
       - id: check-yaml
+      - id: end-of-file-fixer
+        # NOTE Exclude tests directory: some test files have no
+        # the trailing EOL in the file intentionally but some
+        # just missed it.
+        # TODO Add the missed trailing EOL in the following files
+        # if possible.
+        exclude: >-
+            (?x)Tests/(
+                DelphiCoverage/src/UTCovTest\.pas
+              | FortranModules/in_interface/module\.f90
+              | JavascriptCoverage/output\.json\.in
+              | Module/ExternalData/Alt/(
+                    MyAlgoMap1-md5/dded55e43cd6529ee35d24113dfc87a3
+                  | SHA1/85158f0c1996837976e858c42a9a7634bfe91b93
+                  )
+              | RunCMake/(
+                    CMP0055/CMP0055-(NEW|OLD)-Reject-Arguments\.cmake
+                  | CommandLine/E_cat_good_binary_cat-stdout\.txt
+                  | define_property/define_property-INITIALIZE_FROM_VARIABLE-invalid_[12]-result\.txt
+                  | FindMatlab/MatlabTest2-stderr\.txt
+                  | string/UTF-(16|32)LE\.txt
+                  | Syntax/BOM-UTF-(16|32)-LE.cmake
+                  | Syntax/CommandEOF\.cmake
+                  | VS10Project/shader2?\.hlsl
+                  )
+              | SourceGroups/README\.txt
+              | StringFileTest/test\.utf8
+              | VSWindowsFormsResx/WindowsFormsResx/MyForm\.resx
+              | VSXaml/Package\.appxmanifest
+              )
       - id: mixed-line-ending
       - id: trailing-whitespace
