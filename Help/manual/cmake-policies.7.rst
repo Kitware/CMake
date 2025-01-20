@@ -27,9 +27,20 @@ as soon as possible.
 
 Use the :command:`cmake_minimum_required` command to record the latest
 version of CMake for which a project has been updated.
-The ``VERSION <min>...<policy_max>`` syntax enables the ``NEW`` behaviors
-of policies introduced in version ``<policy_max>`` and earlier without
-increasing the minimum version of CMake required by the project.
+For example:
+
+..
+  Sync this cmake_minimum_required example with ``Help/dev/maint.rst``.
+
+.. code-block:: cmake
+
+  cmake_minimum_required(VERSION 3.10...3.31)
+
+This uses the ``<min>...<max>`` syntax to enable the ``NEW`` behaviors
+of policies introduced in CMake 3.31 and earlier while only requiring a
+minimum version of CMake 3.10.  The project is expected to work with
+both the ``OLD`` and ``NEW`` behaviors of policies introduced between
+those versions.
 
 Transition Schedule
 -------------------
