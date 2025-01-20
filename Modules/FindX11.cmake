@@ -80,6 +80,7 @@ and also the following more fine grained variables and targets:
   X11_xkbfile_INCLUDE_PATH,        X11_xkbfile_LIB,        X11_xkbfile_FOUND,        X11::xkbfile
   X11_Xmu_INCLUDE_PATH,            X11_Xmu_LIB,            X11_Xmu_FOUND,            X11::Xmu
   X11_Xpm_INCLUDE_PATH,            X11_Xpm_LIB,            X11_Xpm_FOUND,            X11::Xpm
+  X11_Xpresent_INCLUDE_PATH,       X11_Xpresent_LIB,       X11_Xpresent_FOUND,       X11::Xpresent
   X11_Xtst_INCLUDE_PATH,           X11_Xtst_LIB,           X11_Xtst_FOUND,           X11::Xtst
   X11_Xrandr_INCLUDE_PATH,         X11_Xrandr_LIB,         X11_Xrandr_FOUND,         X11::Xrandr
   X11_Xrender_INCLUDE_PATH,        X11_Xrender_LIB,        X11_Xrender_FOUND,        X11::Xrender
@@ -222,6 +223,7 @@ if (UNIX)
   find_path(X11_xkbfile_INCLUDE_PATH X11/extensions/XKBfile.h        ${X11_INC_SEARCH_PATH})
   find_path(X11_Xmu_INCLUDE_PATH X11/Xmu/Xmu.h                       ${X11_INC_SEARCH_PATH})
   find_path(X11_Xpm_INCLUDE_PATH X11/xpm.h                           ${X11_INC_SEARCH_PATH})
+  find_path(X11_Xpresent_INCLUDE_PATH X11/extensions/Xpresent.h      ${X11_INC_SEARCH_PATH})
   find_path(X11_Xtst_INCLUDE_PATH X11/extensions/XTest.h             ${X11_INC_SEARCH_PATH})
   find_path(X11_XShm_INCLUDE_PATH X11/extensions/XShm.h              ${X11_INC_SEARCH_PATH})
   find_path(X11_Xrandr_INCLUDE_PATH X11/extensions/Xrandr.h          ${X11_INC_SEARCH_PATH})
@@ -299,6 +301,7 @@ if (UNIX)
   find_library(X11_xkbfile_LIB xkbfile                 ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xmu_LIB Xmu                         ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xpm_LIB Xpm                         ${X11_LIB_SEARCH_PATH})
+  find_library(X11_Xpresent_LIB Xpresent               ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xrandr_LIB Xrandr                   ${X11_LIB_SEARCH_PATH})
   find_library(X11_Xrender_LIB Xrender                 ${X11_LIB_SEARCH_PATH})
   find_library(X11_XRes_LIB XRes                       ${X11_LIB_SEARCH_PATH})
@@ -521,6 +524,11 @@ if (UNIX)
   if (X11_Xpm_INCLUDE_PATH AND X11_Xpm_LIB)
       set(X11_Xpm_FOUND TRUE)
       list(APPEND X11_INCLUDE_DIR ${X11_Xpm_INCLUDE_PATH})
+  endif ()
+
+  if (X11_Xpresent_INCLUDE_PATH AND X11_Xpresent_LIB)
+      set(X11_Xpresent_FOUND TRUE)
+      list(APPEND X11_INCLUDE_DIR ${X11_Xpresent_INCLUDE_PATH})
   endif ()
 
   if (X11_Xcomposite_INCLUDE_PATH AND X11_Xcomposite_LIB)
@@ -1169,6 +1177,14 @@ if (UNIX)
       INTERFACE_LINK_LIBRARIES "X11::X11")
   endif ()
 
+  if (X11_Xpresent_FOUND AND NOT TARGET X11::Xpresent)
+    add_library(X11::Xpresent UNKNOWN IMPORTED)
+    set_target_properties(X11::Xpresent PROPERTIES
+      IMPORTED_LOCATION "${X11_Xpresent_LIB}"
+      INTERFACE_INCLUDE_DIRECTORIES "${X11_Xpresent_INCLUDE_PATH}"
+      INTERFACE_LINK_LIBRARIES "X11::X11;X11::Xext;X11::Xfixes;X11::Xrandr")
+  endif ()
+
   if (X11_Xtst_FOUND AND NOT TARGET X11::Xtst)
     add_library(X11::Xtst UNKNOWN IMPORTED)
     set_target_properties(X11::Xtst PROPERTIES
@@ -1356,6 +1372,8 @@ if (UNIX)
     X11_Xss_LIB
     X11_Xpm_INCLUDE_PATH
     X11_Xpm_LIB
+    X11_Xpresent_INCLUDE_PATH
+    X11_Xpresent_LIB
     X11_Xft_LIB
     X11_Xft_INCLUDE_PATH
     X11_Xshape_INCLUDE_PATH
