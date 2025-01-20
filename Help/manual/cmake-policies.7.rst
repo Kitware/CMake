@@ -10,36 +10,71 @@ cmake-policies(7)
 Introduction
 ============
 
-Policies in CMake are used to preserve backward compatible behavior
-across multiple releases.  When a new policy is introduced, newer CMake
-versions will begin to warn about the backward compatible behavior.  It
-is possible to disable the warning by explicitly requesting the OLD, or
-backward compatible behavior using the :command:`cmake_policy` command.
-It is also possible to request ``NEW``, or non-backward compatible behavior
-for a policy, also avoiding the warning.  Each policy can also be set to
-either ``NEW`` or ``OLD`` behavior explicitly on the command line with the
-:variable:`CMAKE_POLICY_DEFAULT_CMP<NNNN>` variable.
+CMake policies introduce behavior changes while preserving compatibility
+for existing project releases.  Policies are deprecation mechanisms, not
+feature toggles.  Each policy documents a deprecated ``OLD`` behavior and
+a preferred ``NEW`` behavior.  Projects must be updated over time to
+use the ``NEW`` behavior, but their existing releases will continue to
+work with the ``OLD`` behavior.
 
-A policy is a deprecation mechanism and not a reliable feature toggle.
-A policy should almost never be set to ``OLD``, except to silence warnings
-in an otherwise frozen or stable codebase, or temporarily as part of a
-larger migration path. The ``OLD`` behavior of each policy is undesirable
-and will be replaced with an error condition in a future release.
+Updating Projects
+-----------------
 
-The :command:`cmake_minimum_required` command does more than report an
-error if a too-old version of CMake is used to build a project.  It
-also sets all policies introduced in that CMake version or earlier to
-``NEW`` behavior.  To manage policies without increasing the minimum required
-CMake version, the :command:`if(POLICY)` command may be used:
+When policies are newly introduced by a version of CMake, their ``OLD``
+behaviors are immediately deprecated by that version of CMake and later.
+Projects should be updated to use the ``NEW`` behaviors of the policies
+as soon as possible.
 
-.. code-block:: cmake
+Use the :command:`cmake_minimum_required` command to record the latest
+version of CMake for which a project has been updated.
+The ``VERSION <min>...<policy_max>`` syntax enables the ``NEW`` behaviors
+of policies introduced in version ``<policy_max>`` and earlier without
+increasing the minimum version of CMake required by the project.
 
-  if(POLICY CMP0990)
-    cmake_policy(SET CMP0990 NEW)
-  endif()
+Transition Schedule
+-------------------
 
-This has the effect of using the ``NEW`` behavior with newer CMake releases which
-users may be using and not issuing a compatibility warning.
+To help projects port to the ``NEW`` behaviors of policies on their own
+schedule, CMake offers a transition period:
+
+* If a policy is not set by a project, CMake uses its ``OLD`` behavior,
+  but may warn that the policy has not been set.
+
+  * Users running CMake may silence the warning without modifying a
+    project by setting the :variable:`CMAKE_POLICY_DEFAULT_CMP<NNNN>`
+    variable as a cache entry on the :manual:`cmake(1)` command line:
+
+    .. code-block:: shell
+
+      cmake -DCMAKE_POLICY_DEFAULT_CMP0990=OLD ...
+
+  * Projects may silence the warning by using the :command:`cmake_policy`
+    command to explicitly set the policy to ``OLD`` or ``NEW`` behavior:
+
+    .. code-block:: cmake
+
+      if(POLICY CMP0990)
+        cmake_policy(SET CMP0990 NEW)
+      endif()
+
+    .. note::
+
+      A policy should almost never be set to ``OLD``, except to silence
+      warnings in an otherwise frozen or stable codebase, or temporarily
+      as part of a larger migration path.
+
+* If a policy is set to ``OLD`` by a project, CMake versions released
+  at least |POLICY_OLD_DELAY_WARNING| after the version that introduced
+  a policy may issue a warning that the policy's ``OLD`` behavior will
+  be removed from a future version of CMake.
+
+* If a policy is not set to ``NEW`` by a project, CMake versions released
+  at least |POLICY_OLD_DELAY_ERROR| after the version that introduced a
+  policy, and whose major version number is higher, may issue an error
+  that the policy's ``OLD`` behavior has been removed.
+
+.. |POLICY_OLD_DELAY_WARNING| replace:: 2 years
+.. |POLICY_OLD_DELAY_ERROR| replace:: 6 years
 
 Supported Policies
 ==================
