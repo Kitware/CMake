@@ -111,6 +111,11 @@ signatures that specify them.  The common options are:
   created.  The default component name may be controlled with the
   :variable:`CMAKE_INSTALL_DEFAULT_COMPONENT_NAME` variable.
 
+  Installation components can be then used by the ``cmake --install`` command's
+  :option:`--component <cmake--install --component>` option and the
+  :module:`CPackComponent` module.  Global target ``list_install_components``
+  lists all available components.
+
 ``EXCLUDE_FROM_ALL``
   .. versionadded:: 3.6
 
