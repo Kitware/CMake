@@ -41,12 +41,6 @@ CMake version, the :command:`if(POLICY)` command may be used:
 This has the effect of using the ``NEW`` behavior with newer CMake releases which
 users may be using and not issuing a compatibility warning.
 
-The setting of a policy is confined in some cases to not propagate to the
-parent scope.  For example, if the files read by the :command:`include` command
-or the :command:`find_package` command contain a use of :command:`cmake_policy`,
-that policy setting will not affect the caller by default.  Both commands accept
-an optional ``NO_POLICY_SCOPE`` keyword to control this behavior.
-
 Supported Policies
 ==================
 
