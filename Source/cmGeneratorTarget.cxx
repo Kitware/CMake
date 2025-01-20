@@ -67,15 +67,7 @@ cmValue cmTargetPropertyComputer::GetSources<cmGeneratorTarget>(
 
 template <>
 const std::string&
-cmTargetPropertyComputer::ComputeLocationForBuild<cmGeneratorTarget>(
-  cmGeneratorTarget const* tgt)
-{
-  return tgt->GetLocation("");
-}
-
-template <>
-const std::string&
-cmTargetPropertyComputer::ComputeLocation<cmGeneratorTarget>(
+cmTargetPropertyComputer::ImportedLocation<cmGeneratorTarget>(
   cmGeneratorTarget const* tgt, const std::string& config)
 {
   return tgt->GetLocation(config);
@@ -1548,14 +1540,7 @@ bool cmGeneratorTarget::MacOSXRpathInstallNameDirDefault() const
     return this->GetPropertyAsBool("MACOSX_RPATH");
   }
 
-  cmPolicies::PolicyStatus cmp0042 = this->GetPolicyStatusCMP0042();
-
-  if (cmp0042 == cmPolicies::WARN) {
-    this->LocalGenerator->GetGlobalGenerator()->AddCMP0042WarnTarget(
-      this->GetName());
-  }
-
-  return cmp0042 == cmPolicies::NEW;
+  return true;
 }
 
 bool cmGeneratorTarget::MacOSXUseInstallNameDir() const
@@ -4202,9 +4187,7 @@ void cmGeneratorTarget::ReportPropertyOrigin(
   bool debugOrigin = !this->DebugCompatiblePropertiesDone[p] &&
     cm::contains(debugProperties, p);
 
-  if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
-    this->DebugCompatiblePropertiesDone[p] = true;
-  }
+  this->DebugCompatiblePropertiesDone[p] = true;
   if (!debugOrigin) {
     return;
   }
@@ -4709,14 +4692,15 @@ bool cmGeneratorTarget::GetConfigCommonSourceFilesForXcode(
   return true;
 }
 
-void cmGeneratorTarget::GetObjectLibrariesCMP0026(
+void cmGeneratorTarget::GetObjectLibrariesInSources(
   std::vector<cmGeneratorTarget*>& objlibs) const
 {
-  // At configure-time, this method can be called as part of getting the
-  // LOCATION property or to export() a file to be include()d.  However
-  // there is no cmGeneratorTarget at configure-time, so search the SOURCES
-  // for TARGET_OBJECTS instead for backwards compatibility with OLD
-  // behavior of CMP0024 and CMP0026 only.
+  // FIXME: This searches SOURCES for TARGET_OBJECTS for backwards
+  // compatibility with the OLD behavior of CMP0026 since this
+  // could be called at configure time.  CMP0026 has been removed,
+  // so this should now be called only at generate time.
+  // Therefore we should be able to improve the implementation
+  // with generate-time information.
   cmBTStringRange rng = this->Target->GetSourceEntries();
   for (auto const& entry : rng) {
     cmList files{ entry.Value };
@@ -4794,16 +4778,8 @@ void cmGeneratorTarget::GetLanguages(std::set<std::string>& languages,
     }
   }
 
-  std::set<cmGeneratorTarget const*> objectLibraries;
-  if (!this->GlobalGenerator->GetConfigureDoneCMP0026()) {
-    std::vector<cmGeneratorTarget*> objectTargets;
-    this->GetObjectLibrariesCMP0026(objectTargets);
-    for (cmGeneratorTarget* gt : objectTargets) {
-      objectLibraries.insert(gt);
-    }
-  } else {
-    objectLibraries = this->GetSourceObjectLibraries(config);
-  }
+  std::set<cmGeneratorTarget const*> objectLibraries =
+    this->GetSourceObjectLibraries(config);
   for (cmGeneratorTarget const* objLib : objectLibraries) {
     objLib->GetLanguages(languages, config);
   }
@@ -5474,11 +5450,8 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
             verifyTarget->SetProperty("DISABLE_PRECOMPILE_HEADERS", "ON");
             verifyTarget->SetProperty("UNITY_BUILD", "OFF");
             verifyTarget->SetProperty("CXX_SCAN_FOR_MODULES", "OFF");
-            cm::optional<std::map<std::string, cmValue>>
-              perConfigCompileDefinitions;
             verifyTarget->FinalizeTargetConfiguration(
-              this->Makefile->GetCompileDefinitionsEntries(),
-              perConfigCompileDefinitions);
+              this->Makefile->GetCompileDefinitionsEntries());
 
             if (!allVerifyTarget) {
               allVerifyTarget = this->GlobalGenerator->GetMakefiles()

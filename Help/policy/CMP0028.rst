@@ -1,6 +1,9 @@
 CMP0028
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 Double colon in target name means ``ALIAS`` or ``IMPORTED`` target.
 
 CMake 2.8.12 and lower allowed the use of targets and files with double
@@ -21,7 +24,5 @@ for this policy is to issue a ``FATAL_ERROR`` if a link dependency contains
 double-colons but is not an ``IMPORTED`` target or an ``ALIAS`` target.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.0
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

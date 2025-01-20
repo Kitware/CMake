@@ -17,12 +17,12 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmPolicies.h"
 #include "cmRange.h"
 #include "cmSourceFile.h"
 #include "cmSourceFileLocationKind.h"
 #include "cmState.h"
 #include "cmStateTypes.h"
+#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
 #include "cmTargetDepend.h"
@@ -353,29 +353,11 @@ void cmComputeTargetDepends::AddTargetDepend(size_t depender_index,
 
   if (!dependee && !linking &&
       (depender->GetType() != cmStateEnums::GLOBAL_TARGET)) {
-    MessageType messageType = MessageType::AUTHOR_WARNING;
-    bool issueMessage = false;
-    std::ostringstream e;
-    switch (depender->GetPolicyStatusCMP0046()) {
-      case cmPolicies::WARN:
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0046) << "\n";
-        issueMessage = true;
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        break;
-      case cmPolicies::NEW:
-        issueMessage = true;
-        messageType = MessageType::FATAL_ERROR;
-        break;
-    }
-    if (issueMessage) {
-      cmake* cm = this->GlobalGenerator->GetCMakeInstance();
-
-      e << "The dependency target \"" << dependee_name << "\" of target \""
-        << depender->GetName() << "\" does not exist.";
-
-      cm->IssueMessage(messageType, e.str(), dependee_name.Backtrace);
-    }
+    this->GlobalGenerator->GetCMakeInstance()->IssueMessage(
+      MessageType::FATAL_ERROR,
+      cmStrCat("The dependency target \"", dependee_name.AsStr(),
+               "\" of target \"", depender->GetName(), "\" does not exist."),
+      dependee_name.Backtrace);
   }
 
   // Skip targets that will not really be linked.  This is probably a

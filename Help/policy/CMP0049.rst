@@ -1,6 +1,9 @@
 CMP0049
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 Do not expand variables in target source entries.
 
 CMake 2.8.12 and lower performed an extra layer of variable expansion
@@ -18,7 +21,5 @@ the target sources.  The ``NEW`` behavior for this policy is to issue an error
 if such variables need to be expanded.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.0
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

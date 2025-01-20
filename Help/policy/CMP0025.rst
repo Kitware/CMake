@@ -1,6 +1,9 @@
 CMP0025
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 Compiler id for Apple Clang is now ``AppleClang``.
 
 CMake 3.0 and above recognize that Apple Clang is a different compiler
@@ -19,11 +22,9 @@ The ``OLD`` behavior for this policy is to use compiler id ``Clang``.  The
 ``NEW`` behavior for this policy is to use compiler id ``AppleClang``.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.0
-.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn by default
-.. include:: STANDARD_ADVICE.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: did *not* warn by default
+.. include:: REMOVED_EPILOGUE.txt
 
 See documentation of the
 :variable:`CMAKE_POLICY_WARNING_CMP0025 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
-variable to control the warning.
-
-.. include:: DEPRECATED.txt
+variable to control the warning in CMake versions before 4.0.

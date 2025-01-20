@@ -1,6 +1,9 @@
 CMP0026
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 Disallow use of the LOCATION property for build targets.
 
 CMake 2.8.12 and lower allowed reading the :prop_tgt:`LOCATION` target
@@ -23,7 +26,5 @@ properties from build-targets.  The ``NEW`` behavior for this policy is to
 not to allow reading the :prop_tgt:`LOCATION` properties from build-targets.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.0
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

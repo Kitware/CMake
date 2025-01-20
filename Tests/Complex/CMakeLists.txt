@@ -19,21 +19,6 @@ function(message)
 endfunction()
 message("message")
 
-# It is not recommended to set a policy to OLD, but this test
-# covers the OLD behavior of some policies.
-foreach(p
-    CMP0029
-    CMP0032
-    CMP0033
-    CMP0034
-    CMP0043
-    CMP0050
-    )
-  if(POLICY ${p})
-    cmake_policy(SET ${p} OLD)
-  endif()
-endforeach()
-
 # Test building without per-rule echo lines in Makefiles.
 set_property(GLOBAL PROPERTY RULE_MESSAGES OFF)
 
@@ -105,18 +90,6 @@ endif()
 
 add_definitions(-DCMAKE_IS_FUN)
 add_definitions(-DCMAKE_IS_REALLY_FUN)
-set_property(DIRECTORY
-  PROPERTY COMPILE_DEFINITIONS_RELEASE
-  CMAKE_IS_FUN_IN_RELEASE_MODE
-  )
-set_property(DIRECTORY
-  PROPERTY COMPILE_DEFINITIONS_RELWITHDEBINFO
-  CMAKE_IS_FUN_IN_RELEASE_MODE
-  )
-set_property(DIRECTORY
-  PROPERTY COMPILE_DEFINITIONS_MINSIZEREL
-  CMAKE_IS_FUN_IN_RELEASE_MODE
-  )
 
 set(TEST_SEP "a b c")
 separate_arguments(TEST_SEP)
@@ -439,6 +412,3 @@ endif()
 #
 add_subdirectory(Library)
 add_subdirectory(Executable)
-subdir_depends(Executable Library)
-export_library_dependencies(${Complex_BINARY_DIR}/ComplexLibraryDepends.cmake)
-include(${Complex_BINARY_DIR}/ComplexLibraryDepends.cmake OPTIONAL)

@@ -1,6 +1,9 @@
 CMP0044
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 Case sensitive ``<LANG>_COMPILER_ID`` generator expressions
 
 CMake 2.8.12 introduced the ``<LANG>_COMPILER_ID``
@@ -15,7 +18,5 @@ for this policy is to perform a case-sensitive comparison with the value in
 the ``<LANG>_COMPILER_ID`` expression.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.0
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

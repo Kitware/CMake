@@ -1,4 +1,4 @@
-CMake Error at CMP0029-NEW.cmake:2 \(subdir_depends\):
-  The subdir_depends command should not be called; see CMP0029.
+CMake Error at CMP0029-NEW.cmake:1 \(subdir_depends\):
+  The subdir_depends command has been removed; see CMP0029.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)

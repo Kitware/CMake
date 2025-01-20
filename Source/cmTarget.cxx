@@ -23,7 +23,6 @@
 #include "cmFileSet.h"
 #include "cmFindPackageStack.h"
 #include "cmGeneratorExpression.h"
-#include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -46,41 +45,12 @@
 #include "cmake.h"
 
 template <>
-const std::string& cmTargetPropertyComputer::ComputeLocationForBuild<cmTarget>(
-  cmTarget const* tgt)
-{
-  static std::string loc;
-  if (tgt->IsImported()) {
-    loc = tgt->ImportedGetFullPath("", cmStateEnums::RuntimeBinaryArtifact);
-    return loc;
-  }
-
-  cmGlobalGenerator* gg = tgt->GetGlobalGenerator();
-  if (!gg->GetConfigureDoneCMP0026()) {
-    gg->CreateGenerationObjects();
-  }
-  cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
-  loc = gt->GetLocationForBuild();
-  return loc;
-}
-
-template <>
-const std::string& cmTargetPropertyComputer::ComputeLocation<cmTarget>(
+const std::string& cmTargetPropertyComputer::ImportedLocation<cmTarget>(
   cmTarget const* tgt, const std::string& config)
 {
   static std::string loc;
-  if (tgt->IsImported()) {
-    loc =
-      tgt->ImportedGetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
-    return loc;
-  }
-
-  cmGlobalGenerator* gg = tgt->GetGlobalGenerator();
-  if (!gg->GetConfigureDoneCMP0026()) {
-    gg->CreateGenerationObjects();
-  }
-  cmGeneratorTarget* gt = gg->FindGeneratorTarget(tgt->GetName());
-  loc = gt->GetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
+  assert(tgt->IsImported());
+  loc = tgt->ImportedGetFullPath(config, cmStateEnums::RuntimeBinaryArtifact);
   return loc;
 }
 
@@ -711,8 +681,6 @@ public:
 
   bool CheckImportedLibName(std::string const& prop,
                             std::string const& value) const;
-
-  std::string ProcessSourceItemCMP0049(const std::string& s) const;
 
   template <typename ValueType>
   void AddDirectoryToFileSet(cmTarget* self, std::string const& fileSetName,
@@ -1398,60 +1366,13 @@ void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
 void cmTarget::AddSources(std::vector<std::string> const& srcs)
 {
   std::vector<std::string> srcFiles;
-  for (auto filename : srcs) {
+  for (std::string const& filename : srcs) {
     if (!cmGeneratorExpression::StartsWithGeneratorExpression(filename)) {
-      if (!filename.empty()) {
-        filename = this->impl->ProcessSourceItemCMP0049(filename);
-        if (filename.empty()) {
-          return;
-        }
-      }
       this->impl->Makefile->GetOrCreateSource(filename);
     }
     srcFiles.emplace_back(filename);
   }
   this->AddTracedSources(srcFiles);
-}
-
-std::string cmTargetInternals::ProcessSourceItemCMP0049(
-  const std::string& s) const
-{
-  std::string src = s;
-
-  // For backwards compatibility replace variables in source names.
-  // This should eventually be removed.
-  this->Makefile->ExpandVariablesInString(src);
-  if (src != s) {
-    std::ostringstream e;
-    bool noMessage = false;
-    MessageType messageType = MessageType::AUTHOR_WARNING;
-    switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0049)) {
-      case cmPolicies::WARN:
-        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0049) << "\n";
-        break;
-      case cmPolicies::OLD:
-        noMessage = true;
-        break;
-      case cmPolicies::NEW:
-        messageType = MessageType::FATAL_ERROR;
-    }
-    if (!noMessage) {
-      e << "Legacy variable expansion in source file \"" << s
-        << "\" expanded to \"" << src << "\" in target \"" << this->Name
-        << "\".  This behavior will be removed in a "
-           "future version of CMake.";
-      this->Makefile->IssueMessage(messageType, e.str());
-      if (messageType == MessageType::FATAL_ERROR) {
-        return "";
-      }
-    }
-  }
-  return src;
-}
-
-std::string cmTarget::GetSourceCMP0049(const std::string& s)
-{
-  return this->impl->ProcessSourceItemCMP0049(s);
 }
 
 struct CreateLocation
@@ -2544,8 +2465,7 @@ bool CheckLinkLibraryPattern(UsageRequirementProperty const& usage,
 }
 
 void cmTarget::FinalizeTargetConfiguration(
-  const cmBTStringRange& noConfigCompileDefinitions,
-  cm::optional<std::map<std::string, cmValue>>& perConfigCompileDefinitions)
+  const cmBTStringRange& compileDefinitions)
 {
   if (this->GetType() == cmStateEnums::GLOBAL_TARGET) {
     return;
@@ -2566,34 +2486,8 @@ void cmTarget::FinalizeTargetConfiguration(
     return;
   }
 
-  for (auto const& def : noConfigCompileDefinitions) {
+  for (auto const& def : compileDefinitions) {
     this->InsertCompileDefinition(def);
-  }
-
-  auto* mf = this->GetMakefile();
-  cmPolicies::PolicyStatus polSt = mf->GetPolicyStatus(cmPolicies::CMP0043);
-  if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {
-    if (perConfigCompileDefinitions) {
-      for (auto const& it : *perConfigCompileDefinitions) {
-        if (cmValue val = it.second) {
-          this->AppendProperty(it.first, *val);
-        }
-      }
-    } else {
-      perConfigCompileDefinitions.emplace();
-      std::vector<std::string> configs =
-        mf->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
-
-      for (std::string const& c : configs) {
-        std::string defPropName =
-          cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(c));
-        cmValue val = mf->GetProperty(defPropName);
-        (*perConfigCompileDefinitions)[defPropName] = val;
-        if (val) {
-          this->AppendProperty(defPropName, *val);
-        }
-      }
-    }
   }
 }
 

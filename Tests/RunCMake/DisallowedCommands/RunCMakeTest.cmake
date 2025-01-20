@@ -1,5 +1,4 @@
 include(RunCMake)
-set(RunCMake_IGNORE_POLICY_VERSION_DEPRECATION ON)
 
 foreach(p
     CMP0029
@@ -11,7 +10,5 @@ foreach(p
     CMP0035
     CMP0036
     )
-  run_cmake(${p}-WARN)
-  run_cmake(${p}-OLD)
   run_cmake(${p}-NEW)
 endforeach()

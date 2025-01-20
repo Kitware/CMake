@@ -1,7 +1,5 @@
 include(PrintVersions.cmake)
 
-cmake_policy(SET CMP0048 NEW)
-
 project(ProjectA VERSION 1.2.3.4 LANGUAGES NONE)
 print_versions(ProjectA)
 

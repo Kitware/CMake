@@ -548,8 +548,6 @@ add_library(
   cmBreakCommand.h
   cmBuildCommand.cxx
   cmBuildCommand.h
-  cmBuildNameCommand.cxx
-  cmBuildNameCommand.h
   cmCMakeHostSystemInformationCommand.cxx
   cmCMakeHostSystemInformationCommand.h
   cmCMakeLanguageCommand.cxx
@@ -588,8 +586,6 @@ add_library(
   cmExperimental.h
   cmExportCommand.cxx
   cmExportCommand.h
-  cmExportLibraryDependenciesCommand.cxx
-  cmExportLibraryDependenciesCommand.h
   cmFLTKWrapUICommand.cxx
   cmFLTKWrapUICommand.h
   cmFileCommand.cxx
@@ -668,8 +664,6 @@ add_library(
   cmListCommand.h
   cmLoadCacheCommand.cxx
   cmLoadCacheCommand.h
-  cmLoadCommandCommand.cxx
-  cmLoadCommandCommand.h
   cmMacroCommand.cxx
   cmMacroCommand.h
   cmMakeDirectoryCommand.cxx
@@ -683,8 +677,6 @@ add_library(
   cmMessageMetadata.h
   cmOptionCommand.cxx
   cmOptionCommand.h
-  cmOutputRequiredFilesCommand.cxx
-  cmOutputRequiredFilesCommand.h
   cmParseArgumentsCommand.cxx
   cmParseArgumentsCommand.h
   cmPathLabel.cxx
@@ -730,8 +722,6 @@ add_library(
   cmSubcommandTable.h
   cmSubdirCommand.cxx
   cmSubdirCommand.h
-  cmSubdirDependsCommand.cxx
-  cmSubdirDependsCommand.h
   cmTargetCompileDefinitionsCommand.cxx
   cmTargetCompileDefinitionsCommand.h
   cmTargetCompileFeaturesCommand.cxx
@@ -760,12 +750,6 @@ add_library(
   cmTryRunCommand.h
   cmUnsetCommand.cxx
   cmUnsetCommand.h
-  cmUseMangledMesaCommand.cxx
-  cmUseMangledMesaCommand.h
-  cmUtilitySourceCommand.cxx
-  cmUtilitySourceCommand.h
-  cmVariableRequiresCommand.cxx
-  cmVariableRequiresCommand.h
   cmVariableWatchCommand.cxx
   cmVariableWatchCommand.h
   cmWhileCommand.cxx
@@ -1384,8 +1368,6 @@ foreach(_tool IN LISTS _tools)
   CMake_OPTIONAL_COMPONENT(${_tool})
   install(TARGETS ${_tool} DESTINATION ${CMAKE_BIN_DIR} ${COMPONENT})
 endforeach()
-
-install(FILES cmCPluginAPI.h DESTINATION ${CMAKE_DATA_DIR}/include)
 
 # Unset temporary variables
 unset(_tools)

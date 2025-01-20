@@ -443,20 +443,7 @@ bool cmGeneratorTarget::VerifyLinkItemColons(LinkItemRole role,
       item.AsStr().find("::") == std::string::npos) {
     return true;
   }
-  MessageType messageType = MessageType::FATAL_ERROR;
   std::string e;
-  switch (this->GetLocalGenerator()->GetPolicyStatus(cmPolicies::CMP0028)) {
-    case cmPolicies::WARN: {
-      e = cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0028), "\n");
-      messageType = MessageType::AUTHOR_WARNING;
-    } break;
-    case cmPolicies::OLD:
-      return true;
-    case cmPolicies::NEW:
-      // Issue the fatal message.
-      break;
-  }
-
   if (role == LinkItemRole::Implementation) {
     e = cmStrCat(e, "Target \"", this->GetName(), "\" links to");
   } else {
@@ -470,8 +457,8 @@ bool cmGeneratorTarget::VerifyLinkItemColons(LinkItemRole role,
   if (backtrace.Empty()) {
     backtrace = this->GetBacktrace();
   }
-  this->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(messageType, e,
-                                                              backtrace);
+  this->GetLocalGenerator()->GetCMakeInstance()->IssueMessage(
+    MessageType::FATAL_ERROR, e, backtrace);
   return false;
 }
 
@@ -829,7 +816,7 @@ template <>
 inline cmLinkImplItem constructItem(cmGeneratorTarget* target,
                                     cmListFileBacktrace const& bt)
 {
-  return cmLinkImplItem(cmLinkItem(target, false, bt), false);
+  return cmLinkImplItem(cmLinkItem(target, false, bt));
 }
 
 template <>
@@ -1080,7 +1067,7 @@ void TransitiveLinkImpl::Follow(cmGeneratorTarget const* target)
 
     // Add the item itself, but at most once.
     if (this->Emitted.insert(item).second) {
-      this->Impl.Libraries.emplace_back(item, /* checkCMP0027= */ false);
+      this->Impl.Libraries.emplace_back(item);
     }
   }
 
@@ -1169,7 +1156,6 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
     std::string const& evaluated =
       cge->Evaluate(this->LocalGenerator, config, this, &dagChecker, nullptr,
                     this->LinkerLanguage);
-    bool const checkCMP0027 = evaluated != entry.Value;
     cmList llibs(evaluated);
     if (cge->GetHadHeadSensitiveCondition()) {
       impl.HadHeadSensitiveCondition = true;
@@ -1203,30 +1189,11 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       }
       if (name == this->GetName() || name.empty()) {
         if (name == this->GetName()) {
-          bool noMessage = false;
-          MessageType messageType = MessageType::FATAL_ERROR;
-          std::ostringstream e;
-          switch (this->GetPolicyStatusCMP0038()) {
-            case cmPolicies::WARN: {
-              e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0038) << "\n";
-              messageType = MessageType::AUTHOR_WARNING;
-            } break;
-            case cmPolicies::OLD:
-              noMessage = true;
-              break;
-            case cmPolicies::NEW:
-              // Issue the fatal message.
-              break;
-          }
-
-          if (!noMessage) {
-            e << "Target \"" << this->GetName() << "\" links to itself.";
-            this->LocalGenerator->GetCMakeInstance()->IssueMessage(
-              messageType, e.str(), this->GetBacktrace());
-            if (messageType == MessageType::FATAL_ERROR) {
-              return;
-            }
-          }
+          this->LocalGenerator->GetCMakeInstance()->IssueMessage(
+            MessageType::FATAL_ERROR,
+            cmStrCat("Target \"", this->GetName(), "\" links to itself."),
+            this->GetBacktrace());
+          return;
         }
         continue;
       }
@@ -1239,7 +1206,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         if (depsForTarget != synthTargetsForConfig.end()) {
           for (auto const* depForTarget : depsForTarget->second) {
             cmLinkItem synthItem(depForTarget, item.Cross, item.Backtrace);
-            impl.Libraries.emplace_back(std::move(synthItem), false);
+            impl.Libraries.emplace_back(std::move(synthItem));
           }
         }
       } else {
@@ -1256,7 +1223,7 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
         }
       }
 
-      impl.Libraries.emplace_back(std::move(item), checkCMP0027);
+      impl.Libraries.emplace_back(std::move(item));
     }
 
     std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();

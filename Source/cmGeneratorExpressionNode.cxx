@@ -1927,7 +1927,6 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
     static cmsys::RegularExpression compilerIdValidator("^[A-Za-z0-9_]*$");
 
     for (auto const& param : parameters) {
-
       if (!compilerIdValidator.find(param)) {
         reportError(context, content->GetOriginalExpression(),
                     "Expression syntax not recognized.");
@@ -1936,22 +1935,6 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
 
       if (strcmp(param.c_str(), compilerId.c_str()) == 0) {
         return "1";
-      }
-
-      if (cmsysString_strcasecmp(param.c_str(), compilerId.c_str()) == 0) {
-        switch (context->LG->GetPolicyStatus(cmPolicies::CMP0044)) {
-          case cmPolicies::WARN: {
-            context->LG->GetCMakeInstance()->IssueMessage(
-              MessageType::AUTHOR_WARNING,
-              cmPolicies::GetPolicyWarning(cmPolicies::CMP0044),
-              context->Backtrace);
-            CM_FALLTHROUGH;
-          }
-          case cmPolicies::OLD:
-            return "1";
-          case cmPolicies::NEW:
-            break;
-        }
       }
     }
     return "0";

@@ -4910,7 +4910,7 @@ void cmGlobalXCodeGenerator::CreateXCodeDependHackMakefile(
         }
 
         std::vector<cmGeneratorTarget*> objlibs;
-        gt->GetObjectLibrariesCMP0026(objlibs);
+        gt->GetObjectLibrariesInSources(objlibs);
         for (auto* objLib : objlibs) {
           makefileStream << this->PostBuildMakeTarget(objLib->GetName(),
                                                       configName)

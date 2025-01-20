@@ -5,7 +5,6 @@
 #include "cmConfigure.h" // IWYU pragma: keep
 
 #include <iosfwd>
-#include <map>
 #include <memory>
 #include <set>
 #include <string>
@@ -114,7 +113,6 @@ public:
   //! Add sources to the target.
   void AddSources(std::vector<std::string> const& srcs);
   void AddTracedSources(std::vector<std::string> const& srcs);
-  std::string GetSourceCMP0049(const std::string& src);
   cmSourceFile* AddSource(const std::string& src, bool before = false);
 
   //! how we identify a library, by name and type
@@ -260,9 +258,7 @@ public:
   void InsertPrecompileHeader(BT<std::string> const& entry);
 
   void AppendBuildInterfaceIncludes();
-  void FinalizeTargetConfiguration(
-    const cmBTStringRange& noConfigCompileDefinitions,
-    cm::optional<std::map<std::string, cmValue>>& perConfigCompileDefinitions);
+  void FinalizeTargetConfiguration(const cmBTStringRange& compileDefinitions);
 
   std::string GetDebugGeneratorExpressions(const std::string& value,
                                            cmTargetLinkLibraryType llt) const;

@@ -703,12 +703,6 @@ Json::Value CodemodelConfig::DumpTarget(cmGeneratorTarget* gt,
 {
   Target t(gt, this->Config);
   std::string prefix = "target-" + gt->GetName();
-  for (char& c : prefix) {
-    // CMP0037 OLD behavior allows slashes in target names.  Remove them.
-    if (c == '/' || c == '\\') {
-      c = '_';
-    }
-  }
   if (!this->Config.empty()) {
     prefix += "-" + this->Config;
   }

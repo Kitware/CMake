@@ -235,12 +235,6 @@ public:
   void AddCustomCommandToOutput(
     std::unique_ptr<cmCustomCommand> cc,
     const CommandSourceCallback& callback = nullptr, bool replace = false);
-  void AddCustomCommandOldStyle(const std::string& target,
-                                const std::vector<std::string>& outputs,
-                                const std::vector<std::string>& depends,
-                                const std::string& source,
-                                const cmCustomCommandLines& commandLines,
-                                const char* comment);
   void AppendCustomCommandToOutput(
     const std::string& output, const std::vector<std::string>& depends,
     const cmImplicitDependsList& implicit_depends,
@@ -994,8 +988,7 @@ public:
   /** Set whether or not to report a CMP0000 violation.  */
   void SetCheckCMP0000(bool b) { this->CheckCMP0000 = b; }
 
-  bool CheckCMP0037(std::string const& targetName,
-                    cmStateEnums::TargetType targetType) const;
+  void IssueInvalidTargetNameError(std::string const& targetName) const;
 
   cmBTStringRange GetIncludeDirectoriesEntries() const;
   cmBTStringRange GetCompileOptionsEntries() const;
@@ -1034,7 +1027,6 @@ public:
 
   std::vector<std::unique_ptr<cmExportBuildFileGenerator>> const&
   GetExportBuildFileGenerators() const;
-  void RemoveExportBuildFileGeneratorCMP0024(cmExportBuildFileGenerator* gen);
   void AddExportBuildFileGenerator(
     std::unique_ptr<cmExportBuildFileGenerator> gen);
 

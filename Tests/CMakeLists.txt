@@ -468,9 +468,6 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(SetLang SetLangX)
   ADD_TEST_MACRO(EmptyProperty EmptyProperty)
   ADD_TEST_MACRO(ExternalOBJ ExternalOBJ)
-  if(NOT CMake_TEST_EXTERNAL_CMAKE)
-    ADD_TEST_MACRO(LoadCommand LoadedCommand)
-  endif()
   ADD_TEST_MACRO(LinkDirectory bin/LinkDirectory)
   ADD_TEST_MACRO(LinkLanguage LinkLanguage)
   ADD_TEST_MACRO(LinkLine LinkLine)
@@ -1332,18 +1329,6 @@ if(BUILD_TESTING)
     # This test runs a lot of processes.  Do not make them compete
     # for resources with other tests.
     set_property(TEST CMakeTestAllGenerators PROPERTY RUN_SERIAL 1)
-  endif()
-
-  if(NOT CMake_TEST_EXTERNAL_CMAKE)
-    add_test(LoadedCommandOneConfig  ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/LoadCommandOneConfig"
-      "${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig"
-      ${build_generator_args}
-      --build-project LoadCommand
-      --test-command  LoadedCommand
-      )
-    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig")
   endif()
 
   add_test(complex  ${CMAKE_CTEST_COMMAND}

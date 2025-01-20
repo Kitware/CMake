@@ -93,29 +93,21 @@
 #  include "cmAddCompileOptionsCommand.h"
 #  include "cmAddLinkOptionsCommand.h"
 #  include "cmAuxSourceDirectoryCommand.h"
-#  include "cmBuildNameCommand.h"
 #  include "cmCMakeHostSystemInformationCommand.h"
 #  include "cmCMakePkgConfigCommand.h"
 #  include "cmExportCommand.h"
-#  include "cmExportLibraryDependenciesCommand.h"
 #  include "cmFLTKWrapUICommand.h"
 #  include "cmFileAPICommand.h"
 #  include "cmIncludeExternalMSProjectCommand.h"
 #  include "cmInstallProgramsCommand.h"
 #  include "cmLinkLibrariesCommand.h"
 #  include "cmLoadCacheCommand.h"
-#  include "cmLoadCommandCommand.h"
-#  include "cmOutputRequiredFilesCommand.h"
 #  include "cmQTWrapCPPCommand.h"
 #  include "cmQTWrapUICommand.h"
 #  include "cmRemoveCommand.h"
 #  include "cmRemoveDefinitionsCommand.h"
 #  include "cmSourceGroupCommand.h"
-#  include "cmSubdirDependsCommand.h"
 #  include "cmTargetLinkDirectoriesCommand.h"
-#  include "cmUseMangledMesaCommand.h"
-#  include "cmUtilitySourceCommand.h"
-#  include "cmVariableRequiresCommand.h"
 #  include "cmVariableWatchCommand.h"
 #  include "cmWriteFileCommand.h"
 #endif
@@ -216,12 +208,11 @@ void GetScriptingCommands(cmState* state)
   state->AddBuiltinCommand("variable_watch", cmVariableWatchCommand);
   state->AddBuiltinCommand("write_file", cmWriteFileCommand);
 
-  state->AddDisallowedCommand(
-    "build_name", cmBuildNameCommand, cmPolicies::CMP0036,
-    "The build_name command should not be called; see CMP0036.");
-  state->AddDisallowedCommand(
-    "use_mangled_mesa", cmUseMangledMesaCommand, cmPolicies::CMP0030,
-    "The use_mangled_mesa command should not be called; see CMP0030.");
+  state->AddRemovedCommand(
+    "build_name", "The build_name command has been removed; see CMP0036.");
+  state->AddRemovedCommand(
+    "use_mangled_mesa",
+    "The use_mangled_mesa command has been removed; see CMP0030.");
   state->AddDisallowedCommand("exec_program", cmExecProgramCommand,
                               cmPolicies::CMP0153,
                               "The exec_program command should not be called; "
@@ -304,26 +295,23 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("cmake_file_api", cmFileAPICommand);
   state->AddBuiltinCommand("cmake_instrumentation", cmInstrumentationCommand);
 
-  state->AddDisallowedCommand(
-    "export_library_dependencies", cmExportLibraryDependenciesCommand,
-    cmPolicies::CMP0033,
-    "The export_library_dependencies command should not be called; "
-    "see CMP0033.");
-  state->AddDisallowedCommand(
-    "load_command", cmLoadCommandCommand, cmPolicies::CMP0031,
-    "The load_command command should not be called; see CMP0031.");
-  state->AddDisallowedCommand(
-    "output_required_files", cmOutputRequiredFilesCommand, cmPolicies::CMP0032,
-    "The output_required_files command should not be called; see CMP0032.");
-  state->AddDisallowedCommand(
-    "subdir_depends", cmSubdirDependsCommand, cmPolicies::CMP0029,
-    "The subdir_depends command should not be called; see CMP0029.");
-  state->AddDisallowedCommand(
-    "utility_source", cmUtilitySourceCommand, cmPolicies::CMP0034,
-    "The utility_source command should not be called; see CMP0034.");
-  state->AddDisallowedCommand(
-    "variable_requires", cmVariableRequiresCommand, cmPolicies::CMP0035,
-    "The variable_requires command should not be called; see CMP0035.");
+  state->AddRemovedCommand(
+    "export_library_dependencies",
+    "The export_library_dependencies command has been removed; see CMP0033.");
+  state->AddRemovedCommand(
+    "load_command", "The load_command command has been removed; see CMP0031.");
+  state->AddRemovedCommand(
+    "output_required_files",
+    "The output_required_files command has been removed; see CMP0032.");
+  state->AddRemovedCommand(
+    "subdir_depends",
+    "The subdir_depends command has been removed; see CMP0029.");
+  state->AddRemovedCommand(
+    "utility_source",
+    "The utility_source command has been removed; see CMP0034.");
+  state->AddRemovedCommand(
+    "variable_requires",
+    "The variable_requires command has been removed; see CMP0035.");
 #endif
 }
 

@@ -621,10 +621,8 @@ public:
   void AddBuildExportSet(cmExportBuildFileGenerator* gen);
   void AddBuildExportExportSet(cmExportBuildFileGenerator* gen);
   bool IsExportedTargetsFile(const std::string& filename) const;
-  bool GenerateImportFile(const std::string& file);
   cmExportBuildFileGenerator* GetExportedTargetsFile(
     const std::string& filename) const;
-  void AddCMP0042WarnTarget(const std::string& target);
   void AddCMP0068WarnTarget(const std::string& target);
 
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
@@ -639,11 +637,6 @@ public:
 #if !defined(CMAKE_BOOTSTRAP)
   cmFileLockPool& GetFileLockPool() { return this->FileLockPool; }
 #endif
-
-  bool GetConfigureDoneCMP0026() const
-  {
-    return this->ConfigureDoneCMP0026AndCMP0024;
-  }
 
   std::string MakeSilentFlag;
 
@@ -881,10 +874,10 @@ private:
 
   void ClearGeneratorMembers();
 
-  bool CheckCMP0037(std::string const& targetName,
-                    std::string const& reason) const;
-  bool CheckCMP0037Prefix(std::string const& targetPrefix,
-                          std::string const& reason) const;
+  bool CheckReservedTargetName(std::string const& targetName,
+                               std::string const& reason) const;
+  bool CheckReservedTargetNamePrefix(std::string const& targetPrefix,
+                                     std::string const& reason) const;
 
   void IndexMakefile(cmMakefile* mf);
   void IndexLocalGenerator(cmLocalGenerator* lg);
@@ -906,8 +899,6 @@ private:
   // Set of binary directories on disk.
   std::set<std::string> BinaryDirectories;
 
-  // track targets to issue CMP0042 warning for.
-  std::set<std::string> CMP0042WarnTargets;
   // track targets to issue CMP0068 warning for.
   std::set<std::string> CMP0068WarnTargets;
 
@@ -945,6 +936,5 @@ protected:
   bool ForceUnixPaths;
   bool ToolSupportsColor;
   bool InstallTargetEnabled;
-  bool ConfigureDoneCMP0026AndCMP0024;
   bool AllowGlobalTargetCodegen;
 };

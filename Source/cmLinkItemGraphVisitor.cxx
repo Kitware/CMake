@@ -121,7 +121,7 @@ void cmLinkItemGraphVisitor::GetDependencies(cmGeneratorTarget const& target,
   }
 
   std::vector<cmGeneratorTarget*> objectLibraries;
-  target.GetObjectLibrariesCMP0026(objectLibraries);
+  target.GetObjectLibrariesInSources(objectLibraries);
   for (auto const& lib : objectLibraries) {
     auto const& name = lib->GetName();
     if (dependencies.find(name) == dependencies.cend()) {

@@ -25,7 +25,6 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmMessageType.h"
-#include "cmPolicies.h"
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -149,37 +148,22 @@ void processIncludeDirectories(cmGeneratorTarget const* tgt,
     cmLinkImplItem const& item = entry.LinkImplItem;
     std::string const& targetName = item.AsStr();
     bool const fromImported = item.Target && item.Target->IsImported();
-    bool const checkCMP0027 = item.CheckCMP0027;
 
     std::string usedIncludes;
     for (std::string& entryInclude : entry.Values) {
       if (fromImported && !cmSystemTools::FileExists(entryInclude)) {
-        std::ostringstream e;
-        MessageType messageType = MessageType::FATAL_ERROR;
-        if (checkCMP0027) {
-          switch (tgt->GetPolicyStatusCMP0027()) {
-            case cmPolicies::WARN:
-              e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0027) << "\n";
-              CM_FALLTHROUGH;
-            case cmPolicies::OLD:
-              messageType = MessageType::AUTHOR_WARNING;
-              break;
-            case cmPolicies::NEW:
-              break;
-          }
-        }
-        /* clang-format off */
-        e << "Imported target \"" << targetName << "\" includes "
-             "non-existent path\n  \"" << entryInclude << "\"\nin its "
-             "INTERFACE_INCLUDE_DIRECTORIES. Possible reasons include:\n"
-             "* The path was deleted, renamed, or moved to another "
-             "location.\n"
-             "* An install or uninstall procedure did not complete "
-             "successfully.\n"
-             "* The installation package was faulty and references files it "
-             "does not provide.\n";
-        /* clang-format on */
-        tgt->GetLocalGenerator()->IssueMessage(messageType, e.str());
+        tgt->GetLocalGenerator()->IssueMessage(
+          MessageType::FATAL_ERROR,
+          cmStrCat(
+            "Imported target \"", targetName,
+            "\" includes non-existent path\n  \"", entryInclude,
+            "\"\nin its INTERFACE_INCLUDE_DIRECTORIES. Possible reasons "
+            "include:\n"
+            "* The path was deleted, renamed, or moved to another location.\n"
+            "* An install or uninstall procedure did not complete "
+            "successfully.\n"
+            "* The installation package was faulty and references files it "
+            "does not provide.\n"));
         return;
       }
 
@@ -247,9 +231,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
   bool debugIncludes = !this->DebugIncludesDone &&
     cm::contains(debugProperties, "INCLUDE_DIRECTORIES");
 
-  if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
-    this->DebugIncludesDone = true;
-  }
+  this->DebugIncludesDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
     this, config, lang, &dagChecker, this->IncludeDirectoriesEntries);

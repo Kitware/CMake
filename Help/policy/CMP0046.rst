@@ -1,6 +1,9 @@
 CMP0046
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 Error on non-existent dependency in add_dependencies.
 
 CMake 2.8.12 and lower silently ignored non-existent dependencies
@@ -12,7 +15,5 @@ if non-existent dependencies are listed in the :command:`add_dependencies`
 command.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.0
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

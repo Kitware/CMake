@@ -35,9 +35,6 @@ set_property(TARGET target_prop_executable APPEND PROPERTY COMPILE_DEFINITIONS
 
 add_executable(target_prop_c_executable ../compiletest.c)
 
-cmake_policy(SET CMP0043 NEW)
-set_property(TARGET target_prop_c_executable APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG DEBUG_MODE)
-
 set_property(TARGET target_prop_c_executable APPEND PROPERTY COMPILE_DEFINITIONS
     "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,CXX>:LINK_CXX_DEFINE>"
     "$<$<STREQUAL:$<TARGET_PROPERTY:LINKER_LANGUAGE>,C>:LINK_C_DEFINE>"

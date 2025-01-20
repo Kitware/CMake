@@ -439,24 +439,9 @@ bool cmExportInstallFileGenerator::CheckInterfaceDirs(
     if (cmHasPrefix(li, this->GetImportPrefixWithSlash())) {
       continue;
     }
-    MessageType messageType = MessageType::FATAL_ERROR;
     std::ostringstream e;
     if (genexPos != std::string::npos) {
-      if (prop == "INTERFACE_INCLUDE_DIRECTORIES") {
-        switch (target->GetPolicyStatusCMP0041()) {
-          case cmPolicies::WARN:
-            messageType = MessageType::WARNING;
-            e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0041) << "\n";
-            break;
-          case cmPolicies::OLD:
-            continue;
-          case cmPolicies::NEW:
-            hadFatalError = true;
-            break; // Issue fatal message.
-        }
-      } else {
-        hadFatalError = true;
-      }
+      hadFatalError = true;
     }
     if (!cmSystemTools::FileIsFullPath(li)) {
       /* clang-format off */
@@ -464,7 +449,8 @@ bool cmExportInstallFileGenerator::CheckInterfaceDirs(
            " property contains relative path:\n"
            "  \"" << li << "\"";
       /* clang-format on */
-      target->GetLocalGenerator()->IssueMessage(messageType, e.str());
+      target->GetLocalGenerator()->IssueMessage(MessageType::FATAL_ERROR,
+                                                e.str());
     }
     bool inBinary = isSubDirectory(li, topBinaryDir);
     bool inSource = isSubDirectory(li, topSourceDir);
@@ -516,7 +502,8 @@ bool cmExportInstallFileGenerator::CheckInterfaceDirs(
            " property contains path:\n"
            "  \"" << li << "\"\nwhich is prefixed in the build directory.";
       /* clang-format on */
-      target->GetLocalGenerator()->IssueMessage(messageType, e.str());
+      target->GetLocalGenerator()->IssueMessage(MessageType::FATAL_ERROR,
+                                                e.str());
     }
     if (!inSourceBuild) {
       if (inSource) {
@@ -524,7 +511,8 @@ bool cmExportInstallFileGenerator::CheckInterfaceDirs(
           << " property contains path:\n"
              "  \""
           << li << "\"\nwhich is prefixed in the source directory.";
-        target->GetLocalGenerator()->IssueMessage(messageType, e.str());
+        target->GetLocalGenerator()->IssueMessage(MessageType::FATAL_ERROR,
+                                                  e.str());
       }
     }
   }

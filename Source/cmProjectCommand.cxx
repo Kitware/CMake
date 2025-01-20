@@ -107,7 +107,6 @@ bool cmProjectCommand(std::vector<std::string> const& args,
   bool haveLanguages = false;
   bool haveDescription = false;
   bool haveHomepage = false;
-  bool injectedProjectCommand = false;
   std::string version;
   std::string description;
   std::string homepage;
@@ -198,8 +197,6 @@ bool cmProjectCommand(std::vector<std::string> const& args,
           "by a value that expanded to nothing.");
         resetReporter();
       };
-    } else if (i == 1 && args[i] == "__CMAKE_INJECTED_PROJECT_COMMAND__") {
-      injectedProjectCommand = true;
     } else if (doing == DoingVersion) {
       doing = DoingLanguages;
       version = args[i];
@@ -234,17 +231,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
     languages.emplace_back("NONE");
   }
 
-  cmPolicies::PolicyStatus const cmp0048 =
-    mf.GetPolicyStatus(cmPolicies::CMP0048);
   if (haveVersion) {
-    // Set project VERSION variables to given values
-    if (cmp0048 == cmPolicies::OLD || cmp0048 == cmPolicies::WARN) {
-      mf.IssueMessage(MessageType::FATAL_ERROR,
-                      "VERSION not allowed unless CMP0048 is set to NEW");
-      cmSystemTools::SetFatalErrorOccurred();
-      return true;
-    }
-
     cmsys::RegularExpression vx(
       R"(^([0-9]+(\.[0-9]+(\.[0-9]+(\.[0-9]+)?)?)?)?$)");
     if (!vx.find(version)) {
@@ -315,7 +302,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
                             version_components[2]);
     TopLevelCMakeVarCondSet(mf, "CMAKE_PROJECT_VERSION_TWEAK",
                             version_components[3]);
-  } else if (cmp0048 != cmPolicies::OLD) {
+  } else {
     // Set project VERSION variables to empty
     std::vector<std::string> vv = { "PROJECT_VERSION",
                                     "PROJECT_VERSION_MAJOR",
@@ -334,25 +321,11 @@ bool cmProjectCommand(std::vector<std::string> const& args,
       vv.emplace_back("CMAKE_PROJECT_VERSION_PATCH");
       vv.emplace_back("CMAKE_PROJECT_VERSION_TWEAK");
     }
-    std::string vw;
     for (std::string const& i : vv) {
       cmValue v = mf.GetDefinition(i);
       if (cmNonempty(v)) {
-        if (cmp0048 == cmPolicies::WARN) {
-          if (!injectedProjectCommand) {
-            vw += "\n  ";
-            vw += i;
-          }
-        } else {
-          mf.AddDefinition(i, "");
-        }
+        mf.AddDefinition(i, "");
       }
-    }
-    if (!vw.empty()) {
-      mf.IssueMessage(
-        MessageType::AUTHOR_WARNING,
-        cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0048),
-                 "\nThe following variable(s) would be set to empty:", vw));
     }
   }
 

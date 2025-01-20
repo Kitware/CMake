@@ -202,13 +202,6 @@ cmGeneratorTarget::IsTransitiveProperty(cm::string_view prop,
         result->Usage = cmGeneratorTarget::UseTo::Compile;
       }
     }
-  } else if (cmHasLiteralPrefix(prop, "COMPILE_DEFINITIONS_")) {
-    cmPolicies::PolicyStatus cmp0043 =
-      lg->GetPolicyStatus(cmPolicies::CMP0043);
-    if (cmp0043 == cmPolicies::WARN || cmp0043 == cmPolicies::OLD) {
-      result = TransitiveProperty{ "INTERFACE_COMPILE_DEFINITIONS"_s,
-                                   UseTo::Compile };
-    }
   } else if (!evaluatingLinkLibraries) {
     // Honor TRANSITIVE_COMPILE_PROPERTIES and TRANSITIVE_LINK_PROPERTIES
     // from the link closure when we are not evaluating the closure itself.

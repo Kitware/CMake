@@ -129,7 +129,6 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   this->CurrentConfigureMakefile = nullptr;
   this->TryCompileOuterMakefile = nullptr;
 
-  this->ConfigureDoneCMP0026AndCMP0024 = false;
   this->FirstTimeProgress = 0.0f;
 
   cm->GetState()->SetIsGeneratorMultiConfig(false);
@@ -313,24 +312,6 @@ void cmGlobalGenerator::AddBuildExportExportSet(
 {
   this->BuildExportExportSets[gen->GetMainExportFileName()] = gen;
   this->AddBuildExportSet(gen);
-}
-
-bool cmGlobalGenerator::GenerateImportFile(const std::string& file)
-{
-  auto const it = this->BuildExportSets.find(file);
-  if (it != this->BuildExportSets.end()) {
-    bool result = it->second->GenerateImportFile();
-
-    if (!this->ConfigureDoneCMP0026AndCMP0024) {
-      for (const auto& m : this->Makefiles) {
-        m->RemoveExportBuildFileGeneratorCMP0024(it->second);
-      }
-    }
-
-    this->BuildExportSets.erase(it);
-    return result;
-  }
-  return false;
 }
 
 void cmGlobalGenerator::ForceLinkerLanguages()
@@ -1029,61 +1010,6 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(
   std::string compilerIdVar = cmStrCat("CMAKE_", lang, "_COMPILER_ID");
   std::string const compilerId = mf->GetSafeDefinition(compilerIdVar);
 
-  if (compilerId == "AppleClang") {
-    switch (mf->GetPolicyStatus(cmPolicies::CMP0025)) {
-      case cmPolicies::WARN:
-        if (!this->CMakeInstance->GetIsInTryCompile() &&
-            mf->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0025")) {
-          std::ostringstream w;
-          /* clang-format off */
-          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0025) << "\n"
-            "Converting " << lang <<
-            R"( compiler id "AppleClang" to "Clang" for compatibility.)"
-            ;
-          /* clang-format on */
-          mf->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
-        }
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        // OLD behavior is to convert AppleClang to Clang.
-        mf->AddDefinition(compilerIdVar, "Clang");
-        break;
-      case cmPolicies::NEW:
-        // NEW behavior is to keep AppleClang.
-        break;
-    }
-  }
-
-  if (compilerId == "QCC") {
-    switch (mf->GetPolicyStatus(cmPolicies::CMP0047)) {
-      case cmPolicies::WARN:
-        if (!this->CMakeInstance->GetIsInTryCompile() &&
-            mf->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0047")) {
-          std::ostringstream w;
-          /* clang-format off */
-          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0047) << "\n"
-            "Converting " << lang <<
-            R"( compiler id "QCC" to "GNU" for compatibility.)"
-            ;
-          /* clang-format on */
-          mf->IssueMessage(MessageType::AUTHOR_WARNING, w.str());
-        }
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        // OLD behavior is to convert QCC to GNU.
-        mf->AddDefinition(compilerIdVar, "GNU");
-        if (lang == "C") {
-          mf->AddDefinition("CMAKE_COMPILER_IS_GNUCC", "1");
-        } else if (lang == "CXX") {
-          mf->AddDefinition("CMAKE_COMPILER_IS_GNUCXX", "1");
-        }
-        break;
-      case cmPolicies::NEW:
-        // NEW behavior is to keep QCC.
-        break;
-    }
-  }
-
   if (compilerId == "XLClang") {
     switch (mf->GetPolicyStatus(cmPolicies::CMP0089)) {
       case cmPolicies::WARN:
@@ -1383,11 +1309,8 @@ void cmGlobalGenerator::Configure()
   }
 
   // now do it
-  this->ConfigureDoneCMP0026AndCMP0024 = false;
   dirMf->Configure();
   dirMf->EnforceDirectoryLevelRules();
-
-  this->ConfigureDoneCMP0026AndCMP0024 = true;
 
   // Put a copy of each global target in every directory.
   {
@@ -1414,7 +1337,7 @@ void cmGlobalGenerator::CreateGenerationObjects(TargetTypes targetTypes)
 {
   this->CreateLocalGenerators();
   // Commit side effects only if we are actually generating
-  if (this->GetConfigureDoneCMP0026()) {
+  if (targetTypes == TargetTypes::AllTargets) {
     this->CheckTargetProperties();
   }
   this->CreateGeneratorTargets(targetTypes);
@@ -1448,11 +1371,6 @@ cmExportBuildFileGenerator* cmGlobalGenerator::GetExportedTargetsFile(
 {
   auto const it = this->BuildExportSets.find(filename);
   return it == this->BuildExportSets.end() ? nullptr : it->second;
-}
-
-void cmGlobalGenerator::AddCMP0042WarnTarget(const std::string& target)
-{
-  this->CMP0042WarnTargets.insert(target);
 }
 
 void cmGlobalGenerator::AddCMP0068WarnTarget(const std::string& target)
@@ -1537,8 +1455,6 @@ bool cmGlobalGenerator::Compute()
   // Start with an empty vector:
   this->FilesReplacedDuringGenerate.clear();
 
-  // clear targets to issue warning CMP0042 for
-  this->CMP0042WarnTargets.clear();
   // clear targets to issue warning CMP0068 for
   this->CMP0068WarnTargets.clear();
 
@@ -1743,19 +1659,6 @@ void cmGlobalGenerator::Generate()
 
   // Perform validation checks on memoized link structures.
   this->CheckTargetLinkLibraries();
-
-  if (!this->CMP0042WarnTargets.empty()) {
-    std::ostringstream w;
-    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0042)
-      << "\n"
-         "MACOSX_RPATH is not specified for"
-         " the following targets:\n";
-    for (std::string const& t : this->CMP0042WarnTargets) {
-      w << ' ' << t << '\n';
-    }
-    this->GetCMakeInstance()->IssueMessage(MessageType::AUTHOR_WARNING,
-                                           w.str());
-  }
 
   if (!this->CMP0068WarnTargets.empty()) {
     std::ostringstream w;
@@ -2005,14 +1908,11 @@ void cmGlobalGenerator::FinalizeTargetConfiguration()
 
   // Construct per-target generator information.
   for (const auto& mf : this->Makefiles) {
-    const cmBTStringRange noConfigCompileDefinitions =
+    const cmBTStringRange compileDefinitions =
       mf->GetCompileDefinitionsEntries();
-    cm::optional<std::map<std::string, cmValue>> perConfigCompileDefinitions;
-
     for (auto& target : mf->GetTargets()) {
       cmTarget* t = &target.second;
-      t->FinalizeTargetConfiguration(noConfigCompileDefinitions,
-                                     perConfigCompileDefinitions);
+      t->FinalizeTargetConfiguration(compileDefinitions);
     }
 
     // The standard include directories for each language
@@ -2773,58 +2673,38 @@ cmGlobalGenerator::SplitFrameworkPath(const std::string& path,
   return cm::nullopt;
 }
 
-static bool RaiseCMP0037Message(cmake* cm, cmTarget* tgt,
-                                std::string const& targetNameAsWritten,
-                                std::string const& reason)
+namespace {
+void IssueReservedTargetNameError(cmake* cm, cmTarget* tgt,
+                                  std::string const& targetNameAsWritten,
+                                  std::string const& reason)
 {
-  MessageType messageType = MessageType::AUTHOR_WARNING;
-  std::ostringstream e;
-  bool issueMessage = false;
-  switch (tgt->GetPolicyStatusCMP0037()) {
-    case cmPolicies::WARN:
-      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0037) << '\n';
-      issueMessage = true;
-      CM_FALLTHROUGH;
-    case cmPolicies::OLD:
-      break;
-    case cmPolicies::NEW:
-      issueMessage = true;
-      messageType = MessageType::FATAL_ERROR;
-      break;
-  }
-  if (issueMessage) {
-    e << "The target name \"" << targetNameAsWritten << "\" is reserved "
-      << reason << '.';
-    if (messageType == MessageType::AUTHOR_WARNING) {
-      e << "  It may result in undefined behavior.";
-    }
-    cm->IssueMessage(messageType, e.str(), tgt->GetBacktrace());
-    if (messageType == MessageType::FATAL_ERROR) {
-      return false;
-    }
-  }
-  return true;
+  cm->IssueMessage(MessageType::FATAL_ERROR,
+                   cmStrCat("The target name \"", targetNameAsWritten,
+                            "\" is reserved ", reason, '.'),
+                   tgt->GetBacktrace());
+}
 }
 
-bool cmGlobalGenerator::CheckCMP0037(std::string const& targetName,
-                                     std::string const& reason) const
+bool cmGlobalGenerator::CheckReservedTargetName(
+  std::string const& targetName, std::string const& reason) const
 {
   cmTarget* tgt = this->FindTarget(targetName);
   if (!tgt) {
     return true;
   }
-  return RaiseCMP0037Message(this->GetCMakeInstance(), tgt, targetName,
-                             reason);
+  IssueReservedTargetNameError(this->GetCMakeInstance(), tgt, targetName,
+                               reason);
+  return false;
 }
 
-bool cmGlobalGenerator::CheckCMP0037Prefix(std::string const& targetPrefix,
-                                           std::string const& reason) const
+bool cmGlobalGenerator::CheckReservedTargetNamePrefix(
+  std::string const& targetPrefix, std::string const& reason) const
 {
   bool ret = true;
   for (auto const& tgtPair : this->TargetSearchIndex) {
-    if (cmHasPrefix(tgtPair.first, targetPrefix) &&
-        !RaiseCMP0037Message(this->GetCMakeInstance(), tgtPair.second,
-                             tgtPair.first, reason)) {
+    if (cmHasPrefix(tgtPair.first, targetPrefix)) {
+      IssueReservedTargetNameError(this->GetCMakeInstance(), tgtPair.second,
+                                   tgtPair.first, reason);
       ret = false;
     }
   }
@@ -2854,7 +2734,8 @@ void cmGlobalGenerator::AddGlobalTarget_Package(
 
   static const auto reservedTargets = { "package", "PACKAGE" };
   for (auto const& target : reservedTargets) {
-    if (!this->CheckCMP0037(target, "when CPack packaging is enabled")) {
+    if (!this->CheckReservedTargetName(target,
+                                       "when CPack packaging is enabled")) {
       return;
     }
   }
@@ -2903,8 +2784,8 @@ void cmGlobalGenerator::AddGlobalTarget_PackageSource(
 
   static const auto reservedTargets = { "package_source" };
   for (auto const& target : reservedTargets) {
-    if (!this->CheckCMP0037(target,
-                            "when CPack source packaging is enabled")) {
+    if (!this->CheckReservedTargetName(
+          target, "when CPack source packaging is enabled")) {
       return;
     }
   }
@@ -2933,7 +2814,8 @@ void cmGlobalGenerator::AddGlobalTarget_Test(
 
   static const auto reservedTargets = { "test", "RUN_TESTS" };
   for (auto const& target : reservedTargets) {
-    if (!this->CheckCMP0037(target, "when CTest testing is enabled")) {
+    if (!this->CheckReservedTargetName(target,
+                                       "when CTest testing is enabled")) {
       return;
     }
   }
@@ -3292,14 +3174,14 @@ bool cmGlobalGenerator::AddBuildDatabaseTargets()
 
   static const auto reservedTargets = { "cmake_build_database" };
   for (auto const& target : reservedTargets) {
-    if (!this->CheckCMP0037(target,
-                            "when exporting build databases are enabled")) {
+    if (!this->CheckReservedTargetName(
+          target, "when exporting build databases are enabled")) {
       return false;
     }
   }
   static const auto reservedPrefixes = { "cmake_build_database-" };
   for (auto const& prefix : reservedPrefixes) {
-    if (!this->CheckCMP0037Prefix(
+    if (!this->CheckReservedTargetNamePrefix(
           prefix, "when exporting build databases are enabled")) {
       return false;
     }

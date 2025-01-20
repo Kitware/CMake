@@ -1,8 +1,7 @@
-// Test SET, VARIABLE_REQUIRES
+// Test SET
 
 #cmakedefine ONE_VAR
 #  cmakedefine ONE_VAR_AND_INDENTED
-#cmakedefine ONE_VAR_IS_DEFINED
 #cmakedefine ZERO_VAR
 #  cmakedefine ZERO_VAR_AND_INDENTED
 

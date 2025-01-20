@@ -195,39 +195,15 @@ Message::LogLevel cmMakefile::GetCurrentLogLevel() const
   return result;
 }
 
-bool cmMakefile::CheckCMP0037(std::string const& targetName,
-                              cmStateEnums::TargetType targetType) const
+void cmMakefile::IssueInvalidTargetNameError(
+  std::string const& targetName) const
 {
-  MessageType messageType = MessageType::AUTHOR_WARNING;
-  std::string e;
-  bool issueMessage = false;
-  switch (this->GetPolicyStatus(cmPolicies::CMP0037)) {
-    case cmPolicies::WARN:
-      if (targetType != cmStateEnums::INTERFACE_LIBRARY) {
-        e = cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0037), '\n');
-        issueMessage = true;
-      }
-      CM_FALLTHROUGH;
-    case cmPolicies::OLD:
-      break;
-    case cmPolicies::NEW:
-      issueMessage = true;
-      messageType = MessageType::FATAL_ERROR;
-      break;
-  }
-  if (issueMessage) {
-    e +=
-      cmStrCat("The target name \"", targetName,
-               "\" is reserved or not valid for certain "
-               "CMake features, such as generator expressions, and may result "
-               "in undefined behavior.");
-    this->IssueMessage(messageType, e);
-
-    if (messageType == MessageType::FATAL_ERROR) {
-      return false;
-    }
-  }
-  return true;
+  this->IssueMessage(
+    MessageType::FATAL_ERROR,
+    cmStrCat("The target name \"", targetName,
+             "\" is reserved or not valid for certain "
+             "CMake features, such as generator expressions, and may result "
+             "in undefined behavior."));
 }
 
 void cmMakefile::MaybeWarnCMP0074(std::string const& rootVar, cmValue rootDef,
@@ -952,20 +928,6 @@ cmMakefile::GetExportBuildFileGenerators() const
   return this->ExportBuildFileGenerators;
 }
 
-void cmMakefile::RemoveExportBuildFileGeneratorCMP0024(
-  cmExportBuildFileGenerator* gen)
-{
-  auto it =
-    std::find_if(this->ExportBuildFileGenerators.begin(),
-                 this->ExportBuildFileGenerators.end(),
-                 [gen](std::unique_ptr<cmExportBuildFileGenerator> const& p) {
-                   return p.get() == gen;
-                 });
-  if (it != this->ExportBuildFileGenerators.end()) {
-    this->ExportBuildFileGenerators.erase(it);
-  }
-}
-
 void cmMakefile::AddExportBuildFileGenerator(
   std::unique_ptr<cmExportBuildFileGenerator> gen)
 {
@@ -1104,38 +1066,20 @@ cmTarget* cmMakefile::GetCustomCommandTarget(
   // Find the target to which to add the custom command.
   auto ti = this->Targets.find(realTarget);
   if (ti == this->Targets.end()) {
-    MessageType messageType = MessageType::AUTHOR_WARNING;
-    bool issueMessage = false;
     std::string e;
-    switch (this->GetPolicyStatus(cmPolicies::CMP0040)) {
-      case cmPolicies::WARN:
-        e = cmStrCat(cmPolicies::GetPolicyWarning(cmPolicies::CMP0040), '\n');
-        issueMessage = true;
-        CM_FALLTHROUGH;
-      case cmPolicies::OLD:
-        break;
-      case cmPolicies::NEW:
-        issueMessage = true;
-        messageType = MessageType::FATAL_ERROR;
-        break;
-    }
-
-    if (issueMessage) {
-      if (cmTarget const* t = this->FindTargetToUse(target)) {
-        if (t->IsImported()) {
-          e += cmStrCat("TARGET '", target,
-                        "' is IMPORTED and does not build here.");
-        } else {
-          e += cmStrCat("TARGET '", target,
-                        "' was not created in this directory.");
-        }
+    if (cmTarget const* t = this->FindTargetToUse(target)) {
+      if (t->IsImported()) {
+        e += cmStrCat("TARGET '", target,
+                      "' is IMPORTED and does not build here.");
       } else {
-        e += cmStrCat("No TARGET '", target,
-                      "' has been created in this directory.");
+        e +=
+          cmStrCat("TARGET '", target, "' was not created in this directory.");
       }
-      this->GetCMakeInstance()->IssueMessage(messageType, e, lfbt);
+    } else {
+      e += cmStrCat("No TARGET '", target,
+                    "' has been created in this directory.");
     }
-
+    this->GetCMakeInstance()->IssueMessage(MessageType::FATAL_ERROR, e, lfbt);
     return nullptr;
   }
 
@@ -1234,72 +1178,6 @@ void cmMakefile::AddCustomCommandToOutput(
         callback(sf);
       }
     });
-}
-
-void cmMakefile::AddCustomCommandOldStyle(
-  const std::string& target, const std::vector<std::string>& outputs,
-  const std::vector<std::string>& depends, const std::string& source,
-  const cmCustomCommandLines& commandLines, const char* comment)
-{
-  auto cc = cm::make_unique<cmCustomCommand>();
-  cc->SetDepends(depends);
-  cc->SetCommandLines(commandLines);
-  cc->SetComment(comment);
-
-  // Translate the old-style signature to one of the new-style
-  // signatures.
-  if (source == target) {
-    // In the old-style signature if the source and target were the
-    // same then it added a post-build rule to the target.  Preserve
-    // this behavior.
-    this->AddCustomCommandToTarget(target, cmCustomCommandType::POST_BUILD,
-                                   std::move(cc));
-    return;
-  }
-
-  auto ti = this->Targets.find(target);
-  cmTarget* t = ti != this->Targets.end() ? &ti->second : nullptr;
-
-  auto addRuleFileToTarget = [=](cmSourceFile* sf) {
-    // If the rule was added to the source (and not a .rule file),
-    // then add the source to the target to make sure the rule is
-    // included.
-    if (!sf->GetPropertyAsBool("__CMAKE_RULE")) {
-      if (t) {
-        t->AddSource(sf->ResolveFullPath());
-      } else {
-        cmSystemTools::Error("Attempt to add a custom rule to a target "
-                             "that does not exist yet for target " +
-                             target);
-      }
-    }
-  };
-
-  // Each output must get its own copy of this rule.
-  cmsys::RegularExpression sourceFiles(
-    "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|mpp|ixx|cppm|ccm|cxxm|c\\+\\+m|cu|m|mm|"
-    "rc|def|r|odl|idl|hpj|bat|h|h\\+\\+|"
-    "hm|hpp|hxx|in|txx|inl)$");
-
-  // Choose whether to use a main dependency.
-  if (sourceFiles.find(source)) {
-    // The source looks like a real file.  Use it as the main dependency.
-    for (std::string const& output : outputs) {
-      auto cc1 = cm::make_unique<cmCustomCommand>(*cc);
-      cc1->SetOutputs(output);
-      cc1->SetMainDependency(source);
-      this->AddCustomCommandToOutput(std::move(cc1), addRuleFileToTarget);
-    }
-  } else {
-    cc->AppendDepends({ source });
-
-    // The source may not be a real file.  Do not use a main dependency.
-    for (std::string const& output : outputs) {
-      auto cc1 = cm::make_unique<cmCustomCommand>(*cc);
-      cc1->SetOutputs(output);
-      this->AddCustomCommandToOutput(std::move(cc1), addRuleFileToTarget);
-    }
-  }
 }
 
 void cmMakefile::AppendCustomCommandToOutput(
@@ -1489,21 +1367,6 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   {
     const char* prop = "IMPLICIT_DEPENDS_INCLUDE_TRANSFORM";
     this->SetProperty(prop, parent->GetProperty(prop));
-  }
-
-  // compile definitions property and per-config versions
-  cmPolicies::PolicyStatus polSt = this->GetPolicyStatus(cmPolicies::CMP0043);
-  if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD) {
-    this->SetProperty("COMPILE_DEFINITIONS",
-                      parent->GetProperty("COMPILE_DEFINITIONS"));
-    std::vector<std::string> configs =
-      this->GetGeneratorConfigs(cmMakefile::ExcludeEmptyConfig);
-    for (std::string const& config : configs) {
-      std::string defPropName =
-        cmStrCat("COMPILE_DEFINITIONS_", cmSystemTools::UpperCase(config));
-      cmValue prop = parent->GetProperty(defPropName);
-      this->SetProperty(defPropName, prop);
-    }
   }
 
   // labels
@@ -1741,7 +1604,7 @@ void cmMakefile::Configure()
         this->SetCheckCMP0000(true);
 
         // Implicitly set the version for the user.
-        cmPolicies::ApplyPolicyVersion(this, 2, 8, 12,
+        cmPolicies::ApplyPolicyVersion(this, 3, 0, 0,
                                        cmPolicies::WarnCompat::Off);
       }
     }
@@ -1765,13 +1628,9 @@ void cmMakefile::Configure()
         "CMake is pretending there is a \"project(Project)\" command on "
         "the first line.",
         this->Backtrace);
-      cmListFileFunction project{ "project",
-                                  0,
-                                  0,
-                                  { { "Project", cmListFileArgument::Unquoted,
-                                      0 },
-                                    { "__CMAKE_INJECTED_PROJECT_COMMAND__",
-                                      cmListFileArgument::Unquoted, 0 } } };
+      cmListFileFunction project{
+        "project", 0, 0, { { "Project", cmListFileArgument::Unquoted, 0 } }
+      };
       listFile.Functions.insert(listFile.Functions.begin(), project);
     }
   }

@@ -62,10 +62,6 @@ void cmPassed(const char* Message, const char* m2 = "")
 #  error This is a problem. Looks like ADD_DEFINITIONS and REMOVE_DEFINITIONS does not work
 #endif
 
-#if defined(COMPLEX_NDEBUG) && !defined(CMAKE_IS_FUN_IN_RELEASE_MODE)
-#  error Per-configuration directory-level definition not inherited.
-#endif
-
 // ======================================================================
 
 void TestAndRemoveFile(const char* filename)
@@ -243,7 +239,7 @@ int main()
 #endif
 
   // ----------------------------------------------------------------------
-  // Test SET, VARIABLE_REQUIRES
+  // Test SET
 
 #ifdef SHOULD_NOT_BE_DEFINED
   cmFailed("IF or SET is broken, SHOULD_NOT_BE_DEFINED is defined.");
@@ -267,13 +263,6 @@ int main()
   cmFailed("cmakedefine is broken, ONE_VAR_AND_INDENTED is not defined.");
 #else
   cmPassed("ONE_VAR_AND_INDENTED is defined.");
-#endif
-
-#ifndef ONE_VAR_IS_DEFINED
-  cmFailed("cmakedefine, SET or VARIABLE_REQUIRES is broken, "
-           "ONE_VAR_IS_DEFINED is not defined.");
-#else
-  cmPassed("ONE_VAR_IS_DEFINED is defined.");
 #endif
 
 #ifdef ZERO_VAR
@@ -891,17 +880,6 @@ int main()
   // A directory has been created.
 
   TestDir("make_dir");
-
-  // ----------------------------------------------------------------------
-  // Test OUTPUT_REQUIRED_FILES
-  // The files required by 'complex' have been output to a file.
-  // The contents of this file is not tested (absolute paths).
-  //
-  // WARNING: if you run 'complex' manually, this *will* fail, because
-  // the file was removed the last time 'complex' was run, and it is
-  // only created during a build.
-
-  TestAndRemoveFile("Executable/Temp/complex-required.txt");
 
   // ----------------------------------------------------------------------
   // Test FIND_LIBRARY

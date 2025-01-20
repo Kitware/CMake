@@ -84,73 +84,72 @@ class cmMakefile;
     POLICY, CMP0023,                                                          \
     "Plain and keyword target_link_libraries signatures cannot be mixed.", 2, \
     8, 12, NEW)                                                               \
-  SELECT(POLICY, CMP0024, "Disallow include export result.", 3, 0, 0, WARN)   \
+  SELECT(POLICY, CMP0024, "Disallow include export result.", 3, 0, 0, NEW)    \
   SELECT(POLICY, CMP0025, "Compiler id for Apple Clang is now AppleClang.",   \
-         3, 0, 0, WARN)                                                       \
+         3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0026, "Disallow use of the LOCATION target property.", 3, \
-         0, 0, WARN)                                                          \
+         0, 0, NEW)                                                           \
   SELECT(POLICY, CMP0027,                                                     \
          "Conditionally linked imported targets with missing include "        \
          "directories.",                                                      \
-         3, 0, 0, WARN)                                                       \
+         3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0028,                                                     \
          "Double colon in target name means ALIAS or IMPORTED target.", 3, 0, \
-         0, WARN)                                                             \
+         0, NEW)                                                              \
   SELECT(POLICY, CMP0029, "The subdir_depends command should not be called.", \
-         3, 0, 0, WARN)                                                       \
+         3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0030,                                                     \
-         "The use_mangled_mesa command should not be called.", 3, 0, 0, WARN) \
+         "The use_mangled_mesa command should not be called.", 3, 0, 0, NEW)  \
   SELECT(POLICY, CMP0031, "The load_command command should not be called.",   \
-         3, 0, 0, WARN)                                                       \
+         3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0032,                                                     \
          "The output_required_files command should not be called.", 3, 0, 0,  \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(POLICY, CMP0033,                                                     \
          "The export_library_dependencies command should not be called.", 3,  \
-         0, 0, WARN)                                                          \
+         0, 0, NEW)                                                           \
   SELECT(POLICY, CMP0034, "The utility_source command should not be called.", \
-         3, 0, 0, WARN)                                                       \
+         3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0035,                                                     \
-         "The variable_requires command should not be called.", 3, 0, 0,      \
-         WARN)                                                                \
+         "The variable_requires command should not be called.", 3, 0, 0, NEW) \
   SELECT(POLICY, CMP0036, "The build_name command should not be called.", 3,  \
-         0, 0, WARN)                                                          \
+         0, 0, NEW)                                                           \
   SELECT(POLICY, CMP0037,                                                     \
          "Target names should not be reserved and should match a validity "   \
          "pattern.",                                                          \
-         3, 0, 0, WARN)                                                       \
+         3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0038, "Targets may not link directly to themselves.", 3,  \
-         0, 0, WARN)                                                          \
+         0, 0, NEW)                                                           \
   SELECT(POLICY, CMP0039, "Utility targets may not have link dependencies.",  \
-         3, 0, 0, WARN)                                                       \
+         3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0040,                                                     \
          "The target in the TARGET signature of add_custom_command() must "   \
          "exist and must be defined in the current directory.",               \
-         3, 0, 0, WARN)                                                       \
+         3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0041,                                                     \
          "Error on relative include with generator expression.", 3, 0, 0,     \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(POLICY, CMP0042, "MACOSX_RPATH is enabled by default.", 3, 0, 0,     \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(POLICY, CMP0043, "Ignore COMPILE_DEFINITIONS_<Config> properties.",  \
-         3, 0, 0, WARN)                                                       \
+         3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0044,                                                     \
          "Case sensitive <LANG>_COMPILER_ID generator expressions.", 3, 0, 0, \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(POLICY, CMP0045,                                                     \
          "Error on non-existent target in get_target_property.", 3, 0, 0,     \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(POLICY, CMP0046,                                                     \
          "Error on non-existent dependency in add_dependencies.", 3, 0, 0,    \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(POLICY, CMP0047, "Use QCC compiler id for the qcc drivers on QNX.",  \
-         3, 0, 0, WARN)                                                       \
+         3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0048, "project() command manages VERSION variables.", 3,  \
-         0, 0, WARN)                                                          \
+         0, 0, NEW)                                                           \
   SELECT(POLICY, CMP0049,                                                     \
-         "Do not expand variables in target source entries.", 3, 0, 0, WARN)  \
+         "Do not expand variables in target source entries.", 3, 0, 0, NEW)   \
   SELECT(POLICY, CMP0050, "Disallow add_custom_command SOURCE signatures.",   \
-         3, 0, 0, WARN)                                                       \
+         3, 0, 0, NEW)                                                        \
   SELECT(POLICY, CMP0051, "List TARGET_OBJECTS in SOURCES target property.",  \
          3, 1, 0, WARN)                                                       \
   SELECT(POLICY, CMP0052,                                                     \

@@ -4,8 +4,6 @@
 #include "cmGeneratorTarget.h"
 /* clang-format on */
 
-#include "cmConfigure.h"
-
 #include <algorithm>
 #include <iterator>
 #include <map>
@@ -21,7 +19,6 @@
 
 #include "cmEvaluatedTargetProperty.h"
 #include "cmGeneratorExpressionDAGChecker.h"
-#include "cmGlobalGenerator.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
@@ -241,9 +238,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileOptions(
   bool debugOptions = !this->DebugCompileOptionsDone &&
     cm::contains(debugProperties, "COMPILE_OPTIONS");
 
-  if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
-    this->DebugCompileOptionsDone = true;
-  }
+  this->DebugCompileOptionsDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
     this, config, language, &dagChecker, this->CompileOptionsEntries);
@@ -282,9 +277,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileFeatures(
   bool debugFeatures = !this->DebugCompileFeaturesDone &&
     cm::contains(debugProperties, "COMPILE_FEATURES");
 
-  if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
-    this->DebugCompileFeaturesDone = true;
-  }
+  this->DebugCompileFeaturesDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
     this, config, std::string(), &dagChecker, this->CompileFeaturesEntries);
@@ -333,40 +326,13 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
   bool debugDefines = !this->DebugCompileDefinitionsDone &&
     cm::contains(debugProperties, "COMPILE_DEFINITIONS");
 
-  if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
-    this->DebugCompileDefinitionsDone = true;
-  }
+  this->DebugCompileDefinitionsDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
     this, config, language, &dagChecker, this->CompileDefinitionsEntries);
 
   AddInterfaceEntries(this, config, "INTERFACE_COMPILE_DEFINITIONS", language,
                       &dagChecker, entries, IncludeRuntimeInterface::Yes);
-
-  if (!config.empty()) {
-    std::string configPropName =
-      "COMPILE_DEFINITIONS_" + cmSystemTools::UpperCase(config);
-    cmValue configProp = this->GetProperty(configPropName);
-    if (configProp) {
-      switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0043)) {
-        case cmPolicies::WARN: {
-          this->LocalGenerator->IssueMessage(
-            MessageType::AUTHOR_WARNING,
-            cmPolicies::GetPolicyWarning(cmPolicies::CMP0043));
-          CM_FALLTHROUGH;
-        }
-        case cmPolicies::OLD: {
-          std::unique_ptr<TargetPropertyEntry> entry =
-            TargetPropertyEntry::Create(
-              *this->LocalGenerator->GetCMakeInstance(), *configProp);
-          entries.Entries.emplace_back(EvaluateTargetPropertyEntry(
-            this, config, language, &dagChecker, *entry));
-        } break;
-        case cmPolicies::NEW:
-          break;
-      }
-    }
-  }
 
   processOptions(this, entries, list, uniqueOptions, debugDefines,
                  "compile definitions", OptionsParse::None);
@@ -397,9 +363,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetPrecompileHeaders(
     std::find(debugProperties.begin(), debugProperties.end(),
               "PRECOMPILE_HEADERS") != debugProperties.end();
 
-  if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
-    this->DebugPrecompileHeadersDone = true;
-  }
+  this->DebugPrecompileHeadersDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
     this, config, language, &dagChecker, this->PrecompileHeadersEntries);
@@ -454,9 +418,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetLinkOptions(
   bool debugOptions = !this->DebugLinkOptionsDone &&
     cm::contains(debugProperties, "LINK_OPTIONS");
 
-  if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
-    this->DebugLinkOptionsDone = true;
-  }
+  this->DebugLinkOptionsDone = true;
 
   EvaluatedTargetPropertyEntries entries = EvaluateTargetPropertyEntries(
     this, config, language, &dagChecker, this->LinkOptionsEntries);

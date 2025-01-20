@@ -1,6 +1,9 @@
 CMP0040
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 The target in the ``TARGET`` signature of :command:`add_custom_command`
 must exist and must be defined in the current directory.
 
@@ -14,7 +17,5 @@ an error if the target referenced in :command:`add_custom_command` is
 unknown or was defined outside the current directory.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.0
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt
