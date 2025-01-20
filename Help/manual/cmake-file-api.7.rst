@@ -1383,6 +1383,8 @@ elsewhere in the containing object.  The backtrace graph object members are:
 Object Kind "configureLog"
 --------------------------
 
+.. versionadded:: 3.26
+
 The ``configureLog`` object kind describes the location and contents of
 a :manual:`cmake-configure-log(7)` file.
 
