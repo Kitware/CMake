@@ -47,10 +47,6 @@ or the :command:`find_package` command contain a use of :command:`cmake_policy`,
 that policy setting will not affect the caller by default.  Both commands accept
 an optional ``NO_POLICY_SCOPE`` keyword to control this behavior.
 
-The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
-to determine whether to report an error on use of deprecated macros or
-functions.
-
 Supported Policies
 ==================
 
