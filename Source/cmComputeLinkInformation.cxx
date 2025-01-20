@@ -1904,11 +1904,14 @@ void cmComputeLinkInformation::AddUserItem(LinkEntry const& entry,
     this->Items.emplace_back(item, ItemIsPath::No);
     return;
   }
+
   if (cmHasPrefix(item.Value, LINKER)) {
     std::vector<BT<std::string>> linkerFlag{ 1, item };
     this->Target->ResolveLinkerWrapper(linkerFlag, this->GetLinkLanguage(),
-                                       true);
-    this->Items.emplace_back(linkerFlag.front(), ItemIsPath::No);
+                                       /* joinItems = */ true);
+    if (!linkerFlag.empty()) {
+      this->Items.emplace_back(linkerFlag.front(), ItemIsPath::No);
+    }
     return;
   }
 
