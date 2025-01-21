@@ -8,40 +8,69 @@ CMakePrintHelpers
 Convenience functions for printing properties and variables, useful
 e.g. for debugging.
 
-::
+Commands
+^^^^^^^^
 
-  cmake_print_properties(<TARGETS       [<target1> ...] |
-                          SOURCES       [<source1> ...] |
-                          DIRECTORIES   [<dir1> ...]    |
-                          TESTS         [<test1> ...]   |
-                          CACHE_ENTRIES [<entry1> ...]  >
-                         PROPERTIES [<prop1> ...]         )
+.. command:: cmake_print_properties
 
-This function prints the values of the properties of the given targets,
-source files, directories, tests or cache entries.  Exactly one of the
-scope keywords must be used.  The scope keyword and its arguments must
-come before the ``PROPERTIES`` keyword, in the arguments list.
+  .. code-block:: cmake
 
-Example::
+    cmake_print_properties(<TARGETS       [<target1> ...] |
+                            SOURCES       [<source1> ...] |
+                            DIRECTORIES   [<dir1> ...]    |
+                            TESTS         [<test1> ...]   |
+                            CACHE_ENTRIES [<entry1> ...]  >
+                           PROPERTIES [<prop1> ...])
 
-  cmake_print_properties(TARGETS foo bar PROPERTIES
-                         LOCATION INTERFACE_INCLUDE_DIRECTORIES)
+  This function prints the values of the properties of the given targets,
+  source files, directories, tests or cache entries.  Exactly one of the
+  scope keywords must be used.  The scope keyword and its arguments must
+  come before the ``PROPERTIES`` keyword in the arguments list.
 
-This will print the LOCATION and INTERFACE_INCLUDE_DIRECTORIES properties for
-both targets foo and bar.
+.. command:: cmake_print_variables
 
-::
+  .. code-block:: cmake
 
-  cmake_print_variables(var1 var2 ..  varN)
+    cmake_print_variables([var1 [var2 ... [varN]]])
 
-This function will print the name of each variable followed by its value.
-Example::
+  This function prints the name of each variable followed by its value.
 
-  cmake_print_variables(CMAKE_C_COMPILER CMAKE_MAJOR_VERSION DOES_NOT_EXIST)
+Examples
+^^^^^^^^
+
+Printing the ``LOCATION`` and ``INTERFACE_INCLUDE_DIRECTORIES`` properties for
+both targets ``foo`` and ``bar``:
+
+.. code-block:: cmake
+
+  include(CMakePrintHelpers)
+
+  cmake_print_properties(
+    TARGETS foo bar
+    PROPERTIES LOCATION INTERFACE_INCLUDE_DIRECTORIES
+  )
 
 Gives::
 
-  -- CMAKE_C_COMPILER="/usr/bin/gcc" ; CMAKE_MAJOR_VERSION="2" ; DOES_NOT_EXIST=""
+  --
+   Properties for TARGET foo:
+     foo.LOCATION = "/usr/lib/libfoo.so"
+     foo.INTERFACE_INCLUDE_DIRECTORIES = "/usr/include;/usr/include/foo"
+   Properties for TARGET bar:
+     bar.LOCATION = "/usr/lib/libbar.so"
+     bar.INTERFACE_INCLUDE_DIRECTORIES = "/usr/include;/usr/include/bar"
+
+Printing given variables:
+
+.. code-block:: cmake
+
+  include(CMakePrintHelpers)
+
+  cmake_print_variables(CMAKE_C_COMPILER CMAKE_MAJOR_VERSION NOT_EXISTS)
+
+Gives::
+
+  -- CMAKE_C_COMPILER="/usr/bin/cc" ; CMAKE_MAJOR_VERSION="3" ; NOT_EXISTS=""
 #]=======================================================================]
 
 function(cmake_print_variables)
