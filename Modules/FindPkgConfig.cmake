@@ -34,7 +34,6 @@ for how these variables are initialized.
 #]========================================]
 
 cmake_policy(PUSH)
-cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
 ### Common stuff ####

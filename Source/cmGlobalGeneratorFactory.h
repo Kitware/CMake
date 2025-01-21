@@ -28,14 +28,13 @@ public:
 
   /** Create a GlobalGenerator */
   virtual std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& n, bool allowArch, cmake* cm) const = 0;
+    const std::string& n, cmake* cm) const = 0;
 
   /** Get the documentation entry for this factory */
   virtual cmDocumentationEntry GetDocumentation() const = 0;
 
   /** Get the names of the current registered generators */
   virtual std::vector<std::string> GetGeneratorNames() const = 0;
-  virtual std::vector<std::string> GetGeneratorNamesWithPlatform() const = 0;
 
   /** Determine whether or not this generator supports toolsets */
   virtual bool SupportsToolset() const = 0;
@@ -56,7 +55,7 @@ class cmGlobalGeneratorSimpleFactory : public cmGlobalGeneratorFactory
 public:
   /** Create a GlobalGenerator */
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, bool /*allowArch*/, cmake* cm) const override
+    const std::string& name, cmake* cm) const override
   {
     if (name != T::GetActualName()) {
       return std::unique_ptr<cmGlobalGenerator>();
@@ -74,10 +73,6 @@ public:
   std::vector<std::string> GetGeneratorNames() const override
   {
     return { T::GetActualName() };
-  }
-  std::vector<std::string> GetGeneratorNamesWithPlatform() const override
-  {
-    return {};
   }
 
   /** Determine whether or not this generator supports toolsets */

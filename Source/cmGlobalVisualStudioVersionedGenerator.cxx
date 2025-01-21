@@ -205,7 +205,7 @@ class cmGlobalVisualStudioVersionedGenerator::Factory15
 {
 public:
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, bool allowArch, cmake* cm) const override
+    const std::string& name, cmake* cm) const override
   {
     std::string genName;
     const char* p = cmVS15GenName(name, genName);
@@ -215,20 +215,7 @@ public:
     if (!*p) {
       return std::unique_ptr<cmGlobalGenerator>(
         new cmGlobalVisualStudioVersionedGenerator(
-          cmGlobalVisualStudioGenerator::VSVersion::VS15, cm, genName, ""));
-    }
-    if (!allowArch || *p++ != ' ') {
-      return std::unique_ptr<cmGlobalGenerator>();
-    }
-    if (strcmp(p, "Win64") == 0) {
-      return std::unique_ptr<cmGlobalGenerator>(
-        new cmGlobalVisualStudioVersionedGenerator(
-          cmGlobalVisualStudioGenerator::VSVersion::VS15, cm, genName, "x64"));
-    }
-    if (strcmp(p, "ARM") == 0) {
-      return std::unique_ptr<cmGlobalGenerator>(
-        new cmGlobalVisualStudioVersionedGenerator(
-          cmGlobalVisualStudioGenerator::VSVersion::VS15, cm, genName, "ARM"));
+          cmGlobalVisualStudioGenerator::VSVersion::VS15, cm, genName));
     }
     return std::unique_ptr<cmGlobalGenerator>();
   }
@@ -244,14 +231,6 @@ public:
   {
     std::vector<std::string> names;
     names.push_back(vs15generatorName);
-    return names;
-  }
-
-  std::vector<std::string> GetGeneratorNamesWithPlatform() const override
-  {
-    std::vector<std::string> names;
-    names.emplace_back(cmStrCat(vs15generatorName, " ARM"));
-    names.emplace_back(cmStrCat(vs15generatorName, " Win64"));
     return names;
   }
 
@@ -314,7 +293,7 @@ class cmGlobalVisualStudioVersionedGenerator::Factory16
 {
 public:
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, bool /*allowArch*/, cmake* cm) const override
+    const std::string& name, cmake* cm) const override
   {
     std::string genName;
     const char* p = cmVS16GenName(name, genName);
@@ -324,7 +303,7 @@ public:
     if (!*p) {
       return std::unique_ptr<cmGlobalGenerator>(
         new cmGlobalVisualStudioVersionedGenerator(
-          cmGlobalVisualStudioGenerator::VSVersion::VS16, cm, genName, ""));
+          cmGlobalVisualStudioGenerator::VSVersion::VS16, cm, genName));
     }
     return std::unique_ptr<cmGlobalGenerator>();
   }
@@ -341,11 +320,6 @@ public:
     std::vector<std::string> names;
     names.push_back(vs16generatorName);
     return names;
-  }
-
-  std::vector<std::string> GetGeneratorNamesWithPlatform() const override
-  {
-    return std::vector<std::string>();
   }
 
   bool SupportsToolset() const override { return true; }
@@ -379,7 +353,7 @@ class cmGlobalVisualStudioVersionedGenerator::Factory17
 {
 public:
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, bool /*allowArch*/, cmake* cm) const override
+    const std::string& name, cmake* cm) const override
   {
     std::string genName;
     const char* p = cmVS17GenName(name, genName);
@@ -389,7 +363,7 @@ public:
     if (!*p) {
       return std::unique_ptr<cmGlobalGenerator>(
         new cmGlobalVisualStudioVersionedGenerator(
-          cmGlobalVisualStudioGenerator::VSVersion::VS17, cm, genName, ""));
+          cmGlobalVisualStudioGenerator::VSVersion::VS17, cm, genName));
     }
     return std::unique_ptr<cmGlobalGenerator>();
   }
@@ -406,11 +380,6 @@ public:
     std::vector<std::string> names;
     names.push_back(vs17generatorName);
     return names;
-  }
-
-  std::vector<std::string> GetGeneratorNamesWithPlatform() const override
-  {
-    return std::vector<std::string>();
   }
 
   bool SupportsToolset() const override { return true; }
@@ -440,9 +409,8 @@ cmGlobalVisualStudioVersionedGenerator::NewFactory17()
 }
 
 cmGlobalVisualStudioVersionedGenerator::cmGlobalVisualStudioVersionedGenerator(
-  VSVersion version, cmake* cm, const std::string& name,
-  std::string const& platformInGeneratorName)
-  : cmGlobalVisualStudio14Generator(cm, name, platformInGeneratorName)
+  VSVersion version, cmake* cm, const std::string& name)
+  : cmGlobalVisualStudio14Generator(cm, name)
   , vsSetupAPIHelper(VSVersionToMajor(version))
 {
   this->Version = version;

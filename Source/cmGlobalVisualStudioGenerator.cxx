@@ -36,20 +36,13 @@
 #include "cmTarget.h"
 #include "cmake.h"
 
-cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(
-  cmake* cm, std::string const& platformInGeneratorName)
+cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(cmake* cm)
   : cmGlobalGenerator(cm)
 {
   cm->GetState()->SetIsGeneratorMultiConfig(true);
   cm->GetState()->SetWindowsShell(true);
   cm->GetState()->SetWindowsVSIDE(true);
-
-  if (platformInGeneratorName.empty()) {
-    this->DefaultPlatformName = "Win32";
-  } else {
-    this->DefaultPlatformName = platformInGeneratorName;
-    this->PlatformInGeneratorName = true;
-  }
+  this->DefaultPlatformName = "Win32";
 }
 
 cmGlobalVisualStudioGenerator::~cmGlobalVisualStudioGenerator() = default;

@@ -185,8 +185,7 @@ public:
   bool IsBuildInParallelSupported() const;
 
 protected:
-  cmGlobalVisualStudio10Generator(cmake* cm, const std::string& name,
-                                  std::string const& platformInGeneratorName);
+  cmGlobalVisualStudio10Generator(cmake* cm, const std::string& name);
 
   void Generate() override;
   virtual bool InitializeSystem(cmMakefile* mf);

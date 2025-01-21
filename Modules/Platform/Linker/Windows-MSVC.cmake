@@ -5,9 +5,6 @@
 # This module is shared by multiple languages; use include blocker.
 include_guard()
 
-block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW)
-
 # Features for LINK_LIBRARY generator expression
 if(MSVC_VERSION GREATER "1900")
   ## WHOLE_ARCHIVE: Force loading all members of an archive
@@ -32,5 +29,3 @@ macro(__windows_linker_msvc lang)
     endif()
   endif()
 endmacro()
-
-endblock()

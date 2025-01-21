@@ -3,10 +3,6 @@
 
 include_guard()
 
-
-block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW)
-
 macro(__linker_lld lang)
   if(CMAKE_${lang}_COMPILER_LINKER_FRONTEND_VARIANT STREQUAL "MSVC")
     include(Linker/MSVC)
@@ -18,5 +14,3 @@ macro(__linker_lld lang)
     __linker_gnu(${lang})
   endif()
 endmacro()
-
-endblock()

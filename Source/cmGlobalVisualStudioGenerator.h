@@ -159,8 +159,7 @@ public:
   bool IsVisualStudio() const override { return true; }
 
 protected:
-  cmGlobalVisualStudioGenerator(cmake* cm,
-                                std::string const& platformInGeneratorName);
+  cmGlobalVisualStudioGenerator(cmake* cm);
 
   virtual bool InitializePlatform(cmMakefile* mf);
 
@@ -195,7 +194,6 @@ protected:
 
   std::string GeneratorPlatform;
   std::string DefaultPlatformName;
-  bool PlatformInGeneratorName = false;
 
 private:
   virtual std::string GetVSMakeProgram() = 0;

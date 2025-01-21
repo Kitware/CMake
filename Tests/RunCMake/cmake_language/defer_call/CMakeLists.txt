@@ -1,4 +1,3 @@
-cmake_policy(SET CMP0053 OLD)
 cmake_language(DEFER ID id1 CALL message STATUS "Deferred Message In Subdirectory: '${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE}'")
 cmake_language(DEFER ID id2 CALL
   cmake_language DEFER ID id3 CALL

@@ -7,6 +7,6 @@
 
     \${var	with	tab}
 
-  syntax error, unexpected cal_SYMBOL, expecting } \(3\)
+  Invalid character \('	'\) in a variable name: 'var'
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)$

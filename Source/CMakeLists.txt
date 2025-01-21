@@ -62,12 +62,6 @@ add_library(ManifestLib INTERFACE)
 add_library(
   CMakeLib
   # Lexers/Parsers
-  LexerParser/cmCommandArgumentLexer.cxx
-  LexerParser/cmCommandArgumentLexer.h
-  LexerParser/cmCommandArgumentLexer.in.l
-  LexerParser/cmCommandArgumentParser.cxx
-  LexerParser/cmCommandArgumentParserTokens.h
-  LexerParser/cmCommandArgumentParser.y
   LexerParser/cmDependsJavaLexer.cxx
   LexerParser/cmDependsJavaLexer.h
   LexerParser/cmDependsJavaLexer.in.l
@@ -141,7 +135,6 @@ add_library(
   cmCMakePresetsGraphReadJSONPackagePresets.cxx
   cmCMakePresetsGraphReadJSONTestPresets.cxx
   cmCMakePresetsGraphReadJSONWorkflowPresets.cxx
-  cmCommandArgumentParserHelper.cxx
   cmCommandLineArgument.h
   cmCommonTargetGenerator.cxx
   cmCommonTargetGenerator.h
@@ -1018,7 +1011,6 @@ if(CMake_BUILD_PCH)
     set_source_files_properties("LexerParser/cmFortranParser.cxx" PROPERTIES SKIP_PRECOMPILE_HEADERS ON)
   else()
     set_source_files_properties(
-      "LexerParser/cmCommandArgumentLexer.cxx"
       "LexerParser/cmGccDepfileLexer.cxx"
       "LexerParser/cmExprLexer.cxx"
       "LexerParser/cmDependsJavaLexer.cxx"

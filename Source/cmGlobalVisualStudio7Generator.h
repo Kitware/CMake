@@ -130,8 +130,7 @@ public:
   virtual bool SupportsCxxModuleDyndep() const { return false; }
 
 protected:
-  cmGlobalVisualStudio7Generator(cmake* cm,
-                                 std::string const& platformInGeneratorName);
+  cmGlobalVisualStudio7Generator(cmake* cm);
 
   void Generate() override;
 

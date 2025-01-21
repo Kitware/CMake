@@ -3,7 +3,6 @@
 
 cmake_policy(PUSH)
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
-cmake_policy(SET CMP0054 NEW)
 
 # Function to print messages of this module
 function(_ios_install_combined_message)

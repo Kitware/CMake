@@ -58,9 +58,8 @@ public:
   }
 
 protected:
-  cmGlobalVisualStudioVersionedGenerator(
-    VSVersion version, cmake* cm, const std::string& name,
-    std::string const& platformInGeneratorName);
+  cmGlobalVisualStudioVersionedGenerator(VSVersion version, cmake* cm,
+                                         const std::string& name);
 
   bool SelectWindowsStoreToolset(std::string& toolset) const override;
 

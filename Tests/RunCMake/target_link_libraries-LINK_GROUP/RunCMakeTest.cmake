@@ -1,8 +1,6 @@
 
 include(RunCMake)
 
-cmake_policy(SET CMP0054 NEW)
-
 macro(run_cmake_target test subtest target)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test}-build)
   set(RunCMake_TEST_NO_CLEAN 1)

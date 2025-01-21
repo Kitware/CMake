@@ -39,9 +39,8 @@
 struct cmIDEFlagTable;
 
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
-  cmake* cm, const std::string& name,
-  std::string const& platformInGeneratorName)
-  : cmGlobalVisualStudio71Generator(cm, platformInGeneratorName)
+  cmake* cm, const std::string& name)
+  : cmGlobalVisualStudio71Generator(cm)
 {
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
   this->Name = name;
@@ -88,13 +87,6 @@ void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
 bool cmGlobalVisualStudio8Generator::SetGeneratorPlatform(std::string const& p,
                                                           cmMakefile* mf)
 {
-  if (this->PlatformInGeneratorName) {
-    // This is an old-style generator name that contains the platform name.
-    // No explicit platform specification is supported, so pass it through
-    // to our base class implementation, which errors on non-empty platforms.
-    return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform(p, mf);
-  }
-
   if (!this->ParseGeneratorPlatform(p, mf)) {
     return false;
   }

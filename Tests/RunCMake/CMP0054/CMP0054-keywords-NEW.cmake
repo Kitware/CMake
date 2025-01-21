@@ -1,5 +1,3 @@
-cmake_policy(SET CMP0054 NEW)
-
 function(assert KEYWORD)
   if("${KEYWORD}" STREQUAL "${KEYWORD}")
   else()

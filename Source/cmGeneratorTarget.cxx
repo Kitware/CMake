@@ -60,7 +60,7 @@ using UseTo = cmGeneratorTarget::UseTo;
 
 template <>
 cmValue cmTargetPropertyComputer::GetSources<cmGeneratorTarget>(
-  cmGeneratorTarget const* tgt, cmMakefile const& /* mf */)
+  cmGeneratorTarget const* tgt)
 {
   return tgt->GetSourcesProperty();
 }

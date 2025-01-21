@@ -1,4 +1,3 @@
-cmake_policy(SET CMP0053 NEW)
 include(RunCMake)
 
 set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/VsNugetPackageRestore)

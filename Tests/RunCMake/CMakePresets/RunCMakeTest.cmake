@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.19) # CMP0053
+cmake_minimum_required(VERSION 3.19)
 
 include(RunCMake)
 

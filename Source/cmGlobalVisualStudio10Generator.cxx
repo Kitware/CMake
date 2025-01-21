@@ -53,9 +53,8 @@ static void ConvertToWindowsSlashes(std::string& s)
 }
 
 cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
-  cmake* cm, const std::string& name,
-  std::string const& platformInGeneratorName)
-  : cmGlobalVisualStudio8Generator(cm, name, platformInGeneratorName)
+  cmake* cm, const std::string& name)
+  : cmGlobalVisualStudio8Generator(cm, name)
 {
   this->DefaultCudaFlagTableName = "v10";
   this->DefaultCudaHostFlagTableName = "v10";
@@ -485,13 +484,6 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
       return false;
     }
   } else if (this->SystemName == "Android"_s) {
-    if (this->PlatformInGeneratorName) {
-      mf->IssueMessage(
-        MessageType::FATAL_ERROR,
-        cmStrCat("CMAKE_SYSTEM_NAME is 'Android' but CMAKE_GENERATOR ",
-                 "specifies a platform too: '", this->GetName(), '\''));
-      return false;
-    }
     if (mf->GetSafeDefinition("CMAKE_GENERATOR_PLATFORM") ==
         "Tegra-Android"_s) {
       if (!this->InitializeTegraAndroid(mf)) {
@@ -513,16 +505,8 @@ bool cmGlobalVisualStudio10Generator::InitializeWindows(cmMakefile*)
   return true;
 }
 
-bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
+bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile*)
 {
-  if (this->PlatformInGeneratorName) {
-    mf->IssueMessage(
-      MessageType::FATAL_ERROR,
-      cmStrCat("CMAKE_SYSTEM_NAME is 'WindowsCE' but CMAKE_GENERATOR ",
-               "specifies a platform too: '", this->GetName(), '\''));
-    return false;
-  }
-
   this->DefaultPlatformToolset = this->SelectWindowsCEToolset();
 
   return true;

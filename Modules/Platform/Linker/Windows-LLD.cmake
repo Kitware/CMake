@@ -5,9 +5,6 @@
 # This module is shared by multiple languages; use include blocker.
 include_guard()
 
-block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW)
-
 macro(__windows_linker_lld lang)
   set(CMAKE_${lang}_PLATFORM_LINKER_ID LLD)
   # Features for LINK_LIBRARY generator expression
@@ -21,5 +18,3 @@ macro(__windows_linker_lld lang)
     __windows_linker_msvc(${lang})
   endif()
 endmacro()
-
-endblock()

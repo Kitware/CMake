@@ -29,8 +29,7 @@ public:
   }
 
 protected:
-  cmGlobalVisualStudio14Generator(cmake* cm, const std::string& name,
-                                  std::string const& platformInGeneratorName);
+  cmGlobalVisualStudio14Generator(cmake* cm, const std::string& name);
 
   bool InitializeWindowsStore(cmMakefile* mf) override;
   bool InitializeAndroid(cmMakefile* mf) override;

@@ -5,9 +5,6 @@
 # This module is shared by multiple languages; use include blocker.
 include_guard()
 
-block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW)
-
 # WHOLE_ARCHIVE Feature for LINK_LIBRARY generator expression
 ## check linker capabilities
 function(__cmake_set_whole_archive_feature __linker)
@@ -47,5 +44,3 @@ endfunction()
 
 ## Configure system linker
 __cmake_set_whole_archive_feature("${CMAKE_LINKER}")
-
-endblock()

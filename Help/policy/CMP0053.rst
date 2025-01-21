@@ -1,6 +1,9 @@
 CMP0053
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 .. versionadded:: 3.1
 
 Simplify variable reference and escape sequence evaluation.
@@ -45,7 +48,5 @@ variable references and escape sequences.  The ``NEW`` behavior is to
 use the simpler variable expansion and escape sequence evaluation rules.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.1
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

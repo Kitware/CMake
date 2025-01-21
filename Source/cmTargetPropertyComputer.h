@@ -27,7 +27,7 @@ public:
       return nullptr;
     }
     if (prop == "SOURCES") {
-      return GetSources(tgt, mf);
+      return GetSources(tgt);
     }
     return nullptr;
   }
@@ -88,5 +88,5 @@ private:
   }
 
   template <typename Target>
-  static cmValue GetSources(Target const* tgt, cmMakefile const& mf);
+  static cmValue GetSources(Target const* tgt);
 };

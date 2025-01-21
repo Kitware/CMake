@@ -315,7 +315,6 @@ CMAKE_CXX_SOURCES="\
   cmCMakePolicyCommand \
   cmCPackPropertiesGenerator \
   cmCacheManager \
-  cmCommandArgumentParserHelper \
   cmCommands \
   cmCommonTargetGenerator \
   cmComputeComponentGraph \
@@ -556,8 +555,6 @@ CMAKE_STD_CXX_SOURCES="\
 "
 
 LexerParser_CXX_SOURCES="\
-  cmCommandArgumentLexer \
-  cmCommandArgumentParser \
   cmExprLexer \
   cmExprParser \
   cmGccDepfileLexer \

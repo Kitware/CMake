@@ -9,9 +9,6 @@ if(NOT APPLE)
   return()
 endif()
 
-block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW) # if() quoted variables not dereferenced
-
 function(__cmake_internal_workaround_headerpad_flag_conflict _LANG)
 
   # Until we can avoid hard-coding -Wl,-headerpad_max_install_names in the
@@ -65,5 +62,3 @@ foreach(__lang IN LISTS __enabled_languages)
 endforeach()
 unset(__lang)
 unset(__enabled_languages)
-
-endblock()

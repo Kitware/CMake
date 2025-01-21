@@ -87,9 +87,9 @@ Basic Expressions
   A quoted string always evaluates to false unless:
 
   * The string's value is one of the true constants, or
-  * Policy :policy:`CMP0054` is not set to ``NEW`` and the string's value
-    happens to be a variable name that is affected by :policy:`CMP0054`'s
-    behavior.
+  * in CMake versions prior to 4.0, policy :policy:`CMP0054` is not set
+    to ``NEW`` and the string's value happens to be a variable name that
+    is affected by :policy:`CMP0054`'s behavior.
 
 Logic Operators
 """""""""""""""

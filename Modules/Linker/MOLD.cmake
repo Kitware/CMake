@@ -5,9 +5,6 @@
 # This module is shared by multiple linkers; use include blocker.
 include_guard()
 
-block(SCOPE_FOR POLICIES)
-cmake_policy(SET CMP0054 NEW)
-
 macro(__linker_mold lang)
   if(CMAKE_EFFECTIVE_SYSTEM_NAME STREQUAL "Apple")
     include(Linker/AppleClang)
@@ -19,5 +16,3 @@ macro(__linker_mold lang)
     __linker_gnu(${lang})
   endif()
 endmacro()
-
-endblock()

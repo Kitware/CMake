@@ -1,5 +1,3 @@
-cmake_policy(SET CMP0054 NEW)
-
 set(FOO "BAR")
 set(BAZ "ZZZ")
 set(MYTRUE ON)

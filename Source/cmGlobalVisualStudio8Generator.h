@@ -51,8 +51,7 @@ public:
   }
 
 protected:
-  cmGlobalVisualStudio8Generator(cmake* cm, const std::string& name,
-                                 std::string const& platformInGeneratorName);
+  cmGlobalVisualStudio8Generator(cmake* cm, const std::string& name);
 
   virtual bool ProcessGeneratorPlatformField(std::string const& key,
                                              std::string const& value);

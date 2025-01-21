@@ -1,7 +1,7 @@
-CMake Error at ParenInVarName0.cmake:4 \(message\):
+CMake Error at ParenInVarName0.cmake:2 \(message\):
   Syntax error in cmake code at
 
-    .*/Tests/RunCMake/Syntax/ParenInVarName0.cmake:4
+    .*/Tests/RunCMake/Syntax/ParenInVarName0.cmake:2
 
   when parsing string
 

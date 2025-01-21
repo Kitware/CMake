@@ -16,8 +16,7 @@ class cmake;
 class cmGlobalVisualStudio12Generator : public cmGlobalVisualStudio11Generator
 {
 protected:
-  cmGlobalVisualStudio12Generator(cmake* cm, const std::string& name,
-                                  std::string const& platformInGeneratorName);
+  cmGlobalVisualStudio12Generator(cmake* cm, const std::string& name);
 
   bool ProcessGeneratorToolsetField(std::string const& key,
                                     std::string const& value) override;

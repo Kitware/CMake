@@ -401,7 +401,6 @@ Deprecated Hint Variables
 #]=======================================================================]
 
 cmake_policy(PUSH)
-cmake_policy(SET CMP0054 NEW) # quoted if arguments
 cmake_policy(SET CMP0057 NEW) # if IN_LIST
 
 # For backwards compatibility support

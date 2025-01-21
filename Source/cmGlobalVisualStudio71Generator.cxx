@@ -17,9 +17,8 @@
 
 class cmake;
 
-cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(
-  cmake* cm, const std::string& platformName)
-  : cmGlobalVisualStudio7Generator(cm, platformName)
+cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(cmake* cm)
+  : cmGlobalVisualStudio7Generator(cm)
 {
   this->ProjectConfigurationSectionName = "ProjectConfiguration";
 }
