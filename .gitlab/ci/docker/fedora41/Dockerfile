@@ -6,6 +6,7 @@ FROM ${BASE_IMAGE} AS dnf-cache
 # Populate DNF cache w/ the fresh metadata and prefetch packages.
 RUN --mount=type=bind,source=deps_packages.lst,target=/root/deps_packages.lst \
     --mount=type=bind,source=iwyu_packages.lst,target=/root/iwyu_packages.lst \
+    --mount=type=bind,source=rust_packages.lst,target=/root/rust_packages.lst \
     --mount=type=bind,source=rvm_packages.lst,target=/root/rvm_packages.lst \
     --mount=type=tmpfs,target=/var/log \
     --mount=type=tmpfs,target=/tmp \
@@ -17,6 +18,16 @@ RUN --mount=type=bind,source=deps_packages.lst,target=/root/deps_packages.lst \
         -y \
         $(grep -h '^[^#]\+$' /root/*.lst)
 
+
+FROM ${BASE_IMAGE} AS rust-build
+LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
+
+RUN --mount=type=bind,source=install_rust.sh,target=/root/install_rust.sh \
+    --mount=type=bind,source=rust_packages.lst,target=/root/rust_packages.lst \
+    --mount=type=cache,from=dnf-cache,source=/var/lib/dnf,target=/var/lib/dnf,sharing=private \
+    --mount=type=tmpfs,target=/var/log \
+    --mount=type=tmpfs,target=/tmp \
+    sh /root/install_rust.sh
 
 FROM ${BASE_IMAGE} AS rvm-build
 LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
@@ -50,6 +61,9 @@ RUN --mount=type=bind,source=install_deps.sh,target=/root/install_deps.sh \
     --mount=type=tmpfs,target=/var/log \
     --mount=type=tmpfs,target=/tmp \
     sh /root/install_deps.sh
+
+RUN --mount=type=bind,from=rust-build,source=/root,target=/root \
+    tar -C /usr/local -xf /root/rust.tar
 
 RUN --mount=type=bind,from=rvm-build,source=/root,target=/root \
     tar -C /usr/local -xf /root/rvm.tar
