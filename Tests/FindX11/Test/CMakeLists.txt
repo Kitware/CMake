@@ -82,6 +82,7 @@ test_x11_component(x11_components Xkb)
 test_x11_component(x11_components xkbfile)
 test_x11_component(x11_components Xmu)
 test_x11_component(x11_components Xpm)
+test_x11_component(x11_components Xpresent)
 test_x11_component(x11_components Xtst)
 test_x11_component(x11_components Xrandr)
 test_x11_component(x11_components Xrender)
@@ -147,6 +148,7 @@ foreach(lib
     xkbfile
     Xmu
     Xpm
+    Xpresent
     Xtst
     Xrandr
     Xrender
