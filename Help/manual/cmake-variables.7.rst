@@ -725,6 +725,7 @@ Variables for CTest
    /variable/CTEST_DROP_SITE_PASSWORD
    /variable/CTEST_DROP_SITE_USER
    /variable/CTEST_EXTRA_COVERAGE_GLOB
+   /variable/CTEST_EXTRA_SUBMIT_FILES
    /variable/CTEST_GIT_COMMAND
    /variable/CTEST_GIT_INIT_SUBMODULES
    /variable/CTEST_GIT_UPDATE_CUSTOM
