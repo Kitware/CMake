@@ -15,5 +15,8 @@ set(CMake_TEST_TLS_VERSION_URL_BAD "https://badtls-v1-1.kitware.com:8011" CACHE 
 set(CMAKE_C_FLAGS_RELEASE "-O3" CACHE STRING "")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3" CACHE STRING "")
 
+# https://libcxx.llvm.org/Hardening.html
+set(CMAKE_CXX_FLAGS "-D_LIBCPP_HARDENING_MODE=_LIBCPP_HARDENING_MODE_DEBUG" CACHE STRING "")
+
 include("${CMAKE_CURRENT_LIST_DIR}/configure_macos_common.cmake")
 include("${CMAKE_CURRENT_LIST_DIR}/configure_common.cmake")
