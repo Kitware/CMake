@@ -402,7 +402,8 @@ Filesystem
 .. signature::
   file(MAKE_DIRECTORY <directories>... [RESULT <result>])
 
-  Create the given directories and their parents as needed.
+  Create the given directories and their parents as needed.  Relative input
+  paths are evaluated with respect to the current source directory.
 
   The options are:
 
