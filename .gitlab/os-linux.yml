@@ -580,7 +580,7 @@
         - .gitlab/ci/cmake_version_update.sh
     interruptible: false # The job internally fetches and retries.
 
-.cmake_codespell_linux:
+.cmake_spellcheck_linux:
     stage: build
     extends: .fedora41
     script:
