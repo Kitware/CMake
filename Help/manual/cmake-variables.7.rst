@@ -738,6 +738,7 @@ Variables for CTest
    /variable/CTEST_MEMORYCHECK_SUPPRESSIONS_FILE
    /variable/CTEST_MEMORYCHECK_TYPE
    /variable/CTEST_NIGHTLY_START_TIME
+   /variable/CTEST_NOTES_FILES
    /variable/CTEST_P4_CLIENT
    /variable/CTEST_P4_COMMAND
    /variable/CTEST_P4_OPTIONS
