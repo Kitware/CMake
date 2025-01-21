@@ -795,9 +795,8 @@ The available ``<dashboard-options>`` are the following:
 
 .. option:: --extra-submit <file>[;<file>]
 
- Submit extra files to the dashboard.
-
- This option will submit extra files to the dashboard.
+ Submit extra ``.xml`` part files to the dashboard.
+ See the :command:`ctest_submit` command's ``PARTS ExtraFiles`` option.
 
 .. option:: --http-header <header>
 
