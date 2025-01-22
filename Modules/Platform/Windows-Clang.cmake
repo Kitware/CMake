@@ -38,6 +38,8 @@ macro(__windows_compiler_clang_gnu lang)
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG "-Xlinker" " ")
   set(CMAKE_${lang}_LINKER_WRAPPER_FLAG_SEP)
 
+  set(CMAKE_${lang}_LINK_MODE DRIVER)
+
   set(CMAKE_${lang}_LINKER_MANIFEST_FLAG " -Xlinker /MANIFESTINPUT:")
   set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-Werror")
 
@@ -217,7 +219,9 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
       unset(CMAKE_${lang}_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_EditAndContinue) # -ZI not supported by Clang
       set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "-WX")
       set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-imsvc")
-    endmacro()
+
+      set(CMAKE_${lang}_LINK_MODE LINKER)
+endmacro()
   else()
     cmake_policy(GET CMP0091 __WINDOWS_CLANG_CMP0091)
     if(__WINDOWS_CLANG_CMP0091 STREQUAL "NEW")
@@ -248,6 +252,8 @@ else()
   __enable_llvm_rc_preprocessing("" "-x c")
   macro(__windows_compiler_clang_base lang)
     __windows_compiler_gnu(${lang})
+
+    set(CMAKE_${lang}_LINK_MODE DRIVER)
   endmacro()
 endif()
 
