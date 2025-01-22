@@ -1,14 +1,14 @@
 include(Compiler/Tasking)
 __compiler_tasking(C)
 
+# Extension flags are not tied to the standard level flags.
+# Avoid passing them here so users/projects can control them independently.
 set(CMAKE_C90_STANDARD_COMPILE_OPTION "--iso=90")
-set(CMAKE_C90_EXTENSION_COMPILE_OPTION "--iso=90" "--language=+gcc,+kanji,+comments,+volatile,+strings")
-
+set(CMAKE_C90_EXTENSION_COMPILE_OPTION "--iso=90")
 set(CMAKE_C99_STANDARD_COMPILE_OPTION "--iso=99")
-set(CMAKE_C99_EXTENSION_COMPILE_OPTION "--iso=99" "--language=+gcc,+kanji,+volatile,+strings")
-
+set(CMAKE_C99_EXTENSION_COMPILE_OPTION "--iso=99")
 set(CMAKE_C11_STANDARD_COMPILE_OPTION "--iso=11")
-set(CMAKE_C11_EXTENSION_COMPILE_OPTION "--iso=11" "--language=+gcc,+kanji,+volatile,+strings")
+set(CMAKE_C11_EXTENSION_COMPILE_OPTION "--iso=11")
 
 set(CMAKE_C_STANDARD_LATEST 11)
 
