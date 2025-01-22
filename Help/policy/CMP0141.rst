@@ -13,8 +13,8 @@ In CMake 3.24 and below, debug information format flags are added to
 the default :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>` cache entries by CMake
 automatically.  This allows users to edit their cache entries to adjust the
 flags.  However, the presence of such default flags is problematic for
-projects that want to choose a different runtime library programmatically.
-In particular, it requires string editing of the
+projects that want to choose a different debug information format
+programmatically.  In particular, it requires string editing of the
 :variable:`CMAKE_<LANG>_FLAGS_<CONFIG>` variables with knowledge of the
 CMake builtin defaults so they can be replaced.
 
