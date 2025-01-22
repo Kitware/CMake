@@ -22,7 +22,9 @@ By default all available parts are submitted.
 The options are:
 
 ``PARTS <part>...``
-  Specify a subset of parts to submit.  Valid part names are::
+  Specify a subset of parts to submit.  Valid part names are:
+
+  .. parsed-literal::
 
     Start      = nothing
     Update     = ctest_update results, in Update.xml
@@ -32,8 +34,8 @@ The options are:
     Coverage   = ctest_coverage results, in Coverage.xml
     MemCheck   = ctest_memcheck results, in DynamicAnalysis.xml and
                  DynamicAnalysis-Test.xml
-    Notes      = Files listed by CTEST_NOTES_FILES, in Notes.xml
-    ExtraFiles = Files listed by CTEST_EXTRA_SUBMIT_FILES
+    Notes      = Files listed by :variable:`CTEST_NOTES_FILES`, in Notes.xml
+    ExtraFiles = Files listed by :variable:`CTEST_EXTRA_SUBMIT_FILES`
     Upload     = Files prepared for upload by ctest_upload(), in Upload.xml
     Submit     = nothing
     Done       = Build is complete, in Done.xml

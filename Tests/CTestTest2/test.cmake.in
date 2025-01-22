@@ -56,7 +56,13 @@ set(CTEST_DROP_LOCATION "@path@/submit.php?project=PublicDashboard")
 
 CTEST_SUBMIT(RETURN_VALUE res)
 
-# Test submission of a subset of parts.
-set(CTEST_EXTRA_SUBMIT_FILES ${CTEST_NOTES_FILES})
-CTEST_SUBMIT(RETURN_VALUE res PARTS ExtraFiles)
-set(CTEST_EXTRA_SUBMIT_FILES)
+set(notes_glob "${CTEST_BINARY_DIRECTORY}/Testing/20[0-9][0-9][0-9][0-9][0-9][0-9]-[0-9][0-9][0-9][0-9]/Notes.xml")
+file(GLOB notes_xml "${notes_glob}")
+if(notes_xml)
+  list(GET notes_xml -1 notes_xml)
+  set(CTEST_EXTRA_SUBMIT_FILES ${notes_xml})
+  CTEST_SUBMIT(RETURN_VALUE res PARTS ExtraFiles)
+  set(CTEST_EXTRA_SUBMIT_FILES)
+else()
+  message(SEND_ERROR "Notes.xml not found:\n ${notes_glob}")
+endif()
