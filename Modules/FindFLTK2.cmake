@@ -138,10 +138,10 @@ if(FLTK2_DIR)
 
     # Add the extra libraries
     load_cache(${FLTK2_DIR}
-      READ_WITH_PREFIX
-      FL FLTK2_USE_SYSTEM_JPEG
-      FL FLTK2_USE_SYSTEM_PNG
-      FL FLTK2_USE_SYSTEM_ZLIB
+      READ_WITH_PREFIX FL
+      FLTK2_USE_SYSTEM_JPEG
+      FLTK2_USE_SYSTEM_PNG
+      FLTK2_USE_SYSTEM_ZLIB
       )
 
     set(FLTK2_IMAGES_LIBS "")
