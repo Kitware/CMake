@@ -305,6 +305,7 @@ syn keyword cmakeProperty contained
             \ MEASUREMENT
             \ MODIFIED
             \ MSVC_DEBUG_INFORMATION_FORMAT
+            \ MSVC_RUNTIME_CHECKS
             \ MSVC_RUNTIME_LIBRARY
             \ NAME
             \ NO_SONAME
@@ -1532,6 +1533,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_MODULE_PATH
             \ CMAKE_MSVCIDE_RUN_PATH
             \ CMAKE_MSVC_DEBUG_INFORMATION_FORMAT
+            \ CMAKE_MSVC_RUNTIME_CHECKS
             \ CMAKE_MSVC_RUNTIME_LIBRARY
             \ CMAKE_NETRC
             \ CMAKE_NETRC_FILE

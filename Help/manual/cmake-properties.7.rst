@@ -359,6 +359,7 @@ Properties on Targets
    /prop_tgt/MANUALLY_ADDED_DEPENDENCIES
    /prop_tgt/MAP_IMPORTED_CONFIG_CONFIG
    /prop_tgt/MSVC_DEBUG_INFORMATION_FORMAT
+   /prop_tgt/MSVC_RUNTIME_CHECKS
    /prop_tgt/MSVC_RUNTIME_LIBRARY
    /prop_tgt/NAME
    /prop_tgt/NO_SONAME
