@@ -18,12 +18,23 @@ $installer_file = Get-Item $installer
 $installer_name = $installer_file.Name
 $package_name = $installer_file.Basename + "-" + $revision
 $package_dir = "$basedir\$package_name"
-
+$exclude = @(
+  "arm/config/debugger"
+  "arm/config/flashloader"
+  "arm/drivers"
+  "arm/src"
+  )
 
 Write-Host "Installing to: $package_dir"
 Start-Process -Wait -FilePath "$installer_file" -ArgumentList "/hide_usd /autoinstall/$package_dir"
+foreach ($p in $exclude) {
+    Remove-Item "$package_dir/$p" -Recurse -Force
+}
+
 @"
-This was repackaged from an installation by "$installer_name".
+This was repackaged from an installation by "$installer_name"
+using CMake's ".gitlab/ci/repackage/iar.ps1" script.
+
 Obtain a network license as follows:
 
   set IAR_LMS_SETTINGS_DIR=%cd%\license
