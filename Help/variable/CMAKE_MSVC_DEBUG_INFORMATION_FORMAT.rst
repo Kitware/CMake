@@ -21,7 +21,7 @@ support per-configuration specification.  For example, the code:
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>")
 
 selects for all following targets the program database debug information format
-for the Debug configuration.
+for the ``Debug`` and ``RelWithDebInfo`` configurations.
 
 If this variable is not set, the :prop_tgt:`MSVC_DEBUG_INFORMATION_FORMAT`
 target property will not be set automatically.  If that property is not set,
