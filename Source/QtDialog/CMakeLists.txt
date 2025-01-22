@@ -364,7 +364,7 @@ if(CMake_INSTALL_DEPENDENCIES AND (APPLE OR WIN32))
     set(fixup_exe "\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/MacOS/CMake")
   endif()
   install(CODE "
-    include(\"${CMake_SOURCE_DIR}/Modules/BundleUtilities.cmake\")
+    include(BundleUtilities)
     set(BU_CHMOD_BUNDLE_ITEMS ON)
     fixup_bundle(\"${fixup_exe}\" \"${QT_PLUGINS}\" \"${Qt_BIN_DIR};${QT_LIBRARY_DIR};${QT_BINARY_DIR}\")
   " ${COMPONENT})
