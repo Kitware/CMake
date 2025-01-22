@@ -3802,31 +3802,56 @@ cmTarget* cmMakefile::AddImportedTarget(const std::string& name,
   return this->ImportedTargetsOwned.back().get();
 }
 
-cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
-                                      bool excludeAliases) const
+cmTarget* cmMakefile::AddForeignTarget(const std::string& origin,
+                                       const std::string& name)
+{
+  std::unique_ptr<cmTarget> target(new cmTarget(
+    cmStrCat("@foreign_", origin, "::", name),
+    cmStateEnums::TargetType::INTERFACE_LIBRARY, cmTarget::Visibility::Foreign,
+    this, cmTarget::PerConfig::Yes));
+
+  this->ImportedTargets[name] = target.get();
+  this->GetGlobalGenerator()->IndexTarget(target.get());
+  this->GetStateSnapshot().GetDirectory().AddImportedTargetName(name);
+
+  this->ImportedTargetsOwned.push_back(std::move(target));
+  return this->ImportedTargetsOwned.back().get();
+}
+
+cmTarget* cmMakefile::FindTargetToUse(
+  const std::string& name, cmStateEnums::TargetDomainSet domains) const
 {
   // Look for an imported target.  These take priority because they
   // are more local in scope and do not have to be globally unique.
   auto targetName = name;
-  if (!excludeAliases) {
+  if (domains.contains(cmStateEnums::TargetDomain::ALIAS)) {
     // Look for local alias targets.
     auto alias = this->AliasTargets.find(name);
     if (alias != this->AliasTargets.end()) {
       targetName = alias->second;
     }
   }
-  auto imported = this->ImportedTargets.find(targetName);
+  auto const imported = this->ImportedTargets.find(targetName);
+
+  bool const useForeign =
+    domains.contains(cmStateEnums::TargetDomain::FOREIGN);
+  bool const useNative = domains.contains(cmStateEnums::TargetDomain::NATIVE);
+
   if (imported != this->ImportedTargets.end()) {
-    return imported->second;
+    if (imported->second->IsForeign() ? useForeign : useNative) {
+      return imported->second;
+    }
   }
 
   // Look for a target built in this directory.
   if (cmTarget* t = this->FindLocalNonAliasTarget(name)) {
-    return t;
+    if (t->IsForeign() ? useForeign : useNative) {
+      return t;
+    }
   }
 
   // Look for a target built in this project.
-  return this->GetGlobalGenerator()->FindTarget(name, excludeAliases);
+  return this->GetGlobalGenerator()->FindTarget(name, domains);
 }
 
 bool cmMakefile::IsAlias(const std::string& name) const

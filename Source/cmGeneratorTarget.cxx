@@ -1141,6 +1141,11 @@ bool cmGeneratorTarget::IsImportedGloballyVisible() const
   return this->Target->IsImportedGloballyVisible();
 }
 
+bool cmGeneratorTarget::IsForeign() const
+{
+  return this->Target->IsForeign();
+}
+
 bool cmGeneratorTarget::CanCompileSources() const
 {
   return this->Target->CanCompileSources();
@@ -5366,7 +5371,8 @@ bool cmGeneratorTarget::AddHeaderSetVerification()
   cmTarget* verifyTarget = nullptr;
   cmTarget* allVerifyTarget =
     this->GlobalGenerator->GetMakefiles().front()->FindTargetToUse(
-      "all_verify_interface_header_sets", true);
+      "all_verify_interface_header_sets",
+      { cmStateEnums::TargetDomain::NATIVE });
 
   auto interfaceFileSetEntries = this->Target->GetInterfaceHeaderSetsEntries();
 

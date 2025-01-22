@@ -1182,7 +1182,8 @@ void cmGeneratorTarget::ComputeLinkImplementationLibraries(
       std::string name = this->CheckCMP0004(lib);
       if (this->GetPolicyStatusCMP0108() == cmPolicies::NEW) {
         // resolve alias name
-        auto* target = this->Makefile->FindTargetToUse(name);
+        auto* target = this->Makefile->FindTargetToUse(
+          name, cmStateEnums::AllTargetDomains);
         if (target) {
           name = target->GetName();
         }

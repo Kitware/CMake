@@ -48,6 +48,7 @@ public:
     Generated,
     Imported,
     ImportedGlobally,
+    Foreign,
   };
 
   enum class PerConfig
@@ -216,6 +217,7 @@ public:
   bool IsSynthetic() const;
   bool IsImported() const;
   bool IsImportedGloballyVisible() const;
+  bool IsForeign() const;
   bool IsPerConfig() const;
   bool IsRuntimeBinary() const;
   bool CanCompileSources() const;

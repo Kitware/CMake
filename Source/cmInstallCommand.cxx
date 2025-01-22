@@ -710,7 +710,8 @@ bool HandleTargetsMode(std::vector<std::string> const& args,
     if (!target) {
       // If no local target has been found, find it in the global scope.
       cmTarget* const global_target =
-        helper.Makefile->GetGlobalGenerator()->FindTarget(tgt, true);
+        helper.Makefile->GetGlobalGenerator()->FindTarget(
+          tgt, { cmStateEnums::TargetDomain::NATIVE });
       if (global_target && !global_target->IsImported()) {
         target = global_target;
       }
@@ -1394,7 +1395,8 @@ bool HandleImportedRuntimeArtifactsMode(std::vector<std::string> const& args,
     if (!target || !target->IsImported()) {
       // If no local target has been found, find it in the global scope.
       cmTarget* const global_target =
-        helper.Makefile->GetGlobalGenerator()->FindTarget(tgt, true);
+        helper.Makefile->GetGlobalGenerator()->FindTarget(
+          tgt, { cmStateEnums::TargetDomain::NATIVE });
       if (global_target && global_target->IsImported()) {
         target = global_target;
       }
