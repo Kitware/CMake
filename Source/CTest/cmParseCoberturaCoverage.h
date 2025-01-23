@@ -10,6 +10,7 @@
 class cmCTest;
 class cmCTestCoverageHandlerContainer;
 
+// noqa: spellcheck off
 /** \class cmParsePythonCoverage
  * \brief Parse coverage.py Python coverage information
  *
@@ -19,6 +20,7 @@ class cmCTestCoverageHandlerContainer;
  * Java-based Cobertura coverage application. This helper class parses
  * that XML file to fill the coverage-handler container.
  */
+// noqa: spellcheck on
 class cmParseCoberturaCoverage
 {
 public:

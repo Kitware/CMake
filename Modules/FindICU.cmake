@@ -215,7 +215,7 @@ function(_ICU_FIND)
     endif()
     if(component STREQUAL "in")
       list(APPEND component_libnames "icui18n")
-      list(APPEND component_debug_libnames "icui18nd")
+      list(APPEND component_debug_libnames "icui18nd")  # noqa: spellcheck disable-line
     endif()
 
     if(static_prefix)

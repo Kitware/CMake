@@ -128,7 +128,7 @@ void cmWIXRichTextFormatWriter::WriteDocumentPrefix()
 {
   ControlWord("viewkind4");
   ControlWord("uc1");
-  ControlWord("pard");
+  ControlWord("pard"); // noqa: spellcheck disable-line
   ControlWord("f0");
   ControlWord("fs14");
 }

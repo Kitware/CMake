@@ -10,7 +10,7 @@ clang-devel
 clang-tools-extra
 clang-tools-extra-devel
 compiler-rt
-flang-19.1.0-2.fc41
+flang
 gcc-c++
 git-core
 lfortran

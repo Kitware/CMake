@@ -1,3 +1,6 @@
+# Help tools that honor '.gitignore' (redundant for Git itself).
+/.git
+
 /CMakeUserPresets.json
 
 # Common build directories

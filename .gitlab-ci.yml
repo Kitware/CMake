@@ -95,9 +95,9 @@ u:cmake.org-help:
 
 # Lint builds
 
-l:codespell:
+l:spellcheck:
     extends:
-        - .cmake_codespell_linux
+        - .cmake_spellcheck_linux
         - .linux_x86_64_tags
         - .run_automatically
 

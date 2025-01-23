@@ -1,0 +1,67 @@
+# The manual about all configuration options is here:
+#   https://github.com/crate-ci/typos/blob/master/docs/reference.md
+
+[default]
+check-file = true
+check-filename = true
+extend-ignore-re = [
+    # NOTE Allow to mark a block of text to exclude from spellchecking
+    "(?s)(#|/(/|\\*)|\\.\\.)\\s*(NOQA|noqa):? spellcheck(: *|=| +)off.*?\\n\\s*(#|/(/|\\*)|\\.\\.)\\s*(NOQA|noqa):? spellcheck(: *|=| +)on"
+    # NOTE Allow to mark a line to exclude from spellchecking
+  , "(?Rm)^.*(#|/(/|\\*)|\\.\\.)\\s*(NOQA|noqa):? spellcheck(: *|=| +)disable-line$"
+  ]
+locale = "en-us"
+
+# Add repo-wide false positives here in the form of `word = "word"`.
+# Check the manual for details.
+[default.extend-words]
+HPE = "HPE"
+# British spelling of `XCODE_SCHEME_UNDEFINED_BEHAVIOUR_SANITIZER` property name.
+BEHAVIOUR = "BEHAVIOUR"
+# Misspelled `Fortran_BUILDING_INSTRINSIC_MODULES` property name kept for compatibility: `INSTRINSIC` should be `INTRINSIC`.
+INSTRINSIC = "INSTRINSIC"
+# This is a file extension for `cobertura-merge`
+ser = "ser"
+# The Ninja option name
+restat = "restat"
+# SpectreMitigation
+Spectre = "Spectre"
+
+[type.cmake.extend-identifiers]
+COMMANDs = "COMMANDs"
+xCOMMANDx = "xCOMMANDx"
+
+[type.cmake.extend-words]
+# Some compiler's options trigger false-positives
+Fo = "Fo"
+ot = "ot"
+# Part of compiler executable name, e.g., `arm-unknown-nto-qnx6`, but also could be in a literal string.
+nto = "nto"
+
+[type.cpp.extend-identifiers]
+APPENDed = "APPENDed"
+
+[type.json.extend-identifiers]
+# Some compiler options from `Templates/MSBuild/FlagTables/*.json` trigger too many false-positives.
+Fo = "Fo"
+fo = "fo"
+Ot = "Ot"
+SEH = "SEH"
+
+[files]
+ignore-hidden = false
+ignore-dot = false
+extend-exclude = [
+    "Copyright.txt"
+    # Exclude third-party sources.
+  , "Source/CursesDialog/form/"
+  , "Source/kwsys/"
+  , "Source/bindexplib.cxx"
+  , "Source/cmcldeps.cxx"
+  , "Source/QtDialog/*.ui"
+  , "Utilities/cm*"
+  , "Utilities/ClangTidyModule"
+  , "Utilities/KWIML"
+    # FIXME: Fix spelling typos in tests.  Exclude for now.
+  , "Tests"
+  ]

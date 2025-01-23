@@ -163,10 +163,14 @@ The following characters have special meaning in regular expressions:
     :command:`if(MATCHES)`, save subgroup matches in the variables
     :variable:`CMAKE_MATCH_<n>` for ``<n>`` 0..9.
 
+.. noqa: spellcheck off
+
 ``*``, ``+`` and ``?`` have higher precedence than concatenation.  ``|``
 has lower precedence than concatenation.  This means that the regular
 expression ``^ab+d$`` matches ``abbd`` but not ``ababd``, and the regular
 expression ``^(ab|cd)$`` matches ``ab`` but not ``abd``.
+
+.. noqa: spellcheck on
 
 CMake language :ref:`Escape Sequences` such as ``\t``, ``\r``, ``\n``,
 and ``\\`` may be used to construct literal tabs, carriage returns,

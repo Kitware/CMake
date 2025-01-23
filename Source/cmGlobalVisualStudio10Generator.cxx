@@ -975,6 +975,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
       cmXMLElement epg(eprj, "PropertyGroup");
       epg.Attribute("Label", "Configuration");
       {
+        // noqa: spellcheck off
         cmXMLElement ect(epg, "ConfigurationType");
         if (this->IsNsightTegra()) {
           // Tegra-Android platform does not understand "Utility".
@@ -982,6 +983,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
         } else {
           ect.Content("Utility");
         }
+        // noqa: spellcheck on
       }
       cmXMLElement(epg, "CharacterSet").Content("MultiByte");
       if (this->IsNsightTegra()) {

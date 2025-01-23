@@ -2033,7 +2033,7 @@ int cmcmd::RunLLVMRC(std::vector<std::string> const& args)
   static const cmsys::RegularExpression llvm_rc_only_double_arg(
     "^[-/](C|LN|L)(.)?");
   static const cmsys::RegularExpression common_double_arg(
-    "^[-/](D|U|I|FO|fo|Fo)(.)?");
+    "^[-/](D|U|I|FO|fo|Fo)(.)?"); // noqa: spellcheck disable-line
   bool acceptNextArg = false;
   bool skipNextArg = false;
   for (std::string const& arg : cmMakeRange(args).advance(4)) {
@@ -2448,7 +2448,7 @@ int cmVSLink::LinkIncremental()
   // Compile the resource file.
   std::vector<std::string> rcCommand;
   rcCommand.push_back(this->RcPath.empty() ? "rc" : this->RcPath);
-  rcCommand.emplace_back("/fo");
+  rcCommand.emplace_back("/fo"); // noqa: spellcheck disable-line
   rcCommand.push_back(this->ManifestFileRes);
   rcCommand.push_back(this->ManifestFileRC);
   if (!RunCommand("RC Pass 1", rcCommand, this->Verbose, FORMAT_DECIMAL)) {
