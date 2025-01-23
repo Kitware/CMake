@@ -4,7 +4,7 @@
 .editorconfig    export-ignore
 
 # Custom attribute to mark sources as using our C code style.
-[attr]our-c-style  whitespace=tab-in-indent  format.clang-format=15
+[attr]our-c-style  whitespace=tab-in-indent  format.clang-format=18
 
 # Custom attribute to mark sources as generated.
 # Do not perform whitespace checks.  Do not format.
