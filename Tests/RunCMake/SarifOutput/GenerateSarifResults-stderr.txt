@@ -1,0 +1,9 @@
+^CMake Warning at GenerateSarifResults\.cmake:2 \(message\):
+  Example warning message
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Warning at GenerateSarifResults\.cmake:5 \(message\):
+  A second example warning message
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)$

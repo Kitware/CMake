@@ -29,6 +29,8 @@
 #include "cmValue.h"
 
 #if !defined(CMAKE_BOOTSTRAP)
+#  include <type_traits>
+
 #  include <cm/optional>
 
 #  include <cm3p/json/value.h>
@@ -575,6 +577,15 @@ public:
 
   cmMessenger* GetMessenger() const { return this->Messenger.get(); }
 
+#ifndef CMAKE_BOOTSTRAP
+  /// Get the SARIF file path if set manually for this run
+  cm::optional<std::string> GetSarifFilePath() const
+  {
+    return (this->SarifFileOutput ? cm::make_optional(this->SarifFilePath)
+                                  : cm::nullopt);
+  }
+#endif
+
   /**
    * Get the state of the suppression of developer (author) warnings.
    * Returns false, by default, if developer warnings should be shown, true
@@ -810,6 +821,11 @@ private:
   std::unique_ptr<cmState> State;
   cmStateSnapshot CurrentSnapshot;
   std::unique_ptr<cmMessenger> Messenger;
+
+#ifndef CMAKE_BOOTSTRAP
+  bool SarifFileOutput = false;
+  std::string SarifFilePath;
+#endif
 
   std::vector<std::string> TraceOnlyThisSources;
 

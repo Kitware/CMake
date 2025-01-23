@@ -446,6 +446,8 @@ add_library(
   cmRST.h
   cmRuntimeDependencyArchive.cxx
   cmRuntimeDependencyArchive.h
+  cmSarifLog.cxx
+  cmSarifLog.h
   cmScriptGenerator.h
   cmScriptGenerator.cxx
   cmSourceFile.cxx
