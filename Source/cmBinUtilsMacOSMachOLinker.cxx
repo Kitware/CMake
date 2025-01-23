@@ -54,7 +54,7 @@ bool cmBinUtilsMacOSMachOLinker::Prepare()
 }
 
 auto cmBinUtilsMacOSMachOLinker::GetFileInfo(std::string const& file)
-  -> const FileInfo*
+  -> FileInfo const*
 {
   // Memoize processed rpaths and library dependencies to reduce the number
   // of calls to otool, especially in the case of heavily recursive libraries
@@ -86,7 +86,7 @@ bool cmBinUtilsMacOSMachOLinker::ScanDependencies(
   if (!executableFile.empty()) {
     executablePath = cmSystemTools::GetFilenamePath(executableFile);
   }
-  const FileInfo* file_info = this->GetFileInfo(file);
+  FileInfo const* file_info = this->GetFileInfo(file);
   if (!file_info) {
     return false;
   }
@@ -119,7 +119,7 @@ bool cmBinUtilsMacOSMachOLinker::GetFileDependencies(
             !IsMissingSystemDylib(path)) {
           auto filename = cmSystemTools::GetFilenameName(path);
           bool unique;
-          const FileInfo* dep_file_info = this->GetFileInfo(path);
+          FileInfo const* dep_file_info = this->GetFileInfo(path);
           if (!dep_file_info) {
             return false;
           }

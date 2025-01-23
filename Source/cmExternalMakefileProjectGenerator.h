@@ -38,7 +38,7 @@ public:
   }
 
   //! Return the list of global generators supported by this extra generator
-  const std::vector<std::string>& GetSupportedGlobalGenerators() const
+  std::vector<std::string> const& GetSupportedGlobalGenerators() const
   {
     return this->SupportedGlobalGenerators;
   }
@@ -47,22 +47,22 @@ public:
    * extra generator name
    */
   static std::string CreateFullGeneratorName(
-    const std::string& globalGenerator, const std::string& extraGenerator);
+    std::string const& globalGenerator, std::string const& extraGenerator);
 
   //! Generate the project files, the Makefiles have already been generated
   virtual void Generate() = 0;
 
-  void SetName(const std::string& n) { this->Name = n; }
+  void SetName(std::string const& n) { this->Name = n; }
   std::string GetName() const { return this->Name; }
 
-  virtual bool Open(const std::string& bindir, const std::string& projectName,
+  virtual bool Open(std::string const& bindir, std::string const& projectName,
                     bool dryRun);
 
 protected:
   //! Contains the names of the global generators support by this generator.
   std::vector<std::string> SupportedGlobalGenerators;
   //! the global generator which creates the makefiles
-  const cmGlobalGenerator* GlobalGenerator = nullptr;
+  cmGlobalGenerator const* GlobalGenerator = nullptr;
 
   std::string Name;
 };
@@ -81,7 +81,7 @@ public:
   virtual std::unique_ptr<cmExternalMakefileProjectGenerator>
   CreateExternalMakefileProjectGenerator() const = 0;
 
-  void AddSupportedGlobalGenerator(const std::string& base);
+  void AddSupportedGlobalGenerator(std::string const& base);
 
 private:
   std::string Name;
@@ -94,8 +94,8 @@ class cmExternalMakefileProjectGeneratorSimpleFactory
   : public cmExternalMakefileProjectGeneratorFactory
 {
 public:
-  cmExternalMakefileProjectGeneratorSimpleFactory(const std::string& n,
-                                                  const std::string& doc)
+  cmExternalMakefileProjectGeneratorSimpleFactory(std::string const& n,
+                                                  std::string const& doc)
     : cmExternalMakefileProjectGeneratorFactory(n, doc)
   {
   }

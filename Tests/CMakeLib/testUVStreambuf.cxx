@@ -21,7 +21,7 @@
 static bool writeDataToStreamPipe(uv_loop_t& loop, cm::uv_pipe_ptr& inputPipe,
                                   char* outputData,
                                   unsigned int outputDataLength,
-                                  const char* /* unused */)
+                                  char const* /* unused */)
 {
   int err;
 
@@ -74,14 +74,14 @@ static bool writeDataToStreamProcess(uv_loop_t& loop,
                                      cm::uv_pipe_ptr& inputPipe,
                                      char* outputData,
                                      unsigned int /* unused */,
-                                     const char* cmakeCommand)
+                                     char const* cmakeCommand)
 {
   int err;
 
   inputPipe.init(loop, 0);
   std::vector<std::string> arguments = { cmakeCommand, "-E", "echo_append",
                                          outputData };
-  std::vector<const char*> processArgs;
+  std::vector<char const*> processArgs;
   for (auto const& arg : arguments) {
     processArgs.push_back(arg.c_str());
   }
@@ -141,8 +141,8 @@ static bool writeDataToStreamProcess(uv_loop_t& loop,
 
 static bool testUVStreambufRead(
   bool (*cb)(uv_loop_t& loop, cm::uv_pipe_ptr& inputPipe, char* outputData,
-             unsigned int outputDataLength, const char* cmakeCommand),
-  const char* cmakeCommand)
+             unsigned int outputDataLength, char const* cmakeCommand),
+  char const* cmakeCommand)
 {
   char outputData[] = TEST_STR;
   bool success = false;

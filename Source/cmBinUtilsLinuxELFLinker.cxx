@@ -22,12 +22,12 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-static std::string ReplaceOrigin(const std::string& rpath,
-                                 const std::string& origin)
+static std::string ReplaceOrigin(std::string const& rpath,
+                                 std::string const& origin)
 {
-  static const cmsys::RegularExpression originRegex(
+  static cmsys::RegularExpression const originRegex(
     "(\\$ORIGIN)([^a-zA-Z0-9_]|$)");
-  static const cmsys::RegularExpression originCurlyRegex("\\${ORIGIN}");
+  static cmsys::RegularExpression const originCurlyRegex("\\${ORIGIN}");
 
   cmsys::RegularExpressionMatch match;
   if (originRegex.find(rpath.c_str(), match)) {
@@ -186,7 +186,7 @@ bool cmBinUtilsLinuxELFLinker::ScanDependencies(std::string const& mainFile)
 }
 
 namespace {
-bool FileHasArchitecture(const char* filename, std::uint16_t machine)
+bool FileHasArchitecture(char const* filename, std::uint16_t machine)
 {
   cmELF elf(filename);
   if (!elf) {

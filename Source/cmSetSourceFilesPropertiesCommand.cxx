@@ -31,13 +31,13 @@ bool cmSetSourceFilesPropertiesCommand(std::vector<std::string> const& args,
 
   // break the arguments into source file names and properties
   // old style allows for specifier before PROPERTIES keyword
-  static const cm::string_view prop_names[] = {
+  static cm::string_view const prop_names[] = {
     "ABSTRACT",       "GENERATED",  "WRAP_EXCLUDE", "COMPILE_FLAGS",
     "OBJECT_DEPENDS", "PROPERTIES", "DIRECTORY",    "TARGET_DIRECTORY"
   };
 
   auto isAPropertyKeyword =
-    [](const std::vector<std::string>::const_iterator& arg_it) {
+    [](std::vector<std::string>::const_iterator const& arg_it) {
       return std::any_of(
         std::begin(prop_names), std::end(prop_names),
         [&arg_it](cm::string_view prop_name) { return *arg_it == prop_name; });
@@ -80,7 +80,7 @@ bool cmSetSourceFilesPropertiesCommand(std::vector<std::string> const& args,
     }
   }
 
-  const auto props_begin = options_it;
+  auto const props_begin = options_it;
 
   bool file_scopes_handled =
     SetPropertyCommand::HandleAndValidateSourceFileDirectoryScopes(
@@ -163,7 +163,7 @@ static bool RunCommandForScope(
   }
 
   // loop over all the files
-  for (const std::string& sfname : cmStringRange{ file_begin, file_end }) {
+  for (std::string const& sfname : cmStringRange{ file_begin, file_end }) {
     // get the source file
     if (cmSourceFile* sf = mf->GetOrCreateSource(sfname)) {
       // loop through the props and set them

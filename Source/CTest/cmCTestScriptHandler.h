@@ -22,7 +22,7 @@ public:
   /**
    * Add a script to run, and if is should run in the current process
    */
-  void AddConfigurationScript(const std::string&, bool pscope);
+  void AddConfigurationScript(std::string const&, bool pscope);
 
   /**
    * Run a dashboard using a specified configuration script
@@ -33,7 +33,7 @@ public:
    * Run a script
    */
   static bool RunScript(cmCTest* ctest, cmMakefile* mf,
-                        const std::string& script, bool InProcess,
+                        std::string const& script, bool InProcess,
                         int* returnValue);
 
   /*
@@ -42,8 +42,8 @@ public:
   void UpdateElapsedTime();
 
   cmCTestScriptHandler(cmCTest* ctest);
-  cmCTestScriptHandler(const cmCTestScriptHandler&) = delete;
-  const cmCTestScriptHandler& operator=(const cmCTestScriptHandler&) = delete;
+  cmCTestScriptHandler(cmCTestScriptHandler const&) = delete;
+  cmCTestScriptHandler const& operator=(cmCTestScriptHandler const&) = delete;
   ~cmCTestScriptHandler();
 
   void CreateCMake();
@@ -52,10 +52,10 @@ public:
 
 private:
   // reads in a script
-  int ReadInScript(const std::string& total_script_arg);
-  int ExecuteScript(const std::string& total_script_arg);
+  int ReadInScript(std::string const& total_script_arg);
+  int ExecuteScript(std::string const& total_script_arg);
 
-  int RunConfigurationScript(const std::string& script, bool pscope);
+  int RunConfigurationScript(std::string const& script, bool pscope);
 
   cmCTest* CTest = nullptr;
   std::vector<std::string> ConfigurationScripts;

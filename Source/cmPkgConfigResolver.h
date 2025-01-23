@@ -87,7 +87,7 @@ public:
   cmPkgConfigEnv env;
 
 private:
-  std::string StrOrDefault(const std::string& key, cm::string_view def = "");
+  std::string StrOrDefault(std::string const& key, cm::string_view def = "");
 };
 
 class cmPkgConfigResolver
@@ -96,77 +96,77 @@ class cmPkgConfigResolver
 
 public:
   static cm::optional<cmPkgConfigResult> ResolveStrict(
-    const std::vector<cmPkgConfigEntry>& entries, cmPkgConfigEnv env);
+    std::vector<cmPkgConfigEntry> const& entries, cmPkgConfigEnv env);
 
   static cm::optional<cmPkgConfigResult> ResolvePermissive(
-    const std::vector<cmPkgConfigEntry>& entries, cmPkgConfigEnv env);
+    std::vector<cmPkgConfigEntry> const& entries, cmPkgConfigEnv env);
 
   static cmPkgConfigResult ResolveBestEffort(
-    const std::vector<cmPkgConfigEntry>& entries, cmPkgConfigEnv env);
+    std::vector<cmPkgConfigEntry> const& entries, cmPkgConfigEnv env);
 
-  static cmPkgConfigVersionReq ParseVersion(const std::string& version);
+  static cmPkgConfigVersionReq ParseVersion(std::string const& version);
 
-  static bool CheckVersion(const cmPkgConfigVersionReq& desired,
-                           const std::string& provided);
+  static bool CheckVersion(cmPkgConfigVersionReq const& desired,
+                           std::string const& provided);
 
   static void ReplaceSep(std::string& list);
 
 #ifdef _WIN32
-  static const char Sep = ';';
+  static char const Sep = ';';
 #else
-  static const char Sep = ':';
+  static char const Sep = ':';
 #endif
 
 private:
   static std::string HandleVariablePermissive(
-    const cmPkgConfigEntry& entry,
-    const std::unordered_map<std::string, std::string>& variables);
+    cmPkgConfigEntry const& entry,
+    std::unordered_map<std::string, std::string> const& variables);
 
   static cm::optional<std::string> HandleVariableStrict(
-    const cmPkgConfigEntry& entry,
-    const std::unordered_map<std::string, std::string>& variables);
+    cmPkgConfigEntry const& entry,
+    std::unordered_map<std::string, std::string> const& variables);
 
   static std::string HandleKeyword(
-    const cmPkgConfigEntry& entry,
-    const std::unordered_map<std::string, std::string>& variables);
+    cmPkgConfigEntry const& entry,
+    std::unordered_map<std::string, std::string> const& variables);
 
   static std::vector<cm::string_view> TokenizeFlags(
-    const std::string& flagline);
+    std::string const& flagline);
 
   static cmPkgConfigCflagsResult MangleCflags(
-    const std::vector<cm::string_view>& flags);
+    std::vector<cm::string_view> const& flags);
 
   static cmPkgConfigCflagsResult MangleCflags(
-    const std::vector<cm::string_view>& flags, const std::string& sysroot);
+    std::vector<cm::string_view> const& flags, std::string const& sysroot);
 
   static cmPkgConfigCflagsResult MangleCflags(
-    const std::vector<cm::string_view>& flags,
-    const std::vector<std::string>& syspaths);
+    std::vector<cm::string_view> const& flags,
+    std::vector<std::string> const& syspaths);
 
   static cmPkgConfigCflagsResult MangleCflags(
-    const std::vector<cm::string_view>& flags, const std::string& sysroot,
-    const std::vector<std::string>& syspaths);
+    std::vector<cm::string_view> const& flags, std::string const& sysroot,
+    std::vector<std::string> const& syspaths);
 
   static cmPkgConfigLibsResult MangleLibs(
-    const std::vector<cm::string_view>& flags);
+    std::vector<cm::string_view> const& flags);
 
   static cmPkgConfigLibsResult MangleLibs(
-    const std::vector<cm::string_view>& flags, const std::string& sysroot);
+    std::vector<cm::string_view> const& flags, std::string const& sysroot);
 
   static cmPkgConfigLibsResult MangleLibs(
-    const std::vector<cm::string_view>& flags,
-    const std::vector<std::string>& syspaths);
+    std::vector<cm::string_view> const& flags,
+    std::vector<std::string> const& syspaths);
 
   static cmPkgConfigLibsResult MangleLibs(
-    const std::vector<cm::string_view>& flags, const std::string& sysroot,
-    const std::vector<std::string>& syspaths);
+    std::vector<cm::string_view> const& flags, std::string const& sysroot,
+    std::vector<std::string> const& syspaths);
 
   static std::string Reroot(cm::string_view flag, cm::string_view prefix,
-                            const std::string& sysroot);
+                            std::string const& sysroot);
 
   static cmPkgConfigVersionReq ParseVersion(std::string::const_iterator& cur,
                                             std::string::const_iterator end);
 
   static std::vector<cmPkgConfigDependency> ParseDependencies(
-    const std::string& deps);
+    std::string const& deps);
 };

@@ -13,7 +13,7 @@
 namespace {
 
 // Try to remove the binary directory once
-cmsys::Status TryToRemoveBinaryDirectoryOnce(const std::string& directoryPath)
+cmsys::Status TryToRemoveBinaryDirectoryOnce(std::string const& directoryPath)
 {
   cmsys::Directory directory;
   directory.Load(directoryPath);
@@ -48,7 +48,7 @@ cmsys::Status TryToRemoveBinaryDirectoryOnce(const std::string& directoryPath)
 /*
  * Empty Binary Directory
  */
-bool EmptyBinaryDirectory(const std::string& sname, std::string& err)
+bool EmptyBinaryDirectory(std::string const& sname, std::string& err)
 {
   // try to avoid deleting root
   if (sname.size() < 2) {

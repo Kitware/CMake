@@ -21,7 +21,7 @@ cmExprParserHelper::cmExprParserHelper()
 
 cmExprParserHelper::~cmExprParserHelper() = default;
 
-int cmExprParserHelper::ParseString(const char* str, int verb)
+int cmExprParserHelper::ParseString(char const* str, int verb)
 {
   if (!str) {
     return 0;
@@ -91,7 +91,7 @@ int cmExprParserHelper::LexInput(char* buf, int maxlen)
   return (0);
 }
 
-void cmExprParserHelper::Error(const char* str)
+void cmExprParserHelper::Error(char const* str)
 {
   unsigned long pos = static_cast<unsigned long>(this->InputBufferPos);
   std::ostringstream ostr;

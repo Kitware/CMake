@@ -66,17 +66,17 @@ int string_view::compare(size_type pos1, size_type count1, string_view v,
   return substr(pos1, count1).compare(v.substr(pos2, count2));
 }
 
-int string_view::compare(const char* s) const
+int string_view::compare(char const* s) const
 {
   return compare(string_view(s));
 }
 
-int string_view::compare(size_type pos1, size_type count1, const char* s) const
+int string_view::compare(size_type pos1, size_type count1, char const* s) const
 {
   return substr(pos1, count1).compare(string_view(s));
 }
 
-int string_view::compare(size_type pos1, size_type count1, const char* s,
+int string_view::compare(size_type pos1, size_type count1, char const* s,
                          size_type count2) const
 {
   return substr(pos1, count1).compare(string_view(s, count2));
@@ -98,13 +98,13 @@ string_view::size_type string_view::find(char c, size_type pos) const noexcept
   return find(string_view(&c, 1), pos);
 }
 
-string_view::size_type string_view::find(const char* s, size_type pos,
+string_view::size_type string_view::find(char const* s, size_type pos,
                                          size_type count) const
 {
   return find(string_view(s, count), pos);
 }
 
-string_view::size_type string_view::find(const char* s, size_type pos) const
+string_view::size_type string_view::find(char const* s, size_type pos) const
 {
   return find(string_view(s), pos);
 }
@@ -129,13 +129,13 @@ string_view::size_type string_view::rfind(char c, size_type pos) const noexcept
   return rfind(string_view(&c, 1), pos);
 }
 
-string_view::size_type string_view::rfind(const char* s, size_type pos,
+string_view::size_type string_view::rfind(char const* s, size_type pos,
                                           size_type count) const
 {
   return rfind(string_view(s, count), pos);
 }
 
-string_view::size_type string_view::rfind(const char* s, size_type pos) const
+string_view::size_type string_view::rfind(char const* s, size_type pos) const
 {
   return rfind(string_view(s), pos);
 }
@@ -157,13 +157,13 @@ string_view::size_type string_view::find_first_of(char c,
   return find_first_of(string_view(&c, 1), pos);
 }
 
-string_view::size_type string_view::find_first_of(const char* s, size_type pos,
+string_view::size_type string_view::find_first_of(char const* s, size_type pos,
                                                   size_type count) const
 {
   return find_first_of(string_view(s, count), pos);
 }
 
-string_view::size_type string_view::find_first_of(const char* s,
+string_view::size_type string_view::find_first_of(char const* s,
                                                   size_type pos) const
 {
   return find_first_of(string_view(s), pos);
@@ -189,13 +189,13 @@ string_view::size_type string_view::find_last_of(char c,
   return find_last_of(string_view(&c, 1), pos);
 }
 
-string_view::size_type string_view::find_last_of(const char* s, size_type pos,
+string_view::size_type string_view::find_last_of(char const* s, size_type pos,
                                                  size_type count) const
 {
   return find_last_of(string_view(s, count), pos);
 }
 
-string_view::size_type string_view::find_last_of(const char* s,
+string_view::size_type string_view::find_last_of(char const* s,
                                                  size_type pos) const
 {
   return find_last_of(string_view(s), pos);
@@ -218,14 +218,14 @@ string_view::size_type string_view::find_first_not_of(
   return find_first_not_of(string_view(&c, 1), pos);
 }
 
-string_view::size_type string_view::find_first_not_of(const char* s,
+string_view::size_type string_view::find_first_not_of(char const* s,
                                                       size_type pos,
                                                       size_type count) const
 {
   return find_first_not_of(string_view(s, count), pos);
 }
 
-string_view::size_type string_view::find_first_not_of(const char* s,
+string_view::size_type string_view::find_first_not_of(char const* s,
                                                       size_type pos) const
 {
   return find_first_not_of(string_view(s), pos);
@@ -251,14 +251,14 @@ string_view::size_type string_view::find_last_not_of(
   return find_last_not_of(string_view(&c, 1), pos);
 }
 
-string_view::size_type string_view::find_last_not_of(const char* s,
+string_view::size_type string_view::find_last_not_of(char const* s,
                                                      size_type pos,
                                                      size_type count) const
 {
   return find_last_not_of(string_view(s, count), pos);
 }
 
-string_view::size_type string_view::find_last_not_of(const char* s,
+string_view::size_type string_view::find_last_not_of(char const* s,
                                                      size_type pos) const
 {
   return find_last_not_of(string_view(s), pos);

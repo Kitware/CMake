@@ -46,7 +46,7 @@ bool cmCreateTestSourceList(std::vector<std::string> const& args,
 
   // Name of the source list
 
-  const char* sourceList = i->c_str();
+  char const* sourceList = i->c_str();
   ++i;
 
   // Name of the test driver

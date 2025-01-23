@@ -88,8 +88,8 @@ bool cmAddSubDirectoryCommand(std::vector<std::string> const& args,
 
     // Remove the CurrentDirectory from the srcPath and replace it
     // with the CurrentOutputDirectory.
-    const std::string& src = mf.GetCurrentSourceDirectory();
-    const std::string& bin = mf.GetCurrentBinaryDirectory();
+    std::string const& src = mf.GetCurrentSourceDirectory();
+    std::string const& bin = mf.GetCurrentBinaryDirectory();
     size_t srcLen = src.length();
     size_t binLen = bin.length();
     if (srcLen > 0 && src.back() == '/') {

@@ -20,13 +20,13 @@ struct cmGeneratorExpressionDAGChecker
   cmGeneratorExpressionDAGChecker(cmListFileBacktrace backtrace,
                                   cmGeneratorTarget const* target,
                                   std::string property,
-                                  const GeneratorExpressionContent* content,
+                                  GeneratorExpressionContent const* content,
                                   cmGeneratorExpressionDAGChecker* parent,
                                   cmLocalGenerator const* contextLG,
                                   std::string const& contextConfig);
   cmGeneratorExpressionDAGChecker(cmGeneratorTarget const* target,
                                   std::string property,
-                                  const GeneratorExpressionContent* content,
+                                  GeneratorExpressionContent const* content,
                                   cmGeneratorExpressionDAGChecker* parent,
                                   cmLocalGenerator const* contextLG,
                                   std::string const& contextConfig);
@@ -42,7 +42,7 @@ struct cmGeneratorExpressionDAGChecker
   Result Check() const;
 
   void ReportError(cmGeneratorExpressionContext* context,
-                   const std::string& expr);
+                   std::string const& expr);
 
   bool EvaluatingTransitiveProperty() const;
   bool EvaluatingGenexExpression() const;
@@ -74,13 +74,13 @@ struct cmGeneratorExpressionDAGChecker
 private:
   Result CheckGraph() const;
 
-  const cmGeneratorExpressionDAGChecker* const Parent;
-  const cmGeneratorExpressionDAGChecker* const Top;
+  cmGeneratorExpressionDAGChecker const* const Parent;
+  cmGeneratorExpressionDAGChecker const* const Top;
   cmGeneratorTarget const* Target;
-  const std::string Property;
+  std::string const Property;
   mutable std::map<cmGeneratorTarget const*, std::set<std::string>> Seen;
-  const GeneratorExpressionContent* const Content;
-  const cmListFileBacktrace Backtrace;
+  GeneratorExpressionContent const* const Content;
+  cmListFileBacktrace const Backtrace;
   Result CheckResult;
   bool TransitivePropertiesOnly = false;
   bool CMP0131 = false;

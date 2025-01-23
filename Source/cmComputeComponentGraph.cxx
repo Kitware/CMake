@@ -7,7 +7,7 @@
 #include <cstddef>
 #include <limits>
 
-const size_t cmComputeComponentGraph::INVALID_COMPONENT =
+size_t const cmComputeComponentGraph::INVALID_COMPONENT =
   std::numeric_limits<size_t>::max();
 
 cmComputeComponentGraph::cmComputeComponentGraph(Graph const& input)

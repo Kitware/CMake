@@ -26,7 +26,7 @@ public:
 
   bool IsValid() const;
 
-  bool ReadFromArguments(const std::vector<std::string>& args,
+  bool ReadFromArguments(std::vector<std::string> const& args,
                          std::string& errorString);
 
   std::string GetCharacters() const;

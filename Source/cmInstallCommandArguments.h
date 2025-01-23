@@ -25,22 +25,22 @@ public:
   // Compute destination path.and check permissions
   bool Finalize();
 
-  const std::string& GetDestination() const;
-  const std::string& GetComponent() const;
-  const std::string& GetNamelinkComponent() const;
+  std::string const& GetDestination() const;
+  std::string const& GetComponent() const;
+  std::string const& GetNamelinkComponent() const;
   bool GetExcludeFromAll() const;
-  const std::string& GetRename() const;
-  const std::string& GetPermissions() const;
-  const std::vector<std::string>& GetConfigurations() const;
+  std::string const& GetRename() const;
+  std::string const& GetPermissions() const;
+  std::vector<std::string> const& GetConfigurations() const;
   bool GetOptional() const;
   bool GetNamelinkOnly() const;
   bool GetNamelinkSkip() const;
   bool HasNamelinkComponent() const;
-  const std::string& GetType() const;
+  std::string const& GetType() const;
 
-  const std::string& GetDefaultComponent() const;
+  std::string const& GetDefaultComponent() const;
 
-  static bool CheckPermissions(const std::string& onePerm, std::string& perm);
+  static bool CheckPermissions(std::string const& onePerm, std::string& perm);
 
 private:
   std::string Destination;
@@ -59,8 +59,8 @@ private:
   std::string PermissionsString;
 
   cmInstallCommandArguments* GenericArguments = nullptr;
-  static const char* PermissionsTable[];
-  static const std::string EmptyString;
+  static char const* PermissionsTable[];
+  static std::string const EmptyString;
   std::string DefaultComponentName;
   bool CheckPermissions();
 };
@@ -69,10 +69,10 @@ class cmInstallCommandIncludesArgument
 {
 public:
   cmInstallCommandIncludesArgument();
-  void Parse(const std::vector<std::string>* args,
+  void Parse(std::vector<std::string> const* args,
              std::vector<std::string>* unconsumedArgs);
 
-  const std::vector<std::string>& GetIncludeDirs() const;
+  std::vector<std::string> const& GetIncludeDirs() const;
 
 private:
   std::vector<std::string> IncludeDirs;
@@ -87,7 +87,7 @@ public:
   void Parse(std::vector<std::string> args,
              std::vector<std::string>* unconsumedArgs);
 
-  const std::string& GetFileSet() const { return this->FileSet; }
+  std::string const& GetFileSet() const { return this->FileSet; }
 
 private:
   std::string FileSet;

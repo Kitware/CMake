@@ -10,7 +10,7 @@
 struct cmDocumentationEntry
 {
 #if __cplusplus <= 201103L
-  cmDocumentationEntry(const std::string& name, const std::string& brief)
+  cmDocumentationEntry(std::string const& name, std::string const& brief)
     : Name{ name }
     , Brief{ brief }
   {

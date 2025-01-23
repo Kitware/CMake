@@ -15,7 +15,7 @@
 class cmBase32Encoder
 {
 public:
-  static const char paddingChar = '=';
+  static char const paddingChar = '=';
 
   cmBase32Encoder();
   ~cmBase32Encoder() = default;
@@ -24,6 +24,6 @@ public:
   // @arg input Input data pointer
   // @arg len Input data size
   // @arg padding Flag to append "=" on demand
-  std::string encodeString(const unsigned char* input, size_t len,
+  std::string encodeString(unsigned char const* input, size_t len,
                            bool padding = true);
 };

@@ -20,19 +20,19 @@ class QCMakePresetItemModel : public QAbstractItemModel
 public:
   QCMakePresetItemModel(QObject* parent = nullptr);
 
-  QVariant data(const QModelIndex& index, int role) const override;
-  Qt::ItemFlags flags(const QModelIndex& index) const override;
+  QVariant data(QModelIndex const& index, int role) const override;
+  Qt::ItemFlags flags(QModelIndex const& index) const override;
 
-  int rowCount(const QModelIndex& parent = QModelIndex{}) const override;
-  int columnCount(const QModelIndex& parent = QModelIndex{}) const override;
+  int rowCount(QModelIndex const& parent = QModelIndex{}) const override;
+  int columnCount(QModelIndex const& parent = QModelIndex{}) const override;
 
   QModelIndex index(int row, int column,
-                    const QModelIndex& parent = QModelIndex{}) const override;
-  QModelIndex parent(const QModelIndex& index) const override;
+                    QModelIndex const& parent = QModelIndex{}) const override;
+  QModelIndex parent(QModelIndex const& index) const override;
 
   QVector<QCMakePreset> const& presets() const;
 
-  int presetNameToRow(const QString& name) const;
+  int presetNameToRow(QString const& name) const;
 
 public slots:
   void setPresets(QVector<QCMakePreset> const& presets);

@@ -21,7 +21,7 @@ cmExportSet::cmExportSet(std::string name)
 cmExportSet::~cmExportSet() = default;
 
 cmExportSet::PackageDependency& cmExportSet::GetPackageDependencyForSetup(
-  const std::string& name)
+  std::string const& name)
 {
   auto& dep = this->PackageDependencies[name];
   if (!dep.SpecifiedIndex) {
@@ -39,7 +39,7 @@ bool cmExportSet::Compute(cmLocalGenerator* lg)
     auto const interfaceFileSets =
       tgtExport->Target->Target->GetAllInterfaceFileSets();
     auto const fileSetInTargetExport =
-      [&tgtExport, lg](const std::string& fileSetName) -> bool {
+      [&tgtExport, lg](std::string const& fileSetName) -> bool {
       auto* fileSet = tgtExport->Target->Target->GetFileSet(fileSetName);
 
       if (!tgtExport->FileSetGenerators.count(fileSet)) {
@@ -72,8 +72,8 @@ void cmExportSet::AddInstallation(cmInstallExportGenerator const* installation)
   this->Installations.push_back(installation);
 }
 
-void cmExportSet::SetXcFrameworkLocation(const std::string& name,
-                                         const std::string& location)
+void cmExportSet::SetXcFrameworkLocation(std::string const& name,
+                                         std::string const& location)
 {
   for (auto& te : this->TargetExports) {
     if (name == te->TargetName) {
@@ -82,7 +82,7 @@ void cmExportSet::SetXcFrameworkLocation(const std::string& name,
   }
 }
 
-cmExportSet& cmExportSetMap::operator[](const std::string& name)
+cmExportSet& cmExportSetMap::operator[](std::string const& name)
 {
   auto it = this->find(name);
   if (it == this->end()) // Export set not found

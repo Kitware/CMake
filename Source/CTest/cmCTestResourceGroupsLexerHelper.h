@@ -20,10 +20,10 @@ public:
       output);
   ~cmCTestResourceGroupsLexerHelper() = default;
 
-  bool ParseString(const std::string& value);
+  bool ParseString(std::string const& value);
 
   void SetProcessCount(unsigned int count);
-  void SetResourceType(const std::string& type);
+  void SetResourceType(std::string const& type);
   void SetNeededSlots(int count);
   void WriteRequirement();
   void WriteProcess();

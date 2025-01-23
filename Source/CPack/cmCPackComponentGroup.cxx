@@ -8,7 +8,7 @@
 #include "cmSystemTools.h"
 
 unsigned long cmCPackComponent::GetInstalledSize(
-  const std::string& installDir) const
+  std::string const& installDir) const
 {
   if (this->TotalSize != 0) {
     return this->TotalSize;
@@ -23,7 +23,7 @@ unsigned long cmCPackComponent::GetInstalledSize(
 }
 
 unsigned long cmCPackComponent::GetInstalledSizeInKbytes(
-  const std::string& installDir) const
+  std::string const& installDir) const
 {
   unsigned long result = (this->GetInstalledSize(installDir) + 512) / 1024;
   return result ? result : 1;

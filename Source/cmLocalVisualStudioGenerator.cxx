@@ -86,7 +86,7 @@ void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
 
 std::unique_ptr<cmCustomCommand>
 cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmGeneratorTarget* target,
-                                                   const std::string& config,
+                                                   std::string const& config,
                                                    bool isFortran)
 {
   std::unique_ptr<cmCustomCommand> pcc;
@@ -117,18 +117,18 @@ cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmGeneratorTarget* target,
   return pcc;
 }
 
-const char* cmLocalVisualStudioGenerator::ReportErrorLabel() const
+char const* cmLocalVisualStudioGenerator::ReportErrorLabel() const
 {
   return ":VCReportError";
 }
 
-const char* cmLocalVisualStudioGenerator::GetReportErrorLabel() const
+char const* cmLocalVisualStudioGenerator::GetReportErrorLabel() const
 {
   return this->ReportErrorLabel();
 }
 
 std::string cmLocalVisualStudioGenerator::ConstructScript(
-  cmCustomCommandGenerator const& ccg, const std::string& newline_text)
+  cmCustomCommandGenerator const& ccg, std::string const& newline_text)
 {
   bool useLocal = this->CustomCommandUseLocal();
   std::string workingDirectory = ccg.GetWorkingDirectory();
@@ -244,7 +244,7 @@ std::string cmLocalVisualStudioGenerator::ConstructScript(
 }
 
 std::string cmLocalVisualStudioGenerator::FinishConstructScript(
-  VsProjectType projectType, const std::string& newline)
+  VsProjectType projectType, std::string const& newline)
 {
   bool useLocal = this->CustomCommandUseLocal();
 

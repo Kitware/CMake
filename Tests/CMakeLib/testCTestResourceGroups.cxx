@@ -15,7 +15,7 @@ struct ExpectedParseResult
     ExpectedValue;
 };
 
-static const std::vector<ExpectedParseResult> expectedResults{
+static std::vector<ExpectedParseResult> const expectedResults{
   /* clang-format off */
   { "threads:2", true, {
     { { "threads", 2, 1 } },
@@ -104,7 +104,7 @@ static const std::vector<ExpectedParseResult> expectedResults{
   /* clang-format on */
 };
 
-static bool TestExpectedParseResult(const ExpectedParseResult& expected)
+static bool TestExpectedParseResult(ExpectedParseResult const& expected)
 {
   std::vector<std::vector<cmCTestTestHandler::cmCTestTestResourceRequirement>>
     result;

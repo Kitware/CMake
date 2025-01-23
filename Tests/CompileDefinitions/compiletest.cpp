@@ -15,9 +15,9 @@ struct CMakeStaticAssert<true>
 {
 };
 
-static const char fun_string[] = CMAKE_IS_;
+static char const fun_string[] = CMAKE_IS_;
 #ifndef NO_SPACES_IN_DEFINE_VALUES
-static const char very_fun_string[] = CMAKE_IS_REALLY;
+static char const very_fun_string[] = CMAKE_IS_REALLY;
 #endif
 
 enum

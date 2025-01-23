@@ -9,7 +9,7 @@
 
 #include "cmStateSnapshot.h"
 
-const std::vector<std::string>& cmCustomCommand::GetOutputs() const
+std::vector<std::string> const& cmCustomCommand::GetOutputs() const
 {
   return this->Outputs;
 }
@@ -24,7 +24,7 @@ void cmCustomCommand::SetOutputs(std::string output)
   this->Outputs = { std::move(output) };
 }
 
-const std::vector<std::string>& cmCustomCommand::GetByproducts() const
+std::vector<std::string> const& cmCustomCommand::GetByproducts() const
 {
   return this->Byproducts;
 }
@@ -34,7 +34,7 @@ void cmCustomCommand::SetByproducts(std::vector<std::string> byproducts)
   this->Byproducts = std::move(byproducts);
 }
 
-const std::vector<std::string>& cmCustomCommand::GetDepends() const
+std::vector<std::string> const& cmCustomCommand::GetDepends() const
 {
   return this->Depends;
 }
@@ -48,7 +48,7 @@ void cmCustomCommand::SetDepends(std::vector<std::string> depends)
   Depends = std::move(depends);
 }
 
-const std::string& cmCustomCommand::GetMainDependency() const
+std::string const& cmCustomCommand::GetMainDependency() const
 {
   assert(this->HasMainDependency_);
   return this->Depends[0];
@@ -67,7 +67,7 @@ void cmCustomCommand::SetMainDependency(std::string main_dependency)
   }
 }
 
-const cmCustomCommandLines& cmCustomCommand::GetCommandLines() const
+cmCustomCommandLines const& cmCustomCommand::GetCommandLines() const
 {
   return this->CommandLines;
 }
@@ -77,24 +77,24 @@ void cmCustomCommand::SetCommandLines(cmCustomCommandLines commandLines)
   this->CommandLines = std::move(commandLines);
 }
 
-const char* cmCustomCommand::GetComment() const
+char const* cmCustomCommand::GetComment() const
 {
-  const char* no_comment = nullptr;
+  char const* no_comment = nullptr;
   return this->HaveComment ? this->Comment.c_str() : no_comment;
 }
 
-void cmCustomCommand::SetComment(const char* comment)
+void cmCustomCommand::SetComment(char const* comment)
 {
   this->Comment = comment ? comment : "";
   this->HaveComment = (comment != nullptr);
 }
 
-void cmCustomCommand::AppendCommands(const cmCustomCommandLines& commandLines)
+void cmCustomCommand::AppendCommands(cmCustomCommandLines const& commandLines)
 {
   cm::append(this->CommandLines, commandLines);
 }
 
-void cmCustomCommand::AppendDepends(const std::vector<std::string>& depends)
+void cmCustomCommand::AppendDepends(std::vector<std::string> const& depends)
 {
   cm::append(this->Depends, depends);
 }
@@ -154,12 +154,12 @@ void cmCustomCommand::SetUsesTerminal(bool b)
   this->UsesTerminal = b;
 }
 
-void cmCustomCommand::SetRole(const std::string& role)
+void cmCustomCommand::SetRole(std::string const& role)
 {
   this->Role = role;
 }
 
-const std::string& cmCustomCommand::GetRole() const
+std::string const& cmCustomCommand::GetRole() const
 {
   return this->Role;
 }
@@ -184,22 +184,22 @@ void cmCustomCommand::SetDependsExplicitOnly(bool b)
   this->DependsExplicitOnly = b;
 }
 
-const std::string& cmCustomCommand::GetDepfile() const
+std::string const& cmCustomCommand::GetDepfile() const
 {
   return this->Depfile;
 }
 
-void cmCustomCommand::SetDepfile(const std::string& depfile)
+void cmCustomCommand::SetDepfile(std::string const& depfile)
 {
   this->Depfile = depfile;
 }
 
-const std::string& cmCustomCommand::GetJobPool() const
+std::string const& cmCustomCommand::GetJobPool() const
 {
   return this->JobPool;
 }
 
-void cmCustomCommand::SetJobPool(const std::string& job_pool)
+void cmCustomCommand::SetJobPool(std::string const& job_pool)
 {
   this->JobPool = job_pool;
 }
@@ -222,19 +222,18 @@ void cmCustomCommand::SetJobserverAware(bool b)
 CM_FOR_EACH_CUSTOM_COMMAND_POLICY(DEFINE_CC_POLICY_ACCESSOR)
 #undef DEFINE_CC_POLICY_ACCESSOR
 
-void cmCustomCommand::RecordPolicyValues(const cmStateSnapshot& snapshot)
-{
+void cmCustomCommand::RecordPolicyValues(cmStateSnapshot const& snapshot){
 #define SET_CC_POLICY(P) this->P##Status = snapshot.GetPolicy(cmPolicies::P);
   CM_FOR_EACH_CUSTOM_COMMAND_POLICY(SET_CC_POLICY)
 #undef SET_CC_POLICY
 }
 
-const std::string& cmCustomCommand::GetTarget() const
+std::string const& cmCustomCommand::GetTarget() const
 {
   return this->Target;
 }
 
-void cmCustomCommand::SetTarget(const std::string& target)
+void cmCustomCommand::SetTarget(std::string const& target)
 {
   this->Target = target;
 }

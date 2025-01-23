@@ -12,10 +12,10 @@
 #include "testCommon.h"
 
 static bool testStackFrameFunctionName(
-  dap::optional<dap::StackFrameFormat> format, const char* expectedName)
+  dap::optional<dap::StackFrameFormat> format, char const* expectedName)
 {
   auto thread = std::make_shared<cmDebugger::cmDebuggerThread>(0, "name");
-  const auto* functionName = "function_name";
+  auto const* functionName = "function_name";
   auto arguments = std::vector<cmListFileArgument>{ cmListFileArgument(
     "arg", cmListFileArgument::Delimiter::Unquoted, 0) };
   cmListFileFunction func(functionName, 10, 20, arguments);

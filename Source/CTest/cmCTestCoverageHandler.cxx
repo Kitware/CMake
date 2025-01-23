@@ -361,7 +361,7 @@ int cmCTestCoverageHandler::ProcessHandler()
       cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "    ", this->Quiet);
     }
 
-    const std::string fullFileName = file.first;
+    std::string const fullFileName = file.first;
     bool shouldIDoCoverage =
       this->ShouldIDoCoverage(fullFileName, sourceDir, binaryDir);
     if (!shouldIDoCoverage) {
@@ -392,10 +392,10 @@ int cmCTestCoverageHandler::ProcessHandler()
       this->StartCoverageLogXML(covLogXML);
     }
 
-    const std::string fileName = cmSystemTools::GetFilenameName(fullFileName);
-    const std::string shortFileName =
+    std::string const fileName = cmSystemTools::GetFilenameName(fullFileName);
+    std::string const shortFileName =
       this->CTest->GetShortPathToFile(fullFileName);
-    const cmCTestCoverageHandlerContainer::SingleFileCoverageVector& fcov =
+    cmCTestCoverageHandlerContainer::SingleFileCoverageVector const& fcov =
       file.second;
     covLogXML.StartElement("File");
     covLogXML.Attribute("Name", fileName);
@@ -609,7 +609,7 @@ void cmCTestCoverageHandler::PopulateCustomVectors(cmMakefile* mf)
 #  define fnc_prefix(s, t) cmHasPrefix(s, t)
 #endif
 
-static bool IsFileInDir(const std::string& infile, const std::string& indir)
+static bool IsFileInDir(std::string const& infile, std::string const& indir)
 {
   std::string file = cmSystemTools::CollapseFullPath(infile);
   std::string dir = cmSystemTools::CollapseFullPath(indir);
@@ -716,9 +716,9 @@ struct cmCTestCoverageHandlerLocale
       cmSystemTools::UnsetEnv("LC_ALL");
     }
   }
-  cmCTestCoverageHandlerLocale(const cmCTestCoverageHandlerLocale&) = delete;
+  cmCTestCoverageHandlerLocale(cmCTestCoverageHandlerLocale const&) = delete;
   cmCTestCoverageHandlerLocale& operator=(
-    const cmCTestCoverageHandlerLocale&) = delete;
+    cmCTestCoverageHandlerLocale const&) = delete;
   std::string lc_all;
 };
 
@@ -789,7 +789,7 @@ int cmCTestCoverageHandler::HandleDelphiCoverage(
   return static_cast<int>(cont->TotalCoverage.size());
 }
 
-static std::string joinCommandLine(const std::vector<std::string>& args)
+static std::string joinCommandLine(std::vector<std::string> const& args)
 {
   std::string ret;
 
@@ -946,7 +946,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
     std::vector<std::string> covargs = basecovargs;
     covargs.push_back(fileDir);
     covargs.push_back(f);
-    const std::string command = joinCommandLine(covargs);
+    std::string const command = joinCommandLine(covargs);
 
     cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                        command << std::endl, this->Quiet);
@@ -1306,7 +1306,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
   std::vector<std::string> covargs =
     cmSystemTools::ParseArguments(lcovExtraFlags);
   covargs.insert(covargs.begin(), lcovCommand);
-  const std::string command = joinCommandLine(covargs);
+  std::string const command = joinCommandLine(covargs);
 
   // In intel compiler we have to call codecov only once in each executable
   // directory. It collects all *.dyn files to generate .dpi file.
@@ -1691,7 +1691,7 @@ std::string cmCTestCoverageHandler::FindFile(
 
 // This is a header put on each marked up source file
 namespace {
-const char* bullseyeHelp[] = {
+char const* bullseyeHelp[] = {
   "    Coverage produced by bullseye covbr tool: ",
   "      www.bullseye.com/help/ref_covbr.html",
   "    * An arrow --> indicates incomplete coverage.",
@@ -1838,7 +1838,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
 }
 
 int cmCTestCoverageHandler::RunBullseyeCommand(
-  cmCTestCoverageHandlerContainer* cont, const char* cmd, const char* arg,
+  cmCTestCoverageHandlerContainer* cont, char const* cmd, char const* arg,
   std::string& outputFile)
 {
   std::string program = cmSystemTools::FindProgram(cmd);
@@ -2142,7 +2142,7 @@ void cmCTestCoverageHandler::LoadLabels()
   }
 }
 
-void cmCTestCoverageHandler::LoadLabels(const char* dir)
+void cmCTestCoverageHandler::LoadLabels(char const* dir)
 {
   LabelSet& dirLabels = this->TargetDirs[dir];
   std::string fname = cmStrCat(dir, "/Labels.txt");

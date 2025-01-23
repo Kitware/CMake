@@ -17,7 +17,7 @@
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 
-static bool stringToId(const char* input, cmPolicies::PolicyID& pid)
+static bool stringToId(char const* input, cmPolicies::PolicyID& pid)
 {
   assert(input);
   if (strlen(input) != 7) {
@@ -58,7 +58,7 @@ static bool stringToId(const char* input, cmPolicies::PolicyID& pid)
 #define CM_FOR_EACH_POLICY_ID_STATUS(POLICY)                                  \
   CM_FOR_EACH_POLICY_TABLE(POLICY, CM_SELECT_ID_STATUS)
 
-static const char* idToString(cmPolicies::PolicyID id)
+static char const* idToString(cmPolicies::PolicyID id)
 {
   switch (id) {
 #define POLICY_CASE(ID)                                                       \
@@ -72,7 +72,7 @@ static const char* idToString(cmPolicies::PolicyID id)
   return nullptr;
 }
 
-static const char* idToVersion(cmPolicies::PolicyID id)
+static char const* idToVersion(cmPolicies::PolicyID id)
 {
   switch (id) {
 #define POLICY_CASE(ID, V_MAJOR, V_MINOR, V_PATCH)                            \
@@ -106,7 +106,7 @@ static bool isPolicyNewerThan(cmPolicies::PolicyID id, unsigned int majorV,
   return false;
 }
 
-static const char* idToShortDescription(cmPolicies::PolicyID id)
+static char const* idToShortDescription(cmPolicies::PolicyID id)
 {
   switch (id) {
 #define POLICY_CASE(ID, SHORT_DESCRIPTION)                                    \
@@ -348,7 +348,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile* mf, unsigned int majorVer,
   return true;
 }
 
-bool cmPolicies::GetPolicyID(const char* id, cmPolicies::PolicyID& pid)
+bool cmPolicies::GetPolicyID(char const* id, cmPolicies::PolicyID& pid)
 {
   return stringToId(id, pid);
 }

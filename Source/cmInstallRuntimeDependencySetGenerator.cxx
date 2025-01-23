@@ -22,8 +22,8 @@
 cmInstallRuntimeDependencySetGenerator::cmInstallRuntimeDependencySetGenerator(
   DependencyType type, cmInstallRuntimeDependencySet* dependencySet,
   std::vector<std::string> installRPaths, bool noInstallRPath,
-  std::string installNameDir, bool noInstallName, const char* depsVar,
-  const char* rpathPrefix, const char* tmpVarPrefix, std::string destination,
+  std::string installNameDir, bool noInstallName, char const* depsVar,
+  char const* rpathPrefix, char const* tmpVarPrefix, std::string destination,
   std::vector<std::string> const& configurations, std::string component,
   std::string permissions, MessageLevel message, bool exclude_from_all,
   cmListFileBacktrace backtrace)
@@ -51,7 +51,7 @@ bool cmInstallRuntimeDependencySetGenerator::Compute(cmLocalGenerator* lg)
 }
 
 void cmInstallRuntimeDependencySetGenerator::GenerateScriptForConfig(
-  std::ostream& os, const std::string& config, Indent indent)
+  std::ostream& os, std::string const& config, Indent indent)
 {
   if (!this->LocalGenerator->GetMakefile()
          ->GetSafeDefinition("CMAKE_INSTALL_NAME_TOOL")
@@ -151,8 +151,8 @@ void cmInstallRuntimeDependencySetGenerator::GenerateScriptForConfig(
 }
 
 void cmInstallRuntimeDependencySetGenerator::GenerateAppleLibraryScript(
-  std::ostream& os, const std::string& config,
-  const std::vector<std::string>& evaluatedRPaths, Indent indent)
+  std::ostream& os, std::string const& config,
+  std::vector<std::string> const& evaluatedRPaths, Indent indent)
 {
   os << indent << "if(NOT " << this->TmpVarPrefix
      << "_dep MATCHES \"\\\\.framework/\")\n";
@@ -174,8 +174,8 @@ void cmInstallRuntimeDependencySetGenerator::GenerateAppleLibraryScript(
 }
 
 void cmInstallRuntimeDependencySetGenerator::GenerateAppleFrameworkScript(
-  std::ostream& os, const std::string& config,
-  const std::vector<std::string>& evaluatedRPaths, Indent indent)
+  std::ostream& os, std::string const& config,
+  std::vector<std::string> const& evaluatedRPaths, Indent indent)
 {
   os << indent << "if(" << this->TmpVarPrefix
      << "_dep MATCHES \"^(.*/)?([^/]*\\\\.framework)/(.*)$\")\n"
@@ -204,9 +204,9 @@ void cmInstallRuntimeDependencySetGenerator::GenerateAppleFrameworkScript(
 }
 
 void cmInstallRuntimeDependencySetGenerator::GenerateInstallNameFixup(
-  std::ostream& os, const std::string& config,
-  const std::vector<std::string>& evaluatedRPaths, const std::string& filename,
-  const std::string& depName, Indent indent)
+  std::ostream& os, std::string const& config,
+  std::vector<std::string> const& evaluatedRPaths, std::string const& filename,
+  std::string const& depName, Indent indent)
 {
   if (!(this->NoInstallRPath && this->NoInstallName)) {
     auto indent2 = indent;
@@ -248,7 +248,7 @@ void cmInstallRuntimeDependencySetGenerator::GenerateInstallNameFixup(
 }
 
 void cmInstallRuntimeDependencySetGenerator::GenerateStripFixup(
-  std::ostream& os, const std::string& config, const std::string& depName,
+  std::ostream& os, std::string const& config, std::string const& depName,
   Indent indent)
 {
   std::string strip =

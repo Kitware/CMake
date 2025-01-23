@@ -14,8 +14,8 @@ public:
   std::vector<cmSourceGroup> GroupChildren;
 };
 
-cmSourceGroup::cmSourceGroup(std::string name, const char* regex,
-                             const char* parentName)
+cmSourceGroup::cmSourceGroup(std::string name, char const* regex,
+                             char const* parentName)
   : Name(std::move(name))
 {
   this->Internal = cm::make_unique<cmSourceGroupInternals>();
@@ -48,7 +48,7 @@ cmSourceGroup& cmSourceGroup::operator=(cmSourceGroup const& r)
   return *this;
 }
 
-void cmSourceGroup::SetGroupRegex(const char* regex)
+void cmSourceGroup::SetGroupRegex(char const* regex)
 {
   if (regex) {
     this->GroupRegex.compile(regex);
@@ -57,7 +57,7 @@ void cmSourceGroup::SetGroupRegex(const char* regex)
   }
 }
 
-void cmSourceGroup::AddGroupFile(const std::string& name)
+void cmSourceGroup::AddGroupFile(std::string const& name)
 {
   this->GroupFiles.insert(name);
 }
@@ -72,22 +72,22 @@ std::string const& cmSourceGroup::GetFullName() const
   return this->FullName;
 }
 
-bool cmSourceGroup::MatchesRegex(const std::string& name)
+bool cmSourceGroup::MatchesRegex(std::string const& name)
 {
   return this->GroupRegex.find(name);
 }
 
-bool cmSourceGroup::MatchesFiles(const std::string& name) const
+bool cmSourceGroup::MatchesFiles(std::string const& name) const
 {
   return this->GroupFiles.find(name) != this->GroupFiles.cend();
 }
 
-void cmSourceGroup::AssignSource(const cmSourceFile* sf)
+void cmSourceGroup::AssignSource(cmSourceFile const* sf)
 {
   this->SourceFiles.push_back(sf);
 }
 
-const std::vector<const cmSourceFile*>& cmSourceGroup::GetSourceFiles() const
+std::vector<cmSourceFile const*> const& cmSourceGroup::GetSourceFiles() const
 {
   return this->SourceFiles;
 }
@@ -97,7 +97,7 @@ void cmSourceGroup::AddChild(cmSourceGroup const& child)
   this->Internal->GroupChildren.push_back(child);
 }
 
-cmSourceGroup* cmSourceGroup::LookupChild(const std::string& name)
+cmSourceGroup* cmSourceGroup::LookupChild(std::string const& name)
 {
   for (cmSourceGroup& group : this->Internal->GroupChildren) {
     // look if descenened is the one were looking for
@@ -110,7 +110,7 @@ cmSourceGroup* cmSourceGroup::LookupChild(const std::string& name)
   return nullptr;
 }
 
-cmSourceGroup* cmSourceGroup::MatchChildrenFiles(const std::string& name)
+cmSourceGroup* cmSourceGroup::MatchChildrenFiles(std::string const& name)
 {
   if (this->MatchesFiles(name)) {
     return this;
@@ -124,14 +124,14 @@ cmSourceGroup* cmSourceGroup::MatchChildrenFiles(const std::string& name)
   return nullptr;
 }
 
-const cmSourceGroup* cmSourceGroup::MatchChildrenFiles(
-  const std::string& name) const
+cmSourceGroup const* cmSourceGroup::MatchChildrenFiles(
+  std::string const& name) const
 {
   if (this->MatchesFiles(name)) {
     return this;
   }
-  for (const cmSourceGroup& group : this->Internal->GroupChildren) {
-    const cmSourceGroup* result = group.MatchChildrenFiles(name);
+  for (cmSourceGroup const& group : this->Internal->GroupChildren) {
+    cmSourceGroup const* result = group.MatchChildrenFiles(name);
     if (result) {
       return result;
     }
@@ -139,7 +139,7 @@ const cmSourceGroup* cmSourceGroup::MatchChildrenFiles(
   return nullptr;
 }
 
-cmSourceGroup* cmSourceGroup::MatchChildrenRegex(const std::string& name)
+cmSourceGroup* cmSourceGroup::MatchChildrenRegex(std::string const& name)
 {
   for (cmSourceGroup& group : this->Internal->GroupChildren) {
     cmSourceGroup* result = group.MatchChildrenRegex(name);

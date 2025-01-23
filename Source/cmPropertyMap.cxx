@@ -10,7 +10,7 @@ void cmPropertyMap::Clear()
   this->Map_.clear();
 }
 
-void cmPropertyMap::SetProperty(const std::string& name, cmValue value)
+void cmPropertyMap::SetProperty(std::string const& name, cmValue value)
 {
   if (!value) {
     this->Map_.erase(name);
@@ -20,8 +20,8 @@ void cmPropertyMap::SetProperty(const std::string& name, cmValue value)
   this->Map_[name] = *value;
 }
 
-void cmPropertyMap::AppendProperty(const std::string& name,
-                                   const std::string& value, bool asString)
+void cmPropertyMap::AppendProperty(std::string const& name,
+                                   std::string const& value, bool asString)
 {
   // Skip if nothing to append.
   if (value.empty()) {
@@ -37,12 +37,12 @@ void cmPropertyMap::AppendProperty(const std::string& name,
   }
 }
 
-void cmPropertyMap::RemoveProperty(const std::string& name)
+void cmPropertyMap::RemoveProperty(std::string const& name)
 {
   this->Map_.erase(name);
 }
 
-cmValue cmPropertyMap::GetPropertyValue(const std::string& name) const
+cmValue cmPropertyMap::GetPropertyValue(std::string const& name) const
 {
   auto it = this->Map_.find(name);
   if (it != this->Map_.end()) {

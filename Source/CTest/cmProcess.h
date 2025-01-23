@@ -124,13 +124,13 @@ private:
                        int term_signal);
   static void OnTimeoutCB(uv_timer_t* timer);
   static void OnReadCB(uv_stream_t* stream, ssize_t nread,
-                       const uv_buf_t* buf);
+                       uv_buf_t const* buf);
   static void OnAllocateCB(uv_handle_t* handle, size_t suggested_size,
                            uv_buf_t* buf);
 
   void OnExit(int64_t exit_status, int term_signal);
   void OnTimeout();
-  void OnRead(ssize_t nread, const uv_buf_t* buf);
+  void OnRead(ssize_t nread, uv_buf_t const* buf);
   void OnAllocate(size_t suggested_size, uv_buf_t* buf);
 
   void StartTimer();
@@ -151,7 +151,7 @@ private:
   std::string Command;
   std::string WorkingDirectory;
   std::vector<std::string> Arguments;
-  std::vector<const char*> ProcessArgs;
+  std::vector<char const*> ProcessArgs;
   int Id;
   int64_t ExitValue;
   Termination TerminationStyle = Termination::Normal;

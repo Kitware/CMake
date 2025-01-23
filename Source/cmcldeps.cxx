@@ -35,7 +35,7 @@ void _setargv()
 {
 }
 
-static void Fatal(const char* msg, ...)
+static void Fatal(char const* msg, ...)
 {
   va_list ap;
   fprintf(stderr, "ninja: FATAL: ");
@@ -50,7 +50,7 @@ static void Fatal(const char* msg, ...)
   ExitProcess(1);
 }
 
-static void usage(const char* msg)
+static void usage(char const* msg)
 {
   Fatal("%s\n\nusage:\n    "
         "cmcldeps "
@@ -73,8 +73,8 @@ static cm::string_view trimLeadingSpace(cm::string_view cmdline)
   return cmdline.substr(i);
 }
 
-static void replaceAll(std::string& str, const std::string& search,
-                       const std::string& repl)
+static void replaceAll(std::string& str, std::string const& search,
+                       std::string const& repl)
 {
   std::string::size_type pos = 0;
   while ((pos = str.find(search, pos)) != std::string::npos) {
@@ -136,7 +136,7 @@ static void escapePath(std::string& path)
   replaceAll(path, " ", "\\ ");
 }
 
-static void outputDepFile(const std::string& dfile, const std::string& objfile,
+static void outputDepFile(std::string const& dfile, std::string const& objfile,
                           std::vector<std::string>& incs)
 {
 
@@ -177,9 +177,9 @@ static void outputDepFile(const std::string& dfile, const std::string& objfile,
   fclose(out);
 }
 
-static int process(cm::string_view srcfilename, const std::string& dfile,
-                   const std::string& objfile, const std::string& prefix,
-                   const std::string& cmd, const std::string& dir = "",
+static int process(cm::string_view srcfilename, std::string const& dfile,
+                   std::string const& objfile, std::string const& prefix,
+                   std::string const& cmd, std::string const& dir = "",
                    bool quiet = false)
 {
   std::string output;

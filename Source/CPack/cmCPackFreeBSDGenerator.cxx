@@ -22,8 +22,8 @@
 #include "cmWorkingDirectory.h"
 
 // Suffix used to tell libpkg what compression to use
-static const char FreeBSDPackageCompression[] = "txz";
-static const char FreeBSDPackageSuffix_17[] = ".pkg";
+static char const FreeBSDPackageCompression[] = "txz";
+static char const FreeBSDPackageSuffix_17[] = ".pkg";
 
 cmCPackFreeBSDGenerator::cmCPackFreeBSDGenerator()
   : cmCPackArchiveGenerator(cmArchiveWrite::CompressXZ, "paxr",
@@ -55,8 +55,8 @@ public:
     : d(nullptr)
   {
   }
-  PkgCreate(const std::string& output_dir, const std::string& toplevel_dir,
-            const std::string& manifest_name)
+  PkgCreate(std::string const& output_dir, std::string const& toplevel_dir,
+            std::string const& manifest_name)
     : d(pkg_create_new())
     , manifest(manifest_name)
 
@@ -106,9 +106,9 @@ private:
 class EscapeQuotes
 {
 public:
-  const std::string& value;
+  std::string const& value;
 
-  EscapeQuotes(const std::string& s)
+  EscapeQuotes(std::string const& s)
     : value(s)
   {
   }
@@ -116,7 +116,7 @@ public:
 
 // Output a string as "string" with escaping applied.
 cmGeneratedFileStream& operator<<(cmGeneratedFileStream& s,
-                                  const EscapeQuotes& v)
+                                  EscapeQuotes const& v)
 {
   s << '"';
   for (char c : v.value) {
@@ -179,7 +179,7 @@ class ManifestKeyValue : public ManifestKey
 public:
   std::string value;
 
-  ManifestKeyValue(const std::string& k, std::string v)
+  ManifestKeyValue(std::string const& k, std::string v)
     : ManifestKey(k)
     , value(std::move(v))
   {
@@ -198,18 +198,18 @@ public:
   using VList = std::vector<std::string>;
   VList value;
 
-  ManifestKeyListValue(const std::string& k)
+  ManifestKeyListValue(std::string const& k)
     : ManifestKey(k)
   {
   }
 
-  ManifestKeyListValue& operator<<(const std::string& v)
+  ManifestKeyListValue& operator<<(std::string const& v)
   {
     value.push_back(v);
     return *this;
   }
 
-  ManifestKeyListValue& operator<<(const std::vector<std::string>& v)
+  ManifestKeyListValue& operator<<(std::vector<std::string> const& v)
   {
     for (std::string const& e : v) {
       (*this) << e;
@@ -237,7 +237,7 @@ public:
 class ManifestKeyDepsValue : public ManifestKeyListValue
 {
 public:
-  ManifestKeyDepsValue(const std::string& k)
+  ManifestKeyDepsValue(std::string const& k)
     : ManifestKeyListValue(k)
   {
   }
@@ -254,7 +254,7 @@ public:
 
 // Write one of the key-value classes (above) to the stream @p s
 cmGeneratedFileStream& operator<<(cmGeneratedFileStream& s,
-                                  const ManifestKey& v)
+                                  ManifestKey const& v)
 {
   s << '"' << v.key << "\": ";
   v.write_value(s);
@@ -264,7 +264,7 @@ cmGeneratedFileStream& operator<<(cmGeneratedFileStream& s,
 
 // Look up variable; if no value is set, returns an empty string;
 // basically a wrapper that handles the nullptr return from GetOption().
-std::string cmCPackFreeBSDGenerator::var_lookup(const char* var_name)
+std::string cmCPackFreeBSDGenerator::var_lookup(char const* var_name)
 {
   cmValue pv = this->GetOption(var_name);
   if (!pv) {
@@ -312,7 +312,7 @@ void cmCPackFreeBSDGenerator::write_manifest_fields(
 
 // Package only actual files; others are ignored (in particular,
 // intermediate subdirectories are ignored).
-static bool ignore_file(const std::string& filename)
+static bool ignore_file(std::string const& filename)
 {
   struct stat statbuf;
   return stat(filename.c_str(), &statbuf) < 0 ||
@@ -325,8 +325,8 @@ static bool ignore_file(const std::string& filename)
 // to paths relative to @p toplevel, with a leading / (since the paths
 // in FreeBSD package files are supposed to be absolute).
 void write_manifest_files(cmGeneratedFileStream& s,
-                          const std::string& toplevel,
-                          const std::vector<std::string>& files)
+                          std::string const& toplevel,
+                          std::vector<std::string> const& files)
 {
   s << "\"files\": {\n";
   for (std::string const& file : files) {
@@ -405,7 +405,7 @@ int cmCPackFreeBSDGenerator::PackageFiles()
     return 0;
   }
 
-  const std::string output_dir = cmSystemTools::GetFilenamePath(toplevel);
+  std::string const output_dir = cmSystemTools::GetFilenamePath(toplevel);
   PkgCreate package(output_dir, toplevel, manifestname);
   if (package.isValid()) {
     if (!package.Create()) {
@@ -431,17 +431,17 @@ int cmCPackFreeBSDGenerator::PackageFiles()
     }
   }
 
-  const std::string packageFileName =
+  std::string const packageFileName =
     var_lookup("CPACK_PACKAGE_FILE_NAME") + FreeBSDPackageSuffix_17;
   if (packageFileNames.size() == 1 && !packageFileName.empty() &&
       packageFileNames[0] != packageFileName) {
     // Since libpkg always writes <name>-<version>.<suffix>,
     // if there is a CPACK_PACKAGE_FILE_NAME set, we need to
     // rename, and then re-set the name.
-    const std::string sourceFile = packageFileNames[0];
-    const std::string packageSubDirectory =
+    std::string const sourceFile = packageFileNames[0];
+    std::string const packageSubDirectory =
       cmSystemTools::GetParentDirectory(sourceFile);
-    const std::string targetFileName =
+    std::string const targetFileName =
       packageSubDirectory + '/' + packageFileName;
     if (cmSystemTools::RenameFile(sourceFile, targetFileName)) {
       this->packageFileNames.clear();

@@ -77,7 +77,7 @@ void cmInstallDirectoryGenerator::GenerateScriptActions(std::ostream& os,
 }
 
 void cmInstallDirectoryGenerator::GenerateScriptForConfig(
-  std::ostream& os, const std::string& config, Indent indent)
+  std::ostream& os, std::string const& config, Indent indent)
 {
   std::vector<std::string> dirs = this->GetDirectories(config);
 
@@ -93,11 +93,11 @@ void cmInstallDirectoryGenerator::GenerateScriptForConfig(
 }
 
 void cmInstallDirectoryGenerator::AddDirectoryInstallRule(
-  std::ostream& os, const std::string& config, Indent indent,
+  std::ostream& os, std::string const& config, Indent indent,
   std::vector<std::string> const& dirs)
 {
   // Write code to install the directories.
-  const char* no_rename = nullptr;
+  char const* no_rename = nullptr;
   this->AddInstallRule(os, this->GetDestination(config),
                        cmInstallType_DIRECTORY, dirs, this->Optional,
                        this->FilePermissions.c_str(),

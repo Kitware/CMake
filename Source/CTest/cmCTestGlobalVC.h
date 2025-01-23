@@ -61,7 +61,7 @@ protected:
   // Information about revisions from a svn log.
   std::list<Revision> Revisions;
 
-  virtual const char* LocalPath(std::string const& path);
+  virtual char const* LocalPath(std::string const& path);
 
   virtual void DoRevision(Revision const& revision,
                           std::vector<Change> const& changes);

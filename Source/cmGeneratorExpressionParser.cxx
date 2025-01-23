@@ -174,7 +174,7 @@ void cmGeneratorExpressionParser::ParseGeneratorExpression(
       extendText(result, colonToken);
 
       auto pit = parameters.begin();
-      const auto pend = parameters.end();
+      auto const pend = parameters.end();
       auto commaIt = commaTokens.begin();
       assert(parameters.size() > commaTokens.size());
       for (; pit != pend; ++pit, ++commaIt) {

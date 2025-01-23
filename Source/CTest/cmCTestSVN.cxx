@@ -44,7 +44,7 @@ void cmCTestSVN::CleanupImpl()
 class cmCTestSVN::InfoParser : public cmCTestVC::LineParser
 {
 public:
-  InfoParser(cmCTestSVN* svn, const char* prefix, std::string& rev,
+  InfoParser(cmCTestSVN* svn, char const* prefix, std::string& rev,
              SVNInfo& svninfo)
     : Rev(rev)
     , SVNRepo(svninfo)
@@ -191,7 +191,7 @@ void cmCTestSVN::GuessBase(SVNInfo& svninfo,
 class cmCTestSVN::UpdateParser : public cmCTestVC::LineParser
 {
 public:
-  UpdateParser(cmCTestSVN* svn, const char* prefix)
+  UpdateParser(cmCTestSVN* svn, char const* prefix)
     : SVN(svn)
   {
     this->SetLog(&svn->Log, prefix);
@@ -291,7 +291,7 @@ class cmCTestSVN::LogParser
   , private cmXMLParser
 {
 public:
-  LogParser(cmCTestSVN* svn, const char* prefix, SVNInfo& svninfo)
+  LogParser(cmCTestSVN* svn, char const* prefix, SVNInfo& svninfo)
     : OutputLogger(svn->Log, prefix)
     , SVN(svn)
     , SVNRepo(svninfo)
@@ -311,39 +311,39 @@ private:
   Change CurChange;
   std::vector<char> CData;
 
-  bool ProcessChunk(const char* data, int length) override
+  bool ProcessChunk(char const* data, int length) override
   {
     this->OutputLogger::ProcessChunk(data, length);
     this->ParseChunk(data, length);
     return true;
   }
 
-  void StartElement(const std::string& name, const char** atts) override
+  void StartElement(std::string const& name, char const** atts) override
   {
     this->CData.clear();
     if (name == "logentry") {
       this->Rev = Revision();
       this->Rev.SVNInfo = &this->SVNRepo;
-      if (const char* rev =
+      if (char const* rev =
             cmCTestSVN::LogParser::FindAttribute(atts, "revision")) {
         this->Rev.Rev = rev;
       }
       this->Changes.clear();
     } else if (name == "path") {
       this->CurChange = Change();
-      if (const char* action =
+      if (char const* action =
             cmCTestSVN::LogParser::FindAttribute(atts, "action")) {
         this->CurChange.Action = action[0];
       }
     }
   }
 
-  void CharacterDataHandler(const char* data, int length) override
+  void CharacterDataHandler(char const* data, int length) override
   {
     cm::append(this->CData, data, data + length);
   }
 
-  void EndElement(const std::string& name) override
+  void EndElement(std::string const& name) override
   {
     if (name == "logentry") {
       this->SVN->DoRevisionSVN(this->Rev, this->Changes);
@@ -362,7 +362,7 @@ private:
     this->CData.clear();
   }
 
-  void ReportError(int /*line*/, int /*column*/, const char* msg) override
+  void ReportError(int /*line*/, int /*column*/, char const* msg) override
   {
     this->SVN->Log << "Error parsing svn log xml: " << msg << "\n";
   }
@@ -420,7 +420,7 @@ void cmCTestSVN::DoRevisionSVN(Revision const& revision,
 class cmCTestSVN::StatusParser : public cmCTestVC::LineParser
 {
 public:
-  StatusParser(cmCTestSVN* svn, const char* prefix)
+  StatusParser(cmCTestSVN* svn, char const* prefix)
     : SVN(svn)
   {
     this->SetLog(&svn->Log, prefix);
@@ -486,7 +486,7 @@ void cmCTestSVN::WriteXMLGlobal(cmXMLWriter& xml)
 class cmCTestSVN::ExternalParser : public cmCTestVC::LineParser
 {
 public:
-  ExternalParser(cmCTestSVN* svn, const char* prefix)
+  ExternalParser(cmCTestSVN* svn, char const* prefix)
     : SVN(svn)
   {
     this->SetLog(&svn->Log, prefix);

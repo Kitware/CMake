@@ -17,7 +17,7 @@ int main()
     return 0;
   }
 
-  const std::string delimiter = "~_~";
+  std::string const delimiter = "~_~";
   input_paths += delimiter;
 
   size_t end = 0;
@@ -35,7 +35,7 @@ int main()
     return 1;
   }
 
-  const std::uint32_t optix_magic_value = 0x7f4e43ed;
+  std::uint32_t const optix_magic_value = 0x7f4e43ed;
   for (auto p : actual_paths) {
     if (p.find(".optixir") == std::string::npos) {
       std::cout << p << " Doesn't have the .optixir suffix" << p << std::endl;

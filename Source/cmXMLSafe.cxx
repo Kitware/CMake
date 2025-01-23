@@ -8,7 +8,7 @@
 
 #include "cm_utf8.h"
 
-cmXMLSafe::cmXMLSafe(const char* s)
+cmXMLSafe::cmXMLSafe(char const* s)
   : Data(s)
   , Size(static_cast<unsigned long>(strlen(s)))
   , DoQuotes(true)
@@ -41,7 +41,7 @@ std::ostream& operator<<(std::ostream& os, cmXMLSafe const& self)
   char const* last = self.Data + self.Size;
   while (first != last) {
     unsigned int ch;
-    if (const char* next = cm_utf8_decode_character(first, last, &ch)) {
+    if (char const* next = cm_utf8_decode_character(first, last, &ch)) {
       // http://www.w3.org/TR/REC-xml/#NT-Char
       if ((ch >= 0x20 && ch <= 0xD7FF) || (ch >= 0xE000 && ch <= 0xFFFD) ||
           (ch >= 0x10000 && ch <= 0x10FFFF) || ch == 0x9 || ch == 0xA ||

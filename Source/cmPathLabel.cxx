@@ -19,12 +19,12 @@ cmPathLabel::cmPathLabel(std::string label)
   this->Hash += ((this->Hash & 0x0001FFFF) << 15);
 }
 
-bool cmPathLabel::operator<(const cmPathLabel& l) const
+bool cmPathLabel::operator<(cmPathLabel const& l) const
 {
   return this->Hash < l.Hash;
 }
 
-bool cmPathLabel::operator==(const cmPathLabel& l) const
+bool cmPathLabel::operator==(cmPathLabel const& l) const
 {
   return this->Hash == l.Hash;
 }

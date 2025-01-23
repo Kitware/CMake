@@ -17,9 +17,9 @@ class StreamWriter;
 class cmMakefileProfilingData
 {
 public:
-  cmMakefileProfilingData(const std::string&);
+  cmMakefileProfilingData(std::string const&);
   ~cmMakefileProfilingData() noexcept;
-  void StartEntry(const std::string& category, const std::string& name,
+  void StartEntry(std::string const& category, std::string const& name,
                   cm::optional<Json::Value> args = cm::nullopt);
   void StopEntry();
 
@@ -30,8 +30,8 @@ public:
     RAII(const RAII&) = delete;
     RAII(RAII&&) noexcept;
 
-    RAII(cmMakefileProfilingData& data, const std::string& category,
-         const std::string& name,
+    RAII(cmMakefileProfilingData& data, std::string const& category,
+         std::string const& name,
          cm::optional<Json::Value> args = cm::nullopt);
 
     ~RAII();

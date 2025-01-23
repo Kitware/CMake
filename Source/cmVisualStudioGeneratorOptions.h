@@ -44,7 +44,7 @@ public:
   void ClearTables();
 
   // Store options from command line flags.
-  void Parse(const std::string& flags);
+  void Parse(std::string const& flags);
   void ParseFinish();
 
   void PrependInheritedString(std::string const& key);
@@ -73,17 +73,17 @@ public:
   bool IsManaged() const;
   // Write options to output.
   void OutputPreprocessorDefinitions(std::ostream& fout, int indent,
-                                     const std::string& lang);
+                                     std::string const& lang);
   void OutputAdditionalIncludeDirectories(std::ostream& fout, int indent,
-                                          const std::string& lang);
+                                          std::string const& lang);
   void OutputFlagMap(std::ostream& fout, int indent);
-  void SetConfiguration(const std::string& config);
-  const std::string& GetConfiguration() const;
+  void SetConfiguration(std::string const& config);
+  std::string const& GetConfiguration() const;
 
 protected:
   virtual void OutputFlag(std::ostream& fout, int indent,
-                          const std::string& tag,
-                          const std::string& content) = 0;
+                          std::string const& tag,
+                          std::string const& content) = 0;
 
 private:
   cmLocalVisualStudioGenerator* LocalGenerator;

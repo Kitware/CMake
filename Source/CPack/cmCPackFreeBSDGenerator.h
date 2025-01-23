@@ -29,6 +29,6 @@ public:
   int PackageFiles() override;
 
 protected:
-  std::string var_lookup(const char* var_name);
+  std::string var_lookup(char const* var_name);
   void write_manifest_fields(cmGeneratedFileStream&);
 };

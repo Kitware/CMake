@@ -525,7 +525,7 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
       current_str += static_cast<char>(c);
     } else if (encoding == encoding_utf8) {
       // Check for UTF-8 encoded string (up to 4 octets)
-      static const unsigned char utf8_check_table[3][2] = {
+      static unsigned char const utf8_check_table[3][2] = {
         { 0xE0, 0xC0 },
         { 0xF0, 0xE0 },
         { 0xF8, 0xF0 },
@@ -638,7 +638,7 @@ bool HandleStringsCommand(std::vector<std::string> const& args,
   }
 
   // Encode the result in a CMake list.
-  const char* sep = "";
+  char const* sep = "";
   std::string output;
   for (std::string const& sr : strings) {
     // Separate the strings in the output to make it a list.
@@ -685,7 +685,7 @@ bool HandleGlobImpl(std::vector<std::string> const& args, bool recurse,
   std::vector<std::string> files;
   bool configureDepends = false;
   bool warnConfigureLate = false;
-  const cmake::WorkingMode workingMode = cm->GetWorkingMode();
+  cmake::WorkingMode const workingMode = cm->GetWorkingMode();
   while (i != args.end()) {
     if (*i == "LIST_DIRECTORIES") {
       ++i; // skip LIST_DIRECTORIES
@@ -878,7 +878,7 @@ bool HandleMakeDirectoryCommand(std::vector<std::string> const& args,
   for (std::string const& arg :
        cmMakeRange(args).advance(1)) // Get rid of subcommand
   {
-    const std::string* cdir = &arg;
+    std::string const* cdir = &arg;
     if (!cmsys::SystemTools::FileIsFullPath(arg)) {
       expr =
         cmStrCat(status.GetMakefile().GetCurrentSourceDirectory(), '/', arg);
@@ -966,9 +966,9 @@ bool HandleDifferentCommand(std::vector<std::string> const& args,
    */
 
   // Evaluate arguments.
-  const char* file_lhs = nullptr;
-  const char* file_rhs = nullptr;
-  const char* var = nullptr;
+  char const* file_lhs = nullptr;
+  char const* file_rhs = nullptr;
+  char const* var = nullptr;
   enum Doing
   {
     DoingNone,
@@ -1004,7 +1004,7 @@ bool HandleDifferentCommand(std::vector<std::string> const& args,
   }
 
   // Compare the files.
-  const char* result =
+  char const* result =
     cmSystemTools::FilesDiffer(file_lhs, file_rhs) ? "1" : "0";
   status.GetMakefile().AddDefinition(var, result);
   return true;
@@ -1412,9 +1412,9 @@ bool HandleRelativePathCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const std::string& outVar = args[1];
-  const std::string& directoryName = args[2];
-  const std::string& fileName = args[3];
+  std::string const& outVar = args[1];
+  std::string const& directoryName = args[2];
+  std::string const& fileName = args[3];
 
   if (!cmSystemTools::FileIsFullPath(directoryName)) {
     std::string errstring =
@@ -1641,9 +1641,9 @@ bool HandleRemoveRecurse(std::vector<std::string> const& args,
   return HandleRemoveImpl(args, true, status);
 }
 
-std::string ToNativePath(const std::string& path)
+std::string ToNativePath(std::string const& path)
 {
-  const auto& outPath = cmSystemTools::ConvertToOutputPath(path);
+  auto const& outPath = cmSystemTools::ConvertToOutputPath(path);
   if (outPath.size() > 1 && outPath.front() == '\"' &&
       outPath.back() == '\"') {
     return outPath.substr(1, outPath.size() - 2);
@@ -1651,7 +1651,7 @@ std::string ToNativePath(const std::string& path)
   return outPath;
 }
 
-std::string ToCMakePath(const std::string& path)
+std::string ToCMakePath(std::string const& path)
 {
   auto temp = path;
   cmSystemTools::ConvertToUnixSlashes(temp);
@@ -1693,8 +1693,8 @@ bool HandleNativePathCommand(std::vector<std::string> const& args,
 
 #if !defined(CMAKE_BOOTSTRAP)
 
-const bool TLS_VERIFY_DEFAULT = true;
-const std::string TLS_VERSION_DEFAULT = "1.2";
+bool const TLS_VERIFY_DEFAULT = true;
+std::string const TLS_VERSION_DEFAULT = "1.2";
 
 // Stuff for curl download/upload
 using cmFileCommandVectorOfChar = std::vector<char>;
@@ -1704,7 +1704,7 @@ size_t cmWriteToFileCallback(void* ptr, size_t size, size_t nmemb, void* data)
   int realsize = static_cast<int>(size * nmemb);
   cmsys::ofstream* fout = static_cast<cmsys::ofstream*>(data);
   if (fout) {
-    const char* chPtr = static_cast<char*>(ptr);
+    char const* chPtr = static_cast<char*>(ptr);
     fout->write(chPtr, realsize);
   }
   return realsize;
@@ -1714,7 +1714,7 @@ size_t cmWriteToMemoryCallback(void* ptr, size_t size, size_t nmemb,
                                void* data)
 {
   int realsize = static_cast<int>(size * nmemb);
-  const char* chPtr = static_cast<char*>(ptr);
+  char const* chPtr = static_cast<char*>(ptr);
   cm::append(*static_cast<cmFileCommandVectorOfChar*>(data), chPtr,
              chPtr + realsize);
   return realsize;
@@ -1750,17 +1750,17 @@ int cmFileCommandCurlDebugCallback(CURL*, curl_infotype type, char* chPtr,
 }
 
 #  if defined(LIBCURL_VERSION_NUM) && LIBCURL_VERSION_NUM >= 0x072000
-const CURLoption CM_CURLOPT_XFERINFOFUNCTION = CURLOPT_XFERINFOFUNCTION;
+CURLoption const CM_CURLOPT_XFERINFOFUNCTION = CURLOPT_XFERINFOFUNCTION;
 using cm_curl_off_t = curl_off_t;
 #  else
-const CURLoption CM_CURLOPT_XFERINFOFUNCTION = CURLOPT_PROGRESSFUNCTION;
+CURLoption const CM_CURLOPT_XFERINFOFUNCTION = CURLOPT_PROGRESSFUNCTION;
 using cm_curl_off_t = double;
 #  endif
 
 class cURLProgressHelper
 {
 public:
-  cURLProgressHelper(cmMakefile* mf, const char* text)
+  cURLProgressHelper(cmMakefile* mf, char const* text)
     : Makefile(mf)
     , Text(text)
   {
@@ -1849,8 +1849,8 @@ public:
     }
   }
 
-  cURLEasyGuard(const cURLEasyGuard&) = delete;
-  cURLEasyGuard& operator=(const cURLEasyGuard&) = delete;
+  cURLEasyGuard(cURLEasyGuard const&) = delete;
+  cURLEasyGuard& operator=(cURLEasyGuard const&) = delete;
 
   void release() { this->Easy = nullptr; }
 
@@ -2193,7 +2193,7 @@ bool HandleDownloadCommand(std::vector<std::string> const& args,
     check_curl_result(res, "DOWNLOAD cannot set TLS/SSL Verify off: ");
   }
 
-  for (const auto& range : curl_ranges) {
+  for (auto const& range : curl_ranges) {
     std::string curl_range = range.first + '-' +
       (range.second.has_value() ? range.second.value() : "");
     res = ::curl_easy_setopt(curl, CURLOPT_RANGE, curl_range.c_str());
@@ -2732,11 +2732,11 @@ bool HandleUploadCommand(std::vector<std::string> const& args,
 #endif
 }
 
-void AddEvaluationFile(const std::string& inputName,
-                       const std::string& targetName,
-                       const std::string& outputExpr,
-                       const std::string& condition, bool inputIsContent,
-                       const std::string& newLineCharacter, mode_t permissions,
+void AddEvaluationFile(std::string const& inputName,
+                       std::string const& targetName,
+                       std::string const& outputExpr,
+                       std::string const& condition, bool inputIsContent,
+                       std::string const& newLineCharacter, mode_t permissions,
                        cmExecutionStatus& status)
 {
   cmListFileBacktrace lfbt = status.GetMakefile().GetBacktrace();
@@ -2814,7 +2814,7 @@ bool HandleGenerateCommand(std::vector<std::string> const& args,
     status.SetError("GENERATE requires INPUT or CONTENT option.");
     return false;
   }
-  const bool inputIsContent = arguments.ParsedKeywords[1] == "CONTENT"_s;
+  bool const inputIsContent = arguments.ParsedKeywords[1] == "CONTENT"_s;
   if (!inputIsContent && arguments.ParsedKeywords[1] != "INPUT") {
     status.SetError("Unknown argument to GENERATE subcommand.");
     return false;
@@ -2942,7 +2942,7 @@ bool HandleLockCommand(std::vector<std::string> const& args,
       release = true;
     } else if (args[i] == "GUARD") {
       ++i;
-      const char* merr = "expected FUNCTION, FILE or PROCESS after GUARD";
+      char const* merr = "expected FUNCTION, FILE or PROCESS after GUARD";
       if (i >= args.size()) {
         status.GetMakefile().IssueMessage(MessageType::FATAL_ERROR, merr);
         return false;
@@ -3047,7 +3047,7 @@ bool HandleLockCommand(std::vector<std::string> const& args,
     }
   }
 
-  const std::string result = fileLockResult.GetOutputMessage();
+  std::string const result = fileLockResult.GetOutputMessage();
 
   if (resultVariable.empty() && !fileLockResult.IsOk()) {
     status.GetMakefile().IssueMessage(
@@ -3089,7 +3089,7 @@ bool HandleTimestampCommand(std::vector<std::string> const& args,
                         filename);
   }
 
-  const std::string& outputVariable = args[argsIndex++];
+  std::string const& outputVariable = args[argsIndex++];
 
   std::string formatString;
   if (args.size() > argsIndex && args[argsIndex] != "UTC") {
@@ -3127,9 +3127,9 @@ bool HandleSizeCommand(std::vector<std::string> const& args,
 
   unsigned int argsIndex = 1;
 
-  const std::string& filename = args[argsIndex++];
+  std::string const& filename = args[argsIndex++];
 
-  const std::string& outputVariable = args[argsIndex++];
+  std::string const& outputVariable = args[argsIndex++];
 
   if (!cmSystemTools::FileExists(filename, true)) {
     status.SetError(
@@ -3152,8 +3152,8 @@ bool HandleReadSymlinkCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const std::string& filename = args[1];
-  const std::string& outputVariable = args[2];
+  std::string const& filename = args[1];
+  std::string const& outputVariable = args[2];
 
   std::string result;
   if (!cmSystemTools::ReadSymlink(filename, result)) {
@@ -3555,9 +3555,9 @@ bool HandleConfigureCommand(std::vector<std::string> const& args,
   makeFile.AddCMakeOutputFile(outputFile);
 
   // Create output directory
-  const std::string::size_type slashPos = outputFile.rfind('/');
+  std::string::size_type const slashPos = outputFile.rfind('/');
   if (slashPos != std::string::npos) {
-    const std::string path = outputFile.substr(0, slashPos);
+    std::string const path = outputFile.substr(0, slashPos);
     cmSystemTools::MakeDirectory(path);
   }
 
@@ -3644,7 +3644,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     return true;
   }
 
-  const char* knownFormats[] = {
+  char const* knownFormats[] = {
     "7zip", "gnutar", "pax", "paxr", "raw", "zip"
   };
 
@@ -3656,7 +3656,7 @@ bool HandleArchiveCreateCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const char* zipFileFormats[] = { "7zip", "zip" };
+  char const* zipFileFormats[] = { "7zip", "zip" };
   if (!parsedArgs.Compression.empty() &&
       cm::contains(zipFileFormats, parsedArgs.Format)) {
     status.SetError(cmStrCat("archive format ", parsedArgs.Format,
@@ -3832,7 +3832,7 @@ bool ValidateAndConvertPermissions(
   if (!permissions) {
     return true;
   }
-  for (const auto& i : *permissions) {
+  for (auto const& i : *permissions) {
     if (!cmFSPermissions::stringToModeT(i, perms)) {
       status.SetError(i + " is an invalid permission specifier");
       cmSystemTools::SetFatalErrorOccurred();
@@ -3842,7 +3842,7 @@ bool ValidateAndConvertPermissions(
   return true;
 }
 
-bool SetPermissions(const std::string& filename, const mode_t& perms,
+bool SetPermissions(std::string const& filename, mode_t const& perms,
                     cmExecutionStatus& status)
 {
   if (!cmSystemTools::SetPermissions(filename, perms)) {
@@ -3922,7 +3922,7 @@ bool HandleChmodCommandImpl(std::vector<std::string> const& args, bool recurse,
 
   if (recurse) {
     std::vector<std::string> tempPathEntries;
-    for (const auto& i : pathEntries) {
+    for (auto const& i : pathEntries) {
       if (cmSystemTools::FileIsDirectory(i)) {
         globber.FindFiles(i + "/*");
         tempPathEntries = globber.GetFiles();
@@ -3938,7 +3938,7 @@ bool HandleChmodCommandImpl(std::vector<std::string> const& args, bool recurse,
   }
 
   // chmod
-  for (const auto& i : allPathEntries) {
+  for (auto const& i : allPathEntries) {
     if (!(cmSystemTools::FileExists(i) || cmSystemTools::FileIsDirectory(i))) {
       status.SetError(cmStrCat("does not exist:\n  ", i));
       cmSystemTools::SetFatalErrorOccurred();
@@ -3947,7 +3947,7 @@ bool HandleChmodCommandImpl(std::vector<std::string> const& args, bool recurse,
 
     if (cmSystemTools::FileExists(i, true)) {
       bool success = true;
-      const mode_t& filePermissions =
+      mode_t const& filePermissions =
         parsedArgs.FilePermissions ? fperms : perms;
       if (filePermissions) {
         success = SetPermissions(i, filePermissions, status);
@@ -3959,7 +3959,7 @@ bool HandleChmodCommandImpl(std::vector<std::string> const& args, bool recurse,
 
     else if (cmSystemTools::FileIsDirectory(i)) {
       bool success = true;
-      const mode_t& directoryPermissions =
+      mode_t const& directoryPermissions =
         parsedArgs.DirectoryPermissions ? dperms : perms;
       if (directoryPermissions) {
         success = SetPermissions(i, directoryPermissions, status);

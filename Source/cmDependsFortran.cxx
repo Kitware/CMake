@@ -56,8 +56,8 @@ public:
   using ObjectInfoMap = std::map<std::string, cmFortranSourceInfo>;
   ObjectInfoMap ObjectInfo;
 
-  cmFortranSourceInfo& CreateObjectInfo(const std::string& obj,
-                                        const std::string& src)
+  cmFortranSourceInfo& CreateObjectInfo(std::string const& obj,
+                                        std::string const& src)
   {
     auto i = this->ObjectInfo.find(obj);
     if (i == this->ObjectInfo.end()) {
@@ -100,8 +100,8 @@ cmDependsFortran::cmDependsFortran(cmLocalUnixMakefileGenerator3* lg)
 
 cmDependsFortran::~cmDependsFortran() = default;
 
-bool cmDependsFortran::WriteDependencies(const std::set<std::string>& sources,
-                                         const std::string& obj,
+bool cmDependsFortran::WriteDependencies(std::set<std::string> const& sources,
+                                         std::string const& obj,
                                          std::ostream& /*makeDepends*/,
                                          std::ostream& /*internalDepends*/)
 {
@@ -156,7 +156,7 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
   }
 
   // Get the directory in which stamp files will be stored.
-  const std::string& stamp_dir = this->TargetDirectory;
+  std::string const& stamp_dir = this->TargetDirectory;
 
   // Get the directory in which module files will be created.
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
@@ -281,7 +281,7 @@ void cmDependsFortran::MatchLocalModules()
 }
 
 void cmDependsFortran::MatchRemoteModules(std::istream& fin,
-                                          const std::string& stampDir)
+                                          std::string const& stampDir)
 {
   std::string line;
   bool doing_provides = false;
@@ -311,8 +311,8 @@ void cmDependsFortran::MatchRemoteModules(std::istream& fin,
   }
 }
 
-void cmDependsFortran::ConsiderModule(const std::string& name,
-                                      const std::string& stampDir)
+void cmDependsFortran::ConsiderModule(std::string const& name,
+                                      std::string const& stampDir)
 {
   // Locate each required module.
   auto required = this->Internal->TargetRequires.find(name);
@@ -340,7 +340,7 @@ bool cmDependsFortran::WriteDependenciesReal(std::string const& obj,
   std::string obj_m = cmSystemTools::ConvertToOutputPath(obj_i);
   internalDepends << obj_i << "\n " << src << '\n';
   if (!info.Includes.empty()) {
-    const auto& lineContinue = static_cast<cmGlobalUnixMakefileGenerator3*>(
+    auto const& lineContinue = static_cast<cmGlobalUnixMakefileGenerator3*>(
                                  this->LocalGenerator->GetGlobalGenerator())
                                  ->LineContinueDirective;
     bool supportLongLineDepend = static_cast<cmGlobalUnixMakefileGenerator3*>(
@@ -482,7 +482,7 @@ bool cmDependsFortran::FindModule(std::string const& name, std::string& module)
   return false;
 }
 
-bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
+bool cmDependsFortran::CopyModule(std::vector<std::string> const& args)
 {
   // Implements
   //
@@ -543,7 +543,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
 // Helper function to look for a short sequence in a stream.  If this
 // is later used for longer sequences it should be re-written using an
 // efficient string search algorithm such as Boyer-Moore.
-static bool cmFortranStreamContainsSequence(std::istream& ifs, const char* seq,
+static bool cmFortranStreamContainsSequence(std::istream& ifs, char const* seq,
                                             int len)
 {
   assert(len > 0);
@@ -592,9 +592,9 @@ static bool cmFortranStreamsDiffer(std::istream& ifs1, std::istream& ifs2)
   return true;
 }
 
-bool cmDependsFortran::ModulesDiffer(const std::string& modFile,
-                                     const std::string& stampFile,
-                                     const std::string& compilerId)
+bool cmDependsFortran::ModulesDiffer(std::string const& modFile,
+                                     std::string const& stampFile,
+                                     std::string const& compilerId)
 {
   /*
   gnu >= 4.9:
@@ -661,8 +661,8 @@ bool cmDependsFortran::ModulesDiffer(const std::string& modFile,
     bool okay = !finModFile.read(reinterpret_cast<char*>(hdr), 2).fail();
     finModFile.seekg(0);
     if (!okay || hdr[0] != 0x1f || hdr[1] != 0x8b) {
-      const char seq[1] = { '\n' };
-      const int seqlen = 1;
+      char const seq[1] = { '\n' };
+      int const seqlen = 1;
 
       if (!cmFortranStreamContainsSequence(finModFile, seq, seqlen)) {
         // The module is of unexpected format.  Assume it is different.
@@ -677,8 +677,8 @@ bool cmDependsFortran::ModulesDiffer(const std::string& modFile,
       }
     }
   } else if (compilerId == "Intel" || compilerId == "IntelLLVM") {
-    const char seq[2] = { '\n', '\0' };
-    const int seqlen = 2;
+    char const seq[2] = { '\n', '\0' };
+    int const seqlen = 2;
 
     // Skip the leading byte which appears to be a version number.
     // We do not need to check for an error because the sequence search

@@ -306,8 +306,8 @@ namespace {
 std::string FindVsWhereCommand()
 {
   std::string vswhere;
-  static const char* programFiles[] = { "ProgramFiles(x86)", "ProgramFiles" };
-  for (const char* pf : programFiles) {
+  static char const* programFiles[] = { "ProgramFiles(x86)", "ProgramFiles" };
+  for (char const* pf : programFiles) {
     if (cmSystemTools::GetEnv(pf, vswhere)) {
       vswhere += "/Microsoft Visual Studio/Installer/vswhere.exe";
       if (cmSystemTools::FileExists(vswhere)) {
@@ -350,7 +350,7 @@ bool cmVSSetupAPIHelper::EnumerateVSInstancesWithVswhere(
     return false;
   }
 
-  for (const auto& item : json) {
+  for (auto const& item : json) {
     VSInstanceInfo instance;
     instance.Version = item["installationVersion"].asString();
     instance.VSInstallLocation = item["installationPath"].asString();
@@ -456,7 +456,7 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
   }
 
   std::vector<VSInstanceInfo> vecVSInstances;
-  for (const auto& instanceInfo : vecVSInstancesAll) {
+  for (auto const& instanceInfo : vecVSInstancesAll) {
     // We are looking for a specific major version.
     if (instanceInfo.Version.size() < wantVersion.size() ||
         instanceInfo.Version.substr(0, wantVersion.size()) != wantVersion) {
@@ -515,7 +515,7 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 }
 
 int cmVSSetupAPIHelper::ChooseVSInstance(
-  const std::vector<VSInstanceInfo>& vecVSInstances)
+  std::vector<VSInstanceInfo> const& vecVSInstances)
 {
   if (vecVSInstances.empty()) {
     return -1;

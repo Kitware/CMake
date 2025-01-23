@@ -19,13 +19,13 @@
 #include "cmSystemTools.h"
 
 // Table of valid permissions.
-const char* cmInstallCommandArguments::PermissionsTable[] = {
+char const* cmInstallCommandArguments::PermissionsTable[] = {
   "OWNER_READ",    "OWNER_WRITE",   "OWNER_EXECUTE", "GROUP_READ",
   "GROUP_WRITE",   "GROUP_EXECUTE", "WORLD_READ",    "WORLD_WRITE",
   "WORLD_EXECUTE", "SETUID",        "SETGID",        nullptr
 };
 
-const std::string cmInstallCommandArguments::EmptyString;
+std::string const cmInstallCommandArguments::EmptyString;
 
 cmInstallCommandArguments::cmInstallCommandArguments(
   std::string defaultComponent, cmMakefile& makefile)
@@ -81,7 +81,7 @@ cmInstallCommandArguments::cmInstallCommandArguments(
   this->Bind("TYPE"_s, this->Type);
 }
 
-const std::string& cmInstallCommandArguments::GetDestination() const
+std::string const& cmInstallCommandArguments::GetDestination() const
 {
   if (!this->DestinationString.empty()) {
     return this->DestinationString;
@@ -92,7 +92,7 @@ const std::string& cmInstallCommandArguments::GetDestination() const
   return EmptyString;
 }
 
-const std::string& cmInstallCommandArguments::GetComponent() const
+std::string const& cmInstallCommandArguments::GetComponent() const
 {
   if (!this->Component.empty()) {
     return this->Component;
@@ -107,7 +107,7 @@ const std::string& cmInstallCommandArguments::GetComponent() const
   return unspecifiedComponent;
 }
 
-const std::string& cmInstallCommandArguments::GetNamelinkComponent() const
+std::string const& cmInstallCommandArguments::GetNamelinkComponent() const
 {
   if (!this->NamelinkComponent.empty()) {
     return this->NamelinkComponent;
@@ -115,7 +115,7 @@ const std::string& cmInstallCommandArguments::GetNamelinkComponent() const
   return this->GetComponent();
 }
 
-const std::string& cmInstallCommandArguments::GetRename() const
+std::string const& cmInstallCommandArguments::GetRename() const
 {
   if (!this->Rename.empty()) {
     return this->Rename;
@@ -126,7 +126,7 @@ const std::string& cmInstallCommandArguments::GetRename() const
   return EmptyString;
 }
 
-const std::string& cmInstallCommandArguments::GetPermissions() const
+std::string const& cmInstallCommandArguments::GetPermissions() const
 {
   if (!this->PermissionsString.empty()) {
     return this->PermissionsString;
@@ -192,17 +192,17 @@ bool cmInstallCommandArguments::HasNamelinkComponent() const
   return false;
 }
 
-const std::string& cmInstallCommandArguments::GetType() const
+std::string const& cmInstallCommandArguments::GetType() const
 {
   return this->Type;
 }
 
-const std::string& cmInstallCommandArguments::GetDefaultComponent() const
+std::string const& cmInstallCommandArguments::GetDefaultComponent() const
 {
   return this->DefaultComponentName;
 }
 
-const std::vector<std::string>& cmInstallCommandArguments::GetConfigurations()
+std::vector<std::string> const& cmInstallCommandArguments::GetConfigurations()
   const
 {
   if (!this->Configurations.empty()) {
@@ -235,10 +235,10 @@ bool cmInstallCommandArguments::CheckPermissions()
 }
 
 bool cmInstallCommandArguments::CheckPermissions(
-  const std::string& onePermission, std::string& permissions)
+  std::string const& onePermission, std::string& permissions)
 {
   // Check the permission against the table.
-  for (const char** valid = cmInstallCommandArguments::PermissionsTable;
+  for (char const** valid = cmInstallCommandArguments::PermissionsTable;
        *valid; ++valid) {
     if (onePermission == *valid) {
       // This is a valid permission.
@@ -253,14 +253,14 @@ bool cmInstallCommandArguments::CheckPermissions(
 
 cmInstallCommandIncludesArgument::cmInstallCommandIncludesArgument() = default;
 
-const std::vector<std::string>&
+std::vector<std::string> const&
 cmInstallCommandIncludesArgument::GetIncludeDirs() const
 {
   return this->IncludeDirs;
 }
 
 void cmInstallCommandIncludesArgument::Parse(
-  const std::vector<std::string>* args, std::vector<std::string>*)
+  std::vector<std::string> const* args, std::vector<std::string>*)
 {
   if (args->empty()) {
     return;

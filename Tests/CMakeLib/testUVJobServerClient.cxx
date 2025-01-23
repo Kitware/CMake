@@ -20,8 +20,8 @@
 
 namespace {
 
-const std::size_t kTOTAL_JOBS = 10;
-const std::size_t kTOTAL_TOKENS = 3;
+std::size_t const kTOTAL_JOBS = 10;
+std::size_t const kTOTAL_TOKENS = 3;
 
 struct Job
 {

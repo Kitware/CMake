@@ -36,7 +36,7 @@ cmDependsJavaParserHelper::~cmDependsJavaParserHelper()
 }
 
 void cmDependsJavaParserHelper::CurrentClass::AddFileNamesForPrinting(
-  std::vector<std::string>* files, const char* prefix, const char* sep) const
+  std::vector<std::string>* files, char const* prefix, char const* sep) const
 {
   std::string rname;
   if (prefix) {
@@ -62,7 +62,7 @@ void cmDependsJavaParserHelper::DeallocateParserType(char** pt)
   this->UnionsAvailable--;
 }
 
-void cmDependsJavaParserHelper::AddClassFound(const char* sclass)
+void cmDependsJavaParserHelper::AddClassFound(char const* sclass)
 {
   if (!sclass) {
     return;
@@ -75,7 +75,7 @@ void cmDependsJavaParserHelper::AddClassFound(const char* sclass)
   this->ClassesFound.emplace_back(sclass);
 }
 
-void cmDependsJavaParserHelper::AddPackagesImport(const char* sclass)
+void cmDependsJavaParserHelper::AddPackagesImport(char const* sclass)
 {
   for (std::string const& pi : this->PackagesImport) {
     if (pi == sclass) {
@@ -85,7 +85,7 @@ void cmDependsJavaParserHelper::AddPackagesImport(const char* sclass)
   this->PackagesImport.emplace_back(sclass);
 }
 
-void cmDependsJavaParserHelper::SafePrintMissing(const char* str, int line,
+void cmDependsJavaParserHelper::SafePrintMissing(char const* str, int line,
                                                  int cnt)
 {
   if (str) {
@@ -103,15 +103,15 @@ void cmDependsJavaParserHelper::SafePrintMissing(const char* str, int line,
     std::cout << "- " << strlen(str) << std::endl;
   }
 }
-void cmDependsJavaParserHelper::Print(const char* place, const char* str) const
+void cmDependsJavaParserHelper::Print(char const* place, char const* str) const
 {
   if (this->Verbose) {
     std::cout << "[" << place << "=" << str << "]" << std::endl;
   }
 }
 
-void cmDependsJavaParserHelper::CombineUnions(char** out, const char* in1,
-                                              char** in2, const char* sep)
+void cmDependsJavaParserHelper::CombineUnions(char** out, char const* in1,
+                                              char** in2, char const* sep)
 {
   size_t len = 1;
   if (in1) {
@@ -160,7 +160,7 @@ void cmDependsJavaParserHelper::PrepareElement(
 }
 
 void cmDependsJavaParserHelper::AllocateParserType(
-  cmDependsJavaParserHelper::ParserType* pt, const char* str, int len)
+  cmDependsJavaParserHelper::ParserType* pt, char const* str, int len)
 {
   pt->str = nullptr;
   if (len == 0) {
@@ -177,7 +177,7 @@ void cmDependsJavaParserHelper::AllocateParserType(
   this->Allocates.push_back(std::move(up));
 }
 
-void cmDependsJavaParserHelper::StartClass(const char* cls)
+void cmDependsJavaParserHelper::StartClass(char const* cls)
 {
   CurrentClass cl;
   cl.Name = cls;
@@ -224,7 +224,7 @@ std::vector<std::string> cmDependsJavaParserHelper::GetFilesProduced()
   return files;
 }
 
-int cmDependsJavaParserHelper::ParseString(const char* str, int verb)
+int cmDependsJavaParserHelper::ParseString(char const* str, int verb)
 {
   if (!str) {
     return 0;
@@ -295,7 +295,7 @@ int cmDependsJavaParserHelper::LexInput(char* buf, int maxlen)
   buf[0] = '\n';
   return 0;
 }
-void cmDependsJavaParserHelper::Error(const char* str)
+void cmDependsJavaParserHelper::Error(char const* str)
 {
   unsigned long pos = static_cast<unsigned long>(this->InputBufferPos);
   fprintf(stderr, "JPError: %s (%lu / Line: %d)\n", str, pos,
@@ -306,8 +306,8 @@ void cmDependsJavaParserHelper::Error(const char* str)
             << "]" << std::endl;
 }
 
-void cmDependsJavaParserHelper::UpdateCombine(const char* str1,
-                                              const char* str2)
+void cmDependsJavaParserHelper::UpdateCombine(char const* str1,
+                                              char const* str2)
 {
   if (this->CurrentCombine.empty() && str1) {
     this->CurrentCombine = str1;
@@ -316,7 +316,7 @@ void cmDependsJavaParserHelper::UpdateCombine(const char* str1,
   this->CurrentCombine += str2;
 }
 
-int cmDependsJavaParserHelper::ParseFile(const char* file)
+int cmDependsJavaParserHelper::ParseFile(char const* file)
 {
   if (!cmSystemTools::FileExists(file)) {
     return 0;

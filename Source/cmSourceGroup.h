@@ -27,8 +27,8 @@ class cmSourceGroupInternals;
 class cmSourceGroup
 {
 public:
-  cmSourceGroup(std::string name, const char* regex,
-                const char* parentName = nullptr);
+  cmSourceGroup(std::string name, char const* regex,
+                char const* parentName = nullptr);
   cmSourceGroup(cmSourceGroup const& r);
   ~cmSourceGroup();
   cmSourceGroup& operator=(cmSourceGroup const&);
@@ -36,12 +36,12 @@ public:
   /**
    * Set the regular expression for this group.
    */
-  void SetGroupRegex(const char* regex);
+  void SetGroupRegex(char const* regex);
 
   /**
    * Add a file name to the explicit list of files for this group.
    */
-  void AddGroupFile(const std::string& name);
+  void AddGroupFile(std::string const& name);
 
   /**
    * Add child to this sourcegroup
@@ -51,7 +51,7 @@ public:
   /**
    * Looks up child and returns it
    */
-  cmSourceGroup* LookupChild(const std::string& name);
+  cmSourceGroup* LookupChild(std::string const& name);
 
   /**
    * Get the name of this group.
@@ -66,41 +66,41 @@ public:
   /**
    * Check if the given name matches this group's regex.
    */
-  bool MatchesRegex(const std::string& name);
+  bool MatchesRegex(std::string const& name);
 
   /**
    * Check if the given name matches this group's explicit file list.
    */
-  bool MatchesFiles(const std::string& name) const;
+  bool MatchesFiles(std::string const& name) const;
 
   /**
    * Check if the given name matches this group's explicit file list
    * in children.
    */
-  cmSourceGroup* MatchChildrenFiles(const std::string& name);
+  cmSourceGroup* MatchChildrenFiles(std::string const& name);
 
   /**
    * Check if the given name matches this group's explicit file list
    * in children.
    */
-  const cmSourceGroup* MatchChildrenFiles(const std::string& name) const;
+  cmSourceGroup const* MatchChildrenFiles(std::string const& name) const;
 
   /**
    * Check if the given name matches this group's regex in children.
    */
-  cmSourceGroup* MatchChildrenRegex(const std::string& name);
+  cmSourceGroup* MatchChildrenRegex(std::string const& name);
 
   /**
    * Assign the given source file to this group.  Used only by
    * generators.
    */
-  void AssignSource(const cmSourceFile* sf);
+  void AssignSource(cmSourceFile const* sf);
 
   /**
    * Get the list of the source files that have been assigned to this
    * source group.
    */
-  const std::vector<const cmSourceFile*>& GetSourceFiles() const;
+  std::vector<cmSourceFile const*> const& GetSourceFiles() const;
 
   std::vector<cmSourceGroup> const& GetGroupChildren() const;
 
@@ -126,7 +126,7 @@ private:
    * Vector of all source files that have been assigned to
    * this group.
    */
-  std::vector<const cmSourceFile*> SourceFiles;
+  std::vector<cmSourceFile const*> SourceFiles;
 
   std::unique_ptr<cmSourceGroupInternals> Internal;
 };

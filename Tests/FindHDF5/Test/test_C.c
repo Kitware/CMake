@@ -1,6 +1,6 @@
 #include <hdf5.h>
 
-int main(int argc, const char* argv[])
+int main(int argc, char const* argv[])
 {
   hid_t fid;
   if (argc != 2) {

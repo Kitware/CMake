@@ -57,7 +57,7 @@ std::string AppendAndTrim(std::string& str, cm::string_view sv)
 
 } // namespace
 
-std::string cmPkgConfigResult::StrOrDefault(const std::string& key,
+std::string cmPkgConfigResult::StrOrDefault(std::string const& key,
                                             cm::string_view def)
 {
   auto it = Keywords.find(key);
@@ -194,7 +194,7 @@ void cmPkgConfigResolver::ReplaceSep(std::string& list)
 }
 
 cm::optional<cmPkgConfigResult> cmPkgConfigResolver::ResolveStrict(
-  const std::vector<cmPkgConfigEntry>& entries, cmPkgConfigEnv env)
+  std::vector<cmPkgConfigEntry> const& entries, cmPkgConfigEnv env)
 {
   cm::optional<cmPkgConfigResult> result;
   cmPkgConfigResult config;
@@ -212,7 +212,7 @@ cm::optional<cmPkgConfigResult> cmPkgConfigResolver::ResolveStrict(
 
   config.env = std::move(env);
 
-  for (const auto& entry : entries) {
+  for (auto const& entry : entries) {
     std::string key(entry.Key);
     if (entry.IsVariable) {
       if (config.Variables.find(key) != config.Variables.end()) {
@@ -256,12 +256,12 @@ cm::optional<cmPkgConfigResult> cmPkgConfigResolver::ResolveStrict(
 }
 
 cm::optional<cmPkgConfigResult> cmPkgConfigResolver::ResolvePermissive(
-  const std::vector<cmPkgConfigEntry>& entries, cmPkgConfigEnv env)
+  std::vector<cmPkgConfigEntry> const& entries, cmPkgConfigEnv env)
 {
   cm::optional<cmPkgConfigResult> result;
 
   cmPkgConfigResult config = ResolveBestEffort(entries, std::move(env));
-  const auto& keys = config.Keywords;
+  auto const& keys = config.Keywords;
 
   if (keys.find("Name") == keys.end() ||
       keys.find("Description") == keys.end() ||
@@ -274,7 +274,7 @@ cm::optional<cmPkgConfigResult> cmPkgConfigResolver::ResolvePermissive(
 }
 
 cmPkgConfigResult cmPkgConfigResolver::ResolveBestEffort(
-  const std::vector<cmPkgConfigEntry>& entries, cmPkgConfigEnv env)
+  std::vector<cmPkgConfigEntry> const& entries, cmPkgConfigEnv env)
 {
   cmPkgConfigResult result;
 
@@ -290,7 +290,7 @@ cmPkgConfigResult cmPkgConfigResolver::ResolveBestEffort(
 
   result.env = std::move(env);
 
-  for (const auto& entry : entries) {
+  for (auto const& entry : entries) {
     std::string key(entry.Key);
     if (entry.IsVariable) {
       result.Variables[key] =
@@ -303,11 +303,11 @@ cmPkgConfigResult cmPkgConfigResolver::ResolveBestEffort(
 }
 
 std::string cmPkgConfigResolver::HandleVariablePermissive(
-  const cmPkgConfigEntry& entry,
-  const std::unordered_map<std::string, std::string>& variables)
+  cmPkgConfigEntry const& entry,
+  std::unordered_map<std::string, std::string> const& variables)
 {
   std::string result;
-  for (const auto& segment : entry.Val) {
+  for (auto const& segment : entry.Val) {
     if (!segment.IsVariable) {
       result += segment.Data;
     } else if (entry.Key != segment.Data) {
@@ -323,13 +323,13 @@ std::string cmPkgConfigResolver::HandleVariablePermissive(
 }
 
 cm::optional<std::string> cmPkgConfigResolver::HandleVariableStrict(
-  const cmPkgConfigEntry& entry,
-  const std::unordered_map<std::string, std::string>& variables)
+  cmPkgConfigEntry const& entry,
+  std::unordered_map<std::string, std::string> const& variables)
 {
   cm::optional<std::string> result;
 
   std::string value;
-  for (const auto& segment : entry.Val) {
+  for (auto const& segment : entry.Val) {
     if (!segment.IsVariable) {
       value += segment.Data;
     } else if (entry.Key == segment.Data) {
@@ -350,11 +350,11 @@ cm::optional<std::string> cmPkgConfigResolver::HandleVariableStrict(
 }
 
 std::string cmPkgConfigResolver::HandleKeyword(
-  const cmPkgConfigEntry& entry,
-  const std::unordered_map<std::string, std::string>& variables)
+  cmPkgConfigEntry const& entry,
+  std::unordered_map<std::string, std::string> const& variables)
 {
   std::string result;
-  for (const auto& segment : entry.Val) {
+  for (auto const& segment : entry.Val) {
     if (!segment.IsVariable) {
       result += segment.Data;
     } else {
@@ -370,7 +370,7 @@ std::string cmPkgConfigResolver::HandleKeyword(
 }
 
 std::vector<cm::string_view> cmPkgConfigResolver::TokenizeFlags(
-  const std::string& flagline)
+  std::string const& flagline)
 {
   std::vector<cm::string_view> result;
 
@@ -380,7 +380,7 @@ std::vector<cm::string_view> cmPkgConfigResolver::TokenizeFlags(
   }
 
   while (it != flagline.end()) {
-    const char* start = &(*it);
+    char const* start = &(*it);
     std::size_t len = 0;
 
     for (; it != flagline.end() && !std::isspace(*it); ++it) {
@@ -398,7 +398,7 @@ std::vector<cm::string_view> cmPkgConfigResolver::TokenizeFlags(
 }
 
 cmPkgConfigCflagsResult cmPkgConfigResolver::MangleCflags(
-  const std::vector<cm::string_view>& flags)
+  std::vector<cm::string_view> const& flags)
 {
   cmPkgConfigCflagsResult result;
 
@@ -414,7 +414,7 @@ cmPkgConfigCflagsResult cmPkgConfigResolver::MangleCflags(
 }
 
 cmPkgConfigCflagsResult cmPkgConfigResolver::MangleCflags(
-  const std::vector<cm::string_view>& flags, const std::string& sysroot)
+  std::vector<cm::string_view> const& flags, std::string const& sysroot)
 {
   cmPkgConfigCflagsResult result;
 
@@ -431,8 +431,8 @@ cmPkgConfigCflagsResult cmPkgConfigResolver::MangleCflags(
 }
 
 cmPkgConfigCflagsResult cmPkgConfigResolver::MangleCflags(
-  const std::vector<cm::string_view>& flags,
-  const std::vector<std::string>& syspaths)
+  std::vector<cm::string_view> const& flags,
+  std::vector<std::string> const& syspaths)
 {
   cmPkgConfigCflagsResult result;
 
@@ -441,7 +441,7 @@ cmPkgConfigCflagsResult cmPkgConfigResolver::MangleCflags(
       cm::string_view noprefix{ flag.data() + 2, flag.size() - 2 };
 
       if (std::all_of(syspaths.begin(), syspaths.end(),
-                      [&](const std::string& path) {
+                      [&](std::string const& path) {
                         return noprefix.rfind(path, 0) == noprefix.npos;
                       })) {
         result.Includes.emplace_back(AppendAndTrim(result.Flagline, flag));
@@ -456,8 +456,8 @@ cmPkgConfigCflagsResult cmPkgConfigResolver::MangleCflags(
 }
 
 cmPkgConfigCflagsResult cmPkgConfigResolver::MangleCflags(
-  const std::vector<cm::string_view>& flags, const std::string& sysroot,
-  const std::vector<std::string>& syspaths)
+  std::vector<cm::string_view> const& flags, std::string const& sysroot,
+  std::vector<std::string> const& syspaths)
 {
   cmPkgConfigCflagsResult result;
 
@@ -467,7 +467,7 @@ cmPkgConfigCflagsResult cmPkgConfigResolver::MangleCflags(
       cm::string_view noprefix{ reroot.data() + 2, reroot.size() - 2 };
 
       if (std::all_of(syspaths.begin(), syspaths.end(),
-                      [&](const std::string& path) {
+                      [&](std::string const& path) {
                         return noprefix.rfind(path, 0) == noprefix.npos;
                       })) {
         result.Includes.emplace_back(AppendAndTrim(result.Flagline, reroot));
@@ -482,7 +482,7 @@ cmPkgConfigCflagsResult cmPkgConfigResolver::MangleCflags(
 }
 
 cmPkgConfigLibsResult cmPkgConfigResolver::MangleLibs(
-  const std::vector<cm::string_view>& flags)
+  std::vector<cm::string_view> const& flags)
 {
   cmPkgConfigLibsResult result;
 
@@ -500,7 +500,7 @@ cmPkgConfigLibsResult cmPkgConfigResolver::MangleLibs(
 }
 
 cmPkgConfigLibsResult cmPkgConfigResolver::MangleLibs(
-  const std::vector<cm::string_view>& flags, const std::string& sysroot)
+  std::vector<cm::string_view> const& flags, std::string const& sysroot)
 {
   cmPkgConfigLibsResult result;
 
@@ -519,8 +519,8 @@ cmPkgConfigLibsResult cmPkgConfigResolver::MangleLibs(
 }
 
 cmPkgConfigLibsResult cmPkgConfigResolver::MangleLibs(
-  const std::vector<cm::string_view>& flags,
-  const std::vector<std::string>& syspaths)
+  std::vector<cm::string_view> const& flags,
+  std::vector<std::string> const& syspaths)
 {
   cmPkgConfigLibsResult result;
 
@@ -529,7 +529,7 @@ cmPkgConfigLibsResult cmPkgConfigResolver::MangleLibs(
       cm::string_view noprefix{ flag.data() + 2, flag.size() - 2 };
 
       if (std::all_of(syspaths.begin(), syspaths.end(),
-                      [&](const std::string& path) {
+                      [&](std::string const& path) {
                         return noprefix.rfind(path, 0) == noprefix.npos;
                       })) {
         result.LibDirs.emplace_back(AppendAndTrim(result.Flagline, flag));
@@ -546,8 +546,8 @@ cmPkgConfigLibsResult cmPkgConfigResolver::MangleLibs(
 }
 
 cmPkgConfigLibsResult cmPkgConfigResolver::MangleLibs(
-  const std::vector<cm::string_view>& flags, const std::string& sysroot,
-  const std::vector<std::string>& syspaths)
+  std::vector<cm::string_view> const& flags, std::string const& sysroot,
+  std::vector<std::string> const& syspaths)
 {
   cmPkgConfigLibsResult result;
 
@@ -557,7 +557,7 @@ cmPkgConfigLibsResult cmPkgConfigResolver::MangleLibs(
       cm::string_view noprefix{ reroot.data() + 2, reroot.size() - 2 };
 
       if (std::all_of(syspaths.begin(), syspaths.end(),
-                      [&](const std::string& path) {
+                      [&](std::string const& path) {
                         return noprefix.rfind(path, 0) == noprefix.npos;
                       })) {
         result.LibDirs.emplace_back(AppendAndTrim(result.Flagline, reroot));
@@ -575,7 +575,7 @@ cmPkgConfigLibsResult cmPkgConfigResolver::MangleLibs(
 
 std::string cmPkgConfigResolver::Reroot(cm::string_view flag,
                                         cm::string_view prefix,
-                                        const std::string& sysroot)
+                                        std::string const& sysroot)
 {
   std::string result = std::string{ prefix };
   result += sysroot;
@@ -655,7 +655,7 @@ cmPkgConfigVersionReq cmPkgConfigResolver::ParseVersion(
 }
 
 std::vector<cmPkgConfigDependency> cmPkgConfigResolver::ParseDependencies(
-  const std::string& deps)
+  std::string const& deps)
 {
 
   std::vector<cmPkgConfigDependency> result;
@@ -706,8 +706,8 @@ std::vector<cmPkgConfigDependency> cmPkgConfigResolver::ParseDependencies(
   return result;
 }
 
-bool cmPkgConfigResolver::CheckVersion(const cmPkgConfigVersionReq& desired,
-                                       const std::string& provided)
+bool cmPkgConfigResolver::CheckVersion(cmPkgConfigVersionReq const& desired,
+                                       std::string const& provided)
 {
 
   if (desired.Operation == cmPkgConfigVersionReq::ANY) {
@@ -847,7 +847,7 @@ bool cmPkgConfigResolver::CheckVersion(const cmPkgConfigVersionReq& desired,
 }
 
 cmPkgConfigVersionReq cmPkgConfigResolver::ParseVersion(
-  const std::string& version)
+  std::string const& version)
 {
   cmPkgConfigVersionReq result;
 

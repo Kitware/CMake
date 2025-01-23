@@ -123,7 +123,7 @@ bool cmProcessOutput::DecodeText(std::string raw, std::string& decoded,
 #endif
 }
 
-bool cmProcessOutput::DecodeText(const char* data, size_t length,
+bool cmProcessOutput::DecodeText(char const* data, size_t length,
                                  std::string& decoded, size_t id)
 {
   return this->DecodeText(std::string(data, length), decoded, id);
@@ -133,7 +133,7 @@ bool cmProcessOutput::DecodeText(std::vector<char> raw,
                                  std::vector<char>& decoded, size_t id)
 {
   std::string str;
-  const bool success =
+  bool const success =
     this->DecodeText(std::string(raw.begin(), raw.end()), str, id);
   decoded.assign(str.begin(), str.end());
   return success;
@@ -144,7 +144,7 @@ bool cmProcessOutput::DoDecodeText(std::string raw, std::string& decoded,
                                    wchar_t* lastChar)
 {
   bool success = false;
-  const int wlength =
+  int const wlength =
     MultiByteToWideChar(codepage, 0, raw.c_str(), int(raw.size()), nullptr, 0);
   auto wdata = cm::make_unique<wchar_t[]>(wlength);
   int r = MultiByteToWideChar(codepage, 0, raw.c_str(), int(raw.size()),

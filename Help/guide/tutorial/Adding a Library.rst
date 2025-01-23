@@ -194,7 +194,7 @@ Lastly, replace ``sqrt`` with the wrapper function ``mathfunctions::sqrt``.
   :caption: TODO 6: tutorial.cxx
   :name: CMakeLists.txt-option
   :language: cmake
-  :start-after:   const double inputValue = std::stod(argv[1]);
+  :start-after:   double const inputValue = std::stod(argv[1]);
   :end-before: std::cout
 
 .. raw:: html

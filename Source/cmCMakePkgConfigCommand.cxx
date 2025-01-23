@@ -71,9 +71,9 @@ cm::optional<std::string> GetPkgConfigBin(cmMakefile& mf)
   return result;
 }
 
-std::vector<std::string> GetLocations(cmMakefile& mf, const char* cachevar,
-                                      const char* envvar, const char* desc,
-                                      const char* pcvar, bool need_pkgconf,
+std::vector<std::string> GetLocations(cmMakefile& mf, char const* cachevar,
+                                      char const* envvar, char const* desc,
+                                      char const* pcvar, bool need_pkgconf,
                                       std::vector<std::string> default_locs)
 {
   auto def = mf.GetDefinition(cachevar);
@@ -172,7 +172,7 @@ std::vector<std::string> GetPkgConfSysCflags(cmMakefile& mf)
   }
 
   std::string paths;
-  auto get_and_append = [&](const char* var) {
+  auto get_and_append = [&](char const* var) {
     if (paths.empty()) {
       cmSystemTools::GetEnv(var, paths);
     } else {
@@ -223,8 +223,8 @@ std::vector<std::string> GetPcPath(cmMakefile& mf)
   return {};
 }
 
-cm::optional<std::string> GetPath(cmMakefile& mf, const char* cachevar,
-                                  const char* envvar, const char* desc)
+cm::optional<std::string> GetPath(cmMakefile& mf, char const* cachevar,
+                                  char const* envvar, char const* desc)
 {
   cm::optional<std::string> result;
 
@@ -258,8 +258,8 @@ cm::optional<std::string> GetTopBuildDir(cmMakefile& mf)
                  "Package file top_build_dir variable default value");
 }
 
-bool GetBool(cmMakefile& mf, const char* cachevar, const char* envvar,
-             const char* desc)
+bool GetBool(cmMakefile& mf, char const* cachevar, char const* envvar,
+             char const* desc)
 {
   auto def = mf.GetDefinition(cachevar);
   if (def) {
@@ -451,7 +451,7 @@ cm::optional<cmPkgConfigResult> HandleCommon(CommonArguments& args,
     return {};
   }
 
-  auto warn_or_error = [&](const std::string& err) {
+  auto warn_or_error = [&](std::string const& err) {
     if (args.Required) {
       status.SetError(err);
       cmSystemTools::SetFatalErrorOccurred();
@@ -610,7 +610,7 @@ struct ExtractArguments : CommonArguments
     SystemLibraryDirs;
 };
 
-const auto ExtractParser =
+auto const ExtractParser =
   BIND_COMMON(ExtractArguments)
     .Bind("ALLOW_SYSTEM_INCLUDES"_s, &ExtractArguments::AllowSystemIncludes)
     .Bind("ALLOW_SYSTEM_LIBS"_s, &ExtractArguments::AllowSystemLibs)
@@ -653,12 +653,12 @@ bool HandleExtractCommand(std::vector<std::string> const& args,
   mf.AddDefinition("CMAKE_PKG_CONFIG_DESCRIPTION", resolved.Description());
   mf.AddDefinition("CMAKE_PKG_CONFIG_VERSION", version);
 
-  auto make_list = [&](const char* def,
-                       const std::vector<cmPkgConfigDependency>& deps) {
+  auto make_list = [&](char const* def,
+                       std::vector<cmPkgConfigDependency> const& deps) {
     std::vector<cm::string_view> vec;
     vec.reserve(deps.size());
 
-    for (const auto& dep : deps) {
+    for (auto const& dep : deps) {
       vec.emplace_back(dep.Name);
     }
 

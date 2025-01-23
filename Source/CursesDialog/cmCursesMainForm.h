@@ -53,7 +53,7 @@ public:
    * Returns true if an entry with the given key is in the
    * list of current composites.
    */
-  bool LookForCacheEntry(const std::string& key);
+  bool LookForCacheEntry(std::string const& key);
 
   enum
   {
@@ -84,7 +84,7 @@ public:
    * During a CMake run, an error handle should add errors
    * to be displayed afterwards.
    */
-  void AddError(const std::string& message, const char* title) override;
+  void AddError(std::string const& message, char const* title) override;
 
   /**
    * Write files to cache file without reconfiguring.
@@ -105,30 +105,30 @@ public:
   /**
    * Used by main program
    */
-  int LoadCache(const char* dir);
+  int LoadCache(char const* dir);
 
   /**
    * Progress callback
    */
-  void UpdateProgress(const std::string& msg, float prog);
+  void UpdateProgress(std::string const& msg, float prog);
 
 protected:
   // Copy the cache values from the user interface to the actual
   // cache.
   void FillCacheManagerFromUI();
   // Fix formatting of values to a consistent form.
-  void FixValue(cmStateEnums::CacheEntryType type, const std::string& in,
+  void FixValue(cmStateEnums::CacheEntryType type, std::string const& in,
                 std::string& out) const;
   // Re-post the existing fields. Used to toggle between
   // normal and advanced modes. Render() should be called
   // afterwards.
   void RePost();
   // Remove an entry from the interface and the cache.
-  void RemoveEntry(const char* value);
+  void RemoveEntry(char const* value);
 
   // Jump to the cache entry whose name matches the string.
-  void JumpToCacheEntry(const char* str);
-  void JumpToCacheEntry(const char* str, bool reverse);
+  void JumpToCacheEntry(char const* str);
+  void JumpToCacheEntry(char const* str, bool reverse);
 
   // Clear and reset the output log and state
   void ResetOutputs();
@@ -156,7 +156,7 @@ protected:
   std::vector<std::string> HelpMessage;
 
   // Common help
-  static const char* s_ConstHelpMessage;
+  static char const* s_ConstHelpMessage;
 
   // Fields displayed. Includes labels, new entry markers, entries
   std::vector<FIELD*> Fields;

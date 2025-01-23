@@ -40,11 +40,11 @@ struct cmListFileArgument
     , Line(line)
   {
   }
-  bool operator==(const cmListFileArgument& r) const
+  bool operator==(cmListFileArgument const& r) const
   {
     return (this->Value == r.Value) && (this->Delim == r.Delim);
   }
-  bool operator!=(const cmListFileArgument& r) const { return !(*this == r); }
+  bool operator!=(cmListFileArgument const& r) const { return !(*this == r); }
   std::string Value;
   Delimiter Delim = Unquoted;
   long Line = 0;
@@ -116,8 +116,8 @@ public:
   // seem to be any way for this to happen given the member types.
   // NOLINTNEXTLINE(bugprone-exception-escape)
   cmListFileContext(cmListFileContext&& /*other*/) noexcept = default;
-  cmListFileContext(const cmListFileContext& /*other*/) = default;
-  cmListFileContext& operator=(const cmListFileContext& /*other*/) = default;
+  cmListFileContext(cmListFileContext const& /*other*/) = default;
+  cmListFileContext& operator=(cmListFileContext const& /*other*/) = default;
 #if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
   cmListFileContext& operator=(cmListFileContext&& /*other*/) noexcept =
     default;
@@ -161,7 +161,7 @@ public:
 };
 
 std::ostream& operator<<(std::ostream&, cmListFileContext const&);
-bool operator<(const cmListFileContext& lhs, const cmListFileContext& rhs);
+bool operator<(cmListFileContext const& lhs, cmListFileContext const& rhs);
 bool operator==(cmListFileContext const& lhs, cmListFileContext const& rhs);
 bool operator!=(cmListFileContext const& lhs, cmListFileContext const& rhs);
 
@@ -237,10 +237,10 @@ std::vector<BT<std::string>> cmExpandListWithBacktrace(
 
 struct cmListFile
 {
-  bool ParseFile(const char* path, cmMessenger* messenger,
+  bool ParseFile(char const* path, cmMessenger* messenger,
                  cmListFileBacktrace const& lfbt);
 
-  bool ParseString(const char* str, const char* virtual_filename,
+  bool ParseString(char const* str, char const* virtual_filename,
                    cmMessenger* messenger, cmListFileBacktrace const& lfbt);
 
   std::vector<cmListFileFunction> Functions;

@@ -39,7 +39,7 @@ private:
   std::map<std::string, Directory> Dirs;
 
   std::string ComputeBranchFlag(std::string const& dir);
-  void LoadRevisions(std::string const& file, const char* branchFlag,
+  void LoadRevisions(std::string const& file, char const* branchFlag,
                      std::vector<Revision>& revisions);
   void WriteXMLDirectory(cmXMLWriter& xml, std::string const& path,
                          Directory const& dir);

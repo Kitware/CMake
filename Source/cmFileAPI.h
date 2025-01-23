@@ -180,7 +180,7 @@ private:
   static Json::Value BuildReplyError(std::string const& error);
   Json::Value const& AddReplyIndexObject(Object const& o);
 
-  static const char* ObjectKindName(ObjectKind kind);
+  static char const* ObjectKindName(ObjectKind kind);
   static std::string ObjectName(Object const& o);
 
   static Json::Value BuildVersion(unsigned int major, unsigned int minor);

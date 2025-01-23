@@ -9,7 +9,7 @@
 int main(int argc, char* argv[])
 {
 #ifndef _WIN32
-  const char* display = getenv("DISPLAY");
+  char const* display = getenv("DISPLAY");
   if (display && strlen(display) > 0) {
 #endif
     QApplication app(argc, argv);

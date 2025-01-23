@@ -24,8 +24,8 @@ public:
   /// Destructor
   ~cmExportSet();
 
-  cmExportSet(const cmExportSet&) = delete;
-  cmExportSet& operator=(const cmExportSet&) = delete;
+  cmExportSet(cmExportSet const&) = delete;
+  cmExportSet& operator=(cmExportSet const&) = delete;
 
   bool Compute(cmLocalGenerator* lg);
 
@@ -33,8 +33,8 @@ public:
 
   void AddInstallation(cmInstallExportGenerator const* installation);
 
-  void SetXcFrameworkLocation(const std::string& name,
-                              const std::string& location);
+  void SetXcFrameworkLocation(std::string const& name,
+                              std::string const& location);
 
   std::string const& GetName() const { return this->Name; }
 
@@ -64,9 +64,9 @@ public:
     cm::optional<unsigned int> FindPackageIndex;
   };
 
-  PackageDependency& GetPackageDependencyForSetup(const std::string& name);
+  PackageDependency& GetPackageDependencyForSetup(std::string const& name);
 
-  const std::map<std::string, PackageDependency>& GetPackageDependencies()
+  std::map<std::string, PackageDependency> const& GetPackageDependencies()
     const
   {
     return this->PackageDependencies;
@@ -89,5 +89,5 @@ public:
    * The operator is overloaded because cmExportSet has no default constructor:
    * we do not want unnamed export sets.
    */
-  cmExportSet& operator[](const std::string& name);
+  cmExportSet& operator[](std::string const& name);
 };

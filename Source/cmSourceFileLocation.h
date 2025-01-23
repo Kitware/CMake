@@ -28,10 +28,10 @@ public:
    * instance with an initial name.
    */
   cmSourceFileLocation(
-    cmMakefile const* mf, const std::string& name,
+    cmMakefile const* mf, std::string const& name,
     cmSourceFileLocationKind kind = cmSourceFileLocationKind::Ambiguous);
   cmSourceFileLocation();
-  cmSourceFileLocation(const cmSourceFileLocation& loc);
+  cmSourceFileLocation(cmSourceFileLocation const& loc);
 
   cmSourceFileLocation& operator=(cmSourceFileLocation const&) = delete;
 
@@ -68,7 +68,7 @@ public:
    * Otherwise it will be a relative path (possibly empty) that is
    * either with respect to the source or build tree.
    */
-  const std::string& GetDirectory() const { return this->Directory; }
+  std::string const& GetDirectory() const { return this->Directory; }
 
   /**
    * Get the file name as best is currently known.  If
@@ -76,7 +76,7 @@ public:
    * final name (but could be).  Otherwise the returned name is the
    * final name.
    */
-  const std::string& GetName() const { return this->Name; }
+  std::string const& GetName() const { return this->Name; }
 
   /**
    * Get the full file path composed of GetDirectory() and GetName().
@@ -99,5 +99,5 @@ private:
 
   // Update the location with additional knowledge.
   void Update(cmSourceFileLocation const& loc);
-  void UpdateExtension(const std::string& name);
+  void UpdateExtension(std::string const& name);
 };

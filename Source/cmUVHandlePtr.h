@@ -316,6 +316,6 @@ UV_HANDLE_PTR_INSTANTIATE_EXTERN(tty)
  * referenced by the uv_buf_t values must remain alive until the callback
  * is made or the stream is closed.
  */
-int uv_write(uv_stream_t* handle, const uv_buf_t bufs[], unsigned int nbufs,
+int uv_write(uv_stream_t* handle, uv_buf_t const bufs[], unsigned int nbufs,
              std::weak_ptr<std::function<void(int)>> cb);
 }

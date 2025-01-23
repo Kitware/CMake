@@ -13,7 +13,7 @@ class cmMakefile;
 class cmStringReplaceHelper
 {
 public:
-  cmStringReplaceHelper(const std::string& regex, std::string replace_expr,
+  cmStringReplaceHelper(std::string const& regex, std::string replace_expr,
                         cmMakefile* makefile = nullptr);
 
   bool IsRegularExpressionValid() const
@@ -25,15 +25,15 @@ public:
     return this->ValidReplaceExpression;
   }
 
-  bool Replace(const std::string& input, std::string& output);
+  bool Replace(std::string const& input, std::string& output);
 
-  const std::string& GetError() { return this->ErrorString; }
+  std::string const& GetError() { return this->ErrorString; }
 
 private:
   class RegexReplacement
   {
   public:
-    RegexReplacement(const char* s)
+    RegexReplacement(char const* s)
       : Number(-1)
       , Value(s)
     {

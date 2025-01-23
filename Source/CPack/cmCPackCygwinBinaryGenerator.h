@@ -21,6 +21,6 @@ public:
 protected:
   int InitializeInternal() override;
   int PackageFiles() override;
-  const char* GetOutputExtension() override;
+  char const* GetOutputExtension() override;
   std::string OutputExtension;
 };

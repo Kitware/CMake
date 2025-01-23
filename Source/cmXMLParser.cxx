@@ -25,13 +25,13 @@ cmXMLParser::~cmXMLParser()
   }
 }
 
-int cmXMLParser::Parse(const char* string)
+int cmXMLParser::Parse(char const* string)
 {
   return this->InitializeParser() &&
     this->ParseChunk(string, strlen(string)) && this->CleanupParser();
 }
 
-int cmXMLParser::ParseFile(const char* file)
+int cmXMLParser::ParseFile(char const* file)
 {
   if (!file) {
     return 0;
@@ -66,7 +66,7 @@ int cmXMLParser::InitializeParser()
   return 1;
 }
 
-int cmXMLParser::ParseChunk(const char* inputString,
+int cmXMLParser::ParseChunk(char const* inputString,
                             std::string::size_type length)
 {
   if (!this->Parser) {
@@ -105,7 +105,7 @@ int cmXMLParser::CleanupParser()
   return result;
 }
 
-int cmXMLParser::ParseBuffer(const char* buffer, std::string::size_type count)
+int cmXMLParser::ParseBuffer(char const* buffer, std::string::size_type count)
 {
   // Pass the buffer to the expat XML parser.
   if (!XML_Parse(static_cast<XML_Parser>(this->Parser), buffer,
@@ -116,7 +116,7 @@ int cmXMLParser::ParseBuffer(const char* buffer, std::string::size_type count)
   return 1;
 }
 
-int cmXMLParser::ParseBuffer(const char* buffer)
+int cmXMLParser::ParseBuffer(char const* buffer)
 {
   return this->ParseBuffer(buffer, static_cast<int>(strlen(buffer)));
 }
@@ -127,26 +127,26 @@ int cmXMLParser::ParsingComplete()
   return 0;
 }
 
-void cmXMLParser::StartElement(const std::string& name, const char** /*atts*/)
+void cmXMLParser::StartElement(std::string const& name, char const** /*atts*/)
 {
   std::cout << "Start element: " << name << std::endl;
 }
 
-void cmXMLParser::EndElement(const std::string& name)
+void cmXMLParser::EndElement(std::string const& name)
 {
   std::cout << "End element: " << name << std::endl;
 }
 
-void cmXMLParser::CharacterDataHandler(const char* /*inData*/,
+void cmXMLParser::CharacterDataHandler(char const* /*inData*/,
                                        int /*inLength*/)
 {
 }
 
-const char* cmXMLParser::FindAttribute(const char** atts,
-                                       const char* attribute)
+char const* cmXMLParser::FindAttribute(char const** atts,
+                                       char const* attribute)
 {
   if (atts && attribute) {
-    for (const char** a = atts; *a && *(a + 1); a += 2) {
+    for (char const** a = atts; *a && *(a + 1); a += 2) {
       if (strcmp(*a, attribute) == 0) {
         return *(a + 1);
       }
@@ -155,7 +155,7 @@ const char* cmXMLParser::FindAttribute(const char** atts,
   return nullptr;
 }
 
-void cmXMLParserStartElement(void* parser, const char* name, const char** atts)
+void cmXMLParserStartElement(void* parser, char const* name, char const** atts)
 {
   // Begin element handler that is registered with the XML_Parser.
   // This just casts the user data to a cmXMLParser and calls
@@ -163,14 +163,14 @@ void cmXMLParserStartElement(void* parser, const char* name, const char** atts)
   static_cast<cmXMLParser*>(parser)->StartElement(name, atts);
 }
 
-void cmXMLParserEndElement(void* parser, const char* name)
+void cmXMLParserEndElement(void* parser, char const* name)
 {
   // End element handler that is registered with the XML_Parser.  This
   // just casts the user data to a cmXMLParser and calls EndElement.
   static_cast<cmXMLParser*>(parser)->EndElement(name);
 }
 
-void cmXMLParserCharacterDataHandler(void* parser, const char* data,
+void cmXMLParserCharacterDataHandler(void* parser, char const* data,
                                      int length)
 {
   // Character data handler that is registered with the XML_Parser.
@@ -187,7 +187,7 @@ void cmXMLParser::ReportXmlParseError()
                     XML_ErrorString(XML_GetErrorCode(parser)));
 }
 
-void cmXMLParser::ReportError(int line, int /*unused*/, const char* msg)
+void cmXMLParser::ReportError(int line, int /*unused*/, char const* msg)
 {
   if (this->ReportCallback) {
     this->ReportCallback(line, msg, this->ReportCallbackData);

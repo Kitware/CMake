@@ -19,7 +19,7 @@ public:
   static unsigned int GetMinorVersion();
   static unsigned int GetPatchVersion();
   static unsigned int GetTweakVersion();
-  static const char* GetCMakeVersion();
+  static char const* GetCMakeVersion();
 };
 
 /* Encode with room for up to 1000 minor releases between major releases

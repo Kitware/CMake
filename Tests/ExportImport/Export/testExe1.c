@@ -2,7 +2,7 @@
 
 extern int testExe1lib(void);
 
-int main(int argc, const char* argv[])
+int main(int argc, char const* argv[])
 {
   if (argc < 2) {
     fprintf(stderr, "Must specify output file.\n");

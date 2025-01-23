@@ -32,7 +32,7 @@ int cm_passed = 0;
 int cm_failed = 0;
 // ======================================================================
 
-void cmFailed(const char* Message, const char* m2 = "", const char* m3 = "")
+void cmFailed(char const* Message, char const* m2 = "", char const* m3 = "")
 {
   std::cout << "FAILED: " << Message << m2 << m3 << "\n";
   cm_failed++;
@@ -40,7 +40,7 @@ void cmFailed(const char* Message, const char* m2 = "", const char* m3 = "")
 
 // ======================================================================
 
-void cmPassed(const char* Message, const char* m2 = "")
+void cmPassed(char const* Message, char const* m2 = "")
 {
   std::cout << "Passed: " << Message << m2 << "\n";
   cm_passed++;
@@ -64,7 +64,7 @@ void cmPassed(const char* Message, const char* m2 = "")
 
 // ======================================================================
 
-void TestAndRemoveFile(const char* filename)
+void TestAndRemoveFile(char const* filename)
 {
   struct stat st;
   if (stat(filename, &st) < 0) {
@@ -83,7 +83,7 @@ void TestAndRemoveFile(const char* filename)
 
 // ======================================================================
 
-void TestDir(const char* filename)
+void TestDir(char const* filename)
 {
   struct stat st;
   if (stat(filename, &st) < 0 || !S_ISDIR(st.st_mode)) {

@@ -154,7 +154,7 @@ std::string cmOutputConverter::MaybeRelativeToCurBinDir(
 }
 
 std::string cmOutputConverter::ConvertToOutputForExisting(
-  const std::string& remote, OutputFormat format, bool useWatcomQuote) const
+  std::string const& remote, OutputFormat format, bool useWatcomQuote) const
 {
 #ifdef _WIN32
   // Cache the Short Paths since we only convert the same few paths anyway and
@@ -300,7 +300,7 @@ std::string cmOutputConverter::EscapeForCMake(cm::string_view str,
 {
   // Always double-quote the argument to take care of most escapes.
   std::string result = (wrapQuotes == WrapQuotes::Wrap) ? "\"" : "";
-  for (const char c : str) {
+  for (char const c : str) {
     if (c == '"') {
       // Escape the double quote to avoid ending the argument.
       result += "\\\"";

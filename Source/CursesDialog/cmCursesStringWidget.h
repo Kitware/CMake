@@ -32,9 +32,9 @@ public:
   /**
    * Set/Get the string.
    */
-  void SetString(const std::string& value);
-  const char* GetString();
-  const char* GetValue() override;
+  void SetString(std::string const& value);
+  char const* GetString();
+  char const* GetValue() override;
 
   /**
    * Set/Get InEdit flag. Can be used to tell the widget to leave

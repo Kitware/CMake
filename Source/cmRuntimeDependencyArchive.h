@@ -22,38 +22,38 @@ public:
   explicit cmRuntimeDependencyArchive(
     cmExecutionStatus& status, std::vector<std::string> searchDirectories,
     std::string bundleExecutable,
-    const std::vector<std::string>& preIncludeRegexes,
-    const std::vector<std::string>& preExcludeRegexes,
-    const std::vector<std::string>& postIncludeRegexes,
-    const std::vector<std::string>& postExcludeRegexes,
+    std::vector<std::string> const& preIncludeRegexes,
+    std::vector<std::string> const& preExcludeRegexes,
+    std::vector<std::string> const& postIncludeRegexes,
+    std::vector<std::string> const& postExcludeRegexes,
     std::vector<std::string> postIncludeFiles,
     std::vector<std::string> postExcludeFiles,
     std::vector<std::string> postExcludeFilesStrict);
   bool Prepare();
-  bool GetRuntimeDependencies(const std::vector<std::string>& executables,
-                              const std::vector<std::string>& libraries,
-                              const std::vector<std::string>& modules);
+  bool GetRuntimeDependencies(std::vector<std::string> const& executables,
+                              std::vector<std::string> const& libraries,
+                              std::vector<std::string> const& modules);
 
-  void SetError(const std::string& e);
+  void SetError(std::string const& e);
 
-  const std::string& GetBundleExecutable() const;
-  const std::vector<std::string>& GetSearchDirectories() const;
-  const std::string& GetGetRuntimeDependenciesTool() const;
+  std::string const& GetBundleExecutable() const;
+  std::vector<std::string> const& GetSearchDirectories() const;
+  std::string const& GetGetRuntimeDependenciesTool() const;
   bool GetGetRuntimeDependenciesCommand(
-    const std::string& search, std::vector<std::string>& command) const;
-  bool IsPreExcluded(const std::string& name) const;
-  bool IsPostExcluded(const std::string& name) const;
+    std::string const& search, std::vector<std::string>& command) const;
+  bool IsPreExcluded(std::string const& name) const;
+  bool IsPostExcluded(std::string const& name) const;
 
-  void AddResolvedPath(const std::string& name, const std::string& path,
+  void AddResolvedPath(std::string const& name, std::string const& path,
                        bool& unique, std::vector<std::string> rpaths = {});
-  void AddUnresolvedPath(const std::string& name);
+  void AddUnresolvedPath(std::string const& name);
 
   cmMakefile* GetMakefile() const;
-  const std::map<std::string, std::set<std::string>>& GetResolvedPaths() const;
-  const std::set<std::string>& GetUnresolvedPaths() const;
-  const std::map<std::string, std::vector<std::string>>& GetRPaths() const;
+  std::map<std::string, std::set<std::string>> const& GetResolvedPaths() const;
+  std::set<std::string> const& GetUnresolvedPaths() const;
+  std::map<std::string, std::vector<std::string>> const& GetRPaths() const;
 
-  static bool PlatformSupportsRuntimeDependencies(const std::string& platform);
+  static bool PlatformSupportsRuntimeDependencies(std::string const& platform);
 
 private:
   cmExecutionStatus& Status;

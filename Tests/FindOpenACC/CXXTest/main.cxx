@@ -10,7 +10,7 @@ void vecaddgpu(float* r, float* a, float* b, std::size_t n)
 
 int main(int, char*[])
 {
-  const std::size_t n = 100000; /* vector length */
+  std::size_t const n = 100000; /* vector length */
   std::vector<float> a(n);      /* input vector 1 */
   std::vector<float> b(n);      /* input vector 2 */
   std::vector<float> r(n);      /* output vector */

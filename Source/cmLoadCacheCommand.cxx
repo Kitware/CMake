@@ -17,7 +17,7 @@ static bool ReadWithPrefix(std::vector<std::string> const& args,
 
 static void CheckLine(cmMakefile& mf, std::string const& prefix,
                       std::set<std::string> const& variablesToRead,
-                      const char* line);
+                      char const* line);
 
 bool cmLoadCacheCommand(std::vector<std::string> const& args,
                         cmExecutionStatus& status)
@@ -117,7 +117,7 @@ static bool ReadWithPrefix(std::vector<std::string> const& args,
   // This is a big hack read loop to overcome a buggy ifstream
   // implementation on HP-UX.  This should work on all platforms even
   // for small buffer sizes.
-  const int bufferSize = 4096;
+  int const bufferSize = 4096;
   char buffer[bufferSize];
   std::string line;
   while (fin) {
@@ -125,10 +125,10 @@ static bool ReadWithPrefix(std::vector<std::string> const& args,
     fin.read(buffer, bufferSize);
     if (fin.gcount()) {
       // Parse for newlines directly.
-      const char* i = buffer;
-      const char* end = buffer + fin.gcount();
+      char const* i = buffer;
+      char const* end = buffer + fin.gcount();
       while (i != end) {
-        const char* begin = i;
+        char const* begin = i;
         while (i != end && *i != '\n') {
           ++i;
         }
@@ -161,7 +161,7 @@ static bool ReadWithPrefix(std::vector<std::string> const& args,
 
 static void CheckLine(cmMakefile& mf, std::string const& prefix,
                       std::set<std::string> const& variablesToRead,
-                      const char* line)
+                      char const* line)
 {
   // Check one line of the cache file.
   std::string var;

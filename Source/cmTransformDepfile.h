@@ -13,5 +13,5 @@ enum class cmDepfileFormat
 
 class cmLocalGenerator;
 
-bool cmTransformDepfile(cmDepfileFormat format, const cmLocalGenerator& lg,
-                        const std::string& infile, const std::string& outfile);
+bool cmTransformDepfile(cmDepfileFormat format, cmLocalGenerator const& lg,
+                        std::string const& infile, std::string const& outfile);

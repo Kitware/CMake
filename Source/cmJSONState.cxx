@@ -13,7 +13,7 @@
 
 #include "cmStringAlgorithms.h"
 
-cmJSONState::cmJSONState(const std::string& filename, Json::Value* root)
+cmJSONState::cmJSONState(std::string const& filename, Json::Value* root)
 {
   cmsys::ifstream fin(filename.c_str(), std::ios::in | std::ios::binary);
   if (!fin) {
@@ -49,7 +49,7 @@ void cmJSONState::AddError(std::string const& errMsg)
 }
 
 void cmJSONState::AddErrorAtValue(std::string const& errMsg,
-                                  const Json::Value* value)
+                                  Json::Value const* value)
 {
   if (value && !value->isNull()) {
     this->AddErrorAtOffset(errMsg, value->getOffsetStart());
@@ -105,7 +105,7 @@ std::string cmJSONState::key_after(std::string const& k)
   return "";
 }
 
-const Json::Value* cmJSONState::value_after(std::string const& k)
+Json::Value const* cmJSONState::value_after(std::string const& k)
 {
   for (auto it = this->parseStack.begin(); it != this->parseStack.end();
        ++it) {
@@ -116,7 +116,7 @@ const Json::Value* cmJSONState::value_after(std::string const& k)
   return nullptr;
 }
 
-void cmJSONState::push_stack(std::string const& k, const Json::Value* value)
+void cmJSONState::push_stack(std::string const& k, Json::Value const* value)
 {
   this->parseStack.emplace_back(k, value);
 }
@@ -140,8 +140,8 @@ cmJSONState::Location cmJSONState::LocateInDocument(ptrdiff_t offset)
 {
   int line = 1;
   int col = 1;
-  const char* beginDoc = doc.data();
-  const char* last = beginDoc + offset;
+  char const* beginDoc = doc.data();
+  char const* last = beginDoc + offset;
   for (; beginDoc != last; ++beginDoc) {
     switch (*beginDoc) {
       case '\r':

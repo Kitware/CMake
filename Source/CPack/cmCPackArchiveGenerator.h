@@ -44,7 +44,7 @@ public:
 
 private:
   // get archive component filename
-  std::string GetArchiveComponentFileName(const std::string& component,
+  std::string GetArchiveComponentFileName(std::string const& component,
                                           bool isGroupName);
 
   class Deduplicator;
@@ -82,9 +82,9 @@ protected:
   int PackageComponentsAllInOne();
 
 private:
-  const char* GetNameOfClass() override { return "cmCPackArchiveGenerator"; }
+  char const* GetNameOfClass() override { return "cmCPackArchiveGenerator"; }
 
-  const char* GetOutputExtension() override
+  char const* GetOutputExtension() override
   {
     return this->OutputExtension.c_str();
   }

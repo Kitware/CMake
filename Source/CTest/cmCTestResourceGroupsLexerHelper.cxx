@@ -12,7 +12,7 @@ cmCTestResourceGroupsLexerHelper::cmCTestResourceGroupsLexerHelper(
 {
 }
 
-bool cmCTestResourceGroupsLexerHelper::ParseString(const std::string& value)
+bool cmCTestResourceGroupsLexerHelper::ParseString(std::string const& value)
 {
   yyscan_t lexer;
   cmCTestResourceGroups_yylex_init_extra(this, &lexer);
@@ -30,7 +30,7 @@ void cmCTestResourceGroupsLexerHelper::SetProcessCount(unsigned int count)
   this->ProcessCount = count;
 }
 
-void cmCTestResourceGroupsLexerHelper::SetResourceType(const std::string& type)
+void cmCTestResourceGroupsLexerHelper::SetResourceType(std::string const& type)
 {
   this->ResourceType = type;
 }

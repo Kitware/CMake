@@ -25,9 +25,9 @@ using std::end;
 
 template <typename C>
 #  if defined(_MSC_VER) && _MSC_VER < 1900
-inline auto cbegin(const C& c)
+inline auto cbegin(C const& c)
 #  else
-inline constexpr auto cbegin(const C& c) noexcept(noexcept(std::begin(c)))
+inline constexpr auto cbegin(C const& c) noexcept(noexcept(std::begin(c)))
 #  endif
   -> decltype(std::begin(c))
 {
@@ -36,9 +36,9 @@ inline constexpr auto cbegin(const C& c) noexcept(noexcept(std::begin(c)))
 
 template <typename C>
 #  if defined(_MSC_VER) && _MSC_VER < 1900
-inline auto cend(const C& c)
+inline auto cend(C const& c)
 #  else
-inline constexpr auto cend(const C& c) noexcept(noexcept(std::end(c)))
+inline constexpr auto cend(C const& c) noexcept(noexcept(std::end(c)))
 #  endif
   -> decltype(std::end(c))
 {
@@ -57,9 +57,9 @@ inline constexpr auto rbegin(C& c)
 }
 template <typename C>
 #  if defined(_MSC_VER) && _MSC_VER < 1900
-inline auto rbegin(const C& c)
+inline auto rbegin(C const& c)
 #  else
-inline constexpr auto rbegin(const C& c)
+inline constexpr auto rbegin(C const& c)
 #  endif
   -> decltype(c.rbegin())
 {
@@ -76,13 +76,13 @@ inline constexpr std::reverse_iterator<T*> rbegin(T (&array)[N]) noexcept
 }
 template <typename T>
 #  if defined(_MSC_VER) && _MSC_VER < 1900
-inline std::reverse_iterator<const T*> rbegin(std::initializer_list<T> il)
+inline std::reverse_iterator<T const*> rbegin(std::initializer_list<T> il)
 #  else
-inline constexpr std::reverse_iterator<const T*> rbegin(
+inline constexpr std::reverse_iterator<T const*> rbegin(
   std::initializer_list<T> il) noexcept
 #  endif
 {
-  return std::reverse_iterator<const T*>(il.end());
+  return std::reverse_iterator<T const*>(il.end());
 }
 
 template <typename C>
@@ -98,9 +98,9 @@ inline constexpr auto rend(C& c)
 }
 template <typename C>
 #  if defined(_MSC_VER) && _MSC_VER < 1900
-inline auto rend(const C& c)
+inline auto rend(C const& c)
 #  else
-inline constexpr auto rend(const C& c)
+inline constexpr auto rend(C const& c)
 #  endif
   -> decltype(c.rend())
 {
@@ -117,20 +117,20 @@ inline constexpr std::reverse_iterator<T*> rend(T (&array)[N]) noexcept
 }
 template <typename T>
 #  if defined(_MSC_VER) && _MSC_VER < 1900
-inline std::reverse_iterator<const T*> rend(std::initializer_list<T> il)
+inline std::reverse_iterator<T const*> rend(std::initializer_list<T> il)
 #  else
-inline constexpr std::reverse_iterator<const T*> rend(
+inline constexpr std::reverse_iterator<T const*> rend(
   std::initializer_list<T> il) noexcept
 #  endif
 {
-  return std::reverse_iterator<const T*>(il.begin());
+  return std::reverse_iterator<T const*>(il.begin());
 }
 
 template <typename C>
 #  if defined(_MSC_VER) && _MSC_VER < 1900
-inline auto crbegin(const C& c)
+inline auto crbegin(C const& c)
 #  else
-inline constexpr auto crbegin(const C& c)
+inline constexpr auto crbegin(C const& c)
 #  endif
   -> decltype(cm::rbegin(c))
 {
@@ -139,9 +139,9 @@ inline constexpr auto crbegin(const C& c)
 
 template <typename C>
 #  if defined(_MSC_VER) && _MSC_VER < 1900
-inline auto crend(const C& c)
+inline auto crend(C const& c)
 #  else
-inline constexpr auto crend(const C& c)
+inline constexpr auto crend(C const& c)
 #  endif
   -> decltype(cm::rend(c))
 {
@@ -165,9 +165,9 @@ using std::crend;
 
 template <typename C>
 #  if defined(_MSC_VER) && _MSC_VER < 1900
-inline auto size(const C& c)
+inline auto size(C const& c)
 #  else
-inline constexpr auto size(const C& c) noexcept(noexcept(c.size()))
+inline constexpr auto size(C const& c) noexcept(noexcept(c.size()))
 #  endif
   -> decltype(c.size())
 {
@@ -176,9 +176,9 @@ inline constexpr auto size(const C& c) noexcept(noexcept(c.size()))
 
 template <typename T, std::size_t N>
 #  if defined(_MSC_VER) && _MSC_VER < 1900
-inline std::size_t size(const T (&)[N])
+inline std::size_t size(T const (&)[N])
 #  else
-inline constexpr std::size_t size(const T (&)[N]) noexcept
+inline constexpr std::size_t size(T const (&)[N]) noexcept
 #  endif
 {
   return N;
@@ -186,9 +186,9 @@ inline constexpr std::size_t size(const T (&)[N]) noexcept
 
 template <typename C>
 #  if defined(_MSC_VER) && _MSC_VER < 1900
-inline auto empty(const C& c)
+inline auto empty(C const& c)
 #  else
-inline constexpr auto empty(const C& c) noexcept(noexcept(c.empty()))
+inline constexpr auto empty(C const& c) noexcept(noexcept(c.empty()))
 #  endif
   -> decltype(c.empty())
 {
@@ -197,9 +197,9 @@ inline constexpr auto empty(const C& c) noexcept(noexcept(c.empty()))
 
 template <typename T, std::size_t N>
 #  if defined(_MSC_VER) && _MSC_VER < 1900
-inline bool empty(const T (&)[N])
+inline bool empty(T const (&)[N])
 #  else
-inline constexpr bool empty(const T (&)[N]) noexcept
+inline constexpr bool empty(T const (&)[N]) noexcept
 #  endif
 {
   return false;
@@ -228,9 +228,9 @@ inline constexpr auto data(C& c) noexcept(noexcept(c.data()))
 
 template <typename C>
 #  if defined(_MSC_VER) && _MSC_VER < 1900
-inline auto data(const C& c)
+inline auto data(C const& c)
 #  else
-inline constexpr auto data(const C& c) noexcept(noexcept(c.data()))
+inline constexpr auto data(C const& c) noexcept(noexcept(c.data()))
 #  endif
   -> decltype(c.data())
 {
@@ -249,9 +249,9 @@ inline constexpr T* data(T (&array)[N]) noexcept
 
 template <typename E>
 #  if defined(_MSC_VER) && _MSC_VER < 1900
-inline const E* data(std::initializer_list<E> il)
+inline E const* data(std::initializer_list<E> il)
 #  else
-inline constexpr const E* data(std::initializer_list<E> il) noexcept
+inline constexpr E const* data(std::initializer_list<E> il) noexcept
 #  endif
 {
   return il.begin();
@@ -269,9 +269,9 @@ using std::data;
 
 template <typename C>
 #  if defined(_MSC_VER) && _MSC_VER < 1900
-inline auto ssize(const C& c)
+inline auto ssize(C const& c)
 #  else
-inline constexpr auto ssize(const C& c)
+inline constexpr auto ssize(C const& c)
 #  endif
   -> typename std::common_type<
     std::ptrdiff_t, typename std::make_signed<decltype(c.size())>::type>::type
@@ -285,9 +285,9 @@ inline constexpr auto ssize(const C& c)
 
 template <typename T, std::ptrdiff_t N>
 #  if defined(_MSC_VER) && _MSC_VER < 1900
-inline std::ptrdiff_t ssize(const T (&)[N])
+inline std::ptrdiff_t ssize(T const (&)[N])
 #  else
-inline constexpr std::ptrdiff_t ssize(const T (&)[N]) noexcept
+inline constexpr std::ptrdiff_t ssize(T const (&)[N]) noexcept
 #  endif
 {
   return N;

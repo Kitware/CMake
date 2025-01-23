@@ -33,7 +33,7 @@
 #include "cmValue.h"
 #include "cmXMLWriter.h"
 
-static const char* cmCTestErrorMatches[] = {
+static char const* cmCTestErrorMatches[] = {
   "^[Bb]us [Ee]rror", // noqa: spellcheck disable-line
   "^[Ss]egmentation [Vv]iolation",
   "^[Ss]egmentation [Ff]ault",
@@ -93,7 +93,7 @@ static const char* cmCTestErrorMatches[] = {
   nullptr
 };
 
-static const char* cmCTestErrorExceptions[] = {
+static char const* cmCTestErrorExceptions[] = {
   "instantiated from ",
   "candidates are:",
   ": warning",
@@ -109,7 +109,7 @@ static const char* cmCTestErrorExceptions[] = {
   nullptr
 };
 
-static const char* cmCTestWarningMatches[] = {
+static char const* cmCTestWarningMatches[] = {
   "([^ :]+):([0-9]+): warning:",
   "([^ :]+):([0-9]+): note:",
   "^cc[^C]*CC: WARNING File = ([^,]+), Line = ([0-9]+)",
@@ -135,7 +135,7 @@ static const char* cmCTestWarningMatches[] = {
   nullptr
 };
 
-static const char* cmCTestWarningExceptions[] = {
+static char const* cmCTestWarningExceptions[] = {
   R"(/usr/.*/X11/Xlib\.h:[0-9]+: war.*: ANSI C\+\+ forbids declaration)",
   R"(/usr/.*/X11/Xutil\.h:[0-9]+: war.*: ANSI C\+\+ forbids declaration)",
   R"(/usr/.*/X11/XResource\.h:[0-9]+: war.*: ANSI C\+\+ forbids declaration)",
@@ -157,7 +157,7 @@ static const char* cmCTestWarningExceptions[] = {
 
 struct cmCTestBuildCompileErrorWarningRex
 {
-  const char* RegularExpressionString;
+  char const* RegularExpressionString;
   int FileIndex;
   int LineIndex;
 };
@@ -281,7 +281,7 @@ int cmCTestBuildHandler::ProcessHandler()
     return -1;
   }
 
-  const std::string& buildDirectory =
+  std::string const& buildDirectory =
     this->CTest->GetCTestConfiguration("BuildDirectory");
   if (buildDirectory.empty()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
@@ -501,7 +501,7 @@ void cmCTestBuildHandler::GenerateXMLLaunched(cmXMLWriter& xml)
   launchDir.Load(this->CTestLaunchDir);
   unsigned long n = launchDir.GetNumberOfFiles();
   for (unsigned long i = 0; i < n; ++i) {
-    const char* fname = launchDir.GetFile(i);
+    char const* fname = launchDir.GetFile(i);
     if (this->IsLaunchedErrorFile(fname) && numErrorsAllowed) {
       numErrorsAllowed--;
       fragments.insert(this->CTestLaunchDir + '/' + fname);
@@ -611,14 +611,14 @@ void cmCTestBuildHandler::GenerateXMLFooter(cmXMLWriter& xml,
   this->CTest->EndXML(xml);
 }
 
-bool cmCTestBuildHandler::IsLaunchedErrorFile(const char* fname)
+bool cmCTestBuildHandler::IsLaunchedErrorFile(char const* fname)
 {
   // error-{hash}.xml
   return (cmHasLiteralPrefix(fname, "error-") &&
           cmHasLiteralSuffix(fname, ".xml"));
 }
 
-bool cmCTestBuildHandler::IsLaunchedWarningFile(const char* fname)
+bool cmCTestBuildHandler::IsLaunchedWarningFile(char const* fname)
 {
   // warning-{hash}.xml
   return (cmHasLiteralPrefix(fname, "warning-") &&
@@ -635,15 +635,15 @@ class cmCTestBuildHandler::LaunchHelper
 public:
   LaunchHelper(cmCTestBuildHandler* handler);
   ~LaunchHelper();
-  LaunchHelper(const LaunchHelper&) = delete;
-  LaunchHelper& operator=(const LaunchHelper&) = delete;
+  LaunchHelper(LaunchHelper const&) = delete;
+  LaunchHelper& operator=(LaunchHelper const&) = delete;
 
 private:
   cmCTestBuildHandler* Handler;
   cmCTest* CTest;
 
   void WriteLauncherConfig();
-  void WriteScrapeMatchers(const char* purpose,
+  void WriteScrapeMatchers(char const* purpose,
                            std::vector<std::string> const& matchers);
 };
 
@@ -703,7 +703,7 @@ void cmCTestBuildHandler::LaunchHelper::WriteLauncherConfig()
 }
 
 void cmCTestBuildHandler::LaunchHelper::WriteScrapeMatchers(
-  const char* purpose, std::vector<std::string> const& matchers)
+  char const* purpose, std::vector<std::string> const& matchers)
 {
   if (matchers.empty()) {
     return;
@@ -716,8 +716,8 @@ void cmCTestBuildHandler::LaunchHelper::WriteScrapeMatchers(
   }
 }
 
-bool cmCTestBuildHandler::RunMakeCommand(const std::string& command,
-                                         int* retVal, const char* dir,
+bool cmCTestBuildHandler::RunMakeCommand(std::string const& command,
+                                         int* retVal, char const* dir,
                                          int timeout, std::ostream& ofs,
                                          Encoding encoding)
 {
@@ -869,7 +869,7 @@ bool cmCTestBuildHandler::RunMakeCommand(const std::string& command,
               launchDir.Load(this->CTestLaunchDir);
               unsigned long n = launchDir.GetNumberOfFiles();
               for (unsigned long i = 0; i < n; ++i) {
-                const char* fname = launchDir.GetFile(i);
+                char const* fname = launchDir.GetFile(i);
                 if (cmHasLiteralSuffix(fname, ".xml")) {
                   launcherXMLFound = true;
                   break;
@@ -940,13 +940,13 @@ bool cmCTestBuildHandler::RunMakeCommand(const std::string& command,
 // ######################################################################
 // ######################################################################
 
-void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
+void cmCTestBuildHandler::ProcessBuffer(char const* data, size_t length,
                                         size_t& tick, size_t tick_len,
                                         std::ostream& ofs,
                                         t_BuildProcessingQueueType* queue)
 {
-  const std::string::size_type tick_line_len = 50;
-  const char* ptr;
+  std::string::size_type const tick_line_len = 50;
+  char const* ptr;
   for (ptr = data; ptr < data + length; ptr++) {
     queue->push_back(*ptr);
   }
@@ -977,7 +977,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
       this->CurrentProcessingLine.clear();
       cm::append(this->CurrentProcessingLine, queue->begin(), it);
       this->CurrentProcessingLine.push_back(0);
-      const char* line = this->CurrentProcessingLine.data();
+      char const* line = this->CurrentProcessingLine.data();
 
       // Process the line
       int lineType = this->ProcessSingleLine(line);
@@ -1074,7 +1074,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, size_t length,
   ofs << cm::string_view(data, length);
 }
 
-int cmCTestBuildHandler::ProcessSingleLine(const char* data)
+int cmCTestBuildHandler::ProcessSingleLine(char const* data)
 {
   if (this->UseCTestLaunch) {
     // No log scraping when using launchers.

@@ -148,7 +148,7 @@ int cmCPackProductBuildGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-bool cmCPackProductBuildGenerator::RunProductBuild(const std::string& command)
+bool cmCPackProductBuildGenerator::RunProductBuild(std::string const& command)
 {
   std::string tmpFile = cmStrCat(this->GetOption("CPACK_TOPLEVEL_DIRECTORY"),
                                  "/ProductBuildOutput.log");
@@ -175,8 +175,8 @@ bool cmCPackProductBuildGenerator::RunProductBuild(const std::string& command)
 }
 
 bool cmCPackProductBuildGenerator::GenerateComponentPackage(
-  const std::string& packageFileDir, const std::string& packageFileName,
-  const std::string& packageDir, const cmCPackComponent* component)
+  std::string const& packageFileDir, std::string const& packageFileName,
+  std::string const& packageDir, cmCPackComponent const* component)
 {
   std::string packageFile = cmStrCat(packageFileDir, '/', packageFileName);
 
@@ -184,7 +184,7 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
                 "-   Building component package: " << packageFile
                                                    << std::endl);
 
-  const char* comp_name = component ? component->Name.c_str() : nullptr;
+  char const* comp_name = component ? component->Name.c_str() : nullptr;
 
   cmValue preflight = this->GetComponentScript("PREFLIGHT", comp_name);
   cmValue postflight = this->GetComponentScript("POSTFLIGHT", comp_name);
@@ -267,7 +267,7 @@ bool cmCPackProductBuildGenerator::GenerateComponentPackage(
 }
 
 cmValue cmCPackProductBuildGenerator::GetComponentScript(
-  const char* script, const char* component_name)
+  char const* script, char const* component_name)
 {
   std::string scriptname = cmStrCat("CPACK_", script, '_');
   if (component_name) {

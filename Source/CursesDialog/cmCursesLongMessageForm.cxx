@@ -17,7 +17,7 @@ inline int ctrl(int z)
 }
 
 cmCursesLongMessageForm::cmCursesLongMessageForm(
-  std::vector<std::string> const& messages, const char* title,
+  std::vector<std::string> const& messages, char const* title,
   ScrollBehavior scrollBehavior)
   : Scrolling(scrollBehavior)
 {
@@ -148,7 +148,7 @@ void cmCursesLongMessageForm::Render(int /*left*/, int /*top*/, int /*width*/,
   refresh();
 }
 
-void cmCursesLongMessageForm::DrawMessage(const char* msg) const
+void cmCursesLongMessageForm::DrawMessage(char const* msg) const
 {
   int i = 0;
   while (msg[i] != '\0' && i < MAX_CONTENT_SIZE) {

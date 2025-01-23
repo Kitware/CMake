@@ -164,10 +164,10 @@ PIMAGE_SECTION_HEADER GetSectionHeaderOffset(
 /*
 + * Utility func, strstr with size
 + */
-const char* StrNStr(const char* start, const char* find, size_t& size)
+char const* StrNStr(char const* start, char const* find, size_t& size)
 {
   size_t len;
-  const char* hint;
+  char const* hint;
 
   if (!start || !find || !size) {
     size = 0;
@@ -175,7 +175,7 @@ const char* StrNStr(const char* start, const char* find, size_t& size)
   }
   len = strlen(find);
 
-  while ((hint = (const char*)memchr(start, find[0], size - len + 1))) {
+  while ((hint = (char const*)memchr(start, find[0], size - len + 1))) {
     size -= (hint - start);
     if (!strncmp(hint, find, len))
       return hint;
@@ -254,7 +254,7 @@ public:
            */
           if (pSymbolTable->N.Name.Short != 0) {
             symbol.clear();
-            symbol.insert(0, (const char*)pSymbolTable->N.ShortName, 8);
+            symbol.insert(0, (char const*)pSymbolTable->N.ShortName, 8);
           } else {
             symbol = stringTable + pSymbolTable->N.Name.Long;
           }
@@ -279,9 +279,9 @@ public:
           // deleting destructor"
           // if scalarPrefix and vectorPrefix are not found then print
           // the symbol
-          const char* scalarPrefix = "??_G";
-          const char* vectorPrefix = "??_E";
-          const char* vftablePrefix = "??_7";
+          char const* scalarPrefix = "??_G";
+          char const* vectorPrefix = "??_E";
+          char const* vftablePrefix = "??_7";
           // The original code had a check for
           //     symbol.find("real@") == std::string::npos)
           // but this disallows member functions with the name "real".
@@ -346,7 +346,7 @@ private:
 };
 #endif
 
-static bool DumpFileWithLlvmNm(std::string const& nmPath, const char* filename,
+static bool DumpFileWithLlvmNm(std::string const& nmPath, char const* filename,
                                std::set<std::string>& symbols,
                                std::set<std::string>& dataSymbols)
 {
@@ -386,7 +386,7 @@ static bool DumpFileWithLlvmNm(std::string const& nmPath, const char* filename,
               line.c_str());
       return false;
     }
-    const char sym_type = line[sym_end + 1];
+    char const sym_type = line[sym_end + 1];
     line.resize(sym_end);
     switch (sym_type) {
       case 'D':
@@ -401,7 +401,7 @@ static bool DumpFileWithLlvmNm(std::string const& nmPath, const char* filename,
   return true;
 }
 
-static bool DumpFile(std::string const& nmPath, const char* filename,
+static bool DumpFile(std::string const& nmPath, char const* filename,
                      std::set<std::string>& symbols,
                      std::set<std::string>& dataSymbols)
 {
@@ -501,12 +501,12 @@ static bool DumpFile(std::string const& nmPath, const char* filename,
 #endif
 }
 
-bool bindexplib::AddObjectFile(const char* filename)
+bool bindexplib::AddObjectFile(char const* filename)
 {
   return DumpFile(this->NmPath, filename, this->Symbols, this->DataSymbols);
 }
 
-bool bindexplib::AddDefinitionFile(const char* filename)
+bool bindexplib::AddDefinitionFile(char const* filename)
 {
   cmsys::ifstream infile(filename);
   if (!infile) {

@@ -61,7 +61,7 @@ cmCursesMainForm::~cmCursesMainForm()
 }
 
 // See if a cache entry is in the list of entries in the ui.
-bool cmCursesMainForm::LookForCacheEntry(const std::string& key)
+bool cmCursesMainForm::LookForCacheEntry(std::string const& key)
 {
   return std::any_of(this->Entries.begin(), this->Entries.end(),
                      [&key](cmCursesCacheEntryComposite const& entry) {
@@ -326,7 +326,7 @@ void cmCursesMainForm::PrintKeys(int process /* = 0 */)
                  "                           ");
       }
       {
-        const char* toggleKeyInstruction =
+        char const* toggleKeyInstruction =
           "      [t] Toggle advanced mode (currently %s)";
         snprintf(thirdLine, sizeof(thirdLine), toggleKeyInstruction,
                  this->AdvancedMode ? "on" : "off");
@@ -439,7 +439,7 @@ void cmCursesMainForm::UpdateStatusBar(cm::optional<std::string> message)
   pos_form_cursor(this->Form);
 }
 
-void cmCursesMainForm::UpdateProgress(const std::string& msg, float prog)
+void cmCursesMainForm::UpdateProgress(std::string const& msg, float prog)
 {
   if (prog >= 0) {
     constexpr int progressBarWidth = 40;
@@ -473,7 +473,7 @@ int cmCursesMainForm::Configure(int noconfigure)
   if (noconfigure == 0) {
     this->UpdateProgress("Configuring", 0);
     this->CMakeInstance->SetProgressCallback(
-      [this](const std::string& msg, float prog) {
+      [this](std::string const& msg, float prog) {
         this->UpdateProgress(msg, prog);
       });
   }
@@ -505,7 +505,7 @@ int cmCursesMainForm::Configure(int noconfigure)
     int xx;
     int yy;
     getmaxyx(stdscr, yy, xx);
-    const char* title = "Configure produced the following output";
+    char const* title = "Configure produced the following output";
     if (cmSystemTools::GetErrorOccurredFlag()) {
       title = "Configure failed with the following output";
     }
@@ -540,7 +540,7 @@ int cmCursesMainForm::Generate()
 
   this->UpdateProgress("Generating", 0);
   this->CMakeInstance->SetProgressCallback(
-    [this](const std::string& msg, float prog) {
+    [this](std::string const& msg, float prog) {
       this->UpdateProgress(msg, prog);
     });
 
@@ -560,7 +560,7 @@ int cmCursesMainForm::Generate()
     int xx;
     int yy;
     getmaxyx(stdscr, yy, xx);
-    const char* title = "Generate produced the following output";
+    char const* title = "Generate produced the following output";
     if (cmSystemTools::GetErrorOccurredFlag()) {
       title = "Generate failed with the following output";
     }
@@ -587,15 +587,15 @@ int cmCursesMainForm::Generate()
   return 0;
 }
 
-void cmCursesMainForm::AddError(const std::string& message,
-                                const char* /*unused*/)
+void cmCursesMainForm::AddError(std::string const& message,
+                                char const* /*unused*/)
 {
   this->Outputs.emplace_back(message);
   this->HasNonStatusOutputs = true;
   this->DisplayOutputs(message);
 }
 
-void cmCursesMainForm::RemoveEntry(const char* value)
+void cmCursesMainForm::RemoveEntry(char const* value)
 {
   if (!value) {
     return;
@@ -604,7 +604,7 @@ void cmCursesMainForm::RemoveEntry(const char* value)
   auto removeIt =
     std::find_if(this->Entries.begin(), this->Entries.end(),
                  [value](cmCursesCacheEntryComposite& entry) -> bool {
-                   const char* val = entry.GetValue();
+                   char const* val = entry.GetValue();
                    return val && !strcmp(value, val);
                  });
 
@@ -618,7 +618,7 @@ void cmCursesMainForm::RemoveEntry(const char* value)
 void cmCursesMainForm::FillCacheManagerFromUI()
 {
   for (cmCursesCacheEntryComposite& entry : this->Entries) {
-    const std::string& cacheKey = entry.Key;
+    std::string const& cacheKey = entry.Key;
     cmValue existingValue =
       this->CMakeInstance->GetState()->GetCacheEntryValue(cacheKey);
     if (existingValue) {
@@ -643,7 +643,7 @@ void cmCursesMainForm::FillCacheManagerFromUI()
 }
 
 void cmCursesMainForm::FixValue(cmStateEnums::CacheEntryType type,
-                                const std::string& in, std::string& out) const
+                                std::string const& in, std::string& out) const
 {
   out = in.substr(0, in.find_last_not_of(' ') + 1);
   if (type == cmStateEnums::PATH || type == cmStateEnums::FILEPATH) {
@@ -826,7 +826,7 @@ void cmCursesMainForm::HandleInput()
         int findex = field_index(cur);
         cmCursesWidget* lbl = reinterpret_cast<cmCursesWidget*>(
           field_userptr(this->Fields[findex - 2]));
-        const char* curField = lbl->GetValue();
+        char const* curField = lbl->GetValue();
         cmValue helpString = nullptr;
 
         cmValue existingValue =
@@ -955,7 +955,7 @@ void cmCursesMainForm::HandleInput()
   }
 }
 
-int cmCursesMainForm::LoadCache(const char* /*unused*/)
+int cmCursesMainForm::LoadCache(char const* /*unused*/)
 
 {
   int r = this->CMakeInstance->LoadCache();
@@ -972,12 +972,12 @@ int cmCursesMainForm::LoadCache(const char* /*unused*/)
   return r;
 }
 
-void cmCursesMainForm::JumpToCacheEntry(const char* astr)
+void cmCursesMainForm::JumpToCacheEntry(char const* astr)
 {
   this->JumpToCacheEntry(astr, false);
 }
 
-void cmCursesMainForm::JumpToCacheEntry(const char* astr, bool reverse)
+void cmCursesMainForm::JumpToCacheEntry(char const* astr, bool reverse)
 {
   std::string str;
   if (astr) {
@@ -998,7 +998,7 @@ void cmCursesMainForm::JumpToCacheEntry(const char* astr, bool reverse)
           field_userptr(this->Fields[findex - 2]));
       }
       if (lbl) {
-        const char* curField = lbl->GetValue();
+        char const* curField = lbl->GetValue();
         if (curField) {
           std::string cfld = cmSystemTools::LowerCase(curField);
           if (cfld.find(str) != std::string::npos && findex != start_index) {
@@ -1057,7 +1057,7 @@ void cmCursesMainForm::DisplayOutputs(std::string const& newOutput)
   }
 }
 
-const char* cmCursesMainForm::s_ConstHelpMessage =
+char const* cmCursesMainForm::s_ConstHelpMessage =
   "CMake is used to configure and generate build files for software projects. "
   "The basic steps for configuring a project with ccmake are as follows:\n\n"
   "1. Run ccmake in the directory where you want the object and executable "

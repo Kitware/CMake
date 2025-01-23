@@ -55,7 +55,7 @@ std::string const& cmFileInstaller::ToName(std::string const& fromName)
   return this->Rename.empty() ? fromName : this->Rename;
 }
 
-void cmFileInstaller::ReportCopy(const std::string& toFile, Type type,
+void cmFileInstaller::ReportCopy(std::string const& toFile, Type type,
                                  bool copy)
 {
   if (!this->MessageNever && (copy || !this->MessageLazy)) {
@@ -68,12 +68,12 @@ void cmFileInstaller::ReportCopy(const std::string& toFile, Type type,
     this->ManifestAppend(toFile);
   }
 }
-bool cmFileInstaller::ReportMissing(const std::string& fromFile)
+bool cmFileInstaller::ReportMissing(std::string const& fromFile)
 {
   return (this->Optional || this->cmFileCopier::ReportMissing(fromFile));
 }
-bool cmFileInstaller::Install(const std::string& fromFile,
-                              const std::string& toFile)
+bool cmFileInstaller::Install(std::string const& fromFile,
+                              std::string const& toFile)
 {
   // Support installing from empty source to make a directory.
   if (this->InstallType == cmInstallType_DIRECTORY && fromFile.empty()) {
@@ -82,8 +82,8 @@ bool cmFileInstaller::Install(const std::string& fromFile,
   return this->cmFileCopier::Install(fromFile, toFile);
 }
 
-bool cmFileInstaller::InstallFile(const std::string& fromFile,
-                                  const std::string& toFile,
+bool cmFileInstaller::InstallFile(std::string const& fromFile,
+                                  std::string const& toFile,
                                   MatchProperties match_properties)
 {
   if (this->InstallMode == cmInstallMode::COPY) {
@@ -228,7 +228,7 @@ bool cmFileInstaller::Parse(std::vector<std::string> const& args)
     return false;
   }
 
-  static const std::map<cm::string_view, cmInstallMode> install_mode_dict{
+  static std::map<cm::string_view, cmInstallMode> const install_mode_dict{
     { "ABS_SYMLINK"_s, cmInstallMode::ABS_SYMLINK },
     { "ABS_SYMLINK_OR_COPY"_s, cmInstallMode::ABS_SYMLINK_OR_COPY },
     { "REL_SYMLINK"_s, cmInstallMode::REL_SYMLINK },
@@ -351,7 +351,7 @@ bool cmFileInstaller::CheckValue(std::string const& arg)
   return true;
 }
 
-bool cmFileInstaller::GetTargetTypeFromString(const std::string& stype)
+bool cmFileInstaller::GetTargetTypeFromString(std::string const& stype)
 {
   if (stype == "EXECUTABLE") {
     this->InstallType = cmInstallType_EXECUTABLE;

@@ -35,7 +35,7 @@ public:
   // Description:
   // During a CMake run, an error handle should add errors
   // to be displayed afterwards.
-  virtual void AddError(const std::string&, const char*) {}
+  virtual void AddError(std::string const&, char const*) {}
 
   // Description:
   // Turn debugging on. This will create ccmakelog.txt.
@@ -47,7 +47,7 @@ public:
 
   // Description:
   // Write a debugging message.
-  static void LogMessage(const char* msg);
+  static void LogMessage(char const* msg);
 
   // Description:
   // Return the FORM. Should be only used by low-level methods.

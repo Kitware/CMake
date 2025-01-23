@@ -23,8 +23,8 @@ cmSearchPath::cmSearchPath(cmFindCommon* findCmd)
 
 cmSearchPath::~cmSearchPath() = default;
 
-void cmSearchPath::ExtractWithout(const std::set<std::string>& ignorePaths,
-                                  const std::set<std::string>& ignorePrefixes,
+void cmSearchPath::ExtractWithout(std::set<std::string> const& ignorePaths,
+                                  std::set<std::string> const& ignorePrefixes,
                                   std::vector<std::string>& outPaths) const
 {
   for (auto const& path : this->Paths) {
@@ -35,12 +35,12 @@ void cmSearchPath::ExtractWithout(const std::set<std::string>& ignorePaths,
   }
 }
 
-void cmSearchPath::AddPath(const std::string& path)
+void cmSearchPath::AddPath(std::string const& path)
 {
   this->AddPathInternal(path, "");
 }
 
-void cmSearchPath::AddUserPath(const std::string& path)
+void cmSearchPath::AddUserPath(std::string const& path)
 {
   assert(this->FC);
 
@@ -50,7 +50,7 @@ void cmSearchPath::AddUserPath(const std::string& path)
                              cmWindowsRegistry::SimpleTypes);
   auto expandedPaths = registry.ExpandExpression(path, this->FC->RegistryView);
   if (expandedPaths) {
-    for (const auto& expandedPath : expandedPaths.value()) {
+    for (auto const& expandedPath : expandedPaths.value()) {
       cmSystemTools::GlobDirs(expandedPath, outPaths);
     }
   }
@@ -64,7 +64,7 @@ void cmSearchPath::AddUserPath(const std::string& path)
   }
 }
 
-void cmSearchPath::AddCMakePath(const std::string& variable)
+void cmSearchPath::AddCMakePath(std::string const& variable)
 {
   assert(this->FC);
 
@@ -81,7 +81,7 @@ void cmSearchPath::AddCMakePath(const std::string& variable)
   }
 }
 
-void cmSearchPath::AddEnvPath(const std::string& variable)
+void cmSearchPath::AddEnvPath(std::string const& variable)
 {
   std::vector<std::string> expanded =
     cmSystemTools::GetEnvPathNormalized(variable);
@@ -90,7 +90,7 @@ void cmSearchPath::AddEnvPath(const std::string& variable)
   }
 }
 
-void cmSearchPath::AddCMakePrefixPath(const std::string& variable)
+void cmSearchPath::AddCMakePrefixPath(std::string const& variable)
 {
   assert(this->FC);
 
@@ -114,7 +114,7 @@ static std::string cmSearchPathStripBin(std::string const& s)
   return s;
 }
 
-void cmSearchPath::AddEnvPrefixPath(const std::string& variable, bool stripBin)
+void cmSearchPath::AddEnvPrefixPath(std::string const& variable, bool stripBin)
 {
   std::vector<std::string> expanded =
     cmSystemTools::GetEnvPathNormalized(variable);
@@ -125,7 +125,7 @@ void cmSearchPath::AddEnvPrefixPath(const std::string& variable, bool stripBin)
   this->AddPrefixPaths(expanded);
 }
 
-void cmSearchPath::AddSuffixes(const std::vector<std::string>& suffixes)
+void cmSearchPath::AddSuffixes(std::vector<std::string> const& suffixes)
 {
   std::vector<PathWithPrefix> inPaths;
   inPaths.swap(this->Paths);
@@ -153,7 +153,7 @@ void cmSearchPath::AddSuffixes(const std::vector<std::string>& suffixes)
   }
 }
 
-void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths)
+void cmSearchPath::AddPrefixPaths(std::vector<std::string> const& paths)
 {
   assert(this->FC);
 
@@ -219,8 +219,8 @@ void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths)
   }
 }
 
-void cmSearchPath::AddPathInternal(const std::string& path,
-                                   const std::string& prefix)
+void cmSearchPath::AddPathInternal(std::string const& path,
+                                   std::string const& prefix)
 {
   assert(this->FC);
 

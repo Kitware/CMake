@@ -57,8 +57,8 @@ class unicode_helper
 {
 protected:
   using utf8_state = unsigned char;
-  static const utf8_state s_start = 0;
-  static const utf8_state s_reject = 8;
+  static utf8_state const s_start = 0;
+  static utf8_state const s_reject = 8;
 
   static inline bool in_range(std::uint32_t c, std::uint32_t lo,
                               std::uint32_t hi)
@@ -83,7 +83,7 @@ protected:
 
   static void append(std::string& str, std::uint32_t codepoint);
 
-  static utf8_state decode(const utf8_state state, const std::uint8_t fragment,
+  static utf8_state decode(utf8_state const state, std::uint8_t const fragment,
                            std::uint32_t& codepoint);
 };
 
@@ -98,7 +98,7 @@ class unicode<Char, typename std::enable_if<(sizeof(Char) == 4)>::type>
 {
 public:
   // UTF32 -> UTF8
-  static std::string to_utf8(const std::wstring& str)
+  static std::string to_utf8(std::wstring const& str)
   {
     std::string result;
     for (auto c : str) {
@@ -114,7 +114,7 @@ public:
   }
 
   // UTF8 -> UTF32
-  static std::wstring from_utf8(const std::string& str)
+  static std::wstring from_utf8(std::string const& str)
   {
     std::wstring result;
     result.reserve(str.length());
@@ -159,7 +159,7 @@ class unicode<Char, typename std::enable_if<(sizeof(Char) == 2)>::type>
 {
 public:
   // UTF16 -> UTF8
-  static std::string to_utf8(const std::wstring& str)
+  static std::string to_utf8(std::wstring const& str)
   {
     std::string result;
     for (auto iter = str.begin(); iter != str.end(); ++iter) {
@@ -193,7 +193,7 @@ public:
   }
 
   // UTF8 -> UTF16
-  static std::wstring from_utf8(const std::string& str)
+  static std::wstring from_utf8(std::string const& str)
   {
     std::wstring result;
     result.reserve(str.length());
@@ -254,11 +254,11 @@ template <>
 class unicode_converter<char, wchar_t>
 {
 public:
-  std::wstring operator()(const std::string& in)
+  std::wstring operator()(std::string const& in)
   {
     return unicode<wchar_t>::from_utf8(in);
   }
-  std::wstring operator()(const char* in)
+  std::wstring operator()(char const* in)
   {
     return unicode<wchar_t>::from_utf8(in);
   }
@@ -268,11 +268,11 @@ template <>
 class unicode_converter<wchar_t, char>
 {
 public:
-  std::string operator()(const std::wstring& in)
+  std::string operator()(std::wstring const& in)
   {
     return unicode<wchar_t>::to_utf8(in);
   }
-  std::string operator()(const wchar_t* in)
+  std::string operator()(wchar_t const* in)
   {
     return unicode<wchar_t>::to_utf8(in);
   }
@@ -282,16 +282,16 @@ template <>
 class unicode_converter<char, char>
 {
 public:
-  std::string operator()(const std::string& in) { return in; }
-  std::string operator()(const char* in) { return std::string(in); }
+  std::string operator()(std::string const& in) { return in; }
+  std::string operator()(char const* in) { return std::string(in); }
   std::string operator()(char in) { return std::string(1, in); }
 };
 template <>
 class unicode_converter<wchar_t, wchar_t>
 {
 public:
-  std::wstring operator()(const std::wstring& in) { return in; }
-  std::wstring operator()(const wchar_t* in) { return std::wstring(in); }
+  std::wstring operator()(std::wstring const& in) { return in; }
+  std::wstring operator()(wchar_t const* in) { return std::wstring(in); }
   std::wstring operator()(wchar_t in) { return std::wstring(1, in); }
 };
 
@@ -308,33 +308,33 @@ struct string_converter<char>
   // std::string::string(const string&, const Allocator&)
   // As workaround, use char* pointer.
   template <typename Char, typename Traits, typename Alloc>
-  static std::basic_string<Char, Traits, Alloc> to(const std::string& in,
-                                                   const Alloc& a)
+  static std::basic_string<Char, Traits, Alloc> to(std::string const& in,
+                                                   Alloc const& a)
   {
     return std::basic_string<Char, Traits, Alloc>(
       unicode_converter<char, Char>()(in).c_str(), a);
   }
   template <typename Char, typename Traits, typename Alloc>
-  static std::basic_string<Char, Traits, Alloc> to(const char* in,
-                                                   const Alloc& a)
+  static std::basic_string<Char, Traits, Alloc> to(char const* in,
+                                                   Alloc const& a)
   {
     return std::basic_string<Char, Traits, Alloc>(
       unicode_converter<char, Char>()(in).c_str(), a);
   }
   template <typename Char, typename Traits, typename Alloc>
-  static std::basic_string<Char, Traits, Alloc> to(char in, const Alloc& a)
+  static std::basic_string<Char, Traits, Alloc> to(char in, Alloc const& a)
   {
     return std::basic_string<Char, Traits, Alloc>(
       unicode_converter<char, Char>()(in).c_str(), a);
   }
 
   template <typename Char>
-  static std::basic_string<Char> to(const std::string& in)
+  static std::basic_string<Char> to(std::string const& in)
   {
     return std::basic_string<Char>(unicode_converter<char, Char>()(in));
   }
   template <typename Char>
-  static std::basic_string<Char> to(const char* in)
+  static std::basic_string<Char> to(char const* in)
   {
     return std::basic_string<Char>(unicode_converter<char, Char>()(in));
   }
@@ -352,33 +352,33 @@ struct string_converter<wchar_t>
   // std::string::string(const string&, const Allocator&)
   // As workaround, use char* pointer.
   template <typename Char, typename Traits, typename Alloc>
-  static std::basic_string<Char, Traits, Alloc> to(const std::wstring& in,
-                                                   const Alloc& a)
+  static std::basic_string<Char, Traits, Alloc> to(std::wstring const& in,
+                                                   Alloc const& a)
   {
     return std::basic_string<Char, Traits, Alloc>(
       unicode_converter<wchar_t, Char>()(in).c_str(), a);
   }
   template <typename Char, typename Traits, typename Alloc>
-  static std::basic_string<Char, Traits, Alloc> to(const wchar_t* in,
-                                                   const Alloc& a)
+  static std::basic_string<Char, Traits, Alloc> to(wchar_t const* in,
+                                                   Alloc const& a)
   {
     return std::basic_string<Char, Traits, Alloc>(
       unicode_converter<wchar_t, Char>()(in).c_str(), a);
   }
   template <typename Char, typename Traits, typename Alloc>
-  static std::basic_string<Char, Traits, Alloc> to(wchar_t in, const Alloc& a)
+  static std::basic_string<Char, Traits, Alloc> to(wchar_t in, Alloc const& a)
   {
     return std::basic_string<Char, Traits, Alloc>(
       unicode_converter<wchar_t, Char>()(in).c_str(), a);
   }
 
   template <typename Char>
-  static std::basic_string<Char> to(const std::wstring& in)
+  static std::basic_string<Char> to(std::wstring const& in)
   {
     return std::basic_string<Char>(unicode_converter<wchar_t, Char>()(in));
   }
   template <typename Char>
-  static std::basic_string<Char> to(const wchar_t* in)
+  static std::basic_string<Char> to(wchar_t const* in)
   {
     return std::basic_string<Char>(unicode_converter<wchar_t, Char>()(in));
   }
@@ -451,18 +451,18 @@ struct source_converter<char, char>
     }
   }
 
-  static void append_source(std::string& p, const cm::string_view s)
+  static void append_source(std::string& p, cm::string_view const s)
   {
     append_range(p, s.begin(), s.end());
   }
   template <typename Traits, typename Alloc>
   static void append_source(std::string& p,
-                            const std::basic_string<char, Traits, Alloc>& s)
+                            std::basic_string<char, Traits, Alloc> const& s)
   {
     append_range(p, s.begin(), s.end());
   }
   template <typename Source>
-  static void append_source(std::string& p, const Source& s)
+  static void append_source(std::string& p, Source const& s)
   {
     append_range(p, s);
   }
@@ -503,12 +503,12 @@ struct source_converter<wchar_t, char>
 
   template <typename Traits, typename Alloc>
   static void append_source(std::string& p,
-                            const std::basic_string<wchar_t, Traits, Alloc>& s)
+                            std::basic_string<wchar_t, Traits, Alloc> const& s)
   {
     append_range(p, s.begin(), s.end());
   }
   template <typename Source>
-  static void append_source(std::string& p, const Source& s)
+  static void append_source(std::string& p, Source const& s)
   {
     append_range(p, s);
   }
@@ -641,7 +641,7 @@ public:
   // Constructors
   // ============
   path() noexcept {}
-  path(const path& p)
+  path(path const& p)
     : path_(p.path_)
   {
   }
@@ -656,7 +656,7 @@ public:
       this->path_, std::move(source));
   }
   template <typename Source, typename = enable_if_pathable<Source>>
-  path(const Source& source, format fmt = auto_format)
+  path(Source const& source, format fmt = auto_format)
   {
     (void)fmt;
     internals::source_converter<
@@ -664,7 +664,7 @@ public:
       path_type::value_type>::append_source(this->path_, source);
   }
   template <typename Iterator, typename = enable_if_pathable<Iterator>>
-  path(const Iterator first, Iterator last, format fmt = auto_format)
+  path(Iterator const first, Iterator last, format fmt = auto_format)
   {
     (void)fmt;
     internals::source_converter<
@@ -676,7 +676,7 @@ public:
 
   // Assignments
   // ===========
-  path& operator=(const path& p)
+  path& operator=(path const& p)
   {
     if (this != &p) {
       this->path_ = p.path_;
@@ -692,7 +692,7 @@ public:
   }
   path& operator=(string_type&& source) { return this->assign(source); }
   template <typename Source, typename = enable_if_pathable<Source>>
-  path& operator=(const Source& source)
+  path& operator=(Source const& source)
   {
     return this->assign(source);
   }
@@ -704,7 +704,7 @@ public:
     return *this;
   }
   template <typename Source, typename = enable_if_pathable<Source>>
-  path& assign(const Source& source)
+  path& assign(Source const& source)
   {
     this->path_.clear();
     internals::source_converter<
@@ -724,15 +724,15 @@ public:
 
   // Concatenation
   // =============
-  path& operator/=(const path& p);
+  path& operator/=(path const& p);
 
   template <typename Source, typename = enable_if_pathable<Source>>
-  path& append(const Source& source)
+  path& append(Source const& source)
   {
     return this->operator/=(path(source));
   }
   template <typename Source>
-  path& operator/=(const Source& source)
+  path& operator/=(Source const& source)
   {
     return this->append(source);
   }
@@ -743,12 +743,12 @@ public:
     return this->operator/=(path(first, last));
   }
 
-  path& operator+=(const path& p)
+  path& operator+=(path const& p)
   {
     this->path_ += p.path_;
     return *this;
   }
-  path& operator+=(const string_type& str)
+  path& operator+=(string_type const& str)
   {
     this->path_ +=
       internals::string_converter<value_type>::to<path_type::value_type>(str);
@@ -759,20 +759,20 @@ public:
     this->path_.append(str.begin(), str.end());
     return *this;
   }
-  path& operator+=(const value_type* str)
+  path& operator+=(value_type const* str)
   {
     this->path_ +=
       internals::string_converter<value_type>::to<path_type::value_type>(str);
     return *this;
   }
-  path& operator+=(const value_type c)
+  path& operator+=(value_type const c)
   {
     this->path_ +=
       internals::string_converter<value_type>::to<path_type::value_type>(c);
     return *this;
   }
   template <typename Source, typename = enable_if_pathable<Source>>
-  path& concat(const Source& source)
+  path& concat(Source const& source)
   {
     internals::source_converter<
       typename internals::source_traits<Source>::value_type,
@@ -780,7 +780,7 @@ public:
     return *this;
   }
   template <typename Source>
-  path& operator+=(const Source& source)
+  path& operator+=(Source const& source)
   {
     return this->concat(source);
   }
@@ -818,14 +818,14 @@ public:
     return *this;
   }
 
-  path& replace_filename(const path& replacement)
+  path& replace_filename(path const& replacement)
   {
     this->remove_filename();
     this->operator/=(replacement);
     return *this;
   }
 
-  path& replace_extension(const path& replacement = path())
+  path& replace_extension(path const& replacement = path())
   {
     auto ext = this->get_filename_fragment(filename_fragment::extension);
     if (!ext.empty()) {
@@ -846,7 +846,7 @@ public:
 
   // Format observers
   // ================
-  const string_type& native() const noexcept
+  string_type const& native() const noexcept
   {
 #  if defined(_WIN32) && !defined(__CYGWIN__)
     this->native_path_ = internals::string_converter<
@@ -856,7 +856,7 @@ public:
     return this->path_;
 #  endif
   }
-  const value_type* c_str() const noexcept { return this->native().c_str(); }
+  value_type const* c_str() const noexcept { return this->native().c_str(); }
   operator string_type() const { return this->native(); }
 
   template <
@@ -867,13 +867,13 @@ public:
                       (std::is_same<Char, wchar_t>::value &&
                        std::is_same<Traits, std::char_traits<wchar_t>>::value),
                     int> = 1>
-  std::basic_string<Char, Traits, Alloc> string(const Alloc& a = Alloc()) const
+  std::basic_string<Char, Traits, Alloc> string(Alloc const& a = Alloc()) const
   {
     return internals::string_converter<path_type::value_type>::to<Char, Traits,
                                                                   Alloc>(
       this->path_, a);
   }
-  const std::string string() const { return this->path_; }
+  std::string const string() const { return this->path_; }
   std::wstring wstring() const
   {
     std::string out = this->string();
@@ -890,7 +890,7 @@ public:
                        std::is_same<Traits, std::char_traits<wchar_t>>::value),
                     int> = 1>
   std::basic_string<Char, Traits, Alloc> generic_string(
-    const Alloc& a = Alloc()) const
+    Alloc const& a = Alloc()) const
   {
     return internals::string_converter<path_type::value_type>::to<Char, Traits,
                                                                   Alloc>(
@@ -906,16 +906,16 @@ public:
 
   // Compare
   // =======
-  int compare(const path& p) const noexcept
+  int compare(path const& p) const noexcept
   {
     return this->compare_path(p.path_);
   }
-  int compare(const string_type& str) const
+  int compare(string_type const& str) const
   {
     return this->compare_path(
       internals::string_converter<value_type>::to<path_type::value_type>(str));
   }
-  int compare(const value_type* str) const
+  int compare(value_type const* str) const
   {
     return this->compare_path(
       internals::string_converter<value_type>::to<path_type::value_type>(str));
@@ -926,9 +926,9 @@ public:
   // ==========
   path lexically_normal() const;
 
-  path lexically_relative(const path& base) const;
+  path lexically_relative(path const& base) const;
 
-  path lexically_proximate(const path& base) const
+  path lexically_proximate(path const& base) const
   {
     path result = this->lexically_relative(base);
     return result.empty() ? *this : result;
@@ -1011,32 +1011,32 @@ public:
 
   // Non-members
   // ===========
-  friend inline bool operator==(const path& lhs, const path& rhs) noexcept
+  friend inline bool operator==(path const& lhs, path const& rhs) noexcept
   {
     return lhs.compare(rhs) == 0;
   }
-  friend inline bool operator!=(const path& lhs, const path& rhs) noexcept
+  friend inline bool operator!=(path const& lhs, path const& rhs) noexcept
   {
     return lhs.compare(rhs) != 0;
   }
-  friend inline bool operator<(const path& lhs, const path& rhs) noexcept
+  friend inline bool operator<(path const& lhs, path const& rhs) noexcept
   {
     return lhs.compare(rhs) < 0;
   }
-  friend inline bool operator<=(const path& lhs, const path& rhs) noexcept
+  friend inline bool operator<=(path const& lhs, path const& rhs) noexcept
   {
     return lhs.compare(rhs) <= 0;
   }
-  friend inline bool operator>(const path& lhs, const path& rhs) noexcept
+  friend inline bool operator>(path const& lhs, path const& rhs) noexcept
   {
     return lhs.compare(rhs) > 0;
   }
-  friend inline bool operator>=(const path& lhs, const path& rhs) noexcept
+  friend inline bool operator>=(path const& lhs, path const& rhs) noexcept
   {
     return lhs.compare(rhs) >= 0;
   }
 
-  friend inline path operator/(const path& lhs, const path& rhs)
+  friend inline path operator/(path const& lhs, path const& rhs)
   {
     path result(lhs);
     result /= rhs;
@@ -1052,7 +1052,7 @@ public:
        std::is_same<Traits,
                     std::char_traits<path::path_type::value_type>>::value),
     std::basic_ostream<Char, Traits>&>
-  operator<<(std::basic_ostream<Char, Traits>& os, const path& p)
+  operator<<(std::basic_ostream<Char, Traits>& os, path const& p)
   {
     os << cm::quoted(p.string<Char, Traits>());
     return os;
@@ -1076,7 +1076,7 @@ public:
 
 private:
   friend class iterator;
-  friend std::size_t hash_value(const path& p) noexcept;
+  friend std::size_t hash_value(path const& p) noexcept;
 
   path_type get_generic() const;
 
@@ -1102,15 +1102,15 @@ public:
 
   using value_type = path;
   using difference_type = std::ptrdiff_t;
-  using pointer = const path*;
-  using reference = const path&;
+  using pointer = path const*;
+  using reference = path const&;
 
   iterator();
-  iterator(const iterator& other);
+  iterator(iterator const& other);
 
   ~iterator();
 
-  iterator& operator=(const iterator& other);
+  iterator& operator=(iterator const& other);
 
   reference operator*() const { return this->path_element_; }
 
@@ -1136,11 +1136,11 @@ public:
 
 private:
   friend class path;
-  friend bool operator==(const iterator&, const iterator&);
+  friend bool operator==(iterator const&, iterator const&);
 
-  iterator(const path* p, bool at_end = false);
+  iterator(path const* p, bool at_end = false);
 
-  const path* path_;
+  path const* path_;
   std::unique_ptr<internals::path_parser> parser_;
   path path_element_;
 };
@@ -1156,9 +1156,9 @@ inline path::iterator path::end() const
 
 // Non-member functions
 // ====================
-bool operator==(const path::iterator& lhs, const path::iterator& rhs);
+bool operator==(path::iterator const& lhs, path::iterator const& rhs);
 
-inline bool operator!=(const path::iterator& lhs, const path::iterator& rhs)
+inline bool operator!=(path::iterator const& lhs, path::iterator const& rhs)
 {
   return !(lhs == rhs);
 }
@@ -1168,7 +1168,7 @@ inline void swap(path& lhs, path& rhs) noexcept
   lhs.swap(rhs);
 }
 
-std::size_t hash_value(const path& p) noexcept;
+std::size_t hash_value(path const& p) noexcept;
 
 #endif
 

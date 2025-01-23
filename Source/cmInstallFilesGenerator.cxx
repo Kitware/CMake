@@ -85,7 +85,7 @@ void cmInstallFilesGenerator::AddFilesInstallRule(
   std::vector<std::string> const& files)
 {
   // Write code to install the files.
-  const char* no_dir_permissions = nullptr;
+  char const* no_dir_permissions = nullptr;
   this->AddInstallRule(
     os, this->GetDestination(config),
     (this->Programs ? cmInstallType_PROGRAMS : cmInstallType_FILES), files,
@@ -104,7 +104,7 @@ void cmInstallFilesGenerator::GenerateScriptActions(std::ostream& os,
 }
 
 void cmInstallFilesGenerator::GenerateScriptForConfig(
-  std::ostream& os, const std::string& config, Indent indent)
+  std::ostream& os, std::string const& config, Indent indent)
 {
   std::vector<std::string> files = this->GetFiles(config);
   this->AddFilesInstallRule(os, config, indent, files);

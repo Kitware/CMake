@@ -25,11 +25,11 @@ class static_string_view : public string_view
   {
   }
 
-  friend static_string_view operator"" _s(const char* data, size_t size);
+  friend static_string_view operator"" _s(char const* data, size_t size);
 };
 
 /** Create a static_string_view using `""_s` literal syntax.  */
-inline static_string_view operator"" _s(const char* data, size_t size)
+inline static_string_view operator"" _s(char const* data, size_t size)
 {
   return string_view(data, size);
 }

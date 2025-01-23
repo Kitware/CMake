@@ -573,7 +573,7 @@ bool testFilter()
       if (list.size() != 1) {
         result = false;
       }
-    } catch (const std::invalid_argument&) {
+    } catch (std::invalid_argument const&) {
     }
   }
 

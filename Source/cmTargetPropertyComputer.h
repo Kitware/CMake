@@ -17,7 +17,7 @@ class cmTargetPropertyComputer
 {
 public:
   template <typename Target>
-  static cmValue GetProperty(Target const* tgt, const std::string& prop,
+  static cmValue GetProperty(Target const* tgt, std::string const& prop,
                              cmMakefile const& mf)
   {
     if (cmValue loc = GetLocation(tgt, prop, mf)) {
@@ -37,7 +37,7 @@ private:
                                          cmMakefile const& mf);
 
   template <typename Target>
-  static const std::string& ImportedLocation(Target const* tgt,
+  static std::string const& ImportedLocation(Target const* tgt,
                                              std::string const& config);
 
   template <typename Target>
@@ -52,7 +52,7 @@ private:
         tgt->GetType() == cmStateEnums::SHARED_LIBRARY ||
         tgt->GetType() == cmStateEnums::MODULE_LIBRARY ||
         tgt->GetType() == cmStateEnums::UNKNOWN_LIBRARY) {
-      static const std::string propLOCATION = "LOCATION";
+      static std::string const propLOCATION = "LOCATION";
       if (prop == propLOCATION) {
         if (!tgt->IsImported()) {
           IssueLocationPropertyError(tgt->GetName(), mf);

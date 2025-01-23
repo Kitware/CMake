@@ -25,7 +25,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
   size_t cnt = 0;
   bool append = false;
   bool quiet = false;
-  const char* smodel = nullptr;
+  char const* smodel = nullptr;
   cmValue src_dir;
   cmValue bld_dir;
 
@@ -110,7 +110,7 @@ bool cmCTestStartCommand::InitialPass(std::vector<std::string> const& args,
                          << "   Build directory: " << *bld_dir << std::endl,
                        quiet);
   }
-  const char* group = this->CTest->GetSpecificGroup();
+  char const* group = this->CTest->GetSpecificGroup();
   if (group) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "   Group: " << group << std::endl, quiet);

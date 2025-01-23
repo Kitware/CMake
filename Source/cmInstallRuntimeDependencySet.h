@@ -20,9 +20,9 @@ class cmInstallRuntimeDependencySet
 public:
   cmInstallRuntimeDependencySet(std::string name = "");
 
-  cmInstallRuntimeDependencySet(const cmInstallRuntimeDependencySet&) = delete;
+  cmInstallRuntimeDependencySet(cmInstallRuntimeDependencySet const&) = delete;
   cmInstallRuntimeDependencySet& operator=(
-    const cmInstallRuntimeDependencySet&) = delete;
+    cmInstallRuntimeDependencySet const&) = delete;
 
   cm::string_view GetName() const { return this->Name; }
 
@@ -39,10 +39,10 @@ public:
   public:
     virtual ~Item() = default;
 
-    virtual std::string GetItemPath(const std::string& config) const = 0;
+    virtual std::string GetItemPath(std::string const& config) const = 0;
 
     virtual void AddPostExcludeFiles(
-      const std::string& /*config*/, std::set<std::string>& /*files*/,
+      std::string const& /*config*/, std::set<std::string>& /*files*/,
       cmInstallRuntimeDependencySet* /*set*/) const
     {
     }
@@ -56,10 +56,10 @@ public:
     {
     }
 
-    std::string GetItemPath(const std::string& config) const override;
+    std::string GetItemPath(std::string const& config) const override;
 
     void AddPostExcludeFiles(
-      const std::string& config, std::set<std::string>& files,
+      std::string const& config, std::set<std::string>& files,
       cmInstallRuntimeDependencySet* set) const override;
 
   private:
@@ -74,7 +74,7 @@ public:
     {
     }
 
-    std::string GetItemPath(const std::string& config) const override;
+    std::string GetItemPath(std::string const& config) const override;
 
   private:
     cmInstallImportedRuntimeArtifactsGenerator* Target;
@@ -128,17 +128,17 @@ public:
       cm::make_unique<ImportedTargetItem>(bundleExecutable));
   }
 
-  const std::vector<std::unique_ptr<Item>>& GetExecutables() const
+  std::vector<std::unique_ptr<Item>> const& GetExecutables() const
   {
     return this->Executables;
   }
 
-  const std::vector<std::unique_ptr<Item>>& GetLibraries() const
+  std::vector<std::unique_ptr<Item>> const& GetLibraries() const
   {
     return this->Libraries;
   }
 
-  const std::vector<std::unique_ptr<Item>>& GetModules() const
+  std::vector<std::unique_ptr<Item>> const& GetModules() const
   {
     return this->Modules;
   }
@@ -158,6 +158,6 @@ private:
   std::vector<std::unique_ptr<Item>> Modules;
   Item* BundleExecutable = nullptr;
 
-  std::map<const cmGeneratorTarget*, std::set<const cmGeneratorTarget*>>
+  std::map<cmGeneratorTarget const*, std::set<cmGeneratorTarget const*>>
     TargetDepends;
 };

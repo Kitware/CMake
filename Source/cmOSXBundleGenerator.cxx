@@ -30,9 +30,9 @@ bool cmOSXBundleGenerator::MustSkip()
   return !this->GT->HaveWellDefinedOutputFiles();
 }
 
-void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
+void cmOSXBundleGenerator::CreateAppBundle(std::string const& targetName,
                                            std::string& outpath,
-                                           const std::string& config)
+                                           std::string const& config)
 {
   if (this->MustSkip()) {
     return;
@@ -57,8 +57,8 @@ void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
 }
 
 void cmOSXBundleGenerator::CreateFramework(
-  const std::string& targetName, const std::string& outpath,
-  const std::string& config, const cmOSXBundleGenerator::SkipParts& skipParts)
+  std::string const& targetName, std::string const& outpath,
+  std::string const& config, cmOSXBundleGenerator::SkipParts const& skipParts)
 {
   if (this->MustSkip()) {
     return;
@@ -163,9 +163,9 @@ void cmOSXBundleGenerator::CreateFramework(
   }
 }
 
-void cmOSXBundleGenerator::CreateCFBundle(const std::string& targetName,
-                                          const std::string& root,
-                                          const std::string& config)
+void cmOSXBundleGenerator::CreateCFBundle(std::string const& targetName,
+                                          std::string const& root,
+                                          std::string const& config)
 {
   if (this->MustSkip()) {
     return;
@@ -191,7 +191,7 @@ void cmOSXBundleGenerator::CreateCFBundle(const std::string& targetName,
 
 void cmOSXBundleGenerator::GenerateMacOSXContentStatements(
   std::vector<cmSourceFile const*> const& sources,
-  MacOSXContentGeneratorType* generator, const std::string& config)
+  MacOSXContentGeneratorType* generator, std::string const& config)
 {
   if (this->MustSkip()) {
     return;
@@ -207,7 +207,7 @@ void cmOSXBundleGenerator::GenerateMacOSXContentStatements(
 }
 
 std::string cmOSXBundleGenerator::InitMacOSXContentDirectory(
-  const char* pkgloc, const std::string& config)
+  char const* pkgloc, std::string const& config)
 {
   // Construct the full path to the content subdirectory.
 

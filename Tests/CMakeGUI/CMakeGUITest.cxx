@@ -210,7 +210,7 @@ void CMakeGUITest::presetArg()
 }
 
 namespace {
-QCMakePropertyList makePresetProperties(const QString& name)
+QCMakePropertyList makePresetProperties(QString const& name)
 {
   return QCMakePropertyList{
     QCMakeProperty{
@@ -313,7 +313,7 @@ void CMakeGUITest::presetArg_data()
 }
 
 namespace {
-void writePresets(const QString& buildDir, const QStringList& names)
+void writePresets(QString const& buildDir, QStringList const& names)
 {
   QJsonArray presets{
     QJsonObject{

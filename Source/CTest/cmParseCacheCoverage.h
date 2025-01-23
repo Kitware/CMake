@@ -28,5 +28,5 @@ protected:
   // remove files with no coverage
   void RemoveUnCoveredFiles();
   // Read a single mcov file
-  bool ReadCMCovFile(const char* f);
+  bool ReadCMCovFile(char const* f);
 };

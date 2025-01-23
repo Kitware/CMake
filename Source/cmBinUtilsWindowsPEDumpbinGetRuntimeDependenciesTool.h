@@ -17,6 +17,6 @@ public:
   cmBinUtilsWindowsPEDumpbinGetRuntimeDependenciesTool(
     cmRuntimeDependencyArchive* archive);
 
-  bool GetFileInfo(const std::string& file,
+  bool GetFileInfo(std::string const& file,
                    std::vector<std::string>& needed) override;
 };

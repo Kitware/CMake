@@ -51,10 +51,10 @@ private:
   /**
    * Submit file using various ways
    */
-  bool SubmitUsingHTTP(const std::string& localprefix,
-                       const std::vector<std::string>& files,
-                       const std::string& remoteprefix,
-                       const std::string& url);
+  bool SubmitUsingHTTP(std::string const& localprefix,
+                       std::vector<std::string> const& files,
+                       std::string const& remoteprefix,
+                       std::string const& url);
 
   using cmCTestSubmitHandlerVectorOfChar = std::vector<char>;
 

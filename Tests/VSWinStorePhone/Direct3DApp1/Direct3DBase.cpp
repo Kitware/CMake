@@ -324,7 +324,7 @@ void Direct3DBase::Present()
 // in physical pixels.
 float Direct3DBase::ConvertDipsToPixels(float dips)
 {
-  static const float dipsPerInch = 96.0f;
+  static float const dipsPerInch = 96.0f;
 #if WINVER > 0x0602
   return floor(dips * DisplayInformation::GetForCurrentView()->LogicalDpi /
                  dipsPerInch +

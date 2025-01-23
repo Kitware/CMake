@@ -29,7 +29,7 @@ cmCTestP4::~cmCTestP4() = default;
 class cmCTestP4::IdentifyParser : public cmCTestVC::LineParser
 {
 public:
-  IdentifyParser(cmCTestP4* p4, const char* prefix, std::string& rev)
+  IdentifyParser(cmCTestP4* p4, char const* prefix, std::string& rev)
     : Rev(rev)
   {
     this->SetLog(&p4->Log, prefix);
@@ -53,7 +53,7 @@ private:
 class cmCTestP4::ChangesParser : public cmCTestVC::LineParser
 {
 public:
-  ChangesParser(cmCTestP4* p4, const char* prefix)
+  ChangesParser(cmCTestP4* p4, char const* prefix)
     : P4(p4)
   {
     this->SetLog(&this->P4->Log, prefix);
@@ -76,7 +76,7 @@ private:
 class cmCTestP4::UserParser : public cmCTestVC::LineParser
 {
 public:
-  UserParser(cmCTestP4* p4, const char* prefix)
+  UserParser(cmCTestP4* p4, char const* prefix)
     : P4(p4)
   {
     this->SetLog(&this->P4->Log, prefix);
@@ -116,7 +116,7 @@ private:
 class cmCTestP4::DiffParser : public cmCTestVC::LineParser
 {
 public:
-  DiffParser(cmCTestP4* p4, const char* prefix)
+  DiffParser(cmCTestP4* p4, char const* prefix)
     : P4(p4)
   {
     this->SetLog(&this->P4->Log, prefix);
@@ -145,7 +145,7 @@ private:
   }
 };
 
-cmCTestP4::User cmCTestP4::GetUserData(const std::string& username)
+cmCTestP4::User cmCTestP4::GetUserData(std::string const& username)
 {
   auto it = this->Users.find(username);
 
@@ -188,7 +188,7 @@ Affected files ...
 class cmCTestP4::DescribeParser : public cmCTestVC::LineParser
 {
 public:
-  DescribeParser(cmCTestP4* p4, const char* prefix)
+  DescribeParser(cmCTestP4* p4, char const* prefix)
     : LineParser('\n', false)
     , P4(p4)
   {
@@ -450,7 +450,7 @@ bool cmCTestP4::LoadModifications()
   return true;
 }
 
-bool cmCTestP4::UpdateCustom(const std::string& custom)
+bool cmCTestP4::UpdateCustom(std::string const& custom)
 {
   cmList p4_custom_command{ custom, cmList::EmptyElements::Yes };
 

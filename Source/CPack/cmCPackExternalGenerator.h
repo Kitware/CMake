@@ -22,7 +22,7 @@ class cmCPackExternalGenerator : public cmCPackGenerator
 public:
   cmCPackTypeMacro(cmCPackExternalGenerator, cmCPackGenerator);
 
-  const char* GetOutputExtension() override { return ".json"; }
+  char const* GetOutputExtension() override { return ".json"; }
 
 protected:
   int InitializeInternal() override;
@@ -32,23 +32,23 @@ protected:
   bool SupportsComponentInstallation() const override;
 
   int InstallProjectViaInstallCommands(
-    bool setDestDir, const std::string& tempInstallDirectory) override;
+    bool setDestDir, std::string const& tempInstallDirectory) override;
   int InstallProjectViaInstallScript(
-    bool setDestDir, const std::string& tempInstallDirectory) override;
+    bool setDestDir, std::string const& tempInstallDirectory) override;
   int InstallProjectViaInstalledDirectories(
-    bool setDestDir, const std::string& tempInstallDirectory,
-    const mode_t* default_dir_mode) override;
+    bool setDestDir, std::string const& tempInstallDirectory,
+    mode_t const* default_dir_mode) override;
 
-  int RunPreinstallTarget(const std::string& installProjectName,
-                          const std::string& installDirectory,
+  int RunPreinstallTarget(std::string const& installProjectName,
+                          std::string const& installDirectory,
                           cmGlobalGenerator* globalGenerator,
-                          const std::string& buildConfig) override;
-  int InstallCMakeProject(bool setDestDir, const std::string& installDirectory,
-                          const std::string& baseTempInstallDirectory,
-                          const mode_t* default_dir_mode,
-                          const std::string& component, bool componentInstall,
-                          const std::string& installSubDirectory,
-                          const std::string& buildConfig,
+                          std::string const& buildConfig) override;
+  int InstallCMakeProject(bool setDestDir, std::string const& installDirectory,
+                          std::string const& baseTempInstallDirectory,
+                          mode_t const* default_dir_mode,
+                          std::string const& component, bool componentInstall,
+                          std::string const& installSubDirectory,
+                          std::string const& buildConfig,
                           std::string& absoluteDestFiles) override;
 
 private:

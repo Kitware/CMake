@@ -70,7 +70,7 @@ public:
   static std::string HelpFileName(cm::string_view);
 
   using MessageCallback =
-    std::function<void(const std::string&, const cmMessageMetadata&)>;
+    std::function<void(std::string const&, cmMessageMetadata const&)>;
   /**
    *  Set the function used by GUIs to display error messages
    *  Function gets passed: message as a const char*,
@@ -81,22 +81,22 @@ public:
   /**
    * Display an error message.
    */
-  static void Error(const std::string& m);
+  static void Error(std::string const& m);
 
   /**
    * Display a message.
    */
-  static void Message(const std::string& m, const char* title = nullptr);
-  static void Message(const std::string& m, const cmMessageMetadata& md);
+  static void Message(std::string const& m, char const* title = nullptr);
+  static void Message(std::string const& m, cmMessageMetadata const& md);
 
   using OutputCallback = std::function<void(std::string const&)>;
 
   //! Send a string to stdout
-  static void Stdout(const std::string& s);
+  static void Stdout(std::string const& s);
   static void SetStdoutCallback(OutputCallback f);
 
   //! Send a string to stderr
-  static void Stderr(const std::string& s);
+  static void Stderr(std::string const& s);
   static void SetStderrCallback(OutputCallback f);
 
   using InterruptCallback = std::function<bool()>;
@@ -129,17 +129,17 @@ public:
   }
 
   //! Return true if the path is a framework
-  static bool IsPathToFramework(const std::string& path);
+  static bool IsPathToFramework(std::string const& path);
 
   //! Return true if the path is a xcframework
-  static bool IsPathToXcFramework(const std::string& path);
+  static bool IsPathToXcFramework(std::string const& path);
 
   //! Return true if the path is a macOS non-framework shared library (aka
   //! .dylib)
-  static bool IsPathToMacOSSharedLibrary(const std::string& path);
+  static bool IsPathToMacOSSharedLibrary(std::string const& path);
 
   static bool DoesFileExistWithExtensions(
-    const std::string& name, const std::vector<std::string>& sourceExts);
+    std::string const& name, std::vector<std::string> const& sourceExts);
 
   /**
    * Check if the given file exists in one of the parent directory of the
@@ -147,12 +147,12 @@ public:
    * Toplevel specifies the top-most directory to where it will look.
    */
   static std::string FileExistsInParentDirectories(
-    const std::string& fname, const std::string& directory,
-    const std::string& toplevel);
+    std::string const& fname, std::string const& directory,
+    std::string const& toplevel);
 
-  static void Glob(const std::string& directory, const std::string& regexp,
+  static void Glob(std::string const& directory, std::string const& regexp,
                    std::vector<std::string>& files);
-  static void GlobDirs(const std::string& fullPath,
+  static void GlobDirs(std::string const& fullPath,
                        std::vector<std::string>& files);
 
   /**
@@ -164,7 +164,7 @@ public:
    * want to find. 0 means all files, -1 means directories, 1 means
    * files only. This method returns true if search was successful.
    */
-  static bool SimpleGlob(const std::string& glob,
+  static bool SimpleGlob(std::string const& glob,
                          std::vector<std::string>& files, int type = 0);
 
   enum class CopyWhen
@@ -200,9 +200,9 @@ public:
    * Note that this function may modify \p path even if it does not succeed.
    */
   static cmsys::Status MakeTempDirectory(char* path,
-                                         const mode_t* mode = nullptr);
+                                         mode_t const* mode = nullptr);
   static cmsys::Status MakeTempDirectory(std::string& path,
-                                         const mode_t* mode = nullptr);
+                                         mode_t const* mode = nullptr);
 
   /** Copy a file. */
   static CopyResult CopySingleFile(std::string const& oldname,
@@ -224,15 +224,15 @@ public:
 
   /** Rename a file or directory within a single disk volume (atomic
       if possible).  */
-  static bool RenameFile(const std::string& oldname,
-                         const std::string& newname);
+  static bool RenameFile(std::string const& oldname,
+                         std::string const& newname);
   static RenameResult RenameFile(std::string const& oldname,
                                  std::string const& newname, Replace replace,
                                  std::string* err = nullptr);
 
   //! Rename a file if contents are different, delete the source otherwise
-  static cmsys::Status MoveFileIfDifferent(const std::string& source,
-                                           const std::string& destination);
+  static cmsys::Status MoveFileIfDifferent(std::string const& source,
+                                           std::string const& destination);
 
   /**
    * Run a single executable command
@@ -263,11 +263,11 @@ public:
     OUTPUT_FORWARD,
     OUTPUT_PASSTHROUGH
   };
-  static bool RunSingleCommand(const std::string& command,
+  static bool RunSingleCommand(std::string const& command,
                                std::string* captureStdOut = nullptr,
                                std::string* captureStdErr = nullptr,
                                int* retVal = nullptr,
-                               const char* dir = nullptr,
+                               char const* dir = nullptr,
                                OutputOption outputflag = OUTPUT_MERGE,
                                cmDuration timeout = cmDuration::zero());
   /**
@@ -279,7 +279,7 @@ public:
                                std::string* captureStdOut = nullptr,
                                std::string* captureStdErr = nullptr,
                                int* retVal = nullptr,
-                               const char* dir = nullptr,
+                               char const* dir = nullptr,
                                OutputOption outputflag = OUTPUT_MERGE,
                                cmDuration timeout = cmDuration::zero(),
                                Encoding encoding = cmProcessOutput::Auto);
@@ -289,14 +289,14 @@ public:
   /**
    * Parse arguments out of a single string command
    */
-  static std::vector<std::string> ParseArguments(const std::string& command);
+  static std::vector<std::string> ParseArguments(std::string const& command);
 
   /** Parse arguments out of a windows command line string.  */
-  static void ParseWindowsCommandLine(const char* command,
+  static void ParseWindowsCommandLine(char const* command,
                                       std::vector<std::string>& args);
 
   /** Parse arguments out of a unix command line string.  */
-  static void ParseUnixCommandLine(const char* command,
+  static void ParseUnixCommandLine(char const* command,
                                    std::vector<std::string>& args);
 
   /** Split a command-line string into the parsed command and the unparsed
@@ -329,10 +329,10 @@ public:
   /**
    * Compare versions
    */
-  static bool VersionCompare(CompareOp op, const std::string& lhs,
-                             const std::string& rhs);
-  static bool VersionCompare(CompareOp op, const std::string& lhs,
-                             const char rhs[]);
+  static bool VersionCompare(CompareOp op, std::string const& lhs,
+                             std::string const& rhs);
+  static bool VersionCompare(CompareOp op, std::string const& lhs,
+                             char const rhs[]);
   static bool VersionCompareEqual(std::string const& lhs,
                                   std::string const& rhs);
   static bool VersionCompareGreater(std::string const& lhs,
@@ -358,7 +358,7 @@ public:
   /** Call cmSystemTools::Error with the message m, plus the
    * result of strerror(errno)
    */
-  static void ReportLastSystemError(const char* m);
+  static void ReportLastSystemError(char const* m);
 
   enum class WaitForLineResult
   {
@@ -385,7 +385,7 @@ public:
   // ConvertToRunCommandPath does not use s_ForceUnixPaths and should
   // be used when RunCommand is called from cmake, because the
   // running cmake needs paths to be in its format
-  static std::string ConvertToRunCommandPath(const std::string& path);
+  static std::string ConvertToRunCommandPath(std::string const& path);
 
   /**
    * For windows computes the long path for the given path,
@@ -434,7 +434,7 @@ public:
 
 #ifndef CMAKE_BOOTSTRAP
   /** Remove an environment variable */
-  static bool UnsetEnv(const char* value);
+  static bool UnsetEnv(char const* value);
 
   /** Get the list of all environment variables */
   static std::vector<std::string> GetEnvironmentVariables();
@@ -457,16 +457,16 @@ public:
      * Add a single variable (or remove if no = sign) to the current
      * environment diff.
      */
-    void PutEnv(const std::string& env);
+    void PutEnv(std::string const& env);
 
     /** Remove a single variable from the current environment diff. */
-    void UnPutEnv(const std::string& env);
+    void UnPutEnv(std::string const& env);
 
     /**
      * Apply an ENVIRONMENT_MODIFICATION operation to this diff. Returns
      * false and issues an error on parse failure.
      */
-    bool ParseOperation(const std::string& envmod);
+    bool ParseOperation(std::string const& envmod);
 
     /**
      * Apply this diff to the actual environment, optionally writing out the
@@ -524,17 +524,17 @@ public:
     No
   };
 
-  static bool ListTar(const std::string& outFileName,
-                      const std::vector<std::string>& files, bool verbose);
-  static bool CreateTar(const std::string& outFileName,
-                        const std::vector<std::string>& files,
-                        const std::string& workingDirectory,
+  static bool ListTar(std::string const& outFileName,
+                      std::vector<std::string> const& files, bool verbose);
+  static bool CreateTar(std::string const& outFileName,
+                        std::vector<std::string> const& files,
+                        std::string const& workingDirectory,
                         cmTarCompression compressType, bool verbose,
                         std::string const& mtime = std::string(),
                         std::string const& format = std::string(),
                         int compressionLevel = 0);
-  static bool ExtractTar(const std::string& inFileName,
-                         const std::vector<std::string>& files,
+  static bool ExtractTar(std::string const& inFileName,
+                         std::vector<std::string> const& files,
                          cmTarExtractTimestamps extractTimestamps,
                          bool verbose);
 
@@ -545,7 +545,7 @@ public:
   static unsigned int RandomNumber();
 
   /** Find the directory containing CMake executables.  */
-  static void FindCMakeResources(const char* argv0);
+  static void FindCMakeResources(char const* argv0);
 
   /** Get the CMake resource paths, after FindCMakeResources.  */
   static std::string const& GetCTestCommand();
@@ -568,7 +568,7 @@ public:
   static cmsys::Status SetLogicalWorkingDirectory(std::string const& lwd);
 
   /** Echo a message in color using KWSys's Terminal cprintf.  */
-  static void MakefileColorEcho(int color, const char* message, bool newLine,
+  static void MakefileColorEcho(int color, char const* message, bool newLine,
                                 bool enabled);
 
   /** Try to guess the soname of a shared library.  */
@@ -599,7 +599,7 @@ public:
   static bool CheckRPath(std::string const& file, std::string const& newRPath);
 
   /** Remove a directory; repeat a few times in case of locked files.  */
-  static bool RepeatedRemoveDirectory(const std::string& dir);
+  static bool RepeatedRemoveDirectory(std::string const& dir);
 
   /** Encode a string as a URL.  */
   static std::string EncodeURL(std::string const& in,
@@ -636,7 +636,7 @@ public:
 #endif
 
   /** Get the real path for a given path, removing all symlinks.  */
-  static std::string GetRealPath(const std::string& path,
+  static std::string GetRealPath(std::string const& path,
                                  std::string* errorMessage = nullptr);
 
   /** Perform one-time initialization of libuv.  */

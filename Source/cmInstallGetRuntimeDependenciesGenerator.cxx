@@ -24,8 +24,8 @@
 
 namespace {
 template <typename T, typename F>
-void WriteMultiArgument(std::ostream& os, const cm::string_view& keyword,
-                        const std::vector<T>& list,
+void WriteMultiArgument(std::ostream& os, cm::string_view const& keyword,
+                        std::vector<T> const& list,
                         cmScriptGeneratorIndent indent, F transform)
 {
   bool first = true;
@@ -42,27 +42,27 @@ void WriteMultiArgument(std::ostream& os, const cm::string_view& keyword,
 }
 
 void WriteFilesArgument(
-  std::ostream& os, const cm::string_view& keyword,
-  const std::vector<std::unique_ptr<cmInstallRuntimeDependencySet::Item>>&
+  std::ostream& os, cm::string_view const& keyword,
+  std::vector<std::unique_ptr<cmInstallRuntimeDependencySet::Item>> const&
     items,
-  const std::string& config, cmScriptGeneratorIndent indent)
+  std::string const& config, cmScriptGeneratorIndent indent)
 {
   WriteMultiArgument(
     os, keyword, items, indent,
-    [config](const std::unique_ptr<cmInstallRuntimeDependencySet::Item>& i)
+    [config](std::unique_ptr<cmInstallRuntimeDependencySet::Item> const& i)
       -> std::string { return cmStrCat('"', i->GetItemPath(config), '"'); });
 }
 
 void WriteGenexEvaluatorArgument(std::ostream& os,
-                                 const cm::string_view& keyword,
-                                 const std::vector<std::string>& genexes,
-                                 const std::string& config,
+                                 cm::string_view const& keyword,
+                                 std::vector<std::string> const& genexes,
+                                 std::string const& config,
                                  cmLocalGenerator* lg,
                                  cmScriptGeneratorIndent indent)
 {
   WriteMultiArgument(
     os, keyword, genexes, indent,
-    [config, lg](const std::string& genex) -> cm::optional<std::string> {
+    [config, lg](std::string const& genex) -> cm::optional<std::string> {
       std::string result = cmGeneratorExpression::Evaluate(genex, lg, config);
       if (result.empty()) {
         return cm::nullopt;
@@ -82,8 +82,8 @@ cmInstallGetRuntimeDependenciesGenerator::
     std::vector<std::string> postExcludeRegexes,
     std::vector<std::string> postIncludeFiles,
     std::vector<std::string> postExcludeFiles, std::string libraryComponent,
-    std::string frameworkComponent, bool noInstallRPath, const char* depsVar,
-    const char* rpathPrefix, std::vector<std::string> const& configurations,
+    std::string frameworkComponent, bool noInstallRPath, char const* depsVar,
+    char const* rpathPrefix, std::vector<std::string> const& configurations,
     MessageLevel message, bool exclude_from_all, cmListFileBacktrace backtrace)
   : cmInstallGenerator("", configurations, "", message, exclude_from_all,
                        false, std::move(backtrace))
@@ -136,7 +136,7 @@ void cmInstallGetRuntimeDependenciesGenerator::GenerateScript(std::ostream& os)
 }
 
 void cmInstallGetRuntimeDependenciesGenerator::GenerateScriptForConfig(
-  std::ostream& os, const std::string& config, Indent indent)
+  std::ostream& os, std::string const& config, Indent indent)
 {
   std::string installNameTool =
     this->LocalGenerator->GetMakefile()->GetSafeDefinition(
@@ -182,7 +182,7 @@ void cmInstallGetRuntimeDependenciesGenerator::GenerateScriptForConfig(
   std::set<std::string> postExcludeFiles;
   auto const addPostExclude =
     [config, &postExcludeFiles, this](
-      const std::vector<std::unique_ptr<cmInstallRuntimeDependencySet::Item>>&
+      std::vector<std::unique_ptr<cmInstallRuntimeDependencySet::Item>> const&
         tgts) {
       for (auto const& item : tgts) {
         item->AddPostExcludeFiles(config, postExcludeFiles,

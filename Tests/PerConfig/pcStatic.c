@@ -1,4 +1,4 @@
-const char* pcStatic(void)
+char const* pcStatic(void)
 {
   return "INFO:symbol[pcStatic]";
 }

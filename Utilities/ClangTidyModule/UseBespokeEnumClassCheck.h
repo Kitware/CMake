@@ -14,7 +14,7 @@ public:
   UseBespokeEnumClassCheck(StringRef Name, ClangTidyContext* Context);
   void registerMatchers(ast_matchers::MatchFinder* Finder) override;
 
-  void check(const ast_matchers::MatchFinder::MatchResult& Result) override;
+  void check(ast_matchers::MatchFinder::MatchResult const& Result) override;
 };
 }
 }

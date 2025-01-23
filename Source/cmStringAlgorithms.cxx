@@ -56,7 +56,7 @@ std::string cmEscapeQuotes(cm::string_view str)
 {
   std::string result;
   result.reserve(str.size());
-  for (const char ch : str) {
+  for (char const ch : str) {
     if (ch == '"') {
       result += '\\';
     }
@@ -68,7 +68,7 @@ std::string cmEscapeQuotes(cm::string_view str)
 namespace {
 template <std::size_t N, typename T>
 inline void MakeDigits(cm::string_view& view, char (&digits)[N],
-                       const char* pattern, T value)
+                       char const* pattern, T value)
 {
   int res = std::snprintf(digits, N, pattern, value);
   if (res > 0 && res < static_cast<int>(N)) {
@@ -160,7 +160,7 @@ std::string cmCatViews(
   return result;
 }
 
-bool cmStrToLong(const char* str, long* value)
+bool cmStrToLong(char const* str, long* value)
 {
   errno = 0;
   char* endp;
@@ -173,7 +173,7 @@ bool cmStrToLong(std::string const& str, long* value)
   return cmStrToLong(str.c_str(), value);
 }
 
-bool cmStrToULong(const char* str, unsigned long* value)
+bool cmStrToULong(char const* str, unsigned long* value)
 {
   errno = 0;
   char* endp;
@@ -192,7 +192,7 @@ bool cmStrToULong(std::string const& str, unsigned long* value)
   return cmStrToULong(str.c_str(), value);
 }
 
-bool cmStrToLongLong(const char* str, long long* value)
+bool cmStrToLongLong(char const* str, long long* value)
 {
   errno = 0;
   char* endp;
@@ -205,7 +205,7 @@ bool cmStrToLongLong(std::string const& str, long long* value)
   return cmStrToLongLong(str.c_str(), value);
 }
 
-bool cmStrToULongLong(const char* str, unsigned long long* value)
+bool cmStrToULongLong(char const* str, unsigned long long* value)
 {
   errno = 0;
   char* endp;

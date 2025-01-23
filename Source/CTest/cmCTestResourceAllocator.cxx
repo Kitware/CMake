@@ -9,7 +9,7 @@
 #include "cmCTestResourceSpec.h"
 
 void cmCTestResourceAllocator::InitializeFromResourceSpec(
-  const cmCTestResourceSpec& spec)
+  cmCTestResourceSpec const& spec)
 {
   this->Resources.clear();
 
@@ -22,15 +22,15 @@ void cmCTestResourceAllocator::InitializeFromResourceSpec(
   }
 }
 
-const std::map<std::string,
-               std::map<std::string, cmCTestResourceAllocator::Resource>>&
+std::map<std::string,
+         std::map<std::string, cmCTestResourceAllocator::Resource>> const&
 cmCTestResourceAllocator::GetResources() const
 {
   return this->Resources;
 }
 
-bool cmCTestResourceAllocator::AllocateResource(const std::string& name,
-                                                const std::string& id,
+bool cmCTestResourceAllocator::AllocateResource(std::string const& name,
+                                                std::string const& id,
                                                 unsigned int slots)
 {
   auto it = this->Resources.find(name);
@@ -51,8 +51,8 @@ bool cmCTestResourceAllocator::AllocateResource(const std::string& name,
   return true;
 }
 
-bool cmCTestResourceAllocator::DeallocateResource(const std::string& name,
-                                                  const std::string& id,
+bool cmCTestResourceAllocator::DeallocateResource(std::string const& name,
+                                                  std::string const& id,
                                                   unsigned int slots)
 {
   auto it = this->Resources.find(name);
@@ -74,13 +74,13 @@ bool cmCTestResourceAllocator::DeallocateResource(const std::string& name,
 }
 
 bool cmCTestResourceAllocator::Resource::operator==(
-  const Resource& other) const
+  Resource const& other) const
 {
   return this->Total == other.Total && this->Locked == other.Locked;
 }
 
 bool cmCTestResourceAllocator::Resource::operator!=(
-  const Resource& other) const
+  Resource const& other) const
 {
   return !(*this == other);
 }

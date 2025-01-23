@@ -18,7 +18,7 @@ public:
   // Load a dynamic library into the current process.
   // The returned cmsys::DynamicLoader::LibraryHandle can be used to access
   // the symbols in the library.
-  static cmsys::DynamicLoader::LibraryHandle OpenLibrary(const char*);
+  static cmsys::DynamicLoader::LibraryHandle OpenLibrary(char const*);
 
   // Description:
   // Flush the cache of dynamic loader.

@@ -53,7 +53,7 @@ public:
                                utils::defaultFileExtensionDelimiters());
   }
   void storeOptions(ClangTidyOptions::OptionMap& Opts) override;
-  void registerPPCallbacks(const SourceManager& SM, Preprocessor* PP,
+  void registerPPCallbacks(SourceManager const& SM, Preprocessor* PP,
                            Preprocessor* ModuleExpanderPP) override;
 
   /// Returns ``true`` if the check should add pragma once to the file

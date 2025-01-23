@@ -21,7 +21,7 @@ unsigned int cmVersion::GetTweakVersion()
   return 0;
 }
 
-const char* cmVersion::GetCMakeVersion()
+char const* cmVersion::GetCMakeVersion()
 {
   return CMake_VERSION;
 }

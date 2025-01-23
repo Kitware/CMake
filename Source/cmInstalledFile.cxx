@@ -18,7 +18,7 @@ cmInstalledFile::Property::Property() = default;
 
 cmInstalledFile::Property::~Property() = default;
 
-void cmInstalledFile::SetName(cmMakefile* mf, const std::string& name)
+void cmInstalledFile::SetName(cmMakefile* mf, std::string const& name)
 {
   cmListFileBacktrace backtrace = mf->GetBacktrace();
   cmGeneratorExpression ge(*mf->GetCMakeInstance(), backtrace);
@@ -37,22 +37,22 @@ cmCompiledGeneratorExpression const& cmInstalledFile::GetNameExpression() const
   return *(this->NameExpression);
 }
 
-void cmInstalledFile::RemoveProperty(const std::string& prop)
+void cmInstalledFile::RemoveProperty(std::string const& prop)
 {
   this->Properties.erase(prop);
 }
 
 void cmInstalledFile::SetProperty(cmMakefile const* mf,
-                                  const std::string& prop,
-                                  const std::string& value)
+                                  std::string const& prop,
+                                  std::string const& value)
 {
   this->RemoveProperty(prop);
   this->AppendProperty(mf, prop, value);
 }
 
 void cmInstalledFile::AppendProperty(cmMakefile const* mf,
-                                     const std::string& prop,
-                                     const std::string& value,
+                                     std::string const& prop,
+                                     std::string const& value,
                                      bool /*asString*/)
 {
   cmListFileBacktrace backtrace = mf->GetBacktrace();
@@ -62,12 +62,12 @@ void cmInstalledFile::AppendProperty(cmMakefile const* mf,
   property.ValueExpressions.push_back(ge.Parse(value));
 }
 
-bool cmInstalledFile::HasProperty(const std::string& prop) const
+bool cmInstalledFile::HasProperty(std::string const& prop) const
 {
   return this->Properties.find(prop) != this->Properties.end();
 }
 
-bool cmInstalledFile::GetProperty(const std::string& prop,
+bool cmInstalledFile::GetProperty(std::string const& prop,
                                   std::string& value) const
 {
   auto i = this->Properties.find(prop);
@@ -80,7 +80,7 @@ bool cmInstalledFile::GetProperty(const std::string& prop,
   std::string output;
   std::string separator;
 
-  for (const auto& ve : property.ValueExpressions) {
+  for (auto const& ve : property.ValueExpressions) {
     output += separator;
     output += ve->GetInput();
     separator = ";";
@@ -90,7 +90,7 @@ bool cmInstalledFile::GetProperty(const std::string& prop,
   return true;
 }
 
-bool cmInstalledFile::GetPropertyAsBool(const std::string& prop) const
+bool cmInstalledFile::GetPropertyAsBool(std::string const& prop) const
 {
   std::string value;
   bool isSet = this->GetProperty(prop, value);
@@ -98,7 +98,7 @@ bool cmInstalledFile::GetPropertyAsBool(const std::string& prop) const
 }
 
 std::vector<std::string> cmInstalledFile::GetPropertyAsList(
-  const std::string& prop) const
+  std::string const& prop) const
 {
   std::string value;
   this->GetProperty(prop, value);

@@ -83,19 +83,19 @@ bool runTest(std::function<bool(dap::Session&)> onThreadExitedEvent)
 
   auto connection = std::make_shared<DebuggerLocalConnection>();
   std::unique_ptr<dap::Session> client = dap::Session::create();
-  client->registerHandler([&](const dap::InitializedEvent& e) {
+  client->registerHandler([&](dap::InitializedEvent const& e) {
     (void)e;
     initializedEventReceivedPromise.set_value(true);
   });
-  client->registerHandler([&](const dap::ExitedEvent& e) {
+  client->registerHandler([&](dap::ExitedEvent const& e) {
     (void)e;
     exitedEventReceivedPromise.set_value(true);
   });
-  client->registerHandler([&](const dap::TerminatedEvent& e) {
+  client->registerHandler([&](dap::TerminatedEvent const& e) {
     (void)e;
     terminatedEventReceivedPromise.set_value(true);
   });
-  client->registerHandler([&](const dap::ThreadEvent& e) {
+  client->registerHandler([&](dap::ThreadEvent const& e) {
     if (e.reason == "started") {
       threadStartedPromise.set_value(true);
     } else if (e.reason == "exited") {

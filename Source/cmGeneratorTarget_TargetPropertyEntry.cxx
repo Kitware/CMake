@@ -33,7 +33,7 @@ public:
   {
   }
 
-  const std::string& Evaluate(cmLocalGenerator*, const std::string&,
+  std::string const& Evaluate(cmLocalGenerator*, std::string const&,
                               cmGeneratorTarget const*,
                               cmGeneratorExpressionDAGChecker*,
                               std::string const&) const override
@@ -64,7 +64,7 @@ public:
   {
   }
 
-  const std::string& Evaluate(cmLocalGenerator* lg, const std::string& config,
+  std::string const& Evaluate(cmLocalGenerator* lg, std::string const& config,
                               cmGeneratorTarget const* headTarget,
                               cmGeneratorExpressionDAGChecker* dagChecker,
                               std::string const& language) const override
@@ -86,7 +86,7 @@ public:
   }
 
 private:
-  const std::unique_ptr<cmCompiledGeneratorExpression> ge;
+  std::unique_ptr<cmCompiledGeneratorExpression> const ge;
 };
 
 class TargetPropertyEntryFileSet
@@ -96,7 +96,7 @@ public:
   TargetPropertyEntryFileSet(
     std::vector<std::string> dirs, bool contextSensitiveDirs,
     std::unique_ptr<cmCompiledGeneratorExpression> entryCge,
-    const cmFileSet* fileSet, cmLinkImplItem const& item = NoLinkImplItem)
+    cmFileSet const* fileSet, cmLinkImplItem const& item = NoLinkImplItem)
     : cmGeneratorTarget::TargetPropertyEntry(item)
     , BaseDirs(std::move(dirs))
     , ContextSensitiveDirs(contextSensitiveDirs)
@@ -105,7 +105,7 @@ public:
   {
   }
 
-  const std::string& Evaluate(cmLocalGenerator* lg, const std::string& config,
+  std::string const& Evaluate(cmLocalGenerator* lg, std::string const& config,
                               cmGeneratorTarget const* headTarget,
                               cmGeneratorExpressionDAGChecker* dagChecker,
                               std::string const& /*lang*/) const override
@@ -142,10 +142,10 @@ public:
   }
 
 private:
-  const std::vector<std::string> BaseDirs;
-  const bool ContextSensitiveDirs;
-  const std::unique_ptr<cmCompiledGeneratorExpression> EntryCge;
-  const cmFileSet* FileSet;
+  std::vector<std::string> const BaseDirs;
+  bool const ContextSensitiveDirs;
+  std::unique_ptr<cmCompiledGeneratorExpression> const EntryCge;
+  cmFileSet const* FileSet;
 };
 
 std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>
@@ -170,7 +170,7 @@ std::unique_ptr<cmGeneratorTarget::TargetPropertyEntry>
 cmGeneratorTarget::TargetPropertyEntry::CreateFileSet(
   std::vector<std::string> dirs, bool contextSensitiveDirs,
   std::unique_ptr<cmCompiledGeneratorExpression> entryCge,
-  const cmFileSet* fileSet, cmLinkImplItem const& item)
+  cmFileSet const* fileSet, cmLinkImplItem const& item)
 {
   return cm::make_unique<TargetPropertyEntryFileSet>(
     std::move(dirs), contextSensitiveDirs, std::move(entryCge), fileSet, item);

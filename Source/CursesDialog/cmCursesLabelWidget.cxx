@@ -5,7 +5,7 @@
 #include "cmCursesWidget.h"
 
 cmCursesLabelWidget::cmCursesLabelWidget(int width, int height, int left,
-                                         int top, const std::string& name)
+                                         int top, std::string const& name)
   : cmCursesWidget(width, height, left, top)
 {
   field_opts_off(this->Field, O_EDIT);

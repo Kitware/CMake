@@ -222,9 +222,9 @@ struct LinkLibraryFeatureAttributeSet
 };
 std::map<std::string, LinkLibraryFeatureAttributeSet>
   LinkLibraryFeatureAttributes;
-const LinkLibraryFeatureAttributeSet& GetLinkLibraryFeatureAttributes(
+LinkLibraryFeatureAttributeSet const& GetLinkLibraryFeatureAttributes(
   cmMakefile* makefile, std::string const& linkLanguage,
-  const std::string& feature)
+  std::string const& feature)
 {
   auto it = LinkLibraryFeatureAttributes.find(feature);
   if (it != LinkLibraryFeatureAttributes.end()) {
@@ -315,10 +315,10 @@ const LinkLibraryFeatureAttributeSet& GetLinkLibraryFeatureAttributes(
 }
 
 // LINK_GROUP helpers
-const cm::string_view LG_BEGIN = "<LINK_GROUP:"_s;
-const cm::string_view LG_END = "</LINK_GROUP:"_s;
-const cm::string_view LG_ITEM_BEGIN = "<LINK_GROUP>"_s;
-const cm::string_view LG_ITEM_END = "</LINK_GROUP>"_s;
+cm::string_view const LG_BEGIN = "<LINK_GROUP:"_s;
+cm::string_view const LG_END = "</LINK_GROUP:"_s;
+cm::string_view const LG_ITEM_BEGIN = "<LINK_GROUP>"_s;
+cm::string_view const LG_ITEM_END = "</LINK_GROUP>"_s;
 
 inline std::string ExtractGroupFeature(std::string const& item)
 {
@@ -347,15 +347,15 @@ public:
   using LinkEntry = cmComputeLinkDepends::LinkEntry;
   using EntryVector = cmComputeLinkDepends::EntryVector;
 
-  EntriesProcessing(const cmGeneratorTarget* target,
-                    const std::string& linkLanguage, EntryVector& entries,
+  EntriesProcessing(cmGeneratorTarget const* target,
+                    std::string const& linkLanguage, EntryVector& entries,
                     EntryVector& finalEntries)
     : Target(target)
     , LinkLanguage(linkLanguage)
     , Entries(entries)
     , FinalEntries(finalEntries)
   {
-    const auto* makefile = target->Makefile;
+    auto const* makefile = target->Makefile;
 
     switch (target->GetPolicyStatusCMP0156()) {
       case cmPolicies::WARN:
@@ -443,13 +443,13 @@ public:
     }
   }
 
-  void AddGroups(const std::map<size_t, std::vector<size_t>>& groups)
+  void AddGroups(std::map<size_t, std::vector<size_t>> const& groups)
   {
     if (!groups.empty()) {
       this->Groups = &groups;
       // record all libraries as part of groups to ensure correct
       // deduplication: libraries as part of groups are always kept.
-      for (const auto& g : groups) {
+      for (auto const& g : groups) {
         for (auto index : g.second) {
           this->Emitted.insert(index);
         }
@@ -457,7 +457,7 @@ public:
     }
   }
 
-  void AddLibraries(const std::vector<size_t>& libEntries)
+  void AddLibraries(std::vector<size_t> const& libEntries)
   {
     if (this->Order == Reverse) {
       std::vector<size_t> entries;
@@ -487,7 +487,7 @@ public:
     }
   }
 
-  void AddObjects(const std::vector<size_t>& objectEntries)
+  void AddObjects(std::vector<size_t> const& objectEntries)
   {
     // Place explicitly linked object files in the front.  The linker will
     // always use them anyway, and they may depend on symbols from libraries.
@@ -514,12 +514,12 @@ public:
 
     // expand groups
     if (this->Groups) {
-      for (const auto& g : *this->Groups) {
-        const LinkEntry& groupEntry = this->Entries[g.first];
+      for (auto const& g : *this->Groups) {
+        LinkEntry const& groupEntry = this->Entries[g.first];
         auto it = this->FinalEntries.begin();
         while (true) {
           it = std::find_if(it, this->FinalEntries.end(),
-                            [&groupEntry](const LinkEntry& entry) -> bool {
+                            [&groupEntry](LinkEntry const& entry) -> bool {
                               return groupEntry.Item == entry.Item;
                             });
           if (it == this->FinalEntries.end()) {
@@ -574,7 +574,7 @@ private:
   }
 
   template <typename Range>
-  void AddLibraries(const Range& libEntries)
+  void AddLibraries(Range const& libEntries)
   {
     for (auto index : libEntries) {
       LinkEntry const& entry = this->Entries[index];
@@ -586,21 +586,21 @@ private:
 
   OrderKind Order = Reverse;
   DeduplicationKind Deduplication = Shared;
-  const cmGeneratorTarget* Target;
-  const std::string& LinkLanguage;
+  cmGeneratorTarget const* Target;
+  std::string const& LinkLanguage;
   EntryVector& Entries;
   EntryVector& FinalEntries;
   std::set<size_t> Emitted;
-  const std::map<size_t, std::vector<size_t>>* Groups = nullptr;
+  std::map<size_t, std::vector<size_t>> const* Groups = nullptr;
 };
 }
 
 std::string const& cmComputeLinkDepends::LinkEntry::DEFAULT =
   cmLinkItem::DEFAULT;
 
-cmComputeLinkDepends::cmComputeLinkDepends(const cmGeneratorTarget* target,
-                                           const std::string& config,
-                                           const std::string& linkLanguage,
+cmComputeLinkDepends::cmComputeLinkDepends(cmGeneratorTarget const* target,
+                                           std::string const& config,
+                                           std::string const& linkLanguage,
                                            LinkLibrariesStrategy strategy)
   : Target(target)
   , Makefile(this->Target->Target->GetMakefile())
@@ -861,7 +861,7 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry qe)
     // Follow the target dependencies.
     if (cmLinkInterface const* iface =
           entry.Target->GetLinkInterface(this->Config, this->Target)) {
-      const bool isIface =
+      bool const isIface =
         entry.Target->GetType() == cmStateEnums::INTERFACE_LIBRARY;
       // This target provides its own link interface information.
       this->AddLinkEntries(depender_index, iface->Libraries);
@@ -948,7 +948,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
 }
 
 void cmComputeLinkDepends::AddVarLinkEntries(
-  cm::optional<size_t> const& depender_index, const char* value)
+  cm::optional<size_t> const& depender_index, char const* value)
 {
   // This is called to add the dependencies named by
   // <item>_LIB_DEPENDS.  The variable contains a semicolon-separated
@@ -1039,7 +1039,7 @@ void cmComputeLinkDepends::AddLinkEntries(
     // emit a warning if an undefined feature is used as part of
     // an imported target
     if (item.Feature != LinkEntry::DEFAULT && depender_index) {
-      const auto& depender = this->EntryList[*depender_index];
+      auto const& depender = this->EntryList[*depender_index];
       if (depender.Target && depender.Target->IsImported() &&
           !IsFeatureSupported(this->Makefile, this->LinkLanguage,
                               item.Feature)) {
@@ -1089,8 +1089,8 @@ void cmComputeLinkDepends::AddLinkEntries(
     }
 
     if (depender_index && group) {
-      const auto& depender = this->EntryList[*depender_index];
-      const auto& groupFeature = this->EntryList[group->first].Feature;
+      auto const& depender = this->EntryList[*depender_index];
+      auto const& groupFeature = this->EntryList[group->first].Feature;
       if (depender.Target && depender.Target->IsImported() &&
           !IsGroupFeatureSupported(this->Makefile, this->LinkLanguage,
                                    groupFeature)) {
@@ -1122,7 +1122,7 @@ void cmComputeLinkDepends::AddLinkEntries(
          entry.Target->GetType() ==
            cmStateEnums::TargetType::INTERFACE_LIBRARY)) {
       supportedItem = false;
-      const auto& groupFeature = this->EntryList[group->first].Feature;
+      auto const& groupFeature = this->EntryList[group->first].Feature;
       this->CMakeInstance->IssueMessage(
         MessageType::AUTHOR_WARNING,
         cmStrCat(
@@ -1164,9 +1164,9 @@ void cmComputeLinkDepends::AddLinkEntries(
 
     if (supportedItem) {
       if (group) {
-        const auto& currentFeature = this->EntryList[group->first].Feature;
-        for (const auto& g : this->GroupItems) {
-          const auto& groupFeature = this->EntryList[g.first].Feature;
+        auto const& currentFeature = this->EntryList[group->first].Feature;
+        for (auto const& g : this->GroupItems) {
+          auto const& groupFeature = this->EntryList[g.first].Feature;
           if (groupFeature == currentFeature) {
             continue;
           }
@@ -1242,7 +1242,7 @@ void cmComputeLinkDepends::AddLinkEntries(
       std::vector<size_t> indexes;
       bool entryHandled = false;
       // search any occurrence of the library in already defined groups
-      for (const auto& g : this->GroupItems) {
+      for (auto const& g : this->GroupItems) {
         for (auto index : g.second) {
           if (entry.Item.Value == this->EntryList[index].Item.Value) {
             indexes.push_back(g.first);
@@ -1302,7 +1302,7 @@ void cmComputeLinkDepends::AddLinkObjects(std::vector<cmLinkItem> const& objs)
 }
 
 cmLinkItem cmComputeLinkDepends::ResolveLinkItem(
-  cm::optional<size_t> const& depender_index, const std::string& name)
+  cm::optional<size_t> const& depender_index, std::string const& name)
 {
   // Look for a target in the scope of the depender.
   cmGeneratorTarget const* from = this->Target;
@@ -1364,7 +1364,7 @@ void cmComputeLinkDepends::UpdateGroupDependencies()
         continue;
       }
       // search the item in the defined groups
-      for (const auto& groupItems : this->GroupItems) {
+      for (auto const& groupItems : this->GroupItems) {
         auto pos = std::find(groupItems.second.cbegin(),
                              groupItems.second.cend(), index);
         if (pos != groupItems.second.cend()) {

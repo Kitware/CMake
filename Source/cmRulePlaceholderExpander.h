@@ -30,57 +30,57 @@ public:
   // ExpandRuleVariables
   struct RuleVariables
   {
-    const char* CMTargetName = nullptr;
-    const char* CMTargetType = nullptr;
-    const char* CMTargetLabels = nullptr;
-    const char* TargetPDB = nullptr;
-    const char* TargetCompilePDB = nullptr;
-    const char* TargetVersionMajor = nullptr;
-    const char* TargetVersionMinor = nullptr;
-    const char* Language = nullptr;
-    const char* AIXExports = nullptr;
-    const char* Objects = nullptr;
-    const char* Target = nullptr;
-    const char* LinkLibraries = nullptr;
-    const char* Source = nullptr;
-    const char* AssemblySource = nullptr;
-    const char* PreprocessedSource = nullptr;
-    const char* DynDepFile = nullptr;
-    const char* Output = nullptr;
-    const char* Object = nullptr;
-    const char* ObjectDir = nullptr;
-    const char* ObjectFileDir = nullptr;
-    const char* Flags = nullptr;
-    const char* ObjectsQuoted = nullptr;
-    const char* SONameFlag = nullptr;
-    const char* TargetSOName = nullptr;
-    const char* TargetInstallNameDir = nullptr;
-    const char* Linker = nullptr;
-    const char* LinkFlags = nullptr;
-    const char* Manifests = nullptr;
-    const char* LanguageCompileFlags = nullptr;
-    const char* Defines = nullptr;
-    const char* Includes = nullptr;
-    const char* DependencyFile = nullptr;
-    const char* DependencyTarget = nullptr;
-    const char* FilterPrefix = nullptr;
-    const char* SwiftLibraryName = nullptr;
-    const char* SwiftModule = nullptr;
-    const char* SwiftModuleName = nullptr;
-    const char* SwiftOutputFileMapOption = nullptr;
-    const char* SwiftSources = nullptr;
-    const char* ISPCHeader = nullptr;
-    const char* CudaCompileMode = nullptr;
-    const char* Fatbinary = nullptr;
-    const char* RegisterFile = nullptr;
-    const char* Launcher = nullptr;
-    const char* Role = nullptr;
+    char const* CMTargetName = nullptr;
+    char const* CMTargetType = nullptr;
+    char const* CMTargetLabels = nullptr;
+    char const* TargetPDB = nullptr;
+    char const* TargetCompilePDB = nullptr;
+    char const* TargetVersionMajor = nullptr;
+    char const* TargetVersionMinor = nullptr;
+    char const* Language = nullptr;
+    char const* AIXExports = nullptr;
+    char const* Objects = nullptr;
+    char const* Target = nullptr;
+    char const* LinkLibraries = nullptr;
+    char const* Source = nullptr;
+    char const* AssemblySource = nullptr;
+    char const* PreprocessedSource = nullptr;
+    char const* DynDepFile = nullptr;
+    char const* Output = nullptr;
+    char const* Object = nullptr;
+    char const* ObjectDir = nullptr;
+    char const* ObjectFileDir = nullptr;
+    char const* Flags = nullptr;
+    char const* ObjectsQuoted = nullptr;
+    char const* SONameFlag = nullptr;
+    char const* TargetSOName = nullptr;
+    char const* TargetInstallNameDir = nullptr;
+    char const* Linker = nullptr;
+    char const* LinkFlags = nullptr;
+    char const* Manifests = nullptr;
+    char const* LanguageCompileFlags = nullptr;
+    char const* Defines = nullptr;
+    char const* Includes = nullptr;
+    char const* DependencyFile = nullptr;
+    char const* DependencyTarget = nullptr;
+    char const* FilterPrefix = nullptr;
+    char const* SwiftLibraryName = nullptr;
+    char const* SwiftModule = nullptr;
+    char const* SwiftModuleName = nullptr;
+    char const* SwiftOutputFileMapOption = nullptr;
+    char const* SwiftSources = nullptr;
+    char const* ISPCHeader = nullptr;
+    char const* CudaCompileMode = nullptr;
+    char const* Fatbinary = nullptr;
+    char const* RegisterFile = nullptr;
+    char const* Launcher = nullptr;
+    char const* Role = nullptr;
   };
 
   // Expand rule variables in CMake of the type found in language rules
   void ExpandRuleVariables(cmOutputConverter* outputConverter,
                            std::string& string,
-                           const RuleVariables& replaceValues);
+                           RuleVariables const& replaceValues);
 
 private:
   std::string ExpandVariable(std::string const& variable) override;

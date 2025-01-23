@@ -30,10 +30,10 @@ public:
                            std::string targetNamespace,
                            std::string cxxModulesDirectory,
                            cmListFileBacktrace backtrace);
-  cmInstallExportGenerator(const cmInstallExportGenerator&) = delete;
+  cmInstallExportGenerator(cmInstallExportGenerator const&) = delete;
   ~cmInstallExportGenerator() override;
 
-  cmInstallExportGenerator& operator=(const cmInstallExportGenerator&) =
+  cmInstallExportGenerator& operator=(cmInstallExportGenerator const&) =
     delete;
 
   virtual char const* InstallSubcommand() const = 0;
@@ -44,7 +44,7 @@ public:
 
   cmLocalGenerator* GetLocalGenerator() const { return this->LocalGenerator; }
 
-  const std::string& GetNamespace() const { return this->Namespace; }
+  std::string const& GetNamespace() const { return this->Namespace; }
 
   std::string const& GetMainImportFile() const { return this->MainImportFile; }
 

@@ -34,9 +34,9 @@ private:
 
 public:
   cmComputeLinkInformation(cmGeneratorTarget const* target,
-                           const std::string& config);
-  cmComputeLinkInformation(const cmComputeLinkInformation&) = delete;
-  cmComputeLinkInformation& operator=(const cmComputeLinkInformation&) =
+                           std::string const& config);
+  cmComputeLinkInformation(cmComputeLinkInformation const&) = delete;
+  cmComputeLinkInformation& operator=(cmComputeLinkInformation const&) =
     delete;
   ~cmComputeLinkInformation();
   bool Compute();
@@ -68,7 +68,7 @@ public:
     cmSourceFile const* ObjectSource = nullptr;
 
     bool HasFeature() const { return this->Feature != nullptr; }
-    const std::string& GetFeatureName() const
+    std::string const& GetFeatureName() const
     {
       return HasFeature() ? this->Feature->Name
                           : cmComputeLinkDepends::LinkEntry::DEFAULT;
@@ -124,7 +124,7 @@ public:
 
   std::string GetConfig() const { return this->Config; }
 
-  const cmGeneratorTarget* GetTarget() { return this->Target; }
+  cmGeneratorTarget const* GetTarget() { return this->Target; }
 
 private:
   using LinkEntry = cmComputeLinkDepends::LinkEntry;
@@ -253,7 +253,7 @@ private:
   bool ArchivesMayBeShared;
 
   void AddLibraryRuntimeInfo(std::string const& fullPath,
-                             const cmGeneratorTarget* target);
+                             cmGeneratorTarget const* target);
   void AddLibraryRuntimeInfo(std::string const& fullPath);
 
   class FeatureDescriptor
@@ -261,10 +261,10 @@ private:
   public:
     FeatureDescriptor() = default;
 
-    const std::string Name;
-    const bool Supported = false;
-    const std::string Prefix;
-    const std::string Suffix;
+    std::string const Name;
+    bool const Supported = false;
+    std::string const Prefix;
+    std::string const Suffix;
     std::string GetDecoratedItem(std::string const& library,
                                  ItemIsPath isPath) const;
     std::string GetDecoratedItem(std::string const& library,

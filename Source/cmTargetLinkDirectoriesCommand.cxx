@@ -20,7 +20,7 @@ public:
   using cmTargetPropCommandBase::cmTargetPropCommandBase;
 
 private:
-  void HandleMissingTarget(const std::string& name) override
+  void HandleMissingTarget(std::string const& name) override
   {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
@@ -28,10 +28,10 @@ private:
                "\" which is not built by this project."));
   }
 
-  std::string Join(const std::vector<std::string>& content) override;
+  std::string Join(std::vector<std::string> const& content) override;
 
   bool HandleDirectContent(cmTarget* tgt,
-                           const std::vector<std::string>& content,
+                           std::vector<std::string> const& content,
                            bool prepend, bool /*system*/) override
   {
     cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
@@ -42,11 +42,11 @@ private:
 };
 
 std::string TargetLinkDirectoriesImpl::Join(
-  const std::vector<std::string>& content)
+  std::vector<std::string> const& content)
 {
   std::vector<std::string> directories;
 
-  for (const auto& dir : content) {
+  for (auto const& dir : content) {
     auto unixPath = dir;
     cmSystemTools::ConvertToUnixSlashes(unixPath);
     if (!cmSystemTools::FileIsFullPath(unixPath) &&

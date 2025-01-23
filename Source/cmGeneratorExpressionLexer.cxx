@@ -4,7 +4,7 @@
 
 cmGeneratorExpressionLexer::cmGeneratorExpressionLexer() = default;
 
-static void InsertText(const char* upto, const char* c,
+static void InsertText(char const* upto, char const* c,
                        std::vector<cmGeneratorExpressionToken>& result)
 {
   if (upto != c) {
@@ -13,7 +13,7 @@ static void InsertText(const char* upto, const char* c,
 }
 
 std::vector<cmGeneratorExpressionToken> cmGeneratorExpressionLexer::Tokenize(
-  const std::string& input)
+  std::string const& input)
 {
   std::vector<cmGeneratorExpressionToken> result;
 
@@ -23,8 +23,8 @@ std::vector<cmGeneratorExpressionToken> cmGeneratorExpressionLexer::Tokenize(
     return result;
   }
 
-  const char* c = input.c_str();
-  const char* upto = c;
+  char const* c = input.c_str();
+  char const* upto = c;
 
   for (; *c; ++c) {
     switch (*c) {

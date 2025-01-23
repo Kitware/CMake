@@ -14,7 +14,7 @@ using TestCases = std::initializer_list<std::pair<std::string, std::string>>;
 
 bool testPrintFormattedNoIndent()
 {
-  const TestCases testCases = {
+  TestCases const testCases = {
     { "", "" },
     { "\n\n", "\n\n\n\n" },
     { "\n  \n\n", "\n\n  \n\n\n\n" },
@@ -83,7 +83,7 @@ bool testPrintFormattedNoIndent()
 
 bool testPrintFormattedIndent2()
 {
-  const TestCases testCases = {
+  TestCases const testCases = {
     { "", "" },
     // BEGIN NOTE Empty lines are not indented.
     { "\n\n", "\n\n\n\n" },
@@ -149,7 +149,7 @@ bool testPrintFormattedIndent2()
 
 bool testPrintFormattedIndent10()
 {
-  const TestCases testCases = {
+  TestCases const testCases = {
     { "", "" },
     { "One line no EOL text", "          One line no EOL text\n" },
     { "This is the text paragraph longer than a pre-defined wrapping position "

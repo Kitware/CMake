@@ -15,7 +15,7 @@ void cmExternalMakefileProjectGenerator::EnableLanguage(
 }
 
 std::string cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
-  const std::string& globalGenerator, const std::string& extraGenerator)
+  std::string const& globalGenerator, std::string const& extraGenerator)
 {
   if (globalGenerator.empty()) {
     return {};
@@ -27,7 +27,7 @@ std::string cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
 }
 
 bool cmExternalMakefileProjectGenerator::Open(
-  const std::string& /*bindir*/, const std::string& /*projectName*/,
+  std::string const& /*bindir*/, std::string const& /*projectName*/,
   bool /*dryRun*/)
 {
   return false;
@@ -60,7 +60,7 @@ cmExternalMakefileProjectGeneratorFactory::GetSupportedGlobalGenerators() const
 }
 
 void cmExternalMakefileProjectGeneratorFactory::AddSupportedGlobalGenerator(
-  const std::string& base)
+  std::string const& base)
 {
   this->SupportedGlobalGenerators.push_back(base);
 }

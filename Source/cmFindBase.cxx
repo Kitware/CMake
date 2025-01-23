@@ -156,10 +156,10 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
         return false;
       }
       // ensure a macro is not specified as validator
-      const auto& validatorName = args[j];
+      auto const& validatorName = args[j];
       cmList macros{ this->Makefile->GetProperty("MACROS") };
       if (std::find_if(macros.begin(), macros.end(),
-                       [&validatorName](const std::string& item) {
+                       [&validatorName](std::string const& item) {
                          return cmSystemTools::Strucmp(validatorName.c_str(),
                                                        item.c_str()) == 0;
                        }) != macros.end()) {
@@ -219,7 +219,7 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
   return true;
 }
 
-bool cmFindBase::Validate(const std::string& path) const
+bool cmFindBase::Validate(std::string const& path) const
 {
   if (this->ValidatorName.empty()) {
     return true;
@@ -357,7 +357,7 @@ struct entry_to_remove
     if (this->valid()) {
       long to_skip = this->count;
       long index_to_remove = 0;
-      for (const auto& path : entries) {
+      for (auto const& path : entries) {
         if (path == this->value && --to_skip == 0) {
           break;
         }
@@ -376,10 +376,10 @@ void cmFindBase::FillCMakeSystemVariablePath()
 {
   cmSearchPath& paths = this->LabeledPaths[PathLabel::CMakeSystem];
 
-  const bool install_prefix_in_list =
+  bool const install_prefix_in_list =
     !this->Makefile->IsOn("CMAKE_FIND_NO_INSTALL_PREFIX");
-  const bool remove_install_prefix = this->NoCMakeInstallPath;
-  const bool add_install_prefix = !this->NoCMakeInstallPath &&
+  bool const remove_install_prefix = this->NoCMakeInstallPath;
+  bool const add_install_prefix = !this->NoCMakeInstallPath &&
     this->Makefile->IsDefinitionSet("CMAKE_FIND_USE_INSTALL_PREFIX");
 
   // We have 3 possible states for `CMAKE_SYSTEM_PREFIX_PATH` and
@@ -462,7 +462,7 @@ bool cmFindBase::CheckForVariableDefined()
 
     if (cached && cacheType != cmStateEnums::UNINITIALIZED) {
       this->VariableType = cacheType;
-      if (const auto& hs =
+      if (auto const& hs =
             state->GetCacheEntryProperty(this->VariableName, "HELPSTRING")) {
         this->VariableDocumentation = *hs;
       }
@@ -487,7 +487,7 @@ void cmFindBase::NormalizeFindResult()
   if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0125) ==
       cmPolicies::NEW) {
     // ensure the path returned by find_* command is absolute
-    const auto& existingValue =
+    auto const& existingValue =
       this->Makefile->GetDefinition(this->VariableName);
     std::string value;
     if (!existingValue->empty()) {
@@ -553,7 +553,7 @@ void cmFindBase::NormalizeFindResult()
   }
 }
 
-void cmFindBase::StoreFindResult(const std::string& value)
+void cmFindBase::StoreFindResult(std::string const& value)
 {
   bool force =
     this->Makefile->GetPolicyStatus(cmPolicies::CMP0125) == cmPolicies::NEW;

@@ -8,7 +8,7 @@
 int main(int argc, char* argv[])
 {
   int ii;
-  const char* fail = getenv("PSEUDO_EMULATOR_FAIL");
+  char const* fail = getenv("PSEUDO_EMULATOR_FAIL");
 
   printf("Command:");
   for (ii = 1; ii < argc; ++ii) {

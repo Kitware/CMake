@@ -5,12 +5,12 @@
 
 #include <cstring>
 
-void cmCTestTestMeasurementXMLParser::StartElement(const std::string& name,
-                                                   const char** attributes)
+void cmCTestTestMeasurementXMLParser::StartElement(std::string const& name,
+                                                   char const** attributes)
 {
   this->CharacterData.clear();
   this->ElementName = name;
-  for (const char** attr = attributes; *attr; attr += 2) {
+  for (char const** attr = attributes; *attr; attr += 2) {
     if (strcmp(attr[0], "name") == 0) {
       this->MeasurementName = attr[1];
     } else if (strcmp(attr[0], "type") == 0) {
@@ -19,7 +19,7 @@ void cmCTestTestMeasurementXMLParser::StartElement(const std::string& name,
   }
 }
 
-void cmCTestTestMeasurementXMLParser::CharacterDataHandler(const char* data,
+void cmCTestTestMeasurementXMLParser::CharacterDataHandler(char const* data,
                                                            int length)
 {
   this->CharacterData.append(data, length);

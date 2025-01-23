@@ -28,7 +28,7 @@ cmInstallSubdirectoryGenerator::~cmInstallSubdirectoryGenerator() = default;
 
 bool cmInstallSubdirectoryGenerator::HaveInstall()
 {
-  for (const auto& generator : this->Makefile->GetInstallGenerators()) {
+  for (auto const& generator : this->Makefile->GetInstallGenerators()) {
     if (generator->HaveInstall()) {
       return true;
     }

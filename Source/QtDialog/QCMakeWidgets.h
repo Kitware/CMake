@@ -35,7 +35,7 @@ class QCMakePathEditor : public QCMakeFileEditor
 {
   Q_OBJECT
 public:
-  QCMakePathEditor(QWidget* p = nullptr, const QString& var = QString());
+  QCMakePathEditor(QWidget* p = nullptr, QString const& var = QString());
   void chooseFile();
 };
 
@@ -44,7 +44,7 @@ class QCMakeFilePathEditor : public QCMakeFileEditor
 {
   Q_OBJECT
 public:
-  QCMakeFilePathEditor(QWidget* p = nullptr, const QString& var = QString());
+  QCMakeFilePathEditor(QWidget* p = nullptr, QString const& var = QString());
   void chooseFile();
 };
 
@@ -54,7 +54,7 @@ class QCMakeFileCompleter : public QCompleter
   Q_OBJECT
 public:
   QCMakeFileCompleter(QObject* o, bool dirs);
-  virtual QString pathFromIndex(const QModelIndex& idx) const;
+  virtual QString pathFromIndex(QModelIndex const& idx) const;
 };
 
 // editor for strings
@@ -69,7 +69,7 @@ public:
   {
     this->addItems(strings);
   }
-  void setValue(const QString& v)
+  void setValue(QString const& v)
   {
     int i = this->findText(v);
     if (i != -1) {
@@ -80,7 +80,7 @@ public:
 
 namespace QtCMake {
 bool setSearchFilter(QSortFilterProxyModel* model,
-                     const QString& searchString);
+                     QString const& searchString);
 
 void setSearchFilterColor(QLineEdit* edit, bool valid);
 }

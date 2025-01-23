@@ -36,9 +36,9 @@ public:
 
 protected:
   void GenerateScriptActions(std::ostream& os, Indent indent) override;
-  void GenerateScriptForConfig(std::ostream& os, const std::string& config,
+  void GenerateScriptForConfig(std::ostream& os, std::string const& config,
                                Indent indent) override;
-  void AddDirectoryInstallRule(std::ostream& os, const std::string& config,
+  void AddDirectoryInstallRule(std::ostream& os, std::string const& config,
                                Indent indent,
                                std::vector<std::string> const& dirs);
   cmLocalGenerator* LocalGenerator = nullptr;

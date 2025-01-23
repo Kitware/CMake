@@ -118,7 +118,7 @@ void append(Container1& v, Container2 const& r)
 {
   std::transform(
     r.begin(), r.end(), std::back_inserter(v),
-    [](const typename Container2::value_type& item) { return item.get(); });
+    [](typename Container2::value_type const& item) { return item.get(); });
 }
 
 template <

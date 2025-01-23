@@ -2,7 +2,7 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "QCMakePreset.h"
 
-bool operator==(const QCMakePreset& lhs, const QCMakePreset& rhs)
+bool operator==(QCMakePreset const& lhs, QCMakePreset const& rhs)
 {
   return lhs.name == rhs.name && lhs.displayName == rhs.displayName &&
     lhs.description == rhs.description && lhs.generator == rhs.generator &&
@@ -11,12 +11,12 @@ bool operator==(const QCMakePreset& lhs, const QCMakePreset& rhs)
     lhs.setToolset == rhs.setToolset && lhs.enabled == rhs.enabled;
 }
 
-bool operator!=(const QCMakePreset& lhs, const QCMakePreset& rhs)
+bool operator!=(QCMakePreset const& lhs, QCMakePreset const& rhs)
 {
   return !(lhs == rhs);
 }
 
-bool operator<(const QCMakePreset& lhs, const QCMakePreset& rhs)
+bool operator<(QCMakePreset const& lhs, QCMakePreset const& rhs)
 {
   return lhs.name < rhs.name ||
     (lhs.name == rhs.name &&
@@ -37,17 +37,17 @@ bool operator<(const QCMakePreset& lhs, const QCMakePreset& rhs)
                    (lhs.enabled < rhs.enabled))))))))))))))));
 }
 
-bool operator<=(const QCMakePreset& lhs, const QCMakePreset& rhs)
+bool operator<=(QCMakePreset const& lhs, QCMakePreset const& rhs)
 {
   return rhs >= lhs;
 }
 
-bool operator>(const QCMakePreset& lhs, const QCMakePreset& rhs)
+bool operator>(QCMakePreset const& lhs, QCMakePreset const& rhs)
 {
   return rhs < lhs;
 }
 
-bool operator>=(const QCMakePreset& lhs, const QCMakePreset& rhs)
+bool operator>=(QCMakePreset const& lhs, QCMakePreset const& rhs)
 {
   return !(lhs < rhs);
 }

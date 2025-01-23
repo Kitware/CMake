@@ -95,7 +95,7 @@ bool cmCPackExternalGenerator::SupportsComponentInstallation() const
 }
 
 int cmCPackExternalGenerator::InstallProjectViaInstallCommands(
-  bool setDestDir, const std::string& tempInstallDirectory)
+  bool setDestDir, std::string const& tempInstallDirectory)
 {
   if (this->StagingEnabled()) {
     return this->cmCPackGenerator::InstallProjectViaInstallCommands(
@@ -106,7 +106,7 @@ int cmCPackExternalGenerator::InstallProjectViaInstallCommands(
 }
 
 int cmCPackExternalGenerator::InstallProjectViaInstallScript(
-  bool setDestDir, const std::string& tempInstallDirectory)
+  bool setDestDir, std::string const& tempInstallDirectory)
 {
   if (this->StagingEnabled()) {
     return this->cmCPackGenerator::InstallProjectViaInstallScript(
@@ -117,8 +117,8 @@ int cmCPackExternalGenerator::InstallProjectViaInstallScript(
 }
 
 int cmCPackExternalGenerator::InstallProjectViaInstalledDirectories(
-  bool setDestDir, const std::string& tempInstallDirectory,
-  const mode_t* default_dir_mode)
+  bool setDestDir, std::string const& tempInstallDirectory,
+  mode_t const* default_dir_mode)
 {
   if (this->StagingEnabled()) {
     return this->cmCPackGenerator::InstallProjectViaInstalledDirectories(
@@ -129,8 +129,8 @@ int cmCPackExternalGenerator::InstallProjectViaInstalledDirectories(
 }
 
 int cmCPackExternalGenerator::RunPreinstallTarget(
-  const std::string& installProjectName, const std::string& installDirectory,
-  cmGlobalGenerator* globalGenerator, const std::string& buildConfig)
+  std::string const& installProjectName, std::string const& installDirectory,
+  cmGlobalGenerator* globalGenerator, std::string const& buildConfig)
 {
   if (this->StagingEnabled()) {
     return this->cmCPackGenerator::RunPreinstallTarget(
@@ -141,10 +141,10 @@ int cmCPackExternalGenerator::RunPreinstallTarget(
 }
 
 int cmCPackExternalGenerator::InstallCMakeProject(
-  bool setDestDir, const std::string& installDirectory,
-  const std::string& baseTempInstallDirectory, const mode_t* default_dir_mode,
-  const std::string& component, bool componentInstall,
-  const std::string& installSubDirectory, const std::string& buildConfig,
+  bool setDestDir, std::string const& installDirectory,
+  std::string const& baseTempInstallDirectory, mode_t const* default_dir_mode,
+  std::string const& component, bool componentInstall,
+  std::string const& installSubDirectory, std::string const& buildConfig,
   std::string& absoluteDestFiles)
 {
   if (this->StagingEnabled()) {

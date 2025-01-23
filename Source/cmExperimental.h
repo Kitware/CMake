@@ -46,7 +46,7 @@ public:
     bool Warned;
   };
 
-  static const FeatureData& DataForFeature(Feature f);
+  static FeatureData const& DataForFeature(Feature f);
   static cm::optional<Feature> FeatureByName(std::string const& name);
   static bool HasSupportEnabled(cmMakefile const& mf, Feature f);
 };

@@ -59,18 +59,18 @@ protected:
    */
   int InitializeInternal() override;
   int PackageFiles() override;
-  const char* GetPackagingInstallPrefix() override;
+  char const* GetPackagingInstallPrefix() override;
 
   /**
    * @brief Target binary extension
    * @return Executable suffix or disk image format
    */
-  const char* GetOutputExtension() override;
+  char const* GetOutputExtension() override;
 
   std::string GetComponentInstallSuffix(
-    const std::string& componentName) override;
+    std::string const& componentName) override;
   std::string GetComponentInstallDirNameSuffix(
-    const std::string& componentName) override;
+    std::string const& componentName) override;
 
   /**
    * @brief Get Component
@@ -81,8 +81,8 @@ protected:
    *
    * @return Pointer to component
    */
-  cmCPackComponent* GetComponent(const std::string& projectName,
-                                 const std::string& componentName) override;
+  cmCPackComponent* GetComponent(std::string const& projectName,
+                                 std::string const& componentName) override;
 
   /**
    * @brief Get group of component
@@ -94,7 +94,7 @@ protected:
    * @return Pointer to component group
    */
   cmCPackComponentGroup* GetComponentGroup(
-    const std::string& projectName, const std::string& groupName) override;
+    std::string const& projectName, std::string const& groupName) override;
 
   enum cmCPackGenerator::CPackSetDestdirSupport SupportsSetDestdir()
     const override;
@@ -114,7 +114,7 @@ protected:
   cmCPackIFWPackage* GetGroupPackage(cmCPackComponentGroup* group) const;
   cmCPackIFWPackage* GetComponentPackage(cmCPackComponent* component) const;
 
-  cmCPackIFWRepository* GetRepository(const std::string& repositoryName);
+  cmCPackIFWRepository* GetRepository(std::string const& repositoryName);
 
 protected:
   // Data
@@ -143,10 +143,10 @@ protected:
 
 private:
   std::vector<std::string> BuildRepogenCommand();
-  int RunRepogen(const std::string& ifwTmpFile);
+  int RunRepogen(std::string const& ifwTmpFile);
 
   std::vector<std::string> BuildBinaryCreatorCommand();
-  int RunBinaryCreator(const std::string& ifwTmpFile);
+  int RunBinaryCreator(std::string const& ifwTmpFile);
 
   std::string RepoGen;
   std::string BinCreator;

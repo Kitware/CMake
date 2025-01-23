@@ -22,7 +22,7 @@ public:
   RegexExplorer(QWidget* p);
 
 private slots:
-  void on_regularExpression_textChanged(const QString& text);
+  void on_regularExpression_textChanged(QString const& text);
   void on_inputText_textChanged();
   void on_matchNumber_currentIndexChanged(int index);
   void on_matchAll_toggled(bool checked);

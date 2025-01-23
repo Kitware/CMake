@@ -6,7 +6,7 @@
 
 cmGeneratorExpressionContext::cmGeneratorExpressionContext(
   cmLocalGenerator* lg, std::string config, bool quiet,
-  cmGeneratorTarget const* headTarget, const cmGeneratorTarget* currentTarget,
+  cmGeneratorTarget const* headTarget, cmGeneratorTarget const* currentTarget,
   bool evaluateForBuildsystem, cmListFileBacktrace backtrace,
   std::string language)
   : Backtrace(std::move(backtrace))

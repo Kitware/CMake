@@ -60,10 +60,10 @@ void cmGlobalJOMMakefileGenerator::PrintCompilerAdvice(std::ostream& os,
 
 std::vector<cmGlobalGenerator::GeneratedMakeCommand>
 cmGlobalJOMMakefileGenerator::GenerateBuildCommand(
-  const std::string& makeProgram, const std::string& projectName,
-  const std::string& projectDir, std::vector<std::string> const& targetNames,
-  const std::string& config, int jobs, bool verbose,
-  const cmBuildOptions& buildOptions,
+  std::string const& makeProgram, std::string const& projectName,
+  std::string const& projectDir, std::vector<std::string> const& targetNames,
+  std::string const& config, int jobs, bool verbose,
+  cmBuildOptions const& buildOptions,
   std::vector<std::string> const& makeOptions)
 {
   std::vector<std::string> jomMakeOptions;

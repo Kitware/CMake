@@ -51,7 +51,7 @@ cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments,
   } else {
     cmValue cmakeGeneratorName = mf.GetDefinition("CTEST_CMAKE_GENERATOR");
     if (cmNonempty(cmakeGeneratorName)) {
-      const std::string& source_dir =
+      std::string const& source_dir =
         this->CTest->GetCTestConfiguration("SourceDirectory");
       if (source_dir.empty()) {
         status.SetError(
@@ -61,8 +61,8 @@ cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments,
         return nullptr;
       }
 
-      const std::string cmlName = mf.GetSafeDefinition("CMAKE_LIST_FILE_NAME");
-      const std::string cmakelists_file = cmStrCat(
+      std::string const cmlName = mf.GetSafeDefinition("CMAKE_LIST_FILE_NAME");
+      std::string const cmakelists_file = cmStrCat(
         source_dir, "/", cmlName.empty() ? "CMakeLists.txt" : cmlName);
       if (!cmSystemTools::FileExists(cmakelists_file)) {
         std::ostringstream e;

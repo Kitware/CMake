@@ -54,7 +54,7 @@ public:
     return this->TarjanComponents;
   }
 
-  static const size_t INVALID_COMPONENT;
+  static size_t const INVALID_COMPONENT;
 
 private:
   void TransferEdges();

@@ -55,7 +55,7 @@ int cmCPackCygwinBinaryGenerator::PackageFiles()
   return this->Superclass::PackageFiles();
 }
 
-const char* cmCPackCygwinBinaryGenerator::GetOutputExtension()
+char const* cmCPackCygwinBinaryGenerator::GetOutputExtension()
 {
   this->OutputExtension = "-";
   cmValue patchNumber = this->GetOption("CPACK_CYGWIN_PATCH_NUMBER");

@@ -22,7 +22,7 @@ cmParseMumpsCoverage::cmParseMumpsCoverage(
 
 cmParseMumpsCoverage::~cmParseMumpsCoverage() = default;
 
-bool cmParseMumpsCoverage::ReadCoverageFile(const char* file)
+bool cmParseMumpsCoverage::ReadCoverageFile(char const* file)
 {
   // Read the gtm_coverage.mcov file, that has two lines of data:
   // packages:/full/path/to/Vista/Packages
@@ -131,7 +131,7 @@ bool cmParseMumpsCoverage::FindMumpsFile(std::string const& routine,
     return true;
   }
   // try some alternate names
-  const char* tryname[] = { "GUX", "GTM", "ONT", nullptr };
+  char const* tryname[] = { "GUX", "GTM", "ONT", nullptr };
   for (int k = 0; tryname[k] != nullptr; k++) {
     std::string routine2 = routine + tryname[k];
     i = this->RoutineToDirectory.find(routine2);

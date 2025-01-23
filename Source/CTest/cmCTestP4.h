@@ -39,14 +39,14 @@ private:
   std::map<std::string, User> Users;
   std::vector<std::string> P4Options;
 
-  User GetUserData(const std::string& username);
+  User GetUserData(std::string const& username);
   void SetP4Options(std::vector<std::string>& options);
 
   std::string GetWorkingRevision();
   bool NoteOldRevision() override;
   bool NoteNewRevision() override;
   bool UpdateImpl() override;
-  bool UpdateCustom(const std::string& custom);
+  bool UpdateCustom(std::string const& custom);
 
   bool LoadRevisions() override;
   bool LoadModifications() override;

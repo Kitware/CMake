@@ -47,15 +47,15 @@ class cmListFileParser
 public:
   cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
                    cmMessenger* messenger);
-  cmListFileParser(const cmListFileParser&) = delete;
-  cmListFileParser& operator=(const cmListFileParser&) = delete;
+  cmListFileParser(cmListFileParser const&) = delete;
+  cmListFileParser& operator=(cmListFileParser const&) = delete;
 
-  bool ParseFile(const char* filename);
-  bool ParseString(const char* str, const char* virtual_filename);
+  bool ParseFile(char const* filename);
+  bool ParseString(char const* str, char const* virtual_filename);
 
 private:
   bool Parse();
-  bool ParseFunction(const char* name, long line);
+  bool ParseFunction(char const* name, long line);
   bool AddArgument(cmListFileLexer_Token* token,
                    cmListFileArgument::Delimiter delim);
   void IssueFileOpenError(std::string const& text) const;
@@ -73,7 +73,7 @@ private:
   cmListFile* ListFile;
   cmListFileBacktrace Backtrace;
   cmMessenger* Messenger;
-  const char* FileName = nullptr;
+  char const* FileName = nullptr;
   std::unique_ptr<cmListFileLexer, void (*)(cmListFileLexer*)> Lexer;
   std::string FunctionName;
   long FunctionLine;
@@ -90,13 +90,13 @@ cmListFileParser::cmListFileParser(cmListFile* lf, cmListFileBacktrace lfbt,
 {
 }
 
-void cmListFileParser::IssueFileOpenError(const std::string& text) const
+void cmListFileParser::IssueFileOpenError(std::string const& text) const
 {
   this->Messenger->IssueMessage(MessageType::FATAL_ERROR, text,
                                 this->Backtrace);
 }
 
-void cmListFileParser::IssueError(const std::string& text) const
+void cmListFileParser::IssueError(std::string const& text) const
 {
   cmListFileContext lfc;
   lfc.FilePath = this->FileName;
@@ -107,7 +107,7 @@ void cmListFileParser::IssueError(const std::string& text) const
   cmSystemTools::SetFatalErrorOccurred();
 }
 
-bool cmListFileParser::ParseFile(const char* filename)
+bool cmListFileParser::ParseFile(char const* filename)
 {
   this->FileName = filename;
 
@@ -142,8 +142,8 @@ bool cmListFileParser::ParseFile(const char* filename)
   return this->Parse();
 }
 
-bool cmListFileParser::ParseString(const char* str,
-                                   const char* virtual_filename)
+bool cmListFileParser::ParseString(char const* str,
+                                   char const* virtual_filename)
 {
   this->FileName = virtual_filename;
 
@@ -208,7 +208,7 @@ bool cmListFileParser::Parse()
   return true;
 }
 
-bool cmListFileParser::ParseFunction(const char* name, long line)
+bool cmListFileParser::ParseFunction(char const* name, long line)
 {
   // Ininitialize a new function call.
   this->FunctionName = name;
@@ -424,7 +424,7 @@ cm::optional<cmListFileContext> cmListFileParser::CheckNesting() const
 
 } // anonymous namespace
 
-bool cmListFile::ParseFile(const char* filename, cmMessenger* messenger,
+bool cmListFile::ParseFile(char const* filename, cmMessenger* messenger,
                            cmListFileBacktrace const& lfbt)
 {
   if (!cmSystemTools::FileExists(filename) ||
@@ -442,9 +442,9 @@ bool cmListFile::ParseFile(const char* filename, cmMessenger* messenger,
   return !parseError;
 }
 
-bool cmListFile::ParseString(const char* str, const char* virtual_filename,
+bool cmListFile::ParseString(char const* str, char const* virtual_filename,
                              cmMessenger* messenger,
-                             const cmListFileBacktrace& lfbt)
+                             cmListFileBacktrace const& lfbt)
 {
   bool parseError = false;
 
@@ -473,7 +473,7 @@ std::ostream& operator<<(std::ostream& os, cmListFileContext const& lfc)
   return os;
 }
 
-bool operator<(const cmListFileContext& lhs, const cmListFileContext& rhs)
+bool operator<(cmListFileContext const& lhs, cmListFileContext const& rhs)
 {
   if (lhs.Line != rhs.Line) {
     return lhs.Line < rhs.Line;
@@ -481,12 +481,12 @@ bool operator<(const cmListFileContext& lhs, const cmListFileContext& rhs)
   return lhs.FilePath < rhs.FilePath;
 }
 
-bool operator==(const cmListFileContext& lhs, const cmListFileContext& rhs)
+bool operator==(cmListFileContext const& lhs, cmListFileContext const& rhs)
 {
   return lhs.Line == rhs.Line && lhs.FilePath == rhs.FilePath;
 }
 
-bool operator!=(const cmListFileContext& lhs, const cmListFileContext& rhs)
+bool operator!=(cmListFileContext const& lhs, cmListFileContext const& rhs)
 {
   return !(lhs == rhs);
 }

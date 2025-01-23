@@ -18,8 +18,8 @@ public:
   cmFileTimeCache();
   ~cmFileTimeCache();
 
-  cmFileTimeCache(const cmFileTimeCache&) = delete;
-  cmFileTimeCache& operator=(const cmFileTimeCache&) = delete;
+  cmFileTimeCache(cmFileTimeCache const&) = delete;
+  cmFileTimeCache& operator=(cmFileTimeCache const&) = delete;
 
   /**
    * @brief Loads the file time from the cache or the file system.

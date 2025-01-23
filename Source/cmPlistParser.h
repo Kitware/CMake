@@ -10,4 +10,4 @@ namespace Json {
 class Value;
 }
 
-cm::optional<Json::Value> cmParsePlist(const std::string& filename);
+cm::optional<Json::Value> cmParsePlist(std::string const& filename);

@@ -13,7 +13,7 @@
 #include "cmSystemTools.h"
 
 cm::optional<cmGccDepfileContent> cmReadGccDepfile(
-  const char* filePath, const std::string& prefix,
+  char const* filePath, std::string const& prefix,
   GccDepfilePrependPaths prependPaths)
 {
   cmGccDepfileLexerHelper helper;

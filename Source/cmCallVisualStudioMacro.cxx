@@ -53,8 +53,8 @@ static bool LogErrorsAsMessages;
     }
 
 //! Using the given instance of Visual Studio, call the named macro
-HRESULT InstanceCallMacro(IDispatch* vsIDE, const std::string& macro,
-                          const std::string& args)
+HRESULT InstanceCallMacro(IDispatch* vsIDE, std::string const& macro,
+                          std::string const& args)
 {
   HRESULT hr = E_POINTER;
 
@@ -112,15 +112,15 @@ HRESULT InstanceCallMacro(IDispatch* vsIDE, const std::string& macro,
                "  wReserved: " << excep.wReserved << '\n';
         /* clang-format on */
         if (excep.bstrSource) {
-          oss << "  bstrSource: " << (const char*)(_bstr_t)excep.bstrSource
+          oss << "  bstrSource: " << (char const*)(_bstr_t)excep.bstrSource
               << '\n';
         }
         if (excep.bstrDescription) {
           oss << "  bstrDescription: "
-              << (const char*)(_bstr_t)excep.bstrDescription << '\n';
+              << (char const*)(_bstr_t)excep.bstrDescription << '\n';
         }
         if (excep.bstrHelpFile) {
-          oss << "  bstrHelpFile: " << (const char*)(_bstr_t)excep.bstrHelpFile
+          oss << "  bstrHelpFile: " << (char const*)(_bstr_t)excep.bstrHelpFile
               << '\n';
         }
         /* clang-format off */
@@ -305,7 +305,7 @@ HRESULT GetRunningInstances(std::map<std::string, IUnknownPtr>& mrot)
 
 //! Do the two file names refer to the same Visual Studio solution? Or are
 //! we perhaps looking for any and all solutions?
-bool FilesSameSolution(const std::string& slnFile, const std::string& slnName)
+bool FilesSameSolution(std::string const& slnFile, std::string const& slnName)
 {
   if (slnFile == "ALL"_s || slnName == "ALL"_s) {
     return true;
@@ -324,7 +324,7 @@ bool FilesSameSolution(const std::string& slnFile, const std::string& slnName)
 //! Find instances of Visual Studio with the given solution file
 //! open. Pass "ALL" for slnFile to gather all running instances
 //! of Visual Studio.
-HRESULT FindVisualStudioInstances(const std::string& slnFile,
+HRESULT FindVisualStudioInstances(std::string const& slnFile,
                                   std::vector<IDispatchPtr>& instances)
 {
   std::map<std::string, IUnknownPtr> mrot;
@@ -363,7 +363,7 @@ HRESULT FindVisualStudioInstances(const std::string& slnFile,
 #endif // defined(HAVE_COMDEF_H)
 
 int cmCallVisualStudioMacro::GetNumberOfRunningVisualStudioInstances(
-  const std::string& slnFile)
+  std::string const& slnFile)
 {
   int count = 0;
 
@@ -396,10 +396,10 @@ int cmCallVisualStudioMacro::GetNumberOfRunningVisualStudioInstances(
 
 //! Get all running objects from the Windows running object table.
 //! Save them in a map by their display names.
-int cmCallVisualStudioMacro::CallMacro(const std::string& slnFile,
-                                       const std::string& macro,
-                                       const std::string& args,
-                                       const bool logErrorsAsMessages)
+int cmCallVisualStudioMacro::CallMacro(std::string const& slnFile,
+                                       std::string const& macro,
+                                       std::string const& args,
+                                       bool const logErrorsAsMessages)
 {
   int err = 1; // no comdef.h
 

@@ -37,7 +37,7 @@ public:
   std::string GetNightlyTime();
 
   /** Prepare the work tree.  */
-  bool InitialCheckout(const std::string& command);
+  bool InitialCheckout(std::string const& command);
 
   /** Perform cleanup operations on the work tree.  */
   void Cleanup();
@@ -110,15 +110,15 @@ protected:
   };
 
   /** Convert a list of arguments to a human-readable command line.  */
-  static std::string ComputeCommandLine(const std::vector<std::string>& cmd);
+  static std::string ComputeCommandLine(std::vector<std::string> const& cmd);
 
   /** Run a command line and send output to given parsers.  */
-  bool RunChild(const std::vector<std::string>& cmd, OutputParser* out,
+  bool RunChild(std::vector<std::string> const& cmd, OutputParser* out,
                 OutputParser* err, std::string workDir = {},
                 Encoding encoding = cmProcessOutput::Auto);
 
   /** Run VC update command line and send output to given parsers.  */
-  bool RunUpdateCommand(const std::vector<std::string>& cmd, OutputParser* out,
+  bool RunUpdateCommand(std::vector<std::string> const& cmd, OutputParser* out,
                         OutputParser* err = nullptr,
                         Encoding encoding = cmProcessOutput::Auto);
 

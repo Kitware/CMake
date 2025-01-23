@@ -11,10 +11,10 @@ class cmDynamicLoaderCache
 {
 public:
   ~cmDynamicLoaderCache();
-  void CacheFile(const char* path, cmsys::DynamicLoader::LibraryHandle /*p*/);
-  bool GetCacheFile(const char* path,
+  void CacheFile(char const* path, cmsys::DynamicLoader::LibraryHandle /*p*/);
+  bool GetCacheFile(char const* path,
                     cmsys::DynamicLoader::LibraryHandle& /*p*/);
-  bool FlushCache(const char* path);
+  bool FlushCache(char const* path);
   void FlushCache();
   static cmDynamicLoaderCache& GetInstance();
 
@@ -28,7 +28,7 @@ cmDynamicLoaderCache cmDynamicLoaderCache::Instance;
 
 cmDynamicLoaderCache::~cmDynamicLoaderCache() = default;
 
-void cmDynamicLoaderCache::CacheFile(const char* path,
+void cmDynamicLoaderCache::CacheFile(char const* path,
                                      cmsys::DynamicLoader::LibraryHandle p)
 {
   cmsys::DynamicLoader::LibraryHandle h;
@@ -38,7 +38,7 @@ void cmDynamicLoaderCache::CacheFile(const char* path,
   this->CacheMap[path] = p;
 }
 
-bool cmDynamicLoaderCache::GetCacheFile(const char* path,
+bool cmDynamicLoaderCache::GetCacheFile(char const* path,
                                         cmsys::DynamicLoader::LibraryHandle& p)
 {
   auto it = this->CacheMap.find(path);
@@ -49,7 +49,7 @@ bool cmDynamicLoaderCache::GetCacheFile(const char* path,
   return false;
 }
 
-bool cmDynamicLoaderCache::FlushCache(const char* path)
+bool cmDynamicLoaderCache::FlushCache(char const* path)
 {
   auto it = this->CacheMap.find(path);
   bool ret = false;
@@ -75,7 +75,7 @@ cmDynamicLoaderCache& cmDynamicLoaderCache::GetInstance()
 }
 
 cmsys::DynamicLoader::LibraryHandle cmDynamicLoader::OpenLibrary(
-  const char* libname)
+  char const* libname)
 {
   cmsys::DynamicLoader::LibraryHandle lh;
   if (cmDynamicLoaderCache::GetInstance().GetCacheFile(libname, lh)) {

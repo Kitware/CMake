@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-inline int runRealExe(const int argc, char** argv)
+inline int runRealExe(int const argc, char** argv)
 {
   std::vector<std::string> args;
   std::string realMocPath;

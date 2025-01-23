@@ -19,8 +19,8 @@ class cmMakefile;
 class cmVariableWatch
 {
 public:
-  using WatchMethod = void (*)(const std::string&, int, void*, const char*,
-                               const cmMakefile*);
+  using WatchMethod = void (*)(std::string const&, int, void*, char const*,
+                               cmMakefile const*);
   using DeleteData = void (*)(void*);
 
   cmVariableWatch();
@@ -29,16 +29,16 @@ public:
   /**
    * Add watch to the variable
    */
-  bool AddWatch(const std::string& variable, WatchMethod method,
+  bool AddWatch(std::string const& variable, WatchMethod method,
                 void* client_data = nullptr, DeleteData delete_data = nullptr);
-  void RemoveWatch(const std::string& variable, WatchMethod method,
+  void RemoveWatch(std::string const& variable, WatchMethod method,
                    void* client_data = nullptr);
 
   /**
    * This method is called when variable is accessed
    */
-  bool VariableAccessed(const std::string& variable, int access_type,
-                        const char* newValue, const cmMakefile* mf) const;
+  bool VariableAccessed(std::string const& variable, int access_type,
+                        char const* newValue, cmMakefile const* mf) const;
 
   /**
    * Different access types.
@@ -56,7 +56,7 @@ public:
   /**
    * Return the access as string
    */
-  static const std::string& GetAccessAsString(int access_type);
+  static std::string const& GetAccessAsString(int access_type);
 
 protected:
   struct Pair
@@ -71,8 +71,8 @@ protected:
       }
     }
     Pair() = default;
-    Pair(const Pair&) = delete;
-    Pair& operator=(const Pair&) = delete;
+    Pair(Pair const&) = delete;
+    Pair& operator=(Pair const&) = delete;
   };
 
   using VectorOfPairs = std::vector<std::shared_ptr<Pair>>;

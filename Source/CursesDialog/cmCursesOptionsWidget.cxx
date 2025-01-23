@@ -79,7 +79,7 @@ void cmCursesOptionsWidget::PreviousOption()
   this->SetValue(this->Options[this->CurrentOption]);
 }
 
-void cmCursesOptionsWidget::SetOption(const std::string& value)
+void cmCursesOptionsWidget::SetOption(std::string const& value)
 {
   this->CurrentOption = 0; // default to 0 index
   this->SetValue(value);

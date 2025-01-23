@@ -25,7 +25,7 @@
 
 struct CatToErrorType
 {
-  const char* ErrorCategory;
+  char const* ErrorCategory;
   int ErrorCode;
 };
 
@@ -40,7 +40,7 @@ static CatToErrorType cmCTestMemCheckBoundsChecker[] = {
   { nullptr, 0 }
 };
 
-static void xmlReportError(int line, const char* msg, void* data)
+static void xmlReportError(int line, char const* msg, void* data)
 {
   cmCTest* ctest = static_cast<cmCTest*>(data);
   cmCTestLog(ctest, ERROR_MESSAGE,
@@ -57,7 +57,7 @@ public:
     this->CTest = c;
     this->SetErrorCallback(xmlReportError, c);
   }
-  void StartElement(const std::string& name, const char** atts) override
+  void StartElement(std::string const& name, char const** atts) override
   {
     if (name == "MemoryLeak" || name == "ResourceLeak") {
       this->Errors.push_back(cmCTestMemCheckHandler::MLK);
@@ -74,9 +74,9 @@ public:
     ostr << "\n";
     this->Log += ostr.str();
   }
-  void EndElement(const std::string& /*name*/) override {}
+  void EndElement(std::string const& /*name*/) override {}
 
-  const char* GetAttribute(const char* name, const char** atts)
+  char const* GetAttribute(char const* name, char const** atts)
   {
     int i = 0;
     for (; atts[i]; ++i) {
@@ -86,10 +86,10 @@ public:
     }
     return nullptr;
   }
-  void ParseError(const char** atts)
+  void ParseError(char const** atts)
   {
     CatToErrorType* ptr = cmCTestMemCheckBoundsChecker;
-    const char* cat = this->GetAttribute("ErrorCategory", atts);
+    char const* cat = this->GetAttribute("ErrorCategory", atts);
     if (!cat) {
       this->Errors.push_back(cmCTestMemCheckHandler::ABW); // do not know
       cmCTestLog(this->CTest, ERROR_MESSAGE,
@@ -237,12 +237,12 @@ void cmCTestMemCheckHandler::InitializeResultsVectors()
 
   // define the standard set of errors
   //----------------------------------------------------------------------
-  static const char* cmCTestMemCheckResultStrings[] = {
+  static char const* cmCTestMemCheckResultStrings[] = {
     "ABR", "ABW", "ABWL", "COR", "EXU", "FFM", "FIM",  "FMM",
     "FMR", "FMW", "FUM",  "IPR", "IPW", "MAF", "MLK",  "MPK",
     "NPR", "ODS", "PAR",  "PLK", "UMC", "UMR", nullptr
   };
-  static const char* cmCTestMemCheckResultLongStrings[] = {
+  static char const* cmCTestMemCheckResultLongStrings[] = {
     "Threading Problem",
     "ABW",
     "ABWL",
@@ -375,7 +375,7 @@ void cmCTestMemCheckHandler::GenerateCTestXML(cmXMLWriter& xml)
     }
     xml.EndElement(); // Results
     if (memoryErrors > 0) {
-      const int maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
+      int const maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
       std::string outname = result.Name + " ";
       outname.resize(maxTestNameWidth + 4, '.');
       cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
@@ -768,7 +768,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
   return true;
 }
 
-bool cmCTestMemCheckHandler::ProcessMemCheckOutput(const std::string& str,
+bool cmCTestMemCheckHandler::ProcessMemCheckOutput(std::string const& str,
                                                    std::string& log,
                                                    std::vector<int>& results)
 {
@@ -798,7 +798,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckOutput(const std::string& str,
 }
 
 std::vector<int>::size_type cmCTestMemCheckHandler::FindOrAddWarning(
-  const std::string& warning)
+  std::string const& warning)
 {
   for (std::vector<std::string>::size_type i = 0;
        i < this->ResultStrings.size(); ++i) {
@@ -812,7 +812,7 @@ std::vector<int>::size_type cmCTestMemCheckHandler::FindOrAddWarning(
   return this->ResultStrings.size() - 1;
 }
 bool cmCTestMemCheckHandler::ProcessMemCheckSanitizerOutput(
-  const std::string& str, std::string& log, std::vector<int>& result)
+  std::string const& str, std::string& log, std::vector<int>& result)
 {
   std::string regex;
   switch (this->MemoryTesterStyle) {
@@ -865,7 +865,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckSanitizerOutput(
   return defects == 0;
 }
 bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
-  const std::string& str, std::string& log, std::vector<int>& results)
+  std::string const& str, std::string& log, std::vector<int>& results)
 {
   std::vector<std::string> lines;
   cmsys::SystemTools::Split(str, lines);
@@ -908,7 +908,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
 }
 
 bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
-  const std::string& str, std::string& log, std::vector<int>& results)
+  std::string const& str, std::string& log, std::vector<int>& results)
 {
   std::vector<std::string> lines;
   cmsys::SystemTools::Split(str, lines);
@@ -1035,7 +1035,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
 }
 
 bool cmCTestMemCheckHandler::ProcessMemCheckDrMemoryOutput(
-  const std::string& str, std::string& log, std::vector<int>& results)
+  std::string const& str, std::string& log, std::vector<int>& results)
 {
   std::vector<std::string> lines;
   cmsys::SystemTools::Split(str, lines);
@@ -1051,7 +1051,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckDrMemoryOutput(
   int defects = 0;
 
   std::ostringstream ostr;
-  for (const auto& l : lines) {
+  for (auto const& l : lines) {
     ostr << l << std::endl;
     if (drMemoryError.find(l)) {
       defects++;
@@ -1072,7 +1072,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckDrMemoryOutput(
 }
 
 bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
-  const std::string& str, std::string& log, std::vector<int>& results)
+  std::string const& str, std::string& log, std::vector<int>& results)
 {
   log.clear();
   auto sttime = std::chrono::steady_clock::now();
@@ -1122,7 +1122,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
 }
 
 bool cmCTestMemCheckHandler::ProcessMemCheckCudaOutput(
-  const std::string& str, std::string& log, std::vector<int>& results)
+  std::string const& str, std::string& log, std::vector<int>& results)
 {
   std::vector<std::string> lines;
   cmsys::SystemTools::Split(str, lines);
@@ -1327,9 +1327,9 @@ void cmCTestMemCheckHandler::PostProcessDrMemoryTest(
 
   cmsys::Glob g;
   g.FindFiles(drMemoryLogDir + "/resfile.*");
-  const std::vector<std::string>& files = g.GetFiles();
+  std::vector<std::string> const& files = g.GetFiles();
 
-  for (const std::string& f : files) {
+  for (std::string const& f : files) {
     cmsys::ifstream ifs(f.c_str());
     if (!ifs) {
       std::string log = "Cannot read memory tester output file: " + f;

@@ -20,7 +20,7 @@ protected:
   bool SupportsComponentInstallation() const override;
   int PackageFiles() override;
 
-  const char* GetOutputExtension() override { return ".nupkg"; }
+  char const* GetOutputExtension() override { return ".nupkg"; }
   bool SupportsAbsoluteDestination() const override { return false; }
   /**
    * The method used to prepare variables when component

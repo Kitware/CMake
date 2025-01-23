@@ -34,9 +34,9 @@ public:
   ~CMakeSetupDialog();
 
 public slots:
-  void setBinaryDirectory(const QString& dir);
-  void setSourceDirectory(const QString& dir);
-  void setDeferredPreset(const QString& preset);
+  void setBinaryDirectory(QString const& dir);
+  void setSourceDirectory(QString const& dir);
+  void setDeferredPreset(QString const& preset);
   void setStartupBinaryDirectory(bool startup);
 
 protected slots:
@@ -48,29 +48,29 @@ protected slots:
   void doHelp();
   void doAbout();
   void doInterrupt();
-  void error(const QString& message);
-  void message(const QString& message);
+  void error(QString const& message);
+  void message(QString const& message);
 
   void doSourceBrowse();
   void doBinaryBrowse();
   void doReloadCache();
   void doDeleteCache();
-  void updateSourceDirectory(const QString& dir);
-  void updateBinaryDirectory(const QString& dir);
-  void updatePresets(const QVector<QCMakePreset>& presets);
-  void updatePreset(const QString& name);
-  void showPresetLoadError(const QString& dir, const QString& message);
-  void showProgress(const QString& msg, float percent);
+  void updateSourceDirectory(QString const& dir);
+  void updateBinaryDirectory(QString const& dir);
+  void updatePresets(QVector<QCMakePreset> const& presets);
+  void updatePreset(QString const& name);
+  void showPresetLoadError(QString const& dir, QString const& message);
+  void showProgress(QString const& msg, float percent);
   void setEnabledState(bool);
   bool setupFirstConfigure();
-  void updateGeneratorLabel(const QString& gen);
+  void updateGeneratorLabel(QString const& gen);
   void setExitAfterGenerate(bool);
-  void addBinaryPath(const QString&);
+  void addBinaryPath(QString const&);
   QStringList loadBuildPaths();
-  void saveBuildPaths(const QStringList&);
-  void onBinaryDirectoryChanged(const QString& dir);
-  void onSourceDirectoryChanged(const QString& dir);
-  void onBuildPresetChanged(const QString& name);
+  void saveBuildPaths(QStringList const&);
+  void onBinaryDirectoryChanged(QString const& dir);
+  void onSourceDirectoryChanged(QString const& dir);
+  void onBuildPresetChanged(QString const& name);
   void setCacheModified();
   void removeSelectedCacheEntries();
   void selectionChanged();
@@ -81,7 +81,7 @@ protected slots:
   void setAdvancedView(bool);
   void setGroupedView(bool);
   void showUserChanges();
-  void setSearchFilter(const QString& str);
+  void setSearchFilter(QString const& str);
   bool prepareConfigure();
   bool doConfigureInternal();
   bool doGenerateInternal();

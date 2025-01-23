@@ -25,7 +25,7 @@ public:
       ptr->AddRef();
     }
   }
-  SmartCOMPtr(const SmartCOMPtr<T>& sptr)
+  SmartCOMPtr(SmartCOMPtr<T> const& sptr)
   {
     ptr = sptr.ptr;
     if (ptr) {
@@ -75,8 +75,8 @@ class SmartBSTR
 {
 public:
   SmartBSTR() = default;
-  SmartBSTR(const SmartBSTR& src) = delete;
-  SmartBSTR& operator=(const SmartBSTR& src) = delete;
+  SmartBSTR(SmartBSTR const& src) = delete;
+  SmartBSTR& operator=(SmartBSTR const& src) = delete;
   operator BSTR() const { return str; }
   BSTR* operator&() throw() { return &str; }
   ~SmartBSTR() throw() { ::SysFreeString(str); }
@@ -118,7 +118,7 @@ private:
                          VSInstanceInfo& vsInstanceInfo);
   bool CheckInstalledComponent(SmartCOMPtr<ISetupPackageReference> package,
                                bool& bWin10SDK, bool& bWin81SDK);
-  int ChooseVSInstance(const std::vector<VSInstanceInfo>& vecVSInstances);
+  int ChooseVSInstance(std::vector<VSInstanceInfo> const& vecVSInstances);
   bool EnumerateAndChooseVSInstance();
   bool LoadSpecifiedVSInstanceFromDisk();
   bool EnumerateVSInstancesWithVswhere(

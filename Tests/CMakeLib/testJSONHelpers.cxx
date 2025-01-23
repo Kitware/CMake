@@ -29,10 +29,10 @@ struct InheritedStruct : public ObjectStruct
 
 namespace ErrorMessages {
 using ErrorGenerator =
-  std::function<void(const Json::Value*, cmJSONState* state)>;
+  std::function<void(Json::Value const*, cmJSONState* state)>;
 ErrorGenerator ErrorGeneratorBuilder(std::string errorMessage)
 {
-  return [errorMessage](const Json::Value* value, cmJSONState* state) -> void {
+  return [errorMessage](Json::Value const* value, cmJSONState* state) -> void {
     state->AddErrorAtValue(errorMessage, value);
   };
 };
@@ -42,9 +42,9 @@ ErrorGenerator InvalidMap = ErrorGeneratorBuilder("Invalid Map");
 ErrorGenerator FaultyObjectProperty =
   ErrorGeneratorBuilder("Faulty Object Property");
 ErrorGenerator InvalidObject(JsonErrors::ObjectError /*errorType*/,
-                             const Json::Value::Members& extraFields)
+                             Json::Value::Members const& extraFields)
 {
-  return [extraFields](const Json::Value* value, cmJSONState* state) -> void {
+  return [extraFields](Json::Value const* value, cmJSONState* state) -> void {
     state->AddErrorAtValue("Invalid Object", value);
   };
 };
@@ -65,12 +65,12 @@ auto const StringVectorHelper = JSONHelperBuilder::Vector<std::string>(
 auto const StringVectorFilterHelper =
   JSONHelperBuilder::VectorFilter<std::string>(
     ErrorMessages::InvalidArray, StringHelper,
-    [](const std::string& value) { return value != "ignore"; });
+    [](std::string const& value) { return value != "ignore"; });
 auto const StringMapHelper =
   JSONHelperBuilder::Map<std::string>(ErrorMessages::InvalidMap, StringHelper);
 auto const StringMapFilterHelper = JSONHelperBuilder::MapFilter<std::string>(
   ErrorMessages::InvalidMap, StringHelper,
-  [](const std::string& key) { return key != "ignore"; });
+  [](std::string const& key) { return key != "ignore"; });
 auto const OptionalStringHelper =
   JSONHelperBuilder::Optional<std::string>(StringHelper);
 
@@ -466,8 +466,8 @@ bool testRequired()
   return true;
 }
 
-JSONHelperBuilder::FilterResult ObjectPropsFilter(const std::string& key,
-                                                  const Json::Value* value,
+JSONHelperBuilder::FilterResult ObjectPropsFilter(std::string const& key,
+                                                  Json::Value const* value,
                                                   cmJSONState* state)
 {
   if (key == "ignore") {

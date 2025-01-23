@@ -33,7 +33,7 @@ public:
   std::shared_ptr<cmDebuggerThread> StartThread(std::string const& name);
   void EndThread(std::shared_ptr<cmDebuggerThread> const& thread);
   cm::optional<dap::StackTraceResponse> GetThreadStackTraceResponse(
-    const dap::StackTraceRequest& request);
+    dap::StackTraceRequest const& request);
 };
 
 } // namespace cmDebugger

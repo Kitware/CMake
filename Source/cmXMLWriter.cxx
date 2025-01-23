@@ -18,7 +18,7 @@ cmXMLWriter::~cmXMLWriter()
   assert(this->Indent == 0);
 }
 
-void cmXMLWriter::StartDocument(const char* encoding)
+void cmXMLWriter::StartDocument(char const* encoding)
 {
   this->Output << R"(<?xml version="1.0" encoding=")" << encoding << "\"?>";
 }
@@ -55,7 +55,7 @@ void cmXMLWriter::EndElement()
   this->ElementOpen = false;
 }
 
-void cmXMLWriter::Element(const char* name)
+void cmXMLWriter::Element(char const* name)
 {
   this->CloseStartElement();
   this->ConditionalLineBreak(!this->IsContent);
@@ -67,7 +67,7 @@ void cmXMLWriter::BreakAttributes()
   this->BreakAttrib = true;
 }
 
-void cmXMLWriter::Comment(const char* comment)
+void cmXMLWriter::Comment(char const* comment)
 {
   this->CloseStartElement();
   this->ConditionalLineBreak(!this->IsContent);
@@ -80,21 +80,21 @@ void cmXMLWriter::CData(std::string const& data)
   this->Output << "<![CDATA[" << data << "]]>";
 }
 
-void cmXMLWriter::Doctype(const char* doctype)
+void cmXMLWriter::Doctype(char const* doctype)
 {
   this->CloseStartElement();
   this->ConditionalLineBreak(!this->IsContent);
   this->Output << "<!DOCTYPE " << doctype << ">";
 }
 
-void cmXMLWriter::ProcessingInstruction(const char* target, const char* data)
+void cmXMLWriter::ProcessingInstruction(char const* target, char const* data)
 {
   this->CloseStartElement();
   this->ConditionalLineBreak(!this->IsContent);
   this->Output << "<?" << target << ' ' << data << "?>";
 }
 
-void cmXMLWriter::FragmentFile(const char* fname)
+void cmXMLWriter::FragmentFile(char const* fname)
 {
   this->CloseStartElement();
   cmsys::ifstream fin(fname, std::ios::in | std::ios::binary);

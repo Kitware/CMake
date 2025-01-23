@@ -874,7 +874,7 @@ bool testIterators()
       result = false;
     }
     res.clear();
-    for (const auto& e : p) {
+    for (auto const& e : p) {
       res.push_back(e);
     }
     if (res != ref) {

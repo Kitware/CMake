@@ -61,8 +61,8 @@ bool cmDepends::Finalize(std::ostream& /*unused*/, std::ostream& /*unused*/)
   return true;
 }
 
-bool cmDepends::Check(const std::string& makeFile,
-                      const std::string& internalFile,
+bool cmDepends::Check(std::string const& makeFile,
+                      std::string const& internalFile,
                       DependencyMap& validDeps)
 {
   // Check whether dependencies must be regenerated.
@@ -78,7 +78,7 @@ bool cmDepends::Check(const std::string& makeFile,
   return okay;
 }
 
-void cmDepends::Clear(const std::string& file) const
+void cmDepends::Clear(std::string const& file) const
 {
   // Print verbose output.
   if (this->Verbose) {
@@ -92,8 +92,8 @@ void cmDepends::Clear(const std::string& file) const
                    "# This may be replaced when dependencies are built.\n";
 }
 
-bool cmDepends::WriteDependencies(const std::set<std::string>& /*unused*/,
-                                  const std::string& /*unused*/,
+bool cmDepends::WriteDependencies(std::set<std::string> const& /*unused*/,
+                                  std::string const& /*unused*/,
                                   std::ostream& /*unused*/,
                                   std::ostream& /*unused*/)
 {
@@ -102,7 +102,7 @@ bool cmDepends::WriteDependencies(const std::set<std::string>& /*unused*/,
 }
 
 bool cmDepends::CheckDependencies(std::istream& internalDepends,
-                                  const std::string& internalDependsFileName,
+                                  std::string const& internalDependsFileName,
                                   DependencyMap& validDeps)
 {
   // Read internal depends file time
@@ -227,7 +227,7 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
   return okay;
 }
 
-void cmDepends::SetIncludePathFromLanguage(const std::string& lang)
+void cmDepends::SetIncludePathFromLanguage(std::string const& lang)
 {
   // Look for the new per "TARGET_" variant first:
   std::string includePathVar =

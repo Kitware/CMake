@@ -66,9 +66,9 @@ public:
   void SetCMakeInstance(cmake* cm) { this->CMake = cm; }
 
 protected:
-  bool StartResultingXML(cmCTest::Part part, const char* name,
+  bool StartResultingXML(cmCTest::Part part, char const* name,
                          cmGeneratedFileStream& xofs);
-  bool StartLogFile(const char* name, cmGeneratedFileStream& xofs);
+  bool StartLogFile(char const* name, cmGeneratedFileStream& xofs);
 
   bool AppendXML = false;
   bool Quiet = false;

@@ -64,9 +64,9 @@ std::string const& String::str()
   return *this->string_;
 }
 
-const char* String::c_str()
+char const* String::c_str()
 {
-  const char* c = this->data();
+  char const* c = this->data();
   if (!c) {
     return c;
   }
@@ -137,7 +137,7 @@ std::string& operator+=(std::string& self, String const& s)
   return self += s.view();
 }
 
-String IntoString<char*>::into_string(const char* s)
+String IntoString<char*>::into_string(char const* s)
 {
   if (!s) {
     return String();

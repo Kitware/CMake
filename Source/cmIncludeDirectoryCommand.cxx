@@ -15,7 +15,7 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
-static void GetIncludes(cmMakefile& mf, const std::string& arg,
+static void GetIncludes(cmMakefile& mf, std::string const& arg,
                         std::vector<std::string>& incs);
 static void NormalizeInclude(cmMakefile& mf, std::string& inc);
 
@@ -89,7 +89,7 @@ bool cmIncludeDirectoryCommand(std::vector<std::string> const& args,
 // output from a program and passing it into a command the cleanup doesn't
 // always happen
 //
-static void GetIncludes(cmMakefile& mf, const std::string& arg,
+static void GetIncludes(cmMakefile& mf, std::string const& arg,
                         std::vector<std::string>& incs)
 {
   // break apart any line feed arguments

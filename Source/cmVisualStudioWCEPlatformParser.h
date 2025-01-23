@@ -16,15 +16,15 @@
 class cmVisualStudioWCEPlatformParser : public cmXMLParser
 {
 public:
-  cmVisualStudioWCEPlatformParser(const char* name = nullptr)
+  cmVisualStudioWCEPlatformParser(char const* name = nullptr)
     : RequiredName(name)
   {
   }
 
-  int ParseVersion(const char* version);
+  int ParseVersion(char const* version);
 
   bool Found() const { return this->FoundRequiredName; }
-  const char* GetArchitectureFamily() const;
+  char const* GetArchitectureFamily() const;
   std::string GetOSVersion() const;
   std::string GetIncludeDirectories() const
   {
@@ -35,18 +35,18 @@ public:
     return this->FixPaths(this->Library);
   }
   std::string GetPathDirectories() const { return this->FixPaths(this->Path); }
-  const std::vector<std::string>& GetAvailablePlatforms() const
+  std::vector<std::string> const& GetAvailablePlatforms() const
   {
     return this->AvailablePlatforms;
   }
 
 protected:
-  void StartElement(const std::string& name, const char** attributes) override;
-  void EndElement(const std::string& name) override;
-  void CharacterDataHandler(const char* data, int length) override;
+  void StartElement(std::string const& name, char const** attributes) override;
+  void EndElement(std::string const& name) override;
+  void CharacterDataHandler(char const* data, int length) override;
 
 private:
-  std::string FixPaths(const std::string& paths) const;
+  std::string FixPaths(std::string const& paths) const;
 
   std::string CharacterData;
 
@@ -59,7 +59,7 @@ private:
   std::map<std::string, std::string> Macros;
   std::vector<std::string> AvailablePlatforms;
 
-  const char* RequiredName;
+  char const* RequiredName;
   bool FoundRequiredName = false;
   std::string VcInstallDir;
   std::string VsInstallDir;

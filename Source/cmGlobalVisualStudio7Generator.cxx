@@ -81,7 +81,7 @@ cmGlobalVisualStudio7Generator::~cmGlobalVisualStudio7Generator() = default;
 // Package GUID of Intel Visual Fortran plugin to VS IDE
 #define CM_INTEL_PLUGIN_GUID "{B68A201D-CB9B-47AF-A52F-7EEC72E217E4}"
 
-const std::string& cmGlobalVisualStudio7Generator::GetIntelProjectVersion()
+std::string const& cmGlobalVisualStudio7Generator::GetIntelProjectVersion()
 {
   if (this->IntelProjectVersion.empty()) {
     // Compute the version of the Intel plugin to the VS IDE.
@@ -184,8 +184,8 @@ std::string cmGlobalVisualStudio7Generator::FindDevEnvCommand()
   return vscmd;
 }
 
-const char* cmGlobalVisualStudio7Generator::ExternalProjectType(
-  const std::string& location)
+char const* cmGlobalVisualStudio7Generator::ExternalProjectType(
+  std::string const& location)
 {
   std::string extension = cmSystemTools::GetFilenameLastExtension(location);
   if (extension == ".vbproj"_s) {
@@ -214,10 +214,10 @@ const char* cmGlobalVisualStudio7Generator::ExternalProjectType(
 
 std::vector<cmGlobalGenerator::GeneratedMakeCommand>
 cmGlobalVisualStudio7Generator::GenerateBuildCommand(
-  const std::string& makeProgram, const std::string& projectName,
-  const std::string& /*projectDir*/,
-  std::vector<std::string> const& targetNames, const std::string& config,
-  int /*jobs*/, bool /*verbose*/, const cmBuildOptions& /*buildOptions*/,
+  std::string const& makeProgram, std::string const& projectName,
+  std::string const& /*projectDir*/,
+  std::vector<std::string> const& targetNames, std::string const& config,
+  int /*jobs*/, bool /*verbose*/, cmBuildOptions const& /*buildOptions*/,
   std::vector<std::string> const& makeOptions)
 {
   // Select the caller- or user-preferred make program, else devenv.
@@ -234,7 +234,7 @@ cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   }
 
   // Workaround to convince VCExpress.exe to produce output.
-  const bool requiresOutputForward =
+  bool const requiresOutputForward =
     (makeProgramLower.find("vcexpress") != std::string::npos);
   std::vector<GeneratedMakeCommand> makeCommands;
 
@@ -243,7 +243,7 @@ cmGlobalVisualStudio7Generator::GenerateBuildCommand(
       ((targetNames.size() == 1) && targetNames.front().empty())) {
     realTargetNames = { "ALL_BUILD" };
   }
-  for (const auto& tname : realTargetNames) {
+  for (auto const& tname : realTargetNames) {
     std::string realTarget;
     if (!tname.empty()) {
       realTarget = tname;
@@ -355,7 +355,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
                                        configs, allConfigurations,
                                        mapping ? *mapping : "");
     } else {
-      const std::set<std::string>& configsPartOfDefaultBuild =
+      std::set<std::string> const& configsPartOfDefaultBuild =
         this->IsPartOfDefaultBuild(configs, projectTargets, target);
       cmValue vcprojName = target->GetProperty("GENERATOR_FILE_NAME");
       if (vcprojName) {
@@ -375,7 +375,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
 }
 
 cmVisualStudioFolder* cmGlobalVisualStudio7Generator::CreateSolutionFolders(
-  const std::string& path)
+  std::string const& path)
 {
   if (path.empty()) {
     return nullptr;
@@ -506,7 +506,7 @@ void cmGlobalVisualStudio7Generator::WriteFoldersContent(std::ostream& fout)
 }
 
 std::string cmGlobalVisualStudio7Generator::ConvertToSolutionPath(
-  const std::string& path)
+  std::string const& path)
 {
   // Convert to backslashes.  Do not use ConvertToOutputPath because
   // we will add quoting ourselves, and we know these projects always
@@ -526,7 +526,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
     this->GetGUID(cmStrCat(root->GetProjectName(), ".sln"));
   bool extensibilityGlobalsOverridden = false;
   bool extensibilityAddInsOverridden = false;
-  const std::vector<std::string> propKeys =
+  std::vector<std::string> const propKeys =
     root->GetMakefile()->GetPropertyKeys();
   for (std::string const& it : propKeys) {
     if (cmHasLiteralPrefix(it, "VS_GLOBAL_SECTION_")) {
@@ -555,11 +555,11 @@ void cmGlobalVisualStudio7Generator::WriteSLNGlobalSections(
         cmValue p = root->GetMakefile()->GetProperty(it);
         cmList keyValuePairs{ *p };
         for (std::string const& itPair : keyValuePairs) {
-          const std::string::size_type posEqual = itPair.find('=');
+          std::string::size_type const posEqual = itPair.find('=');
           if (posEqual != std::string::npos) {
-            const std::string key =
+            std::string const key =
               cmTrimWhitespace(itPair.substr(0, posEqual));
-            const std::string value =
+            std::string const value =
               cmTrimWhitespace(itPair.substr(posEqual + 1));
             fout << "\t\t" << key << " = " << value << '\n';
             if (key == "SolutionGuid"_s) {
@@ -672,8 +672,8 @@ std::string cmGlobalVisualStudio7Generator::GetGUID(std::string const& name)
 }
 
 void cmGlobalVisualStudio7Generator::AppendDirectoryForConfig(
-  const std::string& prefix, const std::string& config,
-  const std::string& suffix, std::string& dir)
+  std::string const& prefix, std::string const& config,
+  std::string const& suffix, std::string& dir)
 {
   if (!config.empty()) {
     dir += cmStrCat(prefix, config, suffix);
@@ -696,7 +696,7 @@ std::set<std::string> cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
     for (std::string const& t : targetNames) {
       // check if target <t> is part of default build
       if (target->GetName() == t) {
-        const std::string propertyName =
+        std::string const propertyName =
           cmStrCat("CMAKE_VS_INCLUDE_", t, "_TO_DEFAULT_BUILD");
         // inspect CMAKE_VS_INCLUDE_<t>_TO_DEFAULT_BUILD properties
         for (std::string const& i : configs) {

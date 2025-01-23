@@ -63,7 +63,7 @@ std::string cmInstallCxxModuleBmiGenerator::GetDestination(
 }
 
 void cmInstallCxxModuleBmiGenerator::GenerateScriptForConfig(
-  std::ostream& os, const std::string& config, Indent indent)
+  std::ostream& os, std::string const& config, Indent indent)
 {
   auto const& loc = this->GetScriptLocation(config);
   if (loc.empty()) {

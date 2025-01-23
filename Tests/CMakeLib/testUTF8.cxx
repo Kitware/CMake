@@ -6,7 +6,7 @@
 
 #include <cm_utf8.h>
 
-using test_utf8_char = const cm::string_view;
+using test_utf8_char = cm::string_view const;
 
 static void byte_array_print(test_utf8_char s)
 {
@@ -77,9 +77,9 @@ static void report_bad(bool passed, test_utf8_char c)
 
 static bool decode_good(test_utf8_entry const& entry)
 {
-  const auto& s = entry.str;
+  auto const& s = entry.str;
   unsigned int uc;
-  if (const char* e =
+  if (char const* e =
         cm_utf8_decode_character(s.data(), s.data() + s.size(), &uc)) {
     int used = static_cast<int>(e - s.data());
     if (uc != entry.chr) {
@@ -104,7 +104,7 @@ static bool decode_good(test_utf8_entry const& entry)
 static bool decode_bad(test_utf8_char s)
 {
   unsigned int uc = 0xFFFFu;
-  const char* e = cm_utf8_decode_character(s.data(), s.data() + s.size(), &uc);
+  char const* e = cm_utf8_decode_character(s.data(), s.data() + s.size(), &uc);
   if (e) {
     report_bad(false, s);
     printf("expected failure, got 0x%04X\n", uc);

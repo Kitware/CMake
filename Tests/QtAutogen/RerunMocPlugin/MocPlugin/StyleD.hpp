@@ -12,7 +12,7 @@ class StyleD : public QStylePlugin
   Q_PLUGIN_METADATA(IID "org.styles.D" FILE "sub/StyleD.json")
   A_CUSTOM_MACRO(org.styles.D, "sub/StyleD_Custom.json", AnotherArg)
 public:
-  QStyle* create(const QString& key);
+  QStyle* create(QString const& key);
 };
 
 #endif

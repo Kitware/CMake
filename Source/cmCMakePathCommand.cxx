@@ -53,7 +53,7 @@ public:
       cmMakeRange(args).advance(Advance), &this->Inputs);
   }
 
-  const std::vector<std::string>& GetInputs() const { return this->Inputs; }
+  std::vector<std::string> const& GetInputs() const { return this->Inputs; }
 
 protected:
   mutable std::vector<std::string> Inputs;
@@ -108,7 +108,7 @@ public:
 };
 
 // retrieve value of input path from specified variable
-bool getInputPath(const std::string& arg, cmExecutionStatus& status,
+bool getInputPath(std::string const& arg, cmExecutionStatus& status,
                   std::string& path)
 {
   cmValue def = status.GetMakefile().GetDefinition(arg);
@@ -125,43 +125,43 @@ bool HandleGetCommand(std::vector<std::string> const& args,
                       cmExecutionStatus& status)
 {
   static std::map<cm::string_view,
-                  std::function<cmCMakePath(const cmCMakePath&, bool)>> const
+                  std::function<cmCMakePath(cmCMakePath const&, bool)>> const
     actions{ { "ROOT_NAME"_s,
-               [](const cmCMakePath& path, bool) -> cmCMakePath {
+               [](cmCMakePath const& path, bool) -> cmCMakePath {
                  return path.GetRootName();
                } },
              { "ROOT_DIRECTORY"_s,
-               [](const cmCMakePath& path, bool) -> cmCMakePath {
+               [](cmCMakePath const& path, bool) -> cmCMakePath {
                  return path.GetRootDirectory();
                } },
              { "ROOT_PATH"_s,
-               [](const cmCMakePath& path, bool) -> cmCMakePath {
+               [](cmCMakePath const& path, bool) -> cmCMakePath {
                  return path.GetRootPath();
                } },
              { "FILENAME"_s,
-               [](const cmCMakePath& path, bool) -> cmCMakePath {
+               [](cmCMakePath const& path, bool) -> cmCMakePath {
                  return path.GetFileName();
                } },
              { "EXTENSION"_s,
-               [](const cmCMakePath& path, bool last_only) -> cmCMakePath {
+               [](cmCMakePath const& path, bool last_only) -> cmCMakePath {
                  if (last_only) {
                    return path.GetExtension();
                  }
                  return path.GetWideExtension();
                } },
              { "STEM"_s,
-               [](const cmCMakePath& path, bool last_only) -> cmCMakePath {
+               [](cmCMakePath const& path, bool last_only) -> cmCMakePath {
                  if (last_only) {
                    return path.GetStem();
                  }
                  return path.GetNarrowStem();
                } },
              { "RELATIVE_PART"_s,
-               [](const cmCMakePath& path, bool) -> cmCMakePath {
+               [](cmCMakePath const& path, bool) -> cmCMakePath {
                  return path.GetRelativePath();
                } },
              { "PARENT_PATH"_s,
-               [](const cmCMakePath& path, bool) -> cmCMakePath {
+               [](cmCMakePath const& path, bool) -> cmCMakePath {
                  return path.GetParentPath();
                } } };
 
@@ -170,7 +170,7 @@ bool HandleGetCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const auto& action = args[2];
+  auto const& action = args[2];
 
   if (actions.find(action) == actions.end()) {
     status.SetError(
@@ -227,7 +227,7 @@ bool HandleSetCommand(std::vector<std::string> const& args,
 
   static NormalizeParser const parser;
 
-  const auto arguments = parser.Parse(args);
+  auto const arguments = parser.Parse(args);
 
   if (parser.GetInputs().size() != 1) {
     status.SetError("SET called with unexpected arguments.");
@@ -256,14 +256,14 @@ bool HandleAppendCommand(std::vector<std::string> const& args,
 
   static OutputVariableParser const parser{};
 
-  const auto arguments = parser.Parse(args);
+  auto const arguments = parser.Parse(args);
 
   if (arguments.MaybeReportError(status.GetMakefile())) {
     return true;
   }
 
   cmCMakePath path(status.GetMakefile().GetSafeDefinition(args[1]));
-  for (const auto& input : parser.GetInputs()) {
+  for (auto const& input : parser.GetInputs()) {
     path /= input;
   }
 
@@ -278,7 +278,7 @@ bool HandleAppendStringCommand(std::vector<std::string> const& args,
 {
   static OutputVariableParser const parser{};
 
-  const auto arguments = parser.Parse(args);
+  auto const arguments = parser.Parse(args);
 
   if (arguments.MaybeReportError(status.GetMakefile())) {
     return true;
@@ -290,7 +290,7 @@ bool HandleAppendStringCommand(std::vector<std::string> const& args,
   }
 
   cmCMakePath path(inputPath);
-  for (const auto& input : parser.GetInputs()) {
+  for (auto const& input : parser.GetInputs()) {
     path += input;
   }
 
@@ -305,7 +305,7 @@ bool HandleRemoveFilenameCommand(std::vector<std::string> const& args,
 {
   static OutputVariableParser const parser{};
 
-  const auto arguments = parser.Parse(args);
+  auto const arguments = parser.Parse(args);
 
   if (arguments.MaybeReportError(status.GetMakefile())) {
     return true;
@@ -335,7 +335,7 @@ bool HandleReplaceFilenameCommand(std::vector<std::string> const& args,
 {
   static OutputVariableParser const parser{};
 
-  const auto arguments = parser.Parse(args);
+  auto const arguments = parser.Parse(args);
 
   if (arguments.MaybeReportError(status.GetMakefile())) {
     return true;
@@ -454,7 +454,7 @@ bool HandleNormalPathCommand(std::vector<std::string> const& args,
 {
   static OutputVariableParser const parser{};
 
-  const auto arguments = parser.Parse(args);
+  auto const arguments = parser.Parse(args);
 
   if (arguments.MaybeReportError(status.GetMakefile())) {
     return true;
@@ -480,8 +480,8 @@ bool HandleNormalPathCommand(std::vector<std::string> const& args,
 
 bool HandleTransformPathCommand(
   std::vector<std::string> const& args, cmExecutionStatus& status,
-  const std::function<cmCMakePath(const cmCMakePath&,
-                                  const std::string& base)>& transform,
+  std::function<cmCMakePath(cmCMakePath const&,
+                            std::string const& base)> const& transform,
   bool normalizeOption = false)
 {
   struct Arguments : public ArgumentParser::ParseResult
@@ -536,7 +536,7 @@ bool HandleRelativePathCommand(std::vector<std::string> const& args,
 {
   return HandleTransformPathCommand(
     args, status,
-    [](const cmCMakePath& path, const std::string& base) -> cmCMakePath {
+    [](cmCMakePath const& path, std::string const& base) -> cmCMakePath {
       return path.Relative(base);
     });
 }
@@ -546,7 +546,7 @@ bool HandleAbsolutePathCommand(std::vector<std::string> const& args,
 {
   return HandleTransformPathCommand(
     args, status,
-    [](const cmCMakePath& path, const std::string& base) -> cmCMakePath {
+    [](cmCMakePath const& path, std::string const& base) -> cmCMakePath {
       return path.Absolute(base);
     },
     true);
@@ -562,7 +562,7 @@ bool HandleNativePathCommand(std::vector<std::string> const& args,
 
   static NormalizeParser const parser;
 
-  const auto arguments = parser.Parse(args);
+  auto const arguments = parser.Parse(args);
 
   if (parser.GetInputs().size() != 1) {
     status.SetError("NATIVE_PATH called with unexpected arguments.");
@@ -593,19 +593,19 @@ bool HandleConvertCommand(std::vector<std::string> const& args,
                           cmExecutionStatus& status)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  const auto pathSep = ";"_s;
+  auto const pathSep = ";"_s;
 #else
-  const auto pathSep = ":"_s;
+  auto const pathSep = ":"_s;
 #endif
-  const auto cmakePath = "TO_CMAKE_PATH_LIST"_s;
-  const auto nativePath = "TO_NATIVE_PATH_LIST"_s;
+  auto const cmakePath = "TO_CMAKE_PATH_LIST"_s;
+  auto const nativePath = "TO_NATIVE_PATH_LIST"_s;
 
   if (args.size() < 4 || args.size() > 5) {
     status.SetError("CONVERT must be called with three or four arguments.");
     return false;
   }
 
-  const auto& action = args[2];
+  auto const& action = args[2];
 
   if (action != cmakePath && action != nativePath) {
     status.SetError(
@@ -620,7 +620,7 @@ bool HandleConvertCommand(std::vector<std::string> const& args,
 
   static NormalizeParser const parser;
 
-  const auto arguments = parser.Parse<4>(args);
+  auto const arguments = parser.Parse<4>(args);
 
   if (!parser.GetInputs().empty()) {
     status.SetError("CONVERT called with unexpected arguments.");
@@ -664,19 +664,19 @@ bool HandleCompareCommand(std::vector<std::string> const& args,
   }
 
   static std::map<cm::string_view,
-                  std::function<bool(const cmCMakePath&,
-                                     const cmCMakePath&)>> const operators{
+                  std::function<bool(cmCMakePath const&,
+                                     cmCMakePath const&)>> const operators{
     { "EQUAL"_s,
-      [](const cmCMakePath& path1, const cmCMakePath& path2) -> bool {
+      [](cmCMakePath const& path1, cmCMakePath const& path2) -> bool {
         return path1 == path2;
       } },
     { "NOT_EQUAL"_s,
-      [](const cmCMakePath& path1, const cmCMakePath& path2) -> bool {
+      [](cmCMakePath const& path1, cmCMakePath const& path2) -> bool {
         return path1 != path2;
       } }
   };
 
-  const auto op = operators.find(args[2]);
+  auto const op = operators.find(args[2]);
   if (op == operators.end()) {
     status.SetError(cmStrCat(
       "COMPARE called with an unknown comparison operator: ", args[2], "."));
@@ -699,7 +699,7 @@ bool HandleCompareCommand(std::vector<std::string> const& args,
 
 bool HandleHasItemCommand(
   std::vector<std::string> const& args, cmExecutionStatus& status,
-  const std::function<bool(const cmCMakePath&)>& has_item)
+  std::function<bool(cmCMakePath const&)> const& has_item)
 {
   if (args.size() != 3) {
     status.SetError(
@@ -730,7 +730,7 @@ bool HandleHasRootNameCommand(std::vector<std::string> const& args,
 {
   return HandleHasItemCommand(
     args, status,
-    [](const cmCMakePath& path) -> bool { return path.HasRootName(); });
+    [](cmCMakePath const& path) -> bool { return path.HasRootName(); });
 }
 
 bool HandleHasRootDirectoryCommand(std::vector<std::string> const& args,
@@ -738,7 +738,7 @@ bool HandleHasRootDirectoryCommand(std::vector<std::string> const& args,
 {
   return HandleHasItemCommand(
     args, status,
-    [](const cmCMakePath& path) -> bool { return path.HasRootDirectory(); });
+    [](cmCMakePath const& path) -> bool { return path.HasRootDirectory(); });
 }
 
 bool HandleHasRootPathCommand(std::vector<std::string> const& args,
@@ -746,7 +746,7 @@ bool HandleHasRootPathCommand(std::vector<std::string> const& args,
 {
   return HandleHasItemCommand(
     args, status,
-    [](const cmCMakePath& path) -> bool { return path.HasRootPath(); });
+    [](cmCMakePath const& path) -> bool { return path.HasRootPath(); });
 }
 
 bool HandleHasFilenameCommand(std::vector<std::string> const& args,
@@ -754,7 +754,7 @@ bool HandleHasFilenameCommand(std::vector<std::string> const& args,
 {
   return HandleHasItemCommand(
     args, status,
-    [](const cmCMakePath& path) -> bool { return path.HasFileName(); });
+    [](cmCMakePath const& path) -> bool { return path.HasFileName(); });
 }
 
 bool HandleHasExtensionCommand(std::vector<std::string> const& args,
@@ -762,7 +762,7 @@ bool HandleHasExtensionCommand(std::vector<std::string> const& args,
 {
   return HandleHasItemCommand(
     args, status,
-    [](const cmCMakePath& path) -> bool { return path.HasExtension(); });
+    [](cmCMakePath const& path) -> bool { return path.HasExtension(); });
 }
 
 bool HandleHasStemCommand(std::vector<std::string> const& args,
@@ -770,7 +770,7 @@ bool HandleHasStemCommand(std::vector<std::string> const& args,
 {
   return HandleHasItemCommand(
     args, status,
-    [](const cmCMakePath& path) -> bool { return path.HasStem(); });
+    [](cmCMakePath const& path) -> bool { return path.HasStem(); });
 }
 
 bool HandleHasRelativePartCommand(std::vector<std::string> const& args,
@@ -778,7 +778,7 @@ bool HandleHasRelativePartCommand(std::vector<std::string> const& args,
 {
   return HandleHasItemCommand(
     args, status,
-    [](const cmCMakePath& path) -> bool { return path.HasRelativePath(); });
+    [](cmCMakePath const& path) -> bool { return path.HasRelativePath(); });
 }
 
 bool HandleHasParentPathCommand(std::vector<std::string> const& args,
@@ -786,7 +786,7 @@ bool HandleHasParentPathCommand(std::vector<std::string> const& args,
 {
   return HandleHasItemCommand(
     args, status,
-    [](const cmCMakePath& path) -> bool { return path.HasParentPath(); });
+    [](cmCMakePath const& path) -> bool { return path.HasParentPath(); });
 }
 
 bool HandleIsAbsoluteCommand(std::vector<std::string> const& args,
@@ -849,7 +849,7 @@ bool HandleIsPrefixCommand(std::vector<std::string> const& args,
 
   static NormalizeParser const parser;
 
-  const auto arguments = parser.Parse(args);
+  auto const arguments = parser.Parse(args);
 
   if (parser.GetInputs().size() != 2) {
     status.SetError("IS_PREFIX called with unexpected arguments.");
@@ -861,8 +861,8 @@ bool HandleIsPrefixCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const auto& input = parser.GetInputs().front();
-  const auto& output = parser.GetInputs().back();
+  auto const& input = parser.GetInputs().front();
+  auto const& output = parser.GetInputs().back();
 
   if (output.empty()) {
     status.SetError("Invalid name for output variable.");
@@ -895,7 +895,7 @@ bool HandleHashCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const auto& output = args[2];
+  auto const& output = args[2];
 
   if (output.empty()) {
     status.SetError("Invalid name for output variable.");

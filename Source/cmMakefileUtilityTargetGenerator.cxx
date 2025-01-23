@@ -37,7 +37,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
   *this->BuildFileStream << "# Utility rule file for "
                          << this->GeneratorTarget->GetName() << ".\n\n";
 
-  const char* root = (this->Makefile->IsOn("CMAKE_MAKE_INCLUDE_FROM_ROOT")
+  char const* root = (this->Makefile->IsOn("CMAKE_MAKE_INCLUDE_FROM_ROOT")
                         ? "$(CMAKE_BINARY_DIR)/"
                         : "");
 

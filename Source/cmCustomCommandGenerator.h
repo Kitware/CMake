@@ -20,8 +20,8 @@ class cmLocalGenerator;
 
 class cmCustomCommandGenerator
 {
-  std::string GetInternalDepfileName(const std::string&,
-                                     const std::string&) const;
+  std::string GetInternalDepfileName(std::string const&,
+                                     std::string const&) const;
 
   cmCustomCommand const* CC;
   std::string OutputConfig;
@@ -37,22 +37,22 @@ class cmCustomCommandGenerator
   std::vector<std::string> Depends;
   std::string WorkingDirectory;
   std::set<BT<std::pair<std::string, bool>>> Utilities;
-  std::function<std::string(const std::string&, const std::string&)>
+  std::function<std::string(std::string const&, std::string const&)>
     ComputeInternalDepfile;
 
   void FillEmulatorsWithArguments();
   std::vector<std::string> GetCrossCompilingEmulator(unsigned int c) const;
-  const char* GetArgv0Location(unsigned int c) const;
+  char const* GetArgv0Location(unsigned int c) const;
 
 public:
   cmCustomCommandGenerator(
     cmCustomCommand const& cc, std::string config, cmLocalGenerator* lg,
     bool transformDepfile = true, cm::optional<std::string> crossConfig = {},
-    std::function<std::string(const std::string&, const std::string&)>
+    std::function<std::string(std::string const&, std::string const&)>
       computeInternalDepfile = {});
-  cmCustomCommandGenerator(const cmCustomCommandGenerator&) = delete;
+  cmCustomCommandGenerator(cmCustomCommandGenerator const&) = delete;
   cmCustomCommandGenerator(cmCustomCommandGenerator&&) = default;
-  cmCustomCommandGenerator& operator=(const cmCustomCommandGenerator&) =
+  cmCustomCommandGenerator& operator=(cmCustomCommandGenerator const&) =
     delete;
   cmCustomCommandGenerator& operator=(cmCustomCommandGenerator&&) = default;
   cmCustomCommand const& GetCC() const { return *(this->CC); }
@@ -70,6 +70,6 @@ public:
   std::string GetFullDepfile() const;
   std::string GetInternalDepfile() const;
 
-  const std::string& GetOutputConfig() const { return this->OutputConfig; }
-  const std::string& GetCommandConfig() const { return this->CommandConfig; }
+  std::string const& GetOutputConfig() const { return this->OutputConfig; }
+  std::string const& GetCommandConfig() const { return this->CommandConfig; }
 };

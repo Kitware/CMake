@@ -16,8 +16,8 @@
 
 namespace GetPropertyCommand {
 bool GetSourceFilePropertyGENERATED(
-  const std::string& name, cmMakefile& mf,
-  const std::function<bool(bool)>& storeResult);
+  std::string const& name, cmMakefile& mf,
+  std::function<bool(bool)> const& storeResult);
 }
 
 bool cmGetSourceFilePropertyCommand(std::vector<std::string> const& args,

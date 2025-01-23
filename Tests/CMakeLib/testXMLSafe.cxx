@@ -12,8 +12,8 @@
 
 struct test_pair
 {
-  const char* in;
-  const char* out;
+  char const* in;
+  char const* out;
 };
 
 static test_pair const pairs[] = {

@@ -9,7 +9,7 @@ struct X
   int n;
 };
 
-constexpr int g(const int (&is)[4])
+constexpr int g(int const (&is)[4])
 {
   X x;
   int r = x.n;

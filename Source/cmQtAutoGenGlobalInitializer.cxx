@@ -44,7 +44,7 @@ cmQtAutoGenGlobalInitializer::Keywords::Keywords()
 cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
   std::vector<std::unique_ptr<cmLocalGenerator>> const& localGenerators)
 {
-  for (const auto& localGen : localGenerators) {
+  for (auto const& localGen : localGenerators) {
     // Detect global autogen and autorcc target names
     bool globalAutoGenTarget = false;
     bool globalAutoRccTarget = false;
@@ -76,7 +76,7 @@ cmQtAutoGenGlobalInitializer::cmQtAutoGenGlobalInitializer(
     }
 
     // Find targets that require AUTOMOC/UIC/RCC processing
-    for (const auto& target : localGen->GetGeneratorTargets()) {
+    for (auto const& target : localGen->GetGeneratorTargets()) {
       // Process only certain target types
       switch (target->GetType()) {
         case cmStateEnums::EXECUTABLE:
@@ -249,7 +249,7 @@ cmQtAutoGenGlobalInitializer::GetCompilerFeatures(
         command.emplace_back(exe);
         command.emplace_back("-h");
         int retVal = 0;
-        const bool runResult = cmSystemTools::RunSingleCommand(
+        bool const runResult = cmSystemTools::RunSingleCommand(
           command, &stdOut, &stdErr, &retVal, nullptr,
           cmSystemTools::OUTPUT_NONE, cmDuration::zero(),
           cmProcessOutput::Auto);
@@ -300,7 +300,7 @@ cmQtAutoGenGlobalInitializer::GetCompilerFeatures(
     command.emplace_back(executable.Default);
     command.emplace_back("-h");
     int retVal = 0;
-    const bool runResult = cmSystemTools::RunSingleCommand(
+    bool const runResult = cmSystemTools::RunSingleCommand(
       command, &stdOut, &stdErr, &retVal, nullptr, cmSystemTools::OUTPUT_NONE,
       cmDuration::zero(), cmProcessOutput::Auto);
     if (!runResult) {

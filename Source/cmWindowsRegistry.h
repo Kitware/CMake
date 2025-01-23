@@ -42,12 +42,12 @@ public:
   using ValueTypeSet = cm::enum_set<ValueType>;
 
   // All types as defined by enum ValueType
-  static const ValueTypeSet AllTypes;
+  static ValueTypeSet const AllTypes;
   // same as AllTypes but without type REG_MULTI_SZ
-  static const ValueTypeSet SimpleTypes;
+  static ValueTypeSet const SimpleTypes;
 
   cmWindowsRegistry(cmMakefile&,
-                    const ValueTypeSet& supportedTypes = AllTypes);
+                    ValueTypeSet const& supportedTypes = AllTypes);
 
   // Helper routine to convert string to enum value
   static cm::optional<View> ToView(cm::string_view name);

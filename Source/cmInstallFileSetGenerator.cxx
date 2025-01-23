@@ -55,7 +55,7 @@ std::string cmInstallFileSetGenerator::GetDestination(
 }
 
 void cmInstallFileSetGenerator::GenerateScriptForConfig(
-  std::ostream& os, const std::string& config, Indent indent)
+  std::ostream& os, std::string const& config, Indent indent)
 {
   for (auto const& dirEntry : this->CalculateFilesPerDir(config)) {
     std::string destSub;
@@ -71,7 +71,7 @@ void cmInstallFileSetGenerator::GenerateScriptForConfig(
 
 std::map<std::string, std::vector<std::string>>
 cmInstallFileSetGenerator::CalculateFilesPerDir(
-  const std::string& config) const
+  std::string const& config) const
 {
   std::map<std::string, std::vector<std::string>> result;
 

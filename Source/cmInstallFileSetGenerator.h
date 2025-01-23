@@ -35,7 +35,7 @@ public:
   cmGeneratorTarget* GetTarget() const { return this->Target; }
 
 protected:
-  void GenerateScriptForConfig(std::ostream& os, const std::string& config,
+  void GenerateScriptForConfig(std::ostream& os, std::string const& config,
                                Indent indent) override;
 
 private:
@@ -47,5 +47,5 @@ private:
   cmGeneratorTarget* Target;
 
   std::map<std::string, std::vector<std::string>> CalculateFilesPerDir(
-    const std::string& config) const;
+    std::string const& config) const;
 };

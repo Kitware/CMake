@@ -10,7 +10,7 @@
 
 struct cmGeneratorExpressionToken
 {
-  cmGeneratorExpressionToken(unsigned type, const char* c, size_t l)
+  cmGeneratorExpressionToken(unsigned type, char const* c, size_t l)
     : TokenType(type)
     , Content(c)
     , Length(l)
@@ -25,7 +25,7 @@ struct cmGeneratorExpressionToken
     CommaSeparator
   };
   unsigned TokenType;
-  const char* Content;
+  char const* Content;
   size_t Length;
 };
 
@@ -37,7 +37,7 @@ class cmGeneratorExpressionLexer
 public:
   cmGeneratorExpressionLexer();
 
-  std::vector<cmGeneratorExpressionToken> Tokenize(const std::string& input);
+  std::vector<cmGeneratorExpressionToken> Tokenize(std::string const& input);
 
   bool GetSawGeneratorExpression() const
   {

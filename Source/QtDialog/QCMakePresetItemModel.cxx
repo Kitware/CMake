@@ -10,7 +10,7 @@ QCMakePresetItemModel::QCMakePresetItemModel(QObject* parent)
 {
 }
 
-QVariant QCMakePresetItemModel::data(const QModelIndex& index, int role) const
+QVariant QCMakePresetItemModel::data(QModelIndex const& index, int role) const
 {
   switch (role) {
     case Qt::AccessibleDescriptionRole:
@@ -62,7 +62,7 @@ QVariant QCMakePresetItemModel::data(const QModelIndex& index, int role) const
   }
 }
 
-Qt::ItemFlags QCMakePresetItemModel::flags(const QModelIndex& index) const
+Qt::ItemFlags QCMakePresetItemModel::flags(QModelIndex const& index) const
 {
   Qt::ItemFlags flags =
     Qt::ItemIsEditable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled;
@@ -75,7 +75,7 @@ Qt::ItemFlags QCMakePresetItemModel::flags(const QModelIndex& index) const
   return flags;
 }
 
-int QCMakePresetItemModel::rowCount(const QModelIndex& parent) const
+int QCMakePresetItemModel::rowCount(QModelIndex const& parent) const
 {
   if (parent.isValid()) {
     return 0;
@@ -86,7 +86,7 @@ int QCMakePresetItemModel::rowCount(const QModelIndex& parent) const
   return this->m_presets.size() + 2;
 }
 
-int QCMakePresetItemModel::columnCount(const QModelIndex& parent) const
+int QCMakePresetItemModel::columnCount(QModelIndex const& parent) const
 {
   if (parent.isValid()) {
     return 0;
@@ -95,7 +95,7 @@ int QCMakePresetItemModel::columnCount(const QModelIndex& parent) const
 }
 
 QModelIndex QCMakePresetItemModel::index(int row, int column,
-                                         const QModelIndex& parent) const
+                                         QModelIndex const& parent) const
 {
   if (parent.isValid() || column != 0 || row < 0 ||
       row >= this->rowCount(QModelIndex{})) {
@@ -113,7 +113,7 @@ QModelIndex QCMakePresetItemModel::index(int row, int column,
   return this->createIndex(row, column, static_cast<quintptr>(row));
 }
 
-QModelIndex QCMakePresetItemModel::parent(const QModelIndex& /*index*/) const
+QModelIndex QCMakePresetItemModel::parent(QModelIndex const& /*index*/) const
 {
   return QModelIndex{};
 }
@@ -130,7 +130,7 @@ void QCMakePresetItemModel::setPresets(QVector<QCMakePreset> const& presets)
   this->endResetModel();
 }
 
-int QCMakePresetItemModel::presetNameToRow(const QString& name) const
+int QCMakePresetItemModel::presetNameToRow(QString const& name) const
 {
   if (this->m_presets.empty()) {
     return 0;

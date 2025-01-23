@@ -1,5 +1,5 @@
 #include "pcShared.h"
-const char* pcShared(void)
+char const* pcShared(void)
 {
   return "INFO:symbol[pcShared]";
 }

@@ -39,7 +39,7 @@ enum ProcessingState
   ProcessingKeywordPrivateInterface
 };
 
-const char* LinkLibraryTypeNames[3] = { "general", "debug", "optimized" };
+char const* LinkLibraryTypeNames[3] = { "general", "debug", "optimized" };
 
 struct TLL
 {
@@ -55,7 +55,7 @@ struct TLL
   ~TLL();
 
   bool HandleLibrary(ProcessingState currentProcessingState,
-                     const std::string& lib, cmTargetLinkLibraryType llt);
+                     std::string const& lib, cmTargetLinkLibraryType llt);
   void AppendProperty(std::string const& prop, std::string const& value);
   void AffectsProperty(std::string const& prop);
 };
@@ -85,7 +85,7 @@ bool cmTargetLinkLibrariesCommand(std::vector<std::string> const& args,
   // Lookup the target for which libraries are specified.
   cmTarget* target = mf.GetGlobalGenerator()->FindTarget(args[0]);
   if (!target) {
-    for (const auto& importedTarget : mf.GetOwnedImportedTargets()) {
+    for (auto const& importedTarget : mf.GetOwnedImportedTargets()) {
       if (importedTarget->GetName() == args[0] &&
           !importedTarget->IsForeign()) {
         target = importedTarget.get();
@@ -350,7 +350,7 @@ TLL::TLL(cmMakefile& mf, cmTarget* target)
 }
 
 bool TLL::HandleLibrary(ProcessingState currentProcessingState,
-                        const std::string& lib, cmTargetLinkLibraryType llt)
+                        std::string const& lib, cmTargetLinkLibraryType llt)
 {
   if (this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY &&
       currentProcessingState != ProcessingKeywordLinkInterface) {
@@ -382,7 +382,7 @@ bool TLL::HandleLibrary(ProcessingState currentProcessingState,
     std::ostringstream e;
     // If the sig is a keyword form and there is a conflict, the existing
     // form must be the plain form.
-    const char* existingSig =
+    char const* existingSig =
       (sig == cmTarget::KeywordTLLSignature ? "plain" : "keyword");
     e << "The " << existingSig
       << " signature for target_link_libraries has "

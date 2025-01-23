@@ -24,8 +24,8 @@ public:
   cmInstallRuntimeDependencySetGenerator(
     DependencyType type, cmInstallRuntimeDependencySet* dependencySet,
     std::vector<std::string> installRPaths, bool noInstallRPath,
-    std::string installNameDir, bool noInstallName, const char* depsVar,
-    const char* rpathPrefix, const char* tmpVarPrefix, std::string destination,
+    std::string installNameDir, bool noInstallName, char const* depsVar,
+    char const* rpathPrefix, char const* tmpVarPrefix, std::string destination,
     std::vector<std::string> const& configurations, std::string component,
     std::string permissions, MessageLevel message, bool exclude_from_all,
     cmListFileBacktrace backtrace);
@@ -42,7 +42,7 @@ public:
   std::string GetDestination(std::string const& config) const;
 
 protected:
-  void GenerateScriptForConfig(std::ostream& os, const std::string& config,
+  void GenerateScriptForConfig(std::ostream& os, std::string const& config,
                                Indent indent) override;
 
 private:
@@ -53,21 +53,21 @@ private:
   std::string InstallNameDir;
   bool NoInstallName;
   std::string Permissions;
-  const char* DepsVar;
-  const char* RPathPrefix;
-  const char* TmpVarPrefix;
+  char const* DepsVar;
+  char const* RPathPrefix;
+  char const* TmpVarPrefix;
   cmLocalGenerator* LocalGenerator = nullptr;
 
   void GenerateAppleLibraryScript(
-    std::ostream& os, const std::string& config,
-    const std::vector<std::string>& evaluatedRPaths, Indent indent);
+    std::ostream& os, std::string const& config,
+    std::vector<std::string> const& evaluatedRPaths, Indent indent);
   void GenerateAppleFrameworkScript(
-    std::ostream& os, const std::string& config,
-    const std::vector<std::string>& evaluatedRPaths, Indent indent);
+    std::ostream& os, std::string const& config,
+    std::vector<std::string> const& evaluatedRPaths, Indent indent);
   void GenerateInstallNameFixup(
-    std::ostream& os, const std::string& config,
-    const std::vector<std::string>& evaluatedRPaths,
-    const std::string& filename, const std::string& depName, Indent indent);
-  void GenerateStripFixup(std::ostream& os, const std::string& config,
-                          const std::string& depName, Indent indent);
+    std::ostream& os, std::string const& config,
+    std::vector<std::string> const& evaluatedRPaths,
+    std::string const& filename, std::string const& depName, Indent indent);
+  void GenerateStripFixup(std::ostream& os, std::string const& config,
+                          std::string const& depName, Indent indent);
 };

@@ -25,10 +25,10 @@ struct cmVariableWatchCallbackData
   std::string Command;
 };
 
-void cmVariableWatchCommandVariableAccessed(const std::string& variable,
+void cmVariableWatchCommandVariableAccessed(std::string const& variable,
                                             int access_type, void* client_data,
-                                            const char* newValue,
-                                            const cmMakefile* mf)
+                                            char const* newValue,
+                                            cmMakefile const* mf)
 {
   cmVariableWatchCallbackData* data =
     static_cast<cmVariableWatchCallbackData*>(client_data);
@@ -47,7 +47,7 @@ void cmVariableWatchCommandVariableAccessed(const std::string& variable,
   if (!data->Command.empty()) {
     cmValue const currentListFile =
       mf->GetDefinition("CMAKE_CURRENT_LIST_FILE");
-    const auto fakeLineNo =
+    auto const fakeLineNo =
       std::numeric_limits<decltype(cmListFileArgument::Line)>::max();
 
     std::vector<cmListFileArgument> newLFFArgs{
@@ -95,7 +95,7 @@ public:
   {
   }
 
-  void operator()(cmLocalGenerator&, const cmListFileBacktrace&) const {}
+  void operator()(cmLocalGenerator&, cmListFileBacktrace const&) const {}
 
 private:
   struct Impl

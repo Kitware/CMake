@@ -30,7 +30,7 @@ public:
   };
 
   /** Construct with the name of the XCOFF input file to parse.  */
-  cmXCOFF(const char* fname, Mode = Mode::ReadOnly);
+  cmXCOFF(char const* fname, Mode = Mode::ReadOnly);
 
   /** Destruct.   */
   ~cmXCOFF();

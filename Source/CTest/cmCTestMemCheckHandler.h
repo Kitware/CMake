@@ -109,7 +109,7 @@ private:
   bool LogWithPID = false; // does log file add pid
   int DefectCount = 0;
 
-  std::vector<int>::size_type FindOrAddWarning(const std::string& warning);
+  std::vector<int>::size_type FindOrAddWarning(std::string const& warning);
   // initialize the ResultStrings and ResultStringsLong for
   // this type of checker
   void InitializeResultsVectors();
@@ -128,19 +128,19 @@ private:
   //! Parse Valgrind/Purify/Bounds Checker result out of the output
   // string. After running, log holds the output and results hold the
   // different memory errors.
-  bool ProcessMemCheckOutput(const std::string& str, std::string& log,
+  bool ProcessMemCheckOutput(std::string const& str, std::string& log,
                              std::vector<int>& results);
-  bool ProcessMemCheckValgrindOutput(const std::string& str, std::string& log,
+  bool ProcessMemCheckValgrindOutput(std::string const& str, std::string& log,
                                      std::vector<int>& results);
-  bool ProcessMemCheckDrMemoryOutput(const std::string& str, std::string& log,
+  bool ProcessMemCheckDrMemoryOutput(std::string const& str, std::string& log,
                                      std::vector<int>& results);
-  bool ProcessMemCheckPurifyOutput(const std::string& str, std::string& log,
+  bool ProcessMemCheckPurifyOutput(std::string const& str, std::string& log,
                                    std::vector<int>& results);
-  bool ProcessMemCheckCudaOutput(const std::string& str, std::string& log,
+  bool ProcessMemCheckCudaOutput(std::string const& str, std::string& log,
                                  std::vector<int>& results);
-  bool ProcessMemCheckSanitizerOutput(const std::string& str, std::string& log,
+  bool ProcessMemCheckSanitizerOutput(std::string const& str, std::string& log,
                                       std::vector<int>& results);
-  bool ProcessMemCheckBoundsCheckerOutput(const std::string& str,
+  bool ProcessMemCheckBoundsCheckerOutput(std::string const& str,
                                           std::string& log,
                                           std::vector<int>& results);
 

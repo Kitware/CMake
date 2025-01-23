@@ -18,7 +18,7 @@ cmScriptGenerator::cmScriptGenerator(std::string config_var,
 cmScriptGenerator::~cmScriptGenerator() = default;
 
 void cmScriptGenerator::Generate(
-  std::ostream& os, const std::string& config,
+  std::ostream& os, std::string const& config,
   std::vector<std::string> const& configurationTypes)
 {
   this->ConfigurationName = config;
@@ -28,10 +28,10 @@ void cmScriptGenerator::Generate(
   this->ConfigurationTypes = nullptr;
 }
 
-static void cmScriptGeneratorEncodeConfig(const std::string& config,
+static void cmScriptGeneratorEncodeConfig(std::string const& config,
                                           std::string& result)
 {
-  for (const char* c = config.c_str(); *c; ++c) {
+  for (char const* c = config.c_str(); *c; ++c) {
     if (*c >= 'a' && *c <= 'z') {
       result += "[";
       result += static_cast<char>(*c + 'A' - 'a');
@@ -48,7 +48,7 @@ static void cmScriptGeneratorEncodeConfig(const std::string& config,
   }
 }
 
-std::string cmScriptGenerator::CreateConfigTest(const std::string& config)
+std::string cmScriptGenerator::CreateConfigTest(std::string const& config)
 {
   std::string result = cmStrCat(this->RuntimeConfigVariable, " MATCHES \"^(");
   if (!config.empty()) {
@@ -62,7 +62,7 @@ std::string cmScriptGenerator::CreateConfigTest(
   std::vector<std::string> const& configs)
 {
   std::string result = cmStrCat(this->RuntimeConfigVariable, " MATCHES \"^(");
-  const char* sep = "";
+  char const* sep = "";
   for (std::string const& config : configs) {
     result += sep;
     sep = "|";
@@ -100,13 +100,13 @@ void cmScriptGenerator::GenerateScriptActions(std::ostream& os, Indent indent)
 }
 
 void cmScriptGenerator::GenerateScriptForConfig(std::ostream& /*unused*/,
-                                                const std::string& /*unused*/,
+                                                std::string const& /*unused*/,
                                                 Indent /*unused*/)
 {
   // No actions for this generator.
 }
 
-bool cmScriptGenerator::GeneratesForConfig(const std::string& config)
+bool cmScriptGenerator::GeneratesForConfig(std::string const& config)
 {
   // If this is not a configuration-specific rule then we install.
   if (this->Configurations.empty()) {

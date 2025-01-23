@@ -28,7 +28,7 @@ public:
   void SetDefinition(std::string const& name, cm::string_view value);
   void RemoveDefinition(std::string const& name);
   std::vector<std::string> ClosureKeys() const;
-  bool RaiseScope(std::string const& var, const char* varDef);
+  bool RaiseScope(std::string const& var, char const* varDef);
 
   void SetListFile(std::string const& listfile);
 
@@ -61,18 +61,18 @@ public:
 
   struct StrictWeakOrder
   {
-    bool operator()(const cmStateSnapshot& lhs,
-                    const cmStateSnapshot& rhs) const;
+    bool operator()(cmStateSnapshot const& lhs,
+                    cmStateSnapshot const& rhs) const;
   };
 
   void SetDirectoryDefinitions();
   void SetDefaultDefinitions();
 
 private:
-  friend bool operator==(const cmStateSnapshot& lhs,
-                         const cmStateSnapshot& rhs);
-  friend bool operator!=(const cmStateSnapshot& lhs,
-                         const cmStateSnapshot& rhs);
+  friend bool operator==(cmStateSnapshot const& lhs,
+                         cmStateSnapshot const& rhs);
+  friend bool operator!=(cmStateSnapshot const& lhs,
+                         cmStateSnapshot const& rhs);
   friend class cmState;
   friend class cmStateDirectory;
   friend struct StrictWeakOrder;
@@ -83,5 +83,5 @@ private:
   cmStateDetail::PositionType Position;
 };
 
-bool operator==(const cmStateSnapshot& lhs, const cmStateSnapshot& rhs);
-bool operator!=(const cmStateSnapshot& lhs, const cmStateSnapshot& rhs);
+bool operator==(cmStateSnapshot const& lhs, cmStateSnapshot const& rhs);
+bool operator!=(cmStateSnapshot const& lhs, cmStateSnapshot const& rhs);

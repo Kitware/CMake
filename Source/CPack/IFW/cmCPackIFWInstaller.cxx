@@ -23,7 +23,7 @@
 cmCPackIFWInstaller::cmCPackIFWInstaller() = default;
 
 void cmCPackIFWInstaller::printSkippedOptionWarning(
-  const std::string& optionName, const std::string& optionValue)
+  std::string const& optionName, std::string const& optionValue)
 {
   cmCPackIFWLogger(
     WARNING,
@@ -293,7 +293,7 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
         this->GetOption("CPACK_IFW_PACKAGE_RESOURCES")) {
     this->Resources.clear();
     cmExpandList(optIFW_PACKAGE_RESOURCES, this->Resources);
-    for (const auto& file : this->Resources) {
+    for (auto const& file : this->Resources) {
       if (!cmSystemTools::FileExists(file)) {
         // The warning will say skipped, but there will later be a hard error
         // when the binarycreator tool tries to read the missing file.
@@ -308,7 +308,7 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
     this->ProductImages.clear();
     cmExpandList(productImages, this->ProductImages);
 
-    auto erase_missing_file_pred = [this](const std::string& file) -> bool {
+    auto erase_missing_file_pred = [this](std::string const& file) -> bool {
       if (!cmSystemTools::FileExists(file)) {
         this->printSkippedOptionWarning("CPACK_IFW_PACKAGE_PRODUCT_IMAGES",
                                         file);
@@ -396,7 +396,7 @@ public:
   std::string path, basePath;
 
 protected:
-  void StartElement(const std::string& name, const char** /*atts*/) override
+  void StartElement(std::string const& name, char const** /*atts*/) override
   {
     this->file = name == "file";
     if (this->file) {
@@ -404,7 +404,7 @@ protected:
     }
   }
 
-  void CharacterDataHandler(const char* data, int length) override
+  void CharacterDataHandler(char const* data, int length) override
   {
     if (this->file) {
       std::string content(data, data + length);
@@ -417,7 +417,7 @@ protected:
     }
   }
 
-  void EndElement(const std::string& /*name*/) override {}
+  void EndElement(std::string const& /*name*/) override {}
 };
 
 void cmCPackIFWInstaller::GenerateInstallerFile()
@@ -621,7 +621,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
     // RunProgramArguments
     if (!this->RunProgramArguments.empty()) {
       xout.StartElement("RunProgramArguments");
-      for (const auto& arg : this->RunProgramArguments) {
+      for (auto const& arg : this->RunProgramArguments) {
         xout.Element("Argument", arg);
       }
       xout.EndElement();
@@ -640,7 +640,7 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   // Product images (copy to config dir)
   if (!this->IsVersionLess("4.0") && !this->ProductImages.empty()) {
     xout.StartElement("ProductImages");
-    const bool hasProductImageUrl = !this->ProductImageUrls.empty();
+    bool const hasProductImageUrl = !this->ProductImageUrls.empty();
     for (size_t i = 0; i < this->ProductImages.size(); ++i) {
       xout.StartElement("ProductImage");
       auto const& srcImg = this->ProductImages[i];

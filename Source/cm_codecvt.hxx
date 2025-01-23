@@ -19,8 +19,8 @@ public:
 protected:
   ~codecvt() override;
   bool do_always_noconv() const noexcept override;
-  result do_out(mbstate_t& state, const char* from, const char* from_end,
-                const char*& from_next, char* to, char* to_end,
+  result do_out(mbstate_t& state, char const* from, char const* from_end,
+                char const*& from_next, char* to, char* to_end,
                 char*& to_next) const override;
   result do_unshift(mbstate_t& state, char* to, char*,
                     char*& to_next) const override;
@@ -48,10 +48,10 @@ private:
   bool m_noconv;
 #  if defined(_WIN32)
   unsigned int m_codepage;
-  result Decode(mbstate_t& state, int need, const char*& from_next,
+  result Decode(mbstate_t& state, int need, char const*& from_next,
                 char*& to_next, char* to_end) const;
   result DecodePartial(mbstate_t& state, char*& to_next, char* to_end) const;
-  void BufferPartial(mbstate_t& state, int need, const char*& from_next) const;
+  void BufferPartial(mbstate_t& state, int need, char const*& from_next) const;
 #  endif
 
 #endif

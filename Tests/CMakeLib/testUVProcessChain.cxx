@@ -28,7 +28,7 @@ struct ExpectedStatus
   std::string ExceptionString;
 };
 
-static const char* ExceptionCodeToString(cmUVProcessChain::ExceptionCode code)
+static char const* ExceptionCodeToString(cmUVProcessChain::ExceptionCode code)
 {
   switch (code) {
     case cmUVProcessChain::ExceptionCode::None:
@@ -50,8 +50,8 @@ static const char* ExceptionCodeToString(cmUVProcessChain::ExceptionCode code)
   }
 }
 
-bool operator==(const cmUVProcessChain::Status* actual,
-                const ExpectedStatus& expected)
+bool operator==(cmUVProcessChain::Status const* actual,
+                ExpectedStatus const& expected)
 {
   if (expected.Status.SpawnResult != actual->SpawnResult) {
     return false;
@@ -76,8 +76,8 @@ bool operator==(const cmUVProcessChain::Status* actual,
 }
 
 static bool resultsMatch(
-  const std::vector<const cmUVProcessChain::Status*>& actual,
-  const std::vector<ExpectedStatus>& expected)
+  std::vector<cmUVProcessChain::Status const*> const& actual,
+  std::vector<ExpectedStatus> const& expected)
 {
   return actual.size() == expected.size() &&
     std::equal(actual.begin(), actual.end(), expected.begin());
@@ -96,7 +96,7 @@ static std::string getInput(std::istream& input)
 
 template <typename T>
 std::function<std::ostream&(std::ostream&)> printExpected(bool match,
-                                                          const T& value)
+                                                          T const& value)
 {
   return [match, value](std::ostream& stream) -> std::ostream& {
     if (match) {
@@ -110,14 +110,14 @@ std::function<std::ostream&(std::ostream&)> printExpected(bool match,
 
 std::ostream& operator<<(
   std::ostream& stream,
-  const std::function<std::ostream&(std::ostream&)>& func)
+  std::function<std::ostream&(std::ostream&)> const& func)
 {
   return func(stream);
 }
 
 static void printResults(
-  const std::vector<const cmUVProcessChain::Status*>& actual,
-  const std::vector<ExpectedStatus>& expected)
+  std::vector<cmUVProcessChain::Status const*> const& actual,
+  std::vector<ExpectedStatus> const& expected)
 {
   std::cout << "Expected: " << std::endl;
   for (auto const& e : expected) {
@@ -149,7 +149,7 @@ static void printResults(
 static bool checkExecution(cmUVProcessChainBuilder& builder,
                            std::unique_ptr<cmUVProcessChain>& chain)
 {
-  static const std::vector<ExpectedStatus> status1 = {
+  static std::vector<ExpectedStatus> const status1 = {
     { false,
       false,
       { 0, false, 0, 0 },
@@ -167,7 +167,7 @@ static bool checkExecution(cmUVProcessChainBuilder& builder,
       "" },
   };
 
-  static const std::vector<ExpectedStatus> status2 = {
+  static std::vector<ExpectedStatus> const status2 = {
     { true,
       true,
       { 0, true, 0, 0 },
@@ -185,7 +185,7 @@ static bool checkExecution(cmUVProcessChainBuilder& builder,
       "" },
   };
 
-  static const std::vector<ExpectedStatus> status3 = {
+  static std::vector<ExpectedStatus> const status3 = {
     { true,
       true,
       { 0, true, 0, 0 },
@@ -211,7 +211,7 @@ static bool checkExecution(cmUVProcessChainBuilder& builder,
 #endif
   };
 
-  std::vector<const cmUVProcessChain::Status*> status;
+  std::vector<cmUVProcessChain::Status const*> status;
 
   chain = cm::make_unique<cmUVProcessChain>(builder.Start());
   if (!chain->Valid()) {
@@ -287,7 +287,7 @@ static bool checkOutput(std::istream& outputStream, std::istream& errorStream)
   return true;
 }
 
-bool testUVProcessChainBuiltin(const char* helperCommand)
+bool testUVProcessChainBuiltin(char const* helperCommand)
 {
   cmUVProcessChainBuilder builder;
   std::unique_ptr<cmUVProcessChain> chain;
@@ -325,7 +325,7 @@ bool testUVProcessChainBuiltin(const char* helperCommand)
   return true;
 }
 
-bool testUVProcessChainBuiltinMerged(const char* helperCommand)
+bool testUVProcessChainBuiltinMerged(char const* helperCommand)
 {
   cmUVProcessChainBuilder builder;
   std::unique_ptr<cmUVProcessChain> chain;
@@ -382,7 +382,7 @@ bool testUVProcessChainBuiltinMerged(const char* helperCommand)
   return true;
 }
 
-bool testUVProcessChainExternal(const char* helperCommand)
+bool testUVProcessChainExternal(char const* helperCommand)
 {
   cmUVProcessChainBuilder builder;
   std::unique_ptr<cmUVProcessChain> chain;
@@ -448,7 +448,7 @@ bool testUVProcessChainExternal(const char* helperCommand)
   return true;
 }
 
-bool testUVProcessChainNone(const char* helperCommand)
+bool testUVProcessChainNone(char const* helperCommand)
 {
   cmUVProcessChainBuilder builder;
   std::unique_ptr<cmUVProcessChain> chain;
@@ -472,7 +472,7 @@ bool testUVProcessChainNone(const char* helperCommand)
   return true;
 }
 
-bool testUVProcessChainCwdUnchanged(const char* helperCommand)
+bool testUVProcessChainCwdUnchanged(char const* helperCommand)
 {
   cmUVProcessChainBuilder builder;
   builder.AddCommand({ helperCommand, "pwd" })
@@ -498,7 +498,7 @@ bool testUVProcessChainCwdUnchanged(const char* helperCommand)
   return true;
 }
 
-bool testUVProcessChainCwdChanged(const char* helperCommand)
+bool testUVProcessChainCwdChanged(char const* helperCommand)
 {
   cmUVProcessChainBuilder builder;
   builder.AddCommand({ helperCommand, "pwd" })
@@ -525,9 +525,9 @@ bool testUVProcessChainCwdChanged(const char* helperCommand)
   return true;
 }
 
-bool testUVProcessChainSpawnFail(const char* helperCommand)
+bool testUVProcessChainSpawnFail(char const* helperCommand)
 {
-  static const std::vector<ExpectedStatus> status1 = {
+  static std::vector<ExpectedStatus> const status1 = {
     { false,
       false,
       { 0, false, 0, 0 },
@@ -553,7 +553,7 @@ bool testUVProcessChainSpawnFail(const char* helperCommand)
 #endif
   };
 
-  static const std::vector<ExpectedStatus> status2 = {
+  static std::vector<ExpectedStatus> const status2 = {
 #ifdef _WIN32
     { true,
       true,
@@ -587,7 +587,7 @@ bool testUVProcessChainSpawnFail(const char* helperCommand)
 #endif
   };
 
-  std::vector<const cmUVProcessChain::Status*> status;
+  std::vector<cmUVProcessChain::Status const*> status;
 
   cmUVProcessChainBuilder builder;
   builder.AddCommand({ helperCommand, "echo" })
@@ -632,7 +632,7 @@ bool testUVProcessChainSpawnFail(const char* helperCommand)
   return true;
 }
 
-bool testUVProcessChainInputFile(const char* helperCommand)
+bool testUVProcessChainInputFile(char const* helperCommand)
 {
   std::unique_ptr<FILE, int (*)(FILE*)> f(
     fopen("testUVProcessChainInput.txt", "rb"), fclose);
@@ -660,7 +660,7 @@ bool testUVProcessChainInputFile(const char* helperCommand)
   return true;
 }
 
-bool testUVProcessChainWait0(const char* helperCommand)
+bool testUVProcessChainWait0(char const* helperCommand)
 {
   cmUVProcessChainBuilder builder;
   builder.AddCommand({ helperCommand, "echo" });
@@ -674,7 +674,7 @@ bool testUVProcessChainWait0(const char* helperCommand)
   return true;
 }
 
-bool testUVProcessChainExternalLoop(const char* helperCommand)
+bool testUVProcessChainExternalLoop(char const* helperCommand)
 {
   cm::uv_loop_ptr loop;
   loop.init();

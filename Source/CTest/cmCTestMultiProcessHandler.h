@@ -90,7 +90,7 @@ public:
     this->RepeatCount = count;
   }
 
-  void SetResourceSpecFile(const std::string& resourceSpecFile)
+  void SetResourceSpecFile(std::string const& resourceSpecFile)
   {
     this->ResourceSpecFile = resourceSpecFile;
   }

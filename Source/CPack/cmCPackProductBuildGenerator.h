@@ -30,21 +30,21 @@ public:
 protected:
   int InitializeInternal() override;
   int PackageFiles() override;
-  const char* GetOutputExtension() override { return ".pkg"; }
+  char const* GetOutputExtension() override { return ".pkg"; }
 
   // Run ProductBuild with the given command line, which will (if
   // successful) produce the given package file. Returns true if
   // ProductBuild succeeds, false otherwise.
-  bool RunProductBuild(const std::string& command);
+  bool RunProductBuild(std::string const& command);
 
   // Generate a package in the file packageFile for the given
   // component.  All of the files within this component are stored in
   // the directory packageDir. Returns true if successful, false
   // otherwise.
-  bool GenerateComponentPackage(const std::string& packageFileDir,
-                                const std::string& packageFileName,
-                                const std::string& packageDir,
-                                const cmCPackComponent* component);
+  bool GenerateComponentPackage(std::string const& packageFileDir,
+                                std::string const& packageFileName,
+                                std::string const& packageDir,
+                                cmCPackComponent const* component);
 
-  cmValue GetComponentScript(const char* script, const char* script_component);
+  cmValue GetComponentScript(char const* script, char const* script_component);
 };

@@ -51,7 +51,7 @@ public:
   }
 
 protected:
-  cmGlobalVisualStudio8Generator(cmake* cm, const std::string& name);
+  cmGlobalVisualStudio8Generator(cmake* cm, std::string const& name);
 
   virtual bool ProcessGeneratorPlatformField(std::string const& key,
                                              std::string const& value);
@@ -66,7 +66,7 @@ protected:
 
   /** Return true if the configuration needs to be deployed */
   virtual bool NeedsDeploy(cmGeneratorTarget const& target,
-                           const char* config) const;
+                           char const* config) const;
 
   /** Returns true if the target system support debugging deployment. */
   virtual bool TargetSystemSupportsDeployment() const;
@@ -75,14 +75,14 @@ protected:
   void WriteSolutionConfigurations(
     std::ostream& fout, std::vector<std::string> const& configs) override;
   void WriteProjectConfigurations(
-    std::ostream& fout, const std::string& name,
+    std::ostream& fout, std::string const& name,
     cmGeneratorTarget const& target, std::vector<std::string> const& configs,
-    const std::set<std::string>& configsPartOfDefaultBuild,
-    const std::string& platformMapping = "") override;
+    std::set<std::string> const& configsPartOfDefaultBuild,
+    std::string const& platformMapping = "") override;
   bool ComputeTargetDepends() override;
-  void WriteProjectDepends(std::ostream& fout, const std::string& name,
-                           const std::string& path,
-                           const cmGeneratorTarget* t) override;
+  void WriteProjectDepends(std::ostream& fout, std::string const& name,
+                           std::string const& path,
+                           cmGeneratorTarget const* t) override;
 
   bool UseFolderProperty() const override;
 

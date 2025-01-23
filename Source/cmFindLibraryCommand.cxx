@@ -79,7 +79,7 @@ bool cmFindLibraryCommand::InitialPass(std::vector<std::string> const& argsIn)
   return true;
 }
 
-void cmFindLibraryCommand::AddArchitecturePaths(const char* suffix)
+void cmFindLibraryCommand::AddArchitecturePaths(char const* suffix)
 {
   std::vector<std::string> original;
   original.swap(this->SearchPaths);
@@ -108,7 +108,7 @@ static bool cmLibDirsLinked(std::string const& l, std::string const& r)
 }
 
 void cmFindLibraryCommand::AddArchitecturePath(
-  std::string const& dir, std::string::size_type start_pos, const char* suffix,
+  std::string const& dir, std::string::size_type start_pos, char const* suffix,
   bool fresh)
 {
   std::string::size_type pos = dir.find("lib/", start_pos);
@@ -246,7 +246,7 @@ struct cmFindLibraryHelper
   bool CheckDirectory(std::string const& path);
   bool CheckDirectoryForName(std::string const& path, Name& name);
 
-  bool Validate(const std::string& path) const
+  bool Validate(std::string const& path) const
   {
     return this->FindBase->Validate(path);
   }
@@ -258,9 +258,9 @@ struct cmFindLibraryHelper
     if (this->DebugMode) {
       // To improve readability of the debug output, if there is only one
       // prefix/suffix, use the plain prefix/suffix instead of the regex.
-      const auto& prefix = (this->Prefixes.size() == 1) ? this->Prefixes[0]
+      auto const& prefix = (this->Prefixes.size() == 1) ? this->Prefixes[0]
                                                         : this->PrefixRegexStr;
-      const auto& suffix = (this->Suffixes.size() == 1) ? this->Suffixes[0]
+      auto const& suffix = (this->Suffixes.size() == 1) ? this->Suffixes[0]
                                                         : this->SuffixRegexStr;
 
       auto regexName = cmStrCat(prefix, name, suffix);
@@ -359,7 +359,7 @@ void cmFindLibraryHelper::RegexFromList(std::string& out, cmList const& in,
   // Surround the list in parens so the '|' does not apply to anything
   // else and the result can be checked after matching.
   out += "(";
-  const char* sep = "";
+  char const* sep = "";
   for (auto const& s : in) {
     // Separate from previous item.
     out += sep;

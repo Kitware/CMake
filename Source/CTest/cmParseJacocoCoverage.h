@@ -35,7 +35,7 @@ private:
   // remove files with no coverage
   void RemoveUnCoveredFiles();
   // Read a single mcov file
-  bool ReadJacocoXML(const char* f);
+  bool ReadJacocoXML(char const* f);
   // split a string based on ,
   bool SplitString(std::vector<std::string>& args, std::string const& line);
   bool FindJavaFile(std::string const& routine, std::string& filepath);

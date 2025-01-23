@@ -30,7 +30,7 @@ public:
   cmUVProcessChainBuilder();
 
   cmUVProcessChainBuilder& AddCommand(
-    const std::vector<std::string>& arguments);
+    std::vector<std::string> const& arguments);
   cmUVProcessChainBuilder& SetBuiltinLoop();
   cmUVProcessChainBuilder& SetExternalLoop(uv_loop_t& loop);
   cmUVProcessChainBuilder& SetNoStream(Stream stdio);
@@ -96,12 +96,12 @@ public:
     std::pair<ExceptionCode, std::string> GetException() const;
   };
 
-  cmUVProcessChain(const cmUVProcessChain& other) = delete;
+  cmUVProcessChain(cmUVProcessChain const& other) = delete;
   cmUVProcessChain(cmUVProcessChain&& other) noexcept;
 
   ~cmUVProcessChain();
 
-  cmUVProcessChain& operator=(const cmUVProcessChain& other) = delete;
+  cmUVProcessChain& operator=(cmUVProcessChain const& other) = delete;
   cmUVProcessChain& operator=(cmUVProcessChain&& other) noexcept;
 
   uv_loop_t& GetLoop();
@@ -112,8 +112,8 @@ public:
 
   bool Valid() const;
   bool Wait(uint64_t milliseconds = 0);
-  std::vector<const Status*> GetStatus() const;
-  const Status& GetStatus(std::size_t index) const;
+  std::vector<Status const*> GetStatus() const;
+  Status const& GetStatus(std::size_t index) const;
   bool Finished() const;
 
 private:

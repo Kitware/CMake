@@ -23,18 +23,18 @@ public:
   cmCPackGeneratorFactory();
 
   //! Get the generator
-  std::unique_ptr<cmCPackGenerator> NewGenerator(const std::string& name);
+  std::unique_ptr<cmCPackGenerator> NewGenerator(std::string const& name);
 
   using CreateGeneratorCall = cmCPackGenerator*();
 
-  void RegisterGenerator(const std::string& name,
-                         const char* generatorDescription,
+  void RegisterGenerator(std::string const& name,
+                         char const* generatorDescription,
                          CreateGeneratorCall* createGenerator);
 
   void SetLogger(cmCPackLog* logger) { this->Logger = logger; }
 
   using DescriptionsMap = std::map<std::string, std::string>;
-  const DescriptionsMap& GetGeneratorsList() const
+  DescriptionsMap const& GetGeneratorsList() const
   {
     return this->GeneratorDescriptions;
   }

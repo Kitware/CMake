@@ -128,7 +128,7 @@ cmDebuggerAdapter::cmDebuggerAdapter(
 
   // Handle errors reported by the Session. These errors include protocol
   // parsing errors and receiving messages with no handler.
-  Session->onError([this](const char* msg) {
+  Session->onError([this](char const* msg) {
     if (SessionLog) {
       dap::writef(SessionLog, "dap::Session error: %s\n", msg);
     }
@@ -144,7 +144,7 @@ cmDebuggerAdapter::cmDebuggerAdapter(
   });
 
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_Initialize
-  Session->registerHandler([this](const dap::CMakeInitializeRequest& req) {
+  Session->registerHandler([this](dap::CMakeInitializeRequest const& req) {
     SupportsVariableType = req.supportsVariableType.value(false);
     dap::CMakeInitializeResponse response;
     response.supportsConfigurationDoneRequest = true;
@@ -159,12 +159,12 @@ cmDebuggerAdapter::cmDebuggerAdapter(
 
   // https://microsoft.github.io/debug-adapter-protocol/specification#Events_Initialized
   Session->registerSentHandler(
-    [&](const dap::ResponseOrError<dap::CMakeInitializeResponse>&) {
+    [&](dap::ResponseOrError<dap::CMakeInitializeResponse> const&) {
       Session->send(dap::InitializedEvent());
     });
 
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_Threads
-  Session->registerHandler([this](const dap::ThreadsRequest& req) {
+  Session->registerHandler([this](dap::ThreadsRequest const& req) {
     (void)req;
     std::unique_lock<std::mutex> lock(Mutex);
     dap::ThreadsResponse response;
@@ -182,7 +182,7 @@ cmDebuggerAdapter::cmDebuggerAdapter(
   });
 
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_StackTrace
-  Session->registerHandler([this](const dap::StackTraceRequest& request)
+  Session->registerHandler([this](dap::StackTraceRequest const& request)
                              -> dap::ResponseOrError<dap::StackTraceResponse> {
     std::unique_lock<std::mutex> lock(Mutex);
 
@@ -196,7 +196,7 @@ cmDebuggerAdapter::cmDebuggerAdapter(
   });
 
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_Scopes
-  Session->registerHandler([this](const dap::ScopesRequest& request)
+  Session->registerHandler([this](dap::ScopesRequest const& request)
                              -> dap::ResponseOrError<dap::ScopesResponse> {
     std::unique_lock<std::mutex> lock(Mutex);
     return DefaultThread->GetScopesResponse(request.frameId,
@@ -204,27 +204,27 @@ cmDebuggerAdapter::cmDebuggerAdapter(
   });
 
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_Variables
-  Session->registerHandler([this](const dap::VariablesRequest& request)
+  Session->registerHandler([this](dap::VariablesRequest const& request)
                              -> dap::ResponseOrError<dap::VariablesResponse> {
     return DefaultThread->GetVariablesResponse(request);
   });
 
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_Pause
-  Session->registerHandler([this](const dap::PauseRequest& req) {
+  Session->registerHandler([this](dap::PauseRequest const& req) {
     (void)req;
     PauseRequest.store(true);
     return dap::PauseResponse();
   });
 
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_Continue
-  Session->registerHandler([this](const dap::ContinueRequest& req) {
+  Session->registerHandler([this](dap::ContinueRequest const& req) {
     (void)req;
     ContinueSem->Notify();
     return dap::ContinueResponse();
   });
 
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_Next
-  Session->registerHandler([this](const dap::NextRequest& req) {
+  Session->registerHandler([this](dap::NextRequest const& req) {
     (void)req;
     NextStepFrom.store(DefaultThread->GetStackFrameSize());
     ContinueSem->Notify();
@@ -232,7 +232,7 @@ cmDebuggerAdapter::cmDebuggerAdapter(
   });
 
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_StepIn
-  Session->registerHandler([this](const dap::StepInRequest& req) {
+  Session->registerHandler([this](dap::StepInRequest const& req) {
     (void)req;
     // This would stop after stepped in, single line stepped or stepped out.
     StepInRequest.store(true);
@@ -241,7 +241,7 @@ cmDebuggerAdapter::cmDebuggerAdapter(
   });
 
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_StepOut
-  Session->registerHandler([this](const dap::StepOutRequest& req) {
+  Session->registerHandler([this](dap::StepOutRequest const& req) {
     (void)req;
     StepOutDepth.store(DefaultThread->GetStackFrameSize() - 1);
     ContinueSem->Notify();
@@ -249,13 +249,13 @@ cmDebuggerAdapter::cmDebuggerAdapter(
   });
 
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_Launch
-  Session->registerHandler([](const dap::LaunchRequest& req) {
+  Session->registerHandler([](dap::LaunchRequest const& req) {
     (void)req;
     return dap::LaunchResponse();
   });
 
   // Handler for disconnect requests
-  Session->registerHandler([this](const dap::DisconnectRequest& request) {
+  Session->registerHandler([this](dap::DisconnectRequest const& request) {
     (void)request;
     BreakpointManager->ClearAll();
     ExceptionManager->ClearAll();
@@ -266,7 +266,7 @@ cmDebuggerAdapter::cmDebuggerAdapter(
     return dap::DisconnectResponse();
   });
 
-  Session->registerHandler([this](const dap::EvaluateRequest& request) {
+  Session->registerHandler([this](dap::EvaluateRequest const& request) {
     dap::EvaluateResponse response;
     if (request.frameId.has_value()) {
       std::shared_ptr<cmDebuggerStackFrame> frame =
@@ -286,7 +286,7 @@ cmDebuggerAdapter::cmDebuggerAdapter(
   // The ConfigurationDone request is made by the client once all configuration
   // requests have been made.
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_ConfigurationDone
-  Session->registerHandler([this](const dap::ConfigurationDoneRequest& req) {
+  Session->registerHandler([this](dap::ConfigurationDoneRequest const& req) {
     (void)req;
     ConfigurationDoneEvent->Fire();
     return dap::ConfigurationDoneResponse();
@@ -397,7 +397,7 @@ void cmDebuggerAdapter::OnBeginFunctionCall(cmMakefile* mf,
     dap::array<dap::integer> hitBreakpoints;
     hitBreakpoints.resize(hits.size());
     std::transform(hits.begin(), hits.end(), hitBreakpoints.begin(),
-                   [&](const int64_t& id) { return dap::integer(id); });
+                   [&](int64_t const& id) { return dap::integer(id); });
     stoppedEvent.reason = "breakpoint";
     stoppedEvent.hitBreakpointIds = hitBreakpoints;
   }

@@ -29,30 +29,30 @@ public:
   void Generate() override;
 
 private:
-  void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);
+  void CreateProjectFile(std::vector<cmLocalGenerator*> const& lgs);
 
-  void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,
-                            const std::string& filename);
+  void CreateNewProjectFile(std::vector<cmLocalGenerator*> const& lgs,
+                            std::string const& filename);
 
   /** Appends all targets as build systems to the project file and get all
    * include directories and compiler definitions used.
    */
-  void AppendAllTargets(const std::vector<cmLocalGenerator*>& lgs,
-                        const cmMakefile* mf, cmGeneratedFileStream& fout,
+  void AppendAllTargets(std::vector<cmLocalGenerator*> const& lgs,
+                        cmMakefile const* mf, cmGeneratedFileStream& fout,
                         MapSourceFileFlags& sourceFileFlags);
   /** Returns the build command that needs to be executed to build the
    *  specified target.
    */
-  std::string BuildMakeCommand(const std::string& make,
-                               const std::string& makefile,
-                               const std::string& target);
+  std::string BuildMakeCommand(std::string const& make,
+                               std::string const& makefile,
+                               std::string const& target);
   /** Appends the specified target to the generated project file as a Sublime
    *  Text build system.
    */
-  void AppendTarget(cmGeneratedFileStream& fout, const std::string& targetName,
+  void AppendTarget(cmGeneratedFileStream& fout, std::string const& targetName,
                     cmLocalGenerator* lg, cmGeneratorTarget* target,
-                    const char* make, const cmMakefile* makefile,
-                    const char* compiler, MapSourceFileFlags& sourceFileFlags,
+                    char const* make, cmMakefile const* makefile,
+                    char const* compiler, MapSourceFileFlags& sourceFileFlags,
                     bool firstTarget);
   /**
    * Compute the flags for compilation of object files for a given @a language.
@@ -68,7 +68,7 @@ private:
   std::string ComputeIncludes(cmSourceFile* source, cmLocalGenerator* lg,
                               cmGeneratorTarget* gtgt);
 
-  bool Open(const std::string& bindir, const std::string& projectName,
+  bool Open(std::string const& bindir, std::string const& projectName,
             bool dryRun) override;
 
   bool ExcludeBuildFolder;

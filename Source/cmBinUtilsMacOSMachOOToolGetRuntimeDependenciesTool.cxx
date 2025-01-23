@@ -43,12 +43,12 @@ bool cmBinUtilsMacOSMachOOToolGetRuntimeDependenciesTool::GetFileInfo(
   }
 
   std::string line;
-  static const cmsys::RegularExpression rpathRegex("^ *cmd LC_RPATH$");
-  static const cmsys::RegularExpression loadDylibRegex(
+  static cmsys::RegularExpression const rpathRegex("^ *cmd LC_RPATH$");
+  static cmsys::RegularExpression const loadDylibRegex(
     "^ *cmd LC_LOAD(_WEAK)?_DYLIB$");
-  static const cmsys::RegularExpression pathRegex(
+  static cmsys::RegularExpression const pathRegex(
     "^ *path (.*) \\(offset [0-9]+\\)$");
-  static const cmsys::RegularExpression nameRegex(
+  static cmsys::RegularExpression const nameRegex(
     "^ *name (.*) \\(offset [0-9]+\\)$");
   cmUVPipeIStream output(process.GetLoop(), process.OutputStream());
   while (std::getline(output, line)) {

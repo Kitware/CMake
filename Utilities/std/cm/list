@@ -22,7 +22,7 @@ using std::erase_if;
 #else
 
 template <typename T, typename Allocator, typename V>
-inline void erase(std::list<T, Allocator>& cont, const V& value)
+inline void erase(std::list<T, Allocator>& cont, V const& value)
 {
   cont.remove_if([&](auto& elem) { return elem == value; });
 }

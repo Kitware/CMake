@@ -23,8 +23,8 @@ public:
     std::string Id;
     unsigned int Capacity;
 
-    bool operator==(const Resource& other) const;
-    bool operator!=(const Resource& other) const;
+    bool operator==(Resource const& other) const;
+    bool operator!=(Resource const& other) const;
   };
 
   class Socket
@@ -32,49 +32,49 @@ public:
   public:
     std::map<std::string, std::vector<Resource>> Resources;
 
-    bool operator==(const Socket& other) const;
-    bool operator!=(const Socket& other) const;
+    bool operator==(Socket const& other) const;
+    bool operator!=(Socket const& other) const;
   };
 
   Socket LocalSocket;
   cmJSONState parseState;
 
-  bool ReadFromJSONFile(const std::string& filename);
+  bool ReadFromJSONFile(std::string const& filename);
 
-  bool operator==(const cmCTestResourceSpec& other) const;
-  bool operator!=(const cmCTestResourceSpec& other) const;
+  bool operator==(cmCTestResourceSpec const& other) const;
+  bool operator!=(cmCTestResourceSpec const& other) const;
 };
 
 namespace cmCTestResourceSpecErrors {
-const auto FILE_NOT_FOUND = [](const Json::Value*, cmJSONState* state) {
+auto const FILE_NOT_FOUND = [](Json::Value const*, cmJSONState* state) {
   state->AddError("File not found");
 };
-const auto JSON_PARSE_ERROR = [](const Json::Value* value,
+auto const JSON_PARSE_ERROR = [](Json::Value const* value,
                                  cmJSONState* state) {
   state->AddErrorAtValue("JSON parse error", value);
 };
-const auto INVALID_ROOT = [](const Json::Value* value, cmJSONState* state) {
+auto const INVALID_ROOT = [](Json::Value const* value, cmJSONState* state) {
   state->AddErrorAtValue("Invalid root object", value);
 };
-const auto NO_VERSION = [](const Json::Value* value, cmJSONState* state) {
+auto const NO_VERSION = [](Json::Value const* value, cmJSONState* state) {
   state->AddErrorAtValue("No version specified", value);
 };
-const auto INVALID_VERSION = [](const Json::Value* value, cmJSONState* state) {
+auto const INVALID_VERSION = [](Json::Value const* value, cmJSONState* state) {
   state->AddErrorAtValue("Invalid version object", value);
 };
-const auto UNSUPPORTED_VERSION = [](const Json::Value* value,
+auto const UNSUPPORTED_VERSION = [](Json::Value const* value,
                                     cmJSONState* state) {
   state->AddErrorAtValue("Unsupported version", value);
 };
-const auto INVALID_SOCKET_SPEC = [](const Json::Value* value,
+auto const INVALID_SOCKET_SPEC = [](Json::Value const* value,
                                     cmJSONState* state) {
   state->AddErrorAtValue("Invalid socket object", value);
 };
-const auto INVALID_RESOURCE_TYPE = [](const Json::Value* value,
+auto const INVALID_RESOURCE_TYPE = [](Json::Value const* value,
                                       cmJSONState* state) {
   state->AddErrorAtValue("Invalid resource type object", value);
 };
-const auto INVALID_RESOURCE = [](const Json::Value* value,
+auto const INVALID_RESOURCE = [](Json::Value const* value,
                                  cmJSONState* state) {
   state->AddErrorAtValue("Invalid resource object", value);
 };

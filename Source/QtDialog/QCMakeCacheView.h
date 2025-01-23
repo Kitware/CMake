@@ -30,7 +30,7 @@ public:
 
   // set the search filter string.  any property key or value not matching will
   // be filtered out
-  bool setSearchFilter(const QString&);
+  bool setSearchFilter(QString const&);
 
 public slots:
   // set whether to show advanced entries
@@ -74,7 +74,7 @@ public slots:
   // to prefix.  Any property that existed already and which is found in this
   // list of properties to set will become an old property.  All others will
   // become new properties and be marked red.
-  void setProperties(const QCMakePropertyList& props);
+  void setProperties(QCMakePropertyList const& props);
 
   // set whether to show new properties in red
   void setShowNewProperties(bool);
@@ -87,8 +87,8 @@ public slots:
 
   // insert a new property at a row specifying all the information about the
   // property
-  bool insertProperty(QCMakeProperty::PropertyType t, const QString& name,
-                      const QString& description, const QVariant& value,
+  bool insertProperty(QCMakeProperty::PropertyType t, QString const& name,
+                      QString const& description, QVariant const& value,
                       bool advanced);
 
 public:
@@ -102,11 +102,11 @@ public:
   int newPropertyCount() const;
 
   // return flags (overloaded to modify flag based on EditEnabled flag)
-  Qt::ItemFlags flags(const QModelIndex& index) const;
-  QModelIndex buddy(const QModelIndex& idx) const;
+  Qt::ItemFlags flags(QModelIndex const& index) const;
+  QModelIndex buddy(QModelIndex const& idx) const;
 
   // get the data in the model for this property
-  void getPropertyData(const QModelIndex& idx1, QCMakeProperty& prop) const;
+  void getPropertyData(QModelIndex const& idx1, QCMakeProperty& prop) const;
 
   // set the view type
   void setViewType(ViewType t);
@@ -119,16 +119,16 @@ protected:
   ViewType View;
 
   // set the data in the model for this property
-  void setPropertyData(const QModelIndex& idx1, const QCMakeProperty& p,
+  void setPropertyData(QModelIndex const& idx1, QCMakeProperty const& p,
                        bool isNew);
 
   // breaks up he property list into groups
   // where each group has the same prefix up to the first underscore
-  static void breakProperties(const QSet<QCMakeProperty>& props,
+  static void breakProperties(QSet<QCMakeProperty> const& props,
                               QMap<QString, QCMakePropertyList>& result);
 
   // gets the prefix of a string up to the first _
-  static QString prefix(const QString& s);
+  static QString prefix(QString const& s);
 };
 
 /// Qt delegate class for interaction (or other customization)
@@ -139,16 +139,16 @@ class QCMakeCacheModelDelegate : public QItemDelegate
 public:
   QCMakeCacheModelDelegate(QObject* p);
   /// create our own editors for cache properties
-  QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option,
-                        const QModelIndex& index) const;
+  QWidget* createEditor(QWidget* parent, QStyleOptionViewItem const& option,
+                        QModelIndex const& index) const;
   bool editorEvent(QEvent* event, QAbstractItemModel* model,
-                   const QStyleOptionViewItem& option,
-                   const QModelIndex& index);
+                   QStyleOptionViewItem const& option,
+                   QModelIndex const& index);
   bool eventFilter(QObject* object, QEvent* event);
   void setModelData(QWidget* editor, QAbstractItemModel* model,
-                    const QModelIndex& index) const;
-  QSize sizeHint(const QStyleOptionViewItem& option,
-                 const QModelIndex& index) const;
+                    QModelIndex const& index) const;
+  QSize sizeHint(QStyleOptionViewItem const& option,
+                 QModelIndex const& index) const;
 
   QSet<QCMakeProperty> changes() const;
   void clearChanges();
@@ -160,7 +160,7 @@ protected:
   bool FileDialogFlag;
   // record a change to an item in the model.
   // this simply saves the item in the set of changes
-  void recordChange(QAbstractItemModel* model, const QModelIndex& index);
+  void recordChange(QAbstractItemModel* model, QModelIndex const& index);
 
   // properties changed by user via this delegate
   QSet<QCMakeProperty> mChanges;

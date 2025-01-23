@@ -46,7 +46,7 @@ std::string ValueToString(std::size_t const value)
   return std::to_string(value);
 }
 
-std::string ValueToString(const char* const value)
+std::string ValueToString(char const* const value)
 {
   return value ? value : std::string{};
 }
@@ -266,13 +266,13 @@ std::map<std::string, std::string> GetOSReleaseVariables(
   cmExecutionStatus& status)
 {
   auto& makefile = status.GetMakefile();
-  const auto& sysroot = makefile.GetSafeDefinition("CMAKE_SYSROOT");
+  auto const& sysroot = makefile.GetSafeDefinition("CMAKE_SYSROOT");
 
   std::map<std::string, std::string> data;
   // Based on
   // https://www.freedesktop.org/software/systemd/man/latest/os-release.html
   for (auto name : { "/etc/os-release"_s, "/usr/lib/os-release"_s }) {
-    const auto& filename = cmStrCat(sysroot, name);
+    auto const& filename = cmStrCat(sysroot, name);
     if (cmSystemTools::FileExists(filename)) {
       cmsys::ifstream fin(filename.c_str());
       for (std::string line; !std::getline(fin, line).fail();) {
@@ -381,21 +381,21 @@ cm::optional<std::string> GetDistribValue(cmExecutionStatus& status,
                                           std::string const& key,
                                           std::string const& variable)
 {
-  const auto prefix = "DISTRIB_"_s;
+  auto const prefix = "DISTRIB_"_s;
   if (!cmHasPrefix(key, prefix)) {
     return {};
   }
 
-  static const std::map<std::string, std::string> s_os_release =
+  static std::map<std::string, std::string> const s_os_release =
     GetOSReleaseVariables(status);
 
   auto& makefile = status.GetMakefile();
 
-  const std::string subkey =
+  std::string const subkey =
     key.substr(prefix.size(), key.size() - prefix.size());
   if (subkey == "INFO"_s) {
     std::string vars;
-    for (const auto& kv : s_os_release) {
+    for (auto const& kv : s_os_release) {
       auto cmake_var_name = cmStrCat(variable, '_', kv.first);
       vars += DELIM[!vars.empty()] + cmake_var_name;
       makefile.AddDefinition(cmake_var_name, kv.second);
@@ -404,7 +404,7 @@ cm::optional<std::string> GetDistribValue(cmExecutionStatus& status,
   }
 
   // Query individual variable
-  const auto it = s_os_release.find(subkey);
+  auto const it = s_os_release.find(subkey);
   if (it != s_os_release.cend()) {
     return it->second;
   }

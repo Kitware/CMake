@@ -73,14 +73,14 @@ Json::Value Toolchains::DumpToolchains()
 
 Json::Value Toolchains::DumpToolchain(std::string const& lang)
 {
-  static const std::vector<ToolchainVariable> CompilerVariables{
+  static std::vector<ToolchainVariable> const CompilerVariables{
     { "path", "COMPILER", false },
     { "id", "COMPILER_ID", false },
     { "version", "COMPILER_VERSION", false },
     { "target", "COMPILER_TARGET", false },
   };
 
-  static const std::vector<ToolchainVariable> CompilerImplicitVariables{
+  static std::vector<ToolchainVariable> const CompilerImplicitVariables{
     { "includeDirectories", "IMPLICIT_INCLUDE_DIRECTORIES", true },
     { "linkDirectories", "IMPLICIT_LINK_DIRECTORIES", true },
     { "linkFrameworkDirectories", "IMPLICIT_LINK_FRAMEWORK_DIRECTORIES",
@@ -88,11 +88,11 @@ Json::Value Toolchains::DumpToolchain(std::string const& lang)
     { "linkLibraries", "IMPLICIT_LINK_LIBRARIES", true },
   };
 
-  static const ToolchainVariable SourceFileExtensionsVariable{
+  static ToolchainVariable const SourceFileExtensionsVariable{
     "sourceFileExtensions", "SOURCE_FILE_EXTENSIONS", true
   };
 
-  const auto& mf =
+  auto const& mf =
     this->FileAPI.GetCMakeInstance()->GetGlobalGenerator()->GetMakefiles()[0];
   Json::Value toolchain = Json::objectValue;
   toolchain["language"] = lang;
@@ -110,7 +110,7 @@ Json::Value Toolchains::DumpToolchainVariables(
   std::vector<ToolchainVariable> const& variables)
 {
   Json::Value object = Json::objectValue;
-  for (const auto& variable : variables) {
+  for (auto const& variable : variables) {
     this->DumpToolchainVariable(mf, object, lang, variable);
   }
   return object;

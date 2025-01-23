@@ -41,13 +41,13 @@ public:
   /** Callback from build system after a .mod file has been generated
       by a Fortran90 compiler to copy the .mod file to the
       corresponding stamp file.  */
-  static bool CopyModule(const std::vector<std::string>& args);
+  static bool CopyModule(std::vector<std::string> const& args);
 
   /** Determine if a mod file and the corresponding mod.stamp file
       are representing  different module information. */
-  static bool ModulesDiffer(const std::string& modFile,
-                            const std::string& stampFile,
-                            const std::string& compilerId);
+  static bool ModulesDiffer(std::string const& modFile,
+                            std::string const& stampFile,
+                            std::string const& compilerId);
 
 protected:
   // Finalize the dependency information for the target.
@@ -57,13 +57,13 @@ protected:
   // Find all the modules required by the target.
   bool LocateModules();
   void MatchLocalModules();
-  void MatchRemoteModules(std::istream& fin, const std::string& stampDir);
-  void ConsiderModule(const std::string& name, const std::string& stampDir);
+  void MatchRemoteModules(std::istream& fin, std::string const& stampDir);
+  void ConsiderModule(std::string const& name, std::string const& stampDir);
   bool FindModule(std::string const& name, std::string& module);
 
   // Implement writing/checking methods required by superclass.
-  bool WriteDependencies(const std::set<std::string>& sources,
-                         const std::string& file, std::ostream& makeDepends,
+  bool WriteDependencies(std::set<std::string> const& sources,
+                         std::string const& file, std::ostream& makeDepends,
                          std::ostream& internalDepends) override;
 
   // Actually write the dependencies to the streams.

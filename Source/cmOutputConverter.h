@@ -54,7 +54,7 @@ public:
   std::string ConvertDirectorySeparatorsForShell(cm::string_view source) const;
 
   //! for existing files convert to output path and short path if spaces
-  std::string ConvertToOutputForExisting(const std::string& remote,
+  std::string ConvertToOutputForExisting(std::string const& remote,
                                          OutputFormat format = SHELL,
                                          bool useWatcomQuote = false) const;
 

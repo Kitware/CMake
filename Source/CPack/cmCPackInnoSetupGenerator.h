@@ -37,7 +37,7 @@ protected:
   int InitializeInternal() override;
   int PackageFiles() override;
 
-  inline const char* GetOutputExtension() override { return ".exe"; }
+  inline char const* GetOutputExtension() override { return ".exe"; }
 
   inline cmCPackGenerator::CPackSetDestdirSupport SupportsSetDestdir()
     const override
@@ -63,22 +63,22 @@ private:
   bool Compile();
 
   bool BuildDownloadedComponentArchive(cmCPackComponent* component,
-                                       const std::string& uploadDirectory,
+                                       std::string const& uploadDirectory,
                                        std::string* hash);
 
   /**
    * Returns the option's value or an empty string if the option isn't set.
    */
-  cmValue RequireOption(const std::string& key);
+  cmValue RequireOption(std::string const& key);
 
   std::string CustomComponentInstallDirectory(
-    const cmCPackComponent* component);
+    cmCPackComponent const* component);
 
   /**
    * Translates boolean expressions into "yes" or "no", as required in
    * Inno Setup (only if "CPACK_INNOSETUP_USE_CMAKE_BOOL_FORMAT" is on).
    */
-  std::string TranslateBool(const std::string& value);
+  std::string TranslateBool(std::string const& value);
 
   /**
    * Creates a typical line of key and value pairs using the given map.
@@ -86,10 +86,10 @@ private:
    * (e.g.: Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}";
    * GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked)
    */
-  std::string ISKeyValueLine(const cmCPackInnoSetupKeyValuePairs& params);
+  std::string ISKeyValueLine(cmCPackInnoSetupKeyValuePairs const& params);
 
   std::string CreateRecursiveComponentPath(cmCPackComponentGroup* group,
-                                           const std::string& path = "");
+                                           std::string const& path = "");
 
   void CreateRecursiveComponentGroups(cmCPackComponentGroup* group);
 
@@ -97,8 +97,8 @@ private:
    * These functions add quotes if the given value hasn't already quotes.
    * Paths are converted into the format used by Windows before.
    */
-  std::string Quote(const std::string& string);
-  std::string QuotePath(const std::string& path,
+  std::string Quote(std::string const& string);
+  std::string QuotePath(std::string const& path,
                         PathType type = PathType::Windows);
 
   /**
@@ -106,7 +106,7 @@ private:
    * '|'  '}'  ','  '%'  '"'
    * Required for Inno Setup constants like {cm:...}
    */
-  std::string PrepareForConstant(const std::string& string);
+  std::string PrepareForConstant(std::string const& string);
 
   std::vector<std::string> includeDirectives;
   cmCPackInnoSetupKeyValuePairs setupDirectives;

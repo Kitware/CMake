@@ -97,8 +97,8 @@ void processLinkDirectories(cmGeneratorTarget const* tgt,
 }
 
 void cmGeneratorTarget::GetLinkDirectories(std::vector<std::string>& result,
-                                           const std::string& config,
-                                           const std::string& language) const
+                                           std::string const& config,
+                                           std::string const& language) const
 {
   std::vector<BT<std::string>> tmp =
     this->GetLinkDirectories(config, language);

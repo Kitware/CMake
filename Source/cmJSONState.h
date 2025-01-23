@@ -24,17 +24,17 @@ class cmJSONState
   };
 
 public:
-  using JsonPair = std::pair<const std::string, const Json::Value*>;
+  using JsonPair = std::pair<std::string const, Json::Value const*>;
   cmJSONState() = default;
-  cmJSONState(const std::string& filename, Json::Value* root);
+  cmJSONState(std::string const& filename, Json::Value* root);
   void AddError(std::string const& errMsg);
-  void AddErrorAtValue(std::string const& errMsg, const Json::Value* value);
+  void AddErrorAtValue(std::string const& errMsg, Json::Value const* value);
   void AddErrorAtOffset(std::string const& errMsg, std::ptrdiff_t offset);
   std::string GetErrorMessage(bool showContext = true);
   std::string key();
   std::string key_after(std::string const& key);
-  const Json::Value* value_after(std::string const& key);
-  void push_stack(std::string const& key, const Json::Value* value);
+  Json::Value const* value_after(std::string const& key);
+  void push_stack(std::string const& key, Json::Value const* value);
   void pop_stack();
 
   class Error

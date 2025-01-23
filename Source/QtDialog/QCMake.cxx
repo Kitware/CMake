@@ -38,7 +38,7 @@ QCMake::QCMake(QObject* p)
   cmSystemTools::SetRunCommandHideConsole(true);
 
   cmSystemTools::SetMessageCallback(
-    [this](std::string const& msg, const cmMessageMetadata& md) {
+    [this](std::string const& msg, cmMessageMetadata const& md) {
       this->messageCallback(msg, md.title);
     });
   cmSystemTools::SetStdoutCallback(
@@ -51,7 +51,7 @@ QCMake::QCMake(QObject* p)
   this->CMakeInstance->SetCMakeEditCommand(
     cmSystemTools::GetCMakeGUICommand());
   this->CMakeInstance->SetProgressCallback(
-    [this](const std::string& msg, float percent) {
+    [this](std::string const& msg, float percent) {
       this->progressCallback(msg, percent);
     });
 
@@ -79,12 +79,12 @@ QCMake::QCMake(QObject* p)
 
 QCMake::~QCMake() = default;
 
-void QCMake::loadCache(const QString& dir)
+void QCMake::loadCache(QString const& dir)
 {
   this->setBinaryDirectory(dir);
 }
 
-void QCMake::setSourceDirectory(const QString& _dir)
+void QCMake::setSourceDirectory(QString const& _dir)
 {
   QString dir = QString::fromStdString(
     cmSystemTools::GetActualCaseForPath(_dir.toStdString()));
@@ -100,7 +100,7 @@ void QCMake::setSourceDirectory(const QString& _dir)
   }
 }
 
-void QCMake::setBinaryDirectory(const QString& _dir)
+void QCMake::setBinaryDirectory(QString const& _dir)
 {
   QString dir = QString::fromStdString(
     cmSystemTools::GetActualCaseForPath(_dir.toStdString()));
@@ -166,7 +166,7 @@ void QCMake::setBinaryDirectory(const QString& _dir)
   }
 }
 
-void QCMake::setPreset(const QString& name, bool setBinary)
+void QCMake::setPreset(QString const& name, bool setBinary)
 {
   if (this->PresetName != name) {
     this->PresetName = name;
@@ -216,7 +216,7 @@ void QCMake::setPreset(const QString& name, bool setBinary)
   }
 }
 
-void QCMake::setGenerator(const QString& gen)
+void QCMake::setGenerator(QString const& gen)
 {
   if (this->Generator != gen) {
     this->Generator = gen;
@@ -224,7 +224,7 @@ void QCMake::setGenerator(const QString& gen)
   }
 }
 
-void QCMake::setPlatform(const QString& platform)
+void QCMake::setPlatform(QString const& platform)
 {
   if (this->Platform != platform) {
     this->Platform = platform;
@@ -232,7 +232,7 @@ void QCMake::setPlatform(const QString& platform)
   }
 }
 
-void QCMake::setToolset(const QString& toolset)
+void QCMake::setToolset(QString const& toolset)
 {
   if (this->Toolset != toolset) {
     this->Toolset = toolset;
@@ -240,7 +240,7 @@ void QCMake::setToolset(const QString& toolset)
   }
 }
 
-void QCMake::setEnvironment(const QProcessEnvironment& environment)
+void QCMake::setEnvironment(QProcessEnvironment const& environment)
 {
   this->Environment = environment;
 }
@@ -330,7 +330,7 @@ void QCMake::open()
   emit this->openDone(successful);
 }
 
-void QCMake::setProperties(const QCMakePropertyList& newProps)
+void QCMake::setProperties(QCMakePropertyList const& newProps)
 {
   QCMakePropertyList props = newProps;
 
@@ -353,9 +353,9 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
     } else {
       prop = props[idx];
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-      const bool isBool = prop.Value.type() == QVariant::Bool;
+      bool const isBool = prop.Value.type() == QVariant::Bool;
 #else
-      const bool isBool = prop.Value.metaType() == QMetaType::fromType<bool>();
+      bool const isBool = prop.Value.metaType() == QMetaType::fromType<bool>();
 #endif
       if (isBool) {
         state->SetCacheEntryValue(key, prop.Value.toBool() ? "ON" : "OFF");
@@ -401,7 +401,7 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
 
 namespace {
 template <typename T>
-QCMakeProperty cache_to_property(const T& v)
+QCMakeProperty cache_to_property(T const& v)
 {
   QCMakeProperty prop;
   prop.Key = QString::fromStdString(v.first);
@@ -528,7 +528,7 @@ bool QCMake::interruptCallback()
 #endif
 }
 
-void QCMake::progressCallback(const std::string& msg, float percent)
+void QCMake::progressCallback(std::string const& msg, float percent)
 {
   if (percent >= 0) {
     emit this->progressChanged(QString::fromStdString(msg), percent);
@@ -538,7 +538,7 @@ void QCMake::progressCallback(const std::string& msg, float percent)
   QCoreApplication::processEvents();
 }
 
-void QCMake::messageCallback(std::string const& msg, const char* /*title*/)
+void QCMake::messageCallback(std::string const& msg, char const* /*title*/)
 {
   emit this->errorMessage(QString::fromStdString(msg));
   QCoreApplication::processEvents();
@@ -602,7 +602,7 @@ void QCMake::loadPresets()
     preset.enabled = it.Expanded && it.Expanded->ConditionResult &&
       std::find_if(this->AvailableGenerators.begin(),
                    this->AvailableGenerators.end(),
-                   [&p](const cmake::GeneratorInfo& g) {
+                   [&p](cmake::GeneratorInfo const& g) {
                      return g.name == p.Generator;
                    }) != this->AvailableGenerators.end();
     presets.push_back(preset);

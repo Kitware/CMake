@@ -96,7 +96,7 @@ cmExperimental::FeatureData& DataForFeature(cmExperimental::Feature f)
 }
 }
 
-const cmExperimental::FeatureData& cmExperimental::DataForFeature(Feature f)
+cmExperimental::FeatureData const& cmExperimental::DataForFeature(Feature f)
 {
   return ::DataForFeature(f);
 }

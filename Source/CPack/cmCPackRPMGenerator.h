@@ -59,15 +59,15 @@ protected:
    * Special case of component install where all
    * components will be put in a single installer.
    */
-  int PackageComponentsAllInOne(const std::string& compInstDirName);
-  const char* GetOutputExtension() override { return ".rpm"; }
-  std::string GetSanitizedDirOrFileName(const std::string& name,
+  int PackageComponentsAllInOne(std::string const& compInstDirName);
+  char const* GetOutputExtension() override { return ".rpm"; }
+  std::string GetSanitizedDirOrFileName(std::string const& name,
                                         bool isFullName = true) const override;
   bool SupportsComponentInstallation() const override;
   std::string GetComponentInstallSuffix(
-    const std::string& componentName) override;
+    std::string const& componentName) override;
   std::string GetComponentInstallDirNameSuffix(
-    const std::string& componentName) override;
+    std::string const& componentName) override;
 
   void AddGeneratedPackageNames();
 };

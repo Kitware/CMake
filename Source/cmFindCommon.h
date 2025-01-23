@@ -43,7 +43,7 @@ protected:
     PathGroup();
 
   public:
-    PathGroup(const std::string& label)
+    PathGroup(std::string const& label)
       : cmPathLabel(label)
     {
     }
@@ -57,7 +57,7 @@ protected:
     PathLabel();
 
   public:
-    PathLabel(const std::string& label)
+    PathLabel(std::string const& label)
       : cmPathLabel(label)
     {
     }

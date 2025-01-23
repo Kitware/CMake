@@ -4,7 +4,7 @@
 
 // -- Static functions
 
-static const unsigned char Base32EncodeTable[33] =
+static unsigned char const Base32EncodeTable[33] =
   "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
 
 inline unsigned char Base32EncodeChar(int schar)
@@ -12,7 +12,7 @@ inline unsigned char Base32EncodeChar(int schar)
   return Base32EncodeTable[schar];
 }
 
-static void Base32Encode5(const unsigned char src[5], char dst[8])
+static void Base32Encode5(unsigned char const src[5], char dst[8])
 {
   // [0]:5 bits
   dst[0] = Base32EncodeChar((src[0] >> 3) & 0x1F);
@@ -36,16 +36,16 @@ static void Base32Encode5(const unsigned char src[5], char dst[8])
 
 cmBase32Encoder::cmBase32Encoder() = default;
 
-std::string cmBase32Encoder::encodeString(const unsigned char* input,
+std::string cmBase32Encoder::encodeString(unsigned char const* input,
                                           size_t len, bool padding)
 {
   std::string res;
 
-  static const size_t blockSize = 5;
-  static const size_t bufferSize = 8;
+  static size_t const blockSize = 5;
+  static size_t const bufferSize = 8;
   char buffer[bufferSize];
 
-  const unsigned char* end = input + len;
+  unsigned char const* end = input + len;
   while ((input + blockSize) <= end) {
     Base32Encode5(input, buffer);
     res.append(buffer, bufferSize);

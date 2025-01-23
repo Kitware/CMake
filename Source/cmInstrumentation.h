@@ -22,48 +22,48 @@ class cmInstrumentation
 {
 public:
   // Read Queries
-  cmInstrumentation(const std::string& binary_dir,
+  cmInstrumentation(std::string const& binary_dir,
                     bool clear_generated = false);
   // Create Query
-  cmInstrumentation(const std::string& binary_dir,
+  cmInstrumentation(std::string const& binary_dir,
                     std::set<cmInstrumentationQuery::Query>& queries,
                     std::set<cmInstrumentationQuery::Hook>& hooks,
                     std::string& callback);
   int InstrumentCommand(
-    std::string command_type, const std::vector<std::string>& command,
-    const std::function<int()>& callback,
+    std::string command_type, std::vector<std::string> const& command,
+    std::function<int()> const& callback,
     cm::optional<std::map<std::string, std::string>> options = cm::nullopt,
     cm::optional<std::map<std::string, std::string>> arrayOptions =
       cm::nullopt,
     bool reloadQueriesAfterCommand = false);
-  int InstrumentTest(const std::string& name, const std::string& command,
-                     const std::vector<std::string>& args, int64_t result,
+  int InstrumentTest(std::string const& name, std::string const& command,
+                     std::vector<std::string> const& args, int64_t result,
                      std::chrono::steady_clock::time_point steadyStart,
                      std::chrono::system_clock::time_point systemStart);
   void GetPreTestStats();
   void LoadQueries();
   bool HasQuery();
   bool HasQuery(cmInstrumentationQuery::Query);
-  bool ReadJSONQueries(const std::string& directory);
-  void ReadJSONQuery(const std::string& file);
+  bool ReadJSONQueries(std::string const& directory);
+  void ReadJSONQuery(std::string const& file);
   void WriteJSONQuery();
   int CollectTimingData(cmInstrumentationQuery::Hook hook);
   std::string errorMsg;
 
 private:
   void WriteInstrumentationJson(Json::Value& index,
-                                const std::string& directory,
-                                const std::string& file_name);
+                                std::string const& directory,
+                                std::string const& file_name);
   static void InsertStaticSystemInformation(Json::Value& index);
   static void GetDynamicSystemInformation(double& memory, double& load);
   static void InsertDynamicSystemInformation(Json::Value& index,
-                                             const std::string& instant);
+                                             std::string const& instant);
   static void InsertTimingData(
     Json::Value& root, std::chrono::steady_clock::time_point steadyStart,
     std::chrono::system_clock::time_point systemStart);
   void ClearGeneratedQueries();
-  bool HasQueryFile(const std::string& file);
-  static std::string GetCommandStr(const std::vector<std::string>& args);
+  bool HasQueryFile(std::string const& file);
+  static std::string GetCommandStr(std::vector<std::string> const& args);
   static std::string ComputeSuffixHash(std::string const& command_str);
   static std::string ComputeSuffixTime();
   std::string binaryDir;

@@ -47,7 +47,7 @@ static bool HandlePackage(std::vector<std::string> const& args,
                           cmExecutionStatus& status);
 
 static void StorePackageRegistry(cmMakefile& mf, std::string const& package,
-                                 const char* content, const char* hash);
+                                 char const* content, char const* hash);
 
 bool cmExportCommand(std::vector<std::string> const& args,
                      cmExecutionStatus& status)
@@ -383,7 +383,7 @@ static bool HandlePackage(std::vector<std::string> const& args,
     status.SetError("PACKAGE must be given a package name.");
     return false;
   }
-  const char* packageExpr = "^[A-Za-z0-9_.-]+$";
+  char const* packageExpr = "^[A-Za-z0-9_.-]+$";
   cmsys::RegularExpression packageRegex(packageExpr);
   if (!packageRegex.find(package)) {
     std::ostringstream e;
@@ -416,7 +416,7 @@ static bool HandlePackage(std::vector<std::string> const& args,
   // We store the current build directory in the registry as a value
   // named by a hash of its own content.  This is deterministic and is
   // unique with high probability.
-  const std::string& outDir = mf.GetCurrentBinaryDirectory();
+  std::string const& outDir = mf.GetCurrentBinaryDirectory();
   cmCryptoHash hasher(cmCryptoHash::AlgoMD5);
   std::string hash = hasher.HashString(outDir);
   StorePackageRegistry(mf, package, outDir.c_str(), hash.c_str());
@@ -443,7 +443,7 @@ static void ReportRegistryError(cmMakefile& mf, std::string const& msg,
 }
 
 static void StorePackageRegistry(cmMakefile& mf, std::string const& package,
-                                 const char* content, const char* hash)
+                                 char const* content, char const* hash)
 {
   std::string key = cmStrCat("Software\\Kitware\\CMake\\Packages\\", package);
   HKEY hKey;
@@ -470,7 +470,7 @@ static void StorePackageRegistry(cmMakefile& mf, std::string const& package,
 }
 #else
 static void StorePackageRegistry(cmMakefile& mf, std::string const& package,
-                                 const char* content, const char* hash)
+                                 char const* content, char const* hash)
 {
 #  if defined(__HAIKU__)
   char dir[B_PATH_NAME_LENGTH];

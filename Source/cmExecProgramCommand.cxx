@@ -16,7 +16,7 @@ using Encoding = cmProcessOutput::Encoding;
 
 namespace {
 bool RunCommand(std::string command, std::string& output, int& retVal,
-                const char* directory = nullptr, bool verbose = true,
+                char const* directory = nullptr, bool verbose = true,
                 Encoding encoding = cmProcessOutput::Auto);
 }
 
@@ -123,7 +123,7 @@ bool cmExecProgramCommand(std::vector<std::string> const& args,
 
 namespace {
 bool RunCommand(std::string command, std::string& output, int& retVal,
-                const char* dir, bool verbose, Encoding encoding)
+                char const* dir, bool verbose, Encoding encoding)
 {
   if (cmSystemTools::GetRunCommandOutput()) {
     verbose = false;
@@ -188,7 +188,7 @@ bool RunCommand(std::string command, std::string& output, int& retVal,
     cmsysProcess_SetOption(cp, cmsysProcess_Option_HideWindow, 1);
   }
   cmsysProcess_SetOption(cp, cmsysProcess_Option_Verbatim, 1);
-  const char* cmd[] = { command.c_str(), nullptr };
+  char const* cmd[] = { command.c_str(), nullptr };
   cmsysProcess_SetCommand(cp, cmd);
 #else
   std::string commandInDir;
@@ -206,7 +206,7 @@ bool RunCommand(std::string command, std::string& output, int& retVal,
   }
   fflush(stdout);
   fflush(stderr);
-  const char* cmd[] = { "/bin/sh", "-c", command.c_str(), nullptr };
+  char const* cmd[] = { "/bin/sh", "-c", command.c_str(), nullptr };
   cmsysProcess_SetCommand(cp, cmd);
 #endif
 

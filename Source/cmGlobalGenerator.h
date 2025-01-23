@@ -118,7 +118,7 @@ public:
   virtual std::string GetName() const { return "Generic"; }
 
   /** Check whether the given name matches the current generator.  */
-  virtual bool MatchesGeneratorName(const std::string& name) const
+  virtual bool MatchesGeneratorName(std::string const& name) const
   {
     return this->GetName() == name;
   }
@@ -147,7 +147,7 @@ public:
                                    cmMakefile* mf);
 
   /** Read any other cache entries needed for cmake --build. */
-  virtual bool ReadCacheEntriesForBuild(const cmState& /*state*/)
+  virtual bool ReadCacheEntriesForBuild(cmState const& /*state*/)
   {
     return true;
   }
@@ -211,8 +211,8 @@ public:
   /**
    * Set/Get and Clear the enabled languages.
    */
-  void SetLanguageEnabled(const std::string&, cmMakefile* mf);
-  bool GetLanguageEnabled(const std::string&) const;
+  void SetLanguageEnabled(std::string const&, cmMakefile* mf);
+  bool GetLanguageEnabled(std::string const&) const;
   void ClearEnabledLanguages();
   void GetEnabledLanguages(std::vector<std::string>& lang) const;
   /**
@@ -226,7 +226,7 @@ public:
    * Resolve the CMAKE_<lang>_COMPILER setting for the given language.
    * Intended to be called from EnableLanguage.
    */
-  void ResolveLanguageCompiler(const std::string& lang, cmMakefile* mf,
+  void ResolveLanguageCompiler(std::string const& lang, cmMakefile* mf,
                                bool optional) const;
 
   /**
@@ -238,9 +238,9 @@ public:
    * Try running cmake and building a file. This is used for dynamically
    * loaded commands, not as part of the usual build process.
    */
-  int TryCompile(int jobs, const std::string& srcdir,
-                 const std::string& bindir, const std::string& projectName,
-                 const std::string& targetName, bool fast, std::string& output,
+  int TryCompile(int jobs, std::string const& srcdir,
+                 std::string const& bindir, std::string const& projectName,
+                 std::string const& targetName, bool fast, std::string& output,
                  cmMakefile* mf);
 
   /**
@@ -249,11 +249,11 @@ public:
    * empty then all is assumed. clean indicates if a "make clean" should be
    * done first.
    */
-  int Build(int jobs, const std::string& srcdir, const std::string& bindir,
-            const std::string& projectName,
+  int Build(int jobs, std::string const& srcdir, std::string const& bindir,
+            std::string const& projectName,
             std::vector<std::string> const& targetNames, std::ostream& ostr,
-            const std::string& makeProgram, const std::string& config,
-            const cmBuildOptions& buildOptions, bool verbose,
+            std::string const& makeProgram, std::string const& config,
+            cmBuildOptions const& buildOptions, bool verbose,
             cmDuration timeout, cmSystemTools::OutputOption outputMode,
             std::vector<std::string> const& nativeOptions =
               std::vector<std::string>());
@@ -261,7 +261,7 @@ public:
   /**
    * Open a generated IDE project given the following information.
    */
-  virtual bool Open(const std::string& bindir, const std::string& projectName,
+  virtual bool Open(std::string const& bindir, std::string const& projectName,
                     bool dryRun);
 
   struct GeneratedMakeCommand final : public detail::GeneratedMakeCommand
@@ -269,10 +269,10 @@ public:
   };
 
   virtual std::vector<GeneratedMakeCommand> GenerateBuildCommand(
-    const std::string& makeProgram, const std::string& projectName,
-    const std::string& projectDir, std::vector<std::string> const& targetNames,
-    const std::string& config, int jobs, bool verbose,
-    const cmBuildOptions& buildOptions = cmBuildOptions(),
+    std::string const& makeProgram, std::string const& projectName,
+    std::string const& projectDir, std::vector<std::string> const& targetNames,
+    std::string const& config, int jobs, bool verbose,
+    cmBuildOptions const& buildOptions = cmBuildOptions(),
     std::vector<std::string> const& makeOptions = std::vector<std::string>());
 
   virtual void PrintBuildCommandAdvice(std::ostream& os, int jobs) const;
@@ -281,21 +281,21 @@ public:
    * Generate a "cmake --build" call for a given target, config and parallel
    * level.
    */
-  std::string GenerateCMakeBuildCommand(const std::string& target,
-                                        const std::string& config,
-                                        const std::string& parallel,
-                                        const std::string& native,
+  std::string GenerateCMakeBuildCommand(std::string const& target,
+                                        std::string const& config,
+                                        std::string const& parallel,
+                                        std::string const& native,
                                         bool ignoreErrors);
 
   //! Get the CMake instance
   cmake* GetCMakeInstance() const { return this->CMakeInstance; }
 
   void SetConfiguredFilesPath(cmGlobalGenerator* gen);
-  const std::vector<std::unique_ptr<cmMakefile>>& GetMakefiles() const
+  std::vector<std::unique_ptr<cmMakefile>> const& GetMakefiles() const
   {
     return this->Makefiles;
   }
-  const LocalGeneratorVector& GetLocalGenerators() const
+  LocalGeneratorVector const& GetLocalGenerators() const
   {
     return this->LocalGenerators;
   }
@@ -321,14 +321,14 @@ public:
 
   std::string GetExtraGeneratorName() const;
 
-  void AddInstallComponent(const std::string& component);
+  void AddInstallComponent(std::string const& component);
 
   /** Mark the (absolute path to a) file as generated.  */
-  void MarkAsGeneratedFile(const std::string& filepath);
+  void MarkAsGeneratedFile(std::string const& filepath);
   /** Determine if the absolute filepath belongs to a generated file.  */
-  bool IsGeneratedFile(const std::string& filepath);
+  bool IsGeneratedFile(std::string const& filepath);
 
-  const std::set<std::string>* GetInstallComponents() const
+  std::set<std::string> const* GetInstallComponents() const
   {
     return &this->InstallComponents;
   }
@@ -350,22 +350,22 @@ public:
   bool GetToolSupportsColor() const { return this->ToolSupportsColor; }
 
   //! return the language for the given extension
-  std::string GetLanguageFromExtension(const char* ext) const;
+  std::string GetLanguageFromExtension(char const* ext) const;
   //! is an extension to be ignored
-  bool IgnoreFile(const char* ext) const;
+  bool IgnoreFile(char const* ext) const;
   //! What is the preference for linkers and this language (None or Preferred)
-  int GetLinkerPreference(const std::string& lang) const;
+  int GetLinkerPreference(std::string const& lang) const;
   //! What is the object file extension for a given source file?
   std::string GetLanguageOutputExtension(cmSourceFile const&) const;
   //! What is the object file extension for a given language?
   std::string GetLanguageOutputExtension(std::string const& lang) const;
 
   //! What is the configurations directory variable called?
-  virtual const char* GetCMakeCFGIntDir() const { return "."; }
+  virtual char const* GetCMakeCFGIntDir() const { return "."; }
 
   //! expand CFGIntDir for a configuration
-  virtual std::string ExpandCFGIntDir(const std::string& str,
-                                      const std::string& config) const;
+  virtual std::string ExpandCFGIntDir(std::string const& str,
+                                      std::string const& config) const;
 
   /** Get whether the generator should use a script for link commands.  */
   bool GetUseLinkScript() const { return this->UseLinkScript; }
@@ -380,19 +380,19 @@ public:
   virtual bool FindMakeProgram(cmMakefile*);
 
   //! Find a target by name by searching the local generators.
-  cmTarget* FindTarget(const std::string& name,
+  cmTarget* FindTarget(std::string const& name,
                        cmStateEnums::TargetDomainSet domains = {
                          cmStateEnums::TargetDomain::NATIVE,
                          cmStateEnums::TargetDomain::ALIAS }) const;
 
-  cmGeneratorTarget* FindGeneratorTarget(const std::string& name) const;
+  cmGeneratorTarget* FindGeneratorTarget(std::string const& name) const;
 
-  void AddAlias(const std::string& name, const std::string& tgtName);
-  bool IsAlias(const std::string& name) const;
+  void AddAlias(std::string const& name, std::string const& tgtName);
+  bool IsAlias(std::string const& name) const;
 
   /** Determine if a name resolves to a framework on disk or a built target
       that is a framework. */
-  bool NameResolvesToFramework(const std::string& libname) const;
+  bool NameResolvesToFramework(std::string const& libname) const;
   /** Split a framework path to the directory and name of the framework as well
    * as optional suffix.
    * Returns std::nullopt if the path does not match with framework format
@@ -456,10 +456,10 @@ public:
         : cmStrCat(this->Directory, '/', this->GetVersionedName());
     }
 
-    const std::string Directory;
-    const std::string Version;
-    const std::string Name;
-    const std::string Suffix;
+    std::string const Directory;
+    std::string const Version;
+    std::string const Name;
+    std::string const Suffix;
   };
   enum class FrameworkFormat
   {
@@ -468,18 +468,18 @@ public:
     Extended
   };
   cm::optional<FrameworkDescriptor> SplitFrameworkPath(
-    const std::string& path,
+    std::string const& path,
     FrameworkFormat format = FrameworkFormat::Relaxed) const;
 
-  cmMakefile* FindMakefile(const std::string& start_dir) const;
+  cmMakefile* FindMakefile(std::string const& start_dir) const;
   cmLocalGenerator* FindLocalGenerator(cmDirectoryId const& id) const;
 
   /** Append the subdirectory for the given configuration.  If anything is
       appended the given prefix and suffix will be appended around it, which
       is useful for leading or trailing slashes.  */
-  virtual void AppendDirectoryForConfig(const std::string& prefix,
-                                        const std::string& config,
-                                        const std::string& suffix,
+  virtual void AppendDirectoryForConfig(std::string const& prefix,
+                                        std::string const& config,
+                                        std::string const& suffix,
                                         std::string& dir);
 
   /** Get the content of a directory.  Directory listings are cached
@@ -498,17 +498,17 @@ public:
 
   static bool IsReservedTarget(std::string const& name);
 
-  virtual const char* GetAllTargetName() const { return "ALL_BUILD"; }
-  virtual const char* GetInstallTargetName() const { return "INSTALL"; }
-  virtual const char* GetInstallLocalTargetName() const { return nullptr; }
-  virtual const char* GetInstallStripTargetName() const { return nullptr; }
-  virtual const char* GetPreinstallTargetName() const { return nullptr; }
-  virtual const char* GetTestTargetName() const { return "RUN_TESTS"; }
-  virtual const char* GetPackageTargetName() const { return "PACKAGE"; }
-  virtual const char* GetPackageSourceTargetName() const { return nullptr; }
-  virtual const char* GetEditCacheTargetName() const { return nullptr; }
-  virtual const char* GetRebuildCacheTargetName() const { return nullptr; }
-  virtual const char* GetCleanTargetName() const { return nullptr; }
+  virtual char const* GetAllTargetName() const { return "ALL_BUILD"; }
+  virtual char const* GetInstallTargetName() const { return "INSTALL"; }
+  virtual char const* GetInstallLocalTargetName() const { return nullptr; }
+  virtual char const* GetInstallStripTargetName() const { return nullptr; }
+  virtual char const* GetPreinstallTargetName() const { return nullptr; }
+  virtual char const* GetTestTargetName() const { return "RUN_TESTS"; }
+  virtual char const* GetPackageTargetName() const { return "PACKAGE"; }
+  virtual char const* GetPackageSourceTargetName() const { return nullptr; }
+  virtual char const* GetEditCacheTargetName() const { return nullptr; }
+  virtual char const* GetRebuildCacheTargetName() const { return nullptr; }
+  virtual char const* GetCleanTargetName() const { return nullptr; }
 
   // Lookup edit_cache target command preferred by this generator.
   virtual std::string GetEditCacheCommand() const { return ""; }
@@ -524,28 +524,28 @@ public:
   // what targets does the specified target depend on directly
   // via a target_link_libraries or add_dependencies
   TargetDependSet const& GetTargetDirectDepends(
-    const cmGeneratorTarget* target);
+    cmGeneratorTarget const* target);
 
   // Return true if target 'l' occurs before 'r' in a global ordering
   // of targets that respects inter-target dependencies.
   bool TargetOrderIndexLess(cmGeneratorTarget const* l,
                             cmGeneratorTarget const* r) const;
 
-  const std::map<std::string, std::vector<cmLocalGenerator*>>& GetProjectMap()
+  std::map<std::string, std::vector<cmLocalGenerator*>> const& GetProjectMap()
     const
   {
     return this->ProjectMap;
   }
 
   // track files replaced during a Generate
-  void FileReplacedDuringGenerate(const std::string& filename);
+  void FileReplacedDuringGenerate(std::string const& filename);
   void GetFilesReplacedDuringGenerate(std::vector<std::string>& filenames);
 
-  void AddRuleHash(const std::vector<std::string>& outputs,
+  void AddRuleHash(std::vector<std::string> const& outputs,
                    std::string const& content);
 
   /** Return whether the given binary directory is unused.  */
-  bool BinaryDirectoryIsNew(const std::string& dir)
+  bool BinaryDirectoryIsNew(std::string const& dir)
   {
     return this->BinaryDirectories.insert(dir).second;
   }
@@ -613,7 +613,7 @@ public:
     return cmStrCat('/', config);
   }
 
-  static std::string EscapeJSON(const std::string& s);
+  static std::string EscapeJSON(std::string const& s);
 
   void ProcessEvaluationFiles();
 
@@ -623,10 +623,10 @@ public:
   }
   void AddBuildExportSet(cmExportBuildFileGenerator* gen);
   void AddBuildExportExportSet(cmExportBuildFileGenerator* gen);
-  bool IsExportedTargetsFile(const std::string& filename) const;
+  bool IsExportedTargetsFile(std::string const& filename) const;
   cmExportBuildFileGenerator* GetExportedTargetsFile(
-    const std::string& filename) const;
-  void AddCMP0068WarnTarget(const std::string& target);
+    std::string const& filename) const;
+  void AddCMP0068WarnTarget(std::string const& target);
 
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 
@@ -634,7 +634,7 @@ public:
 
   void SetFilenameTargetDepends(
     cmSourceFile* sf, std::set<cmGeneratorTarget const*> const& tgts);
-  const std::set<const cmGeneratorTarget*>& GetFilenameTargetDepends(
+  std::set<cmGeneratorTarget const*> const& GetFilenameTargetDepends(
     cmSourceFile* sf) const;
 
 #if !defined(CMAKE_BOOTSTRAP)
@@ -657,7 +657,7 @@ public:
   cmInstallRuntimeDependencySet* CreateAnonymousRuntimeDependencySet();
 
   cmInstallRuntimeDependencySet* GetNamedRuntimeDependencySet(
-    const std::string& name);
+    std::string const& name);
 
   enum class StripCommandStyle
   {
@@ -674,7 +674,7 @@ public:
   void AddTestFile(std::string const& file);
   void AddCMakeFilesToRebuild(std::vector<std::string>& files) const;
 
-  virtual const std::set<std::string>& GetDefaultConfigs() const
+  virtual std::set<std::string> const& GetDefaultConfigs() const
   {
     static std::set<std::string> configs;
     return configs;
@@ -687,11 +687,11 @@ protected:
                      TargetDependSet& originalTargets, cmLocalGenerator* root,
                      std::vector<cmLocalGenerator*>& generators);
   bool IsRootOnlyTarget(cmGeneratorTarget* target) const;
-  void AddTargetDepends(const cmGeneratorTarget* target,
+  void AddTargetDepends(cmGeneratorTarget const* target,
                         TargetDependSet& projectTargets);
-  void SetLanguageEnabledFlag(const std::string& l, cmMakefile* mf);
-  void SetLanguageEnabledMaps(const std::string& l, cmMakefile* mf);
-  void FillExtensionToLanguageMap(const std::string& l, cmMakefile* mf);
+  void SetLanguageEnabledFlag(std::string const& l, cmMakefile* mf);
+  void SetLanguageEnabledMaps(std::string const& l, cmMakefile* mf);
+  void FillExtensionToLanguageMap(std::string const& l, cmMakefile* mf);
   virtual bool CheckLanguages(std::vector<std::string> const& languages,
                               cmMakefile* mf) const;
   virtual void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
@@ -700,8 +700,8 @@ protected:
   virtual bool ComputeTargetDepends();
 
 #if !defined(CMAKE_BOOTSTRAP)
-  void WriteJsonContent(const std::string& fname,
-                        const Json::Value& value) const;
+  void WriteJsonContent(std::string const& fname,
+                        Json::Value const& value) const;
   void WriteInstallJson() const;
 #endif
 
@@ -715,8 +715,8 @@ protected:
   void CreateFileGenerateOutputs();
   bool AddAutomaticSources();
 
-  std::string SelectMakeProgram(const std::string& makeProgram,
-                                const std::string& makeDefault = "") const;
+  std::string SelectMakeProgram(std::string const& makeProgram,
+                                std::string const& makeDefault = "") const;
 
   // Fill the ProjectMap, this must be called after LocalGenerators
   // has been populated.
@@ -726,7 +726,7 @@ protected:
                   cmStateSnapshot const& snp) const;
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen) const;
   bool IsExcluded(cmLocalGenerator* root,
-                  const cmGeneratorTarget* target) const;
+                  cmGeneratorTarget const* target) const;
   virtual void InitializeProgressMarks() {}
 
   struct GlobalTargetInfo
@@ -886,9 +886,9 @@ private:
   void IndexMakefile(cmMakefile* mf);
   void IndexLocalGenerator(cmLocalGenerator* lg);
 
-  virtual const char* GetBuildIgnoreErrorsFlag() const { return nullptr; }
+  virtual char const* GetBuildIgnoreErrorsFlag() const { return nullptr; }
 
-  bool UnsupportedVariableIsDefined(const std::string& name,
+  bool UnsupportedVariableIsDefined(std::string const& name,
                                     bool supported) const;
 
   // Cache directory content and target files to be built.

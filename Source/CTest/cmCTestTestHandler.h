@@ -96,17 +96,17 @@ public:
   /*
    * Add the test to the list of tests to be executed
    */
-  bool AddTest(const std::vector<std::string>& args);
+  bool AddTest(std::vector<std::string> const& args);
 
   /*
    * Set tests properties
    */
-  bool SetTestsProperties(const std::vector<std::string>& args);
+  bool SetTestsProperties(std::vector<std::string> const& args);
 
   /**
    * Set directory properties
    */
-  bool SetDirectoryProperties(const std::vector<std::string>& args);
+  bool SetDirectoryProperties(std::vector<std::string> const& args);
 
   struct cmCTestTestResourceRequirement
   {
@@ -114,8 +114,8 @@ public:
     int SlotsNeeded;
     int UnitsNeeded;
 
-    bool operator==(const cmCTestTestResourceRequirement& other) const;
-    bool operator!=(const cmCTestTestResourceRequirement& other) const;
+    bool operator==(cmCTestTestResourceRequirement const& other) const;
+    bool operator!=(cmCTestTestResourceRequirement const& other) const;
   };
 
   struct Signal
@@ -198,8 +198,8 @@ public:
 
   struct cmCTestTestResultLess
   {
-    bool operator()(const cmCTestTestResult& lhs,
-                    const cmCTestTestResult& rhs) const
+    bool operator()(cmCTestTestResult const& lhs,
+                    cmCTestTestResult const& rhs) const
     {
       return lhs.TestCount < rhs.TestCount;
     }
@@ -213,19 +213,19 @@ public:
 
   // full signature static method to find an executable
   static std::string FindExecutable(cmCTest* ctest,
-                                    const std::string& testCommand,
+                                    std::string const& testCommand,
                                     std::string& resultingConfig,
                                     std::vector<std::string>& extraPaths,
                                     std::vector<std::string>& failed);
 
   static bool ParseResourceGroupsProperty(
-    const std::string& val,
+    std::string const& val,
     std::vector<std::vector<cmCTestTestResourceRequirement>>& resourceGroups);
 
   using ListOfTests = std::vector<cmCTestTestProperties>;
 
   // Support for writing test results in JUnit XML format.
-  void SetJUnitXMLFileName(const std::string& id);
+  void SetJUnitXMLFileName(std::string const& id);
 
 protected:
   using SetOfTests =
@@ -238,12 +238,12 @@ protected:
   int ExecuteCommands(std::vector<std::string>& vec);
 
   bool ProcessOptions();
-  void LogTestSummary(const std::vector<std::string>& passed,
-                      const std::vector<std::string>& failed,
-                      const cmDuration& durationInSecs);
-  void LogDisabledTests(const std::vector<cmCTestTestResult>& disabledTests);
-  void LogFailedTests(const std::vector<std::string>& failed,
-                      const SetOfTests& resultsSet);
+  void LogTestSummary(std::vector<std::string> const& passed,
+                      std::vector<std::string> const& failed,
+                      cmDuration const& durationInSecs);
+  void LogDisabledTests(std::vector<cmCTestTestResult> const& disabledTests);
+  void LogFailedTests(std::vector<std::string> const& failed,
+                      SetOfTests const& resultsSet);
   bool GenerateXML();
 
   void WriteTestResultHeader(cmXMLWriter& xml,
@@ -327,15 +327,15 @@ private:
 
   void UpdateMaxTestNameWidth();
 
-  bool GetValue(const char* tag, std::string& value, std::istream& fin);
-  bool GetValue(const char* tag, int& value, std::istream& fin);
-  bool GetValue(const char* tag, size_t& value, std::istream& fin);
-  bool GetValue(const char* tag, bool& value, std::istream& fin);
-  bool GetValue(const char* tag, double& value, std::istream& fin);
+  bool GetValue(char const* tag, std::string& value, std::istream& fin);
+  bool GetValue(char const* tag, int& value, std::istream& fin);
+  bool GetValue(char const* tag, size_t& value, std::istream& fin);
+  bool GetValue(char const* tag, bool& value, std::istream& fin);
+  bool GetValue(char const* tag, double& value, std::istream& fin);
   /**
    * Find the executable for a test
    */
-  std::string FindTheExecutable(const std::string& exe);
+  std::string FindTheExecutable(std::string const& exe);
 
   std::string GetTestStatus(cmCTestTestResult const&);
   void ExpandTestsToRunInformation(size_t numPossibleTests);

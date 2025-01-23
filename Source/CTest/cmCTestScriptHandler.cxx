@@ -46,7 +46,7 @@ cmCTestScriptHandler::cmCTestScriptHandler(cmCTest* ctest)
 cmCTestScriptHandler::~cmCTestScriptHandler() = default;
 
 // just adds an argument to the vector
-void cmCTestScriptHandler::AddConfigurationScript(const std::string& script,
+void cmCTestScriptHandler::AddConfigurationScript(std::string const& script,
                                                   bool pscope)
 {
   this->ConfigurationScripts.emplace_back(script);
@@ -79,7 +79,7 @@ void cmCTestScriptHandler::UpdateElapsedTime()
   }
 }
 
-int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
+int cmCTestScriptHandler::ExecuteScript(std::string const& total_script_arg)
 {
   // execute the script passing in the arguments to the script as well as the
   // arguments from this invocation of cmake
@@ -190,7 +190,7 @@ void cmCTestScriptHandler::CreateCMake()
   }
 
   this->CMake->SetProgressCallback(
-    [this](const std::string& m, float /*unused*/) {
+    [this](std::string const& m, float /*unused*/) {
       if (!m.empty()) {
         cmCTestLog(this->CTest, HANDLER_OUTPUT, "-- " << m << std::endl);
       }
@@ -220,7 +220,7 @@ void cmCTestScriptHandler::CreateCMake()
 
 // this sets up some variables for the script to use, creates the required
 // cmake instance and generators, and then reads in the script
-int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
+int cmCTestScriptHandler::ReadInScript(std::string const& total_script_arg)
 {
   // Reset the error flag so that the script is read in no matter what
   cmSystemTools::ResetErrorOccurredFlag();
@@ -230,7 +230,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   // passed into the scripts as S_ARG
   std::string script;
   std::string script_arg;
-  const std::string::size_type comma_pos = total_script_arg.find(',');
+  std::string::size_type const comma_pos = total_script_arg.find(',');
   if (comma_pos != std::string::npos) {
     script = total_script_arg.substr(0, comma_pos);
     script_arg = total_script_arg.substr(comma_pos + 1);
@@ -288,7 +288,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   }
 
   // Add definitions of variables passed in on the command line:
-  const std::map<std::string, std::string>& defs =
+  std::map<std::string, std::string> const& defs =
     this->CTest->GetDefinitions();
   for (auto const& d : defs) {
     this->Makefile->AddDefinition(d.first, d.second);
@@ -308,7 +308,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
 
 // run a specific script
 int cmCTestScriptHandler::RunConfigurationScript(
-  const std::string& total_script_arg, bool pscope)
+  std::string const& total_script_arg, bool pscope)
 {
 #ifndef CMAKE_BOOTSTRAP
   cmSystemTools::SaveRestoreEnvironment sre;
@@ -331,7 +331,7 @@ int cmCTestScriptHandler::RunConfigurationScript(
 }
 
 bool cmCTestScriptHandler::RunScript(cmCTest* ctest, cmMakefile* mf,
-                                     const std::string& sname, bool InProcess,
+                                     std::string const& sname, bool InProcess,
                                      int* returnValue)
 {
   auto sh = cm::make_unique<cmCTestScriptHandler>(ctest);

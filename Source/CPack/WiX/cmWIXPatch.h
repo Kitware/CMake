@@ -22,10 +22,10 @@ public:
   bool CheckForUnappliedFragments();
 
 private:
-  void ApplyElementChildren(const cmWIXPatchElement& element,
+  void ApplyElementChildren(cmWIXPatchElement const& element,
                             cmWIXSourceWriter& writer);
 
-  void ApplyElement(const cmWIXPatchElement& element,
+  void ApplyElement(cmWIXPatchElement const& element,
                     cmWIXSourceWriter& writer);
 
   cmCPackLog* Logger;

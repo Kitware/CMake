@@ -15,7 +15,7 @@ class cmXMLSafe
 public:
   /** Construct with the data to be written.  This assumes the data
       will exist for the duration of this object's life.  */
-  cmXMLSafe(const char* s);
+  cmXMLSafe(char const* s);
   cmXMLSafe(std::string const& s);
 
   /** Specify whether to escape quotes too.  This is needed when

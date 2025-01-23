@@ -26,38 +26,38 @@ public:
   cmSearchPath(cmFindCommon* findCmd = nullptr);
   ~cmSearchPath();
 
-  cmSearchPath(const cmSearchPath&) = default;
-  cmSearchPath& operator=(const cmSearchPath&) = default;
+  cmSearchPath(cmSearchPath const&) = default;
+  cmSearchPath& operator=(cmSearchPath const&) = default;
 
   struct PathWithPrefix
   {
     std::string Path;
     std::string Prefix;
 
-    bool operator<(const PathWithPrefix& other) const
+    bool operator<(PathWithPrefix const& other) const
     {
       return this->Path < other.Path ||
         (this->Path == other.Path && this->Prefix < other.Prefix);
     }
   };
-  const std::vector<PathWithPrefix>& GetPaths() const { return this->Paths; }
+  std::vector<PathWithPrefix> const& GetPaths() const { return this->Paths; }
   std::size_t size() const { return this->Paths.size(); }
 
-  void ExtractWithout(const std::set<std::string>& ignorePaths,
-                      const std::set<std::string>& ignorePrefixes,
+  void ExtractWithout(std::set<std::string> const& ignorePaths,
+                      std::set<std::string> const& ignorePrefixes,
                       std::vector<std::string>& outPaths) const;
 
-  void AddPath(const std::string& path);
-  void AddUserPath(const std::string& path);
-  void AddCMakePath(const std::string& variable);
-  void AddEnvPath(const std::string& variable);
-  void AddCMakePrefixPath(const std::string& variable);
-  void AddEnvPrefixPath(const std::string& variable, bool stripBin = false);
-  void AddSuffixes(const std::vector<std::string>& suffixes);
-  void AddPrefixPaths(const std::vector<std::string>& paths);
+  void AddPath(std::string const& path);
+  void AddUserPath(std::string const& path);
+  void AddCMakePath(std::string const& variable);
+  void AddEnvPath(std::string const& variable);
+  void AddCMakePrefixPath(std::string const& variable);
+  void AddEnvPrefixPath(std::string const& variable, bool stripBin = false);
+  void AddSuffixes(std::vector<std::string> const& suffixes);
+  void AddPrefixPaths(std::vector<std::string> const& paths);
 
 protected:
-  void AddPathInternal(const std::string& path, const std::string& prefix);
+  void AddPathInternal(std::string const& path, std::string const& prefix);
 
   cmFindCommon* FC;
   std::vector<PathWithPrefix> Paths;

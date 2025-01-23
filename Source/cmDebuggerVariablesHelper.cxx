@@ -622,7 +622,7 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
       return ret;
     });
 
-  if (const auto* ic = gen->GetInstallComponents()) {
+  if (auto const* ic = gen->GetInstallComponents()) {
     variables->AddSubVariables(CreateIfAny(
       variablesManager, "InstallComponents", supportsVariableType, *ic));
   }

@@ -14,40 +14,40 @@ class cmValue
 public:
   cmValue() noexcept = default;
   cmValue(std::nullptr_t) noexcept {}
-  explicit cmValue(const std::string* value) noexcept
+  explicit cmValue(std::string const* value) noexcept
     : Value(value)
   {
   }
-  explicit cmValue(const std::string& value) noexcept
+  explicit cmValue(std::string const& value) noexcept
     : Value(&value)
   {
   }
-  cmValue(const cmValue& other) noexcept = default;
+  cmValue(cmValue const& other) noexcept = default;
 
-  cmValue& operator=(const cmValue& other) noexcept = default;
+  cmValue& operator=(cmValue const& other) noexcept = default;
   cmValue& operator=(std::nullptr_t) noexcept
   {
     this->Value = nullptr;
     return *this;
   }
 
-  const std::string* Get() const noexcept { return this->Value; }
-  const char* GetCStr() const noexcept
+  std::string const* Get() const noexcept { return this->Value; }
+  char const* GetCStr() const noexcept
   {
     return this->Value ? this->Value->c_str() : nullptr;
   }
 
-  const std::string* operator->() const noexcept
+  std::string const* operator->() const noexcept
   {
     return this->Value ? this->Value : &cmValue::Empty;
   }
-  const std::string& operator*() const noexcept
+  std::string const& operator*() const noexcept
   {
     return this->Value ? *this->Value : cmValue::Empty;
   }
 
   explicit operator bool() const noexcept { return this->Value != nullptr; }
-  operator const std::string&() const noexcept { return this->operator*(); }
+  operator std::string const&() const noexcept { return this->operator*(); }
   explicit operator cm::string_view() const noexcept
   {
     return this->operator*();
@@ -100,7 +100,7 @@ public:
   /**
    * Does a string indicate a true or ON value?
    */
-  static bool IsOn(const char* value) noexcept
+  static bool IsOn(char const* value) noexcept
   {
     return value && IsOn(cm::string_view(value));
   }
@@ -119,20 +119,20 @@ public:
    * IsOn and IsOff both returning false. Note that the special path
    * NOTFOUND, *-NOTFOUND or IGNORE will cause IsOff to return true.
    */
-  static bool IsOff(const char* value) noexcept
+  static bool IsOff(char const* value) noexcept
   {
     return !value || IsOff(cm::string_view(value));
   }
   static bool IsOff(cm::string_view) noexcept;
 
   /** Return true if value is NOTFOUND or ends in -NOTFOUND.  */
-  static bool IsNOTFOUND(const char* value) noexcept
+  static bool IsNOTFOUND(char const* value) noexcept
   {
     return !value || IsNOTFOUND(cm::string_view(value));
   }
   static bool IsNOTFOUND(cm::string_view) noexcept;
 
-  static bool IsEmpty(const char* value) noexcept
+  static bool IsEmpty(char const* value) noexcept
   {
     return !value || *value == '\0';
   }
@@ -143,7 +143,7 @@ public:
    * forced this value. This is not the same as On, but this
    * may be considered as "internally switched on".
    */
-  static bool IsInternallyOn(const char* value) noexcept
+  static bool IsInternallyOn(char const* value) noexcept
   {
     return value && IsInternallyOn(cm::string_view(value));
   }
@@ -151,7 +151,7 @@ public:
 
 private:
   static std::string Empty;
-  const std::string* Value = nullptr;
+  std::string const* Value = nullptr;
 };
 
 std::ostream& operator<<(std::ostream& o, cmValue v);
@@ -238,7 +238,7 @@ inline bool cmIsOn(cm::string_view val)
 {
   return cmValue::IsOn(val);
 }
-inline bool cmIsOn(const char* val)
+inline bool cmIsOn(char const* val)
 {
   return cmValue::IsOn(val);
 }
@@ -258,7 +258,7 @@ inline bool cmIsOff(cm::string_view val)
 {
   return cmValue::IsOff(val);
 }
-inline bool cmIsOff(const char* val)
+inline bool cmIsOff(char const* val)
 {
   return cmValue::IsOff(val);
 }
@@ -282,7 +282,7 @@ inline bool cmNonempty(cm::string_view val)
 {
   return !cmValue::IsEmpty(val);
 }
-inline bool cmNonempty(const char* val)
+inline bool cmNonempty(char const* val)
 {
   return !cmValue::IsEmpty(val);
 }
@@ -300,7 +300,7 @@ inline bool cmIsInternallyOn(cm::string_view val)
 {
   return cmValue::IsInternallyOn(val);
 }
-inline bool cmIsInternallyOn(const char* val)
+inline bool cmIsInternallyOn(char const* val)
 {
   return cmValue::IsInternallyOn(val);
 }

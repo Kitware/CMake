@@ -4,7 +4,7 @@
 
 #include <ostream>
 
-static const char* GHS_TAG[] = { "[INTEGRITY Application]",
+static char const* GHS_TAG[] = { "[INTEGRITY Application]",
                                  "[Library]",
                                  "[Project]",
                                  "[Program]",
@@ -12,7 +12,7 @@ static const char* GHS_TAG[] = { "[INTEGRITY Application]",
                                  "[Subproject]",
                                  "[Custom Target]" };
 
-const char* GhsMultiGpj::GetGpjTag(Types gpjType)
+char const* GhsMultiGpj::GetGpjTag(Types gpjType)
 {
   char const* tag;
   switch (gpjType) {

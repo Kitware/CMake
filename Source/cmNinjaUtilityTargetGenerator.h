@@ -16,7 +16,7 @@ public:
   cmNinjaUtilityTargetGenerator(cmGeneratorTarget* target);
   ~cmNinjaUtilityTargetGenerator() override;
 
-  void Generate(const std::string& config) override;
+  void Generate(std::string const& config) override;
 
 private:
   void WriteUtilBuildStatements(std::string const& config,

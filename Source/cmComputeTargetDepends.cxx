@@ -177,8 +177,8 @@ void cmComputeTargetDepends::CollectTargets()
 {
   // Collect all targets from all generators.
   auto const& lgens = this->GlobalGenerator->GetLocalGenerators();
-  for (const auto& lgen : lgens) {
-    for (const auto& ti : lgen->GetGeneratorTargets()) {
+  for (auto const& lgen : lgens) {
+    for (auto const& ti : lgen->GetGeneratorTargets()) {
       size_t index = this->Targets.size();
       this->TargetIndex[ti.get()] = index;
       this->Targets.push_back(ti.get());
@@ -262,8 +262,8 @@ void cmComputeTargetDepends::CollectTargetDepends(size_t depender_index)
 }
 
 void cmComputeTargetDepends::AddInterfaceDepends(
-  size_t depender_index, const cmGeneratorTarget* dependee,
-  cmListFileBacktrace const& dependee_backtrace, const std::string& config,
+  size_t depender_index, cmGeneratorTarget const* dependee,
+  cmListFileBacktrace const& dependee_backtrace, std::string const& config,
   std::set<cmLinkItem>& emitted)
 {
   cmGeneratorTarget const* depender = this->Targets[depender_index];
@@ -292,7 +292,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(
 
 void cmComputeTargetDepends::AddInterfaceDepends(
   size_t depender_index, cmLinkItem const& dependee_name,
-  const std::string& config, std::set<cmLinkItem>& emitted)
+  std::string const& config, std::set<cmLinkItem>& emitted)
 {
   cmGeneratorTarget const* depender = this->Targets[depender_index];
   cmGeneratorTarget const* dependee = dependee_name.Target;
@@ -507,7 +507,7 @@ void cmComputeTargetDepends::OptimizeLinkDependencies(
 }
 
 void cmComputeTargetDepends::DisplayGraph(Graph const& graph,
-                                          const std::string& name)
+                                          std::string const& name)
 {
   fprintf(stderr, "The %s target dependency graph is:\n", name.c_str());
   size_t n = graph.size();
@@ -555,7 +555,7 @@ void cmComputeTargetDepends::DisplaySideEffects()
 }
 
 void cmComputeTargetDepends::DisplayComponents(
-  cmComputeComponentGraph const& ccg, const std::string& name)
+  cmComputeComponentGraph const& ccg, std::string const& name)
 {
   fprintf(stderr, "The strongly connected components for the %s graph are:\n",
           name.c_str());

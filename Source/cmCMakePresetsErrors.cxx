@@ -15,7 +15,7 @@
 #include "cmStringAlgorithms.h"
 
 namespace cmCMakePresetsErrors {
-const Json::Value* getPreset(cmJSONState* state)
+Json::Value const* getPreset(cmJSONState* state)
 {
   if (state->parseStack.size() < 2) {
     return nullptr;
@@ -30,7 +30,7 @@ const Json::Value* getPreset(cmJSONState* state)
 
 std::string getPresetName(cmJSONState* state)
 {
-  const Json::Value* preset = getPreset(state);
+  Json::Value const* preset = getPreset(state);
   if (preset && preset->isMember("name")) {
     return preset->operator[]("name").asString();
   }
@@ -45,58 +45,58 @@ std::string getVariableName(cmJSONState* state)
   return errMsg;
 }
 
-void FILE_NOT_FOUND(const std::string& filename, cmJSONState* state)
+void FILE_NOT_FOUND(std::string const& filename, cmJSONState* state)
 {
   state->AddError(cmStrCat("File not found: ", filename));
 }
 
-void INVALID_ROOT(const Json::Value* value, cmJSONState* state)
+void INVALID_ROOT(Json::Value const* value, cmJSONState* state)
 {
   state->AddErrorAtValue("Invalid root object", value);
 }
 
-void NO_VERSION(const Json::Value* value, cmJSONState* state)
+void NO_VERSION(Json::Value const* value, cmJSONState* state)
 {
   state->AddErrorAtValue("No \"version\" field", value);
 }
 
-void INVALID_VERSION(const Json::Value* value, cmJSONState* state)
+void INVALID_VERSION(Json::Value const* value, cmJSONState* state)
 {
   state->AddErrorAtValue("Invalid \"version\" field", value);
 }
 
-void UNRECOGNIZED_VERSION(const Json::Value* value, cmJSONState* state)
+void UNRECOGNIZED_VERSION(Json::Value const* value, cmJSONState* state)
 {
   state->AddErrorAtValue("Unrecognized \"version\" field", value);
 }
 
-void INVALID_PRESETS(const Json::Value* value, cmJSONState* state)
+void INVALID_PRESETS(Json::Value const* value, cmJSONState* state)
 {
   state->AddErrorAtValue("Invalid \"configurePresets\" field", value);
 }
 
-void INVALID_PRESET(const Json::Value* value, cmJSONState* state)
+void INVALID_PRESET(Json::Value const* value, cmJSONState* state)
 {
   state->AddErrorAtValue("Invalid preset", value);
 }
 
-void INVALID_PRESET_NAMED(const std::string& presetName, cmJSONState* state)
+void INVALID_PRESET_NAMED(std::string const& presetName, cmJSONState* state)
 {
   state->AddError(cmStrCat("Invalid preset: \"", presetName, "\""));
 }
 
-void INVALID_VARIABLE(const Json::Value* value, cmJSONState* state)
+void INVALID_VARIABLE(Json::Value const* value, cmJSONState* state)
 {
   std::string var = cmCMakePresetsErrors::getVariableName(state);
   state->AddErrorAtValue(cmStrCat("Invalid CMake ", var), value);
 }
 
-void DUPLICATE_PRESETS(const std::string& presetName, cmJSONState* state)
+void DUPLICATE_PRESETS(std::string const& presetName, cmJSONState* state)
 {
   state->AddError(cmStrCat("Duplicate preset: \"", presetName, "\""));
 }
 
-void CYCLIC_PRESET_INHERITANCE(const std::string& presetName,
+void CYCLIC_PRESET_INHERITANCE(std::string const& presetName,
                                cmJSONState* state)
 
 {
@@ -104,61 +104,61 @@ void CYCLIC_PRESET_INHERITANCE(const std::string& presetName,
     cmStrCat("Cyclic preset inheritance for preset \"", presetName, "\""));
 }
 
-void INHERITED_PRESET_UNREACHABLE_FROM_FILE(const std::string& presetName,
+void INHERITED_PRESET_UNREACHABLE_FROM_FILE(std::string const& presetName,
                                             cmJSONState* state)
 {
   state->AddError(cmStrCat("Inherited preset \"", presetName,
                            "\" is unreachable from preset's file"));
 }
 
-void CONFIGURE_PRESET_UNREACHABLE_FROM_FILE(const std::string& presetName,
+void CONFIGURE_PRESET_UNREACHABLE_FROM_FILE(std::string const& presetName,
                                             cmJSONState* state)
 {
   state->AddError(cmStrCat("Configure preset \"", presetName,
                            "\" is unreachable from preset's file"));
 }
 
-void INVALID_MACRO_EXPANSION(const std::string& presetName, cmJSONState* state)
+void INVALID_MACRO_EXPANSION(std::string const& presetName, cmJSONState* state)
 {
   state->AddError(cmStrCat("Invalid macro expansion in \"", presetName, "\""));
 }
 
-void BUILD_TEST_PRESETS_UNSUPPORTED(const Json::Value*, cmJSONState* state)
+void BUILD_TEST_PRESETS_UNSUPPORTED(Json::Value const*, cmJSONState* state)
 {
   state->AddError("File version must be 2 or higher for build and test preset "
                   "support");
 }
 
-void PACKAGE_PRESETS_UNSUPPORTED(const Json::Value*, cmJSONState* state)
+void PACKAGE_PRESETS_UNSUPPORTED(Json::Value const*, cmJSONState* state)
 {
   state->AddError(
     "File version must be 6 or higher for package preset support");
 }
 
-void WORKFLOW_PRESETS_UNSUPPORTED(const Json::Value*, cmJSONState* state)
+void WORKFLOW_PRESETS_UNSUPPORTED(Json::Value const*, cmJSONState* state)
 {
   state->AddError(
     "File version must be 6 or higher for workflow preset support");
 }
 
-void INCLUDE_UNSUPPORTED(const Json::Value*, cmJSONState* state)
+void INCLUDE_UNSUPPORTED(Json::Value const*, cmJSONState* state)
 {
   state->AddError("File version must be 4 or higher for include support");
 }
 
-void INVALID_INCLUDE(const Json::Value* value, cmJSONState* state)
+void INVALID_INCLUDE(Json::Value const* value, cmJSONState* state)
 {
   state->AddErrorAtValue("Invalid \"include\" field", value);
 }
 
-void INVALID_CONFIGURE_PRESET(const std::string& presetName,
+void INVALID_CONFIGURE_PRESET(std::string const& presetName,
                               cmJSONState* state)
 {
   state->AddError(
     cmStrCat(R"(Invalid "configurePreset": ")", presetName, "\""));
 }
 
-void INSTALL_PREFIX_UNSUPPORTED(const Json::Value* value, cmJSONState* state)
+void INSTALL_PREFIX_UNSUPPORTED(Json::Value const* value, cmJSONState* state)
 {
   state->AddErrorAtValue(
     "File version must be 3 or higher for installDir preset "
@@ -183,7 +183,7 @@ void GRAPHVIZ_FILE_UNSUPPORTED(cmJSONState* state)
     "File version must be 10 or higher for graphviz preset support");
 }
 
-void CYCLIC_INCLUDE(const std::string& file, cmJSONState* state)
+void CYCLIC_INCLUDE(std::string const& file, cmJSONState* state)
 {
   state->AddError(cmStrCat("Cyclic include among preset files: ", file));
 }
@@ -194,33 +194,33 @@ void TEST_OUTPUT_TRUNCATION_UNSUPPORTED(cmJSONState* state)
                   "preset support");
 }
 
-void INVALID_WORKFLOW_STEPS(const std::string& workflowStep,
+void INVALID_WORKFLOW_STEPS(std::string const& workflowStep,
                             cmJSONState* state)
 {
   state->AddError(cmStrCat("Invalid workflow step \"", workflowStep, "\""));
 }
 
-void NO_WORKFLOW_STEPS(const std::string& presetName, cmJSONState* state)
+void NO_WORKFLOW_STEPS(std::string const& presetName, cmJSONState* state)
 {
   state->AddError(
     cmStrCat("No workflow steps specified for \"", presetName, "\""));
 }
 
-void FIRST_WORKFLOW_STEP_NOT_CONFIGURE(const std::string& stepName,
+void FIRST_WORKFLOW_STEP_NOT_CONFIGURE(std::string const& stepName,
                                        cmJSONState* state)
 {
   state->AddError(cmStrCat("First workflow step \"", stepName,
                            "\" must be a configure step"));
 }
 
-void CONFIGURE_WORKFLOW_STEP_NOT_FIRST(const std::string& stepName,
+void CONFIGURE_WORKFLOW_STEP_NOT_FIRST(std::string const& stepName,
                                        cmJSONState* state)
 {
   state->AddError(cmStrCat("Configure workflow step \"", stepName,
                            "\" must be the first step"));
 }
 
-void WORKFLOW_STEP_UNREACHABLE_FROM_FILE(const std::string& workflowStep,
+void WORKFLOW_STEP_UNREACHABLE_FROM_FILE(std::string const& workflowStep,
                                          cmJSONState* state)
 {
   state->AddError(cmStrCat("Workflow step \"", workflowStep,
@@ -240,7 +240,7 @@ void TRACE_UNSUPPORTED(cmJSONState* state)
 
 JsonErrors::ErrorGenerator UNRECOGNIZED_VERSION_RANGE(int min, int max)
 {
-  return [min, max](const Json::Value* value, cmJSONState* state) -> void {
+  return [min, max](Json::Value const* value, cmJSONState* state) -> void {
     state->AddErrorAtValue(cmStrCat("Unrecognized \"version\" ",
                                     value->asString(), ": must be >=", min,
                                     " and <=", max),
@@ -249,9 +249,9 @@ JsonErrors::ErrorGenerator UNRECOGNIZED_VERSION_RANGE(int min, int max)
 }
 
 JsonErrors::ErrorGenerator UNRECOGNIZED_CMAKE_VERSION(
-  const std::string& version, int current, int required)
+  std::string const& version, int current, int required)
 {
-  return [version, current, required](const Json::Value* value,
+  return [version, current, required](Json::Value const* value,
                                       cmJSONState* state) -> void {
     state->AddErrorAtValue(cmStrCat("\"cmakeMinimumRequired\" ", version,
                                     " version ", required,
@@ -260,7 +260,7 @@ JsonErrors::ErrorGenerator UNRECOGNIZED_CMAKE_VERSION(
   };
 }
 
-void INVALID_PRESET_NAME(const Json::Value* value, cmJSONState* state)
+void INVALID_PRESET_NAME(Json::Value const* value, cmJSONState* state)
 {
   std::string errMsg = "Invalid Preset Name";
   if (value && value->isConvertibleTo(Json::ValueType::stringValue) &&
@@ -270,7 +270,7 @@ void INVALID_PRESET_NAME(const Json::Value* value, cmJSONState* state)
   state->AddErrorAtValue(errMsg, value);
 }
 
-void INVALID_CONDITION(const Json::Value* value, cmJSONState* state)
+void INVALID_CONDITION(Json::Value const* value, cmJSONState* state)
 {
   state->AddErrorAtValue(
     cmStrCat("Invalid condition for preset \"", getPresetName(state), "\""),
@@ -278,42 +278,42 @@ void INVALID_CONDITION(const Json::Value* value, cmJSONState* state)
 }
 
 JsonErrors::ErrorGenerator INVALID_CONDITION_OBJECT(
-  JsonErrors::ObjectError errorType, const Json::Value::Members& extraFields)
+  JsonErrors::ObjectError errorType, Json::Value::Members const& extraFields)
 {
   return JsonErrors::INVALID_NAMED_OBJECT(
-    [](const Json::Value*, cmJSONState* state) -> std::string {
+    [](Json::Value const*, cmJSONState* state) -> std::string {
       return cmStrCat(" condition for preset \"", getPresetName(state), "\"");
     })(errorType, extraFields);
 }
 
 JsonErrors::ErrorGenerator INVALID_VARIABLE_OBJECT(
-  JsonErrors::ObjectError errorType, const Json::Value::Members& extraFields)
+  JsonErrors::ObjectError errorType, Json::Value::Members const& extraFields)
 {
   return JsonErrors::INVALID_NAMED_OBJECT(
-    [](const Json::Value*, cmJSONState* state) -> std::string {
+    [](Json::Value const*, cmJSONState* state) -> std::string {
       return getVariableName(state);
     })(errorType, extraFields);
 }
 
 JsonErrors::ErrorGenerator INVALID_PRESET_OBJECT(
-  JsonErrors::ObjectError errorType, const Json::Value::Members& extraFields)
+  JsonErrors::ObjectError errorType, Json::Value::Members const& extraFields)
 {
   return JsonErrors::INVALID_NAMED_OBJECT(
-    [](const Json::Value*, cmJSONState*) -> std::string { return "Preset"; })(
+    [](Json::Value const*, cmJSONState*) -> std::string { return "Preset"; })(
     errorType, extraFields);
 }
 
 JsonErrors::ErrorGenerator INVALID_ROOT_OBJECT(
-  JsonErrors::ObjectError errorType, const Json::Value::Members& extraFields)
+  JsonErrors::ObjectError errorType, Json::Value::Members const& extraFields)
 {
   return JsonErrors::INVALID_NAMED_OBJECT(
-    [](const Json::Value*, cmJSONState*) -> std::string {
+    [](Json::Value const*, cmJSONState*) -> std::string {
       return "root object";
     })(errorType, extraFields);
 }
 
-void PRESET_MISSING_FIELD(const std::string& presetName,
-                          const std::string& missingField, cmJSONState* state)
+void PRESET_MISSING_FIELD(std::string const& presetName,
+                          std::string const& missingField, cmJSONState* state)
 {
   state->AddError(cmStrCat("Preset \"", presetName, "\" missing field \"",
                            missingField, "\""));

@@ -29,7 +29,7 @@ using TraceEnableMode = cmCMakePresetsGraph::TraceEnableMode;
 using TraceOutputFormat = cmTraceEnums::TraceOutputFormat;
 
 bool ArchToolsetStrategyHelper(cm::optional<ArchToolsetStrategy>& out,
-                               const Json::Value* value, cmJSONState* state)
+                               Json::Value const* value, cmJSONState* state)
 {
   if (!value) {
     out = cm::nullopt;
@@ -55,7 +55,7 @@ bool ArchToolsetStrategyHelper(cm::optional<ArchToolsetStrategy>& out,
   return false;
 }
 
-std::function<bool(ConfigurePreset&, const Json::Value*, cmJSONState*)>
+std::function<bool(ConfigurePreset&, Json::Value const*, cmJSONState*)>
 ArchToolsetHelper(
   std::string ConfigurePreset::*valueField,
   cm::optional<ArchToolsetStrategy> ConfigurePreset::*strategyField)
@@ -67,7 +67,7 @@ ArchToolsetHelper(
             cmCMakePresetsGraphInternal::PresetStringHelper, false)
       .Bind("strategy", strategyField, ArchToolsetStrategyHelper, false);
   return [valueField, strategyField,
-          objectHelper](ConfigurePreset& out, const Json::Value* value,
+          objectHelper](ConfigurePreset& out, Json::Value const* value,
                         cmJSONState* state) -> bool {
     if (!value) {
       (out.*valueField).clear();
@@ -96,7 +96,7 @@ auto const ToolsetHelper = ArchToolsetHelper(
   &ConfigurePreset::Toolset, &ConfigurePreset::ToolsetStrategy);
 
 bool TraceEnableModeHelper(cm::optional<TraceEnableMode>& out,
-                           const Json::Value* value, cmJSONState* state)
+                           Json::Value const* value, cmJSONState* state)
 {
   if (!value) {
     out = cm::nullopt;
@@ -123,7 +123,7 @@ bool TraceEnableModeHelper(cm::optional<TraceEnableMode>& out,
 }
 
 bool TraceOutputFormatHelper(cm::optional<TraceOutputFormat>& out,
-                             const Json::Value* value, cmJSONState* state)
+                             Json::Value const* value, cmJSONState* state)
 {
   if (!value) {
     out = cm::nullopt;
@@ -149,7 +149,7 @@ bool TraceOutputFormatHelper(cm::optional<TraceOutputFormat>& out,
 
 auto const VariableStringHelper = JSONHelperBuilder::String();
 
-bool VariableValueHelper(std::string& out, const Json::Value* value,
+bool VariableValueHelper(std::string& out, Json::Value const* value,
                          cmJSONState* state)
 {
   if (!value) {
@@ -171,7 +171,7 @@ auto const VariableObjectHelper =
     .Bind("type"_s, &CacheVariable::Type, VariableStringHelper, false)
     .Bind("value"_s, &CacheVariable::Value, VariableValueHelper);
 
-bool VariableHelper(cm::optional<CacheVariable>& out, const Json::Value* value,
+bool VariableHelper(cm::optional<CacheVariable>& out, Json::Value const* value,
                     cmJSONState* state)
 {
   if (value->isBool()) {
@@ -294,7 +294,7 @@ auto const ConfigurePresetHelper =
 
 namespace cmCMakePresetsGraphInternal {
 bool ConfigurePresetsHelper(std::vector<ConfigurePreset>& out,
-                            const Json::Value* value, cmJSONState* state)
+                            Json::Value const* value, cmJSONState* state)
 {
   static auto const helper = JSONHelperBuilder::Vector<ConfigurePreset>(
     cmCMakePresetsErrors::INVALID_PRESETS, ConfigurePresetHelper);

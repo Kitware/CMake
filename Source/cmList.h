@@ -57,7 +57,7 @@ public:
   using reverse_iterator = container_type::reverse_iterator;
   using const_reverse_iterator = container_type::const_reverse_iterator;
 
-  static const size_type npos = static_cast<size_type>(-1);
+  static size_type const npos = static_cast<size_type>(-1);
 
   static cm::string_view element_separator;
 
@@ -73,7 +73,7 @@ public:
   };
 
   cmList() = default;
-  cmList(const cmList&) = default;
+  cmList(cmList const&) = default;
   cmList(cmList&&) = default;
 
   cmList(cm::string_view value,
@@ -119,13 +119,13 @@ public:
     : cmList(first, last, ExpandElements::Yes, emptyElements)
   {
   }
-  cmList(const container_type& init,
+  cmList(container_type const& init,
          ExpandElements expandElements = ExpandElements::Yes,
          EmptyElements emptyElements = EmptyElements::No)
     : cmList(init.begin(), init.end(), expandElements, emptyElements)
   {
   }
-  cmList(const container_type& init, EmptyElements emptyElements)
+  cmList(container_type const& init, EmptyElements emptyElements)
     : cmList(init, ExpandElements::Yes, emptyElements)
   {
   }
@@ -146,7 +146,7 @@ public:
 
   ~cmList() = default;
 
-  cmList& operator=(const cmList&) = default;
+  cmList& operator=(cmList const&) = default;
   cmList& operator=(cmList&&) = default;
 
   cmList& operator=(cm::string_view value)
@@ -170,7 +170,7 @@ public:
     return *this;
   }
 
-  cmList& operator=(const container_type& init)
+  cmList& operator=(container_type const& init)
   {
     this->assign(init);
     return *this;
@@ -238,13 +238,13 @@ public:
   {
     this->assign(first, last, ExpandElements::Yes, emptyElements);
   }
-  void assign(const cmList& init,
+  void assign(cmList const& init,
               ExpandElements expandElements = ExpandElements::No,
               EmptyElements emptyElements = EmptyElements::No)
   {
     this->assign(init.begin(), init.end(), expandElements, emptyElements);
   }
-  void assign(const cmList& init, EmptyElements emptyElements)
+  void assign(cmList const& init, EmptyElements emptyElements)
   {
     this->assign(init, ExpandElements::No, emptyElements);
   }
@@ -261,13 +261,13 @@ public:
   {
     this->assign(std::move(init), ExpandElements::No, emptyElements);
   }
-  void assign(const container_type& init,
+  void assign(container_type const& init,
               ExpandElements expandElements = ExpandElements::Yes,
               EmptyElements emptyElements = EmptyElements::No)
   {
     this->assign(init.begin(), init.end(), expandElements, emptyElements);
   }
-  void assign(const container_type& init, EmptyElements emptyElements)
+  void assign(container_type const& init, EmptyElements emptyElements)
   {
     this->assign(init, ExpandElements::Yes, emptyElements);
   }
@@ -296,7 +296,7 @@ public:
   }
 
   operator container_type&() & noexcept { return this->Values; }
-  operator const container_type&() const& noexcept { return this->Values; }
+  operator container_type const&() const& noexcept { return this->Values; }
   operator container_type&&() && noexcept { return std::move(this->Values); }
 
   // Element access
@@ -354,7 +354,7 @@ public:
   }
 
   container_type& data() noexcept { return this->Values; }
-  const container_type& data() const noexcept { return this->Values; }
+  container_type const& data() const noexcept { return this->Values; }
 
   // Iterators
   iterator begin() noexcept { return this->Values.begin(); }
@@ -443,14 +443,14 @@ public:
   {
     return this->insert(pos, first, last, ExpandElements::Yes, emptyElements);
   }
-  iterator insert(const_iterator pos, const cmList& values,
+  iterator insert(const_iterator pos, cmList const& values,
                   ExpandElements expandElements = ExpandElements::No,
                   EmptyElements emptyElements = EmptyElements::No)
   {
     return this->insert(pos, values.begin(), values.end(), expandElements,
                         emptyElements);
   }
-  iterator insert(const_iterator pos, const cmList& values,
+  iterator insert(const_iterator pos, cmList const& values,
                   EmptyElements emptyElements)
   {
     return this->insert(pos, values, ExpandElements::No, emptyElements);
@@ -472,14 +472,14 @@ public:
     return this->insert(pos, std::move(values), ExpandElements::No,
                         emptyElements);
   }
-  iterator insert(const_iterator pos, const container_type& values,
+  iterator insert(const_iterator pos, container_type const& values,
                   ExpandElements expandElements = ExpandElements::Yes,
                   EmptyElements emptyElements = EmptyElements::No)
   {
     return this->insert(pos, values.begin(), values.end(), expandElements,
                         emptyElements);
   }
-  iterator insert(const_iterator pos, const container_type& values,
+  iterator insert(const_iterator pos, container_type const& values,
                   EmptyElements emptyElements)
   {
     return this->insert(pos, values, ExpandElements::Yes, emptyElements);
@@ -554,14 +554,14 @@ public:
   {
     return this->append(first, last, ExpandElements::Yes, emptyElements);
   }
-  iterator append(const cmList& values,
+  iterator append(cmList const& values,
                   ExpandElements expandElements = ExpandElements::No,
                   EmptyElements emptyElements = EmptyElements::No)
   {
     return this->append(values.begin(), values.end(), expandElements,
                         emptyElements);
   }
-  iterator append(const cmList& values, EmptyElements emptyElements)
+  iterator append(cmList const& values, EmptyElements emptyElements)
   {
     return this->append(values, ExpandElements::No, emptyElements);
   }
@@ -580,14 +580,14 @@ public:
   {
     return this->append(std::move(values), ExpandElements::No, emptyElements);
   }
-  iterator append(const container_type& values,
+  iterator append(container_type const& values,
                   ExpandElements expandElements = ExpandElements::Yes,
                   EmptyElements emptyElements = EmptyElements::No)
   {
     return this->append(values.begin(), values.end(), expandElements,
                         emptyElements);
   }
-  iterator append(const container_type& values, EmptyElements emptyElements)
+  iterator append(container_type const& values, EmptyElements emptyElements)
   {
     return this->append(values, ExpandElements::Yes, emptyElements);
   }
@@ -659,14 +659,14 @@ public:
   {
     return this->prepend(first, last, ExpandElements::Yes, emptyElements);
   }
-  iterator prepend(const cmList& values,
+  iterator prepend(cmList const& values,
                    ExpandElements expandElements = ExpandElements::No,
                    EmptyElements emptyElements = EmptyElements::No)
   {
     return this->prepend(values.begin(), values.end(), expandElements,
                          emptyElements);
   }
-  iterator prepend(const cmList& values, EmptyElements emptyElements)
+  iterator prepend(cmList const& values, EmptyElements emptyElements)
   {
     return this->prepend(values, ExpandElements::No, emptyElements);
   }
@@ -685,14 +685,14 @@ public:
   {
     return this->prepend(std::move(values), ExpandElements::No, emptyElements);
   }
-  iterator prepend(const container_type& values,
+  iterator prepend(container_type const& values,
                    ExpandElements expandElements = ExpandElements::Yes,
                    EmptyElements emptyElements = EmptyElements::No)
   {
     return this->prepend(values.begin(), values.end(), expandElements,
                          emptyElements);
   }
-  iterator prepend(const container_type& values, EmptyElements emptyElements)
+  iterator prepend(container_type const& values, EmptyElements emptyElements)
   {
     return this->prepend(values, ExpandElements::Yes, emptyElements);
   }
@@ -862,13 +862,13 @@ public:
     {
     }
   };
-  cmList& sort(const SortConfiguration& config = SortConfiguration{});
+  cmList& sort(SortConfiguration const& config = SortConfiguration{});
 
   // exception raised on error during transform operations
   class transform_error : public std::runtime_error
   {
   public:
-    transform_error(const std::string& error)
+    transform_error(std::string const& error)
       : std::runtime_error(error)
     {
     }
@@ -886,7 +886,7 @@ public:
 
     virtual ~TransformSelector() = default;
 
-    virtual const std::string& GetTag() = 0;
+    virtual std::string const& GetTag() = 0;
 
     // method NEW is used to allocate a selector of the needed type.
     // For example:
@@ -1135,11 +1135,11 @@ public:
 
   // Non-members
   // ===========
-  friend bool operator==(const cmList& lhs, const cmList& rhs) noexcept
+  friend bool operator==(cmList const& lhs, cmList const& rhs) noexcept
   {
     return lhs.Values == rhs.Values;
   }
-  friend bool operator!=(const cmList& lhs, const cmList& rhs) noexcept
+  friend bool operator!=(cmList const& lhs, cmList const& rhs) noexcept
   {
     return lhs.Values != rhs.Values;
   }
@@ -1160,7 +1160,7 @@ private:
                                          EmptyElements emptyElements);
   static container_type::iterator Insert(container_type& container,
                                          container_type::const_iterator pos,
-                                         const std::string& value,
+                                         std::string const& value,
                                          ExpandElements expandElements,
                                          EmptyElements emptyElements)
   {
@@ -1223,7 +1223,7 @@ private:
       return std::string{};
     }
 
-    const auto sep = std::string{ glue };
+    auto const sep = std::string{ glue };
 
     std::string joined = cmList::ToString(*first);
     for (auto it = std::next(first); it != last; ++it) {
@@ -1301,7 +1301,7 @@ cmList::TransformSelector::New<cmList::TransformSelector::REGEX>(
 // Non-member functions
 // ====================
 inline std::vector<std::string>& operator+=(std::vector<std::string>& l,
-                                            const cmList& r)
+                                            cmList const& r)
 {
   l.insert(l.end(), r.begin(), r.end());
   return l;
@@ -1323,7 +1323,7 @@ inline void swap(cmList& lhs, cmList& rhs) noexcept
 } // namespace std
 
 namespace cm {
-inline void erase(cmList& list, const std::string& value)
+inline void erase(cmList& list, std::string const& value)
 {
   list.erase(std::remove(list.begin(), list.end(), value), list.end());
 }

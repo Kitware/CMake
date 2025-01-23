@@ -26,7 +26,7 @@ class cmGraphVizWriter : public cmLinkItemGraphVisitor
 {
 public:
   cmGraphVizWriter(std::string const& fileName,
-                   const cmGlobalGenerator* globalGenerator);
+                   cmGlobalGenerator const* globalGenerator);
   ~cmGraphVizWriter() override;
 
   void VisitGraph(std::string const& name) override;
@@ -39,8 +39,8 @@ public:
   void OnIndirectLink(cmLinkItem const& depender,
                       cmLinkItem const& dependee) override;
 
-  void ReadSettings(const std::string& settingsFileName,
-                    const std::string& fallbackSettingsFileName);
+  void ReadSettings(std::string const& settingsFileName,
+                    std::string const& fallbackSettingsFileName);
 
   void Write();
 
@@ -80,18 +80,18 @@ private:
                        cmLinkItem const& dependeeTargetName,
                        std::string const& edgeStyle);
 
-  void FindAllConnections(const ConnectionsMap& connectionMap,
-                          const cmLinkItem& rootItem,
+  void FindAllConnections(ConnectionsMap const& connectionMap,
+                          cmLinkItem const& rootItem,
                           Connections& extendedCons,
                           std::set<cmLinkItem>& visitedItems);
 
-  void FindAllConnections(const ConnectionsMap& connectionMap,
-                          const cmLinkItem& rootItem,
+  void FindAllConnections(ConnectionsMap const& connectionMap,
+                          cmLinkItem const& rootItem,
                           Connections& extendedCons);
 
   template <typename DirFunc>
-  void WritePerTargetConnections(const ConnectionsMap& connections,
-                                 const std::string& fileNameSuffix = "");
+  void WritePerTargetConnections(ConnectionsMap const& connections,
+                                 std::string const& fileNameSuffix = "");
 
   bool ItemExcluded(cmLinkItem const& item);
   bool ItemNameFilteredOut(std::string const& itemName);

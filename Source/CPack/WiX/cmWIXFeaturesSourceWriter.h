@@ -19,10 +19,10 @@ public:
   void CreateCMakePackageRegistryEntry(std::string const& package,
                                        std::string const& upgradeGuid);
 
-  void EmitFeatureForComponentGroup(const cmCPackComponentGroup& group,
+  void EmitFeatureForComponentGroup(cmCPackComponentGroup const& group,
                                     cmWIXPatch& patch);
 
-  void EmitFeatureForComponent(const cmCPackComponent& component,
+  void EmitFeatureForComponent(cmCPackComponent const& component,
                                cmWIXPatch& patch);
 
   void EmitComponentRef(std::string const& id);

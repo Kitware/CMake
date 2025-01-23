@@ -289,7 +289,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetSourceFilePaths(
 }
 
 void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*>& files,
-                                       const std::string& config) const
+                                       std::string const& config) const
 {
   std::vector<BT<cmSourceFile*>> tmp = this->GetSourceFiles(config);
   files.reserve(tmp.size());
@@ -311,7 +311,7 @@ std::vector<BT<cmSourceFile*>> cmGeneratorTarget::GetSourceFiles(
 }
 
 void cmGeneratorTarget::GetSourceFilesWithoutObjectLibraries(
-  std::vector<cmSourceFile*>& files, const std::string& config) const
+  std::vector<cmSourceFile*>& files, std::string const& config) const
 {
   std::vector<BT<cmSourceFile*>> tmp =
     this->GetSourceFilesWithoutObjectLibraries(config);

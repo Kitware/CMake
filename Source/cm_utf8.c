@@ -39,7 +39,7 @@ static unsigned int const cm_utf8_min[7] = {
   0, 0, 1u << 7, 1u << 11, 1u << 16, 1u << 21, 1u << 26 /*, 1u<<31 */
 };
 
-const char* cm_utf8_decode_character(const char* first, const char* last,
+char const* cm_utf8_decode_character(char const* first, char const* last,
                                      unsigned int* pc)
 {
   /* We need at least one byte.  */
@@ -93,14 +93,14 @@ const char* cm_utf8_decode_character(const char* first, const char* last,
   }
 }
 
-int cm_utf8_is_valid(const char* s)
+int cm_utf8_is_valid(char const* s)
 {
   if (!s) {
     return 0;
   }
 
-  const char* last = s + strlen(s);
-  const char* pos = s;
+  char const* last = s + strlen(s);
+  char const* pos = s;
   unsigned int pc;
 
   while (pos != last && (pos = cm_utf8_decode_character(pos, last, &pc))) {

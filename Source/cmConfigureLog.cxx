@@ -28,7 +28,7 @@ cmConfigureLog::cmConfigureLog(std::string logDir,
   , LogVersions(std::move(logVersions))
 {
   // Always emit events for the latest log version.
-  static const unsigned long LatestLogVersion = 1;
+  static unsigned long const LatestLogVersion = 1;
   if (!cm::contains(this->LogVersions, LatestLogVersion)) {
     this->LogVersions.emplace_back(LatestLogVersion);
   }
@@ -196,7 +196,7 @@ void cmConfigureLog::WriteValue(cm::string_view key,
 void cmConfigureLog::WriteValue(cm::string_view key,
                                 std::map<std::string, std::string> const& map)
 {
-  static const std::string rawKeyChars = //
+  static std::string const rawKeyChars = //
     "ABCDEFGHIJKLMNOPQRSTUVWXYZ"         //
     "abcdefghijklmnopqrstuvwxyz"         //
     "0123456789"                         //

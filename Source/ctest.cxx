@@ -19,14 +19,14 @@
 #include "CTest/cmCTestLaunch.h"
 
 namespace {
-const cmDocumentationEntry cmDocumentationName = {
+cmDocumentationEntry const cmDocumentationName = {
   {},
   "  ctest - Testing driver provided by CMake."
 };
 
-const cmDocumentationEntry cmDocumentationUsage = { {}, "  ctest [options]" };
+cmDocumentationEntry const cmDocumentationUsage = { {}, "  ctest [options]" };
 
-const cmDocumentationEntry cmDocumentationOptions[] = {
+cmDocumentationEntry const cmDocumentationOptions[] = {
   { "--preset <preset>, --preset=<preset>",
     "Read arguments from a test preset." },
   { "--list-presets", "List available test presets." },

@@ -23,7 +23,7 @@ using std::erase_if;
 #else
 
 template <typename T, typename Allocator, typename V>
-inline void erase(std::deque<T, Allocator>& cont, const V& value)
+inline void erase(std::deque<T, Allocator>& cont, V const& value)
 {
   cont.erase(std::remove(cont.begin(), cont.end(), value), cont.end());
 }

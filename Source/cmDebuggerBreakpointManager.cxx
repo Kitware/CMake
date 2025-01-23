@@ -22,7 +22,7 @@ cmDebuggerBreakpointManager::cmDebuggerBreakpointManager(
   : DapSession(dapSession)
 {
   // https://microsoft.github.io/debug-adapter-protocol/specification#Requests_SetBreakpoints
-  DapSession->registerHandler([&](const dap::SetBreakpointsRequest& request) {
+  DapSession->registerHandler([&](dap::SetBreakpointsRequest const& request) {
     return HandleSetBreakpointsRequest(request);
   });
 }
@@ -76,8 +76,8 @@ cmDebuggerBreakpointManager::HandleSetBreakpointsRequest(
 
   auto sourcePath =
     cmSystemTools::GetActualCaseForPath(request.source.path.value());
-  const dap::array<dap::SourceBreakpoint> defaultValue{};
-  const auto& breakpoints = request.breakpoints.value(defaultValue);
+  dap::array<dap::SourceBreakpoint> const defaultValue{};
+  auto const& breakpoints = request.breakpoints.value(defaultValue);
 
   if (Breakpoints.find(sourcePath) != Breakpoints.end()) {
     Breakpoints[sourcePath].clear();
@@ -173,7 +173,7 @@ std::vector<int64_t> cmDebuggerBreakpointManager::GetBreakpoints(
   std::string const& sourcePath, int64_t line)
 {
   std::unique_lock<std::mutex> lock(Mutex);
-  const auto& all = Breakpoints[sourcePath];
+  auto const& all = Breakpoints[sourcePath];
   std::vector<int64_t> breakpoints;
   if (all.empty()) {
     return breakpoints;
@@ -182,7 +182,7 @@ std::vector<int64_t> cmDebuggerBreakpointManager::GetBreakpoints(
   auto it = all.begin();
 
   while ((it = std::find_if(
-            it, all.end(), [&](const cmDebuggerSourceBreakpoint& breakpoint) {
+            it, all.end(), [&](cmDebuggerSourceBreakpoint const& breakpoint) {
               return (breakpoint.GetIsValid() && breakpoint.GetLine() == line);
             })) != all.end()) {
     breakpoints.emplace_back(it->GetId());

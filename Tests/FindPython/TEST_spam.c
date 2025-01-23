@@ -3,7 +3,7 @@
 
 static PyObject* spam_system(PyObject* self, PyObject* args)
 {
-  const char* command;
+  char const* command;
   int sts;
 
   if (!PyArg_ParseTuple(args, "s", &command))

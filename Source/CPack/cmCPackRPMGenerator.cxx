@@ -49,7 +49,7 @@ void cmCPackRPMGenerator::AddGeneratedPackageNames()
 {
   // add the generated packages to package file names list
   std::string fileNames(this->GetOption("GEN_CPACK_OUTPUT_FILES"));
-  const char sep = ';';
+  char const sep = ';';
   std::string::size_type pos1 = 0;
   std::string::size_type pos2 = fileNames.find(sep, pos1 + 1);
   while (pos2 != std::string::npos) {
@@ -107,7 +107,7 @@ int cmCPackRPMGenerator::PackageOnePack(std::string const& initialToplevel,
 }
 
 std::string cmCPackRPMGenerator::GetSanitizedDirOrFileName(
-  const std::string& name, bool isFullName) const
+  std::string const& name, bool isFullName) const
 {
   auto sanitizedName =
     this->cmCPackGenerator::GetSanitizedDirOrFileName(name, isFullName);
@@ -363,7 +363,7 @@ int cmCPackRPMGenerator::PackageComponents(bool ignoreGroup)
 }
 
 int cmCPackRPMGenerator::PackageComponentsAllInOne(
-  const std::string& compInstDirName)
+  std::string const& compInstDirName)
 {
   int retval = 1;
   /* Reset package file name list it will be populated during the
@@ -445,7 +445,7 @@ bool cmCPackRPMGenerator::SupportsComponentInstallation() const
 }
 
 std::string cmCPackRPMGenerator::GetComponentInstallSuffix(
-  const std::string& componentName)
+  std::string const& componentName)
 {
   if (this->componentPackageMethod == ONE_PACKAGE_PER_COMPONENT) {
     return componentName;
@@ -465,7 +465,7 @@ std::string cmCPackRPMGenerator::GetComponentInstallSuffix(
 }
 
 std::string cmCPackRPMGenerator::GetComponentInstallDirNameSuffix(
-  const std::string& componentName)
+  std::string const& componentName)
 {
   return this->GetSanitizedDirOrFileName(
     this->GetComponentInstallSuffix(componentName));

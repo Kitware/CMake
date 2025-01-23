@@ -39,7 +39,7 @@ cmInstallScriptHandler::cmInstallScriptHandler(std::string _binaryDir,
   : binaryDir(std::move(_binaryDir))
   , component(std::move(_component))
 {
-  const std::string& file =
+  std::string const& file =
     cmStrCat(this->binaryDir, "/CMakeFiles/InstallScripts.json");
   this->parallel = false;
 
@@ -180,7 +180,7 @@ int cmInstallScriptHandler::Install(unsigned int j,
   return 0;
 }
 
-InstallScript::InstallScript(const std::vector<std::string>& cmd)
+InstallScript::InstallScript(std::vector<std::string> const& cmd)
 {
   this->name = cmSystemTools::RelativePath(
     cmSystemTools::GetLogicalWorkingDirectory(), cmd.back());

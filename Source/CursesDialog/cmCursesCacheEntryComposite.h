@@ -14,9 +14,9 @@ class cmState;
 class cmCursesCacheEntryComposite
 {
 public:
-  cmCursesCacheEntryComposite(const std::string& key, int labelwidth,
+  cmCursesCacheEntryComposite(std::string const& key, int labelwidth,
                               int entrywidth);
-  cmCursesCacheEntryComposite(const std::string& key, cmState* state,
+  cmCursesCacheEntryComposite(std::string const& key, cmState* state,
                               bool isNew, int labelwidth, int entrywidth);
   ~cmCursesCacheEntryComposite();
 
@@ -28,7 +28,7 @@ public:
   cmCursesCacheEntryComposite& operator=(cmCursesCacheEntryComposite&&) =
     default;
 
-  const char* GetValue();
+  char const* GetValue();
 
   friend class cmCursesMainForm;
 

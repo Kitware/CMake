@@ -10,7 +10,7 @@
 #  include <dl.h>
 
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
-  const std::string& libname)
+  std::string const& libname)
 {
   return shl_load(libname.c_str(), BIND_DEFERRED | DYNAMIC_PATH, 0L);
 }
@@ -24,7 +24,7 @@ int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
 }
 
 DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
-  DynamicLoader::LibraryHandle lib, const std::string& sym)
+  DynamicLoader::LibraryHandle lib, std::string const& sym)
 {
   void* addr;
   int status;
@@ -45,7 +45,7 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
 #  include <mach-o/dyld.h>
 
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
-  const std::string& libname)
+  std::string const& libname)
 {
   NSObjectFileImageReturnCode rc;
   NSObjectFileImage image = 0;
@@ -69,7 +69,7 @@ int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
 }
 
 DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
-  DynamicLoader::LibraryHandle lib, const std::string& sym)
+  DynamicLoader::LibraryHandle lib, std::string const& sym)
 {
   void* result = 0;
   // Need to prepend symbols with '_' on Apple-gcc compilers
@@ -90,7 +90,7 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
 #  include <stdio.h>
 
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
-  const std::string& libname)
+  std::string const& libname)
 {
   DynamicLoader::LibraryHandle lh;
   int length = MultiByteToWideChar(CP_UTF8, 0, libname.c_str(), -1, NULL, 0);
@@ -108,15 +108,15 @@ int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
 }
 
 DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
-  DynamicLoader::LibraryHandle lib, const std::string& sym)
+  DynamicLoader::LibraryHandle lib, std::string const& sym)
 {
   void* result;
 #  if defined(__BORLANDC__) || defined(__WATCOMC__)
   // Need to prepend symbols with '_'
   std::string ssym = '_' + sym;
-  const char* rsym = ssym.c_str();
+  char const* rsym = ssym.c_str();
 #  else
-  const char* rsym = sym.c_str();
+  char const* rsym = sym.c_str();
 #  endif
   result = (void*)GetProcAddress(lib, rsym);
 // Hack to cast pointer-to-data to pointer-to-function.
@@ -134,7 +134,7 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
 static image_id last_dynamic_err = B_OK;
 
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
-  const std::string& libname)
+  std::string const& libname)
 {
   // image_id's are integers, errors are negative. Add one just in case we
   //  get a valid image_id of zero (is that even possible?).
@@ -165,7 +165,7 @@ int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
 }
 
 DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
-  DynamicLoader::LibraryHandle lib, const std::string& sym)
+  DynamicLoader::LibraryHandle lib, std::string const& sym)
 {
   // Hack to cast pointer-to-data to pointer-to-function.
   union
@@ -199,7 +199,7 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
 #  include <malloc.h>
 
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
-  const std::string& libname)
+  std::string const& libname)
 {
   char* name = (char*)calloc(1, libname.size() + 1);
   dld_init(program_invocation_name);
@@ -216,7 +216,7 @@ int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
 }
 
 DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
-  DynamicLoader::LibraryHandle lib, const std::string& sym)
+  DynamicLoader::LibraryHandle lib, std::string const& sym)
 {
   // Hack to cast pointer-to-data to pointer-to-function.
   union
@@ -232,7 +232,7 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
 #  include <dlfcn.h>
 
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(
-  const std::string& libname)
+  std::string const& libname)
 {
   return dlopen(libname.c_str(), RTLD_LAZY);
 }
@@ -248,7 +248,7 @@ int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
 }
 
 DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
-  DynamicLoader::LibraryHandle lib, const std::string& sym)
+  DynamicLoader::LibraryHandle lib, std::string const& sym)
 {
   // Hack to cast pointer-to-data to pointer-to-function.
   union

@@ -15,7 +15,7 @@
 
 cmSourceFileLocation::cmSourceFileLocation() = default;
 
-cmSourceFileLocation::cmSourceFileLocation(const cmSourceFileLocation& loc)
+cmSourceFileLocation::cmSourceFileLocation(cmSourceFileLocation const& loc)
   : Makefile(loc.Makefile)
 {
   this->AmbiguousDirectory = loc.AmbiguousDirectory;
@@ -25,7 +25,7 @@ cmSourceFileLocation::cmSourceFileLocation(const cmSourceFileLocation& loc)
 }
 
 cmSourceFileLocation::cmSourceFileLocation(cmMakefile const* mf,
-                                           const std::string& name,
+                                           std::string const& name,
                                            cmSourceFileLocationKind kind)
   : Makefile(mf)
 {
@@ -86,7 +86,7 @@ void cmSourceFileLocation::DirectoryUseBinary()
   }
 }
 
-void cmSourceFileLocation::UpdateExtension(const std::string& name)
+void cmSourceFileLocation::UpdateExtension(std::string const& name)
 {
   assert(this->Makefile);
   // Check the extension.
@@ -171,8 +171,8 @@ bool cmSourceFileLocation::Matches(cmSourceFileLocation const& loc)
       return false;
     }
   } else {
-    const cmSourceFileLocation* loc1;
-    const cmSourceFileLocation* loc2;
+    cmSourceFileLocation const* loc1;
+    cmSourceFileLocation const* loc2;
     if (this->AmbiguousExtension) {
       // Only "this" extension is ambiguous.
       loc1 = &loc;

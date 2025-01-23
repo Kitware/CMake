@@ -23,7 +23,7 @@ class cmFilePathChecksum
 {
 public:
   /// Maximum number of characters to use from the path checksum
-  static const size_t partLengthDefault = 10;
+  static size_t const partLengthDefault = 10;
 
   /// @brief Parent directories are empty
   cmFilePathChecksum();

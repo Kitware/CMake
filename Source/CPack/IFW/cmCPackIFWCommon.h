@@ -28,32 +28,32 @@ public:
 public:
   // Internal implementation
 
-  cmValue GetOption(const std::string& op) const;
-  bool IsOn(const std::string& op) const;
-  bool IsSetToOff(const std::string& op) const;
-  bool IsSetToEmpty(const std::string& op) const;
+  cmValue GetOption(std::string const& op) const;
+  bool IsOn(std::string const& op) const;
+  bool IsSetToOff(std::string const& op) const;
+  bool IsSetToEmpty(std::string const& op) const;
 
   /**
    * Compare \a version with QtIFW framework version
    */
-  bool IsVersionLess(const char* version) const;
+  bool IsVersionLess(char const* version) const;
 
   /**
    * Compare \a version with QtIFW framework version
    */
-  bool IsVersionGreater(const char* version) const;
+  bool IsVersionGreater(char const* version) const;
 
   /**
    * Compare \a version with QtIFW framework version
    */
-  bool IsVersionEqual(const char* version) const;
+  bool IsVersionEqual(char const* version) const;
 
   /** Expand the list argument containing the map of the key-value pairs.
    *  If the number of elements is odd, then the first value is used as the
    *  default value with an empty key.
    *  Any values with the same keys will be permanently overwritten.
    */
-  static void ExpandListArgument(const std::string& arg,
+  static void ExpandListArgument(std::string const& arg,
                                  std::map<std::string, std::string>& argsOut);
 
   /** Expand the list argument containing the multimap of the key-value pairs.
@@ -61,7 +61,7 @@ public:
    *  default value with an empty key.
    */
   static void ExpandListArgument(
-    const std::string& arg, std::multimap<std::string, std::string>& argsOut);
+    std::string const& arg, std::multimap<std::string, std::string>& argsOut);
 
   cmCPackIFWGenerator* Generator;
 

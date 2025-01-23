@@ -8,7 +8,7 @@
 #define SLN_EXTENSION "sln-file"
 
 static bool parsedRight(cmVisualStudioSlnParser& parser,
-                        const std::string& file, cmSlnData& data,
+                        std::string const& file, cmSlnData& data,
                         cmVisualStudioSlnParser::ParseResult expected =
                           cmVisualStudioSlnParser::ResultOK)
 {
@@ -45,8 +45,8 @@ int testVisualStudioSlnParser(int, char*[])
     if (!parsedRight(parser, "valid", data)) {
       return 1;
     }
-    const std::vector<cmSlnProjectEntry>& projects = data.GetProjects();
-    const char* const names[] = {
+    std::vector<cmSlnProjectEntry> const& projects = data.GetProjects();
+    char const* const names[] = {
       "3rdParty",
       "ALL_BUILD",
       "CMakeLib",
@@ -98,7 +98,7 @@ int testVisualStudioSlnParser(int, char*[])
       "uninstall"
       /* clang-format needs this comment to break after the opening brace */
     };
-    const size_t expectedProjectCount = sizeof(names) / sizeof(*names);
+    size_t const expectedProjectCount = sizeof(names) / sizeof(*names);
     if (projects.size() != expectedProjectCount) {
       std::cerr << "cmVisualStudioSlnParser returned bad number of "
                 << "projects (" << projects.size() << " instead of "
@@ -168,7 +168,7 @@ int testVisualStudioSlnParser(int, char*[])
         return 1;
       }
     }
-    const char* const files[] = {
+    char const* const files[] = {
       "header",         "projectArgs", "topLevel", "projectContents",
       "projectSection", "global",      "unclosed", "strayQuote",
       "strayParen",     "strayQuote2"

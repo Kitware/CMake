@@ -634,7 +634,7 @@ public:
   };
 
   //! convert a string policy ID into a number
-  static bool GetPolicyID(const char* id, /* out */ cmPolicies::PolicyID& pid);
+  static bool GetPolicyID(char const* id, /* out */ cmPolicies::PolicyID& pid);
 
   //! Return whether a policy has been removed.
   static bool IsRemoved(cmPolicies::PolicyID id);

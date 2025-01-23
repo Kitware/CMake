@@ -24,7 +24,7 @@ void RegexExplorer::setStatusColor(QWidget* widget, bool successful)
   widget->setPalette(palette);
 }
 
-void RegexExplorer::on_regularExpression_textChanged(const QString& text)
+void RegexExplorer::on_regularExpression_textChanged(QString const& text)
 {
 #ifdef QT_NO_STL
   m_regex = text.toAscii().constData();
@@ -67,7 +67,7 @@ void RegexExplorer::on_inputText_textChanged()
   std::string matchingText;
 
   if (matchAll->isChecked()) {
-    const char* p = m_text.c_str();
+    char const* p = m_text.c_str();
     while (m_regexParser.find(p)) {
       std::string::size_type l = m_regexParser.start();
       std::string::size_type r = m_regexParser.end();
@@ -133,7 +133,7 @@ void RegexExplorer::clearMatch()
 
 bool RegexExplorer::stripEscapes(std::string& source)
 {
-  const char* in = source.c_str();
+  char const* in = source.c_str();
 
   std::string result;
   result.reserve(source.size());

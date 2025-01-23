@@ -2,12 +2,12 @@
 /* FIXME Get this working */
 /*#include <intdir_config.h>*/
 
-const char* generatorobj_genex_config_definition(void)
+char const* generatorobj_genex_config_definition(void)
 {
   return GENEX_CONFIG_DEFINITION;
 }
 
-const char* generatorobj_genex_config_include_dir(void)
+char const* generatorobj_genex_config_include_dir(void)
 {
   return GENEX_CONFIG_INCLUDE_DIR;
 }

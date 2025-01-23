@@ -24,8 +24,8 @@ public:
     std::vector<std::string> postExcludeRegexes,
     std::vector<std::string> postIncludeFiles,
     std::vector<std::string> postExcludeFiles, std::string libraryComponent,
-    std::string frameworkComponent, bool noInstallRPath, const char* depsVar,
-    const char* rpathPrefix, std::vector<std::string> const& configurations,
+    std::string frameworkComponent, bool noInstallRPath, char const* depsVar,
+    char const* rpathPrefix, std::vector<std::string> const& configurations,
     MessageLevel message, bool exclude_from_all,
     cmListFileBacktrace backtrace);
 
@@ -34,7 +34,7 @@ public:
 protected:
   void GenerateScript(std::ostream& os) override;
 
-  void GenerateScriptForConfig(std::ostream& os, const std::string& config,
+  void GenerateScriptForConfig(std::ostream& os, std::string const& config,
                                Indent indent) override;
 
 private:
@@ -49,7 +49,7 @@ private:
   std::string LibraryComponent;
   std::string FrameworkComponent;
   bool NoInstallRPath;
-  const char* DepsVar;
-  const char* RPathPrefix;
+  char const* DepsVar;
+  char const* RPathPrefix;
   cmLocalGenerator* LocalGenerator = nullptr;
 };

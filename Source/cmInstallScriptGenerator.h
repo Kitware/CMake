@@ -32,7 +32,7 @@ public:
 
 protected:
   void GenerateScriptActions(std::ostream& os, Indent indent) override;
-  void GenerateScriptForConfig(std::ostream& os, const std::string& config,
+  void GenerateScriptForConfig(std::ostream& os, std::string const& config,
                                Indent indent) override;
   void AddScriptInstallRule(std::ostream& os, Indent indent,
                             std::string const& script) const;

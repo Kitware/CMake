@@ -19,7 +19,7 @@
 template <typename FwdIt>
 FwdIt cmRotate(FwdIt first, FwdIt middle, FwdIt last)
 {
-  const typename std::iterator_traits<FwdIt>::difference_type dist =
+  typename std::iterator_traits<FwdIt>::difference_type const dist =
     std::distance(middle, last);
   std::rotate(first, middle, last);
   std::advance(first, dist);
@@ -75,7 +75,7 @@ typename Range::const_iterator cmRemoveIndices(Range& r, InputRange const& rem)
 {
   typename InputRange::const_iterator remIt = rem.begin();
   typename InputRange::const_iterator remEnd = rem.end();
-  const auto rangeEnd = r.end();
+  auto const rangeEnd = r.end();
   if (remIt == remEnd) {
     return rangeEnd;
   }

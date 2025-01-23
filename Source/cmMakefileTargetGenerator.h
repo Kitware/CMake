@@ -33,10 +33,10 @@ class cmMakefileTargetGenerator : public cmCommonTargetGenerator
 public:
   // constructor to set the ivars
   cmMakefileTargetGenerator(cmGeneratorTarget* target);
-  cmMakefileTargetGenerator(const cmMakefileTargetGenerator&) = delete;
+  cmMakefileTargetGenerator(cmMakefileTargetGenerator const&) = delete;
   ~cmMakefileTargetGenerator() override;
 
-  cmMakefileTargetGenerator& operator=(const cmMakefileTargetGenerator&) =
+  cmMakefileTargetGenerator& operator=(cmMakefileTargetGenerator const&) =
     delete;
 
   // construct using this factory call
@@ -60,8 +60,8 @@ public:
 
 protected:
   void GetDeviceLinkFlags(std::string& linkFlags,
-                          const std::string& linkLanguage);
-  void GetTargetLinkFlags(std::string& flags, const std::string& linkLanguage);
+                          std::string const& linkLanguage);
+  void GetTargetLinkFlags(std::string& flags, std::string const& linkLanguage);
 
   // create the file and directory etc
   void CreateRuleFile();
@@ -95,8 +95,8 @@ protected:
     {
     }
 
-    void operator()(cmSourceFile const& source, const char* pkgloc,
-                    const std::string& config) override;
+    void operator()(cmSourceFile const& source, char const* pkgloc,
+                    std::string const& config) override;
 
   private:
     cmMakefileTargetGenerator* Generator;
@@ -112,14 +112,14 @@ protected:
 
   // CUDA device linking.
   void WriteDeviceLinkRule(std::vector<std::string>& commands,
-                           const std::string& output);
+                           std::string const& output);
 
   // write the build rule for a custom command
   void GenerateCustomRuleFile(cmCustomCommandGenerator const& ccg);
 
   // write a rule to drive building of more than one output from
   // another rule
-  void GenerateExtraOutput(const char* out, const char* in,
+  void GenerateExtraOutput(char const* out, char const* in,
                            bool symbolic = false);
 
   void MakeEchoProgress(cmLocalUnixMakefileGenerator3::EchoProgress&) const;
@@ -133,7 +133,7 @@ protected:
                            std::string::size_type limit = std::string::npos);
 
   // write the driver rule to build target outputs
-  void WriteTargetDriverRule(const std::string& main_output, bool relink);
+  void WriteTargetDriverRule(std::string const& main_output, bool relink);
 
   void DriveCustomCommands(std::vector<std::string>& depends);
 
@@ -146,14 +146,14 @@ protected:
 
   // Append link rule dependencies (objects, etc.).
   void AppendLinkDepends(std::vector<std::string>& depends,
-                         const std::string& linkLanguage);
+                         std::string const& linkLanguage);
 
   // Lookup the link rule for this target.
-  std::string GetLinkRule(const std::string& linkRuleVar);
+  std::string GetLinkRule(std::string const& linkRuleVar);
 
   /** Create a script to hold link rules and a command to invoke the
       script at build time.  */
-  void CreateLinkScript(const char* name,
+  void CreateLinkScript(char const* name,
                         std::vector<std::string> const& link_commands,
                         std::vector<std::string>& makefile_commands,
                         std::vector<std::string>& makefile_depends);
@@ -164,7 +164,7 @@ protected:
   /** Create a response file with the given set of options.  Returns
       the relative path from the target build working directory to the
       response file name.  */
-  std::string CreateResponseFile(const std::string& name,
+  std::string CreateResponseFile(std::string const& name,
                                  std::string const& options,
                                  std::vector<std::string>& makefile_depends,
                                  std::string const& language);
@@ -195,8 +195,8 @@ protected:
   /** Add commands for generate def files */
   void GenDefFile(std::vector<std::string>& real_link_commands);
 
-  void AddIncludeFlags(std::string& flags, const std::string& lang,
-                       const std::string& config) override;
+  void AddIncludeFlags(std::string& flags, std::string const& lang,
+                       std::string const& config) override;
 
   /** Return the response flag for the given configuration */
   std::string GetResponseFlag(ResponseFlagFor mode) const;
@@ -261,10 +261,10 @@ protected:
 
   using MultipleOutputPairsType = std::map<std::string, std::string>;
   MultipleOutputPairsType MultipleOutputPairs;
-  bool WriteMakeRule(std::ostream& os, const char* comment,
-                     const std::vector<std::string>& outputs,
-                     const std::vector<std::string>& depends,
-                     const std::vector<std::string>& commands,
+  bool WriteMakeRule(std::ostream& os, char const* comment,
+                     std::vector<std::string> const& outputs,
+                     std::vector<std::string> const& depends,
+                     std::vector<std::string> const& commands,
                      bool in_help = false);
 
   // Target name info.

@@ -15,14 +15,14 @@ struct cmCTestBinPackerAllocation
   int SlotsNeeded;
   std::string Id;
 
-  bool operator==(const cmCTestBinPackerAllocation& other) const;
-  bool operator!=(const cmCTestBinPackerAllocation& other) const;
+  bool operator==(cmCTestBinPackerAllocation const& other) const;
+  bool operator!=(cmCTestBinPackerAllocation const& other) const;
 };
 
 bool cmAllocateCTestResourcesRoundRobin(
-  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+  std::map<std::string, cmCTestResourceAllocator::Resource> const& resources,
   std::vector<cmCTestBinPackerAllocation>& allocations);
 
 bool cmAllocateCTestResourcesBlock(
-  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+  std::map<std::string, cmCTestResourceAllocator::Resource> const& resources,
   std::vector<cmCTestBinPackerAllocation>& allocations);

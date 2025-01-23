@@ -155,9 +155,9 @@ cmFileSet::CompileDirectoryEntries() const
 }
 
 std::vector<std::string> cmFileSet::EvaluateDirectoryEntries(
-  const std::vector<std::unique_ptr<cmCompiledGeneratorExpression>>& cges,
-  cmLocalGenerator* lg, const std::string& config,
-  const cmGeneratorTarget* target,
+  std::vector<std::unique_ptr<cmCompiledGeneratorExpression>> const& cges,
+  cmLocalGenerator* lg, std::string const& config,
+  cmGeneratorTarget const* target,
   cmGeneratorExpressionDAGChecker* dagChecker) const
 {
   struct DirCacheEntry
@@ -178,7 +178,7 @@ std::vector<std::string> cmFileSet::EvaluateDirectoryEntries(
 
       auto dirCacheResult = dirCache.emplace(dir, DirCacheEntry());
       auto& dirCacheEntry = dirCacheResult.first->second;
-      const auto isNewCacheEntry = dirCacheResult.second;
+      auto const isNewCacheEntry = dirCacheResult.second;
 
       if (isNewCacheEntry) {
         cmSystemTools::FileId fileId;
@@ -215,11 +215,11 @@ std::vector<std::string> cmFileSet::EvaluateDirectoryEntries(
 }
 
 void cmFileSet::EvaluateFileEntry(
-  const std::vector<std::string>& dirs,
+  std::vector<std::string> const& dirs,
   std::map<std::string, std::vector<std::string>>& filesPerDir,
-  const std::unique_ptr<cmCompiledGeneratorExpression>& cge,
-  cmLocalGenerator* lg, const std::string& config,
-  const cmGeneratorTarget* target,
+  std::unique_ptr<cmCompiledGeneratorExpression> const& cge,
+  cmLocalGenerator* lg, std::string const& config,
+  cmGeneratorTarget const* target,
   cmGeneratorExpressionDAGChecker* dagChecker) const
 {
   auto files = cge->Evaluate(lg, config, target, dagChecker);
@@ -255,9 +255,9 @@ void cmFileSet::EvaluateFileEntry(
   }
 }
 
-bool cmFileSet::IsValidName(const std::string& name)
+bool cmFileSet::IsValidName(std::string const& name)
 {
-  static const cmsys::RegularExpression regex("^[a-z0-9][a-zA-Z0-9_]*$");
+  static cmsys::RegularExpression const regex("^[a-z0-9][a-zA-Z0-9_]*$");
 
   cmsys::RegularExpressionMatch match;
   return regex.find(name.c_str(), match);

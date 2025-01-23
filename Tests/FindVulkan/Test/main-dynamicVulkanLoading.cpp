@@ -24,7 +24,7 @@ int main()
     vk::UniqueInstance instance =
       vk::createInstanceUnique(vk::InstanceCreateInfo{
         vk::InstanceCreateFlags(), // flags
-        &(const vk::ApplicationInfo&)vk::ApplicationInfo{
+        &(vk::ApplicationInfo const&)vk::ApplicationInfo{
           "CMake Test application", // application name
           VK_MAKE_VERSION(0, 0, 0), // application version
           "CMake Test Engine",      // engine name

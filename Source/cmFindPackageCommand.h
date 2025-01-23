@@ -82,7 +82,7 @@ private:
     PathLabel();
 
   public:
-    PathLabel(const std::string& label)
+    PathLabel(std::string const& label)
       : cmFindCommon::PathLabel(label)
     {
     }
@@ -109,14 +109,14 @@ private:
   void AppendSuccessInformation();
   void AppendToFoundProperty(bool found);
   void SetVersionVariables(
-    const std::function<void(const std::string&, cm::string_view)>&
+    std::function<void(std::string const&, cm::string_view)> const&
       addDefinition,
-    const std::string& prefix, const std::string& version, unsigned int count,
+    std::string const& prefix, std::string const& version, unsigned int count,
     unsigned int major, unsigned int minor, unsigned int patch,
     unsigned int tweak);
   void SetModuleVariables();
   bool FindModule(bool& found);
-  void AddFindDefinition(const std::string& var, cm::string_view value);
+  void AddFindDefinition(std::string const& var, cm::string_view value);
   void RestoreFindDefinitions();
 
   class SetRestoreFindDefinitions;
@@ -138,7 +138,7 @@ private:
     NoPolicyScope,
     DoPolicyScope
   };
-  bool ReadListFile(const std::string& f, PolicyScopeRule psr);
+  bool ReadListFile(std::string const& f, PolicyScopeRule psr);
   bool ReadPackage();
 
   using AppendixMap =
@@ -151,7 +151,7 @@ private:
   bool ImportPackageTargets(std::string const& fileName,
                             cmPackageInfoReader& reader);
   void StoreVersionFound();
-  void SetConfigDirCacheVariable(const std::string& value);
+  void SetConfigDirCacheVariable(std::string const& value);
 
   void PushFindPackageRootPathStack();
   void PopFindPackageRootPathStack();
@@ -173,7 +173,7 @@ private:
   void LoadPackageRegistryWinSystem();
   void LoadPackageRegistryWin(bool user, unsigned int view,
                               cmSearchPath& outPaths);
-  bool CheckPackageRegistryEntry(const std::string& fname,
+  bool CheckPackageRegistryEntry(std::string const& fname,
                                  cmSearchPath& outPaths);
   bool SearchDirectory(std::string const& dir, PackageDescriptionType type);
   bool CheckDirectory(std::string const& dir, PackageDescriptionType type);
@@ -196,8 +196,8 @@ private:
 
   std::map<std::string, cmPolicies::PolicyID> DeprecatedFindModules;
 
-  static const cm::string_view VERSION_ENDPOINT_INCLUDED;
-  static const cm::string_view VERSION_ENDPOINT_EXCLUDED;
+  static cm::string_view const VERSION_ENDPOINT_INCLUDED;
+  static cm::string_view const VERSION_ENDPOINT_EXCLUDED;
 
   std::string Name;
   std::string Variable;

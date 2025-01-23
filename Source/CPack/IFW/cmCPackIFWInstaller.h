@@ -158,6 +158,6 @@ public:
   std::string Directory;
 
 protected:
-  void printSkippedOptionWarning(const std::string& optionName,
-                                 const std::string& optionValue);
+  void printSkippedOptionWarning(std::string const& optionName,
+                                 std::string const& optionValue);
 };

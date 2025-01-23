@@ -29,26 +29,26 @@ public:
   ~cmTest();
 
   //! Set the test name
-  void SetName(const std::string& name);
+  void SetName(std::string const& name);
   std::string GetName() const { return this->Name; }
 
   void SetCommand(std::vector<std::string> const& command);
   std::vector<std::string> const& GetCommand() const { return this->Command; }
 
   //! Set/Get a property of this source file
-  void SetProperty(const std::string& prop, cmValue value);
-  void SetProperty(const std::string& prop, std::nullptr_t)
+  void SetProperty(std::string const& prop, cmValue value);
+  void SetProperty(std::string const& prop, std::nullptr_t)
   {
     this->SetProperty(prop, cmValue{ nullptr });
   }
-  void SetProperty(const std::string& prop, const std::string& value)
+  void SetProperty(std::string const& prop, std::string const& value)
   {
     this->SetProperty(prop, cmValue(value));
   }
-  void AppendProperty(const std::string& prop, const std::string& value,
+  void AppendProperty(std::string const& prop, std::string const& value,
                       bool asString = false);
-  cmValue GetProperty(const std::string& prop) const;
-  bool GetPropertyAsBool(const std::string& prop) const;
+  cmValue GetProperty(std::string const& prop) const;
+  bool GetPropertyAsBool(std::string const& prop) const;
   cmPropertyMap& GetProperties() { return this->Properties; }
 
   /** Get the cmMakefile instance that owns this test.  */

@@ -38,10 +38,10 @@ void UseCmstrlenCheck::registerMatchers(MatchFinder* Finder)
     this);
 }
 
-void UseCmstrlenCheck::check(const MatchFinder::MatchResult& Result)
+void UseCmstrlenCheck::check(MatchFinder::MatchResult const& Result)
 {
-  const Expr* Strlen = Result.Nodes.getNodeAs<Expr>("strlen");
-  const BinaryOperator* SizeOfMinus =
+  Expr const* Strlen = Result.Nodes.getNodeAs<Expr>("strlen");
+  BinaryOperator const* SizeOfMinus =
     Result.Nodes.getNodeAs<BinaryOperator>("sizeOfMinus");
 
   if (Strlen) {
@@ -50,10 +50,10 @@ void UseCmstrlenCheck::check(const MatchFinder::MatchResult& Result)
   }
 
   if (SizeOfMinus) {
-    const ParenExpr* Paren = Result.Nodes.getNodeAs<ParenExpr>("paren");
-    const UnaryExprOrTypeTraitExpr* SizeOf =
+    ParenExpr const* Paren = Result.Nodes.getNodeAs<ParenExpr>("paren");
+    UnaryExprOrTypeTraitExpr const* SizeOf =
       Result.Nodes.getNodeAs<UnaryExprOrTypeTraitExpr>("sizeOf");
-    const IntegerLiteral* Literal =
+    IntegerLiteral const* Literal =
       Result.Nodes.getNodeAs<IntegerLiteral>("literal");
 
     std::vector<FixItHint> FixIts;

@@ -21,7 +21,7 @@ void cmTargetPropCommandBase::SetError(std::string const& e)
 }
 
 bool cmTargetPropCommandBase::HandleArguments(
-  std::vector<std::string> const& args, const std::string& prop,
+  std::vector<std::string> const& args, std::string const& prop,
   unsigned int flags)
 {
   if (args.size() < 2) {
@@ -42,7 +42,7 @@ bool cmTargetPropCommandBase::HandleArguments(
     this->HandleMissingTarget(args[0]);
     return false;
   }
-  const bool isRegularTarget =
+  bool const isRegularTarget =
     (this->Target->GetType() == cmStateEnums::EXECUTABLE) ||
     (this->Target->GetType() == cmStateEnums::STATIC_LIBRARY) ||
     (this->Target->GetType() == cmStateEnums::SHARED_LIBRARY) ||
@@ -50,7 +50,7 @@ bool cmTargetPropCommandBase::HandleArguments(
     (this->Target->GetType() == cmStateEnums::OBJECT_LIBRARY) ||
     (this->Target->GetType() == cmStateEnums::INTERFACE_LIBRARY) ||
     (this->Target->GetType() == cmStateEnums::UNKNOWN_LIBRARY);
-  const bool isCustomTarget = this->Target->GetType() == cmStateEnums::UTILITY;
+  bool const isCustomTarget = this->Target->GetType() == cmStateEnums::UTILITY;
 
   if (prop == "SOURCES") {
     if (!isRegularTarget && !isCustomTarget) {
@@ -156,7 +156,7 @@ bool cmTargetPropCommandBase::ProcessContentArgs(
 }
 
 bool cmTargetPropCommandBase::PopulateTargetProperties(
-  const std::string& scope, const std::vector<std::string>& content,
+  std::string const& scope, std::vector<std::string> const& content,
   bool prepend, bool system)
 {
   if (content.empty()) {
@@ -174,12 +174,12 @@ bool cmTargetPropCommandBase::PopulateTargetProperties(
 }
 
 void cmTargetPropCommandBase::HandleInterfaceContent(
-  cmTarget* tgt, const std::vector<std::string>& content, bool prepend, bool)
+  cmTarget* tgt, std::vector<std::string> const& content, bool prepend, bool)
 {
   if (prepend) {
-    const std::string propName = std::string("INTERFACE_") + this->Property;
+    std::string const propName = std::string("INTERFACE_") + this->Property;
     cmValue propValue = tgt->GetProperty(propName);
-    const std::string totalContent =
+    std::string const totalContent =
       this->Join(content) + (propValue ? (";" + *propValue) : std::string());
     tgt->SetProperty(propName, totalContent);
   } else {

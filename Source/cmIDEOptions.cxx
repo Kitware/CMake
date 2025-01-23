@@ -99,7 +99,7 @@ void cmIDEOptions::HandleFlag(std::string const& flag)
 bool cmIDEOptions::CheckFlagTable(cmIDEFlagTable const* table,
                                   std::string const& flag, bool& flag_handled)
 {
-  const char* pf = flag.c_str() + 1;
+  char const* pf = flag.c_str() + 1;
   // Look for an entry in the flag table matching this flag.
   for (cmIDEFlagTable const* entry = table; !entry->IDEName.empty(); ++entry) {
     bool entry_found = false;
@@ -160,7 +160,7 @@ void cmIDEOptions::FlagMapUpdate(cmIDEFlagTable const* entry,
   }
 }
 
-void cmIDEOptions::AddDefine(const std::string& def)
+void cmIDEOptions::AddDefine(std::string const& def)
 {
   this->Defines.push_back(def);
 }
@@ -172,7 +172,7 @@ void cmIDEOptions::AddDefines(std::string const& defines)
     cmExpandList(defines, this->Defines);
   }
 }
-void cmIDEOptions::AddDefines(const std::vector<std::string>& defines)
+void cmIDEOptions::AddDefines(std::vector<std::string> const& defines)
 {
   cm::append(this->Defines, defines);
 }
@@ -182,7 +182,7 @@ std::vector<std::string> const& cmIDEOptions::GetDefines() const
   return this->Defines;
 }
 
-void cmIDEOptions::AddInclude(const std::string& include)
+void cmIDEOptions::AddInclude(std::string const& include)
 {
   this->Includes.push_back(include);
 }
@@ -194,7 +194,7 @@ void cmIDEOptions::AddIncludes(std::string const& includes)
     cmExpandList(includes, this->Includes);
   }
 }
-void cmIDEOptions::AddIncludes(const std::vector<std::string>& includes)
+void cmIDEOptions::AddIncludes(std::vector<std::string> const& includes)
 {
   cm::append(this->Includes, includes);
 }
@@ -244,7 +244,7 @@ bool cmIDEOptions::HasFlag(std::string const& flag) const
   return this->FlagMap.find(flag) != this->FlagMap.end();
 }
 
-const char* cmIDEOptions::GetFlag(std::string const& flag) const
+char const* cmIDEOptions::GetFlag(std::string const& flag) const
 {
   // This method works only for single-valued flags!
   auto i = this->FlagMap.find(flag);

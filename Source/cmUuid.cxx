@@ -7,7 +7,7 @@
 
 #include "cmCryptoHash.h"
 
-static const std::array<int, 5> kUuidGroups = { { 4, 2, 2, 2, 6 } };
+static std::array<int, 5> const kUuidGroups = { { 4, 2, 2, 2, 6 } };
 
 std::string cmUuid::FromMd5(std::vector<unsigned char> const& uuidNamespace,
                             std::string const& name) const
@@ -50,7 +50,7 @@ void cmUuid::CreateHashInput(std::vector<unsigned char> const& uuidNamespace,
   }
 }
 
-std::string cmUuid::FromDigest(const unsigned char* digest,
+std::string cmUuid::FromDigest(unsigned char const* digest,
                                unsigned char version) const
 {
   using byte_t = unsigned char;
@@ -92,7 +92,7 @@ bool cmUuid::StringToBinary(std::string const& input,
   return true;
 }
 
-std::string cmUuid::BinaryToString(const unsigned char* input) const
+std::string cmUuid::BinaryToString(unsigned char const* input) const
 {
   std::string output;
 

@@ -15,30 +15,30 @@
 #include "cmJSONHelpers.h"
 #include "cmStringAlgorithms.h"
 
-const std::vector<std::string> cmInstrumentationQuery::QueryString{
+std::vector<std::string> const cmInstrumentationQuery::QueryString{
   "staticSystemInformation", "dynamicSystemInformation"
 };
-const std::vector<std::string> cmInstrumentationQuery::HookString{
+std::vector<std::string> const cmInstrumentationQuery::HookString{
   "postGenerate",   "preBuild", "postBuild",   "preCMakeBuild",
   "postCMakeBuild", "postTest", "postInstall", "manual"
 };
 
 namespace ErrorMessages {
 using ErrorGenerator =
-  std::function<void(const Json::Value*, cmJSONState* state)>;
-ErrorGenerator ErrorGeneratorBuilder(const std::string& errorMessage)
+  std::function<void(Json::Value const*, cmJSONState* state)>;
+ErrorGenerator ErrorGeneratorBuilder(std::string const& errorMessage)
 {
-  return [errorMessage](const Json::Value* value, cmJSONState* state) -> void {
+  return [errorMessage](Json::Value const* value, cmJSONState* state) -> void {
     state->AddErrorAtValue(errorMessage, value);
   };
 };
 
 static ErrorGenerator InvalidArray = ErrorGeneratorBuilder("Invalid Array");
 JsonErrors::ErrorGenerator InvalidRootQueryObject(
-  JsonErrors::ObjectError errorType, const Json::Value::Members& extraFields)
+  JsonErrors::ObjectError errorType, Json::Value::Members const& extraFields)
 {
   return JsonErrors::INVALID_NAMED_OBJECT(
-    [](const Json::Value*, cmJSONState*) -> std::string {
+    [](Json::Value const*, cmJSONState*) -> std::string {
       return "root object";
     })(errorType, extraFields);
 }
@@ -47,10 +47,10 @@ JsonErrors::ErrorGenerator InvalidRootQueryObject(
 using JSONHelperBuilder = cmJSONHelperBuilder;
 
 template <typename E>
-static std::function<bool(E&, const Json::Value*, cmJSONState*)> EnumHelper(
-  const std::vector<std::string> toString, const std::string& type)
+static std::function<bool(E&, Json::Value const*, cmJSONState*)> EnumHelper(
+  std::vector<std::string> const toString, std::string const& type)
 {
-  return [toString, type](E& out, const Json::Value* value,
+  return [toString, type](E& out, Json::Value const* value,
                           cmJSONState* state) -> bool {
     for (size_t i = 0; i < toString.size(); ++i) {
       if (value->asString() == toString[i]) {
@@ -88,7 +88,7 @@ static auto const QueryRootHelper =
     .Bind("hooks"_s, &QueryRoot::hooks, HookListHelper, false)
     .Bind("callbacks"_s, &QueryRoot::callbacks, CallbackListHelper, false);
 
-bool cmInstrumentationQuery::ReadJSON(const std::string& filename,
+bool cmInstrumentationQuery::ReadJSON(std::string const& filename,
                                       std::string& errorMessage,
                                       std::set<Query>& queries,
                                       std::set<Hook>& hooks,

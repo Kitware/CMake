@@ -57,7 +57,7 @@ enum class TargetDomain : unsigned
   FOREIGN
 };
 using TargetDomainSet = cm::enum_set<TargetDomain>;
-static const TargetDomainSet AllTargetDomains{ TargetDomain::NATIVE,
+static TargetDomainSet const AllTargetDomains{ TargetDomain::NATIVE,
                                                TargetDomain::ALIAS,
                                                TargetDomain::FOREIGN };
 

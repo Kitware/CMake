@@ -12,7 +12,7 @@
 #include <QStandardItem>
 
 EnvironmentItemModel::EnvironmentItemModel(
-  const QProcessEnvironment& environment, QObject* parent)
+  QProcessEnvironment const& environment, QObject* parent)
   : QStandardItemModel(parent)
 {
   this->clear();
@@ -42,7 +42,7 @@ void EnvironmentItemModel::clear()
   this->setHorizontalHeaderLabels(labels);
 }
 
-QModelIndex EnvironmentItemModel::buddy(const QModelIndex& index) const
+QModelIndex EnvironmentItemModel::buddy(QModelIndex const& index) const
 {
   if (index.column() == 0) {
     return this->index(index.row(), index.column() + 1, index.parent());
@@ -50,14 +50,14 @@ QModelIndex EnvironmentItemModel::buddy(const QModelIndex& index) const
   return index;
 }
 
-void EnvironmentItemModel::appendVariable(const QString& key,
-                                          const QString& value)
+void EnvironmentItemModel::appendVariable(QString const& key,
+                                          QString const& value)
 {
   this->insertVariable(this->rowCount(), key, value);
 }
 
-void EnvironmentItemModel::insertVariable(int row, const QString& key,
-                                          const QString& value)
+void EnvironmentItemModel::insertVariable(int row, QString const& key,
+                                          QString const& value)
 {
   for (int i = 0; i < this->rowCount(); ++i) {
     if (this->data(this->index(i, 0), Qt::DisplayRole) == key) {
@@ -77,7 +77,7 @@ EnvironmentSearchFilter::EnvironmentSearchFilter(QObject* parent)
 }
 
 bool EnvironmentSearchFilter::filterAcceptsRow(int row,
-                                               const QModelIndex& parent) const
+                                               QModelIndex const& parent) const
 {
   auto* model = this->sourceModel();
   auto key =
@@ -89,7 +89,7 @@ bool EnvironmentSearchFilter::filterAcceptsRow(int row,
 #endif
 }
 
-EnvironmentDialog::EnvironmentDialog(const QProcessEnvironment& environment,
+EnvironmentDialog::EnvironmentDialog(QProcessEnvironment const& environment,
                                      QWidget* parent)
   : QDialog(parent)
 {
@@ -112,8 +112,8 @@ EnvironmentDialog::EnvironmentDialog(const QProcessEnvironment& environment,
   QObject::connect(this->RemoveEntry, &QAbstractButton::clicked, this,
                    &EnvironmentDialog::removeSelectedEntries);
   QObject::connect(
-    this->Search, &QLineEdit::textChanged, [this](const QString& text) {
-      const bool valid = QtCMake::setSearchFilter(this->m_filter, text);
+    this->Search, &QLineEdit::textChanged, [this](QString const& text) {
+      bool const valid = QtCMake::setSearchFilter(this->m_filter, text);
       QtCMake::setSearchFilterColor(this->Search, valid);
     });
   QObject::connect(this->Environment->selectionModel(),

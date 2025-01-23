@@ -26,10 +26,10 @@ public:
   bool InitialPass(std::vector<std::string> const& args);
 
 protected:
-  void AddArchitecturePaths(const char* suffix);
+  void AddArchitecturePaths(char const* suffix);
   void AddArchitecturePath(std::string const& dir,
                            std::string::size_type start_pos,
-                           const char* suffix, bool fresh = true);
+                           char const* suffix, bool fresh = true);
   std::string FindLibrary();
 
 private:

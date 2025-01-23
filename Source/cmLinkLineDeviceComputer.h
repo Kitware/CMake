@@ -41,4 +41,4 @@ public:
 };
 
 bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
-                          const std::string& config);
+                          std::string const& config);

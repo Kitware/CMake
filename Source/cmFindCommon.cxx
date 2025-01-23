@@ -186,7 +186,7 @@ void cmFindCommon::SelectDefaultMacMode()
 
 void cmFindCommon::SelectDefaultSearchModes()
 {
-  const std::array<std::pair<bool&, std::string>, 6> search_paths = {
+  std::array<std::pair<bool&, std::string>, 6> const search_paths = {
     { { this->NoPackageRootPath, "CMAKE_FIND_USE_PACKAGE_ROOT_PATH" },
       { this->NoCMakePath, "CMAKE_FIND_USE_CMAKE_PATH" },
       { this->NoCMakeEnvironmentPath,
@@ -218,10 +218,10 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths,
     this->Makefile->GetDefinition("CMAKE_SYSROOT_COMPILE");
   cmValue sysrootLink = this->Makefile->GetDefinition("CMAKE_SYSROOT_LINK");
   cmValue rootPath = this->Makefile->GetDefinition("CMAKE_FIND_ROOT_PATH");
-  const bool noSysroot = !cmNonempty(sysroot);
-  const bool noCompileSysroot = !cmNonempty(sysrootCompile);
-  const bool noLinkSysroot = !cmNonempty(sysrootLink);
-  const bool noRootPath = !cmNonempty(rootPath);
+  bool const noSysroot = !cmNonempty(sysroot);
+  bool const noCompileSysroot = !cmNonempty(sysrootCompile);
+  bool const noLinkSysroot = !cmNonempty(sysrootLink);
+  bool const noRootPath = !cmNonempty(rootPath);
   if (noSysroot && noCompileSysroot && noLinkSysroot && noRootPath) {
     return;
   }
@@ -231,7 +231,7 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths,
       *debugBuffer, "Prepending the following roots to each prefix:\n");
   }
 
-  auto debugRoot = [this, debugBuffer](const std::string& name,
+  auto debugRoot = [this, debugBuffer](std::string const& name,
                                        cmValue value) {
     if (this->DebugMode && debugBuffer) {
       *debugBuffer = cmStrCat(*debugBuffer, name, '\n');
@@ -312,11 +312,11 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths,
 
 void cmFindCommon::GetIgnoredPaths(std::vector<std::string>& ignore)
 {
-  const std::array<const char*, 2> paths = { { "CMAKE_SYSTEM_IGNORE_PATH",
+  std::array<char const*, 2> const paths = { { "CMAKE_SYSTEM_IGNORE_PATH",
                                                "CMAKE_IGNORE_PATH" } };
 
   // Construct the list of path roots with no trailing slashes.
-  for (const char* pathName : paths) {
+  for (char const* pathName : paths) {
     // Get the list of paths to ignore from the variable.
     cmList::append(ignore, this->Makefile->GetDefinition(pathName));
   }
@@ -335,11 +335,11 @@ void cmFindCommon::GetIgnoredPaths(std::set<std::string>& ignore)
 
 void cmFindCommon::GetIgnoredPrefixPaths(std::vector<std::string>& ignore)
 {
-  const std::array<const char*, 2> paths = {
+  std::array<char const*, 2> const paths = {
     { "CMAKE_SYSTEM_IGNORE_PREFIX_PATH", "CMAKE_IGNORE_PREFIX_PATH" }
   };
   // Construct the list of path roots with no trailing slashes.
-  for (const char* pathName : paths) {
+  for (char const* pathName : paths) {
     // Get the list of paths to ignore from the variable.
     cmList::append(ignore, this->Makefile->GetDefinition(pathName));
   }

@@ -171,7 +171,7 @@ bool cmParsePHPCoverage::ReadFileInformation(std::istream& in)
   return false;
 }
 
-bool cmParsePHPCoverage::ReadPHPData(const char* file)
+bool cmParsePHPCoverage::ReadPHPData(char const* file)
 {
   cmsys::ifstream in(file);
   if (!in) {
@@ -200,7 +200,7 @@ bool cmParsePHPCoverage::ReadPHPData(const char* file)
   return true;
 }
 
-bool cmParsePHPCoverage::ReadPHPCoverageDirectory(const char* d)
+bool cmParsePHPCoverage::ReadPHPCoverageDirectory(char const* d)
 {
   cmsys::Directory dir;
   if (!dir.Load(d)) {

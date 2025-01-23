@@ -45,7 +45,7 @@ bool cmAddCustomCommandCommand(std::vector<std::string> const& args,
   std::string job_pool;
   std::string job_server_aware;
   std::string comment_buffer;
-  const char* comment = nullptr;
+  char const* comment = nullptr;
   std::vector<std::string> depends;
   std::vector<std::string> outputs;
   std::vector<std::string> output;

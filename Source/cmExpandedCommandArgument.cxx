@@ -23,7 +23,7 @@ bool cmExpandedCommandArgument::WasQuoted() const
   return this->Quoted;
 }
 
-bool cmExpandedCommandArgument::operator==(const char* value) const
+bool cmExpandedCommandArgument::operator==(char const* value) const
 {
   return this->Value == value;
 }

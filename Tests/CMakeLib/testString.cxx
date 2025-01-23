@@ -76,14 +76,14 @@ static bool testFromCStrNull(cm::String str)
 static bool testConstructFromCStrNull()
 {
   std::cout << "testConstructFromCStrNull()\n";
-  const char* null = nullptr;
+  char const* null = nullptr;
   return testFromCStrNull(null);
 }
 
 static bool testAssignFromCStrNull()
 {
   std::cout << "testAssignFromCStrNull()\n";
-  const char* null = nullptr;
+  char const* null = nullptr;
   cm::String str;
   str = null;
   return testFromCStrNull(str);
@@ -123,7 +123,7 @@ static bool testAssignFromCharArray()
   return testFromCharArray(str);
 }
 
-static const char* cstr = "abc";
+static char const* cstr = "abc";
 
 static bool testFromCStr(cm::String const& str)
 {
@@ -148,7 +148,7 @@ static bool testAssignFromCStr()
   return testFromCStr(str);
 }
 
-static const std::string stdstr = "abc";
+static std::string const stdstr = "abc";
 
 static bool testFromStdString(cm::String const& str)
 {
@@ -264,7 +264,7 @@ static bool testConstructFromN()
   return true;
 }
 
-static const auto staticStringView = "abc"_s;
+static auto const staticStringView = "abc"_s;
 
 static bool testFromStaticStringView(cm::String str)
 {
@@ -367,7 +367,7 @@ static bool testOperatorBool()
   ASSERT_TRUE(!str);
   str = "";
   ASSERT_TRUE(str);
-  str = static_cast<const char*>(nullptr);
+  str = static_cast<char const*>(nullptr);
   ASSERT_TRUE(!str);
   str = std::string();
   ASSERT_TRUE(str);
@@ -392,7 +392,7 @@ static bool testOperatorPlusEqual()
   cm::String str = "a";
   str += "b";
   {
-    const char* c = "c";
+    char const* c = "c";
     str += c;
   }
   str += 'd';
@@ -424,9 +424,9 @@ static bool testOperatorCompare()
     ASSERT_TRUE("b" >= str);
   }
   {
-    const char* a = "a";
-    const char* b = "b";
-    const char* c = "c";
+    char const* a = "a";
+    char const* b = "b";
+    char const* c = "c";
     ASSERT_TRUE(str == b);
     ASSERT_TRUE(b == str);
     ASSERT_TRUE(str != a);
@@ -682,7 +682,7 @@ static bool testMethod_replace()
   std::cout << "testMethod_replace()\n";
   {
     cm::String str = "abcd";
-    const char* bc = "bc";
+    char const* bc = "bc";
     ASSERT_TRUE(str.replace(1, 2, "BC") == "aBCd");
     ASSERT_TRUE(str.replace(1, 2, bc) == "abcd");
     ASSERT_TRUE(str.replace(1, 2, 'x') == "axd");
@@ -692,7 +692,7 @@ static bool testMethod_replace()
   }
   {
     cm::String str = "abcd";
-    const char* bc = "bc";
+    char const* bc = "bc";
     ASSERT_TRUE(str.replace(str.begin() + 1, str.begin() + 3, "BC") == "aBCd");
     ASSERT_TRUE(str.replace(str.begin() + 1, str.begin() + 3, bc) == "abcd");
     ASSERT_TRUE(str.replace(str.begin() + 1, str.begin() + 3, 'x') == "axd");
@@ -705,7 +705,7 @@ static bool testMethod_replace()
   }
   {
     cm::String str = "abcd";
-    const char* bc = "_bc";
+    char const* bc = "_bc";
     ASSERT_TRUE(str.replace(1, 2, "_BC_", 1, 2) == "aBCd");
     ASSERT_TRUE(str.replace(1, 2, bc, 1) == "abcd");
     ASSERT_TRUE(str.replace(1, 2, 'x', 0) == "axd");
@@ -715,7 +715,7 @@ static bool testMethod_replace()
   }
   {
     cm::String str = "abcd";
-    const char* bc = "_bc_";
+    char const* bc = "_bc_";
     ASSERT_TRUE(str.replace(1, 2, 2, 'x') == "axxd");
     ASSERT_TRUE(str.replace(str.begin() + 1, str.begin() + 3, 2, 'y') ==
                 "ayyd");
@@ -807,7 +807,7 @@ static bool testMethod_substr_AtStart(cm::String str)
     ASSERT_TRUE(substr.size() == 2);
 
     // c_str() not at the end of the buffer internally mutates.
-    const char* substr_c = substr.c_str();
+    char const* substr_c = substr.c_str();
     ASSERT_TRUE(std::strcmp(substr_c, "ab") == 0);
     ASSERT_TRUE(substr_c != str.data());
     ASSERT_TRUE(substr.data() != str.data());
@@ -836,7 +836,7 @@ static bool testMethod_substr_AtStart(cm::String str)
     ASSERT_TRUE(substr.c_str() != str.data());
 
     // c_str() does not internally after str() did so
-    const char* substr_c = substr.c_str();
+    char const* substr_c = substr.c_str();
     ASSERT_TRUE(std::strcmp(substr_c, "ab") == 0);
     ASSERT_TRUE(substr_c == substr.data());
     ASSERT_TRUE(substr.size() == 2);
@@ -866,9 +866,9 @@ static bool testMethod_compare()
   ASSERT_TRUE(str.compare("b") == 0);
   ASSERT_TRUE(str.compare("c") < 0);
   {
-    const char* a = "a";
-    const char* b = "b";
-    const char* c = "c";
+    char const* a = "a";
+    char const* b = "b";
+    char const* c = "c";
     ASSERT_TRUE(str.compare(a) > 0);
     ASSERT_TRUE(str.compare(b) == 0);
     ASSERT_TRUE(str.compare(c) < 0);
@@ -900,7 +900,7 @@ static bool testMethod_find()
   ASSERT_TRUE(str.find("a") == 0);
   ASSERT_TRUE(str.find("a", 1) == 3);
   {
-    const char* a = "a";
+    char const* a = "a";
     ASSERT_TRUE(str.find(a) == 0);
     ASSERT_TRUE(str.find(a, 1) == 3);
   }
@@ -923,7 +923,7 @@ static bool testMethod_rfind()
   ASSERT_TRUE(str.rfind("a") == 3);
   ASSERT_TRUE(str.rfind("a", 1) == 0);
   {
-    const char* a = "a";
+    char const* a = "a";
     ASSERT_TRUE(str.rfind(a) == 3);
     ASSERT_TRUE(str.rfind(a, 1) == 0);
   }
@@ -946,7 +946,7 @@ static bool testMethod_find_first_of()
   ASSERT_TRUE(str.find_first_of("_a") == 0);
   ASSERT_TRUE(str.find_first_of("_a", 1) == 3);
   {
-    const char* a = "_a";
+    char const* a = "_a";
     ASSERT_TRUE(str.find_first_of(a) == 0);
     ASSERT_TRUE(str.find_first_of(a, 1) == 3);
   }
@@ -969,7 +969,7 @@ static bool testMethod_find_first_not_of()
   ASSERT_TRUE(str.find_first_not_of("_a") == 1);
   ASSERT_TRUE(str.find_first_not_of("_a", 2) == 2);
   {
-    const char* a = "_a";
+    char const* a = "_a";
     ASSERT_TRUE(str.find_first_not_of(a) == 1);
     ASSERT_TRUE(str.find_first_not_of(a, 2) == 2);
   }
@@ -992,7 +992,7 @@ static bool testMethod_find_last_of()
   ASSERT_TRUE(str.find_last_of("_a") == 3);
   ASSERT_TRUE(str.find_last_of("_a", 1) == 0);
   {
-    const char* a = "_a";
+    char const* a = "_a";
     ASSERT_TRUE(str.find_last_of(a) == 3);
     ASSERT_TRUE(str.find_last_of(a, 1) == 0);
   }
@@ -1015,7 +1015,7 @@ static bool testMethod_find_last_not_of()
   ASSERT_TRUE(str.find_last_not_of("_a") == 5);
   ASSERT_TRUE(str.find_last_not_of("_a", 1) == 1);
   {
-    const char* a = "_a";
+    char const* a = "_a";
     ASSERT_TRUE(str.find_last_not_of(a) == 5);
     ASSERT_TRUE(str.find_last_not_of(a, 1) == 1);
   }
@@ -1051,17 +1051,17 @@ static bool testAddition()
     ASSERT_TRUE("abcd"_s == "a"_s + (cm::String("b"_s) + "c"_s) + "d"_s);
   }
   {
-    const char* a = "a";
-    const char* b = "b";
-    const char* ab = "ab";
+    char const* a = "a";
+    char const* b = "b";
+    char const* ab = "ab";
     ASSERT_TRUE(cm::String(a) + b == ab);
     ASSERT_TRUE(ab == a + cm::String(b));
-    const char* c = "c";
-    const char* abc = "abc";
+    char const* c = "c";
+    char const* abc = "abc";
     ASSERT_TRUE(a + cm::String(b) + c == abc);
     ASSERT_TRUE(abc == a + cm::String(b) + c);
-    const char* d = "d";
-    const char* abcd = "abcd";
+    char const* d = "d";
+    char const* abcd = "abcd";
     ASSERT_TRUE(a + (cm::String(b) + c) + d == abcd);
     ASSERT_TRUE(abcd == a + (cm::String(b) + c) + d);
   }

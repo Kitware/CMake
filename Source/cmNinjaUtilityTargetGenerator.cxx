@@ -33,7 +33,7 @@ cmNinjaUtilityTargetGenerator::cmNinjaUtilityTargetGenerator(
 
 cmNinjaUtilityTargetGenerator::~cmNinjaUtilityTargetGenerator() = default;
 
-void cmNinjaUtilityTargetGenerator::Generate(const std::string& config)
+void cmNinjaUtilityTargetGenerator::Generate(std::string const& config)
 {
   if (!this->GetGeneratorTarget()->Target->IsPerConfig()) {
     this->WriteUtilBuildStatements(config, config);
@@ -104,8 +104,8 @@ void cmNinjaUtilityTargetGenerator::WriteUtilBuildStatements(
         lg->AddCustomCommandTarget(cc, genTarget);
 
         // Depend on all custom command outputs.
-        const std::vector<std::string>& ccOutputs = ccg.GetOutputs();
-        const std::vector<std::string>& ccByproducts = ccg.GetByproducts();
+        std::vector<std::string> const& ccOutputs = ccg.GetOutputs();
+        std::vector<std::string> const& ccByproducts = ccg.GetByproducts();
         std::transform(ccOutputs.begin(), ccOutputs.end(),
                        std::back_inserter(deps), this->MapToNinjaPath());
         std::transform(ccByproducts.begin(), ccByproducts.end(),

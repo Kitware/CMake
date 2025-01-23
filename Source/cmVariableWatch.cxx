@@ -7,9 +7,9 @@
 #include <utility>
 #include <vector>
 
-const std::string& cmVariableWatch::GetAccessAsString(int access_type)
+std::string const& cmVariableWatch::GetAccessAsString(int access_type)
 {
-  static const std::array<std::string, 6> cmVariableWatchAccessStrings = {
+  static std::array<std::string, 6> const cmVariableWatchAccessStrings = {
     { "READ_ACCESS", "UNKNOWN_READ_ACCESS", "UNKNOWN_DEFINED_ACCESS",
       "MODIFIED_ACCESS", "REMOVED_ACCESS", "NO_ACCESS" }
   };
@@ -23,7 +23,7 @@ cmVariableWatch::cmVariableWatch() = default;
 
 cmVariableWatch::~cmVariableWatch() = default;
 
-bool cmVariableWatch::AddWatch(const std::string& variable, WatchMethod method,
+bool cmVariableWatch::AddWatch(std::string const& variable, WatchMethod method,
                                void* client_data /*=0*/,
                                DeleteData delete_data /*=0*/)
 {
@@ -43,7 +43,7 @@ bool cmVariableWatch::AddWatch(const std::string& variable, WatchMethod method,
   return true;
 }
 
-void cmVariableWatch::RemoveWatch(const std::string& variable,
+void cmVariableWatch::RemoveWatch(std::string const& variable,
                                   WatchMethod method, void* client_data /*=0*/)
 {
   if (!this->WatchMap.count(variable)) {
@@ -62,9 +62,9 @@ void cmVariableWatch::RemoveWatch(const std::string& variable,
   }
 }
 
-bool cmVariableWatch::VariableAccessed(const std::string& variable,
-                                       int access_type, const char* newValue,
-                                       const cmMakefile* mf) const
+bool cmVariableWatch::VariableAccessed(std::string const& variable,
+                                       int access_type, char const* newValue,
+                                       cmMakefile const* mf) const
 {
   auto mit = this->WatchMap.find(variable);
   if (mit != this->WatchMap.end()) {

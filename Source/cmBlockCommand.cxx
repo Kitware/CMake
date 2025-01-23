@@ -33,18 +33,18 @@ using ScopeSet = cm::enum_set<ScopeType>;
 class BlockScopePushPop
 {
 public:
-  BlockScopePushPop(cmMakefile* m, const ScopeSet& scopes);
+  BlockScopePushPop(cmMakefile* m, ScopeSet const& scopes);
   ~BlockScopePushPop() = default;
 
-  BlockScopePushPop(const BlockScopePushPop&) = delete;
-  BlockScopePushPop& operator=(const BlockScopePushPop&) = delete;
+  BlockScopePushPop(BlockScopePushPop const&) = delete;
+  BlockScopePushPop& operator=(BlockScopePushPop const&) = delete;
 
 private:
   std::unique_ptr<cmMakefile::PolicyPushPop> PolicyScope;
   std::unique_ptr<cmMakefile::VariablePushPop> VariableScope;
 };
 
-BlockScopePushPop::BlockScopePushPop(cmMakefile* mf, const ScopeSet& scopes)
+BlockScopePushPop::BlockScopePushPop(cmMakefile* mf, ScopeSet const& scopes)
 {
   if (scopes.contains(ScopeType::POLICIES)) {
     this->PolicyScope = cm::make_unique<cmMakefile::PolicyPushPop>(mf);
@@ -57,7 +57,7 @@ BlockScopePushPop::BlockScopePushPop(cmMakefile* mf, const ScopeSet& scopes)
 class cmBlockFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmBlockFunctionBlocker(cmMakefile* mf, const ScopeSet& scopes,
+  cmBlockFunctionBlocker(cmMakefile* mf, ScopeSet const& scopes,
                          std::vector<std::string> variableNames);
   ~cmBlockFunctionBlocker() override;
 
@@ -80,7 +80,7 @@ private:
 };
 
 cmBlockFunctionBlocker::cmBlockFunctionBlocker(
-  cmMakefile* const mf, const ScopeSet& scopes,
+  cmMakefile* const mf, ScopeSet const& scopes,
   std::vector<std::string> variableNames)
   : Makefile{ mf }
   , Scopes{ scopes }

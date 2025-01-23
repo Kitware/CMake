@@ -28,7 +28,7 @@
 
 using namespace cmFSPermissions;
 
-cmFileCopier::cmFileCopier(cmExecutionStatus& status, const char* name)
+cmFileCopier::cmFileCopier(cmExecutionStatus& status, char const* name)
   : Status(status)
   , Makefile(&status.GetMakefile())
   , Name(name)
@@ -38,13 +38,13 @@ cmFileCopier::cmFileCopier(cmExecutionStatus& status, const char* name)
 cmFileCopier::~cmFileCopier() = default;
 
 cmFileCopier::MatchProperties cmFileCopier::CollectMatchProperties(
-  const std::string& file)
+  std::string const& file)
 {
   // Match rules are case-insensitive on some platforms.
 #if defined(_WIN32) || defined(__APPLE__) || defined(__CYGWIN__)
-  const std::string file_to_match = cmSystemTools::LowerCase(file);
+  std::string const file_to_match = cmSystemTools::LowerCase(file);
 #else
-  const std::string& file_to_match = file;
+  std::string const& file_to_match = file;
 #endif
 
   // Collect properties from all matching rules.
@@ -63,7 +63,7 @@ cmFileCopier::MatchProperties cmFileCopier::CollectMatchProperties(
   return result;
 }
 
-bool cmFileCopier::SetPermissions(const std::string& toFile,
+bool cmFileCopier::SetPermissions(std::string const& toFile,
                                   mode_t permissions)
 {
   if (permissions) {
@@ -116,7 +116,7 @@ std::string const& cmFileCopier::ToName(std::string const& fromName)
   return fromName;
 }
 
-bool cmFileCopier::ReportMissing(const std::string& fromFile)
+bool cmFileCopier::ReportMissing(std::string const& fromFile)
 {
   // The input file does not exist and installation is not optional.
   this->Status.SetError(cmStrCat(this->Name, " cannot find \"", fromFile,
@@ -171,7 +171,7 @@ bool cmFileCopier::GetDefaultDirectoryPermissions(mode_t** mode)
     "CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
   if (cmNonempty(default_dir_install_permissions)) {
     cmList items{ *default_dir_install_permissions };
-    for (const auto& arg : items) {
+    for (auto const& arg : items) {
       if (!this->CheckPermissions(arg, **mode)) {
         this->Status.SetError(
           " Set with CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS variable.");
@@ -438,8 +438,8 @@ bool cmFileCopier::Run(std::vector<std::string> const& args)
   return true;
 }
 
-bool cmFileCopier::Install(const std::string& fromFile,
-                           const std::string& toFile)
+bool cmFileCopier::Install(std::string const& fromFile,
+                           std::string const& toFile)
 {
   if (fromFile.empty()) {
     this->Status.SetError(
@@ -525,8 +525,8 @@ bool cmFileCopier::InstallSymlinkChain(std::string& fromFile,
   return true;
 }
 
-bool cmFileCopier::InstallSymlink(const std::string& fromFile,
-                                  const std::string& toFile)
+bool cmFileCopier::InstallSymlink(std::string const& fromFile,
+                                  std::string const& toFile)
 {
   // Read the original symlink.
   std::string symlinkTarget;
@@ -589,8 +589,8 @@ bool cmFileCopier::InstallSymlink(const std::string& fromFile,
   return true;
 }
 
-bool cmFileCopier::InstallFile(const std::string& fromFile,
-                               const std::string& toFile,
+bool cmFileCopier::InstallFile(std::string const& fromFile,
+                               std::string const& toFile,
                                MatchProperties match_properties)
 {
   // Determine whether we will copy the file.
@@ -647,8 +647,8 @@ bool cmFileCopier::InstallFile(const std::string& fromFile,
   return this->SetPermissions(toFile, permissions);
 }
 
-bool cmFileCopier::InstallDirectory(const std::string& source,
-                                    const std::string& destination,
+bool cmFileCopier::InstallDirectory(std::string const& source,
+                                    std::string const& destination,
                                     MatchProperties match_properties)
 {
   // Inform the user about this directory installation.

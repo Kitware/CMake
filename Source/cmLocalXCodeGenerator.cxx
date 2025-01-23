@@ -35,10 +35,10 @@ std::string cmLocalXCodeGenerator::GetTargetDirectory(
 }
 
 void cmLocalXCodeGenerator::AppendFlagEscape(std::string& flags,
-                                             const std::string& rawFlag) const
+                                             std::string const& rawFlag) const
 {
-  const cmGlobalXCodeGenerator* gg =
-    static_cast<const cmGlobalXCodeGenerator*>(this->GlobalGenerator);
+  cmGlobalXCodeGenerator const* gg =
+    static_cast<cmGlobalXCodeGenerator const*>(this->GlobalGenerator);
   gg->AppendFlag(flags, rawFlag);
 }
 
@@ -46,7 +46,7 @@ void cmLocalXCodeGenerator::Generate()
 {
   cmLocalGenerator::Generate();
 
-  for (const auto& target : this->GetGeneratorTargets()) {
+  for (auto const& target : this->GetGeneratorTargets()) {
     target->HasMacOSXRpathInstallNameDir("");
   }
 }
@@ -54,7 +54,7 @@ void cmLocalXCodeGenerator::Generate()
 void cmLocalXCodeGenerator::AddGeneratorSpecificInstallSetup(std::ostream& os)
 {
   // First check if we need to warn about incompatible settings
-  for (const auto& target : this->GetGeneratorTargets()) {
+  for (auto const& target : this->GetGeneratorTargets()) {
     target->HasMacOSXRpathInstallNameDir("");
   }
 

@@ -131,8 +131,8 @@ void cmLinkLineComputer::ComputeLinkPath(
   if (cli.GetLinkLanguage() == "Swift") {
     std::string linkPathNoBT;
 
-    for (const cmComputeLinkInformation::Item& item : cli.GetItems()) {
-      const cmGeneratorTarget* target = item.Target;
+    for (cmComputeLinkInformation::Item const& item : cli.GetItems()) {
+      cmGeneratorTarget const* target = item.Target;
       if (!target) {
         continue;
       }

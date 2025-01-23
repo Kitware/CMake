@@ -21,15 +21,15 @@ class cmGlobalVisualStudio14Generator : public cmGlobalVisualStudio12Generator
 public:
   static std::unique_ptr<cmGlobalGeneratorFactory> NewFactory();
 
-  bool MatchesGeneratorName(const std::string& name) const override;
+  bool MatchesGeneratorName(std::string const& name) const override;
 
-  const char* GetAndroidApplicationTypeRevision() const override
+  char const* GetAndroidApplicationTypeRevision() const override
   {
     return "2.0";
   }
 
 protected:
-  cmGlobalVisualStudio14Generator(cmake* cm, const std::string& name);
+  cmGlobalVisualStudio14Generator(cmake* cm, std::string const& name);
 
   bool InitializeWindowsStore(cmMakefile* mf) override;
   bool InitializeAndroid(cmMakefile* mf) override;
@@ -69,7 +69,7 @@ protected:
   void AddSolutionItems(cmLocalGenerator* root) override;
 
   void WriteFolderSolutionItems(std::ostream& fout,
-                                const cmVisualStudioFolder& folder) override;
+                                cmVisualStudioFolder const& folder) override;
 
 private:
   class Factory;

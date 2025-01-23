@@ -6,4 +6,4 @@
 
 #include <string>
 
-std::string CMakeToWixPath(const std::string& cygpath);
+std::string CMakeToWixPath(std::string const& cygpath);

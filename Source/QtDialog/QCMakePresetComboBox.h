@@ -16,15 +16,15 @@ class QCMakePresetComboBox : public QComboBox
 public:
   QCMakePresetComboBox(QWidget* parent = nullptr);
 
-  const QVector<QCMakePreset>& presets() const;
+  QVector<QCMakePreset> const& presets() const;
   QString presetName() const;
 
 public slots:
-  void setPresets(const QVector<QCMakePreset>& presets);
-  void setPresetName(const QString& name);
+  void setPresets(QVector<QCMakePreset> const& presets);
+  void setPresetName(QString const& name);
 
 signals:
-  void presetChanged(const QString& name);
+  void presetChanged(QString const& name);
 
 private:
   QCMakePresetItemModel* m_model;
