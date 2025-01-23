@@ -86,3 +86,8 @@ code.xref.cmake-guide {
 code.xref.cmake-guide span.pre {
   white-space: inherit;
 }
+
+/* Ensure top border for header-less tables. */
+table.docutils td {
+  border-top: 1px solid #aaa;
+}

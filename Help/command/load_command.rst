@@ -14,10 +14,6 @@ cmCOMMAND_NAME.  If found, it is loaded as a module and the command is
 added to the set of available CMake commands.  Usually,
 :command:`try_compile` is used before this command to compile the
 module.  If the command is successfully loaded a variable named
-
-.. code-block:: cmake
-
-  CMAKE_LOADED_COMMAND_<COMMAND_NAME>
-
+``CMAKE_LOADED_COMMAND_<COMMAND_NAME>``
 will be set to the full path of the module that was loaded.  Otherwise
 the variable will not be set.

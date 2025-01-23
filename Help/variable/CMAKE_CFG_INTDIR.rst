@@ -16,13 +16,16 @@ of the per-configuration output subdirectory.  On :ref:`Makefile Generators`
 this evaluates to ``.`` because there is only one configuration in a build tree.
 Example values:
 
-::
+.. table::
+  :align: left
 
-  $(Configuration)     = Visual Studio
-  $(CONFIGURATION)     = Xcode
-  .                    = Make-based tools
-  .                    = Ninja
-  ${CONFIGURATION}     = Ninja Multi-Config
+  =========================  ==============================
+  ``$(Configuration)``       Visual Studio
+  ``$(CONFIGURATION)``       Xcode
+  ``.``                      Make-based tools
+  ``.``                      Ninja
+  ``${CONFIGURATION}``       Ninja Multi-Config
+  =========================  ==============================
 
 Since these values are evaluated by the native build system, this
 variable is suitable only for use in command lines that will be
