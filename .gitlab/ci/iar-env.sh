@@ -1,5 +1,5 @@
 files='
-bxarm-9.50.2.deb
+bxarm-9.60.3.deb
 bxavr-8.10.2.deb
 bxrh850-3.10.2.deb
 bxriscv-3.30.1.deb
@@ -12,7 +12,7 @@ for f in $files; do
 done
 
 echo '
-cb6a276ace472939fbb76fc5ce517149296ac2c87047b59504f9fe95aed81794  bxarm-9.50.2.deb
+b65e7e51fa61dd058d9946901ccb2d2b878973573e8d28761644d541bb93a82d  bxarm-9.60.3.deb
 4a1065291952a23a8bfbbaa4eb36ca49b0af8653b8faab34ce955d9d48d64506  bxavr-8.10.2.deb
 b14085a0f21750c58168125d3cece2e3fcbd4c6495c652b5e65b6637bac0ac31  bxrh850-3.10.2.deb
 517e18dffdd4345f97c480b5128c7feea25ec1c3f06e62d8e2e6808c401d514a  bxriscv-3.30.1.deb
