@@ -1,7 +1,7 @@
 #include <cstring>
 
 template <size_t N>
-constexpr size_t cmStrLen(const char (&/*str*/)[N])
+constexpr size_t cmStrLen(const char (& /*str*/)[N])
 {
   return N - 1;
 }

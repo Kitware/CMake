@@ -1733,9 +1733,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
                      "run covbr: " << std::endl, this->Quiet);
 
   if (!this->RunBullseyeCommand(cont, "covbr", nullptr, outputFile)) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "error running covbr for."
-                 << "\n");
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "error running covbr for." << "\n");
     return -1;
   }
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,

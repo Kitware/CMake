@@ -551,8 +551,7 @@ int cmCPackNSISGenerator::InitializeInternal()
     }
   } else {
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                  "CPACK_CREATE_DESKTOP_LINKS: "
-                    << "not set" << std::endl);
+                  "CPACK_CREATE_DESKTOP_LINKS: " << "not set" << std::endl);
   }
 
   std::ostringstream str;

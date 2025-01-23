@@ -16,8 +16,7 @@ struct ExpectedPackResult
   std::vector<cmCTestBinPackerAllocation> ExpectedBlockAllocations;
 };
 
-static const std::vector<ExpectedPackResult> expectedResults
-{
+static const std::vector<ExpectedPackResult> expectedResults{
   /* clang-format off */
   {
     { 2, 2, 2, 2 },

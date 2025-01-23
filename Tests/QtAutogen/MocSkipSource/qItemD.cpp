@@ -4,8 +4,8 @@ class QItemD_Local : public QObject
 {
   Q_OBJECT
 public:
-  QItemD_Local(){};
-  ~QItemD_Local(){};
+  QItemD_Local() {};
+  ~QItemD_Local() {};
 };
 
 void QItemD::go()

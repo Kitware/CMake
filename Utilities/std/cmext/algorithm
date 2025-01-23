@@ -212,8 +212,9 @@ bool contains(Iterator first, Iterator last, Key const& key)
 
 #if defined(__SUNPRO_CC)
 template <typename Range, typename Key>
-auto contains(Range const& range, Key const& key, detail::overload_selector<1>)
-  -> decltype(range.find(key) != range.end())
+auto contains(Range const& range, Key const& key,
+              detail::overload_selector<1>) -> decltype(range.find(key) !=
+                                                        range.end())
 #else
 template <
   typename Range, typename Key,

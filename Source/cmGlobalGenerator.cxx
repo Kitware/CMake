@@ -830,7 +830,7 @@ void cmGlobalGenerator::EnableLanguage(
       // flag
       needTestLanguage[lang] = true;
     } // end if(!this->GetLanguageEnabled(lang) )
-  }   // end loop over languages
+  } // end loop over languages
 
   // **** Load the system specific information if not yet loaded
   if (!mf->GetDefinition("CMAKE_SYSTEM_SPECIFIC_INFORMATION_LOADED")) {
@@ -939,7 +939,7 @@ void cmGlobalGenerator::EnableLanguage(
           cmSystemTools::RemoveFile(compilerLangFile);
         }
       } // end if in try compile
-    }   // end need test language
+    } // end need test language
 
     // load linker configuration,  if required
     if (mf->GetDefinition(cmStrCat("CMAKE_", lang, "_USE_LINKER_INFORMATION"))

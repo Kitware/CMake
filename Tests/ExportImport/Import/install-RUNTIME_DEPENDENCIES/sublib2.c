@@ -1,7 +1,8 @@
 #ifdef _WIN32
 __declspec(dllimport)
 #endif
-  extern void dep7(void);
+extern void
+dep7(void);
 
 #ifdef _WIN32
 __declspec(dllexport)

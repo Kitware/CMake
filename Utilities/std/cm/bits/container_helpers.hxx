@@ -221,7 +221,7 @@ inline auto data(C& c) -> decltype(c.data())
 #  else
 inline constexpr auto data(C& c) noexcept(noexcept(c.data()))
 #  endif
-  -> decltype(c.data())
+                         -> decltype(c.data())
 {
   return c.data();
 }

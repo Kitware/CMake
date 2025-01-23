@@ -26,6 +26,6 @@ public:
    and to encode dates until the year 10000 in the patch level.  */
 #define CMake_VERSION_ENCODE_BASE KWIML_INT_UINT64_C(100000000)
 #define CMake_VERSION_ENCODE(major, minor, patch)                             \
-  ((((major)*1000u) * CMake_VERSION_ENCODE_BASE) +                            \
+  ((((major) * 1000u) * CMake_VERSION_ENCODE_BASE) +                          \
    (((minor) % 1000u) * CMake_VERSION_ENCODE_BASE) +                          \
    (((patch) % CMake_VERSION_ENCODE_BASE)))

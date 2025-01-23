@@ -7,14 +7,12 @@
 #include "cmCTestResourceSpec.h"
 #include "cmJSONState.h"
 
-static const cmCTestResourceSpec spec{
-  { {
-    /* clang-format off */
+static const cmCTestResourceSpec spec{ { {
+                                         /* clang-format off */
   { "gpus", { { "0", 4 }, { "1", 8 }, { "2", 0 }, { "3", 8 } }, },
-    /* clang-format on */
-  } },
-  cmJSONState()
-};
+                                         /* clang-format on */
+                                       } },
+                                       cmJSONState() };
 
 static bool testInitializeFromResourceSpec()
 {

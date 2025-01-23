@@ -42,10 +42,10 @@ public:
   public:
     Error(Location loc, std::string errMsg)
       : location(loc)
-      , message(std::move(errMsg)){};
+      , message(std::move(errMsg)) {};
     Error(std::string errMsg)
       : location({ -1, -1 })
-      , message(std::move(errMsg)){};
+      , message(std::move(errMsg)) {};
     std::string GetErrorMessage() const
     {
       std::string output = message;

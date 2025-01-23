@@ -6,7 +6,7 @@
 #include "cmCursesWidget.h"
 #include "cmStateTypes.h"
 
-#define ctrl(z) ((z)&037)
+#define ctrl(z) ((z) & 037)
 
 cmCursesOptionsWidget::cmCursesOptionsWidget(int width, int height, int left,
                                              int top)

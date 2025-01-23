@@ -1503,7 +1503,7 @@ cmSystemTools::RenameResult cmSystemTools::RenameFile(
 {
 #ifdef _WIN32
 #  ifndef INVALID_FILE_ATTRIBUTES
-#    define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
+#    define INVALID_FILE_ATTRIBUTES ((DWORD) - 1)
 #  endif
   std::wstring const oldname_wstr =
     SystemTools::ConvertToWindowsExtendedPath(oldname);

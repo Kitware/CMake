@@ -26,7 +26,7 @@ int main(void)
     b[i] = (float)(1000 * i);
   }
 /* compute on the GPU */
-#pragma acc data copyin(a [0:n], b [0:n]) copyout(r [0:n])
+#pragma acc data copyin(a[0 : n], b[0 : n]) copyout(r[0 : n])
   {
     vecaddgpu(r, a, b, n);
   }

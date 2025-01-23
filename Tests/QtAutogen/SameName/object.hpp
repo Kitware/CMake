@@ -7,7 +7,7 @@ class Object_hpp : public QObject
 {
   Q_OBJECT
   Q_SLOT
-  void go(){};
+  void go() {};
 };
 
 #endif

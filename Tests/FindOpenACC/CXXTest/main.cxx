@@ -25,7 +25,7 @@ int main(int, char*[])
   auto a_ptr = a.data();
   auto b_ptr = b.data();
   auto r_ptr = r.data();
-#pragma acc data copyin(a_ptr [0:n], b_ptr [0:n]) copyout(r_ptr [0:n])
+#pragma acc data copyin(a_ptr[0 : n], b_ptr[0 : n]) copyout(r_ptr[0 : n])
   {
     vecaddgpu(r_ptr, a_ptr, b_ptr, n);
   }

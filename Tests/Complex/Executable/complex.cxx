@@ -19,7 +19,7 @@ extern "C" {
 
 #include <sys/stat.h>
 #if !defined(S_ISDIR)
-#  define S_ISDIR(mode) ((mode)&_S_IFDIR)
+#  define S_ISDIR(mode) ((mode) & _S_IFDIR)
 #endif
 
 #ifdef COMPLEX_TEST_LINK_STATIC
