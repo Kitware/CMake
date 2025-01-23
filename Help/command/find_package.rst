@@ -208,18 +208,18 @@ The ``[version]`` argument requests a version with which the package found
 should be compatible. There are two possible forms in which it may be
 specified:
 
-  * A single version with the format ``major[.minor[.patch[.tweak]]]``, where
-    each component is a numeric value.
-  * A version range with the format ``versionMin...[<]versionMax`` where
-    ``versionMin`` and ``versionMax`` have the same format and constraints
-    on components being integers as the single version.  By default, both end
-    points are included.  By specifying ``<``, the upper end point will be
-    excluded. Version ranges are only supported with CMake 3.19 or later.
-    Note that it is not possible to extend the compatibility range specified
-    by the package's version file.  For example, if the package version file
-    specifies compatibility within a minor version, it is not possible to
-    extend the compatibility to several minor versions by specifying a
-    version range.
+* A single version with the format ``major[.minor[.patch[.tweak]]]``, where
+  each component is a numeric value.
+* A version range with the format ``versionMin...[<]versionMax`` where
+  ``versionMin`` and ``versionMax`` have the same format and constraints
+  on components being integers as the single version.  By default, both end
+  points are included.  By specifying ``<``, the upper end point will be
+  excluded. Version ranges are only supported with CMake 3.19 or later.
+  Note that it is not possible to extend the compatibility range specified
+  by the package's version file.  For example, if the package version file
+  specifies compatibility within a minor version, it is not possible to
+  extend the compatibility to several minor versions by specifying a
+  version range.
 
 The ``EXACT`` option requests that the version be matched exactly. This option
 is incompatible with the specification of a version range.

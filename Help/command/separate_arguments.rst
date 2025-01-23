@@ -45,8 +45,8 @@ be one of the following keywords:
   ``<variable>`` will be empty. Otherwise, ``<variable>`` is a list of 2
   elements:
 
-    0. Absolute path of the program
-    1. Any command-line arguments present in ``<args>`` as a string
+  0. Absolute path of the program
+  1. Any command-line arguments present in ``<args>`` as a string
 
   For example:
 

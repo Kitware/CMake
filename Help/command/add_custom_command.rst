@@ -141,16 +141,15 @@ The options are:
   built before any target using this custom command
   (see policy :policy:`CMP0112`).
 
-    * ``TARGET_FILE``
-    * ``TARGET_LINKER_FILE``
-    * ``TARGET_SONAME_FILE``
-    * ``TARGET_PDB_FILE``
+  * ``TARGET_FILE``
+  * ``TARGET_LINKER_FILE``
+  * ``TARGET_SONAME_FILE``
+  * ``TARGET_PDB_FILE``
 
   This target-level dependency does NOT add a file-level dependency that would
   cause the custom command to re-run whenever the executable is recompiled.
   List target names with the ``DEPENDS`` option to add such file-level
   dependencies.
-
 
 ``COMMENT``
   Display the given message before the commands are executed at

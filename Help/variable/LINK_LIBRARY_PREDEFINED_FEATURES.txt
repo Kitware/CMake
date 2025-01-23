@@ -54,9 +54,9 @@
   File paths must conform to one of the following patterns (``*`` is a
   wildcard, and optional parts are shown as ``[...]``):
 
-     * ``[/path/to/]FwName[.framework]``
-     * ``[/path/to/]FwName.framework/FwName[suffix]``
-     * ``[/path/to/]FwName.framework/Versions/*/FwName[suffix]``
+  * ``[/path/to/]FwName[.framework]``
+  * ``[/path/to/]FwName.framework/FwName[suffix]``
+  * ``[/path/to/]FwName.framework/Versions/*/FwName[suffix]``
 
   Note that CMake recognizes and automatically handles framework targets,
   even without using the :genex:`$<LINK_LIBRARY:FRAMEWORK,...>` expression.

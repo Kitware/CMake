@@ -84,17 +84,20 @@ Main functions provided by the module
   are set depending on the extension of the matched file:
 
   if match is **.resx** file:
-   - VS_CSHARP_AutoGen "True"
-   - VS_CSHARP_DesignTime "True"
-   - VS_CSHARP_DependentUpon <resx-filename>
+
+  - VS_CSHARP_AutoGen "True"
+  - VS_CSHARP_DesignTime "True"
+  - VS_CSHARP_DependentUpon <resx-filename>
 
   if match is **.cs** file:
-   - VS_CSHARP_DependentUpon <cs-filename>
+
+  - VS_CSHARP_DependentUpon <cs-filename>
 
   if match is **.settings** file:
-   - VS_CSHARP_AutoGen "True"
-   - VS_CSHARP_DesignTimeSharedInput "True"
-   - VS_CSHARP_DependentUpon <settings-filename>
+
+  - VS_CSHARP_AutoGen "True"
+  - VS_CSHARP_DesignTimeSharedInput "True"
+  - VS_CSHARP_DependentUpon <settings-filename>
 
 .. note::
 
@@ -122,7 +125,7 @@ Main functions provided by the module
   If a match is found, the source file properties of the ``.xaml.cs``
   file are set:
 
-   - VS_CSHARP_DependentUpon <xaml-filename>
+  - VS_CSHARP_DependentUpon <xaml-filename>
 
 Helper functions which are used by the above ones
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
