@@ -302,9 +302,9 @@ Changes made since CMake 3.30.0 include the following.
   directories that call :command:`project` with the same project name,
   and it addresses the bug in the implementation introduced in 3.30.4.
 
-3.30.6
-------
+3.30.6, 3.30.7
+--------------
 
-* This version made no changes to documented features or interfaces.
+* These versions made no changes to documented features or interfaces.
   Some implementation updates were made to support ecosystem changes
   and/or fix regressions.
