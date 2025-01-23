@@ -33,9 +33,6 @@ for how these variables are initialized.
 
 #]========================================]
 
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
-
 ### Common stuff ####
 set(PKG_CONFIG_VERSION 1)
 
@@ -1046,5 +1043,3 @@ Variables Affecting Behavior
 ### Local Variables:
 ### mode: cmake
 ### End:
-
-cmake_policy(POP)

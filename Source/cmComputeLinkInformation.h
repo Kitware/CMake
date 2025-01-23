@@ -239,7 +239,6 @@ private:
   // Additional paths configured by the runtime linker
   std::vector<std::string> RuntimeLinkDirs;
 
-  std::set<std::string> CMP0060WarnItems;
   // Dependent library path computation.
   std::unique_ptr<cmOrderDirectories> OrderDependentRPath;
   // Runtime path computation.
@@ -252,7 +251,6 @@ private:
   bool LinkWithRuntimePath;
   bool LinkTypeEnabled;
   bool ArchivesMayBeShared;
-  bool CMP0060Warn;
 
   void AddLibraryRuntimeInfo(std::string const& fullPath,
                              const cmGeneratorTarget* target);

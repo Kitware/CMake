@@ -1,6 +1,3 @@
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW)
-
 include("${CMAKE_CURRENT_LIST_DIR}/../check-json.cmake")
 
 function (check_build_database expect_basename fname component)
@@ -77,5 +74,3 @@ function (check_build_database expect_basename fname component)
 
   set(RunCMake_TEST_FAILED "${RunCMake_TEST_FAILED}" PARENT_SCOPE)
 endfunction ()
-
-cmake_policy(POP)

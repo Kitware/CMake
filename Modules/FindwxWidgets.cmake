@@ -188,9 +188,6 @@ macro(DBG_MSG_V _MSG)
 #    "${CMAKE_CURRENT_LIST_FILE}(${CMAKE_CURRENT_LIST_LINE}): ${_MSG}")
 endmacro()
 
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
-
 # Clear return values in case the module is loaded more than once.
 set(wxWidgets_FOUND FALSE)
 set(wxWidgets_INCLUDE_DIRS "")
@@ -1241,5 +1238,3 @@ function(WXWIDGETS_ADD_RESOURCES _outfiles)
 
   set(${_outfiles} ${${_outfiles}} PARENT_SCOPE)
 endfunction()
-
-cmake_policy(POP)

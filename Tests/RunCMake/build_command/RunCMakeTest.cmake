@@ -9,10 +9,5 @@ run_cmake(BeforeProject)
 unset(RunCMake_TEST_OPTIONS)
 
 run_cmake(CMP0061-NEW)
-if(RunCMake_GENERATOR MATCHES "Make")
-  run_cmake(CMP0061-OLD-make)
-else()
-  run_cmake(CMP0061-OLD-other)
-endif()
 
 run_cmake(ParallelLevel)

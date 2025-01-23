@@ -1245,9 +1245,6 @@ void cmMakefile::AddDefineFlag(std::string const& flag)
     return;
   }
 
-  // Update the string used for the old DEFINITIONS property.
-  s_AddDefineFlag(flag, this->DefineFlagsOrig);
-
   // If this is really a definition, update COMPILE_DEFINITIONS.
   if (this->ParseDefineFlag(flag, false)) {
     return;
@@ -1280,9 +1277,6 @@ void cmMakefile::RemoveDefineFlag(std::string const& flag)
   if (flag.empty()) {
     return;
   }
-
-  // Update the string used for the old DEFINITIONS property.
-  s_RemoveDefineFlag(flag, this->DefineFlagsOrig);
 
   // If this is really a definition, update COMPILE_DEFINITIONS.
   if (this->ParseDefineFlag(flag, true)) {
@@ -1357,7 +1351,6 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
 
   // define flags
   this->DefineFlags = parent->DefineFlags;
-  this->DefineFlagsOrig = parent->DefineFlagsOrig;
 
   // Include transform property.  There is no per-config version.
   {
@@ -1600,7 +1593,7 @@ void cmMakefile::Configure()
         this->SetCheckCMP0000(true);
 
         // Implicitly set the version for the user.
-        cmPolicies::ApplyPolicyVersion(this, 3, 1, 0,
+        cmPolicies::ApplyPolicyVersion(this, 3, 5, 0,
                                        cmPolicies::WarnCompat::Off);
       }
     }
@@ -4002,11 +3995,6 @@ cmStateSnapshot cmMakefile::GetStateSnapshot() const
   return this->StateSnapshot;
 }
 
-const char* cmMakefile::GetDefineFlagsCMP0059() const
-{
-  return this->DefineFlagsOrig.c_str();
-}
-
 cmPolicies::PolicyStatus cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id,
                                                      bool parent_scope) const
 {
@@ -4052,10 +4040,10 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
       !(this->GetCMakeInstance()->GetIsInTryCompile() &&
         (
           // Policies set by cmCoreTryCompile::TryCompileCode.
-          id == cmPolicies::CMP0065 || id == cmPolicies::CMP0083 ||
-          id == cmPolicies::CMP0091 || id == cmPolicies::CMP0104 ||
-          id == cmPolicies::CMP0123 || id == cmPolicies::CMP0126 ||
-          id == cmPolicies::CMP0128 || id == cmPolicies::CMP0136)) &&
+          id == cmPolicies::CMP0083 || id == cmPolicies::CMP0091 ||
+          id == cmPolicies::CMP0104 || id == cmPolicies::CMP0123 ||
+          id == cmPolicies::CMP0126 || id == cmPolicies::CMP0128 ||
+          id == cmPolicies::CMP0136)) &&
       (!this->IsSet("CMAKE_WARN_DEPRECATED") ||
        this->IsOn("CMAKE_WARN_DEPRECATED"))) {
     this->IssueMessage(MessageType::DEPRECATION_WARNING,
@@ -4136,22 +4124,6 @@ void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm) const
        pid = static_cast<PolicyID>(pid + 1)) {
     pm.Set(pid, this->GetPolicyStatus(pid));
   }
-}
-
-bool cmMakefile::IgnoreErrorsCMP0061() const
-{
-  bool ignoreErrors = true;
-  switch (this->GetPolicyStatus(cmPolicies::CMP0061)) {
-    case cmPolicies::WARN:
-      // No warning for this policy!
-      CM_FALLTHROUGH;
-    case cmPolicies::OLD:
-      break;
-    case cmPolicies::NEW:
-      ignoreErrors = false;
-      break;
-  }
-  return ignoreErrors;
 }
 
 cmMakefile::FunctionPushPop::FunctionPushPop(cmMakefile* mf,

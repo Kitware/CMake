@@ -397,7 +397,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   }
 
   this->LocalGenerator->AppendFlags(linkFlags,
-                                    this->LocalGenerator->GetLinkLibsCMP0065(
+                                    this->LocalGenerator->GetExeExportFlags(
                                       linkLanguage, *this->GeneratorTarget));
 
   this->UseLWYU = this->LocalGenerator->AppendLWYUFlags(

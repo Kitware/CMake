@@ -164,33 +164,32 @@ class cmMakefile;
     "Only interpret if() arguments as variables or keywords when unquoted.",  \
     3, 1, 0, NEW)                                                             \
   SELECT(POLICY, CMP0055, "Strict checking for break() command.", 3, 2, 0,    \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(POLICY, CMP0056,                                                     \
          "Honor link flags in try_compile() source-file signature.", 3, 2, 0, \
-         WARN)                                                                \
-  SELECT(POLICY, CMP0057, "Support new IN_LIST if() operator.", 3, 3, 0,      \
-         WARN)                                                                \
+         NEW)                                                                 \
+  SELECT(POLICY, CMP0057, "Support new IN_LIST if() operator.", 3, 3, 0, NEW) \
   SELECT(POLICY, CMP0058,                                                     \
          "Ninja requires custom command byproducts to be explicit.", 3, 3, 0, \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(POLICY, CMP0059,                                                     \
          "Do not treat DEFINITIONS as a built-in directory property.", 3, 3,  \
-         0, WARN)                                                             \
+         0, NEW)                                                              \
   SELECT(POLICY, CMP0060,                                                     \
          "Link libraries by full path even in implicit directories.", 3, 3,   \
-         0, WARN)                                                             \
+         0, NEW)                                                              \
   SELECT(POLICY, CMP0061,                                                     \
          "CTest does not by default tell make to ignore errors (-i).", 3, 3,  \
-         0, WARN)                                                             \
+         0, NEW)                                                              \
   SELECT(POLICY, CMP0062, "Disallow install() of export() result.", 3, 3, 0,  \
-         WARN)                                                                \
+         NEW)                                                                 \
   SELECT(POLICY, CMP0063,                                                     \
-         "Honor visibility properties for all target types.", 3, 3, 0, WARN)  \
-  SELECT(POLICY, CMP0064, "Support new TEST if() operator.", 3, 4, 0, WARN)   \
+         "Honor visibility properties for all target types.", 3, 3, 0, NEW)   \
+  SELECT(POLICY, CMP0064, "Support new TEST if() operator.", 3, 4, 0, NEW)    \
   SELECT(POLICY, CMP0065,                                                     \
          "Do not add flags to export symbols from executables without "       \
          "the ENABLE_EXPORTS target property.",                               \
-         3, 4, 0, WARN)                                                       \
+         3, 4, 0, NEW)                                                        \
   SELECT(POLICY, CMP0066,                                                     \
          "Honor per-config flags in try_compile() source-file signature.", 3, \
          7, 0, WARN)                                                          \

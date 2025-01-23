@@ -93,10 +93,6 @@ function(run_CMP0058 case)
   run_cmake_command(CMP0058-${case}-build ${CMAKE_COMMAND} --build .)
 endfunction()
 
-run_CMP0058(OLD-no)
-run_CMP0058(OLD-by)
-run_CMP0058(WARN-no)
-run_CMP0058(WARN-by)
 run_CMP0058(NEW-no)
 run_CMP0058(NEW-by)
 

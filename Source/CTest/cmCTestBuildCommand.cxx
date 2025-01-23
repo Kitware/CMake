@@ -93,7 +93,7 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
       std::string dir = this->CTest->GetCTestConfiguration("BuildDirectory");
       std::string buildCommand = globalGenerator->GenerateCMakeBuildCommand(
         cmakeBuildTarget, cmakeBuildConfiguration, args.ParallelLevel,
-        cmakeBuildAdditionalFlags, mf.IgnoreErrorsCMP0061());
+        cmakeBuildAdditionalFlags, false);
       cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                          "SetMakeCommand:" << buildCommand << "\n",
                          args.Quiet);

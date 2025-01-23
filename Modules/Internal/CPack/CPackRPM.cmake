@@ -3,9 +3,6 @@
 
 # Author: Eric Noulard with the help of Alexander Neundorf.
 
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
-
 function(set_spec_script_if_enabled TYPE PACKAGE_NAME VAR)
   if(NOT "${VAR}" STREQUAL "" AND NOT "${VAR}" STREQUAL "\n")
     if(PACKAGE_NAME)
@@ -1999,5 +1996,3 @@ mv %_topdir/tmpBBroot $RPM_BUILD_ROOT
 endfunction()
 
 cpack_rpm_generate_package()
-
-cmake_policy(POP)

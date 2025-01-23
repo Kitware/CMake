@@ -1,7 +1,5 @@
 include(RunCMake)
 
-cmake_policy(SET CMP0057 NEW)
-
 function(run_cmake_with_config test)
   if (NOT RunCMake_GENERATOR_IS_MULTI_CONFIG)
     set(RunCMake_TEST_OPTIONS -DCMAKE_BUILD_TYPE=Release)

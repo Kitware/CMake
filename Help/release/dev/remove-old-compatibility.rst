@@ -1,7 +1,7 @@
 remove-old-compatibility
 ------------------------
 
-* Compatibility with versions of CMake older than 3.1 has been removed.
+* Compatibility with versions of CMake older than 3.5 has been removed.
   Calls to :command:`cmake_minimum_required` or :command:`cmake_policy`
   that set the policy version to an older value now issue an error.
   Note that calls to those commands can still support older versions of

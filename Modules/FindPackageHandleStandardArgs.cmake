@@ -214,11 +214,6 @@ Example for the usage:
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageMessage.cmake)
 
 
-cmake_policy(PUSH)
-# IN_LIST operator
-cmake_policy(SET CMP0057 NEW)
-
-
 # internal helper macro
 macro(_FPHSA_FAILURE_MESSAGE _msg)
   set(__msg "${_msg}")
@@ -602,6 +597,3 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   set(${_NAME}_FOUND ${${_NAME}_FOUND} PARENT_SCOPE)
   set(${_NAME_UPPER}_FOUND ${${_NAME}_FOUND} PARENT_SCOPE)
 endfunction()
-
-
-cmake_policy(POP)

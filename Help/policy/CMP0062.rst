@@ -1,6 +1,9 @@
 CMP0062
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 .. versionadded:: 3.3
 
 Disallow :command:`install` of :command:`export` result.
@@ -24,7 +27,5 @@ an :command:`export()` command.  The ``NEW`` behavior for this policy is
 not to allow installing the result of an :command:`export()` command.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.3
-.. |WARNS_OR_DOES_NOT_WARN| replace:: warns
-.. include:: STANDARD_ADVICE.txt
-
-.. include:: DEPRECATED.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: warned
+.. include:: REMOVED_EPILOGUE.txt

@@ -98,9 +98,6 @@ The following cache variables are also available to set or use:
   The include path to ``jawt.h``.
 #]=======================================================================]
 
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW)
-
 include(CheckSourceCompiles)
 include(CMakePushCheckState)
 include(FindPackageHandleStandardArgs)
@@ -692,5 +689,3 @@ if(JNI_FOUND)
     unset(_JNI_JVM_TYPE)
   endif()
 endif()
-
-cmake_policy(POP)

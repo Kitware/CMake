@@ -1,9 +1,6 @@
 # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
 # file Copyright.txt or https://cmake.org/licensing for details.
 
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
-
 # Function to print messages of this module
 function(_ios_install_combined_message)
   message(STATUS "[iOS combined] " ${ARGN})
@@ -319,5 +316,3 @@ function(ios_install_combined target destination)
 
   _ios_install_combined_message("Install done: ${destination}")
 endfunction()
-
-cmake_policy(POP)

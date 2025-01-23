@@ -10,8 +10,6 @@
 #
 
 cmake_policy(PUSH)
-# IN_LIST operator
-cmake_policy (SET CMP0057 NEW)
 # foreach loop variable scope
 cmake_policy (SET CMP0124 NEW)
 # registry view behavior

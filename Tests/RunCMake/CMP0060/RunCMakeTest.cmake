@@ -1,5 +1,4 @@
 include(RunCMake)
-set(RunCMake_IGNORE_POLICY_VERSION_DEPRECATION ON)
 
 function(run_cmake_CMP0060 CASE)
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/CMP0060-${CASE}-build)
@@ -14,7 +13,4 @@ function(run_cmake_CMP0060 CASE)
     )
 endfunction()
 
-run_cmake_CMP0060(OLD)
-run_cmake_CMP0060(WARN-OFF)
-run_cmake_CMP0060(WARN-ON)
 run_cmake_CMP0060(NEW)

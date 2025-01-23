@@ -123,8 +123,8 @@ public:
                                 cmGeneratorTarget const* target,
                                 std::string const& language);
 
-  std::string GetLinkLibsCMP0065(std::string const& linkLanguage,
-                                 cmGeneratorTarget& tgt) const;
+  std::string GetExeExportFlags(std::string const& linkLanguage,
+                                cmGeneratorTarget& tgt) const;
 
   cmState* GetState() const;
   cmStateSnapshot GetStateSnapshot() const;
@@ -585,7 +585,6 @@ protected:
   GeneratorTargetMap GeneratorTargetSearchIndex;
   GeneratorTargetVector GeneratorTargets;
 
-  std::set<cmGeneratorTarget const*> WarnCMP0063;
   GeneratorTargetMap ImportedGeneratorTargets;
   GeneratorTargetVector OwnedImportedGeneratorTargets;
   std::map<std::string, std::string> AliasTargets;

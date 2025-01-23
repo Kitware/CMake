@@ -247,9 +247,6 @@ if(DEFINED CMAKE_GENERATOR)
   endif()
 endif()
 
-cmake_policy(PUSH)
-cmake_policy(SET CMP0057 NEW) # if IN_LIST
-
 # The functions defined in this file depend on the get_prerequisites function
 # (and possibly others) found in:
 #
@@ -1127,5 +1124,3 @@ function(verify_app app)
     message(FATAL_ERROR "error: verify_app failed")
   endif()
 endfunction()
-
-cmake_policy(POP)

@@ -1,4 +1,3 @@
-cmake_policy(SET CMP0057 NEW)
 include(RunCMake)
 
 run_cmake(NotAFeature)

@@ -1,6 +1,9 @@
 CMP0065
 -------
 
+.. |REMOVED_IN_CMAKE_VERSION| replace:: 4.0
+.. include:: REMOVED_PROLOGUE.txt
+
 .. versionadded:: 3.4
 
 Do not add flags to export symbols from executables without
@@ -21,11 +24,9 @@ flags when linking executables if the :prop_tgt:`ENABLE_EXPORTS` target
 property is set to ``True``.
 
 .. |INTRODUCED_IN_CMAKE_VERSION| replace:: 3.4
-.. |WARNS_OR_DOES_NOT_WARN| replace:: does *not* warn by default
-.. include:: STANDARD_ADVICE.txt
+.. |WARNED_OR_DID_NOT_WARN| replace:: did *not* warn by default
+.. include:: REMOVED_EPILOGUE.txt
 
 See documentation of the
 :variable:`CMAKE_POLICY_WARNING_CMP0065 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
-variable to control the warning.
-
-.. include:: DEPRECATED.txt
+variable to control the warning in CMake versions before 4.0.

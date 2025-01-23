@@ -12,7 +12,7 @@ macro(__aix_compiler_gnu lang)
   set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG "-Wl,-blibpath:")
   set(CMAKE_SHARED_LIBRARY_RUNTIME_${lang}_FLAG_SEP ":")
   string(APPEND CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS " -Wl,-bnoipath")
-  set(CMAKE_SHARED_LIBRARY_LINK_${lang}_FLAGS "-Wl,-bexpall") # CMP0065 old behavior
+  set(CMAKE_SHARED_LIBRARY_LINK_${lang}_FLAGS "-Wl,-bexpall")
   set(CMAKE_${lang}_USE_IMPLICIT_LINK_DIRECTORIES_IN_RUNTIME_PATH 1)
   set(CMAKE_${lang}_VERBOSE_LINK_FLAG "-Wl,-v")
 
