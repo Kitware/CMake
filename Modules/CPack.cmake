@@ -498,7 +498,7 @@ The following variables are for advanced uses of CPack:
   .. versionadded:: 3.25
 
   Specify the ``objdump`` executable path used by CPack.
-  The default value will be taken from the ``CMAKE_OBJDUMP`` variable, if set,
+  The default value will be taken from the :variable:`CMAKE_OBJDUMP` variable,
   which may be populated by CMake when enabling languages.  If ``CMAKE_OBJDUMP``
   is not set, CPack will use :command:`find_program` to determine the
   ``objdump`` path when needed.

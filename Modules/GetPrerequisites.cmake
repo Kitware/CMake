@@ -26,7 +26,8 @@ files:
    otool (Mac OSX)
 
 .. versionchanged:: 3.16
-  The tool specified by ``CMAKE_OBJDUMP`` will be used, if set.
+  The tool specified by the :variable:`CMAKE_OBJDUMP` variable
+  will be used, if set.
 
 The following functions are provided by this module:
 

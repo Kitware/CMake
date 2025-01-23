@@ -93,6 +93,7 @@ Variables that Provide Information
    /variable/CMAKE_MINOR_VERSION
    /variable/CMAKE_NETRC
    /variable/CMAKE_NETRC_FILE
+   /variable/CMAKE_OBJDUMP
    /variable/CMAKE_PARENT_LIST_FILE
    /variable/CMAKE_PATCH_VERSION
    /variable/CMAKE_PROJECT_DESCRIPTION
