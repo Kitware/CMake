@@ -10,6 +10,10 @@ sha256sum --check ironpython.sha256sum
 dpkg -i ironpython_3.4.0.deb
 rm ironpython_3.4.0.deb ironpython.sha256sum
 
+# Ruby rbenv
+rbenv install 3.1.2
+rbenv global 3.1.2
+
 # Perforce
 curl -L https://www.perforce.com/downloads/perforce/r21.2/bin.linux26x86_64/helix-core-server.tgz -o - \
   | tar -C /usr/local/bin -xvzf - -- p4 p4d
