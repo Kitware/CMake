@@ -16,6 +16,7 @@ BraceWrapping:
 BreakBeforeBraces: Custom
 ColumnLimit: 79
 IndentPPDirectives: AfterHash
+QualifierAlignment: Right
 SortUsingDeclarations: false
 SpaceAfterTemplateKeyword: true
 IncludeBlocks: Regroup
