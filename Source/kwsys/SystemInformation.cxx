@@ -3418,10 +3418,16 @@ bool SystemInformationImplementation::RetrieveInformationFromCpuInfoFile()
   buffer.resize(fileSize - 2);
   // Number of logical CPUs (combination of multiple processors, multi-core
   // and SMT)
-  size_t pos = buffer.find("processor\t");
+  const char* processor_string =
+#ifdef __s390x__
+    "cpu number";
+#else
+    "processor\t";
+#endif
+  size_t pos = buffer.find(processor_string);
   while (pos != std::string::npos) {
     this->NumberOfLogicalCPU++;
-    pos = buffer.find("processor\t", pos + 1);
+    pos = buffer.find(processor_string, pos + 1);
   }
 
 #if defined(__linux) || defined(__CYGWIN__)
