@@ -479,7 +479,7 @@ The following variables are for advanced uses of CPack:
 
   Specify the ``readelf`` executable path used by CPack.
   The default value will be taken from the ``CMAKE_READELF`` variable, if set,
-  which may be populated by an internal CMake module.  If ``CMAKE_READELF``
+  which may be populated CMake when enabling languages.  If ``CMAKE_READELF``
   is not set, CPack will use :command:`find_program` to determine the
   ``readelf`` path when needed.
 
@@ -489,7 +489,7 @@ The following variables are for advanced uses of CPack:
 
   Specify the ``objcopy`` executable path used by CPack.
   The default value will be taken from the ``CMAKE_OBJCOPY`` variable, if set,
-  which may be populated by an internal CMake module.  If ``CMAKE_OBJCOPY``
+  which may be populated by CMake when enabling languages.  If ``CMAKE_OBJCOPY``
   is not set, CPack will use :command:`find_program` to determine the
   ``objcopy`` path when needed.
 
@@ -499,7 +499,7 @@ The following variables are for advanced uses of CPack:
 
   Specify the ``objdump`` executable path used by CPack.
   The default value will be taken from the ``CMAKE_OBJDUMP`` variable, if set,
-  which may be populated by an internal CMake module.  If ``CMAKE_OBJDUMP``
+  which may be populated by CMake when enabling languages.  If ``CMAKE_OBJDUMP``
   is not set, CPack will use :command:`find_program` to determine the
   ``objdump`` path when needed.
 
