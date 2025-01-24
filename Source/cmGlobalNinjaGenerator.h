@@ -536,6 +536,7 @@ private:
   void WriteTargetRebuildManifest(std::ostream& os);
   bool WriteTargetCleanAdditional(std::ostream& os);
   void WriteTargetClean(std::ostream& os);
+  void WriteTargetInstrument(std::ostream& os);
   void WriteTargetHelp(std::ostream& os);
 
   void ComputeTargetDependsClosure(

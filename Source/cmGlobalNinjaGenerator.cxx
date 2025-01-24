@@ -32,6 +32,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
+#include "cmInstrumentation.h"
 #include "cmLinkLineComputer.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
@@ -1761,6 +1762,13 @@ void cmGlobalNinjaGenerator::WriteBuiltinTargets(std::ostream& os)
   this->WriteTargetRebuildManifest(os);
   this->WriteTargetClean(os);
   this->WriteTargetHelp(os);
+#if !defined(CMAKE_BOOTSTRAP)
+  if (this->GetCMakeInstance()
+        ->GetInstrumentation()
+        ->HasPreOrPostBuildHook()) {
+    this->WriteTargetInstrument(os);
+  }
+#endif
 
   for (std::string const& config : this->GetConfigNames()) {
     this->WriteTargetDefault(*this->GetConfigFileStream(config));
@@ -1834,6 +1842,14 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
     }
   }
   reBuild.ImplicitDeps.push_back(this->CMakeCacheFile);
+
+#if !defined(CMAKE_BOOTSTRAP)
+  if (this->GetCMakeInstance()
+        ->GetInstrumentation()
+        ->HasPreOrPostBuildHook()) {
+    reBuild.ExplicitDeps.push_back(this->NinjaOutputPath("start_instrument"));
+  }
+#endif
 
   // Use 'console' pool to get non buffered output of the CMake re-run call
   // Available since Ninja 1.5
@@ -2177,6 +2193,42 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
     build.Comment = "Print all primary targets available.";
     build.Outputs.push_back(this->NinjaOutputPath("help"));
     this->WriteBuild(os, build);
+  }
+}
+
+void cmGlobalNinjaGenerator::WriteTargetInstrument(std::ostream& os)
+{
+  // Write rule
+  {
+    cmNinjaRule rule("START_INSTRUMENT");
+    rule.Command = cmStrCat(
+      "\"", cmSystemTools::GetCTestCommand(), "\" --start-instrumentation \"",
+      this->GetCMakeInstance()->GetHomeOutputDirectory(), "\"");
+#ifndef _WIN32
+    /*
+     * On Unix systems, Ninja will prefix the command with `/bin/sh -c`.
+     * Use exec so that Ninja is the parent process of the command.
+     */
+    rule.Command = cmStrCat("exec ", rule.Command);
+#endif
+    rule.Description = "Collecting build metrics";
+    rule.Comment = "Rule to initialize instrumentation daemon.";
+    rule.Restat = "1";
+    WriteRule(*this->RulesFileStream, rule);
+  }
+
+  // Write build
+  {
+    cmNinjaBuild phony("phony");
+    phony.Comment = "Phony target to keep START_INSTRUMENTATION out of date.";
+    phony.Outputs.push_back(this->NinjaOutputPath("CMakeFiles/instrument"));
+    cmNinjaBuild instrument("START_INSTRUMENT");
+    instrument.Comment = "Start instrumentation daemon.";
+    instrument.Outputs.push_back(this->NinjaOutputPath("start_instrument"));
+    instrument.ExplicitDeps.push_back(
+      this->NinjaOutputPath("CMakeFiles/instrument"));
+    WriteBuild(os, phony);
+    WriteBuild(os, instrument);
   }
 }
 

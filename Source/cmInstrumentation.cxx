@@ -11,6 +11,7 @@
 #include <cm/optional>
 
 #include <cm3p/json/writer.h>
+#include <cm3p/uv.h>
 
 #include "cmsys/Directory.hxx"
 #include "cmsys/FStream.hxx"
@@ -22,6 +23,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
+#include "cmUVProcessChain.h"
 
 cmInstrumentation::cmInstrumentation(std::string const& binary_dir)
 {
@@ -484,4 +486,47 @@ std::string cmInstrumentation::ComputeSuffixTime()
   ss << cmts.CreateTimestampFromTimeT(ts, "%Y-%m-%dT%H-%M-%S", true) << '-'
      << std::setfill('0') << std::setw(4) << tms;
   return ss.str();
+}
+
+/*
+ * Called by ctest --start-instrumentation as part of the START_INSTRUMENTATION
+ * rule when using the Ninja generator.
+ * This creates a detached process which waits for the Ninja process to die
+ * before running the postBuild hook. In this way, the postBuild hook triggers
+ * after every ninja invocation, regardless of whether the build passed or
+ * failed.
+ */
+int cmInstrumentation::SpawnBuildDaemon()
+{
+  // preBuild Hook
+  this->CollectTimingData(cmInstrumentationQuery::Hook::PreBuild);
+
+  // postBuild Hook
+  if (this->HasHook(cmInstrumentationQuery::Hook::PostBuild)) {
+    auto ninja_pid = uv_os_getppid();
+    if (ninja_pid) {
+      std::vector<std::string> args;
+      args.push_back(cmSystemTools::GetCTestCommand());
+      args.push_back("--wait-and-collect-instrumentation");
+      args.push_back(this->binaryDir);
+      args.push_back(std::to_string(ninja_pid));
+      auto builder = cmUVProcessChainBuilder().SetDetached().AddCommand(args);
+      auto chain = builder.Start();
+      uv_run(&chain.GetLoop(), UV_RUN_DEFAULT);
+    }
+  }
+  return 0;
+}
+
+/*
+ * Always called by ctest --wait-and-collect-instrumentation in a detached
+ * process. Waits for the given PID to end before running the postBuild hook.
+ *
+ * See SpawnBuildDaemon()
+ */
+int cmInstrumentation::CollectTimingAfterBuild(int ppid)
+{
+  while (0 == uv_kill(ppid, 0)) {
+  };
+  return this->CollectTimingData(cmInstrumentationQuery::Hook::PostBuild);
 }

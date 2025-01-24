@@ -46,6 +46,8 @@ public:
                       std::string& callback);
   void ClearGeneratedQueries();
   int CollectTimingData(cmInstrumentationQuery::Hook hook);
+  int SpawnBuildDaemon();
+  int CollectTimingAfterBuild(int ppid);
   std::string errorMsg;
 
 private:
