@@ -54,6 +54,8 @@ RUN --mount=type=bind,source=install_iwyu.sh,target=/root/install_iwyu.sh \
 FROM ${BASE_IMAGE}
 LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
 
+ENV RBENV_ROOT=/opt/rbenv
+
 RUN --mount=type=bind,source=install_deps.sh,target=/root/install_deps.sh \
     --mount=type=bind,source=deps_packages.lst,target=/root/deps_packages.lst \
     --mount=type=cache,from=dnf-cache,source=/var/lib/dnf,target=/var/lib/dnf,sharing=private \
