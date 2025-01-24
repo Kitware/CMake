@@ -92,7 +92,7 @@ extern "C" {
  *   color specification.
  */
 kwsysEXPORT void kwsysTerminal_cfprintf(int color, FILE* stream,
-                                        const char* format, ...);
+                                        char const* format, ...);
 enum kwsysTerminal_Color_e
 {
   /* Normal Text */

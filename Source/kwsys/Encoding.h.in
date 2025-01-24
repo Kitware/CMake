@@ -31,22 +31,22 @@ extern "C" {
    On Windows, UTF-8 is assumed, and on other platforms,
    the current locale is assumed.
    */
-kwsysEXPORT size_t kwsysEncoding_mbstowcs(wchar_t* dest, const char* src,
+kwsysEXPORT size_t kwsysEncoding_mbstowcs(wchar_t* dest, char const* src,
                                           size_t n);
 
 /* Convert a narrow string to a wide string.
    This can return NULL if the conversion fails. */
-kwsysEXPORT wchar_t* kwsysEncoding_DupToWide(const char* src);
+kwsysEXPORT wchar_t* kwsysEncoding_DupToWide(char const* src);
 
 /* Convert a wide string to a narrow string.
    On Windows, UTF-8 is assumed, and on other platforms,
    the current locale is assumed. */
-kwsysEXPORT size_t kwsysEncoding_wcstombs(char* dest, const wchar_t* src,
+kwsysEXPORT size_t kwsysEncoding_wcstombs(char* dest, wchar_t const* src,
                                           size_t n);
 
 /* Convert a wide string to a narrow string.
    This can return NULL if the conversion fails. */
-kwsysEXPORT char* kwsysEncoding_DupToNarrow(const wchar_t* str);
+kwsysEXPORT char* kwsysEncoding_DupToNarrow(wchar_t const* str);
 
 #if defined(__cplusplus)
 } /* extern "C" */

@@ -54,8 +54,8 @@ public:
   SystemToolsManager();
   ~SystemToolsManager();
 
-  SystemToolsManager(const SystemToolsManager&) = delete;
-  SystemToolsManager& operator=(const SystemToolsManager&) = delete;
+  SystemToolsManager(SystemToolsManager const&) = delete;
+  SystemToolsManager& operator=(SystemToolsManager const&) = delete;
 };
 
 // This instance will show up in any translation unit that uses
@@ -69,16 +69,16 @@ static SystemToolsManager SystemToolsManagerInstance;
 typedef int TestFilePermissions;
 #if defined(_WIN32) && !defined(__CYGWIN__)
 // On Windows (VC), no system header defines these constants...
-static const TestFilePermissions TEST_FILE_OK = 0;
-static const TestFilePermissions TEST_FILE_READ = 4;
-static const TestFilePermissions TEST_FILE_WRITE = 2;
-static const TestFilePermissions TEST_FILE_EXECUTE = 1;
+static TestFilePermissions const TEST_FILE_OK = 0;
+static TestFilePermissions const TEST_FILE_READ = 4;
+static TestFilePermissions const TEST_FILE_WRITE = 2;
+static TestFilePermissions const TEST_FILE_EXECUTE = 1;
 #else
 // Standard POSIX constants
-static const TestFilePermissions TEST_FILE_OK = F_OK;
-static const TestFilePermissions TEST_FILE_READ = R_OK;
-static const TestFilePermissions TEST_FILE_WRITE = W_OK;
-static const TestFilePermissions TEST_FILE_EXECUTE = X_OK;
+static TestFilePermissions const TEST_FILE_OK = F_OK;
+static TestFilePermissions const TEST_FILE_READ = R_OK;
+static TestFilePermissions const TEST_FILE_WRITE = W_OK;
+static TestFilePermissions const TEST_FILE_EXECUTE = X_OK;
 #endif
 
 /** \class SystemTools
@@ -99,9 +99,9 @@ public:
    * then an underscore is prepended.  Note that this can produce
    * identifiers that the standard reserves (_[A-Z].* and __.*).
    */
-  static std::string MakeCidentifier(const std::string& s);
+  static std::string MakeCidentifier(std::string const& s);
 
-  static std::string MakeCindentifier(const std::string& s)
+  static std::string MakeCindentifier(std::string const& s)
   {
     return MakeCidentifier(s);
   }
@@ -109,123 +109,123 @@ public:
   /**
    * Replace replace all occurrences of the string in the source string.
    */
-  static void ReplaceString(std::string& source, const char* replace,
-                            const char* with);
-  static void ReplaceString(std::string& source, const std::string& replace,
-                            const std::string& with);
+  static void ReplaceString(std::string& source, char const* replace,
+                            char const* with);
+  static void ReplaceString(std::string& source, std::string const& replace,
+                            std::string const& with);
 
   /**
    * Return a capitalized string (i.e the first letter is uppercased,
    * all other are lowercased).
    */
-  static std::string Capitalized(const std::string&);
+  static std::string Capitalized(std::string const&);
 
   /**
    * Return a 'capitalized words' string (i.e the first letter of each word
    * is uppercased all other are left untouched though).
    */
-  static std::string CapitalizedWords(const std::string&);
+  static std::string CapitalizedWords(std::string const&);
 
   /**
    * Return a 'uncapitalized words' string (i.e the first letter of each word
    * is lowercased all other are left untouched though).
    */
-  static std::string UnCapitalizedWords(const std::string&);
+  static std::string UnCapitalizedWords(std::string const&);
 
   /**
    * Return a lower case string
    */
-  static std::string LowerCase(const std::string&);
+  static std::string LowerCase(std::string const&);
 
   /**
    * Return a lower case string
    */
-  static std::string UpperCase(const std::string&);
+  static std::string UpperCase(std::string const&);
 
   /**
    * Count char in string
    */
-  static size_t CountChar(const char* str, char c);
+  static size_t CountChar(char const* str, char c);
 
   /**
    * Remove some characters from a string.
    * Return a pointer to the new resulting string (allocated with 'new')
    */
-  static char* RemoveChars(const char* str, const char* toremove);
+  static char* RemoveChars(char const* str, char const* toremove);
 
   /**
    * Remove remove all but 0->9, A->F characters from a string.
    * Return a pointer to the new resulting string (allocated with 'new')
    */
-  static char* RemoveCharsButUpperHex(const char* str);
+  static char* RemoveCharsButUpperHex(char const* str);
 
   /**
    * Replace some characters by another character in a string (in-place)
    * Return a pointer to string
    */
-  static char* ReplaceChars(char* str, const char* toreplace,
+  static char* ReplaceChars(char* str, char const* toreplace,
                             char replacement);
 
   /**
    * Returns true if str1 starts (respectively ends) with str2
    */
-  static bool StringStartsWith(const char* str1, const char* str2);
-  static bool StringStartsWith(const std::string& str1, const char* str2);
-  static bool StringEndsWith(const char* str1, const char* str2);
-  static bool StringEndsWith(const std::string& str1, const char* str2);
+  static bool StringStartsWith(char const* str1, char const* str2);
+  static bool StringStartsWith(std::string const& str1, char const* str2);
+  static bool StringEndsWith(char const* str1, char const* str2);
+  static bool StringEndsWith(std::string const& str1, char const* str2);
 
   /**
    * Returns a pointer to the last occurrence of str2 in str1
    */
-  static const char* FindLastString(const char* str1, const char* str2);
+  static char const* FindLastString(char const* str1, char const* str2);
 
   /**
    * Make a duplicate of the string similar to the strdup C function
    * but use new to create the 'new' string, so one can use
    * 'delete' to remove it. Returns 0 if the input is empty.
    */
-  static char* DuplicateString(const char* str);
+  static char* DuplicateString(char const* str);
 
   /**
    * Return the string cropped to a given length by removing chars in the
    * center of the string and replacing them with an ellipsis (...)
    */
-  static std::string CropString(const std::string&, size_t max_len);
+  static std::string CropString(std::string const&, size_t max_len);
 
   /** split a path by separator into an array of strings, default is /.
       If isPath is true then the string is treated like a path and if
       s starts with a / then the first element of the returned array will
       be /, so /foo/bar will be [/, foo, bar]
   */
-  static std::vector<std::string> SplitString(const std::string& s,
+  static std::vector<std::string> SplitString(std::string const& s,
                                               char separator = '/',
                                               bool isPath = false);
   /**
    * Perform a case-independent string comparison
    */
-  static int Strucmp(const char* s1, const char* s2);
+  static int Strucmp(char const* s1, char const* s2);
 
   /**
    * Split a string on its newlines into multiple lines
    * Return false only if the last line stored had no newline
    */
-  static bool Split(const std::string& s, std::vector<std::string>& l);
-  static bool Split(const std::string& s, std::vector<std::string>& l,
+  static bool Split(std::string const& s, std::vector<std::string>& l);
+  static bool Split(std::string const& s, std::vector<std::string>& l,
                     char separator);
 
   /**
    * Joins a vector of strings into a single string, with separator in between
    * each string.
    */
-  static std::string Join(const std::vector<std::string>& list,
-                          const std::string& separator);
+  static std::string Join(std::vector<std::string> const& list,
+                          std::string const& separator);
 
   /**
    * Return string with space added between capitalized words
    * (i.e. EatMyShorts becomes Eat My Shorts )
    * (note that IEatShorts becomes IEat Shorts)
    */
-  static std::string AddSpaceBetweenCapitalizedWords(const std::string&);
+  static std::string AddSpaceBetweenCapitalizedWords(std::string const&);
 
   /**
    * Append two or more strings and produce new one.
@@ -233,9 +233,9 @@ public:
    * with 'new'.
    * Return 0 if inputs are empty or there was an error
    */
-  static char* AppendStrings(const char* str1, const char* str2);
-  static char* AppendStrings(const char* str1, const char* str2,
-                             const char* str3);
+  static char* AppendStrings(char const* str1, char const* str2);
+  static char* AppendStrings(char const* str1, char const* str2,
+                             char const* str3);
 
   /**
    * Estimate the length of the string that will be produced
@@ -246,12 +246,12 @@ public:
    * you will not be able to use this 'ap' anymore from the beginning.
    * It's up to you to call va_end though.
    */
-  static int EstimateFormatLength(const char* format, va_list ap);
+  static int EstimateFormatLength(char const* format, va_list ap);
 
   /**
    * Escape specific characters in 'str'.
    */
-  static std::string EscapeChars(const char* str, const char* chars_to_escape,
+  static std::string EscapeChars(char const* str, char const* chars_to_escape,
                                  char escape_char = '\\');
 
   /** -----------------------------------------------------------------
@@ -266,20 +266,20 @@ public:
 
 #ifdef _WIN32
   /** Calls Encoding::ToWindowsExtendedPath.  */
-  static std::wstring ConvertToWindowsExtendedPath(const std::string&);
+  static std::wstring ConvertToWindowsExtendedPath(std::string const&);
 #endif
 
   /**
    * For windows this calls ConvertToWindowsOutputPath and for unix
    * it calls ConvertToUnixOutputPath
    */
-  static std::string ConvertToOutputPath(const std::string&);
+  static std::string ConvertToOutputPath(std::string const&);
 
   /**
    * Convert the path to a string that can be used in a unix makefile.
    * double slashes are removed, and spaces are escaped.
    */
-  static std::string ConvertToUnixOutputPath(const std::string&);
+  static std::string ConvertToUnixOutputPath(std::string const&);
 
   /**
    * Convert the path to string that can be used in a windows project or
@@ -287,12 +287,12 @@ public:
    * the string, the slashes are converted to windows style backslashes, and
    * if there are spaces in the string it is double quoted.
    */
-  static std::string ConvertToWindowsOutputPath(const std::string&);
+  static std::string ConvertToWindowsOutputPath(std::string const&);
 
   /**
    * Return true if a path with the given name exists in the current directory.
    */
-  static bool PathExists(const std::string& path);
+  static bool PathExists(std::string const& path);
 
   /**
    * Return true if a file exists in the current directory.
@@ -302,10 +302,10 @@ public:
    * also be checked for read access.  (Currently, this check
    * for read access is only done on POSIX systems.)
    */
-  static bool FileExists(const char* filename, bool isFile);
-  static bool FileExists(const std::string& filename, bool isFile);
-  static bool FileExists(const char* filename);
-  static bool FileExists(const std::string& filename);
+  static bool FileExists(char const* filename, bool isFile);
+  static bool FileExists(std::string const& filename, bool isFile);
+  static bool FileExists(char const* filename);
+  static bool FileExists(std::string const& filename);
 
   /**
    * Test if a file exists and can be accessed with the requested
@@ -317,9 +317,9 @@ public:
    * considered readable, and writable files are considered to
    * have the read-only file attribute cleared.
    */
-  static bool TestFileAccess(const char* filename,
+  static bool TestFileAccess(char const* filename,
                              TestFilePermissions permissions);
-  static bool TestFileAccess(const std::string& filename,
+  static bool TestFileAccess(std::string const& filename,
                              TestFilePermissions permissions);
 /**
  * Cross platform wrapper for stat struct
@@ -336,13 +336,13 @@ public:
    * On Windows this may not work for paths longer than 250 characters
    * due to limitations of the underlying '_wstat64' call.
    */
-  static int Stat(const char* path, Stat_t* buf);
-  static int Stat(const std::string& path, Stat_t* buf);
+  static int Stat(char const* path, Stat_t* buf);
+  static int Stat(std::string const& path, Stat_t* buf);
 
   /**
    * Return file length
    */
-  static unsigned long FileLength(const std::string& filename);
+  static unsigned long FileLength(std::string const& filename);
 
   /**
      Change the modification time or create a file
@@ -362,7 +362,7 @@ public:
    *  Get the file extension (including ".") needed for an executable
    *  on the current platform ("" for unix, ".exe" for Windows).
    */
-  static const char* GetExecutableExtension();
+  static char const* GetExecutableExtension();
 
   /**
    * Given a path on a Windows machine, return the actual case of
@@ -371,15 +371,15 @@ public:
    * returned unchanged.  Drive letters are always made upper case.
    * This does nothing on non-Windows systems but return the path.
    */
-  static std::string GetActualCaseForPath(const std::string& path);
+  static std::string GetActualCaseForPath(std::string const& path);
 
   /**
    * Given the path to a program executable, get the directory part of
    * the path with the file stripped off.  If there is no directory
    * part, the empty string is returned.
    */
-  static std::string GetProgramPath(const std::string&);
-  static bool SplitProgramPath(const std::string& in_name, std::string& dir,
+  static std::string GetProgramPath(std::string const&);
+  static bool SplitProgramPath(std::string const& in_name, std::string& dir,
                                std::string& file, bool errorReport = true);
 
   /**
@@ -394,7 +394,7 @@ public:
    *  buildDir is a possibly null path to the build directory.
    *  installPrefix is a possibly null pointer to the install directory.
    */
-  static bool FindProgramPath(const char* argv0, std::string& pathOut,
+  static bool FindProgramPath(char const* argv0, std::string& pathOut,
                               std::string& errorMsg);
 
   /**
@@ -405,7 +405,7 @@ public:
    */
   static std::string CollapseFullPath(std::string const& in_path);
   static std::string CollapseFullPath(std::string const& in_path,
-                                      const char* in_base);
+                                      char const* in_base);
   static std::string CollapseFullPath(std::string const& in_path,
                                       std::string const& in_base);
 
@@ -416,7 +416,7 @@ public:
    * nullptr.  Otherwise empty string is returned and errorMessage
    * contains error description.
    */
-  static std::string GetRealPath(const std::string& path,
+  static std::string GetRealPath(std::string const& path,
                                  std::string* errorMessage = nullptr);
 
   /**
@@ -434,7 +434,7 @@ public:
    * returned.  The root component is stored in the "root" string if
    * given.
    */
-  static const char* SplitPathRootComponent(const std::string& p,
+  static char const* SplitPathRootComponent(std::string const& p,
                                             std::string* root = nullptr);
 
   /**
@@ -451,7 +451,7 @@ public:
    * preserved, including empty ones.  Typically callers should use
    * this only on paths that have already been normalized.
    */
-  static void SplitPath(const std::string& p,
+  static void SplitPath(std::string const& p,
                         std::vector<std::string>& components,
                         bool expand_home_dir = true);
 
@@ -463,50 +463,50 @@ public:
    * preserved, including empty ones.  Typically callers should use
    * this only on paths that have already been normalized.
    */
-  static std::string JoinPath(const std::vector<std::string>& components);
+  static std::string JoinPath(std::vector<std::string> const& components);
   static std::string JoinPath(std::vector<std::string>::const_iterator first,
                               std::vector<std::string>::const_iterator last);
 
   /**
    * Compare a path or components of a path.
    */
-  static bool ComparePath(const std::string& c1, const std::string& c2);
+  static bool ComparePath(std::string const& c1, std::string const& c2);
 
   /**
    * Return path of a full filename (no trailing slashes)
    */
-  static std::string GetFilenamePath(const std::string&);
+  static std::string GetFilenamePath(std::string const&);
 
   /**
    * Return file name of a full filename (i.e. file name without path)
    */
-  static std::string GetFilenameName(const std::string&);
+  static std::string GetFilenameName(std::string const&);
 
   /**
    * Return longest file extension of a full filename (dot included)
    */
-  static std::string GetFilenameExtension(const std::string&);
+  static std::string GetFilenameExtension(std::string const&);
 
   /**
    * Return shortest file extension of a full filename (dot included)
    */
-  static std::string GetFilenameLastExtension(const std::string& filename);
+  static std::string GetFilenameLastExtension(std::string const& filename);
 
   /**
    * Return file name without extension of a full filename
    */
-  static std::string GetFilenameWithoutExtension(const std::string&);
+  static std::string GetFilenameWithoutExtension(std::string const&);
 
   /**
    * Return file name without its last (shortest) extension
    */
-  static std::string GetFilenameWithoutLastExtension(const std::string&);
+  static std::string GetFilenameWithoutLastExtension(std::string const&);
 
   /**
    * Return whether the path represents a full path (not relative)
    */
-  static bool FileIsFullPath(const std::string&);
-  static bool FileIsFullPath(const char*);
+  static bool FileIsFullPath(std::string const&);
+  static bool FileIsFullPath(char const*);
 
   /**
    * For windows return the short path for the given path,
@@ -527,13 +527,13 @@ public:
   /**
    * Get the parent directory of the directory or file
    */
-  static std::string GetParentDirectory(const std::string& fileOrDir);
+  static std::string GetParentDirectory(std::string const& fileOrDir);
 
   /**
    * Check if the given file or directory is in subdirectory of dir
    */
-  static bool IsSubDirectory(const std::string& fileOrDir,
-                             const std::string& dir);
+  static bool IsSubDirectory(std::string const& fileOrDir,
+                             std::string const& dir);
 
   /** -----------------------------------------------------------------
    *               File Manipulation Routines
@@ -544,7 +544,7 @@ public:
    * Open a file considering unicode. On Windows, if 'e' is present in
    * mode it is first discarded.
    */
-  static FILE* Fopen(const std::string& file, const char* mode);
+  static FILE* Fopen(std::string const& file, char const* mode);
 
 /**
  * Visual C++ does not define mode_t.
@@ -558,9 +558,9 @@ public:
    * can make a full path even if none of the directories existed
    * prior to calling this function.
    */
-  static Status MakeDirectory(const char* path, const mode_t* mode = nullptr);
+  static Status MakeDirectory(char const* path, mode_t const* mode = nullptr);
   static Status MakeDirectory(std::string const& path,
-                              const mode_t* mode = nullptr);
+                              mode_t const* mode = nullptr);
 
   /**
    * Represent the result of a file copy operation.
@@ -595,15 +595,15 @@ public:
   /**
    * Compare the contents of two files.  Return true if different
    */
-  static bool FilesDiffer(const std::string& source,
-                          const std::string& destination);
+  static bool FilesDiffer(std::string const& source,
+                          std::string const& destination);
 
   /**
    * Compare the contents of two files, ignoring line ending differences.
    * Return true if different
    */
-  static bool TextFilesDiffer(const std::string& path1,
-                              const std::string& path2);
+  static bool TextFilesDiffer(std::string const& path1,
+                              std::string const& path2);
 
   /**
    * Blockwise copy source to destination file
@@ -628,8 +628,8 @@ public:
     WindowsFileId(unsigned long volumeSerialNumber,
                   unsigned long fileIndexHigh, unsigned long fileIndexLow);
 
-    bool operator==(const WindowsFileId& o) const;
-    bool operator!=(const WindowsFileId& o) const;
+    bool operator==(WindowsFileId const& o) const;
+    bool operator!=(WindowsFileId const& o) const;
 
   private:
     unsigned long m_volumeSerialNumber;
@@ -645,8 +645,8 @@ public:
     UnixFileId(dev_t volumeSerialNumber, ino_t fileSerialNumber,
                off_t fileSize);
 
-    bool operator==(const UnixFileId& o) const;
-    bool operator!=(const UnixFileId& o) const;
+    bool operator==(UnixFileId const& o) const;
+    bool operator!=(UnixFileId const& o) const;
 
   private:
     dev_t m_volumeSerialNumber;
@@ -660,12 +660,12 @@ public:
    * Outputs a FileId for the given file or directory.
    * Returns true on success, false on failure
    */
-  static bool GetFileId(const std::string& file, FileId& id);
+  static bool GetFileId(std::string const& file, FileId& id);
 
   /**
    * Return true if the two files are the same file
    */
-  static bool SameFile(const std::string& file1, const std::string& file2);
+  static bool SameFile(std::string const& file1, std::string const& file2);
 
   /**
    * Copy a file.
@@ -711,49 +711,49 @@ public:
    * Find a file in the system PATH, with optional extra paths
    */
   static std::string FindFile(
-    const std::string& name,
-    const std::vector<std::string>& path = std::vector<std::string>(),
+    std::string const& name,
+    std::vector<std::string> const& path = std::vector<std::string>(),
     bool no_system_path = false);
 
   /**
    * Find a directory in the system PATH, with optional extra paths
    */
   static std::string FindDirectory(
-    const std::string& name,
-    const std::vector<std::string>& path = std::vector<std::string>(),
+    std::string const& name,
+    std::vector<std::string> const& path = std::vector<std::string>(),
     bool no_system_path = false);
 
   /**
    * Find an executable in the system PATH, with optional extra paths
    */
   static std::string FindProgram(
-    const char* name,
-    const std::vector<std::string>& path = std::vector<std::string>(),
+    char const* name,
+    std::vector<std::string> const& path = std::vector<std::string>(),
     bool no_system_path = false);
   static std::string FindProgram(
-    const std::string& name,
-    const std::vector<std::string>& path = std::vector<std::string>(),
+    std::string const& name,
+    std::vector<std::string> const& path = std::vector<std::string>(),
     bool no_system_path = false);
   static std::string FindProgram(
-    const std::vector<std::string>& names,
-    const std::vector<std::string>& path = std::vector<std::string>(),
+    std::vector<std::string> const& names,
+    std::vector<std::string> const& path = std::vector<std::string>(),
     bool no_system_path = false);
 
   /**
    * Find a library in the system PATH, with optional extra paths
    */
-  static std::string FindLibrary(const std::string& name,
-                                 const std::vector<std::string>& path);
+  static std::string FindLibrary(std::string const& name,
+                                 std::vector<std::string> const& path);
 
   /**
    * Return true if the file is a directory
    */
-  static bool FileIsDirectory(const std::string& name);
+  static bool FileIsDirectory(std::string const& name);
 
   /**
    * Return true if the file is an executable
    */
-  static bool FileIsExecutable(const std::string& name);
+  static bool FileIsExecutable(std::string const& name);
 
 #if defined(_WIN32)
   /**
@@ -761,24 +761,24 @@ public:
    * Only available on Windows. This avoids an expensive `GetFileAttributesW`
    * call.
    */
-  static bool FileIsSymlinkWithAttr(const std::wstring& path,
+  static bool FileIsSymlinkWithAttr(std::wstring const& path,
                                     unsigned long attr);
 #endif
 
   /**
    * Return true if the file is a symlink
    */
-  static bool FileIsSymlink(const std::string& name);
+  static bool FileIsSymlink(std::string const& name);
 
   /**
    * Return true if the file is a FIFO
    */
-  static bool FileIsFIFO(const std::string& name);
+  static bool FileIsFIFO(std::string const& name);
 
   /**
    * Return true if the file has a given signature (first set of bytes)
    */
-  static bool FileHasSignature(const char* filename, const char* signature,
+  static bool FileHasSignature(char const* filename, char const* signature,
                                long offset = 0);
 
   /**
@@ -796,7 +796,7 @@ public:
     FileTypeBinary,
     FileTypeText
   };
-  static SystemTools::FileTypeEnum DetectFileType(const char* filename,
+  static SystemTools::FileTypeEnum DetectFileType(char const* filename,
                                                   unsigned long length = 256,
                                                   double percent_bin = 0.05);
 
@@ -828,7 +828,7 @@ public:
    * etc.
    * Return true if the file was found, false otherwise.
    */
-  static bool LocateFileInDir(const char* filename, const char* dir,
+  static bool LocateFileInDir(char const* filename, char const* dir,
                               std::string& filename_found,
                               int try_filename_dirs = 0);
 
@@ -840,18 +840,18 @@ public:
       /a/b/c/d to /a/b/c1/d1 -> ../../c1/d1
       from /usr/src to /usr/src/test/blah/foo.cpp -> test/blah/foo.cpp
   */
-  static std::string RelativePath(const std::string& local,
-                                  const std::string& remote);
+  static std::string RelativePath(std::string const& local,
+                                  std::string const& remote);
 
   /**
    * Return file's modified time
    */
-  static long int ModifiedTime(const std::string& filename);
+  static long int ModifiedTime(std::string const& filename);
 
   /**
    * Return file's creation time (Win32: works only for NTFS, not FAT)
    */
-  static long int CreationTime(const std::string& filename);
+  static long int CreationTime(std::string const& filename);
 
   /**
    * Get and set permissions of the file.  If honor_umask is set, the umask
@@ -861,9 +861,9 @@ public:
    * WARNING:  A non-thread-safe method is currently used to get the umask
    * if a honor_umask parameter is set to true.
    */
-  static Status GetPermissions(const char* file, mode_t& mode);
+  static Status GetPermissions(char const* file, mode_t& mode);
   static Status GetPermissions(std::string const& file, mode_t& mode);
-  static Status SetPermissions(const char* file, mode_t mode,
+  static Status SetPermissions(char const* file, mode_t mode,
                                bool honor_umask = false);
   static Status SetPermissions(std::string const& file, mode_t mode,
                                bool honor_umask = false);
@@ -879,7 +879,7 @@ public:
   /**
    * Get current date/time
    */
-  static std::string GetCurrentDateTime(const char* format);
+  static std::string GetCurrentDateTime(char const* format);
 
   /** -----------------------------------------------------------------
    *               Registry Manipulation Routines
@@ -901,27 +901,27 @@ public:
   /**
    * Get a list of subkeys.
    */
-  static bool GetRegistrySubKeys(const std::string& key,
+  static bool GetRegistrySubKeys(std::string const& key,
                                  std::vector<std::string>& subkeys,
                                  KeyWOW64 view = KeyWOW64_Default);
 
   /**
    * Read a registry value
    */
-  static bool ReadRegistryValue(const std::string& key, std::string& value,
+  static bool ReadRegistryValue(std::string const& key, std::string& value,
                                 KeyWOW64 view = KeyWOW64_Default);
 
   /**
    * Write a registry value
    */
-  static bool WriteRegistryValue(const std::string& key,
-                                 const std::string& value,
+  static bool WriteRegistryValue(std::string const& key,
+                                 std::string const& value,
                                  KeyWOW64 view = KeyWOW64_Default);
 
   /**
    * Delete a registry value
    */
-  static bool DeleteRegistryValue(const std::string& key,
+  static bool DeleteRegistryValue(std::string const& key,
                                   KeyWOW64 view = KeyWOW64_Default);
 
   /** -----------------------------------------------------------------
@@ -935,25 +935,25 @@ public:
    *  of env will be used instead of PATH.
    */
   static void GetPath(std::vector<std::string>& path,
-                      const char* env = nullptr);
+                      char const* env = nullptr);
 
   /**
    * Read an environment variable
    */
-  static const char* GetEnv(const char* key);
-  static const char* GetEnv(const std::string& key);
-  static bool GetEnv(const char* key, std::string& result);
-  static bool GetEnv(const std::string& key, std::string& result);
-  static bool HasEnv(const char* key);
-  static bool HasEnv(const std::string& key);
+  static char const* GetEnv(char const* key);
+  static char const* GetEnv(std::string const& key);
+  static bool GetEnv(char const* key, std::string& result);
+  static bool GetEnv(std::string const& key, std::string& result);
+  static bool HasEnv(char const* key);
+  static bool HasEnv(std::string const& key);
 
   /** Put a string into the environment
       of the form var=value */
-  static bool PutEnv(const std::string& env);
+  static bool PutEnv(std::string const& env);
 
   /** Remove a string from the environment.
       Input is of the form "var" or "var=value" (value is ignored). */
-  static bool UnPutEnv(const std::string& env);
+  static bool UnPutEnv(std::string const& env);
 
   /**
    * Get current working directory CWD
@@ -1008,7 +1008,7 @@ public:
    * decode the dataglom using DecodeURL if set to true.
    * Return false if the URL does not have the required form, true otherwise.
    */
-  static bool ParseURLProtocol(const std::string& URL, std::string& protocol,
+  static bool ParseURLProtocol(std::string const& URL, std::string& protocol,
                                std::string& dataglom, bool decode = false);
 
   /**
@@ -1019,7 +1019,7 @@ public:
    * decode all string except the protocol using DecodeUrl if set to true.
    * Return true if the string matches the format; false otherwise.
    */
-  static bool ParseURL(const std::string& URL, std::string& protocol,
+  static bool ParseURL(std::string const& URL, std::string& protocol,
                        std::string& username, std::string& password,
                        std::string& hostname, std::string& dataport,
                        std::string& datapath, bool decode = false);
@@ -1030,7 +1030,7 @@ public:
    * Does not perform any other sort of validation.
    * Return the decoded string
    */
-  static std::string DecodeURL(const std::string& url);
+  static std::string DecodeURL(std::string const& url);
 
 private:
   static void ClassInitialize();

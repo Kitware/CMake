@@ -30,13 +30,13 @@ extern "C" {
  * is found to be less than, equal to, or greater than the second
  * string, respectively.
  */
-kwsysEXPORT int kwsysString_strcasecmp(const char* lhs, const char* rhs);
+kwsysEXPORT int kwsysString_strcasecmp(char const* lhs, char const* rhs);
 
 /**
  * Identical to String_strcasecmp except that only the first n
  * characters are considered.
  */
-kwsysEXPORT int kwsysString_strncasecmp(const char* lhs, const char* rhs,
+kwsysEXPORT int kwsysString_strncasecmp(char const* lhs, char const* rhs,
                                         size_t n);
 
 #if defined(__cplusplus)

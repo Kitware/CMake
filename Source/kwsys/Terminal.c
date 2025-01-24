@@ -48,7 +48,7 @@ static void kwsysTerminalSetConsoleColor(HANDLE hOut,
                                          FILE* stream, int color);
 #endif
 
-void kwsysTerminal_cfprintf(int color, FILE* stream, const char* format, ...)
+void kwsysTerminal_cfprintf(int color, FILE* stream, char const* format, ...)
 {
   /* Setup the stream with the given color if possible.  */
   int pipeIsConsole = 0;
@@ -106,7 +106,7 @@ static int kwsysTerminalStreamIsNotInteractive(FILE* stream)
 #endif
 
 /* List of terminal names known to support VT100 color escape sequences.  */
-static const char* kwsysTerminalVT100Names[] = { "Eterm",
+static char const* kwsysTerminalVT100Names[] = { "Eterm",
                                                  "alacritty",
                                                  "alacritty-direct",
                                                  "ansi",
@@ -170,7 +170,7 @@ static int kwsysTerminalStreamIsVT100(FILE* stream, int default_vt100,
 {
   /* Force color according to https://bixense.com/clicolors/ convention.  */
   {
-    const char* clicolor_force = getenv("CLICOLOR_FORCE");
+    char const* clicolor_force = getenv("CLICOLOR_FORCE");
     if (clicolor_force && *clicolor_force &&
         strcmp(clicolor_force, "0") != 0) {
       return 1;
@@ -179,7 +179,7 @@ static int kwsysTerminalStreamIsVT100(FILE* stream, int default_vt100,
 
   /* Disable color according to https://bixense.com/clicolors/ convention. */
   {
-    const char* clicolor = getenv("CLICOLOR");
+    char const* clicolor = getenv("CLICOLOR");
     if (clicolor && strcmp(clicolor, "0") == 0) {
       return 0;
     }
@@ -187,7 +187,7 @@ static int kwsysTerminalStreamIsVT100(FILE* stream, int default_vt100,
 
   /* GNU make 4.1+ may tell us that its output is destined for a TTY. */
   {
-    const char* termout = getenv("MAKE_TERMOUT");
+    char const* termout = getenv("MAKE_TERMOUT");
     if (termout && *termout != '\0') {
       return 1;
     }
@@ -197,7 +197,7 @@ static int kwsysTerminalStreamIsVT100(FILE* stream, int default_vt100,
      seem to claim the TERM is xterm even though they do not support
      VT100 escapes.  */
   {
-    const char* emacs = getenv("EMACS");
+    char const* emacs = getenv("EMACS");
     if (emacs && *emacs == 't') {
       return 0;
     }
@@ -205,8 +205,8 @@ static int kwsysTerminalStreamIsVT100(FILE* stream, int default_vt100,
 
   /* Check for a valid terminal.  */
   if (!default_vt100) {
-    const char** t = 0;
-    const char* term = getenv("TERM");
+    char const** t = 0;
+    char const* term = getenv("TERM");
     if (term) {
       for (t = kwsysTerminalVT100Names; *t && strcmp(term, *t) != 0; ++t) {
       }

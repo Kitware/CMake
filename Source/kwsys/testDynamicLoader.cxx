@@ -44,7 +44,7 @@
 // is referenced semantically.
 #include "testDynload.h"
 
-static std::string GetLibName(const char* lname, const char* subdir = nullptr)
+static std::string GetLibName(char const* lname, char const* subdir = nullptr)
 {
   // Construct proper name of lib
   std::string slname;
@@ -71,7 +71,7 @@ static std::string GetLibName(const char* lname, const char* subdir = nullptr)
  * r2: should GetSymbolAddress succeed ?
  * r3: should CloseLibrary succeed ?
  */
-static int TestDynamicLoader(const char* libname, const char* symbol, int r1,
+static int TestDynamicLoader(char const* libname, char const* symbol, int r1,
                              int r2, int r3, int flags = 0)
 {
   std::cerr << "Testing: " << libname << std::endl;

@@ -62,20 +62,20 @@ static void displayError(DWORD errorCode)
   std::cerr.unsetf(std::ios::hex);
 }
 
-std::basic_streambuf<char>* errstream(const char* unused)
+std::basic_streambuf<char>* errstream(char const* unused)
 {
   static_cast<void>(unused);
   return std::cerr.rdbuf();
 }
 
-std::basic_streambuf<wchar_t>* errstream(const wchar_t* unused)
+std::basic_streambuf<wchar_t>* errstream(wchar_t const* unused)
 {
   static_cast<void>(unused);
   return std::wcerr.rdbuf();
 }
 
 template <typename T>
-static void dumpBuffers(const T* expected, const T* received, size_t size)
+static void dumpBuffers(T const* expected, T const* received, size_t size)
 {
   std::basic_ostream<T> err(errstream(expected));
   err << "Expected output: '" << std::basic_string<T>(expected, size) << "'"
@@ -346,7 +346,7 @@ static int testPipe()
           dumpBuffers<char>(encodedTestString.c_str(), buffer2,
                             encodedTestString.size());
         }
-      } catch (const std::runtime_error& ex) {
+      } catch (std::runtime_error const& ex) {
         DWORD lastError = GetLastError();
         std::cerr << "In function testPipe, line " << __LINE__ << ": "
                   << ex.what() << std::endl;
@@ -354,7 +354,7 @@ static int testPipe()
       }
       finishProcess(didFail == 0);
     }
-  } catch (const std::runtime_error& ex) {
+  } catch (std::runtime_error const& ex) {
     DWORD lastError = GetLastError();
     std::cerr << "In function testPipe, line " << __LINE__ << ": " << ex.what()
               << std::endl;
@@ -452,7 +452,7 @@ static int testFile()
           dumpBuffers<char>(encodedTestString.c_str(), buffer2,
                             encodedTestString.size());
         }
-      } catch (const std::runtime_error& ex) {
+      } catch (std::runtime_error const& ex) {
         DWORD lastError = GetLastError();
         std::cerr << "In function testFile, line " << __LINE__ << ": "
                   << ex.what() << std::endl;
@@ -460,7 +460,7 @@ static int testFile()
       }
       finishProcess(didFail == 0);
     }
-  } catch (const std::runtime_error& ex) {
+  } catch (std::runtime_error const& ex) {
     DWORD lastError = GetLastError();
     std::cerr << "In function testFile, line " << __LINE__ << ": " << ex.what()
               << std::endl;
@@ -524,7 +524,7 @@ static int testConsole()
 #      pragma warning(disable : 4996)
 #    endif
 #  endif
-  const bool isVistaOrGreater =
+  bool const isVistaOrGreater =
     LOBYTE(LOWORD(GetVersion())) >= HIBYTE(_WIN32_WINNT_VISTA);
 #  ifdef KWSYS_WINDOWS_DEPRECATED_GetVersion
 #    ifdef __clang__
@@ -746,7 +746,7 @@ static int testConsole()
                              wideInputTestString.size() - 1);
       }
       delete[] outputBuffer;
-    } catch (const std::runtime_error& ex) {
+    } catch (std::runtime_error const& ex) {
       DWORD lastError = GetLastError();
       std::cerr << "In function testConsole, line " << __LINE__ << ": "
                 << ex.what() << std::endl;
