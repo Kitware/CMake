@@ -22,7 +22,7 @@ typedef ptrdiff_t kwsysSystem_ptrdiff_t;
 typedef int kwsysSystem_ptrdiff_t;
 #endif
 
-static int kwsysSystem__AppendByte(const char* local, char** begin, char** end,
+static int kwsysSystem__AppendByte(char const* local, char** begin, char** end,
                                    int* size, char c)
 {
   /* Allocate space for the character.  */
@@ -91,7 +91,7 @@ static int kwsysSystem__AppendArgument(char** local, char*** begin,
 
 #define KWSYSPE_LOCAL_BYTE_COUNT 1024
 #define KWSYSPE_LOCAL_ARGS_COUNT 32
-static char** kwsysSystem__ParseUnixCommand(const char* command, int flags)
+static char** kwsysSystem__ParseUnixCommand(char const* command, int flags)
 {
   /* Create a buffer for argument pointers during parsing.  */
   char* local_pointers[KWSYSPE_LOCAL_ARGS_COUNT];
@@ -107,7 +107,7 @@ static char** kwsysSystem__ParseUnixCommand(const char* command, int flags)
 
   /* Parse the command string.  Try to behave like a UNIX shell.  */
   char** newCommand = 0;
-  const char* c = command;
+  char const* c = command;
   int in_argument = 0;
   int in_escape = 0;
   int in_single = 0;
@@ -224,7 +224,7 @@ static char** kwsysSystem__ParseUnixCommand(const char* command, int flags)
   return newCommand;
 }
 
-char** kwsysSystem_Parse_CommandForUnix(const char* command, int flags)
+char** kwsysSystem_Parse_CommandForUnix(char const* command, int flags)
 {
   /* Validate the flags.  */
   if (flags != 0) {

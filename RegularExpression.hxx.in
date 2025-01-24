@@ -55,9 +55,9 @@ public:
 
 private:
   friend class RegularExpression;
-  const char* startp[NSUBEXP];
-  const char* endp[NSUBEXP];
-  const char* searchstring;
+  char const* startp[NSUBEXP];
+  char const* endp[NSUBEXP];
+  char const* searchstring;
 };
 
 #ifdef _MSC_VER
@@ -369,7 +369,7 @@ public:
   /**
    * Copy the given regular expression.
    */
-  RegularExpression& operator=(const RegularExpression& rxp);
+  RegularExpression& operator=(RegularExpression const& rxp);
 
   /**
    * Returns true if two regular expressions have the same
@@ -403,7 +403,7 @@ private:
   RegularExpressionMatch regmatch;
   char regstart;                  // Internal use only
   char reganch;                   // Internal use only
-  const char* regmust;            // Internal use only
+  char const* regmust;            // Internal use only
   std::string::size_type regmlen; // Internal use only
   char* program;
   int progsize;
@@ -425,7 +425,7 @@ inline RegularExpression::RegularExpression()
  * Creates a regular expression from string s, and
  * compiles s.
  */
-inline RegularExpression::RegularExpression(const char* s)
+inline RegularExpression::RegularExpression(char const* s)
   : regstart{}
   , reganch{}
   , regmust{}
@@ -441,7 +441,7 @@ inline RegularExpression::RegularExpression(const char* s)
  * Creates a regular expression from string s, and
  * compiles s.
  */
-inline RegularExpression::RegularExpression(const std::string& s)
+inline RegularExpression::RegularExpression(std::string const& s)
   : regstart{}
   , reganch{}
   , regmust{}
@@ -474,7 +474,7 @@ inline bool RegularExpression::compile(std::string const& s)
  * Matches the regular expression to the given std string.
  * Returns true if found, and sets start and end indexes accordingly.
  */
-inline bool RegularExpression::find(const char* s)
+inline bool RegularExpression::find(char const* s)
 {
   return this->find(s, this->regmatch);
 }
@@ -540,7 +540,7 @@ inline std::string RegularExpression::match(int n) const
  * Returns true if two regular expressions have different
  * compiled program for pattern matching.
  */
-inline bool RegularExpression::operator!=(const RegularExpression& r) const
+inline bool RegularExpression::operator!=(RegularExpression const& r) const
 {
   return (!(*this == r));
 }

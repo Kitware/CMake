@@ -145,14 +145,14 @@ kwsysEXPORT void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout);
  * Returns 1 for success and 0 for failure.
  */
 kwsysEXPORT int kwsysProcess_SetWorkingDirectory(kwsysProcess* cp,
-                                                 const char* dir);
+                                                 char const* dir);
 
 /**
  * Set the name of a file to be attached to the given pipe.  Returns 1
  * for success and 0 for failure.
  */
 kwsysEXPORT int kwsysProcess_SetPipeFile(kwsysProcess* cp, int pipe,
-                                         const char* file);
+                                         char const* file);
 
 /**
  * Set whether the given pipe in the child is shared with the parent
@@ -181,7 +181,7 @@ kwsysEXPORT void kwsysProcess_SetPipeShared(kwsysProcess* cp, int pipe,
  * read end will be closed in the child process.
  */
 kwsysEXPORT void kwsysProcess_SetPipeNative(
-  kwsysProcess* cp, int pipe, const kwsysProcess_Pipe_Handle p[2]);
+  kwsysProcess* cp, int pipe, kwsysProcess_Pipe_Handle const p[2]);
 
 /**
  * Get/Set a possibly platform-specific option.  Possible options are:

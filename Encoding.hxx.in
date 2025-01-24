@@ -31,8 +31,8 @@ public:
     // argc and wide argv.  This is useful if wmain() is used.
     CommandLineArguments(int argc, wchar_t const* const* argv);
     ~CommandLineArguments();
-    CommandLineArguments(const CommandLineArguments&);
-    CommandLineArguments& operator=(const CommandLineArguments&);
+    CommandLineArguments(CommandLineArguments const&);
+    CommandLineArguments& operator=(CommandLineArguments const&);
 
     int argc() const;
     char const* const* argv() const;
@@ -50,14 +50,14 @@ public:
   // Convert a narrow string to a wide string.
   // On Windows, UTF-8 is assumed, and on other platforms,
   // the current locale is assumed.
-  static std::wstring ToWide(const std::string& str);
-  static std::wstring ToWide(const char* str);
+  static std::wstring ToWide(std::string const& str);
+  static std::wstring ToWide(char const* str);
 
   // Convert a wide string to a narrow string.
   // On Windows, UTF-8 is assumed, and on other platforms,
   // the current locale is assumed.
-  static std::string ToNarrow(const std::wstring& str);
-  static std::string ToNarrow(const wchar_t* str);
+  static std::string ToNarrow(std::wstring const& str);
+  static std::string ToNarrow(wchar_t const* str);
 
 #  if defined(_WIN32)
   /**
@@ -68,7 +68,7 @@ public:
    * absolute paths with Windows-style backslashes.
    **/
   static std::wstring ToWindowsExtendedPath(std::string const&);
-  static std::wstring ToWindowsExtendedPath(const char* source);
+  static std::wstring ToWindowsExtendedPath(char const* source);
   static std::wstring ToWindowsExtendedPath(std::wstring const& wsource);
 #  endif
 

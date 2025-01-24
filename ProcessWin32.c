@@ -89,7 +89,7 @@ static int kwsysProcessInitialize(kwsysProcess* cp);
 static DWORD kwsysProcessCreate(kwsysProcess* cp, int index,
                                 kwsysProcessCreateInformation* si);
 static void kwsysProcessDestroy(kwsysProcess* cp, int event);
-static DWORD kwsysProcessSetupOutputPipeFile(PHANDLE handle, const char* name);
+static DWORD kwsysProcessSetupOutputPipeFile(PHANDLE handle, char const* name);
 static void kwsysProcessSetupSharedPipe(DWORD nStdHandle, PHANDLE handle);
 static void kwsysProcessSetupPipeNative(HANDLE native, PHANDLE handle);
 static void kwsysProcessCleanupHandle(PHANDLE h);
@@ -654,7 +654,7 @@ void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout)
   cp->TimeoutTime.QuadPart = -1;
 }
 
-int kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
+int kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, char const* dir)
 {
   if (!cp) {
     return 0;
@@ -685,7 +685,7 @@ int kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
   return 1;
 }
 
-int kwsysProcess_SetPipeFile(kwsysProcess* cp, int pipe, const char* file)
+int kwsysProcess_SetPipeFile(kwsysProcess* cp, int pipe, char const* file)
 {
   char** pfile;
   if (!cp) {
@@ -867,7 +867,7 @@ int kwsysProcess_GetExitCode(kwsysProcess* cp)
     : 0;
 }
 
-const char* kwsysProcess_GetErrorString(kwsysProcess* cp)
+char const* kwsysProcess_GetErrorString(kwsysProcess* cp)
 {
   if (!cp) {
     return "Process management structure could not be allocated";
@@ -877,7 +877,7 @@ const char* kwsysProcess_GetErrorString(kwsysProcess* cp)
   return "Success";
 }
 
-const char* kwsysProcess_GetExceptionString(kwsysProcess* cp)
+char const* kwsysProcess_GetExceptionString(kwsysProcess* cp)
 {
   if (!(cp && cp->ProcessResults && (cp->NumberOfCommands > 0))) {
     return "GetExceptionString called with NULL process management structure";
@@ -918,7 +918,7 @@ int kwsysProcess_GetExitCodeByIndex(kwsysProcess* cp, int idx)
   return cp->CommandExitCodes[idx];
 }
 
-const char* kwsysProcess_GetExceptionStringByIndex(kwsysProcess* cp, int idx)
+char const* kwsysProcess_GetExceptionStringByIndex(kwsysProcess* cp, int idx)
 {
   KWSYSPE_IDX_CHK("GetExceptionString called with NULL process management "
                   "structure or index out of bound")
@@ -1796,7 +1796,7 @@ void kwsysProcessDestroy(kwsysProcess* cp, int event)
   }
 }
 
-DWORD kwsysProcessSetupOutputPipeFile(PHANDLE phandle, const char* name)
+DWORD kwsysProcessSetupOutputPipeFile(PHANDLE phandle, char const* name)
 {
   HANDLE fout;
   wchar_t* wname;

@@ -155,7 +155,7 @@ typedef struct kwsysProcessCreateInformation_s
   int ErrorPipe[2];
 } kwsysProcessCreateInformation;
 
-static void kwsysProcessVolatileFree(volatile void* p);
+static void kwsysProcessVolatileFree(void volatile* p);
 static int kwsysProcessInitialize(kwsysProcess* cp);
 static void kwsysProcessCleanup(kwsysProcess* cp, int error);
 static void kwsysProcessCleanupDescriptor(int* pfd);
@@ -164,13 +164,13 @@ static int kwsysProcessSetNonBlocking(int fd);
 static int kwsysProcessCreate(kwsysProcess* cp, int prIndex,
                               kwsysProcessCreateInformation* si);
 static void kwsysProcessDestroy(kwsysProcess* cp);
-static int kwsysProcessSetupOutputPipeFile(int* p, const char* name);
+static int kwsysProcessSetupOutputPipeFile(int* p, char const* name);
 static int kwsysProcessSetupOutputPipeNative(int* p, int des[2]);
 static int kwsysProcessGetTimeoutTime(kwsysProcess* cp,
-                                      const double* userTimeout,
+                                      double const* userTimeout,
                                       kwsysProcessTime* timeoutTime);
 static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
-                                      const double* userTimeout,
+                                      double const* userTimeout,
                                       kwsysProcessTimeNative* timeoutLength,
                                       int zeroIsExpired);
 static kwsysProcessTime kwsysProcessTimeGetCurrent(void);
@@ -189,7 +189,7 @@ static pid_t kwsysProcessFork(kwsysProcess* cp,
                               kwsysProcessCreateInformation* si);
 static void kwsysProcessKill(pid_t process_id);
 #if defined(__VMS)
-static int kwsysProcessSetVMSFeature(const char* name, int value);
+static int kwsysProcessSetVMSFeature(char const* name, int value);
 #endif
 static int kwsysProcessesAdd(kwsysProcess* cp);
 static void kwsysProcessesRemove(kwsysProcess* cp);
@@ -225,7 +225,7 @@ struct kwsysProcess_s
 {
   /* The command lines to execute.  */
   char*** Commands;
-  volatile int NumberOfCommands;
+  int volatile NumberOfCommands;
 
   /* Descriptors for the read ends of the child's output pipes and
      the signal pipe. */
@@ -244,7 +244,7 @@ struct kwsysProcess_s
   /* Process IDs returned by the calls to fork.  Everything is volatile
      because the signal handler accesses them.  You must be very careful
      when reaping PIDs or modifying this array to avoid race conditions.  */
-  volatile pid_t* volatile ForkPIDs;
+  pid_t volatile* volatile ForkPIDs;
 
   /* Flag for whether the children were terminated by a failed select.  */
   int SelectError;
@@ -268,7 +268,7 @@ struct kwsysProcess_s
   int MergeOutput;
 
   /* Whether to create the process in a new process group.  */
-  volatile sig_atomic_t CreateProcessGroup;
+  sig_atomic_t volatile CreateProcessGroup;
 
   /* Time at which the child started.  Negative for no timeout.  */
   kwsysProcessTime StartTime;
@@ -292,10 +292,10 @@ struct kwsysProcess_s
 
   /* The status of the process structure.  Must be atomic because
      the signal handler checks this to avoid a race.  */
-  volatile sig_atomic_t State;
+  sig_atomic_t volatile State;
 
   /* Whether the process was killed.  */
-  volatile sig_atomic_t Killed;
+  sig_atomic_t volatile Killed;
 
   /* Buffer for error message in case of failure.  */
   char ErrorMessage[KWSYSPE_PIPE_BUFFER_SIZE + 1];
@@ -495,7 +495,7 @@ void kwsysProcess_SetTimeout(kwsysProcess* cp, double timeout)
   cp->TimeoutTime.tv_sec = -1;
 }
 
-int kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
+int kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, char const* dir)
 {
   if (!cp) {
     return 0;
@@ -519,7 +519,7 @@ int kwsysProcess_SetWorkingDirectory(kwsysProcess* cp, const char* dir)
   return 1;
 }
 
-int kwsysProcess_SetPipeFile(kwsysProcess* cp, int prPipe, const char* file)
+int kwsysProcess_SetPipeFile(kwsysProcess* cp, int prPipe, char const* file)
 {
   char** pfile;
   if (!cp) {
@@ -586,7 +586,7 @@ void kwsysProcess_SetPipeShared(kwsysProcess* cp, int prPipe, int shared)
   }
 }
 
-void kwsysProcess_SetPipeNative(kwsysProcess* cp, int prPipe, const int p[2])
+void kwsysProcess_SetPipeNative(kwsysProcess* cp, int prPipe, int const p[2])
 {
   int* pPipeNative = 0;
 
@@ -695,7 +695,7 @@ int kwsysProcess_GetExitValue(kwsysProcess* cp)
     : -1;
 }
 
-const char* kwsysProcess_GetErrorString(kwsysProcess* cp)
+char const* kwsysProcess_GetErrorString(kwsysProcess* cp)
 {
   if (!cp) {
     return "Process management structure could not be allocated";
@@ -706,7 +706,7 @@ const char* kwsysProcess_GetErrorString(kwsysProcess* cp)
   return "Success";
 }
 
-const char* kwsysProcess_GetExceptionString(kwsysProcess* cp)
+char const* kwsysProcess_GetExceptionString(kwsysProcess* cp)
 {
   if (!(cp && cp->ProcessResults && (cp->NumberOfCommands > 0))) {
     return "GetExceptionString called with NULL process management structure";
@@ -747,7 +747,7 @@ int kwsysProcess_GetExitCodeByIndex(kwsysProcess* cp, int idx)
   return cp->CommandExitCodes[idx];
 }
 
-const char* kwsysProcess_GetExceptionStringByIndex(kwsysProcess* cp, int idx)
+char const* kwsysProcess_GetExceptionStringByIndex(kwsysProcess* cp, int idx)
 {
   KWSYSPE_IDX_CHK("GetExceptionString called with NULL process management "
                   "structure or index out of bound")
@@ -1260,7 +1260,7 @@ static int kwsysProcessWaitForPipe(kwsysProcess* cp, char** data, int* length,
   /* Poll pipes for data since we do not have select.  */
   for (i = 0; i < KWSYSPE_PIPE_COUNT; ++i) {
     if (cp->PipeReadEnds[i] >= 0) {
-      const int fd = cp->PipeReadEnds[i];
+      int const fd = cp->PipeReadEnds[i];
       int n = read(fd, cp->PipeBuffer, KWSYSPE_PIPE_BUFFER_SIZE);
       if (n > 0) {
         /* We have data on this pipe.  */
@@ -1486,7 +1486,7 @@ void kwsysProcess_Kill(kwsysProcess* cp)
 
 /* Call the free() function with a pointer to volatile without causing
    compiler warnings.  */
-static void kwsysProcessVolatileFree(volatile void* p)
+static void kwsysProcessVolatileFree(void volatile* p)
 {
 /* clang has made it impossible to free memory that points to volatile
    without first using special pragmas to disable a warning...  */
@@ -1504,7 +1504,7 @@ static void kwsysProcessVolatileFree(volatile void* p)
 static int kwsysProcessInitialize(kwsysProcess* cp)
 {
   int i;
-  volatile pid_t* oldForkPIDs;
+  pid_t volatile* oldForkPIDs;
   for (i = 0; i < KWSYSPE_PIPE_COUNT; ++i) {
     cp->PipeReadEnds[i] = -1;
   }
@@ -1528,7 +1528,7 @@ static int kwsysProcessInitialize(kwsysProcess* cp)
   cp->ErrorMessage[0] = 0;
 
   oldForkPIDs = cp->ForkPIDs;
-  cp->ForkPIDs = (volatile pid_t*)malloc(sizeof(volatile pid_t) *
+  cp->ForkPIDs = (pid_t volatile*)malloc(sizeof(pid_t volatile) *
                                          (size_t)(cp->NumberOfCommands));
   kwsysProcessVolatileFree(oldForkPIDs);
   if (!cp->ForkPIDs) {
@@ -1935,7 +1935,7 @@ static void kwsysProcessDestroy(kwsysProcess* cp)
   sigprocmask(SIG_SETMASK, &old_mask, 0);
 }
 
-static int kwsysProcessSetupOutputPipeFile(int* p, const char* name)
+static int kwsysProcessSetupOutputPipeFile(int* p, char const* name)
 {
   int fout;
   if (!name) {
@@ -1982,7 +1982,7 @@ static int kwsysProcessSetupOutputPipeNative(int* p, int des[2])
 /* Get the time at which either the process or user timeout will
    expire.  Returns 1 if the user timeout is first, and 0 otherwise.  */
 static int kwsysProcessGetTimeoutTime(kwsysProcess* cp,
-                                      const double* userTimeout,
+                                      double const* userTimeout,
                                       kwsysProcessTime* timeoutTime)
 {
   /* The first time this is called, we need to calculate the time at
@@ -2022,7 +2022,7 @@ static int kwsysProcessGetTimeoutTime(kwsysProcess* cp,
 /* Get the length of time before the given timeout time arrives.
    Returns 1 if the time has already arrived, and 0 otherwise.  */
 static int kwsysProcessGetTimeoutLeft(kwsysProcessTime* timeoutTime,
-                                      const double* userTimeout,
+                                      double const* userTimeout,
                                       kwsysProcessTimeNative* timeoutLength,
                                       int zeroIsExpired)
 {
@@ -2572,7 +2572,7 @@ static void kwsysProcessKill(pid_t process_id)
             fclose(f);
             buffer[nread] = '\0';
             if (nread > 0) {
-              const char* rparen = strrchr(buffer, ')');
+              char const* rparen = strrchr(buffer, ')');
               int ppid;
               if (rparen && (sscanf(rparen + 1, "%*s %d", &ppid) == 1)) {
                 if (ppid == process_id) {
@@ -2628,9 +2628,9 @@ static void kwsysProcessKill(pid_t process_id)
 }
 
 #if defined(__VMS)
-int decc$feature_get_index(const char* name);
+int decc$feature_get_index(char const* name);
 int decc$feature_set_value(int index, int mode, int value);
-static int kwsysProcessSetVMSFeature(const char* name, int value)
+static int kwsysProcessSetVMSFeature(char const* name, int value)
 {
   int i;
   errno = 0;

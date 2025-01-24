@@ -86,7 +86,7 @@ Encoding::CommandLineArguments::~CommandLineArguments()
 }
 
 Encoding::CommandLineArguments::CommandLineArguments(
-  const CommandLineArguments& other)
+  CommandLineArguments const& other)
 {
   this->argv_.resize(other.argv_.size());
   for (size_t i = 0; i < this->argv_.size(); i++) {
@@ -95,7 +95,7 @@ Encoding::CommandLineArguments::CommandLineArguments(
 }
 
 Encoding::CommandLineArguments& Encoding::CommandLineArguments::operator=(
-  const CommandLineArguments& other)
+  CommandLineArguments const& other)
 {
   if (this != &other) {
     size_t i;
@@ -124,11 +124,11 @@ char const* const* Encoding::CommandLineArguments::argv() const
 
 #if KWSYS_STL_HAS_WSTRING
 
-std::wstring Encoding::ToWide(const std::string& str)
+std::wstring Encoding::ToWide(std::string const& str)
 {
   std::wstring wstr;
 #  if defined(_WIN32)
-  const int wlength =
+  int const wlength =
     MultiByteToWideChar(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.data(),
                         int(str.size()), nullptr, 0);
   if (wlength > 0) {
@@ -157,7 +157,7 @@ std::wstring Encoding::ToWide(const std::string& str)
   return wstr;
 }
 
-std::string Encoding::ToNarrow(const std::wstring& str)
+std::string Encoding::ToNarrow(std::wstring const& str)
 {
   std::string nstr;
 #  if defined(_WIN32)
@@ -191,7 +191,7 @@ std::string Encoding::ToNarrow(const std::wstring& str)
   return nstr;
 }
 
-std::wstring Encoding::ToWide(const char* cstr)
+std::wstring Encoding::ToWide(char const* cstr)
 {
   std::wstring wstr;
   size_t length = kwsysEncoding_mbstowcs(nullptr, cstr, 0) + 1;
@@ -204,7 +204,7 @@ std::wstring Encoding::ToWide(const char* cstr)
   return wstr;
 }
 
-std::string Encoding::ToNarrow(const wchar_t* wcstr)
+std::string Encoding::ToNarrow(wchar_t const* wcstr)
 {
   std::string str;
   size_t length = kwsysEncoding_wcstombs(nullptr, wcstr, 0) + 1;
@@ -225,7 +225,7 @@ std::wstring Encoding::ToWindowsExtendedPath(std::string const& source)
 }
 
 // Convert local paths to UNC style paths
-std::wstring Encoding::ToWindowsExtendedPath(const char* source)
+std::wstring Encoding::ToWindowsExtendedPath(char const* source)
 {
   return ToWindowsExtendedPath(ToWide(source));
 }

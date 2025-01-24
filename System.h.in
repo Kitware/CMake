@@ -40,7 +40,7 @@ extern "C" {
  * any character may be escaped by a backslash.  The flags argument is
  * reserved for future use, and must be zero (or the call will fail).
  */
-kwsysEXPORT char** kwsysSystem_Parse_CommandForUnix(const char* command,
+kwsysEXPORT char** kwsysSystem_Parse_CommandForUnix(char const* command,
                                                     int flags);
 
 #if defined(__cplusplus)
