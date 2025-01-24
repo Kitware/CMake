@@ -156,6 +156,12 @@ cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetWorkingDirectory(
   return *this;
 }
 
+cmUVProcessChainBuilder& cmUVProcessChainBuilder::SetDetached()
+{
+  this->Detached = true;
+  return *this;
+}
+
 uv_loop_t* cmUVProcessChainBuilder::GetLoop() const
 {
   return this->Loop;
@@ -337,6 +343,9 @@ void cmUVProcessChain::InternalData::SpawnProcess(
   arguments.push_back(nullptr);
   options.args = const_cast<char**>(arguments.data());
   options.flags = UV_PROCESS_WINDOWS_HIDE;
+  if (this->Builder->Detached) {
+    options.flags |= UV_PROCESS_DETACHED;
+  }
 #if UV_VERSION_MAJOR > 1 ||                                                   \
   (UV_VERSION_MAJOR == 1 && UV_VERSION_MINOR >= 48) ||                        \
   !defined(CMAKE_USE_SYSTEM_LIBUV)
@@ -379,6 +388,9 @@ void cmUVProcessChain::InternalData::SpawnProcess(
   if ((process.ProcessStatus.SpawnResult =
          process.Process.spawn(*this->Loop, options, &process)) < 0) {
     process.Finish();
+  }
+  if (this->Builder->Detached) {
+    uv_unref((uv_handle_t*)process.Process);
   }
   process.InputPipe.reset();
   process.OutputPipe.reset();
