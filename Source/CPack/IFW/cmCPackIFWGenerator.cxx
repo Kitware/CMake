@@ -116,7 +116,7 @@ std::vector<std::string> cmCPackIFWGenerator::BuildRepogenCommand()
   return ifwCmd;
 }
 
-int cmCPackIFWGenerator::RunRepogen(const std::string& ifwTmpFile)
+int cmCPackIFWGenerator::RunRepogen(std::string const& ifwTmpFile)
 {
   if (this->Installer.RemoteRepositories.empty()) {
     return 1;
@@ -274,7 +274,7 @@ std::vector<std::string> cmCPackIFWGenerator::BuildBinaryCreatorCommand()
   return ifwCmd;
 }
 
-int cmCPackIFWGenerator::RunBinaryCreator(const std::string& ifwTmpFile)
+int cmCPackIFWGenerator::RunBinaryCreator(std::string const& ifwTmpFile)
 {
   std::vector<std::string> ifwCmd = this->BuildBinaryCreatorCommand();
   cmCPackIFWLogger(VERBOSE,
@@ -303,9 +303,9 @@ int cmCPackIFWGenerator::RunBinaryCreator(const std::string& ifwTmpFile)
   return 1;
 }
 
-const char* cmCPackIFWGenerator::GetPackagingInstallPrefix()
+char const* cmCPackIFWGenerator::GetPackagingInstallPrefix()
 {
-  const char* defPrefix = this->cmCPackGenerator::GetPackagingInstallPrefix();
+  char const* defPrefix = this->cmCPackGenerator::GetPackagingInstallPrefix();
 
   std::string tmpPref = defPrefix ? defPrefix : "";
 
@@ -318,7 +318,7 @@ const char* cmCPackIFWGenerator::GetPackagingInstallPrefix()
   return this->GetOption("CPACK_IFW_PACKAGING_INSTALL_PREFIX")->c_str();
 }
 
-const char* cmCPackIFWGenerator::GetOutputExtension()
+char const* cmCPackIFWGenerator::GetOutputExtension()
 {
   return this->OutputExtension.c_str();
 }
@@ -327,9 +327,9 @@ int cmCPackIFWGenerator::InitializeInternal()
 {
   // Search Qt Installer Framework tools
 
-  const std::string BinCreatorOpt = "CPACK_IFW_BINARYCREATOR_EXECUTABLE";
-  const std::string RepoGenOpt = "CPACK_IFW_REPOGEN_EXECUTABLE";
-  const std::string FrameworkVersionOpt = "CPACK_IFW_FRAMEWORK_VERSION";
+  std::string const BinCreatorOpt = "CPACK_IFW_BINARYCREATOR_EXECUTABLE";
+  std::string const RepoGenOpt = "CPACK_IFW_REPOGEN_EXECUTABLE";
+  std::string const FrameworkVersionOpt = "CPACK_IFW_FRAMEWORK_VERSION";
 
   if (!this->IsSet(BinCreatorOpt) || !this->IsSet(RepoGenOpt) ||
       !this->IsSet(FrameworkVersionOpt)) {
@@ -462,10 +462,10 @@ int cmCPackIFWGenerator::InitializeInternal()
 }
 
 std::string cmCPackIFWGenerator::GetComponentInstallSuffix(
-  const std::string& componentName)
+  std::string const& componentName)
 {
-  const std::string prefix = "packages/";
-  const std::string suffix = "/data";
+  std::string const prefix = "packages/";
+  std::string const suffix = "/data";
 
   if (this->componentPackageMethod == this->ONE_PACKAGE) {
     return cmStrCat(prefix, this->GetRootPackageName(), suffix);
@@ -476,10 +476,10 @@ std::string cmCPackIFWGenerator::GetComponentInstallSuffix(
 }
 
 std::string cmCPackIFWGenerator::GetComponentInstallDirNameSuffix(
-  const std::string& componentName)
+  std::string const& componentName)
 {
-  const std::string prefix = "packages/";
-  const std::string suffix = "/data";
+  std::string const prefix = "packages/";
+  std::string const suffix = "/data";
 
   if (this->componentPackageMethod == this->ONE_PACKAGE) {
     return cmStrCat(prefix, this->GetRootPackageName(), suffix);
@@ -492,7 +492,7 @@ std::string cmCPackIFWGenerator::GetComponentInstallDirNameSuffix(
 }
 
 cmCPackComponent* cmCPackIFWGenerator::GetComponent(
-  const std::string& projectName, const std::string& componentName)
+  std::string const& projectName, std::string const& componentName)
 {
   auto cit = this->Components.find(componentName);
   if (cit != this->Components.end()) {
@@ -537,7 +537,7 @@ cmCPackComponent* cmCPackIFWGenerator::GetComponent(
 }
 
 cmCPackComponentGroup* cmCPackIFWGenerator::GetComponentGroup(
-  const std::string& projectName, const std::string& groupName)
+  std::string const& projectName, std::string const& groupName)
 {
   cmCPackComponentGroup* group =
     this->cmCPackGenerator::GetComponentGroup(projectName, groupName);
@@ -682,7 +682,7 @@ cmCPackIFWPackage* cmCPackIFWGenerator::GetComponentPackage(
 }
 
 cmCPackIFWRepository* cmCPackIFWGenerator::GetRepository(
-  const std::string& repositoryName)
+  std::string const& repositoryName)
 {
   auto rit = this->Repositories.find(repositoryName);
   if (rit != this->Repositories.end()) {

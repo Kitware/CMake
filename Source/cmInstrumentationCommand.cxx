@@ -25,7 +25,7 @@ bool isCharDigit(char ch)
 {
   return std::isdigit(static_cast<unsigned char>(ch));
 }
-bool validateVersion(const std::string& key, const std::string& versionString,
+bool validateVersion(std::string const& key, std::string const& versionString,
                      int& version, cmExecutionStatus& status)
 {
   if (!std::all_of(versionString.begin(), versionString.end(), isCharDigit)) {
@@ -43,10 +43,10 @@ bool validateVersion(const std::string& key, const std::string& versionString,
 }
 
 template <typename E>
-std::function<bool(const std::string&, E&)> EnumParser(
-  const std::vector<std::string> toString)
+std::function<bool(std::string const&, E&)> EnumParser(
+  std::vector<std::string> const toString)
 {
-  return [toString](const std::string& value, E& out) -> bool {
+  return [toString](std::string const& value, E& out) -> bool {
     for (size_t i = 0; i < toString.size(); ++i) {
       if (value == toString[i]) {
         out = (E)i;

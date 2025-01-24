@@ -15,7 +15,7 @@ int main(int argc, char** argv)
   bool foundSqlite = false;
 
   qDebug() << "Supported Database Drivers:";
-  foreach (const QString& sqlDriver, QSqlDatabase::drivers()) {
+  foreach (QString const& sqlDriver, QSqlDatabase::drivers()) {
     qDebug() << " " << sqlDriver;
     if (sqlDriver == "QSQLITE")
       foundSqlite = true;

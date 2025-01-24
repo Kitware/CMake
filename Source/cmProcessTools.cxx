@@ -60,7 +60,7 @@ std::vector<cmUVProcessChain::Status> cmProcessTools::RunProcess(
   auto status = chain.GetStatus();
   std::transform(
     status.begin(), status.end(), std::back_inserter(result),
-    [](const cmUVProcessChain::Status* s) -> cmUVProcessChain::Status {
+    [](cmUVProcessChain::Status const* s) -> cmUVProcessChain::Status {
       return *s;
     });
   return result;
@@ -72,16 +72,16 @@ cmProcessTools::LineParser::LineParser(char sep, bool ignoreCR)
 {
 }
 
-void cmProcessTools::LineParser::SetLog(std::ostream* log, const char* prefix)
+void cmProcessTools::LineParser::SetLog(std::ostream* log, char const* prefix)
 {
   this->Log = log;
   this->Prefix = prefix ? prefix : "";
 }
 
-bool cmProcessTools::LineParser::ProcessChunk(const char* first, int length)
+bool cmProcessTools::LineParser::ProcessChunk(char const* first, int length)
 {
-  const char* last = first + length;
-  for (const char* c = first; c != last; ++c) {
+  char const* last = first + length;
+  for (char const* c = first; c != last; ++c) {
     if (*c == this->Separator || *c == '\0') {
       this->LineEnd = *c;
 

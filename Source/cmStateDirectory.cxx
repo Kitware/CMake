@@ -54,7 +54,7 @@ void cmStateDirectory::SetCurrentBinary(std::string const& dir)
 
 cmStateDirectory::cmStateDirectory(
   cmLinkedTree<cmStateDetail::BuildsystemDirectoryStateType>::iterator iter,
-  const cmStateSnapshot& snapshot)
+  cmStateSnapshot const& snapshot)
   : DirectoryState(iter)
   , Snapshot_(snapshot)
 {
@@ -266,7 +266,7 @@ void cmStateDirectory::ClearLinkDirectories()
                this->Snapshot_.Position->LinkDirectoriesPosition);
 }
 
-void cmStateDirectory::SetProperty(const std::string& prop, cmValue value,
+void cmStateDirectory::SetProperty(std::string const& prop, cmValue value,
                                    cmListFileBacktrace const& lfbt)
 {
   if (prop == "INCLUDE_DIRECTORIES") {
@@ -313,8 +313,8 @@ void cmStateDirectory::SetProperty(const std::string& prop, cmValue value,
   this->DirectoryState->Properties.SetProperty(prop, value);
 }
 
-void cmStateDirectory::AppendProperty(const std::string& prop,
-                                      const std::string& value, bool asString,
+void cmStateDirectory::AppendProperty(std::string const& prop,
+                                      std::string const& value, bool asString,
                                       cmListFileBacktrace const& lfbt)
 {
   if (prop == "INCLUDE_DIRECTORIES") {
@@ -341,14 +341,14 @@ void cmStateDirectory::AppendProperty(const std::string& prop,
   this->DirectoryState->Properties.AppendProperty(prop, value, asString);
 }
 
-cmValue cmStateDirectory::GetProperty(const std::string& prop) const
+cmValue cmStateDirectory::GetProperty(std::string const& prop) const
 {
-  const bool chain =
+  bool const chain =
     this->Snapshot_.State->IsPropertyChained(prop, cmProperty::DIRECTORY);
   return this->GetProperty(prop, chain);
 }
 
-cmValue cmStateDirectory::GetProperty(const std::string& prop,
+cmValue cmStateDirectory::GetProperty(std::string const& prop,
                                       bool chain) const
 {
   static std::string output;
@@ -444,7 +444,7 @@ cmValue cmStateDirectory::GetProperty(const std::string& prop,
   return retVal;
 }
 
-bool cmStateDirectory::GetPropertyAsBool(const std::string& prop) const
+bool cmStateDirectory::GetPropertyAsBool(std::string const& prop) const
 {
   return this->GetProperty(prop).IsOn();
 }

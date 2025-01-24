@@ -225,41 +225,41 @@ private:
   class ArgumentLambdaHelper;
 
   template <typename... CallState>
-  class ArgumentLambdaHelper<bool(const std::string&, CallState...)>
+  class ArgumentLambdaHelper<bool(std::string const&, CallState...)>
   {
   public:
-    static std::function<bool(const std::string&, CallState...)>
+    static std::function<bool(std::string const&, CallState...)>
     generateSetToTrue(bool& value1)
     {
-      return [&value1](const std::string&, CallState&&...) -> bool {
+      return [&value1](std::string const&, CallState&&...) -> bool {
         value1 = true;
         return true;
       };
     }
 
-    static std::function<bool(const std::string&, CallState...)>
+    static std::function<bool(std::string const&, CallState...)>
     generateSetToTrue(bool& value1, bool& value2)
     {
-      return [&value1, &value2](const std::string&, CallState&&...) -> bool {
+      return [&value1, &value2](std::string const&, CallState&&...) -> bool {
         value1 = true;
         value2 = true;
         return true;
       };
     }
 
-    static std::function<bool(const std::string&, CallState...)>
+    static std::function<bool(std::string const&, CallState...)>
     generateSetToValue(std::string& value1)
     {
-      return [&value1](const std::string& arg, CallState&&...) -> bool {
+      return [&value1](std::string const& arg, CallState&&...) -> bool {
         value1 = arg;
         return true;
       };
     }
 
-    static std::function<bool(const std::string&, CallState...)>
+    static std::function<bool(std::string const&, CallState...)>
     generateSetToValue(cm::optional<std::string>& value1)
     {
-      return [&value1](const std::string& arg, CallState&&...) -> bool {
+      return [&value1](std::string const& arg, CallState&&...) -> bool {
         value1 = arg;
         return true;
       };

@@ -52,7 +52,7 @@ public:
   static bool IntFromHexDigit(char input, char& output);
 
   /// @brief Converts a byte hash to a sequence of hex character pairs
-  static std::string ByteHashToString(const std::vector<unsigned char>& hash);
+  static std::string ByteHashToString(std::vector<unsigned char> const& hash);
 
   /// @brief Calculates a binary hash from string input data
   /// @return Binary hash vector
@@ -62,7 +62,7 @@ public:
   /// @see ByteHashString()
   /// @return Non empty binary hash vector if the file was read successfully.
   ///         An empty vector otherwise.
-  std::vector<unsigned char> ByteHashFile(const std::string& file);
+  std::vector<unsigned char> ByteHashFile(std::string const& file);
 
   /// @brief Calculates a hash string from string input data
   /// @return Sequence of hex characters pairs for each byte of the binary hash
@@ -72,7 +72,7 @@ public:
   /// @see HashString()
   /// @return Non empty hash string if the file was read successfully.
   ///         An empty string otherwise.
-  std::string HashFile(const std::string& file);
+  std::string HashFile(std::string const& file);
 
   /// @brief Returns the name of the hash type.
   /// @return The name of the hash type associated with this hash generator.

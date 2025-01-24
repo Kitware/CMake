@@ -48,8 +48,8 @@ std::vector<std::string> const& cmCommonTargetGenerator::GetConfigNames() const
   return this->ConfigNames;
 }
 
-cmValue cmCommonTargetGenerator::GetFeature(const std::string& feature,
-                                            const std::string& config)
+cmValue cmCommonTargetGenerator::GetFeature(std::string const& feature,
+                                            std::string const& config)
 {
   return this->GeneratorTarget->GetFeature(feature, config);
 }
@@ -57,7 +57,7 @@ cmValue cmCommonTargetGenerator::GetFeature(const std::string& feature,
 void cmCommonTargetGenerator::AppendFortranFormatFlags(
   std::string& flags, cmSourceFile const& source)
 {
-  const std::string srcfmt = source.GetSafeProperty("Fortran_FORMAT");
+  std::string const srcfmt = source.GetSafeProperty("Fortran_FORMAT");
   cmOutputConverter::FortranFormat format =
     cmOutputConverter::GetFortranFormat(srcfmt);
   if (format == cmOutputConverter::FortranFormatNone) {
@@ -65,7 +65,7 @@ void cmCommonTargetGenerator::AppendFortranFormatFlags(
       this->GeneratorTarget->GetSafeProperty("Fortran_FORMAT");
     format = cmOutputConverter::GetFortranFormat(tgtfmt);
   }
-  const char* var = nullptr;
+  char const* var = nullptr;
   switch (format) {
     case cmOutputConverter::FortranFormatFixed:
       var = "CMAKE_Fortran_FORMAT_FIXED_FLAG";
@@ -86,7 +86,7 @@ void cmCommonTargetGenerator::AppendFortranPreprocessFlags(
   std::string& flags, cmSourceFile const& source,
   PreprocessFlagsRequired requires_pp)
 {
-  const std::string srcpp = source.GetSafeProperty("Fortran_PREPROCESS");
+  std::string const srcpp = source.GetSafeProperty("Fortran_PREPROCESS");
   cmOutputConverter::FortranPreprocess preprocess =
     cmOutputConverter::GetFortranPreprocess(srcpp);
   if (preprocess == cmOutputConverter::FortranPreprocess::Unset) {
@@ -94,7 +94,7 @@ void cmCommonTargetGenerator::AppendFortranPreprocessFlags(
       this->GeneratorTarget->GetSafeProperty("Fortran_PREPROCESS");
     preprocess = cmOutputConverter::GetFortranPreprocess(tgtpp);
   }
-  const char* var = nullptr;
+  char const* var = nullptr;
   switch (preprocess) {
     case cmOutputConverter::FortranPreprocess::Needed:
       if (requires_pp == PreprocessFlagsRequired::YES) {
@@ -113,11 +113,11 @@ void cmCommonTargetGenerator::AppendFortranPreprocessFlags(
   }
 }
 
-std::string cmCommonTargetGenerator::GetFlags(const std::string& l,
-                                              const std::string& config,
-                                              const std::string& arch)
+std::string cmCommonTargetGenerator::GetFlags(std::string const& l,
+                                              std::string const& config,
+                                              std::string const& arch)
 {
-  const std::string key = config + arch;
+  std::string const key = config + arch;
 
   auto i = this->Configs[key].FlagsByLanguage.find(l);
   if (i == this->Configs[key].FlagsByLanguage.end()) {
@@ -132,8 +132,8 @@ std::string cmCommonTargetGenerator::GetFlags(const std::string& l,
   return i->second;
 }
 
-std::string cmCommonTargetGenerator::GetDefines(const std::string& l,
-                                                const std::string& config)
+std::string cmCommonTargetGenerator::GetDefines(std::string const& l,
+                                                std::string const& config)
 {
   auto i = this->Configs[config].DefinesByLanguage.find(l);
   if (i == this->Configs[config].DefinesByLanguage.end()) {
@@ -151,7 +151,7 @@ std::string cmCommonTargetGenerator::GetDefines(const std::string& l,
 }
 
 std::string cmCommonTargetGenerator::GetIncludes(std::string const& l,
-                                                 const std::string& config)
+                                                 std::string const& config)
 {
   auto i = this->Configs[config].IncludesByLanguage.find(l);
   if (i == this->Configs[config].IncludesByLanguage.end()) {
@@ -165,7 +165,7 @@ std::string cmCommonTargetGenerator::GetIncludes(std::string const& l,
 
 cmCommonTargetGenerator::LinkedTargetDirs
 cmCommonTargetGenerator::GetLinkedTargetDirectories(
-  const std::string& lang, const std::string& config) const
+  std::string const& lang, std::string const& config) const
 {
   LinkedTargetDirs dirs;
   std::set<cmGeneratorTarget const*> forward_emitted;
@@ -240,7 +240,7 @@ cmCommonTargetGenerator::GetLinkedTargetDirectories(
 }
 
 std::string cmCommonTargetGenerator::ComputeTargetCompilePDB(
-  const std::string& config) const
+  std::string const& config) const
 {
   std::string compilePdbPath;
   if (this->GeneratorTarget->GetType() > cmStateEnums::OBJECT_LIBRARY) {
@@ -267,7 +267,7 @@ std::string cmCommonTargetGenerator::ComputeTargetCompilePDB(
   return compilePdbPath;
 }
 
-std::string cmCommonTargetGenerator::GetManifests(const std::string& config)
+std::string cmCommonTargetGenerator::GetManifests(std::string const& config)
 {
   std::vector<cmSourceFile const*> manifest_srcs;
   this->GeneratorTarget->GetManifests(manifest_srcs, config);
@@ -304,8 +304,8 @@ std::string cmCommonTargetGenerator::GetAIXExports(std::string const&)
 }
 
 void cmCommonTargetGenerator::AppendOSXVerFlag(std::string& flags,
-                                               const std::string& lang,
-                                               const char* name, bool so)
+                                               std::string const& lang,
+                                               char const* name, bool so)
 {
   // Lookup the flag to specify the version.
   std::string fvar = cmStrCat("CMAKE_", lang, "_OSX_", name, "_VERSION_FLAG");
@@ -494,7 +494,7 @@ std::string cmCommonTargetGenerator::GenerateCodeCheckRules(
 }
 
 std::string cmCommonTargetGenerator::GetLinkerLauncher(
-  const std::string& config)
+  std::string const& config)
 {
   std::string lang = this->GeneratorTarget->GetLinkerLanguage(config);
   std::string propName = lang + "_LINKER_LAUNCHER";
@@ -521,7 +521,7 @@ std::string cmCommonTargetGenerator::GetLinkerLauncher(
 }
 
 bool cmCommonTargetGenerator::HaveRequiredLanguages(
-  const std::vector<cmSourceFile const*>& sources,
+  std::vector<cmSourceFile const*> const& sources,
   std::set<std::string>& languagesNeeded) const
 {
   for (cmSourceFile const* sf : sources) {
@@ -530,8 +530,8 @@ bool cmCommonTargetGenerator::HaveRequiredLanguages(
 
   auto* makefile = this->Makefile;
   auto* state = makefile->GetState();
-  auto unary = [&state, &makefile](const std::string& lang) -> bool {
-    const bool valid = state->GetLanguageEnabled(lang);
+  auto unary = [&state, &makefile](std::string const& lang) -> bool {
+    bool const valid = state->GetLanguageEnabled(lang);
     if (!valid) {
       makefile->IssueMessage(
         MessageType::FATAL_ERROR,

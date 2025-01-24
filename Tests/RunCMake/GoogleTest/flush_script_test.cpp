@@ -9,9 +9,9 @@ int main(int argc, char** argv)
   // to test the module without actually needing Google Test.
   if (argc > 1 && std::string(argv[1]) == "--gtest_list_tests") {
     std::cout << "flush_script_test.\n";
-    const size_t flushThreshold = 50000;
-    const size_t flushAfter = 4;
-    const size_t testCaseNum = 3 * flushAfter;
+    size_t const flushThreshold = 50000;
+    size_t const flushAfter = 4;
+    size_t const testCaseNum = 3 * flushAfter;
     std::string testName(flushThreshold / flushAfter, 'T');
     for (size_t i = 1; i <= testCaseNum; ++i)
       std::cout << "  t" << i << testName.c_str() << "\n";

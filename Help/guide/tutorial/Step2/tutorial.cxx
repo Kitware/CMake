@@ -17,12 +17,12 @@ int main(int argc, char* argv[])
   }
 
   // convert input to double
-  const double inputValue = std::stod(argv[1]);
+  double const inputValue = std::stod(argv[1]);
 
   // TODO 6: Replace sqrt with mathfunctions::sqrt
 
   // calculate square root
-  const double outputValue = sqrt(inputValue);
+  double const outputValue = sqrt(inputValue);
   std::cout << "The square root of " << inputValue << " is " << outputValue
             << std::endl;
   return 0;

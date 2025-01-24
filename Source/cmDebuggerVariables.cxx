@@ -15,11 +15,11 @@
 namespace cmDebugger {
 
 namespace {
-const dap::VariablePresentationHint PrivatePropertyHint = { {},
+dap::VariablePresentationHint const PrivatePropertyHint = { {},
                                                             "property",
                                                             {},
                                                             "private" };
-const dap::VariablePresentationHint PrivateDataHint = { {},
+dap::VariablePresentationHint const PrivateDataHint = { {},
                                                         "data",
                                                         {},
                                                         "private" };

@@ -39,7 +39,7 @@
 struct cmIDEFlagTable;
 
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
-  cmake* cm, const std::string& name)
+  cmake* cm, std::string const& name)
   : cmGlobalVisualStudio71Generator(cm)
 {
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
@@ -245,7 +245,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   // Collect the input files used to generate all targets in this
   // project.
   std::vector<std::string> listFiles;
-  for (const auto& gen : generators) {
+  for (auto const& gen : generators) {
     cm::append(listFiles, gen->GetMakefile()->GetListFiles());
   }
   // Sort the list of input files and remove duplicates.
@@ -273,7 +273,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
                stampList);
     std::string stampFile;
     cmGeneratedFileStream fout(stampListFile);
-    for (const auto& gi : generators) {
+    for (auto const& gi : generators) {
       stampFile = cmStrCat(gi->GetMakefile()->GetCurrentBinaryDirectory(),
                            "/CMakeFiles/generate.stamp");
       fout << stampFile << '\n';
@@ -351,9 +351,9 @@ void cmGlobalVisualStudio8Generator::AddExtraIDETargets()
   cmGlobalVisualStudio7Generator::AddExtraIDETargets();
   if (this->AddCheckTarget()) {
     for (auto& LocalGenerator : this->LocalGenerators) {
-      const auto& tgts = LocalGenerator->GetGeneratorTargets();
+      auto const& tgts = LocalGenerator->GetGeneratorTargets();
       // All targets depend on the build-system check target.
-      for (const auto& ti : tgts) {
+      for (auto const& ti : tgts) {
         if (ti->GetName() != CMAKE_CHECK_BUILD_SYSTEM_TARGET) {
           ti->Target->AddUtility(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false);
         }
@@ -374,15 +374,15 @@ void cmGlobalVisualStudio8Generator::WriteSolutionConfigurations(
 }
 
 void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
-  std::ostream& fout, const std::string& name, cmGeneratorTarget const& target,
+  std::ostream& fout, std::string const& name, cmGeneratorTarget const& target,
   std::vector<std::string> const& configs,
-  const std::set<std::string>& configsPartOfDefaultBuild,
+  std::set<std::string> const& configsPartOfDefaultBuild,
   std::string const& platformMapping)
 {
   std::string guid = this->GetGUID(name);
   for (std::string const& i : configs) {
     cmList mapConfig;
-    const char* dstConfig = i.c_str();
+    char const* dstConfig = i.c_str();
     if (target.GetProperty("EXTERNAL_MSPROJECT")) {
       if (cmValue m = target.GetProperty(
             cmStrCat("MAP_IMPORTED_CONFIG_", cmSystemTools::UpperCase(i)))) {
@@ -416,7 +416,7 @@ void cmGlobalVisualStudio8Generator::WriteProjectConfigurations(
 }
 
 bool cmGlobalVisualStudio8Generator::NeedsDeploy(
-  cmGeneratorTarget const& target, const char* config) const
+  cmGeneratorTarget const& target, char const* config) const
 {
   cmStateEnums::TargetType const type = target.GetType();
   if (type != cmStateEnums::EXECUTABLE &&
@@ -459,7 +459,7 @@ bool cmGlobalVisualStudio8Generator::ComputeTargetDepends()
 }
 
 void cmGlobalVisualStudio8Generator::WriteProjectDepends(
-  std::ostream& fout, const std::string&, const std::string&,
+  std::ostream& fout, std::string const&, std::string const&,
   cmGeneratorTarget const* gt)
 {
   TargetDependSet const& unordered = this->GetTargetDirectDepends(gt);

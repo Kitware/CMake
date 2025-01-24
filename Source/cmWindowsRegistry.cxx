@@ -97,7 +97,7 @@ public:
   }
   ~registry_error() override = default;
 
-  const char* what() const noexcept override { return What.c_str(); }
+  char const* what() const noexcept override { return What.c_str(); }
 
 private:
   std::string What;
@@ -131,7 +131,7 @@ public:
 private:
   static std::string FormatSystemError(LSTATUS status);
   static std::wstring ToWide(cm::string_view str);
-  static std::string ToNarrow(const wchar_t* str, int size = -1);
+  static std::string ToNarrow(wchar_t const* str, int size = -1);
 
   HKEY Handler;
 };
@@ -214,12 +214,12 @@ std::wstring KeyHandler::ToWide(cm::string_view str)
     return wstr;
   }
 
-  const auto wlength =
+  auto const wlength =
     MultiByteToWideChar(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.data(),
                         int(str.size()), nullptr, 0);
   if (wlength > 0) {
     auto wdata = cm::make_unique<wchar_t[]>(wlength);
-    const auto r =
+    auto const r =
       MultiByteToWideChar(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, str.data(),
                           int(str.size()), wdata.get(), wlength);
     if (r > 0) {
@@ -234,7 +234,7 @@ std::wstring KeyHandler::ToWide(cm::string_view str)
   return wstr;
 }
 
-std::string KeyHandler::ToNarrow(const wchar_t* wstr, int size)
+std::string KeyHandler::ToNarrow(wchar_t const* wstr, int size)
 {
   std::string str;
 
@@ -242,12 +242,12 @@ std::string KeyHandler::ToNarrow(const wchar_t* wstr, int size)
     return str;
   }
 
-  const auto length =
+  auto const length =
     WideCharToMultiByte(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, wstr, size,
                         nullptr, 0, nullptr, nullptr);
   if (length > 0) {
     auto data = cm::make_unique<char[]>(length);
-    const auto r =
+    auto const r =
       WideCharToMultiByte(KWSYS_ENCODING_DEFAULT_CODEPAGE, 0, wstr, size,
                           data.get(), length, nullptr, nullptr);
     if (r > 0) {
@@ -449,7 +449,7 @@ public:
   }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-  void Replace(const std::string& value)
+  void Replace(std::string const& value)
   {
     this->Expression.replace(
       this->RegistryFormat.start(),
@@ -461,7 +461,7 @@ public:
   cm::string_view GetSubKey() const { return this->SubKey; }
   cm::string_view GetValueName() const { return this->ValueName; }
 
-  const std::string& GetExpression() const { return this->Expression; }
+  std::string const& GetExpression() const { return this->Expression; }
 #endif
 
 private:
@@ -475,16 +475,16 @@ private:
 }
 
 // class cmWindowsRegistry
-const cmWindowsRegistry::ValueTypeSet cmWindowsRegistry::SimpleTypes =
+cmWindowsRegistry::ValueTypeSet const cmWindowsRegistry::SimpleTypes =
   cmWindowsRegistry::ValueTypeSet{ cmWindowsRegistry::ValueType::Reg_SZ,
                                    cmWindowsRegistry::ValueType::Reg_EXPAND_SZ,
                                    cmWindowsRegistry::ValueType::Reg_DWORD,
                                    cmWindowsRegistry::ValueType::Reg_QWORD };
-const cmWindowsRegistry::ValueTypeSet cmWindowsRegistry::AllTypes =
+cmWindowsRegistry::ValueTypeSet const cmWindowsRegistry::AllTypes =
   cmWindowsRegistry::SimpleTypes + cmWindowsRegistry::ValueType::Reg_MULTI_SZ;
 
 cmWindowsRegistry::cmWindowsRegistry(cmMakefile& makefile,
-                                     const ValueTypeSet& supportedTypes)
+                                     ValueTypeSet const& supportedTypes)
 #if defined(_WIN32) && !defined(__CYGWIN__)
   : SupportedTypes(supportedTypes)
 #else
@@ -625,7 +625,7 @@ cm::optional<std::string> cmWindowsRegistry::ReadValue(
       this->LastError.clear();
       auto handler = KeyHandler::OpenKey(key, v);
       return handler.ReadValue(name, this->SupportedTypes, separator);
-    } catch (const registry_error& e) {
+    } catch (registry_error const& e) {
       this->LastError = e.what();
       continue;
     }
@@ -655,7 +655,7 @@ cm::optional<std::vector<std::string>> cmWindowsRegistry::GetValueNames(
       auto list = handler.GetValueNames();
       std::move(list.begin(), list.end(), std::back_inserter(valueNames));
       querySuccessful = true;
-    } catch (const registry_error& e) {
+    } catch (registry_error const& e) {
       this->LastError = e.what();
       continue;
     }
@@ -695,7 +695,7 @@ cm::optional<std::vector<std::string>> cmWindowsRegistry::GetSubKeys(
       auto list = handler.GetSubKeys();
       std::move(list.begin(), list.end(), std::back_inserter(subKeys));
       querySuccessful = true;
-    } catch (const registry_error& e) {
+    } catch (registry_error const& e) {
       this->LastError = e.what();
       continue;
     }
@@ -740,7 +740,7 @@ cm::optional<std::vector<std::string>> cmWindowsRegistry::ExpandExpression(
         auto data = handler.ReadValue(parser.GetValueName(),
                                       this->SupportedTypes, separator);
         parser.Replace(data);
-      } catch (const registry_error& e) {
+      } catch (registry_error const& e) {
         this->LastError = e.what();
         parser.Replace(NOTFOUND);
         continue;

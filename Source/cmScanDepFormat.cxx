@@ -343,7 +343,7 @@ bool cmScanDepFormat_P1689_Write(std::string const& path,
       require_obj["source-path"] = EncodeFilename(require.SourcePath);
     }
 
-    const char* lookup_method = nullptr;
+    char const* lookup_method = nullptr;
     switch (require.Method) {
       case LookupMethod::ByName:
         // No explicit value needed for the default.

@@ -23,7 +23,7 @@ class cmGlobalGhsMultiGenerator : public cmGlobalGenerator
 {
 public:
   // The default filename extension of GHS MULTI's build files.
-  static const char* FILE_EXTENSION;
+  static char const* FILE_EXTENSION;
 
   cmGlobalGhsMultiGenerator(cmake* cm);
   ~cmGlobalGhsMultiGenerator() override;
@@ -83,16 +83,16 @@ public:
 protected:
   void Generate() override;
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(
-    const std::string& makeProgram, const std::string& projectName,
-    const std::string& projectDir, std::vector<std::string> const& targetNames,
-    const std::string& config, int jobs, bool verbose,
-    const cmBuildOptions& buildOptions = cmBuildOptions(),
+    std::string const& makeProgram, std::string const& projectName,
+    std::string const& projectDir, std::vector<std::string> const& targetNames,
+    std::string const& config, int jobs, bool verbose,
+    cmBuildOptions const& buildOptions = cmBuildOptions(),
     std::vector<std::string> const& makeOptions =
       std::vector<std::string>()) override;
   void AddExtraIDETargets() override;
 
 private:
-  void GetToolset(cmMakefile* mf, std::string& tsd, const std::string& ts);
+  void GetToolset(cmMakefile* mf, std::string& tsd, std::string const& ts);
 
   /* top-level project */
   void OutputTopLevelProject(cmLocalGenerator* root,
@@ -112,8 +112,8 @@ private:
   std::string StampFile;
   static std::string TrimQuotes(std::string str);
 
-  static const char* DEFAULT_BUILD_PROGRAM;
-  static const char* CHECK_BUILD_SYSTEM_TARGET;
+  static char const* DEFAULT_BUILD_PROGRAM;
+  static char const* CHECK_BUILD_SYSTEM_TARGET;
 
   bool ComputeTargetBuildOrder(cmGeneratorTarget const* tgt,
                                std::vector<cmGeneratorTarget const*>& build);

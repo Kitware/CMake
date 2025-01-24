@@ -44,19 +44,19 @@ llpkgc_errno_t cmPkgConfigParser::Finish(char* buf, std::size_t len)
   return llpkgc_finish(static_cast<llpkgc_t*>(this));
 }
 
-int cmPkgConfigParser::OnSpanNext(const char*, std::size_t len)
+int cmPkgConfigParser::OnSpanNext(char const*, std::size_t len)
 {
   Len_ += len;
   return 0;
 }
 
-int cmPkgConfigParser::OnSpanNextTr(llpkgc_t* parser, const char* at,
+int cmPkgConfigParser::OnSpanNextTr(llpkgc_t* parser, char const* at,
                                     std::size_t len)
 {
   return static_cast<cmPkgConfigParser*>(parser)->OnSpanNext(at, len);
 }
 
-int cmPkgConfigParser::OnKey(const char* at, std::size_t len)
+int cmPkgConfigParser::OnKey(char const* at, std::size_t len)
 {
   Ptr_ = at;
   Len_ = len;
@@ -64,7 +64,7 @@ int cmPkgConfigParser::OnKey(const char* at, std::size_t len)
   return 0;
 }
 
-int cmPkgConfigParser::OnKeyTr(llpkgc_t* parser, const char* at,
+int cmPkgConfigParser::OnKeyTr(llpkgc_t* parser, char const* at,
                                std::size_t len)
 {
   return static_cast<cmPkgConfigParser*>(parser)->OnKey(at, len);
@@ -94,7 +94,7 @@ int cmPkgConfigParser::OnVariableCompleteTr(llpkgc_t* parser)
   return static_cast<cmPkgConfigParser*>(parser)->OnVariableComplete();
 }
 
-int cmPkgConfigParser::OnValueLiteral(const char* at, std::size_t len)
+int cmPkgConfigParser::OnValueLiteral(char const* at, std::size_t len)
 {
   Ptr_ = at;
   Len_ = len;
@@ -102,7 +102,7 @@ int cmPkgConfigParser::OnValueLiteral(const char* at, std::size_t len)
   return 0;
 }
 
-int cmPkgConfigParser::OnValueLiteralTr(llpkgc_t* parser, const char* at,
+int cmPkgConfigParser::OnValueLiteralTr(llpkgc_t* parser, char const* at,
                                         std::size_t len)
 {
   return static_cast<cmPkgConfigParser*>(parser)->OnValueLiteral(at, len);
@@ -124,7 +124,7 @@ int cmPkgConfigParser::OnValueLiteralCompleteTr(llpkgc_t* parser)
   return static_cast<cmPkgConfigParser*>(parser)->OnValueLiteralComplete();
 }
 
-int cmPkgConfigParser::OnValueVariable(const char* at, std::size_t len)
+int cmPkgConfigParser::OnValueVariable(char const* at, std::size_t len)
 {
   Ptr_ = at;
   Len_ = len;
@@ -132,7 +132,7 @@ int cmPkgConfigParser::OnValueVariable(const char* at, std::size_t len)
   return 0;
 }
 
-int cmPkgConfigParser::OnValueVariableTr(llpkgc_t* parser, const char* at,
+int cmPkgConfigParser::OnValueVariableTr(llpkgc_t* parser, char const* at,
                                          std::size_t len)
 {
   return static_cast<cmPkgConfigParser*>(parser)->OnValueVariable(at, len);

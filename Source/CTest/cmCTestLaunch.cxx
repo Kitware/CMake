@@ -35,7 +35,7 @@
 #  include <io.h>    // for _setmode
 #endif
 
-cmCTestLaunch::cmCTestLaunch(int argc, const char* const* argv, Op operation)
+cmCTestLaunch::cmCTestLaunch(int argc, char const* const* argv, Op operation)
 {
   if (!this->ParseArguments(argc, argv)) {
     return;
@@ -52,7 +52,7 @@ cmCTestLaunch::cmCTestLaunch(int argc, const char* const* argv, Op operation)
 
 cmCTestLaunch::~cmCTestLaunch() = default;
 
-bool cmCTestLaunch::ParseArguments(int argc, const char* const* argv)
+bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
 {
   // Launcher options occur first and are separated from the real
   // command line by a '--' option.
@@ -74,7 +74,7 @@ bool cmCTestLaunch::ParseArguments(int argc, const char* const* argv)
   Doing doing = DoingNone;
   int arg0 = 0;
   for (int i = 1; !arg0 && i < argc; ++i) {
-    const char* arg = argv[i];
+    char const* arg = argv[i];
     if (strcmp(arg, "--") == 0) {
       arg0 = i + 1;
     } else if (strcmp(arg, "--command-type") == 0) {
@@ -145,7 +145,7 @@ bool cmCTestLaunch::ParseArguments(int argc, const char* const* argv)
   return false;
 }
 
-void cmCTestLaunch::HandleRealArg(const char* arg)
+void cmCTestLaunch::HandleRealArg(char const* arg)
 {
 #ifdef _WIN32
   // Expand response file arguments.
@@ -319,7 +319,7 @@ void cmCTestLaunch::LoadScrapeRules()
 }
 
 void cmCTestLaunch::LoadScrapeRules(
-  const char* purpose, std::vector<cmsys::RegularExpression>& regexps) const
+  char const* purpose, std::vector<cmsys::RegularExpression>& regexps) const
 {
   std::string fname =
     cmStrCat(this->Reporter.LogDir, "Custom", purpose, ".txt");
@@ -354,7 +354,7 @@ bool cmCTestLaunch::ScrapeLog(std::string const& fname)
   return false;
 }
 
-int cmCTestLaunch::Main(int argc, const char* const argv[], Op operation)
+int cmCTestLaunch::Main(int argc, char const* const argv[], Op operation)
 {
   if (argc == 2) {
     std::cerr << "ctest --launch: this mode is for internal CTest use only"

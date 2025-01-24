@@ -34,7 +34,7 @@ void cmXCode21Object::PrintList(
   PBXType t)
 {
   bool hasOne = false;
-  for (const auto& obj : v) {
+  for (auto const& obj : v) {
     if (obj->GetType() == OBJECT && obj->GetIsA() == t) {
       hasOne = true;
       break;
@@ -44,7 +44,7 @@ void cmXCode21Object::PrintList(
     return;
   }
   out << "\n/* Begin " << PBXTypeNames[t] << " section */\n";
-  for (const auto& obj : v) {
+  for (auto const& obj : v) {
     if (obj->GetType() == OBJECT && obj->GetIsA() == t) {
       obj->Print(out);
     }

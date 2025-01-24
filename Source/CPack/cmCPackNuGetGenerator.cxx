@@ -129,8 +129,8 @@ void cmCPackNuGetGenerator::AddGeneratedPackageNames()
     return;
   }
   // add the generated packages to package file names list
-  const std::string& fileNames = *files_list;
-  const char sep = ';';
+  std::string const& fileNames = *files_list;
+  char const sep = ';';
   std::string::size_type pos1 = 0;
   std::string::size_type pos2 = fileNames.find(sep, pos1 + 1);
   while (pos2 != std::string::npos) {

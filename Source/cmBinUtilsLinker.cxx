@@ -10,7 +10,7 @@ cmBinUtilsLinker::cmBinUtilsLinker(cmRuntimeDependencyArchive* archive)
 {
 }
 
-void cmBinUtilsLinker::SetError(const std::string& e)
+void cmBinUtilsLinker::SetError(std::string const& e)
 {
   this->Archive->SetError(e);
 }

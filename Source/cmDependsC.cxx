@@ -26,8 +26,8 @@
 cmDependsC::cmDependsC() = default;
 
 cmDependsC::cmDependsC(cmLocalUnixMakefileGenerator3* lg,
-                       const std::string& targetDir, const std::string& lang,
-                       const DependencyMap* validDeps)
+                       std::string const& targetDir, std::string const& lang,
+                       DependencyMap const* validDeps)
   : cmDepends(lg, targetDir)
   , ValidDeps(validDeps)
 {
@@ -73,8 +73,8 @@ cmDependsC::~cmDependsC()
   this->WriteCacheFile();
 }
 
-bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
-                                   const std::string& obj,
+bool cmDependsC::WriteDependencies(std::set<std::string> const& sources,
+                                   std::string const& obj,
                                    std::ostream& makeDepends,
                                    std::ostream& internalDepends)
 {
@@ -215,7 +215,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   std::string obj_m = this->LocalGenerator->ConvertToMakefilePath(obj_i);
   internalDepends << obj_i << '\n';
   if (!dependencies.empty()) {
-    const auto& lineContinue = static_cast<cmGlobalUnixMakefileGenerator3*>(
+    auto const& lineContinue = static_cast<cmGlobalUnixMakefileGenerator3*>(
                                  this->LocalGenerator->GetGlobalGenerator())
                                  ->LineContinueDirective;
     bool supportLongLineDepend = static_cast<cmGlobalUnixMakefileGenerator3*>(
@@ -340,8 +340,8 @@ void cmDependsC::WriteCacheFile() const
   }
 }
 
-void cmDependsC::Scan(std::istream& is, const std::string& directory,
-                      const std::string& fullName)
+void cmDependsC::Scan(std::istream& is, std::string const& directory,
+                      std::string const& fullName)
 {
   cmIncludeLines& newCacheEntry = this->FileCache[fullName];
   newCacheEntry.Used = true;
@@ -406,7 +406,7 @@ void cmDependsC::SetupTransforms()
     // Construct the regular expression to match lines to be
     // transformed.
     std::string xform = "^([ \t]*[#%][ \t]*(include|import)[ \t]*)(";
-    const char* sep = "";
+    char const* sep = "";
     for (auto const& tr : this->TransformRules) {
       xform += sep;
       xform += tr.first;

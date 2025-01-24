@@ -24,12 +24,12 @@
 #include "cmake.h"
 
 namespace {
-const cmDocumentationEntry cmDocumentationName = {
+cmDocumentationEntry const cmDocumentationName = {
   {},
   "  ccmake - Curses Interface for CMake."
 };
 
-const cmDocumentationEntry cmDocumentationUsage[2] = {
+cmDocumentationEntry const cmDocumentationUsage[2] = {
   { {},
     "  ccmake <path-to-source>\n"
     "  ccmake <path-to-existing-build>" },
@@ -39,7 +39,7 @@ const cmDocumentationEntry cmDocumentationUsage[2] = {
     "directory to re-generate its build system." },
 };
 
-const cmDocumentationEntry cmDocumentationUsageNote = {
+cmDocumentationEntry const cmDocumentationUsageNote = {
   {},
   "Run 'ccmake --help' for more information."
 };
@@ -157,7 +157,7 @@ int main(int argc, char const* const* argv)
    * joined by '\n' before display.
    * Removing any trailing '\n' avoid extra empty lines in the final results
    */
-  auto cleanMessage = [](const std::string& message) -> std::string {
+  auto cleanMessage = [](std::string const& message) -> std::string {
     auto msg = message;
     if (!msg.empty() && msg.back() == '\n') {
       msg.pop_back();
@@ -165,13 +165,13 @@ int main(int argc, char const* const* argv)
     return msg;
   };
   cmSystemTools::SetMessageCallback(
-    [&](const std::string& message, const cmMessageMetadata& md) {
+    [&](std::string const& message, cmMessageMetadata const& md) {
       myform->AddError(cleanMessage(message), md.title);
     });
-  cmSystemTools::SetStderrCallback([&](const std::string& message) {
+  cmSystemTools::SetStderrCallback([&](std::string const& message) {
     myform->AddError(cleanMessage(message), "");
   });
-  cmSystemTools::SetStdoutCallback([&](const std::string& message) {
+  cmSystemTools::SetStdoutCallback([&](std::string const& message) {
     myform->UpdateProgress(cleanMessage(message), -1);
   });
 

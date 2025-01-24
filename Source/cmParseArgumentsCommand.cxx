@@ -22,7 +22,7 @@
 
 namespace {
 
-std::string EscapeArg(const std::string& arg)
+std::string EscapeArg(std::string const& arg)
 {
   // replace ";" with "\;" so output argument lists will split correctly
   std::string escapedArg;
@@ -73,17 +73,17 @@ struct UserArgumentParser : public cmArgumentParser<void>
 } // namespace
 
 static void PassParsedArguments(
-  const std::string& prefix, cmMakefile& makefile, const options_map& options,
-  const single_map& singleValArgs, const multi_map& multiValArgs,
-  const std::vector<std::string>& unparsed, const options_set& keywordsSeen,
-  const options_set& keywordsMissingValues, bool parseFromArgV)
+  std::string const& prefix, cmMakefile& makefile, options_map const& options,
+  single_map const& singleValArgs, multi_map const& multiValArgs,
+  std::vector<std::string> const& unparsed, options_set const& keywordsSeen,
+  options_set const& keywordsMissingValues, bool parseFromArgV)
 {
   for (auto const& iter : options) {
     makefile.AddDefinition(cmStrCat(prefix, iter.first),
                            iter.second ? "TRUE" : "FALSE");
   }
 
-  const cmPolicies::PolicyStatus cmp0174 =
+  cmPolicies::PolicyStatus const cmp0174 =
     makefile.GetPolicyStatus(cmPolicies::CMP0174);
   for (auto const& iter : singleValArgs) {
     if (keywordsSeen.find(iter.first) == keywordsSeen.end()) {
@@ -170,7 +170,7 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
     argIter++; // move past N
   }
   // the first argument is the prefix
-  const std::string prefix = (*argIter++) + "_";
+  std::string const prefix = (*argIter++) + "_";
 
   UserArgumentParser parser;
 
@@ -220,7 +220,7 @@ bool cmParseArgumentsCommand(std::vector<std::string> const& args,
       return true;
     }
     for (unsigned long i = argvStart; i < count; ++i) {
-      const std::string argName{ cmStrCat("ARGV", i) };
+      std::string const argName{ cmStrCat("ARGV", i) };
       cmValue arg = status.GetMakefile().GetDefinition(argName);
       if (!arg) {
         status.GetMakefile().IssueMessage(

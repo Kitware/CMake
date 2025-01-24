@@ -32,12 +32,12 @@
 
 static std::string cm_archive_error_string(struct archive* a)
 {
-  const char* e = archive_error_string(a);
+  char const* e = archive_error_string(a);
   return e ? e : "unknown error";
 }
 
 static void cm_archive_entry_copy_pathname(struct archive_entry* e,
-                                           const std::string& dest)
+                                           std::string const& dest)
 {
 #if cmsys_STL_HAS_WSTRING
   archive_entry_copy_pathname_w(e, cmsys::Encoding::ToWide(dest).c_str());
@@ -47,7 +47,7 @@ static void cm_archive_entry_copy_pathname(struct archive_entry* e,
 }
 
 static void cm_archive_entry_copy_sourcepath(struct archive_entry* e,
-                                             const std::string& file)
+                                             std::string const& file)
 {
 #if cmsys_STL_HAS_WSTRING
   archive_entry_copy_sourcepath_w(e, cmsys::Encoding::ToWide(file).c_str());
@@ -66,8 +66,8 @@ public:
   {
   }
   ~Entry() { archive_entry_free(this->Object); }
-  Entry(const Entry&) = delete;
-  Entry& operator=(const Entry&) = delete;
+  Entry(Entry const&) = delete;
+  Entry& operator=(Entry const&) = delete;
   operator struct archive_entry *() { return this->Object; }
 };
 
@@ -75,10 +75,10 @@ struct cmArchiveWrite::Callback
 {
   // archive_write_callback
   static __LA_SSIZE_T Write(struct archive* /*unused*/, void* cd,
-                            const void* b, size_t n)
+                            void const* b, size_t n)
   {
     cmArchiveWrite* self = static_cast<cmArchiveWrite*>(cd);
-    if (self->Stream.write(static_cast<const char*>(b),
+    if (self->Stream.write(static_cast<char const*>(b),
                            static_cast<std::streamsize>(n))) {
       return static_cast<__LA_SSIZE_T>(n);
     }
@@ -278,7 +278,7 @@ cmArchiveWrite::~cmArchiveWrite()
   archive_write_free(this->Archive);
 }
 
-bool cmArchiveWrite::Add(std::string path, size_t skip, const char* prefix,
+bool cmArchiveWrite::Add(std::string path, size_t skip, char const* prefix,
                          bool recursive)
 {
   if (!path.empty() && path.back() == '/') {
@@ -288,7 +288,7 @@ bool cmArchiveWrite::Add(std::string path, size_t skip, const char* prefix,
   return this->Okay();
 }
 
-bool cmArchiveWrite::AddPath(const char* path, size_t skip, const char* prefix,
+bool cmArchiveWrite::AddPath(char const* path, size_t skip, char const* prefix,
                              bool recursive)
 {
   if (strcmp(path, ".") != 0 ||
@@ -310,7 +310,7 @@ bool cmArchiveWrite::AddPath(const char* path, size_t skip, const char* prefix,
     std::string::size_type end = next.size();
     unsigned long n = d.GetNumberOfFiles();
     for (unsigned long i = 0; i < n; ++i) {
-      const char* file = d.GetFile(i);
+      char const* file = d.GetFile(i);
       if (strcmp(file, ".") != 0 && strcmp(file, "..") != 0) {
         next.erase(end);
         next += file;
@@ -323,7 +323,7 @@ bool cmArchiveWrite::AddPath(const char* path, size_t skip, const char* prefix,
   return true;
 }
 
-bool cmArchiveWrite::AddFile(const char* file, size_t skip, const char* prefix)
+bool cmArchiveWrite::AddFile(char const* file, size_t skip, char const* prefix)
 {
   this->Error = "";
   // Skip the file if we have no name for it.  This may happen on a
@@ -331,7 +331,7 @@ bool cmArchiveWrite::AddFile(const char* file, size_t skip, const char* prefix)
   if (skip >= strlen(file)) {
     return true;
   }
-  const char* out = file + skip;
+  char const* out = file + skip;
 
   cmLocaleRAII localeRAII;
   static_cast<void>(localeRAII);
@@ -425,7 +425,7 @@ bool cmArchiveWrite::AddFile(const char* file, size_t skip, const char* prefix)
   return true;
 }
 
-bool cmArchiveWrite::AddData(const char* file, size_t size)
+bool cmArchiveWrite::AddData(char const* file, size_t size)
 {
   cmsys::ifstream fin(file, std::ios::in | std::ios::binary);
   if (!fin) {

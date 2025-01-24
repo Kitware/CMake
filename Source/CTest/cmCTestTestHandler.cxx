@@ -64,8 +64,8 @@ public:
   }
 
   virtual ~cmCTestCommand() = default;
-  cmCTestCommand(const cmCTestCommand&) = default;
-  cmCTestCommand& operator=(const cmCTestCommand&) = default;
+  cmCTestCommand(cmCTestCommand const&) = default;
+  cmCTestCommand& operator=(cmCTestCommand const&) = default;
 
   bool operator()(std::vector<cmListFileArgument> const& args,
                   cmExecutionStatus& status)
@@ -99,7 +99,7 @@ bool ReadSubdirectory(std::string fname, cmExecutionStatus& status)
       status.SetError(workdir.GetError());
       return false;
     }
-    const char* testFilename;
+    char const* testFilename;
     if (cmSystemTools::FileExists("CTestTestfile.cmake")) {
       // does the CTestTestfile.cmake exist ?
       testFilename = "CTestTestfile.cmake";
@@ -449,11 +449,11 @@ int cmCTestTestHandler::ProcessHandler()
  * regular expressions in `expressions`. Skip empty values.
  * Returns true if there were any expressions.
  */
-static bool BuildLabelRE(const std::vector<std::string>& parts,
+static bool BuildLabelRE(std::vector<std::string> const& parts,
                          std::vector<cmsys::RegularExpression>& expressions)
 {
   expressions.clear();
-  for (const auto& p : parts) {
+  for (auto const& p : parts) {
     if (!p.empty()) {
       expressions.emplace_back(p);
     }
@@ -526,9 +526,9 @@ bool cmCTestTestHandler::ProcessOptions()
   return true;
 }
 
-void cmCTestTestHandler::LogTestSummary(const std::vector<std::string>& passed,
-                                        const std::vector<std::string>& failed,
-                                        const cmDuration& durationInSecs)
+void cmCTestTestHandler::LogTestSummary(std::vector<std::string> const& passed,
+                                        std::vector<std::string> const& failed,
+                                        cmDuration const& durationInSecs)
 {
   std::size_t total = passed.size() + failed.size();
 
@@ -567,7 +567,7 @@ void cmCTestTestHandler::LogTestSummary(const std::vector<std::string>& passed,
 }
 
 void cmCTestTestHandler::LogDisabledTests(
-  const std::vector<cmCTestTestResult>& disabledTests)
+  std::vector<cmCTestTestResult> const& disabledTests)
 {
   if (!disabledTests.empty()) {
     cmGeneratedFileStream ofs;
@@ -576,7 +576,7 @@ void cmCTestTestHandler::LogDisabledTests(
                  << "The following tests did not run:" << std::endl);
     this->StartLogFile("TestsDisabled", ofs);
 
-    const char* disabled_reason;
+    char const* disabled_reason;
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
                this->CTest->GetColorCode(cmCTest::Color::BLUE));
     for (cmCTestTestResult const& dt : disabledTests) {
@@ -595,8 +595,8 @@ void cmCTestTestHandler::LogDisabledTests(
   }
 }
 
-void cmCTestTestHandler::LogFailedTests(const std::vector<std::string>& failed,
-                                        const SetOfTests& resultsSet)
+void cmCTestTestHandler::LogFailedTests(std::vector<std::string> const& failed,
+                                        SetOfTests const& resultsSet)
 {
   if (!failed.empty()) {
     cmGeneratedFileStream ofs;
@@ -617,7 +617,7 @@ void cmCTestTestHandler::LogFailedTests(const std::vector<std::string>& failed,
         std::string ft_name_and_status =
           cmStrCat(ft.Name, " (", this->GetTestStatus(ft), ")");
         std::string labels;
-        const cmCTestTestProperties& p = *ft.Properties;
+        cmCTestTestProperties const& p = *ft.Properties;
         if (!p.Labels.empty()) {
           static size_t const maxLen = 50;
           size_t const ns = ft_name_and_status.size() >= maxLen
@@ -762,10 +762,10 @@ void cmCTestTestHandler::PrintLabelOrSubprojectSummary(bool doSubProject)
  * in order for the filter to apply to the test).
  */
 static bool MatchLabelsAgainstFilterRE(
-  const std::vector<std::string>& labels,
-  const std::vector<cmsys::RegularExpression>& expressions)
+  std::vector<std::string> const& labels,
+  std::vector<cmsys::RegularExpression> const& expressions)
 {
-  for (const auto& re : expressions) {
+  for (auto const& re : expressions) {
     // check to see if the label regular expression matches
     bool found = false; // assume it does not match
     cmsys::RegularExpressionMatch match;
@@ -978,7 +978,7 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
   FixtureDependencies fixtureCleanups;
 
   for (auto it = this->TestList.begin(); it != this->TestList.end(); ++it) {
-    const cmCTestTestProperties& p = *it;
+    cmCTestTestProperties const& p = *it;
 
     for (std::string const& deps : p.FixturesSetup) {
       fixtureSetups.insert(std::make_pair(deps, it));
@@ -1039,7 +1039,7 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
       std::pair<FixtureDepsIterator, FixtureDepsIterator> setupRange =
         fixtureSetups.equal_range(requiredFixtureName);
       for (auto sIt = setupRange.first; sIt != setupRange.second; ++sIt) {
-        const std::string& setupTestName = sIt->second->Name;
+        std::string const& setupTestName = sIt->second->Name;
         tests[i].RequireSuccessDepends.insert(setupTestName);
         if (!cm::contains(tests[i].Depends, setupTestName)) {
           tests[i].Depends.push_back(setupTestName);
@@ -1063,7 +1063,7 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
           fixtureSetups.equal_range(requiredFixtureName);
         for (auto it = fixtureRange.first; it != fixtureRange.second; ++it) {
           ListOfTests::const_iterator lotIt = it->second;
-          const cmCTestTestProperties& p = *lotIt;
+          cmCTestTestProperties const& p = *lotIt;
 
           if (!addedTests.insert(p.Name).second) {
             // Already have p in our test list
@@ -1094,7 +1094,7 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
           fixtureCleanups.equal_range(requiredFixtureName);
         for (auto it = fixtureRange.first; it != fixtureRange.second; ++it) {
           ListOfTests::const_iterator lotIt = it->second;
-          const cmCTestTestProperties& p = *lotIt;
+          cmCTestTestProperties const& p = *lotIt;
 
           if (!addedTests.insert(p.Name).second) {
             // Already have p in our test list
@@ -1135,16 +1135,16 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
   // pathological case where setup and cleanup tests are in the test set
   // but no other test has that fixture as a requirement.
   for (cmCTestTestProperties& p : tests) {
-    const std::set<std::string>& cleanups = p.FixturesCleanup;
+    std::set<std::string> const& cleanups = p.FixturesCleanup;
     for (std::string const& fixture : cleanups) {
       // This cleanup test could be part of the original test list that was
       // passed in. It is then possible that no other test requires the
       // fIt fixture, so we have to check for this.
       auto cIt = fixtureRequirements.find(fixture);
       if (cIt != fixtureRequirements.end()) {
-        const std::vector<size_t>& indices = cIt->second;
+        std::vector<size_t> const& indices = cIt->second;
         for (size_t index : indices) {
-          const std::string& reqTestName = tests[index].Name;
+          std::string const& reqTestName = tests[index].Name;
           if (!cm::contains(p.Depends, reqTestName)) {
             p.Depends.push_back(reqTestName);
           }
@@ -1155,9 +1155,9 @@ void cmCTestTestHandler::UpdateForFixtures(ListOfTests& tests) const
       // if no other test cases require the fixture
       cIt = setupFixturesAdded.find(fixture);
       if (cIt != setupFixturesAdded.end()) {
-        const std::vector<size_t>& indices = cIt->second;
+        std::vector<size_t> const& indices = cIt->second;
         for (size_t index : indices) {
-          const std::string& setupTestName = tests[index].Name;
+          std::string const& setupTestName = tests[index].Name;
           if (!cm::contains(p.Depends, setupTestName)) {
             p.Depends.push_back(setupTestName);
           }
@@ -1187,7 +1187,7 @@ void cmCTestTestHandler::UpdateMaxTestNameWidth()
   }
 }
 
-bool cmCTestTestHandler::GetValue(const char* tag, int& value,
+bool cmCTestTestHandler::GetValue(char const* tag, int& value,
                                   std::istream& fin)
 {
   std::string line;
@@ -1205,7 +1205,7 @@ bool cmCTestTestHandler::GetValue(const char* tag, int& value,
   return ret;
 }
 
-bool cmCTestTestHandler::GetValue(const char* tag, double& value,
+bool cmCTestTestHandler::GetValue(char const* tag, double& value,
                                   std::istream& fin)
 {
   std::string line;
@@ -1223,7 +1223,7 @@ bool cmCTestTestHandler::GetValue(const char* tag, double& value,
   return ret;
 }
 
-bool cmCTestTestHandler::GetValue(const char* tag, bool& value,
+bool cmCTestTestHandler::GetValue(char const* tag, bool& value,
                                   std::istream& fin)
 {
   std::string line;
@@ -1250,7 +1250,7 @@ bool cmCTestTestHandler::GetValue(const char* tag, bool& value,
   return ret;
 }
 
-bool cmCTestTestHandler::GetValue(const char* tag, size_t& value,
+bool cmCTestTestHandler::GetValue(char const* tag, size_t& value,
                                   std::istream& fin)
 {
   std::string line;
@@ -1268,7 +1268,7 @@ bool cmCTestTestHandler::GetValue(const char* tag, size_t& value,
   return ret;
 }
 
-bool cmCTestTestHandler::GetValue(const char* tag, std::string& value,
+bool cmCTestTestHandler::GetValue(char const* tag, std::string& value,
                                   std::istream& fin)
 {
   std::string line;
@@ -1418,7 +1418,7 @@ void cmCTestTestHandler::GenerateCTestXML(cmXMLWriter& xml)
       xml.Element("Value", result.ExecutionTime.count());
       xml.EndElement(); // NamedMeasurement
       if (!result.Reason.empty()) {
-        const char* reasonType = "Pass Reason";
+        char const* reasonType = "Pass Reason";
         if (result.Status != cmCTestTestHandler::COMPLETED) {
           reasonType = "Fail Reason";
         }
@@ -1540,7 +1540,7 @@ void cmCTestTestHandler::AttachFiles(cmXMLWriter& xml,
 void cmCTestTestHandler::AttachFile(cmXMLWriter& xml, std::string const& file,
                                     std::string const& name)
 {
-  const std::string& base64 = this->CTest->Base64GzipEncodeFile(file);
+  std::string const& base64 = this->CTest->Base64GzipEncodeFile(file);
   std::string const fname = cmSystemTools::GetFilenameName(file);
   xml.StartElement("NamedMeasurement");
   std::string measurement_name = name;
@@ -1575,7 +1575,7 @@ int cmCTestTestHandler::ExecuteCommands(std::vector<std::string>& vec)
 }
 
 // Find the appropriate executable to run for a test
-std::string cmCTestTestHandler::FindTheExecutable(const std::string& exe)
+std::string cmCTestTestHandler::FindTheExecutable(std::string const& exe)
 {
   std::string resConfig;
   std::vector<std::string> extraPaths;
@@ -1636,7 +1636,7 @@ void cmCTestTestHandler::AddConfigurations(
 
 // Find the appropriate executable to run for a test
 std::string cmCTestTestHandler::FindExecutable(
-  cmCTest* ctest, const std::string& testCommand, std::string& resultingConfig,
+  cmCTest* ctest, std::string const& testCommand, std::string& resultingConfig,
   std::vector<std::string>& extraPaths, std::vector<std::string>& failed)
 {
   // now run the compiled test if we can find it
@@ -1715,7 +1715,7 @@ std::string cmCTestTestHandler::FindExecutable(
 }
 
 bool cmCTestTestHandler::ParseResourceGroupsProperty(
-  const std::string& val,
+  std::string const& val,
   std::vector<std::vector<cmCTestTestResourceRequirement>>& resourceGroups)
 {
   cmCTestResourceGroupsLexerHelper lexer(resourceGroups);
@@ -1761,7 +1761,7 @@ bool cmCTestTestHandler::GetListOfTests()
   cm.GetState()->AddBuiltinCommand("set_directory_properties",
                                    cmCTestSetDirectoryPropertiesCommand(this));
 
-  const char* testFilename;
+  char const* testFilename;
   if (cmSystemTools::FileExists("CTestTestfile.cmake")) {
     // does the CTestTestfile.cmake exist ?
     testFilename = "CTestTestfile.cmake";
@@ -1818,7 +1818,7 @@ void cmCTestTestHandler::UseExcludeRegExp()
 
 std::string cmCTestTestHandler::GetTestStatus(cmCTestTestResult const& result)
 {
-  static const char* statuses[] = { "Not Run",     "Timeout",   "SEGFAULT",
+  static char const* statuses[] = { "Not Run",     "Timeout",   "SEGFAULT",
                                     "ILLEGAL",     "INTERRUPT", "NUMERICAL",
                                     "OTHER_FAULT", "Failed",    "BAD_COMMAND",
                                     "Completed" };
@@ -2008,7 +2008,7 @@ void cmCTestTestHandler::RecordCustomTestMeasurements(cmXMLWriter& xml,
       xml.EndElement();
     } else if (parser.ElementName == "CTestMeasurementFile" ||
                parser.ElementName == "DartMeasurementFile") {
-      const std::string& filename = cmCTest::CleanString(parser.CharacterData);
+      std::string const& filename = cmCTest::CleanString(parser.CharacterData);
       if (!cmSystemTools::FileExists(filename)) {
         xml.StartElement("NamedMeasurement");
         xml.Attribute("name", parser.MeasurementName);
@@ -2096,12 +2096,12 @@ void cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length,
   // Advance n bytes in string delimited by begin/end but do not break in the
   // middle of a multi-byte UTF-8 encoding.
   auto utf8_advance = [](char const* const begin, char const* const end,
-                         size_t n) -> const char* {
+                         size_t n) -> char const* {
     char const* const stop = begin + n;
     char const* current = begin;
     while (current < stop) {
       unsigned int ch;
-      if (const char* next = cm_utf8_decode_character(current, end, &ch)) {
+      if (char const* next = cm_utf8_decode_character(current, end, &ch)) {
         if (next > stop) {
           break;
         }
@@ -2115,7 +2115,7 @@ void cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length,
   };
 
   // Truncation message.
-  const std::string msg =
+  std::string const msg =
     "\n[This part of the test output was removed since it "
     "exceeds the threshold of " +
     std::to_string(length) + " bytes.]\n";
@@ -2150,7 +2150,7 @@ void cmCTestTestHandler::cmCTestTestProperties::AppendError(
 }
 
 bool cmCTestTestHandler::SetTestsProperties(
-  const std::vector<std::string>& args)
+  std::vector<std::string> const& args)
 {
   std::vector<std::string>::const_iterator it;
   std::vector<std::string> tests;
@@ -2360,7 +2360,7 @@ bool cmCTestTestHandler::SetTestsProperties(
 }
 
 bool cmCTestTestHandler::SetDirectoryProperties(
-  const std::vector<std::string>& args)
+  std::vector<std::string> const& args)
 {
   std::vector<std::string>::const_iterator it;
   std::vector<std::string> tests;
@@ -2404,9 +2404,9 @@ bool cmCTestTestHandler::SetDirectoryProperties(
   return true;
 }
 
-bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
+bool cmCTestTestHandler::AddTest(std::vector<std::string> const& args)
 {
-  const std::string& testname = args[0];
+  std::string const& testname = args[0];
   cmCTestOptionalLog(this->CTest, DEBUG, "Add test: " << args[0] << std::endl,
                      this->Quiet);
 
@@ -2465,7 +2465,7 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
 }
 
 bool cmCTestTestHandler::cmCTestTestResourceRequirement::operator==(
-  const cmCTestTestResourceRequirement& other) const
+  cmCTestTestResourceRequirement const& other) const
 {
   return this->ResourceType == other.ResourceType &&
     this->SlotsNeeded == other.SlotsNeeded &&
@@ -2473,12 +2473,12 @@ bool cmCTestTestHandler::cmCTestTestResourceRequirement::operator==(
 }
 
 bool cmCTestTestHandler::cmCTestTestResourceRequirement::operator!=(
-  const cmCTestTestResourceRequirement& other) const
+  cmCTestTestResourceRequirement const& other) const
 {
   return !(*this == other);
 }
 
-void cmCTestTestHandler::SetJUnitXMLFileName(const std::string& filename)
+void cmCTestTestHandler::SetJUnitXMLFileName(std::string const& filename)
 {
   this->TestOptions.JUnitXMLFileName = filename;
 }
@@ -2547,7 +2547,7 @@ bool cmCTestTestHandler::WriteJUnitXML()
     "time",
     std::chrono::duration_cast<std::chrono::seconds>(this->ElapsedTestingTime)
       .count());
-  const std::time_t start_test_time_t =
+  std::time_t const start_test_time_t =
     std::chrono::system_clock::to_time_t(this->StartTestTime);
   cmTimestamp cmts;
   xml.Attribute("timestamp",

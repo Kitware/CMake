@@ -137,7 +137,7 @@ std::unique_ptr<cmUVStreamReadHandle> cmUVStreamRead(uv_stream_t* stream,
       buffer->base = data->Buffer.data();
       buffer->len = suggestedSize;
     },
-    [](uv_stream_t* s, ssize_t nread, const uv_buf_t* buffer) {
+    [](uv_stream_t* s, ssize_t nread, uv_buf_t const* buffer) {
       auto* data = static_cast<cmUVStreamReadHandle*>(s->data);
       if (nread > 0) {
         (void)buffer;

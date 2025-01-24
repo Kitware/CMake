@@ -19,7 +19,7 @@ private:
 
 public:
   Circle(double r)
-    : radius(r){};
+    : radius(r) {};
   virtual double area(void);
   virtual double perimeter(void);
 };
@@ -31,7 +31,7 @@ private:
 
 public:
   Square(double w)
-    : width(w){};
+    : width(w) {};
   virtual double area(void);
   virtual double perimeter(void);
 };

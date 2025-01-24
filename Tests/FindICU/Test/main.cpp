@@ -12,7 +12,7 @@ int main()
   ucnv_open(NULL, &status);
 
   UChar uchars[100];
-  const char* chars = "Test";
+  char const* chars = "Test";
   if (cnv && U_SUCCESS(status)) {
     int32_t len = ucnv_toUChars(cnv, uchars, 100, chars, -1, &status);
   }

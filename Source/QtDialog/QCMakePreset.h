@@ -21,11 +21,11 @@ public:
   bool enabled;
 };
 
-bool operator==(const QCMakePreset& lhs, const QCMakePreset& rhs);
-bool operator!=(const QCMakePreset& lhs, const QCMakePreset& rhs);
-bool operator<(const QCMakePreset& lhs, const QCMakePreset& rhs);
-bool operator<=(const QCMakePreset& lhs, const QCMakePreset& rhs);
-bool operator>(const QCMakePreset& lhs, const QCMakePreset& rhs);
-bool operator>=(const QCMakePreset& lhs, const QCMakePreset& rhs);
+bool operator==(QCMakePreset const& lhs, QCMakePreset const& rhs);
+bool operator!=(QCMakePreset const& lhs, QCMakePreset const& rhs);
+bool operator<(QCMakePreset const& lhs, QCMakePreset const& rhs);
+bool operator<=(QCMakePreset const& lhs, QCMakePreset const& rhs);
+bool operator>(QCMakePreset const& lhs, QCMakePreset const& rhs);
+bool operator>=(QCMakePreset const& lhs, QCMakePreset const& rhs);
 
 Q_DECLARE_METATYPE(QCMakePreset)

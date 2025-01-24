@@ -43,7 +43,7 @@ struct cmDebuggerVariableEntry
     , Type("string")
   {
   }
-  cmDebuggerVariableEntry(std::string name, const char* value)
+  cmDebuggerVariableEntry(std::string name, char const* value)
     : Name(std::move(name))
     , Value(value ? value : "")
     , Type("string")
@@ -88,7 +88,7 @@ class cmDebuggerVariables
   friend class cmDebuggerVariablesManager;
 
 protected:
-  const bool SupportsVariableType;
+  bool const SupportsVariableType;
   std::shared_ptr<cmDebuggerVariablesManager> VariablesManager;
   void EnumerateSubVariablesIfAny(
     dap::array<dap::Variable>& toBeReturned) const;

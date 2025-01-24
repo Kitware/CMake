@@ -33,11 +33,11 @@ protected:
 
   std::string const& ToName(std::string const& fromName) override;
 
-  void ReportCopy(const std::string& toFile, Type type, bool copy) override;
-  bool ReportMissing(const std::string& fromFile) override;
-  bool Install(const std::string& fromFile,
-               const std::string& toFile) override;
-  bool InstallFile(const std::string& fromFile, const std::string& toFile,
+  void ReportCopy(std::string const& toFile, Type type, bool copy) override;
+  bool ReportMissing(std::string const& fromFile) override;
+  bool Install(std::string const& fromFile,
+               std::string const& toFile) override;
+  bool InstallFile(std::string const& fromFile, std::string const& toFile,
                    MatchProperties match_properties) override;
   bool Parse(std::vector<std::string> const& args) override;
   enum
@@ -49,6 +49,6 @@ protected:
   bool CheckKeyword(std::string const& arg) override;
   bool CheckValue(std::string const& arg) override;
   void DefaultFilePermissions() override;
-  bool GetTargetTypeFromString(const std::string& stype);
+  bool GetTargetTypeFromString(std::string const& stype);
   bool HandleInstallDestination();
 };

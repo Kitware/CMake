@@ -18,14 +18,14 @@ public:
   //! Call the named macro in instances of Visual Studio with the
   //! given solution file open. Pass "ALL" for slnFile to call the
   //! macro in each Visual Studio instance.
-  static int CallMacro(const std::string& slnFile, const std::string& macro,
-                       const std::string& args, bool logErrorsAsMessages);
+  static int CallMacro(std::string const& slnFile, std::string const& macro,
+                       std::string const& args, bool logErrorsAsMessages);
 
   //! Count the number of running instances of Visual Studio with the
   //! given solution file open. Pass "ALL" for slnFile to count all
   //! running Visual Studio instances.
   static int GetNumberOfRunningVisualStudioInstances(
-    const std::string& slnFile);
+    std::string const& slnFile);
 
 protected:
 private:

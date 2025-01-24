@@ -85,7 +85,7 @@ void cmInstallScriptGenerator::GenerateScriptActions(std::ostream& os,
 }
 
 void cmInstallScriptGenerator::GenerateScriptForConfig(
-  std::ostream& os, const std::string& config, Indent indent)
+  std::ostream& os, std::string const& config, Indent indent)
 {
   this->AddScriptInstallRule(os, indent, this->GetScript(config));
 }

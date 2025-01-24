@@ -9,8 +9,8 @@
 // this test should return a matrix of 10 x 10 and should check some of the
 // arguments
 
-void mexFunction(const int nlhs, mxArray* plhs[], const int nrhs,
-                 const mxArray* prhs[])
+void mexFunction(int const nlhs, mxArray* plhs[], int const nrhs,
+                 mxArray const* prhs[])
 {
   if (nrhs != 1) {
     mexErrMsgTxt("Incorrect arguments");

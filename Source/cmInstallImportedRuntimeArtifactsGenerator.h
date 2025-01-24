@@ -32,7 +32,7 @@ public:
   std::string GetDestination(std::string const& config) const;
 
 protected:
-  void GenerateScriptForConfig(std::ostream& os, const std::string& config,
+  void GenerateScriptForConfig(std::ostream& os, std::string const& config,
                                Indent indent) override;
 
 private:

@@ -4,7 +4,7 @@
 
 #include <sys/stat.h>
 
-void cmDumpInformationPrintFile(const char* name, FILE* fout)
+void cmDumpInformationPrintFile(char const* name, FILE* fout)
 {
   fprintf(fout, "Avoid ctest truncation of output: CTEST_FULL_OUTPUT\n");
   fprintf(
@@ -24,7 +24,7 @@ void cmDumpInformationPrintFile(const char* name, FILE* fout)
       "Contents of \"%s\":\n"
       "----------------------------------------------------------------\n",
       name);
-    const int bufferSize = 4096;
+    int const bufferSize = 4096;
     char buffer[bufferSize];
     int n;
     while ((n = fread(buffer, 1, bufferSize, fin)) > 0) {
@@ -55,7 +55,7 @@ void cmDumpInformationPrintFile(const char* name, FILE* fout)
 
 int main(int, char*[])
 {
-  const char* files[] = {
+  char const* files[] = {
     DumpInformation_BINARY_DIR "/SystemInformation.out",
     DumpInformation_BINARY_DIR "/AllVariables.txt",
     DumpInformation_BINARY_DIR "/AllCommands.txt",
@@ -69,7 +69,7 @@ int main(int, char*[])
     0
   };
 
-  const char** f;
+  char const** f;
   for (f = files; *f; ++f) {
     cmDumpInformationPrintFile(*f, stdout);
   }

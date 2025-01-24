@@ -46,7 +46,7 @@ class cmDebuggerThread
 public:
   cmDebuggerThread(int64_t id, std::string name);
   int64_t GetId() const { return this->Id; }
-  const std::string& GetName() const { return this->Name; }
+  std::string const& GetName() const { return this->Name; }
   void PushStackFrame(cmMakefile* mf, std::string const& sourcePath,
                       cmListFileFunction const& lff);
   void PopStackFrame();

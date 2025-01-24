@@ -29,7 +29,7 @@ public:
   };
 
   bool HandleArguments(std::vector<std::string> const& args,
-                       const std::string& prop, unsigned int flags = NO_FLAGS);
+                       std::string const& prop, unsigned int flags = NO_FLAGS);
 
 protected:
   std::string Property;
@@ -37,20 +37,20 @@ protected:
   cmMakefile* Makefile;
 
   virtual void HandleInterfaceContent(cmTarget* tgt,
-                                      const std::vector<std::string>& content,
+                                      std::vector<std::string> const& content,
                                       bool prepend, bool system);
   virtual bool PopulateTargetProperties(
-    const std::string& scope, const std::vector<std::string>& content,
+    std::string const& scope, std::vector<std::string> const& content,
     bool prepend, bool system);
 
 private:
-  virtual void HandleMissingTarget(const std::string& name) = 0;
+  virtual void HandleMissingTarget(std::string const& name) = 0;
 
   virtual bool HandleDirectContent(cmTarget* tgt,
-                                   const std::vector<std::string>& content,
+                                   std::vector<std::string> const& content,
                                    bool prepend, bool system) = 0;
 
-  virtual std::string Join(const std::vector<std::string>& content) = 0;
+  virtual std::string Join(std::vector<std::string> const& content) = 0;
 
   bool ProcessContentArgs(std::vector<std::string> const& args,
                           unsigned int& argIndex, bool prepend, bool system);

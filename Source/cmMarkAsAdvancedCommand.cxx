@@ -23,7 +23,7 @@ bool cmMarkAsAdvancedCommand(std::vector<std::string> const& args,
   }
 
   unsigned int i = 0;
-  const char* value = "1";
+  char const* value = "1";
   bool overwrite = false;
   if (args[0] == "CLEAR" || args[0] == "FORCE") {
     overwrite = true;

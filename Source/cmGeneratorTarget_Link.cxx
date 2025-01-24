@@ -49,10 +49,10 @@
 namespace {
 using UseTo = cmGeneratorTarget::UseTo;
 
-const std::string kINTERFACE_LINK_LIBRARIES = "INTERFACE_LINK_LIBRARIES";
-const std::string kINTERFACE_LINK_LIBRARIES_DIRECT =
+std::string const kINTERFACE_LINK_LIBRARIES = "INTERFACE_LINK_LIBRARIES";
+std::string const kINTERFACE_LINK_LIBRARIES_DIRECT =
   "INTERFACE_LINK_LIBRARIES_DIRECT";
-const std::string kINTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE =
+std::string const kINTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE =
   "INTERFACE_LINK_LIBRARIES_DIRECT_EXCLUDE";
 
 unsigned int CheckLinkLibrariesSuppressionRAIICount;
@@ -126,7 +126,7 @@ private:
 };
 
 cmGeneratorTarget::LinkClosure const* cmGeneratorTarget::GetLinkClosure(
-  const std::string& config) const
+  std::string const& config) const
 {
   // There is no link implementation for targets that cannot compile sources.
   if (!this->CanCompileSources()) {
@@ -158,7 +158,7 @@ public:
   {
     this->GG = this->Target->GetLocalGenerator()->GetGlobalGenerator();
   }
-  void Consider(const std::string& lang)
+  void Consider(std::string const& lang)
   {
     int preference = this->GG->GetLinkerPreference(lang);
     if (preference > this->Preference) {
@@ -191,7 +191,7 @@ public:
   }
 };
 
-bool cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
+bool cmGeneratorTarget::ComputeLinkClosure(std::string const& config,
                                            LinkClosure& lc,
                                            bool secondPass) const
 {
@@ -240,7 +240,7 @@ bool cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
     linkLangs.GetHadLinkLanguageSensitiveCondition();
 }
 
-void cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
+void cmGeneratorTarget::ComputeLinkClosure(std::string const& config,
                                            LinkClosure& lc) const
 {
   bool secondPass = false;
@@ -279,7 +279,7 @@ void cmGeneratorTarget::ComputeLinkClosure(const std::string& config,
   }
 }
 
-static void processILibs(const std::string& config,
+static void processILibs(std::string const& config,
                          cmGeneratorTarget const* headTarget,
                          cmLinkItem const& item, cmGlobalGenerator* gg,
                          std::vector<cmGeneratorTarget const*>& tgts,
@@ -314,13 +314,13 @@ cmGeneratorTarget::GetLinkInterfaceClosure(std::string const& config,
   return tgts;
 }
 
-const std::vector<const cmGeneratorTarget*>&
-cmGeneratorTarget::GetLinkImplementationClosure(const std::string& config,
+std::vector<cmGeneratorTarget const*> const&
+cmGeneratorTarget::GetLinkImplementationClosure(std::string const& config,
                                                 UseTo usage) const
 {
   // There is no link implementation for targets that cannot compile sources.
   if (!this->CanCompileSources()) {
-    static std::vector<const cmGeneratorTarget*> const empty;
+    static std::vector<cmGeneratorTarget const*> const empty;
     return empty;
   }
 
@@ -345,7 +345,7 @@ cmGeneratorTarget::GetLinkImplementationClosure(const std::string& config,
 }
 
 cmComputeLinkInformation* cmGeneratorTarget::GetLinkInformation(
-  const std::string& config) const
+  std::string const& config) const
 {
   // Lookup any existing information for this configuration.
   std::string key(cmSystemTools::UpperCase(config));
@@ -613,13 +613,13 @@ void cmGeneratorTarget::ExpandLinkItems(std::string const& prop,
 }
 
 cmLinkInterface const* cmGeneratorTarget::GetLinkInterface(
-  const std::string& config, cmGeneratorTarget const* head) const
+  std::string const& config, cmGeneratorTarget const* head) const
 {
   return this->GetLinkInterface(config, head, false);
 }
 
 cmLinkInterface const* cmGeneratorTarget::GetLinkInterface(
-  const std::string& config, cmGeneratorTarget const* head,
+  std::string const& config, cmGeneratorTarget const* head,
   bool secondPass) const
 {
   // Imported targets have their own link interface.
@@ -663,7 +663,7 @@ cmLinkInterface const* cmGeneratorTarget::GetLinkInterface(
   return iface.Exists ? &iface : nullptr;
 }
 
-void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
+void cmGeneratorTarget::ComputeLinkInterface(std::string const& config,
                                              cmOptionalLinkInterface& iface,
                                              bool secondPass) const
 {
@@ -726,8 +726,8 @@ void cmGeneratorTarget::ComputeLinkInterface(const std::string& config,
   }
 }
 
-const cmLinkInterfaceLibraries* cmGeneratorTarget::GetLinkInterfaceLibraries(
-  const std::string& config, cmGeneratorTarget const* head, UseTo usage) const
+cmLinkInterfaceLibraries const* cmGeneratorTarget::GetLinkInterfaceLibraries(
+  std::string const& config, cmGeneratorTarget const* head, UseTo usage) const
 {
   // Imported targets have their own link interface.
   if (this->IsImported()) {
@@ -764,7 +764,7 @@ const cmLinkInterfaceLibraries* cmGeneratorTarget::GetLinkInterfaceLibraries(
 }
 
 void cmGeneratorTarget::ComputeLinkInterfaceLibraries(
-  const std::string& config, cmOptionalLinkInterface& iface,
+  std::string const& config, cmOptionalLinkInterface& iface,
   cmGeneratorTarget const* headTarget, UseTo usage) const
 {
   // Construct the property name suffix for this configuration.
@@ -856,7 +856,7 @@ std::vector<ValueType> computeImplicitLanguageTargets(
 }
 
 void cmGeneratorTarget::ComputeLinkInterfaceRuntimeLibraries(
-  const std::string& config, cmOptionalLinkInterface& iface) const
+  std::string const& config, cmOptionalLinkInterface& iface) const
 {
   for (std::string const& lang : iface.Languages) {
     if ((lang == "CUDA" || lang == "HIP") &&
@@ -870,7 +870,7 @@ void cmGeneratorTarget::ComputeLinkInterfaceRuntimeLibraries(
 }
 
 void cmGeneratorTarget::ComputeLinkImplementationRuntimeLibraries(
-  const std::string& config, cmOptionalLinkImplementation& impl) const
+  std::string const& config, cmOptionalLinkImplementation& impl) const
 {
   for (std::string const& lang : impl.Languages) {
     if ((lang == "CUDA" || lang == "HIP") &&
@@ -883,8 +883,8 @@ void cmGeneratorTarget::ComputeLinkImplementationRuntimeLibraries(
   }
 }
 
-const cmLinkInterface* cmGeneratorTarget::GetImportLinkInterface(
-  const std::string& config, cmGeneratorTarget const* headTarget, UseTo usage,
+cmLinkInterface const* cmGeneratorTarget::GetImportLinkInterface(
+  std::string const& config, cmGeneratorTarget const* headTarget, UseTo usage,
   bool secondPass) const
 {
   cmGeneratorTarget::ImportInfo const* info = this->GetImportInfo(config);
@@ -945,27 +945,27 @@ const cmLinkInterface* cmGeneratorTarget::GetImportLinkInterface(
 }
 
 cmHeadToLinkInterfaceMap& cmGeneratorTarget::GetHeadToLinkInterfaceMap(
-  const std::string& config) const
+  std::string const& config) const
 {
   return this->LinkInterfaceMap[cmSystemTools::UpperCase(config)];
 }
 
 cmHeadToLinkInterfaceMap&
 cmGeneratorTarget::GetHeadToLinkInterfaceUsageRequirementsMap(
-  const std::string& config) const
+  std::string const& config) const
 {
   return this
     ->LinkInterfaceUsageRequirementsOnlyMap[cmSystemTools::UpperCase(config)];
 }
 
-const cmLinkImplementation* cmGeneratorTarget::GetLinkImplementation(
-  const std::string& config, UseTo usage) const
+cmLinkImplementation const* cmGeneratorTarget::GetLinkImplementation(
+  std::string const& config, UseTo usage) const
 {
   return this->GetLinkImplementation(config, usage, false);
 }
 
-const cmLinkImplementation* cmGeneratorTarget::GetLinkImplementation(
-  const std::string& config, UseTo usage, bool secondPass) const
+cmLinkImplementation const* cmGeneratorTarget::GetLinkImplementation(
+  std::string const& config, UseTo usage, bool secondPass) const
 {
   // There is no link implementation for targets that cannot compile sources.
   if (!this->CanCompileSources()) {
@@ -994,7 +994,7 @@ const cmLinkImplementation* cmGeneratorTarget::GetLinkImplementation(
 }
 
 cmLinkImplementationLibraries const*
-cmGeneratorTarget::GetLinkImplementationLibraries(const std::string& config,
+cmGeneratorTarget::GetLinkImplementationLibraries(std::string const& config,
                                                   UseTo usage) const
 {
   // There is no link implementation for targets that cannot compile sources.
@@ -1123,7 +1123,7 @@ void ComputeLinkImplTransitive(cmGeneratorTarget const* self,
 }
 
 void cmGeneratorTarget::ComputeLinkImplementationLibraries(
-  const std::string& config, cmOptionalLinkImplementation& impl,
+  std::string const& config, cmOptionalLinkImplementation& impl,
   UseTo usage) const
 {
   cmLocalGenerator const* lg = this->LocalGenerator;

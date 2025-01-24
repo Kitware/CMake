@@ -42,5 +42,5 @@ private:
   void FollowNames(std::vector<std::string> const& names);
   bool IsUtility(std::string const& dep);
   void CheckCustomCommand(cmCustomCommand const& cc);
-  void CheckCustomCommands(const std::vector<cmCustomCommand>& commands);
+  void CheckCustomCommands(std::vector<cmCustomCommand> const& commands);
 };

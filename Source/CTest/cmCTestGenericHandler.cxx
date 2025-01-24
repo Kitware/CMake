@@ -18,7 +18,7 @@ cmCTestGenericHandler::cmCTestGenericHandler(cmCTest* ctest)
 cmCTestGenericHandler::~cmCTestGenericHandler() = default;
 
 bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
-                                              const char* name,
+                                              char const* name,
                                               cmGeneratedFileStream& xofs)
 {
   if (!name) {
@@ -54,7 +54,7 @@ bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
   return true;
 }
 
-bool cmCTestGenericHandler::StartLogFile(const char* name,
+bool cmCTestGenericHandler::StartLogFile(char const* name,
                                          cmGeneratedFileStream& xofs)
 {
   if (!name) {

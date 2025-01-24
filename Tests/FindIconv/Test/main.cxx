@@ -14,7 +14,7 @@ private:
   iconv_t iconvd_;
 
 public:
-  iconv_desc(const std::string& tocode, const std::string& fromcode)
+  iconv_desc(std::string const& tocode, std::string const& fromcode)
   {
     iconvd_ = iconv_open(tocode.c_str(), fromcode.c_str());
     if (iconvd_ == reinterpret_cast<iconv_t>(-1))
@@ -37,14 +37,14 @@ int main()
     auto from_len = from_str.size();
     auto to_str_ptr = to_str.data();
     auto to_len = to_str.size();
-    const auto iconv_ret =
+    auto const iconv_ret =
       iconv(conv_d, &from_str_ptr, &from_len, &to_str_ptr, &to_len);
     if (iconv_ret == static_cast<std::size_t>(-1))
       throw std::system_error(errno, std::system_category());
     std::cout << '\'' << from_str.data() << "\' converted to \'"
               << to_str.data() << '\'' << std::endl;
     return EXIT_SUCCESS;
-  } catch (const std::system_error& ex) {
+  } catch (std::system_error const& ex) {
     std::cerr << "ERROR: " << ex.code() << '\n'
               << ex.code().message() << std::endl;
   }

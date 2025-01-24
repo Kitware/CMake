@@ -32,20 +32,20 @@ public:
   void Compute(cmLocalGenerator* lg);
 
   /** Test if this generator installs the test for a given configuration.  */
-  bool TestsForConfig(const std::string& config);
+  bool TestsForConfig(std::string const& config);
 
   cmTest* GetTest() const;
 
 private:
   void GenerateInternalProperties(std::ostream& os);
   std::vector<std::string> EvaluateCommandLineArguments(
-    const std::vector<std::string>& argv, cmGeneratorExpression& ge,
-    const std::string& config) const;
+    std::vector<std::string> const& argv, cmGeneratorExpression& ge,
+    std::string const& config) const;
 
 protected:
   void GenerateScriptConfigs(std::ostream& os, Indent indent) override;
   void GenerateScriptActions(std::ostream& os, Indent indent) override;
-  void GenerateScriptForConfig(std::ostream& os, const std::string& config,
+  void GenerateScriptForConfig(std::ostream& os, std::string const& config,
                                Indent indent) override;
   void GenerateScriptNoConfig(std::ostream& os, Indent indent) override;
   bool NeedsScriptNoConfig() const override;

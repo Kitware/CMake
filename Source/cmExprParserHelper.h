@@ -20,16 +20,16 @@ public:
   cmExprParserHelper();
   ~cmExprParserHelper();
 
-  int ParseString(const char* str, int verb);
+  int ParseString(char const* str, int verb);
 
   int LexInput(char* buf, int maxlen);
-  void Error(const char* str);
+  void Error(char const* str);
 
   void SetResult(KWIML_INT_int64_t value);
 
   KWIML_INT_int64_t GetResult() const { return this->Result; }
 
-  const char* GetError() { return this->ErrorString.c_str(); }
+  char const* GetError() { return this->ErrorString.c_str(); }
 
   void UnexpectedChar(char c);
 
@@ -42,12 +42,12 @@ private:
   int CurrentLine;
   int Verbose;
 
-  void Print(const char* place, const char* str);
+  void Print(char const* place, char const* str);
 
   void SetError(std::string errorString);
 
   KWIML_INT_int64_t Result;
-  const char* FileName;
+  char const* FileName;
   long FileLine;
   std::string ErrorString;
   std::string WarningString;

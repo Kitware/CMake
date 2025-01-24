@@ -51,7 +51,7 @@ public:
   cmScriptGenerator(cmScriptGenerator const&) = delete;
   cmScriptGenerator& operator=(cmScriptGenerator const&) = delete;
 
-  void Generate(std::ostream& os, const std::string& config,
+  void Generate(std::ostream& os, std::string const& config,
                 std::vector<std::string> const& configurationTypes);
 
 protected:
@@ -60,17 +60,17 @@ protected:
   virtual void GenerateScriptConfigs(std::ostream& os, Indent indent);
   virtual void GenerateScriptActions(std::ostream& os, Indent indent);
   virtual void GenerateScriptForConfig(std::ostream& os,
-                                       const std::string& config,
+                                       std::string const& config,
                                        Indent indent);
   virtual void GenerateScriptNoConfig(std::ostream&, Indent) {}
   virtual bool NeedsScriptNoConfig() const { return false; }
 
   // Test if this generator does something for a given configuration.
-  bool GeneratesForConfig(const std::string&);
+  bool GeneratesForConfig(std::string const&);
 
-  std::string CreateConfigTest(const std::string& config);
+  std::string CreateConfigTest(std::string const& config);
   std::string CreateConfigTest(std::vector<std::string> const& configs);
-  std::string CreateComponentTest(const std::string& component);
+  std::string CreateComponentTest(std::string const& component);
 
   // Information shared by most generator types.
   std::string RuntimeConfigVariable;

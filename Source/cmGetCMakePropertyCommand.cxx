@@ -33,7 +33,7 @@ bool cmGetCMakePropertyCommand(std::vector<std::string> const& args,
       output = *macrosProp;
     }
   } else if (args[1] == "COMPONENTS") {
-    const std::set<std::string>* components =
+    std::set<std::string> const* components =
       status.GetMakefile().GetGlobalGenerator()->GetInstallComponents();
     output = cmList::to_string(*components);
   } else {

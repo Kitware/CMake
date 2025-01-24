@@ -252,7 +252,7 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
       // If the test did not pass, reprint test name and error
       std::string output = this->GetTestPrefix(completed, total);
       std::string testName = this->TestProperties->Name;
-      const int maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
+      int const maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
       testName.resize(maxTestNameWidth + 4, '.');
 
       output += testName;
@@ -306,7 +306,7 @@ cmCTestRunTest::EndTestResult cmCTestRunTest::EndTest(size_t completed,
   this->TestResult.Reason = reason;
   if (this->TestHandler->LogFile) {
     bool pass = true;
-    const char* reasonType = "Test Pass Reason";
+    char const* reasonType = "Test Pass Reason";
     if (this->TestResult.Status != cmCTestTestHandler::COMPLETED &&
         this->TestResult.Status != cmCTestTestHandler::NOT_RUN) {
       reasonType = "Test Fail Reason";
@@ -975,7 +975,7 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
                << indexStr.str();
   outputStream << " ";
 
-  const int maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
+  int const maxTestNameWidth = this->CTest->GetMaxTestNameWidth();
   std::string outname = this->TestProperties->Name + " ";
   outname.resize(maxTestNameWidth + 4, '.');
   outputStream << outname;

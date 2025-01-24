@@ -25,7 +25,7 @@
 class cmUVPipeBuffer
 {
 public:
-  using DataRange = cmRange<const char*>;
+  using DataRange = cmRange<char const*>;
   using DataFunction = std::function<void(DataRange)>;
   /// On error the ssize_t argument is a non zero libuv error code
   using EndFunction = std::function<void(ssize_t)>;
@@ -61,7 +61,7 @@ private:
   // -- Libuv callbacks
   static void UVAlloc(uv_handle_t* handle, size_t suggestedSize,
                       uv_buf_t* buf);
-  static void UVData(uv_stream_t* stream, ssize_t nread, const uv_buf_t* buf);
+  static void UVData(uv_stream_t* stream, ssize_t nread, uv_buf_t const* buf);
 
   cm::uv_pipe_ptr UVPipe_;
   std::vector<char> Buffer_;
@@ -116,7 +116,7 @@ void cmUVPipeBuffer::UVAlloc(uv_handle_t* handle, size_t suggestedSize,
 }
 
 void cmUVPipeBuffer::UVData(uv_stream_t* stream, ssize_t nread,
-                            const uv_buf_t* buf)
+                            uv_buf_t const* buf)
 {
   auto& pipe = *reinterpret_cast<cmUVPipeBuffer*>(stream->data);
   if (nread > 0) {
@@ -178,7 +178,7 @@ private:
   bool IsStarted_ = false;
   bool IsFinished_ = false;
   std::function<void()> FinishedCallback_;
-  std::vector<const char*> CommandPtr_;
+  std::vector<char const*> CommandPtr_;
   std::array<uv_stdio_container_t, 3> UVOptionsStdIO_;
   uv_process_options_t UVOptions_;
   cm::uv_process_ptr UVProcess_;
@@ -261,7 +261,7 @@ bool cmUVReadOnlyProcess::start(uv_loop_t* uv_loop,
     int uvErrorCode = this->UVProcess_.spawn(*uv_loop, this->UVOptions_, this);
     if (uvErrorCode != 0) {
       this->Result()->ErrorMessage = "libuv process spawn failed";
-      if (const char* uvErr = uv_strerror(uvErrorCode)) {
+      if (char const* uvErr = uv_strerror(uvErrorCode)) {
         this->Result()->ErrorMessage += ": ";
         this->Result()->ErrorMessage += uvErr;
       }

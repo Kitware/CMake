@@ -14,7 +14,7 @@ class cmLocalGenerator;
 struct cmGeneratorExpressionContext
 {
   cmGeneratorExpressionContext(cmLocalGenerator* lg, std::string config,
-                               bool quiet, const cmGeneratorTarget* headTarget,
+                               bool quiet, cmGeneratorTarget const* headTarget,
                                cmGeneratorTarget const* currentTarget,
                                bool evaluateForBuildsystem,
                                cmListFileBacktrace backtrace,

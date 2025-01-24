@@ -31,7 +31,7 @@ public:
 
 protected:
   // Feature query methods.
-  cmValue GetFeature(const std::string& feature, const std::string& config);
+  cmValue GetFeature(std::string const& feature, std::string const& config);
 
   cmGeneratorTarget* GeneratorTarget;
   cmMakefile* Makefile;
@@ -53,19 +53,19 @@ protected:
     PreprocessFlagsRequired requires_pp = PreprocessFlagsRequired::YES);
 
   virtual void AddIncludeFlags(std::string& flags, std::string const& lang,
-                               const std::string& config) = 0;
+                               std::string const& config) = 0;
   virtual std::string GetClangTidyReplacementsFilePath(
     std::string const& directory, cmSourceFile const& source,
     std::string const& config) const = 0;
 
-  void AppendOSXVerFlag(std::string& flags, const std::string& lang,
-                        const char* name, bool so);
+  void AppendOSXVerFlag(std::string& flags, std::string const& lang,
+                        char const* name, bool so);
 
-  std::string GetFlags(const std::string& l, const std::string& config,
-                       const std::string& arch = std::string());
-  std::string GetDefines(const std::string& l, const std::string& config);
-  std::string GetIncludes(std::string const& l, const std::string& config);
-  std::string GetManifests(const std::string& config);
+  std::string GetFlags(std::string const& l, std::string const& config,
+                       std::string const& arch = std::string());
+  std::string GetDefines(std::string const& l, std::string const& config);
+  std::string GetIncludes(std::string const& l, std::string const& config);
+  std::string GetManifests(std::string const& config);
   std::string GetAIXExports(std::string const& config);
   std::string GenerateCodeCheckRules(
     cmSourceFile const& source, std::string& compilerLauncher,
@@ -81,13 +81,13 @@ protected:
     std::vector<std::string> Forward;
   };
 
-  LinkedTargetDirs GetLinkedTargetDirectories(const std::string& lang,
-                                              const std::string& config) const;
-  std::string ComputeTargetCompilePDB(const std::string& config) const;
+  LinkedTargetDirs GetLinkedTargetDirectories(std::string const& lang,
+                                              std::string const& config) const;
+  std::string ComputeTargetCompilePDB(std::string const& config) const;
 
-  std::string GetLinkerLauncher(const std::string& config);
+  std::string GetLinkerLauncher(std::string const& config);
 
-  bool HaveRequiredLanguages(const std::vector<cmSourceFile const*>& sources,
+  bool HaveRequiredLanguages(std::vector<cmSourceFile const*> const& sources,
                              std::set<std::string>& languagesNeeded) const;
 
 private:

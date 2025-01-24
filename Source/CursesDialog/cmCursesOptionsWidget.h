@@ -25,7 +25,7 @@ public:
   // when this widget has focus. Returns true if the input was
   // handled.
   bool HandleInput(int& key, cmCursesMainForm* fm, WINDOW* w) override;
-  void SetOption(const std::string&);
+  void SetOption(std::string const&);
   void AddOption(std::string const&);
   void NextOption();
   void PreviousOption();

@@ -104,9 +104,9 @@ std::string bool2string(bool const value)
                      static_cast<char>('0' + static_cast<int>(value)));
 }
 
-bool looksLikeSpecialVariable(const std::string& var,
+bool looksLikeSpecialVariable(std::string const& var,
                               cm::static_string_view prefix,
-                              const std::size_t varNameLen)
+                              std::size_t const varNameLen)
 {
   // NOTE Expecting a variable name at least 1 char length:
   // <prefix> + `{` + <varname> + `}`
@@ -198,13 +198,13 @@ public:
   CurrentAndTwoMoreIter make3ArgsIterator() { return *this; }
 
   template <typename Iter>
-  void ReduceOneArg(const bool value, Iter args)
+  void ReduceOneArg(bool const value, Iter args)
   {
     *args.current = cmExpandedCommandArgument(bool2string(value), true);
     this->erase(args.next);
   }
 
-  void ReduceTwoArgs(const bool value, CurrentAndTwoMoreIter args)
+  void ReduceTwoArgs(bool const value, CurrentAndTwoMoreIter args)
   {
     *args.current = cmExpandedCommandArgument(bool2string(value), true);
     this->erase(args.nextnext);
@@ -239,7 +239,7 @@ cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile,
 // directly. AND OR take variables or the values 0 or 1.
 
 bool cmConditionEvaluator::IsTrue(
-  const std::vector<cmExpandedCommandArgument>& args, std::string& errorString,
+  std::vector<cmExpandedCommandArgument> const& args, std::string& errorString,
   MessageType& status)
 {
   errorString.clear();
@@ -257,7 +257,7 @@ bool cmConditionEvaluator::IsTrue(
   // parens
   using handlerFn_t = bool (cmConditionEvaluator::*)(
     cmArgumentList&, std::string&, MessageType&);
-  const std::array<handlerFn_t, 5> handlers = { {
+  std::array<handlerFn_t, 5> const handlers = { {
     &cmConditionEvaluator::HandleLevel0, // parenthesis
     &cmConditionEvaluator::HandleLevel1, // predicates
     &cmConditionEvaluator::HandleLevel2, // binary ops
@@ -303,7 +303,7 @@ cmValue cmConditionEvaluator::GetDefinitionIfUnquoted(
 
 //=========================================================================
 cmValue cmConditionEvaluator::GetVariableOrString(
-  const cmExpandedCommandArgument& argument) const
+  cmExpandedCommandArgument const& argument) const
 {
   cmValue def = this->GetDefinitionIfUnquoted(argument);
 
@@ -317,7 +317,7 @@ cmValue cmConditionEvaluator::GetVariableOrString(
 //=========================================================================
 bool cmConditionEvaluator::IsKeyword(
   cm::static_string_view keyword,
-  const cmExpandedCommandArgument& argument) const
+  cmExpandedCommandArgument const& argument) const
 {
   if (argument.WasQuoted()) {
     return false;
@@ -341,7 +341,7 @@ bool cmConditionEvaluator::GetBooleanValue(
   // Check for numbers.
   if (!arg.empty()) {
     char* end;
-    const double d = std::strtod(arg.GetValue().c_str(), &end);
+    double const d = std::strtod(arg.GetValue().c_str(), &end);
     if (*end == '\0') {
       // The whole string is a number.  Use C conversion to bool.
       return static_cast<bool>(d);
@@ -355,7 +355,7 @@ bool cmConditionEvaluator::GetBooleanValue(
 
 template <int N>
 inline int cmConditionEvaluator::matchKeysImpl(
-  const cmExpandedCommandArgument&)
+  cmExpandedCommandArgument const&)
 {
   // Zero means "not found"
   return 0;
@@ -363,7 +363,7 @@ inline int cmConditionEvaluator::matchKeysImpl(
 
 template <int N, typename T, typename... Keys>
 inline int cmConditionEvaluator::matchKeysImpl(
-  const cmExpandedCommandArgument& arg, T current, Keys... key)
+  cmExpandedCommandArgument const& arg, T current, Keys... key)
 {
   if (this->IsKeyword(current, arg)) {
     // Stop searching as soon as smth has found
@@ -374,7 +374,7 @@ inline int cmConditionEvaluator::matchKeysImpl(
 
 template <typename... Keys>
 inline int cmConditionEvaluator::matchKeys(
-  const cmExpandedCommandArgument& arg, Keys... key)
+  cmExpandedCommandArgument const& arg, Keys... key)
 {
   // Get index of the matched key (1-based)
   return matchKeysImpl<1>(arg, key...);
@@ -403,12 +403,12 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList& newArgs,
 
       // store the reduced args in this vector
       auto argOpen = std::next(arg);
-      const std::vector<cmExpandedCommandArgument> subExpr(
+      std::vector<cmExpandedCommandArgument> const subExpr(
         argOpen, std::prev(argClose));
 
       // now recursively invoke IsTrue to handle the values inside the
       // parenthetical expression
-      const auto value = this->IsTrue(subExpr, errorString, status);
+      auto const value = this->IsTrue(subExpr, errorString, status);
       *arg = cmExpandedCommandArgument(bool2string(value), true);
       argOpen = std::next(arg);
       // remove the now evaluated parenthetical expression
@@ -490,17 +490,17 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList& newArgs, std::string&,
     }
     // is a variable defined
     else if (this->IsKeyword(keyDEFINED, *args.current)) {
-      const auto& var = args.next->GetValue();
-      const auto varNameLen = var.size();
+      auto const& var = args.next->GetValue();
+      auto const varNameLen = var.size();
 
       auto result = false;
       if (looksLikeSpecialVariable(var, "ENV"_s, varNameLen)) {
-        const auto env = args.next->GetValue().substr(4, varNameLen - 5);
+        auto const env = args.next->GetValue().substr(4, varNameLen - 5);
         result = cmSystemTools::HasEnv(env);
       }
 
       else if (looksLikeSpecialVariable(var, "CACHE"_s, varNameLen)) {
-        const auto cache = args.next->GetValue().substr(6, varNameLen - 7);
+        auto const cache = args.next->GetValue().substr(6, varNameLen - 7);
         result = static_cast<bool>(
           this->Makefile.GetState()->GetCacheEntryValue(cache));
       }
@@ -560,7 +560,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
       this->Makefile.ClearMatches();
 
-      const auto& rex = args.nextnext->GetValue();
+      auto const& rex = args.nextnext->GetValue();
       cmsys::RegularExpression regEntry;
       if (!regEntry.compile(rex)) {
         std::ostringstream error;
@@ -570,7 +570,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
         return false;
       }
 
-      const auto match = regEntry.find(*def);
+      auto const match = regEntry.find(*def);
       if (match) {
         this->Makefile.StoreMatches(regEntry);
       }
@@ -605,9 +605,9 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
                                         keySTRLESS_EQUAL, keySTRGREATER,
                                         keySTRGREATER_EQUAL, keySTREQUAL))) {
 
-      const cmValue lhs = this->GetVariableOrString(*args.current);
-      const cmValue rhs = this->GetVariableOrString(*args.nextnext);
-      const auto val = (*lhs).compare(*rhs);
+      cmValue const lhs = this->GetVariableOrString(*args.current);
+      cmValue const rhs = this->GetVariableOrString(*args.nextnext);
+      auto const val = (*lhs).compare(*rhs);
       // clang-format off
       const auto result = cmRt2CtSelector<
             std::less, std::less_equal,
@@ -622,10 +622,10 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
                 this->matchKeys(*args.next, keyVERSION_LESS,
                                 keyVERSION_LESS_EQUAL, keyVERSION_GREATER,
                                 keyVERSION_GREATER_EQUAL, keyVERSION_EQUAL))) {
-      const auto op = MATCH2CMPOP[matchNo - 1];
-      const cmValue lhs = this->GetVariableOrString(*args.current);
-      const cmValue rhs = this->GetVariableOrString(*args.nextnext);
-      const auto result = cmSystemTools::VersionCompare(op, lhs, rhs);
+      auto const op = MATCH2CMPOP[matchNo - 1];
+      cmValue const lhs = this->GetVariableOrString(*args.current);
+      cmValue const rhs = this->GetVariableOrString(*args.nextnext);
+      auto const result = cmSystemTools::VersionCompare(op, lhs, rhs);
       newArgs.ReduceTwoArgs(result, args);
     }
 
@@ -654,7 +654,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList& newArgs,
 
         cmValue lhs = this->GetVariableOrString(*args.current);
         cmValue rhs = this->GetVariableOrString(*args.nextnext);
-        const auto result = cmCMakePath{ *lhs } == cmCMakePath{ *rhs };
+        auto const result = cmCMakePath{ *lhs } == cmCMakePath{ *rhs };
         newArgs.ReduceTwoArgs(result, args);
       }
 
@@ -681,7 +681,7 @@ bool cmConditionEvaluator::HandleLevel3(cmArgumentList& newArgs, std::string&,
   for (auto args = newArgs.make2ArgsIterator(); args.next != newArgs.end();
        args.advance(newArgs)) {
     if (this->IsKeyword(keyNOT, *args.current)) {
-      const auto rhs = this->GetBooleanValue(*args.next);
+      auto const rhs = this->GetBooleanValue(*args.next);
       newArgs.ReduceOneArg(!rhs, args);
     }
   }
@@ -699,8 +699,8 @@ bool cmConditionEvaluator::HandleLevel4(cmArgumentList& newArgs, std::string&,
     int matchNo;
 
     if ((matchNo = this->matchKeys(*args.next, keyAND, keyOR))) {
-      const auto lhs = this->GetBooleanValue(*args.current);
-      const auto rhs = this->GetBooleanValue(*args.nextnext);
+      auto const lhs = this->GetBooleanValue(*args.current);
+      auto const rhs = this->GetBooleanValue(*args.nextnext);
       // clang-format off
       const auto result =
         cmRt2CtSelector<

@@ -175,7 +175,7 @@ bool cmCTestUpdateCommand::ExecuteUpdate(UpdateArguments& args,
 
   // If no update command was specified, lookup one for this VCS tool.
   if (updateCommand.empty()) {
-    const char* key = TypeToCommandKey(updateType);
+    char const* key = TypeToCommandKey(updateType);
     if (key) {
       updateCommand = mf.GetSafeDefinition(key);
     }

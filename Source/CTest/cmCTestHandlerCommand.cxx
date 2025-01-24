@@ -60,8 +60,8 @@ public:
       }
     }
   }
-  SaveRestoreErrorState(const SaveRestoreErrorState&) = delete;
-  SaveRestoreErrorState& operator=(const SaveRestoreErrorState&) = delete;
+  SaveRestoreErrorState(SaveRestoreErrorState const&) = delete;
+  SaveRestoreErrorState& operator=(SaveRestoreErrorState const&) = delete;
 
 private:
   bool InitialErrorState;

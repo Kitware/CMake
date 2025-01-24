@@ -41,21 +41,21 @@ public:
    * @brief Lock the file in given scope.
    * @param timeoutSec Lock timeout. If -1 try until success or fatal error.
    */
-  cmFileLockResult LockFunctionScope(const std::string& filename,
+  cmFileLockResult LockFunctionScope(std::string const& filename,
                                      unsigned long timeoutSec);
-  cmFileLockResult LockFileScope(const std::string& filename,
+  cmFileLockResult LockFileScope(std::string const& filename,
                                  unsigned long timeoutSec);
-  cmFileLockResult LockProcessScope(const std::string& filename,
+  cmFileLockResult LockProcessScope(std::string const& filename,
                                     unsigned long timeoutSec);
   //@}
 
   /**
    * @brief Unlock the file explicitly.
    */
-  cmFileLockResult Release(const std::string& filename);
+  cmFileLockResult Release(std::string const& filename);
 
 private:
-  bool IsAlreadyLocked(const std::string& filename) const;
+  bool IsAlreadyLocked(std::string const& filename) const;
 
   class ScopePool
   {
@@ -68,10 +68,10 @@ private:
     ScopePool& operator=(ScopePool const&) = delete;
     ScopePool& operator=(ScopePool&&) noexcept;
 
-    cmFileLockResult Lock(const std::string& filename,
+    cmFileLockResult Lock(std::string const& filename,
                           unsigned long timeoutSec);
-    cmFileLockResult Release(const std::string& filename);
-    bool IsAlreadyLocked(const std::string& filename) const;
+    cmFileLockResult Release(std::string const& filename);
+    bool IsAlreadyLocked(std::string const& filename) const;
 
   private:
     using List = std::vector<cmFileLock>;

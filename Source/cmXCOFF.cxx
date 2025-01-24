@@ -64,7 +64,7 @@ protected:
   cmXCOFF::Mode Mode;
 
   // Helper methods for subclasses.
-  void SetErrorMessage(const char* msg) { this->External->ErrorMessage = msg; }
+  void SetErrorMessage(char const* msg) { this->External->ErrorMessage = msg; }
 };
 
 namespace {
@@ -75,9 +75,9 @@ struct XCOFF32
   using aouthdr = struct aouthdr;
   using scnhdr = struct scnhdr;
   using ldhdr = struct ldhdr;
-  static const std::size_t aouthdr_size = _AOUTHSZ_EXEC;
+  static std::size_t const aouthdr_size = _AOUTHSZ_EXEC;
 };
-const unsigned char xcoff32_magic[] = { 0x01, 0xDF };
+unsigned char const xcoff32_magic[] = { 0x01, 0xDF };
 
 struct XCOFF64
 {
@@ -85,9 +85,9 @@ struct XCOFF64
   using aouthdr = struct aouthdr_64;
   using scnhdr = struct scnhdr_64;
   using ldhdr = struct ldhdr_64;
-  static const std::size_t aouthdr_size = _AOUTHSZ_EXEC_64;
+  static std::size_t const aouthdr_size = _AOUTHSZ_EXEC_64;
 };
-const unsigned char xcoff64_magic[] = { 0x01, 0xF7 };
+unsigned char const xcoff64_magic[] = { 0x01, 0xF7 };
 
 enum class IsArchive
 {
@@ -369,7 +369,7 @@ bool Impl<XCOFF>::RemoveLibPath()
 }
 }
 
-IsArchive check_if_big_archive(const char* fname)
+IsArchive check_if_big_archive(char const* fname)
 {
   int len = std::strlen(fname);
   if (len < 2) {
@@ -386,7 +386,7 @@ IsArchive check_if_big_archive(const char* fname)
 //============================================================================
 // External class implementation.
 
-cmXCOFF::cmXCOFF(const char* fname, Mode mode)
+cmXCOFF::cmXCOFF(char const* fname, Mode mode)
 {
   // Try to open the file.
   std::ios::openmode fmode = std::ios::in | std::ios::binary;

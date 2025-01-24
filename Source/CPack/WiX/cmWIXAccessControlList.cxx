@@ -72,7 +72,7 @@ void cmWIXAccessControlList::ReportError(std::string const& entry,
 
 bool cmWIXAccessControlList::IsBooleanAttribute(std::string const& name)
 {
-  static const char* validAttributes[] = {
+  static char const* validAttributes[] = {
     /* clang-format needs this comment to break after the opening brace */
     "Append",
     "ChangePermission",

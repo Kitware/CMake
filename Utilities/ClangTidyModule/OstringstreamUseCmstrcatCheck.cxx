@@ -28,11 +28,11 @@ void OstringstreamUseCmstrcatCheck::registerMatchers(MatchFinder* Finder)
 }
 
 void OstringstreamUseCmstrcatCheck::check(
-  const MatchFinder::MatchResult& Result)
+  MatchFinder::MatchResult const& Result)
 {
-  const TypeLoc* ParentTypeNode =
+  TypeLoc const* ParentTypeNode =
     Result.Nodes.getNodeAs<TypeLoc>("parentType");
-  const TypeLoc* RootNode = Result.Nodes.getNodeAs<TypeLoc>("ostringstream");
+  TypeLoc const* RootNode = Result.Nodes.getNodeAs<TypeLoc>("ostringstream");
 
   if (ParentTypeNode != nullptr) {
     if (ParentTypeNode->getBeginLoc().isValid()) {

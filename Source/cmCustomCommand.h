@@ -28,20 +28,20 @@ class cmCustomCommand
 {
 public:
   /** Get the output file produced by the command.  */
-  const std::vector<std::string>& GetOutputs() const;
+  std::vector<std::string> const& GetOutputs() const;
   void SetOutputs(std::vector<std::string> outputs);
   void SetOutputs(std::string output);
 
   /** Get the extra files produced by the command.  */
-  const std::vector<std::string>& GetByproducts() const;
+  std::vector<std::string> const& GetByproducts() const;
   void SetByproducts(std::vector<std::string> byproducts);
 
   /** Get the vector that holds the list of dependencies.  */
-  const std::vector<std::string>& GetDepends() const;
+  std::vector<std::string> const& GetDepends() const;
   void SetDepends(std::vector<std::string> depends);
 
   bool HasMainDependency() const { return this->HasMainDependency_; }
-  const std::string& GetMainDependency() const;
+  std::string const& GetMainDependency() const;
   void SetMainDependency(std::string main_dependency);
 
   /** Get the working directory.  */
@@ -50,18 +50,18 @@ public:
     return this->WorkingDirectory;
   }
 
-  void SetWorkingDirectory(const char* workingDirectory)
+  void SetWorkingDirectory(char const* workingDirectory)
   {
     this->WorkingDirectory = (workingDirectory ? workingDirectory : "");
   }
 
   /** Get the list of command lines.  */
-  const cmCustomCommandLines& GetCommandLines() const;
+  cmCustomCommandLines const& GetCommandLines() const;
   void SetCommandLines(cmCustomCommandLines commandLines);
 
   /** Get the comment string for the command.  */
-  const char* GetComment() const;
-  void SetComment(const char* comment);
+  char const* GetComment() const;
+  void SetComment(char const* comment);
 
   /** Get a value indicating if the command uses UTF-8 output pipes. */
   bool GetStdPipesUTF8() const { return this->StdPipesUTF8; }
@@ -71,10 +71,10 @@ public:
   }
 
   /** Append to the list of command lines.  */
-  void AppendCommands(const cmCustomCommandLines& commandLines);
+  void AppendCommands(cmCustomCommandLines const& commandLines);
 
   /** Append to the list of dependencies.  */
-  void AppendDepends(const std::vector<std::string>& depends);
+  void AppendDepends(std::vector<std::string> const& depends);
 
   /** Set/Get whether old-style escaping should be used.  */
   bool GetEscapeOldStyle() const;
@@ -108,12 +108,12 @@ public:
   void SetDependsExplicitOnly(bool b);
 
   /** Set/Get the depfile (used by the Ninja generator) */
-  const std::string& GetDepfile() const;
-  void SetDepfile(const std::string& depfile);
+  std::string const& GetDepfile() const;
+  void SetDepfile(std::string const& depfile);
 
   /** Set/Get the job_pool (used by the Ninja generator) */
-  const std::string& GetJobPool() const;
-  void SetJobPool(const std::string& job_pool);
+  std::string const& GetJobPool() const;
+  void SetJobPool(std::string const& job_pool);
 
   /** Set/Get whether this custom command should be given access to the
       jobserver (if possible).  */
@@ -126,15 +126,15 @@ public:
 #undef DECLARE_CC_POLICY_ACCESSOR
 
   /** Record policy values from state snapshot */
-  void RecordPolicyValues(const cmStateSnapshot& snapshot);
+  void RecordPolicyValues(cmStateSnapshot const& snapshot);
 
   /** Set/Get the associated target */
-  const std::string& GetTarget() const;
-  void SetTarget(const std::string& target);
+  std::string const& GetTarget() const;
+  void SetTarget(std::string const& target);
 
   /** Set/Get the custom command rolee */
-  const std::string& GetRole() const;
-  void SetRole(const std::string& role);
+  std::string const& GetRole() const;
+  void SetRole(std::string const& role);
 
   /** Record if the custom command can be used for code generation. */
   bool GetCodegen() const { return Codegen; }

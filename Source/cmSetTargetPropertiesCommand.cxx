@@ -34,7 +34,7 @@ bool cmSetTargetPropertiesCommand(std::vector<std::string> const& args,
   cmMakefile& mf = status.GetMakefile();
 
   // loop over all the targets
-  for (const std::string& tname : cmStringRange{ args.begin(), propsIter }) {
+  for (std::string const& tname : cmStringRange{ args.begin(), propsIter }) {
     if (mf.IsAlias(tname)) {
       status.SetError("can not be used on an ALIAS target.");
       return false;

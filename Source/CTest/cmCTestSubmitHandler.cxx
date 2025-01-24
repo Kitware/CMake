@@ -62,18 +62,18 @@ private:
     return val;
   }
 
-  void StartElement(const std::string& /*name*/,
-                    const char** /*atts*/) override
+  void StartElement(std::string const& /*name*/,
+                    char const** /*atts*/) override
   {
     this->CurrentValue.clear();
   }
 
-  void CharacterDataHandler(const char* data, int length) override
+  void CharacterDataHandler(char const* data, int length) override
   {
     cm::append(this->CurrentValue, data, data + length);
   }
 
-  void EndElement(const std::string& name) override
+  void EndElement(std::string const& name) override
   {
     if (name == "status") {
       std::string status = cmSystemTools::UpperCase(this->GetCurrentValue());
@@ -100,7 +100,7 @@ static size_t cmCTestSubmitHandlerWriteMemoryCallback(void* ptr, size_t size,
                                                       size_t nmemb, void* data)
 {
   int realsize = static_cast<int>(size * nmemb);
-  const char* chPtr = static_cast<char*>(ptr);
+  char const* chPtr = static_cast<char*>(ptr);
   cm::append(*static_cast<cmCTestSubmitHandlerVectorOfChar*>(data), chPtr,
              chPtr + realsize);
   return realsize;
@@ -128,8 +128,8 @@ cmCTestSubmitHandler::cmCTestSubmitHandler(cmCTest* ctest)
 }
 
 bool cmCTestSubmitHandler::SubmitUsingHTTP(
-  const std::string& localprefix, const std::vector<std::string>& files,
-  const std::string& remoteprefix, const std::string& url)
+  std::string const& localprefix, std::vector<std::string> const& files,
+  std::string const& remoteprefix, std::string const& url)
 {
   CURL* curl;
   FILE* ftpfile;
@@ -707,7 +707,7 @@ int cmCTestSubmitHandler::ProcessHandler()
                                        this->CDashUploadType);
   }
 
-  const std::string& buildDirectory =
+  std::string const& buildDirectory =
     this->CTest->GetCTestConfiguration("BuildDirectory");
   if (buildDirectory.empty()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
@@ -830,7 +830,7 @@ int cmCTestSubmitHandler::ProcessHandler()
   }
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "Submit files\n",
                      this->Quiet);
-  const char* specificGroup = this->CTest->GetSpecificGroup();
+  char const* specificGroup = this->CTest->GetSpecificGroup();
   if (specificGroup) {
     cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                        "   Send to group: " << specificGroup << std::endl,

@@ -4,7 +4,7 @@
 
 #if defined(_MSC_VER) && _MSC_VER < 1900
 #  include <stdarg.h>
-static int snprintf(char* buffer, size_t count, const char* format, ...)
+static int snprintf(char* buffer, size_t count, char const* format, ...)
 {
   int n;
   va_list argptr;
@@ -16,11 +16,11 @@ static int snprintf(char* buffer, size_t count, const char* format, ...)
 }
 #endif
 
-static int launch(int argc, const char* argv[])
+static int launch(int argc, char const* argv[])
 {
   char cmd[4096];
   size_t len = 0;
-  const char* sep = "";
+  char const* sep = "";
   int i;
   int n;
 #ifdef _WIN32
@@ -55,7 +55,7 @@ static int launch(int argc, const char* argv[])
   return system(cmd);
 }
 
-int main(int argc, const char* argv[])
+int main(int argc, char const* argv[])
 {
   int ownArgs = 1;
   int i;

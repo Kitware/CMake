@@ -32,7 +32,7 @@ cmCPackIFWPackage::CompareStruct::CompareStruct()
 cmCPackIFWPackage::DependenceStruct::DependenceStruct() = default;
 
 cmCPackIFWPackage::DependenceStruct::DependenceStruct(
-  const std::string& dependence)
+  std::string const& dependence)
 {
   // Preferred format is name and version are separated by a colon (:), but
   // note that this is only supported with QtIFW 3.1 or later. Backward
@@ -51,7 +51,7 @@ cmCPackIFWPackage::DependenceStruct::DependenceStruct(
       return;
     }
 
-    const auto versionPart =
+    auto const versionPart =
       cm::string_view(dependence.data() + pos, dependence.size() - pos);
 
     if (cmHasLiteralPrefix(versionPart, "<=")) {
@@ -339,7 +339,7 @@ int cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup* group)
   return this->ConfigureFromPrefix(prefix);
 }
 
-int cmCPackIFWPackage::ConfigureFromGroup(const std::string& groupName)
+int cmCPackIFWPackage::ConfigureFromGroup(std::string const& groupName)
 {
   // Group configuration
 
@@ -373,7 +373,7 @@ int cmCPackIFWPackage::ConfigureFromGroup(const std::string& groupName)
 }
 
 // Common options for components and groups
-int cmCPackIFWPackage::ConfigureFromPrefix(const std::string& prefix)
+int cmCPackIFWPackage::ConfigureFromPrefix(std::string const& prefix)
 {
   // Temporary variable for full option name
   std::string option;
@@ -635,7 +635,7 @@ void cmCPackIFWPackage::GeneratePackageFile()
   }
 
   // Dependencies
-  const bool hyphensInNamesUnsupported = this->Generator &&
+  bool const hyphensInNamesUnsupported = this->Generator &&
     !this->Generator->FrameworkVersion.empty() && this->IsVersionLess("3.1");
   bool warnUnsupportedNames = false;
   std::set<DependenceStruct> compDepSet;

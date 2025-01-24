@@ -33,7 +33,7 @@ public:
   bool inSource;
   std::vector<std::string> filepaths;
   //! Read the XML produced by running `coverage xml`
-  bool ReadCoverageXML(const char* xmlFile);
+  bool ReadCoverageXML(char const* xmlFile);
 
 private:
   class XMLParser;

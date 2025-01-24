@@ -46,16 +46,16 @@ bool cmInstallRuntimeDependencySet::AddBundleExecutable(
 }
 
 std::string cmInstallRuntimeDependencySet::TargetItem::GetItemPath(
-  const std::string& config) const
+  std::string const& config) const
 {
   return this->Target->GetTarget()->GetFullPath(config);
 }
 
 namespace {
-const std::set<const cmGeneratorTarget*>& GetTargetDependsClosure(
-  std::map<const cmGeneratorTarget*, std::set<const cmGeneratorTarget*>>&
+std::set<cmGeneratorTarget const*> const& GetTargetDependsClosure(
+  std::map<cmGeneratorTarget const*, std::set<cmGeneratorTarget const*>>&
     targetDepends,
-  const cmGeneratorTarget* tgt)
+  cmGeneratorTarget const* tgt)
 {
   auto it = targetDepends.insert({ tgt, {} });
   auto& retval = it.first->second;
@@ -79,7 +79,7 @@ const std::set<const cmGeneratorTarget*>& GetTargetDependsClosure(
 }
 
 void cmInstallRuntimeDependencySet::TargetItem::AddPostExcludeFiles(
-  const std::string& config, std::set<std::string>& files,
+  std::string const& config, std::set<std::string>& files,
   cmInstallRuntimeDependencySet* set) const
 {
   for (auto const* dep : GetTargetDependsClosure(set->TargetDepends,
@@ -89,7 +89,7 @@ void cmInstallRuntimeDependencySet::TargetItem::AddPostExcludeFiles(
 }
 
 std::string cmInstallRuntimeDependencySet::ImportedTargetItem::GetItemPath(
-  const std::string& config) const
+  std::string const& config) const
 {
   return this->Target->GetTarget()->GetFullPath(config);
 }

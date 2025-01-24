@@ -6,14 +6,14 @@
 #include <utility>
 
 bool cmCTestBinPackerAllocation::operator==(
-  const cmCTestBinPackerAllocation& other) const
+  cmCTestBinPackerAllocation const& other) const
 {
   return this->ProcessIndex == other.ProcessIndex &&
     this->SlotsNeeded == other.SlotsNeeded && this->Id == other.Id;
 }
 
 bool cmCTestBinPackerAllocation::operator!=(
-  const cmCTestBinPackerAllocation& other) const
+  cmCTestBinPackerAllocation const& other) const
 {
   return !(*this == other);
 }
@@ -35,8 +35,8 @@ namespace {
  */
 template <typename AllocationStrategy>
 bool AllocateCTestResources(
-  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
-  const std::vector<std::string>& resourcesSorted, std::size_t currentIndex,
+  std::map<std::string, cmCTestResourceAllocator::Resource> const& resources,
+  std::vector<std::string> const& resourcesSorted, std::size_t currentIndex,
   std::vector<cmCTestBinPackerAllocation*>& allocations)
 {
   // Iterate through all large enough resources until we find a solution
@@ -83,7 +83,7 @@ bool AllocateCTestResources(
 
 template <typename AllocationStrategy>
 bool AllocateCTestResources(
-  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+  std::map<std::string, cmCTestResourceAllocator::Resource> const& resources,
   std::vector<cmCTestBinPackerAllocation>& allocations)
 {
   // Sort the resource requirements in descending order by slots needed
@@ -115,27 +115,27 @@ class RoundRobinAllocationStrategy
 {
 public:
   static void InitialSort(
-    const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+    std::map<std::string, cmCTestResourceAllocator::Resource> const& resources,
     std::vector<std::string>& resourcesSorted);
 
   static void IncrementalSort(
-    const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+    std::map<std::string, cmCTestResourceAllocator::Resource> const& resources,
     std::vector<std::string>& resourcesSorted, std::size_t lastAllocatedIndex);
 };
 
 void RoundRobinAllocationStrategy::InitialSort(
-  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+  std::map<std::string, cmCTestResourceAllocator::Resource> const& resources,
   std::vector<std::string>& resourcesSorted)
 {
   std::stable_sort(
     resourcesSorted.rbegin(), resourcesSorted.rend(),
-    [&resources](const std::string& id1, const std::string& id2) {
+    [&resources](std::string const& id1, std::string const& id2) {
       return resources.at(id1).Free() < resources.at(id2).Free();
     });
 }
 
 void RoundRobinAllocationStrategy::IncrementalSort(
-  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+  std::map<std::string, cmCTestResourceAllocator::Resource> const& resources,
   std::vector<std::string>& resourcesSorted, std::size_t lastAllocatedIndex)
 {
   auto tmp = resourcesSorted[lastAllocatedIndex];
@@ -153,27 +153,27 @@ class BlockAllocationStrategy
 {
 public:
   static void InitialSort(
-    const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+    std::map<std::string, cmCTestResourceAllocator::Resource> const& resources,
     std::vector<std::string>& resourcesSorted);
 
   static void IncrementalSort(
-    const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+    std::map<std::string, cmCTestResourceAllocator::Resource> const& resources,
     std::vector<std::string>& resourcesSorted, std::size_t lastAllocatedIndex);
 };
 
 void BlockAllocationStrategy::InitialSort(
-  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+  std::map<std::string, cmCTestResourceAllocator::Resource> const& resources,
   std::vector<std::string>& resourcesSorted)
 {
   std::stable_sort(
     resourcesSorted.rbegin(), resourcesSorted.rend(),
-    [&resources](const std::string& id1, const std::string& id2) {
+    [&resources](std::string const& id1, std::string const& id2) {
       return resources.at(id1).Free() < resources.at(id2).Free();
     });
 }
 
 void BlockAllocationStrategy::IncrementalSort(
-  const std::map<std::string, cmCTestResourceAllocator::Resource>&,
+  std::map<std::string, cmCTestResourceAllocator::Resource> const&,
   std::vector<std::string>& resourcesSorted, std::size_t lastAllocatedIndex)
 {
   auto tmp = resourcesSorted[lastAllocatedIndex];
@@ -187,7 +187,7 @@ void BlockAllocationStrategy::IncrementalSort(
 }
 
 bool cmAllocateCTestResourcesRoundRobin(
-  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+  std::map<std::string, cmCTestResourceAllocator::Resource> const& resources,
   std::vector<cmCTestBinPackerAllocation>& allocations)
 {
   return AllocateCTestResources<RoundRobinAllocationStrategy>(resources,
@@ -195,7 +195,7 @@ bool cmAllocateCTestResourcesRoundRobin(
 }
 
 bool cmAllocateCTestResourcesBlock(
-  const std::map<std::string, cmCTestResourceAllocator::Resource>& resources,
+  std::map<std::string, cmCTestResourceAllocator::Resource> const& resources,
   std::vector<cmCTestBinPackerAllocation>& allocations)
 {
   return AllocateCTestResources<BlockAllocationStrategy>(resources,

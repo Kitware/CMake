@@ -23,10 +23,10 @@ public:
   }
 
 protected:
-  bool filterAcceptsRow(int row, const QModelIndex& p) const override
+  bool filterAcceptsRow(int row, QModelIndex const& p) const override
   {
     QStringList strs;
-    const QAbstractItemModel* m = this->sourceModel();
+    QAbstractItemModel const* m = this->sourceModel();
     QModelIndex idx = m->index(row, 0, p);
 
     // if there are no children, get strings for column 0 and 1
@@ -80,9 +80,9 @@ public:
 protected:
   bool ShowAdvanced = false;
 
-  bool filterAcceptsRow(int row, const QModelIndex& p) const override
+  bool filterAcceptsRow(int row, QModelIndex const& p) const override
   {
-    const QAbstractItemModel* m = this->sourceModel();
+    QAbstractItemModel const* m = this->sourceModel();
     QModelIndex idx = m->index(row, 0, p);
 
     // if there are no children
@@ -168,7 +168,7 @@ bool QCMakeCacheView::showAdvanced() const
   return this->AdvancedFilter->showAdvanced();
 }
 
-bool QCMakeCacheView::setSearchFilter(const QString& s)
+bool QCMakeCacheView::setSearchFilter(QString const& s)
 {
   return QtCMake::setSearchFilter(this->SearchFilter, s);
 }
@@ -187,7 +187,7 @@ QCMakeCacheModel::QCMakeCacheModel(QObject* p)
 
 QCMakeCacheModel::~QCMakeCacheModel() = default;
 
-static uint qHash(const QCMakeProperty& p)
+static uint qHash(QCMakeProperty const& p)
 {
   return qHash(p.Key);
 }
@@ -207,7 +207,7 @@ void QCMakeCacheModel::clear()
   this->setHorizontalHeaderLabels(labels);
 }
 
-void QCMakeCacheModel::setProperties(const QCMakePropertyList& props)
+void QCMakeCacheModel::setProperties(QCMakePropertyList const& props)
 {
   this->beginResetModel();
 
@@ -363,8 +363,8 @@ void QCMakeCacheModel::setViewType(QCMakeCacheModel::ViewType t)
   this->endResetModel();
 }
 
-void QCMakeCacheModel::setPropertyData(const QModelIndex& idx1,
-                                       const QCMakeProperty& prop, bool isNew)
+void QCMakeCacheModel::setPropertyData(QModelIndex const& idx1,
+                                       QCMakeProperty const& prop, bool isNew)
 {
   QModelIndex idx2 = idx1.sibling(idx1.row(), 1);
 
@@ -398,7 +398,7 @@ void QCMakeCacheModel::setPropertyData(const QModelIndex& idx1,
   }
 }
 
-void QCMakeCacheModel::getPropertyData(const QModelIndex& idx1,
+void QCMakeCacheModel::getPropertyData(QModelIndex const& idx1,
                                        QCMakeProperty& prop) const
 {
   QModelIndex idx2 = idx1.sibling(idx1.row(), 1);
@@ -418,7 +418,7 @@ void QCMakeCacheModel::getPropertyData(const QModelIndex& idx1,
   }
 }
 
-QString QCMakeCacheModel::prefix(const QString& s)
+QString QCMakeCacheModel::prefix(QString const& s)
 {
   QString prefix = s.section('_', 0, 0);
   if (prefix == s) {
@@ -428,7 +428,7 @@ QString QCMakeCacheModel::prefix(const QString& s)
 }
 
 void QCMakeCacheModel::breakProperties(
-  const QSet<QCMakeProperty>& props, QMap<QString, QCMakePropertyList>& result)
+  QSet<QCMakeProperty> const& props, QMap<QString, QCMakePropertyList>& result)
 {
   QMap<QString, QCMakePropertyList> tmp;
   // return a map of properties grouped by prefixes, and sorted
@@ -502,9 +502,9 @@ QCMakePropertyList QCMakeCacheModel::properties() const
 }
 
 bool QCMakeCacheModel::insertProperty(QCMakeProperty::PropertyType t,
-                                      const QString& name,
-                                      const QString& description,
-                                      const QVariant& value, bool advanced)
+                                      QString const& name,
+                                      QString const& description,
+                                      QVariant const& value, bool advanced)
 {
   QCMakeProperty prop;
   prop.Key = name;
@@ -535,7 +535,7 @@ int QCMakeCacheModel::newPropertyCount() const
   return this->NewPropertyCount;
 }
 
-Qt::ItemFlags QCMakeCacheModel::flags(const QModelIndex& idx) const
+Qt::ItemFlags QCMakeCacheModel::flags(QModelIndex const& idx) const
 {
   Qt::ItemFlags f = QStandardItemModel::flags(idx);
   if (!this->EditEnabled) {
@@ -548,7 +548,7 @@ Qt::ItemFlags QCMakeCacheModel::flags(const QModelIndex& idx) const
   return f;
 }
 
-QModelIndex QCMakeCacheModel::buddy(const QModelIndex& idx) const
+QModelIndex QCMakeCacheModel::buddy(QModelIndex const& idx) const
 {
   if (!this->hasChildren(idx) &&
       this->data(idx, TypeRole).toInt() != QCMakeProperty::BOOL) {
@@ -569,8 +569,8 @@ void QCMakeCacheModelDelegate::setFileDialogFlag(bool f)
 }
 
 QWidget* QCMakeCacheModelDelegate::createEditor(
-  QWidget* p, const QStyleOptionViewItem& /*option*/,
-  const QModelIndex& idx) const
+  QWidget* p, QStyleOptionViewItem const& /*option*/,
+  QModelIndex const& idx) const
 {
   QModelIndex var = idx.sibling(idx.row(), 0);
   int type = var.data(QCMakeCacheModel::TypeRole).toInt();
@@ -606,8 +606,8 @@ QWidget* QCMakeCacheModelDelegate::createEditor(
 
 bool QCMakeCacheModelDelegate::editorEvent(QEvent* e,
                                            QAbstractItemModel* model,
-                                           const QStyleOptionViewItem& option,
-                                           const QModelIndex& index)
+                                           QStyleOptionViewItem const& option,
+                                           QModelIndex const& index)
 {
   Qt::ItemFlags flags = model->flags(index);
   if (!(flags & Qt::ItemIsUserCheckable) ||
@@ -661,14 +661,14 @@ bool QCMakeCacheModelDelegate::eventFilter(QObject* object, QEvent* evt)
 
 void QCMakeCacheModelDelegate::setModelData(QWidget* editor,
                                             QAbstractItemModel* model,
-                                            const QModelIndex& index) const
+                                            QModelIndex const& index) const
 {
   QItemDelegate::setModelData(editor, model, index);
   const_cast<QCMakeCacheModelDelegate*>(this)->recordChange(model, index);
 }
 
-QSize QCMakeCacheModelDelegate::sizeHint(const QStyleOptionViewItem& option,
-                                         const QModelIndex& index) const
+QSize QCMakeCacheModelDelegate::sizeHint(QStyleOptionViewItem const& option,
+                                         QModelIndex const& index) const
 {
   QSize sz = QItemDelegate::sizeHint(option, index);
   QStyle* style = QApplication::style();
@@ -700,7 +700,7 @@ void QCMakeCacheModelDelegate::clearChanges()
 }
 
 void QCMakeCacheModelDelegate::recordChange(QAbstractItemModel* model,
-                                            const QModelIndex& index)
+                                            QModelIndex const& index)
 {
   QModelIndex idx = index;
   QAbstractItemModel* mymodel = model;

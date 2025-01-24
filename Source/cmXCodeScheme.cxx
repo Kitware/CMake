@@ -26,7 +26,7 @@ class cmLocalGenerator;
 
 cmXCodeScheme::cmXCodeScheme(cmLocalGenerator* lg, cmXCodeObject* xcObj,
                              TestObjects tests,
-                             const std::vector<std::string>& configList,
+                             std::vector<std::string> const& configList,
                              unsigned int xcVersion)
   : LocalGenerator(lg)
   , Target(xcObj)
@@ -37,8 +37,8 @@ cmXCodeScheme::cmXCodeScheme(cmLocalGenerator* lg, cmXCodeObject* xcObj,
 {
 }
 
-void cmXCodeScheme::WriteXCodeSharedScheme(const std::string& xcProjDir,
-                                           const std::string& container)
+void cmXCodeScheme::WriteXCodeSharedScheme(std::string const& xcProjDir,
+                                           std::string const& container)
 {
   // Create shared scheme sub-directory tree
   //
@@ -58,7 +58,7 @@ void cmXCodeScheme::WriteXCodeSharedScheme(const std::string& xcProjDir,
 }
 
 void cmXCodeScheme::WriteXCodeXCScheme(std::ostream& fout,
-                                       const std::string& container)
+                                       std::string const& container)
 {
   cmXMLWriter xout(fout);
   xout.SetIndentationElement(std::string(3, ' '));
@@ -90,7 +90,7 @@ void cmXCodeScheme::WriteXCodeXCScheme(std::ostream& fout,
 }
 
 void cmXCodeScheme::WriteBuildAction(cmXMLWriter& xout,
-                                     const std::string& container)
+                                     std::string const& container)
 {
   xout.StartElement("BuildAction");
   xout.BreakAttributes();
@@ -114,8 +114,8 @@ void cmXCodeScheme::WriteBuildAction(cmXMLWriter& xout,
 }
 
 void cmXCodeScheme::WriteTestAction(cmXMLWriter& xout,
-                                    const std::string& configuration,
-                                    const std::string& container)
+                                    std::string const& configuration,
+                                    std::string const& container)
 {
   xout.StartElement("TestAction");
   xout.BreakAttributes();
@@ -150,8 +150,8 @@ void cmXCodeScheme::WriteTestAction(cmXMLWriter& xout,
 }
 
 void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
-                                      const std::string& configuration,
-                                      const std::string& container)
+                                      std::string const& configuration,
+                                      std::string const& container)
 {
   xout.StartElement("LaunchAction");
   xout.BreakAttributes();
@@ -304,7 +304,7 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
         xout.BreakAttributes();
 
         std::string envValue;
-        const auto p = env.find_first_of('=');
+        auto const p = env.find_first_of('=');
         if (p != std::string::npos) {
           envValue = env.substr(p + 1);
           env.resize(p);
@@ -361,8 +361,8 @@ void cmXCodeScheme::WriteLaunchAction(cmXMLWriter& xout,
 }
 
 bool cmXCodeScheme::WriteLaunchActionAttribute(cmXMLWriter& xout,
-                                               const std::string& attrName,
-                                               const std::string& varName)
+                                               std::string const& attrName,
+                                               std::string const& varName)
 {
   if (Target->GetTarget()->GetPropertyAsBool(varName)) {
     xout.Attribute(attrName.c_str(), "YES");
@@ -372,7 +372,7 @@ bool cmXCodeScheme::WriteLaunchActionAttribute(cmXMLWriter& xout,
 }
 
 bool cmXCodeScheme::WriteLaunchActionBooleanAttribute(
-  cmXMLWriter& xout, const std::string& attrName, const std::string& varName,
+  cmXMLWriter& xout, std::string const& attrName, std::string const& varName,
   bool defaultValue)
 {
   cmValue property = Target->GetTarget()->GetProperty(varName);
@@ -387,8 +387,8 @@ bool cmXCodeScheme::WriteLaunchActionBooleanAttribute(
 }
 
 bool cmXCodeScheme::WriteLaunchActionAdditionalOption(
-  cmXMLWriter& xout, const std::string& key, const std::string& value,
-  const std::string& varName)
+  cmXMLWriter& xout, std::string const& key, std::string const& value,
+  std::string const& varName)
 {
   if (Target->GetTarget()->GetPropertyAsBool(varName)) {
     xout.StartElement("AdditionalOption");
@@ -406,8 +406,8 @@ bool cmXCodeScheme::WriteLaunchActionAdditionalOption(
 }
 
 void cmXCodeScheme::WriteProfileAction(cmXMLWriter& xout,
-                                       const std::string& configuration,
-                                       const std::string& container)
+                                       std::string const& configuration,
+                                       std::string const& container)
 {
   xout.StartElement("ProfileAction");
   xout.BreakAttributes();
@@ -427,7 +427,7 @@ void cmXCodeScheme::WriteProfileAction(cmXMLWriter& xout,
 }
 
 void cmXCodeScheme::WriteAnalyzeAction(cmXMLWriter& xout,
-                                       const std::string& configuration)
+                                       std::string const& configuration)
 {
   xout.StartElement("AnalyzeAction");
   xout.BreakAttributes();
@@ -436,7 +436,7 @@ void cmXCodeScheme::WriteAnalyzeAction(cmXMLWriter& xout,
 }
 
 void cmXCodeScheme::WriteArchiveAction(cmXMLWriter& xout,
-                                       const std::string& configuration)
+                                       std::string const& configuration)
 {
   xout.StartElement("ArchiveAction");
   xout.BreakAttributes();
@@ -446,8 +446,8 @@ void cmXCodeScheme::WriteArchiveAction(cmXMLWriter& xout,
 }
 
 void cmXCodeScheme::WriteBuildableProductRunnable(cmXMLWriter& xout,
-                                                  const cmXCodeObject* xcObj,
-                                                  const std::string& container)
+                                                  cmXCodeObject const* xcObj,
+                                                  std::string const& container)
 {
   xout.StartElement("BuildableProductRunnable");
   xout.BreakAttributes();
@@ -457,8 +457,8 @@ void cmXCodeScheme::WriteBuildableProductRunnable(cmXMLWriter& xout,
 }
 
 void cmXCodeScheme::WriteBuildableReference(cmXMLWriter& xout,
-                                            const cmXCodeObject* xcObj,
-                                            const std::string& container)
+                                            cmXCodeObject const* xcObj,
+                                            std::string const& container)
 {
   xout.StartElement("BuildableReference");
   xout.BreakAttributes();
@@ -472,7 +472,7 @@ void cmXCodeScheme::WriteBuildableReference(cmXMLWriter& xout,
 }
 
 void cmXCodeScheme::WriteCustomWorkingDirectory(
-  cmXMLWriter& xout, const std::string& configuration)
+  cmXMLWriter& xout, std::string const& configuration)
 {
   std::string const& propertyValue =
     this->Target->GetTarget()->GetSafeProperty(
@@ -489,7 +489,7 @@ void cmXCodeScheme::WriteCustomWorkingDirectory(
 }
 
 void cmXCodeScheme::WriteCustomLLDBInitFile(cmXMLWriter& xout,
-                                            const std::string& configuration)
+                                            std::string const& configuration)
 {
   std::string const& propertyValue =
     this->Target->GetTarget()->GetSafeProperty("XCODE_SCHEME_LLDB_INIT_FILE");
@@ -507,7 +507,7 @@ std::string cmXCodeScheme::WriteVersionString()
   return v.str();
 }
 
-std::string cmXCodeScheme::FindConfiguration(const std::string& name)
+std::string cmXCodeScheme::FindConfiguration(std::string const& name)
 {
   // Try to find the desired configuration by name,
   // and if it's not found return first from the list
@@ -524,7 +524,7 @@ bool cmXCodeScheme::IsTestable() const
   return !this->Tests.empty() || IsExecutable(this->Target);
 }
 
-bool cmXCodeScheme::IsExecutable(const cmXCodeObject* target)
+bool cmXCodeScheme::IsExecutable(cmXCodeObject const* target)
 {
   cmGeneratorTarget* gt = target->GetTarget();
   if (!gt) {

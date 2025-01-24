@@ -22,7 +22,7 @@
 #include "cmValue.h"
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
-  const std::string& key, int labelwidth, int entrywidth)
+  std::string const& key, int labelwidth, int entrywidth)
   : Key(key)
   , LabelWidth(labelwidth)
   , EntryWidth(entrywidth)
@@ -35,7 +35,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
 }
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
-  const std::string& key, cmState* state, bool isNew, int labelwidth,
+  std::string const& key, cmState* state, bool isNew, int labelwidth,
   int entrywidth)
   : Key(key)
   , LabelWidth(labelwidth)
@@ -100,7 +100,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
 
 cmCursesCacheEntryComposite::~cmCursesCacheEntryComposite() = default;
 
-const char* cmCursesCacheEntryComposite::GetValue()
+char const* cmCursesCacheEntryComposite::GetValue()
 {
   if (this->Label) {
     return this->Label->GetValue();

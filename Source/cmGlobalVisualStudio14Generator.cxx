@@ -18,16 +18,16 @@
 #include "cmSystemTools.h"
 #include "cmValue.h"
 
-static const char vs14generatorName[] = "Visual Studio 14 2015";
+static char const vs14generatorName[] = "Visual Studio 14 2015";
 
 // Map generator name without year to name with year.
-static const char* cmVS14GenName(const std::string& name, std::string& genName)
+static char const* cmVS14GenName(std::string const& name, std::string& genName)
 {
   if (strncmp(name.c_str(), vs14generatorName,
               sizeof(vs14generatorName) - 6) != 0) {
     return nullptr;
   }
-  const char* p = name.c_str() + sizeof(vs14generatorName) - 6;
+  char const* p = name.c_str() + sizeof(vs14generatorName) - 6;
   if (cmHasLiteralPrefix(p, " 2015")) {
     p += 5;
   }
@@ -40,10 +40,10 @@ class cmGlobalVisualStudio14Generator::Factory
 {
 public:
   std::unique_ptr<cmGlobalGenerator> CreateGlobalGenerator(
-    const std::string& name, cmake* cm) const override
+    std::string const& name, cmake* cm) const override
   {
     std::string genName;
-    const char* p = cmVS14GenName(name, genName);
+    char const* p = cmVS14GenName(name, genName);
     if (!p) {
       return std::unique_ptr<cmGlobalGenerator>();
     }
@@ -90,7 +90,7 @@ cmGlobalVisualStudio14Generator::NewFactory()
 }
 
 cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(
-  cmake* cm, const std::string& name)
+  cmake* cm, std::string const& name)
   : cmGlobalVisualStudio12Generator(cm, name)
 {
   std::string vc14Express;
@@ -110,7 +110,7 @@ cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(
 }
 
 bool cmGlobalVisualStudio14Generator::MatchesGeneratorName(
-  const std::string& name) const
+  std::string const& name) const
 {
   std::string genName;
   if (cmVS14GenName(name, genName)) {
@@ -337,7 +337,7 @@ bool cmGlobalVisualStudio14Generator::SelectWindowsStoreToolset(
 
 bool cmGlobalVisualStudio14Generator::IsWindowsDesktopToolsetInstalled() const
 {
-  const char desktop10Key[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+  char const desktop10Key[] = "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
                               "VisualStudio\\14.0\\VC\\Runtimes";
 
   std::vector<std::string> vc14;
@@ -347,7 +347,7 @@ bool cmGlobalVisualStudio14Generator::IsWindowsDesktopToolsetInstalled() const
 
 bool cmGlobalVisualStudio14Generator::IsWindowsStoreToolsetInstalled() const
 {
-  const char universal10Key[] =
+  char const universal10Key[] =
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
     "VisualStudio\\14.0\\Setup\\Build Tools for Windows 10;SrcPath";
 
@@ -538,7 +538,7 @@ void cmGlobalVisualStudio14Generator::AddSolutionItems(cmLocalGenerator* root)
       "",
     };
 
-    for (const std::string& relativePath : cmList(n)) {
+    for (std::string const& relativePath : cmList(n)) {
       pathComponents[2] = relativePath;
 
       std::string fullPath = cmSystemTools::FileIsFullPath(relativePath)
@@ -567,11 +567,11 @@ void cmGlobalVisualStudio14Generator::AddSolutionItems(cmLocalGenerator* root)
 }
 
 void cmGlobalVisualStudio14Generator::WriteFolderSolutionItems(
-  std::ostream& fout, const cmVisualStudioFolder& folder)
+  std::ostream& fout, cmVisualStudioFolder const& folder)
 {
   fout << "\tProjectSection(SolutionItems) = preProject\n";
 
-  for (const std::string& item : folder.SolutionItems) {
+  for (std::string const& item : folder.SolutionItems) {
     fout << "\t\t" << item << " = " << item << "\n";
   }
 

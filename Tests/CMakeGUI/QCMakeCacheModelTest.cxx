@@ -10,7 +10,7 @@
 
 namespace {
 QCMakeProperty makeProperty(
-  const QString& name, const QString& value,
+  QString const& name, QString const& value,
   QCMakeProperty::PropertyType type = QCMakeProperty::STRING,
   bool advanced = false)
 {

@@ -39,11 +39,11 @@ public:
 
   typedef void (*SymbolPointer)();
 
-  static LibraryHandle OpenLibrary(const std::string&);
+  static LibraryHandle OpenLibrary(std::string const&);
 
   static int CloseLibrary(LibraryHandle);
 
-  static SymbolPointer GetSymbolAddress(LibraryHandle, const std::string&);
+  static SymbolPointer GetSymbolAddress(LibraryHandle, std::string const&);
 };
 
 #endif

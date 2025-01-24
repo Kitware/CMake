@@ -36,7 +36,7 @@
 #include "cmake.h"
 
 namespace {
-constexpr const char* unique_binary_directory = "CMAKE_BINARY_DIR_USE_MKDTEMP";
+constexpr char const* unique_binary_directory = "CMAKE_BINARY_DIR_USE_MKDTEMP";
 constexpr size_t lang_property_start = 0;
 constexpr size_t lang_property_size = 4;
 constexpr size_t pie_property_start = 4;
@@ -135,14 +135,14 @@ ArgumentParser::Continue TryCompileCompileDefs(Arguments& args,
 }
 
 cmArgumentParser<Arguments> makeTryCompileParser(
-  const cmArgumentParser<Arguments>& base)
+  cmArgumentParser<Arguments> const& base)
 {
   return cmArgumentParser<Arguments>{ base }.Bind("OUTPUT_VARIABLE"_s,
                                                   &Arguments::OutputVariable);
 }
 
 cmArgumentParser<Arguments> makeTryRunParser(
-  const cmArgumentParser<Arguments>& base)
+  cmArgumentParser<Arguments> const& base)
 {
   return cmArgumentParser<Arguments>{ base }
     .Bind("COMPILE_OUTPUT_VARIABLE"_s, &Arguments::CompileOutputVariable)
@@ -254,8 +254,8 @@ ArgumentParser::Continue cmCoreTryCompile::Arguments::SetSourceType(
 }
 
 Arguments cmCoreTryCompile::ParseArgs(
-  const cmRange<std::vector<std::string>::const_iterator>& args,
-  const cmArgumentParser<Arguments>& parser,
+  cmRange<std::vector<std::string>::const_iterator> const& args,
+  cmArgumentParser<Arguments> const& parser,
   std::vector<std::string>& unparsedArguments)
 {
   Arguments arguments{ this->Makefile };
@@ -263,7 +263,7 @@ Arguments cmCoreTryCompile::ParseArgs(
   if (!arguments.MaybeReportError(*(this->Makefile)) &&
       !unparsedArguments.empty()) {
     std::string m = "Unknown arguments:";
-    for (const auto& i : unparsedArguments) {
+    for (auto const& i : unparsedArguments) {
       m = cmStrCat(m, "\n  \"", i, '"');
     }
     this->Makefile->IssueMessage(MessageType::AUTHOR_WARNING, m);
@@ -275,7 +275,7 @@ Arguments cmCoreTryCompile::ParseArgs(
   cmRange<std::vector<std::string>::const_iterator> args, bool isTryRun)
 {
   std::vector<std::string> unparsedArguments;
-  const auto& second = *(++args.begin());
+  auto const& second = *(++args.begin());
 
   if (!isTryRun && second == "PROJECT") {
     // New PROJECT signature (try_compile only).
@@ -534,8 +534,8 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     if (arguments.SourceFromContent) {
       auto const k = arguments.SourceFromContent->size();
       for (auto i = decltype(k){ 0 }; i < k; i += 2) {
-        const auto& name = (*arguments.SourceFromContent)[i + 0].first;
-        const auto& content = (*arguments.SourceFromContent)[i + 1].first;
+        auto const& name = (*arguments.SourceFromContent)[i + 0].first;
+        auto const& content = (*arguments.SourceFromContent)[i + 1].first;
         auto out = this->WriteSource(name, content, "SOURCE_FROM_CONTENT");
         if (out.empty()) {
           return cm::nullopt;
@@ -547,9 +547,9 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     if (arguments.SourceFromVar) {
       auto const k = arguments.SourceFromVar->size();
       for (auto i = decltype(k){ 0 }; i < k; i += 2) {
-        const auto& name = (*arguments.SourceFromVar)[i + 0].first;
-        const auto& var = (*arguments.SourceFromVar)[i + 1].first;
-        const auto& content = this->Makefile->GetDefinition(var);
+        auto const& name = (*arguments.SourceFromVar)[i + 0].first;
+        auto const& var = (*arguments.SourceFromVar)[i + 1].first;
+        auto const& content = this->Makefile->GetDefinition(var);
         auto out = this->WriteSource(name, content, "SOURCE_FROM_VAR");
         if (out.empty()) {
           return cm::nullopt;
@@ -561,11 +561,11 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     if (arguments.SourceFromFile) {
       auto const k = arguments.SourceFromFile->size();
       for (auto i = decltype(k){ 0 }; i < k; i += 2) {
-        const auto& dst = (*arguments.SourceFromFile)[i + 0].first;
-        const auto& src = (*arguments.SourceFromFile)[i + 1].first;
+        auto const& dst = (*arguments.SourceFromFile)[i + 0].first;
+        auto const& src = (*arguments.SourceFromFile)[i + 1].first;
 
         if (!cmSystemTools::GetFilenamePath(dst).empty()) {
-          const auto& msg =
+          auto const& msg =
             cmStrCat("SOURCE_FROM_FILE given invalid filename \"", dst, '"');
           this->Makefile->IssueMessage(MessageType::FATAL_ERROR, msg);
           return cm::nullopt;
@@ -574,7 +574,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
         auto dstPath = cmStrCat(this->BinaryDirectory, '/', dst);
         auto const result = cmSystemTools::CopyFileAlways(src, dstPath);
         if (!result.IsSuccess()) {
-          const auto& msg = cmStrCat("SOURCE_FROM_FILE failed to copy \"", src,
+          auto const& msg = cmStrCat("SOURCE_FROM_FILE failed to copy \"", src,
                                      "\": ", result.GetString());
           this->Makefile->IssueMessage(MessageType::FATAL_ERROR, msg);
           return cm::nullopt;
@@ -825,11 +825,11 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
               fname.c_str());
       // Create all relevant alias targets
       if (arguments.LinkLibraries) {
-        const auto& aliasTargets = this->Makefile->GetAliasTargets();
+        auto const& aliasTargets = this->Makefile->GetAliasTargets();
         for (std::string const& i : *arguments.LinkLibraries) {
           auto alias = aliasTargets.find(i);
           if (alias != aliasTargets.end()) {
-            const auto& aliasTarget =
+            auto const& aliasTarget =
               this->Makefile->FindTargetToUse(alias->second);
             // Create equivalent library/executable alias
             if (aliasTarget->GetType() == cmStateEnums::EXECUTABLE) {
@@ -1021,7 +1021,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     if (!arguments.LinkOptions.empty()) {
       std::vector<std::string> options;
       options.reserve(arguments.LinkOptions.size());
-      for (const auto& option : arguments.LinkOptions) {
+      for (auto const& option : arguments.LinkOptions) {
         options.emplace_back(cmOutputConverter::EscapeForCMake(option));
       }
 
@@ -1204,7 +1204,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
   if (!this->SrcFileSignature &&
       this->Makefile->GetState()->GetGlobalPropertyAsBool(
         "PROPAGATE_TOP_LEVEL_INCLUDES_TO_TRY_COMPILE")) {
-    const std::string var = "CMAKE_PROJECT_TOP_LEVEL_INCLUDES";
+    std::string const var = "CMAKE_PROJECT_TOP_LEVEL_INCLUDES";
     if (cmValue val = this->Makefile->GetDefinition(var)) {
       std::string flag = cmStrCat("-D", var, "=\'", *val, '\'');
       arguments.CMakeFlags.emplace_back(std::move(flag));
@@ -1338,7 +1338,7 @@ void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
   dir.Load(binDir);
   std::set<std::string> deletedFiles;
   for (unsigned long i = 0; i < dir.GetNumberOfFiles(); ++i) {
-    const char* fileName = dir.GetFile(i);
+    char const* fileName = dir.GetFile(i);
     if (strcmp(fileName, ".") != 0 && strcmp(fileName, "..") != 0 &&
         // Do not delete NFS temporary files.
         !cmHasPrefix(fileName, ".nfs")) {
@@ -1381,7 +1381,7 @@ void cmCoreTryCompile::CleanupFiles(std::string const& binDir)
   }
 }
 
-void cmCoreTryCompile::FindOutputFile(const std::string& targetName)
+void cmCoreTryCompile::FindOutputFile(std::string const& targetName)
 {
   this->FindErrorMessage.clear();
   this->OutputFile.clear();
@@ -1426,7 +1426,7 @@ std::string cmCoreTryCompile::WriteSource(std::string const& filename,
                                           char const* command) const
 {
   if (!cmSystemTools::GetFilenamePath(filename).empty()) {
-    const auto& msg =
+    auto const& msg =
       cmStrCat(command, " given invalid filename \"", filename, '"');
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR, msg);
     return {};
@@ -1435,7 +1435,7 @@ std::string cmCoreTryCompile::WriteSource(std::string const& filename,
   auto filepath = cmStrCat(this->BinaryDirectory, '/', filename);
   cmsys::ofstream file{ filepath.c_str(), std::ios::out };
   if (!file) {
-    const auto& msg =
+    auto const& msg =
       cmStrCat(command, " failed to open \"", filename, "\" for writing");
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR, msg);
     return {};
@@ -1443,7 +1443,7 @@ std::string cmCoreTryCompile::WriteSource(std::string const& filename,
 
   file << content;
   if (!file) {
-    const auto& msg = cmStrCat(command, " failed to write \"", filename, '"');
+    auto const& msg = cmStrCat(command, " failed to write \"", filename, '"');
     this->Makefile->IssueMessage(MessageType::FATAL_ERROR, msg);
     return {};
   }

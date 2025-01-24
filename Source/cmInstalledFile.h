@@ -31,8 +31,8 @@ public:
     Property();
     ~Property();
 
-    Property(const Property&) = delete;
-    Property& operator=(const Property&) = delete;
+    Property(Property const&) = delete;
+    Property& operator=(Property const&) = delete;
 
     ExpressionVectorType ValueExpressions;
   };
@@ -43,26 +43,26 @@ public:
 
   ~cmInstalledFile();
 
-  cmInstalledFile(const cmInstalledFile&) = delete;
-  cmInstalledFile& operator=(const cmInstalledFile&) = delete;
+  cmInstalledFile(cmInstalledFile const&) = delete;
+  cmInstalledFile& operator=(cmInstalledFile const&) = delete;
 
-  void RemoveProperty(const std::string& prop);
+  void RemoveProperty(std::string const& prop);
 
-  void SetProperty(cmMakefile const* mf, const std::string& prop,
-                   const std::string& value);
+  void SetProperty(cmMakefile const* mf, std::string const& prop,
+                   std::string const& value);
 
-  void AppendProperty(cmMakefile const* mf, const std::string& prop,
-                      const std::string& value, bool asString = false);
+  void AppendProperty(cmMakefile const* mf, std::string const& prop,
+                      std::string const& value, bool asString = false);
 
-  bool HasProperty(const std::string& prop) const;
+  bool HasProperty(std::string const& prop) const;
 
-  bool GetProperty(const std::string& prop, std::string& value) const;
+  bool GetProperty(std::string const& prop, std::string& value) const;
 
-  bool GetPropertyAsBool(const std::string& prop) const;
+  bool GetPropertyAsBool(std::string const& prop) const;
 
-  std::vector<std::string> GetPropertyAsList(const std::string& prop) const;
+  std::vector<std::string> GetPropertyAsList(std::string const& prop) const;
 
-  void SetName(cmMakefile* mf, const std::string& name);
+  void SetName(cmMakefile* mf, std::string const& name);
 
   std::string const& GetName() const;
 

@@ -20,14 +20,14 @@ public:
   virtual ~cmIDEOptions();
 
   // Store definitions, includes and flags.
-  void AddDefine(const std::string& define);
+  void AddDefine(std::string const& define);
   void AddDefines(std::string const& defines);
-  void AddDefines(const std::vector<std::string>& defines);
+  void AddDefines(std::vector<std::string> const& defines);
   std::vector<std::string> const& GetDefines() const;
 
-  void AddInclude(const std::string& includes);
+  void AddInclude(std::string const& includes);
   void AddIncludes(std::string const& includes);
-  void AddIncludes(const std::vector<std::string>& includes);
+  void AddIncludes(std::vector<std::string> const& includes);
   std::vector<std::string> const& GetIncludes() const;
 
   void AddFlag(std::string const& flag, std::string const& value);
@@ -38,7 +38,7 @@ public:
   void AppendFlagString(std::string const& flag, std::string const& value);
   void RemoveFlag(std::string const& flag);
   bool HasFlag(std::string const& flag) const;
-  const char* GetFlag(std::string const& flag) const;
+  char const* GetFlag(std::string const& flag) const;
 
 protected:
   // create a map of xml tags to the values they should have in the output

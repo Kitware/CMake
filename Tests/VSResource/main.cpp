@@ -6,7 +6,7 @@ extern int lib();
 
 struct x
 {
-  const char* txt;
+  char const* txt;
 };
 
 int main(int argc, char** argv)

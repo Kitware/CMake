@@ -24,19 +24,19 @@ protected:
   std::string WorkspacePath;
   unsigned int CpuCount = 2;
 
-  std::string GetCodeLiteCompilerName(const cmMakefile* mf) const;
-  std::string GetConfigurationName(const cmMakefile* mf) const;
-  std::string GetBuildCommand(const cmMakefile* mf,
-                              const std::string& targetName) const;
-  std::string GetCleanCommand(const cmMakefile* mf,
-                              const std::string& targetName) const;
-  std::string GetRebuildCommand(const cmMakefile* mf,
-                                const std::string& targetName) const;
-  std::string GetSingleFileBuildCommand(const cmMakefile* mf) const;
+  std::string GetCodeLiteCompilerName(cmMakefile const* mf) const;
+  std::string GetConfigurationName(cmMakefile const* mf) const;
+  std::string GetBuildCommand(cmMakefile const* mf,
+                              std::string const& targetName) const;
+  std::string GetCleanCommand(cmMakefile const* mf,
+                              std::string const& targetName) const;
+  std::string GetRebuildCommand(cmMakefile const* mf,
+                                std::string const& targetName) const;
+  std::string GetSingleFileBuildCommand(cmMakefile const* mf) const;
   std::vector<std::string> CreateProjectsByTarget(cmXMLWriter* xml);
   std::vector<std::string> CreateProjectsByProjectMaps(cmXMLWriter* xml);
-  std::string CollectSourceFiles(const cmMakefile* makefile,
-                                 const cmGeneratorTarget* gt,
+  std::string CollectSourceFiles(cmMakefile const* makefile,
+                                 cmGeneratorTarget const* gt,
                                  std::map<std::string, cmSourceFile*>& cFiles,
                                  std::set<std::string>& otherFiles);
   void FindMatchingHeaderfiles(std::map<std::string, cmSourceFile*>& cFiles,
@@ -44,14 +44,14 @@ protected:
   void CreateProjectSourceEntries(std::map<std::string, cmSourceFile*>& cFiles,
                                   std::set<std::string>& otherFiles,
                                   cmXMLWriter* xml,
-                                  const std::string& projectPath,
-                                  const cmMakefile* mf,
-                                  const std::string& projectType,
-                                  const std::string& targetName);
+                                  std::string const& projectPath,
+                                  cmMakefile const* mf,
+                                  std::string const& projectType,
+                                  std::string const& targetName);
   void CreateFoldersAndFiles(std::set<std::string>& cFiles, cmXMLWriter& xml,
-                             const std::string& projectPath);
+                             std::string const& projectPath);
   void CreateFoldersAndFiles(std::map<std::string, cmSourceFile*>& cFiles,
-                             cmXMLWriter& xml, const std::string& projectPath);
+                             cmXMLWriter& xml, std::string const& projectPath);
 
 public:
   cmExtraCodeLiteGenerator();
@@ -59,10 +59,10 @@ public:
   static cmExternalMakefileProjectGeneratorFactory* GetFactory();
 
   void Generate() override;
-  void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);
+  void CreateProjectFile(std::vector<cmLocalGenerator*> const& lgs);
 
-  void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,
-                            const std::string& filename);
-  void CreateNewProjectFile(const cmGeneratorTarget* lg,
-                            const std::string& filename);
+  void CreateNewProjectFile(std::vector<cmLocalGenerator*> const& lgs,
+                            std::string const& filename);
+  void CreateNewProjectFile(cmGeneratorTarget const* lg,
+                            std::string const& filename);
 };

@@ -16,7 +16,7 @@ int main(void)
   unsigned int cp = GetConsoleOutputCP();
 
   /* 'cl /showIncludes' prints output in the VS language.  */
-  const char* vslang = getenv("VSLANG");
+  char const* vslang = getenv("VSLANG");
   if (!vslang) {
     fprintf(stderr, "VSLANG is not set.\n");
     return 1;

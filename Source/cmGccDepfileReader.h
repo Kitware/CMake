@@ -18,5 +18,5 @@ enum class GccDepfilePrependPaths
  * Read dependencies file and prepend prefix to all relative paths
  */
 cm::optional<cmGccDepfileContent> cmReadGccDepfile(
-  const char* filePath, const std::string& prefix = {},
+  char const* filePath, std::string const& prefix = {},
   GccDepfilePrependPaths prependPaths = GccDepfilePrependPaths::All);

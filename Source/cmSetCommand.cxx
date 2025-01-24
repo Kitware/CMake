@@ -31,7 +31,7 @@ bool cmSetCommand(std::vector<std::string> const& args,
 
     // what is the current value if any
     std::string currValue;
-    const bool currValueSet = cmSystemTools::GetEnv(varName, currValue);
+    bool const currValueSet = cmSystemTools::GetEnv(varName, currValue);
 
     // will it be set to something, then set it
     if (args.size() > 1 && !args[1].empty()) {

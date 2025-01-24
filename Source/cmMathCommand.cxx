@@ -23,7 +23,7 @@ bool cmMathCommand(std::vector<std::string> const& args,
     status.SetError("must be called with at least one argument.");
     return false;
   }
-  const std::string& subCommand = args[0];
+  std::string const& subCommand = args[0];
   if (subCommand == "EXPR") {
     return HandleExprCommand(args, status);
   }
@@ -48,15 +48,15 @@ bool HandleExprCommand(std::vector<std::string> const& args,
     HEXADECIMAL,
   };
 
-  const std::string& outputVariable = args[1];
-  const std::string& expression = args[2];
+  std::string const& outputVariable = args[1];
+  std::string const& expression = args[2];
   size_t argumentIndex = 3;
   NumericFormat outputFormat = NumericFormat::UNINITIALIZED;
 
   status.GetMakefile().AddDefinition(outputVariable, "ERROR");
 
   if (argumentIndex < args.size()) {
-    const std::string messageHint = "sub-command EXPR ";
+    std::string const messageHint = "sub-command EXPR ";
     std::string const& option = args[argumentIndex++];
     if (option == "OUTPUT_FORMAT") {
       if (argumentIndex < args.size()) {
@@ -96,7 +96,7 @@ bool HandleExprCommand(std::vector<std::string> const& args,
   }
 
   char buffer[1024];
-  const char* fmt;
+  char const* fmt;
   switch (outputFormat) {
     case NumericFormat::HEXADECIMAL:
       fmt = "0x%" KWIML_INT_PRIx64;

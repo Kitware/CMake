@@ -37,8 +37,8 @@ public:
    * Set/Get the value (setting the value also changes the contents
    * of the field buffer).
    */
-  virtual void SetValue(const std::string& value);
-  virtual const char* GetValue();
+  virtual void SetValue(std::string const& value);
+  virtual char const* GetValue();
 
   /**
    * Get the type of the widget (STRING, PATH etc...)

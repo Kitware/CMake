@@ -40,7 +40,7 @@ public:
     this->ParseTranslationUnits();
   }
 
-  const TranslationUnitsType& GetTranslationUnits()
+  TranslationUnitsType const& GetTranslationUnits()
   {
     return this->TranslationUnits;
   }
@@ -99,7 +99,7 @@ private:
     return false;
   }
 
-  void ExpectOrDie(char c, const std::string& message)
+  void ExpectOrDie(char c, std::string const& message)
   {
     if (!this->Expect(c)) {
       this->ErrorExit(std::string("'") + c + "' expected " + message + ".");
@@ -121,7 +121,7 @@ private:
     }
   }
 
-  void ErrorExit(const std::string& message)
+  void ErrorExit(std::string const& message)
   {
     std::cout << "ERROR: " << message;
     exit(1);

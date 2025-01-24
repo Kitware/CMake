@@ -24,33 +24,33 @@ public:
   cmDependsJavaParserHelper();
   ~cmDependsJavaParserHelper();
 
-  cmDependsJavaParserHelper(const cmDependsJavaParserHelper&) = delete;
-  cmDependsJavaParserHelper& operator=(const cmDependsJavaParserHelper&) =
+  cmDependsJavaParserHelper(cmDependsJavaParserHelper const&) = delete;
+  cmDependsJavaParserHelper& operator=(cmDependsJavaParserHelper const&) =
     delete;
 
-  int ParseString(const char* str, int verb);
-  int ParseFile(const char* file);
+  int ParseString(char const* str, int verb);
+  int ParseFile(char const* file);
 
   // For the lexer:
   void AllocateParserType(cmDependsJavaParserHelper::ParserType* pt,
-                          const char* str, int len = 0);
+                          char const* str, int len = 0);
 
   int LexInput(char* buf, int maxlen);
-  void Error(const char* str);
+  void Error(char const* str);
 
   // For yacc
-  void AddClassFound(const char* sclass);
+  void AddClassFound(char const* sclass);
   void PrepareElement(ParserType* me);
   void DeallocateParserType(char** pt);
   void CheckEmpty(int line, int cnt, ParserType* pt);
-  void StartClass(const char* cls);
+  void StartClass(char const* cls);
   void EndClass();
-  void AddPackagesImport(const char* sclass);
-  void SetCurrentPackage(const char* pkg) { this->CurrentPackage = pkg; }
-  const char* GetCurrentPackage() { return this->CurrentPackage.c_str(); }
-  void SetCurrentCombine(const char* cmb) { this->CurrentCombine = cmb; }
-  const char* GetCurrentCombine() { return this->CurrentCombine.c_str(); }
-  void UpdateCombine(const char* str1, const char* str2);
+  void AddPackagesImport(char const* sclass);
+  void SetCurrentPackage(char const* pkg) { this->CurrentPackage = pkg; }
+  char const* GetCurrentPackage() { return this->CurrentPackage.c_str(); }
+  void SetCurrentCombine(char const* cmb) { this->CurrentCombine = cmb; }
+  char const* GetCurrentCombine() { return this->CurrentCombine.c_str(); }
+  void UpdateCombine(char const* str1, char const* str2);
 
   std::vector<std::string>& GetClassesFound() { return this->ClassesFound; }
 
@@ -63,7 +63,7 @@ private:
     std::string Name;
     std::vector<CurrentClass> NestedClasses;
     void AddFileNamesForPrinting(std::vector<std::string>* files,
-                                 const char* prefix, const char* sep) const;
+                                 char const* prefix, char const* sep) const;
   };
   std::string CurrentPackage;
   std::string::size_type InputBufferPos;
@@ -85,9 +85,9 @@ private:
 
   void PrintClasses();
 
-  void Print(const char* place, const char* str) const;
-  void CombineUnions(char** out, const char* in1, char** in2, const char* sep);
-  void SafePrintMissing(const char* str, int line, int cnt);
+  void Print(char const* place, char const* str) const;
+  void CombineUnions(char** out, char const* in1, char** in2, char const* sep);
+  void SafePrintMissing(char const* str, int line, int cnt);
 
   void CleanupParser();
 };

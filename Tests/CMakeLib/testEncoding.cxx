@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
     std::cout << "Usage: testEncoding <encoding> <file>" << std::endl;
     return 1;
   }
-  const std::string encoding(argv[1]);
+  std::string const encoding(argv[1]);
 #ifdef _WIN32
   if ((encoding == "UTF8") || (encoding == "UTF-8")) {
     setEncoding(consoleOut, CP_UTF8);

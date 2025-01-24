@@ -50,7 +50,7 @@ cmCPackGenerator::~cmCPackGenerator()
   this->MakefileMap = nullptr;
 }
 
-void cmCPackGenerator::DisplayVerboseOutput(const std::string& msg,
+void cmCPackGenerator::DisplayVerboseOutput(std::string const& msg,
                                             float /*unused*/)
 {
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, msg << std::endl);
@@ -227,7 +227,7 @@ int cmCPackGenerator::InstallProject()
     this->GetOption("CPACK_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS");
   if (cmNonempty(default_dir_install_permissions)) {
     cmList items{ default_dir_install_permissions };
-    for (const auto& arg : items) {
+    for (auto const& arg : items) {
       if (!cmFSPermissions::stringToModeT(arg, default_dir_mode_v)) {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
                       "Invalid permission value '"
@@ -275,8 +275,8 @@ int cmCPackGenerator::InstallProject()
   // Run pre-build actions
   cmValue preBuildScripts = this->GetOption("CPACK_PRE_BUILD_SCRIPTS");
   if (preBuildScripts) {
-    const cmList scripts{ preBuildScripts };
-    for (const auto& script : scripts) {
+    cmList const scripts{ preBuildScripts };
+    for (auto const& script : scripts) {
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                     "Executing pre-build script: " << script << std::endl);
 
@@ -297,7 +297,7 @@ int cmCPackGenerator::InstallProject()
 }
 
 int cmCPackGenerator::InstallProjectViaInstallCommands(
-  bool setDestDir, const std::string& tempInstallDirectory)
+  bool setDestDir, std::string const& tempInstallDirectory)
 {
   (void)setDestDir;
   cmValue installCommands = this->GetOption("CPACK_INSTALL_COMMANDS");
@@ -333,8 +333,8 @@ int cmCPackGenerator::InstallProjectViaInstallCommands(
 }
 
 int cmCPackGenerator::InstallProjectViaInstalledDirectories(
-  bool setDestDir, const std::string& tempInstallDirectory,
-  const mode_t* default_dir_mode)
+  bool setDestDir, std::string const& tempInstallDirectory,
+  mode_t const* default_dir_mode)
 {
   (void)setDestDir;
   (void)tempInstallDirectory;
@@ -362,7 +362,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
       return 0;
     }
     cmList::iterator it;
-    const std::string& tempDir = tempInstallDirectory;
+    std::string const& tempDir = tempInstallDirectory;
     for (it = installDirectoriesList.begin();
          it != installDirectoriesList.end(); ++it) {
       std::vector<std::pair<std::string, std::string>> symlinkedFiles;
@@ -470,7 +470,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
 }
 
 int cmCPackGenerator::InstallProjectViaInstallScript(
-  bool setDestDir, const std::string& tempInstallDirectory)
+  bool setDestDir, std::string const& tempInstallDirectory)
 {
   cmValue cmakeScripts = this->GetOption("CPACK_INSTALL_SCRIPTS");
   {
@@ -537,8 +537,8 @@ int cmCPackGenerator::InstallProjectViaInstallScript(
 }
 
 int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
-  bool setDestDir, const std::string& baseTempInstallDirectory,
-  const mode_t* default_dir_mode)
+  bool setDestDir, std::string const& baseTempInstallDirectory,
+  mode_t const* default_dir_mode)
 {
   cmValue cmakeProjects = this->GetOption("CPACK_INSTALL_CMAKE_PROJECTS");
   cmValue cmakeGenerator = this->GetOption("CPACK_CMAKE_GENERATOR");
@@ -679,11 +679,11 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
 }
 
 int cmCPackGenerator::RunPreinstallTarget(
-  const std::string& installProjectName, const std::string& installDirectory,
-  cmGlobalGenerator* globalGenerator, const std::string& buildConfig)
+  std::string const& installProjectName, std::string const& installDirectory,
+  cmGlobalGenerator* globalGenerator, std::string const& buildConfig)
 {
   // Does this generator require pre-install?
-  if (const char* preinstall = globalGenerator->GetPreinstallTargetName()) {
+  if (char const* preinstall = globalGenerator->GetPreinstallTargetName()) {
     std::string buildCommand = globalGenerator->GenerateCMakeBuildCommand(
       preinstall, buildConfig, "", "", false);
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
@@ -717,10 +717,10 @@ int cmCPackGenerator::RunPreinstallTarget(
 }
 
 int cmCPackGenerator::InstallCMakeProject(
-  bool setDestDir, const std::string& installDirectory,
-  const std::string& baseTempInstallDirectory, const mode_t* default_dir_mode,
-  const std::string& component, bool componentInstall,
-  const std::string& installSubDirectory, const std::string& buildConfig,
+  bool setDestDir, std::string const& installDirectory,
+  std::string const& baseTempInstallDirectory, mode_t const* default_dir_mode,
+  std::string const& component, bool componentInstall,
+  std::string const& installSubDirectory, std::string const& buildConfig,
   std::string& absoluteDestFiles)
 {
   std::string tempInstallDirectory = baseTempInstallDirectory;
@@ -736,7 +736,7 @@ int cmCPackGenerator::InstallCMakeProject(
   cm.SetHomeOutputDirectory("");
   cm.GetCurrentSnapshot().SetDefaultDefinitions();
   cm.AddCMakePaths();
-  cm.SetProgressCallback([this](const std::string& msg, float prog) {
+  cm.SetProgressCallback([this](std::string const& msg, float prog) {
     this->DisplayVerboseOutput(msg, prog);
   });
   cm.SetTrace(this->Trace);
@@ -998,7 +998,7 @@ bool cmCPackGenerator::GenerateChecksumFile(cmCryptoHash& crypto,
   return true;
 }
 
-bool cmCPackGenerator::CopyPackageFile(const std::string& srcFilePath,
+bool cmCPackGenerator::CopyPackageFile(std::string const& srcFilePath,
                                        cm::string_view filename) const
 {
   std::string destFilePath =
@@ -1021,7 +1021,7 @@ bool cmCPackGenerator::CopyPackageFile(const std::string& srcFilePath,
   return true;
 }
 
-bool cmCPackGenerator::ReadListFile(const char* moduleName)
+bool cmCPackGenerator::ReadListFile(char const* moduleName)
 {
   bool retval;
   std::string fullPath = this->MakefileMap->GetModulesFile(moduleName);
@@ -1032,7 +1032,7 @@ bool cmCPackGenerator::ReadListFile(const char* moduleName)
 }
 
 template <typename ValueType>
-void cmCPackGenerator::StoreOptionIfNotSet(const std::string& op,
+void cmCPackGenerator::StoreOptionIfNotSet(std::string const& op,
                                            ValueType value)
 {
   cmValue def = this->MakefileMap->GetDefinition(op);
@@ -1042,18 +1042,18 @@ void cmCPackGenerator::StoreOptionIfNotSet(const std::string& op,
   this->StoreOption(op, value);
 }
 
-void cmCPackGenerator::SetOptionIfNotSet(const std::string& op,
-                                         const char* value)
+void cmCPackGenerator::SetOptionIfNotSet(std::string const& op,
+                                         char const* value)
 {
   this->StoreOptionIfNotSet(op, value);
 }
-void cmCPackGenerator::SetOptionIfNotSet(const std::string& op, cmValue value)
+void cmCPackGenerator::SetOptionIfNotSet(std::string const& op, cmValue value)
 {
   this->StoreOptionIfNotSet(op, value);
 }
 
 template <typename ValueType>
-void cmCPackGenerator::StoreOption(const std::string& op, ValueType value)
+void cmCPackGenerator::StoreOption(std::string const& op, ValueType value)
 {
   if (!value) {
     this->MakefileMap->RemoveDefinition(op);
@@ -1065,11 +1065,11 @@ void cmCPackGenerator::StoreOption(const std::string& op, ValueType value)
   this->MakefileMap->AddDefinition(op, value);
 }
 
-void cmCPackGenerator::SetOption(const std::string& op, const char* value)
+void cmCPackGenerator::SetOption(std::string const& op, char const* value)
 {
   this->StoreOption(op, value);
 }
-void cmCPackGenerator::SetOption(const std::string& op, cmValue value)
+void cmCPackGenerator::SetOption(std::string const& op, cmValue value)
 {
   this->StoreOption(op, value);
 }
@@ -1186,8 +1186,8 @@ int cmCPackGenerator::DoPackage()
     this->MakefileMap->AddDefinition(
       "CPACK_PACKAGE_FILES", cmList::to_string(this->packageFileNames));
 
-    const cmList scripts{ postBuildScripts };
-    for (const auto& script : scripts) {
+    cmList const scripts{ postBuildScripts };
+    for (auto const& script : scripts) {
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                     "Executing post-build script: " << script << std::endl);
 
@@ -1230,7 +1230,7 @@ int cmCPackGenerator::DoPackage()
   return 1;
 }
 
-int cmCPackGenerator::Initialize(const std::string& name, cmMakefile* mf)
+int cmCPackGenerator::Initialize(std::string const& name, cmMakefile* mf)
 {
   this->MakefileMap = mf;
   this->Name = name;
@@ -1313,12 +1313,12 @@ int cmCPackGenerator::InitializeInternal()
   return 1;
 }
 
-bool cmCPackGenerator::IsSet(const std::string& name) const
+bool cmCPackGenerator::IsSet(std::string const& name) const
 {
   return this->MakefileMap->IsSet(name);
 }
 
-cmValue cmCPackGenerator::GetOptionIfSet(const std::string& name) const
+cmValue cmCPackGenerator::GetOptionIfSet(std::string const& name) const
 {
   cmValue ret = this->MakefileMap->GetDefinition(name);
   if (!ret || ret->empty() || cmIsNOTFOUND(*ret)) {
@@ -1327,12 +1327,12 @@ cmValue cmCPackGenerator::GetOptionIfSet(const std::string& name) const
   return ret;
 }
 
-bool cmCPackGenerator::IsOn(const std::string& name) const
+bool cmCPackGenerator::IsOn(std::string const& name) const
 {
   return this->GetOption(name).IsOn();
 }
 
-bool cmCPackGenerator::IsSetToOff(const std::string& op) const
+bool cmCPackGenerator::IsSetToOff(std::string const& op) const
 {
   cmValue ret = this->MakefileMap->GetDefinition(op);
   if (cmNonempty(ret)) {
@@ -1341,7 +1341,7 @@ bool cmCPackGenerator::IsSetToOff(const std::string& op) const
   return false;
 }
 
-bool cmCPackGenerator::IsSetToEmpty(const std::string& op) const
+bool cmCPackGenerator::IsSetToEmpty(std::string const& op) const
 {
   cmValue ret = this->MakefileMap->GetDefinition(op);
   if (ret) {
@@ -1350,7 +1350,7 @@ bool cmCPackGenerator::IsSetToEmpty(const std::string& op) const
   return false;
 }
 
-cmValue cmCPackGenerator::GetOption(const std::string& op) const
+cmValue cmCPackGenerator::GetOption(std::string const& op) const
 {
   cmValue ret = this->MakefileMap->GetDefinition(op);
   if (!ret) {
@@ -1370,7 +1370,7 @@ int cmCPackGenerator::PackageFiles()
   return 0;
 }
 
-const char* cmCPackGenerator::GetInstallPath()
+char const* cmCPackGenerator::GetInstallPath()
 {
   if (!this->InstallPath.empty()) {
     return this->InstallPath.c_str();
@@ -1403,7 +1403,7 @@ const char* cmCPackGenerator::GetInstallPath()
   return this->InstallPath.c_str();
 }
 
-const char* cmCPackGenerator::GetPackagingInstallPrefix()
+char const* cmCPackGenerator::GetPackagingInstallPrefix()
 {
   cmCPackLogger(cmCPackLog::LOG_DEBUG,
                 "GetPackagingInstallPrefix: '"
@@ -1434,15 +1434,15 @@ std::string cmCPackGenerator::FindTemplate(cm::string_view name,
   return ffile;
 }
 
-bool cmCPackGenerator::ConfigureString(const std::string& inString,
+bool cmCPackGenerator::ConfigureString(std::string const& inString,
                                        std::string& outString)
 {
   this->MakefileMap->ConfigureString(inString, outString, true, false);
   return true;
 }
 
-bool cmCPackGenerator::ConfigureFile(const std::string& inName,
-                                     const std::string& outName,
+bool cmCPackGenerator::ConfigureFile(std::string const& inName,
+                                     std::string const& outName,
                                      bool copyOnly /* = false */)
 {
   return this->MakefileMap->ConfigureFile(inName, outName, copyOnly, true,
@@ -1537,7 +1537,7 @@ int cmCPackGenerator::PrepareGroupingKind()
     this->componentPackageMethod = method;
   }
 
-  const char* method_names[] = { "ALL_COMPONENTS_IN_ONE", "IGNORE",
+  char const* method_names[] = { "ALL_COMPONENTS_IN_ONE", "IGNORE",
                                  "ONE_PER_GROUP", "UNKNOWN" };
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
@@ -1550,7 +1550,7 @@ int cmCPackGenerator::PrepareGroupingKind()
 }
 
 std::string cmCPackGenerator::GetSanitizedDirOrFileName(
-  const std::string& name, bool isFullName) const
+  std::string const& name, bool isFullName) const
 {
   if (isFullName) {
 #ifdef _WIN32
@@ -1577,10 +1577,10 @@ std::string cmCPackGenerator::GetSanitizedDirOrFileName(
   }
 
 #ifndef _WIN32
-  constexpr const char* prohibited_chars = "<>\"/\\|?*`";
+  constexpr char const* prohibited_chars = "<>\"/\\|?*`";
 #else
   // Note: Windows also excludes the colon.
-  constexpr const char* prohibited_chars = "<>\"/\\|?*`:";
+  constexpr char const* prohibited_chars = "<>\"/\\|?*`:";
 #endif
   // Given name contains non-supported character?
   // Then return its MD5 hash.
@@ -1594,21 +1594,21 @@ std::string cmCPackGenerator::GetSanitizedDirOrFileName(
 }
 
 std::string cmCPackGenerator::GetComponentInstallSuffix(
-  const std::string& componentName)
+  std::string const& componentName)
 {
   return componentName;
 }
 
 std::string cmCPackGenerator::GetComponentInstallDirNameSuffix(
-  const std::string& componentName)
+  std::string const& componentName)
 {
   return this->GetSanitizedDirOrFileName(
     this->GetComponentInstallSuffix(componentName));
 }
 
 std::string cmCPackGenerator::GetComponentPackageFileName(
-  const std::string& initialPackageFileName,
-  const std::string& groupOrComponentName, bool isGroupName)
+  std::string const& initialPackageFileName,
+  std::string const& groupOrComponentName, bool isGroupName)
 {
 
   /*
@@ -1667,7 +1667,7 @@ bool cmCPackGenerator::WantsComponentInstallation() const
 }
 
 cmCPackInstallationType* cmCPackGenerator::GetInstallationType(
-  const std::string& projectName, const std::string& name)
+  std::string const& projectName, std::string const& name)
 {
   (void)projectName;
   bool hasInstallationType = this->InstallationTypes.count(name) != 0;
@@ -1691,7 +1691,7 @@ cmCPackInstallationType* cmCPackGenerator::GetInstallationType(
 }
 
 cmCPackComponent* cmCPackGenerator::GetComponent(
-  const std::string& projectName, const std::string& name)
+  std::string const& projectName, std::string const& name)
 {
   bool hasComponent = this->Components.count(name) != 0;
   cmCPackComponent* component = &this->Components[name];
@@ -1760,7 +1760,7 @@ cmCPackComponent* cmCPackGenerator::GetComponent(
 }
 
 cmCPackComponentGroup* cmCPackGenerator::GetComponentGroup(
-  const std::string& projectName, const std::string& name)
+  std::string const& projectName, std::string const& name)
 {
   (void)projectName;
   std::string macroPrefix =

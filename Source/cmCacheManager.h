@@ -30,19 +30,19 @@ class cmCacheManager
     friend class cmCacheManager;
 
   public:
-    const std::string& GetValue() const { return this->Value; }
+    std::string const& GetValue() const { return this->Value; }
     void SetValue(cmValue);
 
     cmStateEnums::CacheEntryType GetType() const { return this->Type; }
     void SetType(cmStateEnums::CacheEntryType ty) { this->Type = ty; }
 
     std::vector<std::string> GetPropertyList() const;
-    cmValue GetProperty(const std::string& property) const;
-    bool GetPropertyAsBool(const std::string& property) const;
-    void SetProperty(const std::string& property, const std::string& value);
-    void SetProperty(const std::string& property, bool value);
-    void RemoveProperty(const std::string& property);
-    void AppendProperty(const std::string& property, const std::string& value,
+    cmValue GetProperty(std::string const& property) const;
+    bool GetPropertyAsBool(std::string const& property) const;
+    void SetProperty(std::string const& property, std::string const& value);
+    void SetProperty(std::string const& property, bool value);
+    void RemoveProperty(std::string const& property);
+    void AppendProperty(std::string const& property, std::string const& value,
                         bool asString = false);
 
   private:
@@ -54,15 +54,15 @@ class cmCacheManager
 
 public:
   //! Load a cache for given makefile.  Loads from path/CMakeCache.txt.
-  bool LoadCache(const std::string& path, bool internal,
+  bool LoadCache(std::string const& path, bool internal,
                  std::set<std::string>& excludes,
                  std::set<std::string>& includes);
 
   //! Save cache for given makefile.  Saves to output path/CMakeCache.txt
-  bool SaveCache(const std::string& path, cmMessenger* messenger);
+  bool SaveCache(std::string const& path, cmMessenger* messenger);
 
   //! Delete the cache given
-  bool DeleteCache(const std::string& path);
+  bool DeleteCache(std::string const& path);
 
   //! Print the cache to a stream
   void PrintCache(std::ostream&) const;
@@ -71,11 +71,11 @@ public:
   bool IsCacheLoaded() const { return this->CacheLoaded; }
 
   //! Get a value from the cache given a key
-  cmValue GetInitializedCacheValue(const std::string& key) const;
+  cmValue GetInitializedCacheValue(std::string const& key) const;
 
-  cmValue GetCacheEntryValue(const std::string& key) const
+  cmValue GetCacheEntryValue(std::string const& key) const
   {
-    if (const auto* entry = this->GetCacheEntry(key)) {
+    if (auto const* entry = this->GetCacheEntry(key)) {
       return cmValue(entry->GetValue());
     }
     return nullptr;
@@ -90,7 +90,7 @@ public:
 
   cmStateEnums::CacheEntryType GetCacheEntryType(std::string const& key) const
   {
-    if (const auto* entry = this->GetCacheEntry(key)) {
+    if (auto const* entry = this->GetCacheEntry(key)) {
       return entry->GetType();
     }
     return cmStateEnums::UNINITIALIZED;
@@ -99,7 +99,7 @@ public:
   std::vector<std::string> GetCacheEntryPropertyList(
     std::string const& key) const
   {
-    if (const auto* entry = this->GetCacheEntry(key)) {
+    if (auto const* entry = this->GetCacheEntry(key)) {
       return entry->GetPropertyList();
     }
     return {};
@@ -108,7 +108,7 @@ public:
   cmValue GetCacheEntryProperty(std::string const& key,
                                 std::string const& propName) const
   {
-    if (const auto* entry = this->GetCacheEntry(key)) {
+    if (auto const* entry = this->GetCacheEntry(key)) {
       return entry->GetProperty(propName);
     }
     return nullptr;
@@ -117,7 +117,7 @@ public:
   bool GetCacheEntryPropertyAsBool(std::string const& key,
                                    std::string const& propName) const
   {
-    if (const auto* entry = this->GetCacheEntry(key)) {
+    if (auto const* entry = this->GetCacheEntry(key)) {
       return entry->GetPropertyAsBool(propName);
     }
     return false;
@@ -173,34 +173,34 @@ public:
   unsigned int GetCacheMinorVersion() const { return this->CacheMinorVersion; }
 
   //! Add an entry into the cache
-  void AddCacheEntry(const std::string& key, const std::string& value,
-                     const std::string& helpString,
+  void AddCacheEntry(std::string const& key, std::string const& value,
+                     std::string const& helpString,
                      cmStateEnums::CacheEntryType type)
   {
     this->AddCacheEntry(key, cmValue{ value }, cmValue{ helpString }, type);
   }
-  void AddCacheEntry(const std::string& key, cmValue value,
-                     const std::string& helpString,
+  void AddCacheEntry(std::string const& key, cmValue value,
+                     std::string const& helpString,
                      cmStateEnums::CacheEntryType type)
   {
     this->AddCacheEntry(key, value, cmValue{ helpString }, type);
   }
-  void AddCacheEntry(const std::string& key, cmValue value, cmValue helpString,
+  void AddCacheEntry(std::string const& key, cmValue value, cmValue helpString,
                      cmStateEnums::CacheEntryType type);
 
   //! Remove an entry from the cache
-  void RemoveCacheEntry(const std::string& key);
+  void RemoveCacheEntry(std::string const& key);
 
 private:
   //! Get a cache entry object for a key
-  CacheEntry* GetCacheEntry(const std::string& key);
-  const CacheEntry* GetCacheEntry(const std::string& key) const;
+  CacheEntry* GetCacheEntry(std::string const& key);
+  CacheEntry const* GetCacheEntry(std::string const& key) const;
 
   //! Clean out the CMakeFiles directory if no CMakeCache.txt
-  void CleanCMakeFiles(const std::string& path);
+  void CleanCMakeFiles(std::string const& path);
 
   static void OutputHelpString(std::ostream& fout,
-                               const std::string& helpString);
+                               std::string const& helpString);
   static void OutputWarningComment(std::ostream& fout,
                                    std::string const& message,
                                    bool wrapSpaces);
@@ -213,10 +213,10 @@ private:
   static void OutputValueNoNewlines(std::ostream& fout,
                                     std::string const& value);
 
-  static const char* PersistentProperties[];
-  bool ReadPropertyEntry(const std::string& key, const CacheEntry& e);
-  void WritePropertyEntries(std::ostream& os, const std::string& entryKey,
-                            const CacheEntry& e, cmMessenger* messenger) const;
+  static char const* PersistentProperties[];
+  bool ReadPropertyEntry(std::string const& key, CacheEntry const& e);
+  void WritePropertyEntries(std::ostream& os, std::string const& entryKey,
+                            CacheEntry const& e, cmMessenger* messenger) const;
 
   std::map<std::string, CacheEntry> Cache;
   bool CacheLoaded = false;

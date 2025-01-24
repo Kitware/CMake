@@ -23,17 +23,17 @@ namespace {
 using ParsedArguments = std::map<std::string, std::vector<std::string>>;
 using ExpectedOptions = std::vector<std::string>;
 
-const std::string kTreeOptionName = "TREE";
-const std::string kPrefixOptionName = "PREFIX";
-const std::string kFilesOptionName = "FILES";
-const std::string kRegexOptionName = "REGULAR_EXPRESSION";
-const std::string kSourceGroupOptionName = "<sg_name>";
+std::string const kTreeOptionName = "TREE";
+std::string const kPrefixOptionName = "PREFIX";
+std::string const kFilesOptionName = "FILES";
+std::string const kRegexOptionName = "REGULAR_EXPRESSION";
+std::string const kSourceGroupOptionName = "<sg_name>";
 
 std::set<std::string> getSourceGroupFilesPaths(
-  const std::string& root, const std::vector<std::string>& files)
+  std::string const& root, std::vector<std::string> const& files)
 {
   std::set<std::string> ret;
-  const std::string::size_type rootLength = root.length();
+  std::string::size_type const rootLength = root.length();
 
   for (std::string const& file : files) {
     ret.insert(file.substr(rootLength + 1)); // +1 to also omnit last '/'
@@ -42,8 +42,8 @@ std::set<std::string> getSourceGroupFilesPaths(
   return ret;
 }
 
-bool rootIsPrefix(const std::string& root,
-                  const std::vector<std::string>& files, std::string& error)
+bool rootIsPrefix(std::string const& root,
+                  std::vector<std::string> const& files, std::string& error)
 {
   for (std::string const& file : files) {
     if (!cmHasPrefix(file, root)) {
@@ -56,8 +56,8 @@ bool rootIsPrefix(const std::string& root,
 }
 
 std::vector<std::string> prepareFilesPathsForTree(
-  const std::vector<std::string>& filesPaths,
-  const std::string& currentSourceDir)
+  std::vector<std::string> const& filesPaths,
+  std::string const& currentSourceDir)
 {
   std::vector<std::string> prepared;
   prepared.reserve(filesPaths.size());
@@ -82,9 +82,9 @@ std::vector<std::string> prepareFilesPathsForTree(
   return prepared;
 }
 
-bool addFilesToItsSourceGroups(const std::string& root,
-                               const std::set<std::string>& sgFilesPaths,
-                               const std::string& prefix, cmMakefile& makefile,
+bool addFilesToItsSourceGroups(std::string const& root,
+                               std::set<std::string> const& sgFilesPaths,
+                               std::string const& prefix, cmMakefile& makefile,
                                std::string& errorMsg)
 {
   cmSourceGroup* sg;
@@ -109,7 +109,7 @@ bool addFilesToItsSourceGroups(const std::string& root,
       errorMsg = "Could not create source group for file: " + sgFilesPath;
       return false;
     }
-    const std::string fullPath =
+    std::string const fullPath =
       cmSystemTools::CollapseFullPath(sgFilesPath, root);
     sg->AddGroupFile(fullPath);
   }
@@ -129,16 +129,16 @@ ExpectedOptions getExpectedOptions()
   return options;
 }
 
-bool isExpectedOption(const std::string& argument,
-                      const ExpectedOptions& expectedOptions)
+bool isExpectedOption(std::string const& argument,
+                      ExpectedOptions const& expectedOptions)
 {
   return cm::contains(expectedOptions, argument);
 }
 
-void parseArguments(const std::vector<std::string>& args,
+void parseArguments(std::vector<std::string> const& args,
                     ParsedArguments& parsedArguments)
 {
-  const ExpectedOptions expectedOptions = getExpectedOptions();
+  ExpectedOptions const expectedOptions = getExpectedOptions();
   size_t i = 0;
 
   // at this point we know that args vector is not empty
@@ -152,7 +152,7 @@ void parseArguments(const std::vector<std::string>& args,
 
   for (; i < args.size();) {
     // get current option and increment index to go to next argument
-    const std::string& currentOption = args[i++];
+    std::string const& currentOption = args[i++];
 
     // create current option entry in parsed arguments
     std::vector<std::string>& currentOptionArguments =
@@ -167,14 +167,14 @@ void parseArguments(const std::vector<std::string>& args,
 
 } // namespace
 
-static bool checkArgumentsPreconditions(const ParsedArguments& parsedArguments,
+static bool checkArgumentsPreconditions(ParsedArguments const& parsedArguments,
                                         std::string& errorMsg);
 
 static bool processTree(cmMakefile& mf, ParsedArguments& parsedArguments,
                         std::string& errorMsg);
 
 static bool checkSingleParameterArgumentPreconditions(
-  const std::string& argument, const ParsedArguments& parsedArguments,
+  std::string const& argument, ParsedArguments const& parsedArguments,
   std::string& errorMsg);
 
 bool cmSourceGroupCommand(std::vector<std::string> const& args,
@@ -234,12 +234,12 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
 
     // handle regex
     if (parsedArguments.find(kRegexOptionName) != parsedArguments.end()) {
-      const std::string& sgRegex = parsedArguments[kRegexOptionName].front();
+      std::string const& sgRegex = parsedArguments[kRegexOptionName].front();
       sg->SetGroupRegex(sgRegex.c_str());
     }
 
     // handle files
-    const std::vector<std::string>& filesArguments =
+    std::vector<std::string> const& filesArguments =
       parsedArguments[kFilesOptionName];
     for (auto const& filesArg : filesArguments) {
       std::string src = filesArg;
@@ -252,7 +252,7 @@ bool cmSourceGroupCommand(std::vector<std::string> const& args,
   return true;
 }
 
-static bool checkArgumentsPreconditions(const ParsedArguments& parsedArguments,
+static bool checkArgumentsPreconditions(ParsedArguments const& parsedArguments,
                                         std::string& errorMsg)
 {
   return checkSingleParameterArgumentPreconditions(
@@ -266,7 +266,7 @@ static bool checkArgumentsPreconditions(const ParsedArguments& parsedArguments,
 static bool processTree(cmMakefile& mf, ParsedArguments& parsedArguments,
                         std::string& errorMsg)
 {
-  const std::string root =
+  std::string const root =
     cmSystemTools::CollapseFullPath(parsedArguments[kTreeOptionName].front());
   std::string prefix = parsedArguments[kPrefixOptionName].empty()
     ? ""
@@ -277,16 +277,16 @@ static bool processTree(cmMakefile& mf, ParsedArguments& parsedArguments,
   if (filesArgIt != parsedArguments.end()) {
     files = filesArgIt->second;
   } else {
-    const std::vector<std::unique_ptr<cmSourceFile>>& srcFiles =
+    std::vector<std::unique_ptr<cmSourceFile>> const& srcFiles =
       mf.GetSourceFiles();
-    for (const auto& srcFile : srcFiles) {
+    for (auto const& srcFile : srcFiles) {
       if (!srcFile->GetIsGenerated()) {
         files.push_back(srcFile->GetLocation().GetFullPath());
       }
     }
   }
 
-  const std::vector<std::string> filesVector =
+  std::vector<std::string> const filesVector =
     prepareFilesPathsForTree(files, mf.GetCurrentSourceDirectory());
 
   if (!rootIsPrefix(root, filesVector, errorMsg)) {
@@ -301,12 +301,12 @@ static bool processTree(cmMakefile& mf, ParsedArguments& parsedArguments,
 }
 
 static bool checkSingleParameterArgumentPreconditions(
-  const std::string& argument, const ParsedArguments& parsedArguments,
+  std::string const& argument, ParsedArguments const& parsedArguments,
   std::string& errorMsg)
 {
   auto foundArgument = parsedArguments.find(argument);
   if (foundArgument != parsedArguments.end()) {
-    const std::vector<std::string>& optionArguments = foundArgument->second;
+    std::vector<std::string> const& optionArguments = foundArgument->second;
 
     if (optionArguments.empty()) {
       errorMsg = argument + " argument given without an argument.";

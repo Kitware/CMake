@@ -20,7 +20,7 @@
 #include "cmValue.h"
 #include "cmake.h"
 
-cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name,
+cmSourceFile::cmSourceFile(cmMakefile* mf, std::string const& name,
                            bool generated, cmSourceFileLocationKind kind)
   : Location(mf, name, (!generated) ? kind : cmSourceFileLocationKind::Known)
 {
@@ -34,15 +34,15 @@ std::string const& cmSourceFile::GetExtension() const
   return this->Extension;
 }
 
-const std::string propTRUE = "1";
-const std::string propFALSE = "0";
-const std::string cmSourceFile::propLANGUAGE = "LANGUAGE";
-const std::string cmSourceFile::propLOCATION = "LOCATION";
-const std::string cmSourceFile::propGENERATED = "GENERATED";
-const std::string cmSourceFile::propCOMPILE_DEFINITIONS =
+std::string const propTRUE = "1";
+std::string const propFALSE = "0";
+std::string const cmSourceFile::propLANGUAGE = "LANGUAGE";
+std::string const cmSourceFile::propLOCATION = "LOCATION";
+std::string const cmSourceFile::propGENERATED = "GENERATED";
+std::string const cmSourceFile::propCOMPILE_DEFINITIONS =
   "COMPILE_DEFINITIONS";
-const std::string cmSourceFile::propCOMPILE_OPTIONS = "COMPILE_OPTIONS";
-const std::string cmSourceFile::propINCLUDE_DIRECTORIES =
+std::string const cmSourceFile::propCOMPILE_OPTIONS = "COMPILE_OPTIONS";
+std::string const cmSourceFile::propINCLUDE_DIRECTORIES =
   "INCLUDE_DIRECTORIES";
 
 void cmSourceFile::SetObjectLibrary(std::string const& objlib)
@@ -283,7 +283,7 @@ bool cmSourceFile::Matches(cmSourceFileLocation const& loc)
   return this->Location.Matches(loc);
 }
 
-void cmSourceFile::SetProperty(const std::string& prop, cmValue value)
+void cmSourceFile::SetProperty(std::string const& prop, cmValue value)
 {
   if (prop == propINCLUDE_DIRECTORIES) {
     this->IncludeDirectories.clear();
@@ -308,8 +308,8 @@ void cmSourceFile::SetProperty(const std::string& prop, cmValue value)
   }
 }
 
-void cmSourceFile::AppendProperty(const std::string& prop,
-                                  const std::string& value, bool asString)
+void cmSourceFile::AppendProperty(std::string const& prop,
+                                  std::string const& value, bool asString)
 {
   if (prop == propINCLUDE_DIRECTORIES) {
     if (!value.empty()) {
@@ -331,7 +331,7 @@ void cmSourceFile::AppendProperty(const std::string& prop,
   }
 }
 
-cmValue cmSourceFile::GetPropertyForUser(const std::string& prop)
+cmValue cmSourceFile::GetPropertyForUser(std::string const& prop)
 {
   // This method is a consequence of design history and backwards
   // compatibility.  GetProperty is (and should be) a const method.
@@ -383,7 +383,7 @@ cmValue cmSourceFile::GetPropertyForUser(const std::string& prop)
   return this->GetProperty(prop);
 }
 
-cmValue cmSourceFile::GetProperty(const std::string& prop) const
+cmValue cmSourceFile::GetProperty(std::string const& prop) const
 {
   // Check for computed properties.
   if (prop == propLOCATION) {
@@ -427,7 +427,7 @@ cmValue cmSourceFile::GetProperty(const std::string& prop) const
   cmValue retVal = this->Properties.GetPropertyValue(prop);
   if (!retVal) {
     cmMakefile const* mf = this->Location.GetMakefile();
-    const bool chain =
+    bool const chain =
       mf->GetState()->IsPropertyChained(prop, cmProperty::SOURCE_FILE);
     if (chain) {
       return mf->GetProperty(prop, chain);
@@ -438,7 +438,7 @@ cmValue cmSourceFile::GetProperty(const std::string& prop) const
   return retVal;
 }
 
-const std::string& cmSourceFile::GetSafeProperty(const std::string& prop) const
+std::string const& cmSourceFile::GetSafeProperty(std::string const& prop) const
 {
   cmValue ret = this->GetProperty(prop);
   if (ret) {
@@ -449,7 +449,7 @@ const std::string& cmSourceFile::GetSafeProperty(const std::string& prop) const
   return s_empty;
 }
 
-bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const
+bool cmSourceFile::GetPropertyAsBool(std::string const& prop) const
 {
   return this->GetProperty(prop).IsOn();
 }
@@ -457,7 +457,7 @@ bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const
 void cmSourceFile::MarkAsGenerated()
 {
   this->IsGenerated = true;
-  const auto& mf = *this->Location.GetMakefile();
+  auto const& mf = *this->Location.GetMakefile();
   mf.GetGlobalGenerator()->MarkAsGeneratedFile(this->ResolveFullPath());
 }
 

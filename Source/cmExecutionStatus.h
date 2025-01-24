@@ -41,7 +41,7 @@ public:
     this->ReturnInvoked = true;
   }
   bool GetReturnInvoked() const { return this->ReturnInvoked; }
-  const std::vector<std::string>& GetReturnVariables() const
+  std::vector<std::string> const& GetReturnVariables() const
   {
     return this->Variables;
   }

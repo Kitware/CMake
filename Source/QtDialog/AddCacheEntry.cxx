@@ -6,17 +6,17 @@
 #include <QCompleter>
 #include <QMetaProperty>
 
-static const int NumTypes = 4;
-static const int DefaultTypeIndex = 0;
-static const QByteArray TypeStrings[NumTypes] = { "BOOL", "PATH", "FILEPATH",
+static int const NumTypes = 4;
+static int const DefaultTypeIndex = 0;
+static QByteArray const TypeStrings[NumTypes] = { "BOOL", "PATH", "FILEPATH",
                                                   "STRING" };
-static const QCMakeProperty::PropertyType Types[NumTypes] = {
+static QCMakeProperty::PropertyType const Types[NumTypes] = {
   QCMakeProperty::BOOL, QCMakeProperty::PATH, QCMakeProperty::FILEPATH,
   QCMakeProperty::STRING
 };
 
-AddCacheEntry::AddCacheEntry(QWidget* p, const QStringList& varNames,
-                             const QStringList& varTypes)
+AddCacheEntry::AddCacheEntry(QWidget* p, QStringList const& varNames,
+                             QStringList const& varTypes)
   : QWidget(p)
   , VarNames(varNames)
   , VarTypes(varTypes)
@@ -43,7 +43,7 @@ AddCacheEntry::AddCacheEntry(QWidget* p, const QStringList& varNames,
   this->Name->setCompleter(completer);
   connect(
     completer,
-    static_cast<void (QCompleter::*)(const QString&)>(&QCompleter::activated),
+    static_cast<void (QCompleter::*)(QString const&)>(&QCompleter::activated),
     this, &AddCacheEntry::onCompletionActivated);
 }
 
@@ -87,7 +87,7 @@ QString AddCacheEntry::typeString() const
   return TypeStrings[DefaultTypeIndex];
 }
 
-void AddCacheEntry::onCompletionActivated(const QString& text)
+void AddCacheEntry::onCompletionActivated(QString const& text)
 {
   cm_qsizetype idx = this->VarNames.indexOf(text);
   if (idx != -1) {

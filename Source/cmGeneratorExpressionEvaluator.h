@@ -41,7 +41,7 @@ using cmGeneratorExpressionEvaluatorVector =
 
 struct TextContent : public cmGeneratorExpressionEvaluator
 {
-  TextContent(const char* start, size_t length)
+  TextContent(char const* start, size_t length)
     : Content(start)
     , Length(length)
   {
@@ -63,13 +63,13 @@ struct TextContent : public cmGeneratorExpressionEvaluator
   size_t GetLength() const { return this->Length; }
 
 private:
-  const char* Content;
+  char const* Content;
   size_t Length;
 };
 
 struct GeneratorExpressionContent : public cmGeneratorExpressionEvaluator
 {
-  GeneratorExpressionContent(const char* startContent, size_t length);
+  GeneratorExpressionContent(char const* startContent, size_t length);
 
   void SetIdentifier(cmGeneratorExpressionEvaluatorVector&& identifier)
   {
@@ -95,14 +95,14 @@ struct GeneratorExpressionContent : public cmGeneratorExpressionEvaluator
   ~GeneratorExpressionContent() override;
 
 private:
-  std::string EvaluateParameters(const cmGeneratorExpressionNode* node,
-                                 const std::string& identifier,
+  std::string EvaluateParameters(cmGeneratorExpressionNode const* node,
+                                 std::string const& identifier,
                                  cmGeneratorExpressionContext* context,
                                  cmGeneratorExpressionDAGChecker* dagChecker,
                                  std::vector<std::string>& parameters) const;
 
   std::string ProcessArbitraryContent(
-    const cmGeneratorExpressionNode* node, const std::string& identifier,
+    cmGeneratorExpressionNode const* node, std::string const& identifier,
     cmGeneratorExpressionContext* context,
     cmGeneratorExpressionDAGChecker* dagChecker,
     std::vector<cmGeneratorExpressionEvaluatorVector>::const_iterator pit)
@@ -110,6 +110,6 @@ private:
 
   cmGeneratorExpressionEvaluatorVector IdentifierChildren;
   std::vector<cmGeneratorExpressionEvaluatorVector> ParamChildren;
-  const char* StartContent;
+  char const* StartContent;
   size_t ContentLength;
 };

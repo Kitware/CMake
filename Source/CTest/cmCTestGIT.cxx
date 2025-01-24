@@ -40,7 +40,7 @@ cmCTestGIT::~cmCTestGIT() = default;
 class cmCTestGIT::OneLineParser : public cmCTestVC::LineParser
 {
 public:
-  OneLineParser(cmCTestGIT* git, const char* prefix, std::string& l)
+  OneLineParser(cmCTestGIT* git, char const* prefix, std::string& l)
     : Line1(l)
   {
     this->SetLog(&git->Log, prefix);
@@ -326,7 +326,7 @@ unsigned int cmCTestGIT::GetGitVersion()
 class cmCTestGIT::DiffParser : public cmCTestVC::LineParser
 {
 public:
-  DiffParser(cmCTestGIT* git, const char* prefix)
+  DiffParser(cmCTestGIT* git, char const* prefix)
     : LineParser('\0', false)
     , GIT(git)
   {
@@ -366,16 +366,16 @@ protected:
         this->DiffField = DiffFieldNone;
         return true;
       }
-      const char* src_mode_first = this->Line.c_str() + 1;
-      const char* src_mode_last = this->ConsumeField(src_mode_first);
-      const char* dst_mode_first = this->ConsumeSpace(src_mode_last);
-      const char* dst_mode_last = this->ConsumeField(dst_mode_first);
-      const char* src_sha1_first = this->ConsumeSpace(dst_mode_last);
-      const char* src_sha1_last = this->ConsumeField(src_sha1_first);
-      const char* dst_sha1_first = this->ConsumeSpace(src_sha1_last);
-      const char* dst_sha1_last = this->ConsumeField(dst_sha1_first);
-      const char* status_first = this->ConsumeSpace(dst_sha1_last);
-      const char* status_last = this->ConsumeField(status_first);
+      char const* src_mode_first = this->Line.c_str() + 1;
+      char const* src_mode_last = this->ConsumeField(src_mode_first);
+      char const* dst_mode_first = this->ConsumeSpace(src_mode_last);
+      char const* dst_mode_last = this->ConsumeField(dst_mode_first);
+      char const* src_sha1_first = this->ConsumeSpace(dst_mode_last);
+      char const* src_sha1_last = this->ConsumeField(src_sha1_first);
+      char const* dst_sha1_first = this->ConsumeSpace(src_sha1_last);
+      char const* dst_sha1_last = this->ConsumeField(dst_sha1_first);
+      char const* status_first = this->ConsumeSpace(dst_sha1_last);
+      char const* status_last = this->ConsumeField(status_first);
       if (status_first != status_last) {
         this->CurChange.Action = *status_first;
         this->DiffField = DiffFieldSrc;
@@ -410,14 +410,14 @@ protected:
     return true;
   }
 
-  const char* ConsumeSpace(const char* c)
+  char const* ConsumeSpace(char const* c)
   {
     while (*c && cmIsSpace(*c)) {
       ++c;
     }
     return c;
   }
-  const char* ConsumeField(const char* c)
+  char const* ConsumeField(char const* c)
   {
     while (*c && !cmIsSpace(*c)) {
       ++c;
@@ -448,7 +448,7 @@ protected:
 class cmCTestGIT::CommitParser : public cmCTestGIT::DiffParser
 {
 public:
-  CommitParser(cmCTestGIT* git, const char* prefix)
+  CommitParser(cmCTestGIT* git, char const* prefix)
     : DiffParser(git, prefix)
   {
     this->Separator = SectionSep[this->Section];
@@ -475,29 +475,29 @@ private:
     long TimeZone = 0;
   };
 
-  void ParsePerson(const char* str, Person& person)
+  void ParsePerson(char const* str, Person& person)
   {
     // Person Name <person@domain.com> 1234567890 +0000
-    const char* c = str;
+    char const* c = str;
     while (*c && cmIsSpace(*c)) {
       ++c;
     }
 
-    const char* name_first = c;
+    char const* name_first = c;
     while (*c && *c != '<') {
       ++c;
     }
-    const char* name_last = c;
+    char const* name_last = c;
     while (name_last != name_first && cmIsSpace(*(name_last - 1))) {
       --name_last;
     }
     person.Name.assign(name_first, name_last - name_first);
 
-    const char* email_first = *c ? ++c : c;
+    char const* email_first = *c ? ++c : c;
     while (*c && *c != '>') {
       ++c;
     }
-    const char* email_last = *c ? c++ : c;
+    char const* email_last = *c ? c++ : c;
     person.EMail.assign(email_first, email_last - email_first);
 
     person.Time = strtoul(c, const_cast<char**>(&c), 10);

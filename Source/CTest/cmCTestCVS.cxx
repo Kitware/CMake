@@ -26,7 +26,7 @@ cmCTestCVS::~cmCTestCVS() = default;
 class cmCTestCVS::UpdateParser : public cmCTestVC::LineParser
 {
 public:
-  UpdateParser(cmCTestCVS* cvs, const char* prefix)
+  UpdateParser(cmCTestCVS* cvs, char const* prefix)
     : CVS(cvs)
   {
     this->SetLog(&cvs->Log, prefix);
@@ -106,7 +106,7 @@ class cmCTestCVS::LogParser : public cmCTestVC::LineParser
 {
 public:
   using Revision = cmCTestCVS::Revision;
-  LogParser(cmCTestCVS* cvs, const char* prefix, std::vector<Revision>& revs)
+  LogParser(cmCTestCVS* cvs, char const* prefix, std::vector<Revision>& revs)
     : CVS(cvs)
     , Revisions(revs)
   {
@@ -214,7 +214,7 @@ std::string cmCTestCVS::ComputeBranchFlag(std::string const& dir)
   return "-b";
 }
 
-void cmCTestCVS::LoadRevisions(std::string const& file, const char* branchFlag,
+void cmCTestCVS::LoadRevisions(std::string const& file, char const* branchFlag,
                                std::vector<Revision>& revisions)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "." << std::flush);
@@ -231,7 +231,7 @@ void cmCTestCVS::LoadRevisions(std::string const& file, const char* branchFlag,
 void cmCTestCVS::WriteXMLDirectory(cmXMLWriter& xml, std::string const& path,
                                    Directory const& dir)
 {
-  const char* slash = path.empty() ? "" : "/";
+  char const* slash = path.empty() ? "" : "/";
   xml.StartElement("Directory");
   xml.Element("Name", path);
 

@@ -50,7 +50,7 @@ int main()
   class my_string_view : public std::string_view
   {
   public:
-    my_string_view(const char* p)
+    my_string_view(char const* p)
       : std::string_view(p)
     {
     }

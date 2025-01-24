@@ -13,7 +13,7 @@ cmBinUtilsMacOSMachOGetRuntimeDependenciesTool::
 }
 
 void cmBinUtilsMacOSMachOGetRuntimeDependenciesTool::SetError(
-  const std::string& error)
+  std::string const& error)
 {
   this->Archive->SetError(error);
 }

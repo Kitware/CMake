@@ -11,7 +11,7 @@ static bool cmakeCompilerCUDAArch()
   }
 
   bool found = false;
-  const char* sep = "";
+  char const* sep = "";
   for (int device = 0; device < count; ++device) {
     cudaDeviceProp prop;
     if (cudaGetDeviceProperties(&prop, device) == cudaSuccess) {

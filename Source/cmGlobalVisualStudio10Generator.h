@@ -35,10 +35,10 @@ public:
                            cmMakefile* mf) override;
 
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(
-    const std::string& makeProgram, const std::string& projectName,
-    const std::string& projectDir, std::vector<std::string> const& targetNames,
-    const std::string& config, int jobs, bool verbose,
-    const cmBuildOptions& buildOptions = cmBuildOptions(),
+    std::string const& makeProgram, std::string const& projectName,
+    std::string const& projectDir, std::vector<std::string> const& targetNames,
+    std::string const& config, int jobs, bool verbose,
+    cmBuildOptions const& buildOptions = cmBuildOptions(),
     std::vector<std::string> const& makeOptions =
       std::vector<std::string>()) override;
 
@@ -53,7 +53,7 @@ public:
   void EnableLanguage(std::vector<std::string> const& languages, cmMakefile*,
                       bool optional) override;
 
-  void AddAndroidExecutableWarning(const std::string& name)
+  void AddAndroidExecutableWarning(std::string const& name)
   {
     this->AndroidExecutableWarnings.insert(name);
   }
@@ -65,25 +65,25 @@ public:
   std::string GetNsightTegraVersion() const;
 
   /** The vctargets path for the target platform.  */
-  const char* GetCustomVCTargetsPath() const;
+  char const* GetCustomVCTargetsPath() const;
 
   /** The toolset name for the target platform.  */
-  const char* GetPlatformToolset() const;
+  char const* GetPlatformToolset() const;
   std::string const& GetPlatformToolsetString() const;
 
   /** The toolset version props file, if any.  */
   std::string const& GetPlatformToolsetVersionProps() const;
 
   /** The toolset host architecture name (e.g. x64 for 64-bit host tools).  */
-  const char* GetPlatformToolsetHostArchitecture() const;
+  char const* GetPlatformToolsetHostArchitecture() const;
   std::string const& GetPlatformToolsetHostArchitectureString() const;
 
   /** The cuda toolset version.  */
-  const char* GetPlatformToolsetCuda() const;
+  char const* GetPlatformToolsetCuda() const;
   std::string const& GetPlatformToolsetCudaString() const;
 
   /** The custom cuda install directory */
-  const char* GetPlatformToolsetCudaCustomDir() const;
+  char const* GetPlatformToolsetCudaCustomDir() const;
   std::string const& GetPlatformToolsetCudaCustomDirString() const;
 
   /** The nvcc subdirectory of a custom cuda install directory */
@@ -136,7 +136,7 @@ public:
   /** Return true if building for Android */
   bool TargetsAndroid() const { return this->SystemIsAndroid; }
 
-  const char* GetCMakeCFGIntDir() const override { return "$(Configuration)"; }
+  char const* GetCMakeCFGIntDir() const override { return "$(Configuration)"; }
 
   /** Generate an <output>.rule file path for a given command output.  */
   std::string GenerateRuleFile(std::string const& output) const override;
@@ -145,7 +145,7 @@ public:
                    std::string const& sfRel);
 
   std::string Encoding() override;
-  const char* GetToolsVersion() const;
+  char const* GetToolsVersion() const;
 
   virtual cm::optional<std::string> GetVSInstanceVersion() const { return {}; }
 
@@ -168,7 +168,7 @@ public:
   /** Return the first two components of CMAKE_SYSTEM_VERSION.  */
   std::string GetApplicationTypeRevision() const;
 
-  virtual const char* GetAndroidApplicationTypeRevision() const { return ""; }
+  virtual char const* GetAndroidApplicationTypeRevision() const { return ""; }
 
   cmIDEFlagTable const* GetClFlagTable() const;
   cmIDEFlagTable const* GetCSharpFlagTable() const;
@@ -185,7 +185,7 @@ public:
   bool IsBuildInParallelSupported() const;
 
 protected:
-  cmGlobalVisualStudio10Generator(cmake* cm, const std::string& name);
+  cmGlobalVisualStudio10Generator(cmake* cm, std::string const& name);
 
   void Generate() override;
   virtual bool InitializeSystem(cmMakefile* mf);

@@ -34,16 +34,16 @@ public:
   void CreateOutputFile(cmLocalGenerator* lg, std::string const& config);
 
 private:
-  void Generate(cmLocalGenerator* lg, const std::string& config,
-                const std::string& lang,
+  void Generate(cmLocalGenerator* lg, std::string const& config,
+                std::string const& lang,
                 cmCompiledGeneratorExpression* inputExpression,
                 std::map<std::string, std::string>& outputFiles, mode_t perm);
 
   std::string GetInputFileName(cmLocalGenerator* lg);
   std::string GetOutputFileName(cmLocalGenerator* lg,
                                 cmGeneratorTarget* target,
-                                const std::string& config,
-                                const std::string& lang);
+                                std::string const& config,
+                                std::string const& lang);
   enum PathRole
   {
     PathForInput,
@@ -52,13 +52,13 @@ private:
   std::string FixRelativePath(std::string const& filePath, PathRole role,
                               cmLocalGenerator* lg);
 
-  const std::string Input;
-  const std::string Target;
-  const std::unique_ptr<cmCompiledGeneratorExpression> OutputFileExpr;
-  const std::unique_ptr<cmCompiledGeneratorExpression> Condition;
+  std::string const Input;
+  std::string const Target;
+  std::unique_ptr<cmCompiledGeneratorExpression> const OutputFileExpr;
+  std::unique_ptr<cmCompiledGeneratorExpression> const Condition;
   std::vector<std::string> Files;
-  const bool InputIsContent;
-  const std::string NewLineCharacter;
+  bool const InputIsContent;
+  std::string const NewLineCharacter;
   cmPolicies::PolicyStatus PolicyStatusCMP0070;
   mode_t Permissions;
 };

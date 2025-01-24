@@ -1,7 +1,7 @@
 #include <cstring>
 
 template <size_t N>
-constexpr size_t cmStrLen(const char (&/*str*/)[N])
+constexpr size_t cmStrLen(char const (& /*str*/)[N])
 {
   return N - 1;
 }
@@ -11,7 +11,7 @@ using std::strlen;
 }
 
 namespace ns2 {
-std::size_t strlen(const char* str)
+std::size_t strlen(char const* str)
 {
   return std::strlen(str);
 }

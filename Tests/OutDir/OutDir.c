@@ -3,9 +3,9 @@
 
 int main(void)
 {
-  const char* files[] = { TESTC1_LIB, TESTC2_LIB, CONLY_EXE, 0 };
+  char const* files[] = { TESTC1_LIB, TESTC2_LIB, CONLY_EXE, 0 };
   int result = 0;
-  const char** fname = files;
+  char const** fname = files;
   for (; *fname; ++fname) {
     FILE* f = fopen(*fname, "rb");
     if (f) {

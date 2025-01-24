@@ -19,7 +19,7 @@ namespace {
 using WorkflowPreset = cmCMakePresetsGraph::WorkflowPreset;
 
 bool WorkflowStepTypeHelper(WorkflowPreset::WorkflowStep::Type& out,
-                            const Json::Value* value, cmJSONState* state)
+                            Json::Value const* value, cmJSONState* state)
 {
   if (!value) {
     cmCMakePresetsErrors::INVALID_PRESET(value, state);
@@ -85,7 +85,7 @@ auto const WorkflowPresetHelper =
 namespace cmCMakePresetsGraphInternal {
 bool WorkflowPresetsHelper(
   std::vector<cmCMakePresetsGraph::WorkflowPreset>& out,
-  const Json::Value* value, cmJSONState* state)
+  Json::Value const* value, cmJSONState* state)
 {
   static auto const helper = cmJSONHelperBuilder::Vector<WorkflowPreset>(
     cmCMakePresetsErrors::INVALID_PRESETS, WorkflowPresetHelper);

@@ -33,7 +33,7 @@ class enum_set_iterator
 {
 public:
   enum_set_iterator() = default;
-  enum_set_iterator(const enum_set_iterator& other) = default;
+  enum_set_iterator(enum_set_iterator const& other) = default;
 
   using iterator_category = std::bidirectional_iterator_tag;
   using value_type = typename EnumSet::value_type;
@@ -124,19 +124,19 @@ public:
   using difference_type = size_type;
   using reference = Enum;
   using const_reference = Enum;
-  using pointer = const Enum*;
-  using const_pointer = const Enum*;
+  using pointer = Enum const*;
+  using const_pointer = Enum const*;
 
   using iterator = enum_set_iterator<enum_set>;
-  using const_iterator = enum_set_iterator<const enum_set>;
+  using const_iterator = enum_set_iterator<enum_set const>;
   using reverse_iterator = std::reverse_iterator<iterator>;
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
   constexpr enum_set() noexcept = default;
-  enum_set(const enum_set& other) noexcept { this->insert(other); }
+  enum_set(enum_set const& other) noexcept { this->insert(other); }
   enum_set(std::initializer_list<value_type> list) { this->insert(list); }
 
-  enum_set& operator=(const enum_set& other) noexcept
+  enum_set& operator=(enum_set const& other) noexcept
   {
     this->Set.reset();
     this->Set |= other.Set;
@@ -193,7 +193,7 @@ public:
     this->insert(e);
     return *this;
   }
-  enum_set& operator+=(const enum_set& other) noexcept
+  enum_set& operator+=(enum_set const& other) noexcept
   {
     this->erase(other);
     return *this;
@@ -209,7 +209,7 @@ public:
     this->erase(e);
     return *this;
   }
-  enum_set& operator-=(const enum_set& other) noexcept
+  enum_set& operator-=(enum_set const& other) noexcept
   {
     this->erase(other);
     return *this;
@@ -236,7 +236,7 @@ public:
       this->insert(*i);
     }
   }
-  void insert(const enum_set& other) noexcept { this->Set |= other.Set; }
+  void insert(enum_set const& other) noexcept { this->Set |= other.Set; }
   void insert(std::initializer_list<value_type> list)
   {
     for (auto e : list) {
@@ -265,7 +265,7 @@ public:
     return pos == this->cend() ? this->end()
                                : iterator(this, static_cast<size_type>(*pos));
   }
-  void erase(const enum_set& other) noexcept { this->Set &= ~other.Set; }
+  void erase(enum_set const& other) noexcept { this->Set &= ~other.Set; }
   void erase(std::initializer_list<value_type> list)
   {
     for (auto e : list) {
@@ -283,7 +283,7 @@ public:
   // toggle the specified enum
   void flip(key_type key) { this->Set.flip(static_cast<size_type>(key)); }
   // toggle all the enums stored in the other enum_set
-  void flip(const enum_set& other) noexcept { this->Set ^= other.Set; }
+  void flip(enum_set const& other) noexcept { this->Set ^= other.Set; }
   // toggle all the enums specified in the list
   void flip(std::initializer_list<value_type> list)
   {
@@ -317,14 +317,14 @@ public:
 
 private:
   template <typename E>
-  friend inline bool operator==(const enum_set<E>& lhs,
-                                const enum_set<E>& rhs) noexcept;
+  friend inline bool operator==(enum_set<E> const& lhs,
+                                enum_set<E> const& rhs) noexcept;
 
   template <typename E, typename Predicate>
   friend inline void erase_if(enum_set<E>& set, Predicate pred);
 
   friend class enum_set_iterator<enum_set>;
-  friend class enum_set_iterator<const enum_set>;
+  friend class enum_set_iterator<enum_set const>;
 
   bool test(size_type pos) const { return this->Set.test(pos); }
 
@@ -333,51 +333,51 @@ private:
 
 // non-member functions for enum_set
 template <typename Enum>
-inline enum_set<Enum> operator+(const enum_set<Enum>& lhs, Enum rhs)
+inline enum_set<Enum> operator+(enum_set<Enum> const& lhs, Enum rhs)
 {
   return enum_set<Enum>(lhs) += rhs;
 }
 template <typename Enum>
-inline enum_set<Enum> operator+(const enum_set<Enum>& lhs,
-                                const enum_set<Enum>& rhs) noexcept
+inline enum_set<Enum> operator+(enum_set<Enum> const& lhs,
+                                enum_set<Enum> const& rhs) noexcept
 {
   return enum_set<Enum>(lhs) += rhs;
 }
 template <typename Enum>
-inline enum_set<Enum> operator+(const enum_set<Enum>& lhs,
-                                const std::initializer_list<Enum> rhs)
+inline enum_set<Enum> operator+(enum_set<Enum> const& lhs,
+                                std::initializer_list<Enum> const rhs)
 {
   return enum_set<Enum>(lhs) += rhs;
 }
 
 template <typename Enum>
-inline enum_set<Enum> operator-(const enum_set<Enum>& lhs, Enum rhs)
+inline enum_set<Enum> operator-(enum_set<Enum> const& lhs, Enum rhs)
 {
   return enum_set<Enum>(lhs) -= rhs;
 }
 template <typename Enum>
-inline enum_set<Enum> operator-(const enum_set<Enum>& lhs,
-                                const enum_set<Enum>& rhs) noexcept
+inline enum_set<Enum> operator-(enum_set<Enum> const& lhs,
+                                enum_set<Enum> const& rhs) noexcept
 {
   return enum_set<Enum>(lhs) -= rhs;
 }
 template <typename Enum>
-inline enum_set<Enum> operator-(const enum_set<Enum>& lhs,
-                                const std::initializer_list<Enum> rhs)
+inline enum_set<Enum> operator-(enum_set<Enum> const& lhs,
+                                std::initializer_list<Enum> const rhs)
 {
   return enum_set<Enum>(lhs) -= rhs;
 }
 
 template <typename Enum>
-inline bool operator==(const enum_set<Enum>& lhs,
-                       const enum_set<Enum>& rhs) noexcept
+inline bool operator==(enum_set<Enum> const& lhs,
+                       enum_set<Enum> const& rhs) noexcept
 {
   return lhs.Set == rhs.Set;
 }
 
 template <typename Enum>
-inline bool operator!=(const enum_set<Enum>& lhs,
-                       const enum_set<Enum>& rhs) noexcept
+inline bool operator!=(enum_set<Enum> const& lhs,
+                       enum_set<Enum> const& rhs) noexcept
 {
   return !(lhs == rhs);
 }

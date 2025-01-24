@@ -41,9 +41,9 @@ enum class IncludeDirectoryFallBack
 };
 
 std::string AddLangSpecificInterfaceIncludeDirectories(
-  const cmGeneratorTarget* root, const cmGeneratorTarget* target,
-  const std::string& lang, const std::string& config,
-  const std::string& propertyName, IncludeDirectoryFallBack mode,
+  cmGeneratorTarget const* root, cmGeneratorTarget const* target,
+  std::string const& lang, std::string const& config,
+  std::string const& propertyName, IncludeDirectoryFallBack mode,
   cmGeneratorExpressionDAGChecker* context)
 {
   cmGeneratorExpressionDAGChecker dag{
@@ -65,10 +65,10 @@ std::string AddLangSpecificInterfaceIncludeDirectories(
   }
 
   std::string directories;
-  if (const auto* link_interface =
+  if (auto const* link_interface =
         target->GetLinkInterfaceLibraries(config, root, UseTo::Compile)) {
-    for (const cmLinkItem& library : link_interface->Libraries) {
-      if (const cmGeneratorTarget* dependency = library.Target) {
+    for (cmLinkItem const& library : link_interface->Libraries) {
+      if (cmGeneratorTarget const* dependency = library.Target) {
         if (cm::contains(dependency->GetAllConfigCompileLanguages(), lang)) {
           auto* lg = dependency->GetLocalGenerator();
           std::string value = dependency->GetSafeProperty(propertyName);
@@ -93,19 +93,19 @@ std::string AddLangSpecificInterfaceIncludeDirectories(
 }
 
 void AddLangSpecificImplicitIncludeDirectories(
-  const cmGeneratorTarget* target, const std::string& lang,
-  const std::string& config, const std::string& propertyName,
+  cmGeneratorTarget const* target, std::string const& lang,
+  std::string const& config, std::string const& propertyName,
   IncludeDirectoryFallBack mode, EvaluatedTargetPropertyEntries& entries)
 {
-  if (const auto* libraries =
+  if (auto const* libraries =
         target->GetLinkImplementationLibraries(config, UseTo::Compile)) {
     cmGeneratorExpressionDAGChecker dag{
       target->GetBacktrace(),      target, propertyName, nullptr, nullptr,
       target->GetLocalGenerator(), config
     };
 
-    for (const cmLinkImplItem& library : libraries->Libraries) {
-      if (const cmGeneratorTarget* dependency = library.Target) {
+    for (cmLinkImplItem const& library : libraries->Libraries) {
+      if (cmGeneratorTarget const* dependency = library.Target) {
         if (!dependency->IsInBuildSystem()) {
           continue;
         }
@@ -210,7 +210,7 @@ void processIncludeDirectories(cmGeneratorTarget const* tgt,
 }
 
 std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
-  const std::string& config, const std::string& lang) const
+  std::string const& config, std::string const& lang) const
 {
   ConfigAndLanguage cacheKey(config, lang);
   {
@@ -244,7 +244,7 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetIncludeDirectories(
 
   if (this->CanCompileSources() && (lang != "Swift" && lang != "Fortran")) {
 
-    const std::string propertyName = "ISPC_HEADER_DIRECTORY";
+    std::string const propertyName = "ISPC_HEADER_DIRECTORY";
 
     // If this target has ISPC sources make sure to add the header
     // directory to other compilation units

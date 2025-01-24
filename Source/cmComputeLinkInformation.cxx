@@ -250,7 +250,7 @@ because this need be done only for shared libraries without soname-s.
 */
 
 cmComputeLinkInformation::cmComputeLinkInformation(
-  const cmGeneratorTarget* target, const std::string& config)
+  cmGeneratorTarget const* target, std::string const& config)
   // Store context information.
   : Target(target)
   , Makefile(target->Target->GetMakefile())
@@ -324,7 +324,7 @@ cmComputeLinkInformation::cmComputeLinkInformation(
   // Get options needed to specify RPATHs.
   this->RuntimeUseChrpath = false;
   if (this->Target->GetType() != cmStateEnums::STATIC_LIBRARY) {
-    const char* tType = ((this->Target->GetType() == cmStateEnums::EXECUTABLE)
+    char const* tType = ((this->Target->GetType() == cmStateEnums::EXECUTABLE)
                            ? "EXECUTABLE"
                            : "SHARED_LIBRARY");
     std::string rtVar =
@@ -425,7 +425,7 @@ cmComputeLinkInformation::cmComputeLinkInformation(
 cmComputeLinkInformation::~cmComputeLinkInformation() = default;
 
 namespace {
-const std::string& DEFAULT = cmComputeLinkDepends::LinkEntry::DEFAULT;
+std::string const& DEFAULT = cmComputeLinkDepends::LinkEntry::DEFAULT;
 }
 
 void cmComputeLinkInformation::AppendValues(
@@ -460,8 +460,8 @@ cmComputeLinkInformation::GetDirectoriesWithBacktraces()
   std::vector<BT<std::string>> targetLinkDirectories =
     this->Target->GetLinkDirectories(this->Config, this->LinkLanguage);
 
-  const std::vector<std::string>& orderedDirectories = this->GetDirectories();
-  for (const std::string& dir : orderedDirectories) {
+  std::vector<std::string> const& orderedDirectories = this->GetDirectories();
+  for (std::string const& dir : orderedDirectories) {
     auto result = std::find(targetLinkDirectories.begin(),
                             targetLinkDirectories.end(), dir);
     if (result != targetLinkDirectories.end()) {
@@ -510,13 +510,13 @@ cmComputeLinkInformation::GetXcFrameworkHeaderPaths() const
   return this->XcFrameworkHeaderPaths;
 }
 
-const std::set<const cmGeneratorTarget*>&
+std::set<cmGeneratorTarget const*> const&
 cmComputeLinkInformation::GetSharedLibrariesLinked() const
 {
   return this->SharedLibrariesLinked;
 }
 
-const std::vector<const cmGeneratorTarget*>&
+std::vector<cmGeneratorTarget const*> const&
 cmComputeLinkInformation::GetExternalObjectTargets() const
 {
   return this->ExternalObjectTargets;
@@ -570,7 +570,7 @@ bool cmComputeLinkInformation::Compute()
   // Add the link line items.
   for (cmComputeLinkDepends::LinkEntry const& linkEntry : linkEntries) {
     if (linkEntry.Kind == cmComputeLinkDepends::LinkEntry::Group) {
-      const auto& groupFeature = this->GetGroupFeature(linkEntry.Feature);
+      auto const& groupFeature = this->GetGroupFeature(linkEntry.Feature);
       if (groupFeature.Supported) {
         if (linkEntry.Item.Value == "</LINK_GROUP>" && currentFeature) {
           // emit feature suffix, if any
@@ -653,8 +653,8 @@ bool cmComputeLinkInformation::Compute()
 }
 
 namespace {
-void FinalizeFeatureFormat(std::string& format, const std::string& activeTag,
-                           const std::string& otherTag)
+void FinalizeFeatureFormat(std::string& format, std::string const& activeTag,
+                           std::string const& otherTag)
 {
   auto pos = format.find(otherTag);
   if (pos != std::string::npos) {
@@ -670,7 +670,7 @@ void FinalizeFeatureFormat(std::string& format, const std::string& activeTag,
   }
 }
 
-bool IsValidFeatureFormat(const std::string& format)
+bool IsValidFeatureFormat(std::string const& format)
 {
   return format.find("<LIBRARY>") != std::string::npos ||
     format.find("<LIB_ITEM>") != std::string::npos ||
@@ -680,9 +680,9 @@ bool IsValidFeatureFormat(const std::string& format)
 class FeaturePlaceHolderExpander : public cmPlaceholderExpander
 {
 public:
-  FeaturePlaceHolderExpander(const std::string* library,
-                             const std::string* libItem = nullptr,
-                             const std::string* linkItem = nullptr)
+  FeaturePlaceHolderExpander(std::string const* library,
+                             std::string const* libItem = nullptr,
+                             std::string const* linkItem = nullptr)
     : Library(library)
     , LibItem(libItem)
     , LinkItem(linkItem)
@@ -705,9 +705,9 @@ private:
     return variable;
   }
 
-  const std::string* Library = nullptr;
-  const std::string* LibItem = nullptr;
-  const std::string* LinkItem = nullptr;
+  std::string const* Library = nullptr;
+  std::string const* LibItem = nullptr;
+  std::string const* LinkItem = nullptr;
 };
 }
 
@@ -1112,7 +1112,7 @@ void cmComputeLinkInformation::AddItem(LinkEntry const& entry)
   BT<std::string> const& item = entry.Item;
 
   // Compute the proper name to use to link this library.
-  const std::string& config = this->Config;
+  std::string const& config = this->Config;
   bool impexe = (tgt && tgt->IsExecutableWithExports());
   if (impexe && !tgt->HasImportLibrary(config) && !this->LoaderFlag) {
     // Skip linking to executables on platforms with no import
@@ -1248,7 +1248,7 @@ void cmComputeLinkInformation::AddItem(LinkEntry const& entry)
 void cmComputeLinkInformation::AddSharedDepItem(LinkEntry const& entry)
 {
   BT<std::string> const& item = entry.Item;
-  const cmGeneratorTarget* tgt = entry.Target;
+  cmGeneratorTarget const* tgt = entry.Target;
 
   // Record dependencies on DLLs.
   if (tgt && tgt->GetType() == cmStateEnums::SHARED_LIBRARY &&
@@ -1338,7 +1338,7 @@ void cmComputeLinkInformation::AddSharedDepItem(LinkEntry const& entry)
   if (order) {
     if (tgt) {
       std::string soName = tgt->GetSOName(this->Config);
-      const char* soname = soName.empty() ? nullptr : soName.c_str();
+      char const* soname = soName.empty() ? nullptr : soName.c_str();
       order->AddRuntimeLibrary(lib, soname);
     } else {
       order->AddRuntimeLibrary(lib);
@@ -1367,7 +1367,7 @@ void cmComputeLinkInformation::ComputeLinkTypeInfo()
   // Lookup link type selection flags.
   cmValue static_link_type_flag = nullptr;
   cmValue shared_link_type_flag = nullptr;
-  const char* target_type_str = nullptr;
+  char const* target_type_str = nullptr;
   switch (this->Target->GetType()) {
     case cmStateEnums::EXECUTABLE:
       target_type_str = "EXE";
@@ -1520,7 +1520,7 @@ std::string cmComputeLinkInformation::CreateExtensionRegex(
 {
   // Build a list of extension choices.
   std::string libext = "(";
-  const char* sep = "";
+  char const* sep = "";
   for (std::string const& i : exts) {
     // Separate this choice from the previous one.
     libext += sep;
@@ -1613,7 +1613,7 @@ void cmComputeLinkInformation::AddTargetItem(LinkEntry const& entry)
     return;
   }
 
-  const bool isImportedFrameworkFolderOnApple =
+  bool const isImportedFrameworkFolderOnApple =
     target->IsImportedFrameworkFolderOnApple(this->Config);
   if (target->IsFrameworkOnApple() || isImportedFrameworkFolderOnApple) {
     // Add the framework directory and the framework item itself
@@ -1758,7 +1758,7 @@ void cmComputeLinkInformation::AddUserItem(LinkEntry const& entry)
   //   foo       ==>  -lfoo
   //   libfoo.a  ==>  -Wl,-Bstatic -lfoo
 
-  const cm::string_view LINKER{ "LINKER:" };
+  cm::string_view const LINKER{ "LINKER:" };
   BT<std::string> const& item = entry.Item;
 
   if (item.Value[0] == '-' || item.Value[0] == '$' || item.Value[0] == '`') {
@@ -1881,7 +1881,7 @@ void cmComputeLinkInformation::AddFrameworkItem(LinkEntry const& entry)
     return;
   }
 
-  const std::string& fw_path = fwDescriptor->Directory;
+  std::string const& fw_path = fwDescriptor->Directory;
   if (!fw_path.empty()) {
     // Add the directory portion to the framework search path.
     this->AddFrameworkPath(fw_path);
@@ -2106,7 +2106,7 @@ void cmComputeLinkInformation::AddLibraryRuntimeInfo(
   // Try to get the soname of the library.  Only files with this name
   // could possibly conflict.
   std::string soName = target->GetSOName(this->Config);
-  const char* soname = soName.empty() ? nullptr : soName.c_str();
+  char const* soname = soName.empty() ? nullptr : soName.c_str();
 
   // Include this library in the runtime path ordering.
   this->OrderRuntimeSearchPath->AddRuntimeLibrary(fullPath, soname);

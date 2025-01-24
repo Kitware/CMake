@@ -24,7 +24,7 @@ using cmStringRange = cmRange<std::vector<std::string>::const_iterator>;
 
 /** Returns length of a literal string.  */
 template <size_t N>
-constexpr size_t cmStrLen(const char (&)[N])
+constexpr size_t cmStrLen(char const (&)[N])
 {
   return N - 1;
 }
@@ -225,7 +225,7 @@ public:
     : RValueString_(&str)
   {
   }
-  cmAlphaNum(const char* str)
+  cmAlphaNum(char const* str)
     : View_(str ? cm::string_view(str) : cm::string_view())
   {
   }
@@ -268,7 +268,7 @@ template <typename A, typename B, typename... AV>
 inline std::string cmStrCat(A&& a, B&& b, AV&&... args)
 {
   static auto const makePair =
-    [](const cmAlphaNum& arg) -> std::pair<cm::string_view, std::string*> {
+    [](cmAlphaNum const& arg) -> std::pair<cm::string_view, std::string*> {
     return { arg.View(), arg.RValueString() };
   };
 
@@ -327,7 +327,7 @@ inline bool cmHasPrefix(cm::string_view str, cmValue prefix)
 
 /** Returns true if string @a str starts with string @a prefix.  */
 template <size_t N>
-inline bool cmHasLiteralPrefix(cm::string_view str, const char (&prefix)[N])
+inline bool cmHasLiteralPrefix(cm::string_view str, char const (&prefix)[N])
 {
   return cmHasPrefix(str, cm::string_view(prefix, N - 1));
 }
@@ -358,7 +358,7 @@ inline bool cmHasSuffix(cm::string_view str, cmValue suffix)
 
 /** Returns true if string @a str ends with string @a suffix.  */
 template <size_t N>
-inline bool cmHasLiteralSuffix(cm::string_view str, const char (&suffix)[N])
+inline bool cmHasLiteralSuffix(cm::string_view str, char const (&suffix)[N])
 {
   return cmHasSuffix(str, cm::string_view(suffix, N - 1));
 }
@@ -380,20 +380,20 @@ inline void cmStripSuffixIfExists(std::string& str, cm::string_view suffix)
 }
 
 /** Converts a string to long. Expects that the whole string is an integer.  */
-bool cmStrToLong(const char* str, long* value);
+bool cmStrToLong(char const* str, long* value);
 bool cmStrToLong(std::string const& str, long* value);
 
 /** Converts a string to unsigned long. Expects that the whole string is an
  * integer */
-bool cmStrToULong(const char* str, unsigned long* value);
+bool cmStrToULong(char const* str, unsigned long* value);
 bool cmStrToULong(std::string const& str, unsigned long* value);
 
 /** Converts a string to long long. Expects that the whole string
  * is an integer */
-bool cmStrToLongLong(const char* str, long long* value);
+bool cmStrToLongLong(char const* str, long long* value);
 bool cmStrToLongLong(std::string const& str, long long* value);
 
 /** Converts a string to unsigned long long. Expects that the whole string
  * is an integer */
-bool cmStrToULongLong(const char* str, unsigned long long* value);
+bool cmStrToULongLong(char const* str, unsigned long long* value);
 bool cmStrToULongLong(std::string const& str, unsigned long long* value);

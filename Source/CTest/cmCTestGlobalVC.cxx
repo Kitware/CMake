@@ -18,7 +18,7 @@ cmCTestGlobalVC::cmCTestGlobalVC(cmCTest* ct, cmMakefile* mf,
 
 cmCTestGlobalVC::~cmCTestGlobalVC() = default;
 
-const char* cmCTestGlobalVC::LocalPath(std::string const& path)
+char const* cmCTestGlobalVC::LocalPath(std::string const& path)
 {
   return path.c_str();
 }
@@ -48,7 +48,7 @@ void cmCTestGlobalVC::DoRevision(Revision const& revision,
 
   // Update information about revisions of the changed files.
   for (Change const& c : changes) {
-    if (const char* local = this->LocalPath(c.Path)) {
+    if (char const* local = this->LocalPath(c.Path)) {
       std::string dir = cmSystemTools::GetFilenamePath(local);
       std::string name = cmSystemTools::GetFilenameName(local);
       File& file = this->Dirs[dir][name];
@@ -78,7 +78,7 @@ void cmCTestGlobalVC::WriteXMLDirectory(cmXMLWriter& xml,
                                         std::string const& path,
                                         Directory const& dir)
 {
-  const char* slash = path.empty() ? "" : "/";
+  char const* slash = path.empty() ? "" : "/";
   xml.StartElement("Directory");
   xml.Element("Name", path);
   for (auto const& f : dir) {

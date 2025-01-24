@@ -150,7 +150,7 @@ std::string EvaluateDepfile(std::string const& path,
   return cge->Evaluate(lg, config);
 }
 
-std::string EvaluateComment(const char* comment,
+std::string EvaluateComment(char const* comment,
                             cmGeneratorExpression const& ge,
                             cmLocalGenerator* lg, std::string const& config)
 {
@@ -162,7 +162,7 @@ std::string EvaluateComment(const char* comment,
 cmCustomCommandGenerator::cmCustomCommandGenerator(
   cmCustomCommand const& cc, std::string config, cmLocalGenerator* lg,
   bool transformDepfile, cm::optional<std::string> crossConfig,
-  std::function<std::string(const std::string&, const std::string&)>
+  std::function<std::string(std::string const&, std::string const&)>
     computeInternalDepfile)
   : CC(&cc)
   , OutputConfig(crossConfig ? *crossConfig : config)
@@ -181,7 +181,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(
 
   bool const distinctConfigs = this->OutputConfig != this->CommandConfig;
 
-  const cmCustomCommandLines& cmdlines = this->CC->GetCommandLines();
+  cmCustomCommandLines const& cmdlines = this->CC->GetCommandLines();
   for (cmCustomCommandLine const& cmdline : cmdlines) {
     cmCustomCommandLine argv;
     // For the command itself, we default to the COMMAND_CONFIG.
@@ -258,7 +258,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(
   this->Depends = EvaluateDepends(cc.GetDepends(), ge, this->LG,
                                   this->OutputConfig, this->CommandConfig);
 
-  const std::string& workingdirectory = this->CC->GetWorkingDirectory();
+  std::string const& workingdirectory = this->CC->GetWorkingDirectory();
   if (!workingdirectory.empty()) {
     this->WorkingDirectory = EvaluateSplitConfigGenex(
       workingdirectory, ge, this->LG, true, this->OutputConfig,
@@ -320,7 +320,7 @@ std::vector<std::string> cmCustomCommandGenerator::GetCrossCompilingEmulator(
   return this->EmulatorsWithArguments[c];
 }
 
-const char* cmCustomCommandGenerator::GetArgv0Location(unsigned int c) const
+char const* cmCustomCommandGenerator::GetArgv0Location(unsigned int c) const
 {
   // If the command is the plain name of an executable target, we replace it
   // with the path to the executable artifact in the command config.
@@ -353,14 +353,14 @@ std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
   if (!emulator.empty()) {
     return emulator[0];
   }
-  if (const char* location = this->GetArgv0Location(c)) {
+  if (char const* location = this->GetArgv0Location(c)) {
     return std::string(location);
   }
 
   return this->CommandLines[c][0];
 }
 
-static std::string escapeForShellOldStyle(const std::string& str)
+static std::string escapeForShellOldStyle(std::string const& str)
 {
   std::string result;
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -373,7 +373,7 @@ static std::string escapeForShellOldStyle(const std::string& str)
   }
   return str;
 #else
-  for (const char* ch = str.c_str(); *ch != '\0'; ++ch) {
+  for (char const* ch = str.c_str(); *ch != '\0'; ++ch) {
     if (*ch == ' ') {
       result += '\\';
     }
@@ -406,7 +406,7 @@ void cmCustomCommandGenerator::AppendArguments(unsigned int c,
   cmCustomCommandLine const& commandLine = this->CommandLines[c];
   for (unsigned int j = offset; j < commandLine.size(); ++j) {
     std::string arg;
-    if (const char* location = j == 0 ? this->GetArgv0Location(c) : nullptr) {
+    if (char const* location = j == 0 ? this->GetArgv0Location(c) : nullptr) {
       // GetCommand returned the emulator instead of the argv0 location,
       // so transform the latter now.
       arg = location;
@@ -426,7 +426,7 @@ void cmCustomCommandGenerator::AppendArguments(unsigned int c,
 
 std::string cmCustomCommandGenerator::GetDepfile() const
 {
-  const auto& depfile = this->CC->GetDepfile();
+  auto const& depfile = this->CC->GetDepfile();
   if (depfile.empty()) {
     return "";
   }
@@ -450,7 +450,7 @@ std::string cmCustomCommandGenerator::GetFullDepfile() const
 }
 
 std::string cmCustomCommandGenerator::GetInternalDepfileName(
-  const std::string& /*config*/, const std::string& depfile) const
+  std::string const& /*config*/, std::string const& depfile) const
 {
   cmCryptoHash hash(cmCryptoHash::AlgoSHA256);
   std::string extension;
@@ -482,7 +482,7 @@ std::string cmCustomCommandGenerator::GetInternalDepfile() const
 
 cm::optional<std::string> cmCustomCommandGenerator::GetComment() const
 {
-  const char* comment = this->CC->GetComment();
+  char const* comment = this->CC->GetComment();
   if (!comment) {
     return cm::nullopt;
   }

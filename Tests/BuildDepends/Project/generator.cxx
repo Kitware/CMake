@@ -1,8 +1,8 @@
 #include <stdio.h>
 
-extern const char* foo();
+extern char const* foo();
 
-int main(int argc, const char* argv[])
+int main(int argc, char const* argv[])
 {
   if (argc < 3) {
     fprintf(stderr, "Must specify output file and symbol prefix!");

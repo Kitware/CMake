@@ -31,8 +31,8 @@ enum class ExpandMacroResult
 class MacroExpander
 {
 public:
-  virtual ExpandMacroResult operator()(const std::string& macroNamespace,
-                                       const std::string& macroName,
+  virtual ExpandMacroResult operator()(std::string const& macroNamespace,
+                                       std::string const& macroName,
                                        std::string& macroOut,
                                        int version) const = 0;
   virtual ~MacroExpander() = default;
@@ -44,8 +44,8 @@ ExpandMacroResult ExpandMacros(std::string& out,
                                int version);
 
 ExpandMacroResult ExpandMacro(std::string& out,
-                              const std::string& macroNamespace,
-                              const std::string& macroName,
+                              std::string const& macroNamespace,
+                              std::string const& macroName,
                               MacroExpanderVector const& macroExpanders,
                               int version);
 }
@@ -56,7 +56,7 @@ public:
   virtual ~Condition() = default;
 
   virtual bool Evaluate(
-    const cmCMakePresetsGraphInternal::MacroExpanderVector& expanders,
+    cmCMakePresetsGraphInternal::MacroExpanderVector const& expanders,
     int version, cm::optional<bool>& out) const = 0;
   virtual bool IsNull() const { return false; }
 };
@@ -68,17 +68,17 @@ class BaseMacroExpander : public MacroExpander
   cm::optional<std::string> File;
 
 public:
-  BaseMacroExpander(const cmCMakePresetsGraph& graph)
+  BaseMacroExpander(cmCMakePresetsGraph const& graph)
     : Graph(graph)
   {
   }
-  BaseMacroExpander(const cmCMakePresetsGraph& graph, const std::string& file)
+  BaseMacroExpander(cmCMakePresetsGraph const& graph, std::string const& file)
     : Graph(graph)
     , File(file)
   {
   }
-  ExpandMacroResult operator()(const std::string& macroNamespace,
-                               const std::string& macroName,
+  ExpandMacroResult operator()(std::string const& macroNamespace,
+                               std::string const& macroName,
                                std::string& macroOut,
                                int version) const override;
 };
@@ -90,13 +90,13 @@ class PresetMacroExpander : public MacroExpander
   T const& Preset;
 
 public:
-  PresetMacroExpander(const cmCMakePresetsGraph& graph, const T& preset)
+  PresetMacroExpander(cmCMakePresetsGraph const& graph, T const& preset)
     : Graph(graph)
     , Preset(preset)
   {
   }
-  ExpandMacroResult operator()(const std::string& macroNamespace,
-                               const std::string& macroName,
+  ExpandMacroResult operator()(std::string const& macroNamespace,
+                               std::string const& macroName,
                                std::string& macroOut,
                                int version) const override
   {
@@ -199,58 +199,58 @@ public:
   std::unique_ptr<Condition> SubCondition;
 };
 
-bool PresetStringHelper(std::string& out, const Json::Value* value,
+bool PresetStringHelper(std::string& out, Json::Value const* value,
                         cmJSONState* state);
 
-bool PresetNameHelper(std::string& out, const Json::Value* value,
+bool PresetNameHelper(std::string& out, Json::Value const* value,
                       cmJSONState* state);
 
 bool PresetVectorStringHelper(std::vector<std::string>& out,
-                              const Json::Value* value, cmJSONState* state);
+                              Json::Value const* value, cmJSONState* state);
 
-bool PresetBoolHelper(bool& out, const Json::Value* value, cmJSONState* state);
+bool PresetBoolHelper(bool& out, Json::Value const* value, cmJSONState* state);
 
 bool PresetOptionalBoolHelper(cm::optional<bool>& out,
-                              const Json::Value* value, cmJSONState* state);
+                              Json::Value const* value, cmJSONState* state);
 
-bool PresetIntHelper(int& out, const Json::Value* value, cmJSONState* state);
+bool PresetIntHelper(int& out, Json::Value const* value, cmJSONState* state);
 
-bool PresetOptionalIntHelper(cm::optional<int>& out, const Json::Value* value,
+bool PresetOptionalIntHelper(cm::optional<int>& out, Json::Value const* value,
                              cmJSONState* state);
 
-bool PresetVectorIntHelper(std::vector<int>& out, const Json::Value* value,
+bool PresetVectorIntHelper(std::vector<int>& out, Json::Value const* value,
                            cmJSONState* state);
 
 bool ConfigurePresetsHelper(
   std::vector<cmCMakePresetsGraph::ConfigurePreset>& out,
-  const Json::Value* value, cmJSONState* state);
+  Json::Value const* value, cmJSONState* state);
 
 bool BuildPresetsHelper(std::vector<cmCMakePresetsGraph::BuildPreset>& out,
-                        const Json::Value* value, cmJSONState* state);
+                        Json::Value const* value, cmJSONState* state);
 
 bool TestPresetsHelper(std::vector<cmCMakePresetsGraph::TestPreset>& out,
-                       const Json::Value* value, cmJSONState* state);
+                       Json::Value const* value, cmJSONState* state);
 
 bool PackagePresetsHelper(std::vector<cmCMakePresetsGraph::PackagePreset>& out,
-                          const Json::Value* value, cmJSONState* state);
+                          Json::Value const* value, cmJSONState* state);
 
 bool WorkflowPresetsHelper(
   std::vector<cmCMakePresetsGraph::WorkflowPreset>& out,
-  const Json::Value* value, cmJSONState* state);
+  Json::Value const* value, cmJSONState* state);
 
-cmJSONHelper<std::nullptr_t> VendorHelper(const ErrorGenerator& error);
+cmJSONHelper<std::nullptr_t> VendorHelper(ErrorGenerator const& error);
 
 bool PresetConditionHelper(
   std::shared_ptr<cmCMakePresetsGraph::Condition>& out,
-  const Json::Value* value, cmJSONState* state);
+  Json::Value const* value, cmJSONState* state);
 
 bool PresetVectorOneOrMoreStringHelper(std::vector<std::string>& out,
-                                       const Json::Value* value,
+                                       Json::Value const* value,
                                        cmJSONState* state);
 
 bool EnvironmentMapHelper(
   std::map<std::string, cm::optional<std::string>>& out,
-  const Json::Value* value, cmJSONState* state);
+  Json::Value const* value, cmJSONState* state);
 
 cmJSONHelper<std::nullptr_t> SchemaHelper();
 }

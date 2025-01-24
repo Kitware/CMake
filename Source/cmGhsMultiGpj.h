@@ -22,5 +22,5 @@ public:
 
   static void WriteGpjTag(Types gpjType, std::ostream& fout);
 
-  static const char* GetGpjTag(Types gpjType);
+  static char const* GetGpjTag(Types gpjType);
 };

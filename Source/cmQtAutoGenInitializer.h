@@ -139,7 +139,7 @@ private:
 
   std::string GetMocBuildPath(MUFile const& muf);
 
-  bool GetQtExecutable(GenVarsT& genVars, const std::string& executable,
+  bool GetQtExecutable(GenVarsT& genVars, std::string const& executable,
                        bool ignoreMissingTarget) const;
 
   void handleSkipPch(cmSourceFile* sf);

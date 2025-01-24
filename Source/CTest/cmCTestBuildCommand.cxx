@@ -65,10 +65,10 @@ std::unique_ptr<cmCTestGenericHandler> cmCTestBuildCommand::InitializeHandler(
       : cmNonempty(ctestBuildConfiguration) ? *ctestBuildConfiguration
                                             : this->CTest->GetConfigType();
 
-    const std::string& cmakeBuildAdditionalFlags = cmNonempty(args.Flags)
+    std::string const& cmakeBuildAdditionalFlags = cmNonempty(args.Flags)
       ? args.Flags
       : mf.GetSafeDefinition("CTEST_BUILD_FLAGS");
-    const std::string& cmakeBuildTarget = cmNonempty(args.Target)
+    std::string const& cmakeBuildTarget = cmNonempty(args.Target)
       ? args.Target
       : mf.GetSafeDefinition("CTEST_BUILD_TARGET");
 

@@ -81,7 +81,7 @@ auto const PackagePresetHelper =
 
 namespace cmCMakePresetsGraphInternal {
 bool PackagePresetsHelper(std::vector<cmCMakePresetsGraph::PackagePreset>& out,
-                          const Json::Value* value, cmJSONState* state)
+                          Json::Value const* value, cmJSONState* state)
 {
   static auto const helper = cmJSONHelperBuilder::Vector<PackagePreset>(
     cmCMakePresetsErrors::INVALID_PRESETS, PackagePresetHelper);

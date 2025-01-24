@@ -44,14 +44,14 @@ public:
   struct DependenceStruct
   {
     DependenceStruct();
-    explicit DependenceStruct(const std::string& dependence);
+    explicit DependenceStruct(std::string const& dependence);
 
     std::string Name;
     CompareStruct Compare;
 
     std::string NameWithCompare() const;
 
-    bool operator<(const DependenceStruct& other) const
+    bool operator<(DependenceStruct const& other) const
     {
       return this->Name < other.Name;
     }
@@ -132,8 +132,8 @@ public:
   int ConfigureFromOptions();
   int ConfigureFromComponent(cmCPackComponent* component);
   int ConfigureFromGroup(cmCPackComponentGroup* group);
-  int ConfigureFromGroup(const std::string& groupName);
-  int ConfigureFromPrefix(const std::string& prefix);
+  int ConfigureFromGroup(std::string const& groupName);
+  int ConfigureFromPrefix(std::string const& prefix);
 
   void GeneratePackageFile();
 

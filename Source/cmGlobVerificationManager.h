@@ -26,12 +26,12 @@ class cmGlobVerificationManager
 protected:
   //! Save verification script for given makefile.
   //! Saves to output <path>/<CMakeFilesDirectory>/VerifyGlobs.cmake
-  bool SaveVerificationScript(const std::string& path, cmMessenger* messenger);
+  bool SaveVerificationScript(std::string const& path, cmMessenger* messenger);
 
   //! Add an entry into the glob cache
-  void AddCacheEntry(const cmGlobCacheEntry& entry,
-                     const std::string& variable,
-                     const cmListFileBacktrace& bt, cmMessenger* messenger);
+  void AddCacheEntry(cmGlobCacheEntry const& entry,
+                     std::string const& variable,
+                     cmListFileBacktrace const& bt, cmMessenger* messenger);
 
   //! Get all cache entries
   std::vector<cmGlobCacheEntry> GetCacheEntries() const;
@@ -49,12 +49,12 @@ protected:
 private:
   struct CacheEntryKey
   {
-    const bool Recurse;
-    const bool ListDirectories;
-    const bool FollowSymlinks;
-    const std::string Relative;
-    const std::string Expression;
-    CacheEntryKey(const bool rec, const bool l, const bool s, std::string rel,
+    bool const Recurse;
+    bool const ListDirectories;
+    bool const FollowSymlinks;
+    std::string const Relative;
+    std::string const Expression;
+    CacheEntryKey(bool const rec, bool const l, bool const s, std::string rel,
                   std::string e)
       : Recurse(rec)
       , ListDirectories(l)
@@ -63,8 +63,8 @@ private:
       , Expression(std::move(e))
     {
     }
-    bool operator<(const CacheEntryKey& r) const;
-    void PrintGlobCommand(std::ostream& out, const std::string& cmdVar);
+    bool operator<(CacheEntryKey const& r) const;
+    void PrintGlobCommand(std::ostream& out, std::string const& cmdVar);
   };
 
   struct CacheEntryValue

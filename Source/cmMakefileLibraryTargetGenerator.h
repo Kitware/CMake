@@ -27,13 +27,13 @@ protected:
   void WriteSharedLibraryRules(bool relink);
   void WriteModuleLibraryRules(bool relink);
 
-  void WriteDeviceLibraryRules(const std::string& linkRule, bool relink);
-  void WriteNvidiaDeviceLibraryRules(const std::string& linkRuleVar,
+  void WriteDeviceLibraryRules(std::string const& linkRule, bool relink);
+  void WriteNvidiaDeviceLibraryRules(std::string const& linkRuleVar,
                                      bool relink,
                                      std::vector<std::string>& commands,
-                                     const std::string& targetOutput);
-  void WriteLibraryRules(const std::string& linkRule,
-                         const std::string& extraFlags, bool relink);
+                                     std::string const& targetOutput);
+  void WriteLibraryRules(std::string const& linkRule,
+                         std::string const& extraFlags, bool relink);
   // MacOSX Framework support methods
   void WriteFrameworkRules(bool relink);
 

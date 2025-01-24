@@ -22,7 +22,7 @@ public:
   }
 
 protected:
-  void EndElement(const std::string& name) override
+  void EndElement(std::string const& name) override
   {
     if (name == "source") {
       this->InSource = false;
@@ -33,7 +33,7 @@ protected:
     }
   }
 
-  void CharacterDataHandler(const char* data, int length) override
+  void CharacterDataHandler(char const* data, int length) override
   {
     std::string tmp;
     tmp.insert(0, data, length);
@@ -45,7 +45,7 @@ protected:
     }
   }
 
-  void StartElement(const std::string& name, const char** atts) override
+  void StartElement(std::string const& name, char const** atts) override
   {
     std::string FoundSource;
     std::string finalpath;
@@ -157,7 +157,7 @@ cmParseCoberturaCoverage::cmParseCoberturaCoverage(
 {
 }
 
-bool cmParseCoberturaCoverage::ReadCoverageXML(const char* xmlFile)
+bool cmParseCoberturaCoverage::ReadCoverageXML(char const* xmlFile)
 {
   cmParseCoberturaCoverage::XMLParser parser(this->CTest, this->Coverage);
   parser.ParseFile(xmlFile);

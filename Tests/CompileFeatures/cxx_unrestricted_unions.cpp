@@ -13,5 +13,5 @@ union u
 {
   point p_;
   int i_;
-  const char* s_;
+  char const* s_;
 };

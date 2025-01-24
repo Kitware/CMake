@@ -1,5 +1,5 @@
 #include "pcShared.h"
-extern const char* pcStatic(void);
+extern char const* pcStatic(void);
 int main(void)
 {
   pcStatic();

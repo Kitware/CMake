@@ -1,7 +1,7 @@
 
 void someFunc()
 {
-  const char p[] = R"(a\
+  char const p[] = R"(a\
 b
 c)";
 }

@@ -23,7 +23,7 @@ class cmListFileBacktrace;
 class cmTarget;
 
 static void FinalAction(cmMakefile& makefile, std::string const& name,
-                        const cmListFileBacktrace& lfbt)
+                        cmListFileBacktrace const& lfbt)
 {
   // people should add the srcs to the target themselves, but the old command
   // didn't support that, so check and see if they added the files in and if
@@ -131,7 +131,7 @@ bool cmFLTKWrapUICommand(std::vector<std::string> const& args,
   mf.AddDefinition(varName, sourceListValue);
 
   mf.AddGeneratorAction(
-    [target](cmLocalGenerator& lg, const cmListFileBacktrace& lfbt) {
+    [target](cmLocalGenerator& lg, cmListFileBacktrace const& lfbt) {
       FinalAction(*lg.GetMakefile(), target, lfbt);
     });
   return true;

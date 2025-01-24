@@ -41,10 +41,10 @@ void cmInstallGenerator::CheckCMP0082(bool& haveSubdirectoryInstall,
 void cmInstallGenerator::AddInstallRule(
   std::ostream& os, std::string const& dest, cmInstallType type,
   std::vector<std::string> const& files, bool optional /* = false */,
-  const char* permissions_file /* = nullptr */,
-  const char* permissions_dir /* = nullptr */,
-  const char* rename /* = nullptr */, const char* literal_args /* = nullptr */,
-  Indent indent, const char* files_var /* = nullptr */)
+  char const* permissions_file /* = nullptr */,
+  char const* permissions_dir /* = nullptr */,
+  char const* rename /* = nullptr */, char const* literal_args /* = nullptr */,
+  Indent indent, char const* files_var /* = nullptr */)
 {
   // Use the FILE command to install the file.
   std::string stype;
@@ -165,7 +165,7 @@ void cmInstallGenerator::AddInstallRule(
 }
 
 std::string cmInstallGenerator::CreateComponentTest(
-  const std::string& component, bool exclude_from_all, bool all_components)
+  std::string const& component, bool exclude_from_all, bool all_components)
 {
   if (all_components) {
     if (exclude_from_all) {
@@ -207,7 +207,7 @@ void cmInstallGenerator::GenerateScript(std::ostream& os)
   }
 }
 
-bool cmInstallGenerator::InstallsForConfig(const std::string& config)
+bool cmInstallGenerator::InstallsForConfig(std::string const& config)
 {
   return this->GeneratesForConfig(config);
 }
@@ -255,9 +255,9 @@ std::string cmInstallGenerator::GetDestDirPath(std::string const& file)
 }
 
 void cmInstallGenerator::AddTweak(std::ostream& os, Indent indent,
-                                  const std::string& config,
+                                  std::string const& config,
                                   std::string const& file,
-                                  const TweakMethod& tweak)
+                                  TweakMethod const& tweak)
 {
   std::ostringstream tw;
   tweak(tw, indent.Next(), config, file);
@@ -271,10 +271,10 @@ void cmInstallGenerator::AddTweak(std::ostream& os, Indent indent,
 }
 
 void cmInstallGenerator::AddTweak(std::ostream& os, Indent indent,
-                                  const std::string& config,
+                                  std::string const& config,
                                   std::string const& dir,
                                   std::vector<std::string> const& files,
-                                  const TweakMethod& tweak)
+                                  TweakMethod const& tweak)
 {
   if (files.size() == 1) {
     // Tweak a single file.

@@ -18,66 +18,66 @@ class cmXMLWriter;
 class cmXCodeScheme
 {
 public:
-  using TestObjects = std::vector<const cmXCodeObject*>;
+  using TestObjects = std::vector<cmXCodeObject const*>;
 
   cmXCodeScheme(cmLocalGenerator* lg, cmXCodeObject* xcObj, TestObjects tests,
-                const std::vector<std::string>& configList,
+                std::vector<std::string> const& configList,
                 unsigned int xcVersion);
 
-  void WriteXCodeSharedScheme(const std::string& xcProjDir,
-                              const std::string& container);
+  void WriteXCodeSharedScheme(std::string const& xcProjDir,
+                              std::string const& container);
 
 private:
   cmLocalGenerator* const LocalGenerator;
-  const cmXCodeObject* const Target;
-  const TestObjects Tests;
-  const std::string& TargetName;
-  const std::vector<std::string>& ConfigList;
-  const unsigned int XcodeVersion;
+  cmXCodeObject const* const Target;
+  TestObjects const Tests;
+  std::string const& TargetName;
+  std::vector<std::string> const& ConfigList;
+  unsigned int const XcodeVersion;
 
-  void WriteXCodeXCScheme(std::ostream& fout, const std::string& container);
+  void WriteXCodeXCScheme(std::ostream& fout, std::string const& container);
 
-  void WriteBuildAction(cmXMLWriter& xout, const std::string& container);
-  void WriteTestAction(cmXMLWriter& xout, const std::string& configuration,
-                       const std::string& container);
-  void WriteLaunchAction(cmXMLWriter& xout, const std::string& configuration,
-                         const std::string& container);
+  void WriteBuildAction(cmXMLWriter& xout, std::string const& container);
+  void WriteTestAction(cmXMLWriter& xout, std::string const& configuration,
+                       std::string const& container);
+  void WriteLaunchAction(cmXMLWriter& xout, std::string const& configuration,
+                         std::string const& container);
 
   bool WriteLaunchActionAttribute(cmXMLWriter& xout,
-                                  const std::string& attrName,
-                                  const std::string& varName);
+                                  std::string const& attrName,
+                                  std::string const& varName);
 
   bool WriteLaunchActionBooleanAttribute(cmXMLWriter& xout,
-                                         const std::string& attrName,
-                                         const std::string& varName,
+                                         std::string const& attrName,
+                                         std::string const& varName,
                                          bool defaultValue);
 
   bool WriteLaunchActionAdditionalOption(cmXMLWriter& xout,
-                                         const std::string& attrName,
-                                         const std::string& value,
-                                         const std::string& varName);
+                                         std::string const& attrName,
+                                         std::string const& value,
+                                         std::string const& varName);
 
-  void WriteProfileAction(cmXMLWriter& xout, const std::string& configuration,
-                          const std::string& container);
-  void WriteAnalyzeAction(cmXMLWriter& xout, const std::string& configuration);
-  void WriteArchiveAction(cmXMLWriter& xout, const std::string& configuration);
+  void WriteProfileAction(cmXMLWriter& xout, std::string const& configuration,
+                          std::string const& container);
+  void WriteAnalyzeAction(cmXMLWriter& xout, std::string const& configuration);
+  void WriteArchiveAction(cmXMLWriter& xout, std::string const& configuration);
 
   void WriteBuildableProductRunnable(cmXMLWriter& xout,
-                                     const cmXCodeObject* xcObj,
-                                     const std::string& container);
-  void WriteBuildableReference(cmXMLWriter& xout, const cmXCodeObject* xcObj,
-                               const std::string& container);
+                                     cmXCodeObject const* xcObj,
+                                     std::string const& container);
+  void WriteBuildableReference(cmXMLWriter& xout, cmXCodeObject const* xcObj,
+                               std::string const& container);
 
   void WriteCustomWorkingDirectory(cmXMLWriter& xout,
-                                   const std::string& configuration);
+                                   std::string const& configuration);
 
   void WriteCustomLLDBInitFile(cmXMLWriter& xout,
-                               const std::string& configuration);
+                               std::string const& configuration);
 
   std::string WriteVersionString();
-  std::string FindConfiguration(const std::string& name);
+  std::string FindConfiguration(std::string const& name);
 
   bool IsTestable() const;
 
-  static bool IsExecutable(const cmXCodeObject* target);
+  static bool IsExecutable(cmXCodeObject const* target);
 };

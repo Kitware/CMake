@@ -33,7 +33,7 @@ std::map<std::string, cmGlobalCommonGenerator::DirectoryTarget>
 cmGlobalCommonGenerator::ComputeDirectoryTargets() const
 {
   std::map<std::string, DirectoryTarget> dirTargets;
-  for (const auto& lg : this->LocalGenerators) {
+  for (auto const& lg : this->LocalGenerators) {
     std::string currentBinaryDir =
       lg->GetStateSnapshot().GetDirectory().GetCurrentBinary();
     DirectoryTarget& dirTarget = dirTargets[currentBinaryDir];
@@ -43,16 +43,16 @@ cmGlobalCommonGenerator::ComputeDirectoryTargets() const
 
     // The directory-level rule should depend on the target-level rules
     // for all targets in the directory.
-    for (const auto& gt : lg->GetGeneratorTargets()) {
+    for (auto const& gt : lg->GetGeneratorTargets()) {
       cmStateEnums::TargetType const type = gt->GetType();
       if (type == cmStateEnums::GLOBAL_TARGET || !gt->IsInBuildSystem()) {
         continue;
       }
       DirectoryTarget::Target t;
       t.GT = gt.get();
-      const std::string EXCLUDE_FROM_ALL("EXCLUDE_FROM_ALL");
+      std::string const EXCLUDE_FROM_ALL("EXCLUDE_FROM_ALL");
       if (cmValue exclude = gt->GetProperty(EXCLUDE_FROM_ALL)) {
-        for (const std::string& config : configs) {
+        for (std::string const& config : configs) {
           cmGeneratorExpressionInterpreter genexInterpreter(lg.get(), config,
                                                             gt.get());
           if (cmIsOn(genexInterpreter.Evaluate(*exclude, EXCLUDE_FROM_ALL))) {
@@ -91,7 +91,7 @@ cmGlobalCommonGenerator::ComputeDirectoryTargets() const
 }
 
 bool cmGlobalCommonGenerator::IsExcludedFromAllInConfig(
-  const DirectoryTarget::Target& t, const std::string& config)
+  DirectoryTarget::Target const& t, std::string const& config)
 {
   if (this->IsMultiConfig()) {
     return cm::contains(t.ExcludedFromAllInConfigs, config);
@@ -140,7 +140,7 @@ void cmGlobalCommonGenerator::RemoveUnknownClangTidyExportFixesFiles() const
       if (!this->ClangTidyExportFixesFiles.count(file) &&
           !std::any_of(this->ClangTidyExportFixesFiles.begin(),
                        this->ClangTidyExportFixesFiles.end(),
-                       [&file](const std::string& knownFile) -> bool {
+                       [&file](std::string const& knownFile) -> bool {
                          return cmSystemTools::SameFile(file, knownFile);
                        })) {
         cmSystemTools::RemoveFile(file);

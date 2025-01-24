@@ -130,8 +130,8 @@ bool cmIncludeCommand(std::vector<std::string> const& args,
   std::string listFile = cmSystemTools::CollapseFullPath(
     fname, status.GetMakefile().GetCurrentSourceDirectory());
 
-  const bool fileDoesnotExist = !cmSystemTools::FileExists(listFile);
-  const bool fileIsDirectory = cmSystemTools::FileIsDirectory(listFile);
+  bool const fileDoesnotExist = !cmSystemTools::FileExists(listFile);
+  bool const fileIsDirectory = cmSystemTools::FileIsDirectory(listFile);
   if (fileDoesnotExist || fileIsDirectory) {
     if (!resultVarName.empty()) {
       status.GetMakefile().AddDefinition(resultVarName, "NOTFOUND");

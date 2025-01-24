@@ -189,7 +189,7 @@ void cmCTestLaunchReporter::WriteXMLAction(cmXMLElement& e2) const
   }
 
   // OutputType
-  const char* outputType = nullptr;
+  char const* outputType = nullptr;
   if (!this->OptionTargetType.empty()) {
     if (this->OptionTargetType == "EXECUTABLE") {
       outputType = "executable";
@@ -265,13 +265,13 @@ void cmCTestLaunchReporter::WriteXMLLabels(cmXMLElement& e2)
   }
 }
 
-void cmCTestLaunchReporter::DumpFileToXML(cmXMLElement& e3, const char* tag,
+void cmCTestLaunchReporter::DumpFileToXML(cmXMLElement& e3, char const* tag,
                                           std::string const& fname)
 {
   cmsys::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
 
   std::string line;
-  const char* sep = "";
+  char const* sep = "";
 
   cmXMLElement e4(e3, tag);
   while (cmSystemTools::GetLineFromStream(fin, line)) {

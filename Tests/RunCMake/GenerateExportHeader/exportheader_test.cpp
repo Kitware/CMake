@@ -16,7 +16,7 @@ static void rtrim(std::string& str, char byte)
   }
 }
 
-void compare(const char* refName, const char* testName)
+void compare(char const* refName, char const* testName)
 {
   std::ifstream ref;
   ref.open(refName);

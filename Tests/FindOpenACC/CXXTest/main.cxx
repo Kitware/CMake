@@ -10,7 +10,7 @@ void vecaddgpu(float* r, float* a, float* b, std::size_t n)
 
 int main(int, char*[])
 {
-  const std::size_t n = 100000; /* vector length */
+  std::size_t const n = 100000; /* vector length */
   std::vector<float> a(n);      /* input vector 1 */
   std::vector<float> b(n);      /* input vector 2 */
   std::vector<float> r(n);      /* output vector */
@@ -25,7 +25,7 @@ int main(int, char*[])
   auto a_ptr = a.data();
   auto b_ptr = b.data();
   auto r_ptr = r.data();
-#pragma acc data copyin(a_ptr [0:n], b_ptr [0:n]) copyout(r_ptr [0:n])
+#pragma acc data copyin(a_ptr[0 : n], b_ptr[0 : n]) copyout(r_ptr[0 : n])
   {
     vecaddgpu(r_ptr, a_ptr, b_ptr, n);
   }

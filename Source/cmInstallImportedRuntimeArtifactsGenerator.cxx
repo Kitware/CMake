@@ -19,13 +19,13 @@
 #include "cmStringAlgorithms.h"
 
 namespace {
-const cmsys::RegularExpression FrameworkRegularExpression(
+cmsys::RegularExpression const FrameworkRegularExpression(
   "^(.*/)?([^/]*)\\.framework/(.*)$");
 
-const cmsys::RegularExpression BundleRegularExpression(
+cmsys::RegularExpression const BundleRegularExpression(
   "^(.*/)?([^/]*)\\.app/(.*)$");
 
-const cmsys::RegularExpression CFBundleRegularExpression(
+cmsys::RegularExpression const CFBundleRegularExpression(
   "^(.*/)?([^/]*)\\.bundle/(.*)$");
 }
 
@@ -66,7 +66,7 @@ std::string cmInstallImportedRuntimeArtifactsGenerator::GetDestination(
 }
 
 void cmInstallImportedRuntimeArtifactsGenerator::GenerateScriptForConfig(
-  std::ostream& os, const std::string& config, Indent indent)
+  std::ostream& os, std::string const& config, Indent indent)
 {
   auto location = this->Target->GetFullPath(config);
 

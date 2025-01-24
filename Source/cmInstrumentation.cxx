@@ -23,10 +23,10 @@
 #include "cmSystemTools.h"
 #include "cmTimestamp.h"
 
-cmInstrumentation::cmInstrumentation(const std::string& binary_dir,
+cmInstrumentation::cmInstrumentation(std::string const& binary_dir,
                                      bool clear_generated)
 {
-  const std::string uuid =
+  std::string const uuid =
     cmExperimental::DataForFeature(cmExperimental::Feature::Instrumentation)
       .Uuid;
   this->binaryDir = binary_dir;
@@ -58,7 +58,7 @@ void cmInstrumentation::LoadQueries()
 }
 
 cmInstrumentation::cmInstrumentation(
-  const std::string& binary_dir,
+  std::string const& binary_dir,
   std::set<cmInstrumentationQuery::Query>& queries_,
   std::set<cmInstrumentationQuery::Hook>& hooks_, std::string& callback)
 {
@@ -75,7 +75,7 @@ cmInstrumentation::cmInstrumentation(
   }
 }
 
-bool cmInstrumentation::ReadJSONQueries(const std::string& directory)
+bool cmInstrumentation::ReadJSONQueries(std::string const& directory)
 {
   cmsys::Directory d;
   std::string json = ".json";
@@ -92,7 +92,7 @@ bool cmInstrumentation::ReadJSONQueries(const std::string& directory)
   return result;
 }
 
-void cmInstrumentation::ReadJSONQuery(const std::string& file)
+void cmInstrumentation::ReadJSONQuery(std::string const& file)
 {
   auto query = cmInstrumentationQuery();
   query.ReadJSON(file, this->errorMsg, this->queries, this->hooks,
@@ -151,7 +151,7 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
   }
 
   // Touch index file immediately to claim snippets
-  const std::string& directory = cmStrCat(this->timingDirv1, "/data");
+  std::string const& directory = cmStrCat(this->timingDirv1, "/data");
   std::string const& file_name =
     cmStrCat("index-", ComputeSuffixTime(), ".json");
   std::string index_path = cmStrCat(directory, "/", file_name);
@@ -227,7 +227,7 @@ int cmInstrumentation::CollectTimingData(cmInstrumentationQuery::Hook hook)
 }
 
 void cmInstrumentation::InsertDynamicSystemInformation(
-  Json::Value& root, const std::string& prefix)
+  Json::Value& root, std::string const& prefix)
 {
   cmsys::SystemInformation info;
   Json::Value data;
@@ -299,14 +299,14 @@ void cmInstrumentation::InsertTimingData(
 }
 
 void cmInstrumentation::WriteInstrumentationJson(Json::Value& root,
-                                                 const std::string& subdir,
-                                                 const std::string& file_name)
+                                                 std::string const& subdir,
+                                                 std::string const& file_name)
 {
   Json::StreamWriterBuilder wbuilder;
   wbuilder["indentation"] = "\t";
   std::unique_ptr<Json::StreamWriter> JsonWriter =
     std::unique_ptr<Json::StreamWriter>(wbuilder.newStreamWriter());
-  const std::string& directory = cmStrCat(this->timingDirv1, "/", subdir);
+  std::string const& directory = cmStrCat(this->timingDirv1, "/", subdir);
   cmSystemTools::MakeDirectory(directory);
   cmsys::ofstream ftmp(cmStrCat(directory, "/", file_name).c_str());
   JsonWriter->write(root, &ftmp);
@@ -315,8 +315,8 @@ void cmInstrumentation::WriteInstrumentationJson(Json::Value& root,
 }
 
 int cmInstrumentation::InstrumentTest(
-  const std::string& name, const std::string& command,
-  const std::vector<std::string>& args, int64_t result,
+  std::string const& name, std::string const& command,
+  std::vector<std::string> const& args, int64_t result,
   std::chrono::steady_clock::time_point steadyStart,
   std::chrono::system_clock::time_point systemStart)
 {
@@ -353,8 +353,8 @@ void cmInstrumentation::GetPreTestStats()
 }
 
 int cmInstrumentation::InstrumentCommand(
-  std::string command_type, const std::vector<std::string>& command,
-  const std::function<int()>& callback,
+  std::string command_type, std::vector<std::string> const& command,
+  std::function<int()> const& callback,
   cm::optional<std::map<std::string, std::string>> options,
   cm::optional<std::map<std::string, std::string>> arrayOptions,
   bool reloadQueriesAfterCommand)
@@ -456,7 +456,7 @@ int cmInstrumentation::InstrumentCommand(
 }
 
 std::string cmInstrumentation::GetCommandStr(
-  const std::vector<std::string>& args)
+  std::vector<std::string> const& args)
 {
   std::string command_str;
   for (size_t i = 0; i < args.size(); ++i) {

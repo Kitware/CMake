@@ -59,8 +59,8 @@ public:
 
   ~cmArchiveWrite();
 
-  cmArchiveWrite(const cmArchiveWrite&) = delete;
-  cmArchiveWrite& operator=(const cmArchiveWrite&) = delete;
+  cmArchiveWrite(cmArchiveWrite const&) = delete;
+  cmArchiveWrite& operator=(cmArchiveWrite const&) = delete;
 
   bool Open();
 
@@ -72,7 +72,7 @@ public:
    * skip.  The remaining part of the input path is appended to the
    * "prefix" value to construct the final name in the archive.
    */
-  bool Add(std::string path, size_t skip = 0, const char* prefix = nullptr,
+  bool Add(std::string path, size_t skip = 0, char const* prefix = nullptr,
            bool recursive = true);
 
   /** Returns true if there has been no error.  */
@@ -127,7 +127,7 @@ public:
   }
 
   //! Sets UNAME and GNAME to be used in the tar file
-  void SetUNAMEAndGNAME(const std::string& uname_, const std::string& gname_)
+  void SetUNAMEAndGNAME(std::string const& uname_, std::string const& gname_)
   {
     this->Uname = uname_;
     this->Gname = gname_;
@@ -143,10 +143,10 @@ public:
 
 private:
   bool Okay() const { return this->Error.empty(); }
-  bool AddPath(const char* path, size_t skip, const char* prefix,
+  bool AddPath(char const* path, size_t skip, char const* prefix,
                bool recursive = true);
-  bool AddFile(const char* file, size_t skip, const char* prefix);
-  bool AddData(const char* file, size_t size);
+  bool AddFile(char const* file, size_t skip, char const* prefix);
+  bool AddData(char const* file, size_t size);
 
   struct Callback;
   friend struct Callback;

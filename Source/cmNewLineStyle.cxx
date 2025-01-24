@@ -11,7 +11,7 @@ bool cmNewLineStyle::IsValid() const
   return this->NewLineStyle != Invalid;
 }
 
-bool cmNewLineStyle::ReadFromArguments(const std::vector<std::string>& args,
+bool cmNewLineStyle::ReadFromArguments(std::vector<std::string> const& args,
                                        std::string& errorString)
 {
   this->NewLineStyle = Invalid;

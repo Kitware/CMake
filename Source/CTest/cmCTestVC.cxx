@@ -38,7 +38,7 @@ void cmCTestVC::SetSourceDirectory(std::string const& dir)
   this->SourceDirectory = dir;
 }
 
-bool cmCTestVC::InitialCheckout(const std::string& command)
+bool cmCTestVC::InitialCheckout(std::string const& command)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
              "   First perform the initial checkout: " << command << "\n");
@@ -69,7 +69,7 @@ bool cmCTestVC::InitialCheckout(const std::string& command)
   return result;
 }
 
-bool cmCTestVC::RunChild(const std::vector<std::string>& cmd,
+bool cmCTestVC::RunChild(std::vector<std::string> const& cmd,
                          OutputParser* out, OutputParser* err,
                          std::string workDir, Encoding encoding)
 {
@@ -84,10 +84,10 @@ bool cmCTestVC::RunChild(const std::vector<std::string>& cmd,
   return status.front().SpawnResult == 0 && status.front().ExitStatus == 0;
 }
 
-std::string cmCTestVC::ComputeCommandLine(const std::vector<std::string>& cmd)
+std::string cmCTestVC::ComputeCommandLine(std::vector<std::string> const& cmd)
 {
   std::ostringstream line;
-  const char* sep = "";
+  char const* sep = "";
   for (auto const& arg : cmd) {
     line << sep << "\"" << arg << "\"";
     sep = " ";
@@ -95,7 +95,7 @@ std::string cmCTestVC::ComputeCommandLine(const std::vector<std::string>& cmd)
   return line.str();
 }
 
-bool cmCTestVC::RunUpdateCommand(const std::vector<std::string>& cmd,
+bool cmCTestVC::RunUpdateCommand(std::vector<std::string> const& cmd,
                                  OutputParser* out, OutputParser* err,
                                  Encoding encoding)
 {
@@ -202,7 +202,7 @@ void cmCTestVC::WriteXMLEntry(cmXMLWriter& xml, std::string const& path,
                               std::string const& name, std::string const& full,
                               File const& f)
 {
-  static const char* desc[3] = { "Updated", "Modified", "Conflicting" };
+  static char const* desc[3] = { "Updated", "Modified", "Conflicting" };
   Revision const& rev = f.Rev ? *f.Rev : this->Unknown;
   std::string prior = f.PriorRev ? f.PriorRev->Rev : std::string("Unknown");
   xml.StartElement(desc[f.Status]);

@@ -4,6 +4,6 @@
 
 int main(void)
 {
-  const int value = PCH_VALUE;
+  int const value = PCH_VALUE;
   return value == 42 ? 0 : 1;
 }

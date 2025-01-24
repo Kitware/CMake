@@ -24,8 +24,8 @@ public:
   cmCTestLaunchReporter();
   ~cmCTestLaunchReporter();
 
-  cmCTestLaunchReporter(const cmCTestLaunchReporter&) = delete;
-  cmCTestLaunchReporter& operator=(const cmCTestLaunchReporter&) = delete;
+  cmCTestLaunchReporter(cmCTestLaunchReporter const&) = delete;
+  cmCTestLaunchReporter& operator=(cmCTestLaunchReporter const&) = delete;
 
   // Methods to check the result of the real command.
   bool IsError() const;
@@ -79,7 +79,7 @@ public:
   void WriteXMLCommand(cmXMLElement&);
   void WriteXMLResult(cmXMLElement&);
   void WriteXMLLabels(cmXMLElement&);
-  void DumpFileToXML(cmXMLElement&, const char* tag, std::string const& fname);
+  void DumpFileToXML(cmXMLElement&, char const* tag, std::string const& fname);
 
   // Configuration
   std::string SourceDir;

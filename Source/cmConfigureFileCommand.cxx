@@ -28,7 +28,7 @@ bool cmConfigureFileCommand(std::vector<std::string> const& args,
   }
 
   std::string const& inFile = args[0];
-  const std::string inputFile = cmSystemTools::CollapseFullPath(
+  std::string const inputFile = cmSystemTools::CollapseFullPath(
     inFile, status.GetMakefile().GetCurrentSourceDirectory());
 
   // If the input location is a directory, error out.

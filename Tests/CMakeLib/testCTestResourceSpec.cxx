@@ -12,7 +12,7 @@ struct ExpectedSpec
   cmCTestResourceSpec Expected;
 };
 
-static const std::vector<ExpectedSpec> expectedResourceSpecs = {
+static std::vector<ExpectedSpec> const expectedResourceSpecs = {
   { "spec1.json",
     true,
     { { {
@@ -62,8 +62,8 @@ static const std::vector<ExpectedSpec> expectedResourceSpecs = {
   { "noexist.json", false, {} },
 };
 
-static bool testSpec(const std::string& path, bool expectedResult,
-                     const cmCTestResourceSpec& expected)
+static bool testSpec(std::string const& path, bool expectedResult,
+                     cmCTestResourceSpec const& expected)
 {
   cmCTestResourceSpec actual;
   auto result = actual.ReadFromJSONFile(path);

@@ -133,7 +133,7 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 }
 
 std::unique_ptr<cmCPackGenerator> cmCPackGeneratorFactory::NewGenerator(
-  const std::string& name)
+  std::string const& name)
 {
   auto it = this->GeneratorCreators.find(name);
   if (it == this->GeneratorCreators.end()) {
@@ -148,7 +148,7 @@ std::unique_ptr<cmCPackGenerator> cmCPackGeneratorFactory::NewGenerator(
 }
 
 void cmCPackGeneratorFactory::RegisterGenerator(
-  const std::string& name, const char* generatorDescription,
+  std::string const& name, char const* generatorDescription,
   CreateGeneratorCall* createGenerator)
 {
   if (!createGenerator) {

@@ -20,7 +20,7 @@ cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool::
 }
 
 bool cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool::GetFileInfo(
-  const std::string& file, std::vector<std::string>& needed)
+  std::string const& file, std::vector<std::string>& needed)
 {
   cmUVProcessChainBuilder builder;
   builder.SetBuiltinStream(cmUVProcessChainBuilder::Stream_OUTPUT);
@@ -43,7 +43,7 @@ bool cmBinUtilsWindowsPEObjdumpGetRuntimeDependenciesTool::GetFileInfo(
   }
 
   std::string line;
-  static const cmsys::RegularExpression regex(
+  static cmsys::RegularExpression const regex(
     "^[\t ]*DLL Name: ([^\n]*\\.[Dd][Ll][Ll])$");
   cmUVPipeIStream output(process.GetLoop(), process.OutputStream());
   while (cmSystemTools::GetLineFromStream(output, line)) {

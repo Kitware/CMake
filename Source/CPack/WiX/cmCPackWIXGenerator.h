@@ -24,8 +24,8 @@ public:
   cmCPackTypeMacro(cmCPackWIXGenerator, cmCPackGenerator);
 
   cmCPackWIXGenerator();
-  cmCPackWIXGenerator(const cmCPackWIXGenerator&) = delete;
-  const cmCPackWIXGenerator& operator=(const cmCPackWIXGenerator&) = delete;
+  cmCPackWIXGenerator(cmCPackWIXGenerator const&) = delete;
+  cmCPackWIXGenerator const& operator=(cmCPackWIXGenerator const&) = delete;
   ~cmCPackWIXGenerator();
 
 protected:
@@ -33,7 +33,7 @@ protected:
 
   int PackageFiles() override;
 
-  const char* GetOutputExtension() override { return ".msi"; }
+  char const* GetOutputExtension() override { return ".msi"; }
 
   enum CPackSetDestdirSupport SupportsSetDestdir() const override
   {

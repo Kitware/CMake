@@ -457,10 +457,10 @@ Json::Value const& cmFileAPI::AddReplyIndexObject(Object const& o)
   return indexEntry;
 }
 
-const char* cmFileAPI::ObjectKindName(ObjectKind kind)
+char const* cmFileAPI::ObjectKindName(ObjectKind kind)
 {
   // Keep in sync with ObjectKind enum.
-  static const char* objectKindNames[] = {
+  static char const* objectKindNames[] = {
     "codemodel",    //
     "configureLog", //
     "cache",        //

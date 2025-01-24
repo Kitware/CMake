@@ -27,7 +27,7 @@ int cmCPackBundleGenerator::InitializeInternal()
   }
 
   if (this->GetOption("CPACK_BUNDLE_APPLE_CERT_APP")) {
-    const std::string codesign_path = cmSystemTools::FindProgram(
+    std::string const codesign_path = cmSystemTools::FindProgram(
       "codesign", std::vector<std::string>(), false);
 
     if (codesign_path.empty()) {
@@ -41,7 +41,7 @@ int cmCPackBundleGenerator::InitializeInternal()
   return this->Superclass::InitializeInternal();
 }
 
-const char* cmCPackBundleGenerator::GetPackagingInstallPrefix()
+char const* cmCPackBundleGenerator::GetPackagingInstallPrefix()
 {
   this->InstallPrefix = cmStrCat('/', this->GetOption("CPACK_BUNDLE_NAME"),
                                  ".app/Contents/Resources");
@@ -176,7 +176,7 @@ bool cmCPackBundleGenerator::SupportsComponentInstallation() const
   return false;
 }
 
-int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
+int cmCPackBundleGenerator::SignBundle(std::string const& src_dir)
 {
   cmValue cpack_apple_cert_app =
     this->GetOption("CPACK_BUNDLE_APPLE_CERT_APP");
@@ -189,7 +189,7 @@ int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
       cmStrCat(src_dir, '/', this->GetOption("CPACK_BUNDLE_NAME"), ".app");
 
     // A list of additional files to sign, ie. frameworks and plugins.
-    const std::string sign_parameter =
+    std::string const sign_parameter =
       this->GetOption("CPACK_BUNDLE_APPLE_CODESIGN_PARAMETER")
       ? *this->GetOption("CPACK_BUNDLE_APPLE_CODESIGN_PARAMETER")
       : "--deep -f";

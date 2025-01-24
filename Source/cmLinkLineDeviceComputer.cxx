@@ -155,11 +155,11 @@ void cmLinkLineDeviceComputer::ComputeLinkLibraries(
     if (emitted.insert(linkLib.Value).second) {
       linkLib.Value += " ";
 
-      const cmLinkImplementation* linkImpl =
+      cmLinkImplementation const* linkImpl =
         cli.GetTarget()->GetLinkImplementation(cli.GetConfig(),
                                                cmGeneratorTarget::UseTo::Link);
 
-      for (const cmLinkImplItem& iter : linkImpl->Libraries) {
+      for (cmLinkImplItem const& iter : linkImpl->Libraries) {
         if (iter.Target &&
             iter.Target->GetType() != cmStateEnums::INTERFACE_LIBRARY) {
           std::string libPath = iter.Target->GetLocation(cli.GetConfig());
@@ -186,7 +186,7 @@ std::string cmLinkLineDeviceComputer::GetLinkerLanguage(cmGeneratorTarget*,
 }
 
 bool requireDeviceLinking(cmGeneratorTarget& target, cmLocalGenerator& lg,
-                          const std::string& config)
+                          std::string const& config)
 {
   if (!target.GetGlobalGenerator()->GetLanguageEnabled("CUDA")) {
     return false;

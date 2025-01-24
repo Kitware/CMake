@@ -22,7 +22,7 @@
 #include "cmSystemTools.h"
 
 namespace {
-void WriteFilenameGcc(cmsys::ofstream& fout, const std::string& filename)
+void WriteFilenameGcc(cmsys::ofstream& fout, std::string const& filename)
 {
   for (auto c : filename) {
     switch (c) {
@@ -40,16 +40,16 @@ void WriteFilenameGcc(cmsys::ofstream& fout, const std::string& filename)
 }
 
 void WriteDepfile(cmDepfileFormat format, cmsys::ofstream& fout,
-                  const cmLocalGenerator& lg,
-                  const cmGccDepfileContent& content)
+                  cmLocalGenerator const& lg,
+                  cmGccDepfileContent const& content)
 {
-  std::function<std::string(const std::string&)> formatPath =
-    [&lg](const std::string& path) -> std::string {
+  std::function<std::string(std::string const&)> formatPath =
+    [&lg](std::string const& path) -> std::string {
     return lg.MaybeRelativeToTopBinDir(path);
   };
   if (lg.GetGlobalGenerator()->GetName() == "Xcode") {
     // full paths must be preserved for Xcode compliance
-    formatPath = [](const std::string& path) -> std::string { return path; };
+    formatPath = [](std::string const& path) -> std::string { return path; };
   }
 
   for (auto const& dep : content) {
@@ -91,14 +91,14 @@ void WriteMSBuildAdditionalInputs(cmsys::ofstream& fout,
   }
 
   // Write a UTF-8 BOM so MSBuild knows the encoding when reading the file.
-  static const char utf8bom[] = { static_cast<char>(0xEF),
+  static char const utf8bom[] = { static_cast<char>(0xEF),
                                   static_cast<char>(0xBB),
                                   static_cast<char>(0xBF) };
   fout.write(utf8bom, sizeof(utf8bom));
 
   // Write the format expected by MSBuild CustomBuild AdditionalInputs.
-  const char* sep = "";
-  for (const auto& c : content) {
+  char const* sep = "";
+  for (auto const& c : content) {
     for (std::string path : c.paths) {
       if (!cmSystemTools::FileIsFullPath(path)) {
         path = cmSystemTools::CollapseFullPath(path,
@@ -113,8 +113,8 @@ void WriteMSBuildAdditionalInputs(cmsys::ofstream& fout,
 }
 }
 
-bool cmTransformDepfile(cmDepfileFormat format, const cmLocalGenerator& lg,
-                        const std::string& infile, const std::string& outfile)
+bool cmTransformDepfile(cmDepfileFormat format, cmLocalGenerator const& lg,
+                        std::string const& infile, std::string const& outfile)
 {
   cmGccDepfileContent content;
   if (cmSystemTools::FileExists(infile)) {

@@ -21,7 +21,7 @@ public:
   using cmTargetPropCommandBase::cmTargetPropCommandBase;
 
 private:
-  void HandleMissingTarget(const std::string& name) override
+  void HandleMissingTarget(std::string const& name) override
   {
     this->Makefile->IssueMessage(
       MessageType::FATAL_ERROR,
@@ -30,18 +30,18 @@ private:
   }
 
   bool HandleDirectContent(cmTarget* tgt,
-                           const std::vector<std::string>& content,
+                           std::vector<std::string> const& content,
                            bool prepend, bool system) override;
 
   void HandleInterfaceContent(cmTarget* tgt,
-                              const std::vector<std::string>& content,
+                              std::vector<std::string> const& content,
                               bool prepend, bool system) override;
 
-  std::string Join(const std::vector<std::string>& content) override;
+  std::string Join(std::vector<std::string> const& content) override;
 };
 
 std::string TargetIncludeDirectoriesImpl::Join(
-  const std::vector<std::string>& content)
+  std::vector<std::string> const& content)
 {
   std::string dirs;
   std::string sep;
@@ -59,7 +59,7 @@ std::string TargetIncludeDirectoriesImpl::Join(
 }
 
 bool TargetIncludeDirectoriesImpl::HandleDirectContent(
-  cmTarget* tgt, const std::vector<std::string>& content, bool prepend,
+  cmTarget* tgt, std::vector<std::string> const& content, bool prepend,
   bool system)
 {
   cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
@@ -81,7 +81,7 @@ bool TargetIncludeDirectoriesImpl::HandleDirectContent(
 }
 
 void TargetIncludeDirectoriesImpl::HandleInterfaceContent(
-  cmTarget* tgt, const std::vector<std::string>& content, bool prepend,
+  cmTarget* tgt, std::vector<std::string> const& content, bool prepend,
   bool system)
 {
   this->cmTargetPropCommandBase::HandleInterfaceContent(tgt, content, prepend,

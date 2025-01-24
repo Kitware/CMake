@@ -11,7 +11,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmStringAlgorithms.h"
 
-const std::string cmLinkItem::DEFAULT = "DEFAULT";
+std::string const cmLinkItem::DEFAULT = "DEFAULT";
 
 cmLinkItem::cmLinkItem(std::string n, bool c, cmListFileBacktrace bt,
                        std::string feature)
@@ -77,8 +77,8 @@ cmLinkImplItem::cmLinkImplItem(cmLinkItem item)
 }
 
 namespace {
-const cm::string_view LL_BEGIN = "<LINK_LIBRARY:"_s;
-const cm::string_view LL_END = "</LINK_LIBRARY:"_s;
+cm::string_view const LL_BEGIN = "<LINK_LIBRARY:"_s;
+cm::string_view const LL_END = "</LINK_LIBRARY:"_s;
 }
 cm::optional<std::string> ParseLinkFeature(std::string const& item)
 {

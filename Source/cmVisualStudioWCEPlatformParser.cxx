@@ -10,12 +10,12 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-int cmVisualStudioWCEPlatformParser::ParseVersion(const char* version)
+int cmVisualStudioWCEPlatformParser::ParseVersion(char const* version)
 {
-  const std::string registryBase =
+  std::string const registryBase =
     cmGlobalVisualStudioGenerator::GetRegistryBase(version);
-  const std::string vckey = cmStrCat(registryBase, "\\Setup\\VC;ProductDir");
-  const std::string vskey = cmStrCat(registryBase, "\\Setup\\VS;ProductDir");
+  std::string const vckey = cmStrCat(registryBase, "\\Setup\\VC;ProductDir");
+  std::string const vskey = cmStrCat(registryBase, "\\Setup\\VS;ProductDir");
 
   if (!cmSystemTools::ReadRegistryValue(vckey, this->VcInstallDir,
                                         cmSystemTools::KeyWOW64_32) ||
@@ -27,7 +27,7 @@ int cmVisualStudioWCEPlatformParser::ParseVersion(const char* version)
   cmSystemTools::ConvertToUnixSlashes(this->VsInstallDir);
   this->VcInstallDir.append("//");
 
-  const std::string configFilename =
+  std::string const configFilename =
     cmStrCat(this->VcInstallDir, "vcpackages/WCE.VCPlatform.config");
 
   return this->ParseFile(configFilename.c_str());
@@ -42,7 +42,7 @@ std::string cmVisualStudioWCEPlatformParser::GetOSVersion() const
   return cmStrCat(OSMajorVersion, '.', OSMinorVersion);
 }
 
-const char* cmVisualStudioWCEPlatformParser::GetArchitectureFamily() const
+char const* cmVisualStudioWCEPlatformParser::GetArchitectureFamily() const
 {
   auto it = this->Macros.find("ARCHFAM");
   if (it != this->Macros.end()) {
@@ -52,8 +52,8 @@ const char* cmVisualStudioWCEPlatformParser::GetArchitectureFamily() const
   return nullptr;
 }
 
-void cmVisualStudioWCEPlatformParser::StartElement(const std::string& name,
-                                                   const char** attributes)
+void cmVisualStudioWCEPlatformParser::StartElement(std::string const& name,
+                                                   char const** attributes)
 {
   if (this->FoundRequiredName) {
     return;
@@ -72,7 +72,7 @@ void cmVisualStudioWCEPlatformParser::StartElement(const std::string& name,
     std::string macroName;
     std::string macroValue;
 
-    for (const char** attr = attributes; *attr; attr += 2) {
+    for (char const** attr = attributes; *attr; attr += 2) {
       if (strcmp(attr[0], "Name") == 0) {
         macroName = attr[1];
       } else if (strcmp(attr[0], "Value") == 0) {
@@ -84,7 +84,7 @@ void cmVisualStudioWCEPlatformParser::StartElement(const std::string& name,
       this->Macros[macroName] = macroValue;
     }
   } else if (name == "Directories"_s) {
-    for (const char** attr = attributes; *attr; attr += 2) {
+    for (char const** attr = attributes; *attr; attr += 2) {
       if (strcmp(attr[0], "Include") == 0) {
         this->Include = attr[1];
       } else if (strcmp(attr[0], "Library") == 0) {
@@ -96,7 +96,7 @@ void cmVisualStudioWCEPlatformParser::StartElement(const std::string& name,
   }
 }
 
-void cmVisualStudioWCEPlatformParser::EndElement(const std::string& name)
+void cmVisualStudioWCEPlatformParser::EndElement(std::string const& name)
 {
   if (!this->RequiredName) {
     if (name == "PlatformName"_s) {
@@ -122,14 +122,14 @@ void cmVisualStudioWCEPlatformParser::EndElement(const std::string& name)
   }
 }
 
-void cmVisualStudioWCEPlatformParser::CharacterDataHandler(const char* data,
+void cmVisualStudioWCEPlatformParser::CharacterDataHandler(char const* data,
                                                            int length)
 {
   this->CharacterData.append(data, length);
 }
 
 std::string cmVisualStudioWCEPlatformParser::FixPaths(
-  const std::string& paths) const
+  std::string const& paths) const
 {
   std::string ret = paths;
   cmSystemTools::ReplaceString(ret, "$(PATH)", "%PATH%");

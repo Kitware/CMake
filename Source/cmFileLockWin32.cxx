@@ -7,7 +7,7 @@
 #include "cmFileLock.h"
 #include "cmSystemTools.h"
 
-static const unsigned long LOCK_LEN = static_cast<unsigned long>(-1);
+static unsigned long const LOCK_LEN = static_cast<unsigned long>(-1);
 
 cmFileLock::cmFileLock()
   : Overlapped(cm::make_unique<OVERLAPPED>())

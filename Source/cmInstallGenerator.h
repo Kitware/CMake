@@ -48,17 +48,17 @@ public:
   void AddInstallRule(
     std::ostream& os, std::string const& dest, cmInstallType type,
     std::vector<std::string> const& files, bool optional = false,
-    const char* permissions_file = nullptr,
-    const char* permissions_dir = nullptr, const char* rename = nullptr,
-    const char* literal_args = nullptr, Indent indent = Indent(),
-    const char* files_var = nullptr);
+    char const* permissions_file = nullptr,
+    char const* permissions_dir = nullptr, char const* rename = nullptr,
+    char const* literal_args = nullptr, Indent indent = Indent(),
+    char const* files_var = nullptr);
 
   /** Get the install destination as it should appear in the
       installation script.  */
   static std::string ConvertToAbsoluteDestination(std::string const& dest);
 
   /** Test if this generator installs something for a given configuration.  */
-  bool InstallsForConfig(const std::string& config);
+  bool InstallsForConfig(std::string const& config);
 
   /** Select message level from CMAKE_INSTALL_MESSAGE or 'never'.  */
   static MessageLevel SelectMessageLevel(cmMakefile* mf, bool never = false);
@@ -77,20 +77,20 @@ public:
 protected:
   void GenerateScript(std::ostream& os) override;
 
-  std::string CreateComponentTest(const std::string& component,
+  std::string CreateComponentTest(std::string const& component,
                                   bool exclude_from_all,
                                   bool all_components = false);
 
   using TweakMethod =
     std::function<void(std::ostream& os, Indent indent,
-                       const std::string& config, const std::string& file)>;
+                       std::string const& config, std::string const& file)>;
   static void AddTweak(std::ostream& os, Indent indent,
-                       const std::string& config, std::string const& file,
-                       const TweakMethod& tweak);
+                       std::string const& config, std::string const& file,
+                       TweakMethod const& tweak);
   static void AddTweak(std::ostream& os, Indent indent,
-                       const std::string& config, std::string const& dir,
+                       std::string const& config, std::string const& dir,
                        std::vector<std::string> const& files,
-                       const TweakMethod& tweak);
+                       TweakMethod const& tweak);
 
   // Information shared by most generator types.
   std::string const Destination;

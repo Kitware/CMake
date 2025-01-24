@@ -16,7 +16,7 @@ int fileExists(char* filename)
   return 1;
 }
 
-int findBundleFile(char* exec, const char* file)
+int findBundleFile(char* exec, char const* file)
 {
   int res;
   char* nexec = strdup(exec);

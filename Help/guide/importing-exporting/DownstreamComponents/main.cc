@@ -13,15 +13,15 @@ int main(int argc, char* argv[])
   }
 
   // convert input to double
-  const double inputValue = std::stod(argv[1]);
+  double const inputValue = std::stod(argv[1]);
 
   // calculate square root
-  const double sqrt = MathFunctions::sqrt(inputValue);
+  double const sqrt = MathFunctions::sqrt(inputValue);
   std::cout << "The square root of " << inputValue << " is " << sqrt
             << std::endl;
 
   // calculate sum
-  const double sum = MathFunctions::add(inputValue, inputValue);
+  double const sum = MathFunctions::add(inputValue, inputValue);
   std::cout << inputValue << " + " << inputValue << " = " << sum << std::endl;
 
   return 0;

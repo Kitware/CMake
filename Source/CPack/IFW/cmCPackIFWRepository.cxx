@@ -124,22 +124,22 @@ public:
   bool patched = false;
 
 protected:
-  void StartElement(const std::string& name, const char** atts) override
+  void StartElement(std::string const& name, char const** atts) override
   {
     this->xout.StartElement(name);
     this->StartFragment(atts);
   }
 
-  void StartFragment(const char** atts)
+  void StartFragment(char const** atts)
   {
     for (size_t i = 0; atts[i]; i += 2) {
-      const char* key = atts[i];
-      const char* value = atts[i + 1];
+      char const* key = atts[i];
+      char const* value = atts[i + 1];
       this->xout.Attribute(key, value);
     }
   }
 
-  void EndElement(const std::string& name) override
+  void EndElement(std::string const& name) override
   {
     if (name == "Updates" && !this->patched) {
       this->repository->WriteRepositoryUpdates(this->xout);
@@ -155,7 +155,7 @@ protected:
     }
   }
 
-  void CharacterDataHandler(const char* data, int length) override
+  void CharacterDataHandler(char const* data, int length) override
   {
     std::string content(data, data + length);
     if (content.empty() || content == " " || content == "  " ||

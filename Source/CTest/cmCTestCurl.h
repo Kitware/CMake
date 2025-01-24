@@ -26,8 +26,8 @@ class cmCTestCurl
 public:
   cmCTestCurl(cmCTest*);
   ~cmCTestCurl();
-  cmCTestCurl(const cmCTestCurl&) = delete;
-  cmCTestCurl& operator=(const cmCTestCurl&) = delete;
+  cmCTestCurl(cmCTestCurl const&) = delete;
+  cmCTestCurl& operator=(cmCTestCurl const&) = delete;
   bool UploadFile(std::string const& local_file, std::string const& url,
                   std::string const& fields, std::string& response);
   bool HttpRequest(std::string const& url, std::string const& fields,

@@ -13,9 +13,9 @@
 #include "cmJSONState.h"
 
 namespace JsonErrors {
-ErrorGenerator EXPECTED_TYPE(const std::string& type)
+ErrorGenerator EXPECTED_TYPE(std::string const& type)
 {
-  return [type](const Json::Value* value, cmJSONState* state) -> void {
+  return [type](Json::Value const* value, cmJSONState* state) -> void {
     if (state->key().empty()) {
       state->AddErrorAtValue(cmStrCat("Expected ", type), value);
       return;
@@ -28,35 +28,35 @@ ErrorGenerator EXPECTED_TYPE(const std::string& type)
   };
 }
 
-void INVALID_STRING(const Json::Value* value, cmJSONState* state)
+void INVALID_STRING(Json::Value const* value, cmJSONState* state)
 {
   JsonErrors::EXPECTED_TYPE("a string")(value, state);
 }
 
-void INVALID_BOOL(const Json::Value* value, cmJSONState* state)
+void INVALID_BOOL(Json::Value const* value, cmJSONState* state)
 {
   JsonErrors::EXPECTED_TYPE("a bool")(value, state);
 }
 
-void INVALID_INT(const Json::Value* value, cmJSONState* state)
+void INVALID_INT(Json::Value const* value, cmJSONState* state)
 {
   JsonErrors::EXPECTED_TYPE("an integer")(value, state);
 }
 
-void INVALID_UINT(const Json::Value* value, cmJSONState* state)
+void INVALID_UINT(Json::Value const* value, cmJSONState* state)
 {
   JsonErrors::EXPECTED_TYPE("an unsigned integer")(value, state);
 }
 
 ObjectErrorGenerator INVALID_NAMED_OBJECT(
-  const std::function<std::string(const Json::Value*, cmJSONState*)>&
+  std::function<std::string(Json::Value const*, cmJSONState*)> const&
     nameGenerator)
 {
   return [nameGenerator](
            ObjectError errorType,
-           const Json::Value::Members& extraFields) -> ErrorGenerator {
+           Json::Value::Members const& extraFields) -> ErrorGenerator {
     return [nameGenerator, errorType, extraFields](
-             const Json::Value* value, cmJSONState* state) -> void {
+             Json::Value const* value, cmJSONState* state) -> void {
       std::string name = nameGenerator(value, state);
       switch (errorType) {
         case ObjectError::RequiredMissing:
@@ -88,18 +88,18 @@ ObjectErrorGenerator INVALID_NAMED_OBJECT(
 }
 
 ErrorGenerator INVALID_OBJECT(ObjectError errorType,
-                              const Json::Value::Members& extraFields)
+                              Json::Value::Members const& extraFields)
 {
   return INVALID_NAMED_OBJECT(
-    [](const Json::Value*, cmJSONState*) -> std::string { return "Object"; })(
+    [](Json::Value const*, cmJSONState*) -> std::string { return "Object"; })(
     errorType, extraFields);
 }
 
 ErrorGenerator INVALID_NAMED_OBJECT_KEY(
-  ObjectError errorType, const Json::Value::Members& extraFields)
+  ObjectError errorType, Json::Value::Members const& extraFields)
 {
   return INVALID_NAMED_OBJECT(
-    [](const Json::Value*, cmJSONState* state) -> std::string {
+    [](Json::Value const*, cmJSONState* state) -> std::string {
       for (auto it = state->parseStack.rbegin();
            it != state->parseStack.rend(); ++it) {
         if (it->first.rfind("$vector_item_", 0) == 0) {

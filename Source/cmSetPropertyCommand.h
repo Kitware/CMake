@@ -46,7 +46,7 @@ bool HandleAndValidateTestDirectoryScopes(
   std::string& test_directory, cmMakefile*& test_directory_makefile);
 
 std::string MakeSourceFilePathAbsoluteIfNeeded(
-  cmExecutionStatus& status, const std::string& source_file_path, bool needed);
+  cmExecutionStatus& status, std::string const& source_file_path, bool needed);
 void MakeSourceFilePathsAbsoluteIfNeeded(
   cmExecutionStatus& status,
   std::vector<std::string>& source_files_absolute_paths,

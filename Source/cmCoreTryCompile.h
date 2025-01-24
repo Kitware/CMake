@@ -146,7 +146,7 @@ public:
   TryCompileCode. The result is stored in OutputFile. If nothing is found,
   the error message is stored in FindErrorMessage.
    */
-  void FindOutputFile(const std::string& targetName);
+  void FindOutputFile(std::string const& targetName);
 
   static void WriteTryCompileEventFields(
     cmConfigureLog& log, cmTryCompileResult const& compileResult);
@@ -162,7 +162,7 @@ private:
                           char const* command) const;
 
   Arguments ParseArgs(
-    const cmRange<std::vector<std::string>::const_iterator>& args,
-    const cmArgumentParser<Arguments>& parser,
+    cmRange<std::vector<std::string>::const_iterator> const& args,
+    cmArgumentParser<Arguments> const& parser,
     std::vector<std::string>& unparsedArguments);
 };

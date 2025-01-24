@@ -9,11 +9,11 @@
 
 struct cmGlobCacheEntry
 {
-  const bool Recurse;
-  const bool ListDirectories;
-  const bool FollowSymlinks;
-  const std::string Relative;
-  const std::string Expression;
+  bool const Recurse;
+  bool const ListDirectories;
+  bool const FollowSymlinks;
+  std::string const Relative;
+  std::string const Expression;
   std::vector<std::string> Files;
 
   cmGlobCacheEntry(bool recurse, bool listDirectories, bool followSymlinks,

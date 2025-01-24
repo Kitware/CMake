@@ -32,25 +32,25 @@ private:
 
   void GenerateTarget();
 
-  void WriteTargetSpecifics(std::ostream& fout, const std::string& config);
+  void WriteTargetSpecifics(std::ostream& fout, std::string const& config);
 
-  void WriteCompilerFlags(std::ostream& fout, const std::string& config,
-                          const std::string& language);
-  void WriteCompilerDefinitions(std::ostream& fout, const std::string& config,
-                                const std::string& language);
+  void WriteCompilerFlags(std::ostream& fout, std::string const& config,
+                          std::string const& language);
+  void WriteCompilerDefinitions(std::ostream& fout, std::string const& config,
+                                std::string const& language);
 
   void SetCompilerFlags(std::string const& config,
-                        const std::string& language);
+                        std::string const& language);
 
-  std::string GetDefines(const std::string& language,
+  std::string GetDefines(std::string const& language,
                          std::string const& config);
 
-  void WriteIncludes(std::ostream& fout, const std::string& config,
-                     const std::string& language);
+  void WriteIncludes(std::ostream& fout, std::string const& config,
+                     std::string const& language);
   void WriteTargetLinkLine(std::ostream& fout, std::string const& config);
   void WriteBuildEvents(std::ostream& fout);
   void WriteBuildEventsHelper(std::ostream& fout,
-                              const std::vector<cmCustomCommand>& ccv,
+                              std::vector<cmCustomCommand> const& ccv,
                               std::string const& name, std::string const& cmd);
   void WriteCustomCommandsHelper(std::ostream& fout,
                                  cmCustomCommandGenerator const& ccg);
@@ -62,10 +62,10 @@ private:
                           std::vector<cmSourceFile const*>& order,
                           cmSourceFile const* sf);
   void WriteSources(std::ostream& fout_proj);
-  void WriteSourceProperty(std::ostream& fout, const cmSourceFile* sf,
+  void WriteSourceProperty(std::ostream& fout, cmSourceFile const* sf,
                            std::string const& propName,
                            std::string const& propFlag);
-  static std::string WriteObjectLangOverride(const cmSourceFile* sourceFile);
+  static std::string WriteObjectLangOverride(cmSourceFile const* sourceFile);
 
   bool DetermineIfIntegrityApp();
   cmGeneratorTarget* GeneratorTarget;

@@ -35,7 +35,7 @@ static void sendCommands(std::shared_ptr<dap::ReaderWriter> const& debugger,
                          int delayMs,
                          std::vector<std::string> const& initCommands)
 {
-  for (const auto& command : initCommands) {
+  for (auto const& command : initCommands) {
     std::string contentLength = "Content-Length:";
     contentLength += std::to_string(command.size()) + "\r\n\r\n";
     debugger->write(contentLength.c_str(), contentLength.size());
@@ -186,7 +186,7 @@ int runTest(int argc, char* argv[])
     R"("command" *: *"disconnect".*"success" *: *true.*"type" *: *"response")"
   };
 
-  for (const auto& regexString : expectedResponses) {
+  for (auto const& regexString : expectedResponses) {
     cmsys::RegularExpression regex(regexString);
     if (!regex.find(debuggerResponse)) {
       std::cout << "Expected response not found: " << regexString << std::endl;
@@ -202,10 +202,10 @@ int main(int argc, char* argv[])
 {
   try {
     return runTest(argc, argv);
-  } catch (const std::exception& ex) {
+  } catch (std::exception const& ex) {
     std::cout << "An exception occurred: " << ex.what() << std::endl;
     return -1;
-  } catch (const std::string& ex) {
+  } catch (std::string const& ex) {
     std::cout << "An exception occurred: " << ex << std::endl;
     return -1;
   } catch (...) {

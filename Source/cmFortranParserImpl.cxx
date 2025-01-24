@@ -12,8 +12,8 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-bool cmFortranParser_s::FindIncludeFile(const char* dir,
-                                        const char* includeName,
+bool cmFortranParser_s::FindIncludeFile(char const* dir,
+                                        char const* includeName,
                                         std::string& fileName)
 {
   // If the file is a full path, include it directly.
@@ -85,7 +85,7 @@ std::string cmFortranParser_s::SModName(std::string const& mod_name,
   return mod_name + this->Compiler.SModSep + sub_name + SModExt;
 }
 
-bool cmFortranParser_FilePush(cmFortranParser* parser, const char* fname)
+bool cmFortranParser_FilePush(cmFortranParser* parser, char const* fname)
 {
   // Open the new file and push it onto the stack.  Save the old
   // buffer with it on the stack.
@@ -146,7 +146,7 @@ void cmFortranParser_StringStart(cmFortranParser* parser)
   parser->TokenString.clear();
 }
 
-const char* cmFortranParser_StringEnd(cmFortranParser* parser)
+char const* cmFortranParser_StringEnd(cmFortranParser* parser)
 {
   return parser->TokenString.c_str();
 }
@@ -180,12 +180,12 @@ int cmFortranParser_GetOldStartcond(cmFortranParser* parser)
   return parser->OldStartcond;
 }
 
-void cmFortranParser_Error(cmFortranParser* parser, const char* msg)
+void cmFortranParser_Error(cmFortranParser* parser, char const* msg)
 {
   parser->Error = msg ? msg : "unknown error";
 }
 
-void cmFortranParser_RuleUse(cmFortranParser* parser, const char* module_name)
+void cmFortranParser_RuleUse(cmFortranParser* parser, char const* module_name)
 {
   if (parser->InPPFalseBranch) {
     return;
@@ -198,7 +198,7 @@ void cmFortranParser_RuleUse(cmFortranParser* parser, const char* module_name)
 }
 
 void cmFortranParser_RuleUseIntrinsic(cmFortranParser* parser,
-                                      const char* module_name)
+                                      char const* module_name)
 {
   if (parser->InPPFalseBranch) {
     return;
@@ -211,7 +211,7 @@ void cmFortranParser_RuleUseIntrinsic(cmFortranParser* parser,
 }
 
 void cmFortranParser_RuleLineDirective(cmFortranParser* parser,
-                                       const char* filename)
+                                       char const* filename)
 {
   // This is a #line directive naming a file encountered during preprocessing.
   std::string included = filename;
@@ -233,7 +233,7 @@ void cmFortranParser_RuleLineDirective(cmFortranParser* parser,
   }
 }
 
-void cmFortranParser_RuleInclude(cmFortranParser* parser, const char* name)
+void cmFortranParser_RuleInclude(cmFortranParser* parser, char const* name)
 {
   if (parser->InPPFalseBranch) {
     return;
@@ -261,7 +261,7 @@ void cmFortranParser_RuleInclude(cmFortranParser* parser, const char* name)
 }
 
 void cmFortranParser_RuleModule(cmFortranParser* parser,
-                                const char* module_name)
+                                char const* module_name)
 {
   if (parser->InPPFalseBranch) {
     return;
@@ -276,8 +276,8 @@ void cmFortranParser_RuleModule(cmFortranParser* parser,
 }
 
 void cmFortranParser_RuleSubmodule(cmFortranParser* parser,
-                                   const char* module_name,
-                                   const char* submodule_name)
+                                   char const* module_name,
+                                   char const* submodule_name)
 {
   if (parser->InPPFalseBranch) {
     return;
@@ -299,9 +299,9 @@ void cmFortranParser_RuleSubmodule(cmFortranParser* parser,
 }
 
 void cmFortranParser_RuleSubmoduleNested(cmFortranParser* parser,
-                                         const char* module_name,
-                                         const char* submodule_name,
-                                         const char* nested_submodule_name)
+                                         char const* module_name,
+                                         char const* submodule_name,
+                                         char const* nested_submodule_name)
 {
   if (parser->InPPFalseBranch) {
     return;
@@ -319,14 +319,14 @@ void cmFortranParser_RuleSubmoduleNested(cmFortranParser* parser,
   parser->Info.Provides.insert(parser->SModName(mod_name, nest_name));
 }
 
-void cmFortranParser_RuleDefine(cmFortranParser* parser, const char* macro)
+void cmFortranParser_RuleDefine(cmFortranParser* parser, char const* macro)
 {
   if (!parser->InPPFalseBranch) {
     parser->PPDefinitions.insert(macro);
   }
 }
 
-void cmFortranParser_RuleUndef(cmFortranParser* parser, const char* macro)
+void cmFortranParser_RuleUndef(cmFortranParser* parser, char const* macro)
 {
   if (!parser->InPPFalseBranch) {
     std::set<std::string>::iterator match;
@@ -337,7 +337,7 @@ void cmFortranParser_RuleUndef(cmFortranParser* parser, const char* macro)
   }
 }
 
-void cmFortranParser_RuleIfdef(cmFortranParser* parser, const char* macro)
+void cmFortranParser_RuleIfdef(cmFortranParser* parser, char const* macro)
 {
   // A new PP branch has been opened
   parser->SkipToEnd.push(false);
@@ -352,7 +352,7 @@ void cmFortranParser_RuleIfdef(cmFortranParser* parser, const char* macro)
   }
 }
 
-void cmFortranParser_RuleIfndef(cmFortranParser* parser, const char* macro)
+void cmFortranParser_RuleIfndef(cmFortranParser* parser, char const* macro)
 {
   // A new PP branch has been opened
   parser->SkipToEnd.push(false);

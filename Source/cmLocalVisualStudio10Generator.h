@@ -26,11 +26,11 @@ public:
 
   ~cmLocalVisualStudio10Generator() override;
 
-  void ReadAndStoreExternalGUID(const std::string& name,
-                                const char* path) override;
+  void ReadAndStoreExternalGUID(std::string const& name,
+                                char const* path) override;
 
 protected:
-  const char* ReportErrorLabel() const override;
+  char const* ReportErrorLabel() const override;
   bool CustomCommandUseLocal() const override { return true; }
 
 private:

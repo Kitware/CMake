@@ -34,7 +34,7 @@ public:
    * @brief Lock the file.
    * @param timeoutSec Lock timeout. If -1 try until success or fatal error.
    */
-  cmFileLockResult Lock(const std::string& filename, unsigned long timeoutSec);
+  cmFileLockResult Lock(std::string const& filename, unsigned long timeoutSec);
 
   /**
    * @brief Unlock the file.
@@ -46,7 +46,7 @@ public:
    * @details This function helps to find double locks (deadlocks) and to do
    * explicit unlocks.
    */
-  bool IsLocked(const std::string& filename) const;
+  bool IsLocked(std::string const& filename) const;
 
 private:
   cmFileLockResult OpenFile();

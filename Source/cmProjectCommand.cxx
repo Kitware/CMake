@@ -23,7 +23,7 @@
 #include "cmValue.h"
 
 static bool IncludeByVariable(cmExecutionStatus& status,
-                              const std::string& variable);
+                              std::string const& variable);
 static void TopLevelCMakeVarCondSet(cmMakefile& mf, std::string const& name,
                                     std::string const& value);
 
@@ -253,7 +253,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
         std::numeric_limits<unsigned>::digits10 + 2;
       char vb[MAX_VERSION_COMPONENTS][maxIntLength];
       unsigned v[MAX_VERSION_COMPONENTS] = { 0, 0, 0, 0 };
-      const int vc = std::sscanf(version.c_str(), "%u.%u.%u.%u", &v[0], &v[1],
+      int const vc = std::sscanf(version.c_str(), "%u.%u.%u.%u", &v[0], &v[1],
                                  &v[2], &v[3]);
       for (auto i = 0u; i < MAX_VERSION_COMPONENTS; ++i) {
         if (static_cast<int>(i) < vc) {
@@ -356,7 +356,7 @@ bool cmProjectCommand(std::vector<std::string> const& args,
 }
 
 static bool IncludeByVariable(cmExecutionStatus& status,
-                              const std::string& variable)
+                              std::string const& variable)
 {
   cmMakefile& mf = status.GetMakefile();
   cmValue include = mf.GetDefinition(variable);
@@ -396,7 +396,7 @@ static bool IncludeByVariable(cmExecutionStatus& status,
       continue;
     }
 
-    const bool readit = mf.ReadDependentFile(filePath);
+    bool const readit = mf.ReadDependentFile(filePath);
     if (readit) {
       // If the included file ran successfully, continue to the next file
       continue;

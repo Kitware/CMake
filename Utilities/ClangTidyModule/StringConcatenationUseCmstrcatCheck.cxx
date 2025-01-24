@@ -61,11 +61,11 @@ void StringConcatenationUseCmstrcatCheck::registerMatchers(MatchFinder* Finder)
 }
 
 void StringConcatenationUseCmstrcatCheck::check(
-  const MatchFinder::MatchResult& Result)
+  MatchFinder::MatchResult const& Result)
 {
-  const CXXOperatorCallExpr* AppendNode =
+  CXXOperatorCallExpr const* AppendNode =
     Result.Nodes.getNodeAs<CXXOperatorCallExpr>("append");
-  const CXXOperatorCallExpr* ConcatNode =
+  CXXOperatorCallExpr const* ConcatNode =
     Result.Nodes.getNodeAs<CXXOperatorCallExpr>("concat");
 
   if (AppendNode != nullptr) {
@@ -75,8 +75,8 @@ void StringConcatenationUseCmstrcatCheck::check(
 
       ExprChain TmpExprChain =
         std::make_pair(OperatorType::PlusEquals,
-                       std::vector<const CXXOperatorCallExpr*>{ AppendNode });
-      const CXXOperatorCallExpr* RHSNode =
+                       std::vector<CXXOperatorCallExpr const*>{ AppendNode });
+      CXXOperatorCallExpr const* RHSNode =
         Result.Nodes.getNodeAs<CXXOperatorCallExpr>("rhs");
 
       if (RHSNode != nullptr) {
@@ -106,10 +106,10 @@ void StringConcatenationUseCmstrcatCheck::check(
       } else {
         TmpExprChain = std::make_pair(
           OperatorType::Plus,
-          std::vector<const CXXOperatorCallExpr*>{ ConcatNode });
+          std::vector<CXXOperatorCallExpr const*>{ ConcatNode });
       }
 
-      const CXXOperatorCallExpr* LHSNode =
+      CXXOperatorCallExpr const* LHSNode =
         Result.Nodes.getNodeAs<CXXOperatorCallExpr>("lhs");
 
       if (LHSNode != nullptr) {
@@ -124,11 +124,11 @@ void StringConcatenationUseCmstrcatCheck::check(
 }
 
 void StringConcatenationUseCmstrcatCheck::issueCorrection(
-  const ExprChain& Chain, const MatchFinder::MatchResult& Result)
+  ExprChain const& Chain, MatchFinder::MatchResult const& Result)
 {
   std::vector<FixItHint> FixIts;
-  const CXXOperatorCallExpr* ExprNode;
-  std::vector<const clang::CXXOperatorCallExpr*>::const_iterator It =
+  CXXOperatorCallExpr const* ExprNode;
+  std::vector<clang::CXXOperatorCallExpr const*>::const_iterator It =
     Chain.second.begin();
 
   if (Chain.first == OperatorType::PlusEquals) {

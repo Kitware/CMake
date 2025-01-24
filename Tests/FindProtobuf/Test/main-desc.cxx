@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
   google::protobuf::FileDescriptorSet file_descriptor_set;
   file_descriptor_set.ParseFromIstream(&fs);
 
-  const google::protobuf::DescriptorPool* compiled_pool =
+  google::protobuf::DescriptorPool const* compiled_pool =
     google::protobuf::DescriptorPool::generated_pool();
 
   if (compiled_pool == NULL) {
@@ -25,15 +25,15 @@ int main(int argc, char* argv[])
   google::protobuf::DescriptorPool pool(compiled_pool);
   google::protobuf::DynamicMessageFactory dynamic_message_factory(&pool);
 
-  for (const google::protobuf::FileDescriptorProto& file_descriptor_proto :
+  for (google::protobuf::FileDescriptorProto const& file_descriptor_proto :
        file_descriptor_set.file()) {
-    const google::protobuf::FileDescriptor* file_descriptor =
+    google::protobuf::FileDescriptor const* file_descriptor =
       pool.BuildFile(file_descriptor_proto);
     if (file_descriptor == NULL) {
       continue;
     }
 
-    const google::protobuf::Descriptor* descriptor =
+    google::protobuf::Descriptor const* descriptor =
       pool.FindMessageTypeByName("example.msgs.ExampleDesc");
 
     if (descriptor == NULL) {

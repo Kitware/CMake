@@ -34,7 +34,7 @@ public:
   };
 
   /** Construct with the name of the Mach-O input file to parse.  */
-  cmMachO(const char* fname);
+  cmMachO(char const* fname);
 
   /** Destruct.   */
   ~cmMachO();

@@ -45,8 +45,8 @@ private:
    * @return DeduplicateStatus indicating whether to add, skip, or flag an
    * error for the file.
    */
-  DeduplicateStatus CompareFile(const std::string& path,
-                                const std::string& localTopLevel)
+  DeduplicateStatus CompareFile(std::string const& path,
+                                std::string const& localTopLevel)
   {
     auto fileItr = this->Files.find(path);
     if (fileItr != this->Files.end()) {
@@ -65,7 +65,7 @@ private:
    * @param path The path of the folder to compare.
    * @return DeduplicateStatus indicating whether to add or skip the folder.
    */
-  DeduplicateStatus CompareFolder(const std::string& path)
+  DeduplicateStatus CompareFolder(std::string const& path)
   {
     if (this->Folders.find(path) != this->Folders.end()) {
       return DeduplicateStatus::Skip;
@@ -82,7 +82,7 @@ private:
    * @return DeduplicateStatus indicating whether to add, skip, or flag an
    * error for the symlink.
    */
-  DeduplicateStatus CompareSymlink(const std::string& path)
+  DeduplicateStatus CompareSymlink(std::string const& path)
   {
     auto symlinkItr = this->Symlink.find(path);
     std::string symlinkValue;
@@ -112,8 +112,8 @@ public:
    * @return DeduplicateStatus indicating the action to take for the given
    * path.
    */
-  DeduplicateStatus IsDeduplicate(const std::string& path,
-                                  const std::string& localTopLevel)
+  DeduplicateStatus IsDeduplicate(std::string const& path,
+                                  std::string const& localTopLevel)
   {
     DeduplicateStatus status;
     if (cmSystemTools::FileIsDirectory(path)) {
@@ -186,7 +186,7 @@ cmCPackArchiveGenerator::cmCPackArchiveGenerator(
 cmCPackArchiveGenerator::~cmCPackArchiveGenerator() = default;
 
 std::string cmCPackArchiveGenerator::GetArchiveComponentFileName(
-  const std::string& component, bool isGroupName)
+  std::string const& component, bool isGroupName)
 {
   std::string componentUpper(cmSystemTools::UpperCase(component));
   std::string packageFileName;

@@ -20,11 +20,11 @@ public:
 
   // The comparison operators are only for quick sorting and searching and
   // in no way imply any lexicographical order of the label
-  bool operator<(const cmPathLabel& l) const;
-  bool operator==(const cmPathLabel& l) const;
+  bool operator<(cmPathLabel const& l) const;
+  bool operator==(cmPathLabel const& l) const;
 
-  const std::string& GetLabel() const { return this->Label; }
-  const unsigned int& GetHash() const { return this->Hash; }
+  std::string const& GetLabel() const { return this->Label; }
+  unsigned int const& GetHash() const { return this->Hash; }
 
 protected:
   cmPathLabel();

@@ -68,7 +68,7 @@ public:
   {
   }
 
-  path_parser(const path_parser&) = default;
+  path_parser(path_parser const&) = default;
 
   ~path_parser() = default;
 
@@ -76,8 +76,8 @@ public:
 
   void increment() noexcept
   {
-    const pointer start = this->next_token();
-    const pointer end = this->after_end();
+    pointer const start = this->next_token();
+    pointer const end = this->after_end();
 
     if (start == end) {
       this->set_state(state::at_end);
@@ -138,8 +138,8 @@ public:
 
   void decrement() noexcept
   {
-    const pointer rstart = this->current_token() - 1;
-    const pointer rend = this->before_start();
+    pointer const rstart = this->current_token() - 1;
+    pointer const rend = this->before_start();
 
     if (rstart == rend) {
       this->set_state(state::before_begin);
@@ -327,7 +327,7 @@ private:
          )) {
       return nullptr;
     }
-    const auto step = ptr < end ? 1 : -1;
+    auto const step = ptr < end ? 1 : -1;
     ptr += step;
     while (ptr != end &&
            (*ptr == '/'
@@ -357,7 +357,7 @@ private:
     ) {
       return nullptr;
     }
-    const auto step = ptr < end ? 1 : -1;
+    auto const step = ptr < end ? 1 : -1;
     ptr += step;
     while (ptr != end && *ptr != '/'
 #  if defined(_WIN32)
@@ -476,7 +476,7 @@ private:
   }
 
   state State;
-  const cm::string_view Path;
+  cm::string_view const Path;
   cm::string_view Entry;
 };
 
@@ -503,11 +503,11 @@ void unicode_helper::append(std::string& str, std::uint32_t codepoint)
   }
 }
 
-unicode_helper::utf8_state unicode_helper::decode(const utf8_state state,
-                                                  const std::uint8_t fragment,
+unicode_helper::utf8_state unicode_helper::decode(utf8_state const state,
+                                                  std::uint8_t const fragment,
                                                   std::uint32_t& codepoint)
 {
-  const std::uint32_t utf8_state_info[] = {
+  std::uint32_t const utf8_state_info[] = {
     // encoded states
     0x11111111u, 0x11111111u, 0x77777777u, 0x77777777u, 0x88888888u,
     0x88888888u, 0x88888888u, 0x88888888u, 0x22222299u, 0x22222222u,
@@ -531,7 +531,7 @@ unicode_helper::utf8_state unicode_helper::decode(const utf8_state state,
 } // internals
 
 // Class path
-path& path::operator/=(const path& p)
+path& path::operator/=(path const& p)
 {
   if (p.is_absolute() ||
       (p.has_root_name() && p.get_root_name() != this->get_root_name())) {
@@ -577,8 +577,8 @@ path path::lexically_normal() const
     return *this;
   }
 
-  const cm::string_view dot = "."_s;
-  const cm::string_view dotdot = ".."_s;
+  cm::string_view const dot = "."_s;
+  cm::string_view const dotdot = ".."_s;
 
   std::vector<cm::string_view> root_parts;
   std::vector<cm::string_view> parts;
@@ -632,7 +632,7 @@ path path::lexically_normal() const
 
   std::string np;
   np.reserve(path_size);
-  for (const auto& p : root_parts) {
+  for (auto const& p : root_parts) {
     np += p;
   }
   // convert any slash to the preferred_separator
@@ -641,7 +641,7 @@ path path::lexically_normal() const
       np.begin(), np.end(), '/',
       static_cast<std::string::value_type>(this->preferred_separator));
   }
-  for (const auto& p : parts) {
+  for (auto const& p : parts) {
     if (!p.empty()) {
       np += p;
       np += static_cast<std::string::value_type>(this->preferred_separator);
@@ -658,7 +658,7 @@ path path::lexically_normal() const
   return path(std::move(np));
 }
 
-path path::lexically_relative(const path& base) const
+path path::lexically_relative(path const& base) const
 {
   internals::path_parser parser(this->path_);
   ++parser;
@@ -723,8 +723,8 @@ path path::lexically_relative(const path& base) const
   }
 #  endif
 
-  const cm::string_view dot = "."_s;
-  const cm::string_view dotdot = ".."_s;
+  cm::string_view const dot = "."_s;
+  cm::string_view const dotdot = ".."_s;
 
   auto a = this->begin(), aend = this->end();
   auto b = base.begin(), bend = base.end();
@@ -929,7 +929,7 @@ path::iterator::iterator()
   : path_(nullptr)
 {
 }
-path::iterator::iterator(const iterator& other)
+path::iterator::iterator(iterator const& other)
 {
   this->path_ = other.path_;
   if (other.parser_) {
@@ -937,7 +937,7 @@ path::iterator::iterator(const iterator& other)
     this->path_element_ = path(**this->parser_);
   }
 }
-path::iterator::iterator(const path* p, bool at_end)
+path::iterator::iterator(path const* p, bool at_end)
   : path_(p)
   , parser_(cm::make_unique<internals::path_parser>(p->path_, at_end))
 {
@@ -949,7 +949,7 @@ path::iterator::iterator(const path* p, bool at_end)
 
 path::iterator::~iterator() = default;
 
-path::iterator& path::iterator::operator=(const iterator& other)
+path::iterator& path::iterator::operator=(iterator const& other)
 {
   this->path_ = other.path_;
   if (other.parser_) {
@@ -996,7 +996,7 @@ path::iterator& path::iterator::operator--()
   return *this;
 }
 
-bool operator==(const path::iterator& lhs, const path::iterator& rhs)
+bool operator==(path::iterator const& lhs, path::iterator const& rhs)
 {
   return lhs.path_ == rhs.path_ && lhs.parser_ != nullptr &&
     ((lhs.parser_->at_end() && rhs.parser_->at_end()) ||
@@ -1004,7 +1004,7 @@ bool operator==(const path::iterator& lhs, const path::iterator& rhs)
      ((**lhs.parser_).data() == (**rhs.parser_).data()));
 }
 
-std::size_t hash_value(const path& p) noexcept
+std::size_t hash_value(path const& p) noexcept
 {
   internals::path_parser parser(p.path_);
   std::hash<cm::string_view> hasher;

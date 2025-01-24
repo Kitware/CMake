@@ -39,7 +39,7 @@ cmTargetTraceDependencies::cmTargetTraceDependencies(cmGeneratorTarget* target)
     std::vector<cmSourceFile*> sources;
     this->GeneratorTarget->GetSourceFiles(sources, c);
     for (cmSourceFile* sf : sources) {
-      const std::set<cmGeneratorTarget const*> tgts =
+      std::set<cmGeneratorTarget const*> const tgts =
         this->GlobalGenerator->GetFilenameTargetDepends(sf);
       if (cm::contains(tgts, this->GeneratorTarget)) {
         std::ostringstream e;
@@ -242,7 +242,7 @@ void cmTargetTraceDependencies::CheckCustomCommand(cmCustomCommand const& cc)
 }
 
 void cmTargetTraceDependencies::CheckCustomCommands(
-  const std::vector<cmCustomCommand>& commands)
+  std::vector<cmCustomCommand> const& commands)
 {
   for (cmCustomCommand const& command : commands) {
     this->CheckCustomCommand(command);

@@ -40,7 +40,7 @@ public:
   MessageLevel GetMessageLevel() const { return this->Message; }
 
 protected:
-  void GenerateScriptForConfig(std::ostream& os, const std::string& config,
+  void GenerateScriptForConfig(std::ostream& os, std::string const& config,
                                Indent indent) override;
 
   std::string const TargetName;

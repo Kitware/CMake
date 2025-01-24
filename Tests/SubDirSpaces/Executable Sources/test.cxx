@@ -7,7 +7,7 @@
 #endif
 
 // return true if the file exists
-int FileExists(const char* filename)
+int FileExists(char const* filename)
 {
 #ifdef _MSC_VER
 #  define access _access

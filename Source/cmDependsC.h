@@ -26,8 +26,8 @@ public:
   /** Checking instances need to know the build directory name and the
       relative path from the build directory to the target file.  */
   cmDependsC();
-  cmDependsC(cmLocalUnixMakefileGenerator3* lg, const std::string& targetDir,
-             const std::string& lang, const DependencyMap* validDeps);
+  cmDependsC(cmLocalUnixMakefileGenerator3* lg, std::string const& targetDir,
+             std::string const& lang, DependencyMap const* validDeps);
 
   /** Virtual destructor to cleanup subclasses properly.  */
   ~cmDependsC() override;
@@ -37,13 +37,13 @@ public:
 
 protected:
   // Implement writing/checking methods required by superclass.
-  bool WriteDependencies(const std::set<std::string>& sources,
-                         const std::string& obj, std::ostream& makeDepends,
+  bool WriteDependencies(std::set<std::string> const& sources,
+                         std::string const& obj, std::ostream& makeDepends,
                          std::ostream& internalDepends) override;
 
   // Method to scan a single file.
-  void Scan(std::istream& is, const std::string& directory,
-            const std::string& fullName);
+  void Scan(std::istream& is, std::string const& directory,
+            std::string const& fullName);
 
   // Regular expression to identify C preprocessor include directives.
   cmsys::RegularExpression IncludeRegexLine;
@@ -80,7 +80,7 @@ public:
   };
 
 protected:
-  const DependencyMap* ValidDeps = nullptr;
+  DependencyMap const* ValidDeps = nullptr;
   std::set<std::string> Encountered;
   std::queue<UnscannedEntry> Unscanned;
 

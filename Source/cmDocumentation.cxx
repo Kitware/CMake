@@ -19,7 +19,7 @@
 #include "cmVersion.h"
 
 namespace {
-const cmDocumentationEntry cmDocumentationStandardOptions[21] = {
+cmDocumentationEntry const cmDocumentationStandardOptions[21] = {
   { "-h,-H,--help,-help,-usage,/?", "Print usage information and exit." },
   { "--version,-version,/V [<file>]", "Print version number and exit." },
   { "--help <keyword> [<file>]", "Print help for one keyword and exit." },
@@ -49,18 +49,18 @@ const cmDocumentationEntry cmDocumentationStandardOptions[21] = {
   { "--help-variables [<file>]", "Print cmake-variables manual and exit." }
 };
 
-const cmDocumentationEntry cmDocumentationCPackGeneratorsHeader = {
+cmDocumentationEntry const cmDocumentationCPackGeneratorsHeader = {
   {},
   "The following generators are available on this platform:"
 };
 
-const cmDocumentationEntry cmDocumentationCMakeGeneratorsHeader = {
+cmDocumentationEntry const cmDocumentationCMakeGeneratorsHeader = {
   {},
   "The following generators are available on this platform (* marks "
   "default):"
 };
 
-bool isOption(const char* arg)
+bool isOption(char const* arg)
 {
   return ((arg[0] == '-') || (strcmp(arg, "/V") == 0) ||
           (strcmp(arg, "/?") == 0));
@@ -183,7 +183,7 @@ void cmDocumentation::WarnFormFromFilename(
 
 std::string cmDocumentation::GeneralizeKeyword(std::string cname)
 {
-  std::map<std::string, const std::vector<std::string>> conversions;
+  std::map<std::string, std::vector<std::string> const> conversions;
   std::vector<std::string> languages = {
     "C",      "CXX",      "CSharp",      "CUDA",     "OBJC",
     "OBJCXX", "Fortran",  "HIP",         "ISPC",     "Swift",
@@ -233,8 +233,8 @@ void cmDocumentation::addCPackStandardDocSections()
   this->AllSections.emplace("Generators", std::move(sec));
 }
 
-bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
-                                   const char* exitOpt)
+bool cmDocumentation::CheckOptions(int argc, char const* const* argv,
+                                   char const* exitOpt)
 {
   // Providing zero arguments gives usage information.
   if (argc == 1) {
@@ -244,7 +244,7 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
     return true;
   }
 
-  auto get_opt_argument = [=](const int nextIdx, std::string& target) -> bool {
+  auto get_opt_argument = [=](int const nextIdx, std::string& target) -> bool {
     if ((nextIdx < argc) && !isOption(argv[nextIdx])) {
       target = argv[nextIdx];
       return true;
@@ -389,24 +389,24 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
   return result;
 }
 
-void cmDocumentation::SetName(const std::string& name)
+void cmDocumentation::SetName(std::string const& name)
 {
   this->NameString = name;
 }
 
-void cmDocumentation::SetSection(const char* name,
+void cmDocumentation::SetSection(char const* name,
                                  cmDocumentationSection section)
 {
   this->SectionAtName(name) = std::move(section);
 }
 
-cmDocumentationSection& cmDocumentation::SectionAtName(const char* name)
+cmDocumentationSection& cmDocumentation::SectionAtName(char const* name)
 {
   return this->AllSections.emplace(name, cmDocumentationSection{ name })
     .first->second;
 }
 
-void cmDocumentation::AppendSection(const char* name,
+void cmDocumentation::AppendSection(char const* name,
                                     cmDocumentationEntry& docs)
 {
 
@@ -415,7 +415,7 @@ void cmDocumentation::AppendSection(const char* name,
   this->AppendSection(name, docsVec);
 }
 
-void cmDocumentation::PrependSection(const char* name,
+void cmDocumentation::PrependSection(char const* name,
                                      cmDocumentationEntry& docs)
 {
 
@@ -619,7 +619,7 @@ bool cmDocumentation::PrintHelpListPolicies(std::ostream& os)
 
 bool cmDocumentation::PrintHelpListGenerators(std::ostream& os)
 {
-  const auto si = this->AllSections.find("Generators");
+  auto const si = this->AllSections.find("Generators");
   if (si != this->AllSections.end()) {
     this->Formatter.PrintSection(os, si->second);
   }
@@ -647,7 +647,7 @@ bool cmDocumentation::PrintHelpListVariables(std::ostream& os)
 
 bool cmDocumentation::PrintUsage(std::ostream& os)
 {
-  const auto si = this->AllSections.find("Usage");
+  auto const si = this->AllSections.find("Usage");
   if (si != this->AllSections.end()) {
     this->Formatter.PrintSection(os, si->second);
   }
@@ -673,7 +673,7 @@ bool cmDocumentation::PrintHelp(std::ostream& os)
   return true;
 }
 
-const char* cmDocumentation::GetNameString() const
+char const* cmDocumentation::GetNameString() const
 {
   if (!this->NameString.empty()) {
     return this->NameString.c_str();
@@ -689,8 +689,8 @@ bool cmDocumentation::PrintOldCustomModules(std::ostream& os)
     cmSystemTools::GetFilenameLastExtension(filename));
   std::string name = cmSystemTools::GetFilenameWithoutLastExtension(filename);
 
-  const char* summary = "cmake --help-custom-modules no longer supported\n";
-  const char* detail =
+  char const* summary = "cmake --help-custom-modules no longer supported\n";
+  char const* detail =
     "CMake versions prior to 3.0 exposed their internal module help page\n"
     "generation functionality through the --help-custom-modules option.\n"
     "CMake versions 3.0 and above use other means to generate their module\n"

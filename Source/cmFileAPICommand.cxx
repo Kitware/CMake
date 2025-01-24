@@ -30,7 +30,7 @@ bool isCharDigit(char ch)
 std::string processObjectKindVersions(cmFileAPI& fileApi,
                                       cmFileAPI::ObjectKind objectKind,
                                       cm::string_view keyword,
-                                      const std::vector<std::string>& versions)
+                                      std::vector<std::string> const& versions)
 {
   // The "versions" vector is empty only when the keyword was not present.
   // It is an error to provide the keyword with no versions after it, and that
@@ -40,8 +40,8 @@ std::string processObjectKindVersions(cmFileAPI& fileApi,
   }
 
   // The first supported version listed is what we use
-  for (const std::string& ver : versions) {
-    const char* vStart = ver.c_str();
+  for (std::string const& ver : versions) {
+    char const* vStart = ver.c_str();
     int majorVersion = std::atoi(vStart);
     int minorVersion = 0;
     std::string::size_type pos = ver.find('.');
@@ -106,7 +106,7 @@ bool handleQueryCommand(std::vector<std::string> const& args,
     status.SetError("QUERY subcommand given a non-integer API_VERSION.");
     return false;
   }
-  const int apiVersion = std::atoi(arguments.ApiVersion.c_str());
+  int const apiVersion = std::atoi(arguments.ApiVersion.c_str());
   if (apiVersion != 1) {
     status.SetError(
       cmStrCat("QUERY subcommand given an unsupported API_VERSION \"",
@@ -136,9 +136,9 @@ bool handleQueryCommand(std::vector<std::string> const& args,
   };
 
   if (!std::all_of(errors.begin(), errors.end(),
-                   [](const std::string& s) -> bool { return s.empty(); })) {
+                   [](std::string const& s) -> bool { return s.empty(); })) {
     std::string message("QUERY subcommand was given invalid arguments:");
-    for (const std::string& s : errors) {
+    for (std::string const& s : errors) {
       if (!s.empty()) {
         message = cmStrCat(message, "\n  ", s);
       }

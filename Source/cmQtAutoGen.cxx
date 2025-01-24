@@ -56,8 +56,8 @@ static void MergeOptions(std::vector<std::string>& baseOpts,
         }
         // Test if this is a value option and change the existing value
         if (!optName.empty() && cm::contains(valueOpts, optName)) {
-          const auto existItNext(existIt + 1);
-          const auto fitNext(fit + 1);
+          auto const existItNext(existIt + 1);
+          auto const fitNext(fit + 1);
           if ((existItNext != baseOpts.end()) && (fitNext != fitEnd)) {
             *existItNext = *fitNext;
             ++fit;
@@ -134,7 +134,7 @@ std::string cmQtAutoGen::Tools(bool moc, bool uic, bool rcc)
 
 std::string cmQtAutoGen::Quoted(cm::string_view text)
 {
-  static std::initializer_list<std::pair<const char*, const char*>> const
+  static std::initializer_list<std::pair<char const*, char const*>> const
     replacements = { { "\\", "\\\\" }, { "\"", "\\\"" }, { "\a", "\\a" },
                      { "\b", "\\b" },  { "\f", "\\f" },  { "\n", "\\n" },
                      { "\r", "\\r" },  { "\t", "\\t" },  { "\v", "\\v" } };
@@ -231,7 +231,7 @@ static void RccListParseContent(std::string const& content,
   cmsys::RegularExpression fileMatchRegex("(<file[^<]+)");
   cmsys::RegularExpression fileReplaceRegex("(^<file[^>]*>)");
 
-  const char* contentChars = content.c_str();
+  char const* contentChars = content.c_str();
   while (fileMatchRegex.find(contentChars)) {
     std::string const qrcEntry = fileMatchRegex.match(1);
     contentChars += qrcEntry.size();

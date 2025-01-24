@@ -12,7 +12,7 @@
 #include "cmMakefile.h"
 #include "cmMessageType.h"
 
-bool cmFunctionBlocker::IsFunctionBlocked(const cmListFileFunction& lff,
+bool cmFunctionBlocker::IsFunctionBlocked(cmListFileFunction const& lff,
                                           cmExecutionStatus& status)
 {
   if (lff.LowerCaseName() == this->StartCommandName()) {

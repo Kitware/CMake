@@ -100,7 +100,7 @@ private:
                                 std::vector<std::string>& filesFullPath);
 
   int RunBullseyeCommand(cmCTestCoverageHandlerContainer* cont,
-                         const char* cmd, const char* arg,
+                         char const* cmd, char const* arg,
                          std::string& outputFile);
   bool ParseBullsEyeCovsrcLine(std::string const& inputLine,
                                std::string& sourceFile, int& functionsCalled,
@@ -139,7 +139,7 @@ private:
 
   // Label reading and writing methods.
   void LoadLabels();
-  void LoadLabels(const char* dir);
+  void LoadLabels(char const* dir);
   void WriteXMLLabels(cmXMLWriter& xml, std::string const& source);
 
   // Label-based filtering.

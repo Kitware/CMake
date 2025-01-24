@@ -43,7 +43,7 @@
 #include "RegexExplorer.h"
 #include "WarningMessagesDialog.h"
 
-void OpenReferenceManual(const QString& filename)
+void OpenReferenceManual(QString const& filename)
 {
   QString urlFormat("https://cmake.org/cmake/help/v%1.%2/");
   QUrl url(urlFormat.arg(QString::number(cmVersion::GetMajorVersion()),
@@ -59,7 +59,7 @@ void OpenReferenceManual(const QString& filename)
 }
 
 namespace {
-const QString PRESETS_DISABLED_TOOLTIP =
+QString const PRESETS_DISABLED_TOOLTIP =
   "This option is disabled because there are no available presets in "
   "CMakePresets.json or CMakeUserPresets.json.";
 }
@@ -709,7 +709,7 @@ void CMakeSetupDialog::doSourceBrowse()
   }
 }
 
-void CMakeSetupDialog::updateSourceDirectory(const QString& dir)
+void CMakeSetupDialog::updateSourceDirectory(QString const& dir)
 {
   if (this->SourceDirectory->text() != dir) {
     this->SourceDirectory->blockSignals(true);
@@ -718,7 +718,7 @@ void CMakeSetupDialog::updateSourceDirectory(const QString& dir)
   }
 }
 
-void CMakeSetupDialog::updateBinaryDirectory(const QString& dir)
+void CMakeSetupDialog::updateBinaryDirectory(QString const& dir)
 {
   if (this->BinaryDirectory->currentText() != dir) {
     this->BinaryDirectory->blockSignals(true);
@@ -727,7 +727,7 @@ void CMakeSetupDialog::updateBinaryDirectory(const QString& dir)
   }
 }
 
-void CMakeSetupDialog::updatePresets(const QVector<QCMakePreset>& presets)
+void CMakeSetupDialog::updatePresets(QVector<QCMakePreset> const& presets)
 {
   if (this->Preset->presets() != presets) {
     this->Preset->blockSignals(true);
@@ -744,7 +744,7 @@ void CMakeSetupDialog::updatePresets(const QVector<QCMakePreset>& presets)
   }
 }
 
-void CMakeSetupDialog::updatePreset(const QString& name)
+void CMakeSetupDialog::updatePreset(QString const& name)
 {
   if (this->Preset->presetName() != name) {
     this->Preset->blockSignals(true);
@@ -753,8 +753,8 @@ void CMakeSetupDialog::updatePreset(const QString& name)
   }
 }
 
-void CMakeSetupDialog::showPresetLoadError(const QString& dir,
-                                           const QString& message)
+void CMakeSetupDialog::showPresetLoadError(QString const& dir,
+                                           QString const& message)
 {
   QMessageBox::warning(
     this, "Error Reading CMake Presets",
@@ -778,7 +778,7 @@ void CMakeSetupDialog::doBinaryBrowse()
   }
 }
 
-void CMakeSetupDialog::setBinaryDirectory(const QString& dir)
+void CMakeSetupDialog::setBinaryDirectory(QString const& dir)
 {
   this->BinaryDirectory->setEditText(dir);
 }
@@ -788,7 +788,7 @@ void CMakeSetupDialog::setStartupBinaryDirectory(bool startup)
   this->StartupBinaryDirectory = startup;
 }
 
-void CMakeSetupDialog::onSourceDirectoryChanged(const QString& dir)
+void CMakeSetupDialog::onSourceDirectoryChanged(QString const& dir)
 {
   this->Output->clear();
   QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(),
@@ -796,7 +796,7 @@ void CMakeSetupDialog::onSourceDirectoryChanged(const QString& dir)
                             Q_ARG(QString, dir));
 }
 
-void CMakeSetupDialog::onBinaryDirectoryChanged(const QString& dir)
+void CMakeSetupDialog::onBinaryDirectoryChanged(QString const& dir)
 {
   QString title = QString(tr("CMake %1 - %2"));
   title = title.arg(cmVersion::GetCMakeVersion());
@@ -813,7 +813,7 @@ void CMakeSetupDialog::onBinaryDirectoryChanged(const QString& dir)
                             Q_ARG(QString, dir));
 }
 
-void CMakeSetupDialog::onBuildPresetChanged(const QString& name)
+void CMakeSetupDialog::onBuildPresetChanged(QString const& name)
 {
   QMetaObject::invokeMethod(this->CMakeThread->cmakeInstance(), "setPreset",
                             Qt::QueuedConnection, Q_ARG(QString, name),
@@ -821,17 +821,17 @@ void CMakeSetupDialog::onBuildPresetChanged(const QString& name)
   this->StartupBinaryDirectory = false;
 }
 
-void CMakeSetupDialog::setSourceDirectory(const QString& dir)
+void CMakeSetupDialog::setSourceDirectory(QString const& dir)
 {
   this->SourceDirectory->setText(dir);
 }
 
-void CMakeSetupDialog::setDeferredPreset(const QString& preset)
+void CMakeSetupDialog::setDeferredPreset(QString const& preset)
 {
   this->DeferredPreset = preset;
 }
 
-void CMakeSetupDialog::showProgress(const QString& /*msg*/, float percent)
+void CMakeSetupDialog::showProgress(QString const& /*msg*/, float percent)
 {
   percent = (percent * ProgressFactor) + ProgressOffset;
   this->ProgressBar->setValue(qRound(percent * 100));
@@ -843,7 +843,7 @@ void CMakeSetupDialog::showProgress(const QString& /*msg*/, float percent)
 #endif
 }
 
-void CMakeSetupDialog::error(const QString& msg)
+void CMakeSetupDialog::error(QString const& msg)
 {
   this->Output->setCurrentCharFormat(this->ErrorFormat);
   // QTextEdit will terminate the msg with a ParagraphSeparator, but it also
@@ -856,7 +856,7 @@ void CMakeSetupDialog::error(const QString& msg)
   this->Output->append(paragraph);
 }
 
-void CMakeSetupDialog::message(const QString& msg)
+void CMakeSetupDialog::message(QString const& msg)
 {
   this->Output->setCurrentCharFormat(this->MessageFormat);
   this->Output->append(msg);
@@ -986,7 +986,7 @@ bool CMakeSetupDialog::setupFirstConfigure()
   return false;
 }
 
-void CMakeSetupDialog::updateGeneratorLabel(const QString& gen)
+void CMakeSetupDialog::updateGeneratorLabel(QString const& gen)
 {
   QString str = tr("Current Generator: ");
   if (gen.isEmpty()) {
@@ -1061,7 +1061,7 @@ void CMakeSetupDialog::setExitAfterGenerate(bool b)
   this->ExitAfterGenerate = b;
 }
 
-void CMakeSetupDialog::addBinaryPath(const QString& path)
+void CMakeSetupDialog::addBinaryPath(QString const& path)
 {
   QString cleanpath = QDir::cleanPath(path);
 
@@ -1090,7 +1090,7 @@ void CMakeSetupDialog::dragEnterEvent(QDragEnterEvent* e)
     return;
   }
 
-  const QMimeData* dat = e->mimeData();
+  QMimeData const* dat = e->mimeData();
   QList<QUrl> urls = dat->urls();
   QString file = urls.count() ? urls[0].toLocalFile() : QString();
   if (!file.isEmpty() &&
@@ -1109,7 +1109,7 @@ void CMakeSetupDialog::dropEvent(QDropEvent* e)
     return;
   }
 
-  const QMimeData* dat = e->mimeData();
+  QMimeData const* dat = e->mimeData();
   QList<QUrl> urls = dat->urls();
   QString file = urls.count() ? urls[0].toLocalFile() : QString();
   if (file.endsWith("CMakeCache.txt", Qt::CaseInsensitive)) {
@@ -1143,7 +1143,7 @@ QStringList CMakeSetupDialog::loadBuildPaths()
   return buildPaths;
 }
 
-void CMakeSetupDialog::saveBuildPaths(const QStringList& paths)
+void CMakeSetupDialog::saveBuildPaths(QStringList const& paths)
 {
   QSettings settings;
   settings.beginGroup("Settings/StartPath");
@@ -1370,10 +1370,10 @@ void CMakeSetupDialog::showUserChanges()
   dialog.exec();
 }
 
-void CMakeSetupDialog::setSearchFilter(const QString& str)
+void CMakeSetupDialog::setSearchFilter(QString const& str)
 {
   this->CacheValues->selectionModel()->clear();
-  const bool valid = this->CacheValues->setSearchFilter(str);
+  bool const valid = this->CacheValues->setSearchFilter(str);
   QtCMake::setSearchFilterColor(this->Search, valid);
 }
 

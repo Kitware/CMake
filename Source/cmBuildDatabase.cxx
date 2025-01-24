@@ -498,9 +498,9 @@ int cmcmd_cmake_module_compile_db(
   std::vector<std::string>::const_iterator argBeg,
   std::vector<std::string>::const_iterator argEnd)
 {
-  const std::string* command = nullptr;
-  const std::string* output = nullptr;
-  std::vector<const std::string*> inputs;
+  std::string const* command = nullptr;
+  std::string const* output = nullptr;
+  std::vector<std::string const*> inputs;
 
   bool next_is_output = false;
   for (auto i = argBeg; i != argEnd; ++i) {

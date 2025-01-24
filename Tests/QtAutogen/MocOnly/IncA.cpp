@@ -8,7 +8,7 @@ class IncAPrivate : public QObject
 {
   Q_OBJECT
 public:
-  IncAPrivate(){};
+  IncAPrivate() {};
 };
 
 IncA::IncA()

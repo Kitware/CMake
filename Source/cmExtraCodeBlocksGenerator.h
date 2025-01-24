@@ -29,24 +29,24 @@ public:
 private:
   struct CbpUnit
   {
-    std::vector<const cmGeneratorTarget*> Targets;
+    std::vector<cmGeneratorTarget const*> Targets;
   };
 
-  void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);
+  void CreateProjectFile(std::vector<cmLocalGenerator*> const& lgs);
 
-  void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,
-                            const std::string& filename);
+  void CreateNewProjectFile(std::vector<cmLocalGenerator*> const& lgs,
+                            std::string const& filename);
   std::string CreateDummyTargetFile(cmLocalGenerator* lg,
                                     cmGeneratorTarget* target) const;
 
-  std::string GetCBCompilerId(const cmMakefile* mf);
+  std::string GetCBCompilerId(cmMakefile const* mf);
   int GetCBTargetType(cmGeneratorTarget* target);
-  std::string BuildMakeCommand(const std::string& make,
-                               const std::string& makefile,
-                               const std::string& target,
-                               const std::string& makeFlags);
-  void AppendTarget(cmXMLWriter& xml, const std::string& targetName,
-                    cmGeneratorTarget* target, const std::string& make,
-                    const cmLocalGenerator* lg, const std::string& compiler,
-                    const std::string& makeFlags);
+  std::string BuildMakeCommand(std::string const& make,
+                               std::string const& makefile,
+                               std::string const& target,
+                               std::string const& makeFlags);
+  void AppendTarget(cmXMLWriter& xml, std::string const& targetName,
+                    cmGeneratorTarget* target, std::string const& make,
+                    cmLocalGenerator const* lg, std::string const& compiler,
+                    std::string const& makeFlags);
 };

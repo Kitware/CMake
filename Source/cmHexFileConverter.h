@@ -20,7 +20,7 @@ public:
     IntelHex,
     MotorolaSrec
   };
-  static FileType DetermineFileType(const std::string& inFileName);
-  static bool TryConvert(const std::string& inFileName,
-                         const std::string& outFileName);
+  static FileType DetermineFileType(std::string const& inFileName);
+  static bool TryConvert(std::string const& inFileName,
+                         std::string const& outFileName);
 };

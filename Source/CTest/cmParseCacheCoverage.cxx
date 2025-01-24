@@ -70,7 +70,7 @@ void cmParseCacheCoverage::RemoveUnCoveredFiles()
   }
 }
 
-bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
+bool cmParseCacheCoverage::ReadCMCovFile(char const* file)
 {
   cmsys::ifstream in(file);
   if (!in) {

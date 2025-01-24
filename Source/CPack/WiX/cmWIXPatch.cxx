@@ -30,7 +30,7 @@ void cmWIXPatch::ApplyFragment(std::string const& id,
     return;
   }
 
-  const cmWIXPatchElement& fragment = i->second;
+  cmWIXPatchElement const& fragment = i->second;
   for (auto const& attr : fragment.attributes) {
     writer.AddAttribute(attr.first, attr.second);
   }
@@ -39,22 +39,22 @@ void cmWIXPatch::ApplyFragment(std::string const& id,
   Fragments.erase(i);
 }
 
-void cmWIXPatch::ApplyElementChildren(const cmWIXPatchElement& element,
+void cmWIXPatch::ApplyElementChildren(cmWIXPatchElement const& element,
                                       cmWIXSourceWriter& writer)
 {
-  for (const auto& node : element.children) {
+  for (auto const& node : element.children) {
     switch (node->type()) {
       case cmWIXPatchNode::ELEMENT:
-        ApplyElement(dynamic_cast<const cmWIXPatchElement&>(*node), writer);
+        ApplyElement(dynamic_cast<cmWIXPatchElement const&>(*node), writer);
         break;
       case cmWIXPatchNode::TEXT:
-        writer.AddTextNode(dynamic_cast<const cmWIXPatchText&>(*node).text);
+        writer.AddTextNode(dynamic_cast<cmWIXPatchText const&>(*node).text);
         break;
     }
   }
 }
 
-void cmWIXPatch::ApplyElement(const cmWIXPatchElement& element,
+void cmWIXPatch::ApplyElement(cmWIXPatchElement const& element,
                               cmWIXSourceWriter& writer)
 {
   writer.BeginElement(element.name);

@@ -63,8 +63,8 @@ public:
   public:
     Preset() = default;
     Preset(Preset&& /*other*/) = default;
-    Preset(const Preset& /*other*/) = default;
-    Preset& operator=(const Preset& /*other*/) = default;
+    Preset(Preset const& /*other*/) = default;
+    Preset& operator=(Preset const& /*other*/) = default;
     virtual ~Preset() = default;
 #if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
     Preset& operator=(Preset&& /*other*/) = default;
@@ -87,7 +87,7 @@ public:
 
     std::map<std::string, cm::optional<std::string>> Environment;
 
-    virtual bool VisitPresetInherit(const Preset& parent) = 0;
+    virtual bool VisitPresetInherit(Preset const& parent) = 0;
     virtual bool VisitPresetBeforeInherit() { return true; }
 
     virtual bool VisitPresetAfterInherit(int /* version */,
@@ -102,8 +102,8 @@ public:
   public:
     ConfigurePreset() = default;
     ConfigurePreset(ConfigurePreset&& /*other*/) = default;
-    ConfigurePreset(const ConfigurePreset& /*other*/) = default;
-    ConfigurePreset& operator=(const ConfigurePreset& /*other*/) = default;
+    ConfigurePreset(ConfigurePreset const& /*other*/) = default;
+    ConfigurePreset& operator=(ConfigurePreset const& /*other*/) = default;
     ~ConfigurePreset() override = default;
 #if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
     ConfigurePreset& operator=(ConfigurePreset&& /*other*/) = default;
@@ -143,7 +143,7 @@ public:
     std::vector<std::string> TraceSource;
     std::string TraceRedirect;
 
-    bool VisitPresetInherit(const Preset& parent) override;
+    bool VisitPresetInherit(Preset const& parent) override;
     bool VisitPresetBeforeInherit() override;
     bool VisitPresetAfterInherit(int version, cmJSONState* state) override;
   };
@@ -153,8 +153,8 @@ public:
   public:
     BuildPreset() = default;
     BuildPreset(BuildPreset&& /*other*/) = default;
-    BuildPreset(const BuildPreset& /*other*/) = default;
-    BuildPreset& operator=(const BuildPreset& /*other*/) = default;
+    BuildPreset(BuildPreset const& /*other*/) = default;
+    BuildPreset& operator=(BuildPreset const& /*other*/) = default;
     ~BuildPreset() override = default;
 #if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
     BuildPreset& operator=(BuildPreset&& /*other*/) = default;
@@ -175,7 +175,7 @@ public:
     std::vector<std::string> NativeToolOptions;
     cm::optional<PackageResolveMode> ResolvePackageReferences;
 
-    bool VisitPresetInherit(const Preset& parent) override;
+    bool VisitPresetInherit(Preset const& parent) override;
     bool VisitPresetAfterInherit(int /* version */,
                                  cmJSONState* /*state*/) override;
   };
@@ -185,8 +185,8 @@ public:
   public:
     TestPreset() = default;
     TestPreset(TestPreset&& /*other*/) = default;
-    TestPreset(const TestPreset& /*other*/) = default;
-    TestPreset& operator=(const TestPreset& /*other*/) = default;
+    TestPreset(TestPreset const& /*other*/) = default;
+    TestPreset& operator=(TestPreset const& /*other*/) = default;
     ~TestPreset() override = default;
 #if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
     TestPreset& operator=(TestPreset&& /*other*/) = default;
@@ -309,7 +309,7 @@ public:
     cm::optional<FilterOptions> Filter;
     cm::optional<ExecutionOptions> Execution;
 
-    bool VisitPresetInherit(const Preset& parent) override;
+    bool VisitPresetInherit(Preset const& parent) override;
     bool VisitPresetAfterInherit(int /* version */,
                                  cmJSONState* /*state*/) override;
   };
@@ -319,8 +319,8 @@ public:
   public:
     PackagePreset() = default;
     PackagePreset(PackagePreset&& /*other*/) = default;
-    PackagePreset(const PackagePreset& /*other*/) = default;
-    PackagePreset& operator=(const PackagePreset& /*other*/) = default;
+    PackagePreset(PackagePreset const& /*other*/) = default;
+    PackagePreset& operator=(PackagePreset const& /*other*/) = default;
     ~PackagePreset() override = default;
 #if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
     PackagePreset& operator=(PackagePreset&& /*other*/) = default;
@@ -346,7 +346,7 @@ public:
     std::string PackageDirectory;
     std::string VendorName;
 
-    bool VisitPresetInherit(const Preset& parent) override;
+    bool VisitPresetInherit(Preset const& parent) override;
     bool VisitPresetAfterInherit(int /* version */,
                                  cmJSONState* /*state*/) override;
   };
@@ -356,8 +356,8 @@ public:
   public:
     WorkflowPreset() = default;
     WorkflowPreset(WorkflowPreset&& /*other*/) = default;
-    WorkflowPreset(const WorkflowPreset& /*other*/) = default;
-    WorkflowPreset& operator=(const WorkflowPreset& /*other*/) = default;
+    WorkflowPreset(WorkflowPreset const& /*other*/) = default;
+    WorkflowPreset& operator=(WorkflowPreset const& /*other*/) = default;
     ~WorkflowPreset() override = default;
 #if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
     WorkflowPreset& operator=(WorkflowPreset&& /*other*/) = default;
@@ -384,7 +384,7 @@ public:
 
     std::vector<WorkflowStep> Steps;
 
-    bool VisitPresetInherit(const Preset& parent) override;
+    bool VisitPresetInherit(Preset const& parent) override;
     bool VisitPresetAfterInherit(int /* version */,
                                  cmJSONState* /* state */) override;
   };
@@ -412,17 +412,17 @@ public:
   std::string SourceDir;
   std::vector<std::unique_ptr<File>> Files;
 
-  int GetVersion(const Preset& preset) const
+  int GetVersion(Preset const& preset) const
   {
     return preset.OriginFile->Version;
   }
 
-  static std::string GetFilename(const std::string& sourceDir);
-  static std::string GetUserFilename(const std::string& sourceDir);
-  bool ReadProjectPresets(const std::string& sourceDir,
+  static std::string GetFilename(std::string const& sourceDir);
+  static std::string GetUserFilename(std::string const& sourceDir);
+  bool ReadProjectPresets(std::string const& sourceDir,
                           bool allowNoFiles = false);
 
-  std::string GetGeneratorForPreset(const std::string& presetName) const
+  std::string GetGeneratorForPreset(std::string const& presetName) const
   {
     auto configurePresetName = presetName;
 
@@ -457,17 +457,17 @@ public:
   static void printPrecedingNewline(PrintPrecedingNewline* p);
 
   static void PrintPresets(
-    const std::vector<const cmCMakePresetsGraph::Preset*>& presets);
+    std::vector<cmCMakePresetsGraph::Preset const*> const& presets);
   void PrintConfigurePresetList(
     PrintPrecedingNewline* newline = nullptr) const;
   void PrintConfigurePresetList(
-    const std::function<bool(const ConfigurePreset&)>& filter,
+    std::function<bool(ConfigurePreset const&)> const& filter,
     PrintPrecedingNewline* newline = nullptr) const;
   void PrintBuildPresetList(PrintPrecedingNewline* newline = nullptr) const;
   void PrintTestPresetList(PrintPrecedingNewline* newline = nullptr) const;
   void PrintPackagePresetList(PrintPrecedingNewline* newline = nullptr) const;
   void PrintPackagePresetList(
-    const std::function<bool(const PackagePreset&)>& filter,
+    std::function<bool(PackagePreset const&)> const& filter,
     PrintPrecedingNewline* newline = nullptr) const;
   void PrintWorkflowPresetList(PrintPrecedingNewline* newline = nullptr) const;
   void PrintAllPresets() const;
@@ -486,7 +486,7 @@ private:
   };
 
   bool ReadProjectPresetsInternal(bool allowNoFiles);
-  bool ReadJSONFile(const std::string& filename, RootType rootType,
+  bool ReadJSONFile(std::string const& filename, RootType rootType,
                     ReadReason readReason, std::vector<File*>& inProgressFiles,
                     File*& file, std::string& errMsg);
   void ClearPresets();

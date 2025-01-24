@@ -32,11 +32,11 @@ public:
   std::string GetLevelString(std::string const& lang,
                              cmStandardLevel const& level) const;
 
-  bool AddRequiredTargetFeature(cmTarget* target, const std::string& feature,
+  bool AddRequiredTargetFeature(cmTarget* target, std::string const& feature,
                                 std::string* error = nullptr) const;
 
-  bool CompileFeatureKnown(const std::string& targetName,
-                           const std::string& feature, std::string& lang,
+  bool CompileFeatureKnown(std::string const& targetName,
+                           std::string const& feature, std::string& lang,
                            std::string* error) const;
 
   cm::optional<cmStandardLevel> CompileFeatureStandardLevel(
@@ -45,11 +45,11 @@ public:
   cm::optional<cmStandardLevel> LanguageStandardLevel(
     std::string const& lang, std::string const& standardStr) const;
 
-  cmValue CompileFeaturesAvailable(const std::string& lang,
+  cmValue CompileFeaturesAvailable(std::string const& lang,
                                    std::string* error) const;
 
-  bool GetNewRequiredStandard(const std::string& targetName,
-                              const std::string& feature,
+  bool GetNewRequiredStandard(std::string const& targetName,
+                              std::string const& feature,
                               cmValue currentLangStandardValue,
                               cm::optional<cmStandardLevel>& featureLevel,
                               std::string& newRequiredStandard,
@@ -58,14 +58,14 @@ public:
   bool HaveStandardAvailable(cmGeneratorTarget const* target,
                              std::string const& lang,
                              std::string const& config,
-                             const std::string& feature) const;
+                             std::string const& feature) const;
 
   bool IsLaterStandard(std::string const& lang, std::string const& lhs,
                        std::string const& rhs) const;
 
 private:
-  bool CheckCompileFeaturesAvailable(const std::string& targetName,
-                                     const std::string& feature,
+  bool CheckCompileFeaturesAvailable(std::string const& targetName,
+                                     std::string const& feature,
                                      std::string& lang,
                                      std::string* error) const;
 

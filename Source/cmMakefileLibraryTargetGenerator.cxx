@@ -132,7 +132,7 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
 
 void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
 {
-  const bool requiresDeviceLinking = requireDeviceLinking(
+  bool const requiresDeviceLinking = requireDeviceLinking(
     *this->GeneratorTarget, *this->LocalGenerator, this->GetConfigName());
   if (requiresDeviceLinking) {
     this->WriteDeviceLibraryRules("CMAKE_CUDA_DEVICE_LINK_LIBRARY", false);
@@ -158,7 +158,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
   }
 
   if (!relink) {
-    const bool requiresDeviceLinking = requireDeviceLinking(
+    bool const requiresDeviceLinking = requireDeviceLinking(
       *this->GeneratorTarget, *this->LocalGenerator, this->GetConfigName());
     if (requiresDeviceLinking) {
       this->WriteDeviceLibraryRules("CMAKE_CUDA_DEVICE_LINK_LIBRARY", relink);
@@ -199,7 +199,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 {
   if (!relink) {
-    const bool requiresDeviceLinking = requireDeviceLinking(
+    bool const requiresDeviceLinking = requireDeviceLinking(
       *this->GeneratorTarget, *this->LocalGenerator, this->GetConfigName());
     if (requiresDeviceLinking) {
       this->WriteDeviceLibraryRules("CMAKE_CUDA_DEVICE_LINK_LIBRARY", relink);
@@ -249,7 +249,7 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
 }
 
 void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
-  const std::string& linkRuleVar, bool relink)
+  std::string const& linkRuleVar, bool relink)
 {
 #ifndef CMAKE_BOOTSTRAP
   // TODO: Merge the methods that call this method to avoid
@@ -289,8 +289,8 @@ void cmMakefileLibraryTargetGenerator::WriteDeviceLibraryRules(
 }
 
 void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
-  const std::string& linkRuleVar, bool relink,
-  std::vector<std::string>& commands, const std::string& targetOutput)
+  std::string const& linkRuleVar, bool relink,
+  std::vector<std::string>& commands, std::string const& targetOutput)
 {
   std::string linkLanguage = "CUDA";
 
@@ -412,7 +412,7 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
   // command lines in the make shell.
   if (useLinkScript) {
     // Use a link script.
-    const char* name = (relink ? "drelink.txt" : "dlink.txt");
+    char const* name = (relink ? "drelink.txt" : "dlink.txt");
     this->CreateLinkScript(name, real_link_commands, commands1, depends);
   } else {
     // No link script.  Just use the link rule directly.
@@ -437,7 +437,7 @@ void cmMakefileLibraryTargetGenerator::WriteNvidiaDeviceLibraryRules(
 }
 
 void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
-  const std::string& linkRuleVar, const std::string& extraFlags, bool relink)
+  std::string const& linkRuleVar, std::string const& extraFlags, bool relink)
 {
   // TODO: Merge the methods that call this method to avoid
   // code duplication.
@@ -936,7 +936,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
   // command lines in the make shell.
   if (useLinkScript) {
     // Use a link script.
-    const char* name = (relink ? "relink.txt" : "link.txt");
+    char const* name = (relink ? "relink.txt" : "link.txt");
     this->CreateLinkScript(name, real_link_commands, commands1, depends);
   } else {
     // No link script.  Just use the link rule directly.

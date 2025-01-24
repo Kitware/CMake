@@ -19,7 +19,7 @@ class cmMakefile;
 // File installation helper class.
 struct cmFileCopier
 {
-  cmFileCopier(cmExecutionStatus& status, const char* name = "COPY");
+  cmFileCopier(cmExecutionStatus& status, char const* name = "COPY");
   virtual ~cmFileCopier();
 
   bool Run(std::vector<std::string> const& args);
@@ -27,7 +27,7 @@ struct cmFileCopier
 protected:
   cmExecutionStatus& Status;
   cmMakefile* Makefile;
-  const char* Name;
+  char const* Name;
   bool Always = false;
   cmFileTimeCache FileTimes;
 
@@ -58,22 +58,22 @@ protected:
   std::vector<MatchRule> MatchRules;
 
   // Get the properties from rules matching this input file.
-  MatchProperties CollectMatchProperties(const std::string& file);
+  MatchProperties CollectMatchProperties(std::string const& file);
 
-  bool SetPermissions(const std::string& toFile, mode_t permissions);
+  bool SetPermissions(std::string const& toFile, mode_t permissions);
 
   // Translate an argument to a permissions bit.
   bool CheckPermissions(std::string const& arg, mode_t& permissions);
 
   bool InstallSymlinkChain(std::string& fromFile, std::string& toFile);
-  bool InstallSymlink(const std::string& fromFile, const std::string& toFile);
-  virtual bool InstallFile(const std::string& fromFile,
-                           const std::string& toFile,
+  bool InstallSymlink(std::string const& fromFile, std::string const& toFile);
+  virtual bool InstallFile(std::string const& fromFile,
+                           std::string const& toFile,
                            MatchProperties match_properties);
-  bool InstallDirectory(const std::string& source,
-                        const std::string& destination,
+  bool InstallDirectory(std::string const& source,
+                        std::string const& destination,
                         MatchProperties match_properties);
-  virtual bool Install(const std::string& fromFile, const std::string& toFile);
+  virtual bool Install(std::string const& fromFile, std::string const& toFile);
   virtual std::string const& ToName(std::string const& fromName);
 
   enum Type
@@ -82,8 +82,8 @@ protected:
     TypeDir,
     TypeLink
   };
-  virtual void ReportCopy(const std::string&, Type, bool) {}
-  virtual bool ReportMissing(const std::string& fromFile);
+  virtual void ReportCopy(std::string const&, Type, bool) {}
+  virtual bool ReportMissing(std::string const& fromFile);
 
   MatchRule* CurrentMatchRule = nullptr;
   bool UseGivenPermissionsFile = false;

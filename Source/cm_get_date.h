@@ -9,7 +9,7 @@ extern "C" {
 #endif
 
 /** Parse a date/time string.  Treat relative times with respect to 'now'. */
-time_t cm_get_date(time_t now, const char* str);
+time_t cm_get_date(time_t now, char const* str);
 
 #ifdef __cplusplus
 } /* extern "C" */

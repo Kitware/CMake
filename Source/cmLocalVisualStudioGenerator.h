@@ -34,13 +34,13 @@ public:
   virtual bool IsVFProj() const = 0;
 
   std::string ConstructScript(cmCustomCommandGenerator const& ccg,
-                              const std::string& newline = "\n");
+                              std::string const& newline = "\n");
   std::string FinishConstructScript(VsProjectType projectType,
-                                    const std::string& newline = "\n");
+                                    std::string const& newline = "\n");
 
   /** Label to which to jump in a batch file after a failed step in a
       sequence of custom commands. */
-  const char* GetReportErrorLabel() const;
+  char const* GetReportErrorLabel() const;
 
   cmGlobalVisualStudioGenerator::VSVersion GetVersion() const;
 
@@ -52,10 +52,10 @@ public:
     cmGeneratorTarget const* = nullptr) override;
 
 protected:
-  virtual const char* ReportErrorLabel() const;
+  virtual char const* ReportErrorLabel() const;
   virtual bool CustomCommandUseLocal() const { return false; }
 
   /** Construct a custom command to make exe import lib dir.  */
   std::unique_ptr<cmCustomCommand> MaybeCreateImplibDir(
-    cmGeneratorTarget* target, const std::string& config, bool isFortran);
+    cmGeneratorTarget* target, std::string const& config, bool isFortran);
 };

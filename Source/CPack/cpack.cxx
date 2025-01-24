@@ -39,14 +39,14 @@
 #include "cmake.h"
 
 namespace {
-const cmDocumentationEntry cmDocumentationName = {
+cmDocumentationEntry const cmDocumentationName = {
   {},
   "  cpack - Packaging driver provided by CMake."
 };
 
-const cmDocumentationEntry cmDocumentationUsage = { {}, "  cpack [options]" };
+cmDocumentationEntry const cmDocumentationUsage = { {}, "  cpack [options]" };
 
-const cmDocumentationEntry cmDocumentationOptions[14] = {
+cmDocumentationEntry const cmDocumentationOptions[14] = {
   { "-G <generators>", "Override/define CPACK_GENERATOR" },
   { "-C <Configuration>", "Specify the project configuration" },
   { "-D <var>=<value>", "Set a CPack variable." },
@@ -63,22 +63,22 @@ const cmDocumentationEntry cmDocumentationOptions[14] = {
   { "--list-presets", "List available package presets" }
 };
 
-void cpackProgressCallback(const std::string& message, float /*unused*/)
+void cpackProgressCallback(std::string const& message, float /*unused*/)
 {
   std::cout << "-- " << message << '\n';
 }
 
 std::vector<cmDocumentationEntry> makeGeneratorDocs(
-  const cmCPackGeneratorFactory& gf)
+  cmCPackGeneratorFactory const& gf)
 {
-  const auto& generators = gf.GetGeneratorsList();
+  auto const& generators = gf.GetGeneratorsList();
 
   std::vector<cmDocumentationEntry> docs;
   docs.reserve(generators.size());
 
   std::transform(
     generators.cbegin(), generators.cend(), std::back_inserter(docs),
-    [](const std::decay<decltype(generators)>::type::value_type& gen) {
+    [](std::decay<decltype(generators)>::type::value_type const& gen) {
       return cmDocumentationEntry{ gen.first, gen.second };
     });
   return docs;
@@ -139,27 +139,27 @@ int main(int argc, char const* const* argv)
 
   std::map<std::string, std::string> definitions;
 
-  auto const verboseLambda = [&log](const std::string&, cmake*,
+  auto const verboseLambda = [&log](std::string const&, cmake*,
                                     cmMakefile*) -> bool {
     log.SetVerbose(true);
     cmCPack_Log(&log, cmCPackLog::LOG_OUTPUT, "Enable Verbose\n");
     return true;
   };
 
-  auto const debugLambda = [&log](const std::string&, cmake*,
+  auto const debugLambda = [&log](std::string const&, cmake*,
                                   cmMakefile*) -> bool {
     log.SetDebug(true);
     cmCPack_Log(&log, cmCPackLog::LOG_OUTPUT, "Enable Debug\n");
     return true;
   };
 
-  auto const traceLambda = [](const std::string&, cmake* state,
+  auto const traceLambda = [](std::string const&, cmake* state,
                               cmMakefile*) -> bool {
     state->SetTrace(true);
     return true;
   };
 
-  auto const traceExpandLambda = [](const std::string&, cmake* state,
+  auto const traceExpandLambda = [](std::string const&, cmake* state,
                                     cmMakefile*) -> bool {
     state->SetTrace(true);
     state->SetTraceExpand(true);
@@ -209,7 +209,7 @@ int main(int argc, char const* const* argv)
                      CommandArgument::setToTrue(listPresets) },
     CommandArgument{ "-D", CommandArgument::Values::One,
                      CommandArgument::RequiresSeparator::No,
-                     [&log, &definitions](const std::string& arg, cmake*,
+                     [&log, &definitions](std::string const& arg, cmake*,
                                           cmMakefile*) -> bool {
                        std::string value = arg;
                        size_t pos = value.find_first_of('=');
@@ -255,12 +255,12 @@ int main(int argc, char const* const* argv)
 
   // Set up presets
   if (!preset.empty() || listPresets) {
-    const auto workingDirectory = cmSystemTools::GetLogicalWorkingDirectory();
+    auto const workingDirectory = cmSystemTools::GetLogicalWorkingDirectory();
 
     auto const presetGeneratorsPresent =
-      [&generators](const cmCMakePresetsGraph::PackagePreset& p) {
+      [&generators](cmCMakePresetsGraph::PackagePreset const& p) {
         return std::all_of(p.Generators.begin(), p.Generators.end(),
-                           [&generators](const std::string& gen) {
+                           [&generators](std::string const& gen) {
                              return generators.GetGeneratorsList().count(
                                       gen) != 0;
                            });

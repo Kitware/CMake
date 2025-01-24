@@ -24,7 +24,7 @@ using BuildPreset = cmCMakePresetsGraph::BuildPreset;
 using JSONHelperBuilder = cmJSONHelperBuilder;
 
 bool PackageResolveModeHelper(cm::optional<PackageResolveMode>& out,
-                              const Json::Value* value, cmJSONState* state)
+                              Json::Value const* value, cmJSONState* state)
 {
   if (!value) {
     out = cm::nullopt;
@@ -50,9 +50,9 @@ bool PackageResolveModeHelper(cm::optional<PackageResolveMode>& out,
   return true;
 }
 
-std::function<bool(BuildPreset&, const Json::Value*, cmJSONState*)> const
+std::function<bool(BuildPreset&, Json::Value const*, cmJSONState*)> const
   ResolvePackageReferencesHelper = [](BuildPreset& out,
-                                      const Json::Value* value,
+                                      Json::Value const* value,
                                       cmJSONState* state) -> bool {
   return PackageResolveModeHelper(out.ResolvePackageReferences, value, state);
 };
@@ -102,7 +102,7 @@ auto const BuildPresetHelper =
 
 namespace cmCMakePresetsGraphInternal {
 bool BuildPresetsHelper(std::vector<BuildPreset>& out,
-                        const Json::Value* value, cmJSONState* state)
+                        Json::Value const* value, cmJSONState* state)
 {
   static auto const helper = JSONHelperBuilder::Vector<BuildPreset>(
     cmCMakePresetsErrors::INVALID_PRESETS, BuildPresetHelper);

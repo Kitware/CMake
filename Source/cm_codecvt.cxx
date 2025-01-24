@@ -52,9 +52,9 @@ bool codecvt::do_always_noconv() const noexcept
   return this->m_noconv;
 }
 
-std::codecvt_base::result codecvt::do_out(mbstate_t& state, const char* from,
-                                          const char* from_end,
-                                          const char*& from_next, char* to,
+std::codecvt_base::result codecvt::do_out(mbstate_t& state, char const* from,
+                                          char const* from_end,
+                                          char const*& from_next, char* to,
                                           char* to_end, char*& to_next) const
 {
   from_next = from;
@@ -154,7 +154,7 @@ std::codecvt_base::result codecvt::do_unshift(mbstate_t& state, char* to,
 
 #if defined(_WIN32)
 std::codecvt_base::result codecvt::Decode(mbstate_t& state, int size,
-                                          const char*& from_next,
+                                          char const*& from_next,
                                           char*& to_next, char* to_end) const
 {
   State& lstate = reinterpret_cast<State&>(state);
@@ -226,7 +226,7 @@ std::codecvt_base::result codecvt::DecodePartial(mbstate_t& state,
 }
 
 void codecvt::BufferPartial(mbstate_t& state, int size,
-                            const char*& from_next) const
+                            char const*& from_next) const
 {
   State& lstate = reinterpret_cast<State&>(state);
 

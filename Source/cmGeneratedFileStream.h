@@ -139,7 +139,7 @@ public:
    * Set name of the file that will hold the actual output. This method allows
    * the output file to be changed during the use of cmGeneratedFileStream.
    */
-  void SetName(const std::string& fname);
+  void SetName(std::string const& fname);
 
   /**
    * Set set a custom temporary file extension used with 'Open'.

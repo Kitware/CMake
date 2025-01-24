@@ -24,9 +24,9 @@ void UseBespokeEnumClassCheck::registerMatchers(MatchFinder* Finder)
     this);
 }
 
-void UseBespokeEnumClassCheck::check(const MatchFinder::MatchResult& Result)
+void UseBespokeEnumClassCheck::check(MatchFinder::MatchResult const& Result)
 {
-  const TypeLoc* Node = Result.Nodes.getNodeAs<TypeLoc>("type");
+  TypeLoc const* Node = Result.Nodes.getNodeAs<TypeLoc>("type");
   this->diag(Node->getBeginLoc(),
              "use a bespoke enum class instead of booleans as parameters");
 }

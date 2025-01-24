@@ -18,7 +18,7 @@ class cmListFileBacktrace;
 
 static void FinalAction(cmMakefile& makefile, std::string const& dest,
                         std::vector<std::string> const& args);
-static std::string FindInstallSource(cmMakefile& makefile, const char* name);
+static std::string FindInstallSource(cmMakefile& makefile, char const* name);
 
 bool cmInstallProgramsCommand(std::vector<std::string> const& args,
                               cmExecutionStatus& status)
@@ -39,7 +39,7 @@ bool cmInstallProgramsCommand(std::vector<std::string> const& args,
   std::string const& dest = args[0];
   std::vector<std::string> const finalArgs(args.begin() + 1, args.end());
   mf.AddGeneratorAction(
-    [dest, finalArgs](cmLocalGenerator& lg, const cmListFileBacktrace&) {
+    [dest, finalArgs](cmLocalGenerator& lg, cmListFileBacktrace const&) {
       FinalAction(*lg.GetMakefile(), dest, finalArgs);
     });
   return true;
@@ -89,8 +89,8 @@ static void FinalAction(cmMakefile& makefile, std::string const& dest,
   }
 
   // Use a file install generator.
-  const std::string no_permissions;
-  const std::string no_rename;
+  std::string const no_permissions;
+  std::string const no_rename;
   bool no_exclude_from_all = false;
   std::string no_component =
     makefile.GetSafeDefinition("CMAKE_INSTALL_DEFAULT_COMPONENT_NAME");
@@ -108,7 +108,7 @@ static void FinalAction(cmMakefile& makefile, std::string const& dest,
  * present in the build tree.  If a full path is given, it is just
  * returned.
  */
-static std::string FindInstallSource(cmMakefile& makefile, const char* name)
+static std::string FindInstallSource(cmMakefile& makefile, char const* name)
 {
   if (cmSystemTools::FileIsFullPath(name) ||
       cmGeneratorExpression::Find(name) == 0) {

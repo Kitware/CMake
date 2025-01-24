@@ -41,7 +41,7 @@ void WriteTryRunEvent(cmConfigureLog& log, cmMakefile const& mf,
                       cmTryRunResult const& runResult)
 {
   // Keep in sync with cmFileAPIConfigureLog's DumpEventKindNames.
-  static const std::vector<unsigned long> LogVersionsWithTryRunV1{ 1 };
+  static std::vector<unsigned long> const LogVersionsWithTryRunV1{ 1 };
 
   if (log.IsAnyLogVersionEnabled(LogVersionsWithTryRunV1)) {
     log.BeginEvent("try_run-v1", mf);
@@ -79,12 +79,12 @@ public:
 
   bool TryRunCode(std::vector<std::string> const& args);
 
-  void RunExecutable(const std::string& runArgs,
+  void RunExecutable(std::string const& runArgs,
                      cm::optional<std::string> const& workDir,
                      std::string* runOutputContents,
                      std::string* runOutputStdOutContents,
                      std::string* runOutputStdErrContents);
-  void DoNotRunExecutable(const std::string& runArgs,
+  void DoNotRunExecutable(std::string const& runArgs,
                           cm::optional<std::string> const& srcFile,
                           std::string const& compileResultVariable,
                           std::string* runOutputContents,
@@ -260,7 +260,7 @@ bool TryRunCommandImpl::TryRunCode(std::vector<std::string> const& argv)
   return true;
 }
 
-void TryRunCommandImpl::RunExecutable(const std::string& runArgs,
+void TryRunCommandImpl::RunExecutable(std::string const& runArgs,
                                       cm::optional<std::string> const& workDir,
                                       std::string* out, std::string* stdOut,
                                       std::string* stdErr)
@@ -268,7 +268,7 @@ void TryRunCommandImpl::RunExecutable(const std::string& runArgs,
   int retVal = -1;
 
   std::string finalCommand;
-  const std::string& emulator =
+  std::string const& emulator =
     this->Makefile->GetSafeDefinition("CMAKE_CROSSCOMPILING_EMULATOR");
   if (!emulator.empty()) {
     cmList emulatorWithArgs{ emulator };
@@ -312,7 +312,7 @@ void TryRunCommandImpl::RunExecutable(const std::string& runArgs,
  the executable would have produced.
 */
 void TryRunCommandImpl::DoNotRunExecutable(
-  const std::string& runArgs, cm::optional<std::string> const& srcFile,
+  std::string const& runArgs, cm::optional<std::string> const& srcFile,
   std::string const& compileResultVariable, std::string* out,
   std::string* stdOut, std::string* stdErr, bool stdOutErrRequired)
 {

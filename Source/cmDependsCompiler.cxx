@@ -25,9 +25,9 @@
 #include "cmSystemTools.h"
 
 bool cmDependsCompiler::CheckDependencies(
-  const std::string& internalDepFile, const std::vector<std::string>& depFiles,
+  std::string const& internalDepFile, std::vector<std::string> const& depFiles,
   cmDepends::DependencyMap& dependencies,
-  const std::function<bool(const std::string&)>& isValidPath)
+  std::function<bool(std::string const&)> const& isValidPath)
 {
   bool status = true;
   bool forceReadDeps = true;
@@ -74,10 +74,10 @@ bool cmDependsCompiler::CheckDependencies(
   // dependencies files
   cmFileTime depFileTime;
   for (auto dep = depFiles.begin(); dep != depFiles.end(); dep++) {
-    const auto& source = *dep++;
-    const auto& target = *dep++;
-    const auto& format = *dep++;
-    const auto& depFile = *dep;
+    auto const& source = *dep++;
+    auto const& target = *dep++;
+    auto const& format = *dep++;
+    auto const& depFile = *dep;
 
     if (!cmSystemTools::FileExists(depFile)) {
       continue;
@@ -185,11 +185,11 @@ bool cmDependsCompiler::CheckDependencies(
 }
 
 void cmDependsCompiler::WriteDependencies(
-  const cmDepends::DependencyMap& dependencies, std::ostream& makeDepends,
+  cmDepends::DependencyMap const& dependencies, std::ostream& makeDepends,
   std::ostream& internalDepends)
 {
   // dependencies file consumed by make tool
-  const auto& lineContinue = static_cast<cmGlobalUnixMakefileGenerator3*>(
+  auto const& lineContinue = static_cast<cmGlobalUnixMakefileGenerator3*>(
                                this->LocalGenerator->GetGlobalGenerator())
                                ->LineContinueDirective;
   bool supportLongLineDepend = static_cast<cmGlobalUnixMakefileGenerator3*>(
@@ -204,7 +204,7 @@ void cmDependsCompiler::WriteDependencies(
       this->LocalGenerator->MaybeRelativeToTopBinDir(node.first));
     auto& deps = node.second;
     std::transform(deps.cbegin(), deps.cend(), deps.begin(),
-                   [this](const std::string& dep) {
+                   [this](std::string const& dep) {
                      return this->LocalGenerator->ConvertToMakefilePath(
                        this->LocalGenerator->MaybeRelativeToTopBinDir(dep));
                    });
@@ -213,7 +213,7 @@ void cmDependsCompiler::WriteDependencies(
     if (supportLongLineDepend) {
       makeDepends << target << ": ";
     }
-    for (const auto& dep : deps) {
+    for (auto const& dep : deps) {
       if (supportLongLineDepend) {
         if (first_dep) {
           first_dep = false;
@@ -231,14 +231,14 @@ void cmDependsCompiler::WriteDependencies(
   }
 
   // add phony targets
-  for (const auto& target : phonyTargets) {
+  for (auto const& target : phonyTargets) {
     makeDepends << std::endl << target << ':' << std::endl;
   }
 
   // internal dependencies file
-  for (const auto& node : dependencies) {
+  for (auto const& node : dependencies) {
     internalDepends << node.first << std::endl;
-    for (const auto& dep : node.second) {
+    for (auto const& dep : node.second) {
       internalDepends << ' ' << dep << std::endl;
     }
     internalDepends << std::endl;
@@ -246,7 +246,7 @@ void cmDependsCompiler::WriteDependencies(
 }
 
 void cmDependsCompiler::ClearDependencies(
-  const std::vector<std::string>& depFiles)
+  std::vector<std::string> const& depFiles)
 {
   for (auto dep = depFiles.begin(); dep != depFiles.end(); dep++) {
     dep += 3;

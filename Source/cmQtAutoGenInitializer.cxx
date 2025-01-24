@@ -528,7 +528,7 @@ bool cmQtAutoGenInitializer::InitCustomTargets()
 
 #ifdef _WIN32
     {
-      const auto& value =
+      auto const& value =
         this->GenTarget->GetProperty("AUTOGEN_COMMAND_LINE_LENGTH_MAX");
       if (value.IsSet()) {
         using maxCommandLineLengthType =
@@ -882,10 +882,10 @@ bool cmQtAutoGenInitializer::InitRcc()
     std::string const qtFeatureZSTD = "QT_FEATURE_zstd";
     if (this->GenTarget->Target->GetMakefile()->IsDefinitionSet(
           qtFeatureZSTD)) {
-      const auto zstdDef =
+      auto const zstdDef =
         this->GenTarget->Target->GetMakefile()->GetSafeDefinition(
           qtFeatureZSTD);
-      const auto zstdVal = cmValue(zstdDef);
+      auto const zstdVal = cmValue(zstdDef);
       if (zstdVal.IsOff()) {
         auto const& kw = this->GlobalInitializer->kw();
         auto rccOptions = this->GenTarget->GetSafeProperty(kw.AUTORCC_OPTIONS);
@@ -930,7 +930,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
 
   auto addMUHeader = [this](MUFileHandle&& muf, cm::string_view extension) {
     cmSourceFile* sf = muf->SF;
-    const bool muIt = (muf->MocIt || muf->UicIt);
+    bool const muIt = (muf->MocIt || muf->UicIt);
     if (this->CMP0100Accept || (extension != "hh")) {
       // Accept
       if (muIt && muf->Generated) {
@@ -1058,7 +1058,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
   // The reason is that their file names might be discovered from source files
   // at generation time.
   if (this->MocOrUicEnabled()) {
-    for (const auto& sf : this->Makefile->GetSourceFiles()) {
+    for (auto const& sf : this->Makefile->GetSourceFiles()) {
       // sf->GetExtension() is only valid after sf->ResolveFullPath() ...
       // Since we're iterating over source files that might be not in the
       // target we need to check for path errors (not existing files).
@@ -1210,7 +1210,7 @@ bool cmQtAutoGenInitializer::InitScanFiles()
 
   // Process qrc files
   if (!this->Rcc.Qrcs.empty()) {
-    const bool modernQt = (this->QtVersion.Major >= 5);
+    bool const modernQt = (this->QtVersion.Major >= 5);
     // Target rcc options
     cmList const optionsTarget{ this->GenTarget->GetSafeProperty(
       kw.AUTORCC_OPTIONS) };
@@ -1322,7 +1322,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
         // ${target}_autogen/timestamp custom command.
         // We cannot just use Moc.CompilationFileGenex here, because that
         // custom command runs cmake_autogen for each configuration.
-        for (const auto& p : this->Moc.CompilationFile.Config) {
+        for (auto const& p : this->Moc.CompilationFile.Config) {
           timestampByproducts.push_back(p.second);
         }
       } else {
@@ -1492,7 +1492,7 @@ bool cmQtAutoGenInitializer::InitAutogenTarget()
       // The dependency tree would then look like
       // '_autogen_timestamp_deps (order-only)' <- '/timestamp' file <-
       // '_autogen' target.
-      const auto timestampTargetName =
+      auto const timestampTargetName =
         cmStrCat(this->GenTarget->GetName(), "_autogen_timestamp_deps");
 
       auto cc = cm::make_unique<cmCustomCommand>();
@@ -1636,7 +1636,7 @@ void cmQtAutoGenInitializer::AddCMakeProcessToCommandLines(
         "$<CONFIG>", "$<COMMAND_CONFIG:$<CONFIG>>" }));
   } else if ((this->MultiConfig && this->GlobalGen->IsXcode()) ||
              this->CrossConfig) {
-    const auto& configs =
+    auto const& configs =
       processName == "cmake_autorcc" ? this->ConfigsList : autogenConfigs;
     for (std::string const& config : configs) {
       commandLines.push_back(
@@ -2169,7 +2169,7 @@ static cmQtAutoGen::IntegerVersion parseMocVersion(std::string str)
 {
   cmQtAutoGen::IntegerVersion result;
 
-  static const std::string prelude = "moc ";
+  static std::string const prelude = "moc ";
   size_t const pos = str.find(prelude);
   if (pos == std::string::npos) {
     return result;
@@ -2189,7 +2189,7 @@ static cmQtAutoGen::IntegerVersion parseMocVersion(std::string str)
 }
 
 static cmQtAutoGen::IntegerVersion GetMocVersion(
-  const std::string& mocExecutablePath)
+  std::string const& mocExecutablePath)
 {
   std::string capturedStdOut;
   int exitCode;
@@ -2210,7 +2210,7 @@ static std::string FindMocExecutableFromMocTarget(cmMakefile const* makefile,
                                                   unsigned int qtMajorVersion)
 {
   std::string result;
-  const std::string mocTargetName =
+  std::string const mocTargetName =
     "Qt" + std::to_string(qtMajorVersion) + "::moc";
   cmTarget const* mocTarget = makefile->FindTargetToUse(mocTargetName);
   if (mocTarget) {
@@ -2224,7 +2224,7 @@ cmQtAutoGenInitializer::GetQtVersion(cmGeneratorTarget const* target,
                                      std::string mocExecutable)
 {
   // Converts a char ptr to an unsigned int value
-  auto toUInt = [](const char* const input) -> unsigned int {
+  auto toUInt = [](char const* const input) -> unsigned int {
     unsigned long tmp = 0;
     if (input && cmStrToULong(input, &tmp)) {
       return static_cast<unsigned int>(tmp);
@@ -2357,7 +2357,7 @@ std::string cmQtAutoGenInitializer::GetMocBuildPath(MUFile const& muf)
 }
 
 bool cmQtAutoGenInitializer::GetQtExecutable(GenVarsT& genVars,
-                                             const std::string& executable,
+                                             std::string const& executable,
                                              bool ignoreMissingTarget) const
 {
   auto print_err = [this, &genVars](std::string const& err) {

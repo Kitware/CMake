@@ -33,27 +33,27 @@ struct cmGeneratorExpressionNode
 
   virtual int NumExpectedParameters() const { return 1; }
 
-  virtual bool ShouldEvaluateNextParameter(const std::vector<std::string>&,
+  virtual bool ShouldEvaluateNextParameter(std::vector<std::string> const&,
                                            std::string&) const
   {
     return true;
   }
 
   virtual std::string Evaluate(
-    const std::vector<std::string>& parameters,
+    std::vector<std::string> const& parameters,
     cmGeneratorExpressionContext* context,
-    const GeneratorExpressionContent* content,
+    GeneratorExpressionContent const* content,
     cmGeneratorExpressionDAGChecker* dagChecker) const = 0;
 
   static std::string EvaluateDependentExpression(
     std::string const& prop, cmLocalGenerator* lg,
-    cmGeneratorExpressionContext* context, const cmGeneratorTarget* headTarget,
+    cmGeneratorExpressionContext* context, cmGeneratorTarget const* headTarget,
     cmGeneratorExpressionDAGChecker* dagChecker,
-    const cmGeneratorTarget* currentTarget);
+    cmGeneratorTarget const* currentTarget);
 
-  static const cmGeneratorExpressionNode* GetNode(
-    const std::string& identifier);
+  static cmGeneratorExpressionNode const* GetNode(
+    std::string const& identifier);
 };
 
 void reportError(cmGeneratorExpressionContext* context,
-                 const std::string& expr, const std::string& result);
+                 std::string const& expr, std::string const& result);

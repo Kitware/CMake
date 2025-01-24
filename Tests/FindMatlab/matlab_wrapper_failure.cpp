@@ -6,8 +6,8 @@
 
 #include "mex.h"
 
-void mexFunctionXX(const int nlhs, mxArray* plhs[], const int nrhs,
-                   const mxArray* prhs[])
+void mexFunctionXX(int const nlhs, mxArray* plhs[], int const nrhs,
+                   mxArray const* prhs[])
 {
   mexErrMsgTxt("Should not be running");
 }

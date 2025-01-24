@@ -42,7 +42,7 @@ std::unique_ptr<cmCompiledGeneratorExpression> cmGeneratorExpression::Parse(
 }
 
 std::string cmGeneratorExpression::Evaluate(
-  std::string input, cmLocalGenerator* lg, const std::string& config,
+  std::string input, cmLocalGenerator* lg, std::string const& config,
   cmGeneratorTarget const* headTarget,
   cmGeneratorExpressionDAGChecker* dagChecker,
   cmGeneratorTarget const* currentTarget, std::string const& language)
@@ -61,11 +61,11 @@ std::string cmGeneratorExpression::Evaluate(
   return input;
 }
 
-const std::string& cmCompiledGeneratorExpression::Evaluate(
-  cmLocalGenerator* lg, const std::string& config,
-  const cmGeneratorTarget* headTarget,
+std::string const& cmCompiledGeneratorExpression::Evaluate(
+  cmLocalGenerator* lg, std::string const& config,
+  cmGeneratorTarget const* headTarget,
   cmGeneratorExpressionDAGChecker* dagChecker,
-  const cmGeneratorTarget* currentTarget, std::string const& language) const
+  cmGeneratorTarget const* currentTarget, std::string const& language) const
 {
   cmGeneratorExpressionContext context(
     lg, config, this->Quiet, headTarget,
@@ -78,7 +78,7 @@ const std::string& cmCompiledGeneratorExpression::Evaluate(
 
   this->Output.clear();
 
-  for (const auto& it : this->Evaluators) {
+  for (auto const& it : this->Evaluators) {
     this->Output += it->Evaluate(&context, dagChecker);
 
     this->SeenTargetProperties.insert(context.SeenTargetProperties.cbegin(),
@@ -125,7 +125,7 @@ cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
 }
 
 std::string cmGeneratorExpression::StripEmptyListElements(
-  const std::string& input)
+  std::string const& input)
 {
   if (input.find(';') == std::string::npos) {
     return input;
@@ -133,8 +133,8 @@ std::string cmGeneratorExpression::StripEmptyListElements(
   std::string result;
   result.reserve(input.size());
 
-  const char* c = input.c_str();
-  const char* last = c;
+  char const* c = input.c_str();
+  char const* last = c;
   bool skipSemiColons = true;
   for (; *c; ++c) {
     if (*c == ';') {
@@ -156,7 +156,7 @@ std::string cmGeneratorExpression::StripEmptyListElements(
   return result;
 }
 
-static std::string stripAllGeneratorExpressions(const std::string& input)
+static std::string stripAllGeneratorExpressions(std::string const& input)
 {
   std::string result;
   std::string::size_type pos = 0;
@@ -166,8 +166,8 @@ static std::string stripAllGeneratorExpressions(const std::string& input)
     result += input.substr(lastPos, pos - lastPos);
     pos += 2;
     nestingLevel = 1;
-    const char* c = input.c_str() + pos;
-    const char* const cStart = c;
+    char const* c = input.c_str() + pos;
+    char const* const cStart = c;
     for (; *c; ++c) {
       if (cmGeneratorExpression::StartsWithGeneratorExpression(c)) {
         ++nestingLevel;
@@ -181,7 +181,7 @@ static std::string stripAllGeneratorExpressions(const std::string& input)
         }
       }
     }
-    const std::string::size_type traversed = (c - cStart) + 1;
+    std::string::size_type const traversed = (c - cStart) + 1;
     if (!*c) {
       result += "$<" + input.substr(pos, traversed);
     }
@@ -194,12 +194,12 @@ static std::string stripAllGeneratorExpressions(const std::string& input)
   return cmGeneratorExpression::StripEmptyListElements(result);
 }
 
-static void prefixItems(const std::string& content, std::string& result,
-                        const cm::string_view& prefix)
+static void prefixItems(std::string const& content, std::string& result,
+                        cm::string_view const& prefix)
 {
   std::vector<std::string> entries;
   cmGeneratorExpression::Split(content, entries);
-  const char* sep = "";
+  char const* sep = "";
   for (std::string const& e : entries) {
     result += sep;
     sep = ";";
@@ -212,7 +212,7 @@ static void prefixItems(const std::string& content, std::string& result,
 }
 
 static std::string stripExportInterface(
-  const std::string& input, cmGeneratorExpression::PreprocessContext context,
+  std::string const& input, cmGeneratorExpression::PreprocessContext context,
   cm::string_view importPrefix)
 {
   std::string result;
@@ -251,8 +251,8 @@ static std::string stripExportInterface(
       assert(false && "Invalid position found");
     }
     nestingLevel = 1;
-    const char* c = input.c_str() + pos;
-    const char* const cStart = c;
+    char const* c = input.c_str() + pos;
+    char const* const cStart = c;
     for (; *c; ++c) {
       if (cmGeneratorExpression::StartsWithGeneratorExpression(c)) {
         ++nestingLevel;
@@ -269,7 +269,7 @@ static std::string stripExportInterface(
           result += input.substr(pos, c - cStart);
         } else if (context == cmGeneratorExpression::InstallInterface &&
                    foundGenex == FoundGenex::InstallInterface) {
-          const std::string content = input.substr(pos, c - cStart);
+          std::string const content = input.substr(pos, c - cStart);
           if (!importPrefix.empty()) {
             prefixItems(content, result, importPrefix);
           } else {
@@ -279,7 +279,7 @@ static std::string stripExportInterface(
         break;
       }
     }
-    const std::string::size_type traversed = (c - cStart) + 1;
+    std::string::size_type const traversed = (c - cStart) + 1;
     if (!*c) {
       auto remaining = input.substr(pos, traversed);
       switch (foundGenex) {
@@ -304,7 +304,7 @@ static std::string stripExportInterface(
   return cmGeneratorExpression::StripEmptyListElements(result);
 }
 
-void cmGeneratorExpression::Split(const std::string& input,
+void cmGeneratorExpression::Split(std::string const& input,
                                   std::vector<std::string>& output)
 {
   std::string::size_type pos = 0;
@@ -327,8 +327,8 @@ void cmGeneratorExpression::Split(const std::string& input,
     }
     pos += 2;
     int nestingLevel = 1;
-    const char* c = input.c_str() + pos;
-    const char* const cStart = c;
+    char const* c = input.c_str() + pos;
+    char const* const cStart = c;
     for (; *c; ++c) {
       if (cmGeneratorExpression::StartsWithGeneratorExpression(c)) {
         ++nestingLevel;
@@ -349,7 +349,7 @@ void cmGeneratorExpression::Split(const std::string& input,
         break;
       }
     }
-    const std::string::size_type traversed = (c - cStart) + 1;
+    std::string::size_type const traversed = (c - cStart) + 1;
     output.push_back(preGenex + "$<" + input.substr(pos, traversed));
     pos += traversed;
     lastPos = pos;
@@ -359,7 +359,7 @@ void cmGeneratorExpression::Split(const std::string& input,
   }
 }
 
-std::string cmGeneratorExpression::Preprocess(const std::string& input,
+std::string cmGeneratorExpression::Preprocess(std::string const& input,
                                               PreprocessContext context,
                                               cm::string_view importPrefix)
 {
@@ -376,9 +376,9 @@ std::string cmGeneratorExpression::Preprocess(const std::string& input,
 }
 
 cm::string_view::size_type cmGeneratorExpression::Find(
-  const cm::string_view& input)
+  cm::string_view const& input)
 {
-  const cm::string_view::size_type openpos = input.find("$<");
+  cm::string_view::size_type const openpos = input.find("$<");
   if (openpos != cm::string_view::npos &&
       input.find('>', openpos) != cm::string_view::npos) {
     return openpos;
@@ -386,7 +386,7 @@ cm::string_view::size_type cmGeneratorExpression::Find(
   return cm::string_view::npos;
 }
 
-bool cmGeneratorExpression::IsValidTargetName(const std::string& input)
+bool cmGeneratorExpression::IsValidTargetName(std::string const& input)
 {
   // The ':' is supported to allow use with IMPORTED targets. At least
   // Qt 4 and 5 IMPORTED targets use ':' as the namespace delimiter.
@@ -396,7 +396,7 @@ bool cmGeneratorExpression::IsValidTargetName(const std::string& input)
 }
 
 void cmGeneratorExpression::ReplaceInstallPrefix(
-  std::string& input, const std::string& replacement)
+  std::string& input, std::string const& replacement)
 {
   std::string::size_type pos = 0;
   std::string::size_type lastPos = pos;
@@ -410,7 +410,7 @@ void cmGeneratorExpression::ReplaceInstallPrefix(
 }
 
 void cmCompiledGeneratorExpression::GetMaxLanguageStandard(
-  const cmGeneratorTarget* tgt, std::map<std::string, std::string>& mapping)
+  cmGeneratorTarget const* tgt, std::map<std::string, std::string>& mapping)
 {
   auto it = this->MaxLanguageStandard.find(tgt);
   if (it != this->MaxLanguageStandard.end()) {
@@ -418,8 +418,8 @@ void cmCompiledGeneratorExpression::GetMaxLanguageStandard(
   }
 }
 
-const std::string& cmGeneratorExpressionInterpreter::Evaluate(
-  std::string expression, const std::string& property)
+std::string const& cmGeneratorExpressionInterpreter::Evaluate(
+  std::string expression, std::string const& property)
 {
   this->CompiledGeneratorExpression =
     this->GeneratorExpression.Parse(std::move(expression));

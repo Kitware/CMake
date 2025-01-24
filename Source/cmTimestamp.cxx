@@ -28,7 +28,7 @@
 #include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
-std::string cmTimestamp::CurrentTime(const std::string& formatString,
+std::string cmTimestamp::CurrentTime(std::string const& formatString,
                                      bool utcFlag) const
 {
   // get current time with microsecond resolution
@@ -58,8 +58,8 @@ std::string cmTimestamp::CurrentTime(const std::string& formatString,
                                         formatString, utcFlag);
 }
 
-std::string cmTimestamp::FileModificationTime(const char* path,
-                                              const std::string& formatString,
+std::string cmTimestamp::FileModificationTime(char const* path,
+                                              std::string const& formatString,
                                               bool utcFlag) const
 {
   std::string real_path = cmSystemTools::GetRealPath(path);
@@ -93,7 +93,7 @@ std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
 }
 
 std::string cmTimestamp::CreateTimestampFromTimeT(time_t timeT,
-                                                  const uint32_t microseconds,
+                                                  uint32_t const microseconds,
                                                   std::string formatString,
                                                   bool utcFlag) const
 {
@@ -178,8 +178,8 @@ time_t cmTimestamp::CreateUtcTimeTFromTm(struct tm& tm) const
 }
 
 std::string cmTimestamp::AddTimestampComponent(
-  char flag, struct tm& timeStruct, const time_t timeT, const bool utcFlag,
-  const uint32_t microseconds) const
+  char flag, struct tm& timeStruct, time_t const timeT, bool const utcFlag,
+  uint32_t const microseconds) const
 {
   std::string formatString = cmStrCat('%', flag);
 
@@ -267,7 +267,7 @@ std::string cmTimestamp::AddTimestampComponent(
       tmUnixEpoch.tm_mday = 1;
       tmUnixEpoch.tm_year = 1970 - 1900;
 
-      const time_t unixEpoch = this->CreateUtcTimeTFromTm(tmUnixEpoch);
+      time_t const unixEpoch = this->CreateUtcTimeTFromTm(tmUnixEpoch);
       if (unixEpoch == -1) {
         cmSystemTools::Error(
           "Error generating UNIX epoch in string(TIMESTAMP ...) or "
@@ -293,7 +293,7 @@ std::string cmTimestamp::AddTimestampComponent(
 #ifdef __MINGW32__
   /* See a bug in MinGW: https://sourceforge.net/p/mingw-w64/bugs/793/. A work
    * around is to try to use strftime() from ucrtbase.dll. */
-  using T = size_t(__cdecl*)(char*, size_t, const char*, const struct tm*);
+  using T = size_t(__cdecl*)(char*, size_t, char const*, const struct tm*);
   auto loadUcrtStrftime = []() -> T {
     auto handle =
       LoadLibraryExA("ucrtbase.dll", nullptr, LOAD_LIBRARY_SEARCH_SYSTEM32);

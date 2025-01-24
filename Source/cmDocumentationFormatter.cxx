@@ -18,14 +18,14 @@
 #include "cmStringAlgorithms.h"
 
 namespace {
-const auto EOL = "\n"_s;
-const auto SPACE = " "_s;
-const auto TWO_SPACES = "  "_s;
-const auto MAX_WIDTH_PADDING =
+auto const EOL = "\n"_s;
+auto const SPACE = " "_s;
+auto const TWO_SPACES = "  "_s;
+auto const MAX_WIDTH_PADDING =
   std::string(cmDocumentationFormatter::TEXT_WIDTH, ' ');
 
 void FormatLine(std::back_insert_iterator<std::vector<cm::string_view>> outIt,
-                const cm::string_view text, const cm::string_view padding)
+                cm::string_view const text, cm::string_view const padding)
 {
   auto tokens = cmTokenizedView(text, ' ', cmTokenizerMode::New);
   if (tokens.empty()) {
@@ -43,9 +43,9 @@ void FormatLine(std::back_insert_iterator<std::vector<cm::string_view>> outIt,
   for (auto token : tokens) {
     // It's no need to add a space if this is a very first
     // word on a line.
-    const auto needSpace = currentWidth > padding.size();
+    auto const needSpace = currentWidth > padding.size();
     // Evaluate the size of a current token + possibly spaces before it.
-    const auto tokenWithSpaceSize = token.size() + std::size_t(needSpace) +
+    auto const tokenWithSpaceSize = token.size() + std::size_t(needSpace) +
       std::size_t(needSpace && newSentence);
     // Check if a current word fits on a line.
     // Also, take in account:
@@ -89,7 +89,7 @@ std::string cmDocumentationFormatter::Format(std::string text) const
 
   assert(this->TextIndent < this->TEXT_WIDTH);
 
-  const auto padding =
+  auto const padding =
     cm::string_view(MAX_WIDTH_PADDING.c_str(), this->TextIndent);
 
   std::vector<cm::string_view> tokens;
@@ -106,8 +106,8 @@ std::string cmDocumentationFormatter::Format(std::string text) const
     , end = text.find('\n', start)
     ) // clang-format on
   {
-    const auto isLastLine = end == std::string::npos;
-    const auto line = isLastLine
+    auto const isLastLine = end == std::string::npos;
+    auto const line = isLastLine
       ? cm::string_view{ text.c_str() + start }
       : cm::string_view{ text.c_str() + start, end - start };
 
@@ -148,17 +148,17 @@ std::string cmDocumentationFormatter::Format(std::string text) const
 void cmDocumentationFormatter::PrintSection(
   std::ostream& os, cmDocumentationSection const& section)
 {
-  const std::size_t PREFIX_SIZE =
+  std::size_t const PREFIX_SIZE =
     sizeof(cmDocumentationEntry::CustomNamePrefix) + 1u;
   // length of the "= " literal (see below)
-  const std::size_t SUFFIX_SIZE = 2u;
+  std::size_t const SUFFIX_SIZE = 2u;
   // legacy magic number ;-)
-  const std::size_t NAME_SIZE = 29u;
+  std::size_t const NAME_SIZE = 29u;
 
-  const std::size_t PADDING_SIZE = PREFIX_SIZE + SUFFIX_SIZE;
-  const std::size_t TITLE_SIZE = NAME_SIZE + PADDING_SIZE;
+  std::size_t const PADDING_SIZE = PREFIX_SIZE + SUFFIX_SIZE;
+  std::size_t const TITLE_SIZE = NAME_SIZE + PADDING_SIZE;
 
-  const auto savedIndent = this->TextIndent;
+  auto const savedIndent = this->TextIndent;
 
   os << section.GetName() << '\n';
 

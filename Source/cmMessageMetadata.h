@@ -6,6 +6,6 @@
 
 struct cmMessageMetadata
 {
-  const char* title = nullptr;
+  char const* title = nullptr;
   int desiredColor = cmsysTerminal_Color_Normal;
 };

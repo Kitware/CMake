@@ -22,5 +22,5 @@ public:
 protected:
   cmRuntimeDependencyArchive* Archive;
 
-  void SetError(const std::string& error);
+  void SetError(std::string const& error);
 };

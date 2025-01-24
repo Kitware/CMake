@@ -17,7 +17,7 @@ public:
     StaticSystemInformation,
     DynamicSystemInformation
   };
-  static const std::vector<std::string> QueryString;
+  static std::vector<std::string> const QueryString;
 
   enum Hook
   {
@@ -30,7 +30,7 @@ public:
     PostInstall,
     Manual
   };
-  static const std::vector<std::string> HookString;
+  static std::vector<std::string> const HookString;
 
   struct QueryJSONRoot
   {
@@ -41,7 +41,7 @@ public:
   };
 
   cmInstrumentationQuery() = default;
-  bool ReadJSON(const std::string& file, std::string& errorMessage,
+  bool ReadJSON(std::string const& file, std::string& errorMessage,
                 std::set<Query>& queries, std::set<Hook>& hooks,
                 std::vector<std::string>& callbacks);
   QueryJSONRoot queryRoot;

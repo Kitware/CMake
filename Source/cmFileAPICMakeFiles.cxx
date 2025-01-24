@@ -76,7 +76,7 @@ Json::Value CMakeFiles::DumpInputs()
 
   cmGlobalGenerator* gg =
     this->FileAPI.GetCMakeInstance()->GetGlobalGenerator();
-  for (const auto& lg : gg->GetLocalGenerators()) {
+  for (auto const& lg : gg->GetLocalGenerators()) {
     cmMakefile const* mf = lg->GetMakefile();
     for (std::string const& file : mf->GetListFiles()) {
       inputs.append(this->DumpInput(file));

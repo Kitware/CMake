@@ -24,9 +24,9 @@ public:
 
 protected:
   int InitializeInternal() override;
-  const char* GetPackagingInstallPrefix() override;
+  char const* GetPackagingInstallPrefix() override;
   int ConstructBundle();
-  int SignBundle(const std::string& src_dir);
+  int SignBundle(std::string const& src_dir);
   int PackageFiles() override;
   bool SupportsComponentInstallation() const override;
 

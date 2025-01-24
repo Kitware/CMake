@@ -40,13 +40,13 @@ class cmComputeLinkDepends
 {
 public:
   cmComputeLinkDepends(cmGeneratorTarget const* target,
-                       const std::string& config,
-                       const std::string& linkLanguage,
+                       std::string const& config,
+                       std::string const& linkLanguage,
                        LinkLibrariesStrategy strategy);
   ~cmComputeLinkDepends();
 
-  cmComputeLinkDepends(const cmComputeLinkDepends&) = delete;
-  cmComputeLinkDepends& operator=(const cmComputeLinkDepends&) = delete;
+  cmComputeLinkDepends(cmComputeLinkDepends const&) = delete;
+  cmComputeLinkDepends& operator=(cmComputeLinkDepends const&) = delete;
 
   // Basic information about each link item.
   struct LinkEntry
@@ -109,14 +109,14 @@ private:
                                        cm::optional<size_t> const& groupIndex);
   void AddLinkObject(cmLinkItem const& item);
   void AddVarLinkEntries(cm::optional<size_t> const& depender_index,
-                         const char* value);
+                         char const* value);
   void AddDirectLinkEntries();
   template <typename T>
   void AddLinkEntries(cm::optional<size_t> const& depender_index,
                       std::vector<T> const& libs);
   void AddLinkObjects(std::vector<cmLinkItem> const& objs);
   cmLinkItem ResolveLinkItem(cm::optional<size_t> const& depender_index,
-                             const std::string& name);
+                             std::string const& name);
 
   // One entry for each unique item.
   std::vector<LinkEntry> EntryList;
@@ -130,7 +130,7 @@ private:
   {
     size_t Index;
     cm::optional<size_t> GroupIndex;
-    const char* LibDepends;
+    char const* LibDepends;
   };
   std::queue<BFSEntry> BFSQueue;
   void FollowLinkEntry(BFSEntry qe);

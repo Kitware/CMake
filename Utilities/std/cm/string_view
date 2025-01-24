@@ -31,10 +31,10 @@ public:
   using traits_type = std::string::traits_type;
   using value_type = char;
   using pointer = char*;
-  using const_pointer = const char*;
+  using const_pointer = char const*;
   using reference = char&;
   using const_reference = char const&;
-  using const_iterator = const char*;
+  using const_iterator = char const*;
   using iterator = const_iterator;
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
   using reverse_iterator = const_reverse_iterator;
@@ -46,13 +46,13 @@ public:
   string_view() noexcept = default;
   string_view(string_view const&) noexcept = default;
 
-  string_view(const char* s, size_t count) noexcept
+  string_view(char const* s, size_t count) noexcept
     : data_(s)
     , size_(count)
   {
   }
 
-  string_view(const char* s) noexcept
+  string_view(char const* s) noexcept
     : data_(s)
     , size_(traits_type::length(s))
   {
@@ -126,46 +126,46 @@ public:
   int compare(size_type pos1, size_type count1, string_view v) const;
   int compare(size_type pos1, size_type count1, string_view v, size_type pos2,
               size_type count2) const;
-  int compare(const char* s) const;
-  int compare(size_type pos1, size_type count1, const char* s) const;
-  int compare(size_type pos1, size_type count1, const char* s,
+  int compare(char const* s) const;
+  int compare(size_type pos1, size_type count1, char const* s) const;
+  int compare(size_type pos1, size_type count1, char const* s,
               size_type count2) const;
 
   size_type find(string_view v, size_type pos = 0) const noexcept;
   size_type find(char c, size_type pos = 0) const noexcept;
-  size_type find(const char* s, size_type pos, size_type count) const;
-  size_type find(const char* s, size_type pos = 0) const;
+  size_type find(char const* s, size_type pos, size_type count) const;
+  size_type find(char const* s, size_type pos = 0) const;
 
   size_type rfind(string_view v, size_type pos = npos) const noexcept;
   size_type rfind(char c, size_type pos = npos) const noexcept;
-  size_type rfind(const char* s, size_type pos, size_type count) const;
-  size_type rfind(const char* s, size_type pos = npos) const;
+  size_type rfind(char const* s, size_type pos, size_type count) const;
+  size_type rfind(char const* s, size_type pos = npos) const;
 
   size_type find_first_of(string_view v, size_type pos = 0) const noexcept;
   size_type find_first_of(char c, size_type pos = 0) const noexcept;
-  size_type find_first_of(const char* s, size_type pos, size_type count) const;
-  size_type find_first_of(const char* s, size_type pos = 0) const;
+  size_type find_first_of(char const* s, size_type pos, size_type count) const;
+  size_type find_first_of(char const* s, size_type pos = 0) const;
 
   size_type find_last_of(string_view v, size_type pos = npos) const noexcept;
   size_type find_last_of(char c, size_type pos = npos) const noexcept;
-  size_type find_last_of(const char* s, size_type pos, size_type count) const;
-  size_type find_last_of(const char* s, size_type pos = npos) const;
+  size_type find_last_of(char const* s, size_type pos, size_type count) const;
+  size_type find_last_of(char const* s, size_type pos = npos) const;
 
   size_type find_first_not_of(string_view v, size_type pos = 0) const noexcept;
   size_type find_first_not_of(char c, size_type pos = 0) const noexcept;
-  size_type find_first_not_of(const char* s, size_type pos,
+  size_type find_first_not_of(char const* s, size_type pos,
                               size_type count) const;
-  size_type find_first_not_of(const char* s, size_type pos = 0) const;
+  size_type find_first_not_of(char const* s, size_type pos = 0) const;
 
   size_type find_last_not_of(string_view v,
                              size_type pos = npos) const noexcept;
   size_type find_last_not_of(char c, size_type pos = npos) const noexcept;
-  size_type find_last_not_of(const char* s, size_type pos,
+  size_type find_last_not_of(char const* s, size_type pos,
                              size_type count) const;
-  size_type find_last_not_of(const char* s, size_type pos = npos) const;
+  size_type find_last_not_of(char const* s, size_type pos = npos) const;
 
 private:
-  const char* data_ = nullptr;
+  char const* data_ = nullptr;
   size_type size_ = 0;
 };
 

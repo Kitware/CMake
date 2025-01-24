@@ -53,7 +53,7 @@ static void ConvertToWindowsSlashes(std::string& s)
 }
 
 cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
-  cmake* cm, const std::string& name)
+  cmake* cm, std::string const& name)
   : cmGlobalVisualStudio8Generator(cm, name)
 {
   this->DefaultCudaFlagTableName = "v10";
@@ -309,26 +309,26 @@ bool cmGlobalVisualStudio10Generator::SetGeneratorToolset(
     }
   }
 
-  if (const char* toolset = this->GetPlatformToolset()) {
+  if (char const* toolset = this->GetPlatformToolset()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET", toolset);
   }
   if (!this->GeneratorToolsetVersion.empty()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_VERSION",
                       this->GeneratorToolsetVersion);
   }
-  if (const char* hostArch = this->GetPlatformToolsetHostArchitecture()) {
+  if (char const* hostArch = this->GetPlatformToolsetHostArchitecture()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_HOST_ARCHITECTURE", hostArch);
   }
-  if (const char* cuda = this->GetPlatformToolsetCuda()) {
+  if (char const* cuda = this->GetPlatformToolsetCuda()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_CUDA", cuda);
   }
-  if (const char* cudaDir = this->GetPlatformToolsetCudaCustomDir()) {
+  if (char const* cudaDir = this->GetPlatformToolsetCudaCustomDir()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_CUDA_CUSTOM_DIR", cudaDir);
   }
   if (cm::optional<std::string> fortran = this->GetPlatformToolsetFortran()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_FORTRAN", *fortran);
   }
-  if (const char* vcTargetsDir = this->GetCustomVCTargetsPath()) {
+  if (char const* vcTargetsDir = this->GetCustomVCTargetsPath()) {
     mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET_VCTARGETS_CUSTOM_DIR",
                       vcTargetsDir);
   }
@@ -689,7 +689,7 @@ void cmGlobalVisualStudio10Generator::EnableLanguage(
   cmGlobalVisualStudio8Generator::EnableLanguage(lang, mf, optional);
 }
 
-const char* cmGlobalVisualStudio10Generator::GetCustomVCTargetsPath() const
+char const* cmGlobalVisualStudio10Generator::GetCustomVCTargetsPath() const
 {
   if (this->CustomVCTargetsPath.empty()) {
     return nullptr;
@@ -697,7 +697,7 @@ const char* cmGlobalVisualStudio10Generator::GetCustomVCTargetsPath() const
   return this->CustomVCTargetsPath.c_str();
 }
 
-const char* cmGlobalVisualStudio10Generator::GetPlatformToolset() const
+char const* cmGlobalVisualStudio10Generator::GetPlatformToolset() const
 {
   std::string const& toolset = this->GetPlatformToolsetString();
   if (toolset.empty()) {
@@ -731,7 +731,7 @@ cmGlobalVisualStudio10Generator::GetPlatformToolsetVersionProps() const
   return this->GeneratorToolsetVersionProps;
 }
 
-const char*
+char const*
 cmGlobalVisualStudio10Generator::GetPlatformToolsetHostArchitecture() const
 {
   std::string const& hostArch =
@@ -756,7 +756,7 @@ cmGlobalVisualStudio10Generator::GetPlatformToolsetHostArchitectureString()
   return empty;
 }
 
-const char* cmGlobalVisualStudio10Generator::GetPlatformToolsetCuda() const
+char const* cmGlobalVisualStudio10Generator::GetPlatformToolsetCuda() const
 {
   if (!this->GeneratorToolsetCuda.empty()) {
     return this->GeneratorToolsetCuda.c_str();
@@ -770,7 +770,7 @@ cmGlobalVisualStudio10Generator::GetPlatformToolsetCudaString() const
   return this->GeneratorToolsetCuda;
 }
 
-const char* cmGlobalVisualStudio10Generator::GetPlatformToolsetCudaCustomDir()
+char const* cmGlobalVisualStudio10Generator::GetPlatformToolsetCudaCustomDir()
   const
 {
   if (!this->GeneratorToolsetCudaCustomDir.empty()) {
@@ -967,7 +967,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
     }
     cmXMLElement(eprj, "Import")
       .Attribute("Project", "$(VCTargetsPath)\\Microsoft.Cpp.Default.props");
-    if (const char* hostArch = this->GetPlatformToolsetHostArchitecture()) {
+    if (char const* hostArch = this->GetPlatformToolsetHostArchitecture()) {
       cmXMLElement epg(eprj, "PropertyGroup");
       cmXMLElement(epg, "PreferredToolArchitecture").Content(hostArch);
     }
@@ -1047,10 +1047,10 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
 
 std::vector<cmGlobalGenerator::GeneratedMakeCommand>
 cmGlobalVisualStudio10Generator::GenerateBuildCommand(
-  const std::string& makeProgram, const std::string& projectName,
-  const std::string& projectDir, std::vector<std::string> const& targetNames,
-  const std::string& config, int jobs, bool verbose,
-  const cmBuildOptions& buildOptions,
+  std::string const& makeProgram, std::string const& projectName,
+  std::string const& projectDir, std::vector<std::string> const& targetNames,
+  std::string const& config, int jobs, bool verbose,
+  cmBuildOptions const& buildOptions,
   std::vector<std::string> const& makeOptions)
 {
   std::vector<GeneratedMakeCommand> makeCommands;
@@ -1065,7 +1065,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
                     makeProgramLower.find("vcexpress") != std::string::npos);
 
   // Workaround to convince VCExpress.exe to produce output.
-  const bool requiresOutputForward =
+  bool const requiresOutputForward =
     (makeProgramLower.find("vcexpress") != std::string::npos);
 
   // MSBuild is preferred (and required for VS Express), but if the .sln has
@@ -1105,7 +1105,7 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
       ((targetNames.size() == 1) && targetNames.front().empty())) {
     realTargetNames = { "ALL_BUILD" };
   }
-  for (const auto& tname : realTargetNames) {
+  for (auto const& tname : realTargetNames) {
     // msbuild.exe CxxOnly.sln /t:Build /p:Configuration=Debug
     // /target:ALL_BUILD
     //                         /m
@@ -1265,7 +1265,7 @@ std::string cmGlobalVisualStudio10Generator::Encoding()
   return "utf-8";
 }
 
-const char* cmGlobalVisualStudio10Generator::GetToolsVersion() const
+char const* cmGlobalVisualStudio10Generator::GetToolsVersion() const
 {
   switch (this->Version) {
     case cmGlobalVisualStudioGenerator::VSVersion::VS14:
@@ -1313,7 +1313,7 @@ std::string cmGlobalVisualStudio10Generator::GetApplicationTypeRevision() const
   return this->SystemVersion.substr(0, end2);
 }
 
-static std::string cmLoadFlagTableString(Json::Value entry, const char* field)
+static std::string cmLoadFlagTableString(Json::Value entry, char const* field)
 {
   if (entry.isMember(field)) {
     auto string = entry[field];
@@ -1325,7 +1325,7 @@ static std::string cmLoadFlagTableString(Json::Value entry, const char* field)
 }
 
 static unsigned int cmLoadFlagTableSpecial(Json::Value entry,
-                                           const char* field)
+                                           char const* field)
 {
   unsigned int value = 0;
   if (entry.isMember(field)) {

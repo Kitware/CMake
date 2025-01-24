@@ -605,7 +605,7 @@ static void test_xcb_render_util(void)
 {
   int screen_nbr;
   xcb_connection_t* connection = xcb_connect(NULL, &screen_nbr);
-  const xcb_render_query_version_reply_t* cookie =
+  xcb_render_query_version_reply_t const* cookie =
     xcb_render_util_query_version(connection);
   xcb_disconnect(connection);
 }

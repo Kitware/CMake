@@ -41,18 +41,18 @@ public:
       dependencies didn't changed and false if not.
       Up-to-date Dependencies will be stored in deps. */
   bool CheckDependencies(
-    const std::string& internalDepFile,
-    const std::vector<std::string>& depFiles,
+    std::string const& internalDepFile,
+    std::vector<std::string> const& depFiles,
     cmDepends::DependencyMap& dependencies,
-    const std::function<bool(const std::string&)>& isValidPath);
+    std::function<bool(std::string const&)> const& isValidPath);
 
   /** Write dependencies for the target file.  */
-  void WriteDependencies(const cmDepends::DependencyMap& dependencies,
+  void WriteDependencies(cmDepends::DependencyMap const& dependencies,
                          std::ostream& makeDepends,
                          std::ostream& internalDepends);
 
   /** Clear dependencies for the target so they will be regenerated.  */
-  void ClearDependencies(const std::vector<std::string>& depFiles);
+  void ClearDependencies(std::vector<std::string> const& depFiles);
 
 private:
   bool Verbose = false;

@@ -27,7 +27,7 @@ public:
 
 protected:
   int InitializeInternal() override;
-  const char* GetOutputExtension() override;
+  char const* GetOutputExtension() override;
   int PackageFiles() override;
   bool SupportsComponentInstallation() const override;
 
@@ -36,11 +36,11 @@ protected:
   bool RunCommand(std::string const& command, std::string* output = nullptr);
 
   std::string GetComponentInstallSuffix(
-    const std::string& componentName) override;
+    std::string const& componentName) override;
   std::string GetComponentInstallDirNameSuffix(
-    const std::string& componentName) override;
+    std::string const& componentName) override;
 
-  int CreateDMG(const std::string& src_dir, const std::string& output_file);
+  int CreateDMG(std::string const& src_dir, std::string const& output_file);
 
 private:
   std::string slaDirectory;
@@ -73,11 +73,11 @@ private:
 
   bool WriteLicense(RezDoc& rez, size_t licenseNumber,
                     std::string licenseLanguage,
-                    const std::string& licenseFile, std::string* error);
+                    std::string const& licenseFile, std::string* error);
   void EncodeLicense(RezDict& dict, std::vector<std::string> const& lines);
   void EncodeMenu(RezDict& dict, std::vector<std::string> const& lines);
   bool ReadFile(std::string const& file, std::vector<std::string>& lines,
                 std::string* error);
-  bool BreakLongLine(const std::string& line, std::vector<std::string>& lines,
+  bool BreakLongLine(std::string const& line, std::vector<std::string>& lines,
                      std::string* error);
 };

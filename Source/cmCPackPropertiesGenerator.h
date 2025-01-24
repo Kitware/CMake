@@ -29,7 +29,7 @@ public:
     delete;
 
 protected:
-  void GenerateScriptForConfig(std::ostream& os, const std::string& config,
+  void GenerateScriptForConfig(std::ostream& os, std::string const& config,
                                Indent indent) override;
 
   cmLocalGenerator* LG;

@@ -35,8 +35,8 @@ struct cmWIXPatchElement : cmWIXPatchNode
 
   cmWIXPatchElement();
 
-  cmWIXPatchElement(const cmWIXPatchElement&) = delete;
-  const cmWIXPatchElement& operator=(const cmWIXPatchElement&) = delete;
+  cmWIXPatchElement(cmWIXPatchElement const&) = delete;
+  cmWIXPatchElement const& operator=(cmWIXPatchElement const&) = delete;
 
   ~cmWIXPatchElement();
 
@@ -59,15 +59,15 @@ public:
   cmWIXPatchParser(fragment_map_t& Fragments, cmCPackLog* logger);
 
 private:
-  virtual void StartElement(const std::string& name, const char** atts);
+  virtual void StartElement(std::string const& name, char const** atts);
 
-  void StartFragment(const char** attributes);
+  void StartFragment(char const** attributes);
 
-  virtual void EndElement(const std::string& name);
+  virtual void EndElement(std::string const& name);
 
-  virtual void CharacterDataHandler(const char* data, int length);
+  virtual void CharacterDataHandler(char const* data, int length);
 
-  virtual void ReportError(int line, int column, const char* msg);
+  virtual void ReportError(int line, int column, char const* msg);
 
   void ReportValidationError(std::string const& message);
 

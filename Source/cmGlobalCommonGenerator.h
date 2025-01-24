@@ -41,20 +41,20 @@ public:
     std::vector<Dir> Children;
   };
   std::map<std::string, DirectoryTarget> ComputeDirectoryTargets() const;
-  bool IsExcludedFromAllInConfig(const DirectoryTarget::Target& t,
-                                 const std::string& config);
-  void AddClangTidyExportFixesDir(const std::string& dir)
+  bool IsExcludedFromAllInConfig(DirectoryTarget::Target const& t,
+                                 std::string const& config);
+  void AddClangTidyExportFixesDir(std::string const& dir)
   {
     this->ClangTidyExportFixesDirs.insert(dir);
   }
-  void AddClangTidyExportFixesFile(const std::string& file)
+  void AddClangTidyExportFixesFile(std::string const& file)
   {
     this->ClangTidyExportFixesFiles.insert(file);
   }
 
 protected:
   virtual bool SupportsDirectConsole() const { return true; }
-  const char* GetEditCacheTargetName() const override { return "edit_cache"; }
+  char const* GetEditCacheTargetName() const override { return "edit_cache"; }
   std::string GetEditCacheCommand() const override;
 
   std::set<std::string> ClangTidyExportFixesDirs;

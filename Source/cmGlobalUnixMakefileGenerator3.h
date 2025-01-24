@@ -69,10 +69,10 @@ public:
 
   ~cmGlobalUnixMakefileGenerator3() override;
 
-  cmGlobalUnixMakefileGenerator3(const cmGlobalUnixMakefileGenerator3&) =
+  cmGlobalUnixMakefileGenerator3(cmGlobalUnixMakefileGenerator3 const&) =
     delete;
   cmGlobalUnixMakefileGenerator3& operator=(
-    const cmGlobalUnixMakefileGenerator3&) = delete;
+    cmGlobalUnixMakefileGenerator3 const&) = delete;
 
   //! Get the name for the generator.
   std::string GetName() const override
@@ -169,20 +169,20 @@ public:
 
   // change the build command for speed
   std::vector<GeneratedMakeCommand> GenerateBuildCommand(
-    const std::string& makeProgram, const std::string& projectName,
-    const std::string& projectDir, std::vector<std::string> const& targetNames,
-    const std::string& config, int jobs, bool verbose,
-    const cmBuildOptions& buildOptions = cmBuildOptions(),
+    std::string const& makeProgram, std::string const& projectName,
+    std::string const& projectDir, std::vector<std::string> const& targetNames,
+    std::string const& config, int jobs, bool verbose,
+    cmBuildOptions const& buildOptions = cmBuildOptions(),
     std::vector<std::string> const& makeOptions =
       std::vector<std::string>()) override;
 
   /** Record per-target progress information.  */
   void RecordTargetProgress(cmMakefileTargetGenerator* tg);
 
-  void AddCXXCompileCommand(const std::string& sourceFile,
-                            const std::string& workingDirectory,
-                            const std::string& compileCommand,
-                            const std::string& objPath);
+  void AddCXXCompileCommand(std::string const& sourceFile,
+                            std::string const& workingDirectory,
+                            std::string const& compileCommand,
+                            std::string const& objPath);
 
   /** Does the make tool tolerate .NOTPARALLEL? */
   virtual bool AllowNotParallel() const { return true; }
@@ -213,7 +213,7 @@ protected:
 
   void WriteDirectoryRule2(std::ostream& ruleFileStream,
                            cmLocalUnixMakefileGenerator3& rootLG,
-                           DirectoryTarget const& dt, const char* pass,
+                           DirectoryTarget const& dt, char const* pass,
                            bool check_all, bool check_relink,
                            std::vector<std::string> const& commands = {});
   void WriteDirectoryRules2(std::ostream& ruleFileStream,
@@ -227,28 +227,28 @@ protected:
                                   cmGeneratorTarget* target);
 
   // Target name hooks for superclass.
-  const char* GetAllTargetName() const override { return "all"; }
-  const char* GetInstallTargetName() const override { return "install"; }
-  const char* GetInstallLocalTargetName() const override
+  char const* GetAllTargetName() const override { return "all"; }
+  char const* GetInstallTargetName() const override { return "install"; }
+  char const* GetInstallLocalTargetName() const override
   {
     return "install/local";
   }
-  const char* GetInstallStripTargetName() const override
+  char const* GetInstallStripTargetName() const override
   {
     return "install/strip";
   }
-  const char* GetPreinstallTargetName() const override { return "preinstall"; }
-  const char* GetTestTargetName() const override { return "test"; }
-  const char* GetPackageTargetName() const override { return "package"; }
-  const char* GetPackageSourceTargetName() const override
+  char const* GetPreinstallTargetName() const override { return "preinstall"; }
+  char const* GetTestTargetName() const override { return "test"; }
+  char const* GetPackageTargetName() const override { return "package"; }
+  char const* GetPackageSourceTargetName() const override
   {
     return "package_source";
   }
-  const char* GetRebuildCacheTargetName() const override
+  char const* GetRebuildCacheTargetName() const override
   {
     return "rebuild_cache";
   }
-  const char* GetCleanTargetName() const override { return "clean"; }
+  char const* GetCleanTargetName() const override { return "clean"; }
 
   bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const override { return true; }
 
@@ -287,12 +287,12 @@ protected:
   size_t CountProgressMarksInTarget(
     cmGeneratorTarget const* target,
     std::set<cmGeneratorTarget const*>& emitted);
-  size_t CountProgressMarksInAll(const cmLocalGenerator& lg);
+  size_t CountProgressMarksInAll(cmLocalGenerator const& lg);
 
   std::unique_ptr<cmGeneratedFileStream> CommandDatabase;
 
 private:
-  const char* GetBuildIgnoreErrorsFlag() const override { return "-i"; }
+  char const* GetBuildIgnoreErrorsFlag() const override { return "-i"; }
 
   std::map<cmStateSnapshot, std::set<cmGeneratorTarget const*>,
            cmStateSnapshot::StrictWeakOrder>

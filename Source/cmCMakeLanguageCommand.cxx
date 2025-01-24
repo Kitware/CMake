@@ -217,7 +217,7 @@ bool cmCMakeLanguageCommandEVAL(std::vector<cmListFileArgument> const& args,
       "called with unsupported arguments between EVAL and CODE arguments");
   }
 
-  const std::string code =
+  std::string const code =
     cmJoin(cmMakeRange(expandedArgs.begin() + 2, expandedArgs.end()), " ");
   return makefile.ReadListFileAsString(
     code, cmStrCat(context.FilePath, ":", context.Line, ":EVAL"));
@@ -324,7 +324,7 @@ bool cmCMakeLanguageCommandGET_MESSAGE_LOG_LEVEL(
   Message::LogLevel logLevel = makefile.GetCurrentLogLevel();
   std::string outputValue = cmake::LogLevelToString(logLevel);
 
-  const std::string& outputVariable = expandedArgs[1];
+  std::string const& outputVariable = expandedArgs[1];
   makefile.AddDefinition(outputVariable, outputValue);
   return true;
 }

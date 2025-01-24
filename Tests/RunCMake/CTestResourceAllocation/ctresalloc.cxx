@@ -37,13 +37,13 @@
  *    being allocated, or allocated without being deallocated.
  */
 
-static int usage(const char* argv0)
+static int usage(char const* argv0)
 {
   std::cout << "Usage: " << argv0 << " (write|verify) <args...>" << std::endl;
   return 1;
 }
 
-static int usageWrite(const char* argv0)
+static int usageWrite(char const* argv0)
 {
   std::cout << "Usage: " << argv0
             << " write <log-file> <test-name> <sleep-time-secs>"
@@ -52,7 +52,7 @@ static int usageWrite(const char* argv0)
   return 1;
 }
 
-static int usageVerify(const char* argv0)
+static int usageVerify(char const* argv0)
 {
   std::cout << "Usage: " << argv0
             << " verify <log-file> <resource-spec-file> [<test-names>]"
@@ -83,7 +83,7 @@ static int doWrite(int argc, char const* const* argv)
     assert(result);
 
     // Verify group count
-    const char* resourceGroupCountEnv =
+    char const* resourceGroupCountEnv =
       cmSystemTools::GetEnv("CTEST_RESOURCE_GROUP_COUNT");
     if (!resourceGroupCountEnv) {
       std::cout << "CTEST_RESOURCE_GROUP_COUNT should be defined" << std::endl;
@@ -124,7 +124,7 @@ static int doWrite(int argc, char const* const* argv)
 
         std::string prefix = "CTEST_RESOURCE_GROUP_";
         prefix += std::to_string(i);
-        const char* actualResourcesCStr = cmSystemTools::GetEnv(prefix);
+        char const* actualResourcesCStr = cmSystemTools::GetEnv(prefix);
         if (!actualResourcesCStr) {
           std::cout << prefix << " should be defined" << std::endl;
           return 1;
@@ -155,7 +155,7 @@ static int doWrite(int argc, char const* const* argv)
 
           std::string varName = prefix;
           varName += cmSystemTools::UpperCase(type);
-          const char* varVal = cmSystemTools::GetEnv(varName);
+          char const* varVal = cmSystemTools::GetEnv(varName);
           if (!varVal) {
             std::cout << varName << " should be defined" << std::endl;
             return 1;

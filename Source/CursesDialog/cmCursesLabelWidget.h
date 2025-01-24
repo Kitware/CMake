@@ -15,7 +15,7 @@ class cmCursesLabelWidget : public cmCursesWidget
 {
 public:
   cmCursesLabelWidget(int width, int height, int left, int top,
-                      const std::string& name);
+                      std::string const& name);
   ~cmCursesLabelWidget() override;
 
   cmCursesLabelWidget(cmCursesLabelWidget const&) = delete;

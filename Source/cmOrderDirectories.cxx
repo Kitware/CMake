@@ -140,7 +140,7 @@ class cmOrderDirectoriesConstraintSOName : public cmOrderDirectoriesConstraint
 public:
   cmOrderDirectoriesConstraintSOName(cmOrderDirectories* od,
                                      std::string const& file,
-                                     const char* soname)
+                                     char const* soname)
     : cmOrderDirectoriesConstraint(od, file)
     , SOName(soname ? soname : "")
   {
@@ -242,8 +242,8 @@ bool cmOrderDirectoriesConstraintLibrary::FindConflict(std::string const& dir)
 }
 
 cmOrderDirectories::cmOrderDirectories(cmGlobalGenerator* gg,
-                                       const cmGeneratorTarget* target,
-                                       const char* purpose)
+                                       cmGeneratorTarget const* target,
+                                       char const* purpose)
 {
   this->GlobalGenerator = gg;
   this->Target = target;
@@ -265,7 +265,7 @@ std::vector<std::string> const& cmOrderDirectories::GetOrderedDirectories()
 }
 
 void cmOrderDirectories::AddRuntimeLibrary(std::string const& fullPath,
-                                           const char* soname)
+                                           char const* soname)
 {
   // Add the runtime library at most once.
   if (this->EmittedConstraintSOName.insert(fullPath).second) {
@@ -371,7 +371,7 @@ void cmOrderDirectories::CollectOriginalDirectories()
   this->AddOriginalDirectories(this->UserDirectories);
 
   // Add directories containing constraints.
-  for (const auto& entry : this->ConstraintEntries) {
+  for (auto const& entry : this->ConstraintEntries) {
     entry->AddDirectory();
   }
 
@@ -456,7 +456,7 @@ void cmOrderDirectories::FindImplicitConflicts()
   // Check for items in implicit link directories that have conflicts
   // in the explicit directories.
   std::ostringstream conflicts;
-  for (const auto& entry : this->ImplicitDirEntries) {
+  for (auto const& entry : this->ImplicitDirEntries) {
     entry->FindImplicitConflicts(conflicts);
   }
 

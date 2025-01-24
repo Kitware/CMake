@@ -43,10 +43,10 @@ public:
   }
 
   /** Set the specific language to be scanned.  */
-  void SetLanguage(const std::string& lang) { this->Language = lang; }
+  void SetLanguage(std::string const& lang) { this->Language = lang; }
 
   /** Set the target build directory.  */
-  void SetTargetDirectory(const std::string& dir)
+  void SetTargetDirectory(std::string const& dir)
   {
     this->TargetDirectory = dir;
   }
@@ -65,11 +65,11 @@ public:
       they must be generated Clear has already been called to wipe out
       the old dependencies.
       Dependencies which are still valid will be stored in validDeps. */
-  bool Check(const std::string& makeFile, const std::string& internalFile,
+  bool Check(std::string const& makeFile, std::string const& internalFile,
              DependencyMap& validDeps);
 
   /** Clear dependencies for the target file so they will be regenerated.  */
-  void Clear(const std::string& file) const;
+  void Clear(std::string const& file) const;
 
   /** Set the file comparison object */
   void SetFileTimeCache(cmFileTimeCache* fc) { this->FileTimeCache = fc; }
@@ -77,8 +77,8 @@ public:
 protected:
   // Write dependencies for the target file to the given stream.
   // Return true for success and false for failure.
-  virtual bool WriteDependencies(const std::set<std::string>& sources,
-                                 const std::string& obj,
+  virtual bool WriteDependencies(std::set<std::string> const& sources,
+                                 std::string const& obj,
                                  std::ostream& makeDepends,
                                  std::ostream& internalDepends);
 
@@ -86,7 +86,7 @@ protected:
   // Return false if dependencies must be regenerated and true
   // otherwise.
   virtual bool CheckDependencies(std::istream& internalDepends,
-                                 const std::string& internalDependsFileName,
+                                 std::string const& internalDependsFileName,
                                  DependencyMap& validDeps);
 
   // Finalize the dependency information for the target.
@@ -108,5 +108,5 @@ protected:
   // The include file search path.
   std::vector<std::string> IncludePath;
 
-  void SetIncludePathFromLanguage(const std::string& lang);
+  void SetIncludePathFromLanguage(std::string const& lang);
 };

@@ -23,7 +23,7 @@ void cmCPackLog::SetLogOutputStream(std::ostream* os)
   this->LogOutput = os;
 }
 
-bool cmCPackLog::SetLogOutputFile(const char* fname)
+bool cmCPackLog::SetLogOutputFile(char const* fname)
 {
   this->LogOutputStream.reset();
   if (fname) {
@@ -38,7 +38,7 @@ bool cmCPackLog::SetLogOutputFile(const char* fname)
   return this->LogOutput != nullptr;
 }
 
-void cmCPackLog::Log(int tag, const char* file, int line, const char* msg,
+void cmCPackLog::Log(int tag, char const* file, int line, char const* msg,
                      size_t length)
 {
   // By default no logging

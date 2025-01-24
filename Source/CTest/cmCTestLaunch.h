@@ -29,14 +29,14 @@ public:
   };
 
   /** Entry point from ctest executable main().  */
-  static int Main(int argc, const char* const argv[], Op operation);
+  static int Main(int argc, char const* const argv[], Op operation);
 
-  cmCTestLaunch(const cmCTestLaunch&) = delete;
-  cmCTestLaunch& operator=(const cmCTestLaunch&) = delete;
+  cmCTestLaunch(cmCTestLaunch const&) = delete;
+  cmCTestLaunch& operator=(cmCTestLaunch const&) = delete;
 
 private:
   // Initialize the launcher from its command line.
-  cmCTestLaunch(int argc, const char* const* argv, Op operation);
+  cmCTestLaunch(int argc, char const* const* argv, Op operation);
   ~cmCTestLaunch();
 
   // Run the real command.
@@ -47,14 +47,14 @@ private:
   bool CheckResults();
 
   // Parse out launcher-specific options specified before the real command.
-  bool ParseArguments(int argc, const char* const* argv);
+  bool ParseArguments(int argc, char const* const* argv);
 
   // The real command line appearing after launcher arguments.
   std::vector<std::string> RealArgV;
 
   // The real command line after response file expansion.
   std::vector<std::string> RealArgs;
-  void HandleRealArg(const char* arg);
+  void HandleRealArg(char const* arg);
 
   // Whether or not any data have been written to stdout or stderr.
   bool HaveOut;
@@ -63,7 +63,7 @@ private:
   // Load custom rules to match warnings and their exceptions.
   bool ScrapeRulesLoaded;
   void LoadScrapeRules();
-  void LoadScrapeRules(const char* purpose,
+  void LoadScrapeRules(char const* purpose,
                        std::vector<cmsys::RegularExpression>& regexps) const;
   bool ScrapeLog(std::string const& fname);
 

@@ -16,7 +16,7 @@
 bool cmOptionCommand(std::vector<std::string> const& args,
                      cmExecutionStatus& status)
 {
-  const bool argError = (args.size() < 2) || (args.size() > 3);
+  bool const argError = (args.size() < 2) || (args.size() > 3);
   if (argError) {
     std::string m = cmStrCat("called with incorrect number of arguments: ",
                              cmJoin(args, " "));
@@ -29,7 +29,7 @@ bool cmOptionCommand(std::vector<std::string> const& args,
   {
     auto policyStatus =
       status.GetMakefile().GetPolicyStatus(cmPolicies::CMP0077);
-    const auto& existsBeforeSet =
+    auto const& existsBeforeSet =
       status.GetMakefile().GetStateSnapshot().GetDefinition(args[0]);
     switch (policyStatus) {
       case cmPolicies::WARN:
@@ -75,7 +75,7 @@ bool cmOptionCommand(std::vector<std::string> const& args,
   }
 
   if (checkAndWarn) {
-    const auto& existsAfterSet =
+    auto const& existsAfterSet =
       status.GetMakefile().GetStateSnapshot().GetDefinition(args[0]);
     if (!existsAfterSet) {
       status.GetMakefile().IssueMessage(

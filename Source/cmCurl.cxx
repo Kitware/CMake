@@ -111,7 +111,7 @@ cm::optional<std::string> cmCurlPrintTLSVersion(int curl_tls_version)
   return s;
 }
 
-std::string cmCurlSetCAInfo(::CURL* curl, const std::string& cafile)
+std::string cmCurlSetCAInfo(::CURL* curl, std::string const& cafile)
 {
   std::string e;
   std::string env_ca;
@@ -166,8 +166,8 @@ std::string cmCurlSetCAInfo(::CURL* curl, const std::string& cafile)
   return e;
 }
 
-std::string cmCurlSetNETRCOption(::CURL* curl, const std::string& netrc_level,
-                                 const std::string& netrc_file)
+std::string cmCurlSetNETRCOption(::CURL* curl, std::string const& netrc_level,
+                                 std::string const& netrc_file)
 {
   std::string e;
   CURL_NETRC_OPTION curl_netrc_level = CURL_NETRC_LAST;

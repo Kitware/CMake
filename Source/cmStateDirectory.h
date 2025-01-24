@@ -58,18 +58,18 @@ public:
   void SetLinkDirectories(BT<std::string> const& vecs);
   void ClearLinkDirectories();
 
-  void SetProperty(const std::string& prop, cmValue value,
+  void SetProperty(std::string const& prop, cmValue value,
                    cmListFileBacktrace const& lfbt);
-  void SetProperty(const std::string& prop, std::nullptr_t,
+  void SetProperty(std::string const& prop, std::nullptr_t,
                    cmListFileBacktrace const& lfbt)
   {
     this->SetProperty(prop, cmValue{ nullptr }, lfbt);
   }
-  void AppendProperty(const std::string& prop, const std::string& value,
+  void AppendProperty(std::string const& prop, std::string const& value,
                       bool asString, cmListFileBacktrace const& lfbt);
-  cmValue GetProperty(const std::string& prop) const;
-  cmValue GetProperty(const std::string& prop, bool chain) const;
-  bool GetPropertyAsBool(const std::string& prop) const;
+  cmValue GetProperty(std::string const& prop) const;
+  cmValue GetProperty(std::string const& prop, bool chain) const;
+  bool GetPropertyAsBool(std::string const& prop) const;
   std::vector<std::string> GetPropertyKeys() const;
 
   void AddNormalTargetName(std::string const& name);

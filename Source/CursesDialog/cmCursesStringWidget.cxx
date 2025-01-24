@@ -165,17 +165,17 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
   return true;
 }
 
-void cmCursesStringWidget::SetString(const std::string& value)
+void cmCursesStringWidget::SetString(std::string const& value)
 {
   this->SetValue(value);
 }
 
-const char* cmCursesStringWidget::GetString()
+char const* cmCursesStringWidget::GetString()
 {
   return this->GetValue();
 }
 
-const char* cmCursesStringWidget::GetValue()
+char const* cmCursesStringWidget::GetValue()
 {
   return field_buffer(this->Field, 0);
 }

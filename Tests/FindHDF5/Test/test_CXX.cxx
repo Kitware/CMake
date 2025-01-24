@@ -4,7 +4,7 @@
 using namespace H5;
 #endif
 
-int main(int argc, const char* argv[])
+int main(int argc, char const* argv[])
 {
   if (argc != 2) {
     return 1;

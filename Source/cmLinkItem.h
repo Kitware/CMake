@@ -27,7 +27,7 @@ class cmLinkItem
 
 public:
   // default feature: link library without decoration
-  static const std::string DEFAULT;
+  static std::string const DEFAULT;
 
   cmLinkItem() = default;
   cmLinkItem(std::string s, bool c, cmListFileBacktrace bt,
@@ -142,7 +142,7 @@ struct cmOptionalLinkImplementation : public cmLinkImplementation
 
 /** Compute the link type to use for the given configuration.  */
 inline cmTargetLinkLibraryType ComputeLinkType(
-  const std::string& config, std::vector<std::string> const& debugConfigs)
+  std::string const& config, std::vector<std::string> const& debugConfigs)
 {
   // No configuration is always optimized.
   if (config.empty()) {

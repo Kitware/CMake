@@ -67,7 +67,7 @@ int cmCPackNSISGenerator::PackageFiles()
     std::string outputDir = "$INSTDIR";
     std::string fileN = cmSystemTools::RelativePath(this->toplevel, file);
     if (!this->Components.empty()) {
-      const std::string::size_type pos = fileN.find('/');
+      std::string::size_type const pos = fileN.find('/');
 
       // Use the custom component install directory if we have one
       if (pos != std::string::npos) {
@@ -111,7 +111,7 @@ int cmCPackNSISGenerator::PackageFiles()
     }
     std::replace(fileN.begin(), fileN.end(), '/', '\\');
 
-    const std::string componentOutputDir =
+    std::string const componentOutputDir =
       this->CustomComponentInstallDirectory(componentName);
 
     dstr << "  RMDir \"" << componentOutputDir << "\\" << fileN << "\""
@@ -212,7 +212,7 @@ int cmCPackNSISGenerator::PackageFiles()
     if (cmValue wantedPosition =
           this->GetOptionIfSet("CPACK_NSIS_BRANDING_TEXT_TRIM_POSITION")) {
       if (!wantedPosition->empty()) {
-        const std::set<std::string> possiblePositions{ "CENTER", "LEFT",
+        std::set<std::string> const possiblePositions{ "CENTER", "LEFT",
                                                        "RIGHT" };
         if (possiblePositions.find(*wantedPosition) ==
             possiblePositions.end()) {
@@ -551,8 +551,7 @@ int cmCPackNSISGenerator::InitializeInternal()
     }
   } else {
     cmCPackLogger(cmCPackLog::LOG_DEBUG,
-                  "CPACK_CREATE_DESKTOP_LINKS: "
-                    << "not set" << std::endl);
+                  "CPACK_CREATE_DESKTOP_LINKS: " << "not set" << std::endl);
   }
 
   std::ostringstream str;
@@ -630,7 +629,7 @@ void cmCPackNSISGenerator::CreateMenuLinks(std::ostream& str,
   cmList::iterator it;
   for (it = cpackMenuLinksList.begin(); it != cpackMenuLinksList.end(); ++it) {
     std::string sourceName = *it;
-    const bool url = urlRegex.find(sourceName);
+    bool const url = urlRegex.find(sourceName);
 
     // Convert / to \ in filenames, but not in urls:
     //
@@ -667,12 +666,12 @@ void cmCPackNSISGenerator::CreateMenuLinks(std::ostream& str,
 }
 
 bool cmCPackNSISGenerator::GetListOfSubdirectories(
-  const char* topdir, std::vector<std::string>& dirs)
+  char const* topdir, std::vector<std::string>& dirs)
 {
   cmsys::Directory dir;
   dir.Load(topdir);
   for (unsigned long i = 0; i < dir.GetNumberOfFiles(); ++i) {
-    const char* fileName = dir.GetFile(i);
+    char const* fileName = dir.GetFile(i);
     if (strcmp(fileName, ".") != 0 && strcmp(fileName, "..") != 0) {
       std::string const fullPath =
         std::string(topdir).append("/").append(fileName);
@@ -728,7 +727,7 @@ std::string cmCPackNSISGenerator::CreateComponentDescription(
     componentCode += "  SectionIn" + out.str() + "\n";
   }
 
-  const std::string componentOutputDir =
+  std::string const componentOutputDir =
     this->CustomComponentInstallDirectory(component->Name);
   componentCode += cmStrCat("  SetOutPath \"", componentOutputDir, "\"\n");
 

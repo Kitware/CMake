@@ -47,7 +47,7 @@ bool cmCTestBuildAndTest::RunCMake(cmake* cm)
     args.push_back("-T" + this->BuildGeneratorToolset);
   }
 
-  const char* config = nullptr;
+  char const* config = nullptr;
   if (!this->CTest->GetConfigType().empty()) {
     config = this->CTest->GetConfigType().c_str();
   }
@@ -136,7 +136,7 @@ public:
     : CM(cm)
   {
     cmSystemTools::SetMessageCallback(
-      [](const std::string& msg, const cmMessageMetadata& /* unused */) {
+      [](std::string const& msg, cmMessageMetadata const& /* unused */) {
         std::cout << msg << std::endl;
       });
 
@@ -145,7 +145,7 @@ public:
     cmSystemTools::SetStderrCallback(
       [](std::string const& m) { std::cout << m << std::flush; });
 
-    this->CM.SetProgressCallback([](const std::string& msg, float prog) {
+    this->CM.SetProgressCallback([](std::string const& msg, float prog) {
       if (prog < 0) {
         std::cout << msg << std::endl;
       }
@@ -160,10 +160,10 @@ public:
     cmSystemTools::SetMessageCallback(nullptr);
   }
 
-  cmCTestBuildAndTestCaptureRAII(const cmCTestBuildAndTestCaptureRAII&) =
+  cmCTestBuildAndTestCaptureRAII(cmCTestBuildAndTestCaptureRAII const&) =
     delete;
   cmCTestBuildAndTestCaptureRAII& operator=(
-    const cmCTestBuildAndTestCaptureRAII&) = delete;
+    cmCTestBuildAndTestCaptureRAII const&) = delete;
 };
 
 int cmCTestBuildAndTest::Run()
@@ -247,7 +247,7 @@ int cmCTestBuildAndTest::Run()
         return 1;
       }
     }
-    const char* config = nullptr;
+    char const* config = nullptr;
     if (!this->CTest->GetConfigType().empty()) {
       config = this->CTest->GetConfigType().c_str();
     }

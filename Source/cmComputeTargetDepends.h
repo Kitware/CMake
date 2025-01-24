@@ -69,12 +69,12 @@ private:
   bool ComputeFinalDepends(cmComputeComponentGraph const& ccg);
   void AddInterfaceDepends(size_t depender_index,
                            cmLinkItem const& dependee_name,
-                           const std::string& config,
+                           std::string const& config,
                            std::set<cmLinkItem>& emitted);
   void AddInterfaceDepends(size_t depender_index,
                            cmGeneratorTarget const* dependee,
                            cmListFileBacktrace const& dependee_backtrace,
-                           const std::string& config,
+                           std::string const& config,
                            std::set<cmLinkItem>& emitted);
   void AddObjectDepends(size_t depender_index, cmSourceFile const* o,
                         std::set<cmLinkItem>& emitted);
@@ -96,12 +96,12 @@ private:
   Graph IntermediateGraph;
   Graph FinalGraph;
   std::vector<TargetSideEffects> SideEffects;
-  void DisplayGraph(Graph const& graph, const std::string& name);
+  void DisplayGraph(Graph const& graph, std::string const& name);
   void DisplaySideEffects();
 
   // Deal with connected components.
   void DisplayComponents(cmComputeComponentGraph const& ccg,
-                         const std::string& name);
+                         std::string const& name);
   bool CheckComponents(cmComputeComponentGraph const& ccg);
   void ComplainAboutBadComponent(cmComputeComponentGraph const& ccg, size_t c,
                                  bool strong = false);

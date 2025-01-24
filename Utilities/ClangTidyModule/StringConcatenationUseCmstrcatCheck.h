@@ -14,7 +14,7 @@ public:
   StringConcatenationUseCmstrcatCheck(StringRef Name,
                                       ClangTidyContext* Context);
   void registerMatchers(ast_matchers::MatchFinder* Finder) override;
-  void check(const ast_matchers::MatchFinder::MatchResult& Result) override;
+  void check(ast_matchers::MatchFinder::MatchResult const& Result) override;
 
 private:
   enum class OperatorType
@@ -22,12 +22,12 @@ private:
     Plus,
     PlusEquals
   };
-  typedef std::pair<OperatorType, std::vector<const CXXOperatorCallExpr*>>
+  typedef std::pair<OperatorType, std::vector<CXXOperatorCallExpr const*>>
     ExprChain;
-  std::map<const CXXOperatorCallExpr*, ExprChain> InProgressExprChains;
+  std::map<CXXOperatorCallExpr const*, ExprChain> InProgressExprChains;
 
-  void issueCorrection(const ExprChain& ExprChain,
-                       const ast_matchers::MatchFinder::MatchResult& Result);
+  void issueCorrection(ExprChain const& ExprChain,
+                       ast_matchers::MatchFinder::MatchResult const& Result);
 };
 }
 }

@@ -1,6 +1,6 @@
 
 struct A
 {
-  A(const A&) = delete;
-  A& operator=(const A&) = delete;
+  A(A const&) = delete;
+  A& operator=(A const&) = delete;
 };

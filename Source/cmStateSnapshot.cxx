@@ -46,7 +46,7 @@ cmStateEnums::SnapshotType cmStateSnapshot::GetType() const
   return this->Position->SnapshotType;
 }
 
-void cmStateSnapshot::SetListFile(const std::string& listfile)
+void cmStateSnapshot::SetListFile(std::string const& listfile)
 {
   *this->Position->ExecutionListFile = listfile;
 }
@@ -229,7 +229,7 @@ std::vector<std::string> cmStateSnapshot::ClosureKeys() const
                                     this->Position->Root);
 }
 
-bool cmStateSnapshot::RaiseScope(std::string const& var, const char* varDef)
+bool cmStateSnapshot::RaiseScope(std::string const& var, char const* varDef)
 {
   if (this->Position->ScopeParent == this->Position->DirectoryParent) {
     cmStateSnapshot parentDir = this->GetBuildsystemDirectoryParent();
@@ -403,7 +403,7 @@ cmStateDirectory cmStateSnapshot::GetDirectory() const
   return { this->Position->BuildSystemDirectory, *this };
 }
 
-void cmStateSnapshot::SetProjectName(const std::string& name)
+void cmStateSnapshot::SetProjectName(std::string const& name)
 {
   this->Position->BuildSystemDirectory->ProjectName = name;
 }
@@ -426,17 +426,17 @@ void cmStateSnapshot::InitializeFromParent_ForSubdirsCommand()
 }
 
 bool cmStateSnapshot::StrictWeakOrder::operator()(
-  const cmStateSnapshot& lhs, const cmStateSnapshot& rhs) const
+  cmStateSnapshot const& lhs, cmStateSnapshot const& rhs) const
 {
   return lhs.Position.StrictWeakOrdered(rhs.Position);
 }
 
-bool operator==(const cmStateSnapshot& lhs, const cmStateSnapshot& rhs)
+bool operator==(cmStateSnapshot const& lhs, cmStateSnapshot const& rhs)
 {
   return lhs.Position == rhs.Position;
 }
 
-bool operator!=(const cmStateSnapshot& lhs, const cmStateSnapshot& rhs)
+bool operator!=(cmStateSnapshot const& lhs, cmStateSnapshot const& rhs)
 {
   return lhs.Position != rhs.Position;
 }

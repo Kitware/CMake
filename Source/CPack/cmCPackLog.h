@@ -26,8 +26,8 @@ public:
   cmCPackLog();
   ~cmCPackLog();
 
-  cmCPackLog(const cmCPackLog&) = delete;
-  cmCPackLog& operator=(const cmCPackLog&) = delete;
+  cmCPackLog(cmCPackLog const&) = delete;
+  cmCPackLog& operator=(cmCPackLog const&) = delete;
 
   enum cm_log_tags
   {
@@ -40,19 +40,19 @@ public:
   };
 
   //! Various signatures for logging.
-  void Log(const char* file, int line, const char* msg)
+  void Log(char const* file, int line, char const* msg)
   {
     this->Log(LOG_OUTPUT, file, line, msg);
   }
-  void Log(const char* file, int line, const char* msg, size_t length)
+  void Log(char const* file, int line, char const* msg, size_t length)
   {
     this->Log(LOG_OUTPUT, file, line, msg, length);
   }
-  void Log(int tag, const char* file, int line, const char* msg)
+  void Log(int tag, char const* file, int line, char const* msg)
   {
     this->Log(tag, file, line, msg, strlen(msg));
   }
-  void Log(int tag, const char* file, int line, const char* msg,
+  void Log(int tag, char const* file, int line, char const* msg,
            size_t length);
 
   //! Set Verbose
@@ -84,7 +84,7 @@ public:
 
   //! Set the log output file. The cmCPackLog will try to create file. If it
   // cannot, it will report an error.
-  bool SetLogOutputFile(const char* fname);
+  bool SetLogOutputFile(char const* fname);
 
   //! Set the various prefixes for the logging. SetPrefix sets the generic
   // prefix that overwrites missing ones.
@@ -121,17 +121,17 @@ private:
 class cmCPackLogWrite
 {
 public:
-  cmCPackLogWrite(const char* data, size_t length)
+  cmCPackLogWrite(char const* data, size_t length)
     : Data(data)
     , Length(length)
   {
   }
 
-  const char* Data;
+  char const* Data;
   std::streamsize Length;
 };
 
-inline std::ostream& operator<<(std::ostream& os, const cmCPackLogWrite& c)
+inline std::ostream& operator<<(std::ostream& os, cmCPackLogWrite const& c)
 {
   os.write(c.Data, c.Length);
   os.flush();

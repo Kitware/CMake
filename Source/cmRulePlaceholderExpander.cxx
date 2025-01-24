@@ -360,7 +360,7 @@ std::string cmRulePlaceholderExpander::ExpandVariable(
 
 void cmRulePlaceholderExpander::ExpandRuleVariables(
   cmOutputConverter* outputConverter, std::string& s,
-  const RuleVariables& replaceValues)
+  RuleVariables const& replaceValues)
 {
   this->OutputConverter = outputConverter;
   this->ReplaceValues = &replaceValues;

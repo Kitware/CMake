@@ -34,7 +34,7 @@ private:
   std::unique_ptr<cmBinUtilsMacOSMachOGetRuntimeDependenciesTool> Tool;
   std::unordered_map<std::string, FileInfo> ScannedFileInfo;
 
-  const FileInfo* GetFileInfo(std::string const& file);
+  FileInfo const* GetFileInfo(std::string const& file);
 
   bool ScanDependencies(std::string const& file,
                         std::vector<std::string> const& libs,

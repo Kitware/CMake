@@ -26,7 +26,7 @@ public:
   class InstallScript
   {
   public:
-    InstallScript(const std::vector<std::string>&);
+    InstallScript(std::vector<std::string> const&);
     void start(cm::uv_loop_ptr&, std::function<void()>);
     void printResult(std::size_t n, std::size_t total);
 

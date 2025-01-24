@@ -35,8 +35,8 @@ public:
     , ResolveMode(resolveMode)
   {
   }
-  explicit cmBuildOptions(const cmBuildOptions&) noexcept = default;
-  cmBuildOptions& operator=(const cmBuildOptions&) noexcept = default;
+  explicit cmBuildOptions(cmBuildOptions const&) noexcept = default;
+  cmBuildOptions& operator=(cmBuildOptions const&) noexcept = default;
 
   bool Clean = false;
   bool Fast = false;

@@ -33,7 +33,7 @@ auto const PlistMetadataHelper =
           cmJSONHelperBuilder::String());
 
 bool PlistSupportedPlatformHelper(
-  cmXcFrameworkPlistSupportedPlatform& platform, const Json::Value* value,
+  cmXcFrameworkPlistSupportedPlatform& platform, Json::Value const* value,
   cmJSONState* /*state*/)
 {
   if (!value) {
@@ -70,7 +70,7 @@ bool PlistSupportedPlatformHelper(
 
 bool PlistSupportedPlatformVariantHelper(
   cmXcFrameworkPlistSupportedPlatformVariant& variant,
-  const Json::Value* value, cmJSONState* /*state*/)
+  Json::Value const* value, cmJSONState* /*state*/)
 {
   if (!value) {
     return false;
@@ -121,8 +121,8 @@ auto const PlistHelper =
 }
 
 cm::optional<cmXcFrameworkPlist> cmParseXcFrameworkPlist(
-  const std::string& xcframeworkPath, const cmMakefile& mf,
-  const cmListFileBacktrace& bt)
+  std::string const& xcframeworkPath, cmMakefile const& mf,
+  cmListFileBacktrace const& bt)
 {
   std::string plistPath = cmStrCat(xcframeworkPath, "/Info.plist");
 
@@ -165,8 +165,8 @@ cm::optional<cmXcFrameworkPlist> cmParseXcFrameworkPlist(
   return cm::optional<cmXcFrameworkPlist>(plist);
 }
 
-const cmXcFrameworkPlistLibrary* cmXcFrameworkPlist::SelectSuitableLibrary(
-  const cmMakefile& mf, const cmListFileBacktrace& bt) const
+cmXcFrameworkPlistLibrary const* cmXcFrameworkPlist::SelectSuitableLibrary(
+  cmMakefile const& mf, cmListFileBacktrace const& bt) const
 {
   auto systemName = mf.GetSafeDefinition("CMAKE_SYSTEM_NAME");
   cm::optional<cmXcFrameworkPlistSupportedPlatformVariant> systemVariant;

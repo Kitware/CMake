@@ -169,7 +169,7 @@ public:
 
   void Connect();
   void ConnectFDs(int rfd, int wfd);
-  void ConnectFIFO(const char* path);
+  void ConnectFIFO(char const* path);
   void Disconnect(int status);
 
   cm::uv_pipe_ptr OpenFD(int fd);
@@ -180,10 +180,10 @@ public:
   static void OnAllocateCB(uv_handle_t* handle, size_t suggested_size,
                            uv_buf_t* buf);
   static void OnReadCB(uv_stream_t* stream, ssize_t nread,
-                       const uv_buf_t* buf);
+                       uv_buf_t const* buf);
 
   void OnAllocate(size_t suggested_size, uv_buf_t* buf);
-  void OnRead(ssize_t nread, const uv_buf_t* buf);
+  void OnRead(ssize_t nread, uv_buf_t const* buf);
 
   char ReadBuf = '.';
 
@@ -220,7 +220,7 @@ void ImplPosix::Connect()
   // --jobserver-auth= for gnu make versions >= 4.2
   // --jobserver-fds= for gnu make versions < 4.2
   // -J for bsd make
-  static const std::vector<cm::string_view> prefixes = {
+  static std::vector<cm::string_view> const prefixes = {
     "--jobserver-auth=", "--jobserver-fds=", "-J"
   };
 
@@ -300,7 +300,7 @@ void ImplPosix::ConnectFDs(int rfd, int wfd)
   this->Conn = Connection::FDs;
 }
 
-void ImplPosix::ConnectFIFO(const char* path)
+void ImplPosix::ConnectFIFO(char const* path)
 {
   int fd = open(path, O_RDWR);
   if (fd < 0) {
@@ -385,7 +385,7 @@ void ImplPosix::OnAllocateCB(uv_handle_t* handle, size_t suggested_size,
 }
 
 void ImplPosix::OnReadCB(uv_stream_t* stream, ssize_t nread,
-                         const uv_buf_t* buf)
+                         uv_buf_t const* buf)
 {
   auto* self = static_cast<ImplPosix*>(stream->data);
   self->OnRead(nread, buf);
@@ -396,7 +396,7 @@ void ImplPosix::OnAllocate(size_t /*suggested_size*/, uv_buf_t* buf)
   *buf = uv_buf_init(&this->ReadBuf, 1);
 }
 
-void ImplPosix::OnRead(ssize_t nread, const uv_buf_t* /*buf*/)
+void ImplPosix::OnRead(ssize_t nread, uv_buf_t const* /*buf*/)
 {
   if (nread == 0) {
     return;

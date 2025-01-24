@@ -14,7 +14,7 @@
 #include "cmake.h"
 
 GeneratorExpressionContent::GeneratorExpressionContent(
-  const char* startContent, size_t length)
+  char const* startContent, size_t length)
   : StartContent(startContent)
   , ContentLength(length)
 {
@@ -28,16 +28,16 @@ std::string GeneratorExpressionContent::GetOriginalExpression() const
 }
 
 std::string GeneratorExpressionContent::ProcessArbitraryContent(
-  const cmGeneratorExpressionNode* node, const std::string& identifier,
+  cmGeneratorExpressionNode const* node, std::string const& identifier,
   cmGeneratorExpressionContext* context,
   cmGeneratorExpressionDAGChecker* dagChecker,
   std::vector<cmGeneratorExpressionEvaluatorVector>::const_iterator pit) const
 {
   std::string result;
 
-  const auto pend = this->ParamChildren.end();
+  auto const pend = this->ParamChildren.end();
   for (; pit != pend; ++pit) {
-    for (const auto& pExprEval : *pit) {
+    for (auto const& pExprEval : *pit) {
       if (node->RequiresLiteralInput()) {
         if (pExprEval->GetType() != cmGeneratorExpressionEvaluator::Text) {
           reportError(context, this->GetOriginalExpression(),
@@ -75,7 +75,7 @@ std::string GeneratorExpressionContent::Evaluate(
 
   std::string identifier;
   {
-    for (const auto& pExprEval : this->IdentifierChildren) {
+    for (auto const& pExprEval : this->IdentifierChildren) {
       identifier += pExprEval->Evaluate(context, dagChecker);
       if (context->HadError) {
         return std::string();
@@ -83,7 +83,7 @@ std::string GeneratorExpressionContent::Evaluate(
     }
   }
 
-  const cmGeneratorExpressionNode* node =
+  cmGeneratorExpressionNode const* node =
     cmGeneratorExpressionNode::GetNode(identifier);
 
   if (!node) {
@@ -134,16 +134,16 @@ std::string GeneratorExpressionContent::Evaluate(
 }
 
 std::string GeneratorExpressionContent::EvaluateParameters(
-  const cmGeneratorExpressionNode* node, const std::string& identifier,
+  cmGeneratorExpressionNode const* node, std::string const& identifier,
   cmGeneratorExpressionContext* context,
   cmGeneratorExpressionDAGChecker* dagChecker,
   std::vector<std::string>& parameters) const
 {
-  const int numExpected = node->NumExpectedParameters();
+  int const numExpected = node->NumExpectedParameters();
   {
     auto pit = this->ParamChildren.begin();
-    const auto pend = this->ParamChildren.end();
-    const bool acceptsArbitraryContent =
+    auto const pend = this->ParamChildren.end();
+    bool const acceptsArbitraryContent =
       node->AcceptsArbitraryContentParameter();
     int counter = 1;
     for (; pit != pend; ++pit, ++counter) {
@@ -154,7 +154,7 @@ std::string GeneratorExpressionContent::EvaluateParameters(
       }
       std::string parameter;
       if (node->ShouldEvaluateNextParameter(parameters, parameter)) {
-        for (const auto& pExprEval : *pit) {
+        for (auto const& pExprEval : *pit) {
           parameter += pExprEval->Evaluate(context, dagChecker);
           if (context->HadError) {
             return std::string();

@@ -19,7 +19,7 @@ class cmDocumentationSection
 {
 public:
   /** Create a cmSection, with a special name for man-output mode. */
-  explicit cmDocumentationSection(const char* name)
+  explicit cmDocumentationSection(char const* name)
     : Name(name)
   {
   }
@@ -34,19 +34,19 @@ public:
   std::string GetName() const { return this->Name; }
 
   /** Return a pointer to the first entry of this section. */
-  const std::vector<cmDocumentationEntry>& GetEntries() const
+  std::vector<cmDocumentationEntry> const& GetEntries() const
   {
     return this->Entries;
   }
 
   /** Append an entry to this section. */
-  void Append(const cmDocumentationEntry& entry)
+  void Append(cmDocumentationEntry const& entry)
   {
     this->Entries.push_back(entry);
   }
 
   template <typename Iterable>
-  void Append(const Iterable& entries)
+  void Append(Iterable const& entries)
   {
     this->Entries.insert(std::end(this->Entries), std::begin(entries),
                          std::end(entries));
@@ -54,7 +54,7 @@ public:
 
   /** prepend some documentation to this section */
   template <typename Iterable>
-  void Prepend(const Iterable& entries)
+  void Prepend(Iterable const& entries)
   {
     this->Entries.insert(std::begin(this->Entries), std::begin(entries),
                          std::end(entries));

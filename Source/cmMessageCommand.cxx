@@ -31,7 +31,7 @@ std::string IndentText(std::string text, cmMakefile& mf)
   auto indent =
     cmList{ mf.GetSafeDefinition("CMAKE_MESSAGE_INDENT") }.join("");
 
-  const auto showContext = mf.GetCMakeInstance()->GetShowLogContext() ||
+  auto const showContext = mf.GetCMakeInstance()->GetShowLogContext() ||
     mf.IsOn("CMAKE_MESSAGE_CONTEXT_SHOW");
   if (showContext) {
     auto context =
@@ -69,7 +69,7 @@ void WriteMessageEvent(cmConfigureLog& log, cmMakefile const& mf,
                        std::string const& message)
 {
   // Keep in sync with cmFileAPIConfigureLog's DumpEventKindNames.
-  static const std::vector<unsigned long> LogVersionsWithMessageV1{ 1 };
+  static std::vector<unsigned long> const LogVersionsWithMessageV1{ 1 };
 
   if (log.IsAnyLogVersionEnabled(LogVersionsWithMessageV1)) {
     log.BeginEvent("message-v1", mf);

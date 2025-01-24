@@ -57,7 +57,7 @@ public:
 
   /** Get a testing part id from its string name.  Returns PartCount
       if the string does not name a valid part.  */
-  Part GetPartFromName(const std::string& name);
+  Part GetPartFromName(std::string const& name);
 
   /** Process Command line arguments */
   int Run(std::vector<std::string> const& args);
@@ -105,13 +105,13 @@ public:
   /**
    * Check if CTest file exists
    */
-  bool CTestFileExists(const std::string& filename);
-  bool AddIfExists(Part part, const std::string& file);
+  bool CTestFileExists(std::string const& filename);
+  bool AddIfExists(Part part, std::string const& file);
 
   /**
    * Set the cmake test
    */
-  bool SetTest(const std::string&, bool report = true);
+  bool SetTest(std::string const&, bool report = true);
 
   /**
    * Set the cmake test mode (experimental, nightly, continuous).
@@ -121,11 +121,11 @@ public:
 
   std::string GetTestModelString() const;
   std::string GetTestGroupString() const;
-  static int GetTestModelFromString(const std::string& str);
-  static std::string CleanString(const std::string& str,
+  static int GetTestModelFromString(std::string const& str);
+  static std::string CleanString(std::string const& str,
                                  std::string::size_type spos = 0);
-  std::string GetCTestConfiguration(const std::string& name);
-  void SetCTestConfiguration(const char* name, const std::string& value,
+  std::string GetCTestConfiguration(std::string const& name);
+  void SetCTestConfiguration(char const* name, std::string const& value,
                              bool suppress = false);
   void EmptyCTestConfiguration();
 
@@ -137,15 +137,15 @@ public:
   cmCTest();
   ~cmCTest();
 
-  cmCTest(const cmCTest&) = delete;
-  cmCTest& operator=(const cmCTest&) = delete;
+  cmCTest(cmCTest const&) = delete;
+  cmCTest& operator=(cmCTest const&) = delete;
 
   /** Set the notes files to be created. */
-  void SetNotesFiles(const std::string& notes);
+  void SetNotesFiles(std::string const& notes);
 
-  void PopulateCustomVector(cmMakefile* mf, const std::string& definition,
+  void PopulateCustomVector(cmMakefile* mf, std::string const& definition,
                             std::vector<std::string>& vec);
-  void PopulateCustomInteger(cmMakefile* mf, const std::string& def, int& val);
+  void PopulateCustomInteger(cmMakefile* mf, std::string const& def, int& val);
 
   /** Get the current time as string */
   std::string CurrentTime();
@@ -170,7 +170,7 @@ public:
   /**
    * Open file in the output directory and set the stream
    */
-  bool OpenOutputFile(const std::string& path, const std::string& name,
+  bool OpenOutputFile(std::string const& path, std::string const& name,
                       cmGeneratedFileStream& stream, bool compress = false);
 
   /** Should we only show what we would do? */
@@ -218,7 +218,7 @@ public:
    */
   bool RunCommand(std::vector<std::string> const& args, std::string* stdOut,
                   std::string* stdErr, int* retVal = nullptr,
-                  const char* dir = nullptr,
+                  char const* dir = nullptr,
                   cmDuration timeout = cmDuration::zero(),
                   Encoding encoding = cmProcessOutput::Auto);
 
@@ -226,7 +226,7 @@ public:
    * Clean/make safe for xml the given value such that it may be used as
    * one of the key fields by CDash when computing the buildid.
    */
-  static std::string SafeBuildIdField(const std::string& value);
+  static std::string SafeBuildIdField(std::string const& value);
 
   /** Start CTest XML output file */
   void StartXML(cmXMLWriter& xml, cmake* cm, bool append);
@@ -238,8 +238,8 @@ public:
    * Run command specialized for make and configure. Returns process status
    * and retVal is return value or exception.
    */
-  bool RunMakeCommand(const std::string& command, std::string& output,
-                      int* retVal, const char* dir, cmDuration timeout,
+  bool RunMakeCommand(std::string const& command, std::string& output,
+                      int* retVal, char const* dir, cmDuration timeout,
                       std::ostream& ofs,
                       Encoding encoding = cmProcessOutput::Auto);
 
@@ -255,7 +255,7 @@ public:
    * This means if the file is in binary or
    * source directory, it will become /.../relative/path/to/file
    */
-  std::string GetShortPathToFile(const std::string& fname);
+  std::string GetShortPathToFile(std::string const& fname);
 
   enum
   {
@@ -285,8 +285,8 @@ public:
    * Set the CTest variable from CMake variable
    */
   bool SetCTestConfigurationFromCMakeVariable(cmMakefile* mf,
-                                              const char* dconfig,
-                                              const std::string& cmake_var,
+                                              char const* dconfig,
+                                              std::string const& cmake_var,
                                               bool suppress = false);
 
   /**
@@ -295,7 +295,7 @@ public:
   void SetCMakeVariables(cmMakefile& mf);
 
   /** Decode a URL to the original string.  */
-  static std::string DecodeURL(const std::string&);
+  static std::string DecodeURL(std::string const&);
 
   /**
    * Should ctect configuration be updated. When using new style ctest
@@ -308,7 +308,7 @@ public:
    *
    * The format is key=value
    */
-  void AddCTestConfigurationOverwrite(const std::string& encstr);
+  void AddCTestConfigurationOverwrite(std::string const& encstr);
 
   /** Create XML file that contains all the notes specified */
   int GenerateNotesFile(cmake* cm, std::vector<std::string> const& files);
@@ -317,17 +317,17 @@ public:
   int GenerateDoneFile();
 
   /** Submit extra files to the server */
-  bool SubmitExtraFiles(const std::string& files);
+  bool SubmitExtraFiles(std::string const& files);
   bool SubmitExtraFiles(std::vector<std::string> const& files);
 
   /** Set the output log file name */
-  void SetOutputLogFileName(const std::string& name);
+  void SetOutputLogFileName(std::string const& name);
 
   /** Set the output JUnit file name */
-  void SetOutputJUnitFileName(const std::string& name);
+  void SetOutputJUnitFileName(std::string const& name);
 
   /** Set the visual studio or Xcode config type */
-  void SetConfigType(const std::string& ct);
+  void SetConfigType(std::string const& ct);
 
   /** Various log types */
   enum LogType
@@ -359,24 +359,24 @@ public:
   std::string GetColorCode(Color color) const;
 
   /** The Build ID is assigned by CDash */
-  void SetBuildID(const std::string& id);
+  void SetBuildID(std::string const& id);
   std::string GetBuildID() const;
 
   /** Add file to be submitted */
-  void AddSubmitFile(Part part, const std::string& name);
+  void AddSubmitFile(Part part, std::string const& name);
   std::vector<std::string> const& GetSubmitFiles(Part part) const;
   void ClearSubmitFiles(Part part);
 
   /**
    * Read the custom configuration files and apply them to the current ctest
    */
-  void ReadCustomConfigurationFileTree(const std::string& dir, cmMakefile* mf);
+  void ReadCustomConfigurationFileTree(std::string const& dir, cmMakefile* mf);
 
   std::vector<std::string>& GetInitialCommandLineArguments();
 
   /** Set the group to submit to */
-  void SetSpecificGroup(const char* group);
-  const char* GetSpecificGroup();
+  void SetSpecificGroup(char const* group);
+  char const* GetSpecificGroup();
 
   void SetFailover(bool failover);
   bool GetFailover() const;
@@ -398,7 +398,7 @@ public:
 
   bool GetOutputTestOutputOnTestFailure() const;
 
-  const std::map<std::string, std::string>& GetDefinitions() const;
+  std::map<std::string, std::string> const& GetDefinitions() const;
 
   /** Return the number of times a test should be run */
   int GetRepeatCount() const;
@@ -430,7 +430,7 @@ public:
   std::vector<std::string> GetCommandLineHttpHeaders() const;
 
 private:
-  int GenerateNotesFile(cmake* cm, const std::string& files);
+  int GenerateNotesFile(cmake* cm, std::string const& files);
 
   void BlockTestErrorDiagnostics();
 
@@ -441,10 +441,10 @@ private:
   void ErrorMessageUnknownDashDValue(std::string const& val);
 
   /** add a variable definition from a command line -D value */
-  bool AddVariableDefinition(const std::string& arg);
+  bool AddVariableDefinition(std::string const& arg);
 
   /** set command line arguments read from a test preset */
-  bool SetArgsFromPreset(const std::string& presetName, bool listPresets);
+  bool SetArgsFromPreset(std::string const& presetName, bool listPresets);
 
 #if !defined(_WIN32)
   /** returns true iff the console supports progress output */
@@ -462,8 +462,8 @@ private:
                                std::vector<std::string> const& files);
 
   /** Check if the argument is the one specified */
-  static bool CheckArgument(const std::string& arg, cm::string_view varg1,
-                            const char* varg2 = nullptr);
+  static bool CheckArgument(std::string const& arg, cm::string_view varg1,
+                            char const* varg2 = nullptr);
 
   int RunCMakeAndTest();
   int RunScripts(std::vector<std::pair<std::string, bool>> const& scripts);

@@ -100,12 +100,12 @@ bool cmDefinePropertyCommand(std::vector<std::string> const& args,
     }
 
     // Make sure the variable is not reserved.
-    static constexpr const char* reservedPrefixes[] = {
+    static constexpr char const* reservedPrefixes[] = {
       "CMAKE_",
       "_CMAKE_",
     };
     if (std::any_of(std::begin(reservedPrefixes), std::end(reservedPrefixes),
-                    [&initializeFromVariable](const char* prefix) {
+                    [&initializeFromVariable](char const* prefix) {
                       return cmHasPrefix(initializeFromVariable, prefix);
                     })) {
       status.SetError(cmStrCat("variable name \"", initializeFromVariable,

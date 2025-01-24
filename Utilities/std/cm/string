@@ -24,7 +24,7 @@ using std::erase_if;
 
 template <typename T, typename Traits, typename Allocator, typename V>
 inline void erase(std::basic_string<T, Traits, Allocator>& cont,
-                  const V& value)
+                  V const& value)
 {
   cont.erase(std::remove(cont.begin(), cont.end(), value), cont.end());
 }

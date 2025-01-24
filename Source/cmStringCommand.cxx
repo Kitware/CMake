@@ -290,7 +290,7 @@ bool RegexMatchAll(std::vector<std::string> const& args,
 
   // Scan through the input for all matches.
   std::string output;
-  const char* p = input.c_str();
+  char const* p = input.c_str();
   while (re.find(p)) {
     status.GetMakefile().ClearMatches();
     status.GetMakefile().StoreMatches(re);
@@ -341,7 +341,7 @@ bool RegexReplace(std::vector<std::string> const& args,
   }
 
   // Concatenate all the last arguments together.
-  const std::string input =
+  std::string const input =
     cmJoin(cmMakeRange(args).advance(5), std::string());
   std::string output;
 
@@ -378,9 +378,9 @@ bool HandleFindCommand(std::vector<std::string> const& args,
   }
 
   // local parameter names.
-  const std::string& sstring = args[1];
-  const std::string& schar = args[2];
-  const std::string& outvar = args[3];
+  std::string const& sstring = args[1];
+  std::string const& schar = args[2];
+  std::string const& outvar = args[3];
 
   // ensure that the user cannot accidentally specify REVERSE as a variable
   if (outvar == "REVERSE") {
@@ -426,9 +426,9 @@ bool HandleCompareCommand(std::vector<std::string> const& args,
       return false;
     }
 
-    const std::string& left = args[2];
-    const std::string& right = args[3];
-    const std::string& outvar = args[4];
+    std::string const& left = args[2];
+    std::string const& right = args[3];
+    std::string const& outvar = args[4];
     bool result;
     if (mode == "LESS") {
       result = (left < right);
@@ -464,9 +464,9 @@ bool HandleReplaceCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const std::string& matchExpression = args[1];
-  const std::string& replaceExpression = args[2];
-  const std::string& variableName = args[3];
+  std::string const& matchExpression = args[1];
+  std::string const& replaceExpression = args[2];
+  std::string const& variableName = args[3];
 
   std::string input = cmJoin(cmMakeRange(args).advance(4), std::string());
 
@@ -485,10 +485,10 @@ bool HandleSubstringCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const std::string& stringValue = args[1];
+  std::string const& stringValue = args[1];
   int begin = atoi(args[2].c_str());
   int end = atoi(args[3].c_str());
-  const std::string& variableName = args[4];
+  std::string const& variableName = args[4];
 
   size_t stringLength = stringValue.size();
   int intStringLength = static_cast<int>(stringLength);
@@ -515,8 +515,8 @@ bool HandleLengthCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const std::string& stringValue = args[1];
-  const std::string& variableName = args[2];
+  std::string const& stringValue = args[1];
+  std::string const& variableName = args[2];
 
   size_t length = stringValue.size();
   char buffer[1024];
@@ -563,7 +563,7 @@ bool HandlePrependCommand(std::vector<std::string> const& args,
     return true;
   }
 
-  const std::string& variable = args[1];
+  std::string const& variable = args[1];
 
   std::string value = cmJoin(cmMakeRange(args).advance(2), std::string());
   cmValue oldValue = status.GetMakefile().GetDefinition(variable);
@@ -597,7 +597,7 @@ bool HandleJoinCommand(std::vector<std::string> const& args,
 }
 
 bool joinImpl(std::vector<std::string> const& args, std::string const& glue,
-              const size_t varIdx, cmMakefile& makefile)
+              size_t const varIdx, cmMakefile& makefile)
 {
   std::string const& variableName = args[varIdx];
   // NOTE Items to concat/join placed right after the variable for
@@ -616,8 +616,8 @@ bool HandleMakeCIdentifierCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const std::string& input = args[1];
-  const std::string& variableName = args[2];
+  std::string const& input = args[1];
+  std::string const& variableName = args[2];
 
   status.GetMakefile().AddDefinition(variableName,
                                      cmSystemTools::MakeCidentifier(input));
@@ -632,12 +632,12 @@ bool HandleGenexStripCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const std::string& input = args[1];
+  std::string const& input = args[1];
 
   std::string result = cmGeneratorExpression::Preprocess(
     input, cmGeneratorExpression::StripAllGeneratorExpressions);
 
-  const std::string& variableName = args[2];
+  std::string const& variableName = args[2];
 
   status.GetMakefile().AddDefinition(variableName, result);
   return true;
@@ -651,12 +651,12 @@ bool HandleStripCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const std::string& stringValue = args[1];
-  const std::string& variableName = args[2];
+  std::string const& stringValue = args[1];
+  std::string const& variableName = args[2];
   size_t inStringLength = stringValue.size();
   size_t startPos = inStringLength + 1;
   size_t endPos = 0;
-  const char* ptr = stringValue.c_str();
+  char const* ptr = stringValue.c_str();
   size_t cc;
   for (cc = 0; cc < inStringLength; ++cc) {
     if (!cmIsSpace(*ptr)) {
@@ -712,9 +712,9 @@ bool HandleRepeatCommand(std::vector<std::string> const& args,
     return true;
   }
 
-  const auto& stringValue = args[ArgPos::VALUE];
-  const auto& variableName = args[ArgPos::OUTPUT_VARIABLE];
-  const auto inStringLength = stringValue.size();
+  auto const& stringValue = args[ArgPos::VALUE];
+  auto const& variableName = args[ArgPos::OUTPUT_VARIABLE];
+  auto const inStringLength = stringValue.size();
 
   std::string result;
   switch (inStringLength) {
@@ -751,7 +751,7 @@ bool HandleRandomCommand(std::vector<std::string> const& args,
   bool force_seed = false;
   unsigned int seed = 0;
   int length = 5;
-  const char cmStringCommandDefaultAlphabet[] = "qwertyuiopasdfghjklzxcvbnm"
+  char const cmStringCommandDefaultAlphabet[] = "qwertyuiopasdfghjklzxcvbnm"
                                                 "QWERTYUIOPASDFGHJKLZXCVBNM"
                                                 "0123456789";
   std::string alphabet;
@@ -787,7 +787,7 @@ bool HandleRandomCommand(std::vector<std::string> const& args,
     status.SetError("sub-command RANDOM invoked with bad length.");
     return false;
   }
-  const std::string& variableName = args.back();
+  std::string const& variableName = args.back();
 
   std::vector<char> result;
 
@@ -796,7 +796,7 @@ bool HandleRandomCommand(std::vector<std::string> const& args,
     srand(force_seed ? seed : cmSystemTools::RandomSeed());
   }
 
-  const char* alphaPtr = alphabet.c_str();
+  char const* alphaPtr = alphabet.c_str();
   for (int cc = 0; cc < length; cc++) {
     int idx = static_cast<int>(sizeofAlphabet * rand() / (RAND_MAX + 1.0));
     result.push_back(*(alphaPtr + idx));
@@ -821,7 +821,7 @@ bool HandleTimestampCommand(std::vector<std::string> const& args,
 
   unsigned int argsIndex = 1;
 
-  const std::string& outputVariable = args[argsIndex++];
+  std::string const& outputVariable = args[argsIndex++];
 
   std::string formatString;
   if (args.size() > argsIndex && args[argsIndex] != "UTC") {
@@ -858,7 +858,7 @@ bool HandleUuidCommand(std::vector<std::string> const& args,
     return false;
   }
 
-  const std::string& outputVariable = args[argsIndex++];
+  std::string const& outputVariable = args[argsIndex++];
 
   std::string uuidNamespaceString;
   std::string uuidName;
@@ -941,14 +941,14 @@ struct Args : cmRange<typename std::vector<std::string>::const_iterator>
 {
   using cmRange<typename std::vector<std::string>::const_iterator>::cmRange;
 
-  auto PopFront(cm::string_view error) -> const std::string&;
-  auto PopBack(cm::string_view error) -> const std::string&;
+  auto PopFront(cm::string_view error) -> std::string const&;
+  auto PopBack(cm::string_view error) -> std::string const&;
 };
 
 class json_error : public std::runtime_error
 {
 public:
-  json_error(const std::string& message,
+  json_error(std::string const& message,
              cm::optional<Args> errorPath = cm::nullopt)
     : std::runtime_error(message)
     , ErrorPath{
@@ -959,22 +959,22 @@ public:
   cm::optional<Args> ErrorPath;
 };
 
-const std::string& Args::PopFront(cm::string_view error)
+std::string const& Args::PopFront(cm::string_view error)
 {
   if (this->empty()) {
     throw json_error(std::string(error));
   }
-  const std::string& res = *this->begin();
+  std::string const& res = *this->begin();
   this->advance(1);
   return res;
 }
 
-const std::string& Args::PopBack(cm::string_view error)
+std::string const& Args::PopBack(cm::string_view error)
 {
   if (this->empty()) {
     throw json_error(std::string(error));
   }
-  const std::string& res = *(this->end() - 1);
+  std::string const& res = *(this->end() - 1);
   this->retreat(1);
   return res;
 }
@@ -1001,7 +1001,7 @@ cm::string_view JsonTypeToString(Json::ValueType type)
 }
 
 int ParseIndex(
-  const std::string& str, cm::optional<Args> const& progress = cm::nullopt,
+  std::string const& str, cm::optional<Args> const& progress = cm::nullopt,
   Json::ArrayIndex max = std::numeric_limits<Json::ArrayIndex>::max())
 {
   unsigned long lindex;
@@ -1024,7 +1024,7 @@ Json::Value& ResolvePath(Json::Value& json, Args path)
   Json::Value* search = &json;
 
   for (auto curr = path.begin(); curr != path.end(); ++curr) {
-    const std::string& field = *curr;
+    std::string const& field = *curr;
     Args progress{ path.begin(), curr + 1 };
 
     if (search->isArray()) {
@@ -1033,13 +1033,13 @@ Json::Value& ResolvePath(Json::Value& json, Args path)
 
     } else if (search->isObject()) {
       if (!search->isMember(field)) {
-        const auto progressStr = cmJoin(progress, " "_s);
+        auto const progressStr = cmJoin(progress, " "_s);
         throw json_error(cmStrCat("member '"_s, progressStr, "' not found"_s),
                          progress);
       }
       search = &(*search)[field];
     } else {
-      const auto progressStr = cmJoin(progress, " "_s);
+      auto const progressStr = cmJoin(progress, " "_s);
       throw json_error(
         cmStrCat("invalid path '"_s, progressStr,
                  "', need element of OBJECT or ARRAY type to lookup '"_s,
@@ -1050,7 +1050,7 @@ Json::Value& ResolvePath(Json::Value& json, Args path)
   return *search;
 }
 
-Json::Value ReadJson(const std::string& jsonstr)
+Json::Value ReadJson(std::string const& jsonstr)
 {
   Json::CharReaderBuilder builder;
   builder["collectComments"] = false;
@@ -1063,7 +1063,7 @@ Json::Value ReadJson(const std::string& jsonstr)
   }
   return json;
 }
-std::string WriteJson(const Json::Value& value)
+std::string WriteJson(Json::Value const& value)
 {
   Json::StreamWriterBuilder writer;
   writer["indentation"] = "  ";
@@ -1081,8 +1081,8 @@ bool HandleJSONCommand(std::vector<std::string> const& arguments,
   auto& makefile = status.GetMakefile();
   Args args{ arguments.begin() + 1, arguments.end() };
 
-  const std::string* errorVariable = nullptr;
-  const std::string* outputVariable = nullptr;
+  std::string const* errorVariable = nullptr;
+  std::string const* outputVariable = nullptr;
   bool success = true;
 
   try {
@@ -1094,7 +1094,7 @@ bool HandleJSONCommand(std::vector<std::string> const& arguments,
       makefile.AddDefinition(*errorVariable, "NOTFOUND"_s);
     }
 
-    const auto& mode = args.PopFront("missing mode argument"_s);
+    auto const& mode = args.PopFront("missing mode argument"_s);
     if (mode != "GET"_s && mode != "TYPE"_s && mode != "MEMBER"_s &&
         mode != "LENGTH"_s && mode != "REMOVE"_s && mode != "SET"_s &&
         mode != "EQUAL"_s) {
@@ -1104,11 +1104,11 @@ bool HandleJSONCommand(std::vector<std::string> const& arguments,
                  " EQUAL"_s));
     }
 
-    const auto& jsonstr = args.PopFront("missing json string argument"_s);
+    auto const& jsonstr = args.PopFront("missing json string argument"_s);
     Json::Value json = ReadJson(jsonstr);
 
     if (mode == "GET"_s) {
-      const auto& value = ResolvePath(json, args);
+      auto const& value = ResolvePath(json, args);
       if (value.isObject() || value.isArray()) {
         makefile.AddDefinition(*outputVariable, WriteJson(value));
       } else if (value.isBool()) {
@@ -1118,12 +1118,12 @@ bool HandleJSONCommand(std::vector<std::string> const& arguments,
       }
 
     } else if (mode == "TYPE"_s) {
-      const auto& value = ResolvePath(json, args);
+      auto const& value = ResolvePath(json, args);
       makefile.AddDefinition(*outputVariable, JsonTypeToString(value.type()));
 
     } else if (mode == "MEMBER"_s) {
-      const auto& indexStr = args.PopBack("missing member index"_s);
-      const auto& value = ResolvePath(json, args);
+      auto const& indexStr = args.PopBack("missing member index"_s);
+      auto const& value = ResolvePath(json, args);
       if (!value.isObject()) {
         throw json_error(
           cmStrCat("MEMBER needs to be called with an element of "
@@ -1131,13 +1131,13 @@ bool HandleJSONCommand(std::vector<std::string> const& arguments,
                    JsonTypeToString(value.type())),
           args);
       }
-      const auto index = ParseIndex(
+      auto const index = ParseIndex(
         indexStr, Args{ args.begin(), args.end() + 1 }, value.size());
-      const auto memIt = std::next(value.begin(), index);
+      auto const memIt = std::next(value.begin(), index);
       makefile.AddDefinition(*outputVariable, memIt.name());
 
     } else if (mode == "LENGTH"_s) {
-      const auto& value = ResolvePath(json, args);
+      auto const& value = ResolvePath(json, args);
       if (!value.isArray() && !value.isObject()) {
         throw json_error(cmStrCat("LENGTH needs to be called with an "
                                   "element of type ARRAY or OBJECT, got "_s,
@@ -1149,12 +1149,12 @@ bool HandleJSONCommand(std::vector<std::string> const& arguments,
       makefile.AddDefinition(*outputVariable, sizeStr.View());
 
     } else if (mode == "REMOVE"_s) {
-      const auto& toRemove =
+      auto const& toRemove =
         args.PopBack("missing member or index to remove"_s);
       auto& value = ResolvePath(json, args);
 
       if (value.isArray()) {
-        const auto index = ParseIndex(
+        auto const index = ParseIndex(
           toRemove, Args{ args.begin(), args.end() + 1 }, value.size());
         Json::Value removed;
         value.removeIndex(index, &removed);
@@ -1172,15 +1172,15 @@ bool HandleJSONCommand(std::vector<std::string> const& arguments,
       makefile.AddDefinition(*outputVariable, WriteJson(json));
 
     } else if (mode == "SET"_s) {
-      const auto& newValueStr = args.PopBack("missing new value remove"_s);
-      const auto& toAdd = args.PopBack("missing member name to add"_s);
+      auto const& newValueStr = args.PopBack("missing new value remove"_s);
+      auto const& toAdd = args.PopBack("missing member name to add"_s);
       auto& value = ResolvePath(json, args);
 
       Json::Value newValue = ReadJson(newValueStr);
       if (value.isObject()) {
         value[toAdd] = newValue;
       } else if (value.isArray()) {
-        const auto index =
+        auto const index =
           ParseIndex(toAdd, Args{ args.begin(), args.end() + 1 });
         if (value.isValidIndex(index)) {
           value[static_cast<int>(index)] = newValue;
@@ -1196,15 +1196,15 @@ bool HandleJSONCommand(std::vector<std::string> const& arguments,
       makefile.AddDefinition(*outputVariable, WriteJson(json));
 
     } else if (mode == "EQUAL"_s) {
-      const auto& jsonstr2 =
+      auto const& jsonstr2 =
         args.PopFront("missing second json string argument"_s);
       Json::Value json2 = ReadJson(jsonstr2);
       makefile.AddDefinitionBool(*outputVariable, json == json2);
     }
 
-  } catch (const json_error& e) {
+  } catch (json_error const& e) {
     if (outputVariable && e.ErrorPath) {
-      const auto errorPath = cmJoin(*e.ErrorPath, "-");
+      auto const errorPath = cmJoin(*e.ErrorPath, "-");
       makefile.AddDefinition(*outputVariable,
                              cmStrCat(errorPath, "-NOTFOUND"_s));
     } else if (outputVariable) {

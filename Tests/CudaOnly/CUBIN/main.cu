@@ -11,7 +11,7 @@ static std::string input_paths = { CUBIN_FILE_PATHS };
 
 int main()
 {
-  const std::string delimiter = "~_~";
+  std::string const delimiter = "~_~";
   input_paths += delimiter;
 
   size_t end = 0;

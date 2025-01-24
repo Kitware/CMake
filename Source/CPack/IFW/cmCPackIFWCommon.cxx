@@ -20,29 +20,29 @@ cmCPackIFWCommon::cmCPackIFWCommon()
 {
 }
 
-cmValue cmCPackIFWCommon::GetOption(const std::string& op) const
+cmValue cmCPackIFWCommon::GetOption(std::string const& op) const
 {
   return this->Generator ? this->Generator->cmCPackGenerator::GetOption(op)
                          : nullptr;
 }
 
-bool cmCPackIFWCommon::IsOn(const std::string& op) const
+bool cmCPackIFWCommon::IsOn(std::string const& op) const
 {
   return this->Generator && this->Generator->cmCPackGenerator::IsOn(op);
 }
 
-bool cmCPackIFWCommon::IsSetToOff(const std::string& op) const
+bool cmCPackIFWCommon::IsSetToOff(std::string const& op) const
 {
   return this->Generator && this->Generator->cmCPackGenerator::IsSetToOff(op);
 }
 
-bool cmCPackIFWCommon::IsSetToEmpty(const std::string& op) const
+bool cmCPackIFWCommon::IsSetToEmpty(std::string const& op) const
 {
   return this->Generator &&
     this->Generator->cmCPackGenerator::IsSetToEmpty(op);
 }
 
-bool cmCPackIFWCommon::IsVersionLess(const char* version) const
+bool cmCPackIFWCommon::IsVersionLess(char const* version) const
 {
   if (!this->Generator) {
     return false;
@@ -52,7 +52,7 @@ bool cmCPackIFWCommon::IsVersionLess(const char* version) const
     cmSystemTools::OP_LESS, this->Generator->FrameworkVersion, version);
 }
 
-bool cmCPackIFWCommon::IsVersionGreater(const char* version) const
+bool cmCPackIFWCommon::IsVersionGreater(char const* version) const
 {
   if (!this->Generator) {
     return false;
@@ -62,7 +62,7 @@ bool cmCPackIFWCommon::IsVersionGreater(const char* version) const
     cmSystemTools::OP_GREATER, this->Generator->FrameworkVersion, version);
 }
 
-bool cmCPackIFWCommon::IsVersionEqual(const char* version) const
+bool cmCPackIFWCommon::IsVersionEqual(char const* version) const
 {
   if (!this->Generator) {
     return false;
@@ -73,7 +73,7 @@ bool cmCPackIFWCommon::IsVersionEqual(const char* version) const
 }
 
 void cmCPackIFWCommon::ExpandListArgument(
-  const std::string& arg, std::map<std::string, std::string>& argsOut)
+  std::string const& arg, std::map<std::string, std::string>& argsOut)
 {
   cmList args{ arg };
   if (args.empty()) {
@@ -94,7 +94,7 @@ void cmCPackIFWCommon::ExpandListArgument(
 }
 
 void cmCPackIFWCommon::ExpandListArgument(
-  const std::string& arg, std::multimap<std::string, std::string>& argsOut)
+  std::string const& arg, std::multimap<std::string, std::string>& argsOut)
 {
   cmList args{ arg };
   if (args.empty()) {

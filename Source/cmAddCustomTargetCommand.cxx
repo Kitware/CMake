@@ -51,7 +51,7 @@ bool cmAddCustomTargetCommand(std::vector<std::string> const& args,
   bool uses_terminal = false;
   bool command_expand_lists = false;
   std::string comment_buffer;
-  const char* comment = nullptr;
+  char const* comment = nullptr;
   std::vector<std::string> sources;
   std::string job_pool;
   std::string job_server_aware;

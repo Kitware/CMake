@@ -24,6 +24,6 @@ private:
   void ParseGeneratorExpression(cmGeneratorExpressionEvaluatorVector&);
 
   std::vector<cmGeneratorExpressionToken>::const_iterator it;
-  const std::vector<cmGeneratorExpressionToken> Tokens;
+  std::vector<cmGeneratorExpressionToken> const Tokens;
   unsigned int NestingLevel = 0;
 };

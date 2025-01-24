@@ -1057,39 +1057,39 @@ void cmCTestMultiProcessHandler::MarkFinished()
   cmSystemTools::RemoveFile(fname);
 }
 
-static Json::Value DumpToJsonArray(const std::set<std::string>& values)
+static Json::Value DumpToJsonArray(std::set<std::string> const& values)
 {
   Json::Value jsonArray = Json::arrayValue;
-  for (const auto& it : values) {
+  for (auto const& it : values) {
     jsonArray.append(it);
   }
   return jsonArray;
 }
 
-static Json::Value DumpToJsonArray(const std::vector<std::string>& values)
+static Json::Value DumpToJsonArray(std::vector<std::string> const& values)
 {
   Json::Value jsonArray = Json::arrayValue;
-  for (const auto& it : values) {
+  for (auto const& it : values) {
     jsonArray.append(it);
   }
   return jsonArray;
 }
 
 static Json::Value DumpRegExToJsonArray(
-  const std::vector<std::pair<cmsys::RegularExpression, std::string>>& values)
+  std::vector<std::pair<cmsys::RegularExpression, std::string>> const& values)
 {
   Json::Value jsonArray = Json::arrayValue;
-  for (const auto& it : values) {
+  for (auto const& it : values) {
     jsonArray.append(it.second);
   }
   return jsonArray;
 }
 
 static Json::Value DumpMeasurementToJsonArray(
-  const std::map<std::string, std::string>& values)
+  std::map<std::string, std::string> const& values)
 {
   Json::Value jsonArray = Json::arrayValue;
-  for (const auto& it : values) {
+  for (auto const& it : values) {
     Json::Value measurement = Json::objectValue;
     measurement["measurement"] = it.first;
     measurement["value"] = it.second;
@@ -1109,8 +1109,8 @@ static Json::Value DumpTimeoutAfterMatch(
 }
 
 static Json::Value DumpResourceGroupsToJsonArray(
-  const std::vector<
-    std::vector<cmCTestTestHandler::cmCTestTestResourceRequirement>>&
+  std::vector<
+    std::vector<cmCTestTestHandler::cmCTestTestResourceRequirement>> const&
     resourceGroups)
 {
   Json::Value jsonResourceGroups = Json::arrayValue;
@@ -1371,7 +1371,7 @@ static Json::Value DumpCTestInfo(
   if (!command.empty()) {
     std::vector<std::string> commandAndArgs;
     commandAndArgs.push_back(command);
-    const std::vector<std::string>& args = testRun.GetArguments();
+    std::vector<std::string> const& args = testRun.GetArguments();
     if (!args.empty()) {
       commandAndArgs.reserve(args.size() + 1);
       cm::append(commandAndArgs, args);

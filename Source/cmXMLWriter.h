@@ -23,7 +23,7 @@ public:
   cmXMLWriter(cmXMLWriter const&) = delete;
   cmXMLWriter& operator=(cmXMLWriter const&) = delete;
 
-  void StartDocument(const char* encoding = "UTF-8");
+  void StartDocument(char const* encoding = "UTF-8");
   void EndDocument();
 
   void StartElement(std::string const& name);
@@ -32,13 +32,13 @@ public:
   void BreakAttributes();
 
   template <typename T>
-  void Attribute(const char* name, T const& value)
+  void Attribute(char const* name, T const& value)
   {
     this->PreAttribute();
     this->Output << name << "=\"" << SafeAttribute(value) << '"';
   }
 
-  void Element(const char* name);
+  void Element(char const* name);
 
   template <typename T>
   void Element(std::string const& name, T const& value)
@@ -55,15 +55,15 @@ public:
     this->Output << SafeContent(content);
   }
 
-  void Comment(const char* comment);
+  void Comment(char const* comment);
 
   void CData(std::string const& data);
 
-  void Doctype(const char* doctype);
+  void Doctype(char const* doctype);
 
-  void ProcessingInstruction(const char* target, const char* data);
+  void ProcessingInstruction(char const* target, char const* data);
 
-  void FragmentFile(const char* fname);
+  void FragmentFile(char const* fname);
 
   void SetIndentationElement(std::string const& element);
 
@@ -75,7 +75,7 @@ private:
 
   void CloseStartElement();
 
-  static cmXMLSafe SafeAttribute(const char* value) { return { value }; }
+  static cmXMLSafe SafeAttribute(char const* value) { return { value }; }
 
   static cmXMLSafe SafeAttribute(std::string const& value)
   {
@@ -88,7 +88,7 @@ private:
     return value;
   }
 
-  static cmXMLSafe SafeContent(const char* value)
+  static cmXMLSafe SafeContent(char const* value)
   {
     return cmXMLSafe(value).Quotes(false);
   }
@@ -141,8 +141,8 @@ public:
     this->xmlwr.StartDocument();
   }
   ~cmXMLDocument() { this->xmlwr.EndDocument(); }
-  cmXMLDocument(const cmXMLDocument&) = delete;
-  cmXMLDocument& operator=(const cmXMLDocument&) = delete;
+  cmXMLDocument(cmXMLDocument const&) = delete;
+  cmXMLDocument& operator=(cmXMLDocument const&) = delete;
 
 private:
   friend class cmXMLElement;
@@ -152,28 +152,28 @@ private:
 class cmXMLElement
 {
 public:
-  cmXMLElement(cmXMLWriter& xml, const char* tag)
+  cmXMLElement(cmXMLWriter& xml, char const* tag)
     : xmlwr(xml)
   {
     this->xmlwr.StartElement(tag);
   }
-  cmXMLElement(cmXMLElement& par, const char* tag)
+  cmXMLElement(cmXMLElement& par, char const* tag)
     : xmlwr(par.xmlwr)
   {
     this->xmlwr.StartElement(tag);
   }
-  cmXMLElement(cmXMLDocument& doc, const char* tag)
+  cmXMLElement(cmXMLDocument& doc, char const* tag)
     : xmlwr(doc.xmlwr)
   {
     this->xmlwr.StartElement(tag);
   }
   ~cmXMLElement() { this->xmlwr.EndElement(); }
 
-  cmXMLElement(const cmXMLElement&) = delete;
-  cmXMLElement& operator=(const cmXMLElement&) = delete;
+  cmXMLElement(cmXMLElement const&) = delete;
+  cmXMLElement& operator=(cmXMLElement const&) = delete;
 
   template <typename T>
-  cmXMLElement& Attribute(const char* name, T const& value)
+  cmXMLElement& Attribute(char const* name, T const& value)
   {
     this->xmlwr.Attribute(name, value);
     return *this;
@@ -188,7 +188,7 @@ public:
   {
     this->xmlwr.Element(name, value);
   }
-  void Comment(const char* comment) { this->xmlwr.Comment(comment); }
+  void Comment(char const* comment) { this->xmlwr.Comment(comment); }
 
 private:
   cmXMLWriter& xmlwr;

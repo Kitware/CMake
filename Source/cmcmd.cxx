@@ -85,7 +85,7 @@ int cmcmd_cmake_module_compile_db(
 namespace {
 // ATTENTION If you add new commands, change here,
 // and in `cmakemain.cxx` in the options table
-const char* const HELP_AVAILABLE_COMMANDS = R"(Available commands:
+char const* const HELP_AVAILABLE_COMMANDS = R"(Available commands:
   capabilities              - Report capabilities built into cmake in JSON format
   cat [--] <files>...       - concat the files and print them to the standard output
   chdir dir cmd [args...]   - run command in a given directory
@@ -123,7 +123,7 @@ const char* const HELP_AVAILABLE_COMMANDS = R"(Available commands:
   false                     - do nothing with an exit code of 1
 )";
 #if defined(_WIN32) && !defined(__CYGWIN__)
-const char* const HELP_AVAILABLE_WINDOWS_COMMANDS =
+char const* const HELP_AVAILABLE_WINDOWS_COMMANDS =
   R"(Available on Windows only:
   delete_regv key           - delete registry value
   env_vs8_wince sdkname     - displays a batch file which sets the environment for the provided Windows CE SDK installed in VS2005
@@ -186,7 +186,7 @@ bool cmTarFilesFrom(std::string const& file, std::vector<std::string>& files)
   return true;
 }
 
-void cmCatFile(const std::string& fileToAppend)
+void cmCatFile(std::string const& fileToAppend)
 {
 #ifdef _WIN32
   _setmode(fileno(stdin), _O_BINARY);
@@ -201,7 +201,7 @@ void cmCatFile(const std::string& fileToAppend)
   std::cout << buf;
 }
 
-bool cmRemoveDirectory(const std::string& dir, bool recursive = true)
+bool cmRemoveDirectory(std::string const& dir, bool recursive = true)
 {
   if (cmSystemTools::FileIsSymlink(dir)) {
     if (!cmSystemTools::RemoveFile(dir)) {
@@ -266,7 +266,7 @@ public:
   }
 };
 
-int CLCompileAndDependencies(const std::vector<std::string>& args)
+int CLCompileAndDependencies(std::vector<std::string> const& args)
 {
   std::string depFile;
   std::string currentBinaryDir;
@@ -323,8 +323,8 @@ int CLCompileAndDependencies(const std::vector<std::string>& args)
 }
 #endif
 
-int HandleIWYU(const std::string& runCmd, const std::string& /* sourceFile */,
-               const std::vector<std::string>& orig_cmd)
+int HandleIWYU(std::string const& runCmd, std::string const& /* sourceFile */,
+               std::vector<std::string> const& orig_cmd)
 {
   // Construct the iwyu command line by taking what was given
   // and adding all the arguments we give to the compiler.
@@ -355,8 +355,8 @@ int HandleIWYU(const std::string& runCmd, const std::string& /* sourceFile */,
   return errors_enabled ? ret : 0;
 }
 
-int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
-               const std::vector<std::string>& orig_cmd)
+int HandleTidy(std::string const& runCmd, std::string const& sourceFile,
+               std::vector<std::string> const& orig_cmd)
 {
   cmList tidy_cmd{ runCmd, cmList::EmptyElements::Yes };
   tidy_cmd.push_back(sourceFile);
@@ -403,8 +403,8 @@ int HandleTidy(const std::string& runCmd, const std::string& sourceFile,
   return ret;
 }
 
-int HandleLWYU(const std::string& runCmd, const std::string& sourceFile,
-               const std::vector<std::string>&)
+int HandleLWYU(std::string const& runCmd, std::string const& sourceFile,
+               std::vector<std::string> const&)
 {
   // Construct the ldd -r -u (link what you use lwyu) command line
   // ldd -u -r lwuy target
@@ -432,8 +432,8 @@ int HandleLWYU(const std::string& runCmd, const std::string& sourceFile,
   return 0;
 }
 
-int HandleCppLint(const std::string& runCmd, const std::string& sourceFile,
-                  const std::vector<std::string>&)
+int HandleCppLint(std::string const& runCmd, std::string const& sourceFile,
+                  std::vector<std::string> const&)
 {
   // Construct the cpplint command line.
   cmList cpplint_cmd{ runCmd, cmList::EmptyElements::Yes };
@@ -459,8 +459,8 @@ int HandleCppLint(const std::string& runCmd, const std::string& sourceFile,
   return 0;
 }
 
-int HandleCppCheck(const std::string& runCmd, const std::string& sourceFile,
-                   const std::vector<std::string>& orig_cmd)
+int HandleCppCheck(std::string const& runCmd, std::string const& sourceFile,
+                   std::vector<std::string> const& orig_cmd)
 {
   // Construct the cpplint command line.
   cmList cppcheck_cmd{ runCmd, cmList::EmptyElements::Yes };
@@ -513,17 +513,17 @@ int HandleCppCheck(const std::string& runCmd, const std::string& sourceFile,
   return ret;
 }
 
-using CoCompileHandler = int (*)(const std::string&, const std::string&,
-                                 const std::vector<std::string>&);
+using CoCompileHandler = int (*)(std::string const&, std::string const&,
+                                 std::vector<std::string> const&);
 
 struct CoCompiler
 {
-  const char* Option;
+  char const* Option;
   CoCompileHandler Handler;
   bool NoOriginalCommand;
 };
 
-const std::array<CoCompiler, 5> CoCompilers = {
+std::array<CoCompiler, 5> const CoCompilers = {
   { // Table of options and handlers.
     { "--cppcheck=", HandleCppCheck, false },
     { "--cpplint=", HandleCppLint, false },
@@ -645,7 +645,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
     // Copy file
     if (args[1] == "copy" && args.size() > 3) {
       using CommandArgument =
-        cmCommandLineArgument<bool(const std::string& value)>;
+        cmCommandLineArgument<bool(std::string const& value)>;
 
       cm::optional<std::string> targetArg;
       std::vector<CommandArgument> argParsers{
@@ -655,7 +655,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 
       std::vector<std::string> files;
       for (decltype(args.size()) i = 2; i < args.size(); i++) {
-        const std::string& arg = args[i];
+        std::string const& arg = args[i];
         bool matched = false;
         for (auto const& m : argParsers) {
           if (m.matches(arg)) {
@@ -731,7 +731,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
         args.size() > 3) {
       // If error occurs we want to continue copying next files.
       bool return_value = false;
-      const bool copy_always = (args[1] == "copy_directory");
+      bool const copy_always = (args[1] == "copy_directory");
       for (auto const& arg : cmMakeRange(args).advance(2).retreat(1)) {
         if (!cmSystemTools::CopyADirectory(arg, args.back(), copy_always)) {
           std::cerr << "Error copying directory from \"" << arg << "\" to \""
@@ -1297,7 +1297,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 
     // Internal CMake dependency scanning support.
     if (args[1] == "cmake_depends" && args.size() >= 6) {
-      const bool verbose = isCMakeVerbose();
+      bool const verbose = isCMakeVerbose();
 
       // Create a cmake object instance to process dependencies.
       // All we need is the `set` command.
@@ -1449,7 +1449,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string> const& args,
 
     // Tar files
     if (args[1] == "tar" && args.size() > 3) {
-      const char* knownFormats[] = { "7zip", "gnutar", "pax", "paxr", "zip" };
+      char const* knownFormats[] = { "7zip", "gnutar", "pax", "paxr", "zip" };
 
       std::string const& flags = args[2];
       std::string const& outFile = args[3];
@@ -1787,8 +1787,8 @@ static void cmcmdProgressReport(std::string const& dir, std::string const& num)
   }
   fclose(progFile);
 
-  const char* last = num.c_str();
-  for (const char* c = last;; ++c) {
+  char const* last = num.c_str();
+  for (char const* c = last;; ++c) {
     if (*c == ',' || *c == '\0') {
       if (c != last) {
         fName = cmStrCat(dirName, '/');
@@ -1951,7 +1951,7 @@ int cmcmd::ExecuteLinkScript(std::vector<std::string> const& args)
   return result;
 }
 
-int cmcmd::WindowsCEEnvironment(const char* version, const std::string& name)
+int cmcmd::WindowsCEEnvironment(char const* version, std::string const& name)
 {
 #if !defined(CMAKE_BOOTSTRAP) && defined(_WIN32) && !defined(__CYGWIN__)
   cmVisualStudioWCEPlatformParser parser(name.c_str());
@@ -1974,8 +1974,8 @@ int cmcmd::WindowsCEEnvironment(const char* version, const std::string& name)
   return -1;
 }
 
-int cmcmd::RunPreprocessor(const std::vector<std::string>& command,
-                           const std::string& intermediate_file)
+int cmcmd::RunPreprocessor(std::vector<std::string> const& command,
+                           std::string const& intermediate_file)
 {
   cmUVProcessChainBuilder builder;
 
@@ -2023,16 +2023,16 @@ int cmcmd::RunLLVMRC(std::vector<std::string> const& args)
     return 1;
   }
 
-  const std::string& intermediate_file = args[3];
-  const std::string& source_file = args[2];
+  std::string const& intermediate_file = args[3];
+  std::string const& source_file = args[2];
   std::vector<std::string> preprocess;
   std::vector<std::string> resource_compile;
   std::vector<std::string>* pArgTgt = &preprocess;
 
-  static const cmsys::RegularExpression llvm_rc_only_single_arg("^[-/](N|Y)");
-  static const cmsys::RegularExpression llvm_rc_only_double_arg(
+  static cmsys::RegularExpression const llvm_rc_only_single_arg("^[-/](N|Y)");
+  static cmsys::RegularExpression const llvm_rc_only_double_arg(
     "^[-/](C|LN|L)(.)?");
-  static const cmsys::RegularExpression common_double_arg(
+  static cmsys::RegularExpression const common_double_arg(
     "^[-/](D|U|I|FO|fo|Fo)(.)?"); // noqa: spellcheck disable-line
   bool acceptNextArg = false;
   bool skipNextArg = false;
@@ -2180,7 +2180,7 @@ int cmcmd::VisualStudioLink(std::vector<std::string> const& args, int type)
   if (args.size() < 2) {
     return -1;
   }
-  const bool verbose = cmSystemTools::HasEnv("VERBOSE");
+  bool const verbose = cmSystemTools::HasEnv("VERBOSE");
   std::vector<std::string> expandedArgs;
   for (std::string const& i : args) {
     // check for nmake temporary files
@@ -2230,7 +2230,7 @@ static std::ostream& operator<<(std::ostream& stream,
   return stream;
 }
 
-static bool RunCommand(const char* comment,
+static bool RunCommand(char const* comment,
                        std::vector<std::string> const& command, bool verbose,
                        NumberFormat exitFormat, int* retCodeOut = nullptr,
                        bool (*retCodeOkay)(int) = nullptr)
