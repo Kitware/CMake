@@ -2261,23 +2261,19 @@ void cmMakefileTargetGenerator::CreateObjectLists(
     char const* sep = "";
     for (unsigned int i = 0; i < object_strings.size(); ++i) {
       // Number the response files.
-      std::string responseFileName =
-        (responseMode == Link) ? "objects" : "deviceObjects";
-      responseFileName += std::to_string(i + 1);
-      responseFileName += ".rsp";
+      std::string responseFileName = cmStrCat(
+        (responseMode == Link) ? "objects" : "deviceObjects", i + 1, ".rsp");
 
       // Create this response file.
       std::string objects_rsp = this->CreateResponseFile(
         responseFileName, object_strings[i], makefile_depends, linkLanguage);
 
-      // Separate from previous response file references.
-      buildObjs += sep;
+      buildObjs +=
+        cmStrCat(sep, // Separate from previous response file references.
+                 responseFlag, // Reference the response file.
+                 this->LocalGenerator->ConvertToOutputFormat(
+                   objects_rsp, cmOutputConverter::SHELL));
       sep = " ";
-
-      // Reference the response file.
-      buildObjs += responseFlag;
-      buildObjs += this->LocalGenerator->ConvertToOutputFormat(
-        objects_rsp, cmOutputConverter::SHELL);
     }
   } else if (useLinkScript) {
     if (!useArchiveRules) {

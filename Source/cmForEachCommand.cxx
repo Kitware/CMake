@@ -12,7 +12,6 @@
 #include <cstdlib>
 #include <iterator>
 #include <map>
-#include <sstream>
 #include <stdexcept>
 #include <utility>
 
@@ -186,11 +185,11 @@ bool cmForEachFunctionBlocker::ReplayZipLists(
     // generate names as `var_name_N`,
     // where `N` is the count of lists to zip
     iterationVars.resize(values.size());
-    auto const iter_var_prefix = this->Args.front() + "_";
+    auto const iter_var_prefix = cmStrCat(this->Args.front(), '_');
     auto i = 0u;
     std::generate(
       iterationVars.begin(), iterationVars.end(),
-      [&]() -> std::string { return iter_var_prefix + std::to_string(i++); });
+      [&]() -> std::string { return cmStrCat(iter_var_prefix, i++); });
   }
   assert("Sanity check" && iterationVars.size() == values.size());
 
@@ -358,7 +357,7 @@ bool HandleInMode(std::vector<std::string> const& args,
 
     } else {
       makefile.IssueMessage(MessageType::FATAL_ERROR,
-                            cmStrCat("Unknown argument:\n", "  ", arg, "\n"));
+                            cmStrCat("Unknown argument:\n", "  ", arg, '\n'));
       return true;
     }
   }
@@ -367,11 +366,10 @@ bool HandleInMode(std::vector<std::string> const& args,
   // make sure the given lists count matches variables...
   if (doing == DoingZipLists && varsCount > 1u &&
       (2u * varsCount) != fb->Args.size()) {
-    makefile.IssueMessage(
-      MessageType::FATAL_ERROR,
-      cmStrCat("Expected ", std::to_string(varsCount),
-               " list variables, but given ",
-               std::to_string(fb->Args.size() - varsCount)));
+    makefile.IssueMessage(MessageType::FATAL_ERROR,
+                          cmStrCat("Expected ", varsCount,
+                                   " list variables, but given ",
+                                   fb->Args.size() - varsCount));
     return true;
   }
 
@@ -384,16 +382,12 @@ bool TryParseInteger(cmExecutionStatus& status, std::string const& str, int& i)
 {
   try {
     i = std::stoi(str);
-  } catch (std::invalid_argument&) {
-    std::ostringstream e;
-    e << "Invalid integer: '" << str << "'";
-    status.SetError(e.str());
+  } catch (std::invalid_argument const&) {
+    status.SetError(cmStrCat("Invalid integer: '", str, '\''));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
-  } catch (std::out_of_range&) {
-    std::ostringstream e;
-    e << "Integer out of range: '" << str << "'";
-    status.SetError(e.str());
+  } catch (std::out_of_range const&) {
+    status.SetError(cmStrCat("Integer out of range: '", str, '\''));
     cmSystemTools::SetFatalErrorOccurred();
     return false;
   }

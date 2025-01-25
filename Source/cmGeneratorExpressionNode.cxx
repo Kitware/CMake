@@ -676,7 +676,7 @@ bool CheckGenExParameters(cmGeneratorExpressionContext* ctx,
         nbParameters = "four parameters";
         break;
       default:
-        nbParameters = cmStrCat(std::to_string(required), " parameters");
+        nbParameters = cmStrCat(required, " parameters");
     }
     reportError(ctx, cnt->GetOriginalExpression(),
                 cmStrCat("$<", genex, ':', option, "> expression requires ",

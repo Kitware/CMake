@@ -2116,9 +2116,9 @@ void cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length,
 
   // Truncation message.
   std::string const msg =
-    "\n[This part of the test output was removed since it "
-    "exceeds the threshold of " +
-    std::to_string(length) + " bytes.]\n";
+    cmStrCat("\n[This part of the test output was removed since it exceeds "
+             "the threshold of ",
+             length, " bytes.]\n");
 
   char const* const begin = output.c_str();
   char const* const end = begin + output.size();

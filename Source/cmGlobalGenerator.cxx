@@ -3776,7 +3776,7 @@ std::string const& cmGlobalGenerator::GetRealPath(std::string const& dir)
 
 std::string cmGlobalGenerator::NewDeferId()
 {
-  return cmStrCat("__"_s, std::to_string(this->NextDeferId++));
+  return cmStrCat("__", this->NextDeferId++);
 }
 
 void cmGlobalGenerator::ProcessEvaluationFiles()

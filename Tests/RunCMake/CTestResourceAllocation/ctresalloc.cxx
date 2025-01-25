@@ -122,8 +122,7 @@ static int doWrite(int argc, char const* const* argv)
           expectedResources.insert(it.ResourceType);
         }
 
-        std::string prefix = "CTEST_RESOURCE_GROUP_";
-        prefix += std::to_string(i);
+        std::string prefix = cmStrCat("CTEST_RESOURCE_GROUP_", i);
         char const* actualResourcesCStr = cmSystemTools::GetEnv(prefix);
         if (!actualResourcesCStr) {
           std::cout << prefix << " should be defined" << std::endl;

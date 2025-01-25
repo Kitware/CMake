@@ -79,7 +79,7 @@ bool cmFunctionHelperCommand::operator()(
 
   // set the values for ARGV0 ARGV1 ...
   for (auto t = 0u; t < expandedArgs.size(); ++t) {
-    auto const value = cmStrCat(ARGV, std::to_string(t));
+    auto const value = cmStrCat(ARGV, t);
     makefile.AddDefinition(value, expandedArgs[t]);
     makefile.MarkVariableAsUsed(value);
   }

@@ -894,18 +894,17 @@ bool cmCTestRunTest::ForkProcess()
 
 void cmCTestRunTest::SetupResourcesEnvironment(std::vector<std::string>* log)
 {
-  std::string processCount = "CTEST_RESOURCE_GROUP_COUNT=";
-  processCount += std::to_string(this->AllocatedResources.size());
+  std::string processCount =
+    cmStrCat("CTEST_RESOURCE_GROUP_COUNT=", this->AllocatedResources.size());
   cmSystemTools::PutEnv(processCount);
   if (log) {
-    log->push_back(processCount);
+    log->emplace_back(std::move(processCount));
   }
 
   std::size_t i = 0;
   for (auto const& process : this->AllocatedResources) {
-    std::string prefix = "CTEST_RESOURCE_GROUP_";
-    prefix += std::to_string(i);
-    std::string resourceList = prefix + '=';
+    std::string prefix = cmStrCat("CTEST_RESOURCE_GROUP_", i);
+    std::string resourceList = cmStrCat(prefix, '=');
     prefix += '_';
     bool firstType = true;
     for (auto const& it : process) {
@@ -915,14 +914,15 @@ void cmCTestRunTest::SetupResourcesEnvironment(std::vector<std::string>* log)
       firstType = false;
       auto resourceType = it.first;
       resourceList += resourceType;
-      std::string var = prefix + cmSystemTools::UpperCase(resourceType) + '=';
+      std::string var =
+        cmStrCat(prefix, cmSystemTools::UpperCase(resourceType), '=');
       bool firstName = true;
       for (auto const& it2 : it.second) {
         if (!firstName) {
           var += ';';
         }
         firstName = false;
-        var += "id:" + it2.Id + ",slots:" + std::to_string(it2.Slots);
+        var += cmStrCat("id:", it2.Id, ",slots:", it2.Slots);
       }
       cmSystemTools::PutEnv(var);
       if (log) {

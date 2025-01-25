@@ -3540,10 +3540,10 @@ void cmCTest::Log(LogType logType, std::string msg, bool suppress)
 std::string cmCTest::GetColorCode(Color color) const
 {
   if (this->Impl->OutputColorCode) {
-    return "\033[0;" + std::to_string(static_cast<int>(color)) + "m";
+    return cmStrCat("\033[0;", static_cast<int>(color), 'm');
   }
 
-  return "";
+  return {};
 }
 
 void cmCTest::SetTimeLimit(cmValue val)
