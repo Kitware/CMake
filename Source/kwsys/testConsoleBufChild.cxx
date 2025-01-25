@@ -16,7 +16,7 @@
 
 #include "testConsoleBuf.hxx"
 
-int main(int argc, const char* argv[])
+int main(int argc, char const* argv[])
 {
 #if defined(_WIN32)
   kwsys::ConsoleBuf::Manager out(std::cout);

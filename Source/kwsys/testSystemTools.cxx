@@ -37,7 +37,7 @@
 typedef unsigned short mode_t;
 #endif
 
-static const char* toUnixPaths[][2] = {
+static char const* toUnixPaths[][2] = {
   { "/usr/local/bin/passwd", "/usr/local/bin/passwd" },
   { "/usr/lo cal/bin/pa sswd", "/usr/lo cal/bin/pa sswd" },
   { "/usr/lo\\ cal/bin/pa\\ sswd", "/usr/lo/ cal/bin/pa/ sswd" },
@@ -69,14 +69,14 @@ static bool CheckConvertToUnixSlashes(std::string const& input,
   return true;
 }
 
-static const char* checkEscapeChars[][4] = {
+static char const* checkEscapeChars[][4] = {
   { "1 foo 2 bar 2", "12", "\\", "\\1 foo \\2 bar \\2" },
   { " {} ", "{}", "#", " #{#} " },
   { nullptr, nullptr, nullptr, nullptr }
 };
 
 static bool CheckEscapeChars(std::string const& input,
-                             const char* chars_to_escape, char escape_char,
+                             char const* chars_to_escape, char escape_char,
                              std::string const& output)
 {
   std::string result = kwsys::SystemTools::EscapeChars(
@@ -92,16 +92,16 @@ static bool CheckEscapeChars(std::string const& input,
 static bool CheckFileOperations()
 {
   bool res = true;
-  const std::string testNonExistingFile(TEST_SYSTEMTOOLS_SOURCE_DIR
+  std::string const testNonExistingFile(TEST_SYSTEMTOOLS_SOURCE_DIR
                                         "/testSystemToolsNonExistingFile");
-  const std::string testDotFile(TEST_SYSTEMTOOLS_SOURCE_DIR "/.");
-  const std::string testBinFile(TEST_SYSTEMTOOLS_SOURCE_DIR
+  std::string const testDotFile(TEST_SYSTEMTOOLS_SOURCE_DIR "/.");
+  std::string const testBinFile(TEST_SYSTEMTOOLS_SOURCE_DIR
                                 "/testSystemTools.bin");
-  const std::string testTxtFile(TEST_SYSTEMTOOLS_SOURCE_DIR
+  std::string const testTxtFile(TEST_SYSTEMTOOLS_SOURCE_DIR
                                 "/testSystemTools.cxx");
-  const std::string testNewDir(TEST_SYSTEMTOOLS_BINARY_DIR
+  std::string const testNewDir(TEST_SYSTEMTOOLS_BINARY_DIR
                                "/testSystemToolsNewDir");
-  const std::string testNewFile(testNewDir + "/testNewFile.txt");
+  std::string const testNewFile(testNewDir + "/testNewFile.txt");
 
   if (kwsys::SystemTools::DetectFileType(testNonExistingFile.c_str()) !=
       kwsys::SystemTools::FileTypeUnknown) {
@@ -470,7 +470,7 @@ static bool CheckFileOperations()
   // Perform the same file and directory creation and deletion tests but
   // with paths > 256 characters in length.
 
-  const std::string testNewLongDir(
+  std::string const testNewLongDir(
     TEST_SYSTEMTOOLS_BINARY_DIR
     "/"
     "012345678901234567890123456789012345678901234567890123456789"
@@ -478,7 +478,7 @@ static bool CheckFileOperations()
     "012345678901234567890123456789012345678901234567890123456789"
     "012345678901234567890123456789012345678901234567890123456789"
     "01234567890123");
-  const std::string testNewLongFile(
+  std::string const testNewLongFile(
     testNewLongDir +
     "/"
     "012345678901234567890123456789012345678901234567890123456789"
@@ -667,8 +667,8 @@ static bool CheckStringOperations()
   return res;
 }
 
-static bool CheckPutEnv(const std::string& env, const char* name,
-                        const char* value)
+static bool CheckPutEnv(std::string const& env, char const* name,
+                        char const* value)
 {
   if (!kwsys::SystemTools::PutEnv(env)) {
     std::cerr << "PutEnv(\"" << env << "\") failed!" << std::endl;
@@ -684,7 +684,7 @@ static bool CheckPutEnv(const std::string& env, const char* name,
   return true;
 }
 
-static bool CheckUnPutEnv(const char* env, const char* name)
+static bool CheckUnPutEnv(char const* env, char const* name)
 {
   if (!kwsys::SystemTools::UnPutEnv(env)) {
     std::cerr << "UnPutEnv(\"" << env << "\") failed!" << std::endl;
@@ -713,9 +713,9 @@ static bool CheckEnvironmentOperations()
   return res;
 }
 
-static bool CheckRelativePath(const std::string& local,
-                              const std::string& remote,
-                              const std::string& expected)
+static bool CheckRelativePath(std::string const& local,
+                              std::string const& remote,
+                              std::string const& expected)
 {
   std::string result = kwsys::SystemTools::RelativePath(local, remote);
   if (!kwsys::SystemTools::ComparePath(expected, result)) {
@@ -738,9 +738,9 @@ static bool CheckRelativePaths()
   return res;
 }
 
-static bool CheckCollapsePath(const std::string& path,
-                              const std::string& expected,
-                              const char* base = nullptr)
+static bool CheckCollapsePath(std::string const& path,
+                              std::string const& expected,
+                              char const* base = nullptr)
 {
   std::string result = kwsys::SystemTools::CollapseFullPath(path, base);
   if (!kwsys::SystemTools::ComparePath(expected, result)) {
@@ -772,7 +772,7 @@ static bool CheckCollapsePath()
   return res;
 }
 
-static std::string StringVectorToString(const std::vector<std::string>& vec)
+static std::string StringVectorToString(std::vector<std::string> const& vec)
 {
   std::stringstream ss;
   ss << "vector(";
@@ -788,13 +788,13 @@ static std::string StringVectorToString(const std::vector<std::string>& vec)
 
 static bool CheckGetPath()
 {
-  const char* envName = "S";
+  char const* envName = "S";
 #ifdef _WIN32
-  const char* envValue = "C:\\Somewhere\\something;D:\\Temp";
+  char const* envValue = "C:\\Somewhere\\something;D:\\Temp";
 #else
-  const char* envValue = "/Somewhere/something:/tmp";
+  char const* envValue = "/Somewhere/something:/tmp";
 #endif
-  const char* registryPath = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MyApp; MyKey]";
+  char const* registryPath = "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MyApp; MyKey]";
 
   std::vector<std::string> originalPaths;
   originalPaths.emplace_back(registryPath);
@@ -829,8 +829,8 @@ static bool CheckGetPath()
 
 static bool CheckGetFilenameName()
 {
-  const char* windowsFilepath = "C:\\somewhere\\something";
-  const char* unixFilepath = "/somewhere/something";
+  char const* windowsFilepath = "C:\\somewhere\\something";
+  char const* unixFilepath = "/somewhere/something";
 
 #if defined(_WIN32) || defined(KWSYS_SYSTEMTOOLS_SUPPORT_WINDOWS_SLASHES)
   std::string expectedWindowsFilename = "something";
@@ -860,8 +860,8 @@ static bool CheckGetFilenameName()
 static bool CheckFind()
 {
   bool res = true;
-  const std::string testFindFileName("testFindFile.txt");
-  const std::string testFindFile(TEST_SYSTEMTOOLS_BINARY_DIR "/" +
+  std::string const testFindFileName("testFindFile.txt");
+  std::string const testFindFile(TEST_SYSTEMTOOLS_BINARY_DIR "/" +
                                  testFindFileName);
 
   if (!kwsys::SystemTools::Touch(testFindFile, true)) {
@@ -923,7 +923,7 @@ static bool CheckIsSubDirectory()
 
 static bool CheckGetLineFromStream()
 {
-  const std::string fileWithFiveCharsOnFirstLine(TEST_SYSTEMTOOLS_SOURCE_DIR
+  std::string const fileWithFiveCharsOnFirstLine(TEST_SYSTEMTOOLS_SOURCE_DIR
                                                  "/README.rst");
 
   kwsys::ifstream file(fileWithFiveCharsOnFirstLine.c_str(), std::ios::in);
@@ -974,7 +974,7 @@ static bool CheckGetLineFromStream()
 
 static bool CheckGetLineFromStreamLongLine()
 {
-  const std::string fileWithLongLine("longlines.txt");
+  std::string const fileWithLongLine("longlines.txt");
   std::string firstLine, secondLine;
   // First line: large buffer, containing a carriage return for some reason.
   firstLine.assign(2050, ' ');
@@ -1047,7 +1047,7 @@ static bool CheckGetLineFromStreamLongLine()
   return true;
 }
 
-static bool writeFile(const char* fileName, const char* data)
+static bool writeFile(char const* fileName, char const* data)
 {
   kwsys::ofstream out(fileName, std::ios::binary);
   out << data;
@@ -1058,7 +1058,7 @@ static bool writeFile(const char* fileName, const char* data)
   return true;
 }
 
-static std::string readFile(const char* fileName)
+static std::string readFile(char const* fileName)
 {
   kwsys::ifstream in(fileName, std::ios::binary);
   std::stringstream sstr;
@@ -1073,8 +1073,8 @@ static std::string readFile(const char* fileName)
 
 struct
 {
-  const char* a;
-  const char* b;
+  char const* a;
+  char const* b;
   bool differ;
 } diff_test_cases[] = { { "one", "one", false },
                         { "one", "two", true },
@@ -1088,7 +1088,7 @@ struct
 
 static bool CheckTextFilesDiffer()
 {
-  const int num_test_cases =
+  int const num_test_cases =
     sizeof(diff_test_cases) / sizeof(diff_test_cases[0]);
   for (int i = 0; i < num_test_cases; ++i) {
     if (!writeFile("file_a", diff_test_cases[i].a) ||
@@ -1109,14 +1109,14 @@ static bool CheckTextFilesDiffer()
 static bool CheckCopyFileIfDifferent()
 {
   bool ret = true;
-  const int num_test_cases =
+  int const num_test_cases =
     sizeof(diff_test_cases) / sizeof(diff_test_cases[0]);
   for (int i = 0; i < num_test_cases; ++i) {
     if (!writeFile("file_a", diff_test_cases[i].a) ||
         !writeFile("file_b", diff_test_cases[i].b)) {
       return false;
     }
-    const char* cptarget =
+    char const* cptarget =
       i < 4 ? TEST_SYSTEMTOOLS_BINARY_DIR "/file_b" : "file_b";
     if (!kwsys::SystemTools::CopyFileIfDifferent("file_a", cptarget)) {
       std::cerr << "CopyFileIfDifferent() returned false for test case "
@@ -1178,7 +1178,7 @@ static bool CheckSplitString()
   bool ret = true;
 
   auto check_split = [](std::string const& input,
-                        std::initializer_list<const char*> expected) -> bool {
+                        std::initializer_list<char const*> expected) -> bool {
     auto const components = kwsys::SystemTools::SplitString(input, '/');
     if (components.size() != expected.size()) {
       std::cerr << "Incorrect split count for " << input << ": "

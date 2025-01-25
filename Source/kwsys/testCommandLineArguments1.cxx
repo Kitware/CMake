@@ -57,7 +57,7 @@ int testCommandLineArguments1(int argc, char* argv[])
   int newArgc = 0;
   arg.GetUnusedArguments(&newArgc, &newArgv);
   int cc;
-  const char* valid_unused_args[9] = { nullptr,
+  char const* valid_unused_args[9] = { nullptr,
                                        "--ignored",
                                        "--second-ignored",
                                        "third-ignored",

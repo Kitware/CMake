@@ -62,8 +62,8 @@ public:
   CommandLineArguments();
   ~CommandLineArguments();
 
-  CommandLineArguments(const CommandLineArguments&) = delete;
-  CommandLineArguments& operator=(const CommandLineArguments&) = delete;
+  CommandLineArguments(CommandLineArguments const&) = delete;
+  CommandLineArguments& operator=(CommandLineArguments const&) = delete;
 
   /**
    * Various argument types.
@@ -100,14 +100,14 @@ public:
   /**
    * Prototypes for callbacks for callback interface.
    */
-  typedef int (*CallbackType)(const char* argument, const char* value,
+  typedef int (*CallbackType)(char const* argument, char const* value,
                               void* call_data);
-  typedef int (*ErrorCallbackType)(const char* argument, void* client_data);
+  typedef int (*ErrorCallbackType)(char const* argument, void* client_data);
 
   /**
    * Initialize internal data structures. This should be called before parsing.
    */
-  void Initialize(int argc, const char* const argv[]);
+  void Initialize(int argc, char const* const argv[]);
   void Initialize(int argc, char* argv[]);
 
   /**
@@ -116,7 +116,7 @@ public:
    * are not available.
    */
   void Initialize();
-  void ProcessArgument(const char* arg);
+  void ProcessArgument(char const* arg);
 
   /**
    * This method will parse arguments and call appropriate methods.
@@ -129,56 +129,56 @@ public:
    * argument help specifies the help string used with this option. The
    * callback and call_data can be skipped.
    */
-  void AddCallback(const char* argument, ArgumentTypeEnum type,
-                   CallbackType callback, void* call_data, const char* help);
+  void AddCallback(char const* argument, ArgumentTypeEnum type,
+                   CallbackType callback, void* call_data, char const* help);
 
   /**
    * Add handler for argument which is going to set the variable to the
    * specified value. If the argument is specified, the option is casted to the
    * appropriate type.
    */
-  void AddArgument(const char* argument, ArgumentTypeEnum type, bool* variable,
-                   const char* help);
-  void AddArgument(const char* argument, ArgumentTypeEnum type, int* variable,
-                   const char* help);
-  void AddArgument(const char* argument, ArgumentTypeEnum type,
-                   double* variable, const char* help);
-  void AddArgument(const char* argument, ArgumentTypeEnum type,
-                   char** variable, const char* help);
-  void AddArgument(const char* argument, ArgumentTypeEnum type,
-                   std::string* variable, const char* help);
+  void AddArgument(char const* argument, ArgumentTypeEnum type, bool* variable,
+                   char const* help);
+  void AddArgument(char const* argument, ArgumentTypeEnum type, int* variable,
+                   char const* help);
+  void AddArgument(char const* argument, ArgumentTypeEnum type,
+                   double* variable, char const* help);
+  void AddArgument(char const* argument, ArgumentTypeEnum type,
+                   char** variable, char const* help);
+  void AddArgument(char const* argument, ArgumentTypeEnum type,
+                   std::string* variable, char const* help);
 
   /**
    * Add handler for argument which is going to set the variable to the
    * specified value. If the argument is specified, the option is casted to the
    * appropriate type. This will handle the multi argument values.
    */
-  void AddArgument(const char* argument, ArgumentTypeEnum type,
-                   std::vector<bool>* variable, const char* help);
-  void AddArgument(const char* argument, ArgumentTypeEnum type,
-                   std::vector<int>* variable, const char* help);
-  void AddArgument(const char* argument, ArgumentTypeEnum type,
-                   std::vector<double>* variable, const char* help);
-  void AddArgument(const char* argument, ArgumentTypeEnum type,
-                   std::vector<char*>* variable, const char* help);
-  void AddArgument(const char* argument, ArgumentTypeEnum type,
-                   std::vector<std::string>* variable, const char* help);
+  void AddArgument(char const* argument, ArgumentTypeEnum type,
+                   std::vector<bool>* variable, char const* help);
+  void AddArgument(char const* argument, ArgumentTypeEnum type,
+                   std::vector<int>* variable, char const* help);
+  void AddArgument(char const* argument, ArgumentTypeEnum type,
+                   std::vector<double>* variable, char const* help);
+  void AddArgument(char const* argument, ArgumentTypeEnum type,
+                   std::vector<char*>* variable, char const* help);
+  void AddArgument(char const* argument, ArgumentTypeEnum type,
+                   std::vector<std::string>* variable, char const* help);
 
   /**
    * Add handler for boolean argument. The argument does not take any option
    * and if it is specified, the value of the variable is true/1, otherwise it
    * is false/0.
    */
-  void AddBooleanArgument(const char* argument, bool* variable,
-                          const char* help);
-  void AddBooleanArgument(const char* argument, int* variable,
-                          const char* help);
-  void AddBooleanArgument(const char* argument, double* variable,
-                          const char* help);
-  void AddBooleanArgument(const char* argument, char** variable,
-                          const char* help);
-  void AddBooleanArgument(const char* argument, std::string* variable,
-                          const char* help);
+  void AddBooleanArgument(char const* argument, bool* variable,
+                          char const* help);
+  void AddBooleanArgument(char const* argument, int* variable,
+                          char const* help);
+  void AddBooleanArgument(char const* argument, double* variable,
+                          char const* help);
+  void AddBooleanArgument(char const* argument, char** variable,
+                          char const* help);
+  void AddBooleanArgument(char const* argument, std::string* variable,
+                          char const* help);
 
   /**
    * Set the callbacks for error handling.
@@ -205,8 +205,8 @@ public:
    * Return string containing help. If the argument is specified, only return
    * help for that argument.
    */
-  const char* GetHelp() { return this->Help.c_str(); }
-  const char* GetHelp(const char* arg);
+  char const* GetHelp() { return this->Help.c_str(); }
+  char const* GetHelp(char const* arg);
 
   /**
    * Get / Set the help line length. This length is used when generating the
@@ -219,7 +219,7 @@ public:
    * Get the executable name (argv0). This is only available when using
    * Initialize with argc/argv.
    */
-  const char* GetArgv0();
+  char const* GetArgv0();
 
   /**
    * Get index of the last argument parsed. This is the last argument that was
@@ -231,30 +231,30 @@ protected:
   void GenerateHelp();
 
   //! This is internal method that registers variable with argument
-  void AddArgument(const char* argument, ArgumentTypeEnum type,
-                   VariableTypeEnum vtype, void* variable, const char* help);
+  void AddArgument(char const* argument, ArgumentTypeEnum type,
+                   VariableTypeEnum vtype, void* variable, char const* help);
 
   bool GetMatchedArguments(std::vector<std::string>* matches,
-                           const std::string& arg);
+                           std::string const& arg);
 
   //! Populate individual variables
   bool PopulateVariable(CommandLineArgumentsCallbackStructure* cs,
-                        const char* value);
+                        char const* value);
 
   //! Populate individual variables of type ...
-  void PopulateVariable(bool* variable, const std::string& value);
-  void PopulateVariable(int* variable, const std::string& value);
-  void PopulateVariable(double* variable, const std::string& value);
-  void PopulateVariable(char** variable, const std::string& value);
-  void PopulateVariable(std::string* variable, const std::string& value);
-  void PopulateVariable(std::vector<bool>* variable, const std::string& value);
-  void PopulateVariable(std::vector<int>* variable, const std::string& value);
+  void PopulateVariable(bool* variable, std::string const& value);
+  void PopulateVariable(int* variable, std::string const& value);
+  void PopulateVariable(double* variable, std::string const& value);
+  void PopulateVariable(char** variable, std::string const& value);
+  void PopulateVariable(std::string* variable, std::string const& value);
+  void PopulateVariable(std::vector<bool>* variable, std::string const& value);
+  void PopulateVariable(std::vector<int>* variable, std::string const& value);
   void PopulateVariable(std::vector<double>* variable,
-                        const std::string& value);
+                        std::string const& value);
   void PopulateVariable(std::vector<char*>* variable,
-                        const std::string& value);
+                        std::string const& value);
   void PopulateVariable(std::vector<std::string>* variable,
-                        const std::string& value);
+                        std::string const& value);
 
   typedef CommandLineArgumentsInternal Internal;
   Internal* Internals;

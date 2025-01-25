@@ -27,8 +27,8 @@ static int testNoFile()
   return 0;
 }
 
-static const int num_test_files = 7;
-static const int max_test_file_size = 45;
+static int const num_test_files = 7;
+static int const max_test_file_size = 45;
 
 static kwsys::FStream::BOM expected_bom[num_test_files] = {
   kwsys::FStream::BOM_None,    kwsys::FStream::BOM_None,
@@ -71,9 +71,9 @@ static int testBOM()
   for (int i = 0; i < num_test_files; i++) {
     {
       kwsys::ofstream out("bom.txt", kwsys::ofstream::binary);
-      out.write(reinterpret_cast<const char*>(expected_bom_data[i] + 1),
+      out.write(reinterpret_cast<char const*>(expected_bom_data[i] + 1),
                 *expected_bom_data[i]);
-      out.write(reinterpret_cast<const char*>(file_data[i] + 1),
+      out.write(reinterpret_cast<char const*>(file_data[i] + 1),
                 file_data[i][0]);
     }
 
@@ -106,9 +106,9 @@ static int testBOMIO()
     kwsys::fstream f("bomio.txt",
                      kwsys::fstream::in | kwsys::fstream::out |
                        kwsys::fstream::binary | kwsys::fstream::trunc);
-    f.write(reinterpret_cast<const char*>(expected_bom_data[i] + 1),
+    f.write(reinterpret_cast<char const*>(expected_bom_data[i] + 1),
             *expected_bom_data[i]);
-    f.write(reinterpret_cast<const char*>(file_data[i] + 1), file_data[i][0]);
+    f.write(reinterpret_cast<char const*>(file_data[i] + 1), file_data[i][0]);
     if (!f.good()) {
       std::cout << "Unable to write data " << i << std::endl;
       return 1;

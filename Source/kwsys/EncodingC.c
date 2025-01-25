@@ -15,7 +15,7 @@
 #  include <windows.h>
 #endif
 
-size_t kwsysEncoding_mbstowcs(wchar_t* dest, const char* str, size_t n)
+size_t kwsysEncoding_mbstowcs(wchar_t* dest, char const* str, size_t n)
 {
   if (str == 0) {
     return (size_t)-1;
@@ -29,7 +29,7 @@ size_t kwsysEncoding_mbstowcs(wchar_t* dest, const char* str, size_t n)
 #endif
 }
 
-wchar_t* kwsysEncoding_DupToWide(const char* str)
+wchar_t* kwsysEncoding_DupToWide(char const* str)
 {
   wchar_t* ret = NULL;
   size_t length = kwsysEncoding_mbstowcs(NULL, str, 0) + 1;
@@ -43,7 +43,7 @@ wchar_t* kwsysEncoding_DupToWide(const char* str)
   return ret;
 }
 
-size_t kwsysEncoding_wcstombs(char* dest, const wchar_t* str, size_t n)
+size_t kwsysEncoding_wcstombs(char* dest, wchar_t const* str, size_t n)
 {
   if (str == 0) {
     return (size_t)-1;
@@ -57,7 +57,7 @@ size_t kwsysEncoding_wcstombs(char* dest, const wchar_t* str, size_t n)
 #endif
 }
 
-char* kwsysEncoding_DupToNarrow(const wchar_t* str)
+char* kwsysEncoding_DupToNarrow(wchar_t const* str)
 {
   char* ret = NULL;
   size_t length = kwsysEncoding_wcstombs(NULL, str, 0) + 1;

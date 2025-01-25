@@ -33,7 +33,7 @@ public:
   typedef std::basic_filebuf<CharType, Traits> my_base_type;
   basic_filebuf* open(char const* s, std::ios_base::openmode mode)
   {
-    const std::wstring wstr = Encoding::ToWindowsExtendedPath(s);
+    std::wstring const wstr = Encoding::ToWindowsExtendedPath(s);
     return static_cast<basic_filebuf*>(my_base_type::open(wstr.c_str(), mode));
   }
 #    endif
@@ -41,7 +41,7 @@ public:
 
 #  else
 
-inline std::wstring getcmode(const std::ios_base::openmode mode)
+inline std::wstring getcmode(std::ios_base::openmode const mode)
 {
   std::wstring cmode;
   bool plus = false;
@@ -91,9 +91,9 @@ public:
       return false;
     }
 #  if defined(_MSC_VER)
-    const bool success = buf_->open(file_name, mode) != 0;
+    bool const success = buf_->open(file_name, mode) != 0;
 #  else
-    const std::wstring wstr = Encoding::ToWindowsExtendedPath(file_name);
+    std::wstring const wstr = Encoding::ToWindowsExtendedPath(file_name);
     bool success = false;
     std::wstring cmode = getcmode(mode);
     file_ = _wfopen(wstr.c_str(), cmode.c_str());
