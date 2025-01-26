@@ -86,6 +86,21 @@ repos:
         # NOTE Looks like `bad-dedent` gives too many false-positives.
         args: ['--disable', 'bad-dedent']
 
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: rst-backticks
+        # NOTE The `productionlist` directive can give false-positives
+        exclude: >-
+            (?x)Help/(
+                    dev/maint\.rst
+                  | manual/cmake-(developer|language)\.7\.rst
+                  | variable/CMAKE_MESSAGE_CONTEXT\.rst
+                  )
+              | Tests/CMakeLib/testRST\.rst
+      - id: rst-directive-colons
+      - id: rst-inline-touching-normal
+
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.0
     hooks:
