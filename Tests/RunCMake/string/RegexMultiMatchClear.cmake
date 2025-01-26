@@ -1,3 +1,5 @@
+cmake_policy(SET CMP0186 NEW)
+
 function (output_results msg)
   message("results from: ${msg}")
   message("CMAKE_MATCH_0: -->${CMAKE_MATCH_0}<--")

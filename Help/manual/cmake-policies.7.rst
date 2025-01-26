@@ -92,6 +92,14 @@ Supported Policies
 
 The following policies are supported.
 
+Policies Introduced by CMake 4.1
+--------------------------------
+
+.. toctree::
+   :maxdepth: 1
+
+   CMP0186: Regular expressions match ^ at most once in repeated searches. </policy/CMP0186>
+
 Policies Introduced by CMake 4.0
 --------------------------------
 

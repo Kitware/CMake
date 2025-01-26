@@ -23,6 +23,7 @@
 
 template <typename T>
 class BT;
+class cmMakefile;
 
 /**
  * CMake lists management
@@ -893,6 +894,7 @@ public:
     // cmList::TransformSelector::New<AT>({1, 2, 5, 6});
     //  or
     // cmList::TransformSelector::New<REGEX>("^XX.*");
+    static std::unique_ptr<TransformSelector> New();
     template <typename Type>
     static std::unique_ptr<TransformSelector> New(
       std::initializer_list<index_type>);
@@ -906,6 +908,8 @@ public:
     static std::unique_ptr<TransformSelector> New(std::string const&);
     template <typename Type>
     static std::unique_ptr<TransformSelector> New(std::string&&);
+
+    cmMakefile* Makefile = nullptr;
 
   private:
     static std::unique_ptr<TransformSelector> NewAT(

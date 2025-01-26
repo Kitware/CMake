@@ -678,6 +678,11 @@ bool HandleTransformCommand(std::vector<std::string> const& args,
       return true;
     }
 
+    if (!selector) {
+      selector = cmList::TransformSelector::New();
+    }
+    selector->Makefile = &status.GetMakefile();
+
     list->transform(descriptor->Action, arguments, std::move(selector));
     status.GetMakefile().AddDefinition(outputName, list->to_string());
     return true;

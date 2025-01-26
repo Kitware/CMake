@@ -7,6 +7,7 @@
 #include <utility>
 
 #include "cmMakefile.h"
+#include "cmPolicies.h"
 
 cmStringReplaceHelper::cmStringReplaceHelper(std::string const& regex,
                                              std::string replace_expr,
@@ -24,9 +25,16 @@ bool cmStringReplaceHelper::Replace(std::string const& input,
 {
   output.clear();
 
+  unsigned optAnchor = 0;
+  if (this->Makefile &&
+      this->Makefile->GetPolicyStatus(cmPolicies::CMP0186) !=
+        cmPolicies::NEW) {
+    optAnchor = cmsys::RegularExpression::BOL_AT_OFFSET;
+  }
+
   // Scan through the input for all matches.
   std::string::size_type base = 0;
-  while (this->RegularExpression.find(input.c_str() + base)) {
+  while (this->RegularExpression.find(input, base, optAnchor)) {
     if (this->Makefile) {
       this->Makefile->ClearMatches();
       this->Makefile->StoreMatches(this->RegularExpression);
@@ -35,7 +43,7 @@ bool cmStringReplaceHelper::Replace(std::string const& input,
     auto r = this->RegularExpression.end();
 
     // Concatenate the part of the input that was not matched.
-    output += input.substr(base, l2);
+    output += input.substr(base, l2 - base);
 
     // Make sure the match had some text.
     if (r - l2 == 0) {
@@ -54,11 +62,8 @@ bool cmStringReplaceHelper::Replace(std::string const& input,
         // Replace with part of the match.
         auto n = replacement.Number;
         auto start = this->RegularExpression.start(n);
-        auto end = this->RegularExpression.end(n);
-        auto len = input.length() - base;
-        if ((start != std::string::npos) && (end != std::string::npos) &&
-            (start <= len) && (end <= len)) {
-          output += input.substr(base + start, end - start);
+        if (start != std::string::npos) {
+          output += this->RegularExpression.match(n);
         } else {
           std::ostringstream error;
           error << "replace expression \"" << this->ReplaceExpression
@@ -71,11 +76,11 @@ bool cmStringReplaceHelper::Replace(std::string const& input,
     }
 
     // Move past the match.
-    base += r;
+    base = r;
   }
 
   // Concatenate the text after the last match.
-  output += input.substr(base, input.length() - base);
+  output += input.substr(base);
 
   return true;
 }

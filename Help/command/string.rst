@@ -117,6 +117,11 @@ Search and Replace With Regular Expressions
   two backslashes (``\\1``) are required in CMake code to get a backslash
   through argument parsing.
 
+.. versionchanged:: 4.1
+  The ``^`` anchor now matches only at the beginning of the input
+  string instead of the beginning of each repeated search.
+  See policy :policy:`CMP0186`.
+
 .. _`Regex Specification`:
 
 Regex Specification

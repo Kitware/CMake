@@ -1706,6 +1706,11 @@ static const struct ListNode : public cmGeneratorExpressionNode
                     return std::string{};
                   }
 
+                  if (!selector) {
+                    selector = cmList::TransformSelector::New();
+                  }
+                  selector->Makefile = ctx->LG->GetMakefile();
+
                   return list
                     .transform(descriptor->Action, arguments,
                                std::move(selector))
