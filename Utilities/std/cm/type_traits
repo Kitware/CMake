@@ -23,7 +23,7 @@ using enable_if_t = typename std::enable_if<B, T>::type;
 
 #endif
 
-#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703)
+#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
 
 // Helper classes
 using std::bool_constant;
@@ -54,6 +54,35 @@ struct make_void
 };
 template <typename... ArgTypes>
 using void_t = typename make_void<ArgTypes...>::type;
+
+#endif
+
+#if (__cplusplus >= 202302L ||                                                \
+     (defined(_MSVC_LANG) && _MSVC_LANG >= 202302L)) &&                       \
+  __cpp_lib_is_scoped_enum == 202011L
+
+using std::is_scoped_enum;
+
+#else
+
+namespace internals {
+template <typename T, bool = std::is_enum<T>::value>
+struct is_scoped_enum_helper : std::false_type
+{
+};
+
+template <typename T>
+struct is_scoped_enum_helper<T, true>
+  : public cm::bool_constant<
+      !std::is_convertible<T, typename std::underlying_type<T>::type>::value>
+{
+};
+}
+
+template <typename T>
+struct is_scoped_enum : public internals::is_scoped_enum_helper<T>
+{
+};
 
 #endif
 

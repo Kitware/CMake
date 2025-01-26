@@ -221,6 +221,11 @@ Available features are:
   * ``<cm/vector>``:
     ``cm::erase``, ``cm::erase_if``, ``cm::ssize``
 
+* From ``C++23``:
+
+  * ``<cm/type_traits>``:
+    ``cm::is_scoped_enum``
+
 Additionally, some useful non-standard extensions to the C++ standard library
 are available in headers under the directory ``cmext/`` in namespace ``cm``.
 These are:
