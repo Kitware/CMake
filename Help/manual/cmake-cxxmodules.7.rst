@@ -99,7 +99,7 @@ library combinations:
 The :variable:`CMAKE_CXX_COMPILER_IMPORT_STD` variable may be used to detect
 support for a standard level with the active C++ toolchain.
 
-.. note ::
+.. note::
 
    This support is provided only when experimental support for
    ``import std;`` has been enabled by the
