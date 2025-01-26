@@ -10,7 +10,7 @@
 #
 
 default_stages: [pre-commit]
-default_install_hook_types: [pre-commit]
+default_install_hook_types: [commit-msg, pre-commit]
 fail_fast: false
 # NOTE Exclude third-party sources and some files globally.
 # See `Utilities/Scripts/update-*.bash` scripts and
@@ -85,3 +85,9 @@ repos:
       - id: sphinx-lint
         # NOTE Looks like `bad-dedent` gives too many false-positives.
         args: ['--disable', 'bad-dedent']
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.0
+    hooks:
+      - id: codespell
+        stages: [commit-msg, pre-commit]
