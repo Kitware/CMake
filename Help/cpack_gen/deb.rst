@@ -398,7 +398,7 @@ List of CPack DEB generator specific variables:
 .. variable:: CPACK_DEBIAN_PACKAGE_PREDEPENDS
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_PREDEPENDS
 
- Sets the `Pre-Depends` field of the Debian package.
+ Sets the ``Pre-Depends`` field of the Debian package.
  Like :variable:`Depends <CPACK_DEBIAN_PACKAGE_DEPENDS>`, except that it
  also forces ``dpkg`` to complete installation of the packages named
  before even starting the installation of the package which declares the
@@ -462,8 +462,8 @@ List of CPack DEB generator specific variables:
 .. variable:: CPACK_DEBIAN_PACKAGE_CONFLICTS
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_CONFLICTS
 
- Sets the `Conflicts` field of the Debian package.
- When one binary package declares a conflict with another using a `Conflicts`
+ Sets the ``Conflicts`` field of the Debian package.
+ When one binary package declares a conflict with another using a ``Conflicts``
  field, ``dpkg`` will not allow them to be unpacked on the system at
  the same time.
 
@@ -490,8 +490,8 @@ List of CPack DEB generator specific variables:
 .. variable:: CPACK_DEBIAN_PACKAGE_PROVIDES
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_PROVIDES
 
- Sets the `Provides` field of the Debian package.
- A virtual package is one which appears in the `Provides` control field of
+ Sets the ``Provides`` field of the Debian package.
+ A virtual package is one which appears in the ``Provides`` control field of
  another package.
 
  :Mandatory: No
@@ -509,7 +509,7 @@ List of CPack DEB generator specific variables:
 .. variable:: CPACK_DEBIAN_PACKAGE_REPLACES
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_REPLACES
 
- Sets the `Replaces` field of the Debian package.
+ Sets the ``Replaces`` field of the Debian package.
  Packages can declare in their control file that they should overwrite
  files in certain other packages, or completely replace other packages.
 
@@ -547,7 +547,7 @@ List of CPack DEB generator specific variables:
 .. variable:: CPACK_DEBIAN_PACKAGE_SUGGESTS
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_SUGGESTS
 
- Sets the `Suggests` field of the Debian package.
+ Sets the ``Suggests`` field of the Debian package.
  Allows packages to declare a suggested package install grouping.
 
  :Mandatory: No
@@ -668,7 +668,7 @@ List of CPack DEB generator specific variables:
 .. variable:: CPACK_DEBIAN_PACKAGE_MULTIARCH
               CPACK_DEBIAN_<COMPONENT>_PACKAGE_MULTIARCH
 
- Sets the `Multi-Arch` field of the Debian package.
+ Sets the ``Multi-Arch`` field of the Debian package.
  Packages can declare in their control file how they should handle
  situations, where packages for different architectures are being installed
  on the same machine.

@@ -149,7 +149,7 @@ Existence Checks
   does not matter. Note the following caveats:
 
   * Macro arguments are not variables.
-  * It is not possible to test directly whether a `<name>` is a non-cache
+  * It is not possible to test directly whether a ``<name>`` is a non-cache
     variable.  The expression ``if(DEFINED someName)`` will evaluate to true
     if either a cache or non-cache variable ``someName`` exists.  In
     comparison, the expression ``if(DEFINED CACHE{someName})`` will only

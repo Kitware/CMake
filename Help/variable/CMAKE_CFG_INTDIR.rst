@@ -13,7 +13,7 @@ For native build systems supporting multiple configurations in the
 build tree (such as :ref:`Visual Studio Generators` and :generator:`Xcode`),
 the value is a reference to a build-time variable specifying the name
 of the per-configuration output subdirectory.  On :ref:`Makefile Generators`
-this evaluates to `.` because there is only one configuration in a build tree.
+this evaluates to ``.`` because there is only one configuration in a build tree.
 Example values:
 
 ::
@@ -28,7 +28,7 @@ Since these values are evaluated by the native build system, this
 variable is suitable only for use in command lines that will be
 evaluated at build time.  Example of intended usage:
 
-::
+.. code-block:: cmake
 
   add_executable(mytool mytool.c)
   add_custom_command(

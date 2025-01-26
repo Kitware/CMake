@@ -19,8 +19,8 @@ When consumed, these targets will be reapplied as necessary.
 
 .. note::
 
-   Similar to the introduction of :prop:`CXX_SCAN_FOR_MODULES`, this property
-   defaults to _not_ adding ``import std`` support to targets using
+   Similar to the introduction of :prop_tgt:`CXX_SCAN_FOR_MODULES`, this
+   property defaults to **not** adding ``import std`` support to targets using
    ``cxx_std_23`` without an explicit request in order to preserve existing
    behavior for projects using C++23 without ``import std``. A future policy
    to change the default behavior is expected once the feature sees wider

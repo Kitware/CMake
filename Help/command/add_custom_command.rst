@@ -102,7 +102,7 @@ The options are:
 ``COMMAND``
   Specify the command-line(s) to execute at build time.
   At least one ``COMMAND`` would normally be given, but certain patterns
-  may omit it, such as adding commands in separate calls using `APPEND`.
+  may omit it, such as adding commands in separate calls using ``APPEND``.
 
   If more than one ``COMMAND`` is specified, they will be executed in order,
   but *not* necessarily composed into a stateful shell or batch script.

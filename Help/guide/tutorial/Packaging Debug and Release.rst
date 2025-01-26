@@ -10,7 +10,7 @@ possible, however, to setup CPack to bundle multiple build directories and
 construct a package that contains multiple configurations of the same project.
 
 First, we want to ensure that the debug and release builds use different names
-for the libraries that will be installed. Let's use `d` as the
+for the libraries that will be installed. Let's use ``d`` as the
 postfix for the debug libraries.
 
 Set :variable:`CMAKE_DEBUG_POSTFIX` near the beginning of the top-level

@@ -469,7 +469,7 @@ a remote server.
 The ``DOWNLOADED`` option in the :command:`cpack_add_component` command
 specifies that a component is to be downloaded. Alternatively, the ``ALL``
 option in the :command:`cpack_configure_downloads` command specifies that
-`all` components are to be be downloaded.
+``all`` components are to be be downloaded.
 
 The :command:`cpack_ifw_add_repository` command and the
 :variable:`CPACK_IFW_DOWNLOAD_ALL` variable allow for more specific

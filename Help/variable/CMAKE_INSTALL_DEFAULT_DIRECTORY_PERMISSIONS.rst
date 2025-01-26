@@ -17,11 +17,11 @@ path. Example of such locations are directories created due to the setting of
 
 Expected content of the ``CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS``
 variable is a list of permissions that can be used by :command:`install` command
-`PERMISSIONS` section.
+``PERMISSIONS`` section.
 
 Example usage:
 
-::
+.. code-block:: cmake
 
  set(CMAKE_INSTALL_DEFAULT_DIRECTORY_PERMISSIONS
       OWNER_READ

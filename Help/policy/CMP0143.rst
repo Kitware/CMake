@@ -16,7 +16,7 @@ as ``OFF`` by default unless projects enable the feature.  For example:
 
 CMake 3.26 and later prefer to enable the feature by default.
 
-Note that it is the policy setting at the `end` of the top level
+Note that it is the policy setting at the **end** of the top level
 ``CMakeLists.txt`` file that matters.  The policy setting applies globally
 to the whole project.
 
