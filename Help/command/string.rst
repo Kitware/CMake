@@ -523,6 +523,10 @@ Functionality for querying a JSON string.
   option is not present, a fatal error message is generated.  If no error
   occurs, the ``<error-variable>`` will be set to ``NOTFOUND``.
 
+In the following subcommands, the ``<json-string>`` argument should
+be written as a :ref:`Quoted Argument` to ensure the entire JSON
+string is passed as a single argument even if it contains semicolons.
+
 .. signature::
   string(JSON <out-var> [ERROR_VARIABLE <error-variable>]
          GET <json-string> <member|index> [<member|index> ...])
