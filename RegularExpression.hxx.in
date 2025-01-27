@@ -121,6 +121,9 @@ inline std::string::size_type RegularExpressionMatch::end() const
  */
 inline std::string::size_type RegularExpressionMatch::start(int n) const
 {
+  if (!this->startp[n]) {
+    return std::string::npos;
+  }
   return static_cast<std::string::size_type>(this->startp[n] -
                                              this->searchstring);
 }
@@ -131,6 +134,9 @@ inline std::string::size_type RegularExpressionMatch::start(int n) const
  */
 inline std::string::size_type RegularExpressionMatch::end(int n) const
 {
+  if (!this->endp[n]) {
+    return std::string::npos;
+  }
   return static_cast<std::string::size_type>(this->endp[n] -
                                              this->searchstring);
 }
@@ -338,19 +344,20 @@ public:
    * This method is thread safe when called with different
    * RegularExpressionMatch instances.
    */
-  bool find(char const*, RegularExpressionMatch&) const;
+  bool find(char const*, RegularExpressionMatch&,
+            std::string::size_type offset = 0) const;
 
   /**
    * Matches the regular expression to the given string.
    * Returns true if found, and sets start and end indexes accordingly.
    */
-  inline bool find(char const*);
+  inline bool find(char const*, std::string::size_type offset = 0);
 
   /**
    * Matches the regular expression to the given std string.
    * Returns true if found, and sets start and end indexes accordingly.
    */
-  inline bool find(std::string const&);
+  inline bool find(std::string const&, std::string::size_type offset = 0);
 
   /**
    * Match indices
@@ -474,18 +481,20 @@ inline bool RegularExpression::compile(std::string const& s)
  * Matches the regular expression to the given std string.
  * Returns true if found, and sets start and end indexes accordingly.
  */
-inline bool RegularExpression::find(char const* s)
+inline bool RegularExpression::find(char const* s,
+                                    std::string::size_type offset)
 {
-  return this->find(s, this->regmatch);
+  return this->find(s, this->regmatch, offset);
 }
 
 /**
  * Matches the regular expression to the given std string.
  * Returns true if found, and sets start and end indexes accordingly.
  */
-inline bool RegularExpression::find(std::string const& s)
+inline bool RegularExpression::find(std::string const& s,
+                                    std::string::size_type offset)
 {
-  return this->find(s.c_str());
+  return this->find(s.c_str(), offset);
 }
 
 /**
