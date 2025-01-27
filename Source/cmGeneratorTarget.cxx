@@ -3703,11 +3703,10 @@ std::string cmGeneratorTarget::GetLinkerTool(std::string const& config) const
 std::string cmGeneratorTarget::GetLinkerTool(std::string const& lang,
                                              std::string const& config) const
 {
-  auto usingLinker =
-    cmStrCat("CMAKE_", lang, "_USING_", this->IsDeviceLink() ? "DEVICE_" : "",
-             "LINKER_");
-  auto format = this->Makefile->GetDefinition(cmStrCat(usingLinker, "MODE"));
-  if (!format || format != "TOOL"_s) {
+  auto linkMode = cmStrCat(
+    "CMAKE_", lang, this->IsDeviceLink() ? "_DEVICE_" : "_", "LINK_MODE");
+  auto mode = this->Makefile->GetDefinition(linkMode);
+  if (!mode || mode != "LINKER"_s) {
     return this->Makefile->GetDefinition("CMAKE_LINKER");
   }
 
@@ -3715,7 +3714,9 @@ std::string cmGeneratorTarget::GetLinkerTool(std::string const& lang,
   if (linkerType.empty()) {
     linkerType = "DEFAULT";
   }
-  usingLinker = cmStrCat(usingLinker, linkerType);
+  auto usingLinker =
+    cmStrCat("CMAKE_", lang, "_USING_", this->IsDeviceLink() ? "DEVICE_" : "",
+             "LINKER_", linkerType);
   auto linkerTool = this->Makefile->GetDefinition(usingLinker);
 
   if (!linkerTool) {

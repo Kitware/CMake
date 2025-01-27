@@ -20,7 +20,6 @@ if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
     OR "x${CMAKE_CUDA_SIMULATE_ID}" STREQUAL "xMSVC"
     OR "x${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "xMSVC")
   macro(__compiler_clang lang)
-    set(CMAKE_${lang}_LINK_MODE LINKER)
   endmacro()
 else()
   include(Compiler/GNU)

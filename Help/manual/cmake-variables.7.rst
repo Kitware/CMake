@@ -488,7 +488,6 @@ Variables that Control the Build
    /variable/CMAKE_LANG_LINK_LIBRARY_USING_FEATURE_SUPPORTED
    /variable/CMAKE_LANG_LINK_WHAT_YOU_USE_FLAG
    /variable/CMAKE_LANG_LINKER_LAUNCHER
-   /variable/CMAKE_LANG_USING_LINKER_MODE
    /variable/CMAKE_LANG_USING_LINKER_TYPE
    /variable/CMAKE_LANG_VISIBILITY_PRESET
    /variable/CMAKE_LIBRARY_OUTPUT_DIRECTORY
@@ -854,6 +853,7 @@ Deprecated Variables that Control the Build
    :maxdepth: 1
 
    /variable/CMAKE_IOS_INSTALL_COMBINED
+   /variable/CMAKE_LANG_USING_LINKER_MODE
    /variable/CMAKE_USE_RELATIVE_PATHS
 
 Deprecated Variables for Languages

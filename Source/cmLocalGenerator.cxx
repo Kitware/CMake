@@ -3359,12 +3359,11 @@ void cmLocalGenerator::AppendLinkerTypeFlags(std::string& flags,
       return;
   }
 
-  auto usingLinker =
-    cmStrCat("CMAKE_", linkLanguage, "_USING_",
-             target->IsDeviceLink() ? "DEVICE_" : "", "LINKER_");
-
-  auto format = this->Makefile->GetDefinition(cmStrCat(usingLinker, "MODE"));
-  if (format && format != "FLAG"_s) {
+  auto linkMode =
+    cmStrCat("CMAKE_", linkLanguage, target->IsDeviceLink() ? "_DEVICE_" : "_",
+             "LINK_MODE");
+  auto mode = this->Makefile->GetDefinition(linkMode);
+  if (mode && mode != "DRIVER"_s) {
     return;
   }
 
@@ -3372,7 +3371,9 @@ void cmLocalGenerator::AppendLinkerTypeFlags(std::string& flags,
   if (linkerType.empty()) {
     linkerType = "DEFAULT";
   }
-  usingLinker = cmStrCat(usingLinker, linkerType);
+  auto usingLinker =
+    cmStrCat("CMAKE_", linkLanguage, "_USING_",
+             target->IsDeviceLink() ? "DEVICE_" : "", "LINKER_", linkerType);
   auto linkerTypeFlags = this->Makefile->GetDefinition(usingLinker);
   if (linkerTypeFlags) {
     if (!linkerTypeFlags.IsEmpty()) {

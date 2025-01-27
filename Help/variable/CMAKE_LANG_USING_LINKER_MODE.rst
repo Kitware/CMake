@@ -15,3 +15,18 @@ variable should be interpreted. The supported linker mode values are:
 ``TOOL``
   :variable:`CMAKE_<LANG>_USING_LINKER_<TYPE>` holds the path to the linker
   tool.
+
+.. warning::
+
+  The variable must be set accordingly to how CMake manage the link step:
+
+  * value ``TOOL`` is expected and required when the linker is used directly
+    for the link step.
+  * value ``FLAGS`` is expected or the variable not set when the compiler is
+    used as driver for the link step.
+
+.. deprecated:: 4.0
+
+This variable is no longer used. The type of information stored in the
+:variable:`CMAKE_<LANG>_USING_LINKER_<TYPE>` variable is determined by the
+:variable:`CMAKE_<LANG>_LINK_MODE` variable.

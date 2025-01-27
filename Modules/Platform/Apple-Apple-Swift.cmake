@@ -15,3 +15,5 @@ else()
   set(CMAKE_SHARED_MODULE_LOADER_Swift_FLAG "-Xclang-linker -Wl,-bundle_loader,")
   set(CMAKE_SHARED_MODULE_CREATE_Swift_FLAGS "-Xlinker -bundle")
 endif()
+
+set(CMAKE_Swift_LINK_MODE DRIVER)
