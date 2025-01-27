@@ -51,6 +51,7 @@ These commands are always available.
    /command/include
    /command/include_guard
    /command/list
+   /command/load_cache
    /command/macro
    /command/mark_as_advanced
    /command/math
@@ -105,7 +106,6 @@ These commands are available only in CMake projects.
    /command/install
    /command/link_directories
    /command/link_libraries
-   /command/load_cache
    /command/project
    /command/remove_definitions
    /command/set_source_files_properties
