@@ -302,6 +302,13 @@ Update ``Source/CMakeVersion.cmake`` to set the version to
   set(CMake_VERSION_PATCH $date)
   #set(CMake_VERSION_RC 0)
 
+Update ``Help/manual/cmake-policies.7.rst`` to set the ``...<max>``
+example to ``...$major.$minor``:
+
+.. code-block:: cmake
+
+  cmake_minimum_required(VERSION 3.10...$major.$minor)
+
 Commit with a message such as::
 
   Begin post-$ver development

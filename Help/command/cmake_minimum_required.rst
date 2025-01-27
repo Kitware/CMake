@@ -59,9 +59,10 @@ project code is written for the given range of CMake versions.
 All policies known to the running version of CMake and introduced
 in the ``<min>`` (or ``<max>``, if specified) version or earlier will
 be set to use ``NEW`` behavior.  All policies introduced in later
-versions will be unset.  This effectively requests behavior preferred
-as of a given CMake version and tells newer CMake versions to warn
-about their new policies.
+versions will be unset (unless the
+:variable:`CMAKE_POLICY_DEFAULT_CMP<NNNN>` variable sets a default).
+This effectively requests behavior preferred as of a given CMake
+version and tells newer CMake versions to warn about their new policies.
 
 When a ``<min>`` version higher than 2.4 is specified the command
 implicitly invokes

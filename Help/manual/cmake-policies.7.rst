@@ -10,49 +10,90 @@ cmake-policies(7)
 Introduction
 ============
 
-Policies in CMake are used to preserve backward compatible behavior
-across multiple releases.  When a new policy is introduced, newer CMake
-versions will begin to warn about the backward compatible behavior.  It
-is possible to disable the warning by explicitly requesting the OLD, or
-backward compatible behavior using the :command:`cmake_policy` command.
-It is also possible to request ``NEW``, or non-backward compatible behavior
-for a policy, also avoiding the warning.  Each policy can also be set to
-either ``NEW`` or ``OLD`` behavior explicitly on the command line with the
-:variable:`CMAKE_POLICY_DEFAULT_CMP<NNNN>` variable.
+CMake policies introduce behavior changes while preserving compatibility
+for existing project releases.  Policies are deprecation mechanisms, not
+feature toggles.  Each policy documents a deprecated ``OLD`` behavior and
+a preferred ``NEW`` behavior.  Projects must be updated over time to
+use the ``NEW`` behavior, but their existing releases will continue to
+work with the ``OLD`` behavior.
 
-A policy is a deprecation mechanism and not a reliable feature toggle.
-A policy should almost never be set to ``OLD``, except to silence warnings
-in an otherwise frozen or stable codebase, or temporarily as part of a
-larger migration path. The ``OLD`` behavior of each policy is undesirable
-and will be replaced with an error condition in a future release.
+Updating Projects
+-----------------
 
-The :command:`cmake_minimum_required` command does more than report an
-error if a too-old version of CMake is used to build a project.  It
-also sets all policies introduced in that CMake version or earlier to
-``NEW`` behavior.  To manage policies without increasing the minimum required
-CMake version, the :command:`if(POLICY)` command may be used:
+When policies are newly introduced by a version of CMake, their ``OLD``
+behaviors are immediately deprecated by that version of CMake and later.
+Projects should be updated to use the ``NEW`` behaviors of the policies
+as soon as possible.
+
+Use the :command:`cmake_minimum_required` command to record the latest
+version of CMake for which a project has been updated.
+For example:
+
+..
+  Sync this cmake_minimum_required example with ``Help/dev/maint.rst``.
 
 .. code-block:: cmake
 
-  if(POLICY CMP0990)
-    cmake_policy(SET CMP0990 NEW)
-  endif()
+  cmake_minimum_required(VERSION 3.10...3.31)
 
-This has the effect of using the ``NEW`` behavior with newer CMake releases which
-users may be using and not issuing a compatibility warning.
+This uses the ``<min>...<max>`` syntax to enable the ``NEW`` behaviors
+of policies introduced in CMake 3.31 and earlier while only requiring a
+minimum version of CMake 3.10.  The project is expected to work with
+both the ``OLD`` and ``NEW`` behaviors of policies introduced between
+those versions.
 
-The setting of a policy is confined in some cases to not propagate to the
-parent scope.  For example, if the files read by the :command:`include` command
-or the :command:`find_package` command contain a use of :command:`cmake_policy`,
-that policy setting will not affect the caller by default.  Both commands accept
-an optional ``NO_POLICY_SCOPE`` keyword to control this behavior.
+Transition Schedule
+-------------------
 
-The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
-to determine whether to report an error on use of deprecated macros or
-functions.
+To help projects port to the ``NEW`` behaviors of policies on their own
+schedule, CMake offers a transition period:
+
+* If a policy is not set by a project, CMake uses its ``OLD`` behavior,
+  but may warn that the policy has not been set.
+
+  * Users running CMake may silence the warning without modifying a
+    project by setting the :variable:`CMAKE_POLICY_DEFAULT_CMP<NNNN>`
+    variable as a cache entry on the :manual:`cmake(1)` command line:
+
+    .. code-block:: shell
+
+      cmake -DCMAKE_POLICY_DEFAULT_CMP0990=OLD ...
+
+  * Projects may silence the warning by using the :command:`cmake_policy`
+    command to explicitly set the policy to ``OLD`` or ``NEW`` behavior:
+
+    .. code-block:: cmake
+
+      if(POLICY CMP0990)
+        cmake_policy(SET CMP0990 NEW)
+      endif()
+
+    .. note::
+
+      A policy should almost never be set to ``OLD``, except to silence
+      warnings in an otherwise frozen or stable codebase, or temporarily
+      as part of a larger migration path.
+
+* If a policy is set to ``OLD`` by a project, CMake versions released
+  at least |POLICY_OLD_DELAY_WARNING| after the version that introduced
+  a policy may issue a warning that the policy's ``OLD`` behavior will
+  be removed from a future version of CMake.
+
+* If a policy is not set to ``NEW`` by a project, CMake versions released
+  at least |POLICY_OLD_DELAY_ERROR| after the version that introduced a
+  policy, and whose major version number is higher, may issue an error
+  that the policy's ``OLD`` behavior has been removed.
+
+.. |POLICY_OLD_DELAY_WARNING| replace:: 2 years
+.. |POLICY_OLD_DELAY_ERROR| replace:: 6 years
+
+Supported Policies
+==================
+
+The following policies are supported.
 
 Policies Introduced by CMake 4.0
-================================
+--------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -62,7 +103,7 @@ Policies Introduced by CMake 4.0
    CMP0181: Link command-line fragment variables are parsed and re-quoted. </policy/CMP0181>
 
 Policies Introduced by CMake 3.31
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -79,7 +120,7 @@ Policies Introduced by CMake 3.31
    CMP0171: 'codegen' is a reserved target name. </policy/CMP0171>
 
 Policies Introduced by CMake 3.30
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -95,7 +136,7 @@ Policies Introduced by CMake 3.30
    CMP0162: Visual Studio generators add UseDebugLibraries indicators by default. </policy/CMP0162>
 
 Policies Introduced by CMake 3.29
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -108,7 +149,7 @@ Policies Introduced by CMake 3.29
    CMP0156: De-duplicate libraries on link lines based on linker capabilities. </policy/CMP0156>
 
 Policies Introduced by CMake 3.28
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -119,7 +160,7 @@ Policies Introduced by CMake 3.28
    CMP0152: file(REAL_PATH) resolves symlinks before collapsing ../ components.  </policy/CMP0152>
 
 Policies Introduced by CMake 3.27
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -134,7 +175,7 @@ Policies Introduced by CMake 3.27
    CMP0144: find_package uses upper-case PACKAGENAME_ROOT variables. </policy/CMP0144>
 
 Policies Introduced by CMake 3.26
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -142,7 +183,7 @@ Policies Introduced by CMake 3.26
    CMP0143: USE_FOLDERS global property is treated as ON by default. </policy/CMP0143>
 
 Policies Introduced by CMake 3.25
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -152,7 +193,7 @@ Policies Introduced by CMake 3.25
    CMP0140: The return() command checks its arguments. </policy/CMP0140>
 
 Policies Introduced by CMake 3.24
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -169,7 +210,7 @@ Policies Introduced by CMake 3.24
    CMP0130: while() diagnoses condition evaluation errors. </policy/CMP0130>
 
 Policies Introduced by CMake 3.23
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -177,7 +218,7 @@ Policies Introduced by CMake 3.23
    CMP0129: Compiler id for MCST LCC compilers is now LCC, not GNU. </policy/CMP0129>
 
 Policies Introduced by CMake 3.22
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -186,7 +227,7 @@ Policies Introduced by CMake 3.22
    CMP0127: cmake_dependent_option() supports full Condition Syntax. </policy/CMP0127>
 
 Policies Introduced by CMake 3.21
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -199,7 +240,7 @@ Policies Introduced by CMake 3.21
    CMP0121: The list command detects invalid indices. </policy/CMP0121>
 
 Policies Introduced by CMake 3.20
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -212,7 +253,7 @@ Policies Introduced by CMake 3.20
    CMP0115: Source file extensions must be explicit. </policy/CMP0115>
 
 Policies Introduced by CMake 3.19
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -225,7 +266,7 @@ Policies Introduced by CMake 3.19
    CMP0109: find_program() requires permission to execute but not to read. </policy/CMP0109>
 
 Policies Introduced by CMake 3.18
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -238,7 +279,7 @@ Policies Introduced by CMake 3.18
    CMP0103: Multiple export() with same FILE without APPEND is not allowed. </policy/CMP0103>
 
 Policies Introduced by CMake 3.17
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -250,7 +291,7 @@ Policies Introduced by CMake 3.17
    CMP0098: FindFLEX runs flex in CMAKE_CURRENT_BINARY_DIR when executing. </policy/CMP0098>
 
 Policies Introduced by CMake 3.16
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -260,7 +301,7 @@ Policies Introduced by CMake 3.16
    CMP0095: RPATH entries are properly escaped in the intermediary CMake install script. </policy/CMP0095>
 
 Policies Introduced by CMake 3.15
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -273,7 +314,7 @@ Policies Introduced by CMake 3.15
    CMP0089: Compiler id for IBM Clang-based XL compilers is now XLClang. </policy/CMP0089>
 
 Policies Introduced by CMake 3.14
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -288,7 +329,7 @@ Policies Introduced by CMake 3.14
 
 
 Policies Introduced by CMake 3.13
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -301,7 +342,7 @@ Policies Introduced by CMake 3.13
    CMP0076: target_sources() command converts relative paths to absolute. </policy/CMP0076>
 
 Policies Introduced by CMake 3.12
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -311,7 +352,7 @@ Policies Introduced by CMake 3.12
    CMP0073: Do not produce legacy _LIB_DEPENDS cache entries. </policy/CMP0073>
 
 Policies Introduced by CMake 3.11
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -319,7 +360,7 @@ Policies Introduced by CMake 3.11
    CMP0072: FindOpenGL prefers GLVND by default when available. </policy/CMP0072>
 
 Policies Introduced by CMake 3.10
-=================================
+---------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -328,7 +369,7 @@ Policies Introduced by CMake 3.10
    CMP0070: Define file(GENERATE) behavior for relative paths. </policy/CMP0070>
 
 Policies Introduced by CMake 3.9
-================================
+--------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -337,7 +378,7 @@ Policies Introduced by CMake 3.9
    CMP0068: RPATH settings on macOS do not affect install_name. </policy/CMP0068>
 
 Policies Introduced by CMake 3.8
-================================
+--------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -345,15 +386,25 @@ Policies Introduced by CMake 3.8
    CMP0067: Honor language standard in try_compile() source-file signature. </policy/CMP0067>
 
 Policies Introduced by CMake 3.7
-================================
+--------------------------------
 
 .. toctree::
    :maxdepth: 1
 
    CMP0066: Honor per-config flags in try_compile() source-file signature. </policy/CMP0066>
 
-Policies Introduced by CMake 3.4
-================================
+Unsupported Policies
+====================
+
+The following policies are no longer supported.
+Projects' calls to :command:`cmake_minimum_required(VERSION)` or
+:command:`cmake_policy(VERSION)` must set them to ``NEW``.
+Their ``OLD`` behaviors have been removed from CMake.
+
+.. _`Policies Introduced by CMake 3.4`:
+
+Policies Introduced by CMake 3.4, Removed by CMake 4.0
+------------------------------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -361,8 +412,10 @@ Policies Introduced by CMake 3.4
    CMP0065: Do not add flags to export symbols from executables without the ENABLE_EXPORTS target property. </policy/CMP0065>
    CMP0064: Support new TEST if() operator. </policy/CMP0064>
 
-Policies Introduced by CMake 3.3
-================================
+.. _`Policies Introduced by CMake 3.3`:
+
+Policies Introduced by CMake 3.3, Removed by CMake 4.0
+------------------------------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -375,8 +428,10 @@ Policies Introduced by CMake 3.3
    CMP0058: Ninja requires custom command byproducts to be explicit. </policy/CMP0058>
    CMP0057: Support new IN_LIST if() operator. </policy/CMP0057>
 
-Policies Introduced by CMake 3.2
-================================
+.. _`Policies Introduced by CMake 3.2`:
+
+Policies Introduced by CMake 3.2, Removed by CMake 4.0
+------------------------------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -384,8 +439,10 @@ Policies Introduced by CMake 3.2
    CMP0056: Honor link flags in try_compile() source-file signature. </policy/CMP0056>
    CMP0055: Strict checking for break() command. </policy/CMP0055>
 
-Policies Introduced by CMake 3.1
-================================
+.. _`Policies Introduced by CMake 3.1`:
+
+Policies Introduced by CMake 3.1, Removed by CMake 4.0
+------------------------------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -395,8 +452,10 @@ Policies Introduced by CMake 3.1
    CMP0052: Reject source and build dirs in installed INTERFACE_INCLUDE_DIRECTORIES. </policy/CMP0052>
    CMP0051: List TARGET_OBJECTS in SOURCES target property. </policy/CMP0051>
 
-Policies Introduced by CMake 3.0
-================================
+.. _`Policies Introduced by CMake 3.0`:
+
+Policies Introduced by CMake 3.0, Removed by CMake 4.0
+------------------------------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -429,8 +488,10 @@ Policies Introduced by CMake 3.0
    CMP0025: Compiler id for Apple Clang is now AppleClang. </policy/CMP0025>
    CMP0024: Disallow include export result. </policy/CMP0024>
 
-Policies Introduced by CMake 2.8
-================================
+.. _`Policies Introduced by CMake 2.8`:
+
+Policies Introduced by CMake 2.8, Removed by CMake 4.0
+------------------------------------------------------
 
 .. toctree::
    :maxdepth: 1
@@ -448,8 +509,10 @@ Policies Introduced by CMake 2.8
    CMP0013: Duplicate binary directories are not allowed. </policy/CMP0013>
    CMP0012: if() recognizes numbers and boolean constants. </policy/CMP0012>
 
-Policies Introduced by CMake 2.6
-================================
+.. _`Policies Introduced by CMake 2.6`:
+
+Policies Introduced by CMake 2.6, Removed by CMake 4.0
+------------------------------------------------------
 
 .. toctree::
    :maxdepth: 1
