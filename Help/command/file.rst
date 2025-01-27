@@ -1337,7 +1337,7 @@ Handling Runtime Binaries
     the actual path to ``objdump``, ``dumpbin``, or ``otool``.
 
     If this variable is not specified, it is determined by the value of
-    ``CMAKE_OBJDUMP`` if set, else by system introspection.
+    :variable:`CMAKE_OBJDUMP` variable if set, else by system introspection.
 
     .. versionadded:: 3.18
-      Use ``CMAKE_OBJDUMP`` if set.
+      Uses :variable:`CMAKE_OBJDUMP` if set.
