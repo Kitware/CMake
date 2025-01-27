@@ -861,7 +861,8 @@ public:
 // find -- Matches the regular expression to the given string.
 // Returns true if found, and sets start and end indexes accordingly.
 bool RegularExpression::find(char const* string,
-                             RegularExpressionMatch& rmatch) const
+                             RegularExpressionMatch& rmatch,
+                             std::string::size_type offset) const
 {
   char const* s;
 
@@ -882,7 +883,7 @@ bool RegularExpression::find(char const* string,
 
   // If there is a "must appear" string, look for it.
   if (this->regmust) {
-    s = string;
+    s = string + offset;
     while ((s = strchr(s, this->regmust[0]))) {
       if (strncmp(s, this->regmust, this->regmlen) == 0)
         break; // Found it.
@@ -896,14 +897,13 @@ bool RegularExpression::find(char const* string,
 
   // Mark beginning of line for ^ .
   regFind.regbol = string;
+  s = string + offset;
 
   // Simplest case:  anchored match need be tried only once.
   if (this->reganch)
-    return (
-      regFind.regtry(string, rmatch.startp, rmatch.endp, this->program) != 0);
+    return (regFind.regtry(s, rmatch.startp, rmatch.endp, this->program) != 0);
 
   // Messy cases:  unanchored match.
-  s = string;
   if (this->regstart != '\0')
     // We know what char it must start with.
     while ((s = strchr(s, this->regstart))) {
