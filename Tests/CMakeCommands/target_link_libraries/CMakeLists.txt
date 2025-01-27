@@ -157,7 +157,7 @@ cmake_policy(POP)
 # Test $<COMPILE_ONLY:> genex.
 cmake_policy(SET CMP0099 NEW)
 add_library(dont_link_too SHARED compile_only.cpp)
-target_compile_definitions(dont_link_too PUBLIC USE_EXAMPLE)
+target_compile_definitions(dont_link_too PUBLIC USE_EXAMPLE PRIVATE HAVE_FUNCTION)
 target_link_options(dont_link_too INTERFACE invalid_link_option)
 target_link_libraries(dont_link_too INTERFACE invalid_link_library)
 
@@ -168,3 +168,15 @@ add_library(uses_compile_only_genex_static STATIC compile_only.cpp)
 target_link_libraries(uses_compile_only_genex_static PRIVATE $<COMPILE_ONLY:dont_link_too>)
 add_executable(uses_via_static_linking main.cxx)
 target_link_libraries(uses_via_static_linking PRIVATE uses_compile_only_genex_static)
+
+add_library(uses_compile_only_genex_obj SHARED compile_only.cpp)
+target_compile_definitions(uses_compile_only_genex_obj PRIVATE HAVE_FUNCTION)
+target_link_libraries(uses_compile_only_genex_obj PRIVATE $<COMPILE_ONLY:dont_link_too>)
+
+cmake_policy(SET CMP0131 NEW)
+add_library(only_link_too OBJECT link_only.cpp)
+target_compile_options(only_link_too INTERFACE INVALID_COMPILER_FLAG_ARRRRGH)
+
+add_executable(uses_link_only_genex_obj compile_only.cpp)
+target_compile_definitions(uses_link_only_genex_obj PUBLIC USE_EXAMPLE)
+target_link_libraries(uses_link_only_genex_obj PRIVATE $<LINK_ONLY:only_link_too>)
