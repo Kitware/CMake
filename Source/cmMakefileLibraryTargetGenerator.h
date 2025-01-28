@@ -37,7 +37,7 @@ protected:
   // MacOSX Framework support methods
   void WriteFrameworkRules(bool relink);
 
-  // Store the computd framework version for OS X Frameworks.
+  // Store the computed framework version for OS X Frameworks.
   std::string FrameworkVersion;
 
 private:
