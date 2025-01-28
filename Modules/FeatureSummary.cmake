@@ -136,7 +136,7 @@ function(_FS_GET_FEATURE_SUMMARY _property _var _includeQuiet)
   get_property(_EnabledFeatures  GLOBAL PROPERTY ${_property})
   if(_EnabledFeatures)
     list(REMOVE_DUPLICATES _EnabledFeatures)
-  endif(_EnabledFeatures)
+  endif()
 
   foreach(_currentFeature ${_EnabledFeatures})
 

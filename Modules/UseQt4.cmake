@@ -17,9 +17,9 @@ set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS $<$<NOT:$<CONFIG:Debu
 
 if(QT_INCLUDE_DIRS_NO_SYSTEM)
   include_directories(${QT_INCLUDE_DIR})
-else(QT_INCLUDE_DIRS_NO_SYSTEM)
+else()
   include_directories(SYSTEM ${QT_INCLUDE_DIR})
-endif(QT_INCLUDE_DIRS_NO_SYSTEM)
+endif()
 
 set(QT_LIBRARIES "")
 set(QT_LIBRARIES_PLUGINS "")
@@ -85,9 +85,9 @@ foreach(module QT3SUPPORT QTOPENGL QTASSISTANT QTDESIGNER QTMOTIF QTNSPLUGIN
         add_definitions(-DQT_${qt_module_def}_LIB)
         if(QT_INCLUDE_DIRS_NO_SYSTEM)
           include_directories(${QT_${module}_INCLUDE_DIR})
-        else(QT_INCLUDE_DIRS_NO_SYSTEM)
+        else()
           include_directories(SYSTEM ${QT_${module}_INCLUDE_DIR})
-        endif(QT_INCLUDE_DIRS_NO_SYSTEM)
+        endif()
       endif()
       if(QT_USE_${module} OR QT_IS_STATIC)
         set(QT_LIBRARIES ${QT_LIBRARIES} ${QT_${module}_LIBRARY})

@@ -58,9 +58,9 @@ set(_Backtrace_STD_ARGS Backtrace_INCLUDE_DIR)
 
 if(Backtrace_HEADER)
   set(_Backtrace_HEADER_TRY "${Backtrace_HEADER}")
-else(Backtrace_HEADER)
+else()
   set(_Backtrace_HEADER_TRY "execinfo.h")
-endif(Backtrace_HEADER)
+endif()
 
 find_path(Backtrace_INCLUDE_DIR "${_Backtrace_HEADER_TRY}")
 set(Backtrace_INCLUDE_DIRS ${Backtrace_INCLUDE_DIR})

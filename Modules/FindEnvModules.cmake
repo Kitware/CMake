@@ -241,7 +241,7 @@ function(env_module)
   if(MOD_ARGS_RESULT_VARIABLE)
     set(${MOD_ARGS_RESULT_VARIABLE} ${ret_var} PARENT_SCOPE)
   endif()
-endfunction(env_module)
+endfunction()
 
 #------------------------------------------------------------------------------
 function(env_module_swap out_mod in_mod)

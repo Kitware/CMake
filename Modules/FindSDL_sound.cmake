@@ -217,8 +217,8 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
       )
       if(MIKMOD_LIBRARY)
         set(SDL_SOUND_LIBRARIES_TMP ${SDL_SOUND_LIBRARIES_TMP} ${MIKMOD_LIBRARY})
-      endif(MIKMOD_LIBRARY)
-    endif("${MY_OUTPUT}" MATCHES "MikMod_")
+      endif()
+    endif()
 
     # Find ModPlug
     if("${MY_OUTPUT}" MATCHES "MODPLUG_")

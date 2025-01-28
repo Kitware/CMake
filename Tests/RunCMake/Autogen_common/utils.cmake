@@ -24,7 +24,7 @@ ${make_program_stderr}
             "top ${RunCMake_MAKE_PROGRAM} build failed exited with status ${make_program_result}")
     endif()
   set(make_program_stdout "${make_program_stdout}" PARENT_SCOPE)
-endfunction(run_make_program)
+endfunction()
 
 function(count_substring STRING SUBSTRING COUNT_VAR)
   string(LENGTH "${STRING}" STRING_LENGTH)
