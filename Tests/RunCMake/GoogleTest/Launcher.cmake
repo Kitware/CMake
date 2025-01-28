@@ -27,9 +27,11 @@ set_property(TARGET launcher_test PROPERTY CROSSCOMPILING_EMULATOR "${emulator}"
 gtest_discover_tests(
   launcher_test
   EXTRA_ARGS a "" b
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
 
 gtest_add_tests(
   TARGET launcher_test
   EXTRA_ARGS a "" b
+  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 )
