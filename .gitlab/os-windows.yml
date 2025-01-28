@@ -26,7 +26,7 @@
 
     variables:
         # Debug and RelWithDebinfo build types use the `/Zi` which results in
-        # uncacheable compiations.
+        # uncacheable compilations.
         # https://github.com/mozilla/sccache/issues/242
         CMAKE_CI_BUILD_TYPE: Release
         CTEST_NO_WARNINGS_ALLOWED: 1

@@ -18,7 +18,7 @@ file(WRITE ${CMAKE_CURRENT_BINARY_DIR}/install/${CMAKE_INSTALL_DATADIR}/pkg_a_in
   [[message(STATUS "Hello from pkg_a")]]
 )
 
-# To expose re-using the same package prefix variable, we need to use a
+# To expose reusing the same package prefix variable, we need to use a
 # different install prefix. This is really contrived and not representative of
 # what a package should do.
 generate_apple_platform_selection_file(

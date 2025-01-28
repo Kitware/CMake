@@ -23,6 +23,7 @@ skip =
 
 # noqa: spellcheck off
 ignore-words-list =
+  abd,
   aci,
   ags,
   ake,

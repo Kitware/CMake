@@ -2,7 +2,7 @@ cmake_policy(SET CMP0169 OLD)
 
 include(FetchContent)
 
-# Test using saved details. We are re-using a SOURCE_DIR from a previous test
+# Test using saved details. We are reusing a SOURCE_DIR from a previous test
 # so the download command should not be executed.
 FetchContent_Declare(
   t1
