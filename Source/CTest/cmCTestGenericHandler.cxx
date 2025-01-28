@@ -3,9 +3,9 @@
 #include "cmCTestGenericHandler.h"
 
 #include <sstream>
+#include <string>
 
 #include "cmCTest.h"
-#include "cmStringAlgorithms.h"
 #include "cmSystemTools.h"
 
 cmCTestGenericHandler::cmCTestGenericHandler(cmCTest* ctest)
@@ -72,8 +72,6 @@ bool cmCTestGenericHandler::StartLogFile(char const* name,
     ostr << "_" << this->CTest->GetCurrentTag();
   }
   ostr << ".log";
-  this->LogFileNames[name] =
-    cmStrCat(this->CTest->GetBinaryDir(), "/Testing/Temporary/", ostr.str());
   if (!this->CTest->OpenOutputFile("Temporary", ostr.str(), xofs)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot create log file: " << ostr.str() << std::endl);

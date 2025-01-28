@@ -665,7 +665,6 @@ bool cmCTest::OpenOutputFile(std::string const& path, std::string const& name,
     }
   }
   std::string filename = testingDir + "/" + name;
-  stream.SetTempExt("tmp");
   stream.Open(filename);
   if (!stream) {
     cmCTestLog(this, ERROR_MESSAGE,

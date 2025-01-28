@@ -145,6 +145,7 @@ private:
 
   bool UseCTestLaunch = false;
   std::string CTestLaunchDir;
+  std::string LogFileName;
   class LaunchHelper;
 
   friend class LaunchHelper;
