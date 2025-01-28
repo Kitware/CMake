@@ -153,9 +153,9 @@ int cmCTestConfigureHandler::ProcessHandler()
 {
   cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
                      "Configure project" << std::endl, this->Quiet);
-  std::string cCommand =
+  std::string configureCommand =
     this->CTest->GetCTestConfiguration("ConfigureCommand");
-  if (cCommand.empty()) {
+  if (configureCommand.empty()) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot find ConfigureCommand key in the DartConfiguration.tcl"
                  << std::endl);
@@ -171,64 +171,64 @@ int cmCTestConfigureHandler::ProcessHandler()
     return -1;
   }
 
-  auto elapsed_time_start = std::chrono::steady_clock::now();
+  if (this->CTest->GetShowOnly()) {
+    cmCTestOptionalLog(this->CTest, DEBUG,
+                       "Configure with command: " << configureCommand << '\n',
+                       this->Quiet);
+    return 0;
+  }
+
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                     "Configure with command: " << configureCommand << '\n',
+                     this->Quiet);
+
+  cmGeneratedFileStream logFile;
+  this->StartLogFile("Configure", logFile);
+
+  auto const startTime = std::chrono::system_clock::now();
+  auto const startDateTime = this->CTest->CurrentTime();
+
   std::string output;
   int retVal = 0;
-  bool res = false;
-  if (!this->CTest->GetShowOnly()) {
-    cmGeneratedFileStream os;
-    if (!this->StartResultingXML(cmCTest::PartConfigure, "Configure", os)) {
-      cmCTestLog(this->CTest, ERROR_MESSAGE,
-                 "Cannot open configure file" << std::endl);
-      return 1;
-    }
-    std::string start_time = this->CTest->CurrentTime();
-    auto start_time_time = std::chrono::system_clock::now();
+  bool const res = this->CTest->RunMakeCommand(configureCommand, output,
+                                               &retVal, buildDirectory.c_str(),
+                                               cmDuration::zero(), logFile);
 
-    cmGeneratedFileStream ofs;
-    this->StartLogFile("Configure", ofs);
-    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-                       "Configure with command: " << cCommand << std::endl,
-                       this->Quiet);
-    res = this->CTest->RunMakeCommand(cCommand, output, &retVal,
-                                      buildDirectory.c_str(),
-                                      cmDuration::zero(), ofs);
+  auto const endTime = std::chrono::system_clock::now();
+  auto const endDateTime = this->CTest->CurrentTime();
+  auto const elapsedMinutes =
+    std::chrono::duration_cast<std::chrono::minutes>(endTime - startTime);
 
-    if (ofs) {
-      ofs.close();
-    }
+  cmCTestOptionalLog(this->CTest, DEBUG, "End" << std::endl, this->Quiet);
 
-    if (os) {
-      cmXMLWriter xml(os);
-      this->CTest->StartXML(xml, this->CMake, this->AppendXML);
-      this->CTest->GenerateSubprojectsOutput(xml);
-      xml.StartElement("Configure");
-      xml.Element("StartDateTime", start_time);
-      xml.Element("StartConfigureTime", start_time_time);
-      xml.Element("ConfigureCommand", cCommand);
-      cmCTestOptionalLog(this->CTest, DEBUG, "End" << std::endl, this->Quiet);
-      xml.Element("Log", output);
-      xml.Element("ConfigureStatus", retVal);
-      xml.Element("EndDateTime", this->CTest->CurrentTime());
-      xml.Element("EndConfigureTime", std::chrono::system_clock::now());
-      xml.Element("ElapsedMinutes",
-                  std::chrono::duration_cast<std::chrono::minutes>(
-                    std::chrono::steady_clock::now() - elapsed_time_start)
-                    .count());
-      xml.EndElement(); // Configure
-      this->CTest->EndXML(xml);
-    }
-  } else {
-    cmCTestOptionalLog(this->CTest, DEBUG,
-                       "Configure with command: " << cCommand << std::endl,
-                       this->Quiet);
-  }
   if (!res || retVal) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Error(s) when configuring the project" << std::endl);
-    return -1;
   }
-  return 0;
+
+  cmGeneratedFileStream xmlFile;
+  if (!this->StartResultingXML(cmCTest::PartConfigure, "Configure", xmlFile)) {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Cannot open configure file" << std::endl);
+    return 1;
+  }
+
+  cmXMLWriter xml(xmlFile);
+  this->CTest->StartXML(xml, this->CMake, this->AppendXML);
+  this->CTest->GenerateSubprojectsOutput(xml);
+  xml.StartElement("Configure");
+  xml.Element("StartDateTime", startDateTime);
+  xml.Element("StartConfigureTime", startTime);
+  xml.Element("ConfigureCommand", configureCommand);
+  xml.Element("Log", output);
+  xml.Element("ConfigureStatus", retVal);
+  xml.Element("EndDateTime", endDateTime);
+  xml.Element("EndConfigureTime", endTime);
+  xml.Element("ElapsedMinutes", elapsedMinutes.count());
+  xml.EndElement(); // Configure
+  this->CTest->EndXML(xml);
+
+  return (!res || retVal) ? -1 : 0;
 }
 
 bool cmCTestConfigureCommand::InitialPass(std::vector<std::string> const& args,
