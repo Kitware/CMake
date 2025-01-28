@@ -1,16 +1,16 @@
 {
-	"callbacks" :
-	[
-		"\"@CMAKE_COMMAND@\" -E echo callback2"
-	],
-	"hooks" :
-	[
-		"postCMakeBuild"
-	],
-	"queries" :
-	[
-		"staticSystemInformation",
-		"dynamicSystemInformation"
-	],
+  "callbacks" :
+  [
+    "\"@CMAKE_COMMAND@\" -E echo callback2"
+  ],
+  "hooks" :
+  [
+    "postCMakeBuild"
+  ],
+  "queries" :
+  [
+    "staticSystemInformation",
+    "dynamicSystemInformation"
+  ],
   "version": 1
 }

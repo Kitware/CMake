@@ -1,0 +1,146 @@
+# Read the docs here: https://pre-commit.com
+# List of some available hooks: https://pre-commit.com/hooks.html
+#
+# Install `pre-commit`:
+#
+#   $ pip install pre-commit
+#
+# Install hooks to your clone:
+#   $ pre-commit install
+#
+
+default_stages: [pre-commit]
+default_install_hook_types: [commit-msg, pre-commit]
+fail_fast: false
+# NOTE Exclude third-party sources and some files globally.
+# See `Utilities/Scripts/update-*.bash` scripts and
+# https://pre-commit.com/#regular-expressions
+exclude: >-
+    (?x)Auxiliary/vim
+      | Licenses/.*\.txt$
+      | Source/(CursesDialog/form|kwsys)
+      | Utilities/(cm.*|GitSetup|KWIML)
+      | .*\.patch$
+
+repos:
+  - repo: meta
+    hooks:
+      - id: check-hooks-apply
+      - id: check-useless-excludes
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-case-conflict
+      - id: check-json
+        # NOTE Some tests have intentionally broken JSONs.
+        exclude: >-
+            (?x)Tests/(
+                CMakeLib/testCTestResourceSpec_data/spec13
+              | RunCMake/CTestResourceAllocation/invalid
+              )\.json
+      - id: check-yaml
+      - id: end-of-file-fixer
+        # NOTE Exclude tests directory: some test files have no
+        # the trailing EOL in the file intentionally but some
+        # just missed it.
+        # TODO Add the missed trailing EOL in the following files
+        # if possible.
+        exclude: >-
+            (?x)Tests/(
+                DelphiCoverage/src/UTCovTest\.pas
+              | FortranModules/in_interface/module\.f90
+              | JavascriptCoverage/output\.json\.in
+              | Module/ExternalData/Alt/(
+                    MyAlgoMap1-md5/dded55e43cd6529ee35d24113dfc87a3
+                  | SHA1/85158f0c1996837976e858c42a9a7634bfe91b93
+                  )
+              | RunCMake/(
+                    CMP0055/CMP0055-(NEW|OLD)-Reject-Arguments\.cmake
+                  | CommandLine/E_cat_good_binary_cat-stdout\.txt
+                  | define_property/define_property-INITIALIZE_FROM_VARIABLE-invalid_[12]-result\.txt
+                  | FindMatlab/MatlabTest2-stderr\.txt
+                  | string/UTF-(16|32)LE\.txt
+                  | Syntax/BOM-UTF-(16|32)-LE.cmake
+                  | Syntax/CommandEOF\.cmake
+                  | VS10Project/shader2?\.hlsl
+                  )
+              | SourceGroups/README\.txt
+              | StringFileTest/test\.utf8
+              | VSWindowsFormsResx/WindowsFormsResx/MyForm\.resx
+              | VSXaml/Package\.appxmanifest
+              )
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 3.0.0
+    hooks:
+      - id: git-check
+        pass_filenames: false
+
+  - repo: https://github.com/sphinx-contrib/sphinx-lint
+    rev: v1.0.0
+    hooks:
+      - id: sphinx-lint
+        # NOTE Looks like `bad-dedent` gives too many false-positives.
+        args: ['--disable', 'bad-dedent']
+
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.10.0
+    hooks:
+      - id: rst-backticks
+        # NOTE The `productionlist` directive can give false-positives
+        exclude: >-
+            (?x)Help/(
+                    dev/maint\.rst
+                  | manual/cmake-(developer|language)\.7\.rst
+                  | variable/CMAKE_MESSAGE_CONTEXT\.rst
+                  )
+              | Tests/CMakeLib/testRST\.rst
+      - id: rst-directive-colons
+      - id: rst-inline-touching-normal
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.4.0
+    hooks:
+      - id: codespell
+        stages: [commit-msg, pre-commit]
+
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.29.4
+    hooks:
+      - id: typos
+        # NOTE Override hook's default args to prevent automatic
+        # fixing of found typos. Let the dev decide what to fix!
+        args: ['--force-exclude']
+        stages: [commit-msg, pre-commit]
+
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    # ATTENTION CMake's `clang-format` is version 18.
+    # DO NOT UPDATE THIS VERSION unless officially supported
+    # `clang-format` get bumped.
+    rev: v18.1.8
+    hooks:
+      - id: clang-format
+        types_or: [c, c++, cuda]
+        exclude_types: [objective-c++]
+        # The following exclude list based on the output of:
+        #  $ git ls-files | git check-attr --stdin format.clang-format | grep ...
+        # and
+        #  $ find -name .gitattributes -exec grep -Hn clang-format {} +
+        exclude: >-
+            (?x)(
+                Source/LexerParser
+              | Tests/(
+                    CSharpLinkFromCxx/UsefulManagedCppClass.*
+                  | CompileFeatures/cxx_right_angle_brackets\.cpp
+                  | PositionIndependentTargets/pic_test\.h
+                  | RunCMake/(
+                        CommandLine/cmake_depends/test_UTF-16LE\.h
+                      | CXXModules/examples/circular/circular-[ab]\.cppm
+                      | GenerateExportHeader/reference
+                      )
+                  | VSWinStorePhone/Direct3DApp1/Direct3DApp1\.cpp
+                  )
+              )
