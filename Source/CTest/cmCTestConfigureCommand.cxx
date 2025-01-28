@@ -3,9 +3,9 @@
 #include "cmCTestConfigureCommand.h"
 
 #include <chrono>
+#include <cstdlib>
 #include <sstream>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <cm/memory>
@@ -13,7 +13,6 @@
 
 #include "cmArgumentParser.h"
 #include "cmCTest.h"
-#include "cmCTestGenericHandler.h"
 #include "cmDuration.h"
 #include "cmExecutionStatus.h"
 #include "cmGeneratedFileStream.h"
@@ -26,23 +25,10 @@
 #include "cmXMLWriter.h"
 #include "cmake.h"
 
-class cmCTestConfigureHandler : public cmCTestGenericHandler
-{
-public:
-  cmCTestConfigureHandler(cmCTest* ctest)
-    : cmCTestGenericHandler(ctest)
-  {
-  }
-
-  int ProcessHandler() override;
-};
-
-std::unique_ptr<cmCTestGenericHandler>
-cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments,
-                                           cmExecutionStatus& status) const
+bool cmCTestConfigureCommand::ExecuteConfigure(ConfigureArguments const& args,
+                                               cmExecutionStatus& status) const
 {
   cmMakefile& mf = status.GetMakefile();
-  auto const& args = static_cast<ConfigureArguments&>(arguments);
 
   std::string const buildDirectory = !args.Build.empty()
     ? args.Build
@@ -51,7 +37,7 @@ cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments,
     status.SetError("called with no build directory specified.  "
                     "Either use the BUILD argument or set the "
                     "CTEST_BINARY_DIRECTORY variable.");
-    return nullptr;
+    return false;
   }
 
   std::string configureCommand = mf.GetDefinition("CTEST_CONFIGURE_COMMAND");
@@ -62,7 +48,7 @@ cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments,
         "called with no configure command specified.  "
         "If this is a  \"built with CMake\" project, set "
         "CTEST_CMAKE_GENERATOR. If not, set CTEST_CONFIGURE_COMMAND.");
-      return nullptr;
+      return false;
     }
 
     std::string const sourceDirectory = !args.Source.empty()
@@ -73,7 +59,7 @@ cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments,
       status.SetError("called with invalid source directory.  "
                       "CTEST_SOURCE_DIRECTORY must be set to a directory "
                       "that contains CMakeLists.txt.");
-      return nullptr;
+      return false;
     }
 
     bool const multiConfig = [&]() -> bool {
@@ -135,55 +121,33 @@ cmCTestConfigureCommand::InitializeHandler(HandlerArguments& arguments,
     configureCommand += "\"";
   }
 
-  this->CTest->SetCTestConfiguration("ConfigureCommand", configureCommand,
-                                     args.Quiet);
-
-  if (cmValue labelsForSubprojects =
-        mf.GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
-    this->CTest->SetCTestConfiguration("LabelsForSubprojects",
-                                       *labelsForSubprojects, args.Quiet);
-  }
-
-  auto handler = cm::make_unique<cmCTestConfigureHandler>(this->CTest);
-  handler->SetQuiet(args.Quiet);
-  return std::unique_ptr<cmCTestGenericHandler>(std::move(handler));
-}
-
-int cmCTestConfigureHandler::ProcessHandler()
-{
-  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
-                     "Configure project" << std::endl, this->Quiet);
-  std::string configureCommand =
-    this->CTest->GetCTestConfiguration("ConfigureCommand");
-  if (configureCommand.empty()) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Cannot find ConfigureCommand key in the DartConfiguration.tcl"
-                 << std::endl);
-    return -1;
-  }
-
-  std::string buildDirectory =
-    this->CTest->GetCTestConfiguration("BuildDirectory");
-  if (buildDirectory.empty()) {
-    cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Cannot find BuildDirectory  key in the DartConfiguration.tcl"
-                 << std::endl);
-    return -1;
-  }
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "Configure project\n",
+                     args.Quiet);
 
   if (this->CTest->GetShowOnly()) {
     cmCTestOptionalLog(this->CTest, DEBUG,
                        "Configure with command: " << configureCommand << '\n',
-                       this->Quiet);
-    return 0;
+                       args.Quiet);
+    if (!args.ReturnValue.empty()) {
+      mf.AddDefinition(args.ReturnValue, "0");
+    }
+    return true;
+  }
+
+  if (!cmSystemTools::MakeDirectory(buildDirectory)) {
+    status.SetError(cmStrCat("cannot create directory ", buildDirectory));
+    return false;
   }
 
   cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                      "Configure with command: " << configureCommand << '\n',
-                     this->Quiet);
+                     args.Quiet);
+
+  int const submitIndex =
+    args.SubmitIndex.empty() ? 0 : std::atoi(args.SubmitIndex.c_str());
 
   cmGeneratedFileStream logFile;
-  this->StartLogFile("Configure", logFile);
+  this->CTest->StartLogFile("Configure", submitIndex, logFile);
 
   auto const startTime = std::chrono::system_clock::now();
   auto const startDateTime = this->CTest->CurrentTime();
@@ -199,22 +163,36 @@ int cmCTestConfigureHandler::ProcessHandler()
   auto const elapsedMinutes =
     std::chrono::duration_cast<std::chrono::minutes>(endTime - startTime);
 
-  cmCTestOptionalLog(this->CTest, DEBUG, "End" << std::endl, this->Quiet);
+  cmCTestOptionalLog(this->CTest, DEBUG, "End\n", args.Quiet);
 
   if (!res || retVal) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Error(s) when configuring the project" << std::endl);
+               "Error(s) when configuring the project\n");
+  }
+
+  if (!args.ReturnValue.empty()) {
+    mf.AddDefinition(args.ReturnValue, std::to_string(retVal));
+  }
+
+  if (cmValue value = mf.GetDefinition("CTEST_CHANGE_ID")) {
+    this->CTest->SetCTestConfiguration("ChangeId", *value, args.Quiet);
+  }
+
+  if (cmValue value = mf.GetDefinition("CTEST_LABELS_FOR_SUBPROJECTS")) {
+    this->CTest->SetCTestConfiguration("LabelsForSubprojects", *value,
+                                       args.Quiet);
   }
 
   cmGeneratedFileStream xmlFile;
-  if (!this->StartResultingXML(cmCTest::PartConfigure, "Configure", xmlFile)) {
+  if (!this->CTest->StartResultingXML(cmCTest::PartConfigure, "Configure",
+                                      submitIndex, xmlFile)) {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Cannot open configure file" << std::endl);
-    return 1;
+    return false;
   }
 
   cmXMLWriter xml(xmlFile);
-  this->CTest->StartXML(xml, this->CMake, this->AppendXML);
+  this->CTest->StartXML(xml, mf.GetCMakeInstance(), args.Append);
   this->CTest->GenerateSubprojectsOutput(xml);
   xml.StartElement("Configure");
   xml.Element("StartDateTime", startDateTime);
@@ -228,7 +206,7 @@ int cmCTestConfigureHandler::ProcessHandler()
   xml.EndElement(); // Configure
   this->CTest->EndXML(xml);
 
-  return (!res || retVal) ? -1 : 0;
+  return res;
 }
 
 bool cmCTestConfigureCommand::InitialPass(std::vector<std::string> const& args,
@@ -240,6 +218,6 @@ bool cmCTestConfigureCommand::InitialPass(std::vector<std::string> const& args,
       .Bind("OPTIONS"_s, &ConfigureArguments::Options);
 
   return this->Invoke(parser, args, status, [&](ConfigureArguments& a) {
-    return this->ExecuteHandlerCommand(a, status);
+    return this->ExecuteConfigure(a, status);
   });
 }
