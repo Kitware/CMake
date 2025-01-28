@@ -4,7 +4,12 @@ include(CTest)
 
 find_package(CURL REQUIRED COMPONENTS HTTP)
 
-add_definitions(-DCMAKE_EXPECTED_CURL_VERSION="${CURL_VERSION_STRING}")
+if(NOT CURL_VERSION MATCHES "^[0-9]+\\.[0-9]+(\\.|$)")
+  message(FATAL_ERROR "CURL_VERSION not set")
+endif()
+if(NOT CURL_VERSION_STRING MATCHES "^[0-9]+\\.[0-9]+(\\.|$)")
+  message(FATAL_ERROR "CURL_VERSION_STRING not set")
+endif()
 
 add_executable(test_tgt main.c)
 target_link_libraries(test_tgt CURL::libcurl)
