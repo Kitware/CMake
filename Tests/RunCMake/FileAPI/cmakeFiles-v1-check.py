@@ -76,6 +76,12 @@ def check_object_cmakeFiles(o):
             "isCMake": None,
         },
         {
+            "path": "^dir/very-long/CMakeLists\\.txt$",
+            "isGenerated": None,
+            "isExternal": None,
+            "isCMake": None,
+        },
+        {
             "path": "^dir/dirtest\\.cmake$",
             "isGenerated": None,
             "isExternal": None,

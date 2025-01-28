@@ -15,6 +15,7 @@
         "^\\.$",
         "^dir$",
         "^dir/dir$",
+        "^dir/very-long$",
         "^fileset$",
         "^subdir$"
     ],
