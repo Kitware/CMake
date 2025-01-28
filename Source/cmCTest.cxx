@@ -3102,11 +3102,6 @@ bool cmCTest::GetExtraVerbose() const
   return this->Impl->ExtraVerbose;
 }
 
-int cmCTest::GetSubmitIndex() const
-{
-  return this->Impl->SubmitIndex;
-}
-
 bool cmCTest::GetInteractiveDebugMode() const
 {
   return this->Impl->InteractiveDebugMode;
@@ -3609,5 +3604,69 @@ bool cmCTest::CompressString(std::string& str)
 
   str.assign(reinterpret_cast<char*>(base64EncodedBuffer.data()), rlen);
 
+  return true;
+}
+
+bool cmCTest::StartResultingXML(Part part, char const* name, int submitIndex,
+                                cmGeneratedFileStream& xofs)
+{
+  if (!name) {
+    cmCTestLog(
+      this, ERROR_MESSAGE,
+      "Cannot create resulting XML file without providing the name\n");
+    return false;
+  }
+  if (submitIndex == 0) {
+    submitIndex = this->Impl->SubmitIndex;
+  }
+  std::ostringstream ostr;
+  ostr << name;
+  if (submitIndex > 0) {
+    ostr << "_" << submitIndex;
+  }
+  ostr << ".xml";
+  if (this->Impl->CurrentTag.empty()) {
+    cmCTestLog(this, ERROR_MESSAGE,
+               "Current Tag empty, this may mean NightlyStartTime / "
+               "CTEST_NIGHTLY_START_TIME was not set correctly. Or "
+               "maybe you forgot to call ctest_start() before calling "
+               "ctest_configure().\n");
+    cmSystemTools::SetFatalErrorOccurred();
+    return false;
+  }
+  if (!this->OpenOutputFile(this->Impl->CurrentTag, ostr.str(), xofs, true)) {
+    cmCTestLog(this, ERROR_MESSAGE,
+               "Cannot create resulting XML file: " << ostr.str() << '\n');
+    return false;
+  }
+  this->AddSubmitFile(part, ostr.str());
+  return true;
+}
+
+bool cmCTest::StartLogFile(char const* name, int submitIndex,
+                           cmGeneratedFileStream& xofs)
+{
+  if (!name) {
+    cmCTestLog(this, ERROR_MESSAGE,
+               "Cannot create log file without providing the name\n");
+    return false;
+  }
+  if (submitIndex == 0) {
+    submitIndex = this->Impl->SubmitIndex;
+  }
+  std::ostringstream ostr;
+  ostr << "Last" << name;
+  if (submitIndex > 0) {
+    ostr << "_" << submitIndex;
+  }
+  if (!this->Impl->CurrentTag.empty()) {
+    ostr << "_" << this->Impl->CurrentTag;
+  }
+  ostr << ".log";
+  if (!this->OpenOutputFile("Temporary", ostr.str(), xofs)) {
+    cmCTestLog(this, ERROR_MESSAGE,
+               "Cannot create log file: " << ostr.str() << '\n');
+    return false;
+  }
   return true;
 }
