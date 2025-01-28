@@ -437,8 +437,7 @@ public:
             }
             argsValue["functionArgs"] = args;
           }
-          argsValue["location"] =
-            cmStrCat(lfc.FilePath, ':', std::to_string(lfc.Line));
+          argsValue["location"] = cmStrCat(lfc.FilePath, ':', lfc.Line);
           return argsValue;
         });
 #endif
@@ -2722,8 +2721,7 @@ MessageType cmMakefile::ExpandVariablesInStringImpl(
         if (!openstack.empty() &&
             !(isalnum(inc) || inc == '_' || inc == '/' || inc == '.' ||
               inc == '+' || inc == '-')) {
-          errorstr += "Invalid character ('";
-          errorstr += inc;
+          errorstr += cmStrCat("Invalid character ('", inc);
           result.append(last, in - last);
           errorstr += cmStrCat("') in a variable name: '",
                                result.substr(openstack.back().loc), '\'');

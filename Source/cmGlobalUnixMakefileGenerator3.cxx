@@ -556,7 +556,7 @@ cmGlobalUnixMakefileGenerator3::GenerateBuildCommand(
     if (jobs == cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
       makeCommand.Add("-j");
     } else {
-      makeCommand.Add("-j" + std::to_string(jobs));
+      makeCommand.Add(cmStrCat("-j", jobs));
     }
   }
 
@@ -690,13 +690,7 @@ void cmGlobalUnixMakefileGenerator3::WriteConvenienceRules2(
       cmLocalUnixMakefileGenerator3::EchoProgress progress;
       progress.Dir = cmStrCat(lg.GetBinaryDirectory(), "/CMakeFiles");
       {
-        std::ostringstream progressArg;
-        char const* sep = "";
-        for (unsigned long progFile : this->ProgressMap[gtarget.get()].Marks) {
-          progressArg << sep << progFile;
-          sep = ",";
-        }
-        progress.Arg = progressArg.str();
+        progress.Arg = cmJoin(this->ProgressMap[gtarget.get()].Marks, ",");
       }
 
       bool targetMessages = true;

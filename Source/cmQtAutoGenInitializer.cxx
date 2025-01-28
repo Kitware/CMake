@@ -2210,8 +2210,7 @@ static std::string FindMocExecutableFromMocTarget(cmMakefile const* makefile,
                                                   unsigned int qtMajorVersion)
 {
   std::string result;
-  std::string const mocTargetName =
-    "Qt" + std::to_string(qtMajorVersion) + "::moc";
+  std::string const mocTargetName = cmStrCat("Qt", qtMajorVersion, "::moc");
   cmTarget const* mocTarget = makefile->FindTargetToUse(mocTargetName);
   if (mocTarget) {
     result = mocTarget->GetSafeProperty("IMPORTED_LOCATION");

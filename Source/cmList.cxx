@@ -626,7 +626,7 @@ ActionDescriptorSet::iterator TransformConfigure(
   auto descriptor = Descriptors.find(action);
   if (descriptor == Descriptors.end()) {
     throw transform_error(cmStrCat(" sub-command TRANSFORM, ",
-                                   std::to_string(static_cast<int>(action)),
+                                   static_cast<int>(action),
                                    " invalid action."));
   }
 

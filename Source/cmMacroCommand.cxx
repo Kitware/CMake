@@ -2,7 +2,6 @@
    file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmMacroCommand.h"
 
-#include <cstdio>
 #include <utility>
 
 #include <cm/memory>
@@ -73,14 +72,12 @@ bool cmMacroHelperCommand::operator()(
   std::vector<std::string> variables;
   variables.reserve(this->Args.size() - 1);
   for (unsigned int j = 1; j < this->Args.size(); ++j) {
-    variables.push_back("${" + this->Args[j] + "}");
+    variables.emplace_back(cmStrCat("${", this->Args[j], '}'));
   }
   std::vector<std::string> argVs;
   argVs.reserve(expandedArgs.size());
-  char argvName[60];
   for (unsigned int j = 0; j < expandedArgs.size(); ++j) {
-    snprintf(argvName, sizeof(argvName), "${ARGV%u}", j);
-    argVs.emplace_back(argvName);
+    argVs.emplace_back(cmStrCat("${ARGV", j, '}'));
   }
   // Invoke all the functions that were collected in the block.
   // for each function

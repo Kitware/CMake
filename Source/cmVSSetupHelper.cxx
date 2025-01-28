@@ -433,14 +433,11 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
 
   std::string envVSCommonToolsDir;
   std::string envVSCommonToolsDirEnvName =
-    cmStrCat("VS", std::to_string(this->Version), "0COMNTOOLS");
+    cmStrCat("VS", this->Version, "0COMNTOOLS");
 
-  if (cmSystemTools::GetEnv(envVSCommonToolsDirEnvName.c_str(),
-                            envVSCommonToolsDir)) {
+  if (cmSystemTools::GetEnv(envVSCommonToolsDirEnvName, envVSCommonToolsDir)) {
     cmSystemTools::ConvertToUnixSlashes(envVSCommonToolsDir);
   }
-
-  std::string const wantVersion = cmStrCat(std::to_string(this->Version), '.');
 
   bool specifiedLocationNotSpecifiedVersion = false;
 
@@ -454,6 +451,8 @@ bool cmVSSetupAPIHelper::EnumerateAndChooseVSInstance()
       this->SpecifiedVSInstallLocation.empty()) {
     return false;
   }
+
+  std::string const wantVersion = cmStrCat(this->Version, '.');
 
   std::vector<VSInstanceInfo> vecVSInstances;
   for (auto const& instanceInfo : vecVSInstancesAll) {

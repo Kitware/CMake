@@ -23,6 +23,7 @@
 #include "cmPropertyMap.h"
 #include "cmState.h"
 #include "cmStateSnapshot.h"
+#include "cmStringAlgorithms.h"
 #include "cmTarget.h"
 #include "cmTest.h"
 #include "cmValue.h"
@@ -100,7 +101,7 @@ std::shared_ptr<cmDebuggerVariables> cmDebuggerVariablesHelper::CreateIfAny(
         ret.reserve(items.size());
         int i = 0;
         for (std::string const& item : items) {
-          ret.emplace_back("[" + std::to_string(i++) + "]", item);
+          ret.emplace_back(cmStrCat('[', i++, ']'), item);
         }
         return ret;
       });

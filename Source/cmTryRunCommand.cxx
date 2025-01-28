@@ -272,15 +272,9 @@ void TryRunCommandImpl::RunExecutable(std::string const& runArgs,
     this->Makefile->GetSafeDefinition("CMAKE_CROSSCOMPILING_EMULATOR");
   if (!emulator.empty()) {
     cmList emulatorWithArgs{ emulator };
-    finalCommand +=
-      cmSystemTools::ConvertToRunCommandPath(emulatorWithArgs[0]);
-    finalCommand += " ";
-    for (std::string const& arg : cmMakeRange(emulatorWithArgs).advance(1)) {
-      finalCommand += "\"";
-      finalCommand += arg;
-      finalCommand += "\"";
-      finalCommand += " ";
-    }
+    finalCommand += cmStrCat(
+      cmSystemTools::ConvertToRunCommandPath(emulatorWithArgs[0]), ' ',
+      cmWrap("\"", cmMakeRange(emulatorWithArgs).advance(1), "\"", " "), ' ');
   }
   finalCommand += cmSystemTools::ConvertToRunCommandPath(this->OutputFile);
   if (!runArgs.empty()) {
@@ -292,12 +286,7 @@ void TryRunCommandImpl::RunExecutable(std::string const& runArgs,
     workDir ? workDir->c_str() : nullptr, cmSystemTools::OUTPUT_NONE,
     cmDuration::zero());
   // set the run var
-  std::string retStr;
-  if (worked) {
-    retStr = std::to_string(retVal);
-  } else {
-    retStr = "FAILED_TO_RUN";
-  }
+  std::string retStr = worked ? std::to_string(retVal) : "FAILED_TO_RUN";
   if (this->NoCache) {
     this->Makefile->AddDefinition(this->RunResultVariable, retStr);
   } else {
@@ -454,58 +443,58 @@ void TryRunCommandImpl::DoNotRunExecutable(
                  "enter \"FAILED_TO_RUN\".\n");
       if (stdOut || stdErr) {
         if (stdOut) {
-          comment += internalRunOutputStdOutName;
-          comment +=
-            "\n   contains the text the executable "
-            "would have printed on stdout.\n"
-            "   If the executable would not have been able to run, set ";
-          comment += internalRunOutputStdOutName;
-          comment += " empty.\n"
-                     "   Otherwise check if the output is evaluated by the "
-                     "calling CMake code. If so,\n"
-                     "   check what the source file would have printed when "
-                     "called with the given arguments.\n";
+          comment += cmStrCat(
+            internalRunOutputStdOutName,
+            "\n   contains the text the executable would have printed on "
+            "stdout.\n"
+            "   If the executable would not have been able to run, set ",
+            internalRunOutputStdOutName,
+            " empty.\n"
+            "   Otherwise check if the output is evaluated by the "
+            "calling CMake code. If so,\n"
+            "   check what the source file would have printed when "
+            "called with the given arguments.\n");
         }
         if (stdErr) {
-          comment += internalRunOutputStdErrName;
-          comment +=
-            "\n   contains the text the executable "
-            "would have printed on stderr.\n"
-            "   If the executable would not have been able to run, set ";
-          comment += internalRunOutputStdErrName;
-          comment += " empty.\n"
-                     "   Otherwise check if the output is evaluated by the "
-                     "calling CMake code. If so,\n"
-                     "   check what the source file would have printed when "
-                     "called with the given arguments.\n";
+          comment += cmStrCat(
+            internalRunOutputStdErrName,
+            "\n   contains the text the executable would have printed on "
+            "stderr.\n"
+            "   If the executable would not have been able to run, set ",
+            internalRunOutputStdErrName,
+            " empty.\n"
+            "   Otherwise check if the output is evaluated by the "
+            "calling CMake code. If so,\n"
+            "   check what the source file would have printed when "
+            "called with the given arguments.\n");
         }
       } else if (out) {
-        comment += internalRunOutputName;
-        comment +=
-          "\n   contains the text the executable "
-          "would have printed on stdout and stderr.\n"
-          "   If the executable would not have been able to run, set ";
-        comment += internalRunOutputName;
-        comment += " empty.\n"
-                   "   Otherwise check if the output is evaluated by the "
-                   "calling CMake code. If so,\n"
-                   "   check what the source file would have printed when "
-                   "called with the given arguments.\n";
+        comment += cmStrCat(
+          internalRunOutputName,
+          "\n   contains the text the executable would have printed on stdout "
+          "and stderr.\n"
+          "   If the executable would not have been able to run, set ",
+          internalRunOutputName,
+          " empty.\n"
+          "   Otherwise check if the output is evaluated by the "
+          "calling CMake code. If so,\n"
+          "   check what the source file would have printed when "
+          "called with the given arguments.\n");
       }
 
-      comment += "The ";
-      comment += compileResultVariable;
-      comment += " variable holds the build result for this try_run().\n\n";
+      comment +=
+        cmStrCat("The ", compileResultVariable,
+                 " variable holds the build result for this try_run().\n\n");
       if (srcFile) {
-        comment += "Source file   : ";
-        comment += *srcFile + "\n";
+        comment += cmStrCat("Source file   : ", *srcFile, '\n');
       }
-      comment += "Executable    : ";
-      comment += copyDest + "\n";
-      comment += "Run arguments : ";
-      comment += runArgs;
-      comment += "\n";
-      comment += "   Called from: " + this->Makefile->FormatListFileStack();
+      comment += cmStrCat("Executable    : ", copyDest,
+                          "\n"
+                          "Run arguments : ",
+                          runArgs,
+                          "\n"
+                          "   Called from: ",
+                          this->Makefile->FormatListFileStack());
       cmsys::SystemTools::ReplaceString(comment, "\n", "\n# ");
       file << comment << "\n\n";
 

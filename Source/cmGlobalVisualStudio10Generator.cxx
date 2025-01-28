@@ -1025,11 +1025,11 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
       "Failed to run MSBuild command:\n"
       "  " << cmd[0] << "\n"
       "to get the value of VCTargetsPath:\n"
-      "  " << out << "\n"
+      "  " << out << '\n'
       ;
     /* clang-format on */
     if (ret != 0) {
-      e << "Exit code: " << ret << "\n";
+      e << "Exit code: " << ret << '\n';
     }
     mf->IssueMessage(MessageType::FATAL_ERROR, e.str());
     cmSystemTools::SetFatalErrorOccurred();
@@ -1040,7 +1040,7 @@ bool cmGlobalVisualStudio10Generator::FindVCTargetsPath(cmMakefile* mf)
 
   {
     cmsys::ofstream fout(txt.c_str());
-    fout << this->VCTargetsPath << "\n";
+    fout << this->VCTargetsPath << '\n';
   }
   return true;
 }
@@ -1218,13 +1218,13 @@ cmGlobalVisualStudio10Generator::GenerateBuildCommand(
       if (jobs == cmake::DEFAULT_BUILD_PARALLEL_LEVEL) {
         makeCommand.Add("/m");
       } else {
-        makeCommand.Add(cmStrCat("/m:", std::to_string(jobs)));
+        makeCommand.Add(cmStrCat("/m:", jobs));
       }
     }
 
     // Respect the verbosity: 'n' normal will show build commands
     //                        'm' minimal only the build step's title
-    makeCommand.Add(cmStrCat("/v:", ((verbose) ? "n" : "m")));
+    makeCommand.Add(cmStrCat("/v:", ((verbose) ? 'n' : 'm')));
     makeCommand.Add(makeOptions.begin(), makeOptions.end());
     makeCommands.emplace_back(std::move(makeCommand));
   }
@@ -1462,7 +1462,7 @@ cmIDEFlagTable const* cmGlobalVisualStudio10Generator::LoadFlagTable(
     } else {
       mf->IssueMessage(MessageType::FATAL_ERROR,
                        cmStrCat("JSON flag table for ", table,
-                                " not found for toolset ", genericName, " ",
+                                " not found for toolset ", genericName, ' ',
                                 defaultName));
       return nullptr;
     }
