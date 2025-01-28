@@ -93,7 +93,7 @@ if(GIF_INCLUDE_DIR)
     set(GIF_VERSION "${_GIF_MAJ}.${_GIF_MIN}.${_GIF_REL}")
   else()
     # use UserData field to sniff version instead
-    CHECK_STRUCT_HAS_MEMBER(GifFileType UserData gif_lib.h GIF_GifFileType_UserData )
+    check_struct_has_member(GifFileType UserData gif_lib.h GIF_GifFileType_UserData )
     if(GIF_GifFileType_UserData)
       set(GIF_VERSION 4)
     else()
@@ -109,7 +109,7 @@ if(GIF_INCLUDE_DIR)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(GIF  REQUIRED_VARS  GIF_LIBRARY  GIF_INCLUDE_DIR
+find_package_handle_standard_args(GIF  REQUIRED_VARS  GIF_LIBRARY  GIF_INCLUDE_DIR
                                        VERSION_VAR GIF_VERSION )
 
 if(GIF_FOUND)

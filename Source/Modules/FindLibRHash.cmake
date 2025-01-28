@@ -52,7 +52,7 @@ mark_as_advanced(LibRHash_INCLUDE_DIR)
 
 #-----------------------------------------------------------------------------
 include(${CMAKE_CURRENT_LIST_DIR}/../../Modules/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibRHash
+find_package_handle_standard_args(LibRHash
   REQUIRED_VARS LibRHash_LIBRARY LibRHash_INCLUDE_DIR
   )
 

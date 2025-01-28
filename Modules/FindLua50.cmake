@@ -76,6 +76,6 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 # handle the QUIETLY and REQUIRED arguments and set LUA_FOUND to TRUE if
 # all listed variables are TRUE
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Lua50  DEFAULT_MSG  LUA_LIBRARIES LUA_INCLUDE_DIR)
+find_package_handle_standard_args(Lua50  DEFAULT_MSG  LUA_LIBRARIES LUA_INCLUDE_DIR)
 
 mark_as_advanced(LUA_INCLUDE_DIR LUA_LIBRARIES)

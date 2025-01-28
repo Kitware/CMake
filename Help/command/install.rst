@@ -788,7 +788,7 @@ Signatures
 
   .. code-block:: cmake
 
-    install(CODE "MESSAGE(\"Sample install message.\")")
+    install(CODE "message(\"Sample install message.\")")
 
   will print a message during installation.
 

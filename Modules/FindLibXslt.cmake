@@ -52,7 +52,7 @@ cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 # in the find_path() and find_library() calls
 find_package(PkgConfig QUIET)
 if(PKG_CONFIG_FOUND)
-  PKG_CHECK_MODULES(PC_LIBXSLT QUIET libxslt)
+  pkg_check_modules(PC_LIBXSLT QUIET libxslt)
 endif()
 set(LIBXSLT_DEFINITIONS ${PC_LIBXSLT_CFLAGS_OTHER})
 
@@ -78,7 +78,7 @@ find_library(LIBXSLT_LIBRARY NAMES xslt libxslt
 set(LIBXSLT_LIBRARIES ${LIBXSLT_LIBRARY})
 
 if(PKG_CONFIG_FOUND)
-  PKG_CHECK_MODULES(PC_LIBXSLT_EXSLT QUIET libexslt)
+  pkg_check_modules(PC_LIBXSLT_EXSLT QUIET libexslt)
 endif()
 set(LIBXSLT_EXSLT_DEFINITIONS ${PC_LIBXSLT_EXSLT_CFLAGS_OTHER})
 
@@ -112,7 +112,7 @@ elseif(LIBXSLT_INCLUDE_DIR AND EXISTS "${LIBXSLT_INCLUDE_DIR}/libxslt/xsltconfig
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(LibXslt
+find_package_handle_standard_args(LibXslt
                                   REQUIRED_VARS LIBXSLT_LIBRARIES LIBXSLT_INCLUDE_DIR
                                   VERSION_VAR LIBXSLT_VERSION_STRING)
 

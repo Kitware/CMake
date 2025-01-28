@@ -800,7 +800,7 @@ if(Protobuf_INCLUDE_DIR)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Protobuf
+find_package_handle_standard_args(Protobuf
     REQUIRED_VARS Protobuf_LIBRARIES Protobuf_INCLUDE_DIR
     VERSION_VAR Protobuf_VERSION
 )

@@ -50,7 +50,7 @@ endif()
 set(GNUPLOT ${GNUPLOT_EXECUTABLE})
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Gnuplot
+find_package_handle_standard_args(Gnuplot
                                   REQUIRED_VARS GNUPLOT_EXECUTABLE
                                   VERSION_VAR GNUPLOT_VERSION_STRING)
 

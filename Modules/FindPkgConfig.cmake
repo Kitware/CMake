@@ -974,7 +974,7 @@ endmacro()
 function (pkg_get_variable result pkg variable)
   set(_multiValueArgs DEFINE_VARIABLES)
 
-  CMAKE_PARSE_ARGUMENTS(_parsedArguments "" "" "${_multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(_parsedArguments "" "" "${_multiValueArgs}" ${ARGN})
   set(defined_variables )
   foreach(_def_var ${_parsedArguments_DEFINE_VARIABLES})
     if(NOT _def_var MATCHES "^.+=.*$")

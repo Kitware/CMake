@@ -48,5 +48,5 @@ OSG_FIND_PATH   (OSGANIMATION osgAnimation/Animation)
 OSG_FIND_LIBRARY(OSGANIMATION osgAnimation)
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(osgAnimation DEFAULT_MSG
+find_package_handle_standard_args(osgAnimation DEFAULT_MSG
     OSGANIMATION_LIBRARY OSGANIMATION_INCLUDE_DIR)

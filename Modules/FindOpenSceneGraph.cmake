@@ -226,7 +226,7 @@ if(OpenSceneGraph_FIND_REQUIRED)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenSceneGraph
+find_package_handle_standard_args(OpenSceneGraph
                                   REQUIRED_VARS OPENSCENEGRAPH_LIBRARIES OPENSCENEGRAPH_INCLUDE_DIR ${_osg_component_founds}
                                   VERSION_VAR OPENSCENEGRAPH_VERSION)
 

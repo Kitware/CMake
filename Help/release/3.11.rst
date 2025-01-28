@@ -127,7 +127,7 @@ Properties
 Modules
 -------
 
-* The :module:`CheckIncludeFiles` module :command:`CHECK_INCLUDE_FILES`
+* The :module:`CheckIncludeFiles` module :command:`check_include_files`
   command gained a ``LANGUAGE`` option to specify whether to check using the
   ``C`` or ``CXX`` compiler.
 

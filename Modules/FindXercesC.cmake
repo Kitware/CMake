@@ -112,7 +112,7 @@ unset(XercesC_VERSION_MINOR)
 unset(XercesC_VERSION_PATCH)
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(XercesC
+find_package_handle_standard_args(XercesC
                                   REQUIRED_VARS XercesC_LIBRARY
                                                 XercesC_INCLUDE_DIR
                                                 XercesC_VERSION

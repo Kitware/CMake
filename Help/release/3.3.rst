@@ -135,7 +135,7 @@ Modules
   documentation, and unit tests.
 
 * The :module:`FindPackageHandleStandardArgs` module
-  ``FIND_PACKAGE_HANDLE_STANDARD_ARGS`` function now
+  ``find_package_handle_standard_args`` function now
   always populates both the ``<PackageName>_FOUND``
   and ``<UPPERCASE_NAME>_FOUND`` variables (the latter
   for backwards compatibility).  The ``FOUND_VAR``

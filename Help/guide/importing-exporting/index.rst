@@ -390,7 +390,7 @@ section.
   :start-after: # create config file
   :end-before: # install config files
 
-Install the generated configuration files with the :command:`INSTALL(files)`
+Install the generated configuration files with the :command:`install(FILES)`
 command. Both ``MathFunctionsConfigVersion.cmake`` and
 ``MathFunctionsConfig.cmake`` are installed to the same location, completing
 the package.

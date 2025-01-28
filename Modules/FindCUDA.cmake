@@ -888,7 +888,7 @@ if(NOT CUDA_TOOLKIT_ROOT_DIR AND NOT CMAKE_CROSSCOMPILING)
 endif ()
 
 if(CMAKE_CROSSCOMPILING)
-  SET (CUDA_TOOLKIT_ROOT $ENV{CUDA_TOOLKIT_ROOT})
+  set(CUDA_TOOLKIT_ROOT $ENV{CUDA_TOOLKIT_ROOT})
   if(CMAKE_SYSTEM_PROCESSOR STREQUAL "armv7-a")
     # Support for NVPACK
     set (CUDA_TOOLKIT_TARGET_NAMES "armv7-linux-androideabi")
@@ -909,7 +909,7 @@ if(CMAKE_CROSSCOMPILING)
   foreach(CUDA_TOOLKIT_TARGET_NAME IN LISTS CUDA_TOOLKIT_TARGET_NAMES)
     if (EXISTS "${CUDA_TOOLKIT_ROOT}/targets/${CUDA_TOOLKIT_TARGET_NAME}")
       set(CUDA_TOOLKIT_TARGET_DIR "${CUDA_TOOLKIT_ROOT}/targets/${CUDA_TOOLKIT_TARGET_NAME}" CACHE PATH "CUDA Toolkit target location.")
-      SET (CUDA_TOOLKIT_ROOT_DIR ${CUDA_TOOLKIT_ROOT} CACHE PATH "Toolkit location." FORCE)
+      set(CUDA_TOOLKIT_ROOT_DIR ${CUDA_TOOLKIT_ROOT} CACHE PATH "Toolkit location." FORCE)
       mark_as_advanced(CUDA_TOOLKIT_TARGET_DIR)
       break()
     endif()
@@ -929,7 +929,7 @@ else()
   macro( cuda_find_host_program )
     find_program( ${ARGN} )
   endmacro()
-  SET (CUDA_TOOLKIT_TARGET_DIR ${CUDA_TOOLKIT_ROOT_DIR})
+  set(CUDA_TOOLKIT_TARGET_DIR ${CUDA_TOOLKIT_ROOT_DIR})
 endif()
 
 
@@ -1561,7 +1561,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
     set(CUDA_NVCC_COMPILE_DEFINITIONS "${_dir_compile_defs}")
   else()
     # Append the include directories for this target via generator expression, which is
-    # expanded by the FILE(GENERATE) call below.  This generator expression captures all
+    # expanded by the file(GENERATE) call below.  This generator expression captures all
     # include dirs set by the user, whether via directory properties or target properties
     list(APPEND CUDA_NVCC_INCLUDE_DIRS "$<TARGET_PROPERTY:${cuda_target},INCLUDE_DIRECTORIES>")
 

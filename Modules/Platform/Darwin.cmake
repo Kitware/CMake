@@ -36,7 +36,7 @@ if(NOT DEFINED HAVE_FLAG_SEARCH_PATHS_FIRST)
 endif()
 # More desirable, but does not work:
   #include(CheckCXXCompilerFlag)
-  #CHECK_CXX_COMPILER_FLAG("-Wl,-search_paths_first" HAVE_FLAG_SEARCH_PATHS_FIRST)
+  #check_cxx_compiler_flag("-Wl,-search_paths_first" HAVE_FLAG_SEARCH_PATHS_FIRST)
 
 set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
 set(CMAKE_SHARED_LIBRARY_SUFFIX ".dylib")

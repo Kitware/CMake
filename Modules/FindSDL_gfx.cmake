@@ -75,7 +75,7 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL_gfx
+find_package_handle_standard_args(SDL_gfx
                                   REQUIRED_VARS SDL_GFX_LIBRARIES SDL_GFX_INCLUDE_DIRS
                                   VERSION_VAR SDL_GFX_VERSION_STRING)
 

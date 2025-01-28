@@ -44,7 +44,7 @@ if (NOT WIN32)
   # also fills in GNUTLS_DEFINITIONS, although that isn't normally useful
   find_package(PkgConfig QUIET)
   if(PKG_CONFIG_FOUND)
-    PKG_CHECK_MODULES(PC_GNUTLS QUIET gnutls)
+    pkg_check_modules(PC_GNUTLS QUIET gnutls)
   endif()
   set(GNUTLS_DEFINITIONS ${PC_GNUTLS_CFLAGS_OTHER})
   set(GNUTLS_VERSION ${PC_GNUTLS_VERSION})
@@ -67,7 +67,7 @@ find_library(GNUTLS_LIBRARY NAMES gnutls libgnutls
 mark_as_advanced(GNUTLS_INCLUDE_DIR GNUTLS_LIBRARY)
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(GnuTLS
+find_package_handle_standard_args(GnuTLS
                                   REQUIRED_VARS GNUTLS_LIBRARY GNUTLS_INCLUDE_DIR
                                   VERSION_VAR GNUTLS_VERSION_STRING)
 

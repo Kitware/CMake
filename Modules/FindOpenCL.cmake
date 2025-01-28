@@ -51,12 +51,12 @@ function(_FIND_OPENCL_VERSION)
     set(CMAKE_REQUIRED_INCLUDES "${OpenCL_INCLUDE_DIR}")
 
     if(EXISTS ${OpenCL_INCLUDE_DIR}/Headers/cl.h)
-      CHECK_SYMBOL_EXISTS(
+      check_symbol_exists(
         CL_VERSION_${VERSION}
         "${OpenCL_INCLUDE_DIR}/Headers/cl.h"
         OPENCL_VERSION_${VERSION})
     else()
-      CHECK_SYMBOL_EXISTS(
+      check_symbol_exists(
         CL_VERSION_${VERSION}
         "${OpenCL_INCLUDE_DIR}/CL/cl.h"
         OPENCL_VERSION_${VERSION})

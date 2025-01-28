@@ -86,7 +86,7 @@ if (CMAKE_FIND_PACKAGE_NAME STREQUAL "PerlLibs")
   # the contents, detect the case in this module and suppress it explicitly.
   set(FPHSA_NAME_MISMATCHED 1)
 endif ()
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Perl
+find_package_handle_standard_args(Perl
                                   REQUIRED_VARS PERL_EXECUTABLE
                                   VERSION_VAR PERL_VERSION_STRING)
 unset(FPHSA_NAME_MISMATCHED)

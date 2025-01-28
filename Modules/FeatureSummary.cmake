@@ -358,7 +358,7 @@ endfunction()
 #]=======================================================================]
 
 function(FEATURE_SUMMARY)
-# CMAKE_PARSE_ARGUMENTS(<prefix> <options> <one_value_keywords> <multi_value_keywords> args...)
+# cmake_parse_arguments(<prefix> <options> <one_value_keywords> <multi_value_keywords> args...)
   set(options APPEND
               INCLUDE_QUIET_PACKAGES
               FATAL_ON_MISSING_REQUIRED_PACKAGES
@@ -369,7 +369,7 @@ function(FEATURE_SUMMARY)
                    DESCRIPTION)
   set(multiValueArgs WHAT)
 
-  CMAKE_PARSE_ARGUMENTS(_FS "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${_FIRST_ARG} ${ARGN})
+  cmake_parse_arguments(_FS "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${_FIRST_ARG} ${ARGN})
 
   if(_FS_UNPARSED_ARGUMENTS)
     message(FATAL_ERROR "Unknown keywords given to FEATURE_SUMMARY(): \"${_FS_UNPARSED_ARGUMENTS}\"")
@@ -594,7 +594,7 @@ function(SET_PACKAGE_PROPERTIES _name _props)
   set(oneValueArgs DESCRIPTION URL TYPE PURPOSE )
   set(multiValueArgs ) # none
 
-  CMAKE_PARSE_ARGUMENTS(_SPP "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${ARGN})
+  cmake_parse_arguments(_SPP "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${ARGN})
 
   if(_SPP_UNPARSED_ARGUMENTS)
     message(FATAL_ERROR "Unknown keywords given to SET_PACKAGE_PROPERTIES(): \"${_SPP_UNPARSED_ARGUMENTS}\"")
@@ -813,7 +813,7 @@ endfunction()
 #]=======================================================================]
 function(SET_FEATURE_INFO)
   message(DEPRECATION "SET_FEATURE_INFO is deprecated. Use ADD_FEATURE_INFO instead.")
-  SET_PACKAGE_INFO(${ARGN})
+  set_package_info(${ARGN})
 endfunction()
 
 #[=======================================================================[.rst:
@@ -834,7 +834,7 @@ endfunction()
 function(PRINT_ENABLED_FEATURES)
   message(DEPRECATION "PRINT_ENABLED_FEATURES is deprecated. Use
     feature_summary(WHAT ENABLED_FEATURES DESCRIPTION \"Enabled features:\")")
-  FEATURE_SUMMARY(WHAT ENABLED_FEATURES  DESCRIPTION "Enabled features:")
+  feature_summary(WHAT ENABLED_FEATURES  DESCRIPTION "Enabled features:")
 endfunction()
 
 #[=======================================================================[.rst:
@@ -855,5 +855,5 @@ endfunction()
 function(PRINT_DISABLED_FEATURES)
   message(DEPRECATION "PRINT_DISABLED_FEATURES is deprecated. Use
     feature_summary(WHAT DISABLED_FEATURES DESCRIPTION \"Disabled features:\")")
-  FEATURE_SUMMARY(WHAT DISABLED_FEATURES  DESCRIPTION "Disabled features:")
+  feature_summary(WHAT DISABLED_FEATURES  DESCRIPTION "Disabled features:")
 endfunction()

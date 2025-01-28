@@ -397,7 +397,7 @@ if(_Ruby_DEBUG_OUTPUT)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Ruby  REQUIRED_VARS  ${_Ruby_REQUIRED_VARS}
+find_package_handle_standard_args(Ruby  REQUIRED_VARS  ${_Ruby_REQUIRED_VARS}
                                         VERSION_VAR Ruby_VERSION )
 
 if(Ruby_FOUND)

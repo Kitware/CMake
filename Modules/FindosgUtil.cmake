@@ -49,5 +49,5 @@ OSG_FIND_PATH   (OSGUTIL osgUtil/SceneView)
 OSG_FIND_LIBRARY(OSGUTIL osgUtil)
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(osgUtil DEFAULT_MSG
+find_package_handle_standard_args(osgUtil DEFAULT_MSG
     OSGUTIL_LIBRARY OSGUTIL_INCLUDE_DIR)
