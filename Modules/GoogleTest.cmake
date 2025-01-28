@@ -400,9 +400,9 @@ function(gtest_add_tests)
     message(FATAL_ERROR "${arg_TARGET} does not define an existing CMake target")
   endif()
   if(NOT arg_WORKING_DIRECTORY)
-    unset(workDir)
+    unset(maybe_WORKING_DIRECTORY)
   else()
-    set(workDir WORKING_DIRECTORY "${arg_WORKING_DIRECTORY}")
+    set(maybe_WORKING_DIRECTORY "WORKING_DIRECTORY \${arg_WORKING_DIRECTORY}")
   endif()
 
   if(NOT arg_SOURCES)
@@ -492,11 +492,11 @@ function(gtest_add_tests)
               ${arg_TEST_PREFIX}${orig_test_name}${arg_TEST_SUFFIX}
           )
           cmake_language(EVAL CODE "
-            add_test(NAME ${ctest_test_name}
-                     ${workDir}
-                     COMMAND ${arg_TARGET}
+            add_test(NAME \${ctest_test_name}
+                     ${maybe_WORKING_DIRECTORY}
+                     COMMAND \${arg_TARGET}
                        --gtest_also_run_disabled_tests
-                       --gtest_filter=${gtest_test_name}
+                       --gtest_filter=\${gtest_test_name}
                        ${extra_args}
                      __CMP0178 [==[${cmp0178}]==]
             )"
@@ -508,10 +508,10 @@ function(gtest_add_tests)
       else()
         set(ctest_test_name ${arg_TEST_PREFIX}${gtest_test_name}${arg_TEST_SUFFIX})
         cmake_language(EVAL CODE "
-          add_test(NAME ${ctest_test_name}
-                   ${workDir}
-                   COMMAND ${arg_TARGET}
-                     --gtest_filter=${gtest_test_name}
+          add_test(NAME \${ctest_test_name}
+                   ${maybe_WORKING_DIRECTORY}
+                   COMMAND \${arg_TARGET}
+                     --gtest_filter=\${gtest_test_name}
                      ${extra_args}
                    __CMP0178 [==[${cmp0178}]==]
           )"
