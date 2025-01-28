@@ -47,6 +47,15 @@ provided for backward compatibility:
   This signature can be used only in CMake projects.  Script mode is not
   supported.
 
+.. note::
+
+  Instead of loading the outside project's cache file and manually accessing
+  variables, a more robust and convenient approach is to use the
+  :command:`export` command in the outside project, when available.  This allows
+  the project to provide its targets, configuration, or features in a
+  structured and maintainable way, making integration simpler and less
+  error-prone.
+
 Examples
 ^^^^^^^^
 
