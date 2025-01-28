@@ -551,7 +551,7 @@ that are mapped to subprojects.
 
 When the :prop_test:`PROCESSORS` test property is set, CTest will display a
 weighted test timing result in label and subproject summaries. The time is
-reported with `sec*proc` instead of just `sec`.
+reported with ``sec * proc`` instead of just ``sec``.
 
 The weighted time summary reported for each label or subproject ``j``
 is computed as::
@@ -810,10 +810,10 @@ The available ``<dashboard-options>`` are the following:
 
 .. option:: --http1.0
 
- Submit using `HTTP 1.0`.
+ Submit using ``HTTP 1.0``.
 
- This option will force CTest to use `HTTP 1.0` to submit files to the
- dashboard, instead of `HTTP 1.1`.
+ This option will force CTest to use ``HTTP 1.0`` to submit files to the
+ dashboard, instead of ``HTTP 1.1``.
 
 .. option:: --no-compress-output
 

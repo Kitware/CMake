@@ -22,7 +22,7 @@ https://rpm.org/documentation.
 
 .. versionchanged:: 3.6
 
- `<COMPONENT>` part of variables is preferred to be in upper case (e.g. if
+ ``<COMPONENT>`` part of variables is preferred to be in upper case (e.g. if
  component is named ``foo`` then use :variable:`!CPACK_RPM_FOO_XXXX` variable
  name format) as is with other :variable:`!CPACK_<COMPONENT>_XXXX` variables.
  For the purposes of back compatibility (CMake/CPack version 3.5 and lower)

@@ -3,7 +3,7 @@ CMAKE_EXPORT_BUILD_DATABASE
 
 .. versionadded:: 3.31
 
-.. note ::
+.. note::
 
    This variable is meaningful only when experimental support for build
    databases has been enabled by the

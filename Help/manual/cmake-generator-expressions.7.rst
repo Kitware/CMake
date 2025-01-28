@@ -1415,7 +1415,7 @@ Compile Context
   linking requirements (e.g., all-``inline`` or C++ template libraries).
 
   Note that for proper evaluation of this expression requires policy :policy:`CMP0099`
-  to be set to `NEW`.
+  to be set to ``NEW``.
 
 Linker Language And ID
 ^^^^^^^^^^^^^^^^^^^^^^

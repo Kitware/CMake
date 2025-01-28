@@ -167,12 +167,12 @@ the current working directory (cwd) is used for the other.  For example:
 ============================== ============ ===========
  Command Line                   Source Dir   Build Dir
 ============================== ============ ===========
- ``cmake -B build``             `cwd`        ``build``
+ ``cmake -B build``             *cwd*        ``build``
  ``cmake -B build src``         ``src``      ``build``
  ``cmake -B build -S src``      ``src``      ``build``
- ``cmake src``                  ``src``      `cwd`
- ``cmake build`` (existing)     `loaded`     ``build``
- ``cmake -S src``               ``src``      `cwd`
+ ``cmake src``                  ``src``      *cwd*
+ ``cmake build`` (existing)     *loaded*     ``build``
+ ``cmake -S src``               ``src``      *cwd*
  ``cmake -S src build``         ``src``      ``build``
  ``cmake -S src -B build``      ``src``      ``build``
 ============================== ============ ===========

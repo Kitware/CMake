@@ -164,7 +164,7 @@ The options for the above signatures are:
   The above example shows how values for variables
   ``COMPILE_DEFINITIONS``, ``INCLUDE_DIRECTORIES``, ``LINK_DIRECTORIES``,
   ``LINK_LIBRARIES``, and ``LINK_OPTIONS`` are used. Compiler options
-  can be passed in like `CMAKE_FLAGS -DCOMPILE_DEFINITIONS=-Werror`.
+  can be passed in like ``CMAKE_FLAGS -DCOMPILE_DEFINITIONS=-Werror``.
 
 ``COMPILE_DEFINITIONS <defs>...``
   Specify ``-Ddefinition`` arguments to pass to :command:`add_definitions`

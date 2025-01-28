@@ -6,7 +6,7 @@ CXX_MODULE_STD
 ``CXX_MODULE_STD`` is a boolean specifying whether the target may use
 ``import std;`` its C++ sources or not.
 
-.. note ::
+.. note::
 
    This setting is meaningful only when experimental support for ``import
    std;`` has been enabled by the ``CMAKE_EXPERIMENTAL_CXX_IMPORT_STD`` gate.
@@ -17,10 +17,10 @@ standard applied to the target. This target is only applicable within the
 current build and will not appear in the exported interfaces of the targets.
 When consumed, these targets will be reapplied as necessary.
 
-.. note:
+.. note::
 
-   Similar to the introduction of :prop:`CXX_SCAN_FOR_MODULES`, this property
-   defaults to _not_ adding ``import std`` support to targets using
+   Similar to the introduction of :prop_tgt:`CXX_SCAN_FOR_MODULES`, this
+   property defaults to **not** adding ``import std`` support to targets using
    ``cxx_std_23`` without an explicit request in order to preserve existing
    behavior for projects using C++23 without ``import std``. A future policy
    to change the default behavior is expected once the feature sees wider

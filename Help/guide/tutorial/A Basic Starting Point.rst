@@ -400,7 +400,7 @@ include files.
 
 **Note:** Throughout this tutorial, we will refer to the project build and
 the project binary directory interchangeably. These are the same and are not
-meant to refer to a `bin/` directory.
+meant to refer to a ``bin/`` directory.
 
 We used :command:`target_include_directories` to specify
 where the executable target should look for include files.

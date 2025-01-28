@@ -104,7 +104,7 @@ optional.
 
 ``version``
   The Data version of snippet file to generate, an integer. Currently the only
-  supported version is `1`.
+  supported version is ``1``.
 
 ``callbacks``
   A list of command-line strings for callbacks to handle collected timing
@@ -205,7 +205,7 @@ and contain the following data:
 
   ``version``
     The Data version of the snippet file, an integer. Currently the version is
-    always `1`.
+    always ``1``.
 
   ``command``
     The full command executed.
@@ -312,7 +312,7 @@ for navigating the instrumentation data.
 
 ``version``
   The Data version of the index file, an integer. Currently the version is
-  always `1`.
+  always ``1``.
 
 ``buildDir``
   The build directory of the CMake project.
