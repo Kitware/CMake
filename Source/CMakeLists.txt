@@ -1062,7 +1062,6 @@ add_library(
   CTest/cmCTestBuildHandler.cxx
   CTest/cmCTestCommand.cxx
   CTest/cmCTestConfigureCommand.cxx
-  CTest/cmCTestConfigureHandler.cxx
   CTest/cmCTestCoverageCommand.cxx
   CTest/cmCTestCoverageHandler.cxx
   CTest/cmCTestCurl.cxx
