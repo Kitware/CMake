@@ -16,10 +16,13 @@ cd build
 
 cmake -GNinja \
     -DCMAKE_BUILD_TYPE=Release \
-    "-DIWYU_RESOURCE_RELATIVE_TO=clang" \
-    "-DIWYU_RESOURCE_DIR=../lib/clang/$llvm_version" \
-    "-DCMAKE_INSTALL_PREFIX=/usr/local/lib/llvm-$llvm_version" \
+    -DIWYU_RESOURCE_RELATIVE_TO=clang \
+    -DIWYU_RESOURCE_DIR=../lib/clang/"$llvm_version" \
+    -DCMAKE_INSTALL_PREFIX=/usr/local/lib/llvm-"$llvm_version" \
     ..
-ninja
-DESTDIR=/root/iwyu-destdir ninja install
+
+cmake --build . --parallel
+
+DESTDIR=~/iwyu-destdir cmake --install .
+
 tar -C /root/iwyu-destdir -cf /root/iwyu.tar .
