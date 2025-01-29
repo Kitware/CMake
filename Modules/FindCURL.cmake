@@ -40,8 +40,15 @@ This module defines the following variables:
 ``CURL_LIBRARIES``
   List of libraries when using ``curl``.
 
+``CURL_VERSION``
+  .. versionadded:: 4.0
+
+  The version of ``curl`` found.
+  This supersedes ``CURL_VERSION_STRING``.
+
 ``CURL_VERSION_STRING``
   The version of ``curl`` found.
+  Superseded by ``CURL_VERSION``.
 
 .. versionadded:: 3.13
   Debug and Release variants are found separately.
@@ -147,7 +154,8 @@ if(CURL_INCLUDE_DIR)
     if(EXISTS "${CURL_INCLUDE_DIR}/curl/${_curl_version_header}")
       file(STRINGS "${CURL_INCLUDE_DIR}/curl/${_curl_version_header}" curl_version_str REGEX "^#define[\t ]+LIBCURL_VERSION[\t ]+\".*\"")
 
-      string(REGEX REPLACE "^#define[\t ]+LIBCURL_VERSION[\t ]+\"([^\"]*)\".*" "\\1" CURL_VERSION_STRING "${curl_version_str}")
+      string(REGEX REPLACE "^#define[\t ]+LIBCURL_VERSION[\t ]+\"([^\"]*)\".*" "\\1" CURL_VERSION "${curl_version_str}")
+      set(CURL_VERSION_STRING "${CURL_VERSION}")
       unset(curl_version_str)
       break()
     endif()
@@ -202,7 +210,7 @@ endif()
 
 find_package_handle_standard_args(CURL
                                   REQUIRED_VARS CURL_LIBRARY CURL_INCLUDE_DIR
-                                  VERSION_VAR CURL_VERSION_STRING
+                                  VERSION_VAR CURL_VERSION
                                   HANDLE_COMPONENTS)
 
 if(CURL_FOUND)
