@@ -371,7 +371,7 @@ endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(SDL_sound
+find_package_handle_standard_args(SDL_sound
                                   REQUIRED_VARS SDL_SOUND_LIBRARY SDL_SOUND_INCLUDE_DIR
                                   VERSION_VAR SDL_SOUND_VERSION_STRING)
 

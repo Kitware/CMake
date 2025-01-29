@@ -97,7 +97,7 @@ find_library(ILU_LIBRARIES
 
 #message("ILU_LIBRARIES is ${ILU_LIBRARIES}")
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(DevIL DEFAULT_MSG
+find_package_handle_standard_args(DevIL DEFAULT_MSG
                                   IL_LIBRARIES ILU_LIBRARIES
                                   IL_INCLUDE_DIR)
 # provide legacy variable for compatibility

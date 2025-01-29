@@ -270,7 +270,7 @@ unset(TIFF_NAMES)
 unset(TIFF_NAMES_DEBUG)
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(TIFF
+find_package_handle_standard_args(TIFF
                                   HANDLE_COMPONENTS
                                   REQUIRED_VARS TIFF_LIBRARY TIFF_INCLUDE_DIR
                                   VERSION_VAR TIFF_VERSION_STRING)

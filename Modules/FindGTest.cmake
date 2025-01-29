@@ -199,7 +199,7 @@ find_package(GTest QUIET NO_MODULE)
 # if we found the GTest cmake package then we are done, and
 # can print what we found and return.
 if(GTest_FOUND)
-    FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTest HANDLE_COMPONENTS CONFIG_MODE)
+    find_package_handle_standard_args(GTest HANDLE_COMPONENTS CONFIG_MODE)
 
     set(GTEST_LIBRARIES      GTest::gtest)
     set(GTEST_MAIN_LIBRARIES GTest::gtest_main)
@@ -270,7 +270,7 @@ else()
     __gtest_find_library(GMOCK_MAIN_LIBRARY_DEBUG gmock_maind)
 endif()
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(GTest DEFAULT_MSG GTEST_LIBRARY GTEST_INCLUDE_DIR GTEST_MAIN_LIBRARY)
+find_package_handle_standard_args(GTest DEFAULT_MSG GTEST_LIBRARY GTEST_INCLUDE_DIR GTEST_MAIN_LIBRARY)
 
 if(GMOCK_LIBRARY AND GMOCK_MAIN_LIBRARY)
     set(GMock_FOUND True)

@@ -73,7 +73,7 @@ if (NOT BZIP2_LIBRARIES)
     find_library(BZIP2_LIBRARY_DEBUG NAMES bz2d bzip2d libbz2d libbzip2d NAMES_PER_DIR ${_BZIP2_PATHS} PATH_SUFFIXES lib)
 
     include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
-    SELECT_LIBRARY_CONFIGURATIONS(BZIP2)
+    select_library_configurations(BZIP2)
 else ()
     file(TO_CMAKE_PATH "${BZIP2_LIBRARIES}" BZIP2_LIBRARIES)
 endif ()
@@ -85,7 +85,7 @@ if (BZIP2_INCLUDE_DIR AND EXISTS "${BZIP2_INCLUDE_DIR}/bzlib.h")
 endif ()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(BZip2
+find_package_handle_standard_args(BZip2
                                   REQUIRED_VARS BZIP2_LIBRARIES BZIP2_INCLUDE_DIR
                                   VERSION_VAR BZIP2_VERSION)
 
@@ -97,7 +97,7 @@ if (BZIP2_FOUND)
   set(CMAKE_REQUIRED_QUIET ${BZip2_FIND_QUIETLY})
   set(CMAKE_REQUIRED_INCLUDES ${BZIP2_INCLUDE_DIR})
   set(CMAKE_REQUIRED_LIBRARIES ${BZIP2_LIBRARIES})
-  CHECK_SYMBOL_EXISTS(BZ2_bzCompressInit "bzlib.h" BZIP2_NEED_PREFIX)
+  check_symbol_exists(BZ2_bzCompressInit "bzlib.h" BZIP2_NEED_PREFIX)
   cmake_pop_check_state()
 
   if(NOT TARGET BZip2::BZip2)

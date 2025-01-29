@@ -84,7 +84,7 @@ unset(_JsonCpp_H)
 
 #-----------------------------------------------------------------------------
 include(${CMAKE_CURRENT_LIST_DIR}/../../Modules/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(JsonCpp
+find_package_handle_standard_args(JsonCpp
   REQUIRED_VARS JsonCpp_LIBRARY JsonCpp_INCLUDE_DIR
   VERSION_VAR JsonCpp_VERSION_STRING
   )

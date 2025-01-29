@@ -139,7 +139,7 @@ if(EXPAT_INCLUDE_DIR AND EXISTS "${EXPAT_INCLUDE_DIR}/expat.h")
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(EXPAT
+find_package_handle_standard_args(EXPAT
                                   REQUIRED_VARS EXPAT_LIBRARY EXPAT_INCLUDE_DIR
                                   VERSION_VAR EXPAT_VERSION_STRING)
 

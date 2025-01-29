@@ -36,6 +36,6 @@ find_path(DART_ROOT README.INSTALL
     )
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Dart DEFAULT_MSG DART_ROOT)
+find_package_handle_standard_args(Dart DEFAULT_MSG DART_ROOT)
 
 mark_as_advanced(DART_ROOT)

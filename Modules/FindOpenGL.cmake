@@ -576,7 +576,7 @@ if (CMAKE_FIND_PACKAGE_NAME STREQUAL "GLU")
   # the contents, detect the case in this module and suppress it explicitly.
   set(FPHSA_NAME_MISMATCHED 1)
 endif ()
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenGL REQUIRED_VARS ${_OpenGL_REQUIRED_VARS}
+find_package_handle_standard_args(OpenGL REQUIRED_VARS ${_OpenGL_REQUIRED_VARS}
                                   HANDLE_COMPONENTS)
 unset(FPHSA_NAME_MISMATCHED)
 unset(_OpenGL_REQUIRED_VARS)

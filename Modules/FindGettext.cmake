@@ -78,7 +78,7 @@ if(GETTEXT_MSGMERGE_EXECUTABLE)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Gettext
+find_package_handle_standard_args(Gettext
                                   REQUIRED_VARS GETTEXT_MSGMERGE_EXECUTABLE GETTEXT_MSGFMT_EXECUTABLE
                                   VERSION_VAR GETTEXT_VERSION_STRING)
 
@@ -145,7 +145,7 @@ function(GETTEXT_PROCESS_POT_FILE _potFile)
   set(_oneValueArgs INSTALL_DESTINATION)
   set(_multiValueArgs LANGUAGES)
 
-  CMAKE_PARSE_ARGUMENTS(_parsedArguments "${_options}" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(_parsedArguments "${_options}" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
 
   get_filename_component(_potName ${_potFile} NAME)
   string(REGEX REPLACE "^(.+)(\\.[^.]+)$" "\\1" _potBasename ${_potName})
@@ -196,7 +196,7 @@ function(GETTEXT_PROCESS_PO_FILES _lang)
   set(_multiValueArgs PO_FILES)
   set(_gmoFiles)
 
-  CMAKE_PARSE_ARGUMENTS(_parsedArguments "${_options}" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
+  cmake_parse_arguments(_parsedArguments "${_options}" "${_oneValueArgs}" "${_multiValueArgs}" ${ARGN})
 
   foreach(_current_PO_FILE ${_parsedArguments_PO_FILES})
     get_filename_component(_name ${_current_PO_FILE} NAME)

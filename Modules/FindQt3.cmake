@@ -214,7 +214,7 @@ if (CMAKE_FIND_PACKAGE_NAME STREQUAL "Qt")
   # contents, detect the case in this module and suppress it explicitly.
   set(FPHSA_NAME_MISMATCHED 1)
 endif ()
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Qt3
+find_package_handle_standard_args(Qt3
                                   REQUIRED_VARS QT_QT_LIBRARY QT_INCLUDE_DIR QT_MOC_EXECUTABLE
                                   VERSION_VAR QT_VERSION_STRING)
 unset(FPHSA_NAME_MISMATCHED)

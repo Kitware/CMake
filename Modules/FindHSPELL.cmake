@@ -41,7 +41,7 @@ if (HSPELL_INCLUDE_DIR)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(HSPELL
+find_package_handle_standard_args(HSPELL
                                   REQUIRED_VARS HSPELL_LIBRARIES HSPELL_INCLUDE_DIR
                                   VERSION_VAR HSPELL_VERSION_STRING)
 

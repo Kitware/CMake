@@ -93,7 +93,7 @@ if (CMAKE_FIND_PACKAGE_NAME STREQUAL "TCL" OR
   # Transitively, FindTclStub includes FindTCL.
   set(FPHSA_NAME_MISMATCHED 1)
 endif ()
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Tclsh
+find_package_handle_standard_args(Tclsh
                                   REQUIRED_VARS TCL_TCLSH
                                   VERSION_VAR TCLSH_VERSION_STRING)
 unset(FPHSA_NAME_MISMATCHED)

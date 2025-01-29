@@ -572,7 +572,7 @@ if(BUILD_TESTING)
     set(CMAKE_REQUIRED_INCLUDES ${QT_INCLUDES})
     set(CMAKE_REQUIRED_LIBRARIES ${QT_QTCORE_LIBRARIES})
 
-    CHECK_CXX_SOURCE_COMPILES("#include <QCoreApplication>\n int main() {return (qApp == 0 ? 0 : 1); }\n"
+    check_cxx_source_compiles("#include <QCoreApplication>\n int main() {return (qApp == 0 ? 0 : 1); }\n"
                               QT4_WORKS)
 
     set(CMAKE_REQUIRED_INCLUDES "${_save_CMAKE_REQUIRED_INCLUDES}")

@@ -82,7 +82,7 @@ function(android_push_test_files_to_device)
   # dev_object_store : absolute path to the device object store directory.
   # link_origin      : absolute path to the origin of the link to the dev obj store data file.
   function(push_and_link data_path dev_object_store link_origin)
-    FILE(SHA1 ${data_path} hash_val)
+    file(SHA1 ${data_path} hash_val)
     set(obj_store_dst ${dev_object_store}/${hash_val})
     check_device_file_exists(${obj_store_dst} obj_store_file_exists)
     # TODO: Verify that the object store file is indeed hashed correctly. Could use md5.
@@ -95,7 +95,7 @@ function(android_push_test_files_to_device)
     endif()
     foreach(ex ${arg_no_link_regex})
       filename_regex(${data_path} ${ex})
-      LIST(APPEND match_ex ${filename_match})
+      list(APPEND match_ex ${filename_match})
     endforeach()
     if(match_ex)
       execute_adb_command(shell cp ${obj_store_dst} ${link_origin})

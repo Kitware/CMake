@@ -55,7 +55,7 @@ if (CUPS_INCLUDE_DIR AND CUPS_LIBRARIES AND CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE)
     set(CMAKE_REQUIRED_QUIET ${Cups_FIND_QUIETLY})
 
     # ippDeleteAttribute is new in cups-1.1.19 (and used by kdeprint)
-    CHECK_LIBRARY_EXISTS(cups ippDeleteAttribute "" CUPS_HAS_IPP_DELETE_ATTRIBUTE)
+    check_library_exists(cups ippDeleteAttribute "" CUPS_HAS_IPP_DELETE_ATTRIBUTE)
     cmake_pop_check_state()
 endif ()
 
@@ -81,11 +81,11 @@ endif ()
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 if (CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE)
-    FIND_PACKAGE_HANDLE_STANDARD_ARGS(Cups
+    find_package_handle_standard_args(Cups
                                       REQUIRED_VARS CUPS_LIBRARIES CUPS_INCLUDE_DIR CUPS_HAS_IPP_DELETE_ATTRIBUTE
                                       VERSION_VAR CUPS_VERSION_STRING)
 else ()
-    FIND_PACKAGE_HANDLE_STANDARD_ARGS(Cups
+    find_package_handle_standard_args(Cups
                                       REQUIRED_VARS CUPS_LIBRARIES CUPS_INCLUDE_DIR
                                       VERSION_VAR CUPS_VERSION_STRING)
 endif ()

@@ -18,7 +18,7 @@ check if the compiler supports the standard ANSI iostream header
 include(${CMAKE_CURRENT_LIST_DIR}/CheckIncludeFileCXX.cmake)
 
 if(NOT CMAKE_NO_ANSI_STREAM_HEADERS)
-  CHECK_INCLUDE_FILE_CXX(iostream CMAKE_ANSI_STREAM_HEADERS)
+  check_include_file_cxx(iostream CMAKE_ANSI_STREAM_HEADERS)
   if (CMAKE_ANSI_STREAM_HEADERS)
     set (CMAKE_NO_ANSI_STREAM_HEADERS 0 CACHE INTERNAL
          "Does the compiler support headers like iostream.")
