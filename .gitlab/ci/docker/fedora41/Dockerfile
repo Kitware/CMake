@@ -4,25 +4,21 @@ ARG BASE_IMAGE=fedora:41
 
 FROM ${BASE_IMAGE} AS dnf-cache
 # Populate DNF cache w/ the fresh metadata and prefetch packages.
-RUN --mount=type=bind,source=deps_packages.lst,target=/root/deps_packages.lst \
+RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
+    --mount=type=bind,source=deps_packages.lst,target=/root/deps_packages.lst \
     --mount=type=bind,source=iwyu_packages.lst,target=/root/iwyu_packages.lst \
     --mount=type=bind,source=rust_packages.lst,target=/root/rust_packages.lst \
     --mount=type=bind,source=rvm_packages.lst,target=/root/rvm_packages.lst \
     --mount=type=tmpfs,target=/var/log \
     --mount=type=tmpfs,target=/tmp \
-    dnf install \
-        --setopt=install_weak_deps=False \
-        --setopt=fastestmirror=True \
-        --setopt=max_parallel_downloads=10 \
-        --downloadonly \
-        -y \
-        $(grep -h '^[^#]\+$' /root/*.lst)
+    dnf install --downloadonly -y $(grep -h '^[^#]\+$' /root/*.lst)
 
 
 FROM ${BASE_IMAGE} AS rust-build
 LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
 
-RUN --mount=type=bind,source=install_rust.sh,target=/root/install_rust.sh \
+RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
+    --mount=type=bind,source=install_rust.sh,target=/root/install_rust.sh \
     --mount=type=bind,source=rust_packages.lst,target=/root/rust_packages.lst \
     --mount=type=cache,from=dnf-cache,source=/var/lib/dnf,target=/var/lib/dnf,sharing=private \
     --mount=type=tmpfs,target=/var/log \
@@ -32,7 +28,8 @@ RUN --mount=type=bind,source=install_rust.sh,target=/root/install_rust.sh \
 FROM ${BASE_IMAGE} AS rvm-build
 LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
 
-RUN --mount=type=bind,source=install_rvm.sh,target=/root/install_rvm.sh \
+RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
+    --mount=type=bind,source=install_rvm.sh,target=/root/install_rvm.sh \
     --mount=type=bind,source=rvm_packages.lst,target=/root/rvm_packages.lst \
     --mount=type=cache,from=dnf-cache,source=/var/lib/dnf,target=/var/lib/dnf,sharing=private \
     --mount=type=tmpfs,target=/var/log \
@@ -43,7 +40,8 @@ RUN --mount=type=bind,source=install_rvm.sh,target=/root/install_rvm.sh \
 FROM ${BASE_IMAGE} AS iwyu-build
 LABEL maintainer="Kyle Edwards <kyle.edwards@kitware.com>"
 
-RUN --mount=type=bind,source=install_iwyu.sh,target=/root/install_iwyu.sh \
+RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
+    --mount=type=bind,source=install_iwyu.sh,target=/root/install_iwyu.sh \
     --mount=type=bind,source=iwyu_packages.lst,target=/root/iwyu_packages.lst \
     --mount=type=cache,from=dnf-cache,source=/var/lib/dnf,target=/var/lib/dnf,sharing=private \
     --mount=type=tmpfs,target=/var/log \
@@ -56,7 +54,8 @@ LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
 
 ENV RBENV_ROOT=/opt/rbenv
 
-RUN --mount=type=bind,source=install_deps.sh,target=/root/install_deps.sh \
+RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
+    --mount=type=bind,source=install_deps.sh,target=/root/install_deps.sh \
     --mount=type=bind,source=deps_packages.lst,target=/root/deps_packages.lst \
     --mount=type=cache,from=dnf-cache,source=/var/lib/dnf,target=/var/lib/dnf,sharing=private \
     --mount=type=cache,target=/var/cache/pip \

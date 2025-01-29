@@ -2,12 +2,7 @@
 
 set -e
 
-dnf install \
-    --setopt=install_weak_deps=False \
-    --setopt=fastestmirror=True \
-    --setopt=max_parallel_downloads=10 \
-    -y \
-    $(grep '^[^#]\+$' /root/deps_packages.lst)
+dnf install -y $(grep '^[^#]\+$' /root/deps_packages.lst)
 
 # Remove tests for numpy
 for v in 3.13; do

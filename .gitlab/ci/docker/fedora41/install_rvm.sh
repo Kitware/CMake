@@ -2,12 +2,7 @@
 
 set -e
 
-dnf install \
-    --setopt=install_weak_deps=False \
-    --setopt=fastestmirror=True \
-    --setopt=max_parallel_downloads=10 \
-    -y \
-    $(grep '^[^#]\+$' /root/rvm_packages.lst)
+dnf install -y $(grep '^[^#]\+$' /root/rvm_packages.lst)
 
 gpg2 --keyserver hkps://keyserver.ubuntu.com \
      --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 \

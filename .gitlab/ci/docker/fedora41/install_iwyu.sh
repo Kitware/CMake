@@ -3,12 +3,7 @@
 set -e
 
 # Install development tools.
-dnf install \
-    --setopt=install_weak_deps=False \
-    --setopt=fastestmirror=True \
-    --setopt=max_parallel_downloads=10 \
-    -y \
-    $(grep '^[^#]\+$' /root/iwyu_packages.lst)
+dnf install -y $(grep '^[^#]\+$' /root/iwyu_packages.lst)
 
 cd /root
 git clone "https://github.com/include-what-you-use/include-what-you-use.git"
