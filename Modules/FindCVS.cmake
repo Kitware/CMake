@@ -69,5 +69,5 @@ mark_as_advanced(CVS_EXECUTABLE)
 # Handle the QUIETLY and REQUIRED arguments and set CVS_FOUND to TRUE if
 # all listed variables are TRUE
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(CVS DEFAULT_MSG CVS_EXECUTABLE)

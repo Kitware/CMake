@@ -160,7 +160,7 @@ if(Subversion_SVN_EXECUTABLE)
 
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Subversion REQUIRED_VARS Subversion_SVN_EXECUTABLE
                                              VERSION_VAR Subversion_VERSION_SVN )
 

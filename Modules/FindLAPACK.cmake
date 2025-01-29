@@ -110,7 +110,7 @@ if(CMAKE_Fortran_COMPILER_LOADED)
 else()
   include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
 endif()
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 
 function(_add_lapack_target)
   if(LAPACK_FOUND AND NOT TARGET LAPACK::LAPACK)

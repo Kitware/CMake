@@ -207,7 +207,7 @@ if (Tiff_FOUND)
   endforeach ()
   unset(_TIFF_component)
 
-  include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+  include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(TIFF
                                     HANDLE_COMPONENTS
                                     REQUIRED_VARS Tiff_DIR
@@ -269,7 +269,7 @@ unset(_comp)
 unset(TIFF_NAMES)
 unset(TIFF_NAMES_DEBUG)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(TIFF
                                   HANDLE_COMPONENTS
                                   REQUIRED_VARS TIFF_LIBRARY TIFF_INCLUDE_DIR

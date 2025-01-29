@@ -268,7 +268,7 @@ if("Server" IN_LIST PostgreSQL_FIND_COMPONENTS)
 endif()
 
 # Did we find anything?
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(PostgreSQL
                                   REQUIRED_VARS PostgreSQL_LIBRARY PostgreSQL_INCLUDE_DIR
                                   HANDLE_COMPONENTS

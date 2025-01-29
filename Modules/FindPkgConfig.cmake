@@ -106,7 +106,7 @@ if (PKG_CONFIG_EXECUTABLE)
   unset(_PKG_CONFIG_VERSION_RESULT)
 endif ()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(PkgConfig
                                   REQUIRED_VARS PKG_CONFIG_EXECUTABLE
                                   REASON_FAILURE_MESSAGE "${_PKG_CONFIG_FAILURE_MESSAGE}"

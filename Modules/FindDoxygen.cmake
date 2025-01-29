@@ -433,7 +433,7 @@ endif()
 # or use something like homebrew.
 # ============== End OSX stuff ================
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 
 #
 # Find Doxygen...

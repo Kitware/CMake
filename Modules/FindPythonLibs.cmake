@@ -326,7 +326,7 @@ else()
   unset(CMAKE_FIND_FRAMEWORK)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(PythonLibs
                                   REQUIRED_VARS PYTHON_LIBRARIES PYTHON_INCLUDE_DIRS
                                   VERSION_VAR PYTHONLIBS_VERSION_STRING)

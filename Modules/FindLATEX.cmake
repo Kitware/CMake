@@ -282,7 +282,7 @@ mark_as_advanced(
   HTLATEX_COMPILER
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LATEX
   REQUIRED_VARS LATEX_COMPILER
   HANDLE_COMPONENTS

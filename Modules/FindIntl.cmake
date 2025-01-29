@@ -160,7 +160,7 @@ if(Intl_INCLUDE_DIR AND EXISTS "${Intl_INCLUDE_DIR}/libintl.h")
   unset(Intl_VERSION_NUMBER)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Intl
                                   REQUIRED_VARS ${_Intl_REQUIRED_VARS}
                                   VERSION_VAR Intl_VERSION

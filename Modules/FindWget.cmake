@@ -24,7 +24,7 @@ find_program(WGET_EXECUTABLE
   ${MSYS_INSTALL_PATH}/usr/bin
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Wget DEFAULT_MSG WGET_EXECUTABLE)
 
 mark_as_advanced( WGET_EXECUTABLE )

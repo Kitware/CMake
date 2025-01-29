@@ -145,7 +145,7 @@ if (PERL_EXECUTABLE)
 
 endif ()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(PerlLibs REQUIRED_VARS PERL_LIBRARY PERL_INCLUDE_PATH
                                            VERSION_VAR PERL_VERSION_STRING)
 

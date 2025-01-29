@@ -65,6 +65,6 @@ find_library(PRODUCER_LIBRARY
   /opt
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Producer DEFAULT_MSG
     PRODUCER_LIBRARY PRODUCER_INCLUDE_DIR)

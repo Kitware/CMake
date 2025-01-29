@@ -124,7 +124,7 @@ if(GIT_EXECUTABLE)
   unset(_findgit_role)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Git
                                   REQUIRED_VARS GIT_EXECUTABLE
                                   VERSION_VAR GIT_VERSION_STRING)

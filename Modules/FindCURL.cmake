@@ -82,7 +82,7 @@ Hints
 cmake_policy(PUSH)
 cmake_policy(SET CMP0159 NEW) # file(STRINGS) with REGEX updates CMAKE_MATCH_<n>
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 
 if(NOT CURL_NO_CURL_CMAKE)
   # do a find package call to specifically look for the CMake version

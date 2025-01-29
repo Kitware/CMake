@@ -328,5 +328,5 @@ find_program(EnvModules_COMMAND
   PATH_SUFFIXES libexec
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(EnvModules DEFAULT_MSG EnvModules_COMMAND)

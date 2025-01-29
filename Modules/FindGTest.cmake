@@ -191,7 +191,7 @@ endfunction()
 
 #
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 
 # first specifically look for the CMake version of GTest
 find_package(GTest QUIET NO_MODULE)

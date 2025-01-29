@@ -30,7 +30,7 @@ find_library(MPEG_mpeg2_LIBRARY mpeg2)
 
 find_library(MPEG_vo_LIBRARY vo)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(MPEG DEFAULT_MSG MPEG_mpeg2_LIBRARY MPEG_INCLUDE_DIR)
 
 if(MPEG_FOUND)

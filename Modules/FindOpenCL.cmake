@@ -173,7 +173,7 @@ unset(_OPENCL_x86)
 set(OpenCL_LIBRARIES ${OpenCL_LIBRARY})
 set(OpenCL_INCLUDE_DIRS ${OpenCL_INCLUDE_DIR})
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
   OpenCL
   REQUIRED_VARS OpenCL_LIBRARY OpenCL_INCLUDE_DIR

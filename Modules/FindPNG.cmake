@@ -176,7 +176,7 @@ if(ZLIB_FOUND)
   endif ()
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(PNG
                                   REQUIRED_VARS PNG_LIBRARY PNG_PNG_INCLUDE_DIR
                                   VERSION_VAR PNG_VERSION_STRING)

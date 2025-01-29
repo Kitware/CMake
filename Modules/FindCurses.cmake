@@ -264,7 +264,7 @@ if(PKG_CONFIG_FOUND)
   set(CURSES_CFLAGS ${NCURSES_CFLAGS_OTHER})
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Curses DEFAULT_MSG
   CURSES_LIBRARY CURSES_INCLUDE_PATH)
 

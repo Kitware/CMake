@@ -77,7 +77,7 @@ if(GETTEXT_MSGMERGE_EXECUTABLE)
   unset(msgmerge_namewe)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Gettext
                                   REQUIRED_VARS GETTEXT_MSGMERGE_EXECUTABLE GETTEXT_MSGFMT_EXECUTABLE
                                   VERSION_VAR GETTEXT_VERSION_STRING)

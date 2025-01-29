@@ -62,7 +62,7 @@ This module defines the following variables:
 
 #]=======================================================================]
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 include(${CMAKE_CURRENT_LIST_DIR}/SelectLibraryConfigurations.cmake)
 
 find_package(GLEW CONFIG QUIET)

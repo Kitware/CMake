@@ -322,7 +322,7 @@ if(NOT FLTK_SKIP_OPENGL)
 endif()
 list(APPEND FLTK_LIBRARIES ${FLTK_BASE_LIBRARY})
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 if(FLTK_SKIP_FLUID)
   find_package_handle_standard_args(FLTK DEFAULT_MSG FLTK_LIBRARIES FLTK_INCLUDE_DIR)
 else()

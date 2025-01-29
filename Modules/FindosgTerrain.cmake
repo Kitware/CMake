@@ -48,6 +48,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGTERRAIN osgTerrain/Terrain)
 OSG_FIND_LIBRARY(OSGTERRAIN osgTerrain)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(osgTerrain DEFAULT_MSG
     OSGTERRAIN_LIBRARY OSGTERRAIN_INCLUDE_DIR)

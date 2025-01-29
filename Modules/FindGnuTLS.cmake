@@ -66,7 +66,7 @@ find_library(GNUTLS_LIBRARY NAMES gnutls libgnutls
 
 mark_as_advanced(GNUTLS_INCLUDE_DIR GNUTLS_LIBRARY)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(GnuTLS
                                   REQUIRED_VARS GNUTLS_LIBRARY GNUTLS_INCLUDE_DIR
                                   VERSION_VAR GNUTLS_VERSION_STRING)
