@@ -2,9 +2,6 @@
 
 set -e
 
-# Install development tools.
-dnf install -y $(grep '^[^#]\+$' /root/iwyu_packages.lst)
-
 cd /root
 git clone "https://github.com/include-what-you-use/include-what-you-use.git"
 cd include-what-you-use
