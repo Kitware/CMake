@@ -25,16 +25,27 @@ RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
     --mount=type=tmpfs,target=/tmp \
     sh /root/install_rust.sh
 
-FROM ${BASE_IMAGE} AS rvm-build
-LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
 
+FROM ${BASE_IMAGE} AS rvm-build-env
+LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
+# Pre-install prerequisites for RVM.
 RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
-    --mount=type=bind,source=install_rvm.sh,target=/root/install_rvm.sh \
     --mount=type=bind,source=rvm_packages.lst,target=/root/rvm_packages.lst \
     --mount=type=cache,from=dnf-cache,source=/var/cache/libdnf5,target=/var/cache/libdnf5,sharing=private \
     --mount=type=tmpfs,target=/var/log \
     --mount=type=tmpfs,target=/tmp \
-    sh /root/install_rvm.sh
+    dnf install -y $(grep '^[^#]\+$' /root/rvm_packages.lst)
+
+
+FROM rvm-build-env AS rvm-build
+LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
+# Build Ruby with RVM.
+RUN --mount=type=bind,source=build_rvm.sh,target=/root/build_rvm.sh \
+    --mount=type=cache,target=/usr/local/rvm/archives \
+    --mount=type=cache,target=/usr/local/rvm/gem-cache   \
+    --mount=type=cache,target=/usr/local/rvm/src \
+    --mount=type=tmpfs,target=/tmp \
+    sh /root/build_rvm.sh
 
 
 FROM ${BASE_IMAGE} AS iwyu-build-env
