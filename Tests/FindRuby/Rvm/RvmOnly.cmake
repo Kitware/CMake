@@ -2,6 +2,7 @@ set(CMAKE_FIND_LIBRARY_PREFIXES "")
 set(CMAKE_FIND_LIBRARY_SUFFIXES "")
 
 set(Ruby_FIND_VIRTUALENV ONLY)
+set(Ruby_RBENV_EXECUTABLE "") # Suppress rbenv code path for this test.
 
 # Test: FindRuby.RvmOnly
 if (RUBY_HOME)

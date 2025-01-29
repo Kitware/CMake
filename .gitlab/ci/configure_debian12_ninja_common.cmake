@@ -89,6 +89,7 @@ set(CMake_TEST_FindPython3 "ON" CACHE BOOL "")
 set(CMake_TEST_FindPython3_IronPython "ON" CACHE BOOL "")
 set(CMake_TEST_FindPython3_PyPy "ON" CACHE BOOL "")
 set(CMake_TEST_FindRuby "ON" CACHE BOOL "")
+#set(CMake_TEST_FindRuby_RBENV "ON" CACHE BOOL "") # fails because system and rbenv versions are same
 set(CMake_TEST_FindRuby_RVM "ON" CACHE BOOL "")
 set(CMake_TEST_FindSDL "ON" CACHE BOOL "")
 set(CMake_TEST_FindSQLite3 "ON" CACHE BOOL "")
