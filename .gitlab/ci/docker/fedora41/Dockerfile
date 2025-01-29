@@ -15,16 +15,26 @@ RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
     dnf install --downloadonly -y $(grep -h '^[^#]\+$' /root/*.lst)
 
 
-FROM ${BASE_IMAGE} AS rust-build
+FROM ${BASE_IMAGE} AS rust-build-env
 LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
-
+# Pre-install prerequisites to build Rust projects.
 RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
-    --mount=type=bind,source=install_rust.sh,target=/root/install_rust.sh \
     --mount=type=bind,source=rust_packages.lst,target=/root/rust_packages.lst \
     --mount=type=cache,from=dnf-cache,source=/var/cache/libdnf5,target=/var/cache/libdnf5,sharing=private \
     --mount=type=tmpfs,target=/var/log \
     --mount=type=tmpfs,target=/tmp \
-    sh /root/install_rust.sh
+    dnf install -y $(grep '^[^#]\+$' /root/rust_packages.lst)
+
+
+FROM rust-build-env AS rust-build
+LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
+# Build the needed Rust packages.
+# https://doc.rust-lang.org/cargo/guide/cargo-home.html?highlight=.cargo#caching-the-cargo-home-in-ci
+RUN --mount=type=bind,source=build_rust.sh,target=/root/build_rust.sh \
+    --mount=type=cache,target=/root/.cargo/registry/index \
+    --mount=type=cache,target=/root/.cargo/registry/cache \
+    --mount=type=tmpfs,target=/tmp \
+    sh /root/build_rust.sh
 
 
 FROM ${BASE_IMAGE} AS rvm-build-env
