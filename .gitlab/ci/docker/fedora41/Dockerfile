@@ -7,6 +7,7 @@ FROM ${BASE_IMAGE} AS dnf-cache
 RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
     --mount=type=bind,source=deps_packages.lst,target=/root/deps_packages.lst \
     --mount=type=bind,source=iwyu_packages.lst,target=/root/iwyu_packages.lst \
+    --mount=type=bind,source=rbenv_packages.lst,target=/root/rbenv_packages.lst \
     --mount=type=bind,source=rust_packages.lst,target=/root/rust_packages.lst \
     --mount=type=bind,source=rvm_packages.lst,target=/root/rvm_packages.lst \
     --mount=type=tmpfs,target=/var/log \
@@ -46,6 +47,27 @@ RUN --mount=type=bind,source=build_rvm.sh,target=/root/build_rvm.sh \
     --mount=type=cache,target=/usr/local/rvm/src \
     --mount=type=tmpfs,target=/tmp \
     sh /root/build_rvm.sh
+
+
+FROM ${BASE_IMAGE} AS rbenv
+# Pre-install prerequisites for `rbenv`.
+RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
+    --mount=type=bind,source=rbenv_packages.lst,target=/root/rbenv_packages.lst \
+    --mount=type=cache,from=dnf-cache,source=/var/cache/libdnf5,target=/var/cache/libdnf5,sharing=private \
+    --mount=type=tmpfs,target=/var/log \
+    --mount=type=tmpfs,target=/tmp \
+    dnf install -y $(grep '^[^#]\+$' /root/rbenv_packages.lst)
+
+
+FROM rbenv AS rbenv-build
+ENV RBENV_ROOT=/opt/rbenv
+ENV RBENV_BUILD_ROOT=/root/.cache/rbenv-build
+ENV RUBY_BUILD_CACHE_PATH=/root/.cache/rbenv
+# Build Ruby with `rbenv`.
+RUN --mount=type=cache,target=/root/.cache \
+    --mount=type=bind,source=build_rbenv.sh,target=/root/build_rbenv.sh \
+    --mount=type=tmpfs,target=/tmp \
+    sh /root/build_rbenv.sh
 
 
 FROM ${BASE_IMAGE} AS iwyu-build-env
@@ -98,3 +120,6 @@ RUN --mount=type=bind,from=rust-build,source=/root,target=/root \
 
 RUN --mount=type=bind,from=rvm-build,source=/root,target=/root \
     tar -C /usr/local -xf /root/rvm.tar
+
+RUN --mount=type=bind,from=rbenv-build,source=/root,target=/root \
+    tar -C / -xf /root/rbenv.tar && rbenv global 3.1.2

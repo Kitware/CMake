@@ -11,7 +11,3 @@ done
 
 # Remove some other packages tests
 find /usr/lib64/python3.13/site-packages/breezy -type d -a -name tests -exec rm -rf {} +
-
-# Ruby rbenv
-rbenv install 3.1.2
-rbenv global 3.1.2

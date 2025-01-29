@@ -1,0 +1,18 @@
+rbenv
+ruby-build-rbenv
+
+# Packages needed for `rbenv`
+# https://github.com/rbenv/ruby-build/wiki#fedora
+autoconf
+bzip2
+gcc
+gdbm-devel
+libffi-devel
+libyaml-devel
+make
+ncurses-devel
+openssl-devel
+patch
+readline-devel
+rust
+zlib-devel
