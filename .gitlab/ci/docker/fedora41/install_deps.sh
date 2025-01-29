@@ -15,7 +15,3 @@ find /usr/lib64/python3.13/site-packages/breezy -type d -a -name tests -exec rm 
 # Ruby rbenv
 rbenv install 3.1.2
 rbenv global 3.1.2
-
-# Perforce
-curl -L https://www.perforce.com/downloads/perforce/r21.2/bin.linux26x86_64/helix-core-server.tgz -o - \
-  | tar -C /usr/local/bin -xvzf - -- p4 p4d

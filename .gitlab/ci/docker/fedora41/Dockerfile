@@ -49,10 +49,19 @@ RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
     sh /root/install_iwyu.sh
 
 
+FROM ${BASE_IMAGE} AS p4-dl
+# Download Perforce.
+# NOTE `curl` is pre-installed in the base image.
+RUN curl -C- -L https://www.perforce.com/downloads/perforce/r21.2/bin.linux26x86_64/helix-core-server.tgz \
+  | tar -C /usr/local/bin -xvzf - -- p4 p4d
+
+
 FROM ${BASE_IMAGE}
 LABEL maintainer="Ben Boeckel <ben.boeckel@kitware.com>"
 
 ENV RBENV_ROOT=/opt/rbenv
+
+COPY --from=p4-dl --chown=root:root /usr/local/bin/p4 /usr/local/bin/p4d /usr/local/bin
 
 RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
     --mount=type=bind,source=install_deps.sh,target=/root/install_deps.sh \
