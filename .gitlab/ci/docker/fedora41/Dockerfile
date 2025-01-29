@@ -52,6 +52,7 @@ FROM iwyu-build-env AS iwyu-build
 LABEL maintainer="Kyle Edwards <kyle.edwards@kitware.com>"
 # Build IWYU.
 RUN --mount=type=bind,source=build_iwyu.sh,target=/root/build_iwyu.sh \
+    --mount=type=cache,target=/root/include-what-you-use \
     --mount=type=tmpfs,target=/tmp \
     sh /root/build_iwyu.sh
 
@@ -78,11 +79,11 @@ RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
     --mount=type=tmpfs,target=/tmp \
     sh /root/install_deps.sh
 
+RUN --mount=type=bind,from=iwyu-build,source=/root,target=/root \
+    tar -C / -xf /root/iwyu.tar
+
 RUN --mount=type=bind,from=rust-build,source=/root,target=/root \
     tar -C /usr/local -xf /root/rust.tar
 
 RUN --mount=type=bind,from=rvm-build,source=/root,target=/root \
     tar -C /usr/local -xf /root/rvm.tar
-
-RUN --mount=type=bind,from=iwyu-build,source=/root,target=/root \
-    tar -C / -xf /root/iwyu.tar
