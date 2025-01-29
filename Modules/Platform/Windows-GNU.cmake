@@ -184,7 +184,7 @@ macro(__windows_compiler_gnu_abi lang)
       if(_vs_dir)
         list(APPEND _vs_installer_paths "${_vs_dir}/VC/Auxiliary/Build")
       endif()
-    endforeach(vs)
+    endforeach()
 
     if("${CMAKE_SIZEOF_VOID_P}" EQUAL 4)
       find_program(CMAKE_GNUtoMS_VCVARS NAMES vcvars32.bat

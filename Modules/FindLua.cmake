@@ -106,7 +106,7 @@ function(_lua_set_version_vars)
   endforeach ()
 
   set(_lua_include_subdirs "${_lua_include_subdirs}" PARENT_SCOPE)
-endfunction(_lua_set_version_vars)
+endfunction()
 
 function(_lua_get_header_version)
   unset(LUA_VERSION_STRING PARENT_SCOPE)
@@ -145,7 +145,7 @@ function(_lua_get_header_version)
       return()
     endif ()
   endforeach ()
-endfunction(_lua_get_header_version)
+endfunction()
 
 function(_lua_find_header)
   _lua_set_version_vars()

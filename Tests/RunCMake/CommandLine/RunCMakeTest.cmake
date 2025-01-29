@@ -434,7 +434,7 @@ function(run_EnvironmentExportCompileCommands)
   run_cmake(env-export-compile-commands-override)
 
   unset(ENV{CMAKE_EXPORT_COMPILE_COMMANDS})
-endfunction(run_EnvironmentExportCompileCommands)
+endfunction()
 
 if(RunCMake_GENERATOR MATCHES "Unix Makefiles" OR RunCMake_GENERATOR MATCHES "Ninja")
   run_EnvironmentExportCompileCommands()

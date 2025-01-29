@@ -903,7 +903,7 @@ if(CMAKE_CROSSCOMPILING)
       set(CUDA_TOOLKIT_TARGET_NAMES "aarch64-qnx")
     else()
       set(CUDA_TOOLKIT_TARGET_NAMES "aarch64-linux" "sbsa-linux")
-    endif (ANDROID_ARCH_NAME STREQUAL "arm64")
+    endif()
   endif()
 
   foreach(CUDA_TOOLKIT_TARGET_NAME IN LISTS CUDA_TOOLKIT_TARGET_NAMES)

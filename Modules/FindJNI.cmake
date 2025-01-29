@@ -111,7 +111,7 @@ if(NOT JNI_FIND_COMPONENTS)
       set(JNI_FIND_COMPONENTS NativeHelper)
       set(JNI_FIND_REQUIRED_NativeHelper TRUE)
     endif()
-  else(ANDROID)
+  else()
     set(JNI_FIND_COMPONENTS AWT JVM)
     # For compatibility purposes, if no components are specified both are
     # considered required.
@@ -434,7 +434,7 @@ foreach(search IN LISTS _JNI_SEARCHES)
     find_library(JAVA_JVM_LIBRARY ${_JNI_${search}_JVM}
       DOC "Java Virtual Machine library"
     )
-  endif(JVM IN_LIST JNI_FIND_COMPONENTS)
+  endif()
 
   if(AWT IN_LIST JNI_FIND_COMPONENTS)
     find_library(JAVA_AWT_LIBRARY ${_JNI_${search}_JAWT}
@@ -538,7 +538,7 @@ endif()
 # JVM is available even on Android referencing the nativehelper library
 if(JAVA_JVM_LIBRARY)
   set(JNI_JVM_FOUND TRUE)
-else(JAVA_JVM_LIBRARY)
+else()
   set(JNI_JVM_FOUND FALSE)
 endif()
 
@@ -646,7 +646,7 @@ if(JNI_FOUND)
   if(JNI_AWT_FOUND)
     if(NOT TARGET JNI::AWT)
       add_library(JNI::AWT IMPORTED UNKNOWN)
-    endif(NOT TARGET JNI::AWT)
+    endif()
 
     set_property(TARGET JNI::AWT PROPERTY INTERFACE_INCLUDE_DIRECTORIES
       ${JAVA_AWT_INCLUDE_PATH})
@@ -669,7 +669,7 @@ if(JNI_FOUND)
       else()
         add_library(JNI::JVM IMPORTED INTERFACE)
       endif()
-    endif(NOT TARGET JNI::JVM)
+    endif()
 
     set_property(TARGET JNI::JVM PROPERTY INTERFACE_LINK_LIBRARIES JNI::JNI)
     get_property(_JNI_JVM_TYPE TARGET JNI::JVM PROPERTY TYPE)
