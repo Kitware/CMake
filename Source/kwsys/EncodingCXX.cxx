@@ -194,12 +194,14 @@ std::string Encoding::ToNarrow(std::wstring const& str)
 std::wstring Encoding::ToWide(char const* cstr)
 {
   std::wstring wstr;
-  size_t length = kwsysEncoding_mbstowcs(nullptr, cstr, 0) + 1;
-  if (length > 0) {
-    std::vector<wchar_t> wchars(length);
-    if (kwsysEncoding_mbstowcs(&wchars[0], cstr, length) > 0) {
-      wstr = &wchars[0];
-    }
+  size_t length = kwsysEncoding_mbstowcs(nullptr, cstr, 0);
+  if (length == 0 || length == static_cast<size_t>(-1)) {
+    return wstr;
+  }
+  ++length;
+  std::vector<wchar_t> wchars(length);
+  if (kwsysEncoding_mbstowcs(wchars.data(), cstr, length) > 0) {
+    wstr = wchars.data();
   }
   return wstr;
 }
@@ -207,12 +209,14 @@ std::wstring Encoding::ToWide(char const* cstr)
 std::string Encoding::ToNarrow(wchar_t const* wcstr)
 {
   std::string str;
-  size_t length = kwsysEncoding_wcstombs(nullptr, wcstr, 0) + 1;
-  if (length > 0) {
-    std::vector<char> chars(length);
-    if (kwsysEncoding_wcstombs(&chars[0], wcstr, length) > 0) {
-      str = &chars[0];
-    }
+  size_t length = kwsysEncoding_wcstombs(nullptr, wcstr, 0);
+  if (length == 0 || length == static_cast<size_t>(-1)) {
+    return str;
+  }
+  ++length;
+  std::vector<char> chars(length);
+  if (kwsysEncoding_wcstombs(chars.data(), wcstr, length) > 0) {
+    str = chars.data();
   }
   return str;
 }
