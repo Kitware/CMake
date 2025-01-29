@@ -32,7 +32,9 @@ Main functions provided by the module
 .. command:: csharp_set_windows_forms_properties
 
   Sets source file properties for use of Windows Forms. Use this, if your CSharp
-  target uses Windows Forms::
+  target uses Windows Forms:
+
+  .. code-block:: cmake
 
     csharp_set_windows_forms_properties([<file1> [<file2> [...]]])
 
@@ -64,7 +66,9 @@ Main functions provided by the module
   Sets source file properties of ``.Designer.cs`` files depending on
   sibling filenames. Use this, if your CSharp target does **not**
   use Windows Forms (for Windows Forms use
-  :command:`csharp_set_windows_forms_properties` instead)::
+  :command:`csharp_set_windows_forms_properties` instead):
+
+  .. code-block:: cmake
 
     csharp_set_designer_cs_properties([<file1> [<file2> [...]]])
 
@@ -101,7 +105,9 @@ Main functions provided by the module
 .. command:: csharp_set_xaml_cs_properties
 
   Sets source file properties for use of Windows Presentation Foundation (WPF) and
-  XAML. Use this, if your CSharp target uses WPF/XAML::
+  XAML. Use this, if your CSharp target uses WPF/XAML:
+
+  .. code-block:: cmake
 
     csharp_set_xaml_cs_properties([<file1> [<file2> [...]]])
 
@@ -125,7 +131,9 @@ Helper functions which are used by the above ones
 
   Helper function which computes a list of key values to identify
   source files independently of relative/absolute paths given in cmake
-  and eliminates case sensitivity::
+  and eliminates case sensitivity:
+
+  .. code-block:: cmake
 
     csharp_get_filename_keys(OUT [<file1> [<file2> [...]]])
 
@@ -158,7 +166,9 @@ Helper functions which are used by the above ones
 
   Returns the full filepath and name **without** extension of a key.
   KEY is expected to be a key from csharp_get_filename_keys. In BASE
-  the value of KEY without the file extension is returned::
+  the value of KEY without the file extension is returned:
+
+  .. code-block:: cmake
 
     csharp_get_filename_key_base(BASE KEY)
 
@@ -172,7 +182,9 @@ Helper functions which are used by the above ones
 .. command:: csharp_get_dependentupon_name
 
   Computes a string which can be used as value for the source file property
-  :prop_sf:`VS_CSHARP_<tagname>` with *target* being ``DependentUpon``::
+  :prop_sf:`VS_CSHARP_<tagname>` with *target* being ``DependentUpon``:
+
+  .. code-block:: cmake
 
     csharp_get_dependentupon_name(NAME FILE)
 

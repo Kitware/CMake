@@ -18,7 +18,7 @@ The module defines the following variables:
 .. versionadded:: 3.1
   If the command line client executable is found the following macro is defined:
 
-::
+.. code-block:: cmake
 
   HG_WC_INFO(<dir> <var-prefix>)
 
@@ -32,7 +32,7 @@ at a given location.  This macro defines the following variables:
 
 Example usage:
 
-::
+.. code-block:: cmake
 
    find_package(Hg)
    if(HG_FOUND)

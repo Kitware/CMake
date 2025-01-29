@@ -26,7 +26,7 @@ Typical Usage
 
 Most calls to ``find_package()`` typically have the following form:
 
-.. parsed-literal::
+.. code-block:: cmake
 
   find_package(<PackageName> [<version>] [REQUIRED] [COMPONENTS <components>...])
 
@@ -133,7 +133,7 @@ forced to use only Module mode with a ``MODULE`` keyword.  If the
 Basic Signature
 ^^^^^^^^^^^^^^^
 
-.. parsed-literal::
+.. code-block:: cmake
 
   find_package(<PackageName> [version] [EXACT] [QUIET] [MODULE]
                [REQUIRED] [[COMPONENTS] [components...]]
@@ -249,7 +249,7 @@ of the ``NO_POLICY_SCOPE`` option.
 Full Signature
 ^^^^^^^^^^^^^^
 
-.. parsed-literal::
+.. code-block:: cmake
 
   find_package(<PackageName> [version] [EXACT] [QUIET]
                [REQUIRED] [[COMPONENTS] [components...]]

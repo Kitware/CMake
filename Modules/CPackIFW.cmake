@@ -23,7 +23,7 @@ The module defines the following commands:
 
   Sets the arguments specific to the CPack IFW generator.
 
-  ::
+  .. code-block:: cmake
 
     cpack_ifw_configure_component(<compname> [COMMON] [ESSENTIAL] [VIRTUAL]
                         [FORCED_INSTALLATION] [REQUIRES_ADMIN_RIGHTS]
@@ -176,7 +176,7 @@ The module defines the following commands:
 
   Sets the arguments specific to the CPack IFW generator.
 
-  ::
+  .. code-block:: cmake
 
     cpack_ifw_configure_component_group(<groupname> [VIRTUAL]
                         [FORCED_INSTALLATION] [REQUIRES_ADMIN_RIGHTS]
@@ -317,7 +317,7 @@ The module defines the following commands:
 
   Add QtIFW specific remote repository to binary installer.
 
-  ::
+  .. code-block:: cmake
 
     cpack_ifw_add_repository(<reponame> [DISABLED]
                         URL <url>
@@ -350,7 +350,7 @@ The module defines the following commands:
 
   Update QtIFW specific repository from remote repository.
 
-  ::
+  .. code-block:: cmake
 
     cpack_ifw_update_repository(<reponame>
                         [[ADD|REMOVE] URL <url>]|
@@ -387,7 +387,7 @@ The module defines the following commands:
 
   Add additional resources in the installer binary.
 
-  ::
+  .. code-block:: cmake
 
     cpack_ifw_add_package_resources(<file_path> <file_path> ...)
 

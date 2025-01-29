@@ -106,7 +106,9 @@ Example:
 
 .. command:: protobuf_generate_cpp
 
-  Add custom commands to process ``.proto`` files to C++::
+  Add custom commands to process ``.proto`` files to C++:
+
+  .. code-block:: cmake
 
     protobuf_generate_cpp (
       <srcs-var> <hdrs-var>
@@ -135,7 +137,9 @@ Example:
 
   .. versionadded:: 3.4
 
-  Add custom commands to process ``.proto`` files to Python::
+  Add custom commands to process ``.proto`` files to Python:
+
+  .. code-block:: cmake
 
     protobuf_generate_python (<py-srcs-var> [<proto-file>...])
 
@@ -149,7 +153,9 @@ Example:
 
   .. versionadded:: 3.13
 
-  Automatically generate source files from ``.proto`` schema files at build time::
+  Automatically generate source files from ``.proto`` schema files at build time:
+
+  .. code-block:: cmake
 
     protobuf_generate (
         TARGET <target>
@@ -230,7 +236,9 @@ Example:
     Command name, path, or CMake executable used to generate protobuf bindings.
     If omitted, ``protobuf::protoc`` is used.
 
-  Example::
+  Example:
+
+  .. code-block:: cmake
 
     find_package(gRPC CONFIG REQUIRED)
     find_package(Protobuf REQUIRED)

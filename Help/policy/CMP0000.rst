@@ -13,7 +13,7 @@ CMake.  Specifying a version also helps the project build with CMake
 versions newer than that specified.  Use the :command:`cmake_minimum_required`
 command at the top of your main ``CMakeLists.txt`` file:
 
-::
+.. code-block:: cmake
 
   cmake_minimum_required(VERSION <major>.<minor>)
 

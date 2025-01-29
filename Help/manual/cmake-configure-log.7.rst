@@ -20,7 +20,9 @@ detailed information about specific events, such as toolchain inspection
 by :command:`try_compile`, meant for use in debugging the configuration
 of a build tree.
 
-For human use, this version of CMake writes the configure log to the file::
+For human use, this version of CMake writes the configure log to the file:
+
+.. code-block:: cmake
 
   ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeConfigureLog.yaml
 

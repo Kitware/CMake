@@ -16,7 +16,9 @@ The default value is ``Q_OBJECT;Q_GADGET;Q_NAMESPACE;Q_NAMESPACE_EXPORT``.
 Example
 ^^^^^^^
 Let CMake know that source files that contain ``CUSTOM_MACRO`` must be ``moc``
-processed as well::
+processed as well:
+
+.. code-block:: cmake
 
   set(CMAKE_AUTOMOC ON)
   list(APPEND CMAKE_AUTOMOC_MACRO_NAMES "CUSTOM_MACRO")

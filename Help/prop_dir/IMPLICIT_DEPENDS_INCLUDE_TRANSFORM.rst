@@ -17,13 +17,13 @@ replaced by the value given with the macro argument substituted for
 
 will convert lines of the form
 
-::
+.. code-block:: c
 
   #include MYDIR(myheader.h)
 
 to
 
-::
+.. code-block:: c
 
   #include <mydir/myheader.h>
 

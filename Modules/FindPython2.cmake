@@ -43,7 +43,9 @@ If component ``Development`` is specified, it implies sub-components
 
 To ensure consistent versions between components ``Interpreter``, ``Compiler``,
 ``Development`` (or one of its sub-components) and ``NumPy``, specify all
-components at the same time::
+components at the same time:
+
+.. code-block:: cmake
 
   find_package (Python2 COMPONENTS Interpreter Development)
 
@@ -472,7 +474,9 @@ This module defines the command ``Python2_add_library`` (when
 :prop_gbl:`CMAKE_ROLE` is ``PROJECT``), which has the same semantics as
 :command:`add_library` and adds a dependency to target ``Python2::Python`` or,
 when library type is ``MODULE``, to target ``Python2::Module`` and takes care
-of Python module naming rules::
+of Python module naming rules:
+
+.. code-block:: cmake
 
   Python2_add_library (<name> [STATIC | SHARED | MODULE]
                        <source1> [<source2> ...])

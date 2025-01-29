@@ -24,13 +24,13 @@ The following functions are provided by this module:
 Requires CMake 2.6 or greater because it uses function and
 PARENT_SCOPE.  Also depends on BundleUtilities.cmake.
 
-::
+.. code-block:: cmake
 
   write_qt4_conf(<qt_conf_dir> <qt_conf_contents>)
 
 Writes a qt.conf file with the <qt_conf_contents> into <qt_conf_dir>.
 
-::
+.. code-block:: cmake
 
   resolve_qt4_paths(<paths_var> [<executable_path>])
 
@@ -38,7 +38,7 @@ Loop through <paths_var> list and if any don't exist resolve them
 relative to the <executable_path> (if supplied) or the
 CMAKE_INSTALL_PREFIX.
 
-::
+.. code-block:: cmake
 
   fixup_qt4_executable(<executable>
     [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf>])
@@ -65,7 +65,7 @@ directories to be searched to find library dependencies.
 <request_qt_conf> will force a qt.conf file to be written even if not
 needed.
 
-::
+.. code-block:: cmake
 
   install_qt4_plugin_path(plugin executable copy installed_plugin_path_var
                           <plugins_dir> <component> <configurations>)
@@ -80,7 +80,7 @@ rather than install time.
 
 If <component> is set then anything installed will use this COMPONENT.
 
-::
+.. code-block:: cmake
 
   install_qt4_plugin(plugin executable copy installed_plugin_path_var
                      <plugins_dir> <component>)
@@ -90,7 +90,7 @@ directory (or <plugins_dir>) relative to <executable> and store the
 result in <installed_plugin_path_var>.  See documentation of
 INSTALL_QT4_PLUGIN_PATH.
 
-::
+.. code-block:: cmake
 
   install_qt4_executable(<executable>
     [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf> <component>])

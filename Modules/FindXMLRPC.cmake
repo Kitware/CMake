@@ -27,7 +27,7 @@ Modules may be listed by running "xmlrpc-c-config".  Modules include:
 
 Typical usage:
 
-::
+.. code-block:: cmake
 
   find_package(XMLRPC REQUIRED libwww-client)
 #]=======================================================================]

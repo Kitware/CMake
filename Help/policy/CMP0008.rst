@@ -8,7 +8,7 @@ Libraries linked by full-path must have a valid library file name.
 
 In CMake 2.4 and below it is possible to write code like
 
-::
+.. code-block:: cmake
 
   target_link_libraries(myexe /full/path/to/somelib)
 

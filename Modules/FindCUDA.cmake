@@ -308,9 +308,11 @@ Values for ``target_CUDA_architecture``:
 Returns list of flags to be added to ``CUDA_NVCC_FLAGS`` in ``<out_variable>``.
 Additionally, sets ``<out_variable>_readable`` to the resulting numeric list.
 
-Example::
+Example:
 
-  cuda_select_nvcc_arch_flags(ARCH_FLAGS 3.0 3.5+PTX 5.2(5.0) Maxwell)
+.. code-block:: cmake
+
+  cuda_select_nvcc_arch_flags(ARCH_FLAGS "3.0" "3.5+PTX" "5.2(5.0)" "Maxwell")
   list(APPEND CUDA_NVCC_FLAGS ${ARCH_FLAGS})
 
 More info on CUDA architectures: https://en.wikipedia.org/wiki/CUDA.

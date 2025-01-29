@@ -50,7 +50,9 @@ Syntax
 
 * The CMake language has been extended with
   :ref:`Bracket Argument` and  :ref:`Bracket Comment`
-  syntax inspired by Lua long brackets::
+  syntax inspired by Lua long brackets:
+
+  .. code-block:: cmake
 
     set(x [===[bracket argument]===] #[[bracket comment]])
 

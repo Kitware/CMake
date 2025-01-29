@@ -14,7 +14,7 @@ target explicitly, even if empty.  This produces confusing behavior
 when used in combination with the historical behavior of the plain
 :command:`target_link_libraries` signature.  For example, consider the code:
 
-::
+.. code-block:: cmake
 
  target_link_libraries(mylib A)
  target_link_libraries(mylib PRIVATE B)

@@ -77,7 +77,7 @@ The following cache variables may also be set:
 Example usage
 ^^^^^^^^^^^^^
 
-::
+.. code-block:: cmake
 
     enable_testing()
     find_package(GTest REQUIRED)

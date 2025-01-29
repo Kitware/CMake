@@ -21,7 +21,9 @@ The following command is defined for use with ``SWIG``:
 
   .. versionadded:: 3.8
 
-  Define swig module with given name and specified language::
+  Define swig module with given name and specified language:
+
+  .. code-block:: cmake
 
     swig_add_library(<name>
                      [TYPE <SHARED|MODULE|STATIC|USE_BUILD_SHARED_LIBS>]
@@ -372,7 +374,9 @@ Deprecated Commands
     Use :command:`target_link_libraries` with the standard target name,
     or with ``${SWIG_MODULE_<name>_REAL_NAME}`` for legacy target naming.
 
-  Link libraries to swig module::
+  Link libraries to swig module:
+
+  .. code-block:: cmake
 
     swig_link_libraries(<name> <item>...)
 

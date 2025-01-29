@@ -50,7 +50,9 @@ Possible components are::
   LATEX2HTML
   HTLATEX
 
-Example Usages::
+Example Usages:
+
+.. code-block:: cmake
 
   find_package(LATEX)
   find_package(LATEX COMPONENTS PDFLATEX)

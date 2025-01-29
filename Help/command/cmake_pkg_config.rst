@@ -12,7 +12,7 @@ Process pkg-config format package files.
 Synopsis
 ^^^^^^^^
 
-.. parsed-literal::
+.. code-block:: cmake
 
   cmake_pkg_config(EXTRACT <package> [<version>] [...])
 

@@ -14,7 +14,7 @@ property for executables will be honored at link time.
 
 .. command:: check_pie_supported
 
-  ::
+  .. code-block:: cmake
 
     check_pie_supported([OUTPUT_VARIABLE <output>]
                         [LANGUAGES <lang>...])

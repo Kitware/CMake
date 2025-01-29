@@ -132,9 +132,11 @@ on Windows Nullsoft Scriptable Install System.
 
  Specify links in ``[application]`` menu.  This should contain a list of pair
  ``link`` ``link name``. The link may be a URL or a path relative to
- installation prefix.  Like::
+ installation prefix.  Like:
 
-  set(CPACK_NSIS_MENU_LINKS
+ .. code-block:: cmake
+
+    set(CPACK_NSIS_MENU_LINKS
       "doc/cmake-@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@/cmake.html"
       "CMake Help" "https://cmake.org" "CMake Web Site")
 

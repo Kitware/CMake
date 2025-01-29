@@ -24,7 +24,7 @@ After generating this tar file, it can be sent to CDash for display with the
 
 .. command:: ctest_coverage_collect_gcov
 
-  ::
+  .. code-block:: cmake
 
     ctest_coverage_collect_gcov(TARBALL <tarfile>
       [SOURCE <source_dir>][BUILD <build_dir>]

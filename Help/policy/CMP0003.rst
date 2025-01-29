@@ -10,7 +10,7 @@ This policy affects how libraries whose full paths are NOT known are
 found at link time, but was created due to a change in how CMake deals
 with libraries whose full paths are known.  Consider the code
 
-::
+.. code-block:: cmake
 
   target_link_libraries(myexe /path/to/libA.so)
 
@@ -36,7 +36,7 @@ example code now produces something like
 
 Unfortunately this change can break code like
 
-::
+.. code-block:: cmake
 
   target_link_libraries(myexe /path/to/libA.so B)
 
@@ -70,7 +70,7 @@ The setting for this policy used when generating the link line is that
 in effect when the target is created by an add_executable or
 add_library command.  For the example described above, the code
 
-::
+.. code-block:: cmake
 
   cmake_policy(SET CMP0003 OLD) # or cmake_policy(VERSION 2.4)
   add_executable(myexe myexe.c)
@@ -79,7 +79,7 @@ add_library command.  For the example described above, the code
 will work and suppress the warning for this policy.  It may also be
 updated to work with the corrected linking approach:
 
-::
+.. code-block:: cmake
 
   cmake_policy(SET CMP0003 NEW) # or cmake_policy(VERSION 2.6)
   link_directories(/path/to) # needed to find library B
@@ -88,7 +88,7 @@ updated to work with the corrected linking approach:
 
 Even better, library B may be specified with a full path:
 
-::
+.. code-block:: cmake
 
   add_executable(myexe myexe.c)
   target_link_libraries(myexe /path/to/libA.so /path/to/libB.so)

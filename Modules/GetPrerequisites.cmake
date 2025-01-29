@@ -46,7 +46,7 @@ The following functions are provided by this module:
      (projects can override with gp_resolved_file_type_override)
    gp_file_type
 
-::
+.. code-block:: cmake
 
   GET_PREREQUISITES(<target> <prerequisites_var> <exclude_system> <recurse>
                     <exepath> <dirs> [<rpaths>])
@@ -72,7 +72,7 @@ locations, /usr/lib...
   The variable GET_PREREQUISITES_VERBOSE can be set to true to enable verbose
   output.
 
-::
+.. code-block:: cmake
 
   LIST_PREREQUISITES(<target> [<recurse> [<exclude_system> [<verbose>]]])
 
@@ -86,7 +86,7 @@ indicating whether to include or exclude "system" prerequisites.  With
 <verbose> set to 0 only the full path names of the prerequisites are
 printed, set to 1 extra information will be displayed.
 
-::
+.. code-block:: cmake
 
   LIST_PREREQUISITES_BY_GLOB(<glob_arg> <glob_exp>)
 
@@ -99,21 +99,21 @@ matching file is executable, its prerequisites are listed.
 Any additional (optional) arguments provided are passed along as the
 optional arguments to the list_prerequisites calls.
 
-::
+.. code-block:: cmake
 
   GP_APPEND_UNIQUE(<list_var> <value>)
 
 Append <value> to the list variable <list_var> only if the value is
 not already in the list.
 
-::
+.. code-block:: cmake
 
   IS_FILE_EXECUTABLE(<file> <result_var>)
 
 Return 1 in <result_var> if <file> is a binary executable, 0
 otherwise.
 
-::
+.. code-block:: cmake
 
   GP_ITEM_DEFAULT_EMBEDDED_PATH(<item> <default_embedded_path_var>)
 
@@ -123,7 +123,7 @@ is embedded inside a bundle.
 Override on a per-project basis by providing a project-specific
 gp_item_default_embedded_path_override function.
 
-::
+.. code-block:: cmake
 
   GP_RESOLVE_ITEM(<context> <item> <exepath> <dirs> <resolved_item_var>
                   [<rpaths>])
@@ -133,7 +133,7 @@ Resolve an item into an existing full path file.
 Override on a per-project basis by providing a project-specific
 gp_resolve_item_override function.
 
-::
+.. code-block:: cmake
 
   GP_RESOLVED_FILE_TYPE(<original_file> <file> <exepath> <dirs> <type_var>
                         [<rpaths>])
@@ -157,7 +157,7 @@ Possible types are:
 Override on a per-project basis by providing a project-specific
 gp_resolved_file_type_override function.
 
-::
+.. code-block:: cmake
 
   GP_FILE_TYPE(<original_file> <file> <type_var>)
 

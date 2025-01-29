@@ -131,7 +131,7 @@ Macros
 
 .. command:: GNUInstallDirs_get_absolute_install_dir
 
-  ::
+  .. code-block:: cmake
 
     GNUInstallDirs_get_absolute_install_dir(absvar var dirname)
 

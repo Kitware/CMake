@@ -9,7 +9,7 @@ Libraries linked may not have leading or trailing whitespace.
 CMake versions 2.4 and below silently removed leading and trailing
 whitespace from libraries linked with code like
 
-::
+.. code-block:: cmake
 
   target_link_libraries(myexe " A ")
 

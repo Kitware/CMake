@@ -38,7 +38,9 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
 .. command:: gtest_add_tests
 
   Automatically add tests with CTest by scanning source code for Google Test
-  macros::
+  macros:
+
+  .. code-block:: cmake
 
     gtest_add_tests(TARGET target
                     [SOURCES src1...]
@@ -127,7 +129,9 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
     set_tests_properties(${noArgsTests}   PROPERTIES TIMEOUT 10)
     set_tests_properties(${withArgsTests} PROPERTIES TIMEOUT 20)
 
-  For backward compatibility, the following form is also supported::
+  For backward compatibility, the following form is also supported:
+
+  .. code-block:: cmake
 
     gtest_add_tests(exe args files...)
 
@@ -152,7 +156,9 @@ same as the Google Test name (i.e. ``suite.testcase``); see also
 .. command:: gtest_discover_tests
 
   Automatically add tests with CTest by querying the compiled test executable
-  for available tests::
+  for available tests:
+
+  .. code-block:: cmake
 
     gtest_discover_tests(target
                          [EXTRA_ARGS args...]

@@ -27,7 +27,7 @@ toolchain file instead.
 
 Macro ``CMAKE_FORCE_C_COMPILER`` has the following signature:
 
-::
+.. code-block:: cmake
 
    CMAKE_FORCE_C_COMPILER(<compiler> <compiler-id>)
 
@@ -39,7 +39,7 @@ compiler information tests.
 
 Macro ``CMAKE_FORCE_CXX_COMPILER`` has the following signature:
 
-::
+.. code-block:: cmake
 
    CMAKE_FORCE_CXX_COMPILER(<compiler> <compiler-id>)
 
@@ -51,7 +51,7 @@ compiler information tests.
 
 Macro ``CMAKE_FORCE_Fortran_COMPILER`` has the following signature:
 
-::
+.. code-block:: cmake
 
    CMAKE_FORCE_Fortran_COMPILER(<compiler> <compiler-id>)
 
@@ -63,7 +63,7 @@ compiler information tests.
 
 So a simple toolchain file could look like this:
 
-::
+.. code-block:: cmake
 
    include (CMakeForceCompiler)
    set(CMAKE_SYSTEM_NAME Generic)

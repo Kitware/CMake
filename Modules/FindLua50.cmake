@@ -13,11 +13,15 @@ This module defines::
   LUA_LIBRARIES, both lua and lualib
   LUA_INCLUDE_DIR, where to find lua.h and lualib.h (and probably lauxlib.h)
 
-Note that the expected include convention is::
+Note that the expected include convention is:
+
+.. code-block:: c
 
   #include "lua.h"
 
-and not::
+and not:
+
+.. code-block:: c
 
   #include <lua/lua.h>
 

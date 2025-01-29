@@ -79,14 +79,18 @@ Module Functions
 .. command:: FortranCInterface_HEADER
 
   The ``FortranCInterface_HEADER`` function is provided to generate a
-  C header file containing macros to mangle symbol names::
+  C header file containing macros to mangle symbol names:
+
+  .. code-block:: cmake
 
     FortranCInterface_HEADER(<file>
                              [MACRO_NAMESPACE <macro-ns>]
                              [SYMBOL_NAMESPACE <ns>]
                              [SYMBOLS [<module>:]<function> ...])
 
-  It generates in ``<file>`` definitions of the following macros::
+  It generates in ``<file>`` definitions of the following macros:
+
+  .. code-block:: c
 
      #define FortranCInterface_GLOBAL (name,NAME) ...
      #define FortranCInterface_GLOBAL_(name,NAME) ...
@@ -125,7 +129,9 @@ Module Functions
 .. command:: FortranCInterface_VERIFY
 
   The ``FortranCInterface_VERIFY`` function is provided to verify
-  that the Fortran and C/C++ compilers work together::
+  that the Fortran and C/C++ compilers work together:
+
+  .. code-block:: cmake
 
     FortranCInterface_VERIFY([CXX] [QUIET])
 

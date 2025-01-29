@@ -629,7 +629,7 @@ reStructuredText markup from comment blocks that start in ``.rst:``.
 At the top of ``Modules/<module-name>.cmake``, begin with the following
 license notice:
 
-::
+.. code-block:: cmake
 
  # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
  # file Copyright.txt or https://cmake.org/licensing for details.
@@ -637,7 +637,7 @@ license notice:
 After this notice, add a *BLANK* line.  Then, add documentation using
 a `Bracket Comment`_ of the form:
 
-::
+.. code-block:: cmake
 
   #[=======================================================================[.rst:
   <module-name>
@@ -655,7 +655,7 @@ All such comments must start with ``#`` in the first column.
 
 For example, a ``FindXxx.cmake`` module may contain:
 
-::
+.. code-block:: cmake
 
   # Distributed under the OSI-approved BSD 3-Clause License.  See accompanying
   # file Copyright.txt or https://cmake.org/licensing for details.

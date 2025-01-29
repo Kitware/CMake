@@ -16,7 +16,7 @@ The module defines the following variables:
 
 Example usage:
 
-::
+.. code-block:: cmake
 
    find_package(CVS)
    if(CVS_FOUND)

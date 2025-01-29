@@ -58,7 +58,7 @@ options that need to be passed to the wx-config utility.  For example,
 to use the base toolkit found in the /usr/local path, set the variable
 (before calling the FIND_PACKAGE command) as such:
 
-::
+.. code-block:: cmake
 
   set(wxWidgets_CONFIG_OPTIONS --toolkit=base --prefix=/usr)
 
@@ -93,7 +93,7 @@ and unix style:
 
 Sample usage:
 
-::
+.. code-block:: cmake
 
    # Note that for MinGW users the order of libs is important!
    find_package(wxWidgets COMPONENTS gl core base OPTIONAL_COMPONENTS net)
@@ -107,7 +107,7 @@ Sample usage:
 
 If wxWidgets is required (i.e., not an optional part):
 
-::
+.. code-block:: cmake
 
    find_package(wxWidgets REQUIRED gl core base OPTIONAL_COMPONENTS net)
    include(${wxWidgets_USE_FILE})

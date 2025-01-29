@@ -15,7 +15,9 @@ the compiler version number.
 
 Determine the Visual Studio service pack of the 'cl' in use.
 
-Usage::
+Usage:
+
+.. code-block:: cmake
 
   if(MSVC)
     include(CMakeDetermineVSServicePack)

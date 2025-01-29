@@ -18,7 +18,7 @@ submissions as well as testing with CTest.  This module should be
 included in the CMakeLists.txt file at the top of a project.  Typical
 usage:
 
-::
+.. code-block:: cmake
 
   include(Dart)
   if(BUILD_TESTING)

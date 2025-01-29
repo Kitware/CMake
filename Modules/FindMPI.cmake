@@ -207,7 +207,7 @@ Usage of mpiexec
 When using ``MPIEXEC_EXECUTABLE`` to execute MPI applications, you should typically
 use all of the ``MPIEXEC_EXECUTABLE`` flags as follows:
 
-::
+.. code-block:: cmake
 
    ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS}
      ${MPIEXEC_PREFLAGS} EXECUTABLE ${MPIEXEC_POSTFLAGS} ARGS
