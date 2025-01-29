@@ -32,17 +32,17 @@ zlib-devel
 # Install documentation tools.
 python3-sphinx
 python3-sphinxcontrib-qthelp
-texinfo
 qt5-qttools-devel
 qt6-qttools-devel
+texinfo
 
 # Install lint tools.
 clang-analyzer
 codespell
 
 # Tools needed for the test suite.
-findutils
 file
+findutils
 jq
 which
 
@@ -51,8 +51,8 @@ nasm
 
 # Packages needed to test CTest.
 breezy
-subversion
 mercurial
+subversion
 
 # Packages needed to test CPack.
 rpm-build
@@ -60,7 +60,8 @@ rpm-build
 # Packages needed to test find modules.
 alsa-lib-devel
 blas-devel
-boost-devel boost-python3-devel
+boost-devel
+boost-python3-devel
 bzip2-devel
 cups-devel
 DevIL-devel
@@ -75,7 +76,8 @@ giflib-devel
 glew-devel
 gmock
 gnutls-devel
-grpc-devel grpc-plugins
+grpc-devel
+grpc-plugins
 gsl-devel
 gtest-devel
 gtk2-devel
@@ -90,12 +92,10 @@ lapack-devel
 libarchive-devel
 libcurl-devel
 libicu-devel
-libinput-devel systemd-devel
+libinput-devel
 libjpeg-turbo-devel
 libomp-devel
 libpng-devel
-opensp-devel
-postgresql-server-devel
 libtiff-devel
 libuv-devel
 libxml2-devel
@@ -103,18 +103,31 @@ libxslt-devel
 mpich-devel
 openal-soft-devel
 openmpi-devel
+opensp-devel
 patch
 perl
-protobuf-devel protobuf-c-devel protobuf-lite-devel
-pypy2 pypy2-devel
-pypy3 pypy3-devel
-python3 python3-devel python3-numpy
-python3-jsmin python3-jsonschema
-rbenv ruby-build-rbenv
-ruby rubygems ruby-devel
+postgresql-server-devel
+protobuf-c-devel
+protobuf-devel
+protobuf-lite-devel
+pypy2
+pypy2-devel
+pypy3
+pypy3-devel
+python3
+python3-devel
+python3-jsmin
+python3-jsonschema
+python3-numpy
+rbenv
+ruby
+ruby-build-rbenv
+ruby-devel
+rubygems
 SDL-devel
 sqlite-devel
 swig
+systemd-devel
 unixODBC-devel
 wxGTK-devel
 xalan-c-devel
