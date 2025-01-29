@@ -537,6 +537,7 @@ kwsysEXPORT void kwsysProcess_ResetStartTime(kwsysProcess* cp);
 #    undef kwsysProcess_WaitForExit
 #    undef kwsysProcess_Interrupt
 #    undef kwsysProcess_Kill
+#    undef kwsysProcess_KillPID
 #    undef kwsysProcess_ResetStartTime
 #  endif
 #endif
