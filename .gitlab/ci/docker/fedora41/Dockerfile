@@ -58,7 +58,6 @@ RUN --mount=type=bind,source=dnf.conf,target=/etc/dnf/dnf.conf \
     --mount=type=bind,source=install_deps.sh,target=/root/install_deps.sh \
     --mount=type=bind,source=deps_packages.lst,target=/root/deps_packages.lst \
     --mount=type=cache,from=dnf-cache,source=/var/cache/libdnf5,target=/var/cache/libdnf5,sharing=private \
-    --mount=type=cache,target=/var/cache/pip \
     --mount=type=tmpfs,target=/var/log \
     --mount=type=tmpfs,target=/tmp \
     sh /root/install_deps.sh
