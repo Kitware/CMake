@@ -51,7 +51,7 @@ void AddObjectEntries(cmGeneratorTarget const* headTarget,
                       EvaluatedTargetPropertyEntries& entries)
 {
   if (cmLinkImplementationLibraries const* impl =
-        headTarget->GetLinkImplementationLibraries(config, UseTo::Compile)) {
+        headTarget->GetLinkImplementationLibraries(config, UseTo::Link)) {
     entries.HadContextSensitiveCondition = impl->HadContextSensitiveCondition;
     for (cmLinkImplItem const& lib : impl->Libraries) {
       if (lib.Target &&
