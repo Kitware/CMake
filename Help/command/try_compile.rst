@@ -349,6 +349,7 @@ as needed to honor the state of the calling project:
 * :policy:`CMP0155`
 * :policy:`CMP0157`
 * :policy:`CMP0181`
+* :policy:`CMP0184`
 
 .. versionadded:: 4.0
   The current setting of :policy:`CMP0181` policy is propagated through to the
@@ -416,6 +417,11 @@ configuration:
   property is set to true, :variable:`CMAKE_PROJECT_TOP_LEVEL_INCLUDES` is
   propagated into the test project's build configuration when using the
   :ref:`whole-project signature <Try Compiling Whole Projects>`.
+
+.. versionadded:: 4.0
+  If :policy:`CMP0184` is set to ``NEW``, one can use
+  :variable:`CMAKE_MSVC_RUNTIME_CHECKS` to specify the enabled MSVC runtime
+  checks.
 
 See Also
 ^^^^^^^^

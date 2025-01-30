@@ -483,6 +483,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^(Cray|PGI|NVHPC|XL|XLClang|IBMClang|Fujitsu|F
   add_RunCMake_test(MetaCompileFeatures)
 endif()
 if(MSVC)
+  add_RunCMake_test(MSVCRuntimeChecks)
   add_RunCMake_test(MSVCRuntimeLibrary)
   add_RunCMake_test(MSVCRuntimeTypeInfo)
   add_RunCMake_test(MSVCWarningFlags)

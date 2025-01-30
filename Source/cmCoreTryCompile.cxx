@@ -110,6 +110,8 @@ std::string const kCMAKE_WATCOM_RUNTIME_LIBRARY_DEFAULT =
   "CMAKE_WATCOM_RUNTIME_LIBRARY_DEFAULT";
 std::string const kCMAKE_MSVC_DEBUG_INFORMATION_FORMAT_DEFAULT =
   "CMAKE_MSVC_DEBUG_INFORMATION_FORMAT_DEFAULT";
+std::string const kCMAKE_MSVC_RUNTIME_CHECKS_DEFAULT =
+  "CMAKE_MSVC_RUNTIME_CHECKS_DEFAULT";
 
 /* GHS Multi platform variables */
 std::set<std::string> const ghs_platform_vars{
@@ -683,6 +685,13 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
               !msvcDebugInformationFormatDefault->empty() ? "NEW" : "OLD");
     }
 
+    /* Set MSVC runtime checks policy to match our selection.  */
+    if (cmValue msvcRuntimeChecksDefault =
+          this->Makefile->GetDefinition(kCMAKE_MSVC_RUNTIME_CHECKS_DEFAULT)) {
+      fprintf(fout, "cmake_policy(SET CMP0184 %s)\n",
+              !msvcRuntimeChecksDefault->empty() ? "NEW" : "OLD");
+    }
+
     /* Set cache/normal variable policy to match outer project.
        It may affect toolchain files.  */
     if (this->Makefile->GetPolicyStatus(cmPolicies::CMP0126) !=
@@ -1111,6 +1120,7 @@ cm::optional<cmTryCompileResult> cmCoreTryCompile::TryCompileCode(
     vars.emplace("CMAKE_MSVC_RUNTIME_LIBRARY"_s);
     vars.emplace("CMAKE_WATCOM_RUNTIME_LIBRARY"_s);
     vars.emplace("CMAKE_MSVC_DEBUG_INFORMATION_FORMAT"_s);
+    vars.emplace("CMAKE_MSVC_RUNTIME_CHECKS"_s);
     vars.emplace("CMAKE_CXX_COMPILER_CLANG_SCAN_DEPS"_s);
     vars.emplace("CMAKE_VS_USE_DEBUG_LIBRARIES"_s);
 

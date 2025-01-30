@@ -2193,10 +2193,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
             "CMAKE_" + lang + "_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_" +
             msvcRuntimeLibrary)) {
         this->AppendCompileOptions(flags, *msvcRuntimeLibraryOptions);
-      } else if ((this->Makefile->GetSafeDefinition(
-                    "CMAKE_" + lang + "_COMPILER_ID") == "MSVC" ||
-                  this->Makefile->GetSafeDefinition(
-                    "CMAKE_" + lang + "_SIMULATE_ID") == "MSVC") &&
+      } else if ((compiler == "MSVC" || compilerSimulateId == "MSVC") &&
                  !cmSystemTools::GetErrorOccurredFlag()) {
         // The compiler uses the MSVC ABI so it needs a known runtime library.
         this->IssueMessage(MessageType::FATAL_ERROR,
@@ -2224,10 +2221,8 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
             "CMAKE_" + lang + "_COMPILE_OPTIONS_WATCOM_RUNTIME_LIBRARY_" +
             watcomRuntimeLibrary)) {
         this->AppendCompileOptions(flags, *watcomRuntimeLibraryOptions);
-      } else if ((this->Makefile->GetSafeDefinition(
-                    "CMAKE_" + lang + "_COMPILER_ID") == "OpenWatcom" ||
-                  this->Makefile->GetSafeDefinition(
-                    "CMAKE_" + lang + "_SIMULATE_ID") == "OpenWatcom") &&
+      } else if ((compiler == "OpenWatcom" ||
+                  compilerSimulateId == "OpenWatcom") &&
                  !cmSystemTools::GetErrorOccurredFlag()) {
         // The compiler uses the Watcom ABI so it needs a known runtime
         // library.
@@ -2235,6 +2230,49 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
                            "WATCOM_RUNTIME_LIBRARY value '" +
                              watcomRuntimeLibrary + "' not known for this " +
                              lang + " compiler.");
+      }
+    }
+  }
+
+  // Add MSVC runtime checks flags. This is activated by the presence
+  // of a default selection whether or not it is overridden by a property.
+  cmValue msvcRuntimeChecksDefault =
+    this->Makefile->GetDefinition("CMAKE_MSVC_RUNTIME_CHECKS_DEFAULT");
+  if (cmNonempty(msvcRuntimeChecksDefault)) {
+    cmValue msvcRuntimeChecksValue =
+      target->GetProperty("MSVC_RUNTIME_CHECKS");
+    if (!msvcRuntimeChecksValue) {
+      msvcRuntimeChecksValue = msvcRuntimeChecksDefault;
+    }
+    cmList msvcRuntimeChecksList = cmGeneratorExpression::Evaluate(
+      *msvcRuntimeChecksValue, this, config, target);
+    msvcRuntimeChecksList.remove_duplicates();
+
+    // RTC1/RTCsu VS GUI workaround
+    std::string const stackFrameErrorCheck = "StackFrameErrorCheck";
+    std::string const unitinitializedVariable = "UninitializedVariable";
+    std::string const rtcSU = "RTCsu";
+    if ((cm::contains(msvcRuntimeChecksList, stackFrameErrorCheck) &&
+         cm::contains(msvcRuntimeChecksList, unitinitializedVariable)) ||
+        cm::contains(msvcRuntimeChecksList, rtcSU)) {
+      msvcRuntimeChecksList.remove_items(
+        { stackFrameErrorCheck, unitinitializedVariable, rtcSU });
+      msvcRuntimeChecksList.append(rtcSU);
+    }
+
+    for (std::string const& msvcRuntimeChecks : msvcRuntimeChecksList) {
+      if (cmValue msvcRuntimeChecksOptions =
+            this->Makefile->GetDefinition(cmStrCat(
+              "CMAKE_", lang,
+              "_COMPILE_OPTIONS_MSVC_RUNTIME_CHECKS_" + msvcRuntimeChecks))) {
+        this->AppendCompileOptions(flags, *msvcRuntimeChecksOptions);
+      } else if ((compiler == "MSVC" || compilerSimulateId == "MSVC") &&
+                 !cmSystemTools::GetErrorOccurredFlag()) {
+        // The compiler uses the MSVC ABI so it needs a known runtime checks.
+        this->IssueMessage(MessageType::FATAL_ERROR,
+                           cmStrCat("MSVC_RUNTIME_CHECKS value '",
+                                    msvcRuntimeChecks, "' not known for this ",
+                                    lang, " compiler."));
       }
     }
   }
@@ -2249,10 +2287,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
                        "_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_",
                        *msvcDebugInformationFormat))) {
         this->AppendCompileOptions(flags, *msvcDebugInformationFormatOptions);
-      } else if ((this->Makefile->GetSafeDefinition(
-                    cmStrCat("CMAKE_", lang, "_COMPILER_ID")) == "MSVC"_s ||
-                  this->Makefile->GetSafeDefinition(
-                    cmStrCat("CMAKE_", lang, "_SIMULATE_ID")) == "MSVC"_s) &&
+      } else if ((compiler == "MSVC" || compilerSimulateId == "MSVC") &&
                  !cmSystemTools::GetErrorOccurredFlag()) {
         // The compiler uses the MSVC ABI so it needs a known runtime library.
         this->IssueMessage(MessageType::FATAL_ERROR,

@@ -2128,6 +2128,14 @@ if(BUILD_TESTING)
     set_property(TEST MSVCDebugInformationFormat APPEND
       PROPERTY LABELS "CUDA" "Fortran")
 
+    set(MSVCRuntimeChecks_BUILD_OPTIONS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
+    if(CMAKE_Fortran_COMPILER)
+      list(APPEND MSVCRuntimeChecks_BUILD_OPTIONS -DCMake_TEST_Fortran=1)
+    endif()
+    ADD_TEST_MACRO(MSVCRuntimeChecks)
+    set_property(TEST MSVCRuntimeChecks APPEND
+      PROPERTY LABELS "CUDA" "Fortran")
+
     set(MSVCRuntimeLibrary_BUILD_OPTIONS -DCMake_TEST_CUDA=${CMake_TEST_CUDA})
     ADD_TEST_MACRO(MSVCRuntimeLibrary)
     set_property(TEST MSVCRuntimeLibrary APPEND

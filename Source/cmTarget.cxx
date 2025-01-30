@@ -330,6 +330,7 @@ TargetProperty const StaticTargetProperties[] = {
   { "OSX_ARCHITECTURES"_s, IC::CanCompileSources },
   // ---- Windows
   { "MSVC_DEBUG_INFORMATION_FORMAT"_s, IC::CanCompileSources },
+  { "MSVC_RUNTIME_CHECKS"_s, IC::CanCompileSources },
   { "MSVC_RUNTIME_LIBRARY"_s, IC::CanCompileSources },
   { "VS_JUST_MY_CODE_DEBUGGING"_s, IC::CanCompileSources },
   { "VS_DEBUGGER_COMMAND"_s, IC::ExecutableTarget },
@@ -1763,6 +1764,7 @@ void cmTarget::CopyImportedCxxModulesProperties(cmTarget const* tgt)
     "OSX_ARCHITECTURES",
     // ---- Windows
     "MSVC_DEBUG_INFORMATION_FORMAT",
+    "MSVC_RUNTIME_CHECKS",
     "MSVC_RUNTIME_LIBRARY",
     "VS_PLATFORM_TOOLSET",
     // ---- OpenWatcom

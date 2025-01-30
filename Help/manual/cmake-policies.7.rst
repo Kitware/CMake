@@ -98,6 +98,7 @@ Policies Introduced by CMake 4.0
 .. toctree::
    :maxdepth: 1
 
+   CMP0184: MSVC runtime checks flags are selected by an abstraction. </policy/CMP0184>
    CMP0183: add_feature_info() supports full Condition Syntax. </policy/CMP0183>
    CMP0182: Create shared library archives by default on AIX. </policy/CMP0182>
    CMP0181: Link command-line fragment variables are parsed and re-quoted. </policy/CMP0181>
