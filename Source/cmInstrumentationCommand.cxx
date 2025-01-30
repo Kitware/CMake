@@ -18,6 +18,7 @@ file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstrumentationQuery.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
+#include "cmake.h"
 
 namespace {
 
@@ -141,9 +142,9 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
     callback = cmStrCat(callback, arg);
   }
 
-  auto instrument = cmInstrumentation(
-    status.GetMakefile().GetHomeOutputDirectory(), queries, hooks, callback);
-  instrument.WriteJSONQuery();
-
+  status.GetMakefile()
+    .GetCMakeInstance()
+    ->GetInstrumentation()
+    ->WriteJSONQuery(queries, hooks, callback);
   return true;
 }
