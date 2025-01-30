@@ -1969,6 +1969,8 @@ bool cmFindPackageCommand::FindPackageDependencies(
 
     // Try to find the requirement; fail if we can't.
     if (!fp.FindPackage() || fp.FileFound.empty()) {
+      this->SetError(cmStrCat("could not find "_s, dep.Name,
+                              ", required by "_s, this->Name, '.'));
       return false;
     }
   }

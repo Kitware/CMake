@@ -23,3 +23,8 @@ Call Stack \(most recent call first\):
   cps/[Ii]ncomplete\.cps
   MissingTransitiveDependency\.cmake:[0-9]+ \(find_package\)
   CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at MissingTransitiveDependency\.cmake:[0-9]+ \(find_package\):
+  find_package could not find StillIncomplete, required by Incomplete\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)
