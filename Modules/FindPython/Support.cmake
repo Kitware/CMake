@@ -4160,7 +4160,7 @@ if(_${_PYTHON_PREFIX}_CMAKE_ROLE STREQUAL "PROJECT")
           set_target_properties (${__name}
                                  PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "C"
                                             IMPORTED_IMPLIB_RELEASE "${${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_RELEASE}"
-                                            IMPORTED_LOCATION_RELEASE "${${_PYTHON_PREFIX}_${_PREFIX}RUNTIME_LIBRARY_RELEASE}")
+                                            IMPORTED_LOCATION_RELEASE "${${_PYTHON_PREFIX}_RUNTIME_${_PREFIX}LIBRARY_RELEASE}")
           set_target_properties (${__name}
                                  PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "C"
                                             IMPORTED_IMPLIB_DEBUG "${${_PYTHON_PREFIX}_${_PREFIX}LIBRARY_DEBUG}"
