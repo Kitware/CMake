@@ -414,6 +414,30 @@
         CMAKE_CONFIGURATION: cuda12.2_clang
         CTEST_NO_WARNINGS_ALLOWED: 1
 
+.cuda12.6:
+    extends: .cuda
+    image: "kitware/cmake:ci-cuda12.6-x86_64-2025-01-30"
+    variables:
+        CMAKE_ARCH: x86_64
+
+.cuda12.6_nvidia:
+    extends: .cuda12.6
+    variables:
+        CMAKE_CONFIGURATION: cuda12.6_nvidia
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
+.cuda12.6_nvidia_clang:
+    extends: .cuda12.6
+    variables:
+        CMAKE_CONFIGURATION: cuda12.6_nvidia_clang
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
+.cuda12.6_clang:
+    extends: .cuda12.6
+    variables:
+        CMAKE_CONFIGURATION: cuda12.6_clang
+        CTEST_NO_WARNINGS_ALLOWED: 1
+
 ### HIP builds
 
 .hip5.5:
