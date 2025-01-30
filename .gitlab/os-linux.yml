@@ -402,12 +402,6 @@
         CMAKE_CONFIGURATION: cuda12.2_nvidia
         CTEST_NO_WARNINGS_ALLOWED: 1
 
-.cuda12.2_nvidia_clang:
-    extends: .cuda12.2
-    variables:
-        CMAKE_CONFIGURATION: cuda12.2_nvidia_clang
-        CTEST_NO_WARNINGS_ALLOWED: 1
-
 .cuda12.2_clang:
     extends: .cuda12.2
     variables:

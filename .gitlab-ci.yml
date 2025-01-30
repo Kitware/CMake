@@ -399,17 +399,6 @@ t:cuda12.2-nvidia:
     variables:
         CMAKE_CI_JOB_NIGHTLY: "true"
 
-t:cuda12.2-nvidia-clang:
-    extends:
-        - .cuda12.2_nvidia_clang
-        - .cmake_test_linux_release
-        - .linux_x86_64_tags_cuda
-        - .cmake_junit_artifacts
-        - .run_dependent
-        - .needs_centos7_x86_64
-    variables:
-        CMAKE_CI_JOB_NIGHTLY: "true"
-
 t:cuda12.2-clang:
     extends:
         - .cuda12.2_clang
