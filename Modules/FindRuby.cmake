@@ -107,7 +107,7 @@ endforeach ()
 #   Ruby_LIBRUBYARG=`$RUBY -r rbconfig -e 'printf("%s",Config::CONFIG@<:@"LIBRUBYARG_SHARED"@:>@)'`
 
 # uncomment the following line to get debug output for this file
-# set(_Ruby_DEBUG_OUTPUT TRUE)
+# set(CMAKE_MESSAGE_LOG_LEVEL DEBUG)
 
 # Determine the list of possible names of the ruby executable depending
 # on which version of ruby is required
@@ -419,22 +419,20 @@ if (_Ruby_VERSION_SHORT_NODOT GREATER 18)
   list(APPEND _Ruby_REQUIRED_VARS Ruby_CONFIG_INCLUDE_DIR)
 endif ()
 
-if (_Ruby_DEBUG_OUTPUT)
-  message(STATUS "--------FindRuby.cmake debug------------")
-  message(STATUS "_Ruby_POSSIBLE_EXECUTABLE_NAMES: ${_Ruby_POSSIBLE_EXECUTABLE_NAMES}")
-  message(STATUS "_Ruby_POSSIBLE_LIB_DIR: ${_Ruby_POSSIBLE_LIB_DIR}")
-  message(STATUS "_Ruby_POSSIBLE_LIB_NAMES: ${_Ruby_POSSIBLE_LIB_NAMES}")
-  message(STATUS "Ruby_FIND_VIRTUALENV=${Ruby_FIND_VIRTUALENV}")
-  message(STATUS "Ruby_ENV: ${Ruby_ENV}")
-  message(STATUS "Found Ruby_VERSION: \"${Ruby_VERSION}\"")
-  message(STATUS "Ruby_EXECUTABLE: ${Ruby_EXECUTABLE}")
-  message(STATUS "Ruby_LIBRARY: ${Ruby_LIBRARY}")
-  message(STATUS "Ruby_INCLUDE_DIR: ${Ruby_INCLUDE_DIR}")
-  message(STATUS "Ruby_CONFIG_INCLUDE_DIR: ${Ruby_CONFIG_INCLUDE_DIR}")
-  message(STATUS "Ruby_HDR_DIR: ${Ruby_HDR_DIR}")
-  message(STATUS "Ruby_ARCH_DIR: ${Ruby_ARCH_DIR}")
-  message(STATUS "--------------------")
-endif ()
+message(DEBUG "--------FindRuby.cmake debug------------")
+message(DEBUG "_Ruby_POSSIBLE_EXECUTABLE_NAMES: ${_Ruby_POSSIBLE_EXECUTABLE_NAMES}")
+message(DEBUG "_Ruby_POSSIBLE_LIB_DIR: ${_Ruby_POSSIBLE_LIB_DIR}")
+message(DEBUG "_Ruby_POSSIBLE_LIB_NAMES: ${_Ruby_POSSIBLE_LIB_NAMES}")
+message(DEBUG "Ruby_FIND_VIRTUALENV=${Ruby_FIND_VIRTUALENV}")
+message(DEBUG "Ruby_ENV: ${Ruby_ENV}")
+message(DEBUG "Found Ruby_VERSION: \"${Ruby_VERSION}\"")
+message(DEBUG "Ruby_EXECUTABLE: ${Ruby_EXECUTABLE}")
+message(DEBUG "Ruby_LIBRARY: ${Ruby_LIBRARY}")
+message(DEBUG "Ruby_INCLUDE_DIR: ${Ruby_INCLUDE_DIR}")
+message(DEBUG "Ruby_CONFIG_INCLUDE_DIR: ${Ruby_CONFIG_INCLUDE_DIR}")
+message(DEBUG "Ruby_HDR_DIR: ${Ruby_HDR_DIR}")
+message(DEBUG "Ruby_ARCH_DIR: ${Ruby_ARCH_DIR}")
+message(DEBUG "--------------------")
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Ruby REQUIRED_VARS ${_Ruby_REQUIRED_VARS}
