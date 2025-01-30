@@ -41,7 +41,7 @@ This module can be used to find Squish.
 It provides the function squish_add_test() for adding a squish test
 to cmake using Squish >= 4.x:
 
-::
+.. code-block:: cmake
 
    squish_add_test(cmakeTestName
      AUT targetName SUITE suiteName TEST squishTestName
@@ -74,7 +74,7 @@ The arguments have the following meaning:
 
 
 
-::
+.. code-block:: cmake
 
    enable_testing()
    find_package(Squish 6.5)
@@ -93,14 +93,14 @@ The arguments have the following meaning:
 For users of Squish version 3.x the macro squish_v3_add_test() is
 provided:
 
-::
+.. code-block:: cmake
 
    squish_v3_add_test(testName applicationUnderTest testCase envVars testWrapper)
    Use this macro to add a test using Squish 3.x.
 
 
 
-::
+.. code-block:: cmake
 
   enable_testing()
   find_package(Squish 3.0)

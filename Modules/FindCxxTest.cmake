@@ -68,7 +68,9 @@ Module Commands
 
 .. command:: cxxtest_add_test
 
-  Create a CxxTest runner and adds it to the CTest testing suite::
+  Create a CxxTest runner and adds it to the CTest testing suite:
+
+  .. code-block:: cmake
 
     CXXTEST_ADD_TEST(<test_name> <gen_source_file>
                      <input_files_to_testgen>...)

@@ -29,13 +29,13 @@ This module defines:
 
 Note that the expected include convention is
 
-::
+.. code-block:: c
 
   #include "lua.h"
 
 and not
 
-::
+.. code-block:: c
 
   #include <lua/lua.h>
 

@@ -126,7 +126,9 @@ In either case (or even when providing both variables and imported
 targets), find modules should provide backwards compatibility with old
 versions that had the same name.
 
-A FindFoo.cmake module will typically be loaded by the command::
+A FindFoo.cmake module will typically be loaded by the command:
+
+.. code-block:: cmake
 
   find_package(Foo [major[.minor[.patch[.tweak]]]]
                [EXACT] [QUIET] [REQUIRED]

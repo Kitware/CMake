@@ -682,7 +682,9 @@ If a project arranges for package registry entries to exist, such as::
   45e7d55f13b87179bb12f907c8de6fc4 REG_SZ c:/Users/Me/Work/lib/cmake/MyPackage
   7b4a9844f681c80ce93190d4e3185db9 REG_SZ c:/Users/Me/Work/MyPackage-build
 
-or::
+or
+
+.. code-block:: console
 
  $ cat ~/.cmake/packages/MyPackage/7d1fb77e07ce59a81bed093bbee945bd
  /home/me/work/lib/cmake/MyPackage

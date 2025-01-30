@@ -73,7 +73,7 @@ For these components the following variables are set:
 
 Example Usages:
 
-::
+.. code-block:: cmake
 
   find_package(Java)
   find_package(Java 1.8 REQUIRED)

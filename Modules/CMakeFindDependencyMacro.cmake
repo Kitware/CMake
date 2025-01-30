@@ -8,7 +8,9 @@ CMakeFindDependencyMacro
 .. command:: find_dependency
 
   The ``find_dependency()`` macro wraps a :command:`find_package` call for
-  a package dependency::
+  a package dependency:
+
+  .. code-block:: cmake
 
     find_dependency(<dep> [...])
 

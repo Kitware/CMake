@@ -336,17 +336,23 @@ Deprecated and Removed Features
 * In CMake 3.0 the :command:`target_link_libraries` command
   accidentally began allowing unquoted arguments to use
   :manual:`generator expressions <cmake-generator-expressions(7)>`
-  containing a (``;`` separated) list within them.  For example::
+  containing a (``;`` separated) list within them.  For example:
+
+  .. code-block:: cmake
 
     set(libs B C)
     target_link_libraries(A PUBLIC $<BUILD_INTERFACE:${libs}>)
 
-  This is equivalent to writing::
+  This is equivalent to writing:
+
+  .. code-block:: cmake
 
     target_link_libraries(A PUBLIC $<BUILD_INTERFACE:B C>)
 
   and was never intended to work.  It did not work in CMake 2.8.12.
-  Such generator expressions should be in quoted arguments::
+  Such generator expressions should be in quoted arguments:
+
+  .. code-block:: cmake
 
     set(libs B C)
     target_link_libraries(A PUBLIC "$<BUILD_INTERFACE:${libs}>")
@@ -356,14 +362,18 @@ Deprecated and Removed Features
 * Prior to CMake 3.1 the Makefile generators did not escape ``#``
   correctly inside make variable assignments used in generated
   makefiles, causing them to be treated as comments.  This made
-  code like::
+  code like:
+
+  .. code-block:: cmake
 
     add_compile_options(-Wno-#pragma-messages)
 
   not work in Makefile generators, but work in other generators.
   Now it is escaped correctly, making the behavior consistent
   across generators.  However, some projects may have tried to
-  workaround the original bug with code like::
+  workaround the original bug with code like:
+
+  .. code-block:: cmake
 
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-\\#pragma-messages")
 

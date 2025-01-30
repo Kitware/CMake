@@ -19,7 +19,7 @@ that have been quoted or bracketed.
 
 Given the following partial example:
 
-::
+.. code-block:: cmake
 
   set(A E)
   set(E "")
@@ -32,20 +32,20 @@ Given the following partial example:
 
 After explicit expansion of variables this gives:
 
-::
+.. code-block:: cmake
 
   if("E" STREQUAL "")
 
 With the policy set to ``OLD`` implicit expansion reduces this semantically to:
 
-::
+.. code-block:: cmake
 
   if("" STREQUAL "")
 
 With the policy set to ``NEW`` the quoted arguments will not be
 further dereferenced:
 
-::
+.. code-block:: cmake
 
   if("E" STREQUAL "")
 

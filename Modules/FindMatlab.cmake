@@ -278,7 +278,9 @@ Reference
 
   If set, specifies additional versions of Matlab that may be looked for.
   The variable should be a list of strings, organized by pairs of release
-  name and versions, such as follows::
+  name and versions, such as follows:
+
+  .. code-block:: cmake
 
     set(MATLAB_ADDITIONAL_VERSIONS
         "release_name1=corresponding_version1"
@@ -286,7 +288,9 @@ Reference
         ...
         )
 
-  Example::
+  Example:
+
+  .. code-block:: cmake
 
     set(MATLAB_ADDITIONAL_VERSIONS
         "R2013b=8.2"

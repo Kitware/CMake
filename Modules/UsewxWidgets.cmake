@@ -13,7 +13,7 @@ called.
 
 USAGE
 
-::
+.. code-block:: cmake
 
   # Note that for MinGW users the order of libs is important!
   find_package(wxWidgets REQUIRED net gl core base)

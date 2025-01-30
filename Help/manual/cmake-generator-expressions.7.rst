@@ -691,7 +691,7 @@ All paths are expected to be in cmake-style format.
   present, ``0`` otherwise. See :ref:`Path Structure And Terminology` for the
   meaning of each path component.
 
-  ::
+  .. code-block:: cmake
 
     $<PATH:HAS_ROOT_NAME,path>
     $<PATH:HAS_ROOT_DIRECTORY,path>
@@ -753,7 +753,7 @@ command.  All paths are expected to be in cmake-style format.
     All operations now accept a list of paths as argument. When a list of paths
     is specified, the operation will be applied to each path.
 
-  ::
+  .. code-block:: cmake
 
     $<PATH:GET_ROOT_NAME,path...>
     $<PATH:GET_ROOT_DIRECTORY,path...>

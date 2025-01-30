@@ -41,7 +41,9 @@ Example 1
 A header file ``my_class.hpp`` uses a custom macro ``JSON_FILE_MACRO`` which
 is defined in an other header ``macros.hpp``.
 We want the ``moc`` file of ``my_class.hpp`` to depend on the file name
-argument of ``JSON_FILE_MACRO``::
+argument of ``JSON_FILE_MACRO``:
+
+.. code-block:: c++
 
   // my_class.hpp
   class My_Class : public QObject
@@ -52,7 +54,9 @@ argument of ``JSON_FILE_MACRO``::
   };
 
 In ``CMakeLists.txt`` we add a filter to
-:variable:`CMAKE_AUTOMOC_DEPEND_FILTERS` like this::
+:variable:`CMAKE_AUTOMOC_DEPEND_FILTERS` like this:
+
+.. code-block:: c++
 
   list( APPEND CMAKE_AUTOMOC_DEPEND_FILTERS
     "JSON_FILE_MACRO"
@@ -68,7 +72,9 @@ Example 2
 
 In the target ``my_target`` a header file ``complex_class.hpp`` uses a
 custom macro ``JSON_BASED_CLASS`` which is defined in an other header
-``macros.hpp``::
+``macros.hpp``:
+
+.. code-block:: c++
 
   // macros.hpp
   ...
@@ -81,7 +87,7 @@ custom macro ``JSON_BASED_CLASS`` which is defined in an other header
   };
   ...
 
-::
+.. code-block:: c++
 
   // complex_class.hpp
   #pragma once
@@ -90,13 +96,17 @@ custom macro ``JSON_BASED_CLASS`` which is defined in an other header
 
 Since ``complex_class.hpp`` doesn't contain a ``Q_OBJECT`` macro it would be
 ignored by :prop_tgt:`AUTOMOC`.  We change this by adding ``JSON_BASED_CLASS``
-to :variable:`CMAKE_AUTOMOC_MACRO_NAMES`::
+to :variable:`CMAKE_AUTOMOC_MACRO_NAMES`:
+
+.. code-block:: cmake
 
   list(APPEND CMAKE_AUTOMOC_MACRO_NAMES "JSON_BASED_CLASS")
 
 We want the ``moc`` file of ``complex_class.hpp`` to depend on
 ``meta.json``.  So we add a filter to
-:variable:`CMAKE_AUTOMOC_DEPEND_FILTERS`::
+:variable:`CMAKE_AUTOMOC_DEPEND_FILTERS`:
+
+.. code-block:: cmake
 
   list(APPEND CMAKE_AUTOMOC_DEPEND_FILTERS
     "JSON_BASED_CLASS"
@@ -104,6 +114,8 @@ We want the ``moc`` file of ``complex_class.hpp`` to depend on
   )
 
 Additionally we assume ``meta.json`` is :prop_sf:`GENERATED` which is
-why we have to add it to :prop_tgt:`AUTOGEN_TARGET_DEPENDS`::
+why we have to add it to :prop_tgt:`AUTOGEN_TARGET_DEPENDS`:
+
+.. code-block:: cmake
 
   set_property(TARGET my_target APPEND PROPERTY AUTOGEN_TARGET_DEPENDS "meta.json")

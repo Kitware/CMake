@@ -283,7 +283,7 @@ Query Windows registry
 
 .. versionadded:: 3.24
 
-::
+.. code-block:: cmake
 
   cmake_host_system_information(RESULT <variable>
                                 QUERY WINDOWS_REGISTRY <key> [VALUE_NAMES|SUBKEYS|VALUE <name>]

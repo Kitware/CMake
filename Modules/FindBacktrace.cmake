@@ -28,7 +28,9 @@ The following cache variables are also available to set or use:
   The directory holding the ``backtrace(3)`` header.
 
 Typical usage is to generate of header file using :command:`configure_file`
-with the contents like the following::
+with the contents like the following:
+
+.. code-block:: c
 
  #cmakedefine01 Backtrace_FOUND
  #if Backtrace_FOUND

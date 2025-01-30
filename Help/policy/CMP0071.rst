@@ -28,7 +28,9 @@ source files.
   source file properties :prop_sf:`SKIP_AUTOMOC`, :prop_sf:`SKIP_AUTOUIC` or
   :prop_sf:`SKIP_AUTOGEN`.
 
-Source skip example::
+Source skip example:
+
+.. code-block:: cmake
 
   # ...
   set_property(SOURCE /path/to/file1.h PROPERTY SKIP_AUTOMOC ON)

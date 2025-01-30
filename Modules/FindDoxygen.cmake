@@ -69,7 +69,7 @@ Functions
   ability to customize the Doxygen configuration used to build the
   documentation.
 
-  ::
+  .. code-block:: cmake
 
     doxygen_add_docs(targetName
         [filesOrDirs...]

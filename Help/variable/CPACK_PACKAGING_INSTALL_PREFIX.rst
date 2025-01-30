@@ -7,7 +7,7 @@ Each CPack generator has a default value (like ``/usr``).  This default
 value may be overwritten from the ``CMakeLists.txt`` or the :manual:`cpack(1)`
 command line by setting an alternative value.  Example:
 
-::
+.. code-block:: cmake
 
   set(CPACK_PACKAGING_INSTALL_PREFIX "/opt")
 

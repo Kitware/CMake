@@ -50,7 +50,9 @@ If component ``Development`` is specified, it implies sub-components
 
 To ensure consistent versions between components ``Interpreter``, ``Compiler``,
 ``Development`` (or one of its sub-components) and ``NumPy``, specify all
-components at the same time::
+components at the same time:
+
+.. code-block:: cmake
 
   find_package (Python COMPONENTS Interpreter Development)
 
@@ -340,14 +342,18 @@ Hints
   ``pydebug`` and ``gil_disabled``, ``debug`` and ``free threaded`` versions
   will be searched **after** ``non-debug`` and ``non-gil-disabled`` ones.
 
-  For example, if we have::
+  For example, if we have:
+
+  .. code-block:: cmake
 
     set (Python_FIND_ABI "ON" "ANY" "ANY" "ON")
 
   The following flags combinations will be appended, in that order, to the
   artifact names: ``tdmu``, ``tdm``, ``tdu``, and ``td``.
 
-  And to search any possible ABIs::
+  And to search any possible ABIs:
+
+  .. code-block:: cmake
 
     set (Python_FIND_ABI "ANY" "ANY" "ANY" "ANY")
 
@@ -592,7 +598,9 @@ This module defines the command ``Python_add_library`` (when
 :command:`add_library` and adds a dependency to target ``Python::Python`` or,
 when library type is ``MODULE``, to target ``Python::Module`` or
 ``Python::SABIModule`` (when ``USE_SABI`` option is specified) and takes care
-of Python module naming rules::
+of Python module naming rules:
+
+.. code-block:: cmake
 
   Python_add_library (<name> [STATIC | SHARED | MODULE [USE_SABI <version>] [WITH_SOABI]]
                       <source1> [<source2> ...])

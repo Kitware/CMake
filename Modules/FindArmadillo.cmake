@@ -13,7 +13,7 @@ Armadillo is a library for linear algebra & scientific computing.
 
 Using Armadillo:
 
-::
+.. code-block:: cmake
 
   find_package(Armadillo REQUIRED)
   include_directories(${ARMADILLO_INCLUDE_DIRS})

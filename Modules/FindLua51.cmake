@@ -14,11 +14,15 @@ This module defines::
   LUA_VERSION_STRING, the version of Lua found (since CMake 2.8.8)
 
 
-Note that the expected include convention is::
+Note that the expected include convention is:
+
+.. code-block:: c
 
   #include "lua.h"
 
-and not::
+and not:
+
+.. code-block:: c
 
   #include <lua/lua.h>
 

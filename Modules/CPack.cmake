@@ -176,7 +176,9 @@ installers.  The most commonly-used variables are:
 
   The name of the package file to generate, not including the
   extension.  For example, ``cmake-2.6.1-Linux-i686``.  The default value
-  is::
+  is:
+
+  .. code-block:: cmake
 
     ${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_SYSTEM_NAME}
 
@@ -197,7 +199,9 @@ installers.  The most commonly-used variables are:
   .. versionadded:: 3.7
 
   An algorithm that will be used to generate an additional file with the
-  checksum of the package.  The output file name will be::
+  checksum of the package.  The output file name will be:
+
+  .. code-block:: cmake
 
     ${CPACK_PACKAGE_FILE_NAME}.${CPACK_PACKAGE_CHECKSUM}
 

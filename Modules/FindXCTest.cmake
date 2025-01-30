@@ -22,7 +22,9 @@ Module Functions
 
   The ``xctest_add_bundle`` function creates a XCTest bundle named
   <target> which will test the target <testee>. Supported target types
-  for testee are Frameworks and App Bundles::
+  for testee are Frameworks and App Bundles:
+
+  .. code-block:: cmake
 
     xctest_add_bundle(
       <target>  # Name of the XCTest bundle
@@ -33,7 +35,9 @@ Module Functions
 
   The ``xctest_add_test`` function adds an XCTest bundle to the
   project to be run by :manual:`ctest(1)`. The test will be named
-  <name> and tests <bundle>::
+  <name> and tests <bundle>:
+
+  .. code-block:: cmake
 
     xctest_add_test(
       <name>    # Test name

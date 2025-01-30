@@ -7,7 +7,7 @@ MacroAddFileDependencies
 
 .. deprecated:: 3.14
 
-::
+.. code-block:: cmake
 
   MACRO_ADD_FILE_DEPENDENCIES(<source> <files>...)
 

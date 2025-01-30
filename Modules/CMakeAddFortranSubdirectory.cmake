@@ -18,7 +18,7 @@ built into a dll, so :variable:`BUILD_SHARED_LIBS` is turned on in
 the project.  In addition the :variable:`CMAKE_GNUtoMS` option is set
 to on, so that Microsoft ``.lib`` files are created.  Usage is as follows:
 
-::
+.. code-block:: cmake
 
   cmake_add_fortran_subdirectory(
    <subdir>                # name of subdirectory
