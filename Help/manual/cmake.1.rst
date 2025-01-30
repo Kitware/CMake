@@ -307,6 +307,16 @@ Options
  When this command line option is given, :variable:`CMAKE_MESSAGE_CONTEXT_SHOW`
  is ignored.
 
+.. option:: --sarif-output=<path>
+
+ .. versionadded:: 4.0
+
+ Enable logging of diagnostic messages produced by CMake in the SARIF format.
+
+ Write diagnostic messages to a SARIF file at the path specified. Projects can
+ also set :variable:`CMAKE_EXPORT_SARIF` to ``ON`` to enable this feature for a
+ build tree.
+
 .. option:: --debug-trycompile
 
  Do not delete the files and directories created for

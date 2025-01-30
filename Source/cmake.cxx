@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <utility>
 
+#include <cm/filesystem>
 #include <cm/memory>
 #include <cm/optional>
 #include <cm/string_view>
@@ -61,6 +62,9 @@
 #include "cmJSONState.h"
 #include "cmList.h"
 #include "cmMessenger.h"
+#ifndef CMAKE_BOOTSTRAP
+#  include "cmSarifLog.h"
+#endif
 #include "cmState.h"
 #include "cmStateDirectory.h"
 #include "cmStringAlgorithms.h"
@@ -1272,6 +1276,16 @@ void cmake::SetArgs(std::vector<std::string> const& args)
         state->SetIgnoreLinkWarningAsError(true);
         return true;
       } },
+#ifndef CMAKE_BOOTSTRAP
+    CommandArgument{ "--sarif-output", "No file specified for --sarif-output",
+                     CommandArgument::Values::One,
+                     [](std::string const& value, cmake* state) -> bool {
+                       state->SarifFilePath =
+                         cmSystemTools::ToNormalizedPathOnDisk(value);
+                       state->SarifFileOutput = true;
+                       return true;
+                     } },
+#endif
     CommandArgument{ "--debugger", CommandArgument::Values::Zero,
                      [](std::string const&, cmake* state) -> bool {
 #ifdef CMake_ENABLE_DEBUGGER
@@ -2853,6 +2867,15 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
     return 0;
   }
 
+#ifndef CMAKE_BOOTSTRAP
+  // Configure the SARIF log for the current run
+  cmSarif::LogFileWriter sarifLogFileWriter(
+    this->GetMessenger()->GetSarifResultsLog());
+  if (!sarifLogFileWriter.ConfigureForCMakeRun(*this)) {
+    return -1;
+  }
+#endif
+
   // Log the trace format version to the desired output
   if (this->GetTrace()) {
     this->PrintTraceFormatVersion();
@@ -2879,6 +2902,17 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
       cmSystemTools::Error("Error executing cmake::LoadCache(). Aborting.\n");
       return -1;
     }
+#ifndef CMAKE_BOOTSTRAP
+    // If no SARIF file has been explicitly specified, use the default path
+    if (!this->SarifFileOutput) {
+      // If no output file is specified, use the default path
+      // Enable parent directory creation for the default path
+      sarifLogFileWriter.SetPath(
+        cm::filesystem::path(this->GetHomeOutputDirectory()) /
+          std::string(cmSarif::PROJECT_DEFAULT_SARIF_FILE),
+        true);
+    }
+#endif
   } else {
     if (this->FreshCache) {
       cmSystemTools::Error("--fresh allowed only when configuring a project");
@@ -2908,6 +2942,11 @@ int cmake::Run(std::vector<std::string> const& args, bool noconfigure)
     }
     return this->HasScriptModeExitCode() ? this->GetScriptModeExitCode() : 0;
   }
+
+#ifndef CMAKE_BOOTSTRAP
+  // CMake only responds to the SARIF variable in normal mode
+  this->MarkCliAsUsed(cmSarif::PROJECT_SARIF_FILE_VARIABLE);
+#endif
 
   // If MAKEFLAGS are given in the environment, remove the environment
   // variable.  This will prevent try-compile from succeeding when it

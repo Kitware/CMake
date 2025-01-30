@@ -1180,6 +1180,7 @@ syn keyword cmakeVariable contained
             \ CMAKE_EXE_LINKER_FLAGS
             \ CMAKE_EXE_LINKER_FLAGS_INIT
             \ CMAKE_EXPORT_COMPILE_COMMANDS
+            \ CMAKE_EXPORT_SARIF
             \ CMAKE_EXPORT_NO_PACKAGE_REGISTRY
             \ CMAKE_EXPORT_PACKAGE_REGISTRY
             \ CMAKE_EXTRA_GENERATOR
