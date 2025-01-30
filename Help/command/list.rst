@@ -236,7 +236,7 @@ For more information on regular expressions look under
         list(TRANSFORM <list> GENEX_STRIP ...)
         :target: TRANSFORM_GENEX_STRIP
 
-    :command:`REPLACE <string(REGEX REPLACE)>`:
+    :command:`REPLACE <string(REGEX REPLACE)>`
       Match the regular expression as many times as possible and substitute
       the replacement expression for the match for each element of the list
       (same semantic as :command:`string(REGEX REPLACE)`).

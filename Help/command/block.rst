@@ -7,7 +7,7 @@ Evaluate a group of commands with a dedicated variable and/or policy scope.
 
 .. code-block:: cmake
 
-  block([SCOPE_FOR [POLICIES] [VARIABLES] ] [PROPAGATE <var-name>...])
+  block([SCOPE_FOR [POLICIES] [VARIABLES]] [PROPAGATE <var-name>...])
     <commands>
   endblock()
 

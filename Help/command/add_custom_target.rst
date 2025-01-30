@@ -7,7 +7,7 @@ Add a target with no output so it will always be built.
 
   add_custom_target(Name [ALL] [command1 [args1...]]
                     [COMMAND command2 [args2...] ...]
-                    [DEPENDS depend depend depend ... ]
+                    [DEPENDS depend depend depend ...]
                     [BYPRODUCTS [files...]]
                     [WORKING_DIRECTORY dir]
                     [COMMENT comment]

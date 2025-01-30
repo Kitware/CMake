@@ -405,7 +405,7 @@ Options
 
    ``json-v1``
      Prints each line as a separate JSON document. Each document is
-     separated by a newline ( ``\n`` ). It is guaranteed that no
+     separated by a newline (``\n``). It is guaranteed that no
      newline characters will be present inside a JSON document.
 
      .. code-block:: json

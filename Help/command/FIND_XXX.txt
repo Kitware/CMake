@@ -11,8 +11,8 @@ The general signature is:
    |FIND_XXX| (
              <VAR>
              name | |NAMES|
-             [HINTS [path | ENV var]... ]
-             [PATHS [path | ENV var]... ]
+             [HINTS [path | ENV var]...]
+             [PATHS [path | ENV var]...]
              [REGISTRY_VIEW (64|32|64_32|32_64|HOST|TARGET|BOTH)]
              [PATH_SUFFIXES suffix1 [suffix2 ...]]
              [VALIDATOR function]

@@ -21,4 +21,4 @@ determine the widget type.  Valid ``TYPE`` values are:
   =================  ========================================
 
 Generally the ``TYPE`` of a cache entry should be set by the command which
-creates it ( :command:`set`, :command:`option`, :command:`find_library`, etc.).
+creates it (:command:`set`, :command:`option`, :command:`find_library`, etc.).

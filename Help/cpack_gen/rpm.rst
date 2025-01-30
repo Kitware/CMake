@@ -526,7 +526,7 @@ List of CPack RPM generator specific variables:
 
  May be set by the user in order to specify a USER binary spec file
  to be used by the CPack RPM generator instead of generating the file.
- The specified file will be processed by configure_file( @ONLY).
+ The specified file will be processed by configure_file(@ONLY).
 
 .. variable:: CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE
 
