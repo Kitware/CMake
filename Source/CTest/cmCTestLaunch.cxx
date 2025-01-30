@@ -68,6 +68,7 @@ bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
     DoingCommandType,
     DoingRole,
     DoingBuildDir,
+    DoingCurrentBuildDir,
     DoingCount,
     DoingFilterPrefix
   };
@@ -95,6 +96,8 @@ bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
       doing = DoingRole;
     } else if (strcmp(arg, "--build-dir") == 0) {
       doing = DoingBuildDir;
+    } else if (strcmp(arg, "--current-build-dir") == 0) {
+      doing = DoingCurrentBuildDir;
     } else if (strcmp(arg, "--filter-prefix") == 0) {
       doing = DoingFilterPrefix;
     } else if (doing == DoingOutput) {
@@ -120,6 +123,9 @@ bool cmCTestLaunch::ParseArguments(int argc, char const* const* argv)
       doing = DoingNone;
     } else if (doing == DoingBuildDir) {
       this->Reporter.OptionBuildDir = arg;
+      doing = DoingNone;
+    } else if (doing == DoingCurrentBuildDir) {
+      this->Reporter.OptionCurrentBuildDir = arg;
       doing = DoingNone;
     } else if (doing == DoingFilterPrefix) {
       this->Reporter.OptionFilterPrefix = arg;

@@ -2667,7 +2667,8 @@ int cmake::ActualConfigure()
         cmStrCat("\"", cmSystemTools::GetCTestCommand(), "\" --instrument ");
     }
     std::string common_args =
-      cmStrCat(" --target-name <TARGET_NAME> ", "--build-dir \"",
+      cmStrCat(" --target-name <TARGET_NAME> --current-build-dir ",
+               "<CMAKE_CURRENT_BINARY_DIR> --build-dir \"",
                this->State->GetBinaryDirectory(), "\" ");
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_COMPILE",
