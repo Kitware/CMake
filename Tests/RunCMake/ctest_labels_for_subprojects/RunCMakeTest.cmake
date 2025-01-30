@@ -29,25 +29,36 @@ run_CTestScriptVariable()
 #    ctest -S test.cmake -DCTEST_LABELS_FOR_SUBPROJECTS:STRING="MySubproject"
 # Note: This test includes a failing build
 # Note: Also use --instrumentation mode to ensure it doesn't interfere with label generation
-function(run_CTestScriptVariableCommandLine)
+function(run_CTestScriptVariableCommandLine USE_INSTRUMENTATION)
   set(CTEST_EXTRA_CONFIG "set(CTEST_USE_LAUNCHERS 1)")
   set(CASE_TEST_PREFIX_CODE [[
 file(COPY "${CTEST_RUNCMAKE_SOURCE_DIRECTORY}/MyThirdPartyDependency"
   DESTINATION ${CTEST_SOURCE_DIRECTORY})
   ]])
-  set(CASE_CMAKELISTS_SUFFIX_CODE [[
-add_subdirectory(MyThirdPartyDependency)
-set(CMAKE_EXPERIMENTAL_INSTRUMENTATION "a37d1069-1972-4901-b9c9-f194aaf2b6e0")
-cmake_instrumentation(DATA_VERSION 1 API_VERSION 1)
-  ]])
-
-  run_ctest(CTestScriptVariableCommandLine "-DCTEST_LABELS_FOR_SUBPROJECTS:STRING=MyThirdPartyDependency")
+  if(USE_INSTRUMENTATION)
+    set(CASE_CMAKELISTS_SUFFIX_CODE [[
+  add_subdirectory(MyThirdPartyDependency)
+  set(CMAKE_EXPERIMENTAL_INSTRUMENTATION "a37d1069-1972-4901-b9c9-f194aaf2b6e0")
+  cmake_instrumentation(DATA_VERSION 1 API_VERSION 1)
+    ]])
+    set(RunCMake-check-file CTestScriptVariableCommandLine-check.cmake)
+    run_ctest(CTestScriptVariableCommandLineWithInstrumentation
+      "-DCTEST_LABELS_FOR_SUBPROJECTS:STRING=MyThirdPartyDependency")
+    unset(RunCMake-check-file)
+  else()
+    set(CASE_CMAKELISTS_SUFFIX_CODE [[
+  add_subdirectory(MyThirdPartyDependency)
+    ]])
+    run_ctest(CTestScriptVariableCommandLine
+      "-DCTEST_LABELS_FOR_SUBPROJECTS:STRING=MyThirdPartyDependency")
+  endif()
 
   unset(CTEST_EXTRA_CONFIG)
   unset(CASE_TEST_PREFIX_CODE)
   unset(CASE_CMAKELISTS_SUFFIX_CODE)
 endfunction()
-run_CTestScriptVariableCommandLine()
+run_CTestScriptVariableCommandLine(ON)
+run_CTestScriptVariableCommandLine(OFF)
 
 # 3. Set subprojects via a CTest module variable on the command line
 #    (will populate DartConfiguration.tcl)

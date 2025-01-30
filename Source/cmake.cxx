@@ -2661,14 +2661,14 @@ int cmake::ActualConfigure()
     std::string launcher;
     if (mf->IsOn("CTEST_USE_LAUNCHERS")) {
       launcher =
-        cmStrCat("\"", cmSystemTools::GetCTestCommand(), "\" --launch ");
+        cmStrCat("\"", cmSystemTools::GetCTestCommand(), "\" --launch ",
+                 "--current-build-dir <CMAKE_CURRENT_BINARY_DIR> ");
     } else {
       launcher =
         cmStrCat("\"", cmSystemTools::GetCTestCommand(), "\" --instrument ");
     }
     std::string common_args =
-      cmStrCat(" --target-name <TARGET_NAME> --current-build-dir ",
-               "<CMAKE_CURRENT_BINARY_DIR> --build-dir \"",
+      cmStrCat(" --target-name <TARGET_NAME> --build-dir \"",
                this->State->GetBinaryDirectory(), "\" ");
     this->State->SetGlobalProperty(
       "RULE_LAUNCH_COMPILE",
