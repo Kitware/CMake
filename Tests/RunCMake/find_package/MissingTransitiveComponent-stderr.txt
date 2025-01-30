@@ -1,0 +1,17 @@
+CMake Error in cps/[Tt]ransitive[Mm]issing\.cps:
+  Could not find a configuration file for package "ComponentTest" that is
+  compatible with requested version ""\.
+
+  The following configuration files were considered but not accepted:
+(
+    [^
+]*/Tests/RunCMake/find_package/cps/[Cc]omponent[Tt]est\.cps, version: unknown)+
+
+Call Stack \(most recent call first\):
+  MissingTransitiveComponent\.cmake:[0-9]+ \(find_package\)
+  CMakeLists\.txt:[0-9]+ \(include\)
++
+CMake Error at MissingTransitiveComponent\.cmake:[0-9]+ \(find_package\):
+  find_package could not find ComponentTest, required by TransitiveMissing\.
+Call Stack \(most recent call first\):
+  CMakeLists\.txt:[0-9]+ \(include\)

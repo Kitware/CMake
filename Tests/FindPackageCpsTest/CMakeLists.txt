@@ -185,3 +185,49 @@ elseif(NOT TARGET Bar::Target1)
 elseif(NOT TARGET Bar::Target2)
   message(SEND_ERROR "Bar::Target2 missing !")
 endif()
+
+###############################################################################
+# Test requesting components from a package.
+
+find_package(ComponentTest
+  COMPONENTS Target1 Target2
+  OPTIONAL_COMPONENTS Target4 Target6)
+if(NOT ComponentTest_FOUND)
+  message(SEND_ERROR "ComponentTest not found !")
+elseif(NOT TARGET ComponentTest::Target1)
+  message(SEND_ERROR "ComponentTest::Target1 missing !")
+elseif(NOT TARGET ComponentTest::Target2)
+  message(SEND_ERROR "ComponentTest::Target2 missing !")
+elseif(NOT TARGET ComponentTest::Target3)
+  message(SEND_ERROR "ComponentTest::Target3 missing !")
+elseif(NOT TARGET ComponentTest::Target4)
+  message(SEND_ERROR "ComponentTest::Target4 missing !")
+elseif(NOT TARGET ComponentTest::Target5)
+  message(SEND_ERROR "ComponentTest::Target5 missing !")
+elseif(TARGET ComponentTest::Target6)
+  message(SEND_ERROR "ComponentTest::Target6 exists ?!")
+elseif(TARGET ComponentTest::Target7)
+  message(SEND_ERROR "ComponentTest::Target7 exists ?!")
+elseif(TARGET ComponentTest::Target8)
+  message(SEND_ERROR "ComponentTest::Target8 exists ?!")
+endif()
+
+###############################################################################
+# Test requesting components from a dependency.
+
+find_package(TransitiveTest)
+if(NOT TransitiveTest_FOUND)
+  message(SEND_ERROR "TransitiveTest not found !")
+elseif(NOT TransitiveDep_FOUND)
+  message(SEND_ERROR "TransitiveTest's TransitiveDep not found !")
+elseif(NOT TARGET TransitiveDep::Target1)
+  message(SEND_ERROR "TransitiveDep::Target1 missing !")
+elseif(NOT TARGET TransitiveDep::Target2)
+  message(SEND_ERROR "TransitiveDep::Target2 missing !")
+elseif(NOT TARGET TransitiveDep::Target3)
+  message(SEND_ERROR "TransitiveDep::Target3 missing !")
+elseif(TARGET TransitiveDep::Target4)
+  message(SEND_ERROR "TransitiveDep::Target4 exists ?!")
+elseif(TARGET TransitiveDep::Target5)
+  message(SEND_ERROR "TransitiveDep::Target5 exists ?!")
+endif()

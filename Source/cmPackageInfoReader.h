@@ -50,6 +50,7 @@ public:
   std::vector<unsigned> ParseVersion() const;
 
   std::vector<cmPackageRequirement> GetRequirements() const;
+  std::vector<std::string> GetComponentNames() const;
 
   /// Create targets for components specified in the CPS file.
   bool ImportTargets(cmMakefile* makefile, cmExecutionStatus& status);
