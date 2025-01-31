@@ -7,7 +7,7 @@ FindJPEG
 
 Find the Joint Photographic Experts Group (JPEG) library (``libjpeg``)
 
-Imported targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.12

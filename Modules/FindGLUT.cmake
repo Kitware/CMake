@@ -7,7 +7,7 @@ FindGLUT
 
 Find OpenGL Utility Toolkit (GLUT) library and include files.
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.1

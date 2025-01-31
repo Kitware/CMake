@@ -44,7 +44,7 @@ This will define the following variables:
   ``SP_MULTI_BYTE`` to match this value in order to avoid issues with character
   decoding.
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 This module defines the :prop_tgt:`IMPORTED` target ``OpenSP::OpenSP``, if

@@ -39,7 +39,7 @@ There are also components for the following ImageMagick APIs:
 * ``MagickCore``: ImageMagick MagickCore low-level C API, if found.
 
 
-Imported targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.26

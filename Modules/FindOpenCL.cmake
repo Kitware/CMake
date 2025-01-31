@@ -12,7 +12,7 @@ Finds Open Computing Language (OpenCL)
 .. versionadded:: 3.10
   Detection of OpenCL 2.1 and 2.2.
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.7

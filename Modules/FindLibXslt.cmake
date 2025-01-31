@@ -8,7 +8,7 @@ FindLibXslt
 Find the XSL Transformations, Extensible Stylesheet Language
 Transformations (XSLT) library (LibXslt)
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.18

@@ -7,7 +7,7 @@ FindJasper
 
 Find the Jasper JPEG2000 library.
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 ``Jasper::Jasper``

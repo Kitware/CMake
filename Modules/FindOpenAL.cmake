@@ -29,7 +29,7 @@ OpenAL is searched in the following order:
 5. Manually compiled framework: ``/Library/Frameworks``.
 6. Add-on package: ``/opt``.
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.25

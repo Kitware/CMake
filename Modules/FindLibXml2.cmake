@@ -7,7 +7,7 @@ FindLibXml2
 
 Find the XML processing library (libxml2).
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.12

@@ -55,7 +55,7 @@ The following variables may be set to influence this module's behavior:
     Search for any BLAS/LAPACK.
     Most likely, a BLAS/LAPACK with 32-bit integer interfaces will be found.
 
-Imported targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 This module defines the following :prop_tgt:`IMPORTED` targets:

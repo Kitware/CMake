@@ -39,7 +39,7 @@ This module respects several optional COMPONENTS:
 
   A subset of OpenGL API for embedded systems with more capabilities.
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.8

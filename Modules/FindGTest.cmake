@@ -10,7 +10,7 @@ Locate the Google C++ Testing Framework.
 .. versionadded:: 3.20
   Upstream ``GTestConfig.cmake`` is used if possible.
 
-Imported targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.20

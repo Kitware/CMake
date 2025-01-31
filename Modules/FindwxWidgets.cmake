@@ -114,7 +114,7 @@ If wxWidgets is required (i.e., not an optional part):
    # and for each of your dependent executable/library targets:
    target_link_libraries(<YourTarget> ${wxWidgets_LIBRARIES})
 
-Imported targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.27

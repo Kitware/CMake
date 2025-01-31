@@ -8,7 +8,7 @@ FindSDL
 Locate the SDL library
 
 
-Imported targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.19

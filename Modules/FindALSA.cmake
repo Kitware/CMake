@@ -9,7 +9,7 @@ Find Advanced Linux Sound Architecture (ALSA)
 
 Find the alsa libraries (``asound``)
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.12

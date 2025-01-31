@@ -7,7 +7,7 @@ FindPNG
 
 Find libpng, the official reference library for the PNG image format.
 
-Imported targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.5

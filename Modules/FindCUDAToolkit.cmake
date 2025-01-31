@@ -102,7 +102,7 @@ Options
     If specified, the CUDA Toolkit is considered found only if the exact
     ``VERSION`` specified is recovered.
 
-Imported targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 An :ref:`imported target <Imported targets>` named ``CUDA::toolkit`` is provided.

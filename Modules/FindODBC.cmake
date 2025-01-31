@@ -25,7 +25,7 @@ first from unixODBC, then from iODBC.
 If no config program found, this module searches for ODBC header
 and library in list of known locations.
 
-Imported targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 This module defines the following :prop_tgt:`IMPORTED` targets:

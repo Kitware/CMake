@@ -7,7 +7,7 @@ FindZLIB
 
 Find the native ZLIB includes and library.
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.1
