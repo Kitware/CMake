@@ -787,6 +787,36 @@ std::size_t cmSystemTools::CalculateCommandLineLengthLimit()
   return sz;
 }
 
+void cmSystemTools::MaybePrependCmdExe(std::vector<std::string>& cmdLine)
+{
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  if (!cmdLine.empty()) {
+    auto const& applicationName = cmdLine.at(0);
+    if (cmSystemTools::StringEndsWith(applicationName, ".bat") ||
+        cmSystemTools::StringEndsWith(applicationName, ".cmd")) {
+      std::vector<std::string> output;
+      output.reserve(cmdLine.size() + 2);
+      output.emplace_back(cmSystemTools::GetComspec());
+      output.emplace_back("/c");
+      std::string tmpShortPath;
+      if (applicationName.find(' ') != std::string::npos &&
+          cmSystemTools::GetShortPath(applicationName, tmpShortPath)) {
+        // If the batch file name contains spaces convert it to the windows
+        // short path. Otherwise it might cause issue when running cmd.exe.
+        output.emplace_back(tmpShortPath);
+      } else {
+        output.push_back(applicationName);
+      }
+      std::move(cmdLine.begin() + 1, cmdLine.end(),
+                std::back_inserter(output));
+      cmdLine = std::move(output);
+    }
+  }
+#else
+  static_cast<void>(cmdLine);
+#endif
+}
+
 bool cmSystemTools::RunSingleCommand(std::vector<std::string> const& command,
                                      std::string* captureStdOut,
                                      std::string* captureStdErr, int* retVal,
