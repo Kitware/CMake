@@ -5,57 +5,83 @@
 FindGettext
 -----------
 
-Find GNU gettext tools
+Find GNU gettext tools.
 
-This module looks for the GNU gettext tools.  This module defines the
-following values:
+This module looks for the GNU gettext tools.
 
-::
+Result Variables
+^^^^^^^^^^^^^^^^
 
-  GETTEXT_MSGMERGE_EXECUTABLE: the full path to the msgmerge tool.
-  GETTEXT_MSGFMT_EXECUTABLE: the full path to the msgfmt tool.
-  GETTEXT_FOUND: True if gettext has been found.
-  GETTEXT_VERSION_STRING: the version of gettext found (since CMake 2.8.8)
+This module defines the following variables:
 
+``GETTEXT_FOUND``
+  True if gettext has been found.
 
+``GETTEXT_VERSION_STRING``
+  The version of gettext found.
 
-Additionally it provides the following macros:
+``GETTEXT_MSGMERGE_EXECUTABLE``
+  The full path to the msgmerge tool.
 
-GETTEXT_CREATE_TRANSLATIONS ( outputFile [ALL] file1 ...  fileN )
+``GETTEXT_MSGFMT_EXECUTABLE``
+  The full path to the msgfmt tool.
 
-::
+Functions
+^^^^^^^^^
 
-    This will create a target "translations" which will convert the
-    given input po files into the binary output mo file. If the
-    ALL option is used, the translations will also be created when
-    building the default target.
+This module provides several function.
 
-GETTEXT_PROCESS_POT_FILE( <potfile> [ALL] [INSTALL_DESTINATION <destdir>]
-LANGUAGES <lang1> <lang2> ...  )
+.. command:: gettext_create_translations
 
-::
+  .. code-block:: cmake
 
-     Process the given pot file to mo files.
-     If INSTALL_DESTINATION is given then automatically install rules will
-     be created, the language subdirectory will be taken into account
-     (by default use share/locale/).
-     If ALL is specified, the pot file is processed when building the all target.
-     It creates a custom target "potfile".
+    gettext_create_translations(<mofile> [ALL] <file>...)
 
-GETTEXT_PROCESS_PO_FILES( <lang> [ALL] [INSTALL_DESTINATION <dir>]
-PO_FILES <po1> <po2> ...  )
+  This will create a target "translations" which will convert the
+  given input .po files into the binary output .mo file. Options:
 
-::
+  ``ALL``
+    The translations will be created when building the default target.
 
-     Process the given po files to mo files for the given language.
-     If INSTALL_DESTINATION is given then automatically install rules will
-     be created, the language subdirectory will be taken into account
-     (by default use share/locale/).
-     If ALL is specified, the po files are processed when building the all target.
-     It creates a custom target "pofiles".
+.. command:: gettext_process_pot_file
+
+  .. code-block:: cmake
+
+      gettext_process_pot_file(<potfile> [ALL]
+                               [INSTALL_DESTINATION <destdir>]
+                               LANGUAGES <lang>...)
+
+  This function creates a custom target "potfile" which processes the given
+  .pot file to .mo files. Options:
+
+  ``ALL``
+    The .pot file will be processed when building the default target.
+
+  ``INSTALL_DESTINATION``
+    Install the results into the given directory (``share/locale/`` by
+    default). The language subdirectory will be taken into account.
+
+.. command:: gettext_process_po_files
+
+  .. code-block:: cmake
+
+    gettext_process_po_files(<lang> [ALL]
+                             [INSTALL_DESTINATION <dir>]
+                             PO_FILES <pofile>...)
+
+  This function creates a custom target "pofiles", which processes the given
+  .po files to .mo files for the given language. Options:
+
+  ``ALL``
+    The .po files will be processed when building the default target.
+
+  ``INSTALL_DESTINATION``
+    Install the results into the given directory (``share/locale/`` by
+    default). The language subdirectory will be taken into account .
 
 .. versionadded:: 3.2
-  If you wish to use the Gettext library (libintl), use :module:`FindIntl`.
+  If you wish to use the Gettext runtime library (libintl), use
+  :module:`FindIntl`.
 #]=======================================================================]
 
 find_program(GETTEXT_MSGMERGE_EXECUTABLE msgmerge)
