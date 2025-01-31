@@ -44,21 +44,22 @@ This module will set the following variables in your project:
 
 .. versionchanged:: 3.18
   Previous versions of CMake used the ``RUBY_`` prefix for all variables.
-  The following variables are provided for compatibility reasons,
-  don't use them in new code:
 
-``RUBY_EXECUTABLE``
-  same as Ruby_EXECUTABLE.
-``RUBY_INCLUDE_DIRS``
-  same as Ruby_INCLUDE_DIRS.
-``RUBY_INCLUDE_PATH``
-  same as Ruby_INCLUDE_DIRS.
-``RUBY_LIBRARY``
-  same as Ruby_LIBRARY.
-``RUBY_VERSION``
-  same as Ruby_VERSION.
-``RUBY_FOUND``
-  same as Ruby_FOUND.
+.. deprecated:: 4.0
+  The following variables are deprecated.  See policy :policy:`CMP0185`.
+
+  ``RUBY_EXECUTABLE``
+    same as ``Ruby_EXECUTABLE``.
+  ``RUBY_INCLUDE_DIRS``
+    same as ``Ruby_INCLUDE_DIRS``.
+  ``RUBY_INCLUDE_PATH``
+    same as ``Ruby_INCLUDE_DIRS``.
+  ``RUBY_LIBRARY``
+    same as ``Ruby_LIBRARY``.
+  ``RUBY_VERSION``
+    same as ``Ruby_VERSION``.
+  ``RUBY_FOUND``
+    same as ``Ruby_FOUND``.
 
 Hints
 ^^^^^
@@ -85,20 +86,24 @@ Hints
     or that the ``RBENV_ROOT`` environment variable is defined.
 #]=======================================================================]
 
-# Backwards compatibility
-# Define camel case versions of input variables
-foreach (UPPER
-         RUBY_EXECUTABLE
-         RUBY_LIBRARY
-         RUBY_INCLUDE_DIR
-         RUBY_CONFIG_INCLUDE_DIR)
-  if (DEFINED ${UPPER})
-    string(REPLACE "RUBY_" "Ruby_" Camel ${UPPER})
-    if (NOT DEFINED ${Camel})
-      set(${Camel} ${${UPPER}})
+cmake_policy(GET CMP0185 _Ruby_CMP0185)
+
+if(NOT _Ruby_CMP0185 STREQUAL "NEW")
+  # Backwards compatibility
+  # Define camel case versions of input variables
+  foreach (UPPER
+           RUBY_EXECUTABLE
+           RUBY_LIBRARY
+           RUBY_INCLUDE_DIR
+           RUBY_CONFIG_INCLUDE_DIR)
+    if (DEFINED ${UPPER})
+      string(REPLACE "RUBY_" "Ruby_" Camel ${UPPER})
+      if (NOT DEFINED ${Camel})
+        set(${Camel} ${${UPPER}})
+      endif ()
     endif ()
-  endif ()
-endforeach ()
+  endforeach ()
+endif()
 
 #   Ruby_ARCHDIR=`$RUBY -r rbconfig -e 'printf("%s",Config::CONFIG@<:@"archdir"@:>@)'`
 #   Ruby_SITEARCHDIR=`$RUBY -r rbconfig -e 'printf("%s",Config::CONFIG@<:@"sitearchdir"@:>@)'`
@@ -451,32 +456,34 @@ mark_as_advanced(
     Ruby_CONFIG_INCLUDE_DIR
 )
 
-# Set some variables for compatibility with previous version of this file (no need to provide a CamelCase version of that...)
-set(RUBY_POSSIBLE_LIB_PATH ${_Ruby_POSSIBLE_LIB_DIR})
-set(RUBY_RUBY_LIB_PATH ${Ruby_RUBY_LIB_DIR})
-set(RUBY_INCLUDE_PATH ${Ruby_INCLUDE_DIRS})
+if(NOT _Ruby_CMP0185 STREQUAL "NEW")
+  # Set some variables for compatibility with previous version of this file (no need to provide a CamelCase version of that...)
+  set(RUBY_POSSIBLE_LIB_PATH ${_Ruby_POSSIBLE_LIB_DIR})
+  set(RUBY_RUBY_LIB_PATH ${Ruby_RUBY_LIB_DIR})
+  set(RUBY_INCLUDE_PATH ${Ruby_INCLUDE_DIRS})
 
-# Backwards compatibility
-# Define upper case versions of output variables
-foreach (Camel
-         Ruby_EXECUTABLE
-         Ruby_INCLUDE_DIRS
-         Ruby_LIBRARY
-         Ruby_VERSION
-         Ruby_VERSION_MAJOR
-         Ruby_VERSION_MINOR
-         Ruby_VERSION_PATCH
+  # Backwards compatibility
+  # Define upper case versions of output variables
+  foreach (Camel
+           Ruby_EXECUTABLE
+           Ruby_INCLUDE_DIRS
+           Ruby_LIBRARY
+           Ruby_VERSION
+           Ruby_VERSION_MAJOR
+           Ruby_VERSION_MINOR
+           Ruby_VERSION_PATCH
 
-         Ruby_ARCH_DIR
-         Ruby_ARCH
-         Ruby_HDR_DIR
-         Ruby_ARCHHDR_DIR
-         Ruby_RUBY_LIB_DIR
-         Ruby_SITEARCH_DIR
-         Ruby_SITELIB_DIR
-         Ruby_HAS_VENDOR_RUBY
-         Ruby_VENDORARCH_DIR
-         Ruby_VENDORLIB_DIR)
-  string(TOUPPER ${Camel} UPPER)
-  set(${UPPER} ${${Camel}})
-endforeach ()
+           Ruby_ARCH_DIR
+           Ruby_ARCH
+           Ruby_HDR_DIR
+           Ruby_ARCHHDR_DIR
+           Ruby_RUBY_LIB_DIR
+           Ruby_SITEARCH_DIR
+           Ruby_SITELIB_DIR
+           Ruby_HAS_VENDOR_RUBY
+           Ruby_VENDORARCH_DIR
+           Ruby_VENDORLIB_DIR)
+    string(TOUPPER ${Camel} UPPER)
+    set(${UPPER} ${${Camel}})
+  endforeach ()
+endif()
