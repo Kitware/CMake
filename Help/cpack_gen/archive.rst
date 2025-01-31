@@ -4,19 +4,25 @@ CPack Archive Generator
 CPack generator for packaging files into an archive, which can have
 any of the following formats:
 
-  - 7Z - 7zip - (``.7z``)
-  - TBZ2 (``.tar.bz2``)
-  - TGZ (``.tar.gz``)
-  - TXZ (``.tar.xz``)
-  - TZ (``.tar.Z``)
-  - TZST (``.tar.zst``)
-  - ZIP (``.zip``)
+- 7Z - 7zip - (``.7z``)
 
-.. versionadded:: 3.1
-  7Z and TXZ formats support.
+  .. versionadded:: 3.1
 
-.. versionadded:: 3.16
-  TZST format support.
+- TBZ2 (``.tar.bz2``)
+
+- TGZ (``.tar.gz``)
+
+- TXZ (``.tar.xz``)
+
+  .. versionadded:: 3.1
+
+- TZ (``.tar.Z``)
+
+- TZST (``.tar.zst``)
+
+  .. versionadded:: 3.16
+
+- ZIP (``.zip``)
 
 When this generator is called from ``CPackSourceConfig.cmake`` (or through
 the ``package_source`` target), then the generated archive will contain all
