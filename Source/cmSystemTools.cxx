@@ -792,8 +792,10 @@ void cmSystemTools::MaybePrependCmdExe(std::vector<std::string>& cmdLine)
 #if defined(_WIN32) && !defined(__CYGWIN__)
   if (!cmdLine.empty()) {
     auto const& applicationName = cmdLine.at(0);
-    if (cmSystemTools::StringEndsWith(applicationName, ".bat") ||
-        cmSystemTools::StringEndsWith(applicationName, ".cmd")) {
+    static cmsys::RegularExpression const winCmdRegex(
+      "\\.([Bb][Aa][Tt]|[Cc][Mm][Dd])$");
+    cmsys::RegularExpressionMatch winCmdMatch;
+    if (winCmdRegex.find(applicationName.c_str(), winCmdMatch)) {
       std::vector<std::string> output;
       output.reserve(cmdLine.size() + 2);
       output.emplace_back(cmSystemTools::GetComspec());
