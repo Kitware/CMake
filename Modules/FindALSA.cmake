@@ -61,7 +61,7 @@ if(ALSA_INCLUDE_DIR AND EXISTS "${ALSA_INCLUDE_DIR}/alsa/version.h")
   unset(alsa_version_str)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(ALSA
                                   REQUIRED_VARS ALSA_LIBRARY ALSA_INCLUDE_DIR
                                   VERSION_VAR ALSA_VERSION_STRING)

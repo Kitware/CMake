@@ -222,7 +222,7 @@ if(SDL_INCLUDE_DIR AND EXISTS "${SDL_INCLUDE_DIR}/SDL_version.h")
   set(SDL_VERSION_STRING ${SDL_VERSION})
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 
 find_package_handle_standard_args(SDL
                                   REQUIRED_VARS SDL_LIBRARY SDL_INCLUDE_DIR

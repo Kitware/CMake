@@ -122,7 +122,7 @@ if(XMLRPC_C_FOUND)
 endif()
 
 # Report the results.
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
     XMLRPC
     REQUIRED_VARS XMLRPC_C_FOUND XMLRPC_LIBRARIES

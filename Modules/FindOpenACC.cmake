@@ -260,7 +260,7 @@ macro(_OPENACC_SET_VERSION_BY_SPEC_DATE LANG)
 endmacro()
 
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 foreach (LANG IN ITEMS C CXX Fortran)
   if(CMAKE_${LANG}_COMPILER_LOADED)
     set(OpenACC_${LANG}_FIND_QUIETLY ${OpenACC_FIND_QUIETLY})

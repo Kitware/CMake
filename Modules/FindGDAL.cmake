@@ -202,7 +202,7 @@ if (GDAL_FIND_VERSION VERSION_GREATER_EQUAL 3.5)
    )
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(GDAL
     VERSION_VAR GDAL_VERSION
     REQUIRED_VARS GDAL_LIBRARY GDAL_INCLUDE_DIR)

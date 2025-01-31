@@ -78,7 +78,7 @@ if (CUPS_INCLUDE_DIR AND EXISTS "${CUPS_INCLUDE_DIR}/cups/cups.h")
     endforeach()
 endif ()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 
 if (CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE)
     find_package_handle_standard_args(Cups

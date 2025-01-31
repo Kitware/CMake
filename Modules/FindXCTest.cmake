@@ -105,7 +105,7 @@ if(_xcrun_out)
   mark_as_advanced(XCTest_EXECUTABLE)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(XCTest
   REQUIRED_VARS XCTest_LIBRARY XCTest_INCLUDE_DIR XCTest_EXECUTABLE)
 

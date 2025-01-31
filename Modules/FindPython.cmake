@@ -720,7 +720,7 @@ else()
     set (Python_FIND_REQUIRED_Interpreter TRUE)
   endif()
 
-  include (${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+  include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args (Python HANDLE_COMPONENTS HANDLE_VERSION_RANGE
                                             VERSION_VAR Python_VERSION
                                             REASON_FAILURE_MESSAGE "Version range specified \"${Python_FIND_VERSION_RANGE}\" does not include supported versions")

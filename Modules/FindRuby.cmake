@@ -436,7 +436,7 @@ if (_Ruby_DEBUG_OUTPUT)
   message(STATUS "--------------------")
 endif ()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Ruby REQUIRED_VARS ${_Ruby_REQUIRED_VARS}
                                   VERSION_VAR Ruby_VERSION)
 

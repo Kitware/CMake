@@ -270,7 +270,7 @@ find_program(Java_JARSIGNER_EXECUTABLE
   PATHS ${_JAVA_PATHS}
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 if(Java_FIND_COMPONENTS)
   set(_JAVA_REQUIRED_VARS)
   foreach(component IN LISTS Java_FIND_COMPONENTS)

@@ -58,7 +58,7 @@ optional Fortran support:
 
 #]=======================================================================]
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 
 function(_swig_get_version _swig_executable _swig_version)
   unset(${_swig_version} PARENT_SCOPE)

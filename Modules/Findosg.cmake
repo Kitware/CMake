@@ -53,5 +53,5 @@ include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSG osg/PositionAttitudeTransform)
 OSG_FIND_LIBRARY(OSG osg)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(osg DEFAULT_MSG OSG_LIBRARY OSG_INCLUDE_DIR)

@@ -79,7 +79,7 @@ endif()
 # Deprecated settings for compatibility with CMake1.4
 set(PERL ${PERL_EXECUTABLE})
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 if (CMAKE_FIND_PACKAGE_NAME STREQUAL "PerlLibs")
   # FindPerlLibs include()'s this module. It's an old pattern, but rather than
   # trying to suppress this from outside the module (which is then sensitive to

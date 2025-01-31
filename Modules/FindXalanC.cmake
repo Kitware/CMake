@@ -113,7 +113,7 @@ endif()
 find_package(XercesC ${XalanC_XERCESC_REQUIRED})
 unset(XalanC_XERCESC_REQUIRED)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(XalanC
                                   REQUIRED_VARS XalanC_LIBRARY
                                                 XalanC_INCLUDE_DIR

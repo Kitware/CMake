@@ -53,7 +53,7 @@ This module defines the following :prop_tgt:`IMPORTED` targets:
 
 include(CMakePushCheckState)
 include(CheckSymbolExists)
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 
 # List of variables to be provided to find_package_handle_standard_args()
 set(_Backtrace_STD_ARGS Backtrace_INCLUDE_DIR)

@@ -673,7 +673,7 @@ if (UNIX)
     set(X11_FOUND 1)
   endif ()
 
-  include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+  include(FindPackageHandleStandardArgs)
   if (CMAKE_FIND_PACKAGE_NAME STREQUAL "FLTK")
     # FindFLTK include()'s this module. It's an old pattern, but rather than
     # trying to suppress this from outside the module (which is then sensitive

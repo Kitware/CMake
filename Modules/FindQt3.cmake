@@ -207,7 +207,7 @@ if(NOT Qt3_FIND_VERSION AND QT_MIN_VERSION)
 endif()
 
 # if the include a library are found then we have it
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 if (CMAKE_FIND_PACKAGE_NAME STREQUAL "Qt")
   # FindQt include()'s this module. It's an old pattern, but rather than trying
   # to suppress this from outside the module (which is then sensitive to the

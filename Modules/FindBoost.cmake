@@ -396,7 +396,7 @@ endif()
 
 # The FPHSA helper provides standard way of reporting final search results to
 # the user including the version and component checks.
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 
 # Save project's policies
 cmake_policy(PUSH)

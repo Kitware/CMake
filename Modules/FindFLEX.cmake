@@ -339,6 +339,6 @@ if(FLEX_EXECUTABLE)
 
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(FLEX REQUIRED_VARS FLEX_EXECUTABLE
                                        VERSION_VAR FLEX_VERSION)

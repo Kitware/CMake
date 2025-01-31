@@ -48,6 +48,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGPRODUCER osgProducer/OsgSceneHandler)
 OSG_FIND_LIBRARY(OSGPRODUCER osgProducer)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(osgProducer DEFAULT_MSG
     OSGPRODUCER_LIBRARY OSGPRODUCER_INCLUDE_DIR)

@@ -687,7 +687,7 @@ foreach(_comp IN LISTS OpenSSL_FIND_COMPONENTS)
 endforeach()
 unset(_comp)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(OpenSSL
   REQUIRED_VARS
     OPENSSL_CRYPTO_LIBRARY

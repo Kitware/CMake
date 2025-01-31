@@ -48,6 +48,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGFX osgFX/BumpMapping)
 OSG_FIND_LIBRARY(OSGFX osgFX)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(osgFX DEFAULT_MSG
     OSGFX_LIBRARY OSGFX_INCLUDE_DIR)

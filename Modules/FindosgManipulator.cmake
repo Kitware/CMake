@@ -48,6 +48,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGMANIPULATOR osgManipulator/TrackballDragger)
 OSG_FIND_LIBRARY(OSGMANIPULATOR osgManipulator)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(osgManipulator DEFAULT_MSG
     OSGMANIPULATOR_LIBRARY OSGMANIPULATOR_INCLUDE_DIR)

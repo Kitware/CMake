@@ -224,7 +224,7 @@ find_path(TK_INCLUDE_PATH
   PATH_SUFFIXES ${TCLTK_POSSIBLE_INCLUDE_PATH_SUFFIXES}
   )
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 
 if (CMAKE_FIND_PACKAGE_NAME STREQUAL "TclStub")
   # FindTclStub include()'s this module. It's an old pattern, but rather than

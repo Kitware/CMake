@@ -84,7 +84,7 @@ if(TCL_TCLSH)
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 if (CMAKE_FIND_PACKAGE_NAME STREQUAL "TCL" OR
     CMAKE_FIND_PACKAGE_NAME STREQUAL "TclStub")
   # FindTCL include()'s this module. It's an old pattern, but rather than

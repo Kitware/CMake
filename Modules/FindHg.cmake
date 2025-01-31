@@ -92,7 +92,7 @@ if(HG_EXECUTABLE)
   endmacro()
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Hg
                                   REQUIRED_VARS HG_EXECUTABLE
                                   VERSION_VAR HG_VERSION_STRING)

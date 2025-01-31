@@ -40,7 +40,7 @@ if(ICOTOOL_EXECUTABLE)
   unset(_icotool_version)
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
   Icotool
   REQUIRED_VARS ICOTOOL_EXECUTABLE

@@ -76,7 +76,7 @@ mark_as_advanced(
   TAR
 )
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(UnixCommands
   REQUIRED_VARS BASH CP GZIP MV RM TAR
 )

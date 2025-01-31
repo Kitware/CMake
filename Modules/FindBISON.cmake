@@ -378,6 +378,6 @@ if(BISON_EXECUTABLE)
 
 endif()
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(BISON REQUIRED_VARS  BISON_EXECUTABLE
                                         VERSION_VAR BISON_VERSION)

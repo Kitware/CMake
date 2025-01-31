@@ -33,7 +33,7 @@ endif()
 
 get_property(_${_PYTHON_PREFIX}_CMAKE_ROLE GLOBAL PROPERTY CMAKE_ROLE)
 
-include (${CMAKE_CURRENT_LIST_DIR}/../FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 
 #
 # helper commands

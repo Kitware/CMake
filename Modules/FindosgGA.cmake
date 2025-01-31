@@ -48,6 +48,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGGA osgGA/FlightManipulator)
 OSG_FIND_LIBRARY(OSGGA osgGA)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(osgGA DEFAULT_MSG
     OSGGA_LIBRARY OSGGA_INCLUDE_DIR)

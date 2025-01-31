@@ -48,6 +48,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/Findosg_functions.cmake)
 OSG_FIND_PATH   (OSGTEXT osgText/Text)
 OSG_FIND_LIBRARY(OSGTEXT osgText)
 
-include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(osgText DEFAULT_MSG
     OSGTEXT_LIBRARY OSGTEXT_INCLUDE_DIR)
