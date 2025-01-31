@@ -85,7 +85,6 @@ These modules are loaded using the :command:`include` command.
    /module/InstallRequiredSystemLibraries
    /module/ProcessorCount
    /module/SelectLibraryConfigurations
-   /module/SquishTestScript
    /module/TestForANSIForScope
    /module/TestForANSIStreamHeaders
    /module/TestForSSTREAM
@@ -275,12 +274,13 @@ Deprecated Utility Modules
    /module/Documentation
    /module/GetPrerequisites
    /module/MacroAddFileDependencies
+   /module/SquishTestScript
    /module/TestBigEndian
    /module/TestCXXAcceptsFlag
+   /module/Use_wxWindows
    /module/UseJavaClassFilelist
    /module/UseJavaSymlinks
    /module/UsePkgConfig
-   /module/Use_wxWindows
    /module/WriteBasicConfigVersionFile
    /module/WriteCompilerDetectionHeader
 

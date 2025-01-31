@@ -5,9 +5,8 @@
 UsePkgConfig
 ------------
 
-Obsolete pkg-config module for CMake, use FindPkgConfig instead.
-
-
+.. deprecated:: 3.0
+  Use :module:`FindPkgConfig` instead.
 
 This module defines the following macro:
 
