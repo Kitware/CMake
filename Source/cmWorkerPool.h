@@ -102,8 +102,7 @@ public:
      * Run an external read only process.
      * Use only during JobT::Process() call!
      */
-    bool RunProcess(ProcessResultT& result,
-                    std::vector<std::string> const& command,
+    bool RunProcess(ProcessResultT& result, std::vector<std::string> command,
                     std::string const& workingDirectory);
 
   private:
