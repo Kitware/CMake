@@ -2718,7 +2718,10 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
       cmPackageInfoReader::Read(config_file);
     if (reader && reader->GetName() == this->Name) {
       cm::optional<std::string> cpsVersion = reader->GetVersion();
-      if (cpsVersion) {
+      bool const hasVersion = cpsVersion.has_value();
+
+      if (hasVersion) {
+        version = std::move(*cpsVersion);
         // TODO: Implement version check for CPS
         result = true;
       } else {
@@ -2752,8 +2755,8 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
           result = false;
         }
 
-        if (result && cpsVersion) {
-          this->VersionFound = (version = std::move(*cpsVersion));
+        if (result && hasVersion) {
+          this->VersionFound = version;
 
           std::vector<unsigned> const& versionParts = reader->ParseVersion();
           this->VersionFoundCount = static_cast<unsigned>(versionParts.size());
