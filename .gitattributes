@@ -25,6 +25,7 @@ configure        eol=lf
 
 *.bat            eol=crlf
 *.bat.in         eol=crlf
+*.cmd            eol=crlf
 *.sln            eol=crlf
 *.vcproj         eol=crlf
 

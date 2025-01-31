@@ -1,0 +1,8 @@
+^bat arg1 - arg2 -
+bat "arg1 space" - arg2 -
+bat arg1 - "arg2 space" -
+bat "arg1 space" - "arg2 space" -
+cmd arg1 - arg2 -
+cmd "arg1 space" - arg2 -
+cmd arg1 - "arg2 space" -
+cmd "arg1 space" - "arg2 space" -$

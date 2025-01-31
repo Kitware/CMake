@@ -1,0 +1,8 @@
+execute_process(COMMAND "${CMAKE_CURRENT_LIST_DIR}/with space.bat" arg1 arg2)
+execute_process(COMMAND "${CMAKE_CURRENT_LIST_DIR}/with space.Bat" "arg1 space" arg2)
+execute_process(COMMAND "${CMAKE_CURRENT_LIST_DIR}/with space.bAT" arg1 "arg2 space")
+execute_process(COMMAND "${CMAKE_CURRENT_LIST_DIR}/with space.BAT" "arg1 space" "arg2 space")
+execute_process(COMMAND "${CMAKE_CURRENT_LIST_DIR}/with space.cmd" arg1 arg2)
+execute_process(COMMAND "${CMAKE_CURRENT_LIST_DIR}/with space.Cmd" "arg1 space" arg2)
+execute_process(COMMAND "${CMAKE_CURRENT_LIST_DIR}/with space.cMD" arg1 "arg2 space")
+execute_process(COMMAND "${CMAKE_CURRENT_LIST_DIR}/with space.CMD" "arg1 space" "arg2 space")

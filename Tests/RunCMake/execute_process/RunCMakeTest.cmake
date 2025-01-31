@@ -63,6 +63,14 @@ if(WIN32 OR CYGWIN)
   run_cmake_command(WindowsNoExtension-build ${CMAKE_COMMAND} --build . --config Debug --target RunScript)
 endif()
 
+if(CMAKE_HOST_WIN32
+    # By default, only C: has short paths enabled.
+    # Since querying with `fsutil 8dot3name query C:`
+    # requires admin, just test the drive letter.
+    AND RunCMake_SOURCE_DIR MATCHES "^[Cc]:")
+  run_cmake_command(WindowsBatch ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR}/WindowsBatch.cmake)
+endif()
+
 if(TEST_STARTUPINFO_EXE)
   run_cmake_script(StartupInfo -DTEST_STARTUPINFO_EXE=${TEST_STARTUPINFO_EXE})
 endif()
