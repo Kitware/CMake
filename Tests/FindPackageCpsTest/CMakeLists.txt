@@ -22,23 +22,52 @@ set(CMAKE_FIND_FRAMEWORK FIRST)
 add_executable(FindPackageCpsTest FindPackageTest.cxx)
 
 ###############################################################################
+
+function(expect PACKAGE VAR OP VALUE WHAT)
+  if(NOT ${PACKAGE}_${VAR} ${OP} ${VALUE})
+    message(SEND_ERROR "${PACKAGE} wrong ${WHAT} ${${PACKAGE}_${VAR}} !")
+  endif()
+endfunction()
+
+function(test_version PACKAGE LITERAL COUNT MAJOR MINOR PATCH TWEAK)
+  if(NOT ${PACKAGE}_FOUND)
+    message(SEND_ERROR "${PACKAGE} not found !")
+  else()
+    expect(${PACKAGE} VERSION STREQUAL "${LITERAL}" "version")
+    expect(${PACKAGE} VERSION_COUNT EQUAL ${COUNT} "version count")
+    expect(${PACKAGE} VERSION_MAJOR EQUAL ${MAJOR} "major version")
+    expect(${PACKAGE} VERSION_MINOR EQUAL ${MINOR} "minor version")
+    expect(${PACKAGE} VERSION_PATCH EQUAL ${PATCH} "patch version")
+    expect(${PACKAGE} VERSION_TWEAK EQUAL ${TWEAK} "tweak version")
+  endif()
+endfunction()
+
+function(test_unparsed_version PACKAGE VERSION)
+  find_package(${PACKAGE} CONFIG)
+  test_version(${PACKAGE} "${VERSION}" 0 0 0 0 0)
+endfunction()
+
+###############################################################################
 # Test a basic package search.
 # It should NOT find the package's CMake package file.
 
 find_package(Sample CONFIG)
-if(NOT Sample_FOUND)
-  message(SEND_ERROR "Sample not found !")
-elseif(NOT Sample_VERSION STREQUAL "2.10.11")
-  message(SEND_ERROR "Sample wrong version ${Sample_VERSION} !")
-elseif(NOT Sample_VERSION_MAJOR EQUAL 2)
-  message(SEND_ERROR "Sample wrong major version ${Sample_VERSION_MAJOR} !")
-elseif(NOT Sample_VERSION_MINOR EQUAL 10)
-  message(SEND_ERROR "Sample wrong minor version ${Sample_VERSION_MINOR} !")
-elseif(NOT Sample_VERSION_PATCH EQUAL 11)
-  message(SEND_ERROR "Sample wrong patch version ${Sample_VERSION_PATCH} !")
-elseif(NOT Sample_VERSION_TWEAK EQUAL 0)
-  message(SEND_ERROR "Sample wrong tweak version ${Sample_VERSION_TWEAK} !")
-endif()
+test_version(Sample "2.10.11" 3 2 10 11 0)
+
+###############################################################################
+# Test some more complicated version parsing.
+
+find_package(LongVersion CONFIG)
+test_version(LongVersion "1.1.2.3.5.8+fibonacci" 6 1 1 2 3)
+
+find_package(EmptyMarker CONFIG)
+test_version(EmptyMarker "1.1+" 2 1 1 0 0)
+
+test_unparsed_version(BadVersion1 "1..1")
+test_unparsed_version(BadVersion2 "1.1a.0")
+test_unparsed_version(BadVersion3 "1.1.")
+test_unparsed_version(BadVersion4 "+42")
+test_unparsed_version(CustomVersion "VII")
 
 ###############################################################################
 # Test glob sorting.

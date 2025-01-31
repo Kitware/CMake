@@ -2758,23 +2758,32 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
         if (result && hasVersion) {
           this->VersionFound = version;
 
-          std::vector<unsigned> const& versionParts = reader->ParseVersion();
-          this->VersionFoundCount = static_cast<unsigned>(versionParts.size());
-          switch (this->VersionFoundCount) {
-            case 4:
-              this->VersionFoundTweak = versionParts[3];
-              CM_FALLTHROUGH;
-            case 3:
-              this->VersionFoundPatch = versionParts[2];
-              CM_FALLTHROUGH;
-            case 2:
-              this->VersionFoundMinor = versionParts[1];
-              CM_FALLTHROUGH;
-            case 1:
-              this->VersionFoundMajor = versionParts[0];
-              CM_FALLTHROUGH;
-            default:
-              break;
+          cm::optional<cmPackageInfoReader::Pep440Version> const&
+            parsedVersion = reader->ParseVersion();
+          if (parsedVersion) {
+            std::vector<unsigned> const& versionParts =
+              parsedVersion->ReleaseComponents;
+
+            this->VersionFoundCount =
+              static_cast<unsigned>(versionParts.size());
+            switch (std::min(this->VersionFoundCount, 4u)) {
+              case 4:
+                this->VersionFoundTweak = versionParts[3];
+                CM_FALLTHROUGH;
+              case 3:
+                this->VersionFoundPatch = versionParts[2];
+                CM_FALLTHROUGH;
+              case 2:
+                this->VersionFoundMinor = versionParts[1];
+                CM_FALLTHROUGH;
+              case 1:
+                this->VersionFoundMajor = versionParts[0];
+                CM_FALLTHROUGH;
+              default:
+                break;
+            }
+          } else {
+            this->VersionFoundCount = 0;
           }
         }
         this->CpsReader = std::move(reader);

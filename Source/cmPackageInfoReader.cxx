@@ -366,6 +366,62 @@ void AddDefinitions(cmMakefile* makefile, cmTarget* target,
   }
 }
 
+cm::optional<cmPackageInfoReader::Pep440Version> ParseSimpleVersion(
+  std::string const& version)
+{
+  if (version.empty()) {
+    return cm::nullopt;
+  }
+
+  cmPackageInfoReader::Pep440Version result;
+  result.Simple = true;
+
+  cm::string_view remnant{ version };
+  for (;;) {
+    // Find the next part separator.
+    std::string::size_type const n = remnant.find_first_of(".+-"_s);
+    if (n == 0) {
+      // The part is an empty string.
+      return cm::nullopt;
+    }
+
+    // Extract the part as a number.
+    cm::string_view const part = remnant.substr(0, n);
+    std::string::size_type const l = part.size();
+    std::string::size_type p;
+    unsigned long const value = std::stoul(std::string{ part }, &p);
+    if (p != l || value > std::numeric_limits<unsigned>::max()) {
+      // The part was not a valid number or is too big.
+      return cm::nullopt;
+    }
+    result.ReleaseComponents.push_back(static_cast<unsigned>(value));
+
+    // Have we consumed the entire input?
+    if (n == std::string::npos) {
+      return { std::move(result) };
+    }
+
+    // Lop off the current part.
+    char const sep = remnant[n];
+    remnant = remnant.substr(n + 1);
+    if (sep == '+' || sep == '-') {
+      // If we hit the local label, we're done.
+      result.LocalLabel = remnant;
+      return { std::move(result) };
+    }
+
+    // We just consumed a '.'; check that there's more.
+    if (remnant.empty()) {
+      // A trailing part separator is not allowed.
+      return cm::nullopt;
+    }
+
+    // Continue with the remaining input.
+  }
+
+  // Unreachable.
+}
+
 } // namespace
 
 std::unique_ptr<cmPackageInfoReader> cmPackageInfoReader::Read(
@@ -428,40 +484,22 @@ cm::optional<std::string> cmPackageInfoReader::GetVersion() const
   return cm::nullopt;
 }
 
-std::vector<unsigned> cmPackageInfoReader::ParseVersion() const
+cm::optional<cmPackageInfoReader::Pep440Version>
+cmPackageInfoReader::ParseVersion() const
 {
   // Check that we have a version.
   cm::optional<std::string> const& version = this->GetVersion();
   if (!version) {
-    return {};
+    return cm::nullopt;
   }
-
-  std::vector<unsigned> result;
-  cm::string_view remnant{ *version };
 
   // Check if we know how to parse the version.
   Json::Value const& schema = this->Data["version_schema"];
   if (schema.isNull() || cmStrCaseEq(schema.asString(), "simple"_s)) {
-    // Keep going until we run out of parts.
-    while (!remnant.empty()) {
-      std::string::size_type n = remnant.find('.');
-      cm::string_view part = remnant.substr(0, n);
-      if (n == std::string::npos) {
-        remnant = {};
-      } else {
-        remnant = remnant.substr(n + 1);
-      }
-
-      unsigned long const value = std::stoul(std::string{ part }, &n);
-      if (n == 0 || value > std::numeric_limits<unsigned>::max()) {
-        // The part was not a valid number or is too big.
-        return {};
-      }
-      result.push_back(static_cast<unsigned>(value));
-    }
+    return ParseSimpleVersion(*version);
   }
 
-  return result;
+  return cm::nullopt;
 }
 
 std::vector<cmPackageRequirement> cmPackageInfoReader::GetRequirements() const
