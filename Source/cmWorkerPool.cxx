@@ -17,6 +17,7 @@
 
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmUVHandlePtr.h"
 
 /**
@@ -191,6 +192,7 @@ void cmUVReadOnlyProcess::setup(cmWorkerPool::ProcessResultT* result,
                                 std::vector<std::string> command,
                                 std::string const& workingDirectory)
 {
+  cmSystemTools::MaybePrependCmdExe(command);
   this->Setup_.WorkingDirectory = workingDirectory;
   this->Setup_.Command = std::move(command);
   this->Setup_.Result = result;

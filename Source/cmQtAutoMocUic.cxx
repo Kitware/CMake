@@ -888,8 +888,6 @@ void cmQtAutoMocUicT::JobMocPredefsT::Process()
       // Check if response file is necessary
       MaybeWriteResponseFile(this->MocConst().PredefsFileAbs, cmd);
 
-      cmSystemTools::MaybePrependCmdExe(cmd);
-
       // Execute command
       if (!this->RunProcess(GenT::MOC, result, cmd, reason.get())) {
         this->LogCommandError(GenT::MOC,
@@ -2091,7 +2089,6 @@ void cmQtAutoMocUicT::JobCompileMocT::Process()
     cmd.push_back(sourceFile);
 
     MaybeWriteResponseFile(outputFile, cmd);
-    cmSystemTools::MaybePrependCmdExe(cmd);
   }
 
   // Execute moc command
@@ -2157,8 +2154,6 @@ void cmQtAutoMocUicT::JobCompileUicT::Process()
   cmd.emplace_back("-o");
   cmd.emplace_back(outputFile);
   cmd.emplace_back(sourceFile);
-
-  cmSystemTools::MaybePrependCmdExe(cmd);
 
   cmWorkerPool::ProcessResultT result;
   if (this->RunProcess(GenT::UIC, result, cmd, this->Reason.get())) {
