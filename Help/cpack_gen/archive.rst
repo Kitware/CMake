@@ -8,6 +8,10 @@ any of the following formats:
 
   .. versionadded:: 3.1
 
+- TAR (``.tar``)
+
+  .. versionadded:: 4.0
+
 - TBZ2 (``.tar.bz2``)
 
 - TGZ (``.tar.gz``)

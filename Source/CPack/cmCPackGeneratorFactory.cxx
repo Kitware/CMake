@@ -54,6 +54,8 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
                             cmCPackArchiveGenerator::CreateTZGenerator);
     this->RegisterGenerator("TZST", "Tar Zstandard compression",
                             cmCPackArchiveGenerator::CreateTZSTGenerator);
+    this->RegisterGenerator("TAR", "Tar no compression",
+                            cmCPackArchiveGenerator::CreateTarGenerator);
     this->RegisterGenerator("ZIP", "ZIP file format",
                             cmCPackArchiveGenerator::CreateZIPGenerator);
   }

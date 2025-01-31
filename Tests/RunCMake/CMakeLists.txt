@@ -1126,6 +1126,7 @@ set(cpack_tests
   RPM.COMPONENT_WITH_SPECIAL_CHARS
 
   7Z
+  TAR
   TBZ2
   TGZ
   TXZ
