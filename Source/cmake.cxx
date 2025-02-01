@@ -2662,11 +2662,11 @@ int cmake::ActualConfigure()
 
   if (mf->IsOn("CTEST_USE_LAUNCHERS") &&
       !this->State->GetGlobalProperty("RULE_LAUNCH_COMPILE")) {
-    cmSystemTools::Error(
-      "CTEST_USE_LAUNCHERS is enabled, but the "
-      "RULE_LAUNCH_COMPILE global property is not defined.\n"
-      "Did you forget to include(CTest) in the toplevel "
-      "CMakeLists.txt ?");
+    this->IssueMessage(MessageType::FATAL_ERROR,
+                       "CTEST_USE_LAUNCHERS is enabled, but the "
+                       "RULE_LAUNCH_COMPILE global property is not defined.\n"
+                       "Did you forget to include(CTest) in the toplevel "
+                       "CMakeLists.txt ?");
   }
   // Setup launchers for instrumentation
 #if !defined(CMAKE_BOOTSTRAP)
