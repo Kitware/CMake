@@ -349,12 +349,12 @@ Package
 
  Archive compression level. The allowable values are:
 
-  * 0 (*No compression*)
-  * 1 (*Fastest compression*)
-  * 3 (*Fast compression*)
-  * 5 (*Normal compression*)
-  * 7 (*Maximum compression*)
-  * 9 (*Ultra compression*)
+ * 0 (*No compression*)
+ * 1 (*Fastest compression*)
+ * 3 (*Fast compression*)
+ * 5 (*Normal compression*)
+ * 7 (*Maximum compression*)
+ * 9 (*Ultra compression*)
 
  If this variable is not set, QtIFW will use a default compression level,
  which will typically be 5 (*Normal compression*).

@@ -121,7 +121,7 @@ install(FILES
   )
 
 # generate the export targets for the build tree
-# needs to be after the install(TARGETS ) command
+# needs to be after the install(TARGETS) command
 export(EXPORT MathFunctionsTargets
   FILE "${CMAKE_CURRENT_BINARY_DIR}/MathFunctionsTargets.cmake"
 )

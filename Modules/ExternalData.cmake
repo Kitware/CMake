@@ -244,21 +244,22 @@ members of a series are fetched, only the file originally named by the
 recognizes file series names ending with ``#.ext``, ``_#.ext``, ``.#.ext``,
 or ``-#.ext`` where ``#`` is a sequence of decimal digits and ``.ext`` is
 any single extension.  Configure it with a regex that parses ``<number>``
-and ``<suffix>`` parts from the end of ``<name>``::
+and ``<suffix>`` parts from the end of ``<name>``:
 
- ExternalData_SERIES_PARSE = regex of the form (<number>)(<suffix>)$
+  ``ExternalData_SERIES_PARSE`` - regex of the form ``(<number>)(<suffix>)$``.
 
-For more complicated cases set::
+For more complicated cases set:
 
- ExternalData_SERIES_PARSE = regex with at least two () groups
- ExternalData_SERIES_PARSE_PREFIX = <prefix> regex group number, if any
- ExternalData_SERIES_PARSE_NUMBER = <number> regex group number
- ExternalData_SERIES_PARSE_SUFFIX = <suffix> regex group number
+* ``ExternalData_SERIES_PARSE`` - regex with at least two ``()`` groups.
+* ``ExternalData_SERIES_PARSE_PREFIX`` - regex group number of the ``<prefix>``, if any.
+* ``ExternalData_SERIES_PARSE_NUMBER`` - regex group number of the ``<number>``.
+* ``ExternalData_SERIES_PARSE_SUFFIX`` - regex group number of the ``<suffix>``.
 
 Configure series number matching with a regex that matches the
-``<number>`` part of series members named ``<prefix><number><suffix>``::
+``<number>`` part of series members named ``<prefix><number><suffix>``:
 
- ExternalData_SERIES_MATCH = regex matching <number> in all series members
+  ``ExternalData_SERIES_MATCH`` - regex matching ``<number>`` in all series
+  members
 
 Note that the ``<suffix>`` of a series does not include a hash-algorithm
 extension.
@@ -298,20 +299,22 @@ source directory.
 Hash Algorithms
 ^^^^^^^^^^^^^^^
 
-The following hash algorithms are supported::
+The following hash algorithms are supported:
 
- %(algo)     <ext>     Description
- -------     -----     -----------
- MD5         .md5      Message-Digest Algorithm 5, RFC 1321
- SHA1        .sha1     US Secure Hash Algorithm 1, RFC 3174
- SHA224      .sha224   US Secure Hash Algorithms, RFC 4634
- SHA256      .sha256   US Secure Hash Algorithms, RFC 4634
- SHA384      .sha384   US Secure Hash Algorithms, RFC 4634
- SHA512      .sha512   US Secure Hash Algorithms, RFC 4634
- SHA3_224    .sha3-224 Keccak SHA-3
- SHA3_256    .sha3-256 Keccak SHA-3
- SHA3_384    .sha3-384 Keccak SHA-3
- SHA3_512    .sha3-512 Keccak SHA-3
+ ============ ============= ============
+ %(algo)      <ext>         Description
+ ============ ============= ============
+ ``MD5``      ``.md5``      Message-Digest Algorithm 5, RFC 1321
+ ``SHA1``     ``.sha1``     US Secure Hash Algorithm 1, RFC 3174
+ ``SHA224``   ``.sha224``   US Secure Hash Algorithms, RFC 4634
+ ``SHA256``   ``.sha256``   US Secure Hash Algorithms, RFC 4634
+ ``SHA384``   ``.sha384``   US Secure Hash Algorithms, RFC 4634
+ ``SHA512``   ``.sha512``   US Secure Hash Algorithms, RFC 4634
+ ``SHA3_224`` ``.sha3-224`` Keccak SHA-3
+ ``SHA3_256`` ``.sha3-256`` Keccak SHA-3
+ ``SHA3_384`` ``.sha3-384`` Keccak SHA-3
+ ``SHA3_512`` ``.sha3-512`` Keccak SHA-3
+ ============ ============= ============
 
 .. versionadded:: 3.8
   Added the ``SHA3_*`` hash algorithms.

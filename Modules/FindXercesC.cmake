@@ -9,7 +9,7 @@ FindXercesC
 
 Find the Apache Xerces-C++ validating XML parser headers and libraries.
 
-Imported targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.5

@@ -7,7 +7,7 @@ Add a target with no output so it will always be built.
 
   add_custom_target(Name [ALL] [command1 [args1...]]
                     [COMMAND command2 [args2...] ...]
-                    [DEPENDS depend depend depend ... ]
+                    [DEPENDS depend depend depend ...]
                     [BYPRODUCTS [files...]]
                     [WORKING_DIRECTORY dir]
                     [COMMENT comment]
@@ -103,10 +103,10 @@ The options are:
   dependency will be added automatically so that the mentioned target will be
   built before this custom target (see policy :policy:`CMP0112`).
 
-    * ``TARGET_FILE``
-    * ``TARGET_LINKER_FILE``
-    * ``TARGET_SONAME_FILE``
-    * ``TARGET_PDB_FILE``
+  * ``TARGET_FILE``
+  * ``TARGET_LINKER_FILE``
+  * ``TARGET_SONAME_FILE``
+  * ``TARGET_PDB_FILE``
 
   The command and arguments are optional and if not specified an empty
   target will be created.

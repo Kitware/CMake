@@ -5,21 +5,21 @@
 FindGnuplot
 -----------
 
-this module looks for gnuplot
+This module looks for gnuplot.
 
+Result Variables
+^^^^^^^^^^^^^^^^
 
+``GNUPLOT_FOUND``
+  System has Gnuplot.
 
-Once done this will define
+``GNUPLOT_EXECUTABLE``
+  The Gnuplot executable.
 
-::
+``GNUPLOT_VERSION_STRING``
+  The version of Gnuplot found.
 
-  GNUPLOT_FOUND - system has Gnuplot
-  GNUPLOT_EXECUTABLE - the Gnuplot executable
-  GNUPLOT_VERSION_STRING - the version of Gnuplot found (since CMake 2.8.8)
-
-
-
-GNUPLOT_VERSION_STRING will not work for old versions like 3.7.1.
+  .. note:: Version string detection will not work for old versions like 3.7.1.
 #]=======================================================================]
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindCygwin.cmake)

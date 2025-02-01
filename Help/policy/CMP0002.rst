@@ -10,12 +10,10 @@ Targets names created with :command:`add_executable`, :command:`add_library`, or
 :command:`add_custom_target` are logical build target names.  Logical target
 names must be globally unique because:
 
-::
-
-  - Unique names may be referenced unambiguously both in CMake
-    code and on make tool command lines.
-  - Logical names are used by Xcode and VS IDE generators
-    to produce meaningful project names for the targets.
+* Unique names may be referenced unambiguously both in CMake
+  code and on make tool command lines.
+* Logical names are used by Xcode and VS IDE generators
+  to produce meaningful project names for the targets.
 
 The logical name of executable and library targets does not have to
 correspond to the physical file names built.  Consider using the

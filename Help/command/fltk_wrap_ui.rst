@@ -6,7 +6,7 @@ Create FLTK user interfaces Wrappers.
 .. code-block:: cmake
 
   fltk_wrap_ui(resultingLibraryName source1
-               source2 ... sourceN )
+               source2 ... sourceN)
 
 Produce .h and .cxx files for all the .fl and .fld files listed.  The
 resulting .h and .cxx files will be added to a variable named

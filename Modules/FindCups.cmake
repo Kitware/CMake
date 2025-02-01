@@ -10,7 +10,7 @@ Find the Common UNIX Printing System (CUPS).
 Set ``CUPS_REQUIRE_IPP_DELETE_ATTRIBUTE`` to ``TRUE`` if you need a version which
 features this function (i.e. at least ``1.1.19``)
 
-Imported targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.15

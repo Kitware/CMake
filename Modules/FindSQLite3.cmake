@@ -9,7 +9,7 @@ FindSQLite3
 
 Find the SQLite libraries, v3
 
-IMPORTED targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 This module defines the following :prop_tgt:`IMPORTED` target:

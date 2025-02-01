@@ -9,7 +9,7 @@ FindXalanC
 
 Find the Apache Xalan-C++ XSL transform processor headers and libraries.
 
-Imported targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 This module defines the following :prop_tgt:`IMPORTED` targets:

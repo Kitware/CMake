@@ -211,7 +211,7 @@ Writing
          [CONDITION <expression>] [TARGET <target>]
          [NO_SOURCE_PERMISSIONS | USE_SOURCE_PERMISSIONS |
           FILE_PERMISSIONS <permissions>...]
-         [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
+         [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF]])
 
   The options are:
 
@@ -293,7 +293,7 @@ Writing
   file(CONFIGURE OUTPUT <output-file>
        CONTENT <content>
        [ESCAPE_QUOTES] [@ONLY]
-       [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
+       [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF]])
   :target: CONFIGURE
 
   .. versionadded:: 3.18

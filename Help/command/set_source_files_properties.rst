@@ -19,17 +19,17 @@ list.
   same directory (``CMakeLists.txt``).  Visibility can be set in other directory
   scopes using one or both of the following options:
 
-``DIRECTORY <dirs>...``
-  The source file properties will be set in each of the ``<dirs>``
-  directories' scopes.  CMake must already know about each of these
-  source directories, either by having added them through a call to
-  :command:`add_subdirectory` or it being the top level source directory.
-  Relative paths are treated as relative to the current source directory.
+  ``DIRECTORY <dirs>...``
+    The source file properties will be set in each of the ``<dirs>``
+    directories' scopes.  CMake must already know about each of these
+    source directories, either by having added them through a call to
+    :command:`add_subdirectory` or it being the top level source directory.
+    Relative paths are treated as relative to the current source directory.
 
-``TARGET_DIRECTORY <targets>...``
-  The source file properties will be set in each of the directory scopes
-  where any of the specified ``<targets>`` were created (the ``<targets>``
-  must therefore already exist).
+  ``TARGET_DIRECTORY <targets>...``
+    The source file properties will be set in each of the directory scopes
+    where any of the specified ``<targets>`` were created (the ``<targets>``
+    must therefore already exist).
 
 Use :command:`get_source_file_property` to get property values.
 See also the :command:`set_property(SOURCE)` command.

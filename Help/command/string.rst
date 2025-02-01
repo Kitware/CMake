@@ -478,10 +478,8 @@ Generation
 
   If no explicit ``<format_string>`` is given, it will default to:
 
-  ::
-
-    %Y-%m-%dT%H:%M:%S    for local time.
-    %Y-%m-%dT%H:%M:%SZ   for UTC.
+  * ``%Y-%m-%dT%H:%M:%S`` for local time.
+  * ``%Y-%m-%dT%H:%M:%SZ`` for UTC.
 
   .. versionadded:: 3.8
     If the ``SOURCE_DATE_EPOCH`` environment variable is set,

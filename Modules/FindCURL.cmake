@@ -18,7 +18,7 @@ Find the native CURL headers and libraries.
   FEATURES:  SSL IPv6 UnixSockets libz AsynchDNS IDN GSS-API PSL SPNEGO
              Kerberos NTLM NTLM_WB TLS-SRP HTTP2 HTTPS-proxy
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.12

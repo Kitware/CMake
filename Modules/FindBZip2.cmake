@@ -7,7 +7,7 @@ FindBZip2
 
 Try to find BZip2
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.12

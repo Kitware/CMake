@@ -39,21 +39,22 @@ The following variables are defined by this module:
 
   The version reported by ``doxygen --version``.
 
+Imported Targets
+^^^^^^^^^^^^^^^^
+
 .. versionadded:: 3.9
-  The module defines ``IMPORTED`` targets for Doxygen and each component found.
-  These can be used as part of custom commands, etc. and should be preferred over
-  old-style (and now deprecated) variables like ``DOXYGEN_EXECUTABLE``. The
-  following import targets are defined if their corresponding executable could be
-  found (the component import targets will only be defined if that component was
-  requested):
 
-::
+The module defines ``IMPORTED`` targets for Doxygen and each component found.
+These can be used as part of custom commands, etc. and should be preferred over
+old-style (and now deprecated) variables like ``DOXYGEN_EXECUTABLE``. The
+following import targets are defined if their corresponding executable could be
+found (the component import targets will only be defined if that component was
+requested):
 
-  Doxygen::doxygen
-  Doxygen::dot
-  Doxygen::mscgen
-  Doxygen::dia
-
+* ``Doxygen::doxygen``
+* ``Doxygen::dot``
+* ``Doxygen::mscgen``
+* ``Doxygen::dia``
 
 Functions
 ^^^^^^^^^
@@ -231,94 +232,94 @@ options and will convert their associated CMake variable's contents into the
 required form if set. CMake variables are named ``DOXYGEN_<name>`` for the
 Doxygen settings specified here.
 
-::
+.. hlist::
 
-  ABBREVIATE_BRIEF
-  ALIASES
-  CITE_BIB_FILES
-  DIAFILE_DIRS
-  DOTFILE_DIRS
-  DOT_FONTPATH
-  ENABLED_SECTIONS
-  EXAMPLE_PATH
-  EXAMPLE_PATTERNS
-  EXCLUDE
-  EXCLUDE_PATTERNS
-  EXCLUDE_SYMBOLS
-  EXPAND_AS_DEFINED
-  EXTENSION_MAPPING
-  EXTRA_PACKAGES
-  EXTRA_SEARCH_MAPPINGS
-  FILE_PATTERNS
-  FILTER_PATTERNS
-  FILTER_SOURCE_PATTERNS
-  HTML_EXTRA_FILES
-  HTML_EXTRA_STYLESHEET
-  IGNORE_PREFIX
-  IMAGE_PATH
-  INCLUDE_FILE_PATTERNS
-  INCLUDE_PATH
-  INPUT
-  LATEX_EXTRA_FILES
-  LATEX_EXTRA_STYLESHEET
-  MATHJAX_EXTENSIONS
-  MSCFILE_DIRS
-  PLANTUML_INCLUDE_PATH
-  PREDEFINED
-  QHP_CUST_FILTER_ATTRS
-  QHP_SECT_FILTER_ATTRS
-  STRIP_FROM_INC_PATH
-  STRIP_FROM_PATH
-  TAGFILES
-  TCL_SUBST
+  - ``ABBREVIATE_BRIEF``
+  - ``ALIASES``
+  - ``CITE_BIB_FILES``
+  - ``DIAFILE_DIRS``
+  - ``DOTFILE_DIRS``
+  - ``DOT_FONTPATH``
+  - ``ENABLED_SECTIONS``
+  - ``EXAMPLE_PATH``
+  - ``EXAMPLE_PATTERNS``
+  - ``EXCLUDE``
+  - ``EXCLUDE_PATTERNS``
+  - ``EXCLUDE_SYMBOLS``
+  - ``EXPAND_AS_DEFINED``
+  - ``EXTENSION_MAPPING``
+  - ``EXTRA_PACKAGES``
+  - ``EXTRA_SEARCH_MAPPINGS``
+  - ``FILE_PATTERNS``
+  - ``FILTER_PATTERNS``
+  - ``FILTER_SOURCE_PATTERNS``
+  - ``HTML_EXTRA_FILES``
+  - ``HTML_EXTRA_STYLESHEET``
+  - ``IGNORE_PREFIX``
+  - ``IMAGE_PATH``
+  - ``INCLUDE_FILE_PATTERNS``
+  - ``INCLUDE_PATH``
+  - ``INPUT``
+  - ``LATEX_EXTRA_FILES``
+  - ``LATEX_EXTRA_STYLESHEET``
+  - ``MATHJAX_EXTENSIONS``
+  - ``MSCFILE_DIRS``
+  - ``PLANTUML_INCLUDE_PATH``
+  - ``PREDEFINED``
+  - ``QHP_CUST_FILTER_ATTRS``
+  - ``QHP_SECT_FILTER_ATTRS``
+  - ``STRIP_FROM_INC_PATH``
+  - ``STRIP_FROM_PATH``
+  - ``TAGFILES``
+  - ``TCL_SUBST``
 
 The following single value Doxygen options will be quoted automatically
 if they contain at least one space:
 
-::
+.. hlist::
 
-  CHM_FILE
-  DIA_PATH
-  DOCBOOK_OUTPUT
-  DOCSET_FEEDNAME
-  DOCSET_PUBLISHER_NAME
-  DOT_FONTNAME
-  DOT_PATH
-  EXTERNAL_SEARCH_ID
-  FILE_VERSION_FILTER
-  GENERATE_TAGFILE
-  HHC_LOCATION
-  HTML_FOOTER
-  HTML_HEADER
-  HTML_OUTPUT
-  HTML_STYLESHEET
-  INPUT_FILTER
-  LATEX_FOOTER
-  LATEX_HEADER
-  LATEX_OUTPUT
-  LAYOUT_FILE
-  MAN_OUTPUT
-  MAN_SUBDIR
-  MATHJAX_CODEFILE
-  MSCGEN_PATH
-  OUTPUT_DIRECTORY
-  PERL_PATH
-  PLANTUML_JAR_PATH
-  PROJECT_BRIEF
-  PROJECT_LOGO
-  PROJECT_NAME
-  QCH_FILE
-  QHG_LOCATION
-  QHP_CUST_FILTER_NAME
-  QHP_VIRTUAL_FOLDER
-  RTF_EXTENSIONS_FILE
-  RTF_OUTPUT
-  RTF_STYLESHEET_FILE
-  SEARCHDATA_FILE
-  USE_MDFILE_AS_MAINPAGE
-  WARN_FORMAT
-  WARN_LOGFILE
-  XML_OUTPUT
+  - ``CHM_FILE``
+  - ``DIA_PATH``
+  - ``DOCBOOK_OUTPUT``
+  - ``DOCSET_FEEDNAME``
+  - ``DOCSET_PUBLISHER_NAME``
+  - ``DOT_FONTNAME``
+  - ``DOT_PATH``
+  - ``EXTERNAL_SEARCH_ID``
+  - ``FILE_VERSION_FILTER``
+  - ``GENERATE_TAGFILE``
+  - ``HHC_LOCATION``
+  - ``HTML_FOOTER``
+  - ``HTML_HEADER``
+  - ``HTML_OUTPUT``
+  - ``HTML_STYLESHEET``
+  - ``INPUT_FILTER``
+  - ``LATEX_FOOTER``
+  - ``LATEX_HEADER``
+  - ``LATEX_OUTPUT``
+  - ``LAYOUT_FILE``
+  - ``MAN_OUTPUT``
+  - ``MAN_SUBDIR``
+  - ``MATHJAX_CODEFILE``
+  - ``MSCGEN_PATH``
+  - ``OUTPUT_DIRECTORY``
+  - ``PERL_PATH``
+  - ``PLANTUML_JAR_PATH``
+  - ``PROJECT_BRIEF``
+  - ``PROJECT_LOGO``
+  - ``PROJECT_NAME``
+  - ``QCH_FILE``
+  - ``QHG_LOCATION``
+  - ``QHP_CUST_FILTER_NAME``
+  - ``QHP_VIRTUAL_FOLDER``
+  - ``RTF_EXTENSIONS_FILE``
+  - ``RTF_OUTPUT``
+  - ``RTF_STYLESHEET_FILE``
+  - ``SEARCHDATA_FILE``
+  - ``USE_MDFILE_AS_MAINPAGE``
+  - ``WARN_FORMAT``
+  - ``WARN_LOGFILE``
+  - ``XML_OUTPUT``
 
 .. versionadded:: 3.11
   There are situations where it may be undesirable for a particular config option

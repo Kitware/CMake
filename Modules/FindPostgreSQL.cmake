@@ -7,7 +7,7 @@ FindPostgreSQL
 
 Find the PostgreSQL installation.
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.14

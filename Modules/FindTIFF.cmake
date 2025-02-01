@@ -14,7 +14,7 @@ This module supports the optional component `CXX`, for use with the COMPONENTS
 argument of the :command:`find_package` command. This component has an associated
 imported target, as described below.
 
-Imported targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.5

@@ -5,6 +5,8 @@
 CMakeParseArguments
 -------------------
 
+.. deprecated:: 3.5
+
 This module once implemented the :command:`cmake_parse_arguments` command
 that is now implemented natively by CMake.  It is now an empty placeholder
 for compatibility with projects that include it to get the command from

@@ -110,7 +110,7 @@ behavior:
   additional versions of Matlab for the automatic retrieval of the installed
   versions.
 
-Imported targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.22

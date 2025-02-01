@@ -58,7 +58,7 @@ In ``CMakeLists.txt`` we add a filter to
 
 .. code-block:: c++
 
-  list( APPEND CMAKE_AUTOMOC_DEPEND_FILTERS
+  list(APPEND CMAKE_AUTOMOC_DEPEND_FILTERS
     "JSON_FILE_MACRO"
     "[\n][ \t]*JSON_FILE_MACRO[ \t]*\\([ \t]*\"([^\"]+)\""
   )

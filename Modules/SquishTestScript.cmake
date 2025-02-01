@@ -4,10 +4,7 @@
 #[=======================================================================[.rst:
 SquishTestScript
 ----------------
-
-
-
-
+.. deprecated:: 3.0
 
 This script launches a GUI test using Squish.  You should not call the
 script directly; instead, you should access it via the SQUISH_ADD_TEST

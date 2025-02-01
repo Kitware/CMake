@@ -44,7 +44,7 @@ There are corresponding imported targets for each of these.
 The ``glslc`` and ``glslangValidator`` components are provided even
 if not explicitly requested (for backward compatibility).
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 This module defines :prop_tgt:`IMPORTED` targets if Vulkan has been found:

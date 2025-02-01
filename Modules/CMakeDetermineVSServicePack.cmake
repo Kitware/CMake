@@ -21,8 +21,8 @@ Usage:
 
   if(MSVC)
     include(CMakeDetermineVSServicePack)
-    DetermineVSServicePack( my_service_pack )
-    if( my_service_pack )
+    DetermineVSServicePack(my_service_pack)
+    if(my_service_pack)
       message(STATUS "Detected: ${my_service_pack}")
     endif()
   endif()

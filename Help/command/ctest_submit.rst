@@ -24,21 +24,20 @@ The options are:
 ``PARTS <part>...``
   Specify a subset of parts to submit.  Valid part names are:
 
-  .. parsed-literal::
-
-    Start      = nothing
-    Update     = ctest_update results, in Update.xml
-    Configure  = ctest_configure results, in Configure.xml
-    Build      = ctest_build results, in Build.xml
-    Test       = ctest_test results, in Test.xml
-    Coverage   = ctest_coverage results, in Coverage.xml
-    MemCheck   = ctest_memcheck results, in DynamicAnalysis.xml and
-                 DynamicAnalysis-Test.xml
-    Notes      = Files listed by :variable:`CTEST_NOTES_FILES`, in Notes.xml
-    ExtraFiles = Files listed by :variable:`CTEST_EXTRA_SUBMIT_FILES`
-    Upload     = Files prepared for upload by ctest_upload(), in Upload.xml
-    Submit     = nothing
-    Done       = Build is complete, in Done.xml
+  * ``Start`` - nothing.
+  * ``Update`` - :command:`ctest_update` results, in ``Update.xml``.
+  * ``Configure`` - :command:`ctest_configure` results, in ``Configure.xml``.
+  * ``Build`` - :command:`ctest_build` results, in ``Build.xml``.
+  * ``Test`` - :command:`ctest_test` results, in ``Test.xml``.
+  * ``Coverage`` - :command:`ctest_coverage` results, in ``Coverage.xml``.
+  * ``MemCheck`` - :command:`ctest_memcheck` results, in
+    ``DynamicAnalysis.xml`` and ``DynamicAnalysis-Test.xml``.
+  * ``Notes`` - Files listed by :variable:`CTEST_NOTES_FILES`, in ``Notes.xml``.
+  * ``ExtraFiles`` - Files listed by :variable:`CTEST_EXTRA_SUBMIT_FILES`.
+  * ``Upload`` - Files prepared for upload by :command:`ctest_upload`, in
+    ``Upload.xml``.
+  * ``Submit`` - nothing.
+  * ``Done`` - Build is complete, in ``Done.xml``.
 
 ``FILES <file>...``
   Specify an explicit list of specific files to be submitted.

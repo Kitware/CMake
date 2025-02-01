@@ -122,11 +122,11 @@ constraints):
   identify a file, a hard link, a symbolic link, or a directory.  Two special
   cases are recognized:
 
-    * The item name consisting of a single dot character ``.`` is a
-      directory name that refers to the current directory.
+  * The item name consisting of a single dot character ``.`` is a
+    directory name that refers to the current directory.
 
-    * The item name consisting of two dot characters ``..`` is a
-      directory name that refers to the parent directory.
+  * The item name consisting of two dot characters ``..`` is a
+    directory name that refers to the parent directory.
 
   The ``(...)*`` pattern shown above is to indicate that there can be zero
   or more item names, with multiple items separated by a
@@ -154,11 +154,11 @@ constraints):
 
   The following exceptions apply to the above interpretation:
 
-    * If the first character in the ``filename`` is a period, that period is
-      ignored (i.e. a ``filename`` like ``".profile"`` is treated as having
-      no extension).
+  * If the first character in the ``filename`` is a period, that period is
+    ignored (i.e. a ``filename`` like ``".profile"`` is treated as having
+    no extension).
 
-    * If the ``filename`` is either ``.`` or ``..``, it has no extension.
+  * If the ``filename`` is either ``.`` or ``..``, it has no extension.
 
   The *stem* is the part of the ``filename`` before the extension.
 

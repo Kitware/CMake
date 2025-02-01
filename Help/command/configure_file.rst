@@ -13,7 +13,7 @@ Copy a file to another location and modify its contents.
                  [NO_SOURCE_PERMISSIONS | USE_SOURCE_PERMISSIONS |
                   FILE_PERMISSIONS <permissions>...]
                  [COPYONLY] [ESCAPE_QUOTES] [@ONLY]
-                 [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
+                 [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF]])
 
 Copies an ``<input>`` file to an ``<output>`` file while performing
 `transformations`_ of the input file content.

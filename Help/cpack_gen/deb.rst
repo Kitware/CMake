@@ -25,8 +25,8 @@ or a component GROUP name.
 Here are some CPack DEB generator wiki resources that are here for historic
 reasons and are no longer maintained but may still prove useful:
 
- - https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/Configuration
- - https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/PackageGenerators#deb-unix-only
+- https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/Configuration
+- https://gitlab.kitware.com/cmake/community/-/wikis/doc/cpack/PackageGenerators#deb-unix-only
 
 List of CPack DEB generator specific variables:
 

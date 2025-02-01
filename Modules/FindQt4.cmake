@@ -203,7 +203,7 @@ more-manual way. Several macros are available to add targets for such uses.
         same argument to the target_link_libraries call.
 
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 A particular Qt library may be used by using the corresponding

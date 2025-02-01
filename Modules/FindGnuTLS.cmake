@@ -7,7 +7,7 @@ FindGnuTLS
 
 Find the GNU Transport Layer Security library (gnutls)
 
-IMPORTED Targets
+Imported Targets
 ^^^^^^^^^^^^^^^^
 
 .. versionadded:: 3.16
