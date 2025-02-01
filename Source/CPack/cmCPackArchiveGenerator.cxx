@@ -169,6 +169,12 @@ cmCPackGenerator* cmCPackArchiveGenerator::CreateTZSTGenerator()
                                      ".tar.zst");
 }
 
+cmCPackGenerator* cmCPackArchiveGenerator::CreateTarGenerator()
+{
+  return new cmCPackArchiveGenerator(cmArchiveWrite::CompressNone, "gnutar",
+                                     ".tar");
+}
+
 cmCPackGenerator* cmCPackArchiveGenerator::CreateZIPGenerator()
 {
   return new cmCPackArchiveGenerator(cmArchiveWrite::CompressNone, "zip",
