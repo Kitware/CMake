@@ -7,7 +7,7 @@ Enable or disable CMake diagnostics output in SARIF format for a project.
 
 If enabled, CMake will generate a SARIF log file containing diagnostic messages
 output by CMake when running in a project. By default, the log file is written
-to `.cmake/sarif/cmake.sarif`, but the location can be changed by setting the
+to ``.cmake/sarif/cmake.sarif``, but the location can be changed by setting the
 command-line option :option:`cmake --sarif-output` to the desired path.
 
 The Static Analysis Results Interchange Format (SARIF) is a JSON-based standard
