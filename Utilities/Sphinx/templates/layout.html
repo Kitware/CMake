@@ -1,5 +1,8 @@
 {% extends "!layout.html" %}
 {% block rootrellink %}
+  <li>
+    <label class="sidebar-toggle" for="sidebar-check"></label>
+  </li>
   <li class="rootlink">
     <img src="{{ pathto('_static/cmake-logo-16.png', 1) }}" width="16" height="16" alt=""/>
   {%- if versionswitch is defined %}
@@ -7,7 +10,7 @@
   {%- else %}
     <a href="https://cmake.org/">CMake {{ release }}</a>
   {%- endif %}
-    {{ reldelim1 }}
+    <span class="reldelim1">{{ reldelim1 }}</span>
   </li>
   <li>
     <a href="{{ pathto(master_doc) }}">{% trans %}Documentation{% endtrans %}</a>{{ reldelim1 }}
@@ -15,7 +18,7 @@
 {% endblock %}
 
 {%- block relbar1 %}
-{{ super() }}
+{{ super()|replace('class="related"', 'class="related relbar1"') }}
 {%- if outdated is defined %}
     <div class="outdated">
       This documents an old version of CMake.
@@ -45,6 +48,14 @@
   <title>{{ title|striptags|e }} {{ "&mdash;"|safe }} {{ docstitle|e }}</title>
 {% endblock %}
 
+{%- block header %}
+{%- if render_sidebar %}
+    <input id="sidebar-check" type="checkbox" />
+    <label id="sidebar-overlay" for="sidebar-check"></label>
+{%- endif %}
+{{ super() }}
+{% endblock %}
+
 {%- block footer %}
 {{ super() }}
 {%- if googleanalytics is defined %}
@@ -57,6 +68,17 @@ try {
 var pageTracker = _gat._getTracker("UA-6042509-4");
 pageTracker._trackPageview();
 } catch(err) {}
+</script>
+{%- endif %}
+{%- if render_sidebar %}
+<script type="text/javascript">
+(function() {
+  "use strict";
+  const hide = () => document.getElementById("sidebar-check").checked = false;
+  addEventListener("keydown", e => (e.key === "Escape") && hide());
+  addEventListener("click", e => (e.target.tagName === "A") && hide());
+  addEventListener("hashchange", hide)
+})();
 </script>
 {%- endif %}
 {%- endblock %}
