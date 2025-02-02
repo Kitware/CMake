@@ -68,21 +68,6 @@ void testDeclaration()
       ++failed;
     }
   }
-  {
-    enum class Test : std::uint8_t
-    {
-      A,
-      B,
-      C,
-      D,
-      cm_count = D
-    };
-    cm::enum_set<Test> testSet1;
-
-    if (testSet1.size() != 0 || testSet1.max_size() != 4) {
-      ++failed;
-    }
-  }
 }
 
 void testIteration()
@@ -94,10 +79,9 @@ void testIteration()
     A,
     B,
     C,
-    D,
-    cm_count = D
+    D
   };
-  cm::enum_set<Test> testSet{ Test::A, Test::C, Test::B };
+  cm::enum_set<Test, 4> testSet{ Test::A, Test::C, Test::B };
 
   if (testSet.size() != 3) {
     ++failed;
@@ -134,8 +118,7 @@ void testEdition()
     B,
     C,
     D,
-    E,
-    cm_count = E
+    E
   };
 
   {
@@ -281,29 +264,39 @@ void testEdition()
     }
   }
   {
-    cm::enum_set<Test> testSet1;
-    cm::enum_set<Test> testSet2{ Test::A, Test::C, Test::B };
+    using ESet = cm::enum_set<Test, 5>;
+    ESet testSet1;
+    ESet testSet2{ Test::A, Test::C, Test::B };
 
     testSet1.set();
     if (testSet1.size() != 5 || testSet1.size() != testSet1.max_size()) {
       ++failed;
     }
-    testSet1.flip(Test::D | Test::E);
+    testSet1.flip({ Test::D, Test::E });
     if (testSet1.size() != 3 || testSet1 != testSet2) {
       ++failed;
     }
-    testSet1.flip(Test::D);
-    testSet2 += Test::D;
+    testSet1.flip(Test::D | Test::E);
+    testSet2 += Test::D + Test::E;
+    if (testSet1.size() != 5 || testSet1 != testSet2) {
+      ++failed;
+    }
+    testSet1.flip(Test::E);
+    testSet2 -= Test::E;
     if (testSet1.size() != 4 || testSet1 != testSet2) {
       ++failed;
     }
     testSet1 ^= { Test::A, Test::B, Test::E, Test::D };
-    testSet2 = Test::C + Test::E;
+    testSet2 = { Test::C, Test::E };
     if (testSet1.size() != 2 || testSet1 != testSet2) {
       ++failed;
     }
-    testSet1 ^= Test::A | Test::B | Test::E;
+    testSet1 ^= { Test::A, Test::B, Test::E };
     testSet2 = { Test::A, Test::B, Test::C };
+    if (testSet1.size() != 3 || testSet1 != testSet2) {
+      ++failed;
+    }
+    testSet2 = Test::A | Test::B | Test::C;
     if (testSet1.size() != 3 || testSet1 != testSet2) {
       ++failed;
     }
@@ -320,8 +313,7 @@ void testChecks()
       A,
       B,
       C,
-      D,
-      cm_count = D
+      D
     };
 
     cm::enum_set<Test> testSet;
@@ -353,11 +345,10 @@ void testChecks()
       A,
       B,
       C,
-      D,
-      cm_count = D
+      D
     };
 
-    cm::enum_set<Test> testSet;
+    cm::enum_set<Test, 4> testSet;
 
     if (!testSet.none()) {
       ++failed;
@@ -382,8 +373,7 @@ void testChecks()
       A,
       B,
       C,
-      D,
-      cm_count = D
+      D
     };
 
     cm::enum_set<Test> testSet1;
