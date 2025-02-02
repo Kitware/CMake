@@ -246,12 +246,12 @@ public:
    *  attempting to execute the batch files.
    *
    *  Also cmd.exe is unable to parse batch file names correctly if they
-   *  contain spaces. This function uses cmSystemTools::GetShortPath conversion
-   *  to suppress this behavior.
+   *  contain spaces. This function uses cmSystemTools::GetShortPath
+   *  conversion to suppress this behavior, and returns its status.
    *
    *  The function is noop on platforms different from the pure WIN32 one.
    */
-  static void MaybePrependCmdExe(std::vector<std::string>& cmdLine);
+  static cmsys::Status MaybePrependCmdExe(std::vector<std::string>& cmdLine);
 
   /**
    * Run a single executable command

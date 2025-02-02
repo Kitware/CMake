@@ -787,11 +787,13 @@ std::size_t cmSystemTools::CalculateCommandLineLengthLimit()
   return sz;
 }
 
-void cmSystemTools::MaybePrependCmdExe(std::vector<std::string>& cmdLine)
+cmsys::Status cmSystemTools::MaybePrependCmdExe(
+  std::vector<std::string>& cmdLine)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
+  cmsys::Status status;
   if (!cmdLine.empty()) {
-    auto const& applicationName = cmdLine.at(0);
+    std::string& applicationName = cmdLine.at(0);
     static cmsys::RegularExpression const winCmdRegex(
       "\\.([Bb][Aa][Tt]|[Cc][Mm][Dd])$");
     cmsys::RegularExpressionMatch winCmdMatch;
@@ -800,22 +802,21 @@ void cmSystemTools::MaybePrependCmdExe(std::vector<std::string>& cmdLine)
       output.reserve(cmdLine.size() + 2);
       output.emplace_back(cmSystemTools::GetComspec());
       output.emplace_back("/c");
-      std::string tmpShortPath;
-      if (applicationName.find(' ') != std::string::npos &&
-          cmSystemTools::GetShortPath(applicationName, tmpShortPath)) {
-        // If the batch file name contains spaces convert it to the windows
-        // short path. Otherwise it might cause issue when running cmd.exe.
-        output.emplace_back(tmpShortPath);
-      } else {
-        output.push_back(applicationName);
+      if (applicationName.find(' ') != std::string::npos) {
+        // Convert the batch file path to a short path to avoid spaces.
+        // Otherwise, cmd.exe may not handle arguments with spaces.
+        status = cmSystemTools::GetShortPath(applicationName, applicationName);
       }
+      output.push_back(applicationName);
       std::move(cmdLine.begin() + 1, cmdLine.end(),
                 std::back_inserter(output));
       cmdLine = std::move(output);
     }
   }
+  return status;
 #else
   static_cast<void>(cmdLine);
+  return cmsys::Status::Success();
 #endif
 }
 
