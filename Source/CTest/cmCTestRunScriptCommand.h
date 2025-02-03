@@ -13,9 +13,6 @@ class cmExecutionStatus;
 
 /** \class cmCTestRunScript
  * \brief Run a ctest script
- *
- * cmLibrarysCommand defines a list of executable (i.e., test)
- * programs to create.
  */
 class cmCTestRunScriptCommand : public cmCTestCommand
 {

@@ -11,12 +11,6 @@
 
 class cmExecutionStatus;
 
-/** \class cmCTestReadCustomFiles
- * \brief Run a ctest script
- *
- * cmLibrarysCommand defines a list of executable (i.e., test)
- * programs to create.
- */
 class cmCTestReadCustomFilesCommand : public cmCTestCommand
 {
 public:
