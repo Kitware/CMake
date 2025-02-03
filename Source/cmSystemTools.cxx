@@ -802,6 +802,8 @@ cmsys::Status cmSystemTools::MaybePrependCmdExe(
       output.reserve(cmdLine.size() + 2);
       output.emplace_back(cmSystemTools::GetComspec());
       output.emplace_back("/c");
+      // Convert the batch file path to use backslashes for cmd.exe to parse.
+      std::replace(applicationName.begin(), applicationName.end(), '/', '\\');
       if (applicationName.find(' ') != std::string::npos) {
         // Convert the batch file path to a short path to avoid spaces.
         // Otherwise, cmd.exe may not handle arguments with spaces.
