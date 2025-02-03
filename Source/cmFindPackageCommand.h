@@ -141,9 +141,16 @@ private:
   bool ReadListFile(std::string const& f, PolicyScopeRule psr);
   bool ReadPackage();
 
-  using AppendixMap =
-    std::map<std::string, std::unique_ptr<cmPackageInfoReader>>;
-  AppendixMap FindAppendices(std::string const& base) const;
+  struct Appendix
+  {
+    std::unique_ptr<cmPackageInfoReader> Reader;
+    std::vector<std::string> Components;
+
+    operator cmPackageInfoReader&() const { return *this->Reader; }
+  };
+  using AppendixMap = std::map<std::string, Appendix>;
+  AppendixMap FindAppendices(std::string const& base,
+                             cmPackageInfoReader const& baseReader) const;
   bool FindPackageDependencies(std::string const& fileName,
                                cmPackageInfoReader const& reader,
                                bool required);
@@ -299,6 +306,7 @@ private:
   std::vector<ConfigFileInfo> ConsideredConfigs;
 
   std::unique_ptr<cmPackageInfoReader> CpsReader;
+  AppendixMap CpsAppendices;
 
   friend struct std::hash<ConfigFileInfo>;
 };

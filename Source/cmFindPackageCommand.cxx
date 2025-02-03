@@ -1846,7 +1846,7 @@ bool cmFindPackageCommand::FindEnvironmentConfig()
 }
 
 cmFindPackageCommand::AppendixMap cmFindPackageCommand::FindAppendices(
-  std::string const& base) const
+  std::string const& base, cmPackageInfoReader const& baseReader) const
 {
   AppendixMap appendices;
 
@@ -1865,9 +1865,11 @@ cmFindPackageCommand::AppendixMap cmFindPackageCommand::FindAppendices(
       }
 
       std::unique_ptr<cmPackageInfoReader> reader =
-        cmPackageInfoReader::Read(extra, this->CpsReader.get());
+        cmPackageInfoReader::Read(extra, &baseReader);
       if (reader && reader->GetName() == this->Name) {
-        appendices.emplace(extra, std::move(reader));
+        std::vector<std::string> components = reader->GetComponentNames();
+        Appendix appendix{ std::move(reader), std::move(components) };
+        appendices.emplace(extra, std::move(appendix));
       }
     }
   }
@@ -1894,27 +1896,55 @@ bool cmFindPackageCommand::ReadListFile(std::string const& f,
 
 bool cmFindPackageCommand::ReadPackage()
 {
-  // Resolve any transitive dependencies.
+  // Resolve any transitive dependencies for the root file.
   if (!FindPackageDependencies(this->FileFound, *this->CpsReader,
                                this->Required)) {
     return false;
   }
 
+  auto const hasComponentsRequested =
+    !this->RequiredComponents.empty() || !this->OptionalComponents.empty();
+
   cmMakefile::CallRAII scope{ this->Makefile, this->FileFound, this->Status };
 
-  // Locate appendices.
-  cmFindPackageCommand::AppendixMap appendices =
-    this->FindAppendices(this->FileFound);
+  // Loop over appendices.
+  auto iter = this->CpsAppendices.begin();
+  while (iter != this->CpsAppendices.end()) {
+    bool required = false;
+    bool important = false;
 
-  auto iter = appendices.begin();
-  while (iter != appendices.end()) {
-    bool providesRequiredComponents = false; // TODO
-    bool required = providesRequiredComponents && this->Required;
-    if (!this->FindPackageDependencies(iter->first, *iter->second, required)) {
-      if (providesRequiredComponents) {
+    // Check if this appendix provides any requested components.
+    if (hasComponentsRequested) {
+      auto providesAny = [&iter](
+                           std::set<std::string> const& desiredComponents) {
+        return std::any_of(iter->second.Components.begin(),
+                           iter->second.Components.end(),
+                           [&desiredComponents](std::string const& component) {
+                             return cm::contains(desiredComponents, component);
+                           });
+      };
+
+      if (providesAny(this->RequiredComponents)) {
+        important = true;
+        required = this->Required;
+      } else if (!providesAny(this->OptionalComponents)) {
+        // This appendix doesn't provide any requested components; remove it
+        // from the set to be imported.
+        iter = this->CpsAppendices.erase(iter);
+        continue;
+      }
+    }
+
+    // Resolve any transitive dependencies for the appendix.
+    if (!this->FindPackageDependencies(iter->first, iter->second, required)) {
+      if (important) {
+        // Some dependencies are missing, and we need(ed) this appendix; fail.
         return false;
       }
-      iter = appendices.erase(iter);
+
+      // Some dependencies are missing, but we don't need this appendix; remove
+      // it from the set to be imported.
+      iter = this->CpsAppendices.erase(iter);
     } else {
       ++iter;
     }
@@ -1926,10 +1956,11 @@ bool cmFindPackageCommand::ReadPackage()
   }
 
   // Import targets from appendices.
-  for (auto const& appendix : appendices) {
+  // NOLINTNEXTLINE(readability-use-anyofallof)
+  for (auto const& appendix : this->CpsAppendices) {
     cmMakefile::CallRAII appendixScope{ this->Makefile, appendix.first,
                                         this->Status };
-    if (!this->ImportPackageTargets(appendix.first, *appendix.second)) {
+    if (!this->ImportPackageTargets(appendix.first, appendix.second)) {
       return false;
     }
   }
@@ -1969,6 +2000,8 @@ bool cmFindPackageCommand::FindPackageDependencies(
 
     // Try to find the requirement; fail if we can't.
     if (!fp.FindPackage() || fp.FileFound.empty()) {
+      this->SetError(cmStrCat("could not find "_s, dep.Name,
+                              ", required by "_s, this->Name, '.'));
       return false;
     }
   }
@@ -2687,29 +2720,63 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
       cm::optional<std::string> cpsVersion = reader->GetVersion();
       if (cpsVersion) {
         // TODO: Implement version check for CPS
-        this->VersionFound = (version = std::move(*cpsVersion));
-
-        std::vector<unsigned> const& versionParts = reader->ParseVersion();
-        this->VersionFoundCount = static_cast<unsigned>(versionParts.size());
-        switch (this->VersionFoundCount) {
-          case 4:
-            this->VersionFoundTweak = versionParts[3];
-            CM_FALLTHROUGH;
-          case 3:
-            this->VersionFoundPatch = versionParts[2];
-            CM_FALLTHROUGH;
-          case 2:
-            this->VersionFoundMinor = versionParts[1];
-            CM_FALLTHROUGH;
-          case 1:
-            this->VersionFoundMajor = versionParts[0];
-            CM_FALLTHROUGH;
-          default:
-            break;
-        }
+        result = true;
+      } else {
+        result = this->Version.empty();
       }
-      this->CpsReader = std::move(reader);
-      result = true;
+
+      if (result) {
+        // Locate appendices.
+        cmFindPackageCommand::AppendixMap appendices =
+          this->FindAppendices(config_file, *reader);
+
+        // Collect available components.
+        std::set<std::string> allComponents;
+
+        std::vector<std::string> const& rootComponents =
+          reader->GetComponentNames();
+        allComponents.insert(rootComponents.begin(), rootComponents.end());
+
+        for (auto const& appendix : appendices) {
+          allComponents.insert(appendix.second.Components.begin(),
+                               appendix.second.Components.end());
+        }
+
+        // Verify that all required components are available.
+        std::vector<std::string> missingComponents;
+        std::set_difference(this->RequiredComponents.begin(),
+                            this->RequiredComponents.end(),
+                            allComponents.begin(), allComponents.end(),
+                            std::back_inserter(missingComponents));
+        if (!missingComponents.empty()) {
+          result = false;
+        }
+
+        if (result && cpsVersion) {
+          this->VersionFound = (version = std::move(*cpsVersion));
+
+          std::vector<unsigned> const& versionParts = reader->ParseVersion();
+          this->VersionFoundCount = static_cast<unsigned>(versionParts.size());
+          switch (this->VersionFoundCount) {
+            case 4:
+              this->VersionFoundTweak = versionParts[3];
+              CM_FALLTHROUGH;
+            case 3:
+              this->VersionFoundPatch = versionParts[2];
+              CM_FALLTHROUGH;
+            case 2:
+              this->VersionFoundMinor = versionParts[1];
+              CM_FALLTHROUGH;
+            case 1:
+              this->VersionFoundMajor = versionParts[0];
+              CM_FALLTHROUGH;
+            default:
+              break;
+          }
+        }
+        this->CpsReader = std::move(reader);
+        this->CpsAppendices = std::move(appendices);
+      }
     }
   } else {
     // Get the filename without the .cmake extension.

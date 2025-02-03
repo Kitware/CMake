@@ -88,9 +88,9 @@ The command has a few modes by which it searches for packages:
     mode", "package configuration files", and so forth refer equally to both
     CPS and CMake-script files.  However, some features of ``find_package``
     are not supported at this time when a CPS file is found.  In particular,
-    no attempt to validate whether a candidate ``.cps`` file matches
-    ``VERSION`` or ``COMPONENTS`` requirements is performed at this time.
-    (We expect to implement these features in the near future.)
+    if a ``VERSION`` requirement is specified, only ``.cps`` files which do not
+    provide version information will be rejected.  (We expect to implement
+    proper version validation in the near future.)
 
     Search is implemented in a manner that will tend to prefer |CPS| files
     over CMake-script config files in most cases.  Specifying ``CONFIGS``

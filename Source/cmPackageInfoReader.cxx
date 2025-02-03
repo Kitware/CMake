@@ -481,6 +481,18 @@ std::vector<cmPackageRequirement> cmPackageInfoReader::GetRequirements() const
   return requirements;
 }
 
+std::vector<std::string> cmPackageInfoReader::GetComponentNames() const
+{
+  std::vector<std::string> componentNames;
+
+  Json::Value const& components = this->Data["components"];
+  for (auto ci = components.begin(), ce = components.end(); ci != ce; ++ci) {
+    componentNames.emplace_back(ci.name());
+  }
+
+  return componentNames;
+}
+
 std::string cmPackageInfoReader::ResolvePath(std::string path) const
 {
   cmSystemTools::ConvertToUnixSlashes(path);
