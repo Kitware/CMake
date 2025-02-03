@@ -65,14 +65,14 @@
 ### Fedora
 
 .fedora41:
-    image: "kitware/cmake:ci-fedora41-x86_64-2025-01-23"
+    image: "kitware/cmake:ci-fedora41-x86_64-2025-02-03"
 
     variables:
         GIT_CLONE_PATH: "$CI_BUILDS_DIR/cmake ci/long file name for testing purposes"
         CMAKE_ARCH: x86_64
 
 .fedora41_hip:
-    image: "kitware/cmake:ci-fedora41-hip-x86_64-2024-12-02"
+    image: "kitware/cmake:ci-fedora41-hip-x86_64-2025-02-03"
 
     variables:
         # FIXME(rocclr): device modules fail loading from binaries in paths with spaces
