@@ -41,9 +41,9 @@ public:
   bool HasPreOrPostBuildHook() const;
   bool ReadJSONQueries(std::string const& directory);
   void ReadJSONQuery(std::string const& file);
-  void WriteJSONQuery(std::set<cmInstrumentationQuery::Query>& queries,
-                      std::set<cmInstrumentationQuery::Hook>& hooks,
-                      std::string& callback);
+  void WriteJSONQuery(std::set<cmInstrumentationQuery::Query> const& queries,
+                      std::set<cmInstrumentationQuery::Hook> const& hooks,
+                      std::vector<std::vector<std::string>> const& callback);
   void ClearGeneratedQueries();
   int CollectTimingData(cmInstrumentationQuery::Hook hook);
   int SpawnBuildDaemon();

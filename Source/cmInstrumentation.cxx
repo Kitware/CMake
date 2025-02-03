@@ -80,8 +80,9 @@ void cmInstrumentation::ReadJSONQuery(std::string const& file)
 }
 
 void cmInstrumentation::WriteJSONQuery(
-  std::set<cmInstrumentationQuery::Query>& queries_,
-  std::set<cmInstrumentationQuery::Hook>& hooks_, std::string& callback)
+  std::set<cmInstrumentationQuery::Query> const& queries_,
+  std::set<cmInstrumentationQuery::Hook> const& hooks_,
+  std::vector<std::vector<std::string>> const& callbacks_)
 {
   Json::Value root;
   root["version"] = 1;
@@ -94,8 +95,8 @@ void cmInstrumentation::WriteJSONQuery(
     root["hooks"].append(cmInstrumentationQuery::HookString[hook]);
   }
   root["callbacks"] = Json::arrayValue;
-  if (!callback.empty()) {
-    root["callbacks"].append(callback);
+  for (auto const& callback : callbacks_) {
+    root["callbacks"].append(cmInstrumentation::GetCommandStr(callback));
   }
   cmsys::Directory d;
   int n = 0;
@@ -455,7 +456,7 @@ std::string cmInstrumentation::GetCommandStr(
   for (size_t i = 0; i < args.size(); ++i) {
     command_str = cmStrCat(command_str, args[i]);
     if (i < args.size() - 1) {
-      command_str = cmStrCat(command_str, " ");
+      command_str = cmStrCat(command_str, ' ');
     }
   }
   return command_str;
