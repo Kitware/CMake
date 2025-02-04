@@ -22,6 +22,7 @@ if(NOT CMAKE_TASKING_TOOLSET)
 endif()
 
 macro(__compiler_tasking lang)
+  set(CMAKE_${lang}_OUTPUT_EXTENSION ".o")
 
   set(CMAKE_${lang}_VERBOSE_FLAG "-v")
   set(CMAKE_${lang}_COMPILE_OPTIONS_PIC "--pic")
