@@ -258,7 +258,7 @@
 # elif defined(__CMCS__)
 #  define ARCHITECTURE_ID "MCS"
 
-# elif defined(__CARM__)
+# elif defined(__CARM__) || defined(__CPARM__)
 #  define ARCHITECTURE_ID "ARM"
 
 # elif defined(__CARC__)
