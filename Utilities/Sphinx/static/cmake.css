@@ -1,6 +1,28 @@
 /* Import the Sphinx theme style.  */
 @import url("default.css");
 
+/* Navbar logo */
+li.rootlink > img {
+  vertical-align: middle;
+  margin-top: -5px;
+}
+
+/* Push the footer to the bottom of the page. */
+body {
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+}
+
+div.document {
+  flex-grow: 1;
+}
+
+div.bodywrapper,
+div.body {
+  height: 100%;
+}
+
 /* Wrap sidebar content even within words so that long
    document names do not escape sidebar borders.  */
 div.sphinxsidebarwrapper {
@@ -15,6 +37,12 @@ div.sphinxsidebarwrapper {
 }
 .literal-block a.reference.internal {
   background-color: #dfdfdf;
+}
+
+/* Un-justify some elements. */
+div.body table.docutils p,
+div.body nav.contents p {
+  text-align: left;
 }
 
 /* Apply <pre> style (from classic.css) to signature directive argument. */
@@ -73,7 +101,6 @@ div.outdated {
   padding-right: 2px;
   padding-top: 5px;
   text-align: center;
-  width: 100%;
 }
 
 /* Revert style to the inherited (normal text) for `:guide:` links */
@@ -90,4 +117,213 @@ code.xref.cmake-guide span.pre {
 /* Ensure top border for header-less tables. */
 table.docutils td {
   border-top: 1px solid #aaa;
+}
+
+/* Hide small screen specific items */
+#sidebar-toggle,
+#sidebar-check,
+#sidebar-overlay {
+  display: none;
+}
+
+/* Small screen overrides */
+@media screen and (max-width: 760px) {
+
+  /* Sticky header */
+  div.relbar1 {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  html {
+    scroll-padding-top: 56px;
+  }
+
+  /* Header and footer */
+  div.related {
+    line-height: 28px;
+  }
+
+  div.related ul {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  div.related li.right {
+    display: none;
+  }
+
+  div.related li.rootlink {
+    display: block;
+    margin-bottom: -1px;
+  }
+
+  div.related span.reldelim1 {
+    display: none;
+  }
+
+  /* Popup sidebar */
+  div.sphinxsidebar {
+    background-color: #e4ece8;
+    margin-left: 0;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 260px;
+    height: 100%;
+    overflow-y: scroll;
+    z-index: 30;
+    visibility: hidden;
+    transform: translateX(100%);
+    transition: transform 0.2s ease-out, visibility 0.2s;
+  }
+
+  #sidebar-check:checked ~ div.document div.sphinxsidebar {
+    visibility: visible;
+    transform: none;
+  }
+
+  div.sphinxsidebarwrapper {
+    padding-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Put the search box first in the sidebar. */
+  #searchbox {
+    order: -1;
+    margin-bottom: 10px;
+  }
+
+  /* Popup sidebar overlay */
+  #sidebar-overlay {
+    display: block;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 200%;
+    background-color: #000;
+    z-index: 20;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.2s ease-out, visibility 0.2s;
+  }
+
+  #sidebar-check:checked ~ #sidebar-overlay {
+    visibility: visible;
+    opacity: 0.5;
+  }
+
+  /* Popup sidebar button */
+  label.sidebar-toggle {
+    display: block;
+    float: right;
+    position: relative;
+    cursor: pointer;
+    width: 48px;
+    height: 56px;
+    background: no-repeat center/24px url("data:image/svg+xml,\
+      %3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath\
+      d='M3,6H21 M3,12H21 M3,18H21' fill='none' stroke='white' stroke-width='2'\
+      stroke-linecap='square' /%3E%3C/svg%3E");
+  }
+
+  /* Force-wrap long words */
+  div.body span.pre {
+    white-space: pre-wrap;
+  }
+
+  /* Disable whole page horizontal scroll, enable selectively. */
+  div.body {
+    min-width: auto;
+    overflow-x: hidden;
+    overflow-wrap: break-word;
+  }
+
+  div.body h1 {
+    white-space: nowrap;
+    overflow-x: auto;
+  }
+
+  table.docutils {
+    display: block;
+    overflow-x: auto;
+  }
+
+  /* Adjust various margins */
+  div.bodywrapper {
+    margin: 0;
+  }
+
+  div.body {
+    padding: 0 12px 12px;
+  }
+
+  div.body h1,
+  div.body h2,
+  div.body h3,
+  div.body h4,
+  div.body h5,
+  div.body h6 {
+    margin: 20px -12px 10px;
+    padding: 3px 0px 3px 12px;
+  }
+
+  div.body h1 {
+    margin-top: 0;
+  }
+
+  div.body ul {
+    padding-left: 15px;
+  }
+
+  div.body dd {
+    margin-left: 10px;
+  }
+
+  div.sphinxsidebar h4 {
+    margin: 0;
+  }
+
+  div.sphinxsidebar ul {
+    margin: 5px 0 10px 10px;
+  }
+
+  div.sphinxsidebar ul ul {
+    margin: 0 0 0 10px;
+  }
+
+  div.sphinxsidebar li {
+    margin-top: 5px;
+  }
+
+  div.deprecated > *,
+  div.versionadded > *,
+  div.versionchanged > * {
+    padding-left: 10px;
+  }
+
+  div.deprecated > :first-child,
+  div.versionadded > :first-child,
+  div.versionchanged > :first-child {
+    text-indent: -10px;
+  }
+
+  a.headerlink {
+    display: none;
+  }
+
+  /* Make index single-column. */
+  table.indextable,
+  table.indextable tbody,
+  table.indextable tr,
+  table.indextable td {
+    display: block;
+  }
+
+  table.indextable td {
+    width: auto !important;
+  }
 }
