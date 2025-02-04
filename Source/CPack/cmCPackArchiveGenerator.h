@@ -44,6 +44,7 @@ public:
   bool SupportsComponentInstallation() const override;
 
 private:
+  std::string GetArchiveFileName();
   // get archive component filename
   std::string GetArchiveComponentFileName(std::string const& component,
                                           bool isGroupName);

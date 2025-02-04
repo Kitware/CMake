@@ -191,6 +191,19 @@ cmCPackArchiveGenerator::cmCPackArchiveGenerator(
 
 cmCPackArchiveGenerator::~cmCPackArchiveGenerator() = default;
 
+std::string cmCPackArchiveGenerator::GetArchiveFileName()
+{
+  std::string packageFileName = this->toplevel + "/";
+  if (cmValue v = this->GetOptionIfSet("CPACK_ARCHIVE_FILE_NAME")) {
+    packageFileName += *v;
+  } else {
+    v = this->GetOption("CPACK_PACKAGE_FILE_NAME");
+    packageFileName += *v;
+  }
+  packageFileName += this->GetOutputExtension();
+  return packageFileName;
+}
+
 std::string cmCPackArchiveGenerator::GetArchiveComponentFileName(
   std::string const& component, bool isGroupName)
 {
@@ -398,17 +411,7 @@ int cmCPackArchiveGenerator::PackageComponentsAllInOne()
 {
   // reset the package file names
   this->packageFileNames.clear();
-  this->packageFileNames.emplace_back(this->toplevel);
-  this->packageFileNames[0] += "/";
-
-  if (cmValue v = this->GetOptionIfSet("CPACK_ARCHIVE_FILE_NAME")) {
-    this->packageFileNames[0] += *v;
-  } else {
-    v = this->GetOption("CPACK_PACKAGE_FILE_NAME");
-    this->packageFileNames[0] += *v;
-  }
-
-  this->packageFileNames[0] += this->GetOutputExtension();
+  this->packageFileNames.emplace_back(this->GetArchiveFileName());
 
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "Packaging all groups in one package..."
@@ -449,6 +452,9 @@ int cmCPackArchiveGenerator::PackageFiles()
   }
 
   // CASE 3 : NON COMPONENT package.
+  this->packageFileNames.clear();
+  this->packageFileNames.emplace_back(this->GetArchiveFileName());
+
   DECLARE_AND_OPEN_ARCHIVE(packageFileNames[0], archive);
   cmWorkingDirectory workdir(this->toplevel);
   if (workdir.Failed()) {
