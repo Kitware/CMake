@@ -688,7 +688,7 @@ function (_MPI_interrogate_compiler LANG)
     MPI_ALL_INCLUDE_PATHS "${MPI_COMPILE_CMDLINE}")
 
   # If extracting failed to work, we'll try using -showme:incdirs.
-  # Unlike before, we do this without the environment variables set up, but since only MPICH derivates are affected by any of them, and
+  # Unlike before, we do this without the environment variables set up, but since only MPICH derivatives are affected by any of them, and
   # -showme:... is only supported by Open MPI and LAM/MPI, this isn't a concern.
   if (NOT MPI_ALL_INCLUDE_PATHS)
     _MPI_check_compiler(${LANG} "-showme:incdirs" MPI_INCDIRS_CMDLINE MPI_INCDIRS_COMPILER_RETURN)
