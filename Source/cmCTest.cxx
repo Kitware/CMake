@@ -1975,9 +1975,12 @@ int cmCTest::Run(std::vector<std::string> const& args)
   };
   auto const dashSR =
     [&runScripts, &SRArgumentSpecified](std::string const& script) -> bool {
-    SRArgumentSpecified = true;
-    runScripts.emplace_back(cmSystemTools::ToNormalizedPathOnDisk(script),
-                            true);
+    // -SR should be processed only once
+    if (!SRArgumentSpecified) {
+      SRArgumentSpecified = true;
+      runScripts.emplace_back(cmSystemTools::ToNormalizedPathOnDisk(script),
+                              true);
+    }
     return true;
   };
   auto const dash_S =

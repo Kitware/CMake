@@ -97,7 +97,12 @@ int cmCTestScriptHandler::ExecuteScript(std::string const& total_script_arg)
     this->CTest->GetInitialCommandLineArguments();
   //*** need to make sure this does not have the current script ***
   for (size_t i = 1; i < initArgs.size(); ++i) {
-    argv.push_back(initArgs[i]);
+    // in a nested subprocess, skip the parent's `-SR <path>` arguments.
+    if (initArgs[i] == "-SR") {
+      i++; // <path>
+    } else {
+      argv.push_back(initArgs[i]);
+    }
   }
 
   // Now create process object
