@@ -2125,11 +2125,16 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
     }
   }
 
-  std::string compiler = this->Makefile->GetSafeDefinition(
+  std::string compilerId = this->Makefile->GetSafeDefinition(
     cmStrCat("CMAKE_", lang, "_COMPILER_ID"));
 
   std::string compilerSimulateId = this->Makefile->GetSafeDefinition(
     cmStrCat("CMAKE_", lang, "_SIMULATE_ID"));
+
+  bool const compilerTargetsMsvcABI =
+    (compilerId == "MSVC" || compilerSimulateId == "MSVC");
+  bool const compilerTargetsWatcomABI =
+    (compilerId == "OpenWatcom" || compilerSimulateId == "OpenWatcom");
 
   if (lang == "Swift") {
     if (cmValue v = target->GetProperty("Swift_LANGUAGE_VERSION")) {
@@ -2148,12 +2153,12 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   } else if (lang == "RC" &&
              this->Makefile->GetSafeDefinition("CMAKE_RC_COMPILER")
                  .find("llvm-rc") != std::string::npos) {
-    compiler = this->Makefile->GetSafeDefinition("CMAKE_C_COMPILER_ID");
-    if (!compiler.empty()) {
+    compilerId = this->Makefile->GetSafeDefinition("CMAKE_C_COMPILER_ID");
+    if (!compilerId.empty()) {
       compilerSimulateId =
         this->Makefile->GetSafeDefinition("CMAKE_C_SIMULATE_ID");
     } else {
-      compiler = this->Makefile->GetSafeDefinition("CMAKE_CXX_COMPILER_ID");
+      compilerId = this->Makefile->GetSafeDefinition("CMAKE_CXX_COMPILER_ID");
       compilerSimulateId =
         this->Makefile->GetSafeDefinition("CMAKE_CXX_SIMULATE_ID");
     }
@@ -2162,7 +2167,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
   }
 
   // Add VFS Overlay for Clang compilers
-  if (compiler == "Clang") {
+  if (compilerId == "Clang") {
     if (cmValue vfsOverlay =
           this->Makefile->GetDefinition("CMAKE_CLANG_VFS_OVERLAY")) {
       if (compilerSimulateId == "MSVC") {
@@ -2193,7 +2198,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
             "CMAKE_" + lang + "_COMPILE_OPTIONS_MSVC_RUNTIME_LIBRARY_" +
             msvcRuntimeLibrary)) {
         this->AppendCompileOptions(flags, *msvcRuntimeLibraryOptions);
-      } else if ((compiler == "MSVC" || compilerSimulateId == "MSVC") &&
+      } else if (compilerTargetsMsvcABI &&
                  !cmSystemTools::GetErrorOccurredFlag()) {
         // The compiler uses the MSVC ABI so it needs a known runtime library.
         this->IssueMessage(MessageType::FATAL_ERROR,
@@ -2221,8 +2226,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
             "CMAKE_" + lang + "_COMPILE_OPTIONS_WATCOM_RUNTIME_LIBRARY_" +
             watcomRuntimeLibrary)) {
         this->AppendCompileOptions(flags, *watcomRuntimeLibraryOptions);
-      } else if ((compiler == "OpenWatcom" ||
-                  compilerSimulateId == "OpenWatcom") &&
+      } else if (compilerTargetsWatcomABI &&
                  !cmSystemTools::GetErrorOccurredFlag()) {
         // The compiler uses the Watcom ABI so it needs a known runtime
         // library.
@@ -2266,7 +2270,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
               "CMAKE_", lang,
               "_COMPILE_OPTIONS_MSVC_RUNTIME_CHECKS_" + msvcRuntimeChecks))) {
         this->AppendCompileOptions(flags, *msvcRuntimeChecksOptions);
-      } else if ((compiler == "MSVC" || compilerSimulateId == "MSVC") &&
+      } else if (compilerTargetsMsvcABI &&
                  !cmSystemTools::GetErrorOccurredFlag()) {
         // The compiler uses the MSVC ABI so it needs a known runtime checks.
         this->IssueMessage(MessageType::FATAL_ERROR,
@@ -2287,7 +2291,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
                        "_COMPILE_OPTIONS_MSVC_DEBUG_INFORMATION_FORMAT_",
                        *msvcDebugInformationFormat))) {
         this->AppendCompileOptions(flags, *msvcDebugInformationFormatOptions);
-      } else if ((compiler == "MSVC" || compilerSimulateId == "MSVC") &&
+      } else if (compilerTargetsMsvcABI &&
                  !cmSystemTools::GetErrorOccurredFlag()) {
         // The compiler uses the MSVC ABI so it needs a known runtime library.
         this->IssueMessage(MessageType::FATAL_ERROR,
