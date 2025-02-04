@@ -33,6 +33,14 @@ macro(__compiler_tasking lang)
   set(CMAKE_${lang}_COMPILE_OPTIONS_WARNING_AS_ERROR "--warnings-as-errors")
 
   set(CMAKE_${lang}_LINK_MODE DRIVER)
+  # Features for LINK_LIBRARY generator expression
+  if(    CMAKE_TASKING_TOOLSET STREQUAL "SmartCode"
+     OR (CMAKE_TASKING_TOOLSET STREQUAL "TriCore" AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 4.2))
+    ## WHOLE_ARCHIVE: Force loading all members of an archive
+    set(CMAKE_${lang}_LINK_LIBRARY_USING_WHOLE_ARCHIVE "LINKER:--whole-archive=<LINK_ITEM>")
+    set(CMAKE_${lang}_LINK_LIBRARY_USING_WHOLE_ARCHIVE_SUPPORTED TRUE)
+    set(CMAKE_${lang}_LINK_LIBRARY_WHOLE_ARCHIVE_ATTRIBUTES LIBRARY_TYPE=STATIC DEDUPLICATION=YES OVERRIDE=DEFAULT)
+  endif()
 
   string(APPEND CMAKE_${lang}_FLAGS_INIT " ")
   string(APPEND CMAKE_${lang}_FLAGS_DEBUG_INIT " -O0 -g")
