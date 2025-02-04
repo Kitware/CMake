@@ -48,8 +48,14 @@ Options:
    child process in an ``argv[]`` style array.
 
  * On Windows platforms, the command line is encoded as a string such
-   that child processes using ``CommandLineToArgvW`` will decode the
-   original arguments.
+   that child processes using `CommandLineToArgvW`_ will decode the
+   original arguments.  If the command runs a ``.bat`` or ``.cmd``
+   script, it may receive arguments with extra quoting.
+
+ * .. versionchanged:: 4.0
+     On Windows platforms, if the command runs a ``.bat`` or ``.cmd`` script,
+     it is automatically executed through the command interpreter, ``cmd /c``.
+     However, paths with spaces may fail if a "short path" is not available.
 
  No intermediate shell is used, so shell operators such as ``>``
  are treated as normal arguments.
@@ -197,3 +203,5 @@ Options:
     is checked.  If the variable is not set, the default is ``NONE``.
     If ``RESULT_VARIABLE`` or ``RESULTS_VARIABLE`` is supplied,
     :variable:`CMAKE_EXECUTE_PROCESS_COMMAND_ERROR_IS_FATAL` is ignored.
+
+.. _`CommandLineToArgvW`: https://learn.microsoft.com/en-us/windows/win32/api/shellapi/nf-shellapi-commandlinetoargvw

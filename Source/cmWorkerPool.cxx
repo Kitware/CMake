@@ -17,6 +17,7 @@
 
 #include "cmRange.h"
 #include "cmStringAlgorithms.h"
+#include "cmSystemTools.h"
 #include "cmUVHandlePtr.h"
 
 /**
@@ -159,7 +160,7 @@ public:
 
   // -- Runtime
   void setup(cmWorkerPool::ProcessResultT* result, bool mergedOutput,
-             std::vector<std::string> const& command,
+             std::vector<std::string> command,
              std::string const& workingDirectory = std::string());
   bool start(uv_loop_t* uv_loop, std::function<void()> finishedCallback);
 
@@ -188,11 +189,12 @@ private:
 
 void cmUVReadOnlyProcess::setup(cmWorkerPool::ProcessResultT* result,
                                 bool mergedOutput,
-                                std::vector<std::string> const& command,
+                                std::vector<std::string> command,
                                 std::string const& workingDirectory)
 {
+  cmSystemTools::MaybePrependCmdExe(command);
   this->Setup_.WorkingDirectory = workingDirectory;
-  this->Setup_.Command = command;
+  this->Setup_.Command = std::move(command);
   this->Setup_.Result = result;
   this->Setup_.MergedOutput = mergedOutput;
 }
@@ -396,7 +398,7 @@ public:
    * Run an external process
    */
   bool RunProcess(cmWorkerPool::ProcessResultT& result,
-                  std::vector<std::string> const& command,
+                  std::vector<std::string> command,
                   std::string const& workingDirectory);
 
 private:
@@ -429,7 +431,7 @@ cmWorkerPoolWorker::~cmWorkerPoolWorker()
 }
 
 bool cmWorkerPoolWorker::RunProcess(cmWorkerPool::ProcessResultT& result,
-                                    std::vector<std::string> const& command,
+                                    std::vector<std::string> command,
                                     std::string const& workingDirectory)
 {
   if (command.empty()) {
@@ -439,7 +441,8 @@ bool cmWorkerPoolWorker::RunProcess(cmWorkerPool::ProcessResultT& result,
   {
     std::lock_guard<std::mutex> lock(this->Proc_.Mutex);
     this->Proc_.ROP = cm::make_unique<cmUVReadOnlyProcess>();
-    this->Proc_.ROP->setup(&result, true, command, workingDirectory);
+    this->Proc_.ROP->setup(&result, true, std::move(command),
+                           workingDirectory);
   }
   // Send asynchronous process start request to libuv loop
   this->Proc_.Request.send();
@@ -731,12 +734,12 @@ void cmWorkerPoolInternal::Work(unsigned int workerIndex)
 cmWorkerPool::JobT::~JobT() = default;
 
 bool cmWorkerPool::JobT::RunProcess(ProcessResultT& result,
-                                    std::vector<std::string> const& command,
+                                    std::vector<std::string> command,
                                     std::string const& workingDirectory)
 {
   // Get worker by index
   auto* worker = this->Pool_->Int_->Workers.at(this->WorkerIndex_).get();
-  return worker->RunProcess(result, command, workingDirectory);
+  return worker->RunProcess(result, std::move(command), workingDirectory);
 }
 
 cmWorkerPool::cmWorkerPool()

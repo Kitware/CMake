@@ -29,8 +29,7 @@ public:
 
   cmUVProcessChainBuilder();
 
-  cmUVProcessChainBuilder& AddCommand(
-    std::vector<std::string> const& arguments);
+  cmUVProcessChainBuilder& AddCommand(std::vector<std::string> arguments);
   cmUVProcessChainBuilder& SetBuiltinLoop();
   cmUVProcessChainBuilder& SetExternalLoop(uv_loop_t& loop);
   cmUVProcessChainBuilder& SetNoStream(Stream stdio);
