@@ -37,6 +37,7 @@ public:
   std::string OptionTargetLabels;
   std::string OptionTargetName;
   std::string OptionTargetType;
+  std::string OptionCurrentBuildDir;
   std::string OptionBuildDir;
   std::string OptionFilterPrefix;
   std::string OptionCommandType;
