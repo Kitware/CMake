@@ -414,7 +414,7 @@ void cmCacheManager::OutputHelpString(std::ostream& fout,
   }
   std::string oneLine;
   std::string::size_type pos = 0;
-  for (std::string::size_type i = 0; i <= end; i++) {
+  for (std::string::size_type i = 1; i <= end; i++) {
     if ((i == end) || (helpString[i] == '\n') ||
         ((i - pos >= 60) && (helpString[i] == ' '))) {
       fout << "//";
