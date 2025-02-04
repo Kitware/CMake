@@ -133,6 +133,14 @@ calling any of the functions provided by this module.
   ``<key>`` in entries of the ``ExternalData_URL_TEMPLATES`` list.
   See `Custom Fetch Scripts`_.
 
+.. variable:: ExternalData_HTTPHEADERS
+
+  .. versionadded:: 4.0
+
+  The ``ExternalData_HTTPHEADERS`` variable may be used to supply a list of
+  headers, each element containing one header with the form ``Key: Value``.
+  See the :command:`file(DOWNLOAD)` command's ``HTTPHEADER`` option.
+
 .. variable:: ExternalData_LINK_CONTENT
 
   The ``ExternalData_LINK_CONTENT`` variable may be set to the name of a
@@ -461,6 +469,19 @@ function(ExternalData_add_target target)
       endif()
     endif()
   endforeach()
+
+  # Store http headers.
+  if(ExternalData_HTTPHEADERS)
+    message(STATUS "${CMAKE_CURRENT_BINARY_DIR}/${target}_config.cmake")
+    string(CONCAT _ExternalData_CONFIG_CODE "${_ExternalData_CONFIG_CODE}\n"
+      "set(ExternalData_HTTPHEADERS)")
+    foreach(h IN LISTS ExternalData_HTTPHEADERS)
+      string(REPLACE "\\" "\\\\" tmp "${h}")
+      string(REPLACE "\"" "\\\"" h "${tmp}")
+      string(CONCAT _ExternalData_CONFIG_CODE "${_ExternalData_CONFIG_CODE}\n"
+        "list(APPEND ExternalData_HTTPHEADERS \"${h}\")")
+    endforeach()
+  endif()
 
   # Store configuration for use by build-time script.
   set(config ${CMAKE_CURRENT_BINARY_DIR}/${target}_config.cmake)
@@ -982,6 +1003,12 @@ function(_ExternalData_download_file url file err_var msg_var)
   set(retry 3)
   while(retry)
     math(EXPR retry "${retry} - 1")
+    set(httpheader_args)
+    if (ExternalData_HTTPHEADERS)
+      foreach(h IN LISTS ExternalData_HTTPHEADERS)
+        list(APPEND httpheader_args HTTPHEADER "${h}")
+      endforeach()
+    endif()
     if(ExternalData_TIMEOUT_INACTIVITY)
       set(inactivity_timeout INACTIVITY_TIMEOUT ${ExternalData_TIMEOUT_INACTIVITY})
     elseif(NOT "${ExternalData_TIMEOUT_INACTIVITY}" EQUAL 0)
@@ -1000,7 +1027,7 @@ function(_ExternalData_download_file url file err_var msg_var)
     if (ExternalData_SHOW_PROGRESS)
       list(APPEND show_progress_args SHOW_PROGRESS)
     endif ()
-    file(DOWNLOAD "${url}" "${file}" STATUS status LOG log ${inactivity_timeout} ${absolute_timeout} ${show_progress_args})
+    file(DOWNLOAD "${url}" "${file}" STATUS status LOG log ${httpheader_args} ${inactivity_timeout} ${absolute_timeout} ${show_progress_args})
     list(GET status 0 err)
     list(GET status 1 msg)
     if(err)
