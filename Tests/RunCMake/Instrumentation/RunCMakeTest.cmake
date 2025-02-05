@@ -117,8 +117,8 @@ instrument(cmake-command-parallel-install
   CHECK_SCRIPT check-data-dir.cmake)
 
 # FIXME(#26668) This does not work on Windows
-if (UNIX AND ${RunCMake_GENERATOR} MATCHES "^Ninja")
-  instrument(cmake-command-ninja NO_WARN
+if (UNIX)
+  instrument(cmake-command-make-program NO_WARN
     BUILD_MAKE_PROGRAM
-    CHECK_SCRIPT check-ninja-hooks.cmake)
+    CHECK_SCRIPT check-make-program-hooks.cmake)
 endif()

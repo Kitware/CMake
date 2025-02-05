@@ -117,8 +117,8 @@ optional.
   should be one of the following:
 
   * ``postGenerate``
-  * ``preBuild`` (called when ``ninja`` is invoked; unavailable on Windows)
-  * ``postBuild`` (called when ``ninja`` completes; unavailable on Windows)
+  * ``preBuild`` (called when ``ninja``  or ``make`` is invoked; unavailable on Windows)
+  * ``postBuild`` (called when ``ninja`` or ``make`` completes; unavailable on Windows)
   * ``preCMakeBuild`` (called when ``cmake --build`` is invoked)
   * ``postCMakeBuild`` (called when ``cmake --build`` completes)
   * ``postInstall``
