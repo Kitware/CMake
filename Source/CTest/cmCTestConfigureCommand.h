@@ -4,14 +4,12 @@
 
 #include "cmConfigure.h" // IWYU pragma: keep
 
-#include <memory>
 #include <string>
 #include <vector>
 
 #include "cmCTestHandlerCommand.h"
 
 class cmExecutionStatus;
-class cmCTestGenericHandler;
 
 class cmCTestConfigureCommand : public cmCTestHandlerCommand
 {
@@ -27,8 +25,8 @@ protected:
 private:
   std::string GetName() const override { return "ctest_configure"; }
 
-  std::unique_ptr<cmCTestGenericHandler> InitializeHandler(
-    HandlerArguments& arguments, cmExecutionStatus& status) const override;
+  bool ExecuteConfigure(ConfigureArguments const& args,
+                        cmExecutionStatus& status) const;
 
   bool InitialPass(std::vector<std::string> const& args,
                    cmExecutionStatus& status) const override;

@@ -385,7 +385,11 @@ public:
 
   bool GetVerbose() const;
   bool GetExtraVerbose() const;
-  int GetSubmitIndex() const;
+
+  bool StartResultingXML(Part part, char const* name, int submitIndex,
+                         cmGeneratedFileStream& xofs);
+  bool StartLogFile(char const* name, int submitIndex,
+                    cmGeneratedFileStream& xofs);
 
   void AddSiteProperties(cmXMLWriter& xml, cmake* cm);
 

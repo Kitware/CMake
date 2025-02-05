@@ -302,6 +302,8 @@ int cmCTestBuildHandler::ProcessHandler()
                "Cannot create build log file" << std::endl);
   }
 
+  this->LogFileName = ofs.GetTempName();
+
   // Create lists of regular expression strings for errors, error exceptions,
   // warnings and warning exceptions.
   std::vector<std::string>::size_type cc;
@@ -884,8 +886,7 @@ bool cmCTestBuildHandler::RunMakeCommand(std::string const& command,
                 // Use temporary BuildLog file to populate this error for
                 // CDash.
                 ofs.flush();
-                reporter.LogOut = this->LogFileNames["Build"];
-                reporter.LogOut += ".tmp";
+                reporter.LogOut = this->LogFileName;
                 reporter.WriteXML();
               }
             } else {

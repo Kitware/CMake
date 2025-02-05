@@ -148,6 +148,11 @@ public:
   void SetTempExt(std::string const& ext);
 
   /**
+   * Get the name of the temporary file.
+   */
+  std::string const& GetTempName() const { return this->TempName; }
+
+  /**
    * Write a specific string using an alternate encoding.
    * Afterward, the original encoding is restored.
    */
