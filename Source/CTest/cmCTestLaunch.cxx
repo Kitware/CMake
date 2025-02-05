@@ -260,7 +260,7 @@ void cmCTestLaunch::RunChild()
 
 int cmCTestLaunch::Run()
 {
-  auto instrumenter = cmInstrumentation(this->Reporter.OptionBuildDir);
+  auto instrumentation = cmInstrumentation(this->Reporter.OptionBuildDir);
   std::map<std::string, std::string> options;
   options["target"] = this->Reporter.OptionTargetName;
   options["source"] = this->Reporter.OptionSource;
@@ -270,7 +270,7 @@ int cmCTestLaunch::Run()
   std::map<std::string, std::string> arrayOptions;
   arrayOptions["outputs"] = this->Reporter.OptionOutput;
   arrayOptions["targetLabels"] = this->Reporter.OptionTargetLabels;
-  instrumenter.InstrumentCommand(
+  instrumentation.InstrumentCommand(
     this->Reporter.OptionCommandType, this->RealArgV,
     [this]() -> int {
       this->RunChild();

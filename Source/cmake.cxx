@@ -2611,21 +2611,24 @@ int cmake::ActualConfigure()
       cmStrCat(this->GetHomeOutputDirectory(), "/CMakeFiles"_s),
       this->FileAPI->GetConfigureLogVersions());
   }
+
+  this->Instrumentation =
+    cm::make_unique<cmInstrumentation>(this->State->GetBinaryDirectory());
+  this->Instrumentation->ClearGeneratedQueries();
 #endif
 
   // actually do the configure
   auto startTime = std::chrono::steady_clock::now();
 #if !defined(CMAKE_BOOTSTRAP)
-  cmInstrumentation instrumentation(this->State->GetBinaryDirectory(), true);
-  if (!instrumentation.errorMsg.empty()) {
-    cmSystemTools::Error(instrumentation.errorMsg);
+  if (!this->Instrumentation->errorMsg.empty()) {
+    cmSystemTools::Error(this->Instrumentation->errorMsg);
     return 1;
   }
   std::function<int()> doConfigure = [this]() -> int {
     this->GlobalGenerator->Configure();
     return 0;
   };
-  int ret = instrumentation.InstrumentCommand(
+  int ret = this->Instrumentation->InstrumentCommand(
     "configure", this->cmdArgs, [doConfigure]() { return doConfigure(); },
     cm::nullopt, cm::nullopt, true);
   if (ret != 0) {
@@ -2670,8 +2673,8 @@ int cmake::ActualConfigure()
   }
   // Setup launchers for instrumentation
 #if !defined(CMAKE_BOOTSTRAP)
-  instrumentation.LoadQueries();
-  if (instrumentation.HasQuery()) {
+  this->Instrumentation->LoadQueries();
+  if (this->Instrumentation->HasQuery()) {
     std::string launcher;
     if (mf->IsOn("CTEST_USE_LAUNCHERS")) {
       launcher =
@@ -3016,7 +3019,6 @@ int cmake::Generate()
   auto startTime = std::chrono::steady_clock::now();
 #if !defined(CMAKE_BOOTSTRAP)
   auto profilingRAII = this->CreateProfilingEntry("project", "generate");
-  cmInstrumentation instrumentation(this->State->GetBinaryDirectory());
   std::function<int()> doGenerate = [this]() -> int {
     if (!this->GlobalGenerator->Compute()) {
       return -1;
@@ -3025,7 +3027,8 @@ int cmake::Generate()
     return 0;
   };
 
-  int ret = instrumentation.InstrumentCommand(
+  this->Instrumentation->LoadQueries();
+  int ret = this->Instrumentation->InstrumentCommand(
     "generate", this->cmdArgs, [doGenerate]() { return doGenerate(); });
   if (ret != 0) {
     return ret;
@@ -3046,7 +3049,7 @@ int cmake::Generate()
     this->UpdateProgress(msg.str(), -1);
   }
 #if !defined(CMAKE_BOOTSTRAP)
-  instrumentation.CollectTimingData(
+  this->Instrumentation->CollectTimingData(
     cmInstrumentationQuery::Hook::PostGenerate);
 #endif
   if (!this->GraphVizFile.empty()) {

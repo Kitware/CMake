@@ -18,6 +18,7 @@ file Copyright.txt or https://cmake.org/licensing for details.  */
 #include "cmInstrumentationQuery.h"
 #include "cmMakefile.h"
 #include "cmStringAlgorithms.h"
+#include "cmake.h"
 
 namespace {
 
@@ -80,7 +81,7 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
     ArgumentParser::NonEmpty<std::string> DataVersion;
     ArgumentParser::NonEmpty<std::vector<std::string>> Queries;
     ArgumentParser::NonEmpty<std::vector<std::string>> Hooks;
-    ArgumentParser::NonEmpty<std::vector<std::string>> Callback;
+    ArgumentParser::NonEmpty<std::vector<std::vector<std::string>>> Callbacks;
   };
 
   static auto const parser = cmArgumentParser<Arguments>{}
@@ -88,7 +89,7 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
                                .Bind("DATA_VERSION"_s, &Arguments::DataVersion)
                                .Bind("QUERIES"_s, &Arguments::Queries)
                                .Bind("HOOKS"_s, &Arguments::Hooks)
-                               .Bind("CALLBACK"_s, &Arguments::Callback);
+                               .Bind("CALLBACK"_s, &Arguments::Callbacks);
 
   std::vector<std::string> unparsedArguments;
   Arguments const arguments = parser.Parse(args, &unparsedArguments);
@@ -136,14 +137,10 @@ bool cmInstrumentationCommand(std::vector<std::string> const& args,
     hooks.insert(hook);
   }
 
-  std::string callback;
-  for (auto const& arg : arguments.Callback) {
-    callback = cmStrCat(callback, arg);
-  }
-
-  auto instrument = cmInstrumentation(
-    status.GetMakefile().GetHomeOutputDirectory(), queries, hooks, callback);
-  instrument.WriteJSONQuery();
+  status.GetMakefile()
+    .GetCMakeInstance()
+    ->GetInstrumentation()
+    ->WriteJSONQuery(queries, hooks, arguments.Callbacks);
 
   return true;
 }

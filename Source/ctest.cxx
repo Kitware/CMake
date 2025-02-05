@@ -189,6 +189,18 @@ int main(int argc, char const* const* argv)
     return cmCTestLaunch::Main(argc, argv, cmCTestLaunch::Op::Instrument);
   }
 
+  // Dispatch post-build instrumentation daemon for ninja
+  if (argc == 3 && strcmp(argv[1], "--start-instrumentation") == 0) {
+    return cmInstrumentation(argv[2]).SpawnBuildDaemon();
+  }
+
+  // Dispatch 'ctest --collect-instrumentation' once given PID finishes
+  if (argc == 4 &&
+      strcmp(argv[1], "--wait-and-collect-instrumentation") == 0) {
+    return cmInstrumentation(argv[2]).CollectTimingAfterBuild(
+      std::stoi(argv[3]));
+  }
+
   // Dispatch 'ctest --collect-instrumentation' mode directly.
   if (argc == 3 && strcmp(argv[1], "--collect-instrumentation") == 0) {
     return cmInstrumentation(argv[2]).CollectTimingData(

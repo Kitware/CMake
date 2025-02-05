@@ -23,8 +23,8 @@ only supported value for both fields is 1.  See :ref:`cmake-instrumentation v1`
 for details of the data output content and location.
 
 Each of the optional keywords ``HOOKS``, ``QUERIES``, and ``CALLBACK``
-correspond to one of the parameters to the :ref:`cmake-instrumentation v1 Query Files`. Note that the
-``CALLBACK`` keyword only accepts a single callback.
+correspond to one of the parameters to the :ref:`cmake-instrumentation v1 Query Files`.
+The ``CALLBACK`` keyword can be provided multiple times to create multiple callbacks.
 
 Whenever ``cmake_instrumentation`` is invoked, a query file is generated in
 ``<build>/.cmake/timing/v1/query/generated`` to enable instrumentation
@@ -43,7 +43,8 @@ equivalent JSON query file.
     DATA_VERSION 1
     HOOKS postGenerate preCMakeBuild postCMakeBuild
     QUERIES staticSystemInformation dynamicSystemInformation
-    CALLBACK "${CMAKE_COMMAND} -P /path/to/handle_data.cmake"
+    CALLBACK ${CMAKE_COMMAND} -P /path/to/handle_data.cmake
+    CALLBACK ${CMAKE_COMMAND} -P /path/to/handle_data_2.cmake
   )
 
 .. code-block:: json
@@ -58,5 +59,6 @@ equivalent JSON query file.
     ],
     "callbacks": [
       "/path/to/cmake -P /path/to/handle_data.cmake"
+      "/path/to/cmake -P /path/to/handle_data_2.cmake"
     ]
   }

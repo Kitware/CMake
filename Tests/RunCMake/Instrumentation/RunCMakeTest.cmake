@@ -6,7 +6,7 @@ function(instrument test)
   set(config "${CMAKE_CURRENT_LIST_DIR}/config")
   set(ENV{CMAKE_CONFIG_DIR} ${config})
   cmake_parse_arguments(ARGS
-    "BUILD;INSTALL;TEST;COPY_QUERIES;NO_WARN;STATIC_QUERY;DYNAMIC_QUERY;INSTALL_PARALLEL;MANUAL_HOOK"
+    "BUILD;BUILD_MAKE_PROGRAM;INSTALL;TEST;COPY_QUERIES;NO_WARN;STATIC_QUERY;DYNAMIC_QUERY;INSTALL_PARALLEL;MANUAL_HOOK"
     "CHECK_SCRIPT;CONFIGURE_ARG" "" ${ARGN})
   set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/${test})
   set(uuid "a37d1069-1972-4901-b9c9-f194aaf2b6e0")
@@ -57,6 +57,9 @@ function(instrument test)
   # Follow-up Commands
   if (ARGS_BUILD)
     run_cmake_command(${test}-build ${CMAKE_COMMAND} --build . --config Debug)
+  endif()
+  if (ARGS_BUILD_MAKE_PROGRAM)
+    run_cmake_command(${test}-make-program ${RunCMake_MAKE_PROGRAM})
   endif()
   if (ARGS_INSTALL)
     run_cmake_command(${test}-install ${CMAKE_COMMAND} --install . --prefix install --config Debug)
@@ -112,3 +115,8 @@ instrument(cmake-command-bad-arg NO_WARN)
 instrument(cmake-command-parallel-install
   BUILD INSTALL TEST NO_WARN INSTALL_PARALLEL DYNAMIC_QUERY
   CHECK_SCRIPT check-data-dir.cmake)
+if (UNIX AND ${RunCMake_GENERATOR} MATCHES "^Ninja")
+  instrument(cmake-command-ninja NO_WARN
+    BUILD_MAKE_PROGRAM
+    CHECK_SCRIPT check-ninja-hooks.cmake)
+endif()

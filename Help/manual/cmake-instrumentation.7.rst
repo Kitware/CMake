@@ -117,8 +117,10 @@ optional.
   should be one of the following:
 
   * ``postGenerate``
-  * ``preCMakeBuild``
-  * ``postCMakeBuild``
+  * ``preBuild`` (:ref:`Ninja Generators`. only, when ``ninja`` is invoked)
+  * ``postBuild`` (:ref:`Ninja Generators`. only, when ``ninja`` completes)
+  * ``preCMakeBuild`` (when ``cmake --build`` is invoked)
+  * ``postCMakeBuild`` (when ``cmake --build`` completes)
   * ``postInstall``
   * ``postTest``
 

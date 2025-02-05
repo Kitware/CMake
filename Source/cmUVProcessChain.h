@@ -38,6 +38,7 @@ public:
   cmUVProcessChainBuilder& SetExternalStream(Stream stdio, int fd);
   cmUVProcessChainBuilder& SetExternalStream(Stream stdio, FILE* stream);
   cmUVProcessChainBuilder& SetWorkingDirectory(std::string dir);
+  cmUVProcessChainBuilder& SetDetached();
 
   uv_loop_t* GetLoop() const;
 
@@ -68,6 +69,7 @@ private:
   std::vector<ProcessConfiguration> Processes;
   std::string WorkingDirectory;
   bool MergedBuiltinStreams = false;
+  bool Detached = false;
   uv_loop_t* Loop = nullptr;
 };
 

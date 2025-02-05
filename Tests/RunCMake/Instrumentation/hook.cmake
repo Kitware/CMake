@@ -68,3 +68,7 @@ has_key(vendorString ${staticSystemInformation} ${hasStaticInfo})
 if (NOT ERROR_MESSAGE MATCHES "^$")
   message(FATAL_ERROR ${ERROR_MESSAGE})
 endif()
+
+get_filename_component(dataDir ${index} DIRECTORY)
+get_filename_component(v1 ${dataDir} DIRECTORY)
+file(TOUCH ${v1}/${hook}.hook)
