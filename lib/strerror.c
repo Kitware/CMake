@@ -808,7 +808,7 @@ get_winapi_error(int err, char *buf, size_t buflen)
       *p = '\0';
   }
 
-  return (*buf ? buf : NULL);
+  return *buf ? buf : NULL;
 }
 #endif /* _WIN32 || _WIN32_WCE */
 
@@ -891,7 +891,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
   }
 #else
   {
-    /* !checksrc! disable STRERROR 1 */
+    /* !checksrc! disable BANNEDFUNC 1 */
     const char *msg = strerror(err);
     if(msg)
       msnprintf(buf, buflen, "%s", msg);

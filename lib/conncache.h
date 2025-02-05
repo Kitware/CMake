@@ -31,7 +31,7 @@
 struct connectdata;
 struct Curl_easy;
 struct curl_pollfds;
-struct curl_waitfds;
+struct Curl_waitfds;
 struct Curl_multi;
 struct Curl_share;
 
@@ -113,8 +113,6 @@ typedef bool Curl_cpool_done_match_cb(bool result, void *userdata);
  * @param dest_len    destination length, including terminating NUL
  * @param conn_cb     must be present, called for each connection in the
  *                    bundle until it returns TRUE
- * @param result_cb   if not NULL, is called at the end with the result
- *                    of the `conn_cb` or FALSE if never called.
  * @return combined result of last conn_db and result_cb or FALSE if no
                       connections were present.
  */
@@ -185,8 +183,12 @@ void Curl_cpool_do_locked(struct Curl_easy *data,
  */
 CURLcode Curl_cpool_add_pollfds(struct cpool *connc,
                                 struct curl_pollfds *cpfds);
-CURLcode Curl_cpool_add_waitfds(struct cpool *connc,
-                                struct curl_waitfds *cwfds);
+unsigned int Curl_cpool_add_waitfds(struct cpool *connc,
+                                    struct Curl_waitfds *cwfds);
+
+void Curl_cpool_setfds(struct cpool *cpool,
+                       fd_set *read_fd_set, fd_set *write_fd_set,
+                       int *maxfd);
 
 /**
  * Perform maintenance on connections in the pool. Specifically,
