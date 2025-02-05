@@ -46,6 +46,9 @@ struct ssl_primary_config;
 struct ssl_config_data;
 struct ssl_peer;
 struct ssl_connect_data;
+struct Curl_ssl_session;
+
+int Curl_glts_get_ietf_proto(gnutls_session_t session);
 
 struct gtls_shared_creds {
   gnutls_certificate_credentials_t creds;
@@ -70,19 +73,26 @@ struct gtls_ctx {
   BIT(sent_shutdown);
 };
 
+size_t Curl_gtls_version(char *buffer, size_t size);
+
 typedef CURLcode Curl_gtls_ctx_setup_cb(struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
                                         void *user_data);
+
+typedef CURLcode Curl_gtls_init_session_reuse_cb(struct Curl_cfilter *cf,
+                                                 struct Curl_easy *data,
+                                                 struct Curl_ssl_session *scs,
+                                                 bool *do_early_data);
 
 CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
                             const unsigned char *alpn, size_t alpn_len,
-                            struct ssl_connect_data *connssl,
                             Curl_gtls_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
-                            void *ssl_user_data);
+                            void *ssl_user_data,
+                            Curl_gtls_init_session_reuse_cb *sess_reuse_cb);
 
 CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
@@ -96,11 +106,14 @@ CURLcode Curl_gtls_verifyserver(struct Curl_easy *data,
                                 const char *pinned_key);
 
 /* Extract TLS session and place in cache, if configured. */
-CURLcode Curl_gtls_update_session_id(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
-                                     gnutls_session_t session,
-                                     struct ssl_peer *peer,
-                                     const char *alpn);
+CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 const char *ssl_peer_key,
+                                 gnutls_session_t session,
+                                 curl_off_t valid_until,
+                                 const char *alpn,
+                                 unsigned char *quic_tp,
+                                 size_t quic_tp_len);
 
 extern const struct Curl_ssl Curl_ssl_gnutls;
 

@@ -69,6 +69,8 @@ CURLcode Curl_initinfo(struct Curl_easy *data)
   info->request_size = 0;
   info->proxyauthavail = 0;
   info->httpauthavail = 0;
+  info->proxyauthpicked = 0;
+  info->httpauthpicked = 0;
   info->numconnects = 0;
 
   free(info->contenttype);
@@ -238,8 +240,10 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_FILETIME:
     if(data->info.filetime > LONG_MAX)
       *param_longp = LONG_MAX;
+#if !defined(MSDOS) && !defined(__AMIGA__)
     else if(data->info.filetime < LONG_MIN)
       *param_longp = LONG_MIN;
+#endif
     else
       *param_longp = (long)data->info.filetime;
     break;
@@ -269,6 +273,14 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_PROXYAUTH_AVAIL:
     lptr.to_long = param_longp;
     *lptr.to_ulong = data->info.proxyauthavail;
+    break;
+  case CURLINFO_HTTPAUTH_USED:
+    lptr.to_long = param_longp;
+    *lptr.to_ulong = data->info.httpauthpicked;
+    break;
+  case CURLINFO_PROXYAUTH_USED:
+    lptr.to_long = param_longp;
+    *lptr.to_ulong = data->info.proxyauthpicked;
     break;
   case CURLINFO_OS_ERRNO:
     *param_longp = data->state.os_errno;
@@ -377,6 +389,7 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
     case CURLINFO_APPCONNECT_TIME_T:
     case CURLINFO_PRETRANSFER_TIME_T:
     case CURLINFO_POSTTRANSFER_TIME_T:
+    case CURLINFO_QUEUE_TIME_T:
     case CURLINFO_STARTTRANSFER_TIME_T:
     case CURLINFO_REDIRECT_TIME_T:
     case CURLINFO_SPEED_DOWNLOAD_T:

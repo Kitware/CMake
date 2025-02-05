@@ -38,6 +38,7 @@
 #include "multiif.h"
 #include "strcase.h"
 #include "x509asn1.h"
+#include "vtls_scache.h"
 #include "strerror.h"
 #include "cipher_suite.h"
 
@@ -49,6 +50,11 @@
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Waddress"
+#endif
+
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #endif
 
 #include <limits.h>
@@ -1015,7 +1021,7 @@ failed:
   return ret;
 }
 
-static void sectransp_session_free(void *sessionid, size_t idsize)
+static void sectransp_session_free(void *sessionid)
 {
   /* ST, as of iOS 5 and Mountain Lion, has no public method of deleting a
      cached session ID inside the Security framework. There is a private
@@ -1023,7 +1029,6 @@ static void sectransp_session_free(void *sessionid, size_t idsize)
      got your application rejected from the App Store due to the use of a
      private API, so the best we can do is free up our own char array that we
      created way back in sectransp_connect_step1... */
-  (void)idsize;
   Curl_safefree(sessionid);
 }
 
@@ -1332,19 +1337,19 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     char *ssl_sessionid;
     size_t ssl_sessionid_len;
 
-    Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
-                              (void **)&ssl_sessionid, &ssl_sessionid_len,
-                              NULL)) {
+    Curl_ssl_scache_lock(data);
+    if(Curl_ssl_scache_get_obj(cf, data, connssl->peer.scache_key,
+                               (void **)&ssl_sessionid)) {
       /* we got a session id, use it! */
-      err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
-      Curl_ssl_sessionid_unlock(data);
+      err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid,
+                         strlen(ssl_sessionid));
+      Curl_ssl_scache_unlock(data);
       if(err != noErr) {
         failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
         return CURLE_SSL_CONNECT_ERROR;
       }
-      /* Informational message */
-      infof(data, "SSL reusing session ID");
+      else
+        infof(data, "SSL reusing session ID");
     }
     /* If there is not one, then let's make one up! This has to be done prior
        to starting the handshake. */
@@ -1358,15 +1363,17 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 
       err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
       if(err != noErr) {
-        Curl_ssl_sessionid_unlock(data);
+        Curl_ssl_scache_unlock(data);
         failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
         return CURLE_SSL_CONNECT_ERROR;
       }
 
-      result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
-                                      ssl_sessionid, ssl_sessionid_len,
+      /* This is all a bit weird, as we have not handshaked yet.
+       * I hope this backend will go away soon. */
+      result = Curl_ssl_scache_add_obj(cf, data, connssl->peer.scache_key,
+                                      (void *)ssl_sessionid,
                                       sectransp_session_free);
-      Curl_ssl_sessionid_unlock(data);
+      Curl_ssl_scache_unlock(data);
       if(result)
         return result;
     }
@@ -1504,9 +1511,11 @@ static CURLcode append_cert_to_array(struct Curl_easy *data,
       case CURLE_OK:
         break;
       case CURLE_PEER_FAILED_VERIFICATION:
+        CFRelease(cacert);
         return CURLE_SSL_CACERT_BADFILE;
       case CURLE_OUT_OF_MEMORY:
       default:
+        CFRelease(cacert);
         return result;
     }
     free(certp);
@@ -2424,7 +2433,7 @@ static CURLcode sectransp_shutdown(struct Curl_cfilter *cf,
   struct st_ssl_backend_data *backend =
     (struct st_ssl_backend_data *)connssl->backend;
   CURLcode result = CURLE_OK;
-  ssize_t nread;
+  ssize_t nread = 0;
   char buf[1024];
   size_t i;
 
@@ -2742,31 +2751,32 @@ const struct Curl_ssl Curl_ssl_sectransp = {
 
   sizeof(struct st_ssl_backend_data),
 
-  Curl_none_init,                     /* init */
-  Curl_none_cleanup,                  /* cleanup */
+  NULL,                               /* init */
+  NULL,                               /* cleanup */
   sectransp_version,                  /* version */
-  Curl_none_check_cxn,                /* check_cxn */
   sectransp_shutdown,                 /* shutdown */
   sectransp_data_pending,             /* data_pending */
   sectransp_random,                   /* random */
-  Curl_none_cert_status_request,      /* cert_status_request */
+  NULL,                               /* cert_status_request */
   sectransp_connect,                  /* connect */
   sectransp_connect_nonblocking,      /* connect_nonblocking */
   Curl_ssl_adjust_pollset,            /* adjust_pollset */
   sectransp_get_internals,            /* get_internals */
   sectransp_close,                    /* close_one */
-  Curl_none_close_all,                /* close_all */
-  Curl_none_set_engine,               /* set_engine */
-  Curl_none_set_engine_default,       /* set_engine_default */
-  Curl_none_engines_list,             /* engines_list */
+  NULL,                               /* close_all */
+  NULL,                               /* set_engine */
+  NULL,                               /* set_engine_default */
+  NULL,                               /* engines_list */
   sectransp_false_start,              /* false_start */
   sectransp_sha256sum,                /* sha256sum */
-  NULL,                               /* associate_connection */
-  NULL,                               /* disassociate_connection */
   sectransp_recv,                     /* recv decrypted data */
   sectransp_send,                     /* send data to encrypt */
   NULL,                               /* get_channel_binding */
 };
+
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic pop
+#endif
 
 #ifdef __GNUC__
 #pragma GCC diagnostic pop

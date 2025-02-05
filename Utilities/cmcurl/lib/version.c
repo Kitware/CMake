@@ -38,10 +38,6 @@
 #include "easy_lock.h"
 
 #ifdef USE_ARES
-#  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
-  defined(_WIN32)
-#    define CARES_STATICLIB
-#  endif
 #  include <ares.h>
 #endif
 
@@ -210,9 +206,6 @@ char *curl_version(void)
 #ifdef USE_LIBRTMP
   char rtmp_version[30];
 #endif
-#ifdef USE_HYPER
-  char hyper_buf[30];
-#endif
 #ifdef USE_GSASL
   char gsasl_buf[30];
 #endif
@@ -276,10 +269,6 @@ char *curl_version(void)
 #ifdef USE_LIBRTMP
   Curl_rtmp_version(rtmp_version, sizeof(rtmp_version));
   src[i++] = rtmp_version;
-#endif
-#ifdef USE_HYPER
-  msnprintf(hyper_buf, sizeof(hyper_buf), "Hyper/%s", hyper_version());
-  src[i++] = hyper_buf;
 #endif
 #ifdef USE_GSASL
   msnprintf(gsasl_buf, sizeof(gsasl_buf), "libgsasl/%s",
@@ -423,10 +412,15 @@ static const char * const supported_protocols[] = {
  * curl_global_init() and curl_global_cleanup() calls.
  */
 
-#if defined(USE_LIBIDN2)
+#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
 static int idn_present(curl_version_info_data *info)
 {
+#if defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
+  (void)info;
+  return TRUE;
+#else
   return info->libidn != NULL;
+#endif
 }
 #else
 #define idn_present     NULL
@@ -468,6 +462,9 @@ static const struct feat features_table[] = {
 #ifndef CURL_DISABLE_ALTSVC
   FEATURE("alt-svc",     NULL,                CURL_VERSION_ALTSVC),
 #endif
+#if defined(USE_ARES) && defined(CURLRES_THREADED) && defined(USE_HTTPSRR)
+  FEATURE("asyn-rr", NULL,             0),
+#endif
 #ifdef CURLRES_ASYNCH
   FEATURE("AsynchDNS",   NULL,                CURL_VERSION_ASYNCHDNS),
 #endif
@@ -479,6 +476,10 @@ static const struct feat features_table[] = {
 #endif
 #if defined(USE_SSL) && defined(USE_ECH)
   FEATURE("ECH",         ech_present,         0),
+
+#ifndef USE_HTTPSRR
+#error "ECH enabled but not HTTPSRR, must be a config error"
+#endif
 #endif
 #ifdef USE_GSASL
   FEATURE("gsasl",       NULL,                CURL_VERSION_GSASL),
@@ -498,6 +499,9 @@ static const struct feat features_table[] = {
 #if defined(USE_SSL) && !defined(CURL_DISABLE_PROXY) && \
   !defined(CURL_DISABLE_HTTP)
   FEATURE("HTTPS-proxy", https_proxy_present, CURL_VERSION_HTTPS_PROXY),
+#endif
+#if defined(USE_HTTPSRR)
+  FEATURE("HTTPSRR",     NULL,                0),
 #endif
 #if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
   FEATURE("IDN",         idn_present,         CURL_VERSION_IDN),
@@ -529,6 +533,9 @@ static const struct feat features_table[] = {
 #endif
 #ifdef USE_SSL
   FEATURE("SSL",         NULL,                CURL_VERSION_SSL),
+#endif
+#if defined(USE_SSLS_EXPORT)
+  FEATURE("SSLS-EXPORT", NULL,                0),
 #endif
 #ifdef USE_WINDOWS_SSPI
   FEATURE("SSPI",        NULL,                CURL_VERSION_SSPI),
@@ -673,14 +680,6 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
     static char quicbuffer[80];
     Curl_quic_ver(quicbuffer, sizeof(quicbuffer));
     version_info.quic_version = quicbuffer;
-  }
-#endif
-
-#ifdef USE_HYPER
-  {
-    static char hyper_buffer[30];
-    msnprintf(hyper_buffer, sizeof(hyper_buffer), "Hyper/%s", hyper_version());
-    version_info.hyper_version = hyper_buffer;
   }
 #endif
 
