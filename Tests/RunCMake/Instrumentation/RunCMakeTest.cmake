@@ -115,6 +115,8 @@ instrument(cmake-command-bad-arg NO_WARN)
 instrument(cmake-command-parallel-install
   BUILD INSTALL TEST NO_WARN INSTALL_PARALLEL DYNAMIC_QUERY
   CHECK_SCRIPT check-data-dir.cmake)
+
+# FIXME(#26668) This does not work on Windows
 if (UNIX AND ${RunCMake_GENERATOR} MATCHES "^Ninja")
   instrument(cmake-command-ninja NO_WARN
     BUILD_MAKE_PROGRAM
