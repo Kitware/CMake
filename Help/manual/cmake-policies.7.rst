@@ -34,10 +34,10 @@ For example:
 
 .. code-block:: cmake
 
-  cmake_minimum_required(VERSION 3.10...3.31)
+  cmake_minimum_required(VERSION 3.10...4.0)
 
 This uses the ``<min>...<max>`` syntax to enable the ``NEW`` behaviors
-of policies introduced in CMake 3.31 and earlier while only requiring a
+of policies introduced in CMake 4.0 and earlier while only requiring a
 minimum version of CMake 3.10.  The project is expected to work with
 both the ``OLD`` and ``NEW`` behaviors of policies introduced between
 those versions.
