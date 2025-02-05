@@ -78,7 +78,7 @@ Before merging a ``$topic`` branch into ``release``, verify that the
 .. code-block:: shell
 
   git fetch origin
-  git checkout -b release-$ver origin/release
+  git switch -c release-$ver origin/release
 
 Merge the ``$topic`` branch into the local ``release-$ver`` branch, making
 sure to include a ``Merge-request: !xxxx`` footer in the commit message:
@@ -91,7 +91,7 @@ Merge the ``release-$ver`` branch to ``master``:
 
 .. code-block:: shell
 
-  git checkout master
+  git switch master
   git pull
   git merge --no-ff release-$ver
 
@@ -180,7 +180,7 @@ use for consolidating the release notes:
 
 .. code-block:: shell
 
-  git checkout -b doc-$ver-relnotes
+  git switch -c doc-$ver-relnotes
 
 Run the `consolidate-relnotes.bash`_ script:
 
@@ -236,7 +236,7 @@ branch locally:
 
 .. code-block:: shell
 
-  git checkout -b release-$ver origin/master
+  git switch -c release-$ver origin/master
 
 Remove the development branch release note infrastructure:
 
@@ -278,7 +278,7 @@ Merge the ``release-$ver`` branch to ``master``:
 
 .. code-block:: shell
 
-  git checkout master
+  git switch master
   git pull
   git merge --no-ff release-$ver
 
@@ -287,7 +287,7 @@ note infrastructure, and the version date from ``origin/master``:
 
 .. code-block:: shell
 
-  git checkout origin/master -- \
+  git restore -s origin/master -- \
     Source/CMakeVersion.cmake Help/release/dev/0-sample-topic.rst
   sed -i $'/^Releases/ i\\\n.. include:: dev.txt\\\n' Help/release/index.rst
 
