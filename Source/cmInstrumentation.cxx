@@ -312,7 +312,7 @@ int cmInstrumentation::InstrumentTest(
   std::string const& name, std::string const& command,
   std::vector<std::string> const& args, int64_t result,
   std::chrono::steady_clock::time_point steadyStart,
-  std::chrono::system_clock::time_point systemStart)
+  std::chrono::system_clock::time_point systemStart, std::string config)
 {
   // Store command info
   Json::Value root(this->preTestStats);
@@ -323,6 +323,7 @@ int cmInstrumentation::InstrumentTest(
   root["testName"] = name;
   root["binaryDir"] = this->binaryDir;
   root["result"] = static_cast<Json::Value::Int64>(result);
+  root["config"] = config;
 
   // Post-Command
   this->InsertTimingData(root, steadyStart, systemStart);
@@ -417,6 +418,13 @@ int cmInstrumentation::InstrumentCommand(
       }
     }
   }
+
+  // Create empty config entry if config not found
+  if (!root.isMember("config") &&
+      (command_type == "compile" || command_type == "link")) {
+    root["config"] = "";
+  }
+
   if (arrayOptions.has_value()) {
     for (auto const& item : arrayOptions.value()) {
       if (item.first == "targetLabels" && command_type != "link") {

@@ -1020,7 +1020,8 @@ void cmCTestRunTest::FinalizeTest(bool started)
     this->Instrumentation.InstrumentTest(
       this->TestProperties->Name, this->ActualCommand, this->Arguments,
       this->TestProcess->GetExitValue(), this->TestProcess->GetStartTime(),
-      this->TestProcess->GetSystemStartTime());
+      this->TestProcess->GetSystemStartTime(),
+      this->GetCTest()->GetConfigType());
   }
   this->MultiTestHandler.FinishTestProcess(this->TestProcess->GetRunner(),
                                            started);

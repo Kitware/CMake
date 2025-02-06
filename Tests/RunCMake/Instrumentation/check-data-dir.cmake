@@ -99,6 +99,14 @@ foreach(snippet IN LISTS snippets)
       snippet_error("${snippet}" "Unexpected testName: ${testName}")
     endif()
   endif()
+
+  # Verify that Config is Debug
+  if (filename MATCHES "^test|^compile|^link")
+    string(JSON config GET "${contents}" config)
+    if (NOT config STREQUAL "Debug")
+      snippet_error(${snippet} "Unexpected config: ${config}")
+    endif()
+  endif()
 endforeach()
 
 # Verify that listed snippets match expected roles

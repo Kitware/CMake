@@ -75,6 +75,7 @@ public:
     char const* RegisterFile = nullptr;
     char const* Launcher = nullptr;
     char const* Role = nullptr;
+    char const* Config = nullptr;
   };
 
   // Expand rule variables in CMake of the type found in language rules

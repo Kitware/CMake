@@ -809,8 +809,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules(
       vars.TargetSOName = targetOutSOName.c_str();
     }
     vars.LinkFlags = linkFlags.c_str();
-
     vars.Manifests = manifests.c_str();
+    vars.Config = this->GetConfigName().c_str();
 
     // Compute the directory portion of the install_name setting.
     std::string install_name_dir;
