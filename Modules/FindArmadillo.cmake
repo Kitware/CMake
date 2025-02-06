@@ -99,8 +99,13 @@ if(_ARMA_USE_WRAPPER)
   mark_as_advanced(ARMADILLO_LIBRARY)
   set(_ARMA_REQUIRED_VARS ARMADILLO_LIBRARY)
 else()
-  # Link directly to individual components.
   set(ARMADILLO_LIBRARY "")
+endif()
+
+# Transitive linking with the wrapper does not work with MSVC,
+# so we must *also* link against Armadillo's dependencies.
+if(NOT _ARMA_USE_WRAPPER OR MSVC)
+  # Link directly to individual components.
   foreach(pkg
       LAPACK
       BLAS
