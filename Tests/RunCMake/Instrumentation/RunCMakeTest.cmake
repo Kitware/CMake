@@ -38,7 +38,7 @@ function(instrument test)
   if (ARGS_COPY_QUERIES)
     file(MAKE_DIRECTORY ${RunCMake_TEST_BINARY_DIR}/query)
     set(generated_queries "0;1;2")
-    foreach(n ${generated_queries})
+    foreach(n IN LISTS generated_queries)
       configure_file(
         "${query_dir}/generated/query-${n}.json.in"
         "${RunCMake_TEST_BINARY_DIR}/query/query-${n}.json"
