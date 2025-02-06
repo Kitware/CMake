@@ -215,7 +215,7 @@ endif()
 # to ON or OFF), the symbol detection is skipped.  If the variable is
 # NOT DEFINED, the symbol detection is performed.
 
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
@@ -238,7 +238,7 @@ if(NOT "$ENV{CURL_BUILDINFO}$ENV{CURL_CI}$ENV{CI}" STREQUAL "")
     endif()
   endforeach()
 endif()
-endif()
+endif() # XXX(cmake): end
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
@@ -253,10 +253,11 @@ string(REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+" _curl_version_nu
 string(REGEX REPLACE "[^0]+0x" "" _curl_version_num ${_curl_version_num})
 unset(_curl_version_h_contents)
 
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 message(STATUS "curl version=[${_curl_version}]")
-endif()
-# XXX(CMake): Set these as normal variables to suppress cache entries.
+endif() # XXX(cmake): end
+
+# XXX(cmake): Set these as normal variables to suppress cache entries.
 set(CMAKE_PROJECT_VERSION 0)
 set(CMAKE_PROJECT_VERSION_MAJOR 0)
 set(CMAKE_PROJECT_VERSION_MINOR 0)
@@ -331,9 +332,9 @@ endif()
 if(CMAKE_CROSSCOMPILING)
   set(_target_flags "${_target_flags} CROSS")
 endif()
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 message(STATUS "CMake platform flags:${_target_flags}")
-endif()
+endif() # XXX(cmake): end
 
 if(CMAKE_CROSSCOMPILING)
   message(STATUS "Cross-compiling: "
@@ -392,7 +393,7 @@ if(WIN32)
     endif()
   endif()
 
-  if(0) # This code not needed for building within CMake.
+  if(0) # XXX(cmake): not needed for build within cmake
   list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DWIN32_LEAN_AND_MEAN")  # Apply to all feature checks
 
   set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
@@ -400,7 +401,7 @@ if(WIN32)
     add_definitions("-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
     list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")  # Apply to all feature checks
   endif()
-  endif()
+  endif() # XXX(cmake): end
 
   # Detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
   curl_internal_test(HAVE_WIN32_WINNT)
@@ -429,7 +430,7 @@ elseif(DOS OR AMIGA)
 endif()
 option(CURL_LTO "Enable compiler Link Time Optimizations" OFF)
 
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 if(NOT DOS AND NOT AMIGA)
   # if c-ares is used, default the threaded resolver to OFF
   if(ENABLE_ARES)
@@ -441,7 +442,7 @@ if(NOT DOS AND NOT AMIGA)
 endif()
 
 include(PickyWarnings)
-endif()
+endif() # XXX(cmake): end
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE")  # Required for sendmmsg()
@@ -465,7 +466,7 @@ if(ENABLE_CURLDEBUG)
   set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "CURLDEBUG")
 endif()
 
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 option(CURL_CLANG_TIDY "Run the build through clang-tidy" OFF)
 if(CURL_CLANG_TIDY)
   set(CMAKE_UNITY_BUILD OFF)
@@ -489,7 +490,7 @@ endif()
 if(NOT DEFINED CMAKE_DEBUG_POSTFIX)
   set(CMAKE_DEBUG_POSTFIX "-d")
 endif()
-endif()
+endif() # XXX(cmake): end
 
 set(LIB_STATIC "libcurl_static")
 set(LIB_SHARED "libcurl_shared")
@@ -544,9 +545,9 @@ if(ENABLE_ARES)
   endif()
 endif()
 
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 include(CurlSymbolHiding)
-endif()
+endif() # XXX(cmake): end
 
 option(CURL_ENABLE_EXPORT_TARGET "Enable CMake export target" ON)
 mark_as_advanced(CURL_ENABLE_EXPORT_TARGET)
@@ -599,12 +600,12 @@ option(CURL_DISABLE_LIBCURL_OPTION "Disable --libcurl option from the curl tool"
 mark_as_advanced(CURL_DISABLE_LIBCURL_OPTION)
 option(CURL_DISABLE_MIME "Disable MIME support" OFF)
 mark_as_advanced(CURL_DISABLE_MIME)
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 cmake_dependent_option(CURL_DISABLE_FORM_API "Disable form-api"
   OFF "NOT CURL_DISABLE_MIME"
   ON)
 mark_as_advanced(CURL_DISABLE_FORM_API)
-endif()
+endif() # XXX(cmake): end
 option(CURL_DISABLE_MQTT "Disable MQTT" OFF)
 mark_as_advanced(CURL_DISABLE_MQTT)
 option(CURL_DISABLE_BINDLOCAL "Disable local binding support" OFF)
@@ -706,7 +707,7 @@ if(ENABLE_IPV6)
   set(USE_IPV6 ON)
 endif()
 
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 find_package(Perl)
 
 if(PERL_EXECUTABLE)
@@ -734,7 +735,7 @@ if(ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS)
     message(WARNING "Perl not found. Will not build manuals.")
   endif()
 endif()
-endif()
+endif() # XXX(cmake): end
 
 # Disable warnings on Borland to avoid changing 3rd party code.
 if(BORLAND)
@@ -823,7 +824,7 @@ if(WIN32)
   list(APPEND CURL_LIBS "ws2_32" "bcrypt")
 endif()
 
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 # Check SSL libraries
 option(CURL_ENABLE_SSL "Enable SSL support" ON)
 
@@ -863,7 +864,7 @@ if(USE_OPENSSL_QUIC AND NOT CURL_USE_OPENSSL)
   set(USE_OPENSSL_QUIC OFF)
 endif()
 option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenSSL configuration" OFF)
-endif()
+endif() # XXX(cmake): end
 
 curl_count_true(_enabled_ssl_options_count
   CURL_USE_SCHANNEL
@@ -911,9 +912,9 @@ if(CURL_USE_SECTRANSP)
     set(_valid_default_ssl_backend TRUE)
   endif()
 
-  if(0) # This code not needed for building within CMake.
+  if(0) # XXX(cmake): not needed for build within cmake
   message(WARNING "Secure Transport does not support TLS 1.3.")
-  endif()
+  endif() # XXX(cmake): end
 endif()
 
 if(_use_core_foundation_and_core_services)
@@ -1027,9 +1028,9 @@ if(CURL_USE_BEARSSL)
   endif()
   set(_curl_ca_bundle_supported TRUE)
 
-  if(0) # This code not needed for building within CMake.
+  if(0) # XXX(cmake): not needed for build within cmake
   message(WARNING "BearSSL does not support TLS 1.3.")
-  endif()
+  endif() # XXX(cmake): end
 endif()
 
 if(CURL_USE_WOLFSSL)
@@ -1688,7 +1689,7 @@ else()
   unset(USE_UNIX_SOCKETS CACHE)
 endif()
 
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 #
 # CA handling
 #
@@ -1777,7 +1778,7 @@ if(_curl_ca_bundle_supported)
     endif()
   endif()
 endif()
-endif()
+endif() # XXX(cmake): end
 
 if(WIN32)
   option(CURL_DISABLE_CA_SEARCH "Disable unsafe CA bundle search in PATH on Windows" OFF)
@@ -2048,7 +2049,7 @@ check_type_size("curl_socket_t" SIZEOF_CURL_SOCKET_T)
 cmake_pop_check_state()  # pop curl system headers
 cmake_pop_check_state()  # pop -D_FILE_OFFSET_BITS=64
 
-if(0) # This code not needed for building within CMake.
+if(0) # XXX(cmake): not needed for build within cmake
 if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
   # On non-Windows and not cross-compiling, check for writable argv[]
   include(CheckCSourceRuns)
@@ -2060,7 +2061,7 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
       return (argv[0][0] == ' ')?0:1;
     }" HAVE_WRITABLE_ARGV)
 endif()
-endif()
+endif() # XXX(cmake): end
 
 if(NOT CMAKE_CROSSCOMPILING)
   include(CheckCSourceRuns)
@@ -2221,7 +2222,7 @@ function(curl_transform_makefile_inc _input_file _output_file)
 endfunction()
 
 #-----------------------------------------------------------------------------
-# CMake-specific curl code.
+# XXX(cmake): begin cmake-specific curl code
 add_subdirectory(lib)
 
 add_executable(curltest curltest.c)
@@ -2234,6 +2235,7 @@ endif()
 install(FILES COPYING DESTINATION ${CMAKE_DOC_DIR}/cmcurl)
 
 return() # The rest of this file is not needed for building within CMake.
+# XXX(cmake): end cmake-specific curl code
 #-----------------------------------------------------------------------------
 
 include(GNUInstallDirs)

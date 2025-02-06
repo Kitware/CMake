@@ -47,7 +47,7 @@ if(USE_ARES)
 endif()
 
 #-----------------------------------------------------------------------------
-# CMake-specific curl code.
+# XXX(cmake): begin cmake-specific curl code
 unset(LIBCURL_OUTPUT_NAME CACHE)
 
 add_library(cmcurl ${HHEADERS} ${CSOURCES})
@@ -82,6 +82,7 @@ if(CURL_USE_OPENSSL AND OPENSSL_FOUND AND WIN32)
 endif()
 
 return() # The rest of this file is not needed for building within CMake.
+# XXX(cmake): end cmake-specific curl code
 #-----------------------------------------------------------------------------
 
 if(CURL_BUILD_TESTING)
