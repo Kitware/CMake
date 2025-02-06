@@ -1,0 +1,7 @@
+include(RunCMake)
+
+run_cmake(MissingTransitiveDependency)
+run_cmake(MissingComponent)
+run_cmake(MissingComponentDependency)
+run_cmake(MissingTransitiveComponent)
+run_cmake(MissingTransitiveComponentDependency)

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 4.0)
 
 set(CMAKE_EXPERIMENTAL_FIND_CPS_PACKAGES "e82e467b-f997-4464-8ace-b00808fff261")
 
@@ -15,5 +15,6 @@ set(CMAKE_FIND_USE_INSTALL_PREFIX OFF)
 set(CMAKE_PREFIX_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 ###############################################################################
-# Test finding a package that is missing dependencies.
-find_package(Incomplete REQUIRED)
+# Test depending on components of another package which are missing
+# dependencies.
+find_package(TransitiveIncomplete REQUIRED)
