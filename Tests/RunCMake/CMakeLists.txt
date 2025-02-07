@@ -414,7 +414,7 @@ if(CMAKE_USE_SYSTEM_JSONCPP)
 endif()
 add_RunCMake_test(FileAPI -DPython_EXECUTABLE=${Python_EXECUTABLE}
                           -DCMAKE_CXX_COMPILER_ID=${CMAKE_CXX_COMPILER_ID})
-if("${CMAKE_GENERATOR}" MATCHES "Unix Makefiles|Ninja")
+if(CMAKE_GENERATOR MATCHES "Make|Ninja")
   add_RunCMake_test(Instrumentation)
 endif()
 add_RunCMake_test(ConfigDir)

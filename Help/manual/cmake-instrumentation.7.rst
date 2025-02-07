@@ -117,10 +117,10 @@ optional.
   should be one of the following:
 
   * ``postGenerate``
-  * ``preBuild`` (:ref:`Ninja Generators`. only, when ``ninja`` is invoked)
-  * ``postBuild`` (:ref:`Ninja Generators`. only, when ``ninja`` completes)
-  * ``preCMakeBuild`` (when ``cmake --build`` is invoked)
-  * ``postCMakeBuild`` (when ``cmake --build`` completes)
+  * ``preBuild`` (called when ``ninja``  or ``make`` is invoked; unavailable on Windows)
+  * ``postBuild`` (called when ``ninja`` or ``make`` completes; unavailable on Windows)
+  * ``preCMakeBuild`` (called when ``cmake --build`` is invoked)
+  * ``postCMakeBuild`` (called when ``cmake --build`` completes)
   * ``postInstall``
   * ``postTest``
 

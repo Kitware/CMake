@@ -528,6 +528,7 @@ int cmInstrumentation::SpawnBuildDaemon()
 int cmInstrumentation::CollectTimingAfterBuild(int ppid)
 {
   while (0 == uv_kill(ppid, 0)) {
+    cmSystemTools::Delay(100);
   };
   return this->CollectTimingData(cmInstrumentationQuery::Hook::PostBuild);
 }

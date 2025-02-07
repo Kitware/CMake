@@ -38,7 +38,7 @@ function(instrument test)
   if (ARGS_COPY_QUERIES)
     file(MAKE_DIRECTORY ${RunCMake_TEST_BINARY_DIR}/query)
     set(generated_queries "0;1;2")
-    foreach(n ${generated_queries})
+    foreach(n IN LISTS generated_queries)
       configure_file(
         "${query_dir}/generated/query-${n}.json.in"
         "${RunCMake_TEST_BINARY_DIR}/query/query-${n}.json"
@@ -115,8 +115,10 @@ instrument(cmake-command-bad-arg NO_WARN)
 instrument(cmake-command-parallel-install
   BUILD INSTALL TEST NO_WARN INSTALL_PARALLEL DYNAMIC_QUERY
   CHECK_SCRIPT check-data-dir.cmake)
-if (UNIX AND ${RunCMake_GENERATOR} MATCHES "^Ninja")
-  instrument(cmake-command-ninja NO_WARN
+
+# FIXME(#26668) This does not work on Windows
+if (UNIX)
+  instrument(cmake-command-make-program NO_WARN
     BUILD_MAKE_PROGRAM
-    CHECK_SCRIPT check-ninja-hooks.cmake)
+    CHECK_SCRIPT check-make-program-hooks.cmake)
 endif()
