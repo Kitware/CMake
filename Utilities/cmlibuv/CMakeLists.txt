@@ -302,6 +302,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "SunOS")
   endif()
   if(CMAKE_SYSTEM_VERSION STREQUAL "5.10")
     list(APPEND uv_defines SUNOS_NO_IFADDRS)
+    if(CMAKE_SYSTEM_PROCESSOR STREQUAL "i386")
+      list(APPEND uv_defines CMAKE_NO_MKDTEMP)
+    endif()
   endif()
   list(APPEND uv_sources
     src/unix/no-proctitle.c
@@ -318,6 +321,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "HP-UX")
     )
   list(APPEND uv_defines
     _XOPEN_SOURCE_EXTENDED
+    CMAKE_NO_MKDTEMP
     )
   list(APPEND uv_sources
     src/unix/hpux.c
