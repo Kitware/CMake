@@ -1959,10 +1959,10 @@ typedef enum {
   /* Set stream weight, 1 - 256 (default is 16) */
   CURLOPT(CURLOPT_STREAM_WEIGHT, CURLOPTTYPE_LONG, 239),
 
-  /* Set stream dependency on another CURL handle */
+  /* Set stream dependency on another curl handle */
   CURLOPT(CURLOPT_STREAM_DEPENDS, CURLOPTTYPE_OBJECTPOINT, 240),
 
-  /* Set E-xclusive stream dependency on another CURL handle */
+  /* Set E-xclusive stream dependency on another curl handle */
   CURLOPT(CURLOPT_STREAM_DEPENDS_E, CURLOPTTYPE_OBJECTPOINT, 241),
 
   /* Do not send any tftp option requests to the server */
@@ -2959,7 +2959,9 @@ typedef enum {
   CURLINFO_USED_PROXY       = CURLINFO_LONG + 66,
   CURLINFO_POSTTRANSFER_TIME_T = CURLINFO_OFF_T + 67,
   CURLINFO_EARLYDATA_SENT_T = CURLINFO_OFF_T + 68,
-  CURLINFO_LASTONE          = 68
+  CURLINFO_HTTPAUTH_USED    = CURLINFO_LONG + 69,
+  CURLINFO_PROXYAUTH_USED   = CURLINFO_LONG + 70,
+  CURLINFO_LASTONE          = 70
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as
@@ -3229,6 +3231,50 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 
 #define CURLPAUSE_ALL       (CURLPAUSE_RECV|CURLPAUSE_SEND)
 #define CURLPAUSE_CONT      (CURLPAUSE_RECV_CONT|CURLPAUSE_SEND_CONT)
+
+/*
+ * NAME curl_easy_ssls_import()
+ *
+ * DESCRIPTION
+ *
+ * The curl_easy_ssls_import function adds a previously exported SSL session
+ * to the SSL session cache of the easy handle (or the underlying share).
+ */
+CURL_EXTERN CURLcode curl_easy_ssls_import(CURL *handle,
+                                           const char *session_key,
+                                           const unsigned char *shmac,
+                                           size_t shmac_len,
+                                           const unsigned char *sdata,
+                                           size_t sdata_len);
+
+/* This is the curl_ssls_export_cb callback prototype. It
+ * is passed to curl_easy_ssls_export() to extract SSL sessions/tickets. */
+typedef CURLcode curl_ssls_export_cb(CURL *handle,
+                                     void *userptr,
+                                     const char *session_key,
+                                     const unsigned char *shmac,
+                                     size_t shmac_len,
+                                     const unsigned char *sdata,
+                                     size_t sdata_len,
+                                     curl_off_t valid_until,
+                                     int ietf_tls_id,
+                                     const char *alpn,
+                                     size_t earlydata_max);
+
+/*
+ * NAME curl_easy_ssls_export()
+ *
+ * DESCRIPTION
+ *
+ * The curl_easy_ssls_export function iterates over all SSL sessions stored
+ * in the easy handle (or underlying share) and invokes the passed
+ * callback.
+ *
+ */
+CURL_EXTERN CURLcode curl_easy_ssls_export(CURL *handle,
+                                           curl_ssls_export_cb *export_fn,
+                                           void *userptr);
+
 
 #ifdef  __cplusplus
 } /* end of extern "C" */

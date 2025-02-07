@@ -239,6 +239,24 @@ void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
 }
 #endif /* !CURL_DISABLE_SMTP */
 
+#ifdef USE_SSL
+struct curl_trc_feat Curl_trc_feat_ssls = {
+  "SSLS",
+  CURL_LOG_LVL_NONE,
+};
+
+void Curl_trc_ssls(struct Curl_easy *data, const char *fmt, ...)
+{
+  DEBUGASSERT(!strchr(fmt, '\n'));
+  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ssls)) {
+    va_list ap;
+    va_start(ap, fmt);
+    trc_infof(data, &Curl_trc_feat_ssls, fmt, ap);
+    va_end(ap);
+  }
+}
+#endif /* USE_SSL */
+
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 struct curl_trc_feat Curl_trc_feat_ws = {
   "WS",
@@ -278,6 +296,9 @@ static struct trc_feat_def trc_feats[] = {
 #endif
 #ifndef CURL_DISABLE_SMTP
   { &Curl_trc_feat_smtp,      TRC_CT_PROTOCOL },
+#endif
+#ifdef USE_SSL
+  { &Curl_trc_feat_ssls,      TRC_CT_NETWORK },
 #endif
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
   { &Curl_trc_feat_ws,        TRC_CT_PROTOCOL },
@@ -319,7 +340,7 @@ static struct trc_cft_def trc_cfts[] = {
 #ifdef USE_HTTP3
   { &Curl_cft_http3,          TRC_CT_PROTOCOL },
 #endif
-#if !defined(CURL_DISABLE_HTTP) && !defined(USE_HYPER)
+#if !defined(CURL_DISABLE_HTTP)
   { &Curl_cft_http_connect,   TRC_CT_PROTOCOL },
 #endif
 };
@@ -425,6 +446,55 @@ CURLcode Curl_trc_init(void)
 CURLcode Curl_trc_init(void)
 {
   return CURLE_OK;
+}
+
+void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data; (void)fmt;
+}
+
+void Curl_trc_cf_infof(struct Curl_easy *data,
+                       struct Curl_cfilter *cf,
+                       const char *fmt, ...)
+{
+  (void)data; (void)cf; (void)fmt;
+}
+
+struct curl_trc_feat;
+
+void Curl_trc_write(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data; (void)fmt;
+}
+
+void Curl_trc_read(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data; (void)fmt;
+}
+
+#ifndef CURL_DISABLE_FTP
+void Curl_trc_ftp(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data; (void)fmt;
+}
+#endif
+#ifndef CURL_DISABLE_SMTP
+void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data; (void)fmt;
+}
+#endif
+#if !defined(CURL_DISABLE_WEBSOCKETS) || !defined(CURL_DISABLE_HTTP)
+void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data; (void)fmt;
+}
+#endif
+
+void Curl_trc_ssls(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data;
+  (void)fmt;
 }
 
 #endif /* !defined(CURL_DISABLE_VERBOSE_STRINGS) */

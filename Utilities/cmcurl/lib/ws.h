@@ -27,12 +27,6 @@
 
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 
-#ifdef USE_HYPER
-#define REQTYPE void
-#else
-#define REQTYPE struct dynbuf
-#endif
-
 /* a client-side WS frame decoder, parsing frame headers and
  * payload, keeping track of current position and stats */
 enum ws_dec_state {
@@ -59,7 +53,7 @@ struct ws_encoder {
   unsigned int xori; /* xor index */
   unsigned char mask[4]; /* 32-bit mask for this connection */
   unsigned char firstbyte; /* first byte of frame we encode */
-  bool contfragment; /* set TRUE if the previous fragment sent was not final */
+  BIT(contfragment); /* set TRUE if the previous fragment sent was not final */
 };
 
 /* A websocket connection with en- and decoder that treat frames
@@ -71,9 +65,10 @@ struct websocket {
   struct bufq recvbuf;    /* raw data from the server */
   struct bufq sendbuf;    /* raw data to be sent to the server */
   struct curl_ws_frame frame;  /* the current WS FRAME received */
+  size_t sendbuf_payload; /* number of payload bytes in sendbuf */
 };
 
-CURLcode Curl_ws_request(struct Curl_easy *data, REQTYPE *req);
+CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req);
 CURLcode Curl_ws_accept(struct Curl_easy *data, const char *mem, size_t len);
 
 extern const struct Curl_handler Curl_handler_ws;

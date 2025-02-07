@@ -48,6 +48,7 @@
 #include <curl/curl.h>
 #include "transfer.h"
 #include "vtls/vtls.h"
+#include "vtls/vtls_scache.h"
 #include "url.h"
 #include "getinfo.h"
 #include "hostip.h"
@@ -761,12 +762,25 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
     return CURLE_FAILED_INIT;
   }
 
+  /* if the handle has a connection still attached (it is/was a connect-only
+     handle) then disconnect before performing */
+  if(data->conn) {
+    struct connectdata *c;
+    curl_socket_t s;
+    Curl_detach_connection(data);
+    s = Curl_getconnectinfo(data, &c);
+    if((s != CURL_SOCKET_BAD) && c) {
+      Curl_cpool_disconnect(data, c, TRUE);
+    }
+    DEBUGASSERT(!data->conn);
+  }
+
   if(data->multi_easy)
     multi = data->multi_easy;
   else {
-    /* this multi handle will only ever have a single easy handled attached
-       to it, so make it use minimal hashes */
-    multi = Curl_multi_handle(1, 3, 7);
+    /* this multi handle will only ever have a single easy handle attached to
+       it, so make it use minimal hash sizes */
+    multi = Curl_multi_handle(1, 3, 7, 3);
     if(!multi)
       return CURLE_OUT_OF_MEMORY;
   }
@@ -1335,4 +1349,42 @@ CURLcode curl_easy_upkeep(CURL *d)
 
   /* Use the common function to keep connections alive. */
   return Curl_cpool_upkeep(data);
+}
+
+CURLcode curl_easy_ssls_import(CURL *d, const char *session_key,
+                               const unsigned char *shmac, size_t shmac_len,
+                               const unsigned char *sdata, size_t sdata_len)
+{
+#ifdef USE_SSLS_EXPORT
+  struct Curl_easy *data = d;
+  if(!GOOD_EASY_HANDLE(data))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  return Curl_ssl_session_import(data, session_key,
+                                 shmac, shmac_len, sdata, sdata_len);
+#else
+  (void)d;
+  (void)session_key;
+  (void)shmac;
+  (void)shmac_len;
+  (void)sdata;
+  (void)sdata_len;
+  return CURLE_NOT_BUILT_IN;
+#endif
+}
+
+CURLcode curl_easy_ssls_export(CURL *d,
+                               curl_ssls_export_cb *export_fn,
+                               void *userptr)
+{
+#ifdef USE_SSLS_EXPORT
+  struct Curl_easy *data = d;
+  if(!GOOD_EASY_HANDLE(data))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  return Curl_ssl_session_export(data, export_fn, userptr);
+#else
+  (void)d;
+  (void)export_fn;
+  (void)userptr;
+  return CURLE_NOT_BUILT_IN;
+#endif
 }

@@ -106,8 +106,8 @@ struct Curl_multi {
   curl_push_callback push_cb;
   void *push_userp;
 
-  /* Hostname cache */
-  struct Curl_hash hostcache;
+  struct Curl_hash hostcache; /* Hostname cache */
+  struct Curl_ssl_scache *ssl_scache; /* TLS session pool */
 
 #ifdef USE_LIBPSL
   /* PSL cache. */
@@ -148,8 +148,6 @@ struct Curl_multi {
 
   long max_total_connections; /* if >0, a fixed limit of the maximum number
                                  of connections in total */
-  long max_shutdown_connections; /* if >0, a fixed limit of the maximum number
-                                 of connections in shutdown handling */
 
   /* timer callback and user data pointer for the *socket() API */
   curl_multi_timer_callback timer_cb;

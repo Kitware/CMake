@@ -560,9 +560,6 @@
 /* Define to 1 if you have the <sys/filio.h> header file. */
 #cmakedefine HAVE_SYS_FILIO_H 1
 
-/* Define to 1 if you have the <sys/wait.h> header file. */
-#cmakedefine HAVE_SYS_WAIT_H 1
-
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #cmakedefine HAVE_SYS_IOCTL_H 1
 
@@ -620,32 +617,14 @@
 /* Define this symbol if your OS supports changing the contents of argv */
 #cmakedefine HAVE_WRITABLE_ARGV 1
 
-/* Define to 1 if you need the malloc.h header file even with stdlib.h */
-#cmakedefine NEED_MALLOC_H 1
+/* Define this if time_t is unsigned */
+#cmakedefine HAVE_TIME_T_UNSIGNED 1
 
 /* Define to 1 if _REENTRANT preprocessor symbol must be defined. */
 #cmakedefine NEED_REENTRANT 1
 
 /* cpu-machine-OS */
 #cmakedefine CURL_OS ${CURL_OS}
-
-/* Name of package */
-#cmakedefine PACKAGE ${PACKAGE}
-
-/* Define to the address where bug reports for this package should be sent. */
-#cmakedefine PACKAGE_BUGREPORT ${PACKAGE_BUGREPORT}
-
-/* Define to the full name of this package. */
-#cmakedefine PACKAGE_NAME ${PACKAGE_NAME}
-
-/* Define to the full name and version of this package. */
-#cmakedefine PACKAGE_STRING ${PACKAGE_STRING}
-
-/* Define to the one symbol short name of this package. */
-#cmakedefine PACKAGE_TARNAME ${PACKAGE_TARNAME}
-
-/* Define to the version of this package. */
-#cmakedefine PACKAGE_VERSION ${PACKAGE_VERSION}
 
 /*
  Note: SIZEOF_* variables are fetched with CMake through check_type_size().
@@ -712,6 +691,9 @@ ${SIZEOF_TIME_T_CODE}
 /* if Secure Transport is enabled */
 #cmakedefine USE_SECTRANSP 1
 
+/* if SSL session export support is available */
+#cmakedefine USE_SSLS_EXPORT 1
+
 /* if mbedTLS is enabled */
 #cmakedefine USE_MBEDTLS 1
 
@@ -750,6 +732,9 @@ ${SIZEOF_TIME_T_CODE}
 
 /* if OpenSSL is in use */
 #cmakedefine USE_OPENSSL 1
+
+/* if AmiSSL is in use */
+#cmakedefine USE_AMISSL 1
 
 /* if librtmp/rtmpdump is in use */
 #cmakedefine USE_LIBRTMP 1
@@ -797,11 +782,11 @@ ${SIZEOF_TIME_T_CODE}
 /* to enable Windows SSL  */
 #cmakedefine USE_SCHANNEL 1
 
+/* if Watt-32 is in use */
+#cmakedefine USE_WATT32 1
+
 /* enable multiple SSL backends */
 #cmakedefine CURL_WITH_MULTI_SSL 1
-
-/* Version number of package */
-#cmakedefine VERSION ${VERSION}
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #cmakedefine _FILE_OFFSET_BITS ${_FILE_OFFSET_BITS}
@@ -857,3 +842,9 @@ ${SIZEOF_TIME_T_CODE}
 
 /* if ECH support is available */
 #cmakedefine USE_ECH 1
+
+/* Define to 1 if you have the wolfSSL_CTX_GenerateEchConfig function. */
+#cmakedefine HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
+
+/* Define to 1 if you have the SSL_set1_ech_config_list function. */
+#cmakedefine HAVE_SSL_SET1_ECH_CONFIG_LIST

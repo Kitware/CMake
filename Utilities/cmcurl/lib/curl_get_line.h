@@ -26,6 +26,12 @@
 
 #include "dynbuf.h"
 
+#ifndef BUILDING_LIBCURL
+/* this renames functions so that the tool code can use the same code
+   without getting symbol collisions */
+#define Curl_get_line(a,b) curlx_get_line(a,b)
+#endif
+
 /* Curl_get_line() returns complete lines that end with a newline. */
 int Curl_get_line(struct dynbuf *buf, FILE *input);
 

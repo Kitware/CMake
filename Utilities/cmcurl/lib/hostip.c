@@ -198,7 +198,7 @@ hostcache_entry_is_stale(void *datap, void *hc)
   if(dns->timestamp) {
     /* age in seconds */
     time_t age = prune->now - dns->timestamp;
-    if(age >= prune->max_age_sec)
+    if(age >= (time_t)prune->max_age_sec)
       return TRUE;
     if(age > prune->oldest)
       prune->oldest = age;
@@ -541,7 +541,9 @@ static struct Curl_addrinfo *get_localhost6(int port, const char *name)
   sa6.sin6_family = AF_INET6;
   sa6.sin6_port = htons(port16);
   sa6.sin6_flowinfo = 0;
+#ifdef HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID
   sa6.sin6_scope_id = 0;
+#endif
 
   (void)Curl_inet_pton(AF_INET6, "::1", ipv6);
   memcpy(&sa6.sin6_addr, ipv6, sizeof(ipv6));
@@ -630,7 +632,7 @@ bool Curl_ipv6works(struct Curl_easy *data)
       ipv6_works = 1;
       sclose(s);
     }
-    return (ipv6_works > 0);
+    return ipv6_works > 0;
   }
 }
 #endif /* USE_IPV6 */
@@ -1077,18 +1079,10 @@ static void hostcache_unlink_entry(void *entry)
     Curl_freeaddrinfo(dns->addr);
 #ifdef USE_HTTPSRR
     if(dns->hinfo) {
-      if(dns->hinfo->target)
-        free(dns->hinfo->target);
-      if(dns->hinfo->alpns)
-        free(dns->hinfo->alpns);
-      if(dns->hinfo->ipv4hints)
-        free(dns->hinfo->ipv4hints);
-      if(dns->hinfo->echconfiglist)
-        free(dns->hinfo->echconfiglist);
-      if(dns->hinfo->ipv6hints)
-        free(dns->hinfo->ipv6hints);
-      if(dns->hinfo->val)
-        free(dns->hinfo->val);
+      free(dns->hinfo->target);
+      free(dns->hinfo->ipv4hints);
+      free(dns->hinfo->echconfiglist);
+      free(dns->hinfo->ipv6hints);
       free(dns->hinfo);
     }
 #endif

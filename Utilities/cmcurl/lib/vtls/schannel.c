@@ -41,6 +41,7 @@
 #include "schannel_int.h"
 #include "vtls.h"
 #include "vtls_int.h"
+#include "vtls_scache.h"
 #include "strcase.h"
 #include "sendf.h"
 #include "connect.h" /* for the connect timeout */
@@ -148,7 +149,7 @@
  */
 
 #ifndef CALG_SHA_256
-#  define CALG_SHA_256 0x0000800c
+#define CALG_SHA_256 0x0000800c
 #endif
 
 #ifndef PKCS12_NO_PERSIST_KEY
@@ -954,9 +955,9 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* check for an existing reusable credential handle */
   if(ssl_config->primary.cache_session) {
-    Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
-                              (void **)&old_cred, NULL, NULL)) {
+    Curl_ssl_scache_lock(data);
+    if(Curl_ssl_scache_get_obj(cf, data, connssl->peer.scache_key,
+                               (void **)&old_cred)) {
       backend->cred = old_cred;
       DEBUGF(infof(data, "schannel: reusing existing credential handle"));
 
@@ -966,7 +967,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                    "schannel: incremented credential handle refcount = %d",
                    backend->cred->refcount));
     }
-    Curl_ssl_sessionid_unlock(data);
+    Curl_ssl_scache_unlock(data);
   }
 
   if(!backend->cred) {
@@ -1501,12 +1502,11 @@ add_cert_to_certinfo(const CERT_CONTEXT *ccert_context, bool reverse_order,
   return args->result == CURLE_OK;
 }
 
-static void schannel_session_free(void *sessionid, size_t idsize)
+static void schannel_session_free(void *sessionid)
 {
   /* this is expected to be called under sessionid lock */
   struct Curl_schannel_cred *cred = sessionid;
 
-  (void)idsize;
   if(cred) {
     cred->refcount--;
     if(cred->refcount == 0) {
@@ -1599,14 +1599,12 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* save the current session data for possible reuse */
   if(ssl_config->primary.cache_session) {
-    Curl_ssl_sessionid_lock(data);
+    Curl_ssl_scache_lock(data);
     /* Up ref count since call takes ownership */
     backend->cred->refcount++;
-    result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
-                                    backend->cred,
-                                    sizeof(struct Curl_schannel_cred),
-                                    schannel_session_free);
-    Curl_ssl_sessionid_unlock(data);
+    result = Curl_ssl_scache_add_obj(cf, data, connssl->peer.scache_key,
+                                     backend->cred, schannel_session_free);
+    Curl_ssl_scache_unlock(data);
     if(result)
       return result;
   }
@@ -2275,11 +2273,11 @@ static bool schannel_data_pending(struct Curl_cfilter *cf,
   DEBUGASSERT(backend);
 
   if(backend->ctxt) /* SSL/TLS is in use */
-    return (backend->decdata_offset > 0 ||
-            (backend->encdata_offset > 0 && !backend->encdata_is_incomplete) ||
-            backend->recv_connection_closed ||
-            backend->recv_sspi_close_notify ||
-            backend->recv_unrecoverable_err);
+    return backend->decdata_offset > 0 ||
+           (backend->encdata_offset > 0 && !backend->encdata_is_incomplete) ||
+           backend->recv_connection_closed ||
+           backend->recv_sspi_close_notify ||
+           backend->recv_unrecoverable_err;
   else
     return FALSE;
 }
@@ -2445,9 +2443,9 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* free SSPI Schannel API credential handle */
   if(backend->cred) {
-    Curl_ssl_sessionid_lock(data);
-    schannel_session_free(backend->cred, 0);
-    Curl_ssl_sessionid_unlock(data);
+    Curl_ssl_scache_lock(data);
+    schannel_session_free(backend->cred);
+    Curl_ssl_scache_unlock(data);
     backend->cred = NULL;
   }
 
@@ -2469,7 +2467,7 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static int schannel_init(void)
 {
-  return (Curl_sspi_global_init() == CURLE_OK ? 1 : 0);
+  return Curl_sspi_global_init() == CURLE_OK ? 1 : 0;
 }
 
 static void schannel_cleanup(void)
@@ -2798,24 +2796,21 @@ const struct Curl_ssl Curl_ssl_schannel = {
   schannel_init,                     /* init */
   schannel_cleanup,                  /* cleanup */
   schannel_version,                  /* version */
-  Curl_none_check_cxn,               /* check_cxn */
   schannel_shutdown,                 /* shutdown */
   schannel_data_pending,             /* data_pending */
   schannel_random,                   /* random */
-  Curl_none_cert_status_request,     /* cert_status_request */
+  NULL,                              /* cert_status_request */
   schannel_connect,                  /* connect */
   schannel_connect_nonblocking,      /* connect_nonblocking */
   Curl_ssl_adjust_pollset,           /* adjust_pollset */
   schannel_get_internals,            /* get_internals */
   schannel_close,                    /* close_one */
-  Curl_none_close_all,               /* close_all */
-  Curl_none_set_engine,              /* set_engine */
-  Curl_none_set_engine_default,      /* set_engine_default */
-  Curl_none_engines_list,            /* engines_list */
-  Curl_none_false_start,             /* false_start */
+  NULL,                              /* close_all */
+  NULL,                              /* set_engine */
+  NULL,                              /* set_engine_default */
+  NULL,                              /* engines_list */
+  NULL,                              /* false_start */
   schannel_sha256sum,                /* sha256sum */
-  NULL,                              /* associate_connection */
-  NULL,                              /* disassociate_connection */
   schannel_recv,                     /* recv decrypted data */
   schannel_send,                     /* send data to encrypt */
   NULL,                              /* get_channel_binding */
