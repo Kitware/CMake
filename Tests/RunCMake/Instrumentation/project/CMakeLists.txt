@@ -13,6 +13,7 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E true
   OUTPUT output1 output2
 )
+set_property(SOURCE output1 output2 PROPERTY SYMBOLIC 1)
 add_custom_target(customTarget ALL
   DEPENDS output1
 )

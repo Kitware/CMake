@@ -28,6 +28,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGenerator.h"
 #include "cmGlobalUnixMakefileGenerator3.h"
+#include "cmInstrumentation.h"
 #include "cmList.h"
 #include "cmListFileCache.h"
 #include "cmLocalGenerator.h"
@@ -70,6 +71,26 @@ std::string cmSplitExtension(std::string const& in, std::string& base)
   }
   return ext;
 }
+
+#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
+// Helper function to add the Start Instrumentation command
+void addInstrumentationCommand(cmInstrumentation* instrumentation,
+                               std::vector<std::string>& commands)
+{
+  // FIXME(#26668) This does not work on Windows
+  if (instrumentation->HasPreOrPostBuildHook()) {
+    std::string instrumentationCommand =
+      "$(CTEST_COMMAND) --start-instrumentation $(CMAKE_BINARY_DIR)";
+    /*
+     * On Unix systems, Make will prefix the command with `/bin/sh -c`.
+     * Use exec so that Make is the parent process of the command.
+     * Add a `;` to convince BSD make to not optimize out the shell.
+     */
+    instrumentationCommand = cmStrCat("exec ", instrumentationCommand, " ;");
+    commands.push_back(instrumentationCommand);
+  }
+}
+#endif
 
 // Helper predicate for removing absolute paths that don't point to the
 // source or binary directory. It is used when CMAKE_DEPENDS_IN_PROJECT_ONLY
@@ -651,19 +672,35 @@ void cmLocalUnixMakefileGenerator3::WriteMakeVariables(
 #endif
   }
 
+  auto getShellCommand = [this](std::string command) -> std::string {
+    std::string shellCommand = this->MaybeConvertWatcomShellCommand(command);
+    return shellCommand.empty()
+      ? this->ConvertToOutputFormat(command, cmOutputConverter::SHELL)
+      : shellCommand;
+  };
+
   std::string cmakeShellCommand =
-    this->MaybeConvertWatcomShellCommand(cmSystemTools::GetCMakeCommand());
-  if (cmakeShellCommand.empty()) {
-    cmakeShellCommand = this->ConvertToOutputFormat(
-      cmSystemTools::GetCMakeCommand(), cmOutputConverter::SHELL);
+    getShellCommand(cmSystemTools::GetCMakeCommand());
+
+  makefileStream << "# The CMake executable.\n"
+                    "CMAKE_COMMAND = "
+                 << cmakeShellCommand << "\n";
+
+#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
+  // FIXME(#26668) This does not work on Windows
+  if (this->GetCMakeInstance()
+        ->GetInstrumentation()
+        ->HasPreOrPostBuildHook()) {
+    std::string ctestShellCommand =
+      getShellCommand(cmSystemTools::GetCTestCommand());
+    makefileStream << "# The CTest executable.\n"
+                      "CTEST_COMMAND = "
+                   << ctestShellCommand << "\n";
   }
+#endif
 
   makefileStream
-    << "# The CMake executable.\n"
-       "CMAKE_COMMAND = "
-    << cmakeShellCommand
     << "\n"
-       "\n"
        "# The command to remove a file.\n"
        "RM = "
     << cmakeShellCommand
@@ -811,6 +848,10 @@ void cmLocalUnixMakefileGenerator3::WriteSpecialTargetsBottom(
 
     std::vector<std::string> no_depends;
     commands.push_back(std::move(runRule));
+#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
+    addInstrumentationCommand(this->GetCMakeInstance()->GetInstrumentation(),
+                              commands);
+#endif
     if (!this->IsRootMakefile()) {
       this->CreateCDCommand(commands, this->GetBinaryDirectory(),
                             this->GetCurrentBinaryDirectory());
@@ -1808,6 +1849,10 @@ void cmLocalUnixMakefileGenerator3::WriteLocalAllRules(
         this->ConvertToOutputFormat(cmakefileName, cmOutputConverter::SHELL),
         " 1");
       commands.push_back(std::move(runRule));
+#if !defined(CMAKE_BOOTSTRAP) && !defined(_WIN32)
+      addInstrumentationCommand(this->GetCMakeInstance()->GetInstrumentation(),
+                                commands);
+#endif
     }
     this->CreateCDCommand(commands, this->GetBinaryDirectory(),
                           this->GetCurrentBinaryDirectory());
