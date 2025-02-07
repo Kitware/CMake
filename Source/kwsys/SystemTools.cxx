@@ -2086,67 +2086,43 @@ void SystemTools::ConvertToUnixSlashes(std::string& path)
     return;
   }
 
-  char const* pathCString = path.c_str();
-  bool hasDoubleSlash = false;
 #ifdef __VMS
   ConvertVMSToUnix(path);
 #else
-  char const* pos0 = pathCString;
-  for (std::string::size_type pos = 0; *pos0; ++pos) {
-    if (*pos0 == '\\') {
-      path[pos] = '/';
-    }
+  // replace backslashes
+  std::replace(path.begin(), path.end(), '\\', '/');
 
-    // Also, reuse the loop to check for slash followed by another slash
-    if (!hasDoubleSlash && *(pos0 + 1) == '/' && *(pos0 + 2) == '/') {
-#  ifdef _WIN32
-      // However, on windows if the first characters are both slashes,
-      // then keep them that way, so that network paths can be handled.
-      if (pos > 0) {
-        hasDoubleSlash = true;
-      }
-#  else
-      hasDoubleSlash = true;
-#  endif
-    }
-
-    pos0++;
-  }
-
-  if (hasDoubleSlash) {
-    SystemTools::ReplaceString(path, "//", "/");
-  }
+  // collapse repeated slashes, except exactly two leading slashes are
+  // meaningful and must be preserved.
+  bool hasDoubleSlash = path[0] == '/' && path[1] == '/' && path[2] != '/';
+  auto uniqueEnd = std::unique(
+    path.begin() + hasDoubleSlash, path.end(),
+    [](char c1, char c2) -> bool { return c1 == '/' && c1 == c2; });
+  path.erase(uniqueEnd, path.end());
 #endif
 
-  // remove any trailing slash
   // if there is a tilda ~ then replace it with HOME
-  pathCString = path.c_str();
-  if (pathCString[0] == '~' &&
-      (pathCString[1] == '/' || pathCString[1] == '\0')) {
+  if (path[0] == '~' && (path[1] == '/' || path[1] == '\0')) {
     std::string homeEnv;
     if (SystemTools::GetEnv("HOME", homeEnv)) {
       path.replace(0, 1, homeEnv);
     }
   }
 #ifdef HAVE_GETPWNAM
-  else if (pathCString[0] == '~') {
-    std::string::size_type idx = path.find_first_of("/\0");
-    char oldch = path[idx];
-    path[idx] = '\0';
-    passwd* pw = getpwnam(path.c_str() + 1);
-    path[idx] = oldch;
+  else if (path[0] == '~') {
+    std::string::size_type idx = path.find('/');
+    std::string user = path.substr(1, idx - 1);
+    passwd* pw = getpwnam(user.c_str());
     if (pw) {
       path.replace(0, idx, pw->pw_dir);
     }
   }
 #endif
-  // remove trailing slash if the path is more than
-  // a single /
-  pathCString = path.c_str();
+  // remove trailing slash, but preserve the root slash and the slash
+  // after windows drive letter (c:/).
   size_t size = path.size();
   if (size > 1 && path.back() == '/') {
-    // if it is c:/ then do not remove the trailing slash
-    if (!((size == 3 && pathCString[1] == ':'))) {
+    if (!(size == 3 && path[1] == ':') && path[size - 2] != '/') {
       path.resize(size - 1);
     }
   }
