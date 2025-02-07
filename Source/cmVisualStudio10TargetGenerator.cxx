@@ -4590,6 +4590,13 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions(
     }
     linkOptions.AddFlag("ProgramDataBaseFile", pdb);
 
+    // Add image version
+    int major, minor;
+    this->GeneratorTarget->GetTargetVersion(major, minor);
+    if (major || minor) {
+      linkOptions.AddFlag("Version", cmStrCat(major, '.', minor));
+    }
+
     // A Windows Runtime component uses internal .NET metadata,
     // so does not have an import library.
     if (this->GeneratorTarget->GetPropertyAsBool("VS_WINRT_COMPONENT") &&

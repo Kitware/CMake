@@ -49,6 +49,7 @@ run_cmake(VsSourceSettingsTool)
 run_cmake(VsPlatformToolset)
 run_cmake(VsControlFlowGuardLinkSetting)
 run_cmake(VsToolOverride)
+run_cmake(VsImageVersion)
 
 run_cmake(VsWinRTByDefault)
 
