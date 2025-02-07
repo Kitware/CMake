@@ -5,7 +5,7 @@ CMake Error at MissingComponent.cmake:[0-9]+ \(find_package\):
   The following configuration files were considered but not accepted:
 (
     [^
-]*/Tests/RunCMake/find_package/cps/[Cc]omponent[Tt]est\.cps, version: unknown)+
+]*/Tests/RunCMake/find_package-CPS/cps/[Cc]omponent[Tt]est\.cps, version: unknown)+
 
 Call Stack \(most recent call first\):
   CMakeLists\.txt:[0-9]+ \(include\)

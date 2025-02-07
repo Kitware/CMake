@@ -1,11 +1,3 @@
-CMake Warning \(dev\) at MissingTransitiveDependency\.cmake:[0-9]+ \(find_package\):
-  CMake's support for importing package information in the Common Package
-  Specification format \(via find_package\) is experimental\.  It is meant only
-  for experimentation and feedback to CMake developers.
-Call Stack \(most recent call first\):
-  CMakeLists\.txt:[0-9]+ \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.
-+
 CMake Error in cps/[Ss]till[Ii]ncomplete\.cps:
   Could not find a package configuration file provided by "DoesNotExist" with
   any of the following names:
