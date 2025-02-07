@@ -53,6 +53,21 @@ static char const* toUnixPaths[][2] = {
   { "\\\\usr\\local\\bin\\passwd", "//usr/local/bin/passwd" },
   { "\\\\usr\\lo cal\\bin\\pa sswd", "//usr/lo cal/bin/pa sswd" },
   { "\\\\usr\\lo\\ cal\\bin\\pa\\ sswd", "//usr/lo/ cal/bin/pa/ sswd" },
+  { "\\", "/" },
+  { "/", "/" },
+  { "\\\\", "//" },
+  { "//", "//" },
+  { "\\\\\\", "/" },
+  { "///", "/" },
+  { "C:\\", "C:/" },
+  { "C:\\\\", "C:/" },
+  { "C:\\\\\\", "C:/" },
+  { "\\\\UNC\\path", "//UNC/path" },
+  { "//UNC/path", "//UNC/path" },
+  { "\\\\\\triple\\\\back\\\\\\slash\\\\\\", "/triple/back/slash" },
+  { "///triple//back///slash///", "/triple/back/slash" },
+  { "///////ex treme/////////", "/ex treme" },
+  { "~__nonexistent_username__", "~__nonexistent_username__" },
   { nullptr, nullptr }
 };
 
