@@ -3850,7 +3850,8 @@ int cmake::Build(int jobs, std::string dir, std::vector<std::string> targets,
 
   std::string cachePath = FindCacheFile(dir);
   if (!this->LoadCache(cachePath)) {
-    std::cerr << "Error: could not load cache\n";
+    std::cerr
+      << "Error: not a CMake build directory (missing CMakeCache.txt)\n";
     return 1;
   }
   cmValue cachedGenerator = this->State->GetCacheEntryValue("CMAKE_GENERATOR");
@@ -3979,7 +3980,8 @@ bool cmake::Open(std::string const& dir, bool dryRun)
 
   std::string cachePath = FindCacheFile(dir);
   if (!this->LoadCache(cachePath)) {
-    std::cerr << "Error: could not load cache\n";
+    std::cerr
+      << "Error: not a CMake build directory (missing CMakeCache.txt)\n";
     return false;
   }
   cmValue genName = this->State->GetCacheEntryValue("CMAKE_GENERATOR");
